@@ -1,0 +1,47 @@
+To build the example, run in a Terminal:
+
+cd /path-to-example/
+cmake .
+make
+
+
+Example of use :
+
+Computation of the persistent homology with Z/2Z coefficients of the Rips complex on points 
+sampling a Klein bottle:
+
+./rips_persistence ../../../data/points/Kl.txt -r 0.25 -d 3 -p 2 -m 100
+
+output:
+210  0 0 inf
+210  1 0.0702103 inf
+2  1 0.0702103 inf
+2  2 0.159992 inf
+
+with Z/3Z coefficients:
+
+./rips_persistence ../../../data/points/Kl.txt -r 0.25 -d 3 -p 3 -m 100
+
+output:
+3  0 0 inf
+3  1 0.0702103 inf
+
+and the computation with Z/2Z and Z/3Z coefficients simultaneously:
+
+./rips_multifield_persistence ../../../data/points/Kl.txt -r 0.25 -d 3 -p 2 -q 3 -m 100
+
+output:
+6  0 0 inf
+6  1 0.0702103 inf
+2  1 0.0702103 inf
+2  2 0.159992 inf
+
+and finally the computation with all Z/pZ for 2 <= p <= 71 (20 first prime numbers):
+
+ ./rips_multifield_persistence ../../../data/points/Kl.txt -r 0.25 -d 3 -p 2 -q 71 -m 100
+
+output:
+557940830126698960967415390  0 0 inf
+557940830126698960967415390  1 0.0702103 inf
+2  1 0.0702103 inf
+2  2 0.159992 inf

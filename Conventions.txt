@@ -1,0 +1,75 @@
+Please read this convention before adding your package(s) into Gudhi library.
+
+
+Compilation:
+*********************
+CMake is used for compilation purpose.
+
+
+
+Naming conventions:
+*********************
+
+All headers are named *.h and all sources are named *.cpp.
+Concepts are named with camel case starting with uppercase that is "PersistentHomology.h"
+for instance for the concept of Persitence homology.
+Classes and methods are named with underscore separator that is :
+- "Skeleton_blocker_contractor.h" for the class Skeleton_blocker_contractor
+- "int num_vertices() const" for a method
+
+
+Package organization:
+*********************
+The Gudhi directories are organised by 2 manners (Internal for svn developpers and User for external User/Developper).
+
+Internal:
+--------
+
+src/common/concept/common_concept.h
+           doc/MainPage.h
+           include/gudhi/io.h
+                         ....h
+    package1/concept/package1_concept1.h
+                     ....h
+             doc/Intro_package.h
+             include/gudhi/*.h
+             source/*.cpp
+             test/*.cpp
+                  CMakeLists.txt
+             example/*.cpp
+                     CMakeLists.txt
+    package2/...
+    ...
+    cmake/modules/*.cmake
+
+data/points/kl.txt
+            sphere_3D.txt
+            ....txt
+     meshes/sphere.off
+            Paris.off
+scripts/generate_version.sh
+        ....sh
+        ....py
+Doxyfile
+CMakeLists.txt
+Version.txt
+Conventions.txt
+README
+COPYING
+
+User:
+--------
+
+include/gudhi/*.h
+source/*.cpp
+example/package1/*.cpp
+                 CMakeLists.txt
+        package2/*.cpp
+                 CMakeLists.txt
+        ...
+cmake/modules/*.cmake
+CMakeLists.txt
+Version.txt
+Conventions.txt
+README
+COPYING
