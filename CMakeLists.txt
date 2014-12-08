@@ -9,6 +9,8 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
 message("CMAKE_PREFIX_PATH = ${CMAKE_PREFIX_PATH}")
 message("CMAKE_MODULE_PATH = ${CMAKE_MODULE_PATH}")
 
+enable_testing()
+
 if(MSVC)
   # Turn off some VC++ warnings
   SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4267 /wd4668 /wd4311 /wd4800 /wd4820 /wd4503 /wd4244 /wd4345 /wd4996 /wd4396 /wd4018")
@@ -25,6 +27,18 @@ find_package(Boost)
 find_package(GMP)
 find_package(GMPXX)
 find_package(CGAL)
+
+# Required programs for unitary tests purpose
+FIND_PROGRAM( LCOV_PATH lcov )
+if (LCOV_PATH)
+  message("lcov found in ${LCOV_PATH}")
+endif()
+
+FIND_PROGRAM( PYTHON_PATH python )
+if (PYTHON_PATH)
+  message("python found in ${PYTHON_PATH}")
+endif()
+
 
 if(NOT Boost_FOUND)
   message(FATAL_ERROR "NOTICE: This demo requires Boost and will not be compiled.")

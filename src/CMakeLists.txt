@@ -22,6 +22,8 @@ else()
     LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})                      
 	include_directories(include/)
 	
+	add_subdirectory(example/Simplex_tree)                   
+	add_subdirectory(example/Persistent_cohomology)                   
 	add_subdirectory(example/Skeleton_blocker)                   
 	add_subdirectory(example/Contraction)                   
 endif()  
