@@ -48,12 +48,12 @@ int main (int argc, char * const argv[])
 	//Construct the Simplex Tree
 	Simplex_tree<> simplexTree;
 
-	// Simplex to be inserted:
-	//    1
-	//    o
-	//   /X\
-	//  o---o---o
-	//  2   0   3
+	/* Simplex to be inserted:  */
+	/*    1                     */
+	/*    o                     */
+	/*   /X\                    */
+	/*  o---o---o               */
+	/*  2   0   3               */
 
 	// ++ FIRST
 	std::cout << "   * INSERT 0" << std::endl;
@@ -299,4 +299,5 @@ int main (int argc, char * const argv[])
 	//   [0.2] 2 1
 	//   [0.2] 3 0
 	//   [0.3] 2 1 0
+	return 0;
 }

@@ -360,7 +360,7 @@ class Simplex_tree {
   /** \brief Returns the number of simplices in the complex.
    *
    * Does not count the empty simplex. */
-  size_t num_simplices() {
+  const unsigned int& num_simplices() const {
     return num_simplices_;
   }
 
@@ -526,7 +526,7 @@ class Simplex_tree {
     threshold_ = fil;
   }
   /** Set a number of simplices for the simplicial complex. */
-  void set_num_simplices(size_t num_simplices) {
+  void set_num_simplices(const unsigned int& num_simplices) {
     num_simplices_ = num_simplices;
   }
   /** Set a dimension for the simplicial complex. */
@@ -793,7 +793,7 @@ class Simplex_tree {
   /** \brief Upper bound on the filtration values of the simplices.*/
   Filtration_value threshold_;
   /** \brief Total number of simplices in the complex, without the empty simplex.*/
-  size_t num_simplices_;
+  unsigned int num_simplices_;
   /** \brief Set of simplex tree Nodes representing the vertices.*/
   Siblings root_;
   /** \brief Simplices ordered according to a filtration.*/

@@ -23,12 +23,12 @@ if(GMPXX_FOUND AND GMP_FOUND)
    target_link_libraries(persistent_cohomology_unit_test_multi_field  ${Boost_LIBRARIES} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES})
 
    # Unitary tests
-   add_test(persistent_cohomology_unit_test_multi_field ${CMAKE_CURRENT_BINARY_DIR}/persistent_cohomology_unit_test_multi_field)
+   #add_test(persistent_cohomology_unit_test_multi_field ${CMAKE_CURRENT_BINARY_DIR}/persistent_cohomology_unit_test_multi_field)
 endif()
 
 if (LCOV_PATH)
   # Lcov code coverage of unitary test
-  add_test(persistent_cohomology_unit_test_coverage.info ${CMAKE_SOURCE_DIR}/scripts/check_code_coverage.sh ${CMAKE_SOURCE_DIR}/src/Persistent_cohomology)
+  add_test(src/Persistent_cohomology/lcov/coverage.log ${CMAKE_SOURCE_DIR}/scripts/check_code_coverage.sh ${CMAKE_SOURCE_DIR}/src/Persistent_cohomology)
 endif()
 
 if (PYTHON_PATH)

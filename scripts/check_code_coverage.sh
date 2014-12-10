@@ -4,11 +4,13 @@
 # UNITARY TEST DIRECTORY CHECK
 ROOT_DIR=..
 UT_DIR_TO_CHECK="$1"
-COVERAGE_FILE=$UT_DIR_TO_CHECK/coverage.info
-LOG_FILE=$UT_DIR_TO_CHECK/coverage.log
+LCOV_DIR=$UT_DIR_TO_CHECK/lcov
+COVERAGE_FILE=$LCOV_DIR/coverage.info
+LOG_FILE=$LCOV_DIR/coverage.log
 MIN_PERCENT=95
 
-rm -f $COVERAGE_FILE $LOG_FILE
+rm -rf $LCOV_DIR
+mkdir $LCOV_DIR
 
 lcov --capture --directory $UT_DIR_TO_CHECK --no-external --output-file $COVERAGE_FILE 2>&1 | tee -a $LOG_FILE
 lcov --summary $COVERAGE_FILE 2>&1 | tee -a $LOG_FILE

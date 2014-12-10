@@ -20,7 +20,7 @@ add_test(simplex_tree_unit_test ${CMAKE_CURRENT_BINARY_DIR}/simplex_tree_unit_te
 
 if (LCOV_PATH)
   # Lcov code coverage of unitary test
-  add_test(simplex_tree_unit_test_coverage.info ${CMAKE_SOURCE_DIR}/scripts/check_code_coverage.sh ${CMAKE_SOURCE_DIR}/src/Simplex_tree)
+  add_test(src/Simplex_tree/lcov/coverage.log ${CMAKE_SOURCE_DIR}/scripts/check_code_coverage.sh ${CMAKE_SOURCE_DIR}/src/Simplex_tree)
 endif()
 
 if (PYTHON_PATH)
