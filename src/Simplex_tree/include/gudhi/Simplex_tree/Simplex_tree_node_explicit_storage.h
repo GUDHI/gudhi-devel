@@ -20,11 +20,10 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GUDHI_SIMPLEX_TREE_NODE_EXPLICIT_STORAGE_H
-#define GUDHI_SIMPLEX_TREE_NODE_EXPLICIT_STORAGE_H
+#ifndef SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_SIMPLEX_TREE_NODE_EXPLICIT_STORAGE_H_
+#define SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_SIMPLEX_TREE_NODE_EXPLICIT_STORAGE_H_
 
 #include <vector>
-#include <iostream>
 
 namespace Gudhi {
 
@@ -42,14 +41,10 @@ namespace Gudhi {
 template<class SimplexTree>
 class Simplex_tree_node_explicit_storage {
  public:
-//  friend SimplexTree;
-
   typedef typename SimplexTree::Siblings Siblings;
   typedef typename SimplexTree::Filtration_value Filtration_value;
   typedef typename SimplexTree::Simplex_key Simplex_key;
 
-  //private:
-  //friend class Simplex_tree; 
   // Default constructor.
   Simplex_tree_node_explicit_storage()
       : children_(NULL),
@@ -69,13 +64,6 @@ class Simplex_tree_node_explicit_storage {
   }
 
   /*
-   * Return true if the node has children,
-   * false otherwise.
-   */
-  //bool has_children(Vertex label)
-  //{ //if(children_ == NULL)             return false; //for root simplices
-  //  return (children_->parent() == label);}
-  /*
    * Assign a children to the node
    */
   void assign_children(Siblings * children) {
@@ -92,7 +80,7 @@ class Simplex_tree_node_explicit_storage {
     return filtration_;
   }
 
-  /* Careful -> has_children() must be true*/
+  /* Careful -> children_ can be NULL*/
   Siblings * children() {
     return children_;
   }
@@ -106,11 +94,10 @@ class Simplex_tree_node_explicit_storage {
 
   // Data attached to simplex, explicit storage
   Simplex_key simplex_key_;
-  Filtration_value filtration_;   //value in the filtration
-
+  Filtration_value filtration_;   // value in the filtration
 };
 
 /* @} */  // end addtogroup simplex_tree
-}// namespace Gudhi
+}  // namespace Gudhi
 
-#endif // GUDHI_SIMPLEX_TREE_NODE_EXPLICIT_STORAGE_H
+#endif  // SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_SIMPLEX_TREE_NODE_EXPLICIT_STORAGE_H_

@@ -20,11 +20,12 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SIMPLEX_TREE_ITERATORS_H
-#define SIMPLEX_TREE_ITERATORS_H
+#ifndef SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_SIMPLEX_TREE_ITERATORS_H_
+#define SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_SIMPLEX_TREE_ITERATORS_H_
+
+#include <boost/iterator/iterator_facade.hpp>
 
 #include <vector>
-#include <boost/iterator/iterator_facade.hpp>
 
 namespace Gudhi {
 
@@ -47,7 +48,7 @@ class Simplex_tree_simplex_vertex_iterator : public boost::iterator_facade<
   typedef typename SimplexTree::Siblings Siblings;
   typedef typename SimplexTree::Vertex_handle Vertex_handle;
 
-  Simplex_tree_simplex_vertex_iterator(SimplexTree * st)
+  explicit Simplex_tree_simplex_vertex_iterator(SimplexTree * st)
       :  // any end() iterator
         sib_(NULL),
         v_(st->null_vertex()) {
@@ -93,7 +94,7 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
   typedef typename SimplexTree::Siblings Siblings;
 
 // any end() iterator
-  Simplex_tree_boundary_simplex_iterator(SimplexTree * st)
+  explicit Simplex_tree_boundary_simplex_iterator(SimplexTree * st)
       : last_(st->null_vertex()),
         sib_(NULL) {
   }
@@ -166,7 +167,7 @@ class Simplex_tree_complex_simplex_iterator : public boost::iterator_facade<
       : st_(NULL) {
   }
 
-  Simplex_tree_complex_simplex_iterator(SimplexTree * st)
+  explicit Simplex_tree_complex_simplex_iterator(SimplexTree * st)
       : st_(st) {
     if (st == NULL || st->root() == NULL || st->root()->members().empty()) {
       st_ = NULL;
@@ -302,4 +303,4 @@ class Simplex_tree_skeleton_simplex_iterator : public boost::iterator_facade<
 /* @} */  // end addtogroup simplex_tree
 }  // namespace Gudhi
 
-#endif  // SIMPLEX_TREE_ITERATORS_H
+#endif  // SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_SIMPLEX_TREE_ITERATORS_H_

@@ -54,6 +54,7 @@ else()
 
   add_subdirectory(src/Simplex_tree/test)
   add_subdirectory(src/Simplex_tree/example)
+  add_subdirectory(src/Persistent_cohomology/test)
   add_subdirectory(src/Persistent_cohomology/example)
   add_subdirectory(src/Skeleton_blocker/example) 
   add_subdirectory(src/Contraction/example)

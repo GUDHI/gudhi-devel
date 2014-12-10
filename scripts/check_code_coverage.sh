@@ -12,8 +12,9 @@ rm -f $COVERAGE_FILE $LOG_FILE
 
 lcov --capture --directory $UT_DIR_TO_CHECK --no-external --output-file $COVERAGE_FILE 2>&1 | tee -a $LOG_FILE
 lcov --summary $COVERAGE_FILE 2>&1 | tee -a $LOG_FILE
+genhtml $COVERAGE_FILE --output-directory $UT_DIR_TO_CHECK/lcov
 # CLEAN AFTER USE
-#lcov --directory $UT_DIR_TO_CHECK --zerocounters 2>&1 | tee -a $LOG_FILE
+lcov --directory $UT_DIR_TO_CHECK --zerocounters 2>&1 | tee -a $LOG_FILE
 
 LINE_PERCENTAGE=`grep "lines......:" $LOG_FILE`
 PERC_PER_LINE=${LINE_PERCENTAGE:14:3}

@@ -12,22 +12,22 @@ if(NOT MSVC)
 endif()
 
 include_directories(${Boost_INCLUDE_DIRS})
-add_executable ( TestSimplexTree UnitTestSimplexTree.cpp )
-target_link_libraries(TestSimplexTree ${Boost_LIBRARIES})
+add_executable ( simplex_tree_unit_test simplex_tree_unit_test.cpp )
+target_link_libraries(simplex_tree_unit_test ${Boost_LIBRARIES})
 
 # Unitary tests
-add_test(TestSimplexTree ${CMAKE_CURRENT_BINARY_DIR}/TestSimplexTree)
+add_test(simplex_tree_unit_test ${CMAKE_CURRENT_BINARY_DIR}/simplex_tree_unit_test)
 
 if (LCOV_PATH)
   # Lcov code coverage of unitary test
-  add_test(TestSimplexTreeCov ${CMAKE_SOURCE_DIR}/scripts/check_code_coverage.sh ${CMAKE_SOURCE_DIR}/src/Simplex_tree)
+  add_test(simplex_tree_unit_test_coverage.info ${CMAKE_SOURCE_DIR}/scripts/check_code_coverage.sh ${CMAKE_SOURCE_DIR}/src/Simplex_tree)
 endif()
 
 if (PYTHON_PATH)
   # Cpplint tests on coding style
-  add_test(CpplintSimplexTree ${CMAKE_SOURCE_DIR}/scripts/check_google_style.sh ${CMAKE_SOURCE_DIR}/src/Simplex_tree/include/gudhi/Simplex_tree.h)
-  add_test(CpplintSimplexTreeIndexingTag ${CMAKE_SOURCE_DIR}/scripts/check_google_style.sh ${CMAKE_SOURCE_DIR}/src/Simplex_tree/include/gudhi/Simplex_tree/indexing_tag.h)
-  add_test(CpplintSimplexTreeIterator ${CMAKE_SOURCE_DIR}/scripts/check_google_style.sh ${CMAKE_SOURCE_DIR}/src/Simplex_tree/include/gudhi/Simplex_tree/Simplex_tree_iterators.h)
-  add_test(CpplintSimplexTreeNode ${CMAKE_SOURCE_DIR}/scripts/check_google_style.sh ${CMAKE_SOURCE_DIR}/src/Simplex_tree/include/gudhi/Simplex_tree/Simplex_tree_node_explicit_storage.h)
-  add_test(CpplintSimplexTreeSiblings ${CMAKE_SOURCE_DIR}/scripts/check_google_style.sh ${CMAKE_SOURCE_DIR}/src/Simplex_tree/include/gudhi/Simplex_tree/Simplex_tree_siblings.h)
+  add_test(Simplex_tree.h.cpplint ${CMAKE_SOURCE_DIR}/scripts/check_google_style.sh ${CMAKE_SOURCE_DIR}/src/Simplex_tree/include/gudhi/Simplex_tree.h)
+  add_test(indexing_tag.h.cpplint ${CMAKE_SOURCE_DIR}/scripts/check_google_style.sh ${CMAKE_SOURCE_DIR}/src/Simplex_tree/include/gudhi/Simplex_tree/indexing_tag.h)
+  add_test(Simplex_tree_iterators.h.cpplint ${CMAKE_SOURCE_DIR}/scripts/check_google_style.sh ${CMAKE_SOURCE_DIR}/src/Simplex_tree/include/gudhi/Simplex_tree/Simplex_tree_iterators.h)
+  add_test(Simplex_tree_node_explicit_storage.h.cpplint ${CMAKE_SOURCE_DIR}/scripts/check_google_style.sh ${CMAKE_SOURCE_DIR}/src/Simplex_tree/include/gudhi/Simplex_tree/Simplex_tree_node_explicit_storage.h)
+  add_test(Simplex_tree_siblings.h.cpplint ${CMAKE_SOURCE_DIR}/scripts/check_google_style.sh ${CMAKE_SOURCE_DIR}/src/Simplex_tree/include/gudhi/Simplex_tree/Simplex_tree_siblings.h)
 endif()

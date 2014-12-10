@@ -20,6 +20,9 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_INDEXING_TAG_H_
+#define SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_INDEXING_TAG_H_
+
 namespace Gudhi {
 
 /** \brief Tag for a linear ordering of simplices. 
@@ -31,4 +34,6 @@ struct linear_indexing_tag {
 
 /* \brief Tag for a zigzag ordering of simplices. */
 //  struct zigzag_indexing_tag {};
-}// namespace Gudhi
+}  // namespace Gudhi
+
+#endif  // SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_INDEXING_TAG_H_

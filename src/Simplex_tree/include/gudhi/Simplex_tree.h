@@ -20,19 +20,21 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GUDHI_SIMPLEX_TREE_H
-#define GUDHI_SIMPLEX_TREE_H
+#ifndef SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_H_
+#define SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_H_
+
+#include <gudhi/Simplex_tree/Simplex_tree_node_explicit_storage.h>
+#include <gudhi/Simplex_tree/Simplex_tree_siblings.h>
+#include <gudhi/Simplex_tree/Simplex_tree_iterators.h>
+#include <gudhi/Simplex_tree/indexing_tag.h>
+
+#include <boost/container/flat_map.hpp>
+#include <boost/iterator/transform_iterator.hpp>
+#include <boost/graph/adjacency_list.hpp>
 
 #include <algorithm>
 #include <utility>
 #include <vector>
-#include "gudhi/Simplex_tree/Simplex_tree_node_explicit_storage.h"
-#include "gudhi/Simplex_tree/Simplex_tree_siblings.h"
-#include "gudhi/Simplex_tree/Simplex_tree_iterators.h"
-#include "gudhi/Simplex_tree/indexing_tag.h"
-#include <boost/container/flat_map.hpp>
-#include <boost/iterator/transform_iterator.hpp>
-#include <boost/graph/adjacency_list.hpp>
 
 namespace Gudhi {
 
@@ -107,18 +109,12 @@ class Simplex_tree {
   /* Type of dictionary Vertex_handle -> Node for traversing the simplex tree. */
   typedef typename boost::container::flat_map<Vertex_handle, Node> Dictionary;
 
-  friend class Simplex_tree_node_explicit_storage<
-      Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> > ;
-  friend class Simplex_tree_siblings<
-      Simplex_tree<FiltrationValue, SimplexKey, VertexHandle>, Dictionary> ;
-  friend class Simplex_tree_simplex_vertex_iterator<
-      Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> > ;
-  friend class Simplex_tree_boundary_simplex_iterator<
-      Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> > ;
-  friend class Simplex_tree_complex_simplex_iterator<
-      Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> > ;
-  friend class Simplex_tree_skeleton_simplex_iterator<
-      Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> > ;
+  friend class Simplex_tree_node_explicit_storage< Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> >;
+  friend class Simplex_tree_siblings< Simplex_tree<FiltrationValue, SimplexKey, VertexHandle>, Dictionary>;
+  friend class Simplex_tree_simplex_vertex_iterator< Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> >;
+  friend class Simplex_tree_boundary_simplex_iterator< Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> >;
+  friend class Simplex_tree_complex_simplex_iterator< Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> >;
+  friend class Simplex_tree_skeleton_simplex_iterator< Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> >;
   template<class T1, class T2> friend class Persistent_cohomology;
 
   /* \brief Set of nodes sharing a same parent in the simplex tree. */
@@ -400,7 +396,7 @@ class Simplex_tree {
    * <CODE>Vertex_handle</CODE>.
    */
   template<class RandomAccessVertexRange>
-  Simplex_handle find(RandomAccessVertexRange & s) {
+  Simplex_handle find(const RandomAccessVertexRange & s) {
     if (s.begin() == s.end())
       std::cerr << "Empty simplex \n";
 
@@ -597,7 +593,7 @@ class Simplex_tree {
    * Reverse lexicographic order has the property to always consider the subsimplex of a simplex
    * to be smaller. The filtration function must be monotonic. */
   struct is_before_in_filtration {
-    is_before_in_filtration(Simplex_tree * st)
+    explicit is_before_in_filtration(Simplex_tree * st)
         : st_(st) {
     }
 
@@ -632,7 +628,7 @@ class Simplex_tree {
    * boost::graph_traits<OneSkeletonGraph>::directed_category
    *                                    must be undirected_tag. */
   template<class OneSkeletonGraph>
-  void insert_graph(OneSkeletonGraph & skel_graph) {
+  void insert_graph(const OneSkeletonGraph& skel_graph) {
     assert(num_simplices() == 0);  // the simplex tree must be empty
 
     if (boost::num_vertices(skel_graph) == 0) {
@@ -738,25 +734,22 @@ class Simplex_tree {
   }
   /** \brief Intersects Dictionary 1 [begin1;end1) with Dictionary 2 [begin2,end2)
    * and assigns the maximal possible Filtration_value to the Nodes. */
-  void intersection(std::vector<std::pair<Vertex_handle, Node> > & intersection,
+  void intersection(std::vector<std::pair<Vertex_handle, Node> >& intersection,
                     Dictionary_it begin1, Dictionary_it end1,
                     Dictionary_it begin2, Dictionary_it end2,
                     Filtration_value filtration) {
     if (begin1 == end1 || begin2 == end2)
-      return;  // 0;
+      return;  // ----->>
     while (true) {
       if (begin1->first == begin2->first) {
         intersection.push_back(
             std::pair<Vertex_handle, Node>(
                 begin1->first,
-                Node(
-                    NULL,
-                    maximum(begin1->second.filtration(),
-                            begin2->second.filtration(), filtration))));
+                Node(NULL, maximum(begin1->second.filtration(), begin2->second.filtration(), filtration))));
         ++begin1;
         ++begin2;
         if (begin1 == end1 || begin2 == end2)
-          return;
+          return;  // ----->>
       } else {
         if (begin1->first < begin2->first) {
           ++begin1;
@@ -765,7 +758,7 @@ class Simplex_tree {
         } else {
           ++begin2;
           if (begin2 == end2)
-            return;
+            return;  // ----->>
         }
       }
     }
@@ -784,7 +777,7 @@ class Simplex_tree {
    * dim idx_1 ... idx_k fil   where dim is the dimension of the simplex,
    * idx_1 ... idx_k are the row index (starting from 0) of the simplices of the boundary
    * of the simplex, and fil is its filtration value. */
-  void print_hasse(std::ostream & os) {
+  void print_hasse(std::ostream& os) {
     os << num_simplices() << " " << std::endl;
     for (auto sh : filtration_simplex_range(Indexing_tag())) {
       os << dimension(sh) << " ";
@@ -832,7 +825,7 @@ std::istream& operator>>(std::istream & is, Simplex_tree<T1, T2, T3> & st) {
   size_t num_simplices = 0;
   while (read_simplex(is, simplex, fil)) {  // read all simplices in the file as a list of vertices
     ++num_simplices;
-    int dim = (int) simplex.size() - 1;  // Warning : simplex_size needs to be casted in int - Can be 0
+    int dim = static_cast<int>(simplex.size() - 1);  // Warning : simplex_size needs to be casted in int - Can be 0
     if (max_dim < dim) {
       max_dim = dim;
     }
@@ -852,4 +845,4 @@ std::istream& operator>>(std::istream & is, Simplex_tree<T1, T2, T3> & st) {
 /** @} */  // end defgroup simplex_tree
 }  // namespace Gudhi
 
-#endif  // GUDHI_SIMPLEX_TREE_H
+#endif  // SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_H_
