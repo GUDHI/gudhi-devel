@@ -7,27 +7,25 @@
 #include <ctime>
 #include <list>
 
-#include "combinatorics/Skeleton_blocker/Skeleton_blocker_simple_traits.h"
-#include "geometry/Skeleton_blocker_simple_geometric_traits.h"
+#include "gudhi/Skeleton_blocker/Skeleton_blocker_simple_traits.h"
+#include "gudhi/Skeleton_blocker/Skeleton_blocker_simple_geometric_traits.h"
 //#include "Skeleton_blocker/Simplex.h"
-#include "contraction/Skeleton_blocker_contractor.h"
-#include "Utils.h"
-#include "iofile.h"
-#include "Test.h"
-#include "Skeleton_blocker_geometric_complex.h"
+#include "gudhi/Skeleton_blocker_contractor.h"
+#include "gudhi/Utils.h"
+#include "gudhi/iofile.h"
+#include "gudhi/Test.h"
+#include "gudhi/Skeleton_blocker_geometric_complex.h"
 //#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 
 
-#include "contraction/Edge_profile.h"
-
-#include "contraction/policies/Cost_policy.h"
-#include "contraction/policies/Edge_length_cost.h"
-#include "contraction/policies/Placement_policy.h"
-#include "contraction/policies/Middle_placement.h"
-
-#include "contraction/policies/Valid_contraction_policy.h"
-#include "contraction/policies/Dummy_valid_contraction.h"
-#include "contraction/policies/Link_condition_valid_contraction.h"
+#include "gudhi/Contraction/Edge_profile.h"
+#include "gudhi/Contraction/policies/Cost_policy.h"
+#include "gudhi/Contraction/policies/Edge_length_cost.h"
+#include "gudhi/Contraction/policies/Placement_policy.h"
+#include "gudhi/Contraction/policies/Middle_placement.h"
+#include "gudhi/Contraction/policies/Valid_contraction_policy.h"
+#include "gudhi/Contraction/policies/Dummy_valid_contraction.h"
+#include "gudhi/Contraction/policies/Link_condition_valid_contraction.h"
 
 
 using namespace std;
