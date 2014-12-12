@@ -48,25 +48,28 @@ void build_rips(ComplexType& complex, double offset){
 				complex.add_edge(*p,*q);
 }
 
+int main (int argc, char *argv[])
+{
+	if (argc!=3){
+		std::cerr << "Usage "<<argv[0]<<" GUDHIPATH/src/data/sphere3D.off 0.1 to load the file GUDHIPATH/src/data/sphere3D.off and contract the Rips complex built with paremeter 0.2.\n";
+		return -1;
+	}
 
-
-
-void test_contraction_rips(string name_file, double offset){
 	boost::timer::auto_cpu_timer t;
 	Complex complex;
 
 	// load the points
-	Skeleton_blocker_off_reader<Complex> off_reader(name_file,complex,true);
+	Skeleton_blocker_off_reader<Complex> off_reader(argv[1],complex,true);
 	if(!off_reader.is_valid()){
-		std::cerr << "Unable to read file:"<<name_file<<std::endl;
-		return;
+		std::cerr << "Unable to read file:"<<argv[1]<<std::endl;
+		return EXIT_FAILURE;
 	}
-	std::cerr << "build the Rips complex"<<std::endl;
+	std::cout << "build the Rips complex"<<std::endl;
 
-	build_rips(complex,offset);
+	build_rips(complex,atof(argv[2]));
 
 
-	std::cerr << "Initial complex has "<<
+	std::cout << "Initial complex has "<<
 			complex.num_vertices()<<" vertices, and "<<
 			complex.num_edges()<<" edges."<<std::endl;
 
@@ -77,24 +80,12 @@ void test_contraction_rips(string name_file, double offset){
 			contraction::make_remove_popable_blockers_visitor<Profile>());
 	contractor.contract_edges();
 
-	std::cerr << "Resulting complex has "<<
+	std::cout << "Resulting complex has "<<
 			complex.num_vertices()<<" vertices, "<<
 			complex.num_edges()<<"edges and "<<
 			complex.num_blockers()<<" blockers"<<std::endl;
 
-
-}
-
-
-int main (int argc, char *argv[])
-{
-	if (argc!=3){
-		std::cerr << "Usage "<<argv[0]<<" GUDHIPATH/src/data/sphere3D.off 0.1 to load the file GUDHIPATH/src/data/sphere3D.off and contract the Rips complex built with paremeter 0.2.\n";
-		return -1;
-	}
-
-	std::string name_file(argv[1]);
-	test_contraction_rips(name_file,atof(argv[2]));
+	return EXIT_SUCCESS;
 }
 
 

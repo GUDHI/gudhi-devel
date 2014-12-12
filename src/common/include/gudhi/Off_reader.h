@@ -1,8 +1,8 @@
 /*
  * Off_reader.h
  *  Created on: Nov 28, 2014
- * This file is part of the Gudhi Library. The Gudhi library 
- *    (Geometric Understanding in Higher Dimensions) is a generic C++ 
+ * This file is part of the Gudhi Library. The Gudhi library
+ *    (Geometric Understanding in Higher Dimensions) is a generic C++
  *    library for computational topology.
  *
  *    Author(s):       David Salinas
@@ -21,7 +21,7 @@
  *
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 
@@ -113,18 +113,26 @@ private:
 		bool is_off_file = (line.find("OFF") != std::string::npos);
 		bool is_noff_file = (line.find("nOFF") != std::string::npos);
 
-    	if(!is_off_file && !is_noff_file) return false;
+    	if(!is_off_file && !is_noff_file) {
+    		std::cerr << line<<std::endl;
+    		std::cerr << "missing off header\n";
+    		return false;
+    	}
 
     	if(!goto_next_uncomment_line(line)) return false;
     	std::istringstream iss(line);
    		if(is_off_file){
 	  		off_info_.dim = 3;
-	  		if(!(iss >> off_info_.num_vertices >> off_info_.num_faces >> off_info_.num_edges))
+	  		if(!(iss >> off_info_.num_vertices >> off_info_.num_faces >> off_info_.num_edges)){
+	  			std::cerr << "incorrect number of vertices/faces/edges\n";
 	  			return false;
+	  		}
 		}
 		else
-			if(!(iss >> off_info_.dim >> off_info_.num_vertices >> off_info_.num_faces >> off_info_.num_edges))
+			if(!(iss >> off_info_.dim >> off_info_.num_vertices >> off_info_.num_faces >> off_info_.num_edges)){
+				std::cerr << "incorrect number of vertices/faces/edges\n";
 				return false;
+			}
    		off_visitor.init(off_info_.dim,off_info_.num_vertices,off_info_.num_faces,off_info_.num_edges);
 
    		return true;
@@ -134,7 +142,7 @@ private:
 		uncomment_line.clear();
 		do
 			std::getline(stream_, uncomment_line);
-    	while(uncomment_line[0] == '%');
+    	while(uncomment_line[0] == '%');// || uncomment_line.empty());
 		return (uncomment_line.size()>0 && uncomment_line[0] != '%');
 	}
 

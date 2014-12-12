@@ -46,9 +46,10 @@ public:
 	/**
 	 * @brief Add a vertex to the complex with its associated point.
 	 */
-	void add_vertex(const Point& point){
+	Vertex_handle add_vertex(const Point& point){
 		Vertex_handle ad = SimplifiableSkeletonblocker::add_vertex();
 		(*this)[ad].point() = point;
+		return ad;
 	}
 
 
