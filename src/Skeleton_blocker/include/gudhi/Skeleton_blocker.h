@@ -35,18 +35,18 @@
 
 
 
-/** \defgroup skbl Skeleton-blocker Package
+/** \defgroup skbl Skeleton-Blocker Package
 
 \author David Salinas
 
 \section Introduction
-The Skeleton-blocker data-structure had been introduced in the two papers 
+The Skeleton-Blocker data-structure had been introduced in the two papers 
 [\cite skbl_socg2011,\cite skbl_ijcga2012]. 
 It proposes a light encoding for simplicial complexes by storing only an *implicit* representation of its
 simplices.
 Intuitively, it just stores the 1-skeleton of a simplicial complex with a graph and the set of its "missing faces" that
 is very small in practice (see next section for a formal definition).
-This data-structure handles every classical operations used for simplicial complexes such as
+This data-structure handles all  simplicial complexes operations such as
  as simplex enumeration or simplex removal but operations that are particularly efficient 
  are operations that do not require simplex enumeration such as edge iteration, link computation or simplex contraction.
 
@@ -58,7 +58,7 @@ An abstract simplex is a finite non-empty set and its dimension is its number of
 Whenever \f$\tau \subset \sigma\f$ and \f$\tau \neq \emptyset \f$, \f$ \tau \f$ is called a face of 
 \f$ \sigma\f$  and \f$ \sigma\f$ is called a coface of \f$ \tau \f$ . Furthermore,
 when \f$ \tau \neq \sigma\f$ we say that \f$ \tau\f$ is a proper-face of \f$ \sigma\f$.
-An abstract simplicial complex is a set of simplices that contains all the faces of its simplices.
+An abstract simplicial complex is a set of simplices that contains all the faces of their simplices.
 The 1-skeleton of a simplicial complex (or its graph) consists of its elements of dimension lower than 2.
 
 *\image html "ds_representation.png" "Skeleton-blocker representation" width=20cm
@@ -78,7 +78,7 @@ in topological data-analysis.
 In practice, the set of blockers of a simplicial complex 
 remains also small when simplifying a Rips complex with edge contractions 
 but also for most of the simplicial complexes used in topological data-analysis such as Delaunay, Cech or Witness complexes. 
-For instance, the numbers of blockers is depicted for a random 3 dimensional sphere embedded into \f$R^4\f$ 
+For instance, the numbers of blockers is depicted for random 3 dimensional spheres embedded into \f$R^4\f$ 
 in figure X.
 
 
@@ -93,11 +93,11 @@ in figure X.
 
 Four classes define  a simplicial complex namely :
 
-\li <Code>Skeleton_blocker_complex</Code> : a simplicial complex with basic operations such as vertex/edge/simplex enumeration and construction
-\li <Code>Skeleton_blocker_link_complex</Code> : the link of a simplex in a parent complex. It is represented as a sub complex
+\li Skeleton_blocker_complex : a simplicial complex with basic operations such as vertex/edge/simplex enumeration and construction
+\li Skeleton_blocker_link_complex : the link of a simplex in a parent complex. It is represented as a sub complex
 of the parent complex
-\li <Code>Skeleton_blocker_simplifiable_complex</Code> : a simplicial complex with simplification operations such as edge contraction or simplex collapse
-\li <Code>Skeleton_blocker_geometric_complex</Code> : a simplicial complex who has access to geometric points in  \f$R^d\f$ 
+\li Skeleton_blocker_simplifiable_complex : a simplicial complex with simplification operations such as edge contraction or simplex collapse
+\li Skeleton_blocker_geometric_complex : a simplicial complex who has access to geometric points in  \f$R^d\f$ 
 
 The two last classes are derived classes from the <Code>Skeleton_blocker_complex</Code> class. The class <Code>Skeleton_blocker_link_complex</Code> inheritates from a template passed parameter
 that may be either <Code>Skeleton_blocker_complex</Code> or <Code>Skeleton_blocker_geometric_complex</Code> (a link may store points coordinates or not).

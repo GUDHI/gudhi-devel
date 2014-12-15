@@ -35,14 +35,12 @@ namespace Gudhi{
 
 /** \defgroup persistent_cohomology Persistent Cohomology Package
   *
-  * Computation of persistent cohomology using the algorithm of 
-  * \cite DBLP:journals/dcg/SilvaMV11 and \cite DBLP:journals/corr/abs-1208-5018 
-  * and the Compressed Annotation Matrix 
-  * implementation of \cite DBLP:conf/esa/BoissonnatDM13
-  *
-  *
-  *
-        
+  
+  Computation of persistent cohomology using the algorithm of 
+   \cite DBLP:journals/dcg/SilvaMV11 and \cite DBLP:journals/corr/abs-1208-5018 
+   and the Compressed Annotation Matrix 
+   implementation of \cite DBLP:conf/esa/BoissonnatDM13 
+       
   The theory of homology consists in attaching to a topological space a sequence of 
   (homology) groups, 
   capturing global topological features 
@@ -157,6 +155,21 @@ namespace Gudhi{
     for \f$\mathbb{Z}_p\f$ (for any prime p) and Multi_field for the multi-field persistence algorithm 
     -- computing persistence simultaneously in various coefficient fields -- described 
     in \cite boissonnat:hal-00922572.
+
+
+\section Examples
+    We provide several example files: run these examples with -h for details on their use, and read the README file.
+
+\li <CODE>rips_persistence.cpp</CODE> computes the Rips complex of a point cloud and its persistence diagram.
+
+\li <CODE>rips_multifield_persistence.cpp</CODE> computes the Rips complex of a point cloud and its persistence diagram 
+with a family of field coefficients.
+
+\li <CODE>performance_rips_persistence.cpp</CODE> provides timings for the construction of the Rips complex on a set of 
+points sampling a Klein bottle in \f$\mathbb{R}^5\f$ with a simplex tree, its conversion to a 
+Hasse diagram and the computation of persistent homology and multi-field persistent homology for the 
+different representations.
+
 
 
  \author    Clément Maria

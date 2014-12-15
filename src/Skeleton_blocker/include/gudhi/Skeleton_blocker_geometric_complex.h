@@ -36,7 +36,7 @@ namespace skbl {
 /**
  * @brief Class that represents a geometric complex that can be simplified.
  * The class allows access to points of vertices.
- *
+ * @ingroup skbl
  */
 template<typename SkeletonBlockerGeometricDS>
 class Skeleton_blocker_geometric_complex : public Skeleton_blocker_simplifiable_complex<SkeletonBlockerGeometricDS>

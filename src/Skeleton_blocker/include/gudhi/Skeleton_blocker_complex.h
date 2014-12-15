@@ -57,6 +57,7 @@ namespace skbl {
 /**
  *@class Skeleton_blocker_complex
  *@brief Abstract Simplicial Complex represented with a skeleton/blockers pair.
+ *@ingroup skbl
  */
 template<class SkeletonBlockerDS>
 class Skeleton_blocker_complex

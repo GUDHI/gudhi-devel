@@ -31,6 +31,7 @@ namespace skbl {
 /**
  *  \brief Class that allows simplification operation on a simplicial complex represented
  *  by a skeleton/blockers pair.
+ * \ingroup skbl
  */
 template<typename SkeletonBlockerDS>
 class Skeleton_blocker_simplifiable_complex : public Skeleton_blocker_complex<SkeletonBlockerDS>

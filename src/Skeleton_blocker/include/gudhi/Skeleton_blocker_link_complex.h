@@ -36,6 +36,7 @@ template<class ComplexType> class Skeleton_blocker_sub_complex;
  *  \brief Class representing the link of a simplicial complex encoded by a skeleton/blockers pair.
  *  It inherits from Skeleton_blocker_sub_complex because such complex is a sub complex of a
  *  root complex.
+ * \ingroup skbl
  */
 template<typename ComplexType>
 class Skeleton_blocker_link_complex : public Skeleton_blocker_sub_complex<ComplexType>
