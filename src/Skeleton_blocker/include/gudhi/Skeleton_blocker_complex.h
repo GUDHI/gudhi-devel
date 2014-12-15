@@ -57,21 +57,6 @@ namespace skbl {
 /**
  *@class Skeleton_blocker_complex
  *@brief Abstract Simplicial Complex represented with a skeleton/blockers pair.
- *
- * A simplicial complex is completely defined by :
- * - the graph of its 1-skeleton;
- * - its set of blockers.
- *
- * The graph is a boost graph templated with SkeletonBlockerDS::Graph_vertex and SkeletonBlockerDS::Graph_edge.
- *
- * One can accesses to vertices via SkeletonBlockerDS::Vertex_handle, to edges via Skeleton_blocker_complex::Edge_handle and
- * simplices via Skeleton_blocker_simplex<Vertex_handle>.
- *
- * The SkeletonBlockerDS::Root_vertex_handle serves in the case of a subcomplex (see class Skeleton_blocker_sub_complex)
- * to access to the address of one vertex in the parent complex.
- *
- * @todo TODO Simplex_handle are not classic handle
- *
  */
 template<class SkeletonBlockerDS>
 class Skeleton_blocker_complex
@@ -566,7 +551,7 @@ public:
 	}
 
 	/**
-	 * @brief Adds an edge between vertices a and b
+	 * @brief Adds an edge between vertices a and b and all its cofaces.
 	 */
 	Edge_handle add_edge(Vertex_handle a, Vertex_handle b){
 		assert(contains_vertex(a) && contains_vertex(b));
@@ -598,7 +583,7 @@ public:
 	}
 
 	/**
-	 * @brief Removes edge ab from the simplicial complex.
+	 * @brief Removes edge ab from the simplicial complex and all its cofaces.
 	 */
 	virtual Edge_handle remove_edge(Vertex_handle a, Vertex_handle b){
 		bool found;
@@ -617,7 +602,7 @@ public:
 
 
 	/**
-	 * @brief Removes edge from the simplicial complex.
+	 * @brief Removes edge and its cofaces from the simplicial complex.
 	 */
 	void remove_edge(Edge_handle edge){
 		assert(contains_vertex(first_vertex(edge)));

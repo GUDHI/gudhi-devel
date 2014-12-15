@@ -179,6 +179,19 @@ private:
 };
 
 
+template<typename OFFVisitor>
+void read_off(const std::string& name_file_off,OFFVisitor& vis){
+	std::ifstream stream(name_file_off);
+	if(!stream.is_open())
+		std::cerr <<"could not open file \n";
+	else{
+		Off_reader off_reader(stream);
+		off_reader.read(vis);
+	}
+}
+
+
+
 }  // namespace Gudhi
 
 
