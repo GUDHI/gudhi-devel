@@ -16,6 +16,7 @@
 #include "gudhi/Persistent_cohomology.h"
 
 using namespace Gudhi;
+using namespace Gudhi::persistent_cohomology;
 
 typedef Simplex_tree<> typeST;
 

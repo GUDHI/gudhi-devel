@@ -20,11 +20,14 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GUDHI_SIMPLEX_TREE_SIBLINGS
-#define GUDHI_SIMPLEX_TREE_SIBLINGS
+#ifndef SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_SIMPLEX_TREE_SIBLINGS_H_
+#define SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_SIMPLEX_TREE_SIBLINGS_H_
 
 #include "boost/container/flat_map.hpp"
 #include "Simplex_tree_node_explicit_storage.h"
+
+#include <utility>
+#include <vector>
 
 namespace Gudhi {
 
@@ -69,7 +72,7 @@ class Simplex_tree_siblings {
    *
    * 'members' must be sorted and unique.*/
   Simplex_tree_siblings(Simplex_tree_siblings * oncles, Vertex_handle parent,
-                        std::vector<std::pair<Vertex_handle, Node> > & members)
+                        const std::vector<std::pair<Vertex_handle, Node> > & members)
       : oncles_(oncles),
         parent_(parent),
         members_(boost::container::ordered_unique_range, members.begin(),
@@ -122,10 +125,9 @@ class Simplex_tree_siblings {
   Simplex_tree_siblings * oncles_;
   Vertex_handle parent_;
   Dictionary members_;
-
 };
 
-/* @} */  //end addtogroup simplex_tree
-}// namespace Gudhi
+/* @} */  // end addtogroup simplex_tree
+}  // namespace Gudhi
 
-#endif // GUDHI_SIMPLEX_TREE_SIBLINGS
+#endif  // SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_SIMPLEX_TREE_SIBLINGS_H_

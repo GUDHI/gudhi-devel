@@ -26,10 +26,4 @@ if (LCOV_PATH)
   add_test(src/Persistent_cohomology/lcov/coverage.log ${CMAKE_SOURCE_DIR}/scripts/check_code_coverage.sh ${CMAKE_SOURCE_DIR}/src/Persistent_cohomology)
 endif()
 
-if (PYTHON_PATH)
-  # Cpplint tests on coding style
-  add_test(Persistent_cohomology.h.cpplint ${CMAKE_SOURCE_DIR}/scripts/check_google_style.sh ${CMAKE_SOURCE_DIR}/src/Persistent_cohomology/include/gudhi/Persistent_cohomology.h)
-  add_test(Field_Zp.h.cpplint ${CMAKE_SOURCE_DIR}/scripts/check_google_style.sh ${CMAKE_SOURCE_DIR}/src/Persistent_cohomology/include/gudhi/Persistent_cohomology/Field_Zp.h)
-  add_test(Multi_field.h.cpplint ${CMAKE_SOURCE_DIR}/scripts/check_google_style.sh ${CMAKE_SOURCE_DIR}/src/Persistent_cohomology/include/gudhi/Persistent_cohomology/Multi_field.h)
-  add_test(Persistent_cohomology_column.h.cpplint ${CMAKE_SOURCE_DIR}/scripts/check_google_style.sh ${CMAKE_SOURCE_DIR}/src/Persistent_cohomology/include/gudhi/Persistent_cohomology/Persistent_cohomology_column.h)
-endif()
+cpplint_add_tests("${CMAKE_SOURCE_DIR}/src/Persistent_cohomology/include/gudhi")

@@ -28,6 +28,8 @@
 
 namespace Gudhi {
 
+namespace persistent_cohomology {
+
 /** \brief Structure representing the coefficient field \f$\mathbb{Z}/p\mathbb{Z}\f$
  *
  * \implements CoefficientField
@@ -116,6 +118,8 @@ class Field_Zp {
   const Element mult_id_all;
   const Element add_id_all;
 };
+
+}  // namespace persistent_cohomology
 
 }  // namespace Gudhi
 

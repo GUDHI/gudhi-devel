@@ -4,6 +4,7 @@
 # VERSION CHECK
 ROOT_DIR=..
 FILE_TO_CHECK="$1"
+PYTHON_SCRIPT="$2"
 LOG_FILE=$FILE_TO_CHECK.cpplint
 
 if [ -f $LOG_FILE ]; then
@@ -17,7 +18,7 @@ fi
 
 # CPPLINT FILE
 echo "File: $FILE_TO_CHECK" 2>&1 | tee -a $LOG_FILE
-python ~/cpplint.py --linelength=120 $FILE_TO_CHECK 2>&1 | tee -a $LOG_FILE
+python $PYTHON_SCRIPT --linelength=120 $FILE_TO_CHECK 2>&1 | tee -a $LOG_FILE
 
 LINE_ERRORS=`grep "Total errors found:" $LOG_FILE`
 NB_ERRORS=${LINE_ERRORS:20}

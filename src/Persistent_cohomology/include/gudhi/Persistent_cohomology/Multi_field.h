@@ -30,6 +30,8 @@
 
 namespace Gudhi {
 
+namespace persistent_cohomology {
+
 /** \brief Structure representing coefficients in a set of finite fields simultaneously
  * using the chinese remainder theorem.
  *
@@ -182,6 +184,8 @@ class Multi_field {
   Element mult_id_all;
   const Element add_id_all;
 };
+
+}  // namespace persistent_cohomology
 
 }  // namespace Gudhi
 

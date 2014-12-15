@@ -31,6 +31,8 @@
 
 namespace Gudhi {
 
+namespace persistent_cohomology {
+
 template<typename SimplexKey, typename ArithmeticElement>
 class Persistent_cohomology_column;
 
@@ -138,6 +140,8 @@ class Persistent_cohomology_column : public boost::intrusive::set_base_hook<
   Col_type col_;
   SimplexKey class_key_;
 };
+
+}  // namespace persistent_cohomology
 
 }  // namespace Gudhi
 

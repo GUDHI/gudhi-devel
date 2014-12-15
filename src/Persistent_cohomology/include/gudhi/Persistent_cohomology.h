@@ -40,6 +40,8 @@
 
 namespace Gudhi {
 
+namespace persistent_cohomology {
+
 /** \defgroup persistent_cohomology Persistent Cohomology Package
  *
  * Computation of persistent cohomology using the algorithm of
@@ -746,6 +748,9 @@ class Persistent_cohomology {
 };
 
 /** @} */  // end defgroup persistent_cohomology
+
+}  // namespace persistent_cohomology
+
 }  // namespace Gudhi
 
 #endif  // SRC_PERSISTENT_COHOMOLOGY_INCLUDE_GUDHI_PERSISTENT_COHOMOLOGY_H_

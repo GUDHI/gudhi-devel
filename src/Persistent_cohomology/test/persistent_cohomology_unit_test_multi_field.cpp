@@ -17,6 +17,7 @@
 #include "gudhi/Persistent_cohomology/Multi_field.h"
 
 using namespace Gudhi;
+using namespace Gudhi::persistent_cohomology;
 
 typedef Simplex_tree<> typeST;
 

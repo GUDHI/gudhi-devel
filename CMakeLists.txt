@@ -14,7 +14,7 @@ if(MSVC)
   # Turn off some VC++ warnings
   SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4267 /wd4668 /wd4311 /wd4800 /wd4820 /wd4503 /wd4244 /wd4345 /wd4996 /wd4396 /wd4018")
 else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -std=c++11 -Wall -Wpedantic -lboost_system -lboost_timer -lboost_unit_test_framework -lgmpxx -lgmp")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -std=c++11 -Wall -Wpedantic")
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0")	
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 endif()
@@ -37,6 +37,18 @@ FIND_PROGRAM( PYTHON_PATH python )
 if (PYTHON_PATH)
   message("python found in ${PYTHON_PATH}")
 endif()
+
+# Function to add_test cpplint on each header file of the Gudhi module 
+function(cpplint_add_tests the_directory)
+  if (PYTHON_PATH)
+    # Cpplint tests on coding style
+    file(GLOB files "${the_directory}/*.h" "${the_directory}/*/*.h")
+    foreach(filename ${files})
+      message(${filename})
+      add_test("${filename}.cpplint" ${CMAKE_SOURCE_DIR}/scripts/check_google_style.sh ${filename}  ${CMAKE_SOURCE_DIR}/scripts/cpplint.py)
+    endforeach()
+  endif()
+endfunction(cpplint_add_tests)
 
 
 if(NOT Boost_FOUND)

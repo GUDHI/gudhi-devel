@@ -18,11 +18,4 @@ if (LCOV_PATH)
   add_test(src/Simplex_tree/lcov/coverage.log ${CMAKE_SOURCE_DIR}/scripts/check_code_coverage.sh ${CMAKE_SOURCE_DIR}/src/Simplex_tree)
 endif()
 
-if (PYTHON_PATH)
-  # Cpplint tests on coding style
-  add_test(Simplex_tree.h.cpplint ${CMAKE_SOURCE_DIR}/scripts/check_google_style.sh ${CMAKE_SOURCE_DIR}/src/Simplex_tree/include/gudhi/Simplex_tree.h)
-  add_test(indexing_tag.h.cpplint ${CMAKE_SOURCE_DIR}/scripts/check_google_style.sh ${CMAKE_SOURCE_DIR}/src/Simplex_tree/include/gudhi/Simplex_tree/indexing_tag.h)
-  add_test(Simplex_tree_iterators.h.cpplint ${CMAKE_SOURCE_DIR}/scripts/check_google_style.sh ${CMAKE_SOURCE_DIR}/src/Simplex_tree/include/gudhi/Simplex_tree/Simplex_tree_iterators.h)
-  add_test(Simplex_tree_node_explicit_storage.h.cpplint ${CMAKE_SOURCE_DIR}/scripts/check_google_style.sh ${CMAKE_SOURCE_DIR}/src/Simplex_tree/include/gudhi/Simplex_tree/Simplex_tree_node_explicit_storage.h)
-  add_test(Simplex_tree_siblings.h.cpplint ${CMAKE_SOURCE_DIR}/scripts/check_google_style.sh ${CMAKE_SOURCE_DIR}/src/Simplex_tree/include/gudhi/Simplex_tree/Simplex_tree_siblings.h)
-endif()
+cpplint_add_tests("${CMAKE_SOURCE_DIR}/src/Simplex_tree/include/gudhi")
