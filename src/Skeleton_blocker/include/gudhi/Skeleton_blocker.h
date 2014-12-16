@@ -35,13 +35,13 @@
 
 
 
-/** \defgroup skbl Skeleton-Blocker Package
+/** \defgroup skbl Skeleton-Blocker 
 
 \author David Salinas
 
 \section Introduction
 The Skeleton-Blocker data-structure had been introduced in the two papers 
-[\cite skbl_socg2011,\cite skbl_ijcga2012]. 
+\cite socg_blockers_2011,\cite blockers2012\cite blockers2012. 
 It proposes a light encoding for simplicial complexes by storing only an *implicit* representation of its
 simplices.
 Intuitively, it just stores the 1-skeleton of a simplicial complex with a graph and the set of its "missing faces" that
@@ -53,7 +53,7 @@ This data-structure handles all  simplicial complexes operations such as
 
 \section Definitions
 
-We recall briefly classical definitions of simplicial complexes  [\cite Munkres].
+We recall briefly classical definitions of simplicial complexes   \cite Munkres-elementsalgtop1984.
 An abstract simplex is a finite non-empty set and its dimension is its number of elements minus 1.
 Whenever \f$\tau \subset \sigma\f$ and \f$\tau \neq \emptyset \f$, \f$ \tau \f$ is called a face of 
 \f$ \sigma\f$  and \f$ \sigma\f$ is called a coface of \f$ \tau \f$ . Furthermore,
@@ -101,8 +101,6 @@ of the parent complex
 
 The two last classes are derived classes from the <Code>Skeleton_blocker_complex</Code> class. The class <Code>Skeleton_blocker_link_complex</Code> inheritates from a template passed parameter
 that may be either <Code>Skeleton_blocker_complex</Code> or <Code>Skeleton_blocker_geometric_complex</Code> (a link may store points coordinates or not).
-
-\todo{include links}
 
 \subsection Visitor
 

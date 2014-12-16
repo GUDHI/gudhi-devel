@@ -1,24 +1,24 @@
- /*    This file is part of the Gudhi Library. The Gudhi library
-  *    (Geometric Understanding in Higher Dimensions) is a generic C++
-  *    library for computational topology.
-  *
-  *    Author(s):       David Salinas
-  *
-  *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
-  *
-  *    This program is free software: you can redistribute it and/or modify
-  *    it under the terms of the GNU General Public License as published by
-  *    the Free Software Foundation, either version 3 of the License, or
-  *    (at your option) any later version.
-  *
-  *    This program is distributed in the hope that it will be useful,
-  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *    GNU General Public License for more details.
-  *
-  *    You should have received a copy of the GNU General Public License
-  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  */
+/*    This file is part of the Gudhi Library. The Gudhi library
+ *    (Geometric Understanding in Higher Dimensions) is a generic C++
+ *    library for computational topology.
+ *
+ *    Author(s):       David Salinas
+ *
+ *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #ifndef GUDHI_SKELETON_BLOCKER_COMPLEX_H
 #define GUDHI_SKELETON_BLOCKER_COMPLEX_H
@@ -150,7 +150,6 @@ protected:
 
 
 	//todo remove!!!
-public:
 
 	/** Each vertex can access to the blockers passing through it. */
 	BlockerMap blocker_map_;
@@ -164,7 +163,7 @@ public:
 
 
 	/////////////////////////////////////////////////////////////////////////////
-	/** @name Constructors / Destructors / Initialization
+	/** @name Constructors, Destructors
 	 */
 	//@{
 	Skeleton_blocker_complex(int num_vertices_ = 0,Visitor* visitor_=NULL):visitor(visitor_){
@@ -281,7 +280,7 @@ public:
 	 * @brief Constructor with a list of simplices
 	 * @details The list of simplices must be the list
 	 * of simplices of a simplicial complex.
-	 *todo rewrite as iterators
+	 *
 	 */
 	Skeleton_blocker_complex(std::list<Simplex_handle>& simplices,Visitor* visitor_=NULL):
 		num_vertices_(0),num_blockers_(0),
@@ -314,7 +313,6 @@ public:
 			}
 		}
 	}
-
 
 
 	// We cannot use the default copy constructor since we need
@@ -355,7 +353,7 @@ public:
 	}
 
 	/**
-	 * Clears the simplicial complex. After a call to this function,
+	 * @details Clears the simplicial complex. After a call to this function,
 	 * blockers are destroyed. The 1-skeleton and the set of blockers
 	 * are both empty.
 	 */
@@ -398,11 +396,19 @@ public:
 		return *local;
 	}
 
+	/**
+	 * @brief Return the vertex node associated to local Vertex_handle.
+	 * @remark Assume that the vertex is present in the complex.
+	 */
 	Graph_vertex& operator[](Vertex_handle address){
 		assert(0<=address.vertex && address.vertex< boost::num_vertices(skeleton));
 		return skeleton[address.vertex];
 	}
 
+	/**
+	 * @brief Return the vertex node associated to local Vertex_handle.
+	 * @remark Assume that the vertex is present in the complex.
+	 */
 	const Graph_vertex& operator[](Vertex_handle address) const{
 		assert(0<=address.vertex && address.vertex< boost::num_vertices(skeleton));
 		return skeleton[address.vertex];
@@ -426,7 +432,8 @@ public:
 
 	/**
 	 * @brief Remove a vertex from the simplicial complex
-	 * @remark In fact, it just deactivates the vertex.
+	 * @remark It just deactivates the vertex with a boolean flag but does not
+	 * remove it from vertices from complexity issues.
 	 */
 	void remove_vertex(Vertex_handle address){
 		assert(contains_vertex(address));
@@ -438,17 +445,11 @@ public:
 		if (visitor) visitor->on_remove_vertex(address);
 	}
 
-	/**
-	 * @return true iff the simplicial complex contains the vertex u
-	 */
 	bool contains_vertex(Vertex_handle u) const{
 		if (u.vertex<0 || u.vertex>=boost::num_vertices(skeleton)) return false;
 		return (*this)[u].is_active();
 	}
 
-	/**
-	 * @return true iff the simplicial complex contains the vertex u
-	 */
 	bool contains_vertex(Root_vertex_handle u) const{
 		boost::optional<Vertex_handle> address = get_address(u);
 		return address &&  (*this)[*address].is_active();
@@ -466,9 +467,8 @@ public:
 	}
 
 	/**
-	 * Given an Id return the address of the vertex having this Id in the complex.
-	 * For a simplicial complex, the address is the id but it may not be the case for a SubComplex.
-	 *
+	 * @brief Given an Id return the address of the vertex having this Id in the complex.
+	 * @remark For a simplicial complex, the address is the id but it may not be the case for a SubComplex.
 	 */
 	virtual boost::optional<Vertex_handle> get_address(Root_vertex_handle id) const{
 		boost::optional<Vertex_handle> res;
@@ -488,10 +488,14 @@ public:
 
 
 	/**
+	 * @brief Convert an address of a vertex of a complex to the address in
+	 * the current complex.
+	 * @details
 	 * If the current complex is a sub (or sup) complex of 'other', it converts
 	 * the address of a vertex v expressed in 'other' to the address of the vertex
 	 * v in the current one.
-	 * @remark this methods uses Root_vertex_handle to identify the vertex
+	 * @remark this methods uses Root_vertex_handle to identify the vertex and
+	 * assumes the vertex is present in the current complex.
 	 */
 	Vertex_handle convert_handle_from_another_complex(
 			const Skeleton_blocker_complex& other,Vertex_handle vh_in_other) const{
@@ -500,7 +504,9 @@ public:
 		return *vh_in_current_complex;
 	}
 
-
+	/**
+	 * @brief return the graph degree of a vertex.
+	 */
 	int degree(Vertex_handle local) const{
 		assert(0<=local.vertex && local.vertex< boost::num_vertices(skeleton));
 		return degree_[local.vertex];
@@ -527,24 +533,40 @@ public:
 		return res;
 	}
 
+	/**
+	 * @brief returns the stored node associated to an edge
+	 */
 	Graph_edge& operator[](Edge_handle edge_handle){
 		return skeleton[edge_handle];
 	}
 
+	/**
+	 * @brief returns the stored node associated to an edge
+	 */
 	const Graph_edge& operator[](Edge_handle edge_handle) const{
 		return skeleton[edge_handle];
 	}
 
+	/**
+	 * @brief returns the first vertex of an edge
+	 * @details it assumes that the edge is present in the complex
+	 */
 	Vertex_handle first_vertex(Edge_handle edge_handle) const{
 		return source(edge_handle,skeleton);
 	}
 
+	/**
+	 * @brief returns the first vertex of an edge
+	 * @details it assumes that the edge is present in the complex
+	 */
 	Vertex_handle second_vertex(Edge_handle edge_handle) const{
 		return target(edge_handle,skeleton);
 	}
 
 	/**
 	 * @brief returns the simplex made with the two vertices of the edge
+	 * @details it assumes that the edge is present in the complex
+
 	 */
 	Simplex_handle get_vertices(Edge_handle edge_handle) const{
 		auto edge((*this)[edge_handle]);
@@ -574,7 +596,7 @@ public:
 	}
 
 	/**
-	 * @brief Adds all edges of simplex sigma to the simplicial complex.
+	 * @brief Adds all edges and their cofaces of a simplex to the simplicial complex.
 	 */
 	void add_edges(const Simplex_handle & sigma){
 		Simplex_handle_iterator i, j;
@@ -584,7 +606,8 @@ public:
 	}
 
 	/**
-	 * @brief Removes edge ab from the simplicial complex and all its cofaces.
+	 * @brief Removes an edge from the simplicial complex and all its cofaces.
+	 * @details returns the former Edge_handle representing the edge
 	 */
 	virtual Edge_handle remove_edge(Vertex_handle a, Vertex_handle b){
 		bool found;
@@ -661,23 +684,10 @@ public:
 	/** @name Blockers operations
 	 */
 	//@{
-	/**
-	 * Adds the 2-blocker abc
-	 */
-	void add_blocker(Vertex_handle a, Vertex_handle b, Vertex_handle c){
-		add_blocker(Simplex_handle(a,b,c));
-	}
 
 	/**
-	 * Adds the 3-blocker abcd
-	 */
-	void add_blocker(Vertex_handle a, Vertex_handle b, Vertex_handle c, Vertex_handle d){
-		add_blocker(Simplex_handle(a,b,c,d));
-	}
-
-	/**
-	 * Adds the simplex blocker_pt to the set of blockers and
-	 * returns a Blocker_handle toward it if was not present before.
+	 * @brief Adds the simplex to the set of blockers and
+	 * returns a Blocker_handle toward it if was not present before and 0 otherwise.
 	 */
 	Blocker_handle add_blocker(const Simplex_handle& blocker){
 		if (contains_blocker(blocker))
@@ -701,7 +711,7 @@ public:
 
 protected:
 	/**
-	 * Adds the simplex s to the set of blockers
+	 * @brief Adds the simplex to the set of blockers
 	 */
 	void add_blocker(Blocker_handle blocker){
 		if (contains_blocker(*blocker))
@@ -745,8 +755,8 @@ protected:
 
 public:
 	/**
-	 * Removes the simplex sigma from the set of blockers.
-	 * sigma has to belongs to the set of blockers
+	 * @brief Removes the simplex from the set of blockers.
+	 * @remark sigma has to belongs to the set of blockers
 	 */
 	void remove_blocker(const Blocker_handle sigma){
 		for (auto vertex : *sigma){
@@ -759,7 +769,7 @@ public:
 
 
 	/**
-	 * Remove all blockers, in other words, it expand the simplicial
+	 * @brief Remove all blockers, in other words, it expand the simplicial
 	 * complex to the smallest flag complex that contains it.
 	 */
 	void remove_blockers(){
@@ -851,17 +861,9 @@ private:
 
 
 
-
-	/////////////////////////////////////////////////////////////////////////////
-	/** @name Neighbourhood access
-	 */
-	//@{
-
-public:
+protected:
 	/**
-	 * @brief Adds to simplex n the neighbours of v:
-	 * \f$ n \leftarrow n \cup N(v) \f$.
-	 *
+	 * @details Adds to simplex the neighbours of v e.g. \f$ n \leftarrow n \cup N(v) \f$.
 	 * If keep_only_superior is true then only vertices that are greater than v are added.
 	 */
 	virtual void add_neighbours(Vertex_handle v, Simplex_handle & n,bool keep_only_superior=false) const{
@@ -877,34 +879,25 @@ public:
 	}
 
 	/**
-	 * @brief Add to simplex res all vertices which are
+	 * @details Add to simplex res all vertices which are
 	 * neighbours of alpha: ie \f$ res \leftarrow res \cup N(alpha) \f$.
 	 *
 	 * If 'keep_only_superior' is true then only vertices that are greater than alpha are added.
-	 *
 	 * todo revoir
 	 *
 	 */
 	virtual void add_neighbours(const Simplex_handle &alpha, Simplex_handle & res,bool keep_only_superior=false) const{
 		res.clear();
-		// ----------------------------
-		// Compute vertices in the link
-		// we compute the intersection of N(alpha_i) and store it in n
-		// ----------------------------
 		auto alpha_vertex = alpha.begin();
 		add_neighbours(*alpha_vertex,res,keep_only_superior);
 		for (alpha_vertex = (alpha.begin())++ ; alpha_vertex != alpha.end() ; ++alpha_vertex)
-		{
 			keep_neighbours(*alpha_vertex,res,keep_only_superior);
-		}
 	}
 
 	/**
-	 * @brief Eliminates from simplex n all vertices which are
-	 * not neighbours of v: \f$ res \leftarrow res \cap N(v) \f$.
-	 *
+	 * @details Remove from simplex n all vertices which are
+	 * not neighbours of v e.g. \f$ res \leftarrow res \cap N(v) \f$.
 	 * If 'keep_only_superior' is true then only vertices that are greater than v are keeped.
-	 *
 	 */
 	virtual void keep_neighbours(Vertex_handle v, Simplex_handle& res,bool keep_only_superior=false) const{
 		Simplex_handle nv;
@@ -913,24 +906,17 @@ public:
 	}
 
 	/**
-	 * @brief Eliminates from simplex n all vertices which are
-	 * neighbours of v: \f$ res \leftarrow res \setminus N(v) \f$.
-	 *
+	 * @details Remove from simplex all vertices which are
+	 * neighbours of v eg \f$ res \leftarrow res \setminus N(v) \f$.
 	 * If 'keep_only_superior' is true then only vertices that are greater than v are added.
-	 *
 	 */
 	virtual void remove_neighbours(Vertex_handle v, Simplex_handle & res,bool keep_only_superior=false) const{
 		Simplex_handle nv;
 		add_neighbours(v,nv,keep_only_superior);
 		res.difference(nv);
 	}
-	//@}
 
 
-	/////////////////////////////////////////////////////////////////////////////
-	/** @name Operations on the simplicial complex
-	 */
-	//@{
 public:
 
 	/**
@@ -1003,8 +989,9 @@ public:
 
 	/*
 	 * @brief returns the number of edges in the complex.
-	 * todo in O(n), cache the value
+	 * @details currently in O(n)
 	 */
+	//	todo cache the value
 	int num_edges() const{
 		return boost::num_edges(skeleton);
 	}
@@ -1031,22 +1018,6 @@ public:
 		std::vector<int> component(skeleton.vertex_set().size());
 		return boost::connected_components(this->skeleton,&component[0]) - num_vert_collapsed;
 	}
-
-
-	//todo remove
-	// do
-	void keep_only_largest_cc(){
-		std::vector<unsigned> component(skeleton.vertex_set().size());
-		boost::connected_components(this->skeleton,&component[0]);
-		auto maxCC = min_element(component.begin(),component.end());
-		for (unsigned i = 0; i != component.size(); ++i){
-			if(component[i]!=*maxCC){
-				if(this->contains_vertex(Vertex_handle(i)))
-					this->remove_vertex(Vertex_handle(i));
-			}
-		}
-	}
-
 
 	/**
 	 * @brief %Test if the complex is a cone.
@@ -1223,6 +1194,9 @@ public:
 
 	typedef boost::iterator_range     < Complex_simplex_iterator > Complex_simplex_range;
 
+	/**
+	 * @brief Returns a Complex_simplex_range over all the simplices of the complex
+	 */
 	Complex_simplex_range simplex_range() const
 	{
 		Complex_simplex_iterator end(this,true);
@@ -1265,7 +1239,9 @@ private:
 public:
 
 
-
+	/**
+	 * @brief Returns a range of the blockers of the complex passing through a vertex
+	 */
 	Complex_blocker_around_vertex_range blocker_range(Vertex_handle v)
 	{
 		auto begin = Complex_blocker_around_vertex_iterator(blocker_map_.lower_bound(v));
@@ -1274,7 +1250,7 @@ public:
 	}
 
 	/**
-	 * @brief Returns a Complex_blocker_around_vertex_range over all blockers of the complex adjacent to the vertex v.
+	 * @brief Returns a range of the blockers of the complex passing through a vertex
 	 */
 	Const_complex_blocker_around_vertex_range const_blocker_range(Vertex_handle v) const
 	{
@@ -1310,7 +1286,9 @@ private:
 
 public:
 
-
+	/**
+	 * @brief Returns a range of the blockers of the complex
+	 */
 	Complex_blocker_range blocker_range()
 	{
 		auto begin = Complex_blocker_iterator(blocker_map_.begin(), blocker_map_.end() );
@@ -1318,7 +1296,9 @@ public:
 		return Complex_blocker_range(begin,end);
 	}
 
-
+	/**
+	 * @brief Returns a range of the blockers of the complex
+	 */
 	Const_complex_blocker_range const_blocker_range() const
 	{
 		auto begin = Const_complex_blocker_iterator(blocker_map_.begin(), blocker_map_.end() );

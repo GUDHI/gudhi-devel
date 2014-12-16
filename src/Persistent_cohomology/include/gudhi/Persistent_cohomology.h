@@ -33,9 +33,9 @@
 
 namespace Gudhi{
 
-/** \defgroup persistent_cohomology Persistent Cohomology Package
+/** \defgroup persistent_cohomology Persistent Cohomology
   *
-  
+
   Computation of persistent cohomology using the algorithm of 
    \cite DBLP:journals/dcg/SilvaMV11 and \cite DBLP:journals/corr/abs-1208-5018 
    and the Compressed Annotation Matrix 

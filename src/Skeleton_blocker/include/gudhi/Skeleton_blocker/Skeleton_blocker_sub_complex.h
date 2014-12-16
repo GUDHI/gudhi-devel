@@ -158,13 +158,13 @@ public:
 	 * Constructs the restricted complex of 'parent_complex' to
 	 * vertices of 'simplex'.
 	 */
-	friend void make_restricted_complex(const ComplexType & parent_complex, const Simplex_handle& simplex, Skeleton_blocker_sub_complex & result){
-		result.clear();
+	void make_restricted_complex(const ComplexType & parent_complex, const Simplex_handle& simplex){
+		this->clear();
 		// add vertices to the sub complex
 		for (auto x : simplex){
 			assert(parent_complex.contains_vertex(x));
-			auto x_local = result.add_vertex(parent_complex[x].get_id());
-			result[x_local] = parent_complex[x];
+			auto x_local = this->add_vertex(parent_complex[x].get_id());
+			(*this)[x_local] = parent_complex[x];
 		}
 
 		// add edges to the sub complex
@@ -174,7 +174,7 @@ public:
 			parent_complex.add_neighbours(x, x_neigh, true);
 			x_neigh.intersection(simplex);
 			for (auto y : x_neigh){
-				result.add_edge(parent_complex[x].get_id(), parent_complex[y].get_id());
+				this->add_edge(parent_complex[x].get_id(), parent_complex[y].get_id());
 			}
 		}
 
@@ -183,8 +183,8 @@ public:
 			// check if it is the first time we encounter the blocker
 			if (simplex.contains(*blocker)){
 				Root_simplex_handle blocker_root(parent_complex.get_id(*(blocker)));
-				Simplex_handle blocker_restr(*result.get_simplex_address(blocker_root));
-				result.add_blocker(new Simplex_handle(blocker_restr));
+				Simplex_handle blocker_restr(*(this->get_simplex_address(blocker_root)));
+				this->add_blocker(new Simplex_handle(blocker_restr));
 			}
 		}
 	}

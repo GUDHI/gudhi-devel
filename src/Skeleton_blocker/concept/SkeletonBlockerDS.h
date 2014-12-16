@@ -23,10 +23,6 @@ namespace skbl {
 struct SkeletonBlockerDS
 {
 	/**
-	 * @todo faire un default value pour les vertex_handle
-	 */
-
-	/**
 	 * @brief index that allows to find the vertex in the boost graph
 	 */
 	typedef int boost_vertex_handle;

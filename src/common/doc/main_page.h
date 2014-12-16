@@ -10,7 +10,7 @@ state-of-the-art algorithms and data structures for computational topology.
 
 The current release of the library allows to use several data-structures for simplicial complexes :
 simplex tree, Hasse diagram or skeleton-blocker. Several  operations can then be done on top of these
-representations persistent homology computation, or simplification. 
+representations such a spersistent homology computation or simplification. 
 
 All data-structures are generic and several of their aspects (such as stored elements, policies) 
 can be parametrized via template classes.
@@ -30,7 +30,7 @@ Some packages require additional libraries :
 The procedure to install these packages according to your operating system is 
 detailled here http://doc.cgal.org/latest/Manual/installation.html
 
-The library compiles in Linux, Mac OSX and visual studio 2013.
+The library compiles in Linux, Mac OSX and Visual Studio 2013.
 
 \section d Demos and Examples
 
@@ -51,6 +51,6 @@ make
 \details 
 
 \copyright GNU General Public License v3.                         
-\verbatim  Contact: Clément Maria,     clement.maria@inria.fr \endverbatim
+\verbatim  Contact: gudhi-devel@lists.gforge.inria.fr \endverbatim
 
 */

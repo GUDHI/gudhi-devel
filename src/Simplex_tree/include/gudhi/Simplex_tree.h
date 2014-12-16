@@ -34,7 +34,7 @@
 
 namespace Gudhi{
 
-/** \defgroup simplex_tree Filtered Complexes Package
+/** \defgroup simplex_tree Filtered Complexes 
   * 
   * A simplicial complex \f$\mathbf{K}\f$
   * on a set of vertices \f$V = \{1, \cdots ,|V|\}\f$ is a collection of simplices 
