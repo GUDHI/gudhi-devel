@@ -74,19 +74,35 @@ class Skeleton_blocker_complex
 
 public:
 
-
+	/**
+	 * @brief The type of stored vertex node, specified by the template SkeletonBlockerDS
+	 */
 	typedef typename SkeletonBlockerDS::Graph_vertex Graph_vertex;
+
+	/**
+	 * @brief The type of stored  edge node, specified by the template SkeletonBlockerDS
+	 */
 	typedef typename SkeletonBlockerDS::Graph_edge Graph_edge;
 
 	typedef typename SkeletonBlockerDS::Root_vertex_handle Root_vertex_handle;
+
+	/**
+	 * @brief The type of an handle to a vertex of the complex.
+	 */
 	typedef typename SkeletonBlockerDS::Vertex_handle Vertex_handle;
 	typedef typename Root_vertex_handle::boost_vertex_handle boost_vertex_handle;
 
 
+	/**
+	 * @brief A ordered set of integers that represents a simplex.
+	 */
 	typedef Skeleton_blocker_simplex<Vertex_handle> Simplex_handle;
 	typedef Skeleton_blocker_simplex<Root_vertex_handle> Root_simplex_handle;
 
 
+	/**
+	 * @brief Handle to a blocker of the complex.
+	 */
 	typedef Simplex_handle* Blocker_handle;
 
 
@@ -118,12 +134,12 @@ protected:
 
 public:
 	/**
-	 * Handle to an edge of the complex.
+	 * @brief Handle to an edge of the complex.
 	 */
 	typedef typename boost::graph_traits<Graph>::edge_descriptor Edge_handle;
 
 
-
+protected:
 	typedef std::multimap<Vertex_handle,Simplex_handle *> BlockerMap;
 	typedef typename std::multimap<Vertex_handle,Simplex_handle *>::value_type BlockerPair;
 	typedef typename std::multimap<Vertex_handle,Simplex_handle *>::iterator BlockerMapIterator;
@@ -166,6 +182,9 @@ public:
 	/** @name Constructors, Destructors
 	 */
 	//@{
+	/**
+	*@brief constructs a simplicial complex with a given number of vertices and a visitor.
+	*/
 	Skeleton_blocker_complex(int num_vertices_ = 0,Visitor* visitor_=NULL):visitor(visitor_){
 		clear();
 		for (int i=0; i<num_vertices_; ++i){
@@ -277,10 +296,9 @@ private:
 
 public:
 	/**
-	 * @brief Constructor with a list of simplices
+	 * @brief Constructor with a list of simplices.
 	 * @details The list of simplices must be the list
-	 * of simplices of a simplicial complex.
-	 *
+	 * of simplices of a simplicial complex.	 
 	 */
 	Skeleton_blocker_complex(std::list<Simplex_handle>& simplices,Visitor* visitor_=NULL):
 		num_vertices_(0),num_blockers_(0),
@@ -330,6 +348,8 @@ public:
 		}
 	}
 
+/**
+*/
 	Skeleton_blocker_complex& operator=(const Skeleton_blocker_complex& copy){
 		clear();
 		visitor = NULL;
@@ -370,6 +390,9 @@ public:
 		skeleton.clear();
 	}
 
+/**
+*@brief allows to change the visitor.
+*/
 	void set_visitor(Visitor* other_visitor){
 		visitor = other_visitor;
 	}
@@ -445,11 +468,15 @@ public:
 		if (visitor) visitor->on_remove_vertex(address);
 	}
 
+/**
+*/
 	bool contains_vertex(Vertex_handle u) const{
 		if (u.vertex<0 || u.vertex>=boost::num_vertices(skeleton)) return false;
 		return (*this)[u].is_active();
 	}
 
+/**
+*/
 	bool contains_vertex(Root_vertex_handle u) const{
 		boost::optional<Vertex_handle> address = get_address(u);
 		return address &&  (*this)[*address].is_active();
@@ -923,8 +950,9 @@ public:
 	 * @brief Compute the local vertices of 's' in the current complex
 	 * If one of them is not present in the complex then the return value is uninitialized.
 	 *
-	 * xxx rename get_address et place un using dans sub_complex
+	 * 
 	 */
+	 //xxx rename get_address et place un using dans sub_complex
 	boost::optional<Simplex_handle>	get_simplex_address(const Root_simplex_handle& s) const
 	{
 		boost::optional<Simplex_handle> res;
@@ -1126,6 +1154,7 @@ private:
 public:
 	typedef Triangle_around_vertex_iterator<Skeleton_blocker_complex,Superior_link> Superior_triangle_around_vertex_iterator;
 
+
 	typedef boost::iterator_range     < Triangle_around_vertex_iterator<Skeleton_blocker_complex,Link> > Complex_triangle_around_vertex_range;
 
 	/**
@@ -1320,6 +1349,7 @@ public:
 	 */
 	//@{
 public:
+
 	std::string to_string() const{
 		std::ostringstream stream;
 		stream<<num_vertices()<<" vertices:\n"<<vertices_to_string()<<std::endl;

@@ -224,7 +224,7 @@ bool test_iterator_triangles(){
 	complex.add_vertex();
 	complex.add_edge(Vertex_handle(4),Vertex_handle(7));
 	complex.add_edge(Vertex_handle(3),Vertex_handle(7));
-	complex.add_blocker(Vertex_handle(0),Vertex_handle(1),Vertex_handle(6));
+	complex.add_blocker(Simplex_handle(Vertex_handle(0),Vertex_handle(1),Vertex_handle(6)));
 	num_triangles_seen=0;
 
 	TEST("triangles (should be 6 of them):");
@@ -255,7 +255,7 @@ bool test_iterator_simplices(){
 	complex.add_edge(Vertex_handle(4),Vertex_handle(5));
 	complex.add_edge(Vertex_handle(3),Vertex_handle(4));
 
-	complex.add_blocker(Vertex_handle(2),Vertex_handle(3),Vertex_handle(4),Vertex_handle(5));
+	complex.add_blocker(Simplex_handle(Vertex_handle(2),Vertex_handle(3),Vertex_handle(4),Vertex_handle(5)));
 
 	bool correct_number_simplices = true;
 
@@ -322,7 +322,7 @@ bool test_iterator_simplices3(){
 	complex.add_edge(Vertex_handle(0),Vertex_handle(1));
 	complex.add_edge(Vertex_handle(1),Vertex_handle(2));
 	complex.add_edge(Vertex_handle(2),Vertex_handle(0));
-	complex.add_blocker(Vertex_handle(0),Vertex_handle(1),Vertex_handle(2));
+	complex.add_blocker(Simplex_handle(Vertex_handle(0),Vertex_handle(1),Vertex_handle(2)));
 
 	unsigned num_simplices = 0 ;
 
@@ -470,7 +470,7 @@ bool test_link2(){
 		for (int j=i+1;j<15;j++)
 			complex.add_edge(Vertex_handle(i),Vertex_handle(j));
 	}
-	complex.add_blocker(Vertex_handle(10),Vertex_handle(11),Vertex_handle(13));
+	complex.add_blocker(Simplex_handle(Vertex_handle(10),Vertex_handle(11),Vertex_handle(13)));
 	alpha = Simplex_handle(Vertex_handle(12),Vertex_handle(14));
 	Skeleton_blocker_link_complex<Complex> L(complex,alpha);
 	// Complexes built
@@ -508,7 +508,7 @@ bool test_link3(){
 		for (int j=i+1;j<15;j++)
 			complex.add_edge(Vertex_handle(i),Vertex_handle(j));
 	}
-	complex.add_blocker(Vertex_handle(10),Vertex_handle(11),Vertex_handle(12));
+	complex.add_blocker(Simplex_handle(Vertex_handle(10),Vertex_handle(11),Vertex_handle(12)));
 	alpha = Simplex_handle(Vertex_handle(12),Vertex_handle(14));
 	Skeleton_blocker_link_complex<Complex> L(complex,alpha);
 	// Complexes built
@@ -540,7 +540,7 @@ bool test_link4(){
 		for (int j=i+1;j<15;j++)
 			complex.add_edge(Vertex_handle(i),Vertex_handle(j));
 	}
-	complex.add_blocker(Vertex_handle(10),Vertex_handle(11),Vertex_handle(12),Vertex_handle(13));
+	complex.add_blocker(Simplex_handle(Vertex_handle(10),Vertex_handle(11),Vertex_handle(12),Vertex_handle(13)));
 	Simplex_handle alpha(Vertex_handle(12),Vertex_handle(14));
 	Skeleton_blocker_link_complex<Complex> L(complex,alpha);
 	// Complexes built
@@ -565,7 +565,7 @@ bool test_link5(){
 	Complex complex(0,new Print_complex_visitor<Vertex_handle>());
 	// Build the complexes
 	build_complete(4,complex);
-	complex.add_blocker(Vertex_handle(0),Vertex_handle(1),Vertex_handle(2),Vertex_handle(3));
+	complex.add_blocker(Simplex_handle(Vertex_handle(0),Vertex_handle(1),Vertex_handle(2),Vertex_handle(3)));
 
 	Simplex_handle alpha(Vertex_handle(0),Vertex_handle(1),Vertex_handle(2));
 
@@ -585,7 +585,7 @@ bool test_link6(){
 	Complex complex(0,new Print_complex_visitor<Vertex_handle>());
 	// Build the complexes
 	build_complete(4,complex);
-	complex.add_blocker(Vertex_handle(0),Vertex_handle(1),Vertex_handle(2));
+	complex.add_blocker(Simplex_handle(Vertex_handle(0),Vertex_handle(1),Vertex_handle(2)));
 
 	Simplex_handle alpha(Vertex_handle(0),Vertex_handle(1),Vertex_handle(2));
 
@@ -614,8 +614,8 @@ bool test_link7(){
 		complex.add_edge(Vertex_handle(i),Vertex_handle(7));
 	}
 	complex.add_edge(Vertex_handle(6),Vertex_handle(7));
-	complex.add_blocker(Vertex_handle(0),Vertex_handle(1),Vertex_handle(2));
-	complex.add_blocker(Vertex_handle(3),Vertex_handle(4),Vertex_handle(5));
+	complex.add_blocker(Simplex_handle(Vertex_handle(0),Vertex_handle(1),Vertex_handle(2)));
+	complex.add_blocker(Simplex_handle(Vertex_handle(3),Vertex_handle(4),Vertex_handle(5)));
 
 	Simplex_handle alpha(Vertex_handle(3),Vertex_handle(4),Vertex_handle(5));
 

@@ -30,6 +30,8 @@ namespace Gudhi{
 
 namespace contraction {
 
+
+  
 template< typename EdgeProfile> class Middle_placement : public Placement_policy<EdgeProfile>{
 
 public:

@@ -31,7 +31,9 @@ namespace contraction {
 
 
 
-
+  /**
+  *@brief Policy that accept all edge contraction.
+  */
 template< typename EdgeProfile> class Dummy_valid_contraction : public Valid_contraction_policy<EdgeProfile>{
 public:
 	typedef typename EdgeProfile::Point Point;

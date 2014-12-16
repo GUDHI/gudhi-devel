@@ -32,11 +32,14 @@ namespace skbl {
 
 /**
  * @extends SkeletonBlockerDS
+ * @ingroup skbl
+ * @brief Simple traits that is a model of SkeletonBlockerDS and
+ * can be passed as a template argument to Skeleton_blocker_complex
  */
 struct Skeleton_blocker_simple_traits{
 	/**
-	 * @brief global and local handle similar to <a href="http://www.boost.org/doc/libs/1_38_0/libs/graph/doc/subgraph.html">boost subgraphs</a>.
-	 * In gross, vertices are stored in a vector.
+	 * @brief Global and local handle similar to <a href="http://www.boost.org/doc/libs/1_38_0/libs/graph/doc/subgraph.html">boost subgraphs</a>.
+	 * Vertices are stored in a vector.
 	 * For the root simplicial complex, the local and global descriptors are the same.
 	 * For a subcomplex L and one of its vertices 'v', the local descriptor of 'v' is its position in
 	 * the vertex vector of the subcomplex L whereas its global descriptor is the position of 'v'

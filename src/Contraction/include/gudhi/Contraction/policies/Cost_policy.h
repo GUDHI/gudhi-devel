@@ -29,6 +29,9 @@ namespace Gudhi{
 
 namespace contraction {
 
+/**
+*@brief Policy to specify the cost of contracting an edge.
+*/ 
 template< typename EdgeProfile> class Cost_policy{
 public:
 	typedef typename EdgeProfile::Point Point;

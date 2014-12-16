@@ -28,6 +28,10 @@
 namespace Gudhi {
 namespace contraction {
 
+
+  /**
+  *@brief Policy to specify where the merged point had to be placed after an edge contraction. 
+  */
 template< typename EdgeProfile> class Placement_policy{
 public:
 	typedef typename EdgeProfile::Point Point;

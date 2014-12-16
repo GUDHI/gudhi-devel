@@ -41,7 +41,7 @@
 
 \section Introduction
 The Skeleton-Blocker data-structure had been introduced in the two papers 
-\cite socg_blockers_2011,\cite blockers2012\cite blockers2012. 
+\cite socg_blockers_2011,\cite blockers2012. 
 It proposes a light encoding for simplicial complexes by storing only an *implicit* representation of its
 simplices.
 Intuitively, it just stores the 1-skeleton of a simplicial complex with a graph and the set of its "missing faces" that
@@ -53,7 +53,8 @@ This data-structure handles all  simplicial complexes operations such as
 
 \section Definitions
 
-We recall briefly classical definitions of simplicial complexes   \cite Munkres-elementsalgtop1984.
+We recall briefly classical definitions of simplicial complexes  
+ \cite Munkres-elementsalgtop1984.
 An abstract simplex is a finite non-empty set and its dimension is its number of elements minus 1.
 Whenever \f$\tau \subset \sigma\f$ and \f$\tau \neq \emptyset \f$, \f$ \tau \f$ is called a face of 
 \f$ \sigma\f$  and \f$ \sigma\f$ is called a coface of \f$ \tau \f$ . Furthermore,
@@ -91,22 +92,24 @@ in figure X.
 
 \subsection Overview
 
-Four classes define  a simplicial complex namely :
+Four classes are implemented for simplicial complex in this representation namely :
 
 \li Skeleton_blocker_complex : a simplicial complex with basic operations such as vertex/edge/simplex enumeration and construction
 \li Skeleton_blocker_link_complex : the link of a simplex in a parent complex. It is represented as a sub complex
 of the parent complex
 \li Skeleton_blocker_simplifiable_complex : a simplicial complex with simplification operations such as edge contraction or simplex collapse
-\li Skeleton_blocker_geometric_complex : a simplicial complex who has access to geometric points in  \f$R^d\f$ 
+\li Skeleton_blocker_geometric_complex : a simplifiable simplicial complex who has access to geometric points in  \f$R^d\f$ 
 
 The two last classes are derived classes from the <Code>Skeleton_blocker_complex</Code> class. The class <Code>Skeleton_blocker_link_complex</Code> inheritates from a template passed parameter
 that may be either <Code>Skeleton_blocker_complex</Code> or <Code>Skeleton_blocker_geometric_complex</Code> (a link may store points coordinates or not).
+Most user will just need to use Skeleton_blocker_geometric_complex.
 
 \subsection Visitor
 
 The class <Code>Skeleton_blocker_complex</Code> has a visitor that is called when usual operations such as adding an edge or remove a vertex are called.
 You may want to use this visitor to compute statistics or to update another data-structure (for instance this visitor is heavily used in the 
-<Code>Contraction</Code> package).
+<Code>Contraction</Code> package). 
+
 
 
 

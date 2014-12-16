@@ -9,10 +9,15 @@
 #ifndef GUDHI_SKELETONBLOCKERGEOMETRICDS_H_
 #define GUDHI_SKELETONBLOCKERGEOMETRICDS_H_
 
-/** \brief Concept that must be passed to
- * the template class Skeleton_blocker_geometric_complex
- *
+/** 
+ * \brief Concept for template class of  Skeleton_blocker_geometric_complex .
+ * It must specify a GeometryTrait which contains a Point definition.
+ * 
+ * Graph_vertex must specify how to access to a point.
+ * Graph_edge must specify how to access to an index.
+ * 
  */
+ //todo the index is just for contraction, to remove
 template<typename GeometryTrait>
 struct SkeletonBlockerGeometricDS : public SkeletonBlockerDS
 {
@@ -35,11 +40,11 @@ struct SkeletonBlockerGeometricDS : public SkeletonBlockerDS
 		/**
 		 * @brief Access to the point.
 		 */
-		Point& point(){	return point_; }
+		Point& point();
 		/**
 		 * @brief Access to the point.
 		 */
-		const Point& point() const {	return point_; }
+		const Point& point();
 	};
 
 	/**

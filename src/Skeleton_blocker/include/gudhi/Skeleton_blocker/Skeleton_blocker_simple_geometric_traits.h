@@ -30,8 +30,12 @@ namespace Gudhi{
 
 namespace skbl{
 
+
 /**
  * @extends SkeletonBlockerGeometricDS
+ * @ingroup skbl
+ * @brief Simple traits that is a model of SkeletonBlockerGeometricDS and
+ * can be passed as a template argument to Skeleton_blocker_geometric_complex
  */
 template<typename GeometryTrait>
 struct Skeleton_blocker_simple_geometric_traits : public skbl::Skeleton_blocker_simple_traits {
@@ -49,6 +53,7 @@ public:
 		template<class ComplexGeometricTraits> friend class Skeleton_blocker_geometric_complex;
 	private:
 		Point point_;
+
 		Point& point(){	return point_; }
 		const Point& point() const {	return point_; }
 	};

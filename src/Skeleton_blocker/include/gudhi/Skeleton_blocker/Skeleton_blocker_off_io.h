@@ -28,6 +28,9 @@ namespace Gudhi {
 
 namespace skbl {
 
+/**
+ *@brief Off reader visitor that can be passed to Off_reader to read a Skeleton_blocker_complex.
+ */
 template<typename Complex>
 class Skeleton_blocker_off_visitor_reader{
 	Complex& complex_;
@@ -65,6 +68,9 @@ public:
 	}
 };
 
+/**
+*@brief Class that allows to load a Skeleton_blocker_complex from an off file.
+*/
 template<typename Complex>
 class Skeleton_blocker_off_reader{
 public:

@@ -33,7 +33,7 @@ namespace skbl {
 
 /**
  * @brief Simplicial subcomplex of a complex represented by a skeleton/blockers pair.
- *
+ * @extends Skeleton_blocker_complex
  * @details Stores a subcomplex of a simplicial complex.
  * To simplify explanations below, we will suppose that :
  * - K is the root simplicial complex

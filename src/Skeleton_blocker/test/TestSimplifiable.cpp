@@ -74,8 +74,8 @@ bool test_contraction1(){
 	Complex complex(n);
 	build_complete(n,complex);
 	complex.remove_edge(Vertex_handle(b),Vertex_handle(z));
-	complex.add_blocker(Vertex_handle(a),Vertex_handle(x),Vertex_handle(y));
-	complex.add_blocker(Vertex_handle(b),Vertex_handle(x),Vertex_handle(y));
+	complex.add_blocker(Simplex_handle(Vertex_handle(a),Vertex_handle(x),Vertex_handle(y)));
+	complex.add_blocker(Simplex_handle(Vertex_handle(b),Vertex_handle(x),Vertex_handle(y)));
 
 	// Print result
 	cerr << "complex before complex"<< complex.to_string()<<endl;
@@ -136,7 +136,7 @@ bool test_link_condition1(){
 	Complex complex(0);
 	// Build the complexes
 	build_complete(4,complex);
-	complex.add_blocker(Vertex_handle(0),Vertex_handle(1),Vertex_handle(2));
+	complex.add_blocker(Simplex_handle(Vertex_handle(0),Vertex_handle(1),Vertex_handle(2)));
 
 
 	// Print result
@@ -183,7 +183,7 @@ bool test_collapse2(){
 	complex.add_edge(Vertex_handle(1),Vertex_handle(4));
 	complex.add_edge(Vertex_handle(2),Vertex_handle(4));
 	complex.add_edge(Vertex_handle(3),Vertex_handle(4));
-	complex.add_blocker(Vertex_handle(1),Vertex_handle(2),Vertex_handle(3),Vertex_handle(4));
+	complex.add_blocker(Simplex_handle(Vertex_handle(1),Vertex_handle(2),Vertex_handle(3),Vertex_handle(4)));
 	// Print result
 	cerr << "initial complex :\n"<< complex.to_string();
 	cerr <<endl<<endl;
@@ -206,7 +206,7 @@ bool test_collapse3(){
 	complex.add_edge(Vertex_handle(1),Vertex_handle(4));
 	complex.add_edge(Vertex_handle(2),Vertex_handle(4));
 	complex.add_edge(Vertex_handle(3),Vertex_handle(4));
-	complex.add_blocker(Vertex_handle(1),Vertex_handle(2),Vertex_handle(3),Vertex_handle(4));
+	complex.add_blocker(Simplex_handle(Vertex_handle(1),Vertex_handle(2),Vertex_handle(3),Vertex_handle(4)));
 	// Print result
 	cerr << "initial complex:\n"<< complex.to_string();
 	cerr <<endl<<endl;

@@ -25,6 +25,10 @@
 
 namespace Gudhi {
 namespace contraction {
+
+  /**
+  *@brief Policy to specify if an edge contraction is valid or not. 
+  */
 template< typename EdgeProfile> class Valid_contraction_policy{
 public:
 	typedef typename EdgeProfile::Point Point;

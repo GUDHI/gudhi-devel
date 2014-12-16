@@ -16,9 +16,11 @@ namespace skbl {
 
 
 
-/** \brief Concept that must be passed to
- * the template class Skeleton_blockers_complex
- *
+/** \brief Concept for the template class passed for Skeleton_blocker_complex.
+ * Most importantly, it contains the nodes for vertices and edges
+ * (Graph_vertex and Graph_edge) that are stored in the simplicial 
+ * complex. The user can redefine these classes to attach
+ * additional information to vertices and edges.
  */
 struct SkeletonBlockerDS
 {

@@ -28,7 +28,6 @@
 
 // todo remove the queue to be independent from cgald
 #include "gudhi/Contraction/CGAL_queue/Modifiable_priority_queue.h"
-//#include <CGAL/Modifiable_priority_queue.h>
 
 
 #include <list>
@@ -68,7 +67,9 @@ Valid_contraction_policy<Profile>* make_link_valid_contraction(){
 }
 
 
-// visitor that remove popable blockers after an edge contraction
+/**
+*@brief Visitor to remove popable blockers after an edge contraction.
+*/
 template <class Profile>
 class Contraction_visitor_remove_popable : public Contraction_visitor<Profile>{
 public:
@@ -116,9 +117,9 @@ Contraction_visitor<Profile>* make_remove_popable_blockers_visitor(){
  *@class Skeleton_blocker_contractor
  *@brief Class that allows to contract iteratively edges of a simplicial complex.
  *
- * @details Basically, the simplification algorithm consists in iteratively picking the
+ * @details The simplification algorithm consists in iteratively picking the
  * edge with lowest cost and performing an edge contraction if the contraction is valid.
- * This class is policy based (and much inspired from the edge collapse package of CGAL).
+ * This class is policy based (and much inspired from the edge collapse package of CGAL http://doc.cgal.org/latest/Surface_mesh_simplification/index.html).
  *
  * Policies that can be changed are :
  *  - the cost policy : how much cost an edge contraction
@@ -126,7 +127,6 @@ Contraction_visitor<Profile>* make_remove_popable_blockers_visitor(){
  *  - the valid contraction policy : is the contraction valid. For instance, it can be
  *  a topological condition (link condition) or a geometrical condition (normals messed up).
  *
- * TODO expliquer la pile
  */
 template<
 class GeometricSimplifiableComplex,

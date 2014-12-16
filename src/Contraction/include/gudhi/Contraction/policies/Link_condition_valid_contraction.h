@@ -32,7 +32,9 @@ namespace Gudhi{
 namespace contraction {
 
 
-
+  /**
+  *@brief Policy that only accept edges verifying the link condition (and therefore whose contraction preserving homotopy type). 
+  */
 template< typename EdgeProfile> class Link_condition_valid_contraction : public Valid_contraction_policy<EdgeProfile>{
 public:
 	typedef typename EdgeProfile::Edge_handle Edge_handle;
