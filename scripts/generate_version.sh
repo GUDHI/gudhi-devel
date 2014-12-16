@@ -47,6 +47,7 @@ cp $ROOT_DIR/Conventions.txt $VERSION_DIR
 cp $ROOT_DIR/COPYING $VERSION_DIR
 cp -R $ROOT_DIR/data $VERSION_DIR
 cp $ROOT_DIR/src/CMakeLists.txt $VERSION_DIR
+cp $ROOT_DIR/src/Doxyfile $VERSION_DIR
 
 # PACKAGE LEVEL COPY
 PACKAGE_INC_DIR="/include"

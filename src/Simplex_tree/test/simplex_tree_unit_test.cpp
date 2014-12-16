@@ -166,7 +166,7 @@ void set_and_test_simplex_tree_dim_fil(typeST& simplexTree, int vectorSize, cons
 		simplexTree.set_filtration(max_fil);
 		std::cout << "   set_and_test_simplex_tree_dim_fil - max_fil=" << max_fil << std::endl;
 	}
-	int nb_simplices = simplexTree.num_simplices() + 1;
+	unsigned int nb_simplices = simplexTree.num_simplices() + 1;
 	simplexTree.set_num_simplices(nb_simplices);
 
 	BOOST_CHECK( simplexTree.dimension() == dim_max );
@@ -347,11 +347,12 @@ BOOST_AUTO_TEST_CASE( simplex_tree_insertion )
 	BOOST_CHECK( st.dimension() == dim_max );
 	BOOST_CHECK( AreAlmostTheSame(st.filtration(), max_fil) );
 
-	//    1
-	//    o
-	//   /X\
-	//  o---o---o
-	//  2   0   3
+  /* Inserted simplex:        */
+  /*    1                     */
+  /*    o                     */
+  /*   /X\                    */
+  /*  o---o---o               */
+  /*  2   0   3               */
 
 	//   [0.1] 0
 	//   [0.1] 1

@@ -30,6 +30,7 @@
 #include <boost/program_options.hpp>
 
 using namespace Gudhi;
+using namespace Gudhi::persistent_cohomology;
 
 typedef int    Vertex_handle;
 typedef double Filtration_value;
@@ -68,6 +69,8 @@ int main (int argc, char * argv[])
   Simplex_tree<> st;        
   st.insert_graph(prox_graph); // insert the proximity graph in the simplex tree
   st.expansion( dim_max ); // expand the graph until dimension dim_max
+
+  std::cout << "st=" << st << std::endl;
 
 // Sort the simplices in the order of the filtration
   st.initialize_filtration();

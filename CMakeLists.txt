@@ -1,19 +1,20 @@
 cmake_minimum_required(VERSION 2.6)
 project(GUDHI)
 
-#find_package(Boost 1.45.0 COMPONENTS system filesystem unit_test_framework chrono timer)
-find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework chrono timer REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework chrono timer program_options REQUIRED)
 
 set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
 message("CMAKE_PREFIX_PATH = ${CMAKE_PREFIX_PATH}")
 message("CMAKE_MODULE_PATH = ${CMAKE_MODULE_PATH}")
 
+enable_testing()
+
 if(MSVC)
   # Turn off some VC++ warnings
   SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4267 /wd4668 /wd4311 /wd4800 /wd4820 /wd4503 /wd4244 /wd4345 /wd4996 /wd4396 /wd4018")
 else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -std=c++11 -Wall -Wpedantic -lboost_system -lboost_unit_test_framework -lgmpxx -lgmp")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -std=c++11 -Wall -Wpedantic")
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0")	
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 endif()
@@ -25,6 +26,30 @@ find_package(Boost)
 find_package(GMP)
 find_package(GMPXX)
 find_package(CGAL)
+
+# Required programs for unitary tests purpose
+FIND_PROGRAM( LCOV_PATH lcov )
+if (LCOV_PATH)
+  message("lcov found in ${LCOV_PATH}")
+endif()
+
+FIND_PROGRAM( PYTHON_PATH python )
+if (PYTHON_PATH)
+  message("python found in ${PYTHON_PATH}")
+endif()
+
+# Function to add_test cpplint on each header file of the Gudhi module 
+function(cpplint_add_tests the_directory)
+  if (PYTHON_PATH)
+    # Cpplint tests on coding style
+    file(GLOB files "${the_directory}/*.h" "${the_directory}/*/*.h")
+    foreach(filename ${files})
+      message(${filename})
+      add_test("${filename}.cpplint" ${CMAKE_SOURCE_DIR}/scripts/check_google_style.sh ${filename}  ${CMAKE_SOURCE_DIR}/scripts/cpplint.py)
+    endforeach()
+  endif()
+endfunction(cpplint_add_tests)
+
 
 if(NOT Boost_FOUND)
   message(FATAL_ERROR "NOTICE: This demo requires Boost and will not be compiled.")
@@ -40,7 +65,10 @@ else()
 
   add_subdirectory(src/Simplex_tree/test)
   add_subdirectory(src/Simplex_tree/example)
+  add_subdirectory(src/Persistent_cohomology/test)
   add_subdirectory(src/Persistent_cohomology/example)
+  add_subdirectory(src/Skeleton_blocker/test) 
   add_subdirectory(src/Skeleton_blocker/example) 
+  add_subdirectory(src/Contraction/test)
   add_subdirectory(src/Contraction/example)
 endif()  

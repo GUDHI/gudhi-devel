@@ -31,6 +31,7 @@
 #include <chrono>
 
 using namespace Gudhi;
+using namespace Gudhi::persistent_cohomology;
 
 /* Compute the persistent homology of the complex cpx with coefficients in Z/pZ. */
 template< typename FilteredComplex>

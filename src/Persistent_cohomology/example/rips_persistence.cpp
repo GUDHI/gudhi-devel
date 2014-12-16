@@ -29,6 +29,7 @@
 #include <boost/program_options.hpp>
 
 using namespace Gudhi;
+using namespace Gudhi::persistent_cohomology;
 
 typedef int        Vertex_handle;
 typedef double     Filtration_value;
