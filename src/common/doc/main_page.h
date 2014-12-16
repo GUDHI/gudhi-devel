@@ -50,6 +50,6 @@ make
 \details 
 
 \copyright GNU General Public License v3.                         
-\verbatim  Contact: gudhi-devel@lists.gforge.inria.fr \endverbatim
+\verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
 
 */
