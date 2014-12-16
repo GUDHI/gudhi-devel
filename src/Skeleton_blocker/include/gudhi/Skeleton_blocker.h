@@ -79,8 +79,9 @@ in topological data-analysis.
 In practice, the set of blockers of a simplicial complex 
 remains also small when simplifying a Rips complex with edge contractions 
 but also for most of the simplicial complexes used in topological data-analysis such as Delaunay, Cech or Witness complexes. 
-For instance, the numbers of blockers is depicted for random 3 dimensional spheres embedded into \f$R^4\f$ 
-in figure X.
+For instance, the numbers of blockers is depicted for random 3-dimensional spheres embedded into \f$R^4\f$ 
+in next figure. Storing the graph and blockers of such simplicial complex is much compact in this case than storing 
+its simplices.
 
 
 *\image html "blockers_curve.png" "Number of blockers of random triangulations of 3-spheres" width=10cm

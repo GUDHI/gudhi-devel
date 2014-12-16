@@ -9,6 +9,9 @@
 #ifndef GUDHI_SKELETONBLOCKERGEOMETRICDS_H_
 #define GUDHI_SKELETONBLOCKERGEOMETRICDS_H_
 
+namespace Gudhi {
+namespace skbl {
+
 /** 
  * \brief Concept for template class of  Skeleton_blocker_geometric_complex .
  * It must specify a GeometryTrait which contains a Point definition.
@@ -65,6 +68,7 @@ struct SkeletonBlockerGeometricDS : public SkeletonBlockerDS
 	};
 };
 
-
+}  // namespace skbl
+}  // namespace GUDHI
 
 #endif /* GUDHI_SKELETONBLOCKERGEOMETRICDS_H_ */

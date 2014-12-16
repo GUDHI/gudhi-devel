@@ -19,7 +19,6 @@
   *    You should have received a copy of the GNU General Public License
   *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
-#include <list>
 #include <boost/timer/timer.hpp>
 #include <iostream>
 #include "gudhi/Edge_contraction.h"
@@ -89,7 +88,7 @@ int main (int argc, char *argv[])
 			complex.num_edges()<<" edges."<<std::endl;
 
 	Complex_contractor contractor(complex,
-			new Edge_length_cost<Profile>, //todo make_edge_length_cost
+			new Edge_length_cost<Profile>,
 			contraction::make_first_vertex_placement<Profile>(),
 			contraction::make_link_valid_contraction<Profile>(),
 			contraction::make_remove_popable_blockers_visitor<Profile>());

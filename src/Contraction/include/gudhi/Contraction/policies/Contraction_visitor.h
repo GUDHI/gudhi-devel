@@ -33,6 +33,7 @@ namespace contraction {
 /**
  *@class Contraction_visitor
  *@brief Interface for a visitor of the edge contraction process.
+ *@ingroup contr
  */
 template <typename EdgeProfile>
 class Contraction_visitor {//: public Dummy_complex_visitor<typename EdgeProfile::Vertex_handle>  {
@@ -53,9 +54,9 @@ public:
 	virtual void on_started (ComplexType & complex){}
 
 	/**
-	 * @brief Called when the StopPredicate returned true (but not if the algorithm terminates because the surface could not be simplified any further).
+	 * @brief Called when the algorithm stops.
 	 */
-	virtual void on_stop_condition_reached (const Profile &profile){}
+	virtual void on_stop_condition_reached (){}
 
 
 	/**
@@ -74,6 +75,8 @@ public:
 	 */
 	virtual void on_contracting(const Profile &profile, boost::optional< Point > placement){
 	}
+
+
 
 	/**
 	 * @brief Called when after an edge has been contracted onto a new point placement.

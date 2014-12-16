@@ -31,6 +31,7 @@ namespace contraction {
 
 /**
 *@brief Policy to specify the cost of contracting an edge.
+ *@ingroup contr
 */ 
 template< typename EdgeProfile> class Cost_policy{
 public:

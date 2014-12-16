@@ -23,9 +23,8 @@ for a detailed description of the design of the library.
 \section Compiling
 
 The library uses c++11 and requires Boost with version 1.48.0 or more recent :  http://www.boost.org/.
-Some packages require additional libraries :
-\li the multi-field persistent homology algorithm has an optional dependency with GMP
-\li Qt demos require CGAL, Qt4 and QGLViewer
+The multi-field persistent homology algorithm has an optional dependency with GMP.
+
 
 The procedure to install these packages according to your operating system is 
 detailled here http://doc.cgal.org/latest/Manual/installation.html

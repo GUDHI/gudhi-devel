@@ -56,6 +56,8 @@ namespace Gudhi{
 namespace contraction {
 
 
+
+
 template <class Profile>
 Placement_policy<Profile>* make_first_vertex_placement(){
 	return new First_vertex_placement<Profile>();
@@ -116,6 +118,7 @@ Contraction_visitor<Profile>* make_remove_popable_blockers_visitor(){
 /**
  *@class Skeleton_blocker_contractor
  *@brief Class that allows to contract iteratively edges of a simplicial complex.
+ *@ingroup contr
  *
  * @details The simplification algorithm consists in iteratively picking the
  * edge with lowest cost and performing an edge contraction if the contraction is valid.
@@ -394,7 +397,7 @@ public:
 				DBGMSG("sqrt(cost):",std::sqrt(*cost));
 				if (should_stop(*cost,profile) )
 				{
-					if(contraction_visitor_) contraction_visitor_->on_stop_condition_reached(profile);
+					if(contraction_visitor_) contraction_visitor_->on_stop_condition_reached();
 					DBG("should_stop");
 					break ;
 				}
@@ -416,6 +419,7 @@ public:
 				DBG("uncomputable cost");
 			}
 		}
+		if(contraction_visitor_) contraction_visitor_->on_stop_condition_reached();		
 	}
 
 

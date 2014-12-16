@@ -34,6 +34,7 @@ namespace contraction {
 
   /**
   *@brief Policy that only accept edges verifying the link condition (and therefore whose contraction preserving homotopy type). 
+  *@ingroup contr
   */
 template< typename EdgeProfile> class Link_condition_valid_contraction : public Valid_contraction_policy<EdgeProfile>{
 public:
