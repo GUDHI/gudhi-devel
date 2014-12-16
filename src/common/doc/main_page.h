@@ -30,7 +30,7 @@ Some packages require additional libraries :
 The procedure to install these packages according to your operating system is 
 detailled here http://doc.cgal.org/latest/Manual/installation.html
 
-The library compiles in Linux, Mac OSX and Visual Studio 2013.
+The library compiles in Linux, Mac OSX. 
 
 \section d Demos and Examples
 
