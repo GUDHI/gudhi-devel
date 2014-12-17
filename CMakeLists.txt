@@ -21,10 +21,11 @@ endif()
 
 # BOOST ISSUE result_of vs C++11
 add_definitions(-DBOOST_RESULT_OF_USE_DECLTYPE)
-
 find_package(Boost)
 find_package(GMP)
-find_package(GMPXX)
+if(GMP_FOUND)
+	find_package(GMPXX)
+endif()
 find_package(CGAL)
 
 # Required programs for unitary tests purpose
@@ -69,7 +70,6 @@ else()
   add_subdirectory(src/Persistent_cohomology/example)
   add_subdirectory(src/Skeleton_blocker/test) 
   add_subdirectory(src/Skeleton_blocker/example) 
-  add_subdirectory(src/Contraction/test)
   add_subdirectory(src/Contraction/example)
 endif()  
 
