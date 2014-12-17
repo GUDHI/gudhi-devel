@@ -33,6 +33,9 @@
 #include "gudhi/Utils.h"
 
 
+namespace Gudhi{
+namespace contraction{
+
 
 /** \defgroup contr Contraction
 
@@ -41,7 +44,7 @@
 \section Introduction
 
 The purpose of this package is to offer a user-friendly interface for edge contraction simplification of huge simplicial complexes.
-It uses the Skeleton-Blocker data-structure whose size remains small  during simplification 
+It uses the \ref skbl data-structure whose size remains small  during simplification 
 of most used geometrical complexes in topological data analysis such as the Rips or the Delaunay complexes (much lower than the total number of simplices in practice).
 
 The edge contraction operation consists in identifying two vertices of a simplicial complex. 
@@ -71,18 +74,29 @@ This class design is policy based and heavily inspired from the similar edge col
 Four policies can be customized in this package.
 
 \li Cost_policy: specify how much cost an edge contraction of a given edge. The edge with lowest cost is iteratively picked and contracted if valid.
-\li Valid_policy: specify if a given edge contraction is valid. For instance, this policy can check the link condition which ensures that the homotopy type is preserved afer the edge contraction.
-\li Placement: every time an edge is contracted, its points are merge to one point specified by this policy. This may be the middle of the edge of some more sofisticated point such as the minimum of a cost as in 
+\li Valid_contraction_policy: specify if a given edge contraction is valid. For instance, this policy can check the link condition which ensures that the homotopy type is preserved afer the edge contraction.
+\li Placement_policy: every time an edge is contracted, its points are merge to one point specified by this policy. This may be the middle of the edge of some more sofisticated point such as the minimum of a cost as in 
 \cite Garland.
 
 
 \subsection Visitor
 
-A visitor which implements the class Contraction_visitor gets called when several 
+A visitor which implements the class Contraction_visitor gets called at several key moments
+during the simplification:
+
+\li when the algorithms starts or ends
+\li when an edge is seen for the first time
+\li when an edge is considered for an edge contraction
+\li before and after an edge is contracted
+
+This allows to implements most of edge contraction based algorithm with this 
+package. 
 
 
+\section Performance 
 
 
+TODO show curve CGAL
 
 \section Example
 
@@ -183,6 +197,7 @@ int main (int argc, char *argv[])
 */
 /** @} */  // end defgroup 
 
-
+}
+}
 
 #endif /* GUDHI_EDGE_CONTRACTION_H_ */

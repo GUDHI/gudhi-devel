@@ -1,24 +1,24 @@
- /*    This file is part of the Gudhi Library. The Gudhi library 
-  *    (Geometric Understanding in Higher Dimensions) is a generic C++ 
-  *    library for computational topology.
-  *
-  *    Author(s):       David Salinas
-  *
-  *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
-  *
-  *    This program is free software: you can redistribute it and/or modify
-  *    it under the terms of the GNU General Public License as published by
-  *    the Free Software Foundation, either version 3 of the License, or
-  *    (at your option) any later version.
-  *
-  *    This program is distributed in the hope that it will be useful,
-  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *    GNU General Public License for more details.
-  *
-  *    You should have received a copy of the GNU General Public License
-  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  */
+/*    This file is part of the Gudhi Library. The Gudhi library
+ *    (Geometric Understanding in Higher Dimensions) is a generic C++
+ *    library for computational topology.
+ *
+ *    Author(s):       David Salinas
+ *
+ *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #include <boost/timer/timer.hpp>
 #include <iostream>
 #include "gudhi/Edge_contraction.h"
@@ -69,7 +69,6 @@ int main (int argc, char *argv[])
 		return -1;
 	}
 
-	boost::timer::auto_cpu_timer t;
 	Complex complex;
 
 	// load the points
@@ -78,14 +77,15 @@ int main (int argc, char *argv[])
 		std::cerr << "Unable to read file:"<<argv[1]<<std::endl;
 		return EXIT_FAILURE;
 	}
-	std::cout << "build the Rips complex"<<std::endl;
+	std::cout << "Build the Rips complex"<<std::endl;
 
 	build_rips(complex,atof(argv[2]));
 
+	boost::timer::auto_cpu_timer t;
 
 	std::cout << "Initial complex has "<<
-			complex.num_vertices()<<" vertices, and "<<
-			complex.num_edges()<<" edges."<<std::endl;
+			complex.num_vertices()<<" vertices and "<<
+			complex.num_edges()<<" edges"<<std::endl;
 
 	Complex_contractor contractor(complex,
 			new Edge_length_cost<Profile>,
@@ -94,10 +94,17 @@ int main (int argc, char *argv[])
 			contraction::make_remove_popable_blockers_visitor<Profile>());
 	contractor.contract_edges();
 
-	std::cout << "Resulting complex has "<<
+	std::cout << "Counting final number of simplices \n";
+	unsigned num_simplices = std::distance(complex.simplex_range().begin(),complex.simplex_range().end());
+
+	std::cout << "Final complex has "<<
 			complex.num_vertices()<<" vertices, "<<
-			complex.num_edges()<<" edges and "<<
-			complex.num_blockers()<<" blockers"<<std::endl;
+			complex.num_edges()<<" edges, "<<
+			complex.num_blockers()<<" blockers and "<<
+			num_simplices<<" simplices"<<std::endl;
+
+
+	std::cout << "Time to simplify and enumerate simplices:\n";
 
 	return EXIT_SUCCESS;
 }

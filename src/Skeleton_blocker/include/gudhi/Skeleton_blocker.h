@@ -34,7 +34,8 @@
 #include "gudhi/Utils.h" //xxx
 
 
-
+namespace Gudhi{
+namespace skbl{
 /** \defgroup skbl Skeleton-Blocker 
 
 \author David Salinas
@@ -101,15 +102,14 @@ of the parent complex
 \li Skeleton_blocker_simplifiable_complex : a simplicial complex with simplification operations such as edge contraction or simplex collapse
 \li Skeleton_blocker_geometric_complex : a simplifiable simplicial complex who has access to geometric points in  \f$R^d\f$ 
 
-The two last classes are derived classes from the <Code>Skeleton_blocker_complex</Code> class. The class <Code>Skeleton_blocker_link_complex</Code> inheritates from a template passed parameter
-that may be either <Code>Skeleton_blocker_complex</Code> or <Code>Skeleton_blocker_geometric_complex</Code> (a link may store points coordinates or not).
+The two last classes are derived classes from the Skeleton_blocker_complex class. The class Skeleton_blocker_link_complex inheritates from a template passed parameter
+that may be either Skeleton_blocker_complex or Skeleton_blocker_geometric_complex (a link may store points coordinates or not).
 Most user will just need to use Skeleton_blocker_geometric_complex.
 
 \subsection Visitor
 
-The class <Code>Skeleton_blocker_complex</Code> has a visitor that is called when usual operations such as adding an edge or remove a vertex are called.
-You may want to use this visitor to compute statistics or to update another data-structure (for instance this visitor is heavily used in the 
-<Code>Contraction</Code> package). 
+The class Skeleton_blocker_complex has a visitor that is called when usual operations such as adding an edge or remove a vertex are called.
+You may want to use this visitor to compute statistics or to update another data-structure (for instance this visitor is heavily used in the \ref contr package. 
 
 
 
@@ -189,7 +189,8 @@ their collaboration to write the two initial papers about this data-structure
 \verbatim  Contact: David Salinas,     david.salinas@inria.fr \endverbatim
 */
 /** @} */  // end defgroup 
-
+}
+}
 
 
 #endif

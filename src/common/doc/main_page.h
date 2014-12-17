@@ -23,10 +23,10 @@ for a detailed description of the design of the library.
 \section Compiling
 
 The library uses c++11 and requires Boost with version 1.48.0 or more recent :  http://www.boost.org/.
-The multi-field persistent homology algorithm has an optional dependency with GMP.
+The multi-field persistent homology algorithm has a dependency with GMP and some demos requires CGAL https://www.cgal.org/.
 
 
-The procedure to install these packages according to your operating system is 
+The procedure to install these libraries according to your operating system is 
 detailled here http://doc.cgal.org/latest/Manual/installation.html
 
 The library compiles in Linux and Mac OSX. 
