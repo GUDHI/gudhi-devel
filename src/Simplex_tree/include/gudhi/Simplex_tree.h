@@ -37,6 +37,10 @@
 #include <vector>
 
 namespace Gudhi {
+  
+namespace persistent_cohomology{
+  template<class T1, class T2> class Persistent_cohomology;
+  }
 
 /** \defgroup simplex_tree Filtered Complexes
  *
@@ -116,8 +120,9 @@ class Simplex_tree {
   friend class Simplex_tree_complex_simplex_iterator< Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> >;
   friend class Simplex_tree_skeleton_simplex_iterator< Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> >;
 
-  template<class T1, class T2> friend class Persistent_cohomology;
- 
+  
+  template<class T1, class T2> friend class persistent_cohomology::Persistent_cohomology;
+  
 
   /* \brief Set of nodes sharing a same parent in the simplex tree. */
   typedef Simplex_tree_siblings<Simplex_tree, Dictionary> Siblings;

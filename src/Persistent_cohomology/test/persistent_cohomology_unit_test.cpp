@@ -41,7 +41,7 @@ std::string test_rips_persistence(int coefficient, int min_persistence) {
   st.initialize_filtration();
 
   // Compute the persistence diagram of the complex
-  Persistent_cohomology<Simplex_tree<>, Field_Zp> pcoh(st);
+  persistent_cohomology::Persistent_cohomology<Simplex_tree<>, Field_Zp> pcoh(st);
 
   pcoh.init_coefficients( coefficient );  // initializes the coefficient field for homology
   // Check infinite rips

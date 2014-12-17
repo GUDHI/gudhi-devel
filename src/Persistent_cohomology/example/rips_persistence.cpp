@@ -74,7 +74,7 @@ int main (int argc, char * argv[])
   st.initialize_filtration();
 
 // Compute the persistence diagram of the complex
-  Persistent_cohomology< Simplex_tree<>, Field_Zp > pcoh( st );
+  persistent_cohomology::Persistent_cohomology< Simplex_tree<>, Field_Zp > pcoh(st);
   pcoh.init_coefficients( p ); //initilizes the coefficient field for homology
   
   pcoh.compute_persistent_cohomology( min_persistence );
