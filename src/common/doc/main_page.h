@@ -10,11 +10,9 @@ state-of-the-art algorithms and data structures for computational topology.
 
 The current release of the library allows to use several data-structures for simplicial complexes :
 simplex tree, Hasse diagram or skeleton-blocker. Several  operations can then be done on top of these
-representations such a persistent homology computation or simplification.
-
+representations such as persistent homology computation or simplification. 
 All data-structures are generic and several of their aspects (such as stored elements, policies) 
 can be parameterized via template classes.
-
 We refer to 
 \cite gudhilibrary_ICMS14
 for a detailed description of the design of the library.
@@ -23,13 +21,12 @@ for a detailed description of the design of the library.
 \section compiling Compiling
 
 The library uses c++11 and requires Boost with version 1.48.0 or more recent :  http://www.boost.org/.
+It is a multiplaform library and compiles on Linux, Mac OSX and Visual Studio 2013. 
 
-The library compiles in Linux and Mac OSX.
 
 \subsection gmp GMP:
 The multi-field persistent homology algorithm requires GMP which is a free library for arbitrary-precision
 arithmetic, operating on signed integers, rational numbers, and floating point numbers
-
 The following examples require The GNU Multiple Precision Arithmetic Library (GMP) http://gmplib.org/
 and will not be built if GMP is not installed:
   - Persistent_cohomology/rips_multifield_persistence

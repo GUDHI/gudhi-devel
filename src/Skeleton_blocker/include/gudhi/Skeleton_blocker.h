@@ -41,10 +41,9 @@ namespace skbl{
 \author David Salinas
 
 \section Introduction
-The Skeleton-Blocker data-structure had been introduced in the two papers 
-\cite socg_blockers_2011,\cite blockers2012. 
-It proposes a light encoding for simplicial complexes by storing only an *implicit* representation of its
-simplices.
+The Skeleton-Blocker data-structure proposes a light encoding for simplicial complexes by storing only an *implicit* representation of its
+simplices 
+\cite socg_blockers_2011,\cite blockers2012.
 Intuitively, it just stores the 1-skeleton of a simplicial complex with a graph and the set of its "missing faces" that
 is very small in practice (see next section for a formal definition).
 This data-structure handles all  simplicial complexes operations such as
@@ -60,7 +59,7 @@ An abstract simplex is a finite non-empty set and its dimension is its number of
 Whenever \f$\tau \subset \sigma\f$ and \f$\tau \neq \emptyset \f$, \f$ \tau \f$ is called a face of 
 \f$ \sigma\f$  and \f$ \sigma\f$ is called a coface of \f$ \tau \f$ . Furthermore,
 when \f$ \tau \neq \sigma\f$ we say that \f$ \tau\f$ is a proper-face of \f$ \sigma\f$.
-An abstract simplicial complex is a set of simplices that contains all the faces of their simplices.
+An abstract simplicial complex is a set of simplices that contains all the faces of its simplices.
 The 1-skeleton of a simplicial complex (or its graph) consists of its elements of dimension lower than 2.
 
 *\image html "ds_representation.png" "Skeleton-blocker representation" width=20cm
@@ -81,8 +80,8 @@ In practice, the set of blockers of a simplicial complex
 remains also small when simplifying a Rips complex with edge contractions 
 but also for most of the simplicial complexes used in topological data-analysis such as Delaunay, Cech or Witness complexes. 
 For instance, the numbers of blockers is depicted for random 3-dimensional spheres embedded into \f$R^4\f$ 
-in next figure. Storing the graph and blockers of such simplicial complex is much compact in this case than storing 
-its simplices.
+in next figure. Storing the graph and blockers of such simplicial complexes is much compact in this case than storing 
+their simplices.
 
 
 *\image html "blockers_curve.png" "Number of blockers of random triangulations of 3-spheres" width=10cm
@@ -94,7 +93,7 @@ its simplices.
 
 \subsection Overview
 
-Four classes are implemented for simplicial complex in this representation namely (most user will just need to use Skeleton_blocker_geometric_complex)
+Four classes are implemented for simplicial complex in this representation namely (most user will just need to use Skeleton_blocker_geometric_complex):
 
 \li Skeleton_blocker_complex : a simplicial complex with basic operations such as vertex/edge/simplex enumeration and construction
 \li Skeleton_blocker_link_complex : the link of a simplex in a parent complex. It is represented as a sub complex
@@ -181,7 +180,7 @@ The Euler Characteristic is 1
 
 \subsection Acknowledgements
 The author wishes to thank Dominique Attali and André Lieutier for 
-their collaboration to write the two initial papers about this data-structure
+their collaboration to write the two initial papers (cite socg_blockers_2011,\cite blockers2012) about this data-structure
  and also Dominique for leaving him use a prototype. 
 
 
