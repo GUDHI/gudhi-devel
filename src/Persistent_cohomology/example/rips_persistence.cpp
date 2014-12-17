@@ -117,7 +117,7 @@ void program_options( int argc, char *   argv[]
         ("field-charac,p", po::value<int>(&p)->default_value(11),                  
                   "Characteristic p of the coefficient field Z/pZ for computing homology.")
         ("min-persistence,m", po::value<Filtration_value>(&min_persistence), 
-                  "Minimal lifetime of homology feature to be recorded. Default is 0");
+                  "Minimal lifetime of homology feature to be recorded. Default is 0. Enter a negative value to see zero length intervals");
 
   po::positional_options_description pos;
   pos.add("input-file", 1);

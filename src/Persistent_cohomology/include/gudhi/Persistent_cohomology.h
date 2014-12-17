@@ -313,7 +313,7 @@ class Persistent_cohomology {
   /** \brief Compute the persistent homology of the filtered simplicial
    * complex.
    *
-   * @param[in] min_interval_length the computation disgards all intervals of length
+   * @param[in] min_interval_length the computation discards all intervals of length
    *                                less or equal than min_interval_length
    *
    * Assumes that the filtration provided by the simplicial complex is

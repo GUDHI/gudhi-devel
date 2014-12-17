@@ -50,7 +50,7 @@ EXAMPLE OF SIMPLE INSERTION
    [0.2] 3 0 
    [0.3] 2 1 0 
 
-*** Simplex tree construction with Z/2Z coefficients on points sampling a Klein bottle:
+*** Simplex tree construction with Z/2Z coefficients on weighted graph Klein bottle file:
 
 ./simplex_tree_from_file ../../../data/points/Klein_bottle_complex.txt 2
 Insert the 1-skeleton in the simplex tree in 0 s. 
@@ -67,7 +67,7 @@ Expand the simplex tree in 0 s.
 Information of the Simplex Tree:
   Number of vertices = 10   Number of simplices = 106
 
-*** Simplex_tree computed from a Alpha-shapes 3:
+*** Simplex_tree computed and displayed from a 3D alpha complex:
     [ Requires CGAL, GMP and GMPXX to be installed]
 
 ./simplex_tree_from_alpha_shapes_3 ../../../data/points/bunny_5000
