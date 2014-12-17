@@ -96,7 +96,7 @@ int main (int argc, char *argv[])
 
 	std::cout << "Resulting complex has "<<
 			complex.num_vertices()<<" vertices, "<<
-			complex.num_edges()<<"edges and "<<
+			complex.num_edges()<<" edges and "<<
 			complex.num_blockers()<<" blockers"<<std::endl;
 
 	return EXIT_SUCCESS;
