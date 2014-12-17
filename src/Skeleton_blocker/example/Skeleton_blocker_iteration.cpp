@@ -64,8 +64,13 @@ int main (int argc, char *argv[]){
 	// this is just to illustrate iterators, to count number of vertices
 	// or edges, complex.num_vertices() and complex.num_edges() are
 	// more appropriated!
-	unsigned num_vertices = std::distance(complex.vertex_range().begin(), complex.vertex_range().end());
-	unsigned num_edges = std::distance(complex.edge_range().begin(), complex.edge_range().end());
+	unsigned num_vertices = 0;
+	for(auto v : complex.vertex_range())
+		++num_vertices;
+
+	// such loop can also be done directly with distance as iterators are STL compliant
+	auto edges = complex.edge_range();
+	unsigned num_edges = std::distance(edges.begin(), edges.end());
 
 	unsigned euler = 0;
 	unsigned num_simplices = 0;

@@ -57,12 +57,14 @@ most operations needed (link computation, edge contraction and so on) have polyn
 The simplification can be done without enumerating the set of simplices that is often non tracktable in high-dimension and is then very efficient
 (sub-linear with regards to the number of simplices in practice).
 
-A typical application of this package for homology group computation and is illustrated in the next three figure where a Rips is built uppon a set of high-dimensional points.
-It has initially a huge number of simplices (todo) but simplifying it to a much reduced form with todo vertices takes only few seconds on a desktop machine.
+A typical application of this package for homology group computation and is illustrated in the next figure where a Rips is built uppon a set of high-dimensional points and
+simplified with edge contractions.
+It has initially a big number of simplices (around 20 millions) but simplifying it to a much reduced form with 15 vertices (and 714 simplices) takes only few seconds on a desktop machine (see the example bellow).
 One can then compute homology group with a simplicial complex of less than one hundred simplices instead of running the homology algorithm on the much bigger initial set of 
-simplices.
+simplices which would take much more time and memory.
 
 
+\image html "so3.png" "Edge contraction illustration" 
 
 \section Design
 
@@ -71,7 +73,7 @@ This class design is policy based and heavily inspired from the similar edge col
 
 \subsection Policies
 
-Four policies can be customized in this package.
+Four policies can be customized in this package:
 
 \li Cost_policy: specify how much cost an edge contraction of a given edge. The edge with lowest cost is iteratively picked and contracted if valid.
 \li Valid_contraction_policy: specify if a given edge contraction is valid. For instance, this policy can check the link condition which ensures that the homotopy type is preserved afer the edge contraction.
@@ -107,7 +109,7 @@ to simplices in an external map if storing information on simplices such
 as orientation is needed.
 
 
-\image html "sphere_contraction.png" "Time to simplify random 2-spheres to a tetrahedron" width=10cm
+\image html "sphere_contraction.png" "Time in seconds to simplify random 2-spheres to a tetrahedron" width=10cm
 
 \section Example
 
