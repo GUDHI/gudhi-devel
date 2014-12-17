@@ -166,7 +166,6 @@ int main (int argc, char *argv[])
 		return -1;
 	}
 
-	boost::timer::auto_cpu_timer t;
 	Complex complex;
 
 	// load the points
@@ -175,31 +174,52 @@ int main (int argc, char *argv[])
 		std::cerr << "Unable to read file:"<<argv[1]<<std::endl;
 		return EXIT_FAILURE;
 	}
-	std::cout << "build the Rips complex"<<std::endl;
+	std::cout << "Build the Rips complex"<<std::endl;
 
 	build_rips(complex,atof(argv[2]));
 
+	boost::timer::auto_cpu_timer t;
 
 	std::cout << "Initial complex has "<<
-			complex.num_vertices()<<" vertices, and "<<
-			complex.num_edges()<<" edges."<<std::endl;
+			complex.num_vertices()<<" vertices and "<<
+			complex.num_edges()<<" edges"<<std::endl;
 
 	Complex_contractor contractor(complex,
-			new Edge_length_cost<Profile>, 
+			new Edge_length_cost<Profile>,
 			contraction::make_first_vertex_placement<Profile>(),
 			contraction::make_link_valid_contraction<Profile>(),
 			contraction::make_remove_popable_blockers_visitor<Profile>());
 	contractor.contract_edges();
 
-	std::cout << "Resulting complex has "<<
+	std::cout << "Counting final number of simplices \n";
+	unsigned num_simplices = std::distance(complex.simplex_range().begin(),complex.simplex_range().end());
+
+	std::cout << "Final complex has "<<
 			complex.num_vertices()<<" vertices, "<<
-			complex.num_edges()<<"edges and "<<
-			complex.num_blockers()<<" blockers"<<std::endl;
+			complex.num_edges()<<" edges, "<<
+			complex.num_blockers()<<" blockers and "<<
+			num_simplices<<" simplices"<<std::endl;
+
+
+	std::cout << "Time to simplify and enumerate simplices:\n";
 
 	return EXIT_SUCCESS;
 }
+}
   \endcode
 
+
+\verbatim
+./example/Contraction/RipsContraction ../../data/SO3_10000.off 0.3
+[ 50%] [100%] Built target SkeletonBlockerIteration
+Built target RipsContraction
+Build the Rips complex
+Initial complex has 10000 vertices and 195664 edges
+Counting final number of simplices 
+Final complex has 15 vertices, 101 edges, 165 blockers and 714 simplices
+Time to simplify and enumerate simplices:
+ 3.166621s wall, 3.150000s user + 0.010000s system = 3.160000s CPU (99.8%)
+\endverbatim
 
 
 
