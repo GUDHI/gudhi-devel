@@ -145,7 +145,7 @@ bool read_simplex ( std::istream                 & in_
   for(int i=0; i<dim+1; ++i)
   { in_ >> v; simplex.push_back(v); }
   in_ >> fil;
-  in_.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // ignore until the carriage return
+  in_.ignore((std::numeric_limits<std::streamsize>::max)(), '\n'); // ignore until the carriage return
   return true;
 }
 

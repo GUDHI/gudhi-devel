@@ -130,7 +130,7 @@ void test_rips_persistence_in_dimension(int dimension) {
   std::cout << "********************************************************************" << std::endl;
   std::cout << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_SINGLE_FIELD DIM=" << dimension << " MIN_PERS=Inf" << std::endl;
 
-  str_rips_persistence = test_rips_persistence(dimension, std::numeric_limits<int>::max());
+  str_rips_persistence = test_rips_persistence(dimension, (std::numeric_limits<int>::max)());
 
   BOOST_CHECK(str_rips_persistence.find(value0) == std::string::npos); // Check not found
   BOOST_CHECK(str_rips_persistence.find(value1) == std::string::npos); // Check not found
