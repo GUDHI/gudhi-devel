@@ -94,7 +94,7 @@ its simplices.
 
 \subsection Overview
 
-Four classes are implemented for simplicial complex in this representation namely :
+Four classes are implemented for simplicial complex in this representation namely (most user will just need to use Skeleton_blocker_geometric_complex)
 
 \li Skeleton_blocker_complex : a simplicial complex with basic operations such as vertex/edge/simplex enumeration and construction
 \li Skeleton_blocker_link_complex : the link of a simplex in a parent complex. It is represented as a sub complex
@@ -104,7 +104,7 @@ of the parent complex
 
 The two last classes are derived classes from the Skeleton_blocker_complex class. The class Skeleton_blocker_link_complex inheritates from a template passed parameter
 that may be either Skeleton_blocker_complex or Skeleton_blocker_geometric_complex (a link may store points coordinates or not).
-Most user will just need to use Skeleton_blocker_geometric_complex.
+
 
 \subsection Visitor
 

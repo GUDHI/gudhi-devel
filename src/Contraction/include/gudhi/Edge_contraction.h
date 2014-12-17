@@ -95,8 +95,19 @@ package.
 
 \section Performance 
 
+The next figure shows the computation time to reduce a random 2-sphere to a single tetrahedron with 
+this package and with the CGAL equivalent package (to is specific to 2-manifold simplicial complexes).
+Despite this package is able to deal with \a arbitrary simplicial complexes (any dimensions, manifold or non manifold),
+it is still \a 65% times faster than CGAL package which is focused on 2-manifold. 
+The main reason is that few blockers appears during the simplification and hence,
+the algorithm only have to deal with the graph and not higher-dimensional simplices
+(in this case triangles). However, we recall that higher-dimensional simplices are \a implicitely 
+stored in the \ref skbl data-structure and hence, if one has to store nodes
+to simplices in an external map if storing information on simplices such 
+as orientation is needed.
 
-TODO show curve CGAL
+
+\image html "sphere_contraction.png" "Time to simplify random 2-spheres to a tetrahedron" width=10cm
 
 \section Example
 
