@@ -26,6 +26,7 @@ find_package(GMP 4.2)
 if(GMP_FOUND)
 	find_package(GMPXX)
 endif()
+
 find_package(CGAL 4.4)
 
 # Required programs for unitary tests purpose
