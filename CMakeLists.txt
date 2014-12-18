@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 project(GUDHI)
 
-find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework chrono timer program_options REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework chrono timer program_options thread REQUIRED)
 
 set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
