@@ -1,8 +1,11 @@
 cmake_minimum_required(VERSION 2.6)
 project(GUDHIExPersCohom)
 
+
 add_executable(rips_persistence rips_persistence.cpp)
+
 target_link_libraries(rips_persistence  ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+
 add_test(rips_persistence_2 ${CMAKE_CURRENT_BINARY_DIR}/rips_persistence ${CMAKE_SOURCE_DIR}/data/points/Kl.txt -r 0.25 -d 3 -p 2 -m 100)
 add_test(rips_persistence_3 ${CMAKE_CURRENT_BINARY_DIR}/rips_persistence ${CMAKE_SOURCE_DIR}/data/points/Kl.txt -r 0.25 -d 3 -p 3 -m 100)
 

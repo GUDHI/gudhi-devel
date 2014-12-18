@@ -56,7 +56,7 @@ if(NOT Boost_FOUND)
   message(FATAL_ERROR "NOTICE: This demo requires Boost and will not be compiled.")
 else()
   INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
-  LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
+
   include_directories(src/common/include/)
   include_directories(src/Contraction/include/)
   include_directories(src/Hasse_complex/include/)
