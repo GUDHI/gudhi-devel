@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(GUDHI)
+project(GUDHIdev)
 
 find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework chrono timer program_options thread REQUIRED)
 

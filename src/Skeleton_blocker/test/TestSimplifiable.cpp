@@ -151,11 +151,7 @@ bool test_link_condition1(){
 }
 
 
-
-
-bool test_collapse1(){
-	// xxx implement remove_star(simplex) before
-
+bool test_collapse0(){
 	Complex complex(5);
 	build_complete(4,complex);
 	complex.add_vertex();
@@ -174,6 +170,27 @@ bool test_collapse1(){
 	bool blocker123_here = complex.contains_blocker(simplex_123);
 	cerr <<"----> Ocomplex \n";
 	return blocker123_here;
+}
+
+
+bool test_collapse1(){
+	Complex complex(5);
+	build_complete(4,complex);
+	complex.add_blocker(Simplex_handle(Vertex_handle(0),Vertex_handle(1),Vertex_handle(2),Vertex_handle(3)));
+	// Print result
+	cerr << "initial complex :\n"<< complex.to_string();
+	cerr <<endl<<endl;
+
+	Simplex_handle simplex_123(Vertex_handle(1),Vertex_handle(2),Vertex_handle(3));
+	complex.remove_star(simplex_123);
+	cerr << "complex.remove_star(1,2,3):\n"<< complex.to_string();
+	cerr <<endl<<endl;
+
+	// verification
+	bool res = complex.contains_blocker(simplex_123);
+	res = res && complex.num_blockers()==1;
+	cerr <<"----> Ocomplex \n";
+	return res;
 }
 
 bool test_collapse2(){
@@ -216,11 +233,48 @@ bool test_collapse3(){
 
 	bool blocker134_here = complex.contains_blocker(Simplex_handle(Vertex_handle(1),Vertex_handle(3),Vertex_handle(4)));
 	bool blocker1234_here = complex.contains_blocker(Simplex_handle(Vertex_handle(1),Vertex_handle(2),Vertex_handle(3),Vertex_handle(4)));
-	// verification
-	//	assert_blocker(complex,1,2,3);
-	//	assert(!complex.ContainsBlocker(new AddressSimplex(1,2,3,4)));
-	cerr <<"----> Ocomplex \n";
 	return blocker134_here && !blocker1234_here;
+}
+
+bool test_add_simplex(){
+	Complex complex(5);
+	build_complete(4,complex);
+	complex.add_blocker(Simplex_handle(Vertex_handle(0),Vertex_handle(1),Vertex_handle(2)));
+	// Print result
+	cerr << "initial complex:\n"<< complex.to_string();
+	cerr <<endl<<endl;
+
+	complex.add_simplex(Simplex_handle(Vertex_handle(0),Vertex_handle(1),Vertex_handle(2),Vertex_handle(3)));
+	cerr << "complex after add_simplex:\n"<< complex.to_string();
+
+	return complex.num_blockers()==0;
+}
+
+bool test_add_simplex2(){
+	Complex complex(5);
+	build_complete(4,complex);
+	complex.add_blocker(Simplex_handle(Vertex_handle(0),Vertex_handle(1),Vertex_handle(2)));
+	// Print result
+	cerr << "initial complex:\n"<< complex.to_string();
+	cerr <<endl<<endl;
+
+	Complex copy;
+
+	std::vector<Simplex_handle> simplices(complex.simplex_range().begin(),complex.simplex_range().end());
+	sort(simplices.begin(),simplices.end(),[&](const Simplex_handle& s1,const Simplex_handle& s2){
+		return s1.dimension()<s2.dimension();
+	});
+	for(const auto & simplex : simplices){
+		if(!copy.contains(simplex))
+			copy.add_simplex(simplex);
+	}
+
+	complex.add_simplex(Simplex_handle(Vertex_handle(0),Vertex_handle(1),Vertex_handle(2),Vertex_handle(3)));
+	cerr << "complex after add_simplex:\n"<< complex.to_string();
+
+	return complex.num_blockers()==copy.num_blockers() &&
+			complex.num_edges()==copy.num_edges() &&
+			complex.num_vertices()==copy.num_vertices();
 }
 
 
@@ -282,9 +336,13 @@ int main (int argc, char *argv[])
 	tests_simplifiable_complex.add("Test remove popable blockers",test_remove_popable_blockers);
 
 
+	tests_simplifiable_complex.add("Test collapse 0",test_collapse0);
 	tests_simplifiable_complex.add("Test collapse 1",test_collapse1);
 	tests_simplifiable_complex.add("Test collapse 2",test_collapse2);
 	tests_simplifiable_complex.add("Test collapse 3",test_collapse3);
+
+	tests_simplifiable_complex.add("Test add simplex",test_add_simplex);
+	tests_simplifiable_complex.add("Test add simplex2",test_add_simplex2);
 
 
 	tests_simplifiable_complex.run();

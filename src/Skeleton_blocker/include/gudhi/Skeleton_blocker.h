@@ -180,7 +180,9 @@ The Euler Characteristic is 1
 
 \subsection Acknowledgements
 The author wishes to thank Dominique Attali and André Lieutier for 
-their collaboration to write the two initial papers (cite socg_blockers_2011,\cite blockers2012) about this data-structure
+their collaboration to write the two initial papers 
+\cite socg_blockers_2011,\cite blockers2012
+ about this data-structure
  and also Dominique for leaving him use a prototype. 
 
 

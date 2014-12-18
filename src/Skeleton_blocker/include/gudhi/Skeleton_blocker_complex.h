@@ -717,6 +717,7 @@ public:
 	 * returns a Blocker_handle toward it if was not present before and 0 otherwise.
 	 */
 	Blocker_handle add_blocker(const Simplex_handle& blocker){
+		assert(blocker.dimension()>1);
 		if (contains_blocker(blocker))
 		{
 			//std::cerr << "ATTEMPT TO ADD A BLOCKER ALREADY THERE ---> BLOCKER IGNORED" << endl;

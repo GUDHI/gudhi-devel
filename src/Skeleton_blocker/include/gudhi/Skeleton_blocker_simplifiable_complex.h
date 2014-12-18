@@ -251,21 +251,55 @@ public:
 		else
 			if (sigma.dimension()==1)
 				remove_star(sigma.first_vertex(),sigma.last_vertex());
+			else{
+				remove_blocker_containing_simplex(sigma);
+				this->add_blocker(sigma);
+			}
+	}
+
+	/**
+	 * @brief add the simplex plus all its cofaces
+	 * @details in the case where sigma is a vertex, the simplex
+	 * added has an id which is set to the number of vertices
+	 */
+	void add_simplex(const Simplex_handle& sigma){
+		assert(!this->contains(sigma));
+		if (sigma.dimension()==0)
+			this->add_vertex();
+		else
+			if (sigma.dimension()==1)
+				this->add_edge(sigma.first_vertex(),sigma.last_vertex());
 			else
-				update_blockers_after_remove_star_of_simplex(sigma);
+				remove_blocker_include_in_simplex(sigma);
 	}
 
 private:
-	void update_blockers_after_remove_star_of_simplex(const Simplex_handle& sigma){
-		std::list <Blocker_handle> blockers_to_remove;
+	/**
+	 * remove all blockers that contains sigma
+	 */
+	void remove_blocker_containing_simplex(const Simplex_handle& sigma){
+		std::vector <Blocker_handle> blockers_to_remove;
 		for (auto blocker : this->blocker_range(sigma.first_vertex())){
 			if(blocker->contains(sigma))
 				blockers_to_remove.push_back(blocker);
 		}
 		for(auto blocker_to_update : blockers_to_remove)
 			this->delete_blocker(blocker_to_update);
-		this->add_blocker(sigma);
 	}
+
+	/**
+	 * remove all blockers that contains sigma
+	 */
+	void remove_blocker_include_in_simplex(const Simplex_handle& sigma){
+		std::vector <Blocker_handle> blockers_to_remove;
+		for (auto blocker : this->blocker_range(sigma.first_vertex())){
+			if(sigma.contains(*blocker))
+				blockers_to_remove.push_back(blocker);
+		}
+		for(auto blocker_to_update : blockers_to_remove)
+			this->delete_blocker(blocker_to_update);
+	}
+
 
 public:
 
