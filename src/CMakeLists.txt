@@ -18,7 +18,7 @@ endif()
 add_definitions(-DBOOST_RESULT_OF_USE_DECLTYPE)
 
 find_package(Boost) 
-find_package(GMP)
+find_package(GMP 4.2)
 if(GMP_FOUND)
         find_package(GMPXX)
 endif()
