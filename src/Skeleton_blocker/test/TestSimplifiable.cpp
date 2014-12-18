@@ -253,7 +253,6 @@ bool test_add_simplex(){
 bool test_add_simplex2(){
 	Complex complex(5);
 	build_complete(4,complex);
-	complex.add_blocker(Simplex_handle(Vertex_handle(0),Vertex_handle(1),Vertex_handle(2)));
 	// Print result
 	cerr << "initial complex:\n"<< complex.to_string();
 	cerr <<endl<<endl;
@@ -269,7 +268,7 @@ bool test_add_simplex2(){
 			copy.add_simplex(simplex);
 	}
 
-	complex.add_simplex(Simplex_handle(Vertex_handle(0),Vertex_handle(1),Vertex_handle(2),Vertex_handle(3)));
+
 	cerr << "complex after add_simplex:\n"<< complex.to_string();
 
 	return complex.num_blockers()==copy.num_blockers() &&

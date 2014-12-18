@@ -258,19 +258,13 @@ public:
 	}
 
 	/**
-	 * @brief add the simplex plus all its cofaces
-	 * @details in the case where sigma is a vertex, the simplex
-	 * added has an id which is set to the number of vertices
+	 * @brief add a maximal simplex plus all its cofaces.
+	 * @details the simplex must have dimension greater than one (otherwise use add_vertex or add_edge).
 	 */
 	void add_simplex(const Simplex_handle& sigma){
 		assert(!this->contains(sigma));
-		if (sigma.dimension()==0)
-			this->add_vertex();
-		else
-			if (sigma.dimension()==1)
-				this->add_edge(sigma.first_vertex(),sigma.last_vertex());
-			else
-				remove_blocker_include_in_simplex(sigma);
+		assert(sigma.dimension()>1);
+		remove_blocker_include_in_simplex(sigma);
 	}
 
 private:

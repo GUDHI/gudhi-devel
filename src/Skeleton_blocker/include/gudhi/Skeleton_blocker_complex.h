@@ -1422,9 +1422,7 @@ unsigned make_complex_from_top_faces(Complex& complex,SimplexHandleIterator begi
 	return simplices.size();
 }
 
-
-
-}
+} // namespace skbl
 
 }  // namespace GUDHI
 
