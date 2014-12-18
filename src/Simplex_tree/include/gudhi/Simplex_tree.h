@@ -38,7 +38,7 @@
 
 namespace Gudhi {
   
-
+/** \defgroup simplex_tree Filtered Complexes
 /** \defgroup simplex_tree Filtered Complexes
  *
  * A simplicial complex \f$\mathbf{K}\f$
@@ -117,8 +117,7 @@ class Simplex_tree {
   friend class Simplex_tree_complex_simplex_iterator< Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> >;
   friend class Simplex_tree_skeleton_simplex_iterator< Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> >;
 
-  
-
+  /* \brief Set of nodes sharing a same parent in the simplex tree. */
   /* \brief Set of nodes sharing a same parent in the simplex tree. */
   typedef Simplex_tree_siblings<Simplex_tree, Dictionary> Siblings;
 

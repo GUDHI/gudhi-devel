@@ -26,7 +26,7 @@ find_package(GMP)
 if(GMP_FOUND)
 	find_package(GMPXX)
 endif()
-find_package(CGAL)
+find_package(CGAL 4.4)
 
 # Required programs for unitary tests purpose
 FIND_PROGRAM( LCOV_PATH lcov )
