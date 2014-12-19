@@ -26,6 +26,7 @@
 #include <CGAL/iterator.h>
 
 #include <fstream>
+#include <cmath>
 
 #include "gudhi/graph_simplicial_complex.h"
 #include "gudhi/Simplex_tree.h"
@@ -217,7 +218,7 @@ int main (int argc, char * const argv[])
 #ifdef DEBUG_TRACES
 		std::cout << "filtration = " << *the_alpha_value_iterator << std::endl;
 #endif // DEBUG_TRACES
-		simplex_tree.insert(the_simplex_tree, *the_alpha_value_iterator);
+		simplex_tree.insert(the_simplex_tree, std::sqrt(*the_alpha_value_iterator));
 		if (the_alpha_value_iterator != the_alpha_values.end())
 			++the_alpha_value_iterator;
 		else
