@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 project(GUDHI)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
 find_package(Boost REQUIRED COMPONENTS system filesystem program_options chrono timer REQUIRED)
 
