@@ -139,10 +139,10 @@ int main (int argc, char * const argv[])
 		lp.push_back(p);
 	}
 
-	// alpha shape construction from points
-	Alpha_shape_3 as(lp.begin(),lp.end());
+	// alpha shape construction from points. CGAL has a bug in REGULARIZED mode.
+	Alpha_shape_3 as(lp.begin(),lp.end(),0,Alpha_shape_3::GENERAL);
 #ifdef DEBUG_TRACES
-	std::cout << "Alpha shape computed in REGULARIZED mode by default" << std::endl;
+	std::cout << "Alpha shape computed in GENERAL mode" << std::endl;
 #endif // DEBUG_TRACES
 
 	// filtration with alpha values from alpha shape
