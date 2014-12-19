@@ -40,7 +40,7 @@ CGAL is a C++ library which provides easy access to efficient and reliable geome
 The following example requires CGAL https://www.cgal.org/ and will not be built if CGAL is not installed:
   - Simplex_tree/simplex_tree_from_alpha_shapes_3
 
-Having CGAL version 4.5 or higher installed is recommended. The procedure to install this library according to
+Having CGAL version 4.4 or higher installed is recommended. The procedure to install this library according to
 your operating system is detailed here http://doc.cgal.org/latest/Manual/installation.html
 
 \section demos Demos and Examples

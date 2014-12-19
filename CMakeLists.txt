@@ -22,12 +22,12 @@ endif()
 # BOOST ISSUE result_of vs C++11
 add_definitions(-DBOOST_RESULT_OF_USE_DECLTYPE)
 find_package(Boost)
-find_package(GMP 4.2)
+find_package(GMP)
 if(GMP_FOUND)
 	find_package(GMPXX)
 endif()
 
-find_package(CGAL 4.4)
+find_package(CGAL)
 
 # Required programs for unitary tests purpose
 FIND_PROGRAM( LCOV_PATH lcov )

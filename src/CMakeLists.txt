@@ -19,11 +19,11 @@ endif()
 add_definitions(-DBOOST_RESULT_OF_USE_DECLTYPE)
 
 find_package(Boost) 
-find_package(GMP 4.2)
+find_package(GMP)
 if(GMP_FOUND)
         find_package(GMPXX)
 endif()
-find_package(CGAL 4.4)
+find_package(CGAL)
 
 if(NOT Boost_FOUND)
   message(FATAL_ERROR "NOTICE: This demo requires Boost and will not be compiled.")

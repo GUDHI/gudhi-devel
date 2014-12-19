@@ -3,7 +3,6 @@ project(GUDHIExPersCohom)
 
 
 add_executable(rips_persistence rips_persistence.cpp)
-
 target_link_libraries(rips_persistence  ${Boost_LIBRARY_DIR})
 
 add_test(rips_persistence_2 ${CMAKE_CURRENT_BINARY_DIR}/rips_persistence ${CMAKE_SOURCE_DIR}/data/points/Kl.txt -r 0.25 -d 3 -p 2 -m 100)
