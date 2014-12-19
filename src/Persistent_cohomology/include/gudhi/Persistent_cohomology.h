@@ -222,11 +222,8 @@ class Persistent_cohomology {
 
   /** \brief Initializes the Persistent_cohomology class.
    *
-   * @param[in] cpx Complex for which the persistent homology is compiuted.
+   * @param[in] cpx Complex for which the persistent homology is computed.
    cpx is a model of FilteredComplex
-   *
-   * @param[in] persistence_dim_max if true, the persistent homology for the maximal dimension in the
-   *                                complex is computed. If false, it is ignored. Default is false.
    */
   explicit Persistent_cohomology(Complex_ds& cpx)
       : cpx_(&cpx),
