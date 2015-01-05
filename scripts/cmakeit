@@ -1,0 +1,4 @@
+#!/bin/bash
+#usage bash cmakeit
+
+cmake .
