@@ -115,7 +115,7 @@ read_graph ( std::string file_name )
 
   boost::graph_traits<Graph_t>::vertex_iterator vi, vi_end;
   auto v_it = vertices.begin();
-  for (tie(vi, vi_end) = boost::vertices(skel_graph); vi != vi_end; ++vi,++v_it)
+  for (std::tie(vi, vi_end) = boost::vertices(skel_graph); vi != vi_end; ++vi,++v_it)
   { boost::put(vertex_prop, *vi, v_it->second); }
 
   return skel_graph;
