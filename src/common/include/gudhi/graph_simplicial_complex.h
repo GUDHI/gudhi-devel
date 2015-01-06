@@ -86,7 +86,7 @@ Graph_t compute_proximity_graph( PointCloud &points
   auto vertex_prop = boost::get(vertex_filtration_t(),skel_graph);
 
   boost::graph_traits<Graph_t>::vertex_iterator vi, vi_end;
-  for ( tie(vi, vi_end) = boost::vertices(skel_graph); 
+  for ( std::tie(vi, vi_end) = boost::vertices(skel_graph); 
         vi != vi_end; ++vi )
   { boost::put(vertex_prop, *vi, 0.); }
  
