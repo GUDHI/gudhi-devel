@@ -646,7 +646,7 @@ class Simplex_tree {
 
     typename boost::graph_traits<OneSkeletonGraph>::vertex_iterator v_it,
         v_it_end;
-    for (tie(v_it, v_it_end) = boost::vertices(skel_graph); v_it != v_it_end;
+    for (std::tie(v_it, v_it_end) = boost::vertices(skel_graph); v_it != v_it_end;
         ++v_it) {
       root_.members_.emplace_hint(
           root_.members_.end(), *v_it,
@@ -654,7 +654,7 @@ class Simplex_tree {
     }
     typename boost::graph_traits<OneSkeletonGraph>::edge_iterator e_it,
         e_it_end;
-    for (tie(e_it, e_it_end) = boost::edges(skel_graph); e_it != e_it_end;
+    for (std::tie(e_it, e_it_end) = boost::edges(skel_graph); e_it != e_it_end;
         ++e_it) {
       auto u = source(*e_it, skel_graph);
       auto v = target(*e_it, skel_graph);
