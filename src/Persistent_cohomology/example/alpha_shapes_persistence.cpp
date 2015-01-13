@@ -121,7 +121,7 @@ Vertex_list from (const Alpha_shape_3::Vertex_handle& vh)
 
 void usage(char * const progName)
 {
-  std::cerr << "Usage: " << progName << " path_to_file_graph coeff_field_characteristic min_persistence\n";
+  std::cerr << "Usage: " << progName << " path_to_file_graph coeff_field_characteristic[integer > 0] min_persistence[float >= -1.0]\n";
   exit(-1); // ----- >>
 }
 
@@ -135,13 +135,13 @@ int main (int argc, char * const argv[])
     usage(argv[0]);
   }
 
-  int min_persist_int = 0;
-  returnedScanValue = sscanf(argv[3], "%d", &min_persist_int);
-  if ((returnedScanValue == EOF) || (min_persist_int < -1)) {
+  float min_persistence = 0.0;
+  returnedScanValue = sscanf(argv[3], "%f", &min_persistence);
+  if ((returnedScanValue == EOF) || (min_persistence < -1.0)) {
     std::cerr << "Error: " << argv[3] << " is not correct\n";
     usage(argv[0]);
   }
-  Filtration_value min_persistence = (Filtration_value)min_persist_int;
+  //Filtration_value min_persistence = (Filtration_value)min_persist_int;
 
   // program args management
   if (argc != 4) {
@@ -257,7 +257,7 @@ int main (int argc, char * const argv[])
     if (filtr > filtration_max) {
       filtration_max = filtr;
     }
-    simplex_tree.insert(the_simplex_tree, std::sqrt(*the_alpha_value_iterator));
+    simplex_tree.insert(the_simplex_tree, filtr);
     if (the_alpha_value_iterator != the_alpha_values.end())
       ++the_alpha_value_iterator;
     else
@@ -295,7 +295,7 @@ int main (int argc, char * const argv[])
   Persistent_cohomology< Simplex_tree<>, Field_Zp > pcoh( simplex_tree );
   pcoh.init_coefficients( coeff_field_characteristic ); //initializes the coefficient field for homology
 
-  pcoh.compute_persistent_cohomology( min_persistence );
+  pcoh.compute_persistent_cohomology( (Filtration_value)min_persistence );
 
   pcoh.output_diagram();
 
