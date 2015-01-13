@@ -24,4 +24,13 @@ if(GMPXX_FOUND AND GMP_FOUND)
 
    add_executable ( performance_rips_persistence performance_rips_persistence.cpp )
    target_link_libraries(performance_rips_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES})
+
+   if(CGAL_FOUND)
+      add_definitions(-DDEBUG_TRACES)
+      add_executable(alpha_shapes_persistence alpha_shapes_persistence.cpp)
+      target_link_libraries(alpha_shapes_persistence ${Boost_SYSTEM_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES} ${CGAL_LIBRARY})
+      #add_test(persistence_from_file_3_2_0 ${CMAKE_CURRENT_BINARY_DIR}/persistence_from_file ${CMAKE_SOURCE_DIR}/data/points/bunny_5000.st -p 2 -m 0)
+      #add_test(persistence_from_file_3_3_100 ${CMAKE_CURRENT_BINARY_DIR}/persistence_from_file ${CMAKE_SOURCE_DIR}/data/points/bunny_5000.st -p 3 -m 100)
+   endif()
+
 endif()
