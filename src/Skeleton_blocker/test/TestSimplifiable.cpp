@@ -251,25 +251,28 @@ bool test_add_simplex(){
 }
 
 bool test_add_simplex2(){
-	Complex complex(5);
+	Complex complex;
 	build_complete(4,complex);
 	// Print result
 	cerr << "initial complex:\n"<< complex.to_string();
 	cerr <<endl<<endl;
 
-	Complex copy;
+	Complex copy(complex.num_vertices());
 
 	std::vector<Simplex_handle> simplices(complex.simplex_range().begin(),complex.simplex_range().end());
 	sort(simplices.begin(),simplices.end(),[&](const Simplex_handle& s1,const Simplex_handle& s2){
 		return s1.dimension()<s2.dimension();
 	});
 	for(const auto & simplex : simplices){
-		if(!copy.contains(simplex))
+		if(!copy.contains(simplex) && simplex.dimension()==1)
+			copy.add_edge(simplex.first_vertex(),simplex.last_vertex());
+		if(!copy.contains(simplex) && simplex.dimension()>1)
 			copy.add_simplex(simplex);
 	}
 
 
-	cerr << "complex after add_simplex:\n"<< complex.to_string();
+	cerr << "complex after add_simplex:\n"<< copy.to_string();
+
 
 	return complex.num_blockers()==copy.num_blockers() &&
 			complex.num_edges()==copy.num_edges() &&

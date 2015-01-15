@@ -45,7 +45,7 @@ typedef CGAL::Delaunay_triangulation_3<Kernel,Tds>          Triangulation_3;
 typedef CGAL::Alpha_shape_3<Triangulation_3>                Alpha_shape_3;
 
 // From file type definition
-typedef Kernel::Point_3                                     Point;
+typedef Kernel::Point_3                                     Point_3;
 
 // filtration with alpha values needed type definition
 typedef Alpha_shape_3::FT Alpha_value_type;
@@ -56,7 +56,7 @@ typedef CGAL::Dispatch_output_iterator<
                      > > Dispatch;
 typedef Alpha_shape_3::Cell_handle   Cell_handle;
 typedef Alpha_shape_3::Facet         Facet;
-typedef Alpha_shape_3::Edge          Edge;
+typedef Alpha_shape_3::Edge          Edge_3;
 typedef std::list<Alpha_shape_3::Vertex_handle> Vertex_list;
 
 // gudhi type definition
@@ -94,7 +94,7 @@ Vertex_list from (const Facet& fct)
   }
   return the_list;
 }
-Vertex_list from (const Edge& edg)
+Vertex_list from (const Edge_3& edg)
 {
   Vertex_list the_list;
   for (auto i = 0; i < 4; i++)
@@ -151,14 +151,14 @@ int main (int argc, char * const argv[])
 
   // Read points from file
   std::string filegraph   = argv[1];
-  std::list<Point> lp;
+  std::list<Point_3> lp;
   std::ifstream is(filegraph.c_str());
   int n;
   is >> n;
 #ifdef DEBUG_TRACES
   std::cout << "Reading " << n << " points " << std::endl;
 #endif // DEBUG_TRACES
-  Point p;
+  Point_3 p;
   for( ; n>0 ; n--)    {
     is >> p;
     lp.push_back(p);
@@ -212,12 +212,12 @@ int main (int argc, char * const argv[])
         dim_max=2; // Facet is of dim 2
       }
     }
-    else if (const Edge* edge = CGAL::object_cast<Edge>(&object_iterator))
+    else if (const Edge_3* edge = CGAL::object_cast<Edge_3>(&object_iterator))
     {
       vertex_list = from(*edge);
       count_edges++;
       if (dim_max < 1) {
-        dim_max=1; // Edge is of dim 1
+        dim_max=1; // Edge_3 is of dim 1
       }
     }
     else if (const Alpha_shape_3::Vertex_handle* vertex = CGAL::object_cast<Alpha_shape_3::Vertex_handle>(&object_iterator))

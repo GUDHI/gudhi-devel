@@ -222,11 +222,8 @@ class Persistent_cohomology {
 
   /** \brief Initializes the Persistent_cohomology class.
    *
-   * @param[in] cpx Complex for which the persistent homology is compiuted.
+   * @param[in] cpx Complex for which the persistent homology is computed.
    cpx is a model of FilteredComplex
-   *
-   * @param[in] persistence_dim_max if true, the persistent homology for the maximal dimension in the
-   *                                complex is computed. If false, it is ignored. Default is false.
    */
   explicit Persistent_cohomology(Complex_ds& cpx)
       : cpx_(&cpx),
@@ -705,6 +702,19 @@ class Persistent_cohomology {
       ostream << get<2>(pair) << "  " << cpx_->dimension(get<0>(pair)) << " "
           << cpx_->filtration(get<0>(pair)) << " "
           << cpx_->filtration(get<1>(pair)) << " " << std::endl;
+    }
+  }
+
+  void write_output_diagram(std::string diagram_name)
+  {
+    std::ofstream           diagram_out(diagram_name.c_str());
+    cmp_intervals_by_length cmp( cpx_ );
+    persistent_pairs_.sort( cmp );
+    for(auto pair : persistent_pairs_)
+    {
+    diagram_out << cpx_->dimension(get<0>(pair)) << " "
+          << cpx_->filtration(get<0>(pair)) << " "
+          << cpx_->filtration(get<1>(pair)) << std::endl;
     }
   }
 

@@ -62,7 +62,7 @@ struct Hasse_simplex
   * a complex where all codimension 1 incidence 
   * relations are explicitly encoded.
   *
-  * \implements FilteredComplex. 
+  * \implements FilteredComplex
   * \ingroup simplex_tree
   */
 template < typename FiltrationValue     = double

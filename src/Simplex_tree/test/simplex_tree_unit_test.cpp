@@ -55,7 +55,7 @@ void test_iterators_on_empty_simplex_tree(typeST& tst)
 	for( auto f_simplex : tst.filtration_simplex_range() )
 	{
 		BOOST_CHECK( false); // shall be empty
-		std::cout << "test_simplex_tree_contains - filtration=" << tst.filtration(f_simplex) << std::endl;
+		std::cout << "test_iterators_on_empty_simplex_tree - filtration=" << tst.filtration(f_simplex) << std::endl;
 	}
 }
 
@@ -125,19 +125,24 @@ BOOST_AUTO_TEST_CASE( simplex_tree_from_file )
 	simplex_tree_stream.close();
 }
 
-void test_simplex_tree_contains(typeST& simplexTree, typeSimplex simplex, int pos)
+void test_simplex_tree_contains(typeST& simplexTree, typeSimplex& simplex, int pos)
 {
-	auto f_simplex = simplexTree.filtration_simplex_range().begin();
-	f_simplex += pos;
+	auto f_simplex = simplexTree.filtration_simplex_range().begin() + pos;
+
 	std::cout << "test_simplex_tree_contains - filtration=" << simplexTree.filtration(*f_simplex) << "||" << simplex.second << std::endl;
 	BOOST_CHECK( AreAlmostTheSame(simplexTree.filtration(*f_simplex),simplex.second) );
 
-	typeVectorVertex::iterator simplexIter = simplex.first.end()-1;
+	//typeVectorVertex::iterator simplexIter = simplex.first.end()-1;
+	int simplexIndex=simplex.first.size()-1;
 	for( auto vertex : simplexTree.simplex_vertex_range(*f_simplex) )
 	{
-		std::cout << "test_simplex_tree_contains - vertex=" << vertex << "||" << *simplexIter << std::endl;
-		BOOST_CHECK( vertex ==  *simplexIter);
-		simplexIter--;
+		//std::cout << "test_simplex_tree_contains - vertex=" << vertex << "||" << *simplexIter << std::endl;
+		//BOOST_CHECK( vertex ==  *simplexIter);
+		//simplexIter--;
+	  std::cout << "test_simplex_tree_contains - vertex=" << vertex << "||" << simplex.first.at(simplexIndex) << std::endl;
+	  BOOST_CHECK(vertex ==  simplex.first.at(simplexIndex));
+	  BOOST_CHECK(simplexIndex >= 0);
+	  simplexIndex--;
 	}
 }
 
