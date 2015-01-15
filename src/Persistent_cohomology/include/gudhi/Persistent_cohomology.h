@@ -705,6 +705,19 @@ class Persistent_cohomology {
     }
   }
 
+  void write_output_diagram(std::string diagram_name)
+  {
+    std::ofstream           diagram_out(diagram_name.c_str());
+    cmp_intervals_by_length cmp( cpx_ );
+    persistent_pairs_.sort( cmp );
+    for(auto pair : persistent_pairs_)
+    {
+    diagram_out << cpx_->dimension(get<0>(pair)) << " "
+          << cpx_->filtration(get<0>(pair)) << " "
+          << cpx_->filtration(get<1>(pair)) << std::endl;
+    }
+  }
+
  private:
   /*
    * Structure representing a cocycle.
