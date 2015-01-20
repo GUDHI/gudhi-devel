@@ -19,8 +19,11 @@
   *    You should have received a copy of the GNU General Public License
   *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef SKELETON_BLOCKER_OFF_IO_H_
-#define SKELETON_BLOCKER_OFF_IO_H_
+#ifndef SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SKELETON_BLOCKER_OFF_IO_H_
+#define SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SKELETON_BLOCKER_OFF_IO_H_
+
+#include <string>
+#include <vector>
 
 #include "gudhi/Off_reader.h"
 
@@ -32,71 +35,70 @@ namespace skbl {
  *@brief Off reader visitor that can be passed to Off_reader to read a Skeleton_blocker_complex.
  */
 template<typename Complex>
-class Skeleton_blocker_off_visitor_reader{
-	Complex& complex_;
-	typedef typename Complex::Vertex_handle Vertex_handle;
-	typedef typename Complex::Point Point;
+class Skeleton_blocker_off_visitor_reader {
+  Complex& complex_;
+  typedef typename Complex::Vertex_handle Vertex_handle;
+  typedef typename Complex::Point Point;
 
-	const bool load_only_points_;
+  const bool load_only_points_;
 
-public:
-	Skeleton_blocker_off_visitor_reader(Complex& complex,bool load_only_points = false):
-		complex_(complex),
-		load_only_points_(load_only_points){}
-
-
-	void init(int dim,int num_vertices,int num_faces,int num_edges){
-		//todo do an assert to check that this number are correctly read
-		//todo reserve size for vector points
-	}
+ public:
+  explicit Skeleton_blocker_off_visitor_reader(Complex& complex, bool load_only_points = false):
+    complex_(complex),
+    load_only_points_(load_only_points) {}
 
 
-	void point(const std::vector<double>& point){
-		complex_.add_vertex(point);
-	}
+  void init(int dim, int num_vertices, int num_faces, int num_edges) {
+    // todo do an assert to check that this number are correctly read
+    // todo reserve size for vector points
+  }
 
-	void maximal_face(const std::vector<int>& face){
-		if (!load_only_points_){
-			for(size_t i = 0 ; i < face.size();++i)
-				for(size_t j = i+1 ; j < face.size();++j){
-					complex_.add_edge(Vertex_handle(face[i]),Vertex_handle(face[j]));
-				}
-			}
-	}
 
-	void done(){
-	}
+  void point(const std::vector<double>& point) {
+    complex_.add_vertex(point);
+  }
+
+  void maximal_face(const std::vector<int>& face) {
+    if (!load_only_points_) {
+      for (size_t i = 0; i < face.size(); ++i)
+        for (size_t j = i+1; j < face.size(); ++j) {
+          complex_.add_edge(Vertex_handle(face[i]), Vertex_handle(face[j]));
+        }
+      }
+  }
+
+  void done() {}
 };
 
 /**
 *@brief Class that allows to load a Skeleton_blocker_complex from an off file.
 */
 template<typename Complex>
-class Skeleton_blocker_off_reader{
-public:
-	/**
-	 * name_file : file to read
-	 * read_complex : complex that will receive the file content
-	 * read_only_points : specify true if only the points must be read
-	 */
-	Skeleton_blocker_off_reader(const std::string & name_file,Complex& read_complex,bool read_only_points = false):valid_(false){
-		std::ifstream stream(name_file);
-		if(stream.is_open()){
-			Skeleton_blocker_off_visitor_reader<Complex> off_visitor(read_complex,read_only_points);
-			Off_reader off_reader(stream);
-			valid_ = off_reader.read(off_visitor);
-		}
-	}
+class Skeleton_blocker_off_reader {
+ public:
+  /**
+   * name_file : file to read
+   * read_complex : complex that will receive the file content
+   * read_only_points : specify true if only the points must be read
+   */
+  Skeleton_blocker_off_reader(const std::string & name_file, Complex& read_complex, bool read_only_points = false):valid_(false) {
+    std::ifstream stream(name_file);
+    if (stream.is_open()) {
+      Skeleton_blocker_off_visitor_reader<Complex> off_visitor(read_complex, read_only_points);
+      Off_reader off_reader(stream);
+      valid_ = off_reader.read(off_visitor);
+    }
+  }
 
-	/**
-	 * return true iff reading did not meet problems.
-	 */
-	bool is_valid() const{
-		return valid_;
-	}
+  /**
+   * return true iff reading did not meet problems.
+   */
+  bool is_valid() const {
+    return valid_;
+  }
 
-private:
-	bool valid_;
+ private:
+  bool valid_;
 };
 
 }  // namespace skbl
@@ -105,4 +107,4 @@ private:
 }  // namespace Gudhi
 
 
-#endif /* SKELETON_BLOCKER_OFF_IO_H_ */
+#endif  // SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SKELETON_BLOCKER_OFF_IO_H_

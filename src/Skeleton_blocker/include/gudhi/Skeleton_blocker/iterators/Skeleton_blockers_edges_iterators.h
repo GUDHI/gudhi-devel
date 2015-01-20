@@ -85,7 +85,7 @@ public:
 	}
 
 	Edge_handle dereference() const{
-		return *(*complex)[std::make_pair(v,*current_)];
+		return *(*complex)[std::make_pair(v,static_cast<Vertex_handle>(*current_))];
 	}
 
 private:
