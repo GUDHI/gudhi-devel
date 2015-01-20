@@ -73,31 +73,33 @@ bool test_contraction1(){
 	enum { a, b, x, y, z, n };
 	Complex complex(n);
 	build_complete(n,complex);
-	complex.remove_edge(Vertex_handle(b),Vertex_handle(z));
-	complex.add_blocker(Simplex_handle(Vertex_handle(a),Vertex_handle(x),Vertex_handle(y)));
-	complex.add_blocker(Simplex_handle(Vertex_handle(b),Vertex_handle(x),Vertex_handle(y)));
+	complex.remove_edge(static_cast<Vertex_handle>(b), static_cast<Vertex_handle>(z));
+	complex.add_blocker(Simplex_handle(static_cast<Vertex_handle>(a), static_cast<Vertex_handle>(x),
+	                                   static_cast<Vertex_handle>(y)));
+	complex.add_blocker(Simplex_handle(static_cast<Vertex_handle>(b), static_cast<Vertex_handle>(x),
+	                                   static_cast<Vertex_handle>(y)));
 
 	// Print result
 	cerr << "complex before complex"<< complex.to_string()<<endl;
 
 	cerr <<endl<<endl;
-	complex.contract_edge(Vertex_handle(a),Vertex_handle(b));
+	complex.contract_edge(static_cast<Vertex_handle>(a),static_cast<Vertex_handle>(b));
 	// Print result
 	cerr << "ContractEdge(0,1)\n";
 	PRINT(complex.to_string());
 
 	// verification
 	for (int i=0;i<5;i++)
-		if (i!=1) assert_vertex(complex,Vertex_handle(i));
-	bool test1 = !complex.contains_edge(Vertex_handle(a),Vertex_handle(b));
+		if (i!=1) assert_vertex(complex, static_cast<Vertex_handle>(i));
+	bool test1 = !complex.contains_edge(static_cast<Vertex_handle>(a),static_cast<Vertex_handle>(b));
 	bool test2 = assert_blocker(complex,Root_vertex_handle(a),Root_vertex_handle(x),Root_vertex_handle(y));
 	bool test3 = complex.num_edges()==6;
 	bool test4 = complex.num_blockers()==1;
 	Simplex_handle sigma;
-	sigma.add_vertex(Vertex_handle(a));
-	sigma.add_vertex(Vertex_handle(x));
-	sigma.add_vertex(Vertex_handle(y));
-	sigma.add_vertex(Vertex_handle(z));
+	sigma.add_vertex(static_cast<Vertex_handle>(a));
+	sigma.add_vertex(static_cast<Vertex_handle>(x));
+	sigma.add_vertex(static_cast<Vertex_handle>(y));
+	sigma.add_vertex(static_cast<Vertex_handle>(z));
 	bool test5 = !(complex.contains(sigma));
 	return test1&&test2&&test3&&test4&&test5;
 }
@@ -107,18 +109,18 @@ bool test_contraction2(){
 	enum { a, b, x, y, z, n };
 	Complex complex(n);
 	build_complete(n,complex);
-	complex.remove_edge(Vertex_handle(b),Vertex_handle(x));
+	complex.remove_edge(static_cast<Vertex_handle>(b),static_cast<Vertex_handle>(x));
 	Simplex_handle blocker;
-	blocker.add_vertex(Vertex_handle(a));
-	blocker.add_vertex(Vertex_handle(y));
-	blocker.add_vertex(Vertex_handle(z));
+	blocker.add_vertex(static_cast<Vertex_handle>(a));
+	blocker.add_vertex(static_cast<Vertex_handle>(y));
+	blocker.add_vertex(static_cast<Vertex_handle>(z));
 
 	complex.add_blocker(blocker);
 
 	// Print result
 	cerr << "complex complex"<< complex.to_string();
 	cerr <<endl<<endl;
-	complex.contract_edge(Vertex_handle(a),Vertex_handle(b));
+	complex.contract_edge(static_cast<Vertex_handle>(a),static_cast<Vertex_handle>(b));
 
 	cerr << "complex.ContractEdge(a,b)"<< complex.to_string();
 
@@ -126,7 +128,8 @@ bool test_contraction2(){
 
 	// there should be one blocker (a,c,d,e) in the complex
 	bool test ;
-	test = complex.contains_blocker(Simplex_handle(a,x,y,z));
+	test = complex.contains_blocker(Simplex_handle(static_cast<Vertex_handle>(a), static_cast<Vertex_handle>(x),
+	                                               static_cast<Vertex_handle>(y),static_cast<Vertex_handle>(z)));
 	test = test && complex.num_blockers()==1;
 	return test;
 }
@@ -136,7 +139,7 @@ bool test_link_condition1(){
 	Complex complex(0);
 	// Build the complexes
 	build_complete(4,complex);
-	complex.add_blocker(Simplex_handle(Vertex_handle(0),Vertex_handle(1),Vertex_handle(2)));
+	complex.add_blocker(Simplex_handle(static_cast<Vertex_handle>(0), static_cast<Vertex_handle>(1), static_cast<Vertex_handle>(2)));
 
 
 	// Print result
@@ -155,13 +158,13 @@ bool test_collapse0(){
 	Complex complex(5);
 	build_complete(4,complex);
 	complex.add_vertex();
-	complex.add_edge(2,4);
-	complex.add_edge(3,4);
+	complex.add_edge(static_cast<Vertex_handle>(2), static_cast<Vertex_handle>(4));
+	complex.add_edge(static_cast<Vertex_handle>(3), static_cast<Vertex_handle>(4));
 	// Print result
 	cerr << "initial complex :\n"<< complex.to_string();
 	cerr <<endl<<endl;
 
-	Simplex_handle simplex_123(Vertex_handle(1),Vertex_handle(2),Vertex_handle(3));
+	Simplex_handle simplex_123(static_cast<Vertex_handle>(1), static_cast<Vertex_handle>(2), static_cast<Vertex_handle>(3));
 	complex.remove_star(simplex_123);
 	cerr << "complex.remove_star(1,2,3):\n"<< complex.to_string();
 	cerr <<endl<<endl;
@@ -228,7 +231,7 @@ bool test_collapse3(){
 	cerr << "initial complex:\n"<< complex.to_string();
 	cerr <<endl<<endl;
 
-	complex.remove_star(Vertex_handle(2));
+	complex.remove_star(static_cast<Vertex_handle>(2));
 	cerr << "complex after remove star of 2:\n"<< complex.to_string();
 
 	bool blocker134_here = complex.contains_blocker(Simplex_handle(Vertex_handle(1),Vertex_handle(3),Vertex_handle(4)));

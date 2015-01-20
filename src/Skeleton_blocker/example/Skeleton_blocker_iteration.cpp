@@ -21,6 +21,7 @@
   */
 
 #include <boost/timer/timer.hpp>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -29,8 +30,6 @@
 
 
 #include "gudhi/Skeleton_blocker.h"
-//#include "gudhi/Skeleton_blocker_complex.h"
-//#include "gudhi/Skeleton_blocker/Skeleton_blocker_simple_traits.h"
 
 using namespace std;
 using namespace Gudhi;
