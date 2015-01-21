@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 project(GUDHIExPersCohom)
 
 # problem with Visual Studio link on Boost program_options
-if (!MSVC)
+if (NOT MSVC)
    add_executable(rips_persistence rips_persistence.cpp)
    target_link_libraries(rips_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
    
@@ -30,8 +30,8 @@ if (!MSVC)
          add_definitions(-DDEBUG_TRACES)
          add_executable(alpha_shapes_persistence alpha_shapes_persistence.cpp)
          target_link_libraries(alpha_shapes_persistence ${Boost_SYSTEM_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES} ${CGAL_LIBRARY})
-         add_test(alpha_shapes_persistence_2_0_5 ${CMAKE_CURRENT_BINARY_DIR}/persistence_from_file ${CMAKE_SOURCE_DIR}/data/points/bunny_5000 2 0.5)
-         #add_test(alpha_shapes_persistence_3_3_100 ${CMAKE_CURRENT_BINARY_DIR}/persistence_from_file ${CMAKE_SOURCE_DIR}/data/points/bunny_5000.st -p 3 -m 100)
+         add_test(alpha_shapes_persistence_2_0_5 ${CMAKE_CURRENT_BINARY_DIR}/alpha_shapes_persistence ${CMAKE_SOURCE_DIR}/data/points/bunny_5000 2 0.5)
+         #add_test(alpha_shapes_persistence_3_3_100 ${CMAKE_CURRENT_BINARY_DIR}/alpha_shapes_persistence ${CMAKE_SOURCE_DIR}/data/points/bunny_5000.st -p 3 -m 100)
       endif()
    
    endif()
