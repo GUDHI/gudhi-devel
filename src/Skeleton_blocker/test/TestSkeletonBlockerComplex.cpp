@@ -26,13 +26,10 @@
 #include <sstream>
 #include "gudhi/Utils.h"
 #include "gudhi/Test.h"
-//#include "Skeleton_blocker/Simplex.h"
 #include "gudhi/Skeleton_blocker_complex.h"
 #include "gudhi/Skeleton_blocker_link_complex.h"
 #include "gudhi/Skeleton_blocker/Skeleton_blocker_link_superior.h"
 #include "gudhi/Skeleton_blocker/Skeleton_blocker_simple_traits.h"
-//#include "Simple_vertex.h"
-//#include "Simple_edge.h"
 
 using namespace std;
 

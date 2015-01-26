@@ -79,29 +79,8 @@ public:
 	typedef typename Profile::Complex Complex;
 	typedef typename Complex::Vertex_handle Vertex_handle;
 
-	//todo explore only neighborhood with stack
 	void on_contracted(const Profile  &profile, boost::optional< Point > placement) override{
-		std::list<Vertex_handle> vertex_to_check;
-		vertex_to_check.push_front(profile.v0_handle());
-
-		while(!vertex_to_check.empty()){
-			Vertex_handle v = vertex_to_check.front();
-			vertex_to_check.pop_front();
-
-			bool blocker_popable_found=true;
-			while (blocker_popable_found){
-				blocker_popable_found = false;
-				for(auto block : profile.complex().blocker_range(v)){
-					if (profile.complex().is_popable_blocker(block)) {
-						for(Vertex_handle nv : *block)
-							if(nv!=v) vertex_to_check.push_back(nv);
-						profile.complex().delete_blocker(block);
-						blocker_popable_found = true;
-						break;
-					}
-				}
-			}
-		}
+		profile.complex().remove_all_popable_blockers(profile.v0_handle());
 	}
 };
 
@@ -306,9 +285,7 @@ private:
 	boost::optional<Edge_handle> pop_from_PQ()	{
 		boost::optional<Edge_handle> edge = heap_PQ_->extract_top();
 		if ( edge )
-		{
 			get_data(*edge).reset_PQ_handle();
-		}
 		return edge ;
 	}
 
@@ -339,7 +316,6 @@ private:
 
 		//xxx do a parralel for
 		for(auto edge : complex_.edge_range()){
-			//			Edge_handle edge = *edge_it;
 			complex_[edge].index() = id++;
 			Profile const& profile = create_profile(edge);
 			Edge_data& data = get_data(edge);
