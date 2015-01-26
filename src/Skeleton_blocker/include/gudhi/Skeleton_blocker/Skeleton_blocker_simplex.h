@@ -141,7 +141,7 @@ class Skeleton_blocker_simplex {
    */
   void intersection(const Skeleton_blocker_simplex & a) {
     std::vector<T> v;
-    v.reserve(std::min(simplex_set.size(), a.simplex_set.size()));
+    v.reserve((std::min)(simplex_set.size(), a.simplex_set.size()));
 
     set_intersection(simplex_set.begin(), simplex_set.end(),
                      a.simplex_set.begin(), a.simplex_set.end(),
