@@ -1,0 +1,22 @@
+-- general 
+
+o bug avec kreanrest neighbors lorsqu on baisse k après contraction après collapse vertices
+
+o clarify visitor sk_bl
+
+
+
+-- ui
+
+x points dimension arbitraire
+x contractions
+
+
+x faire le lien MainWindow - Model
+
+
+
+
+-- bug
+x bug ordre contraction -> just that first vertex placement dont work great
+x pb construction rips

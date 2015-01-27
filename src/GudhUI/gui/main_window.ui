@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>861</width>
+    <height>880</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>GudhUI</string>
+  </property>
+  <property name="tabShape">
+   <enum>QTabWidget::Rounded</enum>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="Viewer" name="viewer" native="true">
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>861</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionLoad_points"/>
+    <addaction name="actionLoad_complex"/>
+    <addaction name="actionSave_points"/>
+    <addaction name="actionSave_complex"/>
+   </widget>
+   <widget class="QMenu" name="menuPoints">
+    <property name="title">
+     <string>Points</string>
+    </property>
+    <addaction name="actionNoise"/>
+   </widget>
+   <widget class="QMenu" name="menuGraph">
+    <property name="title">
+     <string>Graph</string>
+    </property>
+    <addaction name="actionK_nearest_neighbors_graph"/>
+    <addaction name="actionUniform_proximity_graph"/>
+    <addaction name="actionShow_graph_stats"/>
+   </widget>
+   <widget class="QMenu" name="menuComplex">
+    <property name="title">
+     <string>Complex</string>
+    </property>
+    <addaction name="actionContract_edges"/>
+    <addaction name="actionCollapse_vertices"/>
+    <addaction name="actionCollapse_edges"/>
+    <addaction name="actionShow_complex_stats"/>
+    <addaction name="actionShow_complex_dimension"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionPoints"/>
+    <addaction name="actionEdges"/>
+    <addaction name="actionTriangles"/>
+    <addaction name="actionChange_projection"/>
+   </widget>
+   <widget class="QMenu" name="menuTopology">
+    <property name="title">
+     <string>Topology</string>
+    </property>
+    <addaction name="actionEuler_characteristic"/>
+    <addaction name="actionShow_homology_group"/>
+    <addaction name="actionPersistence"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuPoints"/>
+   <addaction name="menuGraph"/>
+   <addaction name="menuComplex"/>
+   <addaction name="menuTopology"/>
+   <addaction name="menuView"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionLoad_points">
+   <property name="text">
+    <string>Load points</string>
+   </property>
+  </action>
+  <action name="actionLoad_complex">
+   <property name="text">
+    <string>Load complex</string>
+   </property>
+  </action>
+  <action name="actionSave_points">
+   <property name="text">
+    <string>Save points</string>
+   </property>
+  </action>
+  <action name="actionSave_complex">
+   <property name="text">
+    <string>Save complex</string>
+   </property>
+  </action>
+  <action name="actionNoise">
+   <property name="text">
+    <string>Noise</string>
+   </property>
+  </action>
+  <action name="actionLloyd">
+   <property name="text">
+    <string>Lloyd</string>
+   </property>
+  </action>
+  <action name="actionUniform_proximity_graph">
+   <property name="text">
+    <string>Uniform proximity graph</string>
+   </property>
+  </action>
+  <action name="actionK_nearest_neighbors_graph">
+   <property name="text">
+    <string>k-nearest neighbors graph</string>
+   </property>
+  </action>
+  <action name="actionShow_graph_stats">
+   <property name="text">
+    <string>Show graph stats</string>
+   </property>
+  </action>
+  <action name="actionBuild_complex_from_graph">
+   <property name="text">
+    <string>Graph expansion</string>
+   </property>
+  </action>
+  <action name="actionBuild_Delaunay_from_points">
+   <property name="text">
+    <string>Delaunay from points</string>
+   </property>
+  </action>
+  <action name="actionContract_edges">
+   <property name="text">
+    <string>Contract edges</string>
+   </property>
+  </action>
+  <action name="actionCollapse_vertices">
+   <property name="text">
+    <string>Collapse vertices</string>
+   </property>
+  </action>
+  <action name="actionCollapse_edges">
+   <property name="text">
+    <string>Collapse edges</string>
+   </property>
+  </action>
+  <action name="actionPoints">
+   <property name="text">
+    <string>Points</string>
+   </property>
+  </action>
+  <action name="actionEdges">
+   <property name="text">
+    <string>Edges</string>
+   </property>
+  </action>
+  <action name="actionTriangles">
+   <property name="text">
+    <string>Triangles</string>
+   </property>
+  </action>
+  <action name="actionChange_projection">
+   <property name="text">
+    <string>Change projection</string>
+   </property>
+  </action>
+  <action name="actionShow_complex_stats">
+   <property name="text">
+    <string>Show complex stats</string>
+   </property>
+  </action>
+  <action name="actionShow_complex_dimension">
+   <property name="text">
+    <string>Show complex dimension</string>
+   </property>
+  </action>
+  <action name="actionShow_homology_group">
+   <property name="text">
+    <string>Homology groups</string>
+   </property>
+  </action>
+  <action name="actionPersistence">
+   <property name="text">
+    <string>Point cloud persistence</string>
+   </property>
+  </action>
+  <action name="actionEuler_characteristic">
+   <property name="text">
+    <string>Euler characteristic</string>
+   </property>
+  </action>
+  <action name="actionHomology_groups">
+   <property name="text">
+    <string>Homology groups</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Viewer</class>
+   <extends>QWidget</extends>
+   <header>view/Viewer.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
