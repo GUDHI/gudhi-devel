@@ -18,6 +18,15 @@ output:
 2  1 0.0702103 inf
 2  2 0.159992 inf
 
+
+Every line is of this format: p1*...*pr   dim b d
+where
+ 	p1*...*pr is the product of prime numbers pi such that the homology feature exists in homology with Z/piZ coefficients. 
+	dim is the dimension of the homological feature,
+    b and d are respectively the birth and death of the feature and
+   
+
+
 with Z/3Z coefficients:
 
 ./rips_persistence ../../../data/points/Kl.txt -r 0.25 -d 3 -p 3 -m 100
