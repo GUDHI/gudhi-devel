@@ -37,6 +37,23 @@ private:
 		}
 	};
 
+
+	/**
+	* @brief return a cost corresponding to the squared length of the edge
+	*/
+	template< typename EdgeProfile> class Middle_placement : public contraction::Placement_policy<EdgeProfile>{
+	public:
+		typedef typename contraction::Placement_policy<EdgeProfile>::Placement_type Placement_type;
+		typedef typename EdgeProfile::Point Point;
+		Placement_type operator()(const EdgeProfile& profile) const override{
+			std::vector<double> mid_coords(profile.p0().dimension(),0);
+			for (size_t i = 0; i < profile.p0().dimension(); ++i){
+				mid_coords[i] = (profile.p0()[i] + profile.p1()[i]) / 2.;
+			}
+			return Point(profile.p0().dimension(),mid_coords.begin(), mid_coords.end());			
+		}
+	};
+
 	public:
 	typedef typename SkBlComplex::Vertex_handle Vertex_handle;
 	typedef typename SkBlComplex::Edge_handle Edge_handle;
@@ -53,7 +70,7 @@ private:
 		contraction::Skeleton_blocker_contractor<Complex> contractor(
 				complex_,
 				new Length_cost<contraction::Edge_profile<Complex>>(),
-				contraction::make_first_vertex_placement<Profile>(),
+				new Middle_placement<contraction::Edge_profile<Complex>>(),
 				contraction::make_link_valid_contraction<Profile>(),
 				contraction::make_remove_popable_blockers_visitor<Profile>()
 		);

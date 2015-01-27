@@ -234,9 +234,13 @@ public:
 
 
 	void show_homology_group(){
+#ifndef _WIN32 
+		std::cout << "Works only on linux for the moment\n";
+#else
 		Clock clock;
 		run_chomp();
 		clock.end();
+#endif
 	}
 
 	void show_euler_characteristic(){
@@ -263,6 +267,7 @@ public:
 private:
 	void run_chomp(){
 		save_complex_in_file_for_chomp();
+		std::cout << "Call CHOMP library\n";
 		system("../src/utils/homsimpl chomp.sim");
 	}
 
