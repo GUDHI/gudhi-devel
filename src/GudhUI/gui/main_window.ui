@@ -89,6 +89,7 @@
     <addaction name="actionEuler_characteristic"/>
     <addaction name="actionShow_homology_group"/>
     <addaction name="actionPersistence"/>
+    <addaction name="actionEstimate_topological_changes"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuPoints"/>
@@ -209,13 +210,30 @@
    </property>
   </action>
   <action name="actionEuler_characteristic">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Euler characteristic</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
    </property>
   </action>
   <action name="actionHomology_groups">
    <property name="text">
     <string>Homology groups</string>
+   </property>
+  </action>
+  <action name="actionEstimate_topological_changes">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Rips critical points approximation</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
  </widget>

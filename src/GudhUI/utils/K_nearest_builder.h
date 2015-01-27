@@ -27,7 +27,7 @@ private:
 
 	typedef Geometry_trait Kernel;
 	typedef Point Point_d;
-	typedef boost::tuple<Point_d, int> Point_d_with_id;
+	typedef boost::tuple<Point_d, unsigned> Point_d_with_id;
 	typedef CGAL::Search_traits_d<Kernel> Traits_base;
 	typedef CGAL::Search_traits_adapter<Point_d_with_id, CGAL::Nth_of_tuple_property_map<0, Point_d_with_id>, Traits_base> Traits;
 	typedef CGAL::Orthogonal_k_neighbor_search<Traits> Neighbor_search;
@@ -64,10 +64,11 @@ private:
 
 		Tree tree(points_with_id.begin(),points_with_id.end());
 
+		typedef typename SkBlComplex::Vertex_handle Vertex_handle;
 		for (auto p : complex_.vertex_range()){
 			Neighbor_search search(tree, complex_.point(p),k+1);
 			for(auto it = ++search.begin(); it != search.end(); ++it){
-				auto q = boost::get<1>(it->first);
+				Vertex_handle q(boost::get<1>(it->first));
 				if (p != q && complex_.contains_vertex(p) && complex_.contains_vertex(q))
 					complex_.add_edge(p,q);
 			}

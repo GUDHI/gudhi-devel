@@ -89,6 +89,8 @@ public:
 		pcoh.init_coefficients( params.p ); //initilizes the coefficient field for homology
 		pcoh.compute_persistent_cohomology( INFINITY ); //put params.min_persistence
 		stream_<<"persistence: \n";
+		stream_<<"p dimension birth death: \n";
+
 		pcoh.output_diagram(stream_);
 	}
 

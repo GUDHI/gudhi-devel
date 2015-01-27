@@ -83,7 +83,7 @@ public:
 	void show_euler_characteristic();
 	void persistence_menu();
 	void compute_persistence(int p,double threshold,int max_dim,double min_pers);
-
+	void critical_points_menu();
 
 
 public:

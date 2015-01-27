@@ -19,6 +19,7 @@
 #include "utils/Edge_collapsor.h"
 #include "utils/Edge_contractor.h"
 #include "utils/Persistence_compute.h"
+#include "utils/Critical_points.h"
 
 #include "gudhi/Skeleton_blocker/Skeleton_blocker_simple_geometric_traits.h"
 #include "gudhi/Skeleton_blocker_geometric_complex.h"
@@ -234,8 +235,8 @@ public:
 
 
 	void show_homology_group(){
-#ifndef _WIN32 
-		std::cout << "Works only on linux for the moment\n";
+#ifdef _WIN32
+		std::cout << "Works only on linux x64 for the moment\n";
 #else
 		Clock clock;
 		run_chomp();
@@ -261,6 +262,10 @@ public:
 
 	void show_persistence(	int p,double threshold,int max_dim,double min_pers){
 		Persistence_compute<Complex> persistence(complex_,std::cout,Persistence_params(p,threshold,max_dim,min_pers));
+	}
+
+	void show_critical_points(double max_distance){
+		Critical_points<Complex> critical_points(complex_,std::cout,max_distance);
 	}
 
 

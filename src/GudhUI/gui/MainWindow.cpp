@@ -96,8 +96,8 @@ MainWindow::connectActions(){
 				SLOT(show_euler_characteristic()));
 	QObject::connect(this->actionPersistence, SIGNAL(triggered()), this,
 				SLOT(persistence_menu()));
-
-
+	QObject::connect(this->actionEstimate_topological_changes, SIGNAL(triggered()), this,
+				SLOT(critical_points_menu()));
 
 	QObject::connect(this, SIGNAL(sceneChanged()), this->viewer_instructor_,
 			SLOT(sceneChanged()));
@@ -278,6 +278,14 @@ MainWindow::compute_persistence(int p,double threshold,int max_dim,double min_pe
 	model_.show_persistence(p,threshold,max_dim,min_pers);
 }
 
+void
+MainWindow::critical_points_menu(){
+	bool ok;
+	double max_length = QInputDialog::getDouble(this, tr("Maximal edge length for the Rips"),
+			tr("Maximal edge length:"), 0, 0, 10000, 3, &ok);
+	if (ok)
+		model_.show_critical_points(max_length);
+}
 
 
 #include "MainWindow.moc"
