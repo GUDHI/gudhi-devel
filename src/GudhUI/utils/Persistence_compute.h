@@ -33,7 +33,6 @@
 #include "gudhi/Simplex_tree.h"
 #include "gudhi/distance_functions.h"
 #include "gudhi/Persistent_cohomology.h"
-#include "gudhi/Persistent_cohomology/Multi_field.h"
 
 
 struct Persistence_params{
@@ -63,7 +62,7 @@ public:
 	 * parameters :
 	 * unsigned dim_max
 	 * double threshold
-	 * int p for Z_p
+	 * int p for coefficient Z_p
 	 */
 	Persistence_compute(SkBlComplex& complex,std::ostream& stream,const Persistence_params& params):
 //

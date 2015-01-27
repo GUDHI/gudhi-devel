@@ -19,9 +19,9 @@ menu_uniform_neighbors_(new Menu_uniform_neighbors(this)),
 menu_edge_contraction_(new Menu_edge_contraction(this,model_)),
 menu_persistence_(new Menu_persistence(this))
 {
-#ifndef NDEBUG // catch nan
-feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
-#endif
+//#ifndef NDEBUG // catch nan
+//feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
+//#endif
 
 	setupUi(this);
 

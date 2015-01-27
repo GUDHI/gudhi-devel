@@ -3,11 +3,15 @@ project(GudhUI)
 
 #Specify Gudhi's path here
 #for instance
-SET(Gudhi_Path "/home/dsalinas/Documents/CodeSVN/gudhi/src/include")
+set(Gudhi_Path "C:/Users/dsalinas/Documents/Recherche/Code/c++/Gudhi_library_1.1.0/include")
+#set(Gudhi_Path "/home/dsalinas/Documents/CodeSVN/gudhi/src/include")
+if(MSVC)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4267 /wd4668 /wd4311 /wd4800 /wd4820 /wd4503 /wd4244 /wd4345 /wd4996 /wd4396 /wd4018 -frounding-math")
+else()
+	list(APPEND CMAKE_CXX_FLAGS "-std=c++11 -Wall -pedantic -frounding-math")
+endif() 
 
 set(EXECUTABLE_OUTPUT_PATH bin/${CMAKE_BUILD_TYPE})
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -frounding-math -Wall -pedantic")
 
 find_package(Boost REQUIRED COMPONENTS)
 find_package(CGAL  COMPONENTS Qt4)
@@ -15,7 +19,7 @@ find_package(Qt4)
 find_package(OpenGL)
 find_package(QGLViewer)
 
-if ( CGAL_FOUND AND CGAL_Qt4_FOUND AND QT4_FOUND AND OPENGL_FOUND AND QGLVIEWER_FOUND )
+if ( CGAL_FOUND AND QT4_FOUND AND OPENGL_FOUND AND QGLVIEWER_FOUND )
 
 	set( QT_USE_QTXML    TRUE )
 	set( QT_USE_QTMAIN   TRUE )

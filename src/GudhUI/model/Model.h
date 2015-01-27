@@ -68,8 +68,8 @@ class Model{
 
 public:
 	Complex complex_;
-	typedef typename Complex::Vertex_handle Vertex_handle;
-	typedef typename Complex::CVI CVI;
+	typedef Complex::Vertex_handle Vertex_handle;
+	typedef Complex::CVI CVI;
 
 
 	Model():complex_(){
@@ -176,16 +176,16 @@ public:
 
 private:
 	int min_degree() const{
-		int res = std::numeric_limits<int>::max();
+		int res = (std::numeric_limits<int>::max)();
 		for(auto v : complex_.vertex_range())
-			res= std::min(res,complex_.degree(v));
+			res= (std::min)(res,complex_.degree(v));
 		return res;
 	}
 
 	int max_degree() const{
 		int res = 0;
 		for(auto v : complex_.vertex_range())
-			res= std::max(res,complex_.degree(v));
+			res= (std::max)(res,complex_.degree(v));
 		return res;
 	}
 
@@ -216,7 +216,7 @@ public:
 		Clock clock;
 		for(const auto &s : complex_.simplex_range()){
 			num_simplices++;
-			dimension = std::max(s.dimension(),dimension);
+			dimension = (std::max)(s.dimension(),dimension);
 			if(s.dimension()%2==0)
 				euler+=1;
 			else
@@ -245,7 +245,7 @@ public:
 		int dimension = 0;
 		for(const auto &s : complex_.simplex_range()){
 			num_simplices++;
-			dimension = std::max(s.dimension(),dimension);
+			dimension = (std::max)(s.dimension(),dimension);
 			if(s.dimension()%2==0)
 				euler+=1;
 			else
