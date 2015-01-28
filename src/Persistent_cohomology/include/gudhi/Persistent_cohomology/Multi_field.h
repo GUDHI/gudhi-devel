@@ -52,7 +52,7 @@ class Multi_field {
 
   /* Initialize the multi-field. The generation of prime numbers might fail with
    * a very small probability.*/
-  void init(uint16_t min_prime, uint16_t max_prime) {
+  void init(int min_prime, int max_prime) {
     if (max_prime < 2) {
       std::cerr << "There is no prime less than " << max_prime << std::endl;
     }
@@ -61,7 +61,7 @@ class Multi_field {
           << std::endl;
     }
     // fill the list of prime numbers
-    uint16_t curr_prime = min_prime;
+    int curr_prime = min_prime;
     mpz_t tmp_prime;
     mpz_init_set_ui(tmp_prime, min_prime);
     // test if min_prime is prime
@@ -88,7 +88,7 @@ class Multi_field {
     Element Ui;
     Element tmp_elem;
     for (auto p : primes_) {
-      assert(p != 0);  // division by zero
+      assert(p > 0);  // division by zero + non negative values
       tmp_elem = prod_characteristics_ / p;
       // Element tmp_elem_bis = 10;
       mpz_powm_ui(tmp_elem.get_mpz_t(), tmp_elem.get_mpz_t(), p - 1,
@@ -97,7 +97,7 @@ class Multi_field {
     }
     mult_id_all = 0;
     for (auto uvect : Uvect_) {
-      assert(prod_characteristics_ != 0);  // division by zero
+      assert(prod_characteristics_ > 0);  // division by zero + non negative values
       mult_id_all = (mult_id_all + uvect) % prod_characteristics_;
     }
   }
@@ -120,10 +120,10 @@ class Multi_field {
       return multiplicative_identity();
     }
 
-    assert(prod_characteristics_ != 0);  // division by zero
+    assert(prod_characteristics_ > 0);  // division by zero + non negative values
     Element mult_id = 0;
     for (unsigned int idx = 0; idx < primes_.size(); ++idx) {
-      assert(primes_[idx] != 0);  // division by zero
+      assert(primes_[idx] > 0);  // division by zero + non negative values
       if ((Q % primes_[idx]) == 0) {
         mult_id = (mult_id + Uvect_[idx]) % prod_characteristics_;
       }
@@ -155,19 +155,19 @@ class Multi_field {
     Element inv_qt;
     mpz_invert(inv_qt.get_mpz_t(), x.get_mpz_t(), QT.get_mpz_t());
 
-    assert(prod_characteristics_ != 0);  // division by zero
+    assert(prod_characteristics_ > 0);  // division by zero + non negative values
     return std::pair<Element, Element>(
         (inv_qt * multiplicative_identity(QT)) % prod_characteristics_, QT);
   }
   /** Returns -x * y.*/
   Element times_minus(const Element& x, const Element& y) {
-    assert(prod_characteristics_ != 0);  // division by zero
+    assert(prod_characteristics_ > 0);  // division by zero + non negative values
     return prod_characteristics_ - ((x * y) % prod_characteristics_);
   }
 
   /** Set x <- x + w * y*/
   Element plus_times_equal(const Element& x, const Element& y, const Element& w) {
-    assert(prod_characteristics_ != 0);  // division by zero
+    assert(prod_characteristics_ > 0);  // division by zero + non negative values
     Element result = (x + w * y) % prod_characteristics_;
     if (result < 0)
       result += prod_characteristics_;
@@ -176,7 +176,7 @@ class Multi_field {
 
   Element prod_characteristics_;  // product of characteristics of the fields
                                   // represented by the multi-field class
-  std::vector<uint16_t> primes_;       // all the characteristics of the fields
+  std::vector<int> primes_;       // all the characteristics of the fields
   std::vector<Element> Uvect_;
   Element mult_id_all;
   const Element add_id_all;

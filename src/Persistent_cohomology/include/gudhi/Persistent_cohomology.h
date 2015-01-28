@@ -299,11 +299,11 @@ class Persistent_cohomology {
 
  public:
   /** \brief Initializes the coefficient field.*/
-  void init_coefficients(uint16_t charac) {
+  void init_coefficients(int charac) {
     coeff_field_.init(charac);
   }
   /** \brief Initializes the coefficient field for multi-field persistent homology.*/
-  void init_coefficients(uint16_t charac_min, uint16_t charac_max) {
+  void init_coefficients(int charac_min, int charac_max) {
     coeff_field_.init(charac_min, charac_max);
   }
 
