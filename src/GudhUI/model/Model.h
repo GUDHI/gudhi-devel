@@ -20,6 +20,7 @@
 #include "utils/Edge_contractor.h"
 #include "utils/Persistence_compute.h"
 #include "utils/Critical_points.h"
+#include "utils/Is_manifold.h"
 
 #include "gudhi/Skeleton_blocker/Skeleton_blocker_simple_geometric_traits.h"
 #include "gudhi/Skeleton_blocker_geometric_complex.h"
@@ -56,8 +57,9 @@ public:
 
 	void maximal_face(std::vector<int> vertices){
 		if (!load_only_points_){
-			for (int i = 0; i<vertices.size()-1 ; ++i)
-				for (int j = i+1; j<vertices.size()-1 ; ++j)
+			std::cout<<"size:"<<vertices.size()<<std::endl;
+			for (int i = 0; i<vertices.size() ; ++i)
+				for (int j = i+1; j<vertices.size() ; ++j)
 					complex_.add_edge(Vertex_handle(vertices[i]),Vertex_handle(vertices[j]));
 		}
 	}
@@ -80,23 +82,54 @@ public:
 	void off_file_open(const std::string& name_file){
 		UIDBGMSG("load off file",name_file);
 		complex_.clear();
-		CGAL_geometric_flag_complex_wrapper<Complex> read_wraper(complex_);
+		CGAL_geometric_flag_complex_wrapper<Complex> read_wraper(complex_,false);
 		Gudhi::read_off(name_file,read_wraper);
 	}
 
 	void off_points_open(const std::string& name_file){
 		UIDBGMSG("load off points",name_file);
 		complex_.clear();
-		CGAL_geometric_flag_complex_wrapper<Complex> read_wraper(complex_);
+		CGAL_geometric_flag_complex_wrapper<Complex> read_wraper(complex_,true);
 		Gudhi::read_off(name_file,read_wraper);
 	}
 
 	void off_file_save(const std::string& name_file){
 		UIDBG("save off file");
+		UIDBG("save off off_points_save");
+		std::ofstream file(name_file);
+		if(file.is_open()){
+			file<<"OFF\n";
+			file<<complex_.num_vertices()<<" "<<complex_.num_edges()<<" 0\n";
+			for(auto v : complex_.vertex_range()){
+				const auto& pt(complex_.point(v));
+				for(auto it = pt.cartesian_begin();it!=pt.cartesian_end();++it)
+					file<<*it<<" ";
+				file<<std::endl;
+			}
+			for(auto e : complex_.edge_range())
+				file<<"2 "<<complex_.first_vertex(e)<<" "<<complex_.second_vertex(e)<<"\n";
+			file.close();
+		}
+		else std::cerr << "Could not open file "<<name_file<<std::endl;
+
 	}
 
 	void off_points_save(const std::string& name_file){
 		UIDBG("save off off_points_save");
+		std::ofstream file(name_file);
+		if(file.is_open()){
+			file<<"OFF\n";
+			file<<complex_.num_vertices()<<" 0 0\n";
+			for(auto v : complex_.vertex_range()){
+				const auto& pt(complex_.point(v));
+				for(auto it = pt.cartesian_begin();it!=pt.cartesian_end();++it)
+					file<<*it<<" ";
+				file<<std::endl;
+			}
+			file.close();
+		}
+		else std::cerr << "Could not open file "<<name_file<<std::endl;
+
 	}
 
 	// point sets operations
@@ -160,7 +193,7 @@ public:
 	}
 
 	void collapse_edges(unsigned num_collapses){
-		Edge_collapsor<Complex> collapsor(complex_,complex_.num_edges());
+		Edge_collapsor<Complex> collapsor(complex_,num_collapses);
 	}
 
 
@@ -268,6 +301,17 @@ public:
 		Critical_points<Complex> critical_points(complex_,std::cout,max_distance);
 	}
 
+	void show_is_manifold(){
+		unsigned dim;
+		bool is_manifold;
+		Is_manifold<Complex> test_manifold(complex_,dim,is_manifold);
+
+		if(is_manifold) std::cout << "The complex is a "<<dim<<"-manifold\n";
+		else
+			if(dim<4) std::cout << "The complex has dimension greater than "<<dim<<" and is not a manifold\n";
+			else std::cout << "The complex has dimension>=4 and may or may not be a manifold\n";
+	}
+
 
 private:
 	void run_chomp(){
@@ -296,6 +340,11 @@ public:
 	unsigned num_vertices() const{
 		return  complex_.num_vertices();
 	}
+
+	unsigned num_edges() const{
+		return  complex_.num_edges();
+	}
+
 };
 
 #endif /* MODEL_H_ */

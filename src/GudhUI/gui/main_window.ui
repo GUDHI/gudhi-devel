@@ -90,6 +90,7 @@
     <addaction name="actionShow_homology_group"/>
     <addaction name="actionPersistence"/>
     <addaction name="actionEstimate_topological_changes"/>
+    <addaction name="actionIs_manifold"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuPoints"/>
@@ -234,6 +235,11 @@
    </property>
    <property name="visible">
     <bool>false</bool>
+   </property>
+  </action>
+  <action name="actionIs_manifold">
+   <property name="text">
+    <string>Is manifold</string>
    </property>
   </action>
  </widget>

@@ -84,6 +84,7 @@ public:
 	void persistence_menu();
 	void compute_persistence(int p,double threshold,int max_dim,double min_pers);
 	void critical_points_menu();
+	void is_manifold_menu();
 
 
 public:

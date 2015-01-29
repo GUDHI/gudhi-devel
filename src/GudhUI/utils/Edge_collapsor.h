@@ -10,6 +10,7 @@
 
 #include <list>
 #include "utils/Edge_contractor.h"
+#include "utils/UI_utils.h"
 
 /**
  * Iteratively puts every vertex at the center of its neighbors
@@ -23,8 +24,9 @@ public:
 	typedef typename SkBlComplex::Edge_handle Edge_handle;
 
 	/**
-	 * @brief Modify complex to be the expansion of the k-nearest neighbor
-	 * symetric graph.
+	 * @brief Collapse num_collapses edges. If num_collapses<0 then it collapses all possible edges.
+	 * Largest edges are collapsed first.
+	 *
 	 */
 	Edge_collapsor(SkBlComplex& complex,unsigned num_collapses):
 		complex_(complex),num_collapses_(num_collapses)
@@ -42,7 +44,6 @@ public:
 	}
 
 private:
-
 
 	void collapse_edges(std::list<Edge_handle>& edges){
 		while(!edges.empty() && num_collapses_--){
@@ -63,7 +64,7 @@ private:
 
 		if(link.num_connected_components()>1) return false;
 
-		Edge_contractor<Complex> contractor(link,link.num_vertices()-1);
+		Edge_contractor<SkBlComplex> contractor(link,link.num_vertices()-1);
 
 		return (link.num_vertices()==1);
 	}

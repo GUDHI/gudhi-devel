@@ -98,6 +98,9 @@ MainWindow::connectActions(){
 				SLOT(persistence_menu()));
 	QObject::connect(this->actionEstimate_topological_changes, SIGNAL(triggered()), this,
 				SLOT(critical_points_menu()));
+	QObject::connect(this->actionIs_manifold, SIGNAL(triggered()), this,
+				SLOT(is_manifold_menu()));
+
 
 	QObject::connect(this, SIGNAL(sceneChanged()), this->viewer_instructor_,
 			SLOT(sceneChanged()));
@@ -223,8 +226,7 @@ MainWindow::contract_edges(unsigned num_collapses){
 
 void
 MainWindow::collapse_edges(){
-	std::cerr <<"Collapse "<<100<< " edges\n";
-	model_.collapse_edges(100);
+	model_.collapse_edges(model_.num_edges());
 	update_view();
 }
 
@@ -285,6 +287,11 @@ MainWindow::critical_points_menu(){
 			tr("Maximal edge length:"), 0, 0, 10000, 3, &ok);
 	if (ok)
 		model_.show_critical_points(max_length);
+}
+
+void
+MainWindow::is_manifold_menu(){
+	model_.show_is_manifold();
 }
 
 
