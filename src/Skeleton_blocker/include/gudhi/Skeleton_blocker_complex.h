@@ -198,11 +198,14 @@ public:
 	  visitor(visitor_){
 		std::vector<std::pair<Vertex_handle,Vertex_handle>> edges;
 
-		//first pass add vertices and store edges
+		//first pass count vertices and store edges
+		int num_vertex = -1;
 		for(auto s_it = simplex_begin; s_it != simplex_end; ++s_it){
-			if(s_it->dimension()==0) add_vertex();
+			if(s_it->dimension()==0) num_vertex = (std::max)(num_vertex,s_it->first_vertex().vertex);
 			if(s_it->dimension()==1) edges.emplace_back(s_it->first_vertex(),s_it->last_vertex());
 		}
+		while(num_vertex-->=0) add_vertex();
+
 		for(const auto& e : edges)
 			add_edge(e.first,e.second);
 
@@ -1213,7 +1216,7 @@ public:
 	std::string vertices_to_string() const {
 		std::ostringstream stream;
 		for (auto vertex : vertex_range()) {
-			stream << "(" << (*this)[vertex].get_id() << "),";
+			stream << "{" << (*this)[vertex].get_id() << "} ";
 		}
 		stream << std::endl;
 		return stream.str();
@@ -1221,18 +1224,17 @@ public:
 
 	std::string edges_to_string() const {
 		std::ostringstream stream;
-		for (auto edge : edge_range()) {
-			stream << "(" << (*this)[edge].first() << "," << (*this)[edge].second() << ")" << " id = " << (*this)[edge].index() << std::endl;
-		}
+		for (auto edge : edge_range())
+			stream << "{" << (*this)[edge].first() << "," << (*this)[edge].second() << "} ";
 		stream << std::endl;
 		return stream.str();
 	}
 
 	std::string blockers_to_string() const {
 		std::ostringstream stream;
-		for (auto bl : blocker_map_) {
-			stream << bl.first << " => " << bl.second << ":" << *bl.second << std::endl;
-		}
+
+		for(auto b : const_blocker_range())
+			stream<<*b<<std::endl;
 		return stream.str();
 	}
 
@@ -1254,6 +1256,7 @@ unsigned make_complex_from_top_faces(Complex& complex,SimplexHandleIterator begi
 		auto subfaces_topface = subfaces(*top_face);
 		simplices.insert(simplices.end(),subfaces_topface.begin(),subfaces_topface.end());
 	}
+
 	complex = Complex(simplices.begin(),simplices.end());
 	return simplices.size();
 }

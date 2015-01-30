@@ -116,7 +116,7 @@ You may want to use this visitor to compute statistics or to update another data
 \section Example
 
  
-\subsection s Iterating through vertices, edges, blockers and simplices	
+\subsection Iterating Iterating through vertices, edges, blockers and simplices	
  
 Iteration through vertices, edges, simplices or blockers is straightforward with c++11 for range loops.
 Note that simplex iteration with this implicit data-structure just takes
@@ -177,8 +177,60 @@ The Euler Characteristic is 1
 \endverbatim
 
 
+\subsection s Constructing a skeleton-blockers from a list of maximal faces or from a list of faces
 
-\subsection Acknowledgements
+  \code{.cpp}
+	std::vector<Simplex_handle> simplices;
+
+	//add 4 triangles of a tetrahedron 0123
+	simplices.push_back(Simplex_handle(Vertex_handle(0),Vertex_handle(1),Vertex_handle(2)));
+	simplices.push_back(Simplex_handle(Vertex_handle(1),Vertex_handle(2),Vertex_handle(3)));
+	simplices.push_back(Simplex_handle(Vertex_handle(3),Vertex_handle(0),Vertex_handle(2)));
+	simplices.push_back(Simplex_handle(Vertex_handle(3),Vertex_handle(0),Vertex_handle(1)));
+
+	Complex complex;
+	//get complex from top faces
+	make_complex_from_top_faces(complex,simplices.begin(),simplices.end());
+
+	std::cout << "Simplices:"<<std::endl;
+	for(const Simplex & s : complex.simplex_range())
+		std::cout << s << " ";
+	std::cout << std::endl;
+
+	//One blocker as simplex 0123 is not in the complex but all its proper faces are.
+	std::cout << "Blockers: "<<complex.blockers_to_string()<<std::endl;
+
+	//now build a complex from its full list of simplices
+	simplices.clear();
+	simplices.push_back(Simplex_handle(Vertex_handle(0)));
+	simplices.push_back(Simplex_handle(Vertex_handle(1)));
+	simplices.push_back(Simplex_handle(Vertex_handle(2)));
+	simplices.push_back(Simplex_handle(Vertex_handle(0),Vertex_handle(1)));
+	simplices.push_back(Simplex_handle(Vertex_handle(1),Vertex_handle(2)));
+	simplices.push_back(Simplex_handle(Vertex_handle(2),Vertex_handle(0)));
+	complex = Complex(simplices.begin(),simplices.end());
+
+	std::cout << "Simplices:"<<std::endl;
+	for(const Simplex & s : complex.simplex_range())
+		std::cout << s << " ";
+	std::cout << std::endl;
+
+	//One blocker as simplex 012 is not in the complex but all its proper faces are.
+	std::cout << "Blockers: "<<complex.blockers_to_string()<<std::endl;
+ \endcode
+\verbatim
+./SkeletonBlockerFromSimplices
+Simplices:
+{0} {0,1} {0,2} {0,3} {0,1,2} {0,1,3} {0,2,3} {1} {1,2} {1,3} {1,2,3} {2} {2,3} {3} 
+Blockers: {0,1,2,3}
+
+Simplices:
+{0} {0,1} {0,2} {1} {1,2} {2} 
+Blockers: {0,1,2}
+\endverbatim
+
+
+\section Acknowledgements
 The author wishes to thank Dominique Attali and André Lieutier for 
 their collaboration to write the two initial papers 
 \cite socg_blockers_2011,\cite blockers2012
