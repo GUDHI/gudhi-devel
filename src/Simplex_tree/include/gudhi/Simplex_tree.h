@@ -234,7 +234,7 @@ class Simplex_tree {
    *
    * The filtration must be valid. If the filtration has not been initialized yet, the
    * method initializes it (i.e. order the simplices). */
-  Filtration_simplex_range filtration_simplex_range(linear_indexing_tag) {
+  Filtration_simplex_range filtration_simplex_range(Indexing_tag) {
     if (filtration_vect_.empty()) {
       initialize_filtration();
     }
@@ -449,7 +449,7 @@ class Simplex_tree {
    * The type RandomAccessVertexRange must be a range for which .begin() and
    * .end() return random access iterators, with 'value_type' Vertex_handle. */
   template<class RandomAccessVertexRange>
-  std::pair<Simplex_handle, bool> insert(RandomAccessVertexRange & simplex,
+  std::pair<Simplex_handle, bool> insert_simplex(RandomAccessVertexRange & simplex,
                                          Filtration_value filtration) {
     if (simplex.empty()) {
       return std::pair<Simplex_handle, bool>(null_simplex(), true);
@@ -477,6 +477,37 @@ class Simplex_tree {
     }
     // otherwise the insertion has succeeded
     return res_insert;
+  }
+
+
+  /** \brief Insert a N-simplex and all his subfaces, from a N-simplex represented by a range of
+   * Vertex_handles, in the simplicial complex.
+   *
+   * @param[in]  Nsimplex   range of Vertex_handles, representing the vertices of the new N-simplex
+   * @param[in]  filtration the filtration value assigned to the new N-simplex.
+  */
+  template<class RandomAccessVertexRange>
+  void insert_simplex_and_subfaces(RandomAccessVertexRange& Nsimplex,
+                                         Filtration_value filtration = 0.0) {
+    if (Nsimplex.size() > 1) {
+      for (unsigned int NIndex = 0; NIndex < Nsimplex.size(); NIndex++) {
+        // insert N (N-1)-Simplex
+        RandomAccessVertexRange NsimplexMinusOne;
+        for (unsigned int NListIter = 0; NListIter < Nsimplex.size() - 1; NListIter++) {
+          // (N-1)-Simplex creation
+          NsimplexMinusOne.push_back( Nsimplex[(NIndex + NListIter) % Nsimplex.size()]);
+        }
+        // (N-1)-Simplex recursive call
+        insert_simplex_and_subfaces(NsimplexMinusOne);
+      }
+      // N-Simplex insert
+      insert_simplex(Nsimplex, filtration);
+    } else if (Nsimplex.size() == 1) {
+      // 1-Simplex insert - End of recursivity
+      insert_simplex(Nsimplex, filtration);
+    } else {
+      // Nothing to insert - empty vector
+    }
   }
 
   /** \brief Assign a value 'key' to the key of the simplex
@@ -832,7 +863,7 @@ std::istream& operator>>(std::istream & is, Simplex_tree<T1, T2, T3> & st) {
     if (max_fil < fil) {
       max_fil = fil;
     }
-    st.insert(simplex, fil);  // insert every simplex in the simplex tree
+    st.insert_simplex(simplex, fil);  // insert every simplex in the simplex tree
     simplex.clear();
   }
   st.set_num_simplices(num_simplices);

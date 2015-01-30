@@ -61,7 +61,7 @@ int main (int argc, char * const argv[])
 	firstSimplexVector.push_back(FIRST_VERTEX_HANDLE);
 	typeSimplex firstSimplex = std::make_pair(firstSimplexVector, Filtration_value(FIRST_FILTRATION_VALUE));
 	typePairSimplexBool returnValue =
-			simplexTree.insert ( firstSimplex.first, firstSimplex.second );
+			simplexTree.insert_simplex ( firstSimplex.first, firstSimplex.second );
 
 	if (returnValue.second == true)
 	{
@@ -80,7 +80,7 @@ int main (int argc, char * const argv[])
 	secondSimplexVector.push_back(SECOND_VERTEX_HANDLE);
 	typeSimplex secondSimplex = std::make_pair(secondSimplexVector, Filtration_value(FIRST_FILTRATION_VALUE));
 	returnValue =
-			simplexTree.insert ( secondSimplex.first, secondSimplex.second );
+			simplexTree.insert_simplex ( secondSimplex.first, secondSimplex.second );
 
 	if (returnValue.second == true)
 	{
@@ -100,7 +100,7 @@ int main (int argc, char * const argv[])
 	thirdSimplexVector.push_back(SECOND_VERTEX_HANDLE);
 	typeSimplex thirdSimplex = std::make_pair(thirdSimplexVector, Filtration_value(SECOND_FILTRATION_VALUE));
 	returnValue =
-			simplexTree.insert ( thirdSimplex.first, thirdSimplex.second );
+			simplexTree.insert_simplex ( thirdSimplex.first, thirdSimplex.second );
 
 	if (returnValue.second == true)
 	{
@@ -119,7 +119,7 @@ int main (int argc, char * const argv[])
 	fourthSimplexVector.push_back(THIRD_VERTEX_HANDLE);
 	typeSimplex fourthSimplex = std::make_pair(fourthSimplexVector, Filtration_value(FIRST_FILTRATION_VALUE));
 	returnValue =
-			simplexTree.insert ( fourthSimplex.first, fourthSimplex.second );
+			simplexTree.insert_simplex ( fourthSimplex.first, fourthSimplex.second );
 
 	if (returnValue.second == true)
 	{
@@ -139,7 +139,7 @@ int main (int argc, char * const argv[])
 	fifthSimplexVector.push_back(FIRST_VERTEX_HANDLE);
 	typeSimplex fifthSimplex = std::make_pair(fifthSimplexVector, Filtration_value(SECOND_FILTRATION_VALUE));
 	returnValue =
-			simplexTree.insert ( fifthSimplex.first, fifthSimplex.second );
+			simplexTree.insert_simplex ( fifthSimplex.first, fifthSimplex.second );
 
 	if (returnValue.second == true)
 	{
@@ -159,7 +159,7 @@ int main (int argc, char * const argv[])
 	sixthSimplexVector.push_back(SECOND_VERTEX_HANDLE);
 	typeSimplex sixthSimplex = std::make_pair(sixthSimplexVector, Filtration_value(SECOND_FILTRATION_VALUE));
 	returnValue =
-			simplexTree.insert ( sixthSimplex.first, sixthSimplex.second );
+			simplexTree.insert_simplex ( sixthSimplex.first, sixthSimplex.second );
 
 	if (returnValue.second == true)
 	{
@@ -180,7 +180,7 @@ int main (int argc, char * const argv[])
 	seventhSimplexVector.push_back(FIRST_VERTEX_HANDLE);
 	typeSimplex seventhSimplex = std::make_pair(seventhSimplexVector, Filtration_value(THIRD_FILTRATION_VALUE));
 	returnValue =
-			simplexTree.insert ( seventhSimplex.first, seventhSimplex.second );
+			simplexTree.insert_simplex ( seventhSimplex.first, seventhSimplex.second );
 
 	if (returnValue.second == true)
 	{
@@ -199,7 +199,7 @@ int main (int argc, char * const argv[])
 	eighthSimplexVector.push_back(FOURTH_VERTEX_HANDLE);
 	typeSimplex eighthSimplex = std::make_pair(eighthSimplexVector, Filtration_value(FIRST_FILTRATION_VALUE));
 	returnValue =
-			simplexTree.insert ( eighthSimplex.first, eighthSimplex.second );
+			simplexTree.insert_simplex ( eighthSimplex.first, eighthSimplex.second );
 
 	if (returnValue.second == true)
 	{
@@ -219,7 +219,7 @@ int main (int argc, char * const argv[])
 	ninethSimplexVector.push_back(FIRST_VERTEX_HANDLE);
 	typeSimplex ninethSimplex = std::make_pair(ninethSimplexVector, Filtration_value(SECOND_FILTRATION_VALUE));
 	returnValue =
-			simplexTree.insert ( ninethSimplex.first, ninethSimplex.second );
+			simplexTree.insert_simplex ( ninethSimplex.first, ninethSimplex.second );
 
 	if (returnValue.second == true)
 	{
@@ -238,7 +238,7 @@ int main (int argc, char * const argv[])
 	tenthSimplexVector.push_back(FIRST_VERTEX_HANDLE);
 	typeSimplex tenthSimplex = std::make_pair(tenthSimplexVector, Filtration_value(FOURTH_FILTRATION_VALUE)); // With a different filtration value
 	returnValue =
-			simplexTree.insert ( tenthSimplex.first, tenthSimplex.second );
+			simplexTree.insert_simplex ( tenthSimplex.first, tenthSimplex.second );
 
 	if (returnValue.second == true)
 	{
@@ -259,7 +259,7 @@ int main (int argc, char * const argv[])
 	eleventhSimplexVector.push_back(FIRST_VERTEX_HANDLE);
 	typeSimplex eleventhSimplex = std::make_pair(eleventhSimplexVector, Filtration_value(FOURTH_FILTRATION_VALUE));
 	returnValue =
-			simplexTree.insert ( eleventhSimplex.first, eleventhSimplex.second );
+			simplexTree.insert_simplex ( eleventhSimplex.first, eleventhSimplex.second );
 
 	if (returnValue.second == true)
 	{

@@ -200,7 +200,7 @@ int main (int argc, char * const argv[])
 				// alpha shape not found
 				Simplex_tree_vertex vertex = map_cgal_simplex_tree.size();
 #ifdef DEBUG_TRACES
-				std::cout << "vertex [" << the_alpha_shape_vertex->point() << "] not found - insert " << vertex << std::endl;
+				std::cout << "vertex [" << the_alpha_shape_vertex->point() << "] not found - insert_simplex " << vertex << std::endl;
 #endif // DEBUG_TRACES
 				the_simplex_tree.push_back(vertex);
 				map_cgal_simplex_tree.insert(Alpha_shape_simplex_tree_pair(the_alpha_shape_vertex,vertex));
@@ -218,7 +218,7 @@ int main (int argc, char * const argv[])
 #ifdef DEBUG_TRACES
 		std::cout << "filtration = " << *the_alpha_value_iterator << std::endl;
 #endif // DEBUG_TRACES
-		simplex_tree.insert(the_simplex_tree, std::sqrt(*the_alpha_value_iterator));
+		simplex_tree.insert_simplex(the_simplex_tree, std::sqrt(*the_alpha_value_iterator));
 		if (the_alpha_value_iterator != the_alpha_values.end())
 			++the_alpha_value_iterator;
 		else
