@@ -297,7 +297,7 @@ int main (int argc, char * const argv[])
 
   pcoh.compute_persistent_cohomology( (Filtration_value)min_persistence );
 
-  pcoh.output_diagram();
+  pcoh.write_output_diagram("test.txt");
 
   return 0;
 }
