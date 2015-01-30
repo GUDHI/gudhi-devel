@@ -32,7 +32,7 @@
 #include "gudhi/Skeleton_blocker_link_complex.h"
 #include "gudhi/Skeleton_blocker/Skeleton_blocker_link_superior.h"
 
-
+#include "gudhi/Skeleton_blocker/internal/Trie.h"
 
 
 namespace Gudhi {
@@ -68,91 +68,8 @@ class Simplex_around_vertex_iterator :
 	// Link_vertex_handle == Complex_Vertex_handle but this renaming helps avoiding confusion
 
 
-private:
+	typedef typename Gudhi::skbl::Trie<Complex> Trie;
 
-	struct Trie{
-		Vertex_handle v;
-		std::vector<std::shared_ptr<Trie> > childs;
-	private:
-		const Trie* parent_;
-	public:
-
-
-		//std::list<std::unique_ptr<Trie> > childs; -> use of deleted function
-
-		Trie():parent_(0){}
-		Trie(Vertex_handle v_):v(v_),parent_(0){
-		}
-
-		Trie(Vertex_handle v_,Trie* parent):v(v_),parent_(parent){
-		}
-
-
-		bool operator==(const Trie& other) const{
-			return (v == other.v) ;
-		}
-
-		void add_child(Trie* child){
-			if(child){
-				std::shared_ptr<Trie> ptr_to_add(child);
-				childs.push_back(ptr_to_add);
-				child->parent_ = this;
-			}
-		}
-
-
-		friend std::ostream& operator<<(std::ostream& stream, const Trie& trie){
-			stream<< "T( "<< trie.v<< " ";
-			for(auto t : trie.childs)
-				stream << *t ;
-			stream<<")";
-			return stream;
-		}
-
-		// goes to the root in the trie to consitute simplex
-		void add_vertices_up_to_the_root(Simplex_handle& res) const{
-			res.add_vertex(v);
-			if(parent_)
-				parent_->add_vertices_up_to_the_root(res);
-		}
-
-		Simplex_handle simplex() const{
-			Simplex_handle res;
-			add_vertices_up_to_the_root(res);
-			return res;
-		}
-
-		bool is_leaf() const{
-			return childs.empty();
-		}
-
-		bool is_root() const{
-			return parent_==0;
-		}
-
-		const Trie* parent() {
-			return parent_;
-		}
-
-		void remove_leaf() {
-			assert(is_leaf);
-			if(!is_root())
-				parent_->childs.erase(this);
-		}
-
-	private:
-
-
-	public:
-
-		Trie* go_bottom_left(){
-			if(is_leaf())
-				return this;
-			else
-				return (*childs.begin())->go_bottom_left();
-		}
-
-	};
 
 private:
 	const Complex* complex;

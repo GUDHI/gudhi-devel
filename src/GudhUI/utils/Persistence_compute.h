@@ -87,7 +87,7 @@ public:
 
 		Gudhi::persistent_cohomology::Persistent_cohomology< Gudhi::Simplex_tree<>,Gudhi::persistent_cohomology::Field_Zp > pcoh (st);
 		pcoh.init_coefficients( params.p ); //initilizes the coefficient field for homology
-		pcoh.compute_persistent_cohomology( INFINITY ); //put params.min_persistence
+		pcoh.compute_persistent_cohomology( params.min_pers ); //put params.min_pers
 		stream_<<"persistence: \n";
 		stream_<<"p dimension birth death: \n";
 

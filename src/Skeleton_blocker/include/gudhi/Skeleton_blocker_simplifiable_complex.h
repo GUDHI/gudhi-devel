@@ -78,10 +78,19 @@ class Skeleton_blocker_simplifiable_complex : public Skeleton_blocker_complex<Sk
    * @brief Constructor with a list of simplices
    * @details The list of simplices must be the list
    * of simplices of a simplicial complex, sorted with increasing dimension.
-   * todo take iterator instead
    */
+  //soon deprecated
   explicit Skeleton_blocker_simplifiable_complex(std::list<Simplex_handle>& simplices, Visitor* visitor_ = NULL) :
       Skeleton_blocker_complex<SkeletonBlockerDS>(simplices, visitor_) { }
+
+  /**
+   * @brief Constructor with a list of simplices
+   * @details The list of simplices must be the list of simplices of a simplicial complex.
+   */
+  template<typename SimpleHandleOutputIterator>
+  explicit Skeleton_blocker_simplifiable_complex(SimpleHandleOutputIterator simplex_begin,SimpleHandleOutputIterator simplex_end,bool is_flag_complex = false,Visitor* visitor_ = NULL) :
+      Skeleton_blocker_complex<SkeletonBlockerDS>(simplex_begin,simplex_end,is_flag_complex, visitor_) { }
+
 
   virtual ~Skeleton_blocker_simplifiable_complex() { }
 

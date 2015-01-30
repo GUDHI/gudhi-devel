@@ -77,6 +77,8 @@ struct Skeleton_blocker_simple_traits {
         : vertex(val) {
     }
 
+    operator int() const { return (int)vertex; }
+
     boost_vertex_handle vertex;
 
     bool operator==(const Vertex_handle& other) const {
