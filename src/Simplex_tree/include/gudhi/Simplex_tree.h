@@ -498,7 +498,7 @@ class Simplex_tree {
           NsimplexMinusOne.push_back( Nsimplex[(NIndex + NListIter) % Nsimplex.size()]);
         }
         // (N-1)-Simplex recursive call
-        insert_simplex_and_subfaces(NsimplexMinusOne);
+        insert_simplex_and_subfaces(NsimplexMinusOne, filtration);
       }
       // N-Simplex insert
       insert_simplex(Nsimplex, filtration);
