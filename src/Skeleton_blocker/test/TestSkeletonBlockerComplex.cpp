@@ -758,6 +758,11 @@ bool test_constructor3(){
 	Complex complex(simplices.begin(),simplices.end());
 
 	DBGVALUE(complex.to_string());
+	if(complex.num_blockers()!=1) return false;
+		Sh expected_blocker(Vh(0),Vh(1),Vh(2));
+		for(auto b : complex.const_blocker_range())
+			if(*b!=expected_blocker) return false;
+
 
 	return complex.num_vertices()==3 && complex.num_blockers()==1;
 }
@@ -767,7 +772,6 @@ bool test_constructor4(){
 	typedef Simplex_handle Sh;
 	std::vector<Simplex_handle> simplices;
 	auto subf(subfaces(Sh(Vh(0),Vh(1),Vh(2),Vh(3))));
-	//	subf.pop_back(); //remove max face -> now a blocker 012
 	simplices.insert(simplices.begin(),subf.begin(),subf.end());
 
 	simplices.push_back(Sh(Vh(4)));
@@ -778,6 +782,10 @@ bool test_constructor4(){
 	Complex complex(simplices.begin(),simplices.end());
 
 	DBGVALUE(complex.to_string());
+	if(complex.num_blockers()!=1) return false;
+		Sh expected_blocker(Vh(0),Vh(1),Vh(4));
+		for(auto b : complex.const_blocker_range())
+			if(*b!=expected_blocker) return false;
 
 	return complex.num_vertices()==5 && complex.num_blockers()==1 && complex.num_edges()==8;
 }
@@ -808,6 +816,31 @@ bool test_constructor5(){
 
 	return complex.num_vertices()==6 && complex.num_blockers()==3 && complex.num_edges()==9;
 }
+
+
+bool test_constructor6(){
+	typedef Vertex_handle Vh;
+	typedef Simplex_handle Sh;
+	std::vector<Simplex_handle> simplices;
+	auto subf(subfaces(Sh(Vh(0),Vh(1),Vh(2),Vh(3))));
+	for(auto s:subf){
+		Sh s1(Vh(0),Vh(1),Vh(2),Vh(3));
+		Sh s2(Vh(1),Vh(2),Vh(3));
+		if(s!=s1 && s!=s2) simplices.push_back(s);
+	}
+
+	DBGCONT(simplices);
+	Complex complex(simplices.begin(),simplices.end());
+
+	DBGVALUE(complex.to_string());
+
+	if(complex.num_blockers()!=1) return false;
+	Sh expected_blocker(Vh(1),Vh(2),Vh(3));
+	for(auto b : complex.const_blocker_range())
+		if(*b!=expected_blocker) return false;
+	return complex.num_vertices()==4 && complex.num_blockers()==1 && complex.num_edges()==6;
+}
+
 
 
 int main (int argc, char *argv[])
@@ -843,6 +876,8 @@ int main (int argc, char *argv[])
 	tests_complex.add("test_constructor_list_simplices3",test_constructor3);
 	tests_complex.add("test_constructor_list_simplices4",test_constructor4);
 	tests_complex.add("test_constructor_list_simplices5",test_constructor5);
+	tests_complex.add("test_constructor_list_simplices6",test_constructor6);
+
 
 	if(tests_complex.run()){
 		return EXIT_SUCCESS;

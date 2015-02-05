@@ -239,8 +239,21 @@ public:
 								}
 							if(all_edges_here){ //eg  this->contains(max_face)
 								max_face.add_vertex(nv);
-								if(!cofaces[first_v]->contains(max_face))
+								if(!cofaces[first_v]->contains(max_face)){
+									// if there exists a blocker included in max_face, we remove it
+									// as it is not a minimum missing face
+									// the other alternative would be to check to all properfaces
+									// are in the complex before adding a blocker but that
+									// would be more expensive if there are few blockers
+									std::vector<Blocker_handle> blockers_to_remove;
+									for(auto b : blocker_range(first_v))
+										if(b->contains(max_face))
+											blockers_to_remove.push_back(b);
+									for(auto b : blockers_to_remove)
+										this->delete_blocker(b);
+
 									add_blocker(max_face);
+								}
 								max_face.remove_vertex(nv);
 							}
 						}
@@ -690,9 +703,8 @@ public:
 	 * @remark sigma has to belongs to the set of blockers
 	 */
 	void remove_blocker(const Blocker_handle sigma) {
-		for (auto vertex : *sigma) {
+		for (auto vertex : *sigma)
 			remove_blocker(sigma, vertex);
-		}
 		num_blockers_--;
 	}
 
