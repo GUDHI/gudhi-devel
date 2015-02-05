@@ -174,6 +174,9 @@ public:
 private:
 	typedef Trie<Skeleton_blocker_complex<SkeletonBlockerDS>> STrie;
 	template<typename SimpleHandleOutputIterator>
+	/**
+	 * return a vector of simplex trie for every vertex
+	 */
 	std::vector<STrie*> compute_cofaces(SimpleHandleOutputIterator simplex_begin,SimpleHandleOutputIterator simplex_end){
 		std::vector<STrie*> cofaces(num_vertices(),0);
 		for(auto i = 0u ; i < num_vertices(); ++i)
@@ -198,7 +201,7 @@ public:
 	  visitor(visitor_){
 		std::vector<std::pair<Vertex_handle,Vertex_handle>> edges;
 
-		//first pass count vertices and store edges
+		//first pass to add vertices and edges
 		int num_vertex = -1;
 		for(auto s_it = simplex_begin; s_it != simplex_end; ++s_it){
 			if(s_it->dimension()==0) num_vertex = (std::max)(num_vertex,s_it->first_vertex().vertex);
@@ -1259,18 +1262,88 @@ public:
  * return the total number of simplices
  */
 template<typename Complex, typename SimplexHandleIterator>
-unsigned make_complex_from_top_faces(Complex& complex,SimplexHandleIterator begin,SimplexHandleIterator end) {
+Complex make_complex_from_top_faces(SimplexHandleIterator simplex_begin,SimplexHandleIterator simplex_end,bool is_flag_complex=false) {
 	typedef typename Complex::Simplex_handle Simplex_handle;
+	typedef typename Complex::Blocker_handle Blocker_handle;
+	typedef typename Complex::Vertex_handle Vertex_handle;
+	Complex complex;
 
-	std::vector<Simplex_handle> simplices;
+	complex.clear();
 
-	for (auto top_face = begin; top_face != end; ++top_face) {
-		auto subfaces_topface = subfaces(*top_face);
-		simplices.insert(simplices.end(),subfaces_topface.begin(),subfaces_topface.end());
+	std::vector<std::pair<Vertex_handle,Vertex_handle>> edges;
+	//first pass to add vertices and edges
+	for(auto s_it = simplex_begin; s_it != simplex_end; ++s_it){
+		// if meet simplex 9 12 15, need to have at least 16 vertices
+		int max_vertex = 0;
+		for(auto vh : *s_it )
+			max_vertex=(std::max)(max_vertex,(int)vh);
+		while( complex.num_vertices() <= max_vertex )
+			complex.add_vertex();
+
+		//for all pairs in s, add an edge
+		for(auto u_it = s_it->begin(); u_it != s_it->end(); ++u_it)
+			for(auto v_it = u_it; ++v_it != s_it->end(); /**/)
+				complex.add_edge(*u_it,*v_it);
 	}
 
-	complex = Complex(simplices.begin(),simplices.end());
-	return simplices.size();
+	if(!is_flag_complex){
+		//need to compute blockers
+
+		//store a structure to decide faster if a simplex is in the complex defined by the max faces
+
+		std::vector<std::set<Simplex_handle>> vertex_to_maxfaces(complex.num_vertices());
+		for(auto s_it = simplex_begin; s_it != simplex_end; ++s_it)
+			vertex_to_maxfaces[s_it->first_vertex()].insert(*s_it);
+
+		// for every maximal face s, it picks its first vertex v and check for all nv \in N(v)
+		// if s union nv is in the complex, if not it is a blocker.
+		for(auto max_face = simplex_begin; max_face != simplex_end; ++max_face){
+			if(max_face->dimension()>0){
+				auto first_v = max_face->first_vertex();
+				for(auto nv : complex.vertex_range(first_v)){
+					if(! max_face->contains(nv) && max_face->first_vertex()<nv){
+						//check that all edges in vertices(max_face)\cup nv are here
+						//since max_face is a simplex, we only need to check that edges
+						// (x nv) where x \in max_face are present
+						bool all_edges_here = true;
+						for(auto x : *max_face)
+							if(!complex.contains_edge(x,nv)){
+								all_edges_here = false;
+								break;
+							}
+						if(all_edges_here){ //eg  this->contains(max_face)
+							max_face->add_vertex(nv);
+							if(vertex_to_maxfaces[first_v].find(*max_face)==vertex_to_maxfaces[first_v].end()){ //xxxx
+								// if there exists a blocker included in max_face, we remove it
+								// as it is not a minimum missing face
+								// the other alternative would be to check to all properfaces
+								// are in the complex before adding a blocker but that
+								// would be more expensive if there are few blockers
+								std::vector<Blocker_handle> blockers_to_remove;
+								for(auto b : complex.blocker_range(first_v))
+									if(b->contains(*max_face))
+										blockers_to_remove.push_back(b);
+								for(auto b : blockers_to_remove)
+									complex.delete_blocker(b);
+								complex.add_blocker(*max_face);
+							}
+							max_face->remove_vertex(nv);
+						}
+					}
+				}
+			}
+		}
+	}
+	return complex;
+	//	std::vector<Simplex_handle> simplices;
+	//
+	//	for (auto top_face = simplex_begin; top_face != simplex_end; ++top_face) {
+	//		auto subfaces_topface = subfaces(*top_face);
+	//		simplices.insert(simplices.end(),subfaces_topface.begin(),subfaces_topface.end());
+	//	}
+	//
+	//	complex = Complex(simplices.begin(),simplices.end());
+	//	return simplices.size();
 }
 
 }  // namespace skbl

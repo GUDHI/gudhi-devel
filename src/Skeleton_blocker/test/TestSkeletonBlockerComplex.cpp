@@ -842,6 +842,49 @@ bool test_constructor6(){
 }
 
 
+bool test_constructor7(){
+	typedef Vertex_handle Vh;
+	typedef Simplex_handle Sh;
+	std::vector<Simplex_handle> simplices;
+	simplices.push_back(Sh(Vh(0),Vh(1),Vh(2)));
+	simplices.push_back(Sh(Vh(1),Vh(2),Vh(3)));
+	simplices.push_back(Sh(Vh(3),Vh(0),Vh(2)));
+	simplices.push_back(Sh(Vh(3),Vh(0),Vh(1)));
+
+	//get complex from top faces
+	Complex complex(make_complex_from_top_faces<Complex>(simplices.begin(),simplices.end()));
+
+	DBGVALUE(complex.to_string());
+
+	if(complex.num_blockers()!=1) return false;
+	Sh expected_blocker(Vh(0),Vh(1),Vh(2),Vh(3));
+	for(auto b : complex.const_blocker_range())
+		if(*b!=expected_blocker) return false;
+	return complex.num_vertices()==4 && complex.num_blockers()==1 && complex.num_edges()==6;
+}
+
+
+bool test_constructor8(){
+	typedef Vertex_handle Vh;
+	typedef Simplex_handle Sh;
+	std::vector<Simplex_handle> simplices;
+	simplices.push_back(Sh(Vh(0),Vh(1)));
+	simplices.push_back(Sh(Vh(2),Vh(1)));
+	simplices.push_back(Sh(Vh(0),Vh(2)));
+	simplices.push_back(Sh(Vh(3),Vh(1)));
+	simplices.push_back(Sh(Vh(2),Vh(3)));
+
+	//get complex from top faces
+	Complex complex(make_complex_from_top_faces<Complex>(simplices.begin(),simplices.end()));
+
+	DBGVALUE(complex.to_string());
+
+	return complex.num_vertices()==4 && complex.num_blockers()==2 && complex.num_edges()==5;
+}
+
+
+
+
 
 int main (int argc, char *argv[])
 {
@@ -877,6 +920,8 @@ int main (int argc, char *argv[])
 	tests_complex.add("test_constructor_list_simplices4",test_constructor4);
 	tests_complex.add("test_constructor_list_simplices5",test_constructor5);
 	tests_complex.add("test_constructor_list_simplices6",test_constructor6);
+	tests_complex.add("test_constructor_list_simplices7",test_constructor7);
+	tests_complex.add("test_constructor_list_simplices8",test_constructor8);
 
 
 	if(tests_complex.run()){

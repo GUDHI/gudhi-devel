@@ -48,9 +48,9 @@ int main (int argc, char *argv[]){
 	simplices.push_back(Simplex_handle(Vertex_handle(3),Vertex_handle(0),Vertex_handle(2)));
 	simplices.push_back(Simplex_handle(Vertex_handle(3),Vertex_handle(0),Vertex_handle(1)));
 
-	Complex complex;
 	//get complex from top faces
-	make_complex_from_top_faces(complex,simplices.begin(),simplices.end());
+	Complex complex(make_complex_from_top_faces<Complex>(simplices.begin(),simplices.end()));
+
 
 	std::cout << "Simplices:"<<std::endl;
 	for(const Simplex & s : complex.simplex_range())
