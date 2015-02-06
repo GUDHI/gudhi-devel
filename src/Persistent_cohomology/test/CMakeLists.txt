@@ -11,14 +11,14 @@ add_executable ( persistent_cohomology_unit_test persistent_cohomology_unit_test
 target_link_libraries(persistent_cohomology_unit_test ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 # Unitary tests
-add_test(persistent_cohomology_unit_test ${CMAKE_CURRENT_BINARY_DIR}/persistent_cohomology_unit_test)
+add_test(persistent_cohomology_unit_test ${CMAKE_CURRENT_BINARY_DIR}/persistent_cohomology_unit_test ${CMAKE_SOURCE_DIR}/src/Persistent_cohomology/test/simplex_tree_file_for_unit_test.txt)
 
 if(GMPXX_FOUND AND GMP_FOUND)
    add_executable ( persistent_cohomology_unit_test_multi_field persistent_cohomology_unit_test_multi_field.cpp )
    target_link_libraries(persistent_cohomology_unit_test_multi_field ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES})
 
    # Unitary tests
-   #add_test(persistent_cohomology_unit_test_multi_field ${CMAKE_CURRENT_BINARY_DIR}/persistent_cohomology_unit_test_multi_field)
+   add_test(persistent_cohomology_unit_test_multi_field ${CMAKE_CURRENT_BINARY_DIR}/persistent_cohomology_unit_test_multi_field ${CMAKE_SOURCE_DIR}/src/Persistent_cohomology/test/simplex_tree_file_for_unit_test_multi_field.txt)
 endif()
 
 if (LCOV_PATH)

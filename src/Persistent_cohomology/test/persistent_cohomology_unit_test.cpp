@@ -17,11 +17,15 @@
 
 using namespace Gudhi;
 using namespace Gudhi::persistent_cohomology;
+using namespace boost::unit_test;
 
 typedef Simplex_tree<> typeST;
 
 std::string test_rips_persistence(int coefficient, int min_persistence) {
-  const std::string inputFile("simplex_tree_file_for_unit_test.txt");
+  // Check file name is given as parameter from CMakeLists.txt
+  BOOST_CHECK(framework::master_test_suite().argc == 2);
+  const std::string inputFile(framework::master_test_suite().argv[1]);
+
   std::ifstream simplex_tree_stream;
   simplex_tree_stream.open(inputFile.c_str());
   typeST st;
