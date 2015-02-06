@@ -93,16 +93,17 @@ their simplices.
 
 \subsection Overview
 
-Four classes are implemented for simplicial complex in this representation namely (most user will just need to use Skeleton_blocker_geometric_complex):
+Two main classes of this package are Skeleton_blocker_complex and Skeleton_blocker_geometric_complex.
+The first one can be used to represent an abstract simplicial complex and supports most used
+operations in a simplicial complex such as :
 
-\li Skeleton_blocker_complex : a simplicial complex with basic operations such as vertex/edge/simplex enumeration and construction
-\li Skeleton_blocker_link_complex : the link of a simplex in a parent complex. It is represented as a sub complex
-of the parent complex
-\li Skeleton_blocker_simplifiable_complex : a simplicial complex with simplification operations such as edge contraction or simplex collapse
-\li Skeleton_blocker_geometric_complex : a simplifiable simplicial complex who has access to geometric points in  \f$R^d\f$ 
+\li vertex/edge/simplex enumeration
+\li simplifications operations such as remove star, add star (e.g. general form of collapse),
+edge contractions
 
-The two last classes are derived classes from the Skeleton_blocker_complex class. The class Skeleton_blocker_link_complex inheritates from a template passed parameter
-that may be either Skeleton_blocker_complex or Skeleton_blocker_geometric_complex (a link may store points coordinates or not).
+The class Skeleton_blocker_geometric_complex supports the same methods as Skeleton_blocker_complex
+and point access in addition.
+
 
 
 \subsection Visitor

@@ -26,11 +26,11 @@
 #include <sstream>
 #include "gudhi/Utils.h"
 #include "gudhi/Test.h"
-#include "gudhi/Skeleton_blocker_complex.h"
-#include "gudhi/Skeleton_blocker_link_complex.h"
-#include "gudhi/Skeleton_blocker/Skeleton_blocker_link_superior.h"
-#include "gudhi/Skeleton_blocker/Skeleton_blocker_simple_traits.h"
-#include "gudhi/Skeleton_blocker/internal/Trie.h"
+#include "gudhi/Skeleton_blocker.h"
+//#include "gudhi/Skeleton_blocker_link_complex.h"
+//#include "gudhi/Skeleton_blocker/Skeleton_blocker_link_superior.h"
+//#include "gudhi/Skeleton_blocker/Skeleton_blocker_simple_traits.h"
+//#include "gudhi/Skeleton_blocker/internal/Trie.h"
 
 using namespace std;
 
@@ -71,6 +71,7 @@ bool assert_blocker(Complex &complex,Root_vertex_handle a,Root_vertex_handle b,R
 	//Simplex blocker (a,b,c,d);
 	//return complex.contains_blocker(&blocker);
 }
+
 
 
 void build_complete(int n,Complex& complex){
@@ -410,6 +411,10 @@ bool test_link0(){
 	complex.add_edge(Vertex_handle(b),Vertex_handle(c));complex.add_edge(Vertex_handle(c),Vertex_handle(d));
 	Simplex_handle alpha = Simplex_handle(Vertex_handle(c));
 	Skeleton_blocker_link_complex<Complex> L(complex,alpha);
+
+	auto L2 = complex.link(alpha);
+	if(L!=L2) return false;
+
 	PRINT(L.num_vertices());
 	PRINT(L.to_string());
 
@@ -436,6 +441,9 @@ bool test_link1(){
 	Simplex_handle alpha(Vertex_handle(12),Vertex_handle(14));
 	Skeleton_blocker_link_complex<Complex> L(complex,alpha);
 	// Complexes built
+
+	auto L2 = complex.link(alpha);
+	if(L!=L2) return false;
 
 	// verification
 	bool test1 = L.contains_vertex(*L.get_address(Root_vertex_handle(10)));
@@ -478,6 +486,10 @@ bool test_link2(){
 	cerr <<endl<<endl;
 	cerr << "L= Link_complex("<<alpha<<") : \n"<<L.to_string();
 
+	auto L2 = complex.link(alpha);
+	if(L!=L2) return false;
+
+
 	// verification
 	bool test1 = L.contains_vertex(*L.get_address(Root_vertex_handle(10)));
 	bool test2 = L.contains_vertex(*L.get_address(Root_vertex_handle(11)));
@@ -515,6 +527,10 @@ bool test_link3(){
 	cerr << "complex complex"<< complex.to_string();
 	cerr <<endl<<endl;
 	cerr << "L= Link_complex("<<alpha<<") : \n"<<L.to_string();
+
+	auto L2 = complex.link(alpha);
+	if(L!=L2) return false;
+
 
 	// verification
 	bool test = assert_vertex(L,*L.get_address(Root_vertex_handle(10)));

@@ -28,10 +28,7 @@
 #include <sstream>
 #include "gudhi/Test.h"
 //#include "Skeleton_blocker/Simplex.h"
-#include "gudhi/Skeleton_blocker_complex.h"
-#include "gudhi/Skeleton_blocker/iterators/Skeleton_blockers_iterators.h"
-#include "gudhi/Skeleton_blocker_simplifiable_complex.h"
-#include "gudhi/Skeleton_blocker/Skeleton_blocker_simple_traits.h"
+#include "gudhi/Skeleton_blocker.h"
 
 
 using namespace std;
@@ -41,7 +38,7 @@ using namespace Gudhi;
 using namespace skbl;
 
 template<typename ComplexType> class Skeleton_blocker_sub_complex;
-typedef Skeleton_blocker_simplifiable_complex<Skeleton_blocker_simple_traits> Complex;
+typedef Skeleton_blocker_complex<Skeleton_blocker_simple_traits> Complex;
 typedef Complex::Vertex_handle Vertex_handle;
 typedef Complex::Root_vertex_handle Root_vertex_handle;
 typedef Skeleton_blocker_simplex<Vertex_handle> Simplex_handle;

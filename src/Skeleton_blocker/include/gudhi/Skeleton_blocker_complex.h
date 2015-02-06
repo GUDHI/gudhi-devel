@@ -302,6 +302,31 @@ class Skeleton_blocker_complex {
     return *this;
   }
 
+
+  /**
+   * return true if both complexes have the same simplices.
+   */
+  bool operator==(const Skeleton_blocker_complex& other) const{
+	  if(other.num_vertices() != num_vertices()) return false;
+	  if(other.num_edges() != num_edges()) return false;
+	  if(other.num_blockers() != num_blockers()) return false;
+
+	  for(auto v : vertex_range())
+		  if(!other.contains_vertex(v)) return false;
+
+	  for(auto e : edge_range())
+		  if(!other.contains_edge(first_vertex(e),second_vertex(e))) return false;
+
+	  for(const auto b : const_blocker_range())
+		  if(!other.contains_blocker(*b)) return false;
+
+	  return true;
+  }
+
+  bool operator!=(const Skeleton_blocker_complex& other) const{
+	  return !(*this == other);
+  }
+
   /**
    * The destructor delete all blockers allocated.
    */
@@ -763,7 +788,7 @@ class Skeleton_blocker_complex {
 
     Vertex_handle a = s->first_vertex();
 
-    for (auto blocker : const_blocker_range(a)) {
+    for (const auto blocker : const_blocker_range(a)) {
       if (s == *blocker)
         return true;
     }
@@ -864,6 +889,29 @@ class Skeleton_blocker_complex {
   }
 
  public:
+  typedef Skeleton_blocker_link_complex<Skeleton_blocker_complex> Link_complex;
+
+  /**
+   * Constructs the link of 'simplex' with points coordinates.
+   */
+  Link_complex link(Vertex_handle v) const {
+    return Link_complex(*this, Simplex_handle(v));
+  }
+
+  /**
+   * Constructs the link of 'simplex' with points coordinates.
+   */
+  Link_complex link(Edge_handle edge) const {
+    return Link_complex(*this, edge);
+  }
+
+  /**
+   * Constructs the link of 'simplex' with points coordinates.
+   */
+  Link_complex link(const Simplex_handle& simplex) const {
+    return Link_complex(*this, simplex);
+  }
+
   /**
    * @brief Compute the local vertices of 's' in the current complex
    * If one of them is not present in the complex then the return value is uninitialized.
@@ -986,7 +1034,216 @@ class Skeleton_blocker_complex {
   }
 
   //@}
+	/** @Simplification operations
+	 */
+	//@{
 
+	/**
+	 * Returns true iff the blocker 'sigma' is popable.
+	 * To define popable, let us call 'L' the complex that
+	 * consists in the current complex without the blocker 'sigma'.
+	 * A blocker 'sigma' is then "popable" if the link of 'sigma'
+	 * in L is reducible.
+	 *
+	 */
+	bool is_popable_blocker(Blocker_handle sigma) const;
+
+	/**
+	 * Removes all the popable blockers of the complex and delete them.
+	 * @returns the number of popable blockers deleted
+	 */
+	void remove_popable_blockers();
+
+	/**
+	 * Removes all the popable blockers of the complex passing through v and delete them.
+	 */
+	void remove_popable_blockers(Vertex_handle v);
+
+	/**
+	 * @brief Removes all the popable blockers of the complex passing through v and delete them.
+	 * Also remove popable blockers in the neighborhood if they became popable.
+	 *
+	 */
+	void remove_all_popable_blockers(Vertex_handle v);
+
+	/**
+	 * Remove the star of the vertex 'v'
+	 */
+	void remove_star(Vertex_handle v) ;
+
+private:
+	/**
+	 * after removing the star of a simplex, blockers sigma that contains this simplex must be removed.
+	 * Furthermore, all simplices tau of the form sigma \setminus simplex_to_be_removed must be added
+	 * whenever the dimension of tau is at least 2.
+	 */
+	void update_blockers_after_remove_star_of_vertex_or_edge(const Simplex_handle& simplex_to_be_removed);
+
+public:
+	/**
+	 * Remove the star of the edge connecting vertices a and b.
+	 * @returns the number of blocker that have been removed
+	 */
+	void remove_star(Vertex_handle a, Vertex_handle b) ;
+
+	/**
+	 * Remove the star of the edge 'e'.
+	 */
+	void remove_star(Edge_handle e) ;
+
+	/**
+	 * Remove the star of the simplex 'sigma' which needs to belong to the complex
+	 */
+	void remove_star(const Simplex_handle& sigma);
+
+	/**
+	 * @brief add a maximal simplex plus all its cofaces.
+	 * @details the simplex must have dimension greater than one (otherwise use add_vertex or add_edge).
+	 */
+	void add_simplex(const Simplex_handle& sigma);
+
+private:
+	/**
+	 * remove all blockers that contains sigma
+	 */
+	void remove_blocker_containing_simplex(const Simplex_handle& sigma) ;
+
+	/**
+	 * remove all blockers that contains sigma
+	 */
+	void remove_blocker_include_in_simplex(const Simplex_handle& sigma);
+
+public:
+	enum simplifiable_status {
+		NOT_HOMOTOPY_EQ, MAYBE_HOMOTOPY_EQ, HOMOTOPY_EQ
+	};
+
+	simplifiable_status is_remove_star_homotopy_preserving(const Simplex_handle& simplex) {
+		// todo write a virtual method 'link' in Skeleton_blocker_complex which will be overloaded by the current one of Skeleton_blocker_geometric_complex
+		// then call it there to build the link and return the value of link.is_contractible()
+		return MAYBE_HOMOTOPY_EQ;
+	}
+
+	enum contractible_status {
+		NOT_CONTRACTIBLE, MAYBE_CONTRACTIBLE, CONTRACTIBLE
+	};
+
+	/**
+	 * @brief %Test if the complex is reducible using a strategy defined in the class
+	 * (by default it tests if the complex is a cone)
+	 * @details Note that NO could be returned if some invariant ensures that the complex
+	 * is not a point (for instance if the euler characteristic is different from 1).
+	 * This function will surely have to return MAYBE in some case because the
+	 * associated problem is undecidable but it in practice, it can often
+	 * be solved with the help of geometry.
+	 */
+	virtual contractible_status is_contractible() const {
+		if (this->is_cone()) {
+			return CONTRACTIBLE;
+		} else {
+			return MAYBE_CONTRACTIBLE;
+		}
+	}
+	//@}
+
+	/** @Edge contraction operations
+	 */
+	//@{
+
+	/**
+	 * @return If ignore_popable_blockers is true
+	 * then the result is true iff the link condition at edge ab is satisfied
+	 * or equivalently iff no blocker contains ab.
+	 * If ignore_popable_blockers is false then the
+	 * result is true iff all blocker containing ab are popable.
+	 */
+	bool link_condition(Vertex_handle a, Vertex_handle b, bool ignore_popable_blockers = false) const{
+		for (auto blocker : this->const_blocker_range(a))
+			if (blocker->contains(b)) {
+				// false if ignore_popable_blockers is false
+				// otherwise the blocker has to be popable
+				return ignore_popable_blockers && is_popable_blocker(blocker);
+			}
+		return true;
+
+	}
+
+	/**
+	 * @return If ignore_popable_blockers is true
+	 * then the result is true iff the link condition at edge ab is satisfied
+	 * or equivalently iff no blocker contains ab.
+	 * If ignore_popable_blockers is false then the
+	 * result is true iff all blocker containing ab are popable.
+	 */
+	bool link_condition(Edge_handle e, bool ignore_popable_blockers = false) const {
+		const Graph_edge& edge = (*this)[e];
+		assert(this->get_address(edge.first()));
+		assert(this->get_address(edge.second()));
+		Vertex_handle a(*this->get_address(edge.first()));
+		Vertex_handle b(*this->get_address(edge.second()));
+		return link_condition(a, b, ignore_popable_blockers);
+	}
+
+protected:
+	/**
+	 * Compute simplices beta such that a.beta is an order 0 blocker
+	 * that may be used to construct a new blocker after contracting ab.
+	 * It requires that the link condition is satisfied.
+	 */
+	void tip_blockers(Vertex_handle a, Vertex_handle b, std::vector<Simplex_handle> & buffer) const;
+
+private:
+	/**
+	 * @brief "Replace" the edge 'bx' by the edge 'ax'.
+	 * Assume that the edge 'bx' was present whereas 'ax' was not.
+	 * Precisely, it does not replace edges, but remove 'bx' and then add 'ax'.
+	 * The visitor 'on_swaped_edge' is called just after edge 'ax' had been added
+	 * and just before edge 'bx' had been removed. That way, it can
+	 * eventually access to information of 'ax'.
+	 */
+	void swap_edge(Vertex_handle a, Vertex_handle b, Vertex_handle x);
+
+private:
+	/**
+	 * @brief removes all blockers passing through the edge 'ab'
+	 */
+	void delete_blockers_around_vertex(Vertex_handle v);
+
+	/**
+	 * @brief removes all blockers passing through the edge 'ab'
+	 */
+	void delete_blockers_around_edge(Vertex_handle a, Vertex_handle b);
+
+public:
+	/**
+	 * Contracts the edge.
+	 * @remark If the link condition Link(ab) = Link(a) inter Link(b) is not satisfied,
+	 * it removes first all blockers passing through 'ab'
+	 */
+	void contract_edge(Edge_handle edge) {
+		contract_edge(this->first_vertex(edge), this->second_vertex(edge));
+	}
+
+	/**
+	 * Contracts the edge connecting vertices a and b.
+	 * @remark If the link condition Link(ab) = Link(a) inter Link(b) is not satisfied,
+	 * it removes first all blockers passing through 'ab'
+	 */
+	void contract_edge(Vertex_handle a, Vertex_handle b);
+
+private:
+	void get_blockers_to_be_added_after_contraction(Vertex_handle a, Vertex_handle b, std::set<Simplex_handle>& blockers_to_add);
+
+	/**
+	 * delete all blockers that passes through a or b
+	 */
+	void delete_blockers_around_vertices(Vertex_handle a, Vertex_handle b);
+	void update_edges_after_contraction(Vertex_handle a, Vertex_handle b) ;
+
+	void notify_changed_edges(Vertex_handle a) ;
+	//@}
+
+public:
   /////////////////////////////////////////////////////////////////////////////
   /** @name Vertex iterators
    */
@@ -1259,9 +1516,15 @@ class Skeleton_blocker_complex {
       stream << *b << std::endl;
     return stream.str();
   }
-
   //@}
+
+
+
+
+
 };
+
+
 
 /**
  * build a simplicial complex from a collection
@@ -1342,20 +1605,14 @@ Complex make_complex_from_top_faces(SimplexHandleIterator simplex_begin, Simplex
     }
   }
   return complex;
-  // std::vector<Simplex_handle> simplices;
-  //
-  // for (auto top_face = simplex_begin; top_face != simplex_end; ++top_face) {
-  // auto subfaces_topface = subfaces(*top_face);
-  // simplices.insert(simplices.end(),subfaces_topface.begin(),subfaces_topface.end());
-  // }
-  //
-  // complex = Complex(simplices.begin(),simplices.end());
-  // return simplices.size();
 }
 
 }  // namespace skbl
 
 }  // namespace Gudhi
+
+#include "Skeleton_blocker_simplifiable_complex.h"
+
 
 #endif  // SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_COMPLEX_H_
 

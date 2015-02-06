@@ -23,7 +23,7 @@
 #define SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_GEOMETRIC_COMPLEX_H_
 
 #include "gudhi/Utils.h"
-#include "gudhi/Skeleton_blocker_simplifiable_complex.h"
+#include "gudhi/Skeleton_blocker_complex.h"
 #include "gudhi/Skeleton_blocker/Skeleton_blocker_sub_complex.h"
 
 namespace Gudhi {
@@ -37,11 +37,11 @@ namespace skbl {
  */
 template<typename SkeletonBlockerGeometricDS>
 class Skeleton_blocker_geometric_complex :
-public Skeleton_blocker_simplifiable_complex<SkeletonBlockerGeometricDS> {
+public Skeleton_blocker_complex<SkeletonBlockerGeometricDS> {
  public:
   typedef typename SkeletonBlockerGeometricDS::GT GT;
 
-  typedef Skeleton_blocker_simplifiable_complex<SkeletonBlockerGeometricDS> SimplifiableSkeletonblocker;
+  typedef Skeleton_blocker_complex<SkeletonBlockerGeometricDS> SimplifiableSkeletonblocker;
 
   typedef typename SimplifiableSkeletonblocker::Vertex_handle Vertex_handle;
   typedef typename SimplifiableSkeletonblocker::Root_vertex_handle Root_vertex_handle;
