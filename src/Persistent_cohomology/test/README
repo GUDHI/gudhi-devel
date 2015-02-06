@@ -7,6 +7,15 @@ make
 To launch with details:
 ***********************
 
-./persistent_cohomology_unit_test --report_level=detailed --log_level=all 
+SINGLE FIELD
+------------
+./persistent_cohomology_unit_test simplex_tree_file_for_unit_test.txt --report_level=detailed --log_level=all 
 
    ==> echo $? returns 0 in case of success (non-zero otherwise)
+
+MULTI FIELD
+-----------
+./persistent_cohomology_unit_test_multi_field simplex_tree_file_for_multi_field_unit_test.txt --report_level=detailed --log_level=all
+
+   ==> echo $? returns 0 in case of success (non-zero otherwise)
+

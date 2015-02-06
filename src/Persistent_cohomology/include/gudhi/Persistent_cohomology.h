@@ -696,12 +696,20 @@ class Persistent_cohomology {
    * feature exists in homology with Z/piZ coefficients.
    */
   void output_diagram(std::ostream& ostream = std::cout) {
+
     cmp_intervals_by_length cmp(cpx_);
     persistent_pairs_.sort(cmp);
+    bool has_infinity = std::numeric_limits<Filtration_value>::has_infinity;
     for (auto pair : persistent_pairs_) {
-      ostream << get<2>(pair) << "  " << cpx_->dimension(get<0>(pair)) << " "
+      // Special case on windows, inf is "1.#INF" (cf. unitary tests and R package TDA)
+      if (has_infinity && cpx_->filtration(get<1>(pair)) == std::numeric_limits<Filtration_value>::infinity()) {
+        ostream << get<2>(pair) << "  " << cpx_->dimension(get<0>(pair)) << " "
+          << cpx_->filtration(get<0>(pair)) << " inf " << std::endl;
+      } else {
+        ostream << get<2>(pair) << "  " << cpx_->dimension(get<0>(pair)) << " "
           << cpx_->filtration(get<0>(pair)) << " "
           << cpx_->filtration(get<1>(pair)) << " " << std::endl;
+      }
     }
   }
 

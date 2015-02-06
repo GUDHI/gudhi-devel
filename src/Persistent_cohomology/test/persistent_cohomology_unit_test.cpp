@@ -23,7 +23,7 @@ typedef Simplex_tree<> typeST;
 
 std::string test_rips_persistence(int coefficient, int min_persistence) {
   // Check file name is given as parameter from CMakeLists.txt
-  BOOST_CHECK(framework::master_test_suite().argc == 2);
+  BOOST_CHECK(framework::master_test_suite().argc >= 2);
   const std::string inputFile(framework::master_test_suite().argv[1]);
 
   std::ifstream simplex_tree_stream;
@@ -84,7 +84,8 @@ void test_rips_persistence_in_dimension(int dimension) {
   std::cout << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_SINGLE_FIELD DIM=" << dimension << " MIN_PERS=0" << std::endl;
 
   std::string str_rips_persistence = test_rips_persistence(dimension, 0);
-
+  std::cout << str_rips_persistence << std::endl;
+  
   BOOST_CHECK(str_rips_persistence.find(value0) != std::string::npos); // Check found
   BOOST_CHECK(str_rips_persistence.find(value1) != std::string::npos); // Check found
   BOOST_CHECK(str_rips_persistence.find(value2) != std::string::npos); // Check found
