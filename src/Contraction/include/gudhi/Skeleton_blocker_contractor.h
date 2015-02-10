@@ -391,9 +391,7 @@ public:
 				}
 			}
 			else
-			{
 				DBG("uncomputable cost");
-			}
 		}
 		if(contraction_visitor_) contraction_visitor_->on_stop_condition_reached();		
 	}

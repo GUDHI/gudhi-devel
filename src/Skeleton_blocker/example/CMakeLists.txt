@@ -3,6 +3,8 @@ project(GUDHIskbl)
 
 
 add_executable(SkeletonBlockerFromSimplices Skeleton_blocker_from_simplices.cpp)
-
 add_executable(SkeletonBlockerIteration Skeleton_blocker_iteration.cpp)
+add_executable(SkeletonBlockerLink Skeleton_blocker_link.cpp)
+
+
 target_link_libraries(SkeletonBlockerIteration ${Boost_TIMER_LIBRARY} ${Boost_SYSTEM_LIBRARY})	

@@ -41,7 +41,7 @@ typedef Complex::Simplex_handle Simplex;
 
 
 Complex build_complete_complex(int n){
-	// build a full complex with 10 vertices and 2^n-1 simplices
+	// build a full complex with n vertices and 2^n-1 simplices
 		Complex complex;
 		for(int i=0;i<n;i++)
 			complex.add_vertex();
@@ -57,7 +57,7 @@ int main (int argc, char *argv[]){
 
 	const int n = 15;
 
-	// build a full complex with 10 vertices and 2^n-1 simplices
+	// build a full complex with n vertices and 2^n-1 simplices
 	Complex complex(build_complete_complex(n));
 
 	// this is just to illustrate iterators, to count number of vertices

@@ -468,6 +468,17 @@ template<typename SkeletonBlockerDS>
 void Skeleton_blocker_complex<SkeletonBlockerDS>::add_simplex(const Simplex_handle& sigma) {
 	assert(!this->contains(sigma));
 	assert(sigma.dimension() > 1);
+
+	int num_vertex_to_add = 0;
+	for(auto v : sigma)
+		if(!contains_vertex(v)) ++num_vertex_to_add;
+	while(num_vertex_to_add--) add_vertex();
+
+	for(auto u_it = sigma.begin(); u_it != sigma.end(); ++u_it)
+		for(auto v_it = u_it; ++v_it != sigma.end(); /**/){
+			std::cout <<"add edge"<<*u_it<<" "<<*v_it<<std::endl;
+			add_edge(*u_it,*v_it);
+		}
 	remove_blocker_include_in_simplex(sigma);
 }
 

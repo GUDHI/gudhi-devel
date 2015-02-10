@@ -64,9 +64,6 @@ class Skeleton_blocker_simplex {
   //@{
 
   // Skeleton_blocker_simplex():simplex_set() {}
-  /**
-   * Clear the simplex
-   */
   void clear() {
     simplex_set.clear();
   }
@@ -121,7 +118,6 @@ class Skeleton_blocker_simplex {
    * Add the vertex v to the simplex:
    * Note that adding two times the same vertex is
    * the same that adding it once.
-   * \f$ (*this) \leftarrow (*this) \cup \{ v \} \f$
    */
   void add_vertex(T v) {
     simplex_set.insert(v);
@@ -129,15 +125,13 @@ class Skeleton_blocker_simplex {
 
   /**
    * Remove the vertex v from the simplex:
-   * \f$ (*this) \leftarrow (*this) \setminus \{ v \} \f$
    */
   void remove_vertex(T v) {
     simplex_set.erase(v);
   }
 
   /**
-   * Intersects the simplex with the simplex a:
-   * \f$ (*this) \leftarrow (*this) \cap a \f$
+   * Intersects the simplex with the simplex a.
    */
   void intersection(const Skeleton_blocker_simplex & a) {
     std::vector<T> v;
@@ -152,8 +146,7 @@ class Skeleton_blocker_simplex {
   }
 
   /**
-   * Substracts a from the simplex:
-   * \f$ (*this) \leftarrow (*this) \setminus a \f$
+   * Substracts a from the simplex.
    */
   void difference(const Skeleton_blocker_simplex & a) {
     std::vector<T> v;
@@ -169,8 +162,7 @@ class Skeleton_blocker_simplex {
   }
 
   /**
-   * Add vertices of a to the simplex:
-   * \f$ (*this) \leftarrow (*this) \cup a \f$
+   * Add vertices of a to the simplex.
    */
   void union_vertices(const Skeleton_blocker_simplex & a) {
     std::vector<T> v;
@@ -234,7 +226,7 @@ class Skeleton_blocker_simplex {
     return *(simplex_set.rbegin());
   }
   /**
-   * @return true iff the simplex contains the simplex a, i.e. iff \f$ a \subset (*this) \f$.
+   * @return true iff the simplex contains the simplex a.
    */
   bool contains(const Skeleton_blocker_simplex & a) const {
     return includes(simplex_set.cbegin(), simplex_set.cend(),
@@ -278,7 +270,7 @@ class Skeleton_blocker_simplex {
     auto last2 = a.end();
 
     while (first2 != last2) {
-      // we ignore vertices of b
+      // we ignore vertices x
       if (x == *first2) {
         ++first2;
       } else {
@@ -293,7 +285,7 @@ class Skeleton_blocker_simplex {
   }
 
   /**
-   * @return true iff the simplex contains the difference \f$ a \setminus \{ x \} \f$.
+   * @return true iff the simplex contains the difference \f$ a \setminus \{ x,y \} \f$.
    */
   bool contains_difference(const Skeleton_blocker_simplex& a, T x, T y) const {
     auto first1 = begin();
@@ -303,7 +295,7 @@ class Skeleton_blocker_simplex {
     auto last2 = a.end();
 
     while (first2 != last2) {
-      // we ignore vertices of b
+      // we ignore vertices of x,y
       if (x == *first2 || y == *first2) {
         ++first2;
       } else {
@@ -317,16 +309,10 @@ class Skeleton_blocker_simplex {
     return true;
   }
 
-  /**
-   * @return true iff the simplex contains the vertex v, i.e. iff \f$ v \in (*this) \f$.
-   */
   bool contains(T v) const {
     return (simplex_set.find(v) != simplex_set.end());
   }
 
-  /**
-   * @return \f$ (*this) \cap a = \emptyset \f$.
-   */
   bool disjoint(const Skeleton_blocker_simplex& a) const {
     std::vector<T> v;
     v.reserve(std::min(simplex_set.size(), a.simplex_set.size()));
@@ -354,9 +340,6 @@ class Skeleton_blocker_simplex {
 
   //@}
 
-  /**
-   * Display a simplex
-   */
   friend std::ostream& operator <<(std::ostream& o,
                                    const Skeleton_blocker_simplex & sigma) {
     bool first = true;
