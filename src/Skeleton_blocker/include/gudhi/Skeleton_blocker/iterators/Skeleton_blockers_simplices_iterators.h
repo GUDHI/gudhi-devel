@@ -68,7 +68,7 @@ class Simplex_around_vertex_iterator :
 	// Link_vertex_handle == Complex_Vertex_handle but this renaming helps avoiding confusion
 
 
-	typedef typename Gudhi::skbl::Trie<Complex> Trie;
+	typedef typename Gudhi::skbl::Trie<Simplex_handle> Trie;
 
 
 private:
@@ -76,7 +76,7 @@ private:
 	Vertex_handle v;
 	std::shared_ptr<Link> link_v;
 	std::shared_ptr<Trie> trie;
-	std::list<Trie*> nodes_to_be_seen; // todo regrouper
+	std::list<Trie*> nodes_to_be_seen; // todo deque
 
 public:
 	Simplex_around_vertex_iterator():complex(0){
@@ -197,6 +197,12 @@ public:
 		assert(!nodes_to_be_seen.empty());
 		Trie* first_node = nodes_to_be_seen.front();
 		return first_node->simplex();
+	}
+
+//private:
+	Simplex_handle get_trie_address() const{
+		assert(!nodes_to_be_seen.empty());
+		return nodes_to_be_seen.front();
 	}
 
 private:

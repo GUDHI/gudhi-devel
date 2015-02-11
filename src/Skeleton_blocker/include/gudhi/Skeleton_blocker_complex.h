@@ -173,23 +173,8 @@ public:
 	}
 
 private:
-	typedef Trie<Skeleton_blocker_complex<SkeletonBlockerDS>> STrie;
-
-	template<typename SimpleHandleOutputIterator>
-	/**
-	 * return a vector of simplex trie for every vertex
-	 */
-	std::vector<STrie*> compute_cofaces(SimpleHandleOutputIterator simplex_begin, SimpleHandleOutputIterator simplex_end) {
-		std::vector<STrie*> cofaces(num_vertices(), 0);
-		for (auto i = 0u; i < num_vertices(); ++i)
-			cofaces[i] = new STrie(Vertex_handle(i));
-		for (auto s_it = simplex_begin; s_it != simplex_end; ++s_it) {
-			if (s_it->dimension() >= 1)
-				cofaces[s_it->first_vertex()]->add_simplex(*s_it);
-		}
-		return cofaces;
-	}
-
+	//	typedef Trie<Skeleton_blocker_complex<SkeletonBlockerDS>> STrie;
+	typedef Trie<Simplex_handle> STrie;
 
 public:
 	/**
@@ -201,6 +186,16 @@ public:
 	: num_vertices_(0),
 	  num_blockers_(0),
 	  visitor(visitor_) {
+		add_vertex_and_edges(simplex_begin,simplex_end);
+
+		if (!is_flag_complex)
+			// need to compute blockers
+			add_blockers(simplex_begin,simplex_end);
+	}
+
+private:
+	template<typename SimpleHandleOutputIterator>
+	void add_vertex_and_edges(SimpleHandleOutputIterator simplex_begin, SimpleHandleOutputIterator simplex_end){
 		std::vector<std::pair<Vertex_handle, Vertex_handle>> edges;
 		// first pass to add vertices and edges
 		int num_vertex = -1;
@@ -212,70 +207,52 @@ public:
 
 		for (const auto& e : edges)
 			add_edge(e.first, e.second);
+	}
 
-		if (!is_flag_complex) {
-			// need to compute blockers
-			std::vector<STrie*> cofaces(compute_cofaces(simplex_begin, simplex_end));
-			std::vector<Simplex_handle> max_faces;
+	template<typename SimpleHandleOutputIterator>
+	void add_blockers(SimpleHandleOutputIterator simplex_begin, SimpleHandleOutputIterator simplex_end){
+		Tries<Simplex_handle> tries(num_vertices(),simplex_begin,simplex_end);
+		tries.init_next_dimension();
+		auto simplices(tries.next_dimension_simplices());
 
-			for (auto i = 0u; i < num_vertices(); ++i) {
-				auto max_faces_i = cofaces[i]->maximal_faces();
-				max_faces.insert(max_faces.end(), max_faces_i.begin(), max_faces_i.end());
-			}
+		while(!simplices.empty()){
+			simplices = tries.next_dimension_simplices();
+			for(auto& sigma : simplices){
+				//common_positive_neighbors is the set of vertices u such that
+				//for all s in sigma, us is an edge and u>s
+				Simplex_handle common_positive_neighbors(tries.positive_neighbors(sigma.last_vertex()));
+				for(auto sigma_it = sigma.rbegin(); sigma_it != sigma.rend(); ++sigma_it/**/)
+					if(sigma_it != sigma.rbegin())
+						common_positive_neighbors.intersection(tries.positive_neighbors(*sigma_it));
 
-			// all time here
-
-			// for every maximal face s, it picks its first vertex v and check for all nv \in N(v)
-			// if s union nv is in the complex, if not it is a blocker.
-			for (auto max_face : max_faces) {
-				if (max_face.dimension() > 0) {
-					auto first_v = max_face.first_vertex();
-					for (auto nv : vertex_range(first_v)) {
-						if (!max_face.contains(nv) && max_face.first_vertex() < nv) {
-							// check that all edges in vertices(max_face)\cup nv are here
-							// since max_face is a simplex, we only need to check that edges
-							// (x nv) where x \in max_face are present
-							bool all_edges_here = true;
-							for (auto x : max_face)
-								if (!contains_edge(x, nv)) {
-									all_edges_here = false;
-									break;
-								}
-							if (all_edges_here) {  // eg  this->contains(max_face)
-								max_face.add_vertex(nv);
-								if (!cofaces[first_v]->contains(max_face)) {
-									// if there exists a blocker included in max_face, we remove it
-									// as it is not a minimum missing face
-									// the other alternative would be to check to all properfaces
-									// are in the complex before adding a blocker but that
-									// would be more expensive if there are few blockers
-									std::vector<Blocker_handle> blockers_to_remove;
-									bool is_blocker = true;
-									for (auto b : blocker_range(first_v))
-										if (b->contains(max_face)){
-											blockers_to_remove.push_back(b);
-										}
-										else
-											if (max_face.contains(*b)) {
-												is_blocker = false;
-												break;
-											}
-									for (auto b : blockers_to_remove)
-										this->delete_blocker(b);
-
-									if(is_blocker)
-										add_blocker(max_face);
-								}
-								max_face.remove_vertex(nv);
-							}
+				for(auto x : common_positive_neighbors){
+					//first test that all edges sx are here for all s in sigma
+					bool all_edges_here = true;
+					for(auto s : sigma)
+						if(!contains_edge(x,s)){
+							all_edges_here = false;
+							break;
 						}
-					}
+					if(!all_edges_here) continue;
+
+					// all edges of sigma \cup x are here
+					//we have a blocker if all proper faces of sigma \cup x
+					// are in the complex and if sigma \cup x is not in the complex
+					//the first is equivalent at checking if blocks(sigma \cup x) is true
+					//as all blockers of lower dimension have already been computed
+					sigma.add_vertex(x);
+					if(!tries.contains(sigma)&&!blocks(sigma))
+						add_blocker(sigma);
+					sigma.remove_vertex(x);
 				}
+
 			}
-			for (auto i = 0u; i < num_vertices(); ++i)
-				delete(cofaces[i]);
 		}
 	}
+
+
+public:
+
 
 	// We cannot use the default copy constructor since we need
 	// to make a copy of each of the blockers
@@ -824,11 +801,12 @@ private:
 	 * is a face of sigma.
 	 */
 	bool blocks(const Simplex_handle & sigma) const {
-		for (auto blocker : const_blocker_range()) {
-			if (sigma.contains(*blocker))
-				return true;
-		}
+		for(auto s : sigma)
+			for (auto blocker : const_blocker_range(s))
+				if (sigma.contains(*blocker))
+					return true;
 		return false;
+
 	}
 
 	//@}

@@ -708,10 +708,9 @@ bool test_constructor(){
 
 	add_triangle(0,1,5,simplices);
 	add_triangle(1,2,3,simplices);
-	add_triangle(2,3,4,simplices);
 	add_triangle(1,3,4,simplices);
 	add_triangle(1,2,4,simplices);
-
+	add_triangle(2,3,4,simplices);
 
 	Complex complex(simplices.begin(),simplices.end());
 
@@ -774,6 +773,7 @@ bool test_constructor3(){
 	Complex complex(simplices.begin(),simplices.end());
 
 	DBGVALUE(complex.to_string());
+
 	if(complex.num_blockers()!=1) return false;
 		Sh expected_blocker(Vh(0),Vh(1),Vh(2));
 		for(auto b : complex.const_blocker_range())

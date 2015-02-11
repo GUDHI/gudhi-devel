@@ -182,6 +182,15 @@ class Skeleton_blocker_simplex {
     return simplex_set.cend();
   }
 
+  typename std::set<T>::const_reverse_iterator rbegin() const {
+    return simplex_set.crbegin();
+  }
+
+  typename std::set<T>::const_reverse_iterator rend() const {
+    return simplex_set.crend();
+  }
+
+
   typename std::set<T>::iterator begin() {
     return simplex_set.begin();
   }

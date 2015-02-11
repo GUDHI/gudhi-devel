@@ -30,6 +30,8 @@
 
 #include <memory>
 #include <vector>
+#include <deque>
+#include <set>
 
 namespace Gudhi {
 
@@ -37,10 +39,10 @@ namespace Gudhi {
 namespace skbl {
 
 
-template<typename SkeletonBlockerComplex>
+template<typename SimplexHandle>
 struct Trie{
-	typedef typename SkeletonBlockerComplex::Vertex_handle Vertex_handle;
-	typedef typename SkeletonBlockerComplex::Simplex_handle Simplex_handle;
+	typedef SimplexHandle Simplex_handle;
+	typedef typename SimplexHandle::Vertex_handle Vertex_handle;
 
 	Vertex_handle v;
 	std::vector<std::shared_ptr<Trie> > childs;
@@ -65,6 +67,7 @@ public:
 			child->parent_ = this;
 		}
 	}
+
 	typedef typename Simplex_handle::Simplex_vertex_const_iterator Simplex_vertex_const_iterator;
 
 
@@ -192,6 +195,80 @@ public:
 		return stream;
 	}
 };
+
+
+template<typename SimplexHandle>
+struct Tries{
+	typedef typename SimplexHandle::Vertex_handle Vertex_handle;
+	typedef SimplexHandle Simplex_handle;
+
+	typedef Trie<Simplex_handle> STrie;
+
+
+	template<typename SimpleHandleOutputIterator>
+	Tries(unsigned num_vertices,SimpleHandleOutputIterator simplex_begin, SimpleHandleOutputIterator simplex_end):
+	cofaces_(num_vertices,0){
+		for (auto i = 0u; i < num_vertices; ++i)
+			cofaces_[i] = new STrie(Vertex_handle(i));
+		for (auto s_it = simplex_begin; s_it != simplex_end; ++s_it) {
+			if (s_it->dimension() >= 1)
+				cofaces_[s_it->first_vertex()]->add_simplex(*s_it);
+		}
+	}
+
+	~Tries(){
+		for(STrie* t : cofaces_)
+			delete t;
+	}
+
+	//return a simplex that consists in all u such uv is an edge and u>v
+	Simplex_handle positive_neighbors(Vertex_handle v) const{
+		Simplex_handle res;
+		for(auto child : cofaces_[v]->childs)
+			res.add_vertex(child->v);
+		return res;
+	}
+
+	bool contains(const Simplex_handle& s) const{
+		auto first_v = s.first_vertex();
+		return cofaces_[first_v]->contains(s);
+	}
+
+	friend std::ostream& operator<<(std::ostream& stream, const Tries& tries){
+		for(auto trie : tries.cofaces_)
+			stream<<*trie<<std::endl;
+		return stream;
+	}
+
+	//init_next_dimension must be called first
+	std::vector<Simplex_handle> next_dimension_simplices() const{
+		std::vector<Simplex_handle> res;
+		while(!to_see_.empty() && to_see_.front()->simplex().dimension()==current_dimension_){
+			res.emplace_back(to_see_.front()->simplex());
+			for(auto child : to_see_.front()->childs)
+				to_see_.push_back(child.get());
+			to_see_.pop_front();
+		}
+		++current_dimension_;
+		return res;
+	}
+
+	void init_next_dimension() const{
+		for(auto trie : cofaces_)
+			to_see_.push_back(trie);
+	}
+
+private:
+	mutable std::deque<STrie*> to_see_;
+	mutable unsigned current_dimension_=0;
+
+
+	std::vector<STrie*> cofaces_;
+
+};
+
+
+
 }
 
 }
