@@ -30,8 +30,8 @@ namespace Gudhi{
 namespace skbl {
 
 template<typename SkeletonBlockerComplex>
-class Complex_edge_around_vertex_iterator :
- public boost::iterator_facade < Complex_edge_around_vertex_iterator<SkeletonBlockerComplex>
+class Edge_around_vertex_iterator :
+ public boost::iterator_facade < Edge_around_vertex_iterator<SkeletonBlockerComplex>
 		, typename SkeletonBlockerComplex::Edge_handle const
 		, boost::forward_traversal_tag
 		, typename SkeletonBlockerComplex::Edge_handle const
@@ -54,10 +54,10 @@ private:
 
 public:
 
-	Complex_edge_around_vertex_iterator():complex(NULL){
+	Edge_around_vertex_iterator():complex(NULL){
 	}
 
-	Complex_edge_around_vertex_iterator(const Complex* complex_,Vertex_handle v_):
+	Edge_around_vertex_iterator(const Complex* complex_,Vertex_handle v_):
 		complex(complex_),
 		v(v_)
 	{
@@ -67,7 +67,7 @@ public:
 	/**
 	 * returns an iterator to the end
 	 */
-	Complex_edge_around_vertex_iterator(const Complex* complex_,Vertex_handle v_,int end):
+	Edge_around_vertex_iterator(const Complex* complex_,Vertex_handle v_,int end):
 		complex(complex_),
 		v(v_)
 	{
@@ -75,7 +75,7 @@ public:
 		set_end();
 	}
 
-	bool equal(const Complex_edge_around_vertex_iterator& other) const{
+	bool equal(const Edge_around_vertex_iterator& other) const{
 		return (complex== other.complex) && (v == other.v) && (current_ == other.current_) && (end_ == other.end_);
 	}
 
@@ -102,8 +102,8 @@ private:
  *
  */
 template<typename SkeletonBlockerComplex>
-class Complex_edge_iterator :
-public boost::iterator_facade < Complex_edge_iterator<SkeletonBlockerComplex>
+class Edge_iterator :
+public boost::iterator_facade < Edge_iterator<SkeletonBlockerComplex>
 , typename SkeletonBlockerComplex::Edge_handle const
 , boost::forward_traversal_tag
 , typename SkeletonBlockerComplex::Edge_handle const
@@ -120,10 +120,10 @@ public:
 	const Complex* complex;
 	std::pair<boost_edge_iterator,boost_edge_iterator> edge_iterator ;
 
-	Complex_edge_iterator():complex(NULL){
+	Edge_iterator():complex(NULL){
 	}
 
-	Complex_edge_iterator(const SkeletonBlockerComplex* complex_):
+	Edge_iterator(const SkeletonBlockerComplex* complex_):
 		complex(complex_),
 		edge_iterator(boost::edges(complex_->skeleton))
 	{
@@ -132,7 +132,7 @@ public:
 	/**
 	 * return an iterator to the end
 	 */
-	Complex_edge_iterator(const SkeletonBlockerComplex* complex_,int end):
+	Edge_iterator(const SkeletonBlockerComplex* complex_,int end):
 		complex(complex_),
 		edge_iterator(boost::edges(complex_->skeleton))
 	{
@@ -140,7 +140,7 @@ public:
 	}
 
 
-	bool equal(const Complex_edge_iterator& other) const{
+	bool equal(const Edge_iterator& other) const{
 		return (complex == other.complex) && (edge_iterator == other.edge_iterator);
 	}
 

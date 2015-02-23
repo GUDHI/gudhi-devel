@@ -67,7 +67,6 @@ class Simplex_around_vertex_iterator :
 	typedef typename Link::Vertex_handle Link_vertex_handle;
 	// Link_vertex_handle == Complex_Vertex_handle but this renaming helps avoiding confusion
 
-
 	typedef typename Gudhi::skbl::Trie<Simplex_handle> Trie;
 
 
@@ -97,8 +96,7 @@ public:
 		v(other.v),
 		link_v(other.link_v),
 		trie(other.trie),
-		nodes_to_be_seen(other.nodes_to_be_seen)
-	{
+		nodes_to_be_seen(other.nodes_to_be_seen){
 		if(!other.is_end()){
 		}
 	}
@@ -237,7 +235,7 @@ class Simplex_iterator :
 	typedef typename Complex::Edge_handle Edge_handle;
 	typedef typename Complex::Simplex_handle Simplex_handle;
 
-	typedef typename Complex::CVI CVI;
+	typedef typename Complex::Complex_vertex_iterator Complex_vertex_iterator;
 
 
 	typedef typename Link::Vertex_handle Link_vertex_handle;
@@ -245,7 +243,7 @@ class Simplex_iterator :
 private:
 
 	const Complex* complex_;
-	CVI current_vertex_;
+	Complex_vertex_iterator current_vertex_;
 
 	typedef Simplex_around_vertex_iterator<SkeletonBlockerComplex,Link> SAVI;
 	SAVI current_simplex_around_current_vertex_;

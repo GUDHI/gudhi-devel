@@ -24,16 +24,18 @@
 #include "gudhi/Edge_contraction.h"
 #include "gudhi/Skeleton_blocker.h"
 #include "gudhi/Off_reader.h"
-
+#include "gudhi/Point.h"
 
 using namespace std;
 using namespace Gudhi;
 using namespace skbl;
 using namespace contraction;
 
+
 struct Geometry_trait{
-	typedef std::vector<double> Point;
+	typedef Point_d Point;
 };
+
 
 typedef Geometry_trait::Point Point;
 typedef Skeleton_blocker_simple_geometric_traits<Geometry_trait> Complex_geometric_traits;
@@ -41,25 +43,15 @@ typedef Skeleton_blocker_geometric_complex< Complex_geometric_traits > Complex;
 typedef Edge_profile<Complex> Profile;
 typedef Skeleton_blocker_contractor<Complex> Complex_contractor;
 
-template<typename Point>
-double eucl_distance(const Point& a,const Point& b){
-	double res = 0;
-	auto a_coord = a.begin();
-	auto b_coord = b.begin();
-	for(; a_coord != a.end(); a_coord++, b_coord++){
-		res += (*a_coord - *b_coord) * (*a_coord - *b_coord);
-	}
-	return sqrt(res);
-}
-
 template<typename ComplexType>
 void build_rips(ComplexType& complex, double offset){
 	if (offset<=0) return;
 	auto vertices = complex.vertex_range();
 	for (auto p = vertices.begin(); p != vertices.end(); ++p)
-		for (auto q = p; ++q != vertices.end(); /**/)
-			if (eucl_distance(complex.point(*p), complex.point(*q)) < 2 * offset)
+		for (auto q = p; ++q != vertices.end(); /**/){
+			if ( squared_dist(complex.point(*p), complex.point(*q)) < 4 * offset * offset)
 				complex.add_edge(*p,*q);
+		}
 }
 
 int main (int argc, char *argv[])
@@ -71,13 +63,14 @@ int main (int argc, char *argv[])
 
 	Complex complex;
 
-	// load the points
+	// load only the points
 	Skeleton_blocker_off_reader<Complex> off_reader(argv[1],complex,true);
 	if(!off_reader.is_valid()){
 		std::cerr << "Unable to read file:"<<argv[1]<<std::endl;
 		return EXIT_FAILURE;
 	}
-	std::cout << "Build the Rips complex"<<std::endl;
+
+	std::cout << "Build the Rips complex with "<<complex.num_vertices()<<" vertices"<<std::endl;
 
 	build_rips(complex,atof(argv[2]));
 

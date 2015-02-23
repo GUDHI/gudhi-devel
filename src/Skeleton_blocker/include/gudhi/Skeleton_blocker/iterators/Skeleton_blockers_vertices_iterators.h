@@ -35,8 +35,8 @@ namespace skbl {
  *@remark Incrementation increases Vertex_handle.
  */
 template<typename SkeletonBlockerComplex>
-class Complex_vertex_iterator : public boost::iterator_facade
-< Complex_vertex_iterator <SkeletonBlockerComplex>
+class Vertex_iterator : public boost::iterator_facade
+< Vertex_iterator <SkeletonBlockerComplex>
   , typename SkeletonBlockerComplex::Vertex_handle const
   , boost::forward_traversal_tag
   , typename SkeletonBlockerComplex::Vertex_handle const
@@ -52,10 +52,10 @@ private:
 
 
 public:
-	Complex_vertex_iterator():complex(NULL){
+	Vertex_iterator():complex(NULL){
 	}
 
-	Complex_vertex_iterator(const SkeletonBlockerComplex* complex_):
+	Vertex_iterator(const SkeletonBlockerComplex* complex_):
 		complex(complex_),
 		vertexIterator(vertices(complex_->skeleton)){
 		if(!finished() && !is_active()) {
@@ -66,7 +66,7 @@ public:
 	/**
 	 * return an iterator to the end.
 	 */
-	Complex_vertex_iterator(const SkeletonBlockerComplex* complex_,int end):
+	Vertex_iterator(const SkeletonBlockerComplex* complex_,int end):
 		complex(complex_),vertexIterator(vertices(complex_->skeleton)){
 		vertexIterator.first = vertexIterator.second ;
 	}
@@ -77,11 +77,11 @@ public:
 		return(Vertex_handle(*(vertexIterator.first)));
 	}
 
-	bool equal(const Complex_vertex_iterator& other) const{
+	bool equal(const Vertex_iterator& other) const{
 		return vertexIterator == other.vertexIterator &&  complex == other.complex;
 	}
 
-	bool operator<(const Complex_vertex_iterator& other) const{
+	bool operator<(const Vertex_iterator& other) const{
 		return dereference()<other.dereference();
 	}
 
@@ -107,8 +107,8 @@ private:
 
 
 template<typename SkeletonBlockerComplex>
-class Complex_neighbors_vertices_iterator
-: public boost::iterator_facade < Complex_neighbors_vertices_iterator<SkeletonBlockerComplex>
+class Neighbors_vertices_iterator
+: public boost::iterator_facade < Neighbors_vertices_iterator<SkeletonBlockerComplex>
   , typename SkeletonBlockerComplex::Vertex_handle const
   , boost::forward_traversal_tag
   , typename SkeletonBlockerComplex::Vertex_handle const
@@ -133,10 +133,10 @@ public:
 	//	boost_adjacency_iterator ai, ai_end;
 	//	for (tie(ai, ai_end) = adjacent_vertices(v.vertex, skeleton); ai != ai_end; ++ai){
 
-	Complex_neighbors_vertices_iterator():complex(NULL){
+	Neighbors_vertices_iterator():complex(NULL){
 	}
 
-	Complex_neighbors_vertices_iterator(const Complex* complex_,Vertex_handle v_):
+	Neighbors_vertices_iterator(const Complex* complex_,Vertex_handle v_):
 		complex(complex_),
 		v(v_){
 		tie(current_,end_) = adjacent_vertices(v.vertex, complex->skeleton);
@@ -145,7 +145,7 @@ public:
 	/**
 	 * returns an iterator to the end
 	 */
-	Complex_neighbors_vertices_iterator(const Complex* complex_,Vertex_handle v_,int end):
+	Neighbors_vertices_iterator(const Complex* complex_,Vertex_handle v_,int end):
 		complex(complex_),
 		v(v_){
 		tie(current_,end_) = adjacent_vertices(v.vertex, complex->skeleton);
@@ -162,7 +162,7 @@ public:
 		return(Vertex_handle(*current_));
 	}
 
-	bool equal(const Complex_neighbors_vertices_iterator& other) const{
+	bool equal(const Neighbors_vertices_iterator& other) const{
 		return (complex== other.complex) && (v == other.v) && (current_ == other.current_) && (end_ == other.end_);
 	}
 

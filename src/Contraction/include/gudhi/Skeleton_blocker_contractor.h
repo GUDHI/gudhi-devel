@@ -338,6 +338,7 @@ private:
 	}
 
 	bool is_contraction_valid( Profile const& profile, Placement_type placement ) const{
+		if(!valid_contraction_policy_) return true;
 		return (*valid_contraction_policy_)(profile,placement);
 	}
 

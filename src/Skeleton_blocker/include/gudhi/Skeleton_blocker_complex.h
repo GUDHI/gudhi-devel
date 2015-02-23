@@ -63,10 +63,10 @@ namespace skbl {
  */
 template<class SkeletonBlockerDS>
 class Skeleton_blocker_complex {
-	template<class ComplexType> friend class Complex_vertex_iterator;
-	template<class ComplexType> friend class Complex_neighbors_vertices_iterator;
-	template<class ComplexType> friend class Complex_edge_iterator;
-	template<class ComplexType> friend class Complex_edge_around_vertex_iterator;
+	template<class ComplexType> friend class Vertex_iterator;
+	template<class ComplexType> friend class Neighbors_vertices_iterator;
+	template<class ComplexType> friend class Edge_iterator;
+	template<class ComplexType> friend class Edge_around_vertex_iterator;
 
 	template<class ComplexType> friend class Skeleton_blocker_link_complex;
 	template<class ComplexType> friend class Skeleton_blocker_link_superior;
@@ -587,7 +587,6 @@ public:
 		if (found) {
 			if (visitor)
 				visitor->on_remove_edge(a, b);
-			// if (heapCollapse.Contains(edge)) heapCollapse.Delete(edge);
 			boost::remove_edge(a.vertex, b.vertex, skeleton);
 			degree_[a.vertex]--;
 			degree_[b.vertex]--;
@@ -1237,35 +1236,34 @@ public:
 	/** @name Vertex iterators
 	 */
 	//@{
-	typedef Complex_vertex_iterator<Skeleton_blocker_complex> CVI;  // todo rename
+	typedef Vertex_iterator<Skeleton_blocker_complex> Complex_vertex_iterator;
 
 	//
-	// @brief Range over the vertices of the simplicial complex.
+	// Range over the vertices of the simplicial complex.
 	// Methods .begin() and .end() return a Complex_vertex_iterator.
 	//
-	typedef boost::iterator_range<
-			Complex_vertex_iterator<Skeleton_blocker_complex> > Complex_vertex_range;
+	typedef boost::iterator_range<Complex_vertex_iterator> Complex_vertex_range;
 
 	/**
 	 * @brief Returns a Complex_vertex_range over all vertices of the complex
 	 */
 	Complex_vertex_range vertex_range() const {
-		auto begin = Complex_vertex_iterator<Skeleton_blocker_complex>(this);
-		auto end = Complex_vertex_iterator<Skeleton_blocker_complex>(this, 0);
+		auto begin = Complex_vertex_iterator(this);
+		auto end = Complex_vertex_iterator(this, 0);
 		return Complex_vertex_range(begin, end);
 	}
 
-	typedef boost::iterator_range<
-			Complex_neighbors_vertices_iterator<Skeleton_blocker_complex> > Complex_neighbors_vertices_range;
+	typedef Neighbors_vertices_iterator<Skeleton_blocker_complex> Complex_neighbors_vertices_iterator;
+
+
+	typedef boost::iterator_range<Complex_neighbors_vertices_iterator> Complex_neighbors_vertices_range;
 
 	/**
 	 * @brief Returns a Complex_edge_range over all edges of the simplicial complex that passes trough v
 	 */
 	Complex_neighbors_vertices_range vertex_range(Vertex_handle v) const {
-		auto begin = Complex_neighbors_vertices_iterator<Skeleton_blocker_complex>(
-				this, v);
-		auto end = Complex_neighbors_vertices_iterator<Skeleton_blocker_complex>(
-				this, v, 0);
+		auto begin = Complex_neighbors_vertices_iterator(this, v);
+		auto end = Complex_neighbors_vertices_iterator(this, v, 0);
 		return Complex_neighbors_vertices_range(begin, end);
 	}
 
@@ -1275,28 +1273,33 @@ public:
 	 */
 	//@{
 
-	typedef boost::iterator_range<
-			Complex_edge_iterator<Skeleton_blocker_complex<SkeletonBlockerDS>>> Complex_edge_range;
+	typedef Edge_iterator<Skeleton_blocker_complex> Complex_edge_iterator;
+
+
+	typedef boost::iterator_range<Complex_edge_iterator> Complex_edge_range;
 
 	/**
 	 * @brief Returns a Complex_edge_range over all edges of the simplicial complex
 	 */
 	Complex_edge_range edge_range() const {
-		auto begin = Complex_edge_iterator<Skeleton_blocker_complex < SkeletonBlockerDS >> (this);
-		auto end = Complex_edge_iterator<Skeleton_blocker_complex < SkeletonBlockerDS >> (this, 0);
+		auto begin = Complex_edge_iterator(this);
+		auto end = Complex_edge_iterator(this, 0);
 		return Complex_edge_range(begin, end);
 	}
 
-	typedef boost::iterator_range <Complex_edge_around_vertex_iterator<Skeleton_blocker_complex<SkeletonBlockerDS>>>
-			Complex_edge_around_vertex_range;
+
+	typedef Edge_around_vertex_iterator<Skeleton_blocker_complex> Complex_edge_around_vertex_iterator;
+
+
+	typedef boost::iterator_range <Complex_edge_around_vertex_iterator>	Complex_edge_around_vertex_range;
 
 	/**
 	 * @brief Returns a Complex_edge_range over all edges of the simplicial complex that passes
 	 * through 'v'
 	 */
 	Complex_edge_around_vertex_range edge_range(Vertex_handle v) const {
-		auto begin = Complex_edge_around_vertex_iterator<Skeleton_blocker_complex < SkeletonBlockerDS >> (this, v);
-		auto end = Complex_edge_around_vertex_iterator<Skeleton_blocker_complex < SkeletonBlockerDS >> (this, v, 0);
+		auto begin = Complex_edge_around_vertex_iterator(this, v);
+		auto end = Complex_edge_around_vertex_iterator(this, v, 0);
 		return Complex_edge_around_vertex_range(begin, end);
 	}
 
@@ -1326,6 +1329,10 @@ public:
 	}
 
 	typedef boost::iterator_range<Triangle_iterator<Skeleton_blocker_complex> > Complex_triangle_range;
+
+
+	typedef Triangle_iterator<Skeleton_blocker_complex> Complex_triangle_iterator;
+
 
 	/**
 	 * @brief Range over triangles of the simplicial complex.

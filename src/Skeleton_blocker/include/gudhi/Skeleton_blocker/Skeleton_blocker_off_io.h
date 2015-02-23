@@ -134,7 +134,7 @@ public:
 	Skeleton_blocker_off_reader(const std::string & name_file, Complex& read_complex, bool read_only_points = false,bool is_flag = false):valid_(false) {
 		std::ifstream stream(name_file);
 		if (stream.is_open()) {
-			if(is_flag){
+			if(is_flag || read_only_points){
 				Skeleton_blocker_off_flag_visitor_reader<Complex> off_visitor(read_complex, read_only_points);
 				Off_reader off_reader(stream);
 				valid_ = off_reader.read(off_visitor);
@@ -184,8 +184,8 @@ public:
 			for(auto v : save_complex.vertex_range()){
 				vertex_num[v]=current_vertex++;
 				const auto& pt(save_complex.point(v));
-				for(auto it = pt.begin();it!=pt.end();++it)
-					stream<<*it<<" ";
+				for(auto x : pt)
+					stream<<x<<" ";
 				stream<<std::endl;
 			}
 

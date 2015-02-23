@@ -49,7 +49,7 @@ private:
 	typedef typename LinkType::Vertex_handle Vertex_handle;
 	typedef typename LinkType::Root_vertex_handle Root_vertex_handle;
 	typedef typename LinkType::Simplex_handle Simplex_handle;
-	typedef Complex_edge_iterator<Complex> Complex_edge_iterator_;
+	typedef typename Complex::Complex_edge_iterator Complex_edge_iterator_;
 
 	const Complex* complex_;
 	Vertex_handle v_;
@@ -133,9 +133,10 @@ private:
 	typedef typename SkeletonBlockerComplex::Root_vertex_handle Root_vertex_handle;
 	typedef typename SkeletonBlockerComplex::Simplex_handle Simplex_handle;
 	typedef typename SkeletonBlockerComplex::Superior_triangle_around_vertex_iterator STAVI;
+	typedef typename SkeletonBlockerComplex::Complex_vertex_iterator Complex_vertex_iterator;
 
 	const SkeletonBlockerComplex* complex_;
-	Complex_vertex_iterator<SkeletonBlockerComplex> current_vertex_;
+	Complex_vertex_iterator current_vertex_;
 	STAVI current_triangle_;
 	bool is_end_;
 public:
@@ -176,7 +177,7 @@ public:
 
 	Triangle_iterator& operator=(const Triangle_iterator & other){
 		complex_ = other.complex_;
-		Complex_vertex_iterator<SkeletonBlockerComplex> current_vertex_;
+		Complex_vertex_iterator current_vertex_;
 		STAVI current_triangle_;
 		return *this;
 	}

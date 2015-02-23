@@ -32,14 +32,14 @@
 #include <vector>
 #include <cassert>
 #include <cstddef>
+#include <initializer_list>
 
 class Point_d{
 public:
-	Point_d():coords_(3,0){}
-	Point_d(size_t dim):coords_(dim,0){}
+	Point_d(size_t dim=3):coords_(dim,0){}
 	Point_d(const Point_d& other):coords_(other.coords_){}
-	Point_d(double x,double y,double z):coords_({x,y,z}){}
-
+	Point_d(const std::initializer_list<double>& list):coords_(list) {
+	}
 	template<typename CoordsIt>
 	Point_d(CoordsIt begin,CoordsIt end):coords_(begin,end){}
 
@@ -93,11 +93,11 @@ public:
 		return res;
 	}
 
-	double squared_dist(const Point_d& other) const{
-		assert(dimension()==other.dimension());
+	friend double squared_dist(const Point_d& p1,const Point_d& p2){
+		assert(p1.dimension()==p2.dimension());
 		double res = 0;
-		for(unsigned i = 0; i < coords_.size(); ++i)
-			res+= coords_[i]*coords_[i] + other[i]*other[i];
+		for(unsigned i = 0; i < p1.coords_.size(); ++i)
+			res+= (p1[i]-p2[i])*(p1[i]-p2[i]);
 		return res;
 	}
 

@@ -92,7 +92,8 @@ class Skeleton_blocker_geometric_complex :
 		unsigned current = 0;
 		complex=make_complex_from_top_faces<Skeleton_blocker_geometric_complex>(simplex_begin,simplex_end,is_flag_complex);
 		for(auto point = points_begin; point != points_end; ++point)
-			complex.point(Vertex_handle(current++)) = Point(point->begin(),point->end());
+			//			complex.point(Vertex_handle(current++)) = Point(point->begin(),point->end());
+			complex.point(Vertex_handle(current++)) = Point(*point);
 		return complex;
 	}
 
@@ -185,6 +186,31 @@ class Skeleton_blocker_geometric_complex :
 		return link;
 	}
 
+	typedef Skeleton_blocker_link_complex<Skeleton_blocker_complex<SkeletonBlockerGeometricDS>> Abstract_link;
+
+	/**
+	 * Constructs the abstract link of v (without points coordinates).
+	 */
+	Abstract_link abstract_link(Vertex_handle v) const {
+		return Abstract_link(*this, Simplex_handle(v));
+	}
+
+	/**
+	 * Constructs the link of 'simplex' with points coordinates.
+	 */
+	Geometric_link abstract_link(const Simplex_handle& simplex) const {
+		return Abstract_link(*this, simplex);
+	}
+
+	/**
+	 * Constructs the link of 'simplex' with points coordinates.
+	 */
+	Geometric_link abstract_link(Edge_handle edge) const {
+		return Abstract_link(*this, edge);
+	}
+
+
+
 		private:
 
 	void add_points_to_link(Geometric_link& link) const {
@@ -193,6 +219,9 @@ class Skeleton_blocker_geometric_complex :
 			link.point(v) = (*this).point(v_root);
 		}
 	}
+
+
+
 };
 
 } // namespace skbl
