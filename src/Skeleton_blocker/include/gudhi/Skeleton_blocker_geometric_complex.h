@@ -198,14 +198,14 @@ class Skeleton_blocker_geometric_complex :
 	/**
 	 * Constructs the link of 'simplex' with points coordinates.
 	 */
-	Geometric_link abstract_link(const Simplex_handle& simplex) const {
+	Abstract_link abstract_link(const Simplex_handle& simplex) const {
 		return Abstract_link(*this, simplex);
 	}
 
 	/**
 	 * Constructs the link of 'simplex' with points coordinates.
 	 */
-	Geometric_link abstract_link(Edge_handle edge) const {
+	Abstract_link abstract_link(Edge_handle edge) const {
 		return Abstract_link(*this, edge);
 	}
 
