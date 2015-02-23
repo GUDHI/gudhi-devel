@@ -501,10 +501,16 @@ class Simplex_tree {
         insert_simplex_and_subfaces(NsimplexMinusOne, filtration);
       }
       // N-Simplex insert
-      insert_simplex(Nsimplex, filtration);
+      std::pair<Simplex_handle, bool> returned = insert_simplex(Nsimplex, filtration);
+      if (returned.second == true) {
+        num_simplices_++;
+      }
     } else if (Nsimplex.size() == 1) {
       // 1-Simplex insert - End of recursivity
-      insert_simplex(Nsimplex, filtration);
+      std::pair<Simplex_handle, bool> returned = insert_simplex(Nsimplex, filtration);
+      if (returned.second == true) {
+        num_simplices_++;
+      }
     } else {
       // Nothing to insert - empty vector
     }

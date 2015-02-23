@@ -82,6 +82,8 @@ else()
   add_subdirectory(src/Skeleton_blocker/test) 
   add_subdirectory(src/Skeleton_blocker/example) 
   add_subdirectory(src/Contraction/example)
+  add_subdirectory(src/Hasse_complex/example)
+
 endif()  
 
 
