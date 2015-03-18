@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 2.6)
+project(GUDHIHasseComplexExample)
+
+add_executable ( hasse_complex_from_simplex_tree hasse_complex_from_simplex_tree.cpp )
+add_test(hasse_complex_from_simplex_tree ${CMAKE_CURRENT_BINARY_DIR}/hasse_complex_from_simplex_tree)

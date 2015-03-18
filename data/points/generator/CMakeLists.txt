@@ -16,6 +16,6 @@ if(CGAL_FOUND)
     add_test(hypergenerator_in_sphere_50000_2 ${CMAKE_CURRENT_BINARY_DIR}/hypergenerator in sphere inSphere.off 50000 2)
     # on cube is not available in CGAL
     add_test(hypergenerator_in_cube_7000_12_10.8 ${CMAKE_CURRENT_BINARY_DIR}/hypergenerator in cube inCube.off 7000 12 10.8)
-    add_test(hypergenerator_in_cube_50000_2 ${CMAKE_CURRENT_BINARY_DIR}/hypergenerator in cube inCube.off 50000 2)
+    add_test(hypergenerator_in_cube_50000_2 ${CMAKE_CURRENT_BINARY_DIR}/hypergenerator in cube inCube.off 50000 3)
   endif()
 endif()
