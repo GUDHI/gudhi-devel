@@ -30,7 +30,7 @@
 #include "gudhi/distance_functions.h"
 #include "gudhi/Simplex_tree.h"
 #include <vector>
-#include <forward_list>
+#include <list>
 #include <math.h>
 
 namespace Gudhi {
@@ -42,17 +42,43 @@ template<typename FiltrationValue = double,
 class Simplex_tree;
   */  
 
-      
+    /*
+    typedef int Witness_id;
+typedef int Landmark_id;
+typedef int Simplex_handle; //index in vector complex_
+    */
+
 template<typename FiltrationValue = double,
          typename SimplexKey      = int,
          typename VertexHandle    = int>
-    class Witness_complex: public Simplex_tree<> {
+class Witness_complex: public Simplex_tree<> {
     //class Witness_complex: public Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> {
     //class Witness_complex {
-public:
+private:
 
+  /*
+  template < typename Witness_id = int,
+             typename Landmark_id = int,
+             typename Simplex_handle = Simplex_handle >
+  struct Active_witness {
+    Witness_id witness_id;
+    Landmark_id landmark_id;
+    Simplex_handle simplex_handle;
+  };
+  */
+      
+struct Active_witness {
+    int witness_id;
+    int landmark_id;
+    Simplex_handle simplex_handle;
+};
+    
+      
+
+
+public:
+  
 //Simplex_tree<> st;
-// typedef int                      Simplex_handle; //index in vector complex_
  
 // typedef typename std::vector< Simplex_handle >::iterator    Boundary_simplex_iterator;
 // typedef boost::iterator_range<Boundary_simplex_iterator>    Boundary_simplex_range;  
@@ -69,16 +95,18 @@ public:
    *
    * Must be a signed integer type. */
 //  typedef SimplexKey Simplex_key;
+
   /** \brief Type for the vertex handle.
    *
    * Must be a signed integer type. It admits a total order <. */
-//  typedef VertexHandle Vertex_handle;
+  typedef VertexHandle Vertex_handle;
 
-  /* Type of node in the simplex tree. */
-//  typedef Simplex_tree_node_explicit_storage<Simplex_tree> Node;
+  /* Type of node in the simplex tree. */ 
+  typedef Simplex_tree_node_explicit_storage<Simplex_tree> Node;
   /* Type of dictionary Vertex_handle -> Node for traversing the simplex tree. */
-//  typedef typename boost::container::flat_map<Vertex_handle, Node> Dictionary;
-
+  typedef typename boost::container::flat_map<Vertex_handle, Node> Dictionary;
+  typedef typename Dictionary::iterator Simplex_handle;
+  
 /*
   friend class Simplex_tree_node_explicit_storage< Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> >;
   friend class Simplex_tree_siblings< Simplex_tree<FiltrationValue, SimplexKey, VertexHandle>, Dictionary>;
@@ -93,17 +121,16 @@ public:
 // typedef Simplex_tree_siblings<Simplex_tree, Dictionary> Siblings;
 
 
-typedef std::vector< double > Point_t;
-typedef std::vector< Point_t > Point_Vector;
+  typedef std::vector< double > Point_t;
+  typedef std::vector< Point_t > Point_Vector;
+  
+  typedef std::vector< Vertex_handle > typeVectorVertex;
+  typedef std::pair< typeVectorVertex, Filtration_value> typeSimplex;
+  typedef std::pair< Simplex_tree<>::Simplex_handle, bool > typePairSimplexBool;
 
-typedef std::vector< Vertex_handle > typeVectorVertex;
-typedef std::pair<typeVectorVertex, Filtration_value> typeSimplex;
-typedef std::pair< Simplex_tree<>::Simplex_handle, bool > typePairSimplexBool;
-/*
-Witness_complex(int number_of_landmarks, std::string file_name)
-{
-}
-*/
+  typedef int Witness_id;
+  typedef int Landmark_id;
+  typedef std::list< Active_witness > ActiveWitnessList;
 
 /**
  * /brief Iterative construction of the witness complex basing on a matrix of k nearest neighbours of the form {witnesses}x{landmarks}.
@@ -124,27 +151,41 @@ void witness_complex(KNearestNeighbours & knn)
     /* The list of still useful witnesses
      * it will diminuish in the course of iterations
      */
-    std::forward_list<int> active_w = new std::forward_list<int>();
-    for (int i=0; i != nbW; ++i) {
-        // initial fill of active witnesses list
-        active_w.push_front(i);
-    }
+    ActiveWitnessList active_w = new ActiveWitnessList();
     for (int i=0; i != nbL; ++i) {
         // initial fill of 0-dimensional simplices
         // by doing it we don't assume that landmarks are necessarily witnesses themselves anymore
         vh = (Vertex_handle)i;
         vv = {i};
         /* TODO Filtration */
-        simplex = std::make_pair(vv,Filtration_value(0.0));
+        simplex = std::make_pair(vv, Filtration_value(0.0));
         returnValue = this.insert_simplex(simplex.first, simplex.second);
         /* TODO Error if not inserted : normally no need here though*/
     }
+    int u,v;     // two extremities of an edge
+    if (nbL > 1) // if the supposed dimension of the complex is >0
+        for (int i=0; i != nbW; ++i) {
+            // initial fill of active witnesses list
+            u = knn[i][0];
+            v = knn[i][1];
+            if (u > v) {
+                u = v;
+                v = knn[i][0];
+            }
+            //Siblings * curr_sib = &root_;
+            vh = (Vertex_handle)i;
+            vv = {u,v};
+            returnValue = this.insert_simplex(vv,Filtration_value(0.0));
+            active_w.push_back(i,v,returnValue.first);
+            //Simplex_handle sh = root_.members_.begin()+u;
+            //active_w.push_front(i);
+        }
     while (!active_w.empty() && k+1 < nbL ) {
-        std::forward_list<int>::iterator it = active_w.begin();
+        typename ActiveWitnessList::iterator it = active_w.begin();
         while (it != active_w.end()) {
             typeVectorVertex simplex_vector;
             for (int i=0; i != k+1; ++i) {
-                // create a (k+1) element array for the given active landmark
+                // create a (k+1) element array for the given active witness
                 /*
                 typeVectorVertex::iterator itSV = simplex_vector.begin();
                 while (itSV != simplex_vector.end() && *itSV < knn[*it][i]) {
@@ -152,11 +193,14 @@ void witness_complex(KNearestNeighbours & knn)
                 }
                 simplex_vector.insert(itSV,knn[*it][i]);
                 */
-                simplex_vector.push_back(knn[*it][i]);
+                // simplex_vector.push_back(knn[*it][i]);
             }
             /* THE INSERTION: Checking if all the subfaces are in the simplex tree is mandatory */
-            bool ok = all_faces_in(simplex_vecter);
-            returnValue = this.insert_simplex(simplex_vector,0.0);
+            bool ok = all_faces_in(simplex_vector);
+            if (ok) 
+                returnValue = this.insert_simplex(simplex_vector,0.0);
+            else
+                active_w.erase(it++); //First increase the iterator and then erase the previous element
         }
     } 
 }
@@ -165,6 +209,7 @@ private:
 
 bool all_faces_in(typeVectorVertex v)
 {
+
 return true;
 }
 
