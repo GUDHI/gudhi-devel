@@ -37,5 +37,6 @@ else()
   add_subdirectory(example/Skeleton_blocker)                   
   add_subdirectory(example/Contraction)                   
   add_subdirectory(example/Hasse_complex)
+  add_subdirectory(example/Alpha_shapes)
 
 endif()  
