@@ -33,6 +33,8 @@
 #include <list>
 #include <math.h>
 
+#include <iostream>
+
 namespace Gudhi {
 
   /*
@@ -143,13 +145,17 @@ public:
  * Landmarks are supposed to be in [0,nbL-1]
  */
 
+  
 template< typename KNearestNeighbours >
 void witness_complex(KNearestNeighbours & knn)
+//void witness_complex(std::vector< std::vector< Vertex_handle > > & knn)
 {
-    int k=1; /* current dimension in iterative construction */
+  std::cout << "**Start the procedure witness_complex" << std::endl;
+    int k=2; /* current dimension in iterative construction */
     //Construction of the active witness list
     int nbW = knn.size();
     int nbL = knn.at(0).size();
+    std::cout << "Eh?\n";
     //VertexHandle vh;
     typeVectorVertex vv;
     typeSimplex simplex;
@@ -164,10 +170,12 @@ void witness_complex(KNearestNeighbours & knn)
         //vh = (Vertex_handle)i;
         vv = {i};
         /* TODO Filtration */
-        simplex = std::make_pair(vv, Filtration_value(0.0));
-        returnValue = this->insert_simplex(simplex.first, simplex.second);
+        //simplex = std::make_pair(vv, Filtration_value(0.0));
+        //returnValue = this->insert_simplex(simplex.first, simplex.second);
+        returnValue = this->insert_simplex(vv, Filtration_value(0.0));
         /* TODO Error if not inserted : normally no need here though*/
     }
+    std::cout << "Successfully added landmarks" << std::endl;
     int u,v;     // two extremities of an edge
     if (nbL > 1) // if the supposed dimension of the complex is >0
         for (int i=0; i != nbW; ++i) {
@@ -183,22 +191,17 @@ void witness_complex(KNearestNeighbours & knn)
             vv = {u,v};
             returnValue = this->insert_simplex(vv,Filtration_value(0.0));
             active_w.push_back(Active_witness(i,v,returnValue.first));
+            if (returnValue.second) std::cout << "Added edge " << u << v << std::endl;
             //Simplex_handle sh = root_.members_.begin()+u;
             //active_w.push_front(i);
         }
+    std::cout << "Successfully added edges" << std::endl;
     while (!active_w.empty() && k+1 < nbL ) {
+      std::cout << "Started the step k=" << k << std::endl;
         typename ActiveWitnessList::iterator it = active_w.begin();
         while (it != active_w.end()) {
             typeVectorVertex simplex_vector;
             typeVectorVertex suffix;
-            /*
-            for (int i=0; i != k; ++i) {
-                // create a (k+1) element array for the given active witness
-                 simplex_vector.push_back(knn[it->witness_id][i]);
-            }
-            
-            sort(simplex_vector.begin(),simplex_vector.end());
-            */
             /* THE INSERTION: Checking if all the subfaces are in the simplex tree is mandatory */
             bool ok = all_faces_in(knn[it->witness_id][k],it->simplex_handle);
             if (ok) 
@@ -206,6 +209,7 @@ void witness_complex(KNearestNeighbours & knn)
             else
                 active_w.erase(it++); //First increase the iterator and then erase the previous element
         }
+        k++;
     } 
 }
 
@@ -213,16 +217,23 @@ private:
 
   bool all_faces_in(VertexHandle last, Simplex_handle sh)
   {
+    std::cout << "All face in with the landmark " << last << std::endl;
     std::list< VertexHandle > suffix;
     Simplex_handle curr_sh = sh;
     Siblings * curr_sibl = self_siblings(sh);
     VertexHandle curr_vh = curr_sh->first;
     while (curr_vh > last) {
+      std::cout << "We are at " << curr_vh << "\n";
       suffix.push_front(curr_vh);
+      std::cout << "Still fine 1\n";
       curr_vh = curr_sibl->parent();
+      std::cout << "Still fine 2\n";
       curr_sibl = curr_sibl->oncles();
+      std::cout << "Still fine 3\n";
       curr_sh = curr_sibl->find(curr_vh);
+      std::cout << "Still fine 4\n";
     }
+    std::cout << "Arrived at the mid-parent" << std::endl;
     suffix.push_front(last);
     typename std::list< VertexHandle >::iterator itVV = suffix.begin();
     Simplex_handle sh_bup = curr_sh; // Back up the pointer

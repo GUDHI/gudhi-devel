@@ -33,21 +33,22 @@ typedef std::vector< Vertex_handle > typeVectorVertex;
 
 int main (int argc, char * const argv[])
 {
-  Witness_complex<> wc;
+  Witness_complex<> witnessComplex = Witness_complex<>();
   std::vector< typeVectorVertex > KNN;
-  typeVectorVertex witness0  = {1,7,5,2,6,3,4}; KNN.push_back(witness0 );
-  typeVectorVertex witness1  = {2,6,4,5,7,1,3}; KNN.push_back(witness1 );
-  typeVectorVertex witness2  = {3,4,2,1,5,6,7}; KNN.push_back(witness2 );
-  typeVectorVertex witness3  = {4,2,1,3,5,6,7}; KNN.push_back(witness3 );
-  typeVectorVertex witness4  = {5,1,6,7,2,3,4}; KNN.push_back(witness4 );
-  typeVectorVertex witness5  = {6,7,5,2,1,3,4}; KNN.push_back(witness5 );
-  typeVectorVertex witness6  = {7,5,6,1,2,3,4}; KNN.push_back(witness6 );
-  typeVectorVertex witness7  = {2,6,4,5,3,1,7}; KNN.push_back(witness7 );
-  typeVectorVertex witness8  = {1,2,5,4,3,6,7}; KNN.push_back(witness8 );
+  typeVectorVertex witness0  = {1,0,5,2,6,3,4}; KNN.push_back(witness0 );
+  typeVectorVertex witness1  = {2,6,4,5,0,1,3}; KNN.push_back(witness1 );
+  typeVectorVertex witness2  = {3,4,2,1,5,6,0}; KNN.push_back(witness2 );
+  typeVectorVertex witness3  = {4,2,1,3,5,6,0}; KNN.push_back(witness3 );
+  typeVectorVertex witness4  = {5,1,6,0,2,3,4}; KNN.push_back(witness4 );
+  typeVectorVertex witness5  = {6,0,5,2,1,3,4}; KNN.push_back(witness5 );
+  typeVectorVertex witness6  = {0,5,6,1,2,3,4}; KNN.push_back(witness6 );
+  typeVectorVertex witness7  = {2,6,4,5,3,1,0}; KNN.push_back(witness7 );
+  typeVectorVertex witness8  = {1,2,5,4,3,6,0}; KNN.push_back(witness8 );
   typeVectorVertex witness9  = {3,4,5,2,6,3,4}; KNN.push_back(witness9 );
-  typeVectorVertex witness10 = {5,7,1,3,6,2,4}; KNN.push_back(witness10);
-  typeVectorVertex witness11 = {5,6,1,7,2,3,4}; KNN.push_back(witness11);
-  typeVectorVertex witness12 = {1,6,7,5,2,3,4}; KNN.push_back(witness12);
-  wc.witness_complex(KNN);
+  typeVectorVertex witness10 = {5,0,1,3,6,2,4}; KNN.push_back(witness10);
+  typeVectorVertex witness11 = {5,6,1,0,2,3,4}; KNN.push_back(witness11);
+  typeVectorVertex witness12 = {1,6,0,5,2,3,4}; KNN.push_back(witness12);
+  std::cout << "Let the carnage begin!\n";
+  witnessComplex.witness_complex(KNN);
   std::cout << "Howdy world!\n";
 }
