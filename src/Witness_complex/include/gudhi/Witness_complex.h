@@ -174,14 +174,14 @@ void witness_complex(KNearestNeighbours & knn)
         /* TODO Filtration */
         //simplex = std::make_pair(vv, Filtration_value(0.0));
         //returnValue = this->insert_simplex(simplex.first, simplex.second);
-        //returnValue = insert_simplex(vv, Filtration_value(0.0));
+        returnValue = insert_simplex(vv, Filtration_value(0.0));
         /* TODO Error if not inserted : normally no need here though*/
     }
-    vv = {0};
-    returnValue = insert_simplex(vv,Filtration_value(0.0));
+    //vv = {0};
+    //returnValue = insert_simplex(vv,Filtration_value(0.0));
     std::cout << "Successfully added landmarks" << std::endl;
     // PRINT2
-    print_sc(root());
+    print_sc(root()); std::cout << std::endl;
     int u,v;     // two extremities of an edge
     if (nbL > 1) // if the supposed dimension of the complex is >0
       /*
@@ -215,6 +215,7 @@ void witness_complex(KNearestNeighbours & knn)
         //vh = (Vertex_handle)i;
         vv = {u,v};
         returnValue = this->insert_simplex(vv,Filtration_value(0.0));
+        print_sc(root()); std::cout << std::endl;
         //std::cout << "Added edges" << std::endl;
       }
       //print_sc(root());
@@ -272,14 +273,21 @@ private:
     if (!map.empty())
       {
         std::cout << map.begin()->first;
-        print_sc(map.begin()->second.children());
+        if (map.begin()->second.children() == root())
+          std::cout << "Sweet potato";
+        if (has_children(map.begin()))
+          print_sc(map.begin()->second.children());
         typename Dictionary::iterator it;
         for (it = map.begin()+1; it != map.end(); ++it)
           {
             std::cout << "," << it->first;
+            if (map.begin()->second.children() == root())
+              std::cout << "Sweet potato";
+            if (has_children(it))
+              print_sc(it->second.children());
           }
       }
-    std::cout << ")\n";
+    std::cout << ")";
   }
 
     

@@ -35,6 +35,7 @@
 #include <algorithm>
 #include <utility>
 #include <vector>
+#include <iostream>
 
 namespace Gudhi {
   
