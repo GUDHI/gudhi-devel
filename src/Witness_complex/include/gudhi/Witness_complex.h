@@ -23,6 +23,7 @@
 #ifndef GUDHI_WITNESS_COMPLEX_H_
 #define GUDHI_WITNESS_COMPLEX_H_
 
+#include <boost/container/flat_map.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 #include <algorithm>
 #include <utility>
@@ -155,11 +156,11 @@ void witness_complex(KNearestNeighbours & knn)
     //Construction of the active witness list
     int nbW = knn.size();
     int nbL = knn.at(0).size();
-    std::cout << "Eh?\n";
     //VertexHandle vh;
     typeVectorVertex vv;
     typeSimplex simplex;
     typePairSimplexBool returnValue;
+    int counter = 0;
     /* The list of still useful witnesses
      * it will diminuish in the course of iterations
      */
@@ -168,33 +169,73 @@ void witness_complex(KNearestNeighbours & knn)
         // initial fill of 0-dimensional simplices
         // by doing it we don't assume that landmarks are necessarily witnesses themselves anymore
         //vh = (Vertex_handle)i;
+      counter++;
         vv = {i};
         /* TODO Filtration */
         //simplex = std::make_pair(vv, Filtration_value(0.0));
         //returnValue = this->insert_simplex(simplex.first, simplex.second);
-        returnValue = this->insert_simplex(vv, Filtration_value(0.0));
+        //returnValue = insert_simplex(vv, Filtration_value(0.0));
         /* TODO Error if not inserted : normally no need here though*/
     }
+    vv = {0};
+    returnValue = insert_simplex(vv,Filtration_value(0.0));
     std::cout << "Successfully added landmarks" << std::endl;
+    // PRINT2
+    print_sc(root());
     int u,v;     // two extremities of an edge
     if (nbL > 1) // if the supposed dimension of the complex is >0
-        for (int i=0; i != nbW; ++i) {
+      /*
+      // THE BUGGY CODE
+      for (int i=0; i != nbW; ++i) {
             // initial fill of active witnesses list
             u = knn[i][0];
             v = knn[i][1];
-            if (u > v) {
-                u = v;
-                v = knn[i][0];
-            }
             //Siblings * curr_sib = &root_;
             //vh = (Vertex_handle)i;
             vv = {u,v};
-            returnValue = this->insert_simplex(vv,Filtration_value(0.0));
-            active_w.push_back(Active_witness(i,v,returnValue.first));
-            if (returnValue.second) std::cout << "Added edge " << u << v << std::endl;
+            counter++;
+            returnValue = this->insert_simplex(vv,Filtration_value((double)counter));
+            //std::cout << "Null simplex is " << null_simplex()->first << std::endl;
+            if (returnValue.first != null_simplex())
+              {
+              active_w.push_back(*(new Active_witness(i,v,returnValue.first)));
+              }
+            for (typename ActiveWitnessList::iterator it1 = active_w.begin(); it1 != active_w.end(); ++it1)
+              std::cout << it1->simplex_handle->first << " ";
+            std::cout << std::endl;
             //Simplex_handle sh = root_.members_.begin()+u;
             //active_w.push_front(i);
         }
+      */
+      for (int i=0; i != nbW; ++i) {
+        // initial fill of active witnesses list
+        u = knn[i][0];
+        v = knn[i][1];
+        //Siblings * curr_sib = &root_;
+        //vh = (Vertex_handle)i;
+        vv = {u,v};
+        returnValue = this->insert_simplex(vv,Filtration_value(0.0));
+        //std::cout << "Added edges" << std::endl;
+      }
+      //print_sc(root());
+      for (int i=0; i != nbW; ++i) {
+        // initial fill of active witnesses list
+        u = knn[i][0];
+        v = knn[i][1];
+        if ( u > v) {
+          u = v;
+          v = knn[i][0];
+        }
+        Simplex_handle sh;
+        vv = {u,v};
+        sh = (root()->find(u))->second.children()->find(v);
+        
+        active_w.push_back(*(new Active_witness(i,v,sh)));
+        for (typename ActiveWitnessList::iterator it1 = active_w.begin(); it1 != active_w.end(); ++it1)
+          std::cout << it1->simplex_handle->first << " ";
+        std::cout << std::endl;
+      }
+    
     std::cout << "Successfully added edges" << std::endl;
     while (!active_w.empty() && k+1 < nbL ) {
       std::cout << "Started the step k=" << k << std::endl;
@@ -202,12 +243,14 @@ void witness_complex(KNearestNeighbours & knn)
         while (it != active_w.end()) {
             typeVectorVertex simplex_vector;
             typeVectorVertex suffix;
-            /* THE INSERTION: Checking if all the subfaces are in the simplex tree is mandatory */
+            /* THE INSERTION: Checking if all the subfaces are in the simplex tree*/
+            std::cout << it->simplex_handle->first << std::endl;
             bool ok = all_faces_in(knn[it->witness_id][k],it->simplex_handle);
             if (ok) 
                 returnValue = insert_simplex(simplex_vector,0.0);
             else
-                active_w.erase(it++); //First increase the iterator and then erase the previous element
+                active_w.erase(it); //First increase the iterator and then erase the previous element
+            it++;
         }
         k++;
     } 
@@ -215,6 +258,34 @@ void witness_complex(KNearestNeighbours & knn)
 
 private:
 
+  void print_sc(Siblings * sibl)
+  {
+    if (sibl == NULL)
+      std::cout << "&";
+    else
+      print_children(sibl->members_);
+  }
+
+  void print_children(Dictionary map)
+  {
+    std::cout << "(";
+    if (!map.empty())
+      {
+        std::cout << map.begin()->first;
+        print_sc(map.begin()->second.children());
+        typename Dictionary::iterator it;
+        for (it = map.begin()+1; it != map.end(); ++it)
+          {
+            std::cout << "," << it->first;
+          }
+      }
+    std::cout << ")\n";
+  }
+
+    
+  /** Check if all the facets of a simplex we are going to insert are in the simplex tree or not.
+   *  The only purpose is to test if the witness is still active or not.
+   */  
   bool all_faces_in(VertexHandle last, Simplex_handle sh)
   {
     std::cout << "All face in with the landmark " << last << std::endl;
@@ -223,7 +294,7 @@ private:
     Siblings * curr_sibl = self_siblings(sh);
     VertexHandle curr_vh = curr_sh->first;
     while (curr_vh > last) {
-      std::cout << "We are at " << curr_vh << "\n";
+      std::cout << "We are at " << curr_sh->first << " " << sh->first << "\n";
       suffix.push_front(curr_vh);
       std::cout << "Still fine 1\n";
       curr_vh = curr_sibl->parent();
@@ -239,14 +310,22 @@ private:
     Simplex_handle sh_bup = curr_sh; // Back up the pointer
     while (itVV != suffix.end() && curr_sh->second.children()->find(*itVV) != null_simplex()) {
       // If the node doesn't exist then stop, else go down the tree
+      std::cout << "DOWN!" << curr_sh->first << " -> " << *itVV << std::endl; 
+      std::cout << "Children of " << curr_sh->first << " are ";
+      for (typename Dictionary::iterator itt = curr_sh->second.children()->members_.begin(); itt != curr_sh->second.children()->members_.end(); ++itt)
+        std::cout << itt->first << ",";
+      std::cout << std::endl;
       curr_sh = curr_sh->second.children()->find(*itVV);
+      itVV++;
     }
     if (itVV == suffix.end()) {
       // the simplex is already in the tree
+      std::cout << "The simplex is there" << std::endl;
       return true;
     }
     else if (itVV != suffix.end()) {
       // the father of the simplex is not in the tree
+      std::cout << "The father is not there. Deleting witness." << std::endl;
       return false;
     }
     else {
