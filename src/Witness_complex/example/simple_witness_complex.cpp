@@ -44,7 +44,7 @@ int main (int argc, char * const argv[])
   typeVectorVertex witness6  = {0,5,6,1,2,3,4}; KNN.push_back(witness6 );
   typeVectorVertex witness7  = {2,6,4,5,3,1,0}; KNN.push_back(witness7 );
   typeVectorVertex witness8  = {1,2,5,4,3,6,0}; KNN.push_back(witness8 );
-  typeVectorVertex witness9  = {3,4,5,2,6,3,4}; KNN.push_back(witness9 );
+  typeVectorVertex witness9  = {3,4,0,6,5,1,2}; KNN.push_back(witness9 );
   typeVectorVertex witness10 = {5,0,1,3,6,2,4}; KNN.push_back(witness10);
   typeVectorVertex witness11 = {5,6,1,0,2,3,4}; KNN.push_back(witness11);
   typeVectorVertex witness12 = {1,6,0,5,2,3,4}; KNN.push_back(witness12);
