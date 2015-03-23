@@ -265,10 +265,10 @@ void witness_complex(KNearestNeighbours & knn)
                     simplex_vector.push_back(knn[*it][i]);
                   }
                 returnValue = insert_simplex(simplex_vector,0.0);
+                it++
               }
             else
-                active_w.erase(it); //First increase the iterator and then erase the previous element
-            it++;
+                active_w.erase(it++); //First increase the iterator and then erase the previous element
         }
         print_sc(root());
         k++;
