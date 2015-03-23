@@ -139,7 +139,7 @@ public:
 
   typedef int Witness_id;
   typedef int Landmark_id;
-  typedef std::list< Active_witness > ActiveWitnessList;
+  typedef std::list< Vertex_handle > ActiveWitnessList;
 
 /**
  * /brief Iterative construction of the witness complex basing on a matrix of k nearest neighbours of the form {witnesses}x{landmarks}.
@@ -226,12 +226,14 @@ void witness_complex(KNearestNeighbours & knn)
         if ( u > v) {
           u = v;
           v = knn[i][0];
+          knn[i][0] = knn[i][1];
+          knn[i][1] = v;
         }
         Simplex_handle sh;
         vv = {u,v};
         sh = (root()->find(u))->second.children()->find(v);
         
-        active_w.push_back(Active_witness(i,v,sh));
+        active_w.push_back(i);
         /*for (typename ActiveWitnessList::iterator it1 = active_w.begin(); it1 != active_w.end(); ++it1)
           std::cout << it1->simplex->first << " "; 
           std::cout << std::endl; */
@@ -243,16 +245,32 @@ void witness_complex(KNearestNeighbours & knn)
         typename ActiveWitnessList::iterator it = active_w.begin();
         while (it != active_w.end()) {
             typeVectorVertex simplex_vector;
-            typeVectorVertex suffix;
             /* THE INSERTION: Checking if all the subfaces are in the simplex tree*/
-            // std::cout << it->simplex->first << std::endl;
-            bool ok = all_faces_in(knn[it->witness_id][k],it->simplex_handle);
-            if (ok) 
+            // First sort the first k landmarks
+            int i = k;
+            int temp_swap;
+            VertexHandle inserted_vertex = knn[*it][k];
+            while (i>0 && knn[*it][i-1] > knn[*it][i])
+              {
+                temp_swap = knn[*it][i];
+                knn[*it][i] = knn[*it][i-1];
+                knn[*it][i-1] = temp_swap;
+                i--;
+              }
+            bool ok = all_faces_in(knn, *it, k, inserted_vertex);
+            if (ok)
+              {
+                for (i = 0; i != k+1; ++i)
+                  {
+                    simplex_vector.push_back(knn[*it][i]);
+                  }
                 returnValue = insert_simplex(simplex_vector,0.0);
+              }
             else
                 active_w.erase(it); //First increase the iterator and then erase the previous element
             it++;
         }
+        print_sc(root());
         k++;
     } 
 }
@@ -273,16 +291,16 @@ private:
     if (!map.empty())
       {
         std::cout << map.begin()->first;
-        if (map.begin()->second.children() == root())
-          std::cout << "Sweet potato";
+        /*if (map.begin()->second.children() == root())
+          std::cout << "Sweet potato"; */
         if (has_children(map.begin()))
           print_sc(map.begin()->second.children());
         typename Dictionary::iterator it;
         for (it = map.begin()+1; it != map.end(); ++it)
           {
             std::cout << "," << it->first;
-            if (map.begin()->second.children() == root())
-              std::cout << "Sweet potato";
+            /*if (map.begin()->second.children() == root())
+              std::cout << "Sweet potato";*/
             if (has_children(it))
               print_sc(it->second.children());
           }
@@ -293,82 +311,36 @@ private:
     
   /** Check if all the facets of a simplex we are going to insert are in the simplex tree or not.
    *  The only purpose is to test if the witness is still active or not.
-   */  
-  bool all_faces_in(VertexHandle last, Simplex_handle sh)
+   *  Assuming here that the list of the first k witnessed landmarks is sorted
+   */
+  template< typename KNearestNeighbours >
+  bool all_faces_in(KNearestNeighbours &knn, int witness_id, int k, VertexHandle inserted_vertex)
   {
-    std::cout << "All face in with the landmark " << last << std::endl;
-    std::list< VertexHandle > suffix;
-    Simplex_handle curr_sh = sh;
-    Siblings * curr_sibl = self_siblings(sh);
-    VertexHandle curr_vh = curr_sh->first;
-    while (curr_vh > last) {
-      std::cout << "We are at " << curr_sh->first << " " << sh->first << "\n";
-      suffix.push_front(curr_vh);
-      //std::cout << "Still fine 1\n";
-      curr_vh = curr_sibl->parent();
-      //std::cout << "Still fine 2\n";
-      curr_sibl = curr_sibl->oncles();
-      //std::cout << "Still fine 3\n";
-      curr_sh = curr_sibl->find(curr_vh);
-      //std::cout << "Still fine 4\n";
-    }
-    std::cout << "Arrived at the mid-parent" << std::endl;
-    suffix.push_front(last);
-    typename std::list< VertexHandle >::iterator itVV = suffix.begin();
-    Simplex_handle sh_bup = curr_sh; // Back up the pointer
-    while (itVV != suffix.end() && curr_sh->second.children()->find(*itVV) != null_simplex()) {
-      // If the node doesn't exist then stop, else go down the tree
-      std::cout << "DOWN!" << curr_sh->first << " -> " << *itVV << std::endl; 
-      std::cout << "Children of " << curr_sh->first << " are ";
-      for (typename Dictionary::iterator itt = curr_sh->second.children()->members_.begin(); itt != curr_sh->second.children()->members_.end(); ++itt)
-        std::cout << itt->first << ",";
-      std::cout << std::endl;
-      curr_sh = curr_sh->second.children()->find(*itVV);
-      itVV++;
-    }
-    if (itVV == suffix.end()) {
-      // the simplex is already in the tree
-      std::cout << "The simplex is there" << std::endl;
-      return true;
-    }
-    else if (itVV != suffix.end()) {
-      // the father of the simplex is not in the tree
-      std::cout << "The father is not there. Deleting witness." << std::endl;
-      return false;
-    }
-    else {
-      // CHECK ALL THE FACETS
-      curr_sh = sh_bup;
-      while (curr_sibl != root()) {
-        suffix.push_front(curr_vh);
-        curr_vh = curr_sibl->parent();
-        curr_sibl = curr_sibl->oncles();
-        curr_sh = curr_sibl->find(curr_vh);
-      }
-      suffix.push_front(curr_vh);
-      sh_bup = curr_sh; // the first vertex lexicographicly
-      for (typename std::list< VertexHandle >::iterator itExcl = suffix.begin(); itExcl != suffix.end(); ++itExcl) {
-        if (*itExcl != last) {
-          itVV = suffix.begin();
-          while (itVV != itExcl) {
-            if (curr_sibl->find(*itVV) == null_simplex())
-              return false;
-            curr_sh = curr_sibl->find(*itVV);
-            curr_sibl = self_siblings(curr_sh);
-            itVV++;
-          }
-          itVV++;
-          while (itVV != suffix.end()) {
-            if (curr_sibl->find(*itVV) == null_simplex())
-              return false;
-            curr_sh = curr_sibl->find(*itVV);
-            curr_sibl = self_siblings(curr_sh);
-            itVV++;
-          } //endwhile
-        } //endif
+    std::cout << "All face in with the landmark " << inserted_vertex << std::endl;
+    //std::list< VertexHandle > suffix;
+    Simplex_handle curr_sh = root()->find(knn[witness_id][0]);
+    Siblings * curr_sibl = root();
+    //VertexHandle curr_vh = curr_sh->first;
+    // CHECK ALL THE FACETS
+    Simplex_handle sh_bup = curr_sh; // the first vertex lexicographicly
+    for (int i = 0; i != k+1; ++i)
+      {
+        curr_sh = sh_bup;
+        if (knn[witness_id][i] != inserted_vertex)
+          {
+            for (int j = 0; j != k+1; ++j)
+              {
+                if (j != i)
+                  {
+                    if (curr_sibl->find(knn[witness_id][j]) == null_simplex())
+                      return false;
+                    curr_sh = curr_sibl->find(knn[witness_id][j]);
+                    curr_sibl = self_siblings(curr_sh);
+                  }//endif j!=i
+              }//endfor
+          }//endif
       } //endfor
       return true;
-    } //end check all the facets
   }
 
 /**
