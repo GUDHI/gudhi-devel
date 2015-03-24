@@ -265,12 +265,12 @@ void witness_complex(KNearestNeighbours & knn)
                     simplex_vector.push_back(knn[*it][i]);
                   }
                 returnValue = insert_simplex(simplex_vector,0.0);
-                it++
+                it++;
               }
             else
                 active_w.erase(it++); //First increase the iterator and then erase the previous element
+            print_sc(root()); std::cout << std::endl;
         }
-        print_sc(root());
         k++;
     } 
 }
@@ -326,16 +326,28 @@ private:
     for (int i = 0; i != k+1; ++i)
       {
         curr_sh = sh_bup;
+        curr_sibl = root();
         if (knn[witness_id][i] != inserted_vertex)
           {
             for (int j = 0; j != k+1; ++j)
               {
                 if (j != i)
                   {
+                    std::cout << "+++ We are at vertex=" << knn[witness_id][j] << std::endl;
                     if (curr_sibl->find(knn[witness_id][j]) == null_simplex())
                       return false;
+                    std::cout << "++++ the simplex is there\n";
                     curr_sh = curr_sibl->find(knn[witness_id][j]);
-                    curr_sibl = self_siblings(curr_sh);
+                    std::cout << "++++ curr_sh affectation is OK\n";
+                    if (has_children(curr_sh))
+                      curr_sibl = curr_sh->second.children();
+                    else
+                      if (j < k || (j < k-1 && i == k))
+                        {
+                          std::cout << "++++ the values: j=" << j << ", k=" << k << std::endl;
+                          return false;
+                        }
+                    std::cout << "++++ finished loop safely\n";
                   }//endif j!=i
               }//endfor
           }//endif
