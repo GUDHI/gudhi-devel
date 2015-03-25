@@ -512,6 +512,67 @@ BOOST_AUTO_TEST_CASE( NSimplexAndSubfaces_tree_insertion )
   test_simplex_tree_contains(st,simplexPair4,2);  // (1,0) is in position 2
   test_simplex_tree_contains(st,simplexPair5,14);  // (3,4,5) is in position 14
   test_simplex_tree_contains(st,simplexPair6,26);  // (7,6,1,0) is in position 26
+  
+  // ------------------------------------------------------------------------------------------------------------------
+  // Find in the simplex_tree
+  // ------------------------------------------------------------------------------------------------------------------
+  typeVectorVertex simpleSimplexVector;
+  simpleSimplexVector.push_back(SECOND_VERTEX_HANDLE);
+  Simplex_tree<>::Simplex_handle simplexFound = st.find(simpleSimplexVector);
+  std::cout << "**************IS THE SIMPLEX {1} IN THE SIMPLEX TREE ?\n";
+  if (simplexFound != st.null_simplex())
+    std::cout << "***+ YES IT IS!\n";
+  else
+    std::cout << "***- NO IT ISN'T\n";
+  // Check it is found
+  BOOST_CHECK(simplexFound != st.null_simplex());
+
+  Vertex_handle UNKNOWN_VERTEX_HANDLE = (Vertex_handle) 15;
+  typeVectorVertex unknownSimplexVector;
+  unknownSimplexVector.push_back(UNKNOWN_VERTEX_HANDLE);
+  simplexFound = st.find(unknownSimplexVector);
+  std::cout << "**************IS THE SIMPLEX {15} IN THE SIMPLEX TREE ?\n";
+  if (simplexFound != st.null_simplex())
+    std::cout << "***+ YES IT IS!\n";
+  else
+    std::cout << "***- NO IT ISN'T\n";
+  // Check it is NOT found
+  BOOST_CHECK(simplexFound == st.null_simplex());
+
+  simplexFound = st.find(SimplexVector6);
+  std::cout << "**************IS THE SIMPLEX {0,1,6,7} IN THE SIMPLEX TREE ?\n";
+  if (simplexFound != st.null_simplex())
+    std::cout << "***+ YES IT IS!\n";
+  else
+    std::cout << "***- NO IT ISN'T\n";
+  // Check it is found
+  BOOST_CHECK(simplexFound != st.null_simplex());
+      
+  typeVectorVertex otherSimplexVector;
+  otherSimplexVector.push_back(UNKNOWN_VERTEX_HANDLE);
+  otherSimplexVector.push_back(SECOND_VERTEX_HANDLE);
+  simplexFound = st.find(otherSimplexVector);
+  std::cout << "**************IS THE SIMPLEX {15,1} IN THE SIMPLEX TREE ?\n";
+  if (simplexFound != st.null_simplex())
+    std::cout << "***+ YES IT IS!\n";
+  else
+    std::cout << "***- NO IT ISN'T\n";
+  // Check it is NOT found
+  BOOST_CHECK(simplexFound == st.null_simplex());
+
+  typeVectorVertex invSimplexVector;
+  invSimplexVector.push_back(SECOND_VERTEX_HANDLE);
+  invSimplexVector.push_back(THIRD_VERTEX_HANDLE);
+  invSimplexVector.push_back(FIRST_VERTEX_HANDLE);
+  simplexFound = st.find(invSimplexVector);
+  std::cout << "**************IS THE SIMPLEX {1,2,0} IN THE SIMPLEX TREE ?\n";
+  if (simplexFound != st.null_simplex())
+    std::cout << "***+ YES IT IS!\n";
+  else
+    std::cout << "***- NO IT ISN'T\n";
+  // Check it is found
+  BOOST_CHECK(simplexFound != st.null_simplex());
+  
   // Display the Simplex_tree - Can not be done in the middle of 2 inserts
   std::cout << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
   std::cout << "   - dimension " << st.dimension() << "   - filtration " << st.filtration() << std::endl;
