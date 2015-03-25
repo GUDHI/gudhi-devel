@@ -38,5 +38,7 @@ else()
   add_subdirectory(example/Contraction)                   
   add_subdirectory(example/Hasse_complex)
   add_subdirectort(example/Witness_complex)
+  add_subdirectory(example/Alpha_shapes)
+  add_subdirectory(example/Bottleneck)
 
 endif()  

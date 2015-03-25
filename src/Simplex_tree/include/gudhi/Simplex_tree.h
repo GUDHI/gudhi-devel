@@ -397,7 +397,7 @@ class Simplex_tree {
    * <CODE>Vertex_handle</CODE>.
    */
   template<class RandomAccessVertexRange>
-  Simplex_handle find(const RandomAccessVertexRange & s) {
+  Simplex_handle find(RandomAccessVertexRange & s) {
     if (s.begin() == s.end())
       std::cerr << "Empty simplex \n";
 

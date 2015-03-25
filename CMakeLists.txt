@@ -69,6 +69,8 @@ else()
   message(STATUS "boost include dirs:" ${Boost_INCLUDE_DIRS})
 
   include_directories(src/common/include/)
+  include_directories(src/Alpha_shapes/include/)
+  include_directories(src/Bottleneck/include/)
   include_directories(src/Contraction/include/)
   include_directories(src/Hasse_complex/include/)
   include_directories(src/Persistent_cohomology/include/)
@@ -86,6 +88,13 @@ else()
   add_subdirectory(src/Hasse_complex/example)
   add_subdirectory(src/Witness_complex/test)
   add_subdirectory(src/Witness_complex/example)
+  add_subdirectory(src/Alpha_shapes/example)
+  add_subdirectory(src/Alpha_shapes/test)
+  add_subdirectory(src/Bottleneck/example)
+  add_subdirectory(src/Bottleneck/test)
+
+  # data points generator
+  add_subdirectory(data/points/generator)
 
 endif()  
 

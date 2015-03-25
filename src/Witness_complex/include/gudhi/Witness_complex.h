@@ -273,16 +273,12 @@ private:
     if (!map.empty())
       {
         std::cout << map.begin()->first;
-        if (map.begin()->second.children() == root())
-          std::cout << "Sweet potato";
         if (has_children(map.begin()))
           print_sc(map.begin()->second.children());
         typename Dictionary::iterator it;
         for (it = map.begin()+1; it != map.end(); ++it)
           {
             std::cout << "," << it->first;
-            if (map.begin()->second.children() == root())
-              std::cout << "Sweet potato";
             if (has_children(it))
               print_sc(it->second.children());
           }

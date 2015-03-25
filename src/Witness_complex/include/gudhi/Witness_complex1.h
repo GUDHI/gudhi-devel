@@ -334,10 +334,10 @@ private:
                 if (j != i)
                   {
                     std::cout << "+++ We are at vertex=" << knn[witness_id][j] << std::endl;
-                    if (curr_sibl->find(knn[witness_id][j]) == null_simplex())
+                    if (curr_sibl->members().find(knn[witness_id][j]) == null_simplex())
                       return false;
                     std::cout << "++++ the simplex is there\n";
-                    curr_sh = curr_sibl->find(knn[witness_id][j]);
+                    curr_sh = curr_sibl->members().find(knn[witness_id][j]);
                     std::cout << "++++ curr_sh affectation is OK\n";
                     if (has_children(curr_sh))
                       curr_sibl = curr_sh->second.children();
