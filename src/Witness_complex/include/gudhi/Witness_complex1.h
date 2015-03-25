@@ -313,6 +313,8 @@ private:
    *  The only purpose is to test if the witness is still active or not.
    *  Assuming here that the list of the first k witnessed landmarks is sorted
    */
+
+  /*
   template< typename KNearestNeighbours >
   bool all_faces_in(KNearestNeighbours &knn, int witness_id, int k, VertexHandle inserted_vertex)
   {
@@ -334,22 +336,47 @@ private:
                 if (j != i)
                   {
                     std::cout << "+++ We are at vertex=" << knn[witness_id][j] << std::endl;
-                    if (curr_sibl->members().find(knn[witness_id][j]) == null_simplex())
+                    if (curr_sibl->find(knn[witness_id][j]) == null_simplex())
                       return false;
                     std::cout << "++++ the simplex is there\n";
-                    curr_sh = curr_sibl->members().find(knn[witness_id][j]);
+                    curr_sh = curr_sibl->find(knn[witness_id][j]);
                     std::cout << "++++ curr_sh affectation is OK\n";
-                    if (has_children(curr_sh))
-                      curr_sibl = curr_sh->second.children();
-                    else
-                      if (j < k || (j < k-1 && i == k))
-                        {
-                          std::cout << "++++ the values: j=" << j << ", k=" << k << std::endl;
-                          return false;
-                        }
+                    if (!has_children(curr_sh) && (j < k || (j < k-1 && i == k)))
+                      {
+                        std::cout << "++++ the values: j=" << j << ", k=" << k << std::endl;
+                        return false;
+                      }
+                    curr_sibl = curr_sh->second.children();
                     std::cout << "++++ finished loop safely\n";
                   }//endif j!=i
               }//endfor
+          }//endif
+      } //endfor
+      return true;
+  }
+  */
+  template <typename KNearestNeighbours>
+  bool all_faces_in(KNearestNeighbours &knn, int witness_id, int k, VertexHandle inserted_vertex)
+  {
+    std::cout << "All face in with the landmark " << inserted_vertex << std::endl;
+    std::vector< VertexHandle > facet;
+    //VertexHandle curr_vh = curr_sh->first;
+    // CHECK ALL THE FACETS
+    for (int i = 0; i != k+1; ++i)
+      {
+        if (knn[witness_id][i] != inserted_vertex)
+          {
+            facet = {};
+            for (int j = 0; j != k+1; ++j)
+              {
+                if (j != i)
+                  {
+                    facet.push_back(knn[witness_id][j]);
+                  }
+              }//endfor
+            if (find(facet) == null_simplex())
+              return false;
+            std::cout << "++++ finished loop safely\n";
           }//endif
       } //endfor
       return true;
