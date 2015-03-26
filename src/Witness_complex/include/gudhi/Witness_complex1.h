@@ -180,9 +180,9 @@ void witness_complex(KNearestNeighbours & knn)
     }
     //vv = {0};
     //returnValue = insert_simplex(vv,Filtration_value(0.0));
-    std::cout << "Successfully added landmarks" << std::endl;
+    //std::cout << "Successfully added landmarks" << std::endl;
     // PRINT2
-    print_sc(root()); std::cout << std::endl;
+    //print_sc(root()); std::cout << std::endl;
     int u,v;     // two extremities of an edge
     if (nbL > 1) // if the supposed dimension of the complex is >0
       {
@@ -195,7 +195,7 @@ void witness_complex(KNearestNeighbours & knn)
             //vh = (Vertex_handle)i;
             vv = {u,v};
             returnValue = this->insert_simplex(vv,Filtration_value(0.0));
-            print_sc(root()); std::cout << std::endl;
+            //print_sc(root()); std::cout << std::endl;
             //std::cout << "Added edges" << std::endl;
           }
         //print_sc(root());
@@ -217,10 +217,10 @@ void witness_complex(KNearestNeighbours & knn)
             active_w.push_back(i);
         }
       }
-    std::cout << "Successfully added edges" << std::endl;
-    while (!active_w.empty() && k+1 < nbL )
+    //std::cout << "Successfully added edges" << std::endl;
+    while (!active_w.empty() && k < nbL )
       {
-        std::cout << "Started the step k=" << k << std::endl;
+        //std::cout << "Started the step k=" << k << std::endl;
         typename ActiveWitnessList::iterator it = active_w.begin();
         while (it != active_w.end())
           {
@@ -238,17 +238,17 @@ void witness_complex(KNearestNeighbours & knn)
               }
             else
                 active_w.erase(it++); //First increase the iterator and then erase the previous element
-            print_sc(root()); std::cout << std::endl;
           }
         k++;
-    } 
+    }
+    print_sc(root()); std::cout << std::endl;
 }
 
-  void witness_complex_from_file(std::string file_name, int nbL)
+  void witness_complex_from_file(Point_Vector point_vector, int nbL)
   {
     //READ THE FILE INTO A POINT VECTOR
-    std::vector< std::vector< double > > point_vector;
-    read_points(file_name, point_vector);
+    //std::vector< std::vector< double > > point_vector;
+    //read_points(file_name, point_vector);
     std::vector<std::vector< int > > WL;
     furthestPoints(point_vector, point_vector.size(), nbL, WL);
     witness_complex(WL);
@@ -290,7 +290,7 @@ private:
   template <typename KNearestNeighbours>
   bool all_faces_in(KNearestNeighbours &knn, int witness_id, int k, VertexHandle inserted_vertex)
   {
-    std::cout << "All face in with the landmark " << inserted_vertex << std::endl;
+    //std::cout << "All face in with the landmark " << inserted_vertex << std::endl;
     std::vector< VertexHandle > facet;
     //VertexHandle curr_vh = curr_sh->first;
     // CHECK ALL THE FACETS
@@ -314,6 +314,38 @@ private:
       return true;
   }
 
+  template <typename T>
+  void print_vector(std::vector<T> v)
+  {
+    std::cout << "[";
+    if (!v.empty())
+      {
+        std::cout << *(v.begin());
+        for (auto it = v.begin()+1; it != v.end(); ++it)
+          {
+            std::cout << ",";
+            std::cout << *it;
+          }
+      }
+    std::cout << "]";
+  }
+    
+  template <typename T>
+  void print_vvector(std::vector< std::vector <T> > vv)
+  {
+    std::cout << "[";
+    if (!vv.empty())
+      {
+        print_vector(*(vv.begin()));
+        for (auto it = vv.begin()+1; it != vv.end(); ++it)
+          {
+            std::cout << ",";
+            print_vector(*it);
+          }
+      }
+    std::cout << "]\n";
+  }
+  
 /**
  * \brief Permutes the vector in such a way that the landmarks appear first
  * \arg W is the vector of points which will be the witnesses
@@ -329,7 +361,7 @@ private:
     std::cout << "Enter furthestPoints "<< std::endl;
     // What is density and why we need it.
     // basically it is the stop indicator for "no more landmarks"
-  
+    //std::cout << "W="; print_vvector(W);
     //double density = 5.;
     std::vector< std::vector<double> > wit_land_dist(nbP,std::vector<double>()); // distance matrix witness x landmarks
     std::vector< int >                 chosen_landmarks;    // landmark list
@@ -345,26 +377,41 @@ private:
     double temp_swap_double;
 
     //CHOICE OF THE FIRST LANDMARK
-    std::cout << "Enter the first landmark stage\n";
+    //std::cout << "Enter the first landmark stage\n";
     srand(354698);
     int rand_int = rand()% nbP;
     curr_max_w = rand_int;
 
     for (current_number_of_landmarks = 0; current_number_of_landmarks != nbL; current_number_of_landmarks++)
       {
-        chosen_landmarks.push_back(curr_max_w); // first landmark is random
+        chosen_landmarks.push_back(curr_max_w);
+        //std::cout << "Entered loop with current number of landmarks = " << current_number_of_landmarks << std::endl;
+        //std::cout << "WL="; print_vvector(WL);
+        //std::cout << "WLD="; print_vvector(wit_land_dist);
+        //std::cout << "landmarks="; print_vector(chosen_landmarks); std::cout << std::endl;
         for (auto v: WL)
           v.push_back(current_number_of_landmarks);
-        for (unsigned int i = 0; i < wit_land_dist.size(); ++i)
+        for (int i = 0; i < nbP; ++i)
           {
-            curr_dist = euclidean_distance(W[i],W[chosen_landmarks[current_number_of_landmarks]]);
+            //std::cout << "In the loop with i=" << i << " and landmark=" << chosen_landmarks[current_number_of_landmarks] << std::endl;
+            //std::cout << "W[i]="; print_vector(W[i]); std::cout << " W[landmark]="; print_vector(W[chosen_landmarks[current_number_of_landmarks]]); std::cout << std::endl;
+            if (i != chosen_landmarks[current_number_of_landmarks])
+              curr_dist = euclidean_distance(W[i],W[chosen_landmarks[current_number_of_landmarks]]);
+            else
+              curr_dist = 0;
+            //std::cout << "The problem is not in distance function\n";
             wit_land_dist[i].push_back(curr_dist);
+            WL[i].push_back(current_number_of_landmarks);
+            //std::cout << "Push't back\n";
             if (curr_dist > curr_max_dist)
               {
                 curr_max_dist = curr_dist;
                 curr_max_w = i;
               }
             j = current_number_of_landmarks;
+            //std::cout << "First half complete\n";
+            //std::cout << "WL="; print_vvector(WL);
+            //std::cout << "WLD="; print_vvector(wit_land_dist);
             while (j > 0 && wit_land_dist[i][j-1] > wit_land_dist[i][j])
               {
                 temp_swap_int = WL[i][j];
@@ -374,6 +421,7 @@ private:
                 wit_land_dist[i][j] = wit_land_dist[i][j-1];
                 wit_land_dist[i][j-1] = temp_swap_double;
               }
+            //std::cout << "End loop\n";
           }
       }
     /*
