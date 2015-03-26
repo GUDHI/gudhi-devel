@@ -3,7 +3,9 @@ project(GUDHIWitnessComplex)
 
 add_executable ( simple_witness_complex simple_witness_complex.cpp )
 add_test(simple_witness_complex ${CMAKE_CURRENT_BINARY_DIR}/simple_witness_complex)
-   
+
+add_executable( witness_complex_from_file witness_complex_from_file.cpp )
+add_test( witness_complex_from_bunny &{CMAKE_CURRENT_BINARY_DIR}/witness_complex_from_file ${CMAKE_SOURCE_DIR}/data/points/bunny_5000 )   
 
 # An example with Simplex-tree using CGAL alpha_shapes_3
 #if(GMP_FOUND AND CGAL_FOUND)

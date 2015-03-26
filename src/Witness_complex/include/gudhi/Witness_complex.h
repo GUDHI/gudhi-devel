@@ -373,7 +373,7 @@ private:
 
   void furthestPoints(Point_Vector &W, int nbP, std::string file_land, int dim, int nbL, Point_Vector &L)
   {
-  //std::cout << "Enter furthestPoints "<< endl;
+    std::cout << "Enter furthestPoints "<< std::endl;
   //Point_Vector *L = new Point_Vector();
     double density = 5.;
     int current_number_of_landmarks=0;

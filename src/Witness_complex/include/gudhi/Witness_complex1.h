@@ -32,6 +32,7 @@
 #include "gudhi/Simplex_tree.h"
 #include <vector>
 #include <list>
+#include <limits>
 #include <math.h>
 
 #include <iostream>
@@ -184,97 +185,75 @@ void witness_complex(KNearestNeighbours & knn)
     print_sc(root()); std::cout << std::endl;
     int u,v;     // two extremities of an edge
     if (nbL > 1) // if the supposed dimension of the complex is >0
-      /*
-      // THE BUGGY CODE
-      for (int i=0; i != nbW; ++i) {
+      {
+        for (int i=0; i != nbW; ++i)
+          {
             // initial fill of active witnesses list
             u = knn[i][0];
             v = knn[i][1];
             //Siblings * curr_sib = &root_;
             //vh = (Vertex_handle)i;
             vv = {u,v};
-            counter++;
-            returnValue = this->insert_simplex(vv,Filtration_value((double)counter));
-            //std::cout << "Null simplex is " << null_simplex()->first << std::endl;
-            if (returnValue.first != null_simplex())
+            returnValue = this->insert_simplex(vv,Filtration_value(0.0));
+            print_sc(root()); std::cout << std::endl;
+            //std::cout << "Added edges" << std::endl;
+          }
+        //print_sc(root());
+        for (int i=0; i != nbW; ++i)
+          {
+            // initial fill of active witnesses list
+            u = knn[i][0];
+            v = knn[i][1];
+            if ( u > v)
               {
-              active_w.push_back(*(new Active_witness(i,v,returnValue.first)));
+                u = v;
+                v = knn[i][0];
+                knn[i][0] = knn[i][1];
+                knn[i][1] = v;
               }
-            for (typename ActiveWitnessList::iterator it1 = active_w.begin(); it1 != active_w.end(); ++it1)
-              std::cout << it1->simplex_handle->first << " ";
-            std::cout << std::endl;
-            //Simplex_handle sh = root_.members_.begin()+u;
-            //active_w.push_front(i);
+            Simplex_handle sh;
+            vv = {u,v};
+            sh = (root()->find(u))->second.children()->find(v);
+            active_w.push_back(i);
         }
-      */
-      for (int i=0; i != nbW; ++i) {
-        // initial fill of active witnesses list
-        u = knn[i][0];
-        v = knn[i][1];
-        //Siblings * curr_sib = &root_;
-        //vh = (Vertex_handle)i;
-        vv = {u,v};
-        returnValue = this->insert_simplex(vv,Filtration_value(0.0));
-        print_sc(root()); std::cout << std::endl;
-        //std::cout << "Added edges" << std::endl;
       }
-      //print_sc(root());
-      for (int i=0; i != nbW; ++i) {
-        // initial fill of active witnesses list
-        u = knn[i][0];
-        v = knn[i][1];
-        if ( u > v) {
-          u = v;
-          v = knn[i][0];
-          knn[i][0] = knn[i][1];
-          knn[i][1] = v;
-        }
-        Simplex_handle sh;
-        vv = {u,v};
-        sh = (root()->find(u))->second.children()->find(v);
-        
-        active_w.push_back(i);
-        /*for (typename ActiveWitnessList::iterator it1 = active_w.begin(); it1 != active_w.end(); ++it1)
-          std::cout << it1->simplex->first << " "; 
-          std::cout << std::endl; */
-      }
-    
     std::cout << "Successfully added edges" << std::endl;
-    while (!active_w.empty() && k+1 < nbL ) {
-      std::cout << "Started the step k=" << k << std::endl;
+    while (!active_w.empty() && k+1 < nbL )
+      {
+        std::cout << "Started the step k=" << k << std::endl;
         typename ActiveWitnessList::iterator it = active_w.begin();
-        while (it != active_w.end()) {
+        while (it != active_w.end())
+          {
             typeVectorVertex simplex_vector;
             /* THE INSERTION: Checking if all the subfaces are in the simplex tree*/
             // First sort the first k landmarks
-            int i = k;
-            int temp_swap;
             VertexHandle inserted_vertex = knn[*it][k];
-            while (i>0 && knn[*it][i-1] > knn[*it][i])
-              {
-                temp_swap = knn[*it][i];
-                knn[*it][i] = knn[*it][i-1];
-                knn[*it][i-1] = temp_swap;
-                i--;
-              }
             bool ok = all_faces_in(knn, *it, k, inserted_vertex);
             if (ok)
               {
-                for (i = 0; i != k+1; ++i)
-                  {
-                    simplex_vector.push_back(knn[*it][i]);
-                  }
+                for (int i = 0; i != k+1; ++i)
+                  simplex_vector.push_back(knn[*it][i]);
                 returnValue = insert_simplex(simplex_vector,0.0);
                 it++;
               }
             else
                 active_w.erase(it++); //First increase the iterator and then erase the previous element
             print_sc(root()); std::cout << std::endl;
-        }
+          }
         k++;
     } 
 }
 
+  void witness_complex_from_file(std::string file_name, int nbL)
+  {
+    //READ THE FILE INTO A POINT VECTOR
+    std::vector< std::vector< double > > point_vector;
+    read_points(file_name, point_vector);
+    std::vector<std::vector< int > > WL;
+    furthestPoints(point_vector, point_vector.size(), nbL, WL);
+    witness_complex(WL);
+  }
+  
 private:
 
   void print_sc(Siblings * sibl)
@@ -308,53 +287,6 @@ private:
     std::cout << ")";
   }
 
-    
-  /** Check if all the facets of a simplex we are going to insert are in the simplex tree or not.
-   *  The only purpose is to test if the witness is still active or not.
-   *  Assuming here that the list of the first k witnessed landmarks is sorted
-   */
-
-  /*
-  template< typename KNearestNeighbours >
-  bool all_faces_in(KNearestNeighbours &knn, int witness_id, int k, VertexHandle inserted_vertex)
-  {
-    std::cout << "All face in with the landmark " << inserted_vertex << std::endl;
-    //std::list< VertexHandle > suffix;
-    Simplex_handle curr_sh = root()->find(knn[witness_id][0]);
-    Siblings * curr_sibl = root();
-    //VertexHandle curr_vh = curr_sh->first;
-    // CHECK ALL THE FACETS
-    Simplex_handle sh_bup = curr_sh; // the first vertex lexicographicly
-    for (int i = 0; i != k+1; ++i)
-      {
-        curr_sh = sh_bup;
-        curr_sibl = root();
-        if (knn[witness_id][i] != inserted_vertex)
-          {
-            for (int j = 0; j != k+1; ++j)
-              {
-                if (j != i)
-                  {
-                    std::cout << "+++ We are at vertex=" << knn[witness_id][j] << std::endl;
-                    if (curr_sibl->find(knn[witness_id][j]) == null_simplex())
-                      return false;
-                    std::cout << "++++ the simplex is there\n";
-                    curr_sh = curr_sibl->find(knn[witness_id][j]);
-                    std::cout << "++++ curr_sh affectation is OK\n";
-                    if (!has_children(curr_sh) && (j < k || (j < k-1 && i == k)))
-                      {
-                        std::cout << "++++ the values: j=" << j << ", k=" << k << std::endl;
-                        return false;
-                      }
-                    curr_sibl = curr_sh->second.children();
-                    std::cout << "++++ finished loop safely\n";
-                  }//endif j!=i
-              }//endfor
-          }//endif
-      } //endfor
-      return true;
-  }
-  */
   template <typename KNearestNeighbours>
   bool all_faces_in(KNearestNeighbours &knn, int witness_id, int k, VertexHandle inserted_vertex)
   {
@@ -384,30 +316,73 @@ private:
 
 /**
  * \brief Permutes the vector in such a way that the landmarks appear first
+ * \arg W is the vector of points which will be the witnesses
+ * \arg nbP is the number of witnesses
+ * \arg nbL is the number of landmarks
+ * \arg WL is the matrix of the nearest landmarks with respect to witnesses (output)
  */
 
-  void furthestPoints(Point_Vector &W, int nbP, std::string file_land, int dim, int nbL, Point_Vector &L)
+  template <typename KNearestNeighbours>
+    void furthestPoints(Point_Vector &W, int nbP, int nbL, KNearestNeighbours &WL)
+  //void furthestPoints(Point_Vector &W, int nbP, int nbL, Point_Vector &L)
   {
-  //std::cout << "Enter furthestPoints "<< endl;
-  //Point_Vector *L = new Point_Vector();
-    double density = 5.;
+    std::cout << "Enter furthestPoints "<< std::endl;
+    // What is density and why we need it.
+    // basically it is the stop indicator for "no more landmarks"
+  
+    //double density = 5.;
+    std::vector< std::vector<double> > wit_land_dist(nbP,std::vector<double>()); // distance matrix witness x landmarks
+    std::vector< int >                 chosen_landmarks;    // landmark list
+    WL = KNearestNeighbours(nbP,std::vector<int>()); //nbP copies of empty vectors
     int current_number_of_landmarks=0;
-    double curr_max_dist;
+    double curr_max_dist = 0;
     double curr_dist;
-    double mindist = 10005.;
+    //double infty = std::numeric_limits<double>::infinity();
+    // double mindist = infty;
     int curr_max_w=0;
-    int curr_w=0;
+    int j;
+    int temp_swap_int;
+    double temp_swap_double;
+
+    //CHOICE OF THE FIRST LANDMARK
+    std::cout << "Enter the first landmark stage\n";
     srand(354698);
     int rand_int = rand()% nbP;
-    //std::cout << rand_int << endl;
-    L.push_back(W[rand_int]);// first landmark is random
-    current_number_of_landmarks++;
+    curr_max_w = rand_int;
+
+    for (current_number_of_landmarks = 0; current_number_of_landmarks != nbL; current_number_of_landmarks++)
+      {
+        chosen_landmarks.push_back(curr_max_w); // first landmark is random
+        for (auto v: WL)
+          v.push_back(current_number_of_landmarks);
+        for (unsigned int i = 0; i < wit_land_dist.size(); ++i)
+          {
+            curr_dist = euclidean_distance(W[i],W[chosen_landmarks[current_number_of_landmarks]]);
+            wit_land_dist[i].push_back(curr_dist);
+            if (curr_dist > curr_max_dist)
+              {
+                curr_max_dist = curr_dist;
+                curr_max_w = i;
+              }
+            j = current_number_of_landmarks;
+            while (j > 0 && wit_land_dist[i][j-1] > wit_land_dist[i][j])
+              {
+                temp_swap_int = WL[i][j];
+                WL[i][j] = WL[i][j-1];
+                WL[i][j-1] = temp_swap_int;
+                temp_swap_double = wit_land_dist[i][j];
+                wit_land_dist[i][j] = wit_land_dist[i][j-1];
+                wit_land_dist[i][j-1] = temp_swap_double;
+              }
+          }
+      }
+    /*
     while (1) {
       curr_w = 0;
       curr_max_dist = -1;
       for(Point_Vector::iterator itW = W.begin(); itW != W.end(); itW++) {
         //compute distance from w and L
-        mindist = 100000.;
+        mindist = infty;
         for(Point_Vector::iterator itL = L.begin(); itL != L.end(); itL++) {
           //curr_dist = distPoints(*itW,*itL);
           curr_dist = euclidean_distance(*itW,*itL);
@@ -423,12 +398,13 @@ private:
       }
       L.push_back(W[curr_max_w]);
       current_number_of_landmarks++;
-      density = sqrt(curr_max_dist);
+      //density = sqrt(curr_max_dist);
       //std::cout << "[" << current_number_of_landmarks << ":" << density <<"] ";
       if(L.size() == nbL) break;
     }
+    */
     //std::cout << endl;
-    return L;
+    //return L;
   }
   
 }; //class Witness_complex
