@@ -308,7 +308,7 @@ private:
               }//endfor
             if (find(facet) == null_simplex())
               return false;
-            std::cout << "++++ finished loop safely\n";
+            //std::cout << "++++ finished loop safely\n";
           }//endif
       } //endfor
       return true;
@@ -365,11 +365,13 @@ private:
     //double density = 5.;
     std::vector< std::vector<double> > wit_land_dist(nbP,std::vector<double>()); // distance matrix witness x landmarks
     std::vector< int >                 chosen_landmarks;    // landmark list
+
     WL = KNearestNeighbours(nbP,std::vector<int>()); //nbP copies of empty vectors
     int current_number_of_landmarks=0;
     double curr_max_dist = 0;
     double curr_dist;
-    //double infty = std::numeric_limits<double>::infinity();
+    double infty = std::numeric_limits<double>::infinity();
+    std::vector< double > dist_to_L(nbP,infty);
     // double mindist = infty;
     int curr_max_w=0;
     int j;
@@ -385,15 +387,16 @@ private:
     for (current_number_of_landmarks = 0; current_number_of_landmarks != nbL; current_number_of_landmarks++)
       {
         chosen_landmarks.push_back(curr_max_w);
-        //std::cout << "Entered loop with current number of landmarks = " << current_number_of_landmarks << std::endl;
-        //std::cout << "WL="; print_vvector(WL);
-        //std::cout << "WLD="; print_vvector(wit_land_dist);
-        //std::cout << "landmarks="; print_vector(chosen_landmarks); std::cout << std::endl;
+        curr_max_dist = 0;
+        std::cout << "**********Entered loop with current number of landmarks = " << current_number_of_landmarks << std::endl;
+        std::cout << "WL="; print_vvector(WL);
+        std::cout << "WLD="; print_vvector(wit_land_dist);
+        std::cout << "landmarks="; print_vector(chosen_landmarks); std::cout << std::endl;
         for (auto v: WL)
           v.push_back(current_number_of_landmarks);
         for (int i = 0; i < nbP; ++i)
           {
-            //std::cout << "In the loop with i=" << i << " and landmark=" << chosen_landmarks[current_number_of_landmarks] << std::endl;
+            std::cout << "In the loop with i=" << i << " and landmark=" << chosen_landmarks[current_number_of_landmarks] << std::endl;
             //std::cout << "W[i]="; print_vector(W[i]); std::cout << " W[landmark]="; print_vector(W[chosen_landmarks[current_number_of_landmarks]]); std::cout << std::endl;
             if (i != chosen_landmarks[current_number_of_landmarks])
               curr_dist = euclidean_distance(W[i],W[chosen_landmarks[current_number_of_landmarks]]);
@@ -403,15 +406,15 @@ private:
             wit_land_dist[i].push_back(curr_dist);
             WL[i].push_back(current_number_of_landmarks);
             //std::cout << "Push't back\n";
-            if (curr_dist > curr_max_dist)
+            if (curr_dist < dist_to_L[i])
+              dist_to_L[i] = curr_dist;
+            if (dist_to_L[i] > curr_max_dist)
               {
                 curr_max_dist = curr_dist;
                 curr_max_w = i;
               }
             j = current_number_of_landmarks;
             //std::cout << "First half complete\n";
-            //std::cout << "WL="; print_vvector(WL);
-            //std::cout << "WLD="; print_vvector(wit_land_dist);
             while (j > 0 && wit_land_dist[i][j-1] > wit_land_dist[i][j])
               {
                 temp_swap_int = WL[i][j];
@@ -420,8 +423,12 @@ private:
                 temp_swap_double = wit_land_dist[i][j];
                 wit_land_dist[i][j] = wit_land_dist[i][j-1];
                 wit_land_dist[i][j-1] = temp_swap_double;
+                --j;
               }
-            //std::cout << "End loop\n";
+            std::cout << "result WL="; print_vvector(WL);
+            std::cout << "result WLD="; print_vvector(wit_land_dist);
+
+            std::cout << "End loop\n";
           }
       }
     /*
