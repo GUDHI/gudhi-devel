@@ -4,7 +4,7 @@
  *
  *    Author(s):       Francois Godi
  *
- *    Copyright (C) 2015  INRIA Saclay (France)
+ *    Copyright (C) 2015  INRIA Sophia-Antipolis (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@
 #define SRC_BOTTLENECK_INCLUDE_GUDHI_PLANAR_NEIGHBORS_FINDER_H_
 
 #include <list>
-#include <iostream>
 #include <set>
 
 #include "Persistence_diagrams_graph.h"

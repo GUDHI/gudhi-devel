@@ -4,7 +4,7 @@
  *
  *    Author(s):       Francois Godi
  *
- *    Copyright (C) 2015  INRIA Saclay (France)
+ *    Copyright (C) 2015  INRIA Sophia-Antipolis (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -34,11 +34,11 @@ namespace Gudhi {
 namespace bottleneck {
 
 template<typename Persistence_diagram1, typename Persistence_diagram2>
-double bottleneck_distance(Persistence_diagram1& diag1, Persistence_diagram2& diag2, double e = 0.);
+double bottleneck_distance(const Persistence_diagram1& diag1, const Persistence_diagram2& diag2, double e = 0.);
 
 class Graph_matching {
  public:
-  Graph_matching(const Persistence_diagrams_graph& g);
+  explicit Graph_matching(const Persistence_diagrams_graph& g);
   Graph_matching& operator=(const Graph_matching& m);
   bool perfect() const;
   bool multi_augment();
@@ -52,7 +52,7 @@ class Graph_matching {
 
   Layered_neighbors_finder* layering() const;
   bool augment(Layered_neighbors_finder* layered_nf, int u_start_index, int max_depth);
-  void update(std::deque<int>& path);
+  void update(std::deque<int>* path);
 };
 
 Graph_matching::Graph_matching(const Persistence_diagrams_graph& g)
@@ -128,36 +128,37 @@ Layered_neighbors_finder* Graph_matching::layering() const {
 }
 
 bool Graph_matching::augment(Layered_neighbors_finder *layered_nf, int u_start_index, int max_depth) {
-  std::deque<int> path;
-  path.emplace_back(u_start_index);
+  std::deque<int>* path = new std::deque<int>();
+  path->emplace_back(u_start_index);
   // start is a point from U
   do {
-    if (static_cast<int>(path.size()) > max_depth) {
-      path.pop_back();
-      path.pop_back();
+    if (static_cast<int>(path->size()) > max_depth) {
+      path->pop_back();
+      path->pop_back();
     }
-    if (path.empty())
+    if (path->empty())
       return false;
-    int w = path.back();
-    path.emplace_back(layered_nf->pull_near(w, path.size() / 2));
-    while (path.back() == null_point_index()) {
-      path.pop_back();
-      path.pop_back();
-      if (path.empty())
+    int w = path->back();
+    path->emplace_back(layered_nf->pull_near(w, path->size() / 2));
+    while (path->back() == null_point_index()) {
+      path->pop_back();
+      path->pop_back();
+      if (path->empty())
         return false;
-      path.pop_back();
-      path.emplace_back(layered_nf->pull_near(path.back(), path.size() / 2));
+      path->pop_back();
+      path->emplace_back(layered_nf->pull_near(path->back(), path->size() / 2));
     }
-    path.emplace_back(v_to_u.at(path.back()));
-  } while (path.back() != null_point_index());
-  path.pop_back();
+    path->emplace_back(v_to_u.at(path->back()));
+  } while (path->back() != null_point_index());
+  path->pop_back();
   update(path);
+  delete path;
   return true;
 }
 
-void Graph_matching::update(std::deque<int>& path) {
-  unmatched_in_u.remove(path.front());
-  for (auto it = path.cbegin(); it != path.cend(); ++it) {
+void Graph_matching::update(std::deque<int> *path) {
+  unmatched_in_u.remove(path->front());
+  for (auto it = path->cbegin(); it != path->cend(); ++it) {
     int tmp = *it;
     ++it;
     v_to_u[*it] = tmp;
@@ -165,14 +166,14 @@ void Graph_matching::update(std::deque<int>& path) {
 }
 
 template<typename Persistence_diagram1, typename Persistence_diagram2>
-double bottleneck_distance(Persistence_diagram1& diag1, Persistence_diagram2& diag2, double e) {
+double bottleneck_distance(const Persistence_diagram1 &diag1, const Persistence_diagram2 &diag2, double e) {
   Persistence_diagrams_graph g(diag1, diag2, e);
   std::vector<double>* sd = g.sorted_distances();
   int idmin = 0;
   int idmax = sd->size() - 1;
   double alpha = pow(sd->size(), 0.25);
   Graph_matching m(g);
-  Graph_matching biggest_unperfect = m;
+  Graph_matching biggest_unperfect(g);
   while (idmin != idmax) {
     int pas = static_cast<int>((idmax - idmin) / alpha);
     m.set_r(sd->at(idmin + pas));
