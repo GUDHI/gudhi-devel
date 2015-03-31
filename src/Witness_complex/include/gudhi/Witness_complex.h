@@ -32,9 +32,10 @@
 #include "gudhi/Simplex_tree.h"
 #include <vector>
 #include <list>
+#include <unordered_set>
 #include <limits>
 #include <math.h>
-
+#include <ctime>
 #include <iostream>
 
 namespace Gudhi {
@@ -92,6 +93,30 @@ namespace Gudhi {
     typedef int Witness_id;
     typedef int Landmark_id;
     typedef std::list< Vertex_handle > ActiveWitnessList;
+
+  private:
+    /** Number of landmarks
+     */
+    int nbL;
+    /** Desired density
+     */
+    double density;
+
+  public:
+
+    /** \brief Set number of landmarks to nbL_
+     */
+    void setNbL(int nbL_)
+    {
+      nbL = nbL_;
+    }
+
+    /** \brief Set density to density_
+     */
+    void setDensity(double density_)
+    {
+      density = density_;
+    }
     
     /**
      * /brief Iterative construction of the witness complex basing on a matrix of k nearest neighbours of the form {witnesses}x{landmarks}.
@@ -106,8 +131,7 @@ namespace Gudhi {
       int k=2; /* current dimension in iterative construction */
       //Construction of the active witness list
       int nbW = knn.size();
-      int nbL = knn.at(0).size();
-      //VertexHandle vh;
+      //int nbL = knn.at(0).size();
       typeVectorVertex vv;
       typeSimplex simplex;
       typePairSimplexBool returnValue;
@@ -184,15 +208,18 @@ namespace Gudhi {
             }
           k++;
         }
-      //print_sc(root()); std::cout << std::endl;
+      print_sc(root()); std::cout << std::endl;
     }
 
     /** \brief Construction of witness complex from points given explicitly
+     *  nbL must be set to the right value of landmarks for strategies
+     * FURTHEST_POINT_STRATEGY and RANDOM_POINT_STRATEGY and
+     * density must be set to the right value for DENSITY_STRATEGY
      */
-  void witness_complex_from_file(Point_Vector point_vector, int nbL)
+  void witness_complex_from_points(Point_Vector point_vector)
   {
     std::vector<std::vector< int > > WL;
-    furthestPoints(point_vector, point_vector.size(), nbL, WL);
+    landmark_choice_by_random_points(point_vector, point_vector.size(), WL);
     witness_complex(WL);
   }
   
@@ -226,7 +253,11 @@ private:
         }
       std::cout << ")";
     }
-    
+
+    /** \brief Check if the facets of the k-dimensional simplex witnessed 
+     *  by witness witness_id are already in the complex.
+     *  inserted_vertex is the handle of the (k+1)-th vertex witnessed by witness_id
+     */
     template <typename KNearestNeighbours>
     bool all_faces_in(KNearestNeighbours &knn, int witness_id, int k, VertexHandle inserted_vertex)
     {
@@ -296,53 +327,50 @@ private:
  */
 
   template <typename KNearestNeighbours>
-    void furthestPoints(Point_Vector &W, int nbP, int nbL, KNearestNeighbours &WL)
-  //void furthestPoints(Point_Vector &W, int nbP, int nbL, Point_Vector &L)
+    void landmark_choice_by_furthest_points(Point_Vector &W, int nbP, KNearestNeighbours &WL)
   {
-    //std::cout << "Enter furthestPoints "<< std::endl;
-    // What is density and why we need it.
-    // basically it is the stop indicator for "no more landmarks"
+    //std::cout << "Enter landmark_choice_by_furthest_points "<< std::endl;
     //std::cout << "W="; print_vvector(W);
     //double density = 5.;
-    std::vector< std::vector<double> > wit_land_dist(nbP,std::vector<double>()); // distance matrix witness x landmarks
-    std::vector< int >                 chosen_landmarks;    // landmark list
+    Point_Vector wit_land_dist(nbP,std::vector<double>());    // distance matrix witness x landmarks
+    typeVectorVertex  chosen_landmarks;                       // landmark list
 
-    WL = KNearestNeighbours(nbP,std::vector<int>()); //nbP copies of empty vectors
-    int current_number_of_landmarks=0;
-    double curr_max_dist = 0;
-    double curr_dist;
-    double infty = std::numeric_limits<double>::infinity();
-    std::vector< double > dist_to_L(nbP,infty);
+    WL = KNearestNeighbours(nbP,std::vector<int>());                             
+    int current_number_of_landmarks=0;                        // counter for landmarks 
+    double curr_max_dist = 0;                                 // used for defining the furhest point from L
+    double curr_dist;                                         // used to stock the distance from the current point to L
+    double infty = std::numeric_limits<double>::infinity();   // infinity (see next entry)
+    std::vector< double > dist_to_L(nbP,infty);               // vector of current distances to L from points
     // double mindist = infty;
-    int curr_max_w=0;
+    int curr_max_w=0;                                         // the point currently furthest from L 
     int j;
-    int temp_swap_int;
+    int temp_swap_int;                                        
     double temp_swap_double;
 
     //CHOICE OF THE FIRST LANDMARK
-    //std::cout << "Enter the first landmark stage\n";
+    std::cout << "Enter the first landmark stage\n";
     srand(354698);
     int rand_int = rand()% nbP;
-    curr_max_w = rand_int;
+    curr_max_w = rand_int; //For testing purposes a pseudo-random number is used here
 
     for (current_number_of_landmarks = 0; current_number_of_landmarks != nbL; current_number_of_landmarks++)
       {
+        //curr_max_w at this point is the next landmark
         chosen_landmarks.push_back(curr_max_w);
         curr_max_dist = 0;
         //std::cout << "**********Entered loop with current number of landmarks = " << current_number_of_landmarks << std::endl;
         //std::cout << "WL="; print_vvector(WL);
         //std::cout << "WLD="; print_vvector(wit_land_dist);
-        //std::cout << "landmarks="; print_vector(chosen_landmarks); std::cout << std::endl;
+        std::cout << "landmarks="; print_vector(chosen_landmarks); std::cout << std::endl;
         for (auto v: WL)
           v.push_back(current_number_of_landmarks);
         for (int i = 0; i < nbP; ++i)
           {
+            // iteration on points in W. update of distance vectors
+            
             //std::cout << "In the loop with i=" << i << " and landmark=" << chosen_landmarks[current_number_of_landmarks] << std::endl;
             //std::cout << "W[i]="; print_vector(W[i]); std::cout << " W[landmark]="; print_vector(W[chosen_landmarks[current_number_of_landmarks]]); std::cout << std::endl;
-            if (i != chosen_landmarks[current_number_of_landmarks])
-              curr_dist = euclidean_distance(W[i],W[chosen_landmarks[current_number_of_landmarks]]);
-            else
-              curr_dist = 0;
+            curr_dist = euclidean_distance(W[i],W[chosen_landmarks[current_number_of_landmarks]]);
             //std::cout << "The problem is not in distance function\n";
             wit_land_dist[i].push_back(curr_dist);
             WL[i].push_back(current_number_of_landmarks);
@@ -358,6 +386,7 @@ private:
             //std::cout << "First half complete\n";
             while (j > 0 && wit_land_dist[i][j-1] > wit_land_dist[i][j])
               {
+                // sort the closest landmark vector for every witness
                 temp_swap_int = WL[i][j];
                 WL[i][j] = WL[i][j-1];
                 WL[i][j-1] = temp_swap_int;
@@ -374,8 +403,82 @@ private:
       }
     //std::cout << endl;
   }
-  
+
+    /** \brief Landmark choice strategy by taking random vertices for landmarks.
+     *
+     */
+
+    template <typename KNearestNeighbours>
+    void landmark_choice_by_random_points(Point_Vector &W, int nbP, KNearestNeighbours &WL)
+    {
+      //std::cout << "Enter landmark_choice_by_random_points "<< std::endl;
+      //std::cout << "W="; print_vvector(W);
+      std::unordered_set< int >  chosen_landmarks;              // landmark set
+
+      Point_Vector wit_land_dist(nbP,std::vector<double>());    // distance matrix witness x landmarks
+
+      WL = KNearestNeighbours(nbP,std::vector<int>());                             
+      int current_number_of_landmarks=0;                        // counter for landmarks 
+
+      srand(24660);
+      int chosen_landmark = rand()%nbP;
+      double curr_dist;
+      
+      int j;
+      int temp_swap_int;                                        
+      double temp_swap_double;
+
+      
+      for (current_number_of_landmarks = 0; current_number_of_landmarks != nbL; current_number_of_landmarks++)
+        {
+          while (chosen_landmarks.find(chosen_landmark) != chosen_landmarks.end())
+            {
+              srand((int)clock());
+              chosen_landmark = rand()% nbP;
+              //std::cout << chosen_landmark << "\n";
+            }
+          chosen_landmarks.insert(chosen_landmark);
+          //std::cout << "**********Entered loop with current number of landmarks = " << current_number_of_landmarks << std::endl;
+          //std::cout << "WL="; print_vvector(WL);
+          //std::cout << "WLD="; print_vvector(wit_land_dist);
+          //std::cout << "landmarks="; print_vector(chosen_landmarks); std::cout << std::endl;
+          for (auto v: WL)
+            v.push_back(current_number_of_landmarks);
+          for (int i = 0; i < nbP; ++i)
+            {
+              // iteration on points in W. update of distance vectors
+              
+              //std::cout << "In the loop with i=" << i << " and landmark=" << chosen_landmarks[current_number_of_landmarks] << std::endl;
+              //std::cout << "W[i]="; print_vector(W[i]); std::cout << " W[landmark]="; print_vector(W[chosen_landmarks[current_number_of_landmarks]]); std::cout << std::endl;
+              curr_dist = euclidean_distance(W[i],W[chosen_landmark]);
+              //std::cout << "The problem is not in distance function\n";
+              wit_land_dist[i].push_back(curr_dist);
+              WL[i].push_back(current_number_of_landmarks);
+              //std::cout << "Push't back\n";
+              j = current_number_of_landmarks;
+              //std::cout << "First half complete\n";
+              while (j > 0 && wit_land_dist[i][j-1] > wit_land_dist[i][j])
+                {
+                  // sort the closest landmark vector for every witness
+                  temp_swap_int = WL[i][j];
+                  WL[i][j] = WL[i][j-1];
+                  WL[i][j-1] = temp_swap_int;
+                  temp_swap_double = wit_land_dist[i][j];
+                  wit_land_dist[i][j] = wit_land_dist[i][j-1];
+                  wit_land_dist[i][j-1] = temp_swap_double;
+                  --j;
+                }
+              //std::cout << "result WL="; print_vvector(WL);
+              //std::cout << "result WLD="; print_vvector(wit_land_dist);
+              //std::cout << "End loop\n";
+            }
+        }
+      //std::cout << endl;
+    }
+
+    
 }; //class Witness_complex
+
 
   
 } // namespace Guhdi
