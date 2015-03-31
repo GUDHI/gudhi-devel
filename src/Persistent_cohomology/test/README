@@ -1,7 +1,9 @@
 To compile:
 ***********
 
+cd /path-to-gudhi/
 cmake .
+cd /path-to-test/
 make
 
 To launch with details:
