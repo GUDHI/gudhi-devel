@@ -25,7 +25,7 @@ const Vertex_handle DEFAULT_VERTEX_HANDLE = (const Vertex_handle) -1;
 const Filtration_value DEFAULT_FILTRATION_VALUE = (const Filtration_value) 0.0;
 
 void test_empty_simplex_tree(typeST& tst) {
-  BOOST_CHECK(tst.null_vertex() == DEFAULT_VERTEX_HANDLE);
+  BOOST_CHECK(tst.null_vertex() != DEFAULT_VERTEX_HANDLE);
   BOOST_CHECK(tst.filtration() == DEFAULT_FILTRATION_VALUE);
   BOOST_CHECK(tst.num_vertices() == (size_t) 0);
   BOOST_CHECK(tst.num_simplices() == (size_t) 0);
