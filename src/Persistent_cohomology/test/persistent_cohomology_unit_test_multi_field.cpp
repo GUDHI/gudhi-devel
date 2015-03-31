@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE const_string test
+#define BOOST_TEST_MODULE persistent_cohomology_multi_field test
 #include <boost/test/included/unit_test.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/chrono/thread_clock.hpp>
