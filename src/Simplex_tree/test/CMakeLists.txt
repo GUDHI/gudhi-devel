@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(GUDHITestSimplexTree)
+project(GUDHISimplexTreeUT)
 
 if(NOT MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
@@ -7,11 +7,14 @@ if(NOT MSVC)
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} --coverage")
 endif()
 
-add_executable ( simplex_tree_unit_test simplex_tree_unit_test.cpp )
-target_link_libraries(simplex_tree_unit_test ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+add_executable ( SimplexTreeUT simplex_tree_unit_test.cpp )
+target_link_libraries(SimplexTreeUT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 # Unitary tests
-add_test(simplex_tree_unit_test ${CMAKE_CURRENT_BINARY_DIR}/simplex_tree_unit_test)
+add_test(NAME SimplexTreeUT
+  COMMAND ${CMAKE_CURRENT_BINARY_DIR}/SimplexTreeUT 
+    # XML format for Jenkins xUnit plugin 
+    --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/SimplexTreeUT.xml --log_level=test_suite --report_level=no)
 
 if (LCOV_PATH)
   # Lcov code coverage of unitary test
