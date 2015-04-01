@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 project(GUDHIskbl)
 
-if(NOT MSVC)
+if (GCOVR_PATH)
   # for gcovr to make coverage reports - Corbera Jenkins plugin
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")	

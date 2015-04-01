@@ -27,7 +27,12 @@ def parse():
     # TODO: do this properly, using the xml module.
     # Write header
     sys.stderr.write('''<?xml version="1.0" encoding="UTF-8"?>\n''')
-    sys.stderr.write('''<results>\n''')
+    # VR : sys.stderr.write('''<results>\n''')
+    # Add from VR  + [
+    sys.stderr.write('''<results version=2>\n''') 
+    sys.stderr.write('''<cppcheck version="1.63"/>\n''')
+    sys.stderr.write('''<errors>\n''')
+    # -]
 
     # Do line-by-line conversion
     r = re.compile('([^:]*):([0-9]*):  ([^\[]*)\[([^\]]*)\] \[([0-9]*)\].*')
@@ -41,9 +46,15 @@ def parse():
             continue
         fname, lineno, msg, label, score = g  
         severity = cpplint_score_to_cppcheck_severity(int(score))
-        sys.stderr.write('''<error file="%s" line="%s" id="%s" severity="%s" msg="%s"/>\n'''%(fname, lineno, label, severity, msg))
+        # VR : sys.stderr.write('''<error file="%s" line="%s" id="%s" severity="%s" msg="%s"/>\n'''%(fname, lineno, label, severity, msg))
+        # Add from VR  + [
+        sys.stderr.write('''<error file="%s" line="%s" id="%s" severity="%s" msg="%s"/>\n</error>\n'''%(fname, lineno, label, severity, msg))
+        # -]
 
     # Write footer
+    # Add from VR  + [
+    sys.stderr.write('''</errors>\n'''%(fname, lineno, label, severity, msg))
+    # -]
     sys.stderr.write('''</results>\n''')
 
 

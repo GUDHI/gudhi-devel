@@ -32,9 +32,9 @@ endif()
 find_package(CGAL)
 
 # Required programs for unitary tests purpose
-FIND_PROGRAM( LCOV_PATH lcov )
-if (LCOV_PATH)
-  message("lcov found in ${LCOV_PATH}")
+FIND_PROGRAM( GCOVR_PATH gcovr )
+if (GCOVR_PATH)
+  message("gcovr found in ${GCOVR_PATH}")
 endif()
 
 FIND_PROGRAM( PYTHON_PATH python )

@@ -15,6 +15,13 @@ if(CGAL_FOUND)
       include( ${EIGEN3_USE_FILE} )
       include_directories (BEFORE "../../include")
 
+      if (GCOVR_PATH)
+        # for gcovr to make coverage reports - Corbera Jenkins plugin
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fprofile-arcs -ftest-coverage")
+      endif()
+
       add_definitions(-DDEBUG_TRACES)
       add_executable ( AlphaShapesUT Alpha_shapes_unit_test.cpp )
       target_link_libraries(AlphaShapesUT  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
