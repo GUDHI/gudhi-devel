@@ -219,7 +219,7 @@ namespace Gudhi {
   void witness_complex_from_points(Point_Vector point_vector)
   {
     std::vector<std::vector< int > > WL;
-    landmark_choice_by_furthest_points(point_vector, point_vector.size(), WL);
+    landmark_choice_by_random_points(point_vector, point_vector.size(), WL);
     witness_complex(WL);
   }
   
@@ -360,7 +360,7 @@ private:
         //std::cout << "**********Entered loop with current number of landmarks = " << current_number_of_landmarks << std::endl;
         //std::cout << "WL="; print_vvector(WL);
         //std::cout << "WLD="; print_vvector(wit_land_dist);
-        std::cout << "landmarks="; print_vector(chosen_landmarks); std::cout << std::endl;
+        //std::cout << "landmarks="; print_vector(chosen_landmarks); std::cout << std::endl;
         for (auto v: WL)
           v.push_back(current_number_of_landmarks);
         for (int i = 0; i < nbP; ++i)
@@ -394,17 +394,16 @@ private:
             //std::cout << "result distL="; print_vector(dist_to_L); std::cout << std::endl;
             //std::cout << "End loop\n";
           }
-        std::cout << "Distance to landmarks="; print_vector(dist_to_L); std::cout << std::endl;
+        //std::cout << "Distance to landmarks="; print_vector(dist_to_L); std::cout << std::endl;
         curr_max_dist = 0;
         for (int i = 0; i < nbP; ++i) {
           if (dist_to_L[i] > curr_max_dist)
             {
               curr_max_dist = dist_to_L[i];
               curr_max_w = i;
-              std::cout << "hop curr_max_w is now " << curr_max_w << std::endl;
             }
         }
-        std::cout << "Chose " << curr_max_w << " as new landmark\n";
+        //std::cout << "Chose " << curr_max_w << " as new landmark\n";
       }
     //std::cout << endl;
   }
