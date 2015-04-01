@@ -2,9 +2,9 @@
  *    (Geometric Understanding in Higher Dimensions) is a generic C++
  *    library for computational topology.
  *
- *    Author(s):       Vincent Rouvreau
+ *    Author(s):       Siargey Kachanovich
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Méditerranée (France)
+ *    Copyright (C) 2015  INRIA Sophia Antipolis-Méditerranée (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #include <fstream>
 #include <ctime>
 //#include "gudhi/graph_simplicial_complex.h"
-#include "gudhi/Witness_complex1.h"
+#include "gudhi/Witness_complex.h"
 
 
 using namespace Gudhi;
@@ -81,7 +81,8 @@ int main (int argc, char * const argv[])
   start = clock();
   Point_Vector point_vector;
   read_points_cust(file_name, point_vector);
-  witnessComplex.witness_complex_from_file(point_vector, nbL);
+  witnessComplex.setNbL(nbL);
+  witnessComplex.witness_complex_from_points(point_vector);
   end = clock();
   std::cout << "Howdy world! The process took "
        << (double)(end-start)/CLOCKS_PER_SEC << " s. \n";

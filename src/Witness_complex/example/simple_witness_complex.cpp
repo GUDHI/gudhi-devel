@@ -23,7 +23,7 @@
 #include <iostream>
 #include <ctime>
 //#include "gudhi/graph_simplicial_complex.h"
-#include "gudhi/Witness_complex1.h"
+#include "gudhi/Witness_complex.h"
 
 using namespace Gudhi;
 
