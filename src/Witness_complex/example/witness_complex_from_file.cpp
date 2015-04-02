@@ -23,6 +23,9 @@
 #include <iostream>
 #include <fstream>
 #include <ctime>
+
+//#include <stdlib.h>
+
 //#include "gudhi/graph_simplicial_complex.h"
 #include "gudhi/Witness_complex.h"
 
@@ -86,5 +89,13 @@ int main (int argc, char * const argv[])
   end = clock();
   std::cout << "Howdy world! The process took "
        << (double)(end-start)/CLOCKS_PER_SEC << " s. \n";
-
+  char buffer[100];
+  int i = sprintf(buffer,"%s_%s_result.txt",argv[1],argv[2]);
+  if (i >= 0)
+    {
+      std::string out_file = (std::string)buffer;
+      std::ofstream ofs (out_file, std::ofstream::out);
+      witnessComplex.st_to_file(ofs);
+      ofs.close();
+    }
 }
