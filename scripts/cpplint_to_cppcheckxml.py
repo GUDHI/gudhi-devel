@@ -29,7 +29,7 @@ def parse():
     sys.stderr.write('''<?xml version="1.0" encoding="UTF-8"?>\n''')
     # VR : sys.stderr.write('''<results>\n''')
     # Add from VR  + [
-    sys.stderr.write('''<results version=2>\n''') 
+    sys.stderr.write('''<results version="2">\n''') 
     sys.stderr.write('''<cppcheck version="1.63"/>\n''')
     sys.stderr.write('''<errors>\n''')
     # -]
