@@ -7,6 +7,12 @@ if (GCOVR_PATH)
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")	
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fprofile-arcs -ftest-coverage")
 endif()
+if (GPROF_PATH)
+  # for gprof to make coverage reports - Jenkins
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -pg")
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -pg")
+endif()
 
 add_executable(TestSkeletonBlockerComplex TestSkeletonBlockerComplex.cpp)
 add_executable(TestSimplifiable TestSimplifiable.cpp)

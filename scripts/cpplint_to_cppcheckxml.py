@@ -30,8 +30,8 @@ def parse():
     # VR : sys.stderr.write('''<results>\n''')
     # Add from VR  + [
     sys.stderr.write('''<results version="2">\n''') 
-    sys.stderr.write('''<cppcheck version="1.63"/>\n''')
-    sys.stderr.write('''<errors>\n''')
+    sys.stderr.write('''    <cppcheck version="1.63"/>\n''')
+    sys.stderr.write('''    <errors>\n''')
     # -]
 
     # Do line-by-line conversion
@@ -48,7 +48,9 @@ def parse():
         severity = cpplint_score_to_cppcheck_severity(int(score))
         # VR : sys.stderr.write('''<error file="%s" line="%s" id="%s" severity="%s" msg="%s"/>\n'''%(fname, lineno, label, severity, msg))
         # Add from VR  + [
-        sys.stderr.write('''<error file="%s" line="%s" id="%s" severity="%s" msg="%s"/>\n</error>\n'''%(fname, lineno, label, severity, msg))
+        sys.stderr.write('''        <error id="%s" severity="%s" msg="%s"/>\n'''%(label, severity, msg))
+        sys.stderr.write('''            <location file="%s" line="%s"/>\n'''%(fname, lineno))
+        sys.stderr.write('''        </error>\n'''%(fname, lineno))
         # -]
 
     # Write footer
