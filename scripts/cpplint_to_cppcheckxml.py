@@ -50,7 +50,7 @@ def parse():
         # Add from VR  + [
         sys.stderr.write('''        <error id="%s" severity="%s" msg="%s"/>\n'''%(label, severity, msg))
         sys.stderr.write('''            <location file="%s" line="%s"/>\n'''%(fname, lineno))
-        sys.stderr.write('''        </error>\n'''%(fname, lineno))
+        sys.stderr.write('''        </error>\n''')
         # -]
 
     # Write footer
