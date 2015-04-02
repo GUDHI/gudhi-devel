@@ -8,6 +8,7 @@
 
 import sys
 import re
+import cgi
 
 def cpplint_score_to_cppcheck_severity(score):
     # I'm making this up
@@ -48,14 +49,14 @@ def parse():
         severity = cpplint_score_to_cppcheck_severity(int(score))
         # VR : sys.stderr.write('''<error file="%s" line="%s" id="%s" severity="%s" msg="%s"/>\n'''%(fname, lineno, label, severity, msg))
         # Add from VR  + [
-        sys.stderr.write('''        <error id="%s" severity="%s" msg="%s"/>\n'''%(label, severity, msg))
+        sys.stderr.write('''        <error id="%s" severity="%s" msg="%s">\n'''%(label, severity, cgi.escape(msg,quote=True)))
         sys.stderr.write('''            <location file="%s" line="%s"/>\n'''%(fname, lineno))
         sys.stderr.write('''        </error>\n''')
         # -]
 
     # Write footer
     # Add from VR  + [
-    sys.stderr.write('''</errors>\n''')
+    sys.stderr.write('''    </errors>\n''')
     # -]
     sys.stderr.write('''</results>\n''')
 
