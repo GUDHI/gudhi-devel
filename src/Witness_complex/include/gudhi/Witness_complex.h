@@ -208,7 +208,7 @@ namespace Gudhi {
             }
           k++;
         }
-      print_sc(root()); std::cout << std::endl;
+      //print_sc(root()); std::cout << std::endl;
     }
 
     /** \brief Construction of witness complex from points given explicitly
@@ -253,6 +253,44 @@ private:
         }
       std::cout << ")";
     }
+
+  public:
+    /** \brief Print functions
+     */
+
+    void st_to_file(std::ofstream& out_file)
+    {
+      sc_to_file(out_file, root());
+    }
+
+  private:
+    void sc_to_file(std::ofstream& out_file, Siblings * sibl)
+    {
+      if (sibl == NULL)
+        out_file << "&";
+      else
+        children_to_file(out_file, sibl->members_);
+    }
+    
+    void children_to_file(std::ofstream& out_file, Dictionary map)
+    {
+      out_file << "(";
+      if (!map.empty())
+        {
+          out_file << map.begin()->first;
+          if (has_children(map.begin()))
+            sc_to_file(out_file, map.begin()->second.children());
+          typename Dictionary::iterator it;
+          for (it = map.begin()+1; it != map.end(); ++it)
+            {
+              out_file << "," << it->first;
+              if (has_children(it))
+                sc_to_file(out_file, it->second.children());
+            }
+        }
+      out_file << ")";
+    }
+
 
     /** \brief Check if the facets of the k-dimensional simplex witnessed 
      *  by witness witness_id are already in the complex.
