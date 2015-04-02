@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE const_string test
+#define BOOST_TEST_MODULE persistent_cohomology_multi_field test
 #include <boost/test/included/unit_test.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/chrono/thread_clock.hpp>
@@ -23,8 +23,7 @@ using namespace boost::unit_test;
 typedef Simplex_tree<> typeST;
 
 std::string test_rips_persistence(int min_coefficient, int max_coefficient, int min_persistence) {
-  // Check file name is given as parameter from CMakeLists.txt
-  BOOST_CHECK(framework::master_test_suite().argc >= 2);
+  // file name is given as parameter from CMakeLists.txt
   const std::string inputFile(framework::master_test_suite().argv[1]);
 
   std::ifstream simplex_tree_stream;
