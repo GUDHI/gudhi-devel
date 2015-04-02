@@ -31,273 +31,285 @@ typedef std::vector< Vertex_handle > typeVectorVertex;
 typedef std::pair<typeVectorVertex, Filtration_value> typeSimplex;
 typedef std::pair< Simplex_tree<>::Simplex_handle, bool > typePairSimplexBool;
 
-int main (int argc, char * const argv[])
-{
-	const Filtration_value FIRST_FILTRATION_VALUE = 0.1;
-	const Filtration_value SECOND_FILTRATION_VALUE = 0.2;
-	const Filtration_value THIRD_FILTRATION_VALUE = 0.3;
-	const Filtration_value FOURTH_FILTRATION_VALUE = 0.4;
-	Vertex_handle FIRST_VERTEX_HANDLE =  (Vertex_handle)0;
-	Vertex_handle SECOND_VERTEX_HANDLE = (Vertex_handle)1;
-	Vertex_handle THIRD_VERTEX_HANDLE = (Vertex_handle)2;
-	Vertex_handle FOURTH_VERTEX_HANDLE = (Vertex_handle)3;
+int main(int argc, char * const argv[]) {
+  const Filtration_value FIRST_FILTRATION_VALUE = 0.1;
+  const Filtration_value SECOND_FILTRATION_VALUE = 0.2;
+  const Filtration_value THIRD_FILTRATION_VALUE = 0.3;
+  const Filtration_value FOURTH_FILTRATION_VALUE = 0.4;
+  Vertex_handle FIRST_VERTEX_HANDLE = (Vertex_handle) 0;
+  Vertex_handle SECOND_VERTEX_HANDLE = (Vertex_handle) 1;
+  Vertex_handle THIRD_VERTEX_HANDLE = (Vertex_handle) 2;
+  Vertex_handle FOURTH_VERTEX_HANDLE = (Vertex_handle) 3;
 
-	// TEST OF INSERTION
-	std::cout << "********************************************************************" << std::endl;
-	std::cout << "EXAMPLE OF SIMPLE INSERTION" << std::endl;
-	//Construct the Simplex Tree
-	Simplex_tree<> simplexTree;
+  // TEST OF INSERTION
+  std::cout << "********************************************************************" << std::endl;
+  std::cout << "EXAMPLE OF SIMPLE INSERTION" << std::endl;
+  //Construct the Simplex Tree
+  Simplex_tree<> simplexTree;
 
-	/* Simplex to be inserted:  */
-	/*    1                     */
-	/*    o                     */
-	/*   /X\                    */
-	/*  o---o---o               */
-	/*  2   0   3               */
+  /* Simplex to be inserted:  */
+  /*    1                     */
+  /*    o                     */
+  /*   /X\                    */
+  /*  o---o---o               */
+  /*  2   0   3               */
 
-	// ++ FIRST
-	std::cout << "   * INSERT 0" << std::endl;
-	typeVectorVertex firstSimplexVector;
-	firstSimplexVector.push_back(FIRST_VERTEX_HANDLE);
-	typeSimplex firstSimplex = std::make_pair(firstSimplexVector, Filtration_value(FIRST_FILTRATION_VALUE));
-	typePairSimplexBool returnValue =
-			simplexTree.insert_simplex ( firstSimplex.first, firstSimplex.second );
+  // ++ FIRST
+  std::cout << "   * INSERT 0" << std::endl;
+  typeVectorVertex firstSimplexVector;
+  firstSimplexVector.push_back(FIRST_VERTEX_HANDLE);
+  typeSimplex firstSimplex = std::make_pair(firstSimplexVector, Filtration_value(FIRST_FILTRATION_VALUE));
+  typePairSimplexBool returnValue =
+      simplexTree.insert_simplex(firstSimplex.first, firstSimplex.second);
 
-	if (returnValue.second == true)
-	{
-		std::cout << "   + 0 INSERTED" << std::endl;
-		int nb_simplices = simplexTree.num_simplices() + 1;
-		simplexTree.set_num_simplices(nb_simplices);
-	}
-	else
-	{
-		std::cout << "   - 0 NOT INSERTED" << std::endl;
-	}
+  if (returnValue.second == true) {
+    std::cout << "   + 0 INSERTED" << std::endl;
+    int nb_simplices = simplexTree.num_simplices() + 1;
+    simplexTree.set_num_simplices(nb_simplices);
+  } else {
+    std::cout << "   - 0 NOT INSERTED" << std::endl;
+  }
 
-	// ++ SECOND
-	std::cout << "   * INSERT 1" << std::endl;
-	typeVectorVertex secondSimplexVector;
-	secondSimplexVector.push_back(SECOND_VERTEX_HANDLE);
-	typeSimplex secondSimplex = std::make_pair(secondSimplexVector, Filtration_value(FIRST_FILTRATION_VALUE));
-	returnValue =
-			simplexTree.insert_simplex ( secondSimplex.first, secondSimplex.second );
+  // ++ SECOND
+  std::cout << "   * INSERT 1" << std::endl;
+  typeVectorVertex secondSimplexVector;
+  secondSimplexVector.push_back(SECOND_VERTEX_HANDLE);
+  typeSimplex secondSimplex = std::make_pair(secondSimplexVector, Filtration_value(FIRST_FILTRATION_VALUE));
+  returnValue =
+      simplexTree.insert_simplex(secondSimplex.first, secondSimplex.second);
 
-	if (returnValue.second == true)
-	{
-		std::cout << "   + 1 INSERTED" << std::endl;
-		int nb_simplices = simplexTree.num_simplices() + 1;
-		simplexTree.set_num_simplices(nb_simplices);
-	}
-	else
-	{
-		std::cout << "   - 1 NOT INSERTED" << std::endl;
-	}
+  if (returnValue.second == true) {
+    std::cout << "   + 1 INSERTED" << std::endl;
+    int nb_simplices = simplexTree.num_simplices() + 1;
+    simplexTree.set_num_simplices(nb_simplices);
+  } else {
+    std::cout << "   - 1 NOT INSERTED" << std::endl;
+  }
 
-	// ++ THIRD
-	std::cout << "   * INSERT (0,1)" << std::endl;
-	typeVectorVertex thirdSimplexVector;
-	thirdSimplexVector.push_back(FIRST_VERTEX_HANDLE);
-	thirdSimplexVector.push_back(SECOND_VERTEX_HANDLE);
-	typeSimplex thirdSimplex = std::make_pair(thirdSimplexVector, Filtration_value(SECOND_FILTRATION_VALUE));
-	returnValue =
-			simplexTree.insert_simplex ( thirdSimplex.first, thirdSimplex.second );
+  // ++ THIRD
+  std::cout << "   * INSERT (0,1)" << std::endl;
+  typeVectorVertex thirdSimplexVector;
+  thirdSimplexVector.push_back(FIRST_VERTEX_HANDLE);
+  thirdSimplexVector.push_back(SECOND_VERTEX_HANDLE);
+  typeSimplex thirdSimplex = std::make_pair(thirdSimplexVector, Filtration_value(SECOND_FILTRATION_VALUE));
+  returnValue =
+      simplexTree.insert_simplex(thirdSimplex.first, thirdSimplex.second);
 
-	if (returnValue.second == true)
-	{
-		std::cout << "   + (0,1) INSERTED" << std::endl;
-		int nb_simplices = simplexTree.num_simplices() + 1;
-		simplexTree.set_num_simplices(nb_simplices);
-	}
-	else
-	{
-		std::cout << "   - (0,1) NOT INSERTED" << std::endl;
-	}
+  if (returnValue.second == true) {
+    std::cout << "   + (0,1) INSERTED" << std::endl;
+    int nb_simplices = simplexTree.num_simplices() + 1;
+    simplexTree.set_num_simplices(nb_simplices);
+  } else {
+    std::cout << "   - (0,1) NOT INSERTED" << std::endl;
+  }
 
-	// ++ FOURTH
-	std::cout << "   * INSERT 2" << std::endl;
-	typeVectorVertex fourthSimplexVector;
-	fourthSimplexVector.push_back(THIRD_VERTEX_HANDLE);
-	typeSimplex fourthSimplex = std::make_pair(fourthSimplexVector, Filtration_value(FIRST_FILTRATION_VALUE));
-	returnValue =
-			simplexTree.insert_simplex ( fourthSimplex.first, fourthSimplex.second );
+  // ++ FOURTH
+  std::cout << "   * INSERT 2" << std::endl;
+  typeVectorVertex fourthSimplexVector;
+  fourthSimplexVector.push_back(THIRD_VERTEX_HANDLE);
+  typeSimplex fourthSimplex = std::make_pair(fourthSimplexVector, Filtration_value(FIRST_FILTRATION_VALUE));
+  returnValue =
+      simplexTree.insert_simplex(fourthSimplex.first, fourthSimplex.second);
 
-	if (returnValue.second == true)
-	{
-		std::cout << "   + 2 INSERTED" << std::endl;
-		int nb_simplices = simplexTree.num_simplices() + 1;
-		simplexTree.set_num_simplices(nb_simplices);
-	}
-	else
-	{
-		std::cout << "   - 2 NOT INSERTED" << std::endl;
-	}
+  if (returnValue.second == true) {
+    std::cout << "   + 2 INSERTED" << std::endl;
+    int nb_simplices = simplexTree.num_simplices() + 1;
+    simplexTree.set_num_simplices(nb_simplices);
+  } else {
+    std::cout << "   - 2 NOT INSERTED" << std::endl;
+  }
 
-	// ++ FIFTH
-	std::cout << "   * INSERT (2,0)" << std::endl;
-	typeVectorVertex fifthSimplexVector;
-	fifthSimplexVector.push_back(THIRD_VERTEX_HANDLE);
-	fifthSimplexVector.push_back(FIRST_VERTEX_HANDLE);
-	typeSimplex fifthSimplex = std::make_pair(fifthSimplexVector, Filtration_value(SECOND_FILTRATION_VALUE));
-	returnValue =
-			simplexTree.insert_simplex ( fifthSimplex.first, fifthSimplex.second );
+  // ++ FIFTH
+  std::cout << "   * INSERT (2,0)" << std::endl;
+  typeVectorVertex fifthSimplexVector;
+  fifthSimplexVector.push_back(THIRD_VERTEX_HANDLE);
+  fifthSimplexVector.push_back(FIRST_VERTEX_HANDLE);
+  typeSimplex fifthSimplex = std::make_pair(fifthSimplexVector, Filtration_value(SECOND_FILTRATION_VALUE));
+  returnValue =
+      simplexTree.insert_simplex(fifthSimplex.first, fifthSimplex.second);
 
-	if (returnValue.second == true)
-	{
-		std::cout << "   + (2,0) INSERTED" << std::endl;
-		int nb_simplices = simplexTree.num_simplices() + 1;
-		simplexTree.set_num_simplices(nb_simplices);
-	}
-	else
-	{
-		std::cout << "   - (2,0) NOT INSERTED" << std::endl;
-	}
+  if (returnValue.second == true) {
+    std::cout << "   + (2,0) INSERTED" << std::endl;
+    int nb_simplices = simplexTree.num_simplices() + 1;
+    simplexTree.set_num_simplices(nb_simplices);
+  } else {
+    std::cout << "   - (2,0) NOT INSERTED" << std::endl;
+  }
 
-	// ++ SIXTH
-	std::cout << "   * INSERT (2,1)" << std::endl;
-	typeVectorVertex sixthSimplexVector;
-	sixthSimplexVector.push_back(THIRD_VERTEX_HANDLE);
-	sixthSimplexVector.push_back(SECOND_VERTEX_HANDLE);
-	typeSimplex sixthSimplex = std::make_pair(sixthSimplexVector, Filtration_value(SECOND_FILTRATION_VALUE));
-	returnValue =
-			simplexTree.insert_simplex ( sixthSimplex.first, sixthSimplex.second );
+  // ++ SIXTH
+  std::cout << "   * INSERT (2,1)" << std::endl;
+  typeVectorVertex sixthSimplexVector;
+  sixthSimplexVector.push_back(THIRD_VERTEX_HANDLE);
+  sixthSimplexVector.push_back(SECOND_VERTEX_HANDLE);
+  typeSimplex sixthSimplex = std::make_pair(sixthSimplexVector, Filtration_value(SECOND_FILTRATION_VALUE));
+  returnValue =
+      simplexTree.insert_simplex(sixthSimplex.first, sixthSimplex.second);
 
-	if (returnValue.second == true)
-	{
-		std::cout << "   + (2,1) INSERTED" << std::endl;
-		int nb_simplices = simplexTree.num_simplices() + 1;
-		simplexTree.set_num_simplices(nb_simplices);
-	}
-	else
-	{
-		std::cout << "   - (2,1) NOT INSERTED" << std::endl;
-	}
+  if (returnValue.second == true) {
+    std::cout << "   + (2,1) INSERTED" << std::endl;
+    int nb_simplices = simplexTree.num_simplices() + 1;
+    simplexTree.set_num_simplices(nb_simplices);
+  } else {
+    std::cout << "   - (2,1) NOT INSERTED" << std::endl;
+  }
 
-	// ++ SEVENTH
-	std::cout << "   * INSERT (2,1,0)" << std::endl;
-	typeVectorVertex seventhSimplexVector;
-	seventhSimplexVector.push_back(THIRD_VERTEX_HANDLE);
-	seventhSimplexVector.push_back(SECOND_VERTEX_HANDLE);
-	seventhSimplexVector.push_back(FIRST_VERTEX_HANDLE);
-	typeSimplex seventhSimplex = std::make_pair(seventhSimplexVector, Filtration_value(THIRD_FILTRATION_VALUE));
-	returnValue =
-			simplexTree.insert_simplex ( seventhSimplex.first, seventhSimplex.second );
+  // ++ SEVENTH
+  std::cout << "   * INSERT (2,1,0)" << std::endl;
+  typeVectorVertex seventhSimplexVector;
+  seventhSimplexVector.push_back(THIRD_VERTEX_HANDLE);
+  seventhSimplexVector.push_back(SECOND_VERTEX_HANDLE);
+  seventhSimplexVector.push_back(FIRST_VERTEX_HANDLE);
+  typeSimplex seventhSimplex = std::make_pair(seventhSimplexVector, Filtration_value(THIRD_FILTRATION_VALUE));
+  returnValue =
+      simplexTree.insert_simplex(seventhSimplex.first, seventhSimplex.second);
 
-	if (returnValue.second == true)
-	{
-		std::cout << "   + (2,1,0) INSERTED" << std::endl;
-		int nb_simplices = simplexTree.num_simplices() + 1;
-		simplexTree.set_num_simplices(nb_simplices);
-	}
-	else
-	{
-		std::cout << "   - (2,1,0) NOT INSERTED" << std::endl;
-	}
+  if (returnValue.second == true) {
+    std::cout << "   + (2,1,0) INSERTED" << std::endl;
+    int nb_simplices = simplexTree.num_simplices() + 1;
+    simplexTree.set_num_simplices(nb_simplices);
+  } else {
+    std::cout << "   - (2,1,0) NOT INSERTED" << std::endl;
+  }
 
-	// ++ EIGHTH
-	std::cout << "   * INSERT 3" << std::endl;
-	typeVectorVertex eighthSimplexVector;
-	eighthSimplexVector.push_back(FOURTH_VERTEX_HANDLE);
-	typeSimplex eighthSimplex = std::make_pair(eighthSimplexVector, Filtration_value(FIRST_FILTRATION_VALUE));
-	returnValue =
-			simplexTree.insert_simplex ( eighthSimplex.first, eighthSimplex.second );
+  // ++ EIGHTH
+  std::cout << "   * INSERT 3" << std::endl;
+  typeVectorVertex eighthSimplexVector;
+  eighthSimplexVector.push_back(FOURTH_VERTEX_HANDLE);
+  typeSimplex eighthSimplex = std::make_pair(eighthSimplexVector, Filtration_value(FIRST_FILTRATION_VALUE));
+  returnValue =
+      simplexTree.insert_simplex(eighthSimplex.first, eighthSimplex.second);
 
-	if (returnValue.second == true)
-	{
-		std::cout << "   + 3 INSERTED" << std::endl;
-		int nb_simplices = simplexTree.num_simplices() + 1;
-		simplexTree.set_num_simplices(nb_simplices);
-	}
-	else
-	{
-		std::cout << "   - 3 NOT INSERTED" << std::endl;
-	}
+  if (returnValue.second == true) {
+    std::cout << "   + 3 INSERTED" << std::endl;
+    int nb_simplices = simplexTree.num_simplices() + 1;
+    simplexTree.set_num_simplices(nb_simplices);
+  } else {
+    std::cout << "   - 3 NOT INSERTED" << std::endl;
+  }
 
-	// ++ NINETH
-	std::cout << "   * INSERT (3,0)" << std::endl;
-	typeVectorVertex ninethSimplexVector;
-	ninethSimplexVector.push_back(FOURTH_VERTEX_HANDLE);
-	ninethSimplexVector.push_back(FIRST_VERTEX_HANDLE);
-	typeSimplex ninethSimplex = std::make_pair(ninethSimplexVector, Filtration_value(SECOND_FILTRATION_VALUE));
-	returnValue =
-			simplexTree.insert_simplex ( ninethSimplex.first, ninethSimplex.second );
+  // ++ NINETH
+  std::cout << "   * INSERT (3,0)" << std::endl;
+  typeVectorVertex ninethSimplexVector;
+  ninethSimplexVector.push_back(FOURTH_VERTEX_HANDLE);
+  ninethSimplexVector.push_back(FIRST_VERTEX_HANDLE);
+  typeSimplex ninethSimplex = std::make_pair(ninethSimplexVector, Filtration_value(SECOND_FILTRATION_VALUE));
+  returnValue =
+      simplexTree.insert_simplex(ninethSimplex.first, ninethSimplex.second);
 
-	if (returnValue.second == true)
-	{
-		std::cout << "   + (3,0) INSERTED" << std::endl;
-		int nb_simplices = simplexTree.num_simplices() + 1;
-		simplexTree.set_num_simplices(nb_simplices);
-	}
-	else
-	{
-		std::cout << "   - (3,0) NOT INSERTED" << std::endl;
-	}
+  if (returnValue.second == true) {
+    std::cout << "   + (3,0) INSERTED" << std::endl;
+    int nb_simplices = simplexTree.num_simplices() + 1;
+    simplexTree.set_num_simplices(nb_simplices);
+  } else {
+    std::cout << "   - (3,0) NOT INSERTED" << std::endl;
+  }
 
-	// ++ TENTH
-	std::cout << "   * INSERT 0 (already inserted)" << std::endl;
-	typeVectorVertex tenthSimplexVector;
-	tenthSimplexVector.push_back(FIRST_VERTEX_HANDLE);
-	typeSimplex tenthSimplex = std::make_pair(tenthSimplexVector, Filtration_value(FOURTH_FILTRATION_VALUE)); // With a different filtration value
-	returnValue =
-			simplexTree.insert_simplex ( tenthSimplex.first, tenthSimplex.second );
+  // ++ TENTH
+  std::cout << "   * INSERT 0 (already inserted)" << std::endl;
+  typeVectorVertex tenthSimplexVector;
+  tenthSimplexVector.push_back(FIRST_VERTEX_HANDLE);
+  typeSimplex tenthSimplex = std::make_pair(tenthSimplexVector, Filtration_value(FOURTH_FILTRATION_VALUE)); // With a different filtration value
+  returnValue =
+      simplexTree.insert_simplex(tenthSimplex.first, tenthSimplex.second);
 
-	if (returnValue.second == true)
-	{
-		std::cout << "   + 0 INSERTED" << std::endl;
-		int nb_simplices = simplexTree.num_simplices() + 1;
-		simplexTree.set_num_simplices(nb_simplices);
-	}
-	else
-	{
-		std::cout << "   - 0 NOT INSERTED" << std::endl;
-	}
+  if (returnValue.second == true) {
+    std::cout << "   + 0 INSERTED" << std::endl;
+    int nb_simplices = simplexTree.num_simplices() + 1;
+    simplexTree.set_num_simplices(nb_simplices);
+  } else {
+    std::cout << "   - 0 NOT INSERTED" << std::endl;
+  }
 
-	// ++ ELEVENTH
-	std::cout << "   * INSERT (2,1,0) (already inserted)" << std::endl;
-	typeVectorVertex eleventhSimplexVector;
-	eleventhSimplexVector.push_back(THIRD_VERTEX_HANDLE);
-	eleventhSimplexVector.push_back(SECOND_VERTEX_HANDLE);
-	eleventhSimplexVector.push_back(FIRST_VERTEX_HANDLE);
-	typeSimplex eleventhSimplex = std::make_pair(eleventhSimplexVector, Filtration_value(FOURTH_FILTRATION_VALUE));
-	returnValue =
-			simplexTree.insert_simplex ( eleventhSimplex.first, eleventhSimplex.second );
+  // ++ ELEVENTH
+  std::cout << "   * INSERT (2,1,0) (already inserted)" << std::endl;
+  typeVectorVertex eleventhSimplexVector;
+  eleventhSimplexVector.push_back(THIRD_VERTEX_HANDLE);
+  eleventhSimplexVector.push_back(SECOND_VERTEX_HANDLE);
+  eleventhSimplexVector.push_back(FIRST_VERTEX_HANDLE);
+  typeSimplex eleventhSimplex = std::make_pair(eleventhSimplexVector, Filtration_value(FOURTH_FILTRATION_VALUE));
+  returnValue =
+      simplexTree.insert_simplex(eleventhSimplex.first, eleventhSimplex.second);
 
-	if (returnValue.second == true)
-	{
-		std::cout << "   + (2,1,0) INSERTED" << std::endl;
-		int nb_simplices = simplexTree.num_simplices() + 1;
-		simplexTree.set_num_simplices(nb_simplices);
-	}
-	else
-	{
-		std::cout << "   - (2,1,0) NOT INSERTED" << std::endl;
-	}
+  if (returnValue.second == true) {
+    std::cout << "   + (2,1,0) INSERTED" << std::endl;
+    int nb_simplices = simplexTree.num_simplices() + 1;
+    simplexTree.set_num_simplices(nb_simplices);
+  } else {
+    std::cout << "   - (2,1,0) NOT INSERTED" << std::endl;
+  }
 
-	// ++ GENERAL VARIABLE SET
-	simplexTree.set_filtration(FOURTH_FILTRATION_VALUE); // Max filtration value
-	simplexTree.set_dimension(2); // Max dimension = 2 -> (2,1,0)
+  // ++ GENERAL VARIABLE SET
+  simplexTree.set_filtration(FOURTH_FILTRATION_VALUE); // Max filtration value
+  simplexTree.set_dimension(2); // Max dimension = 2 -> (2,1,0)
 
-	std::cout << "********************************************************************" << std::endl;
-	// Display the Simplex_tree - Can not be done in the middle of 2 inserts
-	std::cout << "* The complex contains " << simplexTree.num_simplices() << " simplices" << std::endl;
-	std::cout << "   - dimension " << simplexTree.dimension() << "   - filtration " << simplexTree.filtration() << std::endl;
-	std::cout << "* Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
-	for( auto f_simplex : simplexTree.filtration_simplex_range() )
-	{
-		std::cout << "   " << "[" << simplexTree.filtration(f_simplex) << "] ";
-		for( auto vertex : simplexTree.simplex_vertex_range(f_simplex) )
-		{
-			std::cout << (int)vertex << " ";
-		}
-		std::cout << std::endl;
-	}
-	//   [0.1] 0
-	//   [0.1] 1
-	//   [0.1] 2
-	//   [0.1] 3
-	//   [0.2] 1 0
-	//   [0.2] 2 0
-	//   [0.2] 2 1
-	//   [0.2] 3 0
-	//   [0.3] 2 1 0
-	return 0;
+  std::cout << "********************************************************************" << std::endl;
+  // Display the Simplex_tree - Can not be done in the middle of 2 inserts
+  std::cout << "* The complex contains " << simplexTree.num_simplices() << " simplices" << std::endl;
+  std::cout << "   - dimension " << simplexTree.dimension() << "   - filtration " << simplexTree.filtration() << std::endl;
+  std::cout << "* Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
+  for (auto f_simplex : simplexTree.filtration_simplex_range()) {
+    std::cout << "   " << "[" << simplexTree.filtration(f_simplex) << "] ";
+    for (auto vertex : simplexTree.simplex_vertex_range(f_simplex)) {
+      std::cout << (int) vertex << " ";
+    }
+    std::cout << std::endl;
+  }
+  //   [0.1] 0
+  //   [0.1] 1
+  //   [0.1] 2
+  //   [0.1] 3
+  //   [0.2] 1 0
+  //   [0.2] 2 0
+  //   [0.2] 2 1
+  //   [0.2] 3 0
+  //   [0.3] 2 1 0
+
+  // ------------------------------------------------------------------------------------------------------------------
+  // Find in the simplex_tree
+  // ------------------------------------------------------------------------------------------------------------------
+  Simplex_tree<>::Simplex_handle simplexFound = simplexTree.find(secondSimplexVector);
+  std::cout << "**************IS THE SIMPLEX {1} IN THE SIMPLEX TREE ?\n";
+  if (simplexFound != simplexTree.null_simplex())
+    std::cout << "***+ YES IT IS!\n";
+  else
+    std::cout << "***- NO IT ISN'T\n";
+
+  Vertex_handle UNKNOWN_VERTEX_HANDLE = (Vertex_handle) 15;
+  typeVectorVertex unknownSimplexVector;
+  unknownSimplexVector.push_back(UNKNOWN_VERTEX_HANDLE);
+  simplexFound = simplexTree.find(unknownSimplexVector);
+  std::cout << "**************IS THE SIMPLEX {15} IN THE SIMPLEX TREE ?\n";
+  if (simplexFound != simplexTree.null_simplex())
+    std::cout << "***+ YES IT IS!\n";
+  else
+    std::cout << "***- NO IT ISN'T\n";
+
+  simplexFound = simplexTree.find(fifthSimplexVector);
+  std::cout << "**************IS THE SIMPLEX {2,0} IN THE SIMPLEX TREE ?\n";
+  if (simplexFound != simplexTree.null_simplex())
+    std::cout << "***+ YES IT IS!\n";
+  else
+    std::cout << "***- NO IT ISN'T\n";
+
+  typeVectorVertex otherSimplexVector;
+  otherSimplexVector.push_back(UNKNOWN_VERTEX_HANDLE);
+  otherSimplexVector.push_back(SECOND_VERTEX_HANDLE);
+  simplexFound = simplexTree.find(otherSimplexVector);
+  std::cout << "**************IS THE SIMPLEX {15,1} IN THE SIMPLEX TREE ?\n";
+  if (simplexFound != simplexTree.null_simplex())
+    std::cout << "***+ YES IT IS!\n";
+  else
+    std::cout << "***- NO IT ISN'T\n";
+
+  typeVectorVertex invSimplexVector;
+  invSimplexVector.push_back(SECOND_VERTEX_HANDLE);
+  invSimplexVector.push_back(THIRD_VERTEX_HANDLE);
+  invSimplexVector.push_back(FIRST_VERTEX_HANDLE);
+  simplexFound = simplexTree.find(invSimplexVector);
+  std::cout << "**************IS THE SIMPLEX {1,2,0} IN THE SIMPLEX TREE ?\n";
+  if (simplexFound != simplexTree.null_simplex())
+    std::cout << "***+ YES IT IS!\n";
+  else
+    std::cout << "***- NO IT ISN'T\n";
+  return 0;
 }
