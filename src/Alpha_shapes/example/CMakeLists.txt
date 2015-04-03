@@ -13,7 +13,6 @@ if(CGAL_FOUND)
     if (EIGEN3_FOUND)
       message(STATUS "Eigen3 version: ${EIGEN3_VERSION}.")
       include( ${EIGEN3_USE_FILE} )
-      include_directories (BEFORE "../../include")
 
       add_executable ( dtoffrw Delaunay_triangulation_off_rw.cpp )
       target_link_libraries(dtoffrw  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
