@@ -33,6 +33,9 @@ namespace Gudhi {
 
 namespace bottleneck {
 
+// Diagram_point is the type of the persistence diagram's points
+typedef std::pair<double, double> Diagram_point;
+
 // Return the used index for encoding none of the points
 int null_point_index();
 
@@ -41,9 +44,6 @@ int null_point_index();
 
 class Persistence_diagrams_graph {
  public:
-  // Diagram_point is the type of the persistence diagram's points
-  typedef typename std::pair<double, double> Diagram_point;
-
   // Persistence_diagram1 and 2 are the types of any externals representations of persistence diagrams.
   // They have to have an iterator over points, which have to have fields first (for birth) and second (for death).
   template<typename Persistence_diagram1, typename Persistence_diagram2>
@@ -108,7 +108,7 @@ inline double Persistence_diagrams_graph::distance(int u_point_index, int v_poin
     return 0;
   Diagram_point p_u = get_u_point(u_point_index);
   Diagram_point p_v = get_v_point(v_point_index);
-  return std::max(std::fabs(p_u.first - p_v.first), std::fabs(p_u.second - p_v.second));
+  return (std::max)(std::fabs(p_u.first - p_v.first), std::fabs(p_u.second - p_v.second));
 }
 
 inline int Persistence_diagrams_graph::size() const {
@@ -124,7 +124,7 @@ inline std::vector<double>* Persistence_diagrams_graph::sorted_distances() {
   return new std::vector<double>(sorted_distances.cbegin(), sorted_distances.cend());
 }
 
-inline Persistence_diagrams_graph::Diagram_point Persistence_diagrams_graph::get_u_point(int u_point_index) const {
+inline Diagram_point Persistence_diagrams_graph::get_u_point(int u_point_index) const {
   if (!on_the_u_diagonal(u_point_index))
     return u.at(u_point_index);
   Diagram_point projector = v.at(corresponding_point_in_v(u_point_index));
@@ -132,7 +132,7 @@ inline Persistence_diagrams_graph::Diagram_point Persistence_diagrams_graph::get
   return Diagram_point(x, x);
 }
 
-inline Persistence_diagrams_graph::Diagram_point Persistence_diagrams_graph::get_v_point(int v_point_index) const {
+inline Diagram_point Persistence_diagrams_graph::get_v_point(int v_point_index) const {
   if (!on_the_v_diagonal(v_point_index))
     return v.at(v_point_index);
   Diagram_point projector = u.at(corresponding_point_in_u(v_point_index));
