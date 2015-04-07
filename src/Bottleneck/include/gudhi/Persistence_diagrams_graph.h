@@ -34,7 +34,7 @@ namespace Gudhi {
 namespace bottleneck {
 
 // Diagram_point is the type of the persistence diagram's points
-typedef typename std::pair<double, double> Diagram_point;
+typedef std::pair<double, double> Diagram_point;
 
 // Return the used index for encoding none of the points
 int null_point_index();
@@ -81,7 +81,7 @@ Persistence_diagrams_graph::Persistence_diagrams_graph(Persistence_diagram1& dia
     swap(u, v);
 }
 
-Persistence_diagrams_graph::Persistence_diagrams_graph::Persistence_diagrams_graph()
+Persistence_diagrams_graph::Persistence_diagrams_graph()
     : u(), v() { }
 
 inline bool Persistence_diagrams_graph::on_the_u_diagonal(int u_point_index) const {
@@ -108,7 +108,7 @@ inline double Persistence_diagrams_graph::distance(int u_point_index, int v_poin
     return 0;
   Diagram_point p_u = get_u_point(u_point_index);
   Diagram_point p_v = get_v_point(v_point_index);
-  return std::max(std::fabs(p_u.first - p_v.first), std::fabs(p_u.second - p_v.second));
+  return (std::max)(std::fabs(p_u.first - p_v.first), std::fabs(p_u.second - p_v.second));
 }
 
 inline int Persistence_diagrams_graph::size() const {
