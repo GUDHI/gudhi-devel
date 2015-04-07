@@ -33,9 +33,6 @@ namespace Gudhi {
 
 namespace bottleneck {
 
-// Diagram_point is the type of the persistence diagram's points
-typedef typename std::pair<double, double> Diagram_point;
-
 // Return the used index for encoding none of the points
 int null_point_index();
 
@@ -44,6 +41,9 @@ int null_point_index();
 
 class Persistence_diagrams_graph {
  public:
+  // Diagram_point is the type of the persistence diagram's points
+  typedef typename std::pair<double, double> Diagram_point;
+
   // Persistence_diagram1 and 2 are the types of any externals representations of persistence diagrams.
   // They have to have an iterator over points, which have to have fields first (for birth) and second (for death).
   template<typename Persistence_diagram1, typename Persistence_diagram2>
@@ -81,7 +81,7 @@ Persistence_diagrams_graph::Persistence_diagrams_graph(Persistence_diagram1& dia
     swap(u, v);
 }
 
-Persistence_diagrams_graph::Persistence_diagrams_graph::Persistence_diagrams_graph()
+Persistence_diagrams_graph::Persistence_diagrams_graph()
     : u(), v() { }
 
 inline bool Persistence_diagrams_graph::on_the_u_diagonal(int u_point_index) const {
@@ -124,7 +124,7 @@ inline std::vector<double>* Persistence_diagrams_graph::sorted_distances() {
   return new std::vector<double>(sorted_distances.cbegin(), sorted_distances.cend());
 }
 
-inline Diagram_point Persistence_diagrams_graph::get_u_point(int u_point_index) const {
+inline Persistence_diagrams_graph::Diagram_point Persistence_diagrams_graph::get_u_point(int u_point_index) const {
   if (!on_the_u_diagonal(u_point_index))
     return u.at(u_point_index);
   Diagram_point projector = v.at(corresponding_point_in_v(u_point_index));
@@ -132,7 +132,7 @@ inline Diagram_point Persistence_diagrams_graph::get_u_point(int u_point_index) 
   return Diagram_point(x, x);
 }
 
-inline Diagram_point Persistence_diagrams_graph::get_v_point(int v_point_index) const {
+inline Persistence_diagrams_graph::Diagram_point Persistence_diagrams_graph::get_v_point(int v_point_index) const {
   if (!on_the_v_diagonal(v_point_index))
     return v.at(v_point_index);
   Diagram_point projector = u.at(corresponding_point_in_u(v_point_index));
