@@ -103,14 +103,17 @@ int main (int argc, char * const argv[])
   Witness_complex<> witnessComplex;
  
   std::cout << "Let the carnage begin!\n";
-  start = clock();
   Point_Vector point_vector;
   read_points_cust(file_name, point_vector);
-  std::cout << "Successfully read the points\n";
+  //std::cout << "Successfully read the points\n";
   witnessComplex.setNbL(nbL);
   //  witnessComplex.witness_complex_from_points(point_vector);
   std::vector<std::vector< int > > WL;
+  start = clock();
   witnessComplex.landmark_choice_by_random_points(point_vector, point_vector.size(), WL);
+  end = clock();
+  std::cout << "Landmark choice took "
+            << (double)(end-start)/CLOCKS_PER_SEC << " s. \n";
   // Write the WL matrix in a file
   mkdir("output", S_IRWXU);
   const size_t last_slash_idx = file_name.find_last_of("/");
@@ -120,6 +123,7 @@ int main (int argc, char * const argv[])
     }
   std::string out_file = "output/"+file_name+"_"+argv[2]+".wl";
   write_wl(out_file,WL);
+  start = clock();
   witnessComplex.witness_complex(WL);
   //
   end = clock();
