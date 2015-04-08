@@ -24,13 +24,17 @@
 #include <fstream>
 #include <ctime>
 
+#include <sys/types.h>
+#include <sys/stat.h>
 //#include <stdlib.h>
 
 //#include "gudhi/graph_simplicial_complex.h"
 #include "gudhi/Witness_complex.h"
 #include "gudhi/reader_utils.h"
+//#include <boost/filesystem.hpp>
 
 using namespace Gudhi;
+//using namespace boost::filesystem;
 
 typedef std::vector< Vertex_handle > typeVectorVertex;
 typedef std::vector< std::vector <double> > Point_Vector;
@@ -65,14 +69,32 @@ read_points_cust ( std::string file_name , std::vector< std::vector< double > > 
   in_file.close();
 }
 
+void write_wl( std::string file_name, std::vector< std::vector <int> > & WL)
+{
+  std::ofstream ofs (file_name, std::ofstream::out);
+  for (auto w : WL)
+    {
+      for (auto l: w)
+        ofs << l << " ";
+      ofs << "\n";
+    }
+  ofs.close();
+}
+
 int main (int argc, char * const argv[])
 {
-    if (argc != 3)
-      {
-          std::cerr << "Usage: " << argv[0]
-    << " path_to_point_file nbL \n";
-    return 0;
-  }
+  if (argc != 3)
+    {
+      std::cerr << "Usage: " << argv[0]
+                << " path_to_point_file nbL \n";
+      return 0;
+    }
+  /*
+  boost::filesystem::path p;
+
+  for (; argc > 2; --argc, ++argv)
+    p /= argv[1];
+  */
   std::string file_name   = argv[1];
   int nbL       = atoi(argv[2]);
   
@@ -86,10 +108,24 @@ int main (int argc, char * const argv[])
   read_points_cust(file_name, point_vector);
   std::cout << "Successfully read the points\n";
   witnessComplex.setNbL(nbL);
-  witnessComplex.witness_complex_from_points(point_vector);
+  //  witnessComplex.witness_complex_from_points(point_vector);
+  std::vector<std::vector< int > > WL;
+  witnessComplex.landmark_choice_by_random_points(point_vector, point_vector.size(), WL);
+  // Write the WL matrix in a file
+  mkdir("output", S_IRWXU);
+  const size_t last_slash_idx = file_name.find_last_of("/");
+  if (std::string::npos != last_slash_idx)
+    {
+      file_name.erase(0, last_slash_idx + 1);
+    }
+  std::string out_file = "output/"+file_name+"_"+argv[2]+".wl";
+  write_wl(out_file,WL);
+  witnessComplex.witness_complex(WL);
+  //
   end = clock();
   std::cout << "Howdy world! The process took "
        << (double)(end-start)/CLOCKS_PER_SEC << " s. \n";
+  /*
   char buffer[100];
   int i = sprintf(buffer,"%s_%s_result.txt",argv[1],argv[2]);
   if (i >= 0)
@@ -99,4 +135,11 @@ int main (int argc, char * const argv[])
       witnessComplex.st_to_file(ofs);
       ofs.close();
     }
+  */
+
+  out_file = "output/"+file_name+"_"+argv[2]+".stree";
+  std::ofstream ofs (out_file, std::ofstream::out);
+  witnessComplex.st_to_file(ofs);
+  ofs.close();
+
 }

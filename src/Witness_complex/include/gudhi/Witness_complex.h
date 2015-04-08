@@ -356,7 +356,8 @@ private:
         }
       std::cout << "]\n";
     }
-  
+
+  public:
 /**
  * \brief Landmark choice strategy by iteratively adding the landmark the furthest from the
  * current landmark set
