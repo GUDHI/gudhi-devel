@@ -32,27 +32,15 @@ endif()
 find_package(CGAL)
 
 # Required programs for unitary tests purpose
-FIND_PROGRAM( LCOV_PATH lcov )
-if (LCOV_PATH)
-  message("lcov found in ${LCOV_PATH}")
+FIND_PROGRAM( GCOVR_PATH gcovr )
+if (GCOVR_PATH)
+  message("gcovr found in ${GCOVR_PATH}")
 endif()
-
-FIND_PROGRAM( PYTHON_PATH python )
-if (PYTHON_PATH)
-  message("python found in ${PYTHON_PATH}")
+# Required programs for unitary tests purpose
+FIND_PROGRAM( GPROF_PATH gprof )
+if (GPROF_PATH)
+  message("gprof found in ${GPROF_PATH}")
 endif()
-
-# Function to add_test cpplint on each header file of the Gudhi module 
-function(cpplint_add_tests the_directory)
-  if (PYTHON_PATH)
-    # Cpplint tests on coding style
-    file(GLOB files "${the_directory}/*.h" "${the_directory}/*/*.h")
-    foreach(filename ${files})
-      message(${filename})
-      add_test("${filename}.cpplint" ${CMAKE_SOURCE_DIR}/scripts/check_google_style.sh ${filename}  ${CMAKE_SOURCE_DIR}/scripts/cpplint.py)
-    endforeach()
-  endif()
-endfunction(cpplint_add_tests)
 
 
 if(NOT Boost_FOUND)
