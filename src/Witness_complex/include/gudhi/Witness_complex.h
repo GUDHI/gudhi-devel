@@ -184,6 +184,7 @@ namespace Gudhi {
               active_w.push_back(i);
             }
         }
+      std::cout << "k=1, active witnesses: " << active_w.size() << std::endl;
       //std::cout << "Successfully added edges" << std::endl;
       while (!active_w.empty() && k < nbL )
         {
@@ -206,6 +207,7 @@ namespace Gudhi {
               else
                 active_w.erase(it++); //First increase the iterator and then erase the previous element
             }
+	  std::cout << "k=" << k << ", active witnesses: " << active_w.size() << std::endl;
           k++;
         }
       //print_sc(root()); std::cout << std::endl;
@@ -453,7 +455,7 @@ private:
     template <typename KNearestNeighbours>
     void landmark_choice_by_random_points(Point_Vector &W, int nbP, KNearestNeighbours &WL)
     {
-      //std::cout << "Enter landmark_choice_by_random_points "<< std::endl;
+      std::cout << "Enter landmark_choice_by_random_points "<< std::endl;
       //std::cout << "W="; print_vvector(W);
       std::unordered_set< int >  chosen_landmarks;              // landmark set
 

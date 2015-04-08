@@ -28,7 +28,7 @@
 
 //#include "gudhi/graph_simplicial_complex.h"
 #include "gudhi/Witness_complex.h"
-
+#include "gudhi/reader_utils.h"
 
 using namespace Gudhi;
 
@@ -65,6 +65,44 @@ read_points_cust ( std::string file_name , std::vector< std::vector< double > > 
   in_file.close();
 }
 
+/**
+ * \brief Rock age method of reading off file
+ *
+ */
+inline void
+off_reader_cust ( std::string file_name , std::vector< std::vector< double > > & points)
+{  
+  std::ifstream in_file (file_name.c_str(),std::ios::in);
+  if(!in_file.is_open())
+    {
+      std::cerr << "Unable to open file " << file_name << std::endl;
+      return;
+    }
+  std::string line;
+  double x;
+  // Line OFF. No need in it
+  if (!getline(in_file, line))
+    {
+      std::cerr << "No line OFF\n";
+      return;
+    }
+  // Line with 3 numbers. No need
+  if (!getline(in_file, line))
+    {
+      std::cerr << "No line with 3 numbers\n";
+      return;
+    }
+  // Reading points
+  while( getline ( in_file , line ) )
+    {
+      std::vector< double > point;
+      std::istringstream iss( line );
+      while(iss >> x) { point.push_back(x); }
+      points.push_back(point);
+    }
+  in_file.close();
+}
+
 int main (int argc, char * const argv[])
 {
     if (argc != 3)
@@ -83,7 +121,8 @@ int main (int argc, char * const argv[])
   std::cout << "Let the carnage begin!\n";
   start = clock();
   Point_Vector point_vector;
-  read_points_cust(file_name, point_vector);
+  off_reader_cust(file_name, point_vector);
+  std::cout << "Successfully read the points\n";
   witnessComplex.setNbL(nbL);
   witnessComplex.witness_complex_from_points(point_vector);
   end = clock();
