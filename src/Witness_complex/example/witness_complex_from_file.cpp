@@ -122,7 +122,7 @@ int main (int argc, char * const argv[])
       file_name.erase(0, last_slash_idx + 1);
     }
   std::string out_file = "output/"+file_name+"_"+argv[2]+".wl";
-  write_wl(out_file,WL);
+  //write_wl(out_file,WL);
   start = clock();
   witnessComplex.witness_complex(WL);
   //
@@ -146,4 +146,8 @@ int main (int argc, char * const argv[])
   witnessComplex.st_to_file(ofs);
   ofs.close();
 
+  out_file = "output/"+file_name+"_"+argv[2]+".badlinks";
+  std::ofstream ofs2(out_file, std::ofstream::out);
+  witnessComplex.write_bad_links(ofs2);
+  ofs2.close();
 }

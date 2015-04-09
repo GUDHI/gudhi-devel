@@ -533,18 +533,22 @@ private:
           std::vector< Vertex_handle > link_vertices;
           // Fill link_vertices
           for (auto u: complex_vertex_range())
-            if (u != v && find({u,v}) != null_simplex())
-              link_vertices.push_back(u);
+            {
+              typeVectorVertex edge = {u,v};
+              if (u != v && find(edge) != null_simplex())   
+                link_vertices.push_back(u);
+            }
           // Find the dimension
           int d = link_dim(link_vertices, link_vertices.begin(),root(),0);
           //Siblings* curr_sibl = root();
-          bool b = link_is_pseudomanifold(link_vertices,d);
+          if (! link_is_pseudomanifold(link_vertices,d))
+            out_file << "Bad link at " << v << "\n";
         }
     }
 
   private:
     int link_dim(std::vector< Vertex_handle >& link_vertices,
-                 typename std::vector< Vertex_handle >::iterator& curr_v,
+                 typename std::vector< Vertex_handle >::iterator curr_v,
                  Siblings* curr_sibl, int curr_d)
     {
       Simplex_handle sh;
@@ -569,9 +573,10 @@ private:
     typedef typename boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS> Adj_graph;
     // map that gives to a certain simplex its node in graph and its dimension
     //typedef std::pair<boost::vecS,Color> Reference;
-    typedef boost::container::flat_map<Simplex_handle, boost::vecS> Graph_map;
     typedef boost::graph_traits<Adj_graph>::vertex_descriptor Vertex_t;
     typedef boost::graph_traits<Adj_graph>::edge_descriptor Edge_t;
+
+    typedef boost::container::flat_map<Simplex_handle, Vertex_t> Graph_map;
     
     /* \brief Verifies if the simplices formed by vertices given by link_vertices 
      * form a pseudomanifold.
@@ -592,7 +597,7 @@ private:
                          root(),
                          0, dimension);
       for (auto f_map_it : f_map)
-        if (boost::out_degree(f_map_it->second, adj_graph) != 2)
+        if (boost::out_degree(f_map_it.second, adj_graph) != 2)
           return false;
       // At this point I know that all (d-1)-simplices are adjacent to exactly 2 d-simplices
       // What is left is to check the connexity
@@ -612,6 +617,8 @@ private:
       Simplex_handle sh;
       Vertex_t vert;
       typename typeVectorVertex::iterator it;
+      std::pair<typename Graph_map::iterator,bool> resPair;
+      //typename Graph_map::iterator resPair;
       //Add vertices
       for (it = curr_v; it != link_vertices.end(); ++it)
         {
@@ -621,14 +628,14 @@ private:
               if (curr_d == dimension)
                 {
                   vert = boost::add_vertex(adj_graph);
-                  f_map.insert(sh,vert);
+                  resPair = f_map.emplace(sh,vert);
                 }
               else
                 {
                   if (curr_d == dimension-1)
                     {
                       vert = boost::add_vertex(adj_graph);
-                      d_map.insert(sh,vert);
+                      resPair = d_map.emplace(sh,vert);
                     }
                   add_vertices_edges(link_vertices,
                                      it+1,
@@ -642,10 +649,10 @@ private:
         }
       // Add edges
       typename Graph_map::iterator map_it;
-      for (auto d_map_it : d_map)
+      for (auto d_map_pair : d_map)
         {
-          sh = d_map_it->first;
-          Vertex_t d_vert = d_map_it->second;
+          sh = d_map_pair.first;
+          Vertex_t d_vert = d_map_pair.second;
           for (auto facet_sh : boundary_simplex_range(sh))
             //for (auto f_map_it : f_map)
             {
