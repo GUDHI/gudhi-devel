@@ -7,6 +7,10 @@ add_test(simple_witness_complex ${CMAKE_CURRENT_BINARY_DIR}/simple_witness_compl
 add_executable( witness_complex_from_file witness_complex_from_file.cpp )
 add_test( witness_complex_from_bunny &{CMAKE_CURRENT_BINARY_DIR}/witness_complex_from_file ${CMAKE_SOURCE_DIR}/data/points/bunny_5000 )   
 
+add_executable( witness_complex_from_off witness_complex_from_off.cpp )
+
+add_executable( witness_complex_from_wl_matrix witness_complex_from_wl_matrix.cpp )
+
 # An example with Simplex-tree using CGAL alpha_shapes_3
 #if(GMP_FOUND AND CGAL_FOUND)
 #   message("CGAL_lib = ${CGAL_LIBRARIES_DIR}")
