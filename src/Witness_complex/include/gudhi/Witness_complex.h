@@ -38,6 +38,10 @@
 #include <ctime>
 #include <iostream>
 
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/connected_components.hpp>
+
 namespace Gudhi {
 
 
@@ -93,7 +97,7 @@ namespace Gudhi {
     typedef int Witness_id;
     typedef int Landmark_id;
     typedef std::list< Vertex_handle > ActiveWitnessList;
-
+    
   private:
     /** Number of landmarks
      */
@@ -521,7 +525,138 @@ private:
       //std::cout << endl;
     }
 
+    void write_bad_links(std::ofstream& out_file)
+    {
+      out_file << "Bad links list\n";
+      for (auto v: complex_vertex_range())
+        {
+          std::vector< Vertex_handle > link_vertices;
+          // Fill link_vertices
+          for (auto u: complex_vertex_range())
+            if (u != v && find({u,v}) != null_simplex())
+              link_vertices.push_back(u);
+          // Find the dimension
+          int d = link_dim(link_vertices, link_vertices.begin(),root(),0);
+          //Siblings* curr_sibl = root();
+          bool b = link_is_pseudomanifold(link_vertices,d);
+        }
+    }
+
+  private:
+    int link_dim(std::vector< Vertex_handle >& link_vertices,
+                 typename std::vector< Vertex_handle >::iterator& curr_v,
+                 Siblings* curr_sibl, int curr_d)
+    {
+      Simplex_handle sh;
+      int final_d = curr_d;
+      typename std::vector< Vertex_handle >::iterator it;
+      for (it = curr_v; it != link_vertices.end(); ++it)
+        {
+          sh = curr_sibl->find(*it);
+          if (sh != null_simplex())
+            {
+              int d = link_dim(link_vertices, it+1, self_siblings(sh), curr_d+1);
+              if (d > final_d)
+                final_d = d;
+            }
+        }
+      return final_d;
+    }
+
+    // color is false is a (d-1)-dim face, true is a d-dim face 
+    //typedef bool Color;
+    // graph is an adjacency list
+    typedef typename boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS> Adj_graph;
+    // map that gives to a certain simplex its node in graph and its dimension
+    //typedef std::pair<boost::vecS,Color> Reference;
+    typedef boost::container::flat_map<Simplex_handle, boost::vecS> Graph_map;
+    typedef boost::graph_traits<Adj_graph>::vertex_descriptor Vertex_t;
+    typedef boost::graph_traits<Adj_graph>::edge_descriptor Edge_t;
     
+    /* \brief Verifies if the simplices formed by vertices given by link_vertices 
+     * form a pseudomanifold.
+     * The idea is to make a bipartite graph, where vertices are the d- and (d-1)-dimensional
+     * faces and edges represent adjacency between them.
+     */
+    bool link_is_pseudomanifold(std::vector< Vertex_handle >& link_vertices,
+                                int dimension)
+    {
+      Adj_graph adj_graph;
+      Graph_map d_map, f_map; // d_map = map for d-dimensional simplices,
+                              // f_map = map for its facets
+      add_vertices_edges(link_vertices,
+                         link_vertices.begin(),
+                         adj_graph,
+                         d_map,
+                         f_map,
+                         root(),
+                         0, dimension);
+      for (auto f_map_it : f_map)
+        if (boost::out_degree(f_map_it->second, adj_graph) != 2)
+          return false;
+      // At this point I know that all (d-1)-simplices are adjacent to exactly 2 d-simplices
+      // What is left is to check the connexity
+      std::vector<int> components(boost::num_vertices(adj_graph));
+      return (boost::connected_components(adj_graph, &components[0]) == 1);
+    }
+
+    void add_vertices_edges(typeVectorVertex& link_vertices,
+                            typename typeVectorVertex::iterator curr_v,
+                            Adj_graph& adj_graph,
+                            Graph_map& d_map,
+                            Graph_map& f_map,
+                            Siblings* curr_sibl,
+                            int curr_d,
+                            int dimension)
+    {
+      Simplex_handle sh;
+      Vertex_t vert;
+      typename typeVectorVertex::iterator it;
+      //Add vertices
+      for (it = curr_v; it != link_vertices.end(); ++it)
+        {
+          sh = curr_sibl->find(*it);
+          if (sh != null_simplex())
+            {
+              if (curr_d == dimension)
+                {
+                  vert = boost::add_vertex(adj_graph);
+                  f_map.insert(sh,vert);
+                }
+              else
+                {
+                  if (curr_d == dimension-1)
+                    {
+                      vert = boost::add_vertex(adj_graph);
+                      d_map.insert(sh,vert);
+                    }
+                  add_vertices_edges(link_vertices,
+                                     it+1,
+                                     adj_graph,
+                                     d_map,
+                                     f_map,
+                                     self_siblings(sh),
+                                     curr_d+1, dimension);
+                }
+            }
+        }
+      // Add edges
+      typename Graph_map::iterator map_it;
+      for (auto d_map_it : d_map)
+        {
+          sh = d_map_it->first;
+          Vertex_t d_vert = d_map_it->second;
+          for (auto facet_sh : boundary_simplex_range(sh))
+            //for (auto f_map_it : f_map)
+            {
+              map_it = f_map.find(facet_sh);
+              //We must have all the facets in the graph at this point
+              assert(map_it != f_map.end());
+              Vertex_t f_vert = map_it->second;
+              boost::add_edge(d_vert,f_vert,adj_graph);
+            }
+        }
+    }
 }; //class Witness_complex
 
 
