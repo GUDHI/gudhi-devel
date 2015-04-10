@@ -528,8 +528,31 @@ private:
     void write_bad_links(std::ofstream& out_file)
     {
       out_file << "Bad links list\n";
+      std::cout << "Entered write_bad_links\n";
+      //typeVectorVertex testv = {9,15,17};
+      /*
+        Mein lieber Gott!
+      Simplex_handle d1 = root()->members().find(9);
+      if (d1 != root()->members().end())
+        {
+          Simplex_handle d2 = d1->second.children()->members().find(15);
+          if (d2 != d1->second.children()->members().end())
+            {
+              Simplex_handle d3 = d2->second.children()->members().find(17);
+              if (d3 != d2->second.children()->members().end())
+                std::cout << "{9,15,17} is there\n";
+              else
+                std::cout << "Everything is jak maje być\n";
+            }
+          else
+            std::cout << "{9,15} is not there\n";
+        }
+      else
+        std::cout << "{9} is not there\n";
+      */
       for (auto v: complex_vertex_range())
         {
+          //std::cout << "Vertex " << v << ":\n";
           std::vector< Vertex_handle > link_vertices;
           // Fill link_vertices
           for (auto u: complex_vertex_range())
@@ -538,8 +561,14 @@ private:
               if (u != v && find(edge) != null_simplex())   
                 link_vertices.push_back(u);
             }
+          /*
+            print_vector(link_vertices);
+            std::cout << "\n";
+          */
           // Find the dimension
-          int d = link_dim(link_vertices, link_vertices.begin(),root(),0);
+          typeVectorVertex empty_simplex = {};
+          int d = link_dim(link_vertices, link_vertices.begin(),-1, empty_simplex);
+          //std::cout << " dim " << d << "\n";
           //Siblings* curr_sibl = root();
           if (! link_is_pseudomanifold(link_vertices,d))
             out_file << "Bad link at " << v << "\n";
@@ -547,22 +576,37 @@ private:
     }
 
   private:
+
     int link_dim(std::vector< Vertex_handle >& link_vertices,
                  typename std::vector< Vertex_handle >::iterator curr_v,
-                 Siblings* curr_sibl, int curr_d)
+                 int curr_d,
+                 typeVectorVertex& curr_simplex)
     {
+      //std::cout << "Entered link_dim for " << *(curr_v-1) << "\n";
       Simplex_handle sh;
       int final_d = curr_d;
       typename std::vector< Vertex_handle >::iterator it;
       for (it = curr_v; it != link_vertices.end(); ++it)
         {
-          sh = curr_sibl->find(*it);
+          curr_simplex.push_back(*it);
+          /*
+          std::cout << "Searching for ";
+          print_vector(curr_simplex);
+          std::cout << " curr_dim " << curr_d << " final_dim " << final_d;
+          */
+          sh = find(curr_simplex);
           if (sh != null_simplex())
             {
-              int d = link_dim(link_vertices, it+1, self_siblings(sh), curr_d+1);
+              //std::cout << " -> " << *it << "\n";
+              int d = link_dim(link_vertices, it+1, curr_d+1, curr_simplex);
               if (d > final_d)
                 final_d = d;
             }
+          /*
+          else
+            std::cout << "\n";
+          */
+          curr_simplex.pop_back();
         }
       return final_d;
     }
@@ -587,32 +631,39 @@ private:
                                 int dimension)
     {
       Adj_graph adj_graph;
-      Graph_map d_map, f_map; // d_map = map for d-dimensional simplices,
+      Graph_map d_map, f_map; // d_map = map for d-dimensional simplices
                               // f_map = map for its facets
-      add_vertices_edges(link_vertices,
-                         link_vertices.begin(),
-                         adj_graph,
-                         d_map,
-                         f_map,
-                         root(),
-                         0, dimension);
+      typeVectorVertex empty_vector = {};
+      add_vertices(link_vertices,
+                   link_vertices.begin(),
+                   adj_graph,
+                   d_map,
+                   f_map,
+                   empty_vector,
+                   0, dimension);
+      //std::cout << "DMAP_SIZE: " << d_map.size() << "\n";
+      //std::cout << "FMAP_SIZE: " << f_map.size() << "\n";
+      add_edges(adj_graph, d_map, f_map);
       for (auto f_map_it : f_map)
-        if (boost::out_degree(f_map_it.second, adj_graph) != 2)
-          return false;
+        {
+          //std::cout << "Degree of " << f_map_it.first->first << " is " << boost::out_degree(f_map_it.second, adj_graph) << "\n";
+          if (boost::out_degree(f_map_it.second, adj_graph) != 2)
+            return false;
+        }
       // At this point I know that all (d-1)-simplices are adjacent to exactly 2 d-simplices
       // What is left is to check the connexity
       std::vector<int> components(boost::num_vertices(adj_graph));
       return (boost::connected_components(adj_graph, &components[0]) == 1);
     }
 
-    void add_vertices_edges(typeVectorVertex& link_vertices,
-                            typename typeVectorVertex::iterator curr_v,
-                            Adj_graph& adj_graph,
-                            Graph_map& d_map,
-                            Graph_map& f_map,
-                            Siblings* curr_sibl,
-                            int curr_d,
-                            int dimension)
+    void add_vertices(typeVectorVertex& link_vertices,
+                      typename typeVectorVertex::iterator curr_v,
+                      Adj_graph& adj_graph,
+                      Graph_map& d_map,
+                      Graph_map& f_map,
+                      typeVectorVertex& curr_simplex,
+                      int curr_d,
+                      int dimension)
     {
       Simplex_handle sh;
       Vertex_t vert;
@@ -620,46 +671,70 @@ private:
       std::pair<typename Graph_map::iterator,bool> resPair;
       //typename Graph_map::iterator resPair;
       //Add vertices
+      //std::cout << "Entered add vertices\n";
       for (it = curr_v; it != link_vertices.end(); ++it)
         {
-          sh = curr_sibl->find(*it);
+          curr_simplex.push_back(*it);
+          /*
+          std::cout << "Searching for ";
+          print_vector(curr_simplex);
+          std::cout << " curr_dim " << curr_d << " d " << dimension << "";
+          */
+          sh = find(curr_simplex);
           if (sh != null_simplex())
             {
+              //std::cout << " added\n";
               if (curr_d == dimension)
                 {
                   vert = boost::add_vertex(adj_graph);
-                  resPair = f_map.emplace(sh,vert);
+                  resPair = d_map.emplace(sh,vert);
                 }
               else
                 {
                   if (curr_d == dimension-1)
                     {
                       vert = boost::add_vertex(adj_graph);
-                      resPair = d_map.emplace(sh,vert);
+                      resPair = f_map.emplace(sh,vert);
                     }
-                  add_vertices_edges(link_vertices,
-                                     it+1,
-                                     adj_graph,
-                                     d_map,
-                                     f_map,
-                                     self_siblings(sh),
-                                     curr_d+1, dimension);
+                  add_vertices(link_vertices,
+                               it+1,
+                               adj_graph,
+                               d_map,
+                               f_map,
+                               curr_simplex,
+                               curr_d+1, dimension);
                 }
             }
+          /*
+          else
+            std::cout << "\n";
+          */
+          curr_simplex.pop_back();
         }
+    }
+    
+    void add_edges(Adj_graph& adj_graph,
+                   Graph_map& d_map,
+                   Graph_map& f_map)
+    {
+      Simplex_handle sh;
       // Add edges
+      //std::cout << "Entered add edges:\n";
       typename Graph_map::iterator map_it;
       for (auto d_map_pair : d_map)
         {
+          //std::cout << "*";
           sh = d_map_pair.first;
           Vertex_t d_vert = d_map_pair.second;
           for (auto facet_sh : boundary_simplex_range(sh))
             //for (auto f_map_it : f_map)
             {
+              //std::cout << "'"; 
               map_it = f_map.find(facet_sh);
               //We must have all the facets in the graph at this point
               assert(map_it != f_map.end());
               Vertex_t f_vert = map_it->second;
+              //std::cout << "Added edge " << sh->first << "-" << map_it->first->first << "\n";
               boost::add_edge(d_vert,f_vert,adj_graph);
             }
         }
