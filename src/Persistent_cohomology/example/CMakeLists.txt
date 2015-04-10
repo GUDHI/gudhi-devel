@@ -9,7 +9,6 @@ if (NOT MSVC)
    add_executable(rips_persistence rips_persistence.cpp)
    target_link_libraries(rips_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
    
-   add_test(rips_persistence_2 ${CMAKE_CURRENT_BINARY_DIR}/rips_persistence ${CMAKE_SOURCE_DIR}/data/points/Kl.txt -r 0.25 -d 3 -p 2 -m 100)
    add_test(rips_persistence_3 ${CMAKE_CURRENT_BINARY_DIR}/rips_persistence ${CMAKE_SOURCE_DIR}/data/points/Kl.txt -r 0.25 -d 3 -p 3 -m 100)
    
    add_executable(persistence_from_file persistence_from_file.cpp)
@@ -23,7 +22,6 @@ if (NOT MSVC)
    
       add_executable(rips_multifield_persistence rips_multifield_persistence.cpp )
       target_link_libraries(rips_multifield_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES})
-      add_test(rips_multifield_persistence_2_3 ${CMAKE_CURRENT_BINARY_DIR}/rips_multifield_persistence ${CMAKE_SOURCE_DIR}/data/points/Kl.txt -r 0.25 -d 3 -p 2 -q 3 -m 100)
       add_test(rips_multifield_persistence_2_71 ${CMAKE_CURRENT_BINARY_DIR}/rips_multifield_persistence ${CMAKE_SOURCE_DIR}/data/points/Kl.txt -r 0.25 -d 3 -p 2 -q 71 -m 100)
    
       add_executable ( performance_rips_persistence performance_rips_persistence.cpp )
