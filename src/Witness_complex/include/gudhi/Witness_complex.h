@@ -530,26 +530,7 @@ private:
       out_file << "Bad links list\n";
       std::cout << "Entered write_bad_links\n";
       //typeVectorVertex testv = {9,15,17};
-      /*
-        Mein lieber Gott!
-      Simplex_handle d1 = root()->members().find(9);
-      if (d1 != root()->members().end())
-        {
-          Simplex_handle d2 = d1->second.children()->members().find(15);
-          if (d2 != d1->second.children()->members().end())
-            {
-              Simplex_handle d3 = d2->second.children()->members().find(17);
-              if (d3 != d2->second.children()->members().end())
-                std::cout << "{9,15,17} is there\n";
-              else
-                std::cout << "Everything is jak maje być\n";
-            }
-          else
-            std::cout << "{9,15} is not there\n";
-        }
-      else
-        std::cout << "{9} is not there\n";
-      */
+      int count = 0;
       for (auto v: complex_vertex_range())
         {
           //std::cout << "Vertex " << v << ":\n";
@@ -571,8 +552,11 @@ private:
           //std::cout << " dim " << d << "\n";
           //Siblings* curr_sibl = root();
           if (! link_is_pseudomanifold(link_vertices,d))
-            out_file << "Bad link at " << v << "\n";
+            count++;
+          //out_file << "Bad link at " << v << "\n";          
         }
+      out_file << "Number of bad links: " << count << "/" << root()->size();
+      std::cout << "Number of bad links: " << count << "/" << root()->size() << std::endl;
     }
 
   private:
