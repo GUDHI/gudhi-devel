@@ -510,21 +510,24 @@ private:
               //std::cout << "Push't back\n";
               j = current_number_of_landmarks;
               //std::cout << "First half complete\n";
-              while (j > 0 && wit_land_dist[i][j-1] > wit_land_dist[i][j])
-                {
-                  // sort the closest landmark vector for every witness
-                  temp_swap_int = WL[i][j];
-                  WL[i][j] = WL[i][j-1];
-                  WL[i][j-1] = temp_swap_int;
-                  temp_swap_double = wit_land_dist[i][j];
-                  wit_land_dist[i][j] = wit_land_dist[i][j-1];
-                  wit_land_dist[i][j-1] = temp_swap_double;
-                  --j;
-                }
               //std::cout << "result WL="; print_vvector(WL);
               //std::cout << "result WLD="; print_vvector(wit_land_dist);
               //std::cout << "End loop\n";
             }
+        }
+      for (int i = 0; i < nbP; i++)
+        {
+          // sort the closest landmark vector for every witness
+          sort(WL[i].begin(), WL[i].end(), [&](int j1, int j2){return wit_land_dist[i][j1] < wit_land_dist[i][j2];});
+          /*
+          temp_swap_int = WL[i][j];
+          WL[i][j] = WL[i][j-1];
+          WL[i][j-1] = temp_swap_int;
+          temp_swap_double = wit_land_dist[i][j];
+          wit_land_dist[i][j] = wit_land_dist[i][j-1];
+          wit_land_dist[i][j-1] = temp_swap_double;
+          --j;
+          */
         }
       //std::cout << endl;
     }
