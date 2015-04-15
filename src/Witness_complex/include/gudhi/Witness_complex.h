@@ -190,8 +190,12 @@ namespace Gudhi {
         }
       std::cout << "k=1, active witnesses: " << active_w.size() << std::endl;
       //std::cout << "Successfully added edges" << std::endl;
+      count_good = {0,0};
+      count_bad = {0,0};
       while (!active_w.empty() && k < nbL )
         {
+	  count_good.push_back(0);
+	  count_bad.push_back(0);
           //std::cout << "Started the step k=" << k << std::endl;
           typename ActiveWitnessList::iterator it = active_w.begin();
           while (it != active_w.end())
@@ -530,7 +534,7 @@ private:
       out_file << "Bad links list\n";
       std::cout << "Entered write_bad_links\n";
       //typeVectorVertex testv = {9,15,17};
-      int count = 0;
+      //int count = 0;
       for (auto v: complex_vertex_range())
         {
           //std::cout << "Vertex " << v << ":\n";
@@ -551,15 +555,35 @@ private:
           int d = link_dim(link_vertices, link_vertices.begin(),-1, empty_simplex);
           //std::cout << " dim " << d << "\n";
           //Siblings* curr_sibl = root();
-          if (! link_is_pseudomanifold(link_vertices,d))
-            count++;
+          if (link_is_pseudomanifold(link_vertices,d))
+            count_good[d]++;
           //out_file << "Bad link at " << v << "\n";          
         }
-      out_file << "Number of bad links: " << count << "/" << root()->size();
-      std::cout << "Number of bad links: " << count << "/" << root()->size() << std::endl;
+      //out_file << "Number of bad links: " << count << "/" << root()->size();
+      //std::cout << "Number of bad links: " << count << "/" << root()->size() << std::endl;
+      nc = nbL;
+      for (int i = 0; i != count_good.size(); i++)
+	{
+	  out_file << "count_good[" << i << "] = " << count_good[i] << std::endl;
+	  nc -= count_good[i];
+	  if (count_good[i] != 0)
+	    std::cout << "count_good[" << i << "] = " << count_good[i] << std::endl;
+	}
+      for (int i = 0; i != count_bad.size(); i++)
+	{
+	  out_file << "count_bad[" << i << "] = " << count_bad[i] << std::endl;
+	  nc -= count_bad[i];
+	  if (count_bad[i] != 0)
+	    std::cout << "count_bad[" << i << "] = " << count_bad[i] << std::endl;
+	}
+      std::cout << "not_connected = " << nc << std::endl;
     }
 
   private:
+
+  std::vector<int> count_good;
+  std::vector<int> count_bad;
+  int nc;
 
     int link_dim(std::vector< Vertex_handle >& link_vertices,
                  typename std::vector< Vertex_handle >::iterator curr_v,
@@ -632,7 +656,10 @@ private:
         {
           //std::cout << "Degree of " << f_map_it.first->first << " is " << boost::out_degree(f_map_it.second, adj_graph) << "\n";
           if (boost::out_degree(f_map_it.second, adj_graph) != 2)
-            return false;
+	    {
+	      count_bad[dimension]++;
+	      return false;
+	    }
         }
       // At this point I know that all (d-1)-simplices are adjacent to exactly 2 d-simplices
       // What is left is to check the connexity
