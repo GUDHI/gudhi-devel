@@ -77,6 +77,7 @@ class Multi_field {
       mpz_nextprime(tmp_prime, tmp_prime);
       curr_prime = mpz_get_ui(tmp_prime);
     }
+    mpz_clear(tmp_prime);
     // set m to primorial(bound_prime)
     prod_characteristics_ = 1;
     for (auto p : primes_) {
