@@ -238,8 +238,8 @@ class Persistent_cohomology {
         transverse_idx_(),                               // key -> row
         persistent_pairs_(),
         interval_length_policy(&cpx, 0),
-        column_pool_(new boost::object_pool<Column>()),  // memory pools for the CAM
-        cell_pool_(new boost::object_pool<Cell>()) {
+        column_pool_(),  // memory pools for the CAM
+        cell_pool_() {
     Simplex_key idx_fil = 0;
     for (auto & sh : cpx_->filtration_simplex_range()) {
       cpx_->assign_key(sh, idx_fil);
@@ -273,9 +273,6 @@ class Persistent_cohomology {
       transverse_ref.second.row_->clear();
       delete transverse_ref.second.row_;
     }
-// Clear the memory pools
-    delete column_pool_;
-    delete cell_pool_;
   }
 
  private:
@@ -528,8 +525,8 @@ class Persistent_cohomology {
                       Arith_element charac) {
     Simplex_key key = cpx_->key(sigma);
     // Create a column containing only one cell,
-    Column * new_col = column_pool_->construct(Column(key));
-    Cell * new_cell = cell_pool_->construct(Cell(key, x, new_col));
+    Column * new_col = column_pool_.construct(Column(key));
+    Cell * new_cell = cell_pool_.construct(Cell(key, x, new_col));
     new_col->col_.push_back(*new_cell);
     // and insert it in the matrix, in constant time thanks to the hint cam_.end().
     // Indeed *new_col has the biggest lexicographic value because key is the
@@ -585,7 +582,7 @@ class Persistent_cohomology {
 
         if (curr_col->col_.empty()) {  // If the column is null
           ds_repr_[curr_col->class_key_] = NULL;
-          column_pool_->free(curr_col);  // delete curr_col;
+          column_pool_.free(curr_col);  // delete curr_col;
         } else {
           // Find whether the column obtained is already in the CAM
           result_insert_cam = cam_.insert(*curr_col);
@@ -602,7 +599,7 @@ class Persistent_cohomology {
             Simplex_key key_tmp = dsets_.find_set(curr_col->class_key_);
             ds_repr_[key_tmp] = &(*(result_insert_cam.first));
             result_insert_cam.first->class_key_ = key_tmp;
-            column_pool_->free(curr_col);  // delete curr_col;
+            column_pool_.free(curr_col);  // delete curr_col;
           }
         }
       } else {
@@ -634,7 +631,7 @@ class Persistent_cohomology {
         ++target_it;
       } else {
         if (target_it->key_ > other_it->first) {
-          Cell * cell_tmp = cell_pool_->construct(Cell(other_it->first   // key
+          Cell * cell_tmp = cell_pool_.construct(Cell(other_it->first   // key
               , coeff_field_.additive_identity(), &target));
 
           cell_tmp->coefficient_ = coeff_field_.plus_times_equal(cell_tmp->coefficient_, other_it->second, w);
@@ -653,7 +650,7 @@ class Persistent_cohomology {
             target.col_.erase(tmp_it);  // removed from column
 
             coeff_field_.clear_coefficient(tmp_cell_ptr->coefficient_);
-            cell_pool_->free(tmp_cell_ptr);  // delete from memory
+            cell_pool_.free(tmp_cell_ptr);  // delete from memory
           } else {
             ++target_it;
             ++other_it;
@@ -662,7 +659,7 @@ class Persistent_cohomology {
       }
     }
     while (other_it != other.end()) {
-      Cell * cell_tmp = cell_pool_->construct(Cell(other_it->first, coeff_field_.additive_identity(), &target));
+      Cell * cell_tmp = cell_pool_.construct(Cell(other_it->first, coeff_field_.additive_identity(), &target));
       cell_tmp->coefficient_ = coeff_field_.plus_times_equal(cell_tmp->coefficient_, other_it->second, w);
       target.col_.insert(target.col_.end(), *cell_tmp);
 
@@ -767,8 +764,8 @@ class Persistent_cohomology {
   std::list<Persistent_interval> persistent_pairs_;
   length_interval interval_length_policy;
 
-  boost::object_pool<Column> * column_pool_;
-  boost::object_pool<Cell> * cell_pool_;
+  boost::object_pool<Column> column_pool_;
+  boost::object_pool<Cell> cell_pool_;
 };
 
 /** @} */  // end defgroup persistent_cohomology
