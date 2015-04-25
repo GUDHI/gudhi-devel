@@ -582,7 +582,7 @@ class Persistent_cohomology {
 
         if (curr_col->col_.empty()) {  // If the column is null
           ds_repr_[curr_col->class_key_] = NULL;
-          column_pool_.free(curr_col);  // delete curr_col;
+          column_pool_.destroy(curr_col);  // delete curr_col;
         } else {
           // Find whether the column obtained is already in the CAM
           result_insert_cam = cam_.insert(*curr_col);
@@ -599,7 +599,7 @@ class Persistent_cohomology {
             Simplex_key key_tmp = dsets_.find_set(curr_col->class_key_);
             ds_repr_[key_tmp] = &(*(result_insert_cam.first));
             result_insert_cam.first->class_key_ = key_tmp;
-            column_pool_.free(curr_col);  // delete curr_col;
+            column_pool_.destroy(curr_col);  // delete curr_col;
           }
         }
       } else {
