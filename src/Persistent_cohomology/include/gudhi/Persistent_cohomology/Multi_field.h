@@ -103,10 +103,6 @@ class Multi_field {
     }
   }
 
-  void clear_coefficient(Element & x) {
-    mpz_clear(x.get_mpz_t());
-  }
-
   /** \brief Returns the additive idendity \f$0_{\Bbbk}\f$ of the field.*/
   const Element& additive_identity() const {
     return add_id_all;

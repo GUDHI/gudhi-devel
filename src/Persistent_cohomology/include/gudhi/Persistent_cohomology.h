@@ -649,8 +649,7 @@ class Persistent_cohomology {
             Cell * tmp_cell_ptr = &(*tmp_it);
             target.col_.erase(tmp_it);  // removed from column
 
-            coeff_field_.clear_coefficient(tmp_cell_ptr->coefficient_);
-            cell_pool_.free(tmp_cell_ptr);  // delete from memory
+            cell_pool_.destroy(tmp_cell_ptr);  // delete from memory
           } else {
             ++target_it;
             ++other_it;

@@ -76,9 +76,6 @@ class Field_Zp {
     return plus_times_equal(0, y, (Element)w);
   }
 
-  void clear_coefficient(Element x) {
-  }
-
   Element plus_equal(const Element& x, const Element& y) {
     return plus_times_equal(x, y, (Element)1);
   }
