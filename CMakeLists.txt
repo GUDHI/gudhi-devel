@@ -29,7 +29,7 @@ find_package(Boost)
 	#find_package(GMPXX)
 #endif()
 
-#find_package(CGAL)
+find_package(CGAL)
 
 # Required programs for unitary tests purpose
 FIND_PROGRAM( LCOV_PATH lcov )

@@ -38,6 +38,13 @@
 #include <ctime>
 #include <iostream>
 
+// Needed for nearest neighbours
+//#include <CGAL/Delaunay_triangulation.h>
+#include <CGAL/Epick_d.h>
+#include <CGAL/K_neighbor_search.h>
+#include <CGAL/Search_traits_d.h>
+
+// Needed for the adjacency graph in bad link search
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
@@ -477,9 +484,9 @@ private:
       int chosen_landmark = rand()%nbP;
       double curr_dist;
       
-      int j;
-      int temp_swap_int;                                        
-      double temp_swap_double;
+      //int j;
+      //int temp_swap_int;                                        
+      //double temp_swap_double;
 
       
       for (current_number_of_landmarks = 0; current_number_of_landmarks != nbL; current_number_of_landmarks++)
@@ -508,7 +515,7 @@ private:
               wit_land_dist[i].push_back(curr_dist);
               WL[i].push_back(current_number_of_landmarks);
               //std::cout << "Push't back\n";
-              j = current_number_of_landmarks;
+              //j = current_number_of_landmarks;
               //std::cout << "First half complete\n";
               //std::cout << "result WL="; print_vvector(WL);
               //std::cout << "result WLD="; print_vvector(wit_land_dist);
@@ -517,21 +524,24 @@ private:
         }
       for (int i = 0; i < nbP; i++)
         {
-          // sort the closest landmark vector for every witness
           sort(WL[i].begin(), WL[i].end(), [&](int j1, int j2){return wit_land_dist[i][j1] < wit_land_dist[i][j2];});
-          /*
-          temp_swap_int = WL[i][j];
-          WL[i][j] = WL[i][j-1];
-          WL[i][j-1] = temp_swap_int;
-          temp_swap_double = wit_land_dist[i][j];
-          wit_land_dist[i][j] = wit_land_dist[i][j-1];
-          wit_land_dist[i][j-1] = temp_swap_double;
-          --j;
-          */
         }
       //std::cout << endl;
     }
 
+    /** \brief Construct the matrix |W|x(D+1) of D+1 closest landmarks
+     *  where W is the set of witnesses and D is the ambient dimension
+     */
+    template <typename KNearestNeighbours>
+    void nearest_landmarks(Point_Vector &W, std::unordered_set<int> &L, KNearestNeighbours &WL)
+    {
+      int D = W[0].size();
+      
+    }
+    
+    /** \brief Search and output links around vertices that are not pseudomanifolds
+     *
+     */
     void write_bad_links(std::ofstream& out_file)
     {
       out_file << "Bad links list\n";
@@ -565,14 +575,14 @@ private:
       //out_file << "Number of bad links: " << count << "/" << root()->size();
       //std::cout << "Number of bad links: " << count << "/" << root()->size() << std::endl;
       nc = nbL;
-      for (int i = 0; i != count_good.size(); i++)
+      for (unsigned int i = 0; i != count_good.size(); i++)
 	{
 	  out_file << "count_good[" << i << "] = " << count_good[i] << std::endl;
 	  nc -= count_good[i];
 	  if (count_good[i] != 0)
 	    std::cout << "count_good[" << i << "] = " << count_good[i] << std::endl;
 	}
-      for (int i = 0; i != count_bad.size(); i++)
+      for (unsigned int i = 0; i != count_bad.size(); i++)
 	{
 	  out_file << "count_bad[" << i << "] = " << count_bad[i] << std::endl;
 	  nc -= count_bad[i];
