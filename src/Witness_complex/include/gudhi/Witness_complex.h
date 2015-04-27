@@ -32,7 +32,8 @@
 #include "gudhi/Simplex_tree.h"
 #include <vector>
 #include <list>
-#include <unordered_set>
+#include <set>
+#include <queue>
 #include <limits>
 #include <math.h>
 #include <ctime>
@@ -40,9 +41,9 @@
 
 // Needed for nearest neighbours
 //#include <CGAL/Delaunay_triangulation.h>
-#include <CGAL/Epick_d.h>
-#include <CGAL/K_neighbor_search.h>
-#include <CGAL/Search_traits_d.h>
+//#include <CGAL/Epick_d.h>
+//#include <CGAL/K_neighbor_search.h>
+//#include <CGAL/Search_traits_d.h>
 
 // Needed for the adjacency graph in bad link search
 #include <boost/graph/graph_traits.hpp>
@@ -233,12 +234,12 @@ namespace Gudhi {
      * FURTHEST_POINT_STRATEGY and RANDOM_POINT_STRATEGY and
      * density must be set to the right value for DENSITY_STRATEGY
      */
-  void witness_complex_from_points(Point_Vector point_vector)
-  {
-    std::vector<std::vector< int > > WL;
-    landmark_choice_by_random_points(point_vector, point_vector.size(), WL);
-    witness_complex(WL);
-  }
+  // void witness_complex_from_points(Point_Vector point_vector)
+  // {
+  //   std::vector<std::vector< int > > WL;
+  //   landmark_choice_by_random_points(point_vector, point_vector.size(), WL);
+  //   witness_complex(WL);
+  // }
   
 private:
 
@@ -468,75 +469,160 @@ private:
      *
      */
 
-    template <typename KNearestNeighbours>
-    void landmark_choice_by_random_points(Point_Vector &W, int nbP, KNearestNeighbours &WL)
+    // template <typename KNearestNeighbours>
+    // void landmark_choice_by_random_points(Point_Vector &W, int nbP, KNearestNeighbours &WL)
+    // {
+    //   std::cout << "Enter landmark_choice_by_random_points "<< std::endl;
+    //   //std::cout << "W="; print_vvector(W);
+    //   std::unordered_set< int >  chosen_landmarks;              // landmark set
+
+    //   Point_Vector wit_land_dist(nbP,std::vector<double>());    // distance matrix witness x landmarks
+
+    //   WL = KNearestNeighbours(nbP,std::vector<int>());                             
+    //   int current_number_of_landmarks=0;                        // counter for landmarks 
+
+    //   srand(24660);
+    //   int chosen_landmark = rand()%nbP;
+    //   double curr_dist;
+      
+    //   //int j;
+    //   //int temp_swap_int;                                        
+    //   //double temp_swap_double;
+
+      
+    //   for (current_number_of_landmarks = 0; current_number_of_landmarks != nbL; current_number_of_landmarks++)
+    //     {
+    //       while (chosen_landmarks.find(chosen_landmark) != chosen_landmarks.end())
+    //         {
+    //           srand((int)clock());
+    //           chosen_landmark = rand()% nbP;
+    //           //std::cout << chosen_landmark << "\n";
+    //         }
+    //       chosen_landmarks.insert(chosen_landmark);
+    //       //std::cout << "**********Entered loop with current number of landmarks = " << current_number_of_landmarks << std::endl;
+    //       //std::cout << "WL="; print_vvector(WL);
+    //       //std::cout << "WLD="; print_vvector(wit_land_dist);
+    //       //std::cout << "landmarks="; print_vector(chosen_landmarks); std::cout << std::endl;
+    //       for (auto v: WL)
+    //         v.push_back(current_number_of_landmarks);
+    //       for (int i = 0; i < nbP; ++i)
+    //         {
+    //           // iteration on points in W. update of distance vectors
+              
+    //           //std::cout << "In the loop with i=" << i << " and landmark=" << chosen_landmarks[current_number_of_landmarks] << std::endl;
+    //           //std::cout << "W[i]="; print_vector(W[i]); std::cout << " W[landmark]="; print_vector(W[chosen_landmarks[current_number_of_landmarks]]); std::cout << std::endl;
+    //           curr_dist = euclidean_distance(W[i],W[chosen_landmark]);
+    //           //std::cout << "The problem is not in distance function\n";
+    //           wit_land_dist[i].push_back(curr_dist);
+    //           WL[i].push_back(current_number_of_landmarks);
+    //           //std::cout << "Push't back\n";
+    //           //j = current_number_of_landmarks;
+    //           //std::cout << "First half complete\n";
+    //           //std::cout << "result WL="; print_vvector(WL);
+    //           //std::cout << "result WLD="; print_vvector(wit_land_dist);
+    //           //std::cout << "End loop\n";
+    //         }
+    //     }
+    //   for (int i = 0; i < nbP; i++)
+    //     {
+    //       sort(WL[i].begin(), WL[i].end(), [&](int j1, int j2){return wit_land_dist[i][j1] < wit_land_dist[i][j2];});
+    //     }
+    //   //std::cout << endl;
+    // }
+
+    /** \brief Landmark choice strategy by taking random vertices for landmarks.
+     *
+     */
+
+    //    template <typename KNearestNeighbours>
+    void landmark_choice_by_random_points(Point_Vector &W, int nbP, std::set<int> &L)
     {
       std::cout << "Enter landmark_choice_by_random_points "<< std::endl;
       //std::cout << "W="; print_vvector(W);
-      std::unordered_set< int >  chosen_landmarks;              // landmark set
+      //std::unordered_set< int >  chosen_landmarks;              // landmark set
 
       Point_Vector wit_land_dist(nbP,std::vector<double>());    // distance matrix witness x landmarks
 
-      WL = KNearestNeighbours(nbP,std::vector<int>());                             
+      //WL = KNearestNeighbours(nbP,std::vector<int>());                             
       int current_number_of_landmarks=0;                        // counter for landmarks 
 
       srand(24660);
       int chosen_landmark = rand()%nbP;
-      double curr_dist;
-      
+      //double curr_dist;
       //int j;
       //int temp_swap_int;                                        
-      //double temp_swap_double;
-
-      
+      //double temp_swap_double; 
       for (current_number_of_landmarks = 0; current_number_of_landmarks != nbL; current_number_of_landmarks++)
         {
-          while (chosen_landmarks.find(chosen_landmark) != chosen_landmarks.end())
+          while (L.find(chosen_landmark) != L.end())
             {
               srand((int)clock());
               chosen_landmark = rand()% nbP;
               //std::cout << chosen_landmark << "\n";
             }
-          chosen_landmarks.insert(chosen_landmark);
+          L.insert(chosen_landmark);
           //std::cout << "**********Entered loop with current number of landmarks = " << current_number_of_landmarks << std::endl;
           //std::cout << "WL="; print_vvector(WL);
           //std::cout << "WLD="; print_vvector(wit_land_dist);
           //std::cout << "landmarks="; print_vector(chosen_landmarks); std::cout << std::endl;
-          for (auto v: WL)
-            v.push_back(current_number_of_landmarks);
-          for (int i = 0; i < nbP; ++i)
-            {
-              // iteration on points in W. update of distance vectors
+          // for (auto v: WL)
+          //   v.push_back(current_number_of_landmarks);
+          // for (int i = 0; i < nbP; ++i)
+          //   {
+          //     // iteration on points in W. update of distance vectors
               
-              //std::cout << "In the loop with i=" << i << " and landmark=" << chosen_landmarks[current_number_of_landmarks] << std::endl;
-              //std::cout << "W[i]="; print_vector(W[i]); std::cout << " W[landmark]="; print_vector(W[chosen_landmarks[current_number_of_landmarks]]); std::cout << std::endl;
-              curr_dist = euclidean_distance(W[i],W[chosen_landmark]);
-              //std::cout << "The problem is not in distance function\n";
-              wit_land_dist[i].push_back(curr_dist);
-              WL[i].push_back(current_number_of_landmarks);
-              //std::cout << "Push't back\n";
-              //j = current_number_of_landmarks;
-              //std::cout << "First half complete\n";
-              //std::cout << "result WL="; print_vvector(WL);
-              //std::cout << "result WLD="; print_vvector(wit_land_dist);
-              //std::cout << "End loop\n";
-            }
+          //     //std::cout << "In the loop with i=" << i << " and landmark=" << chosen_landmarks[current_number_of_landmarks] << std::endl;
+          //     //std::cout << "W[i]="; print_vector(W[i]); std::cout << " W[landmark]="; print_vector(W[chosen_landmarks[current_number_of_landmarks]]); std::cout << std::endl;
+          //     curr_dist = euclidean_distance(W[i],W[chosen_landmark]);
+          //     //std::cout << "The problem is not in distance function\n";
+          //     wit_land_dist[i].push_back(curr_dist);
+          //     WL[i].push_back(current_number_of_landmarks);
+          //     //std::cout << "Push't back\n";
+          //     //j = current_number_of_landmarks;
+          //     //std::cout << "First half complete\n";
+          //     //std::cout << "result WL="; print_vvector(WL);
+          //     //std::cout << "result WLD="; print_vvector(wit_land_dist);
+          //     //std::cout << "End loop\n";
+          //   }
         }
-      for (int i = 0; i < nbP; i++)
-        {
-          sort(WL[i].begin(), WL[i].end(), [&](int j1, int j2){return wit_land_dist[i][j1] < wit_land_dist[i][j2];});
-        }
+      // for (int i = 0; i < nbP; i++)
+      //   {
+      //     sort(WL[i].begin(), WL[i].end(), [&](int j1, int j2){return wit_land_dist[i][j1] < wit_land_dist[i][j2];});
+      //   }
       //std::cout << endl;
     }
 
+    
     /** \brief Construct the matrix |W|x(D+1) of D+1 closest landmarks
      *  where W is the set of witnesses and D is the ambient dimension
      */
     template <typename KNearestNeighbours>
-    void nearest_landmarks(Point_Vector &W, std::unordered_set<int> &L, KNearestNeighbours &WL)
+    void nearest_landmarks(Point_Vector &W, std::set<int> &L, KNearestNeighbours &WL)
     {
       int D = W[0].size();
-      
+      int nbP = W.size();
+      WL = KNearestNeighbours(nbP,std::vector<int>());
+      typedef std::pair<double,int> dist_i;
+      typedef bool (*comp)(dist_i,dist_i);
+      for (int W_i = 0; W_i < nbP; W_i++)
+        {
+          //std::cout << "<<<<<<<<<<<<<<" << W_i <<"\n"; 
+          std::priority_queue<dist_i, std::vector<dist_i>, comp> l_heap([&](dist_i j1, dist_i j2){return j1.first > j2.first;});
+          std::set<int>::iterator L_it;
+          int L_i;
+          for (L_it = L.begin(), L_i=0; L_it != L.end(); L_it++, L_i++)
+            {
+              dist_i dist = std::make_pair(euclidean_distance(W[W_i],W[*L_it]), L_i);
+              l_heap.push(dist);
+            }
+          for (int i = 0; i < D+1; i++)
+            {
+              dist_i dist = l_heap.top();
+              WL[W_i].push_back(dist.second);  
+              //std::cout << dist.first << " " << dist.second << std::endl;
+              l_heap.pop();
+            }
+        }
     }
     
     /** \brief Search and output links around vertices that are not pseudomanifolds

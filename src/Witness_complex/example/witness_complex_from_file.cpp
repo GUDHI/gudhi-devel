@@ -109,9 +109,11 @@ int main (int argc, char * const argv[])
   witnessComplex.setNbL(nbL);
   //  witnessComplex.witness_complex_from_points(point_vector);
   std::vector<std::vector< int > > WL;
+  std::set<int> L;
   start = clock();
   //witnessComplex.landmark_choice_by_furthest_points(point_vector, point_vector.size(), WL);
-  witnessComplex.landmark_choice_by_random_points(point_vector, point_vector.size(), WL);
+  witnessComplex.landmark_choice_by_random_points(point_vector, point_vector.size(), L);
+  witnessComplex.nearest_landmarks(point_vector,L,WL);
   end = clock();
   std::cout << "Landmark choice took "
             << (double)(end-start)/CLOCKS_PER_SEC << " s. \n";

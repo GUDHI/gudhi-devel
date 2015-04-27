@@ -23,16 +23,22 @@
 #include <iostream>
 #include <fstream>
 #include <ctime>
+
 #include <sys/types.h>
 #include <sys/stat.h>
-
 //#include <stdlib.h>
 
 //#include "gudhi/graph_simplicial_complex.h"
 #include "gudhi/Witness_complex.h"
 #include "gudhi/reader_utils.h"
+//#include <boost/filesystem.hpp>
+
+//#include <CGAL/Delaunay_triangulation.h>
+//#include <CGAL/Epick_d.h>
+#include <CGAL/K_neighbor_search.h>
 
 using namespace Gudhi;
+//using namespace boost::filesystem;
 
 typedef std::vector< Vertex_handle > typeVectorVertex;
 typedef std::vector< std::vector <double> > Point_Vector;
@@ -67,91 +73,51 @@ read_points_cust ( std::string file_name , std::vector< std::vector< double > > 
   in_file.close();
 }
 
-/**
- * \brief Rock age method of reading off file
- *
- */
-inline void
-off_reader_cust ( std::string file_name , std::vector< std::vector< double > > & points)
-{  
-  std::ifstream in_file (file_name.c_str(),std::ios::in);
-  if(!in_file.is_open())
+void write_wl( std::string file_name, std::vector< std::vector <int> > & WL)
+{
+  std::ofstream ofs (file_name, std::ofstream::out);
+  for (auto w : WL)
     {
-      std::cerr << "Unable to open file " << file_name << std::endl;
-      return;
+      for (auto l: w)
+        ofs << l << " ";
+      ofs << "\n";
     }
-  std::string line;
-  double x;
-  // Line OFF. No need in it
-  if (!getline(in_file, line))
-    {
-      std::cerr << "No line OFF\n";
-      return;
-    }
-  // Line with 3 numbers. No need
-  if (!getline(in_file, line))
-    {
-      std::cerr << "No line with 3 numbers\n";
-      return;
-    }
-  // Reading points
-  while( getline ( in_file , line ) )
-    {
-      std::vector< double > point;
-      std::istringstream iss( line );
-      while(iss >> x) { point.push_back(x); }
-      points.push_back(point);
-    }
-  in_file.close();
+  ofs.close();
 }
 
 int main (int argc, char * const argv[])
 {
-    if (argc != 3)
-      {
-          std::cerr << "Usage: " << argv[0]
-    << " path_to_point_file nbL \n";
-    return 0;
-  }
+  if (argc != 3)
+    {
+      std::cerr << "Usage: " << argv[0]
+                << " path_to_point_file nbL \n";
+      return 0;
+    }
+  /*
+  boost::filesystem::path p;
+
+  for (; argc > 2; --argc, ++argv)
+    p /= argv[1];
+  */
   std::string file_name   = argv[1];
   int nbL       = atoi(argv[2]);
   
   clock_t start, end;
   //Construct the Simplex Tree
   Witness_complex<> witnessComplex;
-
-  /*
-  std::cout << "Let the carnage begin!\n";
-  start = clock();
-  Point_Vector point_vector;
-  off_reader_cust(file_name, point_vector);
-  std::cout << "Successfully read the points\n";
-  witnessComplex.setNbL(nbL);
-  witnessComplex.witness_complex_from_points(point_vector);
-  end = clock();
-  std::cout << "Howdy world! The process took "
-       << (double)(end-start)/CLOCKS_PER_SEC << " s. \n";
-  char buffer[100];
-  int i = sprintf(buffer,"%s_%s_result.txt",argv[1],argv[2]);
-  if (i >= 0)
-    {
-      std::string out_file = (std::string)buffer;
-      std::ofstream ofs (out_file, std::ofstream::out);
-      witnessComplex.st_to_file(ofs);
-      ofs.close();
-    }
-  */
+ 
   std::cout << "Let the carnage begin!\n";
   Point_Vector point_vector;
-  off_reader_cust(file_name, point_vector);
+  read_points_cust(file_name, point_vector);
   //std::cout << "Successfully read the points\n";
   witnessComplex.setNbL(nbL);
   //  witnessComplex.witness_complex_from_points(point_vector);
   std::vector<std::vector< int > > WL;
   std::set<int> L;
+  int nbP = point_vector.size();
   start = clock();
   //witnessComplex.landmark_choice_by_furthest_points(point_vector, point_vector.size(), WL);
-  witnessComplex.landmark_choice_by_random_points(point_vector, point_vector.size(), L);
+  witnessComplex.landmark_choice_by_random_points(point_vector, nbP, L);
   witnessComplex.nearest_landmarks(point_vector,L,WL);
   end = clock();
   std::cout << "Landmark choice took "
@@ -171,6 +137,17 @@ int main (int argc, char * const argv[])
   end = clock();
   std::cout << "Howdy world! The process took "
        << (double)(end-start)/CLOCKS_PER_SEC << " s. \n";
+  /*
+  char buffer[100];
+  int i = sprintf(buffer,"%s_%s_result.txt",argv[1],argv[2]);
+  if (i >= 0)
+    {
+      std::string out_file = (std::string)buffer;
+      std::ofstream ofs (out_file, std::ofstream::out);
+      witnessComplex.st_to_file(ofs);
+      ofs.close();
+    }
+  */
 
   out_file = "output/"+file_name+"_"+argv[2]+".stree";
   std::ofstream ofs (out_file, std::ofstream::out);
