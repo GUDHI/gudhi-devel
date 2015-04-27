@@ -34,7 +34,7 @@
 //#include <boost/filesystem.hpp>
 
 //#include <CGAL/Delaunay_triangulation.h>
-//#include <CGAL/Epick_d.h>
+#include <CGAL/Epick_d.h>
 #include <CGAL/K_neighbor_search.h>
 
 using namespace Gudhi;

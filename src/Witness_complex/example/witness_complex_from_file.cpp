@@ -115,7 +115,7 @@ int main (int argc, char * const argv[])
   witnessComplex.landmark_choice_by_random_points(point_vector, point_vector.size(), L);
   witnessComplex.nearest_landmarks(point_vector,L,WL);
   end = clock();
-  std::cout << "Landmark choice took "
+  std::cout << "Landmark choice for " << nbL << " landmarks took "
             << (double)(end-start)/CLOCKS_PER_SEC << " s. \n";
   // Write the WL matrix in a file
   mkdir("output", S_IRWXU);
