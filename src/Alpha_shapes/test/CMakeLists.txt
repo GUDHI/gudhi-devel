@@ -28,7 +28,8 @@ if(CGAL_FOUND)
         set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -pg")
       endif()
 
-      add_definitions(-DDEBUG_TRACES)
+      # uncomment to display debug traces
+      # add_definitions(-DDEBUG_TRACES)
       add_executable ( AlphaShapesUT Alpha_shapes_unit_test.cpp )
       target_link_libraries(AlphaShapesUT  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
       add_test(NAME AlphaShapesUT 
