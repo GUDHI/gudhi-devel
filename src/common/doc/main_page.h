@@ -51,7 +51,7 @@ To build the library, run the following in a terminal:
 cd /path-to-gudhi/
 mkdir build
 cd build/
-cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake ..
 make
 \endverbatim
 
