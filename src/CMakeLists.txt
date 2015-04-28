@@ -47,4 +47,10 @@ else()
   add_subdirectory(example/Alpha_shapes)
   add_subdirectory(example/Bottleneck)
 
+  # GudhUI
+  add_subdirectory(GudhUI)
+
+  # data points generator
+  add_subdirectory(data/points/generator)
+
 endif()  

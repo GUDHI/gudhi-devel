@@ -78,6 +78,9 @@ else()
   add_subdirectory(src/Bottleneck/example)
   add_subdirectory(src/Bottleneck/test)
 
+  # GudhUI
+  add_subdirectory(src/GudhUI)
+
   # data points generator
   add_subdirectory(data/points/generator)
 

@@ -72,8 +72,6 @@ class Model{
 public:
 	Complex complex_;
 	typedef Complex::Vertex_handle Vertex_handle;
-	typedef Complex::CVI CVI;
-
 
 	Model():complex_(){
 	}
@@ -317,7 +315,7 @@ private:
 	void run_chomp(){
 		save_complex_in_file_for_chomp();
 		std::cout << "Call CHOMP library\n";
-		system("../src/utils/homsimpl chomp.sim");
+		system("utils/homsimpl chomp.sim");
 	}
 
 	void save_complex_in_file_for_chomp(){
