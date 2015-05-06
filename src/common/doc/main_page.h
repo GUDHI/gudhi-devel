@@ -54,7 +54,7 @@ your operating system is detailed here http://doc.cgal.org/latest/Manual/install
 
 \subsection demos Demos and examples
 
-To build the demos and libraries, run the following in a terminal:
+To build the demos and libraries, run the following commands in a terminal:
 
 \verbatim
 cd /path-to-gudhi/
