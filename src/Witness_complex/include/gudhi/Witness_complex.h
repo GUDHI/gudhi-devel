@@ -284,29 +284,27 @@ private:
   private:
     void sc_to_file(std::ofstream& out_file, Siblings * sibl)
     {
-      if (sibl == NULL)
-        out_file << "&";
-      else
-        children_to_file(out_file, sibl->members_);
+      assert(sibl);
+      children_to_file(out_file, sibl->members_);
     }
     
-    void children_to_file(std::ofstream& out_file, Dictionary map)
+    void children_to_file(std::ofstream& out_file, Dictionary& map)
     {
-      out_file << "(";
+      out_file << "(" << std::flush;
       if (!map.empty())
         {
-          out_file << map.begin()->first;
+          out_file << map.begin()->first << std::flush;
           if (has_children(map.begin()))
             sc_to_file(out_file, map.begin()->second.children());
           typename Dictionary::iterator it;
           for (it = map.begin()+1; it != map.end(); ++it)
             {
-              out_file << "," << it->first;
+              out_file << "," << it->first << std::flush;
               if (has_children(it))
                 sc_to_file(out_file, it->second.children());
             }
         }
-      out_file << ")";
+      out_file << ")" << std::flush;
     }
 
 
@@ -541,7 +539,7 @@ private:
       //std::cout << "W="; print_vvector(W);
       //std::unordered_set< int >  chosen_landmarks;              // landmark set
 
-      Point_Vector wit_land_dist(nbP,std::vector<double>());    // distance matrix witness x landmarks
+      //Point_Vector wit_land_dist(nbP,std::vector<double>());    // distance matrix witness x landmarks
 
       //WL = KNearestNeighbours(nbP,std::vector<int>());                             
       int current_number_of_landmarks=0;                        // counter for landmarks 
@@ -618,7 +616,8 @@ private:
           for (int i = 0; i < D+1; i++)
             {
               dist_i dist = l_heap.top();
-              WL[W_i].push_back(dist.second);  
+              WL[W_i].push_back(dist.second);
+              //WL[W_i].insert(WL[W_i].begin(),dist.second);  
               //std::cout << dist.first << " " << dist.second << std::endl;
               l_heap.pop();
             }

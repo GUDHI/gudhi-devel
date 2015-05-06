@@ -23,6 +23,7 @@
 #include <iostream>
 #include <fstream>
 #include <ctime>
+#include <utility>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -34,25 +35,51 @@
 //#include <boost/filesystem.hpp>
 
 //#include <CGAL/Delaunay_triangulation.h>
+#include <CGAL/Cartesian_d.h>
+#include <CGAL/Search_traits.h>
+#include <CGAL/Search_traits_adapter.h>
+#include <CGAL/property_map.h>
 #include <CGAL/Epick_d.h>
-#include <CGAL/K_neighbor_search.h>
+#include <CGAL/Orthogonal_k_neighbor_search.h>
+
+#include <boost/tuple/tuple.hpp>
+#include <boost/iterator/zip_iterator.hpp>
+#include <boost/iterator/counting_iterator.hpp>
+#include <boost/range/iterator_range.hpp>
 
 using namespace Gudhi;
 //using namespace boost::filesystem;
 
 typedef std::vector< Vertex_handle > typeVectorVertex;
-typedef std::vector< std::vector <double> > Point_Vector;
+
 //typedef std::pair<typeVectorVertex, Filtration_value> typeSimplex;
 //typedef std::pair< Simplex_tree<>::Simplex_handle, bool > typePairSimplexBool;
 
+typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> K;
+typedef K::FT FT;
+typedef K::Point_d Point_d;
+typedef CGAL::Search_traits<
+  FT, Point_d,
+  typename K::Cartesian_const_iterator_d,
+  typename K::Construct_cartesian_const_iterator_d> Traits_base;
+typedef CGAL::Search_traits_adapter<
+  std::ptrdiff_t, Point_d*, Traits_base> STraits;
+//typedef K TreeTraits;
+typedef CGAL::Orthogonal_k_neighbor_search<STraits> K_neighbor_search;
+typedef K_neighbor_search::Tree Tree;
+typedef K_neighbor_search::Distance Distance;
+typedef K_neighbor_search::iterator KNS_iterator;
+typedef K_neighbor_search::iterator KNS_range;
+typedef boost::container::flat_map<int, int> Point_etiquette_map;
 
+typedef std::vector<Point_d> Point_Vector;
 /**
  * \brief Customized version of read_points
  * which takes into account a possible nbP first line
  *
  */
 inline void
-read_points_cust ( std::string file_name , std::vector< std::vector< double > > & points)
+read_points_cust ( std::string file_name , Point_Vector & points)
 {  
   std::ifstream in_file (file_name.c_str(),std::ios::in);
   if(!in_file.is_open())
@@ -67,11 +94,96 @@ read_points_cust ( std::string file_name , std::vector< std::vector< double > > 
       std::vector< double > point;
       std::istringstream iss( line );
       while(iss >> x) { point.push_back(x); }
+      Point_d p(point.begin(), point.end());
       if (point.size() != 1)
-        points.push_back(point);
+        points.push_back(p);
     }
   in_file.close();
 }
+
+/*
+void read_points_to_tree (std::string file_name, Tree& tree)
+{
+  //I assume here that tree is empty
+  std::ifstream in_file (file_name.c_str(),std::ios::in);
+  if(!in_file.is_open())
+    {
+      std::cerr << "Unable to open file " << file_name << std::endl;
+      return;
+    }
+  std::string line;
+  double x;
+   while( getline ( in_file , line ) )
+    {
+      std::vector<double> coords;
+      std::istringstream iss( line );
+      while(iss >> x) { coords.push_back(x); }
+      if (coords.size() != 1)
+        {
+          Point_d point(coords.begin(), coords.end());
+          tree.insert(point);
+        }
+    }
+  in_file.close();
+}
+*/
+
+/** Function that chooses landmarks from W and place it in the kd-tree L.
+ *  Note: nbL hould be removed if the code moves to Witness_complex
+ */
+void landmark_choice_to_tree(Point_Vector &W, int nbP, Point_etiquette_map &L_i, int nbL, std::vector< std::vector <int> > &WL)
+{
+  std::cout << "Enter landmark choice to kd tree\n";
+  std::vector<Point_d> landmarks;
+  int chosen_landmark;
+  //std::pair<Point_etiquette_map::iterator,bool> res = std::make_pair(L_i.begin(),false);
+  Point_d* p;
+  srand(24660);
+  for (int i = 0; i < nbL; i++)
+    {
+      //      while (!res.second)
+      //  {
+          chosen_landmark = rand()%nbP;
+          p = &W[chosen_landmark];
+          //L_i.emplace(chosen_landmark,i);
+          //  }
+      landmarks.push_back(*p);
+      //std::cout << "Added landmark " << chosen_landmark << std::endl;
+    }
+  Tree L(boost::counting_iterator<std::ptrdiff_t>(0),
+         boost::counting_iterator<std::ptrdiff_t>(nbL),
+         typename Tree::Splitter(),
+         STraits((Point_d*)&(landmarks[0])));
+  /*}
+
+
+void d_nearest_landmarks(Point_Vector &W, Tree &L, Point_etiquette_map &L_i, std::vector< std::vector <int> > &WL)
+{*/
+  std::cout << "Enter (D+1) nearest landmarks\n";
+  std::cout << "Size of the tree is " << L.size() << std::endl;
+//int nbP = W.size();
+  int D = W[0].size();
+  for (int i = 0; i < nbP; i++)
+    {
+      //std::cout << "Entered witness number " << i << std::endl;
+      Point_d& w = W[i];
+      //std::cout << "Safely constructed a point\n";
+      //Search D+1 nearest neighbours from the tree of landmarks L 
+      K_neighbor_search search(L, w, D+1, FT(0), true,
+                               CGAL::Distance_adapter<std::ptrdiff_t,Point_d*,CGAL::Euclidean_distance<Traits_base>>((Point_d*)&(landmarks[0])) );
+      //std::cout << "Safely found nearest landmarks\n";
+      for(K_neighbor_search::iterator it = search.begin(); it != search.end(); ++it)
+        {
+          //std::cout << "Entered KNN_it with point at distance " << it->second << "\n";
+          //Point_etiquette_map::iterator itm = L_i.find(it->first);
+          //assert(itm != L_i.end());
+          //std::cout << "Entered KNN_it with point at distance " << it->second << "\n";
+          WL[i].push_back(it->first);
+          //std::cout << i << " " << it->first << ": " << it->second << std::endl; 
+        }
+    }
+}
+
 
 void write_wl( std::string file_name, std::vector< std::vector <int> > & WL)
 {
@@ -112,13 +224,15 @@ int main (int argc, char * const argv[])
   //std::cout << "Successfully read the points\n";
   witnessComplex.setNbL(nbL);
   //  witnessComplex.witness_complex_from_points(point_vector);
-  std::vector<std::vector< int > > WL;
-  std::set<int> L;
   int nbP = point_vector.size();
+  std::vector<std::vector< int > > WL(nbP);
+  //std::set<int> L;
+  Tree L;
+  Point_etiquette_map L_i;
   start = clock();
   //witnessComplex.landmark_choice_by_furthest_points(point_vector, point_vector.size(), WL);
-  witnessComplex.landmark_choice_by_random_points(point_vector, nbP, L);
-  witnessComplex.nearest_landmarks(point_vector,L,WL);
+  landmark_choice_to_tree(point_vector, nbP, L_i, nbL, WL);
+  //d_nearest_landmarks(point_vector, L, L_i, WL);
   end = clock();
   std::cout << "Landmark choice took "
             << (double)(end-start)/CLOCKS_PER_SEC << " s. \n";
@@ -130,7 +244,7 @@ int main (int argc, char * const argv[])
       file_name.erase(0, last_slash_idx + 1);
     }
   std::string out_file = "output/"+file_name+"_"+argv[2]+".wl";
-  //write_wl(out_file,WL);
+  write_wl(out_file,WL);
   start = clock();
   witnessComplex.witness_complex(WL);
   //

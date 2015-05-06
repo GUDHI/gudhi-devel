@@ -125,7 +125,7 @@ int main (int argc, char * const argv[])
       file_name.erase(0, last_slash_idx + 1);
     }
   std::string out_file = "output/"+file_name+"_"+argv[2]+".wl";
-  //write_wl(out_file,WL);
+  write_wl(out_file,WL);
   start = clock();
   witnessComplex.witness_complex(WL);
   //
