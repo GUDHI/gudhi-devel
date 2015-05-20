@@ -192,6 +192,7 @@ namespace Gudhi {
                 }
               Simplex_handle sh;
               vv = {u,v};
+              //if (u==v) std::cout << "Bazzinga!\n";
               sh = (root()->find(u))->second.children()->find(v);
               active_w.push_back(i);
             }
@@ -200,7 +201,8 @@ namespace Gudhi {
       //std::cout << "Successfully added edges" << std::endl;
       count_good = {0,0};
       count_bad = {0,0};
-      while (!active_w.empty() && k < nbL )
+      int D = knn[0].size();
+      while (!active_w.empty() && k < D )
         {
 	  count_good.push_back(0);
 	  count_bad.push_back(0);
@@ -622,6 +624,30 @@ private:
               l_heap.pop();
             }
         }
+    }
+
+    /** \brief Returns true if the link is good
+     */
+    bool has_good_link(Vertex_handle v)
+    {
+      std::vector< Vertex_handle > link_vertices;
+      // Fill link_vertices
+      for (auto u: complex_vertex_range())
+        {
+          typeVectorVertex edge = {u,v};
+          if (u != v && find(edge) != null_simplex())   
+            link_vertices.push_back(u);
+        }
+      /*
+        print_vector(link_vertices);
+        std::cout << "\n";
+      */
+      // Find the dimension
+      typeVectorVertex empty_simplex = {};
+      int d = link_dim(link_vertices, link_vertices.begin(),-1, empty_simplex);
+      //std::cout << " dim " << d << "\n";
+      //Siblings* curr_sibl = root();
+      return (link_is_pseudomanifold(link_vertices,d));
     }
     
     /** \brief Search and output links around vertices that are not pseudomanifolds
