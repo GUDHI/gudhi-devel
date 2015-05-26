@@ -390,6 +390,12 @@ void landmark_choice(Point_Vector &W, int nbP, int nbL, Point_Vector& landmarks,
 
 int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<int>& landmarks_ind)
 {
+  //********************Preface: origin point
+  int D = W[0].size();
+  std::vector<FT> orig_vector;
+  for (int i=0; i<D; i++)
+    orig_vector.push_back(0);
+  Point_d origin(orig_vector);
   //******************** Constructing a WL matrix
   int nbP = W.size();
   int nbL = landmarks.size();
@@ -412,7 +418,6 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
   */
   std::cout << "Enter (D+1) nearest landmarks\n";
   //std::cout << "Size of the tree is " << L.size() << std::endl;
-  int D = W[0].size();
   for (int i = 0; i < nbP; i++)
     {
       //std::cout << "Entered witness number " << i << std::endl;
@@ -476,12 +481,14 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
   
   for (auto u: perturbL)
     {
-      Random_point_iterator rp(D,sqrt(lambda)/16);
+      Random_point_iterator rp(D,sqrt(lambda)/8);
       //std::cout << landmarks[u] << std::endl;
       
       std::vector<FT> point;
       for (int i = 0; i < D; i++)
         {
+          while (K().squared_distance_d_object()(*rp,origin) < lambda/256)
+            rp++;
           //FT coord = W[landmarks_ind[u]][i] + (*rp)[i];
           FT coord = landmarks[u][i] + (*rp)[i];
           if (coord > 1)
@@ -563,10 +570,18 @@ int main (int argc, char * const argv[])
   //Point_etiquette_map L_i;
   //start = clock();
   //witnessComplex.landmark_choice_by_furthest_points(point_vector, point_vector.size(), WL);
-  landmark_choice(point_vector, nbP, nbL, L, chosen_landmarks);
-  for (auto i: chosen_landmarks)
+  bool ok=false;
+  while (!ok)
     {
-      assert(std::count(chosen_landmarks.begin(),chosen_landmarks.end(),i) == 1);
+      ok = true;
+      L = {};
+      chosen_landmarks = {};
+      landmark_choice(point_vector, nbP, nbL, L, chosen_landmarks);
+      for (auto i: chosen_landmarks)
+        {
+          ok = ok && (std::count(chosen_landmarks.begin(),chosen_landmarks.end(),i) == 1);
+          if (!ok) break;
+        }
     }
   int bl = nbL, curr_min = bl;
   
