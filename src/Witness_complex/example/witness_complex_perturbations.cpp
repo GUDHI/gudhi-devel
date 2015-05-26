@@ -236,10 +236,10 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
         }
     }
   //std::cout << "\n";
-  /*
+  
   std::string out_file = "wl_result";
   write_wl(out_file,WL);
-  */
+  
   //******************** Constructng a witness complex
   std::cout << "Entered witness complex construction\n";
   Witness_complex<> witnessComplex;
