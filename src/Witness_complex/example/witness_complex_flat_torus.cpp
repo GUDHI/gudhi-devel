@@ -375,7 +375,8 @@ void landmark_choice(Point_Vector &W, int nbP, int nbL, Point_Vector& landmarks,
     {
       //      while (!res.second)
       //  {
-      chosen_landmark = rand.get_int(0,nbP);
+      while (std::count(landmarks_ind.begin(),landmarks_ind.end(),chosen_landmark)!=0)
+        chosen_landmark = rand.get_int(0,nbP);
       //rand++;
       //std::cout << "Chose " << chosen_landmark << std::endl;
       p = &W[chosen_landmark];
