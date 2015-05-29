@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE( Delaunay_triangulation ) {
   std::string off_file_name("S8_10.off");
   std::cout << "========== OFF FILE NAME = " << off_file_name << " ==========" << std::endl;
   
-  Gudhi::alphashapes::Delaunay_triangulation_off_reader<T> off_reader(off_file_name, dt, true, true);
+  Gudhi::alphashapes::Delaunay_triangulation_off_reader<T> off_reader(off_file_name, dt);
   std::cout << "off_reader.is_valid()=" << off_reader.is_valid() << std::endl;
   BOOST_CHECK(off_reader.is_valid());
 

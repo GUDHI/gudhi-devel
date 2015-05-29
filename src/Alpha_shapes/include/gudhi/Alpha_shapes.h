@@ -47,6 +47,8 @@ namespace Gudhi {
 
 namespace alphashapes {
 
+#define Kinit(f) =k.f()
+
 /** \defgroup alpha_shapes Alpha shapes in dimension N
  *
  <DT>Implementations:</DT>
@@ -86,16 +88,22 @@ class Alpha_shapes {
    */
   typedef CGAL::Delaunay_triangulation<Kernel> Delaunay_triangulation;
 
+  typedef typename Kernel::Compute_squared_radius_d Squared_Radius;
+  typedef typename Kernel::Side_of_bounded_sphere_d Is_Gabriel;
+
+  /** \brief Type required to insert into a simplex_tree (with or without subfaces).*/
+  typedef std::vector<Kernel::Point_d> typeVectorPoint;
+
  private:
   /** \brief Upper bound on the simplex tree of the simplicial complex.*/
   Gudhi::Simplex_tree<> _st;
 
  public:
 
-  Alpha_shapes(std::string off_file_name, int dimension) {
-    Delaunay_triangulation dt(dimension);
-    Gudhi::alphashapes::Delaunay_triangulation_off_reader<Delaunay_triangulation>
-        off_reader(off_file_name, dt, true, true);
+  Alpha_shapes(std::string off_file_name) {
+    // Construct a default Delaunay_triangulation (dim=0) - dim will be set in visitor reader init function
+    Delaunay_triangulation dt(3);
+    Gudhi::alphashapes::Delaunay_triangulation_off_reader<Delaunay_triangulation> off_reader(off_file_name, dt);
     if (!off_reader.is_valid()) {
       std::cerr << "Unable to read file " << off_file_name << std::endl;
       exit(-1); // ----- >>
@@ -120,45 +128,70 @@ class Alpha_shapes {
   template<typename T>
   void init(T triangulation) {
     _st.set_dimension(triangulation.maximal_dimension());
-    _st.set_filtration(0.0);
-    // triangulation points list
-    for (auto vit = triangulation.finite_vertices_begin();
-         vit != triangulation.finite_vertices_end(); ++vit) {
-      typeVectorVertex vertexVector;
-      Vertex_handle vertexHdl = std::distance(triangulation.finite_vertices_begin(), vit);
-      vertexVector.push_back(vertexHdl);
+    Filtration_value filtration_max = 0.0;
 
-      // Insert each point in the simplex tree
-      _st.insert_simplex(vertexVector, 0.0);
+    Kernel k;
+    Squared_Radius squared_radius Kinit(compute_squared_radius_d_object);
+    Is_Gabriel     is_gabriel     Kinit(side_of_bounded_sphere_d_object);
 
-#ifdef DEBUG_TRACES
-      std::cout << "P" << vertexHdl << ":";
-      for (auto Coord = vit->point().cartesian_begin(); Coord != vit->point().cartesian_end(); ++Coord) {
-        std::cout << *Coord << " ";
-      }
-      std::cout << std::endl;
-#endif  // DEBUG_TRACES
-    }
-    // triangulation finite full cells list
-    for (auto cit = triangulation.finite_full_cells_begin();
-         cit != triangulation.finite_full_cells_end(); ++cit) {
+    // triangulation full cells list
+    for (auto cit = triangulation.full_cells_begin(); cit != triangulation.full_cells_end(); ++cit) {
       typeVectorVertex vertexVector;
+      typeVectorPoint pointVector;
       for (auto vit = cit->vertices_begin(); vit != cit->vertices_end(); ++vit) {
-        // Vertex handle is distance - 1
-        Vertex_handle vertexHdl = std::distance(triangulation.vertices_begin(), *vit) - 1;
-        vertexVector.push_back(vertexHdl);
+        if (!triangulation.is_infinite(*vit)) {
+          // Vector of vertex construction for simplex_tree structure
+          // Vertex handle is distance - 1
+          Vertex_handle vertexHdl = std::distance(triangulation.vertices_begin(), *vit) - 1;
+          // infinite cell is -1 for infinite
+          vertexVector.push_back(vertexHdl);
+          // Vector of points for alpha_shapes filtration value computation
+          pointVector.push_back((*vit)->point());
+#ifdef DEBUG_TRACES
+          std::cout << "Point ";
+          for (auto Coord = (*vit)->point().cartesian_begin(); Coord != (*vit)->point().cartesian_end(); ++Coord) {
+            std::cout << *Coord << " | ";
+          }
+          std::cout << std::endl;
+#endif  // DEBUG_TRACES
+        }
+      }
+      Filtration_value alpha_shapes_filtration = 0.0;
+
+      if (!triangulation.is_infinite(cit)) {
+        alpha_shapes_filtration = squared_radius(pointVector.begin(), pointVector.end());
+#ifdef DEBUG_TRACES
+        std::cout << "Alpha_shape filtration value = " << alpha_shapes_filtration << std::endl;
+#endif  // DEBUG_TRACES
+      } else {
+        Filtration_value tmp_filtration = 0.0;
+        bool is_gab = true;
+        for (auto vit = triangulation.finite_vertices_begin(); vit != triangulation.finite_vertices_end(); ++vit) {
+          if (CGAL::ON_UNBOUNDED_SIDE != is_gabriel(pointVector.begin(), pointVector.end(), vit->point())) {
+            is_gab = false;
+            // TODO(VR) : Compute minimum 
+            
+          }
+        }
+        if (true == is_gab) {
+          alpha_shapes_filtration = squared_radius(pointVector.begin(), pointVector.end());
+#ifdef DEBUG_TRACES
+          std::cout << "Alpha_shape filtration value = " << alpha_shapes_filtration << std::endl;
+#endif  // DEBUG_TRACES
+        }
       }
       // Insert each point in the simplex tree
-      _st.insert_simplex_and_subfaces(vertexVector, 0.0);
+      _st.insert_simplex_and_subfaces(vertexVector, alpha_shapes_filtration);
 
 #ifdef DEBUG_TRACES
-      std::cout << "C" << std::distance(triangulation.finite_full_cells_begin(), cit) << ":";
+      std::cout << "C" << std::distance(triangulation.full_cells_begin(), cit) << ":";
       for (auto value : vertexVector) {
         std::cout << value << ' ';
       }
       std::cout << std::endl;
 #endif  // DEBUG_TRACES
     }
+    _st.set_filtration(filtration_max);
   }
 
  public:

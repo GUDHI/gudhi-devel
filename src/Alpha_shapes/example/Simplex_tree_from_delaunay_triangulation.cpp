@@ -48,50 +48,24 @@ typedef CGAL::Delaunay_triangulation<K> T;
 // TriangulationDataStructure template parameter
 
 void usage(char * const progName) {
-  std::cerr << "Usage: " << progName << " filename.off dimension" << std::endl;
+  std::cerr << "Usage: " << progName << " filename.off" << std::endl;
   exit(-1); // ----- >>
 }
 
 int main(int argc, char **argv) {
-  if (argc != 3) {
+  if (argc != 2) {
     std::cerr << "Error: Number of arguments (" << argc << ") is not correct" << std::endl;
     usage(argv[0]);
   }
 
-  int dimension = 0;
-  int returnedScanValue = sscanf(argv[2], "%d", &dimension);
-  if ((returnedScanValue == EOF) || (dimension <= 0)) {
-    std::cerr << "Error: " << argv[2] << " is not correct" << std::endl;
-    usage(argv[0]);
-  }
-
-  // ----------------------------------------------------------------------------
-  //
-  // Init of an alpha-shape from a Delaunay triangulation
-  //
-  // ----------------------------------------------------------------------------
-  T dt(dimension);
   std::string off_file_name(argv[1]);
-
-  Gudhi::alphashapes::Delaunay_triangulation_off_reader<T> off_reader(off_file_name, dt, false, false);
-  if (!off_reader.is_valid()) {
-    std::cerr << "Unable to read file " << off_file_name << std::endl;
-    exit(-1); // ----- >>
-  }
-
-  std::cout << "number of vertices=" << dt.number_of_vertices() << std::endl;
-  std::cout << "number of full cells=" << dt.number_of_full_cells() << std::endl;
-  std::cout << "number of finite full cells=" << dt.number_of_finite_full_cells() << std::endl;
-
-  Gudhi::alphashapes::Alpha_shapes alpha_shapes_from_dt(dt);
-  //std::cout << alpha_shapes_from_dt << std::endl;
 
   // ----------------------------------------------------------------------------
   //
   // Init of an alpha-shape from a OFF file
   //
   // ----------------------------------------------------------------------------
-  Gudhi::alphashapes::Alpha_shapes alpha_shapes_from_file(off_file_name, dimension);
+  Gudhi::alphashapes::Alpha_shapes alpha_shapes_from_file(off_file_name);
   //std::cout << alpha_shapes_from_file << std::endl;
   
   std::cout << "alpha_shapes_from_file.dimension()=" << alpha_shapes_from_file.dimension() << std::endl;

@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 2.6)
 project(GUDHIAlphaShapesTest)
 
-# need CGAL 4.6
-# cmake -DCGAL_DIR=~/workspace/CGAL-4.6-beta1 ../../..
+# need CGAL 4.7
+# cmake -DCGAL_DIR=~/workspace/CGAL-4.7-Ic-41 ../../..
 if(CGAL_FOUND)
-  if (NOT CGAL_VERSION VERSION_LESS 4.6.0)
+  if (NOT CGAL_VERSION VERSION_LESS 4.7.0)
     message(STATUS "CGAL version: ${CGAL_VERSION}.")
 
     include( ${CGAL_USE_FILE} )

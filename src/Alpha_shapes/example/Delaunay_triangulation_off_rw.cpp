@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
 
   T dt(dimension);
   std::string offFileName(argv[1]);
-  Gudhi::alphashapes::Delaunay_triangulation_off_reader<T> off_reader(offFileName, dt, true, true);
+  Gudhi::alphashapes::Delaunay_triangulation_off_reader<T> off_reader(offFileName, dt);
   if (!off_reader.is_valid()) {
     std::cerr << "Unable to read file " << offFileName << std::endl;
     exit(-1); // ----- >>
