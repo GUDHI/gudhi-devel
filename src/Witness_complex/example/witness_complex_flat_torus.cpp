@@ -75,28 +75,33 @@ typedef CGAL::Euclidean_distance<Traits_base> Euclidean_distance;
  * \brief Class of distance in a flat torus in dimaension D
  *
  */
-class Torus_distance : public Euclidean_distance {
+//class Torus_distance : public Euclidean_distance {
+/*
+  class Torus_distance {
 
 public:
-  typedef FT    FT;
-  typedef Point_d Point_d;
-  typedef Point_d Query_item;
-  typedef typename CGAL::Dynamic_dimension_tag D;
+    typedef K::FT    FT;
+    typedef K::Point_d Point_d;
+    typedef Point_d Query_item;
+    typedef typename CGAL::Dynamic_dimension_tag D;
+
+  double box_length = 2;
 
   FT transformed_distance(Query_item q, Point_d p) const
   {
     FT distance = FT(0);
     FT coord = FT(0);
+    //std::cout << "Hello skitty!\n";
     typename K::Construct_cartesian_const_iterator_d construct_it=Traits_base().construct_cartesian_const_iterator_d_object();
     typename K::Cartesian_const_iterator_d qit = construct_it(q),
 	qe = construct_it(q,1), pit = construct_it(p);
 	for(; qit != qe; qit++, pit++)
           {
             coord = sqrt(((*qit)-(*pit))*((*qit)-(*pit)));
-            if (coord*coord <= (1-coord)*(1-coord))
+            if (coord*coord <= (box_length-coord)*(box_length-coord))
               distance += coord*coord;
             else
-              distance += (1-coord)*(1-coord);
+              distance += (box_length-coord)*(box_length-coord);
           }
         return distance;
   }
@@ -113,7 +118,7 @@ public:
         if((*qit) < r.min_coord(i))
           {
             dist1 = (r.min_coord(i)-(*qit));
-            dist2 = (1 - r.max_coord(i)+(*qit));
+            dist2 = (box_length - r.max_coord(i)+(*qit));
             if (dist1 < dist2)
               distance += dist1*dist1;
             else
@@ -121,7 +126,7 @@ public:
           }
         else if ((*qit) > r.max_coord(i))
           {
-            dist1 = (1 - (*qit)+r.min_coord(i));
+            dist1 = (box_length - (*qit)+r.min_coord(i));
             dist2 = ((*qit) - r.max_coord(i));
             if (dist1 < dist2)
               distance += dist1*dist1;
@@ -140,12 +145,13 @@ public:
     typename K::Construct_cartesian_const_iterator_d construct_it=Traits_base().construct_cartesian_const_iterator_d_object();
     typename K::Cartesian_const_iterator_d qit = construct_it(q),
 	                  	           qe = construct_it(q,1);
+    //std::cout << r.max_coord(0) << std::endl;
     for(unsigned int i = 0;qit != qe; i++, qit++)
       {
         if((*qit) < r.min_coord(i))
           {
             dist1 = (r.min_coord(i)-(*qit));
-            dist2 = (1 - r.max_coord(i)+(*qit));
+            dist2 = (box_length - r.max_coord(i)+(*qit));
             if (dist1 < dist2)
               {
                 dists[i] = dist1;
@@ -155,16 +161,18 @@ public:
               {
                 dists[i] = dist2;
                 distance += dist2*dist2;
+                //std::cout << "Good stuff1\n";
               }
           }
         else if ((*qit) > r.max_coord(i))
           {
-            dist1 = (1 - (*qit)+r.min_coord(i));
+            dist1 = (box_length - (*qit)+r.min_coord(i));
             dist2 = ((*qit) - r.max_coord(i));
             if (dist1 < dist2)
               {
                 dists[i] = dist1;
                 distance += dist1*dist1;
+                //std::cout << "Good stuff2\n";
               }
             else
               {
@@ -175,7 +183,7 @@ public:
       };
     return distance;
   }
-  
+    
   FT max_distance_to_rectangle(const Query_item& q,
                                const CGAL::Kd_tree_rectangle<FT,D>& r) const {
     FT distance=FT(0);
@@ -184,14 +192,14 @@ public:
 		                           qe = construct_it(q,1);
     for(unsigned int i = 0;qit != qe; i++, qit++)
       {
-        if (FT(1) <= (r.min_coord(i)+r.max_coord(i)))
-          if ((r.max_coord(i)+r.min_coord(i)-FT(1))/FT(2.0) <= (*qit) &&
+        if (box_length <= (r.min_coord(i)+r.max_coord(i)))
+          if ((r.max_coord(i)+r.min_coord(i)-box_length)/FT(2.0) <= (*qit) &&
               (*qit) <= (r.min_coord(i)+r.max_coord(i))/FT(2.0))
             distance += (r.max_coord(i)-(*qit))*(r.max_coord(i)-(*qit));
           else
             distance += ((*qit)-r.min_coord(i))*((*qit)-r.min_coord(i));
         else
-          if ((FT(1)-r.max_coord(i)-r.min_coord(i))/FT(2.0) <= (*qit) ||
+          if ((box_length-r.max_coord(i)-r.min_coord(i))/FT(2.0) <= (*qit) ||
               (*qit) <= (r.min_coord(i)+r.max_coord(i))/FT(2.0))
             distance += (r.max_coord(i)-(*qit))*(r.max_coord(i)-(*qit));
           else
@@ -200,6 +208,7 @@ public:
     return distance;
   }
 
+  
   FT max_distance_to_rectangle(const Query_item& q,
                                const CGAL::Kd_tree_rectangle<FT,D>& r,
                                std::vector<FT>& dists) const {
@@ -209,8 +218,8 @@ public:
 		                           qe = construct_it(q,1);
     for(unsigned int i = 0;qit != qe; i++, qit++)
       {
-        if (FT(1) <= (r.min_coord(i)+r.max_coord(i)))
-          if ((r.max_coord(i)+r.min_coord(i)-FT(1))/FT(2.0) <= (*qit) &&
+        if (box_length <= (r.min_coord(i)+r.max_coord(i)))
+          if ((r.max_coord(i)+r.min_coord(i)-box_length)/FT(2.0) <= (*qit) &&
               (*qit) <= (r.min_coord(i)+r.max_coord(i))/FT(2.0))
             {
               dists[i] = r.max_coord(i)-(*qit);
@@ -222,7 +231,7 @@ public:
               distance += ((*qit)-r.min_coord(i))*((*qit)-r.min_coord(i));
             }
         else
-          if ((FT(1)-r.max_coord(i)-r.min_coord(i))/FT(2.0) <= (*qit) ||
+          if ((box_length-r.max_coord(i)-r.min_coord(i))/FT(2.0) <= (*qit) ||
               (*qit) <= (r.min_coord(i)+r.max_coord(i))/FT(2.0))
             {
               dists[i] = sqrt((r.max_coord(i)-(*qit))*(r.max_coord(i)-(*qit)));
@@ -237,7 +246,14 @@ public:
       }
     return distance;
   }
-  
+
+    inline FT new_distance(FT dist, FT old_off, FT new_off,
+                           int )  const {
+      
+      FT new_dist = dist + (new_off*new_off - old_off*old_off);
+      return new_dist;
+    }
+    
   inline FT transformed_distance(FT d) const {
     return d*d;
   }
@@ -247,7 +263,7 @@ public:
   }
   
 };
-
+*/
 
 typedef std::vector< Vertex_handle > typeVectorVertex;
 
@@ -259,7 +275,7 @@ typedef CGAL::Search_traits_adapter<
 //typedef K TreeTraits;
 //typedef CGAL::Distance_adapter<std::ptrdiff_t,Point_d*,Euclidean_distance > Euclidean_adapter;
 //typedef CGAL::Kd_tree<STraits> Kd_tree;
-typedef CGAL::Orthogonal_k_neighbor_search<STraits, CGAL::Distance_adapter<std::ptrdiff_t,Point_d*,Torus_distance>> K_neighbor_search;
+typedef CGAL::Orthogonal_k_neighbor_search<STraits, CGAL::Distance_adapter<std::ptrdiff_t,Point_d*,Euclidean_distance>> K_neighbor_search;
 typedef K_neighbor_search::Tree Tree;
 typedef K_neighbor_search::Distance Distance;
 typedef K_neighbor_search::iterator KNS_iterator;
@@ -275,7 +291,7 @@ typedef std::vector<Point_d> Point_Vector;
 typedef CGAL::Random_points_in_cube_d<Point_d> Random_cube_iterator;
 typedef CGAL::Random_points_in_ball_d<Point_d> Random_point_iterator;
 
-
+bool toric=true;
 
 /**
  * \brief Customized version of read_points
@@ -319,6 +335,14 @@ void generate_points_random_box(Point_Vector& W, int nbP, int dim)
     }
 }
 
+/* NOT TORUS RELATED
+ */
+void generate_points_sphere(Point_Vector& W, int nbP, int dim)
+{
+  CGAL::Random_points_on_sphere_d<Point_d> rp(dim,1);
+  for (int i = 0; i < nbP; i++)
+    W.push_back(*rp++);
+}
 /*
 void read_points_to_tree (std::string file_name, Tree& tree)
 {
@@ -359,6 +383,97 @@ void write_wl( std::string file_name, std::vector< std::vector <int> > & WL)
 }
 
 
+std::vector<Point_d> convert_to_torus(std::vector< Point_d>& points)
+{
+  std::vector< Point_d > points_torus;
+  for (auto p: points)
+    {
+      FT theta = M_PI*p[0];
+      FT phi = M_PI*p[1];
+      std::vector<FT> p_torus;
+      p_torus.push_back((1+0.2*cos(theta))*cos(phi));
+      p_torus.push_back((1+0.2*cos(theta))*sin(phi));
+      p_torus.push_back(0.2*sin(theta));
+      points_torus.push_back(Point_d(p_torus));
+    }
+  return points_torus;
+}
+
+void write_points_torus( std::string file_name, std::vector< Point_d > & points)
+{
+  std::ofstream ofs (file_name, std::ofstream::out);
+  std::vector<Point_d> points_torus = convert_to_torus(points);
+  for (auto w : points_torus)
+    {
+      for (auto it = w.cartesian_begin(); it != w.cartesian_end(); ++it)
+        ofs << *it << " ";
+      ofs << "\n";
+    }
+  ofs.close();
+}
+
+void write_points( std::string file_name, std::vector< Point_d > & points)
+{
+  if (toric) write_points_torus(file_name, points);
+  else
+    {
+      std::ofstream ofs (file_name, std::ofstream::out);
+      for (auto w : points)
+        {
+          for (auto it = w.cartesian_begin(); it != w.cartesian_end(); ++it)
+            ofs << *it << " ";
+          ofs << "\n";
+        }
+      ofs.close();
+    }
+}
+
+
+void write_edges_torus(std::string file_name, Witness_complex<>& witness_complex, Point_Vector& landmarks)
+{
+  std::ofstream ofs (file_name, std::ofstream::out);
+  Point_Vector l_torus = convert_to_torus(landmarks);
+  for (auto u: witness_complex.complex_vertex_range())
+    for (auto v: witness_complex.complex_vertex_range())
+      {
+        typeVectorVertex edge = {u,v};
+        if (u < v && witness_complex.find(edge) != witness_complex.null_simplex())   
+          {
+            for (auto it = l_torus[u].cartesian_begin(); it != l_torus[u].cartesian_end(); ++it)
+              ofs << *it << " ";
+            ofs << "\n";
+            for (auto it = l_torus[v].cartesian_begin(); it != l_torus[v].cartesian_end(); ++it)
+              ofs << *it << " ";
+            ofs << "\n\n\n";
+          }
+    }
+  ofs.close();
+}
+
+void write_edges(std::string file_name, Witness_complex<>& witness_complex, Point_Vector& landmarks)
+{
+  std::ofstream ofs (file_name, std::ofstream::out);
+  if (toric) write_edges_torus(file_name, witness_complex, landmarks);
+  else
+    {
+      for (auto u: witness_complex.complex_vertex_range())
+        for (auto v: witness_complex.complex_vertex_range())
+          {
+            typeVectorVertex edge = {u,v};
+            if (u < v && witness_complex.find(edge) != witness_complex.null_simplex())   
+              {
+                for (auto it = landmarks[u].cartesian_begin(); it != landmarks[u].cartesian_end(); ++it)
+                  ofs << *it << " ";
+                ofs << "\n";
+                for (auto it = landmarks[v].cartesian_begin(); it != landmarks[v].cartesian_end(); ++it)
+                  ofs << *it << " ";
+                ofs << "\n\n\n";
+              }
+          }
+      ofs.close();
+    }
+}
+
 
 /** Function that chooses landmarks from W and place it in the kd-tree L.
  *  Note: nbL hould be removed if the code moves to Witness_complex
@@ -397,21 +512,41 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
   for (int i=0; i<D; i++)
     orig_vector.push_back(0);
   Point_d origin(orig_vector);
+  //Distance dist;
+  //dist.transformed_distance(0,1);
   //******************** Constructing a WL matrix
   int nbP = W.size();
   int nbL = landmarks.size();
   //Point_Vector landmarks_ = landmarks;
-  Torus_distance ed;
+  Euclidean_distance ed;
   //Equal_d ed;
   //Point_d p1(std::vector<FT>({0.8,0.8})), p2(std::vector<FT>({0.1,0.1}));
   FT lambda = ed.transformed_distance(landmarks[0],landmarks[1]);
   //std::cout << "Lambda=" << lambda << std::endl;
     //FT lambda = 0.1;//Euclidean_distance();
+  std::vector<Point_d> landmarks_ext;
+  int nb_cells = 1;
+  for (int i = 0; i < D; ++i)
+    nb_cells *= 3;
+  for (int i = 0; i < nb_cells; ++i)
+      for (int k = 0; k < nbL; ++k)
+        {
+          std::vector<double> point;
+          int cell_i = i;
+          for (int l = 0; l < D; ++l)
+            {
+              point.push_back(landmarks[k][l] + 2.0*((cell_i%3)-1));
+              cell_i /= 3;
+            }
+          landmarks_ext.push_back(point);
+        }
+  write_points("landmarks/initial_landmarks",landmarks_ext);
+  STraits traits(&(landmarks_ext[0]));
   std::vector< std::vector <int> > WL(nbP);
   Tree L(boost::counting_iterator<std::ptrdiff_t>(0),
-         boost::counting_iterator<std::ptrdiff_t>(nbL),
+         boost::counting_iterator<std::ptrdiff_t>(nb_cells*nbL),
          typename Tree::Splitter(),
-         STraits(&(landmarks[0])));
+         traits);
   /*Tree2 L2(boost::counting_iterator<std::ptrdiff_t>(0),
            boost::counting_iterator<std::ptrdiff_t>(nbL),
            typename Tree::Splitter(),
@@ -424,10 +559,14 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
       //std::cout << "Entered witness number " << i << std::endl;
       Point_d& w = W[i];
       //std::cout << "Safely constructed a point\n";
-      ////Search D+1 nearest neighbours from the tree of landmarks L 
+      ////Search D+1 nearest neighbours from the tree of landmarks L
+      /*
+      if (w[0]>0.95)
+        std::cout << i << std::endl;
+      */
       K_neighbor_search search(L, w, D+1, FT(0), true,
                                //CGAL::Distance_adapter<std::ptrdiff_t,Point_d*,Euclidean_distance>(&(landmarks[0])) );
-                               CGAL::Distance_adapter<std::ptrdiff_t,Point_d*,Torus_distance>(&(landmarks[0])) );
+                               CGAL::Distance_adapter<std::ptrdiff_t,Point_d*,Euclidean_distance>(&(landmarks_ext[0])) );
       //std::cout << "Safely found nearest landmarks\n";
       for(K_neighbor_search::iterator it = search.begin(); it != search.end(); ++it)
         {
@@ -435,7 +574,7 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
           //Point_etiquette_map::iterator itm = L_i.find(it->first);
           //assert(itm != L_i.end());
           //std::cout << "Entered KNN_it with point at distance " << it->second << "\n";
-          WL[i].push_back(it->first);
+          WL[i].push_back((it->first)%nbL);
           //std::cout << "ITFIRST " << it->first << std::endl;
           //std::cout << i << " " << it->first << ": " << it->second << std::endl; 
         }
@@ -463,6 +602,8 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
   int count_badlinks = 0;
   //std::cout << "Bad links around ";
   for (auto u: witnessComplex.complex_vertex_range())
+    {
+      std::cout << "Vertex " << u << " ";
     if (!witnessComplex.has_good_link(u))
       {
         //std::cout << "Landmark " << u << " start!" << std::endl;
@@ -470,12 +611,16 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
         count_badlinks++;
         //std::cout << u << " ";
         Point_d& l = landmarks[u];
-        Fuzzy_sphere fs(l, sqrt(lambda)*3, 0, STraits(&(landmarks[0])));
-        L.search(std::insert_iterator<std::set<int>>(perturbL,perturbL.begin()),fs);
+        Fuzzy_sphere fs(l, sqrt(lambda)*3, 0, traits);
+        std::vector<int> curr_perturb;
+        L.search(std::insert_iterator<std::vector<int>>(curr_perturb,curr_perturb.begin()),fs);
+        for (int i: curr_perturb)
+          perturbL.insert(i%nbL);
         //L.search(std::inserter(perturbL,perturbL.begin()),fs);
         //L.search(std::ostream_iterator<int>(std::cout,"\n"),fs);
         //std::cout << "PerturbL size is " << perturbL.size() << std::endl;
       }
+    }
   std::cout << "\nBad links total: " << count_badlinks << " Points to perturb: " << perturbL.size() << std::endl;
   //std::cout << "landmark[0][0] before" << landmarks[0][0] << std::endl;
   //*********************** Perturb bad link landmarks
@@ -523,7 +668,18 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
       witnessComplex.st_to_file(ofs);
       ofs.close();
     }
-  
+  /*
+  i = sprintf(buffer,"badlinks.txt");
+  if (i >= 0)
+    {
+      std::string out_file = (std::string)buffer;
+      std::ofstream ofs (out_file, std::ofstream::out);
+      witnessComplex.write_bad_links(ofs);
+      ofs.close();
+    }
+  */
+  write_edges("landmarks/edges", witnessComplex, landmarks);
+  //std::cout << Distance().transformed_distance(Point_d(std::vector<double>({0.1,0.1})), Point_d(std::vector<double>({1.9,1.9}))) << std::endl;
   return count_badlinks;
 }
 
@@ -585,13 +741,16 @@ int main (int argc, char * const argv[])
         }
     }
   int bl = nbL, curr_min = bl;
+  write_points("landmarks/initial_pointset",point_vector);
+  //write_points("landmarks/initial_landmarks",L);
   
-  for (int i = 0; bl > 0; i++)
+  for (int i = 0; i < 1; i++)
     {
       std::cout << "========== Start iteration " << i << "== curr_min(" << curr_min << ")========\n";
       bl=landmark_perturbation(point_vector, L, chosen_landmarks);
       if (bl < curr_min)
         curr_min=bl;
+      write_points("landmarks/landmarks0",L);
     }
   //end = clock();
   

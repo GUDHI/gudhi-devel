@@ -157,11 +157,44 @@ void write_wl( std::string file_name, std::vector< std::vector <int> > & WL)
   ofs.close();
 }
 
+void write_points( std::string file_name, std::vector< Point_d > & WL)
+{
+  std::ofstream ofs (file_name, std::ofstream::out);
+  for (auto w : WL)
+    {
+      for (auto it = w.cartesian_begin(); it != w.cartesian_end(); ++it)
+        ofs << *it << " ";
+      ofs << "\n";
+    }
+  ofs.close();
+}
+
+void write_edges_gnuplot(std::string file_name, Witness_complex<>& witness_complex, Point_Vector& landmarks)
+{
+  std::ofstream ofs (file_name, std::ofstream::out);
+  for (auto u: witness_complex.complex_vertex_range())
+    for (auto v: witness_complex.complex_vertex_range())
+      {
+        typeVectorVertex edge = {u,v};
+        if (u < v && witness_complex.find(edge) != witness_complex.null_simplex())   
+          {
+            for (auto it = landmarks[u].cartesian_begin(); it != landmarks[u].cartesian_end(); ++it)
+              ofs << *it << " ";
+            ofs << "\n";
+            for (auto it = landmarks[v].cartesian_begin(); it != landmarks[v].cartesian_end(); ++it)
+              ofs << *it << " ";
+            ofs << "\n\n\n";
+          }
+    }
+  ofs.close();
+}
+    
 
 
 /** Function that chooses landmarks from W and place it in the kd-tree L.
  *  Note: nbL hould be removed if the code moves to Witness_complex
  */
+
 void landmark_choice(Point_Vector &W, int nbP, int nbL, Point_Vector& landmarks, std::vector<int>& landmarks_ind)
 {
   std::cout << "Enter landmark choice to kd tree\n";
@@ -183,7 +216,32 @@ void landmark_choice(Point_Vector &W, int nbP, int nbL, Point_Vector& landmarks,
       //std::cout << "Added landmark " << chosen_landmark << std::endl;
     }
  }
-
+/*
+void landmark_choice(Point_Vector &W, int nbP, int nbL, Point_Vector& landmarks, std::vector<int>& landmarks_ind)
+{
+  std::cout << "Enter landmark choice to kd tree\n";
+  //std::vector<Point_d> landmarks;
+  int chosen_landmark;
+  //std::pair<Point_etiquette_map::iterator,bool> res = std::make_pair(L_i.begin(),false);
+  Point_d* p;
+  CGAL::Random rand;
+  for (int i = 0; i < nbL; i++)
+    {
+      //      while (!res.second)
+      //  {
+      while (std::count(landmarks_ind.begin(),landmarks_ind.end(),chosen_landmark)!=0)
+        chosen_landmark = rand.get_int(0,nbP);
+      //rand++;
+      //std::cout << "Chose " << chosen_landmark << std::endl;
+      p = &W[chosen_landmark];
+      //L_i.emplace(chosen_landmark,i);
+      //  }
+      landmarks.push_back(*p);
+      landmarks_ind.push_back(chosen_landmark);
+      //std::cout << "Added landmark " << chosen_landmark << std::endl;
+    }
+ }
+*/
 
 int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<int>& landmarks_ind)
 {
@@ -285,13 +343,7 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
   //std::cout << "landmark[0][0] after" << landmarks[0][0] << std::endl;
   std::cout << "lambda=" << lambda << std::endl;
   // Write the WL matrix in a file
-  /*
-  mkdir("output", S_IRWXU);
-  const size_t last_slash_idx = file_name.find_last_of("/");
-  if (std::string::npos != last_slash_idx)
-    {
-      file_name.erase(0, last_slash_idx + 1);
-    }
+ 
   
   char buffer[100];
   int i = sprintf(buffer,"stree_result.txt");
@@ -303,7 +355,8 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
       witnessComplex.st_to_file(ofs);
       ofs.close();
     }
-  */
+  //witnessComplex.write_badlinks("badlinks");
+  write_edges_gnuplot("landmarks/edges", witnessComplex, landmarks);
   return count_badlinks;
 }
 
@@ -345,10 +398,22 @@ int main (int argc, char * const argv[])
   //witnessComplex.landmark_choice_by_furthest_points(point_vector, point_vector.size(), WL);
   landmark_choice(point_vector, nbP, nbL, L, chosen_landmarks);
   int bl = 1;
+
+  mkdir("landmarks", S_IRWXU);
+  const size_t last_slash_idx = file_name.find_last_of("/");
+  if (std::string::npos != last_slash_idx)
+    {
+      file_name.erase(0, last_slash_idx + 1);
+    }
+  write_points("landmarks/initial_pointset",point_vector);
+  write_points("landmarks/initial_landmarks",L);
   for (int i = 0; bl != 0; i++)
     {
       std::cout << "========== Start iteration " << i << " ========\n";
       bl = landmark_perturbation(point_vector, L, chosen_landmarks);
+      std::ostringstream os(std::ostringstream::ate);;
+      os << "landmarks/landmarks0";
+      write_points(os.str(),L);
     }
   //end = clock();
   

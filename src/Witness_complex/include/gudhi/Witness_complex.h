@@ -642,14 +642,16 @@ private:
         print_vector(link_vertices);
         std::cout << "\n";
       */
+      print_vector(link_vertices); std::cout << "\n";
       // Find the dimension
       typeVectorVertex empty_simplex = {};
       int d = link_dim(link_vertices, link_vertices.begin(),-1, empty_simplex);
       //std::cout << " dim " << d << "\n";
       //Siblings* curr_sibl = root();
+      //std::cout << "Currently at vertex "
       return (link_is_pseudomanifold(link_vertices,d));
     }
-    
+
     /** \brief Search and output links around vertices that are not pseudomanifolds
      *
      */
@@ -661,7 +663,7 @@ private:
       //int count = 0;
       for (auto v: complex_vertex_range())
         {
-          //std::cout << "Vertex " << v << ":\n";
+          std::cout << "Vertex " << v << ": ";
           std::vector< Vertex_handle > link_vertices;
           // Fill link_vertices
           for (auto u: complex_vertex_range())
@@ -670,10 +672,10 @@ private:
               if (u != v && find(edge) != null_simplex())   
                 link_vertices.push_back(u);
             }
-          /*
-            print_vector(link_vertices);
-            std::cout << "\n";
-          */
+          
+          print_vector(link_vertices);
+          std::cout << "\n";
+          
           // Find the dimension
           typeVectorVertex empty_simplex = {};
           int d = link_dim(link_vertices, link_vertices.begin(),-1, empty_simplex);
@@ -718,6 +720,7 @@ private:
       Simplex_handle sh;
       int final_d = curr_d;
       typename std::vector< Vertex_handle >::iterator it;
+      //std::cout << "Current vertex is " <<  
       for (it = curr_v; it != link_vertices.end(); ++it)
         {
           curr_simplex.push_back(*it);
@@ -731,8 +734,13 @@ private:
             {
               //std::cout << " -> " << *it << "\n";
               int d = link_dim(link_vertices, it+1, curr_d+1, curr_simplex);
-              if (d > final_d)
-                final_d = d;
+              if (d >= final_d)
+                {
+                  final_d = d;
+                  std::cout << d << " ";
+                  print_vector(curr_simplex);
+                  std::cout << std::endl;
+                }
             }
           /*
           else
@@ -781,14 +789,22 @@ private:
           //std::cout << "Degree of " << f_map_it.first->first << " is " << boost::out_degree(f_map_it.second, adj_graph) << "\n";
           if (boost::out_degree(f_map_it.second, adj_graph) != 2)
 	    {
+              if (boost::out_degree(f_map_it.second, adj_graph) == 3)
+                {
+                  std::cout << "This simplex has 3 cofaces: ";
+                  for(auto v : simplex_vertex_range(f_map_it.first))
+                    std::cout << v << " ";
+                  std::cout << std::endl;
+                }
 	      count_bad[dimension]++;
 	      return false;
 	    }
         }
       // At this point I know that all (d-1)-simplices are adjacent to exactly 2 d-simplices
       // What is left is to check the connexity
-      std::vector<int> components(boost::num_vertices(adj_graph));
-      return (boost::connected_components(adj_graph, &components[0]) == 1);
+      //std::vector<int> components(boost::num_vertices(adj_graph));
+      return true; //Forget the connexity
+      //return (boost::connected_components(adj_graph, &components[0]) == 1);
     }
 
     void add_vertices(typeVectorVertex& link_vertices,
