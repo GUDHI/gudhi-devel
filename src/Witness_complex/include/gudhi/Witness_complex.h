@@ -628,7 +628,7 @@ private:
 
     /** \brief Returns true if the link is good
      */
-    bool has_good_link(Vertex_handle v)
+  bool has_good_link(Vertex_handle v, std::vector< int >& bad_count, std::vector< int >& good_count)
     {
       std::vector< Vertex_handle > link_vertices;
       // Fill link_vertices
@@ -642,14 +642,28 @@ private:
         print_vector(link_vertices);
         std::cout << "\n";
       */
-      print_vector(link_vertices); std::cout << "\n";
+      //print_vector(link_vertices); std::cout << "\n";
       // Find the dimension
       typeVectorVertex empty_simplex = {};
       int d = link_dim(link_vertices, link_vertices.begin(),-1, empty_simplex);
+      /*
+      if (d >= good_count.size())
+	{
+	  std::cout << "d=" << d << std::endl;
+	  std::cout << "gc.size=" << good_count.size() << std::endl;
+	  print_vector(link_vertices);
+	  std::cout << std::endl;
+	}
+      */ 
+      //assert(d < good_count.size());
+      if (d == -1) bad_count[0]++;
       //std::cout << " dim " << d << "\n";
       //Siblings* curr_sibl = root();
       //std::cout << "Currently at vertex "
-      return (link_is_pseudomanifold(link_vertices,d));
+      bool b= (link_is_pseudomanifold(link_vertices,d));
+      if (d != -1) {if (b) good_count[d]++; else bad_count[d]++;}
+      return b;
+      
     }
 
     /** \brief Search and output links around vertices that are not pseudomanifolds
@@ -737,9 +751,9 @@ private:
               if (d >= final_d)
                 {
                   final_d = d;
-                  std::cout << d << " ";
-                  print_vector(curr_simplex);
-                  std::cout << std::endl;
+                  //std::cout << d << " ";
+                  //print_vector(curr_simplex);
+		  // std::cout << std::endl;
                 }
             }
           /*
@@ -789,13 +803,15 @@ private:
           //std::cout << "Degree of " << f_map_it.first->first << " is " << boost::out_degree(f_map_it.second, adj_graph) << "\n";
           if (boost::out_degree(f_map_it.second, adj_graph) != 2)
 	    {
+	      /*
               if (boost::out_degree(f_map_it.second, adj_graph) == 3)
-                {
+                {		 
                   std::cout << "This simplex has 3 cofaces: ";
                   for(auto v : simplex_vertex_range(f_map_it.first))
                     std::cout << v << " ";
                   std::cout << std::endl;
-                }
+		  
+		  }*/
 	      count_bad[dimension]++;
 	      return false;
 	    }

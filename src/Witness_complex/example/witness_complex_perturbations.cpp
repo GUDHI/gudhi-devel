@@ -328,7 +328,7 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
   
   for (auto u: perturbL)
     {
-      Random_point_iterator rp(D,sqrt(lambda)/2);
+      Random_point_iterator rp(D,sqrt(lambda)/4);
       //std::cout << landmarks[u] << std::endl;
       
       std::vector<FT> point;
