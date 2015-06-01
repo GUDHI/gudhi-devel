@@ -584,8 +584,8 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
   std::set< int > perturbL;
   int count_badlinks = 0;
   //std::cout << "Bad links around ";
-  std::vector< int > count_bad(D+3);
-  std::vector< int > count_good(D+3);
+  std::vector< int > count_bad(D);
+  std::vector< int > count_good(D);
   for (auto u: witnessComplex.complex_vertex_range())
     if (!witnessComplex.has_good_link(u, count_bad, count_good))
       {
@@ -623,8 +623,8 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
         {
           while (K().squared_distance_d_object()(*rp,origin) < lambda/256)
             rp++;
-          //FT coord = W[landmarks_ind[u]][i] + (*rp)[i];
-          FT coord = landmarks[u][i] + (*rp)[i];
+          FT coord = W[landmarks_ind[u]][i] + (*rp)[i];
+          //FT coord = landmarks[u][i] + (*rp)[i];
           if (coord > 1)
             point.push_back(coord-1);
           else if (coord < -1)
@@ -723,6 +723,7 @@ int main (int argc, char * const argv[])
   write_points("landmarks/initial_landmarks",L);
   
   for (int i = 0; bl > 0; i++)
+  //for (int i = 0; i < 1; i++)
     {
       std::cout << "========== Start iteration " << i << "== curr_min(" << curr_min << ")========\n";
       bl=landmark_perturbation(point_vector, L, chosen_landmarks);

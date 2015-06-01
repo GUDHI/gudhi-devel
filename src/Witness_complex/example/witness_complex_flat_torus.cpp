@@ -601,10 +601,12 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
   std::set< int > perturbL;
   int count_badlinks = 0;
   //std::cout << "Bad links around ";
+  std::vector< int > count_bad(D);
+  std::vector< int > count_good(D);
   for (auto u: witnessComplex.complex_vertex_range())
     {
-      std::cout << "Vertex " << u << " ";
-    if (!witnessComplex.has_good_link(u))
+      //std::cout << "Vertex " << u << " ";
+      if (!witnessComplex.has_good_link(u, count_bad, count_good))
       {
         //std::cout << "Landmark " << u << " start!" << std::endl;
         //perturbL.insert(u);
@@ -621,6 +623,12 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
         //std::cout << "PerturbL size is " << perturbL.size() << std::endl;
       }
     }
+  for (unsigned int i = 0; i != count_good.size(); i++)
+    if (count_good[i] != 0)
+      std::cout << "count_good[" << i << "] = " << count_good[i] << std::endl;
+  for (unsigned int i = 0; i != count_bad.size(); i++)
+    if (count_bad[i] != 0)
+      std::cout << "count_bad[" << i << "] = " << count_bad[i] << std::endl;
   std::cout << "\nBad links total: " << count_badlinks << " Points to perturb: " << perturbL.size() << std::endl;
   //std::cout << "landmark[0][0] before" << landmarks[0][0] << std::endl;
   //*********************** Perturb bad link landmarks
@@ -744,7 +752,7 @@ int main (int argc, char * const argv[])
   write_points("landmarks/initial_pointset",point_vector);
   //write_points("landmarks/initial_landmarks",L);
   
-  for (int i = 0; i < 1; i++)
+  for (int i = 0; bl > 0; i++)
     {
       std::cout << "========== Start iteration " << i << "== curr_min(" << curr_min << ")========\n";
       bl=landmark_perturbation(point_vector, L, chosen_landmarks);

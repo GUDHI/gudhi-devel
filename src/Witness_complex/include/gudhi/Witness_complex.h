@@ -630,51 +630,41 @@ private:
      */
   bool has_good_link(Vertex_handle v, std::vector< int >& bad_count, std::vector< int >& good_count)
     {
-      std::vector< Vertex_handle > link_vertices;
-      // Fill link_vertices
+      std::vector< Vertex_handle > star_vertices;
+      // Fill star_vertices
+      star_vertices.push_back(v);
       for (auto u: complex_vertex_range())
         {
           typeVectorVertex edge = {u,v};
           if (u != v && find(edge) != null_simplex())   
-            link_vertices.push_back(u);
+            star_vertices.push_back(u);
         }
-      /*
-        print_vector(link_vertices);
-        std::cout << "\n";
-      */
-      //print_vector(link_vertices); std::cout << "\n";
       // Find the dimension
-      typeVectorVertex empty_simplex = {};
-      int d = link_dim(link_vertices, link_vertices.begin(),-1, empty_simplex);
+      typeVectorVertex init_simplex = {star_vertices[0]};
+      int d = star_dim(star_vertices, star_vertices.begin()+1, 0, init_simplex) - 1; //link_dim = star_dim - 1
+      assert(init_simplex.size() == 1);
       /*
-      if (d >= good_count.size())
-	{
-	  std::cout << "d=" << d << std::endl;
-	  std::cout << "gc.size=" << good_count.size() << std::endl;
-	  print_vector(link_vertices);
-	  std::cout << std::endl;
-	}
-      */ 
-      //assert(d < good_count.size());
+      if (d == count_good.size())
+        {
+          std::cout << "Found a star of dimension " << (d+1) << " around " << v << "\nThe star is ";
+          print_vector(star_vertices); std::cout << std::endl;
+        }
+      */
       if (d == -1) bad_count[0]++;
-      //std::cout << " dim " << d << "\n";
-      //Siblings* curr_sibl = root();
-      //std::cout << "Currently at vertex "
-      bool b= (link_is_pseudomanifold(link_vertices,d));
+      bool b= (link_is_pseudomanifold(star_vertices,d));
       if (d != -1) {if (b) good_count[d]++; else bad_count[d]++;}
-      return b;
+      return (d != -1 && b);
       
     }
 
     /** \brief Search and output links around vertices that are not pseudomanifolds
      *
      */
+    /*
     void write_bad_links(std::ofstream& out_file)
     {
       out_file << "Bad links list\n";
       std::cout << "Entered write_bad_links\n";
-      //typeVectorVertex testv = {9,15,17};
-      //int count = 0;
       for (auto v: complex_vertex_range())
         {
           std::cout << "Vertex " << v << ": ";
@@ -693,14 +683,9 @@ private:
           // Find the dimension
           typeVectorVertex empty_simplex = {};
           int d = link_dim(link_vertices, link_vertices.begin(),-1, empty_simplex);
-          //std::cout << " dim " << d << "\n";
-          //Siblings* curr_sibl = root();
           if (link_is_pseudomanifold(link_vertices,d))
             count_good[d]++;
-          //out_file << "Bad link at " << v << "\n";          
         }
-      //out_file << "Number of bad links: " << count << "/" << root()->size();
-      //std::cout << "Number of bad links: " << count << "/" << root()->size() << std::endl;
       nc = nbL;
       for (unsigned int i = 0; i != count_good.size(); i++)
 	{
@@ -718,42 +703,43 @@ private:
 	}
       std::cout << "not_connected = " << nc << std::endl;
     }
-
+    */
   private:
 
   std::vector<int> count_good;
   std::vector<int> count_bad;
   int nc;
 
-    int link_dim(std::vector< Vertex_handle >& link_vertices,
+    int star_dim(std::vector< Vertex_handle >& star_vertices,
                  typename std::vector< Vertex_handle >::iterator curr_v,
                  int curr_d,
                  typeVectorVertex& curr_simplex)
     {
-      //std::cout << "Entered link_dim for " << *(curr_v-1) << "\n";
+      //std::cout << "Entered star_dim for " << *(curr_v-1) << "\n";
       Simplex_handle sh;
       int final_d = curr_d;
       typename std::vector< Vertex_handle >::iterator it;
       //std::cout << "Current vertex is " <<  
-      for (it = curr_v; it != link_vertices.end(); ++it)
+      for (it = curr_v; it != star_vertices.end(); ++it)
         {
           curr_simplex.push_back(*it);
+          typeVectorVertex curr_simplex_copy(curr_simplex);
           /*
           std::cout << "Searching for ";
           print_vector(curr_simplex);
           std::cout << " curr_dim " << curr_d << " final_dim " << final_d;
           */
-          sh = find(curr_simplex);
+          sh = find(curr_simplex_copy); //Need a copy because find sorts the vector and I want star center to be the first
           if (sh != null_simplex())
             {
               //std::cout << " -> " << *it << "\n";
-              int d = link_dim(link_vertices, it+1, curr_d+1, curr_simplex);
+              int d = star_dim(star_vertices, it+1, curr_d+1, curr_simplex);
               if (d >= final_d)
                 {
                   final_d = d;
                   //std::cout << d << " ";
                   //print_vector(curr_simplex);
-		  // std::cout << std::endl;
+		  //std::cout << std::endl;
                 }
             }
           /*
@@ -781,19 +767,19 @@ private:
      * The idea is to make a bipartite graph, where vertices are the d- and (d-1)-dimensional
      * faces and edges represent adjacency between them.
      */
-    bool link_is_pseudomanifold(std::vector< Vertex_handle >& link_vertices,
+    bool link_is_pseudomanifold(std::vector< Vertex_handle >& star_vertices,
                                 int dimension)
     {
       Adj_graph adj_graph;
       Graph_map d_map, f_map; // d_map = map for d-dimensional simplices
                               // f_map = map for its facets
-      typeVectorVertex empty_vector = {};
-      add_vertices(link_vertices,
-                   link_vertices.begin(),
+      typeVectorVertex init_vector = {};
+      add_vertices(star_vertices,
+                   star_vertices.begin()+1,
                    adj_graph,
                    d_map,
                    f_map,
-                   empty_vector,
+                   init_vector,
                    0, dimension);
       //std::cout << "DMAP_SIZE: " << d_map.size() << "\n";
       //std::cout << "FMAP_SIZE: " << f_map.size() << "\n";
@@ -823,60 +809,74 @@ private:
       //return (boost::connected_components(adj_graph, &components[0]) == 1);
     }
 
-    void add_vertices(typeVectorVertex& link_vertices,
+    void add_vertices(typeVectorVertex& star_vertices,
                       typename typeVectorVertex::iterator curr_v,
                       Adj_graph& adj_graph,
                       Graph_map& d_map,
                       Graph_map& f_map,
                       typeVectorVertex& curr_simplex,
                       int curr_d,
-                      int dimension)
+                      int link_dimension)
     {
       Simplex_handle sh;
       Vertex_t vert;
       typename typeVectorVertex::iterator it;
-      std::pair<typename Graph_map::iterator,bool> resPair;
+      //std::pair<typename Graph_map::iterator,bool> resPair;
       //typename Graph_map::iterator resPair;
       //Add vertices
       //std::cout << "Entered add vertices\n";
-      for (it = curr_v; it != link_vertices.end(); ++it)
+      for (it = curr_v; it != star_vertices.end(); ++it)
         {
-          curr_simplex.push_back(*it);
+          curr_simplex.push_back(*it);               //push next vertex in question
+          curr_simplex.push_back(star_vertices[0]);  //push the center of the star
           /*
           std::cout << "Searching for ";
           print_vector(curr_simplex);
           std::cout << " curr_dim " << curr_d << " d " << dimension << "";
           */
-          sh = find(curr_simplex);
+          typeVectorVertex curr_simplex_copy(curr_simplex);
+          sh = find(curr_simplex_copy);                   //a simplex of the star
+          curr_simplex.pop_back();                   //pop the center of the star
+          curr_simplex_copy = typeVectorVertex(curr_simplex);
           if (sh != null_simplex())
             {
               //std::cout << " added\n";
-              if (curr_d == dimension)
+              if (curr_d == link_dimension)
                 {
+                  sh = find(curr_simplex_copy);               //a simplex of the link
+                  assert(sh != null_simplex());          //ASSERT!
                   vert = boost::add_vertex(adj_graph);
-                  resPair = d_map.emplace(sh,vert);
+                  d_map.emplace(sh,vert);
+                  for (Simplex_handle sh_b: boundary_simplex_range(sh))
+                    {
+                      vert = boost::add_vertex(adj_graph);
+                      f_map.emplace(sh_b,vert);
+                    }
                 }
               else
                 {
-                  if (curr_d == dimension-1)
+                  /*
+                  if (curr_d == link_dimension-1)
                     {
                       vert = boost::add_vertex(adj_graph);
                       resPair = f_map.emplace(sh,vert);
                     }
-                  add_vertices(link_vertices,
+                  */
+                  //delete (&curr_simplex_copy); //Just so it doesn't stack
+                  add_vertices(star_vertices,
                                it+1,
                                adj_graph,
                                d_map,
                                f_map,
                                curr_simplex,
-                               curr_d+1, dimension);
+                               curr_d+1, link_dimension);
                 }
             }
           /*
           else
             std::cout << "\n";
           */
-          curr_simplex.pop_back();
+          curr_simplex.pop_back();                           //pop the vertex in question
         }
     }
     
