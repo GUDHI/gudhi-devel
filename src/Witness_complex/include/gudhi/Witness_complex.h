@@ -642,10 +642,13 @@ private:
       // Find the dimension
       typeVectorVertex init_simplex = {star_vertices[0]};
       bool is_pure = true;
-      int d = star_dim(star_vertices, star_vertices.begin()+1, 0, init_simplex, is_pure) - 1; //link_dim = star_dim - 1
+      std::vector<int> dim_coface(star_vertices.size(), 1);
+      int d = star_dim(star_vertices, star_vertices.begin()+1, 0, init_simplex, dim_coface.begin()+1) - 1; //link_dim = star_dim - 1
       assert(init_simplex.size() == 1);
       if (!is_pure)
         std::cout << "Found an impure star around " << v << "\n";
+      for (int dc: dim_coface)
+        is_pure = (dc == dim_coface[0]);
       /*
       if (d == count_good.size())
         {
@@ -653,10 +656,11 @@ private:
           print_vector(star_vertices); std::cout << std::endl;
         }
       */
-      if (d == -1) bad_count[0]++;
+      //if (d == -1) bad_count[0]++;
       bool b= (is_pure && link_is_pseudomanifold(star_vertices,d));
       if (d != -1) {if (b) good_count[d]++; else bad_count[d]++;}
-      return (d != -1 && b);
+      if (!is_pure) bad_count[0]++;
+      return (d != -1 && b && is_pure);
       
     }
 
@@ -717,14 +721,15 @@ private:
                  typename std::vector< Vertex_handle >::iterator curr_v,
                  int curr_d,
                  typeVectorVertex& curr_simplex,
-                 bool& is_pure)
+                 typename std::vector< int >::iterator curr_dc)
     {
       //std::cout << "Entered star_dim for " << *(curr_v-1) << "\n";
       Simplex_handle sh;
       int final_d = curr_d;
       typename std::vector< Vertex_handle >::iterator it;
+      typename std::vector< Vertex_handle >::iterator dc_it;
       //std::cout << "Current vertex is " <<  
-      for (it = curr_v; it != star_vertices.end(); ++it)
+      for (it = curr_v, dc_it = curr_dc; it != star_vertices.end(); ++it, ++dc_it)
         {
           curr_simplex.push_back(*it);
           typeVectorVertex curr_simplex_copy(curr_simplex);
@@ -737,9 +742,7 @@ private:
           if (sh != null_simplex())
             {
               //std::cout << " -> " << *it << "\n";
-              int d = star_dim(star_vertices, it+1, curr_d+1, curr_simplex, is_pure);
-              if (it != curr_v && d != final_d) //If the dimension is known and differs from the one computed previously
-                is_pure = false;                //the simplex is not pure
+              int d = star_dim(star_vertices, it+1, curr_d+1, curr_simplex, dc_it);
               if (d >= final_d)
                 {
                   final_d = d;
@@ -747,6 +750,8 @@ private:
                   //print_vector(curr_simplex);
 		  //std::cout << std::endl;
                 }
+              if (d >= *dc_it)
+                *dc_it = d;
             }
           /*
           else
@@ -780,16 +785,16 @@ private:
       Graph_map d_map, f_map; // d_map = map for d-dimensional simplices
                               // f_map = map for its facets
       typeVectorVertex init_vector = {};
-      add_vertices(star_vertices,
-                   star_vertices.begin()+1,
-                   adj_graph,
-                   d_map,
-                   f_map,
-                   init_vector,
-                   0, dimension);
+      add_vertices_to_link_graph(star_vertices,
+                                 star_vertices.begin()+1,
+                                 adj_graph,
+                                 d_map,
+                                 f_map,
+                                 init_vector,
+                                 0, dimension);
       //std::cout << "DMAP_SIZE: " << d_map.size() << "\n";
       //std::cout << "FMAP_SIZE: " << f_map.size() << "\n";
-      add_edges(adj_graph, d_map, f_map);
+      add_edges_to_link_graph(adj_graph, d_map, f_map);
       for (auto f_map_it : f_map)
         {
           //std::cout << "Degree of " << f_map_it.first->first << " is " << boost::out_degree(f_map_it.second, adj_graph) << "\n";
@@ -815,14 +820,14 @@ private:
       //return (boost::connected_components(adj_graph, &components[0]) == 1);
     }
 
-    void add_vertices(typeVectorVertex& star_vertices,
-                      typename typeVectorVertex::iterator curr_v,
-                      Adj_graph& adj_graph,
-                      Graph_map& d_map,
-                      Graph_map& f_map,
-                      typeVectorVertex& curr_simplex,
-                      int curr_d,
-                      int link_dimension)
+    void add_vertices_to_link_graph(typeVectorVertex& star_vertices,
+                                    typename typeVectorVertex::iterator curr_v,
+                                    Adj_graph& adj_graph,
+                                    Graph_map& d_map,
+                                    Graph_map& f_map,
+                                    typeVectorVertex& curr_simplex,
+                                    int curr_d,
+                                    int link_dimension)
     {
       Simplex_handle sh;
       Vertex_t vert;
@@ -869,13 +874,13 @@ private:
                     }
                   */
                   //delete (&curr_simplex_copy); //Just so it doesn't stack
-                  add_vertices(star_vertices,
-                               it+1,
-                               adj_graph,
-                               d_map,
-                               f_map,
-                               curr_simplex,
-                               curr_d+1, link_dimension);
+                  add_vertices_to_link_graph(star_vertices,
+                                             it+1,
+                                             adj_graph,
+                                             d_map,
+                                             f_map,
+                                             curr_simplex,
+                                             curr_d+1, link_dimension);
                 }
             }
           /*
@@ -886,9 +891,9 @@ private:
         }
     }
     
-    void add_edges(Adj_graph& adj_graph,
-                   Graph_map& d_map,
-                   Graph_map& f_map)
+    void add_edges_to_link_graph(Adj_graph& adj_graph,
+                                 Graph_map& d_map,
+                                 Graph_map& f_map)
     {
       Simplex_handle sh;
       // Add edges
