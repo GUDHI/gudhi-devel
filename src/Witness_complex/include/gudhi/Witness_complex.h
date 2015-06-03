@@ -641,8 +641,11 @@ private:
         }
       // Find the dimension
       typeVectorVertex init_simplex = {star_vertices[0]};
-      int d = star_dim(star_vertices, star_vertices.begin()+1, 0, init_simplex) - 1; //link_dim = star_dim - 1
+      bool is_pure = true;
+      int d = star_dim(star_vertices, star_vertices.begin()+1, 0, init_simplex, is_pure) - 1; //link_dim = star_dim - 1
       assert(init_simplex.size() == 1);
+      if (!is_pure)
+        std::cout << "Found an impure star around " << v << "\n";
       /*
       if (d == count_good.size())
         {
@@ -651,7 +654,7 @@ private:
         }
       */
       if (d == -1) bad_count[0]++;
-      bool b= (link_is_pseudomanifold(star_vertices,d));
+      bool b= (is_pure && link_is_pseudomanifold(star_vertices,d));
       if (d != -1) {if (b) good_count[d]++; else bad_count[d]++;}
       return (d != -1 && b);
       
@@ -713,7 +716,8 @@ private:
     int star_dim(std::vector< Vertex_handle >& star_vertices,
                  typename std::vector< Vertex_handle >::iterator curr_v,
                  int curr_d,
-                 typeVectorVertex& curr_simplex)
+                 typeVectorVertex& curr_simplex,
+                 bool& is_pure)
     {
       //std::cout << "Entered star_dim for " << *(curr_v-1) << "\n";
       Simplex_handle sh;
@@ -733,7 +737,9 @@ private:
           if (sh != null_simplex())
             {
               //std::cout << " -> " << *it << "\n";
-              int d = star_dim(star_vertices, it+1, curr_d+1, curr_simplex);
+              int d = star_dim(star_vertices, it+1, curr_d+1, curr_simplex, is_pure);
+              if (it != curr_v && d != final_d) //If the dimension is known and differs from the one computed previously
+                is_pure = false;                //the simplex is not pure
               if (d >= final_d)
                 {
                   final_d = d;

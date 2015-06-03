@@ -292,6 +292,8 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
           if (dist < lambda)
             lambda = dist;
         }
+      //std::cout << "\nBad links total: " << count_badlinks << " Points to perturb: " << perturbL.size() << std::endl;
+
     }
   //std::cout << "\n";
   
@@ -307,14 +309,16 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
   std::cout << "Entered bad links\n";
   std::set< int > perturbL;
   int count_badlinks = 0;
-  std::cout << "Bad links around ";
+  std::vector< int > count_bad(D);
+  std::vector< int > count_good(D);
+  //std::cout << "Bad links around ";
   for (auto u: witnessComplex.complex_vertex_range())
-    if (!witnessComplex.has_good_link(u))
+    if (!witnessComplex.has_good_link(u, count_bad, count_good))
       {
         //std::cout << "Landmark " << u << " start!" << std::endl;
         //perturbL.insert(u);
         count_badlinks++;
-        std::cout << u << " ";
+        //std::cout << u << " ";
         Point_d& l = landmarks[u];
         Fuzzy_sphere fs(l, sqrt(lambda)*2, 0, STraits(&(landmarks[0])));
         L.search(std::insert_iterator<std::set<int>>(perturbL,perturbL.begin()),fs);
@@ -322,7 +326,13 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
         //L.search(std::ostream_iterator<int>(std::cout,"\n"),fs);
         //std::cout << "PerturbL size is " << perturbL.size() << std::endl;
       }
-  std::cout << "\nBad links total: " << count_badlinks << " Points to perturb: " << perturbL.size() << std::endl;
+  for (unsigned int i = 0; i != count_good.size(); i++)
+    if (count_good[i] != 0)
+      std::cout << "count_good[" << i << "] = " << count_good[i] << std::endl;
+  for (unsigned int i = 0; i != count_bad.size(); i++)
+    if (count_bad[i] != 0)
+      std::cout << "count_bad[" << i << "] = " << count_bad[i] << std::endl;
+  std::cout << "Bad links total: " << count_badlinks << " Points to perturb: " << perturbL.size() << std::endl;
   //std::cout << "landmark[0][0] before" << landmarks[0][0] << std::endl;
   //*********************** Perturb bad link landmarks
   
@@ -405,7 +415,7 @@ int main (int argc, char * const argv[])
     {
       file_name.erase(0, last_slash_idx + 1);
     }
-  write_points("landmarks/initial_pointset",point_vector);
+  //write_points("landmarks/initial_pointset",point_vector);
   write_points("landmarks/initial_landmarks",L);
   for (int i = 0; bl != 0; i++)
     {
