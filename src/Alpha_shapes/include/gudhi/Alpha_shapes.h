@@ -96,13 +96,13 @@ class Alpha_shapes {
 
  private:
   /** \brief Upper bound on the simplex tree of the simplicial complex.*/
-  Gudhi::Simplex_tree<> _st;
+  Gudhi::Simplex_tree<> st_;
 
  public:
 
-  Alpha_shapes(std::string off_file_name) {
+  Alpha_shapes(std::string& off_file_name) {
     // Construct a default Delaunay_triangulation (dim=0) - dim will be set in visitor reader init function
-    Delaunay_triangulation dt(3);
+    Delaunay_triangulation dt(2);
     Gudhi::alphashapes::Delaunay_triangulation_off_reader<Delaunay_triangulation> off_reader(off_file_name, dt);
     if (!off_reader.is_valid()) {
       std::cerr << "Unable to read file " << off_file_name << std::endl;
@@ -117,7 +117,7 @@ class Alpha_shapes {
   }
 
   template<typename T>
-  Alpha_shapes(T triangulation) {
+  Alpha_shapes(T& triangulation) {
     init<T>(triangulation);
   }
 
@@ -126,8 +126,8 @@ class Alpha_shapes {
  private:
 
   template<typename T>
-  void init(T triangulation) {
-    _st.set_dimension(triangulation.maximal_dimension());
+  void init(T& triangulation) {
+    st_.set_dimension(triangulation.maximal_dimension());
     Filtration_value filtration_max = 0.0;
 
     Kernel k;
@@ -148,11 +148,11 @@ class Alpha_shapes {
           // Vector of points for alpha_shapes filtration value computation
           pointVector.push_back((*vit)->point());
 #ifdef DEBUG_TRACES
-          std::cout << "Point ";
+          /*std::cout << "Point ";
           for (auto Coord = (*vit)->point().cartesian_begin(); Coord != (*vit)->point().cartesian_end(); ++Coord) {
             std::cout << *Coord << " | ";
           }
-          std::cout << std::endl;
+          std::cout << std::endl;*/
 #endif  // DEBUG_TRACES
         }
       }
@@ -161,66 +161,71 @@ class Alpha_shapes {
       if (!triangulation.is_infinite(cit)) {
         alpha_shapes_filtration = squared_radius(pointVector.begin(), pointVector.end());
 #ifdef DEBUG_TRACES
-        std::cout << "Alpha_shape filtration value = " << alpha_shapes_filtration << std::endl;
+        //std::cout << "Alpha_shape filtration value = " << alpha_shapes_filtration << std::endl;
 #endif  // DEBUG_TRACES
       } else {
         Filtration_value tmp_filtration = 0.0;
         bool is_gab = true;
-        for (auto vit = triangulation.finite_vertices_begin(); vit != triangulation.finite_vertices_end(); ++vit) {
+        /*for (auto vit = triangulation.finite_vertices_begin(); vit != triangulation.finite_vertices_end(); ++vit) {
           if (CGAL::ON_UNBOUNDED_SIDE != is_gabriel(pointVector.begin(), pointVector.end(), vit->point())) {
             is_gab = false;
             // TODO(VR) : Compute minimum 
             
           }
-        }
+        }*/
         if (true == is_gab) {
           alpha_shapes_filtration = squared_radius(pointVector.begin(), pointVector.end());
 #ifdef DEBUG_TRACES
-          std::cout << "Alpha_shape filtration value = " << alpha_shapes_filtration << std::endl;
+          //std::cout << "Alpha_shape filtration value = " << alpha_shapes_filtration << std::endl;
 #endif  // DEBUG_TRACES
         }
       }
       // Insert each point in the simplex tree
-      _st.insert_simplex_and_subfaces(vertexVector, alpha_shapes_filtration);
+      st_.insert_simplex_and_subfaces(vertexVector, alpha_shapes_filtration);
 
 #ifdef DEBUG_TRACES
       std::cout << "C" << std::distance(triangulation.full_cells_begin(), cit) << ":";
       for (auto value : vertexVector) {
         std::cout << value << ' ';
       }
-      std::cout << std::endl;
+      std::cout << " | alpha=" << alpha_shapes_filtration << std::endl;
 #endif  // DEBUG_TRACES
     }
-    _st.set_filtration(filtration_max);
+    st_.set_filtration(filtration_max);
+  }
+
+  template<typename T>
+  void recursive_init(T& triangulation, typeVectorVertex vertexVector) {
+    
   }
 
  public:
 
   /** \brief Returns the number of vertices in the complex. */
   size_t num_vertices() {
-    return _st.num_vertices();
+    return st_.num_vertices();
   }
 
   /** \brief Returns the number of simplices in the complex.
    *
    * Does not count the empty simplex. */
   const unsigned int& num_simplices() const {
-    return _st.num_simplices();
+    return st_.num_simplices();
   }
 
   /** \brief Returns an upper bound on the dimension of the simplicial complex. */
   int dimension() {
-    return _st.dimension();
+    return st_.dimension();
   }
 
   /** \brief Returns an upper bound of the filtration values of the simplices. */
   Filtration_value filtration() {
-    return _st.filtration();
+    return st_.filtration();
   }
 
   friend std::ostream& operator<<(std::ostream& os, const Alpha_shapes& alpha_shape) {
     // TODO: Program terminated with signal SIGABRT, Aborted - Maybe because of copy constructor
-    Gudhi::Simplex_tree<> st = alpha_shape._st;
+    Gudhi::Simplex_tree<> st = alpha_shape.st_;
     os << st << std::endl;
     return os;
   }

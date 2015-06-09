@@ -66,12 +66,12 @@ int main(int argc, char **argv) {
   //
   // ----------------------------------------------------------------------------
   Gudhi::alphashapes::Alpha_shapes alpha_shapes_from_file(off_file_name);
-  //std::cout << alpha_shapes_from_file << std::endl;
   
   std::cout << "alpha_shapes_from_file.dimension()=" << alpha_shapes_from_file.dimension() << std::endl;
   std::cout << "alpha_shapes_from_file.filtration()=" << alpha_shapes_from_file.filtration() << std::endl;
   std::cout << "alpha_shapes_from_file.num_simplices()=" << alpha_shapes_from_file.num_simplices() << std::endl;
   std::cout << "alpha_shapes_from_file.num_vertices()=" << alpha_shapes_from_file.num_vertices() << std::endl;
+  //std::cout << alpha_shapes_from_file << std::endl;
 
   return 0;
 }

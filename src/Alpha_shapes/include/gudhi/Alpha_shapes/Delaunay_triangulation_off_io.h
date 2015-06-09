@@ -25,6 +25,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <iterator>     // std::distance
 
 #include "gudhi/Off_reader.h"
 
@@ -47,7 +48,7 @@ class Delaunay_triangulation_off_visitor_reader {
 
   void init(int dim, int num_vertices, int num_faces, int num_edges) {
 #ifdef DEBUG_TRACES
-    std::cout << "Delaunay_triangulation_off_visitor_reader::init - dim=" << dim << " - num_vertices=" << 
+    std::cout << "Delaunay_triangulation_off_visitor_reader::init - dim=" << dim << " - num_vertices=" <<
         num_vertices << " - num_faces=" << num_faces << " - num_edges=" << num_edges << std::endl;
 #endif  // DEBUG_TRACES
     if (num_faces > 0) {
@@ -121,7 +122,7 @@ class Delaunay_triangulation_off_reader {
   bool is_valid() const {
     return valid_;
   }
-  
+
  private:
   bool valid_;
 };
@@ -138,10 +139,19 @@ class Delaunay_triangulation_off_writer {
   Delaunay_triangulation_off_writer(const std::string & name_file, const Complex& save_complex) {
     std::ofstream stream(name_file);
     if (stream.is_open()) {
-      // OFF header
-      stream << "OFF" << std::endl;
-      // no endl on next line - don't know why...
-      stream << save_complex.number_of_vertices() << " " << save_complex.number_of_finite_full_cells() << " 0";
+      if (save_complex.current_dimension() == 3) {
+        // OFF header
+        stream << "OFF" << std::endl;
+        // no endl on next line - don't know why...
+        stream << save_complex.number_of_vertices() << " " << save_complex.number_of_finite_full_cells() << " 0";
+      } else {
+        // nOFF header
+        stream << "nOFF" << std::endl;
+        // no endl on next line - don't know why...
+        stream << save_complex.current_dimension() << " " << save_complex.number_of_vertices() << " " <<
+            save_complex.number_of_finite_full_cells() << " 0";
+
+      }
 
       // Points list
       for (auto vit = save_complex.vertices_begin(); vit != save_complex.vertices_end(); ++vit) {
@@ -151,16 +161,36 @@ class Delaunay_triangulation_off_writer {
         stream << std::endl;
       }
 
-      // Finite cells list
-      for (auto cit = save_complex.finite_full_cells_begin(); cit != save_complex.finite_full_cells_end(); ++cit) {
-        stream << std::distance(cit->vertices_begin(), cit->vertices_end()) << " "; // Dimension
+
+      for (auto cit = save_complex.full_cells_begin(); cit != save_complex.full_cells_end(); ++cit) {
+        std::vector<int> vertexVector;
+        stream << std::distance(cit->vertices_begin(), cit->vertices_end()) << " ";
         for (auto vit = cit->vertices_begin(); vit != cit->vertices_end(); ++vit) {
-          auto vertexHdl = *vit;
-          // auto vertexHdl = std::distance(save_complex.vertices_begin(), *vit) - 1;
-          // stream << std::distance(save_complex.vertices_begin(), *(vit)) - 1 << " ";
+          // Vector of vertex construction for simplex_tree structure
+          // Vertex handle is distance - 1
+          //int vertexHdl = std::distance(save_complex.vertices_begin(), *vit);
+          // infinite cell is -1 for infinite
+          //vertexVector.push_back(vertexHdl);
+          // Vector of points for alpha_shapes filtration value computation
         }
         stream << std::endl;
       }
+
+
+
+
+
+      /*
+              // Finite cells list
+              for (auto cit = save_complex.full_cells_begin(); cit != save_complex.full_cells_end(); ++cit) {
+                stream << std::distance(cit->vertices_begin(), cit->vertices_end()) << " "; // Dimension
+                for (auto vit = cit->vertices_begin(); vit != cit->vertices_end(); ++vit) {
+                  //auto vertexHdl = *vit;
+                  auto vertexHdl = std::distance(save_complex.vertices_begin(), vit) - 1;
+                  // stream << std::distance(save_complex.vertices_begin(), *(vit)) - 1 << " ";
+                }
+                stream << std::endl;
+              }*/
       stream.close();
     } else {
       std::cerr << "Delaunay_triangulation_off_writer::Delaunay_triangulation_off_writer could not open file " <<

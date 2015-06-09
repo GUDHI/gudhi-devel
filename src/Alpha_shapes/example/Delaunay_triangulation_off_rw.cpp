@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
   }
   std::cout << std::endl;*/
  
-  int i = 0, j = 0;
+  /*int i = 0, j = 0;
   typedef T::Full_cell_iterator Full_cell_iterator;
   typedef T::Facet Facet;
 
@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
   }
   std::cout << "There are " << i << " facets on the convex hull." << std::endl;
   std::cout << "There are " << j << " facets not on the convex hull." << std::endl;
-
+*/
 
   std::string offOutputFile("out.off");
   Gudhi::alphashapes::Delaunay_triangulation_off_writer<T> off_writer(offOutputFile, dt);
