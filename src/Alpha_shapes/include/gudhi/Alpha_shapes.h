@@ -42,6 +42,8 @@
 #include <iterator>
 #include <vector>
 #include <string>
+#include <limits>
+#include <map>
 
 namespace Gudhi {
 
@@ -78,6 +80,8 @@ class Alpha_shapes {
   // From Simplex_tree
   /** \brief Type required to insert into a simplex_tree (with or without subfaces).*/
   typedef std::vector<Vertex_handle> typeVectorVertex;
+
+  typedef typename Gudhi::Simplex_tree<>::Simplex_handle Simplex_handle;
 
   // From CGAL
   /** \brief Kernel for the Delaunay_triangulation.
@@ -126,13 +130,13 @@ class Alpha_shapes {
  private:
 
   template<typename T>
-  void init(T& triangulation) {
+  void initial_init(T& triangulation) {
     st_.set_dimension(triangulation.maximal_dimension());
     Filtration_value filtration_max = 0.0;
 
     Kernel k;
     Squared_Radius squared_radius Kinit(compute_squared_radius_d_object);
-    Is_Gabriel     is_gabriel     Kinit(side_of_bounded_sphere_d_object);
+    Is_Gabriel is_gabriel Kinit(side_of_bounded_sphere_d_object);
 
     // triangulation full cells list
     for (auto cit = triangulation.full_cells_begin(); cit != triangulation.full_cells_end(); ++cit) {
@@ -195,8 +199,67 @@ class Alpha_shapes {
   }
 
   template<typename T>
-  void recursive_init(T& triangulation, typeVectorVertex vertexVector) {
+  void init(T& triangulation) {
+    st_.set_dimension(triangulation.maximal_dimension());
+    Filtration_value filtration_max = 0.0;
+    Filtration_value filtration_unknown = std::numeric_limits<double>::quiet_NaN();
+
+    Kernel k;
+    Squared_Radius squared_radius Kinit(compute_squared_radius_d_object);
+    Is_Gabriel is_gabriel Kinit(side_of_bounded_sphere_d_object);
+
+    std::map<Kernel::Point_d, Vertex_handle> points_to_vh;
+    // Start to insert at handle = 0 - default integer value
+    Vertex_handle vertex_handle = Vertex_handle();
+    // Loop on triangulation vertices list
+    for (auto vit = triangulation.vertices_begin(); vit != triangulation.vertices_end(); ++vit) {
+      points_to_vh[vit->point()] = vertex_handle;
+      vertex_handle++;
+    }
+
+    // Loop on triangulation finite full cells list
+    for (auto cit = triangulation.finite_full_cells_begin(); cit != triangulation.finite_full_cells_end(); ++cit) {
+      typeVectorVertex vertexVector;
+      typeVectorPoint pointVector;
+      for (auto vit = cit->vertices_begin(); vit != cit->vertices_end(); ++vit) {
+#ifdef DEBUG_TRACES
+        std::cout << "points_to_vh=" << points_to_vh[(*vit)->point()] << std::endl;
+#endif  // DEBUG_TRACES
+        // Vector of vertex construction for simplex_tree structure
+        vertexVector.push_back(points_to_vh[(*vit)->point()]);
+        // Vector of points for alpha_shapes filtration value computation
+        pointVector.push_back((*vit)->point());
+      }
+      Filtration_value alpha_shapes_filtration = squared_radius(pointVector.begin(), pointVector.end());
+      // Insert each simplex and its subfaces in the simplex tree - filtration is NaN
+      std::pair<Simplex_handle, bool> insert_result = st_.insert_simplex_and_subfaces(vertexVector, filtration_unknown);
+
+      if (insert_result.second == true) {
+        // Only top-level cell must have the correct alpha value
+        st_.assign_filtration(insert_result.first, alpha_shapes_filtration);
+#ifdef DEBUG_TRACES
+        std::cout << "alpha_shapes_filtration=" << st_.filtration(insert_result.first) << std::endl;
+#endif  // DEBUG_TRACES
+
+        filtration_max = fmax(filtration_max, alpha_shapes_filtration);
+      }
+    }
     
+    // Loop on triangulation finite full cells list
+    for (auto f_simplex : st_.skeleton_simplex_range(st_.dimension() - 1)) {
+      std::cout << "vertex = [" << st_.filtration(f_simplex) << "] ";
+      for (auto vertex : st_.simplex_vertex_range(f_simplex)) {
+        std::cout << (int) vertex << " ";
+      }
+      std::cout << std::endl;
+      if (st_.filtration(f_simplex) == filtration_unknown)
+        st_.assign_filtration(f_simplex, filtration_max);  // TODO(VR) Compute filtration value from simplex
+    }
+
+#ifdef DEBUG_TRACES
+    std::cout << "filtration_max=" << filtration_max << std::endl;
+#endif  // DEBUG_TRACES
+    st_.set_filtration(filtration_max);
   }
 
  public:
