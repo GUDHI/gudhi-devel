@@ -323,7 +323,20 @@ read_points_cust ( std::string file_name , Point_Vector & points)
 
 void generate_points_grid(Point_Vector& W, int width, int D)
 {
- 
+  int nb_points = 1;
+  for (int i = 0; i < D; ++i)
+    nb_points *= width;
+  for (int i = 0; i < nb_points; ++i)
+    {
+      std::vector<double> point;
+      int cell_i = i;
+      for (int l = 0; l < D; ++l)
+        {
+          point.push_back(0.01*(cell_i%width));
+          cell_i /= width;
+        }
+      W.push_back(point);
+    }
 }
 
 void generate_points_random_box(Point_Vector& W, int nbP, int dim)
@@ -490,8 +503,8 @@ void landmark_choice(Point_Vector &W, int nbP, int nbL, Point_Vector& landmarks,
     {
       //      while (!res.second)
       //  {
-      while (std::count(landmarks_ind.begin(),landmarks_ind.end(),chosen_landmark)!=0)
-        chosen_landmark = rand.get_int(0,nbP);
+      do chosen_landmark = rand.get_int(0,nbP);
+      while (std::count(landmarks_ind.begin(),landmarks_ind.end(),chosen_landmark)!=0);
       //rand++;
       //std::cout << "Chose " << chosen_landmark << std::endl;
       p = &W[chosen_landmark];
@@ -717,7 +730,9 @@ int main (int argc, char * const argv[])
   std::cout << "Let the carnage begin!\n";
   Point_Vector point_vector;
   //read_points_cust(file_name, point_vector);
-  generate_points_random_box(point_vector, nbP, dim);
+  //generate_points_random_box(point_vector, nbP, dim);
+  generate_points_grid(point_vector, (int)pow(nbP, 1.0/dim), dim);
+  nbP = (int)(pow((int)pow(nbP, 1.0/dim), dim));
   /*
   for (auto &p: point_vector)
     {

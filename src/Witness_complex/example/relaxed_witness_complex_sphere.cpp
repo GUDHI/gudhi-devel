@@ -24,7 +24,9 @@
 #include <fstream>
 #include <ctime>
 #include <utility>
+#include <algorithm>
 #include <set>
+#include <queue>
 #include <iterator>
 
 #include <sys/types.h>
@@ -32,7 +34,7 @@
 //#include <stdlib.h>
 
 //#include "gudhi/graph_simplicial_complex.h"
-#include "gudhi/Witness_complex.h"
+#include "gudhi/Relaxed_witness_complex.h"
 #include "gudhi/reader_utils.h"
 //#include <boost/filesystem.hpp> 
 
@@ -42,7 +44,7 @@
 #include <CGAL/Search_traits_adapter.h>
 #include <CGAL/property_map.h>
 #include <CGAL/Epick_d.h>
-#include <CGAL/Orthogonal_k_neighbor_search.h>
+#include <CGAL/Orthogonal_incremental_neighbor_search.h>
 #include <CGAL/Kd_tree.h>
 #include <CGAL/Euclidean_distance.h>
 
@@ -50,7 +52,8 @@
 #include <CGAL/point_generators_d.h>
 #include <CGAL/constructions_d.h>
 #include <CGAL/Fuzzy_sphere.h>
-#include <CGAL/Origin.h>
+#include <CGAL/Random.h>
+
 
 #include <boost/tuple/tuple.hpp>
 #include <boost/iterator/zip_iterator.hpp>
@@ -60,11 +63,6 @@
 using namespace Gudhi;
 //using namespace boost::filesystem;
 
-typedef std::vector< Vertex_handle > typeVectorVertex;
-
-//typedef std::pair<typeVectorVertex, Filtration_value> typeSimplex;
-//typedef std::pair< Simplex_tree<>::Simplex_handle, bool > typePairSimplexBool;
-
 typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> K;
 typedef K::FT FT;
 typedef K::Point_d Point_d;
@@ -72,14 +70,23 @@ typedef CGAL::Search_traits<
   FT, Point_d,
   typename K::Cartesian_const_iterator_d,
   typename K::Construct_cartesian_const_iterator_d> Traits_base;
+typedef CGAL::Euclidean_distance<Traits_base> Euclidean_distance;
+
+typedef std::vector< Vertex_handle > typeVectorVertex;
+
+//typedef std::pair<typeVectorVertex, Filtration_value> typeSimplex;
+//typedef std::pair< Simplex_tree<>::Simplex_handle, bool > typePairSimplexBool;
+
 typedef CGAL::Search_traits_adapter<
   std::ptrdiff_t, Point_d*, Traits_base> STraits;
 //typedef K TreeTraits;
-typedef CGAL::Orthogonal_k_neighbor_search<STraits> K_neighbor_search;
-typedef K_neighbor_search::Tree Tree;
-typedef K_neighbor_search::Distance Distance;
-typedef K_neighbor_search::iterator KNS_iterator;
-typedef K_neighbor_search::iterator KNS_range;
+//typedef CGAL::Distance_adapter<std::ptrdiff_t,Point_d*,Euclidean_distance > Euclidean_adapter;
+//typedef CGAL::Kd_tree<STraits> Kd_tree;
+typedef CGAL::Orthogonal_incremental_neighbor_search<STraits, CGAL::Distance_adapter<std::ptrdiff_t,Point_d*,Euclidean_distance>> Neighbor_search;
+typedef Neighbor_search::Tree Tree;
+typedef Neighbor_search::Distance Distance;
+typedef Neighbor_search::iterator KNS_iterator;
+typedef Neighbor_search::iterator KNS_range;
 typedef boost::container::flat_map<int, int> Point_etiquette_map;
 typedef CGAL::Kd_tree<STraits> Tree2;
 
@@ -87,9 +94,12 @@ typedef CGAL::Fuzzy_sphere<STraits> Fuzzy_sphere;
 
 typedef std::vector<Point_d> Point_Vector;
 
-typedef CGAL::Euclidean_distance<Traits_base> Euclidean_distance;
 //typedef K::Equal_d Equal_d;
+typedef CGAL::Random_points_in_cube_d<Point_d> Random_cube_iterator;
 typedef CGAL::Random_points_in_ball_d<Point_d> Random_point_iterator;
+
+bool toric=false;
+
 /**
  * \brief Customized version of read_points
  * which takes into account a possible nbP first line
@@ -118,32 +128,14 @@ read_points_cust ( std::string file_name , Point_Vector & points)
   in_file.close();
 }
 
-/*
-void read_points_to_tree (std::string file_name, Tree& tree)
+
+void generate_points_sphere(Point_Vector& W, int nbP, int dim)
 {
-  //I assume here that tree is empty
-  std::ifstream in_file (file_name.c_str(),std::ios::in);
-  if(!in_file.is_open())
-    {
-      std::cerr << "Unable to open file " << file_name << std::endl;
-      return;
-    }
-  std::string line;
-  double x;
-   while( getline ( in_file , line ) )
-    {
-      std::vector<double> coords;
-      std::istringstream iss( line );
-      while(iss >> x) { coords.push_back(x); }
-      if (coords.size() != 1)
-        {
-          Point_d point(coords.begin(), coords.end());
-          tree.insert(point);
-        }
-    }
-  in_file.close();
+  CGAL::Random_points_on_sphere_d<Point_d> rp(dim,1);
+  for (int i = 0; i < nbP; i++)
+    W.push_back(*rp++);
 }
-*/
+
 
 void write_wl( std::string file_name, std::vector< std::vector <int> > & WL)
 {
@@ -157,10 +149,40 @@ void write_wl( std::string file_name, std::vector< std::vector <int> > & WL)
   ofs.close();
 }
 
-void write_points( std::string file_name, std::vector< Point_d > & WL)
+void write_rl( std::string file_name, std::vector< std::vector <std::vector<int>::iterator> > & rl)
 {
   std::ofstream ofs (file_name, std::ofstream::out);
-  for (auto w : WL)
+  for (auto w : rl)
+    {
+      for (auto l: w)
+        ofs << *l << " ";
+      ofs << "\n";
+    }
+  ofs.close();
+}
+
+std::vector<Point_d> convert_to_torus(std::vector< Point_d>& points)
+{
+  std::vector< Point_d > points_torus;
+  for (auto p: points)
+    {
+      FT theta = M_PI*p[0];
+      FT phi = M_PI*p[1];
+      std::vector<FT> p_torus;
+      p_torus.push_back((1+0.2*cos(theta))*cos(phi));
+      p_torus.push_back((1+0.2*cos(theta))*sin(phi));
+      p_torus.push_back(0.2*sin(theta));
+      points_torus.push_back(Point_d(p_torus));
+    }
+  return points_torus;
+}
+
+
+void write_points_torus( std::string file_name, std::vector< Point_d > & points)
+{
+  std::ofstream ofs (file_name, std::ofstream::out);
+  std::vector<Point_d> points_torus = convert_to_torus(points);
+  for (auto w : points_torus)
     {
       for (auto it = w.cartesian_begin(); it != w.cartesian_end(); ++it)
         ofs << *it << " ";
@@ -169,32 +191,73 @@ void write_points( std::string file_name, std::vector< Point_d > & WL)
   ofs.close();
 }
 
-void write_edges_gnuplot(std::string file_name, Witness_complex<>& witness_complex, Point_Vector& landmarks)
+
+void write_points( std::string file_name, std::vector< Point_d > & points)
+{
+  if (toric) write_points_torus(file_name, points);
+  else
+    {
+      std::ofstream ofs (file_name, std::ofstream::out);
+      for (auto w : points)
+        {
+          for (auto it = w.cartesian_begin(); it != w.cartesian_end(); ++it)
+            ofs << *it << " ";
+          ofs << "\n";
+        }
+      ofs.close();
+    }
+}
+
+
+void write_edges_torus(std::string file_name, Witness_complex<>& witness_complex, Point_Vector& landmarks)
 {
   std::ofstream ofs (file_name, std::ofstream::out);
+  Point_Vector l_torus = convert_to_torus(landmarks);
   for (auto u: witness_complex.complex_vertex_range())
     for (auto v: witness_complex.complex_vertex_range())
       {
         typeVectorVertex edge = {u,v};
         if (u < v && witness_complex.find(edge) != witness_complex.null_simplex())   
           {
-            for (auto it = landmarks[u].cartesian_begin(); it != landmarks[u].cartesian_end(); ++it)
+            for (auto it = l_torus[u].cartesian_begin(); it != l_torus[u].cartesian_end(); ++it)
               ofs << *it << " ";
             ofs << "\n";
-            for (auto it = landmarks[v].cartesian_begin(); it != landmarks[v].cartesian_end(); ++it)
+            for (auto it = l_torus[v].cartesian_begin(); it != l_torus[v].cartesian_end(); ++it)
               ofs << *it << " ";
             ofs << "\n\n\n";
           }
     }
   ofs.close();
 }
-    
+
+void write_edges(std::string file_name, Witness_complex<>& witness_complex, Point_Vector& landmarks)
+{
+  std::ofstream ofs (file_name, std::ofstream::out);
+  if (toric) write_edges_torus(file_name, witness_complex, landmarks);
+  else
+    {
+      for (auto u: witness_complex.complex_vertex_range())
+        for (auto v: witness_complex.complex_vertex_range())
+          {
+            typeVectorVertex edge = {u,v};
+            if (u < v && witness_complex.find(edge) != witness_complex.null_simplex())   
+              {
+                for (auto it = landmarks[u].cartesian_begin(); it != landmarks[u].cartesian_end(); ++it)
+                  ofs << *it << " ";
+                ofs << "\n";
+                for (auto it = landmarks[v].cartesian_begin(); it != landmarks[v].cartesian_end(); ++it)
+                  ofs << *it << " ";
+                ofs << "\n\n\n";
+              }
+          }
+      ofs.close();
+    }
+}
 
 
 /** Function that chooses landmarks from W and place it in the kd-tree L.
  *  Note: nbL hould be removed if the code moves to Witness_complex
  */
-/*
 void landmark_choice(Point_Vector &W, int nbP, int nbL, Point_Vector& landmarks, std::vector<int>& landmarks_ind)
 {
   std::cout << "Enter landmark choice to kd tree\n";
@@ -202,37 +265,14 @@ void landmark_choice(Point_Vector &W, int nbP, int nbL, Point_Vector& landmarks,
   int chosen_landmark;
   //std::pair<Point_etiquette_map::iterator,bool> res = std::make_pair(L_i.begin(),false);
   Point_d* p;
-  srand(24660);
-  for (int i = 0; i < nbL; i++)
-    {
-      //      while (!res.second)
-      //  {
-      chosen_landmark = rand()%nbP;
-      p = &W[chosen_landmark];
-      //L_i.emplace(chosen_landmark,i);
-      //  }
-      landmarks.push_back(*p);
-      landmarks_ind.push_back(chosen_landmark);
-      //std::cout << "Added landmark " << chosen_landmark << std::endl;
-    }
- }
-*/
-
-void landmark_choice(Point_Vector &W, int nbP, int nbL, Point_Vector& landmarks, std::vector<int>& landmarks_ind)
-{
-  std::cout << "Enter landmark choice to kd tree\n";
-  //std::vector<Point_d> landmarks;
-  int chosen_landmark = 0;
-  //std::pair<Point_etiquette_map::iterator,bool> res = std::make_pair(L_i.begin(),false);
-  Point_d* p;
   CGAL::Random rand;
   for (int i = 0; i < nbL; i++)
     {
       //      while (!res.second)
       //  {
-      do chosen_landmark = rand.uniform_int(0,nbP);
-      while (std::find(landmarks_ind.begin(),landmarks_ind.end(),chosen_landmark) != landmarks_ind.end());
-          //rand++;
+      do chosen_landmark = rand.get_int(0,nbP);
+      while (std::find(landmarks_ind.begin(), landmarks_ind.end(), chosen_landmark) != landmarks_ind.end());
+      //rand++;
       //std::cout << "Chose " << chosen_landmark << std::endl;
       p = &W[chosen_landmark];
       //L_i.emplace(chosen_landmark,i);
@@ -244,38 +284,73 @@ void landmark_choice(Point_Vector &W, int nbP, int nbL, Point_Vector& landmarks,
  }
 
 
-int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<int>& landmarks_ind)
+void landmarks_to_witness_complex(Point_Vector &W, Point_Vector& landmarks, std::vector<int>& landmarks_ind, FT alpha)
 {
+  //********************Preface: origin point
+  unsigned D = W[0].size();
+  std::vector<FT> orig_vector;
+  for (unsigned i = 0; i < D; i++)
+    orig_vector.push_back(0);
+  Point_d origin(orig_vector);
+  //Distance dist;
+  //dist.transformed_distance(0,1);
   //******************** Constructing a WL matrix
   int nbP = W.size();
   int nbL = landmarks.size();
-  //Point_Vector landmarks_ = landmarks;
+  STraits traits(&(landmarks[0]));
   Euclidean_distance ed;
-  //Equal_d ed;
-  FT lambda = ed.transformed_distance(landmarks[0],landmarks[1]);
-    //FT lambda = 0.1;//Euclidean_distance();
   std::vector< std::vector <int> > WL(nbP);
+  std::vector< std::vector< typename std::vector<int>::iterator > > ope_limits(nbP);
   Tree L(boost::counting_iterator<std::ptrdiff_t>(0),
          boost::counting_iterator<std::ptrdiff_t>(nbL),
          typename Tree::Splitter(),
-         STraits(&(landmarks[0])));
-  /*Tree2 L2(boost::counting_iterator<std::ptrdiff_t>(0),
-           boost::counting_iterator<std::ptrdiff_t>(nbL),
-           typename Tree::Splitter(),
-           STraits(&(landmarks[0])));
-  */
+         traits);
+
   std::cout << "Enter (D+1) nearest landmarks\n";
   //std::cout << "Size of the tree is " << L.size() << std::endl;
-  int D = W[0].size();
   for (int i = 0; i < nbP; i++)
     {
       //std::cout << "Entered witness number " << i << std::endl;
       Point_d& w = W[i];
+      std::queue< typename std::vector<int>::iterator > ope_queue; // queue of points at (1+epsilon) distance to current landmark
+      Neighbor_search search(L, w, FT(0), true, CGAL::Distance_adapter<std::ptrdiff_t,Point_d*,Euclidean_distance>(&(landmarks[0])));
+      Neighbor_search::iterator search_it = search.begin();
+      
+      //Incremental search and filling WL
+      while (WL[i].size() < D)
+        WL[i].push_back((search_it++)->first);
+      FT dtow = ed.transformed_distance(w, landmarks[WL[i][D-1]]);
+      while (search_it->second < dtow + alpha)
+        WL[i].push_back((search_it++)->first);
+
+      //Filling the (1+epsilon)-limits table
+      for (std::vector<int>::iterator wl_it = WL[i].begin(); wl_it != WL[i].end(); ++wl_it)
+        {
+          ope_queue.push(wl_it);
+          FT d_to_curr_l = ed.transformed_distance(w, landmarks[*wl_it]);
+          //std::cout << "d_to_curr_l=" << d_to_curr_l << std::endl;
+          //std::cout << "d_to_front+alpha=" << d_to_curr_l << std::endl;
+          while (d_to_curr_l > alpha + ed.transformed_distance(w, landmarks[*(ope_queue.front())]))
+            {
+              ope_limits[i].push_back(wl_it);
+              ope_queue.pop();
+            }
+        }
+      while (ope_queue.size() > 0)
+        {
+          ope_limits[i].push_back(WL[i].end());
+          ope_queue.pop();
+        }
       //std::cout << "Safely constructed a point\n";
-      ////Search D+1 nearest neighbours from the tree of landmarks L 
-      K_neighbor_search search(L, w, D+1, FT(0), true,
-                               CGAL::Distance_adapter<std::ptrdiff_t,Point_d*,CGAL::Euclidean_distance<Traits_base>>(&(landmarks[0])) );
+      ////Search D+1 nearest neighbours from the tree of landmarks L
+      /*
+      if (w[0]>0.95)
+        std::cout << i << std::endl;
+      */
+      //K_neighbor_search search(L, w, D, FT(0), true,
+      //                         CGAL::Distance_adapter<std::ptrdiff_t,Point_d*,Euclidean_distance>(&(landmarks[0])) );
       //std::cout << "Safely found nearest landmarks\n";
+      /* 
       for(K_neighbor_search::iterator it = search.begin(); it != search.end(); ++it)
         {
           //std::cout << "Entered KNN_it with point at distance " << it->second << "\n";
@@ -286,76 +361,19 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
           //std::cout << "ITFIRST " << it->first << std::endl;
           //std::cout << i << " " << it->first << ": " << it->second << std::endl; 
         }
-      if (i == landmarks_ind[WL[i][0]])
-        {
-          //std::cout << "'";
-          FT dist = ed.transformed_distance(W[i], landmarks[WL[i][1]]);
-          if (dist < lambda)
-            lambda = dist;
-        }
-      //std::cout << "\nBad links total: " << count_badlinks << " Points to perturb: " << perturbL.size() << std::endl;
-
+      */
     }
   //std::cout << "\n";
   
-  std::string out_file = "wl_result";
-  write_wl(out_file,WL);
+  //std::string out_file = "wl_result";
+  write_wl("wl_result",WL);
+  write_rl("rl_result",ope_limits);
   
   //******************** Constructng a witness complex
   std::cout << "Entered witness complex construction\n";
   Witness_complex<> witnessComplex;
   witnessComplex.setNbL(nbL);
-  witnessComplex.witness_complex(WL);
-  //******************** Making a set of bad link landmarks
-  std::cout << "Entered bad links\n";
-  std::set< int > perturbL;
-  int count_badlinks = 0;
-  std::vector< int > count_bad(D);
-  std::vector< int > count_good(D);
-  //std::cout << "Bad links around ";
-  for (auto u: witnessComplex.complex_vertex_range())
-    if (!witnessComplex.has_good_link(u, count_bad, count_good))
-      {
-        //std::cout << "Landmark " << u << " start!" << std::endl;
-        //perturbL.insert(u);
-        count_badlinks++;
-        //std::cout << u << " ";
-        Point_d& l = landmarks[u];
-        Fuzzy_sphere fs(l, sqrt(lambda)*2, 0, STraits(&(landmarks[0])));
-        L.search(std::insert_iterator<std::set<int>>(perturbL,perturbL.begin()),fs);
-        //L.search(std::inserter(perturbL,perturbL.begin()),fs);
-        //L.search(std::ostream_iterator<int>(std::cout,"\n"),fs);
-        //std::cout << "PerturbL size is " << perturbL.size() << std::endl;
-      }
-  for (unsigned int i = 0; i != count_good.size(); i++)
-    if (count_good[i] != 0)
-      std::cout << "count_good[" << i << "] = " << count_good[i] << std::endl;
-  for (unsigned int i = 0; i != count_bad.size(); i++)
-    if (count_bad[i] != 0)
-      std::cout << "count_bad[" << i << "] = " << count_bad[i] << std::endl;
-  std::cout << "Bad links total: " << count_badlinks << " Points to perturb: " << perturbL.size() << std::endl;
-  //std::cout << "landmark[0][0] before" << landmarks[0][0] << std::endl;
-  //*********************** Perturb bad link landmarks
-  
-  for (auto u: perturbL)
-    {
-      Random_point_iterator rp(D,sqrt(lambda)/4);
-      //std::cout << landmarks[u] << std::endl;
-      
-      std::vector<FT> point;
-      for (int i = 0; i < D; i++)
-        {
-          point.push_back(W[landmarks_ind[u]][i] + (*rp)[i]);
-        }
-      landmarks[u] = Point_d(point);
-      //std::cout << landmarks[u] << std::endl;
-    }
-  
-  //std::cout << "landmark[0][0] after" << landmarks[0][0] << std::endl;
-  std::cout << "lambda=" << lambda << std::endl;
-  // Write the WL matrix in a file
- 
-  
+  witnessComplex.relaxed_witness_complex(WL, ope_limits);
   char buffer[100];
   int i = sprintf(buffer,"stree_result.txt");
   
@@ -366,67 +384,55 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
       witnessComplex.st_to_file(ofs);
       ofs.close();
     }
-  //witnessComplex.write_badlinks("badlinks");
-  write_edges_gnuplot("landmarks/edges", witnessComplex, landmarks);
-  return count_badlinks;
+  write_edges("landmarks/edges", witnessComplex, landmarks);
+  std::cout << Distance().transformed_distance(Point_d(std::vector<double>({0.1,0.1})), Point_d(std::vector<double>({1.9,1.9}))) << std::endl;
 }
 
 
 int main (int argc, char * const argv[])
 {
-  if (argc != 3)
+  
+  if (argc != 5)
     {
       std::cerr << "Usage: " << argv[0]
-                << " path_to_point_file nbL \n";
+                << " nbP nbL dim alpha\n";
       return 0;
     }
   /*
   boost::filesystem::path p;
-
   for (; argc > 2; --argc, ++argv)
     p /= argv[1];
   */
-  std::string file_name   = argv[1];
-  int nbL       = atoi(argv[2]);
   
+  int nbP       = atoi(argv[1]);
+  int nbL       = atoi(argv[2]);
+  int dim       = atoi(argv[3]);
+  double alpha  = atof(argv[4]);
   //clock_t start, end;
   //Construct the Simplex Tree
-  //Witness_complex<> witnessComplex;
+  Witness_complex<> witnessComplex;
  
   std::cout << "Let the carnage begin!\n";
   Point_Vector point_vector;
-  read_points_cust(file_name, point_vector);
+  //read_points_cust(file_name, point_vector);
+  generate_points_sphere(point_vector, nbP, dim);
+  /*
+  for (auto &p: point_vector)
+    {
+      assert(std::count(point_vector.begin(),point_vector.end(),p) == 1);
+    }
+  */
   //std::cout << "Successfully read the points\n";
   //witnessComplex.setNbL(nbL);
-  //  witnessComplex.witness_complex_from_points(point_vector);
-  int nbP = point_vector.size();
-  //std::vector<std::vector< int > > WL(nbP);
-  //std::set<int> L;
   Point_Vector L;
   std::vector<int> chosen_landmarks;
-  //Point_etiquette_map L_i;
-  //start = clock();
-  //witnessComplex.landmark_choice_by_furthest_points(point_vector, point_vector.size(), WL);
   landmark_choice(point_vector, nbP, nbL, L, chosen_landmarks);
-  int bl = 1;
-
-  mkdir("landmarks", S_IRWXU);
-  const size_t last_slash_idx = file_name.find_last_of("/");
-  if (std::string::npos != last_slash_idx)
-    {
-      file_name.erase(0, last_slash_idx + 1);
-    }
-  //write_points("landmarks/initial_pointset",point_vector);
+  //start = clock();
+  
+  write_points("landmarks/initial_pointset",point_vector);
   write_points("landmarks/initial_landmarks",L);
-  //for (int i = 0; bl != 0; i++)
-  for (int i = 0; i < 1; i++)
-    {
-      std::cout << "========== Start iteration " << i << " ========\n";
-      bl = landmark_perturbation(point_vector, L, chosen_landmarks);
-      std::ostringstream os(std::ostringstream::ate);;
-      os << "landmarks/landmarks0";
-      write_points(os.str(),L);
-    }
+  
+  landmarks_to_witness_complex(point_vector, L, chosen_landmarks, alpha);
   //end = clock();
   
   /*
