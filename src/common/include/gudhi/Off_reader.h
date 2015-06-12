@@ -7,7 +7,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Méditerranée (France)
+ *    Copyright (C) 2014  INRIA Sophia Antipolis-MÃ©diterranÃ©e (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -121,7 +121,7 @@ private:
 
     	if(!goto_next_uncomment_line(line)) return false;
     	std::istringstream iss(line);
-   		if(is_off_file){
+   		if((is_off_file) && (!is_noff_file)) {
 	  		off_info_.dim = 3;
 	  		if(!(iss >> off_info_.num_vertices >> off_info_.num_faces >> off_info_.num_edges)){
 	  			std::cerr << "incorrect number of vertices/faces/edges\n";

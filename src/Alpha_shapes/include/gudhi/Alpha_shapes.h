@@ -32,6 +32,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>  // isnan, fmax
+
+#include <boost/bimap.hpp>
 
 #include <CGAL/Delaunay_triangulation.h>
 #include <CGAL/Epick_d.h>
@@ -208,12 +211,14 @@ class Alpha_shapes {
     Squared_Radius squared_radius Kinit(compute_squared_radius_d_object);
     Is_Gabriel is_gabriel Kinit(side_of_bounded_sphere_d_object);
 
-    std::map<Kernel::Point_d, Vertex_handle> points_to_vh;
+    // bimap to retrieve vertex handles from points and vice versa
+    typedef boost::bimap< Kernel::Point_d, Vertex_handle > bimap_points_vh;
+    bimap_points_vh points_to_vh;
     // Start to insert at handle = 0 - default integer value
     Vertex_handle vertex_handle = Vertex_handle();
     // Loop on triangulation vertices list
     for (auto vit = triangulation.vertices_begin(); vit != triangulation.vertices_end(); ++vit) {
-      points_to_vh[vit->point()] = vertex_handle;
+      points_to_vh.insert(bimap_points_vh::value_type(vit->point(), vertex_handle));
       vertex_handle++;
     }
 
@@ -223,10 +228,10 @@ class Alpha_shapes {
       typeVectorPoint pointVector;
       for (auto vit = cit->vertices_begin(); vit != cit->vertices_end(); ++vit) {
 #ifdef DEBUG_TRACES
-        std::cout << "points_to_vh=" << points_to_vh[(*vit)->point()] << std::endl;
+        std::cout << "points_to_vh=" << points_to_vh.left.at((*vit)->point()) << std::endl;
 #endif  // DEBUG_TRACES
         // Vector of vertex construction for simplex_tree structure
-        vertexVector.push_back(points_to_vh[(*vit)->point()]);
+        vertexVector.push_back(points_to_vh.left.at((*vit)->point()));
         // Vector of points for alpha_shapes filtration value computation
         pointVector.push_back((*vit)->point());
       }
@@ -244,17 +249,99 @@ class Alpha_shapes {
         filtration_max = fmax(filtration_max, alpha_shapes_filtration);
       }
     }
-    
-    // Loop on triangulation finite full cells list
-    for (auto f_simplex : st_.skeleton_simplex_range(st_.dimension() - 1)) {
-      std::cout << "vertex = [" << st_.filtration(f_simplex) << "] ";
+
+    // ### For i : d -> 0
+    for (int decr_dim = st_.dimension(); decr_dim >= 0; decr_dim--) {
+      // ### Foreach Sigma of dim i
+      for (auto f_simplex : st_.skeleton_simplex_range(decr_dim)) {
+        int f_simplex_dim = st_.dimension(f_simplex);
+#ifdef DEBUG_TRACES
+        std::cout << "f_simplex_dim= " << f_simplex_dim << " - decr_dim= " << decr_dim << std::endl;
+#endif  // DEBUG_TRACES
+        if (decr_dim == f_simplex_dim) {
+          typeVectorPoint pointVector;
+#ifdef DEBUG_TRACES
+          std::cout << "vertex ";
+#endif  // DEBUG_TRACES
+          for (auto vertex : st_.simplex_vertex_range(f_simplex)) {
+            pointVector.push_back(points_to_vh.right.at(vertex));
+#ifdef DEBUG_TRACES
+            std::cout << (int) vertex << " ";
+#endif  // DEBUG_TRACES
+          }
+#ifdef DEBUG_TRACES
+          std::cout << std::endl;
+#endif  // DEBUG_TRACES
+          // ### If filt(Sigma) is NaN : filt(Sigma) = alpha(Sigma)
+          if (isnan(st_.filtration(f_simplex))) {
+            Filtration_value alpha_shapes_filtration = 0.0;
+            // No need to compute squared_radius on a single point - alpha is 0.0
+            if (f_simplex_dim > 0) {
+              alpha_shapes_filtration = squared_radius(pointVector.begin(), pointVector.end());
+            }
+            st_.assign_filtration(f_simplex, alpha_shapes_filtration);
+#ifdef DEBUG_TRACES
+            std::cout << "From NaN to alpha_shapes_filtration=" << st_.filtration(f_simplex) << std::endl;
+#endif  // DEBUG_TRACES
+          }
+
+          // ### Foreach Tau face of Sigma
+          for (auto f_boundary : st_.boundary_simplex_range(f_simplex)) {
+#ifdef DEBUG_TRACES
+            std::cout << "Sigma ";
+            for (auto vertex : st_.simplex_vertex_range(f_simplex)) {
+              std::cout << (int) vertex << " ";
+            }
+            std::cout << " - Tau ";
+            for (auto vertex : st_.simplex_vertex_range(f_boundary)) {
+              std::cout << (int) vertex << " ";
+            }
+            std::cout << std::endl;
+#endif  // DEBUG_TRACES
+            // insert the Tau points in a vector for is_gabriel function
+            typeVectorPoint pointVector;
+            Vertex_handle vertexForGabriel = Vertex_handle();
+            for (auto vertex : st_.simplex_vertex_range(f_boundary)) {
+              pointVector.push_back(points_to_vh.right.at(vertex));
+            }
+            // Retrieve the Sigma point that is not part of Tau - parameter for is_gabriel function
+            for (auto vertex : st_.simplex_vertex_range(f_simplex)) {
+              if (std::find(pointVector.begin(), pointVector.end(), points_to_vh.right.at(vertex)) == pointVector.end()) {
+                // vertex is not found in Tau
+                vertexForGabriel = vertex;
+                // No need to continue loop
+                break;
+              }
+            }
+            // ### If filt(Tau) is not NaN
+            // ### or Tau is not Gabriel of Sigma
+            if (!isnan(st_.filtration(f_boundary)) ||
+                !is_gabriel(pointVector.begin(), pointVector.end(), points_to_vh.right.at(vertexForGabriel))
+                ) {
+              // ### filt(Tau) = fmin(filt(Tau), filt(Sigma))
+              Filtration_value alpha_shapes_filtration = fmin(st_.filtration(f_boundary), st_.filtration(f_simplex));
+              st_.assign_filtration(f_boundary, alpha_shapes_filtration);
+#ifdef DEBUG_TRACES
+              std::cout << "From Boundary to alpha_shapes_filtration=" << st_.filtration(f_boundary) << std::endl;
+#endif  // DEBUG_TRACES
+            }
+          }
+        }
+      }
+    }
+
+#ifdef DEBUG_TRACES
+    std::cout << "The complex contains " << st_.num_simplices() << " simplices" << std::endl;
+    std::cout << "   - dimension " << st_.dimension() << "   - filtration " << st_.filtration() << std::endl;
+    std::cout << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
+    for (auto f_simplex : st_.filtration_simplex_range()) {
+      std::cout << "   " << "[" << st_.filtration(f_simplex) << "] ";
       for (auto vertex : st_.simplex_vertex_range(f_simplex)) {
         std::cout << (int) vertex << " ";
       }
       std::cout << std::endl;
-      if (st_.filtration(f_simplex) == filtration_unknown)
-        st_.assign_filtration(f_simplex, filtration_max);  // TODO(VR) Compute filtration value from simplex
     }
+#endif  // DEBUG_TRACES
 
 #ifdef DEBUG_TRACES
     std::cout << "filtration_max=" << filtration_max << std::endl;
@@ -286,7 +373,7 @@ class Alpha_shapes {
     return st_.filtration();
   }
 
-  friend std::ostream& operator<<(std::ostream& os, const Alpha_shapes& alpha_shape) {
+  friend std::ostream& operator<<(std::ostream& os, const Alpha_shapes & alpha_shape) {
     // TODO: Program terminated with signal SIGABRT, Aborted - Maybe because of copy constructor
     Gudhi::Simplex_tree<> st = alpha_shape.st_;
     os << st << std::endl;

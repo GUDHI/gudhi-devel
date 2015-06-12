@@ -25,7 +25,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
-#include <iterator>     // std::distance
+#include <map>
 
 #include "gudhi/Off_reader.h"
 
@@ -130,6 +130,7 @@ class Delaunay_triangulation_off_reader {
 template<typename Complex>
 class Delaunay_triangulation_off_writer {
  public:
+  typedef typename Complex::Point Point;
 
   /**
    * name_file : file where the off will be written
@@ -153,44 +154,29 @@ class Delaunay_triangulation_off_writer {
 
       }
 
+      // bimap to retrieve vertex handles from points and vice versa
+      std::map< Point, int > points_to_vh;
+      // Start to insert at default handle value
+      int vertex_handle = int();
+
       // Points list
       for (auto vit = save_complex.vertices_begin(); vit != save_complex.vertices_end(); ++vit) {
         for (auto Coord = vit->point().cartesian_begin(); Coord != vit->point().cartesian_end(); ++Coord) {
           stream << *Coord << " ";
         }
         stream << std::endl;
+        points_to_vh[vit->point()] = vertex_handle;
+        vertex_handle++;
       }
 
-
-      for (auto cit = save_complex.full_cells_begin(); cit != save_complex.full_cells_end(); ++cit) {
+      for (auto cit = save_complex.finite_full_cells_begin(); cit != save_complex.finite_full_cells_end(); ++cit) {
         std::vector<int> vertexVector;
         stream << std::distance(cit->vertices_begin(), cit->vertices_end()) << " ";
         for (auto vit = cit->vertices_begin(); vit != cit->vertices_end(); ++vit) {
-          // Vector of vertex construction for simplex_tree structure
-          // Vertex handle is distance - 1
-          //int vertexHdl = std::distance(save_complex.vertices_begin(), *vit);
-          // infinite cell is -1 for infinite
-          //vertexVector.push_back(vertexHdl);
-          // Vector of points for alpha_shapes filtration value computation
+          stream << points_to_vh[(*vit)->point()] << " ";
         }
         stream << std::endl;
       }
-
-
-
-
-
-      /*
-              // Finite cells list
-              for (auto cit = save_complex.full_cells_begin(); cit != save_complex.full_cells_end(); ++cit) {
-                stream << std::distance(cit->vertices_begin(), cit->vertices_end()) << " "; // Dimension
-                for (auto vit = cit->vertices_begin(); vit != cit->vertices_end(); ++vit) {
-                  //auto vertexHdl = *vit;
-                  auto vertexHdl = std::distance(save_complex.vertices_begin(), vit) - 1;
-                  // stream << std::distance(save_complex.vertices_begin(), *(vit)) - 1 << " ";
-                }
-                stream << std::endl;
-              }*/
       stream.close();
     } else {
       std::cerr << "Delaunay_triangulation_off_writer::Delaunay_triangulation_off_writer could not open file " <<
