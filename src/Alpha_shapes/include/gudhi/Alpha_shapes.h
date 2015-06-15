@@ -40,6 +40,7 @@
 #include <CGAL/Epick_d.h>
 #include <CGAL/algorithm.h>
 #include <CGAL/assertions.h>
+#include <CGAL/enum.h>
 
 #include <iostream>
 #include <iterator>
@@ -85,6 +86,7 @@ class Alpha_shapes {
   typedef std::vector<Vertex_handle> typeVectorVertex;
 
   typedef typename Gudhi::Simplex_tree<>::Simplex_handle Simplex_handle;
+  typedef typename std::pair<Simplex_handle, bool> Simplex_result;
 
   // From CGAL
   /** \brief Kernel for the Delaunay_triangulation.
@@ -133,84 +135,10 @@ class Alpha_shapes {
  private:
 
   template<typename T>
-  void initial_init(T& triangulation) {
-    st_.set_dimension(triangulation.maximal_dimension());
-    Filtration_value filtration_max = 0.0;
-
-    Kernel k;
-    Squared_Radius squared_radius Kinit(compute_squared_radius_d_object);
-    Is_Gabriel is_gabriel Kinit(side_of_bounded_sphere_d_object);
-
-    // triangulation full cells list
-    for (auto cit = triangulation.full_cells_begin(); cit != triangulation.full_cells_end(); ++cit) {
-      typeVectorVertex vertexVector;
-      typeVectorPoint pointVector;
-      for (auto vit = cit->vertices_begin(); vit != cit->vertices_end(); ++vit) {
-        if (!triangulation.is_infinite(*vit)) {
-          // Vector of vertex construction for simplex_tree structure
-          // Vertex handle is distance - 1
-          Vertex_handle vertexHdl = std::distance(triangulation.vertices_begin(), *vit) - 1;
-          // infinite cell is -1 for infinite
-          vertexVector.push_back(vertexHdl);
-          // Vector of points for alpha_shapes filtration value computation
-          pointVector.push_back((*vit)->point());
-#ifdef DEBUG_TRACES
-          /*std::cout << "Point ";
-          for (auto Coord = (*vit)->point().cartesian_begin(); Coord != (*vit)->point().cartesian_end(); ++Coord) {
-            std::cout << *Coord << " | ";
-          }
-          std::cout << std::endl;*/
-#endif  // DEBUG_TRACES
-        }
-      }
-      Filtration_value alpha_shapes_filtration = 0.0;
-
-      if (!triangulation.is_infinite(cit)) {
-        alpha_shapes_filtration = squared_radius(pointVector.begin(), pointVector.end());
-#ifdef DEBUG_TRACES
-        //std::cout << "Alpha_shape filtration value = " << alpha_shapes_filtration << std::endl;
-#endif  // DEBUG_TRACES
-      } else {
-        Filtration_value tmp_filtration = 0.0;
-        bool is_gab = true;
-        /*for (auto vit = triangulation.finite_vertices_begin(); vit != triangulation.finite_vertices_end(); ++vit) {
-          if (CGAL::ON_UNBOUNDED_SIDE != is_gabriel(pointVector.begin(), pointVector.end(), vit->point())) {
-            is_gab = false;
-            // TODO(VR) : Compute minimum 
-            
-          }
-        }*/
-        if (true == is_gab) {
-          alpha_shapes_filtration = squared_radius(pointVector.begin(), pointVector.end());
-#ifdef DEBUG_TRACES
-          //std::cout << "Alpha_shape filtration value = " << alpha_shapes_filtration << std::endl;
-#endif  // DEBUG_TRACES
-        }
-      }
-      // Insert each point in the simplex tree
-      st_.insert_simplex_and_subfaces(vertexVector, alpha_shapes_filtration);
-
-#ifdef DEBUG_TRACES
-      std::cout << "C" << std::distance(triangulation.full_cells_begin(), cit) << ":";
-      for (auto value : vertexVector) {
-        std::cout << value << ' ';
-      }
-      std::cout << " | alpha=" << alpha_shapes_filtration << std::endl;
-#endif  // DEBUG_TRACES
-    }
-    st_.set_filtration(filtration_max);
-  }
-
-  template<typename T>
   void init(T& triangulation) {
     st_.set_dimension(triangulation.maximal_dimension());
-    Filtration_value filtration_max = 0.0;
-    Filtration_value filtration_unknown = std::numeric_limits<double>::quiet_NaN();
 
-    Kernel k;
-    Squared_Radius squared_radius Kinit(compute_squared_radius_d_object);
-    Is_Gabriel is_gabriel Kinit(side_of_bounded_sphere_d_object);
-
+    // --------------------------------------------------------------------------------------------
     // bimap to retrieve vertex handles from points and vice versa
     typedef boost::bimap< Kernel::Point_d, Vertex_handle > bimap_points_vh;
     bimap_points_vh points_to_vh;
@@ -221,52 +149,54 @@ class Alpha_shapes {
       points_to_vh.insert(bimap_points_vh::value_type(vit->point(), vertex_handle));
       vertex_handle++;
     }
+    // --------------------------------------------------------------------------------------------
 
-    // Loop on triangulation finite full cells list
+    // --------------------------------------------------------------------------------------------
+    // Simplex_tree construction from loop on triangulation finite full cells list
     for (auto cit = triangulation.finite_full_cells_begin(); cit != triangulation.finite_full_cells_end(); ++cit) {
       typeVectorVertex vertexVector;
-      typeVectorPoint pointVector;
+#ifdef DEBUG_TRACES
+      std::cout << "Simplex_tree insertion ";
+#endif  // DEBUG_TRACES
       for (auto vit = cit->vertices_begin(); vit != cit->vertices_end(); ++vit) {
 #ifdef DEBUG_TRACES
-        std::cout << "points_to_vh=" << points_to_vh.left.at((*vit)->point()) << std::endl;
+        std::cout << " " << points_to_vh.left.at((*vit)->point());
 #endif  // DEBUG_TRACES
         // Vector of vertex construction for simplex_tree structure
         vertexVector.push_back(points_to_vh.left.at((*vit)->point()));
-        // Vector of points for alpha_shapes filtration value computation
-        pointVector.push_back((*vit)->point());
       }
-      Filtration_value alpha_shapes_filtration = squared_radius(pointVector.begin(), pointVector.end());
-      // Insert each simplex and its subfaces in the simplex tree - filtration is NaN
-      std::pair<Simplex_handle, bool> insert_result = st_.insert_simplex_and_subfaces(vertexVector, filtration_unknown);
-
-      if (insert_result.second == true) {
-        // Only top-level cell must have the correct alpha value
-        st_.assign_filtration(insert_result.first, alpha_shapes_filtration);
 #ifdef DEBUG_TRACES
-        std::cout << "alpha_shapes_filtration=" << st_.filtration(insert_result.first) << std::endl;
+      std::cout << std::endl;
 #endif  // DEBUG_TRACES
-
-        filtration_max = fmax(filtration_max, alpha_shapes_filtration);
+      // Insert each simplex and its subfaces in the simplex tree - filtration is NaN
+      Simplex_result insert_result = st_.insert_simplex_and_subfaces(vertexVector,
+                                                                     std::numeric_limits<double>::quiet_NaN());
+      if (!insert_result.second) {
+        std::cerr << "Alpha_shapes::init insert_simplex_and_subfaces failed" << std::endl;
       }
     }
+    // --------------------------------------------------------------------------------------------
 
+    Filtration_value filtration_max = 0.0;
+
+    Kernel k;
+    Squared_Radius squared_radius Kinit(compute_squared_radius_d_object);
+    Is_Gabriel is_gabriel Kinit(side_of_bounded_sphere_d_object);
+    // --------------------------------------------------------------------------------------------
     // ### For i : d -> 0
     for (int decr_dim = st_.dimension(); decr_dim >= 0; decr_dim--) {
       // ### Foreach Sigma of dim i
       for (auto f_simplex : st_.skeleton_simplex_range(decr_dim)) {
         int f_simplex_dim = st_.dimension(f_simplex);
-#ifdef DEBUG_TRACES
-        std::cout << "f_simplex_dim= " << f_simplex_dim << " - decr_dim= " << decr_dim << std::endl;
-#endif  // DEBUG_TRACES
         if (decr_dim == f_simplex_dim) {
           typeVectorPoint pointVector;
 #ifdef DEBUG_TRACES
-          std::cout << "vertex ";
+          std::cout << "Sigma of dim " << decr_dim << " is";
 #endif  // DEBUG_TRACES
           for (auto vertex : st_.simplex_vertex_range(f_simplex)) {
             pointVector.push_back(points_to_vh.right.at(vertex));
 #ifdef DEBUG_TRACES
-            std::cout << (int) vertex << " ";
+            std::cout << " " << vertex;
 #endif  // DEBUG_TRACES
           }
 #ifdef DEBUG_TRACES
@@ -280,23 +210,21 @@ class Alpha_shapes {
               alpha_shapes_filtration = squared_radius(pointVector.begin(), pointVector.end());
             }
             st_.assign_filtration(f_simplex, alpha_shapes_filtration);
+            filtration_max = fmax(filtration_max, alpha_shapes_filtration);
 #ifdef DEBUG_TRACES
-            std::cout << "From NaN to alpha_shapes_filtration=" << st_.filtration(f_simplex) << std::endl;
+            std::cout << "filt(Sigma) is NaN : filt(Sigma) =" << st_.filtration(f_simplex) << std::endl;
 #endif  // DEBUG_TRACES
           }
 
           // ### Foreach Tau face of Sigma
           for (auto f_boundary : st_.boundary_simplex_range(f_simplex)) {
 #ifdef DEBUG_TRACES
-            std::cout << "Sigma ";
-            for (auto vertex : st_.simplex_vertex_range(f_simplex)) {
-              std::cout << (int) vertex << " ";
-            }
-            std::cout << " - Tau ";
+            std::cout << " | --------------------------------------------------" << std::endl;
+            std::cout << " | Tau ";
             for (auto vertex : st_.simplex_vertex_range(f_boundary)) {
-              std::cout << (int) vertex << " ";
+              std::cout << vertex << " ";
             }
-            std::cout << std::endl;
+            std::cout << "is a face of Sigma" << std::endl;
 #endif  // DEBUG_TRACES
             // insert the Tau points in a vector for is_gabriel function
             typeVectorPoint pointVector;
@@ -313,35 +241,30 @@ class Alpha_shapes {
                 break;
               }
             }
+#ifdef DEBUG_TRACES
+            std::cout << " | isnan(filtration(Tau)=" << isnan(st_.filtration(f_boundary)) << std::endl;
+            bool is_gab = is_gabriel(pointVector.begin(), pointVector.end(), points_to_vh.right.at(vertexForGabriel))
+                != CGAL::ON_BOUNDED_SIDE;
+            std::cout << " | Tau is_gabriel(Sigma)=" << is_gab << " - vertexForGabriel=" << vertexForGabriel << std::endl;
+#endif  // DEBUG_TRACES
             // ### If filt(Tau) is not NaN
             // ### or Tau is not Gabriel of Sigma
             if (!isnan(st_.filtration(f_boundary)) ||
-                !is_gabriel(pointVector.begin(), pointVector.end(), points_to_vh.right.at(vertexForGabriel))
+                (is_gabriel(pointVector.begin(), pointVector.end(), points_to_vh.right.at(vertexForGabriel)) == CGAL::ON_BOUNDED_SIDE)
                 ) {
               // ### filt(Tau) = fmin(filt(Tau), filt(Sigma))
               Filtration_value alpha_shapes_filtration = fmin(st_.filtration(f_boundary), st_.filtration(f_simplex));
               st_.assign_filtration(f_boundary, alpha_shapes_filtration);
+              filtration_max = fmax(filtration_max, alpha_shapes_filtration);
 #ifdef DEBUG_TRACES
-              std::cout << "From Boundary to alpha_shapes_filtration=" << st_.filtration(f_boundary) << std::endl;
+              std::cout << " | filt(Tau) = fmin(filt(Tau), filt(Sigma)) = " << st_.filtration(f_boundary) << std::endl;
 #endif  // DEBUG_TRACES
             }
           }
         }
       }
     }
-
-#ifdef DEBUG_TRACES
-    std::cout << "The complex contains " << st_.num_simplices() << " simplices" << std::endl;
-    std::cout << "   - dimension " << st_.dimension() << "   - filtration " << st_.filtration() << std::endl;
-    std::cout << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
-    for (auto f_simplex : st_.filtration_simplex_range()) {
-      std::cout << "   " << "[" << st_.filtration(f_simplex) << "] ";
-      for (auto vertex : st_.simplex_vertex_range(f_simplex)) {
-        std::cout << (int) vertex << " ";
-      }
-      std::cout << std::endl;
-    }
-#endif  // DEBUG_TRACES
+    // --------------------------------------------------------------------------------------------
 
 #ifdef DEBUG_TRACES
     std::cout << "filtration_max=" << filtration_max << std::endl;
