@@ -170,6 +170,25 @@ void set_and_test_simplex_tree_dim_fil(typeST& simplexTree, int vectorSize, cons
   BOOST_CHECK(simplexTree.num_simplices() == nb_simplices);
 }
 
+void test_cofaces(typeST& st, std::vector<Vertex_handle> v, int dim, int res)
+{
+	std::vector<typeST::Dictionary> cofaces;
+	if (dim == 0)
+		cofaces = st.star(st.find(v));
+	else
+		cofaces = st.coface(st.find(v), dim);
+	BOOST_CHECK(cofaces.size() == (size_t)res);
+	for (unsigned long i = 0; i < cofaces.size(); ++i)
+	{
+		std::cout << "(";
+		auto j = cofaces[i].begin();
+		std::cout << j->first;
+		for (auto j = cofaces[i].begin() + 1; j != cofaces[i].end(); ++j)
+			std::cout << "," << j->first;
+		std::cout << ")" << std::endl;
+	}
+}
+
 BOOST_AUTO_TEST_CASE( simplex_tree_insertion )
 {
   const Filtration_value FIRST_FILTRATION_VALUE = 0.1;
@@ -586,5 +605,32 @@ BOOST_AUTO_TEST_CASE( NSimplexAndSubfaces_tree_insertion )
     }
     std::cout << std::endl;
   }
+
+    std::cout << "********************************************************************" << std::endl;
+    // TEST COFACE ALGORITHM
+    st.set_dimension(3);
+    std::cout << "COFACE ALGORITHM" << std::endl;
+    std::vector<Vertex_handle> v;
+    v.push_back(3);
+    std::cout << "Star of (3):" << std::endl;
+    test_cofaces(st, v, 0, 4);
+    v.clear();
+    v.push_back(1);
+    v.push_back(7);
+    std::cout << "Star of (1,7): " << std::endl;
+    test_cofaces(st, v, 0, 3);
+    std::cout << "Cofaces of (1,7) of dimension 2: " << std::endl;
+    test_cofaces(st, v, 1, 2);
+    std::cout << "Cofaces with a codimension too high (codimension + vetices > tree.dimension)" << std::endl;
+    test_cofaces(st, v, 5, 0);
+    std::cout << "Cofaces with an empty codimension" << std::endl;
+    test_cofaces(st, v, -1, 0);
+    std::cout << "Cofaces in an empty simplex tree" << std::endl;
+    typeST empty_tree;
+    test_cofaces(empty_tree, v, 1, 0);
+    std::cout << "Cofaces of an empty simplex" << std::endl;
+    v.clear();
+    test_cofaces(st, v, 1, 0);
+
 
 }
