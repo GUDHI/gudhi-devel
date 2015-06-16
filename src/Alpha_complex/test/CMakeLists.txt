@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(GUDHIAlphaShapesTest)
+project(GUDHIAlphaComplexTest)
 
 # need CGAL 4.7
 # cmake -DCGAL_DIR=~/workspace/CGAL-4.7-Ic-41 ../../..
@@ -16,16 +16,16 @@ if(CGAL_FOUND)
       include_directories (BEFORE "../../include")
 
       add_definitions(-DDEBUG_TRACES)
-      add_executable ( AlphaShapesUnitTest Alpha_shapes_unit_test.cpp )
-      target_link_libraries(AlphaShapesUnitTest  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
-      add_test(AlphaShapesUnitTest ${CMAKE_CURRENT_BINARY_DIR}/AlphaShapesUnitTest)
+      add_executable ( AlphaComplexUnitTest Alpha_complex_unit_test.cpp )
+      target_link_libraries(AlphaComplexUnitTest  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+      add_test(AlphaComplexUnitTest ${CMAKE_CURRENT_BINARY_DIR}/AlphaComplexUnitTest)
 
     else()
-      message(WARNING "Eigen3 not found. Version 3.1.0 is required for Alpha shapes feature.")
+      message(WARNING "Eigen3 not found. Version 3.1.0 is required for Alpha complex feature.")
     endif()
   else()
-    message(WARNING "CGAL version: ${CGAL_VERSION} is too old to compile Alpha shapes feature. Version 4.6.0 is required.")
+    message(WARNING "CGAL version: ${CGAL_VERSION} is too old to compile Alpha complex feature. Version 4.6.0 is required.")
   endif ()
 endif()
 
-cpplint_add_tests("${CMAKE_SOURCE_DIR}/src/Alpha_shapes/include/gudhi")
+cpplint_add_tests("${CMAKE_SOURCE_DIR}/src/Alpha_complex/include/gudhi")

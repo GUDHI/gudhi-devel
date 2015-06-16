@@ -31,20 +31,22 @@
 
 namespace Gudhi {
 
-namespace alphashapes {
+namespace alphacomplex {
 
 /**
  *@brief Off reader visitor with flag that can be passed to Off_reader to read a Delaunay_triangulation_complex.
  */
 template<typename Complex>
 class Delaunay_triangulation_off_visitor_reader {
-  Complex& complex_;
+ private:
+  Complex* _complex;
   typedef typename Complex::Point Point;
 
  public:
 
-  explicit Delaunay_triangulation_off_visitor_reader(Complex& complex) :
-      complex_(complex) { }
+  // Pass a Complex as a parameter is required, even if not used. Otherwise, compilation is KO.
+  Delaunay_triangulation_off_visitor_reader(Complex* _complex_ptr)
+      : _complex(nullptr) { }
 
   void init(int dim, int num_vertices, int num_faces, int num_edges) {
 #ifdef DEBUG_TRACES
@@ -59,7 +61,8 @@ class Delaunay_triangulation_off_visitor_reader {
       std::cerr << "Delaunay_triangulation_off_visitor_reader::init edges are not taken into account from OFF " <<
           "file for Delaunay triangulation - edges are computed." << std::endl;
     }
-    //complex_.set_current_dimension(dim);
+    // Complex construction with dimension from file
+    _complex = new Complex(dim);
   }
 
   void point(const std::vector<double>& point) {
@@ -70,7 +73,7 @@ class Delaunay_triangulation_off_visitor_reader {
     }
     std::cout << std::endl;
 #endif  // DEBUG_TRACES
-    complex_.insert(Point(point.size(), point.begin(), point.end()));
+    _complex->insert(Point(point.size(), point.begin(), point.end()));
   }
 
   void maximal_face(const std::vector<int>& face) {
@@ -89,6 +92,10 @@ class Delaunay_triangulation_off_visitor_reader {
     std::cout << "Delaunay_triangulation_off_visitor_reader::done" << std::endl;
 #endif  // DEBUG_TRACES
   }
+
+  Complex* get_complex() {
+    return _complex;
+  }
 };
 
 /**
@@ -103,12 +110,15 @@ class Delaunay_triangulation_off_reader {
    * read_complex : complex that will receive the file content
    * read_only_points : specify true if only the points must be read
    */
-  Delaunay_triangulation_off_reader(const std::string & name_file, Complex& read_complex) : valid_(false) {
+  Delaunay_triangulation_off_reader(const std::string & name_file) : valid_(false) {
     std::ifstream stream(name_file);
     if (stream.is_open()) {
-      Delaunay_triangulation_off_visitor_reader<Complex> off_visitor(read_complex);
+      Delaunay_triangulation_off_visitor_reader<Complex> off_visitor(_complex);
       Off_reader off_reader(stream);
       valid_ = off_reader.read(off_visitor);
+      if (valid_) {
+        _complex = off_visitor.get_complex();
+      }
     } else {
       std::cerr << "Delaunay_triangulation_off_reader::Delaunay_triangulation_off_reader could not open file " <<
           name_file << std::endl;
@@ -123,8 +133,16 @@ class Delaunay_triangulation_off_reader {
     return valid_;
   }
 
+  Complex* get_complex() {
+    if (valid_)
+      return _complex;
+    return nullptr;
+
+  }
+
  private:
   bool valid_;
+  Complex* _complex;
 };
 
 template<typename Complex>
@@ -137,20 +155,20 @@ class Delaunay_triangulation_off_writer {
    * save_complex : complex that be outputted in the file
    * for now only save triangles.
    */
-  Delaunay_triangulation_off_writer(const std::string & name_file, const Complex& save_complex) {
+  Delaunay_triangulation_off_writer(const std::string & name_file, Complex* complex_ptr) {
     std::ofstream stream(name_file);
     if (stream.is_open()) {
-      if (save_complex.current_dimension() == 3) {
+      if (complex_ptr->current_dimension() == 3) {
         // OFF header
         stream << "OFF" << std::endl;
         // no endl on next line - don't know why...
-        stream << save_complex.number_of_vertices() << " " << save_complex.number_of_finite_full_cells() << " 0";
+        stream << complex_ptr->number_of_vertices() << " " << complex_ptr->number_of_finite_full_cells() << " 0";
       } else {
         // nOFF header
         stream << "nOFF" << std::endl;
         // no endl on next line - don't know why...
-        stream << save_complex.current_dimension() << " " << save_complex.number_of_vertices() << " " <<
-            save_complex.number_of_finite_full_cells() << " 0";
+        stream << complex_ptr->current_dimension() << " " << complex_ptr->number_of_vertices() << " " <<
+            complex_ptr->number_of_finite_full_cells() << " 0";
 
       }
 
@@ -160,7 +178,7 @@ class Delaunay_triangulation_off_writer {
       int vertex_handle = int();
 
       // Points list
-      for (auto vit = save_complex.vertices_begin(); vit != save_complex.vertices_end(); ++vit) {
+      for (auto vit = complex_ptr->vertices_begin(); vit != complex_ptr->vertices_end(); ++vit) {
         for (auto Coord = vit->point().cartesian_begin(); Coord != vit->point().cartesian_end(); ++Coord) {
           stream << *Coord << " ";
         }
@@ -169,7 +187,7 @@ class Delaunay_triangulation_off_writer {
         vertex_handle++;
       }
 
-      for (auto cit = save_complex.finite_full_cells_begin(); cit != save_complex.finite_full_cells_end(); ++cit) {
+      for (auto cit = complex_ptr->finite_full_cells_begin(); cit != complex_ptr->finite_full_cells_end(); ++cit) {
         std::vector<int> vertexVector;
         stream << std::distance(cit->vertices_begin(), cit->vertices_end()) << " ";
         for (auto vit = cit->vertices_begin(); vit != cit->vertices_end(); ++vit) {
@@ -185,7 +203,7 @@ class Delaunay_triangulation_off_writer {
   }
 };
 
-} // namespace alphashapes
+} // namespace alphacomplex
 
 } // namespace Gudhi
 

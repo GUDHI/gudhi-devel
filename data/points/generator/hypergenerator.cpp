@@ -86,8 +86,13 @@ int main(int argc, char **argv) {
   }
 
   std::ofstream diagram_out(argv[3]);
-  diagram_out << "OFF" << std::endl;
-  diagram_out << points_number << " 0 0" << std::endl;
+  if (dimension == 3) {
+    diagram_out << "OFF" << std::endl;
+    diagram_out << points_number << " 0 0" << std::endl;
+  } else {
+    diagram_out << "nOFF" << std::endl;
+    diagram_out << dimension << " " << points_number << " 0 0" << std::endl;
+  }
 
   if (diagram_out.is_open()) {
     // Instanciate a random point generator

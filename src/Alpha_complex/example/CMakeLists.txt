@@ -22,6 +22,9 @@ if(CGAL_FOUND)
 
       add_executable ( stfromdt Simplex_tree_from_delaunay_triangulation.cpp )
       target_link_libraries(stfromdt  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
+
+      add_executable ( template_off template_off.cpp )
+      target_link_libraries(template_off  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
     else()
       message(WARNING "Eigen3 not found. Version 3.1.0 is required for Alpha shapes feature.")
     endif()

@@ -22,7 +22,7 @@
 
 // to construct a Delaunay_triangulation from a OFF file
 #include "gudhi/Alpha_shapes/Delaunay_triangulation_off_io.h"
-#include "gudhi/Alpha_shapes.h"
+#include "gudhi/Alpha_complex.h"
 
 // to construct a simplex_tree from Delaunay_triangulation
 #include "gudhi/graph_simplicial_complex.h"
@@ -62,16 +62,16 @@ int main(int argc, char **argv) {
 
   // ----------------------------------------------------------------------------
   //
-  // Init of an alpha-shape from a OFF file
+  // Init of an alpha-complex from a OFF file
   //
   // ----------------------------------------------------------------------------
-  Gudhi::alphashapes::Alpha_shapes alpha_shapes_from_file(off_file_name);
+  Gudhi::alphacomplex::Alpha_complex alpha_complex_from_file(off_file_name);
   
-  std::cout << "alpha_shapes_from_file.dimension()=" << alpha_shapes_from_file.dimension() << std::endl;
-  std::cout << "alpha_shapes_from_file.filtration()=" << alpha_shapes_from_file.filtration() << std::endl;
-  std::cout << "alpha_shapes_from_file.num_simplices()=" << alpha_shapes_from_file.num_simplices() << std::endl;
-  std::cout << "alpha_shapes_from_file.num_vertices()=" << alpha_shapes_from_file.num_vertices() << std::endl;
-  //std::cout << alpha_shapes_from_file << std::endl;
+  std::cout << "alpha_complex_from_file.dimension()=" << alpha_complex_from_file.dimension() << std::endl;
+  std::cout << "alpha_complex_from_file.filtration()=" << alpha_complex_from_file.filtration() << std::endl;
+  std::cout << "alpha_complex_from_file.num_simplices()=" << alpha_complex_from_file.num_simplices() << std::endl;
+  std::cout << "alpha_complex_from_file.num_vertices()=" << alpha_complex_from_file.num_vertices() << std::endl;
+  std::cout << alpha_complex_from_file << std::endl;
 
   return 0;
 }
