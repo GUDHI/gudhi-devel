@@ -578,6 +578,10 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
   Witness_complex<> witnessComplex;
   witnessComplex.setNbL(nbL);
   witnessComplex.witness_complex(WL);
+  if (witnessComplex.is_witness_complex(WL))
+    std::cout << "!!YES. IT IS A WITNESS COMPLEX!!\n";
+  else
+    std::cout << "??NO. IT IS NOT A WITNESS COMPLEX??\n";    
   //******************** Making a set of bad link landmarks
   std::cout << "Entered bad links\n";
   std::set< int > perturbL;
@@ -614,7 +618,7 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
   
   for (auto u: perturbL)
     {
-      Random_point_iterator rp(D,sqrt(lambda)/8);
+      Random_point_iterator rp(D,sqrt(lambda)/8*nbL/count_badlinks);
       //std::cout << landmarks[u] << std::endl;
       
       std::vector<FT> point;
@@ -721,8 +725,8 @@ int main (int argc, char * const argv[])
   write_points("landmarks/initial_pointset",point_vector);
   write_points("landmarks/initial_landmarks",L);
   
-  for (int i = 0; bl > 0; i++)
-  //for (int i = 0; i < 1; i++)
+  //for (int i = 0; bl > 0; i++)
+  for (int i = 0; i < 1; i++)
     {
       std::cout << "========== Start iteration " << i << "== curr_min(" << curr_min << ")========\n";
       bl=landmark_perturbation(point_vector, L, chosen_landmarks);

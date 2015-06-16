@@ -36,6 +36,7 @@
 //#include "gudhi/graph_simplicial_complex.h"
 #include "gudhi/Relaxed_witness_complex.h"
 #include "gudhi/reader_utils.h"
+#include "gudhi/Collapse/Collapse.h"
 //#include <boost/filesystem.hpp> 
 
 //#include <CGAL/Delaunay_triangulation.h>

@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GUDHI_WITNESS_COMPLEX_H_
-#define GUDHI_WITNESS_COMPLEX_H_
+#ifndef GUDHI_RELAXED_WITNESS_COMPLEX_H_
+#define GUDHI_RELAXED_WITNESS_COMPLEX_H_
 
 #include <boost/container/flat_map.hpp>
 #include <boost/iterator/transform_iterator.hpp>
@@ -40,10 +40,17 @@
 #include <iostream>
 
 // Needed for nearest neighbours
-//#include <CGAL/Delaunay_triangulation.h>
-//#include <CGAL/Epick_d.h>
-//#include <CGAL/K_neighbor_search.h>
-//#include <CGAL/Search_traits_d.h>
+#include <CGAL/Cartesian_d.h>
+#include <CGAL/Search_traits.h>
+#include <CGAL/Search_traits_adapter.h>
+#include <CGAL/property_map.h>
+#include <CGAL/Epick_d.h>
+#include <CGAL/Orthogonal_k_neighbor_search.h>
+
+#include <boost/tuple/tuple.hpp>
+#include <boost/iterator/zip_iterator.hpp>
+#include <boost/iterator/counting_iterator.hpp>
+#include <boost/range/iterator_range.hpp>
 
 // Needed for the adjacency graph in bad link search
 #include <boost/graph/graph_traits.hpp>
@@ -131,12 +138,12 @@ namespace Gudhi {
     }
     
     /**
-     * /brief Iterative construction of the witness complex basing on a matrix of k nearest neighbours of the form {witnesses}x{landmarks}.
-     * Landmarks are supposed to be in [0,nbL-1]
+     * /brief Iterative construction of the relaxed witness complex basing on a matrix of k nearest neighbours of the form {witnesses}x{landmarks} and (1+epsilon)-limit table {witnesses}*{landmarks} consisting of iterators of k nearest neighbor matrix.
+     * The line lengths can differ, however both matrices have the same corresponding line lengths.
      */
     
-    template< typename KNearestNeighbours >
-    void witness_complex(KNearestNeighbours & knn)
+    template< typename KNearestNeighbours,  typename OPELimits >
+    void relaxed_witness_complex(KNearestNeighbours & knn, OPELimits & rl)
     //void witness_complex(std::vector< std::vector< Vertex_handle > > & knn)
     {
       std::cout << "**Start the procedure witness_complex" << std::endl;
@@ -144,9 +151,9 @@ namespace Gudhi {
       int nbW = knn.size();
       //int nbL = knn.at(0).size();
       typeVectorVertex vv;
-      typeSimplex simplex;
-      typePairSimplexBool returnValue;
-      int counter = 0;
+      //typeSimplex simplex;
+      //typePairSimplexBool returnValue;
+      //int counter = 0;
       /* The list of still useful witnesses
        * it will diminuish in the course of iterations
        */
@@ -154,18 +161,19 @@ namespace Gudhi {
       for (int i=0; i != nbL; ++i) {
         // initial fill of 0-dimensional simplices
         // by doing it we don't assume that landmarks are necessarily witnesses themselves anymore
-        counter++;
+        //counter++;
         vv = {i};
-        returnValue = insert_simplex(vv, Filtration_value(0.0));
+        insert_simplex(vv, Filtration_value(0.0));
         /* TODO Error if not inserted : normally no need here though*/
       }
       int k=1; /* current dimension in iterative construction */
       //std::cout << "Successfully added landmarks" << std::endl;
       // PRINT2
       //print_sc(root()); std::cout << std::endl;
+      for (int i=0; i != nbW; ++i)
+        active_w.push_back(i);
       /*
       int u,v;     // two extremities of an edge
-      int count = 0;
       if (nbL > 1) // if the supposed dimension of the complex is >0
         {
           for (int i=0; i != nbW; ++i)
@@ -174,70 +182,79 @@ namespace Gudhi {
               u = knn[i][0];
               v = knn[i][1];
               vv = {u,v};
-              returnValue = this->insert_simplex(vv,Filtration_value(0.0));
-              if (returnValue.second)
-                count++;
+              this->insert_simplex(vv,Filtration_value(0.0));
               //print_sc(root()); std::cout << std::endl;
               //std::cout << "Added edges" << std::endl;
             }
-          std::cout << "The number of edges = " << count << std::endl;
-          count = 0;
           //print_sc(root());
-          for (int i=0; i != nbW; ++i)
-            {
-              // initial fill of active witnesses list
-              u = knn[i][0];
-              v = knn[i][1];
-              if ( u > v)
-                {
-                  u = v;
-                  v = knn[i][0];
-                  knn[i][0] = knn[i][1];
-                  knn[i][1] = v;
-                }
-              Simplex_handle sh;
-              vv = {u,v};
-              //if (u==v) std::cout << "Bazzinga!\n";
-              sh = (root()->find(u))->second.children()->find(v);
-              active_w.push_back(i);
-            }
+          
         }
       */
-      for (int i=0; i != nbW; ++i)
-        active_w.push_back(i);
       std::cout << "k=0, active witnesses: " << active_w.size() << std::endl;
       //std::cout << "Successfully added edges" << std::endl;
-      count_good = {0};
-      count_bad = {0};
-      int D = knn[0].size();
-      while (!active_w.empty() && k < D )
+      //count_good = {0,0};
+      //count_bad = {0,0};
+      while (!active_w.empty() && k < nbL )
         {
-	  count_good.push_back(0);
-	  count_bad.push_back(0);
+	  //count_good.push_back(0);
+	  //count_bad.push_back(0);
           //std::cout << "Started the step k=" << k << std::endl;
-          typename ActiveWitnessList::iterator it = active_w.begin();
-          while (it != active_w.end())
+          typename ActiveWitnessList::iterator aw_it = active_w.begin();
+          while (aw_it != active_w.end())
             {
-              typeVectorVertex simplex_vector;
-              /* THE INSERTION: Checking if all the subfaces are in the simplex tree*/
-              bool ok = all_faces_in(knn, *it, k);
-              if (ok)
-                {
-                  for (int i = 0; i != k+1; ++i)
-                    simplex_vector.push_back(knn[*it][i]);
-                  returnValue = insert_simplex(simplex_vector,0.0);
-                  it++;
-                }
+              std::vector<int> simplex;
+              bool ok = add_all_faces_of_dimension(k, knn[*aw_it].begin(), rl[*aw_it].begin(), simplex, knn[*aw_it].end(), knn[*aw_it].end());
+              if (!ok)
+                active_w.erase(aw_it++); //First increase the iterator and then erase the previous element
               else
-                active_w.erase(it++); //First increase the iterator and then erase the previous element
+                aw_it++;
             }
 	  std::cout << "k=" << k << ", active witnesses: " << active_w.size() << std::endl;
-          //std::cout << "** k=" << k << ", num_simplices: " <<count << std::endl;
           k++;
         }
       //print_sc(root()); std::cout << std::endl;
     }
 
+    /* \brief Adds recursively all the faces of a certain dimension dim witnessed by the same witness
+     * Iterator is needed to know until how far we can take landmarks to form simplexes
+     * simplex is the prefix of the simplexes to insert
+     * The output value indicates if the witness rests active or not
+     */
+    bool add_all_faces_of_dimension(int dim, std::vector<int>::iterator curr_l, typename std::vector< std::vector<int>::iterator >::iterator curr_until, std::vector<int>& simplex, std::vector<int>::iterator until, std::vector<int>::iterator end)
+    {
+      /*
+      std::ofstream ofs ("stree_result.txt", std::ofstream::out);
+      st_to_file(ofs);
+      ofs.close();
+      */
+      //print_sc(root());
+      bool will_be_active = false;
+      if (dim > 0)
+        for (std::vector<int>::iterator it = curr_l; it != until && it != end; ++it, ++curr_until)
+          {
+            simplex.push_back(*it);
+            if (find(simplex) != null_simplex())
+              will_be_active = will_be_active || add_all_faces_of_dimension(dim-1, it+1, curr_until+1, simplex, until, end);
+            simplex.pop_back();
+            if (until == end)
+              until = *curr_until;
+          }
+      else if (dim == 0)
+        for (std::vector<int>::iterator it = curr_l; it != until && it != end; ++it, ++curr_until)
+          {
+            simplex.push_back(*it);
+            if (all_faces_in(simplex))
+              {
+                will_be_active = true;
+                insert_simplex(simplex, 0.0);
+              }
+            simplex.pop_back();
+            if (until == end)
+              until = *curr_until;
+          }
+      return will_be_active;
+    }
+    
     /** \brief Construction of witness complex from points given explicitly
      *  nbL must be set to the right value of landmarks for strategies
      * FURTHEST_POINT_STRATEGY and RANDOM_POINT_STRATEGY and
@@ -321,26 +338,21 @@ private:
      *  by witness witness_id are already in the complex.
      *  inserted_vertex is the handle of the (k+1)-th vertex witnessed by witness_id
      */
-    template <typename KNearestNeighbours>
-    bool all_faces_in(KNearestNeighbours &knn, int witness_id, int k)
+    bool all_faces_in(std::vector<int>& simplex)
     {
       //std::cout << "All face in with the landmark " << inserted_vertex << std::endl;
       std::vector< VertexHandle > facet;
       //VertexHandle curr_vh = curr_sh->first;
       // CHECK ALL THE FACETS
-      for (int i = 0; i != k+1; ++i)
+      for (std::vector<int>::iterator not_it = simplex.begin(); not_it != simplex.end(); ++not_it)
         {
-          facet = {};
-          for (int j = 0; j != k+1; ++j)
-            {
-              if (j != i)
-                {
-                  facet.push_back(knn[witness_id][j]);
-                }
-            }//endfor
+          facet.clear();
+          //facet = {};
+          for (std::vector<int>::iterator it = simplex.begin(); it != simplex.end(); ++it)
+            if (it != not_it)
+              facet.push_back(*it); 
           if (find(facet) == null_simplex())
             return false;
-          //std::cout << "++++ finished loop safely\n";
         } //endfor
       return true;
     }
@@ -629,56 +641,19 @@ private:
             }
         }
     }
-
-    /** \brief Returns true if the link is good
-     */
-  bool has_good_link(Vertex_handle v, std::vector< int >& bad_count, std::vector< int >& good_count)
-    {
-      std::vector< Vertex_handle > star_vertices;
-      // Fill star_vertices
-      star_vertices.push_back(v);
-      for (auto u: complex_vertex_range())
-        {
-          typeVectorVertex edge = {u,v};
-          if (u != v && find(edge) != null_simplex())   
-            star_vertices.push_back(u);
-        }
-      // Find the dimension
-      typeVectorVertex init_simplex = {star_vertices[0]};
-      bool is_pure = true;
-      std::vector<int> dim_coface(star_vertices.size(), 1);
-      int d = star_dim(star_vertices, star_vertices.begin()+1, 0, init_simplex, dim_coface.begin()+1) - 1; //link_dim = star_dim - 1
-      assert(init_simplex.size() == 1);
-      if (!is_pure)
-        std::cout << "Found an impure star around " << v << "\n";
-      for (int dc: dim_coface)
-        is_pure = (dc == dim_coface[0]);
-      /*
-      if (d == count_good.size())
-        {
-          std::cout << "Found a star of dimension " << (d+1) << " around " << v << "\nThe star is ";
-          print_vector(star_vertices); std::cout << std::endl;
-        }
-      */
-      //if (d == -1) bad_count[0]++;
-      bool b= (is_pure && link_is_pseudomanifold(star_vertices,d));
-      if (d != -1) {if (b) good_count[d]++; else bad_count[d]++;}
-      if (!is_pure) bad_count[0]++;
-      return (d != -1 && b && is_pure);
-      
-    }
-
+    
     /** \brief Search and output links around vertices that are not pseudomanifolds
      *
      */
-    /*
     void write_bad_links(std::ofstream& out_file)
     {
       out_file << "Bad links list\n";
       std::cout << "Entered write_bad_links\n";
+      //typeVectorVertex testv = {9,15,17};
+      //int count = 0;
       for (auto v: complex_vertex_range())
         {
-          std::cout << "Vertex " << v << ": ";
+          //std::cout << "Vertex " << v << ":\n";
           std::vector< Vertex_handle > link_vertices;
           // Fill link_vertices
           for (auto u: complex_vertex_range())
@@ -687,16 +662,21 @@ private:
               if (u != v && find(edge) != null_simplex())   
                 link_vertices.push_back(u);
             }
-          
-          print_vector(link_vertices);
-          std::cout << "\n";
-          
+          /*
+            print_vector(link_vertices);
+            std::cout << "\n";
+          */
           // Find the dimension
           typeVectorVertex empty_simplex = {};
           int d = link_dim(link_vertices, link_vertices.begin(),-1, empty_simplex);
+          //std::cout << " dim " << d << "\n";
+          //Siblings* curr_sibl = root();
           if (link_is_pseudomanifold(link_vertices,d))
             count_good[d]++;
+          //out_file << "Bad link at " << v << "\n";          
         }
+      //out_file << "Number of bad links: " << count << "/" << root()->size();
+      //std::cout << "Number of bad links: " << count << "/" << root()->size() << std::endl;
       nc = nbL;
       for (unsigned int i = 0; i != count_good.size(); i++)
 	{
@@ -714,48 +694,37 @@ private:
 	}
       std::cout << "not_connected = " << nc << std::endl;
     }
-    */
+
   private:
 
   std::vector<int> count_good;
   std::vector<int> count_bad;
   int nc;
 
-    int star_dim(std::vector< Vertex_handle >& star_vertices,
+    int link_dim(std::vector< Vertex_handle >& link_vertices,
                  typename std::vector< Vertex_handle >::iterator curr_v,
                  int curr_d,
-                 typeVectorVertex& curr_simplex,
-                 typename std::vector< int >::iterator curr_dc)
+                 typeVectorVertex& curr_simplex)
     {
-      //std::cout << "Entered star_dim for " << *(curr_v-1) << "\n";
+      //std::cout << "Entered link_dim for " << *(curr_v-1) << "\n";
       Simplex_handle sh;
       int final_d = curr_d;
       typename std::vector< Vertex_handle >::iterator it;
-      typename std::vector< Vertex_handle >::iterator dc_it;
-      //std::cout << "Current vertex is " <<  
-      for (it = curr_v, dc_it = curr_dc; it != star_vertices.end(); ++it, ++dc_it)
+      for (it = curr_v; it != link_vertices.end(); ++it)
         {
           curr_simplex.push_back(*it);
-          typeVectorVertex curr_simplex_copy(curr_simplex);
           /*
           std::cout << "Searching for ";
           print_vector(curr_simplex);
           std::cout << " curr_dim " << curr_d << " final_dim " << final_d;
           */
-          sh = find(curr_simplex_copy); //Need a copy because find sorts the vector and I want star center to be the first
+          sh = find(curr_simplex);
           if (sh != null_simplex())
             {
               //std::cout << " -> " << *it << "\n";
-              int d = star_dim(star_vertices, it+1, curr_d+1, curr_simplex, dc_it);
-              if (d >= final_d)
-                {
-                  final_d = d;
-                  //std::cout << d << " ";
-                  //print_vector(curr_simplex);
-		  //std::cout << std::endl;
-                }
-              if (d >= *dc_it)
-                *dc_it = d;
+              int d = link_dim(link_vertices, it+1, curr_d+1, curr_simplex);
+              if (d > final_d)
+                final_d = d;
             }
           /*
           else
@@ -774,191 +743,106 @@ private:
     //typedef std::pair<boost::vecS,Color> Reference;
     typedef boost::graph_traits<Adj_graph>::vertex_descriptor Vertex_t;
     typedef boost::graph_traits<Adj_graph>::edge_descriptor Edge_t;
-    typedef boost::graph_traits<Adj_graph>::adjacency_iterator Adj_it;
-    typedef std::pair<Adj_it, Adj_it> Out_edge_it;
 
     typedef boost::container::flat_map<Simplex_handle, Vertex_t> Graph_map;
-    typedef boost::container::flat_map<Vertex_t, Simplex_handle> Inv_graph_map;
-
+    
     /* \brief Verifies if the simplices formed by vertices given by link_vertices 
      * form a pseudomanifold.
      * The idea is to make a bipartite graph, where vertices are the d- and (d-1)-dimensional
      * faces and edges represent adjacency between them.
      */
-    bool link_is_pseudomanifold(std::vector< Vertex_handle >& star_vertices,
+    bool link_is_pseudomanifold(std::vector< Vertex_handle >& link_vertices,
                                 int dimension)
     {
       Adj_graph adj_graph;
       Graph_map d_map, f_map; // d_map = map for d-dimensional simplices
                               // f_map = map for its facets
-      typeVectorVertex init_vector = {};
-      add_vertices_to_link_graph(star_vertices,
-                                 star_vertices.begin()+1,
-                                 adj_graph,
-                                 d_map,
-                                 f_map,
-                                 init_vector,
-                                 0, dimension);
+      typeVectorVertex empty_vector = {};
+      add_vertices(link_vertices,
+                   link_vertices.begin(),
+                   adj_graph,
+                   d_map,
+                   f_map,
+                   empty_vector,
+                   0, dimension);
       //std::cout << "DMAP_SIZE: " << d_map.size() << "\n";
       //std::cout << "FMAP_SIZE: " << f_map.size() << "\n";
-      add_edges_to_link_graph(adj_graph, d_map, f_map);
+      add_edges(adj_graph, d_map, f_map);
       for (auto f_map_it : f_map)
         {
           //std::cout << "Degree of " << f_map_it.first->first << " is " << boost::out_degree(f_map_it.second, adj_graph) << "\n";
           if (boost::out_degree(f_map_it.second, adj_graph) != 2)
 	    {
-              /*
-              if (boost::out_degree(f_map_it.second, adj_graph) >= 3)
-                {		 
-                  std::cout << "This simplex has 3+ cofaces: ";
-                  for(auto v : simplex_vertex_range(f_map_it.first))
-                    std::cout << v << " ";
-                  std::cout << std::endl;
-                  Adj_it ai, ai_end; 
-                  for (std::tie(ai, ai_end) = boost::adjacent_vertices(f_map_it.second, adj_graph); ai != ai_end; ++ai)
-                    {
-                      
-                    }
-                }
-              */
 	      count_bad[dimension]++;
 	      return false;
 	    }
         }
       // At this point I know that all (d-1)-simplices are adjacent to exactly 2 d-simplices
       // What is left is to check the connexity
-      //std::vector<int> components(boost::num_vertices(adj_graph));
-      return true; //Forget the connexity
-      //return (boost::connected_components(adj_graph, &components[0]) == 1);
+      std::vector<int> components(boost::num_vertices(adj_graph));
+      return (boost::connected_components(adj_graph, &components[0]) == 1);
     }
 
-  public:
-bool complex_is_pseudomanifold(int dimension)
-    {
-      Adj_graph adj_graph;
-      Graph_map d_map, f_map; // d_map = map for d-dimensional simplices
-                              // f_map = map for its facets
-      Inv_graph_map inv_d_map;
-      typeVectorVertex init_vector = {};
-      std::vector<int> star_vertices;
-      for (int v: complex_vertex_range())
-        star_vertices.push_back(v);
-      add_max_simplices_to_graph(star_vertices,
-                                 star_vertices.begin(),
-                                 adj_graph,
-                                 d_map,
-                                 f_map,
-                                 inv_d_map,
-                                 init_vector,
-                                 0, dimension);
-      std::cout << "DMAP_SIZE: " << d_map.size() << "\n";
-      std::cout << "FMAP_SIZE: " << f_map.size() << "\n";
-      add_edges_to_link_graph(adj_graph, d_map, f_map);
-      for (auto f_map_it : f_map)
-        {
-          //std::cout << "Degree of " << f_map_it.first->first << " is " << boost::out_degree(f_map_it.second, adj_graph) << "\n";
-          if (boost::out_degree(f_map_it.second, adj_graph) != 2)
-	    {
-              if (boost::out_degree(f_map_it.second, adj_graph) >= 3)
-                {		 
-                  std::cout << "This simplex has 3+ cofaces: ";
-                  for(auto v : simplex_vertex_range(f_map_it.first))
-                    std::cout << v << " ";
-                  std::cout << std::endl;
-                  Adj_it ai, ai_end; 
-                  for (std::tie(ai, ai_end) = boost::adjacent_vertices(f_map_it.second, adj_graph); ai != ai_end; ++ai)
-                    {
-                      auto it = inv_d_map.find(*ai);
-                      assert (it != inv_d_map.end());
-                      Simplex_handle sh = it->second;
-                      for(auto v : simplex_vertex_range(sh))
-                        std::cout << v << " ";
-                      std::cout << std::endl;
-                    }
-                }
-	      count_bad[dimension]++;
-	      return false;
-	    }
-        }
-      // At this point I know that all (d-1)-simplices are adjacent to exactly 2 d-simplices
-      // What is left is to check the connexity
-      //std::vector<int> components(boost::num_vertices(adj_graph));
-      return true; //Forget the connexity
-      //return (boost::connected_components(adj_graph, &components[0]) == 1);
-    }
-
-  private:
-    void add_vertices_to_link_graph(typeVectorVertex& star_vertices,
-                                    typename typeVectorVertex::iterator curr_v,
-                                    Adj_graph& adj_graph,
-                                    Graph_map& d_map,
-                                    Graph_map& f_map,
-                                    typeVectorVertex& curr_simplex,
-                                    int curr_d,
-                                    int link_dimension)
+    void add_vertices(typeVectorVertex& link_vertices,
+                      typename typeVectorVertex::iterator curr_v,
+                      Adj_graph& adj_graph,
+                      Graph_map& d_map,
+                      Graph_map& f_map,
+                      typeVectorVertex& curr_simplex,
+                      int curr_d,
+                      int dimension)
     {
       Simplex_handle sh;
       Vertex_t vert;
       typename typeVectorVertex::iterator it;
-      //std::pair<typename Graph_map::iterator,bool> resPair;
+      std::pair<typename Graph_map::iterator,bool> resPair;
       //typename Graph_map::iterator resPair;
       //Add vertices
       //std::cout << "Entered add vertices\n";
-      for (it = curr_v; it != star_vertices.end(); ++it)
+      for (it = curr_v; it != link_vertices.end(); ++it)
         {
-          curr_simplex.push_back(*it);               //push next vertex in question
-          curr_simplex.push_back(star_vertices[0]);  //push the center of the star
+          curr_simplex.push_back(*it);
           /*
           std::cout << "Searching for ";
           print_vector(curr_simplex);
           std::cout << " curr_dim " << curr_d << " d " << dimension << "";
           */
-          typeVectorVertex curr_simplex_copy(curr_simplex);
-          sh = find(curr_simplex_copy);                   //a simplex of the star
-          curr_simplex.pop_back();                   //pop the center of the star
-          curr_simplex_copy = typeVectorVertex(curr_simplex);
+          sh = find(curr_simplex);
           if (sh != null_simplex())
             {
               //std::cout << " added\n";
-              if (curr_d == link_dimension)
+              if (curr_d == dimension)
                 {
-                  sh = find(curr_simplex_copy);               //a simplex of the link
-                  assert(sh != null_simplex());          //ASSERT!
                   vert = boost::add_vertex(adj_graph);
-                  d_map.emplace(sh,vert);
+                  resPair = d_map.emplace(sh,vert);
                 }
               else
                 {
-                  
-                  if (curr_d == link_dimension-1)
+                  if (curr_d == dimension-1)
                     {
-                      sh = find(curr_simplex_copy);               //a simplex of the link
-                      assert(sh != null_simplex());
                       vert = boost::add_vertex(adj_graph);
-                      f_map.emplace(sh,vert);
+                      resPair = f_map.emplace(sh,vert);
                     }
-                  
-                  //delete (&curr_simplex_copy); //Just so it doesn't stack
-                  add_vertices_to_link_graph(star_vertices,
-                                             it+1,
-                                             adj_graph,
-                                             d_map,
-                                             f_map,
-                                             curr_simplex,
-                                             curr_d+1, link_dimension);
+                  add_vertices(link_vertices,
+                               it+1,
+                               adj_graph,
+                               d_map,
+                               f_map,
+                               curr_simplex,
+                               curr_d+1, dimension);
                 }
             }
           /*
           else
             std::cout << "\n";
           */
-          curr_simplex.pop_back();                           //pop the vertex in question
+          curr_simplex.pop_back();
         }
     }
     
-    void add_edges_to_link_graph(Adj_graph& adj_graph,
-                                 Graph_map& d_map,
-                                 Graph_map& f_map)
+    void add_edges(Adj_graph& adj_graph,
+                   Graph_map& d_map,
+                   Graph_map& f_map)
     {
       Simplex_handle sh;
       // Add edges
@@ -983,123 +867,14 @@ bool complex_is_pseudomanifold(int dimension)
         }
     }
 
-    void add_max_simplices_to_graph(typeVectorVertex& star_vertices,
-                                    typename typeVectorVertex::iterator curr_v,
-                                    Adj_graph& adj_graph,
-                                    Graph_map& d_map,
-                                    Graph_map& f_map,
-                                    Inv_graph_map& inv_d_map,
-                                    typeVectorVertex& curr_simplex,
-                                    int curr_d,
-                                    int link_dimension)
-    {
-      Simplex_handle sh;
-      Vertex_t vert;
-      typename typeVectorVertex::iterator it;
-      //std::pair<typename Graph_map::iterator,bool> resPair;
-      //typename Graph_map::iterator resPair;
-      //Add vertices
-      //std::cout << "Entered add vertices\n";
-      for (it = curr_v; it != star_vertices.end(); ++it)
-        {
-          curr_simplex.push_back(*it);               //push next vertex in question
-          //curr_simplex.push_back(star_vertices[0]);  //push the center of the star
-          /*
-          std::cout << "Searching for ";
-          print_vector(curr_simplex);
-          std::cout << " curr_dim " << curr_d << " d " << dimension << "";
-          */
-          typeVectorVertex curr_simplex_copy(curr_simplex);
-          sh = find(curr_simplex_copy);                   //a simplex of the star
-          //curr_simplex.pop_back();                   //pop the center of the star
-          curr_simplex_copy = typeVectorVertex(curr_simplex);
-          if (sh != null_simplex())
-            {
-              //std::cout << " added\n";
-              if (curr_d == link_dimension)
-                {
-                  sh = find(curr_simplex_copy);               //a simplex of the link
-                  assert(sh != null_simplex());          //ASSERT!
-                  vert = boost::add_vertex(adj_graph);
-                  d_map.emplace(sh,vert);
-                  inv_d_map.emplace(vert,sh);
-                }
-              else
-                {
-                  
-                  if (curr_d == link_dimension-1)
-                    {
-                      sh = find(curr_simplex_copy);               //a simplex of the link
-                      assert(sh != null_simplex());
-                      vert = boost::add_vertex(adj_graph);
-                      f_map.emplace(sh,vert);
-                    }
-                  
-                  //delete (&curr_simplex_copy); //Just so it doesn't stack
-                  add_max_simplices_to_graph(star_vertices,
-                                             it+1,
-                                             adj_graph,
-                                             d_map,
-                                             f_map,
-                                             inv_d_map,
-                                             curr_simplex,
-                                             curr_d+1, link_dimension);
-                }
-            }
-          /*
-          else
-            std::cout << "\n";
-          */
-          curr_simplex.pop_back();                           //pop the vertex in question
-        }
-    }
+    //////////////////////////////////////////////////////////////////////////////////////////////////
+    //***********COLLAPSES**************************************************************************//
+    //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  public:
-    /** \brief Verification if every simplex in the complex is witnessed
-     */
-    template< class KNearestNeighbors >
-    bool is_witness_complex(KNearestNeighbors WL)
-    {
-      //bool final_result = true;
-      for (Simplex_handle sh: complex_simplex_range())
-        {
-          bool is_witnessed = false;
-          typeVectorVertex simplex;
-          int nbV = 0; //number of verticed in the simplex
-          for (int v: simplex_vertex_range(sh))
-            simplex.push_back(v);
-          nbV = simplex.size();
-          for (typeVectorVertex w: WL)
-            {
-              bool has_vertices = true;  
-              for (int v: simplex)
-                if (std::find(w.begin(), w.begin()+nbV, v) == w.begin()+nbV)
-                  {
-                    has_vertices = false;
-                    //break;
-                  }
-              if (has_vertices)
-                {
-                  is_witnessed = true;
-                  std::cout << "The simplex ";
-                  print_vector(simplex);
-                  std::cout << " is witnessed by the witness ";
-                  print_vector(w);
-                  std::cout << std::endl;
-                  break;
-                }
-            }
-          if (!is_witnessed)
-            {
-              std::cout << "The following simplex is not witnessed ";
-              print_vector(simplex);
-              std::cout << std::endl;
-              assert(is_witnessed);
-              return false;
-            }
-        }
-      return true; // Arrive here if the not_witnessed check failed all the time
-    }
+    
+
+
+
 
     
 }; //class Witness_complex
