@@ -1,9 +1,11 @@
 #define BOOST_TEST_MODULE simplex_tree test
 #include <boost/test/included/unit_test.hpp>
+#include <boost/range/adaptor/reversed.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/chrono/thread_clock.hpp>
 #include <iostream>
 #include <string>
+#include <algorithm>
 
 #include <utility> // std::pair, std::make_pair
 
@@ -24,6 +26,7 @@ typedef std::pair<typeVectorVertex, Filtration_value> typeSimplex;
 const Vertex_handle DEFAULT_VERTEX_HANDLE = (const Vertex_handle) -1;
 const Filtration_value DEFAULT_FILTRATION_VALUE = (const Filtration_value) 0.0;
 
+
 void test_empty_simplex_tree(typeST& tst) {
   BOOST_CHECK(tst.null_vertex() == DEFAULT_VERTEX_HANDLE);
   BOOST_CHECK(tst.filtration() == DEFAULT_FILTRATION_VALUE);
@@ -35,6 +38,7 @@ void test_empty_simplex_tree(typeST& tst) {
   BOOST_CHECK(STRoot->parent() == DEFAULT_VERTEX_HANDLE);
   BOOST_CHECK(tst.dimension() == -1);
 }
+
 
 void test_iterators_on_empty_simplex_tree(typeST& tst) {
   std::cout << "Iterator on vertices: " << std::endl;
@@ -170,22 +174,25 @@ void set_and_test_simplex_tree_dim_fil(typeST& simplexTree, int vectorSize, cons
   BOOST_CHECK(simplexTree.num_simplices() == nb_simplices);
 }
 
-void test_cofaces(typeST& st, std::vector<Vertex_handle> v, int dim, int res)
+void test_cofaces(typeST& st, std::vector<Vertex_handle> v, int dim, std::vector<std::vector<Vertex_handle>> res)
 {
-	std::vector<typeST::Dictionary> cofaces;
+	std::vector<typeST::Simplex_handle> cofaces;
 	if (dim == 0)
 		cofaces = st.star(st.find(v));
 	else
 		cofaces = st.coface(st.find(v), dim);
-	BOOST_CHECK(cofaces.size() == (size_t)res);
+	std::vector<Vertex_handle> currentVertices;
 	for (unsigned long i = 0; i < cofaces.size(); ++i)
 	{
-		std::cout << "(";
-		auto j = cofaces[i].begin();
-		std::cout << j->first;
-		for (auto j = cofaces[i].begin() + 1; j != cofaces[i].end(); ++j)
-			std::cout << "," << j->first;
-		std::cout << ")" << std::endl;
+		typeST::Simplex_vertex_range rg = st.simplex_vertex_range(cofaces[i]);
+		currentVertices.clear();
+		for (auto j = rg.begin(); j != rg.end(); ++j)
+		{
+			std::cout << "(" << *j << ")";
+			currentVertices.push_back(*j);
+		}
+		BOOST_CHECK(std::find(res.begin(), res.end(), currentVertices)!=res.end());
+		std::cout << std::endl;
 	}
 }
 
@@ -427,210 +434,247 @@ BOOST_AUTO_TEST_CASE( simplex_tree_insertion )
 
 BOOST_AUTO_TEST_CASE( NSimplexAndSubfaces_tree_insertion )
 {
-  Vertex_handle FIRST_VERTEX_HANDLE = (Vertex_handle)0;
-  Vertex_handle SECOND_VERTEX_HANDLE = (Vertex_handle) 1;
-  Vertex_handle THIRD_VERTEX_HANDLE = (Vertex_handle) 2;
-  Vertex_handle FOURTH_VERTEX_HANDLE = (Vertex_handle) 3;
-  Vertex_handle FIFTH_VERTEX_HANDLE = (Vertex_handle) 4;
-  Vertex_handle SIXTH_VERTEX_HANDLE = (Vertex_handle) 5;
-  Vertex_handle SEVENTH_VERTEX_HANDLE = (Vertex_handle) 6;
-  Vertex_handle EIGHTH_VERTEX_HANDLE = (Vertex_handle) 7;
+	Vertex_handle FIRST_VERTEX_HANDLE = (Vertex_handle)0;
+	Vertex_handle SECOND_VERTEX_HANDLE = (Vertex_handle) 1;
+	Vertex_handle THIRD_VERTEX_HANDLE = (Vertex_handle) 2;
+	Vertex_handle FOURTH_VERTEX_HANDLE = (Vertex_handle) 3;
+	Vertex_handle FIFTH_VERTEX_HANDLE = (Vertex_handle) 4;
+	Vertex_handle SIXTH_VERTEX_HANDLE = (Vertex_handle) 5;
+	Vertex_handle SEVENTH_VERTEX_HANDLE = (Vertex_handle) 6;
+	Vertex_handle EIGHTH_VERTEX_HANDLE = (Vertex_handle) 7;
 
-  // TEST OF INSERTION
-  std::cout << "********************************************************************" << std::endl;
-  std::cout << "TEST OF INSERTION" << std::endl;
-  typeST st;
+	// TEST OF INSERTION
+	std::cout << "********************************************************************" << std::endl;
+	std::cout << "TEST OF INSERTION" << std::endl;
+	typeST st;
 
-  // ++ FIRST
-  std::cout << "   - INSERT (2,1,0)" << std::endl;
-  typeVectorVertex SimplexVector1;
-  SimplexVector1.push_back(THIRD_VERTEX_HANDLE);
-  SimplexVector1.push_back(SECOND_VERTEX_HANDLE);
-  SimplexVector1.push_back(FIRST_VERTEX_HANDLE);
-  BOOST_CHECK( SimplexVector1.size() == 3 );
-  st.insert_simplex_and_subfaces ( SimplexVector1 );
+	// ++ FIRST
+	std::cout << "   - INSERT (2,1,0)" << std::endl;
+	typeVectorVertex SimplexVector1;
+	SimplexVector1.push_back(THIRD_VERTEX_HANDLE);
+	SimplexVector1.push_back(SECOND_VERTEX_HANDLE);
+	SimplexVector1.push_back(FIRST_VERTEX_HANDLE);
+	BOOST_CHECK( SimplexVector1.size() == 3 );
+	st.insert_simplex_and_subfaces ( SimplexVector1 );
 
-  BOOST_CHECK( st.num_vertices() == (size_t)3 ); // +3 (2, 1 and 0 are not existing)
+	BOOST_CHECK( st.num_vertices() == (size_t)3 ); // +3 (2, 1 and 0 are not existing)
 
-  // ++ SECOND
-  std::cout << "   - INSERT 3" << std::endl;
-  typeVectorVertex SimplexVector2;
-  SimplexVector2.push_back(FOURTH_VERTEX_HANDLE);
-  BOOST_CHECK( SimplexVector2.size() == 1 );
-  st.insert_simplex_and_subfaces ( SimplexVector2 );
+	// ++ SECOND
+	std::cout << "   - INSERT 3" << std::endl;
+	typeVectorVertex SimplexVector2;
+	SimplexVector2.push_back(FOURTH_VERTEX_HANDLE);
+	BOOST_CHECK( SimplexVector2.size() == 1 );
+	st.insert_simplex_and_subfaces ( SimplexVector2 );
 
-  BOOST_CHECK( st.num_vertices() == (size_t)4 ); // +1 (3 is not existing)
+	BOOST_CHECK( st.num_vertices() == (size_t)4 ); // +1 (3 is not existing)
 
-  // ++ THIRD
-  std::cout << "   - INSERT (0,3)" << std::endl;
-  typeVectorVertex SimplexVector3;
-  SimplexVector3.push_back(FOURTH_VERTEX_HANDLE);
-  SimplexVector3.push_back(FIRST_VERTEX_HANDLE);
-  BOOST_CHECK( SimplexVector3.size() == 2 );
-  st.insert_simplex_and_subfaces ( SimplexVector3 );
+	// ++ THIRD
+	std::cout << "   - INSERT (0,3)" << std::endl;
+	typeVectorVertex SimplexVector3;
+	SimplexVector3.push_back(FOURTH_VERTEX_HANDLE);
+	SimplexVector3.push_back(FIRST_VERTEX_HANDLE);
+	BOOST_CHECK( SimplexVector3.size() == 2 );
+	st.insert_simplex_and_subfaces ( SimplexVector3 );
 
-  BOOST_CHECK( st.num_vertices() == (size_t)4 );  // Not incremented (all are existing)
+	BOOST_CHECK( st.num_vertices() == (size_t)4 );  // Not incremented (all are existing)
 
-  // ++ FOURTH
-  std::cout << "   - INSERT (1,0) (already inserted)" << std::endl;
-  typeVectorVertex SimplexVector4;
-  SimplexVector4.push_back(SECOND_VERTEX_HANDLE);
-  SimplexVector4.push_back(FIRST_VERTEX_HANDLE);
-  BOOST_CHECK( SimplexVector4.size() == 2 );
-  st.insert_simplex_and_subfaces ( SimplexVector4 );
+	// ++ FOURTH
+	std::cout << "   - INSERT (1,0) (already inserted)" << std::endl;
+	typeVectorVertex SimplexVector4;
+	SimplexVector4.push_back(SECOND_VERTEX_HANDLE);
+	SimplexVector4.push_back(FIRST_VERTEX_HANDLE);
+	BOOST_CHECK( SimplexVector4.size() == 2 );
+	st.insert_simplex_and_subfaces ( SimplexVector4 );
 
-  BOOST_CHECK( st.num_vertices() == (size_t)4 );  // Not incremented (all are existing)
+	BOOST_CHECK( st.num_vertices() == (size_t)4 );  // Not incremented (all are existing)
 
-  // ++ FIFTH
-  std::cout << "   - INSERT (3,4,5)" << std::endl;
-  typeVectorVertex SimplexVector5;
-  SimplexVector5.push_back(FOURTH_VERTEX_HANDLE);
-  SimplexVector5.push_back(FIFTH_VERTEX_HANDLE);
-  SimplexVector5.push_back(SIXTH_VERTEX_HANDLE);
-  BOOST_CHECK( SimplexVector5.size() == 3 );
-  st.insert_simplex_and_subfaces ( SimplexVector5 );
+	// ++ FIFTH
+	std::cout << "   - INSERT (3,4,5)" << std::endl;
+	typeVectorVertex SimplexVector5;
+	SimplexVector5.push_back(FOURTH_VERTEX_HANDLE);
+	SimplexVector5.push_back(FIFTH_VERTEX_HANDLE);
+	SimplexVector5.push_back(SIXTH_VERTEX_HANDLE);
+	BOOST_CHECK( SimplexVector5.size() == 3 );
+	st.insert_simplex_and_subfaces ( SimplexVector5 );
 
-  BOOST_CHECK( st.num_vertices() == (size_t)6 );
+	BOOST_CHECK( st.num_vertices() == (size_t)6 );
 
-  // ++ SIXTH
-  std::cout << "   - INSERT (0,1,6,7)" << std::endl;
-  typeVectorVertex SimplexVector6;
-  SimplexVector6.push_back(FIRST_VERTEX_HANDLE);
-  SimplexVector6.push_back(SECOND_VERTEX_HANDLE);
-  SimplexVector6.push_back(SEVENTH_VERTEX_HANDLE);
-  SimplexVector6.push_back(EIGHTH_VERTEX_HANDLE);
-  BOOST_CHECK( SimplexVector6.size() == 4 );
-  st.insert_simplex_and_subfaces ( SimplexVector6 );
+	// ++ SIXTH
+	std::cout << "   - INSERT (0,1,6,7)" << std::endl;
+	typeVectorVertex SimplexVector6;
+	SimplexVector6.push_back(FIRST_VERTEX_HANDLE);
+	SimplexVector6.push_back(SECOND_VERTEX_HANDLE);
+	SimplexVector6.push_back(SEVENTH_VERTEX_HANDLE);
+	SimplexVector6.push_back(EIGHTH_VERTEX_HANDLE);
+	BOOST_CHECK( SimplexVector6.size() == 4 );
+	st.insert_simplex_and_subfaces ( SimplexVector6 );
 
-  BOOST_CHECK( st.num_vertices() == (size_t)8 ); // +2 (6 and 7 are not existing - 0 and 1 are already existing)
+	BOOST_CHECK( st.num_vertices() == (size_t)8 ); // +2 (6 and 7 are not existing - 0 and 1 are already existing)
 
-  /* Inserted simplex:        */
-  /*    1   6                 */
-  /*    o---o                 */
-  /*   /X\7/                  */
-  /*  o---o---o---o           */
-  /*  2   0   3\X/4           */
-  /*            o             */
-  /*            5             */
-  /*                          */
-  /* In other words:          */
-  /*   A facet [2,1,0]        */
-  /*   An edge [0,3]          */
-  /*   A facet [3,4,5]        */
-  /*   A cell  [0,1,6,7]      */
+	/* Inserted simplex:        */
+	/*    1   6                 */
+	/*    o---o                 */
+	/*   /X\7/                  */
+	/*  o---o---o---o           */
+	/*  2   0   3\X/4           */
+	/*            o             */
+	/*            5             */
+	/*                          */
+	/* In other words:          */
+	/*   A facet [2,1,0]        */
+	/*   An edge [0,3]          */
+	/*   A facet [3,4,5]        */
+	/*   A cell  [0,1,6,7]      */
 
-  typeSimplex simplexPair1 = std::make_pair(SimplexVector1, DEFAULT_FILTRATION_VALUE);
-  typeSimplex simplexPair2 = std::make_pair(SimplexVector2, DEFAULT_FILTRATION_VALUE);
-  typeSimplex simplexPair3 = std::make_pair(SimplexVector3, DEFAULT_FILTRATION_VALUE);
-  typeSimplex simplexPair4 = std::make_pair(SimplexVector4, DEFAULT_FILTRATION_VALUE);
-  typeSimplex simplexPair5 = std::make_pair(SimplexVector5, DEFAULT_FILTRATION_VALUE);
-  typeSimplex simplexPair6 = std::make_pair(SimplexVector6, DEFAULT_FILTRATION_VALUE);
-  test_simplex_tree_contains(st,simplexPair1,6);  // (2,1,0) is in position 6
-  test_simplex_tree_contains(st,simplexPair2,7);  // (3) is in position 7
-  test_simplex_tree_contains(st,simplexPair3,8);  // (3,0) is in position 8
-  test_simplex_tree_contains(st,simplexPair4,2);  // (1,0) is in position 2
-  test_simplex_tree_contains(st,simplexPair5,14);  // (3,4,5) is in position 14
-  test_simplex_tree_contains(st,simplexPair6,26);  // (7,6,1,0) is in position 26
-  
-  // ------------------------------------------------------------------------------------------------------------------
-  // Find in the simplex_tree
-  // ------------------------------------------------------------------------------------------------------------------
-  typeVectorVertex simpleSimplexVector;
-  simpleSimplexVector.push_back(SECOND_VERTEX_HANDLE);
-  Simplex_tree<>::Simplex_handle simplexFound = st.find(simpleSimplexVector);
-  std::cout << "**************IS THE SIMPLEX {1} IN THE SIMPLEX TREE ?\n";
-  if (simplexFound != st.null_simplex())
-    std::cout << "***+ YES IT IS!\n";
-  else
-    std::cout << "***- NO IT ISN'T\n";
-  // Check it is found
-  BOOST_CHECK(simplexFound != st.null_simplex());
+	typeSimplex simplexPair1 = std::make_pair(SimplexVector1, DEFAULT_FILTRATION_VALUE);
+	typeSimplex simplexPair2 = std::make_pair(SimplexVector2, DEFAULT_FILTRATION_VALUE);
+	typeSimplex simplexPair3 = std::make_pair(SimplexVector3, DEFAULT_FILTRATION_VALUE);
+	typeSimplex simplexPair4 = std::make_pair(SimplexVector4, DEFAULT_FILTRATION_VALUE);
+	typeSimplex simplexPair5 = std::make_pair(SimplexVector5, DEFAULT_FILTRATION_VALUE);
+	typeSimplex simplexPair6 = std::make_pair(SimplexVector6, DEFAULT_FILTRATION_VALUE);
+	test_simplex_tree_contains(st,simplexPair1,6);  // (2,1,0) is in position 6
+	test_simplex_tree_contains(st,simplexPair2,7);  // (3) is in position 7
+	test_simplex_tree_contains(st,simplexPair3,8);  // (3,0) is in position 8
+	test_simplex_tree_contains(st,simplexPair4,2);  // (1,0) is in position 2
+	test_simplex_tree_contains(st,simplexPair5,14);  // (3,4,5) is in position 14
+	test_simplex_tree_contains(st,simplexPair6,26);  // (7,6,1,0) is in position 26
 
-  Vertex_handle UNKNOWN_VERTEX_HANDLE = (Vertex_handle) 15;
-  typeVectorVertex unknownSimplexVector;
-  unknownSimplexVector.push_back(UNKNOWN_VERTEX_HANDLE);
-  simplexFound = st.find(unknownSimplexVector);
-  std::cout << "**************IS THE SIMPLEX {15} IN THE SIMPLEX TREE ?\n";
-  if (simplexFound != st.null_simplex())
-    std::cout << "***+ YES IT IS!\n";
-  else
-    std::cout << "***- NO IT ISN'T\n";
-  // Check it is NOT found
-  BOOST_CHECK(simplexFound == st.null_simplex());
+	// ------------------------------------------------------------------------------------------------------------------
+	// Find in the simplex_tree
+	// ------------------------------------------------------------------------------------------------------------------
+	typeVectorVertex simpleSimplexVector;
+	simpleSimplexVector.push_back(SECOND_VERTEX_HANDLE);
+	Simplex_tree<>::Simplex_handle simplexFound = st.find(simpleSimplexVector);
+	std::cout << "**************IS THE SIMPLEX {1} IN THE SIMPLEX TREE ?\n";
+	if (simplexFound != st.null_simplex())
+		std::cout << "***+ YES IT IS!\n";
+	else
+		std::cout << "***- NO IT ISN'T\n";
+	// Check it is found
+	BOOST_CHECK(simplexFound != st.null_simplex());
 
-  simplexFound = st.find(SimplexVector6);
-  std::cout << "**************IS THE SIMPLEX {0,1,6,7} IN THE SIMPLEX TREE ?\n";
-  if (simplexFound != st.null_simplex())
-    std::cout << "***+ YES IT IS!\n";
-  else
-    std::cout << "***- NO IT ISN'T\n";
-  // Check it is found
-  BOOST_CHECK(simplexFound != st.null_simplex());
-      
-  typeVectorVertex otherSimplexVector;
-  otherSimplexVector.push_back(UNKNOWN_VERTEX_HANDLE);
-  otherSimplexVector.push_back(SECOND_VERTEX_HANDLE);
-  simplexFound = st.find(otherSimplexVector);
-  std::cout << "**************IS THE SIMPLEX {15,1} IN THE SIMPLEX TREE ?\n";
-  if (simplexFound != st.null_simplex())
-    std::cout << "***+ YES IT IS!\n";
-  else
-    std::cout << "***- NO IT ISN'T\n";
-  // Check it is NOT found
-  BOOST_CHECK(simplexFound == st.null_simplex());
+	Vertex_handle UNKNOWN_VERTEX_HANDLE = (Vertex_handle) 15;
+	typeVectorVertex unknownSimplexVector;
+	unknownSimplexVector.push_back(UNKNOWN_VERTEX_HANDLE);
+	simplexFound = st.find(unknownSimplexVector);
+	std::cout << "**************IS THE SIMPLEX {15} IN THE SIMPLEX TREE ?\n";
+	if (simplexFound != st.null_simplex())
+		std::cout << "***+ YES IT IS!\n";
+	else
+		std::cout << "***- NO IT ISN'T\n";
+	// Check it is NOT found
+	BOOST_CHECK(simplexFound == st.null_simplex());
 
-  typeVectorVertex invSimplexVector;
-  invSimplexVector.push_back(SECOND_VERTEX_HANDLE);
-  invSimplexVector.push_back(THIRD_VERTEX_HANDLE);
-  invSimplexVector.push_back(FIRST_VERTEX_HANDLE);
-  simplexFound = st.find(invSimplexVector);
-  std::cout << "**************IS THE SIMPLEX {1,2,0} IN THE SIMPLEX TREE ?\n";
-  if (simplexFound != st.null_simplex())
-    std::cout << "***+ YES IT IS!\n";
-  else
-    std::cout << "***- NO IT ISN'T\n";
-  // Check it is found
-  BOOST_CHECK(simplexFound != st.null_simplex());
-  
-  // Display the Simplex_tree - Can not be done in the middle of 2 inserts
-  std::cout << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
-  std::cout << "   - dimension " << st.dimension() << "   - filtration " << st.filtration() << std::endl;
-  std::cout << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
-  for( auto f_simplex : st.filtration_simplex_range() )
-  {
-    std::cout << "   " << "[" << st.filtration(f_simplex) << "] ";
-    for( auto vertex : st.simplex_vertex_range(f_simplex) )
-    {
-      std::cout << (int)vertex << " ";
-    }
-    std::cout << std::endl;
-  }
+	simplexFound = st.find(SimplexVector6);
+	std::cout << "**************IS THE SIMPLEX {0,1,6,7} IN THE SIMPLEX TREE ?\n";
+	if (simplexFound != st.null_simplex())
+		std::cout << "***+ YES IT IS!\n";
+	else
+		std::cout << "***- NO IT ISN'T\n";
+	// Check it is found
+	BOOST_CHECK(simplexFound != st.null_simplex());
 
+	typeVectorVertex otherSimplexVector;
+	otherSimplexVector.push_back(UNKNOWN_VERTEX_HANDLE);
+	otherSimplexVector.push_back(SECOND_VERTEX_HANDLE);
+	simplexFound = st.find(otherSimplexVector);
+	std::cout << "**************IS THE SIMPLEX {15,1} IN THE SIMPLEX TREE ?\n";
+	if (simplexFound != st.null_simplex())
+		std::cout << "***+ YES IT IS!\n";
+	else
+		std::cout << "***- NO IT ISN'T\n";
+	// Check it is NOT found
+	BOOST_CHECK(simplexFound == st.null_simplex());
+
+	typeVectorVertex invSimplexVector;
+	invSimplexVector.push_back(SECOND_VERTEX_HANDLE);
+	invSimplexVector.push_back(THIRD_VERTEX_HANDLE);
+	invSimplexVector.push_back(FIRST_VERTEX_HANDLE);
+	simplexFound = st.find(invSimplexVector);
+	std::cout << "**************IS THE SIMPLEX {1,2,0} IN THE SIMPLEX TREE ?\n";
+	if (simplexFound != st.null_simplex())
+		std::cout << "***+ YES IT IS!\n";
+	else
+		std::cout << "***- NO IT ISN'T\n";
+	// Check it is found
+	BOOST_CHECK(simplexFound != st.null_simplex());
+
+
+
+	// Display the Simplex_tree - Can not be done in the middle of 2 inserts
+	std::cout << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
+	std::cout << "   - dimension " << st.dimension() << "   - filtration " << st.filtration() << std::endl;
+	std::cout << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
+	for( auto f_simplex : st.filtration_simplex_range() )
+	{
+		std::cout << "   " << "[" << st.filtration(f_simplex) << "] ";
+		for( auto vertex : st.simplex_vertex_range(f_simplex) )
+		{
+			std::cout << (int)vertex << " ";
+		}
+		std::cout << std::endl;
+	}
+    
     std::cout << "********************************************************************" << std::endl;
     // TEST COFACE ALGORITHM
     st.set_dimension(3);
     std::cout << "COFACE ALGORITHM" << std::endl;
     std::vector<Vertex_handle> v;
+	std::vector<std::vector<Vertex_handle>> result;
     v.push_back(3);
+	std::cout << "First test : " << std::endl;
     std::cout << "Star of (3):" << std::endl;
-    test_cofaces(st, v, 0, 4);
+	int firstCoface[] = {3, 0};
+	int secondCoface[] = {4, 3};
+	int thirdCoface[] = {5, 4, 3};
+	int fourthCoface[] = {5, 3};
+	result.push_back(std::vector<Vertex_handle>(firstCoface, firstCoface + 2));
+	result.push_back(std::vector<Vertex_handle>(secondCoface, secondCoface + 2));
+	result.push_back(std::vector<Vertex_handle>(thirdCoface, thirdCoface + 3));
+	result.push_back(std::vector<Vertex_handle>(fourthCoface, fourthCoface + 2));
+    test_cofaces(st, v, 0, result);
     v.clear();
+	result.clear();
+			
     v.push_back(1);
     v.push_back(7);
+	std::cout << "Second test : " << std::endl;
     std::cout << "Star of (1,7): " << std::endl;
-    test_cofaces(st, v, 0, 3);
-    std::cout << "Cofaces of (1,7) of dimension 2: " << std::endl;
-    test_cofaces(st, v, 1, 2);
+	int firstCoface2[] = {7, 6, 1, 0};
+	int secondCoface2[] = {7, 1, 0};
+	int thirdCoface2[] = {7 ,6, 1};
+	result.push_back(std::vector<Vertex_handle>(firstCoface2, firstCoface2 + 4));
+	result.push_back(std::vector<Vertex_handle>(secondCoface2, secondCoface2 + 3));
+	result.push_back(std::vector<Vertex_handle>(thirdCoface2, thirdCoface2 + 3));
+    test_cofaces(st, v, 0, result);
+	result.clear();
+
+	std::cout << "Third test : " << std::endl;
+    std::cout << "2-dimension Cofaces of simplex(1,7) : " << std::endl;
+	int secondCoface3[] = {7, 1, 0};
+	int firstCoface3[] = {7, 6, 1};
+	result.push_back(std::vector<Vertex_handle>(firstCoface3, firstCoface3 + 3));
+	result.push_back(std::vector<Vertex_handle>(secondCoface3, secondCoface3 + 3));
+    test_cofaces(st, v, 1, result);
+	result.clear();
+
     std::cout << "Cofaces with a codimension too high (codimension + vetices > tree.dimension)" << std::endl;
-    test_cofaces(st, v, 5, 0);
+    test_cofaces(st, v, 5, result);
     std::cout << "Cofaces with an empty codimension" << std::endl;
-    test_cofaces(st, v, -1, 0);
+    test_cofaces(st, v, -1, result);
     std::cout << "Cofaces in an empty simplex tree" << std::endl;
     typeST empty_tree;
-    test_cofaces(empty_tree, v, 1, 0);
+    test_cofaces(empty_tree, v, 1, result);
     std::cout << "Cofaces of an empty simplex" << std::endl;
     v.clear();
-    test_cofaces(st, v, 1, 0);
-
+    test_cofaces(st, v, 1, result);
+ 
+ /*
+    // TEST Off read
+    std::cout << "********************************************************************" << std::endl;
+    typeST st2;
+    st2.tree_from_off("test.off");
+    std::cout << st2;
+  */  
 
 }

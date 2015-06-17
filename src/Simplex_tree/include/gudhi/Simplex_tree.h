@@ -122,7 +122,7 @@ class Simplex_tree {
 
  public:
   /** \brief Handle type to a simplex contained in the simplicial complex represented
-   * byt he simplex tree. */
+   * by the simplex tree. */
   typedef typename Dictionary::iterator Simplex_handle;
 
  private:
@@ -397,11 +397,8 @@ class Simplex_tree {
    */
   template<class RandomAccessVertexRange>
   Simplex_handle find(RandomAccessVertexRange & s) {
-    if (s.begin() == s.end())
-	{
-      std::cerr << "Empty simplex \n";
+    if (s.begin() == s.end()) // Empty simplex
 	  return null_simplex();
-	}
 
     sort(s.begin(), s.end());
 
@@ -606,9 +603,18 @@ class Simplex_tree {
 private:
     
     /** Recursive search of cofaces
+	 * This function uses DFS
+	 *\param vertices contains a list of vertices, which represent the simplex.
+	 *\param curr_res contains a list of vertices, which represent the current path in the tree.
+	 *\param cofaces contains a list of Simplex_handle, representing all the cofaces asked.
+	 *\param length length of the vertices list
+	 * Prefix actions : When the bottom vertex matches with the current vertex in the tree, we remove the bottom vertex from vertices.
+	 * Infix actions : Then we call or not the recursion.
+	 * Postfix actions : Finally, we add back the removed vertex into vertices, and remove this vertex from curr_res so that we didn't change the parameters.
+	 * If the vertices list is empty, we need to check if the size of the curr_res list matches with the dimension of the cofaces asked.
      */
     template <class RandomAccessVertexRange>
-    void rec_coface(RandomAccessVertexRange &vertices, Siblings *curr_sib, Dictionary *curr_res, std::vector<Dictionary>& cofaces, unsigned int length, unsigned long codimension)
+    void rec_coface(RandomAccessVertexRange &vertices, Siblings *curr_sib, RandomAccessVertexRange *curr_res, std::vector<Simplex_handle>& cofaces, unsigned int length, unsigned long codimension)
     {
         for (auto sib = curr_sib->members().begin(); sib != curr_sib->members().end() && (vertices.empty() || sib->first <= vertices[vertices.size()-1]); ++sib)
         {
@@ -618,23 +624,23 @@ private:
                 if (curr_res->size() >= length && continueRecursion)
                     // If we reached the end of the vertices, and the simplex has more vertices than the given simplex, we found a coface
                 {
-                    curr_res->emplace(sib->first, sib->second);
+                    curr_res->push_back(sib->first);
 					bool egalDim = (codimension == length || curr_res->size() == codimension); // dimension of actual simplex == codimension
 					if (egalDim)
- 	                   cofaces.push_back(*curr_res);
+ 	                   cofaces.push_back(find(*curr_res));
                     if (has_children(sib))
                         rec_coface(vertices, sib->second.children(), curr_res, cofaces, length, codimension);
-                    curr_res->erase(curr_res->end()-1);
+                    curr_res->pop_back();
                 }
             }
             else if (continueRecursion)
             {
                 if (sib->first == vertices[vertices.size()-1]) // If curr_sib matches with the top vertex
                 {
-                    curr_res->emplace(sib->first, sib->second);
+                    curr_res->push_back(sib->first);
 					bool egalDim = (codimension == length || curr_res->size() == codimension); // dimension of actual simplex == codimension
                     if (vertices.size() == 1 &&  curr_res->size() > length && egalDim)
-                        cofaces.push_back(*curr_res);
+                        cofaces.push_back(find(*curr_res));
                     if (has_children(sib))
                     { // Rec call
                         Vertex_handle tmp = vertices[vertices.size()-1];
@@ -642,15 +648,15 @@ private:
                         rec_coface(vertices, sib->second.children(), curr_res, cofaces, length, codimension);
                         vertices.push_back(tmp);
                     }
-                    curr_res->erase(curr_res->end()-1);
+                    curr_res->pop_back();
                 }
                 else // (sib->first < vertices[vertices.size()-1])
                 {
                     if (has_children(sib))
                     {
-                        curr_res->emplace(sib->first, sib->second);
+						curr_res->push_back(sib->first);
                         rec_coface(vertices, sib->second.children(), curr_res, cofaces, length, codimension);
-                        curr_res->erase(curr_res->end()-1);
+						curr_res->pop_back();
                     }
                 }
             }
@@ -659,48 +665,39 @@ private:
 
 public:
     /** \brief Compute the star of a n simplex
-     * \param vertices List of vertices which represent the n simplex.
-     * \return Vector of Dictionary, empty vector if no cofaces found.
+     * \param vertices handles the simplex of which we search the star
+     * \return Vector of Simplex_handle, empty vector if no cofaces found.
      */
     
-    std::vector<Dictionary> star(const Simplex_handle &vertices)	{
+    std::vector<Simplex_handle> star(const Simplex_handle &vertices)	{
         return coface(vertices, 0);
     }
     
     
     
     /** \brief Compute the cofaces of a n simplex
-     * \param vertices List of vertices which represent the n simplex.
-     * \param codimension The function returns the n+codimension-simplices. If codimension = 0, return all cofaces (equivalent of star function)
-     * \return Vector of Dictionary, empty vector if no cofaces found.
+     * \param vertices handles the n-simplex of which we search the n+codimension cofaces
+     * \param codimension The function returns the n+codimension-cofaces of the n-simplex. If codimension = 0, return all cofaces (equivalent of star function)
+     * \return Vector of Simplex_handle, empty vector if no cofaces found.
      * \warning n+codimension must be lower than Simplex_tree dimension, otherwise an an empty vector is returned.
      */
     
-    std::vector<Dictionary> coface(const Simplex_handle &vertices, int codimension)	{
-        std::vector<Dictionary> cofaces;
-		if (dimension_ == -1)
-		{
-            std::cerr << "Simplex_tree::coface - empty simplex tree" << std::endl;
-			return cofaces; // ----->>
-		}
-        if (vertices == null_simplex()) {
-            std::cerr << "Simplex_tree::coface - empty vertices list" << std::endl;
-            return cofaces;  // ----->>
-        }
-        if (codimension < 0) {
-            std::cerr << "Simplex_tree::coface - codimension is empty" << std::endl;
-            return cofaces;  // ----->>
-        }
+    std::vector<Simplex_handle> coface(const Simplex_handle &vertices, int codimension)	{
+        std::vector<Simplex_handle> cofaces;
+		if (dimension_ == -1) // Empty simplex tree
+			return cofaces;
+        if (vertices == null_simplex()) // Empty simplex
+            return cofaces;
+        if (codimension < 0) // codimension must be positive or null integer
+            return cofaces; 
         std::vector<Vertex_handle> copy;
 		Simplex_vertex_range rg = simplex_vertex_range(vertices);
 		for (auto it = rg.begin(); it != rg.end(); ++it)
 			copy.push_back(*it);
-        if (codimension + copy.size() > (unsigned long)(dimension_ + 1) || (codimension == 0 && copy.size() > (unsigned long)dimension_) ) {
-            std::cerr << "Simplex_tree::coface - codimension + vertices list size cannot be greater than Simplex_tree dimension" << std::endl;
-            return cofaces;  // ----->>
-        }
+        if (codimension + copy.size() > (unsigned long)(dimension_ + 1) || (codimension == 0 && copy.size() > (unsigned long)dimension_) ) // n+codimension greater than dimension_
+            return cofaces;
         std::sort(copy.begin(), copy.end(), std::greater<Vertex_handle>());  // must be sorted in decreasing order
-        Dictionary res;
+        std::vector<Vertex_handle> res;
         rec_coface(copy, &root_, &res, cofaces, copy.size(), codimension + copy.size());
         return cofaces;
     }
