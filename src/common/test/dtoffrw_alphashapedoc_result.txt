@@ -1,0 +1,3 @@
+Number of vertices= 7
+Number of finite full cells= 6
+

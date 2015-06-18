@@ -23,9 +23,6 @@
 #ifndef SRC_ALPHA_SHAPES_INCLUDE_GUDHI_ALPHA_SHAPES_H_
 #define SRC_ALPHA_SHAPES_INCLUDE_GUDHI_ALPHA_SHAPES_H_
 
-// to construct a Delaunay_triangulation from a OFF file
-#include <gudhi/Alpha_shapes/Delaunay_triangulation_off_io.h>
-
 // to construct a simplex_tree from Delaunay_triangulation
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/Simplex_tree.h>
@@ -46,8 +43,7 @@
 #include <iterator>
 #include <vector>
 #include <string>
-#include <limits>
-#include <map>
+#include <limits> // NaN
 
 namespace Gudhi {
 
@@ -82,64 +78,79 @@ class Alpha_complex {
  private:
   // From Simplex_tree
   /** \brief Type required to insert into a simplex_tree (with or without subfaces).*/
-  typedef std::vector<Vertex_handle> typeVectorVertex;
+  typedef std::vector<Vertex_handle> Vector_vertex;
 
+  /** \brief Simplex_handle type from simplex_tree.*/
   typedef typename Gudhi::Simplex_tree<>::Simplex_handle Simplex_handle;
+  /** \brief Simplex_result is the type returned from simplex_tree insert function.*/
   typedef typename std::pair<Simplex_handle, bool> Simplex_result;
 
+  /** \brief Filtration_simplex_range type from simplex_tree.*/
+  typedef typename Gudhi::Simplex_tree<>::Filtration_simplex_range Filtration_simplex_range;
+
+  /** \brief Simplex_vertex_range type from simplex_tree.*/
+  typedef typename Gudhi::Simplex_tree<>::Simplex_vertex_range Simplex_vertex_range;
+  
   // From CGAL
-  /** \brief Kernel for the Delaunay_triangulation->
-   * Dimension can be set dynamically.
-   */
+  /** \brief Kernel for the Delaunay_triangulation. Dimension can be set dynamically.*/
   typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kernel;
-  /** \brief Delaunay_triangulation type required to create an alpha-complex.
-   */
+  /** \brief Delaunay_triangulation type required to create an alpha-complex.*/
   typedef CGAL::Delaunay_triangulation<Kernel> Delaunay_triangulation;
 
   typedef typename Kernel::Compute_squared_radius_d Squared_Radius;
   typedef typename Kernel::Side_of_bounded_sphere_d Is_Gabriel;
 
-  /** \brief Type required to insert into a simplex_tree (with or without subfaces).*/
+  /** \brief Type required to compute squared radius, or side of bounded sphere on a vector of points.*/
   typedef std::vector<Kernel::Point_d> Vector_of_CGAL_points;
 
+  /** \brief Vertex_iterator type from CGAL.*/
   typedef Delaunay_triangulation::Vertex_iterator CGAL_vertex_iterator;
 
+  /** \brief Boost bimap type to switch from CGAL vertex iterator to simplex tree vertex handle and vice versa.*/
   typedef boost::bimap< CGAL_vertex_iterator, Vertex_handle > Bimap_vertex;
   
  private:
-  /** \brief Upper bound on the simplex tree of the simplicial complex.*/
+  /** \brief Alpha complex is represented internally by a simplex tree.*/
   Gudhi::Simplex_tree<> st_;
+  /** \brief Boost bimap to switch from CGAL vertex iterator to simplex tree vertex handle and vice versa.*/
   Bimap_vertex cgal_simplextree;
+  /** \brief Pointer on the CGAL Delaunay triangulation.*/
   Delaunay_triangulation* triangulation;
 
  public:
-
   Alpha_complex(std::string& off_file_name)
   : triangulation(nullptr) {
-#ifdef DEBUG_TRACES
-    char buffer[256]={0};
-    sprintf(buffer,"%p", triangulation);
-    std::cout << "pointer=" << buffer << std::endl;
-#endif  // DEBUG_TRACES
-    Gudhi::alphacomplex::Delaunay_triangulation_off_reader<Delaunay_triangulation> off_reader(off_file_name);
+    Gudhi::Delaunay_triangulation_off_reader<Delaunay_triangulation> off_reader(off_file_name);
     if (!off_reader.is_valid()) {
       std::cerr << "Unable to read file " << off_file_name << std::endl;
       exit(-1); // ----- >>
     }
     triangulation = off_reader.get_complex();
-#ifdef DEBUG_TRACES
-    //char buffer[256]={0};
-    sprintf(buffer,"%p", triangulation);
-    std::cout << "pointer=" << buffer << std::endl;
-    std::cout << "number of vertices=" << triangulation->number_of_vertices() << std::endl;
-    std::cout << "number of full cells=" << triangulation->number_of_full_cells() << std::endl;
-    std::cout << "number of finite full cells=" << triangulation->number_of_finite_full_cells() << std::endl;
-#endif  // DEBUG_TRACES
+    init();
+  }
+
+  Alpha_complex(Delaunay_triangulation* triangulation_ptr)
+  : triangulation(triangulation_ptr) {
     init();
   }
 
   ~Alpha_complex() {
     delete triangulation;
+  }
+
+  Filtration_simplex_range filtration_simplex_range() {
+    return st_.filtration_simplex_range();
+  }
+  
+  Simplex_vertex_range simplex_vertex_range(Simplex_handle sh) {
+    return st_.simplex_vertex_range(sh);
+  }
+  
+  /** \brief Returns the filtration value of a simplex.
+   *
+   * Called on the null_simplex, returns INFINITY. */
+  Gudhi::Simplex_tree<>::Filtration_value filtration(Simplex_handle sh) {
+    return st_.filtration(sh);
   }
 
  private:
@@ -161,7 +172,7 @@ class Alpha_complex {
     // --------------------------------------------------------------------------------------------
     // Simplex_tree construction from loop on triangulation finite full cells list
     for (auto cit = triangulation->finite_full_cells_begin(); cit != triangulation->finite_full_cells_end(); ++cit) {
-      typeVectorVertex vertexVector;
+      Vector_vertex vertexVector;
 #ifdef DEBUG_TRACES
       std::cout << "Simplex_tree insertion ";
 #endif  // DEBUG_TRACES
@@ -325,7 +336,6 @@ class Alpha_complex {
   }
 
   friend std::ostream& operator<<(std::ostream& os, const Alpha_complex & alpha_complex) {
-    // TODO: Program terminated with signal SIGABRT, Aborted - Maybe because of copy constructor
     Gudhi::Simplex_tree<> st = alpha_complex.st_;
     os << st << std::endl;
     return os;

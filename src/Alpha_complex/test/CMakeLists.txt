@@ -15,7 +15,7 @@ if(CGAL_FOUND)
       include( ${EIGEN3_USE_FILE} )
       include_directories (BEFORE "../../include")
 
-      add_definitions(-DDEBUG_TRACES)
+      #add_definitions(-DDEBUG_TRACES)
       add_executable ( AlphaComplexUnitTest Alpha_complex_unit_test.cpp )
       target_link_libraries(AlphaComplexUnitTest  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
       add_test(AlphaComplexUnitTest ${CMAKE_CURRENT_BINARY_DIR}/AlphaComplexUnitTest)

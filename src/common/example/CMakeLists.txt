@@ -1,10 +1,9 @@
 cmake_minimum_required(VERSION 2.6)
-project(GUDHIAlphaShapesExample)
+project(GUDHIDelaunayTriangulationOffFileReadWrite)
 
-# need CGAL 4.7
-# cmake -DCGAL_DIR=~/workspace/CGAL-4.7-Ic-41 ../../..
+# need CGAL 4.6
 if(CGAL_FOUND)
-  if (NOT CGAL_VERSION VERSION_LESS 4.7.0)
+  if (NOT CGAL_VERSION VERSION_LESS 4.6.0)
     message(STATUS "CGAL version: ${CGAL_VERSION}.")
 
     include( ${CGAL_USE_FILE} )
@@ -14,9 +13,9 @@ if(CGAL_FOUND)
       message(STATUS "Eigen3 version: ${EIGEN3_VERSION}.")
       include( ${EIGEN3_USE_FILE} )
       
-      #add_definitions(-DDEBUG_TRACES)
-      add_executable ( stfromdt Simplex_tree_from_delaunay_triangulation.cpp )
-      target_link_libraries(stfromdt  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
+      add_executable ( dtoffrw Delaunay_triangulation_off_rw.cpp )
+      target_link_libraries(dtoffrw  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
+      add_test(dtoffrw ${CMAKE_CURRENT_BINARY_DIR}/dtoffrw ${CMAKE_SOURCE_DIR}/data/points/alphashapedoc.off ${CMAKE_CURRENT_BINARY_DIR}/result.off)
 
     else()
       message(WARNING "Eigen3 not found. Version 3.1.0 is required for Alpha shapes feature.")

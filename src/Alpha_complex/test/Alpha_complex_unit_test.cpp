@@ -25,25 +25,10 @@
 #include <boost/system/error_code.hpp>
 #include <boost/chrono/thread_clock.hpp>
 // to construct a Delaunay_triangulation from a OFF file
-#include "gudhi/Alpha_shapes/Delaunay_triangulation_off_io.h"
+#include "gudhi/Delaunay_triangulation_off_io.h"
 #include "gudhi/Alpha_complex.h"
 
-// to construct a simplex_tree from Delaunay_triangulation
-#include "gudhi/graph_simplicial_complex.h"
-#include "gudhi/Simplex_tree.h"
-
-#include <CGAL/Delaunay_triangulation.h>
-#include <CGAL/Epick_d.h>
-#include <CGAL/point_generators_d.h>
-#include <CGAL/algorithm.h>
-#include <CGAL/assertions.h>
-
-#include <iostream>
-#include <iterator>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
+#include <cmath> // float comparison
 
 // Use dynamic_dimension_tag for the user to be able to set dimension
 typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > K;
@@ -51,7 +36,7 @@ typedef CGAL::Delaunay_triangulation<K> T;
 // The triangulation uses the default instantiation of the 
 // TriangulationDataStructure template parameter
 
-BOOST_AUTO_TEST_CASE( OFF_file ) {
+BOOST_AUTO_TEST_CASE( S4_100_OFF_file ) {
   // ----------------------------------------------------------------------------
   //
   // Init of an alpha-complex from a OFF file
@@ -66,61 +51,37 @@ BOOST_AUTO_TEST_CASE( OFF_file ) {
   std::cout << "alpha_complex_from_file.dimension()=" << alpha_complex_from_file.dimension() << std::endl;
   BOOST_CHECK(alpha_complex_from_file.dimension() == DIMENSION);
   
-  const double FILTRATION = 0.0;
-  std::cout << "alpha_complex_from_file.filtration()=" << alpha_complex_from_file.filtration() << std::endl;
-  BOOST_CHECK(alpha_complex_from_file.filtration() == FILTRATION);
-  
   const int NUMBER_OF_VERTICES = 100;
   std::cout << "alpha_complex_from_file.num_vertices()=" << alpha_complex_from_file.num_vertices() << std::endl;
   BOOST_CHECK(alpha_complex_from_file.num_vertices() == NUMBER_OF_VERTICES);
   
-  const int NUMBER_OF_SIMPLICES = 6779;
+  const int NUMBER_OF_SIMPLICES = 6879;
   std::cout << "alpha_complex_from_file.num_simplices()=" << alpha_complex_from_file.num_simplices() << std::endl;
   BOOST_CHECK(alpha_complex_from_file.num_simplices() == NUMBER_OF_SIMPLICES);
 
 }
 
-BOOST_AUTO_TEST_CASE( Delaunay_triangulation ) {
+BOOST_AUTO_TEST_CASE( S8_10_OFF_file ) {
   // ----------------------------------------------------------------------------
   //
-  // Init of an alpha-complex from a Delaunay triangulation
+  // Init of an alpha-complex from a OFF file
   //
   // ----------------------------------------------------------------------------
-  T dt;
   std::string off_file_name("S8_10.off");
   std::cout << "========== OFF FILE NAME = " << off_file_name << " ==========" << std::endl;
   
-  Gudhi::alphacomplex::Delaunay_triangulation_off_reader<T> off_reader(off_file_name, dt);
-  std::cout << "off_reader.is_valid()=" << off_reader.is_valid() << std::endl;
-  BOOST_CHECK(off_reader.is_valid());
-
-  const int NUMBER_OF_VERTICES = 10;
-  std::cout << "dt.number_of_vertices()=" << dt.number_of_vertices() << std::endl;
-  BOOST_CHECK(dt.number_of_vertices() == NUMBER_OF_VERTICES);
-  
-  const int NUMBER_OF_FULL_CELLS = 30;
-  std::cout << "dt.number_of_full_cells()=" << dt.number_of_full_cells() << std::endl;
-  BOOST_CHECK(dt.number_of_full_cells() == NUMBER_OF_FULL_CELLS);
-  
-  const int NUMBER_OF_FINITE_FULL_CELLS = 6;
-  std::cout << "dt.number_of_finite_full_cells()=" << dt.number_of_finite_full_cells() << std::endl;
-  BOOST_CHECK(dt.number_of_finite_full_cells() == NUMBER_OF_FINITE_FULL_CELLS);
-
-  Gudhi::alphacomplex::Alpha_complex alpha_complex_from_dt(dt);
+  Gudhi::alphacomplex::Alpha_complex alpha_complex_from_file(off_file_name);
 
   const int DIMENSION = 8;
-  std::cout << "alpha_complex_from_dt.dimension()=" << alpha_complex_from_dt.dimension() << std::endl;
-  BOOST_CHECK(alpha_complex_from_dt.dimension() == DIMENSION);
+  std::cout << "alpha_complex_from_file.dimension()=" << alpha_complex_from_file.dimension() << std::endl;
+  BOOST_CHECK(alpha_complex_from_file.dimension() == DIMENSION);
   
-  const double FILTRATION = 0.0;
-  std::cout << "alpha_complex_from_dt.filtration()=" << alpha_complex_from_dt.filtration() << std::endl;
-  BOOST_CHECK(alpha_complex_from_dt.filtration() == FILTRATION);
+  const int NUMBER_OF_VERTICES = 10;
+  std::cout << "alpha_complex_from_file.num_vertices()=" << alpha_complex_from_file.num_vertices() << std::endl;
+  BOOST_CHECK(alpha_complex_from_file.num_vertices() == NUMBER_OF_VERTICES);
   
-  std::cout << "alpha_complex_from_dt.num_vertices()=" << alpha_complex_from_dt.num_vertices() << std::endl;
-  BOOST_CHECK(alpha_complex_from_dt.num_vertices() == NUMBER_OF_VERTICES);
-  
-  const int NUMBER_OF_SIMPLICES = 997;
-  std::cout << "alpha_complex_from_dt.num_simplices()=" << alpha_complex_from_dt.num_simplices() << std::endl;
-  BOOST_CHECK(alpha_complex_from_dt.num_simplices() == NUMBER_OF_SIMPLICES);
-}
+  const int NUMBER_OF_SIMPLICES = 1007;
+  std::cout << "alpha_complex_from_file.num_simplices()=" << alpha_complex_from_file.num_simplices() << std::endl;
+  BOOST_CHECK(alpha_complex_from_file.num_simplices() == NUMBER_OF_SIMPLICES);
 
+}

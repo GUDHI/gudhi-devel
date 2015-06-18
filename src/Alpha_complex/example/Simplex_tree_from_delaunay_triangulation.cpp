@@ -21,18 +21,12 @@
  */
 
 // to construct a Delaunay_triangulation from a OFF file
-#include "gudhi/Alpha_shapes/Delaunay_triangulation_off_io.h"
+#include "gudhi/Delaunay_triangulation_off_io.h"
 #include "gudhi/Alpha_complex.h"
 
 // to construct a simplex_tree from Delaunay_triangulation
 #include "gudhi/graph_simplicial_complex.h"
 #include "gudhi/Simplex_tree.h"
-
-#include <CGAL/Delaunay_triangulation.h>
-#include <CGAL/Epick_d.h>
-#include <CGAL/point_generators_d.h>
-#include <CGAL/algorithm.h>
-#include <CGAL/assertions.h>
 
 #include <iostream>
 #include <iterator>
@@ -40,12 +34,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-
-// Use dynamic_dimension_tag for the user to be able to set dimension
-typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > K;
-typedef CGAL::Delaunay_triangulation<K> T;
-// The triangulation uses the default instanciation of the 
-// TriangulationDataStructure template parameter
 
 void usage(char * const progName) {
   std::cerr << "Usage: " << progName << " filename.off" << std::endl;
@@ -62,7 +50,7 @@ int main(int argc, char **argv) {
 
   // ----------------------------------------------------------------------------
   //
-  // Init of an alpha-complex from a OFF file
+  // Init of an alpha-complex from an OFF file
   //
   // ----------------------------------------------------------------------------
   Gudhi::alphacomplex::Alpha_complex alpha_complex_from_file(off_file_name);
@@ -71,7 +59,14 @@ int main(int argc, char **argv) {
   std::cout << "alpha_complex_from_file.filtration()=" << alpha_complex_from_file.filtration() << std::endl;
   std::cout << "alpha_complex_from_file.num_simplices()=" << alpha_complex_from_file.num_simplices() << std::endl;
   std::cout << "alpha_complex_from_file.num_vertices()=" << alpha_complex_from_file.num_vertices() << std::endl;
-  std::cout << alpha_complex_from_file << std::endl;
-
+  
+  std::cout << "Iterator on Simplices in the filtration order, with [filtration value]:" << std::endl;
+  for (auto f_simplex : alpha_complex_from_file.filtration_simplex_range()) {
+    std::cout << "   " << "[" << alpha_complex_from_file.filtration(f_simplex) << "] ";
+    for (auto vertex : alpha_complex_from_file.simplex_vertex_range(f_simplex)) {
+      std::cout << vertex << " ";
+    }
+    std::cout << std::endl;
+  }
   return 0;
 }
