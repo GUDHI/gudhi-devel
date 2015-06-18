@@ -37,8 +37,3 @@ if(CGAL_FOUND)
   endif ()
 endif()
 
-
-
-
-
-cpplint_add_tests("${CMAKE_SOURCE_DIR}/src/common/include/gudhi")
