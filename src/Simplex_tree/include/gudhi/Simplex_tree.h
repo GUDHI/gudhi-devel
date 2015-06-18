@@ -627,7 +627,7 @@ private:
                     curr_res->push_back(sib->first);
 					bool egalDim = (codimension == length || curr_res->size() == codimension); // dimension of actual simplex == codimension
 					if (egalDim)
- 	                   cofaces.push_back(find(*curr_res));
+ 	                   cofaces.push_back(curr_sib->members().find(sib->first));
                     if (has_children(sib))
                         rec_coface(vertices, sib->second.children(), curr_res, cofaces, length, codimension);
                     curr_res->pop_back();
@@ -640,7 +640,7 @@ private:
                     curr_res->push_back(sib->first);
 					bool egalDim = (codimension == length || curr_res->size() == codimension); // dimension of actual simplex == codimension
                     if (vertices.size() == 1 &&  curr_res->size() > length && egalDim)
-                        cofaces.push_back(find(*curr_res));
+                        cofaces.push_back(curr_sib->members().find(sib->first));
                     if (has_children(sib))
                     { // Rec call
                         Vertex_handle tmp = vertices[vertices.size()-1];
@@ -665,33 +665,33 @@ private:
 
 public:
     /** \brief Compute the star of a n simplex
-     * \param vertices handles the simplex of which we search the star
+     * \param simplex handles the simplex of which we search the star
      * \return Vector of Simplex_handle, empty vector if no cofaces found.
      */
     
-    std::vector<Simplex_handle> star(const Simplex_handle &vertices)	{
-        return coface(vertices, 0);
+    std::vector<Simplex_handle> star_simplex_range(const Simplex_handle simplex)	{
+        return cofaces_simplex_range(simplex, 0);
     }
     
     
     
     /** \brief Compute the cofaces of a n simplex
-     * \param vertices handles the n-simplex of which we search the n+codimension cofaces
+     * \param simplex handles the n-simplex of which we search the n+codimension cofaces
      * \param codimension The function returns the n+codimension-cofaces of the n-simplex. If codimension = 0, return all cofaces (equivalent of star function)
      * \return Vector of Simplex_handle, empty vector if no cofaces found.
      * \warning n+codimension must be lower than Simplex_tree dimension, otherwise an an empty vector is returned.
      */
     
-    std::vector<Simplex_handle> coface(const Simplex_handle &vertices, int codimension)	{
+    std::vector<Simplex_handle> cofaces_simplex_range(const Simplex_handle simplex, int codimension)	{
         std::vector<Simplex_handle> cofaces;
 		if (dimension_ == -1) // Empty simplex tree
 			return cofaces;
-        if (vertices == null_simplex()) // Empty simplex
+        if (simplex == null_simplex()) // Empty simplex
             return cofaces;
         if (codimension < 0) // codimension must be positive or null integer
             return cofaces; 
         std::vector<Vertex_handle> copy;
-		Simplex_vertex_range rg = simplex_vertex_range(vertices);
+		Simplex_vertex_range rg = simplex_vertex_range(simplex);
 		for (auto it = rg.begin(); it != rg.end(); ++it)
 			copy.push_back(*it);
         if (codimension + copy.size() > (unsigned long)(dimension_ + 1) || (codimension == 0 && copy.size() > (unsigned long)dimension_) ) // n+codimension greater than dimension_

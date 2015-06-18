@@ -178,9 +178,9 @@ void test_cofaces(typeST& st, std::vector<Vertex_handle> v, int dim, std::vector
 {
 	std::vector<typeST::Simplex_handle> cofaces;
 	if (dim == 0)
-		cofaces = st.star(st.find(v));
+		cofaces = st.star_simplex_range(st.find(v));
 	else
-		cofaces = st.coface(st.find(v), dim);
+		cofaces = st.cofaces_simplex_range(st.find(v), dim);
 	std::vector<Vertex_handle> currentVertices;
 	for (unsigned long i = 0; i < cofaces.size(); ++i)
 	{
