@@ -62,6 +62,10 @@ do
     then
       # SPECIFIC FOR CMAKE MODULES
       cp -R $ROOT_DIR/src/$package $VERSION_DIR
+    elif [ "$package" == "GudhUI" ]
+    then
+      # SPECIFIC FOR GUDHI USER INTERFACE
+      cp -R $ROOT_DIR/src/$package $VERSION_DIR
     else
       # PACKAGE COPY
       if [ -d "$ROOT_DIR/src/$package$PACKAGE_INC_DIR" ]
