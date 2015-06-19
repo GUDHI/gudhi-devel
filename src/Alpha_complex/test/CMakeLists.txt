@@ -16,9 +16,11 @@ if(CGAL_FOUND)
       include_directories (BEFORE "../../include")
 
       #add_definitions(-DDEBUG_TRACES)
-      add_executable ( AlphaComplexUnitTest Alpha_complex_unit_test.cpp )
-      target_link_libraries(AlphaComplexUnitTest  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
-      add_test(AlphaComplexUnitTest ${CMAKE_CURRENT_BINARY_DIR}/AlphaComplexUnitTest)
+      add_executable ( AlphaComplexUT Alpha_complex_unit_test.cpp )
+      target_link_libraries(AlphaComplexUT  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+      add_test(AlphaComplexUT ${CMAKE_CURRENT_BINARY_DIR}/AlphaComplexUT
+      # XML format for Jenkins xUnit plugin 
+      --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/AlphaComplexUT.xml --log_level=test_suite --report_level=no)
 
     else()
       message(WARNING "Eigen3 not found. Version 3.1.0 is required for Alpha complex feature.")
