@@ -15,9 +15,8 @@ if(CGAL_FOUND)
       include( ${EIGEN3_USE_FILE} )
       
       #add_definitions(-DDEBUG_TRACES)
-      add_executable ( stfromdt Simplex_tree_from_delaunay_triangulation.cpp )
-      target_link_libraries(stfromdt  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
-
+      add_executable ( alphaoffreader Alpha_complex_from_off.cpp )
+      target_link_libraries(alphaoffreader  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
     else()
       message(WARNING "Eigen3 not found. Version 3.1.0 is required for Alpha shapes feature.")
     endif()
