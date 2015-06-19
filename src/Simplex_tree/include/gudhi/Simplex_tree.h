@@ -325,7 +325,7 @@ class Simplex_tree {
   /** \brief Returns the filtration value of a simplex.
    *
    * Called on the null_simplex, returns INFINITY. */
-  Filtration_value filtration(Simplex_handle sh) {
+  Filtration_value filtration(Simplex_handle sh) const {
     if (sh != null_simplex()) {
       return sh->second.filtration();
     } else {
@@ -333,34 +333,34 @@ class Simplex_tree {
     }  // filtration(); }
   }
   /** \brief Returns an upper bound of the filtration values of the simplices. */
-  Filtration_value filtration() {
+  Filtration_value filtration() const {
     return threshold_;
   }
   /** \brief Returns a Simplex_handle different from all Simplex_handles
    * associated to the simplices in the simplicial complex.
    *
    * One can call filtration(null_simplex()). */
-  Simplex_handle null_simplex() {
+  Simplex_handle null_simplex() const {
     return Dictionary_it(NULL);
   }
   /** \brief Returns a key different for all keys associated to the
    * simplices of the simplicial complex. */
-  Simplex_key null_key() {
+  Simplex_key null_key() const {
     return -1;
   }
   /** \brief Returns a Vertex_handle different from all Vertex_handles associated
    * to the vertices of the simplicial complex. */
-  Vertex_handle null_vertex() {
+  Vertex_handle null_vertex() const {
     return null_vertex_;
   }
   /** \brief Returns the number of vertices in the complex. */
-  size_t num_vertices() {
+  size_t num_vertices() const {
     return root_.members_.size();
   }
   /** \brief Returns the number of simplices in the complex.
    *
    * Does not count the empty simplex. */
-  const unsigned int& num_simplices() const {
+  unsigned int num_simplices() const {
     return num_simplices_;
   }
 
@@ -377,13 +377,13 @@ class Simplex_tree {
     return dim - 1;
   }
   /** \brief Returns an upper bound on the dimension of the simplicial complex. */
-  int dimension() {
+  int dimension() const {
     return dimension_;
   }
 
   /** \brief Returns true iff the node in the simplex tree pointed by
    * sh has children.*/
-  bool has_children(Simplex_handle sh) {
+  bool has_children(Simplex_handle sh) const {
     return (sh->second.children()->parent() == sh->first);
   }
 
@@ -563,7 +563,7 @@ class Simplex_tree {
     threshold_ = fil;
   }
   /** Set a number of simplices for the simplicial complex. */
-  void set_num_simplices(const unsigned int& num_simplices) {
+  void set_num_simplices(unsigned int num_simplices) {
     num_simplices_ = num_simplices;
   }
   /** Set a dimension for the simplicial complex. */
@@ -771,10 +771,10 @@ class Simplex_tree {
   }
   /** \brief Intersects Dictionary 1 [begin1;end1) with Dictionary 2 [begin2,end2)
    * and assigns the maximal possible Filtration_value to the Nodes. */
-  void intersection(std::vector<std::pair<Vertex_handle, Node> >& intersection,
-                    Dictionary_it begin1, Dictionary_it end1,
-                    Dictionary_it begin2, Dictionary_it end2,
-                    Filtration_value filtration) {
+  static void intersection(std::vector<std::pair<Vertex_handle, Node> >& intersection,
+                           Dictionary_it begin1, Dictionary_it end1,
+                           Dictionary_it begin2, Dictionary_it end2,
+                           Filtration_value filtration) {
     if (begin1 == end1 || begin2 == end2)
       return;  // ----->>
     while (true) {
@@ -801,8 +801,8 @@ class Simplex_tree {
     }
   }
   /** Maximum over 3 values.*/
-  Filtration_value maximum(Filtration_value a, Filtration_value b,
-                           Filtration_value c) {
+  static Filtration_value maximum(Filtration_value a, Filtration_value b,
+                                  Filtration_value c) {
     Filtration_value max = (a < b) ? b : a;
     return ((max < c) ? c : max);
   }
