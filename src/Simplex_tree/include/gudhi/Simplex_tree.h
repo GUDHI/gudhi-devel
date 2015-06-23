@@ -258,7 +258,7 @@ class Simplex_tree {
    * equal to \f$(-1)^{\text{dim} \sigma}\f$ the canonical orientation on the simplex.
    */
   Simplex_vertex_range simplex_vertex_range(Simplex_handle sh) {
-//    assert (simplex != null_simplex()); // Empty simplex
+    assert (sh != null_simplex()); // Empty simplex
     return Simplex_vertex_range(Simplex_vertex_iterator(this, sh),
                                 Simplex_vertex_iterator(this));
   }
@@ -698,7 +698,6 @@ public:
     
     Coface_simplex_range coface_simplex_range(const Simplex_handle simplex, int codimension)	{
         std::vector<Simplex_handle> cofaces;
-        assert (simplex != null_simplex()); // Empty simplex
         assert (codimension >= 0); // codimension must be positive or null integer
 		Simplex_vertex_range rg = simplex_vertex_range(simplex);
         std::vector<Vertex_handle> copy(rg.begin(), rg.end());
