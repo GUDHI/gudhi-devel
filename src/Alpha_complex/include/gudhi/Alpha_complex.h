@@ -51,47 +51,105 @@ namespace alphacomplex {
 
 #define Kinit(f) =k.f()
 
-/** \defgroup alpha_complex Alpha complex in dimension N
- * @{
- * \author    Vincent Rouvreau
- *
- * \section Definition
+/** \tableofcontents
+ *  \defgroup alpha_complex Alpha complex
  * 
- * Alpha_complex is a Simplex_tree constructed from each finite cell of a Delaunay Triangulation in dimension N.
+ * \author    Vincent Rouvreau
+ * 
+ * @{
+ * 
+ * \section definition Definition
+ * 
+ * Alpha_complex is a Simplex_tree constructed from each finite cell of a Delaunay Triangulation.
  * 
  * The filtration value of each simplex is computed from the alpha value of the simplex if it is Gabriel or
  * from the alpha value of the simplex coface that makes the simplex not Gabriel.
  * 
- * Please refer to \cite AlphaShapesDefinition for the alpha complex definition or to 
- * \cite AlphaShapesIntroduction for alpha complex concept vulgarization.
+ * Please refer to \cite AlphaShapesDefinition for a more complete alpha complex definition.
  * 
- * \section Example
+ * Alpha complex are interesting because it looks like an \ref alpha-shape "Alpha shape" as described in
+ * \cite AlphaShapesIntroduction (an alpha complex concept vulgarization).
  * 
- * This example loads points from an OFF file, builds the Delaunay triangulation, and finally initialize the 
- * alpha complex with it.
+ * \section example Example
+ * 
+ * This example loads points from an OFF file, builds the Delaunay triangulation from the points, and finally
+ * initialize the alpha complex with it.
+ * 
  * Then, it is asked to display information about the alpha complex.
  * 
  * \include Alpha_complex_from_off.cpp
  * 
  * When launching:
  * 
- * \code $> ./alphaoffreader ../../data/points/alphashapedoc.off
+ * \code $> ./alphaoffreader ../../data/points/alphacomplexdoc.off
  * \endcode
  *
  * the program output is:
  * 
  * \include alphaoffreader_for_doc.txt
+ * 
+ * \section algorithm Algorithm
+ * 
+ * <b>Data structure</b>
+ * 
+ * In order to build the alpha complex, first, a Simplex tree is build from the cells of a Delaunay Triangulation.
+ * (The filtration value is set to NaN, which stands for unknown value):
+ * \image html "alpha_complex_doc.png" "Simplex tree structure construction example"
+ *
+ * <b>Filtration value computation algorithm</b>
+ *
+ * \f{algorithm}{ 
+ * \caption{Filtration value computation algorithm}\label{alpha}
+ * \begin{algorithmic}
+ * \For{i : dimension $\rightarrow$ 1}
+ *   \ForAll{$\sigma$ of dimension i}
+ *     \If {filtration($\sigma$) is NaN}
+ *       \State filtration($\sigma$) = $\alpha(\sigma)$
+ *     \EndIf
+ *     \ForAll{$\tau$ face of $\sigma$} \Comment{propagate alpha filtration value}
+ *       \If {filtration($\tau$) is not NaN} 
+ *         \State filtration($\tau$) = min (filtration($\tau$), filtration($\sigma$))
+ *       \Else
+ *         \If {$\tau$ is not Gabriel for $\sigma$} 
+ *           \State filtration($\tau$) = filtration($\sigma$)
+ *         \EndIf
+ *       \EndIf
+ *     \EndFor
+ *   \EndFor
+ * \EndFor
+ * \end{algorithmic}
+ * \f}
+ * 
+ * From the example above, it means the algorithm will look into each triangulation ([1,2,3], [2,3,4], [1,3,5], ...),
+ * will compute the filtration value of the triangulation, and then will propagate the filtration value as described
+ * here :
+ * \image html "alpha_complex_doc_135.png" "Filtration value propagation example"
+ * Then, the algorithm will look into each edge ([1,2], [2,3], [1,3], ...),
+ * will compute the filtration value of the edge (in this case, propagation will have no effect).
+ * 
+ * Finally, the algorithm will look into each vertex ([1], [2], [3], [4], [5], [6] and [7]),
+ * will set the filtration value (0 in case of a vertex - propagation will have no effect).
+ * 
+ * \section alpha-shape Alpha shape
+ * 
+ * In the example above, the alpha shape of \f$\alpha_{74} < \alpha < \alpha_{73}\f$ is the alpha complex where the 
+ * \f$\alpha_{74} <\f$ filtration value \f$< \alpha_{73}\f$ as described in \cite AlphaShapesIntroduction
+ * 
+ * \image html "alpha_complex_doc_alpha_shape.png" "Alpha shape example"
+ * \copyright GNU General Public License v3.                         
+ * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
  */
 /** @} */  // end defgroup alpha_complex
 
 /**
  * \brief Alpha complex data structure.
  *
- * \details Every simplex \f$[v_0, \cdots ,v_d]\f$ admits a canonical orientation
- * induced by the order relation on vertices \f$ v_0 < \cdots < v_d \f$.
- *
- * Details may be found in \cite boissonnatmariasimplextreealgorithmica.
- *
+ * \details
+ * The data structure can be constructed from a CGAL Delaunay triangulation (for more informations on CGAL Delaunay 
+ * triangulation, please refer to the corresponding chapter in page http://doc.cgal.org/latest/Triangulation/) or from
+ * an OFF file (cf. Delaunay_triangulation_off_reader).
+ * 
+ * Please refer to \ref alpha_complex for examples.
  *
  */
 template<typename IndexingTag = linear_indexing_tag,
