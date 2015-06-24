@@ -44,6 +44,7 @@
 #include <vector>
 #include <string>
 #include <limits> // NaN
+#include <iterator>     // std::iterator
 
 namespace Gudhi {
 
@@ -62,11 +63,6 @@ namespace alphacomplex {
  * Please refer to \ref alpha_complex for examples.
  *
  */
-template<typename IndexingTag = linear_indexing_tag,
-typename FiltrationValue = double,
-typename SimplexKey = int,  // must be a signed integer type
-typename VertexHandle = int  // must be a signed integer type, int convertible to it
->
 class Alpha_complex : public Simplex_tree<> {
  private:
   // From Simplex_tree
@@ -94,6 +90,9 @@ class Alpha_complex : public Simplex_tree<> {
 
   // Boost bimap type to switch from CGAL vertex iterator to simplex tree vertex handle and vice versa.
   typedef boost::bimap< CGAL_vertex_iterator, Vertex_handle > Bimap_vertex;
+  
+  // size_type type from CGAL.
+  typedef Delaunay_triangulation::size_type size_type;
 
  private:
   /** \brief Boost bimap to switch from CGAL vertex iterator to simplex tree vertex handle and vice versa.*/
@@ -108,7 +107,7 @@ class Alpha_complex : public Simplex_tree<> {
    *
    * @param[in] off_file_name OFF file [path and] name.
    */
-  Alpha_complex(std::string& off_file_name)
+  Alpha_complex(const std::string& off_file_name)
       : triangulation(nullptr) {
     Gudhi::Delaunay_triangulation_off_reader<Delaunay_triangulation> off_reader(off_file_name);
     if (!off_reader.is_valid()) {
@@ -125,6 +124,27 @@ class Alpha_complex : public Simplex_tree<> {
    */
   Alpha_complex(Delaunay_triangulation* triangulation_ptr)
       : triangulation(triangulation_ptr) {
+    init();
+  }
+
+  /** \brief Alpha_complex constructor from a list of points.
+   * Uses the Delaunay_triangulation_off_reader to construct the Delaunay triangulation required to initialize 
+   * the Alpha_complex.
+   *
+   * @param[in] dimension Dimension of points to be inserted.
+   * @param[in] size Number of points to be inserted.
+   * @param[in] firstPoint Iterator on the first point to be inserted.
+   * @param[in] last Point Iterator on the last point to be inserted.
+   */
+  template<typename ForwardIterator >
+  Alpha_complex(int dimension, size_type size, ForwardIterator firstPoint, ForwardIterator lastPoint)
+      : triangulation(nullptr) {
+    triangulation = new Delaunay_triangulation(dimension);
+    Delaunay_triangulation::size_type inserted = triangulation->insert<ForwardIterator>(firstPoint, lastPoint);
+    if (inserted != size) {
+      std::cerr << "Alpha_complex - insertion failed " << inserted << " != " << size<< std::endl;
+      exit(-1); // ----- >>
+    }
     init();
   }
 

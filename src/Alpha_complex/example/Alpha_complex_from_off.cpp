@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
   // ----------------------------------------------------------------------------
   // Init of an alpha complex from an OFF file
   // ----------------------------------------------------------------------------
-  Gudhi::alphacomplex::Alpha_complex<> alpha_complex_from_file(off_file_name);
+  Gudhi::alphacomplex::Alpha_complex alpha_complex_from_file(off_file_name);
   
   // ----------------------------------------------------------------------------
   // Display information about the alpha complex

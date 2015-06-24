@@ -48,8 +48,10 @@ CGAL is a C++ library which provides easy access to efficient and reliable geome
 The following example requires the <a href="http://www.cgal.org/">Computational Geometry Algorithms Library</a> (CGAL) 
 and will not be built if CGAL is not installed:
   - Simplex_tree/simplex_tree_from_alpha_shapes_3
+  - Alpha_complex/Alpha_complex_from_off
+  - Alpha_complex/Alpha_complex_from_points
 
-Having CGAL version 4.4 or higher installed is recommended. The procedure to install this library according to
+Having CGAL version 4.7 or higher installed is recommended. The procedure to install this library according to
 your operating system is detailed here http://doc.cgal.org/latest/Manual/installation.html
 
 \subsection demos Demos and examples
