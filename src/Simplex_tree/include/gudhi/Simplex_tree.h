@@ -26,11 +26,13 @@
 #include <gudhi/Simplex_tree/Simplex_tree_node_explicit_storage.h>
 #include <gudhi/Simplex_tree/Simplex_tree_siblings.h>
 #include <gudhi/Simplex_tree/Simplex_tree_iterators.h>
+#include <gudhi/reader_utils.h>
 #include <gudhi/Simplex_tree/indexing_tag.h>
 
 #include <boost/container/flat_map.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/graph/adjacency_list.hpp>
+#include <gudhi/graph_simplicial_complex.h>
 
 #include <algorithm>
 #include <utility>
@@ -289,6 +291,55 @@ class Simplex_tree {
         dimension_(-1) {
   }
 
+  /** \brief Copy; copy the whole tree structure. */
+  Simplex_tree(Simplex_tree& copy) : root_(NULL, -1)
+	{
+		null_vertex_ = copy.null_vertex_;
+		threshold_ = copy.threshold_;
+		num_simplices_ = copy.num_simplices_;
+		filtration_vect_ = copy.filtration_vect_;
+		dimension_ = copy.dimension_;
+		std::vector<Vertex_handle> v;
+		for (auto sh = copy.root_.members().begin(); sh != copy.root_.members().end(); ++sh)
+		{
+			v.push_back(sh->first);
+			if (has_children(sh)) {
+				rec_copy(sh->second.children(), v);
+			}
+			else {
+				insert_simplex(v, sh->second.filtration());
+			}
+			v.pop_back();
+		}
+	}
+
+  /** rec_copy: DFS, inserts simplices when reaching a leaf.*/
+  void rec_copy(Siblings * sib, std::vector<Vertex_handle> v)
+  {
+	  for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh)
+	  {
+		  v.push_back(sh->first);
+		  if (has_children(sh)) {
+			  rec_copy(sh->second.children(), v);
+		  }
+		  else {
+			  insert_simplex(v, sh->second.filtration());
+		  }
+		  v.pop_back();
+	  }
+  }
+
+
+  /** \brief Move; moves the whole tree structure. */
+  Simplex_tree(Simplex_tree&& old) : null_vertex_(std::move(old.null_vertex_)), threshold_(std::move(old.threshold_)), filtration_vect_(std::move(old.filtration_vect_))
+	{
+		dimension_ = std::move(old.dimension_);
+		num_simplices_ = std::move(old.num_simplices_);
+		old.dimension_ = -1;
+		old.num_simplices_ = 0;
+		root_ = std::move(old.root_);
+	}
+
   /** \brief Destructor; deallocates the whole tree structure. */
   ~Simplex_tree() {
     for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh) {
@@ -309,12 +360,37 @@ class Simplex_tree {
     delete sib;
   }
 
+ public: 
+  /** \brief print_tree: prints the tree in a hierarchical manner. */
+  void print_tree()
+  {
+	  for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh)
+	  {
+		  std::cout << sh->first << " ";
+		  if (has_children(sh))
+			  rec_print(sh->second.children());
+		  std::cout << std::endl;
+	  }
+  }
+
+ private:
+  /** rec_print: prints the tree recursively, using DFS. */
+  void rec_print(Siblings * sib)
+  {
+	  for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh)
+	  {
+		  std::cout << sh->first << " ";
+		  if (has_children(sh))
+			  rec_print(sh->second.children());
+	  }
+  }
+
  public:
   /** \brief Returns the key associated to a simplex.
    *
    * The filtration must be initialized. */
   Simplex_key key(Simplex_handle sh) {
-    return sh->second.key();
+	  return sh->second.key();
   }
   /** \brief Returns the simplex associated to a key.
    *
