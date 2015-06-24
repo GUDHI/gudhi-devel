@@ -179,7 +179,7 @@ void test_cofaces(typeST& st, std::vector<Vertex_handle> v, int dim, std::vector
 	if (dim == 0)
 		cofaces = st.star_simplex_range(st.find(v));
 	else
-		cofaces = st.coface_simplex_range(st.find(v), dim);
+		cofaces = st.cofaces_simplex_range(st.find(v), dim);
 	for (auto simplex = cofaces.begin(); simplex != cofaces.end(); ++simplex)
 	{
 		typeST::Simplex_vertex_range rg = st.simplex_vertex_range(*simplex);

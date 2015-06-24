@@ -157,11 +157,7 @@ class Simplex_tree {
   /** \brief Range over the vertices of a simplex. */
   typedef boost::iterator_range<Simplex_vertex_iterator> Simplex_vertex_range;
   /** \brief Range over the cofaces of a simplex. */
-  /** \brief Iterator over the cofaces of a simplex.
-   *
-   * 'value_type' is Vertex_handle. */
-  typedef typename std::vector<Simplex_handle>::iterator Coface_simplex_iterator;
-  typedef boost::iterator_range<Coface_simplex_iterator> Coface_simplex_range;
+  typedef std::vector<Simplex_handle> Coface_simplex_range;
   /** \brief Iterator over the simplices of the boundary of a simplex.
    *
    * 'value_type' is Simplex_handle. */
@@ -397,7 +393,7 @@ class Simplex_tree {
   
   /** \brief Returns true iff the node in the simplex tree pointed by
    * sh has children.*/
-  bool has_children(Dit_value_t sh) {
+  bool has_children(Dit_value_t & sh) {
     return (sh.second.children()->parent() == sh.first);
   }
 
@@ -685,7 +681,7 @@ public:
      */
     
     Coface_simplex_range star_simplex_range(const Simplex_handle simplex)	{
-        return coface_simplex_range(simplex, 0);
+        return cofaces_simplex_range(simplex, 0);
     }
     
     
@@ -696,8 +692,8 @@ public:
      * \return Vector of Simplex_handle, empty vector if no cofaces found.
      */
     
-    Coface_simplex_range coface_simplex_range(const Simplex_handle simplex, int codimension)	{
-        std::vector<Simplex_handle> cofaces;
+    Coface_simplex_range cofaces_simplex_range(const Simplex_handle simplex, int codimension)	{
+        Coface_simplex_range cofaces;
         assert (codimension >= 0); // codimension must be positive or null integer
 		Simplex_vertex_range rg = simplex_vertex_range(simplex);
         std::vector<Vertex_handle> copy(rg.begin(), rg.end());
@@ -706,7 +702,7 @@ public:
 		assert(std::is_sorted(copy.begin(), copy.end(), std::greater<Vertex_handle>()));  // must be sorted in decreasing order
         std::vector<Vertex_handle> res;
         rec_coface(copy, &root_, res, cofaces, (int)copy.size(), codimension + (int)copy.size());
-		return Coface_simplex_range(cofaces.begin(), cofaces.end());
+		return cofaces;
     }
 
 
