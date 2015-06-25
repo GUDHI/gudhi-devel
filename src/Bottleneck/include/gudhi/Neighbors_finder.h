@@ -26,7 +26,7 @@
 #include <unordered_set>
 #include <list>
 
-#include "gudhi/Planar_neighbors_finder.h"
+#include "Planar_neighbors_finder.h"
 
 namespace Gudhi {
 
@@ -37,56 +37,65 @@ namespace bottleneck {
 // V's points have to be added manually using their index. A neighbor returned is automatically removed.
 
 class Neighbors_finder {
- public:
-  Neighbors_finder(const Persistence_diagrams_graph& g, double r);
-  void add(int v_point_index);
-  int pull_near(int u_point_index);
-  std::list<int>* pull_all_near(int u_point_index);
+public:
+    Neighbors_finder(const Persistence_diagrams_graph& g, double r);
+    void add(int v_point_index);
+    int pull_near(int u_point_index);
+    std::unique_ptr< std::list<int> > pull_all_near(int u_point_index);
 
- private:
-  const Persistence_diagrams_graph& g;
-  const double r;
-  Planar_neighbors_finder planar_neighbors_f;
-  std::unordered_set<int> projections_f;
+private:
+    const Persistence_diagrams_graph& g;
+    const double r;
+    Planar_neighbors_finder planar_neighbors_f;
+    std::unordered_set<int> projections_f;
+    void remove(int v_point_index);
+    bool contains(int v_point_index);
 };
 
 Neighbors_finder::Neighbors_finder(const Persistence_diagrams_graph& g, double r) :
     g(g), r(r), planar_neighbors_f(g, r), projections_f() { }
 
-inline void Neighbors_finder::add(int v_point_index) {
-  if (g.on_the_v_diagonal(v_point_index))
-    projections_f.emplace(v_point_index);
-  else
-    planar_neighbors_f.add(v_point_index);
+/* inline */ void Neighbors_finder::add(int v_point_index) {
+    if (g.on_the_v_diagonal(v_point_index))
+        projections_f.emplace(v_point_index);
+    else
+        planar_neighbors_f.add(v_point_index);
 }
 
-inline int Neighbors_finder::pull_near(int u_point_index) {
-  int v_challenger = g.corresponding_point_in_v(u_point_index);
-  if (planar_neighbors_f.contains(v_challenger) && g.distance(u_point_index, v_challenger) < r) {
-    planar_neighbors_f.remove(v_challenger);
-    return v_challenger;
-  }
-  if (g.on_the_u_diagonal(u_point_index)) {
-    auto it = projections_f.cbegin();
-    if (it != projections_f.cend()) {
-      int tmp = *it;
-      projections_f.erase(it);
-      return tmp;
+/* inline */ void Neighbors_finder::remove(int v_point_index) {
+    if(v_point_index == null_point_index())
+        return;
+    if (g.on_the_v_diagonal(v_point_index))
+        projections_f.erase(v_point_index);
+    else
+        planar_neighbors_f.remove(v_point_index);
+}
+
+/* inline */ bool Neighbors_finder::contains(int v_point_index) {
+    return planar_neighbors_f.contains(v_point_index) || (projections_f.count(v_point_index)>0);
+}
+
+/* inline */ int Neighbors_finder::pull_near(int u_point_index) {
+    int tmp;
+    int c = g.corresponding_point_in_v(u_point_index);
+    if (g.on_the_u_diagonal(u_point_index) && projections_f.cbegin()!=projections_f.cend())
+        tmp = *projections_f.cbegin();
+    else if (contains(c) && (g.distance(u_point_index, c) <= r))
+        tmp = c;
+    else
+        tmp = planar_neighbors_f.pull_near(u_point_index);
+    remove(tmp);
+    return tmp;
+}
+
+std::unique_ptr< std::list<int> > Neighbors_finder::pull_all_near(int u_point_index) {
+    std::unique_ptr< std::list<int> > all_pull = std::move(planar_neighbors_f.pull_all_near(u_point_index));
+    int last_pull = pull_near(u_point_index);
+    while (last_pull != null_point_index()) {
+        all_pull->emplace_back(last_pull);
+        last_pull = pull_near(u_point_index);
     }
-  } else {
-    return planar_neighbors_f.pull_near(u_point_index);
-  }
-  return null_point_index();
-}
-
-inline std::list<int>* Neighbors_finder::pull_all_near(int u_point_index) {
-  std::list<int>* all_pull = planar_neighbors_f.pull_all_near(u_point_index);
-  int last_pull = pull_near(u_point_index);
-  while (last_pull != null_point_index()) {
-    all_pull->emplace_back(last_pull);
-    last_pull = pull_near(u_point_index);
-  }
-  return all_pull;
+    return all_pull;
 }
 
 }  // namespace bottleneck

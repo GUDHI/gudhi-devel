@@ -45,7 +45,7 @@ class Abstract_planar_neighbors_finder {
   virtual void remove(int v_point_index) = 0;
   virtual bool contains(int v_point_index) const = 0;
   virtual int pull_near(int u_point_index) = 0;
-  virtual std::list<int>* pull_all_near(int u_point_index);
+  virtual std::unique_ptr< std::list<int> > pull_all_near(int u_point_index);
 
  protected:
   const Persistence_diagrams_graph& g;
@@ -74,10 +74,10 @@ typedef Naive_pnf Planar_neighbors_finder;
 Abstract_planar_neighbors_finder::Abstract_planar_neighbors_finder(const Persistence_diagrams_graph& g, double r) :
     g(g), r(r) { }
 
-inline Abstract_planar_neighbors_finder::~Abstract_planar_neighbors_finder() { }
+/* inline */ Abstract_planar_neighbors_finder::~Abstract_planar_neighbors_finder() { }
 
-inline std::list<int>* Abstract_planar_neighbors_finder::pull_all_near(int u_point_index) {
-  std::list<int>* all_pull = new std::list<int>();
+/* inline */ std::unique_ptr< std::list<int> > Abstract_planar_neighbors_finder::pull_all_near(int u_point_index) {
+  std::unique_ptr< std::list<int> > all_pull(new std::list<int>);
   int last_pull = pull_near(u_point_index);
   while (last_pull != null_point_index()) {
     all_pull->emplace_back(last_pull);
@@ -89,19 +89,19 @@ inline std::list<int>* Abstract_planar_neighbors_finder::pull_all_near(int u_poi
 Naive_pnf::Naive_pnf(const Persistence_diagrams_graph& g, double r) :
     Abstract_planar_neighbors_finder(g, r), candidates() { }
 
-inline void Naive_pnf::add(int v_point_index) {
+/* inline */ void Naive_pnf::add(int v_point_index) {
   candidates.emplace(v_point_index);
 }
 
-inline void Naive_pnf::remove(int v_point_index) {
+/* inline */ void Naive_pnf::remove(int v_point_index) {
   candidates.erase(v_point_index);
 }
 
-inline bool Naive_pnf::contains(int v_point_index) const {
+/* inline */ bool Naive_pnf::contains(int v_point_index) const {
   return (candidates.count(v_point_index) > 0);
 }
 
-inline int Naive_pnf::pull_near(int u_point_index) {
+/* inline */ int Naive_pnf::pull_near(int u_point_index) {
   for (auto it = candidates.begin(); it != candidates.end(); ++it)
     if (g.distance(u_point_index, *it) <= r) {
       int tmp = *it;

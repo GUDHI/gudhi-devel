@@ -51,20 +51,20 @@ class Layered_neighbors_finder {
 Layered_neighbors_finder::Layered_neighbors_finder(const Persistence_diagrams_graph& g, double r) :
     g(g), r(r), neighbors_finder() { }
 
-inline void Layered_neighbors_finder::add(int v_point_index, int vlayer) {
+/* inline */ void Layered_neighbors_finder::add(int v_point_index, int vlayer) {
   for (int l = neighbors_finder.size(); l <= vlayer; l++)
     neighbors_finder.emplace_back(Neighbors_finder(g, r));
   neighbors_finder.at(vlayer).add(v_point_index);
 }
 
-inline int Layered_neighbors_finder::pull_near(int u_point_index, int vlayer) {
+/* inline */ int Layered_neighbors_finder::pull_near(int u_point_index, int vlayer) {
   if (static_cast<int> (neighbors_finder.size()) <= vlayer)
     return null_point_index();
   return neighbors_finder.at(vlayer).pull_near(u_point_index);
 }
 
-inline int Layered_neighbors_finder::vlayers_number() const {
-  return neighbors_finder.size();
+/* inline */ int Layered_neighbors_finder::vlayers_number() const {
+  return static_cast<int>(neighbors_finder.size());
 }
 
 }  // namespace bottleneck
