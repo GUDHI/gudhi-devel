@@ -368,20 +368,28 @@ class Simplex_tree {
 	  {
 		  std::cout << sh->first << " ";
 		  if (has_children(sh))
+		  {
+			  std::cout << "(";
 			  rec_print(sh->second.children());
+			  std::cout << ")";
+		  }
 		  std::cout << std::endl;
 	  }
   }
 
- private:
   /** rec_print: prints the tree recursively, using DFS. */
+ private:
   void rec_print(Siblings * sib)
   {
 	  for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh)
 	  {
 		  std::cout << sh->first << " ";
 		  if (has_children(sh))
+		  {
+			  std::cout << "(";
 			  rec_print(sh->second.children());
+			  std::cout << ")";
+		  }
 	  }
   }
 
