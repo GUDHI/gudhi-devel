@@ -625,20 +625,19 @@ private:
      */
     void rec_coface(std::vector<Vertex_handle> &vertices, Siblings *curr_sib, std::vector<Vertex_handle> &curr_res, std::vector<Simplex_handle>& cofaces, int length, int nbVertices)
     {
-		if (!(nbVertices == length || (int)curr_res.size() <= nbVertices)) // dimension of actual simplex <= nbVertices
+		bool star = nbVertices == length; 
+		if (!(star || (int)curr_res.size() <= nbVertices)) // dimension of actual simplex <= nbVertices
 			return;
-//        for (auto simplex = curr_sib->members().begin(); simplex != curr_sib->members().end(); ++simplex)
         for (auto& simplex : curr_sib->members()) 
         {
             if (vertices.empty())
 			{
-				//                if ((int)curr_res.size() >= length && continueRecursion)
 				// If we reached the end of the vertices, and the simplex has more vertices than the given simplex, we found a coface
 				curr_res.push_back(simplex.first);
-				bool equalDim = (nbVertices == length || (int)curr_res.size() == nbVertices); // dimension of actual simplex == nbVertices
-				if (equalDim)
+				bool addCoface = (star || (int)curr_res.size() == nbVertices); // dimension of actual simplex == nbVertices
+				if (addCoface)
 					cofaces.push_back(curr_sib->members().find(simplex.first));
-				if (has_children(simplex))
+				if ((!addCoface || star) && has_children(simplex)) // Rec call
 					rec_coface(vertices, simplex.second.children(), curr_res, cofaces, length, nbVertices);
 				curr_res.pop_back();
 			}
@@ -648,10 +647,11 @@ private:
                 {
                     curr_res.push_back(simplex.first);
 					bool equalDim = (nbVertices == length || (int)curr_res.size() == nbVertices); // dimension of actual simplex == nbVertices
-                    if (vertices.size() == 1 && (int)curr_res.size() > length && equalDim)
+					bool addCoface = vertices.size() == 1 && (int)curr_res.size() > length && equalDim;
+					if (addCoface)
                         cofaces.push_back(curr_sib->members().find(simplex.first));
-                    if (has_children(simplex))
-                    { // Rec call
+                    if ((!addCoface || star) && has_children(simplex))
+                 	{ // Rec call
                         Vertex_handle tmp = vertices.back();
                         vertices.pop_back();
                         rec_coface(vertices, simplex.second.children(), curr_res, cofaces, length, nbVertices);
