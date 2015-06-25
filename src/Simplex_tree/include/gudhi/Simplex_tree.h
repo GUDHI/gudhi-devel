@@ -361,36 +361,45 @@ class Simplex_tree {
   }
 
  public: 
-  /** \brief print_tree: prints the tree in a hierarchical manner. */
-  void print_tree()
+
+
+  /** \brief Checks whether or not two simplex trees are equal. */
+  bool operator ==(Simplex_tree st2)
   {
-	  for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh)
+	  if (root_.members().size() != st2.root()->members().size())
+		  return false;
+	  for (auto sh1 = root_.members().begin(), sh2 = st2.root()->members().begin(); sh1 != root_.members().end(); ++sh1, ++sh2)
 	  {
-		  std::cout << sh->first << " ";
-		  if (has_children(sh))
-		  {
-			  std::cout << "(";
-			  rec_print(sh->second.children());
-			  std::cout << ")";
-		  }
-		  std::cout << std::endl;
+		  if (sh1->first != sh2->first)
+			  return false;
+		  if (has_children(sh1))
+			  return rec_equal(sh1->second.children(), sh2->second.children());
+		  else if (has_children(sh2))
+		  	return false;
+		  else
+			  return true;
 	  }
+	  return true;
   }
 
-  /** rec_print: prints the tree recursively, using DFS. */
+  /** rec_equal: Checks recursively whether or not two simplex trees are equal, using DFS. */
  private:
-  void rec_print(Siblings * sib)
+  bool rec_equal(Siblings * s1, Siblings * s2)
   {
-	  for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh)
+	  if (s1->members().size() != s2->members().size())
+		  return false;
+	  for (auto sh1 = s1->members().begin(), sh2 = s2->members().begin(); sh1 != s1->members().end(); ++sh1, ++sh2)
 	  {
-		  std::cout << sh->first << " ";
-		  if (has_children(sh))
-		  {
-			  std::cout << "(";
-			  rec_print(sh->second.children());
-			  std::cout << ")";
-		  }
+		  if (sh1->first != sh2->first)
+			  return false;
+		  if (has_children(sh1))
+			  return rec_equal(sh1->second.children(), sh2->second.children());
+		  else if (has_children(sh2))
+		  	return false;
+		  else
+			  return true;
 	  }
+	  return true;
   }
 
  public:
@@ -404,82 +413,82 @@ class Simplex_tree {
    *
    * The filtration must be initialized. */
   Simplex_handle simplex(Simplex_key key) {
-    return filtration_vect_[key];
+	  return filtration_vect_[key];
   }
   /** \brief Returns the filtration value of a simplex.
    *
    * Called on the null_simplex, returns INFINITY. */
   Filtration_value filtration(Simplex_handle sh) {
-    if (sh != null_simplex()) {
-      return sh->second.filtration();
-    } else {
-      return INFINITY;
-    }  // filtration(); }
-  }
-  /** \brief Returns an upper bound of the filtration values of the simplices. */
-  Filtration_value filtration() {
-    return threshold_;
-  }
-  /** \brief Returns a Simplex_handle different from all Simplex_handles
-   * associated to the simplices in the simplicial complex.
-   *
-   * One can call filtration(null_simplex()). */
-  Simplex_handle null_simplex() {
-    return Dictionary_it(NULL);
-  }
-  /** \brief Returns a key different for all keys associated to the
-   * simplices of the simplicial complex. */
-  Simplex_key null_key() {
-    return -1;
-  }
-  /** \brief Returns a Vertex_handle different from all Vertex_handles associated
-   * to the vertices of the simplicial complex. */
-  Vertex_handle null_vertex() {
-    return null_vertex_;
-  }
-  /** \brief Returns the number of vertices in the complex. */
-  size_t num_vertices() {
-    return root_.members_.size();
-  }
-  /** \brief Returns the number of simplices in the complex.
-   *
-   * Does not count the empty simplex. */
-  const unsigned int& num_simplices() const {
-    return num_simplices_;
-  }
+	  if (sh != null_simplex()) {
+		  return sh->second.filtration();
+	  } else {
+		  return INFINITY;
+	  }  // filtration(); }
+}
+/** \brief Returns an upper bound of the filtration values of the simplices. */
+Filtration_value filtration() {
+	return threshold_;
+}
+/** \brief Returns a Simplex_handle different from all Simplex_handles
+ * associated to the simplices in the simplicial complex.
+ *
+ * One can call filtration(null_simplex()). */
+Simplex_handle null_simplex() {
+	return Dictionary_it(NULL);
+}
+/** \brief Returns a key different for all keys associated to the
+ * simplices of the simplicial complex. */
+Simplex_key null_key() {
+	return -1;
+}
+/** \brief Returns a Vertex_handle different from all Vertex_handles associated
+ * to the vertices of the simplicial complex. */
+Vertex_handle null_vertex() {
+	return null_vertex_;
+}
+/** \brief Returns the number of vertices in the complex. */
+size_t num_vertices() {
+	return root_.members_.size();
+}
+/** \brief Returns the number of simplices in the complex.
+ *
+ * Does not count the empty simplex. */
+const unsigned int& num_simplices() const {
+	return num_simplices_;
+}
 
-  /** \brief Returns the dimension of a simplex.
-   *
-   * Must be different from null_simplex().*/
-  int dimension(Simplex_handle sh) {
-    Siblings * curr_sib = self_siblings(sh);
-    int dim = 0;
-    while (curr_sib != NULL) {
-      ++dim;
-      curr_sib = curr_sib->oncles();
-    }
-    return dim - 1;
-  }
-  /** \brief Returns an upper bound on the dimension of the simplicial complex. */
-  int dimension() {
-    return dimension_;
-  }
+/** \brief Returns the dimension of a simplex.
+ *
+ * Must be different from null_simplex().*/
+int dimension(Simplex_handle sh) {
+	Siblings * curr_sib = self_siblings(sh);
+	int dim = 0;
+	while (curr_sib != NULL) {
+		++dim;
+		curr_sib = curr_sib->oncles();
+	}
+	return dim - 1;
+}
+/** \brief Returns an upper bound on the dimension of the simplicial complex. */
+int dimension() {
+	return dimension_;
+}
 
-  /** \brief Returns true iff the node in the simplex tree pointed by
-   * sh has children.*/
-  bool has_children(Simplex_handle sh) {
-    return (sh->second.children()->parent() == sh->first);
-  }
+/** \brief Returns true iff the node in the simplex tree pointed by
+ * sh has children.*/
+bool has_children(Simplex_handle sh) {
+	return (sh->second.children()->parent() == sh->first);
+}
 
-  /** \brief Given a range of Vertex_handles, returns the Simplex_handle
-   * of the simplex in the simplicial complex containing the corresponding
-   * vertices. Return null_simplex() if the simplex is not in the complex.
-   *
-   * The type RandomAccessVertexRange must be a range for which .begin() and
-   * .end() return random access iterators, with <CODE>value_type</CODE>
-   * <CODE>Vertex_handle</CODE>.
-   */
-  template<class RandomAccessVertexRange>
+/** \brief Given a range of Vertex_handles, returns the Simplex_handle
+ * of the simplex in the simplicial complex containing the corresponding
+ * vertices. Return null_simplex() if the simplex is not in the complex.
+ *
+ * The type RandomAccessVertexRange must be a range for which .begin() and
+ * .end() return random access iterators, with <CODE>value_type</CODE>
+ * <CODE>Vertex_handle</CODE>.
+ */
+template<class RandomAccessVertexRange>
   Simplex_handle find(RandomAccessVertexRange & s) {
   	std::vector<Vertex_handle> copy = s;
   	sort(s.begin(), s.end());
