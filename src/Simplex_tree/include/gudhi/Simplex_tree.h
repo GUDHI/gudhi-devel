@@ -473,15 +473,22 @@ class Simplex_tree {
    */
   template<class RandomAccessVertexRange>
   Simplex_handle find(RandomAccessVertexRange & s) {
-    if (s.begin() == s.end())
-      std::cerr << "Empty simplex \n";
+  	std::vector<Vertex_handle> copy = s;
+  	sort(s.begin(), s.end());
+	return find_rec(s);
+  }
 
-    sort(s.begin(), s.end());
+ private:
+  /** recursive function of find */
+  template<class RandomAccessVertexRange>
+  Simplex_handle find_rec(RandomAccessVertexRange & simplex) {
+    if (simplex.begin() == simplex.end())
+	  return null_simplex();
 
     Siblings * tmp_sib = &root_;
     Dictionary_it tmp_dit;
-    Vertex_handle last = s[s.size() - 1];
-    for (auto v : s) {
+    Vertex_handle last = simplex[simplex.size() - 1];
+    for (auto v : simplex) {
       tmp_dit = tmp_sib->members_.find(v);
       if (tmp_dit == tmp_sib->members_.end()) {
         return null_simplex();
@@ -501,6 +508,36 @@ class Simplex_tree {
   }
 //{ return root_.members_.find(v); }
 
+ private:
+  /** Recursively insert a simplex */
+  template<class RandomAccessVertexRange>
+  std::pair<Simplex_handle, bool> insert_simplex_rec(RandomAccessVertexRange & simplex,
+                                         Filtration_value filtration) {
+    if (simplex.empty()) {
+      return std::pair<Simplex_handle, bool>(null_simplex(), true);
+    }
+    Siblings * curr_sib = &root_;
+    std::pair<Simplex_handle, bool> res_insert;
+    typename RandomAccessVertexRange::iterator vi;
+    for (vi = simplex.begin(); vi != simplex.end() - 1; ++vi) {
+      res_insert = curr_sib->members_.emplace(*vi, Node(curr_sib, filtration));
+      if (!(has_children(res_insert.first))) {
+        res_insert.first->second.assign_children(new Siblings(curr_sib, *vi));
+      }
+        curr_sib = res_insert.first->second.children();
+    }
+    res_insert = curr_sib->members_.emplace(*vi, Node(curr_sib, filtration));
+    if (!res_insert.second) {  // if already in the complex
+      if (res_insert.first->second.filtration() > filtration) {  // if filtration value modified
+        res_insert.first->second.assign_filtration(filtration);
+        return res_insert;
+      }
+      return std::pair<Simplex_handle, bool>(null_simplex(), false);  // if filtration value unchanged
+    }
+    // otherwise the insertion has succeeded
+    return res_insert;
+  }
+public:
   /** \brief Insert a simplex, represented by a range of Vertex_handles, in the simplicial complex.
    *
    * @param[in]  simplex    range of Vertex_handles, representing the vertices of the new simplex
@@ -524,37 +561,13 @@ class Simplex_tree {
    *
    * The type RandomAccessVertexRange must be a range for which .begin() and
    * .end() return random access iterators, with 'value_type' Vertex_handle. */
-  template<class RandomAccessVertexRange>
-  std::pair<Simplex_handle, bool> insert_simplex(RandomAccessVertexRange & simplex,
-                                         Filtration_value filtration) {
-    if (simplex.empty()) {
-      return std::pair<Simplex_handle, bool>(null_simplex(), true);
-    }
-
-    sort(simplex.begin(), simplex.end());  // must be sorted in increasing order
-
-    Siblings * curr_sib = &root_;
-    std::pair<Simplex_handle, bool> res_insert;
-    typename RandomAccessVertexRange::iterator vi;
-    for (vi = simplex.begin(); vi != simplex.end() - 1; ++vi) {
-      res_insert = curr_sib->members_.emplace(*vi, Node(curr_sib, filtration));
-      if (!(has_children(res_insert.first))) {
-        res_insert.first->second.assign_children(new Siblings(curr_sib, *vi));
-      }
-      curr_sib = res_insert.first->second.children();
-    }
-    res_insert = curr_sib->members_.emplace(*vi, Node(curr_sib, filtration));
-    if (!res_insert.second) {  // if already in the complex
-      if (res_insert.first->second.filtration() > filtration) {  // if filtration value modified
-        res_insert.first->second.assign_filtration(filtration);
-        return res_insert;
-      }
-      return std::pair<Simplex_handle, bool>(null_simplex(), false);  // if filtration value unchanged
-    }
-    // otherwise the insertion has succeeded
-    return res_insert;
-  }
-
+template<class RandomAccessVertexRange>
+std::pair<Simplex_handle, bool> insert_simplex(RandomAccessVertexRange & simplex,
+		Filtration_value filtration) {
+	std::vector<Vertex_handle> copy = simplex;
+	sort(copy.begin(), copy.end());
+	return insert_simplex_rec(copy, filtration);
+}
 
   /** \brief Insert a N-simplex and all his subfaces, from a N-simplex represented by a range of
    * Vertex_handles, in the simplicial complex.
@@ -565,6 +578,18 @@ class Simplex_tree {
   template<class RandomAccessVertexRange>
   void insert_simplex_and_subfaces(RandomAccessVertexRange& Nsimplex,
                                          Filtration_value filtration = 0.0) {
+	RandomAccessVertexRange copy(Nsimplex);
+    sort(copy.begin(), copy.end());  // must be sorted in increasing order
+	insert_simplex_and_subfaces_rec(copy, filtration);
+	}
+
+ private:
+
+  /** Recursively insert simplex and all of its subfaces */
+  template<class RandomAccessVertexRange>
+  void insert_simplex_and_subfaces_rec(RandomAccessVertexRange & Nsimplex,
+                                         Filtration_value filtration = 0.0) {
+
     if (Nsimplex.size() > 1) {
       for (unsigned int NIndex = 0; NIndex < Nsimplex.size(); NIndex++) {
         // insert N (N-1)-Simplex
@@ -577,13 +602,13 @@ class Simplex_tree {
         insert_simplex_and_subfaces(NsimplexMinusOne, filtration);
       }
       // N-Simplex insert
-      std::pair<Simplex_handle, bool> returned = insert_simplex(Nsimplex, filtration);
+      std::pair<Simplex_handle, bool> returned = insert_simplex_rec(Nsimplex, filtration);
       if (returned.second == true) {
         num_simplices_++;
       }
     } else if (Nsimplex.size() == 1) {
       // 1-Simplex insert - End of recursivity
-      std::pair<Simplex_handle, bool> returned = insert_simplex(Nsimplex, filtration);
+      std::pair<Simplex_handle, bool> returned = insert_simplex_rec(Nsimplex, filtration);
       if (returned.second == true) {
         num_simplices_++;
       }
@@ -591,6 +616,8 @@ class Simplex_tree {
       // Nothing to insert - empty vector
     }
   }
+
+ public:
 
   /** \brief Assign a value 'key' to the key of the simplex
    * represented by the Simplex_handle 'sh'. */

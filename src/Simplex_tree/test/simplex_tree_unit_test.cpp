@@ -130,6 +130,7 @@ void test_simplex_tree_contains(typeST& simplexTree, typeSimplex& simplex, int p
   BOOST_CHECK( AreAlmostTheSame(simplexTree.filtration(*f_simplex),simplex.second) );
 
   int simplexIndex=simplex.first.size()-1;
+  std::sort(simplex.first.begin(), simplex.first.end()); // if the simplex wasn't sorted, the next test could fail
   for( auto vertex : simplexTree.simplex_vertex_range(*f_simplex) )
   {
     std::cout << "test_simplex_tree_contains - vertex=" << vertex << "||" << simplex.first.at(simplexIndex) << std::endl;
