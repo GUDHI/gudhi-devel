@@ -591,21 +591,20 @@ BOOST_AUTO_TEST_CASE( NSimplexAndSubfaces_tree_insertion )
   // TEST Copy constructor / Move 
   std::cout << "Printing st" << std::endl;
   std::cout << &st << std::endl;
-  std::cout << st; // Vertices test
-//  st.print_tree(); // Hierarchy test
+  std::cout << st;
   typeST st3 = st;
   BOOST_CHECK(st == st3);
   typeST st_move = std::move(st);
   std::cout << "Printing a copy of st" << std::endl;
   std::cout << &st3 << std::endl;
   std::cout << st3;
-//  st3.print_tree();
+  BOOST_CHECK(st_move == st3);
   std::cout << "Printing a move of st" << std::endl;
   std::cout << &st_move << std::endl;
   std::cout << st_move;
-//  st_move.print_tree();
+  typeST st_empty;
+  BOOST_CHECK(st == st_empty);
   std::cout << "Printing st again" << std::endl;
   std::cout << &st << std::endl;
   std::cout << st;
-//  st.print_tree();
 }
