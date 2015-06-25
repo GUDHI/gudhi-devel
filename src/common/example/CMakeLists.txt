@@ -15,7 +15,7 @@ if(CGAL_FOUND)
       
       add_executable ( dtoffrw Delaunay_triangulation_off_rw.cpp )
       target_link_libraries(dtoffrw  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
-      add_test(dtoffrw ${CMAKE_CURRENT_BINARY_DIR}/dtoffrw ${CMAKE_SOURCE_DIR}/data/points/alphashapedoc.off ${CMAKE_CURRENT_BINARY_DIR}/result.off)
+      add_test(dtoffrw ${CMAKE_CURRENT_BINARY_DIR}/dtoffrw ${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off ${CMAKE_CURRENT_BINARY_DIR}/result.off)
 
     else()
       message(WARNING "Eigen3 not found. Version 3.1.0 is required for Alpha shapes feature.")

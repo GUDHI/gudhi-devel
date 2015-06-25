@@ -43,7 +43,7 @@ typedef CGAL::Delaunay_triangulation<K> T;
 BOOST_AUTO_TEST_CASE( Delaunay_triangulation_doc_test )
 {
   // Read the OFF file (input file name given as parameter) and triangulates points
-  Gudhi::Delaunay_triangulation_off_reader<T> off_reader("../../../data/points/alphashapedoc.off");
+  Gudhi::Delaunay_triangulation_off_reader<T> off_reader("../../../data/points/alphacomplexdoc.off");
   // Check the read operation was correct
   BOOST_CHECK(off_reader.is_valid());
   
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE( Delaunay_triangulation_unexisting_file_read_test )
 BOOST_AUTO_TEST_CASE( Delaunay_triangulation_unexisting_file_write_test )
 {
   // Read the OFF file (input file name given as parameter) and triangulates points
-  Gudhi::Delaunay_triangulation_off_reader<T> off_reader("../../../data/points/alphashapedoc.off");
+  Gudhi::Delaunay_triangulation_off_reader<T> off_reader("../../../data/points/alphacomplexdoc.off");
   
   // Retrieve the triangulation
   T* triangulation = off_reader.get_complex();
