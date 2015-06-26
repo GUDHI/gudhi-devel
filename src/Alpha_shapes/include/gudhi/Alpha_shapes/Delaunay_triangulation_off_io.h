@@ -190,15 +190,16 @@ class Delaunay_triangulation_off_writer {
       }
 
       // Finite cells list
-      for (auto cit = save_complex.finite_full_cells_begin(); cit != save_complex.finite_full_cells_end(); ++cit) {
+      /*for (auto cit = save_complex.finite_full_cells_begin(); cit != save_complex.finite_full_cells_end(); ++cit) {
         stream << std::distance(cit->vertices_begin(), cit->vertices_end()) << " ";  // Dimension
         for (auto vit = cit->vertices_begin(); vit != cit->vertices_end(); ++vit) {
           auto vertexHdl = *vit;
+          std::cout << 
           // auto vertexHdl = std::distance(save_complex.vertices_begin(), *vit) - 1;
           // stream << std::distance(save_complex.vertices_begin(), *(vit)) - 1 << " ";
         }
         stream << std::endl;
-      }
+      }*/
       stream.close();
     } else {
       std::cerr << "could not open file " << name_file << std::endl;
