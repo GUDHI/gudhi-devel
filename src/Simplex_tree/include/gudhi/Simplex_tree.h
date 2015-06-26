@@ -314,7 +314,8 @@ class Simplex_tree {
 	}
 
   /** rec_copy: DFS, inserts simplices when reaching a leaf.*/
-  void rec_copy(Siblings * sib, std::vector<Vertex_handle> v)
+  template <typename RandomAccessVertexRange>
+  void rec_copy(Siblings * sib, RandomAccessVertexRange v)
   {
 	  for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh)
 	  {
@@ -361,7 +362,40 @@ class Simplex_tree {
   }
 
  public: 
+  /** \brief Prints the simplex_tree hierarchically. */
+  void print_tree()
+  {
+	  for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh)
+	  {
+		  std::cout << sh->first << " ";
+		  if (has_children(sh))
+		  {
+			  std::cout << "(";
+			  rec_print(sh->second.children());
+			  std::cout << ")";
+		  }
+		  std::cout << std::endl;
+	  }
+  }
 
+
+  /** \brief Recursively prints the simplex_tree, using DFS. */
+ private:
+  void rec_print(Siblings * sib)
+  {
+	  for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh)
+	  {
+		  std::cout << " " << sh->first << " ";
+		  if (has_children(sh))
+		  {
+			  std::cout << "(";
+			  rec_print(sh->second.children());
+			  std::cout << ")";
+		  }
+	  }
+  }
+
+ public:
 
   /** \brief Checks whether or not two simplex trees are equal. */
   bool operator ==(Simplex_tree st2)
@@ -490,7 +524,7 @@ bool has_children(Simplex_handle sh) {
  */
 template<class RandomAccessVertexRange>
   Simplex_handle find(RandomAccessVertexRange & s) {
-  	std::vector<Vertex_handle> copy = s;
+  	RandomAccessVertexRange copy = s;
   	sort(s.begin(), s.end());
 	return find_rec(s);
   }
@@ -581,7 +615,7 @@ public:
 template<class RandomAccessVertexRange>
 std::pair<Simplex_handle, bool> insert_simplex(RandomAccessVertexRange & simplex,
 		Filtration_value filtration) {
-	std::vector<Vertex_handle> copy = simplex;
+	RandomAccessVertexRange copy = simplex;
 	sort(copy.begin(), copy.end());
 	return insert_simplex_rec(copy, filtration);
 }
@@ -719,6 +753,35 @@ std::pair<Simplex_handle, bool> insert_simplex(RandomAccessVertexRange & simplex
     std::stable_sort(filtration_vect_.begin(), filtration_vect_.end(),
                      is_before_in_filtration(this));
   }
+
+/** \brief Contracts two edges
+	\param deleted The base of the edge to be contracted
+	\param remaining The new vertex with children and variables of the former
+*/
+	void edge_contraction(Simplex_handle & deleted, Simplex_handle & remaining)
+	{
+		Siblings * sibDeleted, * sibRemaining; // We need the siblings
+		sibDeleted = (has_children(deleted) ? deleted->second.children()->oncles() : deleted->second.children());
+		sibRemaining = (has_children(remaining) ? remaining->second.children()->oncles() : remaining->second.children());
+		// Add all edges to vertex
+		if (has_children(deleted))
+		{   
+			std::deque<Vertex_handle> v;
+			Vertex_handle vertex = sibRemaining->parent_;
+			Siblings * sib_tmp = sibRemaining->oncles();
+			while (vertex != -1)
+			{
+				v.push_front(vertex);
+				vertex = sib_tmp->parent_;
+				sib_tmp = sib_tmp->oncles();
+			}
+			v.push_back(remaining->first);
+			v.push_back(deleted->first);
+			rec_copy(deleted->second.children(), v);
+		}
+		// Delete the contracted edge
+		sibDeleted->members().erase(deleted->first);
+	}
 
  private:
   /** \brief Returns true iff the list of vertices of sh1
