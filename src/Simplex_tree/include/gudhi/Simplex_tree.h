@@ -522,17 +522,18 @@ bool has_children(Simplex_handle sh) {
  * .end() return random access iterators, with <CODE>value_type</CODE>
  * <CODE>Vertex_handle</CODE>.
  */
-template<class RandomAccessVertexRange>
-  Simplex_handle find(RandomAccessVertexRange & s) {
-  	RandomAccessVertexRange copy = s;
-  	sort(s.begin(), s.end());
-	return find_rec(s);
+template<class InputVertexRange>
+  Simplex_handle find(const InputVertexRange & s) {
+  	std::vector<Vertex_handle> copy;
+	for (auto v = std::begin(s); v != std::end(s); ++v )
+		copy.push_back(*v);
+  	sort(std::begin(copy), std::end(copy));
+	return find_rec(copy);
   }
 
  private:
   /** recursive function of find */
-  template<class RandomAccessVertexRange>
-  Simplex_handle find_rec(RandomAccessVertexRange & simplex) {
+  Simplex_handle find_rec(std::vector<Vertex_handle> & simplex) {
     if (simplex.begin() == simplex.end())
 	  return null_simplex();
 
@@ -561,7 +562,7 @@ template<class RandomAccessVertexRange>
 
  private:
   /** Recursively insert a simplex */
-  template<class RandomAccessVertexRange>
+  template <typename RandomAccessVertexRange>
   std::pair<Simplex_handle, bool> insert_simplex_rec(RandomAccessVertexRange & simplex,
                                          Filtration_value filtration) {
     if (simplex.empty()) {
@@ -613,10 +614,12 @@ public:
    * The type RandomAccessVertexRange must be a range for which .begin() and
    * .end() return random access iterators, with 'value_type' Vertex_handle. */
 template<class RandomAccessVertexRange>
-std::pair<Simplex_handle, bool> insert_simplex(RandomAccessVertexRange & simplex,
+std::pair<Simplex_handle, bool> insert_simplex(const RandomAccessVertexRange & simplex,
 		Filtration_value filtration) {
-	RandomAccessVertexRange copy = simplex;
-	sort(copy.begin(), copy.end());
+	std::vector<Vertex_handle> copy;
+	for (auto v = std::begin(simplex); v != std::end(simplex); ++v)
+		copy.push_back(*v);
+  	sort(std::begin(copy), std::end(copy));
 	return insert_simplex_rec(copy, filtration);
 }
 
@@ -626,18 +629,20 @@ std::pair<Simplex_handle, bool> insert_simplex(RandomAccessVertexRange & simplex
    * @param[in]  Nsimplex   range of Vertex_handles, representing the vertices of the new N-simplex
    * @param[in]  filtration the filtration value assigned to the new N-simplex.
   */
-  template<class RandomAccessVertexRange>
-  void insert_simplex_and_subfaces(RandomAccessVertexRange& Nsimplex,
+  template<class InputVertexRange>
+  void insert_simplex_and_subfaces(const InputVertexRange& Nsimplex,
                                          Filtration_value filtration = 0.0) {
-	RandomAccessVertexRange copy(Nsimplex);
-    sort(copy.begin(), copy.end());  // must be sorted in increasing order
+	std::vector<Vertex_handle> copy;
+	for (auto v = std::begin(Nsimplex); v != std::end(Nsimplex); ++v)
+		copy.push_back(*v);
+  	sort(std::begin(copy), std::end(copy));
 	insert_simplex_and_subfaces_rec(copy, filtration);
 	}
 
  private:
 
   /** Recursively insert simplex and all of its subfaces */
-  template<class RandomAccessVertexRange>
+  template <typename RandomAccessVertexRange>
   void insert_simplex_and_subfaces_rec(RandomAccessVertexRange & Nsimplex,
                                          Filtration_value filtration = 0.0) {
 
