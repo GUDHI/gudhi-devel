@@ -32,19 +32,25 @@ namespace Gudhi {
 
 namespace bottleneck {
 
-// Neighbors_finder is a data structure used to find if a query point from U has neighbors in V
-// in the persistence diagrams graph.
-// V's points have to be added manually using their index. A neighbor returned is automatically removed.
-
+/** \internal \brief data structure used to find any point (including projections) in V near to a query point from U
+ * (which can be a projection).
+ *
+ * V points have to be added manually using their index and before the first pull. A neighbor pulled is automatically removed.
+ *
+ * \ingroup bottleneck_distance
+ */
 class Neighbors_finder {
 public:
-    Neighbors_finder(const Persistence_diagrams_graph& g, double r);
+    /** \internal \brief Constructor taking the near distance definition as parameter. */
+    Neighbors_finder(double r);
+    /** \internal \brief A point added will be possibly pulled. */
     void add(int v_point_index);
+    /** \internal \brief Returns and remove a V point near to the U point given as parameter, null_point_index() if there isn't such a point. */
     int pull_near(int u_point_index);
+    /** \internal \brief Returns and remove all the V points near to the U point given as parameter. */
     std::unique_ptr< std::list<int> > pull_all_near(int u_point_index);
 
 private:
-    const Persistence_diagrams_graph& g;
     const double r;
     Planar_neighbors_finder planar_neighbors_f;
     std::unordered_set<int> projections_f;
@@ -52,43 +58,46 @@ private:
     bool contains(int v_point_index);
 };
 
-Neighbors_finder::Neighbors_finder(const Persistence_diagrams_graph& g, double r) :
-    g(g), r(r), planar_neighbors_f(g, r), projections_f() { }
+Neighbors_finder::Neighbors_finder(double r) :
+    r(r), planar_neighbors_f(r), projections_f() { }
 
-/* inline */ void Neighbors_finder::add(int v_point_index) {
-    if (g.on_the_v_diagonal(v_point_index))
+inline void Neighbors_finder::add(int v_point_index) {
+    if (G::on_the_v_diagonal(v_point_index))
         projections_f.emplace(v_point_index);
     else
         planar_neighbors_f.add(v_point_index);
 }
 
-/* inline */ void Neighbors_finder::remove(int v_point_index) {
+inline void Neighbors_finder::remove(int v_point_index) {
     if(v_point_index == null_point_index())
         return;
-    if (g.on_the_v_diagonal(v_point_index))
+    if (G::on_the_v_diagonal(v_point_index))
         projections_f.erase(v_point_index);
     else
         planar_neighbors_f.remove(v_point_index);
 }
 
-/* inline */ bool Neighbors_finder::contains(int v_point_index) {
+inline bool Neighbors_finder::contains(int v_point_index) {
     return planar_neighbors_f.contains(v_point_index) || (projections_f.count(v_point_index)>0);
 }
 
-/* inline */ int Neighbors_finder::pull_near(int u_point_index) {
+inline int Neighbors_finder::pull_near(int u_point_index) {
     int tmp;
-    int c = g.corresponding_point_in_v(u_point_index);
-    if (g.on_the_u_diagonal(u_point_index) && projections_f.cbegin()!=projections_f.cend())
+    int c = G::corresponding_point_in_v(u_point_index);
+    if (G::on_the_u_diagonal(u_point_index) && !projections_f.empty())
+        //All projections are at distance 0
         tmp = *projections_f.cbegin();
-    else if (contains(c) && (g.distance(u_point_index, c) <= r))
+    else if (contains(c) && (G::distance(u_point_index, c) <= r))
+        //Is the query point near to its projection ?
         tmp = c;
     else
+        //Is the query point near to a V point in the plane ?
         tmp = planar_neighbors_f.pull_near(u_point_index);
     remove(tmp);
     return tmp;
 }
 
-std::unique_ptr< std::list<int> > Neighbors_finder::pull_all_near(int u_point_index) {
+inline std::unique_ptr< std::list<int> > Neighbors_finder::pull_all_near(int u_point_index) {
     std::unique_ptr< std::list<int> > all_pull = std::move(planar_neighbors_f.pull_all_near(u_point_index));
     int last_pull = pull_near(u_point_index);
     while (last_pull != null_point_index()) {

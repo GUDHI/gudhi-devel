@@ -22,7 +22,7 @@
 
 #ifndef SRC_BOTTLENECK_INCLUDE_GUDHI_GRAPH_MATCHING_H_
 #define SRC_BOTTLENECK_INCLUDE_GUDHI_GRAPH_MATCHING_H_
-//#define DEBUG
+
 #include <deque>
 #include <list>
 #include <vector>
@@ -33,31 +33,50 @@ namespace Gudhi {
 
 namespace bottleneck {
 
+/** \brief Function to use in order to compute the Bottleneck distance between two persistence diagrams.
+ *
+ *
+ *
+ * \ingroup bottleneck_distance
+ */
 template<typename Persistence_diagram1, typename Persistence_diagram2>
 double bottleneck_distance(const Persistence_diagram1& diag1, const Persistence_diagram2& diag2, double e = 0.);
 
+/** \internal \brief Structure representing a graph matching. The graph is a Persistence_diagrams_graph.
+ *
+ * \ingroup bottleneck_distance
+ */
 class Graph_matching {
 public:
-    explicit Graph_matching(const Persistence_diagrams_graph& g);
+    /** \internal \brief Constructor constructing an empty matching. */
+    explicit Graph_matching();
+    /** \internal \brief Copy operator. */
     Graph_matching& operator=(const Graph_matching& m);
+    /** \internal \brief Is the matching perfect ? */
     bool perfect() const;
+    /** \internal \brief Augments the matching with a maximal set of edge-disjoint shortest augmenting paths. */
     bool multi_augment();
+    /** \internal \brief Sets the maximum length of the edges allowed to be added in the matching, 0 initially. */
     void set_r(double r);
 
 private:
-    const Persistence_diagrams_graph& g;
     double r;
+    /** \internal \brief Given a point from V, provides its matched point in U, null_point_index() if there isn't. */
     std::vector<int> v_to_u;
+    /** \internal \brief All the unmatched points in U. */
     std::list<int> unmatched_in_u;
 
+    /** \internal \brief Provides a Layered_neighbors_finder dividing the graph in layers. Basically a BFS. */
     std::unique_ptr<Layered_neighbors_finder> layering() const;
+    /** \internal \brief Augments the matching with a simple path no longer than max_depth. Basically a DFS. */
     bool augment(Layered_neighbors_finder & layered_nf, int u_start_index, int max_depth);
+    /** \internal \brief Update the matching with the simple augmenting path given as parameter. */
     void update(std::deque<int> & path);
 };
 
-Graph_matching::Graph_matching(const Persistence_diagrams_graph& g)
-    : g(g), r(0), v_to_u(g.size(), null_point_index()), unmatched_in_u() {
-    for (int u_point_index = 0; u_point_index < g.size(); ++u_point_index)
+Graph_matching::Graph_matching()
+    : r(0.), v_to_u(G::size(), null_point_index()), unmatched_in_u() {
+    for (int u_point_index = 0; u_point_index < G::size(); ++u_point_index)
         unmatched_in_u.emplace_back(u_point_index);
 }
 
@@ -68,56 +87,36 @@ Graph_matching& Graph_matching::operator=(const Graph_matching& m) {
     return *this;
 }
 
-/* inline */ bool Graph_matching::perfect() const {
-#ifdef DEBUG
-    std::cout << "  perfect? unmatched_in_u.size = " << unmatched_in_u.size() << std::endl << std::flush;
-#endif
+inline bool Graph_matching::perfect() const {
     return unmatched_in_u.empty();
 }
 
-/* inline */ bool Graph_matching::multi_augment() {
+inline bool Graph_matching::multi_augment() {
     if (perfect())
         return false;
-#ifdef DEBUG
-    std::cout << "  multi augment" << std::endl << std::flush;
-#endif
     Layered_neighbors_finder layered_nf = *layering();
-    double rn = sqrt(g.size());
     int max_depth = layered_nf.vlayers_number()*2 - 1;
-#ifdef DEBUG
-    std::cout<< "    nb_max_layer = " << max_depth << std::endl << std::flush;
-#endif
-    // verification of a necessary criterion
+    double rn = sqrt(G::size());
+    // verification of a necessary criterion in order to shortcut if possible
     if (max_depth <0 || (unmatched_in_u.size() > rn && max_depth >= rn))
         return false;
     bool successful = false;
     std::list<int> tries(unmatched_in_u);
-    for (auto it = tries.cbegin(); it != tries.cend(); it++){
-        const bool tmp = augment(layered_nf, *it, max_depth); //force augment evaluation even if successful is already true
-        successful = successful || tmp;
-    }
+    for (auto it = tries.cbegin(); it != tries.cend(); it++)
+        // 'augment' has side-effects which have to be always executed, don't change order
+        successful =  augment(layered_nf, *it, max_depth) || successful;
     return successful;
 }
 
-/* inline */ void Graph_matching::set_r(double r) {
+inline void Graph_matching::set_r(double r) {
     this->r = r;
 }
 
-bool Graph_matching::augment(Layered_neighbors_finder & layered_nf, int u_start_index, int max_depth) {
-#ifdef DEBUG
-    std::cout << "    augment" << std::endl << std::flush;
-#endif
-#ifdef DEBUG
-    std::cout << "      u_start_index = " << u_start_index << std::endl << std::flush;
-#endif
+inline bool Graph_matching::augment(Layered_neighbors_finder & layered_nf, int u_start_index, int max_depth) {
+    //V vertices have at most one successor, thus when we backtrack from U we can directly pop_back 2 vertices.
     std::deque<int> path;
     path.emplace_back(u_start_index);
-    // u_start is a point from U
     do {
-#ifdef DEBUG
-        std::cout << "      do" << std::endl << std::flush;
-        std::cout << "        path.size = " << static_cast<int>(path.size()) << std::endl << std::flush;
-#endif
         if (static_cast<int>(path.size()) > max_depth) {
             path.pop_back();
             path.pop_back();
@@ -134,28 +133,22 @@ bool Graph_matching::augment(Layered_neighbors_finder & layered_nf, int u_start_
             path.emplace_back(layered_nf.pull_near(path.back(), path.size() / 2));
         }
         path.emplace_back(v_to_u.at(path.back()));
-#ifdef DEBUG
-        std::cout << "        v_to_u = " << path.back() << std::endl << std::flush;
-#endif
     } while (path.back() != null_point_index());
+    //if v_to_u.at(path.back()) has no successor, path.back() is an exposed vertex
     path.pop_back();
     update(path);
     return true;
 }
 
-std::unique_ptr<Layered_neighbors_finder> Graph_matching::layering() const {
-#ifdef DEBUG
-    std::cout << "    layering" << std::endl << std::flush;
-#endif
-    bool end = false;
-    int layer = 0;
+inline std::unique_ptr<Layered_neighbors_finder> Graph_matching::layering() const {
     std::list<int> u_vertices(unmatched_in_u);
     std::list<int> v_vertices;
-    Neighbors_finder nf(g, r);
-    for (int v_point_index = 0; v_point_index < g.size(); ++v_point_index)
+    Neighbors_finder nf(r);
+    for (int v_point_index = 0; v_point_index < G::size(); ++v_point_index)
         nf.add(v_point_index);
-    std::unique_ptr<Layered_neighbors_finder> layered_nf(new Layered_neighbors_finder(g, r));
-    while (!u_vertices.empty()) {
+    std::unique_ptr<Layered_neighbors_finder> layered_nf(new Layered_neighbors_finder(r));
+    for(int layer = 0; !u_vertices.empty(); layer++) {
+        // one layer is one step in the BFS
         for (auto it = u_vertices.cbegin(); it != u_vertices.cend(); ++it) {
             std::unique_ptr< std::list<int> > u_succ = std::move(nf.pull_all_near(*it));
             for (auto it = u_succ->cbegin(); it != u_succ->cend(); ++it) {
@@ -163,27 +156,27 @@ std::unique_ptr<Layered_neighbors_finder> Graph_matching::layering() const {
                 v_vertices.emplace_back(*it);
             }
         }
+        // When the above for finishes, we have progress of one half-step (from U to V) in the BFS
         u_vertices.clear();
-        for (auto it = v_vertices.cbegin(); it != v_vertices.cend(); it++) {
+        bool end = false;
+        for (auto it = v_vertices.cbegin(); it != v_vertices.cend(); it++)
             if (v_to_u.at(*it) == null_point_index())
+                // we stop when a nearest exposed V vertex (from U exposed vertices) has been found
                 end = true;
             else
                 u_vertices.emplace_back(v_to_u.at(*it));
-        }
+        // When the above for finishes, we have progress of one half-step (from V to U) in the BFS
         if (end)
             return layered_nf;
         v_vertices.clear();
-        layer++;
     }
     return layered_nf;
 }
 
-void Graph_matching::update(std::deque<int>& path) {
-#ifdef DEBUG
-    std::cout << "      update" << std::endl << std::flush;
-#endif
+inline void Graph_matching::update(std::deque<int>& path) {
     unmatched_in_u.remove(path.front());
     for (auto it = path.cbegin(); it != path.cend(); ++it) {
+        // Be careful, the iterator is incremented twice each time
         int tmp = *it;
         ++it;
         v_to_u[*it] = tmp;
@@ -192,27 +185,28 @@ void Graph_matching::update(std::deque<int>& path) {
 
 template<typename Persistence_diagram1, typename Persistence_diagram2>
 double bottleneck_distance(const Persistence_diagram1 &diag1, const Persistence_diagram2 &diag2, double e) {
-    Persistence_diagrams_graph g(diag1, diag2, e);
-    std::unique_ptr< std::vector<double> > sd = std::move(g.sorted_distances());
+    G::initialize(diag1, diag2, e);
+    std::unique_ptr< std::vector<double> > sd = std::move(G::sorted_distances());
     int idmin = 0;
     int idmax = sd->size() - 1;
+    // alpha can be modified, this will change the complexity
     double alpha = pow(sd->size(), 0.25);
-    Graph_matching m(g);
-    Graph_matching biggest_unperfect(g);
+    Graph_matching m;
+    Graph_matching biggest_unperfect;
     while (idmin != idmax) {
-        int pas = static_cast<int>((idmax - idmin) / alpha);
-        m.set_r(sd->at(idmin + pas));
+        int step = static_cast<int>((idmax - idmin) / alpha);
+        m.set_r(sd->at(idmin + step));
         while (m.multi_augment());
+        // The above while compute a maximum matching (according to the r setted before)
         if (m.perfect()) {
-            idmax = idmin + pas;
+            idmax = idmin + step;
             m = biggest_unperfect;
         } else {
             biggest_unperfect = m;
-            idmin = idmin + pas + 1;
+            idmin = idmin + step + 1;
         }
     }
-    double b = sd->at(idmin);
-    return b;
+    return sd->at(idmin);
 }
 
 }  // namespace bottleneck

@@ -27,88 +27,102 @@
 #include <set>
 
 #include "Persistence_diagrams_graph.h"
+#include "Grid_cell.h"
 
 namespace Gudhi {
 
 namespace bottleneck {
 
-// Planar_neighbors_finder is a data structure used to find if a query point from U has planar neighbors in V with the
-// planar distance.
-// V's points have to be added manually using their index. A neighbor returned is automatically removed but we can also
-// remove points manually using their index.
-
+/** \internal \brief Structure used to find any point in V near (according to the planar distance) to a query point from U.
+ *
+ * V points have to be added manually using their index and before the first remove/pull. A neighbor pulled is automatically removed. but we can also
+ * remove points manually using their index.
+ *
+ * \ingroup bottleneck_distance
+ */
 class Abstract_planar_neighbors_finder {
- public:
-  Abstract_planar_neighbors_finder(const Persistence_diagrams_graph& g, double r);
-  virtual ~Abstract_planar_neighbors_finder() = 0;
-  virtual void add(int v_point_index) = 0;
-  virtual void remove(int v_point_index) = 0;
-  virtual bool contains(int v_point_index) const = 0;
-  virtual int pull_near(int u_point_index) = 0;
-  virtual std::unique_ptr< std::list<int> > pull_all_near(int u_point_index);
+public:
+    /** \internal \brief Constructor TODO. */
+    Abstract_planar_neighbors_finder(double r);
+    virtual ~Abstract_planar_neighbors_finder() = 0;
+    /** \internal \brief A point added will be possibly pulled. */
+    virtual void add(int v_point_index) = 0;
+    /** \internal \brief A point manually removed will no longer be possibly pulled. */
+    virtual void remove(int v_point_index) = 0;
+    /** \internal \brief Can the point given as parameter be returned ? */
+    virtual bool contains(int v_point_index) const = 0;
+    /** \internal \brief Provide and remove a V point near to the U point given as parameter, null_point_index() if there isn't such a point. */
+    virtual int pull_near(int u_point_index) = 0;
+    /** \internal \brief Provide and remove all the V points near to the U point given as parameter. */
+    virtual std::unique_ptr< std::list<int> > pull_all_near(int u_point_index);
 
- protected:
-  const Persistence_diagrams_graph& g;
-  const double r;
+protected:
+    const double r;
 };
 
-
-// Naive_pnf is a nave implementation of Abstract_planar_neighbors_finder
-
+/** \internal \brief Naive_pnf is an naïve Abstract_planar_neighbors_finder implementation
+ *
+ * \ingroup bottleneck_distance
+ */
 class Naive_pnf : public Abstract_planar_neighbors_finder {
- public:
-  Naive_pnf(const Persistence_diagrams_graph& g, double r);
-  void add(int v_point_index);
-  void remove(int v_point_index);
-  bool contains(int v_point_index) const;
-  int pull_near(int u_point_index);
+public:
+    /** \internal \brief Constructor taking the near distance definition as parameter. */
+    Naive_pnf(double r);
+    /** \internal \brief A point added will be possibly pulled. */
+    void add(int v_point_index);
+    /** \internal \brief A point manually removed will no longer be possibly pulled. */
+    void remove(int v_point_index);
+    /** \internal \brief Can the point given as parameter be returned ? */
+    bool contains(int v_point_index) const;
+    /** \internal \brief Provide and remove a V point near to the U point given as parameter, null_point_index() if there isn't such a point. */
+    int pull_near(int u_point_index);
 
- private:
-  std::set<int> candidates;
+private:
+    std::set<int> candidates;
 };
 
-
-// Planar_neighbors_finder is the used Abstract_planar_neighbors_finder's implementation
+/** \internal \typedef \brief Planar_neighbors_finder is the used Abstract_planar_neighbors_finder's implementation. */
 typedef Naive_pnf Planar_neighbors_finder;
 
-Abstract_planar_neighbors_finder::Abstract_planar_neighbors_finder(const Persistence_diagrams_graph& g, double r) :
-    g(g), r(r) { }
 
-/* inline */ Abstract_planar_neighbors_finder::~Abstract_planar_neighbors_finder() { }
+Abstract_planar_neighbors_finder::Abstract_planar_neighbors_finder(double r) :
+    r(r) { }
 
-/* inline */ std::unique_ptr< std::list<int> > Abstract_planar_neighbors_finder::pull_all_near(int u_point_index) {
-  std::unique_ptr< std::list<int> > all_pull(new std::list<int>);
-  int last_pull = pull_near(u_point_index);
-  while (last_pull != null_point_index()) {
-    all_pull->emplace_back(last_pull);
-    last_pull = pull_near(u_point_index);
-  }
-  return all_pull;
-}
+inline Abstract_planar_neighbors_finder::~Abstract_planar_neighbors_finder() {}
 
-Naive_pnf::Naive_pnf(const Persistence_diagrams_graph& g, double r) :
-    Abstract_planar_neighbors_finder(g, r), candidates() { }
-
-/* inline */ void Naive_pnf::add(int v_point_index) {
-  candidates.emplace(v_point_index);
-}
-
-/* inline */ void Naive_pnf::remove(int v_point_index) {
-  candidates.erase(v_point_index);
-}
-
-/* inline */ bool Naive_pnf::contains(int v_point_index) const {
-  return (candidates.count(v_point_index) > 0);
-}
-
-/* inline */ int Naive_pnf::pull_near(int u_point_index) {
-  for (auto it = candidates.begin(); it != candidates.end(); ++it)
-    if (g.distance(u_point_index, *it) <= r) {
-      int tmp = *it;
-      candidates.erase(it);
-      return tmp;
+inline std::unique_ptr< std::list<int> > Abstract_planar_neighbors_finder::pull_all_near(int u_point_index) {
+    std::unique_ptr< std::list<int> > all_pull(new std::list<int>);
+    int last_pull = pull_near(u_point_index);
+    while (last_pull != null_point_index()) {
+        all_pull->emplace_back(last_pull);
+        last_pull = pull_near(u_point_index);
     }
-  return null_point_index();
+    return all_pull;
+}
+
+Naive_pnf::Naive_pnf(double r) :
+    Abstract_planar_neighbors_finder(r), candidates() { }
+
+inline void Naive_pnf::add(int v_point_index) {
+    candidates.emplace(v_point_index);
+}
+
+inline void Naive_pnf::remove(int v_point_index) {
+    candidates.erase(v_point_index);
+}
+
+inline bool Naive_pnf::contains(int v_point_index) const {
+    return (candidates.count(v_point_index) > 0);
+}
+
+inline int Naive_pnf::pull_near(int u_point_index) {
+    for (auto it = candidates.begin(); it != candidates.end(); ++it)
+        if (G::distance(u_point_index, *it) <= r) {
+            int tmp = *it;
+            candidates.erase(it);
+            return tmp;
+        }
+    return null_point_index();
 }
 
 }  // namespace bottleneck
