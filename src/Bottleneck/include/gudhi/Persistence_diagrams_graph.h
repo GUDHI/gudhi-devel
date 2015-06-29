@@ -28,6 +28,7 @@
 #include <cmath>
 #include <utility>
 #include <algorithm>
+#include <math.h>
 
 namespace Gudhi {
 
@@ -60,10 +61,10 @@ public:
     static int size();
     /** \internal \brief Returns the O(n^2) sorted distances between the points. */
     static std::unique_ptr< std::vector<double> > sorted_distances();
-    /** \internal \brief Compare points regarding x coordinate. Use v_point_index for V points and u_point_index + G::size() for U points.  */
-    struct Compare_x{bool operator() (const int point_index_1, const int point_index_2) const;};
-    /** \internal \brief Compare points regarding y coordinate. Use v_point_index for V points and u_point_index + G::size() for U points. */
-    struct Compare_y{bool operator() (const int point_index_1, const int point_index_2) const;};
+    /** \internal \brief Compare points regarding x%r coordinate. Use v_point_index for V points and u_point_index + G::size() for U points.  */
+    struct Compare_x{double r; Compare_x(double r); bool operator()(const int point_index_1, const int point_index_2) const;};
+    /** \internal \brief Compare points regarding y%r coordinate. Use v_point_index for V points and u_point_index + G::size() for U points. */
+    struct Compare_y{double r; Compare_y(double r);bool operator()(const int point_index_1, const int point_index_2) const;};
 
 private:
     /** \internal \typedef \brief Internal_point is the internal points representation, indexes used outside. */
@@ -74,20 +75,20 @@ private:
     static Internal_point get_v_point(int v_point_index);
 };
 
-/** \internal \typedef \brief Alias used outside. */
+/** \internal \typedef \brief Shorter alias */
 typedef Persistence_diagrams_graph G;
 
 // static initialization, seems to work but strange
-std::vector<G::Internal_point> Persistence_diagrams_graph::u = [] {return std::vector<G::Internal_point>();}();
-std::vector<G::Internal_point> Persistence_diagrams_graph::v = [] {return std::vector<G::Internal_point>();}();
+std::vector<G::Internal_point> G::u = [] {return std::vector<G::Internal_point>();}();
+std::vector<G::Internal_point> G::v = [] {return std::vector<G::Internal_point>();}();
 
 inline int null_point_index() {
     return -1;
 }
 
 template<typename Persistence_diagram1, typename Persistence_diagram2>
-void Persistence_diagrams_graph::initialize(const Persistence_diagram1 &diag1,
-                                            const Persistence_diagram2 &diag2, double e){
+inline void G::initialize(const Persistence_diagram1 &diag1,
+                          const Persistence_diagram2 &diag2, double e){
     u.clear();
     v.clear();
     for (auto it = diag1.cbegin(); it != diag1.cend(); ++it)
@@ -100,25 +101,25 @@ void Persistence_diagrams_graph::initialize(const Persistence_diagram1 &diag1,
         swap(u, v);
 }
 
-inline bool Persistence_diagrams_graph::on_the_u_diagonal(int u_point_index) {
+inline bool G::on_the_u_diagonal(int u_point_index) {
     return u_point_index >= static_cast<int> (u.size());
 }
 
-inline bool Persistence_diagrams_graph::on_the_v_diagonal(int v_point_index) {
+inline bool G::on_the_v_diagonal(int v_point_index) {
     return v_point_index >= static_cast<int> (v.size());
 }
 
-inline int Persistence_diagrams_graph::corresponding_point_in_u(int v_point_index) {
+inline int G::corresponding_point_in_u(int v_point_index) {
     return on_the_v_diagonal(v_point_index) ?
                 v_point_index - static_cast<int> (v.size()) : v_point_index + static_cast<int> (u.size());
 }
 
-inline int Persistence_diagrams_graph::corresponding_point_in_v(int u_point_index) {
+inline int G::corresponding_point_in_v(int u_point_index) {
     return on_the_u_diagonal(u_point_index) ?
                 u_point_index - static_cast<int> (u.size()) : u_point_index + static_cast<int> (v.size());
 }
 
-inline double Persistence_diagrams_graph::distance(int u_point_index, int v_point_index) {
+inline double G::distance(int u_point_index, int v_point_index) {
     if (on_the_u_diagonal(u_point_index) && on_the_v_diagonal(v_point_index))
         return 0;
     Internal_point p_u = get_u_point(u_point_index);
@@ -126,11 +127,11 @@ inline double Persistence_diagrams_graph::distance(int u_point_index, int v_poin
     return std::max(std::fabs(p_u.first - p_v.first), std::fabs(p_u.second - p_v.second));
 }
 
-inline int Persistence_diagrams_graph::size() {
+inline int G::size() {
     return static_cast<int> (u.size() + v.size());
 }
 
-inline std::unique_ptr< std::vector<double> > Persistence_diagrams_graph::sorted_distances() {
+inline std::unique_ptr< std::vector<double> > G::sorted_distances() {
     // could be optimized
     std::set<double> sorted_distances;
     for (int u_point_index = 0; u_point_index < size(); ++u_point_index)
@@ -140,7 +141,7 @@ inline std::unique_ptr< std::vector<double> > Persistence_diagrams_graph::sorted
     return sd_up;
 }
 
-inline Persistence_diagrams_graph::Internal_point Persistence_diagrams_graph::get_u_point(int u_point_index) {
+inline G::Internal_point G::get_u_point(int u_point_index) {
     if (!on_the_u_diagonal(u_point_index))
         return u.at(u_point_index);
     Internal_point projector = v.at(corresponding_point_in_v(u_point_index));
@@ -148,7 +149,7 @@ inline Persistence_diagrams_graph::Internal_point Persistence_diagrams_graph::ge
     return Internal_point(x, x);
 }
 
-inline Persistence_diagrams_graph::Internal_point Persistence_diagrams_graph::get_v_point(int v_point_index) {
+inline G::Internal_point G::get_v_point(int v_point_index) {
     if (!on_the_v_diagonal(v_point_index))
         return v.at(v_point_index);
     Internal_point projector = u.at(corresponding_point_in_u(v_point_index));
@@ -156,16 +157,30 @@ inline Persistence_diagrams_graph::Internal_point Persistence_diagrams_graph::ge
     return Internal_point(x, x);
 }
 
-inline bool Persistence_diagrams_graph::Compare_x::operator() (const int point_index_1, const int point_index_2) const{
+G::Compare_x::Compare_x(double r)
+    : r(r){ }
+
+G::Compare_y::Compare_y(double r)
+    : r(r){ }
+
+inline bool G::Compare_x::operator()(const int point_index_1, const int point_index_2) const{
     G::Internal_point p1 = point_index_1 < G::size() ? G::get_v_point(point_index_1) : G::get_u_point(point_index_1 - G::size());
     G::Internal_point p2 = point_index_2 < G::size() ? G::get_v_point(point_index_2) : G::get_u_point(point_index_2 - G::size());
-    return p1.first < p2.first;
+    double x1 = fmod(p1.first,r);
+    double x2 = fmod(p2.first,r);
+    if(x1 == x2)
+        return point_index_1 > point_index_2;
+    return x1 < x2;
 }
 
-inline bool Persistence_diagrams_graph::Compare_y::operator() (const int point_index_1, const int point_index_2) const{
+inline bool G::Compare_y::operator()(const int point_index_1, const int point_index_2) const{
     G::Internal_point p1 = point_index_1 < G::size() ? G::get_v_point(point_index_1) : G::get_u_point(point_index_1 - G::size());
     G::Internal_point p2 = point_index_2 < G::size() ? G::get_v_point(point_index_2) : G::get_u_point(point_index_2 - G::size());
-    return p1.second < p2.second;
+    double y1 = fmod(p1.second,r);
+    double y2 = fmod(p2.second,r);
+    if(y1 == y2)
+        return  point_index_1 > point_index_2;
+    return y1 < y2;
 }
 
 }  // namespace bottleneck

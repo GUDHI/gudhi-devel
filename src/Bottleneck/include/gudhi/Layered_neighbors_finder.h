@@ -54,7 +54,7 @@ private:
     std::vector<Neighbors_finder> neighbors_finder;
 };
 
-Layered_neighbors_finder::Layered_neighbors_finder(double r) :
+inline Layered_neighbors_finder::Layered_neighbors_finder(double r) :
     r(r), neighbors_finder() { }
 
 inline void Layered_neighbors_finder::add(int v_point_index, int vlayer) {

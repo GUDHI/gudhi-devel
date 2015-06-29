@@ -58,7 +58,7 @@ private:
     bool contains(int v_point_index);
 };
 
-Neighbors_finder::Neighbors_finder(double r) :
+inline Neighbors_finder::Neighbors_finder(double r) :
     r(r), planar_neighbors_f(r), projections_f() { }
 
 inline void Neighbors_finder::add(int v_point_index) {

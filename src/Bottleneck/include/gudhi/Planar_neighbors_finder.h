@@ -85,7 +85,7 @@ private:
 typedef Naive_pnf Planar_neighbors_finder;
 
 
-Abstract_planar_neighbors_finder::Abstract_planar_neighbors_finder(double r) :
+inline Abstract_planar_neighbors_finder::Abstract_planar_neighbors_finder(double r) :
     r(r) { }
 
 inline Abstract_planar_neighbors_finder::~Abstract_planar_neighbors_finder() {}
@@ -100,7 +100,7 @@ inline std::unique_ptr< std::list<int> > Abstract_planar_neighbors_finder::pull_
     return all_pull;
 }
 
-Naive_pnf::Naive_pnf(double r) :
+inline Naive_pnf::Naive_pnf(double r) :
     Abstract_planar_neighbors_finder(r), candidates() { }
 
 inline void Naive_pnf::add(int v_point_index) {

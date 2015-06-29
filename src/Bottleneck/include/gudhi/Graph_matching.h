@@ -74,13 +74,13 @@ private:
     void update(std::deque<int> & path);
 };
 
-Graph_matching::Graph_matching()
+inline Graph_matching::Graph_matching()
     : r(0.), v_to_u(G::size(), null_point_index()), unmatched_in_u() {
     for (int u_point_index = 0; u_point_index < G::size(); ++u_point_index)
         unmatched_in_u.emplace_back(u_point_index);
 }
 
-Graph_matching& Graph_matching::operator=(const Graph_matching& m) {
+inline Graph_matching& Graph_matching::operator=(const Graph_matching& m) {
     r = m.r;
     v_to_u = m.v_to_u;
     unmatched_in_u = m.unmatched_in_u;
