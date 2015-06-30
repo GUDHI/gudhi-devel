@@ -63,14 +63,10 @@ private:
     Corner_tree xi_yd_order;
     Corner_tree xd_yi_order;
     Corner_tree xd_yd_order;
-    void remove_aux(Corner_tree t, int v_point_index, bool reverse);
-    template <typename Contiguous_tree t>
-    int pull_contiguous_aux();
-    int pull_corner_aux();
-    void build_xi_yi();
-    void build_xi_yd();
-    void build_xd_yi();
-    void build_xd_yd();
+    void remove_aux(Corner_tree t, int v_point_index);
+    template <typename Contiguous_tree>
+    int pull_contiguous_aux(Contiguous_tree t, bool reverse, int u_point_index);
+    //int pull_corner_aux(Corner_tree t, bool reverse, int u_point_index);
 };
 
 
@@ -86,7 +82,7 @@ inline bool Grid_cell::contains(int v_point_index) const{
     return (xi_order.count(v_point_index) > 0);
 }
 
-inline void Grid_cell::remove_aux(Corner_tree t, int v_point_index, bool reverse){
+inline void Grid_cell::remove_aux(Corner_tree t, int v_point_index){
     if(t.empty())
         return;
     std::list<Hidden_points_tree> hidden_points = t.at(v_point_index);
@@ -105,8 +101,8 @@ inline void Grid_cell::remove(int v_point_index){
     remove_aux(xd_yd_order,v_point_index);
 }
 
-template <typename Contiguous_tree t>
-inline int Grid_cell::pull_contiguous_aux(Contiguous_tree t, bool reverse){
+template <typename Contiguous_tree>
+inline int Grid_cell::pull_contiguous_aux(Contiguous_tree t, bool reverse, int u_point_index){
     if(xi_order.empty())
         return null_point_index();
     if(t.empty())
@@ -120,84 +116,94 @@ inline int Grid_cell::pull_contiguous_aux(Contiguous_tree t, bool reverse){
     return null_point_index();
 }
 
-//factorization needed \/ \/ \/
-
 inline int Grid_cell::pull_center(){
     if(xi_order.empty())
         return null_point_index();
-    int v_point_index = *xi_order.begin();
+    int v_point_index = *(xi_order.begin());
     remove(v_point_index);
     return v_point_index;
 }
 
 inline int Grid_cell::pull_xi(int u_point_index){
-    if(xi_order.empty())
-        return null_point_index();
-    int v_point_index = *xi_order.begin(); //!
-    if(G::distance(u_point_index,v_point_index)<=r){
-        remove(v_point_index);
-        return v_point_index;
-    }
-    return null_point_index();
+    return pull_contiguous_aux(xi_order, false, u_point_index);
 }
 
 inline int Grid_cell::pull_xd(int u_point_index){
-    if(xi_order.empty())
-        return null_point_index();
-    int v_point_index = *xi_order.rbegin(); //!
-    if(G::distance(u_point_index,v_point_index)<=r){
-        remove(v_point_index);
-        return v_point_index;
-    }
-    return null_point_index();
+    return pull_contiguous_aux(xi_order, true, u_point_index);
 }
 
 inline int Grid_cell::pull_yi(int u_point_index){
-    if(xi_order.empty())
-        return null_point_index();
-    if(yi_order.empty())
-        for(auto it = xi_order.begin(); it!= xi_order.end(); ++it)
-            yi_order.emplace(*it);
-    int v_point_index = *yi_order.begin(); //!
-    if(G::distance(u_point_index,v_point_index)<=r){
-        remove(v_point_index);
-        return v_point_index;
-    }
-    return null_point_index();
+    return pull_contiguous_aux(yi_order, false, u_point_index);
 }
 
 inline int Grid_cell::pull_yd(int u_point_index){
-    if(xi_order.empty())
-        return null_point_index();
-    if(yi_order.empty())
-        for(auto it = xi_order.begin(); it!= xi_order.end(); ++it)
-            yi_order.emplace(*it);
-    int v_point_index = *yi_order.rbegin(); //!
-    if(G::distance(u_point_index,v_point_index)<=r){
-        remove(v_point_index);
-        return v_point_index;
-    }
-    return null_point_index();
+    return pull_contiguous_aux(yi_order, true, u_point_index);
 }
-
-inline int Grid_cell::pull_xi_yi(int u_point_index){
-    if(xi_order.empty())
+/*
+inline int Grid_cell::pull_corner_aux(Corner_tree t, bool reverse, int u_point_index){
+     if(xi_order.empty())
         return null_point_index();
-    if(xi_yi_order.empty())
-        build_xi_yi();
-    auto it = xi_yi_order.upper_bound(u_point_index+G::size());
-    if(it==xi_yi_order.cbegin()) //!
+    if(t.empty())
+        build_corner(t);
+    auto it = t.upper_bound(u_point_index+G::size());
+    if(it == (reverse ? t.end() : t.begin()))
         return null_point_index();
-    it--; //!
+    if(!reverse)
+        it--;
     int v_point_index = it->first;
     for(auto it2=it->second.begin();it2!=it->second.end();it2++)
-        xi_yi_order.emplace(it2->point,it2->hidden);
+        t.emplace(it2->point,it2->hidden);
     if(G::distance(u_point_index,v_point_index)<=r){
         remove(v_point_index);
         return v_point_index;
     }
     return null_point_index();
+}*/
+
+inline int Grid_cell::pull_xi_yi(int u_point_index){
+    for(auto it = xi_order.begin(); it!=xi_order.end(); ++it)
+        if(G::distance(u_point_index,*it)<=r){
+            int tmp = *it;
+            remove(tmp);
+            return tmp;
+        }
+    return(null_point_index());
+    //return pull_corner_aux(xi_yi_order, false, u_point_index);
 }
+
+inline int Grid_cell::pull_xi_yd(int u_point_index){
+    for(auto it = xi_order.begin(); it!=xi_order.end(); ++it)
+        if(G::distance(u_point_index,*it)<=r){
+            int tmp = *it;
+            remove(tmp);
+            return tmp;
+        }
+    return(null_point_index());
+    //return pull_corner_aux(xi_yd_order, false, u_point_index);
+}
+
+inline int Grid_cell::pull_xd_yi(int u_point_index){
+    for(auto it = xi_order.rbegin(); it!=xi_order.rend(); ++it)
+        if(G::distance(u_point_index,*it)<=r){
+            int tmp = *it;
+            remove(tmp);
+            return tmp;
+        }
+    return(null_point_index());
+    //return pull_corner_aux(xd_yi_order, true, u_point_index);
+}
+
+inline int Grid_cell::pull_xd_yd(int u_point_index){
+    for(auto it = xi_order.begin(); it!=xi_order.end(); ++it)
+        if(G::distance(u_point_index,*it)<=r){
+            int tmp = *it;
+            remove(tmp);
+            return tmp;
+        }
+    return(null_point_index());
+    //return pull_corner_aux(xd_yd_order, true, u_point_index);
+}
+
 
 }  // namespace bipartite_graph_matching
 

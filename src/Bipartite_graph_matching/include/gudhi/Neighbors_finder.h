@@ -58,6 +58,29 @@ private:
     bool contains(int v_point_index);
 };
 
+/** \internal \brief data structure used to find any point (including projections) in V near to a query point from U
+ * (which can be a projection) in a layered graph layer given as parmeter.
+ *
+ * V points have to be added manually using their index and before the first pull. A neighbor pulled is automatically removed.
+ *
+ * \ingroup bottleneck_distance
+ */
+class Layered_neighbors_finder {
+public:
+    /** \internal \brief Constructor taking the near distance definition as parameter. */
+    Layered_neighbors_finder(double r);
+    /** \internal \brief A point added will be possibly pulled. */
+    void add(int v_point_index, int vlayer);
+    /** \internal \brief Returns and remove a V point near to the U point given as parameter, null_point_index() if there isn't such a point. */
+    int pull_near(int u_point_index, int vlayer);
+    /** \internal \brief Returns the number of layers. */
+    int vlayers_number() const;
+
+private:
+    const double r;
+    std::vector<Neighbors_finder> neighbors_finder;
+};
+
 inline Neighbors_finder::Neighbors_finder(double r) :
     r(r), planar_neighbors_f(r), projections_f() { }
 
@@ -105,6 +128,25 @@ inline std::unique_ptr< std::list<int> > Neighbors_finder::pull_all_near(int u_p
         last_pull = pull_near(u_point_index);
     }
     return all_pull;
+}
+
+inline Layered_neighbors_finder::Layered_neighbors_finder(double r) :
+    r(r), neighbors_finder() { }
+
+inline void Layered_neighbors_finder::add(int v_point_index, int vlayer) {
+    for (int l = neighbors_finder.size(); l <= vlayer; l++)
+        neighbors_finder.emplace_back(Neighbors_finder(r));
+    neighbors_finder.at(vlayer).add(v_point_index);
+}
+
+inline int Layered_neighbors_finder::pull_near(int u_point_index, int vlayer) {
+    if (static_cast<int> (neighbors_finder.size()) <= vlayer)
+        return null_point_index();
+    return neighbors_finder.at(vlayer).pull_near(u_point_index);
+}
+
+inline int Layered_neighbors_finder::vlayers_number() const {
+    return static_cast<int>(neighbors_finder.size());
 }
 
 }  // namespace bipartite_graph_matching

@@ -27,7 +27,7 @@
 #include <list>
 #include <vector>
 
-#include "Layered_neighbors_finder.h"
+#include "Neighbors_finder.h"
 
 namespace Gudhi {
 
