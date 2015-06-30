@@ -175,7 +175,7 @@ void set_and_test_simplex_tree_dim_fil(typeST& simplexTree, int vectorSize, cons
 }
 
 void test_cofaces(typeST& st, std::vector<Vertex_handle> v, int dim, std::vector<typeST::Simplex_handle> res) {
-	typeST::Coface_simplex_range cofaces;
+	typeST::Cofaces_simplex_range cofaces;
 	if (dim == 0)
 		cofaces = st.star_simplex_range(st.find(v));
 	else

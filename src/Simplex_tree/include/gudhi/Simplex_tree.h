@@ -157,7 +157,7 @@ class Simplex_tree {
   /** \brief Range over the vertices of a simplex. */
   typedef boost::iterator_range<Simplex_vertex_iterator> Simplex_vertex_range;
   /** \brief Range over the cofaces of a simplex. */
-  typedef std::vector<Simplex_handle> Coface_simplex_range;
+  typedef std::vector<Simplex_handle> Cofaces_simplex_range;
   /** \brief Iterator over the simplices of the boundary of a simplex.
    *
    * 'value_type' is Simplex_handle. */
@@ -391,11 +391,14 @@ class Simplex_tree {
     return (sh->second.children()->parent() == sh->first);
   }
   
+ private:
   /** \brief Returns true iff the node in the simplex tree pointed by
    * sh has children.*/
   bool has_children(Dit_value_t & sh) {
     return (sh.second.children()->parent() == sh.first);
   }
+
+ public:
 
   /** \brief Given a range of Vertex_handles, returns the Simplex_handle
    * of the simplex in the simplicial complex containing the corresponding
@@ -614,40 +617,40 @@ private:
     
     /** Recursive search of cofaces
 	 * This function uses DFS
-	 *\param vertices contains a list of vertices, which represent the simplex.
-	 *\param curr_res contains a list of vertices, which represent the current path in the tree.
+	 *\param vertices contains a list of vertices, which represent the vertices of the simplex not found yet.
+	 *\param curr_res represents the number of vertices of the simplex found.
 	 *\param cofaces contains a list of Simplex_handle, representing all the cofaces asked.
-	 *\param length length of the vertex list "vertices"
+	 *\param length number of vertices in the Simplex_handle of which we search the cofaces.
 	 * Prefix actions : When the bottom vertex matches with the current vertex in the tree, we remove the bottom vertex from vertices.
 	 * Infix actions : Then we call or not the recursion.
 	 * Postfix actions : Finally, we add back the removed vertex into vertices, and remove this vertex from curr_res so that we didn't change the parameters.
 	 * If the vertices list is empty, we need to check if the size of the curr_res list matches with the dimension of the cofaces asked.
      */
-    void rec_coface(std::vector<Vertex_handle> &vertices, Siblings *curr_sib, std::vector<Vertex_handle> &curr_res, std::vector<Simplex_handle>& cofaces, int length, int nbVertices)
+    void rec_coface(std::vector<Vertex_handle> &vertices, Siblings *curr_sib, int curr_res, std::vector<Simplex_handle>& cofaces, int length, int nbVertices)
     {
 		bool star = nbVertices == length; 
-		if (!(star || (int)curr_res.size() <= nbVertices)) // dimension of actual simplex <= nbVertices
+		if (!(star || curr_res <= nbVertices)) // dimension of actual simplex <= nbVertices
 			return;
         for (auto& simplex : curr_sib->members()) 
         {
             if (vertices.empty())
 			{
 				// If we reached the end of the vertices, and the simplex has more vertices than the given simplex, we found a coface
-				curr_res.push_back(simplex.first);
-				bool addCoface = (star || (int)curr_res.size() == nbVertices); // dimension of actual simplex == nbVertices
+				curr_res++;
+				bool addCoface = (star || curr_res == nbVertices); // dimension of actual simplex == nbVertices
 				if (addCoface)
 					cofaces.push_back(curr_sib->members().find(simplex.first));
 				if ((!addCoface || star) && has_children(simplex)) // Rec call
 					rec_coface(vertices, simplex.second.children(), curr_res, cofaces, length, nbVertices);
-				curr_res.pop_back();
+				curr_res--;
 			}
             else 
             {
                 if (simplex.first == vertices.back()) // If curr_sib matches with the top vertex
                 {
-                    curr_res.push_back(simplex.first);
-					bool equalDim = (nbVertices == length || (int)curr_res.size() == nbVertices); // dimension of actual simplex == nbVertices
-					bool addCoface = vertices.size() == 1 && (int)curr_res.size() > length && equalDim;
+                    curr_res++;
+					bool equalDim = (nbVertices == length || curr_res == nbVertices); // dimension of actual simplex == nbVertices
+					bool addCoface = vertices.size() == 1 && curr_res > length && equalDim;
 					if (addCoface)
                         cofaces.push_back(curr_sib->members().find(simplex.first));
                     if ((!addCoface || star) && has_children(simplex))
@@ -657,7 +660,7 @@ private:
                         rec_coface(vertices, simplex.second.children(), curr_res, cofaces, length, nbVertices);
                         vertices.push_back(tmp);
                     }
-                    curr_res.pop_back();
+                    curr_res--;
                 }
 				else if (simplex.first > vertices.back())
 					return;
@@ -665,9 +668,9 @@ private:
                 {
                     if (has_children(simplex))
                     {
-						curr_res.push_back(simplex.first);
+						curr_res++;
                         rec_coface(vertices, simplex.second.children(), curr_res, cofaces, length, nbVertices);
-						curr_res.pop_back();
+						curr_res--;
                     }
                 }
             }
@@ -680,7 +683,7 @@ public:
      * \return Vector of Simplex_handle, empty vector if no cofaces found.
      */
     
-    Coface_simplex_range star_simplex_range(const Simplex_handle simplex)	{
+    Cofaces_simplex_range star_simplex_range(const Simplex_handle simplex)	{
         return cofaces_simplex_range(simplex, 0);
     }
     
@@ -692,16 +695,15 @@ public:
      * \return Vector of Simplex_handle, empty vector if no cofaces found.
      */
     
-    Coface_simplex_range cofaces_simplex_range(const Simplex_handle simplex, int codimension)	{
-        Coface_simplex_range cofaces;
+    Cofaces_simplex_range cofaces_simplex_range(const Simplex_handle simplex, int codimension)	{
+        Cofaces_simplex_range cofaces;
         assert (codimension >= 0); // codimension must be positive or null integer
 		Simplex_vertex_range rg = simplex_vertex_range(simplex);
         std::vector<Vertex_handle> copy(rg.begin(), rg.end());
         if (codimension + (int)copy.size() > dimension_ + 1 || (codimension == 0 && (int)copy.size() > dimension_) ) // n+codimension greater than dimension_
-			return Coface_simplex_range(cofaces.begin(), cofaces.end());
+			return cofaces;
 		assert(std::is_sorted(copy.begin(), copy.end(), std::greater<Vertex_handle>()));  // must be sorted in decreasing order
-        std::vector<Vertex_handle> res;
-        rec_coface(copy, &root_, res, cofaces, (int)copy.size(), codimension + (int)copy.size());
+        rec_coface(copy, &root_, 0, cofaces, (int)copy.size(), codimension + (int)copy.size());
 		return cofaces;
     }
 
