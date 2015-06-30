@@ -31,7 +31,7 @@
 
 namespace Gudhi {
 
-namespace bottleneck {
+namespace bipartite_graph_matching {
 
 /** \internal \brief TODO
  *
@@ -181,7 +181,7 @@ inline int Grid_cell::pull_xi_yi(int u_point_index){
     return null_point_index();
 }
 
-}  // namespace bottleneck
+}  // namespace bipartite_graph_matching
 
 }  // namespace Gudhi
 

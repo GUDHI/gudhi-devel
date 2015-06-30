@@ -29,7 +29,7 @@
 
 namespace Gudhi {
 
-namespace bottleneck {
+namespace bipartite_graph_matching {
 
 /** \internal \brief data structure used to find any point (including projections) in V near to a query point from U
  * (which can be a projection) in a layered graph layer given as parmeter.
@@ -73,7 +73,7 @@ inline int Layered_neighbors_finder::vlayers_number() const {
     return static_cast<int>(neighbors_finder.size());
 }
 
-}  // namespace bottleneck
+}  // namespace bipartite_graph_matching
 
 }  // namespace Gudhi
 

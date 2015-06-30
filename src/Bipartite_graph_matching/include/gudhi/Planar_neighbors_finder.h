@@ -31,7 +31,7 @@
 
 namespace Gudhi {
 
-namespace bottleneck {
+namespace bipartite_graph_matching {
 
 /** \internal \brief Structure used to find any point in V near (according to the planar distance) to a query point from U.
  *
@@ -125,7 +125,7 @@ inline int Naive_pnf::pull_near(int u_point_index) {
     return null_point_index();
 }
 
-}  // namespace bottleneck
+}  // namespace bipartite_graph_matching
 
 }  // namespace Gudhi
 

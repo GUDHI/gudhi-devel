@@ -32,7 +32,7 @@
 
 namespace Gudhi {
 
-namespace bottleneck {
+namespace bipartite_graph_matching {
 
 /** \internal \brief Returns the used index for encoding none of the points */
 int null_point_index();
@@ -183,7 +183,7 @@ inline bool G::Compare_y::operator()(const int point_index_1, const int point_in
     return y1 < y2;
 }
 
-}  // namespace bottleneck
+}  // namespace bipartite_graph_matching
 
 }  // namespace Gudhi
 

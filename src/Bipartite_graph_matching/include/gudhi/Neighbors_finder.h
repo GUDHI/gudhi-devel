@@ -30,7 +30,7 @@
 
 namespace Gudhi {
 
-namespace bottleneck {
+namespace bipartite_graph_matching {
 
 /** \internal \brief data structure used to find any point (including projections) in V near to a query point from U
  * (which can be a projection).
@@ -107,7 +107,7 @@ inline std::unique_ptr< std::list<int> > Neighbors_finder::pull_all_near(int u_p
     return all_pull;
 }
 
-}  // namespace bottleneck
+}  // namespace bipartite_graph_matching
 
 }  // namespace Gudhi
 

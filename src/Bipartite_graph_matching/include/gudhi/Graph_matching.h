@@ -31,7 +31,7 @@
 
 namespace Gudhi {
 
-namespace bottleneck {
+namespace bipartite_graph_matching {
 
 /** \brief Function to use in order to compute the Bottleneck distance between two persistence diagrams.
  *
@@ -209,7 +209,7 @@ double bottleneck_distance(const Persistence_diagram1 &diag1, const Persistence_
     return sd->at(idmin);
 }
 
-}  // namespace bottleneck
+}  // namespace bipartite_graph_matching
 
 }  // namespace Gudhi
 
