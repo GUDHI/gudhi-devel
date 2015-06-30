@@ -33,10 +33,7 @@ namespace Gudhi {
 
 namespace bipartite_graph_matching {
 
-/** \internal \brief TODO
- *
- * \ingroup bottleneck_distance
- */
+
 class Grid_cell {
 public:
     Grid_cell(double r);
@@ -139,7 +136,7 @@ inline int Grid_cell::pull_yi(int u_point_index){
 inline int Grid_cell::pull_yd(int u_point_index){
     return pull_contiguous_aux(yi_order, true, u_point_index);
 }
-/*
+
 inline int Grid_cell::pull_corner_aux(Corner_tree t, bool reverse, int u_point_index){
      if(xi_order.empty())
         return null_point_index();
@@ -158,7 +155,7 @@ inline int Grid_cell::pull_corner_aux(Corner_tree t, bool reverse, int u_point_i
         return v_point_index;
     }
     return null_point_index();
-}*/
+}
 
 inline int Grid_cell::pull_xi_yi(int u_point_index){
     for(auto it = xi_order.begin(); it!=xi_order.end(); ++it)
@@ -210,3 +207,4 @@ inline int Grid_cell::pull_xd_yd(int u_point_index){
 }  // namespace Gudhi
 
 #endif  // SRC_BOTTLENECK_INCLUDE_GUDHI_GRID_CELL_H_
+

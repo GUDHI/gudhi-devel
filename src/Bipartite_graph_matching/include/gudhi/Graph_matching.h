@@ -24,8 +24,6 @@
 #define SRC_BOTTLENECK_INCLUDE_GUDHI_GRAPH_MATCHING_H_
 
 #include <deque>
-#include <list>
-#include <vector>
 
 #include "Neighbors_finder.h"
 

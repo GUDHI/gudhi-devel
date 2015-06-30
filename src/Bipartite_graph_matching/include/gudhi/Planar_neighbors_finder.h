@@ -24,7 +24,7 @@
 #define SRC_BOTTLENECK_INCLUDE_GUDHI_PLANAR_NEIGHBORS_FINDER_H_
 
 #include <list>
-#include <set>
+#include <map>
 
 #include "Persistence_diagrams_graph.h"
 #include "Grid_cell.h"
@@ -78,7 +78,8 @@ public:
     int pull_near(int u_point_index);
 
 private:
-    std::set<int> candidates;
+    std::pair<int,int> get_v_key(int v_point_index) const;
+    std::multimap<std::pair<int,int>,int> grid;
 };
 
 /** \internal \typedef \brief Planar_neighbors_finder is the used Abstract_planar_neighbors_finder's implementation. */
@@ -101,27 +102,47 @@ inline std::unique_ptr< std::list<int> > Abstract_planar_neighbors_finder::pull_
 }
 
 inline Naive_pnf::Naive_pnf(double r) :
-    Abstract_planar_neighbors_finder(r), candidates() { }
+    Abstract_planar_neighbors_finder(r), grid() { }
+
+
+inline std::pair<int,int> Naive_pnf::get_v_key(int v_point_index) const{
+    G::Internal_point v_point = G::get_v_point(v_point_index);
+    return std::make_pair(static_cast<int>(v_point.first/r), static_cast<int>(v_point.second/r));
+}
 
 inline void Naive_pnf::add(int v_point_index) {
-    candidates.emplace(v_point_index);
+    grid.emplace(get_v_key(v_point_index),v_point_index);
 }
 
 inline void Naive_pnf::remove(int v_point_index) {
-    candidates.erase(v_point_index);
+    for(auto it = grid.find(get_v_key(v_point_index)); it!=grid.end(); it++)
+        if(it->second==v_point_index){
+            grid.erase(it);
+            return;
+        }
 }
 
 inline bool Naive_pnf::contains(int v_point_index) const {
-    return (candidates.count(v_point_index) > 0);
+    if(v_point_index == null_point_index())
+        return false;
+    for(auto it = grid.find(get_v_key(v_point_index)); it!=grid.end(); it++)
+        if(it->second==v_point_index)
+            return true;
+    return false;
 }
 
 inline int Naive_pnf::pull_near(int u_point_index) {
-    for (auto it = candidates.begin(); it != candidates.end(); ++it)
-        if (G::distance(u_point_index, *it) <= r) {
-            int tmp = *it;
-            candidates.erase(it);
-            return tmp;
-        }
+    G::Internal_point u_point = G::get_u_point(u_point_index);
+    int i0 = static_cast<int>(u_point.first/r);
+    int j0 = static_cast<int>(u_point.second/r);
+    for(int i = i0 -1; i<= i0 + 1; i++)
+        for(int j = j0 -1; j<= j0 + 1; j++)
+            for(auto it = grid.find(std::make_pair(i,j)); it!=grid.end(); it++)
+                if (G::distance(u_point_index, it->second) <= r) {
+                    int tmp = it->second;
+                    grid.erase(it);
+                    return tmp;
+                }
     return null_point_index();
 }
 

@@ -61,10 +61,6 @@ public:
     static int size();
     /** \internal \brief Returns the O(n^2) sorted distances between the points. */
     static std::unique_ptr< std::vector<double> > sorted_distances();
-    /** \internal \brief Compare points regarding x%r coordinate. Use v_point_index for V points and u_point_index + G::size() for U points.  */
-    struct Compare_x{double r; Compare_x(double r); bool operator()(const int point_index_1, const int point_index_2) const;};
-    /** \internal \brief Compare points regarding y%r coordinate. Use v_point_index for V points and u_point_index + G::size() for U points. */
-    struct Compare_y{double r; Compare_y(double r);bool operator()(const int point_index_1, const int point_index_2) const;};
 
 private:
     /** \internal \typedef \brief Internal_point is the internal points representation, indexes used outside. */
@@ -73,6 +69,8 @@ private:
     static std::vector<Internal_point> v;
     static Internal_point get_u_point(int u_point_index);
     static Internal_point get_v_point(int v_point_index);
+
+    friend class Naive_pnf;
 };
 
 /** \internal \typedef \brief Shorter alias */
@@ -155,32 +153,6 @@ inline G::Internal_point G::get_v_point(int v_point_index) {
     Internal_point projector = u.at(corresponding_point_in_u(v_point_index));
     double x = (projector.first + projector.second) / 2;
     return Internal_point(x, x);
-}
-
-G::Compare_x::Compare_x(double r)
-    : r(r){ }
-
-G::Compare_y::Compare_y(double r)
-    : r(r){ }
-
-inline bool G::Compare_x::operator()(const int point_index_1, const int point_index_2) const{
-    G::Internal_point p1 = point_index_1 < G::size() ? G::get_v_point(point_index_1) : G::get_u_point(point_index_1 - G::size());
-    G::Internal_point p2 = point_index_2 < G::size() ? G::get_v_point(point_index_2) : G::get_u_point(point_index_2 - G::size());
-    double x1 = fmod(p1.first,r);
-    double x2 = fmod(p2.first,r);
-    if(x1 == x2)
-        return point_index_1 > point_index_2;
-    return x1 < x2;
-}
-
-inline bool G::Compare_y::operator()(const int point_index_1, const int point_index_2) const{
-    G::Internal_point p1 = point_index_1 < G::size() ? G::get_v_point(point_index_1) : G::get_u_point(point_index_1 - G::size());
-    G::Internal_point p2 = point_index_2 < G::size() ? G::get_v_point(point_index_2) : G::get_u_point(point_index_2 - G::size());
-    double y1 = fmod(p1.second,r);
-    double y2 = fmod(p2.second,r);
-    if(y1 == y2)
-        return  point_index_1 > point_index_2;
-    return y1 < y2;
 }
 
 }  // namespace bipartite_graph_matching
