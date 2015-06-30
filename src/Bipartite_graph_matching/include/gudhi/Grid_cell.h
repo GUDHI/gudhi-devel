@@ -63,7 +63,10 @@ private:
     Corner_tree xi_yd_order;
     Corner_tree xd_yi_order;
     Corner_tree xd_yd_order;
-    void remove_aux(Corner_tree t, int v_point_index);
+    void remove_aux(Corner_tree t, int v_point_index, bool reverse);
+    template <typename Contiguous_tree t>
+    int pull_contiguous_aux();
+    int pull_corner_aux();
     void build_xi_yi();
     void build_xi_yd();
     void build_xd_yi();
@@ -83,7 +86,7 @@ inline bool Grid_cell::contains(int v_point_index) const{
     return (xi_order.count(v_point_index) > 0);
 }
 
-inline void Grid_cell::remove_aux(Corner_tree t, int v_point_index){
+inline void Grid_cell::remove_aux(Corner_tree t, int v_point_index, bool reverse){
     if(t.empty())
         return;
     std::list<Hidden_points_tree> hidden_points = t.at(v_point_index);
@@ -100,6 +103,21 @@ inline void Grid_cell::remove(int v_point_index){
     remove_aux(xi_yd_order,v_point_index);
     remove_aux(xd_yi_order,v_point_index);
     remove_aux(xd_yd_order,v_point_index);
+}
+
+template <typename Contiguous_tree t>
+inline int Grid_cell::pull_contiguous_aux(Contiguous_tree t, bool reverse){
+    if(xi_order.empty())
+        return null_point_index();
+    if(t.empty())
+        for(auto it = xi_order.begin(); it!= xi_order.end(); ++it)
+            t.emplace(*it);
+    int v_point_index = reverse ? *(t.rbegin()) : *(t.begin());
+    if(G::distance(u_point_index,v_point_index)<=r){
+        remove(v_point_index);
+        return v_point_index;
+    }
+    return null_point_index();
 }
 
 //factorization needed \/ \/ \/
