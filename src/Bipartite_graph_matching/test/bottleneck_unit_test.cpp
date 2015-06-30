@@ -4,7 +4,10 @@
 #include <random>
 #include "../include/gudhi/Graph_matching.h"
 
-using namespace Gudhi::bottleneck;
+#include <chrono>
+#include <fstream>
+
+using namespace Gudhi::bipartite_graph_matching;
 
 int n1 = 81; // a natural number >0
 int n2 = 180; // a natural number >0
@@ -27,7 +30,8 @@ BOOST_AUTO_TEST_CASE(global){
         if(i%3==0)
             v2.emplace_back(std::max(a,b),std::max(a,b)+y);
     }
-    BOOST_CHECK(bottleneck_distance(v1, v2) <= upper_bound/100.);
+    //99.5 and not 100 to avoid float errors.
+    BOOST_CHECK(bottleneck_distance(v1, v2) <= upper_bound/99.5);
 }
 
 BOOST_AUTO_TEST_CASE(persistence_diagrams_graph){
@@ -166,6 +170,38 @@ BOOST_AUTO_TEST_CASE(graph_matching) {
     BOOST_CHECK(!m1.perfect());
 }
 
-BOOST_AUTO_TEST_CASE(grid_cell) {
+/*
+BOOST_AUTO_TEST_CASE(chrono) {
+    std::ofstream objetfichier;
+    objetfichier.open("results.csv", std::ios::out);
 
+    for(int n =50; n<=1000; n+=100){
+        std::uniform_real_distribution<double> unif1(0.,upper_bound);
+        std::uniform_real_distribution<double> unif2(upper_bound/1000.,upper_bound/100.);
+        std::default_random_engine re;
+        std::vector< std::pair<double, double> > v1, v2;
+        for (int i = 0; i < n; i++) {
+            double a = unif1(re);
+            double b = unif1(re);
+            double x = unif2(re);
+            double y = unif2(re);
+            v1.emplace_back(std::min(a,b), std::max(a,b));
+            v2.emplace_back(std::min(a,b)+std::min(x,y), std::max(a,b)+std::max(x,y));
+            if(i%5==0)
+                v1.emplace_back(std::min(a,b),std::min(a,b)+x);
+            if(i%3==0)
+                v2.emplace_back(std::max(a,b),std::max(a,b)+y);
+        }
+
+        std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+        double b = bottleneck_distance(v1,v2);
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+        typedef std::chrono::duration<int,std::milli> millisecs_t;
+        millisecs_t duration(std::chrono::duration_cast<millisecs_t>(end-start));
+        objetfichier << n << ";" << duration.count() << ";" << b << std::endl;
+    }
+    objetfichier.close();
 }
+*/
+
