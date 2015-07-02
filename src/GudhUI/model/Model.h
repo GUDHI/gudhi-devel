@@ -315,7 +315,8 @@ private:
 	void run_chomp(){
 		save_complex_in_file_for_chomp();
 		std::cout << "Call CHOMP library\n";
-		system("utils/homsimpl chomp.sim");
+		int returnValue = system("utils/homsimpl chomp.sim");
+		std::cout << "CHOMP returns" << returnValue << std::endl;
 	}
 
 	void save_complex_in_file_for_chomp(){
