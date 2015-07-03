@@ -23,7 +23,7 @@
 #include "../include/gudhi/Graph_matching.h"
 #include <iostream>
 
-using namespace Gudhi::bottleneck;
+using namespace Gudhi::bipartite_graph_matching;
 
 int main() {
 

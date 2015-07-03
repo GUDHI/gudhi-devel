@@ -176,8 +176,7 @@ inline void Graph_matching::update(std::deque<int>& path) {
     for (auto it = path.cbegin(); it != path.cend(); ++it) {
         // Be careful, the iterator is incremented twice each time
         int tmp = *it;
-        ++it;
-        v_to_u[*it] = tmp;
+        v_to_u[*(++it)] = tmp;
     }
 }
 

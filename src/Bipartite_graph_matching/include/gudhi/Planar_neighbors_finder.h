@@ -27,7 +27,7 @@
 #include <map>
 
 #include "Persistence_diagrams_graph.h"
-#include "Grid_cell.h"
+#include "Envelope_tree.h"
 
 namespace Gudhi {
 
@@ -76,6 +76,8 @@ public:
     bool contains(int v_point_index) const;
     /** \internal \brief Provide and remove a V point near to the U point given as parameter, null_point_index() if there isn't such a point. */
     int pull_near(int u_point_index);
+    /** \internal \brief Provide and remove all the V points near to the U point given as parameter. */
+    virtual std::unique_ptr< std::list<int> > pull_all_near(int u_point_index);
 
 private:
     std::pair<int,int> get_v_key(int v_point_index) const;
@@ -135,15 +137,31 @@ inline int Naive_pnf::pull_near(int u_point_index) {
     G::Internal_point u_point = G::get_u_point(u_point_index);
     int i0 = static_cast<int>(u_point.first/r);
     int j0 = static_cast<int>(u_point.second/r);
-    for(int i = i0 -1; i<= i0 + 1; i++)
-        for(int j = j0 -1; j<= j0 + 1; j++)
-            for(auto it = grid.find(std::make_pair(i,j)); it!=grid.end(); it++)
+    for(int i = 1; i<= 3; i++)
+        for(int j = 1; j<= 3; j++)
+            for(auto it = grid.find(std::make_pair(i0 +(i%3)-1, j0+(j%3)-1)); it!=grid.end(); it++)
                 if (G::distance(u_point_index, it->second) <= r) {
                     int tmp = it->second;
                     grid.erase(it);
                     return tmp;
                 }
     return null_point_index();
+}
+
+inline std::unique_ptr< std::list<int> > Naive_pnf::pull_all_near(int u_point_index) {
+    std::unique_ptr< std::list<int> > all_pull(new std::list<int>);
+    G::Internal_point u_point = G::get_u_point(u_point_index);
+    int i0 = static_cast<int>(u_point.first/r);
+    int j0 = static_cast<int>(u_point.second/r);
+    for(int i = 1; i<= 3; i++)
+        for(int j = 1; j<= 3; j++)
+            for(auto it = grid.find(std::make_pair(i0 +(i%3)-1, j0+(j%3)-1)); it!=grid.end(); it++)
+                if (G::distance(u_point_index, it->second) <= r) {
+                    int tmp = it->second;
+                    grid.erase(it);
+                    all_pull->emplace_back(tmp);
+                }
+    return all_pull;
 }
 
 }  // namespace bipartite_graph_matching

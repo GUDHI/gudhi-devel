@@ -71,6 +71,7 @@ private:
     static Internal_point get_v_point(int v_point_index);
 
     friend class Naive_pnf;
+    friend class Upper_envelope_tree;
 };
 
 /** \internal \typedef \brief Shorter alias */
