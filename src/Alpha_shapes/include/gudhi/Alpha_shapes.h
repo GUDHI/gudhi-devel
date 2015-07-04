@@ -171,7 +171,7 @@ class Alpha_shapes {
   /** \brief Returns the number of simplices in the complex.
    *
    * Does not count the empty simplex. */
-  const unsigned int& num_simplices() const {
+  unsigned num_simplices() const {
     return _st.num_simplices();
   }
 
