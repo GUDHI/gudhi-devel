@@ -63,8 +63,10 @@ using namespace Gudhi;
 //using namespace boost::filesystem;
 
 typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> K;
-typedef K::FT FT;
 typedef K::Point_d Point_d;
+//typedef CGAL::Cartesian_d<double> K;
+//typedef CGAL::Point_d<K> Point_d;
+typedef K::FT FT;
 typedef CGAL::Search_traits<
   FT, Point_d,
   typename K::Cartesian_const_iterator_d,
@@ -72,7 +74,7 @@ typedef CGAL::Search_traits<
 typedef CGAL::Euclidean_distance<Traits_base> Euclidean_distance;
 
 /**
- * \brief Class of distance in a flat torus in dimaension D
+ * \brief Class of distance in a flat torus in dimension D
  *
  */
 //class Torus_distance : public Euclidean_distance {
@@ -288,10 +290,11 @@ typedef CGAL::Fuzzy_sphere<STraits> Fuzzy_sphere;
 typedef std::vector<Point_d> Point_Vector;
 
 //typedef K::Equal_d Equal_d;
+//typedef CGAL::Random_points_in_cube_d<CGAL::Point_d<CGAL::Cartesian_d<FT> > > Random_cube_iterator;
 typedef CGAL::Random_points_in_cube_d<Point_d> Random_cube_iterator;
 typedef CGAL::Random_points_in_ball_d<Point_d> Random_point_iterator;
 
-bool toric=true;
+bool toric=false;
 
 /**
  * \brief Customized version of read_points
@@ -341,7 +344,18 @@ void generate_points_grid(Point_Vector& W, int width, int D)
 
 void generate_points_random_box(Point_Vector& W, int nbP, int dim)
 {
+  /*
   Random_cube_iterator rp(dim, 1);
+  for (int i = 0; i < nbP; i++)
+    {
+      std::vector<double> point;
+      for (auto it = rp->cartesian_begin(); it != rp->cartesian_end(); ++it)
+        point.push_back(*it);
+      W.push_back(Point_d(point));
+      rp++;
+    }
+  */
+  Random_cube_iterator rp(dim, 1.0);
   for (int i = 0; i < nbP; i++)
     {
       W.push_back(*rp++);
@@ -494,9 +508,7 @@ void write_edges(std::string file_name, Witness_complex<>& witness_complex, Poin
 void landmark_choice(Point_Vector &W, int nbP, int nbL, Point_Vector& landmarks, std::vector<int>& landmarks_ind)
 {
   std::cout << "Enter landmark choice to kd tree\n";
-  //std::vector<Point_d> landmarks;
   int chosen_landmark;
-  //std::pair<Point_etiquette_map::iterator,bool> res = std::make_pair(L_i.begin(),false);
   Point_d* p;
   CGAL::Random rand;
   for (int i = 0; i < nbL; i++)
@@ -515,6 +527,33 @@ void landmark_choice(Point_Vector &W, int nbP, int nbL, Point_Vector& landmarks,
       //std::cout << "Added landmark " << chosen_landmark << std::endl;
     }
  }
+
+/** \brief Choose landmarks on a body-central cubic system
+ */
+void landmark_choice_bcc(Point_Vector &W, int nbP, int width, Point_Vector& landmarks, std::vector<int>& landmarks_ind)
+{
+  int D = W[0].size();
+  int nb_points = 1;
+  for (int i = 0; i < D; ++i)
+    nb_points *= width;
+  for (int i = 0; i < nb_points; ++i)
+    {
+      std::vector<double> point;
+      std::vector<double> cpoint;
+      int cell_i = i;
+      for (int l = 0; l < D; ++l)
+        {
+          point.push_back(-1.0+(2.0/width)*(cell_i%width));
+          cpoint.push_back(-1.0+(2.0/width)*(cell_i%width)+(1.0/width));
+          cell_i /= width;
+        }
+      landmarks.push_back(point);
+      landmarks.push_back(cpoint);
+      landmarks_ind.push_back(2*i);
+      landmarks_ind.push_back(2*i+1);
+    }
+  std::cout << "The number of landmarks is: " << landmarks.size() << std::endl;
+}
 
 
 int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<int>& landmarks_ind)
@@ -548,7 +587,7 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
           int cell_i = i;
           for (int l = 0; l < D; ++l)
             {
-              point.push_back(landmarks[k][l] + 2.0*((cell_i%3)-1));
+              point.push_back(landmarks[k][l] + 2.0*((cell_i%3)-1.0));
               cell_i /= 3;
             }
           landmarks_ext.push_back(point);
@@ -587,7 +626,8 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
           //Point_etiquette_map::iterator itm = L_i.find(it->first);
           //assert(itm != L_i.end());
           //std::cout << "Entered KNN_it with point at distance " << it->second << "\n";
-          WL[i].push_back((it->first)%nbL);
+          if (std::find(WL[i].begin(), WL[i].end(), (it->first)%nbL) == WL[i].end())
+            WL[i].push_back((it->first)%nbL);
           //std::cout << "ITFIRST " << it->first << std::endl;
           //std::cout << i << " " << it->first << ": " << it->second << std::endl; 
         }
@@ -609,6 +649,12 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
   Witness_complex<> witnessComplex;
   witnessComplex.setNbL(nbL);
   witnessComplex.witness_complex(WL);
+  /*
+  if (witnessComplex.is_witness_complex(WL))
+    std::cout << "!!YES. IT IS A WITNESS COMPLEX!!\n";
+  else
+    std::cout << "??NO. IT IS NOT A WITNESS COMPLEX??\n";    
+  */
   //******************** Making a set of bad link landmarks
   std::cout << "Entered bad links\n";
   std::set< int > perturbL;
@@ -730,9 +776,9 @@ int main (int argc, char * const argv[])
   std::cout << "Let the carnage begin!\n";
   Point_Vector point_vector;
   //read_points_cust(file_name, point_vector);
-  //generate_points_random_box(point_vector, nbP, dim);
-  generate_points_grid(point_vector, (int)pow(nbP, 1.0/dim), dim);
-  nbP = (int)(pow((int)pow(nbP, 1.0/dim), dim));
+  generate_points_random_box(point_vector, nbP, dim);
+  //generate_points_grid(point_vector, (int)pow(nbP, 1.0/dim), dim);
+  //nbP = (int)(pow((int)pow(nbP, 1.0/dim), dim));
   /*
   for (auto &p: point_vector)
     {
@@ -757,17 +803,20 @@ int main (int argc, char * const argv[])
       L = {};
       chosen_landmarks = {};
       landmark_choice(point_vector, nbP, nbL, L, chosen_landmarks);
+      
+      //int width = (int)pow(nbL, 1.0/dim); landmark_choice_bcc(point_vector, nbP, width, L, chosen_landmarks);
       for (auto i: chosen_landmarks)
         {
           ok = ok && (std::count(chosen_landmarks.begin(),chosen_landmarks.end(),i) == 1);
           if (!ok) break;
         }
+      
     }
   int bl = nbL, curr_min = bl;
   write_points("landmarks/initial_pointset",point_vector);
   //write_points("landmarks/initial_landmarks",L);
-  
-  for (int i = 0; bl > 0; i++)
+  for (int i = 0; i < 1; i++)
+    //for (int i = 0; bl > 0; i++)
     {
       std::cout << "========== Start iteration " << i << "== curr_min(" << curr_min << ")========\n";
       bl=landmark_perturbation(point_vector, L, chosen_landmarks);

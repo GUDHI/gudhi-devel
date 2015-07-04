@@ -416,7 +416,7 @@ int main (int argc, char * const argv[])
     {
       file_name.erase(0, last_slash_idx + 1);
     }
-  //write_points("landmarks/initial_pointset",point_vector);
+  write_points("landmarks/initial_pointset",point_vector);
   write_points("landmarks/initial_landmarks",L);
   //for (int i = 0; bl != 0; i++)
   for (int i = 0; i < 1; i++)

@@ -71,199 +71,6 @@ typedef CGAL::Search_traits<
   typename K::Construct_cartesian_const_iterator_d> Traits_base;
 typedef CGAL::Euclidean_distance<Traits_base> Euclidean_distance;
 
-/**
- * \brief Class of distance in a flat torus in dimaension D
- *
- */
-//class Torus_distance : public Euclidean_distance {
-  class Torus_distance {
-
-public:
-    typedef K::FT    FT;
-    typedef K::Point_d Point_d;
-    typedef Point_d Query_item;
-    typedef typename CGAL::Dynamic_dimension_tag D;
-
-  double box_length = 2;
-
-  FT transformed_distance(Query_item q, Point_d p) const
-  {
-    FT distance = FT(0);
-    FT coord = FT(0);
-    //std::cout << "Hello skitty!\n";
-    typename K::Construct_cartesian_const_iterator_d construct_it=Traits_base().construct_cartesian_const_iterator_d_object();
-    typename K::Cartesian_const_iterator_d qit = construct_it(q),
-	qe = construct_it(q,1), pit = construct_it(p);
-	for(; qit != qe; qit++, pit++)
-          {
-            coord = sqrt(((*qit)-(*pit))*((*qit)-(*pit)));
-            if (coord*coord <= (box_length-coord)*(box_length-coord))
-              distance += coord*coord;
-            else
-              distance += (box_length-coord)*(box_length-coord);
-          }
-        return distance;
-  }
-
-  FT min_distance_to_rectangle(const Query_item& q,
-                               const CGAL::Kd_tree_rectangle<FT,D>& r) const {
-    FT distance = FT(0);
-    FT dist1, dist2;
-    typename K::Construct_cartesian_const_iterator_d construct_it=Traits_base().construct_cartesian_const_iterator_d_object();
-    typename K::Cartesian_const_iterator_d qit = construct_it(q),
-                                           qe = construct_it(q,1);
-    for(unsigned int i = 0;qit != qe; i++, qit++)
-      {
-        if((*qit) < r.min_coord(i))
-          {
-            dist1 = (r.min_coord(i)-(*qit));
-            dist2 = (box_length - r.max_coord(i)+(*qit));
-            if (dist1 < dist2)
-              distance += dist1*dist1;
-            else
-              distance += dist2*dist2;
-          }
-        else if ((*qit) > r.max_coord(i))
-          {
-            dist1 = (box_length - (*qit)+r.min_coord(i));
-            dist2 = ((*qit) - r.max_coord(i));
-            if (dist1 < dist2)
-              distance += dist1*dist1;
-            else
-              distance += dist2*dist2;
-          }
-      }
-    return distance;
-  }
-
-  FT min_distance_to_rectangle(const Query_item& q,
-                               const CGAL::Kd_tree_rectangle<FT,D>& r,
-                               std::vector<FT>& dists) const {
-    FT distance = FT(0);
-    FT dist1, dist2;
-    typename K::Construct_cartesian_const_iterator_d construct_it=Traits_base().construct_cartesian_const_iterator_d_object();
-    typename K::Cartesian_const_iterator_d qit = construct_it(q),
-	                  	           qe = construct_it(q,1);
-    //std::cout << r.max_coord(0) << std::endl;
-    for(unsigned int i = 0;qit != qe; i++, qit++)
-      {
-        if((*qit) < r.min_coord(i))
-          {
-            dist1 = (r.min_coord(i)-(*qit));
-            dist2 = (box_length - r.max_coord(i)+(*qit));
-            if (dist1 < dist2)
-              {
-                dists[i] = dist1;
-                distance += dist1*dist1;
-              }
-            else
-              {
-                dists[i] = dist2;
-                distance += dist2*dist2;
-                //std::cout << "Good stuff1\n";
-              }
-          }
-        else if ((*qit) > r.max_coord(i))
-          {
-            dist1 = (box_length - (*qit)+r.min_coord(i));
-            dist2 = ((*qit) - r.max_coord(i));
-            if (dist1 < dist2)
-              {
-                dists[i] = dist1;
-                distance += dist1*dist1;
-                //std::cout << "Good stuff2\n";
-              }
-            else
-              {
-                dists[i] = dist2;
-                distance += dist2*dist2;
-              }
-          }
-      };
-    return distance;
-  }
-    
-  FT max_distance_to_rectangle(const Query_item& q,
-                               const CGAL::Kd_tree_rectangle<FT,D>& r) const {
-    FT distance=FT(0);
-    typename K::Construct_cartesian_const_iterator_d construct_it=Traits_base().construct_cartesian_const_iterator_d_object();
-    typename K::Cartesian_const_iterator_d qit = construct_it(q),
-		                           qe = construct_it(q,1);
-    for(unsigned int i = 0;qit != qe; i++, qit++)
-      {
-        if (box_length <= (r.min_coord(i)+r.max_coord(i)))
-          if ((r.max_coord(i)+r.min_coord(i)-box_length)/FT(2.0) <= (*qit) &&
-              (*qit) <= (r.min_coord(i)+r.max_coord(i))/FT(2.0))
-            distance += (r.max_coord(i)-(*qit))*(r.max_coord(i)-(*qit));
-          else
-            distance += ((*qit)-r.min_coord(i))*((*qit)-r.min_coord(i));
-        else
-          if ((box_length-r.max_coord(i)-r.min_coord(i))/FT(2.0) <= (*qit) ||
-              (*qit) <= (r.min_coord(i)+r.max_coord(i))/FT(2.0))
-            distance += (r.max_coord(i)-(*qit))*(r.max_coord(i)-(*qit));
-          else
-            distance += ((*qit)-r.min_coord(i))*((*qit)-r.min_coord(i));
-      }
-    return distance;
-  }
-
-  
-  FT max_distance_to_rectangle(const Query_item& q,
-                               const CGAL::Kd_tree_rectangle<FT,D>& r,
-                               std::vector<FT>& dists) const {
-    FT distance=FT(0);
-    typename K::Construct_cartesian_const_iterator_d construct_it=Traits_base().construct_cartesian_const_iterator_d_object();
-    typename K::Cartesian_const_iterator_d qit = construct_it(q),
-		                           qe = construct_it(q,1);
-    for(unsigned int i = 0;qit != qe; i++, qit++)
-      {
-        if (box_length <= (r.min_coord(i)+r.max_coord(i)))
-          if ((r.max_coord(i)+r.min_coord(i)-box_length)/FT(2.0) <= (*qit) &&
-              (*qit) <= (r.min_coord(i)+r.max_coord(i))/FT(2.0))
-            {
-              dists[i] = r.max_coord(i)-(*qit);
-              distance += (r.max_coord(i)-(*qit))*(r.max_coord(i)-(*qit));
-            }
-          else
-            {
-              dists[i] = sqrt(((*qit)-r.min_coord(i))*((*qit)-r.min_coord(i)));
-              distance += ((*qit)-r.min_coord(i))*((*qit)-r.min_coord(i));
-            }
-        else
-          if ((box_length-r.max_coord(i)-r.min_coord(i))/FT(2.0) <= (*qit) ||
-              (*qit) <= (r.min_coord(i)+r.max_coord(i))/FT(2.0))
-            {
-              dists[i] = sqrt((r.max_coord(i)-(*qit))*(r.max_coord(i)-(*qit)));
-              distance += (r.max_coord(i)-(*qit))*(r.max_coord(i)-(*qit));
-              
-            }
-          else
-            {
-              dists[i] = (*qit)-r.min_coord(i);
-              distance += ((*qit)-r.min_coord(i))*((*qit)-r.min_coord(i));
-            }
-      }
-    return distance;
-  }
-
-    inline FT new_distance(FT dist, FT old_off, FT new_off,
-                           int /* cutting_dimension */)  const {
-      
-      FT new_dist = dist + (new_off*new_off - old_off*old_off);
-      return new_dist;
-    }
-    
-  inline FT transformed_distance(FT d) const {
-    return d*d;
-  }
-
-  inline FT inverse_of_transformed_distance(FT d) const {
-    return sqrt(d);
-  }
-  
-};
-
-
 typedef std::vector< Vertex_handle > typeVectorVertex;
 
 //typedef std::pair<typeVectorVertex, Filtration_value> typeSimplex;
@@ -502,6 +309,49 @@ void landmark_choice(Point_Vector &W, int nbP, int nbL, Point_Vector& landmarks,
     }
  }
 
+/** \brief A test with 600cell, the generalisation of icosaedre in 4d
+ */
+void landmark_choice_600cell(Point_Vector&W, int nbP, int nbL, Point_Vector& landmarks, std::vector<int>& landmarks_ind)
+{
+  assert(W[0].size() == 4); //4-dimensionality required
+  FT phi = (1+sqrt(5))/2;
+  FT phi_1 = FT(1)/phi;
+  std::vector<FT> p;
+  // 16 vertices
+  for (FT a = -0.5; a < 1; a += 1)
+    for (FT b = -0.5; b < 1; b += 1)
+      for (FT c = -0.5; c < 1; c += 1)
+        for (FT d = -0.5; d < 1; d += 1)
+          landmarks.push_back(Point_d(std::vector<FT>({a,b,c,d})));
+  // 8 vertices
+  for (FT a = -0.5; a < 1; a += 1)
+    {
+      landmarks.push_back(Point_d(std::vector<FT>({a,0,0,0})));
+      landmarks.push_back(Point_d(std::vector<FT>({0,a,0,0})));
+      landmarks.push_back(Point_d(std::vector<FT>({0,0,a,0})));
+      landmarks.push_back(Point_d(std::vector<FT>({0,0,0,a})));
+    }
+  // 96 vertices
+  for (FT a = -phi/2; a < phi; a += phi)
+    for (FT b = -0.5; b < 1; b += 1)
+      for (FT c = -phi_1/2; c < phi_1; c += phi_1)
+        {
+          landmarks.push_back(Point_d(std::vector<FT>({a,b,c,0})));
+          landmarks.push_back(Point_d(std::vector<FT>({b,a,0,c})));
+          landmarks.push_back(Point_d(std::vector<FT>({c,0,a,b})));
+          landmarks.push_back(Point_d(std::vector<FT>({0,c,b,a})));
+          landmarks.push_back(Point_d(std::vector<FT>({a,c,0,b})));
+          landmarks.push_back(Point_d(std::vector<FT>({a,0,b,c})));
+          landmarks.push_back(Point_d(std::vector<FT>({c,b,0,a})));
+          landmarks.push_back(Point_d(std::vector<FT>({0,b,a,c})));
+          landmarks.push_back(Point_d(std::vector<FT>({b,0,c,a})));
+          landmarks.push_back(Point_d(std::vector<FT>({0,a,c,b})));
+          landmarks.push_back(Point_d(std::vector<FT>({b,c,a,0})));
+          landmarks.push_back(Point_d(std::vector<FT>({c,a,b,0})));
+        }
+  for (int i = 0; i < 120; ++i)
+    landmarks_ind.push_back(i);
+}
 
 int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<int>& landmarks_ind)
 {
@@ -516,10 +366,7 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
   //******************** Constructing a WL matrix
   int nbP = W.size();
   int nbL = landmarks.size();
-  //Point_Vector landmarks_ = landmarks;
-  Torus_distance ed;
-  //Equal_d ed;
-  //Point_d p1(std::vector<FT>({0.8,0.8})), p2(std::vector<FT>({0.1,0.1}));
+  Euclidean_distance ed;
   FT lambda = ed.transformed_distance(landmarks[0],landmarks[1]);
   //std::cout << "Lambda=" << lambda << std::endl;
     //FT lambda = 0.1;//Euclidean_distance();
@@ -578,10 +425,12 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
   Witness_complex<> witnessComplex;
   witnessComplex.setNbL(nbL);
   witnessComplex.witness_complex(WL);
+  /*
   if (witnessComplex.is_witness_complex(WL))
     std::cout << "!!YES. IT IS A WITNESS COMPLEX!!\n";
   else
-    std::cout << "??NO. IT IS NOT A WITNESS COMPLEX??\n";    
+    std::cout << "??NO. IT IS NOT A WITNESS COMPLEX??\n";   
+  */ 
   //******************** Making a set of bad link landmarks
   std::cout << "Entered bad links\n";
   std::set< int > perturbL;
@@ -715,11 +564,14 @@ int main (int argc, char * const argv[])
       L = {};
       chosen_landmarks = {};
       landmark_choice(point_vector, nbP, nbL, L, chosen_landmarks);
+      //landmark_choice_600cell(point_vector, nbP, nbL, L, chosen_landmarks);
+      /*
       for (auto i: chosen_landmarks)
         {
           ok = ok && (std::count(chosen_landmarks.begin(),chosen_landmarks.end(),i) == 1);
           if (!ok) break;
         }
+      */
     }
   int bl = nbL, curr_min = bl;
   write_points("landmarks/initial_pointset",point_vector);
