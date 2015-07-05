@@ -79,14 +79,6 @@ public Skeleton_blocker_complex<SkeletonBlockerGeometricDS> {
       (*this)[Vertex_handle(current++)].point() = Point(point->begin(), point->end());
   }
 
-  template<typename SkeletonBlockerGeometricComplex, typename SimpleHandleOutputIterator, typename PointIterator>
-  SkeletonBlockerGeometricComplex make_complex_from_top_faces(
-                                                                        SimpleHandleOutputIterator simplex_begin,
-                                                                        SimpleHandleOutputIterator simplex_end,
-                                                                        PointIterator points_begin,
-                                                                        PointIterator points_end,
-                                                                        bool is_flag_complex);
-
   /**
    * @brief Constructor with a list of simplices.
    * Points of every vertex are the point constructed with default constructor.
