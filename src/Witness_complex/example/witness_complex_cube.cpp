@@ -291,8 +291,8 @@ bool triangulation_is_protected(Delaunay_triangulation& t, FT delta)
 
 void fill_landmarks(Point_Vector& W, Point_Vector& landmarks, std::vector<int>& landmarks_ind)
 {
-  for (int j = 0; j < landmarks_ind.size(); ++j)
-    landmarks.push_back(W[landmarks_ind[j]][l]);
+  for (unsigned j = 0; j < landmarks_ind.size(); ++j)
+    landmarks.push_back(W[landmarks_ind[j]]);
 }
 
 void landmark_choice_by_delaunay(Point_Vector& W, int nbP, int nbL, Point_Vector& landmarks, std::vector<int>& landmarks_ind, FT delta)
@@ -356,7 +356,7 @@ void landmark_choice_protected_delaunay(Point_Vector& W, int nbP, Point_Vector& 
         }
     else
       list_it++;
-  fill_landmark_copies(W, landmarks, landmarks_ind);
+  fill_landmarks(W, landmarks, landmarks_ind);
 }
 
 
@@ -427,6 +427,7 @@ int landmark_perturbation(Point_Vector &W, int nbL, Point_Vector& landmarks, std
   witnessComplex.witness_complex(WL);
 
   //******************** Making a set of bad link landmarks
+  /*
   std::cout << "Entered bad links\n";
   std::set< int > perturbL;
   int count_badlinks = 0;
@@ -453,8 +454,9 @@ int landmark_perturbation(Point_Vector &W, int nbL, Point_Vector& landmarks, std
     if (count_bad[i] != 0)
       std::cout << "count_bad[" << i << "] = " << count_bad[i] << std::endl;
   std::cout << "\nBad links total: " << count_badlinks << " Points to perturb: " << perturbL.size() << std::endl;
-  
+  */
   //*********************** Perturb bad link landmarks  
+  /*
   for (auto u: perturbL)
     {
       Random_point_iterator rp(D,sqrt(lambda)/8);
@@ -486,56 +488,41 @@ int landmark_perturbation(Point_Vector &W, int nbL, Point_Vector& landmarks, std
     }
   write_edges("landmarks/edges", witnessComplex, landmarks);
   return count_badlinks;
+  */
+  return 0;
 }
 
 
 int main (int argc, char * const argv[])
 {
-  if (argc != 5)
+  if (argc != 3)
     {
       std::cerr << "Usage: " << argv[0]
-                << " nbP nbL dim delta\n";
+                << " nbP dim\n";
       return 0;
     }
   int nbP       = atoi(argv[1]);
-  int nbL       = atoi(argv[2]);
-  int dim       = atoi(argv[3]);
-  FT delta      = atof(argv[4]);
+  int dim       = atoi(argv[2]);
   
   std::cout << "Let the carnage begin!\n";
   Point_Vector point_vector;
   generate_points_random_box(point_vector, nbP, dim);
   Point_Vector L;
   std::vector<int> chosen_landmarks;
-  bool ok=false;
-  while (!ok)
-    {
-      ok = true;
-      L = {};
-      chosen_landmarks = {};
-      //landmark_choice_by_delaunay(point_vector, nbP, nbL, L, chosen_landmarks, delta);
-      landmark_choice_protected_delaunay(point_vector, nbP, L, chosen_landmarks, delta);
-      nbL = chosen_landmarks.size();
-      std::cout << "Number of landmarks is " << nbL << std::endl;
-      //int width = (int)pow(nbL, 1.0/dim); landmark_choice_bcc(point_vector, nbP, width, L, chosen_landmarks);
-      for (auto i: chosen_landmarks)
-        {
-          ok = ok && (std::count(chosen_landmarks.begin(),chosen_landmarks.end(),i) == 1);
-          if (!ok) break;
-        }
-      
-    }
-  int bl = nbL, curr_min = bl;
-  write_points("landmarks/initial_pointset",point_vector);
+  //write_points("landmarks/initial_pointset",point_vector);
   //write_points("landmarks/initial_landmarks",L);
-  //for (int i = 0; i < 1; i++)
-  for (int i = 0; bl > 0; i++)
+  for (int i = 0; i < 11; i++)
+  //for (int i = 0; bl > 0; i++)
     {
-      std::cout << "========== Start iteration " << i << "== curr_min(" << curr_min << ")========\n";
-      bl=landmark_perturbation(point_vector, nbL, L, chosen_landmarks);
-      if (bl < curr_min)
-        curr_min=bl;
-      write_points("landmarks/landmarks0",L);
+      //std::cout << "========== Start iteration " << i << "== curr_min(" << curr_min << ")========\n";
+      double delta = pow(10, -(1.0*i)/2);
+      std::cout << "delta = " << delta << std::endl;
+      L = {}; chosen_landmarks = {};
+      landmark_choice_protected_delaunay(point_vector, nbP, L, chosen_landmarks, delta);
+      int nbL = chosen_landmarks.size();
+      std::cout << "Number of landmarks = " << nbL << std::endl;
+      landmark_perturbation(point_vector, nbL, L, chosen_landmarks);
+      //write_points("landmarks/landmarks0",L);
     }
   
 }

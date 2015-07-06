@@ -335,7 +335,7 @@ void generate_points_grid(Point_Vector& W, int width, int D)
       int cell_i = i;
       for (int l = 0; l < D; ++l)
         {
-          point.push_back(0.01*(cell_i%width));
+          point.push_back((2.0/width)*(cell_i%width));
           cell_i /= width;
         }
       W.push_back(point);
@@ -516,7 +516,7 @@ void landmark_choice(Point_Vector &W, int nbP, int nbL, Point_Vector& landmarks,
       //      while (!res.second)
       //  {
       do chosen_landmark = rand.get_int(0,nbP);
-      while (std::count(landmarks_ind.begin(),landmarks_ind.end(),chosen_landmark)!=0);
+      while (std::find(landmarks_ind.begin(),landmarks_ind.end(),chosen_landmark)!=landmarks_ind.end());
       //rand++;
       //std::cout << "Chose " << chosen_landmark << std::endl;
       p = &W[chosen_landmark];
@@ -672,7 +672,7 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
         count_badlinks++;
         //std::cout << u << " ";
         Point_d& l = landmarks[u];
-        Fuzzy_sphere fs(l, sqrt(lambda)*3, 0, traits);
+        Fuzzy_sphere fs(l, sqrt(lambda), 0, traits);
         std::vector<int> curr_perturb;
         L.search(std::insert_iterator<std::vector<int>>(curr_perturb,curr_perturb.begin()),fs);
         for (int i: curr_perturb)

@@ -267,6 +267,8 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
   std::cout << "Enter (D+1) nearest landmarks\n";
   //std::cout << "Size of the tree is " << L.size() << std::endl;
   int D = W[0].size();
+  clock_t start, end;
+  start = clock();  
   for (int i = 0; i < nbP; i++)
     {
       //std::cout << "Entered witness number " << i << std::endl;
@@ -294,18 +296,23 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
             lambda = dist;
         }
       //std::cout << "\nBad links total: " << count_badlinks << " Points to perturb: " << perturbL.size() << std::endl;
-
-    }
+      }
   //std::cout << "\n";
+  end = clock();
+  std::cout << "WL matrix construction on " << nbL << " landmarks took " << (double)(end-start)/CLOCKS_PER_SEC << "s.\n";
   
+
   std::string out_file = "wl_result";
-  write_wl(out_file,WL);
+  //write_wl(out_file,WL);
   
   //******************** Constructng a witness complex
   std::cout << "Entered witness complex construction\n";
   Witness_complex<> witnessComplex;
   witnessComplex.setNbL(nbL);
+  start = clock();
   witnessComplex.witness_complex(WL);
+  end = clock();
+  std::cout << "Witness complex construction on " << nbL << " landmarks took " << (double)(end-start)/CLOCKS_PER_SEC << "s.\n";
   //******************** Making a set of bad link landmarks
   std::cout << "Entered bad links\n";
   std::set< int > perturbL;
@@ -355,7 +362,7 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
   std::cout << "lambda=" << lambda << std::endl;
   // Write the WL matrix in a file
  
-  
+  /*
   char buffer[100];
   int i = sprintf(buffer,"stree_result.txt");
   
@@ -366,8 +373,9 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
       witnessComplex.st_to_file(ofs);
       ofs.close();
     }
+  */
   //witnessComplex.write_badlinks("badlinks");
-  write_edges_gnuplot("landmarks/edges", witnessComplex, landmarks);
+  //write_edges_gnuplot("landmarks/edges", witnessComplex, landmarks);
   return count_badlinks;
 }
 
@@ -417,7 +425,7 @@ int main (int argc, char * const argv[])
       file_name.erase(0, last_slash_idx + 1);
     }
   write_points("landmarks/initial_pointset",point_vector);
-  write_points("landmarks/initial_landmarks",L);
+  //write_points("landmarks/initial_landmarks",L);
   //for (int i = 0; bl != 0; i++)
   for (int i = 0; i < 1; i++)
     {

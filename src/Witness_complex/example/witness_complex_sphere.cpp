@@ -431,6 +431,7 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
   else
     std::cout << "??NO. IT IS NOT A WITNESS COMPLEX??\n";   
   */ 
+  */
   //******************** Making a set of bad link landmarks
   std::cout << "Entered bad links\n";
   std::set< int > perturbL;
@@ -446,7 +447,7 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
         count_badlinks++;
         //std::cout << u << " ";
         Point_d& l = landmarks[u];
-        Fuzzy_sphere fs(l, sqrt(lambda)*3, 0, traits);
+        Fuzzy_sphere fs(l, sqrt(lambda), 0, traits);
         std::vector<int> curr_perturb;
         L.search(std::insert_iterator<std::vector<int>>(curr_perturb,curr_perturb.begin()),fs);
         for (int i: curr_perturb)
@@ -577,8 +578,8 @@ int main (int argc, char * const argv[])
   write_points("landmarks/initial_pointset",point_vector);
   write_points("landmarks/initial_landmarks",L);
   
-  //for (int i = 0; bl > 0; i++)
-  for (int i = 0; i < 1; i++)
+  for (int i = 0; bl > 0; i++)
+    //for (int i = 0; i < 1; i++)
     {
       std::cout << "========== Start iteration " << i << "== curr_min(" << curr_min << ")========\n";
       bl=landmark_perturbation(point_vector, L, chosen_landmarks);
