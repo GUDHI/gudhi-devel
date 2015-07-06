@@ -292,25 +292,10 @@ class Simplex_tree {
   }
 
   /** \brief Copy; copy the whole tree structure. */
-  Simplex_tree(Simplex_tree& copy) : root_(NULL, -1)
+  Simplex_tree(Simplex_tree& copy) : null_vertex_(copy.null_vertex_), threshold_(copy.threshold_), num_simplices_(copy.num_simplices_), root_(NULL, -1), filtration_vect_(copy.filtration_vect_), dimension_(copy.dimension_) 
 	{
-		null_vertex_ = copy.null_vertex_;
-		threshold_ = copy.threshold_;
-		num_simplices_ = copy.num_simplices_;
-		filtration_vect_ = copy.filtration_vect_;
-		dimension_ = copy.dimension_;
 		std::vector<Vertex_handle> v;
-		for (auto sh = copy.root_.members().begin(); sh != copy.root_.members().end(); ++sh)
-		{
-			v.push_back(sh->first);
-			if (has_children(sh)) {
-				rec_copy(sh->second.children(), v);
-			}
-			else {
-				insert_simplex(v, sh->second.filtration());
-			}
-			v.pop_back();
-		}
+		rec_copy(&copy.root_, v);
 	}
 
   /** rec_copy: DFS, inserts simplices when reaching a leaf.*/
@@ -332,13 +317,10 @@ class Simplex_tree {
 
 
   /** \brief Move; moves the whole tree structure. */
-  Simplex_tree(Simplex_tree&& old) : null_vertex_(std::move(old.null_vertex_)), threshold_(std::move(old.threshold_)), filtration_vect_(std::move(old.filtration_vect_))
+  Simplex_tree(Simplex_tree&& old) : null_vertex_(std::move(old.null_vertex_)), threshold_(std::move(old.threshold_)), num_simplices_(std::move(old.num_simplices_)), root_(std::move(old.root_)), filtration_vect_(std::move(old.filtration_vect_)), dimension_(std::move(old.dimension_))
 	{
-		dimension_ = std::move(old.dimension_);
-		num_simplices_ = std::move(old.num_simplices_);
 		old.dimension_ = -1;
 		old.num_simplices_ = 0;
-		root_ = std::move(old.root_);
 	}
 
   /** \brief Destructor; deallocates the whole tree structure. */
@@ -518,16 +500,13 @@ bool has_children(Simplex_handle sh) {
  * of the simplex in the simplicial complex containing the corresponding
  * vertices. Return null_simplex() if the simplex is not in the complex.
  *
- * The type RandomAccessVertexRange must be a range for which .begin() and
- * .end() return random access iterators, with <CODE>value_type</CODE>
- * <CODE>Vertex_handle</CODE>.
+ * The type InputVertexRange must be a range of <CODE>Vertex_handle</CODE>
+ * on which we can call std::begin() function
  */
 template<class InputVertexRange>
   Simplex_handle find(const InputVertexRange & s) {
-  	std::vector<Vertex_handle> copy;
-	for (auto v = std::begin(s); v != std::end(s); ++v )
-		copy.push_back(*v);
-  	sort(std::begin(copy), std::end(copy));
+  	std::vector<Vertex_handle> copy(std::begin(s), std::end(s));
+  	std::sort(std::begin(copy), std::end(copy));
 	return find_rec(copy);
   }
 
@@ -616,10 +595,8 @@ public:
 template<class RandomAccessVertexRange>
 std::pair<Simplex_handle, bool> insert_simplex(const RandomAccessVertexRange & simplex,
 		Filtration_value filtration) {
-	std::vector<Vertex_handle> copy;
-	for (auto v = std::begin(simplex); v != std::end(simplex); ++v)
-		copy.push_back(*v);
-  	sort(std::begin(copy), std::end(copy));
+	std::vector<Vertex_handle> copy(std::begin(simplex), std::end(simplex));;
+  	std::sort(std::begin(copy), std::end(copy));
 	return insert_simplex_rec(copy, filtration);
 }
 
@@ -632,10 +609,8 @@ std::pair<Simplex_handle, bool> insert_simplex(const RandomAccessVertexRange & s
   template<class InputVertexRange>
   void insert_simplex_and_subfaces(const InputVertexRange& Nsimplex,
                                          Filtration_value filtration = 0.0) {
-	std::vector<Vertex_handle> copy;
-	for (auto v = std::begin(Nsimplex); v != std::end(Nsimplex); ++v)
-		copy.push_back(*v);
-  	sort(std::begin(copy), std::end(copy));
+	std::vector<Vertex_handle> copy(std::begin(Nsimplex), std::end(Nsimplex));;
+  	std::sort(std::begin(copy), std::end(copy));
 	insert_simplex_and_subfaces_rec(copy, filtration);
 	}
 
