@@ -55,6 +55,7 @@ else()
   LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})                      
 
   message(STATUS "boost include dirs:" ${Boost_INCLUDE_DIRS})
+  message(STATUS "boost library dirs:" ${Boost_LIBRARY_DIRS})
 
   include_directories(src/common/include/)
   include_directories(src/Bottleneck/include/)
