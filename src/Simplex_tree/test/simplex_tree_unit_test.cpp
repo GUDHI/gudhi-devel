@@ -620,6 +620,11 @@ BOOST_AUTO_TEST_CASE( NSimplexAndSubfaces_tree_insertion )
     v.push_back(3);
 	std::cout << "First test : " << std::endl;
     std::cout << "Star of (3):" << std::endl;
+
+	simplex.push_back(3);
+	result.push_back(st.find(simplex));
+	simplex.clear();
+
 	simplex.push_back(3);
 	simplex.push_back(0);
 	result.push_back(st.find(simplex));
@@ -649,6 +654,11 @@ BOOST_AUTO_TEST_CASE( NSimplexAndSubfaces_tree_insertion )
     v.push_back(7);
 	std::cout << "Second test : " << std::endl;
     std::cout << "Star of (1,7): " << std::endl;
+
+	simplex.push_back(7);
+	simplex.push_back(1);
+	result.push_back(st.find(simplex));
+	simplex.clear();
 
 	simplex.push_back(7);
 	simplex.push_back(6);
