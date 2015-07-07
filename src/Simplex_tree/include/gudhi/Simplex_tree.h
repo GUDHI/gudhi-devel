@@ -132,7 +132,6 @@ class Simplex_tree {
   typedef typename Dictionary_it::value_type Dit_value_t;
 
   struct return_first {
-
     Vertex_handle operator()(const Dit_value_t& p_sh) const {
       return p_sh.first;
     }
@@ -469,8 +468,8 @@ class Simplex_tree {
     if (simplex.empty()) {
       return std::pair<Simplex_handle, bool>(null_simplex(), true);
     }
-
-    sort(simplex.begin(), simplex.end()); // must be sorted in increasing order
+    // must be sorted in increasing order
+    sort(simplex.begin(), simplex.end());
 
     Siblings * curr_sib = &root_;
     std::pair<Simplex_handle, bool> res_insert;
@@ -483,12 +482,15 @@ class Simplex_tree {
       curr_sib = res_insert.first->second.children();
     }
     res_insert = curr_sib->members_.emplace(*vi, Node(curr_sib, filtration));
-    if (!res_insert.second) { // if already in the complex
-      if (res_insert.first->second.filtration() > filtration) { // if filtration value modified
+    if (!res_insert.second) {
+      // if already in the complex
+      if (res_insert.first->second.filtration() > filtration) {
+        // if filtration value modified
         res_insert.first->second.assign_filtration(filtration);
         return res_insert;
       }
-      return std::pair<Simplex_handle, bool>(null_simplex(), false); // if filtration value unchanged
+      // if filtration value unchanged
+      return std::pair<Simplex_handle, bool>(null_simplex(), false);
     }
     // otherwise the insertion has succeeded
     return res_insert;
@@ -637,27 +639,30 @@ class Simplex_tree {
         bool addCoface = (star || curr_nbVertices == nbVertices); // Add a coface if we wan't the star or if the number of vertices of the current simplex matches with nbVertices
         if (addCoface)
           cofaces.push_back(simplex);
-        if ((!addCoface || star) && has_children(simplex)) // Rec call
+        if ((!addCoface || star) && has_children(simplex))  // Rec call
           rec_coface(vertices, simplex->second.children(), curr_nbVertices + 1, cofaces, star, nbVertices);
       } else {
-        if (simplex->first == vertices.back()) // If curr_sib matches with the top vertex
+        if (simplex->first == vertices.back())  // If curr_sib matches with the top vertex
         {
-          bool equalDim = (star || curr_nbVertices == nbVertices); // dimension of actual simplex == nbVertices
+          bool equalDim = (star || curr_nbVertices == nbVertices);  // dimension of actual simplex == nbVertices
           bool addCoface = vertices.size() == 1 && equalDim;
           if (addCoface)
             cofaces.push_back(simplex);
-          if ((!addCoface || star) && has_children(simplex)) // Rec call
-          { // Rec call
+          if ((!addCoface || star) && has_children(simplex))
+          {
+            // Rec call
             Vertex_handle tmp = vertices.back();
             vertices.pop_back();
             rec_coface(vertices, simplex->second.children(), curr_nbVertices + 1, cofaces, star, nbVertices);
             vertices.push_back(tmp);
           }
-        } else if (simplex->first > vertices.back())
+        } else if (simplex->first > vertices.back()) {
           return;
-        else // (simplex->first < vertices.back()
+        } else {
+          // (simplex->first < vertices.back()
           if (has_children(simplex))
-          rec_coface(vertices, simplex->second.children(), curr_nbVertices + 1, cofaces, star, nbVertices);
+            rec_coface(vertices, simplex->second.children(), curr_nbVertices + 1, cofaces, star, nbVertices);
+        }
       }
     }
   }
@@ -726,7 +731,6 @@ class Simplex_tree {
    * Reverse lexicographic order has the property to always consider the subsimplex of a simplex
    * to be smaller. The filtration function must be monotonic. */
   struct is_before_in_filtration {
-
     explicit is_before_in_filtration(Simplex_tree * st)
         : st_(st) { }
 
@@ -829,7 +833,7 @@ class Simplex_tree {
 
  private:
   /** \brief Recursive expansion of the simplex tree.*/
-  void siblings_expansion(Siblings * siblings, // must contain elements
+  void siblings_expansion(Siblings * siblings,  // must contain elements
                           int k) {
     if (dimension_ > k) {
       dimension_ = k;
@@ -839,28 +843,29 @@ class Simplex_tree {
     Dictionary_it next = siblings->members().begin();
     ++next;
 
-    static std::vector<std::pair<Vertex_handle, Node> > inter; // static, not thread-safe.
+    static std::vector<std::pair<Vertex_handle, Node> > inter;  // static, not thread-safe.
     for (Dictionary_it s_h = siblings->members().begin();
          s_h != siblings->members().end(); ++s_h, ++next) {
       Simplex_handle root_sh = find_vertex(s_h->first);
       if (has_children(root_sh)) {
         intersection(
-                     inter, // output intersection
-                     next, // begin
-                     siblings->members().end(), // end
+                     inter,  // output intersection
+                     next,  // begin
+                     siblings->members().end(),  // end
                      root_sh->second.children()->members().begin(),
                      root_sh->second.children()->members().end(),
                      s_h->second.filtration());
         if (inter.size() != 0) {
           this->num_simplices_ += inter.size();
-          Siblings * new_sib = new Siblings(siblings, // oncles
-                                            s_h->first, // parent
-                                            inter); // boost::container::ordered_unique_range_t
+          Siblings * new_sib = new Siblings(siblings,  // oncles
+                                            s_h->first,  // parent
+                                            inter);  // boost::container::ordered_unique_range_t
           inter.clear();
           s_h->second.assign_children(new_sib);
           siblings_expansion(new_sib, k - 1);
         } else {
-          s_h->second.assign_children(siblings); // ensure the children property
+          // ensure the children property
+          s_h->second.assign_children(siblings);
           inter.clear();
         }
       }
