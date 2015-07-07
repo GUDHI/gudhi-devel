@@ -189,7 +189,7 @@ class Simplex_tree {
   /** \name Range and iterator methods
    * @{ */
 
-  /** \brief Returns a range over the vertices of the simplicial complex.  *
+  /** \brief Returns a range over the vertices of the simplicial complex. 
    * The order is increasing according to < on Vertex_handles.*/
   Complex_vertex_range complex_vertex_range() {
     return Complex_vertex_range(
