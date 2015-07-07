@@ -637,7 +637,7 @@ class Simplex_tree {
       if (vertices.empty()) {
         // If we reached the end of the vertices, and the simplex has more vertices than the given simplex
         // => we found a coface
-        
+
         // Add a coface if we wan't the star or if the number of vertices of the current simplex matches with nbVertices
         bool addCoface = (star || curr_nbVertices == nbVertices);
         if (addCoface)
@@ -645,14 +645,13 @@ class Simplex_tree {
         if ((!addCoface || star) && has_children(simplex))  // Rec call
           rec_coface(vertices, simplex->second.children(), curr_nbVertices + 1, cofaces, star, nbVertices);
       } else {
-        if (simplex->first == vertices.back())  // If curr_sib matches with the top vertex
-        {
+        if (simplex->first == vertices.back()) {
+          // If curr_sib matches with the top vertex
           bool equalDim = (star || curr_nbVertices == nbVertices);  // dimension of actual simplex == nbVertices
           bool addCoface = vertices.size() == 1 && equalDim;
           if (addCoface)
             cofaces.push_back(simplex);
-          if ((!addCoface || star) && has_children(simplex))
-          {
+          if ((!addCoface || star) && has_children(simplex)) {
             // Rec call
             Vertex_handle tmp = vertices.back();
             vertices.pop_back();
@@ -741,8 +740,8 @@ class Simplex_tree {
       if (st_->filtration(sh1) != st_->filtration(sh2)) {
         return st_->filtration(sh1) < st_->filtration(sh2);
       }
-
-      return st_->reverse_lexicographic_order(sh1, sh2); // is sh1 a proper subface of sh2
+      // is sh1 a proper subface of sh2
+      return st_->reverse_lexicographic_order(sh1, sh2);
     }
 
     Simplex_tree * st_;
@@ -769,7 +768,8 @@ class Simplex_tree {
    *                                    must be undirected_tag. */
   template<class OneSkeletonGraph>
   void insert_graph(const OneSkeletonGraph& skel_graph) {
-    assert(num_simplices() == 0); // the simplex tree must be empty
+    // the simplex tree must be empty
+    assert(num_simplices() == 0);
 
     if (boost::num_vertices(skel_graph) == 0) {
       return;
@@ -798,7 +798,8 @@ class Simplex_tree {
          ++e_it) {
       auto u = source(*e_it, skel_graph);
       auto v = target(*e_it, skel_graph);
-      if (u < v) { // count edges only once { std::swap(u,v); } // u < v
+      if (u < v) {
+        // count edges only once { std::swap(u,v); } // u < v
         auto sh = find_vertex(u);
         if (!has_children(sh)) {
           sh->second.assign_children(new Siblings(&root_, sh->first));
@@ -955,7 +956,7 @@ std::ostream& operator<<(std::ostream & os, Simplex_tree<T1, T2, T3> & st) {
     for (auto v : st.simplex_vertex_range(sh)) {
       os << v << " ";
     }
-    os << st.filtration(sh) << "\n"; // TODO(VR): why adding the key ?? not read ?? << "     " << st.key(sh) << " \n";
+    os << st.filtration(sh) << "\n";  // TODO(VR): why adding the key ?? not read ?? << "     " << st.key(sh) << " \n";
   }
   return os;
 }
@@ -990,7 +991,7 @@ std::istream& operator>>(std::istream & is, Simplex_tree<T1, T2, T3> & st) {
 
   return is;
 }
-/** @} */ // end defgroup simplex_tree
+/** @} */  // end defgroup simplex_tree
 
 }  // namespace Gudhi
 
