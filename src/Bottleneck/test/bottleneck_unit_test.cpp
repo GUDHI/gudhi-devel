@@ -1,6 +1,6 @@
-#define BOOST_TEST_MODULE bottleneck test
-
-#include <boost/test/included/unit_test.hpp>
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE "bottleneck"
+#include <boost/test/unit_test.hpp>
 
 #include "gudhi/Graph_matching.h"
 #include <iostream>

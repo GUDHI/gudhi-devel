@@ -1,16 +1,13 @@
-#define BOOST_TEST_MODULE simplex_tree test
-#include <boost/test/included/unit_test.hpp>
-#include <boost/range/adaptor/reversed.hpp>
-#include <boost/system/error_code.hpp>
-#include <boost/chrono/thread_clock.hpp>
 #include <iostream>
 #include <string>
 #include <algorithm>
-
 #include <utility> // std::pair, std::make_pair
-
 #include <cmath> // float comparison
 #include <limits>
+
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE "simplex_tree"
+#include <boost/test/unit_test.hpp>
 
 #include "gudhi/graph_simplicial_complex.h"
 #include "gudhi/reader_utils.h"
