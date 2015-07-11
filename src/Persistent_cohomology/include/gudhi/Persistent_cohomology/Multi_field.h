@@ -142,7 +142,7 @@ class Multi_field {
     return prod_characteristics_;
   }
 
-  /** Returns the inverse in the field. Modifies P.*/
+  /** Returns the inverse in the field. Modifies P. ??? */
   std::pair<Element, Element> inverse(Element x, Element QS) {
     Element QR;
     mpz_gcd(QR.get_mpz_t(), x.get_mpz_t(), QS.get_mpz_t());  // QR <- gcd(x,QS)
@@ -153,12 +153,12 @@ class Multi_field {
     mpz_invert(inv_qt.get_mpz_t(), x.get_mpz_t(), QT.get_mpz_t());
 
     assert(prod_characteristics_ > 0);  // division by zero + non negative values
-    return std::pair<Element, Element>(
-        (inv_qt * multiplicative_identity(QT)) % prod_characteristics_, QT);
+    return { (inv_qt * multiplicative_identity(QT)) % prod_characteristics_, QT };
   }
   /** Returns -x * y.*/
   Element times_minus(const Element& x, const Element& y) {
     assert(prod_characteristics_ > 0);  // division by zero + non negative values
+    /* This assumes that (x*y)%pc cannot be zero, but Field_Zp has specific code for the 0 case ??? */
     return prod_characteristics_ - ((x * y) % prod_characteristics_);
   }
 

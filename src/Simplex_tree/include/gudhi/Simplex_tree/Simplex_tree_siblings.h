@@ -90,18 +90,12 @@ class Simplex_tree_siblings {
    * present in the node.
    */
   void insert(Vertex_handle v, Filtration_value filtration_value) {
-    typename Dictionary::iterator sh = members_.find(v);
-    if (sh != members_.end() && sh->second.filtration() > filtration_value) {
-      sh->second.assign_filtration(filtration_value);
-      return;
-    }
-    if (sh == members_.end()) {
-      members_.emplace(v, Node(this, filtration_value));
-      return;
-    }
+    auto ins = members_.emplace(v, Node(this, filtration_value));
+    if (!ins.second && filtration(ins.first) > filtration_value)
+      ins.first->second.assign_filtration(filtration_value);
   }
 
-  typename Dictionary::iterator find(Vertex_handle v) {
+  Dictionary_it find(Vertex_handle v) {
     return members_.find(v);
   }
 
