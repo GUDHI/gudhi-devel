@@ -881,38 +881,23 @@ class Simplex_tree {
   static void intersection(std::vector<std::pair<Vertex_handle, Node> >& intersection,
                            Dictionary_it begin1, Dictionary_it end1,
                            Dictionary_it begin2, Dictionary_it end2,
-                           Filtration_value filtration) {
+                           Filtration_value filtration_) {
     if (begin1 == end1 || begin2 == end2)
       return;  // ----->>
     while (true) {
       if (begin1->first == begin2->first) {
-        intersection.push_back(std::pair<Vertex_handle, Node>(begin1->first,
-                                                              Node(NULL,
-                                                                   maximum(begin1->second.filtration(),
-                                                                           begin2->second.filtration(), filtration))));
-        ++begin1;
-        ++begin2;
-        if (begin1 == end1 || begin2 == end2)
+        Filtration_value filt = (std::max)({begin1->second.filtration(), begin2->second.filtration(), filtration_});
+        intersection.push_back(std::pair<Vertex_handle, Node>(begin1->first, Node(NULL, filt)));
+        if (++begin1 == end1 || ++begin2 == end2)
           return;  // ----->>
-      } else {
-        if (begin1->first < begin2->first) {
-          ++begin1;
-          if (begin1 == end1)
-            return;
-        } else {
-          ++begin2;
-          if (begin2 == end2)
-            return;  // ----->>
-        }
+      } else if (begin1->first < begin2->first) {
+        if (++begin1 == end1)
+          return;
+      } else /* begin1->first > begin2->first */ {
+        if (++begin2 == end2)
+          return;  // ----->>
       }
     }
-  }
-
-  /** Maximum over 3 values.*/
-  static Filtration_value maximum(Filtration_value a, Filtration_value b,
-                                  Filtration_value c) {
-    Filtration_value max = (a < b) ? b : a;
-    return ((max < c) ? c : max);
   }
 
  public:

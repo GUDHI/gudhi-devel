@@ -77,8 +77,8 @@ class Simplex_tree_siblings {
         parent_(parent),
         members_(boost::container::ordered_unique_range, members.begin(),
                  members.end()) {
-    for (auto map_it = members_.begin(); map_it != members_.end(); map_it++) {
-      map_it->second.assign_children(this);
+    for (auto& map_el : members_) {
+      map_el.second.assign_children(this);
     }
   }
 
@@ -96,8 +96,7 @@ class Simplex_tree_siblings {
       return;
     }
     if (sh == members_.end()) {
-      members_.insert(
-          std::pair<Vertex_handle, Node>(v, Node(this, filtration_value)));
+      members_.emplace(v, Node(this, filtration_value));
       return;
     }
   }
@@ -110,7 +109,7 @@ class Simplex_tree_siblings {
     return oncles_;
   }
 
-  Vertex_handle parent() {
+  Vertex_handle parent() const {
     return parent_;
   }
 
@@ -118,7 +117,7 @@ class Simplex_tree_siblings {
     return members_;
   }
 
-  size_t size() {
+  size_t size() const {
     return members_.size();
   }
 
