@@ -316,21 +316,21 @@ class Simplex_tree {
   /** \brief Returns the key associated to a simplex.
    *
    * The filtration must be initialized. */
-  Simplex_key key(Simplex_handle sh) {
+  static Simplex_key key(Simplex_handle sh) {
     return sh->second.key();
   }
 
   /** \brief Returns the simplex associated to a key.
    *
    * The filtration must be initialized. */
-  Simplex_handle simplex(Simplex_key key) {
+  Simplex_handle simplex(Simplex_key key) const {
     return filtration_vect_[key];
   }
 
   /** \brief Returns the filtration value of a simplex.
    *
    * Called on the null_simplex, returns INFINITY. */
-  Filtration_value filtration(Simplex_handle sh) const {
+  static Filtration_value filtration(Simplex_handle sh) {
     if (sh != null_simplex()) {
       return sh->second.filtration();
     } else {
@@ -347,13 +347,13 @@ class Simplex_tree {
    * associated to the simplices in the simplicial complex.
    *
    * One can call filtration(null_simplex()). */
-  Simplex_handle null_simplex() const {
+  static Simplex_handle null_simplex() {
     return Dictionary_it(NULL);
   }
 
   /** \brief Returns a key different for all keys associated to the
    * simplices of the simplicial complex. */
-  Simplex_key null_key() const {
+  static Simplex_key null_key() {
     return -1;
   }
 

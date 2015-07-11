@@ -109,6 +109,7 @@ BOOST_AUTO_TEST_CASE(simplex_tree_from_file) {
     // Size of simplex
     int size = 0;
     for (auto vertex : st.simplex_vertex_range(f_simplex)) {
+      (void) vertex;
       size++;
     }
     BOOST_CHECK(AreAlmostTheSame(st.filtration(f_simplex), (0.1 * size))); // Specific test: filtration = 0.1 * simplex_size
