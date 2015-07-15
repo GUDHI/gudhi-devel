@@ -887,7 +887,7 @@ class Simplex_tree {
     while (true) {
       if (begin1->first == begin2->first) {
         Filtration_value filt = (std::max)({begin1->second.filtration(), begin2->second.filtration(), filtration_});
-        intersection.push_back(std::pair<Vertex_handle, Node>(begin1->first, Node(NULL, filt)));
+        intersection.emplace_back(begin1->first, Node(NULL, filt));
         if (++begin1 == end1 || ++begin2 == end2)
           return;  // ----->>
       } else if (begin1->first < begin2->first) {
