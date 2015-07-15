@@ -606,10 +606,8 @@ class Simplex_tree {
   void initialize_filtration() {
     filtration_vect_.clear();
     filtration_vect_.reserve(num_simplices());
-    for (auto cpx_it = complex_simplex_range().begin();
-         cpx_it != complex_simplex_range().end(); ++cpx_it) {
-      filtration_vect_.push_back(*cpx_it);
-    }
+    for (Simplex_handle sh : complex_simplex_range())
+      filtration_vect_.push_back(sh);
 
     // the stable sort ensures the ordering heuristic
     std::stable_sort(filtration_vect_.begin(), filtration_vect_.end(),
