@@ -1,16 +1,13 @@
-#define BOOST_TEST_MODULE simplex_tree test
-#include <boost/test/included/unit_test.hpp>
-#include <boost/range/adaptor/reversed.hpp>
-#include <boost/system/error_code.hpp>
-#include <boost/chrono/thread_clock.hpp>
 #include <iostream>
 #include <string>
 #include <algorithm>
-
 #include <utility> // std::pair, std::make_pair
-
 #include <cmath> // float comparison
 #include <limits>
+
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE "simplex_tree"
+#include <boost/test/unit_test.hpp>
 
 #include "gudhi/graph_simplicial_complex.h"
 #include "gudhi/reader_utils.h"
@@ -112,6 +109,7 @@ BOOST_AUTO_TEST_CASE(simplex_tree_from_file) {
     // Size of simplex
     int size = 0;
     for (auto vertex : st.simplex_vertex_range(f_simplex)) {
+      (void) vertex;
       size++;
     }
     BOOST_CHECK(AreAlmostTheSame(st.filtration(f_simplex), (0.1 * size))); // Specific test: filtration = 0.1 * simplex_size

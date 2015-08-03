@@ -336,18 +336,18 @@ class Persistent_cohomology {
 
       if (ds_parent_[key] == key  // root of its tree
       && zero_cocycles_.find(key) == zero_cocycles_.end()) {
-        persistent_pairs_.push_back(
-            Persistent_interval(cpx_->simplex(key), cpx_->null_simplex(), coeff_field_.characteristic()));
+        persistent_pairs_.emplace_back(
+            cpx_->simplex(key), cpx_->null_simplex(), coeff_field_.characteristic());
       }
     }
     for (auto zero_idx : zero_cocycles_) {
-      persistent_pairs_.push_back(
-          Persistent_interval(cpx_->simplex(zero_idx.second), cpx_->null_simplex(), coeff_field_.characteristic()));
+      persistent_pairs_.emplace_back(
+          cpx_->simplex(zero_idx.second), cpx_->null_simplex(), coeff_field_.characteristic());
     }
 // Compute infinite interval of dimension > 0
     for (auto cocycle : transverse_idx_) {
-      persistent_pairs_.push_back(
-          Persistent_interval(cpx_->simplex(cocycle.first), cpx_->null_simplex(), cocycle.second.characteristics_));
+      persistent_pairs_.emplace_back(
+          cpx_->simplex(cocycle.first), cpx_->null_simplex(), cocycle.second.characteristics_);
     }
   }
 
@@ -387,8 +387,8 @@ class Persistent_cohomology {
       if (cpx_->filtration(cpx_->simplex(idx_coc_u))
           < cpx_->filtration(cpx_->simplex(idx_coc_v))) {  // Kill cocycle [idx_coc_v], which is younger.
         if (interval_length_policy(cpx_->simplex(idx_coc_v), sigma)) {
-          persistent_pairs_.push_back(
-              Persistent_interval(cpx_->simplex(idx_coc_v), sigma, coeff_field_.characteristic()));
+          persistent_pairs_.emplace_back(
+              cpx_->simplex(idx_coc_v), sigma, coeff_field_.characteristic());
         }
         // Maintain the index of the 0-cocycle alive.
         if (kv != idx_coc_v) {
@@ -402,8 +402,8 @@ class Persistent_cohomology {
         }
       } else {  // Kill cocycle [idx_coc_u], which is younger.
         if (interval_length_policy(cpx_->simplex(idx_coc_u), sigma)) {
-          persistent_pairs_.push_back(
-              Persistent_interval(cpx_->simplex(idx_coc_u), sigma, coeff_field_.characteristic()));
+          persistent_pairs_.emplace_back(
+              cpx_->simplex(idx_coc_u), sigma, coeff_field_.characteristic());
         }
         // Maintain the index of the 0-cocycle alive.
         if (ku != idx_coc_u) {
@@ -553,9 +553,9 @@ class Persistent_cohomology {
                        Arith_element charac) {
     // Create a finite persistent interval for which the interval exists
     if (interval_length_policy(cpx_->simplex(death_key), sigma)) {
-      persistent_pairs_.push_back(Persistent_interval(cpx_->simplex(death_key)  // creator
-          , sigma                                                               // destructor
-          , charac));                                                           // fields
+      persistent_pairs_.emplace_back(cpx_->simplex(death_key)  // creator
+          , sigma                                              // destructor
+          , charac);                                           // fields
     }
 
     auto death_key_row = transverse_idx_.find(death_key);  // Find the beginning of the row.
@@ -695,7 +695,7 @@ class Persistent_cohomology {
   void output_diagram(std::ostream& ostream = std::cout) {
 
     cmp_intervals_by_length cmp(cpx_);
-    persistent_pairs_.sort(cmp);
+    std::sort(std::begin(persistent_pairs_), std::end(persistent_pairs_), cmp);
     bool has_infinity = std::numeric_limits<Filtration_value>::has_infinity;
     for (auto pair : persistent_pairs_) {
       // Special case on windows, inf is "1.#INF" (cf. unitary tests and R package TDA)
@@ -714,7 +714,7 @@ class Persistent_cohomology {
   {
     std::ofstream           diagram_out(diagram_name.c_str());
     cmp_intervals_by_length cmp( cpx_ );
-    persistent_pairs_.sort( cmp );
+    std::sort(std::begin(persistent_pairs_), std::end(persistent_pairs_), cmp);
     for(auto pair : persistent_pairs_)
     {
     diagram_out << cpx_->dimension(get<0>(pair)) << " "
@@ -761,7 +761,7 @@ class Persistent_cohomology {
   /*  Key -> row. */
   std::map<Simplex_key, cocycle> transverse_idx_;
   /* Persistent intervals. */
-  std::list<Persistent_interval> persistent_pairs_;
+  std::vector<Persistent_interval> persistent_pairs_;
   length_interval interval_length_policy;
 
   boost::object_pool<Column> column_pool_;
