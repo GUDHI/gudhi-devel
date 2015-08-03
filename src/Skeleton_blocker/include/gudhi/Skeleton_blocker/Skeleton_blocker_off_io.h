@@ -107,7 +107,7 @@ class Skeleton_blocker_off_visitor_reader {
   }
 
   void done() {
-    complex_ = make_complex_from_top_faces(maximal_faces_.begin(), maximal_faces_.end(),
+    complex_ = make_complex_from_top_faces<Complex>(maximal_faces_.begin(), maximal_faces_.end(),
                                            points_.begin(), points_.end() );
   }
 };

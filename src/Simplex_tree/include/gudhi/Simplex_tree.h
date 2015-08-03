@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_H_
-#define SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_H_
+#ifndef SIMPLEX_TREE_H_
+#define SIMPLEX_TREE_H_
 
 #include <gudhi/Simplex_tree/Simplex_tree_node_explicit_storage.h>
 #include <gudhi/Simplex_tree/Simplex_tree_siblings.h>
@@ -35,6 +35,7 @@
 #include <algorithm>
 #include <utility>
 #include <vector>
+#include <functional>  // for greater<>
 
 namespace Gudhi {
 /** \defgroup simplex_tree Filtered Complexes
@@ -83,9 +84,8 @@ namespace Gudhi {
  *
  */
 template<typename IndexingTag = linear_indexing_tag,
-typename FiltrationValue = double, typename SimplexKey = int // must be a signed integer type
-, typename VertexHandle = int // must be a signed integer type, int convertible to it
-//         , bool ContiguousVertexHandles = true   //true is Vertex_handles are exactly the set [0;n)
+typename FiltrationValue = double, typename SimplexKey = int  // must be a signed integer type
+, typename VertexHandle = int  // must be a signed integer type, int convertible to it
 >
 class Simplex_tree {
  public:
@@ -121,7 +121,7 @@ class Simplex_tree {
 
  public:
   /** \brief Handle type to a simplex contained in the simplicial complex represented
-   * byt he simplex tree. */
+   * by the simplex tree. */
   typedef typename Dictionary::iterator Simplex_handle;
 
  private:
@@ -155,6 +155,8 @@ class Simplex_tree {
   typedef Simplex_tree_simplex_vertex_iterator<Simplex_tree> Simplex_vertex_iterator;
   /** \brief Range over the vertices of a simplex. */
   typedef boost::iterator_range<Simplex_vertex_iterator> Simplex_vertex_range;
+  /** \brief Range over the cofaces of a simplex. */
+  typedef std::vector<Simplex_handle> Cofaces_simplex_range;
   /** \brief Iterator over the simplices of the boundary of a simplex.
    *
    * 'value_type' is Simplex_handle. */
@@ -187,7 +189,6 @@ class Simplex_tree {
    * @{ */
 
   /** \brief Returns a range over the vertices of the simplicial complex.
-   *
    * The order is increasing according to < on Vertex_handles.*/
   Complex_vertex_range complex_vertex_range() {
     return Complex_vertex_range(
@@ -252,6 +253,7 @@ class Simplex_tree {
    * equal to \f$(-1)^{\text{dim} \sigma}\f$ the canonical orientation on the simplex.
    */
   Simplex_vertex_range simplex_vertex_range(Simplex_handle sh) {
+    assert(sh != null_simplex());  // Empty simplex
     return Simplex_vertex_range(Simplex_vertex_iterator(this, sh),
                                 Simplex_vertex_iterator(this));
   }
@@ -299,7 +301,7 @@ class Simplex_tree {
   }
   /** @} */  // end constructor/destructor
  private:
-  /** Recursive deletion. */
+  // Recursive deletion
   void rec_delete(Siblings * sib) {
     for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh) {
       if (has_children(sh)) {
@@ -313,21 +315,21 @@ class Simplex_tree {
   /** \brief Returns the key associated to a simplex.
    *
    * The filtration must be initialized. */
-  Simplex_key key(Simplex_handle sh) {
+  static Simplex_key key(Simplex_handle sh) {
     return sh->second.key();
   }
 
   /** \brief Returns the simplex associated to a key.
    *
    * The filtration must be initialized. */
-  Simplex_handle simplex(Simplex_key key) {
+  Simplex_handle simplex(Simplex_key key) const {
     return filtration_vect_[key];
   }
 
   /** \brief Returns the filtration value of a simplex.
    *
    * Called on the null_simplex, returns INFINITY. */
-  Filtration_value filtration(Simplex_handle sh) const {
+  static Filtration_value filtration(Simplex_handle sh) {
     if (sh != null_simplex()) {
       return sh->second.filtration();
     } else {
@@ -353,13 +355,13 @@ class Simplex_tree {
    * associated to the simplices in the simplicial complex.
    *
    * One can call filtration(null_simplex()). */
-  Simplex_handle null_simplex() const {
+  static Simplex_handle null_simplex() {
     return Dictionary_it(NULL);
   }
 
   /** \brief Returns a key different for all keys associated to the
    * simplices of the simplicial complex. */
-  Simplex_key null_key() const {
+  static Simplex_key null_key() {
     return -1;
   }
 
@@ -415,8 +417,8 @@ class Simplex_tree {
    */
   template<class RandomAccessVertexRange>
   Simplex_handle find(RandomAccessVertexRange & s) {
-    if (s.begin() == s.end())
-      std::cerr << "Empty simplex \n";
+    if (s.begin() == s.end())  // Empty simplex
+      return null_simplex();
 
     sort(s.begin(), s.end());
 
@@ -471,8 +473,8 @@ class Simplex_tree {
     if (simplex.empty()) {
       return std::pair<Simplex_handle, bool>(null_simplex(), true);
     }
-
-    sort(simplex.begin(), simplex.end());  // must be sorted in increasing order
+    // must be sorted in increasing order
+    sort(simplex.begin(), simplex.end());
 
     Siblings * curr_sib = &root_;
     std::pair<Simplex_handle, bool> res_insert;
@@ -485,12 +487,15 @@ class Simplex_tree {
       curr_sib = res_insert.first->second.children();
     }
     res_insert = curr_sib->members_.emplace(*vi, Node(curr_sib, filtration));
-    if (!res_insert.second) {  // if already in the complex
-      if (res_insert.first->second.filtration() > filtration) {  // if filtration value modified
+    if (!res_insert.second) {
+      // if already in the complex
+      if (res_insert.first->second.filtration() > filtration) {
+        // if filtration value modified
         res_insert.first->second.assign_filtration(filtration);
         return res_insert;
       }
-      return std::pair<Simplex_handle, bool>(null_simplex(), false);  // if filtration value unchanged
+      // if filtration value unchanged
+      return std::pair<Simplex_handle, bool>(null_simplex(), false);
     }
     // otherwise the insertion has succeeded
     return res_insert;
@@ -599,14 +604,98 @@ class Simplex_tree {
   void initialize_filtration() {
     filtration_vect_.clear();
     filtration_vect_.reserve(num_simplices());
-    for (auto cpx_it = complex_simplex_range().begin();
-        cpx_it != complex_simplex_range().end(); ++cpx_it) {
-      filtration_vect_.push_back(*cpx_it);
-    }
+    for (Simplex_handle sh : complex_simplex_range())
+      filtration_vect_.push_back(sh);
 
     // the stable sort ensures the ordering heuristic
     std::stable_sort(filtration_vect_.begin(), filtration_vect_.end(),
                      is_before_in_filtration(this));
+  }
+
+ private:
+  /** Recursive search of cofaces
+   * This function uses DFS
+   *\param vertices contains a list of vertices, which represent the vertices of the simplex not found yet.
+   *\param curr_nbVertices represents the number of vertices of the simplex we reached by going through the tree.
+   *\param cofaces contains a list of Simplex_handle, representing all the cofaces asked.
+   *\param star true if we need the star of the simplex
+   *\param nbVertices number of vertices of the cofaces we search
+   * Prefix actions : When the bottom vertex matches with the current vertex in the tree, we remove the bottom vertex from vertices.
+   * Infix actions : Then we call or not the recursion.
+   * Postfix actions : Finally, we add back the removed vertex into vertices, and remove this vertex from curr_nbVertices so that we didn't change the parameters.
+   * If the vertices list is empty, we need to check if curr_nbVertices matches with the dimension of the cofaces asked.
+   */
+  void rec_coface(std::vector<Vertex_handle> &vertices, Siblings *curr_sib, int curr_nbVertices,
+                  std::vector<Simplex_handle>& cofaces, bool star, int nbVertices) {
+    if (!(star || curr_nbVertices <= nbVertices))  // dimension of actual simplex <= nbVertices
+      return;
+    for (Simplex_handle simplex = curr_sib->members().begin(); simplex != curr_sib->members().end(); ++simplex) {
+      if (vertices.empty()) {
+        // If we reached the end of the vertices, and the simplex has more vertices than the given simplex
+        // => we found a coface
+
+        // Add a coface if we wan't the star or if the number of vertices of the current simplex matches with nbVertices
+        bool addCoface = (star || curr_nbVertices == nbVertices);
+        if (addCoface)
+          cofaces.push_back(simplex);
+        if ((!addCoface || star) && has_children(simplex))  // Rec call
+          rec_coface(vertices, simplex->second.children(), curr_nbVertices + 1, cofaces, star, nbVertices);
+      } else {
+        if (simplex->first == vertices.back()) {
+          // If curr_sib matches with the top vertex
+          bool equalDim = (star || curr_nbVertices == nbVertices);  // dimension of actual simplex == nbVertices
+          bool addCoface = vertices.size() == 1 && equalDim;
+          if (addCoface)
+            cofaces.push_back(simplex);
+          if ((!addCoface || star) && has_children(simplex)) {
+            // Rec call
+            Vertex_handle tmp = vertices.back();
+            vertices.pop_back();
+            rec_coface(vertices, simplex->second.children(), curr_nbVertices + 1, cofaces, star, nbVertices);
+            vertices.push_back(tmp);
+          }
+        } else if (simplex->first > vertices.back()) {
+          return;
+        } else {
+          // (simplex->first < vertices.back()
+          if (has_children(simplex))
+            rec_coface(vertices, simplex->second.children(), curr_nbVertices + 1, cofaces, star, nbVertices);
+        }
+      }
+    }
+  }
+
+ public:
+  /** \brief Compute the star of a n simplex
+   * \param simplex represent the simplex of which we search the star
+   * \return Vector of Simplex_handle, empty vector if no cofaces found.
+   */
+
+  Cofaces_simplex_range star_simplex_range(const Simplex_handle simplex) {
+    return cofaces_simplex_range(simplex, 0);
+  }
+
+  /** \brief Compute the cofaces of a n simplex
+   * \param simplex represent the n-simplex of which we search the n+codimension cofaces
+   * \param codimension The function returns the n+codimension-cofaces of the n-simplex. If codimension = 0, 
+   * return all cofaces (equivalent of star function)
+   * \return Vector of Simplex_handle, empty vector if no cofaces found.
+   */
+
+  Cofaces_simplex_range cofaces_simplex_range(const Simplex_handle simplex, int codimension) {
+    Cofaces_simplex_range cofaces;
+    // codimension must be positive or null integer
+    assert(codimension >= 0);
+    Simplex_vertex_range rg = simplex_vertex_range(simplex);
+    std::vector<Vertex_handle> copy(rg.begin(), rg.end());
+    if (codimension + static_cast<int>(copy.size()) > dimension_ + 1 ||
+        (codimension == 0 && static_cast<int>(copy.size()) > dimension_))  // n+codimension greater than dimension_
+      return cofaces;
+    // must be sorted in decreasing order
+    assert(std::is_sorted(copy.begin(), copy.end(), std::greater<Vertex_handle>()));
+    bool star = codimension == 0;
+    rec_coface(copy, &root_, 1, cofaces, star, codimension + static_cast<int>(copy.size()));
+    return cofaces;
   }
 
  private:
@@ -647,8 +736,8 @@ class Simplex_tree {
       if (st_->filtration(sh1) != st_->filtration(sh2)) {
         return st_->filtration(sh1) < st_->filtration(sh2);
       }
-
-      return st_->reverse_lexicographic_order(sh1, sh2);  // is sh1 a proper subface of sh2
+      // is sh1 a proper subface of sh2
+      return st_->reverse_lexicographic_order(sh1, sh2);
     }
 
     Simplex_tree * st_;
@@ -675,7 +764,8 @@ class Simplex_tree {
    *                                    must be undirected_tag. */
   template<class OneSkeletonGraph>
   void insert_graph(const OneSkeletonGraph& skel_graph) {
-    assert(num_simplices() == 0);  // the simplex tree must be empty
+    // the simplex tree must be empty
+    assert(num_simplices() == 0);
 
     if (boost::num_vertices(skel_graph) == 0) {
       return;
@@ -704,7 +794,8 @@ class Simplex_tree {
         ++e_it) {
       auto u = source(*e_it, skel_graph);
       auto v = target(*e_it, skel_graph);
-      if (u < v) {  // count edges only once { std::swap(u,v); } // u < v
+      if (u < v) {
+        // count edges only once { std::swap(u,v); } // u < v
         auto sh = find_vertex(u);
         if (!has_children(sh)) {
           sh->second.assign_children(new Siblings(&root_, sh->first));
@@ -755,16 +846,16 @@ class Simplex_tree {
 
     static std::vector<std::pair<Vertex_handle, Node> > inter;  // static, not thread-safe.
     for (Dictionary_it s_h = siblings->members().begin();
-        s_h != siblings->members().end(); ++s_h, ++next) {
+         s_h != siblings->members().end(); ++s_h, ++next) {
       Simplex_handle root_sh = find_vertex(s_h->first);
       if (has_children(root_sh)) {
         intersection(
-            inter,                      // output intersection
-            next,                       // begin
-            siblings->members().end(),  // end
-            root_sh->second.children()->members().begin(),
-            root_sh->second.children()->members().end(),
-            s_h->second.filtration());
+                     inter,  // output intersection
+                     next,  // begin
+                     siblings->members().end(),  // end
+                     root_sh->second.children()->members().begin(),
+                     root_sh->second.children()->members().end(),
+                     s_h->second.filtration());
         if (inter.size() != 0) {
           this->num_simplices_ += inter.size();
           Siblings * new_sib = new Siblings(siblings,  // oncles
@@ -774,7 +865,8 @@ class Simplex_tree {
           s_h->second.assign_children(new_sib);
           siblings_expansion(new_sib, k - 1);
         } else {
-          s_h->second.assign_children(siblings);  // ensure the children property
+          // ensure the children property
+          s_h->second.assign_children(siblings);
           inter.clear();
         }
       }
@@ -786,38 +878,23 @@ class Simplex_tree {
   static void intersection(std::vector<std::pair<Vertex_handle, Node> >& intersection,
                            Dictionary_it begin1, Dictionary_it end1,
                            Dictionary_it begin2, Dictionary_it end2,
-                           Filtration_value filtration) {
+                           Filtration_value filtration_) {
     if (begin1 == end1 || begin2 == end2)
       return;  // ----->>
     while (true) {
       if (begin1->first == begin2->first) {
-        intersection.push_back(
-            std::pair<Vertex_handle, Node>(
-                begin1->first,
-                Node(NULL, maximum(begin1->second.filtration(), begin2->second.filtration(), filtration))));
-        ++begin1;
-        ++begin2;
-        if (begin1 == end1 || begin2 == end2)
+        Filtration_value filt = (std::max)({begin1->second.filtration(), begin2->second.filtration(), filtration_});
+        intersection.emplace_back(begin1->first, Node(NULL, filt));
+        if (++begin1 == end1 || ++begin2 == end2)
           return;  // ----->>
-      } else {
-        if (begin1->first < begin2->first) {
-          ++begin1;
-          if (begin1 == end1)
-            return;
-        } else {
-          ++begin2;
-          if (begin2 == end2)
-            return;  // ----->>
-        }
+      } else if (begin1->first < begin2->first) {
+        if (++begin1 == end1)
+          return;
+      } else /* begin1->first > begin2->first */ {
+        if (++begin2 == end2)
+          return;  // ----->>
       }
     }
-  }
-
-  /** Maximum over 3 values.*/
-  static Filtration_value maximum(Filtration_value a, Filtration_value b,
-                                  Filtration_value c) {
-    Filtration_value max = (a < b) ? b : a;
-    return ((max < c) ? c : max);
   }
 
  public:
@@ -864,6 +941,7 @@ std::ostream& operator<<(std::ostream & os, Simplex_tree<T1, T2, T3> & st) {
   }
   return os;
 }
+
 template<typename T1, typename T2, typename T3>
 std::istream& operator>>(std::istream & is, Simplex_tree<T1, T2, T3> & st) {
   // assert(st.num_simplices() == 0);
@@ -873,16 +951,19 @@ std::istream& operator>>(std::istream & is, Simplex_tree<T1, T2, T3> & st) {
   typename Simplex_tree<T1, T2, T3>::Filtration_value max_fil = 0;
   int max_dim = -1;
   size_t num_simplices = 0;
-  while (read_simplex(is, simplex, fil)) {  // read all simplices in the file as a list of vertices
+  while (read_simplex(is, simplex, fil)) {
+    // read all simplices in the file as a list of vertices
     ++num_simplices;
-    int dim = static_cast<int>(simplex.size() - 1);  // Warning : simplex_size needs to be casted in int - Can be 0
+    // Warning : simplex_size needs to be casted in int - Can be 0
+    int dim = static_cast<int> (simplex.size() - 1);
     if (max_dim < dim) {
       max_dim = dim;
     }
     if (max_fil < fil) {
       max_fil = fil;
     }
-    st.insert_simplex(simplex, fil);  // insert every simplex in the simplex tree
+    // insert every simplex in the simplex tree
+    st.insert_simplex(simplex, fil);
     simplex.clear();
   }
   st.set_num_simplices(num_simplices);
@@ -891,8 +972,8 @@ std::istream& operator>>(std::istream & is, Simplex_tree<T1, T2, T3> & st) {
 
   return is;
 }
-
 /** @} */  // end defgroup simplex_tree
+
 }  // namespace Gudhi
 
-#endif  // SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_H_
+#endif  // SIMPLEX_TREE_H_

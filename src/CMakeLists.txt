@@ -47,6 +47,7 @@ else()
   add_subdirectory(example/Hasse_complex)
   add_subdirectory(example/Alpha_complex)
   add_subdirectory(example/Bottleneck)
+  add_subdirectory(example/Bottleneck)
 
   # GudhUI
   add_subdirectory(GudhUI)

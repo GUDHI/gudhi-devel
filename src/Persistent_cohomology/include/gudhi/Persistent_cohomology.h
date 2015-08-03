@@ -37,6 +37,7 @@
 #include <list>
 #include <vector>
 #include <set>
+#include <fstream>  // std::ofstream
 
 namespace Gudhi {
 

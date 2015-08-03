@@ -122,7 +122,7 @@ public :
 	 * Return the point such that it minimizes the gradient of the quadric.
 	 * Det must be passed with the determinant value of the gradient (should be non zero).
 	 */
-	inline Point solve_linear_gradient(double det = grad_determinant()) const{
+	inline Point solve_linear_gradient(double det) const{
 		return Point({
 				(-coeff[1]*coeff[5]*coeff[8]+coeff[1]*coeff[7]*coeff[6]+coeff[2]*coeff[8]*coeff[4]-coeff[2]*coeff[5]*coeff[6]-coeff[3]*coeff[4]*coeff[7]+coeff[3]*coeff[5]*coeff[5])/ det,
 				(coeff[0]*coeff[5]*coeff[8]-coeff[0]*coeff[7]*coeff[6]-coeff[5]*coeff[2]*coeff[3]-coeff[1]*coeff[2]*coeff[8]+coeff[6]*coeff[2]*coeff[2]+coeff[1]*coeff[3]*coeff[7])/det,

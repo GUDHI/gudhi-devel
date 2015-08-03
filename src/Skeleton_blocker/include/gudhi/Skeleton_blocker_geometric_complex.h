@@ -79,23 +79,6 @@ public Skeleton_blocker_complex<SkeletonBlockerGeometricDS> {
       (*this)[Vertex_handle(current++)].point() = Point(point->begin(), point->end());
   }
 
-  template<typename SimpleHandleOutputIterator, typename PointIterator>
-  friend Skeleton_blocker_geometric_complex make_complex_from_top_faces(
-                                                                        SimpleHandleOutputIterator simplex_begin,
-                                                                        SimpleHandleOutputIterator simplex_end,
-                                                                        PointIterator points_begin,
-                                                                        PointIterator points_end,
-                                                                        bool is_flag_complex = false) {
-    Skeleton_blocker_geometric_complex complex;
-    unsigned current = 0;
-    complex =
-        make_complex_from_top_faces<Skeleton_blocker_geometric_complex>(simplex_begin, simplex_end, is_flag_complex);
-    for (auto point = points_begin; point != points_end; ++point)
-      // complex.point(Vertex_handle(current++)) = Point(point->begin(),point->end());
-      complex.point(Vertex_handle(current++)) = Point(*point);
-    return complex;
-  }
-
   /**
    * @brief Constructor with a list of simplices.
    * Points of every vertex are the point constructed with default constructor.
@@ -214,6 +197,25 @@ public Skeleton_blocker_complex<SkeletonBlockerGeometricDS> {
     }
   }
 };
+
+
+template<typename SkeletonBlockerGeometricComplex, typename SimpleHandleOutputIterator, typename PointIterator>
+SkeletonBlockerGeometricComplex make_complex_from_top_faces(
+        SimpleHandleOutputIterator simplex_begin,
+        SimpleHandleOutputIterator simplex_end,
+        PointIterator points_begin,
+        PointIterator points_end,
+        bool is_flag_complex = false) {
+  typedef SkeletonBlockerGeometricComplex SBGC;
+  SkeletonBlockerGeometricComplex complex;
+  unsigned current = 0;
+  complex =
+    make_complex_from_top_faces<SBGC>(simplex_begin, simplex_end, is_flag_complex);
+  for (auto point = points_begin; point != points_end; ++point)
+    // complex.point(Vertex_handle(current++)) = Point(point->begin(),point->end());
+    complex.point(typename SBGC::Vertex_handle(current++)) = typename SBGC::Point(*point);
+  return complex;
+}
 
 }  // namespace skbl
 

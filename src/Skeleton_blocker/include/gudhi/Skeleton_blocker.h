@@ -109,7 +109,7 @@ and point access in addition.
 \subsection Visitor
 
 The class Skeleton_blocker_complex has a visitor that is called when usual operations such as adding an edge or remove a vertex are called.
-You may want to use this visitor to compute statistics or to update another data-structure (for instance this visitor is heavily used in the \ref contr package. 
+You may want to use this visitor to compute statistics or to update another data-structure (for instance this visitor is heavily used in the \ref contr package).
 
 
 
