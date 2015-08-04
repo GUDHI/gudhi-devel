@@ -50,8 +50,6 @@ namespace Gudhi {
 
 namespace alphacomplex {
 
-#define Kinit(f) =k.f()
-
 /**
  * \brief Alpha complex data structure.
  *
@@ -99,6 +97,8 @@ class Alpha_complex : public Simplex_tree<> {
   Bimap_vertex cgal_simplextree;
   /** \brief Pointer on the CGAL Delaunay triangulation.*/
   Delaunay_triangulation* triangulation;
+  /** \brief Kernel for triangulation functions access.*/
+  Kernel kernel;
 
  public:
   /** \brief Alpha_complex constructor from an OFF file name.
@@ -156,6 +156,22 @@ class Alpha_complex : public Simplex_tree<> {
     delete triangulation;
   }
 
+  /** \brief get_point returns the point corresponding to the vertex given as parameter.
+   *
+   * @param[in] vertex Vertex handle of the point to retrieve.
+   * @return The founded point.
+   */
+  Kernel::Point_d get_point(Vertex_handle vertex) {
+    Kernel::Point_d point;
+    try {
+      point = cgal_simplextree.right.at(vertex)->point();
+    }
+    catch(...) {
+      std::cerr << "Alpha_complex - getPoint not found on vertex " << vertex << std::endl;
+    }
+    return point;
+  }
+  
  private:
   /** \brief Initialize the Alpha_complex from the Delaunay triangulation.
    *
@@ -248,9 +264,8 @@ class Alpha_complex : public Simplex_tree<> {
             // No need to compute squared_radius on a single point - alpha is 0.0
             if (f_simplex_dim > 0) {
               // squared_radius function initialization
-              Kernel k;
-              Squared_Radius squared_radius Kinit(compute_squared_radius_d_object);
-
+              Squared_Radius squared_radius = kernel.compute_squared_radius_d_object();
+              
               alpha_complex_filtration = squared_radius(pointVector.begin(), pointVector.end());
             }
             assign_filtration(f_simplex, alpha_complex_filtration);
@@ -315,8 +330,7 @@ class Alpha_complex : public Simplex_tree<> {
             }
           }
           // is_gabriel function initialization
-          Kernel k;
-          Is_Gabriel is_gabriel Kinit(side_of_bounded_sphere_d_object);
+          Is_Gabriel is_gabriel = kernel.side_of_bounded_sphere_d_object();
 #ifdef DEBUG_TRACES
           bool is_gab = is_gabriel(pointVector.begin(), pointVector.end(), (cgal_simplextree.right.at(vertexForGabriel))->point())
               != CGAL::ON_BOUNDED_SIDE;
@@ -337,6 +351,7 @@ class Alpha_complex : public Simplex_tree<> {
       }
     }
   }
+
 };
 
 } // namespace alphacomplex

@@ -93,6 +93,14 @@ bool are_almost_the_same(float a, float b) {
   return std::fabs(a - b) < std::numeric_limits<float>::epsilon();
 }
 
+bool is_point_in_list(Vector_of_points points_list, Point point) {
+  for (auto& point_in_list : points_list) {
+    if (point_in_list == point) {
+      return true; // point found
+    }
+  }
+  return false; // point not found
+}
 BOOST_AUTO_TEST_CASE(Alpha_complex_from_points) {
 
   // ----------------------------------------------------------------------------
@@ -159,5 +167,40 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_from_points) {
         break;
     }
   }
+  
+  Point p1 = alpha_complex_from_points.get_point(1);
+  std::cout << "alpha_complex_from_points.get_point(1)=" << p1 << std::endl;
+  BOOST_CHECK(4 == p1.dimension());
+  BOOST_CHECK(is_point_in_list(points, p1));
+
+  Point p2 = alpha_complex_from_points.get_point(2);
+  std::cout << "alpha_complex_from_points.get_point(2)=" << p2 << std::endl;
+  BOOST_CHECK(4 == p2.dimension());
+  BOOST_CHECK(is_point_in_list(points, p2));
+
+  Point p3 = alpha_complex_from_points.get_point(3);
+  std::cout << "alpha_complex_from_points.get_point(3)=" << p3 << std::endl;
+  BOOST_CHECK(4 == p3.dimension());
+  BOOST_CHECK(is_point_in_list(points, p3));
+
+  Point p4 = alpha_complex_from_points.get_point(4);
+  std::cout << "alpha_complex_from_points.get_point(4)=" << p4 << std::endl;
+  BOOST_CHECK(4 == p4.dimension());
+  BOOST_CHECK(is_point_in_list(points, p4));
+
+  Point p5 = alpha_complex_from_points.get_point(5);
+  std::cout << "alpha_complex_from_points.get_point(5)=" << p5 << std::endl;
+  BOOST_CHECK(0 == p5.dimension());
+  BOOST_CHECK(!is_point_in_list(points, p5));
+
+  Point p0 = alpha_complex_from_points.get_point(0);
+  std::cout << "alpha_complex_from_points.get_point(0)=" << p0 << std::endl;
+  BOOST_CHECK(0 == p0.dimension());
+  BOOST_CHECK(!is_point_in_list(points, p0));
+
+  Point p1234 = alpha_complex_from_points.get_point(1234);
+  std::cout << "alpha_complex_from_points.get_point(1234)=" << p1234.dimension() << std::endl;
+  BOOST_CHECK(0 == p1234.dimension());
+  BOOST_CHECK(!is_point_in_list(points, p1234));
 
 }
