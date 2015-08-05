@@ -611,33 +611,17 @@ BOOST_AUTO_TEST_CASE( NSimplexAndSubfaces_tree_insertion )
 
 	std::cout << "********************************************************************" << std::endl;
 	// TEST Edge_contraction
-	typeST st_copy_2 = st_copy_1, st_copy_3 = st_copy_1;
-	std::vector<Vertex_handle> v1, v2;
-	v1.push_back(3);
-	v2.push_back(0);
-	typeST::Simplex_handle s1;
-	typeST::Simplex_handle s2;
-	s1 = st_copy_1.find(v1);
-	s2 = st_copy_1.find(v2);
-	st_copy_1.edge_contraction(s1, s2);
-	std::cout << "Printing a copy of st, with the edge (3, 0) contracted, 3 being contracted in 0" << std::endl;
+	typeST st_copy_2 = st_copy_1, st_copy_3 = st_copy_1, st_copy_4 = st_copy_1;
+	st_copy_1.edge_contraction(0, 3);
+	std::cout << "Printing a copy of st, with the edge (0, 3) contracted, 3 being contracted in 0" << std::endl;
 	st_copy_1.print_tree();
-	v1.clear();
-	v2.clear();
-	v1.push_back(3);
-	v2.push_back(1);
-	s1 = st_copy_2.find(v1);
-	s2 = st_copy_2.find(v2);
-	st_copy_2.edge_contraction(s1, s2);
-	std::cout << "Printing a copy of st, with the edge (3, 1) contracted, 3 being contracted in 1" << std::endl;
+	st_copy_2.edge_contraction(1, 3);
+	std::cout << "Printing a copy of st, with the edge (1, 3) contracted, 3 being contracted in 1" << std::endl;
 	st_copy_2.print_tree();
-	v1.clear();
-	v2.clear();
-	v1.push_back(4);
-	v2.push_back(3);
-	s1 = st_copy_3.find(v1);
-	s2 = st_copy_3.find(v2);
-	st_copy_3.edge_contraction(s1, s2);
-	std::cout << "Printing a copy of st, with the edge (4, 3) contracted, 4 being contracted in 3" << std::endl;
+	st_copy_3.edge_contraction(3, 4);
+	std::cout << "Printing a copy of st, with the edge (3, 4) contracted, 4 being contracted in 3" << std::endl;
 	st_copy_3.print_tree();
+	st_copy_4.edge_contraction(1, 6);
+	std::cout << "Printing a copy of st, with the edge (1, 6) contracted, 6 being contracted in 1" << std::endl;
+	st_copy_4.print_tree();
 }
