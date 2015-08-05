@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
   // ----------------------------------------------------------------------------
   // Init of an alpha complex from the list of points
   // ----------------------------------------------------------------------------
-  Gudhi::alphacomplex::Alpha_complex alpha_complex_from_points(3, points.size(), points.begin(), points.end());
+  Gudhi::alphacomplex::Alpha_complex<Kernel> alpha_complex_from_points(3, points.size(), points.begin(), points.end());
 
   // ----------------------------------------------------------------------------
   // Display information about the alpha complex

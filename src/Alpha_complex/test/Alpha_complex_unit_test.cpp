@@ -35,11 +35,9 @@
 #include <limits>
 
 // Use dynamic_dimension_tag for the user to be able to set dimension
-typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kernel;
-typedef Kernel::Point_d Point;
-typedef std::vector<Point> Vector_of_points;
+typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kernel_d;
 // The triangulation uses the default instantiation of the TriangulationDataStructure template parameter
-
+/*
 BOOST_AUTO_TEST_CASE(S4_100_OFF_file) {
   // ----------------------------------------------------------------------------
   //
@@ -49,7 +47,7 @@ BOOST_AUTO_TEST_CASE(S4_100_OFF_file) {
   std::string off_file_name("S4_100.off");
   std::cout << "========== OFF FILE NAME = " << off_file_name << " ==========" << std::endl;
 
-  Gudhi::alphacomplex::Alpha_complex alpha_complex_from_file(off_file_name);
+  Gudhi::alphacomplex::Alpha_complex<Kernel_d> alpha_complex_from_file(off_file_name);
 
   const int DIMENSION = 4;
   std::cout << "alpha_complex_from_file.dimension()=" << alpha_complex_from_file.dimension() << std::endl;
@@ -74,7 +72,7 @@ BOOST_AUTO_TEST_CASE(S8_10_OFF_file) {
   std::string off_file_name("S8_10.off");
   std::cout << "========== OFF FILE NAME = " << off_file_name << " ==========" << std::endl;
 
-  Gudhi::alphacomplex::Alpha_complex alpha_complex_from_file(off_file_name);
+  Gudhi::alphacomplex::Alpha_complex<Kernel_d> alpha_complex_from_file(off_file_name);
 
   const int DIMENSION = 8;
   std::cout << "alpha_complex_from_file.dimension()=" << alpha_complex_from_file.dimension() << std::endl;
@@ -88,10 +86,16 @@ BOOST_AUTO_TEST_CASE(S8_10_OFF_file) {
   std::cout << "alpha_complex_from_file.num_simplices()=" << alpha_complex_from_file.num_simplices() << std::endl;
   BOOST_CHECK(alpha_complex_from_file.num_simplices() == NUMBER_OF_SIMPLICES);
 }
-
+*/
 bool are_almost_the_same(float a, float b) {
   return std::fabs(a - b) < std::numeric_limits<float>::epsilon();
 }
+
+// Use dynamic_dimension_tag for the user to be able to set dimension
+typedef CGAL::Epick_d< CGAL::Dimension_tag<4> > Kernel_s;
+typedef Kernel_s::Point_d Point;
+typedef std::vector<Point> Vector_of_points;
+
 
 bool is_point_in_list(Vector_of_points points_list, Point point) {
   for (auto& point_in_list : points_list) {
@@ -101,6 +105,7 @@ bool is_point_in_list(Vector_of_points points_list, Point point) {
   }
   return false; // point not found
 }
+
 BOOST_AUTO_TEST_CASE(Alpha_complex_from_points) {
 
   // ----------------------------------------------------------------------------
@@ -109,6 +114,7 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_from_points) {
   Vector_of_points points;
   std::vector<double> coords;
 
+  points.clear();
   coords.clear();
   coords.push_back(0.0);
   coords.push_back(0.0);
@@ -137,12 +143,12 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_from_points) {
   // ----------------------------------------------------------------------------
   // Init of an alpha complex from the list of points
   // ----------------------------------------------------------------------------
-  Gudhi::alphacomplex::Alpha_complex alpha_complex_from_points(3, points.size(), points.begin(), points.end());
+  Gudhi::alphacomplex::Alpha_complex<Kernel_s> alpha_complex_from_points(3, points.size(), points.begin(), points.end());
 
   std::cout << "========== Alpha_complex_from_points ==========" << std::endl;
 
   std::cout << "alpha_complex_from_points.dimension()=" << alpha_complex_from_points.dimension() << std::endl;
-  BOOST_CHECK(alpha_complex_from_points.dimension() == 3);
+  BOOST_CHECK(alpha_complex_from_points.dimension() == 4);
   std::cout << "alpha_complex_from_points.num_simplices()=" << alpha_complex_from_points.num_simplices() << std::endl;
   BOOST_CHECK(alpha_complex_from_points.num_simplices() == 15);
   std::cout << "alpha_complex_from_points.num_vertices()=" << alpha_complex_from_points.num_vertices() << std::endl;
@@ -190,17 +196,14 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_from_points) {
 
   Point p5 = alpha_complex_from_points.get_point(5);
   std::cout << "alpha_complex_from_points.get_point(5)=" << p5 << std::endl;
-  BOOST_CHECK(0 == p5.dimension());
   BOOST_CHECK(!is_point_in_list(points, p5));
 
   Point p0 = alpha_complex_from_points.get_point(0);
   std::cout << "alpha_complex_from_points.get_point(0)=" << p0 << std::endl;
-  BOOST_CHECK(0 == p0.dimension());
   BOOST_CHECK(!is_point_in_list(points, p0));
 
   Point p1234 = alpha_complex_from_points.get_point(1234);
   std::cout << "alpha_complex_from_points.get_point(1234)=" << p1234.dimension() << std::endl;
-  BOOST_CHECK(0 == p1234.dimension());
   BOOST_CHECK(!is_point_in_list(points, p1234));
 
 }

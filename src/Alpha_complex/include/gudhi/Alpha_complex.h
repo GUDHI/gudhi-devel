@@ -43,8 +43,8 @@
 #include <iterator>
 #include <vector>
 #include <string>
-#include <limits> // NaN
-#include <iterator>     // std::iterator
+#include <limits>  // NaN
+#include <iterator>  // std::iterator
 
 namespace Gudhi {
 
@@ -61,6 +61,7 @@ namespace alphacomplex {
  * Please refer to \ref alpha_complex for examples.
  *
  */
+template<class Kernel>
 class Alpha_complex : public Simplex_tree<> {
  private:
   // From Simplex_tree
@@ -72,35 +73,43 @@ class Alpha_complex : public Simplex_tree<> {
 
   // From CGAL
   // Kernel for the Delaunay_triangulation. Dimension can be set dynamically.
-  typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kernel;
+  //typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kernel;
 
   // Delaunay_triangulation type required to create an alpha-complex.
-  typedef CGAL::Delaunay_triangulation<Kernel> Delaunay_triangulation;
+  typedef typename CGAL::Delaunay_triangulation<Kernel> Delaunay_triangulation;
 
   typedef typename Kernel::Compute_squared_radius_d Squared_Radius;
   typedef typename Kernel::Side_of_bounded_sphere_d Is_Gabriel;
 
+  typedef typename Kernel::Point_d Point_d;
+
   // Type required to compute squared radius, or side of bounded sphere on a vector of points.
-  typedef std::vector<Kernel::Point_d> Vector_of_CGAL_points;
+  typedef typename std::vector<Point_d> Vector_of_CGAL_points;
 
   // Vertex_iterator type from CGAL.
-  typedef Delaunay_triangulation::Vertex_iterator CGAL_vertex_iterator;
+  typedef typename Delaunay_triangulation::Vertex_iterator CGAL_vertex_iterator;
+
+  // size_type type from CGAL.
+  typedef typename Delaunay_triangulation::size_type size_type;
 
   // Boost bimap type to switch from CGAL vertex iterator to simplex tree vertex handle and vice versa.
-  typedef boost::bimap< CGAL_vertex_iterator, Vertex_handle > Bimap_vertex;
-  
-  // size_type type from CGAL.
-  typedef Delaunay_triangulation::size_type size_type;
+  //typedef typename boost::bimap< CGAL_vertex_iterator, Vertex_handle > Bimap_vertex;
+  //typedef typename Bimap_vertex::value_type value_type;
+  typedef typename std::map< CGAL_vertex_iterator, Vertex_handle > Map_vertex_iterator_to_handle;
+  typedef typename std::map< Vertex_handle, CGAL_vertex_iterator > Map_vertex_handle_to_iterator;
 
  private:
-  /** \brief Boost bimap to switch from CGAL vertex iterator to simplex tree vertex handle and vice versa.*/
-  Bimap_vertex cgal_simplextree;
+  /** \brief Map to switch from CGAL vertex iterator to simplex tree vertex handle.*/
+  Map_vertex_iterator_to_handle vertex_iterator_to_handle;
+  /** \brief Map to switch from simplex tree vertex handle to CGAL vertex iterator.*/
+  Map_vertex_handle_to_iterator vertex_handle_to_iterator;
   /** \brief Pointer on the CGAL Delaunay triangulation.*/
   Delaunay_triangulation* triangulation;
   /** \brief Kernel for triangulation functions access.*/
   Kernel kernel;
 
  public:
+
   /** \brief Alpha_complex constructor from an OFF file name.
    * Uses the Delaunay_triangulation_off_reader to construct the Delaunay triangulation required to initialize 
    * the Alpha_complex.
@@ -140,9 +149,9 @@ class Alpha_complex : public Simplex_tree<> {
   Alpha_complex(int dimension, size_type size, ForwardIterator firstPoint, ForwardIterator lastPoint)
       : triangulation(nullptr) {
     triangulation = new Delaunay_triangulation(dimension);
-    Delaunay_triangulation::size_type inserted = triangulation->insert<ForwardIterator>(firstPoint, lastPoint);
+    size_type inserted = triangulation->insert(firstPoint, lastPoint);
     if (inserted != size) {
-      std::cerr << "Alpha_complex - insertion failed " << inserted << " != " << size<< std::endl;
+      std::cerr << "Alpha_complex - insertion failed " << inserted << " != " << size << std::endl;
       exit(-1); // ----- >>
     }
     init();
@@ -161,18 +170,20 @@ class Alpha_complex : public Simplex_tree<> {
    * @param[in] vertex Vertex handle of the point to retrieve.
    * @return The founded point.
    */
-  Kernel::Point_d get_point(Vertex_handle vertex) {
-    Kernel::Point_d point;
+  Point_d get_point(Vertex_handle vertex) {
+    Point_d point;
     try {
-      point = cgal_simplextree.right.at(vertex)->point();
-    }
-    catch(...) {
+      if (vertex_handle_to_iterator[vertex] != nullptr) {
+        point = vertex_handle_to_iterator[vertex]->point();
+      }
+    }    catch (...) {
       std::cerr << "Alpha_complex - getPoint not found on vertex " << vertex << std::endl;
     }
     return point;
   }
-  
+
  private:
+
   /** \brief Initialize the Alpha_complex from the Delaunay triangulation.
    *
    * @warning Delaunay triangulation must be already constructed with at least one vertex and dimension must be more 
@@ -197,7 +208,7 @@ class Alpha_complex : public Simplex_tree<> {
       std::cerr << "Alpha_complex init - Cannot init twice" << std::endl;
       return; // ----- >>
     }
-    
+
     set_dimension(triangulation->maximal_dimension());
 
     // --------------------------------------------------------------------------------------------
@@ -206,7 +217,11 @@ class Alpha_complex : public Simplex_tree<> {
     Vertex_handle vertex_handle = Vertex_handle();
     // Loop on triangulation vertices list
     for (CGAL_vertex_iterator vit = triangulation->vertices_begin(); vit != triangulation->vertices_end(); ++vit) {
-      cgal_simplextree.insert(Bimap_vertex::value_type(vit, vertex_handle));
+#ifdef DEBUG_TRACES
+      std::cout << "Vertex insertion - " << vertex_handle << " -> " << vit->point() << std::endl;
+#endif  // DEBUG_TRACES
+      vertex_iterator_to_handle[vit] = vertex_handle;
+      vertex_handle_to_iterator[vertex_handle] = vit;
       vertex_handle++;
     }
     // --------------------------------------------------------------------------------------------
@@ -219,18 +234,20 @@ class Alpha_complex : public Simplex_tree<> {
       std::cout << "Simplex_tree insertion ";
 #endif  // DEBUG_TRACES
       for (auto vit = cit->vertices_begin(); vit != cit->vertices_end(); ++vit) {
+        if (*vit != nullptr) {
 #ifdef DEBUG_TRACES
-        std::cout << " " << cgal_simplextree.left.at(*vit);
+          std::cout << " " << vertex_iterator_to_handle[*vit];
 #endif  // DEBUG_TRACES
-        // Vector of vertex construction for simplex_tree structure
-        vertexVector.push_back(cgal_simplextree.left.at(*vit));
+          // Vector of vertex construction for simplex_tree structure
+          vertexVector.push_back(vertex_iterator_to_handle[*vit]);
+        }
       }
 #ifdef DEBUG_TRACES
       std::cout << std::endl;
 #endif  // DEBUG_TRACES
       // Insert each simplex and its subfaces in the simplex tree - filtration is NaN
       Simplex_result insert_result = insert_simplex_and_subfaces(vertexVector,
-                                                                     std::numeric_limits<double>::quiet_NaN());
+                                                                 std::numeric_limits<double>::quiet_NaN());
       if (!insert_result.second) {
         std::cerr << "Alpha_complex::init insert_simplex_and_subfaces failed" << std::endl;
       }
@@ -250,7 +267,7 @@ class Alpha_complex : public Simplex_tree<> {
           std::cout << "Sigma of dim " << decr_dim << " is";
 #endif  // DEBUG_TRACES
           for (auto vertex : simplex_vertex_range(f_simplex)) {
-            pointVector.push_back((cgal_simplextree.right.at(vertex))->point());
+            pointVector.push_back(get_point(vertex));
 #ifdef DEBUG_TRACES
             std::cout << " " << vertex;
 #endif  // DEBUG_TRACES
@@ -265,7 +282,7 @@ class Alpha_complex : public Simplex_tree<> {
             if (f_simplex_dim > 0) {
               // squared_radius function initialization
               Squared_Radius squared_radius = kernel.compute_squared_radius_d_object();
-              
+
               alpha_complex_filtration = squared_radius(pointVector.begin(), pointVector.end());
             }
             assign_filtration(f_simplex, alpha_complex_filtration);
@@ -317,12 +334,11 @@ class Alpha_complex : public Simplex_tree<> {
           Vector_of_CGAL_points pointVector;
           Vertex_handle vertexForGabriel = Vertex_handle();
           for (auto vertex : simplex_vertex_range(f_boundary)) {
-            pointVector.push_back((cgal_simplextree.right.at(vertex))->point());
+            pointVector.push_back(get_point(vertex));
           }
           // Retrieve the Sigma point that is not part of Tau - parameter for is_gabriel function
           for (auto vertex : simplex_vertex_range(f_simplex)) {
-            if (std::find(pointVector.begin(), pointVector.end(), (cgal_simplextree.right.at(vertex))->point())
-                == pointVector.end()) {
+            if (std::find(pointVector.begin(), pointVector.end(), get_point(vertex)) == pointVector.end()) {
               // vertex is not found in Tau
               vertexForGabriel = vertex;
               // No need to continue loop
@@ -331,14 +347,13 @@ class Alpha_complex : public Simplex_tree<> {
           }
           // is_gabriel function initialization
           Is_Gabriel is_gabriel = kernel.side_of_bounded_sphere_d_object();
-#ifdef DEBUG_TRACES
-          bool is_gab = is_gabriel(pointVector.begin(), pointVector.end(), (cgal_simplextree.right.at(vertexForGabriel))->point())
+          bool is_gab = is_gabriel(pointVector.begin(), pointVector.end(), get_point(vertexForGabriel))
               != CGAL::ON_BOUNDED_SIDE;
+#ifdef DEBUG_TRACES
           std::cout << " | Tau is_gabriel(Sigma)=" << is_gab << " - vertexForGabriel=" << vertexForGabriel << std::endl;
 #endif  // DEBUG_TRACES
           // ### If Tau is not Gabriel of Sigma
-          if ((is_gabriel(pointVector.begin(), pointVector.end(), (cgal_simplextree.right.at(vertexForGabriel))->point())
-               == CGAL::ON_BOUNDED_SIDE)) {
+          if (false == is_gab) {
             // ### filt(Tau) = filt(Sigma)
             Filtration_value alpha_complex_filtration = filtration(f_simplex);
             assign_filtration(f_boundary, alpha_complex_filtration);

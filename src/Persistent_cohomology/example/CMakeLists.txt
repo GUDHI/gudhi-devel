@@ -28,8 +28,11 @@ if (NOT MSVC)
       target_link_libraries(performance_rips_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES})
    
       if(CGAL_FOUND)
-         # uncomment to display debug traces
-         # add_definitions(-DDEBUG_TRACES)
+        if (CMAKE_BUILD_TYPE MATCHES Debug)
+          # For programs to be more verbose
+          add_definitions(-DDEBUG_TRACES)
+        endif()
+
          add_executable(alpha_shapes_persistence alpha_shapes_persistence.cpp)
          target_link_libraries(alpha_shapes_persistence ${Boost_SYSTEM_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES} ${CGAL_LIBRARY})
          add_test(alpha_shapes_persistence_2_0_5 ${CMAKE_CURRENT_BINARY_DIR}/alpha_shapes_persistence ${CMAKE_SOURCE_DIR}/data/points/bunny_5000 2 0.5)

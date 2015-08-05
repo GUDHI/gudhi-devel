@@ -22,7 +22,8 @@ int main(int argc, char **argv) {
   // ----------------------------------------------------------------------------
   // Init of an alpha complex from an OFF file
   // ----------------------------------------------------------------------------
-  Gudhi::alphacomplex::Alpha_complex alpha_complex_from_file(off_file_name);
+  typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kernel;
+  Gudhi::alphacomplex::Alpha_complex<Kernel> alpha_complex_from_file(off_file_name);
   
   // ----------------------------------------------------------------------------
   // Display information about the alpha complex
