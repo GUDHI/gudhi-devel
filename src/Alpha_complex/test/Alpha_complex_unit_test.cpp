@@ -37,7 +37,7 @@
 // Use dynamic_dimension_tag for the user to be able to set dimension
 typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kernel_d;
 // The triangulation uses the default instantiation of the TriangulationDataStructure template parameter
-/*
+
 BOOST_AUTO_TEST_CASE(S4_100_OFF_file) {
   // ----------------------------------------------------------------------------
   //
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(S8_10_OFF_file) {
   std::cout << "alpha_complex_from_file.num_simplices()=" << alpha_complex_from_file.num_simplices() << std::endl;
   BOOST_CHECK(alpha_complex_from_file.num_simplices() == NUMBER_OF_SIMPLICES);
 }
-*/
+
 bool are_almost_the_same(float a, float b) {
   return std::fabs(a - b) < std::numeric_limits<float>::epsilon();
 }
