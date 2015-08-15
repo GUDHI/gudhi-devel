@@ -542,9 +542,8 @@ class Simplex_tree {
    * and edge. sh must point to a 1-dimensional simplex. This is an
    * optimized version of the boundary computation. */
   std::pair<Simplex_handle, Simplex_handle> endpoints(Simplex_handle sh) {
-    return std::pair<Simplex_handle, Simplex_handle>(
-                                                     root_.members_.find(sh->first),
-                                                     root_.members_.find(self_siblings(sh)->parent()));
+    assert(dimension(sh) == 1);
+    return { find_vertex(sh->first), find_vertex(self_siblings(sh)->parent()) };
   }
 
   /** Returns the Siblings containing a simplex.*/
