@@ -110,13 +110,6 @@ class Simplex_tree {
   /* Type of dictionary Vertex_handle -> Node for traversing the simplex tree. */
   typedef typename boost::container::flat_map<Vertex_handle, Node> Dictionary;
 
-  friend class Simplex_tree_node_explicit_storage< Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> >;
-  friend class Simplex_tree_siblings< Simplex_tree<FiltrationValue, SimplexKey, VertexHandle>, Dictionary>;
-  friend class Simplex_tree_simplex_vertex_iterator< Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> >;
-  friend class Simplex_tree_boundary_simplex_iterator< Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> >;
-  friend class Simplex_tree_complex_simplex_iterator< Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> >;
-  friend class Simplex_tree_skeleton_simplex_iterator< Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> >;
-
   /* \brief Set of nodes sharing a same parent in the simplex tree. */
   /* \brief Set of nodes sharing a same parent in the simplex tree. */
   typedef Simplex_tree_siblings<Simplex_tree, Dictionary> Siblings;
@@ -931,8 +924,8 @@ class Simplex_tree {
 
 // Print a Simplex_tree in os.
 
-template<typename T1, typename T2, typename T3>
-std::ostream& operator<<(std::ostream & os, Simplex_tree<T1, T2, T3> & st) {
+template<typename...T>
+std::ostream& operator<<(std::ostream & os, Simplex_tree<T...> & st) {
   for (auto sh : st.filtration_simplex_range()) {
     os << st.dimension(sh) << " ";
     for (auto v : st.simplex_vertex_range(sh)) {
@@ -943,13 +936,14 @@ std::ostream& operator<<(std::ostream & os, Simplex_tree<T1, T2, T3> & st) {
   return os;
 }
 
-template<typename T1, typename T2, typename T3>
-std::istream& operator>>(std::istream & is, Simplex_tree<T1, T2, T3> & st) {
+template<typename...T>
+std::istream& operator>>(std::istream & is, Simplex_tree<T...> & st) {
   // assert(st.num_simplices() == 0);
 
-  std::vector<typename Simplex_tree<T1, T2, T3>::Vertex_handle> simplex;
-  typename Simplex_tree<T1, T2, T3>::Filtration_value fil;
-  typename Simplex_tree<T1, T2, T3>::Filtration_value max_fil = 0;
+  typedef Simplex_tree<T...> ST;
+  std::vector<typename ST::Vertex_handle> simplex;
+  typename ST::Filtration_value fil;
+  typename ST::Filtration_value max_fil = 0;
   int max_dim = -1;
   size_t num_simplices = 0;
   while (read_simplex(is, simplex, fil)) {
