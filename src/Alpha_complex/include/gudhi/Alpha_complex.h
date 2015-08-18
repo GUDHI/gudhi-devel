@@ -168,7 +168,7 @@ class Alpha_complex : public Simplex_tree<> {
    * @return The founded point.
    */
   Point_d get_point(Vertex_handle vertex) {
-    Point_d point;
+    Point_d point(dimension());
     try {
       if (vertex_handle_to_iterator_[vertex] != nullptr) {
         point = vertex_handle_to_iterator_[vertex]->point();
@@ -251,10 +251,8 @@ class Alpha_complex : public Simplex_tree<> {
         std::cerr << "Alpha_complex::init insert_simplex_and_subfaces failed" << std::endl;
         exit(-1);  // ----->>
       }
-      bool skip_loop = false;
       // +++ For i : d -> 0
-      // This loop is skipped in case alpha²(Sigma) > max_alpha_square_
-      for (int fc_decr_dim = full_cell.dimension(); (fc_decr_dim >= 0) && (!skip_loop); fc_decr_dim--) {
+      for (int fc_decr_dim = full_cell.dimension(); (fc_decr_dim >= 0); fc_decr_dim--) {
         // +++ Foreach Sigma of dim i
         // No need to skip this loop in case alpha²(Sigma) > max_alpha_square_ because of
         // if (fc_decr_dim == f_simplex_dim) which means "only for a full cell"
@@ -277,6 +275,7 @@ class Alpha_complex : public Simplex_tree<> {
             std::cout << std::endl;
 #endif  // DEBUG_TRACES
             Simplex_handle sigma_handle = find(current_vertex);
+            bool skip_propagation = false;
             // +++ If filt(Sigma) is NaN : filt(Sigma) = alpha²(Sigma)
             if ((sigma_handle == null_simplex()) || isnan(filtration(sigma_handle))) {
               Filtration_value alpha_complex_filtration = compute_alpha_square(pointVector.begin(), pointVector.end(),
@@ -301,15 +300,14 @@ class Alpha_complex : public Simplex_tree<> {
                 assign_filtration(sigma_handle, alpha_complex_filtration);
                 filtration_max = fmax(filtration_max, alpha_complex_filtration);
               } else {
-                // if alpha²(Sigma) > max_alpha_square_ go to the next full cell
-                skip_loop = true;
+                // if alpha²(Sigma) > max_alpha_square_ skip propagation
+                skip_propagation = true;
 #ifdef DEBUG_TRACES
-                std::cout << "Alpha_complex::init skip loop on this full cell" << std::endl;
+                std::cout << "Alpha_complex::init skip propagation on this full cell" << std::endl;
 #endif  // DEBUG_TRACES
-                break;
               }
             }  // --- If filt(Sigma) is NaN : filt(Sigma) = alpha(Sigma)
-            if (filtration(sigma_handle) <= max_alpha_square_) {
+            if ((filtration(sigma_handle) <= max_alpha_square_) && !skip_propagation) {
               // Propagate alpha filtration value in Simplex tree if alpha²(Sigma) <= max_alpha_square_
               // in case Sigma is not found AND not inserted (alpha_complex_filtration > max_alpha_square_),
               // filtration(null_simplex()) returns INFINITY => no propagation
