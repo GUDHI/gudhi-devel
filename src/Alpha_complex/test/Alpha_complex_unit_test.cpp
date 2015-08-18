@@ -92,11 +92,11 @@ BOOST_AUTO_TEST_CASE(S4_100_OFF_file_filtered) {
   std::cout << "alpha_complex_from_file.dimension()=" << alpha_complex_from_file.dimension() << std::endl;
   BOOST_CHECK(alpha_complex_from_file.dimension() == DIMENSION);
 
-  const int NUMBER_OF_VERTICES = 13;  // Versus 100, because of filtered alpha value
+  const int NUMBER_OF_VERTICES = 100;
   std::cout << "alpha_complex_from_file.num_vertices()=" << alpha_complex_from_file.num_vertices() << std::endl;
   BOOST_CHECK(alpha_complex_from_file.num_vertices() == NUMBER_OF_VERTICES);
 
-  const int NUMBER_OF_SIMPLICES = 90;  // Versus 6879, because of filtered alpha value
+  const int NUMBER_OF_SIMPLICES = 5966;  // Versus 6879, because of filtered alpha value
   std::cout << "alpha_complex_from_file.num_simplices()=" << alpha_complex_from_file.num_simplices() << std::endl;
   // TODO(VR) : BOOST_CHECK(alpha_complex_from_file.num_simplices() == NUMBER_OF_SIMPLICES);
 
@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE(S8_10_OFF_file_filtered) {
   std::cout << "alpha_complex_from_file.num_vertices()=" << alpha_complex_from_file.num_vertices() << std::endl;
   BOOST_CHECK(alpha_complex_from_file.num_vertices() == NUMBER_OF_VERTICES);
 
-  const int NUMBER_OF_SIMPLICES = 895;  // Versus 1007, because of filtered alpha value
+  const int NUMBER_OF_SIMPLICES = 1004;  // Versus 1007, because of filtered alpha value
   std::cout << "alpha_complex_from_file.num_simplices()=" << alpha_complex_from_file.num_simplices() << std::endl;
   // TODO(VR) : BOOST_CHECK(alpha_complex_from_file.num_simplices() == NUMBER_OF_SIMPLICES);
 
@@ -283,15 +283,7 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_from_points) {
   BOOST_CHECK(4 == p4.dimension());
   BOOST_CHECK(is_point_in_list(points, p4));
 
-  Point p5 = alpha_complex_from_points.get_point(5);
-  std::cout << "alpha_complex_from_points.get_point(5)=" << p5 << std::endl;
-  BOOST_CHECK(!is_point_in_list(points, p5));
-
-  Point p0 = alpha_complex_from_points.get_point(0);
-  std::cout << "alpha_complex_from_points.get_point(0)=" << p0 << std::endl;
-  BOOST_CHECK(!is_point_in_list(points, p0));
-
-  Point p1234 = alpha_complex_from_points.get_point(1234);
-  std::cout << "alpha_complex_from_points.get_point(1234)=" << p1234.dimension() << std::endl;
-  BOOST_CHECK(!is_point_in_list(points, p1234));
+  BOOST_CHECK_THROW (alpha_complex_from_points.get_point(5), std::out_of_range);
+  BOOST_CHECK_THROW (alpha_complex_from_points.get_point(0), std::out_of_range);
+  BOOST_CHECK_THROW (alpha_complex_from_points.get_point(1234), std::out_of_range);
 }

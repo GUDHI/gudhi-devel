@@ -166,17 +166,14 @@ class Alpha_complex : public Simplex_tree<> {
    *
    * @param[in] vertex Vertex handle of the point to retrieve.
    * @return The founded point.
+   * @warning Exception std::out_of_range is thrown in case vertex is not in the map vertex_handle_to_iterator_.
    */
   Point_d get_point(Vertex_handle vertex) {
-    Point_d point(dimension());
-    try {
-      if (vertex_handle_to_iterator_[vertex] != nullptr) {
-        point = vertex_handle_to_iterator_[vertex]->point();
-      }
-    } catch (...) {
-      std::cerr << "Alpha_complex - getPoint not found on vertex " << vertex << std::endl;
+    if (vertex_handle_to_iterator_[vertex] != nullptr) {
+      return vertex_handle_to_iterator_[vertex]->point();
+    } else {
+      throw std::out_of_range("Vertex out of vector range");
     }
-    return point;
   }
 
  private:
