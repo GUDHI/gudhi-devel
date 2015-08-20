@@ -280,7 +280,6 @@ class Simplex_tree {
   Simplex_tree()
       : null_vertex_(-1),
       threshold_(0),
-      num_simplices_(0),
       root_(NULL, null_vertex_),
       filtration_vect_(),
       dimension_(-1) { }
@@ -361,13 +360,27 @@ class Simplex_tree {
     return root_.members_.size();
   }
 
-  /** \brief Returns the number of simplices in the complex.
-   *
-   * Does not count the empty simplex. */
-  unsigned int num_simplices() const {
-    return num_simplices_;
+ public:
+  /** \brief returns the number of simplices in the simplex_tree. */
+  size_t num_simplices() {
+    return num_simplices(&root_);
   }
 
+ private:
+  /** \brief returns the number of simplices in the simplex_tree. */
+  size_t num_simplices(Siblings * sib) {
+    auto sib_begin = sib->members().begin();
+    auto sib_end = sib->members().end();
+    size_t simplices_number = sib_end - sib_begin;
+    for (auto sh = sib_begin; sh != sib_end; ++sh) {
+      if (has_children(sh)) {
+        simplices_number += num_simplices(sh->second.children());
+      }
+    }
+    return simplices_number;
+  }
+
+ public:
   /** \brief Returns the dimension of a simplex.
    *
    * Must be different from null_simplex().*/
@@ -510,15 +523,9 @@ class Simplex_tree {
       }
       // N-Simplex insert
       std::pair<Simplex_handle, bool> returned = insert_simplex(Nsimplex, filtration);
-      if (returned.second == true) {
-        num_simplices_++;
-      }
     } else if (Nsimplex.size() == 1) {
       // 1-Simplex insert - End of recursivity
       std::pair<Simplex_handle, bool> returned = insert_simplex(Nsimplex, filtration);
-      if (returned.second == true) {
-        num_simplices_++;
-      }
     } else {
       // Nothing to insert - empty vector
     }
@@ -567,11 +574,6 @@ class Simplex_tree {
   /** Set an upper bound for the filtration values. */
   void set_filtration(Filtration_value fil) {
     threshold_ = fil;
-  }
-
-  /** Set a number of simplices for the simplicial complex. */
-  void set_num_simplices(unsigned int num_simplices) {
-    num_simplices_ = num_simplices;
   }
 
   /** Set a dimension for the simplicial complex. */
@@ -770,8 +772,6 @@ class Simplex_tree {
       dimension_ = 1;
     }
 
-    num_simplices_ = boost::num_vertices(skel_graph)
-        + boost::num_edges(skel_graph);
     root_.members_.reserve(boost::num_vertices(skel_graph));
 
     typename boost::graph_traits<OneSkeletonGraph>::vertex_iterator v_it,
@@ -850,7 +850,6 @@ class Simplex_tree {
                      root_sh->second.children()->members().end(),
                      s_h->second.filtration());
         if (inter.size() != 0) {
-          this->num_simplices_ += inter.size();
           Siblings * new_sib = new Siblings(siblings,  // oncles
                                             s_h->first,  // parent
                                             inter);  // boost::container::ordered_unique_range_t
@@ -913,7 +912,6 @@ class Simplex_tree {
   /** \brief Upper bound on the filtration values of the simplices.*/
   Filtration_value threshold_;
   /** \brief Total number of simplices in the complex, without the empty simplex.*/
-  unsigned int num_simplices_;
   /** \brief Set of simplex tree Nodes representing the vertices.*/
   Siblings root_;
   /** \brief Simplices ordered according to a filtration.*/
@@ -938,17 +936,13 @@ std::ostream& operator<<(std::ostream & os, Simplex_tree<T...> & st) {
 
 template<typename...T>
 std::istream& operator>>(std::istream & is, Simplex_tree<T...> & st) {
-  // assert(st.num_simplices() == 0);
-
   typedef Simplex_tree<T...> ST;
   std::vector<typename ST::Vertex_handle> simplex;
   typename ST::Filtration_value fil;
   typename ST::Filtration_value max_fil = 0;
   int max_dim = -1;
-  size_t num_simplices = 0;
   while (read_simplex(is, simplex, fil)) {
     // read all simplices in the file as a list of vertices
-    ++num_simplices;
     // Warning : simplex_size needs to be casted in int - Can be 0
     int dim = static_cast<int> (simplex.size() - 1);
     if (max_dim < dim) {
@@ -961,7 +955,6 @@ std::istream& operator>>(std::istream & is, Simplex_tree<T...> & st) {
     st.insert_simplex(simplex, fil);
     simplex.clear();
   }
-  st.set_num_simplices(num_simplices);
   st.set_dimension(max_dim);
   st.set_filtration(max_fil);
 
