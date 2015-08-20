@@ -22,5 +22,6 @@
   
 /** \brief Handle type for the vertices of a cell complex.
   * 
-  * Must be int.*/
+  * Must be a signed integer type. <code>operator&lt;</code> defines a total order on it.
+  */
 struct VertexHandle {};

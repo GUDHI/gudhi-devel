@@ -74,6 +74,16 @@ namespace Gudhi {
  * @{
  */
 
+/// Model of SimplexTreeOptions.
+struct Simplex_tree_options_full_featured {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef int Simplex_key;
+  static constexpr bool store_key = true;
+  static constexpr bool store_filtration = true;
+};
+
 /**
  * \brief Simplex Tree data structure for representing simplicial complexes.
  *
@@ -86,18 +96,10 @@ namespace Gudhi {
  *
  */
 
-struct Simplex_tree_options_full_featured {
-  typedef linear_indexing_tag Indexing_tag;
-  typedef int Vertex_handle;
-  typedef double Filtration_value;
-  typedef int Simplex_key;
-  static constexpr bool store_key = true;
-  static constexpr bool store_filtration = true;
-};
-
-template<typename Options = Simplex_tree_options_full_featured>
+template<typename SimplexTreeOptions = Simplex_tree_options_full_featured>
 class Simplex_tree {
  public:
+  typedef SimplexTreeOptions Options;
   typedef typename Options::Indexing_tag Indexing_tag;
   /** \brief Type for the value of the filtration function.
    *
