@@ -266,7 +266,7 @@ class Simplex_tree {
    * order is used.
    *
    * The filtration must be valid. If the filtration has not been initialized yet, the
-   * method initializes it (i.e. order the simplices). */
+   * method initializes it (i.e. order the simplices). If the complex has changed since the last time the filtration was initialized, please call `initialize_filtration()` to recompute it. */
   Filtration_simplex_range filtration_simplex_range(Indexing_tag) {
     if (filtration_vect_.empty()) {
       initialize_filtration();
@@ -346,21 +346,27 @@ class Simplex_tree {
  public:
   /** \brief Returns the key associated to a simplex.
    *
-   * The filtration must be initialized. */
+   * The filtration must be initialized.
+   * \pre SimplexTreeOptions::store_key
+   */
   static Simplex_key key(Simplex_handle sh) {
     return sh->second.key();
   }
 
   /** \brief Returns the simplex associated to a key.
    *
-   * The filtration must be initialized. */
+   * The filtration must be initialized.
+   * \pre SimplexTreeOptions::store_key
+   */
   Simplex_handle simplex(Simplex_key key) const {
     return filtration_vect_[key];
   }
 
   /** \brief Returns the filtration value of a simplex.
    *
-   * Called on the null_simplex, returns INFINITY. */
+   * Called on the null_simplex, returns INFINITY.
+   * If SimplexTreeOptions::store_filtration is false, returns 0.
+   */
   static Filtration_value filtration(Simplex_handle sh) {
     if (sh != null_simplex()) {
       return sh->second.filtration();
