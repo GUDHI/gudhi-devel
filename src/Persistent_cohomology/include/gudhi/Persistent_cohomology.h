@@ -230,9 +230,10 @@ class Persistent_cohomology {
       : cpx_(&cpx),
         dim_max_(cpx.dimension()),                       // upper bound on the dimension of the simplices
         coeff_field_(),                                  // initialize the field coefficient structure.
-        ds_rank_(cpx_->num_simplices()),                 // union-find
-        ds_parent_(cpx_->num_simplices()),               // union-find
-        ds_repr_(cpx_->num_simplices(), NULL),           // union-find -> annotation vectors
+        num_simplices_(cpx_->num_simplices()),           // num_simplices save to avoid to call thrice the function
+        ds_rank_(num_simplices_),                        // union-find
+        ds_parent_(num_simplices_),                      // union-find
+        ds_repr_(num_simplices_, NULL),                  // union-find -> annotation vectors
         dsets_(&ds_rank_[0], &ds_parent_[0]),            // union-find
         cam_(),                                          // collection of annotation vectors
         zero_cocycles_(),                                // union-find -> Simplex_key of creator for 0-homology
@@ -743,6 +744,7 @@ class Persistent_cohomology {
   Complex_ds * cpx_;
   int dim_max_;
   CoefficientField coeff_field_;
+  size_t num_simplices_;
 
   /*  Disjoint sets data structure to link the model of FilteredComplex
    * with the compressed annotation matrix.
