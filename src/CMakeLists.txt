@@ -19,7 +19,6 @@ set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME    OFF)
 
-find_package(Boost)
 find_package(GMP)
 if(GMP_FOUND)
   find_package(GMPXX)
@@ -44,7 +43,6 @@ else()
   add_subdirectory(example/Skeleton_blocker)                   
   add_subdirectory(example/Contraction)                   
   add_subdirectory(example/Hasse_complex)
-  add_subdirectory(example/Alpha_shapes)
   add_subdirectory(example/Bottleneck)
 
   # GudhUI

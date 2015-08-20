@@ -69,7 +69,9 @@ class Skeleton_blocker_simplex {
   }
 
   Skeleton_blocker_simplex(std::initializer_list<T>& list) {
-    for_each(list.begin(), list.end(), add_vertex);
+    std::for_each(list.begin(), list.end(), [&] (T const& elt) {
+      add_vertex(elt);
+    });
   }
 
   template<typename ... Args>

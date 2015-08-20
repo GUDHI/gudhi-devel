@@ -75,25 +75,11 @@ class Skeleton_blocker_sub_complex : public ComplexType {
   typedef typename ComplexType::Root_simplex_handle Root_simplex_handle;
 
  protected:
-  ///**
-  //* @brief Returns true iff the simplex formed by all vertices contained in 'addresses_sigma_in_link'
-  //* but 'vertex_to_be_ignored' is in 'link'
-  //*/
-  /*
-   template<typename T> friend bool
-   proper_face_in_union(
-   Skeleton_blocker_sub_complex<T> & link,
-   std::vector<boost::optional<typename T::Vertex_handle> > & addresses_sigma_in_link,
-   int vertex_to_be_ignored);*/
-
+  
   /**
    * @brief Determines whether all proper faces of simplex 'sigma' belong to 'link1' \cup 'link2'
    * where 'link1' and 'link2' are subcomplexes of the same complex of type ComplexType
    */
-  // template<typename T> friend bool
-  // proper_faces_in_union(Skeleton_blocker_simplex<typename T::Root_vertex_handle> & sigma, Skeleton_blocker_sub_complex<T> & link1, Skeleton_blocker_sub_complex<T> & link2){
-  // template<typename T> friend bool
-  // proper_faces_in_union(Skeleton_blocker_simplex<typename T::Root_vertex_handle> & sigma, Skeleton_blocker_sub_complex<T> & link1, Skeleton_blocker_sub_complex<T> & link2);
   typedef std::map<Root_vertex_handle, Vertex_handle> IdAddressMap;
   typedef typename IdAddressMap::value_type AddressPair;
   typedef typename IdAddressMap::iterator IdAddressMapIterator;

@@ -208,7 +208,8 @@ void Skeleton_blocker_complex<SkeletonBlockerDS>::remove_star(const Simplex_hand
 }
 
 /**
- * @brief add a maximal simplex plus all its cofaces.
+ * @brief add a maximal simplex plus all its cofaces. All vertices lower than the higher vertex of
+ * sigma must already be present.
  * @details the simplex must have dimension greater than one (otherwise use add_vertex or add_edge).
  */
 template<typename SkeletonBlockerDS>
@@ -223,7 +224,7 @@ void Skeleton_blocker_complex<SkeletonBlockerDS>::add_simplex(const Simplex_hand
 
   for (auto u_it = sigma.begin(); u_it != sigma.end(); ++u_it)
     for (auto v_it = u_it; ++v_it != sigma.end(); /**/) {
-      std::cout << "add edge" << *u_it << " " << *v_it << std::endl;
+      // std::cout << "add edge" << *u_it << " " << *v_it << std::endl;
       add_edge(*u_it, *v_it);
     }
   remove_blocker_include_in_simplex(sigma);
@@ -338,9 +339,11 @@ void
 Skeleton_blocker_complex<SkeletonBlockerDS>::contract_edge(Vertex_handle a, Vertex_handle b) {
   assert(this->contains_vertex(a));
   assert(this->contains_vertex(b));
-  assert(this->contains_edge(a, b));
 
-  // if some blockers passes through 'ab', we remove them.
+  if(this->contains_edge(a, b))
+    this->add_edge(a, b);
+
+  // if some blockers passes through 'ab', we need to remove them.
   if (!link_condition(a, b))
     delete_blockers_around_edge(a, b);
 
