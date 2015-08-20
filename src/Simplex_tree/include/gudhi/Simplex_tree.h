@@ -362,27 +362,19 @@ class Simplex_tree {
 
  public:
   /** \brief returns the number of simplices in the simplex_tree. */
-  long long int num_simplices() {
-    auto sib_begin = root_.members().begin();
-    auto sib_end = root_.members().end();
-    long long int simplices_number = sib_end - sib_begin;
-    for (auto sh = sib_begin; sh != sib_end; ++sh) {
-      if (has_children(sh)) {
-        simplices_number += rec_num_simplices(sh->second.children());
-      }
-    }
-    return simplices_number;
+  size_t num_simplices() {
+    return num_simplices(&root_);
   }
 
  private:
   /** \brief returns the number of simplices in the simplex_tree. */
-  long long int rec_num_simplices(Siblings * sib = nullptr) {
+  size_t num_simplices(Siblings * sib) {
     auto sib_begin = sib->members().begin();
     auto sib_end = sib->members().end();
-    long long int simplices_number = sib_end - sib_begin;
+    size_t simplices_number = sib_end - sib_begin;
     for (auto sh = sib_begin; sh != sib_end; ++sh) {
       if (has_children(sh)) {
-        simplices_number += rec_num_simplices(sh->second.children());
+        simplices_number += num_simplices(sh->second.children());
       }
     }
     return simplices_number;
