@@ -72,8 +72,7 @@ class Simplex_tree_siblings {
    *
    * 'members' must be sorted and unique.*/
   template<typename RandomAccessVertexRange>
-  Simplex_tree_siblings(Simplex_tree_siblings * oncles, Vertex_handle parent,
-                        RandomAccessVertexRange members)
+  Simplex_tree_siblings(Simplex_tree_siblings * oncles, Vertex_handle parent, const& RandomAccessVertexRange members)
       : oncles_(oncles),
         parent_(parent),
         members_(boost::container::ordered_unique_range, members.begin(),
