@@ -288,7 +288,6 @@ class Simplex_tree {
   /** \brief Copy; copy the whole tree structure. */
   Simplex_tree(Simplex_tree& copy) : 	null_vertex_(copy.null_vertex_),
   										threshold_(copy.threshold_),
-										num_simplices_(copy.num_simplices_),
 										root_(NULL, -1, std::vector<std::pair<Vertex_handle, Node>> (copy.root_.members().begin(), copy.root_.members().end())),
 										filtration_vect_(copy.filtration_vect_),
 										dimension_(copy.dimension_) {
@@ -300,9 +299,8 @@ class Simplex_tree {
   {
 	for (auto sh = sib->members().begin(), sh_copy = sib_copy->members().begin(); sh != sib->members().end(); ++sh, ++sh_copy) {
 		if (has_children(sh_copy)) {
-			std::vector<std::pair<Vertex_handle, Node>> v(sh_copy->second.children()->members().begin(), sh_copy->second.children()->members().end());
 			Siblings * newsib =  new Siblings (sib, sh_copy->first);
-			for (auto it = v.begin(); it != v.end(); ++it)
+			for (auto it = sh_copy->second.children()->members().begin(); it != sh_copy->second.children()->members().end(); ++it)
 				newsib->members_.emplace(it->first, Node(sib, it->second.filtration()));
 			rec_copy(newsib, sh_copy->second.children());
 			sh->second.assign_children(newsib);
@@ -314,9 +312,11 @@ class Simplex_tree {
 
 
   /** \brief Move; moves the whole tree structure. */
-  Simplex_tree(Simplex_tree&& old) : null_vertex_(std::move(old.null_vertex_)), threshold_(std::move(old.threshold_)), num_simplices_(std::move(old.num_simplices_)), root_(std::move(old.root_)), filtration_vect_(std::move(old.filtration_vect_)), dimension_(std::move(old.dimension_)) {
+  Simplex_tree(Simplex_tree&& old) : 	null_vertex_(std::move(old.null_vertex_)),
+  										threshold_(std::move(old.threshold_)),
+										root_(std::move(old.root_)), filtration_vect_(std::move(old.filtration_vect_)),
+										dimension_(std::move(old.dimension_)) {
 		old.dimension_ = -1;
-		old.num_simplices_ = 0;
 		old.threshold_ = 0;
 	}
 
@@ -341,7 +341,9 @@ class Simplex_tree {
   }
 
  public: 
-  /** \brief Prints the simplex_tree hierarchically. */
+  /** \brief Prints the simplex_tree hierarchically. 
+   * Since it prints the vertices recursively, one can watch its tree shape.
+   */
   void print_tree()
   {
 	  for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh)
@@ -381,7 +383,6 @@ class Simplex_tree {
   {
 	  return (this->null_vertex_ == st2.null_vertex_ 
 	  		&& this->threshold_ == st2.threshold_ 
-			&& this->num_simplices_ == st2.num_simplices_ 
 			&& this->dimension_ == st2.dimension_ 
 			&& rec_equal(&root_, &st2.root_));
   }
