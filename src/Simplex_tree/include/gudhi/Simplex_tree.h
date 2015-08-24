@@ -288,7 +288,7 @@ class Simplex_tree {
   /** \brief Copy; copy the whole tree structure. */
   Simplex_tree(Simplex_tree& copy) : 	null_vertex_(copy.null_vertex_),
   										threshold_(copy.threshold_),
-										root_(NULL, -1, std::vector<std::pair<Vertex_handle, Node>> (copy.root_.members().begin(), copy.root_.members().end())),
+										root_(NULL, -1, copy.root_.members()),
 										filtration_vect_(copy.filtration_vect_),
 										dimension_(copy.dimension_) {
 		rec_copy(&root_, &copy.root_);
