@@ -10,7 +10,7 @@
 void usage(char * const progName) {
   std::cerr << "Usage: " << progName << " filename.off alpha_square_max_value" << std::endl;
   std::cerr << "       i.e.: " << progName << " ../../data/points/alphacomplexdoc.off 60.0" << std::endl;
-  exit(-1);  // ----- >>
+  exit(-1); // ----- >>
 }
 
 int main(int argc, char **argv) {
@@ -37,12 +37,14 @@ int main(int argc, char **argv) {
 
   std::cout << "Iterator on alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
   for (auto f_simplex : alpha_complex_from_file.filtration_simplex_range()) {
-    std::cout << "   ( ";
-    for (auto vertex : alpha_complex_from_file.simplex_vertex_range(f_simplex)) {
-      std::cout << vertex << " ";
+    if (alpha_complex_from_file.filtration(f_simplex) <= alpha_complex_from_file.filtration()) {
+      std::cout << "   ( ";
+      for (auto vertex : alpha_complex_from_file.simplex_vertex_range(f_simplex)) {
+        std::cout << vertex << " ";
+      }
+      std::cout << ") -> " << "[" << alpha_complex_from_file.filtration(f_simplex) << "] ";
+      std::cout << std::endl;
     }
-    std::cout << ") -> " << "[" << alpha_complex_from_file.filtration(f_simplex) << "] ";
-    std::cout << std::endl;
   }
   return 0;
 }

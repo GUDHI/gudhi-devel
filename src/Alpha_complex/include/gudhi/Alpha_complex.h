@@ -99,8 +99,6 @@ class Alpha_complex : public Simplex_tree<> {
   Delaunay_triangulation* triangulation_;
   /** \brief Kernel for triangulation_ functions access.*/
   Kernel kernel_;
-  /** \brief Maximum value for alpha square.*/
-  Filtration_value max_alpha_square_;
 
  public:
   /** \brief Alpha_complex constructor from an OFF file name.
@@ -110,14 +108,14 @@ class Alpha_complex : public Simplex_tree<> {
    * @param[in] off_file_name OFF file [path and] name.
    */
   Alpha_complex(const std::string& off_file_name, Filtration_value max_alpha_square)
-      : triangulation_(nullptr),
-      max_alpha_square_(max_alpha_square) {
+      : triangulation_(nullptr) {
     Gudhi::Delaunay_triangulation_off_reader<Delaunay_triangulation> off_reader(off_file_name);
     if (!off_reader.is_valid()) {
       std::cerr << "Alpha_complex - Unable to read file " << off_file_name << std::endl;
       exit(-1);  // ----- >>
     }
     triangulation_ = off_reader.get_complex();
+    set_filtration(max_alpha_square);
     init();
   }
 
@@ -126,9 +124,9 @@ class Alpha_complex : public Simplex_tree<> {
    * @param[in] triangulation_ptr Pointer on a Delaunay triangulation.
    */
   Alpha_complex(Delaunay_triangulation* triangulation_ptr, Filtration_value max_alpha_square)
-      : triangulation_(triangulation_ptr),
-      max_alpha_square_(max_alpha_square) {
-    init();
+      : triangulation_(triangulation_ptr) {
+   set_filtration(max_alpha_square);
+   init();
   }
 
   /** \brief Alpha_complex constructor from a list of points.
@@ -143,14 +141,14 @@ class Alpha_complex : public Simplex_tree<> {
   template<typename ForwardIterator >
   Alpha_complex(int dimension, size_type size, ForwardIterator firstPoint, ForwardIterator lastPoint,
                 Filtration_value max_alpha_square)
-      : triangulation_(nullptr),
-      max_alpha_square_(max_alpha_square) {
+      : triangulation_(nullptr) {
     triangulation_ = new Delaunay_triangulation(dimension);
     size_type inserted = triangulation_->insert(firstPoint, lastPoint);
     if (inserted != size) {
       std::cerr << "Alpha_complex - insertion failed " << inserted << " != " << size << std::endl;
       exit(-1);  // ----- >>
     }
+    set_filtration(max_alpha_square);
     init();
   }
 
@@ -169,8 +167,9 @@ class Alpha_complex : public Simplex_tree<> {
    * @warning Exception std::out_of_range is thrown in case vertex is not in the map vertex_handle_to_iterator_.
    */
   Point_d get_point(Vertex_handle vertex) {
-    if (vertex_handle_to_iterator_[vertex] != nullptr) {
-      return vertex_handle_to_iterator_[vertex]->point();
+    auto found_it = vertex_handle_to_iterator_.find(vertex);
+    if (found_it != vertex_handle_to_iterator_.end()) {
+      return found_it->second->point();
     } else {
       throw std::out_of_range("Vertex out of vector range");
     }
@@ -210,20 +209,21 @@ class Alpha_complex : public Simplex_tree<> {
     Vertex_handle vertex_handle = Vertex_handle();
     // Loop on triangulation vertices list
     for (CGAL_vertex_iterator vit = triangulation_->vertices_begin(); vit != triangulation_->vertices_end(); ++vit) {
+      if (!triangulation_->is_infinite(*vit)) {
 #ifdef DEBUG_TRACES
-      std::cout << "Vertex insertion - " << vertex_handle << " -> " << vit->point() << std::endl;
+        std::cout << "Vertex insertion - " << vertex_handle << " -> " << vit->point() << std::endl;
 #endif  // DEBUG_TRACES
-      vertex_iterator_to_handle_[vit] = vertex_handle;
-      vertex_handle_to_iterator_[vertex_handle] = vit;
-      vertex_handle++;
+        vertex_iterator_to_handle_.emplace(vit, vertex_handle);
+        vertex_handle_to_iterator_.emplace(vertex_handle, vit);
+        vertex_handle++;
+      }
     }
     // --------------------------------------------------------------------------------------------
 
-    Filtration_value filtration_max = 0.0;
     // --------------------------------------------------------------------------------------------
     // Simplex_tree construction from loop on triangulation finite full cells list
     for (auto cit = triangulation_->finite_full_cells_begin(); cit != triangulation_->finite_full_cells_end(); ++cit) {
-      Vector_vertex vertex_full_cell;
+      Vector_vertex vertexVector;
 #ifdef DEBUG_TRACES
       std::cout << "Simplex_tree insertion ";
 #endif  // DEBUG_TRACES
@@ -233,149 +233,98 @@ class Alpha_complex : public Simplex_tree<> {
           std::cout << " " << vertex_iterator_to_handle_[*vit];
 #endif  // DEBUG_TRACES
           // Vector of vertex construction for simplex_tree structure
-          vertex_full_cell.push_back(vertex_iterator_to_handle_[*vit]);
+          vertexVector.push_back(vertex_iterator_to_handle_[*vit]);
         }
       }
 #ifdef DEBUG_TRACES
       std::cout << std::endl;
 #endif  // DEBUG_TRACES
-
-      Simplex_tree<> full_cell;
-      full_cell.set_dimension(triangulation_->maximal_dimension());
-      // Create a simplex tree containing only one of the full cells
-      Simplex_result insert_result = full_cell.insert_simplex_and_subfaces(vertex_full_cell);
+      // Insert each simplex and its subfaces in the simplex tree - filtration is NaN
+      Simplex_result insert_result = insert_simplex_and_subfaces(vertexVector,
+                                                                 std::numeric_limits<double>::quiet_NaN());
       if (!insert_result.second) {
         std::cerr << "Alpha_complex::init insert_simplex_and_subfaces failed" << std::endl;
         exit(-1);  // ----->>
       }
-      // +++ For i : d -> 0
-      for (int fc_decr_dim = full_cell.dimension(); (fc_decr_dim >= 0); fc_decr_dim--) {
-        // +++ Foreach Sigma of dim i
-        // No need to skip this loop in case alpha²(Sigma) > max_alpha_square_ because of
-        // if (fc_decr_dim == f_simplex_dim) which means "only for a full cell"
-        for (auto fc_simplex : full_cell.skeleton_simplex_range(fc_decr_dim)) {
-          int f_simplex_dim = full_cell.dimension(fc_simplex);
-          if (fc_decr_dim == f_simplex_dim) {
-            Vector_of_CGAL_points pointVector;
-            Vector_vertex current_vertex;
-#ifdef DEBUG_TRACES
-            std::cout << "Sigma of dim " << fc_decr_dim << " is";
-#endif  // DEBUG_TRACES
-            for (auto vertex : full_cell.simplex_vertex_range(fc_simplex)) {
-              pointVector.push_back(get_point(vertex));
-              current_vertex.push_back(vertex);
-#ifdef DEBUG_TRACES
-              std::cout << " " << vertex;
-#endif  // DEBUG_TRACES
-            }
-#ifdef DEBUG_TRACES
-            std::cout << std::endl;
-#endif  // DEBUG_TRACES
-            Simplex_handle sigma_handle = find(current_vertex);
-            bool skip_propagation = false;
-            // +++ If filt(Sigma) is NaN : filt(Sigma) = alpha²(Sigma)
-            if ((sigma_handle == null_simplex()) || isnan(filtration(sigma_handle))) {
-              Filtration_value alpha_complex_filtration = compute_alpha_square(pointVector.begin(), pointVector.end(),
-                                                                               f_simplex_dim);
-              if (alpha_complex_filtration <= max_alpha_square_) {
-                // Only insert Sigma in Simplex tree if alpha²(Sigma) <= max_alpha_square_
-                if (sigma_handle == null_simplex()) {
-#ifdef DEBUG_TRACES
-                  std::cout << "Alpha_complex::init Sigma not found" << std::endl;
-#endif  // DEBUG_TRACES
-                  insert_result = insert_simplex(current_vertex, std::numeric_limits<double>::quiet_NaN());
-                  if (!insert_result.second) {
-                    std::cerr << "Alpha_complex::init insert_simplex failed" << std::endl;
-                    exit(-1);  // ----->>
-                  }
-                  // Sigma is the new inserted simplex handle
-                  sigma_handle = insert_result.first;
-                }
-#ifdef DEBUG_TRACES
-                std::cout << "Alpha_complex::init filtration = " << alpha_complex_filtration << std::endl;
-#endif  // DEBUG_TRACES
-                assign_filtration(sigma_handle, alpha_complex_filtration);
-                filtration_max = fmax(filtration_max, alpha_complex_filtration);
-              } else {
-                // if alpha²(Sigma) > max_alpha_square_ skip propagation
-                skip_propagation = true;
-#ifdef DEBUG_TRACES
-                std::cout << "Alpha_complex::init skip propagation on this full cell" << std::endl;
-#endif  // DEBUG_TRACES
-              }
-            }  // --- If filt(Sigma) is NaN : filt(Sigma) = alpha(Sigma)
-            if ((filtration(sigma_handle) <= max_alpha_square_) && !skip_propagation) {
-              // Propagate alpha filtration value in Simplex tree if alpha²(Sigma) <= max_alpha_square_
-              // in case Sigma is not found AND not inserted (alpha_complex_filtration > max_alpha_square_),
-              // filtration(null_simplex()) returns INFINITY => no propagation
-              propagate_alpha_filtration(full_cell, fc_simplex, fc_decr_dim, sigma_handle);
-            }
-          }
-        }  // --- Foreach Sigma of dim i
-      }  // --- For i : d -> 0
     }
     // --------------------------------------------------------------------------------------------
 
+    // --------------------------------------------------------------------------------------------
+    // ### For i : d -> 0
+    for (int decr_dim = dimension(); decr_dim >= 0; decr_dim--) {
+      // ### Foreach Sigma of dim i
+      for (auto f_simplex : skeleton_simplex_range(decr_dim)) {
+        int f_simplex_dim = dimension(f_simplex);
+        if (decr_dim == f_simplex_dim) {
+          Vector_of_CGAL_points pointVector;
 #ifdef DEBUG_TRACES
-    std::cout << "filtration_max=" << filtration_max << std::endl;
+          std::cout << "Sigma of dim " << decr_dim << " is";
 #endif  // DEBUG_TRACES
-    set_filtration(filtration_max);
-  }
+          for (auto vertex : simplex_vertex_range(f_simplex)) {
+            pointVector.push_back(get_point(vertex));
+#ifdef DEBUG_TRACES
+            std::cout << " " << vertex;
+#endif  // DEBUG_TRACES
+          }
+#ifdef DEBUG_TRACES
+          std::cout << std::endl;
+#endif  // DEBUG_TRACES
+          // ### If filt(Sigma) is NaN : filt(Sigma) = alpha(Sigma)
+          if (isnan(filtration(f_simplex))) {
+            Filtration_value alpha_complex_filtration = 0.0;
+            // No need to compute squared_radius on a single point - alpha is 0.0
+            if (f_simplex_dim > 0) {
+              // squared_radius function initialization
+              Squared_Radius squared_radius = kernel_.compute_squared_radius_d_object();
 
-  template<typename ForwardIterator >
-  Filtration_value compute_alpha_square(ForwardIterator firstPoint, ForwardIterator lastPoint, int f_simplex_dim) {
-    Filtration_value alpha_square_value = 0.0;
-    // No need to compute squared_radius on a single point - alpha is 0.0
-    if (f_simplex_dim > 0) {
-      // squared_radius function initialization
-      Squared_Radius squared_radius = kernel_.compute_squared_radius_d_object();
-
-      alpha_square_value = squared_radius(firstPoint, lastPoint);
+              alpha_complex_filtration = squared_radius(pointVector.begin(), pointVector.end());
+            }
+            assign_filtration(f_simplex, alpha_complex_filtration);
+#ifdef DEBUG_TRACES
+            std::cout << "filt(Sigma) is NaN : filt(Sigma) =" << filtration(f_simplex) << std::endl;
+#endif  // DEBUG_TRACES
+          }
+          propagate_alpha_filtration(f_simplex, decr_dim);
+        }
+      }
     }
-    return alpha_square_value;
+    // --------------------------------------------------------------------------------------------
   }
 
-  void propagate_alpha_filtration(Simplex_tree& full_cell, Simplex_handle fc_simplex, int fc_decr_dim,
-                                  Simplex_handle sigma_handle) {
+  template<typename Simplex_handle>
+  void propagate_alpha_filtration(Simplex_handle f_simplex, int decr_dim) {
     // ### Foreach Tau face of Sigma
-    for (auto f_boundary : full_cell.boundary_simplex_range(fc_simplex)) {
+    for (auto f_boundary : boundary_simplex_range(f_simplex)) {
 #ifdef DEBUG_TRACES
       std::cout << " | --------------------------------------------------" << std::endl;
       std::cout << " | Tau ";
-#endif  // DEBUG_TRACES
-      Vector_vertex tau_vertex;
-      for (auto vertex : full_cell.simplex_vertex_range(f_boundary)) {
-        tau_vertex.push_back(vertex);
-#ifdef DEBUG_TRACES
+      for (auto vertex : simplex_vertex_range(f_boundary)) {
         std::cout << vertex << " ";
-#endif  // DEBUG_TRACES
       }
-#ifdef DEBUG_TRACES
       std::cout << "is a face of Sigma" << std::endl;
+      std::cout << " | isnan(filtration(Tau)=" << isnan(filtration(f_boundary)) << std::endl;
 #endif  // DEBUG_TRACES
-      Simplex_handle tau_handle = find(tau_vertex);
       // ### If filt(Tau) is not NaN
-
-      if ((tau_handle != null_simplex()) && (!isnan(filtration(tau_handle)))) {
+      if (!isnan(filtration(f_boundary))) {
         // ### filt(Tau) = fmin(filt(Tau), filt(Sigma))
-        Filtration_value alpha_complex_filtration = fmin(filtration(tau_handle), filtration(sigma_handle));
-        assign_filtration(tau_handle, alpha_complex_filtration);
-        // No need to check for filtration_max, alpha_complex_filtration is a min of an existing filtration value
+        Filtration_value alpha_complex_filtration = fmin(filtration(f_boundary), filtration(f_simplex));
+        assign_filtration(f_boundary, alpha_complex_filtration);
 #ifdef DEBUG_TRACES
-        std::cout << " | filt(Tau) = fmin(filt(Tau), filt(Sigma)) = " << alpha_complex_filtration << std::endl;
+        std::cout << " | filt(Tau) = fmin(filt(Tau), filt(Sigma)) = " << filtration(f_boundary) << std::endl;
 #endif  // DEBUG_TRACES
+        // ### Else
       } else {
         // No need to compute is_gabriel for dimension <= 2
         // i.e. : Sigma = (3,1) => Tau = 1
-        if (fc_decr_dim > 1) {
+        if (decr_dim > 1) {
           // insert the Tau points in a vector for is_gabriel function
           Vector_of_CGAL_points pointVector;
           Vertex_handle vertexForGabriel = Vertex_handle();
-          for (auto vertex : full_cell.simplex_vertex_range(f_boundary)) {
+          for (auto vertex : simplex_vertex_range(f_boundary)) {
             pointVector.push_back(get_point(vertex));
           }
           // Retrieve the Sigma point that is not part of Tau - parameter for is_gabriel function
-          for (auto vertex : simplex_vertex_range(sigma_handle)) {
+          for (auto vertex : simplex_vertex_range(f_simplex)) {
             if (std::find(pointVector.begin(), pointVector.end(), get_point(vertex)) == pointVector.end()) {
               // vertex is not found in Tau
               vertexForGabriel = vertex;
@@ -392,24 +341,11 @@ class Alpha_complex : public Simplex_tree<> {
 #endif  // DEBUG_TRACES
           // ### If Tau is not Gabriel of Sigma
           if (false == is_gab) {
-            if (tau_handle == null_simplex()) {
-#ifdef DEBUG_TRACES
-              std::cout << " | Tau not found" << std::endl;
-#endif  // DEBUG_TRACES
-              // in case Tau is not yet created
-              Simplex_result insert_result = insert_simplex(tau_vertex, std::numeric_limits<double>::quiet_NaN());
-              if (!insert_result.second) {
-                std::cerr << "Alpha_complex::propagate_alpha_filtration insert_simplex failed" << std::endl;
-                exit(-1);  // ----->>
-              }
-              // Sigma is the new inserted simplex handle
-              tau_handle = insert_result.first;
-            }
             // ### filt(Tau) = filt(Sigma)
-            assign_filtration(tau_handle, filtration(sigma_handle));
-            // No need to check for filtration_max, alpha_complex_filtration is an existing filtration value
+            Filtration_value alpha_complex_filtration = filtration(f_simplex);
+            assign_filtration(f_boundary, alpha_complex_filtration);
 #ifdef DEBUG_TRACES
-            std::cout << " | filt(Tau) = filt(Sigma) = " << filtration(sigma_handle) << std::endl;
+            std::cout << " | filt(Tau) = filt(Sigma) = " << filtration(f_boundary) << std::endl;
 #endif  // DEBUG_TRACES
           }
         }

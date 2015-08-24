@@ -108,13 +108,6 @@ class Simplex_tree {
   /* Type of dictionary Vertex_handle -> Node for traversing the simplex tree. */
   typedef typename boost::container::flat_map<Vertex_handle, Node> Dictionary;
 
-  friend class Simplex_tree_node_explicit_storage< Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> >;
-  friend class Simplex_tree_siblings< Simplex_tree<FiltrationValue, SimplexKey, VertexHandle>, Dictionary>;
-  friend class Simplex_tree_simplex_vertex_iterator< Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> >;
-  friend class Simplex_tree_boundary_simplex_iterator< Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> >;
-  friend class Simplex_tree_complex_simplex_iterator< Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> >;
-  friend class Simplex_tree_skeleton_simplex_iterator< Simplex_tree<FiltrationValue, SimplexKey, VertexHandle> >;
-
   /* \brief Set of nodes sharing a same parent in the simplex tree. */
   /* \brief Set of nodes sharing a same parent in the simplex tree. */
   typedef Simplex_tree_siblings<Simplex_tree, Dictionary> Siblings;
@@ -188,12 +181,12 @@ class Simplex_tree {
   /** \name Range and iterator methods
    * @{ */
 
-  /** \brief Returns a range over the vertices of the simplicial complex.
+  /** \brief Returns a range over the vertices of the simplicial complex. 
    * The order is increasing according to < on Vertex_handles.*/
   Complex_vertex_range complex_vertex_range() {
     return Complex_vertex_range(
-        boost::make_transform_iterator(root_.members_.begin(), return_first()),
-        boost::make_transform_iterator(root_.members_.end(), return_first()));
+                                boost::make_transform_iterator(root_.members_.begin(), return_first()),
+                                boost::make_transform_iterator(root_.members_.end(), return_first()));
   }
 
   /** \brief Returns a range over the simplices of the simplicial complex.
@@ -284,11 +277,10 @@ class Simplex_tree {
   /** \brief Constructs an empty simplex tree. */
   Simplex_tree()
       : null_vertex_(-1),
-        threshold_(0),
-        num_simplices_(0),
-        root_(NULL, null_vertex_),
-        filtration_vect_(),
-        dimension_(-1) {
+      threshold_(0),
+      root_(NULL, null_vertex_),
+      filtration_vect_(),
+      dimension_(-1) {
   }
 
   /** \brief Destructor; deallocates the whole tree structure. */
@@ -376,13 +368,27 @@ class Simplex_tree {
     return root_.members_.size();
   }
 
-  /** \brief Returns the number of simplices in the complex.
-   *
-   * Does not count the empty simplex. */
-  unsigned int num_simplices() const {
-    return num_simplices_;
+ public:
+  /** \brief returns the number of simplices in the simplex_tree. */
+  size_t num_simplices() {
+    return num_simplices(&root_);
   }
 
+ private:
+  /** \brief returns the number of simplices in the simplex_tree. */
+  size_t num_simplices(Siblings * sib) {
+    auto sib_begin = sib->members().begin();
+    auto sib_end = sib->members().end();
+    size_t simplices_number = sib_end - sib_begin;
+    for (auto sh = sib_begin; sh != sib_end; ++sh) {
+      if (has_children(sh)) {
+        simplices_number += num_simplices(sh->second.children());
+      }
+    }
+    return simplices_number;
+  }
+
+ public:
   /** \brief Returns the dimension of a simplex.
    *
    * Must be different from null_simplex().*/
@@ -407,6 +413,7 @@ class Simplex_tree {
     return (sh->second.children()->parent() == sh->first);
   }
 
+ public:
   /** \brief Given a range of Vertex_handles, returns the Simplex_handle
    * of the simplex in the simplicial complex containing the corresponding
    * vertices. Return null_simplex() if the simplex is not in the complex.
@@ -443,7 +450,7 @@ class Simplex_tree {
   Simplex_handle find_vertex(Vertex_handle v) {
     return root_.members_.begin() + v;
   }
-
+  
   /** \brief Insert a simplex, represented by a range of Vertex_handles, in the simplicial complex.
    *
    * @param[in]  simplex    range of Vertex_handles, representing the vertices of the new simplex
@@ -469,7 +476,7 @@ class Simplex_tree {
    * .end() return random access iterators, with 'value_type' Vertex_handle. */
   template<class RandomAccessVertexRange>
   std::pair<Simplex_handle, bool> insert_simplex(RandomAccessVertexRange & simplex,
-                                         Filtration_value filtration) {
+                                                 Filtration_value filtration) {
     if (simplex.empty()) {
       return std::pair<Simplex_handle, bool>(null_simplex(), true);
     }
@@ -506,7 +513,7 @@ class Simplex_tree {
    *
    * @param[in]  Nsimplex   range of Vertex_handles, representing the vertices of the new N-simplex
    * @param[in]  filtration the filtration value assigned to the new N-simplex.
-  */
+   */
   template<class RandomAccessVertexRange>
   std::pair<Simplex_handle, bool> insert_simplex_and_subfaces(RandomAccessVertexRange& Nsimplex,
                                                               Filtration_value filtration = 0.0) {
@@ -525,13 +532,11 @@ class Simplex_tree {
       // N-Simplex insert
       returned = insert_simplex(Nsimplex, filtration);
       if (returned.second == true) {
-        num_simplices_++;
       }
     } else if (Nsimplex.size() == 1) {
       // 1-Simplex insert - End of recursivity
       returned = insert_simplex(Nsimplex, filtration);
       if (returned.second == true) {
-        num_simplices_++;
       }
     } else {
       // Nothing to insert - empty vector
@@ -539,20 +544,13 @@ class Simplex_tree {
     return returned;
   }
 
-  /** \brief Assign a value 'key' to the key of the simplex
-   * represented by the Simplex_handle 'sh'. */
-  void assign_key(Simplex_handle sh, Simplex_key key) {
-    sh->second.assign_key(key);
-  }
-
  public:
   /** Returns the two Simplex_handle corresponding to the endpoints of
    * and edge. sh must point to a 1-dimensional simplex. This is an
    * optimized version of the boundary computation. */
   std::pair<Simplex_handle, Simplex_handle> endpoints(Simplex_handle sh) {
-    return std::pair<Simplex_handle, Simplex_handle>(
-        root_.members_.find(sh->first),
-        root_.members_.find(self_siblings(sh)->parent()));
+    assert(dimension(sh) == 1);
+    return { find_vertex(sh->first), find_vertex(self_siblings(sh)->parent()) };
   }
 
   /** Returns the Siblings containing a simplex.*/
@@ -563,21 +561,26 @@ class Simplex_tree {
       return sh->second.children();
   }
 
+  // void display_simplex(Simplex_handle sh)
+  // {
+  //   std::cout << "   " << "[" << filtration(sh) << "] ";
+  //   for( auto vertex : simplex_vertex_range(sh) )
+  //     { std::cout << vertex << " "; }
+  // }
+
+  // void print(Simplex_handle sh, std::ostream& os = std::cout)
+  // {  for(auto v : simplex_vertex_range(sh)) {os << v << " ";}
+  //    os << std::endl; }
+
  public:
   /** Returns a pointer to the root nodes of the simplex tree. */
   Siblings * root() {
     return &root_;
   }
 
- public:
   /** Set an upper bound for the filtration values. */
   void set_filtration(Filtration_value fil) {
     threshold_ = fil;
-  }
-
-  /** Set a number of simplices for the simplicial complex. */
-  void set_num_simplices(unsigned int num_simplices) {
-    num_simplices_ = num_simplices;
   }
 
   /** Set a dimension for the simplicial complex. */
@@ -776,22 +779,20 @@ class Simplex_tree {
       dimension_ = 1;
     }
 
-    num_simplices_ = boost::num_vertices(skel_graph)
-        + boost::num_edges(skel_graph);
     root_.members_.reserve(boost::num_vertices(skel_graph));
 
     typename boost::graph_traits<OneSkeletonGraph>::vertex_iterator v_it,
         v_it_end;
     for (std::tie(v_it, v_it_end) = boost::vertices(skel_graph); v_it != v_it_end;
-        ++v_it) {
+         ++v_it) {
       root_.members_.emplace_hint(
-          root_.members_.end(), *v_it,
-          Node(&root_, boost::get(vertex_filtration_t(), skel_graph, *v_it)));
+                                  root_.members_.end(), *v_it,
+                                  Node(&root_, boost::get(vertex_filtration_t(), skel_graph, *v_it)));
     }
     typename boost::graph_traits<OneSkeletonGraph>::edge_iterator e_it,
         e_it_end;
     for (std::tie(e_it, e_it_end) = boost::edges(skel_graph); e_it != e_it_end;
-        ++e_it) {
+         ++e_it) {
       auto u = source(*e_it, skel_graph);
       auto v = target(*e_it, skel_graph);
       if (u < v) {
@@ -802,9 +803,9 @@ class Simplex_tree {
         }
 
         sh->second.children()->members().emplace(
-            v,
-            Node(sh->second.children(),
-                 boost::get(edge_filtration_t(), skel_graph, *e_it)));
+                                                 v,
+                                                 Node(sh->second.children(),
+                                                      boost::get(edge_filtration_t(), skel_graph, *e_it)));
       }
     }
   }
@@ -823,7 +824,7 @@ class Simplex_tree {
   void expansion(int max_dim) {
     dimension_ = max_dim;
     for (Dictionary_it root_it = root_.members_.begin();
-        root_it != root_.members_.end(); ++root_it) {
+         root_it != root_.members_.end(); ++root_it) {
       if (has_children(root_it)) {
         siblings_expansion(root_it->second.children(), max_dim - 1);
       }
@@ -832,10 +833,9 @@ class Simplex_tree {
   }
 
  private:
-
   /** \brief Recursive expansion of the simplex tree.*/
   void siblings_expansion(Siblings * siblings,  // must contain elements
-      int k) {
+                          int k) {
     if (dimension_ > k) {
       dimension_ = k;
     }
@@ -857,10 +857,9 @@ class Simplex_tree {
                      root_sh->second.children()->members().end(),
                      s_h->second.filtration());
         if (inter.size() != 0) {
-          this->num_simplices_ += inter.size();
           Siblings * new_sib = new Siblings(siblings,  // oncles
-              s_h->first,  // parent
-              inter);      // boost::container::ordered_unique_range_t
+                                            s_h->first,  // parent
+                                            inter);  // boost::container::ordered_unique_range_t
           inter.clear();
           s_h->second.assign_children(new_sib);
           siblings_expansion(new_sib, k - 1);
@@ -920,7 +919,6 @@ class Simplex_tree {
   /** \brief Upper bound on the filtration values of the simplices.*/
   Filtration_value threshold_;
   /** \brief Total number of simplices in the complex, without the empty simplex.*/
-  unsigned int num_simplices_;
   /** \brief Set of simplex tree Nodes representing the vertices.*/
   Siblings root_;
   /** \brief Simplices ordered according to a filtration.*/
@@ -930,8 +928,8 @@ class Simplex_tree {
 };
 
 // Print a Simplex_tree in os.
-template<typename T1, typename T2, typename T3>
-std::ostream& operator<<(std::ostream & os, Simplex_tree<T1, T2, T3> & st) {
+template<typename...T>
+std::ostream& operator<<(std::ostream & os, Simplex_tree<T...> & st) {
   for (auto sh : st.filtration_simplex_range()) {
     os << st.dimension(sh) << " ";
     for (auto v : st.simplex_vertex_range(sh)) {
@@ -942,18 +940,15 @@ std::ostream& operator<<(std::ostream & os, Simplex_tree<T1, T2, T3> & st) {
   return os;
 }
 
-template<typename T1, typename T2, typename T3>
-std::istream& operator>>(std::istream & is, Simplex_tree<T1, T2, T3> & st) {
-  // assert(st.num_simplices() == 0);
-
-  std::vector<typename Simplex_tree<T1, T2, T3>::Vertex_handle> simplex;
-  typename Simplex_tree<T1, T2, T3>::Filtration_value fil;
-  typename Simplex_tree<T1, T2, T3>::Filtration_value max_fil = 0;
+template<typename...T>
+std::istream& operator>>(std::istream & is, Simplex_tree<T...> & st) {
+  typedef Simplex_tree<T...> ST;
+  std::vector<typename ST::Vertex_handle> simplex;
+  typename ST::Filtration_value fil;
+  typename ST::Filtration_value max_fil = 0;
   int max_dim = -1;
-  size_t num_simplices = 0;
   while (read_simplex(is, simplex, fil)) {
     // read all simplices in the file as a list of vertices
-    ++num_simplices;
     // Warning : simplex_size needs to be casted in int - Can be 0
     int dim = static_cast<int> (simplex.size() - 1);
     if (max_dim < dim) {
@@ -966,7 +961,6 @@ std::istream& operator>>(std::istream & is, Simplex_tree<T1, T2, T3> & st) {
     st.insert_simplex(simplex, fil);
     simplex.clear();
   }
-  st.set_num_simplices(num_simplices);
   st.set_dimension(max_dim);
   st.set_filtration(max_fil);
 

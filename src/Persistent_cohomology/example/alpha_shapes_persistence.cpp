@@ -263,7 +263,6 @@ int main (int argc, char * const argv[])
       std::cout << "This shall not happen" << std::endl;
   }
   simplex_tree.set_filtration(filtration_max);
-  simplex_tree.set_num_simplices(count_vertices + count_edges + count_facets + count_cells);
   simplex_tree.set_dimension(dim_max);
 
 #ifdef DEBUG_TRACES

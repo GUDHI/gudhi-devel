@@ -40,144 +40,68 @@
 typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kernel_d;
 // The triangulation uses the default instantiation of the TriangulationDataStructure template parameter
 
-BOOST_AUTO_TEST_CASE(S4_100_OFF_file) {
+BOOST_AUTO_TEST_CASE(ALPHA_DOC_OFF_file) {
   // ----------------------------------------------------------------------------
   //
   // Init of an alpha-complex from a OFF file
   //
   // ----------------------------------------------------------------------------
-  std::string off_file_name("S4_100.off");
-  double max_alpha_square_value = 1e10;
+  std::string off_file_name("../../../data/points/alphacomplexdoc.off");
+  double max_alpha_square_value = 60.0;
   std::cout << "========== OFF FILE NAME = " << off_file_name << " - alpha²=" <<
       max_alpha_square_value << "==========" << std::endl;
 
   Gudhi::alphacomplex::Alpha_complex<Kernel_d> alpha_complex_from_file(off_file_name, max_alpha_square_value);
 
-  const int DIMENSION = 4;
+  const int DIMENSION = 2;
   std::cout << "alpha_complex_from_file.dimension()=" << alpha_complex_from_file.dimension() << std::endl;
   BOOST_CHECK(alpha_complex_from_file.dimension() == DIMENSION);
 
-  const int NUMBER_OF_VERTICES = 100;
+  const int NUMBER_OF_VERTICES = 7;
   std::cout << "alpha_complex_from_file.num_vertices()=" << alpha_complex_from_file.num_vertices() << std::endl;
   BOOST_CHECK(alpha_complex_from_file.num_vertices() == NUMBER_OF_VERTICES);
 
-  const int NUMBER_OF_SIMPLICES = 6879;
+  const int NUMBER_OF_SIMPLICES = 25;
   std::cout << "alpha_complex_from_file.num_simplices()=" << alpha_complex_from_file.num_simplices() << std::endl;
-  // TODO(VR) : BOOST_CHECK(alpha_complex_from_file.num_simplices() == NUMBER_OF_SIMPLICES);
+  BOOST_CHECK(alpha_complex_from_file.num_simplices() == NUMBER_OF_SIMPLICES);
 
-  // + TODO(VR) : in wait of num_simplices fix in Simplex_tree [
-  int num_simplices = 0;
-  for (auto f_simplex : alpha_complex_from_file.filtration_simplex_range()) {
-    num_simplices++;
-  }
-  std::cout << "num_simplices=" << num_simplices << std::endl;
-  BOOST_CHECK(num_simplices == NUMBER_OF_SIMPLICES);
-  // - TODO(VR) : in wait of num_simplices fix in Simplex_tree ]
 }
 
-BOOST_AUTO_TEST_CASE(S4_100_OFF_file_filtered) {
+BOOST_AUTO_TEST_CASE(ALPHA_DOC_OFF_file_filtered) {
   // ----------------------------------------------------------------------------
   //
   // Init of an alpha-complex from a OFF file
   //
   // ----------------------------------------------------------------------------
-  std::string off_file_name("S4_100.off");
-  double max_alpha_square_value = 0.999;
+  std::string off_file_name("../../../data/points/alphacomplexdoc.off");
+  double max_alpha_square_value = 59.0;
   std::cout << "========== OFF FILE NAME = " << off_file_name << " - alpha²=" <<
       max_alpha_square_value << "==========" << std::endl;
 
   Gudhi::alphacomplex::Alpha_complex<Kernel_d> alpha_complex_from_file(off_file_name, max_alpha_square_value);
 
-  const int DIMENSION = 4;
+  const int DIMENSION = 2;
   std::cout << "alpha_complex_from_file.dimension()=" << alpha_complex_from_file.dimension() << std::endl;
   BOOST_CHECK(alpha_complex_from_file.dimension() == DIMENSION);
 
-  const int NUMBER_OF_VERTICES = 100;
+  const int NUMBER_OF_VERTICES = 7;
   std::cout << "alpha_complex_from_file.num_vertices()=" << alpha_complex_from_file.num_vertices() << std::endl;
   BOOST_CHECK(alpha_complex_from_file.num_vertices() == NUMBER_OF_VERTICES);
 
-  const int NUMBER_OF_SIMPLICES = 5966;  // Versus 6879, because of filtered alpha value
+  const int NUMBER_OF_SIMPLICES = 25;
   std::cout << "alpha_complex_from_file.num_simplices()=" << alpha_complex_from_file.num_simplices() << std::endl;
-  // TODO(VR) : BOOST_CHECK(alpha_complex_from_file.num_simplices() == NUMBER_OF_SIMPLICES);
+  BOOST_CHECK(alpha_complex_from_file.num_simplices() == NUMBER_OF_SIMPLICES);
 
-  // + TODO(VR) : in wait of num_simplices fix in Simplex_tree [
-  int num_simplices = 0;
+  int num_filtered_simplices = 0;
   for (auto f_simplex : alpha_complex_from_file.filtration_simplex_range()) {
-    num_simplices++;
+    if (alpha_complex_from_file.filtration(f_simplex) <= alpha_complex_from_file.filtration()) {
+      num_filtered_simplices++;
+    }
   }
-  std::cout << "num_simplices=" << num_simplices << std::endl;
-  BOOST_CHECK(num_simplices == NUMBER_OF_SIMPLICES);
-  // - TODO(VR) : in wait of num_simplices fix in Simplex_tree ]
-}
+  const int NUMBER_OF_FILTERED_SIMPLICES = 23;
+  std::cout << "num_filtered_simplices=" << num_filtered_simplices << std::endl;
+  BOOST_CHECK(num_filtered_simplices == NUMBER_OF_FILTERED_SIMPLICES);
 
-BOOST_AUTO_TEST_CASE(S8_10_OFF_file) {
-  // ----------------------------------------------------------------------------
-  //
-  // Init of an alpha-complex from a OFF file
-  //
-  // ----------------------------------------------------------------------------
-  std::string off_file_name("S8_10.off");
-  double max_alpha_square_value = 1e10;
-  std::cout << "========== OFF FILE NAME = " << off_file_name << " - alpha²=" <<
-      max_alpha_square_value << "==========" << std::endl;
-
-  Gudhi::alphacomplex::Alpha_complex<Kernel_d> alpha_complex_from_file(off_file_name, max_alpha_square_value);
-
-  const int DIMENSION = 8;
-  std::cout << "alpha_complex_from_file.dimension()=" << alpha_complex_from_file.dimension() << std::endl;
-  BOOST_CHECK(alpha_complex_from_file.dimension() == DIMENSION);
-
-  const int NUMBER_OF_VERTICES = 10;
-  std::cout << "alpha_complex_from_file.num_vertices()=" << alpha_complex_from_file.num_vertices() << std::endl;
-  BOOST_CHECK(alpha_complex_from_file.num_vertices() == NUMBER_OF_VERTICES);
-
-  const int NUMBER_OF_SIMPLICES = 1007;
-  std::cout << "alpha_complex_from_file.num_simplices()=" << alpha_complex_from_file.num_simplices() << std::endl;
-  // TODO(VR) : BOOST_CHECK(alpha_complex_from_file.num_simplices() == NUMBER_OF_SIMPLICES);
-
-  // + TODO(VR) : in wait of num_simplices fix in Simplex_tree [
-  int num_simplices = 0;
-  for (auto f_simplex : alpha_complex_from_file.filtration_simplex_range()) {
-    num_simplices++;
-  }
-  std::cout << "num_simplices=" << num_simplices << std::endl;
-  BOOST_CHECK(num_simplices == NUMBER_OF_SIMPLICES);
-  // - TODO(VR) : in wait of num_simplices fix in Simplex_tree ]
-}
-
-BOOST_AUTO_TEST_CASE(S8_10_OFF_file_filtered) {
-  // ----------------------------------------------------------------------------
-  //
-  // Init of an alpha-complex from a OFF file
-  //
-  // ----------------------------------------------------------------------------
-  std::string off_file_name("S8_10.off");
-  double max_alpha_square_value = 1.0;
-  std::cout << "========== OFF FILE NAME = " << off_file_name << " - alpha²=" <<
-      max_alpha_square_value << "==========" << std::endl;
-
-  Gudhi::alphacomplex::Alpha_complex<Kernel_d> alpha_complex_from_file(off_file_name, max_alpha_square_value);
-
-  const int DIMENSION = 8;
-  std::cout << "alpha_complex_from_file.dimension()=" << alpha_complex_from_file.dimension() << std::endl;
-  BOOST_CHECK(alpha_complex_from_file.dimension() == DIMENSION);
-
-  const int NUMBER_OF_VERTICES = 10;
-  std::cout << "alpha_complex_from_file.num_vertices()=" << alpha_complex_from_file.num_vertices() << std::endl;
-  BOOST_CHECK(alpha_complex_from_file.num_vertices() == NUMBER_OF_VERTICES);
-
-  const int NUMBER_OF_SIMPLICES = 1004;  // Versus 1007, because of filtered alpha value
-  std::cout << "alpha_complex_from_file.num_simplices()=" << alpha_complex_from_file.num_simplices() << std::endl;
-  // TODO(VR) : BOOST_CHECK(alpha_complex_from_file.num_simplices() == NUMBER_OF_SIMPLICES);
-
-  // + TODO(VR) : in wait of num_simplices fix in Simplex_tree [
-  int num_simplices = 0;
-  for (auto f_simplex : alpha_complex_from_file.filtration_simplex_range()) {
-    num_simplices++;
-  }
-  std::cout << "num_simplices=" << num_simplices << std::endl;
-  BOOST_CHECK(num_simplices == NUMBER_OF_SIMPLICES);
-  // - TODO(VR) : in wait of num_simplices fix in Simplex_tree ]
 }
 
 bool are_almost_the_same(float a, float b) {
@@ -222,10 +146,11 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_from_points) {
 
   std::cout << "========== Alpha_complex_from_points ==========" << std::endl;
 
+  // Another way to check num_simplices
   std::cout << "Iterator on alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
-  int num_simplices = 0;  // TODO(VR) : in wait of num_simplices fix in Simplex_tree
+  int num_simplices = 0;
   for (auto f_simplex : alpha_complex_from_points.filtration_simplex_range()) {
-    num_simplices++;  // TODO(VR) : in wait of num_simplices fix in Simplex_tree
+    num_simplices++;
     std::cout << "   ( ";
     for (auto vertex : alpha_complex_from_points.simplex_vertex_range(f_simplex)) {
       std::cout << vertex << " ";
@@ -233,13 +158,12 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_from_points) {
     std::cout << ") -> " << "[" << alpha_complex_from_points.filtration(f_simplex) << "] ";
     std::cout << std::endl;
   }
+  BOOST_CHECK(num_simplices == 15);
+  std::cout << "alpha_complex_from_points.num_simplices()=" << alpha_complex_from_points.num_simplices() << std::endl;
+  BOOST_CHECK(alpha_complex_from_points.num_simplices() == 15);
 
   std::cout << "alpha_complex_from_points.dimension()=" << alpha_complex_from_points.dimension() << std::endl;
   BOOST_CHECK(alpha_complex_from_points.dimension() == 4);
-  // TODO(VR) : std::cout << "alpha_complex_from_points.num_simplices()=" << alpha_complex_from_points.num_simplices()
-  // << std::endl;
-  // TODO(VR) : BOOST_CHECK(alpha_complex_from_points.num_simplices() == 15);
-  BOOST_CHECK(num_simplices == 15);  // TODO(VR) : in wait of num_simplices fix in Simplex_tree
   std::cout << "alpha_complex_from_points.num_vertices()=" << alpha_complex_from_points.num_vertices() << std::endl;
   BOOST_CHECK(alpha_complex_from_points.num_vertices() == 4);
 
@@ -263,6 +187,11 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_from_points) {
     }
   }
 
+  Point p0 = alpha_complex_from_points.get_point(0);
+  std::cout << "alpha_complex_from_points.get_point(0)=" << p0 << std::endl;
+  BOOST_CHECK(4 == p0.dimension());
+  BOOST_CHECK(is_point_in_list(points, p0));
+
   Point p1 = alpha_complex_from_points.get_point(1);
   std::cout << "alpha_complex_from_points.get_point(1)=" << p1 << std::endl;
   BOOST_CHECK(4 == p1.dimension());
@@ -278,12 +207,8 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_from_points) {
   BOOST_CHECK(4 == p3.dimension());
   BOOST_CHECK(is_point_in_list(points, p3));
 
-  Point p4 = alpha_complex_from_points.get_point(4);
-  std::cout << "alpha_complex_from_points.get_point(4)=" << p4 << std::endl;
-  BOOST_CHECK(4 == p4.dimension());
-  BOOST_CHECK(is_point_in_list(points, p4));
-
-  BOOST_CHECK_THROW (alpha_complex_from_points.get_point(5), std::out_of_range);
-  BOOST_CHECK_THROW (alpha_complex_from_points.get_point(0), std::out_of_range);
+  // Test to the limit
+  BOOST_CHECK_THROW (alpha_complex_from_points.get_point(4), std::out_of_range);
+  BOOST_CHECK_THROW (alpha_complex_from_points.get_point(-1), std::out_of_range);
   BOOST_CHECK_THROW (alpha_complex_from_points.get_point(1234), std::out_of_range);
 }

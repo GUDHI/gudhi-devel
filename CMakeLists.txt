@@ -23,7 +23,6 @@ set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME    OFF)
 
-find_package(Boost)
 find_package(GMP)
 if(GMP_FOUND)
 	find_package(GMPXX)
