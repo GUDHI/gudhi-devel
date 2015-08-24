@@ -523,6 +523,107 @@ BOOST_AUTO_TEST_CASE(NSimplexAndSubfaces_tree_insertion) {
     std::cout << std::endl;
   }
 
+  std::cout << "********************************************************************" << std::endl;
+  // TEST COFACE ALGORITHM
+  st.set_dimension(3);
+  std::cout << "COFACE ALGORITHM" << std::endl;
+  std::vector<Vertex_handle> v;
+  std::vector<Vertex_handle> simplex;
+  std::vector<typeST::Simplex_handle> result;
+  v.push_back(3);
+  std::cout << "First test : " << std::endl;
+  std::cout << "Star of (3):" << std::endl;
+
+  simplex.push_back(3);
+  result.push_back(st.find(simplex));
+  simplex.clear();
+
+  simplex.push_back(3);
+  simplex.push_back(0);
+  result.push_back(st.find(simplex));
+  simplex.clear();
+
+  simplex.push_back(4);
+  simplex.push_back(3);
+  result.push_back(st.find(simplex));
+  simplex.clear();
+
+  simplex.push_back(5);
+  simplex.push_back(4);
+  simplex.push_back(3);
+  result.push_back(st.find(simplex));
+  simplex.clear();
+
+  simplex.push_back(5);
+  simplex.push_back(3);
+  result.push_back(st.find(simplex));
+  simplex.clear();
+
+  test_cofaces(st, v, 0, result);
+  v.clear();
+  result.clear();
+
+  v.push_back(1);
+  v.push_back(7);
+  std::cout << "Second test : " << std::endl;
+  std::cout << "Star of (1,7): " << std::endl;
+
+  simplex.push_back(7);
+  simplex.push_back(1);
+  result.push_back(st.find(simplex));
+  simplex.clear();
+
+  simplex.push_back(7);
+  simplex.push_back(6);
+  simplex.push_back(1);
+  simplex.push_back(0);
+  result.push_back(st.find(simplex));
+  simplex.clear();
+
+  simplex.push_back(7);
+  simplex.push_back(1);
+  simplex.push_back(0);
+  result.push_back(st.find(simplex));
+  simplex.clear();
+
+  simplex.push_back(7);
+  simplex.push_back(6);
+  simplex.push_back(1);
+  result.push_back(st.find(simplex));
+  simplex.clear();
+
+  test_cofaces(st, v, 0, result);
+  result.clear();
+
+  std::cout << "Third test : " << std::endl;
+  std::cout << "2-dimension Cofaces of simplex(1,7) : " << std::endl;
+
+  simplex.push_back(7);
+  simplex.push_back(1);
+  simplex.push_back(0);
+  result.push_back(st.find(simplex));
+  simplex.clear();
+
+  simplex.push_back(7);
+  simplex.push_back(6);
+  simplex.push_back(1);
+  result.push_back(st.find(simplex));
+  simplex.clear();
+
+  test_cofaces(st, v, 1, result);
+  result.clear();
+
+  std::cout << "Cofaces with a codimension too high (codimension + vetices > tree.dimension) :" << std::endl;
+  test_cofaces(st, v, 5, result);
+  //    std::cout << "Cofaces with an empty codimension" << std::endl;
+  //    test_cofaces(st, v, -1, result);
+  //    std::cout << "Cofaces in an empty simplex tree" << std::endl;
+  //   typeST empty_tree;
+  //    test_cofaces(empty_tree, v, 1, result);
+  //    std::cout << "Cofaces of an empty simplex" << std::endl;
+  //    v.clear();
+  //    test_cofaces(st, v, 1, result);
+
 	std::cout << "********************************************************************" << std::endl;
 	// TEST Copy constructor / Move 
 	std::cout << "Printing st" << std::endl;
