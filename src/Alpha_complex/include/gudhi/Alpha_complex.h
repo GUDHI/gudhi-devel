@@ -166,7 +166,7 @@ class Alpha_complex : public Simplex_tree<> {
    * @return The founded point.
    * @warning Exception std::out_of_range is thrown in case vertex is not in the map vertex_handle_to_iterator_.
    */
-  Point_d get_point(Vertex_handle vertex) {
+  Point_d get_point(Vertex_handle vertex) const {
     auto found_it = vertex_handle_to_iterator_.find(vertex);
     if (found_it != vertex_handle_to_iterator_.end()) {
       return found_it->second->point();
