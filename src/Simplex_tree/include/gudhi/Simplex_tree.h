@@ -299,10 +299,10 @@ class Simplex_tree {
   {
 	for (auto sh = sib->members().begin(), sh_copy = sib_copy->members().begin(); sh != sib->members().end(); ++sh, ++sh_copy) {
 		if (has_children(sh_copy)) {
-			boost::container::flat_map<Vertex_handle, Node> copy(sh_copy->second.children()->members());
-			Siblings * newsib =  new Siblings (sib, sh_copy->first, copy);
-//			for (auto it = sh_copy->second.children()->members().begin(); it != sh_copy->second.children()->members().end(); ++it)
-//				newsib->members_.emplace(it->first, Node(sib, it->second.filtration()));
+//			boost::container::flat_map<Vertex_handle, Node> copy(sh_copy->second.children()->members());
+			Siblings * newsib =  new Siblings (sib, sh_copy->first);
+			for (auto it = sh_copy->second.children()->members().begin(); it != sh_copy->second.children()->members().end(); ++it)
+				newsib->members_.emplace(it->first, Node(sib, it->second.filtration()));
 			rec_copy(newsib, sh_copy->second.children());
 			sh->second.assign_children(newsib);
 		}
