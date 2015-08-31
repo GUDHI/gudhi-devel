@@ -515,33 +515,62 @@ class Simplex_tree {
    * @param[in]  filtration the filtration value assigned to the new N-simplex.
    */
   template<class RandomAccessVertexRange>
-  std::pair<Simplex_handle, bool> insert_simplex_and_subfaces(RandomAccessVertexRange& Nsimplex,
+  std::pair<Simplex_handle, bool> insert_simplex_and_subfaces(const RandomAccessVertexRange& Nsimplex,
                                                               Filtration_value filtration = 0.0) {
-    std::pair<Simplex_handle, bool> returned;
-    if (Nsimplex.size() > 1) {
-      for (unsigned int NIndex = 0; NIndex < Nsimplex.size(); NIndex++) {
-        // insert N (N-1)-Simplex
-        RandomAccessVertexRange NsimplexMinusOne;
-        for (unsigned int NListIter = 0; NListIter < Nsimplex.size() - 1; NListIter++) {
-          // (N-1)-Simplex creation
-          NsimplexMinusOne.push_back(Nsimplex[(NIndex + NListIter) % Nsimplex.size()]);
-        }
-        // (N-1)-Simplex recursive call
-        returned = insert_simplex_and_subfaces(NsimplexMinusOne, filtration);
+    // Simplex copy
+    std::vector<Vertex_handle> the_simplex(Nsimplex.begin(), Nsimplex.end());
+    // must be sorted in increasing order
+    std::sort(the_simplex.begin(), the_simplex.end());
+    std::vector<std::vector<Vertex_handle>> to_be_inserted;
+    std::vector<std::vector<Vertex_handle>> to_be_propagated;
+    return rec_insert_simplex_and_subfaces(the_simplex, to_be_inserted, to_be_propagated, filtration);
+  }
+  
+ private:
+  std::pair<Simplex_handle, bool> rec_insert_simplex_and_subfaces(std::vector<Vertex_handle>& the_simplex,
+                                                             std::vector<std::vector<Vertex_handle>>& to_be_inserted,
+                                                             std::vector<std::vector<Vertex_handle>>& to_be_propagated,
+                                                             Filtration_value filtration = 0.0) {
+    std::pair<Simplex_handle, bool> insert_result;
+    if (the_simplex.size() > 1) {
+      // Get and remove last vertex
+      Vertex_handle last_vertex= the_simplex.back();
+      the_simplex.pop_back();
+      // Recursive call after last vertex removal
+      insert_result = rec_insert_simplex_and_subfaces(the_simplex, to_be_inserted, to_be_propagated, filtration);
+      
+      // Concatenation of to_be_inserted and to_be_propagated
+      to_be_inserted.insert(to_be_inserted.end(), to_be_propagated.begin(), to_be_propagated.end());
+      to_be_propagated = to_be_inserted;
+      
+      // to_be_inserted treatment
+      for (auto& simplex_tbi : to_be_inserted) {
+        simplex_tbi.push_back(last_vertex);
       }
-      // N-Simplex insert
-      returned = insert_simplex(Nsimplex, filtration);
-      if (returned.second == true) {
+      std::vector<Vertex_handle> last_simplex(1, last_vertex);
+      to_be_inserted.push_back(last_simplex);
+
+      for (auto& simplex_tbi : to_be_inserted) {
+        insert_result = insert_simplex(simplex_tbi, filtration);
       }
-    } else if (Nsimplex.size() == 1) {
-      // 1-Simplex insert - End of recursivity
-      returned = insert_simplex(Nsimplex, filtration);
-      if (returned.second == true) {
+
+      
+    } else if (the_simplex.size() == 1) {
+      // When reaching the end of recursivity, vector of simplices shall be empty and filled on back recursive
+      if ((to_be_inserted.size() != 0) || (to_be_propagated.size() != 0)){
+        std::cerr << "Simplex_tree::rec_insert_simplex_and_subfaces - Error vector not empty" << std::endl;
+        exit(-1);
       }
+      std::vector<Vertex_handle> first_simplex(1, the_simplex.back());
+      to_be_inserted.push_back(first_simplex);
+      
+      insert_result = insert_simplex(first_simplex, filtration);
     } else {
-      // Nothing to insert - empty vector
+        std::cerr << "Simplex_tree::rec_insert_simplex_and_subfaces - Recursivity error" << std::endl;
+        exit(-1);
     }
-    return returned;
+    
+    return insert_result;
   }
 
  public:

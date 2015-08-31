@@ -219,7 +219,7 @@ class Alpha_complex : public Simplex_tree<> {
       }
     }
     // --------------------------------------------------------------------------------------------
-
+    
     // --------------------------------------------------------------------------------------------
     // Simplex_tree construction from loop on triangulation finite full cells list
     for (auto cit = triangulation_->finite_full_cells_begin(); cit != triangulation_->finite_full_cells_end(); ++cit) {
@@ -242,10 +242,6 @@ class Alpha_complex : public Simplex_tree<> {
       // Insert each simplex and its subfaces in the simplex tree - filtration is NaN
       Simplex_result insert_result = insert_simplex_and_subfaces(vertexVector,
                                                                  std::numeric_limits<double>::quiet_NaN());
-      if (!insert_result.second) {
-        std::cerr << "Alpha_complex::init insert_simplex_and_subfaces failed" << std::endl;
-        exit(-1);  // ----->>
-      }
     }
     // --------------------------------------------------------------------------------------------
 
@@ -324,8 +320,10 @@ class Alpha_complex : public Simplex_tree<> {
             pointVector.push_back(get_point(vertex));
           }
           // Retrieve the Sigma point that is not part of Tau - parameter for is_gabriel function
+          Point_d point_for_gabriel;
           for (auto vertex : simplex_vertex_range(f_simplex)) {
-            if (std::find(pointVector.begin(), pointVector.end(), get_point(vertex)) == pointVector.end()) {
+            point_for_gabriel = get_point(vertex);
+            if (std::find(pointVector.begin(), pointVector.end(), point_for_gabriel) == pointVector.end()) {
               // vertex is not found in Tau
               vertexForGabriel = vertex;
               // No need to continue loop
@@ -334,7 +332,7 @@ class Alpha_complex : public Simplex_tree<> {
           }
           // is_gabriel function initialization
           Is_Gabriel is_gabriel = kernel_.side_of_bounded_sphere_d_object();
-          bool is_gab = is_gabriel(pointVector.begin(), pointVector.end(), get_point(vertexForGabriel))
+          bool is_gab = is_gabriel(pointVector.begin(), pointVector.end(), point_for_gabriel)
               != CGAL::ON_BOUNDED_SIDE;
 #ifdef DEBUG_TRACES
           std::cout << " | Tau is_gabriel(Sigma)=" << is_gab << " - vertexForGabriel=" << vertexForGabriel << std::endl;
