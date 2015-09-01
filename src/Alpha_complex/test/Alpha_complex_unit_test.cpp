@@ -20,10 +20,10 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define BOOST_TEST_MODULE alpha_complex
-#include <boost/test/included/unit_test.hpp>
-#include <boost/system/error_code.hpp>
-#include <boost/chrono/thread_clock.hpp>
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE "alpha_complex"
+#include <boost/test/unit_test.hpp>
+
 #include <CGAL/Delaunay_triangulation.h>
 #include <CGAL/Epick_d.h>
 

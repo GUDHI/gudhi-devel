@@ -20,8 +20,6 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define BOOST_TEST_MODULE DelaunayTriangulationOffFileReadWrite test
-
 // to construct a Delaunay_triangulation from a OFF file
 #include "gudhi/Delaunay_triangulation_off_io.h"
 
@@ -32,9 +30,9 @@
 #include <stdlib.h>
 #include <string>
 
-#include <boost/test/included/unit_test.hpp>
-#include <boost/system/error_code.hpp>
-//#include <boost/chrono/thread_clock.hpp>
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE "delaunay_triangulation_off_read_write"
+#include <boost/test/unit_test.hpp>
 
 // Use dynamic_dimension_tag for the user to be able to set dimension
 typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > K;
