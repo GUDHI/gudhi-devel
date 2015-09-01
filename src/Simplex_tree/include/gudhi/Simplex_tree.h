@@ -540,7 +540,7 @@ class Simplex_tree {
       insert_result = rec_insert_simplex_and_subfaces(the_simplex, to_be_inserted, to_be_propagated, filtration);
       
       // Concatenation of to_be_inserted and to_be_propagated
-      to_be_inserted.insert(to_be_inserted.end(), to_be_propagated.begin(), to_be_propagated.end());
+      to_be_inserted.insert(to_be_inserted.begin(), to_be_propagated.begin(), to_be_propagated.end());
       to_be_propagated = to_be_inserted;
       
       // to_be_inserted treatment
@@ -548,8 +548,14 @@ class Simplex_tree {
         simplex_tbi.push_back(last_vertex);
       }
       std::vector<Vertex_handle> last_simplex(1, last_vertex);
-      to_be_inserted.push_back(last_simplex);
+      to_be_inserted.insert(to_be_inserted.begin(), last_simplex);
+      // i.e. (0,1,2) =>
+      // [to_be_inserted | to_be_propagated] = [(1) (0,1) | (0)]
+      // [to_be_inserted | to_be_propagated] = [(2) (0,2) (1,2) (0,1,2) | (0) (1) (0,1)]
+      // N.B. : it is important the last inserted to be the highest in dimension
+      // in order to return the "last" insert_simplex result
 
+      // insert all to_be_inserted
       for (auto& simplex_tbi : to_be_inserted) {
         insert_result = insert_simplex(simplex_tbi, filtration);
       }
@@ -562,6 +568,7 @@ class Simplex_tree {
         exit(-1);
       }
       std::vector<Vertex_handle> first_simplex(1, the_simplex.back());
+      // i.e. (0,1,2) => [to_be_inserted | to_be_propagated] = [(0) | ]
       to_be_inserted.push_back(first_simplex);
       
       insert_result = insert_simplex(first_simplex, filtration);
