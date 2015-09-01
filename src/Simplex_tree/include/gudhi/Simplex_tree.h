@@ -574,6 +574,12 @@ class Simplex_tree {
   }
 
  public:
+  /** \brief Assign a value 'key' to the key of the simplex
+   * represented by the Simplex_handle 'sh'. */
+  void assign_key(Simplex_handle sh, Simplex_key key) {
+    sh->second.assign_key(key);
+  }
+
   /** Returns the two Simplex_handle corresponding to the endpoints of
    * and edge. sh must point to a 1-dimensional simplex. This is an
    * optimized version of the boundary computation. */
