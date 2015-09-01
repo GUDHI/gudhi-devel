@@ -35,7 +35,7 @@ namespace alphacomplex {
  * 
  * Alpha_complex is a Simplex_tree constructed from each finite cell of a Delaunay Triangulation.
  * 
- * The filtration value of each simplex is computed from the alpha value of the simplex if it is Gabriel or
+ * The filtration value of each simplex is computed from the alpha square value of the simplex if it is Gabriel or
  * from the alpha value of the simplex coface that makes the simplex not Gabriel.
  * 
  * Please refer to \cite AlphaShapesDefinition for a more complete alpha complex definition.
@@ -54,7 +54,7 @@ namespace alphacomplex {
  * 
  * When launching:
  * 
- * \code $> ./alphaoffreader ../../data/points/alphacomplexdoc.off
+ * \code $> ./alphaoffreader ../../data/points/alphacomplexdoc.off 60.0
  * \endcode
  *
  * the program output is:
@@ -77,7 +77,7 @@ namespace alphacomplex {
  * \For{i : dimension $\rightarrow$ 1}
  *   \ForAll{$\sigma$ of dimension i}
  *     \If {filtration($\sigma$) is NaN}
- *       \State filtration($\sigma$) = $\alpha(\sigma)$
+ *       \State filtration($\sigma$) = $\alpha^2(\sigma)$
  *     \EndIf
  *     \ForAll{$\tau$ face of $\sigma$} \Comment{propagate alpha filtration value}
  *       \If {filtration($\tau$) is not NaN} 
@@ -105,8 +105,8 @@ namespace alphacomplex {
  * 
  * \section alpha-shape Alpha shape
  * 
- * In the example above, the alpha shape of \f$\alpha_{74} < \alpha < \alpha_{73}\f$ is the alpha complex where the 
- * \f$\alpha_{74} <\f$ filtration value \f$< \alpha_{73}\f$ as described in \cite AlphaShapesIntroduction
+ * In the example above, the alpha shape of \f$\alpha^2_{74} < \alpha^2 < \alpha^2_{73}\f$ is the alpha complex where the 
+ * \f$\alpha^2_{74} <\f$ filtration value \f$< \alpha^2_{73}\f$ as described in \cite AlphaShapesIntroduction
  * 
  * \image html "alpha_complex_doc_alpha_shape.png" "Alpha shape example"
  * \copyright GNU General Public License v3.                         
