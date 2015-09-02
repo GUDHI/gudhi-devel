@@ -80,8 +80,8 @@ struct Simplex_tree_options_full_featured {
   typedef int Vertex_handle;
   typedef double Filtration_value;
   typedef int Simplex_key;
-  static constexpr bool store_key = true;
-  static constexpr bool store_filtration = true;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
 };
 
 /**
