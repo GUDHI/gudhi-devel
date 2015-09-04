@@ -26,13 +26,14 @@
 #include <gudhi/Simplex_tree/Simplex_tree_node_explicit_storage.h>
 #include <gudhi/Simplex_tree/Simplex_tree_siblings.h>
 #include <gudhi/Simplex_tree/Simplex_tree_iterators.h>
-#include <gudhi/reader_utils.h>
 #include <gudhi/Simplex_tree/indexing_tag.h>
+
+#include <gudhi/reader_utils.h>
+#include <gudhi/graph_simplicial_complex.h>
 
 #include <boost/container/flat_map.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/graph/adjacency_list.hpp>
-#include <gudhi/graph_simplicial_complex.h>
 
 #include <algorithm>
 #include <utility>
@@ -234,8 +235,8 @@ class Simplex_tree {
   Filtration_simplex_range filtration_simplex_range(Indexing_tag) {
     if (filtration_vect_.empty()) {
       initialize_filtration();
-    } return Filtration_simplex_range(filtration_vect_.begin(),
-                                    filtration_vect_.end());
+    }
+    return Filtration_simplex_range(filtration_vect_.begin(), filtration_vect_.end());
   }
 
   Filtration_simplex_range filtration_simplex_range() {
@@ -281,45 +282,48 @@ class Simplex_tree {
   Simplex_tree()
       : null_vertex_(-1),
       threshold_(0),
-      root_(NULL, null_vertex_),
+      root_(nullptr, null_vertex_),
       filtration_vect_(),
       dimension_(-1) { }
 
-  /** \brief Copy; copy the whole tree structure. */
-  Simplex_tree(Simplex_tree& copy) : 	null_vertex_(copy.null_vertex_),
-  										threshold_(copy.threshold_),
-										root_(NULL, -1, copy.root_.members()),
-										filtration_vect_(copy.filtration_vect_),
-										dimension_(copy.dimension_) {
-		rec_copy(&root_, &copy.root_);
-	}
-
-   /** rec_copy: depth first search, inserts simplices when reaching a leaf.*/
-  void rec_copy(Siblings *sib, Siblings *sib_copy)
-  {
-	for (auto sh = sib->members().begin(), sh_copy = sib_copy->members().begin(); sh != sib->members().end(); ++sh, ++sh_copy) {
-		if (has_children(sh_copy)) {
-//			boost::container::flat_map<Vertex_handle, Node> copy(sh_copy->second.children()->members());
-			Siblings * newsib =  new Siblings (sib, sh_copy->first);
-			for (auto it = sh_copy->second.children()->members().begin(); it != sh_copy->second.children()->members().end(); ++it)
-				newsib->members_.emplace(it->first, Node(sib, it->second.filtration()));
-			rec_copy(newsib, sh_copy->second.children());
-			sh->second.assign_children(newsib);
-		}
-	}
+  /** \brief User-defined copy constructor reproduces the whole tree structure. */
+  Simplex_tree(const Simplex_tree& simplex_source)
+      : null_vertex_(simplex_source.null_vertex_),
+      threshold_(simplex_source.threshold_),
+      filtration_vect_(simplex_source.filtration_vect_),
+      dimension_(simplex_source.dimension_) {
+    auto root_source = simplex_source.root_;
+    auto memb_source = root_source.members();
+    root_ = Siblings(nullptr, null_vertex_, memb_source);
+    rec_copy(&root_, &root_source);
   }
 
+  /** \brief depth first search, inserts simplices when reaching a leaf. */
+  void rec_copy(Siblings *sib, Siblings *sib_copy) {
+    for (auto sh = sib->members().begin(), sh_copy = sib_copy->members().begin();
+         sh != sib->members().end(); ++sh, ++sh_copy) {
+      if (has_children(sh_copy)) {
+        Siblings * newsib = new Siblings(sib, sh_copy->first);
+        newsib->members_.reserve(sh_copy->second.children()->members().size());
+        for (auto it = sh_copy->second.children()->members().begin();
+             it != sh_copy->second.children()->members().end(); ++it)
+          newsib->members_.emplace_hint(newsib->members_.end(), it->first, Node(sib, it->second.filtration()));
+        rec_copy(newsib, sh_copy->second.children());
+        sh->second.assign_children(newsib);
+      }
+    }
+  }
 
-
-
-  /** \brief Move; moves the whole tree structure. */
-  Simplex_tree(Simplex_tree&& old) : 	null_vertex_(std::move(old.null_vertex_)),
-  										threshold_(std::move(old.threshold_)),
-										root_(std::move(old.root_)), filtration_vect_(std::move(old.filtration_vect_)),
-										dimension_(std::move(old.dimension_)) {
-		old.dimension_ = -1;
-		old.threshold_ = 0;
-	}
+  /** \brief User-defined move constructor moves the whole tree structure. */
+  Simplex_tree(Simplex_tree && old)
+      : null_vertex_(std::move(old.null_vertex_)),
+      threshold_(std::move(old.threshold_)),
+      root_(std::move(old.root_)), filtration_vect_(std::move(old.filtration_vect_)),
+      dimension_(std::move(old.dimension_)) {
+    old.dimension_ = -1;
+    old.threshold_ = 0;
+    old.root_ = Siblings(nullptr, null_vertex_);
+  }
 
   /** \brief Destructor; deallocates the whole tree structure. */
   ~Simplex_tree() {
@@ -341,71 +345,36 @@ class Simplex_tree {
     delete sib;
   }
 
- public: 
-  /** \brief Prints the simplex_tree hierarchically. 
-   * Since it prints the vertices recursively, one can watch its tree shape.
-   */
-  void print_tree()
-  {
-	  for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh)
-	  {
-		  std::cout << sh->first << " ";
-		  if (has_children(sh))
-		  {
-			  std::cout << "(";
-			  rec_print(sh->second.children());
-			  std::cout << ")";
-		  }
-		  std::cout << std::endl;
-	  }
-  }
-
-
-  /** \brief Recursively prints the simplex_tree, using depth first search. */
- private:
-  void rec_print(Siblings * sib)
-  {
-	  for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh)
-	  {
-		  std::cout << " " << sh->first << " ";
-		  if (has_children(sh))
-		  {
-			  std::cout << "(";
-			  rec_print(sh->second.children());
-			  std::cout << ")";
-		  }
-	  }
-  }
-
  public:
+  /** \brief Checks if two simplex trees are equal. */
+  bool operator==(Simplex_tree st2) {
+    return (this->null_vertex_ == st2.null_vertex_
+            && this->threshold_ == st2.threshold_
+            && this->dimension_ == st2.dimension_
+            && rec_equal(&root_, &st2.root_));
+  }
 
-  /** \brief Checks whether or not two simplex trees are equal. */
-  bool operator ==(Simplex_tree st2)
-  {
-	  return (this->null_vertex_ == st2.null_vertex_ 
-	  		&& this->threshold_ == st2.threshold_ 
-			&& this->dimension_ == st2.dimension_ 
-			&& rec_equal(&root_, &st2.root_));
+  /** \brief Checks if two simplex trees are different. */
+  bool operator!=(Simplex_tree st2) {
+    return (!(*this == st2));
   }
 
   /** rec_equal: Checks recursively whether or not two simplex trees are equal, using depth first search. */
  private:
-  bool rec_equal(Siblings * s1, Siblings * s2)
-  {
-	  if (s1->members().size() != s2->members().size())
-		  return false;
-	  for (auto sh1 = s1->members().begin(), sh2 = s2->members().begin(); sh1 != s1->members().end(); ++sh1, ++sh2)
-	  {
-		  if (sh1->first != sh2->first || sh1->second.filtration() != sh2->second.filtration())
-			  return false;
-		  if (has_children(sh1))
-			  return rec_equal(sh1->second.children(), sh2->second.children());
-		  else if (has_children(sh2))
-		  	return false;
-		  else
-			  return true;
-	  }
-	  return true;
+  bool rec_equal(Siblings * s1, Siblings * s2) {
+    if (s1->members().size() != s2->members().size())
+      return false;
+    for (auto sh1 = s1->members().begin(), sh2 = s2->members().begin(); sh1 != s1->members().end(); ++sh1, ++sh2) {
+      if (sh1->first != sh2->first || sh1->second.filtration() != sh2->second.filtration())
+        return false;
+      if (has_children(sh1))
+        return rec_equal(sh1->second.children(), sh2->second.children());
+      else if (has_children(sh2))
+        return false;
+      else
+        return true;
+    }
+    return true;
   }
 
  public:
@@ -444,7 +413,7 @@ class Simplex_tree {
    *
    * One can call filtration(null_simplex()). */
   static Simplex_handle null_simplex() {
-    return Dictionary_it(NULL);
+    return Dictionary_it(nullptr);
   }
 
   /** \brief Returns a key different for all keys associated to the
@@ -491,7 +460,7 @@ class Simplex_tree {
   int dimension(Simplex_handle sh) {
     Siblings * curr_sib = self_siblings(sh);
     int dim = 0;
-    while (curr_sib != NULL) {
+    while (curr_sib != nullptr) {
       ++dim;
       curr_sib = curr_sib->oncles();
     }
@@ -503,32 +472,36 @@ class Simplex_tree {
     return dimension_;
   }
 
-
   /** \brief Returns true iff the node in the simplex tree pointed by
    * sh has children.*/
   bool has_children(Simplex_handle sh) const {
     return (sh->second.children()->parent() == sh->first);
   }
 
-  /** \brief Given a range of Vertex_handles, returns the Simplex_handle
+    /** \brief Given a range of Vertex_handles, returns the Simplex_handle
    * of the simplex in the simplicial complex containing the corresponding
    * vertices. Return null_simplex() if the simplex is not in the complex.
    *
    * The type InputVertexRange must be a range of <CODE>Vertex_handle</CODE>
    * on which we can call std::begin() function
    */
-template<class InputVertexRange>
+  template<class InputVertexRange>
   Simplex_handle find(const InputVertexRange & s) {
-  	std::vector<Vertex_handle> copy(std::begin(s), std::end(s));
-  	std::sort(std::begin(copy), std::end(copy));
-	return find_simplex(copy);
+    auto first = std::begin(s);
+    auto last = std::end(s);
+
+    if (first == last)
+      return null_simplex();  // ----->>
+
+    // Copy before sorting
+    std::vector<Vertex_handle> copy(first, last);
+    std::sort(std::begin(copy), std::end(copy));
+    return find_simplex(copy);
   }
 
  private:
   /** Find function, with a sorted range of vertices. */
   Simplex_handle find_simplex(std::vector<Vertex_handle> & simplex) {
-    if (simplex.begin() == simplex.end())
-	  return null_simplex();
     Siblings * tmp_sib = &root_;
     Dictionary_it tmp_dit;
     Vertex_handle last = simplex[simplex.size() - 1];
@@ -553,22 +526,19 @@ template<class InputVertexRange>
   //{ return root_.members_.find(v); }
 
  private:
-  /** Recursively insert a simplex */
-  template <typename RandomAccessVertexRange>
-  std::pair<Simplex_handle, bool> insert_simplex_rec(RandomAccessVertexRange & simplex,
-                                                 Filtration_value filtration) {
-    if (simplex.empty()) {
-      return std::pair<Simplex_handle, bool>(null_simplex(), true);
-    }
+  /** \brief Recursively insert a simplex represented by a vector of vertex.
+   \warning the vector must be sorted by increasing vertex handle order */
+  std::pair<Simplex_handle, bool> insert_vertex_vector(const std::vector<Vertex_handle>& simplex,
+                                                     Filtration_value filtration) {
     Siblings * curr_sib = &root_;
     std::pair<Simplex_handle, bool> res_insert;
-    typename RandomAccessVertexRange::iterator vi;
-    for (vi = simplex.begin(); vi != simplex.end() - 1; ++vi) {
+    auto vi = simplex.begin();
+    for (; vi != simplex.end() - 1; ++vi) {
       res_insert = curr_sib->members_.emplace(*vi, Node(curr_sib, filtration));
       if (!(has_children(res_insert.first))) {
         res_insert.first->second.assign_children(new Siblings(curr_sib, *vi));
       }
-        curr_sib = res_insert.first->second.children();
+      curr_sib = res_insert.first->second.children();
     }
     res_insert = curr_sib->members_.emplace(*vi, Node(curr_sib, filtration));
     if (!res_insert.second) {
@@ -584,7 +554,8 @@ template<class InputVertexRange>
     // otherwise the insertion has succeeded
     return res_insert;
   }
-public:
+
+ public:
   /** \brief Insert a simplex, represented by a range of Vertex_handles, in the simplicial complex.
    *
    * @param[in]  simplex    range of Vertex_handles, representing the vertices of the new simplex
@@ -594,7 +565,7 @@ public:
    * to the new simplex.
    * If the insertion fails (the simplex is already there), the bool is set to false. If the insertion
    * fails and the simplex already in the complex has a filtration value strictly bigger than 'filtration',
-   * we assign this simplex with the new value 'filtration', and set the Simplex_handle filed of the
+   * we assign this simplex with the new value 'filtration', and set the Simplex_handle field of the
    * output pair to the Simplex_handle of the simplex. Otherwise, we set the Simplex_handle part to
    * null_simplex.
    *
@@ -608,58 +579,105 @@ public:
    *
    * The type RandomAccessVertexRange must be a range for which .begin() and
    * .end() return random access iterators, with 'value_type' Vertex_handle. */
-template<class RandomAccessVertexRange>
-std::pair<Simplex_handle, bool> insert_simplex(const RandomAccessVertexRange & simplex,
-		Filtration_value filtration) {
-	std::vector<Vertex_handle> copy(std::begin(simplex), std::end(simplex));;
-  	std::sort(std::begin(copy), std::end(copy));
-	return insert_simplex_rec(copy, filtration);
-}
+  template<class RandomAccessVertexRange>
+  std::pair<Simplex_handle, bool> insert_simplex(const RandomAccessVertexRange & simplex,
+                                                 Filtration_value filtration) {
+    auto first = std::begin(simplex);
+    auto last = std::end(simplex);
 
-  /** \brief Insert a N-simplex and all his subfaces, from a N-simplex represented by a range of
+    if (first == last)
+      return std::pair<Simplex_handle, bool>(null_simplex(), true);  // ----->>
+
+    // Copy before sorting
+    std::vector<Vertex_handle> copy(first, last);
+    std::sort(std::begin(copy), std::end(copy));
+    return insert_vertex_vector(copy, filtration);
+  }
+
+    /** \brief Insert a N-simplex and all his subfaces, from a N-simplex represented by a range of
    * Vertex_handles, in the simplicial complex.
    *
    * @param[in]  Nsimplex   range of Vertex_handles, representing the vertices of the new N-simplex
    * @param[in]  filtration the filtration value assigned to the new N-simplex.
+   * The return type is a pair. If the new simplex is inserted successfully (i.e. it was not in the
+   * simplicial complex yet) the bool is set to true and the Simplex_handle is the handle assigned
+   * to the new simplex.
+   * If the insertion fails (the simplex is already there), the bool is set to false. If the insertion
+   * fails and the simplex already in the complex has a filtration value strictly bigger than 'filtration',
+   * we assign this simplex with the new value 'filtration', and set the Simplex_handle field of the
+   * output pair to the Simplex_handle of the simplex. Otherwise, we set the Simplex_handle part to
+   * null_simplex.
    */
   template<class InputVertexRange>
-  void insert_simplex_and_subfaces(const InputVertexRange& Nsimplex,
+  std::pair<Simplex_handle, bool> insert_simplex_and_subfaces(const InputVertexRange& Nsimplex,
                                    Filtration_value filtration = 0.0) {
-	std::vector<Vertex_handle> copy(std::begin(Nsimplex), std::end(Nsimplex));;
-  	std::sort(std::begin(copy), std::end(copy));
-	insert_simplex_and_subfaces_rec(copy, filtration);
-	}
+    auto first = std::begin(Nsimplex);
+    auto last = std::end(Nsimplex);
+
+    if (first == last)
+      return std::pair<Simplex_handle, bool>(null_simplex(), true);  // ----->>
+
+    // Copy before sorting
+    std::vector<Vertex_handle> copy(first, last);
+    std::sort(std::begin(copy), std::end(copy));
+
+    std::vector<std::vector<Vertex_handle>> to_be_inserted;
+    std::vector<std::vector<Vertex_handle>> to_be_propagated;
+    return rec_insert_simplex_and_subfaces(copy, to_be_inserted, to_be_propagated, filtration);
+  }
 
  private:
+  std::pair<Simplex_handle, bool> rec_insert_simplex_and_subfaces(std::vector<Vertex_handle>& the_simplex,
+                                                             std::vector<std::vector<Vertex_handle>>& to_be_inserted,
+                                                             std::vector<std::vector<Vertex_handle>>& to_be_propagated,
+                                                             Filtration_value filtration = 0.0) {
+    std::pair<Simplex_handle, bool> insert_result;
+    if (the_simplex.size() > 1) {
+      // Get and remove last vertex
+      Vertex_handle last_vertex = the_simplex.back();
+      the_simplex.pop_back();
+      // Recursive call after last vertex removal
+      insert_result = rec_insert_simplex_and_subfaces(the_simplex, to_be_inserted, to_be_propagated, filtration);
 
-  /** Recursively insert simplex and all of its subfaces */
-  template <typename RandomAccessVertexRange>
-  void insert_simplex_and_subfaces_rec(RandomAccessVertexRange & Nsimplex,
-                                         Filtration_value filtration = 0.0) {
+      // Concatenation of to_be_inserted and to_be_propagated
+      to_be_inserted.insert(to_be_inserted.begin(), to_be_propagated.begin(), to_be_propagated.end());
+      to_be_propagated = to_be_inserted;
 
-    if (Nsimplex.size() > 1) {
-      for (unsigned int NIndex = 0; NIndex < Nsimplex.size(); NIndex++) {
-        // insert N (N-1)-Simplex
-        RandomAccessVertexRange NsimplexMinusOne;
-        for (unsigned int NListIter = 0; NListIter < Nsimplex.size() - 1; NListIter++) {
-          // (N-1)-Simplex creation
-          NsimplexMinusOne.push_back(Nsimplex[(NIndex + NListIter) % Nsimplex.size()]);
-        }
-        // (N-1)-Simplex recursive call
-        insert_simplex_and_subfaces(NsimplexMinusOne, filtration);
+      // to_be_inserted treatment
+      for (auto& simplex_tbi : to_be_inserted) {
+        simplex_tbi.push_back(last_vertex);
       }
-      // N-Simplex insert
-      std::pair<Simplex_handle, bool> returned = insert_simplex_rec(Nsimplex, filtration);
-    } else if (Nsimplex.size() == 1) {
-      // 1-Simplex insert - End of recursivity
-      std::pair<Simplex_handle, bool> returned = insert_simplex_rec(Nsimplex, filtration);
+      std::vector<Vertex_handle> last_simplex(1, last_vertex);
+      to_be_inserted.insert(to_be_inserted.begin(), last_simplex);
+      // i.e. (0,1,2) =>
+      // [to_be_inserted | to_be_propagated] = [(1) (0,1) | (0)]
+      // [to_be_inserted | to_be_propagated] = [(2) (0,2) (1,2) (0,1,2) | (0) (1) (0,1)]
+      // N.B. : it is important the last inserted to be the highest in dimension
+      // in order to return the "last" insert_simplex result
+
+      // insert all to_be_inserted
+      for (auto& simplex_tbi : to_be_inserted) {
+        insert_result = insert_vertex_vector(simplex_tbi, filtration);
+      }
+    } else if (the_simplex.size() == 1) {
+      // When reaching the end of recursivity, vector of simplices shall be empty and filled on back recursive
+      if ((to_be_inserted.size() != 0) || (to_be_propagated.size() != 0)) {
+        std::cerr << "Simplex_tree::rec_insert_simplex_and_subfaces - Error vector not empty" << std::endl;
+        exit(-1);
+      }
+      std::vector<Vertex_handle> first_simplex(1, the_simplex.back());
+      // i.e. (0,1,2) => [to_be_inserted | to_be_propagated] = [(0) | ]
+      to_be_inserted.push_back(first_simplex);
+
+      insert_result = insert_vertex_vector(first_simplex, filtration);
     } else {
-      // Nothing to insert - empty vector
+        std::cerr << "Simplex_tree::rec_insert_simplex_and_subfaces - Recursivity error" << std::endl;
+        exit(-1);
     }
+    return insert_result;
   }
 
  public:
-
   /** \brief Assign a value 'key' to the key of the simplex
    * represented by the Simplex_handle 'sh'. */
   void assign_key(Simplex_handle sh, Simplex_key key) {
@@ -682,17 +700,6 @@ std::pair<Simplex_handle, bool> insert_simplex(const RandomAccessVertexRange & s
     else
       return sh->second.children();
   }
-
-  // void display_simplex(Simplex_handle sh)
-  // {
-  //   std::cout << "   " << "[" << filtration(sh) << "] ";
-  //   for( auto vertex : simplex_vertex_range(sh) )
-  //     { std::cout << vertex << " "; }
-  // }
-
-  // void print(Simplex_handle sh, std::ostream& os = std::cout)
-  // {  for(auto v : simplex_vertex_range(sh)) {os << v << " ";}
-  //    os << std::endl; }
 
  public:
   /** Returns a pointer to the root nodes of the simplex tree. */
@@ -736,81 +743,6 @@ std::pair<Simplex_handle, bool> insert_simplex(const RandomAccessVertexRange & s
     std::stable_sort(filtration_vect_.begin(), filtration_vect_.end(),
                      is_before_in_filtration(this));
   }
-
-/** \brief Contracts two vertices : the contracted vertex is erased from the three, and the remaining vertex receives all the links of the contracted one.
-	\param remaining The value of the vertex within the other is contracted
-	\param deleted The value of the vertex to be contracted
-*/
-	void edge_contraction(Vertex_handle remaining, Vertex_handle deleted)
-	{
-		std::vector<Vertex_handle> accessRemaining, accessDeleted;
-		accessRemaining.push_back(remaining);
-		accessDeleted.push_back(deleted);
-		Simplex_handle shr = find(accessRemaining), shd = find(accessDeleted);
-		if (has_children(shd))
-		{
-			Siblings * sibDeleted, * sibRemaining; // We need the siblings
-			sibDeleted = shd->second.children();
-			sibRemaining = shr->second.children();
-			rec_insert(sibDeleted, sibRemaining, shd->first);
-		}
-		rec_delete(&root_, shd->first);
-	}
-	
-
-/** \brief recursively insert the members of a Sibling into another, any time the replacedVertex appears into the target Sibling
-	\param sibInserted The sibling to be inserted
-	\param sibTarget The target sibling on which the other sibling is copied
-	\param replacedVertex The replacedVertex (Vertex_handle) needed to insert the sibling
-*/
-	void rec_insert(Siblings * sibInserted, Siblings * sibTarget, Vertex_handle replacedVertex)
-	{
-		for (auto sh = sibTarget->members().begin(); sh != sibTarget->members().end(); ++sh)
-		{
-			if (has_children(sh))
-				rec_insert(sibInserted, sh->second.children(), replacedVertex);
-			if (sh->first == replacedVertex)
-				insert_members(sibTarget, sibInserted);
-		}
-	}
-
-/** \brief Copy a Sibling into another, which is possibly not empty
-	\param sibInserted The sibling to be copied
-	\param sibTarget The sibling on which we wan't to copy the other sibling
-*/
-	void insert_members(Siblings * sibTarget, Siblings * sibInserted)
-	{
-		for (auto sh = sibInserted->members().begin(); sh != sibInserted->members().end(); ++sh)
-		{
-			std::pair<Vertex_handle, Node> member(sh->first, Node(sibTarget, sh->second.filtration()));
-			if (has_children(sh))
-			{
-				std::vector<std::pair<Vertex_handle, Node>> v(sh->second.children()->members().begin(), sh->second.children()->members().end());
-				Siblings * newsib =  new Siblings (sibTarget, sh->first);
-				for (auto it = v.begin(); it != v.end(); ++it)
-					newsib->members_.emplace(it->first, Node(sibTarget, it->second.filtration()));
-				insert_members(newsib, sh->second.children());
-				member.second.assign_children(newsib);
-
-			}
-			sibTarget->members_.emplace(member);
-		}
-	}
-
-/** \brief Erase every occurencies of a vertex in a Sibling
-	\param sib The sibling on which we wan't to erase the elements
-	\param deletedVertex The value of the members we wan't to erase
-*/
-	void rec_delete(Siblings * sib, Vertex_handle deletedVertex)
-	{
-		for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh)
-		{
-			if (has_children(sh))
-				rec_delete(sh->second.children(), deletedVertex);
-			if (sh->first == deletedVertex)
-				sib->members_.erase(sh);
-		}
-	}
 
  private:
   /** Recursive search of cofaces
@@ -888,13 +820,13 @@ std::pair<Simplex_handle, bool> insert_simplex(const RandomAccessVertexRange & s
     assert(codimension >= 0);
     Simplex_vertex_range rg = simplex_vertex_range(simplex);
     std::vector<Vertex_handle> copy(rg.begin(), rg.end());
-    if (codimension + static_cast<int>(copy.size()) > dimension_ + 1 ||
-        (codimension == 0 && static_cast<int>(copy.size()) > dimension_))  // n+codimension greater than dimension_
+    if (codimension + static_cast<int> (copy.size()) > dimension_ + 1 ||
+        (codimension == 0 && static_cast<int> (copy.size()) > dimension_))  // n+codimension greater than dimension_
       return cofaces;
     // must be sorted in decreasing order
     assert(std::is_sorted(copy.begin(), copy.end(), std::greater<Vertex_handle>()));
     bool star = codimension == 0;
-    rec_coface(copy, &root_, 1, cofaces, star, codimension + static_cast<int>(copy.size()));
+    rec_coface(copy, &root_, 1, cofaces, star, codimension + static_cast<int> (copy.size()));
     return cofaces;
   }
 
@@ -1080,7 +1012,7 @@ std::pair<Simplex_handle, bool> insert_simplex(const RandomAccessVertexRange & s
     while (true) {
       if (begin1->first == begin2->first) {
         Filtration_value filt = (std::max)({begin1->second.filtration(), begin2->second.filtration(), filtration_});
-        intersection.emplace_back(begin1->first, Node(NULL, filt));
+        intersection.emplace_back(begin1->first, Node(nullptr, filt));
         if (++begin1 == end1 || ++begin2 == end2)
           return;  // ----->>
       } else if (begin1->first < begin2->first) {
