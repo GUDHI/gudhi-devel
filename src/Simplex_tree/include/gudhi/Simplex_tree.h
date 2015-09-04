@@ -501,7 +501,7 @@ class Simplex_tree {
 
  private:
   /** Find function, with a sorted range of vertices. */
-  Simplex_handle find_simplex(std::vector<Vertex_handle> & simplex) {
+  Simplex_handle find_simplex(const std::vector<Vertex_handle> & simplex) {
     Siblings * tmp_sib = &root_;
     Dictionary_it tmp_dit;
     Vertex_handle last = simplex[simplex.size() - 1];
