@@ -30,8 +30,8 @@ using namespace Gudhi;
 
 struct MyOptions : Simplex_tree_options_full_featured {
   // Not doing persistence, so we don't need those
-  static constexpr bool store_key = false;
-  static constexpr bool store_filtration = false;
+  static const bool store_key = false;
+  static const bool store_filtration = false;
   // I have few vertices
   typedef short Vertex_handle;
 };
