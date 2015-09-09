@@ -503,7 +503,7 @@ class Simplex_tree {
   Simplex_handle find_simplex(const std::vector<Vertex_handle> & simplex) {
     Siblings * tmp_sib = &root_;
     Dictionary_it tmp_dit;
-    Vertex_handle last = simplex[simplex.size() - 1];
+    Vertex_handle last = simplex.back();
     for (auto v : simplex) {
       tmp_dit = tmp_sib->members_.find(v);
       if (tmp_dit == tmp_sib->members_.end()) {
@@ -576,10 +576,10 @@ class Simplex_tree {
    * The filtration value
    * assigned to the new simplex must preserve the monotonicity of the filtration.
    *
-   * The type RandomAccessVertexRange must be a range for which .begin() and
-   * .end() return random access iterators, with 'value_type' Vertex_handle. */
-  template<class RandomAccessVertexRange>
-  std::pair<Simplex_handle, bool> insert_simplex(const RandomAccessVertexRange & simplex,
+   * The type InputVertexRange must be a range for which .begin() and
+   * .end() return input iterators, with 'value_type' Vertex_handle. */
+  template<class InputVertexRange>
+  std::pair<Simplex_handle, bool> insert_simplex(const InputVertexRange & simplex,
                                                  Filtration_value filtration) {
     auto first = std::begin(simplex);
     auto last = std::end(simplex);
