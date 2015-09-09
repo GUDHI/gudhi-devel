@@ -290,7 +290,7 @@ class Simplex_tree {
   Simplex_tree(const Simplex_tree& simplex_source)
       : null_vertex_(simplex_source.null_vertex_),
       threshold_(simplex_source.threshold_),
-      filtration_vect_(simplex_source.filtration_vect_),
+      filtration_vect_(),
       dimension_(simplex_source.dimension_) {
     auto root_source = simplex_source.root_;
     auto memb_source = root_source.members();
@@ -299,16 +299,15 @@ class Simplex_tree {
   }
 
   /** \brief depth first search, inserts simplices when reaching a leaf. */
-  void rec_copy(Siblings *sib, Siblings *sib_copy) {
-    for (auto sh = sib->members().begin(), sh_copy = sib_copy->members().begin();
-         sh != sib->members().end(); ++sh, ++sh_copy) {
-      if (has_children(sh_copy)) {
-        Siblings * newsib = new Siblings(sib, sh_copy->first);
-        newsib->members_.reserve(sh_copy->second.children()->members().size());
-        for (auto it = sh_copy->second.children()->members().begin();
-             it != sh_copy->second.children()->members().end(); ++it)
-          newsib->members_.emplace_hint(newsib->members_.end(), it->first, Node(sib, it->second.filtration()));
-        rec_copy(newsib, sh_copy->second.children());
+  void rec_copy(Siblings *sib, Siblings *sib_source) {
+    for (auto sh = sib->members().begin(), sh_source = sib_source->members().begin();
+         sh != sib->members().end(); ++sh, ++sh_source) {
+      if (has_children(sh_source)) {
+        Siblings * newsib = new Siblings(sib, sh_source->first);
+        newsib->members_.reserve(sh_source->second.children()->members().size());
+        for (auto & child : sh_source->second.children()->members())
+          newsib->members_.emplace_hint(newsib->members_.end(), child.first, Node(sib, child.second.filtration()));
+        rec_copy(newsib, sh_source->second.children());
         sh->second.assign_children(newsib);
       }
     }
@@ -318,7 +317,8 @@ class Simplex_tree {
   Simplex_tree(Simplex_tree && old)
       : null_vertex_(std::move(old.null_vertex_)),
       threshold_(std::move(old.threshold_)),
-      root_(std::move(old.root_)), filtration_vect_(std::move(old.filtration_vect_)),
+      root_(std::move(old.root_)),
+      filtration_vect_(std::move(old.filtration_vect_)),
       dimension_(std::move(old.dimension_)) {
     old.dimension_ = -1;
     old.threshold_ = 0;
@@ -366,10 +366,10 @@ class Simplex_tree {
          (sh1 != s1->members().end() && sh2 != s2->members().end()); ++sh1, ++sh2) {
       if (sh1->first != sh2->first || sh1->second.filtration() != sh2->second.filtration())
         return false;
-      if (((!has_children(sh1)) && (has_children(sh2))) || ((has_children(sh1)) && (!has_children(sh2))))
+      if (has_children(sh1) != has_children(sh2))
         return false;
       // Recursivity on children only if both have children
-      else if (has_children(sh1) && has_children(sh2))
+      else if (has_children(sh1))
         if (!rec_equal(sh1->second.children(), sh2->second.children()))
           return false;
     }
