@@ -657,7 +657,7 @@ BOOST_AUTO_TEST_CASE(copy_move_on_simplex_tree) {
   //std::cout << st_copy << std::endl;
 
   // Check the data are the same
-  BOOST_CHECK(st == st_copy);
+  BOOST_CHECK(st.is_equal(st_copy));
   // Check there is a new simplex tree reference
   BOOST_CHECK(&st != &st_copy);
 
@@ -667,14 +667,14 @@ BOOST_AUTO_TEST_CASE(copy_move_on_simplex_tree) {
   //std::cout << st_move << std::endl;
 
   // Check the data are the same
-  BOOST_CHECK(st_move == st_copy);
+  BOOST_CHECK(st_move.is_equal(st_copy));
   // Check there is a new simplex tree reference
   BOOST_CHECK(&st_move != &st_copy);
   BOOST_CHECK(&st_move != &st);
   
   typeST st_empty;
   // Check st has been emptied by the move
-  BOOST_CHECK(st == st_empty);
+  BOOST_CHECK(st.is_equal(st_empty));
   BOOST_CHECK(st.filtration() == 0);
   BOOST_CHECK(st.dimension() == -1);
   BOOST_CHECK(st.num_simplices() == 0);

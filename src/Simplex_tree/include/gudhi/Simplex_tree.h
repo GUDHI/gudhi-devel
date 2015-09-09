@@ -347,32 +347,31 @@ class Simplex_tree {
 
  public:
   /** \brief Checks if two simplex trees are equal. */
-  bool operator==(Simplex_tree st2) {
-    return (this->null_vertex_ == st2.null_vertex_
-            && this->threshold_ == st2.threshold_
-            && this->dimension_ == st2.dimension_
-            && rec_equal(&root_, &st2.root_));
+  // TODO: constify is required to make an operator==
+  bool is_equal(Simplex_tree& st2)
+  {
+    if ((null_vertex_ != st2.null_vertex_) ||
+        (threshold_ != st2.threshold_) ||
+        (dimension_ != st2.dimension_))
+      return false;
+    return rec_equal(&root_, &st2.root_);
   }
-
-  /** \brief Checks if two simplex trees are different. */
-  bool operator!=(Simplex_tree st2) {
-    return (!(*this == st2));
-  }
-
+  
   /** rec_equal: Checks recursively whether or not two simplex trees are equal, using depth first search. */
  private:
-  bool rec_equal(Siblings * s1, Siblings * s2) {
+  bool rec_equal(Siblings* s1, Siblings* s2) {
     if (s1->members().size() != s2->members().size())
       return false;
-    for (auto sh1 = s1->members().begin(), sh2 = s2->members().begin(); sh1 != s1->members().end(); ++sh1, ++sh2) {
+    for (auto sh1 = s1->members().begin(), sh2 = s2->members().begin();
+         (sh1 != s1->members().end() && sh2 != s2->members().end()); ++sh1, ++sh2) {
       if (sh1->first != sh2->first || sh1->second.filtration() != sh2->second.filtration())
         return false;
-      if (has_children(sh1))
-        return rec_equal(sh1->second.children(), sh2->second.children());
-      else if (has_children(sh2))
+      if (((!has_children(sh1)) && (has_children(sh2))) || ((has_children(sh1)) && (!has_children(sh2))))
         return false;
-      else
-        return true;
+      // Recursivity on children only if both have children
+      else if (has_children(sh1) && has_children(sh2))
+        if (!rec_equal(sh1->second.children(), sh2->second.children()))
+          return false;
     }
     return true;
   }
