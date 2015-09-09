@@ -117,7 +117,7 @@ class Simplex_tree {
   /* Type of node in the simplex tree. */
   typedef Simplex_tree_node_explicit_storage<Simplex_tree> Node;
   /* Type of dictionary Vertex_handle -> Node for traversing the simplex tree. */
-  // FIXME: this wastes space when Vertex_handle is 32 bits and Node is aligned on 64 bits. It would be better to use a flat_set (with our own comparator) where we can control the layout of the struct (put Vertex_handle and Simplex_key next to each other).
+  // Note: this wastes space when Vertex_handle is 32 bits and Node is aligned on 64 bits. It would be better to use a flat_set (with our own comparator) where we can control the layout of the struct (put Vertex_handle and Simplex_key next to each other).
   typedef typename boost::container::flat_map<Vertex_handle, Node> Dictionary;
 
   /* \brief Set of nodes sharing a same parent in the simplex tree. */
