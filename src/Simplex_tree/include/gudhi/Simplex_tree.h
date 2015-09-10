@@ -347,18 +347,21 @@ class Simplex_tree {
 
  public:
   /** \brief Checks if two simplex trees are equal. */
-  // TODO: constify is required to make an operator==
-  bool is_equal(Simplex_tree& st2)
-  {
+  bool operator==(Simplex_tree& st2) {
     if ((null_vertex_ != st2.null_vertex_) ||
         (threshold_ != st2.threshold_) ||
         (dimension_ != st2.dimension_))
       return false;
     return rec_equal(&root_, &st2.root_);
   }
-  
-  /** rec_equal: Checks recursively whether or not two simplex trees are equal, using depth first search. */
+
+  /** \brief Checks if two simplex trees are different. */
+  bool operator!=(Simplex_tree& st2) {
+    return (!(*this == st2));
+  }
+
  private:
+  /** rec_equal: Checks recursively whether or not two simplex trees are equal, using depth first search. */
   bool rec_equal(Siblings* s1, Siblings* s2) {
     if (s1->members().size() != s2->members().size())
       return false;
