@@ -528,7 +528,7 @@ class Simplex_tree {
   //{ return root_.members_.find(v); }
 
  private:
-  /** \brief Recursively insert a simplex represented by a vector of vertex.
+  /** \brief Inserts a simplex represented by a vector of vertex.
    \warning the vector must be sorted by increasing vertex handle order */
   std::pair<Simplex_handle, bool> insert_vertex_vector(const std::vector<Vertex_handle>& simplex,
                                                      Filtration_value filtration) {
