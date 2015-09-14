@@ -74,6 +74,16 @@ namespace Gudhi {
  * @{
  */
 
+/// Model of SimplexTreeOptions.
+struct Simplex_tree_options_full_featured {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef int Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+};
+
 /**
  * \brief Simplex Tree data structure for representing simplicial complexes.
  *
@@ -85,34 +95,62 @@ namespace Gudhi {
  * \implements FilteredComplex
  *
  */
-template<typename IndexingTag = linear_indexing_tag,
-typename FiltrationValue = double, typename SimplexKey = int  // must be a signed integer type
-, typename VertexHandle = int  // must be a signed integer type, int convertible to it
->
+
+template<typename SimplexTreeOptions = Simplex_tree_options_full_featured>
 class Simplex_tree {
  public:
-  typedef IndexingTag Indexing_tag;
+  typedef SimplexTreeOptions Options;
+  typedef typename Options::Indexing_tag Indexing_tag;
   /** \brief Type for the value of the filtration function.
    *
    * Must be comparable with <. */
-  typedef FiltrationValue Filtration_value;
+  typedef typename Options::Filtration_value Filtration_value;
   /** \brief Key associated to each simplex.
    *
    * Must be a signed integer type. */
-  typedef SimplexKey Simplex_key;
+  typedef typename Options::Simplex_key Simplex_key;
   /** \brief Type for the vertex handle.
    *
    * Must be a signed integer type. It admits a total order <. */
-  typedef VertexHandle Vertex_handle;
+  typedef typename Options::Vertex_handle Vertex_handle;
 
   /* Type of node in the simplex tree. */
   typedef Simplex_tree_node_explicit_storage<Simplex_tree> Node;
   /* Type of dictionary Vertex_handle -> Node for traversing the simplex tree. */
+  // Note: this wastes space when Vertex_handle is 32 bits and Node is aligned on 64 bits. It would be better to use a flat_set (with our own comparator) where we can control the layout of the struct (put Vertex_handle and Simplex_key next to each other).
   typedef typename boost::container::flat_map<Vertex_handle, Node> Dictionary;
 
   /* \brief Set of nodes sharing a same parent in the simplex tree. */
   /* \brief Set of nodes sharing a same parent in the simplex tree. */
   typedef Simplex_tree_siblings<Simplex_tree, Dictionary> Siblings;
+
+  struct Key_simplex_base_real {
+    Key_simplex_base_real() : key_(-1) {}
+    void assign_key(Simplex_key k) { key_ = k; }
+    Simplex_key key() const { return key_; }
+    private:
+    Simplex_key key_;
+  };
+  struct Key_simplex_base_dummy {
+    Key_simplex_base_dummy() {}
+    void assign_key(Simplex_key) { }
+    Simplex_key key() const { assert(false); return -1; }
+  };
+  typedef typename std::conditional<Options::store_key, Key_simplex_base_real, Key_simplex_base_dummy>::type Key_simplex_base;
+
+  struct Filtration_simplex_base_real {
+    Filtration_simplex_base_real() : filt_(0) {}
+    void assign_filtration(Filtration_value f) { filt_ = f; }
+    Filtration_value filtration() const { return filt_; }
+    private:
+    Filtration_value filt_;
+  };
+  struct Filtration_simplex_base_dummy {
+    Filtration_simplex_base_dummy() {}
+    void assign_filtration(Filtration_value f) { assert(f == 0); }
+    Filtration_value filtration() const { return 0; }
+  };
+  typedef typename std::conditional<Options::store_filtration, Filtration_simplex_base_real, Filtration_simplex_base_dummy>::type Filtration_simplex_base;
 
  public:
   /** \brief Handle type to a simplex contained in the simplicial complex represented
@@ -228,7 +266,7 @@ class Simplex_tree {
    * order is used.
    *
    * The filtration must be valid. If the filtration has not been initialized yet, the
-   * method initializes it (i.e. order the simplices). */
+   * method initializes it (i.e. order the simplices). If the complex has changed since the last time the filtration was initialized, please call `initialize_filtration()` to recompute it. */
   Filtration_simplex_range filtration_simplex_range(Indexing_tag) {
     if (filtration_vect_.empty()) {
       initialize_filtration();
@@ -307,21 +345,27 @@ class Simplex_tree {
  public:
   /** \brief Returns the key associated to a simplex.
    *
-   * The filtration must be initialized. */
+   * The filtration must be initialized.
+   * \pre SimplexTreeOptions::store_key
+   */
   static Simplex_key key(Simplex_handle sh) {
     return sh->second.key();
   }
 
   /** \brief Returns the simplex associated to a key.
    *
-   * The filtration must be initialized. */
+   * The filtration must be initialized.
+   * \pre SimplexTreeOptions::store_key
+   */
   Simplex_handle simplex(Simplex_key key) const {
     return filtration_vect_[key];
   }
 
   /** \brief Returns the filtration value of a simplex.
    *
-   * Called on the null_simplex, returns INFINITY. */
+   * Called on the null_simplex, returns INFINITY.
+   * If SimplexTreeOptions::store_filtration is false, returns 0.
+   */
   static Filtration_value filtration(Simplex_handle sh) {
     if (sh != null_simplex()) {
       return sh->second.filtration();
@@ -469,7 +513,7 @@ class Simplex_tree {
    * .end() return random access iterators, with 'value_type' Vertex_handle. */
   template<class RandomAccessVertexRange>
   std::pair<Simplex_handle, bool> insert_simplex(RandomAccessVertexRange & simplex,
-                                                 Filtration_value filtration) {
+                                                 Filtration_value filtration = 0) {
     if (simplex.empty()) {
       return std::pair<Simplex_handle, bool>(null_simplex(), true);
     }
