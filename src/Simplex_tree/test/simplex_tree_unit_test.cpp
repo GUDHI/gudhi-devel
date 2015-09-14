@@ -7,10 +7,10 @@
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "simplex_tree"
-#include <boost/test/unit_test.hpp>
+#include <boost/test/included/unit_test.hpp>
 
-#include "gudhi/graph_simplicial_complex.h"
-#include "gudhi/reader_utils.h"
+//  ^
+// /!\ Nothing else from Simplex_tree shall be included to test includes are well defined.
 #include "gudhi/Simplex_tree.h"
 
 using namespace Gudhi;
@@ -59,7 +59,6 @@ void test_iterators_on_empty_simplex_tree(typeST& tst) {
 BOOST_AUTO_TEST_CASE(simplex_tree_when_empty) {
   const Filtration_value DEFAULT_FILTRATION_VALUE = 0;
 
-  // TEST OF DEFAULT CONSTRUCTOR
   std::cout << "********************************************************************" << std::endl;
   std::cout << "TEST OF DEFAULT CONSTRUCTOR" << std::endl;
   typeST st;
@@ -126,6 +125,7 @@ void test_simplex_tree_contains(typeST& simplexTree, typeSimplex& simplex, int p
   BOOST_CHECK(AreAlmostTheSame(simplexTree.filtration(*f_simplex), simplex.second));
 
   int simplexIndex = simplex.first.size() - 1;
+  std::sort(simplex.first.begin(), simplex.first.end()); // if the simplex wasn't sorted, the next test could fail
   for (auto vertex : simplexTree.simplex_vertex_range(*f_simplex)) {
     std::cout << "test_simplex_tree_contains - vertex=" << vertex << "||" << simplex.first.at(simplexIndex) << std::endl;
     BOOST_CHECK(vertex == simplex.first.at(simplexIndex));
@@ -157,33 +157,17 @@ void set_and_test_simplex_tree_dim_fil(typeST& simplexTree, int vectorSize, cons
     std::cout << "   set_and_test_simplex_tree_dim_fil - max_fil=" << max_fil
         << std::endl;
   }
-  
+
   BOOST_CHECK(simplexTree.dimension() == dim_max);
   BOOST_CHECK(AreAlmostTheSame(simplexTree.filtration(), max_fil));
 
   // Another way to count simplices:
-  long long int num_simp = 0;
+  size_t num_simp = 0;
   for (auto f_simplex : simplexTree.complex_simplex_range()) {
     num_simp++;
   }
-  
-  BOOST_CHECK(simplexTree.num_simplices() == num_simp);
-}
 
-void test_cofaces(typeST& st, std::vector<Vertex_handle> v, int dim, std::vector<typeST::Simplex_handle> res) {
-  typeST::Cofaces_simplex_range cofaces;
-  if (dim == 0)
-    cofaces = st.star_simplex_range(st.find(v));
-  else
-    cofaces = st.cofaces_simplex_range(st.find(v), dim);
-  for (auto simplex = cofaces.begin(); simplex != cofaces.end(); ++simplex) {
-    typeST::Simplex_vertex_range rg = st.simplex_vertex_range(*simplex);
-    for (auto vertex = rg.begin(); vertex != rg.end(); ++vertex) {
-      std::cout << "(" << *vertex << ")";
-    }
-    std::cout << std::endl;
-    BOOST_CHECK(std::find(res.begin(), res.end(), *simplex) != res.end());
-  }
+  BOOST_CHECK(simplexTree.num_simplices() == num_simp);
 }
 
 BOOST_AUTO_TEST_CASE(simplex_tree_insertion) {
@@ -199,7 +183,7 @@ BOOST_AUTO_TEST_CASE(simplex_tree_insertion) {
 
   // ++ FIRST
   std::cout << "   - INSERT 0" << std::endl;
-  typeVectorVertex firstSimplexVector { 0 };
+  typeVectorVertex firstSimplexVector{0};
   BOOST_CHECK(firstSimplexVector.size() == 1);
   typeSimplex firstSimplex = std::make_pair(firstSimplexVector, Filtration_value(FIRST_FILTRATION_VALUE));
   typePairSimplexBool returnValue = st.insert_simplex(firstSimplex.first, firstSimplex.second);
@@ -210,7 +194,7 @@ BOOST_AUTO_TEST_CASE(simplex_tree_insertion) {
 
   // ++ SECOND
   std::cout << "   - INSERT 1" << std::endl;
-  typeVectorVertex secondSimplexVector { 1 };
+  typeVectorVertex secondSimplexVector{1};
   BOOST_CHECK(secondSimplexVector.size() == 1);
   typeSimplex secondSimplex = std::make_pair(secondSimplexVector, Filtration_value(FIRST_FILTRATION_VALUE));
   returnValue = st.insert_simplex(secondSimplex.first, secondSimplex.second);
@@ -221,7 +205,7 @@ BOOST_AUTO_TEST_CASE(simplex_tree_insertion) {
 
   // ++ THIRD
   std::cout << "   - INSERT (0,1)" << std::endl;
-  typeVectorVertex thirdSimplexVector { 0, 1 };
+  typeVectorVertex thirdSimplexVector{0, 1};
   BOOST_CHECK(thirdSimplexVector.size() == 2);
   typeSimplex thirdSimplex = std::make_pair(thirdSimplexVector, Filtration_value(SECOND_FILTRATION_VALUE));
   returnValue = st.insert_simplex(thirdSimplex.first, thirdSimplex.second);
@@ -232,7 +216,7 @@ BOOST_AUTO_TEST_CASE(simplex_tree_insertion) {
 
   // ++ FOURTH
   std::cout << "   - INSERT 2" << std::endl;
-  typeVectorVertex fourthSimplexVector { 2 };
+  typeVectorVertex fourthSimplexVector{2};
   BOOST_CHECK(fourthSimplexVector.size() == 1);
   typeSimplex fourthSimplex = std::make_pair(fourthSimplexVector, Filtration_value(FIRST_FILTRATION_VALUE));
   returnValue = st.insert_simplex(fourthSimplex.first, fourthSimplex.second);
@@ -243,7 +227,7 @@ BOOST_AUTO_TEST_CASE(simplex_tree_insertion) {
 
   // ++ FIFTH
   std::cout << "   - INSERT (2,0)" << std::endl;
-  typeVectorVertex fifthSimplexVector { 2, 0 };
+  typeVectorVertex fifthSimplexVector{2, 0};
   BOOST_CHECK(fifthSimplexVector.size() == 2);
   typeSimplex fifthSimplex = std::make_pair(fifthSimplexVector, Filtration_value(SECOND_FILTRATION_VALUE));
   returnValue = st.insert_simplex(fifthSimplex.first, fifthSimplex.second);
@@ -254,7 +238,7 @@ BOOST_AUTO_TEST_CASE(simplex_tree_insertion) {
 
   // ++ SIXTH
   std::cout << "   - INSERT (2,1)" << std::endl;
-  typeVectorVertex sixthSimplexVector { 2, 1 };
+  typeVectorVertex sixthSimplexVector{2, 1};
   BOOST_CHECK(sixthSimplexVector.size() == 2);
   typeSimplex sixthSimplex = std::make_pair(sixthSimplexVector, Filtration_value(SECOND_FILTRATION_VALUE));
   returnValue = st.insert_simplex(sixthSimplex.first, sixthSimplex.second);
@@ -265,7 +249,7 @@ BOOST_AUTO_TEST_CASE(simplex_tree_insertion) {
 
   // ++ SEVENTH
   std::cout << "   - INSERT (2,1,0)" << std::endl;
-  typeVectorVertex seventhSimplexVector { 2, 1, 0 };
+  typeVectorVertex seventhSimplexVector{2, 1, 0};
   BOOST_CHECK(seventhSimplexVector.size() == 3);
   typeSimplex seventhSimplex = std::make_pair(seventhSimplexVector, Filtration_value(THIRD_FILTRATION_VALUE));
   returnValue = st.insert_simplex(seventhSimplex.first, seventhSimplex.second);
@@ -276,7 +260,7 @@ BOOST_AUTO_TEST_CASE(simplex_tree_insertion) {
 
   // ++ EIGHTH
   std::cout << "   - INSERT 3" << std::endl;
-  typeVectorVertex eighthSimplexVector { 3 };
+  typeVectorVertex eighthSimplexVector{3};
   BOOST_CHECK(eighthSimplexVector.size() == 1);
   typeSimplex eighthSimplex = std::make_pair(eighthSimplexVector, Filtration_value(FIRST_FILTRATION_VALUE));
   returnValue = st.insert_simplex(eighthSimplex.first, eighthSimplex.second);
@@ -287,7 +271,7 @@ BOOST_AUTO_TEST_CASE(simplex_tree_insertion) {
 
   // ++ NINETH
   std::cout << "   - INSERT (3,0)" << std::endl;
-  typeVectorVertex ninethSimplexVector { 3, 0 };
+  typeVectorVertex ninethSimplexVector{3, 0};
   BOOST_CHECK(ninethSimplexVector.size() == 2);
   typeSimplex ninethSimplex = std::make_pair(ninethSimplexVector, Filtration_value(SECOND_FILTRATION_VALUE));
   returnValue = st.insert_simplex(ninethSimplex.first, ninethSimplex.second);
@@ -298,7 +282,7 @@ BOOST_AUTO_TEST_CASE(simplex_tree_insertion) {
 
   // ++ TENTH
   std::cout << "   - INSERT 0 (already inserted)" << std::endl;
-  typeVectorVertex tenthSimplexVector { 0 };
+  typeVectorVertex tenthSimplexVector{0};
   BOOST_CHECK(tenthSimplexVector.size() == 1);
   // With a different filtration value
   typeSimplex tenthSimplex = std::make_pair(tenthSimplexVector, Filtration_value(FOURTH_FILTRATION_VALUE));
@@ -313,7 +297,7 @@ BOOST_AUTO_TEST_CASE(simplex_tree_insertion) {
 
   // ++ ELEVENTH
   std::cout << "   - INSERT (2,1,0) (already inserted)" << std::endl;
-  typeVectorVertex eleventhSimplexVector { 2, 1, 0 };
+  typeVectorVertex eleventhSimplexVector{2, 1, 0};
   BOOST_CHECK(eleventhSimplexVector.size() == 3);
   typeSimplex eleventhSimplex = std::make_pair(eleventhSimplexVector, Filtration_value(FOURTH_FILTRATION_VALUE));
   returnValue = st.insert_simplex(eleventhSimplex.first, eleventhSimplex.second);
@@ -376,14 +360,13 @@ BOOST_AUTO_TEST_CASE(simplex_tree_insertion) {
 }
 
 BOOST_AUTO_TEST_CASE(NSimplexAndSubfaces_tree_insertion) {
-  // TEST OF INSERTION
   std::cout << "********************************************************************" << std::endl;
-  std::cout << "TEST OF INSERTION" << std::endl;
+  std::cout << "TEST OF RECURSIVE INSERTION" << std::endl;
   typeST st;
 
   // ++ FIRST
   std::cout << "   - INSERT (2,1,0)" << std::endl;
-  typeVectorVertex SimplexVector1 { 2, 1, 0 };
+  typeVectorVertex SimplexVector1{2, 1, 0};
   BOOST_CHECK(SimplexVector1.size() == 3);
   st.insert_simplex_and_subfaces(SimplexVector1);
 
@@ -391,7 +374,7 @@ BOOST_AUTO_TEST_CASE(NSimplexAndSubfaces_tree_insertion) {
 
   // ++ SECOND
   std::cout << "   - INSERT 3" << std::endl;
-  typeVectorVertex SimplexVector2 { 3 };
+  typeVectorVertex SimplexVector2{3};
   BOOST_CHECK(SimplexVector2.size() == 1);
   st.insert_simplex_and_subfaces(SimplexVector2);
 
@@ -399,7 +382,7 @@ BOOST_AUTO_TEST_CASE(NSimplexAndSubfaces_tree_insertion) {
 
   // ++ THIRD
   std::cout << "   - INSERT (0,3)" << std::endl;
-  typeVectorVertex SimplexVector3 { 3, 0 };
+  typeVectorVertex SimplexVector3{3, 0};
   BOOST_CHECK(SimplexVector3.size() == 2);
   st.insert_simplex_and_subfaces(SimplexVector3);
 
@@ -407,7 +390,7 @@ BOOST_AUTO_TEST_CASE(NSimplexAndSubfaces_tree_insertion) {
 
   // ++ FOURTH
   std::cout << "   - INSERT (1,0) (already inserted)" << std::endl;
-  typeVectorVertex SimplexVector4 { 1, 0 };
+  typeVectorVertex SimplexVector4{1, 0};
   BOOST_CHECK(SimplexVector4.size() == 2);
   st.insert_simplex_and_subfaces(SimplexVector4);
 
@@ -415,7 +398,7 @@ BOOST_AUTO_TEST_CASE(NSimplexAndSubfaces_tree_insertion) {
 
   // ++ FIFTH
   std::cout << "   - INSERT (3,4,5)" << std::endl;
-  typeVectorVertex SimplexVector5 { 3, 4, 5 };
+  typeVectorVertex SimplexVector5{3, 4, 5};
   BOOST_CHECK(SimplexVector5.size() == 3);
   st.insert_simplex_and_subfaces(SimplexVector5);
 
@@ -423,7 +406,7 @@ BOOST_AUTO_TEST_CASE(NSimplexAndSubfaces_tree_insertion) {
 
   // ++ SIXTH
   std::cout << "   - INSERT (0,1,6,7)" << std::endl;
-  typeVectorVertex SimplexVector6 { 0, 1, 6, 7 };
+  typeVectorVertex SimplexVector6{0, 1, 6, 7};
   BOOST_CHECK(SimplexVector6.size() == 4);
   st.insert_simplex_and_subfaces(SimplexVector6);
 
@@ -460,7 +443,7 @@ BOOST_AUTO_TEST_CASE(NSimplexAndSubfaces_tree_insertion) {
   // ------------------------------------------------------------------------------------------------------------------
   // Find in the simplex_tree
   // ------------------------------------------------------------------------------------------------------------------
-  typeVectorVertex simpleSimplexVector { 1 };
+  typeVectorVertex simpleSimplexVector{1};
   Simplex_tree<>::Simplex_handle simplexFound = st.find(simpleSimplexVector);
   std::cout << "**************IS THE SIMPLEX {1} IN THE SIMPLEX TREE ?\n";
   if (simplexFound != st.null_simplex())
@@ -470,7 +453,7 @@ BOOST_AUTO_TEST_CASE(NSimplexAndSubfaces_tree_insertion) {
   // Check it is found
   BOOST_CHECK(simplexFound != st.null_simplex());
 
-  typeVectorVertex unknownSimplexVector { 15 };
+  typeVectorVertex unknownSimplexVector{15};
   simplexFound = st.find(unknownSimplexVector);
   std::cout << "**************IS THE SIMPLEX {15} IN THE SIMPLEX TREE ?\n";
   if (simplexFound != st.null_simplex())
@@ -489,7 +472,7 @@ BOOST_AUTO_TEST_CASE(NSimplexAndSubfaces_tree_insertion) {
   // Check it is found
   BOOST_CHECK(simplexFound != st.null_simplex());
 
-  typeVectorVertex otherSimplexVector { 1, 15 };
+  typeVectorVertex otherSimplexVector{1, 15};
   simplexFound = st.find(otherSimplexVector);
   std::cout << "**************IS THE SIMPLEX {15,1} IN THE SIMPLEX TREE ?\n";
   if (simplexFound != st.null_simplex())
@@ -499,7 +482,7 @@ BOOST_AUTO_TEST_CASE(NSimplexAndSubfaces_tree_insertion) {
   // Check it is NOT found
   BOOST_CHECK(simplexFound == st.null_simplex());
 
-  typeVectorVertex invSimplexVector { 1, 2, 0 };
+  typeVectorVertex invSimplexVector{1, 2, 0};
   simplexFound = st.find(invSimplexVector);
   std::cout << "**************IS THE SIMPLEX {1,2,0} IN THE SIMPLEX TREE ?\n";
   if (simplexFound != st.null_simplex())
@@ -520,114 +503,179 @@ BOOST_AUTO_TEST_CASE(NSimplexAndSubfaces_tree_insertion) {
     }
     std::cout << std::endl;
   }
+}
 
+void test_cofaces(typeST& st, std::vector<Vertex_handle> expected, int dim, std::vector<typeST::Simplex_handle> res) {
+  typeST::Cofaces_simplex_range cofaces;
+  if (dim == 0)
+    cofaces = st.star_simplex_range(st.find(expected));
+  else
+    cofaces = st.cofaces_simplex_range(st.find(expected), dim);
+  for (auto simplex = cofaces.begin(); simplex != cofaces.end(); ++simplex) {
+    typeST::Simplex_vertex_range rg = st.simplex_vertex_range(*simplex);
+    for (auto vertex = rg.begin(); vertex != rg.end(); ++vertex) {
+      std::cout << "(" << *vertex << ")";
+    }
+    std::cout << std::endl;
+    BOOST_CHECK(std::find(res.begin(), res.end(), *simplex) != res.end());
+  }
+}
+
+BOOST_AUTO_TEST_CASE(coface_on_simplex_tree) {
   std::cout << "********************************************************************" << std::endl;
-  // TEST COFACE ALGORITHM
+  std::cout << "TEST COFACE ALGORITHM" << std::endl;
+  typeST st;
+
+  typeVectorVertex SimplexVector{2, 1, 0};
+  st.insert_simplex_and_subfaces(SimplexVector);
+
+  SimplexVector = {3, 0};
+  st.insert_simplex_and_subfaces(SimplexVector);
+
+  SimplexVector = {3, 4, 5};
+  st.insert_simplex_and_subfaces(SimplexVector);
+
+  SimplexVector = {0, 1, 6, 7};
+  st.insert_simplex_and_subfaces(SimplexVector);
+
+  /* Inserted simplex:        */
+  /*    1   6                 */
+  /*    o---o                 */
+  /*   /X\7/                  */
+  /*  o---o---o---o           */
+  /*  2   0   3\X/4           */
+  /*            o             */
+  /*            5             */
+
+  // FIXME
   st.set_dimension(3);
-  std::cout << "COFACE ALGORITHM" << std::endl;
-  std::vector<Vertex_handle> v;
-  std::vector<Vertex_handle> simplex;
+
+  std::vector<Vertex_handle> simplex_result;
   std::vector<typeST::Simplex_handle> result;
-  v.push_back(3);
-  std::cout << "First test : " << std::endl;
-  std::cout << "Star of (3):" << std::endl;
+  std::cout << "First test - Star of (3):" << std::endl;
 
-  simplex.push_back(3);
-  result.push_back(st.find(simplex));
-  simplex.clear();
+  simplex_result = {3};
+  result.push_back(st.find(simplex_result));
 
-  simplex.push_back(3);
-  simplex.push_back(0);
-  result.push_back(st.find(simplex));
-  simplex.clear();
+  simplex_result = {3, 0};
+  result.push_back(st.find(simplex_result));
 
-  simplex.push_back(4);
-  simplex.push_back(3);
-  result.push_back(st.find(simplex));
-  simplex.clear();
+  simplex_result = {4, 3};
+  result.push_back(st.find(simplex_result));
 
-  simplex.push_back(5);
-  simplex.push_back(4);
-  simplex.push_back(3);
-  result.push_back(st.find(simplex));
-  simplex.clear();
+  simplex_result = {5, 4, 3};
+  result.push_back(st.find(simplex_result));
 
-  simplex.push_back(5);
-  simplex.push_back(3);
-  result.push_back(st.find(simplex));
-  simplex.clear();
+  simplex_result = {5, 3};
+  result.push_back(st.find(simplex_result));
+  simplex_result.clear();
 
-  test_cofaces(st, v, 0, result);
-  v.clear();
+  std::vector<Vertex_handle> vertex = {3};
+  test_cofaces(st, vertex, 0, result);
+  vertex.clear();
   result.clear();
 
-  v.push_back(1);
-  v.push_back(7);
-  std::cout << "Second test : " << std::endl;
-  std::cout << "Star of (1,7): " << std::endl;
+  vertex.push_back(1);
+  vertex.push_back(7);
+  std::cout << "Second test - Star of (1,7): " << std::endl;
 
-  simplex.push_back(7);
-  simplex.push_back(1);
-  result.push_back(st.find(simplex));
-  simplex.clear();
+  simplex_result = {7, 1};
+  result.push_back(st.find(simplex_result));
 
-  simplex.push_back(7);
-  simplex.push_back(6);
-  simplex.push_back(1);
-  simplex.push_back(0);
-  result.push_back(st.find(simplex));
-  simplex.clear();
+  simplex_result = {7, 6, 1, 0};
+  result.push_back(st.find(simplex_result));
 
-  simplex.push_back(7);
-  simplex.push_back(1);
-  simplex.push_back(0);
-  result.push_back(st.find(simplex));
-  simplex.clear();
+  simplex_result = {7, 1, 0};
+  result.push_back(st.find(simplex_result));
 
-  simplex.push_back(7);
-  simplex.push_back(6);
-  simplex.push_back(1);
-  result.push_back(st.find(simplex));
-  simplex.clear();
+  simplex_result = {7, 6, 1};
+  result.push_back(st.find(simplex_result));
 
-  test_cofaces(st, v, 0, result);
+  test_cofaces(st, vertex, 0, result);
   result.clear();
 
-  std::cout << "Third test : " << std::endl;
-  std::cout << "2-dimension Cofaces of simplex(1,7) : " << std::endl;
+  std::cout << "Third test - 2-dimension Cofaces of simplex(1,7) : " << std::endl;
 
-  simplex.push_back(7);
-  simplex.push_back(1);
-  simplex.push_back(0);
-  result.push_back(st.find(simplex));
-  simplex.clear();
+  simplex_result = {7, 1, 0};
+  result.push_back(st.find(simplex_result));
 
-  simplex.push_back(7);
-  simplex.push_back(6);
-  simplex.push_back(1);
-  result.push_back(st.find(simplex));
-  simplex.clear();
+  simplex_result = {7, 6, 1};
+  result.push_back(st.find(simplex_result));
 
-  test_cofaces(st, v, 1, result);
+  test_cofaces(st, vertex, 1, result);
   result.clear();
 
   std::cout << "Cofaces with a codimension too high (codimension + vetices > tree.dimension) :" << std::endl;
-  test_cofaces(st, v, 5, result);
-  //    std::cout << "Cofaces with an empty codimension" << std::endl;
-  //    test_cofaces(st, v, -1, result);
+  test_cofaces(st, vertex, 5, result);
+
+  //std::cout << "Cofaces with an empty codimension" << std::endl;
+  //test_cofaces(st, vertex, -1, result);
   //    std::cout << "Cofaces in an empty simplex tree" << std::endl;
   //   typeST empty_tree;
-  //    test_cofaces(empty_tree, v, 1, result);
-  //    std::cout << "Cofaces of an empty simplex" << std::endl;
-  //    v.clear();
-  //    test_cofaces(st, v, 1, result);
+  //    test_cofaces(empty_tree, vertex, 1, result);
+  //std::cout << "Cofaces of an empty simplex" << std::endl;
+  //vertex.clear();
+  // test_cofaces(st, vertex, 1, result);
 
-  /*
-     // TEST Off read
-     std::cout << "********************************************************************" << std::endl;
-     typeST st2;
-     st2.tree_from_off("test.off");
-     std::cout << st2;
-   */
+}
 
+BOOST_AUTO_TEST_CASE(copy_move_on_simplex_tree) {
+  std::cout << "********************************************************************" << std::endl;
+  std::cout << "TEST COPY MOVE CONSTRUCTORS" << std::endl;
+  typeST st;
+
+  typeVectorVertex SimplexVector{2, 1, 0};
+  st.insert_simplex_and_subfaces(SimplexVector);
+
+  SimplexVector = {3, 0};
+  st.insert_simplex_and_subfaces(SimplexVector);
+
+  SimplexVector = {3, 4, 5};
+  st.insert_simplex_and_subfaces(SimplexVector);
+
+  SimplexVector = {0, 1, 6, 7};
+  st.insert_simplex_and_subfaces(SimplexVector);
+
+  /* Inserted simplex:        */
+  /*    1   6                 */
+  /*    o---o                 */
+  /*   /X\7/                  */
+  /*  o---o---o---o           */
+  /*  2   0   3\X/4           */
+  /*            o             */
+  /*            5             */
+
+  // FIXME
+  st.set_dimension(3);
+
+  std::cout << "Printing st - address = " << &st << std::endl;
+
+  // Copy constructor  
+  typeST st_copy = st;
+  std::cout << "Printing a copy of st - address = " << &st_copy << std::endl;
+
+  // Check the data are the same
+  BOOST_CHECK(st == st_copy);
+  // Check there is a new simplex tree reference
+  BOOST_CHECK(&st != &st_copy);
+
+  // Move constructor  
+  typeST st_move = std::move(st);
+  std::cout << "Printing a move of st - address = " << &st_move << std::endl;
+
+  // Check the data are the same
+  BOOST_CHECK(st_move == st_copy);
+  // Check there is a new simplex tree reference
+  BOOST_CHECK(&st_move != &st_copy);
+  BOOST_CHECK(&st_move != &st);
+  
+  typeST st_empty;
+  // Check st has been emptied by the move
+  BOOST_CHECK(st == st_empty);
+  BOOST_CHECK(st.filtration() == 0);
+  BOOST_CHECK(st.dimension() == -1);
+  BOOST_CHECK(st.num_simplices() == 0);
+  BOOST_CHECK(st.num_vertices() == (size_t)0);
+  
+  std::cout << "Printing st once again- address = " << &st << std::endl;
 }

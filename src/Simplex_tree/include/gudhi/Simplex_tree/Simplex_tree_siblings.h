@@ -71,15 +71,15 @@ class Simplex_tree_siblings {
   /* \brief Constructor with initialized set of members.
    *
    * 'members' must be sorted and unique.*/
-  Simplex_tree_siblings(Simplex_tree_siblings * oncles, Vertex_handle parent,
-                        const std::vector<std::pair<Vertex_handle, Node> > & members)
+  template<typename RandomAccessVertexRange>
+  Simplex_tree_siblings(Simplex_tree_siblings * oncles, Vertex_handle parent, const RandomAccessVertexRange & members)
       : oncles_(oncles),
         parent_(parent),
         members_(boost::container::ordered_unique_range, members.begin(),
                  members.end()) {
     for (auto& map_el : members_) {
       map_el.second.assign_children(this);
-    }
+	}
   }
 
   /*
