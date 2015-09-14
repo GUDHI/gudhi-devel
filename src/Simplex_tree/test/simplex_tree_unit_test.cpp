@@ -7,7 +7,7 @@
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "simplex_tree"
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 
 //  ^
 // /!\ Nothing else from Simplex_tree shall be included to test includes are well defined.
