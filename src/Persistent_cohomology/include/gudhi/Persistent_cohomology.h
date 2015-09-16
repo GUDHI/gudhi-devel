@@ -243,7 +243,7 @@ class Persistent_cohomology {
         column_pool_(),  // memory pools for the CAM
         cell_pool_() {
     Simplex_key idx_fil = 0;
-    for (auto & sh : cpx_->filtration_simplex_range()) {
+    for (auto sh : cpx_->filtration_simplex_range()) {
       cpx_->assign_key(sh, idx_fil);
       ++idx_fil;
       dsets_.make_set(cpx_->key(sh));
