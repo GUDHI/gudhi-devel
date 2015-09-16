@@ -20,8 +20,6 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// FIXME: remove the first include
-#include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/Simplex_tree.h>
 #include <iostream>
 #include <initializer_list>
@@ -51,15 +49,14 @@ int main() {
   /*  o---o---o        */
   /*  2   0   3        */
 
-  // FIXME: Replace std::vector<short> with auto
-  std::vector<short> triangle012 = {0, 1, 2};
-  std::vector<short> edge03 = {0, 3};
+  auto triangle012 = {0, 1, 2};
+  auto edge03 = {0, 3};
   st.insert_simplex_and_subfaces(triangle012);
   st.insert_simplex_and_subfaces(edge03);
   // FIXME: Remove this line
   st.set_dimension(2);
 
-  std::vector<short> edge02 = {0, 2};
+  auto edge02 = {0, 2};
   ST::Simplex_handle e = st.find(edge02);
   assert(st.filtration(e) == 0); // We are not using filtrations so everything has value 0
   for(ST::Simplex_handle t : st.cofaces_simplex_range(e, 1)) // Only coface is 012
