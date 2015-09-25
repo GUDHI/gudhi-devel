@@ -44,6 +44,7 @@ else()
   add_subdirectory(example/Contraction)                   
   add_subdirectory(example/Hasse_complex)
   add_subdirectory(example/Bottleneck)
+  add_subdirectory(example/Bitmap_cubical_complex)
 
   # GudhUI
   add_subdirectory(GudhUI)

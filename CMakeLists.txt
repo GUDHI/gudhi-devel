@@ -57,6 +57,7 @@ else()
   message(STATUS "boost library dirs:" ${Boost_LIBRARY_DIRS})
 
   include_directories(src/common/include/)
+  include_directories(src/Bitmap_cubical_complex/include/)
   include_directories(src/Bottleneck/include/)
   include_directories(src/Contraction/include/)
   include_directories(src/Hasse_complex/include/)
@@ -74,6 +75,8 @@ else()
   add_subdirectory(src/Hasse_complex/example)
   add_subdirectory(src/Bottleneck/example)
   add_subdirectory(src/Bottleneck/test)
+  add_subdirectory(src/Bitmap_cubical_complex/example)
+  add_subdirectory(src/Bitmap_cubical_complex/test)
 
   # GudhUI
   add_subdirectory(src/GudhUI)
