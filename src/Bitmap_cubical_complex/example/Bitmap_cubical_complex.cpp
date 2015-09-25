@@ -20,33 +20,35 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-//for persistence algorithm
-#include "gudhi/reader_utils.h"
-#include "gudhi/Bitmap_cubical_complex.h"
-#include "gudhi/Persistent_cohomology.h"
+// for persistence algorithm
+#include <gudhi/reader_utils.h>
+#include <gudhi/Bitmap_cubical_complex.h>
+#include <gudhi/Persistent_cohomology.h>
 
 #include <boost/program_options.hpp>
 
-using namespace Gudhi;
-using namespace Gudhi::persistent_cohomology;
-
-//standard stuff
+// standard stuff
 #include <iostream>
 #include <sstream>
 
+using namespace Gudhi;
+using namespace Gudhi::persistent_cohomology;
 using namespace std;
 
 int main(int argc, char** argv) {
-  cout << "This program computes persistent homology, by using Bitmap_cubical_complex class, of cubical complexes provided in text files in Perseus style (the only numbed in \
-the first line is a dimension D of a cubical complex. In the lines I between 2 and D+1 there are numbers of top dimensional cells in the direction I. Let N denote product \
-of the numbers in the lines between 2 and D. In the lines D+2 to D+2+N there are filtrations of top dimensional cells. We assume that the cells are in the \
-lexicographical order. See CubicalOneSphere.txt or CubicalTwoSphere.txt for example." << endl;
+  cout << "This program computes persistent homology, by using Bitmap_cubical_complex class, of cubical complexes "
+      "provided in text files in Perseus style (the only numbed in the first line is a dimension D of a cubical "
+      "complex. In the lines I between 2 and D+1 there are numbers of top dimensional cells in the direction I. Let N "
+      "denote product of the numbers in the lines between 2 and D. In the lines D+2 to D+2+N there are filtrations of "
+      "top dimensional cells. We assume that the cells are in the lexicographical order. See CubicalOneSphere.txt or "
+      "CubicalTwoSphere.txt for example." << endl;
 
   int p = 2;
   double min_persistence = 0;
 
   if (argc != 2) {
-    cout << "Wrong number of parameters. Please provide the name of a file with a Perseus style cubical complex at the input. The program will now terminate.\n";
+    cout << "Wrong number of parameters. Please provide the name of a file with a Perseus style cubical complex at the "
+        "input. The program will now terminate.\n";
     return 1;
   }
 
@@ -55,7 +57,7 @@ lexicographical order. See CubicalOneSphere.txt or CubicalTwoSphere.txt for exam
 
   // Compute the persistence diagram of the complex
   persistent_cohomology::Persistent_cohomology< Bitmap_cubical_complex<double>, Field_Zp > pcoh(b);
-  pcoh.init_coefficients(p); //initilizes the coefficient field for homology
+  pcoh.init_coefficients(p);  // initializes the coefficient field for homology
   pcoh.compute_persistent_cohomology(min_persistence);
 
 

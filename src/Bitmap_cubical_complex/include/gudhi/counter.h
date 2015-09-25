@@ -26,17 +26,15 @@
 #include <iostream>
 #include <vector>
 
-using namespace std;
-
 /**
  * This is an implementation of a simple counter. It is needed for the implementation of a bitmapCubicalComplex.
  **/
 
 class counter {
  public:
-
   /**
-   * Constructor of a counter class. It takes only the parameter which is the end value of the counter. The default beginning value is a vector of the same length as the endd, filled-in with zeros.
+   * Constructor of a counter class. It takes only the parameter which is the end value of the counter.
+   * The default beginning value is a vector of the same length as the end, filled-in with zeros.
    **/
   counter(std::vector< int > endd) {
     for (size_t i = 0; i != endd.size(); ++i) {
@@ -47,10 +45,12 @@ class counter {
   }
 
   /**
-   * Constructor of a counter class. It takes as the input beginn and end vector. It assumes that begin vector is lexicographically below the end vector.
+   * Constructor of a counter class. It takes as the input beginn and endd vector. It assumes that begin vector is
+   * lexicographically below the end vector.
    **/
   counter(std::vector< int > beginn, std::vector< int > endd) {
-    if (beginn.size() != endd.size())throw "In constructor of a counter, begin and end vectors do not have the same size. Program terminate";
+    if (beginn.size() != endd.size())
+      throw("In constructor of a counter, begin and end vectors do not have the same size. Program terminate");
     for (size_t i = 0; i != endd.size(); ++i) {
       this->current.push_back(0);
       this->begin.push_back(0);
@@ -59,7 +59,8 @@ class counter {
   }
 
   /**
-   * Function to increment the counter. If the value returned by the function is true, then the incrementation process was successful.
+   * Function to increment the counter. If the value returned by the function is true, then the incrementation process
+   * was successful.
    * If the value of the function is false, that means, that the counter have reached its end-value.
    **/
   bool increment() {
@@ -87,8 +88,9 @@ class counter {
   }
 
   /**
-   * Function required in the implementation of bitmapCubicalComplexWPeriodicBoundaryCondition. Its aim is to find an counter corresponding to the element the following
-   * boundary element is identified with when periodic boundary conditions are imposed.
+   * Function required in the implementation of bitmapCubicalComplexWPeriodicBoundaryCondition.
+   * Its aim is to find an counter corresponding to the element the following boundary element is identified with
+   * when periodic boundary conditions are imposed.
    **/
   std::vector< int > findOpposite(std::vector< bool > directionsForPeriodicBCond) {
     std::vector< int > result;
@@ -121,12 +123,13 @@ class counter {
    * Function to write counter to the stream.
    **/
   friend std::ostream& operator<<(std::ostream& out, const counter& c) {
-    //cerr << "c.current.size() : " << c.current.size() << endl;
+    // std::cerr << "c.current.size() : " << c.current.size() << std::endl;
     for (size_t i = 0; i != c.current.size(); ++i) {
       out << c.current[i] << " ";
     }
     return out;
   }
+
  private:
   std::vector< int > begin;
   std::vector< int > end;
