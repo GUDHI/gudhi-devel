@@ -213,12 +213,12 @@ class Simplex_tree {
   /** \brief Range over the simplices of the skeleton of the simplicial complex, for a given 
    * dimension. */
   typedef boost::iterator_range<Skeleton_simplex_iterator> Skeleton_simplex_range;
+  /** \brief Range over the simplices of the simplicial complex, ordered by the filtration. */
+  typedef std::vector<Simplex_handle> Filtration_simplex_range;
   /** \brief Iterator over the simplices of the simplicial complex, ordered by the filtration.
    *
    * 'value_type' is Simplex_handle. */
-  typedef typename std::vector<Simplex_handle>::iterator Filtration_simplex_iterator;
-  /** \brief Range over the simplices of the simplicial complex, ordered by the filtration. */
-  typedef boost::iterator_range<Filtration_simplex_iterator> Filtration_simplex_range;
+  typedef typename Filtration_simplex_range::const_iterator Filtration_simplex_iterator;
 
   /* @} */  // end name range and iterator types
   /** \name Range and iterator methods
@@ -271,16 +271,11 @@ class Simplex_tree {
    * The filtration must be valid. If the filtration has not been initialized yet, the
    * method initializes it (i.e. order the simplices). If the complex has changed since the last time the filtration
    * was initialized, please call `initialize_filtration()` to recompute it. */
-  Filtration_simplex_range filtration_simplex_range(Indexing_tag) {
+  Filtration_simplex_range const& filtration_simplex_range(Indexing_tag=Indexing_tag()) {
     if (filtration_vect_.empty()) {
       initialize_filtration();
     }
-    return Filtration_simplex_range(filtration_vect_.begin(),
-                                    filtration_vect_.end());
-  }
-
-  Filtration_simplex_range filtration_simplex_range() {
-    return filtration_simplex_range(Indexing_tag());
+    return filtration_vect_;
   }
 
   /** \brief Returns a range over the vertices of a simplex.
@@ -1082,7 +1077,7 @@ class Simplex_tree {
    * of the simplex, and fil is its filtration value. */
   void print_hasse(std::ostream& os) {
     os << num_simplices() << " " << std::endl;
-    for (auto sh : filtration_simplex_range(Indexing_tag())) {
+    for (auto sh : filtration_simplex_range()) {
       os << dimension(sh) << " ";
       for (auto b_sh : boundary_simplex_range(sh)) {
         os << key(b_sh) << " ";
