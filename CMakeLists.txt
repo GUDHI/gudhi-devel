@@ -14,7 +14,7 @@ if(MSVC)
   # Turn off some VC++ warnings
   SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4267 /wd4668 /wd4311 /wd4800 /wd4820 /wd4503 /wd4244 /wd4345 /wd4996 /wd4396 /wd4018")
 else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -std=c++11 -Wall -Wpedantic -Wno-sign-compare")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -std=c++11 -Wall -Wpedantic -Wsign-compare")
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb -O0")	
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 endif()
@@ -76,7 +76,7 @@ else()
   add_subdirectory(src/Bottleneck/test)
 
   # GudhUI
-  #add_subdirectory(src/GudhUI)
+  add_subdirectory(src/GudhUI)
 
   # data points generator
   add_subdirectory(data/points/generator)
