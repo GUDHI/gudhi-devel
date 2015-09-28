@@ -268,8 +268,8 @@ class Persistent_cohomology {
   ~Persistent_cohomology() {
     // Clean the transversal lists
     for (auto & transverse_ref : transverse_idx_) {
-      // Release all the cells
-      transverse_ref.second.row_->clear_and_dispose([&](Cell*p){cell_pool_.destroy(p);});
+      // Destruct all the cells
+      transverse_ref.second.row_->clear_and_dispose([&](Cell*p){p->~Cell();});
       delete transverse_ref.second.row_;
     }
   }
