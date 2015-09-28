@@ -93,27 +93,25 @@ class Persistent_cohomology_column : public boost::intrusive::set_base_hook<
       boost::intrusive::base_hook<base_hook_cam_v> > Col_type;
 
   /** \brief Creates an empty column.*/
-  explicit Persistent_cohomology_column(SimplexKey key) {
-    class_key_ = key;
-    col_ = Col_type();
-  }
+  explicit Persistent_cohomology_column(SimplexKey key)
+      : col_(),
+        class_key_(key) {}
  public:
   /** Copy constructor.*/
   Persistent_cohomology_column(Persistent_cohomology_column const &other)
       : col_(),
         class_key_(other.class_key_) {
-    if (!other.col_.empty())
-      std::cerr << "Copying a non-empty column.\n";
+    assert(other.col_.empty());
   }
 
   /** \brief Returns true iff the column is null.*/
-  bool is_null() {
+  bool is_null() const {
     return col_.empty();
   }
   /** \brief Returns the key of the representative simplex of
    * the set of simplices having this column as annotation vector
    * in the compressed annotation matrix.*/
-  SimplexKey class_key() {
+  SimplexKey class_key() const {
     return class_key_;
   }
 

@@ -572,9 +572,8 @@ class Persistent_cohomology {
         Column * curr_col = row_cell_it->self_col_;
         ++row_cell_it;
         // Disconnect the column from the rows in the CAM.
-        for (auto col_cell_it = curr_col->col_.begin();
-            col_cell_it != curr_col->col_.end(); ++col_cell_it) {
-          col_cell_it->base_hook_cam_h::unlink();
+        for (auto& col_cell : curr_col->col_) {
+          col_cell.base_hook_cam_h::unlink();
         }
 
         // Remove the column from the CAM before modifying its value
@@ -589,9 +588,9 @@ class Persistent_cohomology {
           // Find whether the column obtained is already in the CAM
           result_insert_cam = cam_.insert(*curr_col);
           if (result_insert_cam.second) {  // If it was not in the CAM before: insertion has succeeded
-            for (auto col_cell_it = curr_col->col_.begin(); col_cell_it != curr_col->col_.end(); ++col_cell_it) {
+            for (auto& col_cell : curr_col->col_) {
               // re-establish the row links
-              transverse_idx_[col_cell_it->key_].row_->push_front(*col_cell_it);
+              transverse_idx_[col_cell.key_].row_->push_front(col_cell);
             }
           } else {  // There is already an identical column in the CAM:
             // merge two disjoint sets.
