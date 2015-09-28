@@ -8,6 +8,8 @@
 #ifndef MENU_EDGE_CONTRACTION_H_
 #define MENU_EDGE_CONTRACTION_H_
 
+// Workaround for moc-qt4 not parsing boost headers
+#include <CGAL/config.h>
 
 #include "gui/MainWindow.h"
 #include "gui/ui_MenuEdgeContraction.h"
