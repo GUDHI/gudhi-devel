@@ -1,6 +1,9 @@
 #ifndef VIEWER_H
 #define VIEWER_H
 
+// Workaround for moc-qt4 not parsing boost headers
+#include <CGAL/config.h>
+
 #include <QGLViewer/qglviewer.h>
 #include "View_parameter.h"
 #include "model/Complex_typedefs.h"
