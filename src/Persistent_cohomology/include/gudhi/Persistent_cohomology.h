@@ -266,13 +266,10 @@ class Persistent_cohomology {
   }
 
   ~Persistent_cohomology() {
-// Clean the remaining columns in the matrix.
-    for (auto & cam_ref : cam_) {
-      cam_ref.col_.clear();
-    }
-// Clean the transversal lists
+    // Clean the transversal lists
     for (auto & transverse_ref : transverse_idx_) {
-      transverse_ref.second.row_->clear();
+      // Release all the cells
+      transverse_ref.second.row_->clear_and_dispose([&](Cell*p){cell_pool_.destroy(p);});
       delete transverse_ref.second.row_;
     }
   }
@@ -600,6 +597,8 @@ class Persistent_cohomology {
             Simplex_key key_tmp = dsets_.find_set(curr_col->class_key_);
             ds_repr_[key_tmp] = &(*(result_insert_cam.first));
             result_insert_cam.first->class_key_ = key_tmp;
+            // intrusive containers don't own their elements, we have to release them manually
+            curr_col->col_.clear_and_dispose([&](Cell*p){cell_pool_.destroy(p);});
             column_pool_.destroy(curr_col);  // delete curr_col;
           }
         }
