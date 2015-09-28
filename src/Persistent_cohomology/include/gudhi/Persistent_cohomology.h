@@ -25,12 +25,12 @@
 
 #include <gudhi/Persistent_cohomology/Persistent_cohomology_column.h>
 #include <gudhi/Persistent_cohomology/Field_Zp.h>
+#include <gudhi/Simple_object_pool.h>
 
 #include <boost/tuple/tuple.hpp>
 #include <boost/intrusive/set.hpp>
 #include <boost/pending/disjoint_sets.hpp>
 #include <boost/intrusive/list.hpp>
-#include <boost/pool/object_pool.hpp>
 
 #include <map>
 #include <utility>
@@ -268,8 +268,8 @@ class Persistent_cohomology {
   ~Persistent_cohomology() {
     // Clean the transversal lists
     for (auto & transverse_ref : transverse_idx_) {
-      // Release all the cells
-      transverse_ref.second.row_->clear_and_dispose([&](Cell*p){cell_pool_.destroy(p);});
+      // Destruct all the cells
+      transverse_ref.second.row_->clear_and_dispose([&](Cell*p){p->~Cell();});
       delete transverse_ref.second.row_;
     }
   }
@@ -764,8 +764,8 @@ class Persistent_cohomology {
   std::vector<Persistent_interval> persistent_pairs_;
   length_interval interval_length_policy;
 
-  boost::object_pool<Column> column_pool_;
-  boost::object_pool<Cell> cell_pool_;
+  Simple_object_pool<Column> column_pool_;
+  Simple_object_pool<Cell> cell_pool_;
 };
 
 /** @} */  // end defgroup persistent_cohomology
