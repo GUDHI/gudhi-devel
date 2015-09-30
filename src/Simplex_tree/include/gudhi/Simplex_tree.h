@@ -908,8 +908,9 @@ class Simplex_tree {
         : st_(st) { }
 
     bool operator()(const Simplex_handle sh1, const Simplex_handle sh2) const {
-      if (st_->filtration(sh1) != st_->filtration(sh2)) {
-        return st_->filtration(sh1) < st_->filtration(sh2);
+      // Not using st_->filtration(sh1) because it uselessly tests for null_simplex.
+      if (sh1->second.filtration() != sh2->second.filtration()) {
+	return sh1->second.filtration() < sh2->second.filtration();
       }
       // is sh1 a proper subface of sh2
       return st_->reverse_lexicographic_order(sh1, sh2);
