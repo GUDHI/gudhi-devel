@@ -672,7 +672,7 @@ LAYOUT_FILE            =
 # search path. Do not use file names with spaces, bibtex cannot handle them. See
 # also \cite for info how to create references.
 
-CITE_BIB_FILES         = ../biblio/bibliography.bib
+CITE_BIB_FILES         = biblio/bibliography.bib
 
 #---------------------------------------------------------------------------
 # Configuration options related to warning and progress messages
@@ -831,9 +831,9 @@ EXAMPLE_RECURSIVE      = NO
 # that contain images that are to be included in the documentation (see the
 # \image command).
 
-IMAGE_PATH             = Skeleton_blocker/doc/ \
-	common/doc/ \
-	Contraction/doc/
+IMAGE_PATH             = doc/Skeleton_blocker/ \
+	doc/common/ \
+	doc/Contraction/
 
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should
