@@ -450,43 +450,16 @@ class Simplex_tree {
   Simplex_handle find_vertex(Vertex_handle v) {
     return root_.members_.begin() + v;
   }
-  
-  /** \brief Insert a simplex, represented by a range of Vertex_handles, in the simplicial complex.
-   *
-   * @param[in]  simplex    range of Vertex_handles, representing the vertices of the new simplex
-   * @param[in]  filtration the filtration value assigned to the new simplex.
-   * The return type is a pair. If the new simplex is inserted successfully (i.e. it was not in the
-   * simplicial complex yet) the bool is set to true and the Simplex_handle is the handle assigned
-   * to the new simplex.
-   * If the insertion fails (the simplex is already there), the bool is set to false. If the insertion
-   * fails and the simplex already in the complex has a filtration value strictly bigger than 'filtration',
-   * we assign this simplex with the new value 'filtration', and set the Simplex_handle filed of the
-   * output pair to the Simplex_handle of the simplex. Otherwise, we set the Simplex_handle part to
-   * null_simplex.
-   *
-   * All subsimplices do not necessary need to be already in the simplex tree to proceed to an
-   * insertion. However, the property of being a simplicial complex will be violated. This allows
-   * us to insert a stream of simplices contained in a simplicial complex without considering any
-   * order on them.
-   *
-   * The filtration value
-   * assigned to the new simplex must preserve the monotonicity of the filtration.
-   *
-   * The type RandomAccessVertexRange must be a range for which .begin() and
-   * .end() return random access iterators, with 'value_type' Vertex_handle. */
-  template<class RandomAccessVertexRange>
-  std::pair<Simplex_handle, bool> insert_simplex(RandomAccessVertexRange & simplex,
-                                                 Filtration_value filtration) {
-    if (simplex.empty()) {
-      return std::pair<Simplex_handle, bool>(null_simplex(), true);
-    }
-    // must be sorted in increasing order
-    sort(simplex.begin(), simplex.end());
 
+ private:
+  /** \brief Inserts a simplex represented by a vector of vertex.
+   \warning the vector must be sorted by increasing vertex handle order */
+  std::pair<Simplex_handle, bool> insert_vertex_vector(const std::vector<Vertex_handle>& simplex,
+                                                     Filtration_value filtration) {
     Siblings * curr_sib = &root_;
     std::pair<Simplex_handle, bool> res_insert;
-    typename RandomAccessVertexRange::iterator vi;
-    for (vi = simplex.begin(); vi != simplex.end() - 1; ++vi) {
+    auto vi = simplex.begin();
+    for (; vi != simplex.end() - 1; ++vi) {
       res_insert = curr_sib->members_.emplace(*vi, Node(curr_sib, filtration));
       if (!(has_children(res_insert.first))) {
         res_insert.first->second.assign_children(new Siblings(curr_sib, *vi));
@@ -508,24 +481,77 @@ class Simplex_tree {
     return res_insert;
   }
 
-  /** \brief Insert a N-simplex and all his subfaces, from a N-simplex represented by a range of
+ public:
+  /** \brief Insert a simplex, represented by a range of Vertex_handles, in the simplicial complex.
+   *
+   * @param[in]  simplex    range of Vertex_handles, representing the vertices of the new simplex
+   * @param[in]  filtration the filtration value assigned to the new simplex.
+   * The return type is a pair. If the new simplex is inserted successfully (i.e. it was not in the
+   * simplicial complex yet) the bool is set to true and the Simplex_handle is the handle assigned
+   * to the new simplex.
+   * If the insertion fails (the simplex is already there), the bool is set to false. If the insertion
+   * fails and the simplex already in the complex has a filtration value strictly bigger than 'filtration',
+   * we assign this simplex with the new value 'filtration', and set the Simplex_handle field of the
+   * output pair to the Simplex_handle of the simplex. Otherwise, we set the Simplex_handle part to
+   * null_simplex.
+   *
+   * All subsimplices do not necessary need to be already in the simplex tree to proceed to an
+   * insertion. However, the property of being a simplicial complex will be violated. This allows
+   * us to insert a stream of simplices contained in a simplicial complex without considering any
+   * order on them.
+   *
+   * The filtration value
+   * assigned to the new simplex must preserve the monotonicity of the filtration.
+   *
+   * The type InputVertexRange must be a range for which .begin() and
+   * .end() return input iterators, with 'value_type' Vertex_handle. */
+  template<class InputVertexRange>
+  std::pair<Simplex_handle, bool> insert_simplex(const InputVertexRange & simplex,
+                                                 Filtration_value filtration = 0) {
+    auto first = std::begin(simplex);
+    auto last = std::end(simplex);
+
+    if (first == last)
+      return std::pair<Simplex_handle, bool>(null_simplex(), true);  // ----->>
+
+    // Copy before sorting
+    std::vector<Vertex_handle> copy(first, last);
+    std::sort(std::begin(copy), std::end(copy));
+    return insert_vertex_vector(copy, filtration);
+  }
+
+    /** \brief Insert a N-simplex and all his subfaces, from a N-simplex represented by a range of
    * Vertex_handles, in the simplicial complex.
    *
    * @param[in]  Nsimplex   range of Vertex_handles, representing the vertices of the new N-simplex
    * @param[in]  filtration the filtration value assigned to the new N-simplex.
+   * The return type is a pair. If the new simplex is inserted successfully (i.e. it was not in the
+   * simplicial complex yet) the bool is set to true and the Simplex_handle is the handle assigned
+   * to the new simplex.
+   * If the insertion fails (the simplex is already there), the bool is set to false. If the insertion
+   * fails and the simplex already in the complex has a filtration value strictly bigger than 'filtration',
+   * we assign this simplex with the new value 'filtration', and set the Simplex_handle field of the
+   * output pair to the Simplex_handle of the simplex. Otherwise, we set the Simplex_handle part to
+   * null_simplex.
    */
-  template<class RandomAccessVertexRange>
-  std::pair<Simplex_handle, bool> insert_simplex_and_subfaces(const RandomAccessVertexRange& Nsimplex,
-                                                              Filtration_value filtration = 0.0) {
-    // Simplex copy
-    std::vector<Vertex_handle> the_simplex(Nsimplex.begin(), Nsimplex.end());
-    // must be sorted in increasing order
-    std::sort(the_simplex.begin(), the_simplex.end());
+  template<class InputVertexRange>
+  std::pair<Simplex_handle, bool> insert_simplex_and_subfaces(const InputVertexRange& Nsimplex,
+                                   Filtration_value filtration = 0) {
+    auto first = std::begin(Nsimplex);
+    auto last = std::end(Nsimplex);
+
+    if (first == last)
+      return std::pair<Simplex_handle, bool>(null_simplex(), true);  // ----->>
+
+    // Copy before sorting
+    std::vector<Vertex_handle> copy(first, last);
+    std::sort(std::begin(copy), std::end(copy));
+
     std::vector<std::vector<Vertex_handle>> to_be_inserted;
     std::vector<std::vector<Vertex_handle>> to_be_propagated;
-    return rec_insert_simplex_and_subfaces(the_simplex, to_be_inserted, to_be_propagated, filtration);
+    return rec_insert_simplex_and_subfaces(copy, to_be_inserted, to_be_propagated, filtration);
   }
-  
+
  private:
   std::pair<Simplex_handle, bool> rec_insert_simplex_and_subfaces(std::vector<Vertex_handle>& the_simplex,
                                                              std::vector<std::vector<Vertex_handle>>& to_be_inserted,
@@ -534,7 +560,7 @@ class Simplex_tree {
     std::pair<Simplex_handle, bool> insert_result;
     if (the_simplex.size() > 1) {
       // Get and remove last vertex
-      Vertex_handle last_vertex= the_simplex.back();
+      Vertex_handle last_vertex = the_simplex.back();
       the_simplex.pop_back();
       // Recursive call after last vertex removal
       insert_result = rec_insert_simplex_and_subfaces(the_simplex, to_be_inserted, to_be_propagated, filtration);
@@ -557,21 +583,21 @@ class Simplex_tree {
 
       // insert all to_be_inserted
       for (auto& simplex_tbi : to_be_inserted) {
-        insert_result = insert_simplex(simplex_tbi, filtration);
+        insert_result = insert_vertex_vector(simplex_tbi, filtration);
       }
 
       
     } else if (the_simplex.size() == 1) {
       // When reaching the end of recursivity, vector of simplices shall be empty and filled on back recursive
-      if ((to_be_inserted.size() != 0) || (to_be_propagated.size() != 0)){
+      if ((to_be_inserted.size() != 0) || (to_be_propagated.size() != 0)) {
         std::cerr << "Simplex_tree::rec_insert_simplex_and_subfaces - Error vector not empty" << std::endl;
         exit(-1);
       }
       std::vector<Vertex_handle> first_simplex(1, the_simplex.back());
       // i.e. (0,1,2) => [to_be_inserted | to_be_propagated] = [(0) | ]
       to_be_inserted.push_back(first_simplex);
-      
-      insert_result = insert_simplex(first_simplex, filtration);
+
+      insert_result = insert_vertex_vector(first_simplex, filtration);
     } else {
         std::cerr << "Simplex_tree::rec_insert_simplex_and_subfaces - Recursivity error" << std::endl;
         exit(-1);
