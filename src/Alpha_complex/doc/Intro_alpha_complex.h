@@ -93,8 +93,8 @@ namespace alphacomplex {
  * \end{algorithmic}
  * \f}
  * 
- * From the example above, it means the algorithm will look into each triangulation ([1,2,3], [2,3,4], [1,3,5], ...),
- * will compute the filtration value of the triangulation, and then will propagate the filtration value as described
+ * From the example above, it means the algorithm will look into each triangle ([1,2,3], [2,3,4], [1,3,5], ...),
+ * will compute the filtration value of the triangle, and then will propagate the filtration value as described
  * here :
  * \image html "alpha_complex_doc_135.png" "Filtration value propagation example"
  * Then, the algorithm will look into each edge ([1,2], [2,3], [1,3], ...),
@@ -105,8 +105,8 @@ namespace alphacomplex {
  * 
  * \section alpha-shape Alpha shape
  * 
- * In the example above, the alpha shape of \f$\alpha^2_{74} < \alpha^2 < \alpha^2_{73}\f$ is the alpha complex where the 
- * \f$\alpha^2_{74} <\f$ filtration value \f$< \alpha^2_{73}\f$ as described in \cite AlphaShapesIntroduction
+ * In the example above, the alpha shape of \f$\alpha^2_{63} < \alpha^2 < \alpha^2_{62}\f$ is the alpha complex where the 
+ * \f$\alpha^2_{63} <\f$ filtration value \f$< \alpha^2_{62}\f$ as described in \cite AlphaShapesIntroduction
  * 
  * \image html "alpha_complex_doc_alpha_shape.png" "Alpha shape example"
  * \copyright GNU General Public License v3.                         

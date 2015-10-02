@@ -1,11 +1,10 @@
 // to construct a Delaunay_triangulation from a OFF file
-#include "gudhi/Delaunay_triangulation_off_io.h"
+#include <gudhi/Delaunay_triangulation_off_io.h>
 
 #include <CGAL/Delaunay_triangulation.h>
 #include <CGAL/Epick_d.h>
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <iostream>
 #include <string>
 
 // Use dynamic_dimension_tag for the user to be able to set dimension

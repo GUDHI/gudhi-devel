@@ -33,8 +33,8 @@
 #include <vector>
 
 // to construct a Delaunay_triangulation from a OFF file
-#include "gudhi/Delaunay_triangulation_off_io.h"
-#include "gudhi/Alpha_complex.h"
+#include <gudhi/Delaunay_triangulation_off_io.h>
+#include <gudhi/Alpha_complex.h>
 
 // Use dynamic_dimension_tag for the user to be able to set dimension
 typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kernel_d;

@@ -39,7 +39,7 @@ namespace Gudhi {
 template<typename Complex>
 class Delaunay_triangulation_off_visitor_reader {
  private:
-  Complex* _complex;
+  Complex* complex_;
   typedef typename Complex::Point Point;
 
  public:
@@ -48,10 +48,10 @@ class Delaunay_triangulation_off_visitor_reader {
 
   /** \brief Delaunay_triangulation_off_visitor_reader constructor
    *
-   * @param[in] _complex_ptr pointer on a Delaunay triangulation.
+   * @param[in] complex_ptr_ pointer on a Delaunay triangulation.
    */
-  Delaunay_triangulation_off_visitor_reader(Complex* _complex_ptr)
-      : _complex(nullptr) { }
+  Delaunay_triangulation_off_visitor_reader(Complex* complex_ptr_)
+      : complex_(nullptr) { }
 
   /** \brief Off_reader visitor init implementation. 
    * 
@@ -77,7 +77,7 @@ class Delaunay_triangulation_off_visitor_reader {
           "file for Delaunay triangulation - edges are computed." << std::endl;
     }
     // Complex construction with dimension from file
-    _complex = new Complex(dim);
+    complex_ = new Complex(dim);
   }
 
   /** \brief Off_reader visitor point implementation. 
@@ -95,7 +95,7 @@ class Delaunay_triangulation_off_visitor_reader {
     }
     std::cout << std::endl;
 #endif  // DEBUG_TRACES
-    _complex->insert(Point(point.size(), point.begin(), point.end()));
+    complex_->insert(Point(point.size(), point.begin(), point.end()));
   }
 
   // Off_reader visitor maximal_face implementation - not used
@@ -115,7 +115,7 @@ class Delaunay_triangulation_off_visitor_reader {
    * @warning The returned pointer can be nullptr.
    */
   Complex* get_complex() const {
-    return _complex;
+    return complex_;
   }
 };
 
@@ -157,12 +157,12 @@ class Delaunay_triangulation_off_reader {
   : valid_(false) {
     std::ifstream stream(name_file);
     if (stream.is_open()) {
-      Delaunay_triangulation_off_visitor_reader<Complex> off_visitor(_complex);
+      Delaunay_triangulation_off_visitor_reader<Complex> off_visitor(complex_);
       Off_reader off_reader(stream);
       valid_ = off_reader.read(off_visitor);
       if (valid_) {
-        _complex = off_visitor.get_complex();
-        if (_complex == nullptr) {
+        complex_ = off_visitor.get_complex();
+        if (complex_ == nullptr) {
           std::cerr << "Delaunay_triangulation_off_reader::Delaunay_triangulation_off_reader off_visitor returns an empty pointer" << std::endl;
           valid_ = false;
         }
@@ -190,7 +190,7 @@ class Delaunay_triangulation_off_reader {
    */
   Complex* get_complex() const {
     if (valid_)
-      return _complex;
+      return complex_;
     return nullptr;
 
   }
@@ -199,7 +199,7 @@ class Delaunay_triangulation_off_reader {
   /** \brief OFF file read status.*/
   bool valid_;
   /** \brief A pointer on the Delaunay triangulation.*/
-  Complex* _complex;
+  Complex* complex_;
 };
 
 /** \brief OFF file writer from a Delaunay triangulation.

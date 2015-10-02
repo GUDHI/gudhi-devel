@@ -1,11 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
-
+#include <iostream>
 #include <string>
 
 // to construct a Delaunay_triangulation from a OFF file
-#include "gudhi/Delaunay_triangulation_off_io.h"
-#include "gudhi/Alpha_complex.h"
+#include <gudhi/Delaunay_triangulation_off_io.h>
+#include <gudhi/Alpha_complex.h>
 
 void usage(char * const progName) {
   std::cerr << "Usage: " << progName << " filename.off alpha_square_max_value" << std::endl;
