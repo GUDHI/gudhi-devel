@@ -3,6 +3,8 @@
 
 // todo do a viewer instructor that have directely a pointer to a QGLviewer and buffer ot not triangles
 
+// Workaround for moc-qt4 not parsing boost headers
+#include <CGAL/config.h>
 
 #include <memory>
 
