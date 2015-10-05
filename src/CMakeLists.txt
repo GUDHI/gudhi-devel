@@ -56,6 +56,6 @@ else()
   # data points generator
   add_subdirectory(data/points/generator)
 
-  install (FILES include/* DESTINATION include)
+  install (DIRECTORY include/gudhi DESTINATION include)
 
 endif()  
