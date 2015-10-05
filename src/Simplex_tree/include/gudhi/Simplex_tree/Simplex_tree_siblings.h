@@ -20,14 +20,14 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_SIMPLEX_TREE_SIBLINGS_H_
-#define SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_SIMPLEX_TREE_SIBLINGS_H_
-
-#include "boost/container/flat_map.hpp"
-#include "Simplex_tree_node_explicit_storage.h"
+#ifndef SIMPLEX_TREE_SIBLINGS_H_
+#define SIMPLEX_TREE_SIBLINGS_H_
 
 #include <utility>
 #include <vector>
+
+#include "boost/container/flat_map.hpp"
+#include "Simplex_tree_node_explicit_storage.h"
 
 namespace Gudhi {
 
@@ -79,7 +79,7 @@ class Simplex_tree_siblings {
                  members.end()) {
     for (auto& map_el : members_) {
       map_el.second.assign_children(this);
-	}
+    }
   }
 
   /*
@@ -123,4 +123,4 @@ class Simplex_tree_siblings {
 /* @} */  // end addtogroup simplex_tree
 }  // namespace Gudhi
 
-#endif  // SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_SIMPLEX_TREE_SIBLINGS_H_
+#endif  // SIMPLEX_TREE_SIBLINGS_H_

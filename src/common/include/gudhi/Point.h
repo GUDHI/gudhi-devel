@@ -1,13 +1,10 @@
-/*
- * Basic_geometry.h
- *  Created on: Feb 10, 2015
- * This file is part of the Gudhi Library. The Gudhi library 
+/*    This file is part of the Gudhi Library. The Gudhi library 
  *    (Geometric Understanding in Higher Dimensions) is a generic C++ 
  *    library for computational topology.
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Méditerranée (France)
+ *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -24,9 +21,8 @@
  * 
  */
 
-
-#ifndef BASIC_GEOMETRY_H_
-#define BASIC_GEOMETRY_H_
+#ifndef POINT_H_
+#define POINT_H_
 
 #include <cmath>
 #include <vector>
@@ -34,143 +30,141 @@
 #include <cstddef>
 #include <initializer_list>
 
-class Point_d{
-public:
-	Point_d(size_t dim=3):coords_(dim,0){}
-	Point_d(const Point_d& other):coords_(other.coords_){}
-	Point_d(const std::initializer_list<double>& list):coords_(list) {
-	}
-	template<typename CoordsIt>
-	Point_d(CoordsIt begin,CoordsIt end):coords_(begin,end){}
+class Point_d {
+ public:
+  Point_d(size_t dim = 3) : coords_(dim, 0) { }
 
-	size_t dimension() const{
-		return coords_.size();
-	}
+  Point_d(const Point_d& other) : coords_(other.coords_) { }
 
-	double x() const{
-		return coords_[0];
-	}
+  Point_d(const std::initializer_list<double>& list) : coords_(list) { }
 
-	double y() const{
-		return coords_[1];
-	}
+  template<typename CoordsIt>
+  Point_d(CoordsIt begin, CoordsIt end) : coords_(begin, end) { }
 
-	double z() const{
-		return coords_[2];
-	}
+  size_t dimension() const {
+    return coords_.size();
+  }
 
-	double& x(){
-		return coords_[0];
-	}
+  double x() const {
+    return coords_[0];
+  }
 
-	double& y(){
-		return coords_[1];
-	}
+  double y() const {
+    return coords_[1];
+  }
 
-	double& z(){
-		return coords_[2];
-	}
+  double z() const {
+    return coords_[2];
+  }
 
-	std::vector<double>::const_iterator begin() const{
-		return coords_.begin();
-	}
+  double& x() {
+    return coords_[0];
+  }
 
-	std::vector<double>::const_iterator end() const{
-		return coords_.end();
-	}
+  double& y() {
+    return coords_[1];
+  }
 
-	double& operator[](unsigned i){
-		return coords_[i];
-	}
-	const double& operator[](unsigned i) const{
-		return coords_[i];
-	}
+  double& z() {
+    return coords_[2];
+  }
 
-	double squared_norm() const{
-		double res = 0;
-		for(auto x : coords_)
-			res+= x*x;
-		return res;
-	}
+  std::vector<double>::const_iterator begin() const {
+    return coords_.begin();
+  }
 
-	friend double squared_dist(const Point_d& p1,const Point_d& p2){
-		assert(p1.dimension()==p2.dimension());
-		double res = 0;
-		for(unsigned i = 0; i < p1.coords_.size(); ++i)
-			res+= (p1[i]-p2[i])*(p1[i]-p2[i]);
-		return res;
-	}
+  std::vector<double>::const_iterator end() const {
+    return coords_.end();
+  }
 
-	/**
-	 * dot product
-	 */
-	double operator*(const Point_d& other) const{
-		assert(dimension()==other.dimension());
-		double res = 0;
-		for(unsigned i = 0; i < coords_.size(); ++i)
-			res+= coords_[i]*other[i];
-		return res;
-	}
+  double& operator[](unsigned i) {
+    return coords_[i];
+  }
 
-	/**
-	 * only if points have dimension 3
-	 */
-	Point_d cross_product(const Point_d& other){
-		assert(dimension()==3 && other.dimension()==3);
-		Point_d res(3);
-		res[0] = (*this)[1] * other[2] - (*this)[2] * other[1];
-		res[1] = (*this)[2] * other[0] - (*this)[0] * other[2];
-		res[2] = (*this)[0] * other[1] - (*this)[1] * other[0];
-		return res;
-	}
+  const double& operator[](unsigned i) const {
+    return coords_[i];
+  }
 
-	Point_d operator+(const Point_d& other) const{
-		assert(dimension()==other.dimension());
-		Point_d res(dimension());
-		for(unsigned i = 0; i < coords_.size(); ++i)
-			res[i] = (*this)[i] + other[i];
-		return res;
-	}
+  double squared_norm() const {
+    double res = 0;
+    for (auto x : coords_)
+      res += x * x;
+    return res;
+  }
 
-	Point_d operator*(double lambda) const{
-		Point_d res(dimension());
-		for(unsigned i = 0; i < coords_.size(); ++i)
-			res[i] = (*this)[i] * lambda;
-		return res;
-	}
+  friend double squared_dist(const Point_d& p1, const Point_d& p2) {
+    assert(p1.dimension() == p2.dimension());
+    double res = 0;
+    for (unsigned i = 0; i < p1.coords_.size(); ++i)
+      res += (p1[i] - p2[i])*(p1[i] - p2[i]);
+    return res;
+  }
 
-	Point_d operator/(double lambda) const{
-		Point_d res(dimension());
-		for(unsigned i = 0; i < coords_.size(); ++i)
-			res[i] = (*this)[i] / lambda;
-		return res;
-	}
+  /**
+   * dot product
+   */
+  double operator*(const Point_d& other) const {
+    assert(dimension() == other.dimension());
+    double res = 0;
+    for (unsigned i = 0; i < coords_.size(); ++i)
+      res += coords_[i] * other[i];
+    return res;
+  }
 
-	Point_d operator-(const Point_d& other) const{
-		assert(dimension()==other.dimension());
-		Point_d res(dimension());
-		for(unsigned i = 0; i < coords_.size(); ++i)
-			res[i] = (*this)[i] - other[i];
-		return res;
-	}
+  /**
+   * only if points have dimension 3
+   */
+  Point_d cross_product(const Point_d& other) {
+    assert(dimension() == 3 && other.dimension() == 3);
+    Point_d res(3);
+    res[0] = (*this)[1] * other[2] - (*this)[2] * other[1];
+    res[1] = (*this)[2] * other[0] - (*this)[0] * other[2];
+    res[2] = (*this)[0] * other[1] - (*this)[1] * other[0];
+    return res;
+  }
 
-	friend Point_d unit_normal(const Point_d& p1,const Point_d& p2,const Point_d& p3){
-		assert(p1.dimension()==3);
-		assert(p2.dimension()==3);
-		assert(p3.dimension()==3);
-		Point_d p1p2 = p2 - p1;
-		Point_d p1p3 = p3 - p1;
-		Point_d res(p1p2.cross_product(p1p3));
-		return res / std::sqrt(res.squared_norm());
-	}
+  Point_d operator+(const Point_d& other) const {
+    assert(dimension() == other.dimension());
+    Point_d res(dimension());
+    for (unsigned i = 0; i < coords_.size(); ++i)
+      res[i] = (*this)[i] + other[i];
+    return res;
+  }
 
+  Point_d operator*(double lambda) const {
+    Point_d res(dimension());
+    for (unsigned i = 0; i < coords_.size(); ++i)
+      res[i] = (*this)[i] * lambda;
+    return res;
+  }
 
-private:
-	std::vector<double> coords_;
+  Point_d operator/(double lambda) const {
+    Point_d res(dimension());
+    for (unsigned i = 0; i < coords_.size(); ++i)
+      res[i] = (*this)[i] / lambda;
+    return res;
+  }
+
+  Point_d operator-(const Point_d& other) const {
+    assert(dimension() == other.dimension());
+    Point_d res(dimension());
+    for (unsigned i = 0; i < coords_.size(); ++i)
+      res[i] = (*this)[i] - other[i];
+    return res;
+  }
+
+  friend Point_d unit_normal(const Point_d& p1, const Point_d& p2, const Point_d& p3) {
+    assert(p1.dimension() == 3);
+    assert(p2.dimension() == 3);
+    assert(p3.dimension() == 3);
+    Point_d p1p2 = p2 - p1;
+    Point_d p1p3 = p3 - p1;
+    Point_d res(p1p2.cross_product(p1p3));
+    return res / std::sqrt(res.squared_norm());
+  }
+
+ private:
+  std::vector<double> coords_;
 };
 
-
-
-
-
-#endif /* BASIC_GEOMETRY_H_ */
+#endif  // POINT_H_
