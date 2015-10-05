@@ -524,8 +524,8 @@ class Persistent_cohomology {
                       Arith_element charac) {
     Simplex_key key = cpx_->key(sigma);
     // Create a column containing only one cell,
-    Column * new_col = column_pool_.construct(Column(key));
-    Cell * new_cell = cell_pool_.construct(Cell(key, x, new_col));
+    Column * new_col = column_pool_.construct(key);
+    Cell * new_cell = cell_pool_.construct(key, x, new_col);
     new_col->col_.push_back(*new_cell);
     // and insert it in the matrix, in constant time thanks to the hint cam_.end().
     // Indeed *new_col has the biggest lexicographic value because key is the
