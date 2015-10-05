@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DISTANCE_FUNCTION_H_
-#define DISTANCE_FUNCTION_H_
+#ifndef DISTANCE_FUNCTIONS_H_
+#define DISTANCE_FUNCTIONS_H_
 
 /* Compute the Euclidean distance between two Points given
  * by a range of coordinates. The points are assumed to have 
@@ -38,4 +38,4 @@ double euclidean_distance(Point &p1, Point &p2) {
   return sqrt(dist);
 }
 
-#endif  // DISTANCE_FUNCTION_H_
+#endif  // DISTANCE_FUNCTIONS_H_
