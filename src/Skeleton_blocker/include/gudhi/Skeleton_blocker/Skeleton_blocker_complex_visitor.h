@@ -19,10 +19,10 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SKELETON_BLOCKER_COMPLEX_VISITOR_H_
-#define SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SKELETON_BLOCKER_COMPLEX_VISITOR_H_
+#ifndef SKELETON_BLOCKER_SKELETON_BLOCKER_COMPLEX_VISITOR_H_
+#define SKELETON_BLOCKER_SKELETON_BLOCKER_COMPLEX_VISITOR_H_
 
-#include "gudhi/Skeleton_blocker/Skeleton_blocker_simplex.h"
+#include <gudhi/Skeleton_blocker/Skeleton_blocker_simplex.h>
 
 namespace Gudhi {
 
@@ -59,7 +59,7 @@ class Skeleton_blocker_complex_visitor {
    * remove_edge(b,x)
    */
   virtual void on_swaped_edge(Vertex_handle a, Vertex_handle b,
-                              Vertex_handle x)=0;
+                              Vertex_handle x) = 0;
   virtual void on_add_blocker(
       const Skeleton_blocker_simplex<Vertex_handle>&) = 0;
   virtual void on_delete_blocker(
@@ -132,4 +132,4 @@ class Print_complex_visitor : public Skeleton_blocker_complex_visitor<
 
 }  // namespace Gudhi
 
-#endif  // SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SKELETON_BLOCKER_COMPLEX_VISITOR_H_
+#endif  // SKELETON_BLOCKER_SKELETON_BLOCKER_COMPLEX_VISITOR_H_

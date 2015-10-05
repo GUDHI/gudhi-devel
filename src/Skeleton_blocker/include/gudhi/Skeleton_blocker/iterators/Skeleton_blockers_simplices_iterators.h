@@ -19,19 +19,19 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef GUDHI_SKELETON_BLOCKERS_SIMPLICES_ITERATORS_H_
-#define GUDHI_SKELETON_BLOCKERS_SIMPLICES_ITERATORS_H_
+#ifndef SKELETON_BLOCKER_ITERATORS_SKELETON_BLOCKERS_SIMPLICES_ITERATORS_H_
+#define SKELETON_BLOCKER_ITERATORS_SKELETON_BLOCKERS_SIMPLICES_ITERATORS_H_
 
-#include "boost/iterator/iterator_facade.hpp"
+#include <gudhi/Skeleton_blocker_link_complex.h>
+#include <gudhi/Skeleton_blocker/Skeleton_blocker_link_superior.h>
+#include <gudhi/Skeleton_blocker/internal/Trie.h>
+#include <gudhi/Utils.h>
+
+#include <boost/iterator/iterator_facade.hpp>
 
 #include <memory>
 #include <list>
 #include <iostream>
-
-#include "gudhi/Skeleton_blocker_link_complex.h"
-#include "gudhi/Skeleton_blocker/Skeleton_blocker_link_superior.h"
-#include "gudhi/Skeleton_blocker/internal/Trie.h"
-#include "gudhi/Utils.h"
 
 namespace Gudhi {
 
@@ -68,7 +68,7 @@ public boost::iterator_facade < Simplex_around_vertex_iterator<SkeletonBlockerCo
   Vertex_handle v;
   std::shared_ptr<Link> link_v;
   std::shared_ptr<Trie> trie;
-  std::list<Trie*> nodes_to_be_seen; // todo deque
+  std::list<Trie*> nodes_to_be_seen;  // todo deque
 
  public:
   Simplex_around_vertex_iterator() : complex(0) {}
@@ -159,7 +159,7 @@ public boost::iterator_facade < Simplex_around_vertex_iterator<SkeletonBlockerCo
 
     bool both_non_empty = !nodes_to_be_seen.empty() && !other.nodes_to_be_seen.empty();
 
-    if (!both_non_empty) return false; //one is empty the other is not
+    if (!both_non_empty) return false;  // one is empty the other is not
 
     bool same_node = (**(nodes_to_be_seen.begin()) == **(other.nodes_to_be_seen.begin()));
     return same_node;
@@ -174,7 +174,6 @@ public boost::iterator_facade < Simplex_around_vertex_iterator<SkeletonBlockerCo
     for (auto childs : first_node->childs) {
       nodes_to_be_seen.push_back(childs.get());
     }
-
   }
 
   Simplex_handle dereference() const {
@@ -309,4 +308,4 @@ public boost::iterator_facade < Simplex_iterator<SkeletonBlockerComplex>
 
 }  // namespace Gudhi
 
-#endif  // GUDHI_SKELETON_BLOCKERS_SIMPLICES_ITERATORS_H_
+#endif  // SKELETON_BLOCKER_ITERATORS_SKELETON_BLOCKERS_SIMPLICES_ITERATORS_H_

@@ -23,11 +23,12 @@
 #ifndef SIMPLEX_TREE_SIBLINGS_H_
 #define SIMPLEX_TREE_SIBLINGS_H_
 
+#include <gudhi/Simplex_tree/Simplex_tree_node_explicit_storage.h>
+
+#include <boost/container/flat_map.hpp>
+
 #include <utility>
 #include <vector>
-
-#include "boost/container/flat_map.hpp"
-#include "Simplex_tree_node_explicit_storage.h"
 
 namespace Gudhi {
 

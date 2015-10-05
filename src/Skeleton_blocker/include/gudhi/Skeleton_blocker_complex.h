@@ -20,8 +20,20 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_COMPLEX_H_
-#define SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_COMPLEX_H_
+#ifndef SKELETON_BLOCKER_COMPLEX_H_
+#define SKELETON_BLOCKER_COMPLEX_H_
+
+#include <gudhi/Skeleton_blocker/iterators/Skeleton_blockers_iterators.h>
+#include <gudhi/Skeleton_blocker_link_complex.h>
+#include <gudhi/Skeleton_blocker/Skeleton_blocker_link_superior.h>
+#include <gudhi/Skeleton_blocker/Skeleton_blocker_sub_complex.h>
+#include <gudhi/Skeleton_blocker/Skeleton_blocker_simplex.h>
+
+#include <gudhi/Skeleton_blocker/Skeleton_blocker_complex_visitor.h>
+#include <gudhi/Skeleton_blocker/internal/Top_faces.h>
+#include <gudhi/Skeleton_blocker/internal/Trie.h>
+
+#include <gudhi/Utils.h>
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
@@ -39,18 +51,6 @@
 #include <string>
 #include <algorithm>
 #include <utility>
-
-#include "gudhi/Skeleton_blocker/iterators/Skeleton_blockers_iterators.h"
-#include "gudhi/Skeleton_blocker_link_complex.h"
-#include "gudhi/Skeleton_blocker/Skeleton_blocker_link_superior.h"
-#include "gudhi/Skeleton_blocker/Skeleton_blocker_sub_complex.h"
-#include "gudhi/Skeleton_blocker/Skeleton_blocker_simplex.h"
-
-#include "gudhi/Skeleton_blocker/Skeleton_blocker_complex_visitor.h"
-#include "gudhi/Skeleton_blocker/internal/Top_faces.h"
-#include "gudhi/Skeleton_blocker/internal/Trie.h"
-
-#include "gudhi/Utils.h"
 
 namespace Gudhi {
 
@@ -1406,7 +1406,8 @@ class Skeleton_blocker_complex {
   Const_complex_blocker_around_vertex_iterator;
 
   typedef boost::iterator_range <Complex_blocker_around_vertex_iterator> Complex_blocker_around_vertex_range;
-  typedef boost::iterator_range <Const_complex_blocker_around_vertex_iterator> Const_complex_blocker_around_vertex_range;
+  typedef boost::iterator_range <Const_complex_blocker_around_vertex_iterator>
+  Const_complex_blocker_around_vertex_range;
 
  public:
   /**
@@ -1514,7 +1515,7 @@ class Skeleton_blocker_complex {
  * return the total number of simplices
  */
 template<typename Complex, typename SimplexHandleIterator>
-Complex make_complex_from_top_faces(SimplexHandleIterator simplex_begin, SimplexHandleIterator simplex_end, 
+Complex make_complex_from_top_faces(SimplexHandleIterator simplex_begin, SimplexHandleIterator simplex_end,
                                     bool is_flag_complex = false) {
   typedef typename Complex::Simplex_handle Simplex_handle;
   std::vector<Simplex_handle> simplices;
@@ -1531,6 +1532,4 @@ Complex make_complex_from_top_faces(SimplexHandleIterator simplex_begin, Simplex
 
 #include "Skeleton_blocker_simplifiable_complex.h"
 
-
-#endif  // SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_COMPLEX_H_
-
+#endif  // SKELETON_BLOCKER_COMPLEX_H_

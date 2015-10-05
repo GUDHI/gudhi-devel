@@ -23,10 +23,16 @@
 #ifndef READER_UTILS_H_
 #define READER_UTILS_H_
 
+#include <gudhi/graph_simplicial_complex.h>
+
+#include <boost/graph/adjacency_list.hpp>
+
 #include <iostream>
 #include <fstream>
-#include <boost/graph/adjacency_list.hpp>
-#include "gudhi/graph_simplicial_complex.h"
+#include <map>
+#include <limits>  // for numeric_limits<>
+#include <string>
+#include <vector>
 
 /**
  * \brief Read a set of points to turn it

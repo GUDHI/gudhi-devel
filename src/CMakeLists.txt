@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 2.6)
 project(GUDHI)
 
+# Do not forget to  version number.
+set (GUDHI_MAJOR_VERSION 1)
+set (GUDHI_MINOR_VERSION 2)
+set (GUDHI_PATCH_VERSION 0)
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
 find_package(Boost REQUIRED COMPONENTS system filesystem program_options chrono timer REQUIRED)
@@ -50,5 +55,7 @@ else()
 
   # data points generator
   add_subdirectory(data/points/generator)
+
+  install (FILES include/* DESTINATION include)
 
 endif()  

@@ -23,11 +23,11 @@
 #ifndef SRC_PERSISTENT_COHOMOLOGY_INCLUDE_GUDHI_PERSISTENT_COHOMOLOGY_PERSISTENT_COHOMOLOGY_COLUMN_H_
 #define SRC_PERSISTENT_COHOMOLOGY_INCLUDE_GUDHI_PERSISTENT_COHOMOLOGY_PERSISTENT_COHOMOLOGY_COLUMN_H_
 
-#include <list>
+#include <boost/tuple/tuple.hpp>
+#include <boost/intrusive/set.hpp>
+#include <boost/intrusive/list.hpp>
 
-#include "boost/tuple/tuple.hpp"
-#include "boost/intrusive/set.hpp"
-#include "boost/intrusive/list.hpp"
+#include <list>
 
 namespace Gudhi {
 
