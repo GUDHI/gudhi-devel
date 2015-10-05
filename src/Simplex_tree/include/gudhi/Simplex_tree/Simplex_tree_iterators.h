@@ -24,6 +24,10 @@
 #define SIMPLEX_TREE_ITERATORS_H_
 
 #include <boost/iterator/iterator_facade.hpp>
+#include <boost/version.hpp>
+#if BOOST_VERSION >= 105600
+# include <boost/container/static_vector.hpp>
+#endif
 
 #include <vector>
 
@@ -131,8 +135,7 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
     }
 
     Siblings * for_sib = sib_;
-    for (typename std::vector<Vertex_handle>::reverse_iterator rit = suffix_
-        .rbegin(); rit != suffix_.rend(); ++rit) {
+    for (auto rit = suffix_.rbegin(); rit != suffix_.rend(); ++rit) {
       sh_ = for_sib->find(*rit);
       for_sib = sh_->second.children();
     }
@@ -142,9 +145,18 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
     sib_ = sib_->oncles();
   }
 
+  // Most of the storage should be moved to the range, iterators should be light.
   Vertex_handle last_;  // last vertex of the simplex
   Vertex_handle next_;  // next vertex to push in suffix_
+#if BOOST_VERSION >= 105600
+  // 40 seems a conservative bound on the dimension of a Simplex_tree for now,
+  // as it would not fit on the biggest hard-drive.
+  boost::container::static_vector<Vertex_handle, 40> suffix_;
+  // static_vector still has some overhead compared to a trivial hand-made
+  // version using std::aligned_storage, or compared to making suffix_ static.
+#else
   std::vector<Vertex_handle> suffix_;
+#endif
   Siblings * sib_;  // where the next search will start from
   Simplex_handle sh_;  // current Simplex_handle in the boundary
   SimplexTree * st_;  // simplex containing the simplicial complex
