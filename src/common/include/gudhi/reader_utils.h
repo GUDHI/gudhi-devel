@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef READER_UTILS_H
-#define READER_UTILS_H
+#ifndef READER_UTILS_H_
+#define READER_UTILS_H_
 
 #include <iostream>
 #include <fstream>
@@ -187,4 +187,4 @@ bool read_hasse_simplex(std::istream & in_, std::vector< Simplex_key > & boundar
   return true;
 }
 
-#endif  // READER_UTILS_H
+#endif  // READER_UTILS_H_

@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GRAPH_SIMPLICIAL_COMPLEX_H
-#define GRAPH_SIMPLICIAL_COMPLEX_H
+#ifndef GRAPH_SIMPLICIAL_COMPLEX_H_
+#define GRAPH_SIMPLICIAL_COMPLEX_H_
 
 #include <boost/graph/adjacency_list.hpp>
 
@@ -92,4 +92,4 @@ Graph_t compute_proximity_graph(PointCloud &points
   return skel_graph;
 }
 
-#endif  // GRAPH_SIMPLICIAL_COMPLEX_H
+#endif  // GRAPH_SIMPLICIAL_COMPLEX_H_

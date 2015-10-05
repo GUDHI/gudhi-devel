@@ -21,8 +21,8 @@
  * 
  */
 
-#ifndef TEST_H
-#define TEST_H
+#ifndef TEST_H_
+#define TEST_H_
 
 #include <list>
 #include <string>
@@ -102,4 +102,4 @@ class Tests {
   }
 };
 
-#endif  // TEST_H
+#endif  // TEST_H_
