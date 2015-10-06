@@ -1,0 +1,15 @@
+# - Config file for the GUDHI package
+# It defines the following variables
+#  GUDHI_INCLUDE_DIRS - include directories for GUDHI
+#  GUDHI_LIBRARIES    - libraries to link against
+#  GUDHI_EXECUTABLE   - the executables
+
+# Compute paths
+get_filename_component(GUDHI_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+set(GUDHI_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
+
+# Our library dependencies (contains definitions for IMPORTED targets)
+include("${GUDHI_CMAKE_DIR}/GUDHITargets.cmake")
+
+# These are IMPORTED targets created by GUDHITargets.cmake
+set(GUDHI_EXECUTABLE mini_simplex_tree)

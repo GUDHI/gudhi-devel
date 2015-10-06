@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.6)
 project(GUDHIdev)
 
+include(CMakeGUDHIVersion.txt)
+# Generate GUDHI official version file
+configure_file(GUDHIVersion.cmake.in "${PROJECT_BINARY_DIR}/GUDHIVersion.cmake" @ONLY)
+
 find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework chrono timer program_options thread REQUIRED)
 
 set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
