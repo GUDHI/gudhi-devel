@@ -55,6 +55,7 @@ cp $ROOT_DIR/src/Doxyfile $VERSION_DIR
 cp -R $ROOT_DIR/biblio $VERSION_DIR
 cp $ROOT_DIR/src/GUDHIConfigVersion.cmake.in $VERSION_DIR
 cp $ROOT_DIR/src/GUDHIConfig.cmake.in $VERSION_DIR
+cp $ROOT_DIR/GUDHIVersion.cmake.in $VERSION_DIR
 
 # PACKAGE LEVEL COPY
 PACKAGE_INC_DIR="/include"
