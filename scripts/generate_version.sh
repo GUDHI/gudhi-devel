@@ -17,7 +17,7 @@ fi
 # SVN STATUS CHECK OR IF FORCED BY USER
 if [ "$1" != "-f" ]
 then
-  SVN_STATUS=`svn status $ROOT_DIR`
+  SVN_STATUS=`svn status $ROOT_DIR | grep -v $VERSION_FILE`
   echo $SVN_STATUS
 fi
 
