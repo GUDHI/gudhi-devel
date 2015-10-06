@@ -85,6 +85,7 @@ struct Simplex_tree_options_full_featured {
   typedef int Simplex_key;
   static const bool store_key = true;
   static const bool store_filtration = true;
+  static const bool contiguous_vertices = true;
 };
 
 /**
@@ -564,9 +565,21 @@ class Simplex_tree {
   /** \brief Returns the Simplex_handle corresponding to the 0-simplex
    * representing the vertex with Vertex_handle v. */
   Simplex_handle find_vertex(Vertex_handle v) {
-    return root_.members_.begin() + v;
+    if (Options::contiguous_vertices) {
+      assert(contiguous_vertices());
+      return root_.members_.begin() + v;
+    } else {
+      return root_.members_.find(v);
+    }
   }
-  //{ return root_.members_.find(v); }
+
+  /** \private \brief Test if the vertices have contiguous numbering: 0, 1, etc.  */
+  bool contiguous_vertices() const {
+    if(root_.members_.empty()) return true;
+    if(root_.members_.front()!=0) return false;
+    if(root_.members_.back()!=root_.members_.size()-1) return false;
+    return true;
+  }
 
  private:
   /** \brief Inserts a simplex represented by a vector of vertex.
