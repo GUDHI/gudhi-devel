@@ -79,11 +79,12 @@ else()
   add_subdirectory(src/Bottleneck/example)
   add_subdirectory(src/Bottleneck/test)
 
-  # GudhUI
-  add_subdirectory(src/GudhUI)
-
   # data points generator
   add_subdirectory(data/points/generator)
+
+  # Please let GudhUI in last compilation position as QT is known to modify CMAKE_CXX_FLAGS
+  # GudhUI
+  add_subdirectory(src/GudhUI)
 
 endif()  
 
