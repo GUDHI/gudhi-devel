@@ -16,8 +16,8 @@
 //
 // Author(s)     : Fernando Cacciola <fernando.cacciola@geometryfactory.com>
 //
-#ifndef CGAL_MODIFIABLE_PRIORITY_QUEUE_H
-#define CGAL_MODIFIABLE_PRIORITY_QUEUE_H
+#ifndef CONTRACTION_CGAL_MODIFIABLE_PRIORITY_QUEUE_H
+#define CONTRACTION_CGAL_MODIFIABLE_PRIORITY_QUEUE_H
 
 #define CGAL_SURFACE_MESH_SIMPLIFICATION_USE_RELAXED_HEAP
 
@@ -27,65 +27,73 @@
 
 namespace CGAL {
 
-template <class IndexedType_ 
-         ,class Compare_ = std::less<IndexedType_>
-         ,class ID_      = boost::identity_property_map
-         >
-class Modifiable_priority_queue
-{
-public:
-
+template <class IndexedType_, class Compare_ = std::less<IndexedType_>, class ID_ = boost::identity_property_map>
+class Modifiable_priority_queue {
+ public:
   typedef Modifiable_priority_queue Self;
-  
-  typedef IndexedType_ IndexedType ;
-  typedef Compare_     Compare;
-  typedef ID_          ID ;
-  
-  typedef boost::relaxed_heap<IndexedType,Compare,ID> Heap;
+
+  typedef IndexedType_ IndexedType;
+  typedef Compare_ Compare;
+  typedef ID_ ID;
+
+  typedef boost::relaxed_heap<IndexedType, Compare, ID> Heap;
   typedef typename Heap::value_type value_type;
-  typedef typename Heap::size_type  size_type;
-  
-  typedef bool handle ;
-  
-public:
+  typedef typename Heap::size_type size_type;
 
-  Modifiable_priority_queue( size_type largest_ID, Compare const& c, ID const& id ) : mHeap(largest_ID,c,id) {}
-  
-  handle push ( value_type const& v ) { mHeap.push(v) ; return handle(true) ; }
-  
-  handle update ( value_type const& v, handle h ) { mHeap.update(v); return h ; }
-  
-  handle erase ( value_type const& v, handle  ) { mHeap.remove(v); return null_handle() ; }
+  typedef bool handle;
 
-  value_type top() const { return mHeap.top() ; }
-  
-  void pop() { mHeap.pop(); }
-  
-  bool empty() const { return mHeap.empty() ; }
+ public:
+  Modifiable_priority_queue(size_type largest_ID, Compare const& c, ID const& id) : mHeap(largest_ID, c, id) { }
 
-  bool contains ( value_type const& v ) { return mHeap.contains(v) ; }
+  handle push(value_type const& v) {
+    mHeap.push(v);
+    return handle(true);
+  }
 
-  boost::optional<value_type> extract_top()
-  {
-    boost::optional<value_type> r ;
-    if ( !empty() )
-    {
+  handle update(value_type const& v, handle h) {
+    mHeap.update(v);
+    return h;
+  }
+
+  handle erase(value_type const& v, handle) {
+    mHeap.remove(v);
+    return null_handle();
+  }
+
+  value_type top() const {
+    return mHeap.top();
+  }
+
+  void pop() {
+    mHeap.pop();
+  }
+
+  bool empty() const {
+    return mHeap.empty();
+  }
+
+  bool contains(value_type const& v) {
+    return mHeap.contains(v);
+  }
+
+  boost::optional<value_type> extract_top() {
+    boost::optional<value_type> r;
+    if (!empty()) {
       value_type v = top();
       pop();
-      r = boost::optional<value_type>(v) ;
-    }  
-    return r ;
+      r = boost::optional<value_type>(v);
+    }
+    return r;
   }
-  
-  static handle null_handle() { return handle(false); }
-  
-private:
 
-  Heap mHeap ;  
-    
-} ;
+  static handle null_handle() {
+    return handle(false);
+  }
 
-} //namespace CGAL
+ private:
+  Heap mHeap;
+};
 
-#endif
- 
+}  //namespace CGAL
+
+#endif  // CONTRACTION_CGAL_MODIFIABLE_PRIORITY_QUEUE_H
