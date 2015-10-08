@@ -1,13 +1,10 @@
-/*
- * Menu_persistence.cpp
- *  Created on: Jan 27, 2015
- * This file is part of the Gudhi Library. The Gudhi library 
+/* This file is part of the Gudhi Library. The Gudhi library 
  *    (Geometric Understanding in Higher Dimensions) is a generic C++ 
  *    library for computational topology.
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Méditerranée (France)
+ *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -27,34 +24,30 @@
 
 #include "Menu_persistence.h"
 
-Menu_persistence::Menu_persistence(QMainWindow* parent_):parent(parent_)
-{
-	setupUi(this);
-	connectActions(parent_);
+Menu_persistence::Menu_persistence(QMainWindow* parent_) : parent(parent_) {
+  setupUi(this);
+  connectActions(parent_);
 }
 
-void Menu_persistence::connectActions(QMainWindow* parent){
-	QObject::connect(
-			this,
-			SIGNAL(compute_persistence(int,double,int,double)),
-			parent,
-			SLOT(compute_persistence(int,double,int,double))
-	);
+void Menu_persistence::connectActions(QMainWindow* parent) {
+  QObject::connect(this,
+                   SIGNAL(compute_persistence(int, double, int, double)),
+                   parent,
+                   SLOT(compute_persistence(int, double, int, double)));
 }
 
-void Menu_persistence::send_compute_persistence(){
-	emit(compute_persistence(p_spinBox->value(),threshold_doubleSpinBox->value(),
-			maxdimension_spinBox->value(),minpersistence_doubleSpinBox->value()));
+void Menu_persistence::send_compute_persistence() {
+  emit(compute_persistence(p_spinBox->value(), threshold_doubleSpinBox->value(),
+                           maxdimension_spinBox->value(), minpersistence_doubleSpinBox->value()));
 }
 
-void Menu_persistence::accept(){
-	send_compute_persistence();
+void Menu_persistence::accept() {
+  send_compute_persistence();
 }
 
-//void Menu_persistence::compute_persistence(int p_fied,double threshold,int dim_max,double min_persistence){
-////	if(checkBoxAutoUpdate->isChecked())
-////		emit(compute_k_nearest_neighbors((unsigned)spinBoxK->value()));
-//}
-
+// void Menu_persistence::compute_persistence(int p_fied,double threshold,int dim_max,double min_persistence) {
+//  if(checkBoxAutoUpdate->isChecked())
+//    emit(compute_k_nearest_neighbors((unsigned)spinBoxK->value()));
+// }
 
 #include "Menu_persistence.moc"
