@@ -573,11 +573,12 @@ class Simplex_tree {
     }
   }
 
+ public:
   /** \private \brief Test if the vertices have contiguous numbering: 0, 1, etc.  */
   bool contiguous_vertices() const {
     if(root_.members_.empty()) return true;
-    if(root_.members_.front()!=0) return false;
-    if(root_.members_.back()!=root_.members_.size()-1) return false;
+    if(root_.members_.begin()->first!=0) return false;
+    if(std::prev(root_.members_.end())->first!=root_.members_.size()-1) return false;
     return true;
   }
 
