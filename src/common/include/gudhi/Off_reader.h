@@ -166,7 +166,7 @@ class Off_reader {
       iss >> num_face_vertices;
       std::vector<int> face;
       face.assign(std::istream_iterator<int>(iss), std::istream_iterator<int>());
-      if (!face.size() == off_info_.num_vertices) return false;
+      if (face.size() != off_info_.dim) return false;
       visitor.maximal_face(face);
     }
     return true;

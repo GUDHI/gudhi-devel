@@ -21,9 +21,11 @@
 
 #define CGAL_SURFACE_MESH_SIMPLIFICATION_USE_RELAXED_HEAP
 
-#include <climits> // Neeeded by the following Boost header for CHAR_BIT.
 #include <boost/optional.hpp>
 #include <boost/pending/relaxed_heap.hpp>
+
+#include <climits>  // Neeeded by the following Boost header for CHAR_BIT.
+#include <functional>  // for less
 
 namespace CGAL {
 
@@ -94,6 +96,6 @@ class Modifiable_priority_queue {
   Heap mHeap;
 };
 
-}  //namespace CGAL
+}  // namespace CGAL
 
 #endif  // CONTRACTION_CGAL_MODIFIABLE_PRIORITY_QUEUE_H

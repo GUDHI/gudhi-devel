@@ -48,8 +48,6 @@ else()
   add_subdirectory(example/Persistent_cohomology)                   
   add_subdirectory(example/Skeleton_blocker)                   
   add_subdirectory(example/Contraction)                   
-  add_subdirectory(example/Hasse_complex)
-  add_subdirectory(example/Bottleneck)
 
   # data points generator
   add_subdirectory(data/points/generator)

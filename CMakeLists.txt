@@ -75,9 +75,6 @@ else()
   add_subdirectory(src/Skeleton_blocker/test) 
   add_subdirectory(src/Skeleton_blocker/example) 
   add_subdirectory(src/Contraction/example)
-  add_subdirectory(src/Hasse_complex/example)
-  add_subdirectory(src/Bottleneck/example)
-  add_subdirectory(src/Bottleneck/test)
 
   # data points generator
   add_subdirectory(data/points/generator)
