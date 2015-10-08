@@ -120,7 +120,9 @@ class Simplex_tree {
   /* Type of node in the simplex tree. */
   typedef Simplex_tree_node_explicit_storage<Simplex_tree> Node;
   /* Type of dictionary Vertex_handle -> Node for traversing the simplex tree. */
-  // Note: this wastes space when Vertex_handle is 32 bits and Node is aligned on 64 bits. It would be better to use a flat_set (with our own comparator) where we can control the layout of the struct (put Vertex_handle and Simplex_key next to each other).
+  // Note: this wastes space when Vertex_handle is 32 bits and Node is aligned on 64 bits. It would be better to use a
+  // flat_set (with our own comparator) where we can control the layout of the struct (put Vertex_handle and
+  // Simplex_key next to each other).
   typedef typename boost::container::flat_map<Vertex_handle, Node> Dictionary;
 
   /* \brief Set of nodes sharing a same parent in the simplex tree. */
@@ -131,7 +133,7 @@ class Simplex_tree {
     Key_simplex_base_real() : key_(-1) {}
     void assign_key(Simplex_key k) { key_ = k; }
     Simplex_key key() const { return key_; }
-    private:
+   private:
     Simplex_key key_;
   };
   struct Key_simplex_base_dummy {
@@ -145,7 +147,7 @@ class Simplex_tree {
     Filtration_simplex_base_real() : filt_(0) {}
     void assign_filtration(Filtration_value f) { filt_ = f; }
     Filtration_value filtration() const { return filt_; }
-    private:
+   private:
     Filtration_value filt_;
   };
   struct Filtration_simplex_base_dummy {
@@ -153,7 +155,8 @@ class Simplex_tree {
     void assign_filtration(Filtration_value f) { assert(f == 0); }
     Filtration_value filtration() const { return 0; }
   };
-  typedef typename std::conditional<Options::store_filtration, Filtration_simplex_base_real, Filtration_simplex_base_dummy>::type Filtration_simplex_base;
+  typedef typename std::conditional<Options::store_filtration, Filtration_simplex_base_real,
+    Filtration_simplex_base_dummy>::type Filtration_simplex_base;
 
  public:
   /** \brief Handle type to a simplex contained in the simplicial complex represented
@@ -271,7 +274,7 @@ class Simplex_tree {
    * The filtration must be valid. If the filtration has not been initialized yet, the
    * method initializes it (i.e. order the simplices). If the complex has changed since the last time the filtration
    * was initialized, please call `initialize_filtration()` to recompute it. */
-  Filtration_simplex_range const& filtration_simplex_range(Indexing_tag=Indexing_tag()) {
+  Filtration_simplex_range const& filtration_simplex_range(Indexing_tag = Indexing_tag()) {
     if (filtration_vect_.empty()) {
       initialize_filtration();
     }

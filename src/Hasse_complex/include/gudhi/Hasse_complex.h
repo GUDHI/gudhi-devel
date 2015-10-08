@@ -26,6 +26,8 @@
 #include <boost/iterator/counting_iterator.hpp>
 
 #include <algorithm>
+#include <utility>  // for pair
+#include <vector>
 
 namespace Gudhi {
 
@@ -71,11 +73,10 @@ template < typename FiltrationValue = double
 >
 class Hasse_complex {
  public:
-
   typedef Hasse_simplex<Hasse_complex> Hasse_simp;
   typedef FiltrationValue Filtration_value;
   typedef SimplexKey Simplex_key;
-  typedef int Simplex_handle;  //index in vector complex_
+  typedef int Simplex_handle;  // index in vector complex_
 
   typedef boost::counting_iterator< Simplex_handle > Filtration_simplex_iterator;
   typedef boost::iterator_range<Filtration_simplex_iterator> Filtration_simplex_range;
@@ -214,8 +215,8 @@ std::istream& operator>>(std::istream & is
   typename Hasse_complex<T1, T2, T3>::Filtration_value max_fil = 0;
   int max_dim = -1;
   int key = 0;
-  while (read_hasse_simplex(is, boundary, fil))  //read all simplices in the file as a list of vertices
-  {
+  // read all simplices in the file as a list of vertices
+  while (read_hasse_simplex(is, boundary, fil)) {
     // insert every simplex in the simplex tree
     hcpx.complex_.push_back(Hasse_simplex< Hasse_complex<T1, T2, T3> >(key, fil, boundary));
 

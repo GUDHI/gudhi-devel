@@ -21,8 +21,8 @@
  * 
  */
 
-#ifndef UTILS_COLLAPSOR_H_
-#define UTILS_COLLAPSOR_H_
+#ifndef UTILS_EDGE_COLLAPSOR_H_
+#define UTILS_EDGE_COLLAPSOR_H_
 
 #include <list>
 #include "utils/Edge_contractor.h"
@@ -94,4 +94,4 @@ template<typename SkBlComplex> class Edge_collapsor {
   }
 };
 
-#endif  // UTILS_COLLAPSOR_H_
+#endif  // UTILS_EDGE_COLLAPSOR_H_

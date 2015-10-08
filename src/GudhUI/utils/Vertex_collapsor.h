@@ -24,6 +24,8 @@
 #ifndef UTILS_VERTEX_COLLAPSOR_H_
 #define UTILS_VERTEX_COLLAPSOR_H_
 
+#include <list>
+
 #include "utils/Edge_contractor.h"
 #include "utils/Furthest_point_epsilon_net.h"
 #include "utils/UI_utils.h"

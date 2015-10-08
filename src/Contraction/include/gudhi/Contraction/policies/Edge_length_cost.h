@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CONTRACTION_POLICIES_DUMMY_EDGE_LENGTH_COST_H_
-#define CONTRACTION_POLICIES_DUMMY_EDGE_LENGTH_COST_H_
+#ifndef CONTRACTION_POLICIES_EDGE_LENGTH_COST_H_
+#define CONTRACTION_POLICIES_EDGE_LENGTH_COST_H_
 
 #include <gudhi/Contraction/policies/Cost_policy.h>
 
@@ -53,4 +53,4 @@ class Edge_length_cost : public Cost_policy<EdgeProfile> {
 
 }  // namespace Gudhi
 
-#endif  // CONTRACTION_POLICIES_DUMMY_EDGE_LENGTH_COST_H_
+#endif  // CONTRACTION_POLICIES_EDGE_LENGTH_COST_H_

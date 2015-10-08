@@ -21,8 +21,8 @@
  * 
  */
 
-#ifndef VIEW_VIEWER_INSTRUCTOR_H
-#define VIEW_VIEWER_INSTRUCTOR_H
+#ifndef VIEW_VIEWER_INSTRUCTOR_H_
+#define VIEW_VIEWER_INSTRUCTOR_H_
 
 // todo do a viewer instructor that have directely a pointer to a QGLviewer and buffer ot not triangles
 
@@ -114,4 +114,4 @@ class Viewer_instructor : public QWidget {
   void change_light();
 };
 
-#endif  // VIEW_VIEWER_INSTRUCTOR_H
+#endif  // VIEW_VIEWER_INSTRUCTOR_H_

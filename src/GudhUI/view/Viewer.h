@@ -21,8 +21,8 @@
  * 
  */
 
-#ifndef VIEW_VIEWER_H
-#define VIEW_VIEWER_H
+#ifndef VIEW_VIEWER_H_
+#define VIEW_VIEWER_H_
 
 // Workaround for moc-qt4 not parsing boost headers
 #include <CGAL/config.h>
@@ -117,4 +117,4 @@ class Viewer : public QGLViewer {
   void click(const Point_3& position);
 };
 
-#endif  // VIEW_VIEWER_H
+#endif  // VIEW_VIEWER_H_

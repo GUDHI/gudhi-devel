@@ -25,6 +25,10 @@
 
 #include <boost/graph/adjacency_list.hpp>
 
+#include <utility>  // for pair<>
+#include <vector>
+#include <map>
+
 /* Edge tag for Boost PropertyGraph. */
 struct edge_filtration_t {
   typedef boost::edge_property_tag kind;
@@ -79,7 +83,7 @@ Graph_t compute_proximity_graph(PointCloud &points
   Graph_t skel_graph(edges.begin()
                      , edges.end()
                      , edges_fil.begin()
-                     , idx_u); //number of points labeled from 0 to idx_u-1
+                     , idx_u);  // number of points labeled from 0 to idx_u-1
 
   auto vertex_prop = boost::get(vertex_filtration_t(), skel_graph);
 

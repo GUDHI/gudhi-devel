@@ -94,4 +94,4 @@ template<typename SkBlComplex> class Edge_contractor {
   }
 };
 
-#endif /* EDGE_CONTRACTOR_H_ */
+#endif  // UTILS_EDGE_CONTRACTOR_H_

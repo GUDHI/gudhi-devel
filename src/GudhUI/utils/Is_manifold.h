@@ -56,7 +56,7 @@ template<typename SkBlComplex> class Is_manifold {
         dim = local_dimension(v);
         break;
       }
-      //check that the link of every vertex is a dim-1 sphere
+      // check that the link of every vertex is a dim-1 sphere
       for (auto v : input_complex_.vertex_range()) {
         if (!is_k_sphere(v, dim - 1)) {
           res = false;
@@ -90,7 +90,7 @@ template<typename SkBlComplex> class Is_manifold {
     if (complex.empty()) return -1;
     if (complex.num_blockers() != 1) return -2;
 
-    //necessary and sufficient condition : there exists a unique blocker that passes through all vertices
+    // necessary and sufficient condition : there exists a unique blocker that passes through all vertices
     auto first_blocker = *(complex.const_blocker_range().begin());
 
     if (first_blocker->dimension() + 1 != complex.num_vertices())

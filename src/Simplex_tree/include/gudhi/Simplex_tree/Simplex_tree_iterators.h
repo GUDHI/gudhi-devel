@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SIMPLEX_TREE_ITERATORS_H_
-#define SIMPLEX_TREE_ITERATORS_H_
+#ifndef SIMPLEX_TREE_SIMPLEX_TREE_ITERATORS_H_
+#define SIMPLEX_TREE_SIMPLEX_TREE_ITERATORS_H_
 
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/version.hpp>
@@ -315,4 +315,4 @@ class Simplex_tree_skeleton_simplex_iterator : public boost::iterator_facade<
 /* @} */  // end addtogroup simplex_tree
 }  // namespace Gudhi
 
-#endif  // SIMPLEX_TREE_ITERATORS_H_
+#endif  // SIMPLEX_TREE_SIMPLEX_TREE_ITERATORS_H_
