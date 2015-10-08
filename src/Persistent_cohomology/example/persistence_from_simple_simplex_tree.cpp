@@ -20,11 +20,14 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <gudhi/graph_simplicial_complex.h>
+#include <gudhi/Simplex_tree.h>
+#include <gudhi/Persistent_cohomology.h>
+
 #include <iostream>
 #include <ctime>
-#include "gudhi/graph_simplicial_complex.h"
-#include "gudhi/Simplex_tree.h"
-#include "gudhi/Persistent_cohomology.h"
+#include <utility>
+#include <vector>
 
 using namespace Gudhi;
 using namespace Gudhi::persistent_cohomology;
@@ -34,15 +37,19 @@ typedef std::pair<typeVectorVertex, Filtration_value> typeSimplex;
 typedef std::pair< Simplex_tree<>::Simplex_handle, bool > typePairSimplexBool;
 typedef Simplex_tree<> typeST;
 
-void usage(char * const progName)
-{
+void usage(char * const progName) {
   std::cerr << "Usage: " << progName << " coeff_field_characteristic[integer > 0] min_persistence[float >= -1.0]\n";
-  exit(-1); // ----- >>
+  exit(-1);
 }
 
-int main (int argc, char * const argv[])
-{
-  int coeff_field_characteristic=0;
+int main(int argc, char * const argv[]) {
+  // program args management
+  if (argc != 3) {
+    std::cerr << "Error: Number of arguments (" << argc << ") is not correct\n";
+    usage(argv[0]);
+  }
+
+  int coeff_field_characteristic = 0;
   int returnedScanValue = sscanf(argv[1], "%d", &coeff_field_characteristic);
   if ((returnedScanValue == EOF) || (coeff_field_characteristic <= 0)) {
     std::cerr << "Error: " << argv[1] << " is not correct\n";
@@ -56,101 +63,65 @@ int main (int argc, char * const argv[])
     usage(argv[0]);
   }
 
-  // program args management
-  if (argc != 3) {
-    std::cerr << "Error: Number of arguments (" << argc << ") is not correct\n";
-    usage(argv[0]);
-  }
-
   // TEST OF INSERTION
   std::cout << "********************************************************************" << std::endl;
   std::cout << "TEST OF INSERTION" << std::endl;
   typeST st;
 
   // ++ FIRST
-  std::cout << "   - INSERT (2,1,0)" << std::endl;
-  typeVectorVertex SimplexVector1;
-  SimplexVector1.push_back(2);
-  SimplexVector1.push_back(1);
-  SimplexVector1.push_back(0);
-  st.insert_simplex_and_subfaces ( SimplexVector1, 0.3);
+  std::cout << "   - INSERT (0,1,2)" << std::endl;
+  typeVectorVertex SimplexVector = {0, 1, 2};
+  st.insert_simplex_and_subfaces(SimplexVector, 0.3);
 
   // ++ SECOND
   std::cout << "   - INSERT 3" << std::endl;
-  typeVectorVertex SimplexVector2;
-  SimplexVector2.push_back(3);
-  st.insert_simplex_and_subfaces ( SimplexVector2, 0.1);
+  SimplexVector = {3};
+  st.insert_simplex_and_subfaces(SimplexVector, 0.1);
 
   // ++ THIRD
   std::cout << "   - INSERT (0,3)" << std::endl;
-  typeVectorVertex SimplexVector3;
-  SimplexVector3.push_back(3);
-  SimplexVector3.push_back(0);
-  st.insert_simplex_and_subfaces ( SimplexVector3, 0.2);
+  SimplexVector = {0, 3};
+  st.insert_simplex_and_subfaces(SimplexVector, 0.2);
 
   // ++ FOURTH
-  std::cout << "   - INSERT (1,0) (already inserted)" << std::endl;
-  typeVectorVertex SimplexVector4;
-  SimplexVector4.push_back(1);
-  SimplexVector4.push_back(0);
-  st.insert_simplex_and_subfaces ( SimplexVector4, 0.2);
+  std::cout << "   - INSERT (0,1) (already inserted)" << std::endl;
+  SimplexVector = {0, 1};
+  st.insert_simplex_and_subfaces(SimplexVector, 0.2);
 
   // ++ FIFTH
   std::cout << "   - INSERT (3,4,5)" << std::endl;
-  typeVectorVertex SimplexVector5;
-  SimplexVector5.push_back(3);
-  SimplexVector5.push_back(4);
-  SimplexVector5.push_back(5);
-  st.insert_simplex_and_subfaces ( SimplexVector5, 0.3);
+  SimplexVector = {3, 4, 5};
+  st.insert_simplex_and_subfaces(SimplexVector, 0.3);
 
   // ++ SIXTH
   std::cout << "   - INSERT (0,1,6,7)" << std::endl;
-  typeVectorVertex SimplexVector6;
-  SimplexVector6.push_back(0);
-  SimplexVector6.push_back(1);
-  SimplexVector6.push_back(6);
-  SimplexVector6.push_back(7);
-  st.insert_simplex_and_subfaces ( SimplexVector6, 0.4);
+  SimplexVector = {0, 1, 6, 7};
+  st.insert_simplex_and_subfaces(SimplexVector, 0.4);
 
   // ++ SEVENTH
   std::cout << "   - INSERT (4,5,8,9)" << std::endl;
-  typeVectorVertex SimplexVector7;
-  SimplexVector7.push_back(4);
-  SimplexVector7.push_back(5);
-  SimplexVector7.push_back(8);
-  SimplexVector7.push_back(9);
-  st.insert_simplex_and_subfaces ( SimplexVector7, 0.4);
+  SimplexVector = {4, 5, 8, 9};
+  st.insert_simplex_and_subfaces(SimplexVector, 0.4);
 
   // ++ EIGHTH
   std::cout << "   - INSERT (9,10,11)" << std::endl;
-  typeVectorVertex SimplexVector8;
-  SimplexVector8.push_back(9);
-  SimplexVector8.push_back(10);
-  SimplexVector8.push_back(11);
-  st.insert_simplex_and_subfaces ( SimplexVector8, 0.3);
-  
+  SimplexVector = {9, 10, 11};
+  st.insert_simplex_and_subfaces(SimplexVector, 0.3);
+
   // ++ NINETH
   std::cout << "   - INSERT (2,10,12)" << std::endl;
-  typeVectorVertex SimplexVector9;
-  SimplexVector9.push_back(2);
-  SimplexVector9.push_back(10);
-  SimplexVector9.push_back(12);
-  st.insert_simplex_and_subfaces ( SimplexVector9, 0.3);
-  
+  SimplexVector = {2, 10, 12};
+  st.insert_simplex_and_subfaces(SimplexVector, 0.3);
+
   // ++ TENTH
   std::cout << "   - INSERT (11,6)" << std::endl;
-  typeVectorVertex SimplexVector10;
-  SimplexVector10.push_back(11);
-  SimplexVector10.push_back(6);
-  st.insert_simplex_and_subfaces ( SimplexVector10, 0.2);
+  SimplexVector = {6, 11};
+  st.insert_simplex_and_subfaces(SimplexVector, 0.2);
 
   // ++ ELEVENTH
   std::cout << "   - INSERT (13,14,15)" << std::endl;
-  typeVectorVertex SimplexVector11;
-  SimplexVector11.push_back(13);
-  SimplexVector11.push_back(14);
-  SimplexVector11.push_back(15);
-  st.insert_simplex_and_subfaces ( SimplexVector11, 0.25);
+  SimplexVector = {13, 14, 15};
+  st.insert_simplex_and_subfaces(SimplexVector, 0.25);
 
   /* Inserted simplex:         */
   /*    1   6                  */
@@ -175,33 +146,31 @@ int main (int argc, char * const argv[])
   st.set_dimension(2);
   st.set_filtration(0.4);
 
-  std::cout << "The complex contains " << st.num_simplices() << " simplices - " << st.num_vertices() << " vertices " << std::endl;
+  std::cout << "The complex contains " << st.num_simplices() << " simplices - " << st.num_vertices() << " vertices "
+      << std::endl;
   std::cout << "   - dimension " << st.dimension() << "   - filtration " << st.filtration() << std::endl;
-  std::cout << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
+  std::cout << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:"
+      << std::endl;
   std::cout << "**************************************************************" << std::endl;
   std::cout << "strict graph G { " << std::endl;
 
-  for( auto f_simplex : st.filtration_simplex_range() )
-  {
+  for (auto f_simplex : st.filtration_simplex_range()) {
     std::cout << "   " << "[" << st.filtration(f_simplex) << "] ";
-    for( auto vertex : st.simplex_vertex_range(f_simplex) )
-    {
-      std::cout << (int)vertex << " -- ";
+    for (auto vertex : st.simplex_vertex_range(f_simplex)) {
+      std::cout << static_cast<int>(vertex) << " -- ";
     }
     std::cout << ";" << std::endl;
   }
 
   std::cout << "}" << std::endl;
-  //std::cout << "**************************************************************" << std::endl;
-  //st.print_hasse(std::cout);
   std::cout << "**************************************************************" << std::endl;
-
 
   // Compute the persistence diagram of the complex
   persistent_cohomology::Persistent_cohomology< Simplex_tree<>, Field_Zp > pcoh(st);
-  pcoh.init_coefficients( coeff_field_characteristic ); //initiliazes the coefficient field for homology
+  // initializes the coefficient field for homology
+  pcoh.init_coefficients(coeff_field_characteristic);
 
-  pcoh.compute_persistent_cohomology( min_persistence );
+  pcoh.compute_persistent_cohomology(min_persistence);
 
   // Output the diagram in filediag
   pcoh.output_diagram();

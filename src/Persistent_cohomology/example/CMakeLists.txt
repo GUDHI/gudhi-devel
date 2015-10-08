@@ -5,6 +5,7 @@ project(GUDHIExPersCohom)
 if (NOT MSVC)
    add_executable(persistence_from_simple_simplex_tree persistence_from_simple_simplex_tree.cpp)
    target_link_libraries(persistence_from_simple_simplex_tree ${Boost_SYSTEM_LIBRARY})
+   add_test(persistence_from_simple_simplex_tree ${CMAKE_CURRENT_BINARY_DIR}/persistence_from_simple_simplex_tree 1 0)
 
    add_executable(rips_persistence rips_persistence.cpp)
    target_link_libraries(rips_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})

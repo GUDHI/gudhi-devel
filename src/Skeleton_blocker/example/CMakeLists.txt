@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 2.6)
 project(GUDHIskbl)
 
-
 add_executable(SkeletonBlockerFromSimplices Skeleton_blocker_from_simplices.cpp)
 add_executable(SkeletonBlockerIteration Skeleton_blocker_iteration.cpp)
 add_executable(SkeletonBlockerLink Skeleton_blocker_link.cpp)
 
+target_link_libraries(SkeletonBlockerIteration ${Boost_TIMER_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 
-target_link_libraries(SkeletonBlockerIteration ${Boost_TIMER_LIBRARY} ${Boost_SYSTEM_LIBRARY})	
+add_test(SkeletonBlockerFromSimplices ${CMAKE_CURRENT_BINARY_DIR}/SkeletonBlockerFromSimplices)
+add_test(SkeletonBlockerIteration ${CMAKE_CURRENT_BINARY_DIR}/SkeletonBlockerIteration)
+add_test(SkeletonBlockerLink ${CMAKE_CURRENT_BINARY_DIR}/SkeletonBlockerLink)
