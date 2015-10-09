@@ -23,6 +23,8 @@
 #ifndef CONTRACTION_EDGE_PROFILE_H_
 #define CONTRACTION_EDGE_PROFILE_H_
 
+#include <iostream>
+
 namespace Gudhi {
 
 namespace contraction {
@@ -93,9 +95,8 @@ template<typename GeometricSimplifiableComplex> class Edge_profile {
     return complex_.point(v1_handle());
   }
 
-  friend std::ostream& operator<<(std::ostream& o, const Edge_profile & v) {
-    o << "v0:" << v.v0_handle() << " v1:" << v.v1_handle();
-    return o;
+  friend std::ostream& operator<<(std::ostream& o, const Edge_profile& v) {
+    return o << "v0:" << v.v0_handle() << " v1:" << v.v1_handle();
   }
 
  private:
