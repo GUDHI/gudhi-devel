@@ -23,7 +23,7 @@
 #ifndef CONTRACTION_EDGE_PROFILE_H_
 #define CONTRACTION_EDGE_PROFILE_H_
 
-#include <iostream>
+#include <ostream>
 
 namespace Gudhi {
 
