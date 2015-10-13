@@ -20,15 +20,15 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SKELETON_BLOCKER_SUB_COMPLEX_H_
-#define SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SKELETON_BLOCKER_SUB_COMPLEX_H_
+#ifndef SKELETON_BLOCKER_SKELETON_BLOCKER_SUB_COMPLEX_H_
+#define SKELETON_BLOCKER_SKELETON_BLOCKER_SUB_COMPLEX_H_
+
+#include <gudhi/Skeleton_blocker_complex.h>
+#include <gudhi/Skeleton_blocker/Skeleton_blocker_simplex.h>
+#include <gudhi/Utils.h>
 
 #include <map>
 #include <vector>
-
-#include "gudhi/Skeleton_blocker_complex.h"
-#include "gudhi/Skeleton_blocker/Skeleton_blocker_simplex.h"
-#include "gudhi/Utils.h"
 
 namespace Gudhi {
 
@@ -75,7 +75,6 @@ class Skeleton_blocker_sub_complex : public ComplexType {
   typedef typename ComplexType::Root_simplex_handle Root_simplex_handle;
 
  protected:
-  
   /**
    * @brief Determines whether all proper faces of simplex 'sigma' belong to 'link1' \cup 'link2'
    * where 'link1' and 'link2' are subcomplexes of the same complex of type ComplexType
@@ -287,5 +286,5 @@ bool proper_faces_in_union(
 
 }  // namespace Gudhi
 
-#endif  // SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SKELETON_BLOCKER_SUB_COMPLEX_H_
+#endif  // SKELETON_BLOCKER_SKELETON_BLOCKER_SUB_COMPLEX_H_
 

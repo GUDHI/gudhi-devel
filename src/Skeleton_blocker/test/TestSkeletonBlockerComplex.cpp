@@ -343,7 +343,7 @@ bool test_iterator_simplices3(){
 bool test_iterator_simplices4(){
 	Complex empty_complex;
 	for(auto v : empty_complex.vertex_range()){
-		v;
+		(void) v;
 	}
 	for(auto e : empty_complex.edge_range()){
 		empty_complex[e];

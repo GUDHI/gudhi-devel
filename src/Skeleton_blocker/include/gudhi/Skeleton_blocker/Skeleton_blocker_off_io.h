@@ -19,14 +19,14 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SKELETON_BLOCKER_OFF_IO_H_
-#define SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SKELETON_BLOCKER_OFF_IO_H_
+#ifndef SKELETON_BLOCKER_SKELETON_BLOCKER_OFF_IO_H_
+#define SKELETON_BLOCKER_SKELETON_BLOCKER_OFF_IO_H_
+
+#include <gudhi/Off_reader.h>
 
 #include <string>
 #include <vector>
 #include <map>
-
-#include "gudhi/Off_reader.h"
 
 namespace Gudhi {
 
@@ -197,4 +197,4 @@ class Skeleton_blocker_off_writer {
 
 }  // namespace Gudhi
 
-#endif  // SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SKELETON_BLOCKER_OFF_IO_H_
+#endif  // SKELETON_BLOCKER_SKELETON_BLOCKER_OFF_IO_H_

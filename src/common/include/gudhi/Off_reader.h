@@ -1,13 +1,10 @@
-/*
- * Off_reader.h
- *  Created on: Nov 28, 2014
- * This file is part of the Gudhi Library. The Gudhi library
+/*    This file is part of the Gudhi Library. The Gudhi library
  *    (Geometric Understanding in Higher Dimensions) is a generic C++
  *    library for computational topology.
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Méditerranée (France)
+ *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -25,14 +22,15 @@
  */
 
 
-#ifndef GUDHI_OFF_READER_H_
-#define GUDHI_OFF_READER_H_
+#ifndef OFF_READER_H_
+#define OFF_READER_H_
 
 
 #include <sstream>
 #include <iostream>
 #include <iterator>
-
+#include <string>
+#include <vector>
 
 namespace Gudhi {
 
@@ -43,7 +41,6 @@ namespace Gudhi {
  */
 class Off_reader {
  public:
-
   Off_reader(std::ifstream& stream) : stream_(stream) { }
 
   ~Off_reader() {
@@ -121,10 +118,11 @@ class Off_reader {
         std::cerr << "incorrect number of vertices/faces/edges\n";
         return false;
       }
-    } else
+    } else {
       if (!(iss >> off_info_.dim >> off_info_.num_vertices >> off_info_.num_faces >> off_info_.num_edges)) {
       std::cerr << "incorrect number of vertices/faces/edges\n";
       return false;
+      }
     }
     off_visitor.init(off_info_.dim, off_info_.num_vertices, off_info_.num_faces, off_info_.num_edges);
 
@@ -147,7 +145,7 @@ class Off_reader {
       std::vector<double> point;
       std::istringstream iss(line);
       point.assign(std::istream_iterator<double>(iss), std::istream_iterator<double>());
-      //			if(point.size() != off_info_.dim) return false;
+      // if(point.size() != off_info_.dim) return false;
       visitor.point(point);
     }
     return true;
@@ -162,7 +160,7 @@ class Off_reader {
       iss >> num_face_vertices;
       std::vector<int> face;
       face.assign(std::istream_iterator<int>(iss), std::istream_iterator<int>());
-      if (!face.size() == off_info_.num_vertices) return false;
+      if (face.size() != off_info_.dim) return false;
       visitor.maximal_face(face);
     }
     return true;
@@ -172,9 +170,9 @@ class Off_reader {
 template<typename OFFVisitor>
 void read_off(const std::string& name_file_off, OFFVisitor& vis) {
   std::ifstream stream(name_file_off);
-  if (!stream.is_open())
+  if (!stream.is_open()) {
     std::cerr << "could not open file \n";
-  else {
+  } else {
     Off_reader off_reader(stream);
     off_reader.read(vis);
   }
@@ -182,4 +180,4 @@ void read_off(const std::string& name_file_off, OFFVisitor& vis) {
 
 }  // namespace Gudhi
 
-#endif  // GUDHI_OFF_READER_H_
+#endif  // OFF_READER_H_

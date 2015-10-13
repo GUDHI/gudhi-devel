@@ -108,6 +108,7 @@ BOOST_AUTO_TEST_CASE(simplex_tree_from_file) {
     // Size of simplex
     int size = 0;
     for (auto vertex : st.simplex_vertex_range(f_simplex)) {
+      // Remove warning
       (void) vertex;
       size++;
     }
@@ -164,6 +165,8 @@ void set_and_test_simplex_tree_dim_fil(typeST& simplexTree, int vectorSize, cons
   // Another way to count simplices:
   size_t num_simp = 0;
   for (auto f_simplex : simplexTree.complex_simplex_range()) {
+    // Remove warning
+    (void) f_simplex;
     num_simp++;
   }
 

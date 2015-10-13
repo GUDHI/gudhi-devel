@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(ALPHA_DOC_OFF_file) {
   // Init of an alpha-complex from a OFF file
   //
   // ----------------------------------------------------------------------------
-  std::string off_file_name("../../../data/points/alphacomplexdoc.off");
+  std::string off_file_name("alphacomplexdoc.off");
   double max_alpha_square_value = 60.0;
   std::cout << "========== OFF FILE NAME = " << off_file_name << " - alpha²=" <<
       max_alpha_square_value << "==========" << std::endl;
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(ALPHA_DOC_OFF_file_filtered) {
   // Init of an alpha-complex from a OFF file
   //
   // ----------------------------------------------------------------------------
-  std::string off_file_name("../../../data/points/alphacomplexdoc.off");
+  std::string off_file_name("alphacomplexdoc.off");
   double max_alpha_square_value = 59.0;
   std::cout << "========== OFF FILE NAME = " << off_file_name << " - alpha²=" <<
       max_alpha_square_value << "==========" << std::endl;

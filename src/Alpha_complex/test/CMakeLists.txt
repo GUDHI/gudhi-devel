@@ -21,6 +21,10 @@ if(CGAL_FOUND)
 
       add_executable ( AlphaComplexUT Alpha_complex_unit_test.cpp )
       target_link_libraries(AlphaComplexUT  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+
+      # Do not forget to copy test files in current binary dir
+      file(COPY "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+
       add_test(AlphaComplexUT ${CMAKE_CURRENT_BINARY_DIR}/AlphaComplexUT
       # XML format for Jenkins xUnit plugin 
       --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/AlphaComplexUT.xml --log_level=test_suite --report_level=no)

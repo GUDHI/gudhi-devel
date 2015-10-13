@@ -19,10 +19,10 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SKELETON_BLOCKER_LINK_SUPERIOR_H_
-#define SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SKELETON_BLOCKER_LINK_SUPERIOR_H_
+#ifndef SKELETON_BLOCKER_SKELETON_BLOCKER_LINK_SUPERIOR_H_
+#define SKELETON_BLOCKER_SKELETON_BLOCKER_LINK_SUPERIOR_H_
 
-#include "gudhi/Skeleton_blocker_link_complex.h"
+#include <gudhi/Skeleton_blocker_link_complex.h>
 
 namespace Gudhi {
 
@@ -74,4 +74,4 @@ class Skeleton_blocker_link_superior : public Skeleton_blocker_link_complex<
 
 }  // namespace Gudhi
 
-#endif  // SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SKELETON_BLOCKER_LINK_SUPERIOR_H_
+#endif  // SKELETON_BLOCKER_SKELETON_BLOCKER_LINK_SUPERIOR_H_

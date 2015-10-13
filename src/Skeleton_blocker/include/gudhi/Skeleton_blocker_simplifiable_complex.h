@@ -19,14 +19,14 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SIMPLIFIABLE_COMPLEX_H_
-#define SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SIMPLIFIABLE_COMPLEX_H_
+#ifndef SKELETON_BLOCKER_SIMPLIFIABLE_COMPLEX_H_
+#define SKELETON_BLOCKER_SIMPLIFIABLE_COMPLEX_H_
+
+#include <gudhi/Skeleton_blocker/Skeleton_blocker_sub_complex.h>
 
 #include <list>
 #include <vector>
 #include <set>
-
-#include "gudhi/Skeleton_blocker/Skeleton_blocker_sub_complex.h"
 
 namespace Gudhi {
 
@@ -340,7 +340,7 @@ Skeleton_blocker_complex<SkeletonBlockerDS>::contract_edge(Vertex_handle a, Vert
   assert(this->contains_vertex(a));
   assert(this->contains_vertex(b));
 
-  if(this->contains_edge(a, b))
+  if (this->contains_edge(a, b))
     this->add_edge(a, b);
 
   // if some blockers passes through 'ab', we need to remove them.
@@ -447,4 +447,4 @@ Skeleton_blocker_complex<SkeletonBlockerDS>::notify_changed_edges(Vertex_handle 
 
 }  // namespace Gudhi
 
-#endif  // SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SIMPLIFIABLE_COMPLEX_H_
+#endif  // SKELETON_BLOCKER_SIMPLIFIABLE_COMPLEX_H_

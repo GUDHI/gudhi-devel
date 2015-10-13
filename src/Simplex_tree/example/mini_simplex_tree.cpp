@@ -58,11 +58,12 @@ int main() {
 
   auto edge02 = {0, 2};
   ST::Simplex_handle e = st.find(edge02);
-  assert(st.filtration(e) == 0); // We are not using filtrations so everything has value 0
-  for(ST::Simplex_handle t : st.cofaces_simplex_range(e, 1)) // Only coface is 012
-    {
-      for(ST::Vertex_handle v : st.simplex_vertex_range(t)) // v in { 0, 1, 2 }
+  // We are not using filtrations so everything has value 0
+  assert(st.filtration(e) == 0);
+  for (ST::Simplex_handle t : st.cofaces_simplex_range(e, 1)) {
+    // Only coface is 012
+    for (ST::Vertex_handle v : st.simplex_vertex_range(t))  // v in { 0, 1, 2 }
         std::cout << v;
       std::cout << '\n';
-    }
+  }
 }

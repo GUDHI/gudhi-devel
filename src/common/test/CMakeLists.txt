@@ -22,6 +22,11 @@ if(CGAL_FOUND)
       add_executable ( dtoffrw_UT dtoffrw_unit_test.cpp )
       target_link_libraries(dtoffrw_UT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
+      # Do not forget to copy test files in current binary dir
+      file(COPY "dtoffrw_alphashapedoc_result.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+      # Do not forget to copy test files in current binary dir
+      file(COPY "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+
       # Unitary tests
       add_test(dtoffrw_UT ${CMAKE_CURRENT_BINARY_DIR}/dtoffrw_UT
       # XML format for Jenkins xUnit plugin 

@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.6)
 project(GUDHIdev)
 
+include(CMakeGUDHIVersion.txt)
+# Generate GUDHI official version file
+configure_file(GUDHIVersion.cmake.in "${PROJECT_BINARY_DIR}/GUDHIVersion.cmake" @ONLY)
+
 find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework chrono timer program_options thread REQUIRED)
 
 set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
@@ -79,17 +83,15 @@ else()
   add_subdirectory(src/Skeleton_blocker/test) 
   add_subdirectory(src/Skeleton_blocker/example) 
   add_subdirectory(src/Contraction/example)
-  add_subdirectory(src/Hasse_complex/example)
   add_subdirectory(src/Alpha_complex/example)
   add_subdirectory(src/Alpha_complex/test)
-  add_subdirectory(src/Bottleneck/example)
-  add_subdirectory(src/Bottleneck/test)
-
-  # GudhUI
-  add_subdirectory(src/GudhUI)
 
   # data points generator
   add_subdirectory(data/points/generator)
+
+  # Please let GudhUI in last compilation position as QT is known to modify CMAKE_CXX_FLAGS
+  # GudhUI
+  add_subdirectory(src/GudhUI)
 
 endif()  
 

@@ -832,10 +832,16 @@ EXAMPLE_RECURSIVE      = NO
 # that contain images that are to be included in the documentation (see the
 # \image command).
 
+<<<<<<< .working
 IMAGE_PATH             = doc/Skeleton_blocker/ \
 	doc/Alpha_complex/ \
 	doc/common/ \
 	doc/Contraction/
+=======
+IMAGE_PATH             = doc/Skeleton_blocker/ \
+	doc/common/ \
+	doc/Contraction/
+>>>>>>> .merge-right.r851
 
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should

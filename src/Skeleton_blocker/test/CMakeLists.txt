@@ -18,6 +18,10 @@ add_executable(TestSkeletonBlockerComplex TestSkeletonBlockerComplex.cpp)
 add_executable(TestSimplifiable TestSimplifiable.cpp)
 add_executable(TestGeometricComplex TestGeometricComplex.cpp)
 
+# Do not forget to copy test files in current binary dir
+file(COPY "test.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+file(COPY "test2.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+
 add_test(TestSkeletonBlockerComplex ${CMAKE_CURRENT_BINARY_DIR}/TestSkeletonBlockerComplex)
 add_test(TestSimplifiable ${CMAKE_CURRENT_BINARY_DIR}/TestSimplifiable)
 add_test(TestGeometricComplex ${CMAKE_CURRENT_BINARY_DIR}/TestGeometricComplex)

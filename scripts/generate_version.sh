@@ -4,19 +4,20 @@
 #usage bash generate_version.sh -f DIR : generate even if svn is empty and save library in dir
 #
 # 23/06/2015 - Remove source, add biblio, and doc
+# 06/10/2015 - Replace static Version.txt with generated GUDHIVersion.cmake file
 # VERSION CHECK
 ROOT_DIR=..
-VERSION_FILE="$ROOT_DIR/Version.txt"
+VERSION_FILE="$ROOT_DIR/GUDHIVersion.cmake"
 
 if [ ! -f $VERSION_FILE ]; then
-    echo "File not found! : $VERSION_FILE"
+    echo "File not found! : $VERSION_FILE - Please launch cmake first to generate file"
     exit 1
 fi
 
 # SVN STATUS CHECK OR IF FORCED BY USER
 if [ "$1" != "-f" ]
 then
-  SVN_STATUS=`svn status $ROOT_DIR`
+  SVN_STATUS=`svn status $ROOT_DIR | grep -v $VERSION_FILE`
   echo $SVN_STATUS
 fi
 
@@ -44,6 +45,7 @@ mkdir "$VERSION_DIR"
 
 # TOP LEVEL FILE COPY
 cp $VERSION_FILE $VERSION_DIR
+cp $ROOT_DIR/CMakeGUDHIVersion.txt $VERSION_DIR
 cp $ROOT_DIR/README $VERSION_DIR
 cp $ROOT_DIR/Conventions.txt $VERSION_DIR
 cp $ROOT_DIR/COPYING $VERSION_DIR
@@ -51,6 +53,9 @@ cp -R $ROOT_DIR/data $VERSION_DIR
 cp $ROOT_DIR/src/CMakeLists.txt $VERSION_DIR
 cp $ROOT_DIR/src/Doxyfile $VERSION_DIR
 cp -R $ROOT_DIR/biblio $VERSION_DIR
+cp $ROOT_DIR/src/GUDHIConfigVersion.cmake.in $VERSION_DIR
+cp $ROOT_DIR/src/GUDHIConfig.cmake.in $VERSION_DIR
+cp $ROOT_DIR/GUDHIVersion.cmake.in $VERSION_DIR
 
 # PACKAGE LEVEL COPY
 PACKAGE_INC_DIR="/include"
