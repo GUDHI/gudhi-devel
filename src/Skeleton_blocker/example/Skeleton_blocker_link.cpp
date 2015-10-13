@@ -35,7 +35,7 @@ using namespace skbl;
 typedef Skeleton_blocker_complex<Skeleton_blocker_simple_traits> Complex;
 typedef Complex::Vertex_handle Vertex_handle;
 typedef Complex::Root_vertex_handle Root_vertex_handle;
-typedef Complex::Simplex_handle Simplex;
+typedef Complex::Simplex Simplex;
 
 int main(int argc, char *argv[]) {
   // build a full complex with 4 vertices and 2^4-1 simplices

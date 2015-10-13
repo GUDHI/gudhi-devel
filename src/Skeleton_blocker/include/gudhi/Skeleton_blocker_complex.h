@@ -94,16 +94,16 @@ class Skeleton_blocker_complex {
   /**
    * @brief A ordered set of integers that represents a simplex.
    */
-  typedef Skeleton_blocker_simplex<Vertex_handle> Simplex_handle;
+  typedef Skeleton_blocker_simplex<Vertex_handle> Simplex;
   typedef Skeleton_blocker_simplex<Root_vertex_handle> Root_simplex_handle;
 
   /**
    * @brief Handle to a blocker of the complex.
    */
-  typedef Simplex_handle* Blocker_handle;
+  typedef Simplex* Blocker_handle;
 
   typedef typename Root_simplex_handle::Simplex_vertex_const_iterator Root_simplex_iterator;
-  typedef typename Simplex_handle::Simplex_vertex_const_iterator Simplex_handle_iterator;
+  typedef typename Simplex::Simplex_vertex_const_iterator Simplex_handle_iterator;
 
  protected:
   typedef typename boost::adjacency_list<boost::setS,  // edges
@@ -128,10 +128,10 @@ class Skeleton_blocker_complex {
   typedef typename boost::graph_traits<Graph>::edge_descriptor Edge_handle;
 
  protected:
-  typedef std::multimap<Vertex_handle, Simplex_handle *> BlockerMap;
-  typedef typename std::multimap<Vertex_handle, Simplex_handle *>::value_type BlockerPair;
-  typedef typename std::multimap<Vertex_handle, Simplex_handle *>::iterator BlockerMapIterator;
-  typedef typename std::multimap<Vertex_handle, Simplex_handle *>::const_iterator BlockerMapConstIterator;
+  typedef std::multimap<Vertex_handle, Simplex *> BlockerMap;
+  typedef typename std::multimap<Vertex_handle, Simplex *>::value_type BlockerPair;
+  typedef typename std::multimap<Vertex_handle, Simplex *>::iterator BlockerMapIterator;
+  typedef typename std::multimap<Vertex_handle, Simplex *>::const_iterator BlockerMapConstIterator;
 
  protected:
   int num_vertices_;
@@ -174,7 +174,7 @@ class Skeleton_blocker_complex {
 
  private:
   // typedef Trie<Skeleton_blocker_complex<SkeletonBlockerDS>> STrie;
-  typedef Trie<Simplex_handle> STrie;
+  typedef Trie<Simplex> STrie;
 
  public:
   /**
@@ -207,12 +207,12 @@ class Skeleton_blocker_complex {
     while (num_vertex-- >= 0) add_vertex();
 
     for (const auto& e : edges)
-      add_edge(e.first, e.second);
+      add_edge_without_blockers(e.first, e.second);
   }
 
   template<typename SimpleHandleOutputIterator>
   void add_blockers(SimpleHandleOutputIterator simplex_begin, SimpleHandleOutputIterator simplex_end) {
-    Tries<Simplex_handle> tries(num_vertices(), simplex_begin, simplex_end);
+    Tries<Simplex> tries(num_vertices(), simplex_begin, simplex_end);
     tries.init_next_dimension();
     auto simplices(tries.next_dimension_simplices());
 
@@ -221,7 +221,7 @@ class Skeleton_blocker_complex {
       for (auto& sigma : simplices) {
         // common_positive_neighbors is the set of vertices u such that
         // for all s in sigma, us is an edge and u>s
-        Simplex_handle common_positive_neighbors(tries.positive_neighbors(sigma.last_vertex()));
+        Simplex common_positive_neighbors(tries.positive_neighbors(sigma.last_vertex()));
         for (auto sigma_it = sigma.rbegin(); sigma_it != sigma.rend(); ++sigma_it)
           if (sigma_it != sigma.rbegin())
             common_positive_neighbors.intersection(tries.positive_neighbors(*sigma_it));
@@ -427,7 +427,7 @@ class Skeleton_blocker_complex {
    * @return true iff the simplicial complex contains all vertices
    * of simplex sigma
    */
-  bool contains_vertices(const Simplex_handle & sigma) const {
+  bool contains_vertices(const Simplex & sigma) const {
     for (auto vertex : sigma)
       if (!contains_vertex(vertex))
         return false;
@@ -535,41 +535,68 @@ class Skeleton_blocker_complex {
    * @details it assumes that the edge is present in the complex
 
    */
-  Simplex_handle get_vertices(Edge_handle edge_handle) const {
+  Simplex get_vertices(Edge_handle edge_handle) const {
     auto edge((*this)[edge_handle]);
-    return Simplex_handle((*this)[edge.first()], (*this)[edge.second()]);
+    return Simplex((*this)[edge.first()], (*this)[edge.second()]);
   }
 
   /**
-   * @brief Adds an edge between vertices a and b and all its cofaces.
+   * @brief Adds an edge between vertices a and b.
+   * @details For instance, the complex contains edge 01 and 12, then calling
+   * add_edge with vertex 0 and 2 will create a complex containing
+   * the edges 01, 12, 20 but not the triangle 012 (and hence this complex
+   * will contains a blocker 012).
    */
-  Edge_handle add_edge(Vertex_handle a, Vertex_handle b) {
+  Edge_handle add_edge(Vertex_handle a, Vertex_handle b) {    
+    //if the edge is already there we musnt go further
+    //as we may add blockers that should not be here
+    if(contains_edge(a,b)) 
+      return *((*this)[std::make_pair(a,b)]);
+    auto res = add_edge_without_blockers(a,b);
+    add_blockers_after_simplex_insertion(Simplex(a,b));
+    return res;
+  }
+
+    /**
+   * @brief Adds all edges of s in the complex.
+   */
+  void add_edge(const Simplex& s) {
+    for(auto i = s.begin(); i != s.end(); ++i)
+      for(auto j = i; ++j != s.end(); /**/)
+        add_edge(*i,*j);
+  }
+
+  /**
+   * @brief Adds an edge between vertices a and b without blockers.
+   * @details For instance, the complex contains edge 01 and 12, then calling
+   * add_edge with vertex 0 and 2 will create a complex containing
+   * the triangle 012.
+   */
+  Edge_handle add_edge_without_blockers(Vertex_handle a, Vertex_handle b) {
     assert(contains_vertex(a) && contains_vertex(b));
     assert(a != b);
 
     auto edge_handle((*this)[std::make_pair(a, b)]);
-    // std::pair<Edge_handle,bool> pair_descr_bool = (*this)[std::make_pair(a,b)];
-    // Edge_handle edge_descr;
-    // bool edge_present = pair_descr_bool.second;
     if (!edge_handle) {
       edge_handle = boost::add_edge(a.vertex, b.vertex, skeleton).first;
       (*this)[*edge_handle].setId(get_id(a), get_id(b));
       degree_[a.vertex]++;
       degree_[b.vertex]++;
       if (visitor)
-        visitor->on_add_edge(a, b);
+        visitor->on_add_edge_without_blockers(a, b);
     }
     return *edge_handle;
   }
 
+
   /**
-   * @brief Adds all edges and their cofaces of a simplex to the simplicial complex.
+   * @brief Adds all edges of s in the complex without adding blockers.
    */
-  void add_edges(const Simplex_handle & sigma) {
-    Simplex_handle_iterator i, j;
-    for (i = sigma.begin(); i != sigma.end(); ++i)
-      for (j = i, j++; j != sigma.end(); ++j)
-        add_edge(*i, *j);
+  void add_edge_without_blockers(Simplex s) {
+    for(auto i = s.begin(); i != s.end(); ++i){
+      for(auto j = i; ++j != s.end(); /**/)
+        add_edge_without_blockers(*i,*j);
+    }
   }
 
   /**
@@ -627,7 +654,7 @@ class Skeleton_blocker_complex {
    * @return true iff the simplicial complex contains all vertices
    * and all edges of simplex sigma
    */
-  bool contains_edges(const Simplex_handle & sigma) const {
+  bool contains_edges(const Simplex & sigma) const {
     for (auto i = sigma.begin(); i != sigma.end(); ++i) {
       if (!contains_vertex(*i))
         return false;
@@ -649,15 +676,14 @@ class Skeleton_blocker_complex {
    * @brief Adds the simplex to the set of blockers and
    * returns a Blocker_handle toward it if was not present before and 0 otherwise.
    */
-  Blocker_handle add_blocker(const Simplex_handle& blocker) {
+  Blocker_handle add_blocker(const Simplex& blocker) {
     assert(blocker.dimension() > 1);
     if (contains_blocker(blocker)) {
-      // std::cerr << "ATTEMPT TO ADD A BLOCKER ALREADY THERE ---> BLOCKER IGNORED" << endl;
       return 0;
     } else {
       if (visitor)
         visitor->on_add_blocker(blocker);
-      Blocker_handle blocker_pt = new Simplex_handle(blocker);
+      Blocker_handle blocker_pt = new Simplex(blocker);
       num_blockers_++;
       auto vertex = blocker_pt->begin();
       while (vertex != blocker_pt->end()) {
@@ -739,7 +765,7 @@ class Skeleton_blocker_complex {
    *
    * @remark contrarily to delete_blockers does not call the destructor
    */
-  void remove_blocker(const Simplex_handle& sigma) {
+  void remove_blocker(const Simplex& sigma) {
     assert(contains_blocker(sigma));
     for (auto vertex : sigma)
       remove_blocker(sigma, vertex);
@@ -777,7 +803,7 @@ class Skeleton_blocker_complex {
   /**
    * @return true iff s is a blocker of the simplicial complex
    */
-  bool contains_blocker(const Simplex_handle & s) const {
+  bool contains_blocker(const Simplex & s) const {
     if (s.dimension() < 2)
       return false;
 
@@ -795,7 +821,7 @@ class Skeleton_blocker_complex {
    * @return true iff a blocker of the simplicial complex
    * is a face of sigma.
    */
-  bool blocks(const Simplex_handle & sigma) const {
+  bool blocks(const Simplex & sigma) const {
     for (auto s : sigma)
       for (auto blocker : const_blocker_range(s))
         if (sigma.contains(*blocker))
@@ -810,7 +836,7 @@ class Skeleton_blocker_complex {
    * @details Adds to simplex the neighbours of v e.g. \f$ n \leftarrow n \cup N(v) \f$.
    * If keep_only_superior is true then only vertices that are greater than v are added.
    */
-  virtual void add_neighbours(Vertex_handle v, Simplex_handle & n,
+  virtual void add_neighbours(Vertex_handle v, Simplex & n,
                               bool keep_only_superior = false) const {
     boost_adjacency_iterator ai, ai_end;
     for (tie(ai, ai_end) = adjacent_vertices(v.vertex, skeleton); ai != ai_end;
@@ -833,7 +859,7 @@ class Skeleton_blocker_complex {
    * todo revoir
    *
    */
-  virtual void add_neighbours(const Simplex_handle &alpha, Simplex_handle & res,
+  virtual void add_neighbours(const Simplex &alpha, Simplex & res,
                               bool keep_only_superior = false) const {
     res.clear();
     auto alpha_vertex = alpha.begin();
@@ -848,9 +874,9 @@ class Skeleton_blocker_complex {
    * not neighbours of v e.g. \f$ res \leftarrow res \cap N(v) \f$.
    * If 'keep_only_superior' is true then only vertices that are greater than v are keeped.
    */
-  virtual void keep_neighbours(Vertex_handle v, Simplex_handle& res,
+  virtual void keep_neighbours(Vertex_handle v, Simplex& res,
                                bool keep_only_superior = false) const {
-    Simplex_handle nv;
+    Simplex nv;
     add_neighbours(v, nv, keep_only_superior);
     res.intersection(nv);
   }
@@ -860,9 +886,9 @@ class Skeleton_blocker_complex {
    * neighbours of v eg \f$ res \leftarrow res \setminus N(v) \f$.
    * If 'keep_only_superior' is true then only vertices that are greater than v are added.
    */
-  virtual void remove_neighbours(Vertex_handle v, Simplex_handle & res,
+  virtual void remove_neighbours(Vertex_handle v, Simplex & res,
                                  bool keep_only_superior = false) const {
-    Simplex_handle nv;
+    Simplex nv;
     add_neighbours(v, nv, keep_only_superior);
     res.difference(nv);
   }
@@ -874,7 +900,7 @@ class Skeleton_blocker_complex {
    * Constructs the link of 'simplex' with points coordinates.
    */
   Link_complex link(Vertex_handle v) const {
-    return Link_complex(*this, Simplex_handle(v));
+    return Link_complex(*this, Simplex(v));
   }
 
   /**
@@ -887,7 +913,7 @@ class Skeleton_blocker_complex {
   /**
    * Constructs the link of 'simplex' with points coordinates.
    */
-  Link_complex link(const Simplex_handle& simplex) const {
+  Link_complex link(const Simplex& simplex) const {
     return Link_complex(*this, simplex);
   }
 
@@ -899,11 +925,11 @@ class Skeleton_blocker_complex {
    */
   // xxx rename get_address et place un using dans sub_complex
 
-  boost::optional<Simplex_handle> get_simplex_address(
+  boost::optional<Simplex> get_simplex_address(
                                                       const Root_simplex_handle& s) const {
-    boost::optional<Simplex_handle> res;
+    boost::optional<Simplex> res;
 
-    Simplex_handle s_address;
+    Simplex s_address;
     // Root_simplex_const_iterator i;
     for (auto i = s.begin(); i != s.end(); ++i) {
       boost::optional<Vertex_handle> address = get_address(*i);
@@ -920,7 +946,7 @@ class Skeleton_blocker_complex {
    * @brief returns a simplex with vertices which are the id of vertices of the
    * argument.
    */
-  Root_simplex_handle get_id(const Simplex_handle& local_simplex) const {
+  Root_simplex_handle get_id(const Simplex& local_simplex) const {
     Root_simplex_handle global_simplex;
     for (auto x = local_simplex.begin(); x != local_simplex.end(); ++x) {
       global_simplex.add_vertex(get_id(*x));
@@ -932,7 +958,7 @@ class Skeleton_blocker_complex {
    * @brief returns true iff the simplex s belongs to the simplicial
    * complex.
    */
-  virtual bool contains(const Simplex_handle & s) const {
+  virtual bool contains(const Simplex & s) const {
     if (s.dimension() == -1) {
       return false;
     } else if (s.dimension() == 0) {
@@ -1061,7 +1087,7 @@ class Skeleton_blocker_complex {
    * Furthermore, all simplices tau of the form sigma \setminus simplex_to_be_removed must be added
    * whenever the dimension of tau is at least 2.
    */
-  void update_blockers_after_remove_star_of_vertex_or_edge(const Simplex_handle& simplex_to_be_removed);
+  void update_blockers_after_remove_star_of_vertex_or_edge(const Simplex& simplex_to_be_removed);
 
  public:
   /**
@@ -1078,31 +1104,36 @@ class Skeleton_blocker_complex {
   /**
    * Remove the star of the simplex 'sigma' which needs to belong to the complex
    */
-  void remove_star(const Simplex_handle& sigma);
+  void remove_star(const Simplex& sigma);
 
   /**
-   * @brief add a maximal simplex plus all its cofaces.
-   * @details the simplex must have dimension greater than one (otherwise use add_vertex or add_edge).
+   * @brief add a simplex.
+   * @details the simplex must have dimension greater than one (otherwise use add_vertex or add_edge_without_blockers).
+   * and all vertices lower than the higher vertex of sigma must already be in the complex.
+   * if some edges of sigma are not in the complex, then insert_edges_of_sigma flag must be 
+   * set to true.
    */
-  void add_simplex(const Simplex_handle& sigma);
+  void add_simplex(const Simplex& sigma, bool insert_edges_of_sigma = false);
 
  private:
-  /**
-   * remove all blockers that contains sigma
-   */
-  void remove_blocker_containing_simplex(const Simplex_handle& sigma);
+  void add_blockers_after_simplex_insertion(Simplex s);
 
   /**
    * remove all blockers that contains sigma
    */
-  void remove_blocker_include_in_simplex(const Simplex_handle& sigma);
+  void remove_blocker_containing_simplex(const Simplex& sigma);
+
+  /**
+   * remove all blockers that contains sigma
+   */
+  void remove_blocker_include_in_simplex(const Simplex& sigma);
 
  public:
   enum simplifiable_status {
     NOT_HOMOTOPY_EQ, MAYBE_HOMOTOPY_EQ, HOMOTOPY_EQ
   };
 
-  simplifiable_status is_remove_star_homotopy_preserving(const Simplex_handle& simplex) {
+  simplifiable_status is_remove_star_homotopy_preserving(const Simplex& simplex) {
     // todo write a virtual method 'link' in Skeleton_blocker_complex which will be overloaded by the current one of
     // Skeleton_blocker_geometric_complex
     // then call it there to build the link and return the value of link.is_contractible()
@@ -1174,7 +1205,7 @@ class Skeleton_blocker_complex {
    * that may be used to construct a new blocker after contracting ab.
    * It requires that the link condition is satisfied.
    */
-  void tip_blockers(Vertex_handle a, Vertex_handle b, std::vector<Simplex_handle> & buffer) const;
+  void tip_blockers(Vertex_handle a, Vertex_handle b, std::vector<Simplex> & buffer) const;
 
  private:
   /**
@@ -1217,7 +1248,7 @@ class Skeleton_blocker_complex {
 
  private:
   void get_blockers_to_be_added_after_contraction(Vertex_handle a, Vertex_handle b,
-                                                  std::set<Simplex_handle>& blockers_to_add);
+                                                  std::set<Simplex>& blockers_to_add);
   /**
    * delete all blockers that passes through a or b
    */
@@ -1358,11 +1389,27 @@ class Skeleton_blocker_complex {
   /**
    * @brief Returns a Complex_simplex_around_vertex_range over all the simplices around a vertex of the complex
    */
-  Complex_simplex_around_vertex_range simplex_range(Vertex_handle v) const {
+  Complex_simplex_around_vertex_range star_simplex_range(Vertex_handle v) const {
     assert(contains_vertex(v));
     return Complex_simplex_around_vertex_range(
                                                Complex_simplex_around_vertex_iterator(this, v),
                                                Complex_simplex_around_vertex_iterator(this, v, true));
+  }
+  typedef Simplex_coboundary_iterator<Skeleton_blocker_complex, Link> Complex_simplex_coboundary_iterator;
+
+  /**
+   * @brief Range over the simplices of the coboundary of a simplex.
+   * Methods .begin() and .end() return a Complex_simplex_coboundary_iterator.
+   */
+  typedef boost::iterator_range < Complex_simplex_coboundary_iterator > Complex_coboundary_range;
+
+  /**
+   * @brief Returns a Complex_simplex_coboundary_iterator over the simplices of the coboundary of a simplex.
+   */
+  Complex_coboundary_range coboundary_range(const Simplex& s) const {
+    assert(contains(s));
+    return Complex_coboundary_range(Complex_simplex_coboundary_iterator(this, s),
+                                    Complex_simplex_coboundary_iterator(this, s, true));
   }
 
   // typedef Simplex_iterator<Skeleton_blocker_complex,Superior_link> Complex_simplex_iterator;
@@ -1373,7 +1420,7 @@ class Skeleton_blocker_complex {
   /**
    * @brief Returns a Complex_simplex_range over all the simplices of the complex
    */
-  Complex_simplex_range simplex_range() const {
+  Complex_simplex_range complex_simplex_range() const {
     Complex_simplex_iterator end(this, true);
     if (empty()) {
       return Complex_simplex_range(end, end);
@@ -1393,7 +1440,7 @@ class Skeleton_blocker_complex {
    * @brief Iterator over the blockers adjacent to a vertex
    */
   typedef Blocker_iterator_around_vertex_internal<
-  typename std::multimap<Vertex_handle, Simplex_handle *>::iterator,
+  typename std::multimap<Vertex_handle, Simplex *>::iterator,
   Blocker_handle>
   Complex_blocker_around_vertex_iterator;
 
@@ -1401,7 +1448,7 @@ class Skeleton_blocker_complex {
    * @brief Iterator over (constant) blockers adjacent to a vertex
    */
   typedef Blocker_iterator_around_vertex_internal<
-  typename std::multimap<Vertex_handle, Simplex_handle *>::const_iterator,
+  typename std::multimap<Vertex_handle, Simplex *>::const_iterator,
   const Blocker_handle>
   Const_complex_blocker_around_vertex_iterator;
 
@@ -1433,7 +1480,7 @@ class Skeleton_blocker_complex {
    * @brief Iterator over the blockers.
    */
   typedef Blocker_iterator_internal<
-  typename std::multimap<Vertex_handle, Simplex_handle *>::iterator,
+  typename std::multimap<Vertex_handle, Simplex *>::iterator,
   Blocker_handle>
   Complex_blocker_iterator;
 
@@ -1441,7 +1488,7 @@ class Skeleton_blocker_complex {
    * @brief Iterator over the (constant) blockers.
    */
   typedef Blocker_iterator_internal<
-  typename std::multimap<Vertex_handle, Simplex_handle *>::const_iterator,
+  typename std::multimap<Vertex_handle, Simplex *>::const_iterator,
   const Blocker_handle>
   Const_complex_blocker_iterator;
 
@@ -1517,8 +1564,9 @@ class Skeleton_blocker_complex {
 template<typename Complex, typename SimplexHandleIterator>
 Complex make_complex_from_top_faces(SimplexHandleIterator simplex_begin, SimplexHandleIterator simplex_end,
                                     bool is_flag_complex = false) {
-  typedef typename Complex::Simplex_handle Simplex_handle;
-  std::vector<Simplex_handle> simplices;
+  //todo use add_simplex instead! should be more efficient and more elegant :)
+  typedef typename Complex::Simplex Simplex;
+  std::vector<Simplex> simplices;
   for (auto top_face = simplex_begin; top_face != simplex_end; ++top_face) {
     auto subfaces_topface = subfaces(*top_face);
     simplices.insert(simplices.end(), subfaces_topface.begin(), subfaces_topface.end());

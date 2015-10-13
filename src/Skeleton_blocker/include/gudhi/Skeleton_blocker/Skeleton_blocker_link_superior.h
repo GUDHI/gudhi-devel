@@ -44,13 +44,13 @@ class Skeleton_blocker_link_superior : public Skeleton_blocker_link_complex<
  public:
   typedef typename ComplexType::Vertex_handle Vertex_handle;
   typedef typename ComplexType::Root_vertex_handle Root_vertex_handle;
-  typedef typename ComplexType::Simplex_handle Simplex_handle;
+  typedef typename ComplexType::Simplex Simplex;
   typedef typename ComplexType::Root_simplex_handle Root_simplex_handle;
   typedef typename ComplexType::BlockerMap BlockerMap;
   typedef typename ComplexType::BlockerPair BlockerPair;
   typedef typename ComplexType::BlockerMapIterator BlockerMapIterator;
   typedef typename ComplexType::BlockerMapConstIterator BlockerMapConstIterator;
-  typedef typename ComplexType::Simplex_handle::Simplex_vertex_const_iterator AddressSimplexConstIterator;
+  typedef typename ComplexType::Simplex::Simplex_vertex_const_iterator AddressSimplexConstIterator;
   typedef typename ComplexType::Root_simplex_handle::Simplex_vertex_const_iterator IdSimplexConstIterator;
 
   Skeleton_blocker_link_superior()
@@ -58,7 +58,7 @@ class Skeleton_blocker_link_superior : public Skeleton_blocker_link_complex<
   }
 
   Skeleton_blocker_link_superior(const ComplexType & parent_complex,
-                                 Simplex_handle& alpha_parent_adress)
+                                 Simplex& alpha_parent_adress)
       : Skeleton_blocker_link_complex<ComplexType>(parent_complex,
                                                    alpha_parent_adress, true) {
   }
