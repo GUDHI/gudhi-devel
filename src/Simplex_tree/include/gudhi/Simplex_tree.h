@@ -771,12 +771,6 @@ class Simplex_tree {
    * assigned a Simplex_key corresponding to its order in the filtration (from 0 to m-1 for a
    * simplicial complex with m simplices).
    *
-   * The use of a depth-first traversal of the simplex tree, provided by
-   * complex_simplex_range(), combined with
-   * a stable sort is meant to optimize the order of simplices with same
-   * filtration value. The heuristic consists in inserting the cofaces of a
-   * simplex as soon as possible.
-   *
    * Will be automatically called when calling filtration_simplex_range()
    * if the filtration has never been initialized yet. */
   void initialize_filtration() {
@@ -785,7 +779,15 @@ class Simplex_tree {
     for (Simplex_handle sh : complex_simplex_range())
       filtration_vect_.push_back(sh);
 
-    // the stable sort ensures the ordering heuristic
+    /* We use stable_sort here because with libstdc++ it is faster than sort.
+     * is_before_in_filtration is now a total order, but we used to call
+     * stable_sort for the following heuristic:
+     * The use of a depth-first traversal of the simplex tree, provided by
+     * complex_simplex_range(), combined with a stable sort is meant to
+     * optimize the order of simplices with same filtration value. The
+     * heuristic consists in inserting the cofaces of a simplex as soon as
+     * possible.
+     */
     std::stable_sort(filtration_vect_.begin(), filtration_vect_.end(),
                      is_before_in_filtration(this));
   }
