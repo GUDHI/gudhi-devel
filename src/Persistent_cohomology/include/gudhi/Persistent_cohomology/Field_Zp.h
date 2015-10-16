@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SRC_PERSISTENT_COHOMOLOGY_INCLUDE_GUDHI_PERSISTENT_COHOMOLOGY_FIELD_ZP_H_
-#define SRC_PERSISTENT_COHOMOLOGY_INCLUDE_GUDHI_PERSISTENT_COHOMOLOGY_FIELD_ZP_H_
+#ifndef PERSISTENT_COHOMOLOGY_FIELD_ZP_H_
+#define PERSISTENT_COHOMOLOGY_FIELD_ZP_H_
 
 #include <utility>
 #include <vector>
@@ -113,4 +113,4 @@ class Field_Zp {
 
 }  // namespace Gudhi
 
-#endif  // SRC_PERSISTENT_COHOMOLOGY_INCLUDE_GUDHI_PERSISTENT_COHOMOLOGY_FIELD_ZP_H_
+#endif  // PERSISTENT_COHOMOLOGY_FIELD_ZP_H_

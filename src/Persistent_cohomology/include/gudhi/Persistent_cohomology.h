@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SRC_PERSISTENT_COHOMOLOGY_INCLUDE_GUDHI_PERSISTENT_COHOMOLOGY_H_
-#define SRC_PERSISTENT_COHOMOLOGY_INCLUDE_GUDHI_PERSISTENT_COHOMOLOGY_H_
+#ifndef PERSISTENT_COHOMOLOGY_H_
+#define PERSISTENT_COHOMOLOGY_H_
 
 #include <gudhi/Persistent_cohomology/Persistent_cohomology_column.h>
 #include <gudhi/Persistent_cohomology/Field_Zp.h>
@@ -38,6 +38,10 @@
 #include <vector>
 #include <set>
 #include <fstream>  // std::ofstream
+#include <limits>  // for numeric_limits<>
+#include <tuple>
+#include <algorithm>
+#include <string>
 
 namespace Gudhi {
 
@@ -709,13 +713,11 @@ class Persistent_cohomology {
     }
   }
 
-  void write_output_diagram(std::string diagram_name)
-  {
-    std::ofstream           diagram_out(diagram_name.c_str());
-    cmp_intervals_by_length cmp( cpx_ );
+  void write_output_diagram(std::string diagram_name) {
+    std::ofstream diagram_out(diagram_name.c_str());
+    cmp_intervals_by_length cmp(cpx_);
     std::sort(std::begin(persistent_pairs_), std::end(persistent_pairs_), cmp);
-    for(auto pair : persistent_pairs_)
-    {
+    for (auto pair : persistent_pairs_) {
     diagram_out << cpx_->dimension(get<0>(pair)) << " "
           << cpx_->filtration(get<0>(pair)) << " "
           << cpx_->filtration(get<1>(pair)) << std::endl;
@@ -774,4 +776,4 @@ class Persistent_cohomology {
 
 }  // namespace Gudhi
 
-#endif  // SRC_PERSISTENT_COHOMOLOGY_INCLUDE_GUDHI_PERSISTENT_COHOMOLOGY_H_
+#endif  // PERSISTENT_COHOMOLOGY_H_

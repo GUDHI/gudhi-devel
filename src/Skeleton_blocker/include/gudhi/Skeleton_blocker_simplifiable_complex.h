@@ -22,11 +22,11 @@
 #ifndef SKELETON_BLOCKER_SIMPLIFIABLE_COMPLEX_H_
 #define SKELETON_BLOCKER_SIMPLIFIABLE_COMPLEX_H_
 
+#include <gudhi/Skeleton_blocker/Skeleton_blocker_sub_complex.h>
+
 #include <list>
 #include <vector>
 #include <set>
-
-#include <gudhi/Skeleton_blocker/Skeleton_blocker_sub_complex.h>
 
 namespace Gudhi {
 
@@ -340,7 +340,7 @@ Skeleton_blocker_complex<SkeletonBlockerDS>::contract_edge(Vertex_handle a, Vert
   assert(this->contains_vertex(a));
   assert(this->contains_vertex(b));
 
-  if(this->contains_edge(a, b))
+  if (this->contains_edge(a, b))
     this->add_edge(a, b);
 
   // if some blockers passes through 'ab', we need to remove them.

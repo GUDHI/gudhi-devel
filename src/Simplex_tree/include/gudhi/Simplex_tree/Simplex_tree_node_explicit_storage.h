@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SIMPLEX_TREE_NODE_EXPLICIT_STORAGE_H_
-#define SIMPLEX_TREE_NODE_EXPLICIT_STORAGE_H_
+#ifndef SIMPLEX_TREE_SIMPLEX_TREE_NODE_EXPLICIT_STORAGE_H_
+#define SIMPLEX_TREE_SIMPLEX_TREE_NODE_EXPLICIT_STORAGE_H_
 
 #include <vector>
 
@@ -69,4 +69,4 @@ struct Simplex_tree_node_explicit_storage : SimplexTree::Filtration_simplex_base
 /* @} */  // end addtogroup simplex_tree
 }  // namespace Gudhi
 
-#endif  // SIMPLEX_TREE_NODE_EXPLICIT_STORAGE_H_
+#endif  // SIMPLEX_TREE_SIMPLEX_TREE_NODE_EXPLICIT_STORAGE_H_

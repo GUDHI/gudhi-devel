@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SIMPLEX_TREE_SIBLINGS_H_
-#define SIMPLEX_TREE_SIBLINGS_H_
+#ifndef SIMPLEX_TREE_SIMPLEX_TREE_SIBLINGS_H_
+#define SIMPLEX_TREE_SIMPLEX_TREE_SIBLINGS_H_
 
 #include <gudhi/Simplex_tree/Simplex_tree_node_explicit_storage.h>
 
@@ -124,4 +124,4 @@ class Simplex_tree_siblings {
 /* @} */  // end addtogroup simplex_tree
 }  // namespace Gudhi
 
-#endif  // SIMPLEX_TREE_SIBLINGS_H_
+#endif  // SIMPLEX_TREE_SIMPLEX_TREE_SIBLINGS_H_
