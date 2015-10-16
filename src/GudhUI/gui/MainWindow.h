@@ -23,9 +23,6 @@
 #ifndef GUI_MAINWINDOW_H_
 #define GUI_MAINWINDOW_H_
 
-// Workaround for moc-qt4 not parsing boost headers
-#include <CGAL/config.h>
-
 #include <QMainWindow>
 #include "ui_main_window.h"
 #include "model/Model.h"

@@ -24,7 +24,7 @@
 #define GUI_MENU_K_NEAREST_NEIGHBORS_H_
 
 #include <QMainWindow>
-#include "gui/ui_KNearestNeighborsMenu.h"
+#include "ui_KNearestNeighborsMenu.h"
 
 class QWidget;
 
