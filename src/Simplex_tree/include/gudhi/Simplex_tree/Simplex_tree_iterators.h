@@ -99,8 +99,7 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
 
 // any end() iterator
   explicit Simplex_tree_boundary_simplex_iterator(SimplexTree * st)
-      : last_(st->null_vertex()),
-        sib_(NULL) {
+      : sh_(st->null_simplex()) {
   }
 
   Simplex_tree_boundary_simplex_iterator(SimplexTree * st, Simplex_handle sh)
@@ -113,7 +112,7 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
     if (sib_ != NULL) {
       sh_ = sib_->find(next_);
     } else {
-      last_ = st->null_vertex();
+      sh_ = st->null_simplex();
     }  // vertex: == end()
   }
 
@@ -121,16 +120,17 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
   friend class boost::iterator_core_access;
 // valid when iterating along the SAME boundary.
   bool equal(Simplex_tree_boundary_simplex_iterator const& other) const {
-    return (sib_ == other.sib_ && last_ == other.last_);
+    return sh_ == other.sh_;
   }
 
   Simplex_handle const& dereference() const {
+    assert(sh_ != st_->null_simplex());
     return sh_;
   }
 
   void increment() {
     if (sib_ == NULL) {
-      last_ = st_->null_vertex();
+      sh_ = st_->null_simplex();
       return;
     }
 
