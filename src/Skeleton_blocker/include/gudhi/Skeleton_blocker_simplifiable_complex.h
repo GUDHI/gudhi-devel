@@ -45,9 +45,7 @@ bool Skeleton_blocker_complex<SkeletonBlockerDS>::is_popable_blocker(Blocker_han
   assert(this->contains_blocker(*sigma));
   Skeleton_blocker_link_complex<Skeleton_blocker_complex> link_blocker_sigma;
   build_link_of_blocker(*this, *sigma, link_blocker_sigma);
-
-  bool res = link_blocker_sigma.is_contractible() == CONTRACTIBLE;
-  return res;
+  return link_blocker_sigma.is_contractible() == CONTRACTIBLE;
 }
 
 /**

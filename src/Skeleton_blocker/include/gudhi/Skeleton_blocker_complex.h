@@ -134,8 +134,8 @@ class Skeleton_blocker_complex {
   typedef typename std::multimap<Vertex_handle, Simplex *>::const_iterator BlockerMapConstIterator;
 
  protected:
-  int num_vertices_;
-  int num_blockers_;
+  size_t num_vertices_;
+  size_t num_blockers_;
 
   typedef Skeleton_blocker_complex_visitor<Vertex_handle> Visitor;
   // typedef Visitor* Visitor_ptr;
@@ -164,10 +164,10 @@ class Skeleton_blocker_complex {
   /**
    *@brief constructs a simplicial complex with a given number of vertices and a visitor.
    */
-  explicit Skeleton_blocker_complex(int num_vertices_ = 0, Visitor* visitor_ = NULL)
+  explicit Skeleton_blocker_complex(size_t num_vertices_ = 0, Visitor* visitor_ = NULL)
       : visitor(visitor_) {
     clear();
-    for (int i = 0; i < num_vertices_; ++i) {
+    for (size_t i = 0; i < num_vertices_; ++i) {
       add_vertex();
     }
   }
@@ -998,10 +998,31 @@ class Skeleton_blocker_complex {
     return std::distance(triangles.begin(), triangles.end());
   }
 
+
+  /*
+   * @brief returns the number of simplices of a given dimension in the complex.
+   */  
+  size_t num_simplices() const {
+    auto simplices = complex_simplex_range();
+    return std::distance(simplices.begin(), simplices.end());
+  }
+
+  /*
+   * @brief returns the number of simplices of a given dimension in the complex.
+   */  
+  size_t num_simplices(unsigned dimension) const {
+    //todo iterator on k-simplices
+    size_t res = 0;
+    for(const auto& s: complex_simplex_range()) 
+      if(s.dimension() == dimension) 
+        ++res;
+    return res;
+  }
+
   /*
    * @brief returns the number of blockers in the complex.
    */
-  int num_blockers() const {
+  size_t num_blockers() const {
     return num_blockers_;
   }
 

@@ -104,6 +104,23 @@ bool test_simplex() {
   return simplex.dimension() == 3;
 }
 
+bool test_num_simplices() {
+  int n = 4;
+  Complex complex;
+  build_complete(n, complex);
+  size_t sum = 0;
+  for (int i = 0; i < n; i++) {
+    PRINT(complex.num_simplices(i));
+    sum += complex.num_simplices(i);
+  }
+  return 
+    complex.num_vertices() == n && 
+    complex.num_edges() == 6 && 
+    sum == 15 && 
+    complex.num_simplices() == 15;
+}
+
+
 bool test_iterator_vertices1() {
   int n = 10;
   Complex complex(10);
@@ -118,7 +135,7 @@ bool test_iterator_vertices1() {
 
 bool test_iterator_vertices2() {
   int n = 10;
-  Complex complex(10);
+  Complex complex;
   build_complete(10, complex);
   cerr << "complex.num_vertices():" << complex.num_vertices() << endl;
   cerr << "complex.num_edges():" << complex.num_edges() << endl;
@@ -348,7 +365,7 @@ bool test_iterator_simplices4() {
 }
 
 bool test_iterator_coboundary() {
-  Complex c(4);
+  Complex c;
   build_complete(4, c);
   c.remove_edge(Vertex_handle(0), Vertex_handle(2));
   PRINT(c.to_string());
@@ -892,6 +909,7 @@ bool test_constructor8() {
 int main(int argc, char *argv[]) {
   Tests tests_complex;
   tests_complex.add("test simplex", test_simplex);
+  tests_complex.add("test_num_simplices", test_num_simplices);
   tests_complex.add("test_link0", test_link0);
   tests_complex.add("test_link1", test_link1);
   tests_complex.add("test_link2", test_link2);
