@@ -226,7 +226,7 @@ Time to simplify and enumerate simplices:
 
 
 \copyright GNU General Public License v3.                         
-\verbatim  Contact: David Salinas,     david.salinas@inria.fr \endverbatim
+\verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
 */
 /** @} */  // end defgroup
 }  // namespace contraction
