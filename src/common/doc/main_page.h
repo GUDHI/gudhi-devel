@@ -38,7 +38,6 @@ arithmetic, operating on signed integers, rational numbers, and floating point n
 The following examples require the <a href="http://gmplib.org/">GNU Multiple Precision Arithmetic Library</a> (GMP) 
 and will not be built if GMP is not installed:
   - Persistent_cohomology/rips_multifield_persistence
-  - Simplex_tree/simplex_tree_from_alpha_shapes_3
 
 Having GMP version 4.2 or higher installed is recommended.
 
@@ -47,6 +46,8 @@ CGAL is a C++ library which provides easy access to efficient and reliable geome
 
 The following example requires the <a href="http://www.cgal.org/">Computational Geometry Algorithms Library</a> (CGAL) 
 and will not be built if CGAL is not installed:
+  - GudhUI
+  - Persistent_cohomology/alpha_shapes_persistence
   - Simplex_tree/simplex_tree_from_alpha_shapes_3
 
 Having CGAL version 4.4 or higher installed is recommended. The procedure to install this library according to
@@ -90,7 +91,7 @@ make
  * 
  * \section ReleaseHistory Release history
  *
- * – ??-??-2015; release v.1.2.0, Skeleton-Blocker simplex insertion, GudhUI (Gudhi Qt demo), Simplex tree coface function, Clang build issue fix.
+ * – ??-??-2015; release v.1.2.0, GudhUI (Gudhi Qt demo), Simplex tree coface function, Clang build issue fix.
  *
  * – 12-18-2014; release v.1.1, Skeleton-Blocker data-structure, simplification package, additional examples for topological persistence.
  *
@@ -105,7 +106,7 @@ make
  * 
  * Thank you to refer to this section, and to cite the author(s) of all the module you are using.
  * 
- * \section Soon Coming soon
+ * \section Upcoming Upcoming
  *
  * – Alpha complex.
  *
@@ -117,5 +118,5 @@ make
  *
  * – Tangential complex.
  *
- * – Hard clustering.
+ * – Clustering.
 */
