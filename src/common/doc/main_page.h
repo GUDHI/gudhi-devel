@@ -27,7 +27,7 @@ Examples of Gudhi headers inclusion can be found in \ref demos.
 
 \section compiling Compiling
 
-The library uses c++11 and requires <a href="http://www.boost.org/">Boost</a> with version 1.48.0 or more recent.
+The library uses c++11 and requires <a target="_blank" href="http://www.boost.org/">Boost</a> with version 1.48.0 or more recent.
 It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2013. 
 
 
@@ -35,7 +35,7 @@ It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 
 The multi-field persistent homology algorithm requires GMP which is a free library for arbitrary-precision
 arithmetic, operating on signed integers, rational numbers, and floating point numbers.
 
-The following examples require the <a href="http://gmplib.org/">GNU Multiple Precision Arithmetic Library</a> (GMP) 
+The following examples require the <a target="_blank" href="http://gmplib.org/">GNU Multiple Precision Arithmetic Library</a> (GMP) 
 and will not be built if GMP is not installed:
   - Persistent_cohomology/rips_multifield_persistence
 
@@ -44,7 +44,7 @@ Having GMP version 4.2 or higher installed is recommended.
 \subsection cgal CGAL:
 CGAL is a C++ library which provides easy access to efficient and reliable geometric algorithms.
 
-The following example requires the <a href="http://www.cgal.org/">Computational Geometry Algorithms Library</a> (CGAL) 
+The following example requires the <a target="_blank" href="http://www.cgal.org/">Computational Geometry Algorithms Library</a> (CGAL) 
 and will not be built if CGAL is not installed:
   - GudhUI
   - Persistent_cohomology/alpha_shapes_persistence
@@ -86,8 +86,8 @@ make
  * – Simplification methods via implicit representations.
  * 
  *
- * The library is available <a class="el" href="https://gforge.inria.fr/frs/?group_id=3865">here</a> and the documentation is
- * available at this <a class="el" href="http://gudhi.gforge.inria.fr/doc/1.1.0/">webpage</a>.
+ * The library is available <a class="el" target="_blank" href="https://gforge.inria.fr/frs/?group_id=3865">here</a> and the documentation is
+ * available at this <a class="el" href="http://gudhi.gforge.inria.fr/doc/latest/">webpage</a>.
  * 
  * \section ReleaseHistory Release history
  *
@@ -125,10 +125,10 @@ make
  * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
  * 
  * If you want to join our development team, you will have to create an accout on the
- * <a class="el" href="http://gudhi.gforge.inria.fr">INRIA forge</a> and ask to join the GUDHI project.
+ * <a class="el" target="_blank" href="http://gforge.inria.fr">INRIA forge</a> and ask to join the GUDHI project.
  * 
  * Your development will have to follow our
- * <a class="el" href="https://gforge.inria.fr/plugins/mediawiki/wiki/gudhi/index.php/Submitting_process">submitting
+ * <a class="el" target="_blank" href="https://gforge.inria.fr/plugins/mediawiki/wiki/gudhi/index.php/Submitting_process">submitting
  * process</a> (code, documentation, and unitary tests review) and not to break the existing
- * <a class="el" href="https://ci.inria.fr/gudhi/">test suite</a>.
+ * <a class="el" target="_blank" href="https://ci.inria.fr/gudhi/">test suite</a>.
 */
