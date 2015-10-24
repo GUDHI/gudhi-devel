@@ -91,7 +91,7 @@ make
  * 
  * \section ReleaseHistory Release history
  *
- * – ??-??-2015; release v.1.2.0, GudhUI (Gudhi Qt demo), Simplex tree coface function, Clang build issue fix.
+ * – 24-10-2015; release v.1.2.0, GudhUI (Gudhi Qt demo), Simplex tree coface function, Clang build issue fix.
  *
  * – 12-18-2014; release v.1.1, Skeleton-Blocker data-structure, simplification package, additional examples for topological persistence.
  *
@@ -119,4 +119,16 @@ make
  * – Tangential complex.
  *
  * – Clustering.
+ * 
+ * \section Contributions Contributions
+ * Gudhi is opened to external contributions. If you just want to report bugs, feel free to contact us.
+ * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
+ * 
+ * If you want to join our development team, you will have to create an accout on the
+ * <a class="el" href="http://gudhi.gforge.inria.fr">INRIA forge</a> and ask to join the GUDHI project.
+ * 
+ * Your development will have to follow our
+ * <a class="el" href="https://gforge.inria.fr/plugins/mediawiki/wiki/gudhi/index.php/Submitting_process">submitting
+ * process</a> (code, documentation, and unitary tests review) and not to break the existing
+ * <a class="el" href="https://ci.inria.fr/gudhi/">test suite</a>.
 */
