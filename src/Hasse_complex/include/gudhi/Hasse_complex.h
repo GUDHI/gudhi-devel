@@ -44,8 +44,7 @@ struct Hasse_simplex {
   template< class Complex_ds >
   Hasse_simplex(Complex_ds & cpx
                 , typename Complex_ds::Simplex_handle sh)
-      : key_(cpx.key(sh))
-      , filtration_(cpx.filtration(sh))
+      : filtration_(cpx.filtration(sh))
       , boundary_() {
     boundary_.reserve(cpx.dimension(sh) + 1);
     for (auto b_sh : cpx.boundary_simplex_range(sh)) {
@@ -55,7 +54,7 @@ struct Hasse_simplex {
 
   Hasse_simplex(typename HasseCpx::Simplex_key key
                 , typename HasseCpx::Filtration_value fil
-                , std::vector<typename HasseCpx::Simplex_handle> boundary)
+                , std::vector<typename HasseCpx::Simplex_handle> const& boundary)
       : key_(key)
       , filtration_(fil)
       , boundary_(boundary) { }
@@ -197,11 +196,12 @@ class Hasse_complex {
   }
 
   void initialize_filtration() {
+    // Setting the keys is done by pcoh, Simplex_tree doesn't do it either.
+#if 0
     Simplex_key key = 0;
-    for (auto & h_simp : complex_) {
-      h_simp.key_ = key;
-      ++key;
-    }
+    for (auto & h_simp : complex_)
+      h_simp.key_ = key++;
+#endif
   }
 
   std::vector< Hasse_simp, Gudhi::no_init_allocator<Hasse_simp> > complex_;
