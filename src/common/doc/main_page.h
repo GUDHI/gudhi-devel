@@ -65,6 +65,14 @@ cmake ..
 make
 \endverbatim
 
+\subsection testsuites Test suites
+
+To test your build, run the following command in a terminal:
+
+\verbatim
+make test
+\endverbatim
+
 \details 
 
 \copyright GNU General Public License v3.                         
@@ -75,60 +83,73 @@ make
 /*! \page Software Software
  * \tableofcontents
  * \section SoftwareIntroduction Introduction
- * The GUDHI open source library will provide the central data structures and algorithms that underly applications in geometry understanding in higher dimensions. It is intended to both help the development of new algorithmic solutions inside and outside the project, and to facilitate the transfer of results in applied fields.
- *
+ * The GUDHI library is a C++ open source library **intended to provide** the central data structures and algorithms
+ * that underly applications in Geometric and Topological Data Analysis
+ * (<a class="el" target="_blank" href="https://en.wikipedia.org/wiki/Topological_data_analysis">TDA</a>). The GUDHI
+ * library is developed as part of the <a class="el" target="_blank" href="https://project.inria.fr/gudhi/">GUDHI
+ * project</a> supported by the European Research Council. The GUDHI library can both help the development of new
+ * algorithmic solutions  and to facilitate the transfer of state of the art results and new applications of TDA.
+ * 
  * The current release of the GUDHI library includes:
  * 
- * – Data structures to represent, construct and manipulate simplicial complexes.
- * 
- * – Algorithms to compute persistent homology and multi-field persistent homology.
- * 
- * – Simplification methods via implicit representations.
+ * \li Data structures to represent, construct and manipulate simplicial complexes.
+ * \li Algorithms to compute persistent homology and multi-field persistent homology.
+ * \li Simplification methods via implicit representations.
  * 
  *
- * The library is available <a class="el" target="_blank" href="https://gforge.inria.fr/frs/?group_id=3865">here</a> and the documentation is
- * available at this <a class="el" href="http://gudhi.gforge.inria.fr/doc/latest/">webpage</a>.
+ * The library is available <a class="el" target="_blank" href="https://gforge.inria.fr/frs/?group_id=3865">here</a>
+ * and the documentation is available at this <a class="el" href="http://gudhi.gforge.inria.fr/doc/latest/">
+ * webpage</a>.
+ * 
+ * The library comes with data sets, \ref demos and \ref testsuites.
+ * 
+ * \subsection People People
+ * 
+ * The development of the GUDHI library is steered by an Editorial Board, which is responsible for guiding the
+ * development of the library, developers, and the user community.
+ * 
+ * The Editorial board is composed of:
+ * 
+ * \li <a class="el" target="_blank" href="http://www-sop.inria.fr/members/Jean-Daniel.Boissonnat/">
+ * Jean-Daniel Boissonnat</a> | INRIA Sophia Antipolis - Méditerranée
+ * \li <a class="el" target="_blank" href="http://www.loria.fr/~glisse/">Marc Glisse</a> | INRIA Saclay - Ile de France
+ * \li Clément Jamin | INRIA Sophia Antipolis - Méditerranée
+ * \li Vincent Rouvreau | INRIA Saclay - Ile de France
+ * 
+ * \section Contributions Bug reports and contributions
+ * Please help us improving the quality of the GUDHI library. You may report bugs or suggestions to:
+ * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
+ * 
+ * Gudhi is **open** to external contributions. If you want to join our development team, please contact us.
+ * 
  * 
  * \section ReleaseHistory Release history
  *
- * – 24-10-2015; release v.1.2.0, GudhUI (Gudhi Qt demo), Simplex tree coface function, Clang build issue fix.
- *
- * – 12-18-2014; release v.1.1, Skeleton-Blocker data-structure, simplification package, additional examples for topological persistence.
- *
- * – 08-12-2014; release v. 1.0.2, initialize simplex keys in initialize_filtration in Simplex_tree
- *
- * – 07-11-2014: release v. 1.0.1, bug fix in summing columns in Persistent_cohomology
- *
- * – 06-23-2014: release v. 1.0
- * 
- * \section Citation How to cite Gudhi
- * Each Gudhi <a class="el" href="modules.html">module</a> (either data structures or algorithms) has an author section.
- * 
- * Thank you to refer to this section, and to cite the author(s) of all the module you are using.
+ * \li 24-10-2015; release v.1.2.0, GudhUI (Gudhi Qt demo), Simplex tree coface function, Clang build issue fix.
+ * \li 18-12-2014; release v.1.1, Skeleton-Blocker data-structure, simplification package, additional examples for topological persistence.
+ * \li 08-12-2014; release v. 1.0.2, initialize simplex keys in initialize_filtration in Simplex_tree
+ * \li 07-11-2014: release v. 1.0.1, bug fix in summing columns in Persistent_cohomology
+ * \li 23-06-2014: release v. 1.0
  * 
  * \section Upcoming Upcoming
  *
- * – Alpha complex.
- *
- * – Bottleneck distance.
- *
- * – Zig zag persistence.
- *
- * – Witness complex.
- *
- * – Tangential complex.
- *
- * – Clustering.
- * 
- * \section Contributions Contributions
- * Gudhi is opened to external contributions. If you just want to report bugs, feel free to contact us.
- * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
- * 
- * If you want to join our development team, you will have to create an accout on the
- * <a class="el" target="_blank" href="http://gforge.inria.fr">INRIA forge</a> and ask to join the GUDHI project.
- * 
- * Your development will have to follow our
- * <a class="el" target="_blank" href="https://gforge.inria.fr/plugins/mediawiki/wiki/gudhi/index.php/Submitting_process">submitting
- * process</a> (code, documentation, and unitary tests review) and not to break the existing
- * <a class="el" target="_blank" href="https://ci.inria.fr/gudhi/">test suite</a>.
+ * The library is under active development. New packages to be released next include:
+ * \li Alpha complex.
+ * \li Bottleneck distance.
+ * \li Zig zag persistence.
+ * \li Witness complex.
+ * \li Tangential complex.
+ * \li Clustering.
 */
+
+/*! \page Citation Acknowledging the GUDHI library
+ * We kindly ask users to cite the GUDHI library as appropriately as possible in their papers, and to mention the use
+ * of the GUDHI library on the web pages of their projects using GUDHI and provide us with links to these web pages.
+ * Feel free to contact us in case you have any question or remark on this topic.
+ * 
+ * We provide \ref GudhiBibtex entries for the modules of the User and Reference Manual, as well as for publications
+ * directly related to the GUDHI library.
+ * \section GudhiBibtex GUDHI bibtex
+ * \verbinclude  biblio/how_to_cite_gudhi.bib
+*/
+

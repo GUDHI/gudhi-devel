@@ -672,7 +672,8 @@ LAYOUT_FILE            =
 # search path. Do not use file names with spaces, bibtex cannot handle them. See
 # also \cite for info how to create references.
 
-CITE_BIB_FILES         = biblio/bibliography.bib
+CITE_BIB_FILES         = biblio/bibliography.bib \
+                        biblio/how_to_cite_gudhi.bib
 
 #---------------------------------------------------------------------------
 # Configuration options related to warning and progress messages
@@ -811,7 +812,7 @@ EXCLUDE_SYMBOLS        =
 # that contain example code fragments that are included (see the \include
 # command).
 
-EXAMPLE_PATH           =
+EXAMPLE_PATH           = biblio/
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp and
