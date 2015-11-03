@@ -37,7 +37,7 @@
  * 
  * \li <a class="el" target="_blank" href="http://www-sop.inria.fr/members/Jean-Daniel.Boissonnat/">
  * Jean-Daniel Boissonnat</a> | INRIA Sophia Antipolis - Méditerranée
- * \li <a class="el" target="_blank" href="http://www.loria.fr/~glisse/">Marc Glisse</a> | INRIA Saclay - Ile de France
+ * \li <a class="el" target="_blank" href="http://geometrica.saclay.inria.fr/team/Marc.Glisse/">Marc Glisse</a> | INRIA Saclay - Ile de France
  * \li Clément Jamin | INRIA Sophia Antipolis - Méditerranée
  * \li Vincent Rouvreau | INRIA Saclay - Ile de France
  * 
