@@ -37,7 +37,7 @@ namespace Gudhi {
 namespace contraction {
 
 
-/** \defgroup contr Contraction
+/** \defgroup contr Edge contraction
 
 \author David Salinas
 
