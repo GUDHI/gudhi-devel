@@ -69,6 +69,7 @@
  * \li GudhUI
  * \li Persistent_cohomology/alpha_shapes_persistence
  * \li Simplex_tree/simplex_tree_from_alpha_shapes_3
+ * 
  * Having CGAL version 4.4 or higher installed is recommended. The procedure to install this library according to
  * your operating system is detailed here http://doc.cgal.org/latest/Manual/installation.html
  * 
