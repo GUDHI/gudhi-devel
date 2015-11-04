@@ -30,10 +30,7 @@
  * <a class="el" target="_blank" href="https://cran.r-project.org/web/packages/TDA/index.html">R package TDA</a>
  * (Statistical Tools for Topological Data Analysis).
  * 
- * The development of the GUDHI library is steered by an Editorial Board, who is responsible for guiding the
- * development of the library, developers, and the user community.
- * 
- * The Editorial board is composed of:
+ * The development of the GUDHI library is steered by an Editorial Board composed of:
  * 
  * \li <a class="el" target="_blank" href="http://www-sop.inria.fr/members/Jean-Daniel.Boissonnat/">
  * Jean-Daniel Boissonnat</a> | INRIA Sophia Antipolis - Méditerranée
