@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 2.6)
 project(GUDHISimplexTreeFromFile)
 
-add_executable ( simplex_tree_from_file simplex_tree_from_file.cpp )
-add_test(simplex_tree_from_file_2 ${CMAKE_CURRENT_BINARY_DIR}/simplex_tree_from_file ${CMAKE_SOURCE_DIR}/data/points/Klein_bottle_complex.txt 2)
-add_test(simplex_tree_from_file_3 ${CMAKE_CURRENT_BINARY_DIR}/simplex_tree_from_file ${CMAKE_SOURCE_DIR}/data/points/Klein_bottle_complex.txt 3)
+add_executable ( simplex_tree_from_cliques_of_graph simplex_tree_from_cliques_of_graph.cpp )
+add_test(simplex_tree_from_cliques_of_graph_2 ${CMAKE_CURRENT_BINARY_DIR}/simplex_tree_from_cliques_of_graph ${CMAKE_SOURCE_DIR}/data/points/Klein_bottle_complex.txt 2)
+add_test(simplex_tree_from_cliques_of_graph_3 ${CMAKE_CURRENT_BINARY_DIR}/simplex_tree_from_cliques_of_graph ${CMAKE_SOURCE_DIR}/data/points/Klein_bottle_complex.txt 3)
 
 add_executable ( simple_simplex_tree simple_simplex_tree.cpp )
 add_test(simple_simplex_tree ${CMAKE_CURRENT_BINARY_DIR}/simple_simplex_tree)

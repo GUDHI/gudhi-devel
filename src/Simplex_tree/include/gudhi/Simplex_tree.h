@@ -120,7 +120,9 @@ class Simplex_tree {
   /* Type of node in the simplex tree. */
   typedef Simplex_tree_node_explicit_storage<Simplex_tree> Node;
   /* Type of dictionary Vertex_handle -> Node for traversing the simplex tree. */
-  // Note: this wastes space when Vertex_handle is 32 bits and Node is aligned on 64 bits. It would be better to use a flat_set (with our own comparator) where we can control the layout of the struct (put Vertex_handle and Simplex_key next to each other).
+  // Note: this wastes space when Vertex_handle is 32 bits and Node is aligned on 64 bits. It would be better to use a
+  // flat_set (with our own comparator) where we can control the layout of the struct (put Vertex_handle and
+  // Simplex_key next to each other).
   typedef typename boost::container::flat_map<Vertex_handle, Node> Dictionary;
 
   /* \brief Set of nodes sharing a same parent in the simplex tree. */
@@ -131,7 +133,7 @@ class Simplex_tree {
     Key_simplex_base_real() : key_(-1) {}
     void assign_key(Simplex_key k) { key_ = k; }
     Simplex_key key() const { return key_; }
-    private:
+   private:
     Simplex_key key_;
   };
   struct Key_simplex_base_dummy {
@@ -145,7 +147,7 @@ class Simplex_tree {
     Filtration_simplex_base_real() : filt_(0) {}
     void assign_filtration(Filtration_value f) { filt_ = f; }
     Filtration_value filtration() const { return filt_; }
-    private:
+   private:
     Filtration_value filt_;
   };
   struct Filtration_simplex_base_dummy {
@@ -153,7 +155,8 @@ class Simplex_tree {
     void assign_filtration(Filtration_value f) { assert(f == 0); }
     Filtration_value filtration() const { return 0; }
   };
-  typedef typename std::conditional<Options::store_filtration, Filtration_simplex_base_real, Filtration_simplex_base_dummy>::type Filtration_simplex_base;
+  typedef typename std::conditional<Options::store_filtration, Filtration_simplex_base_real,
+    Filtration_simplex_base_dummy>::type Filtration_simplex_base;
 
  public:
   /** \brief Handle type to a simplex contained in the simplicial complex represented
@@ -271,7 +274,7 @@ class Simplex_tree {
    * The filtration must be valid. If the filtration has not been initialized yet, the
    * method initializes it (i.e. order the simplices). If the complex has changed since the last time the filtration
    * was initialized, please call `initialize_filtration()` to recompute it. */
-  Filtration_simplex_range const& filtration_simplex_range(Indexing_tag=Indexing_tag()) {
+  Filtration_simplex_range const& filtration_simplex_range(Indexing_tag = Indexing_tag()) {
     if (filtration_vect_.empty()) {
       initialize_filtration();
     }
@@ -768,12 +771,6 @@ class Simplex_tree {
    * assigned a Simplex_key corresponding to its order in the filtration (from 0 to m-1 for a
    * simplicial complex with m simplices).
    *
-   * The use of a depth-first traversal of the simplex tree, provided by
-   * complex_simplex_range(), combined with
-   * a stable sort is meant to optimize the order of simplices with same
-   * filtration value. The heuristic consists in inserting the cofaces of a
-   * simplex as soon as possible.
-   *
    * Will be automatically called when calling filtration_simplex_range()
    * if the filtration has never been initialized yet. */
   void initialize_filtration() {
@@ -782,7 +779,15 @@ class Simplex_tree {
     for (Simplex_handle sh : complex_simplex_range())
       filtration_vect_.push_back(sh);
 
-    // the stable sort ensures the ordering heuristic
+    /* We use stable_sort here because with libstdc++ it is faster than sort.
+     * is_before_in_filtration is now a total order, but we used to call
+     * stable_sort for the following heuristic:
+     * The use of a depth-first traversal of the simplex tree, provided by
+     * complex_simplex_range(), combined with a stable sort is meant to
+     * optimize the order of simplices with same filtration value. The
+     * heuristic consists in inserting the cofaces of a simplex as soon as
+     * possible.
+     */
     std::stable_sort(filtration_vect_.begin(), filtration_vect_.end(),
                      is_before_in_filtration(this));
   }
@@ -908,8 +913,9 @@ class Simplex_tree {
         : st_(st) { }
 
     bool operator()(const Simplex_handle sh1, const Simplex_handle sh2) const {
-      if (st_->filtration(sh1) != st_->filtration(sh2)) {
-        return st_->filtration(sh1) < st_->filtration(sh2);
+      // Not using st_->filtration(sh1) because it uselessly tests for null_simplex.
+      if (sh1->second.filtration() != sh2->second.filtration()) {
+	return sh1->second.filtration() < sh2->second.filtration();
       }
       // is sh1 a proper subface of sh2
       return st_->reverse_lexicographic_order(sh1, sh2);

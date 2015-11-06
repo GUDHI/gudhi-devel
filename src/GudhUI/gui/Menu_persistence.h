@@ -1,13 +1,10 @@
-/*
- * Menu_persistence.h
- *  Created on: Jan 27, 2015
- * This file is part of the Gudhi Library. The Gudhi library 
+/* This file is part of the Gudhi Library. The Gudhi library 
  *    (Geometric Understanding in Higher Dimensions) is a generic C++ 
  *    library for computational topology.
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Méditerranée (France)
+ *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -24,36 +21,31 @@
  * 
  */
 
-
-#ifndef MENU_PERSISTENCE_H_
-#define MENU_PERSISTENCE_H_
-
+#ifndef GUI_MENU_PERSISTENCE_H_
+#define GUI_MENU_PERSISTENCE_H_
 
 #include <QMainWindow>
 #include "gui/ui_PersistenceMenu.h"
 
 class QWidget;
 
+class Menu_persistence : public QDialog, public Ui::PersistenceMenu {
+  Q_OBJECT
 
-class Menu_persistence : public QDialog,public Ui::PersistenceMenu{
-	Q_OBJECT
-private:
-	QMainWindow* parent;
+ private:
+  QMainWindow* parent;
 
-public:
+ public:
+  Menu_persistence(QMainWindow* parent_);
 
-	Menu_persistence(QMainWindow* parent_);
+  void connectActions(QMainWindow* parent);
 
-	void connectActions(QMainWindow* parent);
+ public slots:
+  void send_compute_persistence();
+  void accept();
 
-	public slots:
-	void send_compute_persistence();
-	void accept();
-	signals:
-	void compute_persistence(int p_fied,double threshold,int dim_max,double min_persistence);
-
+ signals:
+  void compute_persistence(int p_fied, double threshold, int dim_max, double min_persistence);
 };
 
-
-
-#endif /* MENU_PERSISTENCE_H_ */
+#endif  // GUI_MENU_PERSISTENCE_H_

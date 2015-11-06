@@ -19,23 +19,24 @@
   *    You should have received a copy of the GNU General Public License
   *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
-#ifndef SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_H_
-#define SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_H_
 
-#include "gudhi/Skeleton_blocker_complex.h"
-#include "gudhi/Skeleton_blocker_geometric_complex.h"
-#include "gudhi/Skeleton_blocker_simplifiable_complex.h"
-#include "gudhi/Skeleton_blocker/Skeleton_blocker_off_io.h"
+#ifndef SKELETON_BLOCKER_H_
+#define SKELETON_BLOCKER_H_
 
-#include "gudhi/Skeleton_blocker/Skeleton_blocker_simple_traits.h"
-#include "gudhi/Skeleton_blocker/Skeleton_blocker_simple_geometric_traits.h"
+#include <gudhi/Skeleton_blocker_complex.h>
+#include <gudhi/Skeleton_blocker_geometric_complex.h>
+#include <gudhi/Skeleton_blocker_simplifiable_complex.h>
+#include <gudhi/Skeleton_blocker/Skeleton_blocker_off_io.h>
 
+#include <gudhi/Skeleton_blocker/Skeleton_blocker_simple_traits.h>
+#include <gudhi/Skeleton_blocker/Skeleton_blocker_simple_geometric_traits.h>
 
-#include "gudhi/Utils.h"  // xxx
-
+#include <gudhi/Utils.h>  // xxx
 
 namespace Gudhi {
+
 namespace skbl {
+
 /** \defgroup skbl Skeleton-Blocker 
 
 \author David Salinas
@@ -240,14 +241,12 @@ their collaboration to write the two initial papers
 
 
 \copyright GNU General Public License v3.                         
-\verbatim  Contact: David Salinas,     david.salinas@inria.fr \endverbatim
+\verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
 */
 /** @} */  // end defgroup
+
 }  // namespace skbl
+
 }  // namespace Gudhi
 
-
-#endif  // SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_H_
-
-
-
+#endif  // SKELETON_BLOCKER_H_

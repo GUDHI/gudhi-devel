@@ -34,8 +34,8 @@ struct SimplexTreeOptions {
   /// Must be a signed integer type.
   typedef SimplexKey Simplex_key;
   /// If true, each simplex has extra storage for one `Simplex_key`. Necessary for `Persistent_cohomology`.
-  static constexpr bool store_key;
-  /// If true, each simplex has extra storage for one `Filtration_value`, and this value is propagated by operations like `Gudhi::Simplex_tree<SimplexTreeOptions>::expansion`. Without it, `Persistent_cohomology` degenerates to computing usual (non-persistent) cohomology.
-  static constexpr bool store_filtration;
+  static const bool store_key;
+  /// If true, each simplex has extra storage for one `Filtration_value`, and this value is propagated by operations like `Gudhi::Simplex_tree::expansion`. Without it, `Persistent_cohomology` degenerates to computing usual (non-persistent) cohomology.
+  static const bool store_filtration;
 };
 

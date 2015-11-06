@@ -20,9 +20,12 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <gudhi/graph_simplicial_complex.h>
+#include <gudhi/Simplex_tree.h>
+
 #include <iostream>
-#include "gudhi/graph_simplicial_complex.h"
-#include "gudhi/Simplex_tree.h"
+#include <utility>  // for pair
+#include <vector>
 
 using namespace Gudhi;
 
@@ -38,7 +41,7 @@ int main(int argc, char * const argv[]) {
   // TEST OF INSERTION
   std::cout << "********************************************************************" << std::endl;
   std::cout << "EXAMPLE OF SIMPLE INSERTION" << std::endl;
-  //Construct the Simplex Tree
+  // Construct the Simplex Tree
   Simplex_tree<> simplexTree;
 
   /* Simplex to be inserted:  */
@@ -159,8 +162,8 @@ int main(int argc, char * const argv[]) {
   // ++ TENTH
   std::cout << "   * INSERT 0 (already inserted)" << std::endl;
   typeVectorVertex tenthSimplexVector = { 0 };
-  returnValue =
-      simplexTree.insert_simplex(tenthSimplexVector, Filtration_value(FOURTH_FILTRATION_VALUE)); // With a different filtration value
+  // With a different filtration value
+  returnValue = simplexTree.insert_simplex(tenthSimplexVector, Filtration_value(FOURTH_FILTRATION_VALUE));
 
   if (returnValue.second == true) {
     std::cout << "   + 0 INSERTED" << std::endl;
@@ -181,18 +184,18 @@ int main(int argc, char * const argv[]) {
   }
 
   // ++ GENERAL VARIABLE SET
-  simplexTree.set_filtration(FOURTH_FILTRATION_VALUE); // Max filtration value
-  simplexTree.set_dimension(2); // Max dimension = 2 -> (2,1,0)
+  simplexTree.set_filtration(FOURTH_FILTRATION_VALUE);  // Max filtration value
+  simplexTree.set_dimension(2);  // Max dimension = 2 -> (2,1,0)
 
-  std::cout << "********************************************************************" << std::endl;
+  std::cout << "********************************************************************\n";
   // Display the Simplex_tree - Can not be done in the middle of 2 inserts
-  std::cout << "* The complex contains " << simplexTree.num_simplices() << " simplices" << std::endl;
-  std::cout << "   - dimension " << simplexTree.dimension() << "   - filtration " << simplexTree.filtration() << std::endl;
-  std::cout << "* Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
+  std::cout << "* The complex contains " << simplexTree.num_simplices() << " simplices\n";
+  std::cout << "   - dimension " << simplexTree.dimension() << "   - filtration " << simplexTree.filtration() << "\n";
+  std::cout << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
   for (auto f_simplex : simplexTree.filtration_simplex_range()) {
     std::cout << "   " << "[" << simplexTree.filtration(f_simplex) << "] ";
     for (auto vertex : simplexTree.simplex_vertex_range(f_simplex)) {
-      std::cout << (int) vertex << " ";
+      std::cout << static_cast<int>(vertex) << " ";
     }
     std::cout << std::endl;
   }

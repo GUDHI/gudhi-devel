@@ -35,8 +35,9 @@ typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > K;
 typedef K::Point_d Point;
 
 void usage(char * const progName) {
-  std::cerr << "Usage: " << progName << " in|on sphere|cube off_file_name points_number[integer > 0] dimension[integer > 1] radius[double > 0.0 | default = 1.0]" << std::endl;
-  exit(-1); // ----- >>
+  std::cerr << "Usage: " << progName << " in|on sphere|cube off_file_name points_number[integer > 0] " <<
+      "dimension[integer > 1] radius[double > 0.0 | default = 1.0]" << std::endl;
+  exit(-1);
 }
 
 int main(int argc, char **argv) {
@@ -86,8 +87,13 @@ int main(int argc, char **argv) {
   }
 
   std::ofstream diagram_out(argv[3]);
-  diagram_out << "OFF" << std::endl;
-  diagram_out << points_number << " 0 0" << std::endl;
+  if (dimension == 3) {
+    diagram_out << "OFF" << std::endl;
+    diagram_out << points_number << " 0 0" << std::endl;
+  } else {
+    diagram_out << "nOFF" << std::endl;
+    diagram_out << dimension << " " << points_number << " 0 0" << std::endl;
+  }
 
   if (diagram_out.is_open()) {
     // Instanciate a random point generator
@@ -114,7 +120,7 @@ int main(int argc, char **argv) {
 
     for (auto thePoint : points) {
       int i = 0;
-      for (;i < dimension - 1; i++) {
+      for (; i < dimension - 1; i++) {
         diagram_out << thePoint[i] << " ";
       }
       diagram_out << thePoint[i] << std::endl;  // last point + Carriage Return

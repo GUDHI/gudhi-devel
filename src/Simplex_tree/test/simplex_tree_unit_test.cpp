@@ -108,6 +108,7 @@ BOOST_AUTO_TEST_CASE(simplex_tree_from_file) {
     // Size of simplex
     int size = 0;
     for (auto vertex : st.simplex_vertex_range(f_simplex)) {
+      // Remove warning
       (void) vertex;
       size++;
     }
@@ -164,6 +165,8 @@ void set_and_test_simplex_tree_dim_fil(typeST& simplexTree, int vectorSize, cons
   // Another way to count simplices:
   size_t num_simp = 0;
   for (auto f_simplex : simplexTree.complex_simplex_range()) {
+    // Remove warning
+    (void) f_simplex;
     num_simp++;
   }
 
@@ -359,59 +362,121 @@ BOOST_AUTO_TEST_CASE(simplex_tree_insertion) {
 
 }
 
+bool sort_in_decr_order (Vertex_handle i,Vertex_handle j) { return (i>j); }
+
 BOOST_AUTO_TEST_CASE(NSimplexAndSubfaces_tree_insertion) {
   std::cout << "********************************************************************" << std::endl;
   std::cout << "TEST OF RECURSIVE INSERTION" << std::endl;
   typeST st;
+  typePairSimplexBool returnValue;
+  int position = 0;
 
   // ++ FIRST
   std::cout << "   - INSERT (2,1,0)" << std::endl;
   typeVectorVertex SimplexVector1{2, 1, 0};
   BOOST_CHECK(SimplexVector1.size() == 3);
-  st.insert_simplex_and_subfaces(SimplexVector1);
+  returnValue = st.insert_simplex_and_subfaces(SimplexVector1);
 
   BOOST_CHECK(st.num_vertices() == (size_t) 3); // +3 (2, 1 and 0 are not existing)
+
+  // Check it is well inserted
+  BOOST_CHECK(true == returnValue.second);
+  position = 0;
+  std::sort(SimplexVector1.begin(), SimplexVector1.end(), sort_in_decr_order);
+  for (auto vertex : st.simplex_vertex_range(returnValue.first)) {
+    // Check returned Simplex_handle
+    std::cout << "vertex = " << vertex << " | vector[" << position << "] = " << SimplexVector1[position] << std::endl;
+    BOOST_CHECK(vertex == SimplexVector1[position]);
+    position++;
+  }
 
   // ++ SECOND
   std::cout << "   - INSERT 3" << std::endl;
   typeVectorVertex SimplexVector2{3};
   BOOST_CHECK(SimplexVector2.size() == 1);
-  st.insert_simplex_and_subfaces(SimplexVector2);
+  returnValue = st.insert_simplex_and_subfaces(SimplexVector2);
 
   BOOST_CHECK(st.num_vertices() == (size_t) 4); // +1 (3 is not existing)
+
+  // Check it is well inserted
+  BOOST_CHECK(true == returnValue.second);
+  position = 0;
+  std::sort(SimplexVector2.begin(), SimplexVector2.end(), sort_in_decr_order);
+  for (auto vertex : st.simplex_vertex_range(returnValue.first)) {
+    // Check returned Simplex_handle
+    std::cout << "vertex = " << vertex << " | vector[" << position << "] = " << SimplexVector2[position] << std::endl;
+    BOOST_CHECK(vertex == SimplexVector2[position]);
+    position++;
+  }
 
   // ++ THIRD
   std::cout << "   - INSERT (0,3)" << std::endl;
   typeVectorVertex SimplexVector3{3, 0};
   BOOST_CHECK(SimplexVector3.size() == 2);
-  st.insert_simplex_and_subfaces(SimplexVector3);
+  returnValue = st.insert_simplex_and_subfaces(SimplexVector3);
 
   BOOST_CHECK(st.num_vertices() == (size_t) 4); // Not incremented (all are existing)
+
+  // Check it is well inserted
+  BOOST_CHECK(true == returnValue.second);
+  position = 0;
+  std::sort(SimplexVector3.begin(), SimplexVector3.end(), sort_in_decr_order);
+  for (auto vertex : st.simplex_vertex_range(returnValue.first)) {
+    // Check returned Simplex_handle
+    std::cout << "vertex = " << vertex << " | vector[" << position << "] = " << SimplexVector3[position] << std::endl;
+    BOOST_CHECK(vertex == SimplexVector3[position]);
+    position++;
+  }
 
   // ++ FOURTH
   std::cout << "   - INSERT (1,0) (already inserted)" << std::endl;
   typeVectorVertex SimplexVector4{1, 0};
   BOOST_CHECK(SimplexVector4.size() == 2);
-  st.insert_simplex_and_subfaces(SimplexVector4);
+  returnValue = st.insert_simplex_and_subfaces(SimplexVector4);
 
   BOOST_CHECK(st.num_vertices() == (size_t) 4); // Not incremented (all are existing)
+
+  // Check it was not inserted (already there from {2,1,0} insertion)
+  BOOST_CHECK(false == returnValue.second);
 
   // ++ FIFTH
   std::cout << "   - INSERT (3,4,5)" << std::endl;
   typeVectorVertex SimplexVector5{3, 4, 5};
   BOOST_CHECK(SimplexVector5.size() == 3);
-  st.insert_simplex_and_subfaces(SimplexVector5);
+  returnValue = st.insert_simplex_and_subfaces(SimplexVector5);
 
   BOOST_CHECK(st.num_vertices() == (size_t) 6);
+
+  // Check it is well inserted
+  BOOST_CHECK(true == returnValue.second);
+  position = 0;
+  std::sort(SimplexVector5.begin(), SimplexVector5.end(), sort_in_decr_order);
+  for (auto vertex : st.simplex_vertex_range(returnValue.first)) {
+    // Check returned Simplex_handle
+    std::cout << "vertex = " << vertex << " | vector[" << position << "] = " << SimplexVector5[position] << std::endl;
+    BOOST_CHECK(vertex == SimplexVector5[position]);
+    position++;
+  }
 
   // ++ SIXTH
   std::cout << "   - INSERT (0,1,6,7)" << std::endl;
   typeVectorVertex SimplexVector6{0, 1, 6, 7};
   BOOST_CHECK(SimplexVector6.size() == 4);
-  st.insert_simplex_and_subfaces(SimplexVector6);
+  returnValue = st.insert_simplex_and_subfaces(SimplexVector6);
 
   BOOST_CHECK(st.num_vertices() == (size_t) 8); // +2 (6 and 7 are not existing - 0 and 1 are already existing)
 
+  // Check it is well inserted
+  BOOST_CHECK(true == returnValue.second);
+  position = 0;
+  std::sort(SimplexVector6.begin(), SimplexVector6.end(), sort_in_decr_order);
+  for (auto vertex : st.simplex_vertex_range(returnValue.first)) {
+    // Check returned Simplex_handle
+    std::cout << "vertex = " << vertex << " | vector[" << position << "] = " << SimplexVector6[position] << std::endl;
+    BOOST_CHECK(vertex == SimplexVector6[position]);
+    position++;
+  }
+  
   /* Inserted simplex:        */
   /*    1   6                 */
   /*    o---o                 */

@@ -20,14 +20,14 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SRC_PERSISTENT_COHOMOLOGY_INCLUDE_GUDHI_PERSISTENT_COHOMOLOGY_PERSISTENT_COHOMOLOGY_COLUMN_H_
-#define SRC_PERSISTENT_COHOMOLOGY_INCLUDE_GUDHI_PERSISTENT_COHOMOLOGY_PERSISTENT_COHOMOLOGY_COLUMN_H_
+#ifndef PERSISTENT_COHOMOLOGY_PERSISTENT_COHOMOLOGY_COLUMN_H_
+#define PERSISTENT_COHOMOLOGY_PERSISTENT_COHOMOLOGY_COLUMN_H_
+
+#include <boost/tuple/tuple.hpp>
+#include <boost/intrusive/set.hpp>
+#include <boost/intrusive/list.hpp>
 
 #include <list>
-
-#include "boost/tuple/tuple.hpp"
-#include "boost/intrusive/set.hpp"
-#include "boost/intrusive/list.hpp"
 
 namespace Gudhi {
 
@@ -80,40 +80,33 @@ class Persistent_cohomology_cell : public base_hook_cam_h,
  * The non-zero coefficients of the column are stored in a
  * boost::intrusive::list. Contains a hook to be stored in a
  * boost::intrusive::set.
+ *
+ * Movable but not Copyable.
  */
 template<typename SimplexKey, typename ArithmeticElement>
 class Persistent_cohomology_column : public boost::intrusive::set_base_hook<
     boost::intrusive::link_mode<boost::intrusive::normal_link> > {
- private:
   template<class T1, class T2> friend class Persistent_cohomology;
 
+ public:
   typedef Persistent_cohomology_cell<SimplexKey, ArithmeticElement> Cell;
   typedef boost::intrusive::list<Cell,
       boost::intrusive::constant_time_size<false>,
       boost::intrusive::base_hook<base_hook_cam_v> > Col_type;
 
   /** \brief Creates an empty column.*/
-  explicit Persistent_cohomology_column(SimplexKey key) {
-    class_key_ = key;
-    col_ = Col_type();
-  }
- public:
-  /** Copy constructor.*/
-  Persistent_cohomology_column(Persistent_cohomology_column const &other)
+  explicit Persistent_cohomology_column(SimplexKey key)
       : col_(),
-        class_key_(other.class_key_) {
-    if (!other.col_.empty())
-      std::cerr << "Copying a non-empty column.\n";
-  }
+        class_key_(key) {}
 
   /** \brief Returns true iff the column is null.*/
-  bool is_null() {
+  bool is_null() const {
     return col_.empty();
   }
   /** \brief Returns the key of the representative simplex of
    * the set of simplices having this column as annotation vector
    * in the compressed annotation matrix.*/
-  SimplexKey class_key() {
+  SimplexKey class_key() const {
     return class_key_;
   }
 
@@ -145,4 +138,4 @@ class Persistent_cohomology_column : public boost::intrusive::set_base_hook<
 
 }  // namespace Gudhi
 
-#endif  // SRC_PERSISTENT_COHOMOLOGY_INCLUDE_GUDHI_PERSISTENT_COHOMOLOGY_PERSISTENT_COHOMOLOGY_COLUMN_H_
+#endif  // PERSISTENT_COHOMOLOGY_PERSISTENT_COHOMOLOGY_COLUMN_H_
