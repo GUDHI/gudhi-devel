@@ -759,3 +759,39 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(copy_move_on_simplex_tree, typeST, list_of_tested_
   
   std::cout << "Printing st once again- address = " << &st << std::endl;
 }
+
+template<class typeST>
+void test_simplex_is_vertex(typeST& st, typename typeST::Simplex_handle sh, typename typeST::Vertex_handle v) {
+  BOOST_CHECK(st.dimension(sh) == 0);
+  auto&& r = st.simplex_vertex_range(sh);
+  auto i = std::begin(r);
+  BOOST_CHECK(*i == v);
+  BOOST_CHECK(++i == std::end(r));
+}
+
+BOOST_AUTO_TEST_CASE(non_contiguous) {
+  typedef Simplex_tree<> typeST;
+  typedef typeST::Vertex_handle Vertex_handle;
+  typedef typeST::Simplex_handle Simplex_handle;
+  std::cout << "********************************************************************" << std::endl;
+  std::cout << "TEST NON-CONTIGUOUS VERTICES" << std::endl;
+  typeST st;
+  Vertex_handle e[] = {3,-7};
+  std::cout << "Insert" << std::endl;
+  st.insert_simplex_and_subfaces(e);
+  BOOST_CHECK(st.num_vertices() == 2);
+  BOOST_CHECK(st.num_simplices() == 3);
+  std::cout << "Find" << std::endl;
+  Simplex_handle sh = st.find(e);
+  BOOST_CHECK(sh != st.null_simplex());
+  std::cout << "Endpoints" << std::endl;
+  auto p = st.endpoints(sh);
+  test_simplex_is_vertex(st, p.first, 3);
+  test_simplex_is_vertex(st, p.second, -7);
+  std::cout << "Boundary" << std::endl;
+  auto&& b = st.boundary_simplex_range(sh);
+  auto i = std::begin(b);
+  test_simplex_is_vertex(st, *i, -7);
+  test_simplex_is_vertex(st, *++i, 3);
+  BOOST_CHECK(++i == std::end(b));
+}
