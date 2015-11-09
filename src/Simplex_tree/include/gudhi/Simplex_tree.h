@@ -77,16 +77,7 @@ namespace Gudhi {
  * @{
  */
 
-/// Model of SimplexTreeOptions.
-struct Simplex_tree_options_full_featured {
-  typedef linear_indexing_tag Indexing_tag;
-  typedef int Vertex_handle;
-  typedef double Filtration_value;
-  typedef int Simplex_key;
-  static const bool store_key = true;
-  static const bool store_filtration = true;
-  static const bool contiguous_vertices = true;
-};
+struct Simplex_tree_options_full_featured;
 
 /**
  * \brief Simplex Tree data structure for representing simplicial complexes.
@@ -1159,6 +1150,31 @@ std::istream& operator>>(std::istream & is, Simplex_tree<T...> & st) {
 
   return is;
 }
+
+/// Model of SimplexTreeOptions.
+struct Simplex_tree_options_full_featured {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef int Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = false;
+};
+
+/** Model of SimplexTreeOptions, faster than
+  `Simplex_tree_options_full_featured` but note the unsafe
+  `contiguous_vertices` option. */
+struct Simplex_tree_options_fast_persistence {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef float Filtration_value;
+  typedef int Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = true;
+};
+
 /** @} */  // end defgroup simplex_tree
 
 }  // namespace Gudhi

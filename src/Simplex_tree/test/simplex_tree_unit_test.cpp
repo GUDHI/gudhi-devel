@@ -509,7 +509,7 @@ BOOST_AUTO_TEST_CASE(NSimplexAndSubfaces_tree_insertion) {
   // Find in the simplex_tree
   // ------------------------------------------------------------------------------------------------------------------
   typeVectorVertex simpleSimplexVector{1};
-  Simplex_tree<>::Simplex_handle simplexFound = st.find(simpleSimplexVector);
+  typeST::Simplex_handle simplexFound = st.find(simpleSimplexVector);
   std::cout << "**************IS THE SIMPLEX {1} IN THE SIMPLEX TREE ?\n";
   if (simplexFound != st.null_simplex())
     std::cout << "***+ YES IT IS!\n";

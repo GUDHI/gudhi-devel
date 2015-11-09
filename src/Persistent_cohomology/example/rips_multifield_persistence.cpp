@@ -68,7 +68,8 @@ int main(int argc, char * argv[]) {
                                                , euclidean_distance<Point_t>);
 
   // Construct the Rips complex in a Simplex Tree
-  Simplex_tree<> st;
+  typedef Simplex_tree<Simplex_tree_options_fast_persistence> ST;
+  ST st;
   // insert the proximity graph in the simplex tree
   st.insert_graph(prox_graph);
   // expand the graph until dimension dim_max
@@ -78,7 +79,7 @@ int main(int argc, char * argv[]) {
   st.initialize_filtration();
 
   // Compute the persistence diagram of the complex
-  Persistent_cohomology< Simplex_tree<>, Multi_field > pcoh(st);
+  Persistent_cohomology<ST, Multi_field > pcoh(st);
   // initializes the coefficient field for homology
   pcoh.init_coefficients(min_p, max_p);
   // compute persistent homology, disgarding persistent features of life shorter than min_persistence

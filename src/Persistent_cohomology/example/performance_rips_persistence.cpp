@@ -85,7 +85,7 @@ int main(int argc, char * argv[]) {
   std::cout << "Compute Rips graph in " << enlapsed_sec << " sec.\n";
 
   // Construct the Rips complex in a Simplex Tree
-  Simplex_tree<> st;
+  Simplex_tree<Simplex_tree_options_fast_persistence> st;
   start = std::chrono::system_clock::now();
 
   // insert the proximity graph in the simplex tree
