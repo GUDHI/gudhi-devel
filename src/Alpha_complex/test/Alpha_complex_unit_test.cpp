@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_from_points) {
   // Init of an alpha complex from the list of points
   // ----------------------------------------------------------------------------
   double max_alpha_square_value = 1e10;
-  Gudhi::alphacomplex::Alpha_complex<Kernel_s> alpha_complex_from_points(3, points, max_alpha_square_value);
+  Gudhi::alphacomplex::Alpha_complex<Kernel_s> alpha_complex_from_points(points, max_alpha_square_value);
 
   std::cout << "========== Alpha_complex_from_points ==========" << std::endl;
 

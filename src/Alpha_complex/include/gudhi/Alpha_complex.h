@@ -32,9 +32,6 @@
 
 #include <CGAL/Delaunay_triangulation.h>
 #include <CGAL/Epick_d.h>
-#include <CGAL/algorithm.h>
-#include <CGAL/assertions.h>
-#include <CGAL/enum.h>
 
 #include <iostream>
 #include <vector>
@@ -73,6 +70,7 @@ class Alpha_complex : public Simplex_tree<> {
 
   typedef typename Kernel::Compute_squared_radius_d Squared_Radius;
   typedef typename Kernel::Side_of_bounded_sphere_d Is_Gabriel;
+  typedef typename Kernel::Point_dimension_d        Point_Dimension;
 
   typedef typename Kernel::Point_d Point_d;
 
@@ -87,13 +85,15 @@ class Alpha_complex : public Simplex_tree<> {
 
   // Double map type to switch from CGAL vertex iterator to simplex tree vertex handle and vice versa.
   typedef typename std::map< CGAL_vertex_iterator, Vertex_handle > Map_vertex_iterator_to_handle;
-  typedef typename std::map< Vertex_handle, CGAL_vertex_iterator > Map_vertex_handle_to_iterator;
+  //typedef typename std::map< Vertex_handle, CGAL_vertex_iterator > Map_vertex_handle_to_iterator;
+  typedef typename std::vector< CGAL_vertex_iterator > Vector_vertex_iterator;
 
  private:
   /** \brief Map to switch from CGAL vertex iterator to simplex tree vertex handle.*/
   Map_vertex_iterator_to_handle vertex_iterator_to_handle_;
-  /** \brief Map to switch from simplex tree vertex handle to CGAL vertex iterator.*/
-  Map_vertex_handle_to_iterator vertex_handle_to_iterator_;
+  /** \brief Vertex iterator vector to switch from simplex tree vertex handle to CGAL vertex iterator.
+   * Vertex handles are inserted sequentially, starting at 0.*/
+  Vector_vertex_iterator vertex_handle_to_iterator_;
   /** \brief Pointer on the CGAL Delaunay triangulation.*/
   Delaunay_triangulation* triangulation_;
   /** \brief Kernel for triangulation_ functions access.*/
@@ -131,8 +131,6 @@ class Alpha_complex : public Simplex_tree<> {
   }
 
   /** \brief Alpha_complex constructor from a list of points.
-   * Uses the Delaunay_triangulation_off_reader to construct the Delaunay triangulation required to initialize 
-   * the Alpha_complex.
    *
    * @param[in] dimension Dimension of points to be inserted.
    * @param[in] points Range of points to triangulate. Points must be in Kernel::Point_d
@@ -141,12 +139,16 @@ class Alpha_complex : public Simplex_tree<> {
    * std::end return input iterators on a Kernel::Point_d.
    */
   template<typename InputPointRange >
-  Alpha_complex(int dimension, const InputPointRange& points,
+  Alpha_complex(const InputPointRange& points,
                 Filtration_value max_alpha_square = std::numeric_limits<Filtration_value>::infinity())
       : triangulation_(nullptr) {
-    triangulation_ = new Delaunay_triangulation(dimension);
     auto first = std::begin(points);
     auto last = std::end(points);
+    // point_dimension function initialization
+    Point_Dimension point_dimension = kernel_.point_dimension_d_object();
+
+    // Delaunay triangulation is point dimension minus one.
+    triangulation_ = new Delaunay_triangulation(point_dimension(*first) - 1);
     
     size_type inserted = triangulation_->insert(first, last);
     if (inserted != (last -first)) {
@@ -168,16 +170,11 @@ class Alpha_complex : public Simplex_tree<> {
   /** \brief get_point returns the point corresponding to the vertex given as parameter.
    *
    * @param[in] vertex Vertex handle of the point to retrieve.
-   * @return The founded point.
-   * @warning Exception std::out_of_range is thrown in case vertex is not in the map vertex_handle_to_iterator_.
+   * @return The point found.
+   * @warning Exception std::out_of_range is thrown in case vertex is not found.
    */
   Point_d get_point(Vertex_handle vertex) const {
-    auto found_it = vertex_handle_to_iterator_.find(vertex);
-    if (found_it != vertex_handle_to_iterator_.end()) {
-      return found_it->second->point();
-    } else {
-      throw std::out_of_range("Vertex out of vector range");
-    }
+    return vertex_handle_to_iterator_.at(vertex)->point();
   }
 
  private:
@@ -219,7 +216,7 @@ class Alpha_complex : public Simplex_tree<> {
         std::cout << "Vertex insertion - " << vertex_handle << " -> " << vit->point() << std::endl;
 #endif  // DEBUG_TRACES
         vertex_iterator_to_handle_.emplace(vit, vertex_handle);
-        vertex_handle_to_iterator_.emplace(vertex_handle, vit);
+        vertex_handle_to_iterator_.push_back(vit);
         vertex_handle++;
       }
     }
