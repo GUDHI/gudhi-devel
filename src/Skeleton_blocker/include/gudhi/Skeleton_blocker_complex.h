@@ -1018,7 +1018,7 @@ class Skeleton_blocker_complex {
   }
 
   //@}
-  /** @Simplification operations
+  /** @name Simplification operations
    */
   //@{
 
@@ -1131,7 +1131,7 @@ class Skeleton_blocker_complex {
   }
   //@}
 
-  /** @Edge contraction operations
+  /** @name Edge contraction operations
    */
   //@{
 

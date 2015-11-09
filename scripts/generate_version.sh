@@ -61,12 +61,13 @@ cp $ROOT_DIR/GUDHIVersion.cmake.in $VERSION_DIR
 PACKAGE_INC_DIR="/include"
 #PACKAGE_SRC_DIR="/source"
 PACKAGE_EX_DIR="/example"
+PACKAGE_CONCEPT_DIR="/concept"
 PACKAGE_DOC_DIR="/doc"
 for package in `ls $ROOT_DIR/src/`
 do
-  echo $package
-  if [ -d "$ROOT_DIR/src/$package" ]
+  if [ -d "$ROOT_DIR/src/$package" ] && [ $package != "Bottleneck" ]
   then
+    echo $package
     if [ "$package" == "cmake" ]
     then
       # SPECIFIC FOR CMAKE MODULES
@@ -90,6 +91,11 @@ do
       then
         mkdir -p $VERSION_DIR$PACKAGE_EX_DIR/$package
         cp -R $ROOT_DIR/src/$package$PACKAGE_EX_DIR/* $VERSION_DIR$PACKAGE_EX_DIR/$package
+      fi
+      if [ -d "$ROOT_DIR/src/$package$PACKAGE_CONCEPT_DIR" ]
+      then
+        mkdir -p $VERSION_DIR$PACKAGE_CONCEPT_DIR/$package
+        cp -R $ROOT_DIR/src/$package$PACKAGE_CONCEPT_DIR/* $VERSION_DIR$PACKAGE_CONCEPT_DIR/$package
       fi
       if [ -d "$ROOT_DIR/src/$package$PACKAGE_DOC_DIR" ]
       then

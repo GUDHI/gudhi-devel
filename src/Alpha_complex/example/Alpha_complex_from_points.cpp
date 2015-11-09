@@ -1,8 +1,8 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <CGAL/Delaunay_triangulation.h>
 #include <CGAL/Epick_d.h>
 
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -33,8 +33,7 @@ int main(int argc, char **argv) {
   // Init of an alpha complex from the list of points
   // ----------------------------------------------------------------------------
   double max_alpha_square_value = 1e10;
-  Gudhi::alphacomplex::Alpha_complex<Kernel> alpha_complex_from_points(3, points.size(), points.begin(), points.end(),
-                                                                       max_alpha_square_value);
+  Gudhi::alphacomplex::Alpha_complex<Kernel> alpha_complex_from_points(3, points, max_alpha_square_value);
 
   // ----------------------------------------------------------------------------
   // Display information about the alpha complex

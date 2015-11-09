@@ -27,7 +27,6 @@
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/Simplex_tree.h>
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>  // isnan, fmax
 
@@ -107,7 +106,8 @@ class Alpha_complex : public Simplex_tree<> {
    *
    * @param[in] off_file_name OFF file [path and] name.
    */
-  Alpha_complex(const std::string& off_file_name, Filtration_value max_alpha_square)
+  Alpha_complex(const std::string& off_file_name,
+                Filtration_value max_alpha_square = std::numeric_limits<Filtration_value>::infinity())
       : triangulation_(nullptr) {
     Gudhi::Delaunay_triangulation_off_reader<Delaunay_triangulation> off_reader(off_file_name);
     if (!off_reader.is_valid()) {
@@ -123,7 +123,8 @@ class Alpha_complex : public Simplex_tree<> {
    *
    * @param[in] triangulation_ptr Pointer on a Delaunay triangulation.
    */
-  Alpha_complex(Delaunay_triangulation* triangulation_ptr, Filtration_value max_alpha_square)
+  Alpha_complex(Delaunay_triangulation* triangulation_ptr,
+                Filtration_value max_alpha_square = std::numeric_limits<Filtration_value>::infinity())
       : triangulation_(triangulation_ptr) {
    set_filtration(max_alpha_square);
    init();
@@ -134,18 +135,22 @@ class Alpha_complex : public Simplex_tree<> {
    * the Alpha_complex.
    *
    * @param[in] dimension Dimension of points to be inserted.
-   * @param[in] size Number of points to be inserted.
-   * @param[in] firstPoint Iterator on the first point to be inserted.
-   * @param[in] last Point Iterator on the last point to be inserted.
+   * @param[in] points Range of points to triangulate. Points must be in Kernel::Point_d
+   * 
+   * The type InputPointRange must be a range for which std::begin and
+   * std::end return input iterators on a Kernel::Point_d.
    */
-  template<typename ForwardIterator >
-  Alpha_complex(int dimension, size_type size, ForwardIterator firstPoint, ForwardIterator lastPoint,
-                Filtration_value max_alpha_square)
+  template<typename InputPointRange >
+  Alpha_complex(int dimension, const InputPointRange& points,
+                Filtration_value max_alpha_square = std::numeric_limits<Filtration_value>::infinity())
       : triangulation_(nullptr) {
     triangulation_ = new Delaunay_triangulation(dimension);
-    size_type inserted = triangulation_->insert(firstPoint, lastPoint);
-    if (inserted != size) {
-      std::cerr << "Alpha_complex - insertion failed " << inserted << " != " << size << std::endl;
+    auto first = std::begin(points);
+    auto last = std::end(points);
+    
+    size_type inserted = triangulation_->insert(first, last);
+    if (inserted != (last -first)) {
+      std::cerr << "Alpha_complex - insertion failed " << inserted << " != " << (last -first) << std::endl;
       exit(-1);  // ----- >>
     }
     set_filtration(max_alpha_square);
@@ -292,12 +297,12 @@ class Alpha_complex : public Simplex_tree<> {
     // ### Foreach Tau face of Sigma
     for (auto f_boundary : boundary_simplex_range(f_simplex)) {
 #ifdef DEBUG_TRACES
-      std::cout << " | --------------------------------------------------" << std::endl;
+      std::cout << " | --------------------------------------------------\n";
       std::cout << " | Tau ";
       for (auto vertex : simplex_vertex_range(f_boundary)) {
         std::cout << vertex << " ";
       }
-      std::cout << "is a face of Sigma" << std::endl;
+      std::cout << "is a face of Sigma\n";
       std::cout << " | isnan(filtration(Tau)=" << isnan(filtration(f_boundary)) << std::endl;
 #endif  // DEBUG_TRACES
       // ### If filt(Tau) is not NaN

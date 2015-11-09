@@ -77,7 +77,7 @@ else()
 
   # Install the GUDHIConfig.cmake and GUDHIConfigVersion.cmake
   install(FILES
-    "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/GUDHIConfig.cmake"
+    "${PROJECT_BINARY_DIR}/GUDHIConfig.cmake"
     "${PROJECT_BINARY_DIR}/GUDHIConfigVersion.cmake"
     DESTINATION share/gudhi)
 

@@ -26,8 +26,9 @@
 #include <CGAL/Delaunay_triangulation.h>
 #include <CGAL/Epick_d.h>
 
-#include <stdio.h>
 #include <stdlib.h>
+
+#include <iostream>
 #include <string>
 
 #define BOOST_TEST_DYN_LINK
