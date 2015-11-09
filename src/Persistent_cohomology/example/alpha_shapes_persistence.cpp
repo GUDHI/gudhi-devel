@@ -124,6 +124,12 @@ void usage(char * const progName) {
 }
 
 int main(int argc, char * const argv[]) {
+  // program args management
+  if (argc != 4) {
+    std::cerr << "Error: Number of arguments (" << argc << ") is not correct\n";
+    usage(argv[0]);
+  }
+
   int coeff_field_characteristic = 0;
   int returnedScanValue = sscanf(argv[2], "%d", &coeff_field_characteristic);
   if ((returnedScanValue == EOF) || (coeff_field_characteristic <= 0)) {
@@ -135,12 +141,6 @@ int main(int argc, char * const argv[]) {
   returnedScanValue = sscanf(argv[3], "%lf", &min_persistence);
   if ((returnedScanValue == EOF) || (min_persistence < -1.0)) {
     std::cerr << "Error: " << argv[3] << " is not correct\n";
-    usage(argv[0]);
-  }
-
-  // program args management
-  if (argc != 4) {
-    std::cerr << "Error: Number of arguments (" << argc << ") is not correct\n";
     usage(argv[0]);
   }
 
@@ -239,7 +239,7 @@ int main(int argc, char * const argv[]) {
       }
     }
     // Construction of the simplex_tree
-    Filtration_value filtr = std::sqrt(*the_alpha_value_iterator);
+    Filtration_value filtr = /*std::sqrt*/(*the_alpha_value_iterator);
 #ifdef DEBUG_TRACES
     std::cout << "filtration = " << filtr << std::endl;
 #endif  // DEBUG_TRACES

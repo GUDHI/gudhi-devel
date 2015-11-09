@@ -1096,7 +1096,7 @@ class Simplex_tree {
       os << filtration(sh) << " \n";
     }
   }
-
+  
  private:
   Vertex_handle null_vertex_;
   /** \brief Upper bound on the filtration values of the simplices.*/

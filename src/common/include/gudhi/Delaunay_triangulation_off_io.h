@@ -278,7 +278,7 @@ class Delaunay_triangulation_off_writer {
         std::vector<int> vertexVector;
         stream << std::distance(cit->vertices_begin(), cit->vertices_end()) << " ";
         for (auto vit = cit->vertices_begin(); vit != cit->vertices_end(); ++vit) {
-          stream << points_to_vh[(*vit)->point()] << " ";
+          stream << points_to_vh[(*vit)->point()] - 1 << " ";
         }
         stream << std::endl;
       }
