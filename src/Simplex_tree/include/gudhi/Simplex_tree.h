@@ -39,6 +39,7 @@
 #include <utility>
 #include <vector>
 #include <functional>  // for greater<>
+#include <initializer_list>
 
 namespace Gudhi {
 
@@ -531,7 +532,7 @@ class Simplex_tree {
    * The type InputVertexRange must be a range of <CODE>Vertex_handle</CODE>
    * on which we can call std::begin() function
    */
-  template<class InputVertexRange>
+  template<class InputVertexRange=std::initializer_list<Vertex_handle>>
   Simplex_handle find(const InputVertexRange & s) {
     auto first = std::begin(s);
     auto last = std::end(s);
@@ -625,7 +626,7 @@ class Simplex_tree {
    *
    * The type InputVertexRange must be a range for which .begin() and
    * .end() return input iterators, with 'value_type' Vertex_handle. */
-  template<class InputVertexRange>
+  template<class InputVertexRange=std::initializer_list<Vertex_handle>>
   std::pair<Simplex_handle, bool> insert_simplex(const InputVertexRange & simplex,
                                                  Filtration_value filtration = 0) {
     auto first = std::begin(simplex);
@@ -654,7 +655,7 @@ class Simplex_tree {
    * output pair to the Simplex_handle of the simplex. Otherwise, we set the Simplex_handle part to
    * null_simplex.
    */
-  template<class InputVertexRange>
+  template<class InputVertexRange=std::initializer_list<Vertex_handle>>
   std::pair<Simplex_handle, bool> insert_simplex_and_subfaces(const InputVertexRange& Nsimplex,
                                    Filtration_value filtration = 0) {
     auto first = std::begin(Nsimplex);
