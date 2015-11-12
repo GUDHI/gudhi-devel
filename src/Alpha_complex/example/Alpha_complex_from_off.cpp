@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
   // ----------------------------------------------------------------------------
   typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kernel;
   Gudhi::alphacomplex::Alpha_complex<Kernel> alpha_complex_from_file(off_file_name, alpha_square_max_value);
-
+  
   // ----------------------------------------------------------------------------
   // Display information about the alpha complex
   // ----------------------------------------------------------------------------
@@ -35,14 +35,14 @@ int main(int argc, char **argv) {
 
   std::cout << "Iterator on alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
   for (auto f_simplex : alpha_complex_from_file.filtration_simplex_range()) {
-    if (alpha_complex_from_file.filtration(f_simplex) <= alpha_complex_from_file.filtration()) {
+    //if (alpha_complex_from_file.filtration(f_simplex) <= alpha_complex_from_file.filtration()) {
       std::cout << "   ( ";
       for (auto vertex : alpha_complex_from_file.simplex_vertex_range(f_simplex)) {
         std::cout << vertex << " ";
       }
       std::cout << ") -> " << "[" << alpha_complex_from_file.filtration(f_simplex) << "] ";
       std::cout << std::endl;
-    }
+    //}
   }
   return 0;
 }

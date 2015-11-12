@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 project(GUDHIAlphaShapesExample)
 
+add_executable ( flat flat.cpp )
+
 # need CGAL 4.7
 # cmake -DCGAL_DIR=~/workspace/CGAL-4.7-Ic-41 ../../..
 if(CGAL_FOUND)

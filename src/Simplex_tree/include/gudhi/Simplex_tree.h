@@ -39,6 +39,7 @@
 #include <utility>
 #include <vector>
 #include <functional>  // for greater<>
+#include <limits>  // for numeric_limits infinity
 
 namespace Gudhi {
 /** \defgroup simplex_tree Filtered Complexes
@@ -1096,6 +1097,96 @@ class Simplex_tree {
         os << key(b_sh) << " ";
       }
       os << filtration(sh) << " \n";
+    }
+  }
+
+ public:
+  /** \brief Browse the simplex tree to ensure the filtration is not decreasing.
+   * @return The filtration modification information in order to trigger initialize_filtration.
+   * \warning initialize_filtration is launched again in case of filtration modification change.
+   */
+  bool make_filtration_non_decreasing() {
+    bool modified = false;
+    for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh) {
+      if (has_children(sh)) {
+        modified = modified || rec_make_filtration_non_decreasing(sh->second.children(), sh->second.filtration());
+      }
+    }
+    if (modified) {
+      initialize_filtration();
+    }
+    return modified;
+  }
+  
+ private:
+  /** \brief Recursively Browse the simplex tree to ensure the filtration is not decreasing.
+   * @param[in] sib Siblings to be parsed.
+   * @param[in] upper_filtration Upper level filtration value in the simplex tree.
+   * @return The filtration modification information in order to trigger initialize_filtration.
+   */
+  bool rec_make_filtration_non_decreasing(Siblings * sib, Filtration_value upper_filtration) {
+    bool modified = false;
+    for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh) {
+      if (sh->second.filtration() < upper_filtration) {
+        // Store the filtration modification information
+        modified = true;
+        std::cout << "modified" << std::endl;
+        sh->second.assign_filtration(upper_filtration);
+      }
+      if (has_children(sh)) {
+        modified = modified || rec_make_filtration_non_decreasing(sh->second.children(), sh->second.filtration());
+      }
+    }
+    // Make the modified information to be traced by upper call
+    return modified;
+  }
+
+ public:
+  /** \brief Prune above filtration value given as parameter.
+   * @param[in] filtration Maximum threshold value.
+   * \warning threshold_ is set from filtration given as parameter.
+   * \warning The filtration must be valid. If the filtration has not been initialized yet, the method initializes it
+   * (i.e. order the simplices). If the complex has changed since the last time the filtration was initialized, please
+   * call `initialize_filtration()` to recompute it.
+   */
+  void prune_above_filtration(Filtration_value filtration) {
+    threshold_ = filtration;
+    if (filtration != std::numeric_limits<Filtration_value>::infinity()) {
+      // Initialize filtration_vect_ if required
+      if (filtration_vect_.empty()) {
+        initialize_filtration();
+      }
+    
+      // Loop in reverse mode until threshold is reached
+      auto f_simplex = filtration_vect_.rbegin();
+      for (; f_simplex != filtration_vect_.rend() && ((*f_simplex)->second.filtration() > threshold_); f_simplex++) {
+        remove_maximal_simplex(*f_simplex);
+      }
+      // Do not forget to update filtration_vect_ - resize is enough
+      std::size_t new_size = filtration_vect_.size() - (f_simplex - filtration_vect_.rbegin());
+      filtration_vect_.resize(new_size);
+    }
+  }
+
+ private:
+  /** \brief Remove a maximal simplex.
+   * @param[in] sh Simplex handle on the maximal simplex to remove.
+   * \warning Exception std::invalid_argument is thrown in sh has children.
+   */
+  void remove_maximal_simplex(Simplex_handle sh) {
+    // Guarantee the simplex is maximal
+    if (has_children(sh)) {
+      throw std::invalid_argument ("Simplex_tree::remove_maximal_simplex - argument is not a maximal simplex");
+    }
+    // Simplex is a leaf, it means the child is the Siblings owning the leaf.
+    Siblings* child = sh->second.children();
+    if (child->size() > 1) {
+      // Not alone, just remove it from members
+      child->members().erase(sh->first);
+    } else {
+      // Sibling is emptied : must be deleted, and its parent must point on his own Sibling
+      child->oncles()->members().at(child->parent()).assign_children(child->oncles());
+      delete child;
     }
   }
   

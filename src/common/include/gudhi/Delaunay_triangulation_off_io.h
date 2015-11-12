@@ -19,8 +19,8 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef SRC_ALPHA_SHAPES_INCLUDE_GUDHI_ALPHA_SHAPES_DELAUNAY_TRIANGULATION_OFF_IO_H_
-#define SRC_ALPHA_SHAPES_INCLUDE_GUDHI_ALPHA_SHAPES_DELAUNAY_TRIANGULATION_OFF_IO_H_
+#ifndef DELAUNAY_TRIANGULATION_OFF_IO_H_
+#define DELAUNAY_TRIANGULATION_OFF_IO_H_
 
 #include <string>
 #include <vector>
@@ -256,7 +256,6 @@ class Delaunay_triangulation_off_writer {
         // no endl on next line - don't know why...
         stream << complex_ptr->current_dimension() << " " << complex_ptr->number_of_vertices() << " " <<
             complex_ptr->number_of_finite_full_cells() << " 0";
-
       }
 
       // bimap to retrieve vertex handles from points and vice versa
@@ -305,4 +304,4 @@ class Delaunay_triangulation_off_writer {
 
 } // namespace Gudhi
 
-#endif  // SRC_ALPHA_SHAPES_INCLUDE_GUDHI_ALPHA_SHAPES_DELAUNAY_TRIANGULATION_OFF_IO_H_
+#endif  // DELAUNAY_TRIANGULATION_OFF_IO_H_

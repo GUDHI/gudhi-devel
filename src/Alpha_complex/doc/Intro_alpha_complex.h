@@ -20,6 +20,9 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef INTRO_ALPHA_COMPLEX_H_
+#define INTRO_ALPHA_COMPLEX_H_
+
 // needs namespace for Doxygen to link on classes
 namespace Gudhi {
 // needs namespace for Doxygen to link on classes
@@ -117,3 +120,5 @@ namespace alphacomplex {
 } // namespace alphacomplex
 
 } // namespace Gudhi
+
+#endif  // INTRO_ALPHA_COMPLEX_H_

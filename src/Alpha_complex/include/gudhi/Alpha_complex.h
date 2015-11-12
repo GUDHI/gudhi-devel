@@ -105,6 +105,7 @@ class Alpha_complex : public Simplex_tree<> {
    * the Alpha_complex.
    *
    * @param[in] off_file_name OFF file [path and] name.
+   * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$.
    */
   Alpha_complex(const std::string& off_file_name,
                 Filtration_value max_alpha_square = std::numeric_limits<Filtration_value>::infinity())
@@ -115,25 +116,24 @@ class Alpha_complex : public Simplex_tree<> {
       exit(-1);  // ----- >>
     }
     triangulation_ = off_reader.get_complex();
-    set_filtration(max_alpha_square);
-    init();
+    init(max_alpha_square);
   }
 
   /** \brief Alpha_complex constructor from a Delaunay triangulation.
    *
    * @param[in] triangulation_ptr Pointer on a Delaunay triangulation.
+   * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$.
    */
   Alpha_complex(Delaunay_triangulation* triangulation_ptr,
                 Filtration_value max_alpha_square = std::numeric_limits<Filtration_value>::infinity())
       : triangulation_(triangulation_ptr) {
-   set_filtration(max_alpha_square);
-   init();
+   init(max_alpha_square);
   }
 
   /** \brief Alpha_complex constructor from a list of points.
    *
-   * @param[in] dimension Dimension of points to be inserted.
    * @param[in] points Range of points to triangulate. Points must be in Kernel::Point_d
+   * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$.
    * 
    * The type InputPointRange must be a range for which std::begin and
    * std::end return input iterators on a Kernel::Point_d.
@@ -155,8 +155,7 @@ class Alpha_complex : public Simplex_tree<> {
       std::cerr << "Alpha_complex - insertion failed " << inserted << " != " << (last -first) << std::endl;
       exit(-1);  // ----- >>
     }
-    set_filtration(max_alpha_square);
-    init();
+    init(max_alpha_square);
   }
 
   /** \brief Alpha_complex destructor from a Delaunay triangulation.
@@ -180,12 +179,14 @@ class Alpha_complex : public Simplex_tree<> {
  private:
   /** \brief Initialize the Alpha_complex from the Delaunay triangulation.
    *
+   * @param[in] max_alpha_square maximum for alpha square value.
+   * 
    * @warning Delaunay triangulation must be already constructed with at least one vertex and dimension must be more 
    * than 0.
    * 
    * Initialization can be launched once.
    */
-  void init() {
+  void init(Filtration_value max_alpha_square) {
     if (triangulation_ == nullptr) {
       std::cerr << "Alpha_complex init - Cannot init from a NULL triangulation" << std::endl;
       return;  // ----- >>
@@ -286,6 +287,13 @@ class Alpha_complex : public Simplex_tree<> {
         }
       }
     }
+    // --------------------------------------------------------------------------------------------
+
+    // --------------------------------------------------------------------------------------------
+    // As Alpha value is an approximation, we have to make filtration non decreasing while increasing the dimension
+    make_filtration_non_decreasing();
+    // Remove all simplices that have a filtration value greater than max_alpha_square
+    prune_above_filtration(max_alpha_square);
     // --------------------------------------------------------------------------------------------
   }
 
