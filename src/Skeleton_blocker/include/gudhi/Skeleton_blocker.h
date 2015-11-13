@@ -31,7 +31,7 @@
 #include <gudhi/Skeleton_blocker/Skeleton_blocker_simple_traits.h>
 #include <gudhi/Skeleton_blocker/Skeleton_blocker_simple_geometric_traits.h>
 
-#include <gudhi/Utils.h>  // xxx
+#include <gudhi/Debug_utils.h>
 
 namespace Gudhi {
 

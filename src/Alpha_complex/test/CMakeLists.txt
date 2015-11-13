@@ -14,10 +14,6 @@ if(CGAL_FOUND)
       message(STATUS "Eigen3 version: ${EIGEN3_VERSION}.")
       include( ${EIGEN3_USE_FILE} )
       include_directories (BEFORE "../../include")
-      if (CMAKE_BUILD_TYPE MATCHES Debug)
-        # For programs to be more verbose
-        add_definitions(-DDEBUG_TRACES)
-      endif()
 
       add_executable ( AlphaComplexUT Alpha_complex_unit_test.cpp )
       target_link_libraries(AlphaComplexUT  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})

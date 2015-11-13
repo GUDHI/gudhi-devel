@@ -2,17 +2,26 @@ cmake_minimum_required(VERSION 2.6)
 project(GUDHIdev)
 
 include(CMakeGUDHIVersion.txt)
+
+if (NOT CMAKE_BUILD_TYPE)
+ # Set default build type to Release
+ set(CMAKE_BUILD_TYPE "Release")
+endif()
+
+if (CMAKE_BUILD_TYPE MATCHES Debug)
+  # For programs to be more verbose
+  add_definitions(-DNDEBUG)
+endif()
+
+enable_testing()
+
+set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
+message("CMAKE_MODULE_PATH = ${CMAKE_MODULE_PATH}")
+
 # Generate GUDHI official version file
 configure_file(GUDHIVersion.cmake.in "${PROJECT_BINARY_DIR}/GUDHIVersion.cmake" @ONLY)
 
 find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework chrono timer program_options thread REQUIRED)
-
-set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
-message("CMAKE_PREFIX_PATH = ${CMAKE_PREFIX_PATH}")
-message("CMAKE_MODULE_PATH = ${CMAKE_MODULE_PATH}")
-
-enable_testing()
 
 if(MSVC)
   # Turn off some VC++ warnings

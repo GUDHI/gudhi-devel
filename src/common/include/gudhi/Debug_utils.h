@@ -19,28 +19,35 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef UTILS_H_
-#define UTILS_H_
+#ifndef DEBUG_UTILS_H_
+#define DEBUG_UTILS_H_
 
+#include <iostream>
+
+#ifdef NDEBUG
+  // GUDHI_NDEBUG is the Gudhi official flag for debug mode.
+  #define GUDHI_NDEBUG
+#endif
 
 #define PRINT(a) std::cerr << #a << ": " << (a) << " (DISP)" << std::endl
 
-// #define DBG_VERBOSE
-#ifdef DBG_VERBOSE
-#define DBG(a) std::cerr << "DBG: " << (a) << std::endl
-#define DBGMSG(a, b) std::cerr << "DBG: " << a << b << std::endl
-#define DBGVALUE(a) std::cerr << "DBG: " <<  #a << ": " << a << std::endl
-#define DBGCONT(a) std::cerr << "DBG: container " << #a << " -> "; for (auto x : a) std::cerr << x << ","; std::cerr <<
-std::endl
+#ifdef GUDHI_NDEBUG
+  #define DBG(a) std::cout << "DBG: " << (a) << std::endl
+  #define DBGMSG(a, b) std::cout << "DBG: " << a << b << std::endl
+  #define DBGVALUE(a) std::cout << "DBG: " <<  #a << ": " << a << std::endl
+  #define DBGCONT(a) std::cout << "DBG: container " << #a << " -> "; for (auto x : a) std::cout << x << ","; std::cout << std::endl
 #else
-// #define DBG(a) a
-// #define DBGMSG(a,b) b
-// #define DBGVALUE(a) a
-// #define DBGCONT(a) a
-#define DBG(a)
-#define DBGMSG(a, b)
-#define DBGVALUE(a)
-#define DBGCONT(a)
+  #define DBG(a) (void) 0
+  #define DBGMSG(a, b) (void) 0
+  #define DBGVALUE(a) (void) 0
+  #define DBGCONT(a) (void) 0
 #endif
 
-#endif  // UTILS_H_
+// GUDHI_CHECK throw an exception on condition in debug mode, but does nothing in release mode
+#ifdef GUDHI_NDEBUG
+  #define GUDHI_CHECK(cond, excpt) if (cond) throw excpt
+#else
+  #define GUDHI_CHECK(cond, excpt) (void) 0
+#endif
+
+#endif  // DEBUG_UTILS_H_

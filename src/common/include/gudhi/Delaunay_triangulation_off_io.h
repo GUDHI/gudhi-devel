@@ -22,6 +22,8 @@
 #ifndef DELAUNAY_TRIANGULATION_OFF_IO_H_
 #define DELAUNAY_TRIANGULATION_OFF_IO_H_
 
+#include <gudhi/Debug_utils.h>
+
 #include <string>
 #include <vector>
 #include <fstream>
@@ -64,10 +66,10 @@ class Delaunay_triangulation_off_visitor_reader {
    * @param[in] num_edges number of edges in the OFF file (not used).
    */
   void init(int dim, int num_vertices, int num_faces, int num_edges) {
-#ifdef DEBUG_TRACES
-    std::cout << "Delaunay_triangulation_off_visitor_reader::init - dim=" << dim << " - num_vertices=" <<
-        num_vertices << " - num_faces=" << num_faces << " - num_edges=" << num_edges << std::endl;
-#endif  // DEBUG_TRACES
+    DBGMSG("Delaunay_triangulation_off_visitor_reader::init - dim=", dim);
+    DBGMSG(" - num_vertices=", num_vertices);
+    DBGMSG(" - num_faces=", num_faces);
+    DBGMSG(" - num_edges=", num_edges);
     if (num_faces > 0) {
       std::cerr << "Delaunay_triangulation_off_visitor_reader::init faces are not taken into account from OFF " <<
           "file for Delaunay triangulation - faces are computed." << std::endl;
@@ -88,13 +90,8 @@ class Delaunay_triangulation_off_visitor_reader {
    * @param[in] point vector of vertex coordinates.
    */
   void point(const std::vector<double>& point) {
-#ifdef DEBUG_TRACES
-    std::cout << "Delaunay_triangulation_off_visitor_reader::point ";
-    for (auto coordinate : point) {
-      std::cout << coordinate << " | ";
-    }
-    std::cout << std::endl;
-#endif  // DEBUG_TRACES
+    DBG("Delaunay_triangulation_off_visitor_reader::point");
+    DBGCONT(point);
     complex_->insert(Point(point.size(), point.begin(), point.end()));
   }
 

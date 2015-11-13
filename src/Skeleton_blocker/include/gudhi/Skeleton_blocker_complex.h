@@ -33,7 +33,7 @@
 #include <gudhi/Skeleton_blocker/internal/Top_faces.h>
 #include <gudhi/Skeleton_blocker/internal/Trie.h>
 
-#include <gudhi/Utils.h>
+#include <gudhi/Debug_utils.h>
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>

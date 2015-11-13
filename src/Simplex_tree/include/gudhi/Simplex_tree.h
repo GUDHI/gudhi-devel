@@ -30,6 +30,7 @@
 
 #include <gudhi/reader_utils.h>
 #include <gudhi/graph_simplicial_complex.h>
+#include <gudhi/Debug_utils.h>
 
 #include <boost/container/flat_map.hpp>
 #include <boost/iterator/transform_iterator.hpp>
@@ -39,7 +40,8 @@
 #include <utility>
 #include <vector>
 #include <functional>  // for greater<>
-#include <limits>  // for numeric_limits infinity
+#include <stdexcept>
+#include <limits>  // Inf
 
 namespace Gudhi {
 /** \defgroup simplex_tree Filtered Complexes
@@ -717,7 +719,7 @@ class Simplex_tree {
     } else if (the_simplex.size() == 1) {
       // When reaching the end of recursivity, vector of simplices shall be empty and filled on back recursive
       if ((to_be_inserted.size() != 0) || (to_be_propagated.size() != 0)) {
-        std::cerr << "Simplex_tree::rec_insert_simplex_and_subfaces - Error vector not empty" << std::endl;
+        std::cerr << "Simplex_tree::rec_insert_simplex_and_subfaces - Error vector not empty";
         exit(-1);
       }
       std::vector<Vertex_handle> first_simplex(1, the_simplex.back());
@@ -726,7 +728,7 @@ class Simplex_tree {
 
       insert_result = insert_vertex_vector(first_simplex, filtration);
     } else {
-        std::cerr << "Simplex_tree::rec_insert_simplex_and_subfaces - Recursivity error" << std::endl;
+        std::cerr << "Simplex_tree::rec_insert_simplex_and_subfaces - Recursivity error";
         exit(-1);
     }
     return insert_result;
@@ -1099,21 +1101,22 @@ class Simplex_tree {
       os << filtration(sh) << " \n";
     }
   }
-
+  
  public:
   /** \brief Browse the simplex tree to ensure the filtration is not decreasing.
-   * @return The filtration modification information in order to trigger initialize_filtration.
-   * \warning initialize_filtration is launched again in case of filtration modification change.
+   * The simplex tree is browsed starting from the root until the leaf, and the filtration values are set with their
+   * parent value (increased), in case the values are decreasing.
+   * @return The filtration modification information.
+   * \warning Some simplex tree functions require the filtration to be valid. `make_filtration_non_decreasing()`
+   * function is not launching `initialize_filtration()` but returns the filtration modification information. If the
+   * complex has changed , please call `initialize_filtration()` to recompute it.
    */
   bool make_filtration_non_decreasing() {
     bool modified = false;
     for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh) {
       if (has_children(sh)) {
-        modified = modified || rec_make_filtration_non_decreasing(sh->second.children(), sh->second.filtration());
+        modified |= rec_make_filtration_non_decreasing(sh->second.children(), sh->second.filtration());
       }
-    }
-    if (modified) {
-      initialize_filtration();
     }
     return modified;
   }
@@ -1134,7 +1137,7 @@ class Simplex_tree {
         sh->second.assign_filtration(upper_filtration);
       }
       if (has_children(sh)) {
-        modified = modified || rec_make_filtration_non_decreasing(sh->second.children(), sh->second.filtration());
+        modified |= rec_make_filtration_non_decreasing(sh->second.children(), sh->second.filtration());
       }
     }
     // Make the modified information to be traced by upper call
@@ -1150,8 +1153,8 @@ class Simplex_tree {
    * call `initialize_filtration()` to recompute it.
    */
   void prune_above_filtration(Filtration_value filtration) {
-    threshold_ = filtration;
-    if (filtration != std::numeric_limits<Filtration_value>::infinity()) {
+    if (filtration < threshold_) {
+      threshold_ = filtration;
       // Initialize filtration_vect_ if required
       if (filtration_vect_.empty()) {
         initialize_filtration();
@@ -1168,16 +1171,15 @@ class Simplex_tree {
     }
   }
 
- private:
   /** \brief Remove a maximal simplex.
    * @param[in] sh Simplex handle on the maximal simplex to remove.
-   * \warning Exception std::invalid_argument is thrown in sh has children.
+   * \warning In debug mode, the exception std::invalid_argument is thrown if sh has children.
    */
   void remove_maximal_simplex(Simplex_handle sh) {
-    // Guarantee the simplex is maximal
-    if (has_children(sh)) {
-      throw std::invalid_argument ("Simplex_tree::remove_maximal_simplex - argument is not a maximal simplex");
-    }
+    // Guarantee the simplex has no children
+    GUDHI_CHECK(has_children(sh),
+                std::invalid_argument ("Simplex_tree::remove_maximal_simplex - argument is not a maximal simplex"));
+
     // Simplex is a leaf, it means the child is the Siblings owning the leaf.
     Siblings* child = sh->second.children();
     if (child->size() > 1) {

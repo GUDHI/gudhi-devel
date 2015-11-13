@@ -24,7 +24,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include "gudhi/Utils.h"
+#include "gudhi/Debug_utils.h"
 #include "gudhi/Test.h"
 #include "gudhi/Skeleton_blocker.h"
 //#include "gudhi/Skeleton_blocker_link_complex.h"

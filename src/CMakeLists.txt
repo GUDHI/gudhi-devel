@@ -3,15 +3,22 @@ project(GUDHI)
 
 include("CMakeGUDHIVersion.txt")
 
+if (NOT CMAKE_BUILD_TYPE)
+ # Set default build type to Release
+ set(CMAKE_BUILD_TYPE "Release")
+endif()
+
+if (CMAKE_BUILD_TYPE MATCHES Debug)
+  # For programs to be more verbose
+  add_definitions(-DNDEBUG)
+endif()
+
 enable_testing()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
 find_package(Boost REQUIRED COMPONENTS system filesystem program_options chrono timer REQUIRED)
 
-if (NOT CMAKE_BUILD_TYPE)
- set(CMAKE_BUILD_TYPE "Release")
-endif()
 if(MSVC)
   SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4267 /wd4668 /wd4311 /wd4800 /wd4820 /wd4503 /wd4244 /wd4345 /wd4996 /wd4396 /wd4018")
 else()
