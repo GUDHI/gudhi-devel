@@ -434,11 +434,9 @@ class Persistent_cohomology {
     // with multiplicity. We used to sum the coefficients directly in
     // annotations_in_boundary by using a map, we now do it later.
     typedef std::pair<Column *, int> annotation_t;
-    std::vector<annotation_t> annotations_in_boundary;
-    /* A small speed boost is possible with the following non-thread-safe:
-       static std::vector<std::pair<Column *, int>> annotations_in_boundary;
-       annotations_in_boundary.clear();
-    */
+    // Danger: not thread-safe!
+    static std::vector<annotation_t> annotations_in_boundary;
+    annotations_in_boundary.clear();
     int sign = 1 - 2 * (dim_sigma % 2);  // \in {-1,1} provides the sign in the
                                          // alternate sum in the boundary.
     Simplex_key key;
