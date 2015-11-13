@@ -465,14 +465,14 @@ class Persistent_cohomology {
 
     for (auto ann_it = annotations_in_boundary.begin(); ann_it != annotations_in_boundary.end(); /**/) {
       Column* col = ann_it->first;
-      int coef = ann_it->second;
+      int mult = ann_it->second;
       while (++ann_it != annotations_in_boundary.end() && ann_it->first == col) {
-	coef += ann_it->second;
+	mult += ann_it->second;
       }
       // The following test is just a heuristic, it is not required, and it is fine that is misses p == 0.
-      if (coef != coeff_field_.additive_identity()) {  // For all columns in the boundary,
+      if (mult != coeff_field_.additive_identity()) {  // For all columns in the boundary,
         for (auto cell_ref : col->col_) {  // insert every cell in map_a_ds with multiplicity
-          Arith_element w_y = coeff_field_.times(cell_ref.coefficient_, coef);  // coefficient * multiplicity
+          Arith_element w_y = coeff_field_.times(cell_ref.coefficient_, mult);  // coefficient * multiplicity
 
           if (w_y != coeff_field_.additive_identity()) {  // if != 0
             result_insert_a_ds = map_a_ds.insert(std::pair<Simplex_key, Arith_element>(cell_ref.key_, w_y));
