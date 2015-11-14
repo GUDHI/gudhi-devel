@@ -218,7 +218,7 @@ class Skeleton_blocker_simplex {
   }
 
   /**
-   * Returns the first vertex of the (oriented) simplex.
+   * Returns the first and smallest vertex of the simplex.
    *
    * Be careful : assumes the simplex is non-empty.
    */
@@ -228,7 +228,7 @@ class Skeleton_blocker_simplex {
   }
 
   /**
-   * Returns the last vertex of the (oriented) simplex.
+   * Returns the last and greatest vertex of the simplex.
    *
    * Be careful : assumes the simplex is non-empty.
    */

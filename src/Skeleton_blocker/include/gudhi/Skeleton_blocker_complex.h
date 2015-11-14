@@ -23,23 +23,6 @@
 #ifndef SKELETON_BLOCKER_COMPLEX_H_
 #define SKELETON_BLOCKER_COMPLEX_H_
 
-#include <gudhi/Skeleton_blocker/iterators/Skeleton_blockers_iterators.h>
-#include <gudhi/Skeleton_blocker_link_complex.h>
-#include <gudhi/Skeleton_blocker/Skeleton_blocker_link_superior.h>
-#include <gudhi/Skeleton_blocker/Skeleton_blocker_sub_complex.h>
-#include <gudhi/Skeleton_blocker/Skeleton_blocker_simplex.h>
-
-#include <gudhi/Skeleton_blocker/Skeleton_blocker_complex_visitor.h>
-#include <gudhi/Skeleton_blocker/internal/Top_faces.h>
-#include <gudhi/Skeleton_blocker/internal/Trie.h>
-
-#include <gudhi/Utils.h>
-
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/connected_components.hpp>
-#include <boost/iterator/transform_iterator.hpp>
-#include <boost/range/adaptor/map.hpp>
-
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -51,6 +34,21 @@
 #include <string>
 #include <algorithm>
 #include <utility>
+
+#include <gudhi/Skeleton_blocker/iterators/Skeleton_blockers_iterators.h>
+#include <gudhi/Skeleton_blocker_link_complex.h>
+#include <gudhi/Skeleton_blocker/Skeleton_blocker_link_superior.h>
+#include <gudhi/Skeleton_blocker/Skeleton_blocker_sub_complex.h>
+#include <gudhi/Skeleton_blocker/Skeleton_blocker_simplex.h>
+#include <gudhi/Skeleton_blocker/Skeleton_blocker_complex_visitor.h>
+#include <gudhi/Skeleton_blocker/internal/Top_faces.h>
+#include <gudhi/Skeleton_blocker/internal/Trie.h>
+#include <gudhi/Utils.h>
+
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/connected_components.hpp>
+#include <boost/iterator/transform_iterator.hpp>
+#include <boost/range/adaptor/map.hpp>
 
 namespace Gudhi {
 
@@ -182,25 +180,28 @@ class Skeleton_blocker_complex {
    * @details is_flag_complex indicates if the complex is a flag complex or not (to know if blockers have to be computed or not).
    */
   template<typename SimpleHandleOutputIterator>
-  Skeleton_blocker_complex(SimpleHandleOutputIterator simplex_begin, SimpleHandleOutputIterator simplex_end,
+  Skeleton_blocker_complex(SimpleHandleOutputIterator simplices_begin, SimpleHandleOutputIterator simplices_end,
                            bool is_flag_complex = false, Visitor* visitor_ = NULL)
       : num_vertices_(0),
       num_blockers_(0),
       visitor(visitor_) {
-    add_vertex_and_edges(simplex_begin, simplex_end);
+    add_vertices_and_edges(simplices_begin, simplices_end);
 
     if (!is_flag_complex)
       // need to compute blockers
-      add_blockers(simplex_begin, simplex_end);
+      add_blockers(simplices_begin, simplices_end);
   }
 
  private:
+  /**
+   * Add vertices and edges of a simplex in one pass
+   */
   template<typename SimpleHandleOutputIterator>
-  void add_vertex_and_edges(SimpleHandleOutputIterator simplex_begin, SimpleHandleOutputIterator simplex_end) {
+  void add_vertices_and_edges(SimpleHandleOutputIterator simplices_begin, SimpleHandleOutputIterator simplices_end) {
     std::vector<std::pair<Vertex_handle, Vertex_handle>> edges;
     // first pass to add vertices and edges
     int num_vertex = -1;
-    for (auto s_it = simplex_begin; s_it != simplex_end; ++s_it) {
+    for (auto s_it = simplices_begin; s_it != simplices_end; ++s_it) {
       if (s_it->dimension() == 0) num_vertex = (std::max)(num_vertex, s_it->first_vertex().vertex);
       if (s_it->dimension() == 1) edges.emplace_back(s_it->first_vertex(), s_it->last_vertex());
     }
@@ -210,9 +211,10 @@ class Skeleton_blocker_complex {
       add_edge_without_blockers(e.first, e.second);
   }
 
+
   template<typename SimpleHandleOutputIterator>
-  void add_blockers(SimpleHandleOutputIterator simplex_begin, SimpleHandleOutputIterator simplex_end) {
-    Tries<Simplex> tries(num_vertices(), simplex_begin, simplex_end);
+  void add_blockers(SimpleHandleOutputIterator simplices_begin, SimpleHandleOutputIterator simplices_end) {
+    Tries<Simplex> tries(num_vertices(), simplices_begin, simplices_end);
     tries.init_next_dimension();
     auto simplices(tries.next_dimension_simplices());
 
@@ -378,6 +380,7 @@ class Skeleton_blocker_complex {
 
   /**
    * @brief Adds a vertex to the simplicial complex and returns its Vertex_handle.
+   * @remark Vertex representation is contiguous.
    */
   Vertex_handle add_vertex() {
     Vertex_handle address(boost::add_vertex(skeleton));
@@ -1128,13 +1131,10 @@ class Skeleton_blocker_complex {
   void remove_star(const Simplex& sigma);
 
   /**
-   * @brief add a simplex.
-   * @details the simplex must have dimension greater than one (otherwise use add_vertex or add_edge_without_blockers).
-   * and all vertices lower than the higher vertex of sigma must already be in the complex.
-   * if some edges of sigma are not in the complex, then insert_edges_of_sigma flag must be 
-   * set to true.
+   * @brief add a simplex and all its faces.
+   * @details the simplex must have dimension greater than one (otherwise use add_vertex or add_edge_without_blockers).   
    */
-  void add_simplex(const Simplex& sigma, bool insert_edges_of_sigma = false);
+  void add_simplex(const Simplex& sigma);
 
  private:
   void add_blockers_after_simplex_insertion(Simplex s);
@@ -1583,12 +1583,12 @@ class Skeleton_blocker_complex {
  * return the total number of simplices
  */
 template<typename Complex, typename SimplexHandleIterator>
-Complex make_complex_from_top_faces(SimplexHandleIterator simplex_begin, SimplexHandleIterator simplex_end,
+Complex make_complex_from_top_faces(SimplexHandleIterator simplices_begin, SimplexHandleIterator simplices_end,
                                     bool is_flag_complex = false) {
   //todo use add_simplex instead! should be more efficient and more elegant :)
   typedef typename Complex::Simplex Simplex;
   std::vector<Simplex> simplices;
-  for (auto top_face = simplex_begin; top_face != simplex_end; ++top_face) {
+  for (auto top_face = simplices_begin; top_face != simplices_end; ++top_face) {
     auto subfaces_topface = subfaces(*top_face);
     simplices.insert(simplices.end(), subfaces_topface.begin(), subfaces_topface.end());
   }

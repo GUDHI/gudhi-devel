@@ -39,9 +39,12 @@ typedef Complex::Simplex Simplex;
 
 int main(int argc, char *argv[]) {
   // build a full complex with 4 vertices and 2^4-1 simplices
-  // Initial vertices are (0,1,2,3,4)
-  Simplex tetrahedron(Vertex_handle(0), Vertex_handle(1), Vertex_handle(2), Vertex_handle(3));
+  
+  // Create a complex with four vertices (0,1,2,3)
   Complex complex;
+
+  // Add a tetrahedron to this complex
+  Simplex tetrahedron(Vertex_handle(0), Vertex_handle(1), Vertex_handle(2), Vertex_handle(3));
   complex.add_simplex(tetrahedron);
 
   cout << "complex:" << complex.to_string() << endl;

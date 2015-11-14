@@ -367,7 +367,7 @@ bool test_iterator_simplices4() {
 bool test_iterator_coboundary() {
   Complex c;
   build_complete(4, c);
-  c.remove_edge(Vertex_handle(0), Vertex_handle(2));
+  c.remove_edge(Vertex_handle(1), Vertex_handle(3));
   PRINT(c.to_string());
   Simplex s02(Vertex_handle(0), Vertex_handle(2));
   int n = 0;

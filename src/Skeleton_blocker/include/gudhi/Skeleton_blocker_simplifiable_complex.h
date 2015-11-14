@@ -206,20 +206,25 @@ void Skeleton_blocker_complex<SkeletonBlockerDS>::remove_star(const Simplex& sig
 }
 
 template<typename SkeletonBlockerDS>
-void Skeleton_blocker_complex<SkeletonBlockerDS>::add_simplex(const Simplex& sigma, bool insert_edges_of_sigma) {
+void Skeleton_blocker_complex<SkeletonBlockerDS>::add_simplex(const Simplex& sigma) {
   // to add a simplex s, all blockers included in s are first removed
   // and then all simplex in the coboundary of s are added as blockers
   assert(!this->contains(sigma));
   assert(sigma.dimension() > 1);
+  if (!contains_vertices(sigma)) {
+    std::cerr << "add_simplex: Some vertices were not present in the complex, adding them" << std::endl;
+    size_t num_vertices_to_add = sigma.last_vertex() - this->num_vertices() + 1;
+    for (size_t i = 0; i < num_vertices_to_add; ++i)
+      this->add_vertex();
+  }
   assert(contains_vertices(sigma));
-
-  if(insert_edges_of_sigma)
+  if(!contains_edges(sigma))
     add_edge(sigma);
-  else 
-    assert(contains_edges(sigma));
   remove_blocker_include_in_simplex(sigma);
   add_blockers_after_simplex_insertion(sigma);
 }
+
+
 
 template<typename SkeletonBlockerDS>
 void Skeleton_blocker_complex<SkeletonBlockerDS>::add_blockers_after_simplex_insertion(Simplex sigma){

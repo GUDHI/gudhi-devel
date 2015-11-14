@@ -310,7 +310,7 @@ bool test_add_simplex4() {
     for (int k = 0; k < n; k++)
       s.add_vertex(Vertex_handle(k));
     s.remove_vertex(Vertex_handle(i));
-    complex.add_simplex(s, true);
+    complex.add_simplex(s);
 
     //at step i there is only blocker 0..i
     if (i < 2 && complex.num_blockers() > 0)
