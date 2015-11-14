@@ -6,6 +6,25 @@ find_package(Qt5 COMPONENTS Widgets Xml OpenGL)
 find_package(QGLViewer)
 find_package(OpenGL)
 
+
+if (NOT CGAL_FOUND)
+  message(ERROR " GudhUI requires CGAL and will not be compiled.")
+endif()
+
+if (NOT Qt5_FOUND)
+  message(ERROR " GudhUI requires Qt5 and will not be compiled.")
+endif()
+
+if (NOT OPENGL_FOUND)
+  message(ERROR " GudhUI requires OpenGL and will not be compiled.")
+endif()
+
+if (NOT QGLVIEWER_FOUND)
+  message(ERROR " GudhUI requires QGLViewer and will not be compiled.")
+endif()
+
+
+
 if ( CGAL_FOUND AND Qt5_FOUND AND OPENGL_FOUND AND QGLVIEWER_FOUND )
 
   set(CMAKE_AUTOMOC ON)
