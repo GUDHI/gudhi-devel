@@ -455,7 +455,7 @@ class Persistent_cohomology {
     }
     // Place identical annotations consecutively so we can easily sum their multiplicities.
     std::sort(annotations_in_boundary.begin(), annotations_in_boundary.end(),
-	[](annotation_t& a, annotation_t& b) { return a.first < b.first; });
+	[](annotation_t const& a, annotation_t const& b) { return a.first < b.first; });
 
     // Sum the annotations with multiplicity, using a map<key,coeff>
     // to represent a sparse vector.
