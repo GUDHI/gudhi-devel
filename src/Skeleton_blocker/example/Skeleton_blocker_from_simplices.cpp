@@ -35,24 +35,23 @@ using namespace skbl;
 
 typedef Skeleton_blocker_complex<Skeleton_blocker_simple_traits> Complex;
 typedef Complex::Vertex_handle Vertex_handle;
-typedef Complex::Simplex_handle Simplex_handle;
-typedef Complex::Simplex_handle Simplex;
+typedef Complex::Simplex Simplex;
 
 int main(int argc, char *argv[]) {
-  std::vector<Simplex_handle> simplices;
+  std::vector<Simplex> simplices;
 
   // add 4 triangles of a tetrahedron 0123
-  simplices.push_back(Simplex_handle(Vertex_handle(0), Vertex_handle(1), Vertex_handle(2)));
-  simplices.push_back(Simplex_handle(Vertex_handle(1), Vertex_handle(2), Vertex_handle(3)));
-  simplices.push_back(Simplex_handle(Vertex_handle(3), Vertex_handle(0), Vertex_handle(2)));
-  simplices.push_back(Simplex_handle(Vertex_handle(3), Vertex_handle(0), Vertex_handle(1)));
+  simplices.push_back(Simplex(Vertex_handle(0), Vertex_handle(1), Vertex_handle(2)));
+  simplices.push_back(Simplex(Vertex_handle(1), Vertex_handle(2), Vertex_handle(3)));
+  simplices.push_back(Simplex(Vertex_handle(3), Vertex_handle(0), Vertex_handle(2)));
+  simplices.push_back(Simplex(Vertex_handle(3), Vertex_handle(0), Vertex_handle(1)));
 
   // get complex from top faces
   Complex complex(make_complex_from_top_faces<Complex>(simplices.begin(), simplices.end()));
 
 
   std::cout << "Simplices:" << std::endl;
-  for (const Simplex & s : complex.simplex_range())
+  for (const Simplex & s : complex.complex_simplex_range())
     std::cout << s << " ";
   std::cout << std::endl;
 
@@ -61,16 +60,16 @@ int main(int argc, char *argv[]) {
 
   // now build a complex from its full list of simplices
   simplices.clear();
-  simplices.push_back(Simplex_handle(Vertex_handle(0)));
-  simplices.push_back(Simplex_handle(Vertex_handle(1)));
-  simplices.push_back(Simplex_handle(Vertex_handle(2)));
-  simplices.push_back(Simplex_handle(Vertex_handle(0), Vertex_handle(1)));
-  simplices.push_back(Simplex_handle(Vertex_handle(1), Vertex_handle(2)));
-  simplices.push_back(Simplex_handle(Vertex_handle(2), Vertex_handle(0)));
+  simplices.push_back(Simplex(Vertex_handle(0)));
+  simplices.push_back(Simplex(Vertex_handle(1)));
+  simplices.push_back(Simplex(Vertex_handle(2)));
+  simplices.push_back(Simplex(Vertex_handle(0), Vertex_handle(1)));
+  simplices.push_back(Simplex(Vertex_handle(1), Vertex_handle(2)));
+  simplices.push_back(Simplex(Vertex_handle(2), Vertex_handle(0)));
   complex = Complex(simplices.begin(), simplices.end());
 
   std::cout << "Simplices:" << std::endl;
-  for (const Simplex & s : complex.simplex_range())
+  for (const Simplex & s : complex.complex_simplex_range())
     std::cout << s << " ";
   std::cout << std::endl;
 

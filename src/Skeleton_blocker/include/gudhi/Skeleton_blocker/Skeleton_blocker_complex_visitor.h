@@ -41,7 +41,7 @@ class Skeleton_blocker_complex_visitor {
   virtual void on_add_vertex(Vertex_handle) = 0;
   virtual void on_remove_vertex(Vertex_handle) = 0;
 
-  virtual void on_add_edge(Vertex_handle a, Vertex_handle b) = 0;
+  virtual void on_add_edge_without_blockers(Vertex_handle a, Vertex_handle b) = 0;
   virtual void on_remove_edge(Vertex_handle a, Vertex_handle b) = 0;
 
   /**
@@ -54,7 +54,7 @@ class Skeleton_blocker_complex_visitor {
    * @brief Called when performing an edge contraction when
    * an edge bx is replaced by an edge ax (not already present).
    * Precisely, this methods is called this way in contract_edge :
-   * add_edge(a,x)
+   * add_edge_without_blockers(a,x)
    * on_swaped_edge(a,b,x)
    * remove_edge(b,x)
    */
@@ -79,7 +79,7 @@ class Dummy_complex_visitor : public Skeleton_blocker_complex_visitor<
   }
   void on_remove_vertex(Vertex_handle) {
   }
-  void on_add_edge(Vertex_handle a, Vertex_handle b) {
+  void on_add_edge_without_blockers(Vertex_handle a, Vertex_handle b) {
   }
   void on_remove_edge(Vertex_handle a, Vertex_handle b) {
   }
@@ -108,8 +108,8 @@ class Print_complex_visitor : public Skeleton_blocker_complex_visitor<
   void on_remove_vertex(Vertex_handle v) {
     std::cerr << "on_remove_vertex:" << v << std::endl;
   }
-  void on_add_edge(Vertex_handle a, Vertex_handle b) {
-    std::cerr << "on_add_edge:" << a << "," << b << std::endl;
+  void on_add_edge_without_blockers(Vertex_handle a, Vertex_handle b) {
+    std::cerr << "on_add_edge_without_blockers:" << a << "," << b << std::endl;
   }
   void on_remove_edge(Vertex_handle a, Vertex_handle b) {
     std::cerr << "on_remove_edge:" << a << "," << b << std::endl;

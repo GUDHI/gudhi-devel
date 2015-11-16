@@ -36,7 +36,7 @@ namespace skbl {
 
 template<typename SimplexHandle>
 struct Trie {
-  typedef SimplexHandle Simplex_handle;
+  typedef SimplexHandle Simplex;
   typedef typename SimplexHandle::Vertex_handle Vertex_handle;
 
   Vertex_handle v;
@@ -64,7 +64,7 @@ struct Trie {
     }
   }
 
-  typedef typename Simplex_handle::Simplex_vertex_const_iterator Simplex_vertex_const_iterator;
+  typedef typename Simplex::Simplex_vertex_const_iterator Simplex_vertex_const_iterator;
 
   Trie* make_trie(Simplex_vertex_const_iterator s_it, Simplex_vertex_const_iterator s_end) {
     if (s_it == s_end) {
@@ -97,7 +97,7 @@ struct Trie {
     return;
   }
 
-  void maximal_faces_helper(std::vector<Simplex_handle>& res) const {
+  void maximal_faces_helper(std::vector<Simplex>& res) const {
     if (is_leaf()) res.push_back(simplex());
     else
       for (auto child : childs)
@@ -108,14 +108,14 @@ struct Trie {
   /**
    * adds the simplex to the trie
    */
-  void add_simplex(const Simplex_handle& s) {
+  void add_simplex(const Simplex& s) {
     if (s.empty()) return;
     assert(v == s.first_vertex());
     add_simplex_helper(s.begin(), s.end());
   }
 
-  std::vector<Simplex_handle> maximal_faces() const {
-    std::vector<Simplex_handle> res;
+  std::vector<Simplex> maximal_faces() const {
+    std::vector<Simplex> res;
     maximal_faces_helper(res);
     return res;
   }
@@ -123,14 +123,14 @@ struct Trie {
   /**
    * Goes to the root in the trie to consitute simplex
    */
-  void add_vertices_up_to_the_root(Simplex_handle& res) const {
+  void add_vertices_up_to_the_root(Simplex& res) const {
     res.add_vertex(v);
     if (parent_)
       parent_->add_vertices_up_to_the_root(res);
   }
 
-  Simplex_handle simplex() const {
-    Simplex_handle res;
+  Simplex simplex() const {
+    Simplex res;
     add_vertices_up_to_the_root(res);
     return res;
   }
@@ -156,7 +156,7 @@ struct Trie {
   /**
    * true iff the simplex corresponds to one node in the trie
    */
-  bool contains(const Simplex_handle& s) const {
+  bool contains(const Simplex& s) const {
     Trie const* current = this;
     if (s.empty()) return true;
     if (current->v != s.first_vertex()) return false;
@@ -196,9 +196,9 @@ struct Trie {
 template<typename SimplexHandle>
 struct Tries {
   typedef typename SimplexHandle::Vertex_handle Vertex_handle;
-  typedef SimplexHandle Simplex_handle;
+  typedef SimplexHandle Simplex;
 
-  typedef Trie<Simplex_handle> STrie;
+  typedef Trie<Simplex> STrie;
 
   template<typename SimpleHandleOutputIterator>
   Tries(unsigned num_vertices, SimpleHandleOutputIterator simplex_begin, SimpleHandleOutputIterator simplex_end) :
@@ -218,14 +218,14 @@ struct Tries {
 
   // return a simplex that consists in all u such uv is an edge and u>v
 
-  Simplex_handle positive_neighbors(Vertex_handle v) const {
-    Simplex_handle res;
+  Simplex positive_neighbors(Vertex_handle v) const {
+    Simplex res;
     for (auto child : cofaces_[v]->childs)
       res.add_vertex(child->v);
     return res;
   }
 
-  bool contains(const Simplex_handle& s) const {
+  bool contains(const Simplex& s) const {
     auto first_v = s.first_vertex();
     return cofaces_[first_v]->contains(s);
   }
@@ -238,8 +238,8 @@ struct Tries {
 
   // init_next_dimension must be called first
 
-  std::vector<Simplex_handle> next_dimension_simplices() const {
-    std::vector<Simplex_handle> res;
+  std::vector<Simplex> next_dimension_simplices() const {
+    std::vector<Simplex> res;
     while (!to_see_.empty() && to_see_.front()->simplex().dimension() == current_dimension_) {
       res.emplace_back(to_see_.front()->simplex());
       for (auto child : to_see_.front()->childs)

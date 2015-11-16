@@ -145,12 +145,13 @@ class GH_visitor : public Gudhi::contraction::Contraction_visitor<EdgeProfile> {
 
 int main(int argc, char *argv[]) {
   if (argc != 4) {
-    std::cerr << "Usage " << argv[0] << " input.off output.off N to load the file input.off, contract N edges and save "
-        << "the result to output.off.\n";
+    std::cerr << "Usage " << argv[0] <<
+        " input.off output.off N to load the file input.off, contract N edges and save the result to output.off.\n";
     return EXIT_FAILURE;
   }
 
   Complex complex;
+  typedef typename Complex::Vertex_handle Vertex_handle;
 
   // load the points
   Skeleton_blocker_off_reader<Complex> off_reader(argv[1], complex);
@@ -159,8 +160,12 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
-  std::cout << "Load complex with " << complex.num_vertices() << " vertices" << std::endl;
+  if (!complex.empty() && !(complex.point(Vertex_handle(0)).dimension() == 3)) {
+    std::cerr << "Only points of dimension 3 are supported." << std::endl;
+    return EXIT_FAILURE;
+  }
 
+  std::cout << "Load complex with " << complex.num_vertices() << " vertices" << std::endl;
 
   int num_contractions = atoi(argv[3]);
 
@@ -178,7 +183,7 @@ int main(int argc, char *argv[]) {
 
   std::cout << "Final complex has " <<
       complex.num_vertices() << " vertices, " <<
-      complex.num_edges() << " edges and" <<
+      complex.num_edges() << " edges and " <<
       complex.num_triangles() << " triangles." << std::endl;
 
   // write simplified complex
@@ -187,6 +192,8 @@ int main(int argc, char *argv[]) {
   return EXIT_SUCCESS;
 }
 
-
-
 #endif  // GARLAND_HECKBERT_H_
+
+
+
+
