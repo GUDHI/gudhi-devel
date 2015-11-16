@@ -23,18 +23,6 @@
 #ifndef SKELETON_BLOCKER_COMPLEX_H_
 #define SKELETON_BLOCKER_COMPLEX_H_
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <memory>
-#include <map>
-#include <list>
-#include <set>
-#include <vector>
-#include <string>
-#include <algorithm>
-#include <utility>
-
 #include <gudhi/Skeleton_blocker/iterators/Skeleton_blockers_iterators.h>
 #include <gudhi/Skeleton_blocker_link_complex.h>
 #include <gudhi/Skeleton_blocker/Skeleton_blocker_link_superior.h>
@@ -49,6 +37,18 @@
 #include <boost/graph/connected_components.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/range/adaptor/map.hpp>
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <memory>
+#include <map>
+#include <list>
+#include <set>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <utility>
 
 namespace Gudhi {
 
@@ -550,13 +550,13 @@ class Skeleton_blocker_complex {
    * the edges 01, 12, 20 but not the triangle 012 (and hence this complex
    * will contains a blocker 012).
    */
-  Edge_handle add_edge(Vertex_handle a, Vertex_handle b) {    
-    //if the edge is already there we musnt go further
-    //as we may add blockers that should not be here
-    if(contains_edge(a,b)) 
-      return *((*this)[std::make_pair(a,b)]);
-    auto res = add_edge_without_blockers(a,b);
-    add_blockers_after_simplex_insertion(Simplex(a,b));
+  Edge_handle add_edge(Vertex_handle a, Vertex_handle b) {
+    // if the edge is already there we musnt go further
+    // as we may add blockers that should not be here
+    if (contains_edge(a, b))
+      return *((*this)[std::make_pair(a, b)]);
+    auto res = add_edge_without_blockers(a, b);
+    add_blockers_after_simplex_insertion(Simplex(a, b));
     return res;
   }
 
@@ -564,9 +564,9 @@ class Skeleton_blocker_complex {
    * @brief Adds all edges of s in the complex.
    */
   void add_edge(const Simplex& s) {
-    for(auto i = s.begin(); i != s.end(); ++i)
-      for(auto j = i; ++j != s.end(); /**/)
-        add_edge(*i,*j);
+    for (auto i = s.begin(); i != s.end(); ++i)
+      for (auto j = i; ++j != s.end(); /**/)
+        add_edge(*i, *j);
   }
 
   /**
@@ -596,9 +596,9 @@ class Skeleton_blocker_complex {
    * @brief Adds all edges of s in the complex without adding blockers.
    */
   void add_edge_without_blockers(Simplex s) {
-    for(auto i = s.begin(); i != s.end(); ++i){
-      for(auto j = i; ++j != s.end(); /**/)
-        add_edge_without_blockers(*i,*j);
+    for (auto i = s.begin(); i != s.end(); ++i) {
+      for (auto j = i; ++j != s.end(); /**/)
+        add_edge_without_blockers(*i, *j);
     }
   }
 
@@ -1014,10 +1014,10 @@ class Skeleton_blocker_complex {
    * @brief returns the number of simplices of a given dimension in the complex.
    */  
   size_t num_simplices(unsigned dimension) const {
-    //todo iterator on k-simplices
+    // TODO(DS): iterator on k-simplices
     size_t res = 0;
-    for(const auto& s: complex_simplex_range()) 
-      if(s.dimension() == dimension) 
+    for (const auto& s : complex_simplex_range())
+      if (s.dimension() == dimension)
         ++res;
     return res;
   }
@@ -1585,7 +1585,7 @@ class Skeleton_blocker_complex {
 template<typename Complex, typename SimplexHandleIterator>
 Complex make_complex_from_top_faces(SimplexHandleIterator simplices_begin, SimplexHandleIterator simplices_end,
                                     bool is_flag_complex = false) {
-  //todo use add_simplex instead! should be more efficient and more elegant :)
+  // TODO(DS): use add_simplex instead! should be more efficient and more elegant :)
   typedef typename Complex::Simplex Simplex;
   std::vector<Simplex> simplices;
   for (auto top_face = simplices_begin; top_face != simplices_end; ++top_face) {

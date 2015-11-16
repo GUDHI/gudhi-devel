@@ -218,7 +218,7 @@ void Skeleton_blocker_complex<SkeletonBlockerDS>::add_simplex(const Simplex& sig
       this->add_vertex();
   }
   assert(contains_vertices(sigma));
-  if(!contains_edges(sigma))
+  if (!contains_edges(sigma))
     add_edge(sigma);
   remove_blocker_include_in_simplex(sigma);
   add_blockers_after_simplex_insertion(sigma);
@@ -227,10 +227,10 @@ void Skeleton_blocker_complex<SkeletonBlockerDS>::add_simplex(const Simplex& sig
 
 
 template<typename SkeletonBlockerDS>
-void Skeleton_blocker_complex<SkeletonBlockerDS>::add_blockers_after_simplex_insertion(Simplex sigma){
-  if(sigma.dimension() < 1) return;
+void Skeleton_blocker_complex<SkeletonBlockerDS>::add_blockers_after_simplex_insertion(Simplex sigma) {
+  if (sigma.dimension() < 1) return;
 
-  for(auto s : coboundary_range(sigma)) {
+  for (auto s : coboundary_range(sigma)) {
     this->add_blocker(s);
   }
 }
@@ -254,10 +254,10 @@ void Skeleton_blocker_complex<SkeletonBlockerDS>::remove_blocker_containing_simp
  */
 template<typename SkeletonBlockerDS>
 void Skeleton_blocker_complex<SkeletonBlockerDS>::remove_blocker_include_in_simplex(const Simplex& sigma) {
-  //todo write efficiently by using only superior blockers
-  //eg for all s, check blockers whose vertices are all greater than s
+  // TODO(DS): write efficiently by using only superior blockers
+  // eg for all s, check blockers whose vertices are all greater than s
   std::set <Blocker_handle> blockers_to_remove;
-  for(auto s : sigma) {
+  for (auto s : sigma) {
     for (auto blocker : this->blocker_range(s)) {
       if (sigma.contains(*blocker))
         blockers_to_remove.insert(blocker);
@@ -266,11 +266,11 @@ void Skeleton_blocker_complex<SkeletonBlockerDS>::remove_blocker_include_in_simp
   for (auto blocker_to_update : blockers_to_remove) {
     auto s = *blocker_to_update;
     this->delete_blocker(blocker_to_update);
-    //now if there is a vertex v in the link of s 
-    //and v is not included in sigma then v.s is a blocker
-    //(all faces of v.s are there since v belongs to the link of s)
-    for(const auto& b : coboundary_range(s))
-      if(!sigma.contains(b)) 
+    // now if there is a vertex v in the link of s
+    // and v is not included in sigma then v.s is a blocker
+    // (all faces of v.s are there since v belongs to the link of s)
+    for (const auto& b : coboundary_range(s))
+      if (!sigma.contains(b))
         this->add_blocker(b);
   }
 }
@@ -384,9 +384,8 @@ Skeleton_blocker_complex<SkeletonBlockerDS>::contract_edge(Vertex_handle a, Vert
 }
 
 template<typename SkeletonBlockerDS>
-void
-Skeleton_blocker_complex<SkeletonBlockerDS>::get_blockers_to_be_added_after_contraction(Vertex_handle a, Vertex_handle b, 
-    std::set<Simplex>& blockers_to_add) {
+void Skeleton_blocker_complex<SkeletonBlockerDS>::get_blockers_to_be_added_after_contraction(Vertex_handle a,
+    Vertex_handle b, std::set<Simplex>& blockers_to_add) {
   blockers_to_add.clear();
 
   typedef Skeleton_blocker_link_complex<Skeleton_blocker_complex<SkeletonBlockerDS> > LinkComplexType;

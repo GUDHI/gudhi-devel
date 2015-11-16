@@ -39,7 +39,7 @@ typedef Complex::Simplex Simplex;
 
 int main(int argc, char *argv[]) {
   // build a full complex with 4 vertices and 2^4-1 simplices
-  
+
   // Create a complex with four vertices (0,1,2,3)
   Complex complex;
 
@@ -64,7 +64,8 @@ int main(int argc, char *argv[]) {
   // To access to the initial vertices eg (0,1,2,3,4),  Root_vertex_handle must be used.
   // For instance, to test if the link contains the vertex that was labeled i:
   for (int i = 0; i < 5; ++i)
-    cout << "link.contains_vertex(Root_vertex_handle(" << i << ")):" << link.contains_vertex(Root_vertex_handle(i)) << endl;
+    cout << "link.contains_vertex(Root_vertex_handle(" << i << ")):" <<
+        link.contains_vertex(Root_vertex_handle(i)) << endl;
 
   return EXIT_SUCCESS;
 }
