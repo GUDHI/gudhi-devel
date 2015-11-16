@@ -151,7 +151,7 @@ int main(int argc, char *argv[]) {
   }
 
   Complex complex;
-  typedef typename Complex::Vertex_handle Vertex_handle;
+  typedef Complex::Vertex_handle Vertex_handle;
 
   // load the points
   Skeleton_blocker_off_reader<Complex> off_reader(argv[1], complex);
