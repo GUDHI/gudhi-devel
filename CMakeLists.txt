@@ -8,11 +8,6 @@ if (NOT CMAKE_BUILD_TYPE)
  set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-if (CMAKE_BUILD_TYPE MATCHES Debug)
-  # For programs to be more verbose
-  add_definitions(-DNDEBUG)
-endif()
-
 enable_testing()
 
 set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")

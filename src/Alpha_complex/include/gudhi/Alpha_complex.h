@@ -114,7 +114,7 @@ class Alpha_complex : public Simplex_tree<> {
       : triangulation_(nullptr) {
     Gudhi::Delaunay_triangulation_off_reader<Delaunay_triangulation> off_reader(off_file_name);
     if (!off_reader.is_valid()) {
-      std::cerr << "Alpha_complex - Unable to read file " << off_file_name;
+      std::cerr << "Alpha_complex - Unable to read file " << off_file_name << "\n";
       exit(-1);  // ----- >>
     }
     triangulation_ = off_reader.get_complex();
@@ -161,7 +161,7 @@ class Alpha_complex : public Simplex_tree<> {
     
       size_type inserted = triangulation_->insert(first, last);
       if (inserted != (last -first)) {
-        std::cerr << "Alpha_complex - insertion failed " << inserted << " != " << (last -first);
+        std::cerr << "Alpha_complex - insertion failed " << inserted << " != " << (last -first) << "\n";
         exit(-1);  // ----- >>
       }
       init(max_alpha_square);
@@ -198,19 +198,19 @@ class Alpha_complex : public Simplex_tree<> {
    */
   void init(Filtration_value max_alpha_square) {
     if (triangulation_ == nullptr) {
-      std::cerr << "Alpha_complex init - Cannot init from a NULL triangulation";
+      std::cerr << "Alpha_complex init - Cannot init from a NULL triangulation\n";
       return;  // ----- >>
     }
     if (triangulation_->number_of_vertices() < 1) {
-      std::cerr << "Alpha_complex init - Cannot init from a triangulation without vertices";
+      std::cerr << "Alpha_complex init - Cannot init from a triangulation without vertices\n";
       return;  // ----- >>
     }
     if (triangulation_->maximal_dimension() < 1) {
-      std::cerr << "Alpha_complex init - Cannot init from a zero-dimension triangulation";
+      std::cerr << "Alpha_complex init - Cannot init from a zero-dimension triangulation\n";
       return;  // ----- >>
     }
     if (num_vertices() > 0) {
-      std::cerr << "Alpha_complex init - Cannot init twice";
+      std::cerr << "Alpha_complex init - Cannot init twice\n";
       return;  // ----- >>
     }
 
@@ -225,8 +225,9 @@ class Alpha_complex : public Simplex_tree<> {
     // Loop on triangulation vertices list
     for (CGAL_vertex_iterator vit = triangulation_->vertices_begin(); vit != triangulation_->vertices_end(); ++vit) {
       if (!triangulation_->is_infinite(*vit)) {
-        DBGMSG("Vertex insertion - ", vertex_handle);
-        DBGMSG(" -> ", vit->point());
+#ifdef DEBUG_TRACES
+        std::cout << "Vertex insertion - " << vertex_handle << " -> " << vit->point() << std::endl;
+#endif  // DEBUG_TRACES
 
         vertex_iterator_to_handle_.emplace(vit, vertex_handle);
         vertex_handle_to_iterator_.push_back(vit);
@@ -239,12 +240,21 @@ class Alpha_complex : public Simplex_tree<> {
     // Simplex_tree construction from loop on triangulation finite full cells list
     for (auto cit = triangulation_->finite_full_cells_begin(); cit != triangulation_->finite_full_cells_end(); ++cit) {
       Vector_vertex vertexVector;
+#ifdef DEBUG_TRACES
+      std::cout << "Simplex_tree insertion ";
+#endif  // DEBUG_TRACES
       for (auto vit = cit->vertices_begin(); vit != cit->vertices_end(); ++vit) {
         if (*vit != nullptr) {
+#ifdef DEBUG_TRACES
+          std::cout << " " << vertex_iterator_to_handle_[*vit];
+#endif  // DEBUG_TRACES
           // Vector of vertex construction for simplex_tree structure
           vertexVector.push_back(vertex_iterator_to_handle_[*vit]);
         }
       }
+#ifdef DEBUG_TRACES
+      std::cout << std::endl;
+#endif  // DEBUG_TRACES
       // Insert each simplex and its subfaces in the simplex tree - filtration is NaN
       Simplex_result insert_result = insert_simplex_and_subfaces(vertexVector,
                                                                  std::numeric_limits<double>::quiet_NaN());
@@ -259,11 +269,18 @@ class Alpha_complex : public Simplex_tree<> {
         int f_simplex_dim = dimension(f_simplex);
         if (decr_dim == f_simplex_dim) {
           Vector_of_CGAL_points pointVector;
-          DBGMSG("Sigma of dim ", decr_dim);
+#ifdef DEBUG_TRACES
+          std::cout << "Sigma of dim " << decr_dim << " is";
+#endif  // DEBUG_TRACES
           for (auto vertex : simplex_vertex_range(f_simplex)) {
             pointVector.push_back(get_point(vertex));
+#ifdef DEBUG_TRACES
+            std::cout << " " << vertex;
+#endif  // DEBUG_TRACES
           }
-          DBGCONT(simplex_vertex_range(f_simplex));
+#ifdef DEBUG_TRACES
+          std::cout << std::endl;
+#endif  // DEBUG_TRACES
           // ### If filt(Sigma) is NaN : filt(Sigma) = alpha(Sigma)
           if (isnan(filtration(f_simplex))) {
             Filtration_value alpha_complex_filtration = 0.0;
@@ -275,7 +292,9 @@ class Alpha_complex : public Simplex_tree<> {
               alpha_complex_filtration = squared_radius(pointVector.begin(), pointVector.end());
             }
             assign_filtration(f_simplex, alpha_complex_filtration);
-            DBGMSG("filt(Sigma) is NaN : filt(Sigma) =", filtration(f_simplex));
+#ifdef DEBUG_TRACES
+            std::cout << "filt(Sigma) is NaN : filt(Sigma) =" << filtration(f_simplex) << std::endl;
+#endif  // DEBUG_TRACES
           }
           propagate_alpha_filtration(f_simplex, decr_dim);
         }
@@ -295,16 +314,23 @@ class Alpha_complex : public Simplex_tree<> {
   void propagate_alpha_filtration(Simplex_handle f_simplex, int decr_dim) {
     // ### Foreach Tau face of Sigma
     for (auto f_boundary : boundary_simplex_range(f_simplex)) {
-      DBG("------------- TAU -------------");
-      DBGCONT(simplex_vertex_range(f_boundary));
-      DBG("is a face of Sigma");
-      DBGMSG("isnan(filtration(Tau)=", isnan(filtration(f_boundary)));
+#ifdef DEBUG_TRACES
+      std::cout << " | --------------------------------------------------\n";
+      std::cout << " | Tau ";
+      for (auto vertex : simplex_vertex_range(f_boundary)) {
+        std::cout << vertex << " ";
+      }
+      std::cout << "is a face of Sigma\n";
+      std::cout << " | isnan(filtration(Tau)=" << isnan(filtration(f_boundary)) << std::endl;
+#endif  // DEBUG_TRACES
       // ### If filt(Tau) is not NaN
       if (!isnan(filtration(f_boundary))) {
         // ### filt(Tau) = fmin(filt(Tau), filt(Sigma))
         Filtration_value alpha_complex_filtration = fmin(filtration(f_boundary), filtration(f_simplex));
         assign_filtration(f_boundary, alpha_complex_filtration);
-        DBGMSG("filt(Tau) = fmin(filt(Tau), filt(Sigma)) = ", filtration(f_boundary));
+#ifdef DEBUG_TRACES
+        std::cout << " | filt(Tau) = fmin(filt(Tau), filt(Sigma)) = " << filtration(f_boundary) << std::endl;
+#endif  // DEBUG_TRACES
         // ### Else
       } else {
         // No need to compute is_gabriel for dimension <= 2
@@ -331,14 +357,17 @@ class Alpha_complex : public Simplex_tree<> {
           Is_Gabriel is_gabriel = kernel_.side_of_bounded_sphere_d_object();
           bool is_gab = is_gabriel(pointVector.begin(), pointVector.end(), point_for_gabriel)
               != CGAL::ON_BOUNDED_SIDE;
-          DBGMSG("Tau is_gabriel(Sigma)=", is_gab);
-          DBGMSG(" - vertexForGabriel=", vertexForGabriel);
+#ifdef DEBUG_TRACES
+          std::cout << " | Tau is_gabriel(Sigma)=" << is_gab << " - vertexForGabriel=" << vertexForGabriel << std::endl;
+#endif  // DEBUG_TRACES
           // ### If Tau is not Gabriel of Sigma
           if (false == is_gab) {
             // ### filt(Tau) = filt(Sigma)
             Filtration_value alpha_complex_filtration = filtration(f_simplex);
             assign_filtration(f_boundary, alpha_complex_filtration);
-            DBGMSG("filt(Tau) = filt(Sigma) = ", filtration(f_boundary));
+#ifdef DEBUG_TRACES
+            std::cout << " | filt(Tau) = filt(Sigma) = " << filtration(f_boundary) << std::endl;
+#endif  // DEBUG_TRACES
           }
         }
       }

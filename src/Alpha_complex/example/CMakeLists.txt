@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 project(GUDHIAlphaShapesExample)
 
-add_executable ( flat flat.cpp )
-
 # need CGAL 4.7
 # cmake -DCGAL_DIR=~/workspace/CGAL-4.7-Ic-41 ../../..
 if(CGAL_FOUND)
@@ -29,6 +27,10 @@ if(CGAL_FOUND)
     if (EIGEN3_FOUND)
       message(STATUS "Eigen3 version: ${EIGEN3_VERSION}.")
       include( ${EIGEN3_USE_FILE} )
+      if (CMAKE_BUILD_TYPE MATCHES Debug)
+        # For programs to be more verbose
+        add_definitions(-DDEBUG_TRACES)
+      endif()
       
       add_executable ( alphaoffreader Alpha_complex_from_off.cpp )
       target_link_libraries(alphaoffreader  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})

@@ -1173,17 +1173,19 @@ class Simplex_tree {
 
   /** \brief Remove a maximal simplex.
    * @param[in] sh Simplex handle on the maximal simplex to remove.
+   * \pre Please check the simplex has no coface before removing it.
    * \warning In debug mode, the exception std::invalid_argument is thrown if sh has children.
    */
   void remove_maximal_simplex(Simplex_handle sh) {
     // Guarantee the simplex has no children
     GUDHI_CHECK(has_children(sh),
-                std::invalid_argument ("Simplex_tree::remove_maximal_simplex - argument is not a maximal simplex"));
-
-    // Simplex is a leaf, it means the child is the Siblings owning the leaf.
+                std::invalid_argument ("Simplex_tree::remove_maximal_simplex - argument has children"));
+    
+    // Simplex is a leaf, it means the child is the Siblings owning the leaf
     Siblings* child = sh->second.children();
-    if (child->size() > 1) {
+    if ((child->size() > 1) || (child == root())) {
       // Not alone, just remove it from members
+      // Special case when child is the root of the simplex tree, just remove it from members
       child->members().erase(sh->first);
     } else {
       // Sibling is emptied : must be deleted, and its parent must point on his own Sibling

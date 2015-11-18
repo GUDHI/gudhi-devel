@@ -24,14 +24,23 @@
 
 #include <iostream>
 
-#ifdef NDEBUG
-  // GUDHI_NDEBUG is the Gudhi official flag for debug mode.
-  #define GUDHI_NDEBUG
+#ifndef NDEBUG
+  // GUDHI_DEBUG is the Gudhi official flag for debug mode.
+  #define GUDHI_DEBUG
+#endif
+
+// GUDHI_CHECK throw an exception on condition in debug mode, but does nothing in release mode
+// Could assert in release mode, but cmake sets NDEBUG (for "NO DEBUG") in this mode, means assert does nothing.
+#ifdef GUDHI_DEBUG
+  #define GUDHI_CHECK(cond, excpt) if (cond) throw excpt
+#else
+  #define GUDHI_CHECK(cond, excpt) (void) 0
 #endif
 
 #define PRINT(a) std::cerr << #a << ": " << (a) << " (DISP)" << std::endl
 
-#ifdef GUDHI_NDEBUG
+// #define DBG_VERBOSE
+#ifdef DBG_VERBOSE
   #define DBG(a) std::cout << "DBG: " << (a) << std::endl
   #define DBGMSG(a, b) std::cout << "DBG: " << a << b << std::endl
   #define DBGVALUE(a) std::cout << "DBG: " <<  #a << ": " << a << std::endl
@@ -41,13 +50,6 @@
   #define DBGMSG(a, b) (void) 0
   #define DBGVALUE(a) (void) 0
   #define DBGCONT(a) (void) 0
-#endif
-
-// GUDHI_CHECK throw an exception on condition in debug mode, but does nothing in release mode
-#ifdef GUDHI_NDEBUG
-  #define GUDHI_CHECK(cond, excpt) if (cond) throw excpt
-#else
-  #define GUDHI_CHECK(cond, excpt) (void) 0
 #endif
 
 #endif  // DEBUG_UTILS_H_

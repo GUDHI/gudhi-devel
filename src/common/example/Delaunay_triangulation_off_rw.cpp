@@ -24,11 +24,6 @@ int main(int argc, char **argv) {
     usage(argv[0]);
   }
 
-
-#ifdef GUDHI_NDEBUG
-  std::cout << "pouet pouet !!" << std::endl;
-#endif
-
   std::string offInputFile(argv[1]);
   // Read the OFF file (input file name given as parameter) and triangulates points
   Gudhi::Delaunay_triangulation_off_reader<T> off_reader(offInputFile);
