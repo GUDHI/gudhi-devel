@@ -69,7 +69,7 @@ template<typename SkBlComplex> class Is_manifold {
  private:
   unsigned local_dimension(Vertex_handle v) {
     unsigned dim = 0;
-    for (const auto& s : input_complex_.simplex_range(v))
+    for (const auto& s : input_complex_.star_simplex_range(v))
       dim = (std::max)(dim, (unsigned) s.dimension());
     return dim;
   }

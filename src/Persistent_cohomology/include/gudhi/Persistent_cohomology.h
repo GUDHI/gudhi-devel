@@ -431,9 +431,12 @@ class Persistent_cohomology {
       std::map<Simplex_key, Arith_element> & map_a_ds, Simplex_handle sigma,
       int dim_sigma) {
     // traverses the boundary of sigma, keeps track of the annotation vectors,
-    // with multiplicity, in a map.
-    std::map<Column *, int> annotations_in_boundary;
-    std::pair<typename std::map<Column *, int>::iterator, bool> result_insert_bound;
+    // with multiplicity. We used to sum the coefficients directly in
+    // annotations_in_boundary by using a map, we now do it later.
+    typedef std::pair<Column *, int> annotation_t;
+    // Danger: not thread-safe!
+    static std::vector<annotation_t> annotations_in_boundary;
+    annotations_in_boundary.clear();
     int sign = 1 - 2 * (dim_sigma % 2);  // \in {-1,1} provides the sign in the
                                          // alternate sum in the boundary.
     Simplex_key key;
@@ -445,22 +448,29 @@ class Persistent_cohomology {
         // Find its annotation vector
         curr_col = ds_repr_[dsets_.find_set(key)];
         if (curr_col != NULL) {  // and insert it in annotations_in_boundary with multyiplicative factor "sign".
-          result_insert_bound = annotations_in_boundary.insert(std::pair<Column *, int>(curr_col, sign));
-          if (!(result_insert_bound.second)) {
-            result_insert_bound.first->second += sign;
-          }
+	  annotations_in_boundary.emplace_back(curr_col, sign);
         }
       }
       sign = -sign;
     }
+    // Place identical annotations consecutively so we can easily sum their multiplicities.
+    std::sort(annotations_in_boundary.begin(), annotations_in_boundary.end(),
+	[](annotation_t const& a, annotation_t const& b) { return a.first < b.first; });
+
     // Sum the annotations with multiplicity, using a map<key,coeff>
     // to represent a sparse vector.
     std::pair<typename std::map<Simplex_key, Arith_element>::iterator, bool> result_insert_a_ds;
 
-    for (auto ann_ref : annotations_in_boundary) {
-      if (ann_ref.second != coeff_field_.additive_identity()) {  // For all columns in the boundary,
-        for (auto cell_ref : ann_ref.first->col_) {  // insert every cell in map_a_ds with multiplicity
-          Arith_element w_y = coeff_field_.times(cell_ref.coefficient_, ann_ref.second);  // coefficient * multiplicity
+    for (auto ann_it = annotations_in_boundary.begin(); ann_it != annotations_in_boundary.end(); /**/) {
+      Column* col = ann_it->first;
+      int mult = ann_it->second;
+      while (++ann_it != annotations_in_boundary.end() && ann_it->first == col) {
+	mult += ann_it->second;
+      }
+      // The following test is just a heuristic, it is not required, and it is fine that is misses p == 0.
+      if (mult != coeff_field_.additive_identity()) {  // For all columns in the boundary,
+        for (auto cell_ref : col->col_) {  // insert every cell in map_a_ds with multiplicity
+          Arith_element w_y = coeff_field_.times(cell_ref.coefficient_, mult);  // coefficient * multiplicity
 
           if (w_y != coeff_field_.additive_identity()) {  // if != 0
             result_insert_a_ds = map_a_ds.insert(std::pair<Simplex_key, Arith_element>(cell_ref.key_, w_y));

@@ -70,11 +70,11 @@ class Delaunay_triangulation_off_visitor_reader {
 #endif  // DEBUG_TRACES
     if (num_faces > 0) {
       std::cerr << "Delaunay_triangulation_off_visitor_reader::init faces are not taken into account from OFF " <<
-          "file for Delaunay triangulation - faces are computed." << std::endl;
+          "file for Delaunay triangulation - faces are computed.\n";
     }
     if (num_edges > 0) {
       std::cerr << "Delaunay_triangulation_off_visitor_reader::init edges are not taken into account from OFF " <<
-          "file for Delaunay triangulation - edges are computed." << std::endl;
+          "file for Delaunay triangulation - edges are computed.\n";
     }
     // Complex construction with dimension from file
     complex_ = new Complex(dim);
@@ -163,13 +163,14 @@ class Delaunay_triangulation_off_reader {
       if (valid_) {
         complex_ = off_visitor.get_complex();
         if (complex_ == nullptr) {
-          std::cerr << "Delaunay_triangulation_off_reader::Delaunay_triangulation_off_reader off_visitor returns an empty pointer" << std::endl;
+          std::cerr << "Delaunay_triangulation_off_reader::Delaunay_triangulation_off_reader off_visitor returns " <<
+              "an empty pointer\n";
           valid_ = false;
         }
       }
     } else {
       std::cerr << "Delaunay_triangulation_off_reader::Delaunay_triangulation_off_reader could not open file " <<
-          name_file << std::endl;
+          name_file << "\n";
     }
 
   }
@@ -285,7 +286,7 @@ class Delaunay_triangulation_off_writer {
       valid_ = true;
     } else {
       std::cerr << "Delaunay_triangulation_off_writer::Delaunay_triangulation_off_writer could not open file " <<
-          name_file << std::endl;
+          name_file << "\n";
     }
   }
   

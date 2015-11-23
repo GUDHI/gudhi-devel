@@ -56,6 +56,7 @@
  * The following example requires the <a target="_blank" href="http://gmplib.org/">GNU Multiple Precision Arithmetic
  * Library</a> (GMP) and will not be built if GMP is not installed:
  * \li Persistent_cohomology/rips_multifield_persistence
+ *
  * Having GMP version 4.2 or higher installed is recommended.
  * 
  * \subsection cgal CGAL:
@@ -74,19 +75,15 @@
  * 
  * \subsection demos Demos and examples
  * To build the demos and libraries, run the following commands in a terminal:
- * \verbatim
- * cd /path-to-gudhi/
- * mkdir build
- * cd build/
- * cmake ..
- * make
- * \endverbatim
+\verbatim  cd /path-to-gudhi/
+mkdir build
+cd build/
+cmake ..
+make \endverbatim
  * 
  * \subsection testsuites Test suites
  * To test your build, run the following command in a terminal:
- * \verbatim
- * make test
- * \endverbatim
+ * \verbatim  make test \endverbatim
  * 
  * \section Contributions Bug reports and contributions
  * Please help us improving the quality of the GUDHI library. You may report bugs or suggestions to:

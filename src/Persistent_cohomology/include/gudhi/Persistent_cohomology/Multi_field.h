@@ -81,8 +81,7 @@ class Multi_field {
     // set m to primorial(bound_prime)
     prod_characteristics_ = 1;
     for (auto p : primes_) {
-      mpz_mul_ui(prod_characteristics_.get_mpz_t(),
-                 prod_characteristics_.get_mpz_t(), p);
+      prod_characteristics_ *= p;
     }
 
     // Uvect_

@@ -158,7 +158,7 @@ void build_rips(ComplexType& complex, double offset){
 	for (auto p = vertices.begin(); p != vertices.end(); ++p)
 		for (auto q = p; ++q != vertices.end(); )
 			if (eucl_distance(complex.point(*p), complex.point(*q)) < 2 * offset)
-				complex.add_edge(*p,*q);
+				complex.add_edge_without_blockers(*p,*q);
 }
 
 int main (int argc, char *argv[])
@@ -194,7 +194,7 @@ int main (int argc, char *argv[])
 	contractor.contract_edges();
 
 	std::cout << "Counting final number of simplices \n";
-	unsigned num_simplices = std::distance(complex.simplex_range().begin(),complex.simplex_range().end());
+	unsigned num_simplices = std::distance(complex.star_simplex_range().begin(),complex.star_simplex_range().end());
 
 	std::cout << "Final complex has "<<
 			complex.num_vertices()<<" vertices, "<<
