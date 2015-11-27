@@ -1,8 +1,6 @@
 #include <iostream>
 #include <string>
 
-// to construct a Delaunay_triangulation from a OFF file
-#include <gudhi/Delaunay_triangulation_off_io.h>
 #include <gudhi/Alpha_complex.h>
 
 void usage(char * const progName) {
@@ -35,14 +33,12 @@ int main(int argc, char **argv) {
 
   std::cout << "Iterator on alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
   for (auto f_simplex : alpha_complex_from_file.filtration_simplex_range()) {
-    //if (alpha_complex_from_file.filtration(f_simplex) <= alpha_complex_from_file.filtration()) {
-      std::cout << "   ( ";
-      for (auto vertex : alpha_complex_from_file.simplex_vertex_range(f_simplex)) {
-        std::cout << vertex << " ";
-      }
-      std::cout << ") -> " << "[" << alpha_complex_from_file.filtration(f_simplex) << "] ";
-      std::cout << std::endl;
-    //}
+    std::cout << "   ( ";
+    for (auto vertex : alpha_complex_from_file.simplex_vertex_range(f_simplex)) {
+      std::cout << vertex << " ";
+    }
+    std::cout << ") -> " << "[" << alpha_complex_from_file.filtration(f_simplex) << "] ";
+    std::cout << std::endl;
   }
   return 0;
 }

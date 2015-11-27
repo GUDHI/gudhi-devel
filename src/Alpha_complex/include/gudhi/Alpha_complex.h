@@ -27,6 +27,8 @@
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Debug_utils.h>
+// to construct a Delaunay_triangulation from a OFF file
+#include <gudhi/Delaunay_triangulation_off_io.h>
 
 #include <stdlib.h>
 #include <math.h>  // isnan, fmax

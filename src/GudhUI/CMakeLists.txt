@@ -102,10 +102,6 @@ if ( CGAL_FOUND AND QT4_FOUND AND OPENGL_FOUND AND QGLVIEWER_FOUND )
     if (EIGEN3_FOUND)
       message(STATUS "Eigen3 version: ${EIGEN3_VERSION}.")
       include( ${EIGEN3_USE_FILE} )
-      if (CMAKE_BUILD_TYPE MATCHES Debug)
-        # For programs to be more verbose
-        add_definitions(-DDEBUG_TRACES)
-      endif()
       
       add_executable (acp alpha_complex_persistence.cpp)
       target_link_libraries(acp ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY} ${QT_LIBRARIES})

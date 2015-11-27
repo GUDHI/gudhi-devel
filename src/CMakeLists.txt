@@ -42,6 +42,12 @@ else()
   INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
   LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
+  if (DEBUG_TRACES)
+    message(STATUS "DEBUG_TRACES are activated")
+    # For programs to be more verbose
+    add_definitions(-DDEBUG_TRACES)
+  endif()
+
   #---------------------------------------------------------------------------------------
   # Gudhi compilation part
   include_directories(include)

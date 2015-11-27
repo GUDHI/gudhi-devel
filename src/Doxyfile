@@ -673,6 +673,7 @@ LAYOUT_FILE            =
 # also \cite for info how to create references.
 
 CITE_BIB_FILES         = biblio/bibliography.bib \
+                        biblio/how_to_cite_cgal.bib \
                         biblio/how_to_cite_gudhi.bib
 
 #---------------------------------------------------------------------------
@@ -812,7 +813,7 @@ EXCLUDE_SYMBOLS        =
 # that contain example code fragments that are included (see the \include
 # command).
 
-EXAMPLE_PATH           = biblio/
+EXAMPLE_PATH           = biblio/ \
     example/common/ \
     example/Alpha_complex/
 

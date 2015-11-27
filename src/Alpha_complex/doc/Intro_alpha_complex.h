@@ -36,48 +36,58 @@ namespace alphacomplex {
  * 
  * \section definition Definition
  * 
- * Alpha_complex is a Simplex_tree constructed from each finite cell of a Delaunay Triangulation.
+ * Alpha_complex is a <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
+ * constructed from each finite cell of a Delaunay Triangulation.
  * 
  * The filtration value of each simplex is computed from the alpha square value of the simplex if it is Gabriel or
  * from the alpha value of the simplex coface that makes the simplex not Gabriel.
  * 
- * Please refer to \cite AlphaShapesDefinition for a more complete alpha complex definition.
+ * All simplices that have a filtration value strictly greater than a given alpha square value are not inserted into
+ * the simplex.
  * 
- * Alpha complex are interesting because it looks like an \ref alpha-shape "Alpha shape" as described in
- * \cite AlphaShapesIntroduction (an alpha complex concept vulgarization).
+ * \image html "alpha_complex_representation.png" "Alpha simplicial complex representation"
  * 
- * \section example Example
+ * Alpha_complex is constructing a `Simplex_tree` using <a target="_blank"
+ * href="http://doc.cgal.org/latest/Triangulation/index.html#Chapter_Triangulations">Delaunay Triangulation</a>
+ * \cite cgal:hdj-t-15b from <a target="_blank" href="http://www.cgal.org/">CGAL</a> (the Computational Geometry
+ * Algorithms Library \cite cgal:eb-15b).
  * 
- * This example loads points from an OFF file, builds the Delaunay triangulation from the points, and finally
- * initialize the alpha complex with it.
+ * The complex is a template class requiring a <a target="_blank"
+ * href="http://doc.cgal.org/latest/Kernel_d/index.html#Chapter_dD_Geometry_Kernel">dD Geometry Kernel</a>
+ * \cite cgal:s-gkd-15b from CGAL as template.
+ * 
+ * \section pointsexample Example from points
+ * 
+ * This example builds the Delaunay triangulation from the given points in a 2D static kernel, and initializes the
+ * alpha complex with it.
  * 
  * Then, it is asked to display information about the alpha complex.
  * 
- * \include Alpha_complex_from_off.cpp
+ * \include Alpha_complex_from_points.cpp
  * 
  * When launching:
  * 
- * \code $> ./alphaoffreader ../../data/points/alphacomplexdoc.off 60.0
+ * \code $> ./alphapoints 60.0
  * \endcode
  *
  * the program output is:
  * 
- * \include alphaoffreader_for_doc.txt
+ * \include alphaoffreader_for_doc_60.txt
  * 
  * \section algorithm Algorithm
  * 
- * <b>Data structure</b>
+ * \subsection datastructure Data structure
  * 
  * In order to build the alpha complex, first, a Simplex tree is build from the cells of a Delaunay Triangulation.
  * (The filtration value is set to NaN, which stands for unknown value):
  * \image html "alpha_complex_doc.png" "Simplex tree structure construction example"
  *
- * <b>Filtration value computation algorithm</b>
- *
+ * \subsection filtrationcomputation Filtration value computation algorithm
+ * 
  * \f{algorithm}{ 
  * \caption{Filtration value computation algorithm}\label{alpha}
  * \begin{algorithmic}
- * \For{i : dimension $\rightarrow$ 1}
+ * \For{i : dimension $\rightarrow$ 0}
  *   \ForAll{$\sigma$ of dimension i}
  *     \If {filtration($\sigma$) is NaN}
  *       \State filtration($\sigma$) = $\alpha^2(\sigma)$
@@ -93,25 +103,58 @@ namespace alphacomplex {
  *     \EndFor
  *   \EndFor
  * \EndFor
+ * \State make\_filtration\_non\_decreasing()
+ * \State prune\_above\_filtration()
  * \end{algorithmic}
  * \f}
  * 
- * From the example above, it means the algorithm will look into each triangle ([1,2,3], [2,3,4], [1,3,5], ...),
- * will compute the filtration value of the triangle, and then will propagate the filtration value as described
+ * \subsubsection dimension2 Dimension 2
+ * 
+ * From the example above, it means the algorithm looks into each triangle ([1,2,3], [2,3,4], [1,3,5], ...),
+ * computes the filtration value of the triangle, and then propagates the filtration value as described
  * here :
  * \image html "alpha_complex_doc_135.png" "Filtration value propagation example"
- * Then, the algorithm will look into each edge ([1,2], [2,3], [1,3], ...),
- * will compute the filtration value of the edge (in this case, propagation will have no effect).
  * 
- * Finally, the algorithm will look into each vertex ([1], [2], [3], [4], [5], [6] and [7]),
- * will set the filtration value (0 in case of a vertex - propagation will have no effect).
+ * \subsubsection dimension1 Dimension 1
  * 
- * \section alpha-shape Alpha shape
+ * Then, the algorithm looks into each edge ([1,2], [2,3], [1,3], ...),
+ * computes the filtration value of the edge (in this case, propagation will have no effect).
  * 
- * In the example above, the alpha shape of \f$\alpha^2_{63} < \alpha^2 < \alpha^2_{62}\f$ is the alpha complex where the 
- * \f$\alpha^2_{63} <\f$ filtration value \f$< \alpha^2_{62}\f$ as described in \cite AlphaShapesIntroduction
+ * \subsubsection dimension0 Dimension 0
  * 
- * \image html "alpha_complex_doc_alpha_shape.png" "Alpha shape example"
+ * Finally, the algorithm looks into each vertex ([1], [2], [3], [4], [5], [6] and [7]) and
+ * sets the filtration value (0 in case of a vertex - propagation will have no effect).
+ * 
+ * \subsubsection nondecreasing Non decreasing filtration values
+ * 
+ * As Alpha square value computed from CGAL is an approximation, we have to make filtration non decreasing while
+ * increasing the dimension for our simplicial complex to be valid (cf.
+ * `Simplex_tree::make_filtration_non_decreasing()`).
+ * 
+ * \subsubsection pruneabove Prune above given filtration value
+ * 
+ * The simplex tree is pruned from the given maximum alpha square value (cf. `Simplex_tree::prune_above_filtration()`).
+ * In this example, the value is given by the user as argument of the program.
+ * 
+ * 
+ * \section offexample Example from OFF file
+ * 
+ * This example builds the Delaunay triangulation in a dynamic kernel, and initializes the alpha complex with it.
+ * 
+ * 
+ * Then, it is asked to display information about the alpha complex.
+ * 
+ * \include Alpha_complex_from_off.cpp
+ * 
+ * When launching:
+ * 
+ * \code $> ./alphaoffreader ../../data/points/alphacomplexdoc.off 32.0
+ * \endcode
+ *
+ * the program output is:
+ * 
+ * \include alphaoffreader_for_doc_32.txt
+ * 
  * \copyright GNU General Public License v3.                         
  * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
  */

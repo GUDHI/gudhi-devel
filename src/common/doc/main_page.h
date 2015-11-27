@@ -63,7 +63,7 @@
  * CGAL is a C++ library which provides easy access to efficient and reliable geometric algorithms.
  * 
  * The following examples require the <a target="_blank" href="http://www.cgal.org/">Computational Geometry Algorithms
- * Library</a> (CGAL) and will not be built if CGAL is not installed:
+ * Library</a> (CGAL \cite cgal:eb-15b) and will not be built if CGAL is not installed:
  * \li GudhUI
  * \li Persistent_cohomology/alpha_shapes_persistence
  * \li Simplex_tree/simplex_tree_from_alpha_shapes_3

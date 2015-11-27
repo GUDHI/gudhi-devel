@@ -69,6 +69,12 @@ else()
   message(STATUS "boost include dirs:" ${Boost_INCLUDE_DIRS})
   message(STATUS "boost library dirs:" ${Boost_LIBRARY_DIRS})
 
+  if (DEBUG_TRACES)
+    # For programs to be more verbose
+    message(STATUS "DEBUG_TRACES are activated")
+    add_definitions(-DDEBUG_TRACES)
+  endif()
+
   include_directories(src/common/include/)
   include_directories(src/Alpha_complex/include/)
   include_directories(src/Bottleneck/include/)

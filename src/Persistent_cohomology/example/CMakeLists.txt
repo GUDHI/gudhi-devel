@@ -35,10 +35,6 @@ if(GMPXX_FOUND AND GMP_FOUND)
    target_link_libraries(performance_rips_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES})
 
    if(CGAL_FOUND)
-     if (CMAKE_BUILD_TYPE MATCHES Debug)
-       # For programs to be more verbose
-       add_definitions(-DDEBUG_TRACES)
-     endif()
      add_executable(alpha_shapes_persistence alpha_shapes_persistence.cpp)
      target_link_libraries(alpha_shapes_persistence ${Boost_SYSTEM_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES} ${CGAL_LIBRARY})
      add_test(alpha_shapes_persistence_2_0_5 ${CMAKE_CURRENT_BINARY_DIR}/alpha_shapes_persistence ${CMAKE_SOURCE_DIR}/data/points/bunny_5000 2 0.5)
@@ -70,10 +66,6 @@ if(GMPXX_FOUND AND GMP_FOUND)
     if (EIGEN3_FOUND)
       message(STATUS "Eigen3 version: ${EIGEN3_VERSION}.")
       include( ${EIGEN3_USE_FILE} )
-      if (CMAKE_BUILD_TYPE MATCHES Debug)
-        # For programs to be more verbose
-        add_definitions(-DDEBUG_TRACES)
-      endif()
       
       add_executable (alphacomplexpersistence alpha_complex_persistence.cpp)
       target_link_libraries(alphacomplexpersistence  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
