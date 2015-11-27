@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(GUDHISimplexTreeFromFile)
+project(GUDHIBitmap)
 
 add_executable ( Bitmap_cubical_complex Bitmap_cubical_complex.cpp )
 target_link_libraries(Bitmap_cubical_complex ${Boost_SYSTEM_LIBRARY})	

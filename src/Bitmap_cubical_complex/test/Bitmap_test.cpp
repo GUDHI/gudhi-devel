@@ -1,10 +1,23 @@
-#include "gudhi/Bitmap_cubical_complex.h"
+#include <gudhi/reader_utils.h>
+#include <gudhi/Bitmap_cubical_complex.h>
+#include <gudhi/Persistent_cohomology.h>
+#include <boost/program_options.hpp>
+
+// standard stuff
+#include <iostream>
+#include <sstream>
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "cubical_complex"
 #include <boost/test/unit_test.hpp>
 
+
 using namespace std;
+using namespace Gudhi;
+using namespace Gudhi::Cubical_complex;
+using namespace Gudhi::persistent_cohomology;
+
+
 
 BOOST_AUTO_TEST_CASE(check_dimension) {
   std::vector< double > increasingFiltrationOfTopDimensionalCells;
@@ -80,12 +93,14 @@ BOOST_AUTO_TEST_CASE(topDimensionalCellsIterator_test) {
 
 
   int i = 0;
-  for (Bitmap_cubical_complex<double>::Top_dimensional_cells_iterator it = increasing.top_dimensional_cells_begin(); it != increasing.top_dimensional_cells_end(); ++it) {
+  for (Bitmap_cubical_complex<double>::Top_dimensional_cells_iterator 
+       it = increasing.top_dimensional_cells_begin(); it != increasing.top_dimensional_cells_end(); ++it) {
     BOOST_CHECK(*it == expectedFiltrationValues2[i]);
     ++i;
   }
   i = 0;
-  for (Bitmap_cubical_complex<double>::Top_dimensional_cells_iterator it = hole.top_dimensional_cells_begin(); it != hole.top_dimensional_cells_end(); ++it) {
+  for (Bitmap_cubical_complex<double>::Top_dimensional_cells_iterator 
+       it = hole.top_dimensional_cells_begin(); it != hole.top_dimensional_cells_end(); ++it) {
     BOOST_CHECK(*it == expectedFiltrationValues1[i]);
     ++i;
   }
