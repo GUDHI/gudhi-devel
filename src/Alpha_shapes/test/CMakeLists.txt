@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(GUDHIAlphaShapesTest)
+project(GUDHIAlphaShapesUT)
 
 # need CGAL 4.6
 # cmake -DCGAL_DIR=~/workspace/CGAL-4.6-beta1 ../../..
@@ -15,10 +15,28 @@ if(CGAL_FOUND)
       include( ${EIGEN3_USE_FILE} )
       include_directories (BEFORE "../../include")
 
-      add_definitions(-DDEBUG_TRACES)
-      add_executable ( AlphaShapesUnitTest Alpha_shapes_unit_test.cpp )
-      target_link_libraries(AlphaShapesUnitTest  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
-      add_test(AlphaShapesUnitTest ${CMAKE_CURRENT_BINARY_DIR}/AlphaShapesUnitTest)
+      if (GCOVR_PATH)
+        # for gcovr to make coverage reports - Corbera Jenkins plugin
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fprofile-arcs -ftest-coverage")
+      endif()
+      if (GPROF_PATH)
+        # for gprof to make coverage reports - Jenkins
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -pg")
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -pg")
+      endif()
+
+      # uncomment to display debug traces
+      # add_definitions(-DDEBUG_TRACES)
+      add_executable ( AlphaShapesUT Alpha_shapes_unit_test.cpp )
+      target_link_libraries(AlphaShapesUT  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+      add_test(NAME AlphaShapesUT 
+        COMMAND ${CMAKE_CURRENT_BINARY_DIR}/AlphaShapesUT
+        # XML format for Jenkins xUnit plugin 
+        --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/AlphaShapesUT.xml --log_level=test_suite --report_level=no)
+
 
     else()
       message(WARNING "Eigen3 not found. Version 3.1.0 is required for Alpha shapes feature.")
@@ -28,4 +46,3 @@ if(CGAL_FOUND)
   endif ()
 endif()
 
-cpplint_add_tests("${CMAKE_SOURCE_DIR}/src/Alpha_shapes/include/gudhi")

@@ -76,9 +76,6 @@ class Field_Zp {
     return plus_times_equal(0, y, (Element)w);
   }
 
-  void clear_coefficient(Element x) {
-  }
-
   Element plus_equal(const Element& x, const Element& y) {
     return plus_times_equal(x, y, (Element)1);
   }
@@ -88,7 +85,7 @@ class Field_Zp {
     return add_id_all;
   }
   /** \brief Returns the multiplicative identity \f$1_{\Bbbk}\f$ of the field.*/
-  const Element& multiplicative_identity(Element P = 0) const {
+  const Element& multiplicative_identity(Element = 0) const {
     return mult_id_all;
   }
   /** Returns the inverse in the field. Modifies P.*/

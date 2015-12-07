@@ -1,16 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 project(GUDHIWitnessComplex)
-#cmake -DCGAL_DIR=~/GitDrive/CGAL/ ../../..
 
-#if (CGAL_FOUND)
-   #message(STATUS "CGAL version: ${CGAL_VERSION}.")
-   #include( ${CGAL_USE_FILE} )
-
-   #find_package(Eigen3 3.1.0)
-   #include( ${EIGEN3_USE_FILE} )
-
-   #INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIR})
-   #INCLUDE_DIRECTORIES(${CGAL_INCLUDE_DIRS})
+# A simple example
    add_executable ( simple_witness_complex simple_witness_complex.cpp )
    add_test(simple_witness_complex ${CMAKE_CURRENT_BINARY_DIR}/simple_witness_complex)
 
@@ -21,7 +12,7 @@ project(GUDHIWitnessComplex)
    add_executable( witness_complex_from_off witness_complex_from_off.cpp )
    
    add_executable( witness_complex_from_wl_matrix witness_complex_from_wl_matrix.cpp )
-#endif()
+
 
 # An example with Simplex-tree using CGAL alpha_shapes_3
 
@@ -51,6 +42,7 @@ if(CGAL_FOUND)
     if (EIGEN3_FOUND)
       message(STATUS "Eigen3 version: ${EIGEN3_VERSION}.")
       include( ${EIGEN3_USE_FILE} )
+      message(STATUS "Eigen3 use file: ${EIGEN3_USE_FILE}.")
       include_directories (BEFORE "../../include")
 
       add_executable ( witness_complex_knn_landmarks witness_complex_knn_landmarks.cpp )

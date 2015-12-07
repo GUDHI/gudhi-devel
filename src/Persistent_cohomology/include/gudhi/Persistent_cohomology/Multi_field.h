@@ -77,6 +77,7 @@ class Multi_field {
       mpz_nextprime(tmp_prime, tmp_prime);
       curr_prime = mpz_get_ui(tmp_prime);
     }
+    mpz_clear(tmp_prime);
     // set m to primorial(bound_prime)
     prod_characteristics_ = 1;
     for (auto p : primes_) {
@@ -100,10 +101,6 @@ class Multi_field {
       assert(prod_characteristics_ > 0);  // division by zero + non negative values
       mult_id_all = (mult_id_all + uvect) % prod_characteristics_;
     }
-  }
-
-  void clear_coefficient(Element & x) {
-    mpz_clear(x.get_mpz_t());
   }
 
   /** \brief Returns the additive idendity \f$0_{\Bbbk}\f$ of the field.*/

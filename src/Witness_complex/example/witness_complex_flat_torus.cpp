@@ -776,8 +776,8 @@ int main (int argc, char * const argv[])
   std::cout << "Let the carnage begin!\n";
   Point_Vector point_vector;
   //read_points_cust(file_name, point_vector);
-  generate_points_random_box(point_vector, nbP, dim);
-  //generate_points_grid(point_vector, (int)pow(nbP, 1.0/dim), dim);
+  //generate_points_random_box(point_vector, nbP, dim);
+  generate_points_grid(point_vector, (int)pow(nbP, 1.0/dim), dim);
   //nbP = (int)(pow((int)pow(nbP, 1.0/dim), dim));
   /*
   for (auto &p: point_vector)

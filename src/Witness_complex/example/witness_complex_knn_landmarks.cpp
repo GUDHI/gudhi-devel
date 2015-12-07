@@ -32,6 +32,8 @@
 //#include "gudhi/graph_simplicial_complex.h"
 #include "gudhi/Witness_complex.h"
 #include "gudhi/reader_utils.h"
+#include "generators.h"
+#include "output.h"
 //#include <boost/filesystem.hpp>
 
 //#include <CGAL/Delaunay_triangulation.h>
@@ -73,60 +75,6 @@ typedef K_neighbor_search::iterator KNS_range;
 typedef boost::container::flat_map<int, int> Point_etiquette_map;
 
 typedef std::vector<Point_d> Point_Vector;
-/**
- * \brief Customized version of read_points
- * which takes into account a possible nbP first line
- *
- */
-inline void
-read_points_cust ( std::string file_name , Point_Vector & points)
-{  
-  std::ifstream in_file (file_name.c_str(),std::ios::in);
-  if(!in_file.is_open())
-    {
-      std::cerr << "Unable to open file " << file_name << std::endl;
-      return;
-    }
-  std::string line;
-  double x;
-  while( getline ( in_file , line ) )
-    {
-      std::vector< double > point;
-      std::istringstream iss( line );
-      while(iss >> x) { point.push_back(x); }
-      Point_d p(point.begin(), point.end());
-      if (point.size() != 1)
-        points.push_back(p);
-    }
-  in_file.close();
-}
-
-/*
-void read_points_to_tree (std::string file_name, Tree& tree)
-{
-  //I assume here that tree is empty
-  std::ifstream in_file (file_name.c_str(),std::ios::in);
-  if(!in_file.is_open())
-    {
-      std::cerr << "Unable to open file " << file_name << std::endl;
-      return;
-    }
-  std::string line;
-  double x;
-   while( getline ( in_file , line ) )
-    {
-      std::vector<double> coords;
-      std::istringstream iss( line );
-      while(iss >> x) { coords.push_back(x); }
-      if (coords.size() != 1)
-        {
-          Point_d point(coords.begin(), coords.end());
-          tree.insert(point);
-        }
-    }
-  in_file.close();
-}
-*/
 
 /** Function that chooses landmarks from W and place it in the kd-tree L.
  *  Note: nbL hould be removed if the code moves to Witness_complex
@@ -182,19 +130,6 @@ void d_nearest_landmarks(Point_Vector &W, Tree &L, Point_etiquette_map &L_i, std
           //std::cout << i << " " << it->first << ": " << it->second << std::endl; 
         }
     }
-}
-
-
-void write_wl( std::string file_name, std::vector< std::vector <int> > & WL)
-{
-  std::ofstream ofs (file_name, std::ofstream::out);
-  for (auto w : WL)
-    {
-      for (auto l: w)
-        ofs << l << " ";
-      ofs << "\n";
-    }
-  ofs.close();
 }
 
 int main (int argc, char * const argv[])
@@ -270,6 +205,6 @@ int main (int argc, char * const argv[])
 
   out_file = "output/"+file_name+"_"+argv[2]+".badlinks";
   std::ofstream ofs2(out_file, std::ofstream::out);
-  witnessComplex.write_bad_links(ofs2);
+  //witnessComplex.write_bad_links(ofs2);
   ofs2.close();
 }

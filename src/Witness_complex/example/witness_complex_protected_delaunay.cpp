@@ -268,6 +268,15 @@ void insert_delaunay_landmark_with_copies(Point_Vector& W, int chosen_landmark, 
   landmark_count++;
 }
 
+
+
+
+////////////////////////////////////////////////////////////////////////
+// OLD CODE VVVVVVVV
+////////////////////////////////////////////////////////////////////////
+
+
+/*
 bool is_violating_protection(Point_d& p, Delaunay_triangulation& t, int D, FT delta)
 {
   Euclidean_distance ed;
@@ -592,3 +601,4 @@ int main (int argc, char * const argv[])
     }
   
 }
+*/

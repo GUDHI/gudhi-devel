@@ -19,7 +19,8 @@ if(CGAL_FOUND)
       target_link_libraries(dtoffrw  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
       add_test(dtoffrw_tore3D ${CMAKE_CURRENT_BINARY_DIR}/dtoffrw ${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off 3)
 
-      #add_definitions(-DDEBUG_TRACES)
+      # uncomment to display debug traces
+      # add_definitions(-DDEBUG_TRACES)
       add_executable ( stfromdt Simplex_tree_from_delaunay_triangulation.cpp )
       target_link_libraries(stfromdt  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
     else()

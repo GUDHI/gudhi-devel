@@ -1,12 +1,14 @@
 To compile:
 ***********
 
+cd /path-to-gudhi/
 cmake .
+cd /path-to-test/
 make
 
 To launch with details:
 ***********************
 
-./AlphaShapesUnitTest --report_level=detailed --log_level=all 
+./AlphaShapesUT --report_level=detailed --log_level=all 
 
    ==> echo $? returns 0 in case of success (non-zero otherwise)

@@ -35,6 +35,8 @@
 //#include "gudhi/graph_simplicial_complex.h"
 #include "gudhi/Witness_complex.h"
 #include "gudhi/reader_utils.h"
+#include "generators.h"
+#include "output.h"
 //#include <boost/filesystem.hpp> 
 
 //#include <CGAL/Delaunay_triangulation.h>
@@ -94,100 +96,8 @@ typedef CGAL::Fuzzy_sphere<STraits> Fuzzy_sphere;
 typedef std::vector<Point_d> Point_Vector;
 
 //typedef K::Equal_d Equal_d;
-typedef CGAL::Random_points_in_cube_d<Point_d> Random_cube_iterator;
-typedef CGAL::Random_points_in_ball_d<Point_d> Random_point_iterator;
 
 bool toric=false;
-
-/**
- * \brief Customized version of read_points
- * which takes into account a possible nbP first line
- *
- */
-inline void
-read_points_cust ( std::string file_name , Point_Vector & points)
-{  
-  std::ifstream in_file (file_name.c_str(),std::ios::in);
-  if(!in_file.is_open())
-    {
-      std::cerr << "Unable to open file " << file_name << std::endl;
-      return;
-    }
-  std::string line;
-  double x;
-  while( getline ( in_file , line ) )
-    {
-      std::vector< double > point;
-      std::istringstream iss( line );
-      while(iss >> x) { point.push_back(x); }
-      Point_d p(point.begin(), point.end());
-      if (point.size() != 1)
-        points.push_back(p);
-    }
-  in_file.close();
-}
-
-void generate_points_grid(Point_Vector& W, int width, int D)
-{
- 
-}
-
-void generate_points_random_box(Point_Vector& W, int nbP, int dim)
-{
-  Random_cube_iterator rp(dim, 1);
-  for (int i = 0; i < nbP; i++)
-    {
-      W.push_back(*rp++);
-    }
-}
-
-/* NOT TORUS RELATED
- */
-void generate_points_sphere(Point_Vector& W, int nbP, int dim)
-{
-  CGAL::Random_points_on_sphere_d<Point_d> rp(dim,1);
-  for (int i = 0; i < nbP; i++)
-    W.push_back(*rp++);
-}
-/*
-void read_points_to_tree (std::string file_name, Tree& tree)
-{
-  //I assume here that tree is empty
-  std::ifstream in_file (file_name.c_str(),std::ios::in);
-  if(!in_file.is_open())
-    {
-      std::cerr << "Unable to open file " << file_name << std::endl;
-      return;
-    }
-  std::string line;
-  double x;
-   while( getline ( in_file , line ) )
-    {
-      std::vector<double> coords;
-      std::istringstream iss( line );
-      while(iss >> x) { coords.push_back(x); }
-      if (coords.size() != 1)
-        {
-          Point_d point(coords.begin(), coords.end());
-          tree.insert(point);
-        }
-    }
-  in_file.close();
-}
-*/
-
-void write_wl( std::string file_name, std::vector< std::vector <int> > & WL)
-{
-  std::ofstream ofs (file_name, std::ofstream::out);
-  for (auto w : WL)
-    {
-      for (auto l: w)
-        ofs << l << " ";
-      ofs << "\n";
-    }
-  ofs.close();
-}
-
 
 std::vector<Point_d> convert_to_torus(std::vector< Point_d>& points)
 {
@@ -204,82 +114,6 @@ std::vector<Point_d> convert_to_torus(std::vector< Point_d>& points)
     }
   return points_torus;
 }
-
-void write_points_torus( std::string file_name, std::vector< Point_d > & points)
-{
-  std::ofstream ofs (file_name, std::ofstream::out);
-  std::vector<Point_d> points_torus = convert_to_torus(points);
-  for (auto w : points_torus)
-    {
-      for (auto it = w.cartesian_begin(); it != w.cartesian_end(); ++it)
-        ofs << *it << " ";
-      ofs << "\n";
-    }
-  ofs.close();
-}
-
-void write_points( std::string file_name, std::vector< Point_d > & points)
-{
-  if (toric) write_points_torus(file_name, points);
-  else
-    {
-      std::ofstream ofs (file_name, std::ofstream::out);
-      for (auto w : points)
-        {
-          for (auto it = w.cartesian_begin(); it != w.cartesian_end(); ++it)
-            ofs << *it << " ";
-          ofs << "\n";
-        }
-      ofs.close();
-    }
-}
-
-
-void write_edges_torus(std::string file_name, Witness_complex<>& witness_complex, Point_Vector& landmarks)
-{
-  std::ofstream ofs (file_name, std::ofstream::out);
-  Point_Vector l_torus = convert_to_torus(landmarks);
-  for (auto u: witness_complex.complex_vertex_range())
-    for (auto v: witness_complex.complex_vertex_range())
-      {
-        typeVectorVertex edge = {u,v};
-        if (u < v && witness_complex.find(edge) != witness_complex.null_simplex())   
-          {
-            for (auto it = l_torus[u].cartesian_begin(); it != l_torus[u].cartesian_end(); ++it)
-              ofs << *it << " ";
-            ofs << "\n";
-            for (auto it = l_torus[v].cartesian_begin(); it != l_torus[v].cartesian_end(); ++it)
-              ofs << *it << " ";
-            ofs << "\n\n\n";
-          }
-    }
-  ofs.close();
-}
-
-void write_edges(std::string file_name, Witness_complex<>& witness_complex, Point_Vector& landmarks)
-{
-  std::ofstream ofs (file_name, std::ofstream::out);
-  if (toric) write_edges_torus(file_name, witness_complex, landmarks);
-  else
-    {
-      for (auto u: witness_complex.complex_vertex_range())
-        for (auto v: witness_complex.complex_vertex_range())
-          {
-            typeVectorVertex edge = {u,v};
-            if (u < v && witness_complex.find(edge) != witness_complex.null_simplex())   
-              {
-                for (auto it = landmarks[u].cartesian_begin(); it != landmarks[u].cartesian_end(); ++it)
-                  ofs << *it << " ";
-                ofs << "\n";
-                for (auto it = landmarks[v].cartesian_begin(); it != landmarks[v].cartesian_end(); ++it)
-                  ofs << *it << " ";
-                ofs << "\n\n\n";
-              }
-          }
-      ofs.close();
-    }
-}
-
 
 /** Function that chooses landmarks from W and place it in the kd-tree L.
  *  Note: nbL hould be removed if the code moves to Witness_complex
@@ -356,6 +190,7 @@ void landmark_choice_600cell(Point_Vector&W, int nbP, int nbL, Point_Vector& lan
 int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<int>& landmarks_ind)
 {
   //********************Preface: origin point
+  clock_t start, end;
   int D = W[0].size();
   std::vector<FT> orig_vector;
   for (int i=0; i<D; i++)
@@ -383,6 +218,7 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
   */
   std::cout << "Enter (D+1) nearest landmarks\n";
   //std::cout << "Size of the tree is " << L.size() << std::endl;
+  start = clock();
   for (int i = 0; i < nbP; i++)
     {
       //std::cout << "Entered witness number " << i << std::endl;
@@ -416,7 +252,9 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
         }
     }
   //std::cout << "\n";
-  
+  end = clock();
+  std::cout << "Landmark choice for " << nbL << " landmarks took "
+            << (double)(end-start)/CLOCKS_PER_SEC << " s. \n";
   std::string out_file = "wl_result";
   write_wl(out_file,WL);
   
@@ -424,14 +262,19 @@ int landmark_perturbation(Point_Vector &W, Point_Vector& landmarks, std::vector<
   std::cout << "Entered witness complex construction\n";
   Witness_complex<> witnessComplex;
   witnessComplex.setNbL(nbL);
+  start = clock();
   witnessComplex.witness_complex(WL);
+  //
+  end = clock();
+  std::cout << "Howdy world! The process took "
+       << (double)(end-start)/CLOCKS_PER_SEC << " s. \n";
+  //witnessComplex.witness_complex(WL);
   /*
   if (witnessComplex.is_witness_complex(WL))
     std::cout << "!!YES. IT IS A WITNESS COMPLEX!!\n";
   else
     std::cout << "??NO. IT IS NOT A WITNESS COMPLEX??\n";   
   */ 
-  */
   //******************** Making a set of bad link landmarks
   std::cout << "Entered bad links\n";
   std::set< int > perturbL;
@@ -575,8 +418,8 @@ int main (int argc, char * const argv[])
       */
     }
   int bl = nbL, curr_min = bl;
-  write_points("landmarks/initial_pointset",point_vector);
-  write_points("landmarks/initial_landmarks",L);
+  //write_points("landmarks/initial_pointset",point_vector);
+  //write_points("landmarks/initial_landmarks",L);
   
   for (int i = 0; bl > 0; i++)
     //for (int i = 0; i < 1; i++)
@@ -585,7 +428,7 @@ int main (int argc, char * const argv[])
       bl=landmark_perturbation(point_vector, L, chosen_landmarks);
       if (bl < curr_min)
         curr_min=bl;
-      write_points("landmarks/landmarks0",L);
+      //write_points("landmarks/landmarks0",L);
     }
   //end = clock();
   

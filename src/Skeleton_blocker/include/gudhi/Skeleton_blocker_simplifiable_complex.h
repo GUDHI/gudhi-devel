@@ -223,7 +223,7 @@ void Skeleton_blocker_complex<SkeletonBlockerDS>::add_simplex(const Simplex_hand
 
   for (auto u_it = sigma.begin(); u_it != sigma.end(); ++u_it)
     for (auto v_it = u_it; ++v_it != sigma.end(); /**/) {
-      std::cout << "add edge" << *u_it << " " << *v_it << std::endl;
+      // std::cout << "add edge" << *u_it << " " << *v_it << std::endl;
       add_edge(*u_it, *v_it);
     }
   remove_blocker_include_in_simplex(sigma);
