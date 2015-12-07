@@ -19,14 +19,14 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SKELETON_BLOCKER_OFF_IO_H_
-#define SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SKELETON_BLOCKER_OFF_IO_H_
+#ifndef SKELETON_BLOCKER_SKELETON_BLOCKER_OFF_IO_H_
+#define SKELETON_BLOCKER_SKELETON_BLOCKER_OFF_IO_H_
+
+#include <gudhi/Off_reader.h>
 
 #include <string>
 #include <vector>
 #include <map>
-
-#include "gudhi/Off_reader.h"
 
 namespace Gudhi {
 
@@ -61,7 +61,7 @@ class Skeleton_blocker_off_flag_visitor_reader {
     if (!load_only_points_) {
       for (size_t i = 0; i < face.size(); ++i)
         for (size_t j = i + 1; j < face.size(); ++j) {
-          complex_.add_edge(Vertex_handle(face[i]), Vertex_handle(face[j]));
+          complex_.add_edge_without_blockers(Vertex_handle(face[i]), Vertex_handle(face[j]));
         }
     }
   }
@@ -76,12 +76,12 @@ template<typename Complex>
 class Skeleton_blocker_off_visitor_reader {
   Complex& complex_;
   typedef typename Complex::Vertex_handle Vertex_handle;
-  typedef typename Complex::Simplex_handle Simplex_handle;
+  typedef typename Complex::Simplex Simplex;
   typedef typename Complex::Point Point;
 
   const bool load_only_points_;
   std::vector<Point> points_;
-  std::vector<Simplex_handle> maximal_faces_;
+  std::vector<Simplex> maximal_faces_;
 
  public:
   explicit Skeleton_blocker_off_visitor_reader(Complex& complex, bool load_only_points = false) :
@@ -99,7 +99,7 @@ class Skeleton_blocker_off_visitor_reader {
 
   void maximal_face(const std::vector<int>& face) {
     if (!load_only_points_) {
-      Simplex_handle s;
+      Simplex s;
       for (auto x : face)
         s.add_vertex(Vertex_handle(x));
       maximal_faces_.emplace_back(s);
@@ -107,7 +107,7 @@ class Skeleton_blocker_off_visitor_reader {
   }
 
   void done() {
-    complex_ = make_complex_from_top_faces(maximal_faces_.begin(), maximal_faces_.end(),
+    complex_ = make_complex_from_top_faces<Complex>(maximal_faces_.begin(), maximal_faces_.end(),
                                            points_.begin(), points_.end() );
   }
 };
@@ -197,4 +197,4 @@ class Skeleton_blocker_off_writer {
 
 }  // namespace Gudhi
 
-#endif  // SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SKELETON_BLOCKER_OFF_IO_H_
+#endif  // SKELETON_BLOCKER_SKELETON_BLOCKER_OFF_IO_H_

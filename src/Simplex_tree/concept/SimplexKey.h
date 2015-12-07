@@ -22,7 +22,7 @@
 
  /** \brief Key type used as simplex identifier.
   *
-  * Must be <CODE>int</CODE>
+  * Must be a signed integer type.
   */
  struct SimplexKey {};
  

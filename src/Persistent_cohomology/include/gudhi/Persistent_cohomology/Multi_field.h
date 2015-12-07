@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SRC_PERSISTENT_COHOMOLOGY_INCLUDE_GUDHI_PERSISTENT_COHOMOLOGY_MULTI_FIELD_H_
-#define SRC_PERSISTENT_COHOMOLOGY_INCLUDE_GUDHI_PERSISTENT_COHOMOLOGY_MULTI_FIELD_H_
+#ifndef PERSISTENT_COHOMOLOGY_MULTI_FIELD_H_
+#define PERSISTENT_COHOMOLOGY_MULTI_FIELD_H_
 
 #include <gmpxx.h>
 
@@ -81,8 +81,7 @@ class Multi_field {
     // set m to primorial(bound_prime)
     prod_characteristics_ = 1;
     for (auto p : primes_) {
-      mpz_mul_ui(prod_characteristics_.get_mpz_t(),
-                 prod_characteristics_.get_mpz_t(), p);
+      prod_characteristics_ *= p;
     }
 
     // Uvect_
@@ -142,7 +141,7 @@ class Multi_field {
     return prod_characteristics_;
   }
 
-  /** Returns the inverse in the field. Modifies P.*/
+  /** Returns the inverse in the field. Modifies P. ??? */
   std::pair<Element, Element> inverse(Element x, Element QS) {
     Element QR;
     mpz_gcd(QR.get_mpz_t(), x.get_mpz_t(), QS.get_mpz_t());  // QR <- gcd(x,QS)
@@ -153,12 +152,12 @@ class Multi_field {
     mpz_invert(inv_qt.get_mpz_t(), x.get_mpz_t(), QT.get_mpz_t());
 
     assert(prod_characteristics_ > 0);  // division by zero + non negative values
-    return std::pair<Element, Element>(
-        (inv_qt * multiplicative_identity(QT)) % prod_characteristics_, QT);
+    return { (inv_qt * multiplicative_identity(QT)) % prod_characteristics_, QT };
   }
   /** Returns -x * y.*/
   Element times_minus(const Element& x, const Element& y) {
     assert(prod_characteristics_ > 0);  // division by zero + non negative values
+    /* This assumes that (x*y)%pc cannot be zero, but Field_Zp has specific code for the 0 case ??? */
     return prod_characteristics_ - ((x * y) % prod_characteristics_);
   }
 
@@ -183,4 +182,4 @@ class Multi_field {
 
 }  // namespace Gudhi
 
-#endif  // SRC_PERSISTENT_COHOMOLOGY_INCLUDE_GUDHI_PERSISTENT_COHOMOLOGY_MULTI_FIELD_H_
+#endif  // PERSISTENT_COHOMOLOGY_MULTI_FIELD_H_

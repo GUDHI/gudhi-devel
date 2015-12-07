@@ -19,13 +19,13 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SKELETON_BLOCKER_SIMPLE_GEOMETRIC_TRAITS_H_
-#define SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SKELETON_BLOCKER_SIMPLE_GEOMETRIC_TRAITS_H_
+#ifndef SKELETON_BLOCKER_SKELETON_BLOCKER_SIMPLE_GEOMETRIC_TRAITS_H_
+#define SKELETON_BLOCKER_SKELETON_BLOCKER_SIMPLE_GEOMETRIC_TRAITS_H_
+
+#include <gudhi/Skeleton_blocker/Skeleton_blocker_simple_traits.h>
 
 #include <string>
 #include <sstream>
-
-#include "gudhi/Skeleton_blocker/Skeleton_blocker_simple_traits.h"
 
 namespace Gudhi {
 
@@ -91,4 +91,4 @@ struct Skeleton_blocker_simple_geometric_traits :
 
 }  // namespace Gudhi
 
-#endif  // SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SKELETON_BLOCKER_SIMPLE_GEOMETRIC_TRAITS_H_
+#endif  // SKELETON_BLOCKER_SKELETON_BLOCKER_SIMPLE_GEOMETRIC_TRAITS_H_

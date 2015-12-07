@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_INDEXING_TAG_H_
-#define SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_INDEXING_TAG_H_
+#ifndef SIMPLEX_TREE_INDEXING_TAG_H_
+#define SIMPLEX_TREE_INDEXING_TAG_H_
 
 namespace Gudhi {
 
@@ -36,4 +36,4 @@ struct linear_indexing_tag {
 //  struct zigzag_indexing_tag {};
 }  // namespace Gudhi
 
-#endif  // SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_INDEXING_TAG_H_
+#endif  // SIMPLEX_TREE_INDEXING_TAG_H_

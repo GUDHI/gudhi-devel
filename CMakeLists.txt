@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.6)
 project(GUDHIdev)
 
+include(CMakeGUDHIVersion.txt)
+# Generate GUDHI official version file
+configure_file(GUDHIVersion.cmake.in "${PROJECT_BINARY_DIR}/GUDHIVersion.cmake" @ONLY)
+
 find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework chrono timer program_options thread REQUIRED)
 
 set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
@@ -23,7 +27,6 @@ set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME    OFF)
 
-find_package(Boost)
 #find_package(GMP)
 #if(GMP_FOUND)
 	#find_package(GMPXX)
@@ -67,9 +70,9 @@ else()
   LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})                      
 
   message(STATUS "boost include dirs:" ${Boost_INCLUDE_DIRS})
+  message(STATUS "boost library dirs:" ${Boost_LIBRARY_DIRS})
 
   include_directories(src/common/include/)
-  include_directories(src/Alpha_shapes/include/)
   include_directories(src/Bottleneck/include/)
   include_directories(src/Contraction/include/)
   include_directories(src/Hasse_complex/include/)
@@ -85,16 +88,20 @@ else()
   add_subdirectory(src/Skeleton_blocker/test) 
   add_subdirectory(src/Skeleton_blocker/example) 
   add_subdirectory(src/Contraction/example)
-  add_subdirectory(src/Hasse_complex/example)
+  # add_subdirectory(src/Hasse_complex/example)
   add_subdirectory(src/Witness_complex/test)
   add_subdirectory(src/Witness_complex/example)
-  add_subdirectory(src/Alpha_shapes/example)
-  add_subdirectory(src/Alpha_shapes/test)
+  # add_subdirectory(src/Alpha_shapes/example)
+  # add_subdirectory(src/Alpha_shapes/test)
   add_subdirectory(src/Bottleneck/example)
   add_subdirectory(src/Bottleneck/test)
 
   # data points generator
   add_subdirectory(data/points/generator)
+
+  # Please let GudhUI in last compilation position as QT is known to modify CMAKE_CXX_FLAGS
+  # GudhUI
+  add_subdirectory(src/GudhUI)
 
 endif()  
 

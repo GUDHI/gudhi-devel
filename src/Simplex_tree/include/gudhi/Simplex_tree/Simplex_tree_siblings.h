@@ -20,11 +20,12 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_SIMPLEX_TREE_SIBLINGS_H_
-#define SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_SIMPLEX_TREE_SIBLINGS_H_
+#ifndef SIMPLEX_TREE_SIMPLEX_TREE_SIBLINGS_H_
+#define SIMPLEX_TREE_SIMPLEX_TREE_SIBLINGS_H_
 
-#include "boost/container/flat_map.hpp"
-#include "Simplex_tree_node_explicit_storage.h"
+#include <gudhi/Simplex_tree/Simplex_tree_node_explicit_storage.h>
+
+#include <boost/container/flat_map.hpp>
 
 #include <utility>
 #include <vector>
@@ -71,14 +72,14 @@ class Simplex_tree_siblings {
   /* \brief Constructor with initialized set of members.
    *
    * 'members' must be sorted and unique.*/
-  Simplex_tree_siblings(Simplex_tree_siblings * oncles, Vertex_handle parent,
-                        const std::vector<std::pair<Vertex_handle, Node> > & members)
+  template<typename RandomAccessVertexRange>
+  Simplex_tree_siblings(Simplex_tree_siblings * oncles, Vertex_handle parent, const RandomAccessVertexRange & members)
       : oncles_(oncles),
         parent_(parent),
         members_(boost::container::ordered_unique_range, members.begin(),
                  members.end()) {
-    for (auto map_it = members_.begin(); map_it != members_.end(); map_it++) {
-      map_it->second.assign_children(this);
+    for (auto& map_el : members_) {
+      map_el.second.assign_children(this);
     }
   }
 
@@ -90,19 +91,12 @@ class Simplex_tree_siblings {
    * present in the node.
    */
   void insert(Vertex_handle v, Filtration_value filtration_value) {
-    typename Dictionary::iterator sh = members_.find(v);
-    if (sh != members_.end() && sh->second.filtration() > filtration_value) {
-      sh->second.assign_filtration(filtration_value);
-      return;
-    }
-    if (sh == members_.end()) {
-      members_.insert(
-          std::pair<Vertex_handle, Node>(v, Node(this, filtration_value)));
-      return;
-    }
+    auto ins = members_.emplace(v, Node(this, filtration_value));
+    if (!ins.second && filtration(ins.first) > filtration_value)
+      ins.first->second.assign_filtration(filtration_value);
   }
 
-  typename Dictionary::iterator find(Vertex_handle v) {
+  Dictionary_it find(Vertex_handle v) {
     return members_.find(v);
   }
 
@@ -110,7 +104,7 @@ class Simplex_tree_siblings {
     return oncles_;
   }
 
-  Vertex_handle parent() {
+  Vertex_handle parent() const {
     return parent_;
   }
 
@@ -118,7 +112,7 @@ class Simplex_tree_siblings {
     return members_;
   }
 
-  size_t size() {
+  size_t size() const {
     return members_.size();
   }
 
@@ -130,4 +124,4 @@ class Simplex_tree_siblings {
 /* @} */  // end addtogroup simplex_tree
 }  // namespace Gudhi
 
-#endif  // SRC_SIMPLEX_TREE_INCLUDE_GUDHI_SIMPLEX_TREE_SIMPLEX_TREE_SIBLINGS_H_
+#endif  // SIMPLEX_TREE_SIMPLEX_TREE_SIBLINGS_H_

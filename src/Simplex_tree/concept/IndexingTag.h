@@ -25,6 +25,6 @@
   * continuous maps to a cell complex, and compute its persistent
   * homology.
   *
-  * Must be linear_indexing_tag. 
+  * Must be `Gudhi::linear_indexing_tag`. 
   */
 struct IndexingTag {};

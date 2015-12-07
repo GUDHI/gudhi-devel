@@ -20,23 +20,28 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SRC_PERSISTENT_COHOMOLOGY_INCLUDE_GUDHI_PERSISTENT_COHOMOLOGY_H_
-#define SRC_PERSISTENT_COHOMOLOGY_INCLUDE_GUDHI_PERSISTENT_COHOMOLOGY_H_
+#ifndef PERSISTENT_COHOMOLOGY_H_
+#define PERSISTENT_COHOMOLOGY_H_
 
 #include <gudhi/Persistent_cohomology/Persistent_cohomology_column.h>
 #include <gudhi/Persistent_cohomology/Field_Zp.h>
+#include <gudhi/Simple_object_pool.h>
 
 #include <boost/tuple/tuple.hpp>
 #include <boost/intrusive/set.hpp>
 #include <boost/pending/disjoint_sets.hpp>
 #include <boost/intrusive/list.hpp>
-#include <boost/pool/object_pool.hpp>
 
 #include <map>
 #include <utility>
 #include <list>
 #include <vector>
 #include <set>
+#include <fstream>  // std::ofstream
+#include <limits>  // for numeric_limits<>
+#include <tuple>
+#include <algorithm>
+#include <string>
 
 namespace Gudhi {
 
@@ -229,9 +234,10 @@ class Persistent_cohomology {
       : cpx_(&cpx),
         dim_max_(cpx.dimension()),                       // upper bound on the dimension of the simplices
         coeff_field_(),                                  // initialize the field coefficient structure.
-        ds_rank_(cpx_->num_simplices()),                 // union-find
-        ds_parent_(cpx_->num_simplices()),               // union-find
-        ds_repr_(cpx_->num_simplices(), NULL),           // union-find -> annotation vectors
+        num_simplices_(cpx_->num_simplices()),           // num_simplices save to avoid to call thrice the function
+        ds_rank_(num_simplices_),                        // union-find
+        ds_parent_(num_simplices_),                      // union-find
+        ds_repr_(num_simplices_, NULL),                  // union-find -> annotation vectors
         dsets_(&ds_rank_[0], &ds_parent_[0]),            // union-find
         cam_(),                                          // collection of annotation vectors
         zero_cocycles_(),                                // union-find -> Simplex_key of creator for 0-homology
@@ -241,7 +247,7 @@ class Persistent_cohomology {
         column_pool_(),  // memory pools for the CAM
         cell_pool_() {
     Simplex_key idx_fil = 0;
-    for (auto & sh : cpx_->filtration_simplex_range()) {
+    for (auto sh : cpx_->filtration_simplex_range()) {
       cpx_->assign_key(sh, idx_fil);
       ++idx_fil;
       dsets_.make_set(cpx_->key(sh));
@@ -264,13 +270,10 @@ class Persistent_cohomology {
   }
 
   ~Persistent_cohomology() {
-// Clean the remaining columns in the matrix.
-    for (auto & cam_ref : cam_) {
-      cam_ref.col_.clear();
-    }
-// Clean the transversal lists
+    // Clean the transversal lists
     for (auto & transverse_ref : transverse_idx_) {
-      transverse_ref.second.row_->clear();
+      // Destruct all the cells
+      transverse_ref.second.row_->clear_and_dispose([&](Cell*p){p->~Cell();});
       delete transverse_ref.second.row_;
     }
   }
@@ -335,18 +338,18 @@ class Persistent_cohomology {
 
       if (ds_parent_[key] == key  // root of its tree
       && zero_cocycles_.find(key) == zero_cocycles_.end()) {
-        persistent_pairs_.push_back(
-            Persistent_interval(cpx_->simplex(key), cpx_->null_simplex(), coeff_field_.characteristic()));
+        persistent_pairs_.emplace_back(
+            cpx_->simplex(key), cpx_->null_simplex(), coeff_field_.characteristic());
       }
     }
     for (auto zero_idx : zero_cocycles_) {
-      persistent_pairs_.push_back(
-          Persistent_interval(cpx_->simplex(zero_idx.second), cpx_->null_simplex(), coeff_field_.characteristic()));
+      persistent_pairs_.emplace_back(
+          cpx_->simplex(zero_idx.second), cpx_->null_simplex(), coeff_field_.characteristic());
     }
 // Compute infinite interval of dimension > 0
     for (auto cocycle : transverse_idx_) {
-      persistent_pairs_.push_back(
-          Persistent_interval(cpx_->simplex(cocycle.first), cpx_->null_simplex(), cocycle.second.characteristics_));
+      persistent_pairs_.emplace_back(
+          cpx_->simplex(cocycle.first), cpx_->null_simplex(), cocycle.second.characteristics_);
     }
   }
 
@@ -386,8 +389,8 @@ class Persistent_cohomology {
       if (cpx_->filtration(cpx_->simplex(idx_coc_u))
           < cpx_->filtration(cpx_->simplex(idx_coc_v))) {  // Kill cocycle [idx_coc_v], which is younger.
         if (interval_length_policy(cpx_->simplex(idx_coc_v), sigma)) {
-          persistent_pairs_.push_back(
-              Persistent_interval(cpx_->simplex(idx_coc_v), sigma, coeff_field_.characteristic()));
+          persistent_pairs_.emplace_back(
+              cpx_->simplex(idx_coc_v), sigma, coeff_field_.characteristic());
         }
         // Maintain the index of the 0-cocycle alive.
         if (kv != idx_coc_v) {
@@ -401,8 +404,8 @@ class Persistent_cohomology {
         }
       } else {  // Kill cocycle [idx_coc_u], which is younger.
         if (interval_length_policy(cpx_->simplex(idx_coc_u), sigma)) {
-          persistent_pairs_.push_back(
-              Persistent_interval(cpx_->simplex(idx_coc_u), sigma, coeff_field_.characteristic()));
+          persistent_pairs_.emplace_back(
+              cpx_->simplex(idx_coc_u), sigma, coeff_field_.characteristic());
         }
         // Maintain the index of the 0-cocycle alive.
         if (ku != idx_coc_u) {
@@ -428,9 +431,12 @@ class Persistent_cohomology {
       std::map<Simplex_key, Arith_element> & map_a_ds, Simplex_handle sigma,
       int dim_sigma) {
     // traverses the boundary of sigma, keeps track of the annotation vectors,
-    // with multiplicity, in a map.
-    std::map<Column *, int> annotations_in_boundary;
-    std::pair<typename std::map<Column *, int>::iterator, bool> result_insert_bound;
+    // with multiplicity. We used to sum the coefficients directly in
+    // annotations_in_boundary by using a map, we now do it later.
+    typedef std::pair<Column *, int> annotation_t;
+    // Danger: not thread-safe!
+    static std::vector<annotation_t> annotations_in_boundary;
+    annotations_in_boundary.clear();
     int sign = 1 - 2 * (dim_sigma % 2);  // \in {-1,1} provides the sign in the
                                          // alternate sum in the boundary.
     Simplex_key key;
@@ -442,22 +448,29 @@ class Persistent_cohomology {
         // Find its annotation vector
         curr_col = ds_repr_[dsets_.find_set(key)];
         if (curr_col != NULL) {  // and insert it in annotations_in_boundary with multyiplicative factor "sign".
-          result_insert_bound = annotations_in_boundary.insert(std::pair<Column *, int>(curr_col, sign));
-          if (!(result_insert_bound.second)) {
-            result_insert_bound.first->second += sign;
-          }
+	  annotations_in_boundary.emplace_back(curr_col, sign);
         }
       }
       sign = -sign;
     }
+    // Place identical annotations consecutively so we can easily sum their multiplicities.
+    std::sort(annotations_in_boundary.begin(), annotations_in_boundary.end(),
+	[](annotation_t const& a, annotation_t const& b) { return a.first < b.first; });
+
     // Sum the annotations with multiplicity, using a map<key,coeff>
     // to represent a sparse vector.
     std::pair<typename std::map<Simplex_key, Arith_element>::iterator, bool> result_insert_a_ds;
 
-    for (auto ann_ref : annotations_in_boundary) {
-      if (ann_ref.second != coeff_field_.additive_identity()) {  // For all columns in the boundary,
-        for (auto cell_ref : ann_ref.first->col_) {  // insert every cell in map_a_ds with multiplicity
-          Arith_element w_y = coeff_field_.times(cell_ref.coefficient_, ann_ref.second);  // coefficient * multiplicity
+    for (auto ann_it = annotations_in_boundary.begin(); ann_it != annotations_in_boundary.end(); /**/) {
+      Column* col = ann_it->first;
+      int mult = ann_it->second;
+      while (++ann_it != annotations_in_boundary.end() && ann_it->first == col) {
+	mult += ann_it->second;
+      }
+      // The following test is just a heuristic, it is not required, and it is fine that is misses p == 0.
+      if (mult != coeff_field_.additive_identity()) {  // For all columns in the boundary,
+        for (auto cell_ref : col->col_) {  // insert every cell in map_a_ds with multiplicity
+          Arith_element w_y = coeff_field_.times(cell_ref.coefficient_, mult);  // coefficient * multiplicity
 
           if (w_y != coeff_field_.additive_identity()) {  // if != 0
             result_insert_a_ds = map_a_ds.insert(std::pair<Simplex_key, Arith_element>(cell_ref.key_, w_y));
@@ -525,8 +538,8 @@ class Persistent_cohomology {
                       Arith_element charac) {
     Simplex_key key = cpx_->key(sigma);
     // Create a column containing only one cell,
-    Column * new_col = column_pool_.construct(Column(key));
-    Cell * new_cell = cell_pool_.construct(Cell(key, x, new_col));
+    Column * new_col = column_pool_.construct(key);
+    Cell * new_cell = cell_pool_.construct(key, x, new_col);
     new_col->col_.push_back(*new_cell);
     // and insert it in the matrix, in constant time thanks to the hint cam_.end().
     // Indeed *new_col has the biggest lexicographic value because key is the
@@ -552,9 +565,9 @@ class Persistent_cohomology {
                        Arith_element charac) {
     // Create a finite persistent interval for which the interval exists
     if (interval_length_policy(cpx_->simplex(death_key), sigma)) {
-      persistent_pairs_.push_back(Persistent_interval(cpx_->simplex(death_key)  // creator
-          , sigma                                                               // destructor
-          , charac));                                                           // fields
+      persistent_pairs_.emplace_back(cpx_->simplex(death_key)  // creator
+          , sigma                                              // destructor
+          , charac);                                           // fields
     }
 
     auto death_key_row = transverse_idx_.find(death_key);  // Find the beginning of the row.
@@ -570,9 +583,8 @@ class Persistent_cohomology {
         Column * curr_col = row_cell_it->self_col_;
         ++row_cell_it;
         // Disconnect the column from the rows in the CAM.
-        for (auto col_cell_it = curr_col->col_.begin();
-            col_cell_it != curr_col->col_.end(); ++col_cell_it) {
-          col_cell_it->base_hook_cam_h::unlink();
+        for (auto& col_cell : curr_col->col_) {
+          col_cell.base_hook_cam_h::unlink();
         }
 
         // Remove the column from the CAM before modifying its value
@@ -587,9 +599,9 @@ class Persistent_cohomology {
           // Find whether the column obtained is already in the CAM
           result_insert_cam = cam_.insert(*curr_col);
           if (result_insert_cam.second) {  // If it was not in the CAM before: insertion has succeeded
-            for (auto col_cell_it = curr_col->col_.begin(); col_cell_it != curr_col->col_.end(); ++col_cell_it) {
+            for (auto& col_cell : curr_col->col_) {
               // re-establish the row links
-              transverse_idx_[col_cell_it->key_].row_->push_front(*col_cell_it);
+              transverse_idx_[col_cell.key_].row_->push_front(col_cell);
             }
           } else {  // There is already an identical column in the CAM:
             // merge two disjoint sets.
@@ -599,6 +611,8 @@ class Persistent_cohomology {
             Simplex_key key_tmp = dsets_.find_set(curr_col->class_key_);
             ds_repr_[key_tmp] = &(*(result_insert_cam.first));
             result_insert_cam.first->class_key_ = key_tmp;
+            // intrusive containers don't own their elements, we have to release them manually
+            curr_col->col_.clear_and_dispose([&](Cell*p){cell_pool_.destroy(p);});
             column_pool_.destroy(curr_col);  // delete curr_col;
           }
         }
@@ -694,7 +708,7 @@ class Persistent_cohomology {
   void output_diagram(std::ostream& ostream = std::cout) {
 
     cmp_intervals_by_length cmp(cpx_);
-    persistent_pairs_.sort(cmp);
+    std::sort(std::begin(persistent_pairs_), std::end(persistent_pairs_), cmp);
     bool has_infinity = std::numeric_limits<Filtration_value>::has_infinity;
     for (auto pair : persistent_pairs_) {
       // Special case on windows, inf is "1.#INF" (cf. unitary tests and R package TDA)
@@ -709,13 +723,11 @@ class Persistent_cohomology {
     }
   }
 
-  void write_output_diagram(std::string diagram_name)
-  {
-    std::ofstream           diagram_out(diagram_name.c_str());
-    cmp_intervals_by_length cmp( cpx_ );
-    persistent_pairs_.sort( cmp );
-    for(auto pair : persistent_pairs_)
-    {
+  void write_output_diagram(std::string diagram_name) {
+    std::ofstream diagram_out(diagram_name.c_str());
+    cmp_intervals_by_length cmp(cpx_);
+    std::sort(std::begin(persistent_pairs_), std::end(persistent_pairs_), cmp);
+    for (auto pair : persistent_pairs_) {
     diagram_out << cpx_->dimension(get<0>(pair)) << " "
           << cpx_->filtration(get<0>(pair)) << " "
           << cpx_->filtration(get<1>(pair)) << std::endl;
@@ -742,6 +754,7 @@ class Persistent_cohomology {
   Complex_ds * cpx_;
   int dim_max_;
   CoefficientField coeff_field_;
+  size_t num_simplices_;
 
   /*  Disjoint sets data structure to link the model of FilteredComplex
    * with the compressed annotation matrix.
@@ -760,11 +773,11 @@ class Persistent_cohomology {
   /*  Key -> row. */
   std::map<Simplex_key, cocycle> transverse_idx_;
   /* Persistent intervals. */
-  std::list<Persistent_interval> persistent_pairs_;
+  std::vector<Persistent_interval> persistent_pairs_;
   length_interval interval_length_policy;
 
-  boost::object_pool<Column> column_pool_;
-  boost::object_pool<Cell> cell_pool_;
+  Simple_object_pool<Column> column_pool_;
+  Simple_object_pool<Cell> cell_pool_;
 };
 
 /** @} */  // end defgroup persistent_cohomology
@@ -773,4 +786,4 @@ class Persistent_cohomology {
 
 }  // namespace Gudhi
 
-#endif  // SRC_PERSISTENT_COHOMOLOGY_INCLUDE_GUDHI_PERSISTENT_COHOMOLOGY_H_
+#endif  // PERSISTENT_COHOMOLOGY_H_

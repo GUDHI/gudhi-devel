@@ -1,7 +1,4 @@
-/*
- * Garland_heckbert.h
- *  Created on: Feb 10, 2015
- * This file is part of the Gudhi Library. The Gudhi library 
+/* This file is part of the Gudhi Library. The Gudhi library 
  *    (Geometric Understanding in Higher Dimensions) is a generic C++ 
  *    library for computational topology.
  *
@@ -28,12 +25,13 @@
 #ifndef GARLAND_HECKBERT_H_
 #define GARLAND_HECKBERT_H_
 
+#include <gudhi/Point.h>
+#include <gudhi/Edge_contraction.h>
+#include <gudhi/Skeleton_blocker.h>
+#include <gudhi/Off_reader.h>
+
 #include <boost/timer/timer.hpp>
 #include <iostream>
-#include "gudhi/Point.h"
-#include "gudhi/Edge_contraction.h"
-#include "gudhi/Skeleton_blocker.h"
-#include "gudhi/Off_reader.h"
 
 #include "Garland_heckbert/Error_quadric.h"
 
@@ -51,7 +49,6 @@ struct Geometry_trait {
  */
 struct Garland_heckbert_traits : public Skeleton_blocker_simple_geometric_traits<Geometry_trait> {
  public:
-
   struct Garland_heckbert_vertex : public Simple_geometric_vertex {
     Error_quadric<Geometry_trait::Point> quadric;
   };
@@ -68,6 +65,7 @@ typedef Skeleton_blocker_contractor<Complex> Complex_contractor;
  */
 class GH_placement : public Gudhi::contraction::Placement_policy<EdgeProfile> {
   Complex& complex_;
+
  public:
   typedef Gudhi::contraction::Placement_policy<EdgeProfile>::Placement_type Placement_type;
 
@@ -91,8 +89,8 @@ class GH_placement : public Gudhi::contraction::Placement_policy<EdgeProfile> {
  */
 class GH_cost : public Gudhi::contraction::Cost_policy<EdgeProfile> {
   Complex& complex_;
- public:
 
+ public:
   typedef Gudhi::contraction::Cost_policy<EdgeProfile>::Cost_type Cost_type;
 
   GH_cost(Complex& complex) : complex_(complex) { }
@@ -115,13 +113,13 @@ class GH_cost : public Gudhi::contraction::Cost_policy<EdgeProfile> {
  */
 class GH_visitor : public Gudhi::contraction::Contraction_visitor<EdgeProfile> {
   Complex& complex_;
- public:
 
+ public:
   GH_visitor(Complex& complex) : complex_(complex) { }
 
-  //Compute quadrics for every vertex v
-  //The quadric of v consists in the sum of quadric
-  //of every triangles passing through v weighted by its area
+  // Compute quadrics for every vertex v
+  // The quadric of v consists in the sum of quadric
+  // of every triangles passing through v weighted by its area
 
   void on_started(Complex & complex) override {
     for (auto v : complex.vertex_range()) {
@@ -147,11 +145,13 @@ class GH_visitor : public Gudhi::contraction::Contraction_visitor<EdgeProfile> {
 
 int main(int argc, char *argv[]) {
   if (argc != 4) {
-    std::cerr << "Usage " << argv[0] << " input.off output.off N to load the file input.off, contract N edges and save the result to output.off.\n";
+    std::cerr << "Usage " << argv[0] <<
+        " input.off output.off N to load the file input.off, contract N edges and save the result to output.off.\n";
     return EXIT_FAILURE;
   }
 
   Complex complex;
+  typedef Complex::Vertex_handle Vertex_handle;
 
   // load the points
   Skeleton_blocker_off_reader<Complex> off_reader(argv[1], complex);
@@ -160,8 +160,12 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
-  std::cout << "Load complex with " << complex.num_vertices() << " vertices" << std::endl;
+  if (!complex.empty() && !(complex.point(Vertex_handle(0)).dimension() == 3)) {
+    std::cerr << "Only points of dimension 3 are supported." << std::endl;
+    return EXIT_FAILURE;
+  }
 
+  std::cout << "Load complex with " << complex.num_vertices() << " vertices" << std::endl;
 
   int num_contractions = atoi(argv[3]);
 
@@ -172,23 +176,24 @@ int main(int argc, char *argv[]) {
                                 new GH_cost(complex),
                                 new GH_placement(complex),
                                 contraction::make_link_valid_contraction<EdgeProfile>(),
-                                new GH_visitor(complex)
-                                );
+                                new GH_visitor(complex));
 
   std::cout << "Contract " << num_contractions << " edges" << std::endl;
   contractor.contract_edges(num_contractions);
 
   std::cout << "Final complex has " <<
       complex.num_vertices() << " vertices, " <<
-      complex.num_edges() << " edges and" <<
+      complex.num_edges() << " edges and " <<
       complex.num_triangles() << " triangles." << std::endl;
 
-  //write simplified complex
+  // write simplified complex
   Skeleton_blocker_off_writer<Complex> off_writer(argv[2], complex);
 
   return EXIT_SUCCESS;
 }
 
+#endif  // GARLAND_HECKBERT_H_
 
 
-#endif /* GARLAND_HECKBERT_H_ */
+
+

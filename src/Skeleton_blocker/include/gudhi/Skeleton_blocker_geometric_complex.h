@@ -19,12 +19,12 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_GEOMETRIC_COMPLEX_H_
-#define SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_GEOMETRIC_COMPLEX_H_
+#ifndef SKELETON_BLOCKER_GEOMETRIC_COMPLEX_H_
+#define SKELETON_BLOCKER_GEOMETRIC_COMPLEX_H_
 
-#include "gudhi/Utils.h"
-#include "gudhi/Skeleton_blocker_complex.h"
-#include "gudhi/Skeleton_blocker/Skeleton_blocker_sub_complex.h"
+#include <gudhi/Utils.h>
+#include <gudhi/Skeleton_blocker_complex.h>
+#include <gudhi/Skeleton_blocker/Skeleton_blocker_sub_complex.h>
 
 namespace Gudhi {
 
@@ -46,7 +46,7 @@ public Skeleton_blocker_complex<SkeletonBlockerGeometricDS> {
   typedef typename SimplifiableSkeletonblocker::Vertex_handle Vertex_handle;
   typedef typename SimplifiableSkeletonblocker::Root_vertex_handle Root_vertex_handle;
   typedef typename SimplifiableSkeletonblocker::Edge_handle Edge_handle;
-  typedef typename SimplifiableSkeletonblocker::Simplex_handle Simplex_handle;
+  typedef typename SimplifiableSkeletonblocker::Simplex Simplex;
 
   typedef typename SimplifiableSkeletonblocker::Graph_vertex Graph_vertex;
 
@@ -77,23 +77,6 @@ public Skeleton_blocker_complex<SkeletonBlockerGeometricDS> {
     unsigned current = 0;
     for (auto point = points_begin; point != points_end; ++point)
       (*this)[Vertex_handle(current++)].point() = Point(point->begin(), point->end());
-  }
-
-  template<typename SimpleHandleOutputIterator, typename PointIterator>
-  friend Skeleton_blocker_geometric_complex make_complex_from_top_faces(
-                                                                        SimpleHandleOutputIterator simplex_begin,
-                                                                        SimpleHandleOutputIterator simplex_end,
-                                                                        PointIterator points_begin,
-                                                                        PointIterator points_end,
-                                                                        bool is_flag_complex = false) {
-    Skeleton_blocker_geometric_complex complex;
-    unsigned current = 0;
-    complex =
-        make_complex_from_top_faces<Skeleton_blocker_geometric_complex>(simplex_begin, simplex_end, is_flag_complex);
-    for (auto point = points_begin; point != points_end; ++point)
-      // complex.point(Vertex_handle(current++)) = Point(point->begin(),point->end());
-      complex.point(Vertex_handle(current++)) = Point(*point);
-    return complex;
   }
 
   /**
@@ -157,7 +140,7 @@ public Skeleton_blocker_complex<SkeletonBlockerGeometricDS> {
    * Constructs the link of 'simplex' with points coordinates.
    */
   Geometric_link link(Vertex_handle v) const {
-    Geometric_link link(*this, Simplex_handle(v));
+    Geometric_link link(*this, Simplex(v));
     // we now add the point info
     add_points_to_link(link);
     return link;
@@ -166,7 +149,7 @@ public Skeleton_blocker_complex<SkeletonBlockerGeometricDS> {
   /**
    * Constructs the link of 'simplex' with points coordinates.
    */
-  Geometric_link link(const Simplex_handle& simplex) const {
+  Geometric_link link(const Simplex& simplex) const {
     Geometric_link link(*this, simplex);
     // we now add the point info
     add_points_to_link(link);
@@ -189,13 +172,13 @@ public Skeleton_blocker_complex<SkeletonBlockerGeometricDS> {
    * Constructs the abstract link of v (without points coordinates).
    */
   Abstract_link abstract_link(Vertex_handle v) const {
-    return Abstract_link(*this, Simplex_handle(v));
+    return Abstract_link(*this, Simplex(v));
   }
 
   /**
    * Constructs the link of 'simplex' with points coordinates.
    */
-  Abstract_link abstract_link(const Simplex_handle& simplex) const {
+  Abstract_link abstract_link(const Simplex& simplex) const {
     return Abstract_link(*this, simplex);
   }
 
@@ -215,8 +198,27 @@ public Skeleton_blocker_complex<SkeletonBlockerGeometricDS> {
   }
 };
 
+
+template<typename SkeletonBlockerGeometricComplex, typename SimpleHandleOutputIterator, typename PointIterator>
+SkeletonBlockerGeometricComplex make_complex_from_top_faces(
+        SimpleHandleOutputIterator simplex_begin,
+        SimpleHandleOutputIterator simplex_end,
+        PointIterator points_begin,
+        PointIterator points_end,
+        bool is_flag_complex = false) {
+  typedef SkeletonBlockerGeometricComplex SBGC;
+  SkeletonBlockerGeometricComplex complex;
+  unsigned current = 0;
+  complex =
+    make_complex_from_top_faces<SBGC>(simplex_begin, simplex_end, is_flag_complex);
+  for (auto point = points_begin; point != points_end; ++point)
+    // complex.point(Vertex_handle(current++)) = Point(point->begin(),point->end());
+    complex.point(typename SBGC::Vertex_handle(current++)) = typename SBGC::Point(*point);
+  return complex;
+}
+
 }  // namespace skbl
 
 }  // namespace Gudhi
 
-#endif  // SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_GEOMETRIC_COMPLEX_H_
+#endif  // SKELETON_BLOCKER_GEOMETRIC_COMPLEX_H_

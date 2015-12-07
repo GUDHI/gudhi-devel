@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SKELETON_BLOCKER_SIMPLEX_H_
-#define SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SKELETON_BLOCKER_SIMPLEX_H_
+#ifndef SKELETON_BLOCKER_SKELETON_BLOCKER_SIMPLEX_H_
+#define SKELETON_BLOCKER_SKELETON_BLOCKER_SIMPLEX_H_
 
 #include <cassert>
 #include <iostream>
@@ -69,7 +69,9 @@ class Skeleton_blocker_simplex {
   }
 
   Skeleton_blocker_simplex(std::initializer_list<T>& list) {
-    for_each(list.begin(), list.end(), add_vertex);
+    std::for_each(list.begin(), list.end(), [&] (T const& elt) {
+      add_vertex(elt);
+    });
   }
 
   template<typename ... Args>
@@ -216,7 +218,7 @@ class Skeleton_blocker_simplex {
   }
 
   /**
-   * Returns the first vertex of the (oriented) simplex.
+   * Returns the first and smallest vertex of the simplex.
    *
    * Be careful : assumes the simplex is non-empty.
    */
@@ -226,7 +228,7 @@ class Skeleton_blocker_simplex {
   }
 
   /**
-   * Returns the last vertex of the (oriented) simplex.
+   * Returns the last and greatest vertex of the simplex.
    *
    * Be careful : assumes the simplex is non-empty.
    */
@@ -369,5 +371,4 @@ class Skeleton_blocker_simplex {
 
 }  // namespace Gudhi
 
-#endif  // SRC_SKELETON_BLOCKER_INCLUDE_GUDHI_SKELETON_BLOCKER_SKELETON_BLOCKER_SIMPLEX_H_
-
+#endif  // SKELETON_BLOCKER_SKELETON_BLOCKER_SIMPLEX_H_
