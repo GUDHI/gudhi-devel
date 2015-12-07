@@ -48,7 +48,5 @@ int main (int argc, char * const argv[])
   typeVectorVertex witness10 = {5,0,1,3,6,2,4}; KNN.push_back(witness10);
   typeVectorVertex witness11 = {5,6,1,0,2,3,4}; KNN.push_back(witness11);
   typeVectorVertex witness12 = {1,6,0,5,2,3,4}; KNN.push_back(witness12);
-  std::cout << "Let the carnage begin!\n";
   witnessComplex.witness_complex(KNN);
-  std::cout << "Howdy world!\n";
 }
