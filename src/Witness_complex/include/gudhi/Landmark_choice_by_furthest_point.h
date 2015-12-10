@@ -31,18 +31,22 @@
  *  \ingroup witness_complex
  */
 
-class Landmark_choice_by_random_point {
+class Landmark_choice_by_furthest_point {
 
+public:
+  
 /** 
  *  \brief Landmark choice strategy by iteratively adding the furthest witness from the
- *  current landmark set as the new landmark. It takes a random access range `points` and
+ *  current landmark set as the new landmark. 
+ *  \details It chooses nbL landmarks from a random access range `points` and
  *  writes {witness}*{closest landmarks} matrix in `knn`.
  */
 
     template <typename KNearestNeighbours,
               typename Point_random_access_range>
-    Landmark_choice_by_furthest_points(Point_random_access_range &points,
-                                            KNearestNeighbours &knn)
+    Landmark_choice_by_furthest_point(Point_random_access_range &points,
+                                      int nbL,
+                                      KNearestNeighbours &knn)
     {
       int nb_points = points.end() - points.begin();
       std::vector<std::vector<double>> wit_land_dist(nb_points, std::vector<double>());    // distance matrix witness x landmarks

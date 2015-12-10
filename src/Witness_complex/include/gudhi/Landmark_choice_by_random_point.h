@@ -33,18 +33,19 @@
 
 class Landmark_choice_by_random_point {
 
-
+public:
+  
     /** \brief Landmark choice strategy by taking random vertices for landmarks.
-     *  It takes a random access range points and outputs a matrix {witness}*{closest landmarks}
-     *  in knn.
+     *  \details It chooses nbL distinct landmarks from a random access range `points`
+     *  and outputs a matrix {witness}*{closest landmarks} in knn.
      */
     
     template <typename KNearestNeighbours,
               typename Point_random_access_range>                 
-    void landmark_choice_by_random_points(Point_random_access_range &points, KNearestNeighbours &knn)
+    Landmark_choice_by_random_point(Point_random_access_range &points, int nbL, KNearestNeighbours &knn)
     {
       int nbP = points.end() - points.begin();
-      std::set<int> &landmarks;
+      std::set<int> landmarks;
       int current_number_of_landmarks=0;                        // counter for landmarks 
 
       int chosen_landmark = rand()%nbP;
@@ -55,9 +56,10 @@ class Landmark_choice_by_random_point {
           landmarks.insert(chosen_landmark);
         }
 
-      int D = points.begin().size();
+      int dim = points.begin()->size();
       typedef std::pair<double,int> dist_i;
       typedef bool (*comp)(dist_i,dist_i);
+      knn = KNearestNeighbours(nbP);
       for (int points_i = 0; points_i < nbP; points_i++)
         {
           std::priority_queue<dist_i, std::vector<dist_i>, comp> l_heap([&](dist_i j1, dist_i j2){return j1.first > j2.first;});
@@ -68,7 +70,7 @@ class Landmark_choice_by_random_point {
               dist_i dist = std::make_pair(euclidean_distance(points[points_i],points[*landmarks_it]), landmarks_i);
               l_heap.push(dist);
             }
-          for (int i = 0; i < D+1; i++)
+          for (int i = 0; i < dim+1; i++)
             {
               dist_i dist = l_heap.top();
               knn[points_i].push_back(dist.second);

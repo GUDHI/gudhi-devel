@@ -26,21 +26,18 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-//#include <stdlib.h>
 
-//#include "gudhi/graph_simplicial_complex.h"
+#include "gudhi/Simplex_tree.h"
 #include "gudhi/Witness_complex.h"
+#include "gudhi/Landmark_choice_by_random_point.h"
 #include "gudhi/reader_utils.h"
-//#include <boost/filesystem.hpp>
 
 using namespace Gudhi;
-//using namespace boost::filesystem;
 
 typedef std::vector< Vertex_handle > typeVectorVertex;
 typedef std::vector< std::vector <double> > Point_Vector;
-//typedef std::pair<typeVectorVertex, Filtration_value> typeSimplex;
-//typedef std::pair< Simplex_tree<>::Simplex_handle, bool > typePairSimplexBool;
 
+typedef Witness_complex< Simplex_tree<> > WitnessComplex;
 
 /**
  * \brief Customized version of read_points
@@ -69,15 +66,15 @@ read_points_cust ( std::string file_name , std::vector< std::vector< double > > 
   in_file.close();
 }
 
-void write_wl( std::string file_name, std::vector< std::vector <int> > & WL)
+/** Write a gnuplot readable file.
+ *  Data range is a random access range of pairs (arg, value)
+ */
+template < typename Data_range >
+void write_data( Data_range & data, std::string filename )
 {
-  std::ofstream ofs (file_name, std::ofstream::out);
-  for (auto w : WL)
-    {
-      for (auto l: w)
-        ofs << l << " ";
-      ofs << "\n";
-    }
+  std::ofstream ofs(filename, std::ofstream::out);
+  for (auto entry: data)
+    ofs << entry.first << ", " << entry.second << "\n";
   ofs.close();
 }
 
@@ -89,68 +86,33 @@ int main (int argc, char * const argv[])
                 << " path_to_point_file nbL \n";
       return 0;
     }
-  /*
-  boost::filesystem::path p;
 
-  for (; argc > 2; --argc, ++argv)
-    p /= argv[1];
-  */
   std::string file_name   = argv[1];
   int nbL       = atoi(argv[2]);
-  
   clock_t start, end;
-  //Construct the Simplex Tree
-  Witness_complex<> witnessComplex;
- 
-  std::cout << "Let the carnage begin!\n";
+
+  // Construct the Simplex Tree
+  Simplex_tree<> simplex_tree;
+
+  // Read the point file
   Point_Vector point_vector;
   read_points_cust(file_name, point_vector);
-  //std::cout << "Successfully read the points\n";
-  witnessComplex.setNbL(nbL);
-  //  witnessComplex.witness_complex_from_points(point_vector);
-  std::vector<std::vector< int > > WL;
-  std::set<int> L;
+  std::cout << "Successfully read " << point_vector.size() << " points.\n";
+  std::cout << "Ambient dimension is " << point_vector[0].size() << ".\n";
+
+  // Choose landmarks
   start = clock();
-  //witnessComplex.landmark_choice_by_furthest_points(point_vector, point_vector.size(), WL);
-  witnessComplex.landmark_choice_by_random_points(point_vector, point_vector.size(), L);
-  witnessComplex.nearest_landmarks(point_vector,L,WL);
+  std::vector<std::vector< int > > knn;
+  Landmark_choice_by_random_point(point_vector, nbL, knn);
   end = clock();
   std::cout << "Landmark choice for " << nbL << " landmarks took "
             << (double)(end-start)/CLOCKS_PER_SEC << " s. \n";
-  // Write the WL matrix in a file
-  mkdir("output", S_IRWXU);
-  const size_t last_slash_idx = file_name.find_last_of("/");
-  if (std::string::npos != last_slash_idx)
-    {
-      file_name.erase(0, last_slash_idx + 1);
-    }
-  std::string out_file = "output/"+file_name+"_"+argv[2]+".wl";
-  write_wl(out_file,WL);
+  
+  // Compute witness complex
   start = clock();
-  witnessComplex.witness_complex(WL);
-  //
+  WitnessComplex(knn, simplex_tree, nbL, point_vector[0].size());
   end = clock();
-  std::cout << "Howdy world! The process took "
+  std::cout << "Witness complex took "
        << (double)(end-start)/CLOCKS_PER_SEC << " s. \n";
-  /*
-  char buffer[100];
-  int i = sprintf(buffer,"%s_%s_result.txt",argv[1],argv[2]);
-  if (i >= 0)
-    {
-      std::string out_file = (std::string)buffer;
-      std::ofstream ofs (out_file, std::ofstream::out);
-      witnessComplex.st_to_file(ofs);
-      ofs.close();
-    }
-  */
 
-  out_file = "output/"+file_name+"_"+argv[2]+".stree";
-  std::ofstream ofs (out_file, std::ofstream::out);
-  witnessComplex.st_to_file(ofs);
-  ofs.close();
-
-  out_file = "output/"+file_name+"_"+argv[2]+".badlinks";
-  std::ofstream ofs2(out_file, std::ofstream::out);
-  witnessComplex.write_bad_links(ofs2);
-  ofs2.close();
 }

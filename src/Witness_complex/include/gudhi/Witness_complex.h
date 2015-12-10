@@ -73,10 +73,11 @@ namespace Gudhi {
       
     typedef std::vector< double > Point_t;
     typedef std::vector< Point_t > Point_Vector;
-    
+
+    typedef typename Simplicial_complex::Filtration_value Filtration_value;
     typedef std::vector< Vertex_handle > typeVectorVertex;
     typedef std::pair< typeVectorVertex, Filtration_value> typeSimplex;
-    typedef std::pair< Simplex_tree<>::Simplex_handle, bool > typePairSimplexBool;
+    typedef std::pair< Simplex_handle, bool > typePairSimplexBool;
     
     typedef int Witness_id;
     typedef int Landmark_id;
@@ -204,11 +205,12 @@ namespace Gudhi {
   public:
     
     /**
-     *  \brief Verification if every simplex in the complex is witnessed.
+     *  \brief Verification if every simplex in the complex is witnessed by witnesses in knn.
+     *  \param print_output =true will print the witnesses for each simplex
      *  \remark Added for debugging purposes.
      */
     template< class KNearestNeighbors >
-    bool is_witness_complex(KNearestNeighbors & knn)
+    bool is_witness_complex(KNearestNeighbors & knn, bool print_output)
     {
       //bool final_result = true;
       for (Simplex_handle sh: sc.complex_simplex_range())
@@ -231,19 +233,25 @@ namespace Gudhi {
               if (has_vertices)
                 {
                   is_witnessed = true;
-                  std::cout << "The simplex ";
-                  print_vector(simplex);
-                  std::cout << " is witnessed by the witness ";
-                  print_vector(w);
-                  std::cout << std::endl;
+                  if (print_output)
+                    {
+                      std::cout << "The simplex ";
+                      print_vector(simplex);
+                      std::cout << " is witnessed by the witness ";
+                      print_vector(w);
+                      std::cout << std::endl;
+                    }
                   break;
                 }
             }
           if (!is_witnessed)
             {
-              std::cout << "The following simplex is not witnessed ";
-              print_vector(simplex);
-              std::cout << std::endl;
+              if (print_output)
+                {
+                  std::cout << "The following simplex is not witnessed ";
+                  print_vector(simplex);
+                  std::cout << std::endl;
+                }
               assert(is_witnessed);
               return false;
             }
