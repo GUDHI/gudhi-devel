@@ -67,16 +67,10 @@ public:
     * Constructor of a counter class. It takes as the input beginn and end vector. 
     * It assumes that begin vector is lexicographically below the end vector.
     **/
-	counter(std::vector< unsigned >& beginn , std::vector< unsigned >& endd)
+	counter(std::vector< unsigned >& beginn , std::vector< unsigned >& endd):begin(beginn),end(endd),current(endd.size(),0)
 	{
 	    if ( beginn.size() != endd.size() )
 		throw "In constructor of a counter, begin and end vectors do not have the same size. Program terminate";
-	    for ( size_t i = 0 ; i != endd.size() ; ++i )
-        {
-            this->current.push_back(0);
-            this->begin.push_back(0);
-            this->end.push_back( endd[i] );
-        }
 	}
 
     /**

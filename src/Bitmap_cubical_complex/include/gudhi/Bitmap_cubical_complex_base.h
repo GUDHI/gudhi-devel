@@ -30,7 +30,7 @@
 #include <algorithm>
 #include <iterator>
 #include <limits>
-#include "counter.h"
+#include "Bitmap_cubical_complex/counter.h"
 
 
 using namespace std;
@@ -182,11 +182,9 @@ public:
         public:
             Top_dimensional_cells_iterator( Bitmap_cubical_complex_base& b ):b(b)
             {
-                for ( size_t i = 0 ; i != b.dimension() ; ++i )
-                {
-                    this->counter.push_back(0);
-                }
-            }
+		   this->counter = std::vector<size_t>(b.dimension());
+		   std::fill( this->counter.begin() , this->counter.end() , 0 );
+	     }                                    
             Top_dimensional_cells_iterator operator++()
             {
                 //first find first element of the counter that can be increased:
@@ -264,7 +262,7 @@ public:
             }
             friend class Bitmap_cubical_complex_base;
         protected:
-            std::vector< unsigned > counter;
+            std::vector< size_t > counter;
             Bitmap_cubical_complex_base& b;
     };
     Top_dimensional_cells_iterator top_dimensional_cells_begin()
@@ -478,12 +476,16 @@ std::vector< size_t > Bitmap_cubical_complex_base<T>::get_boundary_of_a_cell( si
         getchar();
     }
 
-    std::vector< size_t > boundary_elements;
+    std::vector< size_t > boundary_elements( 2*dimensions_in_which_cell_has_nonzero_length.size() );
     if ( dimensions_in_which_cell_has_nonzero_length.size() == 0 )return boundary_elements;
     for ( size_t i = 0 ; i != dimensions_in_which_cell_has_nonzero_length.size() ; ++i )
     {
-        boundary_elements.push_back( cell - multipliers[ dimensions_in_which_cell_has_nonzero_length[i] ] );
-        boundary_elements.push_back( cell + multipliers[ dimensions_in_which_cell_has_nonzero_length[i] ] );
+        //boundary_elements.push_back( cell - multipliers[ dimensions_in_which_cell_has_nonzero_length[i] ] );
+        //boundary_elements.push_back( cell + multipliers[ dimensions_in_which_cell_has_nonzero_length[i] ] );
+        boundary_elements[2*i] = cell - multipliers[ dimensions_in_which_cell_has_nonzero_length[i] ];
+        boundary_elements[2*i+1] = cell + multipliers[ dimensions_in_which_cell_has_nonzero_length[i] ];
+
+
 
         if (bdg) cerr << "multipliers[dimensions_in_which_cell_has_nonzero_length[i]] : " 
         << multipliers[dimensions_in_which_cell_has_nonzero_length[i]] << endl;

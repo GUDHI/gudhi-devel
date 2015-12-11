@@ -59,16 +59,13 @@ lexicographical order. See CubicalOneSphere.txt or CubicalTwoSphere.txt for exam
 
     Bitmap_cubical_complex<double> b( argv[1] );
 
-
     // Compute the persistence diagram of the complex
     persistent_cohomology::Persistent_cohomology< Bitmap_cubical_complex<double>, Field_Zp > pcoh(b);
     pcoh.init_coefficients( p ); //initilizes the coefficient field for homology
     pcoh.compute_persistent_cohomology( min_persistence );
-
-
     stringstream ss;
     ss << argv[1] << "_persistence";
-    std::ofstream out((char*)ss.str().c_str());
+    std::ofstream out(ss.str().c_str());
     pcoh.output_diagram(out);
     out.close();
 
