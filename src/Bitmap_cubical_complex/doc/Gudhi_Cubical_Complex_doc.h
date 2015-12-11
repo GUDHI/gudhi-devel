@@ -102,5 +102,6 @@ namespace Cubical_complex
 *\end{verbatim}
 *
 *
+*@}//end of the group
 }
 }
