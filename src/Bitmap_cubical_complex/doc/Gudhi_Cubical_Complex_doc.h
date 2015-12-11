@@ -38,70 +38,65 @@ namespace Cubical_complex
 
 *Cubical complex is an example of a structured complex useful in computational mathematics (specially rigorous numerics) and image analysis. The presented implementation of cubical complexes is based on the following definition.
 *
-* An \emph{elementary interval} is an interval of a form $[n,n+1]$, or $[n,n]$, for $n \in \mathcal{Z}$. The first one is called \emph{non-degenerated}, while the second one is \emph{degenerated} interval. A \emph{boundary of a elementary
-*interval} is a chain  $\partial [n,n+1] = [n+1,n+1]-[n,n]$ in case of non-degenerated elementary interval and $\partial [n,n] = 0$ in case of degenerated elementary interval. An \emph{elementary cube} $C$ is a
-*product of elementary intervals, $C=I_1 \times \ldots \times I_n$. \emph{Embedding dimension} of a cube is n, the number of elementary intervals (degenerated or not) in the product. A \emph{dimension of a cube} $C=I_1 \times ... \times I_n$ is the
-*number of non degenerated elementary intervals in the product. A \emph{boundary of a cube} $C=I_1 \times \ldots \times I_n$ is a chain obtained in the following way:
-*\[\partial C = (\partial I_1 \times \ldots \times I_n) + (I_1 \times \partial I_2 \times \ldots \times I_n) + \ldots + (I_1 \times I_2 \times \ldots \times \partial I_n).\]
-*A \emph{cubical complex} $\mathcal{K}$ is a collection of cubes closed under operation of taking boundary (i.e. boundary of every cube from the collection is in the collection). A cube $C$ in cubical complex $\mathcal{K}$ is \emph{maximal} if it is not in
-*a boundary of any other cube in $\mathcal{K}$. A \emph{support} of a cube $C$ is the set in $\mathbb{R}^n$ occupied by $C$ ($n$ is the embedding dimension of $C$).
+* An <em>elementary interval</em> is an interval of a form \f$ [n,n+1] \f$, or \f$[n,n]\f$, for \f$ n \in \mathcal{Z} \f$. The first one is called <em>non-degenerated</em>, while the second one is \a degenerated interval. A <em>boundary of a elementary
+*interval</em> is a chain  \f$\partial [n,n+1] = [n+1,n+1]-[n,n] \f$ in case of non-degenerated elementary interval and \f$\partial [n,n] = 0 \f$ in case of degenerated elementary interval. An <em>elementary cube</em> \f$ C \f$ is a
+
+*product of elementary intervals, \f$C=I_1 \times \ldots \times I_n\f$. <em>Embedding dimension</em> of a cube is n, the number of elementary intervals (degenerated or not) in the product. A <em>dimension of a cube</em> \f$C=I_1 \times ... \times I_n\f$ is the
+*number of non degenerated elementary intervals in the product. A <em>boundary of a cube</em> \f$C=I_1 \times \ldots \times I_n\f$ is a chain obtained in the following way:
+*\f[\partial C = (\partial I_1 \times \ldots \times I_n) + (I_1 \times \partial I_2 \times \ldots \times I_n) + \ldots + (I_1 \times I_2 \times \ldots \times \partial I_n).\f]
+*A <em>cubical complex</em> \f$\mathcal{K}\f$ is a collection of cubes closed under operation of taking boundary (i.e. boundary of every cube from the collection is in the collection). A cube \f$C\f$ in cubical complex \f$\mathcal{K}\f$ is <em>maximal</em> if it is not in
+*a boundary of any other cube in \f$\mathcal{K}\f$. A \a support of a cube \f$C\f$ is the set in \f$\mathbb{R}^n\f$ occupied by \f$C\f$ (\f$n\f$ is the embedding dimension of \f$C\f$).
 *
 *Cubes may be equipped with a filtration values in which case we have filtered cubical complex. All the cubical complexes considered in this implementation are filtered cubical complexes (although, the range of a filtration may be a set of two elements).
 *
-*For further details and theory of cubical complexes, please consult a book:\\
-*Computational homology, by Tomasz Kaczynski, Konstantin Mischaikow, and Marion Mrozek, Appl. Math. Sci., vol. 157, Springer-Verlag, New York, 2004
+*For further details and theory of cubical complexes, please consult \cite kaczynski2004computational .
 *
-*as well as the paper:
-*Efficient computation of persistent homology for cubical data by Hubert Wagner, Chao Chen, Erald Vuçini (published in the proceedings of Workshop on Topology-based Methods in Data
-*Analysis and Visualization)
+*as well as the following paper \cite peikert2012topological .
 *
-*\section{Data structure.}
+*\section datastructure Data structure.
 *
-*The implementation of Cubical complex provides a representation of complexes that occupy a rectangular region in $\mathbb{R}^n$. This extra
-*assumption allows for a memory efficient way of storing cubical complexes in a form of so called bitmaps. Let $R = [b_1,e_1] \times \ldots \times [b_n,e_n]$, for $b_1,...b_n,e_1,...,e_n \in \mathbb{Z}$
-*, $b_i \leq d_i$ be the considered rectangular region and let $\mathcal{K}$ be a filtered cubical complex having the rectangle $R$ as its support. Note that the structure of the coordinate system gives a way
-*a lexicographical ordering of cells of $\mathcal{K}$. This ordering is a base of the presented bitmap-based implementation. In this implementation, the whole cubical complex is stored as a vector
-*of the values of filtration. This, together with dimension of $\mathcal{K}$ and the sizes of $\mathcal{K}$ in all directions, allows to determine, dimension, neighborhood, boundary and coboundary of every cube $C \in \mathcal{K}$.
+*The implementation of Cubical complex provides a representation of complexes that occupy a rectangular region in \f$\mathbb{R}^n\f$. This extra
+*assumption allows for a memory efficient way of storing cubical complexes in a form of so called bitmaps. Let \f$R = [b_1,e_1] \times \ldots \times [b_n,e_n]\f$, for \f$b_1,...b_n,e_1,...,e_n \in \mathbb{Z}\f$
+*, \f$b_i \leq d_i\f$ be the considered rectangular region and let \f$\mathcal{K}\f$ be a filtered cubical complex having the rectangle \f$R\f$ as its support. Note that the structure of the coordinate system gives a way
+*a lexicographical ordering of cells of \f$\mathcal{K}\f$. This ordering is a base of the presented bitmap-based implementation. In this implementation, the whole cubical complex is stored as a vector
+*of the values of filtration. This, together with dimension of \f$\mathcal{K}\f$ and the sizes of \f$\mathcal{K}\f$ in all directions, allows to determine, dimension, neighborhood, boundary and coboundary of every cube \f$C \in \mathcal{K}\f$.
 *
-*\image html "bitmapAllCubes.pdf" "Cubical complex in $\mathbb{R}^2".
+*\image html "bitmapAllCubes.png" "Cubical complex.
 *
-*Note that the cubical complex in the figure above is, in a natural way, a product of one dimensional cubical complexes in $\mathbb{R}$. The number of all cubes in each direction is
-*equal $2n+1$, where $n$ is the number of maximal cubes in the considered direction. Let us consider a cube at the position $k$ in the bitmap. Knowing the sizes of the bitmap,
-*by a series of modulo operation, we can determine which elementary intervals are present in the product that gives the cube $C$. In a similar way, we can compute boundary
+*Note that the cubical complex in the figure above is, in a natural way, a product of one dimensional cubical complexes in \f$\mathbb{R}\f$. The number of all cubes in each direction is
+*equal \f$2n+1\f$, where \f$n\f$ is the number of maximal cubes in the considered direction. Let us consider a cube at the position \f$k\f$ in the bitmap. Knowing the sizes of the bitmap,
+*by a series of modulo operation, we can determine which elementary intervals are present in the product that gives the cube \f$C\f$. In a similar way, we can compute boundary
 *and the coboundary of each cube. Further details can be found in the literature.
 *
-*\section{Input Format.}
+*\section inputformat Input Format.
 *
 *In the current implantation, filtration is given at the maximal cubes, and it is then extended by the lower star filtration to all cubes. There are a number of constructors
-*that can be used to construct cubical complex by users who want to use the code directly. They can be found in the \emph{Bitmap\_cubical\_complex} class.
-*Currently one input from a text file is used. It uses a format used already in Perseus software $(http://www.sas.upenn.edu/~vnanda/perseus/)$ by Vidit Nanda.
+*that can be used to construct cubical complex by users who want to use the code directly. They can be found in the \a Bitmap_cubical_complex class.
+*Currently one input from a text file is used. It uses a format used already in Perseus software (http://www.sas.upenn.edu/~vnanda/perseus/) by Vidit Nanda.
 *Below we are providing a description of the format.
 *
-*\begin{enumerate}
-*\item The first line of the file is $d$, the embedding dimension of a complex.
-*\item The next $d$ lines consist of positive numbers being the numbers of top dimensional cubes in the given direction. Let us call those numbers $n_1,\ldots,n_d$.
-*\item Later there is a sequence of $n_1 \dot \ldots \dot n_d$ numbers in a lexicographical ordering. Those numbers are filtrations of top dimensional cubes.
-*\end{enumerate}
 *
-*\image html "exampleBitmap.pdf" "Example of a input data."
+*\image html "exampleBitmap.png" "Example of a input data."
 *
 *The input file for the following complex is:
-*\begin{verbatim}
-*2
-*3
-*3
-*1
-*2
-*3
-*8
-*20
-*4
-*7
-*6
-*5
-*\end{verbatim}
-*
-*
+*\verbatim
+2
+3
+3
+1
+2
+3
+8
+20
+4
+7
+6
+5
+\endverbatim
+
+*/
+/** @} */  // end defgroup cubical_complex
+
 *@}//end of the group
 }
 }
