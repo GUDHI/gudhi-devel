@@ -30,21 +30,13 @@ int main(int argc, char **argv) {
   // Init of a list of points
   // ----------------------------------------------------------------------------
   Vector_of_points points;
-
-  std::vector<double> coords = { 1.0, 1.0 };
-  points.push_back(Point(coords.begin(), coords.end()));
-  coords = { 7.0, 0.0 };
-  points.push_back(Point(coords.begin(), coords.end()));
-  coords = { 4.0, 6.0 };
-  points.push_back(Point(coords.begin(), coords.end()));
-  coords = { 9.0, 6.0 };
-  points.push_back(Point(coords.begin(), coords.end()));
-  coords = { 0.0, 14.0 };
-  points.push_back(Point(coords.begin(), coords.end()));
-  coords = { 2.0, 19.0 };
-  points.push_back(Point(coords.begin(), coords.end()));
-  coords = { 9.0, 17.0 };
-  points.push_back(Point(coords.begin(), coords.end()));
+  points.push_back(Point(1.0, 1.0));
+  points.push_back(Point(7.0, 0.0));
+  points.push_back(Point(4.0, 6.0));
+  points.push_back(Point(9.0, 6.0));
+  points.push_back(Point(0.0, 14.0));
+  points.push_back(Point(2.0, 19.0));
+  points.push_back(Point(9.0, 17.0));
 
   // ----------------------------------------------------------------------------
   // Init of an alpha complex from the list of points

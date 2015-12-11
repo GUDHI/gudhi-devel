@@ -530,7 +530,7 @@ class Simplex_tree {
     return dimension_;
   }
 
-  /** \brief Returns true iff the node in the simplex tree pointed by
+  /** \brief Returns true if the node in the simplex tree pointed by
    * sh has children.*/
   bool has_children(Simplex_handle sh) const {
     return (sh->second.children()->parent() == sh->first);
@@ -1134,7 +1134,6 @@ class Simplex_tree {
       if (sh->second.filtration() < upper_filtration) {
         // Store the filtration modification information
         modified = true;
-        std::cout << "modified" << std::endl;
         sh->second.assign_filtration(upper_filtration);
       }
       if (has_children(sh)) {
@@ -1154,21 +1153,51 @@ class Simplex_tree {
    * call `initialize_filtration()` to recompute it.
    */
   void prune_above_filtration(Filtration_value filtration) {
-    if (filtration < threshold_) {
-      threshold_ = filtration;
-      // Initialize filtration_vect_ if required
-      if (filtration_vect_.empty()) {
-        initialize_filtration();
-      }
+std::cout << "prune_above_filtration - filtration=" << filtration << std::endl;
+    // No action if filtration is not stored
+    if (Options::store_filtration) {
+      if (filtration < threshold_) {
+        threshold_ = filtration;
+        // Initialize filtration_vect_ if required
+        if (filtration_vect_.empty()) {
+std::cout << "prune_above_filtration - initialize_filtration" << std::endl;
+          initialize_filtration();
+        }
+
+std::cout << "prune_above_filtration - after initialize_filtration ";
+for(auto sh : filtration_vect_) {
+for (auto vertex : simplex_vertex_range(sh)) {
+std::cout << (int) vertex << ", ";
+}
+std::cout <<  " - filtration=" << sh->second.filtration() <<  " - " << &(sh->second) << std::endl;
+}
     
-      // Loop in reverse mode until threshold is reached
-      auto f_simplex = filtration_vect_.rbegin();
-      for (; f_simplex != filtration_vect_.rend() && ((*f_simplex)->second.filtration() > threshold_); f_simplex++) {
-        remove_maximal_simplex(*f_simplex);
+        
+        // Loop in reverse mode until threshold is reached
+        auto f_simplex = filtration_vect_.rbegin();
+        for (; (f_simplex != filtration_vect_.rend()) && ((*f_simplex)->second.filtration() > threshold_); f_simplex++) {
+          
+std::cout << "prune_above_filtration - remove ";
+for (auto vertex : simplex_vertex_range(*f_simplex)) {
+std::cout << (int) vertex << ", ";
+}
+std::cout <<  " - " << &((*f_simplex)->second) << std::endl;
+
+          remove_maximal_simplex(*f_simplex);
+        }
+std::cout << "prune_above_filtration - remove STOPPED ON ";
+for (auto vertex : simplex_vertex_range(*f_simplex)) {
+std::cout << (int) vertex << ", ";
+}
+std::cout <<  " - filtration=" << (*f_simplex)->second.filtration() <<  " - " << &(*f_simplex->second) << std::endl;
+        if (f_simplex != filtration_vect_.rbegin()) {
+          // Do not forget to update filtration_vect_ - resize is enough
+          std::size_t new_size = filtration_vect_.size() - (f_simplex - filtration_vect_.rbegin());
+std::cout << "prune_above_filtration - resize" << new_size << std::endl;
+          filtration_vect_.resize(new_size);
+        }
+
       }
-      // Do not forget to update filtration_vect_ - resize is enough
-      std::size_t new_size = filtration_vect_.size() - (f_simplex - filtration_vect_.rbegin());
-      filtration_vect_.resize(new_size);
     }
   }
 
@@ -1187,14 +1216,46 @@ class Simplex_tree {
     if ((child->size() > 1) || (child == root())) {
       // Not alone, just remove it from members
       // Special case when child is the root of the simplex tree, just remove it from members
-      child->members().erase(sh->first);
+std::cout << "remove_maximal_simplex - members removal" << std::endl;
+      child->erase(sh->first);
     } else {
       // Sibling is emptied : must be deleted, and its parent must point on his own Sibling
+std::cout << "remove_maximal_simplex - members is empty" << std::endl;
       child->oncles()->members().at(child->parent()).assign_children(child->oncles());
       delete child;
     }
   }
-  
+/***************************************************************************************************************/  
+   public:
+  /** \brief Prints the simplex_tree hierarchically. 
+   * Since it prints the vertices recursively, one can watch its tree shape.
+   */
+  void print_tree() {
+    for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh) {
+      std::cout << sh->first << " ";
+      if (has_children(sh)) {
+        std::cout << "(";
+        rec_print(sh->second.children());
+        std::cout << ")";
+      }
+      std::cout << std::endl;
+    }
+  }
+
+
+  /** \brief Recursively prints the simplex_tree, using depth first search. */
+ private:
+  void rec_print(Siblings * sib) {
+    for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh) {
+      std::cout << " " << sh->first << " ";
+      if (has_children(sh)) {
+        std::cout << "(";
+        rec_print(sh->second.children());
+        std::cout << ")";
+      }
+    }
+  }
+/*****************************************************************************************************************/
  private:
   Vertex_handle null_vertex_;
   /** \brief Upper bound on the filtration values of the simplices.*/

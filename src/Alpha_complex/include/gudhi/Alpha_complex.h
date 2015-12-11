@@ -125,7 +125,9 @@ class Alpha_complex : public Simplex_tree<> {
 
   /** \brief Alpha_complex constructor from a Delaunay triangulation.
    *
-   * @param[in] triangulation_ptr Pointer on a Delaunay triangulation.
+   * @param[in] triangulation_ptr Pointer on a <a target="_blank"
+   * href="http://doc.cgal.org/latest/Triangulation/index.html#Chapter_Triangulations">
+   * CGAL::Delaunay_triangulation<Kernel></a> \cite cgal:hdj-t-15b.
    * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$.
    */
   Alpha_complex(Delaunay_triangulation* triangulation_ptr,
@@ -170,7 +172,7 @@ class Alpha_complex : public Simplex_tree<> {
     }
   }
 
-  /** \brief Alpha_complex destructor from a Delaunay triangulation.
+  /** \brief Alpha_complex destructor.
    *
    * @warning Deletes the Delaunay triangulation.
    */

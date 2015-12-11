@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE( Delaunay_triangulation_doc_test )
 
 BOOST_AUTO_TEST_CASE( Delaunay_triangulation_unexisting_file_read_test )
 {
-  Gudhi::Delaunay_triangulation_off_reader<T> off_reader("pouetpouet_tralala.off");
+  Gudhi::Delaunay_triangulation_off_reader<T> off_reader("some_impossible_weird_file_name.off");
   // Check the read operation was correct
   BOOST_CHECK(!off_reader.is_valid());
   T* triangulation = off_reader.get_complex();
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE( Delaunay_triangulation_unexisting_file_write_test )
   T* triangulation = off_reader.get_complex();
 
   // Write the OFF file (output file name given as parameter) with the points and triangulated cells as faces
-  Gudhi::Delaunay_triangulation_off_writer<T> off_writer("/pouetpouet_tralala/pouetpouet_tralala/pouetpouet_tralala.off", triangulation);
+  Gudhi::Delaunay_triangulation_off_writer<T> off_writer("/some_impossible_weird_directory_name/another_weird_directory_name/some_impossible_weird_file_name.off", triangulation);
 
   // Check the write operation was correct
   BOOST_CHECK(!off_writer.is_valid());

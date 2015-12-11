@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE ipe SYSTEM "ipe.dtd">
-<ipe version="70005" creator="Ipe 7.1.4">
-<info created="D:20150603143945" modified="D:20150831170130"/>
+<ipe version="70107" creator="Ipe 7.1.10">
+<info created="D:20150603143945" modified="D:20151130095407"/>
 <ipestyle name="basic">
 <symbol name="arrow/arc(spx)">
 <path stroke="sym-stroke" fill="sym-stroke" pen="sym-pen">
@@ -202,13 +202,13 @@ h
 <dashstyle name="dash dotted" value="[4 2 1 2] 0"/>
 <dashstyle name="dash dot dotted" value="[4 2 1 2 1 2] 0"/>
 <textsize name="large" value="\large"/>
+<textsize name="small" value="\small"/>
+<textsize name="tiny" value="\tiny"/>
 <textsize name="Large" value="\Large"/>
 <textsize name="LARGE" value="\LARGE"/>
 <textsize name="huge" value="\huge"/>
 <textsize name="Huge" value="\Huge"/>
-<textsize name="small" value="\small"/>
 <textsize name="footnote" value="\footnotesize"/>
-<textsize name="tiny" value="\tiny"/>
 <textstyle name="center" begin="\begin{center}" end="\end{center}"/>
 <textstyle name="itemize" begin="\begin{itemize}" end="\end{itemize}"/>
 <textstyle name="item" begin="\begin{itemize}\item{}" end="\end{itemize}"/>
@@ -232,14 +232,7 @@ h
 <page>
 <layer name="alpha"/>
 <view layers="alpha" active="alpha"/>
-<use layer="alpha" matrix="1 0 0 1 -240 0" name="mark/fdisk(sfx)" pos="280 660" size="normal" stroke="black" fill="white"/>
-<use matrix="1 0 0 1 -239.3 -10.1537" name="mark/fdisk(sfx)" pos="300 720" size="normal" stroke="black" fill="white"/>
-<use matrix="1 0 0 1 -240 0" name="mark/fdisk(sfx)" pos="370 690" size="normal" stroke="black" fill="white"/>
-<use matrix="1 0 0 1 -240 0" name="mark/fdisk(sfx)" pos="290 530" size="normal" stroke="black" fill="white"/>
-<use matrix="1 0 0 1 -240 0" name="mark/fdisk(sfx)" pos="350 520" size="normal" stroke="black" fill="white"/>
-<use matrix="1 0 0 1 -240 0" name="mark/fdisk(sfx)" pos="320 580" size="normal" stroke="black" fill="white"/>
-<use matrix="1 0 0 1 -240 0" name="mark/fdisk(sfx)" pos="370 580" size="normal" stroke="black" fill="white"/>
-<path matrix="1 0 0 1 -240 0" stroke="darkcyan">
+<path layer="alpha" matrix="1 0 0 1 -240 0" stroke="darkcyan">
 320 580 m
 350 520 l
 290 530 l
@@ -434,5 +427,12 @@ h
 280 610 m
 170 610 l
 </path>
+<use matrix="1 0 0 1 -239.3 -10.1537" name="mark/fdisk(sfx)" pos="300 720" size="normal" stroke="black" fill="white"/>
+<use matrix="1 0 0 1 -240 0" name="mark/fdisk(sfx)" pos="370 690" size="normal" stroke="black" fill="white"/>
+<use matrix="1 0 0 1 -240 0" name="mark/fdisk(sfx)" pos="280 660" size="normal" stroke="black" fill="white"/>
+<use matrix="1 0 0 1 -240 0" name="mark/fdisk(sfx)" pos="320 580" size="normal" stroke="black" fill="white"/>
+<use matrix="1 0 0 1 -240 0" name="mark/fdisk(sfx)" pos="370 580" size="normal" stroke="black" fill="white"/>
+<use matrix="1 0 0 1 -240 0" name="mark/fdisk(sfx)" pos="350 520" size="normal" stroke="black" fill="white"/>
+<use matrix="1 0 0 1 -240 0" name="mark/fdisk(sfx)" pos="290 530" size="normal" stroke="black" fill="white"/>
 </page>
 </ipe>

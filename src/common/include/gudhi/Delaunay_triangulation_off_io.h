@@ -135,7 +135,7 @@ class Delaunay_triangulation_off_visitor_reader {
  * 
  * When launching:
  * 
- * \code $> ./dtoffrw ../../data/points/alphashapedoc.off triangulated.off
+ * \code $> ./dtoffrw ../../data/points/alphacomplexdoc triangulated.off
  * \endcode
  *
  * the program output is:

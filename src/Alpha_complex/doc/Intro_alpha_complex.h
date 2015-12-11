@@ -37,10 +37,10 @@ namespace alphacomplex {
  * \section definition Definition
  * 
  * Alpha_complex is a <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
- * constructed from each finite cell of a Delaunay Triangulation.
+ * constructed from the finite cells of a Delaunay Triangulation.
  * 
- * The filtration value of each simplex is computed from the alpha square value of the simplex if it is Gabriel or
- * from the alpha value of the simplex coface that makes the simplex not Gabriel.
+ * The filtration value of each simplex is computed from the circumradius of the simplex if it is Gabriel or
+ * from the alpha value of the simplex cofaces that make it not Gabriel.
  * 
  * All simplices that have a filtration value strictly greater than a given alpha square value are not inserted into
  * the simplex.
@@ -78,7 +78,7 @@ namespace alphacomplex {
  * 
  * \subsection datastructure Data structure
  * 
- * In order to build the alpha complex, first, a Simplex tree is build from the cells of a Delaunay Triangulation.
+ * In order to build the alpha complex, first, a Simplex tree is built from the cells of a Delaunay Triangulation.
  * (The filtration value is set to NaN, which stands for unknown value):
  * \image html "alpha_complex_doc.png" "Simplex tree structure construction example"
  *
