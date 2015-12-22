@@ -85,7 +85,7 @@ The program will create random cubical complex of that sizes and compute persist
 
     stringstream ss;
     ss << "randomComplex_persistence";
-    std::ofstream out((char*)ss.str().c_str());
+    std::ofstream out(ss.str().c_str());
     pcoh.output_diagram(out);
     out.close();
 

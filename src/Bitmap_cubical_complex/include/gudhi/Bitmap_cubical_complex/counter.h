@@ -51,7 +51,7 @@ public:
     * Constructor of a counter class. It takes only the parameter which is the end value of the counter. 
     * The default beginning value is a vector of the same length as the endd, filled-in with zeros.
     **/
-    counter(std::vector<unsigned> const& endd): begin(endd.size(),0), end(endd), current(endd.size(),0){}
+    counter(const std::vector<unsigned>& endd): begin(endd.size(),0), end(endd), current(endd.size(),0){}
 	//counter(std::vector< int >& endd)
 	//{
 	//    for ( size_t i = 0 ; i != endd.size() ; ++i )
@@ -67,7 +67,7 @@ public:
     * Constructor of a counter class. It takes as the input beginn and end vector. 
     * It assumes that begin vector is lexicographically below the end vector.
     **/
-	counter(std::vector< unsigned >& beginn , std::vector< unsigned >& endd):begin(beginn),end(endd),current(endd.size(),0)
+	counter(const std::vector< unsigned >& beginn , const std::vector< unsigned >& endd):begin(beginn),end(endd),current(endd.size(),0)
 	{
 	    if ( beginn.size() != endd.size() )
 		throw "In constructor of a counter, begin and end vectors do not have the same size. Program terminate";
@@ -112,7 +112,7 @@ public:
     * Its aim is to find an counter corresponding to the element the following
     * boundary element is identified with when periodic boundary conditions are imposed.
     **/
-    std::vector< unsigned > find_opposite( std::vector< bool >& directionsForPeriodicBCond )
+    std::vector< unsigned > find_opposite( const std::vector< bool >& directionsForPeriodicBCond )
     {
         std::vector< unsigned > result;
         for ( size_t i = 0 ; i != this->current.size() ; ++i )

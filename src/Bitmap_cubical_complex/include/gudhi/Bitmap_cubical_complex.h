@@ -45,7 +45,6 @@ public:
 //*********************************************//
 //Typedefs and typenames
 //*********************************************//
-    friend class Simplex_handle;
     typedef size_t Simplex_key;
     typedef T Filtration_value;
     typedef Simplex_key Simplex_handle;
@@ -83,7 +82,7 @@ public:
     * in the following directions and vector of element of a type T
     * with filtration on top dimensional cells.
     **/
-    Bitmap_cubical_complex( std::vector<unsigned>& dimensions , std::vector<T>& top_dimensional_cells ):
+    Bitmap_cubical_complex( const std::vector<unsigned>& dimensions , const std::vector<T>& top_dimensional_cells ):
     Bitmap_cubical_complex_base<T>(dimensions,top_dimensional_cells),
     key_associated_to_simplex(this->total_number_of_cells+1)
     {
@@ -114,7 +113,7 @@ public:
     static Simplex_handle null_simplex()
     {
         if ( globalDbg ){cerr << "Simplex_handle null_simplex()\n";}
-        return std::numeric_limits<int>::max();
+        return std::numeric_limits<Simplex_handle>::max();
     }
 
 
@@ -129,22 +128,22 @@ public:
     /**
     * Return dimension of a cell pointed by the Simplex_handle.
     **/
-    inline unsigned dimension(const Simplex_handle& sh)const
+    inline unsigned dimension(Simplex_handle sh)const
     {
         if ( globalDbg ){cerr << "unsigned dimension(const Simplex_handle& sh)\n";}
-        if ( sh != std::numeric_limits<int>::max() ) return this->get_dimension_of_a_cell( sh );
+        if ( sh != std::numeric_limits<Simplex_handle>::max() ) return this->get_dimension_of_a_cell( sh );
         return -1;
     }
 
     /**
     * Return the filtration of a cell pointed by the Simplex_handle.
     **/
-    T filtration(const Simplex_handle& sh)
+    T filtration(Simplex_handle sh)
     {
         if ( globalDbg ){cerr << "T filtration(const Simplex_handle& sh)\n";}
         //Returns the filtration value of a simplex.
-        if ( sh != std::numeric_limits<int>::max() ) return this->data[sh];
-        return std::numeric_limits<int>::max();
+        if ( sh != std::numeric_limits<Simplex_handle>::max() ) return this->data[sh];
+        return std::numeric_limits<Simplex_handle>::max();
     }
 
     /**
@@ -153,16 +152,16 @@ public:
     static Simplex_key null_key()
     {
         if ( globalDbg ){cerr << "Simplex_key null_key()\n";}
-        return std::numeric_limits<int>::max();
+        return std::numeric_limits<Simplex_handle>::max();
     }
 
     /**
     * Return the key of a cube pointed by the Simplex_handle.
     **/
-    Simplex_key key(const Simplex_handle& sh)const
+    Simplex_key key(Simplex_handle sh)const
     {
         if ( globalDbg ){cerr << "Simplex_key key(const Simplex_handle& sh)\n";}
-        if ( sh != std::numeric_limits<int>::max() )
+        if ( sh != std::numeric_limits<Simplex_handle>::max() )
         {
             return this->key_associated_to_simplex[sh];
         }
@@ -175,7 +174,7 @@ public:
     Simplex_handle simplex(Simplex_key key)
     {
         if ( globalDbg ){cerr << "Simplex_handle simplex(Simplex_key key)\n";}
-        if ( key != std::numeric_limits<int>::max() )
+        if ( key != std::numeric_limits<Simplex_handle>::max() )
         {
             return this->simplex_associated_to_key[ key ];
         }
@@ -185,23 +184,10 @@ public:
     /**
     * Assign key to a cube pointed by the Simplex_handle
     **/
-    void assign_key(Simplex_handle& sh, Simplex_key key)
+    void assign_key(Simplex_handle sh, Simplex_key key)
     {
         if ( globalDbg ){cerr << "void assign_key(Simplex_handle& sh, Simplex_key key)\n";}
-
-
-
-
-
-
-
-
-if ( key == std::numeric_limits<int>::max() ) return;//TODO FAKE!!! CHEATING!!!
-
-
-
-
-
+        if ( key == std::numeric_limits<Simplex_handle>::max() ) return;
         this->key_associated_to_simplex[sh] = key;
         this->simplex_associated_to_key[key] = sh;
     }
@@ -223,32 +209,8 @@ if ( key == std::numeric_limits<int>::max() ) return;//TODO FAKE!!! CHEATING!!!
     * Boundary_simplex_range class provides ranges for boundary iterators.
     **/
     typedef typename std::vector< Simplex_handle >::iterator Boundary_simplex_iterator;
-    class Boundary_simplex_range
-    {
-        //Range giving access to the simplices in the boundary of a simplex.
-        //.begin() and .end() return type Boundary_simplex_iterator.
-        public:
-            typedef Boundary_simplex_iterator const_iterator;
-            Boundary_simplex_range(const Simplex_handle& sh , Bitmap_cubical_complex<T>* CC_):sh(sh),CC(CC_)
-            {
-                this->boundary_elements = this->CC->get_boundary_of_a_cell( sh );
-            }
-            Boundary_simplex_iterator begin()
-            {
-                if ( globalDbg ){cerr << "Boundary_simplex_iterator begin\n";}
-                return this->boundary_elements.begin();
+    typedef typename std::vector< Simplex_handle > Boundary_simplex_range;
 
-            }
-            Boundary_simplex_iterator end()
-            {
-                if ( globalDbg ){cerr << "Boundary_simplex_iterator end()\n";}
-                return this->boundary_elements.end();
-            }
-        private:
-            Simplex_handle sh;
-            Bitmap_cubical_complex<T>* CC;
-            std::vector< Simplex_handle > boundary_elements;
-    };
 
 
     /**
@@ -342,12 +304,9 @@ if ( key == std::numeric_limits<int>::max() ) return;//TODO FAKE!!! CHEATING!!!
     * boundary_simplex_range creates an object of a Boundary_simplex_range class
     * that provides ranges for the Boundary_simplex_iterator.
     **/
-    Boundary_simplex_range boundary_simplex_range(Simplex_handle& sh)
+    Boundary_simplex_range boundary_simplex_range(Simplex_handle sh)
     {
-        if ( globalDbg ){cerr << "Boundary_simplex_range boundary_simplex_range(Simplex_handle& sh)\n";}
-        //Returns a range giving access to all simplices of the boundary of a simplex,
-        //i.e. the set of codimension 1 subsimplices of the Simplex.
-        return Boundary_simplex_range(sh,this);
+        return this->get_boundary_of_a_cell(sh);
     }
 
     /**
@@ -514,12 +473,11 @@ void Bitmap_cubical_complex<T>::initialize_simplex_associated_to_key()
     {
 	cerr << "void Bitmap_cubical_complex<T>::initialize_elements_ordered_according_to_filtration() \n";
     }
-    std::vector<size_t> data_of_elements_from_bitmap( this->data.size() );
-    std::iota (std::begin(data_of_elements_from_bitmap), std::end(data_of_elements_from_bitmap), 0);
-    std::sort( data_of_elements_from_bitmap.begin() ,
-               data_of_elements_from_bitmap.end() ,
+    this->simplex_associated_to_key = std::vector<size_t>( this->data.size() );
+    std::iota (std::begin(simplex_associated_to_key), std::end(simplex_associated_to_key), 0);
+    std::sort( simplex_associated_to_key.begin() ,
+               simplex_associated_to_key.end() ,
                is_before_in_filtration<T>(this) );
-    this->simplex_associated_to_key = data_of_elements_from_bitmap;
 }
 
 
