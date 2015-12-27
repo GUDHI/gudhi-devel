@@ -279,6 +279,7 @@ public:
         //.begin() and .end() return type Filtration_simplex_iterator.
         public:
             typedef Filtration_simplex_iterator const_iterator;
+            typedef Filtration_simplex_iterator iterator;
             Filtration_simplex_range(Bitmap_cubical_complex<T>* b):b(b){};
             Filtration_simplex_iterator begin()
             {
@@ -431,6 +432,7 @@ public:
         //.begin() and .end() return type Filtration_simplex_iterator.
         public:
             typedef Skeleton_simplex_iterator const_iterator;
+            typedef Skeleton_simplex_iterator iterator;
             Skeleton_simplex_range(Bitmap_cubical_complex<T>* b , unsigned dimension):b(b),dimension(dimension){};
             Skeleton_simplex_iterator begin()
             {

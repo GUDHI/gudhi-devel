@@ -183,7 +183,7 @@ public:
             Top_dimensional_cells_iterator( Bitmap_cubical_complex_base& b ):b(b)
             {
 		   this->counter = std::vector<size_t>(b.dimension());
-		   std::fill( this->counter.begin() , this->counter.end() , 0 );
+		   //std::fill( this->counter.begin() , this->counter.end() , 0 );
 	     }
             Top_dimensional_cells_iterator operator++()
             {
@@ -328,6 +328,7 @@ protected:
      std::vector<unsigned> compute_counter_for_given_cell( size_t cell )const
     {
         std::vector<unsigned> counter;
+        counter.reserve( this->sizes.size() );
         for ( size_t dim = this->sizes.size() ; dim != 0 ; --dim )
         {
             counter.push_back(cell/this->multipliers[dim-1]);
@@ -380,11 +381,11 @@ Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base
         cerr <<
        "Error in constructor\
         Bitmap_cubical_complex_base\
-       ( std::vector<size_t> sizes_in_following_directions , std::vector<float> top_dimensional_cells ).\
+       ( std::vector<size_t> sizes_in_following_directions , std::vector<T> top_dimensional_cells ).\
        Number of top dimensional elements that follow from sizes_in_following_directions vector is different\
        than the size of top_dimensional_cells vector." << endl;
         throw("Error in constructor Bitmap_cubical_complex_base( std::vector<size_t> sizes_in_following_directions,\
-        std::vector<float> top_dimensional_cells )\
+        std::vector<T> top_dimensional_cells )\
       . Number of top dimensional elements that follow from sizes_in_following_directions vector is different than the\
        size of top_dimensional_cells vector.");
     }
@@ -412,6 +413,7 @@ Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base( const char* perseus
     if (dbg){cerr << "dimensionOfData : " << dimensionOfData << endl;}
 
     std::vector<unsigned> sizes;
+    sizes.reserve( dimensionOfData );
     for ( size_t i = 0 ; i != dimensionOfData ; ++i )
     {
         unsigned size_in_this_dimension;
@@ -450,16 +452,20 @@ template <typename T>
 std::vector< size_t > Bitmap_cubical_complex_base<T>::get_boundary_of_a_cell( size_t cell )const
 {
     std::vector< size_t > boundary_elements;
+
+    //Speed traded of for memory. Check if it is better in practice.
+    boundary_elements.reserve( this->dimension()*2 );
+
     size_t cell1 = cell;
     for ( size_t i = this->multipliers.size() ; i != 0 ; --i )
     {
-        unsigned position = cell1/multipliers[i-1];
+        unsigned position = cell1/this->multipliers[i-1];
         if ( position%2 == 1 )
         {
-            boundary_elements.push_back( cell - multipliers[ i-1 ] );
-            boundary_elements.push_back( cell + multipliers[ i-1 ] );
+            boundary_elements.push_back( cell - this->multipliers[ i-1 ] );
+            boundary_elements.push_back( cell + this->multipliers[ i-1 ] );
         }
-        cell1 = cell1%multipliers[i-1];
+        cell1 = cell1%this->multipliers[i-1];
     }
     return boundary_elements;
 }
@@ -470,84 +476,48 @@ std::vector< size_t > Bitmap_cubical_complex_base<T>::get_boundary_of_a_cell( si
 template <typename T>
 std::vector< size_t > Bitmap_cubical_complex_base<T>::get_coboundary_of_a_cell( size_t cell )const
 {
-    bool bdg = false;
     //first of all, we need to take the list of coordinates in which the cell has nonzero length.
     //We do it by using modified version to compute dimension of a cell:
     std::vector< unsigned > dimensions_in_which_cell_has_zero_length;
+
+    //Speed traded of for memory. Check if it is better in practice.
+    dimensions_in_which_cell_has_zero_length.reserve( this->dimension()*2 );
+
     unsigned dimension = 0;
     size_t cell1 = cell;
     for ( size_t i = this->multipliers.size() ; i != 0 ; --i )
     {
-        unsigned position = cell1/multipliers[i-1];
+        unsigned position = cell1/this->multipliers[i-1];
         if ( position%2 == 0 )
         {
             dimensions_in_which_cell_has_zero_length.push_back(i-1);
             dimension++;
         }
-        cell1 = cell1%multipliers[i-1];
+        cell1 = cell1%this->multipliers[i-1];
     }
 
     std::vector<unsigned> counter = this->compute_counter_for_given_cell( cell );
-    //reverse(counter.begin() , counter.end());
-
-    if (bdg)
-    {
-        cerr << "dimensions_in_which_cell_has_zero_length : \n";
-        for ( size_t i = 0 ; i != dimensions_in_which_cell_has_zero_length.size() ; ++i )
-        {
-            cerr << dimensions_in_which_cell_has_zero_length[i] << endl;
-        }
-        cerr << "\n counter : " << endl;
-        for ( size_t i = 0 ; i != counter.size() ; ++i )
-        {
-            cerr << counter[i] << endl;
-        }
-        getchar();
-    }
-
     std::vector< size_t > coboundary_elements;
+
+    //Speed traded of for memory. Check if it is better in practice.
+    coboundary_elements.reserve ( dimensions_in_which_cell_has_zero_length.size()*2 );
+
     if ( dimensions_in_which_cell_has_zero_length.size() == 0 )return coboundary_elements;
     for ( size_t i = 0 ; i != dimensions_in_which_cell_has_zero_length.size() ; ++i )
     {
-       if ( bdg )
-        {
-            cerr << "Dimension : " << i << endl;
-            if (counter[dimensions_in_which_cell_has_zero_length[i]] == 0)
-            {
-                cerr << "In dimension : " << i
-                << " we cannot substract, since we will jump out of a Bitmap_cubical_complex_base \n";
-            }
-            if ( counter[dimensions_in_which_cell_has_zero_length[i]]
-                 ==
-                 2*this->sizes[dimensions_in_which_cell_has_zero_length[i]] )
-            {
-                cerr << "In dimension : " << i
-                     << " we cannot substract, since we will jump out of a Bitmap_cubical_complex_base \n";
-            }
-        }
-
-
-        if ( (cell > multipliers[dimensions_in_which_cell_has_zero_length[i]])
+        if ( (cell > this->multipliers[dimensions_in_which_cell_has_zero_length[i]])
               && (counter[dimensions_in_which_cell_has_zero_length[i]] != 0) )
-        //if ( counter[dimensions_in_which_cell_has_zero_length[i]] != 0 )
         {
-            if ( bdg )
-            {
-                 cerr << "Subtracting : " << cell - multipliers[dimensions_in_which_cell_has_zero_length[i]] << endl;
-            }
-            coboundary_elements.push_back( cell - multipliers[dimensions_in_which_cell_has_zero_length[i]] );
+            coboundary_elements.push_back( cell - this->multipliers[dimensions_in_which_cell_has_zero_length[i]] );
         }
         if (
-           (cell + multipliers[dimensions_in_which_cell_has_zero_length[i]] < this->data.size()) &&
+           (cell + this->multipliers[dimensions_in_which_cell_has_zero_length[i]] < this->data.size()) &&
            (counter[dimensions_in_which_cell_has_zero_length[i]]
            !=
            2*this->sizes[dimensions_in_which_cell_has_zero_length[i]])
            )
-        //if ( counter[dimensions_in_which_cell_has_zero_length[i]] !=
-        //2*this->sizes[dimensions_in_which_cell_has_zero_length[i]] )
         {
-            coboundary_elements.push_back( cell + multipliers[dimensions_in_which_cell_has_zero_length[i]] );
-            if ( bdg )cerr << "Adding : " << cell + multipliers[dimensions_in_which_cell_has_zero_length[i]] << endl;
+            coboundary_elements.push_back( cell + this->multipliers[dimensions_in_which_cell_has_zero_length[i]] );
         }
     }
     return coboundary_elements;
@@ -566,12 +536,12 @@ unsigned Bitmap_cubical_complex_base<T>::get_dimension_of_a_cell( size_t cell )c
     unsigned dimension = 0;
     for ( size_t i = this->multipliers.size() ; i != 0 ; --i )
     {
-        unsigned position = cell/multipliers[i-1];
+        unsigned position = cell/this->multipliers[i-1];
 
         if (dbg)cerr << "i-1 :" << i-1 << endl;
         if (dbg)cerr << "cell : " << cell << endl;
         if (dbg)cerr << "position : " << position << endl;
-        if (dbg)cerr << "multipliers["<<i-1<<"] = " << multipliers[i-1] << endl;
+        if (dbg)cerr << "multipliers["<<i-1<<"] = " << this->multipliers[i-1] << endl;
         if (dbg)getchar();
 
         if ( position%2 == 1 )
@@ -579,7 +549,7 @@ unsigned Bitmap_cubical_complex_base<T>::get_dimension_of_a_cell( size_t cell )c
             if (dbg)cerr << "Nonzero length in this direction \n";
             dimension++;
         }
-        cell = cell%multipliers[i-1];
+        cell = cell%this->multipliers[i-1];
     }
     return dimension;
 }
@@ -600,7 +570,14 @@ void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration()
     //in imposing lower star filtration:
     std::vector<bool> is_this_cell_considered( this->data.size() , false );
 
+    size_t size_to_reserve = 1;
+    for ( size_t i = 0 ; i != this->multipliers.size() ; ++i )
+    {
+        size_to_reserve *= (size_t)((this->multipliers[i]-1)/2);
+    }
+
     std::vector<size_t> indices_to_consider;
+    indices_to_consider.reserve( size_to_reserve );
     //we assume here that we already have a filtration on the top dimensional cells and
     //we have to extend it to lower ones.
     typename Bitmap_cubical_complex_base<T>::Top_dimensional_cells_iterator it(*this);
@@ -672,12 +649,17 @@ generate_vector_of_shifts_for_bitmaps_with_periodic_boundary_conditions
     if ( this->sizes.size() != directions_for_periodic_b_cond.size() )
     throw "directions_for_periodic_b_cond vector size is different from the size of the bitmap. Program terminate \n";
 
-    std::vector<unsigned> sizes( this->sizes.size() );
-    for ( size_t i = 0 ; i != this->sizes.size() ; ++i )sizes[i] = 2*this->sizes[i];
+    std::vector<unsigned> sizes;
+    sizes.reserve( this->sizes.size() );
+    for ( size_t i = 0 ; i != this->sizes.size() ; ++i )
+    {
+        sizes.push_back(2*this->sizes[i]);
+    }
 
     counter c( sizes );
 
     std::vector< size_t > result;
+    result.reserve( this->data.size() );
 
     for ( size_t i = 0 ; i != this->data.size() ; ++i )
     {
@@ -685,7 +667,6 @@ generate_vector_of_shifts_for_bitmaps_with_periodic_boundary_conditions
         if ( !c.isFinal() )
         {
             position = i;
-            //result.push_back( i );
         }
         else
         {
