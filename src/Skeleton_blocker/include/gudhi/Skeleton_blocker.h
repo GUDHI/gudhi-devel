@@ -129,7 +129,7 @@ of a simplicial complex.
   \code{.cpp}
 	typedef Skeleton_blocker_complex<Skeleton_blocker_simple_traits> Complex;
 	typedef Complex::Vertex_handle Vertex_handle;
-	typedef Complex::Simplex_handle Simplex;
+	typedef Complex::Simplex Simplex;
 
   	const int n = 15;
 
@@ -139,8 +139,7 @@ of a simplicial complex.
 		complex.add_vertex();
 	for(int i=0;i<n;i++)
 		for(int j=0;j<i;j++)
-			//note that add_edge adds the edge and all its cofaces
-			complex.add_edge(Vertex_handle(i),Vertex_handle(j));
+			complex.add_edge_without_blockers(Vertex_handle(i),Vertex_handle(j));
 
 	// this is just to illustrate iterators, to count number of vertices
 	// or edges, complex.num_vertices() and complex.num_edges() are
@@ -159,7 +158,7 @@ of a simplicial complex.
 	// we use a reference to a simplex instead of a copy
 	// value here because a simplex is a set of integers
 	// and copying it cost time
-	for(const Simplex & s : complex.simplex_range()){
+	for(const Simplex & s : complex.star_simplex_range()){
 		++num_simplices;
 		if(s.dimension()%2 == 0) 
 			euler += 1;
@@ -182,20 +181,20 @@ The Euler Characteristic is 1
 \subsection s Constructing a skeleton-blockers from a list of maximal faces or from a list of faces
 
   \code{.cpp}
-	std::vector<Simplex_handle> simplices;
+	std::vector<Simplex> simplices;
 
 	//add 4 triangles of a tetrahedron 0123
-	simplices.push_back(Simplex_handle(Vertex_handle(0),Vertex_handle(1),Vertex_handle(2)));
-	simplices.push_back(Simplex_handle(Vertex_handle(1),Vertex_handle(2),Vertex_handle(3)));
-	simplices.push_back(Simplex_handle(Vertex_handle(3),Vertex_handle(0),Vertex_handle(2)));
-	simplices.push_back(Simplex_handle(Vertex_handle(3),Vertex_handle(0),Vertex_handle(1)));
+	simplices.push_back(Simplex(Vertex_handle(0),Vertex_handle(1),Vertex_handle(2)));
+	simplices.push_back(Simplex(Vertex_handle(1),Vertex_handle(2),Vertex_handle(3)));
+	simplices.push_back(Simplex(Vertex_handle(3),Vertex_handle(0),Vertex_handle(2)));
+	simplices.push_back(Simplex(Vertex_handle(3),Vertex_handle(0),Vertex_handle(1)));
 
 	Complex complex;
 	//get complex from top faces
 	make_complex_from_top_faces(complex,simplices.begin(),simplices.end());
 
 	std::cout << "Simplices:"<<std::endl;
-	for(const Simplex & s : complex.simplex_range())
+	for(const Simplex & s : complex.star_simplex_range())
 		std::cout << s << " ";
 	std::cout << std::endl;
 
@@ -204,16 +203,16 @@ The Euler Characteristic is 1
 
 	//now build a complex from its full list of simplices
 	simplices.clear();
-	simplices.push_back(Simplex_handle(Vertex_handle(0)));
-	simplices.push_back(Simplex_handle(Vertex_handle(1)));
-	simplices.push_back(Simplex_handle(Vertex_handle(2)));
-	simplices.push_back(Simplex_handle(Vertex_handle(0),Vertex_handle(1)));
-	simplices.push_back(Simplex_handle(Vertex_handle(1),Vertex_handle(2)));
-	simplices.push_back(Simplex_handle(Vertex_handle(2),Vertex_handle(0)));
+	simplices.push_back(Simplex(Vertex_handle(0)));
+	simplices.push_back(Simplex(Vertex_handle(1)));
+	simplices.push_back(Simplex(Vertex_handle(2)));
+	simplices.push_back(Simplex(Vertex_handle(0),Vertex_handle(1)));
+	simplices.push_back(Simplex(Vertex_handle(1),Vertex_handle(2)));
+	simplices.push_back(Simplex(Vertex_handle(2),Vertex_handle(0)));
 	complex = Complex(simplices.begin(),simplices.end());
 
 	std::cout << "Simplices:"<<std::endl;
-	for(const Simplex & s : complex.simplex_range())
+	for(const Simplex & s : complex.star_simplex_range())
 		std::cout << s << " ";
 	std::cout << std::endl;
 
@@ -241,7 +240,7 @@ their collaboration to write the two initial papers
 
 
 \copyright GNU General Public License v3.                         
-\verbatim  Contact: David Salinas,     david.salinas@inria.fr \endverbatim
+\verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
 */
 /** @} */  // end defgroup
 

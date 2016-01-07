@@ -62,7 +62,8 @@ typedef Alpha_shape_3::Edge Edge;
 typedef std::list<Alpha_shape_3::Vertex_handle> Vertex_list;
 
 // gudhi type definition
-typedef Gudhi::Simplex_tree<>::Vertex_handle Simplex_tree_vertex;
+typedef Gudhi::Simplex_tree<> Simplex_tree;
+typedef Simplex_tree::Vertex_handle Simplex_tree_vertex;
 typedef std::map<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex > Alpha_shape_simplex_tree_map;
 typedef std::pair<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex> Alpha_shape_simplex_tree_pair;
 typedef std::vector< Simplex_tree_vertex > Simplex_tree_vector_vertex;
@@ -161,7 +162,7 @@ int main(int argc, char * const argv[]) {
 
   // Loop on objects vector
   Vertex_list vertex_list;
-  Gudhi::Simplex_tree<> simplex_tree;
+  Simplex_tree simplex_tree;
   Alpha_shape_simplex_tree_map map_cgal_simplex_tree;
   std::vector<Alpha_value_type>::iterator the_alpha_value_iterator = the_alpha_values.begin();
   for (auto object_iterator : the_objects) {

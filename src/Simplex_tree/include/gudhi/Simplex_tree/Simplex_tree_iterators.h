@@ -99,12 +99,13 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
 
 // any end() iterator
   explicit Simplex_tree_boundary_simplex_iterator(SimplexTree * st)
-      : last_(st->null_vertex()),
-        sib_(NULL) {
+      : sib_(NULL),
+        sh_(st->null_simplex()) {
   }
 
   Simplex_tree_boundary_simplex_iterator(SimplexTree * st, Simplex_handle sh)
       : suffix_(),
+        sib_(st->self_siblings(sh)),
         st_(st) {
     last_ = sh->first;
     Siblings * sib = st->self_siblings(sh);
@@ -113,7 +114,7 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
     if (sib_ != NULL) {
       sh_ = sib_->find(next_);
     } else {
-      last_ = st->null_vertex();
+      sh_ = st->null_simplex();
     }  // vertex: == end()
   }
 
@@ -121,28 +122,40 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
   friend class boost::iterator_core_access;
 // valid when iterating along the SAME boundary.
   bool equal(Simplex_tree_boundary_simplex_iterator const& other) const {
-    return (sib_ == other.sib_ && last_ == other.last_);
+    return sh_ == other.sh_;
   }
 
   Simplex_handle const& dereference() const {
+    assert(sh_ != st_->null_simplex());
     return sh_;
   }
 
   void increment() {
     if (sib_ == NULL) {
-      last_ = st_->null_vertex();
+      sh_ = st_->null_simplex();
       return;
     }
 
     Siblings * for_sib = sib_;
-    for (auto rit = suffix_.rbegin(); rit != suffix_.rend(); ++rit) {
+    Siblings * new_sib = sib_->oncles();
+    auto rit = suffix_.rbegin();
+    if (SimplexTree::Options::contiguous_vertices && new_sib == nullptr && rit != suffix_.rend()) {
+      // We reached the root, use a short-cut to find a vertex. We could also
+      // optimize finding the second vertex of a segment, but people are
+      // expected to call endpoints().
+      assert(st_->contiguous_vertices());
+      sh_ = for_sib->members_.begin()+*rit;
+      for_sib = sh_->second.children();
+      ++rit;
+    }
+    for (; rit != suffix_.rend(); ++rit) {
       sh_ = for_sib->find(*rit);
       for_sib = sh_->second.children();
     }
     sh_ = for_sib->find(last_);  // sh_ points to the right simplex now
     suffix_.push_back(next_);
     next_ = sib_->parent();
-    sib_ = sib_->oncles();
+    sib_ = new_sib;
   }
 
   // Most of the storage should be moved to the range, iterators should be light.
