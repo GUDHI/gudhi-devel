@@ -99,11 +99,13 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
 
 // any end() iterator
   explicit Simplex_tree_boundary_simplex_iterator(SimplexTree * st)
-      : sh_(st->null_simplex()) {
+      : sib_(NULL),
+        sh_(st->null_simplex()) {
   }
 
   Simplex_tree_boundary_simplex_iterator(SimplexTree * st, Simplex_handle sh)
       : suffix_(),
+        sib_(st->self_siblings(sh)),
         st_(st) {
     last_ = sh->first;
     Siblings * sib = st->self_siblings(sh);
@@ -137,9 +139,7 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
     Siblings * for_sib = sib_;
     Siblings * new_sib = sib_->oncles();
     auto rit = suffix_.rbegin();
-    if (SimplexTree::Options::contiguous_vertices
-	&& new_sib == nullptr
-	&& rit != suffix_.rend()) {
+    if (SimplexTree::Options::contiguous_vertices && new_sib == nullptr && rit != suffix_.rend()) {
       // We reached the root, use a short-cut to find a vertex. We could also
       // optimize finding the second vertex of a segment, but people are
       // expected to call endpoints().
