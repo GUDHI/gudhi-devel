@@ -249,7 +249,7 @@ class Model {
     int euler = 0;
     int dimension = 0;
     Clock clock;
-    for (const auto &s : complex_.simplex_range()) {
+    for (const auto &s : complex_.complex_simplex_range()) {
       num_simplices++;
       dimension = (std::max)(s.dimension(), dimension);
       if (s.dimension() % 2 == 0)
@@ -281,7 +281,7 @@ class Model {
     unsigned num_simplices = 0;
     int euler = 0;
     int dimension = 0;
-    for (const auto &s : complex_.simplex_range()) {
+    for (const auto &s : complex_.complex_simplex_range()) {
       num_simplices++;
       dimension = (std::max)(s.dimension(), dimension);
       if (s.dimension() % 2 == 0)
@@ -328,7 +328,7 @@ class Model {
   void save_complex_in_file_for_chomp() {
     std::ofstream file;
     file.open("chomp.sim");
-    for (const auto &s : complex_.simplex_range()) {
+    for (const auto &s : complex_.complex_simplex_range()) {
       bool first = true;
       file << "(";
       for (auto x : s) {
