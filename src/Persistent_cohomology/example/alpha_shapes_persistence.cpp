@@ -66,7 +66,8 @@ typedef Alpha_shape_3::Edge Edge_3;
 typedef std::list<Alpha_shape_3::Vertex_handle> Vertex_list;
 
 // gudhi type definition
-typedef Simplex_tree<>::Vertex_handle Simplex_tree_vertex;
+typedef Simplex_tree<Simplex_tree_options_fast_persistence> ST;
+typedef ST::Vertex_handle Simplex_tree_vertex;
 typedef std::map<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex > Alpha_shape_simplex_tree_map;
 typedef std::pair<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex> Alpha_shape_simplex_tree_pair;
 typedef std::vector< Simplex_tree_vertex > Simplex_tree_vector_vertex;
@@ -184,7 +185,7 @@ int main(int argc, char * const argv[]) {
 
   // Loop on objects vector
   Vertex_list vertex_list;
-  Simplex_tree<> simplex_tree;
+  ST simplex_tree;
   Alpha_shape_simplex_tree_map map_cgal_simplex_tree;
   std::vector<Alpha_value_type>::iterator the_alpha_value_iterator = the_alpha_values.begin();
   int dim_max = 0;
@@ -281,7 +282,7 @@ int main(int argc, char * const argv[]) {
 
   std::cout << "Simplex_tree dim: " << simplex_tree.dimension() << std::endl;
   // Compute the persistence diagram of the complex
-  Persistent_cohomology< Simplex_tree<>, Field_Zp > pcoh(simplex_tree);
+  Persistent_cohomology< ST, Field_Zp > pcoh(simplex_tree);
   // initializes the coefficient field for homology
   pcoh.init_coefficients(coeff_field_characteristic);
 

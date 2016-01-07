@@ -54,7 +54,7 @@ int main(int argc, char * argv[]) {
       << std::endl;
   std::cout << "     - p=" << p << " - min_persistence=" << min_persistence << std::endl;
 
-  // Construct the Rips complex in a Simplex Tree
+  // Read the list of simplices from a file.
   Simplex_tree<> simplex_tree;
 
   std::ifstream simplex_tree_stream(simplex_tree_file);
