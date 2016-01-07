@@ -34,6 +34,10 @@ endif()
 
 find_package(CGAL)
 
+# Find TBB package for parallel sort - not mandatory, just optional.
+set(TBB_FIND_QUIETLY ON)
+find_package(TBB)
+
 # Required programs for unitary tests purpose
 FIND_PROGRAM( GCOVR_PATH gcovr )
 if (GCOVR_PATH)

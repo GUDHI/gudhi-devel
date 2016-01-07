@@ -3,4 +3,4 @@
 
 include_directories ( ${TBB_INCLUDE_DIRS} )
 link_directories( ${TBB_LIBRARY_DIRS} )
-add_definitions( -DNOMINMAX -DGUDHI_LINKED_WITH_TBB )
+add_definitions( -DNOMINMAX -DGUDHI_USE_TBB )
