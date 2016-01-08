@@ -35,6 +35,10 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
+#ifdef GUDHI_USE_TBB
+#include <tbb/parallel_sort.h>
+#endif
+
 #include <algorithm>
 #include <utility>
 #include <vector>
@@ -794,8 +798,12 @@ class Simplex_tree {
      * heuristic consists in inserting the cofaces of a simplex as soon as
      * possible.
      */
+#ifdef GUDHI_USE_TBB
+    tbb::parallel_sort(filtration_vect_, is_before_in_filtration(this));
+#else
     std::stable_sort(filtration_vect_.begin(), filtration_vect_.end(),
                      is_before_in_filtration(this));
+#endif
   }
 
  private:
