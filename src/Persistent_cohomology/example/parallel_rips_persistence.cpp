@@ -26,7 +26,7 @@
 #include <gudhi/distance_functions.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
-#include "gudhi/Hasse_complex.h"
+#include <gudhi/Hasse_complex.h>
 
 #include <boost/program_options.hpp>
 

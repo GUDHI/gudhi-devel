@@ -23,13 +23,13 @@
 #ifndef HASSE_COMPLEX_H_
 #define HASSE_COMPLEX_H_
 
+#include <gudhi/allocator.h>
+
 #include <boost/iterator/counting_iterator.hpp>
 
 #include <algorithm>
 #include <utility>  // for pair
 #include <vector>
-
-#include <gudhi/allocator.h>
 
 #ifdef GUDHI_USE_TBB
 #include <tbb/parallel_for.h>
@@ -109,12 +109,12 @@ class Hasse_complex {
       , dim_max_(cpx.dimension()) {
     int size = complex_.size();
 #ifdef GUDHI_USE_TBB
-    tbb::parallel_for(0,size,[&](int idx){new (&complex_[idx]) Hasse_simp(cpx, cpx.simplex(idx));});
-    for (int idx=0; idx<size; ++idx)
+    tbb::parallel_for(0, size, [&](int idx){new (&complex_[idx]) Hasse_simp(cpx, cpx.simplex(idx));});
+    for (int idx=0; idx < size; ++idx)
       if (complex_[idx].boundary_.empty())
         vertices_.push_back(idx);
 #else
-    for (int idx=0; idx<size; ++idx) {
+    for (int idx=0; idx < size; ++idx) {
       new (&complex_[idx]) Hasse_simp(cpx, cpx.simplex(idx));
       if (complex_[idx].boundary_.empty())
         vertices_.push_back(idx);

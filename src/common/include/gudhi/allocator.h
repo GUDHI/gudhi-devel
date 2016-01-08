@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GUDHI_ALLOCATOR_H_
-#define GUDHI_ALLOCATOR_H_
+#ifndef ALLOCATOR_H_
+#define ALLOCATOR_H_
 
 #include <memory>
 #include <utility>
@@ -43,13 +43,13 @@ struct no_init_allocator : Base {
 
   // Do nothing: that's the whole point!
   template<class P>
-  void construct(P*)noexcept{}
+  void construct(P*) noexcept {}
 
-  template<class P, class...U> void construct(P*p, U&&...u){
+  template<class P, class...U> void construct(P*p, U&&...u) {
     Base_traits::construct(*(Base*)this, p, std::forward<U>(u)...);
   }
 };
 
 }  // namespace Gudhi
 
-#endif  // GUDHI_ALLOCATOR_H_
+#endif  // ALLOCATOR_H_

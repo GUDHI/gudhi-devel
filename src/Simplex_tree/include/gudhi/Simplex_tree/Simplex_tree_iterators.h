@@ -54,7 +54,7 @@ class Simplex_tree_simplex_vertex_iterator : public boost::iterator_facade<
 
   explicit Simplex_tree_simplex_vertex_iterator(SimplexTree * st)
       :  // any end() iterator
-        sib_(NULL),
+        sib_(nullptr),
         v_(st->null_vertex()) {
   }
 
@@ -99,19 +99,19 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
 
 // any end() iterator
   explicit Simplex_tree_boundary_simplex_iterator(SimplexTree * st)
-      : sib_(NULL),
-        sh_(st->null_simplex()) {
+      : sib_(nullptr),
+        sh_(st->null_simplex()),
+        st_(st)  {
   }
 
   Simplex_tree_boundary_simplex_iterator(SimplexTree * st, Simplex_handle sh)
-      : suffix_(),
-        sib_(st->self_siblings(sh)),
+      : last_(sh->first),
+        sib_(nullptr),
         st_(st) {
-    last_ = sh->first;
     Siblings * sib = st->self_siblings(sh);
     next_ = sib->parent();
-    sib_ = sib->oncles(); /* \todo check if NULL*/
-    if (sib_ != NULL) {
+    sib_ = sib->oncles();
+    if (sib_ != nullptr) {
       sh_ = sib_->find(next_);
     } else {
       sh_ = st->null_simplex();
@@ -131,7 +131,7 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
   }
 
   void increment() {
-    if (sib_ == NULL) {
+    if (sib_ == nullptr) {
       sh_ = st_->null_simplex();
       return;
     }
@@ -189,13 +189,15 @@ class Simplex_tree_complex_simplex_iterator : public boost::iterator_facade<
 
 // any end() iterator
   Simplex_tree_complex_simplex_iterator()
-      : st_(NULL) {
+      : sib_(nullptr),
+        st_(nullptr) {
   }
 
   explicit Simplex_tree_complex_simplex_iterator(SimplexTree * st)
-      : st_(st) {
-    if (st == NULL || st->root() == NULL || st->root()->members().empty()) {
-      st_ = NULL;
+      : sib_(nullptr),
+        st_(st) {
+    if (st == nullptr || st->root() == nullptr || st->root()->members().empty()) {
+      st_ = nullptr;
     } else {
       sh_ = st->root()->members().begin();
       sib_ = st->root();
@@ -210,10 +212,10 @@ class Simplex_tree_complex_simplex_iterator : public boost::iterator_facade<
 
 // valid when iterating along the SAME boundary.
   bool equal(Simplex_tree_complex_simplex_iterator const& other) const {
-    if (other.st_ == NULL) {
-      return (st_ == NULL);
+    if (other.st_ == nullptr) {
+      return (st_ == nullptr);
     }
-    if (st_ == NULL) {
+    if (st_ == nullptr) {
       return false;
     }
     return (&(sh_->second) == &(other.sh_->second));
@@ -227,8 +229,8 @@ class Simplex_tree_complex_simplex_iterator : public boost::iterator_facade<
   void increment() {
     ++sh_;
     if (sh_ == sib_->members().end()) {
-      if (sib_->oncles() == NULL) {
-        st_ = NULL;
+      if (sib_->oncles() == nullptr) {
+        st_ = nullptr;
         return;
       }  // reach the end
       sh_ = sib_->oncles()->members().find(sib_->parent());
@@ -261,15 +263,19 @@ class Simplex_tree_skeleton_simplex_iterator : public boost::iterator_facade<
 
 // any end() iterator
   Simplex_tree_skeleton_simplex_iterator()
-      : st_(NULL) {
+      : sib_(nullptr),
+        st_(nullptr),
+        dim_skel_(0),
+        curr_dim_(0) {
   }
 
   Simplex_tree_skeleton_simplex_iterator(SimplexTree * st, int dim_skel)
-      : st_(st),
+      : sib_(nullptr),
+        st_(st),
         dim_skel_(dim_skel),
         curr_dim_(0) {
-    if (st == NULL || st->root() == NULL || st->root()->members().empty()) {
-      st_ = NULL;
+    if (st == nullptr || st->root() == nullptr || st->root()->members().empty()) {
+      st_ = nullptr;
     } else {
       sh_ = st->root()->members().begin();
       sib_ = st->root();
@@ -285,10 +291,10 @@ class Simplex_tree_skeleton_simplex_iterator : public boost::iterator_facade<
 
 // valid when iterating along the SAME boundary.
   bool equal(Simplex_tree_skeleton_simplex_iterator const& other) const {
-    if (other.st_ == NULL) {
-      return (st_ == NULL);
+    if (other.st_ == nullptr) {
+      return (st_ == nullptr);
     }
-    if (st_ == NULL) {
+    if (st_ == nullptr) {
       return false;
     }
     return (&(sh_->second) == &(other.sh_->second));
@@ -302,8 +308,8 @@ class Simplex_tree_skeleton_simplex_iterator : public boost::iterator_facade<
   void increment() {
     ++sh_;
     if (sh_ == sib_->members().end()) {
-      if (sib_->oncles() == NULL) {
-        st_ = NULL;
+      if (sib_->oncles() == nullptr) {
+        st_ = nullptr;
         return;
       }  // reach the end
       sh_ = sib_->oncles()->members().find(sib_->parent());
