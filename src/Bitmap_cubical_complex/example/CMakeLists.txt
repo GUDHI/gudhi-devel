@@ -10,3 +10,6 @@ add_executable ( Random_bitmap_cubical_complex Random_bitmap_cubical_complex.cpp
 target_link_libraries(Random_bitmap_cubical_complex ${Boost_SYSTEM_LIBRARY})	
 add_test(Random_bitmap_cubical_complex ${CMAKE_CURRENT_BINARY_DIR}/Random_bitmap_cubical_complex 2 100 100)
 
+add_executable ( Bitmap_cubical_complex_periodic_boundary_conditions Bitmap_cubical_complex_periodic_boundary_conditions.cpp )
+target_link_libraries(Bitmap_cubical_complex_periodic_boundary_conditions ${Boost_SYSTEM_LIBRARY})	
+

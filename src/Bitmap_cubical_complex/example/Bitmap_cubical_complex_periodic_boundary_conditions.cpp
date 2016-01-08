@@ -22,7 +22,7 @@
 
 
 #include <gudhi/reader_utils.h>
-#include <gudhi/Bitmap_cubical_complex.h>
+#include <gudhi/Bitmap_cubical_complex_periodic_boundary_conditions.h>
 #include <gudhi/Persistent_cohomology.h>
 
 
@@ -37,10 +37,9 @@ using namespace Gudhi::persistent_cohomology;
 
 using namespace std;
 
-
 int main( int argc , char** argv )
 {
-    cout << "This program computes persistent homology, by using bitmap_cubical_complex class, of cubical complexes provided in text files in Perseus style (the only numbered in \
+    cout << "This program computes persistent homology, by using Bitmap_cubical_complex_periodic_boundary_conditions class, of cubical complexes provided in text files in Perseus style (the only numbered in \
 the first line is a dimension D of a bitmap. In the lines I between 2 and D+1 there are numbers of top dimensional cells in the direction I. Let N denote product \
 of the numbers in the lines between 2 and D. In the lines D+2 to D+2+N there are filtrations of top dimensional cells. We assume that the cells are in the \
 lexicographical order. See CubicalOneSphere.txt or CubicalTwoSphere.txt for example." << endl;
@@ -54,11 +53,11 @@ lexicographical order. See CubicalOneSphere.txt or CubicalTwoSphere.txt for exam
         return 1;
     }
 
-    Bitmap_cubical_complex<double> b( argv[1] );
+    Bitmap_cubical_complex_periodic_boundary_conditions<double> b( argv[1] );
 
 
     // Compute the persistence diagram of the complex
-    persistent_cohomology::Persistent_cohomology< Bitmap_cubical_complex<double>, Field_Zp > pcoh(b);
+    persistent_cohomology::Persistent_cohomology< Bitmap_cubical_complex_periodic_boundary_conditions<double>, Field_Zp > pcoh(b,true);
     pcoh.init_coefficients( p ); //initilizes the coefficient field for homology
     pcoh.compute_persistent_cohomology( min_persistence );
 
