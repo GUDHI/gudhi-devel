@@ -29,12 +29,10 @@
 #include <CGAL/Search_traits_d.h>
 #include <CGAL/Search_traits_adapter.h>
 #include <CGAL/property_map.h>
-#include <boost/iterator/iterator_facade.hpp>
-#include <boost/iterator/zip_iterator.hpp>
 
 #include <unordered_map>
-#include <tuple>
 #include <list>
+#include <utility>
 
 #include "utils/UI_utils.h"
 #include "model/Complex_typedefs.h"
@@ -43,9 +41,9 @@ template<typename SkBlComplex> class K_nearest_builder {
  private:
   typedef Geometry_trait Kernel;
   typedef Point Point_d;
-  typedef boost::tuple<Point_d, unsigned> Point_d_with_id;
+  typedef std::pair<Point_d, unsigned> Point_d_with_id;
   typedef CGAL::Search_traits_d<Kernel> Traits_base;
-  typedef CGAL::Search_traits_adapter<Point_d_with_id, CGAL::Nth_of_tuple_property_map<0, Point_d_with_id>,
+  typedef CGAL::Search_traits_adapter<Point_d_with_id, CGAL::First_of_pair_property_map<Point_d_with_id>,
       Traits_base> Traits;
   typedef CGAL::Orthogonal_k_neighbor_search<Traits> Neighbor_search;
   typedef Neighbor_search::Tree Tree;
@@ -81,7 +79,7 @@ template<typename SkBlComplex> class K_nearest_builder {
     for (auto p : complex_.vertex_range()) {
       Neighbor_search search(tree, complex_.point(p), k + 1);
       for (auto it = ++search.begin(); it != search.end(); ++it) {
-        Vertex_handle q(boost::get<1>(it->first));
+        Vertex_handle q(std::get<1>(it->first));
         if (p != q && complex_.contains_vertex(p) && complex_.contains_vertex(q))
           complex_.add_edge(p, q);
       }

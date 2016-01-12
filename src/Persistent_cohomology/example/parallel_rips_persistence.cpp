@@ -2,9 +2,10 @@
  *    (Geometric Understanding in Higher Dimensions) is a generic C++ 
  *    library for computational topology.
  *
- *    Author(s):       Vincent Rouvreau
+ *    Author(s):       Clément Maria, Marc Glisse
  *
- *    Copyright (C) 2014  INRIA Saclay (France)
+ *    Copyright (C) 2014  INRIA Sophia Antipolis-Méditerranée (France),
+ *                  2015  INRIA Saclay Île de France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -25,10 +26,23 @@
 #include <gudhi/distance_functions.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
+#include <gudhi/Hasse_complex.h>
 
 #include <boost/program_options.hpp>
 
+#ifdef GUDHI_USE_TBB
+#include <tbb/task_scheduler_init.h>
+#endif
+
 #include <string>
+#include <vector>
+
+////////////////////////////////////////////////////////////////
+//                                                            //
+//  WARNING: persistence computation itself is not parallel,  //
+//  and this uses more memory than rips_persistence.          //
+//                                                            //
+////////////////////////////////////////////////////////////////
 
 using namespace Gudhi;
 using namespace Gudhi::persistent_cohomology;
@@ -37,84 +51,106 @@ typedef int Vertex_handle;
 typedef double Filtration_value;
 
 void program_options(int argc, char * argv[]
-                     , std::string & simplex_tree_file
-                     , std::string & output_file
+                     , std::string & filepoints
+                     , std::string & filediag
+                     , Filtration_value & threshold
+                     , int & dim_max
                      , int & p
                      , Filtration_value & min_persistence);
 
 int main(int argc, char * argv[]) {
-  std::string simplex_tree_file;
-  std::string output_file;
+  std::string filepoints;
+  std::string filediag;
+  Filtration_value threshold;
+  int dim_max;
   int p;
   Filtration_value min_persistence;
 
-  program_options(argc, argv, simplex_tree_file, output_file, p, min_persistence);
+  program_options(argc, argv, filepoints, filediag, threshold, dim_max, p, min_persistence);
 
-  std::cout << "Simplex_tree from file=" << simplex_tree_file.c_str() << " - output_file=" << output_file.c_str()
-      << std::endl;
-  std::cout << "     - p=" << p << " - min_persistence=" << min_persistence << std::endl;
+  // Extract the points from the file filepoints
+  typedef std::vector<double> Point_t;
+  std::vector< Point_t > points;
+  read_points(filepoints, points);
 
-  // Read the list of simplices from a file.
-  Simplex_tree<> simplex_tree;
+  // Compute the proximity graph of the points
+  Graph_t prox_graph = compute_proximity_graph(points, threshold
+                                               , euclidean_distance<Point_t>);
 
-  std::ifstream simplex_tree_stream(simplex_tree_file);
-  simplex_tree_stream >> simplex_tree;
+  // Construct the Rips complex in a Simplex Tree
+  Simplex_tree<>& st = *new Simplex_tree<>;
+  // insert the proximity graph in the simplex tree
+  st.insert_graph(prox_graph);
+  // expand the graph until dimension dim_max
+  st.expansion(dim_max);
 
-  std::cout << "The complex contains " << simplex_tree.num_simplices() << " simplices" << std::endl;
-  std::cout << "   - dimension " << simplex_tree.dimension() << "   - filtration " << simplex_tree.filtration()
-      << std::endl;
+  std::cout << "The complex contains " << st.num_simplices() << " simplices \n";
+  std::cout << "   and has dimension " << st.dimension() << " \n";
 
-  /*
-  std::cout << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
-  for( auto f_simplex : simplex_tree.filtration_simplex_range() )
-  { std::cout << "   " << "[" << simplex_tree.filtration(f_simplex) << "] ";
-  for( auto vertex : simplex_tree.simplex_vertex_range(f_simplex) )
-  { std::cout << vertex << " "; }
-  std::cout << std::endl;
-  }*/
+#ifdef GUDHI_USE_TBB
+  // Unnecessary, but clarifies which operations are parallel.
+  tbb::task_scheduler_init ts;
+#endif
 
   // Sort the simplices in the order of the filtration
-  simplex_tree.initialize_filtration();
+  st.initialize_filtration();
+  int count = 0;
+  for (auto sh : st.filtration_simplex_range())
+    st.assign_key(sh, count++);
+
+  // Convert to a more convenient representation.
+  Hasse_complex<> hcpx(st);
+
+#ifdef GUDHI_USE_TBB
+  ts.terminate();
+#endif
+
+  // Free some space.
+  delete &st;
 
   // Compute the persistence diagram of the complex
-  Persistent_cohomology< Simplex_tree<>, Field_Zp > pcoh(simplex_tree);
+  persistent_cohomology::Persistent_cohomology< Hasse_complex<>, Field_Zp > pcoh(hcpx);
   // initializes the coefficient field for homology
   pcoh.init_coefficients(p);
 
   pcoh.compute_persistent_cohomology(min_persistence);
 
-  // Output the diagram in output_file
-  if (output_file.empty()) {
+  // Output the diagram in filediag
+  if (filediag.empty()) {
     pcoh.output_diagram();
   } else {
-    std::ofstream out(output_file);
+    std::ofstream out(filediag);
     pcoh.output_diagram(out);
     out.close();
   }
-
-  return 0;
 }
 
 void program_options(int argc, char * argv[]
-                     , std::string & simplex_tree_file
-                     , std::string & output_file
+                     , std::string & filepoints
+                     , std::string & filediag
+                     , Filtration_value & threshold
+                     , int & dim_max
                      , int & p
                      , Filtration_value & min_persistence) {
   namespace po = boost::program_options;
   po::options_description hidden("Hidden options");
   hidden.add_options()
-      ("input-file", po::value<std::string>(&simplex_tree_file),
-       "Name of file containing a simplex set. Format is one simplex per line (cf. reader_utils.h - read_simplex): Dim1 X11 X12 ... X1d Fil1  ");
+      ("input-file", po::value<std::string>(&filepoints),
+       "Name of file containing a point set. Format is one point per line:   X1 ... Xd ");
 
   po::options_description visible("Allowed options", 100);
   visible.add_options()
       ("help,h", "produce help message")
-      ("output-file,o", po::value<std::string>(&output_file)->default_value(std::string()),
+      ("output-file,o", po::value<std::string>(&filediag)->default_value(std::string()),
        "Name of file in which the persistence diagram is written. Default print in std::cout")
+      ("max-edge-length,r", po::value<Filtration_value>(&threshold)->default_value(0),
+       "Maximal length of an edge for the Rips complex construction.")
+      ("cpx-dimension,d", po::value<int>(&dim_max)->default_value(1),
+       "Maximal dimension of the Rips complex we want to compute.")
       ("field-charac,p", po::value<int>(&p)->default_value(11),
        "Characteristic p of the coefficient field Z/pZ for computing homology.")
       ("min-persistence,m", po::value<Filtration_value>(&min_persistence),
-       "Minimal lifetime of homology feature to be recorded. Default is 0");
+       "Minimal lifetime of homology feature to be recorded. Default is 0. Enter a negative value to see zero length intervals");
 
   po::positional_options_description pos;
   pos.add("input-file", 1);

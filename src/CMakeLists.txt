@@ -31,6 +31,10 @@ endif()
 
 find_package(CGAL)
 
+# Find TBB package for parallel sort - not mandatory, just optional.
+set(TBB_FIND_QUIETLY ON)
+find_package(TBB)
+
 if(NOT Boost_FOUND)
   message(FATAL_ERROR "NOTICE: This demo requires Boost and will not be compiled.")
 else()

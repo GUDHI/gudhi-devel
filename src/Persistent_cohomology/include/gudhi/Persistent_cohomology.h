@@ -27,7 +27,6 @@
 #include <gudhi/Persistent_cohomology/Field_Zp.h>
 #include <gudhi/Simple_object_pool.h>
 
-#include <boost/tuple/tuple.hpp>
 #include <boost/intrusive/set.hpp>
 #include <boost/pending/disjoint_sets.hpp>
 #include <boost/intrusive/list.hpp>
@@ -223,7 +222,7 @@ class Persistent_cohomology {
 // Sparse column type for the annotation of the boundary of an element.
   typedef std::vector<std::pair<Simplex_key, Arith_element> > A_ds_type;
 // Persistent interval type. The Arith_element field is used for the multi-field framework.
-  typedef boost::tuple<Simplex_handle, Simplex_handle, Arith_element> Persistent_interval;
+  typedef std::tuple<Simplex_handle, Simplex_handle, Arith_element> Persistent_interval;
 
   /** \brief Initializes the Persistent_cohomology class.
    *

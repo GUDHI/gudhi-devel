@@ -18,6 +18,11 @@ target_link_libraries(rips_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_O
    
 add_test(rips_persistence_3 ${CMAKE_CURRENT_BINARY_DIR}/rips_persistence ${CMAKE_SOURCE_DIR}/data/points/Kl.txt -r 0.25 -d 3 -p 3 -m 100)
    
+add_executable(parallel_rips_persistence parallel_rips_persistence.cpp)
+target_link_libraries(parallel_rips_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+   
+add_test(parallel_rips_persistence_3 ${CMAKE_CURRENT_BINARY_DIR}/parallel_rips_persistence ${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.txt -r 0.3 -d 3 -p 3 -m 100)
+   
 add_executable(persistence_from_file persistence_from_file.cpp)
 target_link_libraries(persistence_from_file ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
 add_test(persistence_from_file_3_2_0 ${CMAKE_CURRENT_BINARY_DIR}/persistence_from_file ${CMAKE_SOURCE_DIR}/data/points/bunny_5000.st -p 2 -m 0)
@@ -77,6 +82,4 @@ if(GMPXX_FOUND AND GMP_FOUND)
     # message(WARNING "CGAL not found.")
   endif()
    
-else()
-  # message(WARNING "GMP not found.")
 endif()

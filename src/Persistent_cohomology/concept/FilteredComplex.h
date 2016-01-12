@@ -65,9 +65,9 @@ struct FilteredComplex
   Simplex_key              key      ( Simplex_handle sh );
 /** \brief Returns the simplex associated to a key.
   *
-  * If key is different from null_key(), there must be a unique 
-  * simplex having this key. */  
-  Simplex_handle           simplex  ( Simplex_key key );
+  * If key is different from null_key(), returns the simplex that
+  * has index idx in the filtration. */
+  Simplex_handle           simplex  ( Simplex_key idx );
 /** \brief Assign a key to a simplex. */
   void                     assign_key(Simplex_handle sh, Simplex_key key);
  
