@@ -30,6 +30,7 @@
 
 #include <string>
 #include <vector>
+#include <limits>  // infinity
 
 using namespace Gudhi;
 using namespace Gudhi::persistent_cohomology;
@@ -114,7 +115,7 @@ void program_options(int argc, char * argv[]
       ("help,h", "produce help message")
       ("output-file,o", po::value<std::string>(&filediag)->default_value(std::string()),
        "Name of file in which the persistence diagram is written. Default print in std::cout")
-      ("max-edge-length,r", po::value<Filtration_value>(&threshold)->default_value(0),
+      ("max-edge-length,r", po::value<Filtration_value>(&threshold)->default_value(std::numeric_limits<Filtration_value>::infinity()),
        "Maximal length of an edge for the Rips complex construction.")
       ("cpx-dimension,d", po::value<int>(&dim_max)->default_value(1),
        "Maximal dimension of the Rips complex we want to compute.")

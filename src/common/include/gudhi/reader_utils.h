@@ -58,7 +58,9 @@ inline void read_points(std::string file_name, std::vector< std::vector< double 
     while (iss >> x) {
       point.push_back(x);
     }
-    points.push_back(point);
+    // Check for empty lines
+    if (!point.empty())
+      points.push_back(point);
   }
   in_file.close();
 }

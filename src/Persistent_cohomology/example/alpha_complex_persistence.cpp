@@ -1,34 +1,35 @@
 #include <iostream>
 #include <string>
 
+#include <boost/program_options.hpp>
+
 // to construct a Delaunay_triangulation from a OFF file
 #include <gudhi/Delaunay_triangulation_off_io.h>
 #include <gudhi/Alpha_complex.h>
 #include <gudhi/Persistent_cohomology.h>
 
-void usage(char * const progName) {
-  std::cerr << "Usage: " << progName << " filename.off alpha_square_max_value[double] " <<
-      "coeff_field_characteristic[integer > 0] min_persistence[double >= -1.0]" << std::endl;
-  std::cerr << "       i.e.: " << progName << " ../../data/points/alphacomplexdoc.off 60.0 2 0.02" << std::endl;
-  exit(-1); // ----- >>
-}
+void program_options(int argc, char * argv[]
+                     , std::string & off_file_points
+                     , std::string & output_file_diag
+                     , Filtration_value & alpha_square_max_value
+                     , int & coeff_field_characteristic
+                     , Filtration_value & min_persistence);
 
 int main(int argc, char **argv) {
-  if (argc != 5) {
-    std::cerr << "Error: Number of arguments (" << argc << ") is not correct" << std::endl;
-    usage(argv[0]);
-  }
+  std::string off_file_points;
+  std::string output_file_diag;
+  Filtration_value alpha_square_max_value;
+  int coeff_field_characteristic;
+  Filtration_value min_persistence;
+  
+  program_options(argc, argv, off_file_points, output_file_diag, alpha_square_max_value, coeff_field_characteristic, min_persistence);
 
-  std::string off_file_name(argv[1]);
-  double alpha_square_max_value = atof(argv[2]);
-  int coeff_field_characteristic = atoi(argv[3]);
-  double min_persistence = atof(argv[4]);
   
   // ----------------------------------------------------------------------------
   // Init of an alpha complex from an OFF file
   // ----------------------------------------------------------------------------
   typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kernel;
-  Gudhi::alphacomplex::Alpha_complex<Kernel> alpha_complex_from_file(off_file_name, alpha_square_max_value);
+  Gudhi::alphacomplex::Alpha_complex<Kernel> alpha_complex_from_file(off_file_points, alpha_square_max_value);
 
   // ----------------------------------------------------------------------------
   // Display information about the alpha complex
@@ -49,7 +50,66 @@ int main(int argc, char **argv) {
 
   pcoh.compute_persistent_cohomology(min_persistence);
 
-  pcoh.output_diagram();
+  // Output the diagram in filediag
+  if (output_file_diag.empty()) {
+    pcoh.output_diagram();
+  } else {
+    std::cout << "Result in file: " << output_file_diag << std::endl;
+    std::ofstream out(output_file_diag);
+    pcoh.output_diagram(out);
+    out.close();
+  }
 
   return 0;
+}
+
+void program_options(int argc, char * argv[]
+                     , std::string & off_file_points
+                     , std::string & output_file_diag
+                     , Filtration_value & alpha_square_max_value
+                     , int & coeff_field_characteristic
+                     , Filtration_value & min_persistence) {
+  namespace po = boost::program_options;
+  po::options_description hidden("Hidden options");
+  hidden.add_options()
+      ("input-file", po::value<std::string>(&off_file_points),
+       "Name of file containing a point set. Format is one point per line:   X1 ... Xd ");
+
+  po::options_description visible("Allowed options", 100);
+  visible.add_options()
+      ("help,h", "produce help message")
+      ("output-file,o", po::value<std::string>(&output_file_diag)->default_value(std::string()),
+       "Name of file in which the persistence diagram is written. Default print in std::cout")
+      ("max-alpha-square-value,r", po::value<Filtration_value>(&alpha_square_max_value)->default_value(std::numeric_limits<Filtration_value>::infinity()),
+       "Maximal alpha square value for the Alpha complex construction.")
+      ("field-charac,p", po::value<int>(&coeff_field_characteristic)->default_value(11),
+       "Characteristic p of the coefficient field Z/pZ for computing homology.")
+      ("min-persistence,m", po::value<Filtration_value>(&min_persistence),
+       "Minimal lifetime of homology feature to be recorded. Default is 0. Enter a negative value to see zero length intervals");
+
+  po::positional_options_description pos;
+  pos.add("input-file", 1);
+
+  po::options_description all;
+  all.add(visible).add(hidden);
+
+  po::variables_map vm;
+  po::store(po::command_line_parser(argc, argv).
+            options(all).positional(pos).run(), vm);
+  po::notify(vm);
+
+  if (vm.count("help") || !vm.count("input-file")) {
+    std::cout << std::endl;
+    std::cout << "Compute the persistent homology with coefficient field Z/pZ \n";
+    std::cout << "of an Alpha complex defined on a set of input points.\n \n";
+    std::cout << "The output diagram contains one bar per line, written with the convention: \n";
+    std::cout << "   p   dim b d \n";
+    std::cout << "where dim is the dimension of the homological feature,\n";
+    std::cout << "b and d are respectively the birth and death of the feature and \n";
+    std::cout << "p is the characteristic of the field Z/pZ used for homology coefficients." << std::endl << std::endl;
+
+    std::cout << "Usage: " << argv[0] << " [options] input-file" << std::endl << std::endl;
+    std::cout << visible << std::endl;
+    std::abort();
+  }
 }

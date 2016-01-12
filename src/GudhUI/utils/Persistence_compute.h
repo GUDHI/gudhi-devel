@@ -46,10 +46,6 @@ struct Persistence_params {
  * Show persistence into output stream
  */
 template<typename SkBlComplex> class Persistence_compute {
- private:
-  SkBlComplex& complex_;
-  std::ostream& stream_;
-
  public:
   typedef typename SkBlComplex::Vertex_handle Vertex_handle;
   typedef typename SkBlComplex::Edge_handle Edge_handle;
@@ -61,9 +57,7 @@ template<typename SkBlComplex> class Persistence_compute {
    * double threshold
    * int p for coefficient Z_p
    */
-  Persistence_compute(SkBlComplex& complex, std::ostream& stream, const Persistence_params& params) :
-      // double threshold = 0.5,unsigned dim_max = 8):
-      complex_(complex), stream_(stream) {
+  Persistence_compute(SkBlComplex& complex, std::ostream& stream, const Persistence_params& params) {
     // for now everything is copied, todo boost adapt iterators to points of SkBlComplex instead of copying to an
     // initial vector
     typedef std::vector<double> Point_t;
@@ -87,10 +81,11 @@ template<typename SkBlComplex> class Persistence_compute {
     pcoh.init_coefficients(params.p);
     // put params.min_pers
     pcoh.compute_persistent_cohomology(params.min_pers);
-    stream_ << "persistence: \n";
-    stream_ << "p dimension birth death: \n";
+    stream << "persistence: \n";
+    stream << "p dimension birth death: \n";
 
-    pcoh.output_diagram(stream_);
+    pcoh.output_diagram(stream);
+    
   }
 };
 

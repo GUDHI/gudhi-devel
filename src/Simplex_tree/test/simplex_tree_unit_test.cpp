@@ -351,7 +351,7 @@ BOOST_AUTO_TEST_CASE(simplex_tree_insertion) {
   // Display the Simplex_tree - Can not be done in the middle of 2 inserts
   std::cout << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
   std::cout << "   - dimension " << st.dimension() << "   - filtration " << st.filtration() << std::endl;
-  std::cout << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
+  std::cout << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
   for (auto f_simplex : st.filtration_simplex_range()) {
     std::cout << "   " << "[" << st.filtration(f_simplex) << "] ";
     for (auto vertex : st.simplex_vertex_range(f_simplex)) {
@@ -549,7 +549,7 @@ BOOST_AUTO_TEST_CASE(NSimplexAndSubfaces_tree_insertion) {
   // Display the Simplex_tree - Can not be done in the middle of 2 inserts
   std::cout << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
   std::cout << "   - dimension " << st.dimension() << "   - filtration " << st.filtration() << std::endl;
-  std::cout << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
+  std::cout << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
   for (auto f_simplex : st.filtration_simplex_range()) {
     std::cout << "   " << "[" << st.filtration(f_simplex) << "] ";
     for (auto vertex : st.simplex_vertex_range(f_simplex)) {
@@ -805,7 +805,7 @@ struct MyOptions : Simplex_tree_options_full_featured {
 };
 typedef Simplex_tree<MyOptions> miniST;
 
-/*BOOST_AUTO_TEST_CASE(remove_maximal_simplex) {
+BOOST_AUTO_TEST_CASE(remove_maximal_simplex) {
   std::cout << "********************************************************************" << std::endl;
   std::cout << "REMOVE MAXIMAL SIMPLEX" << std::endl;
 
@@ -887,7 +887,7 @@ typedef Simplex_tree<MyOptions> miniST;
   st.remove_maximal_simplex(st.find({7}));
   
   BOOST_CHECK(st == st_wo_seven);
-}*/
+}
 
 BOOST_AUTO_TEST_CASE(prune_above_filtration) {
   std::cout << "********************************************************************" << std::endl;
@@ -939,10 +939,10 @@ BOOST_AUTO_TEST_CASE(prune_above_filtration) {
   st.prune_above_filtration(5.0);
   BOOST_CHECK(st == st_complete);
 
-  // Display the Simplex_tree - Can not be done in the middle of 2 inserts
+  // Display the Simplex_tree
   std::cout << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
   std::cout << "   - dimension " << st.dimension() << "   - filtration " << st.filtration() << std::endl;
-  std::cout << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
+  std::cout << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
   for (auto f_simplex : st.filtration_simplex_range()) {
     std::cout << "   " << "[" << st.filtration(f_simplex) << "] ";
     for (auto vertex : st.simplex_vertex_range(f_simplex)) {
@@ -955,35 +955,45 @@ BOOST_AUTO_TEST_CASE(prune_above_filtration) {
   // Set the st_pruned filtration for operator==
   st_pruned.set_filtration(2.5);
   st.prune_above_filtration(2.5);
-  /*BOOST_CHECK(st == st_pruned);
+  BOOST_CHECK(st == st_pruned);
+
+  // Display the Simplex_tree
+  std::cout << "The complex pruned at 2.5 contains " << st.num_simplices() << " simplices" << std::endl;
+  std::cout << "   - dimension " << st.dimension() << "   - filtration " << st.filtration() << std::endl;
+  std::cout << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
+  for (auto f_simplex : st.filtration_simplex_range()) {
+    std::cout << "   " << "[" << st.filtration(f_simplex) << "] ";
+    for (auto vertex : st.simplex_vertex_range(f_simplex)) {
+      std::cout << (int) vertex << " ";
+    }
+    std::cout << std::endl;
+  }
 
   st_pruned.set_filtration(2.0);
   st.prune_above_filtration(2.0);
   BOOST_CHECK(st == st_pruned);
-*/
-/*  std::cout << "The complex contains " << st.num_simplices() << " simplices --------------------------" << std::endl;
-  std::cout << "   - dimension " << st.dimension() << "   - filtration " << st.filtration() << std::endl;
-  st.print_tree();
 
-  std::cout << "The pruned complex contains " << st_pruned.num_simplices() << " simplices --------------------------" << std::endl;
-  std::cout << "   - dimension " << st_pruned.dimension() << "   - filtration " << st_pruned.filtration() << std::endl;
-  st_pruned.print_tree();
-  
   typeST st_empty;
   // FIXME
   st_empty.set_dimension(3);
   st.prune_above_filtration(0.0);
- */
-  /*BOOST_CHECK(st == st_empty);
+
+    // Display the Simplex_tree
+  std::cout << "The complex pruned at 0.0 contains " << st.num_simplices() << " simplices" << std::endl;
+  std::cout << "   - dimension " << st.dimension() << "   - filtration " << st.filtration() << std::endl;
+  std::cout << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
+  for (auto f_simplex : st.filtration_simplex_range()) {
+    std::cout << "   " << "[" << st.filtration(f_simplex) << "] ";
+    for (auto vertex : st.simplex_vertex_range(f_simplex)) {
+      std::cout << (int) vertex << " ";
+    }
+    std::cout << std::endl;
+  }
+
+  BOOST_CHECK(st == st_empty);
 
   // Test case to the limit
   st.prune_above_filtration(-1.0);
   st_empty.set_filtration(-1.0);
   BOOST_CHECK(st == st_empty);
-*/
 }
-
-/*BOOST_AUTO_TEST_CASE(sanitizer) {
-  int a[2] = {1, 0};
-  int b=a[2];
-}*/

@@ -39,7 +39,7 @@ class Bar_code_persistence {
         max_death = death;
   }
 
-  void show() {
+  void show(const std::string& window_title) {
     // Create a view, put a scene in it
     QGraphicsView * view = new QGraphicsView();
     QGraphicsScene * scene = new QGraphicsScene();
@@ -78,6 +78,7 @@ class Bar_code_persistence {
       QGraphicsTextItem* dimText = scene->addText(scale_value, QFont("Helvetica", 8));
       dimText->setPos(scale - (3.0 * scale_value.size()), height + 9.0 * (modulo % 2));
     }
+    view->setWindowTitle(window_title.c_str());
     // Show the view
     view->show();
   }

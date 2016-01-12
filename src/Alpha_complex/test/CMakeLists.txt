@@ -18,8 +18,6 @@ if(CGAL_FOUND)
       add_executable ( AlphaComplexUT Alpha_complex_unit_test.cpp )
       target_link_libraries(AlphaComplexUT  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
-      add_executable ( cerr cerr.cpp )
-
       # Do not forget to copy test files in current binary dir
       file(COPY "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
