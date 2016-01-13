@@ -54,11 +54,11 @@ lexicographical order. See CubicalOneSphere.txt or CubicalTwoSphere.txt for exam
         return 1;
     }
 
-    Bitmap_cubical_complex<double> b( argv[1] );
+    Bitmap_cubical_complex< Bitmap_cubical_complex_base<double> > b( argv[1] );
 
 
     // Compute the persistence diagram of the complex
-    persistent_cohomology::Persistent_cohomology< Bitmap_cubical_complex<double>, Field_Zp > pcoh(b);
+    persistent_cohomology::Persistent_cohomology< Bitmap_cubical_complex< Bitmap_cubical_complex_base<double> >, Field_Zp > pcoh(b);
     pcoh.init_coefficients( p ); //initilizes the coefficient field for homology
     pcoh.compute_persistent_cohomology( min_persistence );
 

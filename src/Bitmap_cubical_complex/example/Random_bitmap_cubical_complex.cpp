@@ -74,11 +74,11 @@ The program will create random cubical complex of that sizes and compute persist
 
 
 
-    Bitmap_cubical_complex<double> b( sizes , data );
+    Bitmap_cubical_complex< Bitmap_cubical_complex_base<double> > b( sizes , data );
 
 
     // Compute the persistence diagram of the complex
-    persistent_cohomology::Persistent_cohomology< Bitmap_cubical_complex<double>, Field_Zp > pcoh(b);
+    persistent_cohomology::Persistent_cohomology< Bitmap_cubical_complex< Bitmap_cubical_complex_base<double> >, Field_Zp > pcoh(b);
     pcoh.init_coefficients( p ); //initilizes the coefficient field for homology
     pcoh.compute_persistent_cohomology( min_persistence );
 

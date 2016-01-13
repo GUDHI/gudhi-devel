@@ -22,9 +22,9 @@
 
 
 #include <gudhi/reader_utils.h>
-#include <gudhi/Bitmap_cubical_complex_periodic_boundary_conditions.h>
+#include <gudhi/Bitmap_cubical_complex.h>
+#include <gudhi/Bitmap_cubical_complex_periodic_boundary_conditions_base.h>
 #include <gudhi/Persistent_cohomology.h>
-
 
 using namespace Gudhi;
 using namespace Gudhi::Cubical_complex;
@@ -53,11 +53,14 @@ lexicographical order. See CubicalOneSphere.txt or CubicalTwoSphere.txt for exam
         return 1;
     }
 
-    Bitmap_cubical_complex_periodic_boundary_conditions<double> b( argv[1] );
+    Bitmap_cubical_complex< Bitmap_cubical_complex_periodic_boundary_conditions_base<double> > b( argv[1] );
 
 
     // Compute the persistence diagram of the complex
-    persistent_cohomology::Persistent_cohomology< Bitmap_cubical_complex_periodic_boundary_conditions<double>, Field_Zp > pcoh(b,true);
+    persistent_cohomology::Persistent_cohomology<
+    Bitmap_cubical_complex< Bitmap_cubical_complex_periodic_boundary_conditions_base<double>   >
+    , Field_Zp
+    > pcoh(b,true);
     pcoh.init_coefficients( p ); //initilizes the coefficient field for homology
     pcoh.compute_persistent_cohomology( min_persistence );
 
