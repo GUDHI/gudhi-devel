@@ -33,6 +33,9 @@
 
 class Landmark_choice_by_furthest_point {
 
+private:
+  typedef std::vector<int> typeVectorVertex;
+  
 public:
   
 /** 
@@ -57,45 +60,43 @@ public:
       double curr_max_dist = 0;                                 // used for defining the furhest point from L
       const double infty = std::numeric_limits<double>::infinity(); // infinity (see next entry)
       std::vector< double > dist_to_L(nb_points,infty);         // vector of current distances to L from points
+      int dim = points.begin()->size();
       
-    //CHOICE OF THE FIRST LANDMARK
-    int rand_int = rand() % nb_points;
-    int curr_max_w = rand_int; //For testing purposes a pseudo-random number is used here
-
-    for (current_number_of_landmarks = 0; current_number_of_landmarks != nbL; current_number_of_landmarks++)
-      {
-        //curr_max_w at this point is the next landmark
-        chosen_landmarks.push_back(curr_max_w);
-        for (auto v: knn)
-          v.push_back(current_number_of_landmarks);
-        int i = 0;
-        for (const auto& p: points)
-          {
-            // used to stock the distance from the current point to L
-            double curr_dist = euclidean_distance(p, points.begin() + chosen_landmarks[current_number_of_landmarks]);
-            wit_land_dist[i].push_back(curr_dist);
-            knn[i].push_back(current_number_of_landmarks);
-            if (curr_dist < dist_to_L[i])
-              dist_to_L[i] = curr_dist;
-            int j = current_number_of_landmarks;
-            while (j > 0 && wit_land_dist[i][j-1] > wit_land_dist[i][j])
-              {
-                std::swap(knn[i][j], knn[i][j-1]);
-                std::swap(wit_land_dist[i][j-1], wit_land_dist[i][j-1]);
-                --j;
-              }
-            ++i;
-          }
-        curr_max_dist = 0;
-        for (auto dist: dist_to_L) {
-          if (dist > curr_max_dist)
+      int rand_int = rand() % nb_points;
+      int curr_max_w = rand_int; //For testing purposes a pseudo-random number is used here
+      
+      for (current_number_of_landmarks = 0; current_number_of_landmarks != nbL; current_number_of_landmarks++)
+        {
+          //curr_max_w at this point is the next landmark
+          chosen_landmarks.push_back(curr_max_w);
+          for (auto& v: knn)
+            v.push_back(current_number_of_landmarks);
+          unsigned i = 0;
+          for (auto& p: points)
             {
-              curr_max_dist = dist;
-              curr_max_w = i;
+              double curr_dist = euclidean_distance(p, *(points.begin() + chosen_landmarks[current_number_of_landmarks]));
+              wit_land_dist[i].push_back(curr_dist);
+              knn[i].push_back(current_number_of_landmarks);
+              if (curr_dist < dist_to_L[i])
+                dist_to_L[i] = curr_dist;
+              int j = current_number_of_landmarks;
+              while (j > 0 && wit_land_dist[i][j-1] > wit_land_dist[i][j])
+                {
+                  std::swap(knn[i][j], knn[i][j-1]);
+                  std::swap(wit_land_dist[i][j-1], wit_land_dist[i][j-1]);
+                  --j;
+                }
+              ++i;
             }
+          curr_max_dist = 0;
+          for (i = 0; i < dist_to_L.size(); i++)
+            if (dist_to_L[i] > curr_max_dist)
+              {
+                curr_max_dist = dist_to_L[i];
+                curr_max_w = i;
+              }
         }
-      }
-  }
+    }
 
 };
 

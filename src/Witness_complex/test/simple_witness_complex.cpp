@@ -51,8 +51,5 @@ int main (int argc, char * const argv[])
   typeVectorVertex witness11 = {5,6,1,0,2,3,4}; knn.push_back(witness11);
   typeVectorVertex witness12 = {1,6,0,5,2,3,4}; knn.push_back(witness12);
   WitnessComplex witnessComplex(knn, complex, 7, 7);
-  if (witnessComplex.is_witness_complex(knn, true))
-    std::cout << "Witness complex is good\n";
-  else
-    std::cout << "Witness complex is bad\n";
+  assert(witnessComplex.is_witness_complex(knn, true));
 }
