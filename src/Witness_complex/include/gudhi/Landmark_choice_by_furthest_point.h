@@ -60,7 +60,7 @@ public:
       double curr_max_dist = 0;                                 // used for defining the furhest point from L
       const double infty = std::numeric_limits<double>::infinity(); // infinity (see next entry)
       std::vector< double > dist_to_L(nb_points,infty);         // vector of current distances to L from points
-      int dim = points.begin()->size();
+      //int dim = points.begin()->size();
       
       int rand_int = rand() % nb_points;
       int curr_max_w = rand_int; //For testing purposes a pseudo-random number is used here
@@ -69,8 +69,6 @@ public:
         {
           //curr_max_w at this point is the next landmark
           chosen_landmarks.push_back(curr_max_w);
-          for (auto& v: knn)
-            v.push_back(current_number_of_landmarks);
           unsigned i = 0;
           for (auto& p: points)
             {
@@ -79,13 +77,6 @@ public:
               knn[i].push_back(current_number_of_landmarks);
               if (curr_dist < dist_to_L[i])
                 dist_to_L[i] = curr_dist;
-              int j = current_number_of_landmarks;
-              while (j > 0 && wit_land_dist[i][j-1] > wit_land_dist[i][j])
-                {
-                  std::swap(knn[i][j], knn[i][j-1]);
-                  std::swap(wit_land_dist[i][j-1], wit_land_dist[i][j-1]);
-                  --j;
-                }
               ++i;
             }
           curr_max_dist = 0;
@@ -96,6 +87,11 @@ public:
                 curr_max_w = i;
               }
         }
+      for (unsigned i = 0; i < points.size(); ++i)
+        std::sort(knn[i].begin(),
+                  knn[i].end(),
+                  [&wit_land_dist, i](int a, int b)
+                  { return wit_land_dist[i][a] < wit_land_dist[i][b]; });
     }
 
 };

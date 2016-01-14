@@ -47,7 +47,7 @@ int main (int argc, char * const argv[])
       for (double k = 0; k < 10; k += 1.0)
         points.push_back(Point({i,j,k}));
 
-  bool b_print_output = true;
+  bool b_print_output = false;
   // First test: random choice
   Simplex_tree<> complex1;
   Landmark_choice_by_random_point lcrp(points, 100, knn);
