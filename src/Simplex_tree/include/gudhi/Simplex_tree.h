@@ -325,11 +325,10 @@ class Simplex_tree {
   Simplex_tree(const Simplex_tree& simplex_source)
       : null_vertex_(simplex_source.null_vertex_),
       threshold_(simplex_source.threshold_),
+      root_(nullptr, null_vertex_ , simplex_source.root_.members_),
       filtration_vect_(),
       dimension_(simplex_source.dimension_) {
     auto root_source = simplex_source.root_;
-    auto memb_source = root_source.members();
-    root_ = Siblings(nullptr, null_vertex_, memb_source);
     rec_copy(&root_, &root_source);
   }
 
@@ -341,7 +340,7 @@ class Simplex_tree {
         Siblings * newsib = new Siblings(sib, sh_source->first);
         newsib->members_.reserve(sh_source->second.children()->members().size());
         for (auto & child : sh_source->second.children()->members())
-          newsib->members_.emplace_hint(newsib->members_.end(), child.first, Node(sib, child.second.filtration()));
+          newsib->members_.emplace_hint(newsib->members_.end(), child.first, Node(newsib, child.second.filtration()));
         rec_copy(newsib, sh_source->second.children());
         sh->second.assign_children(newsib);
       }
@@ -1105,6 +1104,43 @@ class Simplex_tree {
       os << filtration(sh) << " \n";
     }
   }
+/***************************************************************************************************************/  
+ public:
+  /** \brief Prints the simplex_tree hierarchically. 
+   * Since it prints the vertices recursively, one can watch its tree shape.
+   */
+  void debug_tree() {
+    std::cout << "{" << &root_ << "} -------------------------------------------------------------------" << std::endl;    
+    for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh) {
+      std::cout << sh->first << " [" << sh->second.filtration() << "] ";
+      if (has_children(sh)) {
+        rec_debug_tree(sh->second.children());
+      } else {
+        std::cout << " {- " << sh->second.children() << "} ";
+      }
+      std::cout << std::endl;
+    }
+    std::cout << "--------------------------------------------------------------------------------------" << std::endl;    
+  }
+
+
+  /** \brief Recursively prints the simplex_tree, using depth first search. */
+ private:
+  void rec_debug_tree(Siblings * sib) {
+    std::cout << " {" << sib << "} (";
+    for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh) {
+      std::cout << " " << sh->first << " [" << sh->second.filtration() << "] ";
+      if (has_children(sh)) {
+        rec_debug_tree(sh->second.children());
+      } else {
+        std::cout << " {- " << sh->second.children() << "} ";
+      }
+    }
+    std::cout << ")";
+  }
+
+/*****************************************************************************************************************/
+
 
  private:
   Vertex_handle null_vertex_;
