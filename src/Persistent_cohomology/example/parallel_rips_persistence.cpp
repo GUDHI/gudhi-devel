@@ -2,9 +2,10 @@
  *    (Geometric Understanding in Higher Dimensions) is a generic C++ 
  *    library for computational topology.
  *
- *    Author(s):       Clément Maria
+ *    Author(s):       Clément Maria, Marc Glisse
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Méditerranée (France)
+ *    Copyright (C) 2014  INRIA Sophia Antipolis-Méditerranée (France),
+ *                  2015  INRIA Saclay Île de France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -25,11 +26,23 @@
 #include <gudhi/distance_functions.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
+#include <gudhi/Hasse_complex.h>
 
 #include <boost/program_options.hpp>
 
+#ifdef GUDHI_USE_TBB
+#include <tbb/task_scheduler_init.h>
+#endif
+
 #include <string>
 #include <vector>
+
+////////////////////////////////////////////////////////////////
+//                                                            //
+//  WARNING: persistence computation itself is not parallel,  //
+//  and this uses more memory than rips_persistence.          //
+//                                                            //
+////////////////////////////////////////////////////////////////
 
 using namespace Gudhi;
 using namespace Gudhi::persistent_cohomology;
@@ -65,8 +78,7 @@ int main(int argc, char * argv[]) {
                                                , euclidean_distance<Point_t>);
 
   // Construct the Rips complex in a Simplex Tree
-  typedef Simplex_tree<Simplex_tree_options_fast_persistence> ST;
-  ST st;
+  Simplex_tree<>& st = *new Simplex_tree<>;
   // insert the proximity graph in the simplex tree
   st.insert_graph(prox_graph);
   // expand the graph until dimension dim_max
@@ -75,11 +87,29 @@ int main(int argc, char * argv[]) {
   std::cout << "The complex contains " << st.num_simplices() << " simplices \n";
   std::cout << "   and has dimension " << st.dimension() << " \n";
 
+#ifdef GUDHI_USE_TBB
+  // Unnecessary, but clarifies which operations are parallel.
+  tbb::task_scheduler_init ts;
+#endif
+
   // Sort the simplices in the order of the filtration
   st.initialize_filtration();
+  int count = 0;
+  for (auto sh : st.filtration_simplex_range())
+    st.assign_key(sh, count++);
+
+  // Convert to a more convenient representation.
+  Hasse_complex<> hcpx(st);
+
+#ifdef GUDHI_USE_TBB
+  ts.terminate();
+#endif
+
+  // Free some space.
+  delete &st;
 
   // Compute the persistence diagram of the complex
-  persistent_cohomology::Persistent_cohomology<ST, Field_Zp > pcoh(st);
+  persistent_cohomology::Persistent_cohomology< Hasse_complex<>, Field_Zp > pcoh(hcpx);
   // initializes the coefficient field for homology
   pcoh.init_coefficients(p);
 
@@ -93,8 +123,6 @@ int main(int argc, char * argv[]) {
     pcoh.output_diagram(out);
     out.close();
   }
-
-  return 0;
 }
 
 void program_options(int argc, char * argv[]

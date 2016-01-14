@@ -23,11 +23,17 @@
 #ifndef HASSE_COMPLEX_H_
 #define HASSE_COMPLEX_H_
 
+#include <gudhi/allocator.h>
+
 #include <boost/iterator/counting_iterator.hpp>
 
 #include <algorithm>
 #include <utility>  // for pair
 #include <vector>
+
+#ifdef GUDHI_USE_TBB
+#include <tbb/parallel_for.h>
+#endif
 
 namespace Gudhi {
 
@@ -38,8 +44,7 @@ struct Hasse_simplex {
   template< class Complex_ds >
   Hasse_simplex(Complex_ds & cpx
                 , typename Complex_ds::Simplex_handle sh)
-      : key_(cpx.key(sh))
-      , filtration_(cpx.filtration(sh))
+      : filtration_(cpx.filtration(sh))
       , boundary_() {
     boundary_.reserve(cpx.dimension(sh) + 1);
     for (auto b_sh : cpx.boundary_simplex_range(sh)) {
@@ -49,7 +54,7 @@ struct Hasse_simplex {
 
   Hasse_simplex(typename HasseCpx::Simplex_key key
                 , typename HasseCpx::Filtration_value fil
-                , std::vector<typename HasseCpx::Simplex_handle> boundary)
+                , std::vector<typename HasseCpx::Simplex_handle> const& boundary)
       : key_(key)
       , filtration_(fil)
       , boundary_(boundary) { }
@@ -97,20 +102,24 @@ class Hasse_complex {
 
   template < class Complex_ds >
   Hasse_complex(Complex_ds & cpx)
-      : complex_()
+      : complex_(cpx.num_simplices())
       , vertices_()
       , threshold_(cpx.filtration())
       , num_vertices_()
       , dim_max_(cpx.dimension()) {
-    complex_.reserve(cpx.num_simplices());
-    int idx = 0;
-    for (auto cpx_sh : cpx.filtration_simplex_range()) {
-      complex_.push_back(Hasse_simp(cpx, cpx_sh));
-      if (dimension(idx) == 0) {
+    int size = complex_.size();
+#ifdef GUDHI_USE_TBB
+    tbb::parallel_for(0, size, [&](int idx){new (&complex_[idx]) Hasse_simp(cpx, cpx.simplex(idx));});
+    for (int idx=0; idx < size; ++idx)
+      if (complex_[idx].boundary_.empty())
         vertices_.push_back(idx);
-      }
-      ++idx;
+#else
+    for (int idx=0; idx < size; ++idx) {
+      new (&complex_[idx]) Hasse_simp(cpx, cpx.simplex(idx));
+      if (complex_[idx].boundary_.empty())
+        vertices_.push_back(idx);
     }
+#endif
   }
 
   Hasse_complex()
@@ -187,14 +196,15 @@ class Hasse_complex {
   }
 
   void initialize_filtration() {
+    // Setting the keys is done by pcoh, Simplex_tree doesn't do it either.
+#if 0
     Simplex_key key = 0;
-    for (auto & h_simp : complex_) {
-      h_simp.key_ = key;
-      ++key;
-    }
+    for (auto & h_simp : complex_)
+      h_simp.key_ = key++;
+#endif
   }
 
-  std::vector< Hasse_simp > complex_;
+  std::vector< Hasse_simp, Gudhi::no_init_allocator<Hasse_simp> > complex_;
   std::vector<Simplex_handle> vertices_;
   Filtration_value threshold_;
   size_t num_vertices_;
@@ -218,7 +228,7 @@ std::istream& operator>>(std::istream & is
   // read all simplices in the file as a list of vertices
   while (read_hasse_simplex(is, boundary, fil)) {
     // insert every simplex in the simplex tree
-    hcpx.complex_.push_back(Hasse_simplex< Hasse_complex<T1, T2, T3> >(key, fil, boundary));
+    hcpx.complex_.emplace_back(key, fil, boundary);
 
     if (max_dim < hcpx.dimension(key)) {
       max_dim = hcpx.dimension(key);

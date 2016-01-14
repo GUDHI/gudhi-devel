@@ -23,7 +23,6 @@
 #ifndef PERSISTENT_COHOMOLOGY_PERSISTENT_COHOMOLOGY_COLUMN_H_
 #define PERSISTENT_COHOMOLOGY_PERSISTENT_COHOMOLOGY_COLUMN_H_
 
-#include <boost/tuple/tuple.hpp>
 #include <boost/intrusive/set.hpp>
 #include <boost/intrusive/list.hpp>
 

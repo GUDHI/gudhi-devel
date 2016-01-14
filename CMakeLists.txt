@@ -34,6 +34,10 @@ set(Boost_USE_STATIC_RUNTIME    OFF)
 
 find_package(CGAL)
 
+# Find TBB package for parallel sort - not mandatory, just optional.
+set(TBB_FIND_QUIETLY ON)
+find_package(TBB)
+
 # Required programs for unitary tests purpose
 FIND_PROGRAM( LCOV_PATH lcov )
 if (LCOV_PATH)
