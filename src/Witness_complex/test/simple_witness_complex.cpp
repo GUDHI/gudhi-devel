@@ -22,9 +22,8 @@
 
 #include <iostream>
 #include <ctime>
-//#include "gudhi/graph_simplicial_complex.h"
-#include "gudhi/Simplex_tree.h"
-#include "gudhi/Witness_complex.h"
+#include <gudhi/Simplex_tree.h>
+#include <gudhi/Witness_complex.h>
 
 using namespace Gudhi;
 

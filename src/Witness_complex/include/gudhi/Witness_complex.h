@@ -27,7 +27,7 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include <algorithm>
 #include <utility>
-#include "gudhi/distance_functions.h"
+#include <gudhi/distance_functions.h>
 #include <vector>
 #include <list>
 #include <set>

@@ -22,11 +22,10 @@
 
 #include <iostream>
 #include <ctime>
-//#include "gudhi/graph_simplicial_complex.h"
-#include "gudhi/Simplex_tree.h"
-#include "gudhi/Witness_complex.h"
-#include "gudhi/Landmark_choice_by_random_point.h"
-#include "gudhi/Landmark_choice_by_furthest_point.h"
+#include <gudhi/Simplex_tree.h>
+#include <gudhi/Witness_complex.h>
+#include <gudhi/Landmark_choice_by_random_point.h>
+#include <gudhi/Landmark_choice_by_furthest_point.h>
 
 
 using namespace Gudhi;
