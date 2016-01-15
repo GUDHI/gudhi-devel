@@ -29,6 +29,7 @@
 
 
 using namespace Gudhi;
+using namespace Gudhi::witness_complex;
 
 typedef std::vector< Vertex_handle > typeVectorVertex;
 typedef Witness_complex<Simplex_tree<>> WitnessComplex;

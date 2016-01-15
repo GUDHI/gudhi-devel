@@ -33,6 +33,7 @@
 #include "gudhi/reader_utils.h"
 
 using namespace Gudhi;
+using namespace Gudhi::witness_complex;
 
 typedef std::vector< Vertex_handle > typeVectorVertex;
 typedef std::vector< std::vector <double> > Point_Vector;

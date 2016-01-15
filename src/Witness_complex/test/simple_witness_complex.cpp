@@ -26,11 +26,10 @@
 #include <gudhi/Witness_complex.h>
 
 using namespace Gudhi;
+using namespace Gudhi::witness_complex;
 
 typedef std::vector< Vertex_handle > typeVectorVertex;
 typedef Witness_complex<Simplex_tree<>> WitnessComplex;
-//typedef std::pair<typeVectorVertex, Filtration_value> typeSimplex;
-//typedef std::pair< Simplex_tree<>::Simplex_handle, bool > typePairSimplexBool;
 
 int main (int argc, char * const argv[])
 {
@@ -50,5 +49,5 @@ int main (int argc, char * const argv[])
   typeVectorVertex witness11 = {5,6,1,0,2,3,4}; knn.push_back(witness11);
   typeVectorVertex witness12 = {1,6,0,5,2,3,4}; knn.push_back(witness12);
   WitnessComplex witnessComplex(knn, complex, 7, 7);
-  assert(witnessComplex.is_witness_complex(knn, true));
+  assert(witnessComplex.is_witness_complex(knn, false));
 }

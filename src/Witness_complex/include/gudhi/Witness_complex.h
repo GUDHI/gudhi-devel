@@ -44,7 +44,8 @@
 
 namespace Gudhi {
 
-
+  namespace witness_complex {
+  
   /** 
       \class Witness_complex
       \brief Constructs the witness complex for the given set of witnesses and landmarks.
@@ -256,13 +257,13 @@ namespace Gudhi {
               return false;
             }
         }
-      return true; // Arrive here if the not_witnessed check failed all the time
+      return true;
     }
 
     
-}; //class Witness_complex
+  }; //class Witness_complex
 
-
+  }  //namespace witness_complex
   
 } // namespace Guhdi
 

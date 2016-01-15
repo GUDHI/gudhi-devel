@@ -23,6 +23,10 @@
 #ifndef GUDHI_LANDMARK_CHOICE_BY_FURTHEST_POINT_H_
 #define GUDHI_LANDMARK_CHOICE_BY_FURTHEST_POINT_H_
 
+namespace Gudhi {
+
+namespace witness_complex {
+
 /**
  *  \class Landmark_choice_by_furthest_point
  *  \brief The class `Landmark_choice_by_furthest_point` allows to construct the matrix
@@ -95,5 +99,9 @@ public:
     }
 
 };
+
+}
+
+}
 
 #endif
