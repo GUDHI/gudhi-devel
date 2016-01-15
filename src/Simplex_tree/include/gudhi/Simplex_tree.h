@@ -47,6 +47,7 @@
 #include <stdexcept>
 #include <limits>  // Inf
 #include <initializer_list>
+#include <algorithm> // for std::max
 
 namespace Gudhi {
 /** \defgroup simplex_tree Filtered Complexes
@@ -127,6 +128,10 @@ class Simplex_tree {
   /* \brief Set of nodes sharing a same parent in the simplex tree. */
   /* \brief Set of nodes sharing a same parent in the simplex tree. */
   typedef Simplex_tree_siblings<Simplex_tree, Dictionary> Siblings;
+
+  /** \brief Element of a flat_map.
+   * 'value_type' is Map_element. */
+  typedef typename std::pair<Vertex_handle, Node> Map_element;
 
   struct Key_simplex_base_real {
     Key_simplex_base_real() : key_(-1) {}
@@ -221,7 +226,7 @@ class Simplex_tree {
    *
    * 'value_type' is Simplex_handle. */
   typedef typename Filtration_simplex_range::const_iterator Filtration_simplex_iterator;
-
+  
   /* @} */  // end name range and iterator types
   /** \name Range and iterator methods
    * @{ */
@@ -327,11 +332,10 @@ class Simplex_tree {
   Simplex_tree(const Simplex_tree& simplex_source)
       : null_vertex_(simplex_source.null_vertex_),
       threshold_(simplex_source.threshold_),
+      root_(nullptr, null_vertex_ , simplex_source.root_.members_),
       filtration_vect_(),
       dimension_(simplex_source.dimension_) {
     auto root_source = simplex_source.root_;
-    auto memb_source = root_source.members();
-    root_ = Siblings(nullptr, null_vertex_, memb_source);
     rec_copy(&root_, &root_source);
   }
 
@@ -343,7 +347,7 @@ class Simplex_tree {
         Siblings * newsib = new Siblings(sib, sh_source->first);
         newsib->members_.reserve(sh_source->second.children()->members().size());
         for (auto & child : sh_source->second.children()->members())
-          newsib->members_.emplace_hint(newsib->members_.end(), child.first, Node(sib, child.second.filtration()));
+          newsib->members_.emplace_hint(newsib->members_.end(), child.first, Node(newsib, child.second.filtration()));
         rec_copy(newsib, sh_source->second.children());
         sh->second.assign_children(newsib);
       }
@@ -1127,9 +1131,15 @@ class Simplex_tree {
    */
   bool make_filtration_non_decreasing() {
     bool modified = false;
+
+    // Find the maximum filtration value in the border
+    Simplex_handle max_border_value = std::max_element( std::begin(root_.members()), std::end(root_.members()),
+                                                       [](const Map_element& sh1, const Map_element& sh2) {
+                                                         return sh1.second.filtration() < sh2.second.filtration();
+                                                       });
     for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh) {
       if (has_children(sh)) {
-        modified |= rec_make_filtration_non_decreasing(sh->second.children(), sh->second.filtration());
+        modified |= rec_make_filtration_non_decreasing(sh->second.children(), max_border_value->second.filtration());
       }
     }
     return modified;
@@ -1143,6 +1153,12 @@ class Simplex_tree {
    */
   bool rec_make_filtration_non_decreasing(Siblings * sib, Filtration_value upper_filtration) {
     bool modified = false;
+    // Find the maximum filtration value in the border
+    Simplex_handle max_border_value = std::max_element( std::begin(sib->members()), std::end(sib->members()),
+                                                        [](const Map_element& sh1, const Map_element& sh2) {
+                                                          return sh1.second.filtration() < sh2.second.filtration();
+                                                        });
+
     for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh) {
       if (sh->second.filtration() < upper_filtration) {
         // Store the filtration modification information
@@ -1150,7 +1166,7 @@ class Simplex_tree {
         sh->second.assign_filtration(upper_filtration);
       }
       if (has_children(sh)) {
-        modified |= rec_make_filtration_non_decreasing(sh->second.children(), sh->second.filtration());
+        modified |= rec_make_filtration_non_decreasing(sh->second.children(), max_border_value->second.filtration());
       }
     }
     // Make the modified information to be traced by upper call
@@ -1223,6 +1239,42 @@ std::cout << "prune_above_filtration - filtration=" << filtration << std::endl;
       delete child;
     }
   }
+/***************************************************************************************************************/  
+ public:
+  /** \brief Prints the simplex_tree hierarchically. 
+   * Since it prints the vertices recursively, one can watch its tree shape.
+   */
+  void debug_tree() {
+    std::cout << "{" << &root_ << "} -------------------------------------------------------------------" << std::endl;    
+    for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh) {
+      std::cout << sh->first << " [" << sh->second.filtration() << "] ";
+      if (has_children(sh)) {
+        rec_debug_tree(sh->second.children());
+      } else {
+        std::cout << " {- " << sh->second.children() << "} ";
+      }
+      std::cout << std::endl;
+    }
+    std::cout << "--------------------------------------------------------------------------------------" << std::endl;    
+  }
+
+
+  /** \brief Recursively prints the simplex_tree, using depth first search. */
+ private:
+  void rec_debug_tree(Siblings * sib) {
+    std::cout << " {" << sib << "} (";
+    for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh) {
+      std::cout << " " << sh->first << " [" << sh->second.filtration() << "] ";
+      if (has_children(sh)) {
+        rec_debug_tree(sh->second.children());
+      } else {
+        std::cout << " {- " << sh->second.children() << "} ";
+      }
+    }
+    std::cout << ")";
+  }
+
+/*****************************************************************************************************************/
 
  private:
   Vertex_handle null_vertex_;

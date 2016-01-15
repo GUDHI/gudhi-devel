@@ -802,13 +802,18 @@ BOOST_AUTO_TEST_CASE(make_filtration_non_decreasing) {
   typedef Simplex_tree<> typeST;
   typeST st;
 
-  st.insert_simplex_and_subfaces({2, 1, 0}, 4.0);
-  st.insert_simplex_and_subfaces({3, 0}, 3.0);
+  st.insert_simplex_and_subfaces({2, 1, 0}, 2.0);
+  st.insert_simplex_and_subfaces({3, 0}, 2.0);
   st.insert_simplex_and_subfaces({3, 4, 5}, 2.0);
-  // Because of non decreasing property of simplex tree, { 0 } , { 1 } and { 0, 1 } are going to be set from value 4.0
+  
+  typeST st_bis = st;
+  // Check default insertion ensures the filtration values are non decreasing
+  BOOST_CHECK(!st.make_filtration_non_decreasing());
+
+  // Because of non decreasing property of simplex tree, { 0 } , { 1 } and { 0, 1 } are going to be set from value 2.0
   // to 1.0
   st.insert_simplex_and_subfaces({0, 1, 6, 7}, 1.0);
-
+  
   /* Inserted simplex:        */
   /*    1   6                 */
   /*    o---o                 */
@@ -817,45 +822,29 @@ BOOST_AUTO_TEST_CASE(make_filtration_non_decreasing) {
   /*  2   0   3\X/4           */
   /*            o             */
   /*            5             */
-
-  // FIXME
-  st.set_dimension(3);
-
-  // Copy constructor  
-  typeST st_copy = st;
-
-  // Check default insertion ensures the filtration values are non decreasing
-  BOOST_CHECK(!st.make_filtration_non_decreasing());
-  // Check the simplex tree is not modified by the function
-  BOOST_CHECK(st == st_copy);
-
-  // Make { 0, 1 } decreasing
-  st.assign_filtration(st.find({0, 1}), 0.5);
-  // Make { 1, 6, 7 } decreasing
-  st.assign_filtration(st.find({1, 6, 7}), 0.4);
-  // Make { 3, 4 } decreasing
-  st.assign_filtration(st.find({3, 4}), 0.3);
-  // Make { 4, 5 } decreasing
-  st.assign_filtration(st.find({4, 5}), 0.1);
-
-  // Check the filtration values were decreasing
+  
   BOOST_CHECK(st.make_filtration_non_decreasing());
-  // Check the simplex tree has been modified by the function to retrieve the initial simplex tree
-  BOOST_CHECK(st == st_copy);
+  
+  // Check make_filtration_non_decreasing is just not modifying root values
+  st_bis.insert_simplex_and_subfaces({0, 1, 6, 7}, 2.0);
+  st_bis.assign_filtration(st_bis.find({0}), 1.0);
+  st_bis.assign_filtration(st_bis.find({1}), 1.0);
+  st_bis.assign_filtration(st_bis.find({6}), 1.0);
+  st_bis.assign_filtration(st_bis.find({7}), 1.0);
+  
+  BOOST_CHECK(st == st_bis);
 
-  // Change { 0, 3 }, but still non decreasing
-  st.assign_filtration(st.find({0, 3}), 1.01);
-  // Change { 0, 1, 6, 7 }, but still non decreasing
-  st.assign_filtration(st.find({0, 1, 6, 7}), 1.201);
-  // Change { 1, 2 }, but still non decreasing
-  st.assign_filtration(st.find({1, 2}), 1.05);
-  // Change { 4 }, but still non decreasing
-  st.assign_filtration(st.find({4}), 1.123);
+  // Check make_filtration_non_decreasing can modify non-root values (leaves and non-leaf)
+  st.assign_filtration(st.find({0, 1, 6, 7}), 1.99);
+  st.assign_filtration(st.find({3, 4}), 1.5);
+  st.assign_filtration(st.find({0, 3}), -1.0);
+  BOOST_CHECK(st.make_filtration_non_decreasing());
+  BOOST_CHECK(st == st_bis);
 
-  // Check the filtration values are non decreasing
+  // Check make_filtration_non_decreasing is not modifying when increasing
+  st.assign_filtration(st.find({0, 1, 6, 7}), 4.5);
+  st.assign_filtration(st.find({3, 4, 5}), 15.0);
   BOOST_CHECK(!st.make_filtration_non_decreasing());
-  // Check the simplex tree has been modified from the original
-  BOOST_CHECK(st != st_copy);
 
 }
 
