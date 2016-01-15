@@ -105,7 +105,7 @@ namespace Gudhi {
      *  Landmarks are supposed to be in [0,nbL_-1]
      */    
     template< typename KNearestNeighbours >
-    Witness_complex(KNearestNeighbours & knn,
+    Witness_complex(KNearestNeighbours const & knn,
                     Simplicial_complex & sc_,
                     int nbL_,
                     int dim ): nbL(nbL_), sc(sc_) 
@@ -164,7 +164,7 @@ namespace Gudhi {
      *  inserted_vertex is the handle of the (k+1)-th vertex witnessed by witness_id
      */
     template <typename KNearestNeighbours>
-    bool all_faces_in(KNearestNeighbours &knn, int witness_id, int k)
+    bool all_faces_in(KNearestNeighbours const &knn, int witness_id, int k)
     {
       //std::cout << "All face in with the landmark " << inserted_vertex << std::endl;
       std::vector< Vertex_handle > facet;
@@ -188,7 +188,7 @@ namespace Gudhi {
     }
 
    template <typename T>
-    void print_vector(std::vector<T> v)
+    void print_vector(const std::vector<T> v)
     {
       std::cout << "[";
       if (!v.empty())
@@ -211,7 +211,7 @@ namespace Gudhi {
      *  \remark Added for debugging purposes.
      */
     template< class KNearestNeighbors >
-    bool is_witness_complex(KNearestNeighbors & knn, bool print_output)
+    bool is_witness_complex(KNearestNeighbors const & knn, bool print_output)
     {
       //bool final_result = true;
       for (Simplex_handle sh: sc.complex_simplex_range())

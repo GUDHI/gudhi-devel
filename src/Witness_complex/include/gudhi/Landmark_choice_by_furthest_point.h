@@ -51,7 +51,7 @@ public:
 
     template <typename KNearestNeighbours,
               typename Point_random_access_range>
-    Landmark_choice_by_furthest_point(Point_random_access_range &points,
+    Landmark_choice_by_furthest_point(Point_random_access_range const &points,
                                       int nbL,
                                       KNearestNeighbours &knn)
     {

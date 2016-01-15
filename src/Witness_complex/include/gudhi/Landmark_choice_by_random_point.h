@@ -46,7 +46,9 @@ public:
     
     template <typename KNearestNeighbours,
               typename Point_random_access_range>                 
-    Landmark_choice_by_random_point(Point_random_access_range &points, int nbL, KNearestNeighbours &knn)
+    Landmark_choice_by_random_point(Point_random_access_range const &points,
+                                    int nbL,
+                                    KNearestNeighbours &knn)
     {
       int nbP = points.end() - points.begin();
       std::set<int> landmarks;
