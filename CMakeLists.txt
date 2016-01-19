@@ -65,27 +65,27 @@ else()
   message(STATUS "boost library dirs:" ${Boost_LIBRARY_DIRS})
 
   include_directories(src/common/include/)
-  include_directories(src/Bottleneck/include/)
-  include_directories(src/Contraction/include/)
-  include_directories(src/Hasse_complex/include/)
-  include_directories(src/Persistent_cohomology/include/)
+#  include_directories(src/Bottleneck/include/)
+#  include_directories(src/Contraction/include/)
+#  include_directories(src/Hasse_complex/include/)
+#  include_directories(src/Persistent_cohomology/include/)
   include_directories(src/Simplex_tree/include/)
-  include_directories(src/Skeleton_blocker/include/)
+#  include_directories(src/Skeleton_blocker/include/)
 
   add_subdirectory(src/Simplex_tree/test)
   add_subdirectory(src/Simplex_tree/example)
-  add_subdirectory(src/Persistent_cohomology/test)
-  add_subdirectory(src/Persistent_cohomology/example)
-  add_subdirectory(src/Skeleton_blocker/test) 
-  add_subdirectory(src/Skeleton_blocker/example) 
-  add_subdirectory(src/Contraction/example)
+#  add_subdirectory(src/Persistent_cohomology/test)
+#  add_subdirectory(src/Persistent_cohomology/example)
+#  add_subdirectory(src/Skeleton_blocker/test) 
+#  add_subdirectory(src/Skeleton_blocker/example) 
+#  add_subdirectory(src/Contraction/example)
 
   # data points generator
-  add_subdirectory(data/points/generator)
+#  add_subdirectory(data/points/generator)
 
   # Please let GudhUI in last compilation position as QT is known to modify CMAKE_CXX_FLAGS
   # GudhUI
-  add_subdirectory(src/GudhUI)
+#  add_subdirectory(src/GudhUI)
 
 endif()  
 
