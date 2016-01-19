@@ -75,7 +75,7 @@ namespace Gudhi {
     typedef std::vector< double > Point_t;
     typedef std::vector< Point_t > Point_Vector;
 
-    typedef typename Simplicial_complex::Filtration_value Filtration_value;
+    //typedef typename Simplicial_complex::Filtration_value Filtration_value;
     typedef std::vector< Vertex_handle > typeVectorVertex;
     typedef std::pair< typeVectorVertex, Filtration_value> typeSimplex;
     typedef std::pair< Simplex_handle, bool > typePairSimplexBool;
@@ -96,16 +96,25 @@ namespace Gudhi {
      */
 
     //@{
+
+    // Witness_range<Closest_landmark_range<Vertex_handle>>
     
     /**
      *  \brief Iterative construction of the witness complex.
      *  \details The witness complex is written in sc_ basing on a matrix knn of
      *  nearest neighbours of the form {witnesses}x{landmarks}.
-     *  Parameter dim serves as the limit for the number of closest landmarks to consider.
+     *
+     *  The type KNearestNeighbors can be seen as 
+     *  Witness_range<Closest_landmark_range<Vertex_handle>>, where
+     *  Witness_range and Closest_landmark_range are random access ranges.
+     *
+     *  Constructor takes into account at most (dim+1) 
+     *  first landmarks from each landmark range to construct simplices.
+     *
      *  Landmarks are supposed to be in [0,nbL_-1]
      */    
-    template< typename KNearestNeighbours >
-    Witness_complex(KNearestNeighbours const & knn,
+    template< typename KNearestNeighbors >
+    Witness_complex(KNearestNeighbors const & knn,
                     Simplicial_complex & sc_,
                     int nbL_,
                     int dim ): nbL(nbL_), sc(sc_) 
@@ -125,7 +134,7 @@ namespace Gudhi {
         // by doing it we don't assume that landmarks are necessarily witnesses themselves anymore
         counter++;
         vv = {i};
-        returnValue = sc.insert_simplex(vv, Filtration_value(0.0));
+        returnValue = sc.insert_simplex(vv);
         /* TODO Error if not inserted : normally no need here though*/
       }
       int k=1; /* current dimension in iterative construction */
@@ -163,8 +172,8 @@ namespace Gudhi {
      *  by witness witness_id are already in the complex.
      *  inserted_vertex is the handle of the (k+1)-th vertex witnessed by witness_id
      */
-    template <typename KNearestNeighbours>
-    bool all_faces_in(KNearestNeighbours const &knn, int witness_id, int k)
+    template <typename KNearestNeighbors>
+    bool all_faces_in(KNearestNeighbors const &knn, int witness_id, int k)
     {
       //std::cout << "All face in with the landmark " << inserted_vertex << std::endl;
       std::vector< Vertex_handle > facet;
