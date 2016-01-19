@@ -806,46 +806,78 @@ BOOST_AUTO_TEST_CASE(make_filtration_non_decreasing) {
   st.insert_simplex_and_subfaces({3, 0}, 2.0);
   st.insert_simplex_and_subfaces({3, 4, 5}, 2.0);
   
-  typeST st_bis = st;
-  // Check default insertion ensures the filtration values are non decreasing
+  // Inserted simplex:
+  //    1
+  //    o
+  //   /X\
+  //  o---o---o---o
+  //  2   0   3\X/4
+  //            o
+  //            5
+
+  std::cout << "Check default insertion ensures the filtration values are non decreasing" << std::endl;
   BOOST_CHECK(!st.make_filtration_non_decreasing());
 
   // Because of non decreasing property of simplex tree, { 0 } , { 1 } and { 0, 1 } are going to be set from value 2.0
   // to 1.0
   st.insert_simplex_and_subfaces({0, 1, 6, 7}, 1.0);
   
-  /* Inserted simplex:        */
-  /*    1   6                 */
-  /*    o---o                 */
-  /*   /X\7/                  */
-  /*  o---o---o---o           */
-  /*  2   0   3\X/4           */
-  /*            o             */
-  /*            5             */
+  // Inserted simplex:
+  //    1   6
+  //    o---o
+  //   /X\7/
+  //  o---o---o---o
+  //  2   0   3\X/4
+  //            o
+  //            5
   
-  BOOST_CHECK(st.make_filtration_non_decreasing());
-  
-  // Check make_filtration_non_decreasing is just not modifying root values
-  st_bis.insert_simplex_and_subfaces({0, 1, 6, 7}, 2.0);
-  st_bis.assign_filtration(st_bis.find({0}), 1.0);
-  st_bis.assign_filtration(st_bis.find({1}), 1.0);
-  st_bis.assign_filtration(st_bis.find({6}), 1.0);
-  st_bis.assign_filtration(st_bis.find({7}), 1.0);
-  
-  BOOST_CHECK(st == st_bis);
-
-  // Check make_filtration_non_decreasing can modify non-root values (leaves and non-leaf)
-  st.assign_filtration(st.find({0, 1, 6, 7}), 1.99);
-  st.assign_filtration(st.find({3, 4}), 1.5);
-  st.assign_filtration(st.find({0, 3}), -1.0);
-  BOOST_CHECK(st.make_filtration_non_decreasing());
-  BOOST_CHECK(st == st_bis);
-
-  // Check make_filtration_non_decreasing is not modifying when increasing
-  st.assign_filtration(st.find({0, 1, 6, 7}), 4.5);
-  st.assign_filtration(st.find({3, 4, 5}), 15.0);
+  std::cout << "Check default second insertion ensures the filtration values are non decreasing" << std::endl;
   BOOST_CHECK(!st.make_filtration_non_decreasing());
+  
+  // Copy original simplex tree
+  typeST st_copy = st;
 
+  // Modify specific values for st to become like st_copy thanks to make_filtration_non_decreasing
+  st.assign_filtration(st.find({0,1,6,7}), 0.8);
+  st.assign_filtration(st.find({0,1,6}), 0.9);
+  st.assign_filtration(st.find({0,6}), 0.6);
+  st.assign_filtration(st.find({3,4,5}), 1.2);
+  st.assign_filtration(st.find({3,4}), 1.1);
+  st.assign_filtration(st.find({4,5}), 1.99);
+  
+  std::cout << "Check the simplex_tree is rolled back in case of decreasing filtration values" << std::endl;
+  BOOST_CHECK(st.make_filtration_non_decreasing());
+  BOOST_CHECK(st == st_copy);
+
+  // Other simplex tree
+  typeST st_other;
+  st_other.insert_simplex_and_subfaces({2, 1, 0}, 3.0);  // This one is different from st
+  st_other.insert_simplex_and_subfaces({3, 0}, 2.0);
+  st_other.insert_simplex_and_subfaces({3, 4, 5}, 2.0);
+  st_other.insert_simplex_and_subfaces({0, 1, 6, 7}, 1.0);
+
+  // Modify specific values for st to become like st_other thanks to make_filtration_non_decreasing
+  st.assign_filtration(st.find({2}), 3.0);
+  // By modifying just the simplex {2}
+  // {0,1,2}, {1,2} and {0,2} will be modified
+  
+  std::cout << "Check the simplex_tree is repaired in case of decreasing filtration values" << std::endl;
+  BOOST_CHECK(st.make_filtration_non_decreasing());
+  BOOST_CHECK(st == st_other);
+
+  // Modify specific values for st still to be non-decreasing
+  st.assign_filtration(st.find({0,1,2}), 10.0);
+  st.assign_filtration(st.find({0,2}), 9.0);
+  st.assign_filtration(st.find({0,1,6,7}), 50.0);
+  st.assign_filtration(st.find({0,1,6}), 49.0);
+  st.assign_filtration(st.find({0,1,7}), 48.0);
+  // Other copy simplex tree
+  typeST st_other_copy = st;
+  
+  std::cout << "Check the simplex_tree is not modified in case of non-decreasing filtration values" << std::endl;
+  BOOST_CHECK(!st.make_filtration_non_decreasing());
+  BOOST_CHECK(st == st_other_copy);
+  
 }
 
 struct MyOptions : Simplex_tree_options_full_featured {

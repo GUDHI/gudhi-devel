@@ -129,10 +129,6 @@ class Simplex_tree {
   /* \brief Set of nodes sharing a same parent in the simplex tree. */
   typedef Simplex_tree_siblings<Simplex_tree, Dictionary> Siblings;
 
-  /** \brief Element of a flat_map.
-   * 'value_type' is Map_element. */
-  typedef typename std::pair<Vertex_handle, Node> Map_element;
-
   struct Key_simplex_base_real {
     Key_simplex_base_real() : key_(-1) {}
     void assign_key(Simplex_key k) { key_ = k; }
@@ -1131,15 +1127,10 @@ class Simplex_tree {
    */
   bool make_filtration_non_decreasing() {
     bool modified = false;
-
-    // Find the maximum filtration value in the border
-    Simplex_handle max_border_value = std::max_element( std::begin(root_.members()), std::end(root_.members()),
-                                                       [](const Map_element& sh1, const Map_element& sh2) {
-                                                         return sh1.second.filtration() < sh2.second.filtration();
-                                                       });
-    for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh) {
+    // Loop must be from the end to the beginning, as higher dimension simplex are always on the left part of the tree
+    for (auto sh = (root_.members().end() - 1); sh >= root_.members().begin(); --sh) {
       if (has_children(sh)) {
-        modified |= rec_make_filtration_non_decreasing(sh->second.children(), max_border_value->second.filtration());
+        modified |= rec_make_filtration_non_decreasing(sh->second.children());
       }
     }
     return modified;
@@ -1148,25 +1139,27 @@ class Simplex_tree {
  private:
   /** \brief Recursively Browse the simplex tree to ensure the filtration is not decreasing.
    * @param[in] sib Siblings to be parsed.
-   * @param[in] upper_filtration Upper level filtration value in the simplex tree.
    * @return The filtration modification information in order to trigger initialize_filtration.
    */
-  bool rec_make_filtration_non_decreasing(Siblings * sib, Filtration_value upper_filtration) {
+  bool rec_make_filtration_non_decreasing(Siblings * sib) {
     bool modified = false;
-    // Find the maximum filtration value in the border
-    Simplex_handle max_border_value = std::max_element( std::begin(sib->members()), std::end(sib->members()),
-                                                        [](const Map_element& sh1, const Map_element& sh2) {
-                                                          return sh1.second.filtration() < sh2.second.filtration();
-                                                        });
 
     for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh) {
-      if (sh->second.filtration() < upper_filtration) {
+      // Find the maximum filtration value in the border
+      Boundary_simplex_range boundary = boundary_simplex_range(sh);
+      Boundary_simplex_iterator max_border = std::max_element( std::begin(boundary), std::end(boundary),
+                                                              [](Simplex_handle sh1, Simplex_handle sh2) {
+                                                                return filtration(sh1) < filtration(sh2);
+                                                              } );
+
+      Filtration_value max_filt_border_value = filtration(*max_border);
+      if (sh->second.filtration() < max_filt_border_value) {
         // Store the filtration modification information
         modified = true;
-        sh->second.assign_filtration(upper_filtration);
+        sh->second.assign_filtration(max_filt_border_value);
       }
       if (has_children(sh)) {
-        modified |= rec_make_filtration_non_decreasing(sh->second.children(), max_border_value->second.filtration());
+        modified |= rec_make_filtration_non_decreasing(sh->second.children());
       }
     }
     // Make the modified information to be traced by upper call
