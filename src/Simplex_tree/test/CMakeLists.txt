@@ -24,5 +24,5 @@ file(COPY "simplex_tree_for_unit_test.txt" DESTINATION ${CMAKE_CURRENT_BINARY_DI
 add_test(NAME SimplexTreeUT
   COMMAND ${CMAKE_CURRENT_BINARY_DIR}/SimplexTreeUT 
     # XML format for Jenkins xUnit plugin 
-    --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/SimplexTreeUT.xml --log_level=all --report_level=no)
+    --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/SimplexTreeUT.xml --log_level=test_suite --report_level=no)
 
