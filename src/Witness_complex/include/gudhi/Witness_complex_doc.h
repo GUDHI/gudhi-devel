@@ -1,5 +1,5 @@
-#ifndef WITNESS_COMPLEX_DOC_
-#define WITNESS_COMPLEX_DOC_
+#ifndef WITNESS_COMPLEX_DOC_H_
+#define WITNESS_COMPLEX_DOC_H_
 
 /**
    \defgroup witness_complex Witness complex

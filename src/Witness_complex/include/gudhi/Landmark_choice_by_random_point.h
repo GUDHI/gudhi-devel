@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GUDHI_LANDMARK_CHOICE_BY_RANDOM_POINT_H_
-#define GUDHI_LANDMARK_CHOICE_BY_RANDOM_POINT_H_
+#ifndef LANDMARK_CHOICE_BY_RANDOM_POINT_H_
+#define LANDMARK_CHOICE_BY_RANDOM_POINT_H_
 
 namespace Gudhi {
 
@@ -51,6 +51,7 @@ public:
                                     KNearestNeighbours &knn)
     {
       int nbP = points.end() - points.begin();
+      assert(nbP >= nbL);
       std::set<int> landmarks;
       int current_number_of_landmarks=0;                        // counter for landmarks 
 

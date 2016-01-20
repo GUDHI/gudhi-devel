@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GUDHI_WITNESS_COMPLEX_H_
-#define GUDHI_WITNESS_COMPLEX_H_
+#ifndef WITNESS_COMPLEX_H_
+#define WITNESS_COMPLEX_H_
 
 #include <boost/container/flat_map.hpp>
 #include <boost/iterator/transform_iterator.hpp>

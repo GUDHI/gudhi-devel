@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GUDHI_LANDMARK_CHOICE_BY_FURTHEST_POINT_H_
-#define GUDHI_LANDMARK_CHOICE_BY_FURTHEST_POINT_H_
+#ifndef LANDMARK_CHOICE_BY_FURTHEST_POINT_H_
+#define LANDMARK_CHOICE_BY_FURTHEST_POINT_H_
 
 namespace Gudhi {
 
@@ -56,6 +56,7 @@ public:
                                       KNearestNeighbours &knn)
     {
       int nb_points = points.end() - points.begin();
+      assert(nb_points >= nbL);
       std::vector<std::vector<double>> wit_land_dist(nb_points, std::vector<double>());    // distance matrix witness x landmarks
       typeVectorVertex  chosen_landmarks;                       // landmark list
       
