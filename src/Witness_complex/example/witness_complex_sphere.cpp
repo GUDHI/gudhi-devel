@@ -41,36 +41,9 @@ using namespace Gudhi;
 using namespace Gudhi::witness_complex;
 
 typedef std::vector< Vertex_handle > typeVectorVertex;
-//typedef std::vector< std::vector <double> > Point_Vector;
 
 typedef Witness_complex< Simplex_tree<> > WitnessComplex;
 
-/**
- * \brief Customized version of read_points
- * which takes into account a possible nbP first line
- *
- */
-inline void
-read_points_cust ( std::string file_name , std::vector< std::vector< double > > & points)
-{  
-  std::ifstream in_file (file_name.c_str(),std::ios::in);
-  if(!in_file.is_open())
-    {
-      std::cerr << "Unable to open file " << file_name << std::endl;
-      return;
-    }
-  std::string line;
-  double x;
-  while( getline ( in_file , line ) )
-    {
-      std::vector< double > point;
-      std::istringstream iss( line );
-      while(iss >> x) { point.push_back(x); }
-      if (point.size() != 1)
-        points.push_back(point);
-    }
-  in_file.close();
-}
 
 /** Write a gnuplot readable file.
  *  Data range is a random access range of pairs (arg, value)
@@ -86,15 +59,14 @@ void write_data( Data_range & data, std::string filename )
 
 int main (int argc, char * const argv[])
 {
-  if (argc != 3)
+  if (argc != 2)
     {
       std::cerr << "Usage: " << argv[0]
-                << " path_to_point_file nbL \n";
+                << " nbL \n";
       return 0;
     }
 
-  std::string file_name   = argv[1];
-  int nbL       = atoi(argv[2]);
+  int nbL       = atoi(argv[1]);
   clock_t start, end;
 
   // Construct the Simplex Tree
