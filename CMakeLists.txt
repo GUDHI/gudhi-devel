@@ -71,6 +71,7 @@ else()
   include_directories(src/Persistent_cohomology/include/)
   include_directories(src/Simplex_tree/include/)
   include_directories(src/Skeleton_blocker/include/)
+  include_directories(src/Witness_complex/include/)
 
   add_subdirectory(src/Simplex_tree/test)
   add_subdirectory(src/Simplex_tree/example)
@@ -79,6 +80,8 @@ else()
   add_subdirectory(src/Skeleton_blocker/test) 
   add_subdirectory(src/Skeleton_blocker/example) 
   add_subdirectory(src/Contraction/example)
+  add_subdirectory(src/Witness_complex/test)
+  add_subdirectory(src/Witness_complex/example)
 
   # data points generator
   add_subdirectory(data/points/generator)
@@ -88,5 +91,3 @@ else()
   add_subdirectory(src/GudhUI)
 
 endif()  
-
-
