@@ -82,7 +82,6 @@ class Witness_complex {
 
  private:
   int nbL;  // Number of landmarks
-  double density;  // Desired density
   Simplicial_complex& sc;  // Simplicial complex
 
  public:
@@ -116,8 +115,6 @@ class Witness_complex {
     // Construction of the active witness list
     int nbW = knn.size();
     typeVectorVertex vv;
-    typeSimplex simplex;
-    typePairSimplexBool returnValue;
     int counter = 0;
     /* The list of still useful witnesses
      * it will diminuish in the course of iterations
@@ -128,7 +125,7 @@ class Witness_complex {
       // by doing it we don't assume that landmarks are necessarily witnesses themselves anymore
       counter++;
       vv = {i};
-      returnValue = sc.insert_simplex(vv);
+      sc.insert_simplex(vv);
       // TODO(SK) Error if not inserted : normally no need here though
     }
     int k = 1; /* current dimension in iterative construction */
@@ -145,7 +142,8 @@ class Witness_complex {
         if (ok) {
           for (int i = 0; i != k + 1; ++i)
             simplex_vector.push_back(knn[*it][i]);
-          returnValue = sc.insert_simplex(simplex_vector, 0.0);
+          sc.insert_simplex(simplex_vector, 0.0);
+          // TODO(SK) Error if not inserted : normally no need here though
           it++;
         } else {
           active_w.erase(it++);  // First increase the iterator and then erase the previous element
@@ -183,7 +181,7 @@ class Witness_complex {
   }
 
   template <typename T>
-  void print_vector(const std::vector<T> v) {
+  static void print_vector(const std::vector<T>& v) {
     std::cout << "[";
     if (!v.empty()) {
       std::cout << *(v.begin());

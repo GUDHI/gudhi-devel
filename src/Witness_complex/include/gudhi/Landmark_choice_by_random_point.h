@@ -76,7 +76,7 @@ class Landmark_choice_by_random_point {
       std::set<int>::iterator landmarks_it;
       int landmarks_i = 0;
       for (landmarks_it = landmarks.begin(), landmarks_i = 0; landmarks_it != landmarks.end();
-           landmarks_it++, landmarks_i++) {
+           ++landmarks_it, landmarks_i++) {
         dist_i dist = std::make_pair(euclidean_distance(points[points_i], points[*landmarks_it]), landmarks_i);
         l_heap.push(dist);
       }
