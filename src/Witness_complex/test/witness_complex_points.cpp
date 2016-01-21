@@ -55,12 +55,12 @@ BOOST_AUTO_TEST_CASE(witness_complex_points) {
   Landmark_choice_by_random_point lcrp(points, 100, knn);
   assert(!knn.empty());
   WitnessComplex witnessComplex1(knn, complex1, 100, 3);
-  assert(witnessComplex1.is_witness_complex(knn, b_print_output));
+  BOOST_CHECK(witnessComplex1.is_witness_complex(knn, b_print_output));
 
   // Second test: furthest choice
   knn.clear();
   Simplex_tree complex2;
   Landmark_choice_by_furthest_point lcfp(points, 100, knn);
   WitnessComplex witnessComplex2(knn, complex2, 100, 3);
-  assert(witnessComplex2.is_witness_complex(knn, b_print_output));
+  BOOST_CHECK(witnessComplex2.is_witness_complex(knn, b_print_output));
 }
