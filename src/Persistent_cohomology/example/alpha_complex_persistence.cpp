@@ -1,12 +1,14 @@
-#include <iostream>
-#include <string>
-
 #include <boost/program_options.hpp>
 
+#include <CGAL/Epick_d.h>
 // to construct a Delaunay_triangulation from a OFF file
 #include <gudhi/Delaunay_triangulation_off_io.h>
 #include <gudhi/Alpha_complex.h>
 #include <gudhi/Persistent_cohomology.h>
+
+#include <iostream>
+#include <string>
+#include <limits>  // for numeric_limits
 
 void program_options(int argc, char * argv[]
                      , std::string & off_file_points
@@ -21,10 +23,10 @@ int main(int argc, char **argv) {
   Filtration_value alpha_square_max_value;
   int coeff_field_characteristic;
   Filtration_value min_persistence;
-  
-  program_options(argc, argv, off_file_points, output_file_diag, alpha_square_max_value, coeff_field_characteristic, min_persistence);
 
-  
+  program_options(argc, argv, off_file_points, output_file_diag, alpha_square_max_value,
+                  coeff_field_characteristic, min_persistence);
+
   // ----------------------------------------------------------------------------
   // Init of an alpha complex from an OFF file
   // ----------------------------------------------------------------------------
@@ -80,7 +82,8 @@ void program_options(int argc, char * argv[]
       ("help,h", "produce help message")
       ("output-file,o", po::value<std::string>(&output_file_diag)->default_value(std::string()),
        "Name of file in which the persistence diagram is written. Default print in std::cout")
-      ("max-alpha-square-value,r", po::value<Filtration_value>(&alpha_square_max_value)->default_value(std::numeric_limits<Filtration_value>::infinity()),
+      ("max-alpha-square-value,r",
+      po::value<Filtration_value>(&alpha_square_max_value)->default_value(std::numeric_limits<Filtration_value>::infinity()),
        "Maximal alpha square value for the Alpha complex construction.")
       ("field-charac,p", po::value<int>(&coeff_field_characteristic)->default_value(11),
        "Characteristic p of the coefficient field Z/pZ for computing homology.")

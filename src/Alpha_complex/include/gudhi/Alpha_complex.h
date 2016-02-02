@@ -34,7 +34,6 @@
 #include <math.h>  // isnan, fmax
 
 #include <CGAL/Delaunay_triangulation.h>
-#include <CGAL/Epick_d.h>
 
 #include <iostream>
 #include <vector>

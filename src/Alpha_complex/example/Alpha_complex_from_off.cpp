@@ -1,12 +1,13 @@
+#include <gudhi/Alpha_complex.h>
+#include <CGAL/Epick_d.h>
+
 #include <iostream>
 #include <string>
-
-#include <gudhi/Alpha_complex.h>
 
 void usage(char * const progName) {
   std::cerr << "Usage: " << progName << " filename.off alpha_square_max_value" << std::endl;
   std::cerr << "       i.e.: " << progName << " ../../data/points/alphacomplexdoc.off 60.0" << std::endl;
-  exit(-1); // ----- >>
+  exit(-1);  // ----- >>
 }
 
 int main(int argc, char **argv) {
@@ -23,7 +24,7 @@ int main(int argc, char **argv) {
   // ----------------------------------------------------------------------------
   typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kernel;
   Gudhi::alphacomplex::Alpha_complex<Kernel> alpha_complex_from_file(off_file_name, alpha_square_max_value);
-  
+
   // ----------------------------------------------------------------------------
   // Display information about the alpha complex
   // ----------------------------------------------------------------------------

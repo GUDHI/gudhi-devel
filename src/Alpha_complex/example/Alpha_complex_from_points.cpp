@@ -1,31 +1,17 @@
-#include <stdlib.h>
-#include <CGAL/Delaunay_triangulation.h>
 #include <CGAL/Epick_d.h>
+#include <gudhi/Alpha_complex.h>
 
 #include <iostream>
 #include <string>
 #include <vector>
 
-#include <gudhi/Alpha_complex.h>
-
 typedef CGAL::Epick_d< CGAL::Dimension_tag<2> > Kernel;
 typedef Kernel::Point_d Point;
 typedef std::vector<Point> Vector_of_points;
 
-void usage(char * const progName) {
-  std::cerr << "Usage: " << progName << " alpha_square_max_value" << std::endl;
-  std::cerr << "       i.e.: " << progName << " 32.0" << std::endl;
-  exit(-1); // ----- >>
-}
-
 int main(int argc, char **argv) {
-  if (argc != 2) {
-    std::cerr << "Error: Number of arguments (" << argc << ") is not correct" << std::endl;
-    usage(argv[0]);
-  }
+  double alpha_square_max_value = 32.0;
 
-  double alpha_square_max_value = atof(argv[1]);
-  
   // ----------------------------------------------------------------------------
   // Init of a list of points
   // ----------------------------------------------------------------------------
