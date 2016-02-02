@@ -34,6 +34,7 @@ if(CGAL_FOUND)
 
       add_executable ( witness_complex_sphere witness_complex_sphere.cpp )
       target_link_libraries(witness_complex_sphere ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
+      add_test( witness_complex_sphere_10 ${CMAKE_CURRENT_BINARY_DIR}/witness_complex_sphere 10)   
     else()
       message(WARNING "Eigen3 not found. Version 3.1.0 is required for witness_complex_sphere example.")      
     endif()

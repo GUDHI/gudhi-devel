@@ -22,11 +22,6 @@
 #define BOOST_PARAMETER_MAX_ARITY 12
 
 
-#include <iostream>
-#include <fstream>
-#include <ctime>
-#include <utility> 
-
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -34,6 +29,13 @@
 #include <gudhi/Witness_complex.h>
 #include <gudhi/Landmark_choice_by_random_point.h>
 #include <gudhi/reader_utils.h>
+
+#include <iostream>
+#include <fstream>
+#include <ctime>
+#include <utility>
+#include <string>
+#include <vector>
 
 #include "generators.h"
 
@@ -44,56 +46,51 @@ typedef std::vector< Vertex_handle > typeVectorVertex;
 
 typedef Witness_complex< Simplex_tree<> > WitnessComplex;
 
-
 /** Write a gnuplot readable file.
  *  Data range is a random access range of pairs (arg, value)
  */
 template < typename Data_range >
-void write_data( Data_range & data, std::string filename )
-{
+void write_data(Data_range & data, std::string filename) {
   std::ofstream ofs(filename, std::ofstream::out);
-  for (auto entry: data)
+  for (auto entry : data)
     ofs << entry.first << ", " << entry.second << "\n";
   ofs.close();
 }
 
-int main (int argc, char * const argv[])
-{
-  if (argc != 2)
-    {
-      std::cerr << "Usage: " << argv[0]
-                << " nbL \n";
-      return 0;
-    }
+int main(int argc, char * const argv[]) {
+  if (argc != 2) {
+    std::cerr << "Usage: " << argv[0]
+        << " nbL \n";
+    return 0;
+  }
 
-  int nbL       = atoi(argv[1]);
+  int nbL = atoi(argv[1]);
   clock_t start, end;
 
   // Construct the Simplex Tree
   Simplex_tree<> simplex_tree;
 
-  std::vector< std::pair<int, double> > l_time;      
-  
+  std::vector< std::pair<int, double> > l_time;
+
   // Read the point file
-  for (int nbP = 500; nbP < 10000; nbP += 500)
-    {
-      Point_Vector point_vector;
-      generate_points_sphere(point_vector, nbP, 4);
-      std::cout << "Successfully generated " << point_vector.size() << " points.\n";
-      std::cout << "Ambient dimension is " << point_vector[0].size() << ".\n";
-            
-      // Choose landmarks
-      start = clock();
-      std::vector<std::vector< int > > knn;
-      Landmark_choice_by_random_point(point_vector, nbL, knn);
-      
-      // Compute witness complex
-      WitnessComplex(knn, simplex_tree, nbL, point_vector[0].size());
-      end = clock();
-      double time = (double)(end-start)/CLOCKS_PER_SEC;
-      std::cout << "Witness complex for " << nbL << " landmarks took "
-       << time << " s. \n";
-      l_time.push_back(std::make_pair(nbP,time));
-    }
+  for (int nbP = 500; nbP < 10000; nbP += 500) {
+    Point_Vector point_vector;
+    generate_points_sphere(point_vector, nbP, 4);
+    std::cout << "Successfully generated " << point_vector.size() << " points.\n";
+    std::cout << "Ambient dimension is " << point_vector[0].size() << ".\n";
+
+    // Choose landmarks
+    start = clock();
+    std::vector<std::vector< int > > knn;
+    Landmark_choice_by_random_point(point_vector, nbL, knn);
+
+    // Compute witness complex
+    WitnessComplex(knn, simplex_tree, nbL, point_vector[0].size());
+    end = clock();
+    double time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+    std::cout << "Witness complex for " << nbL << " landmarks took "
+        << time << " s. \n";
+    l_time.push_back(std::make_pair(nbP, time));
+  }
   write_data(l_time, "w_time.dat");
 }

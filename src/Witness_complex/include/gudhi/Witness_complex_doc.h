@@ -35,4 +35,4 @@
 
  */
 
-#endif
+#endif  // WITNESS_COMPLEX_DOC_H_

@@ -20,17 +20,19 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <fstream>
-#include <ctime>
-
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "gudhi/Simplex_tree.h"
-#include "gudhi/Witness_complex.h"
-#include "gudhi/Landmark_choice_by_random_point.h"
-#include "gudhi/reader_utils.h"
+#include <gudhi/Simplex_tree.h>
+#include <gudhi/Witness_complex.h>
+#include <gudhi/Landmark_choice_by_random_point.h>
+#include <gudhi/reader_utils.h>
+
+#include <iostream>
+#include <fstream>
+#include <ctime>
+#include <string>
+#include <vector>
 
 using namespace Gudhi;
 using namespace Gudhi::witness_complex;
@@ -46,24 +48,23 @@ typedef Witness_complex< Simplex_tree<> > WitnessComplex;
  *
  */
 inline void
-read_points_cust ( std::string file_name , std::vector< std::vector< double > > & points)
-{  
-  std::ifstream in_file (file_name.c_str(),std::ios::in);
-  if(!in_file.is_open())
-    {
-      std::cerr << "Unable to open file " << file_name << std::endl;
-      return;
-    }
+read_points_cust(std::string file_name, std::vector< std::vector< double > > & points) {
+  std::ifstream in_file(file_name.c_str(), std::ios::in);
+  if (!in_file.is_open()) {
+    std::cerr << "Unable to open file " << file_name << std::endl;
+    return;
+  }
   std::string line;
   double x;
-  while( getline ( in_file , line ) )
-    {
-      std::vector< double > point;
-      std::istringstream iss( line );
-      while(iss >> x) { point.push_back(x); }
-      if (point.size() != 1)
-        points.push_back(point);
+  while (getline(in_file, line)) {
+    std::vector< double > point;
+    std::istringstream iss(line);
+    while (iss >> x) {
+      point.push_back(x);
     }
+    if (point.size() != 1)
+      points.push_back(point);
+  }
   in_file.close();
 }
 
@@ -71,25 +72,22 @@ read_points_cust ( std::string file_name , std::vector< std::vector< double > > 
  *  Data range is a random access range of pairs (arg, value)
  */
 template < typename Data_range >
-void write_data( Data_range & data, std::string filename )
-{
+void write_data(Data_range & data, std::string filename) {
   std::ofstream ofs(filename, std::ofstream::out);
-  for (auto entry: data)
+  for (auto entry : data)
     ofs << entry.first << ", " << entry.second << "\n";
   ofs.close();
 }
 
-int main (int argc, char * const argv[])
-{
-  if (argc != 3)
-    {
-      std::cerr << "Usage: " << argv[0]
-                << " path_to_point_file nbL \n";
-      return 0;
-    }
+int main(int argc, char * const argv[]) {
+  if (argc != 3) {
+    std::cerr << "Usage: " << argv[0]
+        << " path_to_point_file nbL \n";
+    return 0;
+  }
 
-  std::string file_name   = argv[1];
-  int nbL       = atoi(argv[2]);
+  std::string file_name = argv[1];
+  int nbL = atoi(argv[2]);
   clock_t start, end;
 
   // Construct the Simplex Tree
@@ -107,13 +105,12 @@ int main (int argc, char * const argv[])
   Landmark_choice_by_random_point(point_vector, nbL, knn);
   end = clock();
   std::cout << "Landmark choice for " << nbL << " landmarks took "
-            << (double)(end-start)/CLOCKS_PER_SEC << " s. \n";
-  
+      << static_cast<double>(end - start) / CLOCKS_PER_SEC << " s. \n";
+
   // Compute witness complex
   start = clock();
   WitnessComplex(knn, simplex_tree, nbL, point_vector[0].size());
   end = clock();
   std::cout << "Witness complex took "
-       << (double)(end-start)/CLOCKS_PER_SEC << " s. \n";
-
+      << static_cast<double>(end - start) / CLOCKS_PER_SEC << " s. \n";
 }

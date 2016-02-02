@@ -20,34 +20,40 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <ctime>
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE "simple_witness_complex"
+#include <boost/test/unit_test.hpp>
+#include <boost/mpl/list.hpp>
+
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Witness_complex.h>
 
-using namespace Gudhi;
-using namespace Gudhi::witness_complex;
+#include <iostream>
+#include <ctime>
+#include <vector>
 
+typedef Gudhi::Simplex_tree<> Simplex_tree;
 typedef std::vector< Vertex_handle > typeVectorVertex;
-typedef Witness_complex<Simplex_tree<>> WitnessComplex;
+typedef Gudhi::witness_complex::Witness_complex<Simplex_tree> WitnessComplex;
 
-int main (int argc, char * const argv[])
-{
-  Simplex_tree<> complex;
+BOOST_AUTO_TEST_CASE(simple_witness_complex) {
+  Simplex_tree complex;
   std::vector< typeVectorVertex > knn;
-  typeVectorVertex witness0  = {1,0,5,2,6,3,4}; knn.push_back(witness0 );
-  typeVectorVertex witness1  = {2,6,4,5,0,1,3}; knn.push_back(witness1 );
-  typeVectorVertex witness2  = {3,4,2,1,5,6,0}; knn.push_back(witness2 );
-  typeVectorVertex witness3  = {4,2,1,3,5,6,0}; knn.push_back(witness3 );
-  typeVectorVertex witness4  = {5,1,6,0,2,3,4}; knn.push_back(witness4 );
-  typeVectorVertex witness5  = {6,0,5,2,1,3,4}; knn.push_back(witness5 );
-  typeVectorVertex witness6  = {0,5,6,1,2,3,4}; knn.push_back(witness6 );
-  typeVectorVertex witness7  = {2,6,4,5,3,1,0}; knn.push_back(witness7 );
-  typeVectorVertex witness8  = {1,2,5,4,3,6,0}; knn.push_back(witness8 );
-  typeVectorVertex witness9  = {3,4,0,6,5,1,2}; knn.push_back(witness9 );
-  typeVectorVertex witness10 = {5,0,1,3,6,2,4}; knn.push_back(witness10);
-  typeVectorVertex witness11 = {5,6,1,0,2,3,4}; knn.push_back(witness11);
-  typeVectorVertex witness12 = {1,6,0,5,2,3,4}; knn.push_back(witness12);
+
+  knn.push_back({1, 0, 5, 2, 6, 3, 4});
+  knn.push_back({2, 6, 4, 5, 0, 1, 3});
+  knn.push_back({3, 4, 2, 1, 5, 6, 0});
+  knn.push_back({4, 2, 1, 3, 5, 6, 0});
+  knn.push_back({5, 1, 6, 0, 2, 3, 4});
+  knn.push_back({6, 0, 5, 2, 1, 3, 4});
+  knn.push_back({0, 5, 6, 1, 2, 3, 4});
+  knn.push_back({2, 6, 4, 5, 3, 1, 0});
+  knn.push_back({1, 2, 5, 4, 3, 6, 0});
+  knn.push_back({3, 4, 0, 6, 5, 1, 2});
+  knn.push_back({5, 0, 1, 3, 6, 2, 4});
+  knn.push_back({5, 6, 1, 0, 2, 3, 4});
+  knn.push_back({1, 6, 0, 5, 2, 3, 4});
   WitnessComplex witnessComplex(knn, complex, 7, 7);
-  assert(witnessComplex.is_witness_complex(knn, false));
+
+  BOOST_CHECK(witnessComplex.is_witness_complex(knn, false));
 }

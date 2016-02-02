@@ -23,6 +23,11 @@
 #ifndef LANDMARK_CHOICE_BY_RANDOM_POINT_H_
 #define LANDMARK_CHOICE_BY_RANDOM_POINT_H_
 
+#include <queue>  // for priority_queue<>
+#include <utility>  // for pair<>
+#include <vector>
+#include <set>
+
 namespace Gudhi {
 
 namespace witness_complex {
@@ -36,60 +41,56 @@ namespace witness_complex {
  */
 
 class Landmark_choice_by_random_point {
+ public:
+  /** \brief Landmark choice strategy by taking random vertices for landmarks.
+   *  \details It chooses nbL distinct landmarks from a random access range `points`
+   *  and outputs a matrix {witness}*{closest landmarks} in knn.
+   */
 
-public:
-  
-    /** \brief Landmark choice strategy by taking random vertices for landmarks.
-     *  \details It chooses nbL distinct landmarks from a random access range `points`
-     *  and outputs a matrix {witness}*{closest landmarks} in knn.
-     */
-    
-    template <typename KNearestNeighbours,
-              typename Point_random_access_range>                 
-    Landmark_choice_by_random_point(Point_random_access_range const &points,
-                                    int nbL,
-                                    KNearestNeighbours &knn)
-    {
-      int nbP = points.end() - points.begin();
-      assert(nbP >= nbL);
-      std::set<int> landmarks;
-      int current_number_of_landmarks=0;                        // counter for landmarks 
+  template <typename KNearestNeighbours,
+  typename Point_random_access_range>
+  Landmark_choice_by_random_point(Point_random_access_range const &points,
+                                  int nbL,
+                                  KNearestNeighbours &knn) {
+    int nbP = points.end() - points.begin();
+    assert(nbP >= nbL);
+    std::set<int> landmarks;
+    int current_number_of_landmarks = 0;  // counter for landmarks
 
-      int chosen_landmark = rand()%nbP;
-      for (current_number_of_landmarks = 0; current_number_of_landmarks != nbL; current_number_of_landmarks++)
-        {
-          while (landmarks.find(chosen_landmark) != landmarks.end())
-            chosen_landmark = rand()% nbP;
-          landmarks.insert(chosen_landmark);
-        }
-
-      int dim = points.begin()->size();
-      typedef std::pair<double,int> dist_i;
-      typedef bool (*comp)(dist_i,dist_i);
-      knn = KNearestNeighbours(nbP);
-      for (int points_i = 0; points_i < nbP; points_i++)
-        {
-          std::priority_queue<dist_i, std::vector<dist_i>, comp> l_heap([&](dist_i j1, dist_i j2){return j1.first > j2.first;});
-          std::set<int>::iterator landmarks_it;
-          int landmarks_i = 0;
-          for (landmarks_it = landmarks.begin(), landmarks_i=0; landmarks_it != landmarks.end(); landmarks_it++, landmarks_i++)
-            {
-              dist_i dist = std::make_pair(euclidean_distance(points[points_i],points[*landmarks_it]), landmarks_i);
-              l_heap.push(dist);
-            }
-          for (int i = 0; i < dim+1; i++)
-            {
-              dist_i dist = l_heap.top();
-              knn[points_i].push_back(dist.second);
-              l_heap.pop();
-            }
-        }
+    // TODO(SK) Consider using rand_r(...) instead of rand(...) for improved thread safety
+    int chosen_landmark = rand() % nbP;
+    for (current_number_of_landmarks = 0; current_number_of_landmarks != nbL; current_number_of_landmarks++) {
+      while (landmarks.find(chosen_landmark) != landmarks.end())
+        chosen_landmark = rand() % nbP;
+      landmarks.insert(chosen_landmark);
     }
 
+    int dim = points.begin()->size();
+    typedef std::pair<double, int> dist_i;
+    typedef bool (*comp)(dist_i, dist_i);
+    knn = KNearestNeighbours(nbP);
+    for (int points_i = 0; points_i < nbP; points_i++) {
+      std::priority_queue<dist_i, std::vector<dist_i>, comp> l_heap([&](dist_i j1, dist_i j2) {
+        return j1.first > j2.first;
+      });
+      std::set<int>::iterator landmarks_it;
+      int landmarks_i = 0;
+      for (landmarks_it = landmarks.begin(), landmarks_i = 0; landmarks_it != landmarks.end();
+           ++landmarks_it, landmarks_i++) {
+        dist_i dist = std::make_pair(euclidean_distance(points[points_i], points[*landmarks_it]), landmarks_i);
+        l_heap.push(dist);
+      }
+      for (int i = 0; i < dim + 1; i++) {
+        dist_i dist = l_heap.top();
+        knn[points_i].push_back(dist.second);
+        l_heap.pop();
+      }
+    }
+  }
 };
 
-}
-  
-}
-  
-#endif
+}  // namespace witness_complex
+
+}  // namespace Gudhi
+
+#endif  // LANDMARK_CHOICE_BY_RANDOM_POINT_H_
