@@ -40,29 +40,28 @@ if(GMPXX_FOUND AND GMP_FOUND)
   target_link_libraries(performance_rips_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES})
 
   if(CGAL_FOUND)
-    add_executable(alpha_shapes_persistence alpha_shapes_persistence.cpp)
-    target_link_libraries(alpha_shapes_persistence ${Boost_SYSTEM_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES} ${CGAL_LIBRARY})
-    add_test(alpha_shapes_persistence_2_0_5 ${CMAKE_CURRENT_BINARY_DIR}/alpha_shapes_persistence ${CMAKE_SOURCE_DIR}/data/points/bunny_5000 2 0.5)
-    #add_test(alpha_shapes_persistence_3_3_100 ${CMAKE_CURRENT_BINARY_DIR}/alpha_shapes_persistence ${CMAKE_SOURCE_DIR}/data/points/bunny_5000.st -p 3 -m 100)
+    include( ${CGAL_USE_FILE} )
+    # In CMakeLists.txt, when include(${CGAL_USE_FILE}), CXX_FLAGS are overwritten.
+    # cf. http://doc.cgal.org/latest/Manual/installation.html#title40
+    # A workaround is to add "-std=c++11" again.
+    # A fix would be to use https://cmake.org/cmake/help/v3.1/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html 
+    # or even better https://cmake.org/cmake/help/v3.1/variable/CMAKE_CXX_STANDARD.html
+    # but it implies to use cmake version 3.1 at least.
+    if(NOT MSVC)
+      include(CheckCXXCompilerFlag)
+      CHECK_CXX_COMPILER_FLAG(-std=c++11 COMPILER_SUPPORTS_CXX11)
+      if(COMPILER_SUPPORTS_CXX11)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+      endif()
+    endif()
+    # - End of workaround
+
+    add_executable(alpha_complex_3d_persistence alpha_complex_3d_persistence.cpp)
+    target_link_libraries(alpha_complex_3d_persistence ${Boost_SYSTEM_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES} ${CGAL_LIBRARY})
+    add_test(alpha_complex_3d_persistence_2_0_5 ${CMAKE_CURRENT_BINARY_DIR}/alpha_complex_3d_persistence ${CMAKE_SOURCE_DIR}/data/points/bunny_5000 2 0.5)
 
     if (NOT CGAL_VERSION VERSION_LESS 4.7.0)
       message(STATUS "CGAL version: ${CGAL_VERSION}.")
-
-      include( ${CGAL_USE_FILE} )
-      # In CMakeLists.txt, when include(${CGAL_USE_FILE}), CXX_FLAGS are overwritten.
-      # cf. http://doc.cgal.org/latest/Manual/installation.html#title40
-      # A workaround is to add "-std=c++11" again.
-      # A fix would be to use https://cmake.org/cmake/help/v3.1/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html 
-      # or even better https://cmake.org/cmake/help/v3.1/variable/CMAKE_CXX_STANDARD.html
-      # but it implies to use cmake version 3.1 at least.
-      if(NOT MSVC)
-        include(CheckCXXCompilerFlag)
-        CHECK_CXX_COMPILER_FLAG(-std=c++11 COMPILER_SUPPORTS_CXX11)
-        if(COMPILER_SUPPORTS_CXX11)
-          set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-        endif()
-      endif()
-      # - End of workaround
 
       find_package(Eigen3 3.1.0)
       if (EIGEN3_FOUND)
