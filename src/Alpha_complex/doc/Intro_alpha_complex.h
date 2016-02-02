@@ -67,7 +67,7 @@ namespace alphacomplex {
  * 
  * When launching:
  * 
- * \code $> ./alphapoints 60.0
+ * \code $> ./alphapoints
  * \endcode
  *
  * the program output is:

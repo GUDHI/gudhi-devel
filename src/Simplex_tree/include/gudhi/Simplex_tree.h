@@ -307,7 +307,8 @@ class Simplex_tree {
    * of the simplex.
    *
    * @param[in] sh Simplex for which the boundary is computed. */
-  Boundary_simplex_range boundary_simplex_range(Simplex_handle sh) {
+  template<class DictionaryIterator>
+  Boundary_simplex_range boundary_simplex_range(DictionaryIterator sh) {
     return Boundary_simplex_range(Boundary_simplex_iterator(this, sh),
                                   Boundary_simplex_iterator(this));
   }
@@ -528,7 +529,11 @@ class Simplex_tree {
 
   /** \brief Returns true if the node in the simplex tree pointed by
    * sh has children.*/
-  bool has_children(Simplex_handle sh) const {
+  /*bool has_children(Simplex_handle sh) const {
+    return (sh->second.children()->parent() == sh->first);
+  }*/
+  template<class DictionaryIterator>
+  bool has_children(DictionaryIterator sh) const {
     return (sh->second.children()->parent() == sh->first);
   }
 
@@ -1128,7 +1133,7 @@ class Simplex_tree {
   bool make_filtration_non_decreasing() {
     bool modified = false;
     // Loop must be from the end to the beginning, as higher dimension simplex are always on the left part of the tree
-    for (auto sh = (root_.members().end() - 1); sh >= root_.members().begin(); --sh) {
+    for (auto sh = root_.members().rbegin(); sh != root_.members().rend(); ++sh) {
       if (has_children(sh)) {
         modified |= rec_make_filtration_non_decreasing(sh->second.children());
       }
@@ -1144,10 +1149,11 @@ class Simplex_tree {
   bool rec_make_filtration_non_decreasing(Siblings * sib) {
     bool modified = false;
 
+    // Loop must be from the end to the beginning, as higher dimension simplex are always on the left part of the tree
     for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh) {
       // Find the maximum filtration value in the border
       Boundary_simplex_range boundary = boundary_simplex_range(sh);
-      Boundary_simplex_iterator max_border = std::max_element( std::begin(boundary), std::end(boundary),
+      Boundary_simplex_iterator max_border = std::max_element(std::begin(boundary), std::end(boundary),
                                                               [](Simplex_handle sh1, Simplex_handle sh2) {
                                                                 return filtration(sh1) < filtration(sh2);
                                                               } );
@@ -1175,7 +1181,6 @@ class Simplex_tree {
    * call `initialize_filtration()` to recompute it.
    */
   void prune_above_filtration(Filtration_value filtration) {
-std::cout << "prune_above_filtration - filtration=" << filtration << std::endl;
     // No action if filtration is not stored
     if (Options::store_filtration) {
       if (filtration < threshold_) {

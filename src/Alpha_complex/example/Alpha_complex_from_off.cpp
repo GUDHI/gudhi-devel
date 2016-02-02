@@ -5,14 +5,14 @@
 #include <string>
 
 void usage(char * const progName) {
-  std::cerr << "Usage: " << progName << " filename.off alpha_square_max_value" << std::endl;
-  std::cerr << "       i.e.: " << progName << " ../../data/points/alphacomplexdoc.off 60.0" << std::endl;
+  std::cerr << "Usage: " << progName << " filename.off alpha_square_max_value [ouput_file.txt]\n";
+  std::cerr << "       i.e.: " << progName << " ../../data/points/alphacomplexdoc.off 60.0\n";
   exit(-1);  // ----- >>
 }
 
 int main(int argc, char **argv) {
-  if (argc != 3) {
-    std::cerr << "Error: Number of arguments (" << argc << ") is not correct" << std::endl;
+  if ((argc != 3) && (argc != 4)) {
+    std::cerr << "Error: Number of arguments (" << argc << ") is not correct\n";
     usage(argv[0]);
   }
 
@@ -25,21 +25,34 @@ int main(int argc, char **argv) {
   typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kernel;
   Gudhi::alphacomplex::Alpha_complex<Kernel> alpha_complex_from_file(off_file_name, alpha_square_max_value);
 
+  std::streambuf* streambufffer;
+  std::ofstream ouput_file_stream;
+  
+  if (argc == 4) {
+    ouput_file_stream.open(std::string(argv[3]));
+    streambufffer = ouput_file_stream.rdbuf();
+  } else {
+    streambufffer = std::cout.rdbuf();
+  }
+
+  std::ostream output_stream(streambufffer);
+
   // ----------------------------------------------------------------------------
   // Display information about the alpha complex
   // ----------------------------------------------------------------------------
-  std::cout << "Alpha complex is of dimension " << alpha_complex_from_file.dimension() <<
+  output_stream << "Alpha complex is of dimension " << alpha_complex_from_file.dimension() <<
       " - " << alpha_complex_from_file.num_simplices() << " simplices - " <<
       alpha_complex_from_file.num_vertices() << " vertices." << std::endl;
 
-  std::cout << "Iterator on alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
+  output_stream << "Iterator on alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
   for (auto f_simplex : alpha_complex_from_file.filtration_simplex_range()) {
-    std::cout << "   ( ";
+    output_stream << "   ( ";
     for (auto vertex : alpha_complex_from_file.simplex_vertex_range(f_simplex)) {
-      std::cout << vertex << " ";
+      output_stream << vertex << " ";
     }
-    std::cout << ") -> " << "[" << alpha_complex_from_file.filtration(f_simplex) << "] ";
-    std::cout << std::endl;
+    output_stream << ") -> " << "[" << alpha_complex_from_file.filtration(f_simplex) << "] ";
+    output_stream << std::endl;
   }
+  ouput_file_stream.close();
   return 0;
 }

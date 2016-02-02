@@ -10,7 +10,7 @@ typedef Kernel::Point_d Point;
 typedef std::vector<Point> Vector_of_points;
 
 int main(int argc, char **argv) {
-  double alpha_square_max_value = 32.0;
+  double alpha_square_max_value = 60.0;
 
   // ----------------------------------------------------------------------------
   // Init of a list of points
