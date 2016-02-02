@@ -31,20 +31,9 @@ namespace Gudhi {
 
 namespace witness_complex {
 
-/**
- *  \class Landmark_choice_by_furthest_point
- *  \brief The class `Landmark_choice_by_furthest_point` allows to construct the matrix
- *  of closest landmarks per witness by iteratively choosing the furthest witness
- *  from the set of already chosen landmarks as the new landmark. 
- *  \ingroup witness_complex
- */
+ typedef std::vector<int> typeVectorVertex;
 
-class Landmark_choice_by_furthest_point {
- private:
-  typedef std::vector<int> typeVectorVertex;
-
- public:
-    /** 
+  /** 
    *  \brief Landmark choice strategy by iteratively adding the furthest witness from the
    *  current landmark set as the new landmark. 
    *  \details It chooses nbL landmarks from a random access range `points` and
@@ -53,9 +42,9 @@ class Landmark_choice_by_furthest_point {
 
   template <typename KNearestNeighbours,
   typename Point_random_access_range>
-  Landmark_choice_by_furthest_point(Point_random_access_range const &points,
-                                    int nbL,
-                                    KNearestNeighbours &knn) {
+  void landmark_choice_by_furthest_point(Point_random_access_range const &points,
+                                         int nbL,
+                                         KNearestNeighbours &knn) {
     int nb_points = points.end() - points.begin();
     assert(nb_points >= nbL);
     // distance matrix witness x landmarks
@@ -98,7 +87,6 @@ class Landmark_choice_by_furthest_point {
                 [&wit_land_dist, i](int a, int b) {
                   return wit_land_dist[i][a] < wit_land_dist[i][b]; });
   }
-};
 
 }  // namespace witness_complex
 

@@ -82,7 +82,7 @@ int main(int argc, char * const argv[]) {
     // Choose landmarks
     start = clock();
     std::vector<std::vector< int > > knn;
-    Landmark_choice_by_random_point(point_vector, nbL, knn);
+    Gudhi::witness_complex::landmark_choice_by_random_point(point_vector, nbL, knn);
 
     // Compute witness complex
     WitnessComplex(knn, simplex_tree, nbL, point_vector[0].size());

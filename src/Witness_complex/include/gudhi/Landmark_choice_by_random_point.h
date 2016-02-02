@@ -32,26 +32,16 @@ namespace Gudhi {
 
 namespace witness_complex {
 
-/** 
- *  \class Landmark_choice_by_random_point
- *  \brief The class `Landmark_choice_by_random_point` allows to construct the matrix
- *  of closest landmarks per witness by iteratively choosing a random non-chosen witness
- *  as a new landmark. 
- *  \ingroup witness_complex
- */
-
-class Landmark_choice_by_random_point {
- public:
   /** \brief Landmark choice strategy by taking random vertices for landmarks.
    *  \details It chooses nbL distinct landmarks from a random access range `points`
    *  and outputs a matrix {witness}*{closest landmarks} in knn.
    */
 
   template <typename KNearestNeighbours,
-  typename Point_random_access_range>
-  Landmark_choice_by_random_point(Point_random_access_range const &points,
-                                  int nbL,
-                                  KNearestNeighbours &knn) {
+            typename Point_random_access_range>
+  void landmark_choice_by_random_point(Point_random_access_range const &points,
+                                       int nbL,
+                                       KNearestNeighbours &knn) {
     int nbP = points.end() - points.begin();
     assert(nbP >= nbL);
     std::set<int> landmarks;
@@ -71,8 +61,8 @@ class Landmark_choice_by_random_point {
     knn = KNearestNeighbours(nbP);
     for (int points_i = 0; points_i < nbP; points_i++) {
       std::priority_queue<dist_i, std::vector<dist_i>, comp> l_heap([&](dist_i j1, dist_i j2) {
-        return j1.first > j2.first;
-      });
+          return j1.first > j2.first;
+        });
       std::set<int>::iterator landmarks_it;
       int landmarks_i = 0;
       for (landmarks_it = landmarks.begin(), landmarks_i = 0; landmarks_it != landmarks.end();
@@ -87,7 +77,6 @@ class Landmark_choice_by_random_point {
       }
     }
   }
-};
 
 }  // namespace witness_complex
 

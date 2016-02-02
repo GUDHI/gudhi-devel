@@ -102,7 +102,7 @@ int main(int argc, char * const argv[]) {
   // Choose landmarks
   start = clock();
   std::vector<std::vector< int > > knn;
-  Landmark_choice_by_random_point(point_vector, nbL, knn);
+  Gudhi::witness_complex::landmark_choice_by_random_point(point_vector, nbL, knn);
   end = clock();
   std::cout << "Landmark choice for " << nbL << " landmarks took "
       << static_cast<double>(end - start) / CLOCKS_PER_SEC << " s. \n";

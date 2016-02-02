@@ -37,8 +37,6 @@ typedef std::vector<double> Point;
 typedef std::vector< Vertex_handle > typeVectorVertex;
 typedef Gudhi::Simplex_tree<> Simplex_tree;
 typedef Gudhi::witness_complex::Witness_complex<Simplex_tree> WitnessComplex;
-typedef Gudhi::witness_complex::Landmark_choice_by_random_point Landmark_choice_by_random_point;
-typedef Gudhi::witness_complex::Landmark_choice_by_furthest_point Landmark_choice_by_furthest_point;
 
 BOOST_AUTO_TEST_CASE(witness_complex_points) {
   std::vector< typeVectorVertex > knn;
@@ -52,7 +50,7 @@ BOOST_AUTO_TEST_CASE(witness_complex_points) {
   bool b_print_output = false;
   // First test: random choice
   Simplex_tree complex1;
-  Landmark_choice_by_random_point lcrp(points, 100, knn);
+  Gudhi::witness_complex::landmark_choice_by_random_point(points, 100, knn);
   assert(!knn.empty());
   WitnessComplex witnessComplex1(knn, complex1, 100, 3);
   BOOST_CHECK(witnessComplex1.is_witness_complex(knn, b_print_output));
@@ -60,7 +58,7 @@ BOOST_AUTO_TEST_CASE(witness_complex_points) {
   // Second test: furthest choice
   knn.clear();
   Simplex_tree complex2;
-  Landmark_choice_by_furthest_point lcfp(points, 100, knn);
+  Gudhi::witness_complex::landmark_choice_by_furthest_point(points, 100, knn);
   WitnessComplex witnessComplex2(knn, complex2, 100, 3);
   BOOST_CHECK(witnessComplex2.is_witness_complex(knn, b_print_output));
 }
