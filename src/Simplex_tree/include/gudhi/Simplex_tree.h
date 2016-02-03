@@ -1132,9 +1132,9 @@ class Simplex_tree {
   bool make_filtration_non_decreasing() {
     bool modified = false;
     // Loop must be from the end to the beginning, as higher dimension simplex are always on the left part of the tree
-    for (auto& sh : boost::adaptors::reverse(root_.members())) {
-      if (has_children(&sh)) {
-        modified |= rec_make_filtration_non_decreasing(sh.second.children());
+    for (auto& simplex : boost::adaptors::reverse(root_.members())) {
+      if (has_children(&simplex)) {
+        modified |= rec_make_filtration_non_decreasing(simplex.second.children());
       }
     }
     return modified;
@@ -1149,22 +1149,22 @@ class Simplex_tree {
     bool modified = false;
 
     // Loop must be from the end to the beginning, as higher dimension simplex are always on the left part of the tree
-    for (auto& sh : boost::adaptors::reverse(sib->members())) {
+    for (auto& simplex : boost::adaptors::reverse(sib->members())) {
       // Find the maximum filtration value in the border
-      Boundary_simplex_range boundary = boundary_simplex_range(&sh);
+      Boundary_simplex_range boundary = boundary_simplex_range(&simplex);
       Boundary_simplex_iterator max_border = std::max_element(std::begin(boundary), std::end(boundary),
                                                               [](Simplex_handle sh1, Simplex_handle sh2) {
                                                                 return filtration(sh1) < filtration(sh2);
                                                               } );
 
       Filtration_value max_filt_border_value = filtration(*max_border);
-      if (sh.second.filtration() < max_filt_border_value) {
+      if (simplex.second.filtration() < max_filt_border_value) {
         // Store the filtration modification information
         modified = true;
-        sh.second.assign_filtration(max_filt_border_value);
+        simplex.second.assign_filtration(max_filt_border_value);
       }
-      if (has_children(&sh)) {
-        modified |= rec_make_filtration_non_decreasing(sh.second.children());
+      if (has_children(&simplex)) {
+        modified |= rec_make_filtration_non_decreasing(simplex.second.children());
       }
     }
     // Make the modified information to be traced by upper call
