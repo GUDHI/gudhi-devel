@@ -52,9 +52,11 @@ namespace alphacomplex {
  * \cite cgal:hdj-t-15b from <a target="_blank" href="http://www.cgal.org/">CGAL</a> (the Computational Geometry
  * Algorithms Library \cite cgal:eb-15b).
  * 
- * The complex is a template class requiring a <a target="_blank"
+ * The complex is a template class requiring an Epick_d <a target="_blank"
  * href="http://doc.cgal.org/latest/Kernel_d/index.html#Chapter_dD_Geometry_Kernel">dD Geometry Kernel</a>
  * \cite cgal:s-gkd-15b from CGAL as template.
+ * 
+ * \remark When Alpha_complex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
  * 
  * \section pointsexample Example from points
  * 

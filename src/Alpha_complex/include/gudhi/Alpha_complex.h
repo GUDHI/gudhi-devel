@@ -57,6 +57,12 @@ namespace alphacomplex {
  * 
  * Please refer to \ref alpha_complex for examples.
  *
+ * The complex is a template class requiring an Epick_d <a target="_blank"
+ * href="http://doc.cgal.org/latest/Kernel_d/index.html#Chapter_dD_Geometry_Kernel">dD Geometry Kernel</a>
+ * \cite cgal:s-gkd-15b from CGAL as template.
+ * 
+ * \remark When Alpha_complex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
+ * 
  */
 template<class Kernel>
 class Alpha_complex : public Simplex_tree<> {
