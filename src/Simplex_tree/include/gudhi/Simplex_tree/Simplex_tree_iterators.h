@@ -104,7 +104,8 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
         st_(st)  {
   }
 
-  Simplex_tree_boundary_simplex_iterator(SimplexTree * st, Simplex_handle sh)
+  template<class SimplexHandle>
+  Simplex_tree_boundary_simplex_iterator(SimplexTree * st, SimplexHandle sh)
       : last_(sh->first),
         sib_(nullptr),
         st_(st) {
