@@ -325,11 +325,10 @@ class Simplex_tree {
   Simplex_tree(const Simplex_tree& simplex_source)
       : null_vertex_(simplex_source.null_vertex_),
       threshold_(simplex_source.threshold_),
+      root_(nullptr, null_vertex_ , simplex_source.root_.members_),
       filtration_vect_(),
       dimension_(simplex_source.dimension_) {
     auto root_source = simplex_source.root_;
-    auto memb_source = root_source.members();
-    root_ = Siblings(nullptr, null_vertex_, memb_source);
     rec_copy(&root_, &root_source);
   }
 
@@ -341,7 +340,7 @@ class Simplex_tree {
         Siblings * newsib = new Siblings(sib, sh_source->first);
         newsib->members_.reserve(sh_source->second.children()->members().size());
         for (auto & child : sh_source->second.children()->members())
-          newsib->members_.emplace_hint(newsib->members_.end(), child.first, Node(sib, child.second.filtration()));
+          newsib->members_.emplace_hint(newsib->members_.end(), child.first, Node(newsib, child.second.filtration()));
         rec_copy(newsib, sh_source->second.children());
         sh->second.assign_children(newsib);
       }
