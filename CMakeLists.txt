@@ -7,52 +7,71 @@ configure_file(GUDHIVersion.cmake.in "${PROJECT_BINARY_DIR}/GUDHIVersion.cmake" 
 
 find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework chrono timer program_options thread REQUIRED)
 
-set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
-message("CMAKE_PREFIX_PATH = ${CMAKE_PREFIX_PATH}")
-message("CMAKE_MODULE_PATH = ${CMAKE_MODULE_PATH}")
-
-enable_testing()
-
-if(MSVC)
-  # Turn off some VC++ warnings
-  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4267 /wd4668 /wd4311 /wd4800 /wd4820 /wd4503 /wd4244 /wd4345 /wd4996 /wd4396 /wd4018")
-else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -std=c++11 -Wall -Wpedantic -Wsign-compare")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb -O0")	
-  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
-endif()
-
-set(Boost_USE_STATIC_LIBS        ON)
-set(Boost_USE_MULTITHREADED      ON)
-set(Boost_USE_STATIC_RUNTIME    OFF)
-
-find_package(GMP)
-if(GMP_FOUND)
-	find_package(GMPXX)
-endif()
-
-find_package(CGAL)
-
-# Find TBB package for parallel sort - not mandatory, just optional.
-set(TBB_FIND_QUIETLY ON)
-find_package(TBB)
-
-# Required programs for unitary tests purpose
-FIND_PROGRAM( GCOVR_PATH gcovr )
-if (GCOVR_PATH)
-  message("gcovr found in ${GCOVR_PATH}")
-endif()
-# Required programs for unitary tests purpose
-FIND_PROGRAM( GPROF_PATH gprof )
-if (GPROF_PATH)
-  message("gprof found in ${GPROF_PATH}")
-endif()
-
-
 if(NOT Boost_FOUND)
   message(FATAL_ERROR "NOTICE: This demo requires Boost and will not be compiled.")
 else()
+
+  set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
+  set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
+  message("CMAKE_PREFIX_PATH = ${CMAKE_PREFIX_PATH}")
+  message("CMAKE_MODULE_PATH = ${CMAKE_MODULE_PATH}")
+
+  enable_testing()
+
+  find_package(GMP)
+  if(GMP_FOUND)
+    INCLUDE_DIRECTORIES(${GMP_INCLUDE_DIR})
+    find_package(GMPXX)
+    if(GMPXX_FOUND)
+      INCLUDE_DIRECTORIES(${GMPXX_INCLUDE_DIR})
+    endif()
+  endif()
+
+  # find CGAL package before set of CXX flags because
+  # in CMakeLists.txt, when include(${CGAL_USE_FILE}), CXX_FLAGS are overwritten.
+  # cf. http://doc.cgal.org/latest/Manual/installation.html#title40
+  set(CGAL_DONT_OVERRIDE_CMAKE_FLAGS TRUE CACHE BOOL "Force CGAL to maintain CMAKE flags")
+  find_package(CGAL)
+  if(CGAL_FOUND)
+    include( ${CGAL_USE_FILE} )
+    set(CMAKE_CXX_CGAL_FOR_GUDHI_FLAGS "-frounding-math")
+  endif()
+  
+  if(MSVC)
+    # Turn off some VC++ warnings
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4267 /wd4668 /wd4311 /wd4800 /wd4820 /wd4503 /wd4244 /wd4345 /wd4996 /wd4396 /wd4018")
+  else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wpedantic -Wsign-compare ${CMAKE_CXX_CGAL_FOR_GUDHI_FLAGS}")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb -O0")	
+    # set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+  endif()
+
+  if(CMAKE_BUILD_TYPE MATCHES Debug)
+    message("Compilation flags are: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG}")
+  else()
+    message("Compilation flags are: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
+  endif()
+
+  set(Boost_USE_STATIC_LIBS        ON)
+  set(Boost_USE_MULTITHREADED      ON)
+  set(Boost_USE_STATIC_RUNTIME    OFF)
+
+  # Find TBB package for parallel sort - not mandatory, just optional.
+  set(TBB_FIND_QUIETLY ON)
+  find_package(TBB)
+
+  # Required programs for unitary tests purpose
+  FIND_PROGRAM( GCOVR_PATH gcovr )
+  if (GCOVR_PATH)
+    message("gcovr found in ${GCOVR_PATH}")
+  endif()
+  # Required programs for unitary tests purpose
+  FIND_PROGRAM( GPROF_PATH gprof )
+  if (GPROF_PATH)
+    message("gprof found in ${GPROF_PATH}")
+  endif()
+
+
   # BOOST ISSUE result_of vs C++11
   add_definitions(-DBOOST_RESULT_OF_USE_DECLTYPE)
   # BOOST ISSUE with Libraries name resolution under Windows
