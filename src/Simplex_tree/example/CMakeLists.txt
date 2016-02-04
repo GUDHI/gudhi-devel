@@ -32,6 +32,6 @@ if(GMP_FOUND AND CGAL_FOUND)
 
   INCLUDE_DIRECTORIES(${GMP_INCLUDE_DIR})
   add_executable ( simplex_tree_from_alpha_shapes_3 simplex_tree_from_alpha_shapes_3.cpp )
-  target_link_libraries(simplex_tree_from_alpha_shapes_3 ${GMP_LIBRARIES} ${CGAL_LIBRARY})
+  target_link_libraries(simplex_tree_from_alpha_shapes_3 ${GMP_LIBRARIES} ${CGAL_LIBRARY} ${Boost_SYSTEM_LIBRARY})
   add_test(simplex_tree_from_alpha_shapes_3 ${CMAKE_CURRENT_BINARY_DIR}/simplex_tree_from_alpha_shapes_3 ${CMAKE_SOURCE_DIR}/data/points/bunny_5000)
 endif()
