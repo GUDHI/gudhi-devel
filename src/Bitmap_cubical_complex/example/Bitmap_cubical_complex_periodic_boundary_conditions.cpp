@@ -39,6 +39,8 @@ using namespace std;
 
 int main( int argc , char** argv )
 {
+    clock_t beginOfProgram = clock();
+
     cout << "This program computes persistent homology, by using Bitmap_cubical_complex_periodic_boundary_conditions class, of cubical complexes provided in text files in Perseus style (the only numbered in \
 the first line is a dimension D of a bitmap. In the lines I between 2 and D+1 there are numbers of top dimensional cells in the direction I. Let N denote product \
 of the numbers in the lines between 2 and D. In the lines D+2 to D+2+N there are filtrations of top dimensional cells. We assume that the cells are in the \
@@ -53,14 +55,18 @@ lexicographical order. See CubicalOneSphere.txt or CubicalTwoSphere.txt for exam
         return 1;
     }
 
-    Bitmap_cubical_complex< Bitmap_cubical_complex_periodic_boundary_conditions_base<double> > b( argv[1] );
+    Bitmap_cubical_complex< Bitmap_cubical_complex_periodic_boundary_conditions_base<float> > b( argv[1] );
+
+    cerr << "Here \n";
+
+    clock_t endCreateBitmap = clock();
+    double elapsed_secsCreateBitmap = double(endCreateBitmap - beginOfProgram) / CLOCKS_PER_SEC;
+    cerr << "Time of creation of bitmap : " << elapsed_secsCreateBitmap << endl;
+    
 
 
     // Compute the persistence diagram of the complex
-    persistent_cohomology::Persistent_cohomology<
-    Bitmap_cubical_complex< Bitmap_cubical_complex_periodic_boundary_conditions_base<double>   >
-    , Field_Zp
-    > pcoh(b,true);
+    persistent_cohomology::Persistent_cohomology< Bitmap_cubical_complex< Bitmap_cubical_complex_periodic_boundary_conditions_base<float> >, Field_Zp > pcoh(b,true);
     pcoh.init_coefficients( p ); //initilizes the coefficient field for homology
     pcoh.compute_persistent_cohomology( min_persistence );
 
@@ -71,5 +77,8 @@ lexicographical order. See CubicalOneSphere.txt or CubicalTwoSphere.txt for exam
     pcoh.output_diagram(out);
     out.close();
 
+    clock_t endOfProgram = clock();
+    double elapsed_secsOfProgram = double(endOfProgram - beginOfProgram) / CLOCKS_PER_SEC;
+    cerr << "Overall execution time : " << elapsed_secsOfProgram << endl;
     return 0;
 }

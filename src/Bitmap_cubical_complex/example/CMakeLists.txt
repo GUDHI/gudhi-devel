@@ -13,3 +13,5 @@ add_test(Random_bitmap_cubical_complex ${CMAKE_CURRENT_BINARY_DIR}/Random_bitmap
 add_executable ( Bitmap_cubical_complex_periodic_boundary_conditions Bitmap_cubical_complex_periodic_boundary_conditions.cpp )
 target_link_libraries(Bitmap_cubical_complex_periodic_boundary_conditions ${Boost_SYSTEM_LIBRARY})	
 
+add_executable ( Compute_persistence_with_phat Compute_persistence_with_phat.cpp )
+target_link_libraries(Compute_persistence_with_phat ${Boost_SYSTEM_LIBRARY})
