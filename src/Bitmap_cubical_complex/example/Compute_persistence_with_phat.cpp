@@ -52,7 +52,7 @@ int main( int argc , char** argv )
 
 
     Compute_persistence_with_phat< Bitmap_cubical_complex< Bitmap_cubical_complex_base<double> > , double > phat(&b);
-    phat::persistence_pairs pairs = phat.compute_persistence_pairs_dualized_chunk_reduction();
+    phat::persistence_pairs pairs = phat.compute_persistence_pairs_standard_reduction();
     std::pair< std::vector< std::vector<double> > , std::vector< std::vector< std::pair<double,double> > > > persistence = phat.get_the_intervals( pairs );
     writeBettiNumbersAndPersistenceIntervalsToFile( "phat_persistence" , persistence );
 
