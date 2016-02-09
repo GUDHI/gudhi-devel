@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <iterator>
 #include <limits>
+#include <ctime>
 #include "Bitmap_cubical_complex/counter.h"
 
 
@@ -68,7 +69,9 @@ public:
     /**
     *Default constructor
     **/
-    Bitmap_cubical_complex_base(){}
+    Bitmap_cubical_complex_base()
+    {
+    }
     /**
     * There are a few constructors of a Bitmap_cubical_complex_base class.
     * First one, that takes vector<unsigned>, creates an empty bitmap of a dimension equal
@@ -110,7 +113,7 @@ public:
     * non-negative integers pointing to the
     * positions of (co)boundary element of the input cell.
     **/
-    inline std::vector< size_t > get_coboundary_of_a_cell( size_t cell )const;
+    virtual inline std::vector< size_t > get_coboundary_of_a_cell( size_t cell )const;
     /**
     * In the case of get_dimension_of_a_cell function, the output is a non-negative integer
     * indicating the dimension of a cell.
@@ -140,7 +143,7 @@ public:
     /**
     * Returns number of all cubes in the data structure.
     **/
-    inline unsigned size_of_bitmap()const
+    inline unsigned size()const
     {
         return this->data.size();
     }
@@ -151,6 +154,18 @@ public:
     template <typename K>
     friend ostream& operator << ( ostream & os , const Bitmap_cubical_complex_base<K>& b );
 
+
+    /**
+    * Functions that put the input data to bins.
+    **/
+    void put_data_toBins( size_t number_of_bins );
+    void put_data_toBins( T diameter_of_bin );
+
+    /**
+    * Functions to find min and max values of filtration.
+    **/
+    std::pair< T ,T > min_max_filtration();
+
     //ITERATORS
 
     /**
@@ -158,21 +173,40 @@ public:
     * in lexicographical order).
     **/
     typedef typename std::vector< T >::iterator all_cells_iterator;
-    all_cells_iterator all_cells_begin()const
+
+    /**
+    * Function returning an iterator to the first cell of the bitmap.
+    **/
+    all_cells_iterator all_cells_begin()
     {
         return this->data.begin();
     }
+
+     /**
+    * Function returning an iterator to the last cell of the bitmap.
+    **/
     all_cells_iterator all_cells_end()const
     {
         return this->data.end();
     }
 
-
+    /**
+    * Constant iterator through all cells in the complex (in order they appear in the structure -- i.e.
+    * in lexicographical order).
+    **/
     typedef typename std::vector< T >::const_iterator all_cells_const_iterator;
+
+    /**
+    * Function returning a constant iterator to the first cell of the bitmap.
+    **/
     all_cells_const_iterator all_cells_const_begin()const
     {
         return this->data.begin();
     }
+
+    /**
+    * Function returning a constant iterator to the last cell of the bitmap.
+    **/
     all_cells_const_iterator all_cells_const_end()const
     {
         return this->data.end();
@@ -270,11 +304,19 @@ public:
             std::vector< size_t > counter;
             Bitmap_cubical_complex_base& b;
     };
+
+    /**
+    * Function returning a Top_dimensional_cells_iterator to the first top dimensional cell cell of the bitmap.
+    **/
     Top_dimensional_cells_iterator top_dimensional_cells_begin()
     {
         Top_dimensional_cells_iterator a(*this);
         return a;
     }
+
+    /**
+    * Function returning a Top_dimensional_cells_iterator to the last top dimensional cell cell of the bitmap.
+    **/
     Top_dimensional_cells_iterator top_dimensional_cells_end()
     {
         Top_dimensional_cells_iterator a(*this);
@@ -351,6 +393,50 @@ protected:
 };
 
 
+template <typename T>
+void Bitmap_cubical_complex_base<T>::put_data_toBins( size_t number_of_bins )
+{
+    bool bdg = false;
+
+    std::pair< T ,T > min_max = this->min_max_filtration();
+    T dx = (min_max.second-min_max.first)/(T)number_of_bins;
+
+    //now put the data into the appropriate bins:
+    for ( size_t i = 0 ; i != this->data.size() ; ++i )
+    {
+        if ( bdg ){cerr << "Before binning : " << this->data[i] << endl;}
+        this->data[i] = min_max.first + dx*(this->data[i]-min_max.first)/number_of_bins;
+        if ( bdg ){cerr << "After binning : " << this->data[i] << endl;getchar();}
+    }
+}
+
+template <typename T>
+void Bitmap_cubical_complex_base<T>::put_data_toBins( T diameter_of_bin )
+{
+    bool bdg = false;
+    std::pair< T ,T > min_max = this->min_max_filtration();
+
+    size_t number_of_bins = (min_max.second - min_max.first)/diameter_of_bin;
+    //now put the data into the appropriate bins:
+    for ( size_t i = 0 ; i != this->data.size() ; ++i )
+    {
+        if ( bdg ){cerr << "Before binning : " << this->data[i] << endl;}
+        this->data[i] = min_max.first + diameter_of_bin*(this->data[i]-min_max.first)/number_of_bins;
+        if ( bdg ){cerr << "After binning : " << this->data[i] << endl;getchar();}
+    }
+}
+
+template <typename T>
+std::pair< T ,T > Bitmap_cubical_complex_base<T>::min_max_filtration()
+{
+    std::pair< T ,T > min_max( std::numeric_limits<T>::max() , std::numeric_limits<T>::min() );
+    for ( size_t i = 0 ; i != this->data.size() ; ++i )
+    {
+        if ( this->data[i] < min_max.first )min_max.first = this->data[i];
+        if ( this->data[i] > min_max.second )min_max.second = this->data[i];
+    }
+    return min_max;
+}
 
 
 template <typename K>
@@ -422,7 +508,7 @@ void Bitmap_cubical_complex_base<T>::read_perseus_style_file( const char* perseu
     unsigned dimensionOfData;
     inFiltration >> dimensionOfData;
 
-    if (dbg){cerr << "dimensionOfData : " << dimensionOfData << endl;}
+    if (dbg){cerr << "dimensionOfData : " << dimensionOfData << endl;getchar();}
 
     std::vector<unsigned> sizes;
     sizes.reserve( dimensionOfData );

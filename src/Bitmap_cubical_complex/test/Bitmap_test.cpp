@@ -310,7 +310,7 @@ BOOST_AUTO_TEST_CASE(compute_boundary_test_1) {
   dimensions.push_back(3);
 
   Bitmap_cubical_complex< Bitmap_cubical_complex_base<double> > increasing(dimensions, increasingFiltrationOfTopDimensionalCells);
-  for (size_t i = 0; i != increasing.size_of_bitmap(); ++i) {
+  for (size_t i = 0; i != increasing.size(); ++i) {
     std::vector< size_t > bd = increasing.get_boundary_of_a_cell(i);
     for (size_t j = 0; j != bd.size(); ++j) {
       BOOST_CHECK(boundaries[i][j] == bd[j]);
@@ -423,7 +423,7 @@ BOOST_AUTO_TEST_CASE(compute_boundary_test_2) {
   coboundaryElements.push_back(41);
   coboundaryElements.push_back(47);
   size_t number = 0;
-  for (size_t i = 0; i != increasing.size_of_bitmap(); ++i) {
+  for (size_t i = 0; i != increasing.size(); ++i) {
     std::vector< size_t > bd = increasing.get_coboundary_of_a_cell(i);
     for (size_t j = 0; j != bd.size(); ++j) {
       BOOST_CHECK(coboundaryElements[number] == bd[j]);
@@ -502,7 +502,7 @@ BOOST_AUTO_TEST_CASE(compute_boundary_test_3) {
   dim.push_back(1);
   dim.push_back(0);
 
-  for (size_t i = 0; i != increasing.size_of_bitmap(); ++i) {
+  for (size_t i = 0; i != increasing.size(); ++i) {
     BOOST_CHECK(increasing.get_dimension_of_a_cell(i) == dim[i]);
   }
 }
@@ -726,7 +726,7 @@ BOOST_AUTO_TEST_CASE(boudary_operator_2d_bitmap_with_periodic_bcond) {
   boundaries.push_back( boundary14 );
   boundaries.push_back( boundary15 );
 
-  for (size_t i = 0; i != cmplx.size_of_bitmap(); ++i) {
+  for (size_t i = 0; i != cmplx.size(); ++i) {
     std::vector< size_t > bd = cmplx.get_boundary_of_a_cell(i);
     for (size_t j = 0; j != bd.size(); ++j) {
       BOOST_CHECK(boundaries[i][j] == bd[j]);
@@ -826,7 +826,7 @@ BOOST_AUTO_TEST_CASE(coboudary_operator_2d_bitmap_with_periodic_bcond) {
   coboundaries.push_back( coboundary14 );
   coboundaries.push_back( coboundary15 );
 
-  for (size_t i = 0; i != cmplx.size_of_bitmap(); ++i) {
+  for (size_t i = 0; i != cmplx.size(); ++i) {
     std::vector< size_t > cbd = cmplx.get_coboundary_of_a_cell(i);
     for (size_t j = 0; j != cbd.size(); ++j) {
       BOOST_CHECK(coboundaries[i][j] == cbd[j]);
@@ -879,7 +879,7 @@ BOOST_AUTO_TEST_CASE(bitmap_2d_with_periodic_bcond_filtration) {
   filtration.push_back(3);//15
 
 
-  for (size_t i = 0; i != cmplx.size_of_bitmap(); ++i)
+  for (size_t i = 0; i != cmplx.size(); ++i)
   {
       BOOST_CHECK( filtration[i] == cmplx.get_cell_data(i) );
   }

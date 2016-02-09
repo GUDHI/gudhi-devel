@@ -38,20 +38,18 @@ namespace Cubical_complex
 
 *Cubical complex is an example of a structured complex useful in computational mathematics (specially rigorous numerics) and image analysis. The presented implementation of cubical complexes is based on the following definition.
 *
-* An <em>elementary interval</em> is an interval of a form \f$ [n,n+1] \f$, or \f$[n,n]\f$, for \f$ n \in \mathcal{Z} \f$. The first one is called <em>non-degenerated</em>, while the second one is \a degenerated interval. A <em>boundary of a elementary
-*interval</em> is a chain  \f$\partial [n,n+1] = [n+1,n+1]-[n,n] \f$ in case of non-degenerated elementary interval and \f$\partial [n,n] = 0 \f$ in case of degenerated elementary interval. An <em>elementary cube</em> \f$ C \f$ is a
+* An <em>elementary interval</em> is an interval of a form \f$ [n,n+1] \f$, or \f$[n,n]\f$, for \f$ n \in \mathcal{Z} \f$. The first one is called <em>non-degenerate</em>, while the second one is \a degenerate interval. A <em>boundary of a elementary
+*interval</em> is a chain  \f$\partial [n,n+1] = [n+1,n+1]-[n,n] \f$ in case of non-degenerate elementary interval and \f$\partial [n,n] = 0 \f$ in case of degenerate elementary interval. An <em>elementary cube</em> \f$ C \f$ is a
 
-*product of elementary intervals, \f$C=I_1 \times \ldots \times I_n\f$. <em>Embedding dimension</em> of a cube is n, the number of elementary intervals (degenerated or not) in the product. A <em>dimension of a cube</em> \f$C=I_1 \times ... \times I_n\f$ is the
-*number of non degenerated elementary intervals in the product. A <em>boundary of a cube</em> \f$C=I_1 \times \ldots \times I_n\f$ is a chain obtained in the following way:
+*product of elementary intervals, \f$C=I_1 \times \ldots \times I_n\f$. <em>Embedding dimension</em> of a cube is n, the number of elementary intervals (degenerate or not) in the product. A <em>dimension of a cube</em> \f$C=I_1 \times ... \times I_n\f$ is the
+*number of non degenerate elementary intervals in the product. A <em>boundary of a cube</em> \f$C=I_1 \times \ldots \times I_n\f$ is a chain obtained in the following way:
 *\f[\partial C = (\partial I_1 \times \ldots \times I_n) + (I_1 \times \partial I_2 \times \ldots \times I_n) + \ldots + (I_1 \times I_2 \times \ldots \times \partial I_n).\f]
 *A <em>cubical complex</em> \f$\mathcal{K}\f$ is a collection of cubes closed under operation of taking boundary (i.e. boundary of every cube from the collection is in the collection). A cube \f$C\f$ in cubical complex \f$\mathcal{K}\f$ is <em>maximal</em> if it is not in
 *a boundary of any other cube in \f$\mathcal{K}\f$. A \a support of a cube \f$C\f$ is the set in \f$\mathbb{R}^n\f$ occupied by \f$C\f$ (\f$n\f$ is the embedding dimension of \f$C\f$).
 *
 *Cubes may be equipped with a filtration values in which case we have filtered cubical complex. All the cubical complexes considered in this implementation are filtered cubical complexes (although, the range of a filtration may be a set of two elements).
 *
-*For further details and theory of cubical complexes, please consult \cite kaczynski2004computational .
-*
-*as well as the following paper \cite peikert2012topological .
+*For further details and theory of cubical complexes, please consult \cite kaczynski2004computational as well as the following paper \cite peikert2012topological .
 *
 *\section datastructure Data structure.
 *
@@ -73,7 +71,8 @@ namespace Cubical_complex
 *In the current implantation, filtration is given at the maximal cubes, and it is then extended by the lower star filtration to all cubes. There are a number of constructors
 *that can be used to construct cubical complex by users who want to use the code directly. They can be found in the \a Bitmap_cubical_complex class.
 *Currently one input from a text file is used. It uses a format used already in Perseus software (http://www.sas.upenn.edu/~vnanda/perseus/) by Vidit Nanda.
-*Below we are providing a description of the format.
+*Below we are providing a description of the format. The first line contains a number d begin the dimension of the bitmap (2 in the example below). Next d lines are the numbers of
+*top dimensional cubes in each dimensions (3 and 3 in the example below). Next, in lexicographical order, the filtration of top dimensional cubes is given (1 4 6 8 20 4 7 6 5 in the example below).
 *
 *
 *\image html "exampleBitmap.png" "Example of a input data."
@@ -82,6 +81,29 @@ namespace Cubical_complex
 *\verbatim
 2
 3
+3
+1
+4
+6
+8
+20
+4
+7
+6
+5
+\endverbatim
+
+\section Periodic boundary conditions
+Often one would like to impose periodic boundary conditions to the cubical complex. Let \f$ I_1\times ... \times I_n \f$ be a box
+that is decomposed with a cubical complex \f$ \mathcal{K} \f$. Imposing periodic boundary conditions in the direction i, means that the left and the right side of a complex
+\f$ \mathcal{K} \f$ are considered the same. In particular, if for a bitmap \f$ \mathcal{K} \f$ periodic boundary conditions are imposed in all directions, then complex
+\f$ \mathcal{K} \f$ became n-dimensional torus. One can use various constructors from the file Bitmap_cubical_complex_periodic_boundary_conditions_base.h to construct cubical
+complex with periodic boundary conditions. One can also use Perseus style input files. To indicate periodic boundary conditions in a given direction, then number of top dimensional cells
+in this direction have to be multiplied by -1. For instance:
+
+*\verbatim
+2
+-3
 3
 1
 2
@@ -93,6 +115,9 @@ namespace Cubical_complex
 6
 5
 \endverbatim
+
+Indicate that we have imposed periodic boundary conditions in the direction x, but not in the direction y.
+
 
 */
 /** @} */  // end defgroup cubical_complex

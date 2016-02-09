@@ -1,4 +1,4 @@
-	/*    This file is part of the Gudhi Library. The Gudhi library
+/*    This file is part of the Gudhi Library. The Gudhi library
  *    (Geometric Understanding in Higher Dimensions) is a generic C++
  *    library for computational topology.
  *
@@ -66,6 +66,7 @@ public:
     Bitmap_cubical_complex( const char* perseus_style_file ):
     T(perseus_style_file),key_associated_to_simplex(this->total_number_of_cells+1)
     {
+        //clock_t begin = clock();
         if ( globalDbg ){cerr << "Bitmap_cubical_complex( const char* perseus_style_file )\n";}
         for ( size_t i = 0 ; i != this->total_number_of_cells ; ++i )
         {
@@ -75,6 +76,7 @@ public:
         //If the user decide to change some elements of the bitmap, then this procedure need
         //to be called again.
         this->initialize_simplex_associated_to_key();
+        //cerr << "Time of running Bitmap_cubical_complex( const char* perseus_style_file ) constructor : " << double(clock() - begin) / CLOCKS_PER_SEC << endl;
     }
 
 
@@ -116,6 +118,7 @@ public:
         //to be called again.
         this->initialize_simplex_associated_to_key();
     }
+
 
 //*********************************************//
 //Other 'easy' functions
@@ -328,6 +331,15 @@ public:
     **/
     Boundary_simplex_range boundary_simplex_range(Simplex_handle sh)
     {
+        /*
+        std::vector< size_t > bdry = this->get_boundary_of_a_cell(sh);
+        Boundary_simplex_range result( bdry.size() );
+        for ( size_t i = 0 ; i != bdry.size() ; ++i )
+        {
+            result[i] = this->simplex_associated_to_key[ bdry[i] ];
+        }
+        return result;
+        */
         return this->get_boundary_of_a_cell(sh);
     }
 
@@ -501,6 +513,12 @@ void Bitmap_cubical_complex<T>::initialize_simplex_associated_to_key()
     std::sort( simplex_associated_to_key.begin() ,
                simplex_associated_to_key.end() ,
                is_before_in_filtration<T>(this) );
+
+    //we still need to deal here with a key_associated_to_simplex:
+    for ( size_t i = 0  ; i != simplex_associated_to_key.size() ; ++i )
+    {
+        this->key_associated_to_simplex[ simplex_associated_to_key[i] ] = i;
+    }
 }
 
 

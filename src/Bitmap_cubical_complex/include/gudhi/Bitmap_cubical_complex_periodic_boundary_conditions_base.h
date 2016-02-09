@@ -83,9 +83,9 @@ Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_comp
 template <typename T>
 Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_complex_periodic_boundary_conditions_base( const char* perseus_style_file )
 {
+    
     //for Perseus style files:
     bool dbg = false;
-
     ifstream inFiltration;
     inFiltration.open( perseus_style_file );
     unsigned dimensionOfData;
@@ -129,8 +129,8 @@ Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_comp
     }
     inFiltration.close();
     this->impose_lower_star_filtration();
-
-    /*
+    
+/*
      char* filename = (char*)perseus_style_file;
      //char* filename = "combustionWithPeriodicBoundaryConditions/v0/tV0_000000.float";
      ifstream file( filename , ios::binary | ios::ate );
@@ -155,8 +155,14 @@ Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_comp
          cerr << "Cannot open the file: " << filename << ". The program will now terminate \n";
          exit(1);
      }
+
+     clock_t read_begin = clock();
      fread( slice,4,w*h*d,fp );
      fclose(fp);
+     cerr << "Time of reading the file : " << double(clock() - read_begin) / CLOCKS_PER_SEC << endl;
+
+
+     clock_t begin_creation_bitap = clock();
      std::vector<T> data(slice,slice+w*h*d);
      delete[] slice;
      std::vector< unsigned > sizes;
@@ -164,13 +170,20 @@ Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_comp
      sizes.push_back(w);
      sizes.push_back(w);
 
-     std::vector< bool > directions;
-     directions.push_back( true );
-     directions.push_back( true );
-     directions.push_back( true );
-     Bitmap_cubical_complex_periodic_boundary_conditions_base<T> b( sizes, data, directions );
-     *this = b;
-     */
+    this->directions_in_which_periodic_b_cond_are_to_be_imposed.push_back( true );
+    this->directions_in_which_periodic_b_cond_are_to_be_imposed.push_back( true );
+    this->directions_in_which_periodic_b_cond_are_to_be_imposed.push_back( true );
+    this->set_up_containers( sizes );
+
+    size_t i = 0;
+    for ( typename Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Top_dimensional_cells_iterator it = this->top_dimensional_cells_begin() ; it != this->top_dimensional_cells_end() ; ++it )
+    {
+        *it = data[i];
+        ++i;
+    }
+    this->impose_lower_star_filtration();
+    cerr << "Time of creation of a bitmap : " << double(clock() - begin_creation_bitap ) / CLOCKS_PER_SEC << endl;
+*/
 }
 
 template <typename T>
