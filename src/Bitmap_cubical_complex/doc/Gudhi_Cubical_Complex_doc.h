@@ -36,7 +36,7 @@ namespace Cubical_complex
 * @{
 *
 
-*Cubical complex is an example of a structured complex useful in computational mathematics (specially rigorous numerics) and image analysis. The presented implementation of cubical complexes is based on the following definition.
+*Bitmap_cubical_complex is an example of a structured complex useful in computational mathematics (specially rigorous numerics) and image analysis. The presented implementation of cubical complexes is based on the following definition.
 *
 * An <em>elementary interval</em> is an interval of a form \f$ [n,n+1] \f$, or \f$[n,n]\f$, for \f$ n \in \mathcal{Z} \f$. The first one is called <em>non-degenerate</em>, while the second one is \a degenerate interval. A <em>boundary of a elementary
 *interval</em> is a chain  \f$\partial [n,n+1] = [n+1,n+1]-[n,n] \f$ in case of non-degenerate elementary interval and \f$\partial [n,n] = 0 \f$ in case of degenerate elementary interval. An <em>elementary cube</em> \f$ C \f$ is a
@@ -93,7 +93,7 @@ namespace Cubical_complex
 5
 \endverbatim
 
-\section Periodic boundary conditions
+\section PeriodicBoundaryConditions Periodic boundary conditions
 Often one would like to impose periodic boundary conditions to the cubical complex. Let \f$ I_1\times ... \times I_n \f$ be a box
 that is decomposed with a cubical complex \f$ \mathcal{K} \f$. Imposing periodic boundary conditions in the direction i, means that the left and the right side of a complex
 \f$ \mathcal{K} \f$ are considered the same. In particular, if for a bitmap \f$ \mathcal{K} \f$ periodic boundary conditions are imposed in all directions, then complex
@@ -106,8 +106,8 @@ in this direction have to be multiplied by -1. For instance:
 -3
 3
 1
-2
-3
+4
+6
 8
 20
 4
@@ -117,6 +117,9 @@ in this direction have to be multiplied by -1. For instance:
 \endverbatim
 
 Indicate that we have imposed periodic boundary conditions in the direction x, but not in the direction y.
+
+ * \section BitmapExamples Examples
+ * End user programs are available in example/Bitmap_cubical_complex folder.
 
 
 */

@@ -39,6 +39,11 @@ const bool globalDbg = false;
 
 template <typename T> class is_before_in_filtration;
 
+/**
+ *@class Bitmap_cubical_complex
+ *@brief Cubical complex represented as a bitmap.
+ *@ingroup cubical_complex
+ */
 template <typename T>
 class Bitmap_cubical_complex : public T
 {
