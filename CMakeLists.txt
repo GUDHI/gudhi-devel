@@ -27,29 +27,28 @@ else()
     endif()
   endif()
 
-  # find CGAL package before set of CXX flags because
-  # in CMakeLists.txt, when include(${CGAL_USE_FILE}), CXX_FLAGS are overwritten.
+  # In CMakeLists.txt, when include(${CGAL_USE_FILE}), CMAKE_CXX_FLAGS are overwritten.
   # cf. http://doc.cgal.org/latest/Manual/installation.html#title40
-  set(CGAL_DONT_OVERRIDE_CMAKE_FLAGS TRUE CACHE BOOL "Force CGAL to maintain CMAKE flags")
+  # A workaround is to include(${CGAL_USE_FILE}) before adding "-std=c++11".
+  # A fix would be to use https://cmake.org/cmake/help/v3.1/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html 
+  # or even better https://cmake.org/cmake/help/v3.1/variable/CMAKE_CXX_STANDARD.html
+  # but it implies to use cmake version 3.1 at least.
   find_package(CGAL)
   if(CGAL_FOUND)
     include( ${CGAL_USE_FILE} )
-    set(CMAKE_CXX_CGAL_FOR_GUDHI_FLAGS "-frounding-math")
   endif()
   
   if(MSVC)
     # Turn off some VC++ warnings
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4267 /wd4668 /wd4311 /wd4800 /wd4820 /wd4503 /wd4244 /wd4345 /wd4996 /wd4396 /wd4018")
   else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wpedantic -Wsign-compare ${CMAKE_CXX_CGAL_FOR_GUDHI_FLAGS}")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb -O0")	
-    # set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wpedantic -Wsign-compare")
   endif()
 
   if(CMAKE_BUILD_TYPE MATCHES Debug)
-    message("Compilation flags are: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG}")
+    message("++ Debug compilation flags are: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG}")
   else()
-    message("Compilation flags are: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
+    message("++ Release compilation flags are: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
   endif()
 
   set(Boost_USE_STATIC_LIBS        ON)
