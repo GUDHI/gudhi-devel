@@ -65,8 +65,8 @@ class Witness_complex {
   };
 
  private:
-  typedef typename Simplicial_complex::Simplex_handle Simplex_handle;
-  typedef typename Simplicial_complex::Vertex_handle Vertex_handle;
+  typedef typename SimplicialComplex::Simplex_handle Simplex_handle;
+  typedef typename SimplicialComplex::Vertex_handle Vertex_handle;
 
   typedef std::vector< double > Point_t;
   typedef std::vector< Point_t > Point_Vector;
