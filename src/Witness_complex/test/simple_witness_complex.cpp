@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(simple_witness_complex) {
   knn.push_back({5, 0, 1, 3, 6, 2, 4});
   knn.push_back({5, 6, 1, 0, 2, 3, 4});
   knn.push_back({1, 6, 0, 5, 2, 3, 4});
-  WitnessComplex witnessComplex(knn, complex, 7, 7);
+  WitnessComplex witnessComplex(knn, 7, 7, complex);
 
   BOOST_CHECK(witnessComplex.is_witness_complex(knn, false));
 }

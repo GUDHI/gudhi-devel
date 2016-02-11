@@ -52,13 +52,13 @@ BOOST_AUTO_TEST_CASE(witness_complex_points) {
   Simplex_tree complex1;
   Gudhi::witness_complex::landmark_choice_by_random_point(points, 100, knn);
   assert(!knn.empty());
-  WitnessComplex witnessComplex1(knn, complex1, 100, 3);
+  WitnessComplex witnessComplex1(knn, 100, 3, complex1);
   BOOST_CHECK(witnessComplex1.is_witness_complex(knn, b_print_output));
 
   // Second test: furthest choice
   knn.clear();
   Simplex_tree complex2;
   Gudhi::witness_complex::landmark_choice_by_furthest_point(points, 100, knn);
-  WitnessComplex witnessComplex2(knn, complex2, 100, 3);
+  WitnessComplex witnessComplex2(knn, 100, 3, complex2);
   BOOST_CHECK(witnessComplex2.is_witness_complex(knn, b_print_output));
 }

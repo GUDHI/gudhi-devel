@@ -40,16 +40,11 @@ struct Simplicial_complex {
   /** Returns a Simplex_hanlde that is different from all simplex handles 
    * of the simplices. */
   Simplex_handle null_simplex();
-  /** \brief Returns the number of simplices in the complex.
-   *
-   * Does not count the empty simplex. */
-  size_t num_simplices();
 
   /** \brief Iterator over the simplices of the complex,
    * in an arbitrary order.
    *
    * 'value_type' must be 'Simplex_handle'.*/
-  typedef unspecified Complex_simplex_iterator;
   typedef unspecified Complex_simplex_range;
 
   /**
@@ -71,19 +66,17 @@ struct Simplicial_complex {
    */
   typedef unspecified Insertion_result_type;
 
-  /** \brief Input range of vertices.
-   * 'value_type' must be 'Vertex_handle'. */
-  typedef unspecified Input_vertex_range;
-
   /** \brief Inserts a simplex with vertices from a given range
    *  'vertex_range' in the simplicial complex.
    *  */
+  template< typedef Input_vertex_range >
   Insertion_result_type insert_simplex(Input_vertex_range const & vertex_range);
 
   /** \brief Finds a simplex with vertices given by a range
    *
    * If a simplex exists, its Simplex_handle is returned.
    * Otherwise null_simplex() is returned. */
+  template< typedef Input_vertex_range >
   Simplex_handle find(Input_vertex_range const & vertex_range);
 };
 

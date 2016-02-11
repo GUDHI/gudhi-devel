@@ -68,17 +68,6 @@ read_points_cust(std::string file_name, std::vector< std::vector< double > > & p
   in_file.close();
 }
 
-/** Write a gnuplot readable file.
- *  Data range is a random access range of pairs (arg, value)
- */
-template < typename Data_range >
-void write_data(Data_range & data, std::string filename) {
-  std::ofstream ofs(filename, std::ofstream::out);
-  for (auto entry : data)
-    ofs << entry.first << ", " << entry.second << "\n";
-  ofs.close();
-}
-
 int main(int argc, char * const argv[]) {
   if (argc != 3) {
     std::cerr << "Usage: " << argv[0]
@@ -109,7 +98,7 @@ int main(int argc, char * const argv[]) {
 
   // Compute witness complex
   start = clock();
-  WitnessComplex(knn, simplex_tree, nbL, point_vector[0].size());
+  WitnessComplex(knn, nbL, point_vector[0].size(), simplex_tree);
   end = clock();
   std::cout << "Witness complex took "
       << static_cast<double>(end - start) / CLOCKS_PER_SEC << " s. \n";

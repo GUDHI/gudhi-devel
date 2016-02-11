@@ -35,6 +35,12 @@ namespace witness_complex {
   /** \brief Landmark choice strategy by taking random vertices for landmarks.
    *  \details It chooses nbL distinct landmarks from a random access range `points`
    *  and outputs a matrix {witness}*{closest landmarks} in knn.
+   *
+   *  The type KNearestNeighbors can be seen as 
+   *  Witness_range<Closest_landmark_range<Vertex_handle>>, where
+   *  Witness_range and Closest_landmark_range are random access ranges and
+   *  Vertex_handle is the label type of a vertex in a simplicial complex.
+   *  Closest_landmark_range needs to have push_back operation.
    */
 
   template <typename KNearestNeighbours,

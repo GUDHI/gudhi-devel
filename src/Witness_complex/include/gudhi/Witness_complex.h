@@ -71,7 +71,6 @@ class Witness_complex {
   typedef std::vector< double > Point_t;
   typedef std::vector< Point_t > Point_Vector;
 
-  // typedef typename Simplicial_complex::Filtration_value Filtration_value;
   typedef std::vector< Vertex_handle > typeVectorVertex;
   typedef std::pair< typeVectorVertex, Filtration_value> typeSimplex;
   typedef std::pair< Simplex_handle, bool > typePairSimplexBool;
@@ -109,9 +108,9 @@ class Witness_complex {
    */
   template< typename KNearestNeighbors >
   Witness_complex(KNearestNeighbors const & knn,
-                  Simplicial_complex & sc_,
                   int nbL_,
-                  int dim) : nbL(nbL_), sc(sc_) {
+                  int dim,
+                  Simplicial_complex & sc_) : nbL(nbL_), sc(sc_) {
     // Construction of the active witness list
     int nbW = knn.size();
     typeVectorVertex vv;
@@ -120,7 +119,7 @@ class Witness_complex {
      * it will diminuish in the course of iterations
      */
     ActiveWitnessList active_w;  // = new ActiveWitnessList();
-    for (int i = 0; i != nbL; ++i) {
+    for (Vertex_handle i = 0; i != nbL; ++i) {
       // initial fill of 0-dimensional simplices
       // by doing it we don't assume that landmarks are necessarily witnesses themselves anymore
       counter++;
@@ -131,9 +130,7 @@ class Witness_complex {
     int k = 1; /* current dimension in iterative construction */
     for (int i = 0; i != nbW; ++i)
       active_w.push_back(i);
-    // std::cout << "Successfully added edges" << std::endl;
     while (!active_w.empty() && k < dim) {
-      // std::cout << "Started the step k=" << k << std::endl;
       typename ActiveWitnessList::iterator it = active_w.begin();
       while (it != active_w.end()) {
         typeVectorVertex simplex_vector;
@@ -142,7 +139,7 @@ class Witness_complex {
         if (ok) {
           for (int i = 0; i != k + 1; ++i)
             simplex_vector.push_back(knn[*it][i]);
-          sc.insert_simplex(simplex_vector, 0.0);
+          sc.insert_simplex(simplex_vector);
           // TODO(SK) Error if not inserted : normally no need here though
           it++;
         } else {
@@ -162,9 +159,7 @@ class Witness_complex {
    */
   template <typename KNearestNeighbors>
   bool all_faces_in(KNearestNeighbors const &knn, int witness_id, int k) {
-    // std::cout << "All face in with the landmark " << inserted_vertex << std::endl;
     std::vector< Vertex_handle > facet;
-    // Vertex_handle curr_vh = curr_sh->first;
     // CHECK ALL THE FACETS
     for (int i = 0; i != k + 1; ++i) {
       facet = {};
@@ -175,7 +170,6 @@ class Witness_complex {
       }  // endfor
       if (sc.find(facet) == sc.null_simplex())
         return false;
-      // std::cout << "++++ finished loop safely\n";
     }  // endfor
     return true;
   }
@@ -206,12 +200,12 @@ class Witness_complex {
       bool is_witnessed = false;
       typeVectorVertex simplex;
       int nbV = 0;  // number of verticed in the simplex
-      for (int v : sc.simplex_vertex_range(sh))
+      for (Vertex_handle v : sc.simplex_vertex_range(sh))
         simplex.push_back(v);
       nbV = simplex.size();
       for (typeVectorVertex w : knn) {
         bool has_vertices = true;
-        for (int v : simplex)
+        for (Vertex_handle v : simplex)
           if (std::find(w.begin(), w.begin() + nbV, v) == w.begin() + nbV) {
             has_vertices = false;
             // break;

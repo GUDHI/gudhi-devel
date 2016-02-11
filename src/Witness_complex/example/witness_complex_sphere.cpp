@@ -60,11 +60,11 @@ void write_data(Data_range & data, std::string filename) {
 int main(int argc, char * const argv[]) {
   if (argc != 2) {
     std::cerr << "Usage: " << argv[0]
-        << " nbL \n";
+        << " number_of_landmarks \n";
     return 0;
   }
 
-  int nbL = atoi(argv[1]);
+  int number_of_landmarks = atoi(argv[1]);
   clock_t start, end;
 
   // Construct the Simplex Tree
@@ -82,13 +82,13 @@ int main(int argc, char * const argv[]) {
     // Choose landmarks
     start = clock();
     std::vector<std::vector< int > > knn;
-    Gudhi::witness_complex::landmark_choice_by_random_point(point_vector, nbL, knn);
+    Gudhi::witness_complex::landmark_choice_by_random_point(point_vector, number_of_landmarks, knn);
 
     // Compute witness complex
-    WitnessComplex(knn, simplex_tree, nbL, point_vector[0].size());
+    WitnessComplex(knn, number_of_landmarks, point_vector[0].size(), simplex_tree);
     end = clock();
     double time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
-    std::cout << "Witness complex for " << nbL << " landmarks took "
+    std::cout << "Witness complex for " << number_of_landmarks << " landmarks took "
         << time << " s. \n";
     std::cout << "Number of simplices is: " << simplex_tree.num_simplices() << "\n";
     l_time.push_back(std::make_pair(nbP, time));
