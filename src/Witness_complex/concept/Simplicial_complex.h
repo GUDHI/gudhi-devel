@@ -31,7 +31,7 @@ namespace witness_complex {
  * for a type to implement a simplicial complex, 
  * used for example to build a 'Witness_complex'. 
  */
-struct Simplicial_complex {
+struct SimplicialComplex {
   /** Handle to specify a simplex. */
   typedef unspecified Simplex_handle;
   /** Handle to specify a vertex. Must be a non-negative integer. */

@@ -52,7 +52,7 @@ namespace witness_complex {
     \brief Constructs the witness complex for the given set of witnesses and landmarks.
     \ingroup witness_complex
  */
-template< class Simplicial_complex>
+template< class SimplicialComplex>
 class Witness_complex {
  private:
   struct Active_witness {
@@ -81,7 +81,7 @@ class Witness_complex {
 
  private:
   int nbL;  // Number of landmarks
-  Simplicial_complex& sc;  // Simplicial complex
+  SimplicialComplex& sc;  // Simplicial complex
 
  public:
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -110,7 +110,7 @@ class Witness_complex {
   Witness_complex(KNearestNeighbors const & knn,
                   int nbL_,
                   int dim,
-                  Simplicial_complex & sc_) : nbL(nbL_), sc(sc_) {
+                  SimplicialComplex & sc_) : nbL(nbL_), sc(sc_) {
     // Construction of the active witness list
     int nbW = knn.size();
     typeVectorVertex vv;
