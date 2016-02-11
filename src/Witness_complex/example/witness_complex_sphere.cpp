@@ -90,6 +90,7 @@ int main(int argc, char * const argv[]) {
     double time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
     std::cout << "Witness complex for " << nbL << " landmarks took "
         << time << " s. \n";
+    std::cout << "Number of simplices is: " << simplex_tree.num_simplices() << "\n";
     l_time.push_back(std::make_pair(nbP, time));
   }
   write_data(l_time, "w_time.dat");
