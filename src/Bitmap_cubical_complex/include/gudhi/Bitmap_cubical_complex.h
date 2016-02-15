@@ -40,8 +40,8 @@ const bool globalDbg = false;
 template <typename T> class is_before_in_filtration;
 
 /**
-* This is a Bitmap_cubical_complex class. It joints a functionalities of Bitmap_cubical_complex__base and Bitmap_cubical_complex_periodic_boundary_conditions_base classes into
-* Gudhi persistent homology engine. It is a template class that inherit from its template parameter. The template parameter is supposed to be either Bitmap_cubical_complex__base or Bitmap_cubical_complex_periodic_boundary_conditions_base class.
+* This is a Bitmap_cubical_complex class. It joints a functionalities of Bitmap_cubical_complex_base and Bitmap_cubical_complex_periodic_boundary_conditions_base classes into
+* Gudhi persistent homology engine. It is a template class that inherit from its template parameter. The template parameter is supposed to be either Bitmap_cubical_complex_base or Bitmap_cubical_complex_periodic_boundary_conditions_base class.
 **/
 
 /**
