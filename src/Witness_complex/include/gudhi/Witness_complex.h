@@ -80,8 +80,8 @@ class Witness_complex {
   typedef std::list< Vertex_handle > ActiveWitnessList;
 
  private:
-  int nbL;  // Number of landmarks
-  SimplicialComplex& sc;  // Simplicial complex
+  int nbL_;  // Number of landmarks
+  SimplicialComplex& sc_;  // Simplicial complex
 
  public:
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -108,9 +108,9 @@ class Witness_complex {
    */
   template< typename KNearestNeighbors >
   Witness_complex(KNearestNeighbors const & knn,
-                  int nbL_,
+                  int nbL,
                   int dim,
-                  SimplicialComplex & sc_) : nbL(nbL_), sc(sc_) {
+                  SimplicialComplex & sc) : nbL_(nbL), sc_(sc) {
     // Construction of the active witness list
     int nbW = knn.size();
     typeVectorVertex vv;
@@ -119,12 +119,12 @@ class Witness_complex {
      * it will diminuish in the course of iterations
      */
     ActiveWitnessList active_w;  // = new ActiveWitnessList();
-    for (Vertex_handle i = 0; i != nbL; ++i) {
+    for (Vertex_handle i = 0; i != nbL_; ++i) {
       // initial fill of 0-dimensional simplices
       // by doing it we don't assume that landmarks are necessarily witnesses themselves anymore
       counter++;
       vv = {i};
-      sc.insert_simplex(vv);
+      sc_.insert_simplex(vv);
       // TODO(SK) Error if not inserted : normally no need here though
     }
     int k = 1; /* current dimension in iterative construction */
@@ -139,7 +139,7 @@ class Witness_complex {
         if (ok) {
           for (int i = 0; i != k + 1; ++i)
             simplex_vector.push_back(knn[*it][i]);
-          sc.insert_simplex(simplex_vector);
+          sc_.insert_simplex(simplex_vector);
           // TODO(SK) Error if not inserted : normally no need here though
           it++;
         } else {
@@ -168,7 +168,7 @@ class Witness_complex {
           facet.push_back(knn[witness_id][j]);
         }
       }  // endfor
-      if (sc.find(facet) == sc.null_simplex())
+      if (sc_.find(facet) == sc_.null_simplex())
         return false;
     }  // endfor
     return true;
@@ -196,11 +196,11 @@ class Witness_complex {
   template< class KNearestNeighbors >
   bool is_witness_complex(KNearestNeighbors const & knn, bool print_output) {
     // bool final_result = true;
-    for (Simplex_handle sh : sc.complex_simplex_range()) {
+    for (Simplex_handle sh : sc_.complex_simplex_range()) {
       bool is_witnessed = false;
       typeVectorVertex simplex;
       int nbV = 0;  // number of verticed in the simplex
-      for (Vertex_handle v : sc.simplex_vertex_range(sh))
+      for (Vertex_handle v : sc_.simplex_vertex_range(sh))
         simplex.push_back(v);
       nbV = simplex.size();
       for (typeVectorVertex w : knn) {
