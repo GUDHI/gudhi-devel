@@ -4,6 +4,7 @@ from libcpp.utility cimport pair
 
 cimport cgudhi
 
+
 # SimplexTree python interface
 cdef class SimplexTree:
     cdef cgudhi.Simplex_tree_interface[cgudhi.Simplex_tree_options_full_featured] *thisptr
@@ -37,17 +38,57 @@ cdef class SimplexTree:
           complex.push_back(i)
         return self.thisptr.find_simplex(complex)
     def insert(self, simplex, filtration = 0.0):
-        return self.thisptr.insert_simplex(simplex, <double>filtration)
+        cdef vector[int] complex
+        for i in simplex:
+          complex.push_back(i)
+        return self.thisptr.insert_simplex(complex, <double>filtration)
     def insert_with_subfaces(self, simplex, filtration = 0.0):
-        return self.thisptr.insert_simplex_and_subfaces(simplex, <double>filtration)
+        cdef vector[int] complex
+        for i in simplex:
+          complex.push_back(i)
+        return self.thisptr.insert_simplex_and_subfaces(complex, <double>filtration)
     def get_filtered_tree(self):
-        return self.thisptr.get_filtered_tree()
+        cdef vector[pair[vector[int], double]] coface_tree = self.thisptr.get_filtered_tree()
+        ct = []
+        for filtered_complex in coface_tree:
+            v = []
+            for vertex in filtered_complex.first:
+                v.append(vertex)
+            ct.append((v,filtered_complex.second))
+        return ct
     def get_skeleton_tree(self, dim):
-        return self.thisptr.get_skeleton_tree(<int>dim)
+        cdef vector[pair[vector[int], double]] coface_tree = self.thisptr.get_skeleton_tree(<int>dim)
+        ct = []
+        for filtered_complex in coface_tree:
+            v = []
+            for vertex in filtered_complex.first:
+                v.append(vertex)
+            ct.append((v,filtered_complex.second))
+        return ct
     def get_star_tree(self, simplex):
-        return self.thisptr.get_star_tree(simplex)
+        cdef vector[int] complex
+        for i in simplex:
+          complex.push_back(i)
+        cdef vector[pair[vector[int], double]] coface_tree = self.thisptr.get_star_tree(complex)
+        ct = []
+        for filtered_complex in coface_tree:
+            v = []
+            for vertex in filtered_complex.first:
+                v.append(vertex)
+            ct.append((v,filtered_complex.second))
+        return ct
     def get_coface_tree(self, simplex, dim):
-        return self.thisptr.get_coface_tree(simplex, <int>dim)
+        cdef vector[int] complex
+        for i in simplex:
+          complex.push_back(i)
+        cdef vector[pair[vector[int], double]] coface_tree = self.thisptr.get_coface_tree(complex, <int>dim)
+        ct = []
+        for filtered_complex in coface_tree:
+            v = []
+            for vertex in filtered_complex.first:
+                v.append(vertex)
+            ct.append((v,filtered_complex.second))
+        return ct
 
 
 cdef class MiniSimplexTree:
@@ -70,3 +111,55 @@ cdef class MiniSimplexTree:
         for i in simplex:
           complex.push_back(i)
         return self.thisptr.find_simplex(complex)
+    def insert(self, simplex):
+        cdef vector[int] complex
+        for i in simplex:
+          complex.push_back(i)
+        return self.thisptr.insert_simplex(complex, 0.0)
+    def insert_with_subfaces(self, simplex, filtration = 0.0):
+        cdef vector[int] complex
+        for i in simplex:
+          complex.push_back(i)
+        return self.thisptr.insert_simplex_and_subfaces(complex, <double>filtration)
+    def get_filtered_tree(self):
+        cdef vector[pair[vector[int], double]] coface_tree = self.thisptr.get_filtered_tree()
+        ct = []
+        for filtered_complex in coface_tree:
+            v = []
+            for vertex in filtered_complex.first:
+                v.append(vertex)
+            ct.append((v,filtered_complex.second))
+        return ct
+    def get_skeleton_tree(self, dim):
+        cdef vector[pair[vector[int], double]] coface_tree = self.thisptr.get_skeleton_tree(<int>dim)
+        ct = []
+        for filtered_complex in coface_tree:
+            v = []
+            for vertex in filtered_complex.first:
+                v.append(vertex)
+            ct.append((v,filtered_complex.second))
+        return ct
+    def get_star_tree(self, simplex):
+        cdef vector[int] complex
+        for i in simplex:
+          complex.push_back(i)
+        cdef vector[pair[vector[int], double]] coface_tree = self.thisptr.get_star_tree(complex)
+        ct = []
+        for filtered_complex in coface_tree:
+            v = []
+            for vertex in filtered_complex.first:
+                v.append(vertex)
+            ct.append((v,filtered_complex.second))
+        return ct
+    def get_coface_tree(self, simplex, dim):
+        cdef vector[int] complex
+        for i in simplex:
+          complex.push_back(i)
+        cdef vector[pair[vector[int], double]] coface_tree = self.thisptr.get_coface_tree(complex, <int>dim)
+        ct = []
+        for filtered_complex in coface_tree:
+            v = []
+            for vertex in filtered_complex.first:
+                v.append(vertex)
+            ct.append((v,filtered_complex.second))
+        return ct

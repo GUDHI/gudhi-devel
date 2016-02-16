@@ -52,13 +52,13 @@ print("MiniSimplexTree creation from insertion")
 triangle012 = [0, 1, 2]
 edge03 = [0, 3]
 mini_st = gudhi.MiniSimplexTree()
-mini_st.insert_simplex_and_subfaces(triangle012)
-mini_st.insert_simplex_and_subfaces(edge03)
+mini_st.insert_with_subfaces(triangle012)
+mini_st.insert_with_subfaces(edge03)
 # FIXME: Remove this line
 mini_st.set_dimension(2);
 
 edge02 = [0, 2]
-if st.st.find(edge02):
+if mini_st.find(edge02):
   # Only coface is 012
-  print("coface(edge02,1)=", st_from_graph_expansion.get_coface_tree(edge02, 1))
+  print("coface(edge02,1)=", mini_st.get_coface_tree(edge02, 1))
 
