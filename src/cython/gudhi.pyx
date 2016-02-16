@@ -50,7 +50,7 @@ cdef class SimplexTree:
         return self.thisptr.get_coface_tree(simplex, <int>dim)
 
 
-#cdef class MiniSimplexTree:
+cdef class MiniSimplexTree:
     cdef cgudhi.Simplex_tree_interface[cgudhi.Simplex_tree_options_mini] *thisptr
     def __cinit__(self):
         self.thisptr = new cgudhi.Simplex_tree_interface[cgudhi.Simplex_tree_options_mini]()
@@ -70,8 +70,3 @@ cdef class SimplexTree:
         for i in simplex:
           complex.push_back(i)
         return self.thisptr.find_simplex(complex)
-
-    def get_filtered_tree(self):
-        return self.thisptr.get_filtered_tree()
-    def get_skeleton_tree(self, dim):
-        return self.thisptr.get_skeleton_tree(<int>dim)
