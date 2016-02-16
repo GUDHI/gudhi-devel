@@ -6,7 +6,7 @@ gudhi = Extension(
     sources = ['gudhi.pyx',],
     language = 'c++',
     extra_compile_args=['-std=c++11'],
-    include_dirs = ['..'],
+    include_dirs = ['../include','.'],
 )
 
 setup(
