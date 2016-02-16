@@ -188,11 +188,11 @@ class Witness_complex {
   }
 
  public:
-  /**
-   *  \brief Verification if every simplex in the complex is witnessed by witnesses in knn.
-   *  \param print_output =true will print the witnesses for each simplex
-   *  \remark Added for debugging purposes.
-   */
+  // /**
+  //  *  \brief Verification if every simplex in the complex is witnessed by witnesses in knn.
+  //  *  \param print_output =true will print the witnesses for each simplex
+  //  *  \remark Added for debugging purposes.
+  //  */
   template< class KNearestNeighbors >
   bool is_witness_complex(KNearestNeighbors const & knn, bool print_output) {
     // bool final_result = true;

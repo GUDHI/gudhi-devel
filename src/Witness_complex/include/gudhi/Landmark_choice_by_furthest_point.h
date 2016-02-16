@@ -34,6 +34,7 @@ namespace witness_complex {
  typedef std::vector<int> typeVectorVertex;
 
   /** 
+   *  \ingroup witness_complex
    *  \brief Landmark choice strategy by iteratively adding the furthest witness from the
    *  current landmark set as the new landmark. 
    *  \details It chooses nbL landmarks from a random access range `points` and
