@@ -70,17 +70,17 @@ namespace witness_complex {
 template< class Simplicial_complex >
 class Relaxed_witness_complex {
 
- private:    
-    struct Active_witness {
-      int witness_id;
-      int landmark_id;
-      
-      Active_witness(int witness_id_, int landmark_id_)
-        : witness_id(witness_id_),
-          landmark_id(landmark_id_) { }
+private:    
+  struct Active_witness {
+    int witness_id;
+    int landmark_id;
+    
+    Active_witness(int witness_id_, int landmark_id_)
+      : witness_id(witness_id_),
+        landmark_id(landmark_id_) { }
     };
 
- private:
+private:
   typedef typename Simplicial_complex::Simplex_handle Simplex_handle;
   typedef typename Simplicial_complex::Vertex_handle Vertex_handle;
 

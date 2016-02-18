@@ -31,6 +31,7 @@ add_test(persistence_from_file_3_3_100 ${CMAKE_CURRENT_BINARY_DIR}/persistence_f
 if(GMPXX_FOUND AND GMP_FOUND)
    message("GMPXX_LIBRARIES = ${GMPXX_LIBRARIES}")
    message("GMP_LIBRARIES = ${GMP_LIBRARIES}")
+   message("CGAL_LIBRARY = ${CGAL_LIBRARY}")
 
    add_executable(rips_multifield_persistence rips_multifield_persistence.cpp )
    target_link_libraries(rips_multifield_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES})
@@ -40,6 +41,21 @@ if(GMPXX_FOUND AND GMP_FOUND)
    target_link_libraries(performance_rips_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES})
 
    if(CGAL_FOUND)
+    include( ${CGAL_USE_FILE} )
+     # In CMakeLists.txt, when include(${CGAL_USE_FILE}), CXX_FLAGS are overwritten.
+     # cf. http://doc.cgal.org/latest/Manual/installation.html#title40
+     # A workaround is to add "-std=c++11" again.
+     # A fix would be to use https://cmake.org/cmake/help/v3.1/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html
+     # or even better https://cmake.org/cmake/help/v3.1/variable/CMAKE_CXX_STANDARD.html
+     # but it implies to use cmake version 3.1 at least.
+     if(NOT MSVC)
+       include(CheckCXXCompilerFlag)
+       CHECK_CXX_COMPILER_FLAG(-std=c++11 COMPILER_SUPPORTS_CXX11)
+       if(COMPILER_SUPPORTS_CXX11)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+      endif()
+     endif()
+     # - End of workaround
      if (CMAKE_BUILD_TYPE MATCHES Debug)
        # For programs to be more verbose
        add_definitions(-DDEBUG_TRACES)
