@@ -39,6 +39,11 @@ namespace witness_complex {
    *  current landmark set as the new landmark. 
    *  \details It chooses nbL landmarks from a random access range `points` and
    *  writes {witness}*{closest landmarks} matrix in `knn`.
+   *
+   *  The type KNearestNeighbors can be seen as 
+   *  Witness_range<Closest_landmark_range<Vertex_handle>>, where
+   *  Witness_range and Closest_landmark_range are random access ranges 
+   *  
    */
 
   template <typename KNearestNeighbours,
@@ -82,7 +87,7 @@ namespace witness_complex {
           curr_max_w = i;
         }
     }
-    for (unsigned i = 0; i < points.size(); ++i)
+    for (unsigned i = 0; i < nb_points; ++i)
       std::sort(knn[i].begin(),
                 knn[i].end(),
                 [&wit_land_dist, i](int a, int b) {

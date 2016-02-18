@@ -32,7 +32,9 @@ namespace Gudhi {
 
 namespace witness_complex {
 
-  /** \brief Landmark choice strategy by taking random vertices for landmarks.
+  /**
+   *  \ingroup witness_complex
+   * \brief Landmark choice strategy by taking random vertices for landmarks.
    *  \details It chooses nbL distinct landmarks from a random access range `points`
    *  and outputs a matrix {witness}*{closest landmarks} in knn.
    *
