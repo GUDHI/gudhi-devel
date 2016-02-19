@@ -601,7 +601,7 @@ bool test_link4() {
 }
 
 bool test_link5() {
-  Complex complex(0, new Print_complex_visitor<Vertex_handle>());
+  Complex complex(0);
   // Build the complexes
   build_complete(4, complex);
   complex.add_blocker(Simplex(Vertex_handle(0), Vertex_handle(1), Vertex_handle(2), Vertex_handle(3)));
@@ -621,7 +621,7 @@ bool test_link5() {
 }
 
 bool test_link6() {
-  Complex complex(0, new Print_complex_visitor<Vertex_handle>());
+  Complex complex(0);
   // Build the complexes
   build_complete(4, complex);
   complex.add_blocker(Simplex(Vertex_handle(0), Vertex_handle(1), Vertex_handle(2)));
@@ -642,7 +642,7 @@ bool test_link6() {
 }
 
 bool test_link7() {
-  Complex complex(0, new Print_complex_visitor<Vertex_handle>());
+  Complex complex(0);
   // Build the complexes
   build_complete(6, complex);
   complex.add_vertex();
