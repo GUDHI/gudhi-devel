@@ -39,13 +39,13 @@ namespace alphacomplex {
  * Alpha_complex is a <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
  * constructed from the finite cells of a Delaunay Triangulation.
  * 
- * The filtration value of each simplex is computed from the circumradius of the simplex if it is Gabriel or
- * from the alpha value of the simplex cofaces that make it not Gabriel.
+ * The filtration value of each simplex is computed as the square of the circumradius of the simplex if the circumsphere is empty (the simplex is then said to be Gabriel), and as the minimum of the filtration
+ * values of the codimension 1 cofaces that make it not Gabriel otherwise.
  * 
- * All simplices that have a filtration value strictly greater than a given alpha square value are not inserted into
- * the simplex.
+ * All simplices that have a filtration value strictly greater than a given alpha squared value are not inserted into
+ * the complex.
  * 
- * \image html "alpha_complex_representation.png" "Alpha simplicial complex representation"
+ * \image html "alpha_complex_representation.png" "Alpha-complex representation"
  * 
  * Alpha_complex is constructing a `Simplex_tree` using <a target="_blank"
  * href="http://doc.cgal.org/latest/Triangulation/index.html#Chapter_Triangulations">Delaunay Triangulation</a>
@@ -54,7 +54,7 @@ namespace alphacomplex {
  * 
  * The complex is a template class requiring an Epick_d <a target="_blank"
  * href="http://doc.cgal.org/latest/Kernel_d/index.html#Chapter_dD_Geometry_Kernel">dD Geometry Kernel</a>
- * \cite cgal:s-gkd-15b from CGAL as template.
+ * \cite cgal:s-gkd-15b from CGAL as template parameter.
  * 
  * \remark When Alpha_complex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
  * 
@@ -129,14 +129,13 @@ namespace alphacomplex {
  * 
  * \subsubsection nondecreasing Non decreasing filtration values
  * 
- * As Alpha square value computed from CGAL is an approximation, we have to make filtration non decreasing while
- * increasing the dimension for our simplicial complex to be valid (cf.
- * `Simplex_tree::make_filtration_non_decreasing()`).
+ * As the squared radii computed by CGAL are an approximation, it might happen that these alpha squared values do not quite define a proper filtration (i.e. non-decreasing with respect to inclusion).
+ * We fix that up by calling `Simplex_tree::make_filtration_non_decreasing()`.
  * 
  * \subsubsection pruneabove Prune above given filtration value
  * 
- * The simplex tree is pruned from the given maximum alpha square value (cf. `Simplex_tree::prune_above_filtration()`).
- * In this example, the value is given by the user as argument of the program.
+ * The simplex tree is pruned from the given maximum alpha squared value (cf. `Simplex_tree::prune_above_filtration()`).
+ * In the following example, the value is given by the user as argument of the program.
  * 
  * 
  * \section offexample Example from OFF file
