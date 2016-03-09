@@ -1,15 +1,14 @@
 /*! \mainpage
+ *  \tableofcontents
  * \image html "Gudhi_banner.jpg" "" width=20cm
  * 
  * \section Introduction Introduction
  * The Gudhi library (Geometric Understanding in Higher Dimensions) is a generic open source C++ library for
  * Computational Topology and Topological Data Analysis
  * (<a class="el" target="_blank" href="https://en.wikipedia.org/wiki/Topological_data_analysis">TDA</a>).
- * The GUDHI library is developed as part of the
- * <a class="el" target="_blank" href="https://project.inria.fr/gudhi/">GUDHI project</a> supported by the European
- * Research Council. The GUDHI library intends  to help the development of new algorithmic solutions in TDA and their
- * transfer to applications. It provides robust, efficient, flexible and easy to use implementations of
- * state-of-the-art algorithms and data structures.
+ * The GUDHI library intends  to help the development of new algorithmic solutions in TDA and their transfer to
+ * applications. It provides robust, efficient, flexible and easy to use implementations of state-of-the-art
+ * algorithms and data structures.
  * 
  * The current release of the GUDHI library includes:
  * 
@@ -20,24 +19,86 @@
  * All data-structures are generic and several of their aspects can be parameterized via template classes.
  * We refer to \cite gudhilibrary_ICMS14 for a detailed description of the design of the library.
  *
- * The library is available <a class="el" target="_blank" href="https://gforge.inria.fr/frs/?group_id=3865">here</a>
- * and the documentation is available at this <a class="el" href="http://gudhi.gforge.inria.fr/doc/latest/">
- * webpage</a>.
- * 
- * The library comes with data sets, \ref demos and \ref testsuites.
- * 
- * Gudhi is also accessible though the
- * <a class="el" target="_blank" href="https://cran.r-project.org/web/packages/TDA/index.html">R package TDA</a>
- * (Statistical Tools for Topological Data Analysis).
- * 
- * The development of the GUDHI library is steered by an Editorial Board composed of:
- * 
- * \li <a class="el" target="_blank" href="http://www-sop.inria.fr/members/Jean-Daniel.Boissonnat/">
- * Jean-Daniel Boissonnat</a> | INRIA Sophia Antipolis - Méditerranée
- * \li <a class="el" target="_blank" href="http://geometrica.saclay.inria.fr/team/Marc.Glisse/">Marc Glisse</a> | INRIA Saclay - Ile de France
- * \li Clément Jamin | INRIA Sophia Antipolis - Méditerranée
- * \li Vincent Rouvreau | INRIA Saclay - Ile de France
- * 
+ \section DataStructures Data structures
+ \subsection SimplexTreeDataStructure Simplex tree
+ \image html "Simplex_tree_representation.png" "Simplex tree representation"
+<table border="0">
+  <tr>
+    <td width="25%">
+      <b>Introduced in:</b> GUDHI 1.0.0<br>
+      <b>Copyright:</b> GPL v3<br>
+    </td>
+    <td width="75%">
+    <i>Clément Maria</i><br>
+    The simplex tree is an efficient and flexible
+ data structure for representing general (filtered) simplicial complexes. The data structure
+ is described in \cite boissonnatmariasimplextreealgorithmica .<br>
+    <b>User manual:</b> \ref simplex_tree - <b>Reference manual:</b> Gudhi::Simplex_tree
+    </td>
+ </tr>
+</table>
+ \subsection SkeletonBlockerDataStructure Skeleton blocker
+ \image html "ds_representation.png" "Skeleton blocker representation"
+<table border="0">
+  <tr>
+    <td width="25%">
+      <b>Introduced in:</b> GUDHI 1.1.0<br>
+      <b>Copyright:</b> GPL v3<br>
+    </td>
+    <td width="75%">
+    <i>David Salinas</i><br>
+    The Skeleton-Blocker data-structure proposes a light encoding for simplicial complexes by storing only an *implicit*
+    representation of its simplices \cite socg_blockers_2011,\cite blockers2012. Intuitively, it just stores the
+    1-skeleton of a simplicial complex with a graph and the set of its "missing faces" that is very small in practice.
+    This data-structure handles all simplicial complexes operations such as simplex enumeration or simplex removal but
+    operations that are particularly efficient are operations that do not require simplex enumeration such as edge
+    iteration, link computation or simplex contraction.<br>
+    <b>User manual:</b> \ref skbl - <b>Reference manual:</b> Gudhi::skbl::Skeleton_blocker_complex
+    </td>
+ </tr>
+</table>
+ 
+ \section Toolbox Toolbox
+ \subsection PersistentCohomologyToolbox Persistent Cohomology
+ \image html "barcode_poch.png" "Persistent Cohomology represented as a barcode"
+<table border="0">
+  <tr>
+    <td width="25%">
+      <b>Introduced in:</b> GUDHI 1.0.0<br>
+      <b>Copyright:</b> GPL v3<br>
+    </td>
+    <td width="75%">
+    <i>Clément Maria</i><br>
+    The theory of homology consists in attaching to a topological space a sequence of (homology) groups, capturing
+    global topological features like connected components, holes, cavities, etc. Persistent homology studies the
+    evolution -- birth, life and death -- of these features when the topological space is changing. Consequently, the
+    theory is essentially composed of three elements: topological spaces, their homology groups and an evolution
+    scheme.
+    Computation of persistent cohomology using the algorithm of \cite DBLP:journals/dcg/SilvaMV11 and
+    \cite DBLP:journals/corr/abs-1208-5018 and the Compressed Annotation Matrix implementation of
+    \cite DBLP:conf/esa/BoissonnatDM13 .<br>
+    <b>User manual:</b> \ref persistent_cohomology
+    </td>
+ </tr>
+</table>
+ \subsection ContractionToolbox Contraction
+ \image html "sphere_contraction_representation.png" "Sphere contraction example"
+<table border="0">
+  <tr>
+    <td width="25%">
+      <b>Introduced in:</b> GUDHI 1.1.0<br>
+      <b>Copyright:</b> GPL v3<br>
+    </td>
+    <td width="75%">
+    <i>David Salinas</i><br>
+    The purpose of this package is to offer a user-friendly interface for edge contraction simplification of huge
+    simplicial complexes. It uses the \ref skbl data-structure whose size remains small  during simplification of most
+    used geometrical complexes of topological data analysis such as the Rips or the Delaunay complexes. In practice,
+    the size of this data-structure is even much lower than the total number of simplices.<br>
+    <b>User manual:</b> \ref contr
+    </td>
+ </tr>
+</table>
 */
 
 /*! \page installation Gudhi installation
@@ -47,7 +108,7 @@
  * 
  * \section compiling Compiling
  * The library uses c++11 and requires <a target="_blank" href="http://www.boost.org/">Boost</a> with version 1.48.0 or
- * more recent. It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2013.
+ * more recent. It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2015.
  * 
  * \subsection gmp GMP:
  * The multi-field persistent homology algorithm requires GMP which is a free library for arbitrary-precision

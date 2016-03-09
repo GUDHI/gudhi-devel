@@ -63,15 +63,6 @@ namespace persistent_cohomology {
   composed of three elements: 
   topological spaces, their homology groups and an evolution scheme.
 
- The theory of homology consists in attaching to a topological space a sequence of
- (homology) groups,
- capturing global topological features
- like connected components, holes, cavities, etc. Persistent homology studies the evolution
- -- birth, life and death -- of
- these features when the topological space is changing. Consequently, the theory is essentially
- composed of three elements:
- topological spaces, their homology groups and an evolution scheme.
-
  <DT>Topological Spaces:</DT>
  Topological spaces are represented by simplicial complexes.
  Let \f$V = \{1, \cdots ,|V|\}\f$ be a set of <EM>vertices</EM>.

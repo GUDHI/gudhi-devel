@@ -68,6 +68,7 @@ namespace Gudhi {
  The simplex tree is an efficient and flexible
  data structure for representing general (filtered) simplicial complexes. The data structure
  is described in \cite boissonnatmariasimplextreealgorithmica
+ \image html "Simplex_tree_representation.png" "Simplex tree representation"
 
  The second one is the Hasse_complex. The Hasse complex is a data structure representing
  explicitly all co-dimension 1 incidence relations in a complex. It is consequently faster

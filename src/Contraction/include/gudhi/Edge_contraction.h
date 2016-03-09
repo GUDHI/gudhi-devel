@@ -46,7 +46,7 @@ namespace contraction {
 The purpose of this package is to offer a user-friendly interface for edge contraction simplification of huge simplicial complexes.
 It uses the \ref skbl data-structure whose size remains small  during simplification  
 of  most used geometrical complexes of topological data analysis such as the Rips or the Delaunay complexes. In practice, the 
-size of this data-structure is even uch lower than the total number of simplices.
+size of this data-structure is even much lower than the total number of simplices.
 
 The edge contraction operation consists in identifying two vertices of a simplicial complex. 
 A lot of algorithms have been developed in computer graphics that allows to reduce efficiently the size of 2-dimensional simplicial complexes
