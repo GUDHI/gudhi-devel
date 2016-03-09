@@ -60,7 +60,7 @@
  
  \section Toolbox Toolbox
  \subsection PersistentCohomologyToolbox Persistent Cohomology
- \image html "barcode_poch.png" "Persistent Cohomology represented as a barcode"
+ \image html "3DTorus_poch.png" "Rips Persistent Cohomology on a 3D Torus"
 <table border="0">
   <tr>
     <td width="25%">
