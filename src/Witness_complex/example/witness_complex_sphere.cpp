@@ -44,8 +44,6 @@ using namespace Gudhi::witness_complex;
 
 typedef std::vector< Vertex_handle > typeVectorVertex;
 
-typedef Witness_complex< Simplex_tree<> > WitnessComplex;
-
 /** Write a gnuplot readable file.
  *  Data range is a random access range of pairs (arg, value)
  */
@@ -85,7 +83,7 @@ int main(int argc, char * const argv[]) {
     Gudhi::witness_complex::landmark_choice_by_random_point(point_vector, number_of_landmarks, knn);
 
     // Compute witness complex
-    WitnessComplex(knn, number_of_landmarks, point_vector[0].size(), simplex_tree);
+    Gudhi::witness_complex::witness_complex(knn, number_of_landmarks, point_vector[0].size(), simplex_tree);
     end = clock();
     double time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
     std::cout << "Witness complex for " << number_of_landmarks << " landmarks took "

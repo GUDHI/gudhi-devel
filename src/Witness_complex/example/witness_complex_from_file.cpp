@@ -40,7 +40,7 @@ using namespace Gudhi::witness_complex;
 typedef std::vector< Vertex_handle > typeVectorVertex;
 typedef std::vector< std::vector <double> > Point_Vector;
 
-typedef Witness_complex< Simplex_tree<> > WitnessComplex;
+//typedef Witness_complex< Simplex_tree<> > WitnessComplex;
 
 /**
  * \brief Customized version of read_points
@@ -98,7 +98,7 @@ int main(int argc, char * const argv[]) {
 
   // Compute witness complex
   start = clock();
-  WitnessComplex(knn, nbL, point_vector[0].size(), simplex_tree);
+  Gudhi::witness_complex::witness_complex(knn, nbL, point_vector[0].size(), simplex_tree);
   end = clock();
   std::cout << "Witness complex took "
       << static_cast<double>(end - start) / CLOCKS_PER_SEC << " s. \n";

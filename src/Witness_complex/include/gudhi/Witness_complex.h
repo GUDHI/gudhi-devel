@@ -48,6 +48,7 @@ namespace Gudhi {
 namespace witness_complex {
 
 /** 
+ *  \private
     \class Witness_complex
     \brief Constructs the witness complex for the given set of witnesses and landmarks.
     \ingroup witness_complex
@@ -236,6 +237,34 @@ class Witness_complex {
   }
 };
 
+  /**
+   *  \ingroup witness_complex
+   *  \brief Iterative construction of the witness complex.
+   *  \details The witness complex is written in simplicial complex sc_
+   *   basing on a matrix knn of
+   *  nearest neighbours of the form {witnesses}x{landmarks}.
+   *
+   *  The type KNearestNeighbors can be seen as 
+   *  Witness_range<Closest_landmark_range<Vertex_handle>>, where
+   *  Witness_range and Closest_landmark_range are random access ranges.
+   *
+   *  Procedure takes into account at most (dim+1) 
+   *  first landmarks from each landmark range to construct simplices.
+   *
+   *  Landmarks are supposed to be in [0,nbL_-1]
+   */
+
+  
+  template <class KNearestNeighbors, class SimplicialComplexForWitness>
+  void witness_complex(KNearestNeighbors const & knn,
+                       int nbL,
+                       int dim,
+                       SimplicialComplexForWitness & sc)
+  {
+    
+    Witness_complex<SimplicialComplexForWitness>(knn, nbL, dim, sc);
+  }
+  
 }  // namespace witness_complex
 
 }  // namespace Gudhi
