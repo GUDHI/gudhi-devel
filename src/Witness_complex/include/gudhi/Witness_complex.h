@@ -47,12 +47,12 @@ namespace Gudhi {
 
 namespace witness_complex {
 
-/** 
- *  \private
-    \class Witness_complex
-    \brief Constructs the witness complex for the given set of witnesses and landmarks.
-    \ingroup witness_complex
- */
+// /*
+//  *  \private
+//     \class Witness_complex
+//     \brief Constructs the witness complex for the given set of witnesses and landmarks.
+//     \ingroup witness_complex
+//  */
 template< class SimplicialComplex>
 class Witness_complex {
  private:
@@ -86,14 +86,14 @@ class Witness_complex {
 
  public:
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  /** @name Constructor
+  /* @name Constructor
    */
 
   //@{
 
   // Witness_range<Closest_landmark_range<Vertex_handle>>
 
-  /**
+  /*
    *  \brief Iterative construction of the witness complex.
    *  \details The witness complex is written in sc_ basing on a matrix knn of
    *  nearest neighbours of the form {witnesses}x{landmarks}.
@@ -154,7 +154,7 @@ class Witness_complex {
   //@}
 
  private:
-  /** \brief Check if the facets of the k-dimensional simplex witnessed 
+  /* \brief Check if the facets of the k-dimensional simplex witnessed 
    *  by witness witness_id are already in the complex.
    *  inserted_vertex is the handle of the (k+1)-th vertex witnessed by witness_id
    */
@@ -189,7 +189,7 @@ class Witness_complex {
   }
 
  public:
-  // /**
+  // /*
   //  *  \brief Verification if every simplex in the complex is witnessed by witnesses in knn.
   //  *  \param print_output =true will print the witnesses for each simplex
   //  *  \remark Added for debugging purposes.
