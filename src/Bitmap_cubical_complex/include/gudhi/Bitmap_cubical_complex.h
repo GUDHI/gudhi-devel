@@ -23,6 +23,7 @@
 
 #pragma once
 #include <limits>
+#include <numeric>
 #include "Bitmap_cubical_complex_base.h"
 #include "Bitmap_cubical_complex_periodic_boundary_conditions_base.h"
 
@@ -128,6 +129,11 @@ public:
         //to be called again.
         this->initialize_simplex_associated_to_key();
     }
+
+    /**
+    * Destructor of the Bitmap_cubical_complex class.
+    **/
+    virtual ~Bitmap_cubical_complex(){}
 
 
 //*********************************************//

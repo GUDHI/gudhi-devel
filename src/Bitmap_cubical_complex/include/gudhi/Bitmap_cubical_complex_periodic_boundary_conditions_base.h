@@ -38,6 +38,11 @@ namespace Cubical_complex
 
 
 /**
+ *@class Bitmap_cubical_complex_periodic_boundary_conditions_base
+ *@brief Cubical complex with periodic boundary conditions represented as a bitmap.
+ *@ingroup cubical_complex
+ */
+/**
 * This is a class implementing a bitmap data structure with periodic boundary conditions. Most of the functions are identical to the functions from Bitmap_cubical_complex_base.
 * The ones that needed to be updated are the constructors and get_boundary_of_a_cell and get_coboundary_of_a_cell.
 */
@@ -63,6 +68,11 @@ public:
     * A constructor of Bitmap_cubical_complex_periodic_boundary_conditions_base class that takes the following parameters: (1) vector with numbers of top dimensional cells in all dimensions and (2) vector of top dimensional cells (ordered lexicographically) and (3) vector of booleans. If at i-th position of this vector there is true value, that means that periodic boundary conditions are to be imposed in this direction. In case of false, the periodic boundary conditions will not be imposed in the direction i.
     */
     Bitmap_cubical_complex_periodic_boundary_conditions_base( const std::vector<unsigned>& dimensions , const std::vector<T>& topDimensionalCells , const std::vector< bool >& directions_in_which_periodic_b_cond_are_to_be_imposed );
+
+    /**
+    * Destructor of the Bitmap_cubical_complex_periodic_boundary_conditions_base class.
+    **/
+    virtual ~Bitmap_cubical_complex_periodic_boundary_conditions_base(){}
 
     //overwritten methods co compute boundary and coboundary
     /**

@@ -23,6 +23,7 @@
 #pragma once
 
 #include <iostream>
+#include <numeric>
 #include <string>
 #include <vector>
 #include <string>
@@ -43,7 +44,11 @@ namespace Cubical_complex
 {
 
 
-
+/**
+ *@class Bitmap_cubical_complex_base
+ *@brief Cubical complex represented as a bitmap, class with basic implementation.
+ *@ingroup cubical_complex
+ */
 /**
  * This is a class implementing a basic bitmap data structure to store cubical complexes.
  * It implements only the most basic subroutines.
@@ -91,6 +96,11 @@ public:
     * together with vector of filtration values of top dimensional cells.
     **/
     Bitmap_cubical_complex_base( const std::vector<unsigned>& dimensions , const std::vector<T>& top_dimensional_cells );
+
+    /**
+    * Destructor of the Bitmap_cubical_complex_base class.
+    **/
+    virtual ~Bitmap_cubical_complex_base(){}
 
     /**
     * The functions get_boundary_of_a_cell, get_coboundary_of_a_cell, get_dimension_of_a_cell
@@ -156,9 +166,18 @@ public:
 
 
     /**
-    * Functions that put the input data to bins.
+    * Function that put the input data to bins. Sometimes if most of the cells have different birth-death times, the performance of the algorithms to compute persistence gets
+    * worst. When dealing with this type of data, one may want to put different values on cells to some number of bins. The function put_data_toBins( size_t number_of_bins )
+    * ais designed for that purpose. The parameter of the function is the number of bins (distinct values) we want to have in the cubical complex.
     **/
     void put_data_toBins( size_t number_of_bins );
+
+    /**
+    * Function that put the input data to bins. Sometimes if most of the cells have different birth-death times, the performance of the algorithms to compute persistence gets
+    * worst. When dealing with this type of data, one may want to put different values on cells to some number of bins. The function put_data_toBins( T diameter_of_bin ) is
+    * designed for that purpose. The parameter of it is the diameter of each bin. Note that the bottleneck distance between the persistence diagram of the cubical complex
+    * before and after using such a function will be bounded by the parameter diameter_of_bin.
+    **/
     void put_data_toBins( T diameter_of_bin );
 
     /**
@@ -174,21 +193,6 @@ public:
     **/
     typedef typename std::vector< T >::iterator all_cells_iterator;
 
-    /**
-    * Function returning an iterator to the first cell of the bitmap.
-    **/
-    all_cells_iterator all_cells_begin()
-    {
-        return this->data.begin();
-    }
-
-     /**
-    * Function returning an iterator to the last cell of the bitmap.
-    **/
-    all_cells_iterator all_cells_end()const
-    {
-        return this->data.end();
-    }
 
     /**
     * Constant iterator through all cells in the complex (in order they appear in the structure -- i.e.
@@ -204,10 +208,43 @@ public:
         return this->data.begin();
     }
 
+
     /**
     * Function returning a constant iterator to the last cell of the bitmap.
     **/
     all_cells_const_iterator all_cells_const_end()const
+    {
+        return this->data.end();
+    }
+
+    /**
+    * Function returning an iterator to the first cell of the bitmap.
+    **/
+    all_cells_iterator all_cells_begin()
+    {
+        return this->data.begin();
+    }
+
+    /**
+    * Function returning a constant iterator to the first cell of the bitmap.
+    **/
+    all_cells_const_iterator all_cells_begin() const
+    {
+        return this->data.begin();
+    }
+
+    /**
+    * Function returning an iterator to the last cell of the bitmap.
+    **/
+    all_cells_iterator all_cells_end()
+    {
+        return this->data.end();
+    }
+
+    /**
+    * Function returning a constant iterator to the last cell of the bitmap.
+    **/
+    all_cells_const_iterator all_cells_end() const
     {
         return this->data.end();
     }

@@ -22,6 +22,7 @@
 
 
 #include <gudhi/reader_utils.h>
+#include <gudhi/Bitmap_cubical_complex_base.h>
 #include <gudhi/Bitmap_cubical_complex.h>
 #include <gudhi/Persistent_cohomology.h>
 
@@ -56,12 +57,11 @@ lexicographical order. See CubicalOneSphere.txt or CubicalTwoSphere.txt for exam
 
     Bitmap_cubical_complex< Bitmap_cubical_complex_base<double> > b( argv[1] );
 
-
     // Compute the persistence diagram of the complex
     persistent_cohomology::Persistent_cohomology< Bitmap_cubical_complex< Bitmap_cubical_complex_base<double> >, Field_Zp > pcoh(b);
     pcoh.init_coefficients( p ); //initilizes the coefficient field for homology
-    pcoh.compute_persistent_cohomology( min_persistence );
 
+    pcoh.compute_persistent_cohomology( min_persistence );
 
     stringstream ss;
     ss << argv[1] << "_persistence";
