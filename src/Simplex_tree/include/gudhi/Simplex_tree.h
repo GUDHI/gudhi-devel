@@ -451,12 +451,12 @@ class Simplex_tree {
   }
 
   /** \brief Sets the filtration value of a simplex.
-   *
-   * No action if called on the null_simplex*/
+   * \warning In debug mode, the exception std::invalid_argument is thrown if sh is a null_simplex.
+   */
   void assign_filtration(Simplex_handle sh, Filtration_value fv) {
-    if (sh != null_simplex()) {
-      sh->second.assign_filtration(fv);
-    }
+    GUDHI_CHECK(sh == null_simplex(),
+                std::invalid_argument ("Simplex_tree::assign_filtration - cannot assign filtration on null_simplex"));
+    sh->second.assign_filtration(fv);
   }
 
   /** \brief Returns an upper bound of the filtration values of the simplices. */
