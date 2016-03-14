@@ -49,7 +49,9 @@ namespace alphacomplex {
 
 /**
  * \brief Alpha complex data structure.
- *
+ * 
+ * \ingroup alpha_complex
+ * 
  * \details
  * The data structure can be constructed from a CGAL Delaunay triangulation (for more informations on CGAL Delaunay 
  * triangulation, please refer to the corresponding chapter in page http://doc.cgal.org/latest/Triangulation/) or from
