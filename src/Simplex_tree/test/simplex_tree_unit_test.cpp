@@ -985,7 +985,6 @@ BOOST_AUTO_TEST_CASE(prune_above_filtration) {
 
   st.insert_simplex_and_subfaces({0, 1, 6, 7}, 1.0);
   st.insert_simplex_and_subfaces({3, 4, 5}, 2.0);
-  st.set_filtration(6.0);
 
   // Constructs a copy at this state for further test purpose
   typeST st_pruned = st;
@@ -1053,7 +1052,6 @@ BOOST_AUTO_TEST_CASE(prune_above_filtration) {
   BOOST_CHECK(st == st_pruned);
 
   typeST st_empty;
-  st_empty.set_filtration(6.0);  // For equality reason
   // FIXME
   st_empty.set_dimension(3);
   st.prune_above_filtration(0.0);
@@ -1067,4 +1065,42 @@ BOOST_AUTO_TEST_CASE(prune_above_filtration) {
   // Test case to the limit
   st.prune_above_filtration(-1.0);
   BOOST_CHECK(st == st_empty);
+}
+
+BOOST_AUTO_TEST_CASE(mini_prune_above_filtration) {
+  std::cout << "********************************************************************" << std::endl;
+  std::cout << "MINI PRUNE ABOVE FILTRATION" << std::endl;
+  typedef Simplex_tree<MyOptions> typeST;
+  typeST st;
+
+  // FIXME
+  st.set_dimension(3);
+
+  st.insert_simplex_and_subfaces({0, 1, 6, 7});
+  st.insert_simplex_and_subfaces({3, 4, 5});
+  st.insert_simplex_and_subfaces({3, 0});
+  st.insert_simplex_and_subfaces({2, 1, 0});
+
+  // st:
+  //    1   6
+  //    o---o
+  //   /X\7/
+  //  o---o---o---o
+  //  2   0   3\X/4
+  //            o
+  //            5
+
+  st.initialize_filtration();
+  
+  // Display the Simplex_tree
+  std::cout << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
+  BOOST_CHECK(st.num_simplices() == 27);
+
+  // Test case to the limit
+  st.prune_above_filtration(-1.0);
+
+  // Display the Simplex_tree
+  std::cout << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
+  BOOST_CHECK(st.num_simplices() == 0);
+
 }

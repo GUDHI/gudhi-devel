@@ -1179,33 +1179,30 @@ class Simplex_tree {
    * call `initialize_filtration()` to recompute it.
    */
   void prune_above_filtration(Filtration_value filtration) {
-    // No action if filtration is not stored
-    if (Options::store_filtration) {
-      // Initialize filtration_vect_ if required
-      if (filtration_vect_.empty()) {
-        initialize_filtration();
-      }
-        
-      std::vector<std::vector<Vertex_handle>> simplex_list_to_removed;
-      // Loop in reverse mode until threshold is reached
-      // Do not erase while looping, because removing is shifting data in a flat_map
-      for (auto f_simplex = filtration_vect_.rbegin();
-           (f_simplex != filtration_vect_.rend()) && ((*f_simplex)->second.filtration() > filtration);
-           f_simplex++) {
-        std::vector<Vertex_handle> simplex_to_remove;
-        for (auto vertex : simplex_vertex_range(*f_simplex))
-          simplex_to_remove.insert(simplex_to_remove.begin(), vertex);
-        simplex_list_to_removed.push_back(simplex_to_remove);
-      }
-      for (auto simplex_to_remove : simplex_list_to_removed) {
-        Simplex_handle sh = find_simplex(simplex_to_remove);
-        if (sh != null_simplex())
-          remove_maximal_simplex(sh);
-      }
-      // Re-initialize filtration_vect_ if dta were removed, because removing is shifting data in a flat_map
-      if (simplex_list_to_removed.size() > 0)
-        initialize_filtration();
+    // Initialize filtration_vect_ if required
+    if (filtration_vect_.empty()) {
+      initialize_filtration();
     }
+      
+    std::vector<std::vector<Vertex_handle>> simplex_list_to_removed;
+    // Loop in reverse mode until threshold is reached
+    // Do not erase while looping, because removing is shifting data in a flat_map
+    for (auto f_simplex = filtration_vect_.rbegin();
+         (f_simplex != filtration_vect_.rend()) && ((*f_simplex)->second.filtration() > filtration);
+         f_simplex++) {
+      std::vector<Vertex_handle> simplex_to_remove;
+      for (auto vertex : simplex_vertex_range(*f_simplex))
+        simplex_to_remove.insert(simplex_to_remove.begin(), vertex);
+      simplex_list_to_removed.push_back(simplex_to_remove);
+    }
+    for (auto simplex_to_remove : simplex_list_to_removed) {
+      Simplex_handle sh = find_simplex(simplex_to_remove);
+      if (sh != null_simplex())
+        remove_maximal_simplex(sh);
+    }
+    // Re-initialize filtration_vect_ if dta were removed, because removing is shifting data in a flat_map
+    if (simplex_list_to_removed.size() > 0)
+      initialize_filtration();
   }
 
   /** \brief Remove a maximal simplex.
