@@ -31,7 +31,9 @@
 
 namespace Gudhi {
 
-/** \brief OFF file visitor implementation according to Off_reader in order to construct a CGAL Delaunay triangulation.
+/** 
+ * \class Delaunay_triangulation_off_visitor_reader Delaunay_triangulation_off_io.h gudhi/Delaunay_triangulation_off_io.h
+ * \brief OFF file visitor implementation according to Off_reader in order to construct a CGAL Delaunay triangulation.
  * 
  * For more informations on CGAL Delaunay triangulation, please refer to the corresponding chapter in page
  *  http://doc.cgal.org/latest/Triangulation/
@@ -41,7 +43,7 @@ class Delaunay_triangulation_off_visitor_reader {
  private:
   Complex* complex_;
   typedef typename Complex::Point Point;
-
+  std::vector<Point> point_cloud;
  public:
 
   // TODO(VR) : Pass a Complex as a parameter is required, even if not used. Otherwise, compilation is KO.
@@ -95,7 +97,9 @@ class Delaunay_triangulation_off_visitor_reader {
     }
     std::cout << std::endl;
 #endif  // DEBUG_TRACES
-    complex_->insert(Point(point.size(), point.begin(), point.end()));
+    // Fill the point cloud
+    // VR: complex_->insert(Point(point.size(), point.begin(), point.end()));
+    point_cloud.push_back(Point(point.size(), point.begin(), point.end()));
   }
 
   // Off_reader visitor maximal_face implementation - not used
@@ -103,9 +107,11 @@ class Delaunay_triangulation_off_visitor_reader {
     // For Delaunay Triangulation, only points are read
   }
 
-  // Off_reader visitor done implementation - not used
+  // Off_reader visitor done implementation
   void done() {
-    // Nothing to be done on end of OFF file read
+    // It is advised to insert all the points at a time in a Delaunay Triangulation because points are sorted at the
+    // beginning of the insertion
+    complex_->insert(point_cloud.begin(), point_cloud.end());
   }
 
   /** \brief Returns the constructed Delaunay triangulation.
@@ -119,7 +125,9 @@ class Delaunay_triangulation_off_visitor_reader {
   }
 };
 
-/** \brief OFF file reader implementation in order to construct a Delaunay triangulation.
+/** 
+ * \class Delaunay_triangulation_off_reader Delaunay_triangulation_off_io.h gudhi/Delaunay_triangulation_off_io.h
+ * \brief OFF file reader implementation in order to construct a Delaunay triangulation.
  * 
  * This class is using the Delaunay_triangulation_off_visitor_reader to visit the OFF file according to Off_reader.
  * 
@@ -135,7 +143,7 @@ class Delaunay_triangulation_off_visitor_reader {
  * 
  * When launching:
  * 
- * \code $> ./dtoffrw ../../data/points/alphacomplexdoc triangulated.off
+ * \code $> ./dtoffrw ../../data/points/alphacomplexdoc.off triangulated.off
  * \endcode
  *
  * the program output is:
@@ -203,7 +211,9 @@ class Delaunay_triangulation_off_reader {
   Complex* complex_;
 };
 
-/** \brief OFF file writer from a Delaunay triangulation.
+/**
+ * \class Delaunay_triangulation_off_writer Delaunay_triangulation_off_io.h gudhi/Delaunay_triangulation_off_io.h
+ * \brief OFF file writer from a Delaunay triangulation.
  * 
  * This class constructs the OFF file header according to http://www.geomview.org/docs/html/OFF.html
  * 

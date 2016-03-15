@@ -112,19 +112,19 @@ namespace alphacomplex {
  * 
  * \subsubsection dimension2 Dimension 2
  * 
- * From the example above, it means the algorithm looks into each triangle ([1,2,3], [2,3,4], [1,3,5], ...),
+ * From the example above, it means the algorithm looks into each triangle ([4,2,1], [2,4,6], [4,5,6], ...),
  * computes the filtration value of the triangle, and then propagates the filtration value as described
  * here :
- * \image html "alpha_complex_doc_135.png" "Filtration value propagation example"
+ * \image html "alpha_complex_doc_421.png" "Filtration value propagation example"
  * 
  * \subsubsection dimension1 Dimension 1
  * 
- * Then, the algorithm looks into each edge ([1,2], [2,3], [1,3], ...),
+ * Then, the algorithm looks into each edge ([1,2], [4,2], [4,1], ...),
  * computes the filtration value of the edge (in this case, propagation will have no effect).
  * 
  * \subsubsection dimension0 Dimension 0
  * 
- * Finally, the algorithm looks into each vertex ([1], [2], [3], [4], [5], [6] and [7]) and
+ * Finally, the algorithm looks into each vertex ([0], [1], [2], [3], [4], [5] and [6]) and
  * sets the filtration value (0 in case of a vertex - propagation will have no effect).
  * 
  * \subsubsection nondecreasing Non decreasing filtration values

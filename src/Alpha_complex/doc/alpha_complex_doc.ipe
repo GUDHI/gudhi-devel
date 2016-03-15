@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE ipe SYSTEM "ipe.dtd">
 <ipe version="70107" creator="Ipe 7.1.10">
-<info created="D:20150603143945" modified="D:20151130095407"/>
+<info created="D:20150603143945" modified="D:20160315144626"/>
 <ipestyle name="basic">
 <symbol name="arrow/arc(spx)">
 <path stroke="sym-stroke" fill="sym-stroke" pen="sym-pen">
@@ -253,13 +253,13 @@ h
 320 580 l
 </path>
 <text matrix="1 0 0 1 -260 0" transformations="translations" pos="380 530" stroke="darkcyan" type="label" width="118.196" height="8.307" depth="2.32" valign="baseline" size="large">Delaunay triangulation</text>
-<text matrix="1 0 0 1 -242.155 -3.50128" transformations="translations" pos="282.952 524.893" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">0</text>
-<text matrix="1 0 0 1 -240 0" transformations="translations" pos="352.708 510.349" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">1</text>
-<text matrix="1 0 0 1 -240 0" transformations="translations" pos="310.693 578.759" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">2</text>
-<text matrix="1 0 0 1 -240 0" transformations="translations" pos="375.332 578.49" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">3</text>
-<text matrix="1 0 0 1 -240 0" transformations="translations" pos="272.179 660.635" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">4</text>
-<text matrix="1 0 0 1 -239.3 -10.1537" transformations="translations" pos="296.419 724.197" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">5</text>
-<text matrix="1 0 0 1 -240 0" transformations="translations" pos="375.332 689.453" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">6</text>
+<text matrix="1 0 0 1 -242.155 -3.50128" transformations="translations" pos="282.952 524.893" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">2</text>
+<text matrix="1 0 0 1 -240 0" transformations="translations" pos="352.708 510.349" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">6</text>
+<text matrix="1 0 0 1 -240 0" transformations="translations" pos="310.693 578.759" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">4</text>
+<text matrix="1 0 0 1 -240 0" transformations="translations" pos="375.332 578.49" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">5</text>
+<text matrix="1 0 0 1 -240 0" transformations="translations" pos="272.179 660.635" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">1</text>
+<text matrix="1 0 0 1 -239.3 -10.1537" transformations="translations" pos="296.419 724.197" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">3</text>
+<text matrix="1 0 0 1 -240 0" transformations="translations" pos="375.332 689.453" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">0</text>
 <path matrix="1 0 0 1 -240 0" stroke="darkcyan">
 280 660 m
 300 710 l
@@ -278,137 +278,17 @@ h
 320 580 l
 280 660 l
 </path>
-<text matrix="1 0 0 1 -40 -40" transformations="translations" pos="360 680" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">0</text>
-<text matrix="1 0 0 1 -50 -40" transformations="translations" pos="360 660" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">1</text>
-<text matrix="1 0 0 1 -50 -40" transformations="translations" pos="360 640" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">2</text>
-<text matrix="1 0 0 1 -50 -40" transformations="translations" pos="370 660" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">2</text>
-<text matrix="1 0 0 1 -30 -40" transformations="translations" pos="380 680" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">1</text>
-<text matrix="1 0 0 1 -30 -40" transformations="translations" pos="380 660" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">2</text>
-<text matrix="1 0 0 1 -10 -40" transformations="translations" pos="400 680" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">2</text>
-<text matrix="1 0 0 1 -40 -40" transformations="translations" pos="390 640" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">3</text>
-<text matrix="1 0 0 1 -40 -40" transformations="translations" pos="400 660" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">3</text>
-<text matrix="1 0 0 1 -30 -40" transformations="translations" pos="410 660" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">3</text>
-<text matrix="1 0 0 1 -10 -40" transformations="translations" pos="430 680" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">3</text>
-<text matrix="1 0 0 1 -50 -40" transformations="translations" pos="370 640" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">4</text>
-<text matrix="1 0 0 1 -50 -40" transformations="translations" pos="380 660" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">4</text>
-<text matrix="1 0 0 1 -40 -40" transformations="translations" pos="430 660" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">4</text>
-<text matrix="1 0 0 1 -20 -40" transformations="translations" pos="460 680" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">4</text>
-<text matrix="1 0 0 1 -50 -40" transformations="translations" pos="430 640" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">6</text>
-<text matrix="1 0 0 1 -50 -40" transformations="translations" pos="450 660" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">6</text>
-<text matrix="1 0 0 1 -40 -40" transformations="translations" pos="460 660" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">6</text>
-<text matrix="1 0 0 1 -30 -40" transformations="translations" pos="520 680" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">6</text>
-<text matrix="1 0 0 1 90 -40" transformations="translations" pos="300 640" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">6</text>
-<text matrix="1 0 0 1 100 -40" transformations="translations" pos="350 660" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">6</text>
-<text matrix="1 0 0 1 90 -40" transformations="translations" pos="350 660" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">5</text>
-<text matrix="1 0 0 1 90 -40" transformations="translations" pos="350 640" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">6</text>
-<text matrix="1 0 0 1 90 -40" transformations="translations" pos="380 680" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">5</text>
-<path matrix="1 0 0 1 90 -40" stroke="black">
+<path matrix="1 0 0 1 104.05 -60.1773" stroke="black">
 4 0 0 4 320 704 e
 </path>
-<path matrix="1 0 0 1 90 -40" stroke="black">
+<path matrix="1 0 0 1 104.05 -60.1773" stroke="black">
 322.919 706.788 m
 317.189 701.058 l
 317.189 701.203 l
 </path>
-<path matrix="1 0 0 1 90 -40" stroke="black">
+<path matrix="1 0 0 1 104.05 -60.1773" stroke="black">
 317.551 706.934 m
 322.629 701.058 l
-</path>
-<path matrix="1 0 0 1 90 -40" stroke="black" arrow="normal/tiny">
-230 680 m
-240 670 l
-</path>
-<path matrix="1 0 0 1 120 -40" stroke="black" arrow="normal/tiny">
-230 680 m
-240 670 l
-</path>
-<path matrix="1 0 0 1 160 -40" stroke="black" arrow="normal/tiny">
-230 680 m
-240 670 l
-</path>
-<path matrix="1 0 0 1 210 -40" stroke="black" arrow="normal/tiny">
-230 680 m
-240 670 l
-</path>
-<path matrix="1 0 0 1 90 -40" stroke="black" arrow="normal/tiny">
-230 680 m
-220 670 l
-</path>
-<path matrix="1 0 0 1 90 -40" stroke="black" arrow="normal/tiny">
-230 680 m
-230 670 l
-</path>
-<path matrix="1 0 0 1 90 -40" stroke="black" arrow="normal/tiny">
-220 660 m
-220 650 l
-</path>
-<path matrix="1 0 0 1 90 -40" stroke="black" arrow="normal/tiny">
-230 660 m
-230 650 l
-</path>
-<path matrix="1 0 0 1 90 -40" stroke="black" arrow="normal/tiny">
-260 680 m
-260 670 l
-</path>
-<path matrix="1 0 0 1 90 -40" stroke="black" arrow="normal/tiny">
-260 660 m
-260 650 l
-</path>
-<path matrix="1 0 0 1 90 -40" stroke="black" arrow="normal/tiny">
-300 680 m
-300 670 l
-</path>
-<path matrix="1 0 0 1 90 -40" stroke="black" arrow="normal/tiny">
-300 680 m
-290 670 l
-</path>
-<path matrix="1 0 0 1 90 -40" stroke="black" arrow="normal/tiny">
-290 660 m
-290 650 l
-</path>
-<path matrix="1 0 0 1 90 -40" stroke="black" arrow="normal/tiny">
-300 660 m
-300 650 l
-</path>
-<path matrix="1 0 0 1 90 -40" stroke="black" arrow="normal/tiny">
-330 680 m
-330 670 l
-</path>
-<path matrix="1 0 0 1 90 -40" stroke="black" arrow="normal/tiny">
-350 680 m
-350 670 l
-</path>
-<path matrix="1 0 0 1 90 -40" stroke="black" arrow="normal/tiny">
-350 660 m
-350 650 l
-</path>
-<path matrix="1 0 0 1 90 -40" stroke="black" arrow="normal/tiny">
-320 700 m
-240 690 l
-</path>
-<path matrix="1 0 0 1 90 -40" stroke="black" arrow="normal/tiny">
-320 700 m
-270 690 l
-</path>
-<path matrix="1 0 0 1 90 -40" stroke="black" arrow="normal/tiny">
-320 700 m
-310 690 l
-</path>
-<path matrix="1 0 0 1 90 -40" stroke="black" arrow="normal/tiny">
-320 700 m
-330 690 l
-</path>
-<path matrix="1 0 0 1 90 -40" stroke="black" arrow="normal/tiny">
-320 700 m
-350 690 l
-</path>
-<path matrix="1 0 0 1 90 -40" stroke="black" arrow="normal/tiny">
-320 700 m
-380 690 l
-</path>
-<path matrix="1 0 0 1 90 -40" stroke="black" arrow="normal/tiny">
-320 700 m
-400 690 l
 </path>
 <path matrix="1 0 0 1 50 0" stroke="black">
 240 620 m
@@ -434,5 +314,246 @@ h
 <use matrix="1 0 0 1 -240 0" name="mark/fdisk(sfx)" pos="370 580" size="normal" stroke="black" fill="white"/>
 <use matrix="1 0 0 1 -240 0" name="mark/fdisk(sfx)" pos="350 520" size="normal" stroke="black" fill="white"/>
 <use matrix="1 0 0 1 -240 0" name="mark/fdisk(sfx)" pos="290 530" size="normal" stroke="black" fill="white"/>
+<text matrix="1 0 0 1 -8 -96" transformations="translations" pos="304 680" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">3</text>
+<path matrix="1 0 0 1 4 -96" stroke="black">
+300 688 m
+300 676 l
+312 676 l
+312 688 l
+h
+</path>
+<path matrix="1 0 0 1 -8 -96" stroke="black">
+300 688 m
+300 676 l
+312 676 l
+312 688 l
+h
+</path>
+<text matrix="1 0 0 1 -8 -96" transformations="translations" pos="316 680" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">4</text>
+<text matrix="1 0 0 1 12 -76" transformations="translations" pos="304 680" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">3</text>
+<path matrix="1 0 0 1 24 -76" stroke="black">
+300 688 m
+300 676 l
+312 676 l
+312 688 l
+h
+</path>
+<path matrix="1 0 0 1 12 -76" stroke="black">
+300 688 m
+300 676 l
+312 676 l
+312 688 l
+h
+</path>
+<text matrix="1 0 0 1 12 -76" transformations="translations" pos="316 680" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">4</text>
+<text matrix="1 0 0 1 0 -76" transformations="translations" pos="304 680" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">1</text>
+<path matrix="1 0 0 1 36 -76" stroke="black">
+300 688 m
+300 676 l
+312 676 l
+312 688 l
+h
+</path>
+<path matrix="1 0 0 1 0 -76" stroke="black">
+300 688 m
+300 676 l
+312 676 l
+312 688 l
+h
+</path>
+<text matrix="1 0 0 1 24 -76" transformations="translations" pos="316 680" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">5</text>
+<path matrix="1 0 0 1 20 -96" stroke="black">
+300 688 m
+300 676 l
+312 676 l
+312 688 l
+h
+</path>
+<text matrix="1 0 0 1 8 -96" transformations="translations" pos="316 680" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">5</text>
+<text matrix="1 0 0 1 64 -76" transformations="translations" pos="304 680" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">3</text>
+<path matrix="1 0 0 1 76 -76" stroke="black">
+300 688 m
+300 676 l
+312 676 l
+312 688 l
+h
+</path>
+<path matrix="1 0 0 1 64 -76" stroke="black">
+300 688 m
+300 676 l
+312 676 l
+312 688 l
+h
+</path>
+<text matrix="1 0 0 1 64 -76" transformations="translations" pos="316 680" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">4</text>
+<text matrix="1 0 0 1 52 -76" transformations="translations" pos="304 680" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">2</text>
+<path matrix="1 0 0 1 52 -76" stroke="black">
+300 688 m
+300 676 l
+312 676 l
+312 688 l
+h
+</path>
+<path matrix="1 0 0 1 48 -96" stroke="black">
+300 688 m
+300 676 l
+312 676 l
+312 688 l
+h
+</path>
+<text matrix="1 0 0 1 36 -96" transformations="translations" pos="316 680" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">4</text>
+<text matrix="1 0 0 1 104 -76" transformations="translations" pos="304 680" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">6</text>
+<path matrix="1 0 0 1 104 -76" stroke="black">
+300 688 m
+300 676 l
+312 676 l
+312 688 l
+h
+</path>
+<text matrix="1 0 0 1 92 -76" transformations="translations" pos="304 680" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">4</text>
+<path matrix="1 0 0 1 92 -76" stroke="black">
+300 688 m
+300 676 l
+312 676 l
+312 688 l
+h
+</path>
+<path matrix="1 0 0 1 92 -96" stroke="black">
+300 688 m
+300 676 l
+312 676 l
+312 688 l
+h
+</path>
+<text matrix="1 0 0 1 80 -96" transformations="translations" pos="316 680" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">6</text>
+<text matrix="1 0 0 1 148 -76" transformations="translations" pos="304 680" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">6</text>
+<path matrix="1 0 0 1 148 -76" stroke="black">
+300 688 m
+300 676 l
+312 676 l
+312 688 l
+h
+</path>
+<text matrix="1 0 0 1 136 -76" transformations="translations" pos="304 680" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">5</text>
+<path matrix="1 0 0 1 136 -76" stroke="black">
+300 688 m
+300 676 l
+312 676 l
+312 688 l
+h
+</path>
+<path matrix="1 0 0 1 168 -76" stroke="black">
+300 688 m
+300 676 l
+312 676 l
+312 688 l
+h
+</path>
+<text matrix="1 0 0 1 156 -76" transformations="translations" pos="316 680" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">6</text>
+<path matrix="1 0 0 1 168 -76" stroke="black">
+300 688 m
+300 676 l
+312 676 l
+312 688 l
+h
+</path>
+<text matrix="1 0 0 1 156 -76" transformations="translations" pos="316 680" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">6</text>
+<path matrix="1 0 0 1 48 -96" stroke="black">
+292 716 m
+292 728 l
+316 728 l
+316 716 l
+h
+</path>
+<path matrix="1 0 0 1 48 -96" stroke="black">
+316 716 m
+316 728 l
+340 728 l
+340 716 l
+h
+</path>
+<path matrix="1 0 0 1 48 -96" stroke="black">
+340 716 m
+340 728 l
+364 728 l
+364 716 l
+h
+</path>
+<path matrix="1 0 0 1 48 -96" stroke="black">
+364 716 m
+364 728 l
+388 728 l
+388 716 l
+h
+</path>
+<path matrix="1 0 0 1 48 -96" stroke="black">
+388 716 m
+388 728 l
+412 728 l
+412 716 l
+h
+</path>
+<path matrix="1 0 0 1 48 -96" stroke="black">
+412 716 m
+412 728 l
+436 728 l
+436 716 l
+h
+</path>
+<path matrix="1 0 0 1 48 -96" stroke="black">
+436 716 m
+436 728 l
+460 728 l
+460 716 l
+h
+</path>
+<text matrix="1 0 0 1 48 -96" transformations="translations" pos="304 720" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">0</text>
+<text matrix="1 0 0 1 48 -96" transformations="translations" pos="328 720" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">1</text>
+<text matrix="1 0 0 1 48 -96" transformations="translations" pos="352 720" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">2</text>
+<text matrix="1 0 0 1 48 -96" transformations="translations" pos="376 720" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">3</text>
+<text matrix="1 0 0 1 48 -96" transformations="translations" pos="400 720" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">4</text>
+<text matrix="1 0 0 1 48 -96" transformations="translations" pos="424 720" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">5</text>
+<text matrix="1 0 0 1 48 -96" transformations="translations" pos="448 720" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">6</text>
+<path matrix="1 0 0 1 36 -96" stroke="black">
+436 708 m
+436 716 l
+</path>
+<path matrix="1 0 0 1 36 -96" stroke="black">
+364 708 m
+364 716 l
+</path>
+<path matrix="1 0 0 1 36 -96" stroke="black">
+364 688 m
+364 696 l
+</path>
+<path matrix="1 0 0 1 36 -96" stroke="black">
+320 688 m
+320 696 l
+</path>
+<path matrix="1 0 0 1 36 -96" stroke="black">
+296 708 m
+308 716 l
+308 716 l
+</path>
+<path matrix="1 0 0 1 36 -96" stroke="black">
+264 688 m
+268 696 l
+</path>
+<path matrix="1 0 0 1 36 -96" stroke="black">
+292 688 m
+292 696 l
+</path>
+<path matrix="1 0 0 1 36 -96" stroke="black">
+388 736 m
+388 728 l
+</path>
+<path stroke="black">
+372 612 m
+376 620 l
+</path>
+<path stroke="black">
+448 612 m
+448 620 l
+</path>
 </page>
 </ipe>

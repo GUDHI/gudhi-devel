@@ -22,8 +22,6 @@ if(CGAL_FOUND)
       target_link_libraries(dtoffrw_UT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
       # Do not forget to copy test files in current binary dir
-      file(COPY "dtoffrw_alphashapedoc_result.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
-      # Do not forget to copy test files in current binary dir
       file(COPY "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
       # Unitary tests
@@ -32,6 +30,8 @@ if(CGAL_FOUND)
       --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/dtoffrw_UT.xml --log_level=test_suite --report_level=no)
 
       if (DIFF_PATH)
+        # Do not forget to copy test result files in current binary dir
+        file(COPY "dtoffrw_alphashapedoc_result.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
         add_test(dtoffrw_diff_files_UT ${DIFF_PATH} ${CMAKE_CURRENT_BINARY_DIR}/UT.off ${CMAKE_CURRENT_BINARY_DIR}/dtoffrw_alphashapedoc_result.off)
       endif()
 

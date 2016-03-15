@@ -48,6 +48,7 @@ namespace Gudhi {
 namespace alphacomplex {
 
 /**
+ * \class Alpha_complex Alpha_complex.h gudhi/Alpha_complex.h
  * \brief Alpha complex data structure.
  * 
  * \ingroup alpha_complex
