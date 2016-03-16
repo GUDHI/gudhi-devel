@@ -132,7 +132,7 @@ int main(int argc, char * const argv[]) {
   int coeff_field_characteristic = atoi(argv[2]);
 
   Filtration_value min_persistence = 0.0;
-  returnedScanValue = sscanf(argv[3], "%lf", &min_persistence);
+  int returnedScanValue = sscanf(argv[3], "%lf", &min_persistence);
   if ((returnedScanValue == EOF) || (min_persistence < -1.0)) {
     std::cerr << "Error: " << argv[3] << " is not correct\n";
     usage(argv[0]);
