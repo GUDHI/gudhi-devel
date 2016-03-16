@@ -85,7 +85,6 @@ template<typename SkBlComplex> class Persistence_compute {
     stream << "p dimension birth death: \n";
 
     pcoh.output_diagram(stream);
-    
   }
 };
 

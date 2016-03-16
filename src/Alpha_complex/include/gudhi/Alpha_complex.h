@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ALPHA_COMPLEX_H_
-#define ALPHA_COMPLEX_H_
+#ifndef DOC_ALPHA_COMPLEX_INTRO_ALPHA_COMPLEX_H_
+#define DOC_ALPHA_COMPLEX_INTRO_ALPHA_COMPLEX_H_
 
 // to construct a simplex_tree from Delaunay_triangulation
 #include <gudhi/graph_simplicial_complex.h>
@@ -97,7 +97,6 @@ class Alpha_complex : public Simplex_tree<> {
 
   // Double map type to switch from CGAL vertex iterator to simplex tree vertex handle and vice versa.
   typedef typename std::map< CGAL_vertex_iterator, Vertex_handle > Map_vertex_iterator_to_handle;
-  //typedef typename std::map< Vertex_handle, CGAL_vertex_iterator > Map_vertex_handle_to_iterator;
   typedef typename std::vector< CGAL_vertex_iterator > Vector_vertex_iterator;
 
  private:
@@ -141,7 +140,7 @@ class Alpha_complex : public Simplex_tree<> {
   Alpha_complex(Delaunay_triangulation* triangulation_ptr,
                 Filtration_value max_alpha_square = std::numeric_limits<Filtration_value>::infinity())
       : triangulation_(triangulation_ptr) {
-   init(max_alpha_square);
+    init(max_alpha_square);
   }
 
   /** \brief Alpha_complex constructor from a list of points.
@@ -160,17 +159,17 @@ class Alpha_complex : public Simplex_tree<> {
       : triangulation_(nullptr) {
     auto first = std::begin(points);
     auto last = std::end(points);
-    
+
     GUDHI_CHECK((first == last),
-                std::invalid_argument ("Alpha_complex::Alpha_complex(InputPointRange) - Empty input point range"));
-    
+                std::invalid_argument("Alpha_complex::Alpha_complex(InputPointRange) - Empty input point range"));
+
     if (first != last) {
       // point_dimension function initialization
       Point_Dimension point_dimension = kernel_.point_dimension_d_object();
 
       // Delaunay triangulation is point dimension minus one.
       triangulation_ = new Delaunay_triangulation(point_dimension(*first) - 1);
-    
+
       size_type inserted = triangulation_->insert(first, last);
       if (inserted != (last -first)) {
         std::cerr << "Alpha_complex - insertion failed " << inserted << " != " << (last -first) << "\n";
@@ -227,7 +226,7 @@ class Alpha_complex : public Simplex_tree<> {
     }
 
     set_dimension(triangulation_->maximal_dimension());
-    // set_filtration to +inf for prune_above_filtration to be done (if necessary) 
+    // set_filtration to +inf for prune_above_filtration to be done (if necessary)
     set_filtration(std::numeric_limits<Filtration_value>::infinity());
 
     // --------------------------------------------------------------------------------------------
@@ -247,7 +246,7 @@ class Alpha_complex : public Simplex_tree<> {
       }
     }
     // --------------------------------------------------------------------------------------------
-    
+
     // --------------------------------------------------------------------------------------------
     // Simplex_tree construction from loop on triangulation finite full cells list
     for (auto cit = triangulation_->finite_full_cells_begin(); cit != triangulation_->finite_full_cells_end(); ++cit) {
@@ -393,4 +392,4 @@ class Alpha_complex : public Simplex_tree<> {
 
 }  // namespace Gudhi
 
-#endif  // ALPHA_COMPLEX_H_
+#endif  // DOC_ALPHA_COMPLEX_INTRO_ALPHA_COMPLEX_H_

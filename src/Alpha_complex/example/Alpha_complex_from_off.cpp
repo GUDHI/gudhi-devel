@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
 
   std::streambuf* streambufffer;
   std::ofstream ouput_file_stream;
-  
+
   if (argc == 4) {
     ouput_file_stream.open(std::string(argv[3]));
     streambufffer = ouput_file_stream.rdbuf();

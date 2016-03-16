@@ -10,12 +10,12 @@
 // Use dynamic_dimension_tag for the user to be able to set dimension
 typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > K;
 typedef CGAL::Delaunay_triangulation<K> T;
-// The triangulation uses the default instantiation of the 
+// The triangulation uses the default instantiation of the
 // TriangulationDataStructure template parameter
 
 void usage(char * const progName) {
   std::cerr << "Usage: " << progName << " inputFile.off outputFile.off" << std::endl;
-  exit(-1); // ----- >>
+  exit(-1);
 }
 
 int main(int argc, char **argv) {
@@ -30,9 +30,9 @@ int main(int argc, char **argv) {
   // Check the read operation was correct
   if (!off_reader.is_valid()) {
     std::cerr << "Unable to read file " << offInputFile << std::endl;
-    exit(-1); // ----- >>
+    exit(-1);
   }
-  
+
   // Retrieve the triangulation
   T* triangulation = off_reader.get_complex();
   // Operations on triangulation
@@ -47,8 +47,8 @@ int main(int argc, char **argv) {
   // Check the write operation was correct
   if (!off_writer.is_valid()) {
     std::cerr << "Unable to write file " << offOutputFile << std::endl;
-    exit(-1); // ----- >>
+    exit(-1);
   }
-  
+
   return 0;
 }

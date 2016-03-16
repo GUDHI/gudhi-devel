@@ -36,7 +36,6 @@ class FirstCoordProjector3D : public Projector3D {
     return Point_3(p.x(), p.y(), p.z());
     else if  (p.dimension() >= 2)
     return Point_3(p.x(), p.y(), 0.0);
-
   }
 };
 

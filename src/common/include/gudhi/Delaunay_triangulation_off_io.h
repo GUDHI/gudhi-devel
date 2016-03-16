@@ -44,8 +44,8 @@ class Delaunay_triangulation_off_visitor_reader {
   Complex* complex_;
   typedef typename Complex::Point Point;
   std::vector<Point> point_cloud;
- public:
 
+ public:
   // TODO(VR) : Pass a Complex as a parameter is required, even if not used. Otherwise, compilation is KO.
 
   /** \brief Delaunay_triangulation_off_visitor_reader constructor
@@ -153,7 +153,6 @@ class Delaunay_triangulation_off_visitor_reader {
 template<typename Complex>
 class Delaunay_triangulation_off_reader {
  public:
-
   /** \brief Reads the OFF file and constructs the Delaunay triangulation from the points
    * that are in the OFF file.
    *
@@ -180,7 +179,6 @@ class Delaunay_triangulation_off_reader {
       std::cerr << "Delaunay_triangulation_off_reader::Delaunay_triangulation_off_reader could not open file " <<
           name_file << "\n";
     }
-
   }
 
   /** \brief Returns if the OFF file read operation was successful or not.
@@ -201,7 +199,6 @@ class Delaunay_triangulation_off_reader {
     if (valid_)
       return complex_;
     return nullptr;
-
   }
 
  private:
@@ -285,7 +282,6 @@ class Delaunay_triangulation_off_writer {
       }
 
       for (auto cit = complex_ptr->finite_full_cells_begin(); cit != complex_ptr->finite_full_cells_end(); ++cit) {
-        std::vector<int> vertexVector;
         stream << std::distance(cit->vertices_begin(), cit->vertices_end()) << " ";
         for (auto vit = cit->vertices_begin(); vit != cit->vertices_end(); ++vit) {
           stream << points_to_vh[(*vit)->point()] - 1 << " ";
@@ -299,7 +295,7 @@ class Delaunay_triangulation_off_writer {
           name_file << "\n";
     }
   }
-  
+
   /** \brief Returns if the OFF write operation was successful or not.
    *
    * @return OFF file write status.
@@ -313,6 +309,6 @@ class Delaunay_triangulation_off_writer {
   bool valid_;
 };
 
-} // namespace Gudhi
+}  // namespace Gudhi
 
 #endif  // DELAUNAY_TRIANGULATION_OFF_IO_H_

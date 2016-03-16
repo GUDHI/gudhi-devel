@@ -12,6 +12,10 @@
 #include <vector>
 #include <limits>  // NaN, infinity
 #include <utility>  // for pair
+#include <string>
+
+#ifndef UTILS_BAR_CODE_PERSISTENCE_H_
+#define UTILS_BAR_CODE_PERSISTENCE_H_
 
 class Bar_code_persistence {
  private:
@@ -21,7 +25,6 @@ class Bar_code_persistence {
   double max_death;
 
  public:
-
   Bar_code_persistence()
       : min_birth(std::numeric_limits<double>::quiet_NaN()),
       max_death(std::numeric_limits<double>::quiet_NaN()) { }
@@ -45,13 +48,13 @@ class Bar_code_persistence {
     QGraphicsScene * scene = new QGraphicsScene();
     view->setScene(scene);
     double ratio = 600.0 / (max_death - min_birth);
-    //std::cout << "min_birth=" << min_birth << " - max_death=" << max_death << " - ratio=" << ratio << std::endl;
+    // std::cout << "min_birth=" << min_birth << " - max_death=" << max_death << " - ratio=" << ratio << std::endl;
 
     double height = 0.0, birth = 0.0, death = 0.0;
     int pers_num = 1;
     for (auto& persistence : persistence_vector) {
       height = 5.0 * pers_num;
-      //std::cout << "[" << pers_num << "] birth=" << persistence.first << " - death=" << persistence.second << std::endl;
+      // std::cout << "[" << pers_num << "] birth=" << persistence.first << " - death=" << persistence.second << std::endl;
       if (std::isfinite(persistence.first))
         birth = ((persistence.first - min_birth) * ratio) + 50.0;
       else
@@ -83,3 +86,5 @@ class Bar_code_persistence {
     view->show();
   }
 };
+
+#endif  // UTILS_BAR_CODE_PERSISTENCE_H_

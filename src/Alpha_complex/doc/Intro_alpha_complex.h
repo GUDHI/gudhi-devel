@@ -161,8 +161,8 @@ namespace alphacomplex {
  */
 /** @} */  // end defgroup alpha_complex
 
-} // namespace alphacomplex
+}  // namespace alphacomplex
 
-} // namespace Gudhi
+}  // namespace Gudhi
 
 #endif  // INTRO_ALPHA_COMPLEX_H_
