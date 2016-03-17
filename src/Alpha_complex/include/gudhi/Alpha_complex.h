@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DOC_ALPHA_COMPLEX_INTRO_ALPHA_COMPLEX_H_
-#define DOC_ALPHA_COMPLEX_INTRO_ALPHA_COMPLEX_H_
+#ifndef ALPHA_COMPLEX_H_
+#define ALPHA_COMPLEX_H_
 
 // to construct a simplex_tree from Delaunay_triangulation
 #include <gudhi/graph_simplicial_complex.h>
@@ -392,4 +392,4 @@ class Alpha_complex : public Simplex_tree<> {
 
 }  // namespace Gudhi
 
-#endif  // DOC_ALPHA_COMPLEX_INTRO_ALPHA_COMPLEX_H_
+#endif  // ALPHA_COMPLEX_H_
