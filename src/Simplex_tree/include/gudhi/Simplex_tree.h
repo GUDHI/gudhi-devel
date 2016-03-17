@@ -41,7 +41,6 @@
 #include <tbb/parallel_sort.h>
 #endif
 
-#include <algorithm>
 #include <utility>
 #include <vector>
 #include <functional>  // for greater<>
@@ -223,7 +222,7 @@ class Simplex_tree {
    *
    * 'value_type' is Simplex_handle. */
   typedef typename Filtration_simplex_range::const_iterator Filtration_simplex_iterator;
-  
+
   /* @} */  // end name range and iterator types
   /** \name Range and iterator methods
    * @{ */
@@ -455,7 +454,7 @@ class Simplex_tree {
    */
   void assign_filtration(Simplex_handle sh, Filtration_value fv) {
     GUDHI_CHECK(sh == null_simplex(),
-                std::invalid_argument ("Simplex_tree::assign_filtration - cannot assign filtration on null_simplex"));
+                std::invalid_argument("Simplex_tree::assign_filtration - cannot assign filtration on null_simplex"));
     sh->second.assign_filtration(fv);
   }
 
@@ -1119,7 +1118,7 @@ class Simplex_tree {
       os << filtration(sh) << " \n";
     }
   }
-  
+
  public:
   /** \brief Browse the simplex tree to ensure the filtration is not decreasing.
    * The simplex tree is browsed starting from the root until the leaf, and the filtration values are set with their
@@ -1139,7 +1138,7 @@ class Simplex_tree {
     }
     return modified;
   }
-  
+
  private:
   /** \brief Recursively Browse the simplex tree to ensure the filtration is not decreasing.
    * @param[in] sib Siblings to be parsed.
@@ -1183,7 +1182,7 @@ class Simplex_tree {
     if (filtration_vect_.empty()) {
       initialize_filtration();
     }
-      
+  
     std::vector<std::vector<Vertex_handle>> simplex_list_to_removed;
     // Loop in reverse mode until threshold is reached
     // Do not erase while looping, because removing is shifting data in a flat_map
@@ -1205,6 +1204,37 @@ class Simplex_tree {
       initialize_filtration();
   }
 
+  /*
+  // Another alternative for prune_above_filtration
+  // Seg fault in this state
+  void prune_above_filtration(Filtration_value filt) {
+    if (!Options::store_filtration || filt >= filtration()) return;
+    rec_prune_above_filtration(root(), filt);
+    set_filtration(filt);
+  }
+  
+ private:
+  void rec_prune_above_filtration(Siblings* sib, Filtration_value filt) {
+    auto&& list=sib->members();
+    auto last = std::remove_if(list.begin(), list.end(), [=](Dit_value_t& simplex) {
+      if (simplex.second.filtration()<=filt) return false;
+      if (has_children(&simplex)) rec_delete(simplex.second.children());
+      return true;
+      });
+      
+    if (last == list.begin() && sib != root()) {
+      // Removing the whole siblings, parent becomes a leaf.
+      sib->oncles()->members()[sib->parent()].assign_children(sib->oncles());
+      delete sib;
+    } else {
+      // Keeping some elements of siblings. Remove the others, and recurse in the remaining ones.
+      list.erase(last, list.end());
+      for(auto&& simplex : list)
+        if(has_children(&simplex))
+          rec_prune_above_filtration(simplex.second.children(), filt);
+    }
+  }*/
+ 
   /** \brief Remove a maximal simplex.
    * @param[in] sh Simplex handle on the maximal simplex to remove.
    * \pre Please check the simplex has no coface before removing it.
@@ -1214,8 +1244,8 @@ class Simplex_tree {
   void remove_maximal_simplex(Simplex_handle sh) {
     // Guarantee the simplex has no children
     GUDHI_CHECK(has_children(sh),
-                std::invalid_argument ("Simplex_tree::remove_maximal_simplex - argument has children"));
-    
+                std::invalid_argument("Simplex_tree::remove_maximal_simplex - argument has children"));
+  
     // Simplex is a leaf, it means the child is the Siblings owning the leaf
     Siblings* child = sh->second.children();
 
