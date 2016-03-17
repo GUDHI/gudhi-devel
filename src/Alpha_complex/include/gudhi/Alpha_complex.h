@@ -150,8 +150,7 @@ class Alpha_complex : public Simplex_tree<> {
    * 
    * The type InputPointRange must be a range for which std::begin and
    * std::end return input iterators on a Kernel::Point_d.
-   * \warning In debug mode, the exception std::invalid_argument is thrown if an empty input point range is passed as
-   * argument.
+   * \exception std::invalid_argument In debug mode, if an empty input point range is passed as argument.
    */
   template<typename InputPointRange >
   Alpha_complex(const InputPointRange& points,
@@ -191,7 +190,7 @@ class Alpha_complex : public Simplex_tree<> {
    *
    * @param[in] vertex Vertex handle of the point to retrieve.
    * @return The point found.
-   * @warning Exception std::out_of_range is thrown in case vertex is not found.
+   * @exception std::out_of_range In case vertex is not found (cf. std::vector::at).
    */
   Point_d get_point(Vertex_handle vertex) const {
     return vertex_handle_to_iterator_.at(vertex)->point();

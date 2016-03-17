@@ -98,7 +98,6 @@ class Delaunay_triangulation_off_visitor_reader {
     std::cout << std::endl;
 #endif  // DEBUG_TRACES
     // Fill the point cloud
-    // VR: complex_->insert(Point(point.size(), point.begin(), point.end()));
     point_cloud.push_back(Point(point.size(), point.begin(), point.end()));
   }
 
@@ -116,9 +115,7 @@ class Delaunay_triangulation_off_visitor_reader {
 
   /** \brief Returns the constructed Delaunay triangulation.
    *
-   * @return A pointer on the Delaunay triangulation.
-   * 
-   * @warning The returned pointer can be nullptr.
+   * @return A pointer on the Delaunay triangulation. Default value is <CODE>nullptr</CODE>.
    */
   Complex* get_complex() const {
     return complex_;
@@ -157,8 +154,8 @@ class Delaunay_triangulation_off_reader {
    * that are in the OFF file.
    *
    * @param[in] name_file OFF file to read.
-   *
-   * @warning Check with is_valid() function to see if read operation was successful.
+   * 
+   * \post Check with is_valid() function to see if read operation was successful.
    */
   Delaunay_triangulation_off_reader(const std::string & name_file)
   : valid_(false) {
@@ -191,9 +188,7 @@ class Delaunay_triangulation_off_reader {
 
   /** \brief Returns the constructed Delaunay triangulation.
    *
-   * @return A pointer on the Delaunay triangulation.
-   * 
-   * @warning The returned pointer can be nullptr.
+   * @return A pointer on the Delaunay triangulation. Default value is <CODE>nullptr</CODE>.
    */
   Complex* get_complex() const {
     if (valid_)
@@ -242,12 +237,12 @@ class Delaunay_triangulation_off_writer {
  public:
   typedef typename Complex::Point Point;
 
-  /** \brief Writes the OFF file from the Delaunay triangulation
+  /** \brief Writes the OFF file from the Delaunay triangulation.
    *
    * @param[in] name_file OFF file to write.
    * @param[in] complex_ptr pointer on a Delaunay triangulation.
-   *
-   * @warning Check with is_valid() function to see if write operation was successful.
+   * 
+   * \post Check with is_valid() function to see if write operation was successful.
    */
   Delaunay_triangulation_off_writer(const std::string & name_file, Complex* complex_ptr)
       : valid_(false) {
