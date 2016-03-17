@@ -121,7 +121,7 @@ void Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::construct_comp
     size_t i = 0;
     for ( typename Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Top_dimensional_cells_iterator it = this->top_dimensional_cells_begin() ; it != this->top_dimensional_cells_end() ; ++it )
     {
-        *it = topDimensionalCells[i];
+        this->get_cell_data(*it) = topDimensionalCells[i];
         ++i;
     }
     this->impose_lower_star_filtration();
@@ -178,7 +178,7 @@ Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_comp
                  << this->get_dimension_of_a_cell(it.compute_index_in_bitmap())
                  << " get the value : " << filtrationLevel << endl;
         }
-        *it = filtrationLevel;
+        this->get_cell_data(*it) = filtrationLevel;
         ++it;
     }
     inFiltration.close();

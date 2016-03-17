@@ -72,9 +72,10 @@ The program will create random cubical complex of that sizes and compute persist
         data.push_back( rand()/(double)RAND_MAX );
     }
 
-
-
     Bitmap_cubical_complex< Bitmap_cubical_complex_base<double> > b( sizes , data );
+
+
+
 
 
     // Compute the persistence diagram of the complex

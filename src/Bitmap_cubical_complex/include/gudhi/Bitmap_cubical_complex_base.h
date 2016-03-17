@@ -130,7 +130,9 @@ public:
     **/
     inline unsigned get_dimension_of_a_cell( size_t cell )const;
     /**
-    * In the case of get_cell_data, the output parameter is a reference to the value of a cube in a given position.
+    * In the case of get_cell_data, the output parameter is a reference to the value of a cube in a given position. This allows reading and changing the value of filtration.
+    * Note that if the value of a filtration is changed, the code do not check if we have a filtration or not. i.e. it do not check if the value of a filtration of a cell is
+    * not smaller than the value of a filtration of its boundary and not greater than the value of its coboundary.
     **/
     inline T& get_cell_data( size_t cell );
 
@@ -191,76 +193,179 @@ public:
     * Iterator through all cells in the complex (in order they appear in the structure -- i.e.
     * in lexicographical order).
     **/
-    typedef typename std::vector< T >::iterator all_cells_iterator;
+    //typedef typename std::vector< T >::iterator all_cells_iterator;
 
 
     /**
     * Constant iterator through all cells in the complex (in order they appear in the structure -- i.e.
     * in lexicographical order).
     **/
-    typedef typename std::vector< T >::const_iterator all_cells_const_iterator;
+    //typedef typename std::vector< T >::const_iterator all_cells_const_iterator;
 
     /**
     * Function returning a constant iterator to the first cell of the bitmap.
     **/
-    all_cells_const_iterator all_cells_const_begin()const
-    {
-        return this->data.begin();
-    }
+    //all_cells_const_iterator all_cells_const_begin()const
+    //{
+    //    return this->data.begin();
+    //}
 
 
     /**
     * Function returning a constant iterator to the last cell of the bitmap.
     **/
-    all_cells_const_iterator all_cells_const_end()const
-    {
-        return this->data.end();
-    }
+    //all_cells_const_iterator all_cells_const_end()const
+    //{
+    //    return this->data.end();
+    //}
 
     /**
     * Function returning an iterator to the first cell of the bitmap.
     **/
-    all_cells_iterator all_cells_begin()
-    {
-        return this->data.begin();
-    }
+    //all_cells_iterator all_cells_begin()
+    //{
+    //    return this->data.begin();
+    //}
 
     /**
     * Function returning a constant iterator to the first cell of the bitmap.
     **/
-    all_cells_const_iterator all_cells_begin() const
-    {
-        return this->data.begin();
-    }
+    //all_cells_const_iterator all_cells_begin() const
+    //{
+    //    return this->data.begin();
+    //}
 
     /**
     * Function returning an iterator to the last cell of the bitmap.
     **/
-    all_cells_iterator all_cells_end()
-    {
-        return this->data.end();
-    }
+    //all_cells_iterator all_cells_end()
+    //{
+    //    return this->data.end();
+    //}
 
     /**
     * Function returning a constant iterator to the last cell of the bitmap.
     **/
-    all_cells_const_iterator all_cells_end() const
+    //all_cells_const_iterator all_cells_end() const
+    //{
+    //    return this->data.end();
+    //}
+
+    /**
+    * Iterator through all cells in the complex (in order they appear in the structure -- i.e.
+    * in lexicographical order).
+    **/
+    class All_cells_iterator : std::iterator< std::input_iterator_tag, T >
     {
-        return this->data.end();
+        public:
+            All_cells_iterator()
+            {
+               this->counter = 0;
+             }
+            All_cells_iterator operator++()
+            {
+                //first find first element of the counter that can be increased:
+               ++this->counter;
+                return *this;
+            }
+            All_cells_iterator operator++(int)
+            {
+                All_cells_iterator result = *this;
+                ++(*this);
+                return result;
+            }
+            All_cells_iterator operator =( const All_cells_iterator& rhs )
+            {
+                this->counter = rhs.counter;
+                return *this;
+            }
+            bool operator == ( const All_cells_iterator& rhs )const
+            {
+                if ( this->counter != rhs.counter )return false;
+                return true;
+            }
+            bool operator != ( const All_cells_iterator& rhs )const
+            {
+                return !(*this == rhs);
+            }
+
+            size_t operator*()
+            {
+                return this->counter;
+            }
+            friend class Bitmap_cubical_complex_base;
+        protected:
+            size_t counter;
+    };
+
+    /**
+    * Function returning a All_cells_iterator to the first cell of the bitmap.
+    **/
+    All_cells_iterator all_cells_iterator_begin()
+    {
+        All_cells_iterator a;
+        return a;
     }
+
+    /**
+    * Function returning a All_cells_iterator to the last cell of the bitmap.
+    **/
+    All_cells_iterator all_cells_iterator_end()
+    {
+        All_cells_iterator a;
+        a.counter = this->data.size();
+        return a;
+    }
+
+    /**
+    * Boundary_range class provides ranges for boundary iterators.
+    **/
+    typedef typename std::vector< size_t >::iterator Boundary_iterator;
+    typedef typename std::vector< size_t > Boundary_range;
+
+    /**
+    * boundary_simplex_range creates an object of a Boundary_simplex_range class
+    * that provides ranges for the Boundary_simplex_iterator.
+    **/
+    Boundary_range boundary_range(size_t sh)
+    {
+        return this->get_boundary_of_a_cell(sh);
+    }
+
+    /**
+    * Coboundary_range class provides ranges for boundary iterators.
+    **/
+    typedef typename std::vector< size_t >::iterator Coboundary_iterator;
+    typedef typename std::vector< size_t > Coboundary_range;
+
+    /**
+    * boundary_simplex_range creates an object of a Boundary_simplex_range class
+    * that provides ranges for the Boundary_simplex_iterator.
+    **/
+    Coboundary_range coboundary_range(size_t sh)
+    {
+        return this->get_coboundary_of_a_cell(sh);
+    }
+
+
+
+
+
+
+
 
     /**
     * Iterator through top dimensional cells of the complex. The cells appear in order they are stored
     * in the structure (i.e. in lexicographical order)
     **/
-    class Top_dimensional_cells_iterator : std::iterator< std::input_iterator_tag, double >
+    class Top_dimensional_cells_iterator : std::iterator< std::input_iterator_tag, T >
     {
         public:
             Top_dimensional_cells_iterator( Bitmap_cubical_complex_base& b ):b(b)
             {
-		   this->counter = std::vector<size_t>(b.dimension());
-		   //std::fill( this->counter.begin() , this->counter.end() , 0 );
-	     }
+               this->counter = std::vector<size_t>(b.dimension());
+               //std::fill( this->counter.begin() , this->counter.end() , 0 );
+             }
             Top_dimensional_cells_iterator operator++()
             {
                 //first find first element of the counter that can be increased:
@@ -308,15 +413,20 @@ public:
                 return !(*this == rhs);
             }
 
-            T& operator*()
+            //T& operator*()
+            //{
+            //    //given the counter, compute the index in the array and return this element.
+            //    unsigned index = 0;
+            //    for ( size_t i = 0 ; i != this->counter.size() ; ++i )
+            //    {
+            //        index += (2*this->counter[i]+1)*this->b.multipliers[i];
+            //    }
+            //    return this->b.data[index];
+            //}
+
+            size_t operator*()
             {
-                //given the counter, compute the index in the array and return this element.
-                unsigned index = 0;
-                for ( size_t i = 0 ; i != this->counter.size() ; ++i )
-                {
-                    index += (2*this->counter[i]+1)*this->b.multipliers[i];
-                }
-                return this->b.data[index];
+                return this->compute_index_in_bitmap();
             }
 
             size_t compute_index_in_bitmap()const
@@ -328,6 +438,7 @@ public:
                 }
                 return index;
             }
+
 
             void print_counter()const
             {
@@ -343,7 +454,7 @@ public:
     };
 
     /**
-    * Function returning a Top_dimensional_cells_iterator to the first top dimensional cell cell of the bitmap.
+    * Function returning a Top_dimensional_cells_iterator to the first top dimensional cell of the bitmap.
     **/
     Top_dimensional_cells_iterator top_dimensional_cells_begin()
     {
@@ -352,7 +463,7 @@ public:
     }
 
     /**
-    * Function returning a Top_dimensional_cells_iterator to the last top dimensional cell cell of the bitmap.
+    * Function returning a Top_dimensional_cells_iterator to the last top dimensional cell of the bitmap.
     **/
     Top_dimensional_cells_iterator top_dimensional_cells_end()
     {
@@ -523,7 +634,7 @@ void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_top_dimensional_cells
     size_t index = 0;
     for ( it = this->top_dimensional_cells_begin() ; it != this->top_dimensional_cells_end() ; ++it )
     {
-        (*it) = top_dimensional_cells[index];
+        this->get_cell_data(*it) = top_dimensional_cells[index];
         ++index;
     }
     this->impose_lower_star_filtration();
@@ -564,7 +675,7 @@ void Bitmap_cubical_complex_base<T>::read_perseus_style_file( const char* perseu
 
     while ( !inFiltration.eof() )
     {
-        double filtrationLevel;
+        T filtrationLevel;
         inFiltration >> filtrationLevel;
         if ( dbg )
         {
@@ -574,7 +685,7 @@ void Bitmap_cubical_complex_base<T>::read_perseus_style_file( const char* perseu
                  << this->get_dimension_of_a_cell(it.compute_index_in_bitmap())
                  << " get the value : " << filtrationLevel << endl;
         }
-        *it = filtrationLevel;
+        this->get_cell_data(*it) = filtrationLevel;
         ++it;
     }
     inFiltration.close();
