@@ -35,13 +35,16 @@ using namespace skbl;
 typedef Skeleton_blocker_complex<Skeleton_blocker_simple_traits> Complex;
 typedef Complex::Vertex_handle Vertex_handle;
 typedef Complex::Root_vertex_handle Root_vertex_handle;
-typedef Complex::Simplex_handle Simplex;
+typedef Complex::Simplex Simplex;
 
 int main(int argc, char *argv[]) {
   // build a full complex with 4 vertices and 2^4-1 simplices
-  // Initial vertices are (0,1,2,3,4)
-  Simplex tetrahedron(Vertex_handle(0), Vertex_handle(1), Vertex_handle(2), Vertex_handle(3));
+
+  // Create a complex with four vertices (0,1,2,3)
   Complex complex;
+
+  // Add a tetrahedron to this complex
+  Simplex tetrahedron(Vertex_handle(0), Vertex_handle(1), Vertex_handle(2), Vertex_handle(3));
   complex.add_simplex(tetrahedron);
 
   cout << "complex:" << complex.to_string() << endl;
@@ -61,7 +64,8 @@ int main(int argc, char *argv[]) {
   // To access to the initial vertices eg (0,1,2,3,4),  Root_vertex_handle must be used.
   // For instance, to test if the link contains the vertex that was labeled i:
   for (int i = 0; i < 5; ++i)
-    cout << "link.contains_vertex(Root_vertex_handle(" << i << ")):" << link.contains_vertex(Root_vertex_handle(i)) << endl;
+    cout << "link.contains_vertex(Root_vertex_handle(" << i << ")):" <<
+        link.contains_vertex(Root_vertex_handle(i)) << endl;
 
   return EXIT_SUCCESS;
 }

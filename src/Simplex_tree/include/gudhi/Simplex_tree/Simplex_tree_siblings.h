@@ -57,7 +57,7 @@ class Simplex_tree_siblings {
 
   /* Default constructor.*/
   Simplex_tree_siblings()
-      : oncles_(NULL),
+      : oncles_(nullptr),
         parent_(-1),
         members_() {
   }
