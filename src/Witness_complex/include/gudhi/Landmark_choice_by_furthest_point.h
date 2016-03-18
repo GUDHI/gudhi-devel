@@ -31,7 +31,7 @@ namespace Gudhi {
 
 namespace witness_complex {
 
- typedef std::vector<int> typeVectorVertex;
+  typedef std::vector<int> typeVectorVertex;
 
   /** 
    *  \ingroup witness_complex

@@ -39,11 +39,6 @@
 
 #include "generators.h"
 
-using namespace Gudhi;
-using namespace Gudhi::witness_complex;
-
-typedef std::vector< Vertex_handle > typeVectorVertex;
-
 /** Write a gnuplot readable file.
  *  Data range is a random access range of pairs (arg, value)
  */
@@ -66,7 +61,7 @@ int main(int argc, char * const argv[]) {
   clock_t start, end;
 
   // Construct the Simplex Tree
-  Simplex_tree<> simplex_tree;
+  Gudhi::Simplex_tree<> simplex_tree;
 
   std::vector< std::pair<int, double> > l_time;
 

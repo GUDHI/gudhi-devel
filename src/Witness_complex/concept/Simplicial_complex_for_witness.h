@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CONCEPT_WITNESS_COMPLEX_SIMPLICIAL_COMPLEX_H_
-#define CONCEPT_WITNESS_COMPLEX_SIMPLICIAL_COMPLEX_H_
+#ifndef CONCEPT_WITNESS_COMPLEX_SIMPLICIAL_COMPLEX_FOR_WITNESS_H_
+#define CONCEPT_WITNESS_COMPLEX_SIMPLICIAL_COMPLEX_FOR_WITNESS_H_
 
 namespace Gudhi {
 
@@ -84,4 +84,4 @@ struct SimplicialComplexForWitness {
 
 }  // namespace Gudhi
 
-#endif  // CONCEPT_WITNESS_COMPLEX_SIMPLICIAL_COMPLEX_H_
+#endif  // CONCEPT_WITNESS_COMPLEX_SIMPLICIAL_COMPLEX_FOR_WITNESS_H_

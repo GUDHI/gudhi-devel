@@ -34,13 +34,8 @@
 #include <string>
 #include <vector>
 
-using namespace Gudhi;
-using namespace Gudhi::witness_complex;
-
 typedef std::vector< Vertex_handle > typeVectorVertex;
 typedef std::vector< std::vector <double> > Point_Vector;
-
-//typedef Witness_complex< Simplex_tree<> > WitnessComplex;
 
 /**
  * \brief Customized version of read_points
@@ -80,7 +75,7 @@ int main(int argc, char * const argv[]) {
   clock_t start, end;
 
   // Construct the Simplex Tree
-  Simplex_tree<> simplex_tree;
+  Gudhi::Simplex_tree<> simplex_tree;
 
   // Read the point file
   Point_Vector point_vector;

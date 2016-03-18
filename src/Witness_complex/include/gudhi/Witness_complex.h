@@ -142,7 +142,7 @@ class Witness_complex {
             simplex_vector.push_back(knn[*it][i]);
           sc_.insert_simplex(simplex_vector);
           // TODO(SK) Error if not inserted : normally no need here though
-          it++;
+          ++it;
         } else {
           active_w.erase(it++);  // First increase the iterator and then erase the previous element
         }
@@ -196,7 +196,6 @@ class Witness_complex {
   //  */
   template< class KNearestNeighbors >
   bool is_witness_complex(KNearestNeighbors const & knn, bool print_output) {
-    // bool final_result = true;
     for (Simplex_handle sh : sc_.complex_simplex_range()) {
       bool is_witnessed = false;
       typeVectorVertex simplex;
@@ -209,7 +208,6 @@ class Witness_complex {
         for (Vertex_handle v : simplex)
           if (std::find(w.begin(), w.begin() + nbV, v) == w.begin() + nbV) {
             has_vertices = false;
-            // break;
           }
         if (has_vertices) {
           is_witnessed = true;
@@ -244,27 +242,23 @@ class Witness_complex {
    *   basing on a matrix knn of
    *  nearest neighbours of the form {witnesses}x{landmarks}.
    *
-   *  The type KNearestNeighbors can be seen as 
+   *  The type KNearestNeighbors can be seen as
    *  Witness_range<Closest_landmark_range<Vertex_handle>>, where
    *  Witness_range and Closest_landmark_range are random access ranges.
    *
-   *  Procedure takes into account at most (dim+1) 
+   *  Procedure takes into account at most (dim+1)
    *  first landmarks from each landmark range to construct simplices.
    *
    *  Landmarks are supposed to be in [0,nbL_-1]
    */
-
-  
   template <class KNearestNeighbors, class SimplicialComplexForWitness>
   void witness_complex(KNearestNeighbors const & knn,
                        int nbL,
                        int dim,
-                       SimplicialComplexForWitness & sc)
-  {
-    
+                       SimplicialComplexForWitness & sc) {
     Witness_complex<SimplicialComplexForWitness>(knn, nbL, dim, sc);
   }
-  
+
 }  // namespace witness_complex
 
 }  // namespace Gudhi

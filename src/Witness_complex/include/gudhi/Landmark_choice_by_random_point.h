@@ -68,7 +68,7 @@ namespace witness_complex {
     typedef bool (*comp)(dist_i, dist_i);
     knn = KNearestNeighbours(nbP);
     for (int points_i = 0; points_i < nbP; points_i++) {
-      std::priority_queue<dist_i, std::vector<dist_i>, comp> l_heap([&](dist_i j1, dist_i j2) {
+      std::priority_queue<dist_i, std::vector<dist_i>, comp> l_heap([](dist_i j1, dist_i j2) {
           return j1.first > j2.first;
         });
       std::set<int>::iterator landmarks_it;
