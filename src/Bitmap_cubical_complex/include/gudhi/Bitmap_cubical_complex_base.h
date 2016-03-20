@@ -161,26 +161,28 @@ public:
     }
 
     /**
-    * Writing to stream operator.
+    * Writing to stream operator. By using it we get the values T of cells in order in which they are stored in the structure. This procedure is used for debugging purposes.
     **/
     template <typename K>
     friend ostream& operator << ( ostream & os , const Bitmap_cubical_complex_base<K>& b );
 
 
     /**
-    * Function that put the input data to bins. Sometimes if most of the cells have different birth-death times, the performance of the algorithms to compute persistence gets
+    * Function that put the input data to bins. By putting data to bins we mean rounding them to a sequence of values equally distributed in the range of data.
+    * Sometimes if most of the cells have different birth-death times, the performance of the algorithms to compute persistence gets
     * worst. When dealing with this type of data, one may want to put different values on cells to some number of bins. The function put_data_toBins( size_t number_of_bins )
     * ais designed for that purpose. The parameter of the function is the number of bins (distinct values) we want to have in the cubical complex.
     **/
-    void put_data_toBins( size_t number_of_bins );
+    void put_data_to_bins( size_t number_of_bins );
 
     /**
-    * Function that put the input data to bins. Sometimes if most of the cells have different birth-death times, the performance of the algorithms to compute persistence gets
+    * Function that put the input data to bins. By putting data to bins we mean rounding them to a sequence of values equally distributed in the range of data.
+    * Sometimes if most of the cells have different birth-death times, the performance of the algorithms to compute persistence gets
     * worst. When dealing with this type of data, one may want to put different values on cells to some number of bins. The function put_data_toBins( T diameter_of_bin ) is
     * designed for that purpose. The parameter of it is the diameter of each bin. Note that the bottleneck distance between the persistence diagram of the cubical complex
     * before and after using such a function will be bounded by the parameter diameter_of_bin.
     **/
-    void put_data_toBins( T diameter_of_bin );
+    void put_data_to_bins( T diameter_of_bin );
 
     /**
     * Functions to find min and max values of filtration.
@@ -188,69 +190,6 @@ public:
     std::pair< T ,T > min_max_filtration();
 
     //ITERATORS
-
-    /**
-    * Iterator through all cells in the complex (in order they appear in the structure -- i.e.
-    * in lexicographical order).
-    **/
-    //typedef typename std::vector< T >::iterator all_cells_iterator;
-
-
-    /**
-    * Constant iterator through all cells in the complex (in order they appear in the structure -- i.e.
-    * in lexicographical order).
-    **/
-    //typedef typename std::vector< T >::const_iterator all_cells_const_iterator;
-
-    /**
-    * Function returning a constant iterator to the first cell of the bitmap.
-    **/
-    //all_cells_const_iterator all_cells_const_begin()const
-    //{
-    //    return this->data.begin();
-    //}
-
-
-    /**
-    * Function returning a constant iterator to the last cell of the bitmap.
-    **/
-    //all_cells_const_iterator all_cells_const_end()const
-    //{
-    //    return this->data.end();
-    //}
-
-    /**
-    * Function returning an iterator to the first cell of the bitmap.
-    **/
-    //all_cells_iterator all_cells_begin()
-    //{
-    //    return this->data.begin();
-    //}
-
-    /**
-    * Function returning a constant iterator to the first cell of the bitmap.
-    **/
-    //all_cells_const_iterator all_cells_begin() const
-    //{
-    //    return this->data.begin();
-    //}
-
-    /**
-    * Function returning an iterator to the last cell of the bitmap.
-    **/
-    //all_cells_iterator all_cells_end()
-    //{
-    //    return this->data.end();
-    //}
-
-    /**
-    * Function returning a constant iterator to the last cell of the bitmap.
-    **/
-    //all_cells_const_iterator all_cells_end() const
-    //{
-    //    return this->data.end();
-    //}
-
     /**
     * Iterator through all cells in the complex (in order they appear in the structure -- i.e.
     * in lexicographical order).
@@ -289,6 +228,11 @@ public:
                 return !(*this == rhs);
             }
 
+            /*
+            * The operator * returns position of a cube in the structure of cubical complex. This position can be then used as an argument of the following functions:
+            * get_boundary_of_a_cell, get_coboundary_of_a_cell, get_dimension_of_a_cell to get information about the cell boundary and coboundary and dimension
+            * and in function get_cell_data to get a filtration of a cell.
+            */
             size_t operator*()
             {
                 return this->counter;
@@ -317,10 +261,31 @@ public:
         return a;
     }
 
+
+    /**
+    * All_cells_iterator_range class provides ranges for All_cells_iterator
+    **/
+    class All_cells_iterator_range
+    {
+        public:
+            All_cells_iterator_range(Bitmap_cubical_complex_base* b):b(b){};
+            All_cells_iterator begin()
+            {
+                return b->all_cells_iterator_begin();
+            }
+            All_cells_iterator end()
+            {
+                return b->all_cells_iterator_end();
+            }
+        private:
+            Bitmap_cubical_complex_base<T>* b;
+    };
+
+
     /**
     * Boundary_range class provides ranges for boundary iterators.
     **/
-    typedef typename std::vector< size_t >::iterator Boundary_iterator;
+    typedef typename std::vector< size_t >::const_iterator Boundary_iterator;
     typedef typename std::vector< size_t > Boundary_range;
 
     /**
@@ -424,6 +389,11 @@ public:
             //    return this->b.data[index];
             //}
 
+            /*
+            * The operator * returns position of a cube in the structure of cubical complex. This position can be then used as an argument of the following functions:
+            * get_boundary_of_a_cell, get_coboundary_of_a_cell, get_dimension_of_a_cell to get information about the cell boundary and coboundary and dimension
+            * and in function get_cell_data to get a filtration of a cell.
+            */
             size_t operator*()
             {
                 return this->compute_index_in_bitmap();
@@ -475,6 +445,25 @@ public:
         a.counter[0]++;
         return a;
     }
+
+    /**
+    * All_cells_iterator_range class provides ranges for Top_dimensional_cells_iterator_range
+    **/
+    class Top_dimensional_cells_iterator_range
+    {
+        public:
+            Top_dimensional_cells_iterator_range(Bitmap_cubical_complex_base* b):b(b){};
+            Top_dimensional_cells_iterator begin()
+            {
+                return b->top_dimensional_cells_begin();
+            }
+            Top_dimensional_cells_iterator end()
+            {
+                return b->top_dimensional_cells_end();
+            }
+        private:
+            Bitmap_cubical_complex_base<T>* b;
+    };
 
 
 //****************************************************************************************************************//
@@ -542,7 +531,7 @@ protected:
 
 
 template <typename T>
-void Bitmap_cubical_complex_base<T>::put_data_toBins( size_t number_of_bins )
+void Bitmap_cubical_complex_base<T>::put_data_to_bins( size_t number_of_bins )
 {
     bool bdg = false;
 
@@ -559,7 +548,7 @@ void Bitmap_cubical_complex_base<T>::put_data_toBins( size_t number_of_bins )
 }
 
 template <typename T>
-void Bitmap_cubical_complex_base<T>::put_data_toBins( T diameter_of_bin )
+void Bitmap_cubical_complex_base<T>::put_data_to_bins( T diameter_of_bin )
 {
     bool bdg = false;
     std::pair< T ,T > min_max = this->min_max_filtration();

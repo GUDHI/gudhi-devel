@@ -15,3 +15,6 @@ target_link_libraries(Bitmap_cubical_complex_periodic_boundary_conditions ${Boos
 
 #add_executable ( Compute_persistence_with_phat Compute_persistence_with_phat.cpp )
 #target_link_libraries(Compute_persistence_with_phat ${Boost_SYSTEM_LIBRARY})
+
+#add_executable ( periodic_boundary_conditions_phat periodic_boundary_conditions_phat.cpp )
+#target_link_libraries(periodic_boundary_conditions_phat ${Boost_SYSTEM_LIBRARY})

@@ -1063,3 +1063,429 @@ BOOST_AUTO_TEST_CASE(all_cells_iterator_and_boundary_iterators_in_Bitmap_cubical
         ++i;
     }
 }
+
+
+
+
+
+
+
+
+BOOST_AUTO_TEST_CASE(all_cells_iterator_and_boundary_iterators_in_Bitmap_cubical_complex_base_check_range_check_2)
+{
+    std::vector< double > expected_filtration;
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(1);
+    expected_filtration.push_back(1);
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(1);
+    expected_filtration.push_back(1);
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(1);
+    expected_filtration.push_back(1);
+    expected_filtration.push_back(2);
+    expected_filtration.push_back(2);
+    expected_filtration.push_back(2);
+    expected_filtration.push_back(3);
+    expected_filtration.push_back(3);
+    expected_filtration.push_back(2);
+    expected_filtration.push_back(2);
+    expected_filtration.push_back(2);
+    expected_filtration.push_back(3);
+    expected_filtration.push_back(3);
+
+    std::vector<unsigned> expected_dimension;
+    expected_dimension.push_back(0);
+    expected_dimension.push_back(1);
+    expected_dimension.push_back(0);
+    expected_dimension.push_back(1);
+    expected_dimension.push_back(0);
+    expected_dimension.push_back(1);
+    expected_dimension.push_back(2);
+    expected_dimension.push_back(1);
+    expected_dimension.push_back(2);
+    expected_dimension.push_back(1);
+    expected_dimension.push_back(0);
+    expected_dimension.push_back(1);
+    expected_dimension.push_back(0);
+    expected_dimension.push_back(1);
+    expected_dimension.push_back(0);
+    expected_dimension.push_back(1);
+    expected_dimension.push_back(2);
+    expected_dimension.push_back(1);
+    expected_dimension.push_back(2);
+    expected_dimension.push_back(1);
+    expected_dimension.push_back(0);
+    expected_dimension.push_back(1);
+    expected_dimension.push_back(0);
+    expected_dimension.push_back(1);
+    expected_dimension.push_back(0);
+
+    std::vector<size_t> expected_boundary;
+    expected_boundary.push_back(0);
+    expected_boundary.push_back(2);
+    expected_boundary.push_back(2);
+    expected_boundary.push_back(4);
+    expected_boundary.push_back(0);
+    expected_boundary.push_back(10);
+    expected_boundary.push_back(1);
+    expected_boundary.push_back(11);
+    expected_boundary.push_back(5);
+    expected_boundary.push_back(7);
+    expected_boundary.push_back(2);
+    expected_boundary.push_back(12);
+    expected_boundary.push_back(3);
+    expected_boundary.push_back(13);
+    expected_boundary.push_back(7);
+    expected_boundary.push_back(9);
+    expected_boundary.push_back(4);
+    expected_boundary.push_back(14);
+    expected_boundary.push_back(10);
+    expected_boundary.push_back(12);
+    expected_boundary.push_back(12);
+    expected_boundary.push_back(14);
+    expected_boundary.push_back(10);
+    expected_boundary.push_back(20);
+    expected_boundary.push_back(11);
+    expected_boundary.push_back(21);
+    expected_boundary.push_back(15);
+    expected_boundary.push_back(17);
+    expected_boundary.push_back(12);
+    expected_boundary.push_back(22);
+    expected_boundary.push_back(13);
+    expected_boundary.push_back(23);
+    expected_boundary.push_back(17);
+    expected_boundary.push_back(19);
+    expected_boundary.push_back(14);
+    expected_boundary.push_back(24);
+    expected_boundary.push_back(20);
+    expected_boundary.push_back(22);
+    expected_boundary.push_back(22);
+    expected_boundary.push_back(24);
+
+
+    std::vector<size_t> expected_coboundary;
+    expected_coboundary.push_back(5);
+    expected_coboundary.push_back(1);
+    expected_coboundary.push_back(6);
+    expected_coboundary.push_back(7);
+    expected_coboundary.push_back(1);
+    expected_coboundary.push_back(3);
+    expected_coboundary.push_back(8);
+    expected_coboundary.push_back(9);
+    expected_coboundary.push_back(3);
+    expected_coboundary.push_back(6);
+    expected_coboundary.push_back(6);
+    expected_coboundary.push_back(8);
+    expected_coboundary.push_back(8);
+    expected_coboundary.push_back(5);
+    expected_coboundary.push_back(15);
+    expected_coboundary.push_back(11);
+    expected_coboundary.push_back(6);
+    expected_coboundary.push_back(16);
+    expected_coboundary.push_back(7);
+    expected_coboundary.push_back(17);
+    expected_coboundary.push_back(11);
+    expected_coboundary.push_back(13);
+    expected_coboundary.push_back(8);
+    expected_coboundary.push_back(18);
+    expected_coboundary.push_back(9);
+    expected_coboundary.push_back(19);
+    expected_coboundary.push_back(13);
+    expected_coboundary.push_back(16);
+    expected_coboundary.push_back(16);
+    expected_coboundary.push_back(18);
+    expected_coboundary.push_back(18);
+    expected_coboundary.push_back(15);
+    expected_coboundary.push_back(21);
+    expected_coboundary.push_back(16);
+    expected_coboundary.push_back(17);
+    expected_coboundary.push_back(21);
+    expected_coboundary.push_back(23);
+    expected_coboundary.push_back(18);
+    expected_coboundary.push_back(19);
+    expected_coboundary.push_back(23);
+
+
+
+    std::vector< unsigned > sizes(2);
+    sizes[0] = 2;
+    sizes[1] = 2;
+
+    std::vector< double > data(4);
+    data[0] = 0;
+    data[1] = 1;
+    data[2] = 2;
+    data[3] = 3;
+
+    Bitmap_cubical_complex_base<double> ba( sizes , data );
+    int i = 0;
+    int bd_it = 0;
+    int cbd_it = 0;
+
+    Bitmap_cubical_complex_base<double>::All_cells_iterator_range range(&ba);
+    for ( Bitmap_cubical_complex_base<double>::All_cells_iterator it = range.begin() ; it != range.end() ; ++it )
+    {
+        BOOST_CHECK( expected_filtration[i] == ba.get_cell_data( *it ) );
+        BOOST_CHECK( expected_dimension[i] == ba.get_dimension_of_a_cell( *it ) );
+
+        Bitmap_cubical_complex_base<double>::Boundary_range bdrange = ba.boundary_range(*it);
+        for ( Bitmap_cubical_complex_base<double>::Boundary_iterator bd = bdrange.begin() ; bd != bdrange.end() ; ++bd )
+        {
+            BOOST_CHECK( expected_boundary[bd_it] == *bd );
+            ++bd_it;
+        }
+
+        Bitmap_cubical_complex_base<double>::Coboundary_range cbdrange = ba.coboundary_range(*it);
+        for ( Bitmap_cubical_complex_base<double>::Coboundary_iterator cbd = cbdrange.begin() ; cbd != cbdrange.end() ; ++cbd )
+        {
+             BOOST_CHECK( expected_coboundary[cbd_it] == *cbd );
+            ++cbd_it;
+        }
+        ++i;
+    }
+}
+
+
+
+
+
+
+BOOST_AUTO_TEST_CASE(all_cells_iterator_and_boundary_iterators_in_Bitmap_cubical_complex_base_check_range_check)
+{
+    std::vector< double > expected_filtration;
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(1);
+    expected_filtration.push_back(1);
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(1);
+    expected_filtration.push_back(1);
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(1);
+    expected_filtration.push_back(1);
+    expected_filtration.push_back(2);
+    expected_filtration.push_back(2);
+    expected_filtration.push_back(2);
+    expected_filtration.push_back(3);
+    expected_filtration.push_back(3);
+    expected_filtration.push_back(2);
+    expected_filtration.push_back(2);
+    expected_filtration.push_back(2);
+    expected_filtration.push_back(3);
+    expected_filtration.push_back(3);
+
+    std::vector<unsigned> expected_dimension;
+    expected_dimension.push_back(0);
+    expected_dimension.push_back(1);
+    expected_dimension.push_back(0);
+    expected_dimension.push_back(1);
+    expected_dimension.push_back(0);
+    expected_dimension.push_back(1);
+    expected_dimension.push_back(2);
+    expected_dimension.push_back(1);
+    expected_dimension.push_back(2);
+    expected_dimension.push_back(1);
+    expected_dimension.push_back(0);
+    expected_dimension.push_back(1);
+    expected_dimension.push_back(0);
+    expected_dimension.push_back(1);
+    expected_dimension.push_back(0);
+    expected_dimension.push_back(1);
+    expected_dimension.push_back(2);
+    expected_dimension.push_back(1);
+    expected_dimension.push_back(2);
+    expected_dimension.push_back(1);
+    expected_dimension.push_back(0);
+    expected_dimension.push_back(1);
+    expected_dimension.push_back(0);
+    expected_dimension.push_back(1);
+    expected_dimension.push_back(0);
+
+    std::vector<size_t> expected_boundary;
+    expected_boundary.push_back(0);
+    expected_boundary.push_back(2);
+    expected_boundary.push_back(2);
+    expected_boundary.push_back(4);
+    expected_boundary.push_back(0);
+    expected_boundary.push_back(10);
+    expected_boundary.push_back(1);
+    expected_boundary.push_back(11);
+    expected_boundary.push_back(5);
+    expected_boundary.push_back(7);
+    expected_boundary.push_back(2);
+    expected_boundary.push_back(12);
+    expected_boundary.push_back(3);
+    expected_boundary.push_back(13);
+    expected_boundary.push_back(7);
+    expected_boundary.push_back(9);
+    expected_boundary.push_back(4);
+    expected_boundary.push_back(14);
+    expected_boundary.push_back(10);
+    expected_boundary.push_back(12);
+    expected_boundary.push_back(12);
+    expected_boundary.push_back(14);
+    expected_boundary.push_back(10);
+    expected_boundary.push_back(20);
+    expected_boundary.push_back(11);
+    expected_boundary.push_back(21);
+    expected_boundary.push_back(15);
+    expected_boundary.push_back(17);
+    expected_boundary.push_back(12);
+    expected_boundary.push_back(22);
+    expected_boundary.push_back(13);
+    expected_boundary.push_back(23);
+    expected_boundary.push_back(17);
+    expected_boundary.push_back(19);
+    expected_boundary.push_back(14);
+    expected_boundary.push_back(24);
+    expected_boundary.push_back(20);
+    expected_boundary.push_back(22);
+    expected_boundary.push_back(22);
+    expected_boundary.push_back(24);
+
+
+    std::vector<size_t> expected_coboundary;
+    expected_coboundary.push_back(5);
+    expected_coboundary.push_back(1);
+    expected_coboundary.push_back(6);
+    expected_coboundary.push_back(7);
+    expected_coboundary.push_back(1);
+    expected_coboundary.push_back(3);
+    expected_coboundary.push_back(8);
+    expected_coboundary.push_back(9);
+    expected_coboundary.push_back(3);
+    expected_coboundary.push_back(6);
+    expected_coboundary.push_back(6);
+    expected_coboundary.push_back(8);
+    expected_coboundary.push_back(8);
+    expected_coboundary.push_back(5);
+    expected_coboundary.push_back(15);
+    expected_coboundary.push_back(11);
+    expected_coboundary.push_back(6);
+    expected_coboundary.push_back(16);
+    expected_coboundary.push_back(7);
+    expected_coboundary.push_back(17);
+    expected_coboundary.push_back(11);
+    expected_coboundary.push_back(13);
+    expected_coboundary.push_back(8);
+    expected_coboundary.push_back(18);
+    expected_coboundary.push_back(9);
+    expected_coboundary.push_back(19);
+    expected_coboundary.push_back(13);
+    expected_coboundary.push_back(16);
+    expected_coboundary.push_back(16);
+    expected_coboundary.push_back(18);
+    expected_coboundary.push_back(18);
+    expected_coboundary.push_back(15);
+    expected_coboundary.push_back(21);
+    expected_coboundary.push_back(16);
+    expected_coboundary.push_back(17);
+    expected_coboundary.push_back(21);
+    expected_coboundary.push_back(23);
+    expected_coboundary.push_back(18);
+    expected_coboundary.push_back(19);
+    expected_coboundary.push_back(23);
+
+
+
+    std::vector< unsigned > sizes(2);
+    sizes[0] = 2;
+    sizes[1] = 2;
+
+    std::vector< double > data(4);
+    data[0] = 0;
+    data[1] = 1;
+    data[2] = 2;
+    data[3] = 3;
+
+    Bitmap_cubical_complex_base<double> ba( sizes , data );
+    int i = 0;
+    int bd_it = 0;
+    int cbd_it = 0;
+
+    Bitmap_cubical_complex_base<double>::All_cells_iterator_range range(&ba);
+    for ( Bitmap_cubical_complex_base<double>::All_cells_iterator it = range.begin() ; it != range.end() ; ++it )
+    {
+        BOOST_CHECK( expected_filtration[i] == ba.get_cell_data( *it ) );
+        BOOST_CHECK( expected_dimension[i] == ba.get_dimension_of_a_cell( *it ) );
+
+        Bitmap_cubical_complex_base<double>::Boundary_range bdrange = ba.boundary_range(*it);
+        for ( Bitmap_cubical_complex_base<double>::Boundary_iterator bd = bdrange.begin() ; bd != bdrange.end() ; ++bd )
+        {
+            BOOST_CHECK( expected_boundary[bd_it] == *bd );
+            ++bd_it;
+        }
+
+        Bitmap_cubical_complex_base<double>::Coboundary_range cbdrange = ba.coboundary_range(*it);
+        for ( Bitmap_cubical_complex_base<double>::Coboundary_iterator cbd = cbdrange.begin() ; cbd != cbdrange.end() ; ++cbd )
+        {
+             BOOST_CHECK( expected_coboundary[cbd_it] == *cbd );
+            ++cbd_it;
+        }
+        ++i;
+    }
+}
+
+BOOST_AUTO_TEST_CASE(Top_dimensional_cells_iterator_range_check)
+{
+    std::vector< double > expected_filtration;
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(1);
+    expected_filtration.push_back(1);
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(1);
+    expected_filtration.push_back(1);
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(0);
+    expected_filtration.push_back(1);
+    expected_filtration.push_back(1);
+    expected_filtration.push_back(2);
+    expected_filtration.push_back(2);
+    expected_filtration.push_back(2);
+    expected_filtration.push_back(3);
+    expected_filtration.push_back(3);
+    expected_filtration.push_back(2);
+    expected_filtration.push_back(2);
+    expected_filtration.push_back(2);
+    expected_filtration.push_back(3);
+    expected_filtration.push_back(3);
+
+
+    std::vector< unsigned > sizes(2);
+    sizes[0] = 2;
+    sizes[1] = 2;
+
+    std::vector< double > data(4);
+    data[0] = 0;
+    data[1] = 1;
+    data[2] = 2;
+    data[3] = 3;
+
+    Bitmap_cubical_complex_base<double> ba( sizes , data );
+    int i = 0;
+
+    Bitmap_cubical_complex_base<double>::Top_dimensional_cells_iterator_range range(&ba);
+    for ( Bitmap_cubical_complex_base<double>::Top_dimensional_cells_iterator it = range.begin() ; it != range.end() ; ++it )
+    {
+        BOOST_CHECK( data[i] == ba.get_cell_data( *it ) );
+        BOOST_CHECK( ba.get_dimension_of_a_cell( *it ) == 2 );
+        ++i;
+    }
+}
