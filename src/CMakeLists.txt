@@ -71,6 +71,7 @@ else()
   #add_subdirectory(example/Skeleton_blocker)                   
   #add_subdirectory(example/Contraction)                   
   add_subdirectory(example/Bitmap_cubical_complex)
+  add_subdirectory(example/Witness_complex)
 
   # data points generator
   add_subdirectory(data/points/generator)
