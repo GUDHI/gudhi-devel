@@ -28,8 +28,7 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
 
-#include <boost/container/flat_map.hpp>
-#include <boost/iterator/transform_iterator.hpp>
+#include <boost/range/size.hpp>
 
 #include <gudhi/distance_functions.h>
 
@@ -113,7 +112,7 @@ class Witness_complex {
                   int dim,
                   SimplicialComplex & sc) : nbL_(nbL), sc_(sc) {
     // Construction of the active witness list
-    int nbW = knn.size();
+    int nbW = boost::size(knn);
     typeVectorVertex vv;
     int counter = 0;
     /* The list of still useful witnesses

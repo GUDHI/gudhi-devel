@@ -23,8 +23,11 @@
 #ifndef LANDMARK_CHOICE_BY_RANDOM_POINT_H_
 #define LANDMARK_CHOICE_BY_RANDOM_POINT_H_
 
+#include <boost/range/size.hpp>
+
 #include <queue>  // for priority_queue<>
 #include <utility>  // for pair<>
+#include <iterator>
 #include <vector>
 #include <set>
 
@@ -50,7 +53,7 @@ namespace witness_complex {
   void landmark_choice_by_random_point(Point_random_access_range const &points,
                                        int nbL,
                                        KNearestNeighbours &knn) {
-    int nbP = points.end() - points.begin();
+    int nbP = boost::size(points);
     assert(nbP >= nbL);
     std::set<int> landmarks;
     int current_number_of_landmarks = 0;  // counter for landmarks
@@ -63,7 +66,7 @@ namespace witness_complex {
       landmarks.insert(chosen_landmark);
     }
 
-    int dim = points.begin()->size();
+    int dim = boost::size(*std::begin(points));
     typedef std::pair<double, int> dist_i;
     typedef bool (*comp)(dist_i, dist_i);
     knn = KNearestNeighbours(nbP);
