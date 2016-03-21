@@ -578,7 +578,7 @@ class Simplex_tree {
   bool contiguous_vertices() const {
     if (root_.members_.empty()) return true;
     if (root_.members_.begin()->first != 0) return false;
-    if (std::prev(root_.members_.end())->first != root_.members_.size()-1) return false;
+    if (std::prev(root_.members_.end())->first != static_cast<Vertex_handle>(root_.members_.size() - 1)) return false;
     return true;
   }
 

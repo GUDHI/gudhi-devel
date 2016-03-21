@@ -57,6 +57,22 @@
     </td>
  </tr>
 </table>
+ \subsection WitnessComplexDataStructure Witness complex
+ \image html "Witness_complex_representation.png" "Witness complex representation"
+<table border="0">
+  <tr>
+    <td width="25%">
+      <b>Introduced in:</b> GUDHI 1.3.0<br>
+      <b>Copyright:</b> GPL v3<br>
+    </td>
+    <td width="75%">
+    <i>Siargey Kachanovich</i><br>
+    Witness complex \f$ Wit(W,L) \f$  is a simplicial complex defined on two sets of points in \f$\mathbb{R}^D\f$.
+    The data structure is described in \cite boissonnatmariasimplextreealgorithmica .<br>
+    <b>User manual:</b> \ref witness_complex - <b>Reference manual:</b> Gudhi::witness_complex::SimplicialComplexForWitness
+    </td>
+ </tr>
+</table>
  
  \section Toolbox Toolbox
  \subsection PersistentCohomologyToolbox Persistent Cohomology
