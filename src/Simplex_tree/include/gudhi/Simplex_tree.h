@@ -86,6 +86,7 @@ namespace Gudhi {
 struct Simplex_tree_options_full_featured;
 
 /**
+ * \class Simplex_tree Simplex_tree.h gudhi/Simplex_tree.h
  * \brief Simplex Tree data structure for representing simplicial complexes.
  *
  * \details Every simplex \f$[v_0, \cdots ,v_d]\f$ admits a canonical orientation
