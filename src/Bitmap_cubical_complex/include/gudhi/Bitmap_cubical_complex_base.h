@@ -170,7 +170,7 @@ public:
     /**
     * Function that put the input data to bins. By putting data to bins we mean rounding them to a sequence of values equally distributed in the range of data.
     * Sometimes if most of the cells have different birth-death times, the performance of the algorithms to compute persistence gets
-    * worst. When dealing with this type of data, one may want to put different values on cells to some number of bins. The function put_data_toBins( size_t number_of_bins )
+    * worst. When dealing with this type of data, one may want to put different values on cells to some number of bins. The function put_data_to_bins( size_t number_of_bins )
     * ais designed for that purpose. The parameter of the function is the number of bins (distinct values) we want to have in the cubical complex.
     **/
     void put_data_to_bins( size_t number_of_bins );
@@ -178,7 +178,7 @@ public:
     /**
     * Function that put the input data to bins. By putting data to bins we mean rounding them to a sequence of values equally distributed in the range of data.
     * Sometimes if most of the cells have different birth-death times, the performance of the algorithms to compute persistence gets
-    * worst. When dealing with this type of data, one may want to put different values on cells to some number of bins. The function put_data_toBins( T diameter_of_bin ) is
+    * worst. When dealing with this type of data, one may want to put different values on cells to some number of bins. The function put_data_to_bins( T diameter_of_bin ) is
     * designed for that purpose. The parameter of it is the diameter of each bin. Note that the bottleneck distance between the persistence diagram of the cubical complex
     * before and after using such a function will be bounded by the parameter diameter_of_bin.
     **/
@@ -263,12 +263,12 @@ public:
 
 
     /**
-    * All_cells_iterator_range class provides ranges for All_cells_iterator
+    * All_cells_range class provides ranges for All_cells_iterator
     **/
-    class All_cells_iterator_range
+    class All_cells_range
     {
         public:
-            All_cells_iterator_range(Bitmap_cubical_complex_base* b):b(b){};
+            All_cells_range(Bitmap_cubical_complex_base* b):b(b){};
             All_cells_iterator begin()
             {
                 return b->all_cells_iterator_begin();
@@ -280,6 +280,11 @@ public:
         private:
             Bitmap_cubical_complex_base<T>* b;
     };
+
+    All_cells_range all_cells_range()
+    {
+        return All_cells_range(this);
+    }
 
 
     /**
@@ -300,7 +305,7 @@ public:
     /**
     * Coboundary_range class provides ranges for boundary iterators.
     **/
-    typedef typename std::vector< size_t >::iterator Coboundary_iterator;
+    typedef typename std::vector< size_t >::const_iterator Coboundary_iterator;
     typedef typename std::vector< size_t > Coboundary_range;
 
     /**
@@ -426,7 +431,7 @@ public:
     /**
     * Function returning a Top_dimensional_cells_iterator to the first top dimensional cell of the bitmap.
     **/
-    Top_dimensional_cells_iterator top_dimensional_cells_begin()
+    Top_dimensional_cells_iterator top_dimensional_cells_iterator_begin()
     {
         Top_dimensional_cells_iterator a(*this);
         return a;
@@ -435,7 +440,7 @@ public:
     /**
     * Function returning a Top_dimensional_cells_iterator to the last top dimensional cell of the bitmap.
     **/
-    Top_dimensional_cells_iterator top_dimensional_cells_end()
+    Top_dimensional_cells_iterator top_dimensional_cells_iterator_end()
     {
         Top_dimensional_cells_iterator a(*this);
         for ( size_t i = 0 ; i != this->dimension() ; ++i )
@@ -447,23 +452,28 @@ public:
     }
 
     /**
-    * All_cells_iterator_range class provides ranges for Top_dimensional_cells_iterator_range
+    * Top_dimensional_cells_iterator_range class provides ranges for Top_dimensional_cells_iterator_range
     **/
-    class Top_dimensional_cells_iterator_range
+    class Top_dimensional_cells_range
     {
         public:
-            Top_dimensional_cells_iterator_range(Bitmap_cubical_complex_base* b):b(b){};
+            Top_dimensional_cells_range(Bitmap_cubical_complex_base* b):b(b){};
             Top_dimensional_cells_iterator begin()
             {
-                return b->top_dimensional_cells_begin();
+                return b->top_dimensional_cells_iterator_begin();
             }
             Top_dimensional_cells_iterator end()
             {
-                return b->top_dimensional_cells_end();
+                return b->top_dimensional_cells_iterator_end();
             }
         private:
             Bitmap_cubical_complex_base<T>* b;
     };
+
+    Top_dimensional_cells_range top_dimensional_cells_range()
+    {
+        return Top_dimensional_cells_range(this);
+    }
 
 
 //****************************************************************************************************************//
@@ -621,7 +631,7 @@ void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_top_dimensional_cells
 
     Bitmap_cubical_complex_base<T>::Top_dimensional_cells_iterator it(*this);
     size_t index = 0;
-    for ( it = this->top_dimensional_cells_begin() ; it != this->top_dimensional_cells_end() ; ++it )
+    for ( it = this->top_dimensional_cells_iterator_begin() ; it != this->top_dimensional_cells_iterator_end() ; ++it )
     {
         this->get_cell_data(*it) = top_dimensional_cells[index];
         ++index;
@@ -660,7 +670,7 @@ void Bitmap_cubical_complex_base<T>::read_perseus_style_file( const char* perseu
     this->set_up_containers( sizes );
 
     Bitmap_cubical_complex_base<T>::Top_dimensional_cells_iterator it(*this);
-    it = this->top_dimensional_cells_begin();
+    it = this->top_dimensional_cells_iterator_begin();
 
     while ( !inFiltration.eof() )
     {
@@ -824,7 +834,7 @@ void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration()
     //we assume here that we already have a filtration on the top dimensional cells and
     //we have to extend it to lower ones.
     typename Bitmap_cubical_complex_base<T>::Top_dimensional_cells_iterator it(*this);
-    for ( it = this->top_dimensional_cells_begin() ; it != this->top_dimensional_cells_end() ; ++it )
+    for ( it = this->top_dimensional_cells_iterator_begin() ; it != this->top_dimensional_cells_iterator_end() ; ++it )
     {
         indices_to_consider.push_back( it.compute_index_in_bitmap() );
     }

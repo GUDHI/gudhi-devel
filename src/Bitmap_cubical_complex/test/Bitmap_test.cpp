@@ -94,13 +94,13 @@ BOOST_AUTO_TEST_CASE(topDimensionalCellsIterator_test) {
 
   int i = 0;
   for (Bitmap_cubical_complex< Bitmap_cubical_complex_base<double> >::Top_dimensional_cells_iterator
-       it = increasing.top_dimensional_cells_begin(); it != increasing.top_dimensional_cells_end(); ++it) {
+       it = increasing.top_dimensional_cells_iterator_begin(); it != increasing.top_dimensional_cells_iterator_end(); ++it) {
     BOOST_CHECK(increasing.get_cell_data(*it) == expectedFiltrationValues2[i]);
     ++i;
   }
   i = 0;
   for (Bitmap_cubical_complex< Bitmap_cubical_complex_base<double> >::Top_dimensional_cells_iterator
-       it = hole.top_dimensional_cells_begin(); it != hole.top_dimensional_cells_end(); ++it) {
+       it = hole.top_dimensional_cells_iterator_begin(); it != hole.top_dimensional_cells_iterator_end(); ++it) {
     BOOST_CHECK(hole.get_cell_data(*it) == expectedFiltrationValues1[i]);
     ++i;
   }
@@ -1229,7 +1229,7 @@ BOOST_AUTO_TEST_CASE(all_cells_iterator_and_boundary_iterators_in_Bitmap_cubical
     int bd_it = 0;
     int cbd_it = 0;
 
-    Bitmap_cubical_complex_base<double>::All_cells_iterator_range range(&ba);
+    Bitmap_cubical_complex_base<double>::All_cells_range range(&ba);
     for ( Bitmap_cubical_complex_base<double>::All_cells_iterator it = range.begin() ; it != range.end() ; ++it )
     {
         BOOST_CHECK( expected_filtration[i] == ba.get_cell_data( *it ) );
@@ -1415,7 +1415,7 @@ BOOST_AUTO_TEST_CASE(all_cells_iterator_and_boundary_iterators_in_Bitmap_cubical
     int bd_it = 0;
     int cbd_it = 0;
 
-    Bitmap_cubical_complex_base<double>::All_cells_iterator_range range(&ba);
+    Bitmap_cubical_complex_base<double>::All_cells_range range = ba.all_cells_range();
     for ( Bitmap_cubical_complex_base<double>::All_cells_iterator it = range.begin() ; it != range.end() ; ++it )
     {
         BOOST_CHECK( expected_filtration[i] == ba.get_cell_data( *it ) );
@@ -1481,7 +1481,7 @@ BOOST_AUTO_TEST_CASE(Top_dimensional_cells_iterator_range_check)
     Bitmap_cubical_complex_base<double> ba( sizes , data );
     int i = 0;
 
-    Bitmap_cubical_complex_base<double>::Top_dimensional_cells_iterator_range range(&ba);
+    Bitmap_cubical_complex_base<double>::Top_dimensional_cells_range range = ba.top_dimensional_cells_range();
     for ( Bitmap_cubical_complex_base<double>::Top_dimensional_cells_iterator it = range.begin() ; it != range.end() ; ++it )
     {
         BOOST_CHECK( data[i] == ba.get_cell_data( *it ) );

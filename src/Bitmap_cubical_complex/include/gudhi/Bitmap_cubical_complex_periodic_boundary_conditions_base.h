@@ -119,7 +119,7 @@ void Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::construct_comp
     this->set_up_containers( dimensions );
 
     size_t i = 0;
-    for ( typename Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Top_dimensional_cells_iterator it = this->top_dimensional_cells_begin() ; it != this->top_dimensional_cells_end() ; ++it )
+    for ( typename Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Top_dimensional_cells_iterator it = this->top_dimensional_cells_iterator_begin() ; it != this->top_dimensional_cells_iterator_end() ; ++it )
     {
         this->get_cell_data(*it) = topDimensionalCells[i];
         ++i;
@@ -162,7 +162,7 @@ Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_comp
     this->set_up_containers( sizes );
 
     typename Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Top_dimensional_cells_iterator it(*this);
-    it = this->top_dimensional_cells_begin();
+    it = this->top_dimensional_cells_iterator_begin();
 
     while ( !inFiltration.eof() )
     {
@@ -230,7 +230,7 @@ Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_comp
     this->set_up_containers( sizes );
 
     size_t i = 0;
-    for ( typename Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Top_dimensional_cells_iterator it = this->top_dimensional_cells_begin() ; it != this->top_dimensional_cells_end() ; ++it )
+    for ( typename Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Top_dimensional_cells_iterator it = this->top_dimensional_cells_iterator_begin() ; it != this->top_dimensional_cells_iterator_end() ; ++it )
     {
         *it = data[i];
         ++i;
