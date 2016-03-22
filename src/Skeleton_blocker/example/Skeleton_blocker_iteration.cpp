@@ -37,7 +37,7 @@ using namespace skbl;
 
 typedef Skeleton_blocker_complex<Skeleton_blocker_simple_traits> Complex;
 typedef Complex::Vertex_handle Vertex_handle;
-typedef Complex::Simplex_handle Simplex;
+typedef Complex::Simplex Simplex;
 
 Complex build_complete_complex(int n) {
   // build a full complex with n vertices and 2^n-1 simplices
@@ -46,8 +46,7 @@ Complex build_complete_complex(int n) {
     complex.add_vertex();
   for (int i = 0; i < n; i++)
     for (int j = 0; j < i; j++)
-      // note that add_edge, add the edge and all its cofaces
-      complex.add_edge(Vertex_handle(i), Vertex_handle(j));
+      complex.add_edge_without_blockers(Vertex_handle(i), Vertex_handle(j));
   return complex;
 }
 
@@ -77,7 +76,7 @@ int main(int argc, char *argv[]) {
   // we use a reference to a simplex instead of a copy
   // value here because a simplex is a set of integers
   // and copying it cost time
-  for (const Simplex & s : complex.simplex_range()) {
+  for (const Simplex & s : complex.complex_simplex_range()) {
     ++num_simplices;
     if (s.dimension() % 2 == 0)
       euler += 1;

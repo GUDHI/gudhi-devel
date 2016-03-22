@@ -46,7 +46,7 @@ public Skeleton_blocker_complex<SkeletonBlockerGeometricDS> {
   typedef typename SimplifiableSkeletonblocker::Vertex_handle Vertex_handle;
   typedef typename SimplifiableSkeletonblocker::Root_vertex_handle Root_vertex_handle;
   typedef typename SimplifiableSkeletonblocker::Edge_handle Edge_handle;
-  typedef typename SimplifiableSkeletonblocker::Simplex_handle Simplex_handle;
+  typedef typename SimplifiableSkeletonblocker::Simplex Simplex;
 
   typedef typename SimplifiableSkeletonblocker::Graph_vertex Graph_vertex;
 
@@ -140,7 +140,7 @@ public Skeleton_blocker_complex<SkeletonBlockerGeometricDS> {
    * Constructs the link of 'simplex' with points coordinates.
    */
   Geometric_link link(Vertex_handle v) const {
-    Geometric_link link(*this, Simplex_handle(v));
+    Geometric_link link(*this, Simplex(v));
     // we now add the point info
     add_points_to_link(link);
     return link;
@@ -149,7 +149,7 @@ public Skeleton_blocker_complex<SkeletonBlockerGeometricDS> {
   /**
    * Constructs the link of 'simplex' with points coordinates.
    */
-  Geometric_link link(const Simplex_handle& simplex) const {
+  Geometric_link link(const Simplex& simplex) const {
     Geometric_link link(*this, simplex);
     // we now add the point info
     add_points_to_link(link);
@@ -172,13 +172,13 @@ public Skeleton_blocker_complex<SkeletonBlockerGeometricDS> {
    * Constructs the abstract link of v (without points coordinates).
    */
   Abstract_link abstract_link(Vertex_handle v) const {
-    return Abstract_link(*this, Simplex_handle(v));
+    return Abstract_link(*this, Simplex(v));
   }
 
   /**
    * Constructs the link of 'simplex' with points coordinates.
    */
-  Abstract_link abstract_link(const Simplex_handle& simplex) const {
+  Abstract_link abstract_link(const Simplex& simplex) const {
     return Abstract_link(*this, simplex);
   }
 

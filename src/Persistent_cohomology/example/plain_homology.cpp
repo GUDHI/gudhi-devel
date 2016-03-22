@@ -27,6 +27,10 @@
 
 using namespace Gudhi;
 
+/* We could perfectly well use the default Simplex_tree<> (which uses
+ * Simplex_tree_options_full_featured), the following simply demonstrates
+ * how to save on storage by not storing a filtration value.  */
+
 struct MyOptions : Simplex_tree_options_full_featured {
   // Implicitly use 0 as filtration value for all simplices
   static const bool store_filtration = false;

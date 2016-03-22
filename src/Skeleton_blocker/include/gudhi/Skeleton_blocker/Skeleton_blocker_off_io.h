@@ -61,7 +61,7 @@ class Skeleton_blocker_off_flag_visitor_reader {
     if (!load_only_points_) {
       for (size_t i = 0; i < face.size(); ++i)
         for (size_t j = i + 1; j < face.size(); ++j) {
-          complex_.add_edge(Vertex_handle(face[i]), Vertex_handle(face[j]));
+          complex_.add_edge_without_blockers(Vertex_handle(face[i]), Vertex_handle(face[j]));
         }
     }
   }
@@ -76,12 +76,12 @@ template<typename Complex>
 class Skeleton_blocker_off_visitor_reader {
   Complex& complex_;
   typedef typename Complex::Vertex_handle Vertex_handle;
-  typedef typename Complex::Simplex_handle Simplex_handle;
+  typedef typename Complex::Simplex Simplex;
   typedef typename Complex::Point Point;
 
   const bool load_only_points_;
   std::vector<Point> points_;
-  std::vector<Simplex_handle> maximal_faces_;
+  std::vector<Simplex> maximal_faces_;
 
  public:
   explicit Skeleton_blocker_off_visitor_reader(Complex& complex, bool load_only_points = false) :
@@ -99,7 +99,7 @@ class Skeleton_blocker_off_visitor_reader {
 
   void maximal_face(const std::vector<int>& face) {
     if (!load_only_points_) {
-      Simplex_handle s;
+      Simplex s;
       for (auto x : face)
         s.add_vertex(Vertex_handle(x));
       maximal_faces_.emplace_back(s);
