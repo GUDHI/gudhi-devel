@@ -34,6 +34,7 @@
 #include <math.h>  // isnan, fmax
 
 #include <CGAL/Delaunay_triangulation.h>
+#include <CGAL/Epick_d.h>
 
 #include <iostream>
 #include <vector>
@@ -62,13 +63,24 @@ namespace alphacomplex {
  *
  * The complex is a template class requiring an Epick_d <a target="_blank"
  * href="http://doc.cgal.org/latest/Kernel_d/index.html#Chapter_dD_Geometry_Kernel">dD Geometry Kernel</a>
- * \cite cgal:s-gkd-15b from CGAL as template.
+ * \cite cgal:s-gkd-15b from CGAL as template, default value is <a target="_blank"
+ * href="http://doc.cgal.org/latest/Kernel_d/classCGAL_1_1Epick__d.html">CGAL::Epick_d</a>
+ * < <a target="_blank" href="http://doc.cgal.org/latest/Kernel_23/classCGAL_1_1Dynamic__dimension__tag.html">
+ * CGAL::Dynamic_dimension_tag </a> >
  * 
  * \remark When Alpha_complex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
  * 
  */
-template<class Kernel>
+template<class Kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>>
 class Alpha_complex : public Simplex_tree<> {
+ public:
+  /** \brief A Delaunay triangulation of a set of points in \f$ \mathbb{R}^D\f$.*/
+  typedef typename CGAL::Delaunay_triangulation<Kernel> Delaunay_triangulation;
+  /** \brief A point in Euclidean space.*/
+  typedef typename Kernel::Point_d Point_d;
+  /** \brief Geometric traits class that provides the geometric types and predicates needed by Delaunay
+   * triangulations.*/
+  typedef Kernel Geom_traits;
  private:
   // From Simplex_tree
   // Type required to insert into a simplex_tree (with or without subfaces).
@@ -77,14 +89,9 @@ class Alpha_complex : public Simplex_tree<> {
   // Simplex_result is the type returned from simplex_tree insert function.
   typedef typename std::pair<Simplex_handle, bool> Simplex_result;
 
-  // Delaunay_triangulation type required to create an alpha-complex.
-  typedef typename CGAL::Delaunay_triangulation<Kernel> Delaunay_triangulation;
-
   typedef typename Kernel::Compute_squared_radius_d Squared_Radius;
   typedef typename Kernel::Side_of_bounded_sphere_d Is_Gabriel;
   typedef typename Kernel::Point_dimension_d        Point_Dimension;
-
-  typedef typename Kernel::Point_d Point_d;
 
   // Type required to compute squared radius, or side of bounded sphere on a vector of points.
   typedef typename std::vector<Point_d> Vector_of_CGAL_points;
@@ -135,6 +142,8 @@ class Alpha_complex : public Simplex_tree<> {
    * @param[in] triangulation_ptr Pointer on a <a target="_blank"
    * href="http://doc.cgal.org/latest/Triangulation/index.html#Chapter_Triangulations">
    * CGAL::Delaunay_triangulation<Kernel></a> \cite cgal:hdj-t-15b.
+   * Alpha_complex takes ownership of the Delaunay_triangulation object, which must have been allocated using operator
+   * new.
    * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$.
    */
   Alpha_complex(Delaunay_triangulation* triangulation_ptr,
