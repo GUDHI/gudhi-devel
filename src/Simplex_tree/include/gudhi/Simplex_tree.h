@@ -454,7 +454,7 @@ class Simplex_tree {
    * \exception std::invalid_argument In debug mode, if sh is a null_simplex.
    */
   void assign_filtration(Simplex_handle sh, Filtration_value fv) {
-    GUDHI_CHECK(sh == null_simplex(),
+    GUDHI_CHECK(sh != null_simplex(),
                 std::invalid_argument("Simplex_tree::assign_filtration - cannot assign filtration on null_simplex"));
     sh->second.assign_filtration(fv);
   }
@@ -1256,7 +1256,7 @@ class Simplex_tree {
    */
   void remove_maximal_simplex(Simplex_handle sh) {
     // Guarantee the simplex has no children
-    GUDHI_CHECK(has_children(sh),
+    GUDHI_CHECK(!has_children(sh),
                 std::invalid_argument("Simplex_tree::remove_maximal_simplex - argument has children"));
 
     // Simplex is a leaf, it means the child is the Siblings owning the leaf

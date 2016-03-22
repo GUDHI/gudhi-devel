@@ -159,7 +159,6 @@ class Alpha_complex : public Simplex_tree<> {
    * 
    * The type InputPointRange must be a range for which std::begin and
    * std::end return input iterators on a Kernel::Point_d.
-   * \exception std::invalid_argument In debug mode, if an empty input point range is passed as argument.
    */
   template<typename InputPointRange >
   Alpha_complex(const InputPointRange& points,
@@ -167,9 +166,6 @@ class Alpha_complex : public Simplex_tree<> {
       : triangulation_(nullptr) {
     auto first = std::begin(points);
     auto last = std::end(points);
-
-    GUDHI_CHECK((first == last),
-                std::invalid_argument("Alpha_complex::Alpha_complex(InputPointRange) - Empty input point range"));
 
     if (first != last) {
       // point_dimension function initialization

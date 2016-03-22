@@ -29,12 +29,12 @@
   #define GUDHI_DEBUG
 #endif
 
-// GUDHI_CHECK throw an exception on condition in debug mode, but does nothing in release mode
+// GUDHI_CHECK throw an exception if expression is false in debug mode, but does nothing in release mode
 // Could assert in release mode, but cmake sets NDEBUG (for "NO DEBUG") in this mode, means assert does nothing.
 #ifdef GUDHI_DEBUG
-  #define GUDHI_CHECK(cond, excpt) if (cond) throw excpt
+  #define GUDHI_CHECK(expression, excpt) if ((expression) == 0) throw excpt
 #else
-  #define GUDHI_CHECK(cond, excpt) (void) 0
+  #define GUDHI_CHECK(expression, excpt) (void) 0
 #endif
 
 #define PRINT(a) std::cerr << #a << ": " << (a) << " (DISP)" << std::endl
