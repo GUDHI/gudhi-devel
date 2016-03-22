@@ -166,8 +166,8 @@ class Alpha_complex : public Simplex_tree<> {
       // point_dimension function initialization
       Point_Dimension point_dimension = kernel_.point_dimension_d_object();
 
-      // Delaunay triangulation is point dimension minus one.
-      triangulation_ = new Delaunay_triangulation(point_dimension(*first) - 1);
+      // Delaunay triangulation is point dimension.
+      triangulation_ = new Delaunay_triangulation(point_dimension(*first));
 
       size_type inserted = triangulation_->insert(first, last);
       if (inserted != (last -first)) {
