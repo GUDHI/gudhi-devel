@@ -1,12 +1,12 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: gudhi
 Upstream-Contact: gudhi-users@lists.gforge.inria.fr
-Source: <url://http://gudhi.gforge.inria.fr/doc/1.2.0/>
+Source: <url://http://gudhi.gforge.inria.fr/>
 
 Files: *
-Copyright: 2014-2015 Inria Sophia Antipolis-Méditerranée
-           2014-2015 Inria Saclay - Ile de France
-           2014-2015 Université Nice Sophia Antipolis
+Copyright: 2014-2016 Inria Sophia Antipolis-Méditerranée
+           2014-2016 Inria Saclay - Ile de France
+           2014-2016 Université Nice Sophia Antipolis
 License: GPL-3.0+
 
 License: GPL-3.0+

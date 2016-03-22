@@ -4,7 +4,7 @@ Maintainer: Marc Glisse <marc.glisse@normalesup.org>
 Build-Depends: debhelper (>= 9), cmake, libboost-dev
 Standards-Version: 3.9.6
 Section: libs
-Homepage: http://gudhi.gforge.inria.fr/doc/1.2.0/
+Homepage: http://gudhi.gforge.inria.fr/
 #Vcs-Git: git://anonscm.debian.org/collab-maint/gudhi.git
 #Vcs-Browser: https://anonscm.debian.org/gitweb/?p=collab-maint/gudhi.git;a=summary
 
@@ -19,6 +19,8 @@ Description: Gudhi library for topological data analysis
  Analysis (TDA).
  .
  The current release of the GUDHI library includes:
- * Data structures to represent, construct and manipulate simplicial complexes.
- * Algorithms to compute persistent homology and multi-field persistent homology.
+ * Data structures to represent, construct and manipulate simplicial and
+ cubical complexes, including alpha-complex, witness complex, Rips complex.
+ * Algorithms to compute persistent homology and multi-field persistent
+ homology.
  * Simplication of simplicial complexes by edge contraction.
