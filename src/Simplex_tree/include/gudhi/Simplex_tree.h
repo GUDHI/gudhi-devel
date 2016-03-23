@@ -1219,37 +1219,39 @@ class Simplex_tree {
     return (simplex_list_to_removed.size() > 0);
   }
 
-  /*
+  
   // Another alternative for prune_above_filtration
-  // initialize_filtration is not called. UT are not passed.
-  void prune_above_filtration(Filtration_value filt) {
-    if (!Options::store_filtration || filt >= filtration()) return;
-    rec_prune_above_filtration(root(), filt);
-    set_filtration(filt);
+  // UT are passed and performance are similar.
+  /*bool prune_above_filtration(Filtration_value filt) {
+    return rec_prune_above_filtration(root(), filt);
   }
   
  private:
-  void rec_prune_above_filtration(Siblings* sib, Filtration_value filt) {
+  bool rec_prune_above_filtration(Siblings* sib, Filtration_value filt) {
     auto&& list=sib->members();
     auto last = std::remove_if(list.begin(), list.end(), [=](Dit_value_t& simplex) {
-      if (simplex.second.filtration()<=filt) return false;
-      if (has_children(&simplex)) rec_delete(simplex.second.children());
-      return true;
+        if (simplex.second.filtration()<=filt) return false;
+        if (has_children(&simplex)) rec_delete(simplex.second.children());
+        return true;
       });
-      
+    
+    bool modified = (last != list.end());
     if (last == list.begin() && sib != root()) {
       // Removing the whole siblings, parent becomes a leaf.
       sib->oncles()->members()[sib->parent()].assign_children(sib->oncles());
       delete sib;
+      return true;
     } else {
       // Keeping some elements of siblings. Remove the others, and recurse in the remaining ones.
       list.erase(last, list.end());
       for(auto&& simplex : list)
         if(has_children(&simplex))
-          rec_prune_above_filtration(simplex.second.children(), filt);
+          modified |= rec_prune_above_filtration(simplex.second.children(), filt);
     }
+    return modified;
   }*/
 
+ public:
   /** \brief Remove a maximal simplex.
    * @param[in] sh Simplex handle on the maximal simplex to remove.
    * \pre Please check the simplex has no coface before removing it.
