@@ -230,8 +230,6 @@ class Alpha_complex : public Simplex_tree<> {
     }
 
     set_dimension(triangulation_->maximal_dimension());
-    // set_filtration to +inf for prune_above_filtration to be done (if necessary)
-    set_filtration(std::numeric_limits<Filtration_value>::infinity());
 
     // --------------------------------------------------------------------------------------------
     // double map to retrieve simplex tree vertex handles from CGAL vertex iterator and vice versa
@@ -323,7 +321,9 @@ class Alpha_complex : public Simplex_tree<> {
       initialize_filtration();
     }
     // Remove all simplices that have a filtration value greater than max_alpha_square
-    prune_above_filtration(max_alpha_square);
+    if (prune_above_filtration(max_alpha_square)) {
+      initialize_filtration();
+    }
     // --------------------------------------------------------------------------------------------
   }
 

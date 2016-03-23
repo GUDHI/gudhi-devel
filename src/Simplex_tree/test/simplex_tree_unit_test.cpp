@@ -1012,20 +1012,30 @@ BOOST_AUTO_TEST_CASE(prune_above_filtration) {
   //            o
   //            5
 
+  bool simplex_is_changed = false;
   // Check the no action cases
   // greater than initial filtration value
-  st.prune_above_filtration(10.0);
+  simplex_is_changed = st.prune_above_filtration(10.0);
+  if (simplex_is_changed)
+    st.initialize_filtration();
   BOOST_CHECK(st == st_complete);
+  BOOST_CHECK(!simplex_is_changed);
   // equal to initial filtration value
-  st.prune_above_filtration(6.0);
+  simplex_is_changed = st.prune_above_filtration(6.0);
+  if (simplex_is_changed)
+    st.initialize_filtration();
   BOOST_CHECK(st == st_complete);
+  BOOST_CHECK(!simplex_is_changed);
   // lower than initial filtration value, but still greater than the maximum filtration value
-  st.prune_above_filtration(5.0);
+  simplex_is_changed = st.prune_above_filtration(5.0);
+  if (simplex_is_changed)
+    st.initialize_filtration();
   BOOST_CHECK(st == st_complete);
+  BOOST_CHECK(!simplex_is_changed);
 
   // Display the Simplex_tree
   std::cout << "The complex contains " << st.num_simplices() << " simplices";
-  std::cout << "   - dimension " << st.dimension() << "   - filtration " << st.filtration() << std::endl;
+  std::cout << " - dimension " << st.dimension() << std::endl;
   std::cout << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
   for (auto f_simplex : st.filtration_simplex_range()) {
     std::cout << "   " << "[" << st.filtration(f_simplex) << "] ";
@@ -1036,35 +1046,46 @@ BOOST_AUTO_TEST_CASE(prune_above_filtration) {
   }
 
   // Check the pruned cases
-  // Set the st_pruned filtration for operator==
-  st.prune_above_filtration(2.5);
+  simplex_is_changed = st.prune_above_filtration(2.5);
+  if (simplex_is_changed)
+    st.initialize_filtration();
   BOOST_CHECK(st == st_pruned);
+  BOOST_CHECK(simplex_is_changed);
 
   // Display the Simplex_tree
   std::cout << "The complex pruned at 2.5 contains " << st.num_simplices() << " simplices";
-  std::cout << "   - dimension " << st.dimension() << "   - filtration " << st.filtration() << std::endl;
+  std::cout << " - dimension " << st.dimension() << std::endl;
 
-  st.prune_above_filtration(2.0);
+  simplex_is_changed = st.prune_above_filtration(2.0);
+  if (simplex_is_changed)
+    st.initialize_filtration();
   
   std::cout << "The complex pruned at 2.0 contains " << st.num_simplices() << " simplices";
-  std::cout << "   - dimension " << st.dimension() << "   - filtration " << st.filtration() << std::endl;
+  std::cout << " - dimension " << st.dimension() << std::endl;
 
   BOOST_CHECK(st == st_pruned);
+  BOOST_CHECK(!simplex_is_changed);
 
   typeST st_empty;
   // FIXME
   st_empty.set_dimension(3);
-  st.prune_above_filtration(0.0);
+  simplex_is_changed = st.prune_above_filtration(0.0);
+  if (simplex_is_changed)
+    st.initialize_filtration();
 
   // Display the Simplex_tree
   std::cout << "The complex pruned at 0.0 contains " << st.num_simplices() << " simplices";
-  std::cout << "   - dimension " << st.dimension() << "   - filtration " << st.filtration() << std::endl;
+  std::cout << " - dimension " << st.dimension() << std::endl;
 
   BOOST_CHECK(st == st_empty);
+  BOOST_CHECK(simplex_is_changed);
 
   // Test case to the limit
-  st.prune_above_filtration(-1.0);
+  simplex_is_changed = st.prune_above_filtration(-1.0);
+  if (simplex_is_changed)
+    st.initialize_filtration();
   BOOST_CHECK(st == st_empty);
+  BOOST_CHECK(!simplex_is_changed);
 }
 
 BOOST_AUTO_TEST_CASE(mini_prune_above_filtration) {
@@ -1096,11 +1117,33 @@ BOOST_AUTO_TEST_CASE(mini_prune_above_filtration) {
   std::cout << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
   BOOST_CHECK(st.num_simplices() == 27);
 
+  // Test case to the limit - With these options, there is no filtration, which means filtration is 0
+  bool simplex_is_changed = st.prune_above_filtration(1.0);
+  if (simplex_is_changed)
+    st.initialize_filtration();
+  // Display the Simplex_tree
+  std::cout << "The complex pruned at 1.0 contains " << st.num_simplices() << " simplices" << std::endl;
+  BOOST_CHECK(!simplex_is_changed);
+  BOOST_CHECK(st.num_simplices() == 27);
+
+  simplex_is_changed = st.prune_above_filtration(0.0);
+  if (simplex_is_changed)
+    st.initialize_filtration();
+  // Display the Simplex_tree
+  std::cout << "The complex pruned at 0.0 contains " << st.num_simplices() << " simplices" << std::endl;
+  BOOST_CHECK(!simplex_is_changed);
+  BOOST_CHECK(st.num_simplices() == 27);
+
   // Test case to the limit
-  st.prune_above_filtration(-1.0);
+  simplex_is_changed = st.prune_above_filtration(-1.0);
+  if (simplex_is_changed)
+    st.initialize_filtration();
+  // Display the Simplex_tree
+  std::cout << "The complex pruned at -1.0 contains " << st.num_simplices() << " simplices" << std::endl;
+  BOOST_CHECK(simplex_is_changed);
+  BOOST_CHECK(st.num_simplices() == 0);
 
   // Display the Simplex_tree
   std::cout << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
-  BOOST_CHECK(st.num_simplices() == 0);
 
 }

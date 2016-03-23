@@ -1186,11 +1186,14 @@ class Simplex_tree {
  public:
   /** \brief Prune above filtration value given as parameter.
    * @param[in] filtration Maximum threshold value.
-   * \post The filtration must be valid. If the filtration has not been initialized yet, the method initializes it
-   * (i.e. order the simplices). If the complex has changed since the last time the filtration was initialized, please
-   * call `initialize_filtration()` to recompute it.
+   * @return The filtration modification information.
+   * \pre The filtration must be valid. If the filtration has not been initialized yet, the method initializes it
+   * (i.e. order the simplices).
+   * \post Some simplex tree functions require the filtration to be valid. `prune_above_filtration()`
+   * function is not launching `initialize_filtration()` but returns the filtration modification information. If the
+   * complex has changed , please call `initialize_filtration()` to recompute it.
    */
-  void prune_above_filtration(Filtration_value filtration) {
+  bool prune_above_filtration(Filtration_value filtration) {
     // Initialize filtration_vect_ if required
     if (filtration_vect_.empty()) {
       initialize_filtration();
@@ -1213,13 +1216,12 @@ class Simplex_tree {
         remove_maximal_simplex(sh);
     }
     // Re-initialize filtration_vect_ if dta were removed, because removing is shifting data in a flat_map
-    if (simplex_list_to_removed.size() > 0)
-      initialize_filtration();
+    return (simplex_list_to_removed.size() > 0);
   }
 
   /*
   // Another alternative for prune_above_filtration
-  // Seg fault in this state
+  // initialize_filtration is not called. UT are not passed.
   void prune_above_filtration(Filtration_value filt) {
     if (!Options::store_filtration || filt >= filtration()) return;
     rec_prune_above_filtration(root(), filt);

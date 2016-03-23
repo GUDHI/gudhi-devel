@@ -78,7 +78,8 @@ BOOST_AUTO_TEST_CASE(ALPHA_DOC_OFF_file_filtered) {
   std::cout << "========== OFF FILE NAME = " << off_file_name << " - alpha²=" <<
       max_alpha_square_value << "==========" << std::endl;
 
-  Gudhi::alphacomplex::Alpha_complex<Kernel_d> alpha_complex_from_file(off_file_name, max_alpha_square_value);
+  // Use of the default dynamic kernel
+  Gudhi::alphacomplex::Alpha_complex<> alpha_complex_from_file(off_file_name, max_alpha_square_value);
 
   const int DIMENSION = 2;
   std::cout << "alpha_complex_from_file.dimension()=" << alpha_complex_from_file.dimension() << std::endl;
@@ -200,7 +201,12 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_from_points) {
   BOOST_CHECK_THROW (alpha_complex_from_points.get_point(1234), std::out_of_range);
   
   // Test after prune_above_filtration
-  alpha_complex_from_points.prune_above_filtration(0.6);
+  bool modified = alpha_complex_from_points.prune_above_filtration(0.6);
+  if (modified) {
+    alpha_complex_from_points.initialize_filtration();
+  }
+  BOOST_CHECK(modified);
+  
   // Another way to check num_simplices
   std::cout << "Iterator on alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
   num_simplices = 0;
