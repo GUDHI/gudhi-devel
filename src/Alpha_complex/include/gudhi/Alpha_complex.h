@@ -317,11 +317,11 @@ class Alpha_complex : public Simplex_tree<> {
 
     // --------------------------------------------------------------------------------------------
     // As Alpha value is an approximation, we have to make filtration non decreasing while increasing the dimension
-    if (make_filtration_non_decreasing()) {
-      initialize_filtration();
-    }
+    bool modified_filt = make_filtration_non_decreasing();
     // Remove all simplices that have a filtration value greater than max_alpha_square
-    if (prune_above_filtration(max_alpha_square)) {
+    // Remark: prune_above_filtration does not require initialize_filtration to be done before.
+    modified_filt |= prune_above_filtration(max_alpha_square);
+    if (modified_filt) {
       initialize_filtration();
     }
     // --------------------------------------------------------------------------------------------

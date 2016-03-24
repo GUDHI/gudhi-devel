@@ -1187,42 +1187,11 @@ class Simplex_tree {
   /** \brief Prune above filtration value given as parameter.
    * @param[in] filtration Maximum threshold value.
    * @return The filtration modification information.
-   * \pre The filtration must be valid. If the filtration has not been initialized yet, the method initializes it
-   * (i.e. order the simplices).
    * \post Some simplex tree functions require the filtration to be valid. `prune_above_filtration()`
    * function is not launching `initialize_filtration()` but returns the filtration modification information. If the
    * complex has changed , please call `initialize_filtration()` to recompute it.
    */
-  bool prune_above_filtration(Filtration_value filtration) {
-    // Initialize filtration_vect_ if required
-    if (filtration_vect_.empty()) {
-      initialize_filtration();
-    }
-
-    std::vector<std::vector<Vertex_handle>> simplex_list_to_removed;
-    // Loop in reverse mode until threshold is reached
-    // Do not erase while looping, because removing is shifting data in a flat_map
-    for (auto f_simplex = filtration_vect_.rbegin();
-         (f_simplex != filtration_vect_.rend()) && ((*f_simplex)->second.filtration() > filtration);
-         f_simplex++) {
-      std::vector<Vertex_handle> simplex_to_remove;
-      for (auto vertex : simplex_vertex_range(*f_simplex))
-        simplex_to_remove.insert(simplex_to_remove.begin(), vertex);
-      simplex_list_to_removed.push_back(simplex_to_remove);
-    }
-    for (auto simplex_to_remove : simplex_list_to_removed) {
-      Simplex_handle sh = find_simplex(simplex_to_remove);
-      if (sh != null_simplex())
-        remove_maximal_simplex(sh);
-    }
-    // Re-initialize filtration_vect_ if dta were removed, because removing is shifting data in a flat_map
-    return (simplex_list_to_removed.size() > 0);
-  }
-
-  
-  // Another alternative for prune_above_filtration
-  // UT are passed and performance are similar.
-  /*bool prune_above_filtration(Filtration_value filt) {
+  bool prune_above_filtration(Filtration_value filt) {
     return rec_prune_above_filtration(root(), filt);
   }
   
@@ -1249,7 +1218,7 @@ class Simplex_tree {
           modified |= rec_prune_above_filtration(simplex.second.children(), filt);
     }
     return modified;
-  }*/
+  }
 
  public:
   /** \brief Remove a maximal simplex.
