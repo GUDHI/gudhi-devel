@@ -1,105 +1,79 @@
-#include <gudhi/reader_utils.h>
-#include <gudhi/Bitmap_cubical_complex.h>
-#include <gudhi/Persistent_cohomology.h>
-#include <boost/program_options.hpp>
-
-// standard stuff
-#include <iostream>
-#include <sstream>
+/*    This file is part of the Gudhi Library. The Gudhi library
+ *    (Geometric Understanding in Higher Dimensions) is a generic C++
+ *    library for computational topology.
+ *
+ *    Author(s):       Pawel Dlotko
+ *
+ *    Copyright (C) 2015  INRIA Saclay (France)
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "cubical_complex"
 #include <boost/test/unit_test.hpp>
 
+#include <gudhi/reader_utils.h>
+#include <gudhi/Bitmap_cubical_complex.h>
+#include <gudhi/Persistent_cohomology.h>
 
-using namespace std;
-using namespace Gudhi;
-using namespace Gudhi::Cubical_complex;
-using namespace Gudhi::persistent_cohomology;
+// standard stuff
+#include <iostream>
+#include <sstream>
+#include <vector>
 
 
+typedef Gudhi::Cubical_complex::Bitmap_cubical_complex_base<double> Bitmap_cubical_complex_base;
+typedef Gudhi::Cubical_complex::Bitmap_cubical_complex<Bitmap_cubical_complex_base> Bitmap_cubical_complex;
+
+typedef Gudhi::Cubical_complex::Bitmap_cubical_complex_periodic_boundary_conditions_base<double>
+Bitmap_cubical_complex_periodic_boundary_conditions_base;
+typedef Gudhi::Cubical_complex::Bitmap_cubical_complex<Bitmap_cubical_complex_periodic_boundary_conditions_base>
+Bitmap_cubical_complex_periodic_boundary_conditions;
 
 BOOST_AUTO_TEST_CASE(check_dimension) {
-  std::vector< double > increasingFiltrationOfTopDimensionalCells;
-  increasingFiltrationOfTopDimensionalCells.push_back(1);
-  increasingFiltrationOfTopDimensionalCells.push_back(2);
-  increasingFiltrationOfTopDimensionalCells.push_back(3);
-  increasingFiltrationOfTopDimensionalCells.push_back(4);
-  increasingFiltrationOfTopDimensionalCells.push_back(5);
-  increasingFiltrationOfTopDimensionalCells.push_back(6);
-  increasingFiltrationOfTopDimensionalCells.push_back(7);
-  increasingFiltrationOfTopDimensionalCells.push_back(8);
-  increasingFiltrationOfTopDimensionalCells.push_back(9);
+  std::vector< double > increasingFiltrationOfTopDimensionalCells({1, 2, 3, 4, 5, 6, 7, 8, 9});
 
-  std::vector<unsigned> dimensions;
-  dimensions.push_back(3);
-  dimensions.push_back(3);
+  std::vector<unsigned> dimensions({3, 3});
 
-  Bitmap_cubical_complex< Bitmap_cubical_complex_base<double> > increasing(dimensions, increasingFiltrationOfTopDimensionalCells);
+  Bitmap_cubical_complex increasing(dimensions, increasingFiltrationOfTopDimensionalCells);
   BOOST_CHECK(increasing.dimension() == 2);
 }
 
 BOOST_AUTO_TEST_CASE(topDimensionalCellsIterator_test) {
-  std::vector< double > expectedFiltrationValues1;
-  expectedFiltrationValues1.push_back(0);
-  expectedFiltrationValues1.push_back(0);
-  expectedFiltrationValues1.push_back(0);
-  expectedFiltrationValues1.push_back(0);
-  expectedFiltrationValues1.push_back(100);
-  expectedFiltrationValues1.push_back(0);
-  expectedFiltrationValues1.push_back(0);
-  expectedFiltrationValues1.push_back(0);
-  expectedFiltrationValues1.push_back(0);
+  std::vector< double > expectedFiltrationValues1({0, 0, 0, 0, 100, 0, 0, 0, 0});
 
-  std::vector< double > expectedFiltrationValues2;
-  expectedFiltrationValues2.push_back(1);
-  expectedFiltrationValues2.push_back(2);
-  expectedFiltrationValues2.push_back(3);
-  expectedFiltrationValues2.push_back(4);
-  expectedFiltrationValues2.push_back(5);
-  expectedFiltrationValues2.push_back(6);
-  expectedFiltrationValues2.push_back(7);
-  expectedFiltrationValues2.push_back(8);
-  expectedFiltrationValues2.push_back(9);
+  std::vector< double > expectedFiltrationValues2({1, 2, 3, 4, 5, 6, 7, 8, 9});
 
-  std::vector< double > increasingFiltrationOfTopDimensionalCells;
-  increasingFiltrationOfTopDimensionalCells.push_back(1);
-  increasingFiltrationOfTopDimensionalCells.push_back(2);
-  increasingFiltrationOfTopDimensionalCells.push_back(3);
-  increasingFiltrationOfTopDimensionalCells.push_back(4);
-  increasingFiltrationOfTopDimensionalCells.push_back(5);
-  increasingFiltrationOfTopDimensionalCells.push_back(6);
-  increasingFiltrationOfTopDimensionalCells.push_back(7);
-  increasingFiltrationOfTopDimensionalCells.push_back(8);
-  increasingFiltrationOfTopDimensionalCells.push_back(9);
+  std::vector< double > increasingFiltrationOfTopDimensionalCells({1, 2, 3, 4, 5, 6, 7, 8, 9});
 
-  std::vector< double > oneDimensionalCycle;
-  oneDimensionalCycle.push_back(0);
-  oneDimensionalCycle.push_back(0);
-  oneDimensionalCycle.push_back(0);
-  oneDimensionalCycle.push_back(0);
-  oneDimensionalCycle.push_back(100);
-  oneDimensionalCycle.push_back(0);
-  oneDimensionalCycle.push_back(0);
-  oneDimensionalCycle.push_back(0);
-  oneDimensionalCycle.push_back(0);
+  std::vector< double > oneDimensionalCycle({0, 0, 0, 0, 100, 0, 0, 0, 0});
 
-  std::vector<unsigned> dimensions;
-  dimensions.push_back(3);
-  dimensions.push_back(3);
+  std::vector<unsigned> dimensions({3, 3});
 
-  Bitmap_cubical_complex< Bitmap_cubical_complex_base<double> > increasing(dimensions, increasingFiltrationOfTopDimensionalCells);
-  Bitmap_cubical_complex< Bitmap_cubical_complex_base<double> > hole(dimensions, oneDimensionalCycle);
+  Bitmap_cubical_complex increasing(dimensions, increasingFiltrationOfTopDimensionalCells);
+  Bitmap_cubical_complex hole(dimensions, oneDimensionalCycle);
 
 
   int i = 0;
-  for (Bitmap_cubical_complex< Bitmap_cubical_complex_base<double> >::Top_dimensional_cells_iterator
+  for (Bitmap_cubical_complex::Top_dimensional_cells_iterator
        it = increasing.top_dimensional_cells_iterator_begin(); it != increasing.top_dimensional_cells_iterator_end(); ++it) {
     BOOST_CHECK(increasing.get_cell_data(*it) == expectedFiltrationValues2[i]);
     ++i;
   }
   i = 0;
-  for (Bitmap_cubical_complex< Bitmap_cubical_complex_base<double> >::Top_dimensional_cells_iterator
+  for (Bitmap_cubical_complex::Top_dimensional_cells_iterator
        it = hole.top_dimensional_cells_iterator_begin(); it != hole.top_dimensional_cells_iterator_end(); ++it) {
     BOOST_CHECK(hole.get_cell_data(*it) == expectedFiltrationValues1[i]);
     ++i;
@@ -107,7 +81,6 @@ BOOST_AUTO_TEST_CASE(topDimensionalCellsIterator_test) {
 }
 
 BOOST_AUTO_TEST_CASE(compute_boundary_test_1) {
-
   std::vector<double> boundary0;
   std::vector<double> boundary1;
   boundary1.push_back(0);
@@ -294,22 +267,11 @@ BOOST_AUTO_TEST_CASE(compute_boundary_test_1) {
 
 
 
-  std::vector< double > increasingFiltrationOfTopDimensionalCells;
-  increasingFiltrationOfTopDimensionalCells.push_back(1);
-  increasingFiltrationOfTopDimensionalCells.push_back(2);
-  increasingFiltrationOfTopDimensionalCells.push_back(3);
-  increasingFiltrationOfTopDimensionalCells.push_back(4);
-  increasingFiltrationOfTopDimensionalCells.push_back(5);
-  increasingFiltrationOfTopDimensionalCells.push_back(6);
-  increasingFiltrationOfTopDimensionalCells.push_back(7);
-  increasingFiltrationOfTopDimensionalCells.push_back(8);
-  increasingFiltrationOfTopDimensionalCells.push_back(9);
+  std::vector< double > increasingFiltrationOfTopDimensionalCells({1, 2, 3, 4, 5, 6, 7, 8, 9});
 
-  std::vector<unsigned> dimensions;
-  dimensions.push_back(3);
-  dimensions.push_back(3);
+  std::vector<unsigned> dimensions({3, 3});
 
-  Bitmap_cubical_complex< Bitmap_cubical_complex_base<double> > increasing(dimensions, increasingFiltrationOfTopDimensionalCells);
+  Bitmap_cubical_complex increasing(dimensions, increasingFiltrationOfTopDimensionalCells);
   for (size_t i = 0; i != increasing.size(); ++i) {
     std::vector< size_t > bd = increasing.get_boundary_of_a_cell(i);
     for (size_t j = 0; j != bd.size(); ++j) {
@@ -319,22 +281,11 @@ BOOST_AUTO_TEST_CASE(compute_boundary_test_1) {
 }
 
 BOOST_AUTO_TEST_CASE(compute_boundary_test_2) {
-  std::vector< double > increasingFiltrationOfTopDimensionalCells;
-  increasingFiltrationOfTopDimensionalCells.push_back(1);
-  increasingFiltrationOfTopDimensionalCells.push_back(2);
-  increasingFiltrationOfTopDimensionalCells.push_back(3);
-  increasingFiltrationOfTopDimensionalCells.push_back(4);
-  increasingFiltrationOfTopDimensionalCells.push_back(5);
-  increasingFiltrationOfTopDimensionalCells.push_back(6);
-  increasingFiltrationOfTopDimensionalCells.push_back(7);
-  increasingFiltrationOfTopDimensionalCells.push_back(8);
-  increasingFiltrationOfTopDimensionalCells.push_back(9);
+  std::vector< double > increasingFiltrationOfTopDimensionalCells({1, 2, 3, 4, 5, 6, 7, 8, 9});
 
-  std::vector<unsigned> dimensions;
-  dimensions.push_back(3);
-  dimensions.push_back(3);
+  std::vector<unsigned> dimensions({3, 3});
 
-  Bitmap_cubical_complex< Bitmap_cubical_complex_base<double> > increasing(dimensions, increasingFiltrationOfTopDimensionalCells);
+  Bitmap_cubical_complex increasing(dimensions, increasingFiltrationOfTopDimensionalCells);
 
 
   std::vector<double> coboundaryElements;
@@ -429,27 +380,15 @@ BOOST_AUTO_TEST_CASE(compute_boundary_test_2) {
       BOOST_CHECK(coboundaryElements[number] == bd[j]);
       ++number;
     }
-
   }
 }
 
 BOOST_AUTO_TEST_CASE(compute_boundary_test_3) {
-  std::vector< double > increasingFiltrationOfTopDimensionalCells;
-  increasingFiltrationOfTopDimensionalCells.push_back(1);
-  increasingFiltrationOfTopDimensionalCells.push_back(2);
-  increasingFiltrationOfTopDimensionalCells.push_back(3);
-  increasingFiltrationOfTopDimensionalCells.push_back(4);
-  increasingFiltrationOfTopDimensionalCells.push_back(5);
-  increasingFiltrationOfTopDimensionalCells.push_back(6);
-  increasingFiltrationOfTopDimensionalCells.push_back(7);
-  increasingFiltrationOfTopDimensionalCells.push_back(8);
-  increasingFiltrationOfTopDimensionalCells.push_back(9);
+  std::vector< double > increasingFiltrationOfTopDimensionalCells({1, 2, 3, 4, 5, 6, 7, 8, 9});
 
-  std::vector<unsigned> dimensions;
-  dimensions.push_back(3);
-  dimensions.push_back(3);
+  std::vector<unsigned> dimensions({3, 3});
 
-  Bitmap_cubical_complex< Bitmap_cubical_complex_base<double> > increasing(dimensions, increasingFiltrationOfTopDimensionalCells);
+  Bitmap_cubical_complex increasing(dimensions, increasingFiltrationOfTopDimensionalCells);
 
   std::vector<unsigned> dim;
   dim.push_back(0);
@@ -508,22 +447,11 @@ BOOST_AUTO_TEST_CASE(compute_boundary_test_3) {
 }
 
 BOOST_AUTO_TEST_CASE(Filtration_simplex_iterator_test) {
-  std::vector< double > increasingFiltrationOfTopDimensionalCells;
-  increasingFiltrationOfTopDimensionalCells.push_back(1);
-  increasingFiltrationOfTopDimensionalCells.push_back(2);
-  increasingFiltrationOfTopDimensionalCells.push_back(3);
-  increasingFiltrationOfTopDimensionalCells.push_back(4);
-  increasingFiltrationOfTopDimensionalCells.push_back(5);
-  increasingFiltrationOfTopDimensionalCells.push_back(6);
-  increasingFiltrationOfTopDimensionalCells.push_back(7);
-  increasingFiltrationOfTopDimensionalCells.push_back(8);
-  increasingFiltrationOfTopDimensionalCells.push_back(9);
+  std::vector< double > increasingFiltrationOfTopDimensionalCells({1, 2, 3, 4, 5, 6, 7, 8, 9});
 
-  std::vector<unsigned> dimensions;
-  dimensions.push_back(3);
-  dimensions.push_back(3);
+  std::vector<unsigned> dimensions({3, 3});
 
-  Bitmap_cubical_complex< Bitmap_cubical_complex_base<double> > increasing(dimensions, increasingFiltrationOfTopDimensionalCells);
+  Bitmap_cubical_complex increasing(dimensions, increasingFiltrationOfTopDimensionalCells);
 
   std::vector< unsigned > dim;
   dim.push_back(0);
@@ -628,34 +556,23 @@ BOOST_AUTO_TEST_CASE(Filtration_simplex_iterator_test) {
   fil.push_back(9);
 
 
-  Bitmap_cubical_complex< Bitmap_cubical_complex_base<double> >::Filtration_simplex_range range = increasing.filtration_simplex_range();
+  Bitmap_cubical_complex::Filtration_simplex_range range = increasing.filtration_simplex_range();
   size_t position = 0;
-  for (Bitmap_cubical_complex< Bitmap_cubical_complex_base<double> >::Filtration_simplex_iterator it = range.begin(); it != range.end(); ++it) {
+  for (Bitmap_cubical_complex::Filtration_simplex_iterator it = range.begin(); it != range.end(); ++it) {
     BOOST_CHECK(increasing.dimension(*it) == dim[position]);
     BOOST_CHECK(increasing.filtration(*it) == fil[position]);
     ++position;
   }
 }
 
-
-
 BOOST_AUTO_TEST_CASE(boudary_operator_2d_bitmap_with_periodic_bcond) {
-  std::vector< double > filtration;
-  filtration.push_back(0);
-  filtration.push_back(0);
-  filtration.push_back(0);
-  filtration.push_back(0);
+  std::vector< double > filtration({0, 0, 0, 0});
 
+  std::vector<unsigned> dimensions({2, 2});
 
-  std::vector<unsigned> dimensions;
-  dimensions.push_back(2);
-  dimensions.push_back(2);
+  std::vector<bool> periodic_directions({true, true});
 
-  std::vector<bool> periodic_directions;
-  periodic_directions.push_back(true);
-  periodic_directions.push_back(true);
-
-  Bitmap_cubical_complex< Bitmap_cubical_complex_periodic_boundary_conditions_base<double> > cmplx(dimensions, filtration,periodic_directions);
+  Bitmap_cubical_complex_periodic_boundary_conditions cmplx(dimensions, filtration, periodic_directions);
   BOOST_CHECK(cmplx.dimension() == 2);
 
 
@@ -709,22 +626,22 @@ BOOST_AUTO_TEST_CASE(boudary_operator_2d_bitmap_with_periodic_bcond) {
   boundary15.push_back(12);
 
   std::vector< std::vector<double> > boundaries;
-  boundaries.push_back( boundary0 );
-  boundaries.push_back( boundary1 );
-  boundaries.push_back( boundary2 );
-  boundaries.push_back( boundary3 );
-  boundaries.push_back( boundary4 );
-  boundaries.push_back( boundary5 );
-  boundaries.push_back( boundary6 );
-  boundaries.push_back( boundary7 );
-  boundaries.push_back( boundary8 );
-  boundaries.push_back( boundary9 );
-  boundaries.push_back( boundary10 );
-  boundaries.push_back( boundary11 );
-  boundaries.push_back( boundary12 );
-  boundaries.push_back( boundary13 );
-  boundaries.push_back( boundary14 );
-  boundaries.push_back( boundary15 );
+  boundaries.push_back(boundary0);
+  boundaries.push_back(boundary1);
+  boundaries.push_back(boundary2);
+  boundaries.push_back(boundary3);
+  boundaries.push_back(boundary4);
+  boundaries.push_back(boundary5);
+  boundaries.push_back(boundary6);
+  boundaries.push_back(boundary7);
+  boundaries.push_back(boundary8);
+  boundaries.push_back(boundary9);
+  boundaries.push_back(boundary10);
+  boundaries.push_back(boundary11);
+  boundaries.push_back(boundary12);
+  boundaries.push_back(boundary13);
+  boundaries.push_back(boundary14);
+  boundaries.push_back(boundary15);
 
   for (size_t i = 0; i != cmplx.size(); ++i) {
     std::vector< size_t > bd = cmplx.get_boundary_of_a_cell(i);
@@ -734,28 +651,14 @@ BOOST_AUTO_TEST_CASE(boudary_operator_2d_bitmap_with_periodic_bcond) {
   }
 }
 
-
-
-
-
-
 BOOST_AUTO_TEST_CASE(coboudary_operator_2d_bitmap_with_periodic_bcond) {
-  std::vector< double > filtration;
-  filtration.push_back(0);
-  filtration.push_back(0);
-  filtration.push_back(0);
-  filtration.push_back(0);
+  std::vector< double > filtration({0, 0, 0, 0});
 
+  std::vector<unsigned> dimensions({2, 2});
 
-  std::vector<unsigned> dimensions;
-  dimensions.push_back(2);
-  dimensions.push_back(2);
+  std::vector<bool> periodic_directions({true, true});
 
-  std::vector<bool> periodic_directions;
-  periodic_directions.push_back(true);
-  periodic_directions.push_back(true);
-
-  Bitmap_cubical_complex< Bitmap_cubical_complex_periodic_boundary_conditions_base<double> > cmplx(dimensions, filtration,periodic_directions);
+  Bitmap_cubical_complex_periodic_boundary_conditions cmplx(dimensions, filtration, periodic_directions);
   BOOST_CHECK(cmplx.dimension() == 2);
 
 
@@ -809,22 +712,22 @@ BOOST_AUTO_TEST_CASE(coboudary_operator_2d_bitmap_with_periodic_bcond) {
   std::vector<double> coboundary15;
 
   std::vector< std::vector<double> > coboundaries;
-  coboundaries.push_back( coboundary0 );
-  coboundaries.push_back( coboundary1 );
-  coboundaries.push_back( coboundary2 );
-  coboundaries.push_back( coboundary3 );
-  coboundaries.push_back( coboundary4 );
-  coboundaries.push_back( coboundary5 );
-  coboundaries.push_back( coboundary6 );
-  coboundaries.push_back( coboundary7 );
-  coboundaries.push_back( coboundary8 );
-  coboundaries.push_back( coboundary9 );
-  coboundaries.push_back( coboundary10 );
-  coboundaries.push_back( coboundary11 );
-  coboundaries.push_back( coboundary12 );
-  coboundaries.push_back( coboundary13 );
-  coboundaries.push_back( coboundary14 );
-  coboundaries.push_back( coboundary15 );
+  coboundaries.push_back(coboundary0);
+  coboundaries.push_back(coboundary1);
+  coboundaries.push_back(coboundary2);
+  coboundaries.push_back(coboundary3);
+  coboundaries.push_back(coboundary4);
+  coboundaries.push_back(coboundary5);
+  coboundaries.push_back(coboundary6);
+  coboundaries.push_back(coboundary7);
+  coboundaries.push_back(coboundary8);
+  coboundaries.push_back(coboundary9);
+  coboundaries.push_back(coboundary10);
+  coboundaries.push_back(coboundary11);
+  coboundaries.push_back(coboundary12);
+  coboundaries.push_back(coboundary13);
+  coboundaries.push_back(coboundary14);
+  coboundaries.push_back(coboundary15);
 
   for (size_t i = 0; i != cmplx.size(); ++i) {
     std::vector< size_t > cbd = cmplx.get_coboundary_of_a_cell(i);
@@ -834,57 +737,40 @@ BOOST_AUTO_TEST_CASE(coboudary_operator_2d_bitmap_with_periodic_bcond) {
   }
 }
 
-
-
-
-
-
-
 BOOST_AUTO_TEST_CASE(bitmap_2d_with_periodic_bcond_filtration) {
-  std::vector< double > filtrationOrg;
-  filtrationOrg.push_back(0);
-  filtrationOrg.push_back(1);
-  filtrationOrg.push_back(2);
-  filtrationOrg.push_back(3);
+  std::vector< double > filtrationOrg({0, 1, 2, 3});
 
+  std::vector<unsigned> dimensions({2, 2});
 
-  std::vector<unsigned> dimensions;
-  dimensions.push_back(2);
-  dimensions.push_back(2);
+  std::vector<bool> periodic_directions({true, true});
 
-  std::vector<bool> periodic_directions;
-  periodic_directions.push_back(true);
-  periodic_directions.push_back(true);
-
-  Bitmap_cubical_complex< Bitmap_cubical_complex_periodic_boundary_conditions_base<double> > cmplx(dimensions, filtrationOrg,periodic_directions);
+  Bitmap_cubical_complex_periodic_boundary_conditions cmplx(dimensions, filtrationOrg, periodic_directions);
   BOOST_CHECK(cmplx.dimension() == 2);
 
 
   std::vector<double> filtration;
-  filtration.push_back(0);//0
-  filtration.push_back(0);//1
-  filtration.push_back(0);//2
-  filtration.push_back(1);//3
-  filtration.push_back(0);//4
-  filtration.push_back(0);//5
-  filtration.push_back(0);//6
-  filtration.push_back(1);//7
-  filtration.push_back(0);//8
-  filtration.push_back(0);//9
-  filtration.push_back(0);//10
-  filtration.push_back(1);//11
-  filtration.push_back(2);//12
-  filtration.push_back(2);//13
-  filtration.push_back(2);//14
-  filtration.push_back(3);//15
+  filtration.push_back(0);  // 0
+  filtration.push_back(0);  // 1
+  filtration.push_back(0);  // 2
+  filtration.push_back(1);  // 3
+  filtration.push_back(0);  // 4
+  filtration.push_back(0);  // 5
+  filtration.push_back(0);  // 6
+  filtration.push_back(1);  // 7
+  filtration.push_back(0);  // 8
+  filtration.push_back(0);  // 9
+  filtration.push_back(0);  // 10
+  filtration.push_back(1);  // 11
+  filtration.push_back(2);  // 12
+  filtration.push_back(2);  // 13
+  filtration.push_back(2);  // 14
+  filtration.push_back(3);  // 15
 
 
-  for (size_t i = 0; i != cmplx.size(); ++i)
-  {
-      BOOST_CHECK( filtration[i] == cmplx.get_cell_data(i) );
+  for (size_t i = 0; i != cmplx.size(); ++i) {
+    BOOST_CHECK(filtration[i] == cmplx.get_cell_data(i));
   }
 }
-
 BOOST_AUTO_TEST_CASE(all_cells_iterator_and_boundary_iterators_in_Bitmap_cubical_complex_base_check)
 {
     std::vector< double > expected_filtration;
@@ -1038,24 +924,24 @@ BOOST_AUTO_TEST_CASE(all_cells_iterator_and_boundary_iterators_in_Bitmap_cubical
     data[2] = 2;
     data[3] = 3;
 
-    Bitmap_cubical_complex_base<double> ba( sizes , data );
+    Bitmap_cubical_complex_base ba( sizes , data );
     int i = 0;
     int bd_it = 0;
     int cbd_it = 0;
-    for ( Bitmap_cubical_complex_base<double>::All_cells_iterator it = ba.all_cells_iterator_begin() ; it != ba.all_cells_iterator_end() ; ++it )
+    for ( Bitmap_cubical_complex_base::All_cells_iterator it = ba.all_cells_iterator_begin() ; it != ba.all_cells_iterator_end() ; ++it )
     {
         BOOST_CHECK( expected_filtration[i] == ba.get_cell_data( *it ) );
         BOOST_CHECK( expected_dimension[i] == ba.get_dimension_of_a_cell( *it ) );
 
-        Bitmap_cubical_complex_base<double>::Boundary_range bdrange = ba.boundary_range(*it);
-        for ( Bitmap_cubical_complex_base<double>::Boundary_iterator bd = bdrange.begin() ; bd != bdrange.end() ; ++bd )
+        Bitmap_cubical_complex_base::Boundary_range bdrange = ba.boundary_range(*it);
+        for ( Bitmap_cubical_complex_base::Boundary_iterator bd = bdrange.begin() ; bd != bdrange.end() ; ++bd )
         {
             BOOST_CHECK( expected_boundary[bd_it] == *bd );
             ++bd_it;
         }
 
-        Bitmap_cubical_complex_base<double>::Coboundary_range cbdrange = ba.coboundary_range(*it);
-        for ( Bitmap_cubical_complex_base<double>::Coboundary_iterator cbd = cbdrange.begin() ; cbd != cbdrange.end() ; ++cbd )
+        Bitmap_cubical_complex_base::Coboundary_range cbdrange = ba.coboundary_range(*it);
+        for ( Bitmap_cubical_complex_base::Coboundary_iterator cbd = cbdrange.begin() ; cbd != cbdrange.end() ; ++cbd )
         {
              BOOST_CHECK( expected_coboundary[cbd_it] == *cbd );
             ++cbd_it;
@@ -1224,26 +1110,26 @@ BOOST_AUTO_TEST_CASE(all_cells_iterator_and_boundary_iterators_in_Bitmap_cubical
     data[2] = 2;
     data[3] = 3;
 
-    Bitmap_cubical_complex_base<double> ba( sizes , data );
+    Bitmap_cubical_complex_base ba( sizes , data );
     int i = 0;
     int bd_it = 0;
     int cbd_it = 0;
 
-    Bitmap_cubical_complex_base<double>::All_cells_range range(&ba);
-    for ( Bitmap_cubical_complex_base<double>::All_cells_iterator it = range.begin() ; it != range.end() ; ++it )
+    Bitmap_cubical_complex_base::All_cells_range range(&ba);
+    for ( Bitmap_cubical_complex_base::All_cells_iterator it = range.begin() ; it != range.end() ; ++it )
     {
         BOOST_CHECK( expected_filtration[i] == ba.get_cell_data( *it ) );
         BOOST_CHECK( expected_dimension[i] == ba.get_dimension_of_a_cell( *it ) );
 
-        Bitmap_cubical_complex_base<double>::Boundary_range bdrange = ba.boundary_range(*it);
-        for ( Bitmap_cubical_complex_base<double>::Boundary_iterator bd = bdrange.begin() ; bd != bdrange.end() ; ++bd )
+        Bitmap_cubical_complex_base::Boundary_range bdrange = ba.boundary_range(*it);
+        for ( Bitmap_cubical_complex_base::Boundary_iterator bd = bdrange.begin() ; bd != bdrange.end() ; ++bd )
         {
             BOOST_CHECK( expected_boundary[bd_it] == *bd );
             ++bd_it;
         }
 
-        Bitmap_cubical_complex_base<double>::Coboundary_range cbdrange = ba.coboundary_range(*it);
-        for ( Bitmap_cubical_complex_base<double>::Coboundary_iterator cbd = cbdrange.begin() ; cbd != cbdrange.end() ; ++cbd )
+        Bitmap_cubical_complex_base::Coboundary_range cbdrange = ba.coboundary_range(*it);
+        for ( Bitmap_cubical_complex_base::Coboundary_iterator cbd = cbdrange.begin() ; cbd != cbdrange.end() ; ++cbd )
         {
              BOOST_CHECK( expected_coboundary[cbd_it] == *cbd );
             ++cbd_it;
@@ -1410,26 +1296,26 @@ BOOST_AUTO_TEST_CASE(all_cells_iterator_and_boundary_iterators_in_Bitmap_cubical
     data[2] = 2;
     data[3] = 3;
 
-    Bitmap_cubical_complex_base<double> ba( sizes , data );
+    Bitmap_cubical_complex_base ba( sizes , data );
     int i = 0;
     int bd_it = 0;
     int cbd_it = 0;
 
-    Bitmap_cubical_complex_base<double>::All_cells_range range = ba.all_cells_range();
-    for ( Bitmap_cubical_complex_base<double>::All_cells_iterator it = range.begin() ; it != range.end() ; ++it )
+    Bitmap_cubical_complex_base::All_cells_range range = ba.all_cells_range();
+    for ( Bitmap_cubical_complex_base::All_cells_iterator it = range.begin() ; it != range.end() ; ++it )
     {
         BOOST_CHECK( expected_filtration[i] == ba.get_cell_data( *it ) );
         BOOST_CHECK( expected_dimension[i] == ba.get_dimension_of_a_cell( *it ) );
 
-        Bitmap_cubical_complex_base<double>::Boundary_range bdrange = ba.boundary_range(*it);
-        for ( Bitmap_cubical_complex_base<double>::Boundary_iterator bd = bdrange.begin() ; bd != bdrange.end() ; ++bd )
+        Bitmap_cubical_complex_base::Boundary_range bdrange = ba.boundary_range(*it);
+        for ( Bitmap_cubical_complex_base::Boundary_iterator bd = bdrange.begin() ; bd != bdrange.end() ; ++bd )
         {
             BOOST_CHECK( expected_boundary[bd_it] == *bd );
             ++bd_it;
         }
 
-        Bitmap_cubical_complex_base<double>::Coboundary_range cbdrange = ba.coboundary_range(*it);
-        for ( Bitmap_cubical_complex_base<double>::Coboundary_iterator cbd = cbdrange.begin() ; cbd != cbdrange.end() ; ++cbd )
+        Bitmap_cubical_complex_base::Coboundary_range cbdrange = ba.coboundary_range(*it);
+        for ( Bitmap_cubical_complex_base::Coboundary_iterator cbd = cbdrange.begin() ; cbd != cbdrange.end() ; ++cbd )
         {
              BOOST_CHECK( expected_coboundary[cbd_it] == *cbd );
             ++cbd_it;
@@ -1478,14 +1364,15 @@ BOOST_AUTO_TEST_CASE(Top_dimensional_cells_iterator_range_check)
     data[2] = 2;
     data[3] = 3;
 
-    Bitmap_cubical_complex_base<double> ba( sizes , data );
+    Bitmap_cubical_complex_base ba( sizes , data );
     int i = 0;
 
-    Bitmap_cubical_complex_base<double>::Top_dimensional_cells_range range = ba.top_dimensional_cells_range();
-    for ( Bitmap_cubical_complex_base<double>::Top_dimensional_cells_iterator it = range.begin() ; it != range.end() ; ++it )
+    Bitmap_cubical_complex_base::Top_dimensional_cells_range range = ba.top_dimensional_cells_range();
+    for ( Bitmap_cubical_complex_base::Top_dimensional_cells_iterator it = range.begin() ; it != range.end() ; ++it )
     {
         BOOST_CHECK( data[i] == ba.get_cell_data( *it ) );
         BOOST_CHECK( ba.get_dimension_of_a_cell( *it ) == 2 );
         ++i;
     }
 }
+
