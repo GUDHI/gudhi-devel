@@ -30,6 +30,7 @@
 #include <utility>  // for pair<>
 #include <algorithm>  // for sort
 #include <vector>
+#include <numeric>  // for iota
 
 namespace Gudhi {
 
