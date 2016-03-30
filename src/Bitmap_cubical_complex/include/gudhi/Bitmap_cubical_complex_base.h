@@ -204,7 +204,7 @@ class Bitmap_cubical_complex_base {
     }
 
     All_cells_iterator operator++() {
-      //first find first element of the counter that can be increased:
+      // first find first element of the counter that can be increased:
       ++this->counter;
       return *this;
     }
@@ -317,14 +317,13 @@ class Bitmap_cubical_complex_base {
    **/
   class Top_dimensional_cells_iterator : std::iterator< std::input_iterator_tag, T > {
    public:
-
     Top_dimensional_cells_iterator(Bitmap_cubical_complex_base& b) : b(b) {
       this->counter = std::vector<size_t>(b.dimension());
-      //std::fill( this->counter.begin() , this->counter.end() , 0 );
+      // std::fill( this->counter.begin() , this->counter.end() , 0 );
     }
 
     Top_dimensional_cells_iterator operator++() {
-      //first find first element of the counter that can be increased:
+      // first find first element of the counter that can be increased:
       size_t dim = 0;
       while ((dim != this->b.dimension()) && (this->counter[dim] == this->b.sizes[dim] - 1))++dim;
 
@@ -499,7 +498,7 @@ void Bitmap_cubical_complex_base<T>::put_data_to_bins(size_t number_of_bins) {
   std::pair< T, T > min_max = this->min_max_filtration();
   T dx = (min_max.second - min_max.first) / (T) number_of_bins;
 
-  //now put the data into the appropriate bins:
+  // now put the data into the appropriate bins:
   for (size_t i = 0; i != this->data.size(); ++i) {
     if (bdg) {
       std::cerr << "Before binning : " << this->data[i] << std::endl;
@@ -518,7 +517,7 @@ void Bitmap_cubical_complex_base<T>::put_data_to_bins(T diameter_of_bin) {
   std::pair< T, T > min_max = this->min_max_filtration();
 
   size_t number_of_bins = (min_max.second - min_max.first) / diameter_of_bin;
-  //now put the data into the appropriate bins:
+  // now put the data into the appropriate bins:
   for (size_t i = 0; i != this->data.size(); ++i) {
     if (bdg) {
       std::cerr << "Before binning : " << this->data[i] << std::endl;
@@ -542,7 +541,7 @@ std::pair< T, T > Bitmap_cubical_complex_base<T>::min_max_filtration() {
 }
 
 template <typename K>
-ostream& operator<<(ostream & out, const Bitmap_cubical_complex_base<K>& b) {
+std::ostream& operator<<(std::ostream & out, const Bitmap_cubical_complex_base<K>& b) {
   for (typename Bitmap_cubical_complex_base<K>::all_cells_const_iterator
        it = b.all_cells_const_begin(); it != b.all_cells_const_end(); ++it) {
     out << *it << " ";
@@ -565,16 +564,13 @@ void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_top_dimensional_cells
     number_of_top_dimensional_elements *= sizes_in_following_directions[i];
   }
   if (number_of_top_dimensional_elements != top_dimensional_cells.size()) {
-    std::cerr <<
-        "Error in constructor\
-        Bitmap_cubical_complex_base\
-       ( std::vector<size_t> sizes_in_following_directions , std::vector<T> top_dimensional_cells ).\
-       Number of top dimensional elements that follow from sizes_in_following_directions vector is different\
-       than the size of top_dimensional_cells vector." << std::endl;
-    throw ("Error in constructor Bitmap_cubical_complex_base( std::vector<size_t> sizes_in_following_directions,\
-        std::vector<T> top_dimensional_cells )\
-      . Number of top dimensional elements that follow from sizes_in_following_directions vector is different than the\
-       size of top_dimensional_cells vector.");
+    std::cerr << "Error in constructor Bitmap_cubical_complex_base ( std::vector<size_t> sizes_in_following_directions"
+        << ", std::vector<T> top_dimensional_cells ). Number of top dimensional elements that follow from "
+        << "sizes_in_following_directions vector is different than the size of top_dimensional_cells vector."
+        << std::endl;
+    throw ("Error in constructor Bitmap_cubical_complex_base( std::vector<size_t> sizes_in_following_directions,"
+           "std::vector<T> top_dimensional_cells ). Number of top dimensional elements that follow from "
+           "sizes_in_following_directions vector is different than the size of top_dimensional_cells vector.");
   }
 
   Bitmap_cubical_complex_base<T>::Top_dimensional_cells_iterator it(*this);
@@ -610,7 +606,6 @@ void Bitmap_cubical_complex_base<T>::read_perseus_style_file(const char* perseus
   for (size_t i = 0; i != dimensionOfData; ++i) {
     unsigned size_in_this_dimension;
     inFiltration >> size_in_this_dimension;
-    size_in_this_dimension = size_in_this_dimension;
     sizes.push_back(size_in_this_dimension);
     if (dbg) {
       std::cerr << "size_in_this_dimension : " << size_in_this_dimension << std::endl;
@@ -738,8 +733,7 @@ template <typename T>
 void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration() {
   bool dbg = false;
 
-  //this vector will be used to check which elements have already been taken care of
-  //in imposing lower star filtration:
+  // this vector will be used to check which elements have already been taken care of in imposing lower star filtration
   std::vector<bool> is_this_cell_considered(this->data.size(), false);
 
   size_t size_to_reserve = 1;
@@ -749,8 +743,8 @@ void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration() {
 
   std::vector<size_t> indices_to_consider;
   indices_to_consider.reserve(size_to_reserve);
-  //we assume here that we already have a filtration on the top dimensional cells and
-  //we have to extend it to lower ones.
+  // we assume here that we already have a filtration on the top dimensional cells and
+  // we have to extend it to lower ones.
   typename Bitmap_cubical_complex_base<T>::Top_dimensional_cells_iterator it(*this);
   for (it = this->top_dimensional_cells_iterator_begin(); it != this->top_dimensional_cells_iterator_end(); ++it) {
     indices_to_consider.push_back(it.compute_index_in_bitmap());
@@ -799,7 +793,7 @@ bool compareFirstElementsOfTuples(const std::pair< std::pair< T, size_t >, char 
     if (first.first.first > second.first.first) {
       return false;
     }
-    //in this case first.first.first == second.first.first, so we need to compare dimensions
+    // in this case first.first.first == second.first.first, so we need to compare dimensions
     return first.second < second.second;
   }
 }

@@ -26,6 +26,10 @@
 #include <gudhi/Bitmap_cubical_complex_base.h>
 #include <gudhi/Bitmap_cubical_complex_periodic_boundary_conditions_base.h>
 
+#ifdef GUDHI_USE_TBB
+#include <tbb/parallel_sort.h>
+#endif
+
 #include <limits>
 #include <utility>  // for pair<>
 #include <algorithm>  // for sort
@@ -129,7 +133,7 @@ class Bitmap_cubical_complex : public T {
   /**
    * Destructor of the Bitmap_cubical_complex class.
    **/
-  virtual ~Bitmap_cubical_complex(){}
+  virtual ~Bitmap_cubical_complex() {}
 
   //*********************************************//
   // Other 'easy' functions
@@ -259,7 +263,7 @@ class Bitmap_cubical_complex : public T {
    public:
     Filtration_simplex_iterator(Bitmap_cubical_complex* b) : b(b), position(0) { }
 
-    Filtration_simplex_iterator() : b(NULL) { }
+    Filtration_simplex_iterator() : b(NULL), position(0) { }
 
     Filtration_simplex_iterator operator++() {
       if (globalDbg) {
@@ -537,9 +541,11 @@ void Bitmap_cubical_complex<T>::initialize_simplex_associated_to_key() {
   }
   this->simplex_associated_to_key = std::vector<size_t>(this->data.size());
   std::iota(std::begin(simplex_associated_to_key), std::end(simplex_associated_to_key), 0);
-  std::sort(simplex_associated_to_key.begin(),
-            simplex_associated_to_key.end(),
-            is_before_in_filtration<T>(this));
+#ifdef GUDHI_USE_TBB
+  tbb::parallel_sort(filtration_vect_, is_before_in_filtration(this));
+#else
+  std::sort(simplex_associated_to_key.begin(), simplex_associated_to_key.end(), is_before_in_filtration<T>(this));
+#endif
 
   // we still need to deal here with a key_associated_to_simplex:
   for ( size_t i = 0  ; i != simplex_associated_to_key.size() ; ++i )

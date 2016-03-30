@@ -84,7 +84,7 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
   /**
    * Destructor of the Bitmap_cubical_complex_periodic_boundary_conditions_base class.
    **/
-  virtual ~Bitmap_cubical_complex_periodic_boundary_conditions_base(){}
+  virtual ~Bitmap_cubical_complex_periodic_boundary_conditions_base() {}
 
   // overwritten methods co compute boundary and coboundary
   /**
