@@ -83,6 +83,7 @@ else()
   message(STATUS "boost library dirs:" ${Boost_LIBRARY_DIRS})
 
   include_directories(src/common/include/)
+  include_directories(src/Bitmap_cubical_complex/include/)
   include_directories(src/Bottleneck/include/)
   include_directories(src/Contraction/include/)
   include_directories(src/Hasse_complex/include/)
@@ -100,6 +101,8 @@ else()
   add_subdirectory(src/Contraction/example)
   add_subdirectory(src/Witness_complex/test)
   add_subdirectory(src/Witness_complex/example)
+  add_subdirectory(src/Bitmap_cubical_complex/test)
+  add_subdirectory(src/Bitmap_cubical_complex/example)
 
   # data points generator
   add_subdirectory(data/points/generator)

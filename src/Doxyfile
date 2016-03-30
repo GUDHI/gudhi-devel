@@ -835,7 +835,8 @@ EXAMPLE_RECURSIVE      = NO
 IMAGE_PATH             = doc/Skeleton_blocker/ \
 	doc/common/ \
 	doc/Contraction/ \
-	doc/Witness_complex/
+	doc/Witness_complex/ \
+	doc/Bitmap_cubical_complex/
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should
 # invoke to filter for each input file. Doxygen will invoke the filter program
