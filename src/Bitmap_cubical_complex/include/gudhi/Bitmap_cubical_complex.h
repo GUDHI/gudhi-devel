@@ -46,9 +46,12 @@ const bool globalDbg = false;
 template <typename T> class is_before_in_filtration;
 
 /**
-* This is a Bitmap_cubical_complex class. It joints a functionalities of Bitmap_cubical_complex_base and Bitmap_cubical_complex_periodic_boundary_conditions_base classes into
-* Gudhi persistent homology engine. It is a template class that inherit from its template parameter. The template parameter is supposed to be either Bitmap_cubical_complex_base or Bitmap_cubical_complex_periodic_boundary_conditions_base class.
-**/
+ * This is a Bitmap_cubical_complex class. It joints a functionalities of Bitmap_cubical_complex_base and
+ * Bitmap_cubical_complex_periodic_boundary_conditions_base classes into
+ * Gudhi persistent homology engine. It is a template class that inherit from its template parameter. The template
+ * parameter is supposed to be either Bitmap_cubical_complex_base or
+ * Bitmap_cubical_complex_periodic_boundary_conditions_base class.
+ **/
 
 /**
  *@class Bitmap_cubical_complex
@@ -113,7 +116,8 @@ class Bitmap_cubical_complex : public T {
   /**
    * Constructor that requires vector of elements of type unsigned, which gives number of top dimensional cells
    * in the following directions and vector of element of a type T::filtration_type
-   * with filtration on top dimensional cells. The last parameter of the constructor is a vector of bools of a length equal to the dimension of cubical complex.
+   * with filtration on top dimensional cells. The last parameter of the constructor is a vector of boolean of a length
+   * equal to the dimension of cubical complex.
    * If the position i on this vector is true, then we impose periodic boundary conditions in this direction.
    **/
   Bitmap_cubical_complex(const std::vector<unsigned>& dimensions,
@@ -545,7 +549,7 @@ void Bitmap_cubical_complex<T>::initialize_simplex_associated_to_key() {
   this->simplex_associated_to_key = std::vector<size_t>(this->data.size());
   std::iota(std::begin(simplex_associated_to_key), std::end(simplex_associated_to_key), 0);
 #ifdef GUDHI_USE_TBB
-  tbb::parallel_sort(filtration_vect_, is_before_in_filtration(this));
+  tbb::parallel_sort(simplex_associated_to_key, is_before_in_filtration<T>(this));
 #else
   std::sort(simplex_associated_to_key.begin(), simplex_associated_to_key.end(), is_before_in_filtration<T>(this));
 #endif
