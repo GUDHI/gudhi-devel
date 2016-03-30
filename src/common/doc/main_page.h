@@ -3,7 +3,7 @@
  * \image html "Gudhi_banner.jpg" "" width=20cm
  * 
  * \section Introduction Introduction
- * The Gudhi library (Geometric Understanding in Higher Dimensions) is a generic open source C++ library for
+ * The Gudhi library (Geometry Understanding in Higher Dimensions) is a generic open source C++ library for
  * Computational Topology and Topological Data Analysis
  * (<a class="el" target="_blank" href="https://en.wikipedia.org/wiki/Topological_data_analysis">TDA</a>).
  * The GUDHI library intends  to help the development of new algorithmic solutions in TDA and their transfer to
@@ -20,16 +20,32 @@
  * We refer to \cite gudhilibrary_ICMS14 for a detailed description of the design of the library.
  *
  \section DataStructures Data structures
+ \subsection CubicalComplexDataStructure Cubical complex
+ \image html "Cubical_complex_representation.png" "Cubical complex representation"
+<table border="0">
+  <tr>
+    <td width="25%">
+      <b>Author:</b> Pawel Dlotko<br>
+      <b>Introduced in:</b> GUDHI 1.3.0<br>
+      <b>Copyright:</b> GPL v3<br>
+    </td>
+    <td width="75%">
+    The cubical complex is an example of a structured complex useful in computational mathematics (specially
+    rigorous numerics) and image analysis.<br>
+    <b>User manual:</b> \ref cubical_complex - <b>Reference manual:</b> Gudhi::Cubical_complex::Bitmap_cubical_complex
+    </td>
+ </tr>
+</table>
  \subsection SimplexTreeDataStructure Simplex tree
  \image html "Simplex_tree_representation.png" "Simplex tree representation"
 <table border="0">
   <tr>
     <td width="25%">
+      <b>Author:</b> Clément Maria<br>
       <b>Introduced in:</b> GUDHI 1.0.0<br>
       <b>Copyright:</b> GPL v3<br>
     </td>
     <td width="75%">
-    <i>Clément Maria</i><br>
     The simplex tree is an efficient and flexible
  data structure for representing general (filtered) simplicial complexes. The data structure
  is described in \cite boissonnatmariasimplextreealgorithmica .<br>
@@ -42,11 +58,11 @@
 <table border="0">
   <tr>
     <td width="25%">
+      <b>Author:</b> David Salinas<br>
       <b>Introduced in:</b> GUDHI 1.1.0<br>
       <b>Copyright:</b> GPL v3<br>
     </td>
     <td width="75%">
-    <i>David Salinas</i><br>
     The Skeleton-Blocker data-structure proposes a light encoding for simplicial complexes by storing only an *implicit*
     representation of its simplices \cite socg_blockers_2011,\cite blockers2012. Intuitively, it just stores the
     1-skeleton of a simplicial complex with a graph and the set of its "missing faces" that is very small in practice.
@@ -62,11 +78,11 @@
 <table border="0">
   <tr>
     <td width="25%">
+      <b>Author:</b> Siargey Kachanovich<br>
       <b>Introduced in:</b> GUDHI 1.3.0<br>
       <b>Copyright:</b> GPL v3<br>
     </td>
     <td width="75%">
-    <i>Siargey Kachanovich</i><br>
     Witness complex \f$ Wit(W,L) \f$  is a simplicial complex defined on two sets of points in \f$\mathbb{R}^D\f$.
     The data structure is described in \cite boissonnatmariasimplextreealgorithmica .<br>
     <b>User manual:</b> \ref witness_complex - <b>Reference manual:</b> Gudhi::witness_complex::SimplicialComplexForWitness
@@ -75,16 +91,34 @@
 </table>
  
  \section Toolbox Toolbox
+ \subsection ContractionToolbox Contraction
+ \image html "sphere_contraction_representation.png" "Sphere contraction example"
+<table border="0">
+  <tr>
+    <td width="25%">
+      <b>Author:</b> David Salinas<br>
+      <b>Introduced in:</b> GUDHI 1.1.0<br>
+      <b>Copyright:</b> GPL v3<br>
+    </td>
+    <td width="75%">
+    The purpose of this package is to offer a user-friendly interface for edge contraction simplification of huge
+    simplicial complexes. It uses the \ref skbl data-structure whose size remains small  during simplification of most
+    used geometrical complexes of topological data analysis such as the Rips or the Delaunay complexes. In practice,
+    the size of this data-structure is even much lower than the total number of simplices.<br>
+    <b>User manual:</b> \ref contr
+    </td>
+ </tr>
+</table>
  \subsection PersistentCohomologyToolbox Persistent Cohomology
  \image html "3DTorus_poch.png" "Rips Persistent Cohomology on a 3D Torus"
 <table border="0">
   <tr>
     <td width="25%">
+      <b>Author:</b> Clément Maria<br>
       <b>Introduced in:</b> GUDHI 1.0.0<br>
       <b>Copyright:</b> GPL v3<br>
     </td>
     <td width="75%">
-    <i>Clément Maria</i><br>
     The theory of homology consists in attaching to a topological space a sequence of (homology) groups, capturing
     global topological features like connected components, holes, cavities, etc. Persistent homology studies the
     evolution -- birth, life and death -- of these features when the topological space is changing. Consequently, the
@@ -94,24 +128,6 @@
     \cite DBLP:journals/corr/abs-1208-5018 and the Compressed Annotation Matrix implementation of
     \cite DBLP:conf/esa/BoissonnatDM13 .<br>
     <b>User manual:</b> \ref persistent_cohomology
-    </td>
- </tr>
-</table>
- \subsection ContractionToolbox Contraction
- \image html "sphere_contraction_representation.png" "Sphere contraction example"
-<table border="0">
-  <tr>
-    <td width="25%">
-      <b>Introduced in:</b> GUDHI 1.1.0<br>
-      <b>Copyright:</b> GPL v3<br>
-    </td>
-    <td width="75%">
-    <i>David Salinas</i><br>
-    The purpose of this package is to offer a user-friendly interface for edge contraction simplification of huge
-    simplicial complexes. It uses the \ref skbl data-structure whose size remains small  during simplification of most
-    used geometrical complexes of topological data analysis such as the Rips or the Delaunay complexes. In practice,
-    the size of this data-structure is even much lower than the total number of simplices.<br>
-    <b>User manual:</b> \ref contr
     </td>
  </tr>
 </table>
