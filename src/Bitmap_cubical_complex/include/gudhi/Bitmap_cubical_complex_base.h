@@ -779,7 +779,6 @@ void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration() {
               << " while of a cell: " << indices_to_consider[i] << " is: " << this->data[ indices_to_consider[i] ]
               << std::endl;
           getchar();
-
         }
         if (this->data[ bd[boundaryIt] ] > this->data[ indices_to_consider[i] ]) {
           this->data[ bd[boundaryIt] ] = this->data[ indices_to_consider[i] ];

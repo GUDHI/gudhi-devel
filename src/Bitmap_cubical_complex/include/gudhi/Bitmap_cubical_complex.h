@@ -397,7 +397,8 @@ class Bitmap_cubical_complex : public T {
     }
     // this method returns two first elements from the boundary of sh.
     if (bdry.size() < 2)
-      throw("Error in endpoints in Bitmap_cubical_complex class. The cell have less than two elements in the boundary.");
+      throw("Error in endpoints in Bitmap_cubical_complex class. The cell have less than two elements in the "
+            "boundary.");
     return std::make_pair(bdry[0], bdry[1]);
   }
 
@@ -550,8 +551,7 @@ void Bitmap_cubical_complex<T>::initialize_simplex_associated_to_key() {
 #endif
 
   // we still need to deal here with a key_associated_to_simplex:
-  for ( size_t i = 0  ; i != simplex_associated_to_key.size() ; ++i )
-  {
+  for ( size_t i = 0  ; i != simplex_associated_to_key.size() ; ++i ) {
     this->key_associated_to_simplex[ simplex_associated_to_key[i] ] = i;
   }
 }
