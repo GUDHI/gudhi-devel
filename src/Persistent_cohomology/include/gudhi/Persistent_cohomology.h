@@ -48,6 +48,7 @@ namespace persistent_cohomology {
 
 /** \defgroup persistent_cohomology Persistent Cohomology
   *
+ \author    Clément Maria
 
   Computation of persistent cohomology using the algorithm of 
    \cite DBLP:journals/dcg/SilvaMV11 and \cite DBLP:journals/corr/abs-1208-5018 
@@ -169,11 +170,6 @@ points sampling a Klein bottle in \f$\mathbb{R}^5\f$ with a simplex tree, its co
 Hasse diagram and the computation of persistent homology and multi-field persistent homology for the 
 different representations.
 
-
-
- \author    Clément Maria
- \version   1.0
- \date      2014
  \copyright GNU General Public License v3.
  @{  
  */

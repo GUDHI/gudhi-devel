@@ -39,13 +39,10 @@ namespace Gudhi {
 namespace Cubical_complex {
 
 /**
- * @class Bitmap_cubical_complex_base
+ * @class Bitmap_cubical_complex_base Bitmap_cubical_complex_base.h gudhi/Bitmap_cubical_complex_base.h
  * @brief Cubical complex represented as a bitmap, class with basic implementation.
  * @ingroup cubical_complex
- */
-
-/**
- * This is a class implementing a basic bitmap data structure to store cubical complexes.
+ * @details This is a class implementing a basic bitmap data structure to store cubical complexes.
  * It implements only the most basic subroutines.
  * The idea of the bitmap is the following. Our aim is to have a memory efficient
  * data structure to store d-dimensional cubical complex

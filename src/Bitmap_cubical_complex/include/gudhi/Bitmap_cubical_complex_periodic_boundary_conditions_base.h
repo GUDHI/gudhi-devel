@@ -39,12 +39,10 @@ namespace Cubical_complex {
 // the cells on the right / top are not in the Bitmap_cubical_complex_periodic_boundary_conditions_base
 
 /**
- * @class Bitmap_cubical_complex_periodic_boundary_conditions_base
+ * @class Bitmap_cubical_complex_periodic_boundary_conditions_base Bitmap_cubical_complex_periodic_boundary_conditions_base.h gudhi/Bitmap_cubical_complex_periodic_boundary_conditions_base.h
  * @brief Cubical complex with periodic boundary conditions represented as a bitmap.
  * @ingroup cubical_complex
- */
-/**
- * This is a class implementing a bitmap data structure with periodic boundary conditions. Most of the functions are
+ * @details This is a class implementing a bitmap data structure with periodic boundary conditions. Most of the functions are
  * identical to the functions from Bitmap_cubical_complex_base.
  * The ones that needed to be updated are the constructors and get_boundary_of_a_cell and get_coboundary_of_a_cell.
  */

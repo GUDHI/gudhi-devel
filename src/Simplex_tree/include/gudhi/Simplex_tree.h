@@ -48,6 +48,7 @@
 namespace Gudhi {
 
 /** \defgroup simplex_tree Filtered Complexes
+ * \author    Cl&eacute;ment Maria
  *
  * A simplicial complex \f$\mathbf{K}\f$
  * on a set of vertices \f$V = \{1, \cdots ,|V|\}\f$ is a collection of simplices
@@ -75,10 +76,6 @@ namespace Gudhi {
  when accessing the boundary of a simplex, but is less compact and harder to construct from
  scratch.
 
-
- * \author    Clément Maria
- * \version   1.0
- * \date      2014
  * \copyright GNU General Public License v3.
  * @{
  */

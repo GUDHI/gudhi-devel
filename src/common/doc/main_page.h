@@ -41,7 +41,7 @@
 <table border="0">
   <tr>
     <td width="25%">
-      <b>Author:</b> Clément Maria<br>
+      <b>Author:</b> Cl&eacute;ment Maria<br>
       <b>Introduced in:</b> GUDHI 1.0.0<br>
       <b>Copyright:</b> GPL v3<br>
     </td>
@@ -114,7 +114,7 @@
 <table border="0">
   <tr>
     <td width="25%">
-      <b>Author:</b> Clément Maria<br>
+      <b>Author:</b> Cl&eacute;ment Maria<br>
       <b>Introduced in:</b> GUDHI 1.0.0<br>
       <b>Copyright:</b> GPL v3<br>
     </td>

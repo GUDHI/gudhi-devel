@@ -31,6 +31,7 @@ namespace Gudhi {
 namespace Cubical_complex {
 
 /**
+ * @class counter counter.h gudhi/Bitmap_cubical_complex/counter.h
  * This is an implementation of a counter being a vector of integers. 
  * The constructor of the class takes as an input two vectors W and V. 
  * It assumes that W < V coordinatewise.
@@ -40,7 +41,6 @@ namespace Cubical_complex {
  * The current counter reach the end counter V if the value returned by the increment function is FALSE.
  * This class is needed for the implementation of a bitmapCubicalComplex.
  **/
-
 class counter {
  public:
   /**
