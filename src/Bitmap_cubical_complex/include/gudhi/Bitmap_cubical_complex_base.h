@@ -140,7 +140,7 @@ class Bitmap_cubical_complex_base {
    * then there is no need to call this function. Call it only if you are putting the filtration
    * of the cells by your own (for instance by using Top_dimensional_cells_iterator).
    **/
-  void impose_lower_star_filtration(); // assume that top dimensional cells are already set.
+  void impose_lower_star_filtration();  // assume that top dimensional cells are already set.
 
   /**
    * Returns dimension of a complex.
@@ -198,7 +198,6 @@ class Bitmap_cubical_complex_base {
    **/
   class All_cells_iterator : std::iterator< std::input_iterator_tag, T > {
    public:
-
     All_cells_iterator() {
       this->counter = 0;
     }
@@ -215,7 +214,7 @@ class Bitmap_cubical_complex_base {
       return result;
     }
 
-    All_cells_iterator operator=(const All_cells_iterator& rhs) {
+    All_cells_iterator& operator=(const All_cells_iterator& rhs) {
       this->counter = rhs.counter;
       return *this;
     }
@@ -230,8 +229,10 @@ class Bitmap_cubical_complex_base {
     }
 
     /*
-     * The operator * returns position of a cube in the structure of cubical complex. This position can be then used as an argument of the following functions:
-     * get_boundary_of_a_cell, get_coboundary_of_a_cell, get_dimension_of_a_cell to get information about the cell boundary and coboundary and dimension
+     * The operator * returns position of a cube in the structure of cubical complex. This position can be then used as
+     * an argument of the following functions:
+     * get_boundary_of_a_cell, get_coboundary_of_a_cell, get_dimension_of_a_cell to get information about the cell
+     * boundary and coboundary and dimension
      * and in function get_cell_data to get a filtration of a cell.
      */
     size_t operator*() {
@@ -264,8 +265,7 @@ class Bitmap_cubical_complex_base {
    **/
   class All_cells_range {
    public:
-
-    All_cells_range(Bitmap_cubical_complex_base* b) : b(b) { };
+    All_cells_range(Bitmap_cubical_complex_base* b) : b(b) { }
 
     All_cells_iterator begin() {
       return b->all_cells_iterator_begin();
@@ -344,7 +344,7 @@ class Bitmap_cubical_complex_base {
       return result;
     }
 
-    Top_dimensional_cells_iterator operator=(const Top_dimensional_cells_iterator& rhs) {
+    Top_dimensional_cells_iterator& operator=(const Top_dimensional_cells_iterator& rhs) {
       this->counter = rhs.counter;
       this->b = rhs.b;
       return *this;
@@ -364,8 +364,10 @@ class Bitmap_cubical_complex_base {
     }
 
     /*
-     * The operator * returns position of a cube in the structure of cubical complex. This position can be then used as an argument of the following functions:
-     * get_boundary_of_a_cell, get_coboundary_of_a_cell, get_dimension_of_a_cell to get information about the cell boundary and coboundary and dimension
+     * The operator * returns position of a cube in the structure of cubical complex. This position can be then used as
+     * an argument of the following functions:
+     * get_boundary_of_a_cell, get_coboundary_of_a_cell, get_dimension_of_a_cell to get information about the cell
+     * boundary and coboundary and dimension
      * and in function get_cell_data to get a filtration of a cell.
      */
     size_t operator*() {
@@ -416,8 +418,7 @@ class Bitmap_cubical_complex_base {
    **/
   class Top_dimensional_cells_range {
    public:
-
-    Top_dimensional_cells_range(Bitmap_cubical_complex_base* b) : b(b) { };
+    Top_dimensional_cells_range(Bitmap_cubical_complex_base* b) : b(b) { }
 
     Top_dimensional_cells_iterator begin() {
       return b->top_dimensional_cells_iterator_begin();
@@ -485,10 +486,13 @@ class Bitmap_cubical_complex_base {
     return counter;
   }
   void read_perseus_style_file(const char* perseus_style_file);
-  void setup_bitmap_based_on_top_dimensional_cells_list(const std::vector<unsigned>& sizes_in_following_directions, const std::vector<T>& top_dimensional_cells);
+  void setup_bitmap_based_on_top_dimensional_cells_list(const std::vector<unsigned>& sizes_in_following_directions,
+                                                        const std::vector<T>& top_dimensional_cells);
   Bitmap_cubical_complex_base(const char* perseus_style_file, std::vector<bool> directions);
   Bitmap_cubical_complex_base(const std::vector<unsigned>& sizes, std::vector<bool> directions);
-  Bitmap_cubical_complex_base(const std::vector<unsigned>& dimensions, const std::vector<T>& top_dimensional_cells, std::vector<bool> directions);
+  Bitmap_cubical_complex_base(const std::vector<unsigned>& dimensions,
+                              const std::vector<T>& top_dimensional_cells,
+                              std::vector<bool> directions);
 };
 
 template <typename T>
@@ -556,7 +560,8 @@ Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base
 }
 
 template <typename T>
-void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_top_dimensional_cells_list(const std::vector<unsigned>& sizes_in_following_directions, const std::vector<T>& top_dimensional_cells) {
+void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_top_dimensional_cells_list(const std::vector<unsigned>& sizes_in_following_directions,
+                                                                                      const std::vector<T>& top_dimensional_cells) {
   this->set_up_containers(sizes_in_following_directions);
 
   size_t number_of_top_dimensional_elements = 1;
@@ -568,7 +573,7 @@ void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_top_dimensional_cells
         << ", std::vector<T> top_dimensional_cells ). Number of top dimensional elements that follow from "
         << "sizes_in_following_directions vector is different than the size of top_dimensional_cells vector."
         << std::endl;
-    throw ("Error in constructor Bitmap_cubical_complex_base( std::vector<size_t> sizes_in_following_directions,"
+    throw("Error in constructor Bitmap_cubical_complex_base( std::vector<size_t> sizes_in_following_directions,"
            "std::vector<T> top_dimensional_cells ). Number of top dimensional elements that follow from "
            "sizes_in_following_directions vector is different than the size of top_dimensional_cells vector.");
   }
@@ -591,7 +596,7 @@ Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base
 template <typename T>
 void Bitmap_cubical_complex_base<T>::read_perseus_style_file(const char* perseus_style_file) {
   bool dbg = false;
-  std::ifstream inFiltration, inIds;
+  std::ifstream inFiltration;
   inFiltration.open(perseus_style_file);
   unsigned dimensionOfData;
   inFiltration >> dimensionOfData;
@@ -634,23 +639,30 @@ void Bitmap_cubical_complex_base<T>::read_perseus_style_file(const char* perseus
 }
 
 template <typename T>
-Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const char* perseus_style_file, std::vector<bool> directions) {
-  //this constructor is here just for compatibility with a class that creates cubical complexes with periodic bundary conditions.
-  //It ignores the last parameter of the function.
+Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const char* perseus_style_file,
+                                                            std::vector<bool> directions) {
+  // this constructor is here just for compatibility with a class that creates cubical complexes with periodic boundary
+  // conditions.
+  // It ignores the last parameter of the function.
   this->read_perseus_style_file(perseus_style_file);
 }
 
 template <typename T>
-Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const std::vector<unsigned>& sizes, std::vector<bool> directions) {
-  //this constructor is here just for compatibility with a class that creates cubical complexes with periodic bundary conditions.
-  //It ignores the last parameter of the function.
+Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const std::vector<unsigned>& sizes,
+                                                            std::vector<bool> directions) {
+  // this constructor is here just for compatibility with a class that creates cubical complexes with periodic boundary
+  // conditions.
+  // It ignores the last parameter of the function.
   this->set_up_containers(sizes);
 }
 
 template <typename T>
-Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const std::vector<unsigned>& dimensions, const std::vector<T>& top_dimensional_cells, std::vector<bool> directions) {
-  //this constructor is here just for compatibility with a class that creates cubical complexes with periodic bundary conditions.
-  //It ignores the last parameter of the function.
+Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const std::vector<unsigned>& dimensions,
+                                                            const std::vector<T>& top_dimensional_cells,
+                                                            std::vector<bool> directions) {
+  // this constructor is here just for compatibility with a class that creates cubical complexes with periodic boundary
+  // conditions.
+  // It ignores the last parameter of the function.
   this->setup_bitmap_based_on_top_dimensional_cells_list(dimensions, top_dimensional_cells);
 }
 
@@ -663,7 +675,7 @@ template <typename T>
 std::vector< size_t > Bitmap_cubical_complex_base<T>::get_boundary_of_a_cell(size_t cell)const {
   std::vector< size_t > boundary_elements;
 
-  //Speed traded of for memory. Check if it is better in practice.
+  // Speed traded of for memory. Check if it is better in practice.
   boundary_elements.reserve(this->dimension()*2);
 
   size_t cell1 = cell;
@@ -763,14 +775,17 @@ void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration() {
       std::vector<size_t> bd = this->get_boundary_of_a_cell(indices_to_consider[i]);
       for (size_t boundaryIt = 0; boundaryIt != bd.size(); ++boundaryIt) {
         if (dbg) {
-          std::cerr << "filtration of a cell : " << bd[boundaryIt] << " is : " << this->data[ bd[boundaryIt] ] << " while of a cell: " << indices_to_consider[i] << " is: " << this->data[ indices_to_consider[i] ] << std::endl;
+          std::cerr << "filtration of a cell : " << bd[boundaryIt] << " is : " << this->data[ bd[boundaryIt] ]
+              << " while of a cell: " << indices_to_consider[i] << " is: " << this->data[ indices_to_consider[i] ]
+              << std::endl;
           getchar();
 
         }
         if (this->data[ bd[boundaryIt] ] > this->data[ indices_to_consider[i] ]) {
           this->data[ bd[boundaryIt] ] = this->data[ indices_to_consider[i] ];
           if (dbg) {
-            std::cerr << "Setting the value of a cell : " << bd[boundaryIt] << " to : " << this->data[ indices_to_consider[i] ] << std::endl;
+            std::cerr << "Setting the value of a cell : " << bd[boundaryIt] << " to : "
+                << this->data[ indices_to_consider[i] ] << std::endl;
             getchar();
           }
         }
@@ -798,8 +813,8 @@ bool compareFirstElementsOfTuples(const std::pair< std::pair< T, size_t >, char 
   }
 }
 
-} // namespace Cubical_complex
+}  // namespace Cubical_complex
 
-} // namespace Gudhi
+}  // namespace Gudhi
 
 #endif  // BITMAP_CUBICAL_COMPLEX_BASE_H_

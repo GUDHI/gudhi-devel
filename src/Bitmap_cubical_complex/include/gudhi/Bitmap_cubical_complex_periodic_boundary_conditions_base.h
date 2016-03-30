@@ -44,9 +44,10 @@ namespace Cubical_complex {
  * @ingroup cubical_complex
  */
 /**
-* This is a class implementing a bitmap data structure with periodic boundary conditions. Most of the functions are identical to the functions from Bitmap_cubical_complex_base.
-* The ones that needed to be updated are the constructors and get_boundary_of_a_cell and get_coboundary_of_a_cell.
-*/
+ * This is a class implementing a bitmap data structure with periodic boundary conditions. Most of the functions are
+ * identical to the functions from Bitmap_cubical_complex_base.
+ * The ones that needed to be updated are the constructors and get_boundary_of_a_cell and get_coboundary_of_a_cell.
+ */
 template <typename T>
 class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_cubical_complex_base<T> {
  public:
@@ -88,14 +89,16 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
 
   // overwritten methods co compute boundary and coboundary
   /**
-   * A version of a function that return boundary of a given cell for an object of Bitmap_cubical_complex_periodic_boundary_conditions_base class.
+   * A version of a function that return boundary of a given cell for an object of
+   * Bitmap_cubical_complex_periodic_boundary_conditions_base class.
    */
-  virtual std::vector< size_t > get_boundary_of_a_cell(size_t cell)const;
+  virtual std::vector< size_t > get_boundary_of_a_cell(size_t cell) const;
 
   /**
-   * A version of a function that return coboundary of a given cell for an object of Bitmap_cubical_complex_periodic_boundary_conditions_base class.
+   * A version of a function that return coboundary of a given cell for an object of
+   * Bitmap_cubical_complex_periodic_boundary_conditions_base class.
    */
-  virtual std::vector< size_t > get_coboundary_of_a_cell( size_t cell )const;
+  virtual std::vector< size_t > get_coboundary_of_a_cell(size_t cell) const;
 
  protected:
   std::vector< bool > directions_in_which_periodic_b_cond_are_to_be_imposed;
@@ -132,7 +135,7 @@ void Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::construct_comp
   this->set_up_containers(dimensions);
 
   size_t i = 0;
-  for (typename Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Top_dimensional_cells_iterator it = this->top_dimensional_cells_iterator_begin(); it != this->top_dimensional_cells_iterator_end(); ++it) {
+  for (auto it = this->top_dimensional_cells_iterator_begin(); it != this->top_dimensional_cells_iterator_end(); ++it) {
     this->get_cell_data(*it) = topDimensionalCells[i];
     ++i;
   }

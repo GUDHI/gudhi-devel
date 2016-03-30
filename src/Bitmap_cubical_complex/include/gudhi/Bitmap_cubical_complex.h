@@ -285,6 +285,7 @@ class Bitmap_cubical_complex : public T {
       }
       this->b = rhs.b;
       this->position = rhs.position;
+      return (*this);
     }
 
     bool operator==(const Filtration_simplex_iterator& rhs)const {
@@ -454,6 +455,7 @@ class Bitmap_cubical_complex : public T {
       this->b = rhs.b;
       this->position = rhs.position;
       this->dimension = rhs.dimension;
+      return (*this);
     }
 
     bool operator==(const Skeleton_simplex_iterator& rhs)const {
