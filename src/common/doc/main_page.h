@@ -236,17 +236,6 @@ make \endverbatim
  * 
 */
 
-/*! \page Upcoming Upcoming
- *
- * The library is under active development. New packages to be released next include:
- * \li Alpha complex.
- * \li Bottleneck distance.
- * \li Zig zag persistence.
- * \li Witness complex.
- * \li Tangential complex.
- * \li Clustering.
-*/
-
 /*! \page Citation Acknowledging the GUDHI library
  * We kindly ask users to cite the GUDHI library as appropriately as possible in their papers, and to mention the use
  * of the GUDHI library on the web pages of their projects using GUDHI and provide us with links to these web pages.
