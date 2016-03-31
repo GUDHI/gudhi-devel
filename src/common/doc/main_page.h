@@ -127,7 +127,7 @@
     Computation of persistent cohomology using the algorithm of \cite DBLP:journals/dcg/SilvaMV11 and
     \cite DBLP:journals/corr/abs-1208-5018 and the Compressed Annotation Matrix implementation of
     \cite DBLP:conf/esa/BoissonnatDM13 .<br>
-    <b>User manual:</b> \ref persistent_cohomology
+    <b>User manual:</b> \ref persistent_cohomology - <b>Reference manual:</b> Gudhi::persistent_cohomology::Persistent_cohomology
     </td>
  </tr>
 </table>
@@ -216,12 +216,13 @@
  * Persistent_cohomology/rips_persistence.cpp</a>
  * 
  * \subsection demos Demos and examples
- * To build the demos and libraries, run the following commands in a terminal:
+ * To build the demos and examples, run the following commands in a terminal:
 \verbatim  cd /path-to-gudhi/
 mkdir build
 cd build/
 cmake ..
 make \endverbatim
+ * A list of examples is available <a href="examples.html">here</a>.
  * 
  * \subsection testsuites Test suites
  * To test your build, run the following command in a terminal:

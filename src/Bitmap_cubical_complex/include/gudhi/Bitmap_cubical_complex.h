@@ -318,7 +318,8 @@ class Bitmap_cubical_complex : public T {
   };
 
   /**
-   * Filtration_simplex_range provides the ranges for Filtration_simplex_iterator.
+   * @class Filtration_simplex_range Bitmap_cubical_complex.h gudhi/Bitmap_cubical_complex.h
+   * @brief Filtration_simplex_range provides the ranges for Filtration_simplex_iterator.
    **/
   class Filtration_simplex_range {
     // Range over the simplices of the complex in the order of the filtration.
@@ -489,7 +490,8 @@ class Bitmap_cubical_complex : public T {
   };
 
   /**
-   * Class needed for compatibility with Gudhi. Not useful for other purposes.
+   * @class Skeleton_simplex_range Bitmap_cubical_complex.h gudhi/Bitmap_cubical_complex.h
+   * @brief Class needed for compatibility with Gudhi. Not useful for other purposes.
    **/
   class Skeleton_simplex_range {
     // Range over the simplices of the complex in the order of the filtration.

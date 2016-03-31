@@ -32,7 +32,8 @@ namespace Gudhi {
 
 namespace persistent_cohomology {
 
-/** \brief Structure representing coefficients in a set of finite fields simultaneously
+/** \class Multi_field Multi_field.h gudhi/Persistent_cohomology/Multi_field.h
+ * \brief Structure representing coefficients in a set of finite fields simultaneously
  * using the chinese remainder theorem.
  *
  * \implements CoefficientField

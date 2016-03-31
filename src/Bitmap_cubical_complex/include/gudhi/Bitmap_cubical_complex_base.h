@@ -190,7 +190,8 @@ class Bitmap_cubical_complex_base {
   // ITERATORS
 
   /**
-   * Iterator through all cells in the complex (in order they appear in the structure -- i.e.
+   * @class All_cells_iterator Bitmap_cubical_complex_base.h gudhi/Bitmap_cubical_complex_base.h
+   * @brief Iterator through all cells in the complex (in order they appear in the structure -- i.e.
    * in lexicographical order).
    **/
   class All_cells_iterator : std::iterator< std::input_iterator_tag, T > {
@@ -258,7 +259,8 @@ class Bitmap_cubical_complex_base {
   }
 
   /**
-   * All_cells_range class provides ranges for All_cells_iterator
+   * @class All_cells_range Bitmap_cubical_complex_base.h gudhi/Bitmap_cubical_complex_base.h
+   * @brief All_cells_range class provides ranges for All_cells_iterator
    **/
   class All_cells_range {
    public:
@@ -309,7 +311,8 @@ class Bitmap_cubical_complex_base {
   }
 
   /**
-   * Iterator through top dimensional cells of the complex. The cells appear in order they are stored
+   * @class Top_dimensional_cells_iterator Bitmap_cubical_complex_base.h gudhi/Bitmap_cubical_complex_base.h
+   * @brief Iterator through top dimensional cells of the complex. The cells appear in order they are stored
    * in the structure (i.e. in lexicographical order)
    **/
   class Top_dimensional_cells_iterator : std::iterator< std::input_iterator_tag, T > {
@@ -411,7 +414,8 @@ class Bitmap_cubical_complex_base {
   }
 
   /**
-   * Top_dimensional_cells_iterator_range class provides ranges for Top_dimensional_cells_iterator_range
+   * @class Top_dimensional_cells_range Bitmap_cubical_complex_base.h gudhi/Bitmap_cubical_complex_base.h
+   * @brief Top_dimensional_cells_iterator_range class provides ranges for Top_dimensional_cells_iterator_range
    **/
   class Top_dimensional_cells_range {
    public:
