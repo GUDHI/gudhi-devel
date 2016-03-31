@@ -58,6 +58,10 @@ else()
   # Find TBB package for parallel sort - not mandatory, just optional.
   set(TBB_FIND_QUIETLY ON)
   find_package(TBB)
+  if (TBB_FOUND)
+    message("TBB found in ${TBB_LIBRARY_DIRS}")
+    add_definitions(-DGUDHI_USE_TBB)
+  endif()
 
   # Required programs for unitary tests purpose
   FIND_PROGRAM( GCOVR_PATH gcovr )

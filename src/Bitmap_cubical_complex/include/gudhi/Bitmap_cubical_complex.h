@@ -546,7 +546,8 @@ void Bitmap_cubical_complex<T>::initialize_simplex_associated_to_key() {
   this->simplex_associated_to_key = std::vector<size_t>(this->data.size());
   std::iota(std::begin(simplex_associated_to_key), std::end(simplex_associated_to_key), 0);
 #ifdef GUDHI_USE_TBB
-  tbb::parallel_sort(simplex_associated_to_key, is_before_in_filtration<T>(this));
+  tbb::parallel_sort(simplex_associated_to_key.begin(), simplex_associated_to_key.end(),
+                     is_before_in_filtration<T>(this));
 #else
   std::sort(simplex_associated_to_key.begin(), simplex_associated_to_key.end(), is_before_in_filtration<T>(this));
 #endif

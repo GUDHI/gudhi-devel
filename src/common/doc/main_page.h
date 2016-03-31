@@ -148,21 +148,72 @@
  * 
  * The following example requires the <a target="_blank" href="http://gmplib.org/">GNU Multiple Precision Arithmetic
  * Library</a> (GMP) and will not be built if GMP is not installed:
- * \li Persistent_cohomology/rips_multifield_persistence
+ * \li <a href="_persistent_cohomology_2alpha_shapes_persistence_8cpp-example.html">
+ * Persistent_cohomology/alpha_shapes_persistence.cpp</a>
+ * \li <a href="_persistent_cohomology_2performance_rips_persistence_8cpp-example.html">
+ * Persistent_cohomology/performance_rips_persistence.cpp</a>
+ * \li <a href="_persistent_cohomology_2rips_multifield_persistence_8cpp-example.html">
+ * Persistent_cohomology/rips_multifield_persistence.cpp</a>
+ * \li <a href="_simplex_tree_2simplex_tree_from_alpha_shapes_3_8cpp-example.html">
+ * Simplex_tree/simplex_tree_from_alpha_shapes_3.cpp</a>
  *
  * Having GMP version 4.2 or higher installed is recommended.
  * 
  * \subsection cgal CGAL:
  * CGAL is a C++ library which provides easy access to efficient and reliable geometric algorithms.
  * 
- * The following examples require the <a target="_blank" href="http://www.cgal.org/">Computational Geometry Algorithms
- * Library</a> (CGAL) and will not be built if CGAL is not installed:
- * \li GudhUI
- * \li Persistent_cohomology/alpha_shapes_persistence
- * \li Simplex_tree/simplex_tree_from_alpha_shapes_3
- * 
  * Having CGAL version 4.4 or higher installed is recommended. The procedure to install this library according to
  * your operating system is detailed here http://doc.cgal.org/latest/Manual/installation.html
+ * 
+ * The following examples require the <a target="_blank" href="http://www.cgal.org/">Computational Geometry Algorithms
+ * Library</a> (CGAL) and will not be built if CGAL is not installed:
+ * \li <a href="_persistent_cohomology_2alpha_shapes_persistence_8cpp-example.html">
+ * Persistent_cohomology/alpha_shapes_persistence.cpp</a>
+ * \li <a href="_simplex_tree_2simplex_tree_from_alpha_shapes_3_8cpp-example.html">
+ * Simplex_tree/simplex_tree_from_alpha_shapes_3.cpp</a>
+ * 
+ * The following example requires CGAL version &ge; 4.6:
+ * \li <a href="_witness_complex_2witness_complex_sphere_8cpp-example.html">
+ * Witness_complex/witness_complex_sphere.cpp</a>
+ * 
+ * \subsection tbb Threading Building Blocks:
+ * <a target="_blank" href="https://www.threadingbuildingblocks.org/">Intel&reg; TBB</a> lets you easily write parallel
+ * C++ programs that take full advantage of multicore performance, that are portable and composable, and that have
+ * future-proof scalability.
+ * 
+ * Having Intel&reg; TBB installed is recommended to parallelize and accelerate some GUDHI computations.
+ * 
+ * The following examples are using Intel&reg; TBB if installed:
+ * \li <a href="_bitmap_cubical_complex_2_bitmap_cubical_complex_8cpp-example.html">
+ * Bitmap_cubical_complex/Bitmap_cubical_complex.cpp</a>
+ * \li <a href="_bitmap_cubical_complex_2_bitmap_cubical_complex_periodic_boundary_conditions_8cpp-example.html">
+ * Bitmap_cubical_complex/Bitmap_cubical_complex_periodic_boundary_conditions.cpp</a>
+ * \li <a href="_bitmap_cubical_complex_2_random_bitmap_cubical_complex_8cpp-example.html">
+ * Bitmap_cubical_complex/Random_bitmap_cubical_complex.cpp</a>
+ * \li <a href="_persistent_cohomology_2alpha_shapes_persistence_8cpp-example.html">
+ * Persistent_cohomology/alpha_shapes_persistence.cpp</a>
+ * \li <a href="_simplex_tree_2simple_simplex_tree_8cpp-example.html">
+ * Simplex_tree/simple_simplex_tree.cpp</a>
+ * \li <a href="_simplex_tree_2simplex_tree_from_alpha_shapes_3_8cpp-example.html">
+ * Simplex_tree/simplex_tree_from_alpha_shapes_3.cpp</a>
+ * \li <a href="_simplex_tree_2simplex_tree_from_cliques_of_graph_8cpp-example.html">
+ * Simplex_tree/simplex_tree_from_cliques_of_graph.cpp</a>
+ * \li <a href="_persistent_cohomology_2alpha_shapes_persistence_8cpp-example.html">
+ * Persistent_cohomology/alpha_shapes_persistence.cpp</a>
+ * \li <a href="_persistent_cohomology_2parallel_rips_persistence_8cpp-example.html">
+ * Persistent_cohomology/parallel_rips_persistence.cpp</a>
+ * \li <a href="_persistent_cohomology_2performance_rips_persistence_8cpp-example.html">
+ * Persistent_cohomology/performance_rips_persistence.cpp</a>
+ * \li <a href="_persistent_cohomology_2persistence_from_file_8cpp-example.html">
+ * Persistent_cohomology/persistence_from_file.cpp</a>
+ * \li <a href="_persistent_cohomology_2persistence_from_simple_simplex_tree_8cpp-example.html">
+ * Persistent_cohomology/persistence_from_simple_simplex_tree.cpp</a>
+ * \li <a href="_persistent_cohomology_2plain_homology_8cpp-example.html">
+ * Persistent_cohomology/plain_homology.cpp</a>
+ * \li <a href="_persistent_cohomology_2rips_multifield_persistence_8cpp-example.html">
+ * Persistent_cohomology/rips_multifield_persistence.cpp</a>
+ * \li <a href="_persistent_cohomology_2rips_persistence_8cpp-example.html">
+ * Persistent_cohomology/rips_persistence.cpp</a>
  * 
  * \subsection demos Demos and examples
  * To build the demos and libraries, run the following commands in a terminal:
@@ -205,4 +256,30 @@ make \endverbatim
  * \section GudhiBibtex GUDHI bibtex
  * \verbinclude  biblio/how_to_cite_gudhi.bib
 */
+
+// List of Gudhi examples - Doxygen needs at least a file tag to analyse comments
+/*! @file Examples
+ * @example Bitmap_cubical_complex/Bitmap_cubical_complex.cpp
+ * @example Bitmap_cubical_complex/Bitmap_cubical_complex_periodic_boundary_conditions.cpp
+ * @example Bitmap_cubical_complex/Random_bitmap_cubical_complex.cpp
+ * @example Contraction/Garland_heckbert.cpp
+ * @example Contraction/Rips_contraction.cpp
+ * @example Persistent_cohomology/alpha_shapes_persistence.cpp
+ * @example Persistent_cohomology/parallel_rips_persistence.cpp
+ * @example Persistent_cohomology/performance_rips_persistence.cpp
+ * @example Persistent_cohomology/persistence_from_file.cpp
+ * @example Persistent_cohomology/persistence_from_simple_simplex_tree.cpp
+ * @example Persistent_cohomology/plain_homology.cpp
+ * @example Persistent_cohomology/rips_multifield_persistence.cpp
+ * @example Persistent_cohomology/rips_persistence.cpp
+ * @example Simplex_tree/mini_simplex_tree.cpp
+ * @example Simplex_tree/simple_simplex_tree.cpp
+ * @example Simplex_tree/simplex_tree_from_alpha_shapes_3.cpp
+ * @example Simplex_tree/simplex_tree_from_cliques_of_graph.cpp
+ * @example Skeleton_blocker/Skeleton_blocker_from_simplices.cpp
+ * @example Skeleton_blocker/Skeleton_blocker_iteration.cpp
+ * @example Skeleton_blocker/Skeleton_blocker_link.cpp
+ * @example Witness_complex/witness_complex_from_file.cpp
+ * @example Witness_complex/witness_complex_sphere.cpp
+ */
 
