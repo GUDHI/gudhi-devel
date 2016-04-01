@@ -955,7 +955,7 @@ class Simplex_tree {
     bool operator()(const Simplex_handle sh1, const Simplex_handle sh2) const {
       // Not using st_->filtration(sh1) because it uselessly tests for null_simplex.
       if (sh1->second.filtration() != sh2->second.filtration()) {
-	return sh1->second.filtration() < sh2->second.filtration();
+        return sh1->second.filtration() < sh2->second.filtration();
       }
       // is sh1 a proper subface of sh2
       return st_->reverse_lexicographic_order(sh1, sh2);
@@ -1194,16 +1194,16 @@ class Simplex_tree {
   bool prune_above_filtration(Filtration_value filt) {
     return rec_prune_above_filtration(root(), filt);
   }
-  
+
  private:
   bool rec_prune_above_filtration(Siblings* sib, Filtration_value filt) {
-    auto&& list=sib->members();
+    auto&& list = sib->members();
     auto last = std::remove_if(list.begin(), list.end(), [=](Dit_value_t& simplex) {
-        if (simplex.second.filtration()<=filt) return false;
+        if (simplex.second.filtration() <= filt) return false;
         if (has_children(&simplex)) rec_delete(simplex.second.children());
         return true;
       });
-    
+
     bool modified = (last != list.end());
     if (last == list.begin() && sib != root()) {
       // Removing the whole siblings, parent becomes a leaf.
@@ -1213,8 +1213,8 @@ class Simplex_tree {
     } else {
       // Keeping some elements of siblings. Remove the others, and recurse in the remaining ones.
       list.erase(last, list.end());
-      for(auto&& simplex : list)
-        if(has_children(&simplex))
+      for (auto&& simplex : list)
+        if (has_children(&simplex))
           modified |= rec_prune_above_filtration(simplex.second.children(), filt);
     }
     return modified;
