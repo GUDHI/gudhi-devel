@@ -1,6 +1,6 @@
 /*! \mainpage
  *  \tableofcontents
- * \image html "Gudhi_banner.jpg" "" width=20cm
+ * \image html "Gudhi_banner.png" "" width=20cm
  * 
  * \section Introduction Introduction
  * The Gudhi library (Geometry Understanding in Higher Dimensions) is a generic open source C++ library for

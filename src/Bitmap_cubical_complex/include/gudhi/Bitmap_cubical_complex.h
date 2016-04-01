@@ -46,7 +46,6 @@ const bool globalDbg = false;
 template <typename T> class is_before_in_filtration;
 
 /**
- * @class Bitmap_cubical_complex Bitmap_cubical_complex.h gudhi/Bitmap_cubical_complex.h
  * @brief Cubical complex represented as a bitmap.
  * @ingroup cubical_complex
  * @details This is a Bitmap_cubical_complex class. It joints a functionalities of Bitmap_cubical_complex_base and
@@ -318,7 +317,6 @@ class Bitmap_cubical_complex : public T {
   };
 
   /**
-   * @class Filtration_simplex_range Bitmap_cubical_complex.h gudhi/Bitmap_cubical_complex.h
    * @brief Filtration_simplex_range provides the ranges for Filtration_simplex_iterator.
    **/
   class Filtration_simplex_range {
@@ -490,7 +488,6 @@ class Bitmap_cubical_complex : public T {
   };
 
   /**
-   * @class Skeleton_simplex_range Bitmap_cubical_complex.h gudhi/Bitmap_cubical_complex.h
    * @brief Class needed for compatibility with Gudhi. Not useful for other purposes.
    **/
   class Skeleton_simplex_range {

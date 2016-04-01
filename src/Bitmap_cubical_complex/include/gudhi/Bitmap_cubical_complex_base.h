@@ -39,7 +39,6 @@ namespace Gudhi {
 namespace Cubical_complex {
 
 /**
- * @class Bitmap_cubical_complex_base Bitmap_cubical_complex_base.h gudhi/Bitmap_cubical_complex_base.h
  * @brief Cubical complex represented as a bitmap, class with basic implementation.
  * @ingroup cubical_complex
  * @details This is a class implementing a basic bitmap data structure to store cubical complexes.
@@ -190,7 +189,6 @@ class Bitmap_cubical_complex_base {
   // ITERATORS
 
   /**
-   * @class All_cells_iterator Bitmap_cubical_complex_base.h gudhi/Bitmap_cubical_complex_base.h
    * @brief Iterator through all cells in the complex (in order they appear in the structure -- i.e.
    * in lexicographical order).
    **/
@@ -259,7 +257,6 @@ class Bitmap_cubical_complex_base {
   }
 
   /**
-   * @class All_cells_range Bitmap_cubical_complex_base.h gudhi/Bitmap_cubical_complex_base.h
    * @brief All_cells_range class provides ranges for All_cells_iterator
    **/
   class All_cells_range {
@@ -311,7 +308,6 @@ class Bitmap_cubical_complex_base {
   }
 
   /**
-   * @class Top_dimensional_cells_iterator Bitmap_cubical_complex_base.h gudhi/Bitmap_cubical_complex_base.h
    * @brief Iterator through top dimensional cells of the complex. The cells appear in order they are stored
    * in the structure (i.e. in lexicographical order)
    **/
@@ -414,7 +410,6 @@ class Bitmap_cubical_complex_base {
   }
 
   /**
-   * @class Top_dimensional_cells_range Bitmap_cubical_complex_base.h gudhi/Bitmap_cubical_complex_base.h
    * @brief Top_dimensional_cells_iterator_range class provides ranges for Top_dimensional_cells_iterator_range
    **/
   class Top_dimensional_cells_range {

@@ -30,8 +30,7 @@ namespace Gudhi {
 
 namespace persistent_cohomology {
 
-/** \class Field_Zp Field_Zp.h gudhi/Persistent_cohomology/Field_Zp.h
- * \brief Structure representing the coefficient field \f$\mathbb{Z}/p\mathbb{Z}\f$
+/** \brief Structure representing the coefficient field \f$\mathbb{Z}/p\mathbb{Z}\f$
  *
  * \implements CoefficientField
  * \ingroup persistent_cohomology

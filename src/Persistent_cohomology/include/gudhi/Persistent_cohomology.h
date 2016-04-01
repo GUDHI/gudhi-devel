@@ -174,8 +174,7 @@ different representations.
  @{  
  */
 
-/** \class Persistent_cohomology Persistent_cohomology.h gudhi/Persistent_cohomology.h
- * \brief Computes the persistent cohomology of a filtered complex.
+/** \brief Computes the persistent cohomology of a filtered complex.
  *
  * The computation is implemented with a Compressed Annotation Matrix
  * (CAM)\cite DBLP:conf/esa/BoissonnatDM13,
