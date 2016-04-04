@@ -1,1 +1,0 @@
-/usr/bin/c++    -frounding-math -O2 -std=c++11 -Wall -Wpedantic -Wsign-compare -O3 -DNDEBUG    CMakeFiles/hasse_complex_from_simplex_tree.dir/hasse_complex_from_simplex_tree.cpp.o  -o hasse_complex_from_simplex_tree -rdynamic 

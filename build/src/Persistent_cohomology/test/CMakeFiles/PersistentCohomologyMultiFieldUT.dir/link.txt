@@ -1,1 +1,0 @@
-/usr/bin/c++    -frounding-math -O2 -std=c++11 -Wall -Wpedantic -Wsign-compare -pg -O3 -DNDEBUG -pg    CMakeFiles/PersistentCohomologyMultiFieldUT.dir/persistent_cohomology_unit_test_multi_field.cpp.o  -o PersistentCohomologyMultiFieldUT -rdynamic -lboost_system -lboost_unit_test_framework -lgmpxx -lgmp 

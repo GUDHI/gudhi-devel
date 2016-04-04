@@ -1,1 +1,0 @@
-/usr/bin/c++    -frounding-math -O2 -std=c++11 -Wall -Wpedantic -Wsign-compare -O3 -DNDEBUG    CMakeFiles/performance_rips_persistence.dir/performance_rips_persistence.cpp.o  -o performance_rips_persistence -rdynamic -lboost_system -lboost_program_options -lgmpxx -lgmp 

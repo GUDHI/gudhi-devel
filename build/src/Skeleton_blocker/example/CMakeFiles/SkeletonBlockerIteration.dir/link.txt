@@ -1,1 +1,0 @@
-/usr/bin/c++    -frounding-math -O2 -std=c++11 -Wall -Wpedantic -Wsign-compare -O3 -DNDEBUG    CMakeFiles/SkeletonBlockerIteration.dir/Skeleton_blocker_iteration.cpp.o  -o SkeletonBlockerIteration -rdynamic -lboost_timer -lboost_system 

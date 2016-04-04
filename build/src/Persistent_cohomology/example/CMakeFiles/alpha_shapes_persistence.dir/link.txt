@@ -1,1 +1,0 @@
-/usr/bin/c++    -frounding-math -O2 -std=c++11 -Wall -Wpedantic -Wsign-compare -O3 -DNDEBUG    CMakeFiles/alpha_shapes_persistence.dir/alpha_shapes_persistence.cpp.o  -o alpha_shapes_persistence -rdynamic -lboost_system -lgmpxx -lgmp /usr/local/lib/libCGAL.so.11.0.1 

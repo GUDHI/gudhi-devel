@@ -1,1 +1,0 @@
-/usr/bin/c++    -frounding-math -O2 -std=c++11 -Wall -Wpedantic -Wsign-compare -O3 -DNDEBUG    CMakeFiles/SkeletonBlockerFromSimplices.dir/Skeleton_blocker_from_simplices.cpp.o  -o SkeletonBlockerFromSimplices -rdynamic 

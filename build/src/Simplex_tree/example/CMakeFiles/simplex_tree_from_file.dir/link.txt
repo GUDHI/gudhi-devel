@@ -1,1 +1,0 @@
-/usr/bin/c++    -frounding-math -O2 -std=c++11 -Wall -Wpedantic -Wsign-compare -O3 -DNDEBUG    CMakeFiles/simplex_tree_from_file.dir/simplex_tree_from_file.cpp.o  -o simplex_tree_from_file -rdynamic 
