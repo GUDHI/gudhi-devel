@@ -9,6 +9,15 @@ if(CGAL_FOUND)
     message(STATUS "CGAL version: ${CGAL_VERSION}.")
 
     include( ${CGAL_USE_FILE} )
+
+    if(NOT MSVC)
+      include(CheckCXXCompilerFlag)
+      CHECK_CXX_COMPILER_FLAG(-std=c++11 COMPILER_SUPPORTS_CXX11)
+      if(COMPILER_SUPPORTS_CXX11)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+      endif()
+    endif()
+    # - End of workaround
  
     find_package(Eigen3 3.1.0)
     if (EIGEN3_FOUND)
