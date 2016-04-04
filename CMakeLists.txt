@@ -82,16 +82,3 @@ else()
 
 endif()
 
-include( ${CGAL_USE_FILE} )
-# In CMakeLists.txt, when include(${CGAL_USE_FILE}), CXX_FLAGS are overwritten.
-# cf. http://doc.cgal.org/latest/Manual/installation.html#title40
-# A workaround is to add "-std=c++11" again.
-if(NOT MSVC)
-include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG(-std=c++11 COMPILER_SUPPORTS_CXX11)
-if(COMPILER_SUPPORTS_CXX11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-endif()
-endif()
-# - End of workaround
-
