@@ -1,0 +1,1 @@
+/usr/bin/c++    -frounding-math -O2 -std=c++11 -Wall -Wpedantic -Wsign-compare -O3 -DNDEBUG    CMakeFiles/basic_example.dir/basic.cpp.o  -o basic_example  -L/usr/local/lib -rdynamic -lmpfr -lgmpxx -lgmp /usr/local/lib/libCGAL.so.11.0.1 -lboost_thread -lboost_system -lpthread -Wl,-rpath,/usr/local/lib 

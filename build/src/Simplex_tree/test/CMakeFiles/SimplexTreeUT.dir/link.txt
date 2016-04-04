@@ -1,0 +1,1 @@
+/usr/bin/c++    -frounding-math -O2 -std=c++11 -Wall -Wpedantic -Wsign-compare -pg -O3 -DNDEBUG -pg    CMakeFiles/SimplexTreeUT.dir/simplex_tree_unit_test.cpp.o  -o SimplexTreeUT -rdynamic -lboost_system -lboost_unit_test_framework 

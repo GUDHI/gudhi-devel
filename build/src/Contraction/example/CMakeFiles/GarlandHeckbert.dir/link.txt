@@ -1,0 +1,1 @@
+/usr/bin/c++    -frounding-math -O2 -std=c++11 -Wall -Wpedantic -Wsign-compare -O3 -DNDEBUG    CMakeFiles/GarlandHeckbert.dir/Garland_heckbert.cpp.o  -o GarlandHeckbert -rdynamic -lboost_timer -lboost_system 

@@ -42,7 +42,6 @@ if (GPROF_PATH)
   message("gprof found in ${GPROF_PATH}")
 endif()
 
-
 if(NOT Boost_FOUND)
   message(FATAL_ERROR "NOTICE: This demo requires Boost and will not be compiled.")
 else()
@@ -75,12 +74,24 @@ else()
   add_subdirectory(src/Hasse_complex/example)
   add_subdirectory(src/Alpha_shapes/example)
   add_subdirectory(src/Alpha_shapes/test)
-  add_subdirectory(src/Bottleneck/example)
-  add_subdirectory(src/Bottleneck/test)
+  add_subdirectory(src/Bipartite_graphs_matching/example)
+  add_subdirectory(src/Bipartite_graphs_matching/test)
 
   # data points generator
   add_subdirectory(data/points/generator)
 
-endif()  
+endif()
 
+include( ${CGAL_USE_FILE} )
+# In CMakeLists.txt, when include(${CGAL_USE_FILE}), CXX_FLAGS are overwritten.
+# cf. http://doc.cgal.org/latest/Manual/installation.html#title40
+# A workaround is to add "-std=c++11" again.
+if(NOT MSVC)
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG(-std=c++11 COMPILER_SUPPORTS_CXX11)
+if(COMPILER_SUPPORTS_CXX11)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+endif()
+endif()
+# - End of workaround
 
