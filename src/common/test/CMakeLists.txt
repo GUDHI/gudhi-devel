@@ -10,9 +10,9 @@ if (GPROF_PATH)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
 endif()
 
-# need CGAL 4.6
+# need CGAL 4.7
 if(CGAL_FOUND)
-  if (NOT CGAL_VERSION VERSION_LESS 4.6.0)
+  if (NOT CGAL_VERSION VERSION_LESS 4.7.0)
     find_package(Eigen3 3.1.0)
     if (EIGEN3_FOUND)
       message(STATUS "Eigen3 version: ${EIGEN3_VERSION}.")
