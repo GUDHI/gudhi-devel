@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kernel;
 typedef typename Kernel::Point_d Point_d;

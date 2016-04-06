@@ -33,7 +33,6 @@
 #include <stdlib.h>
 #include <math.h>  // isnan, fmax
 
-//#include <CGAL/Triangulation_data_structure.h>
 #include <CGAL/Delaunay_triangulation.h>
 #include <CGAL/Epick_d.h>
 #include <CGAL/Spatial_sort_traits_adapter_d.h>
@@ -79,7 +78,7 @@ class Alpha_complex : public Simplex_tree<> {
  public:
   // Add an int in TDS to save point index in the structure
   typedef CGAL::Triangulation_data_structure<CGAL::Dynamic_dimension_tag,
-                              CGAL::Triangulation_vertex<Kernel, int>,
+                              CGAL::Triangulation_vertex<Kernel, std::ptrdiff_t>,
                               CGAL::Triangulation_full_cell<Kernel> > TDS;
   /** \brief A Delaunay triangulation of a set of points in \f$ \mathbb{R}^D\f$.*/
   typedef CGAL::Delaunay_triangulation<Kernel, TDS> Delaunay_triangulation;
@@ -111,13 +110,10 @@ class Alpha_complex : public Simplex_tree<> {
   // size_type type from CGAL.
   typedef typename Delaunay_triangulation::size_type size_type;
 
-  // Double map type to switch from CGAL vertex iterator to simplex tree vertex handle and vice versa.
-  typedef typename std::map< CGAL_vertex_iterator, Vertex_handle > Map_vertex_iterator_to_handle;
+  // Map type to switch from simplex tree vertex handle to CGAL vertex iterator.
   typedef typename std::map< Vertex_handle, CGAL_vertex_iterator > Vector_vertex_iterator;
 
  private:
-  /** \brief Map to switch from CGAL vertex iterator to simplex tree vertex handle.*/
-  Map_vertex_iterator_to_handle vertex_iterator_to_handle_;
   /** \brief Vertex iterator vector to switch from simplex tree vertex handle to CGAL vertex iterator.
    * Vertex handles are inserted sequentially, starting at 0.*/
   Vector_vertex_iterator vertex_handle_to_iterator_;
@@ -198,15 +194,15 @@ class Alpha_complex : public Simplex_tree<> {
       triangulation_ = new Delaunay_triangulation(point_dimension(*first));
 
       std::vector<Point_d> points(first, last);
-    
+
       // Creates a vector {0, 1, ..., N-1}
       std::vector<std::ptrdiff_t> indices(boost::counting_iterator<std::ptrdiff_t>(0),
                                           boost::counting_iterator<std::ptrdiff_t>(points.size()));
-  
+
       // Sort indices considering CGAL spatial sort
       typedef CGAL::Spatial_sort_traits_adapter_d<Kernel, Point_d*> Search_traits_d;
-      spatial_sort(indices.begin(),indices.end(),Search_traits_d(&(points[0])));
-    
+      spatial_sort(indices.begin(), indices.end(), Search_traits_d(&(points[0])));
+
       typename Delaunay_triangulation::Full_cell_handle hint;
       for (auto index : indices) {
         typename Delaunay_triangulation::Vertex_handle pos = triangulation_->insert(points[index], hint);
@@ -261,8 +257,6 @@ class Alpha_complex : public Simplex_tree<> {
 #ifdef DEBUG_TRACES
         std::cout << "Vertex insertion - " << vit->data() << " -> " << vit->point() << std::endl;
 #endif  // DEBUG_TRACES
-
-        vertex_iterator_to_handle_.emplace(vit, vit->data());
         vertex_handle_to_iterator_.emplace(vit->data(), vit);
       }
     }
@@ -278,10 +272,10 @@ class Alpha_complex : public Simplex_tree<> {
       for (auto vit = cit->vertices_begin(); vit != cit->vertices_end(); ++vit) {
         if (*vit != nullptr) {
 #ifdef DEBUG_TRACES
-          std::cout << " " << vertex_iterator_to_handle_[*vit];
+          std::cout << " " << (*vit)->data();
 #endif  // DEBUG_TRACES
           // Vector of vertex construction for simplex_tree structure
-          vertexVector.push_back(vertex_iterator_to_handle_[*vit]);
+          vertexVector.push_back((*vit)->data());
         }
       }
 #ifdef DEBUG_TRACES

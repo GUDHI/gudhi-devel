@@ -22,12 +22,12 @@
 #ifndef POINTS_OFF_IO_H_
 #define POINTS_OFF_IO_H_
 
+#include <gudhi/Off_reader.h>
+
 #include <string>
 #include <vector>
 #include <fstream>
 #include <map>
-
-#include <gudhi/Off_reader.h>
 
 namespace Gudhi {
 
@@ -87,7 +87,7 @@ class Points_off_visitor_reader {
 
   // Off_reader visitor done implementation - Only points are read
   void done() { }
-  
+
   /** \brief Point cloud getter.
    *
    * @return point_cloud.
@@ -95,7 +95,6 @@ class Points_off_visitor_reader {
   const std::vector<Point_d>& get_point_cloud() {
     return point_cloud;
   }
-
 };
 
 /** 

@@ -138,6 +138,6 @@ Filtration_simplex_range filtration_simplex_range();
 * @todo use an enum? Just a bool?
 */
 //int is_before_in_filtration(Simplex_handle s, Simplex_handle t);
-/*************************************************/     
+/*************************************************/
 
 };
