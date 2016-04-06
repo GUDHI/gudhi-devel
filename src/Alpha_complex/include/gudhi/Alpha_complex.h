@@ -27,14 +27,16 @@
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Debug_utils.h>
-// to construct a Delaunay_triangulation from a OFF file
-#include <gudhi/Delaunay_triangulation_off_io.h>
+// to construct Alpha_complex from a OFF file of points
+#include <gudhi/Points_off_io.h>
 
 #include <stdlib.h>
 #include <math.h>  // isnan, fmax
 
+//#include <CGAL/Triangulation_data_structure.h>
 #include <CGAL/Delaunay_triangulation.h>
 #include <CGAL/Epick_d.h>
+#include <CGAL/Spatial_sort_traits_adapter_d.h>
 
 #include <iostream>
 #include <vector>
@@ -43,6 +45,7 @@
 #include <map>
 #include <utility>  // std::pair
 #include <stdexcept>
+#include <numeric>  // for std::iota
 
 namespace Gudhi {
 
@@ -57,7 +60,7 @@ namespace alphacomplex {
  * \details
  * The data structure can be constructed from a CGAL Delaunay triangulation (for more informations on CGAL Delaunay 
  * triangulation, please refer to the corresponding chapter in page http://doc.cgal.org/latest/Triangulation/) or from
- * an OFF file (cf. Delaunay_triangulation_off_reader).
+ * an OFF file (cf. Points_off_reader).
  * 
  * Please refer to \ref alpha_complex for examples.
  *
@@ -74,13 +77,19 @@ namespace alphacomplex {
 template<class Kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>>
 class Alpha_complex : public Simplex_tree<> {
  public:
+  // Add an int in TDS to save point index in the structure
+  typedef CGAL::Triangulation_data_structure<CGAL::Dynamic_dimension_tag,
+                              CGAL::Triangulation_vertex<Kernel, int>,
+                              CGAL::Triangulation_full_cell<Kernel> > TDS;
   /** \brief A Delaunay triangulation of a set of points in \f$ \mathbb{R}^D\f$.*/
-  typedef typename CGAL::Delaunay_triangulation<Kernel> Delaunay_triangulation;
+  typedef CGAL::Delaunay_triangulation<Kernel, TDS> Delaunay_triangulation;
+
   /** \brief A point in Euclidean space.*/
   typedef typename Kernel::Point_d Point_d;
   /** \brief Geometric traits class that provides the geometric types and predicates needed by Delaunay
    * triangulations.*/
   typedef Kernel Geom_traits;
+
  private:
   // From Simplex_tree
   // Type required to insert into a simplex_tree (with or without subfaces).
@@ -104,7 +113,7 @@ class Alpha_complex : public Simplex_tree<> {
 
   // Double map type to switch from CGAL vertex iterator to simplex tree vertex handle and vice versa.
   typedef typename std::map< CGAL_vertex_iterator, Vertex_handle > Map_vertex_iterator_to_handle;
-  typedef typename std::vector< CGAL_vertex_iterator > Vector_vertex_iterator;
+  typedef typename std::map< Vertex_handle, CGAL_vertex_iterator > Vector_vertex_iterator;
 
  private:
   /** \brief Map to switch from CGAL vertex iterator to simplex tree vertex handle.*/
@@ -128,28 +137,13 @@ class Alpha_complex : public Simplex_tree<> {
   Alpha_complex(const std::string& off_file_name,
                 Filtration_value max_alpha_square = std::numeric_limits<Filtration_value>::infinity())
       : triangulation_(nullptr) {
-    Gudhi::Delaunay_triangulation_off_reader<Delaunay_triangulation> off_reader(off_file_name);
+    Gudhi::Points_off_reader<Point_d> off_reader(off_file_name);
     if (!off_reader.is_valid()) {
       std::cerr << "Alpha_complex - Unable to read file " << off_file_name << "\n";
       exit(-1);  // ----- >>
     }
-    triangulation_ = off_reader.get_complex();
-    init(max_alpha_square);
-  }
 
-  /** \brief Alpha_complex constructor from a Delaunay triangulation.
-   *
-   * @param[in] triangulation_ptr Pointer on a <a target="_blank"
-   * href="http://doc.cgal.org/latest/Triangulation/index.html#Chapter_Triangulations">
-   * CGAL::Delaunay_triangulation<Kernel></a> \cite cgal:hdj-t-15b.
-   * Alpha_complex takes ownership of the Delaunay_triangulation object, which must have been allocated using operator
-   * new.
-   * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$.
-   */
-  Alpha_complex(Delaunay_triangulation* triangulation_ptr,
-                Filtration_value max_alpha_square = std::numeric_limits<Filtration_value>::infinity())
-      : triangulation_(triangulation_ptr) {
-    init(max_alpha_square);
+    init_from_range(off_reader.get_point_cloud(), max_alpha_square);
   }
 
   /** \brief Alpha_complex constructor from a list of points.
@@ -164,23 +158,7 @@ class Alpha_complex : public Simplex_tree<> {
   Alpha_complex(const InputPointRange& points,
                 Filtration_value max_alpha_square = std::numeric_limits<Filtration_value>::infinity())
       : triangulation_(nullptr) {
-    auto first = std::begin(points);
-    auto last = std::end(points);
-
-    if (first != last) {
-      // point_dimension function initialization
-      Point_Dimension point_dimension = kernel_.point_dimension_d_object();
-
-      // Delaunay triangulation is point dimension.
-      triangulation_ = new Delaunay_triangulation(point_dimension(*first));
-
-      size_type inserted = triangulation_->insert(first, last);
-      if (inserted != (last -first)) {
-        std::cerr << "Alpha_complex - insertion failed " << inserted << " != " << (last -first) << "\n";
-        exit(-1);  // ----- >>
-      }
-      init(max_alpha_square);
-    }
+    init_from_range(points, max_alpha_square);
   }
 
   /** \brief Alpha_complex destructor.
@@ -190,6 +168,12 @@ class Alpha_complex : public Simplex_tree<> {
   ~Alpha_complex() {
     delete triangulation_;
   }
+
+  // Forbid copy/move constructor/assignment operator
+  Alpha_complex(const Alpha_complex& other) = delete;
+  Alpha_complex& operator= (const Alpha_complex& other) = delete;
+  Alpha_complex (Alpha_complex&& other) = delete;
+  Alpha_complex& operator= (Alpha_complex&& other) = delete;
 
   /** \brief get_point returns the point corresponding to the vertex given as parameter.
    *
@@ -202,6 +186,44 @@ class Alpha_complex : public Simplex_tree<> {
   }
 
  private:
+  template<typename InputPointRange >
+  void init_from_range(const InputPointRange& points, Filtration_value max_alpha_square) {
+    auto first = std::begin(points);
+    auto last = std::end(points);
+    if (first != last) {
+      // point_dimension function initialization
+      Point_Dimension point_dimension = kernel_.point_dimension_d_object();
+
+      // Delaunay triangulation is point dimension.
+      triangulation_ = new Delaunay_triangulation(point_dimension(*first));
+
+      std::vector<Point_d> points(first, last);
+    
+      // Creates a vector {0, 1, ..., N-1}
+      std::vector<std::ptrdiff_t> indices(boost::counting_iterator<std::ptrdiff_t>(0),
+                                          boost::counting_iterator<std::ptrdiff_t>(points.size()));
+  
+      // Sort indices considering CGAL spatial sort
+      typedef CGAL::Spatial_sort_traits_adapter_d<Kernel, Point_d*> Search_traits_d;
+      spatial_sort(indices.begin(),indices.end(),Search_traits_d(&(points[0])));
+    
+      typename Delaunay_triangulation::Full_cell_handle hint;
+      for (auto index : indices) {
+        typename Delaunay_triangulation::Vertex_handle pos = triangulation_->insert(points[index], hint);
+        // Save index value as data to retrieve it after insertion
+        pos->data() = index;
+        hint = pos->full_cell();
+      }
+
+      if (triangulation_->number_of_vertices() != (last -first)) {
+        std::cerr << "Alpha_complex - insertion failed " << triangulation_->number_of_vertices() << " != " <<
+            (last -first) << "\n";
+        exit(-1);  // ----- >>
+      }
+      init(max_alpha_square);
+    }
+  }
+
   /** \brief Initialize the Alpha_complex from the Delaunay triangulation.
    *
    * @param[in] max_alpha_square maximum for alpha square value.
@@ -233,18 +255,15 @@ class Alpha_complex : public Simplex_tree<> {
 
     // --------------------------------------------------------------------------------------------
     // double map to retrieve simplex tree vertex handles from CGAL vertex iterator and vice versa
-    // Start to insert at handle = 0 - default integer value
-    Vertex_handle vertex_handle = Vertex_handle();
     // Loop on triangulation vertices list
     for (CGAL_vertex_iterator vit = triangulation_->vertices_begin(); vit != triangulation_->vertices_end(); ++vit) {
       if (!triangulation_->is_infinite(*vit)) {
 #ifdef DEBUG_TRACES
-        std::cout << "Vertex insertion - " << vertex_handle << " -> " << vit->point() << std::endl;
+        std::cout << "Vertex insertion - " << vit->data() << " -> " << vit->point() << std::endl;
 #endif  // DEBUG_TRACES
 
-        vertex_iterator_to_handle_.emplace(vit, vertex_handle);
-        vertex_handle_to_iterator_.push_back(vit);
-        vertex_handle++;
+        vertex_iterator_to_handle_.emplace(vit, vit->data());
+        vertex_handle_to_iterator_.emplace(vit->data(), vit);
       }
     }
     // --------------------------------------------------------------------------------------------

@@ -1,8 +1,7 @@
 #include <boost/program_options.hpp>
 
 #include <CGAL/Epick_d.h>
-// to construct a Delaunay_triangulation from a OFF file
-#include <gudhi/Delaunay_triangulation_off_io.h>
+
 #include <gudhi/Alpha_complex.h>
 #include <gudhi/Persistent_cohomology.h>
 

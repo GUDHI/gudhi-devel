@@ -4,17 +4,15 @@
 #include <iostream>
 #include <string>
 
-void usage(char * const progName) {
+void usage(int nbArgs, char * const progName) {
+  std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
   std::cerr << "Usage: " << progName << " filename.off alpha_square_max_value [ouput_file.txt]\n";
   std::cerr << "       i.e.: " << progName << " ../../data/points/alphacomplexdoc.off 60.0\n";
   exit(-1);  // ----- >>
 }
 
 int main(int argc, char **argv) {
-  if ((argc != 3) && (argc != 4)) {
-    std::cerr << "Error: Number of arguments (" << argc << ") is not correct\n";
-    usage(argv[0]);
-  }
+  if ((argc != 3) && (argc != 4)) usage(argc, (argv[0] - 1));
 
   std::string off_file_name(argv[1]);
   double alpha_square_max_value = atof(argv[2]);

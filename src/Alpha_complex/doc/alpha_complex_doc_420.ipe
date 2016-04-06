@@ -252,14 +252,14 @@ h
 350 520 l
 320 580 l
 </path>
-<text matrix="1 0 0 1 0 80" transformations="translations" pos="380 530" stroke="darkcyan" type="label" width="54.628" height="8.965" depth="2.99" valign="baseline" size="large">Cell [4,2,1]</text>
-<text matrix="1 0 0 1 -2.15463 76.4987" transformations="translations" pos="282.952 524.893" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">2</text>
-<text matrix="1 0 0 1 0 80" transformations="translations" pos="352.708 510.349" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">6</text>
-<text matrix="1 0 0 1 0 80" transformations="translations" pos="310.693 578.759" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">4</text>
-<text matrix="1 0 0 1 0 80" transformations="translations" pos="375.332 578.49" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">5</text>
-<text matrix="1 0 0 1 0 80" transformations="translations" pos="272.179 660.635" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">1</text>
-<text matrix="1 0 0 1 0.700256 69.8463" transformations="translations" pos="296.419 724.197" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">3</text>
-<text matrix="1 0 0 1 0 80" transformations="translations" pos="375.332 689.453" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">0</text>
+<text matrix="1 0 0 1 0 80" transformations="translations" pos="380 530" stroke="darkcyan" type="label" width="54.628" height="8.965" depth="2.99" valign="baseline" size="large">Cell [4,2,0]</text>
+<text matrix="1 0 0 1 -2.15463 76.4987" transformations="translations" pos="282.952 524.893" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">0</text>
+<text matrix="1 0 0 1 0 80" transformations="translations" pos="352.708 510.349" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">1</text>
+<text matrix="1 0 0 1 0 80" transformations="translations" pos="310.693 578.759" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">2</text>
+<text matrix="1 0 0 1 0 80" transformations="translations" pos="375.332 578.49" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">3</text>
+<text matrix="1 0 0 1 0 80" transformations="translations" pos="272.179 660.635" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">4</text>
+<text matrix="1 0 0 1 0.700256 69.8463" transformations="translations" pos="296.419 724.197" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">5</text>
+<text matrix="1 0 0 1 0 80" transformations="translations" pos="375.332 689.453" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">6</text>
 <path matrix="1 0 0 1 0 80" stroke="lightgray">
 280 660 m
 300 710 l
@@ -285,7 +285,7 @@ h
 243.428 591.569 m
 186.061 643.28 l
 </path>
-<text matrix="1 0 0 1 0 80" transformations="translations" pos="212.724 627.389" stroke="darkcyan" type="label" width="18.785" height="4.294" depth="1.49" valign="baseline">$\alpha_{421}$</text>
+<text matrix="1 0 0 1 0 80" transformations="translations" pos="212.724 627.389" stroke="darkcyan" type="label" width="18.785" height="4.294" depth="1.49" valign="baseline">$\alpha_{420}$</text>
 <path matrix="1 0 0 1 -264 -162" stroke="lightgray">
 320 580 m
 350 520 l
@@ -306,15 +306,15 @@ h
 350 520 l
 320 580 l
 </path>
-<text matrix="0.582962 0 0 1 -211.265 -209.555" transformations="translations" pos="380 530" stroke="darkcyan" type="label" width="231.798" height="8.965" depth="2.99" valign="baseline" size="large">[4,2] is Gabriel $\rightarrow$ $\alpha_{42}$ is not$\\$
+<text matrix="0.582962 0 0 1 -211.265 -209.555" transformations="translations" pos="380 530" stroke="darkcyan" type="label" width="231.798" height="8.965" depth="2.99" valign="baseline" size="large">[2,0] is Gabriel $\rightarrow$ $\alpha_{20}$ is not$\\$
 modified (NaN)
 </text>
-<text matrix="1 0 0 1 -266.155 -165.501" transformations="translations" pos="282.952 524.893" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">2</text>
-<text matrix="1 0 0 1 -264 -162" transformations="translations" pos="310.693 578.759" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">4</text>
-<text matrix="1 0 0 1 -264 -162" transformations="translations" pos="375.332 578.49" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">5</text>
-<text matrix="1 0 0 1 -264 -172" transformations="translations" pos="272.179 660.635" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">1</text>
-<text matrix="1 0 0 1 -263.3 -172.154" transformations="translations" pos="296.419 724.197" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">3</text>
-<text matrix="1 0 0 1 -264 -162" transformations="translations" pos="375.332 689.453" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">0</text>
+<text matrix="1 0 0 1 -266.155 -165.501" transformations="translations" pos="282.952 524.893" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">0</text>
+<text matrix="1 0 0 1 -264 -162" transformations="translations" pos="310.693 578.759" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">2</text>
+<text matrix="1 0 0 1 -264 -162" transformations="translations" pos="375.332 578.49" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">3</text>
+<text matrix="1 0 0 1 -264 -172" transformations="translations" pos="272.179 660.635" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">4</text>
+<text matrix="1 0 0 1 -263.3 -172.154" transformations="translations" pos="296.419 724.197" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">5</text>
+<text matrix="1 0 0 1 -264 -162" transformations="translations" pos="375.332 689.453" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">6</text>
 <path matrix="1 0 0 1 -264 -162" stroke="lightgray">
 280 660 m
 300 710 l
@@ -333,7 +333,7 @@ modified (NaN)
 320 580 l
 280 660 l
 </path>
-<text matrix="1 0 0 1 -166.834 -240.52" transformations="translations" pos="212.724 627.389" stroke="darkcyan" type="label" width="14.814" height="4.294" depth="1.49" valign="baseline">$\alpha_{42}$</text>
+<text matrix="1 0 0 1 -166.834 -240.52" transformations="translations" pos="212.724 627.389" stroke="darkcyan" type="label" width="14.814" height="4.294" depth="1.49" valign="baseline">$\alpha_{20}$</text>
 <path matrix="1 0 0 1 -264 -162" stroke="darkcyan" pen="heavier">
 290 530 m
 320 580 l
@@ -365,11 +365,11 @@ modified (NaN)
 350 520 l
 320 580 l
 </path>
-<text matrix="1 0 0 1 -199.21 -189.117" transformations="translations" pos="380 530" stroke="darkred" type="label" width="168.308" height="8.965" depth="2.99" valign="baseline" size="large">[2,1] is not Gabriel $\rightarrow$ $\alpha_{21} = \alpha_{421}$</text>
-<text matrix="1 0 0 1 -40.1546 -167.501" transformations="translations" pos="282.952 524.893" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">2</text>
-<text matrix="1 0 0 1 -38 -164" transformations="translations" pos="375.332 578.49" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">5</text>
-<text matrix="1 0 0 1 -37.2997 -174.154" transformations="translations" pos="296.419 724.197" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">3</text>
-<text matrix="1 0 0 1 -38 -164" transformations="translations" pos="375.332 689.453" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">0</text>
+<text matrix="1 0 0 1 -199.21 -189.117" transformations="translations" pos="380 530" stroke="darkred" type="label" width="168.308" height="8.965" depth="2.99" valign="baseline" size="large">[0,4] is not Gabriel $\rightarrow$ $\alpha_{40} = \alpha_{420}$</text>
+<text matrix="1 0 0 1 -40.1546 -167.501" transformations="translations" pos="282.952 524.893" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">0</text>
+<text matrix="1 0 0 1 -38 -164" transformations="translations" pos="375.332 578.49" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">3</text>
+<text matrix="1 0 0 1 -37.2997 -174.154" transformations="translations" pos="296.419 724.197" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">5</text>
+<text matrix="1 0 0 1 -38 -164" transformations="translations" pos="375.332 689.453" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">6</text>
 <path matrix="1 0 0 1 -38 -164" stroke="lightgray">
 280 660 m
 300 710 l
@@ -388,7 +388,7 @@ modified (NaN)
 320 580 l
 280 660 l
 </path>
-<text matrix="1 0 0 1 52.4654 -193.97" transformations="translations" pos="212.724 627.389" stroke="darkcyan" type="label" width="14.814" height="4.294" depth="1.49" valign="baseline">$\alpha_{12}$</text>
+<text matrix="1 0 0 1 52.4654 -193.97" transformations="translations" pos="212.724 627.389" stroke="darkcyan" type="label" width="14.814" height="4.294" depth="1.49" valign="baseline">$\alpha_{40}$</text>
 <path matrix="1 0 0 1 -38 -164" stroke="darkcyan" pen="heavier">
 290 530 m
 280 660 l
@@ -413,12 +413,12 @@ modified (NaN)
 350 520 l
 320 580 l
 </path>
-<text matrix="1 0 0 1 123.845 -165.501" transformations="translations" pos="282.952 524.893" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">2</text>
-<text matrix="1 0 0 1 126 -162" transformations="translations" pos="352.708 510.349" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">6</text>
-<text matrix="1 0 0 1 126 -162" transformations="translations" pos="310.693 578.759" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">4</text>
-<text matrix="1 0 0 1 126 -162" transformations="translations" pos="375.332 578.49" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">5</text>
-<text matrix="1 0 0 1 126.7 -172.154" transformations="translations" pos="296.419 724.197" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">3</text>
-<text matrix="1 0 0 1 126 -162" transformations="translations" pos="375.332 689.453" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">0</text>
+<text matrix="1 0 0 1 123.845 -165.501" transformations="translations" pos="282.952 524.893" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">0</text>
+<text matrix="1 0 0 1 126 -162" transformations="translations" pos="352.708 510.349" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">1</text>
+<text matrix="1 0 0 1 126 -162" transformations="translations" pos="310.693 578.759" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">2</text>
+<text matrix="1 0 0 1 126 -162" transformations="translations" pos="375.332 578.49" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">3</text>
+<text matrix="1 0 0 1 126.7 -172.154" transformations="translations" pos="296.419 724.197" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">5</text>
+<text matrix="1 0 0 1 126 -162" transformations="translations" pos="375.332 689.453" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">6</text>
 <path matrix="1 0 0 1 126 -162" stroke="lightgray">
 280 660 m
 300 710 l
@@ -437,8 +437,8 @@ modified (NaN)
 320 580 l
 280 660 l
 </path>
-<text matrix="1 0 0 1 225.859 -165.729" transformations="translations" pos="212.724 627.389" stroke="darkcyan" type="label" width="14.814" height="4.294" depth="1.49" valign="baseline">$\alpha_{41}$</text>
-<text matrix="1 0 0 1 122 -164" transformations="translations" pos="272.179 660.635" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">1</text>
+<text matrix="1 0 0 1 225.859 -165.729" transformations="translations" pos="212.724 627.389" stroke="darkcyan" type="label" width="14.814" height="4.294" depth="1.49" valign="baseline">$\alpha_{42}$</text>
+<text matrix="1 0 0 1 122 -164" transformations="translations" pos="272.179 660.635" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">4</text>
 <path stroke="darkcyan" pen="heavier">
 406.093 497.775 m
 446.094 418.092 l
@@ -450,7 +450,7 @@ modified (NaN)
 425.854 457.774 m
 470.795 457.774 l
 </path>
-<text matrix="1 0 0 1 -48.9756 -209.799" transformations="translations" pos="380 530" stroke="darkcyan" type="label" width="231.798" height="8.965" depth="2.99" valign="baseline" size="large">[4,1] is Gabriel $\rightarrow$ $\alpha_{41}$ is not modified (NaN)
+<text matrix="1 0 0 1 -48.9756 -209.799" transformations="translations" pos="380 530" stroke="darkcyan" type="label" width="231.798" height="8.965" depth="2.99" valign="baseline" size="large">[2,4] is Gabriel $\rightarrow$ $\alpha_{42}$ is not modified (NaN)
 </text>
 <path stroke="darkblue" arrow="normal/normal">
 205.028 596.091 m
@@ -464,9 +464,9 @@ modified (NaN)
 341.123 594.316 m
 413.904 554.079 l
 </path>
-<text matrix="1 0 0 1 39.645 -2.36686" transformations="translations" pos="199.703 569.464" stroke="darkblue" type="label" width="93.206" height="7.473" depth="2.49" valign="baseline">For all faces of [4,2,1]</text>
+<text matrix="1 0 0 1 39.645 -2.36686" transformations="translations" pos="199.703 569.464" stroke="darkblue" type="label" width="93.206" height="7.473" depth="2.49" valign="baseline">For all faces of [4,2,0]</text>
 <text matrix="1 0 0 1 -93.391 2.68003" transformations="translations" pos="104.437 300.174" stroke="black" type="label" width="208.621" height="6.926" depth="1.93" valign="baseline">N.B. : is Gabriel on a single point has no sense.</text>
-<text matrix="1 0 0 1 -36.9231 10" transformations="translations" pos="48 784" stroke="black" type="label" width="118.324" height="7.473" depth="2.49" valign="baseline">Dimension =2 - $\sigma$ = [4,2,1]</text>
+<text matrix="1 0 0 1 -36.9231 10" transformations="translations" pos="48 784" stroke="black" type="label" width="118.324" height="7.473" depth="2.49" valign="baseline">Dimension =2 - $\sigma$ = [4,2,0]</text>
 <path stroke="darkcyan">
 247.333 430.892 m
 311.764 430.892 l
@@ -484,19 +484,19 @@ modified (NaN)
 <use matrix="1 0 0 1 -264 -162" name="mark/fdisk(sfx)" pos="370 690" size="normal" stroke="black" fill="white"/>
 <use matrix="1 0 0 1 -264 -162" name="mark/fdisk(sfx)" pos="370 580" size="normal" stroke="black" fill="white"/>
 <use matrix="1 0 0 1 -264 -162" name="mark/fdisk(sfx)" pos="350 520" size="normal" stroke="black" fill="white"/>
-<text matrix="1 0 0 1 -264 -162" transformations="translations" pos="352.708 510.349" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">6</text>
+<text matrix="1 0 0 1 -264 -162" transformations="translations" pos="352.708 510.349" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">1</text>
 <use matrix="1 0 0 1 -264 -162" name="mark/fdisk(sfx)" pos="305 555" size="normal" stroke="darkcyan" fill="white"/>
 <use matrix="1 0 0 1 -264 -162" name="mark/fdisk(sfx)" pos="290 530" size="normal" stroke="black" fill="white"/>
 <use matrix="1 0 0 1 -264 -162" name="mark/fdisk(sfx)" pos="320 580" size="normal" stroke="black" fill="white"/>
 <use matrix="1 0 0 1 -37.2997 -174.154" name="mark/fdisk(sfx)" pos="300 720" size="normal" stroke="black" fill="white"/>
 <use matrix="1 0 0 1 -38 -164" name="mark/fdisk(sfx)" pos="370 690" size="normal" stroke="black" fill="white"/>
-<text matrix="1 0 0 1 -38 -164" transformations="translations" pos="272.179 660.635" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">1</text>
+<text matrix="1 0 0 1 -38 -164" transformations="translations" pos="272.179 660.635" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">4</text>
 <use name="mark/fdisk(sfx)" pos="247 431" size="normal" stroke="darkcyan" fill="white"/>
 <use matrix="1 0 0 1 -38 -164" name="mark/fdisk(sfx)" pos="350 520" size="normal" stroke="black" fill="white"/>
-<text matrix="1 0 0 1 -38 -164" transformations="translations" pos="352.708 510.349" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">6</text>
+<text matrix="1 0 0 1 -38 -164" transformations="translations" pos="352.708 510.349" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">1</text>
 <use matrix="1 0 0 1 -38 -164" name="mark/fdisk(sfx)" pos="370 580" size="normal" stroke="black" fill="white"/>
 <use matrix="1 0 0 1 -38 -164" name="mark/fdisk(sfx)" pos="320 580" size="normal" stroke="darkred" fill="white"/>
-<text matrix="1 0 0 1 -38 -164" transformations="translations" pos="310.693 578.759" stroke="darkred" type="label" width="4.981" height="6.42" depth="0" valign="baseline">4</text>
+<text matrix="1 0 0 1 -38 -164" transformations="translations" pos="310.693 578.759" stroke="darkred" type="label" width="4.981" height="6.42" depth="0" valign="baseline">2</text>
 <path matrix="1 0 0 1 -38 -164" stroke="darkred" pen="heavier">
 65.192 0 0 65.192 285 595 e
 </path>

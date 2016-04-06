@@ -18,22 +18,16 @@ if(CGAL_FOUND)
       message(STATUS "Eigen3 version: ${EIGEN3_VERSION}.")
       include( ${EIGEN3_USE_FILE} )
       
-      add_executable ( dtoffrw_UT dtoffrw_unit_test.cpp )
-      target_link_libraries(dtoffrw_UT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+      add_executable ( poffreader_UT points_off_reader_unit_test.cpp )
+      target_link_libraries(poffreader_UT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
       # Do not forget to copy test files in current binary dir
       file(COPY "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
       # Unitary tests
-      add_test(dtoffrw_UT ${CMAKE_CURRENT_BINARY_DIR}/dtoffrw_UT
+      add_test(poffreader_UT ${CMAKE_CURRENT_BINARY_DIR}/poffreader_UT
       # XML format for Jenkins xUnit plugin 
-      --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/dtoffrw_UT.xml --log_level=test_suite --report_level=no)
-
-      if (DIFF_PATH)
-        # Do not forget to copy test result files in current binary dir
-        file(COPY "dtoffrw_alphashapedoc_result.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
-        add_test(dtoffrw_diff_files_UT ${DIFF_PATH} ${CMAKE_CURRENT_BINARY_DIR}/UT.off ${CMAKE_CURRENT_BINARY_DIR}/dtoffrw_alphashapedoc_result.off)
-      endif()
+      --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/poffreader_UT.xml --log_level=test_suite --report_level=no)
 
     else()
       message(WARNING "Eigen3 not found. Version 3.1.0 is required for Alpha shapes feature.")
