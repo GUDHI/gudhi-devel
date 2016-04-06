@@ -27,6 +27,10 @@
 #include <fstream>
 #include <map>
 
+#include <CGAL/Spatial_sort_traits_adapter_d.h>
+
+#include <boost/iterator/counting_iterator.hpp>
+
 #include "gudhi/Off_reader.h"
 
 namespace Gudhi {
@@ -42,8 +46,9 @@ template<typename Complex>
 class Delaunay_triangulation_off_visitor_reader {
  private:
   Complex* complex_;
-  typedef typename Complex::Point Point;
-  std::vector<Point> point_cloud;
+  typedef typename Complex::Point_d Point_d;
+  typedef typename Complex::size_type size_type;
+  std::vector<Point_d> point_cloud;
 
  public:
   // TODO(VR) : Pass a Complex as a parameter is required, even if not used. Otherwise, compilation is KO.
@@ -98,7 +103,7 @@ class Delaunay_triangulation_off_visitor_reader {
     std::cout << std::endl;
 #endif  // DEBUG_TRACES
     // Fill the point cloud
-    point_cloud.push_back(Point(point.size(), point.begin(), point.end()));
+    point_cloud.push_back(Point_d(point.size(), point.begin(), point.end()));
   }
 
   // Off_reader visitor maximal_face implementation - not used
@@ -110,7 +115,11 @@ class Delaunay_triangulation_off_visitor_reader {
   void done() {
     // It is advised to insert all the points at a time in a Delaunay Triangulation because points are sorted at the
     // beginning of the insertion
-    complex_->insert(point_cloud.begin(), point_cloud.end());
+    size_type inserted = complex_->insert(point_cloud.begin(), point_cloud.end());
+    if (inserted != (point_cloud.end() -point_cloud.begin())) {
+      std::cerr << "Delaunay_triangulation_off_visitor_reader::done - insertion failed " << inserted << " != " <<
+          (point_cloud.end() -point_cloud.begin()) << "\n";
+    }
   }
 
   /** \brief Returns the constructed Delaunay triangulation.
@@ -120,6 +129,36 @@ class Delaunay_triangulation_off_visitor_reader {
   Complex* get_complex() const {
     return complex_;
   }
+
+ private:
+  template<typename PointRangeIterator >
+  size_type insert_with_index(const PointRangeIterator& first, const PointRangeIterator& last) {
+    size_type vertices_before_insertion = complex_->number_of_vertices();
+    std::vector<Point_d> points(first, last);
+    
+    std::vector<std::ptrdiff_t> indices;
+    indices.reserve(points.size());
+  
+    // Creates a vector {0, 1, ..., N-1}
+    std::copy(boost::counting_iterator<std::ptrdiff_t>(0), boost::counting_iterator<std::ptrdiff_t>(points.size()),
+              std::back_inserter(indices));
+  
+    // Sort indices considering CGAL spatial sort
+    typedef CGAL::Spatial_sort_traits_adapter_d<Kernel, Point_d*> Search_traits_d;
+    spatial_sort(indices.begin(),indices.end(),Search_traits_d(&(points[0])));
+    
+    typename Delaunay_triangulation::Full_cell_handle hint;
+    for (typename std::vector<std::ptrdiff_t>::const_iterator it = indices.begin(), end = indices.end();
+         it != end; ++it) {
+      typename Delaunay_triangulation::Vertex_handle pos = complex_->insert(points[*it], hint);
+      // Save index value as data to retrieve it after insertion
+      pos->data() = *it;
+      hint = pos->full_cell();
+    }
+
+    return (complex_->number_of_vertices() - vertices_before_insertion);
+  }
+
 };
 
 /** 
