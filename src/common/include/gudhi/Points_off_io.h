@@ -92,7 +92,7 @@ class Points_off_visitor_reader {
    *
    * @return point_cloud.
    */
-  const std::vector<Point_d>& get_point_cloud() {
+  const std::vector<Point_d>& get_point_cloud() const {
     return point_cloud;
   }
 };
@@ -161,7 +161,7 @@ class Points_off_reader {
    *
    * @return point_cloud.
    */
-  const std::vector<Point_d>& get_point_cloud() {
+  const std::vector<Point_d>& get_point_cloud() const {
     return point_cloud;
   }
 
