@@ -1191,8 +1191,8 @@ class Simplex_tree {
    * function is not launching `initialize_filtration()` but returns the filtration modification information. If the
    * complex has changed , please call `initialize_filtration()` to recompute it.
    */
-  bool prune_above_filtration(Filtration_value filt) {
-    return rec_prune_above_filtration(root(), filt);
+  bool prune_above_filtration(Filtration_value filtration) {
+    return rec_prune_above_filtration(root(), filtration);
   }
 
  private:
