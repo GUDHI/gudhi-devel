@@ -126,6 +126,8 @@ class Alpha_complex : public Simplex_tree<> {
   /** \brief Alpha_complex constructor from an OFF file name.
    * Uses the Delaunay_triangulation_off_reader to construct the Delaunay triangulation required to initialize 
    * the Alpha_complex.
+   * 
+   * Duplicate points are inserted once in the Alpha_complex. This is the reason why the vertices may be not contiguous.
    *
    * @param[in] off_file_name OFF file [path and] name.
    * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$.
@@ -144,11 +146,15 @@ class Alpha_complex : public Simplex_tree<> {
 
   /** \brief Alpha_complex constructor from a list of points.
    *
+   * Duplicate points are inserted once in the Alpha_complex. This is the reason why the vertices may be not contiguous.
+   * 
    * @param[in] points Range of points to triangulate. Points must be in Kernel::Point_d
    * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$.
    * 
    * The type InputPointRange must be a range for which std::begin and
    * std::end return input iterators on a Kernel::Point_d.
+   * 
+   * @post Compare num_simplices with InputPointRange points number (not the same in case of duplicate points). 
    */
   template<typename InputPointRange >
   Alpha_complex(const InputPointRange& points,
@@ -209,12 +215,6 @@ class Alpha_complex : public Simplex_tree<> {
         // Save index value as data to retrieve it after insertion
         pos->data() = index;
         hint = pos->full_cell();
-      }
-
-      if (triangulation_->number_of_vertices() != (last -first)) {
-        std::cerr << "Alpha_complex - insertion failed " << triangulation_->number_of_vertices() << " != " <<
-            (last -first) << "\n";
-        exit(-1);  // ----- >>
       }
       init(max_alpha_square);
     }
@@ -282,8 +282,7 @@ class Alpha_complex : public Simplex_tree<> {
       std::cout << std::endl;
 #endif  // DEBUG_TRACES
       // Insert each simplex and its subfaces in the simplex tree - filtration is NaN
-      Simplex_result insert_result = insert_simplex_and_subfaces(vertexVector,
-                                                                 std::numeric_limits<double>::quiet_NaN());
+      insert_simplex_and_subfaces(vertexVector, std::numeric_limits<double>::quiet_NaN());
     }
     // --------------------------------------------------------------------------------------------
 
@@ -368,7 +367,9 @@ class Alpha_complex : public Simplex_tree<> {
         if (decr_dim > 1) {
           // insert the Tau points in a vector for is_gabriel function
           Vector_of_CGAL_points pointVector;
+#ifdef DEBUG_TRACES
           Vertex_handle vertexForGabriel = Vertex_handle();
+#endif  // DEBUG_TRACES
           for (auto vertex : simplex_vertex_range(f_boundary)) {
             pointVector.push_back(get_point(vertex));
           }
@@ -377,8 +378,10 @@ class Alpha_complex : public Simplex_tree<> {
           for (auto vertex : simplex_vertex_range(f_simplex)) {
             point_for_gabriel = get_point(vertex);
             if (std::find(pointVector.begin(), pointVector.end(), point_for_gabriel) == pointVector.end()) {
+#ifdef DEBUG_TRACES
               // vertex is not found in Tau
               vertexForGabriel = vertex;
+#endif  // DEBUG_TRACES
               // No need to continue loop
               break;
             }
