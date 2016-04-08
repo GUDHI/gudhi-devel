@@ -43,7 +43,7 @@ struct FilteredComplex
   * is model of IndexingTag. */
   typedef unspecified      Indexing_tag;
 
-/** Returns a Simplex_hanlde that is different from all simplex handles 
+/** Returns a Simplex_handle that is different from all simplex handles 
   * of the simplices. */
   Simplex_handle           null_simplex();
 /** \brief Returns the number of simplices in the complex.
@@ -61,12 +61,13 @@ struct FilteredComplex
 /** \brief Returns a key that is different from the keys associated 
   * to the simplices. */
   Simplex_key              null_key ();
-/** \brief Returns the key associated to a simplex. */  
+/** \brief Returns the key associated to a simplex.
+ *
+ * This is never called on null_simplex(). */
   Simplex_key              key      ( Simplex_handle sh );
-/** \brief Returns the simplex associated to a key.
-  *
-  * If key is different from null_key(), returns the simplex that
-  * has index idx in the filtration. */
+/** \brief Returns the simplex that has index idx in the filtration.
+ *
+ * This is never called on null_key(). */
   Simplex_handle           simplex  ( Simplex_key idx );
 /** \brief Assign a key to a simplex. */
   void                     assign_key(Simplex_handle sh, Simplex_key key);

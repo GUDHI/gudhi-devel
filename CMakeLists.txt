@@ -3,7 +3,7 @@ project(GUDHIdev)
 
 include(CMakeGUDHIVersion.txt)
 # Generate GUDHI official version file
-configure_file(GUDHIVersion.cmake.in "${PROJECT_BINARY_DIR}/GUDHIVersion.cmake" @ONLY)
+configure_file(GUDHIVersion.cmake.in "${CMAKE_SOURCE_DIR}/GUDHIVersion.cmake" @ONLY)
 
 find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework chrono timer program_options thread REQUIRED)
 
@@ -93,12 +93,14 @@ endif()
 
   include_directories(src/common/include/)
   include_directories(src/Alpha_complex/include/)
+  include_directories(src/Bitmap_cubical_complex/include/)
   include_directories(src/Bottleneck/include/)
   include_directories(src/Contraction/include/)
   include_directories(src/Hasse_complex/include/)
   include_directories(src/Persistent_cohomology/include/)
   include_directories(src/Simplex_tree/include/)
   include_directories(src/Skeleton_blocker/include/)
+  include_directories(src/Witness_complex/include/)
 
   add_subdirectory(src/common/example)
   add_subdirectory(src/common/test)
@@ -109,6 +111,10 @@ endif()
   add_subdirectory(src/Skeleton_blocker/test) 
   add_subdirectory(src/Skeleton_blocker/example) 
   add_subdirectory(src/Contraction/example)
+  add_subdirectory(src/Witness_complex/test)
+  add_subdirectory(src/Witness_complex/example)
+  add_subdirectory(src/Bitmap_cubical_complex/test)
+  add_subdirectory(src/Bitmap_cubical_complex/example)
   add_subdirectory(src/Alpha_complex/example)
   add_subdirectory(src/Alpha_complex/test)
 

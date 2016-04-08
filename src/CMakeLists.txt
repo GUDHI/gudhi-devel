@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.6)
 project(GUDHI)
 
 include("CMakeGUDHIVersion.txt")
+# Generate GUDHI official version file
+configure_file(GUDHIVersion.cmake.in "${CMAKE_SOURCE_DIR}/GUDHIVersion.cmake" @ONLY)
 
 enable_testing()
 
@@ -77,6 +79,8 @@ else()
   add_subdirectory(example/Persistent_cohomology)                   
   add_subdirectory(example/Skeleton_blocker)                   
   add_subdirectory(example/Contraction)                   
+  add_subdirectory(example/Bitmap_cubical_complex)
+  add_subdirectory(example/Witness_complex)
   add_subdirectory(example/Alpha_complex)
 
   # data points generator
@@ -93,8 +97,9 @@ else()
   # (this registers the build-tree with a global CMake-registry)
   export(PACKAGE GUDHI)
 
+  message("++ make install will install ${PROJECT_NAME} in the following directory : ${CMAKE_INSTALL_PREFIX}")
   # Create the GUDHIConfig.cmake and GUDHIConfigVersion files
-  set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include")
+  set(CONF_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include")
   configure_file(GUDHIConfig.cmake.in "${PROJECT_BINARY_DIR}/GUDHIConfig.cmake" @ONLY)
   configure_file(GUDHIConfigVersion.cmake.in "${PROJECT_BINARY_DIR}/GUDHIConfigVersion.cmake" @ONLY)
 
