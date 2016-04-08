@@ -39,9 +39,6 @@
 #include <list>
 #include <vector>
 
-using namespace Gudhi;
-using namespace Gudhi::persistent_cohomology;
-
 // Alpha_shape_3 templates type definitions
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
 typedef CGAL::Alpha_shape_vertex_base_3<Kernel> Vb;
@@ -66,11 +63,12 @@ typedef Alpha_shape_3::Edge Edge_3;
 typedef std::list<Alpha_shape_3::Vertex_handle> Vertex_list;
 
 // gudhi type definition
-typedef Simplex_tree<Simplex_tree_options_fast_persistence> ST;
+typedef Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence> ST;
 typedef ST::Vertex_handle Simplex_tree_vertex;
 typedef std::map<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex > Alpha_shape_simplex_tree_map;
 typedef std::pair<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex> Alpha_shape_simplex_tree_pair;
 typedef std::vector< Simplex_tree_vertex > Simplex_tree_vector_vertex;
+typedef Gudhi::persistent_cohomology::Persistent_cohomology< ST, Gudhi::persistent_cohomology::Field_Zp > PCOH;
 
 Vertex_list from(const Cell_handle& ch) {
   Vertex_list the_list;
@@ -125,23 +123,18 @@ void usage(char * const progName) {
 }
 
 int main(int argc, char * const argv[]) {
-  int coeff_field_characteristic = 0;
-  int returnedScanValue = sscanf(argv[2], "%d", &coeff_field_characteristic);
-  if ((returnedScanValue == EOF) || (coeff_field_characteristic <= 0)) {
-    std::cerr << "Error: " << argv[2] << " is not correct\n";
-    usage(argv[0]);
-  }
-
-  Filtration_value min_persistence = 0.0;
-  returnedScanValue = sscanf(argv[3], "%lf", &min_persistence);
-  if ((returnedScanValue == EOF) || (min_persistence < -1.0)) {
-    std::cerr << "Error: " << argv[3] << " is not correct\n";
-    usage(argv[0]);
-  }
-
   // program args management
   if (argc != 4) {
     std::cerr << "Error: Number of arguments (" << argc << ") is not correct\n";
+    usage(argv[0]);
+  }
+
+  int coeff_field_characteristic = atoi(argv[2]);
+
+  Filtration_value min_persistence = 0.0;
+  int returnedScanValue = sscanf(argv[3], "%lf", &min_persistence);
+  if ((returnedScanValue == EOF) || (min_persistence < -1.0)) {
+    std::cerr << "Error: " << argv[3] << " is not correct\n";
     usage(argv[0]);
   }
 
@@ -240,7 +233,7 @@ int main(int argc, char * const argv[]) {
       }
     }
     // Construction of the simplex_tree
-    Filtration_value filtr = std::sqrt(*the_alpha_value_iterator);
+    Filtration_value filtr = /*std::sqrt*/(*the_alpha_value_iterator);
 #ifdef DEBUG_TRACES
     std::cout << "filtration = " << filtr << std::endl;
 #endif  // DEBUG_TRACES
@@ -282,7 +275,7 @@ int main(int argc, char * const argv[]) {
 
   std::cout << "Simplex_tree dim: " << simplex_tree.dimension() << std::endl;
   // Compute the persistence diagram of the complex
-  Persistent_cohomology< ST, Field_Zp > pcoh(simplex_tree);
+  PCOH pcoh(simplex_tree);
   // initializes the coefficient field for homology
   pcoh.init_coefficients(coeff_field_characteristic);
 

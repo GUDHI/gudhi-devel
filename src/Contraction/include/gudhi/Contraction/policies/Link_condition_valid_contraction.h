@@ -23,8 +23,8 @@
 #ifndef CONTRACTION_POLICIES_LINK_CONDITION_VALID_CONTRACTION_H_
 #define CONTRACTION_POLICIES_LINK_CONDITION_VALID_CONTRACTION_H_
 
-#include <gudhi/Utils.h>
 #include <gudhi/Contraction/policies/Valid_contraction_policy.h>
+#include <gudhi/Debug_utils.h>
 
 
 namespace Gudhi {

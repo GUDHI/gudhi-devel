@@ -69,7 +69,10 @@ else()
   if (GPROF_PATH)
     message("gprof found in ${GPROF_PATH}")
   endif()
-
+FIND_PROGRAM( DIFF_PATH diff )
+if (DIFF_PATH)
+  message("diff found in ${DIFF_PATH}")
+endif()
 
   # BOOST ISSUE result_of vs C++11
   add_definitions(-DBOOST_RESULT_OF_USE_DECLTYPE)
@@ -82,7 +85,14 @@ else()
   message(STATUS "boost include dirs:" ${Boost_INCLUDE_DIRS})
   message(STATUS "boost library dirs:" ${Boost_LIBRARY_DIRS})
 
+  if (DEBUG_TRACES)
+    # For programs to be more verbose
+    message(STATUS "DEBUG_TRACES are activated")
+    add_definitions(-DDEBUG_TRACES)
+  endif()
+
   include_directories(src/common/include/)
+  include_directories(src/Alpha_complex/include/)
   include_directories(src/Bitmap_cubical_complex/include/)
   include_directories(src/Bottleneck/include/)
   include_directories(src/Contraction/include/)
@@ -92,6 +102,8 @@ else()
   include_directories(src/Skeleton_blocker/include/)
   include_directories(src/Witness_complex/include/)
 
+  add_subdirectory(src/common/example)
+  add_subdirectory(src/common/test)
   add_subdirectory(src/Simplex_tree/test)
   add_subdirectory(src/Simplex_tree/example)
   add_subdirectory(src/Persistent_cohomology/test)
@@ -103,6 +115,8 @@ else()
   add_subdirectory(src/Witness_complex/example)
   add_subdirectory(src/Bitmap_cubical_complex/test)
   add_subdirectory(src/Bitmap_cubical_complex/example)
+  add_subdirectory(src/Alpha_complex/example)
+  add_subdirectory(src/Alpha_complex/test)
 
   # data points generator
   add_subdirectory(data/points/generator)
@@ -112,3 +126,5 @@ else()
   add_subdirectory(src/GudhUI)
 
 endif()  
+
+

@@ -22,9 +22,9 @@
 #ifndef SKELETON_BLOCKER_GEOMETRIC_COMPLEX_H_
 #define SKELETON_BLOCKER_GEOMETRIC_COMPLEX_H_
 
-#include <gudhi/Utils.h>
 #include <gudhi/Skeleton_blocker_complex.h>
 #include <gudhi/Skeleton_blocker/Skeleton_blocker_sub_complex.h>
+#include <gudhi/Debug_utils.h>
 
 namespace Gudhi {
 

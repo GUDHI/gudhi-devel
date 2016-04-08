@@ -30,7 +30,7 @@
 #include <gudhi/Contraction/policies/Valid_contraction_policy.h>
 #include <gudhi/Contraction/policies/Dummy_valid_contraction.h>
 #include <gudhi/Contraction/policies/Link_condition_valid_contraction.h>
-#include <gudhi/Utils.h>
+#include <gudhi/Debug_utils.h>
 
 namespace Gudhi {
 

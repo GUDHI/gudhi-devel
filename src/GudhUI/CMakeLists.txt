@@ -58,6 +58,8 @@ if ( CGAL_FOUND AND QT4_FOUND AND OPENGL_FOUND AND QGLVIEWER_FOUND )
   target_link_libraries( GudhUI ${QT_LIBRARIES} ${QGLVIEWER_LIBRARIES} )
   target_link_libraries( GudhUI ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY} )	
 
+###############################################################################
+
 else()
   message(STATUS "NOTICE: GudhUI requires CGAL, the QGLViewer, OpenGL and Qt4, and will not be compiled.")
 endif()

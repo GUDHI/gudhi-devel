@@ -64,16 +64,24 @@ else()
   INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
   LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
+  if (DEBUG_TRACES)
+    message(STATUS "DEBUG_TRACES are activated")
+    # For programs to be more verbose
+    add_definitions(-DDEBUG_TRACES)
+  endif()
+
   #---------------------------------------------------------------------------------------
   # Gudhi compilation part
   include_directories(include)
 
+  add_subdirectory(example/common)
   add_subdirectory(example/Simplex_tree)                   
   add_subdirectory(example/Persistent_cohomology)                   
   add_subdirectory(example/Skeleton_blocker)                   
   add_subdirectory(example/Contraction)                   
   add_subdirectory(example/Bitmap_cubical_complex)
   add_subdirectory(example/Witness_complex)
+  add_subdirectory(example/Alpha_complex)
 
   # data points generator
   add_subdirectory(data/points/generator)
