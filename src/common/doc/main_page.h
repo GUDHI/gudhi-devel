@@ -20,6 +20,26 @@
  * We refer to \cite gudhilibrary_ICMS14 for a detailed description of the design of the library.
  *
  \section DataStructures Data structures
+ \subsection AlphaComplexDataStructure Alpha complex
+ \image html "alpha_complex_representation.png" "Alpha complex representation"
+<table border="0">
+  <tr>
+    <td width="25%">
+      <b>Author:</b> Vincent Rouvreau<br>
+      <b>Introduced in:</b> GUDHI 1.3.0<br>
+      <b>Copyright:</b> GPL v3<br>
+    </td>
+    <td width="75%">
+    Alpha_complex is a simplicial complex constructed from the finite cells of a Delaunay Triangulation.<br>
+    The filtration value of each simplex is computed as the square of the circumradius of the simplex if the
+    circumsphere is empty (the simplex is then said to be Gabriel), and as the minimum of the filtration
+    values of the codimension 1 cofaces that make it not Gabriel otherwise.
+    All simplices that have a filtration value strictly greater than a given alpha squared value are not inserted into
+    the complex.<br>
+    <b>User manual:</b> \ref alpha_complex - <b>Reference manual:</b> Gudhi::alphacomplex::Alpha_complex
+    </td>
+ </tr>
+</table>
  \subsection CubicalComplexDataStructure Cubical complex
  \image html "Cubical_complex_representation.png" "Cubical complex representation"
 <table border="0">
@@ -166,15 +186,42 @@
  * your operating system is detailed here http://doc.cgal.org/latest/Manual/installation.html
  * 
  * The following examples require the <a target="_blank" href="http://www.cgal.org/">Computational Geometry Algorithms
- * Library</a> (CGAL) and will not be built if CGAL is not installed:
- * \li <a href="_persistent_cohomology_2alpha_shapes_persistence_8cpp-example.html">
- * Persistent_cohomology/alpha_shapes_persistence.cpp</a>
+ * Library</a> (CGAL \cite cgal:eb-15b) and will not be built if CGAL is not installed:
+ * \li <a href="_persistent_cohomology_2alpha_complex_3d_persistence_8cpp-example.html">
+ * Persistent_cohomology/alpha_complex_3d_persistence.cpp</a>
+ * \li <a href="_persistent_cohomology_2alpha_complex_persistence_8cpp-example.html">
+ * Persistent_cohomology/alpha_complex_persistence.cpp</a>
  * \li <a href="_simplex_tree_2simplex_tree_from_alpha_shapes_3_8cpp-example.html">
  * Simplex_tree/simplex_tree_from_alpha_shapes_3.cpp</a>
+ * \li <a href="_alpha_complex_2_alpha_complex_from_off_8cpp-example.html">
+ *  Alpha_complex/Alpha_complex_from_off.cpp</a>
+ * \li <a href="_alpha_complex_2_alpha_complex_from_points_8cpp-example.html">
+ *  Alpha_complex/Alpha_complex_from_points.cpp</a>
  * 
  * The following example requires CGAL version &ge; 4.6:
  * \li <a href="_witness_complex_2witness_complex_sphere_8cpp-example.html">
  * Witness_complex/witness_complex_sphere.cpp</a>
+ * 
+ * The following example requires CGAL version &ge; 4.7:
+ * \li <a href="_alpha_complex_2_alpha_complex_from_off_8cpp-example.html">
+ * Alpha_complex/Alpha_complex_from_off.cpp</a>
+ * \li <a href="_alpha_complex_2_alpha_complex_from_points_8cpp-example.html">
+ * Alpha_complex/Alpha_complex_from_points.cpp</a>
+ * \li <a href="common_2_c_g_a_l_points_off_reader_8cpp-example.html">
+ * common/CGAL_points_off_reader.cpp</a>
+ * 
+ * \subsection eigen3 Eigen3:
+ * <a target="_blank" href="http://eigen.tuxfamily.org/">Eigen3</a> is a C++ template library for linear algebra:
+ * matrices, vectors, numerical solvers, and related algorithms.
+ * 
+ * The following example requires the <a target="_blank" href="http://eigen.tuxfamily.org/">Eigen3</a> and will not be
+ * built if Eigen3 is not installed:
+ * \li <a href="_alpha_complex_2_alpha_complex_from_off_8cpp-example.html">
+ * Alpha_complex/Alpha_complex_from_off.cpp</a> (requires also Eigen3)
+ * \li <a href="_alpha_complex_2_alpha_complex_from_points_8cpp-example.html">
+ * Alpha_complex/Alpha_complex_from_points.cpp</a> (requires also Eigen3)
+ * \li <a href="_persistent_cohomology_2alpha_complex_persistence_8cpp-example.html">
+ * Persistent_cohomology/alpha_complex_persistence.cpp</a>
  * 
  * \subsection tbb Threading Building Blocks:
  * <a target="_blank" href="https://www.threadingbuildingblocks.org/">Intel&reg; TBB</a> lets you easily write parallel
@@ -184,14 +231,20 @@
  * Having Intel&reg; TBB installed is recommended to parallelize and accelerate some GUDHI computations.
  * 
  * The following examples are using Intel&reg; TBB if installed:
+ * \li <a href="_alpha_complex_2_alpha_complex_from_off_8cpp-example.html">
+ * Alpha_complex/Alpha_complex_from_off.cpp</a>
+ * \li <a href="_alpha_complex_2_alpha_complex_from_points_8cpp-example.html">
+ * Alpha_complex/Alpha_complex_from_points.cpp</a>
  * \li <a href="_bitmap_cubical_complex_2_bitmap_cubical_complex_8cpp-example.html">
  * Bitmap_cubical_complex/Bitmap_cubical_complex.cpp</a>
  * \li <a href="_bitmap_cubical_complex_2_bitmap_cubical_complex_periodic_boundary_conditions_8cpp-example.html">
  * Bitmap_cubical_complex/Bitmap_cubical_complex_periodic_boundary_conditions.cpp</a>
  * \li <a href="_bitmap_cubical_complex_2_random_bitmap_cubical_complex_8cpp-example.html">
  * Bitmap_cubical_complex/Random_bitmap_cubical_complex.cpp</a>
- * \li <a href="_persistent_cohomology_2alpha_shapes_persistence_8cpp-example.html">
- * Persistent_cohomology/alpha_shapes_persistence.cpp</a>
+ * \li <a href="_persistent_cohomology_2alpha_complex_3d_persistence_8cpp-example.html">
+ * Persistent_cohomology/alpha_complex_3d_persistence.cpp</a>
+ * \li <a href="_persistent_cohomology_2alpha_complex_persistence_8cpp-example.html">
+ * Persistent_cohomology/alpha_complex_persistence.cpp</a>
  * \li <a href="_simplex_tree_2simple_simplex_tree_8cpp-example.html">
  * Simplex_tree/simple_simplex_tree.cpp</a>
  * \li <a href="_simplex_tree_2simplex_tree_from_alpha_shapes_3_8cpp-example.html">
@@ -249,12 +302,16 @@ make \endverbatim
 
 // List of Gudhi examples - Doxygen needs at least a file tag to analyse comments
 /*! @file Examples
+ * @example Alpha_complex/Alpha_complex_from_off.cpp
+ * @example Alpha_complex/Alpha_complex_from_points.cpp
  * @example Bitmap_cubical_complex/Bitmap_cubical_complex.cpp
  * @example Bitmap_cubical_complex/Bitmap_cubical_complex_periodic_boundary_conditions.cpp
  * @example Bitmap_cubical_complex/Random_bitmap_cubical_complex.cpp
+ * @example common/CGAL_points_off_reader.cpp
  * @example Contraction/Garland_heckbert.cpp
  * @example Contraction/Rips_contraction.cpp
- * @example Persistent_cohomology/alpha_shapes_persistence.cpp
+ * @example Persistent_cohomology/alpha_complex_3d_persistence.cpp
+ * @example Persistent_cohomology/alpha_complex_persistence.cpp
  * @example Persistent_cohomology/parallel_rips_persistence.cpp
  * @example Persistent_cohomology/performance_rips_persistence.cpp
  * @example Persistent_cohomology/persistence_from_file.cpp

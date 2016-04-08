@@ -25,7 +25,7 @@
 #include <gudhi/Skeleton_blocker_link_complex.h>
 #include <gudhi/Skeleton_blocker/Skeleton_blocker_link_superior.h>
 #include <gudhi/Skeleton_blocker/internal/Trie.h>
-#include <gudhi/Utils.h>
+#include <gudhi/Debug_utils.h>
 
 #include <boost/iterator/iterator_facade.hpp>
 

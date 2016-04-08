@@ -61,6 +61,8 @@ if (TBB_FOUND)
   target_link_libraries( GudhUI ${TBB_RELEASE_LIBRARY})
 endif()
 
+###############################################################################
+
 else()
   message(STATUS "NOTICE: GudhUI requires CGAL, the QGLViewer, OpenGL and Qt4, and will not be compiled.")
 endif()

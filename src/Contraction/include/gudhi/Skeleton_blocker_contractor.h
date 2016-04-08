@@ -37,7 +37,7 @@
 #include <gudhi/Contraction/policies/Contraction_visitor.h>
 
 #include <gudhi/Skeleton_blocker/Skeleton_blocker_complex_visitor.h>
-#include <gudhi/Utils.h>
+#include <gudhi/Debug_utils.h>
 
 
 #include <boost/scoped_array.hpp>

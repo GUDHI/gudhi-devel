@@ -673,6 +673,7 @@ LAYOUT_FILE            =
 # also \cite for info how to create references.
 
 CITE_BIB_FILES         = biblio/bibliography.bib \
+                        biblio/how_to_cite_cgal.bib \
                         biblio/how_to_cite_gudhi.bib
 
 #---------------------------------------------------------------------------
@@ -836,6 +837,7 @@ EXAMPLE_RECURSIVE      = NO
 # \image command).
 
 IMAGE_PATH             = doc/Skeleton_blocker/ \
+	doc/Alpha_complex/ \
 	doc/common/ \
 	doc/Contraction/ \
 	doc/Simplex_tree/ \
@@ -1602,7 +1604,7 @@ PAPER_TYPE             = a4
 # If left blank no extra packages will be included.
 # This tag requires that the tag GENERATE_LATEX is set to YES.
 
-EXTRA_PACKAGES         = amsfonts amsmath amssymb
+EXTRA_PACKAGES         = amsfonts amsmath amssymb algorithm algpseudocode
 
 # The LATEX_HEADER tag can be used to specify a personal LaTeX header for the
 # generated LaTeX document. The header should contain everything until the first
