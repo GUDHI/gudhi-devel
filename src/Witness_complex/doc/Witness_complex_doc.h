@@ -6,6 +6,8 @@
 
    \author Siargey Kachanovich
 
+   \image html "Witness_complex_representation.png" "Witness complex representation"
+
    \section Definitions
 
    Witness complex \f$ Wit(W,L) \f$  is a simplicial complex defined on two sets of points in \f$\mathbb{R}^D\f$:
@@ -18,7 +20,9 @@
 
    \f$ \sigma \subset L \f$ is witnessed if there exists a point \f$w \in W\f$ such that 
    w is closer to the vertices of \f$ \sigma \f$ than other points in \f$ L \f$ and all of its faces are witnessed as well. 
-      
+ 
+   The data structure is described in \cite boissonnatmariasimplextreealgorithmica .
+
    \section Implementation
 
    The principal class of this module is Gudhi::Witness_complex.

@@ -7,57 +7,55 @@ add_definitions( -DBOOST_ALL_DYN_LINK )
 
 add_executable(plain_homology plain_homology.cpp)
 target_link_libraries(plain_homology ${Boost_SYSTEM_LIBRARY})
-add_test(plain_homology ${CMAKE_CURRENT_BINARY_DIR}/plain_homology)
 
 add_executable(persistence_from_simple_simplex_tree persistence_from_simple_simplex_tree.cpp)
 target_link_libraries(persistence_from_simple_simplex_tree ${Boost_SYSTEM_LIBRARY})
-add_test(persistence_from_simple_simplex_tree ${CMAKE_CURRENT_BINARY_DIR}/persistence_from_simple_simplex_tree 1 0)
 
 add_executable(rips_persistence rips_persistence.cpp)
 target_link_libraries(rips_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
-   
-add_test(rips_persistence_3 ${CMAKE_CURRENT_BINARY_DIR}/rips_persistence ${CMAKE_SOURCE_DIR}/data/points/Kl.txt -r 0.25 -d 3 -p 3 -m 100)
-   
+
 add_executable(parallel_rips_persistence parallel_rips_persistence.cpp)
 target_link_libraries(parallel_rips_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
-   
-add_test(parallel_rips_persistence_3 ${CMAKE_CURRENT_BINARY_DIR}/parallel_rips_persistence ${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.txt -r 0.3 -d 3 -p 3 -m 100)
-   
+
 add_executable(persistence_from_file persistence_from_file.cpp)
 target_link_libraries(persistence_from_file ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
+if (TBB_FOUND)
+  target_link_libraries(plain_homology ${TBB_RELEASE_LIBRARY})
+  target_link_libraries(persistence_from_simple_simplex_tree ${TBB_RELEASE_LIBRARY})
+  target_link_libraries(rips_persistence ${TBB_RELEASE_LIBRARY})
+  target_link_libraries(parallel_rips_persistence ${TBB_RELEASE_LIBRARY})
+  target_link_libraries(persistence_from_file ${TBB_RELEASE_LIBRARY})
+endif()
+
+add_test(plain_homology ${CMAKE_CURRENT_BINARY_DIR}/plain_homology)
+add_test(persistence_from_simple_simplex_tree ${CMAKE_CURRENT_BINARY_DIR}/persistence_from_simple_simplex_tree 1 0)
+add_test(rips_persistence_3 ${CMAKE_CURRENT_BINARY_DIR}/rips_persistence ${CMAKE_SOURCE_DIR}/data/points/Kl.txt -r 0.2 -d 3 -p 3 -m 100)
+add_test(parallel_rips_persistence_3 ${CMAKE_CURRENT_BINARY_DIR}/parallel_rips_persistence ${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.txt -r 0.3 -d 3 -p 3 -m 100)
 add_test(persistence_from_file_3_2_0 ${CMAKE_CURRENT_BINARY_DIR}/persistence_from_file ${CMAKE_SOURCE_DIR}/data/points/bunny_5000.st -p 2 -m 0)
 add_test(persistence_from_file_3_3_100 ${CMAKE_CURRENT_BINARY_DIR}/persistence_from_file ${CMAKE_SOURCE_DIR}/data/points/bunny_5000.st -p 3 -m 100)
-
+   
 if(GMPXX_FOUND AND GMP_FOUND)
-  message("GMPXX_LIBRARIES = ${GMPXX_LIBRARIES}")
-  message("GMP_LIBRARIES = ${GMP_LIBRARIES}")
+   message("GMPXX_LIBRARIES = ${GMPXX_LIBRARIES}")
+   message("GMP_LIBRARIES = ${GMP_LIBRARIES}")
 
-  add_executable(rips_multifield_persistence rips_multifield_persistence.cpp )
-  target_link_libraries(rips_multifield_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES})
-  add_test(rips_multifield_persistence_2_71 ${CMAKE_CURRENT_BINARY_DIR}/rips_multifield_persistence ${CMAKE_SOURCE_DIR}/data/points/Kl.txt -r 0.25 -d 3 -p 2 -q 71 -m 100)
+   add_executable(rips_multifield_persistence rips_multifield_persistence.cpp )
+   target_link_libraries(rips_multifield_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES})
+   add_executable ( performance_rips_persistence performance_rips_persistence.cpp )
+   target_link_libraries(performance_rips_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES})
+   if (TBB_FOUND)
+     target_link_libraries(rips_multifield_persistence ${TBB_RELEASE_LIBRARY})
+     target_link_libraries(performance_rips_persistence ${TBB_RELEASE_LIBRARY})
+   endif()
 
-  add_executable ( performance_rips_persistence performance_rips_persistence.cpp )
-  target_link_libraries(performance_rips_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES})
+   add_test(rips_multifield_persistence_2_71 ${CMAKE_CURRENT_BINARY_DIR}/rips_multifield_persistence ${CMAKE_SOURCE_DIR}/data/points/Kl.txt -r 0.2 -d 3 -p 2 -q 71 -m 100)
 
   if(CGAL_FOUND)
-    include( ${CGAL_USE_FILE} )
-    # In CMakeLists.txt, when include(${CGAL_USE_FILE}), CXX_FLAGS are overwritten.
-    # cf. http://doc.cgal.org/latest/Manual/installation.html#title40
-    # A workaround is to add "-std=c++11" again.
-    # A fix would be to use https://cmake.org/cmake/help/v3.1/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html 
-    # or even better https://cmake.org/cmake/help/v3.1/variable/CMAKE_CXX_STANDARD.html
-    # but it implies to use cmake version 3.1 at least.
-    if(NOT MSVC)
-      include(CheckCXXCompilerFlag)
-      CHECK_CXX_COMPILER_FLAG(-std=c++11 COMPILER_SUPPORTS_CXX11)
-      if(COMPILER_SUPPORTS_CXX11)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-      endif()
-    endif()
-    # - End of workaround
-
     add_executable(alpha_complex_3d_persistence alpha_complex_3d_persistence.cpp)
     target_link_libraries(alpha_complex_3d_persistence ${Boost_SYSTEM_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES} ${CGAL_LIBRARY})
+    if (TBB_FOUND)
+      target_link_libraries(alpha_complex_3d_persistence ${TBB_RELEASE_LIBRARY})
+    endif()
     add_test(alpha_complex_3d_persistence_2_0_5 ${CMAKE_CURRENT_BINARY_DIR}/alpha_complex_3d_persistence ${CMAKE_SOURCE_DIR}/data/points/bunny_5000 2 0.5)
 
     if (NOT CGAL_VERSION VERSION_LESS 4.7.0)
@@ -70,6 +68,9 @@ if(GMPXX_FOUND AND GMP_FOUND)
       
         add_executable (alpha_complex_persistence alpha_complex_persistence.cpp)
         target_link_libraries(alpha_complex_persistence  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+        if (TBB_FOUND)
+          target_link_libraries(alpha_complex_persistence ${TBB_RELEASE_LIBRARY})
+        endif()
 
       else()
         message(WARNING "Eigen3 not found. Version 3.1.0 is required for Alpha shapes feature.")

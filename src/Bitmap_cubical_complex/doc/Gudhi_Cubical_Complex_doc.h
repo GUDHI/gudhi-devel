@@ -76,7 +76,7 @@ namespace Cubical_complex {
  * directions, allows to determine, dimension, neighborhood, boundary and coboundary of every cube \f$C \in
  * \mathcal{K}\f$.
  *
- * \image html "bitmapAllCubes.png" "Cubical complex.
+ * \image html "Cubical_complex_representation.png" Cubical complex.
  *
  * Note that the cubical complex in the figure above is, in a natural way, a product of one dimensional cubical
  * complexes in \f$\mathbb{R}\f$. The number of all cubes in each direction is equal \f$2n+1\f$, where \f$n\f$ is the
@@ -145,7 +145,8 @@ namespace Cubical_complex {
 
  * \section BitmapExamples Examples
  * End user programs are available in example/Bitmap_cubical_complex folder.
-
+ * 
+ * \copyright GNU General Public License v3.
  */
 /** @} */  // end defgroup cubical_complex
 

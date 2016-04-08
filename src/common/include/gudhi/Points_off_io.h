@@ -113,7 +113,7 @@ class Points_off_visitor_reader {
  * This example loads points from an OFF file and builds a vector of CGAL points in dimension d.
  * Then, it is asked to display the points.
  * 
- * \include CGAL_points_off_reader.cpp
+ * \include common/CGAL_points_off_reader.cpp
  * 
  * When launching:
  * 
@@ -122,7 +122,7 @@ class Points_off_visitor_reader {
  *
  * the program output is:
  * 
- * \include cgaloffreader_result.txt
+ * \include common/cgaloffreader_result.txt
  */
 template<typename Point_d>
 class Points_off_reader {

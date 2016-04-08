@@ -65,7 +65,7 @@ namespace alphacomplex {
  * 
  * Then, it is asked to display information about the alpha complex.
  * 
- * \include Alpha_complex_from_points.cpp
+ * \include Alpha_complex/Alpha_complex_from_points.cpp
  * 
  * When launching:
  * 
@@ -74,7 +74,7 @@ namespace alphacomplex {
  *
  * the program output is:
  * 
- * \include alphaoffreader_for_doc_60.txt
+ * \include Alpha_complex/alphaoffreader_for_doc_60.txt
  * 
  * \section algorithm Algorithm
  * 
@@ -145,7 +145,7 @@ namespace alphacomplex {
  * 
  * Then, it is asked to display information about the alpha complex.
  * 
- * \include Alpha_complex_from_off.cpp
+ * \include Alpha_complex/Alpha_complex_from_off.cpp
  * 
  * When launching:
  * 
@@ -154,7 +154,7 @@ namespace alphacomplex {
  *
  * the program output is:
  * 
- * \include alphaoffreader_for_doc_32.txt
+ * \include Alpha_complex/alphaoffreader_for_doc_32.txt
  * 
  * \copyright GNU General Public License v3.                         
  * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim

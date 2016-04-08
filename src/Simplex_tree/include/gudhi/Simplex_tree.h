@@ -51,6 +51,7 @@
 
 namespace Gudhi {
 /** \defgroup simplex_tree Filtered Complexes
+ * \author    Cl&eacute;ment Maria
  *
  * A simplicial complex \f$\mathbf{K}\f$
  * on a set of vertices \f$V = \{1, \cdots ,|V|\}\f$ is a collection of simplices
@@ -71,16 +72,13 @@ namespace Gudhi {
  The simplex tree is an efficient and flexible
  data structure for representing general (filtered) simplicial complexes. The data structure
  is described in \cite boissonnatmariasimplextreealgorithmica
+ \image html "Simplex_tree_representation.png" "Simplex tree representation"
 
  The second one is the Hasse_complex. The Hasse complex is a data structure representing
  explicitly all co-dimension 1 incidence relations in a complex. It is consequently faster
  when accessing the boundary of a simplex, but is less compact and harder to construct from
  scratch.
 
-
- * \author    Clément Maria
- * \version   1.0
- * \date      2014
  * \copyright GNU General Public License v3.
  * @{
  */
@@ -88,6 +86,7 @@ namespace Gudhi {
 struct Simplex_tree_options_full_featured;
 
 /**
+ * \class Simplex_tree Simplex_tree.h gudhi/Simplex_tree.h
  * \brief Simplex Tree data structure for representing simplicial complexes.
  *
  * \details Every simplex \f$[v_0, \cdots ,v_d]\f$ admits a canonical orientation
@@ -825,10 +824,11 @@ class Simplex_tree {
      * possible.
      */
 #ifdef GUDHI_USE_TBB
-    tbb::parallel_sort(filtration_vect_, is_before_in_filtration(this));
+    std::cout << "TBB is ON !!!" << std::endl;
+    tbb::parallel_sort(filtration_vect_.begin(), filtration_vect_.end(), is_before_in_filtration(this));
 #else
-    std::stable_sort(filtration_vect_.begin(), filtration_vect_.end(),
-                     is_before_in_filtration(this));
+    std::cout << "TBB is OFF..." << std::endl;
+    std::stable_sort(filtration_vect_.begin(), filtration_vect_.end(), is_before_in_filtration(this));
 #endif
   }
 

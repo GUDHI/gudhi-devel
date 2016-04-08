@@ -39,13 +39,9 @@ namespace Gudhi {
 namespace Cubical_complex {
 
 /**
- * @class Bitmap_cubical_complex_base
  * @brief Cubical complex represented as a bitmap, class with basic implementation.
  * @ingroup cubical_complex
- */
-
-/**
- * This is a class implementing a basic bitmap data structure to store cubical complexes.
+ * @details This is a class implementing a basic bitmap data structure to store cubical complexes.
  * It implements only the most basic subroutines.
  * The idea of the bitmap is the following. Our aim is to have a memory efficient
  * data structure to store d-dimensional cubical complex
@@ -193,7 +189,7 @@ class Bitmap_cubical_complex_base {
   // ITERATORS
 
   /**
-   * Iterator through all cells in the complex (in order they appear in the structure -- i.e.
+   * @brief Iterator through all cells in the complex (in order they appear in the structure -- i.e.
    * in lexicographical order).
    **/
   class All_cells_iterator : std::iterator< std::input_iterator_tag, T > {
@@ -261,7 +257,7 @@ class Bitmap_cubical_complex_base {
   }
 
   /**
-   * All_cells_range class provides ranges for All_cells_iterator
+   * @brief All_cells_range class provides ranges for All_cells_iterator
    **/
   class All_cells_range {
    public:
@@ -312,7 +308,7 @@ class Bitmap_cubical_complex_base {
   }
 
   /**
-   * Iterator through top dimensional cells of the complex. The cells appear in order they are stored
+   * @brief Iterator through top dimensional cells of the complex. The cells appear in order they are stored
    * in the structure (i.e. in lexicographical order)
    **/
   class Top_dimensional_cells_iterator : std::iterator< std::input_iterator_tag, T > {
@@ -414,7 +410,7 @@ class Bitmap_cubical_complex_base {
   }
 
   /**
-   * Top_dimensional_cells_iterator_range class provides ranges for Top_dimensional_cells_iterator_range
+   * @brief Top_dimensional_cells_iterator_range class provides ranges for Top_dimensional_cells_iterator_range
    **/
   class Top_dimensional_cells_range {
    public:
