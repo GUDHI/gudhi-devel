@@ -31,7 +31,7 @@
 #include <gudhi/Skeleton_blocker/Skeleton_blocker_simple_traits.h>
 #include <gudhi/Skeleton_blocker/Skeleton_blocker_simple_geometric_traits.h>
 
-#include <gudhi/Utils.h>  // xxx
+#include <gudhi/Debug_utils.h>
 
 namespace Gudhi {
 
@@ -240,7 +240,6 @@ their collaboration to write the two initial papers
 
 
 \copyright GNU General Public License v3.                         
-\verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
 */
 /** @} */  // end defgroup
 

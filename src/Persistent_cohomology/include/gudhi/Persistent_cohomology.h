@@ -48,6 +48,7 @@ namespace persistent_cohomology {
 
 /** \defgroup persistent_cohomology Persistent Cohomology
   *
+ \author    Clément Maria
 
   Computation of persistent cohomology using the algorithm of 
    \cite DBLP:journals/dcg/SilvaMV11 and \cite DBLP:journals/corr/abs-1208-5018 
@@ -62,15 +63,6 @@ namespace persistent_cohomology {
   these features when the topological space is changing. Consequently, the theory is essentially 
   composed of three elements: 
   topological spaces, their homology groups and an evolution scheme.
-
- The theory of homology consists in attaching to a topological space a sequence of
- (homology) groups,
- capturing global topological features
- like connected components, holes, cavities, etc. Persistent homology studies the evolution
- -- birth, life and death -- of
- these features when the topological space is changing. Consequently, the theory is essentially
- composed of three elements:
- topological spaces, their homology groups and an evolution scheme.
 
  <DT>Topological Spaces:</DT>
  Topological spaces are represented by simplicial complexes.
@@ -178,11 +170,6 @@ points sampling a Klein bottle in \f$\mathbb{R}^5\f$ with a simplex tree, its co
 Hasse diagram and the computation of persistent homology and multi-field persistent homology for the 
 different representations.
 
-
-
- \author    Clément Maria
- \version   1.0
- \date      2014
  \copyright GNU General Public License v3.
  @{  
  */

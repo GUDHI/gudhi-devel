@@ -25,7 +25,7 @@
 
 #include <gudhi/Skeleton_blocker_complex.h>
 #include <gudhi/Skeleton_blocker/Skeleton_blocker_simplex.h>
-#include <gudhi/Utils.h>
+#include <gudhi/Debug_utils.h>
 
 #include <map>
 #include <vector>

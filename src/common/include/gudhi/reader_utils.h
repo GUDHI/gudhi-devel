@@ -58,7 +58,9 @@ inline void read_points(std::string file_name, std::vector< std::vector< double 
     while (iss >> x) {
       point.push_back(x);
     }
-    points.push_back(point);
+    // Check for empty lines
+    if (!point.empty())
+      points.push_back(point);
   }
   in_file.close();
 }
@@ -159,7 +161,7 @@ bool read_simplex(std::istream & in_, std::vector< Vertex_handle > & simplex, Fi
     simplex.push_back(v);
   }
   in_ >> fil;
-  in_.ignore((std::numeric_limits<std::streamsize>::max)(), '\n'); // ignore until the carriage return
+  in_.ignore((std::numeric_limits<std::streamsize>::max)(), '\n');  // ignore until the carriage return
   return true;
 }
 
