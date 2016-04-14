@@ -53,8 +53,14 @@ if(GMPXX_FOUND AND GMP_FOUND)
   if(CGAL_FOUND)
     add_executable(alpha_complex_3d_persistence alpha_complex_3d_persistence.cpp)
     target_link_libraries(alpha_complex_3d_persistence ${Boost_SYSTEM_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES} ${CGAL_LIBRARY})
+
+    add_executable(periodic_alpha_complex_3d_persistence periodic_alpha_complex_3d_persistence.cpp)
+    target_link_libraries(periodic_alpha_complex_3d_persistence ${Boost_SYSTEM_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES} ${CGAL_LIBRARY})
+    add_test(periodic_alpha_complex_3d_persistence_2_0 ${CMAKE_CURRENT_BINARY_DIR}/alpha_complex_3d_persistence ${CMAKE_SOURCE_DIR}/data/points/grid_10_10_10_in_0_1.off 2 0)
+
     if (TBB_FOUND)
       target_link_libraries(alpha_complex_3d_persistence ${TBB_RELEASE_LIBRARY})
+      target_link_libraries(periodic_alpha_complex_3d_persistence ${TBB_RELEASE_LIBRARY})
     endif()
     add_test(alpha_complex_3d_persistence_2_0_5 ${CMAKE_CURRENT_BINARY_DIR}/alpha_complex_3d_persistence ${CMAKE_SOURCE_DIR}/data/points/bunny_5000 2 0.5)
 
@@ -65,7 +71,7 @@ if(GMPXX_FOUND AND GMP_FOUND)
       if (EIGEN3_FOUND)
         message(STATUS "Eigen3 version: ${EIGEN3_VERSION}.")
         include( ${EIGEN3_USE_FILE} )
-      
+
         add_executable (alpha_complex_persistence alpha_complex_persistence.cpp)
         target_link_libraries(alpha_complex_persistence  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
         if (TBB_FOUND)

@@ -43,7 +43,7 @@ class Points_off_visitor_reader {
   /** \brief Off_reader visitor init implementation. 
    * 
    * The init parameters are set from OFF file header.
-   * Dimension value is required in order to construct Alpha complex.
+   * Dimension value is required in order to construct a vector of points.
    *
    * @param[in] dim space dimension of vertices.
    * @param[in] num_vertices number of vertices in the OFF file (not used).
@@ -63,12 +63,19 @@ class Points_off_visitor_reader {
     }
   }
 
-  /** \brief Off_reader visitor point implementation. 
+  /** @brief Off_reader visitor point implementation. 
    * 
    * The point function is called on each vertex line from OFF file.
-   * This function inserts the vertex in the Alpha complex.
+   * This function inserts the vertex in the vector of points.
    *
    * @param[in] point vector of vertex coordinates.
+   * 
+   * @details
+   * Point_d must have a constructor with the following form:
+   * 
+   * @code template<class InputIterator > Point_d::Point_d(int d, InputIterator first, InputIterator last) @endcode
+   * 
+   * where d is the point dimension. 		
    */
   void point(const std::vector<double>& point) {
 #ifdef DEBUG_TRACES
@@ -127,7 +134,7 @@ class Points_off_visitor_reader {
 template<typename Point_d>
 class Points_off_reader {
  public:
-  /** \brief Reads the OFF file and constructs the Alpha complex from the points
+  /** \brief Reads the OFF file and constructs a vector of points from the points
    * that are in the OFF file.
    *
    * @param[in] name_file OFF file to read.
