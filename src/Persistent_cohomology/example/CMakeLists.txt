@@ -54,15 +54,11 @@ if(GMPXX_FOUND AND GMP_FOUND)
     add_executable(alpha_complex_3d_persistence alpha_complex_3d_persistence.cpp)
     target_link_libraries(alpha_complex_3d_persistence ${Boost_SYSTEM_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES} ${CGAL_LIBRARY})
 
-    add_executable(periodic_alpha_complex_3d_persistence periodic_alpha_complex_3d_persistence.cpp)
-    target_link_libraries(periodic_alpha_complex_3d_persistence ${Boost_SYSTEM_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES} ${CGAL_LIBRARY})
-    add_test(periodic_alpha_complex_3d_persistence_2_0 ${CMAKE_CURRENT_BINARY_DIR}/alpha_complex_3d_persistence ${CMAKE_SOURCE_DIR}/data/points/grid_10_10_10_in_0_1.off 2 0)
-
     if (TBB_FOUND)
       target_link_libraries(alpha_complex_3d_persistence ${TBB_RELEASE_LIBRARY})
-      target_link_libraries(periodic_alpha_complex_3d_persistence ${TBB_RELEASE_LIBRARY})
     endif()
-    add_test(alpha_complex_3d_persistence_2_0_5 ${CMAKE_CURRENT_BINARY_DIR}/alpha_complex_3d_persistence ${CMAKE_SOURCE_DIR}/data/points/bunny_5000 2 0.5)
+    add_test(alpha_complex_3d_persistence_2_0_5 ${CMAKE_CURRENT_BINARY_DIR}/alpha_complex_3d_persistence ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off 2 0.45)
+
 
     if (NOT CGAL_VERSION VERSION_LESS 4.7.0)
       message(STATUS "CGAL version: ${CGAL_VERSION}.")
@@ -74,9 +70,16 @@ if(GMPXX_FOUND AND GMP_FOUND)
 
         add_executable (alpha_complex_persistence alpha_complex_persistence.cpp)
         target_link_libraries(alpha_complex_persistence  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
+        add_executable(periodic_alpha_complex_3d_persistence periodic_alpha_complex_3d_persistence.cpp)
+        target_link_libraries(periodic_alpha_complex_3d_persistence ${Boost_SYSTEM_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES} ${CGAL_LIBRARY})
+
         if (TBB_FOUND)
           target_link_libraries(alpha_complex_persistence ${TBB_RELEASE_LIBRARY})
+          target_link_libraries(periodic_alpha_complex_3d_persistence ${TBB_RELEASE_LIBRARY})
         endif()
+        add_test(alpha_complex_persistence_2_0_45 ${CMAKE_CURRENT_BINARY_DIR}/alpha_complex_persistence ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -m 0.45 -p 2)
+        add_test(periodic_alpha_complex_3d_persistence_2_0 ${CMAKE_CURRENT_BINARY_DIR}/periodic_alpha_complex_3d_persistence ${CMAKE_SOURCE_DIR}/data/points/grid_10_10_10_in_0_1.off 2 0)
 
       else()
         message(WARNING "Eigen3 not found. Version 3.1.0 is required for Alpha shapes feature.")
