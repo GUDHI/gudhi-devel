@@ -824,10 +824,8 @@ class Simplex_tree {
      * possible.
      */
 #ifdef GUDHI_USE_TBB
-    std::cout << "TBB is ON !!!" << std::endl;
     tbb::parallel_sort(filtration_vect_.begin(), filtration_vect_.end(), is_before_in_filtration(this));
 #else
-    std::cout << "TBB is OFF..." << std::endl;
     std::stable_sort(filtration_vect_.begin(), filtration_vect_.end(), is_before_in_filtration(this));
 #endif
   }
