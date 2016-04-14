@@ -116,6 +116,10 @@ class Simplex_tree_siblings {
     return members_.size();
   }
 
+  void erase(const Dictionary_it iterator) {
+    members_.erase(iterator);
+  }
+
   Simplex_tree_siblings * oncles_;
   Vertex_handle parent_;
   Dictionary members_;

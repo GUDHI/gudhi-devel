@@ -22,8 +22,8 @@
 #ifndef SKELETON_BLOCKER_LINK_COMPLEX_H_
 #define SKELETON_BLOCKER_LINK_COMPLEX_H_
 
-#include <gudhi/Utils.h>
 #include <gudhi/Skeleton_blocker_complex.h>
+#include <gudhi/Debug_utils.h>
 
 namespace Gudhi {
 

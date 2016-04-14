@@ -61,4 +61,5 @@ edge02 = [0, 2]
 if mini_st.find(edge02):
   # Only coface is 012
   print("coface(edge02,1)=", mini_st.get_coface_tree(edge02, 1))
+print("filtered_tree=", mini_st.get_filtered_tree())
 

@@ -4,18 +4,17 @@ project(GUDHIPersistentCohomologyUT)
 if (GCOVR_PATH)
   # for gcovr to make coverage reports - Corbera Jenkins plugin
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")	
-  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fprofile-arcs -ftest-coverage")
 endif()
 if (GPROF_PATH)
   # for gprof to make coverage reports - Jenkins
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -pg")
-  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -pg")
 endif()
 
 add_executable ( PersistentCohomologyUT persistent_cohomology_unit_test.cpp )
 target_link_libraries(PersistentCohomologyUT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+if (TBB_FOUND)
+  target_link_libraries(PersistentCohomologyUT ${TBB_RELEASE_LIBRARY})
+endif()
 
 # Unitary tests
 add_test(NAME PersistentCohomologyUT 
@@ -26,7 +25,10 @@ add_test(NAME PersistentCohomologyUT
 
 if(GMPXX_FOUND AND GMP_FOUND)
   add_executable ( PersistentCohomologyMultiFieldUT persistent_cohomology_unit_test_multi_field.cpp )
-  target_link_libraries(PersistentCohomologyMultiFieldUT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES})
+target_link_libraries(PersistentCohomologyMultiFieldUT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES})
+if (TBB_FOUND)
+  target_link_libraries(PersistentCohomologyMultiFieldUT ${TBB_RELEASE_LIBRARY})
+endif()
 
   # Unitary tests
   add_test(NAME PersistentCohomologyMultiFieldUT

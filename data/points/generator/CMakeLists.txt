@@ -5,22 +5,6 @@ if(CGAL_FOUND)
   if (NOT CGAL_VERSION VERSION_LESS 4.6.0)
     message(STATUS "CGAL version: ${CGAL_VERSION}.")
 
-    include( ${CGAL_USE_FILE} )
-    # In CMakeLists.txt, when include(${CGAL_USE_FILE}), CXX_FLAGS are overwritten.
-    # cf. http://doc.cgal.org/latest/Manual/installation.html#title40
-    # A workaround is to add "-std=c++11" again.
-    # A fix would be to use https://cmake.org/cmake/help/v3.1/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html 
-    # or even better https://cmake.org/cmake/help/v3.1/variable/CMAKE_CXX_STANDARD.html
-    # but it implies to use cmake version 3.1 at least.
-    if(NOT MSVC)
-      include(CheckCXXCompilerFlag)
-      CHECK_CXX_COMPILER_FLAG(-std=c++11 COMPILER_SUPPORTS_CXX11)
-      if(COMPILER_SUPPORTS_CXX11)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-      endif()
-    endif()
-    # - End of workaround
-
     find_package(Eigen3 3.1.0)
     if (EIGEN3_FOUND)
       include( ${EIGEN3_USE_FILE} )
