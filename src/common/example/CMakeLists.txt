@@ -5,7 +5,7 @@ project(GUDHIDelaunayTriangulationOffFileReadWrite)
 if(CGAL_FOUND)
   add_executable ( cgal3Doffreader CGAL_3D_points_off_reader.cpp )
   target_link_libraries(cgal3Doffreader  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
-  add_test(cgal3Doffreader ${CMAKE_CURRENT_BINARY_DIR}/cgaloffreader ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off)
+  add_test(cgal3Doffreader ${CMAKE_CURRENT_BINARY_DIR}/cgal3Doffreader ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off)
 
   if (NOT CGAL_VERSION VERSION_LESS 4.7.0)
     find_package(Eigen3 3.1.0)
