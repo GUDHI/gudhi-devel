@@ -173,7 +173,7 @@ int main(int argc, char * const argv[]) {
 
   // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode. This is the default mode
   // Maybe need to set it to GENERAL mode
-  Alpha_shape_3 as(pdt, Alpha_shape_3::GENERAL);
+  Alpha_shape_3 as(pdt, 0, Alpha_shape_3::GENERAL);
 
   // filtration with alpha values from alpha shape
   std::vector<Object> the_objects;
@@ -291,7 +291,7 @@ int main(int argc, char * const argv[]) {
 
   std::cout << "Simplex_tree dim: " << simplex_tree.dimension() << std::endl;
   // Compute the persistence diagram of the complex
-  Persistent_cohomology pcoh(simplex_tree);
+  Persistent_cohomology pcoh(simplex_tree, true);
   // initializes the coefficient field for homology
   pcoh.init_coefficients(coeff_field_characteristic);
 
