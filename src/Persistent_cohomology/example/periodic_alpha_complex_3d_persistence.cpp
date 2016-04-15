@@ -249,7 +249,7 @@ int main(int argc, char * const argv[]) {
       }
     }
     // Construction of the simplex_tree
-    Filtration_value filtr = std::sqrt(*the_alpha_value_iterator);
+    Filtration_value filtr = /*std::sqrt*/(*the_alpha_value_iterator);
 #ifdef DEBUG_TRACES
     std::cout << "filtration = " << filtr << std::endl;
 #endif  // DEBUG_TRACES
