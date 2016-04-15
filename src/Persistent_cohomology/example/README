@@ -105,18 +105,19 @@ N.B.: alpha_complex_persistence accepts OFF files in d-Dimension.
 
 3) 3D periodic special case
 ---------------------------
-./periodic_alpha_complex_3d_persistence ../../data/points/grid_10_10_10_in_0_1.off 2 0.0
+./periodic_alpha_complex_3d_persistence ../../data/points/grid_10_10_10_in_0_1.off 3 1.0
 
 output:
 Periodic Delaunay computed.
 Simplex_tree dim: 3
-2  0 0.0866025 inf 
-2  1 0.0866025 inf 
-2  1 0.0866025 inf 
-2  1 0.0866025 inf 
-2  2 0.0866025 inf 
-2  2 0.0866025 inf 
-2  2 0.0866025 inf 
+3  0 0 inf
+3  1 0.05 inf
+3  1 0.05 inf
+3  1 0.05 inf
+3  2 0.0707107 inf
+3  2 0.0707107 inf
+3  2 0.0707107 inf
+3  3 0.0866025 inf
 
 N.B.: periodic_alpha_complex_3d_persistence accepts only OFF files in 3D dimension. In this example, the periodic cube
 is hard coded to { x = [0,1]; y = [0,1]; z = [0,1] }
