@@ -255,8 +255,8 @@
  * Simplex_tree/simplex_tree_from_cliques_of_graph.cpp</a>
  * \li <a href="_persistent_cohomology_2alpha_shapes_persistence_8cpp-example.html">
  * Persistent_cohomology/alpha_shapes_persistence.cpp</a>
- * \li <a href="_persistent_cohomology_2parallel_rips_persistence_8cpp-example.html">
- * Persistent_cohomology/parallel_rips_persistence.cpp</a>
+ * \li <a href="_persistent_cohomology_2rips_persistence_via_boundary_matrix_8cpp-example.html">
+ * Persistent_cohomology/rips_persistence_via_boundary_matrix.cpp</a>
  * \li <a href="_persistent_cohomology_2performance_rips_persistence_8cpp-example.html">
  * Persistent_cohomology/performance_rips_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2persistence_from_file_8cpp-example.html">
@@ -317,7 +317,7 @@ make \endverbatim
  * @example Contraction/Rips_contraction.cpp
  * @example Persistent_cohomology/alpha_complex_3d_persistence.cpp
  * @example Persistent_cohomology/alpha_complex_persistence.cpp
- * @example Persistent_cohomology/parallel_rips_persistence.cpp
+ * @example Persistent_cohomology/rips_persistence_via_boundary_matrix.cpp
  * @example Persistent_cohomology/performance_rips_persistence.cpp
  * @example Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp
  * @example Persistent_cohomology/persistence_from_file.cpp
