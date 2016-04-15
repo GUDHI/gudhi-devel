@@ -45,14 +45,14 @@ using K = CGAL::Exact_predicates_inexact_constructions_kernel;
 using PK = CGAL::Periodic_3_Delaunay_triangulation_traits_3<K>;
 // Vertex type
 using DsVb = CGAL::Periodic_3_triangulation_ds_vertex_base_3<>;
-using Vb = CGAL::Triangulation_vertex_base_3<PK,DsVb>;
-using AsVb = CGAL::Alpha_shape_vertex_base_3<PK,Vb>;
+using Vb = CGAL::Triangulation_vertex_base_3<PK, DsVb>;
+using AsVb = CGAL::Alpha_shape_vertex_base_3<PK, Vb>;
 // Cell type
 using DsCb = CGAL::Periodic_3_triangulation_ds_cell_base_3<>;
-using Cb = CGAL::Triangulation_cell_base_3<PK,DsCb>;
-using AsCb = CGAL::Alpha_shape_cell_base_3<PK,Cb>;
-using Tds = CGAL::Triangulation_data_structure_3<AsVb,AsCb>;
-using P3DT3 = CGAL::Periodic_3_Delaunay_triangulation_3<PK,Tds>;
+using Cb = CGAL::Triangulation_cell_base_3<PK, DsCb>;
+using AsCb = CGAL::Alpha_shape_cell_base_3<PK, Cb>;
+using Tds = CGAL::Triangulation_data_structure_3<AsVb, AsCb>;
+using P3DT3 = CGAL::Periodic_3_Delaunay_triangulation_3<PK, Tds>;
 using Alpha_shape_3 = CGAL::Alpha_shape_3<P3DT3>;
 using Point_3 = PK::Point_3;
 
@@ -162,9 +162,9 @@ int main(int argc, char * const argv[]) {
 
   // Retrieve the triangulation
   std::vector<Point_3> lp = off_reader.get_point_cloud();
-  
+
   // Define the periodic cube
-  P3DT3 pdt(PK::Iso_cuboid_3(0,0,0,1,1,1));
+  P3DT3 pdt(PK::Iso_cuboid_3(0, 0, 0, 1, 1, 1));
   // Heuristic for inserting large point sets (if pts is reasonably large)
   pdt.insert(lp.begin(), lp.end(), true);
   // As pdt won't be modified anymore switch to 1-sheeted cover if possible
