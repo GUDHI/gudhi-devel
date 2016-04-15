@@ -26,7 +26,8 @@
 #include <boost/variant.hpp>
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Delaunay_triangulation_3.h>
+#include <CGAL/Periodic_3_Delaunay_triangulation_traits_3.h>
+#include <CGAL/Periodic_3_Delaunay_triangulation_3.h>
 #include <CGAL/Alpha_shape_3.h>
 #include <CGAL/iterator.h>
 
@@ -39,36 +40,42 @@
 #include <list>
 #include <vector>
 
-// Alpha_shape_3 templates type definitions
-typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
-typedef CGAL::Alpha_shape_vertex_base_3<Kernel> Vb;
-typedef CGAL::Alpha_shape_cell_base_3<Kernel> Fb;
-typedef CGAL::Triangulation_data_structure_3<Vb, Fb> Tds;
-typedef CGAL::Delaunay_triangulation_3<Kernel, Tds> Triangulation_3;
-typedef CGAL::Alpha_shape_3<Triangulation_3> Alpha_shape_3;
-
-// From file type definition
-typedef Kernel::Point_3 Point_3;
+// Traits
+using K = CGAL::Exact_predicates_inexact_constructions_kernel;
+using PK = CGAL::Periodic_3_Delaunay_triangulation_traits_3<K>;
+// Vertex type
+using DsVb = CGAL::Periodic_3_triangulation_ds_vertex_base_3<>;
+using Vb = CGAL::Triangulation_vertex_base_3<PK,DsVb>;
+using AsVb = CGAL::Alpha_shape_vertex_base_3<PK,Vb>;
+// Cell type
+using DsCb = CGAL::Periodic_3_triangulation_ds_cell_base_3<>;
+using Cb = CGAL::Triangulation_cell_base_3<PK,DsCb>;
+using AsCb = CGAL::Alpha_shape_cell_base_3<PK,Cb>;
+using Tds = CGAL::Triangulation_data_structure_3<AsVb,AsCb>;
+using P3DT3 = CGAL::Periodic_3_Delaunay_triangulation_3<PK,Tds>;
+using Alpha_shape_3 = CGAL::Alpha_shape_3<P3DT3>;
+using Point_3 = PK::Point_3;
 
 // filtration with alpha values needed type definition
-typedef Alpha_shape_3::FT Alpha_value_type;
-typedef CGAL::Object Object;
-typedef CGAL::Dispatch_output_iterator<
-CGAL::cpp11::tuple<Object, Alpha_value_type>,
-CGAL::cpp11::tuple<std::back_insert_iterator< std::vector<Object> >,
-    std::back_insert_iterator< std::vector<Alpha_value_type> > > > Dispatch;
-typedef Alpha_shape_3::Cell_handle Cell_handle;
-typedef Alpha_shape_3::Facet Facet;
-typedef Alpha_shape_3::Edge Edge_3;
-typedef std::list<Alpha_shape_3::Vertex_handle> Vertex_list;
+using Alpha_value_type = Alpha_shape_3::FT;
+using Object = CGAL::Object;
+using Dispatch = CGAL::Dispatch_output_iterator<
+    CGAL::cpp11::tuple<Object, Alpha_value_type>,
+    CGAL::cpp11::tuple<std::back_insert_iterator< std::vector<Object> >,
+    std::back_insert_iterator< std::vector<Alpha_value_type> > > >;
+using Cell_handle = Alpha_shape_3::Cell_handle;
+using Facet = Alpha_shape_3::Facet;
+using Edge_3 = Alpha_shape_3::Edge;
+using Vertex_list = std::list<Alpha_shape_3::Vertex_handle>;
 
 // gudhi type definition
-typedef Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence> ST;
-typedef ST::Vertex_handle Simplex_tree_vertex;
-typedef std::map<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex > Alpha_shape_simplex_tree_map;
-typedef std::pair<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex> Alpha_shape_simplex_tree_pair;
-typedef std::vector< Simplex_tree_vertex > Simplex_tree_vector_vertex;
-typedef Gudhi::persistent_cohomology::Persistent_cohomology< ST, Gudhi::persistent_cohomology::Field_Zp > PCOH;
+using ST = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
+using Simplex_tree_vertex = ST::Vertex_handle;
+using Alpha_shape_simplex_tree_map = std::map<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex >;
+using Alpha_shape_simplex_tree_pair = std::pair<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex>;
+using Simplex_tree_vector_vertex = std::vector< Simplex_tree_vertex >;
+using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<
+    ST, Gudhi::persistent_cohomology::Field_Zp >;
 
 Vertex_list from(const Cell_handle& ch) {
   Vertex_list the_list;
@@ -129,10 +136,15 @@ int main(int argc, char * const argv[]) {
     usage(argv[0]);
   }
 
-  int coeff_field_characteristic = atoi(argv[2]);
+  int coeff_field_characteristic = 0;
+  int returnedScanValue = sscanf(argv[2], "%d", &coeff_field_characteristic);
+  if ((returnedScanValue == EOF) || (coeff_field_characteristic <= 0)) {
+    std::cerr << "Error: " << argv[2] << " is not correct\n";
+    usage(argv[0]);
+  }
 
   Filtration_value min_persistence = 0.0;
-  int returnedScanValue = sscanf(argv[3], "%lf", &min_persistence);
+  returnedScanValue = sscanf(argv[3], "%lf", &min_persistence);
   if ((returnedScanValue == EOF) || (min_persistence < -1.0)) {
     std::cerr << "Error: " << argv[3] << " is not correct\n";
     usage(argv[0]);
@@ -150,12 +162,18 @@ int main(int argc, char * const argv[]) {
 
   // Retrieve the triangulation
   std::vector<Point_3> lp = off_reader.get_point_cloud();
+  
+  // Define the periodic cube
+  P3DT3 pdt(PK::Iso_cuboid_3(0,0,0,1,1,1));
+  // Heuristic for inserting large point sets (if pts is reasonably large)
+  pdt.insert(lp.begin(), lp.end(), true);
+  // As pdt won't be modified anymore switch to 1-sheeted cover if possible
+  if (pdt.is_triangulation_in_1_sheet()) pdt.convert_to_1_sheeted_covering();
+  std::cout << "Periodic Delaunay computed." << std::endl;
 
-  // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode.
-  Alpha_shape_3 as(lp.begin(), lp.end(), 0, Alpha_shape_3::GENERAL);
-#ifdef DEBUG_TRACES
-  std::cout << "Alpha shape computed in GENERAL mode" << std::endl;
-#endif  // DEBUG_TRACES
+  // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode. This is the default mode
+  // Maybe need to set it to GENERAL mode
+  Alpha_shape_3 as(pdt, Alpha_shape_3::GENERAL);
 
   // filtration with alpha values from alpha shape
   std::vector<Object> the_objects;
@@ -231,7 +249,7 @@ int main(int argc, char * const argv[]) {
       }
     }
     // Construction of the simplex_tree
-    Filtration_value filtr = /*std::sqrt*/(*the_alpha_value_iterator);
+    Filtration_value filtr = std::sqrt(*the_alpha_value_iterator);
 #ifdef DEBUG_TRACES
     std::cout << "filtration = " << filtr << std::endl;
 #endif  // DEBUG_TRACES
@@ -273,7 +291,7 @@ int main(int argc, char * const argv[]) {
 
   std::cout << "Simplex_tree dim: " << simplex_tree.dimension() << std::endl;
   // Compute the persistence diagram of the complex
-  PCOH pcoh(simplex_tree);
+  Persistent_cohomology pcoh(simplex_tree);
   // initializes the coefficient field for homology
   pcoh.init_coefficients(coeff_field_characteristic);
 
