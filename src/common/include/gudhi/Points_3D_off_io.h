@@ -41,7 +41,6 @@ class Points_3D_off_visitor_reader {
   bool valid_;
 
  public:
-
   /** @brief Off_reader visitor init implementation. 
    * 
    * The init parameters are set from OFF file header.
@@ -138,11 +137,11 @@ class Points_3D_off_visitor_reader {
  * This example loads points from an OFF file and builds a vector of CGAL points in dimension 3.
  * Then, it is asked to display the points.
  * 
- * @include common/CGAL_Points_3D_off_reader.cpp
+ * @include common/CGAL_3D_points_off_reader.cpp
  * 
  * When launching:
  * 
- * @code $> ./cgal3Doffreader ../../data/points/alphacomplexdoc.off
+ * @code $> ./cgal3Doffreader ../../data/points/tore3D_300.off
  * @endcode
  *
  * the program output is:
@@ -152,7 +151,6 @@ class Points_3D_off_visitor_reader {
 template<typename Point_3>
 class Points_3D_off_reader {
  public:
-
   /** @brief Reads the OFF file and constructs a vector of points from the points
    * that are in the OFF file.
    *
@@ -199,6 +197,6 @@ class Points_3D_off_reader {
   bool valid_;
 };
 
-} // namespace Gudhi
+}  // namespace Gudhi
 
 #endif  // POINTS_3D_OFF_IO_H_

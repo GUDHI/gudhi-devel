@@ -189,8 +189,6 @@
  * Library</a> (CGAL \cite cgal:eb-15b) and will not be built if CGAL is not installed:
  * \li <a href="_persistent_cohomology_2alpha_complex_3d_persistence_8cpp-example.html">
  * Persistent_cohomology/alpha_complex_3d_persistence.cpp</a>
- * \li <a href="_persistent_cohomology_2alpha_complex_persistence_8cpp-example.html">
- * Persistent_cohomology/alpha_complex_persistence.cpp</a>
  * \li <a href="_simplex_tree_2simplex_tree_from_alpha_shapes_3_8cpp-example.html">
  * Simplex_tree/simplex_tree_from_alpha_shapes_3.cpp</a>
  * \li <a href="_alpha_complex_2_alpha_complex_from_off_8cpp-example.html">
@@ -207,8 +205,10 @@
  * Alpha_complex/Alpha_complex_from_off.cpp</a>
  * \li <a href="_alpha_complex_2_alpha_complex_from_points_8cpp-example.html">
  * Alpha_complex/Alpha_complex_from_points.cpp</a>
- * \li <a href="common_2_c_g_a_l_points_off_reader_8cpp-example.html">
- * common/CGAL_points_off_reader.cpp</a>
+ * \li <a href="_persistent_cohomology_2alpha_complex_persistence_8cpp-example.html">
+ * Persistent_cohomology/alpha_complex_persistence.cpp</a>
+ * \li <a href="_persistent_cohomology_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
+ * Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp</a>
  * 
  * \subsection eigen3 Eigen3:
  * <a target="_blank" href="http://eigen.tuxfamily.org/">Eigen3</a> is a C++ template library for linear algebra:
@@ -222,6 +222,8 @@
  * Alpha_complex/Alpha_complex_from_points.cpp</a> (requires also Eigen3)
  * \li <a href="_persistent_cohomology_2alpha_complex_persistence_8cpp-example.html">
  * Persistent_cohomology/alpha_complex_persistence.cpp</a>
+ * \li <a href="_persistent_cohomology_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
+ * Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp</a>
  * 
  * \subsection tbb Threading Building Blocks:
  * <a target="_blank" href="https://www.threadingbuildingblocks.org/">Intel&reg; TBB</a> lets you easily write parallel
@@ -267,6 +269,8 @@
  * Persistent_cohomology/rips_multifield_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2rips_persistence_8cpp-example.html">
  * Persistent_cohomology/rips_persistence.cpp</a>
+ * \li <a href="_persistent_cohomology_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
+ * Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp</a>
  * 
  * \subsection demos Demos and examples
  * To build the demos and examples, run the following commands in a terminal:
@@ -307,6 +311,7 @@ make \endverbatim
  * @example Bitmap_cubical_complex/Bitmap_cubical_complex.cpp
  * @example Bitmap_cubical_complex/Bitmap_cubical_complex_periodic_boundary_conditions.cpp
  * @example Bitmap_cubical_complex/Random_bitmap_cubical_complex.cpp
+ * @example common/CGAL_3D_points_off_reader.cpp
  * @example common/CGAL_points_off_reader.cpp
  * @example Contraction/Garland_heckbert.cpp
  * @example Contraction/Rips_contraction.cpp
@@ -314,6 +319,7 @@ make \endverbatim
  * @example Persistent_cohomology/alpha_complex_persistence.cpp
  * @example Persistent_cohomology/parallel_rips_persistence.cpp
  * @example Persistent_cohomology/performance_rips_persistence.cpp
+ * @example Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp
  * @example Persistent_cohomology/persistence_from_file.cpp
  * @example Persistent_cohomology/persistence_from_simple_simplex_tree.cpp
  * @example Persistent_cohomology/plain_homology.cpp
