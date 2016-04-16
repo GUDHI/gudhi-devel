@@ -77,7 +77,7 @@ template<class Kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>>
 class Alpha_complex : public Simplex_tree<> {
  public:
   // Add an int in TDS to save point index in the structure
-  typedef CGAL::Triangulation_data_structure<CGAL::Dynamic_dimension_tag,
+  typedef CGAL::Triangulation_data_structure<typename Kernel::Dimension,
                               CGAL::Triangulation_vertex<Kernel, std::ptrdiff_t>,
                               CGAL::Triangulation_full_cell<Kernel> > TDS;
   /** \brief A Delaunay triangulation of a set of points in \f$ \mathbb{R}^D\f$.*/
@@ -287,13 +287,15 @@ class Alpha_complex : public Simplex_tree<> {
     // --------------------------------------------------------------------------------------------
 
     // --------------------------------------------------------------------------------------------
+    // Will be re-used many times
+    Vector_of_CGAL_points pointVector;
     // ### For i : d -> 0
     for (int decr_dim = dimension(); decr_dim >= 0; decr_dim--) {
       // ### Foreach Sigma of dim i
       for (auto f_simplex : skeleton_simplex_range(decr_dim)) {
         int f_simplex_dim = dimension(f_simplex);
         if (decr_dim == f_simplex_dim) {
-          Vector_of_CGAL_points pointVector;
+          pointVector.clear();
 #ifdef DEBUG_TRACES
           std::cout << "Sigma of dim " << decr_dim << " is";
 #endif  // DEBUG_TRACES
