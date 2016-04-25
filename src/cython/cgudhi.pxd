@@ -19,7 +19,6 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         void set_dimension(int dimension)
         int dimension()
         bint find_simplex(vector[int] simplex)
-        bint insert_simplex(vector[int] simplex, double filtration)
         bint insert_simplex_and_subfaces(vector[int] simplex, double filtration)
         vector[pair[vector[int], double]] get_filtered_tree()
         vector[pair[vector[int], double]] get_skeleton_tree(int dimension)

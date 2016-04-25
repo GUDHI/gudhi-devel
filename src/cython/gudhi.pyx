@@ -41,11 +41,6 @@ cdef class SimplexTree:
         cdef vector[int] complex
         for i in simplex:
           complex.push_back(i)
-        return self.thisptr.insert_simplex(complex, <double>filtration)
-    def insert_with_subfaces(self, simplex, filtration = 0.0):
-        cdef vector[int] complex
-        for i in simplex:
-          complex.push_back(i)
         return self.thisptr.insert_simplex_and_subfaces(complex, <double>filtration)
     def get_filtered_tree(self):
         cdef vector[pair[vector[int], double]] coface_tree = self.thisptr.get_filtered_tree()
@@ -111,12 +106,7 @@ cdef class MiniSimplexTree:
         for i in simplex:
           complex.push_back(i)
         return self.thisptr.find_simplex(complex)
-    def insert(self, simplex):
-        cdef vector[int] complex
-        for i in simplex:
-          complex.push_back(i)
-        return self.thisptr.insert_simplex(complex, 0.0)
-    def insert_with_subfaces(self, simplex, filtration = 0.0):
+    def insert(self, simplex, filtration = 0.0):
         cdef vector[int] complex
         for i in simplex:
           complex.push_back(i)

@@ -37,34 +37,29 @@ template<typename SimplexTreeOptions = Simplex_tree_options_full_featured>
 class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   typedef typename Simplex_tree<SimplexTreeOptions>::Simplex_handle Simplex_handle;
   typedef typename std::pair<Simplex_handle, bool> Insertion_result;
-  typedef std::vector<Vertex_handle> Complex;
-  typedef std::pair<Complex, Filtration_value> Filtered_complex;
+  typedef std::vector<Vertex_handle> Simplex;
+  typedef std::pair<Simplex, Filtration_value> Filtered_complex;
   typedef std::vector<Filtered_complex> Complex_tree;
 
  public:
 
-  bool find_simplex(const Complex& vh) {
+  bool find_simplex(const Simplex& vh) {
     return (Simplex_tree<SimplexTreeOptions>::find(vh) != Simplex_tree<SimplexTreeOptions>::null_simplex());
   }
 
-  bool insert_simplex(const Complex& vh, Filtration_value filtration = 0) {
-    Insertion_result result = Simplex_tree<SimplexTreeOptions>::insert_simplex(vh, filtration);
-    return (result.second);
-  }
-
-  bool insert_simplex_and_subfaces(const Complex& complex, Filtration_value filtration = 0) {
+  bool insert_simplex_and_subfaces(const Simplex& complex, Filtration_value filtration = 0) {
     Insertion_result result = Simplex_tree<SimplexTreeOptions>::insert_simplex_and_subfaces(complex, filtration);
     return (result.second);
   }
 
-  Filtration_value simplex_filtration(const Complex& complex) {
+  Filtration_value simplex_filtration(const Simplex& complex) {
     return Simplex_tree<SimplexTreeOptions>::filtration(Simplex_tree<SimplexTreeOptions>::find(complex));
   }
 
   Complex_tree get_filtered_tree() {
     Complex_tree filtered_tree;
     for (auto f_simplex : Simplex_tree<SimplexTreeOptions>::filtration_simplex_range()) {
-      Complex simplex;
+      Simplex simplex;
       for (auto vertex : Simplex_tree<SimplexTreeOptions>::simplex_vertex_range(f_simplex)) {
         simplex.insert(simplex.begin(), vertex);
       }
@@ -77,7 +72,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   Complex_tree get_skeleton_tree(int dimension) {
     Complex_tree skeleton_tree;
     for (auto f_simplex : Simplex_tree<SimplexTreeOptions>::skeleton_simplex_range(dimension)) {
-      Complex simplex;
+      Simplex simplex;
       for (auto vertex : Simplex_tree<SimplexTreeOptions>::simplex_vertex_range(f_simplex)) {
         simplex.insert(simplex.begin(), vertex);
       }
@@ -86,10 +81,10 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     return skeleton_tree;
   }
 
-  Complex_tree get_star_tree(const Complex& complex) {
+  Complex_tree get_star_tree(const Simplex& complex) {
     Complex_tree star_tree;
     for (auto f_simplex : Simplex_tree<SimplexTreeOptions>::star_simplex_range(Simplex_tree<SimplexTreeOptions>::find(complex))) {
-      Complex simplex;
+      Simplex simplex;
       for (auto vertex : Simplex_tree<SimplexTreeOptions>::simplex_vertex_range(f_simplex)) {
         simplex.insert(simplex.begin(), vertex);
       }
@@ -98,10 +93,10 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     return star_tree;
   }
 
-  Complex_tree get_coface_tree(const Complex& complex, int dimension) {
+  Complex_tree get_coface_tree(const Simplex& complex, int dimension) {
     Complex_tree coface_tree;
     for (auto f_simplex : Simplex_tree<SimplexTreeOptions>::cofaces_simplex_range(Simplex_tree<SimplexTreeOptions>::find(complex), dimension)) {
-      Complex simplex;
+      Simplex simplex;
       for (auto vertex : Simplex_tree<SimplexTreeOptions>::simplex_vertex_range(f_simplex)) {
         simplex.insert(simplex.begin(), vertex);
       }

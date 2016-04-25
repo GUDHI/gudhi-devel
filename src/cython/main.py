@@ -16,7 +16,7 @@ if st.find([0,1]):
 else:
   print("Not found...")
 
-if st.insert_with_subfaces([0,1,2], filtration=4.0):
+if st.insert([0,1,2], filtration=4.0):
   print("Inserted !!")
 else:
   print("Not inserted...")
@@ -39,12 +39,12 @@ print("skeleton_tree[1]=", st.get_skeleton_tree(1))
 print("skeleton_tree[0]=", st.get_skeleton_tree(0))
 
 print("#######################################################################")
-print("SimplexTree creation from graph expansion")
-st_from_graph_expansion = gudhi.SimplexTree(points=[[0,0],[1,0],[0,1],[1,1]],max_dimension=1,max_edge_length=42)
+print("SimplexTree creation from Rips")
+st_from_rips = gudhi.SimplexTree(points=[[0,0],[1,0],[0,1],[1,1]],max_dimension=1,max_edge_length=42)
 
-print("filtered_tree=", st_from_graph_expansion.get_filtered_tree())
-print("star([0])=", st_from_graph_expansion.get_star_tree([0]))
-print("coface([0],1)=", st_from_graph_expansion.get_coface_tree([0], 1))
+print("filtered_tree=", st_from_rips.get_filtered_tree())
+print("star([0])=", st_from_rips.get_star_tree([0]))
+print("coface([0],1)=", st_from_rips.get_coface_tree([0], 1))
 
 
 print("#######################################################################")
@@ -52,8 +52,8 @@ print("MiniSimplexTree creation from insertion")
 triangle012 = [0, 1, 2]
 edge03 = [0, 3]
 mini_st = gudhi.MiniSimplexTree()
-mini_st.insert_with_subfaces(triangle012)
-mini_st.insert_with_subfaces(edge03)
+mini_st.insert(triangle012)
+mini_st.insert(edge03)
 # FIXME: Remove this line
 mini_st.set_dimension(2);
 
