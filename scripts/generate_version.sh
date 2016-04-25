@@ -66,7 +66,7 @@ do
   if [ -d "$ROOT_DIR/src/$package" ] && [ $package != "Bottleneck" ]
   then
     echo $package
-    if [ "$package" == "cmake" ]
+    if [ "$package" == "cmake" ] || [ "$package" == "debian" ]
     then
       # SPECIFIC FOR CMAKE MODULES
       cp -R $ROOT_DIR/src/$package $VERSION_DIR
