@@ -56,6 +56,10 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     return Simplex_tree<SimplexTreeOptions>::filtration(Simplex_tree<SimplexTreeOptions>::find(complex));
   }
 
+  void remove_maximal_simplex(const Simplex& complex) {
+    return Simplex_tree<SimplexTreeOptions>::remove_maximal_simplex(Simplex_tree<SimplexTreeOptions>::find(complex));
+  }
+
   Complex_tree get_filtered_tree() {
     Complex_tree filtered_tree;
     for (auto f_simplex : Simplex_tree<SimplexTreeOptions>::filtration_simplex_range()) {
