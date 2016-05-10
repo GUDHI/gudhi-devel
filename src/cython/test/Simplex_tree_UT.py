@@ -42,6 +42,17 @@ class TestSimplexTree(unittest.TestCase):
     self.assertEqual(st.get_skeleton_tree(1), [([0, 1], 0.0), ([0, 2], 4.0), ([0], 0.0), ([1, 2], 4.0), ([1], 0.0), ([2], 4.0)])
     self.assertEqual(st.get_skeleton_tree(0), [([0], 0.0), ([1], 0.0), ([2], 4.0)])
 
+    # remove_maximal_simplex test
+    self.assertEqual(st.get_coface_tree([0,1,2], 1), [])
+    st.remove_maximal_simplex([0,1,2])
+    self.assertEqual(st.get_skeleton_tree(2), [([0, 1], 0.0), ([0, 2], 4.0), ([0], 0.0), ([1, 2], 4.0), ([1], 0.0), ([2], 4.0)])
+    self.assertFalse(st.find([0,1,2]))
+    self.assertTrue(st.find([0,1]))
+    self.assertTrue(st.find([0,2]))
+    self.assertTrue(st.find([0]))
+    self.assertTrue(st.find([1]))
+    self.assertTrue(st.find([2]))
+
   def test_rips(self):
     rips_complex = gudhi.SimplexTree(points=[[0,0],[1,0],[0,1],[1,1]],max_dimension=1,max_edge_length=42)
 
@@ -56,7 +67,7 @@ class TestSimplexTree(unittest.TestCase):
     self.assertEqual(filtered_rips.num_simplices(), 8)
     self.assertEqual(filtered_rips.num_vertices(), 4)
 
-  def test_split(self):
+  def test_mini(self):
     triangle012 = [0,1,2]
     edge03 = [0,3]
     mini_st = gudhi.MiniSimplexTree()
@@ -68,6 +79,12 @@ class TestSimplexTree(unittest.TestCase):
     edge02 = [0,2]
     self.assertTrue(mini_st.find(edge02))
     self.assertEqual(mini_st.get_coface_tree(edge02, 1), [([0, 1, 2], 0.0)])
+
+    # remove_maximal_simplex test
+    self.assertEqual(mini_st.get_coface_tree(triangle012, 1), [])
+    mini_st.remove_maximal_simplex(triangle012)
+    self.assertTrue(mini_st.find(edge02))
+    self.assertFalse(mini_st.find(triangle012))
 
 if __name__ == '__main__':
     unittest.main()

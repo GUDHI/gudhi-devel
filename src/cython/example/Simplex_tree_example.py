@@ -61,5 +61,9 @@ edge02 = [0, 2]
 if mini_st.find(edge02):
   # Only coface is 012
   print("coface(edge02,1)=", mini_st.get_coface_tree(edge02, 1))
-print("filtered_tree=", mini_st.get_filtered_tree())
 
+if mini_st.get_coface_tree(triangle012, 1) == []:
+  # Precondition: Check the simplex has no coface before removing it.
+  mini_st.remove_maximal_simplex(triangle012)
+
+print("filtered_tree after triangle012 removal =", mini_st.get_filtered_tree())
