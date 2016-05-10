@@ -9,7 +9,7 @@ enable_testing()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
-find_package(Boost REQUIRED COMPONENTS system filesystem program_options chrono timer REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system filesystem program_options chrono timer date_time REQUIRED)
 
 if(NOT Boost_FOUND)
   message(FATAL_ERROR "NOTICE: This demo requires Boost and will not be compiled.")
