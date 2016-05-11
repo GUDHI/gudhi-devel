@@ -64,7 +64,7 @@ public:
   typedef Incremental_neighbor_search                       INS_range;
 
   /// Constructor
-  Point_cloud_data_structure(Point_container_ const& points)
+  Spatial_tree_data_structure(Point_container_ const& points)
   : m_points(points),
     m_tree(boost::counting_iterator<std::ptrdiff_t>(0),
            boost::counting_iterator<std::ptrdiff_t>(points.size()),
@@ -77,7 +77,7 @@ public:
 
   /// Constructor
   template <typename Point_indices_range>
-  Point_cloud_data_structure(
+  Spatial_tree_data_structure(
     Point_container_ const& points,
     Point_indices_range const& only_these_points)
     : m_points(points),
@@ -91,7 +91,7 @@ public:
   }
 
   /// Constructor
-  Point_cloud_data_structure(
+  Spatial_tree_data_structure(
     Point_container_ const& points,
     std::size_t begin_idx, std::size_t past_the_end_idx)
   : m_points(points),
