@@ -6,8 +6,10 @@ test:
 
 example:
 	python example/Simplex_tree_example.py
+	python example/Alpha_complex_example.py
 
 clean:
 	rm -rf build/ *.o *.so *.cpp
 
+# For not Makefile to take into account example and test directories
 .PHONY: example test

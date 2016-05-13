@@ -5,8 +5,10 @@ gudhi = Extension(
     "gudhi",
     sources = ['gudhi.pyx',],
     language = 'c++',
-    extra_compile_args=['-std=c++11'],
-    include_dirs = ['../include','./src/cpp'],
+    extra_compile_args=['-frounding-math','-std=c++11','-DCGAL_EIGEN3_ENABLED','-DCGAL_USE_GMP','-DCGAL_USE_GMPXX','-DCGAL_USE_MPFR'],
+    libraries=['mpfr','gmpxx','gmp','CGAL'],
+    library_dirs=['/usr/local/lib/'],
+    include_dirs = ['../include','./src/cpp','/usr/local/include/eigen3'],
 )
 
 setup(

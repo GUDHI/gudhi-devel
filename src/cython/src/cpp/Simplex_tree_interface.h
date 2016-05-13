@@ -4,7 +4,7 @@
  *
  *    Author(s):       Vincent Rouvreau
  *
- *    Copyright (C) 2016  INRIA Sophia Antipolis-Méditerranée (France)
+ *    Copyright (C) 2016  INRIA Saclay (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -37,9 +37,9 @@ template<typename SimplexTreeOptions = Simplex_tree_options_full_featured>
 class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   typedef typename Simplex_tree<SimplexTreeOptions>::Simplex_handle Simplex_handle;
   typedef typename std::pair<Simplex_handle, bool> Insertion_result;
-  typedef std::vector<Vertex_handle> Simplex;
-  typedef std::pair<Simplex, Filtration_value> Filtered_complex;
-  typedef std::vector<Filtered_complex> Complex_tree;
+  using Simplex = std::vector<Vertex_handle>;
+  using Filtered_complex = std::pair<Simplex, Filtration_value>;
+  using Complex_tree = std::vector<Filtered_complex>;
 
  public:
 
