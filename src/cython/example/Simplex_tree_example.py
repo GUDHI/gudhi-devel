@@ -39,15 +39,6 @@ print("skeleton_tree[1]=", st.get_skeleton_tree(1))
 print("skeleton_tree[0]=", st.get_skeleton_tree(0))
 
 print("#######################################################################")
-print("SimplexTree creation from Rips")
-st_from_rips = gudhi.SimplexTree(points=[[0,0],[1,0],[0,1],[1,1]],max_dimension=1,max_edge_length=42)
-
-print("filtered_tree=", st_from_rips.get_filtered_tree())
-print("star([0])=", st_from_rips.get_star_tree([0]))
-print("coface([0],1)=", st_from_rips.get_coface_tree([0], 1))
-
-
-print("#######################################################################")
 print("MiniSimplexTree creation from insertion")
 triangle012 = [0, 1, 2]
 edge03 = [0, 3]
