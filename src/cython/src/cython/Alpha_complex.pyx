@@ -45,6 +45,7 @@ cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
         vector[pair[vector[int], double]] get_star_tree(vector[int] simplex)
         vector[pair[vector[int], double]] get_coface_tree(vector[int] simplex, int dimension)
         void remove_maximal_simplex(vector[int] simplex)
+        vector[double] get_point(int vertex)
 
 # AlphaComplex python interface
 cdef class AlphaComplex:
@@ -125,3 +126,6 @@ cdef class AlphaComplex:
         return ct
     def remove_maximal_simplex(self, simplex):
         self.thisptr.remove_maximal_simplex(simplex)
+    def get_point(self, vertex):
+        cdef vector[double] point = self.thisptr.get_point(vertex)
+        return point

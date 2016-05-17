@@ -36,5 +36,7 @@ print("filtered_tree=", alpha_complex.get_filtered_tree())
 print("star([0])=", alpha_complex.get_star_tree([0]))
 print("coface([0],1)=", alpha_complex.get_coface_tree([0], 1))
 
+print("point[0]=", alpha_complex.get_point(0))
+print("point[5]=", alpha_complex.get_point(5))
 
 print("#######################################################################")

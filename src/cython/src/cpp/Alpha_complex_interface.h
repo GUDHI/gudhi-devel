@@ -115,14 +115,17 @@ class Alpha_complex_interface : public Alpha_complex< CGAL::Epick_d< CGAL::Dynam
     return coface_tree;
   }
   
-  /*std::vector<double> get_point__(int vh) {
+  std::vector<double> get_point(int vh) {
     std::vector<double> vd;
-    Simplex_handle sh = Alpha_complex::find(vh);
-    if (sh != Alpha_complex::null_simplex()) {
+    try {
       Point_d ph = Alpha_complex::get_point(vh);
+      for (auto coord = ph.cartesian_begin(); coord < ph.cartesian_end(); coord++)
+        vd.push_back(*coord);
+    } catch (std::out_of_range outofrange) {
+      // std::out_of_range is thrown in case not found. Other exceptions must be re-thrown
     }
     return vd;
-  }*/
+  }
 
 };
 
