@@ -38,6 +38,8 @@ print("skeleton_tree[2]=", st.get_skeleton_tree(2))
 print("skeleton_tree[1]=", st.get_skeleton_tree(1))
 print("skeleton_tree[0]=", st.get_skeleton_tree(0))
 
+print("persistence(2)=", st.persistence(2))
+
 print("#######################################################################")
 print("MiniSimplexTree creation from insertion")
 triangle012 = [0, 1, 2]

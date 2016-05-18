@@ -48,6 +48,11 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         vector[pair[vector[int], double]] get_coface_tree(vector[int] simplex, int dimension)
         void remove_maximal_simplex(vector[int] simplex)
 
+cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
+    cdef cppclass Persistent_cohomology_interface_full_featured "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree_options_full_featured>":
+        Persistent_cohomology_interface_full_featured(Simplex_tree_interface_full_featured* st)
+        void get_persistence(int homology_coeff_field, double min_persistence)
+
 # SimplexTree python interface
 cdef class SimplexTree:
     cdef Simplex_tree_interface_full_featured *thisptr
@@ -126,7 +131,12 @@ cdef class SimplexTree:
         return ct
     def remove_maximal_simplex(self, simplex):
         self.thisptr.remove_maximal_simplex(simplex)
-
+    def persistence(self, homology_coeff_field, min_persistence = 0):
+        cdef Persistent_cohomology_interface_full_featured *pcohptr = new Persistent_cohomology_interface_full_featured(self.thisptr)
+        if pcohptr != NULL:
+            pcohptr.get_persistence(homology_coeff_field, min_persistence)
+            del pcohptr
+        return 5
 
 cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_options_mini:
