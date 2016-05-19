@@ -47,6 +47,11 @@ cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
         void remove_maximal_simplex(vector[int] simplex)
         vector[double] get_point(int vertex)
 
+cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
+    cdef cppclass Alpha_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::alphacomplex::Alpha_complex< CGAL::Epick_d< CGAL::Dynamic_dimension_tag > >>":
+        Alpha_complex_persistence_interface(Alpha_complex_interface* st)
+        void get_persistence(int homology_coeff_field, double min_persistence)
+
 # AlphaComplex python interface
 cdef class AlphaComplex:
     cdef Alpha_complex_interface *thisptr
@@ -129,3 +134,9 @@ cdef class AlphaComplex:
     def get_point(self, vertex):
         cdef vector[double] point = self.thisptr.get_point(vertex)
         return point
+    def persistence(self, homology_coeff_field, min_persistence = 0):
+        cdef Alpha_complex_persistence_interface *pcohptr = new Alpha_complex_persistence_interface(self.thisptr)
+        if pcohptr != NULL:
+            pcohptr.get_persistence(homology_coeff_field, min_persistence)
+            del pcohptr
+        return 5

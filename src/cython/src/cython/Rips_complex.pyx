@@ -49,6 +49,11 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         void remove_maximal_simplex(vector[int] simplex)
         void graph_expansion(vector[vector[double]] points,int max_dimension,double max_edge_length)
 
+cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
+    cdef cppclass Rips_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>":
+        Rips_complex_persistence_interface(Rips_complex_interface* st)
+        void get_persistence(int homology_coeff_field, double min_persistence)
+
 # RipsComplex python interface
 cdef class RipsComplex:
     cdef Rips_complex_interface *thisptr
@@ -130,3 +135,9 @@ cdef class RipsComplex:
         return ct
     def remove_maximal_simplex(self, simplex):
         self.thisptr.remove_maximal_simplex(simplex)
+    def persistence(self, homology_coeff_field, min_persistence = 0):
+        cdef Rips_complex_persistence_interface *pcohptr = new Rips_complex_persistence_interface(self.thisptr)
+        if pcohptr != NULL:
+            pcohptr.get_persistence(homology_coeff_field, min_persistence)
+            del pcohptr
+        return 5

@@ -39,24 +39,3 @@ print("skeleton_tree[1]=", st.get_skeleton_tree(1))
 print("skeleton_tree[0]=", st.get_skeleton_tree(0))
 
 print("persistence(2)=", st.persistence(2))
-
-print("#######################################################################")
-print("MiniSimplexTree creation from insertion")
-triangle012 = [0, 1, 2]
-edge03 = [0, 3]
-mini_st = gudhi.MiniSimplexTree()
-mini_st.insert(triangle012)
-mini_st.insert(edge03)
-# FIXME: Remove this line
-mini_st.set_dimension(2);
-
-edge02 = [0, 2]
-if mini_st.find(edge02):
-  # Only coface is 012
-  print("coface(edge02,1)=", mini_st.get_coface_tree(edge02, 1))
-
-if mini_st.get_coface_tree(triangle012, 1) == []:
-  # Precondition: Check the simplex has no coface before removing it.
-  mini_st.remove_maximal_simplex(triangle012)
-
-print("filtered_tree after triangle012 removal =", mini_st.get_filtered_tree())

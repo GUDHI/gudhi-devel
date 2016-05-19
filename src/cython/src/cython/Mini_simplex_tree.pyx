@@ -28,9 +28,9 @@ from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 
 cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
-    cdef cppclass Simplex_tree_options_full_featured:
+    cdef cppclass Simplex_tree_options_mini:
         pass
-    cdef cppclass Simplex_tree_interface_full_featured "Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>":
+    cdef cppclass Simplex_tree_interface_mini "Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_mini>":
         Simplex_tree()
         double filtration()
         double simplex_filtration(vector[int] simplex)
@@ -46,18 +46,19 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         vector[pair[vector[int], double]] get_skeleton_tree(int dimension)
         vector[pair[vector[int], double]] get_star_tree(vector[int] simplex)
         vector[pair[vector[int], double]] get_coface_tree(vector[int] simplex, int dimension)
+        void graph_expansion(vector[vector[double]] points,int max_dimension,double max_edge_length)
         void remove_maximal_simplex(vector[int] simplex)
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
-    cdef cppclass Simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>":
-        Simplex_tree_persistence_interface(Simplex_tree_interface_full_featured* st)
+    cdef cppclass Mini_simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_mini>>":
+        Mini_simplex_tree_persistence_interface(Simplex_tree_interface_mini* st)
         void get_persistence(int homology_coeff_field, double min_persistence)
 
-# SimplexTree python interface
-cdef class SimplexTree:
-    cdef Simplex_tree_interface_full_featured *thisptr
+# MiniSimplexTree python interface
+cdef class MiniSimplexTree:
+    cdef Simplex_tree_interface_mini *thisptr
     def __cinit__(self):
-        self.thisptr = new Simplex_tree_interface_full_featured()
+        self.thisptr = new Simplex_tree_interface_mini()
     def __dealloc__(self):
         if self.thisptr != NULL:
             del self.thisptr
@@ -131,10 +132,9 @@ cdef class SimplexTree:
         return ct
     def remove_maximal_simplex(self, simplex):
         self.thisptr.remove_maximal_simplex(simplex)
-    def persistence(self, homology_coeff_field, min_persistence = 0):
-        cdef Simplex_tree_persistence_interface *pcohptr = new Simplex_tree_persistence_interface(self.thisptr)
+    def plain_homology(self, homology_coeff_field):
+        cdef Mini_simplex_tree_persistence_interface *pcohptr = new Mini_simplex_tree_persistence_interface(self.thisptr)
         if pcohptr != NULL:
-            pcohptr.get_persistence(homology_coeff_field, min_persistence)
+            pcohptr.get_persistence(homology_coeff_field, 0)
             del pcohptr
         return 5
-

@@ -39,4 +39,7 @@ print("coface([0],1)=", alpha_complex.get_coface_tree([0], 1))
 print("point[0]=", alpha_complex.get_point(0))
 print("point[5]=", alpha_complex.get_point(5))
 
+alpha_complex.initialize_filtration()
+print("persistence(2)=", alpha_complex.persistence(2))
+
 print("#######################################################################")

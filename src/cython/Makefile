@@ -3,11 +3,13 @@ ext:
 
 test:
 	python test/Simplex_tree_UT.py
+	python test/Mini_simplex_tree_UT.py
 	python test/Rips_complex_UT.py
 	python test/Alpha_complex_UT.py
 
 example:
 	python example/Simplex_tree_example.py
+	python example/Mini_simplex_tree_example.py
 	python example/Rips_complex_example.py
 	python example/Alpha_complex_example.py
 

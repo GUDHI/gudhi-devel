@@ -120,7 +120,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
 
 struct Simplex_tree_options_mini : Simplex_tree_options_full_featured {
   // Not doing persistence, so we don't need those
-  static const bool store_key = false;
+  static const bool store_key = true;
   static const bool store_filtration = false;
   // I have few vertices
   typedef short Vertex_handle;

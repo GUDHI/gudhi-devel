@@ -27,17 +27,22 @@
 
 namespace Gudhi {
 
-template<typename SimplexTreeOptions = Simplex_tree_options_full_featured>
+template<class FilteredComplex>
 class Persistent_cohomology_interface : public
-persistent_cohomology::Persistent_cohomology<Simplex_tree<SimplexTreeOptions>,persistent_cohomology::Field_Zp> {
+persistent_cohomology::Persistent_cohomology<FilteredComplex,persistent_cohomology::Field_Zp> {
  public:
-  Persistent_cohomology_interface(Simplex_tree<SimplexTreeOptions>* stptr)
-  : persistent_cohomology::Persistent_cohomology<Simplex_tree<SimplexTreeOptions>,persistent_cohomology::Field_Zp>(*stptr) { }
+  Persistent_cohomology_interface(FilteredComplex* stptr)
+  : persistent_cohomology::Persistent_cohomology<FilteredComplex,persistent_cohomology::Field_Zp>(*stptr) { std::cout << "ctor" << std::endl; }
   void get_persistence(int homology_coeff_field, double min_persistence) {
-    persistent_cohomology::Persistent_cohomology<Simplex_tree<SimplexTreeOptions>,persistent_cohomology::Field_Zp>::init_coefficients(homology_coeff_field);
-    persistent_cohomology::Persistent_cohomology<Simplex_tree<SimplexTreeOptions>,persistent_cohomology::Field_Zp>::compute_persistent_cohomology(min_persistence);
-    persistent_cohomology::Persistent_cohomology<Simplex_tree<SimplexTreeOptions>,persistent_cohomology::Field_Zp>::output_diagram();
+    std::cout << "1" << std::endl; 
+    persistent_cohomology::Persistent_cohomology<FilteredComplex,persistent_cohomology::Field_Zp>::init_coefficients(homology_coeff_field);
+    std::cout << "2" << std::endl; 
+    persistent_cohomology::Persistent_cohomology<FilteredComplex,persistent_cohomology::Field_Zp>::compute_persistent_cohomology(min_persistence);
+    std::cout << "3" << std::endl; 
+    persistent_cohomology::Persistent_cohomology<FilteredComplex,persistent_cohomology::Field_Zp>::output_diagram();
+    std::cout << "4" << std::endl; 
   }
+
 };
 
 } // namespace Gudhi
