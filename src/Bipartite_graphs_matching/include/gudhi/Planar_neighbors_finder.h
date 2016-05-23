@@ -25,8 +25,11 @@
 
 #include <list>
 #include <map>
-
+#include <CGAL/Search_traits.h>
+#include <CGAL/Orthogonal_incremental_neighbor_search.h>
+#include <CGAL/Weighted_Minkowski_distance.h>
 #include "Persistence_diagrams_graph.h"
+
 
 namespace Gudhi {
 
@@ -39,34 +42,10 @@ namespace bipartite_graph_matching {
  *
  * \ingroup bottleneck_distance
  */
-class Abstract_planar_neighbors_finder {
-public:
-    /** \internal \brief Constructor TODO. */
-    Abstract_planar_neighbors_finder(double r);
-    virtual ~Abstract_planar_neighbors_finder() = 0;
-    /** \internal \brief A point added will be possibly pulled. */
-    virtual void add(int v_point_index) = 0;
-    /** \internal \brief A point manually removed will no longer be possibly pulled. */
-    virtual void remove(int v_point_index) = 0;
-    /** \internal \brief Can the point given as parameter be returned ? */
-    virtual bool contains(int v_point_index) const = 0;
-    /** \internal \brief Provide and remove a V point near to the U point given as parameter, null_point_index() if there isn't such a point. */
-    virtual int pull_near(int u_point_index) = 0;
-    /** \internal \brief Provide and remove all the V points near to the U point given as parameter. */
-    virtual std::unique_ptr< std::list<int> > pull_all_near(int u_point_index);
-
-protected:
-    const double r;
-};
-
-/** \internal \brief Naive_pnf is an naïve Abstract_planar_neighbors_finder implementation
- *
- * \ingroup bottleneck_distance
- */
-class Naive_pnf : public Abstract_planar_neighbors_finder {
+class Naive_pnf {
 public:
     /** \internal \brief Constructor taking the near distance definition as parameter. */
-    Naive_pnf(double r);
+    Naive_pnf(double r_);
     /** \internal \brief A point added will be possibly pulled. */
     void add(int v_point_index);
     /** \internal \brief A point manually removed will no longer be possibly pulled. */
@@ -76,39 +55,53 @@ public:
     /** \internal \brief Provide and remove a V point near to the U point given as parameter, null_point_index() if there isn't such a point. */
     int pull_near(int u_point_index);
     /** \internal \brief Provide and remove all the V points near to the U point given as parameter. */
-    virtual std::unique_ptr< std::list<int> > pull_all_near(int u_point_index);
+    virtual std::shared_ptr< std::list<int> > pull_all_near(int u_point_index);
 
 private:
+    double r;
     std::pair<int,int> get_v_key(int v_point_index) const;
     std::multimap<std::pair<int,int>,int> grid;
 };
 
-/** \internal \typedef \brief Planar_neighbors_finder is the used Abstract_planar_neighbors_finder's implementation. */
-typedef Naive_pnf Planar_neighbors_finder;
+class Cgal_pnf {
+
+    typedef CGAL::Dimension_tag<2> D;
+    typedef CGAL::Search_traits<double, Internal_point, const double*, Construct_coord_iterator, D> Cgal_traits;
+    typedef CGAL::Weighted_Minkowski_distance<Cgal_traits> Distance;
+    typedef CGAL::Orthogonal_incremental_neighbor_search<Cgal_traits, Distance> K_neighbor_search;
+    typedef K_neighbor_search::Tree Kd_tree;
 
 
-inline Abstract_planar_neighbors_finder::Abstract_planar_neighbors_finder(double r) :
-    r(r) { }
+public:
+    /** \internal \brief Constructor taking the near distance definition as parameter. */
+    Cgal_pnf(double r_);
+    /** \internal \brief A point added will be possibly pulled. */
+    void add(int v_point_index);
+    /** \internal \brief A point manually removed will no longer be possibly pulled. */
+    void remove(int v_point_index);
+    /** \internal \brief Can the point given as parameter be returned ? */
+    bool contains(int v_point_index) const;
+    /** \internal \brief Provide and remove a V point near to the U point given as parameter, null_point_index() if there isn't such a point. */
+    int pull_near(int u_point_index);
+    /** \internal \brief Provide and remove all the V points near to the U point given as parameter. */
+    virtual std::shared_ptr< std::list<int> > pull_all_near(int u_point_index);
 
-inline Abstract_planar_neighbors_finder::~Abstract_planar_neighbors_finder() {}
+private:
+    double r;
+    std::set<int> contents;
+    Kd_tree kd_t;
+};
 
-inline std::unique_ptr< std::list<int> > Abstract_planar_neighbors_finder::pull_all_near(int u_point_index) {
-    std::unique_ptr< std::list<int> > all_pull(new std::list<int>);
-    int last_pull = pull_near(u_point_index);
-    while (last_pull != null_point_index()) {
-        all_pull->emplace_back(last_pull);
-        last_pull = pull_near(u_point_index);
-    }
-    return all_pull;
-}
+/** \internal \typedef \brief Planar_neighbors_finder is the used implementation. */
+typedef Cgal_pnf Planar_neighbors_finder;
 
-inline Naive_pnf::Naive_pnf(double r) :
-    Abstract_planar_neighbors_finder(r), grid() { }
+inline Naive_pnf::Naive_pnf(double r_) :
+    r(r_), grid() { }
 
 
 inline std::pair<int,int> Naive_pnf::get_v_key(int v_point_index) const{
-    G::Internal_point v_point = G::get_v_point(v_point_index);
-    return std::make_pair(static_cast<int>(v_point.first/r), static_cast<int>(v_point.second/r));
+    Internal_point v_point = G::get_v_point(v_point_index);
+    return std::make_pair(static_cast<int>(v_point.x()/r), static_cast<int>(v_point.y()/r));
 }
 
 inline void Naive_pnf::add(int v_point_index) {
@@ -133,9 +126,9 @@ inline bool Naive_pnf::contains(int v_point_index) const {
 }
 
 inline int Naive_pnf::pull_near(int u_point_index) {
-    G::Internal_point u_point = G::get_u_point(u_point_index);
-    int i0 = static_cast<int>(u_point.first/r);
-    int j0 = static_cast<int>(u_point.second/r);
+    Internal_point u_point = G::get_u_point(u_point_index);
+    int i0 = static_cast<int>(u_point.x()/r);
+    int j0 = static_cast<int>(u_point.y()/r);
     for(int i = 1; i<= 3; i++)
         for(int j = 1; j<= 3; j++)
             for(auto it = grid.find(std::make_pair(i0 +(i%3)-1, j0+(j%3)-1)); it!=grid.end(); it++)
@@ -147,11 +140,11 @@ inline int Naive_pnf::pull_near(int u_point_index) {
     return null_point_index();
 }
 
-inline std::unique_ptr< std::list<int> > Naive_pnf::pull_all_near(int u_point_index) {
-    std::unique_ptr< std::list<int> > all_pull(new std::list<int>);
-    G::Internal_point u_point = G::get_u_point(u_point_index);
-    int i0 = static_cast<int>(u_point.first/r);
-    int j0 = static_cast<int>(u_point.second/r);
+inline std::shared_ptr< std::list<int> > Naive_pnf::pull_all_near(int u_point_index) {
+    std::shared_ptr< std::list<int> > all_pull(new std::list<int>);
+    Internal_point u_point = G::get_u_point(u_point_index);
+    int i0 = static_cast<int>(u_point.x()/r);
+    int j0 = static_cast<int>(u_point.y()/r);
     for(int i = 1; i<= 3; i++)
         for(int j = 1; j<= 3; j++)
             for(auto it = grid.find(std::make_pair(i0 +(i%3)-1, j0+(j%3)-1)); it!=grid.end(); it++)
@@ -162,6 +155,63 @@ inline std::unique_ptr< std::list<int> > Naive_pnf::pull_all_near(int u_point_in
                 }
     return all_pull;
 }
+
+
+/** \internal \brief Constructor taking the near distance definition as parameter. */
+inline Cgal_pnf::Cgal_pnf(double r_)
+    : r(r_), contents(), kd_t() {}
+
+
+/** \internal \brief A point added will be possibly pulled. */
+inline void Cgal_pnf::add(int v_point_index){
+    Internal_point v_point = G::get_v_point(v_point_index);
+    v_point.point_index = v_point_index;
+    kd_t.insert(v_point);
+    contents.insert(v_point_index);
+}
+
+/** \internal \brief A point manually removed will no longer be possibly pulled. */
+inline void Cgal_pnf::remove(int v_point_index){
+    contents.erase(v_point_index);
+}
+
+/** \internal \brief Can the point given as parameter be returned ? */
+inline bool Cgal_pnf::contains(int v_point_index) const{
+    return contents.count(v_point_index)>0;
+}
+
+/** \internal \brief Provide and remove a V point near to the U point given as parameter, null_point_index() if there isn't such a point. */
+inline int Cgal_pnf::pull_near(int u_point_index){
+    Internal_point u_point = G::get_u_point(u_point_index);
+    K_neighbor_search search(kd_t, u_point, 0., true, Distance(0.));
+    for (auto it = search.begin(); it != search.end(); it++)
+        if(contents.count(it->first.point_index)==0)
+            kd_t.remove(it->first);
+        else if(G::distance(u_point_index, it->first.point_index) > r){
+            for(auto itc=contents.cbegin(); itc != contents.cend(); itc++)
+                if(G::distance(u_point_index, *itc) <= r)
+                    std::cout << G::distance(u_point_index, *itc) << " ! > " << r << std::endl;
+            return null_point_index();
+        }
+        else
+        {
+            kd_t.remove(it->first);
+            contents.erase(it->first.point_index);
+            return it->first.point_index;
+        }
+    return null_point_index();
+}
+
+inline std::shared_ptr< std::list<int> > Cgal_pnf::pull_all_near(int u_point_index) {
+    std::shared_ptr< std::list<int> > all_pull(new std::list<int>);
+    int last_pull = pull_near(u_point_index);
+    while (last_pull != null_point_index()) {
+        all_pull->emplace_back(last_pull);
+        last_pull = pull_near(u_point_index);
+    }
+    return all_pull;
+}
+
 
 }  // namespace bipartite_graph_matching
 

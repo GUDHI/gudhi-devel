@@ -30,13 +30,12 @@
 #include <algorithm>
 #include <math.h>
 #include <memory>
+#include "Internal_point.h"
 
 namespace Gudhi {
 
 namespace bipartite_graph_matching {
 
-/** \internal \brief Returns the used index for encoding none of the points */
-int null_point_index();
 
 /** \internal \brief Structure representing an euclidean bipartite graph containing
  *  the points from the two persistence diagrams (including the projections).
@@ -61,30 +60,24 @@ public:
     /** \internal \brief Returns size = |U| = |V|. */
     static int size();
     /** \internal \brief Returns the O(n^2) sorted distances between the points. */
-    static std::unique_ptr< std::vector<double> > sorted_distances();
+    static std::shared_ptr< std::vector<double> > sorted_distances();
 
 private:
-    /** \internal \typedef \brief Internal_point is the internal points representation, indexes used outside. */
-    typedef std::pair<double, double> Internal_point;
     static std::vector<Internal_point> u;
     static std::vector<Internal_point> v;
     static Internal_point get_u_point(int u_point_index);
     static Internal_point get_v_point(int v_point_index);
 
     friend class Naive_pnf;
-    friend class Upper_envelope_tree;
+    friend class Cgal_pnf;
 };
 
 /** \internal \typedef \brief Shorter alias */
 typedef Persistence_diagrams_graph G;
 
-// static initialization, seems to work but strange
-std::vector<G::Internal_point> G::u = [] {return std::vector<G::Internal_point>();}();
-std::vector<G::Internal_point> G::v = [] {return std::vector<G::Internal_point>();}();
-
-inline int null_point_index() {
-    return -1;
-}
+// static initialization
+std::vector<Internal_point> G::u = [] {return std::vector<Internal_point>();}();
+std::vector<Internal_point> G::v = [] {return std::vector<Internal_point>();}();
 
 template<typename Persistence_diagram1, typename Persistence_diagram2>
 inline void G::initialize(const Persistence_diagram1 &diag1,
@@ -92,10 +85,10 @@ inline void G::initialize(const Persistence_diagram1 &diag1,
     u.clear();
     v.clear();
     for (auto it = diag1.cbegin(); it != diag1.cend(); ++it)
-        if (it->second - it->first > e)
+        if (it->y() - it->x() > e)
             u.emplace_back(*it);
     for (auto it = diag2.cbegin(); it != diag2.cend(); ++it)
-        if (it->second - it->first > e)
+        if (it->y() - it->x() > e)
             v.emplace_back(*it);
     if (u.size() < v.size())
         swap(u, v);
@@ -124,37 +117,37 @@ inline double G::distance(int u_point_index, int v_point_index) {
         return 0;
     Internal_point p_u = get_u_point(u_point_index);
     Internal_point p_v = get_v_point(v_point_index);
-    return std::max(std::fabs(p_u.first - p_v.first), std::fabs(p_u.second - p_v.second));
+    return std::max(std::fabs(p_u.x() - p_v.x()), std::fabs(p_u.y() - p_v.y()));
 }
 
 inline int G::size() {
     return static_cast<int> (u.size() + v.size());
 }
 
-inline std::unique_ptr< std::vector<double> > G::sorted_distances() {
+inline std::shared_ptr< std::vector<double> > G::sorted_distances() {
     // could be optimized
     std::set<double> sorted_distances;
     for (int u_point_index = 0; u_point_index < size(); ++u_point_index)
         for (int v_point_index = 0; v_point_index < size(); ++v_point_index)
             sorted_distances.emplace(distance(u_point_index, v_point_index));
-    std::unique_ptr< std::vector<double> > sd_up(new std::vector<double>(sorted_distances.cbegin(), sorted_distances.cend()));
+    std::shared_ptr< std::vector<double> > sd_up(new std::vector<double>(sorted_distances.cbegin(), sorted_distances.cend()));
     return sd_up;
 }
 
-inline G::Internal_point G::get_u_point(int u_point_index) {
+inline Internal_point G::get_u_point(int u_point_index) {
     if (!on_the_u_diagonal(u_point_index))
         return u.at(u_point_index);
     Internal_point projector = v.at(corresponding_point_in_v(u_point_index));
-    double x = (projector.first + projector.second) / 2;
-    return Internal_point(x, x);
+    double m = (projector.x() + projector.y()) / 2;
+    return Internal_point(m, m);
 }
 
-inline G::Internal_point G::get_v_point(int v_point_index) {
+inline Internal_point G::get_v_point(int v_point_index) {
     if (!on_the_v_diagonal(v_point_index))
         return v.at(v_point_index);
     Internal_point projector = u.at(corresponding_point_in_u(v_point_index));
-    double x = (projector.first + projector.second) / 2;
-    return Internal_point(x, x);
+    double m = (projector.x() + projector.y()) / 2;
+    return Internal_point(m, m);
 }
 
 }  // namespace bipartite_graph_matching

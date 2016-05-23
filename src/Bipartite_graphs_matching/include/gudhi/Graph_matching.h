@@ -65,7 +65,7 @@ private:
     std::list<int> unmatched_in_u;
 
     /** \internal \brief Provides a Layered_neighbors_finder dividing the graph in layers. Basically a BFS. */
-    std::unique_ptr<Layered_neighbors_finder> layering() const;
+    std::shared_ptr<Layered_neighbors_finder> layering() const;
     /** \internal \brief Augments the matching with a simple path no longer than max_depth. Basically a DFS. */
     bool augment(Layered_neighbors_finder & layered_nf, int u_start_index, int max_depth);
     /** \internal \brief Update the matching with the simple augmenting path given as parameter. */
@@ -138,20 +138,20 @@ inline bool Graph_matching::augment(Layered_neighbors_finder & layered_nf, int u
     return true;
 }
 
-inline std::unique_ptr<Layered_neighbors_finder> Graph_matching::layering() const {
+inline std::shared_ptr<Layered_neighbors_finder> Graph_matching::layering() const {
     std::list<int> u_vertices(unmatched_in_u);
     std::list<int> v_vertices;
     Neighbors_finder nf(r);
     for (int v_point_index = 0; v_point_index < G::size(); ++v_point_index)
         nf.add(v_point_index);
-    std::unique_ptr<Layered_neighbors_finder> layered_nf(new Layered_neighbors_finder(r));
+    std::shared_ptr<Layered_neighbors_finder> layered_nf(new Layered_neighbors_finder(r));
     for(int layer = 0; !u_vertices.empty(); layer++) {
         // one layer is one step in the BFS
-        for (auto it = u_vertices.cbegin(); it != u_vertices.cend(); ++it) {
-            std::unique_ptr< std::list<int> > u_succ = std::move(nf.pull_all_near(*it));
-            for (auto it = u_succ->cbegin(); it != u_succ->cend(); ++it) {
-                layered_nf->add(*it, layer);
-                v_vertices.emplace_back(*it);
+        for (auto it1 = u_vertices.cbegin(); it1 != u_vertices.cend(); ++it1) {
+            std::shared_ptr<std::list<int>> u_succ(nf.pull_all_near(*it1));
+            for (auto it2 = u_succ->begin(); it2 != u_succ->end(); ++it2) {
+                layered_nf->add(*it2, layer);
+                v_vertices.emplace_back(*it2);
             }
         }
         // When the above for finishes, we have progress of one half-step (from U to V) in the BFS
@@ -183,7 +183,7 @@ inline void Graph_matching::update(std::deque<int>& path) {
 template<typename Persistence_diagram1, typename Persistence_diagram2>
 double bottleneck_distance(const Persistence_diagram1 &diag1, const Persistence_diagram2 &diag2, double e) {
     G::initialize(diag1, diag2, e);
-    std::unique_ptr< std::vector<double> > sd = std::move(G::sorted_distances());
+    std::shared_ptr< std::vector<double> > sd(G::sorted_distances());
     int idmin = 0;
     int idmax = sd->size() - 1;
     // alpha can be modified, this will change the complexity
