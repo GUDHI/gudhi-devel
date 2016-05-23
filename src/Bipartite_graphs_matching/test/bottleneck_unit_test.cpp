@@ -11,13 +11,13 @@ using namespace Gudhi::bipartite_graph_matching;
 
 int n1 = 81; // a natural number >0
 int n2 = 180; // a natural number >0
-double upper_bound = 400.5; // any real >0
+double upper_bound = 406.43; // any real >0
 
 BOOST_AUTO_TEST_CASE(global){
     std::uniform_real_distribution<double> unif1(0.,upper_bound);
     std::uniform_real_distribution<double> unif2(upper_bound/1000.,upper_bound/100.);
     std::default_random_engine re;
-    std::vector< std::pair<double, double> > v1, v2;
+    std::vector< Internal_point > v1, v2;
     for (int i = 0; i < n1; i++) {
         double a = unif1(re);
         double b = unif1(re);
@@ -30,15 +30,14 @@ BOOST_AUTO_TEST_CASE(global){
         if(i%3==0)
             v2.emplace_back(std::max(a,b),std::max(a,b)+y);
     }
-    //99.5 and not 100 to avoid float errors.
-    BOOST_CHECK(bottleneck_distance(v1, v2) <= upper_bound/99.5);
+    BOOST_CHECK(bottleneck_distance(v1, v2) <= upper_bound/100.);
 }
 
 BOOST_AUTO_TEST_CASE(persistence_diagrams_graph){
     // Random construction
     std::uniform_real_distribution<double> unif(0.,upper_bound);
     std::default_random_engine re;
-    std::vector< std::pair<double, double> > v1, v2;
+    std::vector< Internal_point > v1, v2;
     for (int i = 0; i < n1; i++) {
         double a = unif(re);
         double b = unif(re);
@@ -50,7 +49,7 @@ BOOST_AUTO_TEST_CASE(persistence_diagrams_graph){
         v2.emplace_back(std::min(a,b), std::max(a,b));
     }
     G::initialize(v1, v2, 0.);
-    std::unique_ptr< std::vector<double> > d = std::move(G::sorted_distances());
+    std::shared_ptr< std::vector<double> > d(G::sorted_distances());
     //
     BOOST_CHECK(!G::on_the_u_diagonal(n1-1));
     BOOST_CHECK(!G::on_the_u_diagonal(n1));
@@ -91,7 +90,7 @@ BOOST_AUTO_TEST_CASE(persistence_diagrams_graph){
 
 
 BOOST_AUTO_TEST_CASE(planar_neighbors_finder) {
-    Planar_neighbors_finder pnf = Planar_neighbors_finder(1.);
+    Planar_neighbors_finder pnf(1.);
     for(int v_point_index=0; v_point_index<n1; v_point_index+=2)
         pnf.add(v_point_index);
     //
@@ -109,7 +108,7 @@ BOOST_AUTO_TEST_CASE(planar_neighbors_finder) {
     BOOST_CHECK(!pnf.contains(3));
     //
     int v_point_index_1 = pnf.pull_near(n2/2);
-    BOOST_CHECK((v_point_index_1 == -1) || (G::distance(n2/2,v_point_index_1)<=1.));
+    BOOST_CHECK((v_point_index_1 == -1) || ((G::distance(n2/2,v_point_index_1)<=1.)));
     BOOST_CHECK(!pnf.contains(v_point_index_1));
     std::list<int> l = *pnf.pull_all_near(n2/2);
     bool v = true;
@@ -120,9 +119,8 @@ BOOST_AUTO_TEST_CASE(planar_neighbors_finder) {
     BOOST_CHECK(v_point_index_2 == -1);
 }
 
-
 BOOST_AUTO_TEST_CASE(neighbors_finder) {
-    Neighbors_finder nf = Neighbors_finder(1.);
+    Neighbors_finder nf(1.);
     for(int v_point_index=1; v_point_index<((n2+n1)*9/10); v_point_index+=2)
         nf.add(v_point_index);
     //
@@ -138,7 +136,7 @@ BOOST_AUTO_TEST_CASE(neighbors_finder) {
 }
 
 BOOST_AUTO_TEST_CASE(layered_neighbors_finder) {
-    Layered_neighbors_finder lnf = Layered_neighbors_finder(1.);
+    Layered_neighbors_finder lnf(1.);
     for(int v_point_index=1; v_point_index<((n2+n1)*9/10); v_point_index+=2)
         lnf.add(v_point_index, v_point_index % 7);
     //
@@ -169,7 +167,6 @@ BOOST_AUTO_TEST_CASE(graph_matching) {
     BOOST_CHECK(m2.perfect());
     BOOST_CHECK(!m1.perfect());
 }
-
 /*
 BOOST_AUTO_TEST_CASE(chrono) {
     std::ofstream objetfichier;
@@ -179,7 +176,7 @@ BOOST_AUTO_TEST_CASE(chrono) {
         std::uniform_real_distribution<double> unif1(0.,upper_bound);
         std::uniform_real_distribution<double> unif2(upper_bound/1000.,upper_bound/100.);
         std::default_random_engine re;
-        std::vector< std::pair<double, double> > v1, v2;
+        std::vector< Internal_point > v1, v2;
         for (int i = 0; i < n; i++) {
             double a = unif1(re);
             double b = unif1(re);
@@ -202,6 +199,4 @@ BOOST_AUTO_TEST_CASE(chrono) {
         objetfichier << n << ";" << duration.count() << ";" << b << std::endl;
     }
     objetfichier.close();
-}
-*/
-
+}*/
