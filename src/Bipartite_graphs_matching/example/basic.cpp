@@ -26,14 +26,14 @@
 using namespace Gudhi::bipartite_graph_matching;
 
 int main() {
-    std::vector< Internal_point > v1, v2;
+    std::vector< std::pair<double,double> > v1, v2;
 
-    v1.push_back(Internal_point(2.7,3.7));
-    v1.push_back(Internal_point(9.6,14));
-    v1.push_back(Internal_point(34.2,34.974));
+    v1.push_back(std::pair<double,double>(2.7,3.7));
+    v1.push_back(std::pair<double,double>(9.6,14));
+    v1.push_back(std::pair<double,double>(34.2,34.974));
 
-    v2.push_back(Internal_point(2.8,4.45));
-    v2.push_back(Internal_point(9.5,14.1));
+    v2.push_back(std::pair<double,double>(2.8,4.45));
+    v2.push_back(std::pair<double,double>(9.5,14.1));
 
 
     double b = bottleneck_distance(v1, v2);

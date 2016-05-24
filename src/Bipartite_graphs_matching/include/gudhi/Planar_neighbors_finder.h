@@ -28,6 +28,7 @@
 #include <CGAL/Search_traits.h>
 #include <CGAL/Orthogonal_incremental_neighbor_search.h>
 #include <CGAL/Weighted_Minkowski_distance.h>
+#include "../CGAL/Miscellaneous.h"
 #include "Persistence_diagrams_graph.h"
 
 
@@ -66,9 +67,9 @@ private:
 class Cgal_pnf {
 
     typedef CGAL::Dimension_tag<2> D;
-    typedef CGAL::Search_traits<double, Internal_point, const double*, Construct_coord_iterator, D> Cgal_traits;
-    typedef CGAL::Weighted_Minkowski_distance<Cgal_traits> Distance;
-    typedef CGAL::Orthogonal_incremental_neighbor_search<Cgal_traits, Distance> K_neighbor_search;
+    typedef CGAL::Search_traits<double, Internal_point, const double*, CGAL::Construct_coord_iterator, D> Traits;
+    typedef CGAL::Weighted_Minkowski_distance<Traits> Distance;
+    typedef CGAL::Orthogonal_incremental_neighbor_search<Traits, Distance> K_neighbor_search;
     typedef K_neighbor_search::Tree Kd_tree;
 
 
@@ -164,15 +165,14 @@ inline Cgal_pnf::Cgal_pnf(double r_)
 
 /** \internal \brief A point added will be possibly pulled. */
 inline void Cgal_pnf::add(int v_point_index){
-    Internal_point v_point = G::get_v_point(v_point_index);
-    v_point.point_index = v_point_index;
-    kd_t.insert(v_point);
     contents.insert(v_point_index);
+    kd_t.insert(G::get_v_point(v_point_index));
 }
 
 /** \internal \brief A point manually removed will no longer be possibly pulled. */
 inline void Cgal_pnf::remove(int v_point_index){
     contents.erase(v_point_index);
+    kd_t.remove(G::get_v_point(v_point_index));
 }
 
 /** \internal \brief Can the point given as parameter be returned ? */
@@ -183,23 +183,16 @@ inline bool Cgal_pnf::contains(int v_point_index) const{
 /** \internal \brief Provide and remove a V point near to the U point given as parameter, null_point_index() if there isn't such a point. */
 inline int Cgal_pnf::pull_near(int u_point_index){
     Internal_point u_point = G::get_u_point(u_point_index);
-    K_neighbor_search search(kd_t, u_point, 0., true, Distance(0.));
-    for (auto it = search.begin(); it != search.end(); it++)
-        if(contents.count(it->first.point_index)==0)
-            kd_t.remove(it->first);
-        else if(G::distance(u_point_index, it->first.point_index) > r){
-            for(auto itc=contents.cbegin(); itc != contents.cend(); itc++)
-                if(G::distance(u_point_index, *itc) <= r)
-                    std::cout << G::distance(u_point_index, *itc) << " ! > " << r << std::endl;
-            return null_point_index();
-        }
-        else
-        {
-            kd_t.remove(it->first);
-            contents.erase(it->first.point_index);
-            return it->first.point_index;
-        }
-    return null_point_index();
+    std::vector<double> w = {1., 1.};
+    K_neighbor_search search(kd_t, u_point, 0., true, Distance(0, 2, w));
+    auto it = search.begin();
+    if(it==search.end() || G::distance(u_point_index, it->first.point_index) > r){
+        for(auto itc=contents.cbegin(); itc != contents.cend(); itc++)
+            if(G::distance(u_point_index, *itc) <= r)
+                std::cout << G::distance(u_point_index, *itc) << " ! > " << r << std::endl;
+        return null_point_index();
+    }
+    return it->first.point_index;
 }
 
 inline std::shared_ptr< std::list<int> > Cgal_pnf::pull_all_near(int u_point_index) {

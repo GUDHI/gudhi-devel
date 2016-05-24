@@ -13,31 +13,11 @@ int n1 = 81; // a natural number >0
 int n2 = 180; // a natural number >0
 double upper_bound = 406.43; // any real >0
 
-BOOST_AUTO_TEST_CASE(global){
-    std::uniform_real_distribution<double> unif1(0.,upper_bound);
-    std::uniform_real_distribution<double> unif2(upper_bound/1000.,upper_bound/100.);
-    std::default_random_engine re;
-    std::vector< Internal_point > v1, v2;
-    for (int i = 0; i < n1; i++) {
-        double a = unif1(re);
-        double b = unif1(re);
-        double x = unif2(re);
-        double y = unif2(re);
-        v1.emplace_back(std::min(a,b), std::max(a,b));
-        v2.emplace_back(std::min(a,b)+std::min(x,y), std::max(a,b)+std::max(x,y));
-        if(i%5==0)
-            v1.emplace_back(std::min(a,b),std::min(a,b)+x);
-        if(i%3==0)
-            v2.emplace_back(std::max(a,b),std::max(a,b)+y);
-    }
-    BOOST_CHECK(bottleneck_distance(v1, v2) <= upper_bound/100.);
-}
-
 BOOST_AUTO_TEST_CASE(persistence_diagrams_graph){
     // Random construction
     std::uniform_real_distribution<double> unif(0.,upper_bound);
     std::default_random_engine re;
-    std::vector< Internal_point > v1, v2;
+    std::vector< std::pair<double, double> > v1, v2;
     for (int i = 0; i < n1; i++) {
         double a = unif(re);
         double b = unif(re);
@@ -87,7 +67,6 @@ BOOST_AUTO_TEST_CASE(persistence_diagrams_graph){
     BOOST_CHECK(std::count(d->begin(), d->end(), G::distance((n1+n2)-1,n2))==1);
     BOOST_CHECK(std::count(d->begin(), d->end(), G::distance((n1+n2)-1,(n1+n2)-1))==1);
 }
-
 
 BOOST_AUTO_TEST_CASE(planar_neighbors_finder) {
     Planar_neighbors_finder pnf(1.);
@@ -167,6 +146,27 @@ BOOST_AUTO_TEST_CASE(graph_matching) {
     BOOST_CHECK(m2.perfect());
     BOOST_CHECK(!m1.perfect());
 }
+
+BOOST_AUTO_TEST_CASE(global){
+    std::uniform_real_distribution<double> unif1(0.,upper_bound);
+    std::uniform_real_distribution<double> unif2(upper_bound/1000.,upper_bound/100.);
+    std::default_random_engine re;
+    std::vector< std::pair<double, double> > v1, v2;
+    for (int i = 0; i < n1; i++) {
+        double a = unif1(re);
+        double b = unif1(re);
+        double x = unif2(re);
+        double y = unif2(re);
+        v1.emplace_back(std::min(a,b), std::max(a,b));
+        v2.emplace_back(std::min(a,b)+std::min(x,y), std::max(a,b)+std::max(x,y));
+        if(i%5==0)
+            v1.emplace_back(std::min(a,b),std::min(a,b)+x);
+        if(i%3==0)
+            v2.emplace_back(std::max(a,b),std::max(a,b)+y);
+    }
+    BOOST_CHECK(bottleneck_distance(v1, v2) <= upper_bound/100.);
+}
+
 /*
 BOOST_AUTO_TEST_CASE(chrono) {
     std::ofstream objetfichier;
@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE(chrono) {
         std::uniform_real_distribution<double> unif1(0.,upper_bound);
         std::uniform_real_distribution<double> unif2(upper_bound/1000.,upper_bound/100.);
         std::default_random_engine re;
-        std::vector< Internal_point > v1, v2;
+        std::vector< std::pair<double, double> > v1, v2;
         for (int i = 0; i < n; i++) {
             double a = unif1(re);
             double b = unif1(re);

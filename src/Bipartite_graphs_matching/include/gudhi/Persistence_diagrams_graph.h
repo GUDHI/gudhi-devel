@@ -85,11 +85,11 @@ inline void G::initialize(const Persistence_diagram1 &diag1,
     u.clear();
     v.clear();
     for (auto it = diag1.cbegin(); it != diag1.cend(); ++it)
-        if (it->y() - it->x() > e)
-            u.emplace_back(*it);
+        if (it->second - it->first > e)
+            u.push_back(Internal_point(it->first, it->second, u.size()));
     for (auto it = diag2.cbegin(); it != diag2.cend(); ++it)
-        if (it->y() - it->x() > e)
-            v.emplace_back(*it);
+        if (it->second - it->first > e)
+            v.push_back(Internal_point(it->first, it->second, v.size()));
     if (u.size() < v.size())
         swap(u, v);
 }
@@ -139,7 +139,7 @@ inline Internal_point G::get_u_point(int u_point_index) {
         return u.at(u_point_index);
     Internal_point projector = v.at(corresponding_point_in_v(u_point_index));
     double m = (projector.x() + projector.y()) / 2;
-    return Internal_point(m, m);
+    return Internal_point(m,m,u_point_index);
 }
 
 inline Internal_point G::get_v_point(int v_point_index) {
@@ -147,7 +147,7 @@ inline Internal_point G::get_v_point(int v_point_index) {
         return v.at(v_point_index);
     Internal_point projector = u.at(corresponding_point_in_u(v_point_index));
     double m = (projector.x() + projector.y()) / 2;
-    return Internal_point(m, m);
+    return Internal_point(m,m,v_point_index);
 }
 
 }  // namespace bipartite_graph_matching
