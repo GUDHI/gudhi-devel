@@ -24,6 +24,7 @@
 #include <gudhi/Persistent_cohomology.h>
 
 #include <iostream>
+#include <vector>
 
 using namespace Gudhi;
 
@@ -40,6 +41,24 @@ struct MyOptions : Simplex_tree_options_full_featured {
   typedef short Vertex_handle;
 };
 typedef Simplex_tree<MyOptions> ST;
+
+  /*
+   * Compare two intervals by dimension, then by length.
+   */
+  struct cmp_intervals_by_dim_then_length {
+    explicit cmp_intervals_by_dim_then_length(ST * sc)
+        : sc_(sc) {
+    }
+    template<typename Persistent_interval>
+    bool operator()(const Persistent_interval & p1, const Persistent_interval & p2) {
+      if (sc_->dimension(get < 0 > (p1)) == sc_->dimension(get < 0 > (p2)))
+        return (sc_->filtration(get < 1 > (p1)) - sc_->filtration(get < 0 > (p1))
+            > sc_->filtration(get < 1 > (p2)) - sc_->filtration(get < 0 > (p2)));
+      else
+        return (sc_->dimension(get < 0 > (p1)) > sc_->dimension(get < 0 > (p2)));
+    }
+    ST* sc_;
+  };
 
 int main() {
   ST st;
@@ -81,4 +100,36 @@ int main() {
   // 2  1 0 inf 
   // means that in Z/2Z-homology, the Betti numbers are b0=2 and b1=1.
   pcoh.output_diagram();
+  
+  
+  // ********************************************************
+  // get_persistence
+  // ********************************************************
+  std::cout << std::endl;
+  std::cout << std::endl;
+
+  // First version
+  std::vector<int> betti_numbers = pcoh.betti_numbers();
+  std::cout << "The Betti numbers are : ";
+  for (std::size_t i = 0; i < betti_numbers.size(); i++)
+    std::cout << "b" << i << " = " << betti_numbers[i] << " ; ";
+  std::cout << std::endl;
+
+  // Second version
+  std::cout << "The Betti numbers are : ";
+  for (int i = 0; i < st.dimension(); i++)
+    std::cout << "b" << i << " = " << pcoh.betti_number(i) << " ; ";
+  std::cout << std::endl;
+  
+  // Get persistence
+  cmp_intervals_by_dim_then_length cmp(&st);
+  auto persistent_pairs = pcoh.get_persistent_pairs();
+  std::sort(std::begin(persistent_pairs), std::end(persistent_pairs), cmp);
+  for (auto pair : persistent_pairs) {
+    std::cout << st.dimension(get<0>(pair)) << " "
+          << st.filtration(get<0>(pair)) << " "
+          << st.filtration(get<1>(pair)) << std::endl;
+  }
+
+
 }

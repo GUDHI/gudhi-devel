@@ -83,7 +83,7 @@ class Persistent_cohomology {
 // Sparse column type for the annotation of the boundary of an element.
   typedef std::vector<std::pair<Simplex_key, Arith_element> > A_ds_type;
 // Persistent interval type. The Arith_element field is used for the multi-field framework.
-  typedef std::tuple<Simplex_handle, Simplex_handle, Arith_element> Persistent_interval;
+  typedef std::tuple<Simplex_handle, Simplex_handle/*, Arith_element*/> Persistent_interval;
 
   /** \brief Initializes the Persistent_cohomology class.
    *
@@ -199,17 +199,17 @@ class Persistent_cohomology {
       if (ds_parent_[key] == key  // root of its tree
       && zero_cocycles_.find(key) == zero_cocycles_.end()) {
         persistent_pairs_.emplace_back(
-            cpx_->simplex(key), cpx_->null_simplex(), coeff_field_.characteristic());
+            cpx_->simplex(key), cpx_->null_simplex()/*, coeff_field_.characteristic()*/);
       }
     }
     for (auto zero_idx : zero_cocycles_) {
       persistent_pairs_.emplace_back(
-          cpx_->simplex(zero_idx.second), cpx_->null_simplex(), coeff_field_.characteristic());
+          cpx_->simplex(zero_idx.second), cpx_->null_simplex()/*, coeff_field_.characteristic()*/);
     }
 // Compute infinite interval of dimension > 0
     for (auto cocycle : transverse_idx_) {
       persistent_pairs_.emplace_back(
-          cpx_->simplex(cocycle.first), cpx_->null_simplex(), cocycle.second.characteristics_);
+          cpx_->simplex(cocycle.first), cpx_->null_simplex()/*, cocycle.second.characteristics_*/);
     }
   }
 
@@ -250,7 +250,7 @@ class Persistent_cohomology {
           < cpx_->filtration(cpx_->simplex(idx_coc_v))) {  // Kill cocycle [idx_coc_v], which is younger.
         if (interval_length_policy(cpx_->simplex(idx_coc_v), sigma)) {
           persistent_pairs_.emplace_back(
-              cpx_->simplex(idx_coc_v), sigma, coeff_field_.characteristic());
+              cpx_->simplex(idx_coc_v), sigma/*, coeff_field_.characteristic()*/);
         }
         // Maintain the index of the 0-cocycle alive.
         if (kv != idx_coc_v) {
@@ -265,7 +265,7 @@ class Persistent_cohomology {
       } else {  // Kill cocycle [idx_coc_u], which is younger.
         if (interval_length_policy(cpx_->simplex(idx_coc_u), sigma)) {
           persistent_pairs_.emplace_back(
-              cpx_->simplex(idx_coc_u), sigma, coeff_field_.characteristic());
+              cpx_->simplex(idx_coc_u), sigma/*, coeff_field_.characteristic()*/);
         }
         // Maintain the index of the 0-cocycle alive.
         if (ku != idx_coc_u) {
@@ -308,14 +308,14 @@ class Persistent_cohomology {
         // Find its annotation vector
         curr_col = ds_repr_[dsets_.find_set(key)];
         if (curr_col != NULL) {  // and insert it in annotations_in_boundary with multyiplicative factor "sign".
-	  annotations_in_boundary.emplace_back(curr_col, sign);
+          annotations_in_boundary.emplace_back(curr_col, sign);
         }
       }
       sign = -sign;
     }
     // Place identical annotations consecutively so we can easily sum their multiplicities.
     std::sort(annotations_in_boundary.begin(), annotations_in_boundary.end(),
-	[](annotation_t const& a, annotation_t const& b) { return a.first < b.first; });
+              [](annotation_t const& a, annotation_t const& b) { return a.first < b.first; });
 
     // Sum the annotations with multiplicity, using a map<key,coeff>
     // to represent a sparse vector.
@@ -325,7 +325,7 @@ class Persistent_cohomology {
       Column* col = ann_it->first;
       int mult = ann_it->second;
       while (++ann_it != annotations_in_boundary.end() && ann_it->first == col) {
-	mult += ann_it->second;
+        mult += ann_it->second;
       }
       // The following test is just a heuristic, it is not required, and it is fine that is misses p == 0.
       if (mult != coeff_field_.additive_identity()) {  // For all columns in the boundary,
@@ -427,7 +427,7 @@ class Persistent_cohomology {
     if (interval_length_policy(cpx_->simplex(death_key), sigma)) {
       persistent_pairs_.emplace_back(cpx_->simplex(death_key)  // creator
           , sigma                                              // destructor
-          , charac);                                           // fields
+          /*, charac*/);                                           // fields
     }
 
     auto death_key_row = transverse_idx_.find(death_key);  // Find the beginning of the row.
@@ -566,17 +566,16 @@ class Persistent_cohomology {
    * feature exists in homology with Z/piZ coefficients.
    */
   void output_diagram(std::ostream& ostream = std::cout) {
-
     cmp_intervals_by_length cmp(cpx_);
     std::sort(std::begin(persistent_pairs_), std::end(persistent_pairs_), cmp);
     bool has_infinity = std::numeric_limits<Filtration_value>::has_infinity;
     for (auto pair : persistent_pairs_) {
       // Special case on windows, inf is "1.#INF" (cf. unitary tests and R package TDA)
       if (has_infinity && cpx_->filtration(get<1>(pair)) == std::numeric_limits<Filtration_value>::infinity()) {
-        ostream << get<2>(pair) << "  " << cpx_->dimension(get<0>(pair)) << " "
+        ostream << /*get<2>(pair) <<*/ "  " << cpx_->dimension(get<0>(pair)) << " "
           << cpx_->filtration(get<0>(pair)) << " inf " << std::endl;
       } else {
-        ostream << get<2>(pair) << "  " << cpx_->dimension(get<0>(pair)) << " "
+        ostream << /*get<2>(pair) <<*/ "  " << cpx_->dimension(get<0>(pair)) << " "
           << cpx_->filtration(get<0>(pair)) << " "
           << cpx_->filtration(get<1>(pair)) << " " << std::endl;
       }
@@ -594,12 +593,52 @@ class Persistent_cohomology {
     }
   }
 
+  /** @brief Returns Betti numbers.
+   *
+   */
+  const std::vector<int> betti_numbers() const {
+    // Init Betti numbers vector with zeros until Simplicial complex dimension
+    std::vector<int> betti_numbers(cpx_->dimension(), 0);
+    
+    for (auto pair : persistent_pairs_) {
+      // Increment corresponding betti number
+      betti_numbers[cpx_->dimension(get<0>(pair))] += 1;
+    }
+    return betti_numbers;
+  }
+
+  /** @brief Returns the Betti number passed by parameter.
+   * @param[in] dimension The Betti number dimension to get.
+   * @return Betti number
+   *
+   */
+  const int betti_number(int dimension) const {
+    int betti_number = 0;
+    
+    for (auto pair : persistent_pairs_) {
+      if (cpx_->dimension(get<0>(pair)) == dimension)
+        // Increment betti number found
+        ++betti_number;
+    }
+    return betti_number;
+  }
+  
+  /** @brief Returns the persistent pairs.
+   * @return Persistent pairs
+   *
+   */
+  std::vector<Persistent_interval> get_persistent_pairs() const {
+    return persistent_pairs_;
+  }
+  
  private:
   /*
    * Structure representing a cocycle.
    */
   struct cocycle {
-    cocycle() {
+    cocycle()
+        : row_(nullptr),
+          characteristics_() {
     }
     cocycle(Arith_element characteristics, Hcell * row)
         : row_(row),
