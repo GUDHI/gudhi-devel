@@ -82,7 +82,7 @@ public:
     void remove(int v_point_index);
     /** \internal \brief Can the point given as parameter be returned ? */
     bool contains(int v_point_index) const;
-    /** \internal \brief Provide and remove a V point near to the U point given as parameter, null_point_index() if there isn't such a point. */
+    /** \internal \brief Provide a V point near to the U point given as parameter, null_point_index() if there isn't such a point. */
     int pull_near(int u_point_index);
     /** \internal \brief Provide and remove all the V points near to the U point given as parameter. */
     virtual std::shared_ptr< std::list<int> > pull_all_near(int u_point_index);
@@ -110,6 +110,7 @@ inline void Naive_pnf::add(int v_point_index) {
 }
 
 inline void Naive_pnf::remove(int v_point_index) {
+    if(!contains(v_point_index))
     for(auto it = grid.find(get_v_key(v_point_index)); it!=grid.end(); it++)
         if(it->second==v_point_index){
             grid.erase(it);
@@ -135,7 +136,6 @@ inline int Naive_pnf::pull_near(int u_point_index) {
             for(auto it = grid.find(std::make_pair(i0 +(i%3)-1, j0+(j%3)-1)); it!=grid.end(); it++)
                 if (G::distance(u_point_index, it->second) <= r) {
                     int tmp = it->second;
-                    grid.erase(it);
                     return tmp;
                 }
     return null_point_index();
@@ -186,12 +186,8 @@ inline int Cgal_pnf::pull_near(int u_point_index){
     std::vector<double> w = {1., 1.};
     K_neighbor_search search(kd_t, u_point, 0., true, Distance(0, 2, w));
     auto it = search.begin();
-    if(it==search.end() || G::distance(u_point_index, it->first.point_index) > r){
-        for(auto itc=contents.cbegin(); itc != contents.cend(); itc++)
-            if(G::distance(u_point_index, *itc) <= r)
-                std::cout << G::distance(u_point_index, *itc) << " ! > " << r << std::endl;
+    if(it==search.end() || G::distance(u_point_index, it->first.point_index) > r)
         return null_point_index();
-    }
     return it->first.point_index;
 }
 
@@ -200,6 +196,7 @@ inline std::shared_ptr< std::list<int> > Cgal_pnf::pull_all_near(int u_point_ind
     int last_pull = pull_near(u_point_index);
     while (last_pull != null_point_index()) {
         all_pull->emplace_back(last_pull);
+        remove(last_pull);
         last_pull = pull_near(u_point_index);
     }
     return all_pull;
