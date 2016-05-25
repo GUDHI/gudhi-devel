@@ -57,6 +57,7 @@ else()
 
   include_directories(src/common/include/)
   include_directories(src/Alpha_shapes/include/)
+  include_directories(src/Bipartite_graphs_matching/include/)
   include_directories(src/Bottleneck/include/)
   include_directories(src/Contraction/include/)
   include_directories(src/Hasse_complex/include/)

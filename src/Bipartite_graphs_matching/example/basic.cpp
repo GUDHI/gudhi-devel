@@ -20,7 +20,7 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../include/gudhi/Graph_matching.h"
+#include <gudhi/Graph_matching.h>
 #include <iostream>
 
 #include <chrono>
