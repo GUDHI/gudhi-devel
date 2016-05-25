@@ -32,15 +32,11 @@ class Persistent_cohomology_interface : public
 persistent_cohomology::Persistent_cohomology<FilteredComplex,persistent_cohomology::Field_Zp> {
  public:
   Persistent_cohomology_interface(FilteredComplex* stptr)
-  : persistent_cohomology::Persistent_cohomology<FilteredComplex,persistent_cohomology::Field_Zp>(*stptr) { std::cout << "ctor" << std::endl; }
+  : persistent_cohomology::Persistent_cohomology<FilteredComplex,persistent_cohomology::Field_Zp>(*stptr) { }
   void get_persistence(int homology_coeff_field, double min_persistence) {
-    std::cout << "1" << std::endl; 
     persistent_cohomology::Persistent_cohomology<FilteredComplex,persistent_cohomology::Field_Zp>::init_coefficients(homology_coeff_field);
-    std::cout << "2" << std::endl; 
     persistent_cohomology::Persistent_cohomology<FilteredComplex,persistent_cohomology::Field_Zp>::compute_persistent_cohomology(min_persistence);
-    std::cout << "3" << std::endl; 
     persistent_cohomology::Persistent_cohomology<FilteredComplex,persistent_cohomology::Field_Zp>::output_diagram();
-    std::cout << "4" << std::endl; 
   }
 
 };
