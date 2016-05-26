@@ -88,7 +88,7 @@ class Persistent_cohomology {
   /** \brief Initializes the Persistent_cohomology class.
    *
    * @param[in] cpx Complex for which the persistent homology is computed.
-   cpx is a model of FilteredComplex
+   * cpx is a model of FilteredComplex
    */
   explicit Persistent_cohomology(Complex_ds& cpx)
       : cpx_(&cpx),
@@ -117,7 +117,7 @@ class Persistent_cohomology {
   /** \brief Initializes the Persistent_cohomology class.
    *
    * @param[in] cpx Complex for which the persistent homology is compiuted.
-   cpx is a model of FilteredComplex
+   * cpx is a model of FilteredComplex
    *
    * @param[in] persistence_dim_max if true, the persistent homology for the maximal dimension in the
    *                                complex is computed. If false, it is ignored. Default is false.
@@ -554,14 +554,6 @@ class Persistent_cohomology {
     Complex_ds * sc_;
   };
 
-  /*
-   * Returns true when Filtration_value type accepts infinity values and the given value is equal to infinity.
-   */
-  bool is_infinity(Filtration_value value) const {
-    bool has_infinity = std::numeric_limits<Filtration_value>::has_infinity;
-    return (has_infinity && value == std::numeric_limits<Filtration_value>::infinity());
-  }
-
  public:
   /** \brief Output the persistence diagram in ostream.
    *
@@ -576,13 +568,14 @@ class Persistent_cohomology {
   void output_diagram(std::ostream& ostream = std::cout) {
     cmp_intervals_by_length cmp(cpx_);
     std::sort(std::begin(persistent_pairs_), std::end(persistent_pairs_), cmp);
+    bool has_infinity = std::numeric_limits<Filtration_value>::has_infinity;
     for (auto pair : persistent_pairs_) {
       // Special case on windows, inf is "1.#INF" (cf. unitary tests and R package TDA)
-      if (is_infinity(cpx_->filtration(get<1>(pair)))) {
-        ostream << /*get<2>(pair) <<*/ "  " << cpx_->dimension(get<0>(pair)) << " "
+      if (has_infinity && cpx_->filtration(get<1>(pair)) == std::numeric_limits<Filtration_value>::infinity()) {
+        ostream << get<2>(pair) << "  " << cpx_->dimension(get<0>(pair)) << " "
           << cpx_->filtration(get<0>(pair)) << " inf " << std::endl;
       } else {
-        ostream << /*get<2>(pair) <<*/ "  " << cpx_->dimension(get<0>(pair)) << " "
+        ostream << get<2>(pair) << "  " << cpx_->dimension(get<0>(pair)) << " "
           << cpx_->filtration(get<0>(pair)) << " "
           << cpx_->filtration(get<1>(pair)) << " " << std::endl;
       }
@@ -601,14 +594,15 @@ class Persistent_cohomology {
   }
 
   /** @brief Returns Betti numbers.
-   *
+   * @return A vector of persistent Betti numbers.
    */
   std::vector<int> betti_numbers() const {
     // Init Betti numbers vector with zeros until Simplicial complex dimension
     std::vector<int> betti_numbers(cpx_->dimension(), 0);
     
     for (auto pair : persistent_pairs_) {
-      if (is_infinity(cpx_->filtration(get<1>(pair)))) {
+      // Count never ended persistence intervals
+      if (cpx_->null_simplex() == get<1>(pair)) {
         // Increment corresponding betti number
         betti_numbers[cpx_->dimension(get<0>(pair))] += 1;
       }
@@ -616,16 +610,56 @@ class Persistent_cohomology {
     return betti_numbers;
   }
 
-  /** @brief Returns the Betti number passed by parameter.
+  /** @brief Returns the Betti number of the dimension passed by parameter.
    * @param[in] dimension The Betti number dimension to get.
-   * @return Betti number
+   * @return Betti number of the given dimension
    *
    */
   int betti_number(int dimension) const {
     int betti_number = 0;
     
     for (auto pair : persistent_pairs_) {
-      if (is_infinity(cpx_->filtration(get<1>(pair)))) {
+      // Count never ended persistence intervals
+      if (cpx_->null_simplex() == get<1>(pair)) {
+        if (cpx_->dimension(get<0>(pair)) == dimension) {
+          // Increment betti number found
+          ++betti_number;
+        }
+      }
+    }
+    return betti_number;
+  }
+  
+  /** @brief Returns the persistent Betti numbers.
+   * @param[in] from The persistence birth limit to be added in the number \f$(persistent birth \leq from)\f$.
+   * @param[in] to The persistence death limit to be added in the number  \f$(persistent death > from)\f$.
+   * @return A vector of persistent Betti numbers.
+   */
+  std::vector<int> persistent_betti_numbers(Filtration_value from, Filtration_value to) const {
+    // Init Betti numbers vector with zeros until Simplicial complex dimension
+    std::vector<int> betti_numbers(cpx_->dimension(), 0);
+    
+    for (auto pair : persistent_pairs_) {
+      // Count persistence intervals that covers the given interval
+      if (cpx_->filtration(get<0>(pair)) <= from && cpx_->filtration(get<1>(pair)) > to) {
+        // Increment corresponding betti number
+        betti_numbers[cpx_->dimension(get<0>(pair))] += 1;
+      }
+    }
+    return betti_numbers;
+  }
+
+  /** @brief Returns the persistentBetti number of the dimension passed by parameter.
+   * @param[in] dimension The Betti number dimension to get.
+   * @return Betti number of the given dimension
+   *
+   */
+  int persistent_betti_number(int dimension, Filtration_value from, Filtration_value to) const {
+    int betti_number = 0;
+    
+    for (auto pair : persistent_pairs_) {
+      // Count persistence intervals that covers the given interval
+      if (cpx_->filtration(get<0>(pair)) <= from && cpx_->filtration(get<1>(pair)) > to) {
         if (cpx_->dimension(get<0>(pair)) == dimension) {
           // Increment betti number found
           ++betti_number;
