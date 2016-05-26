@@ -28,8 +28,8 @@
 #include <CGAL/Search_traits.h>
 #include <CGAL/Orthogonal_incremental_neighbor_search.h>
 #include <CGAL/Weighted_Minkowski_distance.h>
-#include "../CGAL/Miscellaneous.h"
-#include "Persistence_diagrams_graph.h"
+#include <CGAL/Miscellaneous.h>
+#include <gudhi/Persistence_diagrams_graph.h>
 
 
 namespace Gudhi {

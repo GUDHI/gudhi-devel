@@ -28,7 +28,7 @@
 
 using namespace Gudhi::bipartite_graph_matching;
 
-
+/*
 double upper_bound = 400.; // any real >0
 
 int main(){
@@ -63,8 +63,9 @@ int main(){
     }
     objetfichier.close();
 }
+*/
 
-/*
+
 int main() {
     std::vector< std::pair<double,double> > v1, v2;
 
@@ -80,4 +81,4 @@ int main() {
 
     std::cout << "Bottleneck distance = " << b << std::endl;
 
-}*/
+}

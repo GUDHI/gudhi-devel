@@ -25,7 +25,7 @@
 
 #include <deque>
 
-#include "Neighbors_finder.h"
+#include <gudhi/Neighbors_finder.h>
 
 namespace Gudhi {
 

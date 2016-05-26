@@ -2,7 +2,7 @@
 
 #include <boost/test/included/unit_test.hpp>
 #include <random>
-#include "../include/gudhi/Graph_matching.h"
+#include <gudhi/Graph_matching.h>
 
 using namespace Gudhi::bipartite_graph_matching;
 

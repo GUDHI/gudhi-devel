@@ -30,7 +30,7 @@
 #include <algorithm>
 #include <math.h>
 #include <memory>
-#include "Internal_point.h"
+#include <gudhi/Internal_point.h>
 
 namespace Gudhi {
 

@@ -24,7 +24,7 @@
 #define SRC_BOTTLENECK_INCLUDE_GUDHI_NEIGHBORS_FINDER_H_
 
 #include <unordered_set>
-#include "Planar_neighbors_finder.h"
+#include <gudhi/Planar_neighbors_finder.h>
 
 namespace Gudhi {
 
