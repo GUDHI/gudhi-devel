@@ -68,7 +68,7 @@ class Persistent_cohomology {
   typedef typename Complex_ds::Simplex_handle Simplex_handle;
   typedef typename Complex_ds::Filtration_value Filtration_value;
   typedef typename CoefficientField::Element Arith_element;
-// Compressed Annotation Matrix types:
+  // Compressed Annotation Matrix types:
   // Column type
   typedef Persistent_cohomology_column<Simplex_key, Arith_element> Column;  // contains 1 set_hook
   // Cell type
@@ -80,10 +80,10 @@ class Persistent_cohomology {
 
   typedef boost::intrusive::set<Column,
       boost::intrusive::constant_time_size<false> > Cam;
-// Sparse column type for the annotation of the boundary of an element.
+  // Sparse column type for the annotation of the boundary of an element.
   typedef std::vector<std::pair<Simplex_key, Arith_element> > A_ds_type;
-// Persistent interval type. The Arith_element field is used for the multi-field framework.
-  typedef std::tuple<Simplex_handle, Simplex_handle/*, Arith_element*/> Persistent_interval;
+  // Persistent interval type. The Arith_element field is used for the multi-field framework.
+  typedef std::tuple<Simplex_handle, Simplex_handle, Arith_element> Persistent_interval;
 
   /** \brief Initializes the Persistent_cohomology class.
    *
@@ -199,17 +199,17 @@ class Persistent_cohomology {
       if (ds_parent_[key] == key  // root of its tree
       && zero_cocycles_.find(key) == zero_cocycles_.end()) {
         persistent_pairs_.emplace_back(
-            cpx_->simplex(key), cpx_->null_simplex()/*, coeff_field_.characteristic()*/);
+            cpx_->simplex(key), cpx_->null_simplex(), coeff_field_.characteristic());
       }
     }
     for (auto zero_idx : zero_cocycles_) {
       persistent_pairs_.emplace_back(
-          cpx_->simplex(zero_idx.second), cpx_->null_simplex()/*, coeff_field_.characteristic()*/);
+          cpx_->simplex(zero_idx.second), cpx_->null_simplex(), coeff_field_.characteristic());
     }
-// Compute infinite interval of dimension > 0
+    // Compute infinite interval of dimension > 0
     for (auto cocycle : transverse_idx_) {
       persistent_pairs_.emplace_back(
-          cpx_->simplex(cocycle.first), cpx_->null_simplex()/*, cocycle.second.characteristics_*/);
+          cpx_->simplex(cocycle.first), cpx_->null_simplex(), cocycle.second.characteristics_);
     }
   }
 
@@ -250,7 +250,7 @@ class Persistent_cohomology {
           < cpx_->filtration(cpx_->simplex(idx_coc_v))) {  // Kill cocycle [idx_coc_v], which is younger.
         if (interval_length_policy(cpx_->simplex(idx_coc_v), sigma)) {
           persistent_pairs_.emplace_back(
-              cpx_->simplex(idx_coc_v), sigma/*, coeff_field_.characteristic()*/);
+              cpx_->simplex(idx_coc_v), sigma, coeff_field_.characteristic());
         }
         // Maintain the index of the 0-cocycle alive.
         if (kv != idx_coc_v) {
@@ -265,7 +265,7 @@ class Persistent_cohomology {
       } else {  // Kill cocycle [idx_coc_u], which is younger.
         if (interval_length_policy(cpx_->simplex(idx_coc_u), sigma)) {
           persistent_pairs_.emplace_back(
-              cpx_->simplex(idx_coc_u), sigma/*, coeff_field_.characteristic()*/);
+              cpx_->simplex(idx_coc_u), sigma, coeff_field_.characteristic());
         }
         // Maintain the index of the 0-cocycle alive.
         if (ku != idx_coc_u) {
@@ -427,7 +427,7 @@ class Persistent_cohomology {
     if (interval_length_policy(cpx_->simplex(death_key), sigma)) {
       persistent_pairs_.emplace_back(cpx_->simplex(death_key)  // creator
           , sigma                                              // destructor
-          /*, charac*/);                                           // fields
+          , charac);                                           // fields
     }
 
     auto death_key_row = transverse_idx_.find(death_key);  // Find the beginning of the row.
@@ -554,6 +554,14 @@ class Persistent_cohomology {
     Complex_ds * sc_;
   };
 
+  /*
+   * Returns true when Filtration_value type accepts infinity values and the given value is equal to infinity.
+   */
+  bool is_infinity(Filtration_value value) const {
+    bool has_infinity = std::numeric_limits<Filtration_value>::has_infinity;
+    return (has_infinity && value == std::numeric_limits<Filtration_value>::infinity());
+  }
+
  public:
   /** \brief Output the persistence diagram in ostream.
    *
@@ -568,10 +576,9 @@ class Persistent_cohomology {
   void output_diagram(std::ostream& ostream = std::cout) {
     cmp_intervals_by_length cmp(cpx_);
     std::sort(std::begin(persistent_pairs_), std::end(persistent_pairs_), cmp);
-    bool has_infinity = std::numeric_limits<Filtration_value>::has_infinity;
     for (auto pair : persistent_pairs_) {
       // Special case on windows, inf is "1.#INF" (cf. unitary tests and R package TDA)
-      if (has_infinity && cpx_->filtration(get<1>(pair)) == std::numeric_limits<Filtration_value>::infinity()) {
+      if (is_infinity(cpx_->filtration(get<1>(pair)))) {
         ostream << /*get<2>(pair) <<*/ "  " << cpx_->dimension(get<0>(pair)) << " "
           << cpx_->filtration(get<0>(pair)) << " inf " << std::endl;
       } else {
@@ -596,13 +603,15 @@ class Persistent_cohomology {
   /** @brief Returns Betti numbers.
    *
    */
-  const std::vector<int> betti_numbers() const {
+  std::vector<int> betti_numbers() const {
     // Init Betti numbers vector with zeros until Simplicial complex dimension
     std::vector<int> betti_numbers(cpx_->dimension(), 0);
     
     for (auto pair : persistent_pairs_) {
-      // Increment corresponding betti number
-      betti_numbers[cpx_->dimension(get<0>(pair))] += 1;
+      if (is_infinity(cpx_->filtration(get<1>(pair)))) {
+        // Increment corresponding betti number
+        betti_numbers[cpx_->dimension(get<0>(pair))] += 1;
+      }
     }
     return betti_numbers;
   }
@@ -612,13 +621,16 @@ class Persistent_cohomology {
    * @return Betti number
    *
    */
-  const int betti_number(int dimension) const {
+  int betti_number(int dimension) const {
     int betti_number = 0;
     
     for (auto pair : persistent_pairs_) {
-      if (cpx_->dimension(get<0>(pair)) == dimension)
-        // Increment betti number found
-        ++betti_number;
+      if (is_infinity(cpx_->filtration(get<1>(pair)))) {
+        if (cpx_->dimension(get<0>(pair)) == dimension) {
+          // Increment betti number found
+          ++betti_number;
+        }
+      }
     }
     return betti_number;
   }
@@ -627,7 +639,7 @@ class Persistent_cohomology {
    * @return Persistent pairs
    *
    */
-  std::vector<Persistent_interval> get_persistent_pairs() const {
+  const std::vector<Persistent_interval>& get_persistent_pairs() const {
     return persistent_pairs_;
   }
   
