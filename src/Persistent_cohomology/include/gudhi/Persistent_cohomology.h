@@ -599,7 +599,7 @@ class Persistent_cohomology {
   std::vector<int> betti_numbers() const {
     // Init Betti numbers vector with zeros until Simplicial complex dimension
     std::vector<int> betti_numbers(cpx_->dimension(), 0);
-    
+
     for (auto pair : persistent_pairs_) {
       // Count never ended persistence intervals
       if (cpx_->null_simplex() == get<1>(pair)) {
@@ -617,7 +617,7 @@ class Persistent_cohomology {
    */
   int betti_number(int dimension) const {
     int betti_number = 0;
-    
+
     for (auto pair : persistent_pairs_) {
       // Count never ended persistence intervals
       if (cpx_->null_simplex() == get<1>(pair)) {
@@ -629,7 +629,7 @@ class Persistent_cohomology {
     }
     return betti_number;
   }
-  
+
   /** @brief Returns the persistent Betti numbers.
    * @param[in] from The persistence birth limit to be added in the number \f$(persistent birth \leq from)\f$.
    * @param[in] to The persistence death limit to be added in the number  \f$(persistent death > from)\f$.
@@ -638,7 +638,7 @@ class Persistent_cohomology {
   std::vector<int> persistent_betti_numbers(Filtration_value from, Filtration_value to) const {
     // Init Betti numbers vector with zeros until Simplicial complex dimension
     std::vector<int> betti_numbers(cpx_->dimension(), 0);
-    
+
     for (auto pair : persistent_pairs_) {
       // Count persistence intervals that covers the given interval
       if (cpx_->filtration(get<0>(pair)) <= from && cpx_->filtration(get<1>(pair)) > to) {
@@ -656,7 +656,7 @@ class Persistent_cohomology {
    */
   int persistent_betti_number(int dimension, Filtration_value from, Filtration_value to) const {
     int betti_number = 0;
-    
+
     for (auto pair : persistent_pairs_) {
       // Count persistence intervals that covers the given interval
       if (cpx_->filtration(get<0>(pair)) <= from && cpx_->filtration(get<1>(pair)) > to) {
@@ -668,7 +668,7 @@ class Persistent_cohomology {
     }
     return betti_number;
   }
-  
+
   /** @brief Returns the persistent pairs.
    * @return Persistent pairs
    *
@@ -676,7 +676,7 @@ class Persistent_cohomology {
   const std::vector<Persistent_interval>& get_persistent_pairs() const {
     return persistent_pairs_;
   }
-  
+
  private:
   /*
    * Structure representing a cocycle.

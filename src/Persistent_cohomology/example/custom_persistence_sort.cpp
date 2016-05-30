@@ -32,6 +32,7 @@
 #include <iterator>
 #include <vector>
 #include <fstream>  // for std::ofstream
+#include <algorithm>  // for std::sort
 
 
 using Kernel = CGAL::Epick_d< CGAL::Dimension_tag<3> >;

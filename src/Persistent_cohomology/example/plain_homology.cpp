@@ -77,13 +77,12 @@ int main() {
 
   // Print the result. The format is, on each line: 2 dim 0 inf
   // where 2 represents the field, dim the dimension of the feature.
-  // 2  0 0 inf 
-  // 2  0 0 inf 
-  // 2  1 0 inf 
+  // 2  0 0 inf
+  // 2  0 0 inf
+  // 2  1 0 inf
   // means that in Z/2Z-homology, the Betti numbers are b0=2 and b1=1.
   pcoh.output_diagram();
-  
-  
+
   // Print the Betti numbers are b0=2 and b1=1.
   std::cout << std::endl;
   std::cout << "The Betti numbers are : ";
