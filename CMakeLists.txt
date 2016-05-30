@@ -5,7 +5,7 @@ include(CMakeGUDHIVersion.txt)
 # Generate GUDHI official version file
 configure_file(GUDHIVersion.cmake.in "${CMAKE_SOURCE_DIR}/GUDHIVersion.cmake" @ONLY)
 
-find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework chrono timer program_options thread REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework chrono timer date_time program_options thread REQUIRED)
 
 if(NOT Boost_FOUND)
   message(FATAL_ERROR "NOTICE: This demo requires Boost and will not be compiled.")
@@ -64,6 +64,7 @@ else()
   set(TBB_FIND_QUIETLY ON)
   find_package(TBB)
   if (TBB_FOUND)
+    include(${TBB_USE_FILE})
     message("TBB found in ${TBB_LIBRARY_DIRS}")
     add_definitions(-DGUDHI_USE_TBB)
   endif()
