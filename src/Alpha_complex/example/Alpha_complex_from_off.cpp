@@ -14,13 +14,13 @@ void usage(int nbArgs, char * const progName) {
 int main(int argc, char **argv) {
   if ((argc != 3) && (argc != 4)) usage(argc, (argv[0] - 1));
 
-  std::string off_file_name(argv[1]);
-  double alpha_square_max_value = atof(argv[2]);
+  std::string off_file_name {argv[1]};
+  double alpha_square_max_value {atof(argv[2])};
 
   // ----------------------------------------------------------------------------
   // Init of an alpha complex from an OFF file
   // ----------------------------------------------------------------------------
-  typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kernel;
+  using Kernel = CGAL::Epick_d< CGAL::Dynamic_dimension_tag >;
   Gudhi::alphacomplex::Alpha_complex<Kernel> alpha_complex_from_file(off_file_name, alpha_square_max_value);
 
   std::streambuf* streambufffer;
