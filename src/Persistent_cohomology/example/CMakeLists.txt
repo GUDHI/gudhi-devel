@@ -74,12 +74,17 @@ if(GMPXX_FOUND AND GMP_FOUND)
         add_executable(periodic_alpha_complex_3d_persistence periodic_alpha_complex_3d_persistence.cpp)
         target_link_libraries(periodic_alpha_complex_3d_persistence ${Boost_SYSTEM_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES} ${CGAL_LIBRARY})
 
+        add_executable(custom_persistence_sort custom_persistence_sort.cpp)
+        target_link_libraries(custom_persistence_sort ${Boost_SYSTEM_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES} ${CGAL_LIBRARY})
+
         if (TBB_FOUND)
           target_link_libraries(alpha_complex_persistence ${TBB_RELEASE_LIBRARY})
           target_link_libraries(periodic_alpha_complex_3d_persistence ${TBB_RELEASE_LIBRARY})
+          target_link_libraries(custom_persistence_sort ${TBB_RELEASE_LIBRARY})
         endif()
         add_test(alpha_complex_persistence_2_0_45 ${CMAKE_CURRENT_BINARY_DIR}/alpha_complex_persistence ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -m 0.45 -p 2)
         add_test(periodic_alpha_complex_3d_persistence_2_0 ${CMAKE_CURRENT_BINARY_DIR}/periodic_alpha_complex_3d_persistence ${CMAKE_SOURCE_DIR}/data/points/grid_10_10_10_in_0_1.off 2 0)
+        add_test(custom_persistence_sort ${CMAKE_CURRENT_BINARY_DIR}/custom_persistence_sort)
 
       else()
         message(WARNING "Eigen3 not found. Version 3.1.0 is required for Alpha shapes feature.")
