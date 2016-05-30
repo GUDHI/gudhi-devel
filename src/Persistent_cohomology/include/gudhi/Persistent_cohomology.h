@@ -649,10 +649,11 @@ class Persistent_cohomology {
     return betti_numbers;
   }
 
-  /** @brief Returns the persistentBetti number of the dimension passed by parameter.
+  /** @brief Returns the persistent Betti number of the dimension passed by parameter.
    * @param[in] dimension The Betti number dimension to get.
-   * @return Betti number of the given dimension
-   *
+   * @param[in] from The persistence birth limit to be added in the number \f$(persistent birth \leq from)\f$.
+   * @param[in] to The persistence death limit to be added in the number  \f$(persistent death > from)\f$.
+   * @return Persistent Betti number of the given dimension
    */
   int persistent_betti_number(int dimension, Filtration_value from, Filtration_value to) const {
     int betti_number = 0;
