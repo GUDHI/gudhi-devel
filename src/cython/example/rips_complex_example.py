@@ -1,5 +1,6 @@
-from distutils.core import setup, Extension
-from Cython.Build import cythonize
+#!/usr/bin/env python
+
+import gudhi
 
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
@@ -27,21 +28,14 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016  INRIA Saclay (France)"
 __license__ = "GPL v3"
 
-gudhi = Extension(
-    "gudhi",
-    sources = ['gudhi.pyx',],
-    language = 'c++',
-    extra_compile_args=['-frounding-math','-std=c++11','-DCGAL_EIGEN3_ENABLED','-DCGAL_USE_GMP','-DCGAL_USE_GMPXX','-DCGAL_USE_MPFR'],
-    libraries=['mpfr','gmpxx','gmp','CGAL'],
-    library_dirs=['/usr/local/lib/'],
-    include_dirs = ['../include','./src/cpp','/usr/local/include/eigen3'],
-)
+print("#####################################################################")
+print("RipsComplex creation from points")
+rips = gudhi.RipsComplex(points=[[0, 0], [1, 0], [0, 1], [1, 1]],
+                         max_dimension=1, max_edge_length=42)
 
-setup(
-    name = 'gudhi',
-    author='Vincent Rouvreau',
-    author_email='gudhi-contact@lists.gforge.inria.fr',
-    version='0.1.0',
-    url='http://gudhi.gforge.inria.fr/',
-    ext_modules = cythonize(gudhi),
-)
+print("filtered_tree=", rips.get_filtered_tree())
+print("star([0])=", rips.get_star_tree([0]))
+print("coface([0], 1)=", rips.get_coface_tree([0], 1))
+
+print("persistence(2)=", rips.persistence(homology_coeff_field=2,
+                                          min_persistence=0))

@@ -1,5 +1,6 @@
-from distutils.core import setup, Extension
-from Cython.Build import cythonize
+import unittest
+
+import gudhi
 
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
@@ -27,21 +28,28 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016  INRIA Saclay (France)"
 __license__ = "GPL v3"
 
-gudhi = Extension(
-    "gudhi",
-    sources = ['gudhi.pyx',],
-    language = 'c++',
-    extra_compile_args=['-frounding-math','-std=c++11','-DCGAL_EIGEN3_ENABLED','-DCGAL_USE_GMP','-DCGAL_USE_GMPXX','-DCGAL_USE_MPFR'],
-    libraries=['mpfr','gmpxx','gmp','CGAL'],
-    library_dirs=['/usr/local/lib/'],
-    include_dirs = ['../include','./src/cpp','/usr/local/include/eigen3'],
-)
 
-setup(
-    name = 'gudhi',
-    author='Vincent Rouvreau',
-    author_email='gudhi-contact@lists.gforge.inria.fr',
-    version='0.1.0',
-    url='http://gudhi.gforge.inria.fr/',
-    ext_modules = cythonize(gudhi),
-)
+class TestMiniSimplexTree(unittest.TestCase):
+
+    def test_mini(self):
+        triangle012 = [0, 1, 2]
+        edge03 = [0, 3]
+        mini_st = gudhi.MiniSimplexTree()
+        self.assertTrue(mini_st.insert(triangle012))
+        self.assertTrue(mini_st.insert(edge03))
+        # FIXME: Remove this line
+        mini_st.set_dimension(2)
+
+        edge02 = [0, 2]
+        self.assertTrue(mini_st.find(edge02))
+        self.assertEqual(mini_st.get_coface_tree(edge02, 1),
+                         [([0, 1, 2], 0.0)])
+
+        # remove_maximal_simplex test
+        self.assertEqual(mini_st.get_coface_tree(triangle012, 1), [])
+        mini_st.remove_maximal_simplex(triangle012)
+        self.assertTrue(mini_st.find(edge02))
+        self.assertFalse(mini_st.find(triangle012))
+
+if __name__ == '__main__':
+    unittest.main()

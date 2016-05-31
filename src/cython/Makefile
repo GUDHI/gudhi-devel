@@ -2,16 +2,16 @@ ext:
 	python setup.py build_ext --inplace
 
 test:
-	python test/Simplex_tree_UT.py
-	python test/Mini_simplex_tree_UT.py
-	python test/Rips_complex_UT.py
-	python test/Alpha_complex_UT.py
+	python test/test_simplex_tree.py
+	python test/test_mini_simplex_tree.py
+	python test/test_rips_complex.py
+	python test/test_alpha_complex.py
 
 example:
-	python example/Simplex_tree_example.py
-	python example/Mini_simplex_tree_example.py
-	python example/Rips_complex_example.py
-	python example/Alpha_complex_example.py
+	python example/simplex_tree_example.py
+	python example/mini_simplex_tree_example.py
+	python example/rips_complex_example.py
+	python example/alpha_complex_example.py
 
 clean:
 	rm -rf build/ *.o *.so *.cpp
