@@ -66,6 +66,12 @@ print("coface([0], 1)=", alpha_complex.get_coface_tree([0], 1))
 print("point[0]=", alpha_complex.get_point(0))
 print("point[5]=", alpha_complex.get_point(5))
 
+print("betti_numbers()=")
+print(alpha_complex.betti_numbers())
+
 alpha_complex.initialize_filtration()
-print("persistence(2)=", alpha_complex.persistence(homology_coeff_field=2,
-                                                   min_persistence=0))
+print("persistence(homology_coeff_field=2, min_persistence=0)=")
+print(alpha_complex.persistence(homology_coeff_field=2, min_persistence=0))
+
+print("betti_numbers()=")
+print(alpha_complex.betti_numbers())

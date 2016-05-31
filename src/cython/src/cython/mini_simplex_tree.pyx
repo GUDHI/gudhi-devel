@@ -55,11 +55,15 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Mini_simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_mini>>":
         Mini_simplex_tree_persistence_interface(Simplex_tree_interface_mini * st)
-        void get_persistence(int homology_coeff_field, double min_persistence)
+        vector[pair[int, pair[double, double]]] get_persistence(int homology_coeff_field, double min_persistence)
+        vector[int] betti_numbers()
+        vector[int] persistent_betti_numbers(double from_value, double to_value)
 
 # MiniSimplexTree python interface
 cdef class MiniSimplexTree:
     cdef Simplex_tree_interface_mini * thisptr
+
+    cdef Mini_simplex_tree_persistence_interface * pcohptr
 
     def __cinit__(self):
         self.thisptr = new Simplex_tree_interface_mini()
@@ -67,6 +71,8 @@ cdef class MiniSimplexTree:
     def __dealloc__(self):
         if self.thisptr != NULL:
             del self.thisptr
+        if self.pcohptr != NULL:
+            del self.pcohptr
 
     def get_filtration(self):
         return self.thisptr.filtration()
@@ -158,10 +164,29 @@ cdef class MiniSimplexTree:
     def remove_maximal_simplex(self, simplex):
         self.thisptr.remove_maximal_simplex(simplex)
 
-    def plain_homology(self, homology_coeff_field=11):
-        cdef Mini_simplex_tree_persistence_interface * pcohptr \
-            = new Mini_simplex_tree_persistence_interface(self.thisptr)
-        if pcohptr != NULL:
-            pcohptr.get_persistence(homology_coeff_field, 0)
-            del pcohptr
-        return 5
+    def persistence(self, homology_coeff_field=11):
+        if self.pcohptr != NULL:
+            del self.pcohptr
+        self.pcohptr = new Mini_simplex_tree_persistence_interface(self.thisptr)
+        cdef vector[pair[int, pair[double, double]]] persistence_result
+        if self.pcohptr != NULL:
+            persistence_result = self.pcohptr.get_persistence(homology_coeff_field, 0)
+        return persistence_result
+
+    def betti_numbers(self):
+        cdef vector[int] bn_result
+        if self.pcohptr != NULL:
+            bn_result = self.pcohptr.betti_numbers()
+        else:
+            print("betti_numbers function requires persistence function"
+                  " to be launched first.")
+        return bn_result
+
+    def persistent_betti_numbers(self, from_value, to_value):
+        cdef vector[int] pbn_result
+        if self.pcohptr != NULL:
+            pbn_result = self.pcohptr.persistent_betti_numbers(<double>from_value, <double>to_value)
+        else:
+            print("persistent_betti_numbers function requires persistence function"
+                  " to be launched first.")
+        return pbn_result

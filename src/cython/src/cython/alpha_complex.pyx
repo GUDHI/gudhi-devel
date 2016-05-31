@@ -53,11 +53,15 @@ cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Alpha_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::alphacomplex::Alpha_complex< CGAL::Epick_d< CGAL::Dynamic_dimension_tag > >>":
         Alpha_complex_persistence_interface(Alpha_complex_interface * st)
-        void get_persistence(int homology_coeff_field, double min_persistence)
+        vector[pair[int, pair[double, double]]] get_persistence(int homology_coeff_field, double min_persistence)
+        vector[int] betti_numbers()
+        vector[int] persistent_betti_numbers(double from_value, double to_value)
 
 # AlphaComplex python interface
 cdef class AlphaComplex:
     cdef Alpha_complex_interface * thisptr
+
+    cdef Alpha_complex_persistence_interface * pcohptr
 
     def __cinit__(self, points=None, max_alpha_square=float('inf')):
         if points is not None:
@@ -67,6 +71,8 @@ cdef class AlphaComplex:
     def __dealloc__(self):
         if self.thisptr != NULL:
             del self.thisptr
+        if self.pcohptr != NULL:
+            del self.pcohptr
 
     def get_filtration(self):
         return self.thisptr.filtration()
@@ -163,9 +169,28 @@ cdef class AlphaComplex:
         return point
 
     def persistence(self, homology_coeff_field=11, min_persistence=0):
-        cdef Alpha_complex_persistence_interface * pcohptr \
-            = new Alpha_complex_persistence_interface(self.thisptr)
-        if pcohptr != NULL:
-            pcohptr.get_persistence(homology_coeff_field, min_persistence)
-            del pcohptr
-        return 5
+        if self.pcohptr != NULL:
+            del self.pcohptr
+        self.pcohptr = new Alpha_complex_persistence_interface(self.thisptr)
+        cdef vector[pair[int, pair[double, double]]] persistence_result
+        if self.pcohptr != NULL:
+            persistence_result = self.pcohptr.get_persistence(homology_coeff_field, min_persistence)
+        return persistence_result
+
+    def betti_numbers(self):
+        cdef vector[int] bn_result
+        if self.pcohptr != NULL:
+            bn_result = self.pcohptr.betti_numbers()
+        else:
+            print("betti_numbers function requires persistence function"
+                  " to be launched first.")
+        return bn_result
+
+    def persistent_betti_numbers(self, from_value, to_value):
+        cdef vector[int] pbn_result
+        if self.pcohptr != NULL:
+            pbn_result = self.pcohptr.persistent_betti_numbers(<double>from_value, <double>to_value)
+        else:
+            print("persistent_betti_numbers function requires persistence function"
+                  " to be launched first.")
+        return pbn_result

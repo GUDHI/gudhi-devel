@@ -55,7 +55,8 @@ mini_st.set_dimension(2)
 # initialize_filtration required before plain_homology
 mini_st.initialize_filtration()
 
-print("plain_homology(2)=", mini_st.plain_homology(2))
+print("persistence(homology_coeff_field=2)=")
+print(mini_st.persistence(homology_coeff_field=2))
 
 edge02 = [0, 2]
 if mini_st.find(edge02):

@@ -37,5 +37,5 @@ print("filtered_tree=", rips.get_filtered_tree())
 print("star([0])=", rips.get_star_tree([0]))
 print("coface([0], 1)=", rips.get_coface_tree([0], 1))
 
-print("persistence(2)=", rips.persistence(homology_coeff_field=2,
-                                          min_persistence=0))
+print("persistence(homology_coeff_field=2, min_persistence=0)=")
+print(rips.persistence(homology_coeff_field=2, min_persistence=0))

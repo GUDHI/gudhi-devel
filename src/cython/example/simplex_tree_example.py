@@ -2,8 +2,6 @@
 
 import gudhi
 
-st = gudhi.SimplexTree()
-
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
    library for computational topology.
@@ -32,6 +30,9 @@ __license__ = "GPL v3"
 
 print("#####################################################################")
 print("SimplexTree creation from insertion")
+
+st = gudhi.SimplexTree()
+
 if st.insert([0, 1]):
     print("Inserted !!")
 else:
@@ -64,5 +65,5 @@ print("skeleton_tree[2]=", st.get_skeleton_tree(2))
 print("skeleton_tree[1]=", st.get_skeleton_tree(1))
 print("skeleton_tree[0]=", st.get_skeleton_tree(0))
 
-print("persistence(2)=", st.persistence(homology_coeff_field=2,
-                                        min_persistence=0))
+print("persistence(homology_coeff_field=2, min_persistence=0)=")
+print(st.persistence(homology_coeff_field=2, min_persistence=0))
