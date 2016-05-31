@@ -94,7 +94,7 @@ private:
 };
 
 /** \internal \typedef \brief Planar_neighbors_finder is the used implementation. */
-typedef Cgal_pnf Planar_neighbors_finder;
+typedef Naive_pnf Planar_neighbors_finder;
 
 inline Naive_pnf::Naive_pnf(double r_) :
     r(r_), grid() { }
@@ -110,12 +110,12 @@ inline void Naive_pnf::add(int v_point_index) {
 }
 
 inline void Naive_pnf::remove(int v_point_index) {
-    if(!contains(v_point_index))
-    for(auto it = grid.find(get_v_key(v_point_index)); it!=grid.end(); it++)
-        if(it->second==v_point_index){
-            grid.erase(it);
-            return;
-        }
+    if(v_point_index != null_point_index())
+        for(auto it = grid.find(get_v_key(v_point_index)); it!=grid.end(); it++)
+            if(it->second==v_point_index){
+                grid.erase(it);
+                return;
+            }
 }
 
 inline bool Naive_pnf::contains(int v_point_index) const {
@@ -136,6 +136,7 @@ inline int Naive_pnf::pull_near(int u_point_index) {
             for(auto it = grid.find(std::make_pair(i0 +(i%3)-1, j0+(j%3)-1)); it!=grid.end(); it++)
                 if (G::distance(u_point_index, it->second) <= r) {
                     int tmp = it->second;
+                    grid.erase(it);
                     return tmp;
                 }
     return null_point_index();
@@ -165,18 +166,24 @@ inline Cgal_pnf::Cgal_pnf(double r_)
 
 /** \internal \brief A point added will be possibly pulled. */
 inline void Cgal_pnf::add(int v_point_index){
+    if(v_point_index == null_point_index())
+        return;
     contents.insert(v_point_index);
     kd_t.insert(G::get_v_point(v_point_index));
 }
 
 /** \internal \brief A point manually removed will no longer be possibly pulled. */
 inline void Cgal_pnf::remove(int v_point_index){
-    contents.erase(v_point_index);
-    kd_t.remove(G::get_v_point(v_point_index));
+    if(contains(v_point_index)){
+        contents.erase(v_point_index);
+        kd_t.remove(G::get_v_point(v_point_index));
+    }
 }
 
 /** \internal \brief Can the point given as parameter be returned ? */
 inline bool Cgal_pnf::contains(int v_point_index) const{
+    if(v_point_index == null_point_index())
+        return false;
     return contents.count(v_point_index)>0;
 }
 
@@ -188,7 +195,9 @@ inline int Cgal_pnf::pull_near(int u_point_index){
     auto it = search.begin();
     if(it==search.end() || G::distance(u_point_index, it->first.point_index) > r)
         return null_point_index();
-    return it->first.point_index;
+    int tmp = it->first.point_index;
+    remove(tmp);
+    return tmp;
 }
 
 inline std::shared_ptr< std::list<int> > Cgal_pnf::pull_all_near(int u_point_index) {
@@ -196,7 +205,6 @@ inline std::shared_ptr< std::list<int> > Cgal_pnf::pull_all_near(int u_point_ind
     int last_pull = pull_near(u_point_index);
     while (last_pull != null_point_index()) {
         all_pull->emplace_back(last_pull);
-        remove(last_pull);
         last_pull = pull_near(u_point_index);
     }
     return all_pull;

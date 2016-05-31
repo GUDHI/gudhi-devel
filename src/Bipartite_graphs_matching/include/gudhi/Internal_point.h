@@ -42,7 +42,7 @@ struct Internal_point {
     double& y() { return vec[ 1 ]; }
     bool operator==(const Internal_point& p) const
     {
-        return (x() == p.x()) && (y() == p.y()) && (point_index==p.point_index);
+        return point_index==p.point_index;
     }
     bool  operator!=(const Internal_point& p) const { return ! (*this == p); }
 /* 

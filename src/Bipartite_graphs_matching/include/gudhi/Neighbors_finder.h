@@ -106,7 +106,7 @@ inline int Neighbors_finder::pull_near(int u_point_index) {
     int tmp;
     int c = G::corresponding_point_in_v(u_point_index);
     if (G::on_the_u_diagonal(u_point_index) && !projections_f.empty())
-        //All projections are at distance 0
+        //Any pair of projection is at distance 0
         tmp = *projections_f.cbegin();
     else if (contains(c) && (G::distance(u_point_index, c) <= r))
         //Is the query point near to its projection ?
