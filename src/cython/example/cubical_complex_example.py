@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+
+import gudhi
+
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
    library for computational topology.
@@ -24,8 +28,13 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016  INRIA Saclay (France)"
 __license__ = "GPL v3"
 
-include "src/cython/simplex_tree.pyx"
-include "src/cython/mini_simplex_tree.pyx"
-include "src/cython/rips_complex.pyx"
-include "src/cython/alpha_complex.pyx"
-include "src/cython/cubical_complex.pyx"
+print("#####################################################################")
+print("CubicalComplex creation")
+cubical_complex = gudhi.CubicalComplex(dimensions=[3, 3],
+                                       top_dimensional_cells=[1, 2, 3, 4, 5, 6, 7, 8, 9])
+
+print("persistence(homology_coeff_field=2, min_persistence=0)=")
+print(cubical_complex.persistence(homology_coeff_field=2, min_persistence=0))
+
+print("betti_numbers()=")
+print(cubical_complex.betti_numbers())
