@@ -1,0 +1,22 @@
+cmake_minimum_required(VERSION 2.6)
+project(GUDHILandmarkingTest)
+
+# Landmarking test
+if(CGAL_FOUND)
+  if (NOT CGAL_VERSION VERSION_LESS 4.8.0)
+    message(STATUS "CGAL version: ${CGAL_VERSION}.")
+
+    find_package(Eigen3 3.1.0)
+    if (EIGEN3_FOUND)
+      message(STATUS "Eigen3 version: ${EIGEN3_VERSION}.")
+      include( ${EIGEN3_USE_FILE} )
+      include_directories (BEFORE "../../include")
+
+      add_executable( landmarking_UT landmarking.cpp ) 
+    else()
+      message(WARNING "Eigen3 not found. Version 3.1.0 is required for Landmarking feature.")
+    endif()
+  else()
+    message(WARNING "CGAL version: ${CGAL_VERSION} is too old to compile Landmarking feature. Version 4.8.0 is required.")
+  endif ()
+endif()
