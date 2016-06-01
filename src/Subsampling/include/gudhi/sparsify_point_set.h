@@ -73,8 +73,6 @@ sparsify_point_set(
       std::size_t neighbor_point_idx = neighbor.first;
       // If the neighbor is too close, we drop the neighbor
       if (neighbor.second < min_squared_dist)
-        //if (neighbor.second < 0.2*((*it_pt)[0] + 1.)*0.5 + 0.00005)
-        //if (neighbor.second < ((*it_pt)[0] < 0 ? 0.2 : 0.00001))
       {
         // N.B.: If neighbor_point_idx < pt_idx, 
         // dropped_points[neighbor_point_idx] is already true but adding a
