@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
 import gudhi
+import matplotlib.pyplot as plt
 
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
    library for computational topology.
 
-   Author(s):       Vincent Rouvreau
+   Author(s):       Marc Glisse
 
    Copyright (C) 2016  INRIA Saclay (France)
 
@@ -24,17 +25,23 @@ import gudhi
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-__author__ = "Vincent Rouvreau"
+__author__ = "Marc Glisse"
 __copyright__ = "Copyright (C) 2016  INRIA Saclay (France)"
 __license__ = "GPL v3"
 
 print("#####################################################################")
-print("CubicalComplex creation")
-cubical_complex = gudhi.CubicalComplex(dimensions=[3, 3],
-                                       top_dimensional_cells=[1, 2, 3, 4, 5, 6, 7, 8, 9])
+print("RipsComplex creation from points")
+rips = gudhi.RipsComplex(points=[[0, 0], [1, 0], [0, 1], [1, 1]],
+                         max_dimension=1, max_edge_length=42)
 
-print("persistence(homology_coeff_field=2, min_persistence=0)=")
-print(cubical_complex.persistence(homology_coeff_field=2, min_persistence=0))
+diag = rips.persistence(homology_coeff_field=2, min_persistence=0)
+print("diag=", diag)
 
-print("betti_numbers()=")
-print(cubical_complex.betti_numbers())
+diag0=[i[1] for i in diag if i[0]==0]
+diag1=[i[1] for i in diag if i[0]==1]
+
+plt.plot([i[0] for i in diag0],[min(i[1],1.5) for i in diag0],'ro',
+         [i[0] for i in diag1],[i[1] for i in diag1],'bs',[-.2,1.5],[-.2,1.5],
+         '-')
+plt.axis([-.2,1.5,-.2,1.5])
+plt.show()

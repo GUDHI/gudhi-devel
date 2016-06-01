@@ -12,7 +12,8 @@ example:
 	python example/mini_simplex_tree_example.py
 	python example/rips_complex_example.py
 	python example/alpha_complex_example.py
-	python example/cubical_complex_example.py
+	python example/random_cubical_complex_example.py 10 10
+	python example/rips_persistence_diagram.py
 
 clean:
 	rm -rf build/ *.o *.so *.cpp
