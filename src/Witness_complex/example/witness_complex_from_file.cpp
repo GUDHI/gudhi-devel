@@ -25,6 +25,7 @@
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Witness_complex.h>
+#include <gudhi/Construct_closest_landmark_table.h>
 #include <gudhi/Landmark_choice_by_random_point.h>
 #include <gudhi/reader_utils.h>
 
@@ -78,7 +79,7 @@ int main(int argc, char * const argv[]) {
   Gudhi::Simplex_tree<> simplex_tree;
 
   // Read the point file
-  Point_Vector point_vector;
+  Point_Vector point_vector, landmarks;
   read_points_cust(file_name, point_vector);
   std::cout << "Successfully read " << point_vector.size() << " points.\n";
   std::cout << "Ambient dimension is " << point_vector[0].size() << ".\n";
@@ -86,7 +87,8 @@ int main(int argc, char * const argv[]) {
   // Choose landmarks
   start = clock();
   std::vector<std::vector< int > > knn;
-  Gudhi::witness_complex::landmark_choice_by_random_point(point_vector, nbL, knn);
+  Gudhi::landmark_choice_by_random_point(point_vector, 100, std::back_inserter(landmarks));
+  Gudhi::witness_complex::construct_closest_landmark_table(point_vector, landmarks, knn);
   end = clock();
   std::cout << "Landmark choice for " << nbL << " landmarks took "
       << static_cast<double>(end - start) / CLOCKS_PER_SEC << " s. \n";
