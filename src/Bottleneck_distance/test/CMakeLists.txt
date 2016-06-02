@@ -44,7 +44,8 @@ endif()
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb -O0")	
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 
-add_executable ( BottleneckUT bottleneck_unit_test.cpp )
+add_executable ( bottleneckUT bottleneck_unit_test.cpp )
+add_executable ( bottleneck_chrono bottleneck_chrono.cpp )
 target_link_libraries(BottleneckUT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 # Unitary tests

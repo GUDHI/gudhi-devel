@@ -24,7 +24,7 @@ if(CGAL_FOUND)
       include( ${EIGEN3_USE_FILE} )
       include_directories (BEFORE "../../include")
 
-      add_executable (basic_example basic.cpp)
+      add_executable (bottleneck_example bottleneck_example.cpp)
       #add_test(dtoffrw_tore3D ${CMAKE_CURRENT_BINARY_DIR}/dtoffrw ${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off 3)
 
     else()
