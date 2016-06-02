@@ -46,13 +46,13 @@ endif()
 
 add_executable ( bottleneckUT bottleneck_unit_test.cpp )
 add_executable ( bottleneck_chrono bottleneck_chrono.cpp )
-target_link_libraries(BottleneckUT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+target_link_libraries(bottleneckUT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 # Unitary tests
-add_test(NAME BottleneckUT 
-  COMMAND ${CMAKE_CURRENT_BINARY_DIR}/BottleneckUT
+add_test(NAME bottleneckUT 
+  COMMAND ${CMAKE_CURRENT_BINARY_DIR}/bottleneckUT
   # XML format for Jenkins xUnit plugin 
-  --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/BottleneckUT.xml --log_level=test_suite --report_level=no)
+  --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/bottleneckUT.xml --log_level=test_suite --report_level=no)
 
 
     else()
