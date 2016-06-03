@@ -34,9 +34,9 @@ int main() {
     v2.push_back(std::pair<double,double>(2.8,4.45));
     v2.push_back(std::pair<double,double>(9.5,14.1));
 
+    double b =  Gudhi::Bottleneck_distance::compute(v1, v2, 0.0001);
+    std::cout << "Approx. bottleneck distance = " << b << std::endl;
 
-    double b =  Gudhi::Bottleneck_distance::compute(v1, v2);
-
+    b =  Gudhi::Bottleneck_distance::compute(v1, v2);
     std::cout << "Bottleneck distance = " << b << std::endl;
-
 }

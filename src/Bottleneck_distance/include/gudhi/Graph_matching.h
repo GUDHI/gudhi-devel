@@ -214,6 +214,43 @@ double compute(const Persistence_diagram1 &diag1, const Persistence_diagram2 &di
     if(e< std::numeric_limits<double>::min())
         return compute_exactly(diag1, diag2);
     G::initialize(diag1, diag2, e);
+    int in = G::diameter()/e;
+    int idmin = 0;
+    int idmax = in;
+    // alpha can be modified, this will change the complexity
+    double alpha = pow(in, 0.25);
+    Graph_matching m;
+    Graph_matching biggest_unperfect;
+    while (idmin != idmax) {
+        int step = static_cast<int>((idmax - idmin) / alpha);
+        m.set_r(e*(idmin + step));
+        while (m.multi_augment());
+        //The above while compute a maximum matching (according to the r setted before)
+        if (m.perfect()) {
+            idmax = idmin + step;
+            m = biggest_unperfect;
+        } else {
+            biggest_unperfect = m;
+            idmin = idmin + step + 1;
+        }
+    }
+    return e*(idmin);
+}
+
+
+
+}  // namespace Bottleneck_distance
+
+}  // namespace Gudhi
+
+#endif  // SRC_BOTTLENECK_INCLUDE_GUDHI_GRAPH_MATCHING_H_
+
+/* Dichotomic version
+template<typename Persistence_diagram1, typename Persistence_diagram2>
+double compute(const Persistence_diagram1 &diag1, const Persistence_diagram2 &diag2, double e) {
+    if(e< std::numeric_limits<double>::min())
+        return compute_exactly(diag1, diag2);
+    G::initialize(diag1, diag2, e);
     double d = 0.;
     double f = G::diameter();
     while (f-d > e){
@@ -221,16 +258,11 @@ double compute(const Persistence_diagram1 &diag1, const Persistence_diagram2 &di
         m.set_r((d+f)/2.);
         while (m.multi_augment());
         //The above while compute a maximum matching (according to the r setted before)
-        if (m.perfect()) 
+        if (m.perfect())
             f = (d+f)/2.;
-         else 
+         else
             d= (d+f)/2.;
     }
     return d;
-}
+} */
 
-}  // namespace Bottleneck_distance
-
-}  // namespace Gudhi
-
-#endif  // SRC_BOTTLENECK_INCLUDE_GUDHI_GRAPH_MATCHING_H_

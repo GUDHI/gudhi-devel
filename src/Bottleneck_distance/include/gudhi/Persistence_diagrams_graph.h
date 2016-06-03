@@ -129,6 +129,7 @@ inline int G::size() {
 inline std::shared_ptr< std::vector<double> > G::sorted_distances() {
     // could be optimized
     std::set<double> sorted_distances;
+    sorted_distances.emplace(0.);
     for (int u_point_index = 0; u_point_index < size(); ++u_point_index)
         for (int v_point_index = 0; v_point_index < size(); ++v_point_index)
             sorted_distances.emplace(distance(u_point_index, v_point_index));

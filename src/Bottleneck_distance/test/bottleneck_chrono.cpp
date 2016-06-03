@@ -33,7 +33,7 @@ int main(){
     std::ofstream objetfichier;
     objetfichier.open("results.csv", std::ios::out);
 
-    for(int n=0; n<=2500; n+=250){
+    for(int n=0; n<=4000; n+=400){
         std::uniform_real_distribution<double> unif1(0.,upper_bound);
         std::uniform_real_distribution<double> unif2(upper_bound/1000.,upper_bound/100.);
         std::default_random_engine re;
@@ -51,7 +51,7 @@ int main(){
                 v2.emplace_back(std::max(a,b),std::max(a,b)+y);
         }
         std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-        double b = compute(v1,v2, 0.01);
+        double b = compute(v1,v2, 0.0001);
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         typedef std::chrono::duration<int,std::milli> millisecs_t;
         millisecs_t duration(std::chrono::duration_cast<millisecs_t>(end-start));

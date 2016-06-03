@@ -94,7 +94,7 @@ private:
 };
 
 /** \internal \typedef \brief Planar_neighbors_finder is the used implementation. */
-typedef Naive_pnf Planar_neighbors_finder;
+typedef Cgal_pnf Planar_neighbors_finder;
 
 inline Naive_pnf::Naive_pnf(double r_) :
     r(r_), grid() { }
