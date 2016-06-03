@@ -40,6 +40,9 @@ namespace Bottleneck_distance {
 template<typename Persistence_diagram1, typename Persistence_diagram2>
 double compute(const Persistence_diagram1& diag1, const Persistence_diagram2& diag2, double e = 0.);
 
+template<typename Persistence_diagram1, typename Persistence_diagram2>
+double compute_exactly(const Persistence_diagram1& diag1, const Persistence_diagram2& diag2);
+
 /** \internal \brief Structure representing a graph matching. The graph is a Persistence_diagrams_graph.
  *
  * \ingroup bottleneck_distance

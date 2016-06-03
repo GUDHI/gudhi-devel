@@ -51,7 +51,7 @@ int main(){
                 v2.emplace_back(std::max(a,b),std::max(a,b)+y);
         }
         std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-        double b = bottleneck_approx(v1,v2, 0.);
+        double b = compute(v1,v2, 0.01);
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         typedef std::chrono::duration<int,std::milli> millisecs_t;
         millisecs_t duration(std::chrono::duration_cast<millisecs_t>(end-start));

@@ -23,7 +23,6 @@
 #include <gudhi/Graph_matching.h>
 #include <iostream>
 
-using namespace Gudhi::Bottleneck_distance;
 
 int main() {
     std::vector< std::pair<double,double> > v1, v2;
@@ -36,7 +35,7 @@ int main() {
     v2.push_back(std::pair<double,double>(9.5,14.1));
 
 
-    double b = bottleneck_distance(v1, v2);
+    double b =  Gudhi::Bottleneck_distance::compute(v1, v2);
 
     std::cout << "Bottleneck distance = " << b << std::endl;
 

@@ -154,9 +154,9 @@ inline Internal_point G::get_v_point(int v_point_index) {
 
 inline double G::diameter() {
     double max = 0.;
-    for(it = u.cbegin(); it != u.cend(); it++)
+    for(auto it = u.cbegin(); it != u.cend(); it++)
         max = std::max(max,it->y());
-    for(it = v.cbegin(); it != v.cend(); it++)
+    for(auto it = v.cbegin(); it != v.cend(); it++)
         max = std::max(max,it->y());
     return max;
 }
