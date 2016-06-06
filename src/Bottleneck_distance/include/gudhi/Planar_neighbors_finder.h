@@ -25,9 +25,7 @@
 
 #include <list>
 #include <map>
-#include <CGAL/Search_traits.h>
-#include <CGAL/Orthogonal_incremental_neighbor_search.h>
-#include <CGAL/Weighted_Minkowski_distance.h>
+#include  "../CGAL/Kd_tree.h"
 #include <CGAL/Miscellaneous.h>
 #include <gudhi/Persistence_diagrams_graph.h>
 
