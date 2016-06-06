@@ -13,7 +13,6 @@ example:
 	python example/rips_complex_example.py
 	python example/alpha_complex_example.py
 	python example/random_cubical_complex_example.py 10 10
-	python example/rips_persistence_diagram.py
 	python example/alpha_complex_from_file_example.py data/500_random_points_on_3D_Torus.csv
 
 clean:

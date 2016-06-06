@@ -6,7 +6,7 @@ import gudhi
    (Geometric Understanding in Higher Dimensions) is a generic C++
    library for computational topology.
 
-   Author(s):       Marc Glisse
+   Author(s):       Vincent Rouvreau
 
    Copyright (C) 2016 INRIA
 
@@ -24,16 +24,19 @@ import gudhi
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-__author__ = "Marc Glisse"
+__author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 INRIA"
 __license__ = "GPL v3"
 
 print("#####################################################################")
-print("RipsComplex creation from points")
-rips = gudhi.RipsComplex(points=[[0, 0], [1, 0], [0, 1], [1, 1]],
-                         max_dimension=1, max_edge_length=42)
+print("Show palette colors values for dimension")
 
-diag = rips.persistence(homology_coeff_field=2, min_persistence=0)
-print("diag=", diag)
+gudhi.show_palette_values()
 
-gudhi.bar_code_persistence(diag)
+print("#####################################################################")
+print("Show bar code persistence example")
+
+persistence = [(2, (1.0, float('inf'))), (1, (1.4142135623730951, float('inf'))),
+               (1, (1.4142135623730951, float('inf'))), (0, (0.0, float('inf'))),
+               (0, (0.0, 1.0)), (0, (0.0, 1.0)), (0, (0.0, 1.0))]
+gudhi.bar_code_persistence(persistence)
