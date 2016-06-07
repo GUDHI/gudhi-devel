@@ -35,12 +35,17 @@ palette = ['#ff0000', '#00ff00', '#0000ff', '#00ffff', '#ff00ff', '#ffff00',
            '#008888']
 
 def show_palette_values():
+    """This function shows palette color values in function of the dimension.
+
+    :returns: plot -- An horizontal bar plot of dimensions color.
+    """
     colors = []
     for color in palette:
         colors.append(color)
 
     y_pos = np.arange(len(palette))
 
+    # alpha=0.4 is realy usefull for ugly colors
     plt.barh(y_pos, y_pos + 1, align='center', alpha=0.4, color=colors)
     plt.ylabel('Dimension')
     plt.title('Dimension palette values')
@@ -48,6 +53,12 @@ def show_palette_values():
     plt.show()
 
 def bar_code_persistence(persistence):
+    """This function plots the persistence bar code.
+
+    :param persistence: The persistence to plot.
+    :type persistence: list of tuples(dimension, tuple(birth, death)).
+    :returns: plot -- An horizontal bar plot of persistence.
+    """
     # Look for minimum birth date and maximum death date for plot optimisation
     max_death = 0
     min_birth = persistence[0][1][0]
