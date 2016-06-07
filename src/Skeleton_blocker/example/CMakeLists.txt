@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(GUDHIskbl)
+project(Skeleton_blocker_examples)
 
 add_executable(SkeletonBlockerFromSimplices Skeleton_blocker_from_simplices.cpp)
 add_executable(SkeletonBlockerIteration Skeleton_blocker_iteration.cpp)

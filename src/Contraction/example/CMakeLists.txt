@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(GUDHIskbl)
+project(Contraction_examples)
 
 
 add_executable(RipsContraction Rips_contraction.cpp)

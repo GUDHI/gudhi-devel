@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(GUDHIWitnessComplex)
+project(Witness_complex_examples)
 
 # A simple example
    add_executable( witness_complex_from_file witness_complex_from_file.cpp )

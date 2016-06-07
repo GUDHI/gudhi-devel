@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(GUDHIAlphaShapesExample)
+project(Alpha_shapes_examples)
 
 # need CGAL 4.7
 # cmake -DCGAL_DIR=~/workspace/CGAL-4.7-Ic-41 ../../..
