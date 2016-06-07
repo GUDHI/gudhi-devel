@@ -42,11 +42,21 @@ cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
 
 # CubicalComplex python interface
 cdef class CubicalComplex:
+    """The CubicalComplex is an example of a structured complex useful in
+    computational mathematics (specially rigorous numerics) and image
+    analysis.
+    """
     cdef Bitmap_cubical_complex_base_interface * thisptr
 
     cdef Cubical_complex_persistence_interface * pcohptr
 
     def __cinit__(self, dimensions=None, top_dimensional_cells=None):
+        """CubicalComplex constructor.
+
+        Args:
+           dimensions (list): A list of number of top dimensional cells.
+           top_dimensional_cells (list): A list of top dimensional cells.
+         """
         if dimensions is not None:
             if top_dimensional_cells is not None:
                 self.thisptr = new Bitmap_cubical_complex_base_interface(dimensions, top_dimensional_cells)
@@ -58,6 +68,18 @@ cdef class CubicalComplex:
             del self.pcohptr
 
     def persistence(self, homology_coeff_field=11, min_persistence=0):
+        """This function returns the persistence of the simplicial complex.
+
+        :param homology_coeff_field: The homology coefficient field. Must be a
+        prime number
+        :type homology_coeff_field: int.
+        :param min_persistence: The minimum persistence value to take into
+        account (strictly greater than min_persistence). Default value is 0.0.
+        Sets min_persistence to -1.0 to see all values.
+        :type min_persistence: float.
+        :returns: list of tuples(dimension, tuple(birth, death)) -- the star tree of a
+        simplex.
+        """
         if self.pcohptr != NULL:
             del self.pcohptr
         self.pcohptr = new Cubical_complex_persistence_interface(self.thisptr)
@@ -67,6 +89,10 @@ cdef class CubicalComplex:
         return persistence_result
 
     def betti_numbers(self):
+        """This function returns the Betti numbers of the simplicial complex.
+
+        :returns: list of int -- The Betti numbers ([B0, B1, ..., Bn]).
+        """
         cdef vector[int] bn_result
         if self.pcohptr != NULL:
             bn_result = self.pcohptr.betti_numbers()
@@ -76,6 +102,19 @@ cdef class CubicalComplex:
         return bn_result
 
     def persistent_betti_numbers(self, from_value, to_value):
+        """This function returns the persistent Betti numbers of the
+        simplicial complex.
+
+        :param from_value: The persistence birth limit to be added in the
+        numbers (persistent birth <= from_value).
+        :type from_value: float.
+        :param to_value: The persistence death limit to be added in the
+        numbers (persistent death > to_value).
+        :type to_value: float.
+
+        :returns: list of int -- The persistent Betti numbers ([B0, B1, ...,
+        Bn]).
+        """
         cdef vector[int] pbn_result
         if self.pcohptr != NULL:
             pbn_result = self.pcohptr.persistent_betti_numbers(<double>from_value, <double>to_value)
