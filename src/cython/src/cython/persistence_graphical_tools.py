@@ -27,6 +27,26 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 INRIA"
 __license__ = "GPL v3"
 
+def __min_birth_max_death(persistence):
+    """This function returns (min_birth, max_death) from the persistence.
+
+    :param persistence: The persistence to plot.
+    :type persistence: list of tuples(dimension, tuple(birth, death)).
+    :returns: (float, float) -- (min_birth, max_death).
+    """
+    # Look for minimum birth date and maximum death date for plot optimisation
+    max_death = 0
+    min_birth = persistence[0][1][0]
+    for interval in reversed(persistence):
+        if float(interval[1][1]) != float('inf'):
+            if float(interval[1][1]) > max_death:
+                max_death = float(interval[1][1])
+        if float(interval[1][0]) > max_death:
+            max_death = float(interval[1][0])
+        if float(interval[1][0]) < min_birth:
+            min_birth = float(interval[1][0])
+    return (min_birth, max_death)
+
 """
 Only 13 colors for the palette
 """
@@ -59,20 +79,11 @@ def bar_code_persistence(persistence):
     :type persistence: list of tuples(dimension, tuple(birth, death)).
     :returns: plot -- An horizontal bar plot of persistence.
     """
-    # Look for minimum birth date and maximum death date for plot optimisation
-    max_death = 0
-    min_birth = persistence[0][1][0]
-    for interval in reversed(persistence):
-        if float(interval[1][1]) != float('inf'):
-            if float(interval[1][1]) > max_death:
-                max_death = float(interval[1][1])
-        if float(interval[1][0]) > max_death:
-            max_death = float(interval[1][0])
-        if float(interval[1][0]) < min_birth:
-            min_birth = float(interval[1][0])
-
+    (min_birth, max_death) = __min_birth_max_death(persistence)
     ind = 0
     delta = ((max_death - min_birth) / 10.0)
+    # Replace infinity values with max_death + delta for bar code to be more
+    # readable
     infinity = max_death + delta
     axis_start = min_birth - delta
     # Draw horizontal bars in loop
@@ -88,6 +99,50 @@ def bar_code_persistence(persistence):
                      left = interval[1][0], alpha=0.4,
                      color = palette[interval[0]])
         ind = ind + 1
+
+    plt.title('Persistence bar code')
+    plt.xlabel('Birth - Death')
     # Ends plot on infinity value and starts a little bit before min_birth
     plt.axis([axis_start, infinity, 0, ind])
+    plt.show()
+
+def diagram_persistence(persistence):
+    """This function plots the persistence diagram.
+
+    :param persistence: The persistence to plot.
+    :type persistence: list of tuples(dimension, tuple(birth, death)).
+    :returns: plot -- An diagram plot of persistence.
+    """
+    (min_birth, max_death) = __min_birth_max_death(persistence)
+    ind = 0
+    delta = ((max_death - min_birth) / 10.0)
+    # Replace infinity values with max_death + delta for diagram to be more
+    # readable
+    infinity = max_death + delta
+    axis_start = min_birth - delta
+
+    # line display of equation : birth = death
+    x = np.linspace(axis_start, infinity, 1000)
+    # infinity line and text
+    plt.plot(x, x, color='k', linewidth=1.0)
+    plt.plot(x, [infinity] * len(x), linewidth=1.0, color='k', alpha=0.4)
+    plt.text(axis_start, infinity, r'$\infty$', color='k', alpha=0.4)
+
+    # Draw points in loop
+    for interval in reversed(persistence):
+        if float(interval[1][1]) != float('inf'):
+            # Finite death case
+            plt.scatter(interval[1][0], interval[1][1], alpha=0.4,
+                        color = palette[interval[0]])
+        else:
+            # Infinite death case for diagram to be nicer
+            plt.scatter(interval[1][0], infinity, alpha=0.4,
+                        color = palette[interval[0]])
+        ind = ind + 1
+
+    plt.title('Persistence diagram')
+    plt.xlabel('Birth')
+    plt.ylabel('Death')
+    # Ends plot on infinity value and starts a little bit before min_birth
+    plt.axis([axis_start, infinity, axis_start, infinity + delta])
     plt.show()

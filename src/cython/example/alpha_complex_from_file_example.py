@@ -49,15 +49,12 @@ points = pandas.read_csv(args.file, header=None)
 alpha_complex = gudhi.AlphaComplex(points=points.values,
                                    max_alpha_square=0.5)
 
-print("dimension=", alpha_complex.dimension())
-print("point[0]=", alpha_complex.get_point(0))
-print("point[5]=", alpha_complex.get_point(5))
-
 alpha_complex.initialize_filtration()
 diag = alpha_complex.persistence(homology_coeff_field=2, min_persistence=0.1)
 
 print("betti_numbers()=")
 print(alpha_complex.betti_numbers())
 
-print("star([0])=", alpha_complex.get_star_tree([0]))
-print("coface([0], 1)=", alpha_complex.get_coface_tree([0], 1))
+gudhi.diagram_persistence(diag)
+
+gudhi.bar_code_persistence(diag)
