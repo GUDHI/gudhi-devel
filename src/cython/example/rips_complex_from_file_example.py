@@ -31,14 +31,14 @@ __copyright__ = "Copyright (C) 2016 INRIA"
 __license__ = "GPL v3"
 
 print("#####################################################################")
-print("AlphaComplex creation from points read in a file")
+print("RipsComplex creation from points read in a file")
 
-parser = argparse.ArgumentParser(description='AlphaComplex creation from '
+parser = argparse.ArgumentParser(description='RipsComplex creation from '
                                  'points read in a file.',
                                  epilog='Example: '
-                                 'example/alpha_complex_from_file_example.py '
+                                 'example/rips_complex_from_file_example.py '
                                  'data/500_random_points_on_3D_Torus.csv '
-                                 '- Constructs a alpha complex with the '
+                                 '- Constructs a rips complex with the '
                                  'points from the given file. File format '
                                  'is X1, X2, ..., Xn')
 parser.add_argument('file', type=argparse.FileType('r'))
@@ -46,16 +46,16 @@ args = parser.parse_args()
 
 points = pandas.read_csv(args.file, header=None)
 
-print("AlphaComplex with max_alpha_square=0.5")
+print("RipsComplex with max_edge_length=1.9")
 
-alpha_complex = gudhi.AlphaComplex(points=points.values,
-                                   max_alpha_square=0.5)
+rips_complex = gudhi.RipsComplex(points=points.values,
+                                 max_dimension=len(points.values[0]), max_edge_length=1.9)
 
-alpha_complex.initialize_filtration()
-diag = alpha_complex.persistence(homology_coeff_field=2, min_persistence=0.1)
+rips_complex.initialize_filtration()
+diag = rips_complex.persistence(homology_coeff_field=2, min_persistence=0.1)
 
 print("betti_numbers()=")
-print(alpha_complex.betti_numbers())
+print(rips_complex.betti_numbers())
 
 gudhi.diagram_persistence(diag)
 

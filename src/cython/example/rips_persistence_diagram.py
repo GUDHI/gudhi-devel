@@ -36,4 +36,4 @@ rips = gudhi.RipsComplex(points=[[0, 0], [1, 0], [0, 1], [1, 1]],
 diag = rips.persistence(homology_coeff_field=2, min_persistence=0)
 print("diag=", diag)
 
-gudhi.bar_code_persistence(diag)
+gudhi.diagram_persistence(diag)
