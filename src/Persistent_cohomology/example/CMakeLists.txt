@@ -83,7 +83,7 @@ if(GMPXX_FOUND AND GMP_FOUND)
           target_link_libraries(custom_persistence_sort ${TBB_RELEASE_LIBRARY})
         endif()
         add_test(alpha_complex_persistence_2_0_45 ${CMAKE_CURRENT_BINARY_DIR}/alpha_complex_persistence ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -m 0.45 -p 2)
-        add_test(periodic_alpha_complex_3d_persistence_2_0 ${CMAKE_CURRENT_BINARY_DIR}/periodic_alpha_complex_3d_persistence ${CMAKE_SOURCE_DIR}/data/points/grid_10_10_10_in_0_1.off 2 0)
+        add_test(periodic_alpha_complex_3d_persistence_2_0 ${CMAKE_CURRENT_BINARY_DIR}/periodic_alpha_complex_3d_persistence ${CMAKE_SOURCE_DIR}/data/points/grid_10_10_10_in_0_1.off ${CMAKE_SOURCE_DIR}/data/points/iso_cuboid_3_in_0_1.txt 2 0)
         add_test(custom_persistence_sort ${CMAKE_CURRENT_BINARY_DIR}/custom_persistence_sort)
 
       else()
