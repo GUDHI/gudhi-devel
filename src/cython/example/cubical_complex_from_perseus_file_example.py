@@ -4,7 +4,7 @@ import gudhi
 import numpy
 import argparse
 import operator
-
+import os
 
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
@@ -36,18 +36,21 @@ parser = argparse.ArgumentParser(description='Cubical complex from a perseus'
                                  'file style name.',
                                  epilog='Example: '
                                  './cubical_complex_from_perseus_file_example.py'
-                                 '../data/bitmap/CubicalTwoSphere.txt')
-parser.add_argument('perseus_file', type=str, required=True,
-                    help='Perseus file style name')
+                                 ' -f ../data/bitmap/CubicalTwoSphere.txt')
+
+parser.add_argument("-f", "--file", type=str, required=True)
 
 args = parser.parse_args()
 
-print("#####################################################################")
-print("CubicalComplex creation")
-cubical_complex = gudhi.CubicalComplex(perseus_file=args.perseus_file)
+if os.access(args.file, os.R_OK):
+    print("#####################################################################")
+    print("CubicalComplex creation")
+    cubical_complex = gudhi.CubicalComplex(perseus_file=args.file)
 
-print("persistence(homology_coeff_field=2, min_persistence=0)=")
-print(cubical_complex.persistence(homology_coeff_field=2, min_persistence=0))
+    print("persistence(homology_coeff_field=2, min_persistence=0)=")
+    print(cubical_complex.persistence(homology_coeff_field=2, min_persistence=0))
 
-print("betti_numbers()=")
-print(cubical_complex.betti_numbers())
+    print("betti_numbers()=")
+    print(cubical_complex.betti_numbers())
+else:
+    print(args.file, "is unreachable")
