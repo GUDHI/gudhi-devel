@@ -144,4 +144,12 @@ void generate_points_sphere(Point_Vector& W, int nbP, int dim) {
     W.push_back(*rp++);
 }
 
+/** \brief Generate nbP points on a d-torus
+ *
+ */
+void generate_points_torus(Point_Vector& W, int nbP, int dim) {
+  CGAL::Random_points_on_sphere_d<Point_d> rp(2, 1);
+  
+}
+
 #endif  // EXAMPLE_WITNESS_COMPLEX_GENERATORS_H_

@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef RELAXED_WITNESS_COMPLEX_H_
-#define RELAXED_WITNESS_COMPLEX_H_
+#ifndef A0_COMPLEX_H_
+#define A0_COMPLEX_H_
 
 #include <boost/container/flat_map.hpp>
 #include <boost/iterator/transform_iterator.hpp>
@@ -68,7 +68,7 @@ namespace witness_complex {
    *  w is closer to the vertices of this simplex than others) and all of its faces are witnessed as well. 
    */
 template< class Simplicial_complex >
-class Relaxed_witness_complex {
+class A0_complex {
 
 private:    
   struct Active_witness {
@@ -129,12 +129,12 @@ private:
      */
     
     template< typename KNearestNeighbours >
-    Relaxed_witness_complex(std::vector< std::vector<double> > const & distances,
+    A0_complex(std::vector< std::vector<double> > const & distances,
                             KNearestNeighbours const & knn,
                             Simplicial_complex & sc_, 
                             int nbL_,
-                            double alpha,
-                            int limD) : nbL(nbL_), sc(sc_) {
+                            double alpha2,
+                            unsigned limD) : nbL(nbL_), sc(sc_) {
       int nbW = knn.size();
       typeVectorVertex vv;
       //int counter = 0;
@@ -150,29 +150,26 @@ private:
         sc.insert_simplex(vv, Filtration_value(0.0));
         /* TODO Error if not inserted : normally no need here though*/
       }
-      int k = 1; /* current dimension in iterative construction */
-      for (int i=0; i != nbW; ++i)
-        active_w.push_back(i);
-      while (!active_w.empty() && k <= limD && k < nbL )
-        {
-          typename ActiveWitnessList::iterator aw_it = active_w.begin();
-          while (aw_it != active_w.end())
-            {
-              std::vector<int> simplex;
-              bool ok = add_all_faces_of_dimension(k,
-                                                   alpha,
-                                                   std::numeric_limits<double>::infinity(),
-                                                   distances[*aw_it].begin(),
-                                                   knn[*aw_it].begin(),
-                                                   simplex,
-                                                   knn[*aw_it].end());
-              if (!ok)
-                active_w.erase(aw_it++); //First increase the iterator and then erase the previous element
-              else
-                aw_it++;
-            }
-          k++;
+      for (int i=0; i != nbW; ++i) {
+        // int i_end = limD+1;
+        // if (knn[i].size() < limD+1)
+        //   i_end = knn[i].size();
+        // double dist_wL = *(distances[i].begin());
+        // while (distances[i][i_end] > dist_wL + alpha2)
+        //   i_end--;
+        // add_all_witnessed_faces(distances[i].begin(),
+        //                         knn[i].begin(),
+        //                         knn[i].begin() + i_end + 1);
+        unsigned j_end = 0;
+        while (j_end < distances[i].size() && j_end <= limD && distances[i][j_end] <= distances[i][0] + alpha2) {
+          std::vector<int> simplex;
+          for (unsigned j = 0; j <= j_end; ++j)
+            simplex.push_back(knn[i][j]);
+          assert(distances[i][j_end] - distances[i][0] >= 0);
+          sc.insert_simplex_and_subfaces(simplex, distances[i][j_end] - distances[i][0]);
+          j_end++; 
         }
+      }
       sc.set_dimension(limD);
     }
 
@@ -184,59 +181,20 @@ private:
    * simplex is the prefix of the simplexes to insert
    * The output value indicates if the witness rests active or not
    */
-  bool add_all_faces_of_dimension(int dim,
-                                  double alpha,
-                                  double norelax_dist,
-                                  std::vector<double>::const_iterator curr_d,
-                                  std::vector<int>::const_iterator curr_l,
-                                  std::vector<int>& simplex,
-                                  std::vector<int>::const_iterator end)
+  void add_all_witnessed_faces(std::vector<double>::const_iterator curr_d,
+                               std::vector<int>::const_iterator curr_l,
+                               std::vector<int>::const_iterator end)
   {
-    if (curr_l == end)
-      return false;
-    bool will_be_active = false;
-    std::vector<int>::const_iterator l_it = curr_l;
-    std::vector<double>::const_iterator d_it = curr_d;
-    if (dim > 0)
-      for (; *d_it - alpha <= norelax_dist && l_it != end; ++l_it, ++d_it) {
+    std::vector<int> simplex;
+    std::vector<int>::const_iterator l_end = curr_l;
+    for (; l_end != end; ++l_end) {
+      std::vector<int>::const_iterator l_it = curr_l;
+      std::vector<double>::const_iterator d_it = curr_d;
+      simplex = {};
+      for (; l_it != l_end; ++l_it, ++d_it)
         simplex.push_back(*l_it);
-        if (sc.find(simplex) != sc.null_simplex())
-          will_be_active = add_all_faces_of_dimension(dim-1,
-                                                      alpha,
-                                                      norelax_dist,
-                                                      d_it+1,
-                                                      l_it+1,
-                                                      simplex,
-                                                      end) || will_be_active;
-        simplex.pop_back();
-        // If norelax_dist is infinity, change to first omitted distance
-        if (*d_it <= norelax_dist)
-          norelax_dist = *d_it;
-        will_be_active = add_all_faces_of_dimension(dim-1,
-                                                    alpha,
-                                                    norelax_dist,
-                                                    d_it+1,
-                                                    l_it+1,
-                                                    simplex,
-                                                    end) || will_be_active;
-      } 
-    else if (dim == 0)
-      for (; *d_it - alpha <= norelax_dist && l_it != end; ++l_it, ++d_it) {
-        simplex.push_back(*l_it);
-        double filtration_value = 0;
-        // if norelax_dist is infinite, relaxation is 0.
-        if (*d_it > norelax_dist) 
-          filtration_value = *d_it - norelax_dist; 
-        if (all_faces_in(simplex, &filtration_value)) {
-          will_be_active = true;
-          sc.insert_simplex(simplex, filtration_value);
-        }
-        simplex.pop_back();
-        // If norelax_dist is infinity, change to first omitted distance
-        if (*d_it < norelax_dist)
-          norelax_dist = *d_it;
-      } 
-    return will_be_active;
+      sc.insert_simplex_and_subfaces(simplex, *(d_it--) - *curr_d);
+    }
   }
   
   /** \brief Check if the facets of the k-dimensional simplex witnessed 

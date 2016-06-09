@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef RELAXED_WITNESS_COMPLEX_H_
-#define RELAXED_WITNESS_COMPLEX_H_
+#ifndef WEAK_RELAXED_WITNESS_COMPLEX_H_
+#define WEAK_RELAXED_WITNESS_COMPLEX_H_
 
 #include <boost/container/flat_map.hpp>
 #include <boost/iterator/transform_iterator.hpp>
@@ -68,7 +68,7 @@ namespace witness_complex {
    *  w is closer to the vertices of this simplex than others) and all of its faces are witnessed as well. 
    */
 template< class Simplicial_complex >
-class Relaxed_witness_complex {
+class Weak_relaxed_witness_complex {
 
 private:    
   struct Active_witness {
@@ -129,7 +129,7 @@ private:
      */
     
     template< typename KNearestNeighbours >
-    Relaxed_witness_complex(std::vector< std::vector<double> > const & distances,
+    Weak_relaxed_witness_complex(std::vector< std::vector<double> > const & distances,
                             KNearestNeighbours const & knn,
                             Simplicial_complex & sc_, 
                             int nbL_,
@@ -370,7 +370,7 @@ private:
       
   }
   
-}; //class Relaxed_witness_complex
+}; //class Weak_relaxed_witness_complex
 
 } // namespace witness_complex
   

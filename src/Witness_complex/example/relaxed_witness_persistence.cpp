@@ -4,7 +4,7 @@
  *
  *    Author(s):       Siargey Kachanovich
  *
- *    Copyright (C) 2015  INRIA Sophia Antipolis-Méditerranée (France)
+ *    Copyright (C) 2016  INRIA Sophia Antipolis-Méditerranée (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -22,9 +22,11 @@
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Relaxed_witness_complex.h>
+#include <gudhi/Dim_lists.h>
 #include <gudhi/reader_utils.h>
 #include <gudhi/Persistent_cohomology.h>
 #include "Landmark_choice_random_knn.h"
+#include "Landmark_choice_sparsification.h"
 
 #include <iostream>
 #include <fstream>
@@ -34,6 +36,7 @@
 #include <set>
 #include <queue>
 #include <iterator>
+#include <string>
 
 #include <boost/tuple/tuple.hpp>
 #include <boost/iterator/zip_iterator.hpp>
@@ -49,6 +52,7 @@ using namespace Gudhi::persistent_cohomology;
 
 typedef std::vector<Point_d> Point_Vector;
 typedef Relaxed_witness_complex< Simplex_tree<> > RelaxedWitnessComplex;
+typedef Simplex_tree<>::Simplex_handle Simplex_handle;
 
 /**
  * \brief Customized version of read_points
@@ -81,7 +85,7 @@ void output_experiment_information(char * const file_name)
     std::cout << "Enter a valid experiment number. Usage: "
               << file_name << " exp_no options\n";
     std::cout << "Experiment description:\n"
-              << "0 nbP nbL dim alpha limD: "
+              << "0 nbP nbL dim alpha limD mu_epsilon: "
               << "Build persistence diagram on relaxed witness complex "
               << "built from a point cloud on (dim-1)-dimensional sphere "
               << "consisting of nbP witnesses and nbL landmarks. "
@@ -93,7 +97,7 @@ void output_experiment_information(char * const file_name)
               << "The maximal relaxation is alpha and the limit on simplicial complex dimension is limD\n";
 }
 
-void rw_experiment(Point_Vector & point_vector, int nbL, FT alpha, int limD)
+void rw_experiment(Point_Vector & point_vector, int nbL, FT alpha, int limD, FT mu_epsilon = 0.1)
 {
   clock_t start, end;
   Simplex_tree<> simplex_tree;
@@ -102,81 +106,60 @@ void rw_experiment(Point_Vector & point_vector, int nbL, FT alpha, int limD)
   std::vector<std::vector< int > > knn;
   std::vector<std::vector< FT > > distances;
   start = clock();
-  Gudhi::witness_complex::landmark_choice_by_random_knn(point_vector, nbL, alpha, limD, knn, distances);
+  //Gudhi::witness_complex::landmark_choice_by_random_knn(point_vector, nbL, alpha, limD, knn, distances);
+  std::vector<Point_d> landmarks;
+  Gudhi::witness_complex::landmark_choice_by_sparsification(point_vector, nbL, mu_epsilon, landmarks);
+  Gudhi::witness_complex::build_distance_matrix(point_vector,   // aka witnesses
+                                                landmarks,  // aka landmarks
+                                                alpha,
+                                                limD,
+                                                knn,
+                                                distances);
   end = clock();
   double time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
   std::cout << "Choice of " << nbL << " landmarks took "
             << time << " s. \n";
   // Compute witness complex
   start = clock();
-  RelaxedWitnessComplex(distances,
-                        knn,
-                        simplex_tree,
-                        nbL,
-                        alpha,
-                        limD);
+  RelaxedWitnessComplex rw(distances,
+                           knn,
+                           simplex_tree,
+                           nbL,
+                           alpha,
+                           limD);
   end = clock();
   time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
-  std::cout << "Witness complex for " << nbL << " landmarks took "
+  std::cout << "Relaxed witness complex for " << nbL << " landmarks took "
             << time << " s. \n";
   std::cout << "The complex contains " << simplex_tree.num_simplices() << " simplices \n";
   // std::cout << simplex_tree << "\n";
   
   // Compute the persistence diagram of the complex
-  persistent_cohomology::Persistent_cohomology< Simplex_tree<>, Field_Zp > pcoh(simplex_tree, false);
+  simplex_tree.set_dimension(limD);
+  persistent_cohomology::Persistent_cohomology< Simplex_tree<>, Field_Zp > pcoh(simplex_tree, true);
   int p = 3;
   pcoh.init_coefficients( p ); //initilizes the coefficient field for homology
   start = clock();
-  pcoh.compute_persistent_cohomology( alpha/5 );
+  pcoh.compute_persistent_cohomology( alpha/1000 );
   end = clock();
   time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
   std::cout << "Persistence diagram took "
             << time << " s. \n";
   pcoh.output_diagram();
+
+  int chi = 0;
+  for (auto sh: simplex_tree.complex_simplex_range())
+    chi += 1-2*(simplex_tree.dimension(sh)%2);
+  std::cout << "Euler characteristic is " << chi << std::endl;
+
 }
 
-void rips_experiment(Point_Vector & points, double threshold, int dim_max)
-{
-  typedef std::vector<double> Point_t;
-  typedef Simplex_tree<Simplex_tree_options_fast_persistence> ST;
-  clock_t start, end;
-  ST st;
-
-  // Compute the proximity graph of the points
-  start = clock();
-  Graph_t prox_graph = compute_proximity_graph(points, threshold
-                                               , euclidean_distance<Point_t>);
-  // Construct the Rips complex in a Simplex Tree
-  // insert the proximity graph in the simplex tree
-  st.insert_graph(prox_graph);
-  // expand the graph until dimension dim_max
-  st.expansion(dim_max);
-  end = clock();
-  
-  double time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
-  std::cout << "Rips complex took "
-            << time << " s. \n";
-  std::cout << "The complex contains " << st.num_simplices() << " simplices \n";
-  //std::cout << "   and has dimension " << st.dimension() << " \n";
-
-  // Sort the simplices in the order of the filtration
-  st.initialize_filtration();
-
-  // Compute the persistence diagram of the complex
-  persistent_cohomology::Persistent_cohomology<ST, Field_Zp > pcoh(st);
-  // initializes the coefficient field for homology
-  int p = 3;
-  double min_persistence = threshold/5;
-  pcoh.init_coefficients(p);
-  pcoh.compute_persistent_cohomology(min_persistence);
-  pcoh.output_diagram();
-}
 
 int experiment0 (int argc, char * const argv[])
 {
-  if (argc != 7) {
+  if (argc != 8) {
     std::cerr << "Usage: " << argv[0]
-              << " 0 nbP nbL dim alpha limD\n";
+              << " 0 nbP nbL dim alpha limD mu_epsilon\n";
     return 0;
   }
   /*
@@ -190,6 +173,7 @@ int experiment0 (int argc, char * const argv[])
   int dim       = atoi(argv[4]);
   double alpha  = atof(argv[5]);
   int limD      = atoi(argv[6]);
+  double mu_epsilon = atof(argv[7]);
 
   // Read the point file
   Point_Vector point_vector;
@@ -244,25 +228,25 @@ int experiment1 (int argc, char * const argv[])
       ok = true; break;
     }
   }
-  ok = false;
-  while (!ok) {
-    std::cout << "Rips complex: parameters threshold, limD.\n";
-    std::cout << "Enter threshold: ";
-    std::cin >> alpha;
-    std::cout << "Enter limD: ";
-    std::cin >> limD;
-    std::cout << "Start Rips complex...\n";
-    rips_experiment(point_vector, alpha, limD);
-    std::cout << "Is the result correct? [y/n]: ";
-    char answer;
-    std::cin >> answer;
-    switch (answer) {
-    case 'n':
-      ok = false; break;
-    default :
-      ok = true; break;
-    }
-  }
+  // ok = false;
+  // while (!ok) {
+  //   std::cout << "Rips complex: parameters threshold, limD.\n";
+  //   std::cout << "Enter threshold: ";
+  //   std::cin >> alpha;
+  //   std::cout << "Enter limD: ";
+  //   std::cin >> limD;
+  //   std::cout << "Start Rips complex...\n";
+  //   rips_experiment(point_vector, alpha, limD);
+  //   std::cout << "Is the result correct? [y/n]: ";
+  //   char answer;
+  //   std::cin >> answer;
+  //   switch (answer) {
+  //   case 'n':
+  //     ok = false; break;
+  //   default :
+  //     ok = true; break;
+  //   }
+  // }
 }
 
 int main (int argc, char * const argv[])
