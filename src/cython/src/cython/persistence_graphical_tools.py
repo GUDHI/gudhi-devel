@@ -53,10 +53,13 @@ Only 13 colors for the palette
 palette = ['#ff0000', '#00ff00', '#0000ff', '#00ffff', '#ff00ff', '#ffff00',
            '#000000', '#880000', '#008800', '#000088', '#888800', '#880088',
            '#008888']
-
-def show_palette_values():
+ 
+def show_palette_values(alpha=0.6):
     """This function shows palette color values in function of the dimension.
 
+    :param alpha: alpha value in [0.0, 1.0] for horizontal bars (default is
+    0.6).
+    :type alpha: float.
     :returns: plot -- An horizontal bar plot of dimensions color.
     """
     colors = []
@@ -65,18 +68,20 @@ def show_palette_values():
 
     y_pos = np.arange(len(palette))
 
-    # alpha=0.4 is realy usefull for ugly colors
-    plt.barh(y_pos, y_pos + 1, align='center', alpha=0.4, color=colors)
+    plt.barh(y_pos, y_pos + 1, align='center', alpha=alpha, color=colors)
     plt.ylabel('Dimension')
     plt.title('Dimension palette values')
 
     plt.show()
 
-def bar_code_persistence(persistence):
+def barcode_persistence(persistence, alpha=0.6):
     """This function plots the persistence bar code.
 
     :param persistence: The persistence to plot.
     :type persistence: list of tuples(dimension, tuple(birth, death)).
+    :param alpha: alpha value in [0.0, 1.0] for horizontal bars (default is
+    0.6).
+    :type alpha: float.
     :returns: plot -- An horizontal bar plot of persistence.
     """
     (min_birth, max_death) = __min_birth_max_death(persistence)
@@ -91,26 +96,28 @@ def bar_code_persistence(persistence):
         if float(interval[1][1]) != float('inf'):
             # Finite death case
             plt.barh(ind, (interval[1][1] - interval[1][0]), height=0.8,
-                     left = interval[1][0], alpha=0.4,
+                     left = interval[1][0], alpha=alpha,
                      color = palette[interval[0]])
         else:
             # Infinite death case for diagram to be nicer
             plt.barh(ind, (infinity - interval[1][0]), height=0.8,
-                     left = interval[1][0], alpha=0.4,
+                     left = interval[1][0], alpha=alpha,
                      color = palette[interval[0]])
         ind = ind + 1
 
-    plt.title('Persistence bar code')
-    plt.xlabel('Birth - Death')
+    plt.title('Persistence barcode')
     # Ends plot on infinity value and starts a little bit before min_birth
     plt.axis([axis_start, infinity, 0, ind])
     plt.show()
 
-def diagram_persistence(persistence):
+def diagram_persistence(persistence, alpha=0.6):
     """This function plots the persistence diagram.
 
     :param persistence: The persistence to plot.
     :type persistence: list of tuples(dimension, tuple(birth, death)).
+    :param alpha: alpha value in [0.0, 1.0] for points and horizontal infinity
+    line (default is 0.6).
+    :type alpha: float.
     :returns: plot -- An diagram plot of persistence.
     """
     (min_birth, max_death) = __min_birth_max_death(persistence)
@@ -125,18 +132,18 @@ def diagram_persistence(persistence):
     x = np.linspace(axis_start, infinity, 1000)
     # infinity line and text
     plt.plot(x, x, color='k', linewidth=1.0)
-    plt.plot(x, [infinity] * len(x), linewidth=1.0, color='k', alpha=0.4)
-    plt.text(axis_start, infinity, r'$\infty$', color='k', alpha=0.4)
+    plt.plot(x, [infinity] * len(x), linewidth=1.0, color='k', alpha=alpha)
+    plt.text(axis_start, infinity, r'$\infty$', color='k', alpha=alpha)
 
     # Draw points in loop
     for interval in reversed(persistence):
         if float(interval[1][1]) != float('inf'):
             # Finite death case
-            plt.scatter(interval[1][0], interval[1][1], alpha=0.4,
+            plt.scatter(interval[1][0], interval[1][1], alpha=alpha,
                         color = palette[interval[0]])
         else:
             # Infinite death case for diagram to be nicer
-            plt.scatter(interval[1][0], infinity, alpha=0.4,
+            plt.scatter(interval[1][0], infinity, alpha=alpha,
                         color = palette[interval[0]])
         ind = ind + 1
 

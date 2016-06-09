@@ -34,9 +34,14 @@ print("Show palette colors values for dimension")
 gudhi.show_palette_values()
 
 print("#####################################################################")
-print("Show bar code persistence example")
+print("Show barcode persistence example")
 
 persistence = [(2, (1.0, float('inf'))), (1, (1.4142135623730951, float('inf'))),
                (1, (1.4142135623730951, float('inf'))), (0, (0.0, float('inf'))),
                (0, (0.0, 1.0)), (0, (0.0, 1.0)), (0, (0.0, 1.0))]
-gudhi.bar_code_persistence(persistence)
+gudhi.barcode_persistence(persistence)
+
+print("#####################################################################")
+print("Show diagram persistence example")
+
+gudhi.diagram_persistence(persistence)

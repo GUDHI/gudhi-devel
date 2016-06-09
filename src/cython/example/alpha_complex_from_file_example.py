@@ -59,4 +59,4 @@ print(alpha_complex.betti_numbers())
 
 gudhi.diagram_persistence(diag)
 
-gudhi.bar_code_persistence(diag)
+gudhi.barcode_persistence(diag)

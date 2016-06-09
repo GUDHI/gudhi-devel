@@ -31,14 +31,14 @@ __copyright__ = "Copyright (C) 2016 INRIA"
 __license__ = "GPL v3"
 
 print("#####################################################################")
-print("RipsComplex creation from points read in a file")
+print("WitnessComplex creation from points read in a file")
 
-parser = argparse.ArgumentParser(description='RipsComplex creation from '
+parser = argparse.ArgumentParser(description='WitnessComplex creation from '
                                  'points read in a file.',
                                  epilog='Example: '
-                                 'example/rips_complex_from_file_example.py '
-                                 'data/500_random_points_on_3D_Torus.csv '
-                                 '- Constructs a rips complex with the '
+                                 'example/witness_complex_from_file_example.py'
+                                 ' data/500_random_points_on_3D_Torus.csv '
+                                 '- Constructs a witness complex with the '
                                  'points from the given file. File format '
                                  'is X1, X2, ..., Xn')
 parser.add_argument('file', type=argparse.FileType('r'))
@@ -46,17 +46,25 @@ args = parser.parse_args()
 
 points = pandas.read_csv(args.file, header=None)
 
-print("RipsComplex with max_edge_length=1.9")
+print("WitnessComplex with number_of_landmarks=5")
 
-rips_complex = gudhi.RipsComplex(points=points.values,
-                                 max_dimension=len(points.values[0]), max_edge_length=1.9)
+witness_complex = gudhi.WitnessComplex(points=points.values,
+                                     number_of_landmarks=200)
 
-rips_complex.initialize_filtration()
-diag = rips_complex.persistence(homology_coeff_field=2, min_persistence=0.1)
+print("filtered_tree=", witness_complex.get_filtered_tree())
 
+witness_complex.initialize_filtration()
+diag = witness_complex.persistence(homology_coeff_field=2, min_persistence=0.1)
+
+print("diag=", diag)
+
+gudhi.diagram_persistence(diag)
+
+"""
 print("betti_numbers()=")
-print(rips_complex.betti_numbers())
+print(witness_complex.betti_numbers())
 
 gudhi.diagram_persistence(diag)
 
 gudhi.barcode_persistence(diag)
+"""
