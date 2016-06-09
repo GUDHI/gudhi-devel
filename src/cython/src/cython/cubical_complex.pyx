@@ -1,6 +1,7 @@
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
+from libcpp.string cimport string
 
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
@@ -31,6 +32,7 @@ __license__ = "GPL v3"
 cdef extern from "Cubical_complex_interface.h" namespace "Gudhi":
     cdef cppclass Bitmap_cubical_complex_base_interface "Gudhi::Cubical_complex::Cubical_complex_interface<>":
           Bitmap_cubical_complex_base_interface(vector[unsigned] dimensions, vector[double] top_dimensional_cells)
+          Bitmap_cubical_complex_base_interface(string perseus_file)
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Cubical_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Cubical_complex::Cubical_complex_interface<>>":
@@ -50,16 +52,20 @@ cdef class CubicalComplex:
 
     cdef Cubical_complex_persistence_interface * pcohptr
 
-    def __cinit__(self, dimensions=None, top_dimensional_cells=None):
-        """CubicalComplex constructor.
+    def __cinit__(self, dimensions=None, top_dimensional_cells=None, perseus_file=''):
+        """CubicalComplex constructor from dimensions and
+        top_dimensional_cells or from a perseus file style name.
 
         Args:
            dimensions (list): A list of number of top dimensional cells.
            top_dimensional_cells (list): A list of top dimensional cells.
+           perseus_file (string): A perseus file style name.
          """
         if dimensions is not None:
             if top_dimensional_cells is not None:
                 self.thisptr = new Bitmap_cubical_complex_base_interface(dimensions, top_dimensional_cells)
+        else:
+            self.thisptr = new Bitmap_cubical_complex_base_interface(perseus_file)
 
     def __dealloc__(self):
         if self.thisptr != NULL:
