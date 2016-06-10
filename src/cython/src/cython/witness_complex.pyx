@@ -30,7 +30,7 @@ __license__ = "GPL v3"
 
 cdef extern from "Witness_complex_interface.h" namespace "Gudhi":
     cdef cppclass Witness_complex_interface "Gudhi::witness_complex::Witness_complex_interface":
-        Witness_complex_interface(vector[vector[double]] points, int number_of_landmarks)
+        Witness_complex_interface(vector[vector[double]] points, int number_of_landmarks, double max_alpha_square, double mu_epsilon, int dimension_limit)
         double filtration()
         double simplex_filtration(vector[int] simplex)
         void set_filtration(double filtration)
@@ -63,17 +63,25 @@ cdef class WitnessComplex:
 
     #cdef Witness_complex_persistence_interface * pcohptr
 
-    def __cinit__(self, points=None, number_of_landmarks=5):
+    def __cinit__(self, points, number_of_landmarks, max_alpha_square,
+                  mu_epsilon, dimension_limit):
         """WitnessComplex constructor.
 
         Args:
            points (list): A list of points in d-Dimension.
            number_of_landmarks (int): Number of landmarks to build the
            WitnessComplex.
+           max_alpha_square (float): Maximum alpha square value to build the
+           distance matrix.
+           mu_epsilon (float): Mu epsilon value for sparsification.
+           dimension_limit (int): Dimension limit of the simplicial complex.
         """
         if points is not None:
             self.thisptr = new Witness_complex_interface(points,
-                                                         number_of_landmarks)
+                                                         number_of_landmarks,
+                                                         max_alpha_square,
+                                                         mu_epsilon,
+                                                         dimension_limit)
 
     def __dealloc__(self):
         if self.thisptr != NULL:

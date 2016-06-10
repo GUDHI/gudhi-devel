@@ -37,7 +37,7 @@ parser = argparse.ArgumentParser(description='WitnessComplex creation from '
                                  'points read in a file.',
                                  epilog='Example: '
                                  'example/witness_complex_from_file_example.py'
-                                 ' data/500_random_points_on_3D_Torus.csv '
+                                 ' data/2000_random_points_on_3D_Torus.csv '
                                  '- Constructs a witness complex with the '
                                  'points from the given file. File format '
                                  'is X1, X2, ..., Xn')
@@ -46,25 +46,20 @@ args = parser.parse_args()
 
 points = pandas.read_csv(args.file, header=None)
 
-print("WitnessComplex with number_of_landmarks=5")
+print("WitnessComplex with number_of_landmarks=100 alpha=0.7 epsilon_mu=0.001 max_dim=10")
 
 witness_complex = gudhi.WitnessComplex(points=points.values,
-                                     number_of_landmarks=200)
-
-print("filtered_tree=", witness_complex.get_filtered_tree())
+                                       number_of_landmarks=100,
+                                       max_alpha_square=0.7,
+                                       mu_epsilon=0.001,
+                                       dimension_limit=10)
 
 witness_complex.initialize_filtration()
 diag = witness_complex.persistence(homology_coeff_field=2, min_persistence=0.1)
 
-print("diag=", diag)
-
-gudhi.diagram_persistence(diag)
-
-"""
 print("betti_numbers()=")
 print(witness_complex.betti_numbers())
 
 gudhi.diagram_persistence(diag)
 
 gudhi.barcode_persistence(diag)
-"""

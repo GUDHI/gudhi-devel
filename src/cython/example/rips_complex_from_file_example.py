@@ -37,7 +37,7 @@ parser = argparse.ArgumentParser(description='RipsComplex creation from '
                                  'points read in a file.',
                                  epilog='Example: '
                                  'example/rips_complex_from_file_example.py '
-                                 'data/500_random_points_on_3D_Torus.csv '
+                                 'data/2000_random_points_on_3D_Torus.csv '
                                  '- Constructs a rips complex with the '
                                  'points from the given file. File format '
                                  'is X1, X2, ..., Xn')
@@ -46,13 +46,13 @@ args = parser.parse_args()
 
 points = pandas.read_csv(args.file, header=None)
 
-print("RipsComplex with max_edge_length=1.9")
+print("RipsComplex with max_edge_length=0.7")
 
 rips_complex = gudhi.RipsComplex(points=points.values,
-                                 max_dimension=len(points.values[0]), max_edge_length=1.9)
+                                 max_dimension=len(points.values[0]), max_edge_length=0.7)
 
 rips_complex.initialize_filtration()
-diag = rips_complex.persistence(homology_coeff_field=2, min_persistence=0.1)
+diag = rips_complex.persistence(homology_coeff_field=2, min_persistence=0.3)
 
 print("betti_numbers()=")
 print(rips_complex.betti_numbers())
