@@ -33,7 +33,7 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 /**
  *@brief Abstract simplex used in Skeleton blockers data-structure.
@@ -367,7 +367,9 @@ class Skeleton_blocker_simplex {
   }
 };
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 

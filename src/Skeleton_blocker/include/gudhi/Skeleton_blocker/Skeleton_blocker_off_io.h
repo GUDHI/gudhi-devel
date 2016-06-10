@@ -30,7 +30,7 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 /**
  *@brief Off reader visitor that can be passed to Off_reader to read a Skeleton_blocker_complex.
@@ -193,7 +193,9 @@ class Skeleton_blocker_off_writer {
   }
 };
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 

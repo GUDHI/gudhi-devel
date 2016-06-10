@@ -9,7 +9,7 @@
 #include <vector>
 
 using Kernel = CGAL::Epick_d< CGAL::Dynamic_dimension_tag >;
-using Point_d = typename Kernel::Point_d;
+using Point_d = Kernel::Point_d;
 
 void usage(char * const progName) {
   std::cerr << "Usage: " << progName << " inputFile.off" << std::endl;

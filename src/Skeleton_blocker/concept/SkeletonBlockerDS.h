@@ -12,7 +12,7 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 
 
@@ -118,8 +118,11 @@ struct SkeletonBlockerDS
 
 
 
-}  // namespace skbl
-}  // namespace GUDHI
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
+
+}  // namespace Gudhi
 
 
 #endif /* GUDHI_SKELETONBLOCKERDS_H_ */

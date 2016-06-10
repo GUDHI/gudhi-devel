@@ -37,7 +37,7 @@
 
 using Kernel = CGAL::Epick_d< CGAL::Dimension_tag<3> >;
 using Point = Kernel::Point_d;
-using Alpha_complex = Gudhi::alphacomplex::Alpha_complex<Kernel>;
+using Alpha_complex = Gudhi::alpha_complex::Alpha_complex<Kernel>;
 
 std::vector<Point> random_points() {
   // Instanciate a random point generator

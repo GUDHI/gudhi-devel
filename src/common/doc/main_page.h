@@ -36,7 +36,7 @@
     values of the codimension 1 cofaces that make it not Gabriel otherwise.
     All simplices that have a filtration value strictly greater than a given alpha squared value are not inserted into
     the complex.<br>
-    <b>User manual:</b> \ref alpha_complex - <b>Reference manual:</b> Gudhi::alphacomplex::Alpha_complex
+    <b>User manual:</b> \ref alpha_complex - <b>Reference manual:</b> Gudhi::alpha_complex::Alpha_complex
     </td>
  </tr>
 </table>
@@ -52,7 +52,7 @@
     <td width="75%">
     The cubical complex is an example of a structured complex useful in computational mathematics (specially
     rigorous numerics) and image analysis.<br>
-    <b>User manual:</b> \ref cubical_complex - <b>Reference manual:</b> Gudhi::Cubical_complex::Bitmap_cubical_complex
+    <b>User manual:</b> \ref cubical_complex - <b>Reference manual:</b> Gudhi::cubical_complex::Bitmap_cubical_complex
     </td>
  </tr>
 </table>
@@ -89,7 +89,7 @@
     This data-structure handles all simplicial complexes operations such as simplex enumeration or simplex removal but
     operations that are particularly efficient are operations that do not require simplex enumeration such as edge
     iteration, link computation or simplex contraction.<br>
-    <b>User manual:</b> \ref skbl - <b>Reference manual:</b> Gudhi::skbl::Skeleton_blocker_complex
+    <b>User manual:</b> \ref skbl - <b>Reference manual:</b> Gudhi::skeleton_blocker::Skeleton_blocker_complex
     </td>
  </tr>
 </table>

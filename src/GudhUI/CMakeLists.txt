@@ -58,7 +58,7 @@ if ( CGAL_FOUND AND QT4_FOUND AND OPENGL_FOUND AND QGLVIEWER_FOUND )
   target_link_libraries( GudhUI ${QT_LIBRARIES} ${QGLVIEWER_LIBRARIES} )
   target_link_libraries( GudhUI ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY} )	
 if (TBB_FOUND)
-  target_link_libraries( GudhUI ${TBB_RELEASE_LIBRARY})
+  target_link_libraries( GudhUI ${TBB_LIBRARIES})
 endif()
 
 ###############################################################################

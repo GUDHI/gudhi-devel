@@ -13,7 +13,7 @@ endif()
 add_executable ( BitmapCCUT Bitmap_test.cpp )
 target_link_libraries(BitmapCCUT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 if (TBB_FOUND)
-  target_link_libraries(BitmapCCUT ${TBB_RELEASE_LIBRARY})
+  target_link_libraries(BitmapCCUT ${TBB_LIBRARIES})
 endif()
 
 # Unitary tests

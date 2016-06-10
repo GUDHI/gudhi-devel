@@ -29,7 +29,7 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 /**
  * @extends SkeletonBlockerGeometricDS
@@ -39,7 +39,7 @@ namespace skbl {
  */
 template<typename GeometryTrait>
 struct Skeleton_blocker_simple_geometric_traits :
-    public skbl::Skeleton_blocker_simple_traits {
+    public Skeleton_blocker_simple_traits {
  public:
   typedef GeometryTrait GT;
   typedef typename GT::Point Point;
@@ -87,7 +87,9 @@ struct Skeleton_blocker_simple_geometric_traits :
   typedef Skeleton_blocker_simple_traits::Graph_edge Graph_edge;
 };
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 

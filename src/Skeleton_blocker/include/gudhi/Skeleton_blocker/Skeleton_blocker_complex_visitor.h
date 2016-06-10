@@ -26,7 +26,7 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 // todo rajouter les const
 
 /**
@@ -128,7 +128,9 @@ class Print_complex_visitor : public Skeleton_blocker_complex_visitor<
   }
 };
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 

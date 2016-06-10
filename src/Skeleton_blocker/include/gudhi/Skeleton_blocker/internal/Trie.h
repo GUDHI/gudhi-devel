@@ -32,7 +32,7 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 template<typename SimplexHandle>
 struct Trie {
@@ -261,7 +261,9 @@ struct Tries {
   std::vector<STrie*> cofaces_;
 };
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 

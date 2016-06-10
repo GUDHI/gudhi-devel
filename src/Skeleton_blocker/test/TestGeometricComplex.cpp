@@ -31,7 +31,7 @@
 
 using namespace std;
 using namespace Gudhi;
-using namespace skbl;
+using namespace skeleton_blocker;
 
 struct Geometry_trait {
   typedef std::vector<double> Point;
