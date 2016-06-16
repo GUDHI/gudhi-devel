@@ -594,7 +594,7 @@ class Persistent_cohomology {
   }
 
   /** @brief Returns Betti numbers.
-   * @return A vector of persistent Betti numbers.
+   * @return A vector of Betti numbers.
    */
   std::vector<int> betti_numbers() const {
     // Init Betti numbers vector with zeros until Simplicial complex dimension
@@ -632,7 +632,7 @@ class Persistent_cohomology {
 
   /** @brief Returns the persistent Betti numbers.
    * @param[in] from The persistence birth limit to be added in the number \f$(persistent birth \leq from)\f$.
-   * @param[in] to The persistence death limit to be added in the number  \f$(persistent death > from)\f$.
+   * @param[in] to The persistence death limit to be added in the number  \f$(persistent death > to)\f$.
    * @return A vector of persistent Betti numbers.
    */
   std::vector<int> persistent_betti_numbers(Filtration_value from, Filtration_value to) const {
@@ -641,7 +641,10 @@ class Persistent_cohomology {
 
     for (auto pair : persistent_pairs_) {
       // Count persistence intervals that covers the given interval
-      if (cpx_->filtration(get<0>(pair)) <= from && cpx_->filtration(get<1>(pair)) > to) {
+      // null_simplex test : if the function is called with to=+infinity, we still get something useful. And it will
+      // still work if we change the complex filtration function to reject null simplices.
+      if (cpx_->filtration(get<0>(pair)) <= from &&
+          (get<1>(pair) == cpx_->null_simplex() || cpx_->filtration(get<1>(pair)) > to)) {
         // Increment corresponding betti number
         betti_numbers[cpx_->dimension(get<0>(pair))] += 1;
       }
@@ -652,7 +655,7 @@ class Persistent_cohomology {
   /** @brief Returns the persistent Betti number of the dimension passed by parameter.
    * @param[in] dimension The Betti number dimension to get.
    * @param[in] from The persistence birth limit to be added in the number \f$(persistent birth \leq from)\f$.
-   * @param[in] to The persistence death limit to be added in the number  \f$(persistent death > from)\f$.
+   * @param[in] to The persistence death limit to be added in the number  \f$(persistent death > to)\f$.
    * @return Persistent Betti number of the given dimension
    */
   int persistent_betti_number(int dimension, Filtration_value from, Filtration_value to) const {
@@ -660,7 +663,10 @@ class Persistent_cohomology {
 
     for (auto pair : persistent_pairs_) {
       // Count persistence intervals that covers the given interval
-      if (cpx_->filtration(get<0>(pair)) <= from && cpx_->filtration(get<1>(pair)) > to) {
+      // null_simplex test : if the function is called with to=+infinity, we still get something useful. And it will
+      // still work if we change the complex filtration function to reject null simplices.
+      if (cpx_->filtration(get<0>(pair)) <= from &&
+          (get<1>(pair) == cpx_->null_simplex() || cpx_->filtration(get<1>(pair)) > to)) {
         if (cpx_->dimension(get<0>(pair)) == dimension) {
           // Increment betti number found
           ++betti_number;
