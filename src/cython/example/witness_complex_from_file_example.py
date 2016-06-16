@@ -46,20 +46,11 @@ args = parser.parse_args()
 
 points = pandas.read_csv(args.file, header=None)
 
-print("WitnessComplex with number_of_landmarks=100 alpha=0.7 epsilon_mu=0.001 max_dim=10")
+print("WitnessComplex with number_of_landmarks=100")
 
 witness_complex = gudhi.WitnessComplex(points=points.values,
-                                       number_of_landmarks=100,
-                                       max_alpha_square=0.7,
-                                       mu_epsilon=0.001,
-                                       dimension_limit=10)
+                                       number_of_landmarks=100)
 
 witness_complex.initialize_filtration()
-diag = witness_complex.persistence(homology_coeff_field=2, min_persistence=0.1)
 
-print("betti_numbers()=")
-print(witness_complex.betti_numbers())
-
-gudhi.diagram_persistence(diag)
-
-gudhi.barcode_persistence(diag)
+print("filtered_tree=", witness_complex.get_filtered_tree())

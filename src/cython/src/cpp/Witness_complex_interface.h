@@ -24,9 +24,8 @@
 #define	WITNESS_COMPLEX_INTERFACE_H
 
 #include <gudhi/Simplex_tree.h>
-#include <gudhi/Relaxed_witness_complex.h>
-#include <gudhi/Landmark_choice_sparsification.h>
-#include <gudhi/A0_complex.h>
+#include <gudhi/Witness_complex.h>
+#include <gudhi/Landmark_choice_by_furthest_point.h>
 
 #include "Persistent_cohomology_interface.h"
 
@@ -46,22 +45,13 @@ class Witness_complex_interface {
   using Complex_tree = std::vector<Filtered_complex>;
 
  public:
-  Witness_complex_interface(std::vector<std::vector<double>>&points, int number_of_landmarks, double max_alpha_square,
-                            double mu_epsilon, int dimension_limit)
+  Witness_complex_interface(std::vector<std::vector<double>>&points, int number_of_landmarks)
   : pcoh_(nullptr) {
     std::vector<std::vector< int > > knn;
-    std::vector<std::vector< FT > > distances;
-    std::vector< Point_d > landmarks;
-    std::vector<Point_d> point_vector;
-    for (auto point : points) {
-      point_vector.push_back(Point_d(point.size(), point.begin(), point.end()));
-    }
-    Gudhi::witness_complex::landmark_choice_by_sparsification(point_vector, number_of_landmarks, mu_epsilon, landmarks);
-    Gudhi::witness_complex::build_distance_matrix(point_vector, landmarks, max_alpha_square, dimension_limit, knn,
-                                                  distances);
 
-    A0_complex< Simplex_tree<> > rw(distances, knn, simplex_tree_, number_of_landmarks, max_alpha_square,
-                                    dimension_limit);
+    Gudhi::witness_complex::landmark_choice_by_furthest_point(points, number_of_landmarks, knn);
+    Gudhi::witness_complex::witness_complex(knn, number_of_landmarks, points[0].size(), simplex_tree_);
+
   }
 
   bool find_simplex(const Simplex& vh) {
