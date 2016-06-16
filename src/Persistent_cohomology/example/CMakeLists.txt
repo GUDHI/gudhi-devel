@@ -52,10 +52,13 @@ if(GMP_FOUND)
 
    add_test(rips_multifield_persistence_2_71 ${CMAKE_CURRENT_BINARY_DIR}/rips_multifield_persistence ${CMAKE_SOURCE_DIR}/data/points/Kl.txt -r 0.2 -d 3 -p 2 -q 71 -m 100)
    endif(GMPXX_FOUND)
+else()
+  # message(WARNING "GMP not found.")
+endif(GMP_FOUND)
 
   if(CGAL_FOUND)
     add_executable(alpha_complex_3d_persistence alpha_complex_3d_persistence.cpp)
-    target_link_libraries(alpha_complex_3d_persistence ${Boost_SYSTEM_LIBRARY} ${GMP_LIBRARIES} ${CGAL_LIBRARY})
+    target_link_libraries(alpha_complex_3d_persistence ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
 
     if (TBB_FOUND)
       target_link_libraries(alpha_complex_3d_persistence ${TBB_LIBRARIES})
@@ -75,10 +78,10 @@ if(GMP_FOUND)
         target_link_libraries(alpha_complex_persistence  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
         add_executable(periodic_alpha_complex_3d_persistence periodic_alpha_complex_3d_persistence.cpp)
-        target_link_libraries(periodic_alpha_complex_3d_persistence ${Boost_SYSTEM_LIBRARY} ${GMP_LIBRARIES} ${CGAL_LIBRARY})
+        target_link_libraries(periodic_alpha_complex_3d_persistence ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
 
         add_executable(custom_persistence_sort custom_persistence_sort.cpp)
-        target_link_libraries(custom_persistence_sort ${Boost_SYSTEM_LIBRARY} ${GMP_LIBRARIES} ${CGAL_LIBRARY})
+        target_link_libraries(custom_persistence_sort ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
 
         if (TBB_FOUND)
           target_link_libraries(alpha_complex_persistence ${TBB_LIBRARIES})
@@ -99,6 +102,3 @@ if(GMP_FOUND)
     # message(WARNING "CGAL not found.")
   endif(CGAL_FOUND)
    
-else()
-  # message(WARNING "GMP not found.")
-endif(GMP_FOUND)
