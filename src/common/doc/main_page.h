@@ -168,14 +168,10 @@
  * 
  * The following example requires the <a target="_blank" href="http://gmplib.org/">GNU Multiple Precision Arithmetic
  * Library</a> (GMP) and will not be built if GMP is not installed:
- * \li <a href="_persistent_cohomology_2alpha_shapes_persistence_8cpp-example.html">
- * Persistent_cohomology/alpha_shapes_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2performance_rips_persistence_8cpp-example.html">
  * Persistent_cohomology/performance_rips_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2rips_multifield_persistence_8cpp-example.html">
  * Persistent_cohomology/rips_multifield_persistence.cpp</a>
- * \li <a href="_simplex_tree_2simplex_tree_from_alpha_shapes_3_8cpp-example.html">
- * Simplex_tree/simplex_tree_from_alpha_shapes_3.cpp</a>
  *
  * Having GMP version 4.2 or higher installed is recommended.
  * 
