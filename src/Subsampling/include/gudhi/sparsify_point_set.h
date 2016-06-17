@@ -35,7 +35,7 @@ namespace Gudhi {
 namespace subsampling {
 
 template <typename Kernel, typename Point_container, typename OutputIterator>
-bool
+void
 sparsify_point_set(
   const Kernel &k, Point_container const& input_pts,
   typename Kernel::FT min_squared_dist,
