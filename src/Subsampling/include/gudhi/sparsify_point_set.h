@@ -32,6 +32,7 @@
 #include <vector>
 
 namespace Gudhi {
+namespace subsampling {
 
 template <typename Kernel, typename Point_container, typename OutputIterator>
 bool
@@ -91,6 +92,7 @@ sparsify_point_set(
 #endif
 }
 
-} //namespace Gudhi
+} // namespace subsampling
+} // namespace Gudhi
 
 #endif // GUDHI_POINT_CLOUD_H

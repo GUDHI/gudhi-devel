@@ -125,28 +125,28 @@ Vertex_list from(const Alpha_shape_3::Vertex_handle& vh) {
 
 void usage(char * const progName) {
   std::cerr << "Usage: " << progName <<
-      " path_to_file_graph coeff_field_characteristic[integer > 0] min_persistence[float >= -1.0]\n";
+      " path_to_file_graph path_to_iso_cuboid_3_file coeff_field_characteristic[integer > 0] min_persistence[float >= -1.0]\n";
   exit(-1);
 }
 
 int main(int argc, char * const argv[]) {
   // program args management
-  if (argc != 4) {
+  if (argc != 5) {
     std::cerr << "Error: Number of arguments (" << argc << ") is not correct\n";
     usage(argv[0]);
   }
 
   int coeff_field_characteristic = 0;
-  int returnedScanValue = sscanf(argv[2], "%d", &coeff_field_characteristic);
+  int returnedScanValue = sscanf(argv[3], "%d", &coeff_field_characteristic);
   if ((returnedScanValue == EOF) || (coeff_field_characteristic <= 0)) {
-    std::cerr << "Error: " << argv[2] << " is not correct\n";
+    std::cerr << "Error: " << argv[3] << " is not correct\n";
     usage(argv[0]);
   }
 
   Filtration_value min_persistence = 0.0;
-  returnedScanValue = sscanf(argv[3], "%lf", &min_persistence);
+  returnedScanValue = sscanf(argv[4], "%lf", &min_persistence);
   if ((returnedScanValue == EOF) || (min_persistence < -1.0)) {
-    std::cerr << "Error: " << argv[3] << " is not correct\n";
+    std::cerr << "Error: " << argv[4] << " is not correct\n";
     usage(argv[0]);
   }
 
@@ -160,11 +160,21 @@ int main(int argc, char * const argv[]) {
     usage(argv[0]);
   }
 
+  // Read iso_cuboid_3 information from file
+  std::ifstream iso_cuboid_str(argv[2]);
+  double x_min, y_min, z_min, x_max, y_max, z_max;
+  if (iso_cuboid_str.good()) {
+    iso_cuboid_str >> x_min >> y_min >> z_min >> x_max >> y_max >> z_max;
+  } else {
+    std::cerr << "Unable to read file " << argv[2] << std::endl;
+    usage(argv[0]);
+  }
+
   // Retrieve the triangulation
   std::vector<Point_3> lp = off_reader.get_point_cloud();
 
   // Define the periodic cube
-  P3DT3 pdt(PK::Iso_cuboid_3(0, 0, 0, 1, 1, 1));
+  P3DT3 pdt(PK::Iso_cuboid_3(x_min, y_min, z_min, x_max, y_max, z_max));
   // Heuristic for inserting large point sets (if pts is reasonably large)
   pdt.insert(lp.begin(), lp.end(), true);
   // As pdt won't be modified anymore switch to 1-sheeted cover if possible

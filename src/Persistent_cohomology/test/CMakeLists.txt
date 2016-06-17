@@ -4,17 +4,20 @@ project(GUDHIPersistentCohomologyUT)
 if (GCOVR_PATH)
   # for gcovr to make coverage reports - Corbera Jenkins plugin
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
-endif()
+endif(GCOVR_PATH)
 if (GPROF_PATH)
   # for gprof to make coverage reports - Jenkins
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
-endif()
+endif(GPROF_PATH)
 
 add_executable ( PersistentCohomologyUT persistent_cohomology_unit_test.cpp )
 target_link_libraries(PersistentCohomologyUT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+add_executable ( BettiNumbersUT betti_numbers_unit_test.cpp )
+target_link_libraries(BettiNumbersUT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 if (TBB_FOUND)
-  target_link_libraries(PersistentCohomologyUT ${TBB_RELEASE_LIBRARY})
-endif()
+  target_link_libraries(PersistentCohomologyUT ${TBB_LIBRARIES})
+  target_link_libraries(BettiNumbersUT ${TBB_LIBRARIES})
+endif(TBB_FOUND)
 
 # Unitary tests
 add_test(NAME PersistentCohomologyUT 
@@ -23,12 +26,17 @@ add_test(NAME PersistentCohomologyUT
     # XML format for Jenkins xUnit plugin 
     --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/PersistentCohomologyUT.xml --log_level=test_suite --report_level=no)
 
+add_test(NAME BettiNumbersUT 
+  COMMAND ${CMAKE_CURRENT_BINARY_DIR}/BettiNumbersUT
+    # XML format for Jenkins xUnit plugin 
+    --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/BettiNumbersUT.xml --log_level=test_suite --report_level=no)
+
 if(GMPXX_FOUND AND GMP_FOUND)
   add_executable ( PersistentCohomologyMultiFieldUT persistent_cohomology_unit_test_multi_field.cpp )
-target_link_libraries(PersistentCohomologyMultiFieldUT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES})
-if (TBB_FOUND)
-  target_link_libraries(PersistentCohomologyMultiFieldUT ${TBB_RELEASE_LIBRARY})
-endif()
+  target_link_libraries(PersistentCohomologyMultiFieldUT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES})
+  if (TBB_FOUND)
+    target_link_libraries(PersistentCohomologyMultiFieldUT ${TBB_LIBRARIES})
+  endif(TBB_FOUND)
 
   # Unitary tests
   add_test(NAME PersistentCohomologyMultiFieldUT
@@ -37,5 +45,5 @@ endif()
       # XML format for Jenkins xUnit plugin 
       --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/PersistentCohomologyMultiFieldUT.xml --log_level=test_suite --report_level=no)
 
-endif()
+endif(GMPXX_FOUND AND GMP_FOUND)
 
