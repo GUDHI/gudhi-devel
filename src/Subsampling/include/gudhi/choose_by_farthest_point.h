@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LANDMARK_CHOICE_BY_FARTHEST_POINT_H_
-#define LANDMARK_CHOICE_BY_FARTHEST_POINT_H_
+#ifndef CHOOSE_BY_FARTHEST_POINT_H_
+#define CHOOSE_BY_FARTHEST_POINT_H_
 
 #include <gudhi/Spatial_tree_data_structure.h>
 
@@ -29,29 +29,8 @@
 #include <algorithm>  // for sort
 #include <vector>
 #include <random>
-#include <boost/heap/fibonacci_heap.hpp>
 
 namespace Gudhi {
-
-
-  template < typename Point_d,
-             typename Heap,
-             typename Tree,
-             typename Presence_table >
-  void update_heap( Point_d &l,
-                    unsigned nbL,
-                    Heap &heap,
-                    Tree &tree,
-                    Presence_table &table)
-  {
-    auto search = tree.query_incremental_ANN(l);
-    for (auto w: search) {
-      if (table[w.first].first)
-        if (w.second < table[w.first].second->second) {
-          heap.update(table[w.first].second, w);
-        }
-    }
-  }
   
   /** 
    *  \ingroup witness_complex
@@ -69,54 +48,13 @@ namespace Gudhi {
   template < typename Kernel,
              typename Point_container,
              typename OutputIterator>
-  void landmark_choice_by_farthest_point( Kernel& k,
+  void choose_by_farthest_point( Kernel& k,
                                           Point_container const &points,
                                           int nbL,
                                           OutputIterator output_it)
   {
-
-    // typedef typename Kernel::FT FT;
-    // typedef std::pair<unsigned, FT> Heap_node;
-    
-    // struct R_max_compare
-    // {
-    //   bool operator()(const Heap_node &rmh1, const Heap_node &rmh2) const
-    //   {
-    //     return rmh1.second < rmh2.second;
-    //   }
-    // };
-    
-    // typedef boost::heap::fibonacci_heap<Heap_node, boost::heap::compare<R_max_compare>> Heap;
-    // typedef Spatial_tree_data_structure<Kernel, Point_container> Tree;
-    // typedef std::vector< std::pair<bool, Heap_node*> > Presence_table;
-
     typename Kernel::Squared_distance_d sqdist = k.squared_distance_d_object();
     
-  //   Tree tree(points);
-  //   Heap heap;
-  //   Presence_table table(points.size());
-  //   for (auto p: table)
-  //     std::cout << p.first << "\n";
-  //   int number_landmarks = 0; // number of treated landmarks
-
-  //   double curr_max_dist = 0;                                      // used for defining the furhest point from L
-  //   const double infty = std::numeric_limits<double>::infinity();  // infinity (see next entry)
-  //   std::vector< double > dist_to_L(points.size(), infty);         // vector of current distances to L from points
-    
-  //   // Choose randomly the first landmark 
-  //   std::random_device rd;
-  //   std::mt19937 gen(rd());
-  //   std::uniform_int_distribution<> dis(1, 6);
-  //   int curr_landmark = dis(gen);
-    
-  //   do {
-  //     *output_landmarks++ = points[curr_landmark];
-  //     std::cout << curr_landmark << "\n";
-  //     number_landmarks++;
-  //   }
-  //   while (number_landmarks < nbL);
-  // }
-
     int nb_points = boost::size(points);
     assert(nb_points >= nbL);
 
@@ -155,4 +93,4 @@ namespace Gudhi {
   
 }  // namespace Gudhi
 
-#endif  // LANDMARK_CHOICE_BY_FARTHEST_POINT_H_
+#endif  // CHOOSE_BY_FARTHEST_POINT_H_

@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LANDMARK_CHOICE_BY_RANDOM_POINT_H_
-#define LANDMARK_CHOICE_BY_RANDOM_POINT_H_
+#ifndef PICK_RANDOM_POINTS_H_
+#define PICK_RANDOM_POINTS_H_
 
 #include <boost/range/size.hpp>
 
@@ -45,7 +45,7 @@ namespace Gudhi {
 
   template <typename Point_container,
             typename OutputIterator>
-  void landmark_choice_by_random_point(Point_container const &points,
+  void pick_random_points(Point_container const &points,
                                        unsigned nbL,
                                        OutputIterator output_it) {
 #ifdef GUDHI_LM_PROFILING
