@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
-project(GUDHILandmarkingTest)
+project(Subsampling_tests)
 
-# Landmarking test
 if(CGAL_FOUND)
   if (NOT CGAL_VERSION VERSION_LESS 4.8.0)
     message(STATUS "CGAL version: ${CGAL_VERSION}.")
@@ -13,8 +12,9 @@ if(CGAL_FOUND)
       include_directories (BEFORE "../../include")
 
       add_executable( landmarking_UT landmarking.cpp ) 
+      add_executable( Subsampling_test_sparsify_point_set test_sparsify_point_set.cpp)
     else()
-      message(WARNING "Eigen3 not found. Version 3.1.0 is required for Landmarking feature.")
+      message(WARNING "Eigen3 not found. Version 3.1.0 is required for Subsampling feature.")
     endif()
   else()
     message(WARNING "CGAL version: ${CGAL_VERSION} is too old to compile Landmarking feature. Version 4.8.0 is required.")
