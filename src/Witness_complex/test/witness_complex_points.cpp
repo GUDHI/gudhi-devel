@@ -28,8 +28,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Witness_complex.h>
 #include <gudhi/Construct_closest_landmark_table.h>
-#include <gudhi/Landmark_choice_by_random_point.h>
-#include <gudhi/Landmark_choice_by_farthest_point.h>
+#include <gudhi/pick_random_points.h>
 
 #include <iostream>
 #include <vector>
@@ -51,7 +50,7 @@ BOOST_AUTO_TEST_CASE(witness_complex_points) {
   bool b_print_output = false;
   // First test: random choice
   Simplex_tree complex1;
-  Gudhi::landmark_choice_by_random_point(points, 100, std::back_inserter(landmarks));
+  Gudhi::pick_random_points(points, 100, std::back_inserter(landmarks));
   Gudhi::witness_complex::construct_closest_landmark_table(points, landmarks, knn);
   assert(!knn.empty());
   WitnessComplex witnessComplex1(knn, 100, 3, complex1);

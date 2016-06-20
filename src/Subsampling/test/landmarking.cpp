@@ -2,8 +2,8 @@
 // # define TBB_USE_THREADING_TOOL
 // #endif
 
-#include <gudhi/Landmark_choice_by_random_point.h>
-#include <gudhi/Landmark_choice_by_farthest_point.h>
+#include <gudhi/pick_random_points.h>
+#include <gudhi/choose_by_farthest_point.h>
 #include <vector>
 #include <iterator>
 
@@ -35,13 +35,13 @@ int main() {
   
   
   std::vector<Point_d> landmarks;
-  Gudhi::landmark_choice_by_random_point(vect, 5, std::back_inserter(landmarks));
+  Gudhi::pick_random_points(vect, 5, std::back_inserter(landmarks));
   std::cout << "landmark vector contains: ";
   for (auto l: landmarks)
     std::cout << l << "\n";
 
   landmarks.clear();
   K k;
-  Gudhi::landmark_choice_by_farthest_point(k, vect, 16, std::back_inserter(landmarks));
+  Gudhi::choose_by_farthest_point(k, vect, 16, std::back_inserter(landmarks));
   
 }

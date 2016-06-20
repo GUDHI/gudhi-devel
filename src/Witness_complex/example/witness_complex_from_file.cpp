@@ -26,7 +26,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Witness_complex.h>
 #include <gudhi/Construct_closest_landmark_table.h>
-#include <gudhi/Landmark_choice_by_random_point.h>
+#include <gudhi/pick_random_points.h>
 #include <gudhi/reader_utils.h>
 
 #include <iostream>
@@ -87,7 +87,7 @@ int main(int argc, char * const argv[]) {
   // Choose landmarks
   start = clock();
   std::vector<std::vector< int > > knn;
-  Gudhi::landmark_choice_by_random_point(point_vector, 100, std::back_inserter(landmarks));
+  Gudhi::pick_random_points(point_vector, 100, std::back_inserter(landmarks));
   Gudhi::witness_complex::construct_closest_landmark_table(point_vector, landmarks, knn);
   end = clock();
   std::cout << "Landmark choice for " << nbL << " landmarks took "
