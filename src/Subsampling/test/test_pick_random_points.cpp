@@ -2,8 +2,7 @@
 // # define TBB_USE_THREADING_TOOL
 // #endif
 
-#include <gudhi/pick_random_points.h>
-#include <gudhi/choose_by_farthest_point.h>
+#include <gudhi/Pick_random_points.h>
 #include <vector>
 #include <iterator>
 
