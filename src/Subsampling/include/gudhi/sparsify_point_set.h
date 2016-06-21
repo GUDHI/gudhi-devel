@@ -40,9 +40,9 @@ sparsify_point_set(
   const Kernel &k, Point_container const& input_pts,
   typename Kernel::FT min_squared_dist,
   OutputIterator output_it)
-{
-  typedef typename Gudhi::Spatial_tree_data_structure<
-    Kernel, Point_container>                    Points_ds;
+{ 
+  typedef typename Gudhi::spatial_searching::Spatial_tree_data_structure<
+    Kernel, Point_container>  Points_ds;
 
   typename Kernel::Squared_distance_d sqdist = k.squared_distance_d_object();
 
