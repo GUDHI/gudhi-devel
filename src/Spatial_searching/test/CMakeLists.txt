@@ -1,0 +1,27 @@
+cmake_minimum_required(VERSION 2.6)
+project(Spatial_searching_tests)
+
+if (GCOVR_PATH)
+  # for gcovr to make coverage reports - Corbera Jenkins plugin
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+endif()
+if (GPROF_PATH)
+  # for gprof to make coverage reports - Jenkins
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+endif()
+
+if(CGAL_FOUND)
+  find_package(Eigen3 3.1.0)
+  if (EIGEN3_FOUND)
+    message(STATUS "Eigen3 version: ${EIGEN3_VERSION}.")
+    include( ${EIGEN3_USE_FILE} )
+    include_directories (BEFORE "../../include")
+
+    add_executable( Spatial_searching_test_Spatial_tree_data_structure test_Spatial_tree_data_structure.cpp )
+    target_link_libraries(Spatial_searching_test_Spatial_tree_data_structure ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+  else()
+    message(WARNING "Eigen3 not found. Version 3.1.0 is required for the Spatial_searching tests.")
+  endif()
+else()
+  message(WARNING "CGAL not found. It is required for the Spatial_searching tests.")
+endif()
