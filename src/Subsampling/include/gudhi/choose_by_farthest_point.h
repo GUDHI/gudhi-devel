@@ -23,8 +23,6 @@
 #ifndef CHOOSE_BY_FARTHEST_POINT_H_
 #define CHOOSE_BY_FARTHEST_POINT_H_
 
-#include <gudhi/Spatial_tree_data_structure.h>
-
 #include <boost/range.hpp>
 
 #include <iterator>
@@ -50,10 +48,10 @@ namespace Gudhi {
   template < typename Kernel,
              typename Point_container,
              typename OutputIterator>
-  void choose_by_farthest_point( Kernel& k,
-                                          Point_container const &points,
-                                          int nbL,
-                                          OutputIterator output_it)
+  void choose_by_farthest_point(Kernel& k,
+                                Point_container const &points,
+                                int nbL,
+                                OutputIterator output_it)
   {
     typename Kernel::Squared_distance_d sqdist = k.squared_distance_d_object();
     
@@ -71,7 +69,6 @@ namespace Gudhi {
     std::uniform_int_distribution<> dis(1, 6);
     int curr_max_w = dis(gen);
 
-    
     for (current_number_of_landmarks = 0; current_number_of_landmarks != nbL; current_number_of_landmarks++) {
       // curr_max_w at this point is the next landmark
       *output_it++ = points[curr_max_w];
