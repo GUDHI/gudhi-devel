@@ -46,8 +46,8 @@ namespace Gudhi {
   template <typename Point_container,
             typename OutputIterator>
   void pick_random_points(Point_container const &points,
-                                       unsigned nbL,
-                                       OutputIterator output_it) {
+                          unsigned nbL,
+                          OutputIterator output_it) {
 #ifdef GUDHI_LM_PROFILING
     Gudhi::Clock t;
 #endif
@@ -67,14 +67,12 @@ namespace Gudhi {
       *output_it++ = points[l];
     
 #ifdef GUDHI_LM_PROFILING
-      t.end();
-      std::cerr << "Random landmark choice took " << t.num_seconds()
-        << " seconds." << std::endl;
+    t.end();
+    std::cerr << "Random landmark choice took " << t.num_seconds()
+      << " seconds." << std::endl;
 #endif
-
-    
   }
 
 }  // namespace Gudhi
 
-#endif  // LANDMARK_CHOICE_BY_RANDOM_POINT_H_
+#endif  // PICK_RANDOM_POINTS_H_
