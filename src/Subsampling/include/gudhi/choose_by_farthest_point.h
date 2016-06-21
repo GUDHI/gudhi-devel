@@ -25,6 +25,8 @@
 
 #include <gudhi/Spatial_tree_data_structure.h>
 
+#include <boost/range.hpp>
+
 #include <iterator>
 #include <algorithm>  // for sort
 #include <vector>
@@ -73,7 +75,7 @@ namespace Gudhi {
     for (current_number_of_landmarks = 0; current_number_of_landmarks != nbL; current_number_of_landmarks++) {
       // curr_max_w at this point is the next landmark
       *output_it++ = points[curr_max_w];
-      std::cout << curr_max_w << "\n";
+      // std::cout << curr_max_w << "\n";
       unsigned i = 0;
       for (auto& p : points) {
         double curr_dist = sqdist(p, *(std::begin(points) + curr_max_w));
