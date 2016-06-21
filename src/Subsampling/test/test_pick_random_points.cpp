@@ -39,9 +39,6 @@ int main() {
   std::cout << "landmark vector contains: ";
   for (auto l: landmarks)
     std::cout << l << "\n";
-
-  landmarks.clear();
-  K k;
-  Gudhi::choose_by_farthest_point(k, vect, 16, std::back_inserter(landmarks));
+  assert(landmarks_size() == 5);
   
 }

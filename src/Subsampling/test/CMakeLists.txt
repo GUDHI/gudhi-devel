@@ -21,8 +21,10 @@ if(CGAL_FOUND)
       include( ${EIGEN3_USE_FILE} )
       include_directories (BEFORE "../../include")
 
-      add_executable( test_choose_farthest_point test_choose_farthest_point.cpp )
-      target_link_libraries(test_choose_farthest_point ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+      add_executable( Subsampling_test_pick_random_points test_pick_random_points.cpp )
+
+      add_executable( Subsampling_test_choose_farthest_point test_choose_farthest_point.cpp )
+      target_link_libraries(Subsampling_test_choose_farthest_point ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
       
       add_executable( Subsampling_test_sparsify_point_set test_sparsify_point_set.cpp)
     else()
