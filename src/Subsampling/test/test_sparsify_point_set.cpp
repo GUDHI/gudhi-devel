@@ -2,6 +2,10 @@
 // # define TBB_USE_THREADING_TOOL
 // #endif
 
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE Subsampling - test sparsify_point_set
+#include <boost/test/unit_test.hpp>
+
 #include <gudhi/sparsify_point_set.h>
 
 #include <CGAL/Epick_d.h>
@@ -11,7 +15,8 @@
 #include <vector>
 #include <iterator>
 
-int main() {
+BOOST_AUTO_TEST_CASE(test_sparsify_point_set) 
+{
   typedef CGAL::Epick_d<CGAL::Dimension_tag<4> >   K;
   typedef typename K::FT                           FT;
   typedef typename K::Point_d                      Point_d;
@@ -30,5 +35,5 @@ int main() {
   //for (auto p : results)
   //  std::cout << p << "\n";
 
-  return 0;
+  BOOST_CHECK(points.size() > results.size());
 }
