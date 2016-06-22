@@ -24,7 +24,7 @@
 // # define TBB_USE_THREADING_TOOL
 // #endif
 
-#include <gudhi/Pick_random_points.h>
+#include <gudhi/pick_random_points.h>
 #include <vector>
 #include <iterator>
 
@@ -55,11 +55,11 @@ int main() {
   vect.push_back(Point_d(std::vector<FT>({1,1,1,1})));
   
   
-  std::vector<Point_d> landmarks;
-  Gudhi::pick_random_points(vect, 5, std::back_inserter(landmarks));
+  std::vector<Point_d> results;
+  Gudhi::subsampling::pick_random_points(vect, 5, std::back_inserter(results));
   std::cout << "landmark vector contains: ";
-  for (auto l: landmarks)
+  for (auto l: results)
     std::cout << l << "\n";
-  assert(landmarks_size() == 5);
+  assert(results.size() == 5);
   
 }

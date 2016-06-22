@@ -41,7 +41,7 @@ typedef typename K::Point_d                                       Point_d;
 
 
 BOOST_AUTO_TEST_CASE(test_choose_farthest_point) {
-  std::vector< Point_d > points, landmarks;
+  std::vector< Point_d > points, results;
   // Add grid points (625 points)
   for (FT i = 0; i < 5; i += 1.0)
     for (FT j = 0; j < 5; j += 1.0)
@@ -49,9 +49,9 @@ BOOST_AUTO_TEST_CASE(test_choose_farthest_point) {
         for (FT l = 0; l < 5; l += 1.0)
           points.push_back(Point_d(std::vector<FT>({i, j, k, l})));
 
-  landmarks.clear();
+  results.clear();
   K k;
-  Gudhi::choose_by_farthest_point(k, points, 100, std::back_inserter(landmarks));
+  Gudhi::subsampling::choose_by_farthest_point(k, points, 100, std::back_inserter(results));
   
-  assert(landmarks.size() == 100);
+  assert(results.size() == 100);
 }

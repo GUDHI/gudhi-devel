@@ -31,32 +31,29 @@
 #include <random>
 
 namespace Gudhi {
-  
+
+namespace subsampling {
   /** 
-   *  \ingroup witness_complex
-   *  \brief Landmark choice strategy by iteratively adding the farthest witness from the
-   *  current landmark set as the new landmark. 
-   *  \details It chooses nbL landmarks from a random access range `points` and
-   *  writes {witness}*{closest landmarks} matrix in `knn`.
-   *
-   *  The type KNearestNeighbors can be seen as 
-   *  Witness_range<Closest_landmark_range<Vertex_handle>>, where
-   *  Witness_range and Closest_landmark_range are random access ranges 
+   *  \ingroup subsampling
+   *  \brief Subsample by a greedy strategy of iteratively adding the farthest point from the
+   *  current chosen point set to the subsampling. 
+   *  \details It chooses `final_size` points from a random access range `points` and
+   *  outputs it in the output iterator `output_it`.
    *  
    */
 
   template < typename Kernel,
              typename Point_container,
              typename OutputIterator>
-  void choose_by_farthest_point(Kernel& k,
-                                Point_container const &points,
-                                int nbL,
-                                OutputIterator output_it)
+  void choose_by_farthest_point( Kernel& k,
+                                 Point_container const &points,
+                                 int final_size,
+                                 OutputIterator output_it)
   {
     typename Kernel::Squared_distance_d sqdist = k.squared_distance_d_object();
     
     int nb_points = boost::size(points);
-    assert(nb_points >= nbL);
+    assert(nb_points >= final_size);
 
     int current_number_of_landmarks = 0;  // counter for landmarks
     double curr_max_dist = 0;  // used for defining the furhest point from L
@@ -69,7 +66,7 @@ namespace Gudhi {
     std::uniform_int_distribution<> dis(1, 6);
     int curr_max_w = dis(gen);
 
-    for (current_number_of_landmarks = 0; current_number_of_landmarks != nbL; current_number_of_landmarks++) {
+    for (current_number_of_landmarks = 0; current_number_of_landmarks != final_size; current_number_of_landmarks++) {
       // curr_max_w at this point is the next landmark
       *output_it++ = points[curr_max_w];
       // std::cout << curr_max_w << "\n";
@@ -89,6 +86,8 @@ namespace Gudhi {
         }
     }
   }
+
+} // namespace subsampling
   
 }  // namespace Gudhi
 
