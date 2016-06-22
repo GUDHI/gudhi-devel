@@ -24,7 +24,7 @@
 #define GUDHI_SPARSIFY_POINT_SET_H
 
 #include <gudhi/Spatial_tree_data_structure.h>
-#ifdef GUDHI_TC_PROFILING
+#ifdef GUDHI_SUBSAMPLING_PROFILING
 #include <gudhi/Clock.h>
 #endif
 
@@ -46,7 +46,7 @@ sparsify_point_set(
 
   typename Kernel::Squared_distance_d sqdist = k.squared_distance_d_object();
 
-#ifdef GUDHI_TC_PROFILING
+#ifdef GUDHI_SUBSAMPLING_PROFILING
   Gudhi::Clock t;
 #endif
 
@@ -85,7 +85,7 @@ sparsify_point_set(
     }
   }
 
-#ifdef GUDHI_TC_PROFILING
+#ifdef GUDHI_SUBSAMPLING_PROFILING
   t.end();
   std::cerr << "Point set sparsified in " << t.num_seconds()
     << " seconds." << std::endl;
