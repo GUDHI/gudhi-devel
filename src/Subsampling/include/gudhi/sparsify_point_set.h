@@ -34,6 +34,14 @@
 namespace Gudhi {
 namespace subsampling {
 
+/**
+*  \ingroup subsampling
+*  \brief Outputs a subset of the input points so that the 
+*         squared distance between any two points
+*         is greater than or equal to `min_squared_dist`.
+*
+*/
+
 template <typename Kernel, typename Point_container, typename OutputIterator>
 void
 sparsify_point_set(
