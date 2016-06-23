@@ -46,136 +46,10 @@ namespace Gudhi {
 
 namespace persistent_cohomology {
 
-/** \defgroup persistent_cohomology Persistent Cohomology
-  *
- \author    Clément Maria
-
-  Computation of persistent cohomology using the algorithm of 
-   \cite DBLP:journals/dcg/SilvaMV11 and \cite DBLP:journals/corr/abs-1208-5018 
-   and the Compressed Annotation Matrix 
-   implementation of \cite DBLP:conf/esa/BoissonnatDM13 
-       
-  The theory of homology consists in attaching to a topological space a sequence of 
-  (homology) groups, 
-  capturing global topological features 
-  like connected components, holes, cavities, etc. Persistent homology studies the evolution 
-  -- birth, life and death -- of 
-  these features when the topological space is changing. Consequently, the theory is essentially 
-  composed of three elements: 
-  topological spaces, their homology groups and an evolution scheme.
-
- <DT>Topological Spaces:</DT>
- Topological spaces are represented by simplicial complexes.
- Let \f$V = \{1, \cdots ,|V|\}\f$ be a set of <EM>vertices</EM>.
- A <EM>simplex</EM> \f$\sigma\f$ is a subset of vertices
- \f$\sigma \subseteq V\f$. A <EM>simplicial complex</EM> \f$\mathbf{K}\f$
- on \f$V\f$ is a collection of simplices \f$\{\sigma\}\f$,
- \f$\sigma \subseteq V\f$, such that \f$\tau \subseteq \sigma \in \mathbf{K}
- \Rightarrow \tau \in \mathbf{K}\f$. The dimension \f$n=|\sigma|-1\f$ of \f$\sigma\f$
- is its number of elements minus 1. A <EM>filtration</EM> of a simplicial complex is
- a function \f$f:\mathbf{K} \rightarrow \mathbb{R}\f$ satisfying \f$f(\tau)\leq
- f(\sigma)\f$ whenever \f$\tau \subseteq \sigma\f$.
-
- We define the concept FilteredComplex which enumerates the requirements for a class
- to represent a filtered complex from which persistent homology may be computed.
- We use the vocabulary of simplicial complexes, but the concept
- is valid for any type of cell complex. The main requirements
- are the definition of:
- \li type <CODE>Indexing_tag</CODE>, which is a model of the concept
- <CODE>IndexingTag</CODE>,
- describing the nature of the indexing scheme,
- \li type Simplex_handle to manipulate simplices,
- \li method <CODE>int dimension(Simplex_handle)</CODE> returning
- the dimension of a simplex,
- \li type and method <CODE>Boundary_simplex_range
- boundary_simplex_range(Simplex_handle)</CODE> that returns
- a range giving access to the codimension 1 subsimplices of the
- input simplex, as-well-as the coefficients \f$(-1)^i\f$ in the
- definition of the operator \f$\partial\f$. The iterators have
- value type <CODE>Simplex_handle</CODE>,
- \li type and method
- <CODE>Filtration_simplex_range filtration_simplex_range ()</CODE>
- that returns a range giving
- access to all the simplices of the complex read in the order
- assigned by the indexing scheme,
- \li type and method
- <CODE>Filtration_value filtration (Simplex_handle)</CODE> that returns the value of
- the filtration on the simplex represented by the handle.
-
- <DT>Homology:</DT>
- For a ring \f$\mathcal{R}\f$, the group of <EM>n-chains</EM>,
- denoted \f$\mathbf{C}_n(\mathbf{K},\mathcal{R})\f$, of \f$\mathbf{K}\f$ is the
- group of formal sums of
- n-simplices with \f$\mathcal{R}\f$ coefficients. The <EM>boundary operator</EM> is a
- linear operator
- \f$\partial_n: \mathbf{C}_n(\mathbf{K},\mathcal{R}) \rightarrow \mathbf{C}_{n-1}(\mathbf{K},\mathcal{R})\f$
- such that \f$\partial_n \sigma = \partial_n [v_0, \cdots , v_n] =
- \sum_{i=0}^n (-1)^{i}[v_0,\cdots ,\widehat{v_i}, \cdots,v_n]\f$,
- where \f$\widehat{v_i}\f$ means \f$v_i\f$ is omitted from the list. The chain
- groups form a sequence:
-
- \f[\cdots \ \ \mathbf{C}_n(\mathbf{K},\mathcal{R}) \xrightarrow{\ \partial_n\ } \mathbf{C}_{n-1}(\mathbf{K},\mathcal{R})
- \xrightarrow{\partial_{n-1}} \cdots \xrightarrow{\ \partial_2 \ }
- \mathbf{C}_1(\mathbf{K},\mathcal{R}) \xrightarrow{\ \partial_1 \ }  \mathbf{C}_0(\mathbf{K},\mathcal{R}) \f]
-
- of finitely many groups \f$\mathbf{C}_n(\mathbf{K},\mathcal{R})\f$ and homomorphisms
- \f$\partial_n\f$, indexed by the dimension \f$n \geq 0\f$.
- The boundary operators satisfy the property \f$\partial_n \circ \partial_{n+1}=0\f$
- for every \f$n > 0\f$
- and we define the homology groups:
-
- \f[\mathbf{H}_n(\mathbf{K},\mathcal{R}) = \ker \partial_n / \mathrm{im} \  \partial_{n+1}\f]
-
- We refer to \cite Munkres-elementsalgtop1984 for an introduction to homology
- theory and to \cite DBLP:books/daglib/0025666 for an introduction to persistent homology.
-
- <DT>Indexing Scheme:</DT>
- "Changing" a simplicial complex consists in applying a simplicial map.
- An <EM>indexing scheme</EM> is a directed graph together with a traversal
- order, such that two
- consecutive nodes in the graph are connected by an arrow (either forward or backward).
- The nodes represent simplicial complexes and the directed edges simplicial maps.
-
- From the computational point of view, there are two types of indexing schemes of
- interest
- in persistent homology: <EM>linear</EM> ones
- \f$\bullet \longrightarrow \bullet \longrightarrow \cdots \longrightarrow \bullet
- \longrightarrow \bullet\f$
- in persistent homology \cite DBLP:journals/dcg/ZomorodianC05 ,
- and <EM>zigzag</EM> ones
- \f$\bullet \longrightarrow \bullet \longleftarrow \cdots
- \longrightarrow \bullet
- \longleftarrow \bullet \f$ in zigzag persistent
- homology \cite DBLP:journals/focm/CarlssonS10.
- These indexing schemes have a natural left-to-right traversal order, and we
- describe them with ranges and iterators.
- In the current release of the Gudhi library, only the linear case is implemented.
-
- In the following, we consider the case where the indexing scheme is induced
- by a filtration.
- Ordering the simplices
- by increasing filtration values (breaking ties so as a simplex appears after
- its subsimplices of same filtration value) provides an indexing scheme.
-
-\section Examples
-    We provide several example files: run these examples with -h for details on their use, and read the README file.
-
-\li <CODE>rips_persistence.cpp</CODE> computes the Rips complex of a point cloud and its persistence diagram.
-
-\li <CODE>rips_multifield_persistence.cpp</CODE> computes the Rips complex of a point cloud and its persistence diagram 
-with a family of field coefficients.
-
-\li <CODE>performance_rips_persistence.cpp</CODE> provides timings for the construction of the Rips complex on a set of 
-points sampling a Klein bottle in \f$\mathbb{R}^5\f$ with a simplex tree, its conversion to a 
-Hasse diagram and the computation of persistent homology and multi-field persistent homology for the 
-different representations.
-
- \copyright GNU General Public License v3.
- @{  
- */
-
 /** \brief Computes the persistent cohomology of a filtered complex.
  *
+ * \ingroup persistent_cohomology
+ * 
  * The computation is implemented with a Compressed Annotation Matrix
  * (CAM)\cite DBLP:conf/esa/BoissonnatDM13,
  * and is adapted to the computation of Multi-Field Persistent Homology (MF)
@@ -184,8 +58,8 @@ different representations.
  * \implements PersistentHomology
  *
  */
-// Memory allocation policy: classic, use a mempool, etc.*/
-template<class FilteredComplex, class CoefficientField>  // to do mem allocation policy: classic, mempool, etc.
+// TODO(CM): Memory allocation policy: classic, use a mempool, etc.
+template<class FilteredComplex, class CoefficientField>
 class Persistent_cohomology {
  public:
   typedef FilteredComplex Complex_ds;
@@ -194,7 +68,7 @@ class Persistent_cohomology {
   typedef typename Complex_ds::Simplex_handle Simplex_handle;
   typedef typename Complex_ds::Filtration_value Filtration_value;
   typedef typename CoefficientField::Element Arith_element;
-// Compressed Annotation Matrix types:
+  // Compressed Annotation Matrix types:
   // Column type
   typedef Persistent_cohomology_column<Simplex_key, Arith_element> Column;  // contains 1 set_hook
   // Cell type
@@ -206,15 +80,15 @@ class Persistent_cohomology {
 
   typedef boost::intrusive::set<Column,
       boost::intrusive::constant_time_size<false> > Cam;
-// Sparse column type for the annotation of the boundary of an element.
+  // Sparse column type for the annotation of the boundary of an element.
   typedef std::vector<std::pair<Simplex_key, Arith_element> > A_ds_type;
-// Persistent interval type. The Arith_element field is used for the multi-field framework.
+  // Persistent interval type. The Arith_element field is used for the multi-field framework.
   typedef std::tuple<Simplex_handle, Simplex_handle, Arith_element> Persistent_interval;
 
   /** \brief Initializes the Persistent_cohomology class.
    *
    * @param[in] cpx Complex for which the persistent homology is computed.
-   cpx is a model of FilteredComplex
+   * cpx is a model of FilteredComplex
    */
   explicit Persistent_cohomology(Complex_ds& cpx)
       : cpx_(&cpx),
@@ -243,7 +117,7 @@ class Persistent_cohomology {
   /** \brief Initializes the Persistent_cohomology class.
    *
    * @param[in] cpx Complex for which the persistent homology is compiuted.
-   cpx is a model of FilteredComplex
+   * cpx is a model of FilteredComplex
    *
    * @param[in] persistence_dim_max if true, the persistent homology for the maximal dimension in the
    *                                complex is computed. If false, it is ignored. Default is false.
@@ -332,7 +206,7 @@ class Persistent_cohomology {
       persistent_pairs_.emplace_back(
           cpx_->simplex(zero_idx.second), cpx_->null_simplex(), coeff_field_.characteristic());
     }
-// Compute infinite interval of dimension > 0
+    // Compute infinite interval of dimension > 0
     for (auto cocycle : transverse_idx_) {
       persistent_pairs_.emplace_back(
           cpx_->simplex(cocycle.first), cpx_->null_simplex(), cocycle.second.characteristics_);
@@ -434,14 +308,14 @@ class Persistent_cohomology {
         // Find its annotation vector
         curr_col = ds_repr_[dsets_.find_set(key)];
         if (curr_col != NULL) {  // and insert it in annotations_in_boundary with multyiplicative factor "sign".
-	  annotations_in_boundary.emplace_back(curr_col, sign);
+          annotations_in_boundary.emplace_back(curr_col, sign);
         }
       }
       sign = -sign;
     }
     // Place identical annotations consecutively so we can easily sum their multiplicities.
     std::sort(annotations_in_boundary.begin(), annotations_in_boundary.end(),
-	[](annotation_t const& a, annotation_t const& b) { return a.first < b.first; });
+              [](annotation_t const& a, annotation_t const& b) { return a.first < b.first; });
 
     // Sum the annotations with multiplicity, using a map<key,coeff>
     // to represent a sparse vector.
@@ -451,7 +325,7 @@ class Persistent_cohomology {
       Column* col = ann_it->first;
       int mult = ann_it->second;
       while (++ann_it != annotations_in_boundary.end() && ann_it->first == col) {
-	mult += ann_it->second;
+        mult += ann_it->second;
       }
       // The following test is just a heuristic, it is not required, and it is fine that is misses p == 0.
       if (mult != coeff_field_.additive_identity()) {  // For all columns in the boundary,
@@ -692,7 +566,6 @@ class Persistent_cohomology {
    * feature exists in homology with Z/piZ coefficients.
    */
   void output_diagram(std::ostream& ostream = std::cout) {
-
     cmp_intervals_by_length cmp(cpx_);
     std::sort(std::begin(persistent_pairs_), std::end(persistent_pairs_), cmp);
     bool has_infinity = std::numeric_limits<Filtration_value>::has_infinity;
@@ -720,12 +593,105 @@ class Persistent_cohomology {
     }
   }
 
+  /** @brief Returns Betti numbers.
+   * @return A vector of Betti numbers.
+   */
+  std::vector<int> betti_numbers() const {
+    // Init Betti numbers vector with zeros until Simplicial complex dimension
+    std::vector<int> betti_numbers(cpx_->dimension(), 0);
+
+    for (auto pair : persistent_pairs_) {
+      // Count never ended persistence intervals
+      if (cpx_->null_simplex() == get<1>(pair)) {
+        // Increment corresponding betti number
+        betti_numbers[cpx_->dimension(get<0>(pair))] += 1;
+      }
+    }
+    return betti_numbers;
+  }
+
+  /** @brief Returns the Betti number of the dimension passed by parameter.
+   * @param[in] dimension The Betti number dimension to get.
+   * @return Betti number of the given dimension
+   *
+   */
+  int betti_number(int dimension) const {
+    int betti_number = 0;
+
+    for (auto pair : persistent_pairs_) {
+      // Count never ended persistence intervals
+      if (cpx_->null_simplex() == get<1>(pair)) {
+        if (cpx_->dimension(get<0>(pair)) == dimension) {
+          // Increment betti number found
+          ++betti_number;
+        }
+      }
+    }
+    return betti_number;
+  }
+
+  /** @brief Returns the persistent Betti numbers.
+   * @param[in] from The persistence birth limit to be added in the number \f$(persistent birth \leq from)\f$.
+   * @param[in] to The persistence death limit to be added in the number  \f$(persistent death > to)\f$.
+   * @return A vector of persistent Betti numbers.
+   */
+  std::vector<int> persistent_betti_numbers(Filtration_value from, Filtration_value to) const {
+    // Init Betti numbers vector with zeros until Simplicial complex dimension
+    std::vector<int> betti_numbers(cpx_->dimension(), 0);
+
+    for (auto pair : persistent_pairs_) {
+      // Count persistence intervals that covers the given interval
+      // null_simplex test : if the function is called with to=+infinity, we still get something useful. And it will
+      // still work if we change the complex filtration function to reject null simplices.
+      if (cpx_->filtration(get<0>(pair)) <= from &&
+          (get<1>(pair) == cpx_->null_simplex() || cpx_->filtration(get<1>(pair)) > to)) {
+        // Increment corresponding betti number
+        betti_numbers[cpx_->dimension(get<0>(pair))] += 1;
+      }
+    }
+    return betti_numbers;
+  }
+
+  /** @brief Returns the persistent Betti number of the dimension passed by parameter.
+   * @param[in] dimension The Betti number dimension to get.
+   * @param[in] from The persistence birth limit to be added in the number \f$(persistent birth \leq from)\f$.
+   * @param[in] to The persistence death limit to be added in the number  \f$(persistent death > to)\f$.
+   * @return Persistent Betti number of the given dimension
+   */
+  int persistent_betti_number(int dimension, Filtration_value from, Filtration_value to) const {
+    int betti_number = 0;
+
+    for (auto pair : persistent_pairs_) {
+      // Count persistence intervals that covers the given interval
+      // null_simplex test : if the function is called with to=+infinity, we still get something useful. And it will
+      // still work if we change the complex filtration function to reject null simplices.
+      if (cpx_->filtration(get<0>(pair)) <= from &&
+          (get<1>(pair) == cpx_->null_simplex() || cpx_->filtration(get<1>(pair)) > to)) {
+        if (cpx_->dimension(get<0>(pair)) == dimension) {
+          // Increment betti number found
+          ++betti_number;
+        }
+      }
+    }
+    return betti_number;
+  }
+
+  /** @brief Returns the persistent pairs.
+   * @return Persistent pairs
+   *
+   */
+  const std::vector<Persistent_interval>& get_persistent_pairs() const {
+    return persistent_pairs_;
+  }
+
  private:
   /*
    * Structure representing a cocycle.
    */
   struct cocycle {
-    cocycle() {
+    cocycle()
+        : row_(nullptr),
+          characteristics_() {
     }
     cocycle(Arith_element characteristics, Hcell * row)
         : row_(row),
@@ -765,8 +731,6 @@ class Persistent_cohomology {
   Simple_object_pool<Column> column_pool_;
   Simple_object_pool<Cell> cell_pool_;
 };
-
-/** @} */  // end defgroup persistent_cohomology
 
 }  // namespace persistent_cohomology
 
