@@ -31,11 +31,13 @@ __license__ = "GPL v3"
 
 class TestWitnessComplex(unittest.TestCase):
 
-    def test_infinite_alpha(self):
+    def test_witness_complex(self):
         point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
         witness = gudhi.WitnessComplex(points=point_list,
                                        number_of_landmarks=10)
 
+        # FIXME: Remove this line
+        witness.set_dimension(2)
 
         self.assertEqual(witness.num_simplices(), 13)
         self.assertEqual(witness.num_vertices(), 10)
@@ -46,8 +48,12 @@ class TestWitnessComplex(unittest.TestCase):
                          ([1, 2], 0.0), ([3], 0.0), ([4], 0.0), ([3, 4], 0.0),
                          ([5], 0.0), ([6], 0.0), ([7], 0.0), ([8], 0.0),
                          ([9], 0.0)])
-        self.assertEqual(witness.get_star_tree([0]), [])
-        self.assertEqual(witness.get_coface_tree([0], 1), [])
+
+        self.assertEqual(witness.get_coface_tree([2], 1),
+                         [([0, 2], 0.0), ([1, 2], 0.0)])
+        self.assertEqual(witness.get_star_tree([2]),
+                         [([0, 2], 0.0), ([1, 2], 0.0), ([2], 0.0)])
+
 
 if __name__ == '__main__':
     unittest.main()

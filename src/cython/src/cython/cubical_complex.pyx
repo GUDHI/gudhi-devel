@@ -2,6 +2,7 @@ from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 from libcpp.string cimport string
+import os
 
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
@@ -52,7 +53,8 @@ cdef class CubicalComplex:
 
     cdef Cubical_complex_persistence_interface * pcohptr
 
-    def __cinit__(self, dimensions=None, top_dimensional_cells=None, perseus_file=''):
+    def __cinit__(self, dimensions=None, top_dimensional_cells=None,
+                  perseus_file=''):
         """CubicalComplex constructor from dimensions and
         top_dimensional_cells or from a perseus file style name.
 
@@ -61,17 +63,32 @@ cdef class CubicalComplex:
            top_dimensional_cells (list): A list of top dimensional cells.
            perseus_file (string): A perseus file style name.
          """
-        if dimensions is not None:
-            if top_dimensional_cells is not None:
-                self.thisptr = new Bitmap_cubical_complex_base_interface(dimensions, top_dimensional_cells)
+        if (((dimensions is not None) or (top_dimensional_cells is not None)) and
+             (perseus_file is not '')):
+            print("CubicalComplex can be constructed from dimensions and "
+                  "top_dimensional_cells or from a perseus file style name.")
         else:
-            self.thisptr = new Bitmap_cubical_complex_base_interface(perseus_file)
+            if dimensions is not None:
+                if top_dimensional_cells is not None:
+                    self.thisptr = new Bitmap_cubical_complex_base_interface(dimensions, top_dimensional_cells)
+            else:
+                if perseus_file is not '':
+                    if os.path.isfile(perseus_file):
+                        self.thisptr = new Bitmap_cubical_complex_base_interface(perseus_file)
+                    else:
+                        print("file " + perseus_file + " not found.")
 
     def __dealloc__(self):
         if self.thisptr != NULL:
             del self.thisptr
         if self.pcohptr != NULL:
             del self.pcohptr
+
+    def __is_defined(self):
+        return self.thisptr != NULL
+
+    def __is_persistence_defined(self):
+        return self.pcohptr != NULL
 
     def persistence(self, homology_coeff_field=11, min_persistence=0):
         """This function returns the persistence of the simplicial complex.
@@ -88,7 +105,8 @@ cdef class CubicalComplex:
         """
         if self.pcohptr != NULL:
             del self.pcohptr
-        self.pcohptr = new Cubical_complex_persistence_interface(self.thisptr)
+        if self.thisptr != NULL:
+            self.pcohptr = new Cubical_complex_persistence_interface(self.thisptr)
         cdef vector[pair[int, pair[double, double]]] persistence_result
         if self.pcohptr != NULL:
             persistence_result = self.pcohptr.get_persistence(homology_coeff_field, min_persistence)
@@ -98,13 +116,13 @@ cdef class CubicalComplex:
         """This function returns the Betti numbers of the simplicial complex.
 
         :returns: list of int -- The Betti numbers ([B0, B1, ..., Bn]).
+
+        :warning: betti_numbers function requires persistence function to be
+        launched first.
         """
         cdef vector[int] bn_result
         if self.pcohptr != NULL:
             bn_result = self.pcohptr.betti_numbers()
-        else:
-            print("betti_numbers function requires persistence function"
-                  " to be launched first.")
         return bn_result
 
     def persistent_betti_numbers(self, from_value, to_value):
@@ -120,11 +138,11 @@ cdef class CubicalComplex:
 
         :returns: list of int -- The persistent Betti numbers ([B0, B1, ...,
         Bn]).
+
+        :warning: betti_numbers function requires persistence function to be
+        launched first.
         """
         cdef vector[int] pbn_result
         if self.pcohptr != NULL:
             pbn_result = self.pcohptr.persistent_betti_numbers(<double>from_value, <double>to_value)
-        else:
-            print("persistent_betti_numbers function requires persistence function"
-                  " to be launched first.")
         return pbn_result
