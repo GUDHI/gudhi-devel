@@ -81,22 +81,31 @@ cdef class AlphaComplex:
 
     cdef Alpha_complex_persistence_interface * pcohptr
 
-    def __cinit__(self, points=None, max_alpha_square=float('inf')):
+    def __cinit__(self, points=[], max_alpha_square=float('inf')):
         """AlphaComplex constructor.
 
         Args:
            points (list): A list of points in d-Dimension.
            max_alpha_square (float): Maximum Alpha square value.
         """
-        if points is not None:
-            self.thisptr = new Alpha_complex_interface(points,
-                                                       max_alpha_square)
+        self.thisptr = new Alpha_complex_interface(points,
+                                                   max_alpha_square)
 
     def __dealloc__(self):
         if self.thisptr != NULL:
             del self.thisptr
         if self.pcohptr != NULL:
             del self.pcohptr
+
+    def __is_defined(self):
+        """Returns true if AlphaComplex pointer is not NULL.
+         """
+        return self.thisptr != NULL
+
+    def __is_persistence_defined(self):
+        """Returns true if Persistence pointer is not NULL.
+         """
+        return self.pcohptr != NULL
 
     def get_filtration(self):
         """This function returns the main simplicial complex filtration value.

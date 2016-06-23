@@ -1,6 +1,4 @@
-import unittest
-
-import gudhi
+from gudhi import WitnessComplex
 
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
@@ -29,31 +27,29 @@ __copyright__ = "Copyright (C) 2016 INRIA"
 __license__ = "GPL v3"
 
 
-class TestWitnessComplex(unittest.TestCase):
+def test_empty_witness_complex():
+    witness = WitnessComplex()
+    assert witness.__is_defined() == False
 
-    def test_witness_complex(self):
-        point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
-        witness = gudhi.WitnessComplex(points=point_list,
-                                       number_of_landmarks=10)
+def test_witness_complex():
+    point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
+    witness = WitnessComplex(points=point_list, number_of_landmarks=10)
+    assert witness.__is_defined() == True
 
-        # FIXME: Remove this line
-        witness.set_dimension(2)
+    # FIXME: Remove this line
+    witness.set_dimension(2)
 
-        self.assertEqual(witness.num_simplices(), 13)
-        self.assertEqual(witness.num_vertices(), 10)
-        witness.initialize_filtration()
+    assert witness.num_simplices() == 13
+    assert witness.num_vertices() == 10
+    witness.initialize_filtration()
 
-        self.assertEqual(witness.get_filtered_tree(),
-                         [([0], 0.0), ([1], 0.0), ([2], 0.0), ([0, 2], 0.0),
-                         ([1, 2], 0.0), ([3], 0.0), ([4], 0.0), ([3, 4], 0.0),
-                         ([5], 0.0), ([6], 0.0), ([7], 0.0), ([8], 0.0),
-                         ([9], 0.0)])
+    assert witness.get_filtered_tree() == \
+        [([0], 0.0), ([1], 0.0), ([2], 0.0), ([0, 2], 0.0),
+        ([1, 2], 0.0), ([3], 0.0), ([4], 0.0), ([3, 4], 0.0),
+        ([5], 0.0), ([6], 0.0), ([7], 0.0), ([8], 0.0),
+        ([9], 0.0)]
 
-        self.assertEqual(witness.get_coface_tree([2], 1),
-                         [([0, 2], 0.0), ([1, 2], 0.0)])
-        self.assertEqual(witness.get_star_tree([2]),
-                         [([0, 2], 0.0), ([1, 2], 0.0), ([2], 0.0)])
-
-
-if __name__ == '__main__':
-    unittest.main()
+    assert witness.get_coface_tree([2], 1) == \
+        [([0, 2], 0.0), ([1, 2], 0.0)]
+    assert witness.get_star_tree([2]) == \
+        [([0, 2], 0.0), ([1, 2], 0.0), ([2], 0.0)]

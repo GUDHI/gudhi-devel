@@ -2,11 +2,11 @@ ext:
 	python setup.py build_ext --inplace
 
 test:
-	python test/test_simplex_tree.py
-	python test/test_mini_simplex_tree.py
-	python test/test_rips_complex.py
-	python test/test_alpha_complex.py
-	python test/test_witness_complex.py
+	python -m pytest test/test_simplex_tree.py
+	python -m pytest test/test_mini_simplex_tree.py
+	python -m pytest test/test_rips_complex.py
+	python -m pytest test/test_alpha_complex.py
+	python -m pytest test/test_witness_complex.py
 	python -m pytest test/test_cubical_complex.py
 
 example:

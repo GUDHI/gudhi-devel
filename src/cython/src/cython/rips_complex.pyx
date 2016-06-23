@@ -78,7 +78,7 @@ cdef class RipsComplex:
 
     cdef Rips_complex_persistence_interface * pcohptr
 
-    def __cinit__(self, points=None, max_dimension=3,
+    def __cinit__(self, points=[], max_dimension=3,
                   max_edge_length=float('inf')):
         """RipsComplex constructor.
 
@@ -98,6 +98,16 @@ cdef class RipsComplex:
             del self.thisptr
         if self.pcohptr != NULL:
             del self.pcohptr
+
+    def __is_defined(self):
+        """Returns true if RipsComplex pointer is not NULL.
+         """
+        return self.thisptr != NULL
+
+    def __is_persistence_defined(self):
+        """Returns true if Persistence pointer is not NULL.
+         """
+        return self.pcohptr != NULL
 
     def get_filtration(self):
         """This function returns the main simplicial complex filtration value.

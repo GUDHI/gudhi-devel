@@ -1,6 +1,4 @@
-import unittest
-
-import gudhi
+from gudhi import MiniSimplexTree
 
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
@@ -29,27 +27,24 @@ __copyright__ = "Copyright (C) 2016 INRIA"
 __license__ = "GPL v3"
 
 
-class TestMiniSimplexTree(unittest.TestCase):
+def test_mini():
+    triangle012 = [0, 1, 2]
+    edge03 = [0, 3]
+    mini_st = MiniSimplexTree()
+    assert mini_st.__is_defined() == True
+    assert mini_st.__is_persistence_defined() == False
+    assert mini_st.insert(triangle012) == True
+    assert mini_st.insert(edge03) == True
+    # FIXME: Remove this line
+    mini_st.set_dimension(2)
 
-    def test_mini(self):
-        triangle012 = [0, 1, 2]
-        edge03 = [0, 3]
-        mini_st = gudhi.MiniSimplexTree()
-        self.assertTrue(mini_st.insert(triangle012))
-        self.assertTrue(mini_st.insert(edge03))
-        # FIXME: Remove this line
-        mini_st.set_dimension(2)
+    edge02 = [0, 2]
+    assert mini_st.find(edge02) == True
+    assert mini_st.get_coface_tree(edge02, 1) == \
+            [([0, 1, 2], 0.0)]
 
-        edge02 = [0, 2]
-        self.assertTrue(mini_st.find(edge02))
-        self.assertEqual(mini_st.get_coface_tree(edge02, 1),
-                         [([0, 1, 2], 0.0)])
-
-        # remove_maximal_simplex test
-        self.assertEqual(mini_st.get_coface_tree(triangle012, 1), [])
-        mini_st.remove_maximal_simplex(triangle012)
-        self.assertTrue(mini_st.find(edge02))
-        self.assertFalse(mini_st.find(triangle012))
-
-if __name__ == '__main__':
-    unittest.main()
+    # remove_maximal_simplex test
+    assert mini_st.get_coface_tree(triangle012, 1) == []
+    mini_st.remove_maximal_simplex(triangle012)
+    assert mini_st.find(edge02) == True
+    assert mini_st.find(triangle012) == False

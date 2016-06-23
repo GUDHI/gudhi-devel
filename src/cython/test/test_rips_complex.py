@@ -1,6 +1,4 @@
-import unittest
-
-import gudhi
+from gudhi import RipsComplex
 
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
@@ -29,33 +27,39 @@ __copyright__ = "Copyright (C) 2016 INRIA"
 __license__ = "GPL v3"
 
 
-class TestRipsComplex(unittest.TestCase):
+def test_empty_rips():
+    rips_complex = RipsComplex()
+    assert rips_complex.__is_defined() == True
+    assert rips_complex.__is_persistence_defined() == False
 
-    def test_rips(self):
-        point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
-        rips_complex = gudhi.RipsComplex(points=point_list, max_dimension=1,
-                                         max_edge_length=42)
+def test_rips():
+    point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
+    rips_complex = RipsComplex(points=point_list, max_dimension=1,
+                               max_edge_length=42)
+    assert rips_complex.__is_defined() == True
+    assert rips_complex.__is_persistence_defined() == False
 
-        self.assertEqual(rips_complex.num_simplices(), 10)
-        self.assertEqual(rips_complex.num_vertices(), 4)
+    assert rips_complex.num_simplices() == 10
+    assert rips_complex.num_vertices() == 4
 
-        self.assertEqual(rips_complex.get_filtered_tree(),
-                         [([0], 0.0), ([1], 0.0), ([2], 0.0), ([3], 0.0),
-                          ([0, 1], 1.0), ([0, 2], 1.0), ([1, 3], 1.0),
-                          ([2, 3], 1.0), ([1, 2], 1.4142135623730951),
-                          ([0, 3], 1.4142135623730951)])
-        self.assertEqual(rips_complex.get_star_tree([0]),
-                         [([0], 0.0), ([0, 1], 1.0), ([0, 2], 1.0),
-                          ([0, 3], 1.4142135623730951)])
-        self.assertEqual(rips_complex.get_coface_tree([0], 1),
-                         [([0, 1], 1.0), ([0, 2], 1.0),
-                          ([0, 3], 1.4142135623730951)])
+    assert rips_complex.get_filtered_tree() == \
+           [([0], 0.0), ([1], 0.0), ([2], 0.0), ([3], 0.0),
+            ([0, 1], 1.0), ([0, 2], 1.0), ([1, 3], 1.0),
+            ([2, 3], 1.0), ([1, 2], 1.4142135623730951),
+            ([0, 3], 1.4142135623730951)]
+    assert rips_complex.get_star_tree([0]) == \
+           [([0], 0.0), ([0, 1], 1.0), ([0, 2], 1.0),
+            ([0, 3], 1.4142135623730951)]
+    assert rips_complex.get_coface_tree([0], 1) == \
+           [([0, 1], 1.0), ([0, 2], 1.0),
+            ([0, 3], 1.4142135623730951)]
 
-        filtered_rips = gudhi.RipsComplex(points=point_list, max_dimension=1,
-                                          max_edge_length=1.0)
+def test_filtered_rips():
+    point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
+    filtered_rips = RipsComplex(points=point_list, max_dimension=1,
+                                      max_edge_length=1.0)
+    assert filtered_rips.__is_defined() == True
+    assert filtered_rips.__is_persistence_defined() == False
 
-        self.assertEqual(filtered_rips.num_simplices(), 8)
-        self.assertEqual(filtered_rips.num_vertices(), 4)
-
-if __name__ == '__main__':
-    unittest.main()
+    assert filtered_rips.num_simplices() == 8
+    assert filtered_rips.num_vertices() == 4

@@ -85,9 +85,13 @@ cdef class CubicalComplex:
             del self.pcohptr
 
     def __is_defined(self):
+        """Returns true if CubicalComplex pointer is not NULL.
+         """
         return self.thisptr != NULL
 
     def __is_persistence_defined(self):
+        """Returns true if Persistence pointer is not NULL.
+         """
         return self.pcohptr != NULL
 
     def persistence(self, homology_coeff_field=11, min_persistence=0):

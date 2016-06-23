@@ -83,6 +83,16 @@ cdef class SimplexTree:
         if self.pcohptr != NULL:
             del self.pcohptr
 
+    def __is_defined(self):
+        """Returns true if SimplexTree pointer is not NULL.
+         """
+        return self.thisptr != NULL
+
+    def __is_persistence_defined(self):
+        """Returns true if Persistence pointer is not NULL.
+         """
+        return self.pcohptr != NULL
+
     def get_filtration(self):
         """This function returns the main simplicial complex filtration value.
 

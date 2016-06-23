@@ -1,6 +1,4 @@
-import unittest
-
-import gudhi
+from gudhi import SimplexTree
 
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
@@ -29,63 +27,72 @@ __copyright__ = "Copyright (C) 2016 INRIA"
 __license__ = "GPL v3"
 
 
-class TestSimplexTree(unittest.TestCase):
+def test_insertion():
+    st = SimplexTree()
+    assert st.__is_defined() == True
+    assert st.__is_persistence_defined() == False
 
-    def test_insertion(self):
-        st = gudhi.SimplexTree()
+    # insert test
+    assert st.insert([0, 1]) == True
+    assert st.insert([0, 1, 2], filtration=4.0) == True
+    # FIXME: Remove this line
+    st.set_dimension(2)
+    assert st.num_simplices() == 7
+    assert st.num_vertices() == 3
 
-        # insert test
-        self.assertTrue(st.insert([0, 1]))
-        self.assertTrue(st.insert([0, 1, 2], filtration=4.0))
-        self.assertEqual(st.num_simplices(), 7)
-        self.assertEqual(st.num_vertices(), 3)
+    # find test
+    assert st.find([0, 1, 2]) == True
+    assert st.find([0, 1]) == True
+    assert st.find([0, 2]) == True
+    assert st.find([0]) == True
+    assert st.find([1]) == True
+    assert st.find([2]) == True
+    assert st.find([3])    == False
+    assert st.find([0, 3]) == False
+    assert st.find([1, 3]) == False
+    assert st.find([2, 3]) == False
 
-        # find test
-        self.assertTrue(st.find([0, 1, 2]))
-        self.assertTrue(st.find([0, 1]))
-        self.assertTrue(st.find([0, 2]))
-        self.assertTrue(st.find([0]))
-        self.assertTrue(st.find([1]))
-        self.assertTrue(st.find([2]))
-        self.assertFalse(st.find([3]))
-        self.assertFalse(st.find([0, 3]))
-        self.assertFalse(st.find([1, 3]))
-        self.assertFalse(st.find([2, 3]))
+    # filtration test
+    st.set_filtration(5.0)
+    st.initialize_filtration()
+    assert st.get_filtration() == 5.0
+    assert st.filtration([0, 1, 2]) == 4.0
+    assert st.filtration([0, 2]) == 4.0
+    assert st.filtration([1, 2]) == 4.0
+    assert st.filtration([2]) == 4.0
+    assert st.filtration([0, 1]) == 0.0
+    assert st.filtration([0]) == 0.0
+    assert st.filtration([1]) == 0.0
 
-        # filtration test
-        st.set_filtration(5.0)
-        st.initialize_filtration()
-        self.assertEqual(st.get_filtration(), 5.0)
-        self.assertEqual(st.filtration([0, 1, 2]), 4.0)
-        self.assertEqual(st.filtration([0, 2]), 4.0)
-        self.assertEqual(st.filtration([1, 2]), 4.0)
-        self.assertEqual(st.filtration([2]), 4.0)
-        self.assertEqual(st.filtration([0, 1]), 0.0)
-        self.assertEqual(st.filtration([0]), 0.0)
-        self.assertEqual(st.filtration([1]), 0.0)
+    # skeleton_tree test
+    assert st.get_skeleton_tree(2) == \
+        [([0, 1, 2], 4.0), ([0, 1], 0.0), ([0, 2], 4.0),
+        ([0], 0.0), ([1, 2], 4.0), ([1], 0.0), ([2], 4.0)]
+    assert st.get_skeleton_tree(1) == \
+        [([0, 1], 0.0), ([0, 2], 4.0), ([0], 0.0),
+        ([1, 2], 4.0), ([1], 0.0), ([2], 4.0)]
+    assert st.get_skeleton_tree(0) == \
+        [([0], 0.0), ([1], 0.0), ([2], 4.0)]
 
-        # skeleton_tree test
-        self.assertEqual(st.get_skeleton_tree(2),
-                         [([0, 1, 2], 4.0), ([0, 1], 0.0), ([0, 2], 4.0),
-                          ([0], 0.0), ([1, 2], 4.0), ([1], 0.0), ([2], 4.0)])
-        self.assertEqual(st.get_skeleton_tree(1),
-                         [([0, 1], 0.0), ([0, 2], 4.0), ([0], 0.0),
-                          ([1, 2], 4.0), ([1], 0.0), ([2], 4.0)])
-        self.assertEqual(st.get_skeleton_tree(0),
-                         [([0], 0.0), ([1], 0.0), ([2], 4.0)])
+    # remove_maximal_simplex test
+    assert st.get_coface_tree([0, 1, 2], 1) == []
+    st.remove_maximal_simplex([0, 1, 2])
+    assert st.get_skeleton_tree(2) == \
+        [([0, 1], 0.0), ([0, 2], 4.0), ([0], 0.0),
+        ([1, 2], 4.0), ([1], 0.0), ([2], 4.0)]
+    assert st.find([0, 1, 2]) == False
+    assert st.find([0, 1]) == True
+    assert st.find([0, 2]) == True
+    assert st.find([0]) == True
+    assert st.find([1]) == True
+    assert st.find([2]) == True
 
-        # remove_maximal_simplex test
-        self.assertEqual(st.get_coface_tree([0, 1, 2], 1), [])
-        st.remove_maximal_simplex([0, 1, 2])
-        self.assertEqual(st.get_skeleton_tree(2),
-                         [([0, 1], 0.0), ([0, 2], 4.0), ([0], 0.0),
-                          ([1, 2], 4.0), ([1], 0.0), ([2], 4.0)])
-        self.assertFalse(st.find([0, 1, 2]))
-        self.assertTrue(st.find([0, 1]))
-        self.assertTrue(st.find([0, 2]))
-        self.assertTrue(st.find([0]))
-        self.assertTrue(st.find([1]))
-        self.assertTrue(st.find([2]))
-
-if __name__ == '__main__':
-    unittest.main()
+    st.initialize_filtration()
+    assert st.persistence() == [(1, (4.0, float('inf'))), (0, (0.0, float('inf')))]
+    assert st.__is_persistence_defined() == True
+    assert st.betti_numbers() == [1, 1]
+    assert st.persistent_betti_numbers(-0.1, 10000.0) == [0, 0]
+    assert st.persistent_betti_numbers(0.0, 10000.0) == [1, 0]
+    assert st.persistent_betti_numbers(3.9, 10000.0) == [1, 0]
+    assert st.persistent_betti_numbers(4.0, 10000.0) == [1, 1]
+    assert st.persistent_betti_numbers(9999.0, 10000.0) == [1, 1]

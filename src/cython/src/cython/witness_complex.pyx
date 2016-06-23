@@ -61,8 +61,6 @@ cdef class WitnessComplex:
 
     cdef Witness_complex_interface * thisptr
 
-    #cdef Witness_complex_persistence_interface * pcohptr
-
     def __cinit__(self, points=None, number_of_landmarks=5):
         """WitnessComplex constructor.
 
@@ -78,8 +76,11 @@ cdef class WitnessComplex:
     def __dealloc__(self):
         if self.thisptr != NULL:
             del self.thisptr
-        #if self.pcohptr != NULL:
-        #    del self.pcohptr
+
+    def __is_defined(self):
+        """Returns true if AlphaComplex pointer is not NULL.
+         """
+        return self.thisptr != NULL
 
     def get_filtration(self):
         """This function returns the main simplicial complex filtration value.
