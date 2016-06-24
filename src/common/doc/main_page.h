@@ -187,10 +187,6 @@
  * Persistent_cohomology/alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_simplex_tree_2simplex_tree_from_alpha_shapes_3_8cpp-example.html">
  * Simplex_tree/simplex_tree_from_alpha_shapes_3.cpp</a>
- * \li <a href="_alpha_complex_2_alpha_complex_from_off_8cpp-example.html">
- *  Alpha_complex/Alpha_complex_from_off.cpp</a>
- * \li <a href="_alpha_complex_2_alpha_complex_from_points_8cpp-example.html">
- *  Alpha_complex/Alpha_complex_from_points.cpp</a>
  * 
  * The following example requires CGAL version &ge; 4.6:
  * \li <a href="_witness_complex_2witness_complex_sphere_8cpp-example.html">
