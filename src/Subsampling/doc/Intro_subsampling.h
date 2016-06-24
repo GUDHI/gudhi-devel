@@ -30,7 +30,7 @@ namespace subsampling {
 
 /**  \defgroup subsampling Subsampling
  * 
- * \author    Clément Jamin, Siargey Kachanovich
+ * \author Cl&eacute;ment Jamin, Siargey Kachanovich
  * 
  * @{
  * 
@@ -38,9 +38,9 @@ namespace subsampling {
  * 
  * This Gudhi component offers methods to subsample a set of points.
  * 
- * \section sparsifyexamples Example: `sparsify_point_set`
+ * \section sparsifyexamples Example: sparsify_point_set
  * 
- * This example Outputs a subset of the input points so that the 
+ * This example outputs a subset of the input points so that the 
  * squared distance between any two points
  * is greater than or equal to 0.4.
  * 
