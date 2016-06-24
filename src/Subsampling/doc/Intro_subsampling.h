@@ -46,6 +46,13 @@ namespace subsampling {
  * 
  * \include Subsampling/example_sparsify_point_set.cpp
  * 
+ * \section farthestpointexamples Example: choose_by_farthest_point
+ *
+ * This example outputs a subset of 100 points obtained by Gonz&aacute;lez algorithm,
+ * starting with a random point.
+ *
+ * \include Subsampling/example_choose_by_farthest_point.cpp
+ * 
  * \copyright GNU General Public License v3.                         
  * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
  */
