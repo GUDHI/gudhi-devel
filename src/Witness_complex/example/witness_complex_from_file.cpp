@@ -26,7 +26,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Witness_complex.h>
 #include <gudhi/Construct_closest_landmark_table.h>
-#include <gudhi/Pick_random_points.h>
+#include <gudhi/pick_random_points.h>
 #include <gudhi/reader_utils.h>
 
 #include <iostream>
