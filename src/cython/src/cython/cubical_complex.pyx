@@ -63,7 +63,7 @@ cdef class CubicalComplex:
            top_dimensional_cells (list): A list of top dimensional cells.
            perseus_file (string): A perseus file style name.
          """
-        if (((dimensions is not None) or (top_dimensional_cells is not None)) and
+        if ((dimensions is not None) or (top_dimensional_cells is not None) and
              (perseus_file is not '')):
             print("CubicalComplex can be constructed from dimensions and "
                   "top_dimensional_cells or from a perseus file style name.")

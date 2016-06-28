@@ -74,15 +74,14 @@ else()
   if (GCOVR_PATH)
     message("gcovr found in ${GCOVR_PATH}")
   endif()
-  # Required programs for unitary tests purpose
   FIND_PROGRAM( GPROF_PATH gprof )
   if (GPROF_PATH)
     message("gprof found in ${GPROF_PATH}")
   endif()
-FIND_PROGRAM( DIFF_PATH diff )
-if (DIFF_PATH)
-  message("diff found in ${DIFF_PATH}")
-endif()
+  FIND_PROGRAM( DIFF_PATH diff )
+  if (DIFF_PATH)
+    message("diff found in ${DIFF_PATH}")
+  endif()
 
   # BOOST ISSUE result_of vs C++11
   add_definitions(-DBOOST_RESULT_OF_USE_DECLTYPE)
@@ -134,6 +133,10 @@ endif()
   # Please let GudhUI in last compilation position as QT is known to modify CMAKE_CXX_FLAGS
   # GudhUI
   add_subdirectory(src/GudhUI)
+
+  # This variable is used by Cython CMakeLists.txt to know its path
+  set(GUDHI_CYTHON_PATH "src/cython")
+  add_subdirectory(${GUDHI_CYTHON_PATH})
 
 endif()  
 

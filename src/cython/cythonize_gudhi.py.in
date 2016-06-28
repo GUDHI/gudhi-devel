@@ -1,3 +1,6 @@
+from distutils.core import setup, Extension
+from Cython.Build import cythonize
+
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
    library for computational topology.
@@ -24,10 +27,21 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016  INRIA Saclay (France)"
 __license__ = "GPL v3"
 
-include "src/cython/simplex_tree.pyx"
-include "src/cython/mini_simplex_tree.pyx"
-include "src/cython/rips_complex.pyx"
-include "src/cython/alpha_complex.pyx"
-include "src/cython/cubical_complex.pyx"
-include "src/cython/witness_complex.pyx"
-include "src/cython/persistence_graphical_tools.py"
+gudhi = Extension(
+    "gudhi",
+    sources = ['gudhi.pyx',],
+    language = 'c++',
+    extra_compile_args=[@GUDHI_CYTHON_EXTRA_COMPILE_ARGS@],
+    libraries=[@GUDHI_CYTHON_LIBRARIES@],
+    library_dirs=[@GUDHI_CYTHON_LIBRARY_DIRS@],
+    include_dirs = [@GUDHI_CYTHON_INCLUDE_DIRS@],
+)
+
+setup(
+    name = 'gudhi',
+    author='Vincent Rouvreau',
+    author_email='gudhi-contact@lists.gforge.inria.fr',
+    version='0.1.0',
+    url='http://gudhi.gforge.inria.fr/',
+    ext_modules = cythonize(gudhi),
+)
