@@ -31,27 +31,22 @@
 
 #include <array>
 #include <vector>
-#include <iterator>
 
 BOOST_AUTO_TEST_CASE(test_Spatial_tree_data_structure)
 {
   typedef CGAL::Epick_d<CGAL::Dimension_tag<4> >    K;
   typedef K::FT                                     FT;
-  typedef K::Point_d                                Point_d;
-  typedef std::vector<Point_d>                      Point_container;
+  typedef K::Point_d                                Point;
+  typedef std::vector<Point>                        Points;
 
   typedef Gudhi::spatial_searching::Spatial_tree_data_structure<
-    K, Point_container>                             Points_ds;
-  typedef typename Points_ds::KNS_range             KNS_range;
-  typedef typename Points_ds::KNS_iterator          KNS_iterator;
-  typedef typename Points_ds::INS_range             INS_range;
-  typedef typename Points_ds::INS_iterator          INS_iterator;
+    K, Points>                                      Points_ds;
   
   CGAL::Random rd;
 
-  std::vector<Point_d> points;
+  Points points;
   for (int i = 0 ; i < 500 ; ++i)
-    points.push_back(Point_d(std::array<FT,4>({rd.get_double(-1.,1),rd.get_double(-1.,1),rd.get_double(-1.,1),rd.get_double(-1.,1)})));
+    points.push_back(Point(std::array<FT,4>({rd.get_double(-1.,1),rd.get_double(-1.,1),rd.get_double(-1.,1),rd.get_double(-1.,1)})));
 
   Points_ds points_ds(points);
 
@@ -59,9 +54,8 @@ BOOST_AUTO_TEST_CASE(test_Spatial_tree_data_structure)
     points_ds.query_ANN(points[10], 1, false).begin()->first;
   BOOST_CHECK(closest_pt_index == 10);
 
-  KNS_range kns_range = points_ds.query_ANN(points[20], 10, true);
+  auto kns_range = points_ds.query_ANN(points[20], 10, true);
 
-  KNS_iterator nn_it = kns_range.begin();
   FT last_dist = -1.;
   for (auto const& nghb : kns_range)
   {
