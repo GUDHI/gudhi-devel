@@ -36,6 +36,26 @@
 namespace Gudhi {
 namespace spatial_searching {
 
+
+  /**
+  * \class Spatial_tree_data_structure Spatial_tree_data_structure.h gudhi/Spatial_tree_data_structure.h
+  * \brief Spatial tree data structure to perform (approximate) nearest neighbor search.
+  *
+  * \ingroup spatial_searching
+  *
+  * \details
+  *  The class Spatial_tree_data_structure represents a tree-based data structure, based on .
+  *  <a target="_blank" href="http://doc.cgal.org/latest/Spatial_searching/index.html">CGAL dD spatial searching data structures</a>.
+  *  It provides a simplified API to perform (approximate) nearest neighbor searches. Contrary to CGAL default behavior, the tree
+  * does not store the points themselves, but stores indices.
+  *
+  * \tparam K requires a <a target="_blank"
+  *   href="http://doc.cgal.org/latest/Kernel_d/classCGAL_1_1Epick__d.html">CGAL::Epick_d</a> class, which
+  *   can be static if you know the ambiant dimension at compile-time, or dynamic if you don't.
+  * \tparam Point_container_ is the type of the container where points are stored (on the user side).
+  *   It must provide random-access via `operator[]` and the points should be stored contiguously in memory.
+  *   `std::vector` is a good candidate.
+  */
 template <typename K, typename Point_container_>
 class Spatial_tree_data_structure
 {
@@ -126,7 +146,8 @@ public:
   KNS_range query_ANN(const
     Point &sp,
     unsigned int k,
-    bool sorted = true) const
+    bool sorted = true,
+    FT eps = FT(0)) const
   {
     // Initialize the search structure, and search all N points
     // Note that we need to pass the Distance explicitly since it needs to
@@ -135,7 +156,7 @@ public:
       m_tree,
       sp,
       k,
-      FT(0),
+      eps,
       true,
       CGAL::Distance_adapter<std::ptrdiff_t,Point*,CGAL::Euclidean_distance<Traits_base> >(
         (Point*)&(m_points[0])),
@@ -144,7 +165,7 @@ public:
     return search;
   }
 
-  INS_range query_incremental_ANN(const Point &sp) const
+  INS_range query_incremental_ANN(const Point &sp, FT eps = FT(0)) const
   {
     // Initialize the search structure, and search all N points
     // Note that we need to pass the Distance explicitly since it needs to
@@ -152,7 +173,7 @@ public:
     Incremental_neighbor_search search(
       m_tree,
       sp,
-      FT(0),
+      eps,
       true,
       CGAL::Distance_adapter<std::ptrdiff_t, Point*, CGAL::Euclidean_distance<Traits_base> >(
         (Point*)&(m_points[0])) );
