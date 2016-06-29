@@ -20,7 +20,7 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+
 #ifndef Persistence_landscapes_H
 #define Persistence_landscapes_H
 
@@ -36,8 +36,6 @@
 
 
 
-
-
 #include <gudhi/abstract_classes/Abs_Vectorized_topological_data.h>
 #include <gudhi/abstract_classes/Abs_Topological_data_with_averages.h>
 #include <gudhi/abstract_classes/Abs_Topological_data_with_distances.h>
@@ -48,6 +46,10 @@ using namespace std;
 
 
 
+namespace Gudhi 
+{
+namespace Gudhi_stat 
+{
 
 
 
@@ -172,7 +174,8 @@ inline double sub(double x, double y){return x-y;}
  * For details of algorithms, please consult ''A persistence landscapes toolbox for topological statistics'' by Peter Bubenik and Pawel Dlotko. 
  * Persistence landscapes allow vertorization, computations of distances, computations of projections to Real, computations of averages and scalar products. Therefore they implement suitable interfaces.
 **/ 
-class Persistence_landscape :  	public Abs_Vectorized_topological_data , 
+class Persistence_landscape :  	
+								public Abs_Vectorized_topological_data , 
 								public Abs_Topological_data_with_distances, 
 								public Abs_Real_valued_topological_data, 
 								public Abs_Topological_data_with_averages, 
@@ -232,7 +235,7 @@ public:
     /**
 	 * This function compute integral of the 'level'-level of a landscape.
 	**/ 
-    double compute_integral_of_landscape( int level )const;
+    double compute_integral_of_landscape( size_t level )const;
     
     
     /**
@@ -406,7 +409,7 @@ public:
 	/**
 	 * Computations of L^{p} distance between two landscapes. p is the parameter of the procedure.
 	**/ 
-    friend double compute_discance_of_landscapes( const Persistence_landscape& first, const Persistence_landscape& second , unsigned p );
+    friend double compute_discance_of_landscapes( const Persistence_landscape& first, const Persistence_landscape& second , int p );
 
     
     
@@ -441,13 +444,14 @@ public:
 	**/  
     double project_to_R( int number_of_function )
     {
-		return this->compute_integral_of_landscape( number_of_function );
+		return this->compute_integral_of_landscape( (size_t)number_of_function );
 	}
+	
     std::vector<double> vectorize( int number_of_function )
     {
 		//TODO, think of something smarter over here
 		std::vector<double> v;
-		if ( number_of_function > this->land.size() )
+		if ( (size_t)number_of_function > this->land.size() )
 		{
 			return v;
 		}		
@@ -582,7 +586,6 @@ Persistence_landscape::Persistence_landscape(const char* filename)
     std::string line;
     std::vector< std::pair<double,double> > barcode;
 
-    bool isThisAFirsLine = true;
     while (!in.eof())
     {
         getline(in,line);
@@ -634,6 +637,7 @@ bool Persistence_landscape::operator == ( const Persistence_landscape& rhs  )con
         {
             if ( !( almost_equal(this->land[level][i].first , rhs.land[level][i].first) && almost_equal(this->land[level][i].second , rhs.land[level][i].second) ) ) 
             {
+				//cerr<< this->land[level][i].first << " , " <<  rhs.land[level][i].first << " and " << this->land[level][i].second << " , " << rhs.land[level][i].second << endl;
                 if (operatorEqualDbg)std::cerr << "this->land[level][i] : " << this->land[level][i].first << " " << this->land[level][i].second << "\n";
                 if (operatorEqualDbg)std::cerr << "rhs.land[level][i] : " << rhs.land[level][i].first << " " << rhs.land[level][i].second	 << "\n";
                 if (operatorEqualDbg)std::cerr << "3\n";
@@ -712,7 +716,7 @@ void Persistence_landscape::construct_persistence_landscape_from_barcode( const 
 			std::cerr << "1 Adding to lambda_n : (" << -std::numeric_limits<int>::max() << " " << 0  << ") , (" << minus_length(characteristicPoints[0]) << " " << 0 << ") , (" << characteristicPoints[0].first << " " << characteristicPoints[0].second << ") \n";
 		}
 
-		int i = 1;
+		size_t i = 1;
 		std::vector< std::pair<double,double> >  newCharacteristicPoints;
 		while ( i < characteristicPoints.size() )
 		{
@@ -837,7 +841,7 @@ double Persistence_landscape::compute_integral_of_landscape()const
     return result;
 }
 
-double Persistence_landscape::compute_integral_of_landscape( int  level )const
+double Persistence_landscape::compute_integral_of_landscape( size_t  level )const
 {
     double result = 0;
     if ( level >= this->land.size() )
@@ -1153,8 +1157,8 @@ Persistence_landscape operation_on_pair_of_landscapes ( const Persistence_landsc
     for ( size_t i = 0 ; i != std::min( land1.land.size() , land2.land.size() ) ; ++i )
     {
         std::vector< std::pair<double,double> > lambda_n;
-        int p = 0;
-        int q = 0;
+        size_t p = 0;
+        size_t q = 0;
         while ( (p+1 < land1.land[i].size()) && (q+1 < land2.land[i].size()) )
         {
             if ( operation_on_pair_of_landscapesDBG )
@@ -1262,19 +1266,19 @@ double compute_maximal_distance_non_symmetric( const Persistence_landscape& pl1,
     if (dbg)std::cerr << " compute_maximal_distance_non_symmetric \n";
     //this distance is not symmetric. It compute ONLY distance between inflection points of pl1 and pl2.
     double maxDist = 0;
-    int minimalNumberOfLevels = std::min( pl1.land.size() , pl2.land.size() );
-    for ( int level = 0 ; level != minimalNumberOfLevels ; ++ level )
+    size_t minimalNumberOfLevels = std::min( pl1.land.size() , pl2.land.size() );
+    for ( size_t level = 0 ; level != minimalNumberOfLevels ; ++ level )
     {
         if (dbg)
         {
             std::cerr << "Level : " << level << std::endl;
             std::cerr << "PL1 : \n";
-            for ( int i = 0 ; i  != pl1.land[level].size() ; ++i )
+            for ( size_t i = 0 ; i  != pl1.land[level].size() ; ++i )
             {
                 std::cerr << "(" <<pl1.land[level][i].first << "," << pl1.land[level][i].second << ") \n";
             }
             std::cerr << "PL2 : \n";
-            for ( int i = 0 ; i  != pl2.land[level].size() ; ++i )
+            for ( size_t i = 0 ; i  != pl2.land[level].size() ; ++i )
             {
                 std::cerr << "(" <<pl2.land[level][i].first << "," << pl2.land[level][i].second << ") \n";
             }
@@ -1282,7 +1286,7 @@ double compute_maximal_distance_non_symmetric( const Persistence_landscape& pl1,
         }
 
         int p2Count = 0;
-        for ( int i = 1 ; i != pl1.land[level].size()-1 ; ++i ) //w tym przypadku nie rozwarzam punktow w nieskocznosci
+        for ( size_t i = 1 ; i != pl1.land[level].size()-1 ; ++i ) //w tym przypadku nie rozwarzam punktow w nieskocznosci
         {
             while ( true )
             {
@@ -1307,9 +1311,9 @@ double compute_maximal_distance_non_symmetric( const Persistence_landscape& pl1,
 
     if ( minimalNumberOfLevels < pl1.land.size() )
     {
-        for ( int level = minimalNumberOfLevels ; level != pl1.land.size() ; ++ level )
+        for ( size_t level = minimalNumberOfLevels ; level != pl1.land.size() ; ++ level )
         {
-            for ( int i = 0 ; i != pl1.land[level].size() ; ++i )
+            for ( size_t i = 0 ; i != pl1.land[level].size() ; ++i )
             {
                 if (dbg)std::cerr << "pl1[level][i].second  : " << pl1.land[level][i].second << std::endl;
                 if ( maxDist < pl1.land[level][i].second )maxDist = pl1.land[level][i].second;
@@ -1322,7 +1326,7 @@ double compute_maximal_distance_non_symmetric( const Persistence_landscape& pl1,
 
 
 
-double compute_discance_of_landscapes( const Persistence_landscape& first, const Persistence_landscape& second , unsigned p )
+double compute_discance_of_landscapes( const Persistence_landscape& first, const Persistence_landscape& second , int p )
 {
     //This is what we want to compute: (\int_{- \infty}^{+\infty}| first-second |^p)^(1/p). We will do it one step at a time:
 
@@ -1331,20 +1335,27 @@ double compute_discance_of_landscapes( const Persistence_landscape& first, const
 
     //| first-second |:
     lan = lan.abs();
+	if ( p != -1 )
+	{
+		//\int_{- \infty}^{+\infty}| first-second |^p
+		double result;
+		if ( p != 1 )
+		{
+			result = lan.compute_integral_of_landscape( (double)p );
+		}
+		else
+		{
+			result = lan.compute_integral_of_landscape();
+		}
 
-    //\int_{- \infty}^{+\infty}| first-second |^p
-    double result;
-    if ( p != 1 )
-    {
-        result = lan.compute_integral_of_landscape( (double)p );
-    }
-    else
-    {
-        result = lan.compute_integral_of_landscape();
-    }
-
-    //(\int_{- \infty}^{+\infty}| first-second |^p)^(1/p)
-    return pow( result , 1/(double)p );
+		//(\int_{- \infty}^{+\infty}| first-second |^p)^(1/p)
+		return pow( result , 1/(double)p );
+	}
+	else
+	{
+		//p == -1
+		return lan.compute_maximum();
+	}
 }
 
 double compute_max_norm_discance_of_landscapes( const Persistence_landscape& first, const Persistence_landscape& second )
@@ -1460,7 +1471,8 @@ double compute_inner_product( const Persistence_landscape& l1 , const Persistenc
 
 
 
-
+}//namespace gudhi stat
+}//namespace gudhi
 
 
 #endif
