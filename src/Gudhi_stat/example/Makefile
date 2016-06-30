@@ -109,6 +109,20 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
+src/Gudhi_stat/example/CMakeFiles/persistence_intervals.dir/rule:
+	cd /home/pawel/Dropbox/gudhi/gudhi_stat && $(MAKE) -f CMakeFiles/Makefile2 src/Gudhi_stat/example/CMakeFiles/persistence_intervals.dir/rule
+.PHONY : src/Gudhi_stat/example/CMakeFiles/persistence_intervals.dir/rule
+
+# Convenience name for target.
+persistence_intervals: src/Gudhi_stat/example/CMakeFiles/persistence_intervals.dir/rule
+.PHONY : persistence_intervals
+
+# fast build rule for target.
+persistence_intervals/fast:
+	cd /home/pawel/Dropbox/gudhi/gudhi_stat && $(MAKE) -f src/Gudhi_stat/example/CMakeFiles/persistence_intervals.dir/build.make src/Gudhi_stat/example/CMakeFiles/persistence_intervals.dir/build
+.PHONY : persistence_intervals/fast
+
+# Convenience name for target.
 src/Gudhi_stat/example/CMakeFiles/persistence_landscape.dir/rule:
 	cd /home/pawel/Dropbox/gudhi/gudhi_stat && $(MAKE) -f CMakeFiles/Makefile2 src/Gudhi_stat/example/CMakeFiles/persistence_landscape.dir/rule
 .PHONY : src/Gudhi_stat/example/CMakeFiles/persistence_landscape.dir/rule
@@ -121,6 +135,44 @@ persistence_landscape: src/Gudhi_stat/example/CMakeFiles/persistence_landscape.d
 persistence_landscape/fast:
 	cd /home/pawel/Dropbox/gudhi/gudhi_stat && $(MAKE) -f src/Gudhi_stat/example/CMakeFiles/persistence_landscape.dir/build.make src/Gudhi_stat/example/CMakeFiles/persistence_landscape.dir/build
 .PHONY : persistence_landscape/fast
+
+# Convenience name for target.
+src/Gudhi_stat/example/CMakeFiles/vector_representation.dir/rule:
+	cd /home/pawel/Dropbox/gudhi/gudhi_stat && $(MAKE) -f CMakeFiles/Makefile2 src/Gudhi_stat/example/CMakeFiles/vector_representation.dir/rule
+.PHONY : src/Gudhi_stat/example/CMakeFiles/vector_representation.dir/rule
+
+# Convenience name for target.
+vector_representation: src/Gudhi_stat/example/CMakeFiles/vector_representation.dir/rule
+.PHONY : vector_representation
+
+# fast build rule for target.
+vector_representation/fast:
+	cd /home/pawel/Dropbox/gudhi/gudhi_stat && $(MAKE) -f src/Gudhi_stat/example/CMakeFiles/vector_representation.dir/build.make src/Gudhi_stat/example/CMakeFiles/vector_representation.dir/build
+.PHONY : vector_representation/fast
+
+persistence_intervals.o: persistence_intervals.cpp.o
+.PHONY : persistence_intervals.o
+
+# target to build an object file
+persistence_intervals.cpp.o:
+	cd /home/pawel/Dropbox/gudhi/gudhi_stat && $(MAKE) -f src/Gudhi_stat/example/CMakeFiles/persistence_intervals.dir/build.make src/Gudhi_stat/example/CMakeFiles/persistence_intervals.dir/persistence_intervals.cpp.o
+.PHONY : persistence_intervals.cpp.o
+
+persistence_intervals.i: persistence_intervals.cpp.i
+.PHONY : persistence_intervals.i
+
+# target to preprocess a source file
+persistence_intervals.cpp.i:
+	cd /home/pawel/Dropbox/gudhi/gudhi_stat && $(MAKE) -f src/Gudhi_stat/example/CMakeFiles/persistence_intervals.dir/build.make src/Gudhi_stat/example/CMakeFiles/persistence_intervals.dir/persistence_intervals.cpp.i
+.PHONY : persistence_intervals.cpp.i
+
+persistence_intervals.s: persistence_intervals.cpp.s
+.PHONY : persistence_intervals.s
+
+# target to generate assembly for a file
+persistence_intervals.cpp.s:
+	cd /home/pawel/Dropbox/gudhi/gudhi_stat && $(MAKE) -f src/Gudhi_stat/example/CMakeFiles/persistence_intervals.dir/build.make src/Gudhi_stat/example/CMakeFiles/persistence_intervals.dir/persistence_intervals.cpp.s
+.PHONY : persistence_intervals.cpp.s
 
 persistence_landscape.o: persistence_landscape.cpp.o
 .PHONY : persistence_landscape.o
@@ -146,6 +198,30 @@ persistence_landscape.cpp.s:
 	cd /home/pawel/Dropbox/gudhi/gudhi_stat && $(MAKE) -f src/Gudhi_stat/example/CMakeFiles/persistence_landscape.dir/build.make src/Gudhi_stat/example/CMakeFiles/persistence_landscape.dir/persistence_landscape.cpp.s
 .PHONY : persistence_landscape.cpp.s
 
+vector_representation.o: vector_representation.cpp.o
+.PHONY : vector_representation.o
+
+# target to build an object file
+vector_representation.cpp.o:
+	cd /home/pawel/Dropbox/gudhi/gudhi_stat && $(MAKE) -f src/Gudhi_stat/example/CMakeFiles/vector_representation.dir/build.make src/Gudhi_stat/example/CMakeFiles/vector_representation.dir/vector_representation.cpp.o
+.PHONY : vector_representation.cpp.o
+
+vector_representation.i: vector_representation.cpp.i
+.PHONY : vector_representation.i
+
+# target to preprocess a source file
+vector_representation.cpp.i:
+	cd /home/pawel/Dropbox/gudhi/gudhi_stat && $(MAKE) -f src/Gudhi_stat/example/CMakeFiles/vector_representation.dir/build.make src/Gudhi_stat/example/CMakeFiles/vector_representation.dir/vector_representation.cpp.i
+.PHONY : vector_representation.cpp.i
+
+vector_representation.s: vector_representation.cpp.s
+.PHONY : vector_representation.s
+
+# target to generate assembly for a file
+vector_representation.cpp.s:
+	cd /home/pawel/Dropbox/gudhi/gudhi_stat && $(MAKE) -f src/Gudhi_stat/example/CMakeFiles/vector_representation.dir/build.make src/Gudhi_stat/example/CMakeFiles/vector_representation.dir/vector_representation.cpp.s
+.PHONY : vector_representation.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -153,12 +229,20 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... persistence_intervals"
 	@echo "... persistence_landscape"
 	@echo "... rebuild_cache"
 	@echo "... test"
+	@echo "... vector_representation"
+	@echo "... persistence_intervals.o"
+	@echo "... persistence_intervals.i"
+	@echo "... persistence_intervals.s"
 	@echo "... persistence_landscape.o"
 	@echo "... persistence_landscape.i"
 	@echo "... persistence_landscape.s"
+	@echo "... vector_representation.o"
+	@echo "... vector_representation.i"
+	@echo "... vector_representation.s"
 .PHONY : help
 
 

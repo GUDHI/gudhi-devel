@@ -1,1 +1,0 @@
-/usr/bin/c++    -frounding-math -std=c++11 -Wall -Wpedantic -Wsign-compare -O3 -DNDEBUG    CMakeFiles/persistence_landscape.dir/persistence_landscape.cpp.o  -o persistence_landscape  -L/usr/local/lib -rdynamic -lmpfr -lgmpxx -lgmp /usr/local/lib/libCGAL.so.11.0.1 -lboost_thread -lboost_system -lpthread -lboost_system -lpthread -Wl,-rpath,/usr/local/lib 

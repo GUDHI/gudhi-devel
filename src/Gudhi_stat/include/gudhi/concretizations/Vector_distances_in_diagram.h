@@ -375,17 +375,19 @@ void Vector_distances_in_diagram<F>::compute_average( std::vector< Abs_Topologic
 		return;
 	}
 	
-	Vector_distances_in_diagram<F>* base = (Vector_distances_in_diagram<F>*)to_average[0];
-	for ( size_t i = 1 ; i != to_average.size() ; ++i )
+	size_t maximal_length_of_vector = 0;
+	for ( size_t i = 0 ; i != to_average.size() ; ++i )
 	{
 		Vector_distances_in_diagram<F>* current = (Vector_distances_in_diagram<F>*)to_average[i];
-		if ( current->sorted_vector_of_distnaces.size() != base->sorted_vector_of_distnaces.size() )
+		if ( current->sorted_vector_of_distnaces.size() > maximal_length_of_vector )
 		{
-			throw "Not compatible sizes of Vector_distances_in_diagram in the method Vector_distances_in_diagram<F>::compute_average";
+			maximal_length_of_vector = current->sorted_vector_of_distnaces.size();
 		}
 	}
 	
-	std::vector< double > av( base->sorted_vector_of_distnaces.size() , 0 );
+	//cerr << "maximal_length_of_vector  : " << maximal_length_of_vector << endl;
+	
+	std::vector< double > av(  maximal_length_of_vector , 0 );
 	for ( size_t i = 0 ; i != to_average.size() ; ++i )
 	{
 		Vector_distances_in_diagram<F>* current = (Vector_distances_in_diagram<F>*)to_average[i];
@@ -395,12 +397,12 @@ void Vector_distances_in_diagram<F>::compute_average( std::vector< Abs_Topologic
 		}
 	}
 	
-	for ( size_t i = 0 ; i != to_average.size() ; ++i )
+	for ( size_t i = 0 ; i != maximal_length_of_vector ; ++i )
 	{
 		av[i] /= (double)to_average.size();
 	}
-	
-	(*this) = Vector_distances_in_diagram<F>( av );
+	this->sorted_vector_of_distnaces = av;
+	this->where_to_cut = av.size();
 }
 
 template <typename F>
