@@ -44,9 +44,8 @@ using namespace std;
 	
 
 BOOST_AUTO_TEST_CASE(check_construction_of_landscape) 
-{
-	char* filename = (char*)"data/file_with_diagram";
-	Persistence_landscape p(filename);
+{	
+	Persistence_landscape p( "data/file_with_diagram" );
 	
 	Persistence_landscape q;
 	q.load_landscape_from_file( "data/file_with_landscape_from_file_with_diagram" );
@@ -57,8 +56,7 @@ BOOST_AUTO_TEST_CASE(check_construction_of_landscape)
 
 BOOST_AUTO_TEST_CASE(check_computations_of_integrals) 
 {
-	char* filename = (char*)"data/file_with_diagram";
-	Persistence_landscape p(filename);	
+	Persistence_landscape p( "data/file_with_diagram" );	
 	double integral = p.compute_integral_of_landscape();
 	//cerr << integral  << " " << 2.34992 << endl;
 	BOOST_CHECK( fabs( integral - 2.34992 ) <= 0.00001 );
@@ -67,8 +65,7 @@ BOOST_AUTO_TEST_CASE(check_computations_of_integrals)
 
 BOOST_AUTO_TEST_CASE(check_computations_of_integrals_for_each_level_separatelly) 
 {
-	char* filename = (char*)"data/file_with_diagram";
-	Persistence_landscape p(filename);	
+	Persistence_landscape p( "data/file_with_diagram" );	
 	
 	std::vector< double > integrals_fir_different_levels;
 	integrals_fir_different_levels.push_back(	0.216432	);
@@ -111,8 +108,7 @@ BOOST_AUTO_TEST_CASE(check_computations_of_integrals_for_each_level_separatelly)
 
 BOOST_AUTO_TEST_CASE(check_computations_of_integrals_of_powers_of_landscape) 
 {
-	char* filename = (char*)"data/file_with_diagram";
-	Persistence_landscape p(filename);	
+	Persistence_landscape p( "data/file_with_diagram" );	
 	
 	std::vector<double> integrals_fir_different_powers;
  	integrals_fir_different_powers.push_back(	0.216432	);
@@ -130,8 +126,7 @@ BOOST_AUTO_TEST_CASE(check_computations_of_integrals_of_powers_of_landscape)
 
 BOOST_AUTO_TEST_CASE(check_computations_of_values_on_different_points) 
 {
-	char* filename = (char*)"data/file_with_diagram";
-	Persistence_landscape p(filename);	
+	Persistence_landscape p( "data/file_with_diagram" );	
 	
 	
 	BOOST_CHECK( fabs( p.compute_value_at_a_given_point(1,0.0)  ) <= 0.00001 );
@@ -150,9 +145,8 @@ BOOST_AUTO_TEST_CASE(check_computations_of_values_on_different_points)
 
 
 BOOST_AUTO_TEST_CASE(check_computations_sum_differences_and_multiplications) 
-{
-	char* filename = (char*)"data/file_with_diagram";
-	Persistence_landscape p(filename);	
+{	
+	Persistence_landscape p( "data/file_with_diagram" );	
 	Persistence_landscape second;
 	second.load_landscape_from_file("data/file_with_landscape_from_file_with_diagram_1" );
 	
@@ -178,9 +172,8 @@ BOOST_AUTO_TEST_CASE(check_computations_sum_differences_and_multiplications)
 
 
 BOOST_AUTO_TEST_CASE(check_computations_of_maxima_and_norms) 
-{
-	char* filename = (char*)"data/file_with_diagram";
-	Persistence_landscape p(filename);	
+{	
+	Persistence_landscape p( "data/file_with_diagram" );	
 	Persistence_landscape second;
 	second.load_landscape_from_file("data/file_with_landscape_from_file_with_diagram_1" );	
 	Persistence_landscape sum = p + second;

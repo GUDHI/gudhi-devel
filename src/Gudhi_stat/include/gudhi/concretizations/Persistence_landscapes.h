@@ -120,7 +120,7 @@ double find_zero_of_a_line_segment_between_those_two_points ( std::pair<double,d
 
 
 /**
- * This function compare pairs of doubles for sorting purposes.
+ * Lexicographical ordering of points	.
 **/
 bool compare_points_sorting( std::pair<double,double> f, std::pair<double,double> s )
 {
@@ -162,11 +162,7 @@ double function_value ( std::pair<double,double> p1, std::pair<double,double> p2
 }
 
 
-/**
- *Function internally used for operations on persistence landascapes.
-**/
-inline double add(double x, double y){return x+y;}
-inline double sub(double x, double y){return x-y;}
+
 
 
 /**
@@ -198,7 +194,7 @@ public:
     /**
 	 * Assignement operator.
 	**/
-    Persistence_landscape operator=( const Persistence_landscape& org );
+    Persistence_landscape& operator=( const Persistence_landscape& org );
 
     /**
 	 * Copy constructor.
@@ -265,7 +261,7 @@ public:
 	**/
     friend Persistence_landscape add_two_landscapes ( const Persistence_landscape& land1 ,  const Persistence_landscape& land2 )
     {
-        return operation_on_pair_of_landscapes(land1,land2,add);
+        return operation_on_pair_of_landscapes< std::plus<double> >(land1,land2);
     }
 
     /**
@@ -273,7 +269,7 @@ public:
 	**/
     friend Persistence_landscape subtract_two_landscapes ( const Persistence_landscape& land1 ,  const Persistence_landscape& land2 )
     {
-        return operation_on_pair_of_landscapes(land1,land2,sub);
+        return operation_on_pair_of_landscapes< std::minus<double> >(land1,land2);
     }
 
 	/**
@@ -328,7 +324,7 @@ public:
 
 
 	/**
-	 * Operator *=. The second parameter is a real number.
+	 * Operator *=. The second parameter is a real number by which the y values of all landscape functions are multiplied. The x-values remain unchanged. 
 	**/
     Persistence_landscape operator *= ( double x )
     {
@@ -381,7 +377,7 @@ public:
 	/**
 	 * Computations of a L^i norm of landscape, where i is the input parameter.
 	**/
-    double compute_norm_of_landscape( int i )
+    double compute_norm_of_landscape( double i )
     {
         Persistence_landscape l;
         if ( i != -1 )
@@ -542,7 +538,7 @@ private:
     void construct_persistence_landscape_from_barcode( const std::vector< std::pair< double , double > > & p );
     Persistence_landscape multiply_lanscape_by_real_number_not_overwrite( double x )const;
     void multiply_lanscape_by_real_number_overwrite( double x );
-    friend Persistence_landscape operation_on_pair_of_landscapes ( const Persistence_landscape& land1 ,  const Persistence_landscape& land2 , double (*oper)(double,double) );
+    template < typename oper > friend Persistence_landscape operation_on_pair_of_landscapes ( const Persistence_landscape& land1 ,  const Persistence_landscape& land2 );
     friend double compute_maximal_distance_non_symmetric( const Persistence_landscape& pl1, const Persistence_landscape& pl2 );
 
     void set_up_numbers_of_functions_for_vectorization_and_projections_to_reals()
@@ -649,7 +645,7 @@ bool Persistence_landscape::operator == ( const Persistence_landscape& rhs  )con
 }
 
 
-Persistence_landscape Persistence_landscape::operator=( const Persistence_landscape& oryginal )
+Persistence_landscape& Persistence_landscape::operator=( const Persistence_landscape& oryginal )
 {
     std::vector< std::vector< std::pair<double,double> > > land( oryginal.land.size() );
     for ( size_t i = 0 ; i != oryginal.land.size() ; ++i )
@@ -1146,13 +1142,15 @@ void Persistence_landscape::load_landscape_from_file( const char* filename )
 }
 
 
-bool operation_on_pair_of_landscapesDBG = false;
-Persistence_landscape operation_on_pair_of_landscapes ( const Persistence_landscape& land1 ,  const Persistence_landscape& land2 , double (*oper)(double,double) )
+template < typename T >
+Persistence_landscape operation_on_pair_of_landscapes ( const Persistence_landscape& land1 ,  const Persistence_landscape& land2 )
 {
+	bool operation_on_pair_of_landscapesDBG = false;
     if ( operation_on_pair_of_landscapesDBG ){std::cout << "operation_on_pair_of_landscapes\n";std::cin.ignore();}
     Persistence_landscape result;
     std::vector< std::vector< std::pair<double,double> > > land( std::max( land1.land.size() , land2.land.size() ) );
     result.land = land;
+    T oper;
 
     for ( size_t i = 0 ; i != std::min( land1.land.size() , land2.land.size() ) ; ++i )
     {
@@ -1175,9 +1173,14 @@ Persistence_landscape operation_on_pair_of_landscapes ( const Persistence_landsc
                 {
                     std::cout << "first \n";
                     std::cout << " function_value(land2.land[i][q-1],land2.land[i][q],land1.land[i][p].first) : "<<  function_value(land2.land[i][q-1],land2.land[i][q],land1.land[i][p].first) << "\n";
-                    std::cout << "oper( " << land1.land[i][p].second <<"," << function_value(land2.land[i][q-1],land2.land[i][q],land1.land[i][p].first) << " : " << oper( land1.land[i][p].second , function_value(land2.land[i][q-1],land2.land[i][q],land1.land[i][p].first) ) << "\n";
+                    //std::cout << "oper( " << land1.land[i][p].second <<"," << function_value(land2.land[i][q-1],land2.land[i][q],land1.land[i][p].first) << " : " << oper( land1.land[i][p].second , function_value(land2.land[i][q-1],land2.land[i][q],land1.land[i][p].first) ) << "\n";
                 }
-                lambda_n.push_back( std::make_pair( land1.land[i][p].first , oper( land1.land[i][p].second , function_value(land2.land[i][q-1],land2.land[i][q],land1.land[i][p].first) ) ) );
+                lambda_n.push_back( 
+									std::make_pair( 
+									              land1.land[i][p].first , 
+									              oper( (double)land1.land[i][p].second , function_value(land2.land[i][q-1],land2.land[i][q],land1.land[i][p].first) ) 
+												  ) 
+								  );
                 ++p;
                 continue;
             }

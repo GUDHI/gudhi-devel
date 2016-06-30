@@ -40,10 +40,8 @@ int main( int argc , char** argv )
 	{
 		std::cerr << "To run this program, please provide a name of a file with persistence landscape \n";
 		//return 1;
-	}
-	//char* filename = argv[1];
-	char* filename = (char*)"../test/data/file_with_diagram";
-	Persistence_landscape p(filename);
+	}		
+	Persistence_landscape p("../test/data/file_with_diagram");
 	
 	Persistence_landscape q;
 	q.load_landscape_from_file( "file_with_landscape_from_file_with_diagram" );
