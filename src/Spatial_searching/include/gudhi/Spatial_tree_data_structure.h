@@ -49,9 +49,9 @@ namespace spatial_searching {
   * It provides a simplified API to perform (approximate) nearest neighbor searches. Contrary to CGAL default behavior, the tree
   * does not store the points themselves, but stores indices.
   *
-  * There are two types of queries: the <i>k-nearest neighbor query</i>, where `k` is fixed and the k nearest points are 
+  * There are two types of queries: the <i>k-nearest neighbor query</i>, where <i>k</i> is fixed and the <i>k</i> nearest points are 
   * computed right away,
-  * and the <i>incremental nearest neighbor query</i>, where no number of neighbors is provided during the call, and the
+  * and the <i>incremental nearest neighbor query</i>, where no number of neighbors is provided during the call, as the
   * neighbors will be computed incrementally when the iterator on the range is incremented.
   *
   * \tparam K requires a <a target="_blank"
@@ -94,7 +94,7 @@ public:
   /// of a point P and `second` is the squared distance between P and the query point.
   typedef Incremental_neighbor_search                       INS_range;
 
-  /// Constructor
+  /// \brief Constructor
   /// @param[in] points Const reference to the point container. This container
   /// is not copied, so it should not be destroyed or modified afterwards.
   Spatial_tree_data_structure(Point_container_ const& points)
@@ -108,10 +108,10 @@ public:
     m_tree.build();
   }
 
-  /// Constructor
+  /// \brief Constructor
   /// @param[in] points Const reference to the point container. This container
   /// is not copied, so it should not be destroyed or modified afterwards.
-  /// @param[in] Only_these_points specifies the indices of the points that
+  /// @param[in] Only_these_points Specifies the indices of the points that
   /// should be actually inserted into the tree. The other points are ignored.
   template <typename Point_indices_range>
   Spatial_tree_data_structure(
@@ -127,7 +127,7 @@ public:
     m_tree.build();
   }
 
-  /// Constructor
+  /// \brief Constructor
   /// @param[in] points Const reference to the point container. This container
   /// is not copied, so it should not be destroyed or modified afterwards.
   /// @param[in] begin_idx, past_the_end_idx Define the subset of the points that
@@ -163,14 +163,14 @@ public:
     m_tree.insert(point_idx);
   }
 
-  /// Search for the k-nearest neighbors from a query point.
+  /// \brief Search for the k-nearest neighbors from a query point.
   /// @param[in] p The query point.
   /// @param[in] k Number of nearest points to search.
   /// @param[in] sorted Indicates if the computed sequence of k-nearest neighbors needs to be sorted.
   /// @param[in] eps Approximation factor.
   /// @return A range containing the k-nearest neighbors.
   KNS_range query_ANN(const
-    Point &sp,
+    Point &p,
     unsigned int k,
     bool sorted = true,
     FT eps = FT(0)) const
@@ -180,7 +180,7 @@ public:
     // know the property map
     K_neighbor_search search(
       m_tree,
-      sp,
+      p,
       k,
       eps,
       true,
@@ -191,20 +191,20 @@ public:
     return search;
   }
 
-  /// Search incrementally for the nearest neighbors from a query point.
+  /// \brief Search incrementally for the nearest neighbors from a query point.
   /// @param[in] p The query point.
   /// @param[in] eps Approximation factor.
   /// @return A range containing the neighbors sorted by their distance to p. 
   /// All the neighbors are not computed by this function, but they will be
   /// computed incrementally when the iterator on the range is incremented.
-  INS_range query_incremental_ANN(const Point &sp, FT eps = FT(0)) const
+  INS_range query_incremental_ANN(const Point &p, FT eps = FT(0)) const
   {
     // Initialize the search structure, and search all N points
     // Note that we need to pass the Distance explicitly since it needs to
     // know the property map
     Incremental_neighbor_search search(
       m_tree,
-      sp,
+      p,
       eps,
       true,
       CGAL::Distance_adapter<std::ptrdiff_t, Point*, CGAL::Euclidean_distance<Traits_base> >(
