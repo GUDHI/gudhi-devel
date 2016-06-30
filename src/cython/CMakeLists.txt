@@ -74,6 +74,7 @@ if(PYTHON_PATH AND CYTHON_PATH)
   
   add_custom_target(cythonize_gudhi ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so")
 
+  # Unitary tests are available through py.test
   find_program( PYTEST_PATH py.test )
   if(PYTEST_PATH)
     add_test(
@@ -82,5 +83,26 @@ if(PYTHON_PATH AND CYTHON_PATH)
         COMMAND ${PYTEST_PATH})
     set_tests_properties(gudhi_cython_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
   endif(PYTEST_PATH)
+
+  # Documentation generation is available through sphinx
+  find_program( SPHINX_PATH sphinx-build )
+  if(SPHINX_PATH)
+    file(COPY doc DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    # Developper version
+    file(GLOB GUDHI_DEV_DOC_IMAGES "${CMAKE_SOURCE_DIR}/src/*/doc/*.png")
+    file(COPY ${GUDHI_DEV_DOC_IMAGES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/source/img")
+    # User version
+    file(GLOB GUDHI_USER_DOC_IMAGES "${CMAKE_SOURCE_DIR}/doc/*/*.png")
+    file(COPY ${GUDHI_USER_DOC_IMAGES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/source/img")
+    if (UNIX)
+      add_custom_target(html 
+          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc
+          COMMAND make html)
+    else (UNIX)
+      add_custom_target(html 
+          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc
+          COMMAND make.bat html)
+    endif (UNIX)
+  endif(SPHINX_PATH)
 
 endif(PYTHON_PATH AND CYTHON_PATH)

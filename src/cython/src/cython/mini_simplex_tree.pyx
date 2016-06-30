@@ -179,7 +179,7 @@ cdef class MiniSimplexTree:
         value (default value is '0.0').
 
         :param simplex: The N-simplex to insert, represented by a list of
-        vertex.
+            vertex.
         :type simplex: list of int.
         :param filtration: The filtration value of the simplex.
         :type filtration: float.
@@ -196,7 +196,7 @@ cdef class MiniSimplexTree:
         values.
 
         :returns:  list of tuples(simplex, filtration) -- the tree sorted by
-        increasing filtration values.
+            increasing filtration values.
         """
         cdef vector[pair[vector[int], double]] coface_tree \
             = self.thisptr.get_filtered_tree()
@@ -215,7 +215,7 @@ cdef class MiniSimplexTree:
         :param dimension: The skeleton dimension value.
         :type dimension: int.
         :returns:  list of tuples(simplex, filtration) -- the skeleton tree
-        of a maximum dimension.
+            of a maximum dimension.
         """
         cdef vector[pair[vector[int], double]] coface_tree \
             = self.thisptr.get_skeleton_tree(<int>dimension)
@@ -233,7 +233,7 @@ cdef class MiniSimplexTree:
         :param simplex: The N-simplex, represented by a list of vertex.
         :type simplex: list of int.
         :returns:  list of tuples(simplex, filtration) -- the star tree of a
-        simplex.
+            simplex.
         """
         cdef vector[int] complex
         for i in simplex:
@@ -255,10 +255,10 @@ cdef class MiniSimplexTree:
         :param simplex: The N-simplex, represented by a list of vertex.
         :type simplex: list of int.
         :param codimension: The codimension. If codimension = 0, all cofaces
-        are returned (equivalent of get_star_tree function)
+            are returned (equivalent of get_star_tree function)
         :type codimension: int.
         :returns:  list of tuples(simplex, filtration) -- the coface tree of a
-        simplex.
+            simplex.
         """
         cdef vector[int] complex
         for i in simplex:
@@ -286,14 +286,15 @@ cdef class MiniSimplexTree:
         """This function returns the persistence of the simplicial complex.
 
         :param homology_coeff_field: The homology coefficient field. Must be a
-        prime number
+            prime number
         :type homology_coeff_field: int.
         :param min_persistence: The minimum persistence value to take into
-        account (strictly greater than min_persistence). Default value is 0.0.
-        Sets min_persistence to -1.0 to see all values.
+            account (strictly greater than min_persistence). Default value is
+            0.0.
+            Sets min_persistence to -1.0 to see all values.
         :type min_persistence: float.
-        :returns: list of tuples(dimension, tuple(birth, death)) -- the star tree of a
-        simplex.
+        :returns: list of pairs(dimension, pair(birth, death)) -- the
+            persistence of the simplicial complex.
         """
         if self.pcohptr != NULL:
             del self.pcohptr
@@ -307,6 +308,9 @@ cdef class MiniSimplexTree:
         """This function returns the Betti numbers of the simplicial complex.
 
         :returns: list of int -- The Betti numbers ([B0, B1, ..., Bn]).
+
+        :note: betti_numbers function requires persistence function to be
+            launched first.
         """
         cdef vector[int] bn_result
         if self.pcohptr != NULL:
@@ -321,14 +325,17 @@ cdef class MiniSimplexTree:
         simplicial complex.
 
         :param from_value: The persistence birth limit to be added in the
-        numbers (persistent birth <= from_value).
+            numbers (persistent birth <= from_value).
         :type from_value: float.
         :param to_value: The persistence death limit to be added in the
-        numbers (persistent death > to_value).
+            numbers (persistent death > to_value).
         :type to_value: float.
 
         :returns: list of int -- The persistent Betti numbers ([B0, B1, ...,
-        Bn]).
+            Bn]).
+
+        :note: persistent_betti_numbers function requires persistence
+            function to be launched first.
         """
         cdef vector[int] pbn_result
         if self.pcohptr != NULL:
