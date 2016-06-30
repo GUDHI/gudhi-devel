@@ -5,17 +5,22 @@ FIND_PROGRAM( PYTHON_PATH python )
 FIND_PROGRAM( CYTHON_PATH cython )
 
 if(PYTHON_PATH AND CYTHON_PATH)
+  # Gudhi and CGAL compilation option
   if(MSVC)
-    message("++ MSVC")
-  else()
-    message("++ NOT MSVC")
+    set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'/fp:strict', ")
+  else(MSVC)
     set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-std=c++11', ")
-  endif()
-  
+  endif(MSVC)
+  if(CMAKE_COMPILER_IS_GNUCXX)
+    set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-frounding-math', ")
+  endif(CMAKE_COMPILER_IS_GNUCXX)
+  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+    set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-fp-model strict', ")
+  endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+
   find_package(Eigen3 3.1.0)
   
   if (EIGEN3_FOUND)
-    message("++ EIGEN3_FOUND")
     # No problem, even if no CGAL found
     set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_EIGEN3_ENABLED', ")
     set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${EIGEN3_INCLUDE_DIR}', ")
@@ -53,14 +58,12 @@ if(PYTHON_PATH AND CYTHON_PATH)
   # Loop on INCLUDE_DIRECTORIES PROPERTY
   get_property(GUDHI_INCLUDE_DIRECTORIES DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
   foreach(GUDHI_INCLUDE_DIRECTORY ${GUDHI_INCLUDE_DIRECTORIES})
-    message(STATUS "dir='${GUDHI_INCLUDE_DIRECTORY}'")
     set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${GUDHI_INCLUDE_DIRECTORY}', ")
   endforeach()
   set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${CMAKE_SOURCE_DIR}/${GUDHI_CYTHON_PATH}/src/cpp', ")
   
   # Generate cythonize_gudhi.py file to cythonize Gudhi
   configure_file(cythonize_gudhi.py.in "${CMAKE_CURRENT_BINARY_DIR}/cythonize_gudhi.py" @ONLY)
-  
   # Generate gudhi.pyx - Gudhi cython file 
   configure_file(gudhi.pyx.in "${CMAKE_CURRENT_BINARY_DIR}/gudhi.pyx" @ONLY)
   
@@ -71,12 +74,13 @@ if(PYTHON_PATH AND CYTHON_PATH)
   
   add_custom_target(cythonize_gudhi ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so")
 
-  FIND_PROGRAM( PYTEST_PATH py.test )
+  find_program( PYTEST_PATH py.test )
   if(PYTEST_PATH)
     add_test(
         NAME gudhi_cython_py_test
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMAND ${PYTEST_PATH})
+    set_tests_properties(gudhi_cython_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
   endif(PYTEST_PATH)
 
 endif(PYTHON_PATH AND CYTHON_PATH)
