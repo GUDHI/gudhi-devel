@@ -81,7 +81,7 @@ public:
   typedef CGAL::Orthogonal_k_neighbor_search<STraits>       K_neighbor_search;
   typedef typename K_neighbor_search::Tree                  Tree;
   typedef typename K_neighbor_search::Distance              Distance;
-  /// The range returned by a k-nearest neighbor search.
+  /// \brief The range returned by a k-nearest neighbor search.
   /// Its value type is `std::pair<std::size_t, FT>` where `first` is the index
   /// of a point P and `second` is the squared distance between P and the query point.
   typedef K_neighbor_search                                 KNS_range;
@@ -89,7 +89,7 @@ public:
   typedef CGAL::Orthogonal_incremental_neighbor_search<
     STraits, Distance, CGAL::Sliding_midpoint<STraits>, Tree>
                                                    Incremental_neighbor_search;
-  /// The range returned by an incremental nearest neighbor search.
+  /// \brief The range returned by an incremental nearest neighbor search.
   /// Its value type is `std::pair<std::size_t, FT>` where `first` is the index
   /// of a point P and `second` is the squared distance between P and the query point.
   typedef Incremental_neighbor_search                       INS_range;
