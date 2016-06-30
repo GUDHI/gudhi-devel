@@ -46,9 +46,9 @@ using namespace std;
 
 
 
-namespace Gudhi 
+namespace Gudhi
 {
-namespace Gudhi_stat 
+namespace Gudhi_stat
 {
 
 
@@ -59,7 +59,7 @@ double epsi = 0.000005;
 
 
 /**
- *  A procedure used to compare doubles. Typically gien two doubles A and B, comparing A == B is not good idea. In this case, we use the procedure almostEqual with the epsi defined at 
+ *  A procedure used to compare doubles. Typically gien two doubles A and B, comparing A == B is not good idea. In this case, we use the procedure almostEqual with the epsi defined at
  *  the top of the file. Setting up the epsi give the user a tolerance on what should be consider equal.
 **/
 inline bool almost_equal( double a , double b )
@@ -71,7 +71,7 @@ inline bool almost_equal( double a , double b )
 
 
 /**
- * Extra functions needed in construction of barcodes. 
+ * Extra functions needed in construction of barcodes.
 **/
 double minus_length( std::pair<double,double> a )
 {
@@ -85,8 +85,8 @@ double birth_plus_deaths( std::pair<double,double> a )
 
 
 /**
- * Given two points in R^2, the procedure compute the parameters A and B of the line y = Ax + B that crosses those two points. 
-**/ 
+ * Given two points in R^2, the procedure compute the parameters A and B of the line y = Ax + B that crosses those two points.
+**/
 std::pair<double,double> compute_parameters_of_a_line( std::pair<double,double> p1 , std::pair<double,double> p2 )
 {
     double a = (p2.second-p1.second)/( p2.first - p1.first );
@@ -95,8 +95,8 @@ std::pair<double,double> compute_parameters_of_a_line( std::pair<double,double> 
 }
 
 /**
- * This procedure given two points which lies on the opposide sides of x axis, compute x for which the line connecting those two points crosses x axis. 
-**/ 
+ * This procedure given two points which lies on the opposide sides of x axis, compute x for which the line connecting those two points crosses x axis.
+**/
 double find_zero_of_a_line_segment_between_those_two_points ( std::pair<double,double> p1, std::pair<double,double> p2 )
 {
     if ( p1.first == p2.first )return p1.first;
@@ -120,8 +120,8 @@ double find_zero_of_a_line_segment_between_those_two_points ( std::pair<double,d
 
 
 /**
- * This function compare pairs of doubles for sorting purposes. 
-**/ 
+ * This function compare pairs of doubles for sorting purposes.
+**/
 bool compare_points_sorting( std::pair<double,double> f, std::pair<double,double> s )
 {
     if ( f.first < s.first )
@@ -163,114 +163,114 @@ double function_value ( std::pair<double,double> p1, std::pair<double,double> p2
 
 
 /**
- *Function internally used for operations on persistence landascapes. 
-**/ 
+ *Function internally used for operations on persistence landascapes.
+**/
 inline double add(double x, double y){return x+y;}
 inline double sub(double x, double y){return x-y;}
 
 
 /**
  * A clas implementing persistence landascpes data structures. For theroretical desciritpion, please consult a paper ''Statistical topological data analysis using persistence landscapes'' by Peter Bubenik.
- * For details of algorithms, please consult ''A persistence landscapes toolbox for topological statistics'' by Peter Bubenik and Pawel Dlotko. 
+ * For details of algorithms, please consult ''A persistence landscapes toolbox for topological statistics'' by Peter Bubenik and Pawel Dlotko.
  * Persistence landscapes allow vertorization, computations of distances, computations of projections to Real, computations of averages and scalar products. Therefore they implement suitable interfaces.
-**/ 
-class Persistence_landscape :  	
-								public Abs_Vectorized_topological_data , 
-								public Abs_Topological_data_with_distances, 
-								public Abs_Real_valued_topological_data, 
-								public Abs_Topological_data_with_averages, 
+**/
+class Persistence_landscape :
+								public Abs_Vectorized_topological_data ,
+								public Abs_Topological_data_with_distances,
+								public Abs_Real_valued_topological_data,
+								public Abs_Topological_data_with_averages,
 								public Abs_Topological_data_with_scalar_product
 {
 public:
 	/**
 	 * Default constructor.
-	**/ 
+	**/
     Persistence_landscape()
     {
 		this->set_up_numbers_of_functions_for_vectorization_and_projections_to_reals();
 	}
-    
+
     /**
 	 * Constructor that takes as an input a vector of birth-death pairs.
-	**/ 
+	**/
     Persistence_landscape( const std::vector< std::pair< double , double > >& p );
-    
+
     /**
 	 * Assignement operator.
-	**/ 
+	**/
     Persistence_landscape operator=( const Persistence_landscape& org );
-    
+
     /**
 	 * Copy constructor.
-	**/ 
+	**/
     Persistence_landscape(const Persistence_landscape&);
-    
+
     /**
-	 * Constructor that reads persistence intervals from file and creates persistence landscape. The format of the input file is the following: in each line we put birth-death pair. Last line is assumed 
-	 * to be empty. Even if the points within a line are not ordered, they will be ordered while the input is read. 
-	**/ 
+	 * Constructor that reads persistence intervals from file and creates persistence landscape. The format of the input file is the following: in each line we put birth-death pair. Last line is assumed
+	 * to be empty. Even if the points within a line are not ordered, they will be ordered while the input is read.
+	**/
     Persistence_landscape(const char* filename);
-    
-    
-    
+
+
+
     /**
-     * This procedure loads a landscape from file. It erase all the data that was previously stored in this landscape. 
-    **/ 
+     * This procedure loads a landscape from file. It erase all the data that was previously stored in this landscape.
+    **/
     void load_landscape_from_file( const char* filename );
-    
-    
+
+
     /**
      * The procedure stores a landscape to a file. The file can be later used by a procedure load_landscape_from_file.
-    **/ 
+    **/
     void print_to_file( const char* filename )const;
 
-  
+
 
 	/**
 	 * This function compute integral of the landscape (defined formally as sum of integrals on R of all landscape functions)
-	**/ 
+	**/
     double compute_integral_of_landscape()const;
-    
-    
+
+
     /**
 	 * This function compute integral of the 'level'-level of a landscape.
-	**/ 
+	**/
     double compute_integral_of_landscape( size_t level )const;
-    
-    
+
+
     /**
 	 * This function compute integral of the landscape p-th power of a landscape (defined formally as sum of integrals on R of p-th powers of all landscape functions)
-	**/ 
+	**/
 	double compute_integral_of_landscape( double p )const;//this function compute integral of p-th power of landscape.
-    
-    
+
+
     /**
-     * A function that computes the value of a landscape at a given point. The parameters of the function are: unsigned level and double x. 
+     * A function that computes the value of a landscape at a given point. The parameters of the function are: unsigned level and double x.
      * The procedure will compute the value of the level-landscape at the point x.
     **/
     double compute_value_at_a_given_point( unsigned level , double x )const;
-    
+
     /**
-     * Writing landscape into a stream. A i-th level landscape starts with a string "lambda_i". Then the discontinuity points of the landscapes follows. 
+     * Writing landscape into a stream. A i-th level landscape starts with a string "lambda_i". Then the discontinuity points of the landscapes follows.
      * Shall those points be joined with lines, we will obtain the i-th landscape function.
-    **/ 
+    **/
     friend std::ostream& operator<<(std::ostream& out, Persistence_landscape& land );
 
 
 
-	
-    
+
+
 	/**
 	 * A function that compute sum of two landscapes.
-	**/ 
+	**/
     friend Persistence_landscape add_two_landscapes ( const Persistence_landscape& land1 ,  const Persistence_landscape& land2 )
     {
         return operation_on_pair_of_landscapes(land1,land2,add);
     }
-    
+
     /**
 	 * A function that compute difference of two landscapes.
-	**/ 
+	**/
     friend Persistence_landscape subtract_two_landscapes ( const Persistence_landscape& land1 ,  const Persistence_landscape& land2 )
     {
         return operation_on_pair_of_landscapes(land1,land2,sub);
@@ -278,7 +278,7 @@ public:
 
 	/**
 	 * An operator +, that compute sum of two landscapes.
-	**/ 
+	**/
     friend Persistence_landscape operator+( const Persistence_landscape& first , const Persistence_landscape& second )
     {
         return add_two_landscapes( first,second );
@@ -286,7 +286,7 @@ public:
 
 	/**
 	 * An operator -, that compute difference of two landscapes.
-	**/ 
+	**/
     friend Persistence_landscape operator-( const Persistence_landscape& first , const Persistence_landscape& second )
     {
         return subtract_two_landscapes( first,second );
@@ -294,7 +294,7 @@ public:
 
 	/**
 	 * An operator * that allows multipilication of a landscape by a real number.
-	**/ 
+	**/
     friend Persistence_landscape operator*( const Persistence_landscape& first , double con )
     {
         return first.multiply_lanscape_by_real_number_not_overwrite(con);
@@ -302,7 +302,7 @@ public:
 
 	/**
 	 * An operator * that allows multipilication of a landscape by a real number (order of parameters swapped).
-	**/ 
+	**/
     friend Persistence_landscape operator*( double con , const Persistence_landscape& first  )
     {
         return first.multiply_lanscape_by_real_number_not_overwrite(con);
@@ -310,7 +310,7 @@ public:
 
 	/**
 	 * Operator +=. The second parameter is persistnece landwscape.
-	**/ 
+	**/
     Persistence_landscape operator += ( const Persistence_landscape& rhs )
     {
         *this = *this + rhs;
@@ -319,7 +319,7 @@ public:
 
 	/**
 	 * Operator -=. The second parameter is persistnece landwscape.
-	**/ 
+	**/
     Persistence_landscape operator -= ( const Persistence_landscape& rhs )
     {
         *this = *this - rhs;
@@ -329,7 +329,7 @@ public:
 
 	/**
 	 * Operator *=. The second parameter is a real number.
-	**/ 
+	**/
     Persistence_landscape operator *= ( double x )
     {
         *this = *this*x;
@@ -338,7 +338,7 @@ public:
 
 	/**
 	 * Operator /=. The second parameter is a real number.
-	**/ 
+	**/
     Persistence_landscape operator /= ( double x )
     {
         if ( x == 0 )throw( "In operator /=, division by 0. Program terminated." );
@@ -347,14 +347,14 @@ public:
     }
 
 	/**
-	 * An operator to compare two persistence landscapes.  
-	**/ 
+	 * An operator to compare two persistence landscapes.
+	**/
     bool operator == ( const Persistence_landscape& rhs  )const;
-    
-    
+
+
     /**
-	 * An operator to compare two persistence landscapes.  
-	**/ 
+	 * An operator to compare two persistence landscapes.
+	**/
     bool operator != ( const Persistence_landscape& rhs  )const
     {
 		return !((*this) == rhs);
@@ -363,7 +363,7 @@ public:
 
 	/**
 	 * Computations of maximum (y) value of landscape.
-	**/ 
+	**/
     double compute_maximum()const
     {
         double maxValue = 0;
@@ -380,7 +380,7 @@ public:
 
 	/**
 	 * Computations of a L^i norm of landscape, where i is the input parameter.
-	**/ 
+	**/
     double compute_norm_of_landscape( int i )
     {
         Persistence_landscape l;
@@ -394,59 +394,59 @@ public:
         }
     }
 
-	/**	
+	/**
  	 * An operator to compute the value of a landscape in the level 'level' at the argument 'x'.
-	**/ 
+	**/
     double operator()(unsigned level,double x)const{return this->compute_value_at_a_given_point(level,x);}
 
 	/**
 	 * Computations of L^{\infty} distance between two landscapes.
-	**/ 
+	**/
     friend double compute_max_norm_discance_of_landscapes( const Persistence_landscape& first, const Persistence_landscape& second );
     //friend double compute_max_norm_discance_of_landscapes( const Persistence_landscape& first, const Persistence_landscape& second , unsigned& nrOfLand , double&x , double& y1, double& y2 );
 
 
 	/**
 	 * Computations of L^{p} distance between two landscapes. p is the parameter of the procedure.
-	**/ 
+	**/
     friend double compute_discance_of_landscapes( const Persistence_landscape& first, const Persistence_landscape& second , int p );
 
-    
-    
+
+
 	/**
 	 * Function to compute absolute value of a PL function. The representation of persistence landscapes allow to store general PL-function. When computing distance betwen two landscapes, we compute difference between
 	 * them. In this case, a general PL-function with negative value can appear as a result. Then in order to compute distance, we need to take its absolute value. This is the purpose of this procedure.
-	**/ 
+	**/
     Persistence_landscape abs();
 
 	/**
 	 * Computes the number of landscape functions.
-	**/ 
+	**/
     size_t size()const{return this->land.size(); }
 
 	/**
-	 *  Computate maximal value of lambda-level landscape. 
-	**/ 
+	 *  Computate maximal value of lambda-level landscape.
+	**/
     double find_max( unsigned lambda )const;
-    
+
 	/**
 	 * Function to compute inner (scalar) product of two landscapes.
 	**/
     friend double compute_inner_product( const Persistence_landscape& l1 , const Persistence_landscape& l2 );
 
 
-	
-    
+
+
 	//concretization of abstract functions:
-	
+
 	/**
-	 * The number of projections to R is defined to the number of nonzero landscape functions. I-th projection is an integral of i-th landscape function over whole R. 
-	**/  
+	 * The number of projections to R is defined to the number of nonzero landscape functions. I-th projection is an integral of i-th landscape function over whole R.
+	**/
     double project_to_R( int number_of_function )
     {
 		return this->compute_integral_of_landscape( (size_t)number_of_function );
 	}
-	
+
     std::vector<double> vectorize( int number_of_function )
     {
 		//TODO, think of something smarter over here
@@ -454,7 +454,7 @@ public:
 		if ( (size_t)number_of_function > this->land.size() )
 		{
 			return v;
-		}		
+		}
 		v.reserve( this->land[number_of_function].size() );
 		for ( size_t i = 0 ; i != this->land[number_of_function].size() ; ++i )
 		{
@@ -464,16 +464,16 @@ public:
 	}
     void compute_average( std::vector< Abs_Topological_data_with_averages* > to_average )
     {
-		bool dbg = false;				
-		
+		bool dbg = false;
+
 		std::vector< Persistence_landscape* > nextLevelMerge( to_average.size() );
         for ( size_t i = 0 ; i != to_average.size() ; ++i )
         {
             nextLevelMerge[i] = (Persistence_landscape*)to_average[i];
         }
         bool is_this_first_level = true;//in the loop, we will create dynamically a unmber of intermediate complexes. We have to clean that up, but we cannot erase the initial andscapes we have
-										//to average. In this case, we simply check if the nextLevelMerge are the input landscapes or the ones created in that loop by usig this extra variable. 
-        
+										//to average. In this case, we simply check if the nextLevelMerge are the input landscapes or the ones created in that loop by usig this extra variable.
+
         while ( nextLevelMerge.size() != 1 )
         {
             if ( dbg ){cerr << "nextLevelMerge.size() : " << nextLevelMerge.size() << endl;}
@@ -490,27 +490,27 @@ public:
                 else
                 {
                     (*l) = *nextLevelMerge[i];
-                }                
+                }
                 nextNextLevelMerge.push_back( l );
             }
             if ( dbg ){cerr << "After this iteration \n";}
-            
+
             if ( !is_this_first_level )
             {
 				//deallocate the memory if the vector nextLevelMerge do not consist of the initial landscapes
 				for ( size_t i = 0 ; i != nextLevelMerge.size() ; ++i )
 				{
 					delete nextLevelMerge[i];
-				}  
+				}
 			}
-			is_this_first_level = false;           
-            nextLevelMerge.swap(nextNextLevelMerge);           
+			is_this_first_level = false;
+            nextLevelMerge.swap(nextNextLevelMerge);
         }
         (*this) = (*nextLevelMerge[0]);
         (*this) *= 1/( (double)to_average.size() );
 	}
-	
-	
+
+
     double distance( const Abs_Topological_data_with_distances* second , double power = 1 )
     {
 		if ( power != -1 )
@@ -522,31 +522,31 @@ public:
 			return compute_max_norm_discance_of_landscapes( *this , *((Persistence_landscape*)second) );
 		}
 	}
-	
-	
+
+
 	double compute_scalar_product( const Abs_Topological_data_with_scalar_product* second )
 	{
 		return compute_inner_product( (*this) , *((Persistence_landscape*)second) );
 	}
-	
-	
+
+
 	std::vector< std::vector< std::pair<double,double> > > output_for_visualization()
 	{
 		return this->land;
 	}
-	
-	
+
+
 private:
-    std::vector< std::vector< std::pair<double,double> > > land;    
-    
+    std::vector< std::vector< std::pair<double,double> > > land;
+
     void construct_persistence_landscape_from_barcode( const std::vector< std::pair< double , double > > & p );
     Persistence_landscape multiply_lanscape_by_real_number_not_overwrite( double x )const;
     void multiply_lanscape_by_real_number_overwrite( double x );
     friend Persistence_landscape operation_on_pair_of_landscapes ( const Persistence_landscape& land1 ,  const Persistence_landscape& land2 , double (*oper)(double,double) );
     friend double compute_maximal_distance_non_symmetric( const Persistence_landscape& pl1, const Persistence_landscape& pl2 );
-    
+
     void set_up_numbers_of_functions_for_vectorization_and_projections_to_reals()
-	{		
+	{
 		//warning, this function can be only called after filling in the intervals vector.
 		this->number_of_functions_for_vectorization = this->land.size();
 		this->number_of_functions_for_projections_to_reals = this->land.size();
@@ -556,14 +556,14 @@ private:
 
 Persistence_landscape::Persistence_landscape(const Persistence_landscape& oryginal)
 {
-    //std::cerr << "Running copy constructor \n";    
+    //std::cerr << "Running copy constructor \n";
     std::vector< std::vector< std::pair<double,double> > > land( oryginal.land.size() );
     for ( size_t i = 0 ; i != oryginal.land.size() ; ++i )
     {
         land[i].insert( land[i].end() , oryginal.land[i].begin() , oryginal.land[i].end() );
-    }   
-    this->land = land;  
-    this->set_up_numbers_of_functions_for_vectorization_and_projections_to_reals(); 
+    }
+    this->land = land;
+    this->set_up_numbers_of_functions_for_vectorization_and_projections_to_reals();
 }
 
 
@@ -571,7 +571,7 @@ Persistence_landscape::Persistence_landscape(const Persistence_landscape& orygin
 
 
 Persistence_landscape::Persistence_landscape(const char* filename)
-{	
+{
     bool dbg = false;
 
     if ( dbg )
@@ -582,7 +582,7 @@ Persistence_landscape::Persistence_landscape(const char* filename)
     //this constructor reads persistence landscape form a file. This file have to be created by this software beforehead
     std::ifstream in;
     in.open( filename );
-  
+
     std::string line;
     std::vector< std::pair<double,double> > barcode;
 
@@ -607,10 +607,10 @@ Persistence_landscape::Persistence_landscape(const char* filename)
             {
 				std::cerr << beginn << " , " << endd << std::endl;
 			}
-        }       
+        }
 	}
 	in.close();
-	
+
 	this->construct_persistence_landscape_from_barcode( barcode );
 	this->set_up_numbers_of_functions_for_vectorization_and_projections_to_reals();
 }
@@ -635,7 +635,7 @@ bool Persistence_landscape::operator == ( const Persistence_landscape& rhs  )con
         }
         for ( size_t i = 0 ; i != this->land[level].size() ; ++i )
         {
-            if ( !( almost_equal(this->land[level][i].first , rhs.land[level][i].first) && almost_equal(this->land[level][i].second , rhs.land[level][i].second) ) ) 
+            if ( !( almost_equal(this->land[level][i].first , rhs.land[level][i].first) && almost_equal(this->land[level][i].second , rhs.land[level][i].second) ) )
             {
 				//cerr<< this->land[level][i].first << " , " <<  rhs.land[level][i].first << " and " << this->land[level][i].second << " , " << rhs.land[level][i].second << endl;
                 if (operatorEqualDbg)std::cerr << "this->land[level][i] : " << this->land[level][i].first << " " << this->land[level][i].second << "\n";
@@ -650,13 +650,13 @@ bool Persistence_landscape::operator == ( const Persistence_landscape& rhs  )con
 
 
 Persistence_landscape Persistence_landscape::operator=( const Persistence_landscape& oryginal )
-{   
+{
     std::vector< std::vector< std::pair<double,double> > > land( oryginal.land.size() );
     for ( size_t i = 0 ; i != oryginal.land.size() ; ++i )
     {
         land[i].insert( land[i].end() , oryginal.land[i].begin() , oryginal.land[i].end() );
-    }    
-    this->land = land;    
+    }
+    this->land = land;
     return *this;
 }
 
@@ -673,8 +673,8 @@ void Persistence_landscape::construct_persistence_landscape_from_barcode( const 
 {
 	bool dbg = false;
     if ( dbg ){cerr << "Persistence_landscape::Persistence_landscape( const std::vector< std::pair< double , double > >& p )" << endl;}
-    
-	//this is a general algorithm to construct persistence landscapes.        
+
+	//this is a general algorithm to construct persistence landscapes.
 	std::vector< std::pair<double,double> > bars;
 	bars.insert( bars.begin() , p.begin() , p.end() );
 	std::sort( bars.begin() , bars.end() , compare_points_sorting );
@@ -734,7 +734,7 @@ void Persistence_landscape::construct_persistence_landscape_from_barcode( const 
 
 
 					if ( dbg )
-					{						
+					{
 						std::cerr << "characteristicPoints[i+p] : " << characteristicPoints[i+p].first << " " << characteristicPoints[i+p].second << "\n";
 						std::cerr << "point : " << point.first << " " << point.second << "\n";
 						getchar();
@@ -765,7 +765,7 @@ void Persistence_landscape::construct_persistence_landscape_from_barcode( const 
 						if (dbg)
 						{
 							std::cerr << "characteristicPoints[i+p] : " << characteristicPoints[i+p].first << " " << characteristicPoints[i+p].second << "\n";
-							std::cerr << "point : " << point.first << " " << point.second << "\n";						
+							std::cerr << "point : " << point.first << " " << point.second << "\n";
 							std::cerr << "characteristicPoints[i+p] birth and death : " << minus_length(characteristicPoints[i+p]) << " , " << birth_plus_deaths(characteristicPoints[i+p]) << "\n";
 							std::cerr << "point birth and death : " << minus_length(point) << " , " << birth_plus_deaths(point) << "\n";
 
@@ -804,8 +804,8 @@ void Persistence_landscape::construct_persistence_landscape_from_barcode( const 
 		}
 		lambda_n.push_back( std::make_pair(birth_plus_deaths(lambda_n[lambda_n.size()-1]),0) );
 		lambda_n.push_back( std::make_pair( std::numeric_limits<int>::max() , 0 ) );
-		
-		characteristicPoints = newCharacteristicPoints;		
+
+		characteristicPoints = newCharacteristicPoints;
 
 		lambda_n.erase(std::unique(lambda_n.begin(), lambda_n.end()), lambda_n.end());
 		this->land.push_back( lambda_n );
@@ -851,13 +851,13 @@ double Persistence_landscape::compute_integral_of_landscape( size_t  level )cons
 	}
 	//also negative landscapes are assumed to be zero.
 	if ( level < 0 )return 0;
-    
+
 	for ( size_t nr = 2 ; nr != this->land[ level ].size()-1 ; ++nr )
 	{
 		//it suffices to compute every planar integral and then sum them ap for each lambda_n
 		result += 0.5*( this->land[ level ][nr].first - this->land[ level ][nr-1].first )*(this->land[ level ][nr].second + this->land[ level ][nr-1].second);
 	}
-    
+
     return result;
 }
 
@@ -1061,7 +1061,7 @@ Persistence_landscape Persistence_landscape::multiply_lanscape_by_real_number_no
         }
         result[dim] = lambda_dim;
     }
-    Persistence_landscape res;   
+    Persistence_landscape res;
     //CHANGE
     //res.land = result;
     res.land.swap(result);
@@ -1070,9 +1070,9 @@ Persistence_landscape Persistence_landscape::multiply_lanscape_by_real_number_no
 
 
 void Persistence_landscape::print_to_file( const char* filename )const
-{    
+{
     std::ofstream write;
-    write.open(filename);    
+    write.open(filename);
     for ( size_t dim = 0 ; dim != this->land.size() ; ++dim )
     {
         write << "#lambda_" << dim << std::endl;
@@ -1089,8 +1089,8 @@ void Persistence_landscape::load_landscape_from_file( const char* filename )
 	bool dbg = false;
 	//removing the current content of the persistence landscape.
 	this->land.clear();
-	
-	
+
+
 	//this constructor reads persistence landscape form a file. This file have to be created by this software beforehead
     std::ifstream in;
     in.open( filename );
@@ -1100,7 +1100,7 @@ void Persistence_landscape::load_landscape_from_file( const char* filename )
 		throw "The file from which you are trying to read the persistence landscape do not exist. The program will now terminate \n";
 	}
 
-    std::string line;    
+    std::string line;
     std::vector< std::pair<double,double> > landscapeAtThisLevel;
 
     bool isThisAFirsLine = true;
@@ -1108,12 +1108,12 @@ void Persistence_landscape::load_landscape_from_file( const char* filename )
     {
         getline(in,line);
         if ( !(line.length() == 0 || line[0] == '#') )
-        {			
+        {
             std::stringstream lineSS;
             lineSS << line;
             double beginn, endd;
             lineSS >> beginn;
-            lineSS >> endd;            
+            lineSS >> endd;
             landscapeAtThisLevel.push_back( std::make_pair( beginn , endd ) );
             if (dbg){std::cerr << "Reading a pont : " << beginn << " , " << endd << std::endl;}
         }
