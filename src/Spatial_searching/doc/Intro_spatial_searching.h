@@ -42,7 +42,7 @@ namespace spatial_searching {
  * 
  * \section spatial_searching_examples Example
  * 
- * This example generates 500 random points, then queries the 10 nearest points to the 20th point.
+ * This example generates 500 random points, then performs queries for nearest points using different methods.
  * 
  * \include Spatial_searching/example_spatial_searching.cpp
  * 
