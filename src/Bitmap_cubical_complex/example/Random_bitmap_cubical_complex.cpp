@@ -61,8 +61,8 @@ int main(int argc, char** argv) {
     data.push_back(rand() / static_cast<double>(RAND_MAX));
   }
 
-  typedef Gudhi::Cubical_complex::Bitmap_cubical_complex_base<double> Bitmap_cubical_complex_base;
-  typedef Gudhi::Cubical_complex::Bitmap_cubical_complex<Bitmap_cubical_complex_base> Bitmap_cubical_complex;
+  typedef Gudhi::cubical_complex::Bitmap_cubical_complex_base<double> Bitmap_cubical_complex_base;
+  typedef Gudhi::cubical_complex::Bitmap_cubical_complex<Bitmap_cubical_complex_base> Bitmap_cubical_complex;
   Bitmap_cubical_complex b(sizes, data);
 
   // Compute the persistence diagram of the complex

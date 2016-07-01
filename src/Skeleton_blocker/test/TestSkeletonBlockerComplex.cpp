@@ -36,7 +36,7 @@ using namespace std;
 
 using namespace Gudhi;
 
-using namespace skbl;
+using namespace skeleton_blocker;
 
 
 typedef Skeleton_blocker_complex<Skeleton_blocker_simple_traits> Complex;

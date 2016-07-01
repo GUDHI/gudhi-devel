@@ -38,7 +38,7 @@
 
 namespace Gudhi {
 
-namespace Cubical_complex {
+namespace cubical_complex {
 
 // global variable, was used just for debugging.
 const bool globalDbg = false;
@@ -586,7 +586,9 @@ class is_before_in_filtration {
   Bitmap_cubical_complex<T>* CC_;
 };
 
-}  // namespace Cubical_complex
+}  // namespace cubical_complex
+
+namespace Cubical_complex = cubical_complex;
 
 }  // namespace Gudhi
 

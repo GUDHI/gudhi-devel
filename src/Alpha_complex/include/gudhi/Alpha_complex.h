@@ -48,7 +48,7 @@
 
 namespace Gudhi {
 
-namespace alphacomplex {
+namespace alpha_complex {
 
 /**
  * \class Alpha_complex Alpha_complex.h gudhi/Alpha_complex.h
@@ -410,7 +410,9 @@ class Alpha_complex : public Simplex_tree<> {
   }
 };
 
-}  // namespace alphacomplex
+}  // namespace alpha_complex
+
+namespace alphacomplex = alpha_complex;
 
 }  // namespace Gudhi
 

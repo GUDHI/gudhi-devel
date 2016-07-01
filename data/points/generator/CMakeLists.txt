@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(GUDHIPointsGenerator)
+project(Data_points_generator)
 
 if(CGAL_FOUND)
   if (NOT CGAL_VERSION VERSION_LESS 4.6.0)
@@ -9,8 +9,9 @@ if(CGAL_FOUND)
     if (EIGEN3_FOUND)
       include( ${EIGEN3_USE_FILE} )
       include_directories (BEFORE "../../include")
-
+	  
       add_executable ( hypergenerator hypergenerator.cpp )
+      target_link_libraries(hypergenerator ${Boost_SYSTEM_LIBRARY})
       add_test(hypergenerator_on_sphere_3000_10_5.0 ${CMAKE_CURRENT_BINARY_DIR}/hypergenerator on sphere onSphere.off 3000 10 5.0)
       add_test(hypergenerator_on_sphere_10000_3 ${CMAKE_CURRENT_BINARY_DIR}/hypergenerator on sphere onSphere.off 10000 3)
       add_test(hypergenerator_in_sphere_7000_12_10.8 ${CMAKE_CURRENT_BINARY_DIR}/hypergenerator in sphere inSphere.off 7000 12 10.8)

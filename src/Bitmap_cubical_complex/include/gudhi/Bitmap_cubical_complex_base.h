@@ -36,7 +36,7 @@
 
 namespace Gudhi {
 
-namespace Cubical_complex {
+namespace cubical_complex {
 
 /**
  * @brief Cubical complex represented as a bitmap, class with basic implementation.
@@ -808,7 +808,9 @@ bool compareFirstElementsOfTuples(const std::pair< std::pair< T, size_t >, char 
   }
 }
 
-}  // namespace Cubical_complex
+}  // namespace cubical_complex
+
+namespace Cubical_complex = cubical_complex;
 
 }  // namespace Gudhi
 

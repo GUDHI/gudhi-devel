@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(ALPHA_DOC_OFF_file) {
   std::cout << "========== OFF FILE NAME = " << off_file_name << " - alpha²=" <<
       max_alpha_square_value << "==========" << std::endl;
 
-  Gudhi::alphacomplex::Alpha_complex<Kernel_d> alpha_complex_from_file(off_file_name, max_alpha_square_value);
+  Gudhi::alpha_complex::Alpha_complex<Kernel_d> alpha_complex_from_file(off_file_name, max_alpha_square_value);
 
   const int DIMENSION = 2;
   std::cout << "alpha_complex_from_file.dimension()=" << alpha_complex_from_file.dimension() << std::endl;
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(ALPHA_DOC_OFF_file_filtered) {
       max_alpha_square_value << "==========" << std::endl;
 
   // Use of the default dynamic kernel
-  Gudhi::alphacomplex::Alpha_complex<> alpha_complex_from_file(off_file_name, max_alpha_square_value);
+  Gudhi::alpha_complex::Alpha_complex<> alpha_complex_from_file(off_file_name, max_alpha_square_value);
 
   const int DIMENSION = 2;
   std::cout << "alpha_complex_from_file.dimension()=" << alpha_complex_from_file.dimension() << std::endl;
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_from_points) {
   // ----------------------------------------------------------------------------
   // Init of an alpha complex from the list of points
   // ----------------------------------------------------------------------------
-  Gudhi::alphacomplex::Alpha_complex<Kernel_s> alpha_complex_from_points(points);
+  Gudhi::alpha_complex::Alpha_complex<Kernel_s> alpha_complex_from_points(points);
 
   std::cout << "========== Alpha_complex_from_points ==========" << std::endl;
 

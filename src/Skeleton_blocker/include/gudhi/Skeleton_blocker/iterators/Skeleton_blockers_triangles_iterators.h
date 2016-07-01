@@ -27,7 +27,7 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 /**
  * \brief Iterator over the triangles that are
@@ -213,7 +213,9 @@ typename SkeletonBlockerComplex::Simplex const
   }
 };
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 

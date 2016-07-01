@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
   // Init of an alpha complex from an OFF file
   // ----------------------------------------------------------------------------
   using Kernel = CGAL::Epick_d< CGAL::Dynamic_dimension_tag >;
-  Gudhi::alphacomplex::Alpha_complex<Kernel> alpha_complex_from_file(off_file_points, alpha_square_max_value);
+  Gudhi::alpha_complex::Alpha_complex<Kernel> alpha_complex_from_file(off_file_points, alpha_square_max_value);
 
   // ----------------------------------------------------------------------------
   // Display information about the alpha complex
@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
 
   std::cout << "Simplex_tree dim: " << alpha_complex_from_file.dimension() << std::endl;
   // Compute the persistence diagram of the complex
-  Gudhi::persistent_cohomology::Persistent_cohomology< Gudhi::alphacomplex::Alpha_complex<Kernel>,
+  Gudhi::persistent_cohomology::Persistent_cohomology< Gudhi::alpha_complex::Alpha_complex<Kernel>,
       Gudhi::persistent_cohomology::Field_Zp > pcoh(alpha_complex_from_file);
   // initializes the coefficient field for homology
   pcoh.init_coefficients(coeff_field_characteristic);

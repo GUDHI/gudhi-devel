@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(GUDHIDelaunayTriangulationOffFileReadWrite)
+project(Common_examples)
 
 # need CGAL 4.7
 if(CGAL_FOUND)

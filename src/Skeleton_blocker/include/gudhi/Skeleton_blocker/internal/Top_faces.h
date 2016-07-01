@@ -28,7 +28,7 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 template<typename SimplexHandle>
 std::list<SimplexHandle> subfaces(SimplexHandle top_face) {
@@ -63,7 +63,9 @@ void register_faces(std::vector< std::set<SimplexHandle> >& simplices_per_dimens
   }
 }
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 

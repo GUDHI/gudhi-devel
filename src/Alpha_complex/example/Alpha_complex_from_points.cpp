@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
   // ----------------------------------------------------------------------------
   // Init of an alpha complex from the list of points
   // ----------------------------------------------------------------------------
-  Gudhi::alphacomplex::Alpha_complex<Kernel> alpha_complex_from_points(points, alpha_square_max_value);
+  Gudhi::alpha_complex::Alpha_complex<Kernel> alpha_complex_from_points(points, alpha_square_max_value);
 
   // ----------------------------------------------------------------------------
   // Display information about the alpha complex

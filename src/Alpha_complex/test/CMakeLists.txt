@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(GUDHIAlphaComplexTest)
+project(Alpha_complex_tests)
 
 if (GCOVR_PATH)
   # for gcovr to make coverage reports - Corbera Jenkins plugin
@@ -23,9 +23,9 @@ if(CGAL_FOUND)
       include_directories (BEFORE "../../include")
 
       add_executable ( AlphaComplexUT Alpha_complex_unit_test.cpp )
-      target_link_libraries(AlphaComplexUT  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+      target_link_libraries(AlphaComplexUT  ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${CGAL_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
       if (TBB_FOUND)
-        target_link_libraries(AlphaComplexUT ${TBB_RELEASE_LIBRARY})
+        target_link_libraries(AlphaComplexUT ${TBB_LIBRARIES})
       endif()
 
       # Do not forget to copy test files in current binary dir
