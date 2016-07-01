@@ -81,13 +81,18 @@ cdef class AlphaComplex:
 
     cdef Alpha_complex_persistence_interface * pcohptr
 
-    def __cinit__(self, points=[], max_alpha_square=float('inf')):
+    # Fake constructor that does nothing but documenting the constructor
+    def __init__(self, points=[], max_alpha_square=float('inf')):
         """AlphaComplex constructor.
 
-        Args:
-           points (list): A list of points in d-Dimension.
-           max_alpha_square (float): Maximum Alpha square value.
+        :param points: A list of points in d-Dimension.
+        :type points: list of list of double
+        :param max_alpha_square: Maximum Alpha square value.
+        :type max_alpha_square: double
         """
+
+    # The real cython constructor
+    def __cinit__(self, points=[], max_alpha_square=float('inf')):
         self.thisptr = new Alpha_complex_interface(points,
                                                    max_alpha_square)
 
@@ -119,7 +124,7 @@ cdef class AlphaComplex:
         given N-simplex.
 
         :param simplex: The N-simplex, represented by a list of vertex.
-        :type simplex: list of int.
+        :type simplex: list of int
         :returns:  float -- the simplicial complex filtration value.
         """
         return self.thisptr.simplex_filtration(simplex)

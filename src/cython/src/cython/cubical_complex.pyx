@@ -53,16 +53,26 @@ cdef class CubicalComplex:
 
     cdef Cubical_complex_persistence_interface * pcohptr
 
-    def __cinit__(self, dimensions=None, top_dimensional_cells=None,
+    # Fake constructor that does nothing but documenting the constructor
+    def __init__(self, dimensions=None, top_dimensional_cells=None,
                   perseus_file=''):
         """CubicalComplex constructor from dimensions and
         top_dimensional_cells or from a perseus file style name.
 
-        Args:
-           dimensions (list): A list of number of top dimensional cells.
-           top_dimensional_cells (list): A list of top dimensional cells.
-           perseus_file (string): A perseus file style name.
-         """
+        :param dimensions: A list of number of top dimensional cells.
+        :type dimensions: list of int
+        :param top_dimensional_cells: A list of top dimensional cells.
+        :type top_dimensional_cells: list of double
+
+        Or
+
+        :param perseus_file: A perseus file style name.
+        :type perseus_file: string
+        """
+
+    # The real cython constructor
+    def __cinit__(self, dimensions=None, top_dimensional_cells=None,
+                  perseus_file=''):
         if ((dimensions is not None) or (top_dimensional_cells is not None) and
              (perseus_file is not '')):
             print("CubicalComplex can be constructed from dimensions and "

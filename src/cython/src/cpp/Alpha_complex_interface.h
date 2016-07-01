@@ -32,7 +32,7 @@
 
 namespace Gudhi {
 
-namespace alphacomplex {
+namespace alpha_complex {
 
 class Alpha_complex_interface : public Alpha_complex< CGAL::Epick_d< CGAL::Dynamic_dimension_tag > > {
   using Alpha_complex = Alpha_complex< CGAL::Epick_d< CGAL::Dynamic_dimension_tag > > ;
@@ -129,7 +129,7 @@ class Alpha_complex_interface : public Alpha_complex< CGAL::Epick_d< CGAL::Dynam
 
 };
 
-}  // namespace alphacomplex
+}  // namespace alpha_complex
 
 } // namespace Gudhi
 

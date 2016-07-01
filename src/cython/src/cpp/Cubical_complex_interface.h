@@ -33,7 +33,7 @@
 
 namespace Gudhi {
 
-namespace Cubical_complex {
+namespace cubical_complex {
 
 template<typename CubicalComplexOptions = Bitmap_cubical_complex_base<double>>
 class Cubical_complex_interface : public Bitmap_cubical_complex<CubicalComplexOptions> {
@@ -50,7 +50,7 @@ class Cubical_complex_interface : public Bitmap_cubical_complex<CubicalComplexOp
 
 };
 
-}  // namespace Cubical_complex
+}  // namespace cubical_complex
 
 }  // namespace Gudhi
 
