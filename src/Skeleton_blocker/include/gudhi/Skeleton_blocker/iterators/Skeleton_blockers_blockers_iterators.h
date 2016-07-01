@@ -26,7 +26,7 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 /**
  * @brief Iterator through the blockers of a vertex.
@@ -124,7 +124,9 @@ ReturnType
   }
 };
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 

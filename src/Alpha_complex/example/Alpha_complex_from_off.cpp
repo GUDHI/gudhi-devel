@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
   // Init of an alpha complex from an OFF file
   // ----------------------------------------------------------------------------
   typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kernel;
-  Gudhi::alphacomplex::Alpha_complex<Kernel> alpha_complex_from_file(off_file_name, alpha_square_max_value);
+  Gudhi::alpha_complex::Alpha_complex<Kernel> alpha_complex_from_file(off_file_name, alpha_square_max_value);
 
   std::streambuf* streambufffer;
   std::ofstream ouput_file_stream;

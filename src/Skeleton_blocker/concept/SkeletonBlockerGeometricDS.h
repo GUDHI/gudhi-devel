@@ -10,7 +10,7 @@
 #define GUDHI_SKELETONBLOCKERGEOMETRICDS_H_
 
 namespace Gudhi {
-namespace skbl {
+namespace skeleton_blocker {
 
 /** 
  * \brief Concept for template class of  Skeleton_blocker_geometric_complex .
@@ -68,7 +68,10 @@ struct SkeletonBlockerGeometricDS : public SkeletonBlockerDS
 	};
 };
 
-}  // namespace skbl
-}  // namespace GUDHI
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
+
+}  // namespace Gudhi
 
 #endif /* GUDHI_SKELETONBLOCKERGEOMETRICDS_H_ */

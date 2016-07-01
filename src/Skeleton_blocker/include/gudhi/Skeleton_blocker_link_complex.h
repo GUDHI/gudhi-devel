@@ -27,7 +27,7 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 template<class ComplexType> class Skeleton_blocker_sub_complex;
 
@@ -290,7 +290,9 @@ class Skeleton_blocker_link_complex : public Skeleton_blocker_sub_complex<
   }
 };
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 

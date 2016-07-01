@@ -32,7 +32,7 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 /**
  * @brief Simplicial subcomplex of a complex represented by a skeleton/blockers pair.
@@ -282,7 +282,9 @@ bool proper_faces_in_union(
   return true;
 }
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 

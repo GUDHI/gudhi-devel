@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(GUDHIPointsGenerator)
+project(Data_points_generator)
 
 if(CGAL_FOUND)
   if (NOT CGAL_VERSION VERSION_LESS 4.6.0)

@@ -49,8 +49,8 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  typedef Gudhi::Cubical_complex::Bitmap_cubical_complex_periodic_boundary_conditions_base<double> Bitmap_base;
-  typedef Gudhi::Cubical_complex::Bitmap_cubical_complex< Bitmap_base > Bitmap_cubical_complex;
+  typedef Gudhi::cubical_complex::Bitmap_cubical_complex_periodic_boundary_conditions_base<double> Bitmap_base;
+  typedef Gudhi::cubical_complex::Bitmap_cubical_complex< Bitmap_base > Bitmap_cubical_complex;
 
   Bitmap_cubical_complex b(argv[1]);
 

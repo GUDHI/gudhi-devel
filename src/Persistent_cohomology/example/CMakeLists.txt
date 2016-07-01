@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(GUDHIExPersCohom)
+project(Persistent_cohomology_examples)
 
 # problem with Visual Studio link on Boost program_options
 add_definitions( -DBOOST_ALL_NO_LIB )

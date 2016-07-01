@@ -26,7 +26,7 @@
 // needs namespace for Doxygen to link on classes
 namespace Gudhi {
 // needs namespace for Doxygen to link on classes
-namespace alphacomplex {
+namespace alpha_complex {
 
 /**  \defgroup alpha_complex Alpha complex
  * 
@@ -161,7 +161,9 @@ namespace alphacomplex {
  */
 /** @} */  // end defgroup alpha_complex
 
-}  // namespace alphacomplex
+}  // namespace alpha_complex
+
+namespace alphacomplex = alpha_complex;
 
 }  // namespace Gudhi
 

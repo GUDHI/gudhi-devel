@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(GUDHIBottleneckUT)
+project(Bottleneck_tests)
 
 if (GCOVR_PATH)
   # for gcovr to make coverage reports - Corbera Jenkins plugin

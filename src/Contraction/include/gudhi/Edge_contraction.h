@@ -127,7 +127,7 @@ while ensuring its homotopy type is preserved during the contraction (edge are c
 
 using namespace std;
 using namespace Gudhi;
-using namespace skbl;
+using namespace skeleton_blocker;
 using namespace contraction;
 
 struct Geometry_trait{

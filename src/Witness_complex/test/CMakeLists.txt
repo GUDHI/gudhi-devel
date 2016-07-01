@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(GUDHIWitnessComplexUT)
+project(Witness_complex_tests)
 
 if (GCOVR_PATH)
   # for gcovr to make coverage reports - Corbera Jenkins plugin
