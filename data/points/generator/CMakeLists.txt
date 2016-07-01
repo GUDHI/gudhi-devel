@@ -3,13 +3,7 @@ project(Data_points_generator)
 
 if(CGAL_FOUND)
   if (NOT CGAL_VERSION VERSION_LESS 4.6.0)
-    message(STATUS "CGAL version: ${CGAL_VERSION}.")
-
-    find_package(Eigen3 3.1.0)
     if (EIGEN3_FOUND)
-      include( ${EIGEN3_USE_FILE} )
-      include_directories (BEFORE "../../include")
-	  
       add_executable ( hypergenerator hypergenerator.cpp )
       target_link_libraries(hypergenerator ${Boost_SYSTEM_LIBRARY})
       add_test(hypergenerator_on_sphere_3000_10_5.0 ${CMAKE_CURRENT_BINARY_DIR}/hypergenerator on sphere onSphere.off 3000 10 5.0)
