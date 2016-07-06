@@ -18,7 +18,8 @@ if(CGAL_FOUND)
     include_directories (BEFORE "../../include")
 
     add_executable( Spatial_searching_test_Spatial_tree_data_structure test_Spatial_tree_data_structure.cpp )
-    target_link_libraries(Spatial_searching_test_Spatial_tree_data_structure ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+    target_link_libraries(Spatial_searching_test_Spatial_tree_data_structure 
+      ${CGAL_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
   else()
     message(WARNING "Eigen3 not found. Version 3.1.0 is required for the Spatial_searching tests.")
   endif()

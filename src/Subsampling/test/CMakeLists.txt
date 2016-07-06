@@ -21,12 +21,13 @@ if(CGAL_FOUND)
       include_directories (BEFORE "../../include")
 
       add_executable( Subsampling_test_pick_random_points test_pick_random_points.cpp )
+      target_link_libraries(Subsampling_test_pick_random_points ${CGAL_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
       add_executable( Subsampling_test_choose_farthest_point test_choose_farthest_point.cpp )
-      target_link_libraries(Subsampling_test_choose_farthest_point ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+      target_link_libraries(Subsampling_test_choose_farthest_point ${CGAL_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
       
       add_executable(Subsampling_test_sparsify_point_set test_sparsify_point_set.cpp)
-      target_link_libraries(Subsampling_test_sparsify_point_set ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+      target_link_libraries(Subsampling_test_sparsify_point_set ${CGAL_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
     else()
       message(WARNING "Eigen3 not found. Version 3.1.0 is required for Subsampling feature.")
     endif()

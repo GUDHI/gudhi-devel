@@ -17,7 +17,7 @@ if(CGAL_FOUND)
       #target_link_libraries(Subsampling_example_choose_farthest_point ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
       
       add_executable(Subsampling_example_sparsify_point_set example_sparsify_point_set.cpp)
-      target_link_libraries(Subsampling_example_sparsify_point_set ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+      target_link_libraries(Subsampling_example_sparsify_point_set ${CGAL_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
     else()
       message(WARNING "Eigen3 not found. Version 3.1.0 is required for Subsampling feature.")
     endif()

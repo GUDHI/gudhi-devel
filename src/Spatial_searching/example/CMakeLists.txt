@@ -12,6 +12,7 @@ if(CGAL_FOUND)
       include_directories (BEFORE "../../include")
 
       add_executable( Spatial_searching_example_spatial_searching example_spatial_searching.cpp )
+      target_link_libraries(Spatial_searching_example_spatial_searching ${CGAL_LIBRARY})
     else()
       message(WARNING "Eigen3 not found. Version 3.1.0 is required for the Tangential_complex examples.")
     endif()
