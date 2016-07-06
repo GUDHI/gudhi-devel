@@ -54,7 +54,7 @@ namespace spatial_searching {
   * and the <i>incremental nearest neighbor query</i>, where no number of neighbors is provided during the call, as the
   * neighbors will be computed incrementally when the iterator on the range is incremented.
   *
-  * \tparam K requires a model of the <a target="_blank"
+  * \tparam K must be a model of the <a target="_blank"
   *   href="http://doc.cgal.org/latest/Spatial_searching/classSearchTraits.html">SearchTraits</a>
   *   concept, such as the <a target="_blank"
   *   href="http://doc.cgal.org/latest/Kernel_d/classCGAL_1_1Epick__d.html">CGAL::Epick_d</a> class, which
