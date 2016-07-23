@@ -2,9 +2,9 @@
  *    (Geometric Understanding in Higher Dimensions) is a generic C++
  *    library for computational topology.
  *
- *    Author(s):       Francois Godi
+ *    Author(s):       Francois Godi, small modifications by Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA Sophia-Antipolis (France)
+ *    Copyright (C) 2015  INRIA Saclay (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -22,21 +22,55 @@
 
 #include <gudhi/Graph_matching.h>
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
 
+using namespace std;
 
-int main() {
-    std::vector< std::pair<double,double> > v1, v2;
+//PD: I am using this type of procedures a lot in Gudhi stat. We should make one for all at some point.
+std::vector< std::pair<double, double> > read_diagram_from_file( const char* filename )
+{
+    ifstream in;
+    in.open( filename );
+    std::vector< std::pair<double, double> > result;
+    if ( !in.is_open() )
+    {
+        std::cerr << "File : " << filename << " do not exist. The program will now terminate \n";
+        throw "File do not exist \n";
+    }
 
-    v1.push_back(std::pair<double,double>(2.7,3.7));
-    v1.push_back(std::pair<double,double>(9.6,14));
-    v1.push_back(std::pair<double,double>(34.2,34.974));
+    std::string line;
+    while (!in.eof())
+    {
+        getline(in,line);
+        if ( line.length() != 0 )
+        {
+            std::stringstream lineSS;
+            lineSS << line;
+            double beginn, endd;
+            lineSS >> beginn;
+            lineSS >> endd;
+            result.push_back( std::make_pair( beginn , endd ) );
+        }
+    }
+    in.close();
+    return result;
+}//read_diagram_from_file
 
-    v2.push_back(std::pair<double,double>(2.8,4.45));
-    v2.push_back(std::pair<double,double>(9.5,14.1));
-
-    double b =  Gudhi::Bottleneck_distance::compute(v1, v2, 0.0001);
-    std::cout << "Approx. bottleneck distance = " << b << std::endl;
-
-    b =  Gudhi::Bottleneck_distance::compute(v1, v2);
-    std::cout << "Bottleneck distance = " << b << std::endl;
+int main( int argc , char** argv )
+{
+  if ( argc < 3 )
+  {
+      std::cout << "To run this program please provide as an input two files with persistence diagrams. Each file should contain a birth-death pair per line. Third, optional parameter is an error bound on a bottleneck distance (set by default to zero). The program will now terminate \n";
+  }
+  std::vector< std::pair< double , double > > diag1 = read_diagram_from_file( argv[1] );
+  std::vector< std::pair< double , double > > diag2 = read_diagram_from_file( argv[2] );
+  double tolerance = 0;
+  if ( argc == 4 )
+  {
+      tolerance = atof( argv[3] );
+  }
+  double b = Gudhi::Bottleneck_distance::compute(diag1, diag2, tolerance);
+  std::cout << "The distance between the diagrams is : " << b << ". The tolerace is : " << tolerance << std::endl;
 }
