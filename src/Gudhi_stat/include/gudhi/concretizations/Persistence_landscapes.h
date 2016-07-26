@@ -24,7 +24,7 @@
 #ifndef Persistence_landscapes_H
 #define Persistence_landscapes_H
 
-
+//standard include
 #include <cmath>
 #include <iostream>
 #include <vector>
@@ -35,12 +35,13 @@
 #include <unistd.h>
 
 
-
+//gudhi include
 #include <gudhi/abstract_classes/Abs_Vectorized_topological_data.h>
 #include <gudhi/abstract_classes/Abs_Topological_data_with_averages.h>
 #include <gudhi/abstract_classes/Abs_Topological_data_with_distances.h>
 #include <gudhi/abstract_classes/Abs_Real_valued_topological_data.h>
 #include <gudhi/abstract_classes/Abs_Topological_data_with_scalar_product.h>
+#include <gudhi/concretizations/read_persitence_from_file.h>
 using namespace std;
 
 
@@ -205,7 +206,7 @@ public:
 	 * Constructor that reads persistence intervals from file and creates persistence landscape. The format of the input file is the following: in each line we put birth-death pair. Last line is assumed
 	 * to be empty. Even if the points within a line are not ordered, they will be ordered while the input is read.
 	**/
-    Persistence_landscape(const char* filename);
+    Persistence_landscape(const char* filename , size_t dimension = 0);
 
 
 
@@ -530,6 +531,10 @@ public:
 	{
 		return this->land;
 	}
+	
+	
+	//a function used to create a gnuplot script for visualization of landscapes
+	void plot( const char* filename ,int from = -1, int to = -1 ,  double xRangeBegin = -1 , double xRangeEnd = -1 , double yRangeBegin = -1 , double yRangeEnd = -1 );
 
 
 private:
@@ -566,47 +571,18 @@ Persistence_landscape::Persistence_landscape(const Persistence_landscape& orygin
 
 
 
-Persistence_landscape::Persistence_landscape(const char* filename)
+Persistence_landscape::Persistence_landscape(const char* filename , size_t dimension)
 {
     bool dbg = false;
 
     if ( dbg )
     {
         std::cerr << "Using constructor : Persistence_landscape(char* filename)" << std::endl;
-    }
-
-    //this constructor reads persistence landscape form a file. This file have to be created by this software beforehead
-    std::ifstream in;
-    in.open( filename );
-
-    std::string line;
-    std::vector< std::pair<double,double> > barcode;
-
-    while (!in.eof())
-    {
-        getline(in,line);
-        if ( !(line.length() == 0 || line[0] == '#') )
-        {
-            std::stringstream lineSS;
-            lineSS << line;
-            double beginn, endd;
-            lineSS >> beginn;
-            lineSS >> endd;
-            if ( beginn > endd )
-            {
-                double b = beginn;
-                beginn = endd;
-                endd = b;
-            }
-            barcode.push_back( std::make_pair( beginn , endd ) );
-            if (dbg)
-            {
-				std::cerr << beginn << " , " << endd << std::endl;
-			}
-        }
-	}
-	in.close();
-
+    }   
+    //standard file with barcode
+    //std::vector< std::pair< double , double > > barcode = read_standard_file( filename );    
+    //gudhi file with barcode
+    std::vector< std::pair< double , double > > barcode = read_gudhi_file( filename , dimension );        
 	this->construct_persistence_landscape_from_barcode( barcode );
 	this->set_up_numbers_of_functions_for_vectorization_and_projections_to_reals();
 }
@@ -1471,6 +1447,49 @@ double compute_inner_product( const Persistence_landscape& l1 , const Persistenc
     }
     return result;
 }
+
+
+void Persistence_landscape::plot( const char* filename , int from, int to , double xRangeBegin , double xRangeEnd , double yRangeBegin , double yRangeEnd )
+{
+    //this program create a gnuplot script file that allows to plot persistence diagram.
+    ofstream out;
+
+    std::ostringstream nameSS;
+    nameSS << filename << "_GnuplotScript";
+    std::string nameStr = nameSS.str();
+    out.open( (char*)nameStr.c_str() );
+
+    if ( (xRangeBegin != -1) || (xRangeEnd != -1) || (yRangeBegin != -1) || (yRangeEnd != -1)  )
+    {
+        out << "set xrange [" << xRangeBegin << " : " << xRangeEnd << "]" << endl;
+        out << "set yrange [" << yRangeBegin << " : " << yRangeEnd << "]" << endl;
+    }
+
+    if ( from == -1 ){from = 0;}
+    if ( to == -1 ){to = this->land.size();}
+
+    out << "plot ";
+    for ( size_t lambda= std::min((size_t)from,this->land.size()) ; lambda != std::min((size_t)to,this->land.size()) ; ++lambda )
+    {
+        out << "     '-' using 1:2 title 'l" << lambda << "' with lp";
+        if ( lambda+1 != std::min((size_t)to,this->land.size()) )
+        {
+            out << ", \\";
+        }
+        out << endl;
+    }
+
+    for ( size_t lambda= std::min((size_t)from,this->land.size()) ; lambda != std::min((size_t)to,this->land.size()) ; ++lambda )
+    {
+        for ( size_t i = 1 ; i != this->land[lambda].size()-1 ; ++i )
+        {
+            out << this->land[lambda][i].first << " " << this->land[lambda][i].second << endl;
+        }
+        out << "EOF" << endl;
+    }
+    cout << "Gnuplot script to visualize persistence diagram written to the file: " << nameStr << ". Type load '" << nameStr << "' in gnuplot to visualize." << endl;
+}
+
 
 
 

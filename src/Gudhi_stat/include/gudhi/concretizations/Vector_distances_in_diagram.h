@@ -37,6 +37,7 @@
 #include <gudhi/abstract_classes/Abs_Topological_data_with_distances.h>
 #include <gudhi/abstract_classes/Abs_Real_valued_topological_data.h>
 #include <gudhi/abstract_classes/Abs_Topological_data_with_scalar_product.h>
+#include <gudhi/concretizations/read_persitence_from_file.h>
 using namespace std;
 
 namespace Gudhi 
@@ -203,27 +204,13 @@ Vector_distances_in_diagram<F>& Vector_distances_in_diagram<F>::operator =( cons
 
 template <typename F>
 Vector_distances_in_diagram<F>::Vector_distances_in_diagram( const char* filename , size_t where_to_cut  ):Abs_Vectorized_topological_data(where_to_cut)
-{
-    std::vector< std::pair< double , double > > intervals;
-    ifstream in;
-    in.open( filename );
+{   
+    //standard file with barcode
+    std::vector< std::pair< double , double > > intervals = read_standard_file( filename );    
+    //gudhi file with barcode
+    //std::vector< std::pair< double , double > > intervals = read_gudhi_file( filename , dimension );   
     
-    if ( !in.good() )
-    {
-		std::cerr << "File : " << filename << " do not exist. The program will now terminate \n";
-        throw("File with the persistence diagram do not exist, the program will now terminate.\n");
-    }
-    
-    while ( true )
-    {		
-        double first;
-        double second;		     
-        in >> first >> second;
-        if ( in.eof() )break;
-        intervals.push_back( std::make_pair( first,second ) );
-    }
     this->intervals = intervals;
-    in.close();
     this->compute_sorted_vector_of_distnaces_via_heap( where_to_cut );
     set_up_numbers_of_functions_for_vectorization_and_projections_to_reals();
 }

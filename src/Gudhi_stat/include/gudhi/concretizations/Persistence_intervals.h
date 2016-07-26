@@ -23,9 +23,13 @@
 #ifndef Persistence_intervals_H_
 #define Persistence_intervals_H_
 
+//gudhi include
 #include <gudhi/abstract_classes/Abs_Vectorized_topological_data.h>
 #include <gudhi/abstract_classes/Abs_Topological_data_with_distances.h>
 #include <gudhi/abstract_classes/Abs_Real_valued_topological_data.h>
+#include <gudhi/concretizations/read_persitence_from_file.h>
+
+//standard include
 #include <limits>
 #include <iostream>
 #include <fstream>
@@ -109,8 +113,7 @@ public:
 
 	/**
      * Operator that send the diagram to a stream. 
-    **/
-    
+    **/    
     friend ostream& operator << ( ostream& out , const Persistence_intervals& intervals )
     {
         for ( size_t i = 0 ; i != intervals.intervals.size() ; ++i )
@@ -119,7 +122,36 @@ public:
         }
         return out;
     }
-
+    
+    /**
+     * Generating gnuplot script to plot the interval. 
+    **/
+    void plot( const char* filename ) 
+    {
+		//this program create a gnuplot script file that allows to plot persistence diagram.
+		ofstream out;
+		
+		std::ostringstream nameSS;
+		nameSS << filename << "_GnuplotScript";
+		std::string nameStr = nameSS.str();
+		out.open( (char*)nameStr.c_str() );
+		std::pair<double,double> min_max_values = this->min_max();
+		out << "set xrange [" << min_max_values.first - 0.1*(min_max_values.second-min_max_values.first) << " : " << min_max_values.second + 0.1*(min_max_values.second-min_max_values.first) << " ]" << endl;
+		out << "set yrange [" << min_max_values.first - 0.1*(min_max_values.second-min_max_values.first) << " : " << min_max_values.second + 0.1*(min_max_values.second-min_max_values.first) << " ]" << endl;
+		out << "plot '-' using 1:2 notitle \"" << filename << "\", \\" << endl;
+		out << "     '-' using 1:2 notitle with lp" << endl;
+		for ( size_t i = 0 ; i != this->intervals.size() ; ++i )
+		{
+			out << this->intervals[i].first << " " << this->intervals[i].second << endl;
+		}
+		out << "EOF" << endl;
+		out << min_max_values.first - 0.1*(min_max_values.second-min_max_values.first) << " " << min_max_values.first - 0.1*(min_max_values.second-min_max_values.first) << endl;
+		out << min_max_values.second + 0.1*(min_max_values.second-min_max_values.first) << " " << min_max_values.second + 0.1*(min_max_values.second-min_max_values.first) << endl;
+			
+		out.close();
+		
+		cout << "Gnuplot script to visualize persistence diagram written to the file: " << nameStr << ". Type load '" << nameStr << "' in gnuplot to visualize." << endl;
+	}
 
 	/**
      * Return a familly of vectors obtained from the persistence diagram. The i-th vector consist of the lenfth of i dominant persistence intervals. 
@@ -182,37 +214,43 @@ protected:
 
 Persistence_intervals::Persistence_intervals( const char* filename )
 {
-    bool dbg = false;
-    ifstream in;
-    in.open( filename );
+    //bool dbg = false;
+    //ifstream in;
+    //in.open( filename );
 
-    if ( !in.good() )
-    {
-        throw("File with the persistence diagram do not exist, the program will now terminate.\n");
-    }
+    //if ( !in.good() )
+    //{
+    //    throw("File with the persistence diagram do not exist, the program will now terminate.\n");
+    //}
 
-    while ( true )
-    {
-        double first;
-        double second;
-        in >> first >> second;
+    //while ( true )
+    //{
+    //    double first;
+    //    double second;
+    //    in >> first >> second;
 
-        if ( first > second )
-        {
-            double buf = first;
-            first = second;
-            second = buf;
-        }
+    //    if ( first > second )
+    //    {
+    //        double buf = first;
+    //        first = second;
+    //        second = buf;
+    //    }
 
-        if ( in.eof() )break;
-        this->intervals.push_back( std::make_pair( first,second ) );
-        if ( dbg )
-        {
-            cerr << "Adding interval [ " << first << " , " << second << " ]\n";
-            getchar();
-        }
-    }
-    in.close();
+    //    if ( in.eof() )break;
+    //    this->intervals.push_back( std::make_pair( first,second ) );
+    //    if ( dbg )
+    //    {
+    //        cerr << "Adding interval [ " << first << " , " << second << " ]\n";
+    //        getchar();
+    //    }
+    //}
+    //in.close();
+    //standard file with barcode
+    std::vector< std::pair< double , double > > barcode = read_standard_file( filename );    
+    //gudhi file with barcode
+    //std::vector< std::pair< double , double > > barcode = read_gudhi_file( filename , dimension );   
+    
+    this->intervals = barcode;
     this->set_up_numbers_of_functions_for_vectorization_and_projections_to_reals();
 }//Persistence_intervals
 
@@ -479,7 +517,7 @@ std::vector< double > Persistence_intervals::k_n_n( size_t k , size_t where_to_c
     }
     std::vector< double > distances_from_diagonal( this->intervals.size() );
     std::fill( distances_from_diagonal.begin() , distances_from_diagonal.end() , 0 );
-    for ( size_t i = 0 ; i != this->intervals.size() ; ++i )
+    for ( size_t i = 0 ; i != this->intervals.size() ; ++i )
     {
         std::vector< double > distancesFromI;
         for ( size_t j = i+1 ; j != this->intervals.size() ; ++j )
