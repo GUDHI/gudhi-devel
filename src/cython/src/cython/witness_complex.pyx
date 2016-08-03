@@ -61,14 +61,19 @@ cdef class WitnessComplex:
 
     cdef Witness_complex_interface * thisptr
 
-    def __cinit__(self, points=None, number_of_landmarks=5):
+    # Fake constructor that does nothing but documenting the constructor
+    def __init__(self, points=[], number_of_landmarks=5):
         """WitnessComplex constructor.
 
-        Args:
-           points (list): A list of points in d-Dimension.
-           number_of_landmarks (int): Number of landmarks to build the
+        :param points: A list of points in d-Dimension.
+        :type points: list of list of double
+        :param number_of_landmarks: Number of landmarks to build the
            WitnessComplex.
+        :type number_of_landmarks: int
         """
+
+    # The real cython constructor
+    def __cinit__(self, points=None, number_of_landmarks=5):
         if points is not None:
             self.thisptr = new Witness_complex_interface(points,
                                                          number_of_landmarks)

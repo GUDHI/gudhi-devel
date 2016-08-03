@@ -74,6 +74,12 @@ cdef class MiniSimplexTree:
 
     cdef Mini_simplex_tree_persistence_interface * pcohptr
 
+    # Fake constructor that does nothing but documenting the constructor
+    def __init__(self, points=[], max_alpha_square=float('inf')):
+        """MiniSimplexTree constructor.
+        """
+
+    # The real cython constructor
     def __cinit__(self):
         self.thisptr = new Simplex_tree_interface_mini()
 
