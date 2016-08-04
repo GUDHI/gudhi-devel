@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(GUDHIDelaunayTriangulationOffFileReadWriteUT)
+project(Common_tests)
 
 if (GCOVR_PATH)
   # for gcovr to make coverage reports - Corbera Jenkins plugin
@@ -13,11 +13,7 @@ endif()
 # need CGAL 4.7
 if(CGAL_FOUND)
   if (NOT CGAL_VERSION VERSION_LESS 4.7.0)
-    find_package(Eigen3 3.1.0)
     if (EIGEN3_FOUND)
-      message(STATUS "Eigen3 version: ${EIGEN3_VERSION}.")
-      include( ${EIGEN3_USE_FILE} )
-      
       add_executable ( poffreader_UT points_off_reader_unit_test.cpp )
       target_link_libraries(poffreader_UT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
@@ -30,10 +26,10 @@ if(CGAL_FOUND)
       --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/poffreader_UT.xml --log_level=test_suite --report_level=no)
 
     else()
-      message(WARNING "Eigen3 not found. Version 3.1.0 is required for Alpha shapes feature.")
+      message(WARNING "Eigen3 not found. Version 3.1.0 is required for points_off_reader unitary tests.")
     endif()
   else()
-    message(WARNING "CGAL version: ${CGAL_VERSION} is too old to compile Alpha shapes feature. Version 4.6.0 is required.")
+    message(WARNING "CGAL version: ${CGAL_VERSION} is too old to compile points_off_reader unitary tests. Version 4.7.0 is required.")
   endif ()
 endif()
 

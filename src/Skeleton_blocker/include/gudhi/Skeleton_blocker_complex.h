@@ -52,7 +52,7 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 /**
  *@class Skeleton_blocker_complex
@@ -1595,7 +1595,9 @@ Complex make_complex_from_top_faces(SimplexHandleIterator simplices_begin, Simpl
   return Complex(simplices.begin(), simplices.end(), is_flag_complex);
 }
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 

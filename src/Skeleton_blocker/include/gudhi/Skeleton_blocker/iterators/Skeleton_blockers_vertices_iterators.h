@@ -28,7 +28,7 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 /**
  *@brief Iterator on the vertices of a simplicial complex
@@ -163,7 +163,9 @@ class Neighbors_vertices_iterator: public boost::iterator_facade < Neighbors_ver
   }
 };
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 

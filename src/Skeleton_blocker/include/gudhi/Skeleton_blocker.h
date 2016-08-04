@@ -35,7 +35,7 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 /** \defgroup skbl Skeleton-Blocker 
 
@@ -243,7 +243,9 @@ their collaboration to write the two initial papers
 */
 /** @} */  // end defgroup
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 

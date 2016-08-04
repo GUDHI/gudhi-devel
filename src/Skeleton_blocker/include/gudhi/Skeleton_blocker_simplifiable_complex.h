@@ -30,7 +30,7 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 /**
  * Returns true iff the blocker 'sigma' is popable.
@@ -459,7 +459,9 @@ Skeleton_blocker_complex<SkeletonBlockerDS>::notify_changed_edges(Vertex_handle 
 }
 
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 

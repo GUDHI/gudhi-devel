@@ -31,7 +31,7 @@
 
 namespace Gudhi {
 
-namespace Cubical_complex {
+namespace cubical_complex {
 
 // in this class, we are storing all the elements which are in normal bitmap (i.e. the bitmap without the periodic
 // boundary conditions). But, we set up the iterators and the procedures to compute boundary and coboundary in the way
@@ -299,7 +299,9 @@ std::vector< size_t > Bitmap_cubical_complex_periodic_boundary_conditions_base<T
   return coboundary_elements;
 }
 
-}  // namespace Cubical_complex
+}  // namespace cubical_complex
+
+namespace Cubical_complex = cubical_complex;
 
 }  // namespace Gudhi
 

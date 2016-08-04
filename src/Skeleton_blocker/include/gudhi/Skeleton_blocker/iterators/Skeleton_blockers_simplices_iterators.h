@@ -35,7 +35,7 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 /**
  * Link may be Skeleton_blocker_link_complex<SkeletonBlockerComplex> to iterate over all
@@ -61,7 +61,7 @@ public boost::iterator_facade < Simplex_around_vertex_iterator<SkeletonBlockerCo
   // Link_vertex_handle == Complex_Vertex_handle but this renaming helps avoiding confusion
   typedef typename Link::Vertex_handle Link_vertex_handle;
 
-  typedef typename Gudhi::skbl::Trie<Simplex> Trie;
+  typedef typename Gudhi::skeleton_blocker::Trie<Simplex> Trie;
 
  private:
   const Complex* complex;
@@ -391,7 +391,9 @@ private:
 };
 
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 

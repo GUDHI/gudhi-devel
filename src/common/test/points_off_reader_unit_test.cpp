@@ -35,7 +35,7 @@
 #include <boost/test/unit_test.hpp>
 
 typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kernel;
-typedef typename Kernel::Point_d Point_d;
+typedef Kernel::Point_d Point_d;
 
 BOOST_AUTO_TEST_CASE( points_doc_test )
 {

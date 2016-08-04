@@ -34,12 +34,12 @@
 #include <vector>
 
 
-typedef Gudhi::Cubical_complex::Bitmap_cubical_complex_base<double> Bitmap_cubical_complex_base;
-typedef Gudhi::Cubical_complex::Bitmap_cubical_complex<Bitmap_cubical_complex_base> Bitmap_cubical_complex;
+typedef Gudhi::cubical_complex::Bitmap_cubical_complex_base<double> Bitmap_cubical_complex_base;
+typedef Gudhi::cubical_complex::Bitmap_cubical_complex<Bitmap_cubical_complex_base> Bitmap_cubical_complex;
 
-typedef Gudhi::Cubical_complex::Bitmap_cubical_complex_periodic_boundary_conditions_base<double>
+typedef Gudhi::cubical_complex::Bitmap_cubical_complex_periodic_boundary_conditions_base<double>
 Bitmap_cubical_complex_periodic_boundary_conditions_base;
-typedef Gudhi::Cubical_complex::Bitmap_cubical_complex<Bitmap_cubical_complex_periodic_boundary_conditions_base>
+typedef Gudhi::cubical_complex::Bitmap_cubical_complex<Bitmap_cubical_complex_periodic_boundary_conditions_base>
 Bitmap_cubical_complex_periodic_boundary_conditions;
 
 BOOST_AUTO_TEST_CASE(check_dimension) {

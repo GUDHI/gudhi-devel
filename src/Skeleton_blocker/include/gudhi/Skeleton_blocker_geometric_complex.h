@@ -28,7 +28,7 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 /**
  * @brief Class that represents a geometric complex that can be simplified.
@@ -217,7 +217,9 @@ SkeletonBlockerGeometricComplex make_complex_from_top_faces(
   return complex;
 }
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 

@@ -29,7 +29,7 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 /**
  * @extends SkeletonBlockerDS
@@ -175,7 +175,9 @@ struct Skeleton_blocker_simple_traits {
   };
 };
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 
