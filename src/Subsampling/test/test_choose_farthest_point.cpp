@@ -53,5 +53,5 @@ BOOST_AUTO_TEST_CASE(test_choose_farthest_point) {
   K k;
   Gudhi::subsampling::choose_by_farthest_point(k, points, 100, std::back_inserter(landmarks));
   
-  assert(landmarks.size() == 100);
+  BOOST_CHECK(landmarks.size() == 100);
 }

@@ -60,6 +60,6 @@ int main() {
   std::cout << "landmark vector contains: ";
   for (auto l: results)
     std::cout << l << "\n";
-  assert(results.size() == 5);
   
+  BOOST_CHECK(results.size() == 5);
 }
