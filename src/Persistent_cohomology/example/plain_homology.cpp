@@ -39,6 +39,8 @@ struct MyOptions : Simplex_tree_options_full_featured {
   static const bool store_key = true;
   // I have few vertices
   typedef short Vertex_handle;
+  // Maximum number of simplices to compute persistence is 2^8 = 256
+  typedef std::uint8_t Simplex_key;
 };
 typedef Simplex_tree<MyOptions> ST;
 
