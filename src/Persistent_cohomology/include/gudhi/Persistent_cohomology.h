@@ -41,6 +41,7 @@
 #include <tuple>
 #include <algorithm>
 #include <string>
+#include <stdexcept>  // for std::out_of_range
 
 namespace Gudhi {
 
@@ -89,6 +90,7 @@ class Persistent_cohomology {
    *
    * @param[in] cpx Complex for which the persistent homology is computed.
    * cpx is a model of FilteredComplex
+   * @exception std::out_of_range In case the number of simplices is more than Simplex_key type numeric limit.
    */
   explicit Persistent_cohomology(Complex_ds& cpx)
       : cpx_(&cpx),
@@ -106,6 +108,9 @@ class Persistent_cohomology {
         interval_length_policy(&cpx, 0),
         column_pool_(),  // memory pools for the CAM
         cell_pool_() {
+    if (cpx_->num_simplices() > std::numeric_limits<Simplex_key>::max()) {
+      throw std::out_of_range ("The number of simplices is more than Simplex_key type numeric limit.");
+    }
     Simplex_key idx_fil = 0;
     for (auto sh : cpx_->filtration_simplex_range()) {
       cpx_->assign_key(sh, idx_fil);

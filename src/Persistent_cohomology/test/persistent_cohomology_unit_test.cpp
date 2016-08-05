@@ -4,6 +4,7 @@
 #include <utility> // std::pair, std::make_pair
 #include <cmath> // float comparison
 #include <limits>
+#include <cstdint>  // for std::uint8_t
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "persistent_cohomology"
@@ -172,3 +173,44 @@ BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_dim_5 )
 // std::string str_rips_persistence = test_rips_persistence(6, 0);
 // TODO(VR): division by zero
 // std::string str_rips_persistence = test_rips_persistence(0, 0);
+
+/** SimplexTree minimal options to test the limits.
+ * 
+ * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint8_t>::max()<\CODE> = 256.*/
+struct MiniSTOptions {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef short Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::uint8_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = false;
+  static const bool contiguous_vertices = false;
+};
+
+using Mini_simplex_tree = Gudhi::Simplex_tree<MiniSTOptions>;
+using Mini_st_persistence =
+    Gudhi::persistent_cohomology::Persistent_cohomology<Mini_simplex_tree, Gudhi::persistent_cohomology::Field_Zp>;
+
+BOOST_AUTO_TEST_CASE( persistence_constructor_exception )
+{
+  Mini_simplex_tree st;
+
+  // To make number of simplices = 255
+  const short simplex_0[] = {0, 1, 2, 3, 4, 5, 6, 7};
+  st.insert_simplex_and_subfaces(simplex_0);
+  // FIXME: Remove this line
+  st.set_dimension(8);
+
+  // Sort the simplices in the order of the filtration
+  st.initialize_filtration();
+
+  BOOST_CHECK(st.num_simplices() <= std::numeric_limits<MiniSTOptions::Simplex_key>::max());
+  // Class for homology computation
+  BOOST_CHECK_NO_THROW(Mini_st_persistence pcoh(st));
+
+  st.insert_simplex({8});
+  BOOST_CHECK(st.num_simplices() > std::numeric_limits<MiniSTOptions::Simplex_key>::max());
+  // Class for homology computation
+  BOOST_CHECK_THROW(Mini_st_persistence pcoh2(st), std::out_of_range);
+
+}
