@@ -53,6 +53,11 @@ namespace subsampling {
  *
  * \include Subsampling/example_choose_by_farthest_point.cpp
  * 
+ * \section randompointexamples Example: pick_random_points
+ *
+ * This example outputs a subset of 100 points picked randomly.
+ *
+ * \include Subsampling/example_pick_random_points.cpp
  * \copyright GNU General Public License v3.                         
  * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
  */
