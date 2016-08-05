@@ -1,5 +1,6 @@
+==============================
 Alpha complex reference manual
-##############################
+==============================
 
 .. autoclass:: gudhi.AlphaComplex
    :members:

@@ -78,15 +78,21 @@ cdef class RipsComplex:
 
     cdef Rips_complex_persistence_interface * pcohptr
 
-    def __cinit__(self, points=[], max_dimension=3,
-                  max_edge_length=float('inf')):
+    # Fake constructor that does nothing but documenting the constructor
+    def __init__(self, points=[], max_alpha_square=float('inf')):
         """RipsComplex constructor.
 
-        Args:
-           points (list): A list of points in d-Dimension.
-           max_dimension (int): Maximum dimension of the N-simplex to insert.
-           max_edge_length (float): Maximum edge length, or distance.
+        :param points: A list of points in d-Dimension.
+        :type points: list of list of double
+        :param max_dimension: Maximum dimension of the complex to be expanded.
+        :type max_dimension: int
+        :param max_edge_length: Maximum edge length value (rips radius).
+        :type max_edge_length: double
         """
+
+    # The real cython constructor
+    def __cinit__(self, points=[], max_dimension=3,
+                  max_edge_length=float('inf')):
         self.thisptr = new Rips_complex_interface()
         # Constructor from graph expansion
         if points is not None:

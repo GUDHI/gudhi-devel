@@ -1,8 +1,8 @@
+=========================
 Cubical complex user manual
-###########################
+=========================
+Definition
+----------
 
-blablabla
-
-.. image:: img/Cubical_complex_representation.png
-   :align: center
+.. include:: cubical_complex_sum.rst
 

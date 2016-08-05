@@ -42,6 +42,8 @@ parser = argparse.ArgumentParser(description='AlphaComplex creation from '
                                  'points from the given file. File format '
                                  'is X1, X2, ..., Xn')
 parser.add_argument('file', type=argparse.FileType('r'))
+parser.add_argument('--no-diagram', default=False, action='store_true' , help='Flag for not to display the diagrams')
+
 args = parser.parse_args()
 
 points = pandas.read_csv(args.file, header=None)
@@ -57,6 +59,6 @@ diag = alpha_complex.persistence(homology_coeff_field=2, min_persistence=0.1)
 print("betti_numbers()=")
 print(alpha_complex.betti_numbers())
 
-gudhi.diagram_persistence(diag)
-
-gudhi.barcode_persistence(diag)
+if args.no_diagram == False:
+    gudhi.diagram_persistence(diag)
+    gudhi.barcode_persistence(diag)

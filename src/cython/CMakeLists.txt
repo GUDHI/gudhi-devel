@@ -72,7 +72,8 @@ if(PYTHON_PATH AND CYTHON_PATH)
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
       COMMAND python "${CMAKE_CURRENT_BINARY_DIR}/cythonize_gudhi.py" "build_ext" "--inplace")
   
-  add_custom_target(cythonize_gudhi ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so")
+  add_custom_target(cythonize_gudhi ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so"
+                    COMMENT "Do not forget to add ${CMAKE_CURRENT_BINARY_DIR}/gudhi.so to your PYTHONPATH before using examples")
 
   # Unitary tests are available through py.test
   find_program( PYTEST_PATH py.test )
