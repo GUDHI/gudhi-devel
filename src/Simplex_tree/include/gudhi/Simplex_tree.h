@@ -1300,7 +1300,7 @@ std::istream& operator>>(std::istream & is, Simplex_tree<T...> & st) {
 
 /** Model of SimplexTreeOptions.
  * 
- * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()<\CODE>
+ * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
  * (about 4 billions of simplices). */
 struct Simplex_tree_options_full_featured {
   typedef linear_indexing_tag Indexing_tag;
@@ -1315,7 +1315,7 @@ struct Simplex_tree_options_full_featured {
 /** Model of SimplexTreeOptions, faster than `Simplex_tree_options_full_featured` but note the unsafe
  * `contiguous_vertices` option.
  * 
- * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()<\CODE>
+ * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
  * (about 4 billions of simplices). */
 
 struct Simplex_tree_options_fast_persistence {
