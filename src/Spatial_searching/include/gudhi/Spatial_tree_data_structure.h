@@ -171,7 +171,7 @@ public:
   /// @param[in] sorted Indicates if the computed sequence of k-nearest neighbors needs to be sorted.
   /// @param[in] eps Approximation factor.
   /// @return A range containing the k-nearest neighbors.
-  KNS_range query_ANN(const
+  KNS_range query_k_nearest_neighbors(const
     Point &p,
     unsigned int k,
     bool sorted = true,
@@ -199,7 +199,7 @@ public:
   /// @return A range containing the neighbors sorted by their distance to p. 
   /// All the neighbors are not computed by this function, but they will be
   /// computed incrementally when the iterator on the range is incremented.
-  INS_range query_incremental_ANN(const Point &p, FT eps = FT(0)) const
+  INS_range query_incremental_nearest_neighbors(const Point &p, FT eps = FT(0)) const
   {
     // Initialize the search structure, and search all N points
     // Note that we need to pass the Distance explicitly since it needs to
@@ -215,6 +215,58 @@ public:
     return search;
   }
 
+  /// \brief Search for the k-farthest points from a query point.
+  /// @param[in] p The query point.
+  /// @param[in] k Number of farthest points to search.
+  /// @param[in] sorted Indicates if the computed sequence of k-farthest neighbors needs to be sorted.
+  /// @param[in] eps Approximation factor.
+  /// @return A range containing the k-farthest neighbors.
+  KNS_range query_k_farthest_neighbors(const
+    Point &p,
+    unsigned int k,
+    bool sorted = true,
+    FT eps = FT(0)) const
+  {
+    // Initialize the search structure, and search all N points
+    // Note that we need to pass the Distance explicitly since it needs to
+    // know the property map
+    K_neighbor_search search(
+      m_tree,
+      p,
+      k,
+      eps,
+      false,
+      CGAL::Distance_adapter<std::ptrdiff_t,Point*,CGAL::Euclidean_distance<Traits_base> >(
+        (Point*)&(m_points[0])),
+      sorted);
+
+    return search;
+  }
+
+  /// \brief Search incrementally for the farthest neighbors from a query point.
+  /// @param[in] p The query point.
+  /// @param[in] eps Approximation factor.
+  /// @return A range containing the neighbors sorted by their distance to p. 
+  /// All the neighbors are not computed by this function, but they will be
+  /// computed incrementally when the iterator on the range is incremented.
+  INS_range query_incremental_farthest_neighbors(const Point &p, FT eps = FT(0)) const
+  {
+    // Initialize the search structure, and search all N points
+    // Note that we need to pass the Distance explicitly since it needs to
+    // know the property map
+    Incremental_neighbor_search search(
+      m_tree,
+      p,
+      eps,
+      false,
+      CGAL::Distance_adapter<std::ptrdiff_t, Point*, CGAL::Euclidean_distance<Traits_base> >(
+        (Point*)&(m_points[0])) );
+
+    return search;
+  }
+
+  
+  
 protected:
   Point_container_ const& m_points;
   Tree m_tree;

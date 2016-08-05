@@ -51,15 +51,24 @@ BOOST_AUTO_TEST_CASE(test_Spatial_tree_data_structure)
   Points_ds points_ds(points);
 
   std::size_t closest_pt_index =
-    points_ds.query_ANN(points[10], 1, false).begin()->first;
+    points_ds.query_k_nearest_neighbors(points[10], 1, false).begin()->first;
   BOOST_CHECK(closest_pt_index == 10);
 
-  auto kns_range = points_ds.query_ANN(points[20], 10, true);
+  auto kns_range = points_ds.query_k_nearest_neighbors(points[20], 10, true);
 
   FT last_dist = -1.;
   for (auto const& nghb : kns_range)
   {
     BOOST_CHECK(nghb.second > last_dist);
+    last_dist = nghb.second;
+  }
+
+  auto kfs_range = points_ds.query_k_farthest_neighbors(points[20], 10, true);
+
+  last_dist = kfs_range.begin()->second;
+  for (auto const& nghb : kfs_range)
+  {
+    BOOST_CHECK(nghb.second <= last_dist);
     last_dist = nghb.second;
   }
 }

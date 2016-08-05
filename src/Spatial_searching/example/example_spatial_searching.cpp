@@ -27,16 +27,29 @@ int main (void)
 
   // 20-nearest neighbor query
   std::cout << "20 nearest neighbors:\n";
-  auto kns_range = points_ds.query_ANN(points[20], 10, true);
+  auto kns_range = points_ds.query_k_nearest_neighbors(points[20], 10, true);
   for (auto const& nghb : kns_range)
     std::cout << nghb.first << " (sq. dist. = " << nghb.second << ")\n";
 
   // Incremental nearest neighbor query
   std::cout << "Incremental nearest neighbors:\n";
-  auto ins_range = points_ds.query_incremental_ANN(points[45]);
+  auto ins_range = points_ds.query_incremental_nearest_neighbors(points[45]);
   // Get all the neighbors that are closer than 0.5
   for (auto ins_iterator = ins_range.begin(); ins_iterator->second < 0.5*0.5 ; ++ins_iterator)
     std::cout << ins_iterator->first << " (sq. dist. = " << ins_iterator->second << ")\n";
 
+  // 20-farthest neighbor query
+  std::cout << "20 farthest neighbors:\n";
+  auto kfs_range = points_ds.query_k_farthest_neighbors(points[20], 10, true);
+  for (auto const& nghb : kfs_range)
+    std::cout << nghb.first << " (sq. dist. = " << nghb.second << ")\n";
+
+  // Incremental farthest neighbor query
+  std::cout << "Incremental farthest neighbors:\n";
+  auto ifs_range = points_ds.query_incremental_farthest_neighbors(points[45]);
+  // Get all the neighbors that are farthest than 2.3
+  for (auto ifs_iterator = ifs_range.begin(); ifs_iterator->second > 2.3*2.3 ; ++ifs_iterator)
+    std::cout << ifs_iterator->first << " (sq. dist. = " << ifs_iterator->second << ")\n";
+  
   return 0;
 }
