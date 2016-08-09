@@ -95,10 +95,16 @@ if(PYTHON_PATH AND CYTHON_PATH)
     # User version
     file(GLOB GUDHI_USER_DOC_IMAGES "${CMAKE_SOURCE_DIR}/doc/*/*.png")
     file(COPY ${GUDHI_USER_DOC_IMAGES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/source/img")
+    # Biblio
+    file(GLOB GUDHI_BIB_FILES "${CMAKE_SOURCE_DIR}/biblio/*.bib")
+    file(COPY ${GUDHI_BIB_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/source/")
+    # Examples
+    file(GLOB GUDHI_EXAMPLES_FILES "${CMAKE_SOURCE_DIR}/src/cython/example/*.py")
+    file(COPY ${GUDHI_EXAMPLES_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/source/")
     if (UNIX)
       add_custom_target(html 
           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc
-          COMMAND make html)
+          COMMAND make html && make doctest)
     else (UNIX)
       add_custom_target(html 
           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc

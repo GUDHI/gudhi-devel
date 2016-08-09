@@ -3,9 +3,6 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. toctree::
-   :maxdepth: 2
-
 GUDHI's documentation
 #####################
 
@@ -17,10 +14,11 @@ Introduction
 
 The Gudhi library (Geometry Understanding in Higher Dimensions) is a generic
 open source C++ library for Computational Topology and Topological Data
-Analysis (TDA). The GUDHI library intends to help the development of new
-algorithmic solutions in TDA and their transfer to applications. It provides
-robust, efficient, flexible and easy to use implementations of
-state-of-the-art algorithms and data structures.
+Analysis (`TDA <https://en.wikipedia.org/wiki/Topological_data_analysis>`_).
+The GUDHI library intends to help the development of new algorithmic solutions
+in TDA and their transfer to applications. It provides robust, efficient,
+flexible and easy to use implementations of state-of-the-art algorithms and
+data structures.
 
 The current release of the GUDHI library includes:
 
@@ -29,8 +27,8 @@ The current release of the GUDHI library includes:
 * Simplication of simplicial complexes by edge contraction.
 
 All data-structures are generic and several of their aspects can be
-parameterized via template classes. We refer to [14] for a detailed
-description of the design of the library.
+parameterized via template classes. We refer to :cite:`gudhilibrary_ICMS14`
+for a detailed description of the design of the library.
 
 Data structures
 ***************
@@ -62,10 +60,4 @@ Toolbox
 Persistence cohomology
 ======================
 
-=====================================  =====================================  =====================================
-:Author: Clément Maria                 :Introduced in: GUDHI PYTHON 1.4.0     :Copyright: GPL v3
-=====================================  =====================================  =====================================
-
-
-
-
+.. include:: persistent_cohomology_sum.rst

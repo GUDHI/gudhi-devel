@@ -7,8 +7,7 @@
 |      img/Simplex_tree_representation.png  | representing general (filtered) simplicial complexes.                |
 |                                           |                                                                      |
 |                                           | The data structure is described in                                   |
-|                                           | `this document <http://dx.doi.org/10.1007/s00453-014-9887-3>`_       |
+|                                           | :cite:`boissonnatmariasimplextreealgorithmica`                       |
 +-------------------------------------------+----------------------------------------------------------------------+
 | :doc:`simplex_tree_user`                  | :doc:`simplex_tree_ref`                                              |
 +-------------------------------------------+----------------------------------------------------------------------+
- 
