@@ -81,30 +81,25 @@ In order to build the alpha complex, first, a Simplex tree is built from the cel
 Filtration value computation algorithm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. math::
-    \begin{algorithm}
-    \caption{Filtration value computation algorithm}\label{alpha}
-    \begin{algorithmic}
-    \For{i : dimension $\rightarrow$ 0}
-    \ForAll{$\sigma$ of dimension i}
-    \If {filtration($\sigma$) is NaN}
-    \State filtration($\sigma$) = $\alpha^2(\sigma)$
-    \EndIf
-    \ForAll{$\tau$ face of $\sigma$} \Comment{propagate alpha filtration value}
-    \If {filtration($\tau$) is not NaN} 
-    \State filtration($\tau$) = min (filtration($\tau$), filtration($\sigma$))
-    \Else
-    \If {$\tau$ is not Gabriel for $\sigma$} 
-    \State filtration($\tau$) = filtration($\sigma$)
-    \EndIf
-    \EndIf
-    \EndFor
-    \EndFor
-    \EndFor
-    \State make\_filtration\_non\_decreasing()
-    \State prune\_above\_filtration()
-    \end{algorithmic}
-    \end{algorithm}
+  **for** i : dimension :math:`\rightarrow` 0 **do**
+    **for all** :math:`\sigma` of dimension i
+      **if** filtration(:math:`\sigma`) is NaN **then**
+        filtration(:math:`\sigma`) = :math:`\alpha^2(\sigma)`
+      **end if**
+  
+      *//propagate alpha filtration value*
+  
+      **for all** :math:`\tau` face of :math:`\sigma`
+        **if** filtration(:math:`\tau`) is not NaN **then**
+          filtration(:math:`\tau`) = filtration(:math:`\sigma`)
+        **end if**
+      **end for**
+    **end for**
+  **end for**
+  
+  make_filtration_non_decreasing()
+  
+  prune_above_filtration()
 
 Dimension 2
 ^^^^^^^^^^^
