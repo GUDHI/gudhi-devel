@@ -98,9 +98,10 @@ if(PYTHON_PATH AND CYTHON_PATH)
     # Biblio
     file(GLOB GUDHI_BIB_FILES "${CMAKE_SOURCE_DIR}/biblio/*.bib")
     file(COPY ${GUDHI_BIB_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/source/")
-    # Examples
-    file(GLOB GUDHI_EXAMPLES_FILES "${CMAKE_SOURCE_DIR}/src/cython/example/*.py")
-    file(COPY ${GUDHI_EXAMPLES_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/source/")
+    # Cubical complex perseus doc example
+    file(GLOB GUDHI_CUBICAL_PERSEUS_FILES "${CMAKE_SOURCE_DIR}/data/bitmap/*cubicalcomplexdoc.txt")
+    file(COPY ${GUDHI_CUBICAL_PERSEUS_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/source/")
+    file(COPY "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/source/")
     if (UNIX)
       add_custom_target(html 
           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc
