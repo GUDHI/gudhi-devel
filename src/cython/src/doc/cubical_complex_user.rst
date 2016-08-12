@@ -99,7 +99,7 @@ The input file for the following complex is:
 .. testcode::
 
     import gudhi
-    cubical_complex = gudhi.CubicalComplex(perseus_file='source/cubicalcomplexdoc.txt')
+    cubical_complex = gudhi.CubicalComplex(perseus_file='cubicalcomplexdoc.txt')
     result_str = 'Cubical complex is of dimension ' + repr(cubical_complex.dimension()) + ' - ' + \
         repr(cubical_complex.num_simplices()) + ' simplices.'
     print(result_str)
@@ -133,7 +133,7 @@ Indicate that we have imposed periodic boundary conditions in the direction x, b
 .. testcode::
 
     import gudhi
-    periodic_cc = gudhi.PeriodicCubicalComplex(perseus_file='source/periodiccubicalcomplexdoc.txt')
+    periodic_cc = gudhi.PeriodicCubicalComplex(perseus_file='periodiccubicalcomplexdoc.txt')
     result_str = 'Periodic cubical complex is of dimension ' + repr(periodic_cc.dimension()) + ' - ' + \
         repr(periodic_cc.num_simplices()) + ' simplices.'
     print(result_str)

@@ -91,24 +91,24 @@ if(PYTHON_PATH AND CYTHON_PATH)
     file(COPY doc DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     # Developper version
     file(GLOB GUDHI_DEV_DOC_IMAGES "${CMAKE_SOURCE_DIR}/src/*/doc/*.png")
-    file(COPY ${GUDHI_DEV_DOC_IMAGES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/source/img")
+    file(COPY ${GUDHI_DEV_DOC_IMAGES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/src/doc/img")
     # User version
     file(GLOB GUDHI_USER_DOC_IMAGES "${CMAKE_SOURCE_DIR}/doc/*/*.png")
-    file(COPY ${GUDHI_USER_DOC_IMAGES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/source/img")
+    file(COPY ${GUDHI_USER_DOC_IMAGES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/src/doc/img")
     # Biblio
     file(GLOB GUDHI_BIB_FILES "${CMAKE_SOURCE_DIR}/biblio/*.bib")
-    file(COPY ${GUDHI_BIB_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/source/")
+    file(COPY ${GUDHI_BIB_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/src/doc/")
     # Cubical complex perseus doc example
     file(GLOB GUDHI_CUBICAL_PERSEUS_FILES "${CMAKE_SOURCE_DIR}/data/bitmap/*cubicalcomplexdoc.txt")
-    file(COPY ${GUDHI_CUBICAL_PERSEUS_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/source/")
-    file(COPY "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/source/")
+    file(COPY ${GUDHI_CUBICAL_PERSEUS_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/src/doc/")
+    file(COPY "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/src/doc/")
     if (UNIX)
       add_custom_target(html 
-          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc
+          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/doc
           COMMAND make html && make doctest)
     else (UNIX)
       add_custom_target(html 
-          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc
+          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/doc
           COMMAND make.bat html)
     endif (UNIX)
   endif(SPHINX_PATH)
