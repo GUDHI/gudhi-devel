@@ -26,9 +26,10 @@ if(PYTHON_PATH AND CYTHON_PATH)
     set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${EIGEN3_INCLUDE_DIR}', ")
   endif (EIGEN3_FOUND)
   
-  # Copy recursively src and test repositories before packages finding
+  # Copy recursively include, cython and test repositories before packages finding
   # Some tests files are removed in case some packages are not found
-  file(COPY src DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+  file(COPY include DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+  file(COPY cython DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
   file(COPY test DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
   
   if (CGAL_FOUND)
@@ -48,7 +49,7 @@ if(PYTHON_PATH AND CYTHON_PATH)
         endif(GMPXX_FOUND)
       endif(GMP_FOUND)
   
-      set(GUDHI_CYTHON_ALPHA_COMPLEX "include 'src/cython/alpha_complex.pyx'")
+      set(GUDHI_CYTHON_ALPHA_COMPLEX "include 'cython/alpha_complex.pyx'")
     else (NOT CGAL_VERSION VERSION_LESS 4.7.0)
       # Remove alpha complex unitary tests
       file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_alpha_complex.py)
@@ -60,7 +61,7 @@ if(PYTHON_PATH AND CYTHON_PATH)
   foreach(GUDHI_INCLUDE_DIRECTORY ${GUDHI_INCLUDE_DIRECTORIES})
     set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${GUDHI_INCLUDE_DIRECTORY}', ")
   endforeach()
-  set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${CMAKE_SOURCE_DIR}/${GUDHI_CYTHON_PATH}/src/include', ")
+  set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${CMAKE_SOURCE_DIR}/${GUDHI_CYTHON_PATH}/include', ")
   
   # Generate cythonize_gudhi.py file to cythonize Gudhi
   configure_file(cythonize_gudhi.py.in "${CMAKE_CURRENT_BINARY_DIR}/cythonize_gudhi.py" @ONLY)
@@ -88,27 +89,27 @@ if(PYTHON_PATH AND CYTHON_PATH)
   # Documentation generation is available through sphinx
   find_program( SPHINX_PATH sphinx-build )
   if(SPHINX_PATH)
-    file(COPY src/doc DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    file(COPY doc DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     # Developper version
     file(GLOB GUDHI_DEV_DOC_IMAGES "${CMAKE_SOURCE_DIR}/src/*/doc/*.png")
-    file(COPY ${GUDHI_DEV_DOC_IMAGES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/src/doc/img")
+    file(COPY ${GUDHI_DEV_DOC_IMAGES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/img")
     # User version
     file(GLOB GUDHI_USER_DOC_IMAGES "${CMAKE_SOURCE_DIR}/doc/*/*.png")
-    file(COPY ${GUDHI_USER_DOC_IMAGES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/src/doc/img")
+    file(COPY ${GUDHI_USER_DOC_IMAGES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/img")
     # Biblio
     file(GLOB GUDHI_BIB_FILES "${CMAKE_SOURCE_DIR}/biblio/*.bib")
-    file(COPY ${GUDHI_BIB_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/src/doc/")
+    file(COPY ${GUDHI_BIB_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
     # Cubical complex perseus doc example
     file(GLOB GUDHI_CUBICAL_PERSEUS_FILES "${CMAKE_SOURCE_DIR}/data/bitmap/*cubicalcomplexdoc.txt")
-    file(COPY ${GUDHI_CUBICAL_PERSEUS_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/src/doc/")
-    file(COPY "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/src/doc/")
+    file(COPY ${GUDHI_CUBICAL_PERSEUS_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
+    file(COPY "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
     if (UNIX)
       add_custom_target(html 
-          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/doc
+          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc
           COMMAND make html && make doctest)
     else (UNIX)
       add_custom_target(html 
-          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/doc
+          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc
           COMMAND make.bat html)
     endif (UNIX)
   endif(SPHINX_PATH)
