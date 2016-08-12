@@ -60,7 +60,7 @@ if(PYTHON_PATH AND CYTHON_PATH)
   foreach(GUDHI_INCLUDE_DIRECTORY ${GUDHI_INCLUDE_DIRECTORIES})
     set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${GUDHI_INCLUDE_DIRECTORY}', ")
   endforeach()
-  set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${CMAKE_SOURCE_DIR}/${GUDHI_CYTHON_PATH}/src/cpp', ")
+  set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${CMAKE_SOURCE_DIR}/${GUDHI_CYTHON_PATH}/src/include', ")
   
   # Generate cythonize_gudhi.py file to cythonize Gudhi
   configure_file(cythonize_gudhi.py.in "${CMAKE_CURRENT_BINARY_DIR}/cythonize_gudhi.py" @ONLY)
@@ -88,7 +88,7 @@ if(PYTHON_PATH AND CYTHON_PATH)
   # Documentation generation is available through sphinx
   find_program( SPHINX_PATH sphinx-build )
   if(SPHINX_PATH)
-    file(COPY doc DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    file(COPY src/doc DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     # Developper version
     file(GLOB GUDHI_DEV_DOC_IMAGES "${CMAKE_SOURCE_DIR}/src/*/doc/*.png")
     file(COPY ${GUDHI_DEV_DOC_IMAGES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/src/doc/img")
