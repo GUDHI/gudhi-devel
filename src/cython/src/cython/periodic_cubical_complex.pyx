@@ -31,34 +31,34 @@ __copyright__ = "Copyright (C) 2016 INRIA"
 __license__ = "GPL v3"
 
 cdef extern from "Cubical_complex_interface.h" namespace "Gudhi":
-    cdef cppclass Bitmap_cubical_complex_base_interface "Gudhi::Cubical_complex::Cubical_complex_interface<>":
-        Bitmap_cubical_complex_base_interface(vector[unsigned] dimensions, vector[double] top_dimensional_cells)
-        Bitmap_cubical_complex_base_interface(string perseus_file)
+    cdef cppclass Periodic_cubical_complex_base_interface "Gudhi::Cubical_complex::Cubical_complex_interface<Gudhi::cubical_complex::Bitmap_cubical_complex_periodic_boundary_conditions_base<double>>":
+        Periodic_cubical_complex_base_interface(vector[unsigned] dimensions, vector[double] top_dimensional_cells)
+        Periodic_cubical_complex_base_interface(string perseus_file)
         int num_simplices()
         int dimension()
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
-    cdef cppclass Cubical_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Cubical_complex::Cubical_complex_interface<>>":
-        Cubical_complex_persistence_interface(Bitmap_cubical_complex_base_interface * st)
+    cdef cppclass Periodic_cubical_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Cubical_complex::Cubical_complex_interface<Gudhi::cubical_complex::Bitmap_cubical_complex_periodic_boundary_conditions_base<double>>>":
+        Periodic_cubical_complex_persistence_interface(Periodic_cubical_complex_base_interface * st)
         vector[pair[int, pair[double, double]]] get_persistence(int homology_coeff_field, double min_persistence)
         vector[int] betti_numbers()
         vector[int] persistent_betti_numbers(double from_value, double to_value)
 
 
-# CubicalComplex python interface
-cdef class CubicalComplex:
-    """The CubicalComplex is an example of a structured complex useful in
-    computational mathematics (specially rigorous numerics) and image
+# PeriodicCubicalComplex python interface
+cdef class PeriodicCubicalComplex:
+    """The PeriodicCubicalComplex is an example of a structured complex useful
+    in computational mathematics (specially rigorous numerics) and image
     analysis.
     """
-    cdef Bitmap_cubical_complex_base_interface * thisptr
+    cdef Periodic_cubical_complex_base_interface * thisptr
 
-    cdef Cubical_complex_persistence_interface * pcohptr
+    cdef Periodic_cubical_complex_persistence_interface * pcohptr
 
     # Fake constructor that does nothing but documenting the constructor
     def __init__(self, dimensions=None, top_dimensional_cells=None,
                   perseus_file=''):
-        """CubicalComplex constructor from dimensions and
+        """PeriodicCubicalComplex constructor from dimensions and
         top_dimensional_cells or from a perseus file style name.
 
         :param dimensions: A list of number of top dimensional cells.
@@ -77,16 +77,17 @@ cdef class CubicalComplex:
                   perseus_file=''):
         if ((dimensions is not None) or (top_dimensional_cells is not None) and
              (perseus_file is not '')):
-            print("CubicalComplex can be constructed from dimensions and "
-                  "top_dimensional_cells or from a perseus file style name.")
+            print("PeriodicCubicalComplex can be constructed from dimensions"
+                  " and top_dimensional_cells or from a perseus file style "
+                  "name.")
         else:
             if dimensions is not None:
                 if top_dimensional_cells is not None:
-                    self.thisptr = new Bitmap_cubical_complex_base_interface(dimensions, top_dimensional_cells)
+                    self.thisptr = new Periodic_cubical_complex_base_interface(dimensions, top_dimensional_cells)
             else:
                 if perseus_file is not '':
                     if os.path.isfile(perseus_file):
-                        self.thisptr = new Bitmap_cubical_complex_base_interface(perseus_file)
+                        self.thisptr = new Periodic_cubical_complex_base_interface(perseus_file)
                     else:
                         print("file " + perseus_file + " not found.")
 
@@ -97,7 +98,7 @@ cdef class CubicalComplex:
             del self.pcohptr
 
     def __is_defined(self):
-        """Returns true if CubicalComplex pointer is not NULL.
+        """Returns true if PeriodicCubicalComplex pointer is not NULL.
          """
         return self.thisptr != NULL
 
@@ -138,7 +139,7 @@ cdef class CubicalComplex:
         if self.pcohptr != NULL:
             del self.pcohptr
         if self.thisptr != NULL:
-            self.pcohptr = new Cubical_complex_persistence_interface(self.thisptr)
+            self.pcohptr = new Periodic_cubical_complex_persistence_interface(self.thisptr)
         cdef vector[pair[int, pair[double, double]]] persistence_result
         if self.pcohptr != NULL:
             persistence_result = self.pcohptr.get_persistence(homology_coeff_field, min_persistence)

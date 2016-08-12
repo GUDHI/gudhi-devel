@@ -28,6 +28,7 @@ include "src/cython/simplex_tree.pyx"
 include "src/cython/mini_simplex_tree.pyx"
 include "src/cython/rips_complex.pyx"
 include "src/cython/cubical_complex.pyx"
+include "src/cython/periodic_cubical_complex.pyx"
 include "src/cython/persistence_graphical_tools.py"
 include "src/cython/witness_complex.pyx"
 @GUDHI_CYTHON_ALPHA_COMPLEX@

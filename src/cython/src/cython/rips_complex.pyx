@@ -79,7 +79,8 @@ cdef class RipsComplex:
     cdef Rips_complex_persistence_interface * pcohptr
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, points=[], max_alpha_square=float('inf')):
+    def __init__(self, points=[], max_dimension=3,
+                 max_edge_length=float('inf')):
         """RipsComplex constructor.
 
         :param points: A list of points in d-Dimension.

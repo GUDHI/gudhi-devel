@@ -49,6 +49,11 @@ class Alpha_complex_interface : public Alpha_complex< CGAL::Epick_d< CGAL::Dynam
   : Alpha_complex(points, max_alpha_square) {
   }
 
+  // bool from_file is a workaround fro cython to find the correct signature
+  Alpha_complex_interface(const std::string& off_file, double max_alpha_square, bool from_file)
+  : Alpha_complex(off_file, max_alpha_square) {
+  }
+
   bool find_simplex(const Simplex& vh) {
     return (Alpha_complex::find(vh) != Alpha_complex::null_simplex());
   }

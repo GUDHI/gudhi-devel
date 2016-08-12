@@ -1,6 +1,9 @@
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
+from libcpp.string cimport string
+from libcpp cimport bool
+import os
 
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
@@ -31,6 +34,8 @@ __license__ = "GPL v3"
 cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
     cdef cppclass Alpha_complex_interface "Gudhi::alphacomplex::Alpha_complex_interface":
         Alpha_complex_interface(vector[vector[double]] points, double max_alpha_square)
+        # bool from_file is a workaround fro cython to find the correct signature
+        Alpha_complex_interface(string off_file, double max_alpha_square, bool from_file)
         double filtration()
         double simplex_filtration(vector[int] simplex)
         void set_filtration(double filtration)
@@ -82,19 +87,33 @@ cdef class AlphaComplex:
     cdef Alpha_complex_persistence_interface * pcohptr
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, points=[], max_alpha_square=float('inf')):
+    def __init__(self, points=None, off_file='', max_alpha_square=float('inf')):
         """AlphaComplex constructor.
 
         :param points: A list of points in d-Dimension.
         :type points: list of list of double
-        :param max_alpha_square: Maximum Alpha square value.
+
+        Or
+
+        :param off_file: An OFF file style name.
+        :type off_file: string
+
+        :param max_alpha_square: Maximum Alpha square value. Default is :math:`\infty`
         :type max_alpha_square: double
         """
 
     # The real cython constructor
-    def __cinit__(self, points=[], max_alpha_square=float('inf')):
-        self.thisptr = new Alpha_complex_interface(points,
-                                                   max_alpha_square)
+    def __cinit__(self, points=[], off_file='', max_alpha_square=float('inf')):
+        if off_file is not '':
+            if os.path.isfile(off_file):
+                self.thisptr = new Alpha_complex_interface(off_file,
+                    max_alpha_square, True)
+            else:
+                print("file " + off_file + " not found.")
+        else:
+            self.thisptr = new Alpha_complex_interface(points,
+                max_alpha_square)
+                
 
     def __dealloc__(self):
         if self.thisptr != NULL:

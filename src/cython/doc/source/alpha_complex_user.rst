@@ -153,7 +153,7 @@ Then, it is asked to display information about the alpha complex:
 .. testcode::
 
    import gudhi
-   alpha_complex = gudhi.AlphaComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]],
+   alpha_complex = gudhi.AlphaComplex(off_file='source/alphacomplexdoc.off',
                                       max_alpha_square=59.0)
    result_str = 'Alpha complex is of dimension ' + repr(alpha_complex.dimension()) + ' - ' + \
        repr(alpha_complex.num_simplices()) + ' simplices - ' + \

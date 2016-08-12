@@ -7,5 +7,6 @@
 |      img/Cubical_complex_representation.png | computational mathematics (specially rigorous numerics) and image    |
 |                                             | analysis.                                                            |
 +---------------------------------------------+----------------------------------------------------------------------+
-| :doc:`cubical_complex_user`                 | :doc:`cubical_complex_ref`                                           |
+| :doc:`cubical_complex_user`                 | * :doc:`cubical_complex_ref`                                         |
+|                                             | * :doc:`periodic_cubical_complex_ref`                                |
 +---------------------------------------------+----------------------------------------------------------------------+

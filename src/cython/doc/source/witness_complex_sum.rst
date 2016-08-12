@@ -3,19 +3,23 @@
 =====================================  =====================================  =====================================
 
 +---------------------------------------------+----------------------------------------------------------------------+
-| .. image::                                  | Alpha_complex is a simplicial complex constructed from the finite    |
-|      img/Witness_complex_representation.png | cells of a Delaunay Triangulation.                                   |
+| .. image::                                  | Witness complex :math:`Wit(W,L)` is a simplicial complex defined on  |
+|      img/Witness_complex_representation.png | two sets of points in :math:`\mathbb{R}^D`:Wit(W,L)` is a simplicial |
+|                                             | complex defined on two sets of points in :math:`\mathbb{R}^D`:       |
 |                                             |                                                                      |
-|                                             | The filtration value of each simplex is computed as the square of the|
-|                                             | circumradius of the simplex if the circumsphere is empty (the simplex|
-|                                             | is then said to be Gabriel), and as the minimum of the filtration    |
-|                                             | values of the codimension 1 cofaces that make it not Gabriel         |
-|                                             | otherwise. All simplices that have a filtration value strictly       |
-|                                             | greater than a given alpha squared value are not inserted into the   |
-|                                             | complex.                                                             |
+|                                             | * :math:`W` set of **witnesses** and                                 |
+|                                             | * :math:`L \subseteq W` set of **landmarks**.                        |
 |                                             |                                                                      |
-|                                             | This package requires having CGAL version 4.7 or higher (4.8.1 is    |
-|                                             | advised for better perfomances).                                     |
+|                                             | The simplices are based on landmarks and a simplex belongs to the    |
+|                                             | witness complex if and only if it is witnessed, that is:             |
+|                                             |                                                                      |
+|                                             | :math:`\sigma \subset L` is witnessed if there exists a point        |
+|                                             | :math:`w \in W` such that w is closer to the vertices of             |
+|                                             | :math:`\sigma` than other points in :math:`L` and all of its faces   |
+|                                             | are witnessed as well.                                               |
+|                                             |                                                                      |
+|                                             | The data structure is described in                                   |
+|                                             | :cite:`boissonnatmariasimplextreealgorithmica`.                      |
 +---------------------------------------------+----------------------------------------------------------------------+
 | :doc:`witness_complex_user`                 | :doc:`witness_complex_ref`                                           |
 +---------------------------------------------+----------------------------------------------------------------------+
