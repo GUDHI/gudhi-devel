@@ -56,7 +56,7 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
  public:
 
   Persistent_cohomology_interface(FilteredComplex* stptr)
-      : persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomology::Field_Zp>(*stptr), 
+      : persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomology::Field_Zp>(*stptr, true), 
       stptr_(stptr) { }
 
   std::vector<std::pair<int, std::pair<double, double>>> get_persistence(int homology_coeff_field, double min_persistence) {

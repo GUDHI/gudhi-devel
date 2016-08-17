@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import gudhi
-import pandas
 import argparse
 
 """This file is part of the Gudhi Library. The Gudhi library
@@ -30,35 +29,35 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 INRIA"
 __license__ = "GPL v3"
 
-print("#####################################################################")
-print("AlphaComplex creation from points read in a file")
-
 parser = argparse.ArgumentParser(description='AlphaComplex creation from '
-                                 'points read in a file.',
+                                 'points read in a OFF file.',
                                  epilog='Example: '
-                                 'example/alpha_complex_from_file_example.py '
-                                 'data/500_random_points_on_3D_Torus.csv '
+                                 'example/alpha_complex_diagram_persistence_from_off_file_example.py '
+                                 '../data/points/tore3D_1307.off '
                                  '- Constructs a alpha complex with the '
                                  'points from the given file. File format '
                                  'is X1, X2, ..., Xn')
-parser.add_argument('file', type=argparse.FileType('r'))
+parser.add_argument("-f", "--file", type=str, required=True)
 parser.add_argument('--no-diagram', default=False, action='store_true' , help='Flag for not to display the diagrams')
 
 args = parser.parse_args()
 
-points = pandas.read_csv(args.file, header=None)
+with open(args.file, 'r') as f:
+    first_line = f.readline()
+    if (first_line == 'OFF\n') or (first_line == 'nOFF\n'):
 
-print("AlphaComplex with max_alpha_square=0.5")
+        print("#####################################################################")
+        print("AlphaComplex creation from points read in a OFF file")
+        alpha_complex = gudhi.AlphaComplex(off_file=args.file, max_alpha_square=0.5)
+    
+        diag = alpha_complex.persistence(homology_coeff_field=2, min_persistence=0.1)
+    
+        print("betti_numbers()=")
+        print(alpha_complex.betti_numbers())
+    
+        if args.no_diagram == False:
+            gudhi.diagram_persistence(diag)
+    else:
+        print(args.file, "is not a valid OFF file")
 
-alpha_complex = gudhi.AlphaComplex(points=points.values,
-                                   max_alpha_square=0.5)
-
-alpha_complex.initialize_filtration()
-diag = alpha_complex.persistence(homology_coeff_field=2, min_persistence=0.1)
-
-print("betti_numbers()=")
-print(alpha_complex.betti_numbers())
-
-if args.no_diagram == False:
-    gudhi.diagram_persistence(diag)
-    gudhi.barcode_persistence(diag)
+    f.close()

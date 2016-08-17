@@ -61,3 +61,8 @@ Persistence cohomology
 ======================
 
 .. include:: persistent_cohomology_sum.rst
+
+Persistence graphical tools
+===========================
+
+.. include:: persistence_graphical_tools_sum.rst

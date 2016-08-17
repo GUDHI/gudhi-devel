@@ -57,8 +57,7 @@ palette = ['#ff0000', '#00ff00', '#0000ff', '#00ffff', '#ff00ff', '#ffff00',
 def show_palette_values(alpha=0.6):
     """This function shows palette color values in function of the dimension.
 
-    :param alpha: alpha value in [0.0, 1.0] for horizontal bars (default is
-    0.6).
+    :param alpha: alpha value in [0.0, 1.0] for horizontal bars (default is 0.6).
     :type alpha: float.
     :returns: plot -- An horizontal bar plot of dimensions color.
     """
@@ -79,8 +78,7 @@ def barcode_persistence(persistence, alpha=0.6):
 
     :param persistence: The persistence to plot.
     :type persistence: list of tuples(dimension, tuple(birth, death)).
-    :param alpha: alpha value in [0.0, 1.0] for horizontal bars (default is
-    0.6).
+    :param alpha: alpha value in [0.0, 1.0] for horizontal bars (default is 0.6).
     :type alpha: float.
     :returns: plot -- An horizontal bar plot of persistence.
     """
@@ -115,8 +113,7 @@ def diagram_persistence(persistence, alpha=0.6):
 
     :param persistence: The persistence to plot.
     :type persistence: list of tuples(dimension, tuple(birth, death)).
-    :param alpha: alpha value in [0.0, 1.0] for points and horizontal infinity
-    line (default is 0.6).
+    :param alpha: alpha value in [0.0, 1.0] for points and horizontal infinity line (default is 0.6).
     :type alpha: float.
     :returns: plot -- An diagram plot of persistence.
     """

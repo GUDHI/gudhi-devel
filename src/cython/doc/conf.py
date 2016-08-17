@@ -32,10 +32,10 @@ sys.path.insert(0, os.path.abspath('..'))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'matplotlib.sphinxext.plot_directive',
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
     'sphinx.ext.todo',
-    'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
@@ -43,6 +43,9 @@ extensions = [
 ]
 
 todo_include_todos = True
+# plot option : do not show hyperlinks (Source code, png, hires.png, pdf)
+plot_html_show_source_link = False
+plot_html_show_formats = False
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
