@@ -36,27 +36,33 @@ print("RipsComplex creation from points read in a file")
 parser = argparse.ArgumentParser(description='RipsComplex creation from '
                                  'points read in a file.',
                                  epilog='Example: '
-                                 'example/rips_complex_from_file_example.py '
-                                 'data/2000_random_points_on_3D_Torus.csv '
+                                 'example/rips_complex_diagram_persistence_with_pandas_interface_example.py '
+                                 '../data/2000_random_points_on_3D_Torus.csv '
                                  '- Constructs a rips complex with the '
                                  'points from the given file. File format '
                                  'is X1, X2, ..., Xn')
-parser.add_argument('file', type=argparse.FileType('r'))
+parser.add_argument("-f", "--file", type=str, required=True)
+parser.add_argument("-e", "--max-edge-length", type=float, default=0.5)
+parser.add_argument('--no-diagram', default=False, action='store_true' , help='Flag for not to display the diagrams')
+
 args = parser.parse_args()
 
 points = pandas.read_csv(args.file, header=None)
 
-print("RipsComplex with max_edge_length=0.7")
+message = "RipsComplex with max_edge_length=" + repr(args.max_edge_length)
+print(message)
 
 rips_complex = gudhi.RipsComplex(points=points.values,
-                                 max_dimension=len(points.values[0]), max_edge_length=0.7)
+                                 max_dimension=len(points.values[0]), max_edge_length=args.max_edge_length)
+
+message = "Number of simplices=" + repr(rips_complex.num_simplices())
+print(message)
 
 rips_complex.initialize_filtration()
-diag = rips_complex.persistence(homology_coeff_field=2, min_persistence=0.3)
+diag = rips_complex.persistence()
 
 print("betti_numbers()=")
 print(rips_complex.betti_numbers())
 
-gudhi.diagram_persistence(diag)
-
-gudhi.barcode_persistence(diag)
+if args.no_diagram == False:
+    gudhi.diagram_persistence(diag)

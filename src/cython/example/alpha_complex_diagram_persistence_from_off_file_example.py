@@ -33,11 +33,12 @@ parser = argparse.ArgumentParser(description='AlphaComplex creation from '
                                  'points read in a OFF file.',
                                  epilog='Example: '
                                  'example/alpha_complex_diagram_persistence_from_off_file_example.py '
-                                 '../data/points/tore3D_1307.off '
+                                 '-f ../data/points/tore3D_300.off -a 0.6'
                                  '- Constructs a alpha complex with the '
                                  'points from the given file. File format '
                                  'is X1, X2, ..., Xn')
 parser.add_argument("-f", "--file", type=str, required=True)
+parser.add_argument("-a", "--max_alpha_square", type=float, default=0.5)
 parser.add_argument('--no-diagram', default=False, action='store_true' , help='Flag for not to display the diagrams')
 
 args = parser.parse_args()
@@ -45,12 +46,18 @@ args = parser.parse_args()
 with open(args.file, 'r') as f:
     first_line = f.readline()
     if (first_line == 'OFF\n') or (first_line == 'nOFF\n'):
-
         print("#####################################################################")
         print("AlphaComplex creation from points read in a OFF file")
-        alpha_complex = gudhi.AlphaComplex(off_file=args.file, max_alpha_square=0.5)
+        
+        message = "AlphaComplex with max_edge_length=" + repr(args.max_alpha_square)
+        print(message)
+        
+        alpha_complex = gudhi.AlphaComplex(off_file=args.file, max_alpha_square=args.max_alpha_square)
     
-        diag = alpha_complex.persistence(homology_coeff_field=2, min_persistence=0.1)
+        message = "Number of simplices=" + repr(alpha_complex.num_simplices())
+        print(message)
+        
+        diag = alpha_complex.persistence()
     
         print("betti_numbers()=")
         print(alpha_complex.betti_numbers())

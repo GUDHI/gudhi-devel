@@ -2,6 +2,7 @@ from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 from libcpp.string cimport string
+from libcpp cimport bool
 import os
 
 """This file is part of the Gudhi Library. The Gudhi library
@@ -39,7 +40,7 @@ cdef extern from "Cubical_complex_interface.h" namespace "Gudhi":
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Periodic_cubical_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Cubical_complex::Cubical_complex_interface<Gudhi::cubical_complex::Bitmap_cubical_complex_periodic_boundary_conditions_base<double>>>":
-        Periodic_cubical_complex_persistence_interface(Periodic_cubical_complex_base_interface * st)
+        Periodic_cubical_complex_persistence_interface(Periodic_cubical_complex_base_interface * st, bool persistence_dim_max)
         vector[pair[int, pair[double, double]]] get_persistence(int homology_coeff_field, double min_persistence)
         vector[int] betti_numbers()
         vector[int] persistent_betti_numbers(double from_value, double to_value)
@@ -75,21 +76,16 @@ cdef class PeriodicCubicalComplex:
     # The real cython constructor
     def __cinit__(self, dimensions=None, top_dimensional_cells=None,
                   perseus_file=''):
-        if ((dimensions is not None) or (top_dimensional_cells is not None) and
-             (perseus_file is not '')):
-            print("PeriodicCubicalComplex can be constructed from dimensions"
-                  " and top_dimensional_cells or from a perseus file style "
-                  "name.")
-        else:
-            if dimensions is not None:
-                if top_dimensional_cells is not None:
-                    self.thisptr = new Periodic_cubical_complex_base_interface(dimensions, top_dimensional_cells)
+        if (dimensions is not None) and (top_dimensional_cells is not None) and (perseus_file is ''):
+            self.thisptr = new Periodic_cubical_complex_base_interface(dimensions, top_dimensional_cells)
+        elif (dimensions is None) and (top_dimensional_cells is None) and (perseus_file is not ''):
+            if os.path.isfile(perseus_file):
+                self.thisptr = new Periodic_cubical_complex_base_interface(perseus_file)
             else:
-                if perseus_file is not '':
-                    if os.path.isfile(perseus_file):
-                        self.thisptr = new Periodic_cubical_complex_base_interface(perseus_file)
-                    else:
-                        print("file " + perseus_file + " not found.")
+                print("file " + perseus_file + " not found.")
+        else:
+            print("CubicalComplex can be constructed from dimensions and "
+              "top_dimensional_cells or from a perseus file style name.")
 
     def __dealloc__(self):
         if self.thisptr != NULL:
@@ -139,7 +135,7 @@ cdef class PeriodicCubicalComplex:
         if self.pcohptr != NULL:
             del self.pcohptr
         if self.thisptr != NULL:
-            self.pcohptr = new Periodic_cubical_complex_persistence_interface(self.thisptr)
+            self.pcohptr = new Periodic_cubical_complex_persistence_interface(self.thisptr, True)
         cdef vector[pair[int, pair[double, double]]] persistence_result
         if self.pcohptr != NULL:
             persistence_result = self.pcohptr.get_persistence(homology_coeff_field, min_persistence)

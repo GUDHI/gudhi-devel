@@ -34,10 +34,10 @@ __license__ = "GPL v3"
 
 parser = argparse.ArgumentParser(description='Random cubical complex.',
                                  epilog='Example: '
-                                 './random_cubical_complex_example.py 10 10 10'
-                                 ' - Constructs a random cubical complex in a '
-                                 'dimension [10, 10, 10] (aka. 1000 random '
-                                 'top dimensional cells).')
+                                 './random_cubical_complex_persistence_example.py'
+                                 ' 10 10 10 - Constructs a random cubical '
+                                 'complex in a dimension [10, 10, 10] (aka. '
+                                 '1000 random top dimensional cells).')
 parser.add_argument('dimension', type=int, nargs="*",
                     help='Cubical complex dimensions')
 

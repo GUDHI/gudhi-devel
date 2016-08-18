@@ -51,7 +51,7 @@ def is_file_perseus(file):
 parser = argparse.ArgumentParser(description='Periodic cubical complex from a '
                                  'perseus file style name.',
                                  epilog='Example: '
-                                 './periodic_cubical_complex_from_perseus_file_example.py'
+                                 './periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py'
                                  ' -f ../data/bitmap/CubicalTwoSphere.txt')
 
 parser.add_argument("-f", "--file", type=str, required=True)

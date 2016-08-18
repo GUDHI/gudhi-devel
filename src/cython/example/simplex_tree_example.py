@@ -64,6 +64,3 @@ print("num_vertices=", st.num_vertices())
 print("skeleton_tree[2]=", st.get_skeleton_tree(2))
 print("skeleton_tree[1]=", st.get_skeleton_tree(1))
 print("skeleton_tree[0]=", st.get_skeleton_tree(0))
-
-print("persistence(homology_coeff_field=2, min_persistence=0)=")
-print(st.persistence(homology_coeff_field=2, min_persistence=0))

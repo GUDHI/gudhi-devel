@@ -82,5 +82,5 @@ def test_dimension_constructor():
     assert cub.__is_persistence_defined() == False
     assert cub.persistence() == [(1, (0.0, 100.0)), (0, (0.0, 1.8446744073709552e+19))]
     assert cub.__is_persistence_defined() == True
-    assert cub.betti_numbers() == [1, 0]
-    assert cub.persistent_betti_numbers(0, 1000) == [1, 0]
+    assert cub.betti_numbers() == [1, 0, 0]
+    assert cub.persistent_betti_numbers(0, 1000) == [1, 0, 0]
