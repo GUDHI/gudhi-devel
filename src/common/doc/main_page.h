@@ -154,6 +154,7 @@
 */
 
 /*! \page installation Gudhi installation
+ *  \tableofcontents
  * As Gudhi is a header only library, there is no need to install the library.
  * 
  * Examples of Gudhi headers inclusion can be found in \ref demos.
@@ -162,6 +163,20 @@
  * The library uses c++11 and requires <a target="_blank" href="http://www.boost.org/">Boost</a> with version 1.48.0 or
  * more recent. It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2015.
  * 
+ * \subsection demos Demos and examples
+ * To build the demos and examples, run the following commands in a terminal:
+\verbatim  cd /path-to-gudhi/
+mkdir build
+cd build/
+cmake ..
+make \endverbatim
+ * A list of examples is available <a href="examples.html">here</a>.
+ * 
+ * \subsection testsuites Test suites
+ * To test your build, run the following command in a terminal:
+ * \verbatim  make test \endverbatim
+ * 
+ * \section optionallibrary Optional third-party library
  * \subsection gmp GMP:
  * The multi-field persistent homology algorithm requires GMP which is a free library for arbitrary-precision
  * arithmetic, operating on signed integers, rational numbers, and floating point numbers.
@@ -176,7 +191,8 @@
  * Having GMP version 4.2 or higher installed is recommended.
  * 
  * \subsection cgal CGAL:
- * CGAL is a C++ library which provides easy access to efficient and reliable geometric algorithms.
+ * The \ref alpha_complex data structure and few examples requires CGAL, which is a C++ library which provides easy
+ * access to efficient and reliable geometric algorithms.
  * 
  * Having CGAL version 4.4 or higher installed is recommended. The procedure to install this library according to
  * your operating system is detailed here http://doc.cgal.org/latest/Manual/installation.html
@@ -205,6 +221,7 @@
  * Persistent_cohomology/custom_persistence_sort.cpp</a>
  * 
  * \subsection eigen3 Eigen3:
+ * The \ref alpha_complex data structure and few examples requires
  * <a target="_blank" href="http://eigen.tuxfamily.org/">Eigen3</a> is a C++ template library for linear algebra:
  * matrices, vectors, numerical solvers, and related algorithms.
  * 
@@ -269,19 +286,6 @@
  * Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2custom_persistence_sort_8cpp-example.html">
  * Persistent_cohomology/custom_persistence_sort.cpp</a>
- * 
- * \subsection demos Demos and examples
- * To build the demos and examples, run the following commands in a terminal:
-\verbatim  cd /path-to-gudhi/
-mkdir build
-cd build/
-cmake ..
-make \endverbatim
- * A list of examples is available <a href="examples.html">here</a>.
- * 
- * \subsection testsuites Test suites
- * To test your build, run the following command in a terminal:
- * \verbatim  make test \endverbatim
  * 
  * \section Contributions Bug reports and contributions
  * Please help us improving the quality of the GUDHI library. You may report bugs or suggestions to:

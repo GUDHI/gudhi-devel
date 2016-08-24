@@ -32,12 +32,14 @@ else()
   # A fix would be to use https://cmake.org/cmake/help/v3.1/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html 
   # or even better https://cmake.org/cmake/help/v3.1/variable/CMAKE_CXX_STANDARD.html
   # but it implies to use cmake version 3.1 at least.
-  find_package(CGAL)
+
+  # find CGAL in QUIET mode for cmake to be less verbose when CGAL is not found.
+  find_package(CGAL QUIET)
   # Only CGAL versions > 4.4 supports what Gudhi uses from CGAL
-  if (CGAL_VERSION VERSION_LESS 4.4.0)
+  if (CGAL_VERSION VERSION_LESS 4.4.0 AND CGAL_FOUND)
     message("CGAL version ${CGAL_VERSION} is considered too old to be used by Gudhi.")
     unset(CGAL_FOUND)
-  endif()
+  endif(CGAL_VERSION VERSION_LESS 4.4.0 AND CGAL_FOUND)
   if(CGAL_FOUND)
     message(STATUS "CGAL version: ${CGAL_VERSION}.")
     include( ${CGAL_USE_FILE} )
