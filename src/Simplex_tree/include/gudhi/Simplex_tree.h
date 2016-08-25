@@ -110,7 +110,7 @@ class Simplex_tree {
   typedef typename Options::Filtration_value Filtration_value;
   /** \brief Key associated to each simplex.
    *
-   * Must be a signed integer type. */
+   * Must be an integer type. */
   typedef typename Options::Simplex_key Simplex_key;
   /** \brief Type for the vertex handle.
    *
