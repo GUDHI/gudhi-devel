@@ -181,6 +181,7 @@ struct MiniSTOptions {
   typedef linear_indexing_tag Indexing_tag;
   typedef short Vertex_handle;
   typedef double Filtration_value;
+  // Maximum number of simplices to compute persistence is 2^8 - 1 = 255. One is reserved for null_key
   typedef std::uint8_t Simplex_key;
   static const bool store_key = true;
   static const bool store_filtration = false;
