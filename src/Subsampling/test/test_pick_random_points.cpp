@@ -24,6 +24,10 @@
 // # define TBB_USE_THREADING_TOOL
 // #endif
 
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE Subsampling - test pick_random_points
+#include <boost/test/unit_test.hpp>
+
 #include <gudhi/pick_random_points.h>
 #include <vector>
 #include <iterator>
@@ -31,7 +35,8 @@
 #include <CGAL/Epick_d.h>
 
 
-int main() {
+BOOST_AUTO_TEST_CASE(test_pick_random_points)
+{
   typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag>                K;
   typedef typename K::FT                                            FT;
   typedef typename K::Point_d                                       Point_d;
@@ -53,8 +58,7 @@ int main() {
   vect.push_back(Point_d(std::vector<FT>({1,1,0,1})));
   vect.push_back(Point_d(std::vector<FT>({1,1,1,0})));
   vect.push_back(Point_d(std::vector<FT>({1,1,1,1})));
-  
-  
+
   std::vector<Point_d> results;
   Gudhi::subsampling::pick_random_points(vect, 5, std::back_inserter(results));
   std::cout << "landmark vector contains: ";
