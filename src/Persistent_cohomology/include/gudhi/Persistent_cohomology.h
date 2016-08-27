@@ -308,14 +308,14 @@ class Persistent_cohomology {
         // Find its annotation vector
         curr_col = ds_repr_[dsets_.find_set(key)];
         if (curr_col != NULL) {  // and insert it in annotations_in_boundary with multyiplicative factor "sign".
-	  annotations_in_boundary.emplace_back(curr_col, sign);
+          annotations_in_boundary.emplace_back(curr_col, sign);
         }
       }
       sign = -sign;
     }
     // Place identical annotations consecutively so we can easily sum their multiplicities.
     std::sort(annotations_in_boundary.begin(), annotations_in_boundary.end(),
-	[](annotation_t const& a, annotation_t const& b) { return a.first < b.first; });
+              [](annotation_t const& a, annotation_t const& b) { return a.first < b.first; });
 
     // Sum the annotations with multiplicity, using a map<key,coeff>
     // to represent a sparse vector.
@@ -325,7 +325,7 @@ class Persistent_cohomology {
       Column* col = ann_it->first;
       int mult = ann_it->second;
       while (++ann_it != annotations_in_boundary.end() && ann_it->first == col) {
-	mult += ann_it->second;
+        mult += ann_it->second;
       }
       // The following test is just a heuristic, it is not required, and it is fine that is misses p == 0.
       if (mult != coeff_field_.additive_identity()) {  // For all columns in the boundary,
