@@ -87,7 +87,7 @@ sparsify_point_set(
 
     *output_it++ = *it_pt;
 
-    auto ins_range = points_ds.query_incremental_ANN(*it_pt);
+    auto ins_range = points_ds.query_incremental_nearest_neighbors(*it_pt);
 
     // If another point Q is closer that min_squared_dist, mark Q to be dropped
     for (auto const& neighbor : ins_range)
