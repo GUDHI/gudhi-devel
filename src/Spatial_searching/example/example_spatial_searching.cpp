@@ -25,8 +25,8 @@ int main (void)
 
   Points_ds points_ds(points);
 
-  // 20-nearest neighbor query
-  std::cout << "20 nearest neighbors:\n";
+  // 10-nearest neighbor query
+  std::cout << "10 nearest neighbors from points[20]:\n";
   auto kns_range = points_ds.query_k_nearest_neighbors(points[20], 10, true);
   for (auto const& nghb : kns_range)
     std::cout << nghb.first << " (sq. dist. = " << nghb.second << ")\n";
@@ -38,8 +38,8 @@ int main (void)
   for (auto ins_iterator = ins_range.begin(); ins_iterator->second < 0.5*0.5 ; ++ins_iterator)
     std::cout << ins_iterator->first << " (sq. dist. = " << ins_iterator->second << ")\n";
 
-  // 20-farthest neighbor query
-  std::cout << "20 farthest neighbors:\n";
+  // 10-farthest neighbor query
+  std::cout << "10 farthest neighbors from points[20]:\n";
   auto kfs_range = points_ds.query_k_farthest_neighbors(points[20], 10, true);
   for (auto const& nghb : kfs_range)
     std::cout << nghb.first << " (sq. dist. = " << nghb.second << ")\n";
