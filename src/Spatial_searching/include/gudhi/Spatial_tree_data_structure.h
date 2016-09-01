@@ -67,10 +67,12 @@ template <typename K, typename Point_container_>
 class Spatial_tree_data_structure
 {
 public:
-  typedef typename Point_container_::value_type             Point;
+  /// The kernel.
   typedef K                                                 Kernel;
   /// Number type used for distances.
   typedef typename Kernel::FT                               FT;
+  /// The point type.
+  typedef typename Point_container_::value_type             Point;
 
   typedef CGAL::Search_traits<
     FT, Point,
