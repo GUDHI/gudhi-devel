@@ -257,9 +257,8 @@ public:
     return search;
   }
 
-  
-  
-protected:
+
+private:
   Point_container_ const& m_points;
   Tree m_tree;
 };
