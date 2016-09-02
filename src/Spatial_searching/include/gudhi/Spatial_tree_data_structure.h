@@ -150,16 +150,6 @@ public:
     m_tree.build();
   }
 
-  /*Point_container_ &points()
-  {
-    return m_points;
-  }
-
-  const Point_container_ &points() const
-  {
-    return m_points;
-  }*/
-
   // Be careful, this function invalidates the tree,
   // which will be recomputed at the next query
   void insert(std::ptrdiff_t point_idx)
