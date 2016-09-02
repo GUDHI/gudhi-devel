@@ -76,7 +76,7 @@ int main(int argc, char * const argv[]) {
     // Choose landmarks
     start = clock();
     std::vector<std::vector< int > > knn;
-    Gudhi::pick_random_points(point_vector, 100, std::back_inserter(landmarks));
+    Gudhi::subsampling::pick_random_points(point_vector, 100, std::back_inserter(landmarks));
     Gudhi::witness_complex::construct_closest_landmark_table(point_vector, landmarks, knn);
 
     // Compute witness complex
