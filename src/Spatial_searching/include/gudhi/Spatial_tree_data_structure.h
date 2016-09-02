@@ -115,7 +115,7 @@ public:
   /// \brief Constructor
   /// @param[in] points Const reference to the point container. This container
   /// is not copied, so it should not be destroyed or modified afterwards.
-  /// @param[in] Only_these_points Specifies the indices of the points that
+  /// @param[in] only_these_points Specifies the indices of the points that
   /// should be actually inserted into the tree. The other points are ignored.
   template <typename Point_indices_range>
   Spatial_tree_data_structure(
