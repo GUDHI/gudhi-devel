@@ -6,7 +6,15 @@ if (NOT CMAKE_VERSION VERSION_LESS 2.8.11)
   # Definition of the custom target user_version
   add_custom_target(user_version)
   
-  set(GUDHI_USER_VERSION_DIR ${CMAKE_SOURCE_DIR}/${DATE_AND_TIME}_GUDHI_${GUDHI_VERSION})
+  if(DEFINED USER_VERSION_DIR)
+    # set the GUDHI_USER_VERSION_DIR with USER_VERSION_DIR defined by the user
+    set(GUDHI_USER_VERSION_DIR ${CMAKE_CURRENT_BINARY_DIR}/${USER_VERSION_DIR})
+  else()
+    # set the GUDHI_USER_VERSION_DIR with timestamp and Gudhi version number
+    set(GUDHI_USER_VERSION_DIR ${CMAKE_CURRENT_BINARY_DIR}/${DATE_AND_TIME}_GUDHI_${GUDHI_VERSION})
+  endif()
+
+  set(GUDHI_DOXYGEN_DEPENDENCY user_version)
 
   add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                      make_directory ${GUDHI_USER_VERSION_DIR}
