@@ -48,6 +48,7 @@
 #include <limits>  // Inf
 #include <initializer_list>
 #include <algorithm>  // for std::max
+#include <cstdint>  // for std::uint32_t
 
 namespace Gudhi {
 /** \defgroup simplex_tree Filtered Complexes
@@ -109,7 +110,7 @@ class Simplex_tree {
   typedef typename Options::Filtration_value Filtration_value;
   /** \brief Key associated to each simplex.
    *
-   * Must be a signed integer type. */
+   * Must be an integer type. */
   typedef typename Options::Simplex_key Simplex_key;
   /** \brief Type for the vertex handle.
    *
@@ -1297,25 +1298,31 @@ std::istream& operator>>(std::istream & is, Simplex_tree<T...> & st) {
   return is;
 }
 
-/// Model of SimplexTreeOptions.
+/** Model of SimplexTreeOptions.
+ * 
+ * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
+ * (about 4 billions of simplices). */
 struct Simplex_tree_options_full_featured {
   typedef linear_indexing_tag Indexing_tag;
   typedef int Vertex_handle;
   typedef double Filtration_value;
-  typedef int Simplex_key;
+  typedef std::uint32_t Simplex_key;
   static const bool store_key = true;
   static const bool store_filtration = true;
   static const bool contiguous_vertices = false;
 };
 
-/** Model of SimplexTreeOptions, faster than
-  `Simplex_tree_options_full_featured` but note the unsafe
-  `contiguous_vertices` option. */
+/** Model of SimplexTreeOptions, faster than `Simplex_tree_options_full_featured` but note the unsafe
+ * `contiguous_vertices` option.
+ * 
+ * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
+ * (about 4 billions of simplices). */
+
 struct Simplex_tree_options_fast_persistence {
   typedef linear_indexing_tag Indexing_tag;
   typedef int Vertex_handle;
   typedef float Filtration_value;
-  typedef int Simplex_key;
+  typedef std::uint32_t Simplex_key;
   static const bool store_key = true;
   static const bool store_filtration = true;
   static const bool contiguous_vertices = true;
