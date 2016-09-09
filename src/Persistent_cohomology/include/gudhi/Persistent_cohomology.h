@@ -109,6 +109,7 @@ class Persistent_cohomology {
         column_pool_(),  // memory pools for the CAM
         cell_pool_() {
     if (cpx_->num_simplices() > std::numeric_limits<Simplex_key>::max()) {
+      // num_simplices must be strictly lower than the limit, because a value is reserved for null_key.
       throw std::out_of_range ("The number of simplices is more than Simplex_key type numeric limit.");
     }
     Simplex_key idx_fil = 0;
