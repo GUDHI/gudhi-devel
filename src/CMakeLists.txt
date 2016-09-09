@@ -15,6 +15,10 @@ if(NOT Boost_FOUND)
   message(FATAL_ERROR "NOTICE: This demo requires Boost and will not be compiled.")
 else()
 
+  # For "make doxygen"
+  set(GUDHI_USER_VERSION_DIR ${CMAKE_SOURCE_DIR})
+  include(${CMAKE_MODULE_PATH}/GUDHI_doxygen_target.txt)
+
   find_package(GMP)
   if(GMP_FOUND)
     message(STATUS "GMP_LIBRARIES = ${GMP_LIBRARIES}")
