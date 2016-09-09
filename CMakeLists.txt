@@ -18,6 +18,11 @@ else()
 
   enable_testing()
 
+  # For "make user_version"
+  include(${CMAKE_MODULE_PATH}/GUDHI_user_version_target.txt)
+  # For "make doxygen"
+  include(${CMAKE_MODULE_PATH}/GUDHI_doxygen_target.txt)
+
   find_package(GMP)
   if(GMP_FOUND)
     message(STATUS "GMP_LIBRARIES = ${GMP_LIBRARIES}")
