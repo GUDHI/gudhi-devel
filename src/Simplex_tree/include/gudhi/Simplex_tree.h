@@ -51,38 +51,6 @@
 #include <cstdint>  // for std::uint32_t
 
 namespace Gudhi {
-/** \defgroup simplex_tree Filtered Complexes
- * \author    Cl&eacute;ment Maria
- *
- * A simplicial complex \f$\mathbf{K}\f$
- * on a set of vertices \f$V = \{1, \cdots ,|V|\}\f$ is a collection of simplices
- * \f$\{\sigma\}\f$,
- * \f$\sigma \subseteq V\f$ such that \f$\tau \subseteq \sigma \in \mathbf{K} \rightarrow \tau \in
- * \mathbf{K}\f$. The
- * dimension \f$n=|\sigma|-1\f$ of \f$\sigma\f$ is its number of elements minus \f$1\f$.
- *
- * A filtration of a simplicial complex is
- * a function \f$f:\mathbf{K} \rightarrow \mathbb{R}\f$ satisfying \f$f(\tau)\leq f(\sigma)\f$ whenever
- * \f$\tau \subseteq \sigma\f$. Ordering the simplices by increasing filtration values
- * (breaking ties so as a simplex appears after its subsimplices of same filtration value)
- * provides an indexing scheme.
- *
-
- <DT>Implementations:</DT>
- There are two implementation of complexes. The first on is the Simplex_tree data structure.
- The simplex tree is an efficient and flexible
- data structure for representing general (filtered) simplicial complexes. The data structure
- is described in \cite boissonnatmariasimplextreealgorithmica
- \image html "Simplex_tree_representation.png" "Simplex tree representation"
-
- The second one is the Hasse_complex. The Hasse complex is a data structure representing
- explicitly all co-dimension 1 incidence relations in a complex. It is consequently faster
- when accessing the boundary of a simplex, but is less compact and harder to construct from
- scratch.
-
- * \copyright GNU General Public License v3.
- * @{
- */
 
 struct Simplex_tree_options_full_featured;
 

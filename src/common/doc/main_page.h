@@ -13,8 +13,8 @@
  * The current release of the GUDHI library includes:
  * 
  * \li Data structures to represent, construct and manipulate simplicial complexes.
- * \li Algorithms to compute persistent homology and multi-field persistent homology.
- * \li Simplication of simplicial complexes by edge contraction.
+ * \li Simplification of simplicial complexes by edge contraction.
+ * \li Algorithms to compute persistent homology persistent homology.
  * 
  * All data-structures are generic and several of their aspects can be parameterized via template classes.
  * We refer to \cite gudhilibrary_ICMS14 for a detailed description of the design of the library.
@@ -266,8 +266,10 @@ make \endverbatim
  * Simplex_tree/simplex_tree_from_alpha_shapes_3.cpp</a>
  * \li <a href="_simplex_tree_2simplex_tree_from_cliques_of_graph_8cpp-example.html">
  * Simplex_tree/simplex_tree_from_cliques_of_graph.cpp</a>
- * \li <a href="_persistent_cohomology_2alpha_shapes_persistence_8cpp-example.html">
- * Persistent_cohomology/alpha_shapes_persistence.cpp</a>
+ * \li <a href="_persistent_cohomology_2alpha_complex_3d_persistence_8cpp-example.html">
+ * Persistent_cohomology/alpha_complex_3d_persistence.cpp</a>
+ * \li <a href="_persistent_cohomology_2alpha_complex_persistence_8cpp-example.html">
+ * Persistent_cohomology/alpha_complex_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2rips_persistence_via_boundary_matrix_8cpp-example.html">
  * Persistent_cohomology/rips_persistence_via_boundary_matrix.cpp</a>
  * \li <a href="_persistent_cohomology_2performance_rips_persistence_8cpp-example.html">
