@@ -608,8 +608,8 @@ std::vector< double > Persistence_intervals::k_n_n( size_t k , size_t where_to_c
 
 std::pair<double,double> Persistence_intervals::min_max()
 {
-    double min_ = INT_MAX;
-    double max_ = -INT_MAX;
+    double min_ = std::numeric_limits<int>::max();
+    double max_ = -std::numeric_limits<int>::max();
     for ( size_t i = 0 ; i != this->intervals.size() ; ++i )
     {
         if ( this->intervals[i].first < min_ )min_ = this->intervals[i].first;
