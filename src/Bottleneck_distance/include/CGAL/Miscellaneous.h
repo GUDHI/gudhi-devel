@@ -4,7 +4,7 @@
  *
  *    Author(s):       Francois Godi
  *
- *    Copyright (C) 2015  INRIA Saclay (France)
+ *    Copyright (C) 2015  INRIA Sophia-Antipolis (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -20,21 +20,32 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "gudhi/Graph_matching.h"
-#include <iostream>
+#ifndef SRC_BOTTLENECK_INCLUDE_CGAL_MISCELLANEOUS_H_
+#define SRC_BOTTLENECK_INCLUDE_CGAL_MISCELLANEOUS_H_
 
-using namespace Gudhi::bottleneck;
+#include <gudhi/Internal_point.h>
 
-int main() {
-  int n = 100;
-  std::vector< std::pair<double, double> > v1, v2;
-  for (int i = 0; i < n; i++) {
-    int a = rand() % n;
-    v1.emplace_back(a, a + rand() % (n - a));
-    int b = rand() % n;
-    v2.emplace_back(b, b + rand() % (n - b));
-  }
-  // v1 and v2 are persistence diagrams containing each 100 randoms points.
-  double b = bottleneck_distance(v1, v2, 0);
-  std::cout << b << std::endl;
-}
+namespace CGAL {
+
+typedef Gudhi::Bottleneck_distance::Internal_point Internal_point;
+
+template <>
+struct Kernel_traits<Internal_point> {
+    struct Kernel {
+        typedef double FT;
+        typedef double RT;
+    };
+};
+
+
+struct Construct_coord_iterator {
+    typedef  const double* result_type;
+    const double* operator()(const Internal_point& p) const
+    { return static_cast<const double*>(p.vec); }
+    const double* operator()(const Internal_point& p, int)  const
+    { return static_cast<const double*>(p.vec+2); }
+};
+
+} //namespace CGAL
+
+#endif  // SRC_BOTTLENECK_INCLUDE_CGAL_MISCELLANEOUS_H_
