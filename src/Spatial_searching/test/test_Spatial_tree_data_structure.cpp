@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(test_Spatial_tree_data_structure)
 
   Points points;
   for (int i = 0 ; i < 500 ; ++i)
-    points.push_back(Point(std::array<FT,4>({rd.get_double(-1.,1),rd.get_double(-1.,1),rd.get_double(-1.,1),rd.get_double(-1.,1)})));
+    points.push_back(Point(rd.get_double(-1.,1), rd.get_double(-1.,1), rd.get_double(-1.,1), rd.get_double(-1.,1)));
 
   Points_ds points_ds(points);
 
