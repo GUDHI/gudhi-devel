@@ -21,17 +21,16 @@
 #ifndef CGAL_KD_TREE_H
 #define CGAL_KD_TREE_H
 
+#include "CGAL/Kd_tree_node.h"
+
 #include <CGAL/basic.h>
 #include <CGAL/assertions.h>
 #include <vector>
 
 #include <CGAL/algorithm.h>
-#include <CGAL/Kd_tree_node.h>
 #include <CGAL/Splitters.h>
 #include <CGAL/internal/Get_dimension_tag.h>
 #include <CGAL/Search_traits.h>
-#include <CGAL/Orthogonal_incremental_neighbor_search.h>
-#include <CGAL/Weighted_Minkowski_distance.h>
 
 
 #include <deque>

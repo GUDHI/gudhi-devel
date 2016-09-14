@@ -25,8 +25,16 @@
 
 #include <list>
 #include <map>
-#include "../CGAL/Kd_tree.h"
-#include "../CGAL/Miscellaneous.h"
+
+// Inclusion order is important for CGAL patch
+#include "CGAL/Kd_tree_node.h"
+#include "CGAL/Kd_tree.h"
+#include "CGAL/Orthogonal_incremental_neighbor_search.h"
+#include "CGAL/Miscellaneous.h"
+
+#include <CGAL/Weighted_Minkowski_distance.h>
+#include <CGAL/Search_traits.h>
+
 #include <gudhi/Persistence_diagrams_graph.h>
 
 
