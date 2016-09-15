@@ -34,7 +34,7 @@ namespace skeleton_blocker {
  * Graph_edge must specify how to access to an index.
  * 
  */
-//todo the index is just for contraction, to remove
+// TODO(DS): the index is just for contraction, to remove
 
 template<typename GeometryTrait>
 struct SkeletonBlockerGeometricDS : public SkeletonBlockerDS {

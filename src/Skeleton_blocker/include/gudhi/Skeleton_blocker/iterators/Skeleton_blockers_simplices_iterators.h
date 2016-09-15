@@ -337,7 +337,7 @@ public boost::iterator_facade < Simplex_coboundary_iterator<SkeletonBlockerCompl
   Simplex_coboundary_iterator(const Complex* complex_, const Simplex& sigma_) :
       complex(complex_),
       sigma(sigma_),
-      //need only vertices of the link hence the true flag
+      // need only vertices of the link hence the true flag
       link(new Link(*complex_, sigma_, false, true)) {
     auto link_vertex_range = link->vertex_range();
     current_vertex = link_vertex_range.begin();
