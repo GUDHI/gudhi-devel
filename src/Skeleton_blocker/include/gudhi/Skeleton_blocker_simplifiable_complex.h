@@ -146,8 +146,7 @@ void Skeleton_blocker_complex<SkeletonBlockerDS>::remove_star(Vertex_handle v) {
  * whenever the dimension of tau is at least 2.
  */
 template<typename SkeletonBlockerDS>
-void Skeleton_blocker_complex<SkeletonBlockerDS>::update_blockers_after_remove_star_of_vertex_or_edge(
-                                                                                                      const Simplex& simplex_to_be_removed) {
+void Skeleton_blocker_complex<SkeletonBlockerDS>::update_blockers_after_remove_star_of_vertex_or_edge(const Simplex& simplex_to_be_removed) {
   std::list <Blocker_handle> blockers_to_update;
   if (simplex_to_be_removed.empty()) return;
 
@@ -384,7 +383,8 @@ Skeleton_blocker_complex<SkeletonBlockerDS>::contract_edge(Vertex_handle a, Vert
 
 template<typename SkeletonBlockerDS>
 void Skeleton_blocker_complex<SkeletonBlockerDS>::get_blockers_to_be_added_after_contraction(Vertex_handle a,
-                                                                                             Vertex_handle b, std::set<Simplex>& blockers_to_add) {
+                                                                                             Vertex_handle b,
+                                                                                             std::set<Simplex>& blockers_to_add) {
   blockers_to_add.clear();
 
   typedef Skeleton_blocker_link_complex<Skeleton_blocker_complex<SkeletonBlockerDS> > LinkComplexType;

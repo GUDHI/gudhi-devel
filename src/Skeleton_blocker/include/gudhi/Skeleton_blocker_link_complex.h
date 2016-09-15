@@ -201,8 +201,8 @@ ComplexType> {
    * corresponding address in 'other_complex'.
    * It assumes that other_complex have a vertex 'this.get_id(address)'
    */
-  boost::optional<Vertex_handle> give_equivalent_vertex(
-                                                        const ComplexType & other_complex, Vertex_handle address) const {
+  boost::optional<Vertex_handle> give_equivalent_vertex(const ComplexType & other_complex,
+                                                        Vertex_handle address) const {
     Root_vertex_handle id((*this)[address].get_id());
     return other_complex.get_address(id);
   }

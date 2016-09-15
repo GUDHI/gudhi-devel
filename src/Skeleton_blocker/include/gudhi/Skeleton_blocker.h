@@ -37,7 +37,8 @@ namespace Gudhi {
 
 namespace skeleton_blocker {
 
-/** \defgroup skbl Skeleton-Blocker 
+/** \defgroup skbl Skeleton-Blocker
+@{
 
 \author David Salinas
 
@@ -236,12 +237,12 @@ The author wishes to thank Dominique Attali and André Lieutier for
 their collaboration to write the two initial papers 
 \cite socg_blockers_2011,\cite blockers2012
  about this data-structure
- and also Dominique for leaving him use a prototype. 
+ and also Dominique for leaving him use a prototype.
 
 
-\copyright GNU General Public License v3.                         
- */
-/** @} */ // end defgroup
+\copyright GNU General Public License v3.
+
+@} */
 
 }  // namespace skeleton_blocker
 

@@ -45,7 +45,6 @@ struct Trie {
   const Trie* parent_;
 
  public:
-
   Trie() : parent_(0) { }
 
   Trie(Vertex_handle v_) : v(v_), parent_(0) { }
@@ -80,7 +79,6 @@ struct Trie {
  private:
   // go down recursively in the tree while advancing the simplex iterator.
   // when it reaches a leaf, it inserts the remaining that is not present
-
   void add_simplex_helper(Simplex_vertex_const_iterator s_it, Simplex_vertex_const_iterator s_end) {
     assert(*s_it == v);
     ++s_it;
@@ -106,7 +104,6 @@ struct Trie {
   }
 
  public:
-
   /**
    * adds the simplex to the trie
    */

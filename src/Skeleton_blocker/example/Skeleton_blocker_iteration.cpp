@@ -30,12 +30,8 @@
 #include <fstream>
 #include <sstream>
 
-
-using namespace std;
-using namespace Gudhi;
-using namespace skeleton_blocker;
-
-typedef Skeleton_blocker_complex<Skeleton_blocker_simple_traits> Complex;
+typedef Gudhi::skeleton_blocker::Skeleton_blocker_simple_traits Traits;
+typedef Gudhi::skeleton_blocker::Skeleton_blocker_complex<Traits> Complex;
 typedef Complex::Vertex_handle Vertex_handle;
 typedef Complex::Simplex Simplex;
 

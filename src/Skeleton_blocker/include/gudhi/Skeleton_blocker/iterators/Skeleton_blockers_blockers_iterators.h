@@ -47,7 +47,6 @@ ReturnType
   MapIteratorType end_of_map;
 
  public:
-
   Blocker_iterator_internal() : current_position() { }
 
   Blocker_iterator_internal(MapIteratorType position, MapIteratorType end_of_map_) :
@@ -66,7 +65,6 @@ ReturnType
   }
 
  private:
-
   /**
    * Let the current pair be (v,sigma) where v is a vertex and sigma is a blocker.
    * If v is not the first vertex of sigma then we already have seen sigma as a blocker

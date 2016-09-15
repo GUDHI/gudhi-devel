@@ -136,7 +136,7 @@ typename SkeletonBlockerComplex::Simplex const
   Triangle_iterator(const SkeletonBlockerComplex* complex) :
       complex_(complex),
       current_vertex_(complex->vertex_range().begin()),
-      current_triangle_(complex, *current_vertex_), // xxx this line is problematic is the complex is empty
+      current_triangle_(complex, *current_vertex_),  // this line is problematic is the complex is empty
       is_end_(false) {
     assert(!complex->empty());
     gotoFirstTriangle();
@@ -185,8 +185,10 @@ typename SkeletonBlockerComplex::Simplex const
   // goto the next vertex that has a triangle pending or the
   // end vertex iterator if none exists
   void goto_next_vertex() {
-    assert(current_triangle_.finished()); // we mush have consume all triangles passing through the vertex
-    assert(!is_finished()); // we must not be done
+    // we must have consume all triangles passing through the vertex
+    assert(current_triangle_.finished());
+    // we must not be done
+    assert(!is_finished());
 
     ++current_vertex_;
 

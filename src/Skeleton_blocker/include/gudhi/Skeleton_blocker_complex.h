@@ -104,8 +104,8 @@ class Skeleton_blocker_complex {
   typedef typename Simplex::Simplex_vertex_const_iterator Simplex_handle_iterator;
 
  protected:
-  typedef typename boost::adjacency_list<boost::setS, // edges
-  boost::vecS, // vertices
+  typedef typename boost::adjacency_list<boost::setS,  // edges
+  boost::vecS,  // vertices
   boost::undirectedS, Graph_vertex, Graph_edge> Graph;
   // todo/remark : edges are not sorted, it heavily penalizes computation for SuperiorLink
   // (eg Link with greater vertices)
@@ -445,7 +445,7 @@ class Skeleton_blocker_complex {
     boost::optional<Vertex_handle> res;
     int num_vertices = boost::num_vertices(skeleton);
     if (id.vertex < num_vertices)
-      res = Vertex_handle(id.vertex); // xxx
+      res = Vertex_handle(id.vertex);
     return res;
   }
 

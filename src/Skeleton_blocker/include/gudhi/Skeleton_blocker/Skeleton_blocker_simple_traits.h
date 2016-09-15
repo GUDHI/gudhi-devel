@@ -148,7 +148,6 @@ struct Skeleton_blocker_simple_traits {
     int index_;
 
    public:
-
     Graph_edge()
         : a_(-1),
         b_(-1),

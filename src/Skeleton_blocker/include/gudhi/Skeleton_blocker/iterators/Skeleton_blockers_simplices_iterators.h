@@ -69,7 +69,8 @@ public boost::iterator_facade < Simplex_around_vertex_iterator<SkeletonBlockerCo
   Vertex_handle v;
   std::shared_ptr<Link> link_v;
   std::shared_ptr<Trie> trie;
-  std::list<Trie*> nodes_to_be_seen; // todo deque
+  // TODO(DS): use a deque instead
+  std::list<Trie*> nodes_to_be_seen;
 
  public:
   Simplex_around_vertex_iterator() : complex(0) { }
@@ -161,7 +162,8 @@ public boost::iterator_facade < Simplex_around_vertex_iterator<SkeletonBlockerCo
 
     bool both_non_empty = !nodes_to_be_seen.empty() && !other.nodes_to_be_seen.empty();
 
-    if (!both_non_empty) return false; // one is empty the other is not
+    // one is empty the other is not
+    if (!both_non_empty) return false;
 
     bool same_node = (**(nodes_to_be_seen.begin()) == **(other.nodes_to_be_seen.begin()));
     return same_node;

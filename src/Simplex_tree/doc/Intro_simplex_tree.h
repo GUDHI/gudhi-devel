@@ -28,6 +28,7 @@ namespace Gudhi {
 
 
 /** \defgroup simplex_tree Filtered Complexes
+ * @{
  * \author    Cl&eacute;ment Maria
  *
  * A simplicial complex \f$\mathbf{K}\f$ on a set of vertices \f$V = \{1, \cdots ,|V|\}\f$ is a collection of
@@ -76,7 +77,7 @@ Number of vertices = 10   Number of simplices = 98 \endcode
  * compact and harder to construct from scratch.
  * 
  * \copyright GNU General Public License v3.
- * @{
+ * @}
  */
 
 }  // namespace Gudhi

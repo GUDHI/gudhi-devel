@@ -24,18 +24,14 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include "gudhi/Debug_utils.h"
-#include "gudhi/Test.h"
-#include "gudhi/Skeleton_blocker.h"
+#include <gudhi/Debug_utils.h>
+#include <gudhi/Test.h>
+#include <gudhi/Skeleton_blocker.h>
 
-using namespace std;
-
-using namespace Gudhi;
-
-using namespace skeleton_blocker;
-
-
-typedef Skeleton_blocker_complex<Skeleton_blocker_simple_traits> Complex;
+template<typename ComplexType> class Skeleton_blocker_sub_complex;
+typedef Gudhi::skeleton_blocker::Skeleton_blocker_simple_traits Traits;
+typedef Gudhi::skeleton_blocker::Skeleton_blocker_complex<Traits> Complex;
+typedef Gudhi::skeleton_blocker::Skeleton_blocker_link_complex<Complex> Skeleton_blocker_link_complex;
 typedef Complex::Vertex_handle Vertex_handle;
 typedef Complex::Root_vertex_handle Root_vertex_handle;
 typedef Complex::Simplex Simplex;
@@ -120,10 +116,10 @@ bool test_num_simplices() {
 bool test_iterator_vertices1() {
   int n = 10;
   Complex complex(10);
-  cerr << "complex.num_vertices():" << complex.num_vertices() << endl;
+  std::cerr << "complex.num_vertices():" << complex.num_vertices() << std::endl;
   int num_vertex_seen = 0;
   for (auto vi : complex.vertex_range()) {
-    cerr << "vertex:" << vi << endl;
+    std::cerr << "vertex:" << vi << std::endl;
     ++num_vertex_seen;
   }
   return num_vertex_seen == n;
@@ -133,11 +129,11 @@ bool test_iterator_vertices2() {
   int n = 10;
   Complex complex;
   build_complete(10, complex);
-  cerr << "complex.num_vertices():" << complex.num_vertices() << endl;
-  cerr << "complex.num_edges():" << complex.num_edges() << endl;
+  std::cerr << "complex.num_vertices():" << complex.num_vertices() << std::endl;
+  std::cerr << "complex.num_edges():" << complex.num_edges() << std::endl;
   int num_vertex_seen = 0;
   for (auto vi : complex.vertex_range(Vertex_handle(2))) {
-    cerr << "vertex:" << vi << endl;
+    std::cerr << "vertex:" << vi << std::endl;
     ++num_vertex_seen;
   }
   std::cerr << "num_vertex_seen:" << num_vertex_seen << std::endl;
@@ -152,10 +148,10 @@ bool test_iterator_edge() {
       complex.add_edge_without_blockers(Vertex_handle(i), Vertex_handle(j));
   complex.remove_edge(Vertex_handle(2), Vertex_handle(3));
   complex.remove_edge(Vertex_handle(3), Vertex_handle(5));
-  cerr << "complex.num_edges():" << complex.num_edges() << endl;
+  std::cerr << "complex.num_edges():" << complex.num_edges() << std::endl;
   int num_edges_seen = 0;
   for (auto edge : complex.edge_range()) {
-    cerr << "edge :" << complex[edge] << endl;
+    std::cerr << "edge :" << complex[edge] << std::endl;
     ++num_edges_seen;
   }
 
@@ -170,10 +166,10 @@ bool test_iterator_edge2() {
       complex.add_edge_without_blockers(Vertex_handle(i), Vertex_handle(j));
   complex.remove_edge(Vertex_handle(2), Vertex_handle(3));
   complex.remove_edge(Vertex_handle(3), Vertex_handle(5));
-  cerr << "complex.num_edges():" << complex.num_edges() << endl;
+  std::cerr << "complex.num_edges():" << complex.num_edges() << std::endl;
   int num_neigbors_seen = 0;
   for (auto neighbor : complex.vertex_range(Vertex_handle(2))) {
-    cerr << "neighbor" << neighbor << endl;
+    std::cerr << "neighbor" << neighbor << std::endl;
     ++num_neigbors_seen;
   }
   return num_neigbors_seen == 8;
@@ -187,7 +183,7 @@ bool test_iterator_edge3() {
       complex.add_edge_without_blockers(Vertex_handle(i), Vertex_handle(j));
   complex.remove_edge(Vertex_handle(2), Vertex_handle(3));
   complex.remove_edge(Vertex_handle(3), Vertex_handle(5));
-  cerr << "complex.num_edges():" << complex.num_edges() << endl;
+  std::cerr << "complex.num_edges():" << complex.num_edges() << std::endl;
   int num_neigbors_seen = 0;
   for (auto edge : complex.edge_range(Vertex_handle(2))) {
     std::cerr << edge << std::endl;
@@ -432,7 +428,7 @@ bool test_link0() {
   complex.add_edge_without_blockers(Vertex_handle(b), Vertex_handle(c));
   complex.add_edge_without_blockers(Vertex_handle(c), Vertex_handle(d));
   Simplex alpha = Simplex(Vertex_handle(c));
-  Skeleton_blocker_link_complex<Complex> L(complex, alpha);
+  Skeleton_blocker_link_complex L(complex, alpha);
 
   auto L2 = complex.link(alpha);
   if (L != L2) return false;
@@ -461,7 +457,7 @@ bool test_link1() {
       complex.add_edge_without_blockers(Vertex_handle(i), Vertex_handle(j));
   }
   Simplex alpha(Vertex_handle(12), Vertex_handle(14));
-  Skeleton_blocker_link_complex<Complex> L(complex, alpha);
+  Skeleton_blocker_link_complex L(complex, alpha);
   // Complexes built
 
   auto L2 = complex.link(alpha);
@@ -479,7 +475,7 @@ bool test_link1() {
   simplex.add_vertex(Root_vertex_handle(13));
   bool test6(L.get_simplex_address(simplex));
   bool test7 = L.contains(*(L.get_simplex_address(simplex)));
-  cerr << "----> Ocomplex \n";
+  std::cerr << "----> Ocomplex \n";
   return test1 && test2 && test3 && test4 && test5 && test6&&test7;
 
 }
@@ -499,13 +495,13 @@ bool test_link2() {
   }
   complex.add_blocker(Simplex(Vertex_handle(10), Vertex_handle(11), Vertex_handle(13)));
   alpha = Simplex(Vertex_handle(12), Vertex_handle(14));
-  Skeleton_blocker_link_complex<Complex> L(complex, alpha);
+  Skeleton_blocker_link_complex L(complex, alpha);
   // Complexes built
 
   // Print result
-  cerr << "complex complex" << complex.to_string();
-  cerr << endl << endl;
-  cerr << "L= Link_complex(" << alpha << ") : \n" << L.to_string();
+  std::cerr << "complex complex" << complex.to_string();
+  std::cerr << std::endl << std::endl;
+  std::cerr << "L= Link_complex(" << alpha << ") : \n" << L.to_string();
 
   auto L2 = complex.link(alpha);
   if (L != L2) return false;
@@ -522,7 +518,7 @@ bool test_link2() {
   simplex.add_vertex(Root_vertex_handle(11));
   simplex.add_vertex(Root_vertex_handle(13));
   bool test6 = L.contains_blocker(*(L.get_simplex_address(simplex)));
-  cerr << "----> Ocomplex \n";
+  std::cerr << "----> Ocomplex \n";
   return test1 && test2 && test3 && test4 && test5&&test6;
 }
 
@@ -541,13 +537,13 @@ bool test_link3() {
   }
   complex.add_blocker(Simplex(Vertex_handle(10), Vertex_handle(11), Vertex_handle(12)));
   alpha = Simplex(Vertex_handle(12), Vertex_handle(14));
-  Skeleton_blocker_link_complex<Complex> L(complex, alpha);
+  Skeleton_blocker_link_complex L(complex, alpha);
   // Complexes built
 
   // Print result
-  cerr << "complex complex" << complex.to_string();
-  cerr << endl << endl;
-  cerr << "L= Link_complex(" << alpha << ") : \n" << L.to_string();
+  std::cerr << "complex complex" << complex.to_string();
+  std::cerr << std::endl << std::endl;
+  std::cerr << "L= Link_complex(" << alpha << ") : \n" << L.to_string();
 
   auto L2 = complex.link(alpha);
   if (L != L2) return false;
@@ -577,7 +573,7 @@ bool test_link4() {
   }
   complex.add_blocker(Simplex(Vertex_handle(10), Vertex_handle(11), Vertex_handle(12), Vertex_handle(13)));
   Simplex alpha(Vertex_handle(12), Vertex_handle(14));
-  Skeleton_blocker_link_complex<Complex> L(complex, alpha);
+  Skeleton_blocker_link_complex L(complex, alpha);
   // Complexes built
 
   // verification
@@ -591,7 +587,7 @@ bool test_link4() {
   simplex.add_vertex(Root_vertex_handle(11));
   simplex.add_vertex(Root_vertex_handle(13));
   bool test6 = L.contains_blocker(*(L.get_simplex_address(simplex)));
-  cerr << "----> Ocomplex \n";
+  std::cerr << "----> Ocomplex \n";
   return test1 && test2 && test3 && test4 && test5&&test6;
 
 }
@@ -605,11 +601,11 @@ bool test_link5() {
   Simplex alpha(Vertex_handle(0), Vertex_handle(1), Vertex_handle(2));
 
 
-  Skeleton_blocker_link_complex<Complex> L(complex, alpha); // Complexes built
+  Skeleton_blocker_link_complex L(complex, alpha); // Complexes built
 
   // Print result
   PRINT(complex.to_string());
-  cerr << endl << endl;
+  std::cerr << std::endl << std::endl;
   PRINT(L.to_string());
 
   // verification
@@ -624,13 +620,13 @@ bool test_link6() {
 
   Simplex alpha(Vertex_handle(0), Vertex_handle(1), Vertex_handle(2));
 
-  Skeleton_blocker_link_complex<Complex> link_blocker_alpha;
+  Skeleton_blocker_link_complex link_blocker_alpha;
 
   build_link_of_blocker(complex, alpha, link_blocker_alpha);
 
   // Print result
   PRINT(complex.to_string());
-  cerr << endl << endl;
+  std::cerr << std::endl << std::endl;
   PRINT(link_blocker_alpha.to_string());
 
   // verification
@@ -653,7 +649,7 @@ bool test_link7() {
 
   Simplex alpha(Vertex_handle(3), Vertex_handle(4), Vertex_handle(5));
 
-  Skeleton_blocker_link_complex<Complex> link_blocker_alpha;
+  Skeleton_blocker_link_complex link_blocker_alpha;
 
   build_link_of_blocker(complex, alpha, link_blocker_alpha);
 
@@ -661,10 +657,10 @@ bool test_link7() {
 
   // Print result
   PRINT(complex.to_string());
-  cerr << endl << endl;
+  std::cerr << std::endl << std::endl;
   DBGVALUE(link_blocker_alpha.to_string());
 
-  Skeleton_blocker_link_complex<Complex> link_blocker_alpha_cpy = link_blocker_alpha;
+  Skeleton_blocker_link_complex link_blocker_alpha_cpy = link_blocker_alpha;
 
   DBGVALUE(link_blocker_alpha_cpy.to_string());
 
@@ -684,7 +680,7 @@ bool test_link7() {
 }
 
 template<typename SimplexHandle>
-void add_triangle_edges(int a, int b, int c, list<SimplexHandle>& simplices) {
+void add_triangle_edges(int a, int b, int c, std::list<SimplexHandle>& simplices) {
   typedef SimplexHandle Simplex;
   typedef typename SimplexHandle::Vertex_handle Vertex_handle;
 
@@ -694,14 +690,14 @@ void add_triangle_edges(int a, int b, int c, list<SimplexHandle>& simplices) {
 }
 
 template<typename SimplexHandle>
-void add_triangle(int a, int b, int c, list<SimplexHandle>& simplices) {
+void add_triangle(int a, int b, int c, std::list<SimplexHandle>& simplices) {
   typedef SimplexHandle Simplex;
   typedef typename SimplexHandle::Vertex_handle Vertex_handle;
   simplices.push_back(Simplex(Vertex_handle(a), Vertex_handle(b), Vertex_handle(c)));
 }
 
 bool test_constructor() {
-  list <Simplex> simplices;
+  std::list <Simplex> simplices;
 
   simplices.push_back(Simplex(Vertex_handle(0)));
   simplices.push_back(Simplex(Vertex_handle(1)));
@@ -732,8 +728,8 @@ bool test_constructor() {
   return ( complex.num_vertices() == 6 && complex.num_edges() == 10 && complex.num_blockers() == 2);
 }
 
-list<Simplex> subfaces(Simplex top_face) {
-  list<Simplex> res;
+std::list<Simplex> subfaces(Simplex top_face) {
+  std::list<Simplex> res;
   if (top_face.dimension() == -1) return res;
   if (top_face.dimension() == 0) {
     res.push_back(top_face);
@@ -742,7 +738,7 @@ list<Simplex> subfaces(Simplex top_face) {
     Vertex_handle first_vertex = top_face.first_vertex();
     top_face.remove_vertex(first_vertex);
     res = subfaces(top_face);
-    list<Simplex> copy = res;
+    std::list<Simplex> copy = res;
     for (auto& simplex : copy) {
       simplex.add_vertex(first_vertex);
     }
@@ -757,7 +753,7 @@ bool test_constructor2() {
   for (int i = 0; i < 5; ++i)
     simplex.add_vertex(static_cast<Vertex_handle> (i));
 
-  list <Simplex> simplices(subfaces(simplex));
+  std::list <Simplex> simplices(subfaces(simplex));
   simplices.remove(simplex);
 
   Complex complex(simplices.begin(), simplices.end());
@@ -765,7 +761,7 @@ bool test_constructor2() {
   PRINT(complex.to_string());
 
   for (auto b : complex.const_blocker_range()) {
-    cout << "b:" << b << endl;
+    std::cout << "b:" << b << std::endl;
   }
 
   return ( complex.num_vertices() == 5 && complex.num_edges() == 10 && complex.num_blockers() == 1);
@@ -873,7 +869,7 @@ bool test_constructor7() {
   simplices.push_back(Sh(Vh(3), Vh(0), Vh(1)));
 
   //get complex from top faces
-  Complex complex(make_complex_from_top_faces<Complex>(simplices.begin(), simplices.end()));
+  Complex complex(Gudhi::skeleton_blocker::make_complex_from_top_faces<Complex>(simplices.begin(), simplices.end()));
 
   DBGVALUE(complex.to_string());
 
@@ -895,7 +891,7 @@ bool test_constructor8() {
   simplices.push_back(Sh(Vh(2), Vh(3)));
 
   //get complex from top faces
-  Complex complex(make_complex_from_top_faces<Complex>(simplices.begin(), simplices.end()));
+  Complex complex(Gudhi::skeleton_blocker::make_complex_from_top_faces<Complex>(simplices.begin(), simplices.end()));
 
   DBGVALUE(complex.to_string());
 

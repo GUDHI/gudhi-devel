@@ -25,26 +25,22 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include "gudhi/Test.h"
-#include "gudhi/Skeleton_blocker.h"
+#include <gudhi/Test.h>
+#include <gudhi/Skeleton_blocker.h>
 
-
-using namespace std;
-using namespace Gudhi;
-using namespace skeleton_blocker;
 
 struct Geometry_trait {
   typedef std::vector<double> Point;
 };
 
 typedef Geometry_trait::Point Point;
-typedef Skeleton_blocker_simple_geometric_traits<Geometry_trait> Complex_geometric_traits;
-typedef Skeleton_blocker_geometric_complex< Complex_geometric_traits > Complex;
+typedef Gudhi::skeleton_blocker::Skeleton_blocker_simple_geometric_traits<Geometry_trait> Complex_geometric_traits;
+typedef Gudhi::skeleton_blocker::Skeleton_blocker_geometric_complex< Complex_geometric_traits > Complex;
 typedef Complex::Vertex_handle Vertex_handle;
 
 bool test_constructor1() {
   Complex complex;
-  Skeleton_blocker_off_reader<Complex> off_reader("test2.off", complex);
+  Gudhi::skeleton_blocker::Skeleton_blocker_off_reader<Complex> off_reader("test2.off", complex);
   if (!off_reader.is_valid()) {
     std::cerr << "Unable to read file" << std::endl;
     return false;
@@ -60,19 +56,19 @@ bool test_constructor1() {
   if (complex.num_vertices() != 7 || complex.num_edges() != 12 || complex.num_triangles() != 6)
     return false;
 
-  Skeleton_blocker_off_writer<Complex> off_writer("tmp.off", complex);
+  Gudhi::skeleton_blocker::Skeleton_blocker_off_writer<Complex> off_writer("tmp.off", complex);
   Complex same;
-  Skeleton_blocker_off_reader<Complex> off_reader2("tmp.off", same);
+  Gudhi::skeleton_blocker::Skeleton_blocker_off_reader<Complex> off_reader2("tmp.off", same);
 
-  std::cout << "\ncomplex:" << complex.to_string() << endl;
-  std::cout << "\nsame:" << same.to_string() << endl;
+  std::cout << "\ncomplex:" << complex.to_string() << std::endl;
+  std::cout << "\nsame:" << same.to_string() << std::endl;
 
   return (complex == same);
 }
 
 bool test_constructor2() {
   Complex complex;
-  Skeleton_blocker_off_reader<Complex> off_reader("test2.off", complex);
+  Gudhi::skeleton_blocker::Skeleton_blocker_off_reader<Complex> off_reader("test2.off", complex);
   if (!off_reader.is_valid()) {
     std::cerr << "Unable to read file" << std::endl;
     return false;
@@ -89,7 +85,7 @@ bool test_constructor2() {
   auto link_0 = complex.abstract_link(Vertex_handle(0));
 
 
-  std::cout << "\n link(0):" << link_0.to_string() << endl;
+  std::cout << "\n link(0):" << link_0.to_string() << std::endl;
 
   auto link_geometric_0 = complex.link(Vertex_handle(0));
 
