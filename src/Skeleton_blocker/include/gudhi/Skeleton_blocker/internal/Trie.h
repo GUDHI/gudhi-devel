@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Méditerranée (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
-
 
 #ifndef SKELETON_BLOCKER_INTERNAL_TRIE_H_
 #define SKELETON_BLOCKER_INTERNAL_TRIE_H_
@@ -46,6 +45,7 @@ struct Trie {
   const Trie* parent_;
 
  public:
+
   Trie() : parent_(0) { }
 
   Trie(Vertex_handle v_) : v(v_), parent_(0) { }
@@ -80,6 +80,7 @@ struct Trie {
  private:
   // go down recursively in the tree while advancing the simplex iterator.
   // when it reaches a leaf, it inserts the remaining that is not present
+
   void add_simplex_helper(Simplex_vertex_const_iterator s_it, Simplex_vertex_const_iterator s_end) {
     assert(*s_it == v);
     ++s_it;
@@ -105,6 +106,7 @@ struct Trie {
   }
 
  public:
+
   /**
    * adds the simplex to the trie
    */
@@ -240,7 +242,7 @@ struct Tries {
 
   std::vector<Simplex> next_dimension_simplices() const {
     std::vector<Simplex> res;
-    while (!to_see_.empty() && to_see_.front()->simplex().dimension() == current_dimension_) {
+    while (!(to_see_.empty()) && (to_see_.front()->simplex().dimension() == current_dimension_)) {
       res.emplace_back(to_see_.front()->simplex());
       for (auto child : to_see_.front()->childs)
         to_see_.push_back(child.get());
@@ -257,7 +259,7 @@ struct Tries {
 
  private:
   mutable std::deque<STrie*> to_see_;
-  mutable unsigned current_dimension_ = 0;
+  mutable int current_dimension_ = 0;
   std::vector<STrie*> cofaces_;
 };
 

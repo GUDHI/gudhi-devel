@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #ifndef SKELETON_BLOCKER_ITERATORS_SKELETON_BLOCKERS_BLOCKERS_ITERATORS_H_
 #define SKELETON_BLOCKER_ITERATORS_SKELETON_BLOCKERS_BLOCKERS_ITERATORS_H_
 
@@ -46,6 +47,7 @@ ReturnType
   MapIteratorType end_of_map;
 
  public:
+
   Blocker_iterator_internal() : current_position() { }
 
   Blocker_iterator_internal(MapIteratorType position, MapIteratorType end_of_map_) :
@@ -64,6 +66,7 @@ ReturnType
   }
 
  private:
+
   /**
    * Let the current pair be (v,sigma) where v is a vertex and sigma is a blocker.
    * If v is not the first vertex of sigma then we already have seen sigma as a blocker

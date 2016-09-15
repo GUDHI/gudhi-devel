@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #ifndef SKELETON_BLOCKER_SKELETON_BLOCKER_OFF_IO_H_
 #define SKELETON_BLOCKER_SKELETON_BLOCKER_OFF_IO_H_
 
@@ -49,8 +50,8 @@ class Skeleton_blocker_off_flag_visitor_reader {
       load_only_points_(load_only_points) { }
 
   void init(int dim, int num_vertices, int num_faces, int num_edges) {
-    // todo do an assert to check that this number are correctly read
-    // todo reserve size for vector points
+    // TODO(DS): do an assert to check that this number are correctly read
+    // TODO(DS): reserve size for vector points
   }
 
   void point(const std::vector<double>& point) {
@@ -108,7 +109,7 @@ class Skeleton_blocker_off_visitor_reader {
 
   void done() {
     complex_ = make_complex_from_top_faces<Complex>(maximal_faces_.begin(), maximal_faces_.end(),
-                                           points_.begin(), points_.end() );
+                                                    points_.begin(), points_.end());
   }
 };
 
@@ -140,7 +141,7 @@ class Skeleton_blocker_off_reader {
   }
 
   /**
-   * return true iff reading did not meet problems.
+   * return true if reading did not meet problems.
    */
   bool is_valid() const {
     return valid_;

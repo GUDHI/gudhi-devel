@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
   // For instance, to test if the link contains the vertex that was labeled i:
   for (int i = 0; i < 5; ++i)
     cout << "link.contains_vertex(Root_vertex_handle(" << i << ")):" <<
-        link.contains_vertex(Root_vertex_handle(i)) << endl;
+      link.contains_vertex(Root_vertex_handle(i)) << endl;
 
   return EXIT_SUCCESS;
 }

@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #ifndef SKELETON_BLOCKER_ITERATORS_SKELETON_BLOCKERS_TRIANGLES_ITERATORS_H_
 #define SKELETON_BLOCKER_ITERATORS_SKELETON_BLOCKERS_TRIANGLES_ITERATORS_H_
 
@@ -135,7 +136,7 @@ typename SkeletonBlockerComplex::Simplex const
   Triangle_iterator(const SkeletonBlockerComplex* complex) :
       complex_(complex),
       current_vertex_(complex->vertex_range().begin()),
-      current_triangle_(complex, *current_vertex_),  // xxx this line is problematic is the complex is empty
+      current_triangle_(complex, *current_vertex_), // xxx this line is problematic is the complex is empty
       is_end_(false) {
     assert(!complex->empty());
     gotoFirstTriangle();
@@ -172,7 +173,8 @@ typename SkeletonBlockerComplex::Simplex const
     bool both_arent_finished = !is_finished() && !other.is_finished();
     // if the two iterators are not finished, they must have the same state
     return (complex_ == other.complex_) && (both_are_finished || ((both_arent_finished) &&
-        current_vertex_ == other.current_vertex_ && current_triangle_ == other.current_triangle_));
+                                                                  current_vertex_ == other.current_vertex_ &&
+                                                                  current_triangle_ == other.current_triangle_));
   }
 
   Simplex dereference() const {
@@ -183,8 +185,8 @@ typename SkeletonBlockerComplex::Simplex const
   // goto the next vertex that has a triangle pending or the
   // end vertex iterator if none exists
   void goto_next_vertex() {
-    assert(current_triangle_.finished());  // we mush have consume all triangles passing through the vertex
-    assert(!is_finished());  // we must not be done
+    assert(current_triangle_.finished()); // we mush have consume all triangles passing through the vertex
+    assert(!is_finished()); // we must not be done
 
     ++current_vertex_;
 

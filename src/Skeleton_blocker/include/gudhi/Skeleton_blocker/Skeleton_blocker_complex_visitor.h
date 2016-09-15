@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #ifndef SKELETON_BLOCKER_SKELETON_BLOCKER_COMPLEX_VISITOR_H_
 #define SKELETON_BLOCKER_SKELETON_BLOCKER_COMPLEX_VISITOR_H_
 
@@ -27,7 +28,7 @@
 namespace Gudhi {
 
 namespace skeleton_blocker {
-// todo rajouter les const
+// TODO(DS): to be constified
 
 /**
  *@class Skeleton_blocker_complex_visitor
@@ -36,7 +37,7 @@ namespace skeleton_blocker {
 template<typename Vertex_handle>
 class Skeleton_blocker_complex_visitor {
  public:
-  virtual ~Skeleton_blocker_complex_visitor() {}
+  virtual ~Skeleton_blocker_complex_visitor() { }
 
   virtual void on_add_vertex(Vertex_handle) = 0;
   virtual void on_remove_vertex(Vertex_handle) = 0;
@@ -61,9 +62,9 @@ class Skeleton_blocker_complex_visitor {
   virtual void on_swaped_edge(Vertex_handle a, Vertex_handle b,
                               Vertex_handle x) = 0;
   virtual void on_add_blocker(
-      const Skeleton_blocker_simplex<Vertex_handle>&) = 0;
+                              const Skeleton_blocker_simplex<Vertex_handle>&) = 0;
   virtual void on_delete_blocker(
-      const Skeleton_blocker_simplex<Vertex_handle>*) = 0;
+                                 const Skeleton_blocker_simplex<Vertex_handle>*) = 0;
 };
 
 /**
@@ -73,24 +74,23 @@ class Skeleton_blocker_complex_visitor {
  */
 template<typename Vertex_handle>
 class Dummy_complex_visitor : public Skeleton_blocker_complex_visitor<
-    Vertex_handle> {
+Vertex_handle> {
  public:
-  void on_add_vertex(Vertex_handle) {
-  }
-  void on_remove_vertex(Vertex_handle) {
-  }
-  void on_add_edge_without_blockers(Vertex_handle a, Vertex_handle b) {
-  }
-  void on_remove_edge(Vertex_handle a, Vertex_handle b) {
-  }
-  void on_changed_edge(Vertex_handle a, Vertex_handle b) {
-  }
-  void on_swaped_edge(Vertex_handle a, Vertex_handle b, Vertex_handle x) {
-  }
-  void on_add_blocker(const Skeleton_blocker_simplex<Vertex_handle>&) {
-  }
-  void on_delete_blocker(const Skeleton_blocker_simplex<Vertex_handle>*) {
-  }
+  void on_add_vertex(Vertex_handle) { }
+
+  void on_remove_vertex(Vertex_handle) { }
+
+  void on_add_edge_without_blockers(Vertex_handle a, Vertex_handle b) { }
+
+  void on_remove_edge(Vertex_handle a, Vertex_handle b) { }
+
+  void on_changed_edge(Vertex_handle a, Vertex_handle b) { }
+
+  void on_swaped_edge(Vertex_handle a, Vertex_handle b, Vertex_handle x) { }
+
+  void on_add_blocker(const Skeleton_blocker_simplex<Vertex_handle>&) { }
+
+  void on_delete_blocker(const Skeleton_blocker_simplex<Vertex_handle>*) { }
 };
 
 /**
@@ -100,29 +100,36 @@ class Dummy_complex_visitor : public Skeleton_blocker_complex_visitor<
  */
 template<typename Vertex_handle>
 class Print_complex_visitor : public Skeleton_blocker_complex_visitor<
-    Vertex_handle> {
+Vertex_handle> {
  public:
   void on_add_vertex(Vertex_handle v) {
     std::cerr << "on_add_vertex:" << v << std::endl;
   }
+
   void on_remove_vertex(Vertex_handle v) {
     std::cerr << "on_remove_vertex:" << v << std::endl;
   }
+
   void on_add_edge_without_blockers(Vertex_handle a, Vertex_handle b) {
     std::cerr << "on_add_edge_without_blockers:" << a << "," << b << std::endl;
   }
+
   void on_remove_edge(Vertex_handle a, Vertex_handle b) {
     std::cerr << "on_remove_edge:" << a << "," << b << std::endl;
   }
+
   void on_changed_edge(Vertex_handle a, Vertex_handle b) {
     std::cerr << "on_changed_edge:" << a << "," << b << std::endl;
   }
+
   void on_swaped_edge(Vertex_handle a, Vertex_handle b, Vertex_handle x) {
     std::cerr << "on_swaped_edge:" << a << "," << b << "," << x << std::endl;
   }
+
   void on_add_blocker(const Skeleton_blocker_simplex<Vertex_handle>& b) {
     std::cerr << "on_add_blocker:" << b << std::endl;
   }
+
   void on_delete_blocker(const Skeleton_blocker_simplex<Vertex_handle>* b) {
     std::cerr << "on_delete_blocker:" << b << std::endl;
   }

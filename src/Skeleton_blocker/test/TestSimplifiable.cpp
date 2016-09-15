@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -20,14 +20,12 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
 #include <fstream>
 #include <sstream>
 #include "gudhi/Test.h"
-//#include "Skeleton_blocker/Simplex.h"
 #include "gudhi/Skeleton_blocker.h"
 
 
@@ -406,11 +404,11 @@ int main(int argc, char *argv[]) {
   tests_simplifiable_complex.add("Test collapse 2", test_collapse2);
   tests_simplifiable_complex.add("Test collapse 3", test_collapse3);
 
-  tests_simplifiable_complex.add("Test add edge",test_add_edge);
+  tests_simplifiable_complex.add("Test add edge", test_add_edge);
   tests_simplifiable_complex.add("Test add simplex", test_add_simplex);
   tests_simplifiable_complex.add("Test add simplex2", test_add_simplex2);
-  tests_simplifiable_complex.add("Test add simplex3",test_add_simplex3);
-  tests_simplifiable_complex.add("Test add simplex4",test_add_simplex4);
+  tests_simplifiable_complex.add("Test add simplex3", test_add_simplex3);
+  tests_simplifiable_complex.add("Test add simplex4", test_add_simplex4);
 
 
   tests_simplifiable_complex.run();

@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -27,10 +27,6 @@
 #include "gudhi/Debug_utils.h"
 #include "gudhi/Test.h"
 #include "gudhi/Skeleton_blocker.h"
-//#include "gudhi/Skeleton_blocker_link_complex.h"
-//#include "gudhi/Skeleton_blocker/Skeleton_blocker_link_superior.h"
-//#include "gudhi/Skeleton_blocker/Skeleton_blocker_simple_traits.h"
-//#include "gudhi/Skeleton_blocker/internal/Trie.h"
 
 using namespace std;
 
@@ -946,7 +942,4 @@ int main(int argc, char *argv[]) {
   } else {
     return EXIT_FAILURE;
   }
-
-  //	test_iterator_simplices();
 }
-
