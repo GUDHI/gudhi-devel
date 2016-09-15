@@ -35,7 +35,6 @@
 
 #include "Garland_heckbert/Error_quadric.h"
 
-using namespace std;
 using namespace Gudhi;
 using namespace skeleton_blocker;
 using namespace contraction;
