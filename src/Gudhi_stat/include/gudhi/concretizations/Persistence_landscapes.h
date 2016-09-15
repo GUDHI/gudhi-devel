@@ -580,9 +580,9 @@ Persistence_landscape::Persistence_landscape(const char* filename , size_t dimen
         std::cerr << "Using constructor : Persistence_landscape(char* filename)" << std::endl;
     }   
     //standard file with barcode
-    //std::vector< std::pair< double , double > > barcode = read_standard_file( filename );    
+    std::vector< std::pair< double , double > > barcode = read_standard_file( filename );    
     //gudhi file with barcode
-    std::vector< std::pair< double , double > > barcode = read_gudhi_file( filename , dimension );        
+    //std::vector< std::pair< double , double > > barcode = read_gudhi_file( filename , dimension );        
 	this->construct_persistence_landscape_from_barcode( barcode );
 	this->set_up_numbers_of_functions_for_vectorization_and_projections_to_reals();
 }
