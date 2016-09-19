@@ -22,10 +22,6 @@
 
 #include <gudhi/Points_off_io.h>
 
-// For CGAL points type in dimension d
-// cf. http://doc.cgal.org/latest/Kernel_d/classCGAL_1_1Point__d.html
-#include <CGAL/Epick_d.h>
-
 #include <iostream>
 #include <string>
 #include <vector>
@@ -34,8 +30,7 @@
 #define BOOST_TEST_MODULE "points_off_read_write"
 #include <boost/test/unit_test.hpp>
 
-typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kernel;
-typedef Kernel::Point_d Point_d;
+using Point_d = std::vector<double>;
 
 BOOST_AUTO_TEST_CASE( points_doc_test )
 {
@@ -50,19 +45,19 @@ BOOST_AUTO_TEST_CASE( points_doc_test )
 
   std::vector<Point_d> expected_points;
   std::vector<double> point = {1.0, 1.0};
-  expected_points.push_back(Point_d(2, point.begin(), point.end()));
+  expected_points.push_back(Point_d(point.begin(), point.end()));
   point = {7.0, 0.0};
-  expected_points.push_back(Point_d(2, point.begin(), point.end()));
+  expected_points.push_back(Point_d(point.begin(), point.end()));
   point = {4.0, 6.0};
-  expected_points.push_back(Point_d(2, point.begin(), point.end()));
+  expected_points.push_back(Point_d(point.begin(), point.end()));
   point = {9.0, 6.0};
-  expected_points.push_back(Point_d(2, point.begin(), point.end()));
+  expected_points.push_back(Point_d(point.begin(), point.end()));
   point = {0.0, 14.0};
-  expected_points.push_back(Point_d(2, point.begin(), point.end()));
+  expected_points.push_back(Point_d(point.begin(), point.end()));
   point = {2.0, 19.0};
-  expected_points.push_back(Point_d(2, point.begin(), point.end()));
+  expected_points.push_back(Point_d(point.begin(), point.end()));
   point = {9.0, 17.0};
-  expected_points.push_back(Point_d(2, point.begin(), point.end()));
+  expected_points.push_back(Point_d(point.begin(), point.end()));
 
   BOOST_CHECK(point_cloud == expected_points);
 }
