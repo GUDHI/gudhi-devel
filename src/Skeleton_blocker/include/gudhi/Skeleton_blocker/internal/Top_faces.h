@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #ifndef SKELETON_BLOCKER_INTERNAL_TOP_FACES_H_
 #define SKELETON_BLOCKER_INTERNAL_TOP_FACES_H_
 
@@ -69,4 +70,4 @@ namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 
-#endif  // SKELETON_BLOCKER_INTERNAL_TOP_FACES_H_
+#endif   // SKELETON_BLOCKER_INTERNAL_TOP_FACES_H_

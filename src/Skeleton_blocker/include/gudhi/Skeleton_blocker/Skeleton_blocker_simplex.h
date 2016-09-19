@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -63,7 +63,6 @@ class Skeleton_blocker_simplex {
    */
   //@{
 
-  // Skeleton_blocker_simplex():simplex_set() {}
   void clear() {
     simplex_set.clear();
   }
@@ -89,8 +88,7 @@ class Skeleton_blocker_simplex {
     add_vertex(v);
   }
 
-  void add_vertices() {
-  }
+  void add_vertices() { }
 
   /**
    * Initialize a simplex with a string such as {0,1,2}
@@ -192,7 +190,6 @@ class Skeleton_blocker_simplex {
     return simplex_set.crend();
   }
 
-
   typename std::set<T>::iterator begin() {
     return simplex_set.begin();
   }
@@ -236,6 +233,7 @@ class Skeleton_blocker_simplex {
     assert(!empty());
     return *(simplex_set.rbegin());
   }
+
   /**
    * @return true iff the simplex contains the simplex a.
    */
@@ -351,8 +349,8 @@ class Skeleton_blocker_simplex {
 
   //@}
 
-  friend std::ostream& operator <<(std::ostream& o,
-                                   const Skeleton_blocker_simplex & sigma) {
+  friend std::ostream& operator<<(std::ostream& o,
+                                  const Skeleton_blocker_simplex & sigma) {
     bool first = true;
     o << "{";
     for (auto i : sigma) {

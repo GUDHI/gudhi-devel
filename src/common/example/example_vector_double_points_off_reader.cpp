@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
   int n {0};
   for (auto point : point_cloud) {
     std::cout << "Point[" << n << "] = ";
-    for (int i {0}; i < point.size(); i++)
+    for (std::size_t i {0}; i < point.size(); i++)
       std::cout << point[i] << " ";
     std::cout << "\n";
     ++n;

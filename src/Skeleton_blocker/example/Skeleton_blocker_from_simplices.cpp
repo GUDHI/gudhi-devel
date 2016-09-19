@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -29,11 +29,8 @@
 #include <sstream>
 #include <vector>
 
-using namespace std;
-using namespace Gudhi;
-using namespace skeleton_blocker;
-
-typedef Skeleton_blocker_complex<Skeleton_blocker_simple_traits> Complex;
+typedef Gudhi::skeleton_blocker::Skeleton_blocker_simple_traits Traits;
+typedef Gudhi::skeleton_blocker::Skeleton_blocker_complex<Traits> Complex;
 typedef Complex::Vertex_handle Vertex_handle;
 typedef Complex::Simplex Simplex;
 
@@ -47,7 +44,7 @@ int main(int argc, char *argv[]) {
   simplices.push_back(Simplex(Vertex_handle(3), Vertex_handle(0), Vertex_handle(1)));
 
   // get complex from top faces
-  Complex complex(make_complex_from_top_faces<Complex>(simplices.begin(), simplices.end()));
+  Complex complex(Gudhi::skeleton_blocker::make_complex_from_top_faces<Complex>(simplices.begin(), simplices.end()));
 
 
   std::cout << "Simplices:" << std::endl;
