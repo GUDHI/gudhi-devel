@@ -13,8 +13,8 @@ if(CGAL_FOUND)
 
       add_executable( Subsampling_example_pick_random_points example_pick_random_points.cpp )
 
-      add_executable( Subsampling_example_choose_by_farthest_point example_choose_by_farthest_point.cpp )
-      #target_link_libraries(Subsampling_example_choose_farthest_point ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+      add_executable( Subsampling_example_choose_n_farthest_points example_choose_n_farthest_points.cpp )
+      #target_link_libraries(Subsampling_example_choose_n_farthest_points ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
       
       add_executable(Subsampling_example_sparsify_point_set example_sparsify_point_set.cpp)
       target_link_libraries(Subsampling_example_sparsify_point_set ${CGAL_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
