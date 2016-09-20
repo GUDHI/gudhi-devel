@@ -1,4 +1,4 @@
-#include <gudhi/choose_by_farthest_point.h>
+#include <gudhi/choose_n_farthest_points.h>
 
 #include <CGAL/Epick_d.h>
 #include <CGAL/Random.h>
@@ -21,7 +21,7 @@ int main (void)
 
   K k;
   std::vector<Point_d> results;
-  Gudhi::subsampling::choose_by_farthest_point(k, points, 100, std::back_inserter(results));
+  Gudhi::subsampling::choose_n_farthest_points(k, points, 100, std::back_inserter(results));
   std::cout << "Before sparsification: " << points.size() << " points.\n";
   std::cout << "After  sparsification: " << results.size() << " points.\n";
 

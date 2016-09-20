@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CHOOSE_BY_FARTHEST_POINT_H_
-#define CHOOSE_BY_FARTHEST_POINT_H_
+#ifndef CHOOSE_N_FARTHEST_POINTS_H_
+#define CHOOSE_N_FARTHEST_POINTS_H_
 
 #include <boost/range.hpp>
 
@@ -54,7 +54,7 @@ namespace subsampling {
   template < typename Kernel,
              typename Point_container,
              typename OutputIterator>
-  void choose_by_farthest_point( Kernel const &k,
+  void choose_n_farthest_points( Kernel const &k,
                                  Point_container const &input_pts,
                                  unsigned final_size,
                                  unsigned starting_point,
@@ -105,7 +105,7 @@ namespace subsampling {
   template < typename Kernel,
              typename Point_container,
              typename OutputIterator>
-  void choose_by_farthest_point( Kernel& k,
+  void choose_n_farthest_points( Kernel& k,
                                  Point_container const &input_pts,
                                  int final_size,
                                  OutputIterator output_it)
@@ -115,11 +115,11 @@ namespace subsampling {
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(1, 6);
     int starting_point = dis(gen);
-    choose_by_farthest_point(k, input_pts, final_size, starting_point, output_it);
+    choose_n_farthest_points(k, input_pts, final_size, starting_point, output_it);
   }
   
 } // namespace subsampling
   
 }  // namespace Gudhi
 
-#endif  // CHOOSE_BY_FARTHEST_POINT_H_
+#endif  // CHOOSE_N_FARTHEST_POINTS_H_

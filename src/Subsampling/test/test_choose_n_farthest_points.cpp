@@ -29,7 +29,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
 
-#include <gudhi/choose_by_farthest_point.h>
+#include <gudhi/choose_n_farthest_points.h>
 #include <vector>
 #include <iterator>
 
@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(test_choose_farthest_point) {
 
   landmarks.clear();
   K k;
-  Gudhi::subsampling::choose_by_farthest_point(k, points, 100, std::back_inserter(landmarks));
+  Gudhi::subsampling::choose_n_farthest_points(k, points, 100, std::back_inserter(landmarks));
   
   BOOST_CHECK(landmarks.size() == 100);
 }
