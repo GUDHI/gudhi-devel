@@ -27,7 +27,9 @@
 #include <CGAL/Orthogonal_incremental_neighbor_search.h>
 #include <CGAL/Search_traits.h>
 #include <CGAL/Search_traits_adapter.h>
+#include <CGAL/property_map.h>
 
+#include <boost/property_map/property_map.hpp>
 #include <boost/iterator/counting_iterator.hpp>
 
 #include <cstddef>
@@ -59,28 +61,33 @@ namespace spatial_searching {
   *   concept, such as the <a target="_blank"
   *   href="http://doc.cgal.org/latest/Kernel_d/classCGAL_1_1Epick__d.html">CGAL::Epick_d</a> class, which
   *   can be static if you know the ambiant dimension at compile-time, or dynamic if you don't.
-  * \tparam Point_container_ is the type of the container where points are stored (on the user side).
-  *   It must provide random-access via `operator[]` and the points should be stored contiguously in memory.
-  *   `std::vector` is a good candidate.
+  * \tparam Point_range is the type of the range that provides the points.
+  *   It must be a range whose iterator type is a `RandomAccessIterator`.
   */
-template <typename K, typename Point_container_>
+template <typename K, typename Point_range>
 class Spatial_tree_data_structure
 {
+  typedef boost::iterator_property_map<
+    typename Point_range::const_iterator,
+    CGAL::Identity_property_map<std::ptrdiff_t> >           Point_property_map;
+
 public:
   /// The kernel.
   typedef K                                                 Kernel;
   /// Number type used for distances.
   typedef typename Kernel::FT                               FT;
   /// The point type.
-  typedef typename Point_container_::value_type             Point;
+  typedef typename Point_range::value_type                  Point;
 
   typedef CGAL::Search_traits<
     FT, Point,
     typename Kernel::Cartesian_const_iterator_d, 
     typename Kernel::Construct_cartesian_const_iterator_d>  Traits_base;
-  // using a pointer as a special property map type
+  
   typedef CGAL::Search_traits_adapter<
-    std::ptrdiff_t, Point*, Traits_base>                    STraits;
+    std::ptrdiff_t,
+    Point_property_map,
+    Traits_base>                                            STraits;
   
   typedef CGAL::Orthogonal_k_neighbor_search<STraits>       K_neighbor_search;
   typedef typename K_neighbor_search::Tree                  Tree;
@@ -99,52 +106,52 @@ public:
   typedef Incremental_neighbor_search                       INS_range;
 
   /// \brief Constructor
-  /// @param[in] points Const reference to the point container. This container
+  /// @param[in] points Const reference to the point range. This range
   /// is not copied, so it should not be destroyed or modified afterwards.
-  Spatial_tree_data_structure(Point_container_ const& points)
+  Spatial_tree_data_structure(Point_range const& points)
   : m_points(points),
     m_tree(boost::counting_iterator<std::ptrdiff_t>(0),
            boost::counting_iterator<std::ptrdiff_t>(points.size()),
            typename Tree::Splitter(),
-           STraits((Point*)&(points[0])) )
+           STraits(std::begin(points)) )
   {
     // Build the tree now (we don't want to wait for the first query)
     m_tree.build();
   }
 
   /// \brief Constructor
-  /// @param[in] points Const reference to the point container. This container
+  /// @param[in] points Const reference to the point range. This range
   /// is not copied, so it should not be destroyed or modified afterwards.
   /// @param[in] only_these_points Specifies the indices of the points that
   /// should be actually inserted into the tree. The other points are ignored.
   template <typename Point_indices_range>
   Spatial_tree_data_structure(
-    Point_container_ const& points,
+    Point_range const& points,
     Point_indices_range const& only_these_points)
     : m_points(points),
       m_tree(
         only_these_points.begin(), only_these_points.end(),
         typename Tree::Splitter(),
-        STraits((Point*)&(points[0])))
+        STraits(std::begin(points)))
   {
     // Build the tree now (we don't want to wait for the first query)
     m_tree.build();
   }
 
   /// \brief Constructor
-  /// @param[in] points Const reference to the point container. This container
+  /// @param[in] points Const reference to the point range. This range
   /// is not copied, so it should not be destroyed or modified afterwards.
   /// @param[in] begin_idx, past_the_end_idx Define the subset of the points that
   /// should be actually inserted into the tree. The other points are ignored.
   Spatial_tree_data_structure(
-    Point_container_ const& points,
+    Point_range const& points,
     std::size_t begin_idx, std::size_t past_the_end_idx)
   : m_points(points),
     m_tree(
       boost::counting_iterator<std::ptrdiff_t>(begin_idx),
       boost::counting_iterator<std::ptrdiff_t>(past_the_end_idx),
       typename Tree::Splitter(),
-      STraits((Point*)&(points[0])) )
+      STraits(std::begin(point)) )
   {
     // Build the tree now (we don't want to wait for the first query)
     m_tree.build();
@@ -178,8 +185,8 @@ public:
       k,
       eps,
       true,
-      CGAL::Distance_adapter<std::ptrdiff_t,Point*,CGAL::Euclidean_distance<Traits_base> >(
-        (Point*)&(m_points[0])),
+      CGAL::Distance_adapter<std::ptrdiff_t,Point_property_map,CGAL::Euclidean_distance<Traits_base> >(
+        std::begin(m_points)),
       sorted);
 
     return search;
@@ -201,8 +208,8 @@ public:
       p,
       eps,
       true,
-      CGAL::Distance_adapter<std::ptrdiff_t, Point*, CGAL::Euclidean_distance<Traits_base> >(
-        (Point*)&(m_points[0])) );
+      CGAL::Distance_adapter<std::ptrdiff_t, Point_property_map, CGAL::Euclidean_distance<Traits_base> >(
+        std::begin(m_points)) );
 
     return search;
   }
@@ -228,8 +235,8 @@ public:
       k,
       eps,
       false,
-      CGAL::Distance_adapter<std::ptrdiff_t,Point*,CGAL::Euclidean_distance<Traits_base> >(
-        (Point*)&(m_points[0])),
+      CGAL::Distance_adapter<std::ptrdiff_t,Point_property_map,CGAL::Euclidean_distance<Traits_base> >(
+        std::begin(m_points)),
       sorted);
 
     return search;
@@ -251,15 +258,15 @@ public:
       p,
       eps,
       false,
-      CGAL::Distance_adapter<std::ptrdiff_t, Point*, CGAL::Euclidean_distance<Traits_base> >(
-        (Point*)&(m_points[0])) );
+      CGAL::Distance_adapter<std::ptrdiff_t, Point_property_map, CGAL::Euclidean_distance<Traits_base> >(
+        std::begin(m_points)) );
 
     return search;
   }
 
 
 private:
-  Point_container_ const& m_points;
+  Point_range const& m_points;
   Tree m_tree;
 };
 
