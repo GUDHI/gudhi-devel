@@ -47,7 +47,7 @@ namespace subsampling {
 
   template <typename Point_container,
             typename OutputIterator>
-  void pick_random_points(Point_container const &points,
+  void pick_n_random_points(Point_container const &points,
                           unsigned final_size,
                           OutputIterator output_it) {
 #ifdef GUDHI_SUBS_PROFILING

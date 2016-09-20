@@ -11,7 +11,7 @@ if(CGAL_FOUND)
       include( ${EIGEN3_USE_FILE} )
       include_directories (BEFORE "../../include")
 
-      add_executable( Subsampling_example_pick_random_points example_pick_random_points.cpp )
+      add_executable( Subsampling_example_pick_n_random_points example_pick_n_random_points.cpp )
 
       add_executable( Subsampling_example_choose_n_farthest_points example_choose_n_farthest_points.cpp )
       #target_link_libraries(Subsampling_example_choose_n_farthest_points ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})

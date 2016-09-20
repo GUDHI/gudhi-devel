@@ -1,4 +1,4 @@
-#include <gudhi/pick_random_points.h>
+#include <gudhi/pick_n_random_points.h>
 
 #include <CGAL/Epick_d.h>
 #include <CGAL/Random.h>
@@ -21,7 +21,7 @@ int main (void)
 
   K k;
   std::vector<Point_d> results;
-  Gudhi::subsampling::pick_random_points(points, 100, std::back_inserter(results));
+  Gudhi::subsampling::pick_n_random_points(points, 100, std::back_inserter(results));
   std::cout << "Before sparsification: " << points.size() << " points.\n";
   std::cout << "After  sparsification: " << results.size() << " points.\n";
 
