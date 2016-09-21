@@ -25,3 +25,5 @@ target_link_libraries( plot_persistence_intervals ${Boost_SYSTEM_LIBRARY})
 add_executable ( vector_representation vector_representation.cpp )
 target_link_libraries(vector_representation ${Boost_SYSTEM_LIBRARY})
 
+add_executable ( persistence_heat_maps persistence_heat_maps.cpp )
+target_link_libraries(persistence_heat_maps ${Boost_SYSTEM_LIBRARY})
