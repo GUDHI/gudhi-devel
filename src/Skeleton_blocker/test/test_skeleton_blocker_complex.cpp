@@ -358,7 +358,8 @@ BOOST_AUTO_TEST_CASE(test_skeleton_iterator_blockers) {
 
   num_blockers = 0;
   for (auto blockers : complex.blocker_range()) {
-#ifndef _WIN64
+// If not windows - _WIN32 is for windows 32 and 64 bits
+#ifndef _WIN32
     for (auto block_ptr = myBlockers.begin(); block_ptr < myBlockers.end(); block_ptr++)
       if (*block_ptr == *blockers)
         myBlockers.erase(block_ptr);
@@ -366,7 +367,8 @@ BOOST_AUTO_TEST_CASE(test_skeleton_iterator_blockers) {
     num_blockers++;
   }
   BOOST_CHECK(num_blockers == 4);
-#ifndef _WIN64
+// If not windows - _WIN32 is for windows 32 and 64 bits
+#ifndef _WIN32
   BOOST_CHECK(myBlockers.empty());
 #endif
 }
