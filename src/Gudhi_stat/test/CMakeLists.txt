@@ -70,3 +70,23 @@ add_test(NAME persistence_lanscapes_on_grid_test
   COMMAND ${CMAKE_CURRENT_BINARY_DIR}/persistence_lanscapes_on_grid_test
     # XML format for Jenkins xUnit plugin 
     --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/persistence_lanscapes_on_grid_test.xml --log_level=test_suite --report_level=no)
+
+
+
+
+
+
+
+
+
+
+
+
+add_executable ( persistence_heat_maps_test persistence_heat_maps_test.cpp )
+target_link_libraries(persistence_heat_maps_test ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+
+# Unitary tests
+add_test(NAME persistence_heat_maps_test
+  COMMAND ${CMAKE_CURRENT_BINARY_DIR}/persistence_heat_maps_test
+    # XML format for Jenkins xUnit plugin
+    --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/persistence_heat_maps_test.xml --log_level=test_suite --report_level=no)

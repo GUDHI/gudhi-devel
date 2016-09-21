@@ -42,6 +42,7 @@
 #include <gudhi/abstract_classes/Abs_Real_valued_topological_data.h>
 #include <gudhi/abstract_classes/Abs_Topological_data_with_scalar_product.h>
 #include <gudhi/concretizations/read_persitence_from_file.h>
+#include <gudhi/common.h>
 using namespace std;
 
 
@@ -55,20 +56,6 @@ namespace Gudhi_stat
 
 
 
-//double epsi = std::numeric_limits<double>::epsilon();
-double epsi = 0.000005;
-
-
-/**
- *  A procedure used to compare doubles. Typically gien two doubles A and B, comparing A == B is not good idea. In this case, we use the procedure almostEqual with the epsi defined at
- *  the top of the file. Setting up the epsi give the user a tolerance on what should be consider equal.
-**/
-inline bool almost_equal( double a , double b )
-{
-    if ( fabs(a-b) < epsi )
-        return true;
-    return false;
-}
 
 
 /**

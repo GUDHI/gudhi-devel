@@ -33,6 +33,7 @@
 #include <gudhi/abstract_classes/Abs_Real_valued_topological_data.h>
 #include <gudhi/abstract_classes/Abs_Topological_data_with_scalar_product.h>
 #include <gudhi/concretizations/read_persitence_from_file.h>
+#include <gudhi/common.h>
 
 
 
@@ -119,9 +120,9 @@ public:
 	Persistence_heat_maps()
 	{
 		this->scalling_function_with_respect_to_distance_from_diagonal = constant_function;
-		this->erase_below_diagonal = false;
-		this->filter = create_Gaussian_filter(5,1);
+		this->erase_below_diagonal = false;		
 		this->min_ = this->max_ = 0;
+		this->set_up_parameters_for_basic_classes();
 	};
 	
 	/**
@@ -178,21 +179,45 @@ public:
     void write_to_file( const char* filename );
     
     /**
-     * A constructor based on a data from file. It is assumed that the file is provided in a format as crated by write_to_file function.
+     * A function that load a heat map from file to the current object (and arase qhatever was stored in the current object before).
     **/
-    Persistence_heat_maps( const char* filename );
+    void load_from_file( const char* filename );
     
     
     /**
      * The procedure checks if min_, max_ and this->heat_maps sizes are the same. 
     **/ 
-    inline bool check_if_the_same( const Persistence_heat_maps* second  )
+    inline bool check_if_the_same( const Persistence_heat_maps& second  )
     {
-		if ( this->heat_map.size() != second->heat_map.size() )return false;
-		if ( this->min_ != second->min_ )return false;
-		if ( this->max_ != second->max_ )return false;
+		if ( this->heat_map.size() != second.heat_map.size() )return false;
+		if ( this->min_ != second.min_ )return false;
+		if ( this->max_ != second.max_ )return false;
 		//in the other case we may assume that the persistence images are defined on the same domain.
 		return true;
+	}
+	
+	/**
+	 * Operator == to check if to persistence heat maps are the same.
+	**/ 
+	bool operator == ( const Persistence_heat_maps& rhs )
+	{
+		if ( !this->check_if_the_same(rhs) ) return false;//in this case, the domains are not the same, so the maps cannot be the same.
+		for ( size_t i = 0 ; i != this->heat_map.size() ; ++i )
+		{
+			for ( size_t j = 0 ; j != this->heat_map[i].size() ; ++j )
+			{
+				if ( !almost_equal(this->heat_map[i][j] , rhs.heat_map[i][j]) )return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * Operator != to check if to persistence heat maps are different.
+	**/ 
+	bool operator != ( const Persistence_heat_maps& rhs )
+	{
+		return !( (*this) == rhs );
 	}
     
     
@@ -231,7 +256,7 @@ public:
 		Persistence_heat_maps* second = (Persistence_heat_maps*)second_;
 		
 		//first we need to check if (*this) and second are defined on the same domain and have the same dimensions:
-		if ( !this->check_if_the_same(second) )
+		if ( !this->check_if_the_same(*second) )
 		{
 			std::cerr << "The persistence images are of noncompatible sizes. We cannot therefore compute distance between them. The program will now terminate";
 			throw "The persistence images are of noncompatible sizes. We cannot therefore compute distance between them. The program will now terminate";
@@ -279,7 +304,7 @@ public:
 		Persistence_heat_maps* second = (Persistence_heat_maps*)second_;
 		
 		//first we need to check if (*this) and second are defined on the same domain and have the same dimensions:
-		if ( !this->check_if_the_same(second) )
+		if ( !this->check_if_the_same(*second) )
 		{
 			std::cerr << "The persistence images are of noncompatible sizes. We cannot therefore compute distance between them. The program will now terminate";
 			throw "The persistence images are of noncompatible sizes. We cannot therefore compute distance between them. The program will now terminate";
@@ -311,8 +336,7 @@ private:
 		this->number_of_functions_for_projections_to_reals = 1;
 	}
     
-    //data
-    std::vector< std::vector<double> > filter;      
+    //data    
     double (*scalling_function_with_respect_to_distance_from_diagonal)( std::pair< double , double >& point_in_diagram );    
     bool erase_below_diagonal;
     double min_;
@@ -353,11 +377,12 @@ void Persistence_heat_maps::construct( const std::vector< std::pair<double,doubl
 	{
 		cerr << "min_ : " << min_ << endl;
 		cerr << "max_ : " << max_ << endl;
+		cerr << "number_of_pixels : " << number_of_pixels << endl;
+		getchar();
 	}
 
     this->min_ = min_;
-    this->max_ = max_;
-    this->filter = filter;
+    this->max_ = max_;    
 
 
     //initialization of the structure heat_map
@@ -374,8 +399,8 @@ void Persistence_heat_maps::construct( const std::vector< std::pair<double,doubl
 	for ( size_t pt_nr = 0 ; pt_nr != intervals_.size() ; ++pt_nr )
 	{
 		//compute the value of intervals_[pt_nr] in the grid:
-		int x_grid = (int)(intervals_[pt_nr].first - this->min_)/( this->max_-this->min_ )*this->heat_map.size();
-		int y_grid = (int)(intervals_[pt_nr].second - this->min_)/( this->max_-this->min_ )*this->heat_map.size();
+		int x_grid = (int)((intervals_[pt_nr].first - this->min_)/( this->max_-this->min_ )*number_of_pixels);
+		int y_grid = (int)((intervals_[pt_nr].second - this->min_)/( this->max_-this->min_ )*number_of_pixels);
 		
 		if ( dbg )
 		{
@@ -385,14 +410,14 @@ void Persistence_heat_maps::construct( const std::vector< std::pair<double,doubl
 		}
 		
 		//x_grid and y_grid gives a center of the kernel. We want to have its lower left cordner. To get this, we need to shift x_grid and y_grid by a grid diameter.		
-		x_grid -= this->filter.size()/2;
-		y_grid -= this->filter.size()/2;
+		x_grid -= filter.size()/2;
+		y_grid -= filter.size()/2;
 		//note that the numbers x_grid and y_grid may be negative. 
 		
 		
-		for ( size_t i = 0 ; i != this->filter.size() ; ++i )
+		for ( size_t i = 0 ; i != filter.size() ; ++i )
 		{
-			for ( size_t j = 0 ; j != this->filter.size() ; ++j )
+			for ( size_t j = 0 ; j != filter.size() ; ++j )
 			{
 				//if the point (x_grid+i,y_grid+j) is the correct point in the grid.						
 				if ( 
@@ -401,10 +426,10 @@ void Persistence_heat_maps::construct( const std::vector< std::pair<double,doubl
 					  ((y_grid+j)>=0) && (y_grid+j<this->heat_map.size()) 
 				   )
 				{
-					this->heat_map[ y_grid+j ][ x_grid+i ] += this->filter[i][j];
+					this->heat_map[ y_grid+j ][ x_grid+i ] += filter[i][j];
 					if ( dbg )
 					{
-						std::cerr << "Position : (" << x_grid+i << "," << y_grid+j << ") got increased by the value : " << this->filter[i][j] << std::endl;
+						std::cerr << "Position : (" << x_grid+i << "," << y_grid+j << ") got increased by the value : " << filter[i][j] << std::endl;
 					}					
 				}
 			}
@@ -573,7 +598,7 @@ void Persistence_heat_maps::write_to_file( const char* filename )
 	out.open( filename );
 	
 	//First we store this->min_ and this->max_ values:
-	out << this->min_ << this->max_ << std::endl;	
+	out << this->min_ << " " << this->max_ << std::endl;	
 	for ( size_t i = 0 ; i != this->heat_map.size() ; ++i )
     {
         for ( size_t j = 0 ; j != this->heat_map[i].size() ; ++j )
@@ -586,9 +611,9 @@ void Persistence_heat_maps::write_to_file( const char* filename )
 }
 
 
-Persistence_heat_maps::Persistence_heat_maps( const char* filename )
+void Persistence_heat_maps::load_from_file( const char* filename )
 {
-	bool dbg = false;
+	bool dbg = false;	
 	
 	ifstream in;
 	in.open( filename );
@@ -601,14 +626,23 @@ Persistence_heat_maps::Persistence_heat_maps( const char* filename )
 	}
 	
 	//now we read the file one by one. 
-	std::string line;
+	
 	 
+	 
+	in >> this->min_ >> this->max_;	    
+	if ( dbg )
+	{
+		std::cerr << "Reading the following values of min and max : " << this->min_ << " , " << this->max_ << std::endl;
+	}
+
+	std::string temp;
+	std::getline(in, temp);
+         
 	while (!in.eof())
 	{
-		in >> this->min_ >> this->max_;		
-        getline(in,line);
+		std::getline(in, temp);
         std::stringstream lineSS;
-        lineSS << line;
+        lineSS << temp;
         
         std::vector<double> line_of_heat_map;    
         while ( lineSS.good() )
@@ -625,9 +659,10 @@ Persistence_heat_maps::Persistence_heat_maps( const char* filename )
 		if ( dbg )
 		{
 			std::cout << std::endl;
+			getchar();
 		}
 
-		this->heat_map.push_back( line_of_heat_map );
+		if ( in.good() )this->heat_map.push_back( line_of_heat_map );
 	}	
 	in.close();
 	if ( dbg )std::cout << "Done \n";
