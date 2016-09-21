@@ -12,7 +12,7 @@
 #include "gudhi/Simplex_tree.h"
 #include "gudhi/Persistent_cohomology.h"
 
-struct MyOptions : Gudhi::Simplex_tree_options_full_featured {
+struct MiniSTOptions : Gudhi::Simplex_tree_options_full_featured {
   // Implicitly use 0 as filtration value for all simplices
   static const bool store_filtration = false;
   // The persistence algorithm needs this
@@ -21,7 +21,7 @@ struct MyOptions : Gudhi::Simplex_tree_options_full_featured {
   typedef short Vertex_handle;
 };
 
-using Mini_simplex_tree = Gudhi::Simplex_tree<MyOptions>;
+using Mini_simplex_tree = Gudhi::Simplex_tree<MiniSTOptions>;
 using Mini_st_persistence =
     Gudhi::persistent_cohomology::Persistent_cohomology<Mini_simplex_tree, Gudhi::persistent_cohomology::Field_Zp>;
 

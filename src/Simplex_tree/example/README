@@ -52,7 +52,7 @@ EXAMPLE OF SIMPLE INSERTION
 
 *** Simplex tree construction with Z/2Z coefficients on weighted graph Klein bottle file:
 
-./simplex_tree_from_file ../../../data/points/Klein_bottle_complex.txt 2
+./simplex_tree_from_cliques_of_graph ../../../data/points/Klein_bottle_complex.txt 2
 Insert the 1-skeleton in the simplex tree in 0 s. 
 Expand the simplex tree in 0 s. 
 Information of the Simplex Tree: 
@@ -60,7 +60,7 @@ Information of the Simplex Tree:
 
 with Z/3Z coefficients:
 
-./simplex_tree_from_file ../../../data/points/Klein_bottle_complex.txt 3
+./simplex_tree_from_cliques_of_graph ../../../data/points/Klein_bottle_complex.txt 3
 
 Insert the 1-skeleton in the simplex tree in 0 s.
 Expand the simplex tree in 0 s.
