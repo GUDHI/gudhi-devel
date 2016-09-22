@@ -89,10 +89,98 @@ int main( int argc , char** argv )
 	q.load_from_file( "persistence_heat_map_from_file_with_diagram" );	
 	
 	cerr << (p == q) << endl;
-*/	
-	
-	
+*/
+/*
+	//test of computations of a mean:
+	std::vector< std::pair< double,double > > intervals;
+	intervals.push_back( std::make_pair(5,5) );	
+	std::vector< std::vector<double> > filter = create_Gaussian_filter(5,1);		
+	Persistence_heat_maps p( intervals , filter ,  constant_function, false , 100 , 0 , 10 );
+	p.plot( "heat_map_1" );
 
+	
+	std::vector< std::pair< double,double > > intervals2;
+	intervals2.push_back( std::make_pair(7,7) );		
+	Persistence_heat_maps q( intervals2 , filter ,  constant_function, false , 100 , 0 , 10 );
+	q.plot( "heat_map_2" );
+	
+	
+	std::vector< Abs_Topological_data_with_averages* > to_average;
+	to_average.push_back( (Abs_Topological_data_with_averages*)(&p) );
+	to_average.push_back( (Abs_Topological_data_with_averages*)(&q) );
+	Persistence_heat_maps av;	
+	av.compute_average( to_average );
+	av.plot( "average" );
+*/
+
+/*
+	std::vector< std::vector<double> > filter = create_Gaussian_filter(30,1);	
+	Persistence_heat_maps p( "file_with_diagram" , filter ,  constant_function, false , 1000 , 0 , 10 );
+	Persistence_heat_maps q( "file_with_diagram_1" , filter ,  constant_function, false , 1000 , 0 , 10 );
+	Persistence_heat_maps r( "file_with_diagram_2" , filter ,  constant_function, false , 1000 , 0 , 10 );
+	
+	std::vector< Abs_Topological_data_with_averages* > to_average;
+	to_average.push_back( (Abs_Topological_data_with_averages*)(&p) );
+	to_average.push_back( (Abs_Topological_data_with_averages*)(&q) );
+	to_average.push_back( (Abs_Topological_data_with_averages*)(&r) );
+	Persistence_heat_maps av;	
+	av.compute_average( to_average );
+	
+	av.write_to_file( "template_average_of_heat_maps" );
+*/	
+
+/*
+	std::vector< std::pair< double,double > > intervals;
+	intervals.push_back( std::make_pair(5,5) );	
+	std::vector< std::vector<double> > filter = create_Gaussian_filter(5,1);		
+	Persistence_heat_maps p( intervals , filter ,  constant_function, false , 10 , 0 , 10 );
+	p.plot( "heat_map_1" );
+	
+	std::vector< std::pair< double,double > > intervals2;
+	intervals2.push_back( std::make_pair(7,7) );		
+	Persistence_heat_maps q( intervals2 , filter ,  constant_function, false , 10 , 0 , 10 );
+	q.plot( "heat_map_2" );
+	
+	std::vector< Persistence_heat_maps* > to_compute_median;
+	to_compute_median.push_back( &p );
+	to_compute_median.push_back( &q );	
+	Persistence_heat_maps median;	
+	median.compute_median( to_compute_median );
+	median.plot( "median" );
+*/
+
+/*
+	std::vector< std::vector<double> > filter = create_Gaussian_filter(30,1);	
+	Persistence_heat_maps p( "file_with_diagram" , filter ,  constant_function, false , 1000 , 0 , 1 );
+	Persistence_heat_maps q( "file_with_diagram_1" , filter ,  constant_function, false , 1000 , 0 , 1 );
+	Persistence_heat_maps r( "file_with_diagram_2" , filter ,  constant_function, false , 1000 , 0 , 1 );
+	
+	std::vector< Persistence_heat_maps* > to_compute_median;
+	to_compute_median.push_back( &p );
+	to_compute_median.push_back( &q );
+	to_compute_median.push_back( &r );
+	Persistence_heat_maps median;	
+	median.compute_median( to_compute_median );
+	
+	median.write_to_file( "template_median_of_heat_maps" );
+*/
+
+
+
+	std::vector< std::vector<double> > filter = create_Gaussian_filter(30,1);	
+	Persistence_heat_maps p( "file_with_diagram" , filter ,  constant_function, false , 1000 , 0 , 1 );
+	Persistence_heat_maps q( "file_with_diagram_1" , filter ,  constant_function, false , 1000 , 0 , 1 );
+	Persistence_heat_maps r( "file_with_diagram_2" , filter ,  constant_function, false , 1000 , 0 , 1 );
+	
+	std::vector< Persistence_heat_maps* > to_compute_percentage_of_active;
+	to_compute_percentage_of_active.push_back( &p );
+	to_compute_percentage_of_active.push_back( &q );
+	to_compute_percentage_of_active.push_back( &r );
+	Persistence_heat_maps percentage_of_active;	
+	percentage_of_active.compute_percentage_of_active( to_compute_percentage_of_active , 0.1 );
+	
+	percentage_of_active.write_to_file( "template_percentage_of_active_of_heat_maps" );
+	//percentage_of_active.plot( "template_percentage_of_active_of_heat_maps" );
 	
 	
 

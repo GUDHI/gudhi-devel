@@ -189,24 +189,62 @@ public:
     **/ 
     inline bool check_if_the_same( const Persistence_heat_maps& second  )
     {
-		if ( this->heat_map.size() != second.heat_map.size() )return false;
-		if ( this->min_ != second.min_ )return false;
-		if ( this->max_ != second.max_ )return false;
+		bool dbg = false;
+		if ( this->heat_map.size() != second.heat_map.size() )
+		{
+			if ( dbg )std::cerr << "this->heat_map.size() : " << this->heat_map.size()  << " \n second.heat_map.size() : " << second.heat_map.size() << std::endl;
+			return false;
+		}
+		if ( this->min_ != second.min_ )
+		{
+			if ( dbg )std::cerr << "this->min_ : " << this->min_ << ", second.min_ : " << second.min_ << std::endl;
+			return false;
+		}
+		if ( this->max_ != second.max_ )
+		{
+			if ( dbg )std::cerr << "this->max_ : " << this->max_ << ", second.max_ : " << second.max_ << std::endl;
+			return false;
+		}
 		//in the other case we may assume that the persistence images are defined on the same domain.
 		return true;
 	}
+	
+	
+	/**
+	 * Return minimal range value of persistent image.
+	**/ 
+	inline double gimme_min(){return this->min_;}
+
+	/**
+	 * Return maximal range value of persistent image.
+	**/ 
+	inline double gimme_max(){return this->max_;}
+	
 	
 	/**
 	 * Operator == to check if to persistence heat maps are the same.
 	**/ 
 	bool operator == ( const Persistence_heat_maps& rhs )
 	{
-		if ( !this->check_if_the_same(rhs) ) return false;//in this case, the domains are not the same, so the maps cannot be the same.
+		bool dbg = false;
+		if ( !this->check_if_the_same(rhs) )
+		{
+			if ( dbg )std::cerr << "The domains are not the same \n";
+			return false;//in this case, the domains are not the same, so the maps cannot be the same.
+		}
 		for ( size_t i = 0 ; i != this->heat_map.size() ; ++i )
 		{
 			for ( size_t j = 0 ; j != this->heat_map[i].size() ; ++j )
 			{
-				if ( !almost_equal(this->heat_map[i][j] , rhs.heat_map[i][j]) )return false;
+				if ( !almost_equal(this->heat_map[i][j] , rhs.heat_map[i][j]) )
+				{
+					if ( dbg )
+					{
+						std::cerr << "this->heat_map[" << i << "][" << j << "] = " << this->heat_map[i][j] << std::endl;
+						std::cerr << "rhs.heat_map[" << i << "][" << j << "] = " << rhs.heat_map[i][j] << std::endl;						
+					}
+					return false;
+				}
 			}
 		}
 		return true;
@@ -228,99 +266,11 @@ public:
     
     
     //Concretizations of virtual methods:    
-    std::vector<double> vectorize( int number_of_function )
-    {
-		//convert this->heat_map into one large vector:
-		size_t size_of_result = 0;
-		for ( size_t i = 0 ; i != this->heat_map.size() ; ++i )
-		{
-			size_of_result += this->heat_map[i].size();
-		}
-		
-		std::vector< double > result;
-		result.reserve( size_of_result );
-		
-		for ( size_t i = 0 ; i != this->heat_map.size() ; ++i )
-		{
-			for ( size_t j = 0 ; j != this->heat_map[i].size() ; ++j )
-			{
-				result.push_back( this->heat_map[i][j] );
-			}
-		}
-		
-		return result;
-	}
-	
-	double distance( const Abs_Topological_data_with_distances* second_ , double power = 1)
-	{		
-		Persistence_heat_maps* second = (Persistence_heat_maps*)second_;
-		
-		//first we need to check if (*this) and second are defined on the same domain and have the same dimensions:
-		if ( !this->check_if_the_same(*second) )
-		{
-			std::cerr << "The persistence images are of noncompatible sizes. We cannot therefore compute distance between them. The program will now terminate";
-			throw "The persistence images are of noncompatible sizes. We cannot therefore compute distance between them. The program will now terminate";
-		}
-		
-		//if we are here, we know that the two persistence iomages are defined on the same domain, so we can start computing their distances:
-		
-		double distance = 0;
-		for ( size_t i = 0 ; i != this->heat_map.size() ; ++i )
-		{
-			for ( size_t j = 0 ; j != this->heat_map[i].size() ; ++j )
-			{
-				distance += pow( abs(this->heat_map[i][j] - second->heat_map[i][j]) , power );
-			}
-		}
-		return distance;
-	}
-	
-	double project_to_R( int number_of_function )
-	{
-		double result = 0;
-		for ( size_t i = 0 ; i != this->heat_map.size() ; ++i )
-		{
-			for ( size_t j = 0 ; j != this->heat_map[i].size() ; ++j )
-			{
-				result += this->heat_map[i][j];
-			}
-		}
-		return result;
-	}
-	
-	void compute_average( std::vector< Abs_Topological_data_with_averages* > to_average )
-	{
-		std::vector<Persistence_heat_maps*> maps;
-		maps.reserve( to_average.size() );
-		for ( size_t i = 0 ; i != to_average.size() ; ++i )
-		{
-			maps.push_back( (Persistence_heat_maps*)to_average[i] );
-		}		
-		this->compute_mean( maps );
-	}
-	
-	double compute_scalar_product( const Abs_Topological_data_with_scalar_product* second_ )
-	{
-		Persistence_heat_maps* second = (Persistence_heat_maps*)second_;
-		
-		//first we need to check if (*this) and second are defined on the same domain and have the same dimensions:
-		if ( !this->check_if_the_same(*second) )
-		{
-			std::cerr << "The persistence images are of noncompatible sizes. We cannot therefore compute distance between them. The program will now terminate";
-			throw "The persistence images are of noncompatible sizes. We cannot therefore compute distance between them. The program will now terminate";
-		}
-		
-		//if we are here, we know that the two persistence iomages are defined on the same domain, so we can start computing their scalar product:
-		double scalar_prod = 0;
-		for ( size_t i = 0 ; i != this->heat_map.size() ; ++i )
-		{
-			for ( size_t j = 0 ; j != this->heat_map[i].size() ; ++j )
-			{
-				scalar_prod += this->heat_map[i][j]*second->heat_map[i][j];
-			}
-		}
-		return scalar_prod;
-	}
+    std::vector<double> vectorize( int number_of_function );
+	double distance( const Abs_Topological_data_with_distances* second_ , double power = 1);
+	double project_to_R( int number_of_function );	
+	void compute_average( std::vector< Abs_Topological_data_with_averages* > to_average );	
+	double compute_scalar_product( const Abs_Topological_data_with_scalar_product* second_ );
 	
 private:
 	//private methods
@@ -352,7 +302,7 @@ void Persistence_heat_maps::construct( const std::vector< std::pair<double,doubl
 									   bool erase_below_diagonal , size_t number_of_pixels , double min_ , double max_ )
 {
     bool dbg = false;       
-    if ( dbg )std::cerr << "Eneterring construct procedure \n";
+    if ( dbg )std::cerr << "Entering construct procedure \n";
 
     if ( min_ == max_ )
     {
@@ -504,9 +454,9 @@ void Persistence_heat_maps::compute_median( const std::vector<Persistence_heat_m
 	std::vector< std::vector<double> > heat_maps = this->check_and_initialize_maps( maps );
 	
 	std::vector<double> to_compute_median( maps.size() );
-    for ( size_t i = 0 ; i != heat_map.size() ; ++i )
+    for ( size_t i = 0 ; i != heat_maps.size() ; ++i )
     {
-        for ( size_t j = 0 ; j != heat_map[i].size() ; ++j )
+        for ( size_t j = 0 ; j != heat_maps[i].size() ; ++j )
         {
 			for ( size_t map_no = 0 ; map_no != maps.size() ; ++map_no )
 			{
@@ -517,6 +467,8 @@ void Persistence_heat_maps::compute_median( const std::vector<Persistence_heat_m
         }       
     }
 	this->heat_map = heat_maps;
+	this->min_= maps[0]->min_;
+	this->max_= maps[0]->max_;
 }
 
 
@@ -524,23 +476,22 @@ void Persistence_heat_maps::compute_median( const std::vector<Persistence_heat_m
 void Persistence_heat_maps::compute_mean( const std::vector<Persistence_heat_maps*>& maps )
 {
 	std::vector< std::vector<double> > heat_maps = this->check_and_initialize_maps( maps );
-	
-	std::vector<double> to_compute_median( maps.size() );
-    for ( size_t i = 0 ; i != heat_map.size() ; ++i )
+		    for ( size_t i = 0 ; i != heat_maps.size() ; ++i )
     {
-        for ( size_t j = 0 ; j != heat_map[i].size() ; ++j )
+        for ( size_t j = 0 ; j != heat_maps[i].size() ; ++j )
         {
 			double mean = 0;
 			for ( size_t map_no = 0 ; map_no != maps.size() ; ++map_no )
-			{
+			{	
 				mean += maps[map_no]->heat_map[i][j];
-			}
+			}		
             heat_maps[i][j] =  mean/(double)maps.size();
         }       
     }
 	this->heat_map = heat_maps;
+	this->min_ = maps[0]->min_;
+	this->max_ = maps[0]->max_;
 }
-
 
 
 
@@ -549,9 +500,9 @@ void Persistence_heat_maps::compute_percentage_of_active( const std::vector<Pers
 {
 	std::vector< std::vector<double> > heat_maps = this->check_and_initialize_maps( maps );
 
-    for ( size_t i = 0 ; i != this->heat_map.size() ; ++i )
+    for ( size_t i = 0 ; i != heat_maps.size() ; ++i )
     {
-        for ( size_t j = 0 ; j != this->heat_map[i].size() ; ++j )
+        for ( size_t j = 0 ; j != heat_maps[i].size() ; ++j )
         {
             size_t number_of_active_levels = 0;
             for ( size_t map_no = 0 ; map_no != maps.size() ; ++map_no )
@@ -569,6 +520,8 @@ void Persistence_heat_maps::compute_percentage_of_active( const std::vector<Pers
         }       
     }
     this->heat_map = heat_maps;
+    this->min_ = maps[0]->min_;
+	this->max_ = maps[0]->max_;
 }
 
 
@@ -667,6 +620,103 @@ void Persistence_heat_maps::load_from_file( const char* filename )
 	in.close();
 	if ( dbg )std::cout << "Done \n";
 }
+
+
+//Concretizations of virtual methods:    
+std::vector<double> Persistence_heat_maps::vectorize( int number_of_function )
+{
+	//convert this->heat_map into one large vector:
+	size_t size_of_result = 0;
+	for ( size_t i = 0 ; i != this->heat_map.size() ; ++i )
+	{
+		size_of_result += this->heat_map[i].size();
+	}
+	
+	std::vector< double > result;
+	result.reserve( size_of_result );
+	
+	for ( size_t i = 0 ; i != this->heat_map.size() ; ++i )
+	{
+		for ( size_t j = 0 ; j != this->heat_map[i].size() ; ++j )
+		{
+			result.push_back( this->heat_map[i][j] );
+		}
+	}
+	
+	return result;
+}
+
+double Persistence_heat_maps::distance( const Abs_Topological_data_with_distances* second_ , double power )
+{		
+	Persistence_heat_maps* second = (Persistence_heat_maps*)second_;
+	
+	//first we need to check if (*this) and second are defined on the same domain and have the same dimensions:
+	if ( !this->check_if_the_same(*second) )
+	{
+		std::cerr << "The persistence images are of noncompatible sizes. We cannot therefore compute distance between them. The program will now terminate";
+		throw "The persistence images are of noncompatible sizes. We cannot therefore compute distance between them. The program will now terminate";
+	}
+	
+	//if we are here, we know that the two persistence iomages are defined on the same domain, so we can start computing their distances:
+	
+	double distance = 0;
+	for ( size_t i = 0 ; i != this->heat_map.size() ; ++i )
+	{
+		for ( size_t j = 0 ; j != this->heat_map[i].size() ; ++j )
+		{
+			distance += pow( abs(this->heat_map[i][j] - second->heat_map[i][j]) , power );
+		}
+	}
+	return distance;
+}
+
+double Persistence_heat_maps::project_to_R( int number_of_function )
+{
+	double result = 0;
+	for ( size_t i = 0 ; i != this->heat_map.size() ; ++i )
+	{
+		for ( size_t j = 0 ; j != this->heat_map[i].size() ; ++j )
+		{
+			result += this->heat_map[i][j];
+		}
+	}
+	return result;
+}
+
+void Persistence_heat_maps::compute_average( std::vector< Abs_Topological_data_with_averages* > to_average )
+{
+	std::vector<Persistence_heat_maps*> maps;
+	maps.reserve( to_average.size() );
+	for ( size_t i = 0 ; i != to_average.size() ; ++i )
+	{
+		maps.push_back( (Persistence_heat_maps*)to_average[i] );
+	}					
+	this->compute_mean( maps );
+}
+
+double Persistence_heat_maps::compute_scalar_product( const Abs_Topological_data_with_scalar_product* second_ )
+{
+	Persistence_heat_maps* second = (Persistence_heat_maps*)second_;
+	
+	//first we need to check if (*this) and second are defined on the same domain and have the same dimensions:
+	if ( !this->check_if_the_same(*second) )
+	{
+		std::cerr << "The persistence images are of noncompatible sizes. We cannot therefore compute distance between them. The program will now terminate";
+		throw "The persistence images are of noncompatible sizes. We cannot therefore compute distance between them. The program will now terminate";
+	}
+	
+	//if we are here, we know that the two persistence iomages are defined on the same domain, so we can start computing their scalar product:
+	double scalar_prod = 0;
+	for ( size_t i = 0 ; i != this->heat_map.size() ; ++i )
+	{
+		for ( size_t j = 0 ; j != this->heat_map[i].size() ; ++j )
+		{
+			scalar_prod += this->heat_map[i][j]*second->heat_map[i][j];
+		}
+	}
+	return scalar_prod;
+}
+
 
 
 
