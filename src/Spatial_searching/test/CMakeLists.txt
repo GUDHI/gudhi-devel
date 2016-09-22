@@ -14,11 +14,7 @@ if(CGAL_FOUND)
   if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
     message(STATUS "CGAL version: ${CGAL_VERSION}.")
 
-    find_package(Eigen3 3.1.0)
     if (EIGEN3_FOUND)
-      message(STATUS "Eigen3 version: ${EIGEN3_VERSION}.")
-      include( ${EIGEN3_USE_FILE} )	
-      include_directories (BEFORE "../../include")
 
       add_executable( Spatial_searching_test_Kd_tree_search test_Kd_tree_search.cpp )
       target_link_libraries(Spatial_searching_test_Kd_tree_search 
