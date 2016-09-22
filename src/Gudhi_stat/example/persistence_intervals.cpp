@@ -33,9 +33,6 @@
 using namespace Gudhi;
 using namespace Gudhi::Gudhi_stat;
 
-
-double epsilon = 0.0000005;
-
 using namespace std;
 
 	
@@ -48,8 +45,7 @@ int main( int argc , char** argv )
 	}
 	
 	Persistence_intervals p( argv[1] );
-	std::pair<double,double> min_max_ = p.min_max();
-	
+	std::pair<double,double> min_max_ = p.min_max();	
 	cout << "Birth-death range : " <<  min_max_.first << " " << min_max_.second << endl;
 	
 	
@@ -59,8 +55,8 @@ int main( int argc , char** argv )
 	{
 		cout << dominant_ten_intervals_length[i] << endl;
 	}
-	std::vector< std::pair<double,double> > ten_dominant_intervals = p.dominant_intervals( 10 );
 	
+	std::vector< std::pair<double,double> > ten_dominant_intervals = p.dominant_intervals( 10 );	
 	cout << "Here are the dominant intervals : " << endl;
 	for ( size_t i = 0 ; i != ten_dominant_intervals.size() ; ++i )
 	{
