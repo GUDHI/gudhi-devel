@@ -151,7 +151,7 @@ public:
       boost::counting_iterator<std::ptrdiff_t>(begin_idx),
       boost::counting_iterator<std::ptrdiff_t>(past_the_end_idx),
       typename Tree::Splitter(),
-      STraits(std::begin(point)) )
+      STraits(std::begin(points)) )
   {
     // Build the tree now (we don't want to wait for the first query)
     m_tree.build();
