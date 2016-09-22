@@ -1,4 +1,4 @@
-#include <gudhi/Spatial_tree_data_structure.h>
+#include <gudhi/Kd_tree_search.h>
 
 #include <CGAL/Epick_d.h>
 #include <CGAL/Random.h>
@@ -14,7 +14,7 @@ int main (void)
   typedef typename K::Point_d                         Point;
   typedef std::vector<Point>                          Points;
 
-  typedef gss::Spatial_tree_data_structure<K, Points> Points_ds;
+  typedef gss::Kd_tree_search<K, Points> Points_ds;
 
   CGAL::Random rd;
 

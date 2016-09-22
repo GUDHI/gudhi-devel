@@ -25,7 +25,7 @@
 
 #include <boost/range.hpp>
 
-#include <gudhi/Spatial_tree_data_structure.h>
+#include <gudhi/Kd_tree_search.h>
 
 #include <gudhi/Clock.h>
 

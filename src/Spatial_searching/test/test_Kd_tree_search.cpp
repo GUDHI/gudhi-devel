@@ -21,10 +21,10 @@
  */
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE Spatial_searching - test Spatial_tree_data_structure
+#define BOOST_TEST_MODULE Spatial_searching - test Kd_tree_search
 #include <boost/test/unit_test.hpp>
 
-#include <gudhi/Spatial_tree_data_structure.h>
+#include <gudhi/Kd_tree_search.h>
 
 #include <CGAL/Epick_d.h>
 #include <CGAL/Random.h>
@@ -32,14 +32,14 @@
 #include <array>
 #include <vector>
 
-BOOST_AUTO_TEST_CASE(test_Spatial_tree_data_structure)
+BOOST_AUTO_TEST_CASE(test_Kd_tree_search)
 {
   typedef CGAL::Epick_d<CGAL::Dimension_tag<4> >    K;
   typedef K::FT                                     FT;
   typedef K::Point_d                                Point;
   typedef std::vector<Point>                        Points;
 
-  typedef Gudhi::spatial_searching::Spatial_tree_data_structure<
+  typedef Gudhi::spatial_searching::Kd_tree_search<
     K, Points>                                      Points_ds;
   
   CGAL::Random rd;

@@ -23,7 +23,7 @@
 #ifndef GUDHI_SPARSIFY_POINT_SET_H
 #define GUDHI_SPARSIFY_POINT_SET_H
 
-#include <gudhi/Spatial_tree_data_structure.h>
+#include <gudhi/Kd_tree_search.h>
 #ifdef GUDHI_SUBSAMPLING_PROFILING
 #include <gudhi/Clock.h>
 #endif
@@ -62,7 +62,7 @@ sparsify_point_set(
   typename Kernel::FT min_squared_dist,
   OutputIterator output_it)
 { 
-  typedef typename Gudhi::spatial_searching::Spatial_tree_data_structure<
+  typedef typename Gudhi::spatial_searching::Kd_tree_search<
     Kernel, Point_range>  Points_ds;
 
   typename Kernel::Squared_distance_d sqdist = k.squared_distance_d_object();
