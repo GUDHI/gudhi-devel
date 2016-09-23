@@ -3,7 +3,8 @@ project(Witness_complex_examples)
 
 # A simple example
    add_executable( witness_complex_from_file witness_complex_from_file.cpp )
-   add_test( witness_complex_from_bunny ${CMAKE_CURRENT_BINARY_DIR}/witness_complex_from_file ${CMAKE_SOURCE_DIR}/data/points/bunny_5000 100)   
+   add_test( witness_complex_from_bunny ${CMAKE_CURRENT_BINARY_DIR}/witness_complex_from_file
+             ${CMAKE_SOURCE_DIR}/data/points/bunny_5000_to_be_removed 100)   
 
 if(CGAL_FOUND)
   if (NOT CGAL_VERSION VERSION_LESS 4.6.0)
