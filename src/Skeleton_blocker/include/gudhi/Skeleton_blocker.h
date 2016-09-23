@@ -42,7 +42,7 @@ namespace skeleton_blocker {
 
 \author David Salinas
 
-\section Introduction
+\section skblintroduction Introduction
 The Skeleton-Blocker data-structure proposes a light encoding for simplicial complexes by storing only an *implicit* representation of its
 simplices 
 \cite socg_blockers_2011,\cite blockers2012.
@@ -53,7 +53,7 @@ This data-structure handles all  simplicial complexes operations such as
  are operations that do not require simplex enumeration such as edge iteration, link computation or simplex contraction.
 
 
-\section Definitions
+\section skbldefinitions Definitions
 
 We recall briefly classical definitions of simplicial complexes  
  \cite Munkres-elementsalgtop1984.
@@ -108,7 +108,7 @@ and point access in addition.
 
 
 
-\subsection Visitor
+\subsection skblvisitor Visitor
 
 The class Skeleton_blocker_complex has a visitor that is called when usual operations such as adding an edge or remove a vertex are called.
 You may want to use this visitor to compute statistics or to update another data-structure (for instance this visitor is heavily used in the \ref contr package).
@@ -116,7 +116,7 @@ You may want to use this visitor to compute statistics or to update another data
 
 
 
-\section Example
+\section skblexample Example
 
  
 \subsection Iterating Iterating through vertices, edges, blockers and simplices	
