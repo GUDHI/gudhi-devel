@@ -206,17 +206,17 @@ class Alpha_complex {
   }
 
  public:
-  template <typename Simplicial_complex>
-  bool create_complex(Simplicial_complex& complex) {
-    typedef typename Simplicial_complex::Filtration_value Filtration_value;
+  template <typename SimplicialComplexForAlpha>
+  bool create_complex(SimplicialComplexForAlpha& complex) {
+    typedef typename SimplicialComplexForAlpha::Filtration_value Filtration_value;
     return create_complex(complex, std::numeric_limits<Filtration_value>::infinity());
   }
 
   /** \brief Initialize the simplicial complex from the Delaunay triangulation.
    *
-   * \tparam Simplicial_complex must meet Simplicial_complex_for_alpha concept.
+   * \tparam SimplicialComplexForAlpha must meet `SimplicialComplexForAlpha` concept.
    * 
-   * @param[in] complex Simplicial_complex to be created.
+   * @param[in] complex SimplicialComplexForAlpha to be created.
    * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$.
    * 
    * @return true if creation succeeds, false otherwise.
@@ -226,10 +226,11 @@ class Alpha_complex {
    * 
    * Initialization can be launched once.
    */
-  template <typename Simplicial_complex, typename Filtration_value>
-  bool create_complex(Simplicial_complex& complex, Filtration_value max_alpha_square) {
-    // From Simplicial_complex type required to insert into a simplicial complex (with or without subfaces).
-    typedef typename Simplicial_complex::Vertex_handle Vertex_handle;
+  template <typename SimplicialComplexForAlpha, typename Filtration_value>
+  bool create_complex(SimplicialComplexForAlpha& complex, Filtration_value max_alpha_square) {
+    // From SimplicialComplexForAlpha type required to insert into a simplicial complex (with or without subfaces).
+    typedef typename SimplicialComplexForAlpha::Vertex_handle Vertex_handle;
+    typedef typename SimplicialComplexForAlpha::Simplex_handle Simplex_handle;
     typedef std::vector<Vertex_handle> Vector_vertex;
     
     if (triangulation_ == nullptr) {
@@ -294,7 +295,7 @@ class Alpha_complex {
     // ### For i : d -> 0
     for (int decr_dim = complex.dimension(); decr_dim >= 0; decr_dim--) {
       // ### Foreach Sigma of dim i
-      for (auto f_simplex : complex.skeleton_simplex_range(decr_dim)) {
+      for (Simplex_handle f_simplex : complex.skeleton_simplex_range(decr_dim)) {
         int f_simplex_dim = complex.dimension(f_simplex);
         if (decr_dim == f_simplex_dim) {
           pointVector.clear();
@@ -345,12 +346,12 @@ class Alpha_complex {
   }
 
  private:
-  template <typename Simplicial_complex, typename Simplex_handle>
-  void propagate_alpha_filtration(Simplicial_complex& complex, Simplex_handle f_simplex, int decr_dim) {
-    // From Simplicial_complex type required to assign filtration values.
-    typedef typename Simplicial_complex::Filtration_value Filtration_value;
+  template <typename SimplicialComplexForAlpha, typename Simplex_handle>
+  void propagate_alpha_filtration(SimplicialComplexForAlpha& complex, Simplex_handle f_simplex, int decr_dim) {
+    // From SimplicialComplexForAlpha type required to assign filtration values.
+    typedef typename SimplicialComplexForAlpha::Filtration_value Filtration_value;
 #ifdef DEBUG_TRACES
-    typedef typename Simplicial_complex::Vertex_handle Vertex_handle;
+    typedef typename SimplicialComplexForAlpha::Vertex_handle Vertex_handle;
 #endif  // DEBUG_TRACES
     
     // ### Foreach Tau face of Sigma

@@ -51,7 +51,7 @@ namespace alpha_complex {
  * Alpha_complex is constructing a <a target="_blank"
  * href="http://doc.cgal.org/latest/Triangulation/index.html#Chapter_Triangulations">Delaunay Triangulation</a>
  * \cite cgal:hdj-t-15b from <a target="_blank" href="http://www.cgal.org/">CGAL</a> (the Computational Geometry
- * Algorithms Library \cite cgal:eb-15b) and is able to create a `Simplicial_complex_for_alpha`.
+ * Algorithms Library \cite cgal:eb-15b) and is able to create a `SimplicialComplexForAlpha`.
  * 
  * The complex is a template class requiring an Epick_d <a target="_blank"
  * href="http://doc.cgal.org/latest/Kernel_d/index.html#Chapter_dD_Geometry_Kernel">dD Geometry Kernel</a>
@@ -135,12 +135,12 @@ namespace alpha_complex {
  * 
  * As the squared radii computed by CGAL are an approximation, it might happen that these alpha squared values do not
  * quite define a proper filtration (i.e. non-decreasing with respect to inclusion).
- * We fix that up by calling `Simplicial_complex_for_alpha::make_filtration_non_decreasing()`.
+ * We fix that up by calling `SimplicialComplexForAlpha::make_filtration_non_decreasing()`.
  * 
  * \subsubsection pruneabove Prune above given filtration value
  * 
  * The simplex tree is pruned from the given maximum alpha squared value (cf.
- * `Simplicial_complex_for_alpha::prune_above_filtration()`).
+ * `SimplicialComplexForAlpha::prune_above_filtration()`).
  * In the following example, the value is given by the user as argument of the program.
  * 
  * 
