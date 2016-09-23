@@ -114,7 +114,7 @@ class Points_off_visitor_reader {
  * 
  * where d is the point dimension. 		
  * 
- * \section Example
+ * \section pointoffioexample Example
  *
  * This example loads points from an OFF file and builds a vector of points (vector of double).
  * Then, it is asked to display the points.
