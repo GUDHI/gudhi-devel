@@ -232,7 +232,7 @@ class Alpha_complex {
     typedef typename SimplicialComplexForAlpha::Vertex_handle Vertex_handle;
     typedef typename SimplicialComplexForAlpha::Simplex_handle Simplex_handle;
     typedef std::vector<Vertex_handle> Vector_vertex;
-    
+
     if (triangulation_ == nullptr) {
       std::cerr << "Alpha_complex cannot create_complex from a NULL triangulation\n";
       return false;  // ----- >>
@@ -249,7 +249,7 @@ class Alpha_complex {
       std::cerr << "Alpha_complex create_complex - complex is not empty\n";
       return false;  // ----- >>
     }
-    
+
     complex.set_dimension(triangulation_->maximal_dimension());
 
     // --------------------------------------------------------------------------------------------
@@ -353,7 +353,7 @@ class Alpha_complex {
 #ifdef DEBUG_TRACES
     typedef typename SimplicialComplexForAlpha::Vertex_handle Vertex_handle;
 #endif  // DEBUG_TRACES
-    
+
     // ### Foreach Tau face of Sigma
     for (auto f_boundary : complex.boundary_simplex_range(f_simplex)) {
 #ifdef DEBUG_TRACES

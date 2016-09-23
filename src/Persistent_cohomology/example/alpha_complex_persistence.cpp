@@ -42,19 +42,19 @@ int main(int argc, char **argv) {
     std::cout << "Simplicial complex is of dimension " << simplex.dimension() <<
         " - " << simplex.num_simplices() << " simplices - " <<
         simplex.num_vertices() << " vertices." << std::endl;
-  
+
     // Sort the simplices in the order of the filtration
     simplex.initialize_filtration();
-  
+
     std::cout << "Simplex_tree dim: " << simplex.dimension() << std::endl;
     // Compute the persistence diagram of the complex
     Gudhi::persistent_cohomology::Persistent_cohomology< Gudhi::Simplex_tree<>,
         Gudhi::persistent_cohomology::Field_Zp > pcoh(simplex);
     // initializes the coefficient field for homology
     pcoh.init_coefficients(coeff_field_characteristic);
-  
+
     pcoh.compute_persistent_cohomology(min_persistence);
-  
+
     // Output the diagram in filediag
     if (output_file_diag.empty()) {
       pcoh.output_diagram();

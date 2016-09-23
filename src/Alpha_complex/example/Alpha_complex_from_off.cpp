@@ -39,15 +39,16 @@ int main(int argc, char **argv) {
   Gudhi::Simplex_tree<> simplex;
   if (alpha_complex_from_file.create_complex(simplex, alpha_square_max_value)) {
     std::ostream output_stream(streambufffer);
-  
+
     // ----------------------------------------------------------------------------
     // Display information about the alpha complex
     // ----------------------------------------------------------------------------
     output_stream << "Alpha complex is of dimension " << simplex.dimension() <<
         " - " << simplex.num_simplices() << " simplices - " <<
         simplex.num_vertices() << " vertices." << std::endl;
-  
-    output_stream << "Iterator on alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
+
+    output_stream << "Iterator on alpha complex simplices in the filtration order, with [filtration value]:" <<
+        std::endl;
     for (auto f_simplex : simplex.filtration_simplex_range()) {
       output_stream << "   ( ";
       for (auto vertex : simplex.simplex_vertex_range(f_simplex)) {

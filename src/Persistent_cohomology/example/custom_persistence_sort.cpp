@@ -97,18 +97,18 @@ int main(int argc, char **argv) {
     std::cout << "Simplicial complex is of dimension " << simplex.dimension() <<
         " - " << simplex.num_simplices() << " simplices - " <<
         simplex.num_vertices() << " vertices." << std::endl;
-    
+
     // Sort the simplices in the order of the filtration
     simplex.initialize_filtration();
-  
+
     std::cout << "Simplex_tree dim: " << simplex.dimension() << std::endl;
-    
+
     Persistent_cohomology pcoh(simplex);
-  
+
     // initializes the coefficient field for homology - Z/3Z
     pcoh.init_coefficients(3);
     pcoh.compute_persistent_cohomology(0.2);
-  
+
     // Custom sort and output persistence
     cmp_intervals_by_dim_then_length cmp(&simplex);
     auto persistent_pairs = pcoh.get_persistent_pairs();
@@ -118,13 +118,13 @@ int main(int argc, char **argv) {
             << simplex.filtration(get<0>(pair)) << " "
             << simplex.filtration(get<1>(pair)) << std::endl;
     }
-  
+
     // Persistent Betti numbers
     std::cout << "The persistent Betti numbers in interval [0.40, 0.41] are : ";
     for (int dim = 0; dim < simplex.dimension(); dim++)
       std::cout << "b" << dim << " = " << pcoh.persistent_betti_number(dim, 0.40, 0.41) << " ; ";
     std::cout << std::endl;
-  
+
     // Betti numbers
     std::vector<int> betti_numbers = pcoh.betti_numbers();
     std::cout << "The Betti numbers are : ";

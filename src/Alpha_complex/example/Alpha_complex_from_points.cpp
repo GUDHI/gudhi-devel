@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
     std::cout << "Alpha complex is of dimension " << simplex.dimension() <<
         " - " << simplex.num_simplices() << " simplices - " <<
         simplex.num_vertices() << " vertices." << std::endl;
-  
+
     std::cout << "Iterator on alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
     for (auto f_simplex : simplex.filtration_simplex_range()) {
       std::cout << "   ( ";

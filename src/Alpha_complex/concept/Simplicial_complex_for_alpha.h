@@ -40,7 +40,7 @@ struct SimplicialComplexForAlpha {
 
   /** Returns the number of vertices in the simplicial complex. */
   std::size_t num_vertices();
-  
+
   /** Gets the simplicial complex dimension. */
   int dimension();
 
@@ -61,10 +61,10 @@ struct SimplicialComplexForAlpha {
 
   /** Browses the simplicial complex to make the filtration non-decreasing. */
   void make_filtration_non_decreasing();
-  
+
   /** Prune the simplicial complex above 'filtration' value given as parameter. */
   void prune_above_filtration(Filtration_value filtration);
-  
+
   /** Sorts the filtration values in the simplicial complex. */
   void initialize_filtration();
 
@@ -88,7 +88,6 @@ struct SimplicialComplexForAlpha {
   /** \brief Return type of an insertion of a simplex
    */
   typedef unspecified Insertion_result_type;
-
 };
 
 }  // namespace alpha_complex
