@@ -147,7 +147,7 @@ struct Trie {
   }
 
   void remove_leaf() {
-    assert(is_leaf);
+    assert(is_leaf());
     if (!is_root())
       parent_->childs.erase(this);
   }
