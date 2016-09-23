@@ -23,7 +23,7 @@
 
 
 #include <gudhi/abstract_classes/Abs_Topological_data.h>
-#include <gudhi/concretizations/Persistence_landscape.h>
+#include <gudhi/concretizations/Persistence_landscape_on_grid.h>
 
 
 
@@ -35,7 +35,7 @@ using namespace Gudhi::Gudhi_stat;
 
 int main( int argc , char** argv )
 {
-	std::cout << "This program computes average persistence landscape of persistence landscapes created based on persistence diagrams provided as an input. Please call this program with the names of files with persistence diagrams \n";
+	std::cout << "This program computes average persistence landscape on grid of persistence landscapes on grid created based on persistence diagrams provided as an input. Please call this program with the names of files with persistence diagrams \n";
 	std::vector< const char* > filenames;
 	
 	if ( argc == 1 )
@@ -53,12 +53,12 @@ int main( int argc , char** argv )
 	std::vector< Abs_Topological_data_with_averages* > lands;
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{
-		Persistence_landscape* l = new Persistence_landscape;
+		Persistence_landscape_on_grid* l = new Persistence_landscape_on_grid;
 		l->load_landscape_from_file( filenames[i] );
 		lands.push_back( (Abs_Topological_data_with_averages*)l );
 	}
 	
-	Persistence_landscape av;
+	Persistence_landscape_on_grid av;
 	av.compute_average( lands );
 	
 	av.print_to_file( "average" );

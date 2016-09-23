@@ -23,7 +23,7 @@
 
 
 #include <gudhi/abstract_classes/Abs_Topological_data.h>
-#include <gudhi/concretizations/Persistence_landscape.h>
+#include <gudhi/concretizations/Persistence_heat_maps.h>
 
 
 
@@ -50,25 +50,24 @@ int main( int argc , char** argv )
 	}
 	
 	std::cout << "Creating persistence landscapes...\n";
-	std::vector< Abs_Topological_data_with_averages* > lands;
+	std::vector< Abs_Topological_data_with_averages* > maps;
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{
-		Persistence_landscape* l = new Persistence_landscape;
-		l->load_landscape_from_file( filenames[i] );
-		lands.push_back( (Abs_Topological_data_with_averages*)l );
+		Persistence_heat_maps* l = new Persistence_heat_maps;
+		l->load_from_file( filenames[i] );
+		maps.push_back( (Abs_Topological_data_with_averages*)l );
 	}
 	
-	Persistence_landscape av;
-	av.compute_average( lands );
+	Persistence_heat_maps av;
+	av.compute_average( maps );
 	
 	av.print_to_file( "average" );
 	
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{
-		delete lands[i];
+		delete maps[i];
 	}
 	
 	std::cout << "Done \n";
-
 	return 0;
 }

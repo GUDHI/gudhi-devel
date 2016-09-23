@@ -25,6 +25,9 @@
 #include <sstream>
 #include <iostream>
 #include <cmath>
+#include <limits>
+#include <vector>
+#include <algorithm>
 
 //gudhi include
 #include <gudhi/abstract_classes/Abs_Vectorized_topological_data.h>
@@ -99,10 +102,36 @@ std::vector< std::vector<double> > create_Gaussian_filter( size_t pixel_radius ,
     return kernel;
 }
 
-double constant_function( std::pair< double , double >& point_in_diagram )
+
+/**
+ * There are various options to scale the poits depending on their location. One can for instance:
+ * (1) do nothing (scale all of them with the weight 1), as in the function constant_function
+ * (2) Scale them by the distance to the diagonal. This is implemented in function
+ * (3) Scale them with the square of their distance to diagonal. This is implemented in function
+ * (4) Scale them with 
+**/ 
+
+double constant_function( const std::pair< double , double >& point_in_diagram )
 {
 	return 1;
 }
+
+double distance_from_diagonal( const std::pair< double , double >& point_in_diagram )
+{
+	//(point_in_diagram.first+point_in_diagram.second)/2.0
+	return sqrt( pow((point_in_diagram.first-(point_in_diagram.first+point_in_diagram.second)/2.0),2) + pow((point_in_diagram.second-(point_in_diagram.first+point_in_diagram.second)/2.0),2)  );
+}
+
+double squared_distance_from_diagonal( const std::pair< double , double >& point_in_diagram )
+{
+	return pow((point_in_diagram.first-(point_in_diagram.first+point_in_diagram.second)/2.0),2) + pow((point_in_diagram.second-(point_in_diagram.first+point_in_diagram.second)/2.0),2);
+}
+
+double arc_tan_of_persistence_of_point( const std::pair< double , double >& point_in_diagram )
+{
+	return atan( point_in_diagram.second - point_in_diagram.first );
+}
+
 
 
 
@@ -135,7 +164,7 @@ public:
 	 * (6) a min x and y value of points that are to be taken into account. By default it is set to -1, in which case the program compute the values based on the data,
 	 * (6) a max x and y value of points that are to be taken into account. By default it is set to -1, in which case the program compute the values based on the data.
 	**/  
-    Persistence_heat_maps( const std::vector< std::pair< double,double > >  & interval , std::vector< std::vector<double> > filter = create_Gaussian_filter(5,1) ,  double (*scalling_function_with_respect_to_distance_from_diagonal)( std::pair< double , double >& point_in_diagram ) = constant_function, bool erase_below_diagonal = false , size_t number_of_pixels = 1000 , double min_ = -1 , double max_ = -1  );
+    Persistence_heat_maps( const std::vector< std::pair< double,double > >  & interval , std::vector< std::vector<double> > filter = create_Gaussian_filter(5,1) ,  double (*scalling_function_with_respect_to_distance_from_diagonal)( const std::pair< double , double >& point_in_diagram ) = constant_function, bool erase_below_diagonal = false , size_t number_of_pixels = 1000 , double min_ = -1 , double max_ = -1  );
     
     /**
 	 * Construction that takes at the input a name of a file with persistence intervals, a filter (radius 5 by default), a scaling function (constant by default), a boolean value which determines if the area of image below diagonal should, or should not be erased (should by default). The next parameter is the number of pixels in each direction (set to 1000 by default). and min and max values of images (both set to -1 by defaulet. If this is the case, the program will pick the right values based on the data).
@@ -150,7 +179,7 @@ public:
 	 * (6) a min x and y value of points that are to be taken into account. By default it is set to -1, in which case the program compute the values based on the data,
 	 * (6) a max x and y value of points that are to be taken into account. By default it is set to -1, in which case the program compute the values based on the data.
 	**/ 	
-    Persistence_heat_maps( const char* name_of_file_with_names_of_files_with_interval , std::vector< std::vector<double> > filter = create_Gaussian_filter(5,1) , double (*scalling_function_with_respect_to_distance_from_diagonal)( std::pair< double , double >& point_in_diagram ) = constant_function, bool erase_below_diagonal = false , size_t number_of_pixels = 1000 , double min_ = -1 , double max_ = -1  );
+    Persistence_heat_maps( const char* name_of_file_with_names_of_files_with_interval , std::vector< std::vector<double> > filter = create_Gaussian_filter(5,1) , double (*scalling_function_with_respect_to_distance_from_diagonal)( const std::pair< double , double >& point_in_diagram ) = constant_function, bool erase_below_diagonal = false , size_t number_of_pixels = 1000 , double min_ = -1 , double max_ = -1  );
 
 	
 	/**
@@ -176,7 +205,7 @@ public:
      * In the first line, the values min and max of the image are stored
      * In the next lines, we have the persistence images in a form of a bitmap image. 
     **/
-    void write_to_file( const char* filename );
+    void print_to_file( const char* filename );
     
     /**
      * A function that load a heat map from file to the current object (and arase qhatever was stored in the current object before).
@@ -277,7 +306,7 @@ private:
 	std::vector< std::vector<double> > check_and_initialize_maps( const std::vector<Persistence_heat_maps*>& maps );
     void construct( const std::vector< std::pair<double,double> >& intervals_  , 
 					std::vector< std::vector<double> > filter = create_Gaussian_filter(5,1),
-                    double (*scalling_function_with_respect_to_distance_from_diagonal)( std::pair< double , double >& point_in_diagram ) = constant_function, 
+                    double (*scalling_function_with_respect_to_distance_from_diagonal)( const std::pair< double , double >& point_in_diagram ) = constant_function, 
                     bool erase_below_diagonal = false , size_t number_of_pixels = 1000 , double min_ = -1 , double max_ = -1 );
                     
 	void set_up_parameters_for_basic_classes()
@@ -287,7 +316,7 @@ private:
 	}
     
     //data    
-    double (*scalling_function_with_respect_to_distance_from_diagonal)( std::pair< double , double >& point_in_diagram );    
+    double (*scalling_function_with_respect_to_distance_from_diagonal)( const std::pair< double , double >& point_in_diagram );    
     bool erase_below_diagonal;
     double min_;
     double max_;
@@ -298,7 +327,7 @@ private:
 //if min_ == max_, then the program is requested to set up the values itself based on persistence intervals
 void Persistence_heat_maps::construct( const std::vector< std::pair<double,double> >& intervals_  ,  
 									   std::vector< std::vector<double> > filter,
-									   double (*scalling_function_with_respect_to_distance_from_diagonal)( std::pair< double , double >& point_in_diagram ), 
+									   double (*scalling_function_with_respect_to_distance_from_diagonal)( const std::pair< double , double >& point_in_diagram ), 
 									   bool erase_below_diagonal , size_t number_of_pixels , double min_ , double max_ )
 {
     bool dbg = false;       
@@ -307,8 +336,8 @@ void Persistence_heat_maps::construct( const std::vector< std::pair<double,doubl
     if ( min_ == max_ )
     {
         //in this case, we want the program to set up the min_ and max_ values by itself.
-        min_ = INT_MAX;
-        max_ = -INT_MAX;
+        min_ = std::numeric_limits<int>::max();
+        max_ = -std::numeric_limits<int>::max();
         
         
         for ( size_t i = 0 ; i != intervals_.size() ; ++i )
@@ -364,6 +393,7 @@ void Persistence_heat_maps::construct( const std::vector< std::pair<double,doubl
 		y_grid -= filter.size()/2;
 		//note that the numbers x_grid and y_grid may be negative. 
 		
+		double scaling_value = this->scalling_function_with_respect_to_distance_from_diagonal(intervals_[pt_nr]);
 		
 		for ( size_t i = 0 ; i != filter.size() ; ++i )
 		{
@@ -376,7 +406,7 @@ void Persistence_heat_maps::construct( const std::vector< std::pair<double,doubl
 					  ((y_grid+j)>=0) && (y_grid+j<this->heat_map.size()) 
 				   )
 				{
-					this->heat_map[ y_grid+j ][ x_grid+i ] += filter[i][j];
+					this->heat_map[ y_grid+j ][ x_grid+i ] += scaling_value * filter[i][j];
 					if ( dbg )
 					{
 						std::cerr << "Position : (" << x_grid+i << "," << y_grid+j << ") got increased by the value : " << filter[i][j] << std::endl;
@@ -403,7 +433,7 @@ void Persistence_heat_maps::construct( const std::vector< std::pair<double,doubl
 
 Persistence_heat_maps::Persistence_heat_maps( const std::vector< std::pair< double,double > >  & interval , 
 											  std::vector< std::vector<double> > filter,  
-											  double (*scalling_function_with_respect_to_distance_from_diagonal)( std::pair< double , double >& point_in_diagram ), 
+											  double (*scalling_function_with_respect_to_distance_from_diagonal)( const std::pair< double , double >& point_in_diagram ), 
 											  bool erase_below_diagonal , size_t number_of_pixels , double min_ , double max_ )
 {
     this->construct( interval ,  filter ,  constant_function, erase_below_diagonal , number_of_pixels , min_ , max_ );
@@ -413,7 +443,7 @@ Persistence_heat_maps::Persistence_heat_maps( const std::vector< std::pair< doub
 
 Persistence_heat_maps::Persistence_heat_maps( const char* name_of_file_with_names_of_files_with_interval , 
 											  std::vector< std::vector<double> > filter, 
-											  double (*scalling_function_with_respect_to_distance_from_diagonal)( std::pair< double , double >& point_in_diagram ), 
+											  double (*scalling_function_with_respect_to_distance_from_diagonal)( const std::pair< double , double >& point_in_diagram ), 
 											  bool erase_below_diagonal , size_t number_of_pixels  , double min_ , double max_ )
 {    
     std::vector< std::pair< double , double > > intervals_ = read_standard_file( name_of_file_with_names_of_files_with_interval );   
@@ -545,7 +575,7 @@ void Persistence_heat_maps::plot( const char* filename )
 
 
 
-void Persistence_heat_maps::write_to_file( const char* filename )
+void Persistence_heat_maps::print_to_file( const char* filename )
 {
 	ofstream out;
 	out.open( filename );

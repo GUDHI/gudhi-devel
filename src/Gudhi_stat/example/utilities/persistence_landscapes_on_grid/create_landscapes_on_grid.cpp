@@ -23,7 +23,7 @@
 
 
 #include <gudhi/abstract_classes/Abs_Topological_data.h>
-#include <gudhi/concretizations/Persistence_landscape.h>
+#include <gudhi/concretizations/Persistence_landscape_on_grid.h>
 
 
 
@@ -36,9 +36,23 @@ using namespace Gudhi::Gudhi_stat;
 
 int main( int argc , char** argv )
 {
-	std::cout << "This program creates persistence landscapes of diagrams provided as an input. Please call this program with the names of files with persistence diagrams \n";
+	std::cout << "This program creates persistence landscape on grid of diagrams provided as an input.\n";
+	std::cout << "The first parameter of a program is an integer, a size of a grid.\n";
+	std::cout << "The second and third parameters are min and max of the grid. If you want those numbers to be computed based on the data, set them both to -1 \n";
+	std::cout << "The remoaning parameters are the names of files with persistence diagrams. \n";
+	
+	if ( argc < 4 )
+	{
+		std::cout << "Wrong parameter list, the program will now terminate \n";
+		return 1;
+	}
+	
+	size_t size_of_grid = (size_t)atoi( argv[1] );
+	double min_ = atof( argv[2] );
+	double max_ = atof( argv[3] );
+	
 	std::vector< const char* > filenames;
-	for ( int i = 1 ; i < argc ; ++i )
+	for ( int i = 4 ; i < argc ; ++i )
 	{
 		filenames.push_back( argv[i] );
 	}
@@ -46,7 +60,16 @@ int main( int argc , char** argv )
 	std::cout << "Creating persistence landscapes...\n";	
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{
-		Persistence_landscape l( filenames[i] , 1 );
+		Persistence_landscape_on_grid l;
+		if ( (min_ != -1) || (max_ != -1) )
+		{
+			l = Persistence_landscape_on_grid( filenames[i] , min_ , max_ , size_of_grid );
+		}
+		else
+		{
+			//(min_ == -1) && (max_ == -1), in this case the program will find min_ and max_ based on the data.
+			l = Persistence_landscape_on_grid( filenames[i] , size_of_grid );
+		}		
 		std::stringstream ss;
 		ss << filenames[i] << ".land";
 		l.print_to_file( ss.str().c_str() );

@@ -66,7 +66,8 @@ struct maximum_distance
 
 
 /**
-* This is an implementation of idea presented in the paper by Steve, Matthew and Max.
+* This is an implementation of idea presented in the paper by Steve, Matthew and Max. The parameter of the class is the class that computes distance used to construct the vectors. The typical function is
+* either Eucludean of maximum (Manhattan) distance. 
 **/
 
 template <typename F>
@@ -135,6 +136,19 @@ public:
 	 * Write a vector to a file.
 	**/
     void write_to_file( const char* filename );
+    
+    /**
+	 * Write a vector to a file.
+	**/
+    void print_to_file( const char* filename )
+    {
+		this->write_to_file(filename);
+	}
+    
+    /**
+	 * Loading a vector to a file.
+	**/
+    void load_from_file( const char* filename );
     
     //concretization of abstract methods:
     double project_to_R( int number_of_function );
@@ -452,6 +466,28 @@ void Vector_distances_in_diagram<F>::write_to_file( const char* filename )
 	}
 	
 	out.close();
+}
+
+template < typename F>
+void Vector_distances_in_diagram<F>::load_from_file( const char* filename )
+{
+	//check if the file exist.
+	if ( !( access( filename, F_OK ) != -1 ) )
+	{
+		cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
+		throw "The file from which you are trying to read the persistence landscape do not exist. The program will now terminate \n";
+	}	
+	std::ifstream in;
+	in.open( filename );
+	
+	double number;
+	while ( true )
+	{		
+		in >> number;
+		if ( in.eof() )break;
+		this->sorted_vector_of_distnaces.push_back(number);
+	}	
+	in.close();
 }
 
 template < typename F>

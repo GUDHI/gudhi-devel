@@ -83,7 +83,7 @@ int main( int argc , char** argv )
    //test to construct persistence heat map:
     std::vector< std::vector<double> > filter = create_Gaussian_filter(100,1);		
 	Persistence_heat_maps p( "file_with_diagram" , filter ,  constant_function, false , 1000 , 0 , 1 );
-	p.write_to_file( "persistence_heat_map_from_file_with_diagram" );
+	p.print_to_file( "persistence_heat_map_from_file_with_diagram" );
 	
 	Persistence_heat_maps q;
 	q.load_from_file( "persistence_heat_map_from_file_with_diagram" );	
@@ -126,7 +126,7 @@ int main( int argc , char** argv )
 	Persistence_heat_maps av;	
 	av.compute_average( to_average );
 	
-	av.write_to_file( "template_average_of_heat_maps" );
+	av.print_to_file( "template_average_of_heat_maps" );
 */	
 
 /*
@@ -162,7 +162,7 @@ int main( int argc , char** argv )
 	Persistence_heat_maps median;	
 	median.compute_median( to_compute_median );
 	
-	median.write_to_file( "template_median_of_heat_maps" );
+	median.print_to_file( "template_median_of_heat_maps" );
 */
 
 
@@ -179,7 +179,7 @@ int main( int argc , char** argv )
 	Persistence_heat_maps percentage_of_active;	
 	percentage_of_active.compute_percentage_of_active( to_compute_percentage_of_active , 0.1 );
 	
-	percentage_of_active.write_to_file( "template_percentage_of_active_of_heat_maps" );
+	percentage_of_active.print_to_file( "template_percentage_of_active_of_heat_maps" );
 	//percentage_of_active.plot( "template_percentage_of_active_of_heat_maps" );
 	
 	

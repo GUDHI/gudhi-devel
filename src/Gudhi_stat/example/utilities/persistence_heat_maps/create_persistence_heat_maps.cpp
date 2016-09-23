@@ -23,7 +23,7 @@
 
 
 #include <gudhi/abstract_classes/Abs_Topological_data.h>
-#include <gudhi/concretizations/Persistence_landscape.h>
+#include <gudhi/concretizations/Persistence_heat_maps.h>
 
 
 
@@ -31,44 +31,46 @@ using namespace Gudhi;
 using namespace Gudhi::Gudhi_stat;
 
 #include <iostream>
+#include <sstream>
+
 
 
 int main( int argc , char** argv )
 {
-	std::cout << "This program computes average persistence landscape of persistence landscapes created based on persistence diagrams provided as an input. Please call this program with the names of files with persistence diagrams \n";
-	std::vector< const char* > filenames;
+	std::cout << "This program creates persistence landscape on grid of diagrams provided as an input.\n";
+	std::cout << "The first parameter of a program is an integer, a size of a grid.\n";
+	std::cout << "The second and third parameters are min and max of the grid. If you want those numbers to be computed based on the data, set them both to -1 \n";
+	std::cout << "The remoaning parameters are the names of files with persistence diagrams. \n";
 	
-	if ( argc == 1 )
+	if ( argc < 4 )
 	{
-		std::cout << "No input files given, the program will now terminate \n";
+		std::cout << "Wrong parameter list, the program will now terminate \n";
 		return 1;
 	}
 	
-	for ( int i = 1 ; i < argc ; ++i )
+	size_t size_of_grid = (size_t)atoi( argv[1] );
+	double min_ = atof( argv[2] );
+	double max_ = atof( argv[3] );
+	
+	std::vector< const char* > filenames;
+	for ( int i = 4 ; i < argc ; ++i )
 	{
 		filenames.push_back( argv[i] );
 	}
-	
-	std::cout << "Creating persistence landscapes...\n";
-	std::vector< Abs_Topological_data_with_averages* > lands;
-	for ( size_t i = 0 ; i != filenames.size() ; ++i )
-	{
-		Persistence_landscape* l = new Persistence_landscape;
-		l->load_landscape_from_file( filenames[i] );
-		lands.push_back( (Abs_Topological_data_with_averages*)l );
-	}
-	
-	Persistence_landscape av;
-	av.compute_average( lands );
-	
-	av.print_to_file( "average" );
-	
-	for ( size_t i = 0 ; i != filenames.size() ; ++i )
-	{
-		delete lands[i];
-	}
-	
-	std::cout << "Done \n";
 
+	
+	
+	
+	std::cout << "Creating persistence heat maps...\n";	
+	std::vector< std::vector<double> > filter = create_Gaussian_filter(10,1);
+	
+	for ( size_t i = 0 ; i != filenames.size() ; ++i )
+	{		
+		Persistence_heat_maps l( filenames[i] , filter, constant_function, false , size_of_grid , min_ , max_ );	
+		std::stringstream ss;
+		ss << filenames[i] << ".land";
+		l.print_to_file( ss.str().c_str() );
+	}
+	std::cout << "Done \n";
 	return 0;
 }

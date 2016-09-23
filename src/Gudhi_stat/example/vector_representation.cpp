@@ -50,7 +50,6 @@ int main( int argc , char** argv )
 	}
 	
 	Vector_distances_in_diagram< euclidean_distance<double> > p( argv[1] , 100 );
-
 	cout << "This is a vector corresponding to the input persistence diagram : \n";	
 	cout << p << endl;
 

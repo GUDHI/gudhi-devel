@@ -23,7 +23,7 @@
 
 
 #include <gudhi/abstract_classes/Abs_Topological_data.h>
-#include <gudhi/concretizations/Persistence_landscapes_on_grid.h>
+#include <gudhi/concretizations/Persistence_landscape_on_grid.h>
 
 
 

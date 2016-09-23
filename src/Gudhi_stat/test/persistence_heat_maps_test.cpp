@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(check_construction_of_heat_maps)
 {	
 	std::vector< std::vector<double> > filter = create_Gaussian_filter(100,1);		
 	Persistence_heat_maps p( "data/file_with_diagram" , filter ,  constant_function, false , 1000 , 0 , 1 );
-	p.write_to_file( "data/persistence_heat_map_from_file_with_diagram" );
+	p.print_to_file( "data/persistence_heat_map_from_file_with_diagram" );
 	
 	Persistence_heat_maps q;
 	q.load_from_file( "data/persistence_heat_map_from_file_with_diagram" );	

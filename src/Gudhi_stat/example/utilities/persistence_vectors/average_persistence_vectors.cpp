@@ -23,7 +23,7 @@
 
 
 #include <gudhi/abstract_classes/Abs_Topological_data.h>
-#include <gudhi/concretizations/Persistence_landscape.h>
+#include <gudhi/concretizations/Vector_distances_in_diagram.h>
 
 
 
@@ -53,12 +53,12 @@ int main( int argc , char** argv )
 	std::vector< Abs_Topological_data_with_averages* > lands;
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{
-		Persistence_landscape* l = new Persistence_landscape;
-		l->load_landscape_from_file( filenames[i] );
+		Vector_distances_in_diagram< euclidean_distance<double> >* l = new Vector_distances_in_diagram< euclidean_distance<double> >;
+		l->load_from_file( filenames[i] );
 		lands.push_back( (Abs_Topological_data_with_averages*)l );
 	}
 	
-	Persistence_landscape av;
+	Vector_distances_in_diagram< euclidean_distance<double> > av;
 	av.compute_average( lands );
 	
 	av.print_to_file( "average" );
