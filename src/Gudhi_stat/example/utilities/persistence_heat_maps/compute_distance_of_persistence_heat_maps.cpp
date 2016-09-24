@@ -38,7 +38,7 @@ int main( int argc , char** argv )
 {
 	std::cout << "This program compute dsitance of persistence landscapes stored in a file (the file needs to be created beforehand). \n";	
 	std::cout << "The first parameter of a program is an interger p. The program compute L^p distance of the two landscapes. For L^infty distance choose p = -1. \n";
-	std::cout << "The remaining parameters of this programs are names of files with persistence landscapes.";
+	std::cout << "The remaining parameters of this programs are names of files with persistence landscapes.\n";
 	
 	if ( argc < 3 )
 	{
@@ -46,7 +46,7 @@ int main( int argc , char** argv )
 		return 1;
 	}
 	
-	int p = atoi( argv[3] );
+	int p = atoi( argv[1] );
 
 	std::vector< const char* > filenames;
 	for ( int i = 2 ; i < argc ; ++i )

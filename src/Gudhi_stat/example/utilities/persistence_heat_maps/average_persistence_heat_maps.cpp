@@ -61,7 +61,7 @@ int main( int argc , char** argv )
 	Persistence_heat_maps av;
 	av.compute_average( maps );
 	
-	av.print_to_file( "average" );
+	av.print_to_file( "average.mps" );
 	
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{

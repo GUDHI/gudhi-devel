@@ -40,9 +40,10 @@ int main( int argc , char** argv )
 	std::cout << "This program creates persistence landscape on grid of diagrams provided as an input.\n";
 	std::cout << "The first parameter of a program is an integer, a size of a grid.\n";
 	std::cout << "The second and third parameters are min and max of the grid. If you want those numbers to be computed based on the data, set them both to -1 \n";
-	std::cout << "The remoaning parameters are the names of files with persistence diagrams. \n";
+	std::cerr << "The fourth parameter is an integer, the standard deviation of a gaussian kernel expressed in a number of pixels \n";
+	std::cout << "The remaining parameters are the names of files with persistence diagrams. \n";
 	
-	if ( argc < 4 )
+	if ( argc < 5 )
 	{
 		std::cout << "Wrong parameter list, the program will now terminate \n";
 		return 1;
@@ -51,24 +52,26 @@ int main( int argc , char** argv )
 	size_t size_of_grid = (size_t)atoi( argv[1] );
 	double min_ = atof( argv[2] );
 	double max_ = atof( argv[3] );
+	size_t stdiv = atof( argv[4] );
 	
 	std::vector< const char* > filenames;
-	for ( int i = 4 ; i < argc ; ++i )
+	for ( int i = 5 ; i < argc ; ++i )
 	{
 		filenames.push_back( argv[i] );
 	}
 
 	
 	
-	
 	std::cout << "Creating persistence heat maps...\n";	
-	std::vector< std::vector<double> > filter = create_Gaussian_filter(10,1);
+	std::vector< std::vector<double> > filter = create_Gaussian_filter(stdiv,1);
 	
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{		
-		Persistence_heat_maps l( filenames[i] , filter, constant_function, false , size_of_grid , min_ , max_ );	
+		std::cout << "Creating a heat map based on a file : " << filenames[i] << std::endl;
+		Persistence_heat_maps l( filenames[i] , filter, constant_function, false , size_of_grid , min_ , max_ );		
+		
 		std::stringstream ss;
-		ss << filenames[i] << ".land";
+		ss << filenames[i] << ".mps";
 		l.print_to_file( ss.str().c_str() );
 	}
 	std::cout << "Done \n";

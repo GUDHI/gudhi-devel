@@ -38,13 +38,7 @@ int main( int argc , char** argv )
 {
 	std::cout << "This program plot persistence landscape stored in a file (the file needs to be created beforehand). Please call the code with the name of a landsape file \n";	
 	Persistence_heat_maps l;
-	l.load_from_file( argv[1] );
-	
-	std::stringstream ss;
-	ss << argv[1] << "_gnuplot_script";
-	l.plot( ss.str().c_str() );
-	
-	std::cout << "Done \n";
-		
+	l.load_from_file( argv[1] );		
+	l.plot( argv[1] );	
 	return 0;
 }
