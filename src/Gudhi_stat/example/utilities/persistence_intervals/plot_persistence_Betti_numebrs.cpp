@@ -82,12 +82,12 @@ int main( int argc , char** argv )
 	out << endl;
 	out.close();
 	
-	for ( size_t i = 0 ; i != pbns.size() ; ++i )
-	{
-		cout << pbns[i].first << " " << pbns[i].second << std::endl;
-	}	
+	//for ( size_t i = 0 ; i != pbns.size() ; ++i )
+	//{
+	//	cout << pbns[i].first << " " << pbns[i].second << std::endl;
+	//}	
 	
-	std::cout << "To vizualize, open gnuplot and type: \'load " << gnuplot_script.str().c_str() << "\'" << std::endl;
+	std::cout << "To vizualize, open gnuplot and type: load \'" << gnuplot_script.str().c_str() << "\'" << std::endl;
 			
 	return 0;
 }

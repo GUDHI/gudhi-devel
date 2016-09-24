@@ -27,6 +27,8 @@
 #include <gudhi/concretizations/Persistence_intervals.h>
 
 #include <iostream>
+#include <vector>
+#include <limits>
 
 
 
@@ -38,14 +40,33 @@ using namespace std;
 
 int main( int argc , char** argv )
 {
-	std::cout << "This program compute minimum birth and the maximum death time for a collection of persistence intervals \n";
-	if ( argc != 2 )
+	//std::cout << "This program compute minimum birth and the maximum death time for a collection of persistence intervals \n";
+	//if ( argc != 2 )
+	//{
+	//	cout << "To run this program, please provide the name of a file with persistence diagram \n";
+	//	return 1;
+	//}
+	//Persistence_intervals p( argv[1] );
+	//std::pair<double,double> min_max_ = p.min_max();
+	//cout << "Birth-death range : min: " <<  min_max_.first << ", max: " << min_max_.second << endl;
+	
+	std::vector< const char* > filenames;
+	for ( int i = 1 ; i < argc ; ++i )
 	{
-		cout << "To run this program, please provide the name of a file with persistence diagram \n";
-		return 1;
+		filenames.push_back( argv[i] );
 	}
-
-	Persistence_intervals p( argv[1] );
-	std::pair<double,double> min_max_ = p.min_max();
-	cout << "Birth-death range : min: " <<  min_max_.first << ", max: " << min_max_.second << endl;
+	
+	double min_ = std::numeric_limits<double>::max();
+	double max_ = -std::numeric_limits<double>::max();
+	
+	for ( size_t file_no = 0 ; file_no != filenames.size() ; ++file_no )
+	{
+		std::cout << "Creating diagram based on a file : " << filenames[file_no] << std::endl;
+		Persistence_intervals p( filenames[file_no] );
+		std::pair<double,double> min_max_ = p.min_max();
+		if ( min_max_.first < min_ )min_ = min_max_.first;
+		if ( min_max_.second > max_ )max_ = min_max_.second;
+	}
+	cout << "Birth-death range : min: " <<  min_ << ", max: " << max_ << endl;
+	return 0;
 }
