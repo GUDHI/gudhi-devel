@@ -61,7 +61,7 @@ int main( int argc , char** argv )
 	Persistence_landscape_on_grid av;
 	av.compute_average( lands );
 	
-	av.print_to_file( "average" );
+	av.print_to_file( "average.g_land" );
 	
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{

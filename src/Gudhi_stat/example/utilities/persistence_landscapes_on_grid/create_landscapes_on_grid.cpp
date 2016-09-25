@@ -39,7 +39,7 @@ int main( int argc , char** argv )
 	std::cout << "This program creates persistence landscape on grid of diagrams provided as an input.\n";
 	std::cout << "The first parameter of a program is an integer, a size of a grid.\n";
 	std::cout << "The second and third parameters are min and max of the grid. If you want those numbers to be computed based on the data, set them both to -1 \n";
-	std::cout << "The remoaning parameters are the names of files with persistence diagrams. \n";
+	std::cout << "The remaining parameters are the names of files with persistence diagrams. \n";
 	
 	if ( argc < 4 )
 	{
@@ -60,6 +60,7 @@ int main( int argc , char** argv )
 	std::cout << "Creating persistence landscapes...\n";	
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{
+		std::cout << "Creating persistence landscape on a grid based on a file : " << filenames[i] << std::endl;
 		Persistence_landscape_on_grid l;
 		if ( (min_ != -1) || (max_ != -1) )
 		{
@@ -71,7 +72,7 @@ int main( int argc , char** argv )
 			l = Persistence_landscape_on_grid( filenames[i] , size_of_grid );
 		}		
 		std::stringstream ss;
-		ss << filenames[i] << ".land";
+		ss << filenames[i] << ".g_land";
 		l.print_to_file( ss.str().c_str() );
 	}
 	std::cout << "Done \n";
