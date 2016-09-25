@@ -35,7 +35,8 @@ using namespace Gudhi::Gudhi_stat;
 
 int main( int argc , char** argv )
 {
-	std::cout << "This program computes average persistence landscape of persistence landscapes created based on persistence diagrams provided as an input. Please call this program with the names of files with persistence diagrams \n";
+	std::cout << "This program computes average persistence landscape of persistence landscapes created based on persistence diagrams provided as an input (you must create them first).\n"; 
+	std::cout << "Please call this program with the names of files with persistence landscapes. The program will create a persistence landscape which will be their average \n";
 	std::vector< const char* > filenames;
 	
 	if ( argc == 1 )
@@ -61,7 +62,7 @@ int main( int argc , char** argv )
 	Persistence_landscape av;
 	av.compute_average( lands );
 	
-	av.print_to_file( "average" );
+	av.print_to_file( "average.land" );
 	
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{
