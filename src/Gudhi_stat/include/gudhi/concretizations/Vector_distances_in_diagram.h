@@ -170,16 +170,59 @@ public:
 	}
     
     //concretization of abstract methods:
+     /**
+     * Compute projection to real numbers of persistence vector. 
+    **/
     double project_to_R( int number_of_function );
+    
+    /**
+     * Compute a vectorization of a persistent vectors.
+    **/
     std::vector<double> vectorize( int number_of_function );
+    
+    /**
+     * Compute a average of two persistent vectors.
+    **/
     void compute_average( std::vector< Abs_Topological_data_with_averages* > to_average );
+    
+    /**
+     * Compute a distance of two persistent vectors.
+    **/
     double distance( const Abs_Topological_data_with_distances* second , double power = 1);
+    
+    /**
+     * Compute a scalar product of two persistent vectors.
+    **/ 
     double compute_scalar_product( const Abs_Topological_data_with_scalar_product* second );
     
-    //For visualization use output from vectorize and build histograms. 
+    /**
+    * For visualization use output from vectorize and build histograms. 
+    **/
     std::vector< double > output_for_visualization()
     {
 		return this->sorted_vector_of_distnaces;
+	}
+	
+	/**
+	 * Create a gnuplot script to vizualize the data structure. 
+	 **/ 
+	void plot( const char* filename )
+	{
+		std::stringstream gnuplot_script;
+		gnuplot_script << filename << "_Gnuplot_script";
+		ofstream out;
+		out.open( gnuplot_script.str().c_str() );
+		out << "set style data histogram" << std::endl;
+		out << "set style histogram cluster gap 1" << std::endl;
+		out << "set style fill solid border -1" << std::endl;
+		out << "plot '-' notitle" << std::endl;    
+		for ( size_t i = 0 ; i != this->sorted_vector_of_distnaces.size() ; ++i )
+		{
+			out << this->sorted_vector_of_distnaces[i]  << std::endl;
+		}		
+		out << endl;
+		out.close();
+		std::cout << "To vizualize, open gnuplot and type: load \'" << gnuplot_script.str().c_str() << "\'" <<  std::endl;			
 	}
     
 

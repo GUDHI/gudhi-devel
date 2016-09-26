@@ -99,4 +99,6 @@ target_link_libraries(utilities/persistence_vectors/compute_distance_of_persiste
 add_executable ( utilities/persistence_vectors/compute_scalar_product_of_persistence_vectors utilities/persistence_vectors/compute_scalar_product_of_persistence_vectors.cpp )
 target_link_libraries(utilities/persistence_vectors/compute_scalar_product_of_persistence_vectors ${Boost_SYSTEM_LIBRARY})
 
+add_executable ( utilities/persistence_vectors/plot_persistence_vectors utilities/persistence_vectors/plot_persistence_vectors.cpp )
+target_link_libraries(utilities/persistence_vectors/plot_persistence_vectors ${Boost_SYSTEM_LIBRARY})
 
