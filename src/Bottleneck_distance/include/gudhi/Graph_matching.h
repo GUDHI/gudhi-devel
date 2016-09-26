@@ -31,8 +31,7 @@ namespace Gudhi {
 
 namespace Bottleneck_distance {
 
-/** \brief Function to use in order to compute the Bottleneck distance between two persistence diagrams.
- *
+/** \brief Function to use in order to compute the Bottleneck distance between two persistence diagrams. You get an additive e-approximation.
  *
  *
  * \ingroup bottleneck_distance
