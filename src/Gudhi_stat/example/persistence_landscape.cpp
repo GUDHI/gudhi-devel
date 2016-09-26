@@ -159,9 +159,9 @@ int main( int argc , char** argv )
 	{
 		Persistence_landscape p( "../test/data/file_with_diagram" );
 		Persistence_landscape q( "../test/data/file_with_diagram_1" );
-		cout << "Scalar product : " <<  p.compute_scalar_product( &q ) << endl;
-		
+		cout << "Scalar product : " <<  p.compute_scalar_product( &q ) << endl;		
 	}
+
 	
 	return 0;
 }

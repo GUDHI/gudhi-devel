@@ -133,8 +133,13 @@ int main( int argc , char** argv )
 	*/
 	
 
-	Persistence_landscape_on_grid p( "file_with_diagram", 0,1,100 );
-	Persistence_landscape_on_grid q( "file_with_diagram_1", 0,1,100 );
+	Persistence_landscape_on_grid p( "file_with_diagram", 0,1,10000 );
+	Persistence_landscape_on_grid q( "file_with_diagram_1", 0,1,10000 );
+	
+	//std::vector< std::pair< double,double > > aa;
+	//aa.push_back( std::make_pair( 0,1 ) );
+	//Persistence_landscape_on_grid p( aa, 0,1,10 );
+	//Persistence_landscape_on_grid q( aa, 0,1,10 );
 	cerr <<  p.compute_scalar_product( &q ) << endl;
 
 		
