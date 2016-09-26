@@ -23,7 +23,7 @@
 
 
 #include <gudhi/abstract_classes/Abs_Topological_data.h>
-#include <gudhi/concretizations/Persistence_heat_maps.h>
+#include <gudhi/concretizations/PSSK.h>
 
 
 
@@ -37,7 +37,7 @@ using namespace Gudhi::Gudhi_stat;
 
 int main( int argc , char** argv )
 {
-	std::cout << "This program creates persistence heat map of diagrams provided as an input.\n";
+	std::cout << "This program creates PSSK of diagrams provided as an input.\n";
 	std::cout << "The first parameter of a program is an integer, a size of a grid.\n";
 	std::cout << "The second and third parameters are min and max of the grid. If you want those numbers to be computed based on the data, set them both to -1 \n";
 	std::cerr << "The fourth parameter is an integer, the standard deviation of a gaussian kernel expressed in a number of pixels \n";
@@ -58,20 +58,18 @@ int main( int argc , char** argv )
 	for ( int i = 5 ; i < argc ; ++i )
 	{
 		filenames.push_back( argv[i] );
-	}
-
-	
+	}	
 	
 	std::cout << "Creating persistence heat maps...\n";	
-	std::vector< std::vector<double> > filter = create_Gaussian_filter(stdiv,1);
+	std::vector< std::vector<double> > filter = create_Gaussian_filter(stdiv,1);	
 	
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{		
 		std::cout << "Creating a heat map based on a file : " << filenames[i] << std::endl;
-		Persistence_heat_maps l( filenames[i] , filter, constant_function, false , size_of_grid , min_ , max_ );		
+		PSSK l( filenames[i] , filter , size_of_grid , min_ , max_ );		
 		
 		std::stringstream ss;
-		ss << filenames[i] << ".mps";
+		ss << filenames[i] << ".pssk";
 		l.print_to_file( ss.str().c_str() );
 	}
 	std::cout << "Done \n";

@@ -314,7 +314,7 @@ public:
 	void compute_average( std::vector< Abs_Topological_data_with_averages* > to_average );	
 	double compute_scalar_product( const Abs_Topological_data_with_scalar_product* second_ );
 	
-private:
+protected:
 	//private methods
 	std::vector< std::vector<double> > check_and_initialize_maps( const std::vector<Persistence_heat_maps*>& maps );
     void construct( const std::vector< std::pair<double,double> >& intervals_  , 

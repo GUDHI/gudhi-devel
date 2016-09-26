@@ -102,3 +102,20 @@ target_link_libraries(utilities/persistence_vectors/compute_scalar_product_of_pe
 add_executable ( utilities/persistence_vectors/plot_persistence_vectors utilities/persistence_vectors/plot_persistence_vectors.cpp )
 target_link_libraries(utilities/persistence_vectors/plot_persistence_vectors ${Boost_SYSTEM_LIBRARY})
 
+
+#PSSK
+add_executable ( utilities/PSSK/average_pssk utilities/PSSK/average_pssk.cpp )
+target_link_libraries(utilities/PSSK/average_pssk ${Boost_SYSTEM_LIBRARY})
+
+add_executable ( utilities/PSSK/create_pssk utilities/PSSK/create_pssk.cpp )
+target_link_libraries(utilities/PSSK/create_pssk ${Boost_SYSTEM_LIBRARY})
+
+add_executable ( utilities/PSSK/plot_pssk utilities/PSSK/plot_pssk.cpp )
+target_link_libraries(utilities/PSSK/plot_pssk ${Boost_SYSTEM_LIBRARY})
+
+add_executable ( utilities/PSSK/compute_distance_of_pssk utilities/PSSK/compute_distance_of_pssk.cpp )
+target_link_libraries(utilities/PSSK/compute_distance_of_pssk ${Boost_SYSTEM_LIBRARY})
+
+add_executable ( utilities/PSSK/compute_scalar_product_of_pssk utilities/PSSK/compute_scalar_product_of_pssk.cpp )
+target_link_libraries(utilities/PSSK/compute_scalar_product_of_pssk ${Boost_SYSTEM_LIBRARY})
+
