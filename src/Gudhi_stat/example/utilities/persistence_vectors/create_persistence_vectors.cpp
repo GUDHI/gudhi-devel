@@ -43,10 +43,10 @@ int main( int argc , char** argv )
 		filenames.push_back( argv[i] );
 	}
 	
-	std::cout << "Creating persistence vectors...\n";	
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{
-		Vector_distances_in_diagram< euclidean_distance<double> > l( filenames[i] , -1 );
+		std::cerr << "Creatign persistence vectors based on a file : " << filenames[i] << std::endl;
+		Vector_distances_in_diagram< euclidean_distance<double> > l( filenames[i] , -1 );				
 		std::stringstream ss;
 		ss << filenames[i] << ".vect";
 		l.print_to_file( ss.str().c_str() );
@@ -54,3 +54,4 @@ int main( int argc , char** argv )
 	std::cout << "Done \n";
 	return 0;
 }
+

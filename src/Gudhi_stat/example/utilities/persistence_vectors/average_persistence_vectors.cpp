@@ -35,7 +35,8 @@ using namespace Gudhi::Gudhi_stat;
 
 int main( int argc , char** argv )
 {
-	std::cout << "This program computes average persistence landscape of persistence landscapes created based on persistence diagrams provided as an input. Please call this program with the names of files with persistence diagrams \n";
+	std::cout << "This program computes average persistence vector of persistence vectors created based on persistence diagrams provided as an input. \n";
+	std::cout << "Please call this program with the names of files with persistence diagrams \n";
 	std::vector< const char* > filenames;
 	
 	if ( argc == 1 )
@@ -49,10 +50,10 @@ int main( int argc , char** argv )
 		filenames.push_back( argv[i] );
 	}
 	
-	std::cout << "Creating persistence landscapes...\n";
+	std::cout << "Reading persistence vectors...\n";
 	std::vector< Abs_Topological_data_with_averages* > lands;
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
-	{
+	{		
 		Vector_distances_in_diagram< euclidean_distance<double> >* l = new Vector_distances_in_diagram< euclidean_distance<double> >;
 		l->load_from_file( filenames[i] );
 		lands.push_back( (Abs_Topological_data_with_averages*)l );
@@ -61,7 +62,7 @@ int main( int argc , char** argv )
 	Vector_distances_in_diagram< euclidean_distance<double> > av;
 	av.compute_average( lands );
 	
-	av.print_to_file( "average" );
+	av.print_to_file( "average.vect" );
 	
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{

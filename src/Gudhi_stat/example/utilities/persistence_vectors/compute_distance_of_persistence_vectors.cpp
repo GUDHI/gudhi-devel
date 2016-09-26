@@ -36,9 +36,9 @@ using namespace Gudhi::Gudhi_stat;
 
 int main( int argc , char** argv )
 {
-	std::cout << "This program compute dsitance of persistence vectors stored in a file (the file needs to be created beforehand). \n";	
-	std::cout << "The first parameter of a program is an interger p. The program compute l^p distance of the vectors. For L^infty distance choose p = -1. \n";
-	std::cout << "The remaining parameters of this programs are names of files with persistence vectors.";
+	std::cout << "This program compute distance of persistence vectors stored in a file (the file needs to be created beforehand). \n";	
+	std::cout << "The first parameter of a program is an interger p. The program compute l^p distance of the vectors. For l^infty distance choose p = -1. \n";
+	std::cout << "The remaining parameters of this programs are names of files with persistence vectors.\n";
 	
 	if ( argc < 3 )
 	{
@@ -46,7 +46,7 @@ int main( int argc , char** argv )
 		return 1;
 	}
 	
-	int p = atoi( argv[3] );
+	int p = atoi( argv[1] );
 
 	std::vector< const char* > filenames;
 	for ( int i = 2 ; i < argc ; ++i )
@@ -57,6 +57,7 @@ int main( int argc , char** argv )
 	vectors.reserve( filenames.size() );
 	for ( size_t file_no = 0 ; file_no != filenames.size() ; ++file_no )
 	{
+		//cerr << filenames[file_no] << endl;
 		Vector_distances_in_diagram< euclidean_distance<double> >* l = new Vector_distances_in_diagram< euclidean_distance<double> >;
 		l->load_from_file( filenames[file_no] );
 		vectors.push_back( l );
@@ -71,11 +72,11 @@ int main( int argc , char** argv )
 		std::vector< double > v( filenames.size() , 0 );
 		distance[i] = v;
 	}
-	
+		
 	//and now we can compute the distances:
 	for ( size_t i = 0 ; i != vectors.size() ; ++i )
 	{
-		for ( size_t j = i ; j != vectors.size() ; ++j )
+		for ( size_t j = i+1 ; j != vectors.size() ; ++j )
 		{
 			distance[i][j] = distance[j][i] = ((Vector_distances_in_diagram< euclidean_distance<double> >*)vectors[i])->distance( vectors[j] , p ) ;
 		}

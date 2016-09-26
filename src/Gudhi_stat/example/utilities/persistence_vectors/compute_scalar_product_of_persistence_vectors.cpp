@@ -37,7 +37,7 @@ using namespace Gudhi::Gudhi_stat;
 int main( int argc , char** argv )
 {
 	std::cout << "This program compute scalar product of persistence vectors stored in a file (the file needs to be created beforehand). \n";	
-	std::cout << "The parameters of this programs are names of files with persistence vectors.";
+	std::cout << "The parameters of this programs are names of files with persistence vectors.\n";
 
 	std::vector< const char* > filenames;
 	for ( int i = 1 ; i < argc ; ++i )

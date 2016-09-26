@@ -88,7 +88,7 @@ std::vector< std::vector<double> > create_Gaussian_filter( size_t pixel_radius ,
             kernel[x + pixel_radius][y + pixel_radius] = (exp(-(r*r)/sigma_sqr))/(3.141592 * sigma_sqr);
             sum += kernel[x + pixel_radius][y + pixel_radius];            
         }
-    }
+    }      
  
     // normalize the kernel
     for( size_t i = 0; i != kernel.size() ; ++i)
@@ -99,6 +99,19 @@ std::vector< std::vector<double> > create_Gaussian_filter( size_t pixel_radius ,
 		}
             
     }
+    
+    if ( dbg )
+    {
+		std::cerr << "Here is the kernel : \n";
+		for( size_t i = 0; i != kernel.size() ; ++i)
+		{
+			for( size_t j = 0; j != kernel[i].size() ; ++j)
+			{
+				std::cerr << kernel[i][j] << " ";
+			}
+			std::cerr << std::endl;
+		}
+	}
     return kernel;
 }
 
@@ -112,7 +125,7 @@ std::vector< std::vector<double> > create_Gaussian_filter( size_t pixel_radius ,
 **/ 
 
 double constant_function( const std::pair< double , double >& point_in_diagram )
-{
+{	
 	return 1;
 }
 
@@ -179,7 +192,7 @@ public:
 	 * (6) a min x and y value of points that are to be taken into account. By default it is set to -1, in which case the program compute the values based on the data,
 	 * (6) a max x and y value of points that are to be taken into account. By default it is set to -1, in which case the program compute the values based on the data.
 	**/ 	
-    Persistence_heat_maps( const char* name_of_file_with_names_of_files_with_interval , std::vector< std::vector<double> > filter = create_Gaussian_filter(5,1) , double (*scalling_function_with_respect_to_distance_from_diagonal)( const std::pair< double , double >& point_in_diagram ) = constant_function, bool erase_below_diagonal = false , size_t number_of_pixels = 1000 , double min_ = -1 , double max_ = -1  );
+    Persistence_heat_maps( const char* filename , std::vector< std::vector<double> > filter = create_Gaussian_filter(5,1) , double (*scalling_function_with_respect_to_distance_from_diagonal)( const std::pair< double , double >& point_in_diagram ) = constant_function, bool erase_below_diagonal = false , size_t number_of_pixels = 1000 , double min_ = -1 , double max_ = -1  );
 
 	
 	/**
@@ -362,6 +375,7 @@ void Persistence_heat_maps::construct( const std::vector< std::pair<double,doubl
 
     this->min_ = min_;
     this->max_ = max_;    
+    this->scalling_function_with_respect_to_distance_from_diagonal = scalling_function_with_respect_to_distance_from_diagonal;
 
 
     //initialization of the structure heat_map
@@ -393,12 +407,20 @@ void Persistence_heat_maps::construct( const std::vector< std::pair<double,doubl
 		y_grid -= filter.size()/2;
 		//note that the numbers x_grid and y_grid may be negative. 
 		
+		if ( dbg )
+		{
+			std::cerr << "After shift : \n";;
+			std::cerr << "x_grid : " << x_grid << endl;
+			std::cerr << "y_grid : " << y_grid << endl;
+		}
+				
 		double scaling_value = this->scalling_function_with_respect_to_distance_from_diagonal(intervals_[pt_nr]);
+
 		
 		for ( size_t i = 0 ; i != filter.size() ; ++i )
 		{
 			for ( size_t j = 0 ; j != filter.size() ; ++j )
-			{
+			{			
 				//if the point (x_grid+i,y_grid+j) is the correct point in the grid.						
 				if ( 
 					  ((x_grid+i)>=0) && (x_grid+i<this->heat_map.size()) 
@@ -406,6 +428,7 @@ void Persistence_heat_maps::construct( const std::vector< std::pair<double,doubl
 					  ((y_grid+j)>=0) && (y_grid+j<this->heat_map.size()) 
 				   )
 				{
+					if ( dbg ){std::cerr << y_grid+j << " " <<  x_grid+i << std::endl;}
 					this->heat_map[ y_grid+j ][ x_grid+i ] += scaling_value * filter[i][j];
 					if ( dbg )
 					{
@@ -441,12 +464,12 @@ Persistence_heat_maps::Persistence_heat_maps( const std::vector< std::pair< doub
 }
 
 
-Persistence_heat_maps::Persistence_heat_maps( const char* name_of_file_with_names_of_files_with_interval , 
+Persistence_heat_maps::Persistence_heat_maps( const char* filename , 
 											  std::vector< std::vector<double> > filter, 
 											  double (*scalling_function_with_respect_to_distance_from_diagonal)( const std::pair< double , double >& point_in_diagram ), 
 											  bool erase_below_diagonal , size_t number_of_pixels  , double min_ , double max_ )
 {    
-    std::vector< std::pair< double , double > > intervals_ = read_standard_file( name_of_file_with_names_of_files_with_interval );   
+    std::vector< std::pair< double , double > > intervals_ = read_standard_file( filename );           
     this->construct( intervals_ ,  filter ,  constant_function, erase_below_diagonal , number_of_pixels , min_ , max_ );
     this->set_up_parameters_for_basic_classes();
 }
@@ -559,7 +582,10 @@ void Persistence_heat_maps::compute_percentage_of_active( const std::vector<Pers
 void Persistence_heat_maps::plot( const char* filename )
 {
 	ofstream out;
-    out.open( filename );
+	std::stringstream ss;
+	ss << filename << "_Gnuplot_script";
+	
+    out.open( ss.str().c_str() );
 	out << "plot      '-' matrix with image" << std::endl;
     for ( size_t i = 0 ; i != this->heat_map.size() ; ++i )
     {
@@ -569,14 +595,15 @@ void Persistence_heat_maps::plot( const char* filename )
         }
         out << endl;
     }
-
     out.close();
+    std::cout << "Gnuplot script have been created. Open gnuplot and type load \'" << ss.str().c_str() << "\' to see the picture." << std::endl; 
 }
 
 
 
 void Persistence_heat_maps::print_to_file( const char* filename )
 {
+
 	ofstream out;
 	out.open( filename );
 	
