@@ -40,6 +40,8 @@ namespace bottleneck_distance {
  * the points of the two diagrams (+ all the diagonal points) such that 
  * any couple of matched points are at distance at most b.
  *
+ * \image html perturb_pd.png La bottleneck distance est la longueur de la plus longue arête.
+ *
  */
 /** @} */  // end defgroup bottleneck_distance
 
