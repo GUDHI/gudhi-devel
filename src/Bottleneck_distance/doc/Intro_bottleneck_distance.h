@@ -35,7 +35,11 @@ namespace bottleneck_distance {
  * 
  * \section bottleneckdefinition Definition
  * 
- * Bottleneck distance is blablabla...
+ * Bottleneck distance mesures the similarity between two persistence diagrams. 
+ * It's the shortest distance b for which there exists a perfect matching between 
+ * the points of the two diagrams (+ all the diagonal points) such that 
+ * any couple of matched points are at distance at most b.
+ *
  */
 /** @} */  // end defgroup bottleneck_distance
 
