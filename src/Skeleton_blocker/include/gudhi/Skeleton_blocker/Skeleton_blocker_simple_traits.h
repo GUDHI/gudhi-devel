@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #ifndef SKELETON_BLOCKER_SKELETON_BLOCKER_SIMPLE_TRAITS_H_
 #define SKELETON_BLOCKER_SKELETON_BLOCKER_SIMPLE_TRAITS_H_
 
@@ -48,9 +49,9 @@ struct Skeleton_blocker_simple_traits {
    */
   struct Root_vertex_handle {
     typedef int boost_vertex_handle;
+
     explicit Root_vertex_handle(boost_vertex_handle val = -1)
-        : vertex(val) {
-    }
+        : vertex(val) { }
     boost_vertex_handle vertex;
 
     bool operator!=(const Root_vertex_handle& other) const {
@@ -65,8 +66,8 @@ struct Skeleton_blocker_simple_traits {
       return this->vertex < other.vertex;
     }
 
-    friend std::ostream& operator <<(std::ostream& o,
-                                     const Root_vertex_handle & v) {
+    friend std::ostream& operator<<(std::ostream& o,
+                                    const Root_vertex_handle & v) {
       o << v.vertex;
       return o;
     }
@@ -74,11 +75,13 @@ struct Skeleton_blocker_simple_traits {
 
   struct Vertex_handle {
     typedef int boost_vertex_handle;
-    explicit Vertex_handle(boost_vertex_handle val = -1)
-        : vertex(val) {
-    }
 
-    operator int() const { return static_cast<int>(vertex); }
+    explicit Vertex_handle(boost_vertex_handle val = -1)
+        : vertex(val) { }
+
+    operator int() const {
+      return static_cast<int> (vertex);
+    }
 
     boost_vertex_handle vertex;
 
@@ -94,7 +97,7 @@ struct Skeleton_blocker_simple_traits {
       return this->vertex < other.vertex;
     }
 
-    friend std::ostream& operator <<(std::ostream& o, const Vertex_handle & v) {
+    friend std::ostream& operator<<(std::ostream& o, const Vertex_handle & v) {
       o << v.vertex;
       return o;
     }
@@ -105,21 +108,24 @@ struct Skeleton_blocker_simple_traits {
     Root_vertex_handle id_;
 
    public:
-    virtual ~Graph_vertex() {
-    }
+    virtual ~Graph_vertex() { }
 
     void activate() {
       is_active_ = true;
     }
+
     void deactivate() {
       is_active_ = false;
     }
+
     bool is_active() const {
       return is_active_;
     }
+
     void set_id(Root_vertex_handle i) {
       id_ = i;
     }
+
     Root_vertex_handle get_id() const {
       return id_;
     }
@@ -130,7 +136,7 @@ struct Skeleton_blocker_simple_traits {
       return res.str();
     }
 
-    friend std::ostream& operator <<(std::ostream& o, const Graph_vertex & v) {
+    friend std::ostream& operator<<(std::ostream& o, const Graph_vertex & v) {
       o << v.to_string();
       return o;
     }
@@ -144,13 +150,13 @@ struct Skeleton_blocker_simple_traits {
    public:
     Graph_edge()
         : a_(-1),
-          b_(-1),
-          index_(-1) {
-    }
+        b_(-1),
+        index_(-1) { }
 
     int& index() {
       return index_;
     }
+
     int index() const {
       return index_;
     }
@@ -168,7 +174,7 @@ struct Skeleton_blocker_simple_traits {
       return b_;
     }
 
-    friend std::ostream& operator <<(std::ostream& o, const Graph_edge & v) {
+    friend std::ostream& operator<<(std::ostream& o, const Graph_edge & v) {
       o << "(" << v.a_ << "," << v.b_ << " - id = " << v.index();
       return o;
     }

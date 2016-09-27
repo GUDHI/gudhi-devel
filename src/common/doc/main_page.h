@@ -315,8 +315,8 @@ make \endverbatim
  * @example Bitmap_cubical_complex/Bitmap_cubical_complex.cpp
  * @example Bitmap_cubical_complex/Bitmap_cubical_complex_periodic_boundary_conditions.cpp
  * @example Bitmap_cubical_complex/Random_bitmap_cubical_complex.cpp
- * @example common/CGAL_3D_points_off_reader.cpp
- * @example common/CGAL_points_off_reader.cpp
+ * @example common/example_CGAL_3D_points_off_reader.cpp
+ * @example common/example_CGAL_points_off_reader.cpp
  * @example Contraction/Garland_heckbert.cpp
  * @example Contraction/Rips_contraction.cpp
  * @example Persistent_cohomology/alpha_complex_3d_persistence.cpp

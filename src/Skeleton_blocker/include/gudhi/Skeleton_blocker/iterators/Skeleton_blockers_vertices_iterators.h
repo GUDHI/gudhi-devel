@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #ifndef SKELETON_BLOCKER_ITERATORS_SKELETON_BLOCKERS_VERTICES_ITERATORS_H_
 #define SKELETON_BLOCKER_ITERATORS_SKELETON_BLOCKERS_VERTICES_ITERATORS_H_
 
@@ -103,7 +104,7 @@ class Vertex_iterator : public boost::iterator_facade< Vertex_iterator <Skeleton
 };
 
 template<typename SkeletonBlockerComplex>
-class Neighbors_vertices_iterator: public boost::iterator_facade < Neighbors_vertices_iterator<SkeletonBlockerComplex>
+class Neighbors_vertices_iterator : public boost::iterator_facade < Neighbors_vertices_iterator<SkeletonBlockerComplex>
 , typename SkeletonBlockerComplex::Vertex_handle const
 , boost::forward_traversal_tag
 , typename SkeletonBlockerComplex::Vertex_handle const> {
@@ -122,9 +123,6 @@ class Neighbors_vertices_iterator: public boost::iterator_facade < Neighbors_ver
   boost_adjacency_iterator end_;
 
  public:
-  // boost_adjacency_iterator ai, ai_end;
-  // for (tie(ai, ai_end) = adjacent_vertices(v.vertex, skeleton); ai != ai_end; ++ai) {
-
   Neighbors_vertices_iterator() : complex(NULL) { }
 
   Neighbors_vertices_iterator(const Complex* complex_, Vertex_handle v_) :
@@ -157,7 +155,7 @@ class Neighbors_vertices_iterator: public boost::iterator_facade < Neighbors_ver
   }
 
  private:
-  // todo remove this ugly hack
+  // TODO(DS): remove this ugly hack
   void set_end() {
     current_ = end_;
   }
@@ -170,5 +168,3 @@ namespace skbl = skeleton_blocker;
 }  // namespace Gudhi
 
 #endif  // SKELETON_BLOCKER_ITERATORS_SKELETON_BLOCKERS_VERTICES_ITERATORS_H_
-
-
