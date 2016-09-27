@@ -20,15 +20,15 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SRC_BOTTLENECK_INCLUDE_GUDHI_NEIGHBORS_FINDER_H_
-#define SRC_BOTTLENECK_INCLUDE_GUDHI_NEIGHBORS_FINDER_H_
+#ifndef NEIGHBORS_FINDER_H_
+#define NEIGHBORS_FINDER_H_
 
 #include <unordered_set>
 #include <gudhi/Planar_neighbors_finder.h>
 
 namespace Gudhi {
 
-namespace Bottleneck_distance {
+namespace bottleneck_distance {
 
 /** \internal \brief data structure used to find any point (including projections) in V near to a query point from U
  * (which can be a projection).
@@ -147,8 +147,8 @@ inline int Layered_neighbors_finder::vlayers_number() const {
     return static_cast<int>(neighbors_finder.size());
 }
 
-}  // namespace Bottleneck_distance
+}  // namespace bottleneck_distance
 
 }  // namespace Gudhi
 
-#endif  // SRC_BOTTLENECK_INCLUDE_GUDHI_NEIGHBORS_FINDER_H_
+#endif  // NEIGHBORS_FINDER_H_

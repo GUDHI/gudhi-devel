@@ -28,12 +28,9 @@
 #include <sstream>
 #include <string>
 
-using namespace std;
-
-//PD: I am using this type of procedures a lot in Gudhi stat. We should make one for all at some point.
 std::vector< std::pair<double, double> > read_diagram_from_file( const char* filename )
 {
-    ifstream in;
+    std::ifstream in;
     in.open( filename );
     std::vector< std::pair<double, double> > result;
     if ( !in.is_open() )
@@ -58,13 +55,15 @@ std::vector< std::pair<double, double> > read_diagram_from_file( const char* fil
     }
     in.close();
     return result;
-}//read_diagram_from_file
+}  //read_diagram_from_file
 
 int main( int argc , char** argv )
 {
   if ( argc < 3 )
   {
-      std::cout << "To run this program please provide as an input two files with persistence diagrams. Each file should contain a birth-death pair per line. Third, optional parameter is an error bound on a bottleneck distance (set by default to zero). The program will now terminate \n";
+      std::cout << "To run this program please provide as an input two files with persistence diagrams. Each file " <<
+          "should contain a birth-death pair per line. Third, optional parameter is an error bound on a bottleneck" <<
+          " distance (set by default to zero). The program will now terminate \n";
   }
   std::vector< std::pair< double , double > > diag1 = read_diagram_from_file( argv[1] );
   std::vector< std::pair< double , double > > diag2 = read_diagram_from_file( argv[2] );
@@ -73,6 +72,6 @@ int main( int argc , char** argv )
   {
       tolerance = atof( argv[3] );
   }
-  double b = Gudhi::Bottleneck_distance::compute(diag1, diag2, tolerance);
+  double b = Gudhi::bottleneck_distance::compute(diag1, diag2, tolerance);
   std::cout << "The distance between the diagrams is : " << b << ". The tolerace is : " << tolerance << std::endl;
 }

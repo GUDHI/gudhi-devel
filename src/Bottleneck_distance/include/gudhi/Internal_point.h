@@ -20,12 +20,12 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SRC_BOTTLENECK_INCLUDE_GUDHI_INTERNAL_POINT_H_
-#define SRC_BOTTLENECK_INCLUDE_GUDHI_INTERNAL_POINT_H_
+#ifndef INTERNAL_POINT_H_
+#define INTERNAL_POINT_H_
 
 namespace Gudhi {
 
-namespace Bottleneck_distance {
+namespace bottleneck_distance {
 
 /** \internal \brief Returns the used index for encoding none of the points */
 int null_point_index();
@@ -67,8 +67,8 @@ inline int null_point_index() {
     return -1;
 }
 
-}  // namespace Bottleneck_distance
+}  // namespace bottleneck_distance
 
 }  // namespace Gudhi
 
-#endif  // SRC_BOTTLENECK_INCLUDE_GUDHI_INTERNAL_POINT_H_
+#endif  // INTERNAL_POINT_H_

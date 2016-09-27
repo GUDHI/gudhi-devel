@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SRC_BOTTLENECK_INCLUDE_GUDHI_GRAPH_MATCHING_H_
-#define SRC_BOTTLENECK_INCLUDE_GUDHI_GRAPH_MATCHING_H_
+#ifndef GRAPH_MATCHING_H_
+#define GRAPH_MATCHING_H_
 
 #include <deque>
 
@@ -29,7 +29,7 @@
 
 namespace Gudhi {
 
-namespace Bottleneck_distance {
+namespace bottleneck_distance {
 
 /** \brief Function to use in order to compute the Bottleneck distance between two persistence diagrams. You get an additive e-approximation.
  *
@@ -238,11 +238,11 @@ double compute(const Persistence_diagram1 &diag1, const Persistence_diagram2 &di
 
 
 
-}  // namespace Bottleneck_distance
+}  // namespace bottleneck_distance
 
 }  // namespace Gudhi
 
-#endif  // SRC_BOTTLENECK_INCLUDE_GUDHI_GRAPH_MATCHING_H_
+#endif  // GRAPH_MATCHING_H_
 
 /* Dichotomic version
 template<typename Persistence_diagram1, typename Persistence_diagram2>

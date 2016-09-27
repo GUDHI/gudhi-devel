@@ -27,7 +27,7 @@
 #include <random>
 #include <gudhi/Graph_matching.h>
 
-using namespace Gudhi::Bottleneck_distance;
+using namespace Gudhi::bottleneck_distance;
 
 int n1 = 81; // a natural number >0
 int n2 = 180; // a natural number >0

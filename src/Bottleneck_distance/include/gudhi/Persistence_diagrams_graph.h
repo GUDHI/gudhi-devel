@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SRC_BOTTLENECK_INCLUDE_GUDHI_PERSISTENCE_DIAGRAMS_GRAPH_H_
-#define SRC_BOTTLENECK_INCLUDE_GUDHI_PERSISTENCE_DIAGRAMS_GRAPH_H_
+#ifndef PERSISTENCE_DIAGRAMS_GRAPH_H_
+#define PERSISTENCE_DIAGRAMS_GRAPH_H_
 
 #include <vector>
 #include <set>
@@ -34,7 +34,7 @@
 
 namespace Gudhi {
 
-namespace Bottleneck_distance {
+namespace bottleneck_distance {
 
 
 /** \internal \brief Structure representing an euclidean bipartite graph containing
@@ -162,8 +162,8 @@ inline double G::diameter() {
     return max;
 }
 
-}  // namespace Bottleneck_distance
+}  // namespace bottleneck_distance
 
 }  // namespace Gudhi
 
-#endif  // SRC_BOTTLENECK_INCLUDE_GUDHI_PERSISTENCE_DIAGRAMS_GRAPH_H_
+#endif  // PERSISTENCE_DIAGRAMS_GRAPH_H_

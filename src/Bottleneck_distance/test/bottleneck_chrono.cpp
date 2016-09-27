@@ -24,7 +24,7 @@
 #include <chrono>
 #include <fstream>
 
-using namespace Gudhi::Bottleneck_distance;
+using namespace Gudhi::bottleneck_distance;
 
 
 double upper_bound = 400.; // any real >0

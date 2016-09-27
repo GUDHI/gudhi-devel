@@ -27,7 +27,7 @@
 
 namespace CGAL {
 
-typedef Gudhi::Bottleneck_distance::Internal_point Internal_point;
+typedef Gudhi::bottleneck_distance::Internal_point Internal_point;
 
 template <>
 struct Kernel_traits<Internal_point> {

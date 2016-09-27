@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SRC_BOTTLENECK_INCLUDE_GUDHI_PLANAR_NEIGHBORS_FINDER_H_
-#define SRC_BOTTLENECK_INCLUDE_GUDHI_PLANAR_NEIGHBORS_FINDER_H_
+#ifndef PLANAR_NEIGHBORS_FINDER_H_
+#define PLANAR_NEIGHBORS_FINDER_H_
 
 #include <list>
 #include <map>
@@ -40,7 +40,7 @@
 
 namespace Gudhi {
 
-namespace Bottleneck_distance {
+namespace bottleneck_distance {
 
 /** \internal \brief Structure used to find any point in V near (according to the planar distance) to a query point from U.
  *
@@ -217,8 +217,8 @@ inline std::shared_ptr< std::list<int> > Cgal_pnf::pull_all_near(int u_point_ind
 }
 
 
-}  // namespace Bottleneck_distance
+}  // namespace bottleneck_distance
 
 }  // namespace Gudhi
 
-#endif  // SRC_BOTTLENECK_INCLUDE_GUDHI_PLANAR_NEIGHBORS_FINDER_H_
+#endif  // PLANAR_NEIGHBORS_FINDER_H_

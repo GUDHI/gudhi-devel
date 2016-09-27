@@ -26,15 +26,20 @@
 // needs namespace for Doxygen to link on classes
 namespace Gudhi {
 // needs namespace for Doxygen to link on classes
-namespace Bottleneck_distance {
+namespace bottleneck_distance {
 
 /**  \defgroup bottleneck_distance Bottleneck distance
  * 
  * \author    François Godi
+ * @{
  * 
+ * \section bottleneckdefinition Definition
+ * 
+ * Bottleneck distance is blablabla...
  */
+/** @} */  // end defgroup bottleneck_distance
 
-}  // namespace Bottleneck_distance
+}  // namespace bottleneck_distance
 
 }  // namespace Gudhi
 
