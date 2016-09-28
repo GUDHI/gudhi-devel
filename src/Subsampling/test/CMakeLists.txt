@@ -1,0 +1,34 @@
+cmake_minimum_required(VERSION 2.6)
+project(Subsampling_tests)
+
+if (GCOVR_PATH)
+  # for gcovr to make coverage reports - Corbera Jenkins plugin
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+endif()
+if (GPROF_PATH)
+  # for gprof to make coverage reports - Jenkins
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+endif()
+
+if(CGAL_FOUND)
+  if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
+    message(STATUS "CGAL version: ${CGAL_VERSION}.")
+
+    if (EIGEN3_FOUND)
+      add_executable( Subsampling_test_pick_n_random_points test_pick_n_random_points.cpp )
+      target_link_libraries(Subsampling_test_pick_n_random_points ${CGAL_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+
+      add_executable( Subsampling_test_choose_n_farthest_points test_choose_n_farthest_points.cpp )
+      target_link_libraries(Subsampling_test_choose_n_farthest_points ${CGAL_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+
+      add_executable(Subsampling_test_sparsify_point_set test_sparsify_point_set.cpp)
+      target_link_libraries(Subsampling_test_sparsify_point_set ${CGAL_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+    else()
+      message(WARNING "Eigen3 not found. Version 3.1.0 is required for Subsampling feature.")
+    endif()
+  else()
+    message(WARNING "CGAL version: ${CGAL_VERSION} is too old to compile Subsampling tests. Version 4.8.1 is required.")
+  endif ()
+else()
+  message(WARNING "CGAL not found. It is required for the Subsampling tests.")
+endif()

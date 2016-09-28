@@ -27,8 +27,11 @@
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Witness_complex.h>
-#include <gudhi/Landmark_choice_by_random_point.h>
+#include <gudhi/Construct_closest_landmark_table.h>
+#include <gudhi/pick_n_random_points.h>
 #include <gudhi/reader_utils.h>
+
+#include <CGAL/Epick_d.h>
 
 #include <iostream>
 #include <fstream>
@@ -67,7 +70,7 @@ int main(int argc, char * const argv[]) {
 
   // Read the point file
   for (int nbP = 500; nbP < 10000; nbP += 500) {
-    Point_Vector point_vector;
+    Point_Vector point_vector, landmarks;
     generate_points_sphere(point_vector, nbP, 4);
     std::cout << "Successfully generated " << point_vector.size() << " points.\n";
     std::cout << "Ambient dimension is " << point_vector[0].size() << ".\n";
@@ -75,10 +78,16 @@ int main(int argc, char * const argv[]) {
     // Choose landmarks
     start = clock();
     std::vector<std::vector< int > > knn;
-    Gudhi::witness_complex::landmark_choice_by_random_point(point_vector, number_of_landmarks, knn);
+    Gudhi::subsampling::pick_n_random_points(point_vector, 100, std::back_inserter(landmarks));
+    Gudhi::witness_complex::construct_closest_landmark_table(point_vector, landmarks, knn);
 
     // Compute witness complex
-    Gudhi::witness_complex::witness_complex(knn, number_of_landmarks, point_vector[0].size(), simplex_tree);
+    // Gudhi::witness_complex::witness_complex(knn, number_of_landmarks, point_vector[0].size(), simplex_tree);
+    Gudhi::witness_complex::Witness_complex<Gudhi::Simplex_tree<>, CGAL::Epick_d<CGAL::Dynamic_dimension_tag>>(landmarks.begin(),
+                                                                                                               landmarks.end(),
+                                                                                                               point_vector.begin(),
+                                                                                                               point_vector.end(),
+                                                                                                               simplex_tree);
     end = clock();
     double time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
     std::cout << "Witness complex for " << number_of_landmarks << " landmarks took "
