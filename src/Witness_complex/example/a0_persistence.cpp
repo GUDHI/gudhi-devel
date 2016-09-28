@@ -138,6 +138,12 @@ void rw_experiment(Point_Vector & point_vector, int nbL, FT alpha2, int limD, FT
   std::cout << "Witness complex for " << nbL << " landmarks took "
             << time << " s. \n";
   std::cout << "The complex contains " << simplex_tree.num_simplices() << " simplices \n";
+  int streedim = 0;
+  for (auto s: simplex_tree.complex_simplex_range())
+    if (simplex_tree.dimension(s) > streedim)
+      streedim = simplex_tree.dimension(s);
+  std::cout << "Dimension of the simplicial complex is " << streedim << std::endl;
+
   //std::cout << simplex_tree << "\n";
   
   // Compute the persistence diagram of the complex
@@ -348,7 +354,7 @@ int experiment1 (int argc, char * const argv[])
   read_points_cust(file_name, point_vector);
   std::cout << "The file contains " << point_vector.size() << " points.\n";
   std::cout << "Ambient dimension is " << point_vector[0].size() << ".\n";
-
+  
   Simplex_tree<> simplex_tree;
   std::vector<std::vector< int > > knn;
   std::vector<std::vector< FT > > distances;

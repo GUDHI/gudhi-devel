@@ -26,6 +26,7 @@
 #include <gudhi/Dim_lists.h>
 #include <gudhi/reader_utils.h>
 #include <gudhi/Persistent_cohomology.h>
+#include <gudhi/Good_links.h>
 #include "Landmark_choice_random_knn.h"
 #include "Landmark_choice_sparsification.h"
 
@@ -44,6 +45,8 @@
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/range/iterator_range.hpp>
 
+#include <boost/program_options.hpp>
+
 #include "generators.h"
 #include "output.h"
 #include "output_tikz.h"
@@ -53,13 +56,95 @@ using namespace Gudhi::witness_complex;
 using namespace Gudhi::persistent_cohomology;
 
 typedef std::vector<Point_d> Point_Vector;
-typedef Simplex_tree<Simplex_tree_options_fast_persistence> STree;
-//typedef Simplex_tree<> STree;
+//typedef Simplex_tree<Simplex_tree_options_fast_persistence> STree;
+typedef Simplex_tree<> STree;
 typedef A0_complex< STree> A0Complex;
 typedef STree::Simplex_handle Simplex_handle;
 
 typedef A0_complex< STree > SRWit;
 typedef Relaxed_witness_complex< STree > WRWit;
+
+/** Program options ***************************************************************
+***********************************************************************************
+***********************************************************************************
+***********************************************************************************
+**********************************************************************************/
+
+
+void program_options(int argc, char * const argv[]
+                     , int & experiment_number
+                     , std::string & filepoints
+                     , std::string & landmark_file
+                     , std::string & experiment_name
+                     , int & nbL
+                     , double & alpha2_s
+                     , double & alpha2_w
+                     , double & mu_epsilon
+                     , int & dim_max
+                     , std::vector<int> & desired_homology
+                     , double & min_persistence) {
+  namespace po = boost::program_options;
+  po::options_description hidden("Hidden options");
+  hidden.add_options()
+    ("option", po::value<int>(& experiment_number),
+     "Experiment id.")
+    ("input-file", po::value<std::string>(&filepoints),
+       "Name of file containing a point set. Format is one point per line:   X1 ... Xd ");
+  
+  po::options_description visible("Allowed options", 100);
+  visible.add_options()
+      ("help,h", "produce help message")
+      ("output-file,o", po::value<std::string>(&experiment_name)->default_value("witness"),
+       "The prefix of all the output files. Default is 'witness'")
+      ("landmarks,L", po::value<int>(&nbL)->default_value(0),
+       "Number of landmarks.")
+      ( "landmark-file,l", po::value<std::string>(&landmark_file),
+        "Name of a fike containing landmarks")
+      ("alpha2_s,A", po::value<double>(&alpha2_s)->default_value(0),
+       "Relaxation parameter for the strong complex.")
+      ("alpha2_w,a", po::value<double>(&alpha2_w)->default_value(0),
+       "Relaxation parameter for the weak complex.")
+      ("mu_epsilon,e", po::value<double>(&mu_epsilon)->default_value(0),
+       "Sparsification parameter.")
+      ("cpx-dimension,d", po::value<int>(&dim_max)->default_value(1),
+       "Maximal dimension of the Witness complex we want to compute.")
+    
+    ("homology,H", po::value<std::vector<int>>(&desired_homology)->multitoken(),
+    "The desired Betti numbers.")
+      ("min-persistence,m", po::value<Filtration_value>(&min_persistence),
+       "Minimal lifetime of homology feature to be recorded. Default is 0. Enter a negative value to see zero length intervals");
+
+  po::positional_options_description pos;
+  pos.add("option", 1);
+  pos.add("input-file", 2);
+
+  po::options_description all;
+  all.add(visible).add(hidden);
+
+  po::variables_map vm;
+  po::store(po::command_line_parser(argc, argv).
+            options(all).positional(pos).run(), vm);
+  po::notify(vm);
+
+  if (vm.count("help") || !vm.count("input-file")) {
+    std::cout << std::endl;
+    std::cout << "Compute the persistent homology with coefficient field Z/3Z \n";
+    std::cout << "of a Strong relaxed witness complex defined on a set of input points.\n \n";
+    std::cout << "The output diagram contains one bar per line, written with the convention: \n";
+    std::cout << "   p   dim b d \n";
+    std::cout << "where dim is the dimension of the homological feature,\n";
+    std::cout << "b and d are respectively the birth and death of the feature and \n";
+    std::cout << "p is the characteristic of the field Z/pZ used for homology coefficients." << std::endl << std::endl;
+
+    std::cout << "Usage: " << argv[0] << " [options] input-file" << std::endl << std::endl;
+    std::cout << visible << std::endl;
+    std::abort();
+  }
+}
+
+
+
+
 
 /**
  * \brief Customized version of read_points
@@ -175,6 +260,7 @@ void rw_experiment(Point_Vector & point_vector, int nbL, FT alpha2, int limD, FT
   Gudhi::witness_complex::Dim_lists<STree> simplices(simplex_tree, limD); 
   
   // std::vector<Simplex_handle> simplices;
+  std::cout << "Starting collapses...\n";
   simplices.collapse();
   simplices.output_simplices();
 
@@ -204,6 +290,21 @@ void rw_experiment(Point_Vector & point_vector, int nbL, FT alpha2, int limD, FT
     chi += 1-2*(simplex_tree.dimension(sh)%2);
   std::cout << "Euler characteristic is " << chi << std::endl;
   write_witness_mesh(point_vector, landmarks_ind, collapsed_tree, collapsed_tree.complex_simplex_range(), false, true, mesh_filename+"_after_collapse.mesh");
+  Gudhi::Good_links<STree> gl(collapsed_tree);
+  if (gl.complex_is_pseudomanifold())
+    std::cout << "Collapsed complex is a pseudomanifold.\n";
+  else
+    std::cout << "Collapsed complex is NOT a pseudomanifold.\n";
+  bool good = true;
+  for (auto v: collapsed_tree.complex_vertex_range())
+    if (!gl.has_good_link(v)) {
+      std::cout << "Bad link around " << v << std::endl;
+      good = false;
+    }
+  if (good)
+    std::cout << "All links are good.\n";
+  else
+    std::cout << "There are bad links.\n";
 }
 
 void rips_experiment(Point_Vector & points, double threshold, int dim_max)
@@ -267,83 +368,6 @@ int experiment0 (int argc, char * const argv[])
   return 0;
 }
 
-int experiment1 (int argc, char * const argv[])
-{
-  if (argc != 8) {
-    std::cerr << "Usage: " << argv[0]
-              << " 1 file_name nbL alpha mu_epsilon limD experiment_name\n";
-    return 0;
-  }
-  /*
-    boost::filesystem::path p;
-    for (; argc > 2; --argc, ++argv)
-    p /= argv[1];
-  */
-  
-  std::string file_name = argv[2];
-  int nbL = atoi(argv[3]), limD = atoi(argv[6]);
-  double alpha2 = atof(argv[4]), mu_epsilon = atof(argv[5]);
-  std::string experiment_name = argv[7];
-
-  // Read the point file
-  Point_Vector point_vector;
-  read_points_cust(file_name, point_vector);
-  std::cout << "The file contains " << point_vector.size() << " points.\n";
-  std::cout << "Ambient dimension is " << point_vector[0].size() << ".\n";
-
-  STree simplex_tree;
-  std::vector<std::vector< int > > knn;
-  std::vector<std::vector< FT > > distances;
-  std::vector<Point_d> landmarks;
-  Gudhi::witness_complex::landmark_choice_by_sparsification(point_vector, nbL, mu_epsilon, landmarks);
-  Gudhi::witness_complex::build_distance_matrix(point_vector,   // aka witnesses
-                                                landmarks,  // aka landmarks
-                                                alpha2,
-                                                limD,
-                                                knn,
-                                                distances);
-  WRWit      rw(distances,
-                knn,
-                simplex_tree,
-                nbL,
-                0,
-                limD);
-  std::vector<int> landmarks_ind(nbL); 
-  for (unsigned i = 0; i != distances.size(); ++i) {
-    if (distances[i][0] == 0)
-      landmarks_ind[knn[i][0]] = i;
-  }
-
-  write_witness_mesh(point_vector, landmarks_ind, simplex_tree, simplex_tree.complex_simplex_range(), false, true, experiment_name+"_witness_complex.mesh");
-
-  int chi = 0;
-  for (auto sh: simplex_tree.complex_simplex_range())
-    chi += 1-2*(simplex_tree.dimension(sh)%2);
-  std::cout << "Euler characteristic is " << chi << std::endl;
-
-  rw_experiment(point_vector, nbL, alpha2, limD, mu_epsilon, experiment_name);
-  
-  // ok = false;
-  // while (!ok) {
-  //   std::cout << "Rips complex: parameters threshold, limD.\n";
-  //   std::cout << "Enter threshold: ";
-  //   std::cin >> alpha;
-  //   std::cout << "Enter limD: ";
-  //   std::cin >> limD;
-  //   std::cout << "Start Rips complex...\n";
-  //   rips_experiment(point_vector, alpha, limD);
-  //   std::cout << "Is the result correct? [y/n]: ";
-  //   char answer;
-  //   std::cin >> answer;
-  //   switch (answer) {
-  //   case 'n':
-  //     ok = false; break;
-  //   default :
-  //     ok = true; break;
-  //   }
-  // }
-  return 0;
-}
 
 /********************************************************************************************
  * Length of the good interval experiment
@@ -380,17 +404,25 @@ double good_interval_length(const std::vector<int> & desired_homology, STree & s
   std::string line;
   std::vector<Pers_endpoint> pers_endpoints;
   while (getline(in_stream, line)) {
-    int p, dim;
+    unsigned p, dim;
     double alpha_start, alpha_end;
     std::istringstream iss(line);
     iss >> p >> dim >> alpha_start >> alpha_end;
+    if (iss.fail())
+      alpha_end = alpha2;
+    //std::cout << p << " " << dim << " " << alpha_start << " " << alpha_end << "\n";
+    //if (dim < desired_homology.size()+1)
     if (alpha_start != alpha_end) {
-      if (alpha_end < alpha_start)
-        alpha_end = alpha2;
+    //   if (alpha_end < alpha_start)
+    //     alpha_end = alpha2;
       pers_endpoints.push_back(Pers_endpoint(alpha_start, true, dim));
       pers_endpoints.push_back(Pers_endpoint(alpha_end, false, dim));
+      std::cout << p << " " << dim << " " << alpha_start << " " << alpha_end << "\n";
     }
   }
+  std::cout << "desired_homology.size() = " << desired_homology.size() << "\n";
+  for (auto nd: desired_homology)
+    std::cout << nd << std::endl;
   std::cout << "Pers_endpoints.size = " << pers_endpoints.size() << std::endl;
   in_stream.close();
   std::sort(pers_endpoints.begin(),
@@ -404,13 +436,20 @@ double good_interval_length(const std::vector<int> & desired_homology, STree & s
     std::cout << p.alpha << " " << p.dim << " " << p.start << "\n";
   }
   */
-  std::vector<int> current_homology(nbL-1,0);
-  current_homology[0] = 1; // for the compulsary "0 0 inf" entry
+  std::vector<int> current_homology(desired_homology.size(),0);
+  //current_homology[0] = 1; // for the compulsary "0 0 inf" entry
   double good_start = 0, good_end = 0;
   double sum_intervals = 0;
   int num_pieces = 0;
   bool interval_in_process = (desired_homology == current_homology);
   for (auto p: pers_endpoints) {
+    /*
+      std::cout << p.alpha << " " << p.dim << " ";
+    if (p.start)
+      std::cout << "s\n";
+    else
+      std::cout << "e\n";
+    */
     /*
     std::cout << "Treating " << p.alpha << " " << p.dim << " " << p.start
               << " [";
@@ -450,65 +489,113 @@ void run_comparison(std::vector<std::vector< int > > const & knn,
                     std::vector<std::vector< FT > > const & distances,
                     Point_Vector & points,
                     unsigned nbL,
-                    double alpha2,
+                    unsigned limD,
+                    double alpha2_s,
+                    double alpha2_w,
                     std::vector<int>& desired_homology)
 {
   clock_t start, end;
   STree simplex_tree;
 
-  alpha2 = 0.55;
-  std::cout << "alpha2 = " << alpha2 << "\n";
+  //std::cout << "alpha2 = " << alpha2_s << "\n";
   start = clock();
   SRWit srwit(distances,
               knn,
               simplex_tree,
               nbL,
-              alpha2,
-              nbL-1);
+              alpha2_s,
+              limD);
   end = clock();
   std::cout << "SRWit.size = " << simplex_tree.num_simplices() << std::endl;
-  simplex_tree.set_dimension(nbL-1);
+  simplex_tree.set_dimension(desired_homology.size());
 
   std::cout << "Good homology interval length for SRWit is "
-                << good_interval_length(desired_homology, simplex_tree, alpha2) << "\n";
+                << good_interval_length(desired_homology, simplex_tree, alpha2_s) << "\n";
   std::cout << "Time: " << static_cast<double>(end - start) / CLOCKS_PER_SEC << " s. \n";
+  int chi = 0;
+  for (auto sh: simplex_tree.complex_simplex_range())
+    chi += 1-2*(simplex_tree.dimension(sh)%2);
+  std::cout << "Euler characteristic is " << chi << std::endl;
+
 
   STree simplex_tree2;
-  alpha2 = 0.35;
-  std::cout << "alpha2 = " << alpha2 << "\n";
+  std::cout << "alpha2 = " << alpha2_w << "\n";
   start = clock();
   WRWit wrwit(distances,
               knn,
               simplex_tree2,
               nbL,
-              alpha2,
-              nbL-1);
+              alpha2_w,
+              limD);
   end = clock();
   std::cout << "WRWit.size = " << simplex_tree2.num_simplices() << std::endl;
-  simplex_tree.set_dimension(nbL-1);
+  simplex_tree2.set_dimension(nbL-1);
   
   std::cout << "Good homology interval length for WRWit is "
-            << good_interval_length(desired_homology, simplex_tree2, alpha2) << "\n";
+            << good_interval_length(desired_homology, simplex_tree2, alpha2_w) << "\n";
   std::cout << "Time: " << static_cast<double>(end - start) / CLOCKS_PER_SEC << " s. \n";
+  chi = 0;
+  for (auto sh: simplex_tree2.complex_simplex_range())
+    chi += 1-2*(simplex_tree2.dimension(sh)%2);
+  std::cout << "Euler characteristic is " << chi << std::endl;
 
-  STree simplex_tree3;
-  std::cout << "Enter alpha2 for Rips: ";
-  std::cin >> alpha2;
-  std::cout << "\n";
-  std::cout << "points.size() = " << points.size() << "\n";
-  start = clock();
-  rips(points,
-       0.2, 
-       nbL-1,
-       simplex_tree3);
-  end = clock();
-  std::cout << "Rips.size = " << simplex_tree3.num_simplices() << std::endl;
-  simplex_tree.set_dimension(nbL-1);
+  //write_witness_mesh(points, landmarks_ind, simplex_tree2, simplex_tree2.complex_simplex_range(), false, true, "wrwit.mesh");
+
   
-  std::cout << "Good homology interval length for WRWit is "
-            << good_interval_length(desired_homology, simplex_tree3, alpha2) << "\n";
-  std::cout << "Time: " << static_cast<double>(end - start) / CLOCKS_PER_SEC << " s. \n";
 }
+
+int experiment1 (int argc, char * const argv[])
+{
+  /*
+    boost::filesystem::path p;
+    for (; argc > 2; --argc, ++argv)
+    p /= argv[1];
+  */
+  
+  // std::string file_name = argv[2];
+  // int nbL = atoi(argv[3]), limD = atoi(argv[6]);
+  // double alpha2 = atof(argv[4]), mu_epsilon = atof(argv[5]);
+  // std::string experiment_name = argv[7];
+
+  int option = 1;
+  std::string file_name, landmark_file;
+  int nbL = 0, limD;
+  double alpha2_s, alpha2_w, mu_epsilon, min_pers;
+  std::string experiment_name;
+  std::vector<int> desired_homology = {1};
+  std::vector<Point_d> landmarks;
+  
+  program_options(argc, argv, option, file_name, landmark_file, experiment_name, nbL, alpha2_s, alpha2_w, mu_epsilon, limD, desired_homology, min_pers);
+
+  // Read the point file
+  Point_Vector point_vector;
+  read_points_cust(file_name, point_vector);
+  //std::cout << "The file contains " << point_vector.size() << " points.\n";
+  //std::cout << "Ambient dimension is " << point_vector[0].size() << ".\n";
+  //std::cout << "Limit dimension for the complexes is " << limD << ".\n";
+
+  if (landmark_file == "")
+    Gudhi::witness_complex::landmark_choice_by_sparsification(point_vector, nbL, mu_epsilon, landmarks);
+    //Gudhi::witness_complex::landmark_choice_by_random_knn(point_vector, nbL, alpha2_s, limD, knn, distances);
+  else
+    read_points_cust(landmark_file, landmarks);
+  nbL = landmarks.size();
+  STree simplex_tree;
+  std::vector<std::vector< int > > knn;
+  std::vector<std::vector< FT > > distances;
+
+  //Gudhi::witness_complex::landmark_choice_by_sparsification(point_vector, nbL, mu_epsilon, landmarks);
+  Gudhi::witness_complex::build_distance_matrix(point_vector,   // aka witnesses
+                                                landmarks,  // aka landmarks
+                                                alpha2_s,
+                                                limD,
+                                                knn,
+                                                distances);
+
+  run_comparison(knn, distances, point_vector, nbL, limD, alpha2_s, alpha2_w, desired_homology);
+  return 0;
+}
+
 
 int experiment2(int argc, char * const argv[])
 {
@@ -524,7 +611,6 @@ int experiment2(int argc, char * const argv[])
     case 4: alpha2 = 1.4; break;
     default: alpha2 = 1.4; break;
     }
-    std::cout << "alpha2 = " << alpha2 << "\n";
     unsigned nbL = 20;
     std::vector<int> desired_homology(nbL-1,0);
     desired_homology[0] = 1; desired_homology[d] = 1;
@@ -536,19 +622,22 @@ int experiment2(int argc, char * const argv[])
       std::cout << "Running test S"<< d <<", |W|=" << nbW << ", |L|=" << nbL << std::endl;
       generate_points_sphere(point_vector, i*1000, d+1);
       std::vector<Point_d> landmarks;
-      Gudhi::witness_complex::landmark_choice_by_sparsification(point_vector, nbL, mu_epsilon, landmarks);
 
+      Gudhi::witness_complex::landmark_choice_by_sparsification(point_vector, nbL, mu_epsilon, landmarks);
+      
       std::vector<std::vector< int > > knn;
       std::vector<std::vector< FT > > distances;
-    
+
+      
       std::cout << "|L| after sparsification: " << landmarks.size() << "\n";
+      
       Gudhi::witness_complex::build_distance_matrix(point_vector,   // aka witnesses
                                                     landmarks,  // aka landmarks
                                                     alpha2,
                                                     nbL-1,
                                                     knn,
                                                     distances);
-      run_comparison(knn, distances, point_vector, nbL, alpha2, desired_homology);
+      run_comparison(knn, distances, point_vector, nbL, nbL-1, alpha2, alpha2, desired_homology);
     }
   }
   /*
@@ -588,7 +677,8 @@ int experiment2(int argc, char * const argv[])
 
 int experiment3(int argc, char * const argv[])
 {
-  // COLLAPSES EXPERIMENT
+  // Both witnesses and landmarks are given as input
+  
   
   return 0;
 }
@@ -608,6 +698,9 @@ int main (int argc, char * const argv[])
     break;
   case 2 :
     return experiment2(argc, argv);
+    break;
+  case 3 :
+    return experiment3(argc, argv);
     break;
   default :
     output_experiment_information(argv[0]);

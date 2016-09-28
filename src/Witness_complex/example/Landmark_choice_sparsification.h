@@ -74,7 +74,7 @@ namespace witness_complex {
                                          FT mu_epsilon,
                                          Point_random_access_range & landmarks)
   {
-    int nbP = points.end() - points.begin();
+    unsigned nbP = points.end() - points.begin();
     assert(nbP >= nbL);
     CGAL::Random rand;
     // TODO(SK) Consider using rand_r(...) instead of rand(...) for improved thread safety
@@ -87,7 +87,7 @@ namespace witness_complex {
                       typename Tree::Splitter(),
                       points_traits);
     
-    for (int points_i = 0; points_i < nbP; points_i++) {
+    for (unsigned points_i = 0; points_i < nbP; points_i++) {
       if (dropped_points[points_i])
         continue;
       Point_d & w = points[points_i];
@@ -98,7 +98,7 @@ namespace witness_complex {
         dropped_points[i] = true;
     }
 
-    for (int points_i = 0; points_i < nbP; points_i++) {
+    for (unsigned points_i = 0; points_i < nbP; points_i++) {
       if (dropped_points[points_i])
         landmarks.push_back(points[points_i]);
     }

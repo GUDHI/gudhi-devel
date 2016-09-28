@@ -25,10 +25,12 @@
 
 #include <CGAL/Epick_d.h>
 #include <CGAL/point_generators_d.h>
+#include <CGAL/Random.h>
 
 #include <fstream>
 #include <string>
 #include <vector>
+#include <cmath>
 
 typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> K;
 typedef K::FT FT;
@@ -144,12 +146,21 @@ void generate_points_sphere(Point_Vector& W, int nbP, int dim) {
     W.push_back(*rp++);
 }
 
-/** \brief Generate nbP points on a d-torus
+/** \brief Generate nbP points on a (flat) d-torus embedded in R^{2d}
  *
  */
 void generate_points_torus(Point_Vector& W, int nbP, int dim) {
-  CGAL::Random_points_on_sphere_d<Point_d> rp(2, 1);
-  
+  CGAL::Random rand;
+  const double pi = std::acos(-1);
+  for (int i = 0; i < nbP; i++) {
+    std::vector<FT> point;
+    for (int j = 0; j < dim; j++) {
+      double alpha = rand.uniform_real((double)0, 2*pi);
+      point.push_back(sin(alpha));
+      point.push_back(cos(alpha));
+    }
+    W.push_back(Point_d(point));
+  }
 }
 
 #endif  // EXAMPLE_WITNESS_COMPLEX_GENERATORS_H_

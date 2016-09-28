@@ -131,7 +131,7 @@ typedef Neighbor_search::Tree Tree;
           distances[points_i].push_back(sqrt(search_it->second));
           knn[points_i].push_back((search_it++)->first);
         }
-      std::cout << "k = " << knn[points_i].size() << std::endl;
+      //std::cout << "k = " << knn[points_i].size() << std::endl;
     }
   }
 

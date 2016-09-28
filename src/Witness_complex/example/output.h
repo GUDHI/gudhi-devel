@@ -73,9 +73,12 @@ void write_edges(std::string file_name, STree& witness_complex, Point_Vector& la
   ofs.close();
 }
 
-/** \brief Write triangles (tetrahedra in 3d) of a witness
- *  complex in a file, compatible with medit.
- *  l_is_v = landmark is vertex
+/** \brief Write triangles (tetrahedra in 3d) of a simplicial complex in a file, compatible with medit.
+ *  `landmarks_ind` represents the set of landmark indices in W  
+ *  `st` is the Simplex_tree to be visualized,
+ *  `shr` is the Simplex_handle_range of simplices in `st` to be visualized
+ *  `is2d` should be true if the simplicial complex is 2d, false if 3d
+ *  `l_is_v` = landmark is vertex
  */
 template <typename SimplexHandleRange,
           typename STree >
