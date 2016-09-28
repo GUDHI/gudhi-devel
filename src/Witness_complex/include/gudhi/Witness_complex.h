@@ -52,8 +52,13 @@ namespace witness_complex {
 //     \brief Constructs the witness complex for the given set of witnesses and landmarks.
 //     \ingroup witness_complex
 //  */
-template< class SimplicialComplex>
+template< class SimplicialComplex,
+          class Kernel_ >
 class Witness_complex {
+  typedef Kernel_        K;
+  typedef K::Point_d     Point_d;
+  
+  
  private:
   struct Active_witness {
     int witness_id;
@@ -82,7 +87,9 @@ class Witness_complex {
  private:
   int nbL_;  // Number of landmarks
   SimplicialComplex& sc_;  // Simplicial complex
-
+  std::vector<Point_d> witnesses_, landmarks_; 
+  
+  
  public:
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /* @name Constructor
@@ -93,7 +100,7 @@ class Witness_complex {
   // Witness_range<Closest_landmark_range<Vertex_handle>>
 
   /*
-   *  \brief Iterative construction of the witness complex.
+   *  \brief Iterative construction of the (weak) witness complex.
    *  \details The witness complex is written in sc_ basing on a matrix knn of
    *  nearest neighbours of the form {witnesses}x{landmarks}.
    *
@@ -106,6 +113,18 @@ class Witness_complex {
    *
    *  Landmarks are supposed to be in [0,nbL_-1]
    */
+  template< typename InputIteratorLandmarks,
+            typename InputIteratorWitnesses >
+  Witness_complex(InputIteratorLandmarks landmarks_first,
+                  InputIteratorLandmarks landmarks_last,
+                  InputIteratorWitnesses witnesses_first,
+                  InputIteratorWitnesses witnesses_last)
+    : witnesses_(witnesses_first, witnesses_last), landmarks_(landmarks_first, landmarks_last)
+  {    
+  }
+
+  
+  
   template< typename KNearestNeighbors >
   Witness_complex(KNearestNeighbors const & knn,
                   int nbL,
