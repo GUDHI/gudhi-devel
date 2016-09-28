@@ -459,7 +459,7 @@ Persistence_heat_maps::Persistence_heat_maps( const std::vector< std::pair< doub
 											  double (*scalling_function_with_respect_to_distance_from_diagonal)( const std::pair< double , double >& point_in_diagram ), 
 											  bool erase_below_diagonal , size_t number_of_pixels , double min_ , double max_ )
 {
-    this->construct( interval ,  filter ,  constant_function, erase_below_diagonal , number_of_pixels , min_ , max_ );
+    this->construct( interval ,  filter ,  scalling_function_with_respect_to_distance_from_diagonal, erase_below_diagonal , number_of_pixels , min_ , max_ );
     this->set_up_parameters_for_basic_classes();
 }
 
@@ -470,7 +470,7 @@ Persistence_heat_maps::Persistence_heat_maps( const char* filename ,
 											  bool erase_below_diagonal , size_t number_of_pixels  , double min_ , double max_ )
 {    
     std::vector< std::pair< double , double > > intervals_ = read_standard_file( filename );           
-    this->construct( intervals_ ,  filter ,  constant_function, erase_below_diagonal , number_of_pixels , min_ , max_ );
+    this->construct( intervals_ ,  filter ,  scalling_function_with_respect_to_distance_from_diagonal, erase_below_diagonal , number_of_pixels , min_ , max_ );
     this->set_up_parameters_for_basic_classes();
 }
 

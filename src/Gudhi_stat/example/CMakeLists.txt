@@ -86,6 +86,19 @@ target_link_libraries(utilities/persistence_heat_maps/compute_distance_of_persis
 add_executable ( utilities/persistence_heat_maps/compute_scalar_product_of_persistence_heat_maps utilities/persistence_heat_maps/compute_scalar_product_of_persistence_heat_maps.cpp )
 target_link_libraries(utilities/persistence_heat_maps/compute_scalar_product_of_persistence_heat_maps ${Boost_SYSTEM_LIBRARY})
 
+add_executable ( utilities/persistence_heat_maps/create_pssk utilities/persistence_heat_maps/create_pssk.cpp )
+target_link_libraries(utilities/persistence_heat_maps/create_pssk ${Boost_SYSTEM_LIBRARY})
+
+add_executable ( utilities/persistence_heat_maps/create_persistence_heat_maps_weighted_by_distance_from_diagonal utilities/persistence_heat_maps/create_persistence_heat_maps_weighted_by_distance_from_diagonal.cpp )
+target_link_libraries(utilities/persistence_heat_maps/create_persistence_heat_maps_weighted_by_distance_from_diagonal ${Boost_SYSTEM_LIBRARY})
+
+add_executable ( utilities/persistence_heat_maps/create_persistence_heat_maps_weighted_by_squared_distance_from_diagonal utilities/persistence_heat_maps/create_persistence_heat_maps_weighted_by_squared_distance_from_diagonal.cpp )
+target_link_libraries(utilities/persistence_heat_maps/create_persistence_heat_maps_weighted_by_squared_distance_from_diagonal ${Boost_SYSTEM_LIBRARY})
+
+add_executable ( utilities/persistence_heat_maps/create_persistence_heat_maps_weighted_by_arctan_of_their_persistence utilities/persistence_heat_maps/create_persistence_heat_maps_weighted_by_arctan_of_their_persistence.cpp )
+target_link_libraries(utilities/persistence_heat_maps/create_persistence_heat_maps_weighted_by_arctan_of_their_persistence ${Boost_SYSTEM_LIBRARY})
+
+
 #persitence vectors
 add_executable ( utilities/persistence_vectors/average_persistence_vectors utilities/persistence_vectors/average_persistence_vectors.cpp )
 target_link_libraries(utilities/persistence_vectors/average_persistence_vectors ${Boost_SYSTEM_LIBRARY})
@@ -104,17 +117,18 @@ target_link_libraries(utilities/persistence_vectors/plot_persistence_vectors ${B
 
 
 #PSSK
-add_executable ( utilities/PSSK/average_pssk utilities/PSSK/average_pssk.cpp )
-target_link_libraries(utilities/PSSK/average_pssk ${Boost_SYSTEM_LIBRARY})
+#seems that this is not needed, since the only difference is the creation. The rest works the same as in the persitence heat maps. So, I have moved the creation of PSSK into the persitence heat maps folder, and use the methos from over there.
+#add_executable ( utilities/PSSK/average_pssk utilities/PSSK/average_pssk.cpp )
+#target_link_libraries(utilities/PSSK/average_pssk ${Boost_SYSTEM_LIBRARY})
 
-add_executable ( utilities/PSSK/create_pssk utilities/PSSK/create_pssk.cpp )
-target_link_libraries(utilities/PSSK/create_pssk ${Boost_SYSTEM_LIBRARY})
+#add_executable ( utilities/PSSK/create_pssk utilities/PSSK/create_pssk.cpp )
+#target_link_libraries(utilities/PSSK/create_pssk ${Boost_SYSTEM_LIBRARY})
 
-add_executable ( utilities/PSSK/plot_pssk utilities/PSSK/plot_pssk.cpp )
-target_link_libraries(utilities/PSSK/plot_pssk ${Boost_SYSTEM_LIBRARY})
+#add_executable ( utilities/PSSK/plot_pssk utilities/PSSK/plot_pssk.cpp )
+#target_link_libraries(utilities/PSSK/plot_pssk ${Boost_SYSTEM_LIBRARY})
 
-add_executable ( utilities/PSSK/compute_distance_of_pssk utilities/PSSK/compute_distance_of_pssk.cpp )
-target_link_libraries(utilities/PSSK/compute_distance_of_pssk ${Boost_SYSTEM_LIBRARY})
+#add_executable ( utilities/PSSK/compute_distance_of_pssk utilities/PSSK/compute_distance_of_pssk.cpp )
+#target_link_libraries(utilities/PSSK/compute_distance_of_pssk ${Boost_SYSTEM_LIBRARY})
 
 add_executable ( utilities/PSSK/compute_scalar_product_of_pssk utilities/PSSK/compute_scalar_product_of_pssk.cpp )
 target_link_libraries(utilities/PSSK/compute_scalar_product_of_pssk ${Boost_SYSTEM_LIBRARY})
