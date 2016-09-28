@@ -1,0 +1,105 @@
+%
+\documentclass[11pt]{article}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{url}
+
+\graphicspath{{./figures/}}
+
+\newcommand{\ds}{\displaystyle}
+\newcommand{\pd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\mbf}[1]{\mathbf{#1}}
+\newcommand{\mbb}[1]{\mathbb{#1}}
+\newcommand{\R}{\mbb{R}}
+\newcommand{\N}{\mbb{N}}
+\newcommand{\mcal}[1]{\mathcal{#1}}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\set}[1]{\{#1\}}
+%\usepackage{customMath}
+
+\usepackage[top=2.5cm, bottom=3.5cm, left=2.5cm, right=2.5cm]{geometry}
+\parindent=12pt
+\pdfpagewidth 8.5in
+\pdfpageheight 11in
+%
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\topfraction}{0.95}
+\renewcommand{\bottomfraction}{0.05}
+\renewcommand{\floatpagefraction}{0.90}
+%
+\newcommand{\PD}[1]{\textcolor{green}{\textbf{PD}\noindent\textbf{[#1]}}}
+\newcommand{\TS}[1]{\textcolor{blue}{\textbf{TS}\noindent\textbf{[#1]}}}
+\newcommand{\TW}[1]{\textcolor{red}{\textbf{TW}\noindent\textbf{[#1]}}}
+
+\renewcommand{\epsilon}{\varepsilon}
+\DeclareMathOperator{\Ima}{Im}
+
+\newcommand{\norm}[1]{\ensuremath{\left\|#1\right\|}}
+\newcommand{\bdr}[1]{bdr\ #1}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{prop}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{cor}[theorem]{Corollary}
+\newtheorem{remark}[theorem]{Remark}
+
+
+\begin{document}
+
+\begin{center}
+\Huge{The gudhi stat doc.\\
+Ver 1.0.}
+\end{center}
+
+
+\section{Idea}
+
+When it comes to the statistics and machine learning, one need only very limited number of operations to be performed on a data to proceed. Let us think of some representation of persistence $\mathcal{A}$. To perform most of the statistical and machine learning operations one need to be able to compute average of object of type $\mathcal{A}$ (so that the averaged object is also of a type $\mathcal{A}$). One need to be able to compute distance between objects of a type $\mathcal{A}$, and compute scalar product of objects of a type $\mathcal{A}$.
+
+To put this statement into a context, let us assume we have two collections $c_1,...,c_n$ and $d_1,...,d_n$ of objects of a type $\mathcal{A}$. We want to verify if the average of those two collections are different by performing bootstrap.
+First of all, we compute averages of those two connections: $C =$ average of $c_1,...,c_n$ and $D =$ average of $d_1,...,d_n$. Note that both $C$ and $D$ are of a type $\mathcal{A}$. Then we compute $d(C,D)$, a distance between $C$ and $D$.
+Later we put the two collections into one bin:\\
+\[B = { c_1,...,c_n,d_1,...,d_n }\]
+Then we shuffle $B$, and we divide the shuffled version of $B$ into two classes: $B_1$ and $B_2$. Note that again, $B_1$ and $B_2$ are of a type $\mathcal{A}$. We compute their distance $d(B_1,B_2)$. The procedure of shuffling and dividing the set $B$ is repeated $N$ times ($N$ is reasonably large number).
+Then the p-value of a statement that the averages of  $c_1,...,c_n$ and $d_1,...,d_n$ is approximated by the number of times $d(B_11,B_2) > d(C,D)$ divided by $N$.
+
+As one can see, this procedure can be performed fro any type $\mathcal{A}$ which can be averaged, and which allows for computations of distances. The idea of Gudhi stat is to take advantage of C++ (and later python) polymorphism and implement a few interfaces:
+\begin{enumerate}
+\item Interface of a representation of persistence that allows averaging (so that the average object is of the same type).
+\item Interface of representation of persistence that allows computations of distances.
+\item Interface of representation of persistence that allows computations of scalar product.
+\end{enumerate}
+
+And then to implement various currently known representations based on those interfaces. At the moment we have the implementation of following classes available (further details of those representations will be discussed later):
+\begin{enumerate}
+\item Exact persistence landscapes (allow averaging, computation of distances and scalar products).
+\item Persistence landscapes on a grid (allow averaging, computation of distances and scalar products).
+\item Persistence heat maps – various representations where one put some weighted or not Gaussian kernel for each point of diagram (allow averaging, computation of distances and scalar products).
+\item Persistence vectors (allow averaging, computation of distances and scalar products).
+\item Persistence diagrams / barcodes (allow computation of distances).
+\end{enumerate}
+
+
+The main aim of this implementation is to be able to implement various statistical methods, both on the level of C++ and python, that operates on the interfaces that are require (like, in the example above, the ability of averaging and computations of distances). Then, we are able to use any of representation that implement a given interface (including the future ones). Below we are discussing the representations which are currently implemented in Gudhi\_stat:
+
+
+\section{Persistence Landscapes}
+Persistence landscapes were originally proposed by Bubenik in~\cite{landscapes1}]. Efficient algorithms to compute them rigorously were proposed by Bubenik and Dłotko in~\cite{landscapes2}. The idea of persistence landscapes is shortly summarized in below.
+
+\section{Persistence Landscapes on a grid}
+Persistence landscapes were originally proposed by Bubenik
+\section{Persistence heat maps}
+aaa
+\section{Persistence vectors}
+aaa
+
+\begin{thebibliography}{99}
+\bibitem{landscapes1}  P. Bubenik, Statistical topological data analysis using persistence landscapes, Journal of Machine Learning Research, 16 (2015), 77–102.
+
+\bibitem{landscapes2} P. Bubenik, P. Dlotko, A persistence landscapes toolbox for topological statistics. Journal of Symbolic Computation.
+
+\end{thebibliography}
+\end{document}
