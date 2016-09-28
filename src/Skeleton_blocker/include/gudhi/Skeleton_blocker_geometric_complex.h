@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -19,16 +19,17 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #ifndef SKELETON_BLOCKER_GEOMETRIC_COMPLEX_H_
 #define SKELETON_BLOCKER_GEOMETRIC_COMPLEX_H_
 
-#include <gudhi/Utils.h>
 #include <gudhi/Skeleton_blocker_complex.h>
 #include <gudhi/Skeleton_blocker/Skeleton_blocker_sub_complex.h>
+#include <gudhi/Debug_utils.h>
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 /**
  * @brief Class that represents a geometric complex that can be simplified.
@@ -217,7 +218,9 @@ SkeletonBlockerGeometricComplex make_complex_from_top_faces(
   return complex;
 }
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 

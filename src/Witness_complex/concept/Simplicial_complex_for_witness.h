@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CONCEPT_WITNESS_COMPLEX_SIMPLICIAL_COMPLEX_H_
-#define CONCEPT_WITNESS_COMPLEX_SIMPLICIAL_COMPLEX_H_
+#ifndef CONCEPT_WITNESS_COMPLEX_SIMPLICIAL_COMPLEX_FOR_WITNESS_H_
+#define CONCEPT_WITNESS_COMPLEX_SIMPLICIAL_COMPLEX_FOR_WITNESS_H_
 
 namespace Gudhi {
 
@@ -31,7 +31,7 @@ namespace witness_complex {
  * for a type to implement a simplicial complex, 
  * used for example to build a 'Witness_complex'. 
  */
-struct Simplicial_complex {
+struct SimplicialComplexForWitness {
   /** Handle to specify a simplex. */
   typedef unspecified Simplex_handle;
   /** Handle to specify a vertex. Must be a non-negative integer. */
@@ -40,16 +40,11 @@ struct Simplicial_complex {
   /** Returns a Simplex_hanlde that is different from all simplex handles 
    * of the simplices. */
   Simplex_handle null_simplex();
-  /** \brief Returns the number of simplices in the complex.
-   *
-   * Does not count the empty simplex. */
-  size_t num_simplices();
 
   /** \brief Iterator over the simplices of the complex,
    * in an arbitrary order.
    *
    * 'value_type' must be 'Simplex_handle'.*/
-  typedef unspecified Complex_simplex_iterator;
   typedef unspecified Complex_simplex_range;
 
   /**
@@ -71,19 +66,17 @@ struct Simplicial_complex {
    */
   typedef unspecified Insertion_result_type;
 
-  /** \brief Input range of vertices.
-   * 'value_type' must be 'Vertex_handle'. */
-  typedef unspecified Input_vertex_range;
-
   /** \brief Inserts a simplex with vertices from a given range
    *  'vertex_range' in the simplicial complex.
    *  */
+  template< typedef Input_vertex_range >
   Insertion_result_type insert_simplex(Input_vertex_range const & vertex_range);
 
   /** \brief Finds a simplex with vertices given by a range
    *
    * If a simplex exists, its Simplex_handle is returned.
    * Otherwise null_simplex() is returned. */
+  template< typedef Input_vertex_range >
   Simplex_handle find(Input_vertex_range const & vertex_range);
 };
 
@@ -91,4 +84,4 @@ struct Simplicial_complex {
 
 }  // namespace Gudhi
 
-#endif  // CONCEPT_WITNESS_COMPLEX_SIMPLICIAL_COMPLEX_H_
+#endif  // CONCEPT_WITNESS_COMPLEX_SIMPLICIAL_COMPLEX_FOR_WITNESS_H_

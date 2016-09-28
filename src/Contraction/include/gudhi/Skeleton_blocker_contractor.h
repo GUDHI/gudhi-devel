@@ -37,7 +37,7 @@
 #include <gudhi/Contraction/policies/Contraction_visitor.h>
 
 #include <gudhi/Skeleton_blocker/Skeleton_blocker_complex_visitor.h>
-#include <gudhi/Utils.h>
+#include <gudhi/Debug_utils.h>
 
 
 #include <boost/scoped_array.hpp>
@@ -100,7 +100,7 @@ Contraction_visitor<Profile>* make_remove_popable_blockers_visitor() {
  *
  */
 template<class GeometricSimplifiableComplex, class EdgeProfile = Edge_profile<GeometricSimplifiableComplex>>
-class Skeleton_blocker_contractor : private skbl::Dummy_complex_visitor<
+class Skeleton_blocker_contractor : private skeleton_blocker::Dummy_complex_visitor<
 typename GeometricSimplifiableComplex::Vertex_handle> {
   GeometricSimplifiableComplex& complex_;
 

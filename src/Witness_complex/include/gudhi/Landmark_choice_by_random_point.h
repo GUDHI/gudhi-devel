@@ -23,8 +23,11 @@
 #ifndef LANDMARK_CHOICE_BY_RANDOM_POINT_H_
 #define LANDMARK_CHOICE_BY_RANDOM_POINT_H_
 
+#include <boost/range/size.hpp>
+
 #include <queue>  // for priority_queue<>
 #include <utility>  // for pair<>
+#include <iterator>
 #include <vector>
 #include <set>
 
@@ -32,9 +35,17 @@ namespace Gudhi {
 
 namespace witness_complex {
 
-  /** \brief Landmark choice strategy by taking random vertices for landmarks.
+  /**
+   *  \ingroup witness_complex
+   * \brief Landmark choice strategy by taking random vertices for landmarks.
    *  \details It chooses nbL distinct landmarks from a random access range `points`
    *  and outputs a matrix {witness}*{closest landmarks} in knn.
+   *
+   *  The type KNearestNeighbors can be seen as 
+   *  Witness_range<Closest_landmark_range<Vertex_handle>>, where
+   *  Witness_range and Closest_landmark_range are random access ranges and
+   *  Vertex_handle is the label type of a vertex in a simplicial complex.
+   *  Closest_landmark_range needs to have push_back operation.
    */
 
   template <typename KNearestNeighbours,
@@ -42,7 +53,7 @@ namespace witness_complex {
   void landmark_choice_by_random_point(Point_random_access_range const &points,
                                        int nbL,
                                        KNearestNeighbours &knn) {
-    int nbP = points.end() - points.begin();
+    int nbP = boost::size(points);
     assert(nbP >= nbL);
     std::set<int> landmarks;
     int current_number_of_landmarks = 0;  // counter for landmarks
@@ -55,12 +66,12 @@ namespace witness_complex {
       landmarks.insert(chosen_landmark);
     }
 
-    int dim = points.begin()->size();
+    int dim = boost::size(*std::begin(points));
     typedef std::pair<double, int> dist_i;
     typedef bool (*comp)(dist_i, dist_i);
     knn = KNearestNeighbours(nbP);
     for (int points_i = 0; points_i < nbP; points_i++) {
-      std::priority_queue<dist_i, std::vector<dist_i>, comp> l_heap([&](dist_i j1, dist_i j2) {
+      std::priority_queue<dist_i, std::vector<dist_i>, comp> l_heap([](dist_i j1, dist_i j2) {
           return j1.first > j2.first;
         });
       std::set<int>::iterator landmarks_it;

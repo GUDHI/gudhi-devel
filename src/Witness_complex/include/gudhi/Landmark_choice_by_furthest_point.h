@@ -23,7 +23,10 @@
 #ifndef LANDMARK_CHOICE_BY_FURTHEST_POINT_H_
 #define LANDMARK_CHOICE_BY_FURTHEST_POINT_H_
 
+#include <boost/range/size.hpp>
+
 #include <limits>  // for numeric_limits<>
+#include <iterator>
 #include <algorithm>  // for sort
 #include <vector>
 
@@ -31,13 +34,19 @@ namespace Gudhi {
 
 namespace witness_complex {
 
- typedef std::vector<int> typeVectorVertex;
+  typedef std::vector<int> typeVectorVertex;
 
   /** 
+   *  \ingroup witness_complex
    *  \brief Landmark choice strategy by iteratively adding the furthest witness from the
    *  current landmark set as the new landmark. 
    *  \details It chooses nbL landmarks from a random access range `points` and
    *  writes {witness}*{closest landmarks} matrix in `knn`.
+   *
+   *  The type KNearestNeighbors can be seen as 
+   *  Witness_range<Closest_landmark_range<Vertex_handle>>, where
+   *  Witness_range and Closest_landmark_range are random access ranges 
+   *  
    */
 
   template <typename KNearestNeighbours,
@@ -45,7 +54,7 @@ namespace witness_complex {
   void landmark_choice_by_furthest_point(Point_random_access_range const &points,
                                          int nbL,
                                          KNearestNeighbours &knn) {
-    int nb_points = points.end() - points.begin();
+    int nb_points = boost::size(points);
     assert(nb_points >= nbL);
     // distance matrix witness x landmarks
     std::vector<std::vector<double>> wit_land_dist(nb_points, std::vector<double>());
@@ -59,6 +68,7 @@ namespace witness_complex {
     std::vector< double > dist_to_L(nb_points, infty);  // vector of current distances to L from points
 
     // TODO(SK) Consider using rand_r(...) instead of rand(...) for improved thread safety
+    // or better yet std::uniform_int_distribution
     int rand_int = rand() % nb_points;
     int curr_max_w = rand_int;  // For testing purposes a pseudo-random number is used here
 
@@ -67,7 +77,7 @@ namespace witness_complex {
       chosen_landmarks.push_back(curr_max_w);
       unsigned i = 0;
       for (auto& p : points) {
-        double curr_dist = euclidean_distance(p, *(points.begin() + chosen_landmarks[current_number_of_landmarks]));
+        double curr_dist = euclidean_distance(p, *(std::begin(points) + chosen_landmarks[current_number_of_landmarks]));
         wit_land_dist[i].push_back(curr_dist);
         knn[i].push_back(current_number_of_landmarks);
         if (curr_dist < dist_to_L[i])
@@ -81,9 +91,9 @@ namespace witness_complex {
           curr_max_w = i;
         }
     }
-    for (unsigned i = 0; i < points.size(); ++i)
-      std::sort(knn[i].begin(),
-                knn[i].end(),
+    for (int i = 0; i < nb_points; ++i)
+      std::sort(std::begin(knn[i]),
+                std::end(knn[i]),
                 [&wit_land_dist, i](int a, int b) {
                   return wit_land_dist[i][a] < wit_land_dist[i][b]; });
   }

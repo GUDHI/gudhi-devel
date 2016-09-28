@@ -32,8 +32,12 @@ class FirstCoordProjector3D : public Projector3D {
   typedef Projector3D::Point_3 Point_3;
 
   Point_3 operator()(const Point& p) const {
-    assert(p.dimension() >= 3);
-    return Point_3(p.x(), p.y(), p.z());
+    if (p.dimension() >= 3)
+      return Point_3(p.x(), p.y(), p.z());
+    else if  (p.dimension() >= 2)
+      return Point_3(p.x(), p.y(), 0.0);
+    else
+      return Point_3(0.0, 0.0, 0.0);
   }
 };
 

@@ -31,40 +31,35 @@
 #include <iterator>
 #include <string>
 #include <vector>
+#include <fstream>
 
 namespace Gudhi {
 
-/**
- * Read an off file and calls a visitor methods while reading it.
- * An off file must have its first/snd line in this format :
- * OFF
- * num_vert num_faces num_edges
- *
- * A noff file must have its first/snd line in this format :
- * nOFF
- * dim num_vert num_faces num_edges
- *
- * The number of edges num_edges is optional and can be left to zero.
+/** \brief OFF file reader top class visitor. 
+ * 
+ * OFF file must be conform to format described here : 
+ * http://www.geomview.org/docs/html/OFF.html
  */
 class Off_reader {
  public:
   Off_reader(std::ifstream& stream) : stream_(stream) { }
-  // Off_reader(const std::string& name):stream_(name){
-  //   if(!stream_.is_open())
-  //   std::cerr <<"could not open file \n";
-  // }
 
   ~Off_reader() {
     stream_.close();
   }
 
-  /**
-   * read an off file and calls the following methods :
-   * void init(int dim,int num_vertices,int num_faces,int num_edges); //num_edges may not be set
-   * void point(const std::vector<double>& point);
-   * void maximal_face(const std::list<int>& face);
-   * void done();
-   * of the visitor when reading a point or a maximal face.
+  /** \brief
+   * Read an OFF file and calls the following methods :
+   * 
+   * <CODE>void init(int dim,int num_vertices,int num_faces,int num_edges);  // from file header - num_edges may not be set
+   * 
+   * void point(const std::vector<double>& point);  // for each point read
+   * 
+   * void maximal_face(const std::list<int>& face);  // for each face read
+   * 
+   * void done();  // upon file read is finished</CODE>
+   * 
+   * of the visitor when reading a point or a maximal face. Edges are not taken into account.
    */
   template<typename OffVisitor>
   bool read(OffVisitor& off_visitor) {
@@ -118,7 +113,7 @@ class Off_reader {
 
     if (!goto_next_uncomment_line(line)) return false;
     std::istringstream iss(line);
-    if (is_off_file) {
+    if ((is_off_file) && (!is_noff_file)) {
       off_info_.dim = 3;
       if (!(iss >> off_info_.num_vertices >> off_info_.num_faces >> off_info_.num_edges)) {
         std::cerr << "incorrect number of vertices/faces/edges\n";
@@ -126,8 +121,8 @@ class Off_reader {
       }
     } else {
       if (!(iss >> off_info_.dim >> off_info_.num_vertices >> off_info_.num_faces >> off_info_.num_edges)) {
-        std::cerr << "incorrect number of vertices/faces/edges\n";
-        return false;
+      std::cerr << "incorrect number of vertices/faces/edges\n";
+      return false;
       }
     }
     off_visitor.init(off_info_.dim, off_info_.num_vertices, off_info_.num_faces, off_info_.num_edges);
@@ -138,7 +133,7 @@ class Off_reader {
   bool goto_next_uncomment_line(std::string& uncomment_line) {
     uncomment_line.clear();
     do
-      std::getline(stream_, uncomment_line); while (uncomment_line[0] == '%');  // || uncomment_line.empty());
+      std::getline(stream_, uncomment_line); while (uncomment_line[0] == '%');
     return (uncomment_line.size() > 0 && uncomment_line[0] != '%');
   }
 
@@ -166,7 +161,7 @@ class Off_reader {
       iss >> num_face_vertices;
       std::vector<int> face;
       face.assign(std::istream_iterator<int>(iss), std::istream_iterator<int>());
-      if (face.size() != off_info_.dim) return false;
+      // if (face.size() != (off_info_.dim + 1)) return false;
       visitor.maximal_face(face);
     }
     return true;

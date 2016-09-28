@@ -1,17 +1,13 @@
 cmake_minimum_required(VERSION 2.6)
-project(GUDHIWitnessComplexUT)
+project(Witness_complex_tests)
 
 if (GCOVR_PATH)
   # for gcovr to make coverage reports - Corbera Jenkins plugin
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")	
-  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fprofile-arcs -ftest-coverage")
 endif()
 if (GPROF_PATH)
   # for gprof to make coverage reports - Jenkins
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -pg")
-  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -pg")
 endif()
 
 add_executable ( simple_witness_complexUT simple_witness_complex.cpp )

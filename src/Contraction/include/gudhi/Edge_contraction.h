@@ -30,7 +30,7 @@
 #include <gudhi/Contraction/policies/Valid_contraction_policy.h>
 #include <gudhi/Contraction/policies/Dummy_valid_contraction.h>
 #include <gudhi/Contraction/policies/Link_condition_valid_contraction.h>
-#include <gudhi/Utils.h>
+#include <gudhi/Debug_utils.h>
 
 namespace Gudhi {
 
@@ -41,12 +41,12 @@ namespace contraction {
 
 \author David Salinas
 
-\section Introduction
+\section edgecontractionintroduction Introduction
 
 The purpose of this package is to offer a user-friendly interface for edge contraction simplification of huge simplicial complexes.
 It uses the \ref skbl data-structure whose size remains small  during simplification  
 of  most used geometrical complexes of topological data analysis such as the Rips or the Delaunay complexes. In practice, the 
-size of this data-structure is even uch lower than the total number of simplices.
+size of this data-structure is even much lower than the total number of simplices.
 
 The edge contraction operation consists in identifying two vertices of a simplicial complex. 
 A lot of algorithms have been developed in computer graphics that allows to reduce efficiently the size of 2-dimensional simplicial complexes
@@ -127,7 +127,7 @@ while ensuring its homotopy type is preserved during the contraction (edge are c
 
 using namespace std;
 using namespace Gudhi;
-using namespace skbl;
+using namespace skeleton_blocker;
 using namespace contraction;
 
 struct Geometry_trait{
@@ -226,7 +226,6 @@ Time to simplify and enumerate simplices:
 
 
 \copyright GNU General Public License v3.                         
-\verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
 */
 /** @} */  // end defgroup
 }  // namespace contraction

@@ -71,9 +71,9 @@ class CGAL_geometric_flag_complex_wrapper {
 
   void maximal_face(std::vector<int> vertices) {
     if (!load_only_points_) {
-      std::cout << "size:" << vertices.size() << std::endl;
-      for (int i = 0; i < vertices.size(); ++i)
-        for (int j = i + 1; j < vertices.size(); ++j)
+      // std::cout << "size:" << vertices.size() << std::endl;
+      for (std::size_t i = 0; i < vertices.size(); ++i)
+        for (std::size_t j = i + 1; j < vertices.size(); ++j)
           complex_.add_edge(Vertex_handle(vertices[i]), Vertex_handle(vertices[j]));
     }
   }

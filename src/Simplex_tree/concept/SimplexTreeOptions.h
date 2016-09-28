@@ -31,7 +31,7 @@ struct SimplexTreeOptions {
   typedef VertexHandle Vertex_handle;
   /// Must be comparable with operator<.
   typedef FiltrationValue Filtration_value;
-  /// Must be a signed integer type.
+  /// Must be an integer type.
   typedef SimplexKey Simplex_key;
   /// If true, each simplex has extra storage for one `Simplex_key`. Necessary for `Persistent_cohomology`.
   static const bool store_key;

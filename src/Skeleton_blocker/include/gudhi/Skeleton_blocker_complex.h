@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 #include <gudhi/Skeleton_blocker/Skeleton_blocker_complex_visitor.h>
 #include <gudhi/Skeleton_blocker/internal/Top_faces.h>
 #include <gudhi/Skeleton_blocker/internal/Trie.h>
-#include <gudhi/Utils.h>
+#include <gudhi/Debug_utils.h>
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
@@ -52,7 +52,7 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 /**
  *@class Skeleton_blocker_complex
@@ -210,7 +210,6 @@ class Skeleton_blocker_complex {
     for (const auto& e : edges)
       add_edge_without_blockers(e.first, e.second);
   }
-
 
   template<typename SimpleHandleOutputIterator>
   void add_blockers(SimpleHandleOutputIterator simplices_begin, SimpleHandleOutputIterator simplices_end) {
@@ -414,7 +413,8 @@ class Skeleton_blocker_complex {
   /**
    */
   bool contains_vertex(Vertex_handle u) const {
-    if (u.vertex < 0 || u.vertex >= boost::num_vertices(skeleton))
+    Vertex_handle num_vertices(boost::num_vertices(skeleton));
+    if (u.vertex < 0 || u.vertex >= num_vertices)
       return false;
     return (*this)[u].is_active();
   }
@@ -441,11 +441,11 @@ class Skeleton_blocker_complex {
    * @brief Given an Id return the address of the vertex having this Id in the complex.
    * @remark For a simplicial complex, the address is the id but it may not be the case for a SubComplex.
    */
-  virtual boost::optional<Vertex_handle> get_address(
-                                                     Root_vertex_handle id) const {
+  virtual boost::optional<Vertex_handle> get_address(Root_vertex_handle id) const {
     boost::optional<Vertex_handle> res;
-    if (id.vertex < boost::num_vertices(skeleton))
-      res = Vertex_handle(id.vertex);  // xxx
+    int num_vertices = boost::num_vertices(skeleton);
+    if (id.vertex < num_vertices)
+      res = Vertex_handle(id.vertex);
     return res;
   }
 
@@ -560,7 +560,7 @@ class Skeleton_blocker_complex {
     return res;
   }
 
-    /**
+  /**
    * @brief Adds all edges of s in the complex.
    */
   void add_edge(const Simplex& s) {
@@ -590,7 +590,6 @@ class Skeleton_blocker_complex {
     }
     return *edge_handle;
   }
-
 
   /**
    * @brief Adds all edges of s in the complex without adding blockers.
@@ -844,12 +843,13 @@ class Skeleton_blocker_complex {
     boost_adjacency_iterator ai, ai_end;
     for (tie(ai, ai_end) = adjacent_vertices(v.vertex, skeleton); ai != ai_end;
          ++ai) {
+      Vertex_handle value(*ai);
       if (keep_only_superior) {
-        if (*ai > v.vertex) {
-          n.add_vertex(Vertex_handle(*ai));
+        if (value > v.vertex) {
+          n.add_vertex(value);
         }
       } else {
-        n.add_vertex(Vertex_handle(*ai));
+        n.add_vertex(value);
       }
     }
   }
@@ -929,7 +929,7 @@ class Skeleton_blocker_complex {
   // xxx rename get_address et place un using dans sub_complex
 
   boost::optional<Simplex> get_simplex_address(
-                                                      const Root_simplex_handle& s) const {
+                                               const Root_simplex_handle& s) const {
     boost::optional<Simplex> res;
 
     Simplex s_address;
@@ -1001,10 +1001,9 @@ class Skeleton_blocker_complex {
     return std::distance(triangles.begin(), triangles.end());
   }
 
-
   /*
    * @brief returns the number of simplices of a given dimension in the complex.
-   */  
+   */
   size_t num_simplices() const {
     auto simplices = complex_simplex_range();
     return std::distance(simplices.begin(), simplices.end());
@@ -1012,8 +1011,8 @@ class Skeleton_blocker_complex {
 
   /*
    * @brief returns the number of simplices of a given dimension in the complex.
-   */  
-  size_t num_simplices(unsigned dimension) const {
+   */
+  size_t num_simplices(int dimension) const {
     // TODO(DS): iterator on k-simplices
     size_t res = 0;
     for (const auto& s : complex_simplex_range())
@@ -1595,7 +1594,9 @@ Complex make_complex_from_top_faces(SimplexHandleIterator simplices_begin, Simpl
   return Complex(simplices.begin(), simplices.end(), is_flag_complex);
 }
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 

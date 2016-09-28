@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -19,15 +19,16 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #ifndef SKELETON_BLOCKER_LINK_COMPLEX_H_
 #define SKELETON_BLOCKER_LINK_COMPLEX_H_
 
-#include <gudhi/Utils.h>
 #include <gudhi/Skeleton_blocker_complex.h>
+#include <gudhi/Debug_utils.h>
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 template<class ComplexType> class Skeleton_blocker_sub_complex;
 
@@ -39,7 +40,7 @@ template<class ComplexType> class Skeleton_blocker_sub_complex;
  */
 template<typename ComplexType>
 class Skeleton_blocker_link_complex : public Skeleton_blocker_sub_complex<
-    ComplexType> {
+ComplexType> {
   template<typename T> friend class Skeleton_blocker_link_superior;
   typedef typename ComplexType::Edge_handle Edge_handle;
 
@@ -60,8 +61,7 @@ class Skeleton_blocker_link_complex : public Skeleton_blocker_sub_complex<
   typedef typename ComplexType::Root_simplex_handle::Simplex_vertex_const_iterator Root_simplex_handle_iterator;
 
   explicit Skeleton_blocker_link_complex(bool only_superior_vertices = false)
-      : only_superior_vertices_(only_superior_vertices) {
-  }
+      : only_superior_vertices_(only_superior_vertices) { }
 
   /**
    * If the parameter only_superior_vertices is true,
@@ -95,10 +95,10 @@ class Skeleton_blocker_link_complex : public Skeleton_blocker_sub_complex<
    */
   Skeleton_blocker_link_complex(const ComplexType & parent_complex,
                                 Edge_handle edge, bool only_superior_vertices =
-                                    false)
+                                false)
       : only_superior_vertices_(only_superior_vertices) {
     Simplex alpha_simplex(parent_complex.first_vertex(edge),
-                                 parent_complex.second_vertex(edge));
+                          parent_complex.second_vertex(edge));
     build_link(parent_complex, alpha_simplex);
   }
 
@@ -151,7 +151,7 @@ class Skeleton_blocker_link_complex : public Skeleton_blocker_sub_complex<
                              bool only_superior_vertices) {
     // for a vertex we know exactly the number of vertices of the link (and the size of the corresponding vector
     this->skeleton.m_vertices.reserve(
-        parent_complex.degree(alpha_parent_adress));
+                                      parent_complex.degree(alpha_parent_adress));
 
     // For all vertex 'v' in this intersection, we go through all its adjacent blockers.
     // If one blocker minus 'v' is included in alpha then the vertex is not in the link complex.
@@ -169,21 +169,21 @@ class Skeleton_blocker_link_complex : public Skeleton_blocker_sub_complex<
       return;
 
     for (auto x_link = this->vertex_range().begin();
-        x_link != this->vertex_range().end(); ++x_link) {
+         x_link != this->vertex_range().end(); ++x_link) {
       for (auto y_link = x_link; ++y_link != this->vertex_range().end();) {
         Vertex_handle x_parent = *parent_complex.get_address(
-            this->get_id(*x_link));
+                                                             this->get_id(*x_link));
         Vertex_handle y_parent = *parent_complex.get_address(
-            this->get_id(*y_link));
+                                                             this->get_id(*y_link));
         if (parent_complex.contains_edge(x_parent, y_parent)) {
           // we check that there is no blocker subset of alpha passing trough x and y
           bool new_edge = true;
           for (auto blocker_parent : parent_complex.const_blocker_range(
-              x_parent)) {
+                                                                        x_parent)) {
             if (!is_alpha_blocker || *blocker_parent != alpha_parent_adress) {
               if (blocker_parent->contains(y_parent)) {
                 new_edge = !(alpha_parent_adress.contains_difference(
-                    *blocker_parent, x_parent, y_parent));
+                                                                     *blocker_parent, x_parent, y_parent));
                 if (!new_edge)
                   break;
               }
@@ -201,8 +201,8 @@ class Skeleton_blocker_link_complex : public Skeleton_blocker_sub_complex<
    * corresponding address in 'other_complex'.
    * It assumes that other_complex have a vertex 'this.get_id(address)'
    */
-  boost::optional<Vertex_handle> give_equivalent_vertex(
-      const ComplexType & other_complex, Vertex_handle address) const {
+  boost::optional<Vertex_handle> give_equivalent_vertex(const ComplexType & other_complex,
+                                                        Vertex_handle address) const {
     Root_vertex_handle id((*this)[address].get_id());
     return other_complex.get_address(id);
   }
@@ -269,7 +269,7 @@ class Skeleton_blocker_link_complex : public Skeleton_blocker_sub_complex<
                   bool only_vertices = false) {
     assert(is_alpha_blocker || parent_complex.contains(alpha_parent_adress));
     compute_link_vertices(parent_complex, alpha_parent_adress, only_superior_vertices_);
-    if(!only_vertices) {
+    if (!only_vertices) {
       compute_link_edges(parent_complex, alpha_parent_adress, is_alpha_blocker);
       compute_link_blockers(parent_complex, alpha_parent_adress, is_alpha_blocker);
     }
@@ -290,7 +290,9 @@ class Skeleton_blocker_link_complex : public Skeleton_blocker_sub_complex<
   }
 };
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 
