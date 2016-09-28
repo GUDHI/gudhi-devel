@@ -28,7 +28,7 @@
 #include <gudhi/Simplex_tree/Simplex_tree_iterators.h>
 #include <gudhi/Simplex_tree/indexing_tag.h>
 
-#include <gudhi/reader_utils.h>
+//#include <gudhi/reader_utils.h>
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/Debug_utils.h>
 

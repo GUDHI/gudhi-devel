@@ -39,14 +39,14 @@ struct vertex_filtration_t {
   typedef boost::vertex_property_tag kind;
 };
 
-typedef int Vertex_handle;
+/*typedef int Vertex_handle;
 typedef double Filtration_value;
 typedef boost::adjacency_list < boost::vecS, boost::vecS, boost::undirectedS
 , boost::property < vertex_filtration_t, Filtration_value >
 , boost::property < edge_filtration_t, Filtration_value >
 > Graph_t;
 typedef std::pair< Vertex_handle, Vertex_handle > Edge_t;
-
+*/
 /** \brief Output the proximity graph of the points.
  *
  * If points contains n elements, the proximity graph is the graph 
@@ -56,7 +56,7 @@ typedef std::pair< Vertex_handle, Vertex_handle > Edge_t;
  * The type PointCloud furnishes .begin() and .end() methods, that return
  * iterators with value_type Point.
  */
-template< typename PointCloud
+/*template< typename PointCloud
 , typename Point >
 Graph_t compute_proximity_graph(PointCloud &points
                                 , Filtration_value threshold
@@ -94,6 +94,6 @@ Graph_t compute_proximity_graph(PointCloud &points
   }
 
   return skel_graph;
-}
+}*/
 
 #endif  // GRAPH_SIMPLICIAL_COMPLEX_H_

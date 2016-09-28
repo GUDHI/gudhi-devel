@@ -29,7 +29,7 @@
  * by a range of coordinates. The points are assumed to have 
  * the same dimension. */
 template< typename Point >
-double euclidean_distance(Point &p1, Point &p2) {
+double euclidean_distance(const Point &p1,const Point &p2) {
   double dist = 0.;
   auto it1 = p1.begin();
   auto it2 = p2.begin();
