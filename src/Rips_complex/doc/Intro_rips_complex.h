@@ -29,11 +29,11 @@ namespace rips_complex {
 
 /**  \defgroup rips_complex Rips complex
  * 
- * \author    Clément Maria & Vincent Rouvreau
+ * \author    Clément Maria and Vincent Rouvreau
  * 
  * @{
  * 
- * \section definition Definition
+ * \section ripsdefinition Definition
  * 
  * Rips_complex
  * <a target="_blank" href="https://en.wikipedia.org/wiki/Vietoris%E2%80%93Rips_complex">(Wikipedia)</a> is a
@@ -61,18 +61,19 @@ namespace rips_complex {
  * 
  * Then, it is asked to display information about the simplicial complex.
  * 
- * \include Rips_complex/example_rips_complex_from_points.cpp
+ * \include Rips_complex/example_one_skeleton_rips_from_points.cpp
  * 
- * When launching:
+ * When launching (rips maximal distance between 2 points is 12.0, is expanded until dimension 1 - one skeleton graph
+ * with other words):
  * 
- * \code $> ./ripspoints
+ * \code $> ./oneskeletonripspoints 12.0
  * \endcode
  *
  * the program output is:
  * 
- * \include Rips_complex/rips_points_for_doc_12_2.txt
+ * \include Rips_complex/one_skeleton_rips_points_for_doc.txt
  * 
- * \section offexample Example from OFF file
+ * \section ripsoffexample Example from OFF file
  * 
  * This example builds the one skeleton graph from the given points in an OFF file, threshold value, and distance
  * function.
@@ -90,7 +91,7 @@ namespace rips_complex {
  *
  * the program output is:
  * 
- * \include Rips_complex/rips_points_for_doc_12_3.txt
+ * \include Rips_complex/full_skeleton_rips_points_for_doc.txt
  * 
  * \copyright GNU General Public License v3.                         
  * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim

@@ -11,20 +11,15 @@
 
 void usage(int nbArgs, char * const progName) {
   std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
-  std::cerr << "Usage: " << progName << " dim_max [threshold]\n";
-  std::cerr << "       i.e.: " << progName << " 3 12.0\n";
+  std::cerr << "Usage: " << progName << " threshold\n";
+  std::cerr << "       i.e.: " << progName << " 12.0\n";
   exit(-1);  // ----- >>
 }
 
 int main(int argc, char **argv) {
-  if ((argc != 2) && (argc != 3)) usage(argc, argv[0]);
+  if (argc != 2) usage(argc, argv[0]);
 
-  double threshold = std::numeric_limits<double>::infinity();
-  int dim_max = atoi(argv[1]);
-  
-  if (argc == 3) {
-    threshold = atof(argv[2]);
-  }
+  double threshold = atof(argv[1]);
 
   // Type definitions
   using Point = std::vector<double>;
@@ -41,14 +36,14 @@ int main(int argc, char **argv) {
   points.push_back({9.0, 17.0});
   
   // ----------------------------------------------------------------------------
-  // Init of a rips complex from an OFF file
+  // Init of a rips complex from points
   // ----------------------------------------------------------------------------
   Rips_complex rips_complex_from_file(points, threshold, euclidean_distance<Point>);
 
   Simplex_tree simplex;
-  if (rips_complex_from_file.create_complex(simplex, dim_max)) {
+  if (rips_complex_from_file.create_complex(simplex, 1)) {
     // ----------------------------------------------------------------------------
-    // Display information about the rips complex
+    // Display information about the one skeleton rips complex
     // ----------------------------------------------------------------------------
     std::cout << "Rips complex is of dimension " << simplex.dimension() <<
         " - " << simplex.num_simplices() << " simplices - " <<

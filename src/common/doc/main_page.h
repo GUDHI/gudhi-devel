@@ -55,6 +55,23 @@
     <b>User manual:</b> \ref cubical_complex - <b>Reference manual:</b> Gudhi::cubical_complex::Bitmap_cubical_complex
     </td>
  </tr>
+ \subsection RipsComplexDataStructure Rips complex
+ \image html "rips_complex_representation.png" "Rips complex representation"
+<table border="0">
+  <tr>
+    <td width="25%">
+      <b>Author:</b> Cl&eacute;ment Maria<br>
+      <b>Introduced in:</b> GUDHI 1.4.0<br>
+      <b>Copyright:</b> GPL v3<br>
+    </td>
+    <td width="75%">
+    Rips_complex is a simplicial complex constructed from a one skeleton graph.<br>
+    The filtration value of each edge is computed from a user-given distance function and is inserted until a
+    user-given threshold value.<br>
+    <b>User manual:</b> \ref rips_complex - <b>Reference manual:</b> Gudhi::rips_complex::Rips_complex
+    </td>
+ </tr>
+</table>
 </table>
  \subsection SimplexTreeDataStructure Simplex tree
  \image html "Simplex_tree_representation.png" "Simplex tree representation"
@@ -288,6 +305,10 @@ make \endverbatim
  * Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2custom_persistence_sort_8cpp-example.html">
  * Persistent_cohomology/custom_persistence_sort.cpp</a>
+ * \li <a href="_rips_complex_2example_one_skeleton_rips_from_points_8cpp-example.html">
+ * Rips_complex/example_one_skeleton_rips_from_points.cpp</a>
+ * \li <a href="_rips_complex_2example_rips_complex_from_off_file_8cpp-example.html">
+ * Rips_complex/example_rips_complex_from_off_file.cpp</a>
  * 
  * \section Contributions Bug reports and contributions
  * Please help us improving the quality of the GUDHI library. You may report bugs or suggestions to:
@@ -330,6 +351,8 @@ make \endverbatim
  * @example Persistent_cohomology/rips_multifield_persistence.cpp
  * @example Persistent_cohomology/rips_persistence.cpp
  * @example Persistent_cohomology/custom_persistence_sort.cpp
+ * @example Rips_complex/example_one_skeleton_rips_from_points.cpp
+ * @example Rips_complex/example_rips_complex_from_off_file.cpp
  * @example Simplex_tree/mini_simplex_tree.cpp
  * @example Simplex_tree/simple_simplex_tree.cpp
  * @example Simplex_tree/simplex_tree_from_alpha_shapes_3.cpp

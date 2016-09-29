@@ -144,6 +144,7 @@ else()
   add_subdirectory(src/Alpha_complex/example)
   add_subdirectory(src/Alpha_complex/test)
   add_subdirectory(src/Rips_complex/example)
+  add_subdirectory(src/Rips_complex/test)
 
   # data points generator
   add_subdirectory(data/points/generator)
