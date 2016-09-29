@@ -54,6 +54,8 @@ void write_data(Data_range & data, std::string filename) {
 }
 
 int main(int argc, char * const argv[]) {
+  typedef Gudhi::witness_complex::Witness_complex<CGAL::Epick_d<CGAL::Dynamic_dimension_tag>> Witness_complex;
+  
   if (argc != 2) {
     std::cerr << "Usage: " << argv[0]
         << " number_of_landmarks \n";
@@ -77,21 +79,20 @@ int main(int argc, char * const argv[]) {
 
     // Choose landmarks
     start = clock();
-    std::vector<std::vector< int > > knn;
-    Gudhi::subsampling::pick_n_random_points(point_vector, 100, std::back_inserter(landmarks));
-    Gudhi::witness_complex::construct_closest_landmark_table(point_vector, landmarks, knn);
+    Gudhi::subsampling::pick_n_random_points(point_vector, number_of_landmarks, std::back_inserter(landmarks));
 
     // Compute witness complex
-    // Gudhi::witness_complex::witness_complex(knn, number_of_landmarks, point_vector[0].size(), simplex_tree);
-    Gudhi::witness_complex::Witness_complex<Gudhi::Simplex_tree<>, CGAL::Epick_d<CGAL::Dynamic_dimension_tag>>(landmarks.begin(),
-                                                                                                               landmarks.end(),
-                                                                                                               point_vector.begin(),
-                                                                                                               point_vector.end(),
-                                                                                                               simplex_tree);
+    Witness_complex witness_complex(landmarks.begin(),
+                                    landmarks.end(),
+                                    point_vector.begin(),
+                                    point_vector.end());
+    witness_complex.create_complex(simplex_tree, 0);
     end = clock();
     double time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
     std::cout << "Witness complex for " << number_of_landmarks << " landmarks took "
         << time << " s. \n";
+    assert(1 == 0);
+    std::cout << simplex_tree << "\n";
     std::cout << "Number of simplices is: " << simplex_tree.num_simplices() << "\n";
     l_time.push_back(std::make_pair(nbP, time));
   }

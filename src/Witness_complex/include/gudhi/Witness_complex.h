@@ -30,6 +30,7 @@
 
 #include <boost/range/size.hpp>
 
+#include "Active_witness/Active_witness.h"
 #include <gudhi/distance_functions.h>
 #include <gudhi/Kd_tree_search.h>
 
@@ -55,9 +56,9 @@ namespace witness_complex {
 //     \brief Constructs the witness complex for the given set of witnesses and landmarks.
 //     \ingroup witness_complex
 //  */
-template< class SimplicialComplex,
-          class Kernel_ >
+template< class Kernel_ >
 class Witness_complex {
+private:
   typedef Kernel_                                                 K;
   typedef typename K::Point_d                                     Point_d;
   typedef typename K::FT                                          FT;
@@ -65,40 +66,35 @@ class Witness_complex {
   typedef gss::Kd_tree_search<Kernel_, Point_range>               Kd_tree;
   typedef typename Kd_tree::INS_range                             Nearest_landmark_range;
   typedef typename std::vector<Nearest_landmark_range>            Nearest_landmark_table;
-  typedef typename Nearest_landmark_table::const_iterator         Nearest_landmark_table_iterator;
+  typedef typename Nearest_landmark_range::iterator               Nearest_landmark_row_iterator;
   //typedef std::vector<std::pair<unsigned,FT>>                     Nearest_landmarks;
   
- private:
-  struct Active_witness {
-    int witness_id;
-    int landmark_id;
+  // struct Active_witness {
+  //   int witness_id;
+  //   int landmark_id;
 
-    Active_witness(int witness_id_, int landmark_id_)
-        : witness_id(witness_id_),
-        landmark_id(landmark_id_) { }
-  };
-
- private:
-  typedef typename SimplicialComplex::Simplex_handle Simplex_handle;
-  typedef typename SimplicialComplex::Vertex_handle Vertex_handle;
-
+  //   Active_witness(int witness_id_, int landmark_id_)
+  //       : witness_id(witness_id_),
+  //       landmark_id(landmark_id_) { }
+  // };
+  
   typedef std::vector< double > Point_t;
   typedef std::vector< Point_t > Point_Vector;
 
-  typedef std::vector< Vertex_handle > typeVectorVertex;
-  typedef std::pair< typeVectorVertex, Filtration_value> typeSimplex;
-  typedef std::pair< Simplex_handle, bool > typePairSimplexBool;
+  typedef FT Filtration_value;
 
-  typedef int Witness_id;
-  typedef int Landmark_id;
-  typedef std::list< Vertex_handle > ActiveWitnessList;
+  
+  typedef std::size_t Witness_id;
+  typedef std::size_t Landmark_id;
+  typedef std::pair<std::size_t, FT> Id_distance_pair;
+  typedef Active_witness<Id_distance_pair, Nearest_landmark_range> ActiveWitness;
+  typedef std::list< ActiveWitness > ActiveWitnessList;
+  typedef std::vector< Landmark_id > typeVectorVertex;
+  typedef std::pair< typeVectorVertex, Filtration_value> typeSimplex;
 
  private:
-  int nbL_;  // Number of landmarks
-  SimplicialComplex&             sc_;  // Simplicial complex
   Point_range                         witnesses_, landmarks_;
   Kd_tree                             landmark_tree_;
-  std::vector<Nearest_landmark_range> nearest_landmarks_;
   
  public:
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -128,28 +124,38 @@ class Witness_complex {
   Witness_complex(InputIteratorLandmarks landmarks_first,
                   InputIteratorLandmarks landmarks_last,
                   InputIteratorWitnesses witnesses_first,
-                  InputIteratorWitnesses witnesses_last,
-                  SimplicialComplex& sc)
-    : witnesses_(witnesses_first, witnesses_last), landmarks_(landmarks_first, landmarks_last), landmark_tree_(landmarks_), sc_(sc)
+                  InputIteratorWitnesses witnesses_last)
+    : witnesses_(witnesses_first, witnesses_last), landmarks_(landmarks_first, landmarks_last), landmark_tree_(landmarks_)
   {    
-    for (Point_d w : witnesses_)
-      nearest_landmarks_.push_back(landmark_tree_.query_incremental_nearest_neighbors(w));
   }
 
+  /** \brief Returns the point corresponding to the given vertex.
+   */
   Point_d get_point( std::size_t vertex ) const
   {
     return landmarks_[vertex];
   }
   
+  /** \brief Outputs the (weak) witness complex with 
+   *         squared relaxation parameter 'max_alpha_square'
+   *         to simplicial complex 'complex'.
+   */
   template < typename SimplicialComplexForWitness >
   bool create_complex(SimplicialComplexForWitness& complex,
-                      FT  max_alpha_square) const
+                      FT  max_alpha_square)       
   {
-    unsigned nbW = witnesses_.size(),
-             nbL = landmarks_.size();
+    unsigned nbL = landmarks_.size();
+    if (complex.num_vertices() > 0) {
+      std::cerr << "Witness complex cannot create complex - complex is not empty.\n";
+      return false;
+    }
+    if (max_alpha_square < 0) {
+      std::cerr << "Witness complex cannot create complex - squared relaxation parameter must be non-negative.\n";
+      return false;
+    }
     typeVectorVertex vv;
-    ActiveWitnessList active_w;// = new ActiveWitnessList();
-    for (int i = 0; i != nbL; ++i) {
+    ActiveWitnessList active_witnesses;// = new ActiveWitnessList();
+    for (auto i = 0; i != nbL; ++i) {
       // initial fill of 0-dimensional simplices
       // by doing it we don't assume that landmarks are necessarily witnesses themselves anymore
       //counter++;
@@ -158,26 +164,27 @@ class Witness_complex {
       /* TODO Error if not inserted : normally no need here though*/
     }
     unsigned k = 1; /* current dimension in iterative construction */
-    for (int i=0; i != nbW; ++i)
-      active_w.push_back(i);
-    while (!active_w.empty() && k < nbL ) {
-      typename ActiveWitnessList::iterator aw_it = active_w.begin();
-      while (aw_it != active_w.end()) {
+    for (auto w: witnesses_)
+      active_witnesses.push_back(ActiveWitness(landmark_tree_.query_incremental_nearest_neighbors(w)));
+    while (!active_witnesses.empty() && k < nbL ) {
+      typename ActiveWitnessList::iterator aw_it = active_witnesses.begin();
+      while (aw_it != active_witnesses.end()) {
         std::vector<int> simplex;
         bool ok = add_all_faces_of_dimension(k,
                                              max_alpha_square,
                                              std::numeric_limits<double>::infinity(),
-                                             nearest_landmarks_[*aw_it].begin(),
+                                             aw_it->begin(),
                                              simplex,
                                              complex,
-                                             nearest_landmarks_[*aw_it].end());
+                                             aw_it->end());
         if (!ok)
-          active_w.erase(aw_it++); //First increase the iterator and then erase the previous element
+          active_witnesses.erase(aw_it++); //First increase the iterator and then erase the previous element
         else
           aw_it++;
       }
       k++;
     }
+    return true;
   }
 
   //@}
@@ -193,34 +200,37 @@ class Witness_complex {
   bool add_all_faces_of_dimension(int dim,
                                   double alpha2,
                                   double norelax_dist2,
-                                  Nearest_landmark_table_iterator curr_l,
+                                  typename ActiveWitness::iterator curr_l,
                                   std::vector<int>& simplex,
                                   SimplicialComplexForWitness& sc,
-                                  Nearest_landmark_table_iterator end)
+                                  typename ActiveWitness::iterator end)
   {
     if (curr_l == end)
       return false;
     bool will_be_active = false;
-    Nearest_landmark_table_iterator l_it = curr_l;
+    typename ActiveWitness::iterator l_it = curr_l;
     if (dim > 0)
       for (; l_it->second - alpha2 <= norelax_dist2 && l_it != end; ++l_it) {
         simplex.push_back(l_it->first);
-        if (sc.find(simplex) != sc.null_simplex())
+        if (sc.find(simplex) != sc.null_simplex()) {
+          typename ActiveWitness::iterator next_it = l_it;
           will_be_active = add_all_faces_of_dimension(dim-1,
                                                       alpha2,
                                                       norelax_dist2,
-                                                      l_it+1,
+                                                      ++next_it,
                                                       simplex,
                                                       sc,
                                                       end) || will_be_active;
+        }
         simplex.pop_back();
         // If norelax_dist is infinity, change to first omitted distance
         if (l_it->second <= norelax_dist2)
           norelax_dist2 = l_it->second;
+        typename ActiveWitness::iterator next_it = l_it;
         will_be_active = add_all_faces_of_dimension(dim-1,
                                                     alpha2,
                                                     norelax_dist2,
-                                                    l_it+1,
+                                                    ++next_it,
                                                     simplex,
                                                     sc,
                                                     end) || will_be_active;
@@ -253,6 +263,8 @@ class Witness_complex {
                     double* filtration_value,
                     SimplicialComplexForWitness& sc)
   {
+    typedef typename SimplicialComplexForWitness::Simplex_handle Simplex_handle;
+
     std::vector< int > facet;
     for (std::vector<int>::iterator not_it = simplex.begin(); not_it != simplex.end(); ++not_it)
       {
@@ -297,45 +309,45 @@ class Witness_complex {
   //  *  \param print_output =true will print the witnesses for each simplex
   //  *  \remark Added for debugging purposes.
   //  */
-  template< class KNearestNeighbors >
-  bool is_witness_complex(KNearestNeighbors const & knn, bool print_output) {
-    for (Simplex_handle sh : sc_.complex_simplex_range()) {
-      bool is_witnessed = false;
-      typeVectorVertex simplex;
-      int nbV = 0;  // number of verticed in the simplex
-      for (Vertex_handle v : sc_.simplex_vertex_range(sh))
-        simplex.push_back(v);
-      nbV = simplex.size();
-      for (typeVectorVertex w : knn) {
-        bool has_vertices = true;
-        for (Vertex_handle v : simplex)
-          if (std::find(w.begin(), w.begin() + nbV, v) == w.begin() + nbV) {
-            has_vertices = false;
-          }
-        if (has_vertices) {
-          is_witnessed = true;
-          if (print_output) {
-            std::cout << "The simplex ";
-            print_vector(simplex);
-            std::cout << " is witnessed by the witness ";
-            print_vector(w);
-            std::cout << std::endl;
-          }
-          break;
-        }
-      }
-      if (!is_witnessed) {
-        if (print_output) {
-          std::cout << "The following simplex is not witnessed ";
-          print_vector(simplex);
-          std::cout << std::endl;
-        }
-        assert(is_witnessed);
-        return false;
-      }
-    }
-    return true;
-  }
+  // template< class KNearestNeighbors >
+  // bool is_witness_complex(KNearestNeighbors const & knn, bool print_output) {
+  //   for (Simplex_handle sh : sc_.complex_simplex_range()) {
+  //     bool is_witnessed = false;
+  //     typeVectorVertex simplex;
+  //     int nbV = 0;  // number of verticed in the simplex
+  //     for (Vertex_handle v : sc_.simplex_vertex_range(sh))
+  //       simplex.push_back(v);
+  //     nbV = simplex.size();
+  //     for (typeVectorVertex w : knn) {
+  //       bool has_vertices = true;
+  //       for (Vertex_handle v : simplex)
+  //         if (std::find(w.begin(), w.begin() + nbV, v) == w.begin() + nbV) {
+  //           has_vertices = false;
+  //         }
+  //       if (has_vertices) {
+  //         is_witnessed = true;
+  //         if (print_output) {
+  //           std::cout << "The simplex ";
+  //           print_vector(simplex);
+  //           std::cout << " is witnessed by the witness ";
+  //           print_vector(w);
+  //           std::cout << std::endl;
+  //         }
+  //         break;
+  //       }
+  //     }
+  //     if (!is_witnessed) {
+  //       if (print_output) {
+  //         std::cout << "The following simplex is not witnessed ";
+  //         print_vector(simplex);
+  //         std::cout << std::endl;
+  //       }
+  //       assert(is_witnessed);
+  //       return false;
+  //     }
+  //   }
+  //   return true;
+  // }
 };
 
   /**
