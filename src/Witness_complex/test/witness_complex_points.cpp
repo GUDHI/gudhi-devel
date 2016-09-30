@@ -34,7 +34,7 @@
 #include <vector>
 
 typedef std::vector<double> Point;
-typedef std::vector< Vertex_handle > typeVectorVertex;
+typedef std::vector< int > typeVectorVertex;
 typedef Gudhi::Simplex_tree<> Simplex_tree;
 typedef Gudhi::witness_complex::Witness_complex<Simplex_tree> WitnessComplex;
 

@@ -34,7 +34,7 @@
 #include <string>
 #include <vector>
 
-typedef std::vector< Vertex_handle > typeVectorVertex;
+typedef std::vector< int > typeVectorVertex;
 typedef std::vector< std::vector <double> > Point_Vector;
 
 /**

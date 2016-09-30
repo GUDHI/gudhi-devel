@@ -29,6 +29,13 @@
 
 using namespace Gudhi;
 
+typedef int Vertex_handle;
+typedef double Filtration_value;
+typedef boost::adjacency_list < boost::vecS, boost::vecS, boost::undirectedS,
+                                boost::property < vertex_filtration_t, Filtration_value >,
+                                boost::property < edge_filtration_t, Filtration_value > > Graph_t;
+typedef std::pair< Vertex_handle, Vertex_handle > Edge_t;
+
 int main(int argc, char * const argv[]) {
   if (argc != 3) {
     std::cerr << "Usage: " << argv[0]
@@ -43,7 +50,7 @@ int main(int argc, char * const argv[]) {
   Simplex_tree<> st;
 
   start = clock();
-  auto g = read_graph(filegraph);
+  auto g = read_graph<Graph_t, Edge_t, Filtration_value, Vertex_handle>(filegraph);
   // insert the graph in the simplex tree as 1-skeleton
   st.insert_graph(g);
   end = clock();

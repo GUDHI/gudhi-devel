@@ -21,12 +21,12 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gudhi/reader_utils.h>
-#include <gudhi/graph_simplicial_complex.h>
-#include <gudhi/distance_functions.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
+#include <gudhi/Rips_complex.h>
 #include <gudhi/Hasse_complex.h>
+#include <gudhi/Points_off_io.h>
+#include <gudhi/distance_functions.h>
 
 #include <boost/program_options.hpp>
 
@@ -44,14 +44,16 @@
 //                                                            //
 ////////////////////////////////////////////////////////////////
 
-using namespace Gudhi;
-using namespace Gudhi::persistent_cohomology;
-
-typedef int Vertex_handle;
-typedef double Filtration_value;
+// Types definition
+using Simplex_tree = Gudhi::Simplex_tree<>;
+using Filtration_value = Simplex_tree::Filtration_value;
+using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
+using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
+using Point = std::vector<double>;
+using Points_off_reader = Gudhi::Points_off_reader<Point>;
 
 void program_options(int argc, char * argv[]
-                     , std::string & filepoints
+                     , std::string & off_file_points
                      , std::string & filediag
                      , Filtration_value & threshold
                      , int & dim_max
@@ -59,30 +61,22 @@ void program_options(int argc, char * argv[]
                      , Filtration_value & min_persistence);
 
 int main(int argc, char * argv[]) {
-  std::string filepoints;
+  std::string off_file_points;
   std::string filediag;
   Filtration_value threshold;
   int dim_max;
   int p;
   Filtration_value min_persistence;
 
-  program_options(argc, argv, filepoints, filediag, threshold, dim_max, p, min_persistence);
+  program_options(argc, argv, off_file_points, filediag, threshold, dim_max, p, min_persistence);
 
-  // Extract the points from the file filepoints
-  typedef std::vector<double> Point_t;
-  std::vector< Point_t > points;
-  read_points(filepoints, points);
-
-  // Compute the proximity graph of the points
-  Graph_t prox_graph = compute_proximity_graph(points, threshold
-                                               , euclidean_distance<Point_t>);
+  Points_off_reader off_reader(off_file_points);
+  Rips_complex rips_complex_from_file(off_reader.get_point_cloud(), threshold,
+                                      euclidean_distance<Point>);
 
   // Construct the Rips complex in a Simplex Tree
-  Simplex_tree<>& st = *new Simplex_tree<>;
-  // insert the proximity graph in the simplex tree
-  st.insert_graph(prox_graph);
-  // expand the graph until dimension dim_max
-  st.expansion(dim_max);
+  Simplex_tree& st = *new Simplex_tree;
+  rips_complex_from_file.create_complex(st, dim_max);
 
   std::cout << "The complex contains " << st.num_simplices() << " simplices \n";
   std::cout << "   and has dimension " << st.dimension() << " \n";
@@ -99,7 +93,7 @@ int main(int argc, char * argv[]) {
     st.assign_key(sh, count++);
 
   // Convert to a more convenient representation.
-  Hasse_complex<> hcpx(st);
+  Gudhi::Hasse_complex<> hcpx(st);
 
 #ifdef GUDHI_USE_TBB
   ts.terminate();
@@ -109,7 +103,7 @@ int main(int argc, char * argv[]) {
   delete &st;
 
   // Compute the persistence diagram of the complex
-  persistent_cohomology::Persistent_cohomology< Hasse_complex<>, Field_Zp > pcoh(hcpx);
+  Gudhi::persistent_cohomology::Persistent_cohomology< Gudhi::Hasse_complex<>, Field_Zp > pcoh(hcpx);
   // initializes the coefficient field for homology
   pcoh.init_coefficients(p);
 
@@ -126,7 +120,7 @@ int main(int argc, char * argv[]) {
 }
 
 void program_options(int argc, char * argv[]
-                     , std::string & filepoints
+                     , std::string & off_file_points
                      , std::string & filediag
                      , Filtration_value & threshold
                      , int & dim_max
@@ -135,7 +129,7 @@ void program_options(int argc, char * argv[]
   namespace po = boost::program_options;
   po::options_description hidden("Hidden options");
   hidden.add_options()
-      ("input-file", po::value<std::string>(&filepoints),
+      ("input-file", po::value<std::string>(&off_file_points),
        "Name of file containing a point set. Format is one point per line:   X1 ... Xd ");
 
   po::options_description visible("Allowed options", 100);

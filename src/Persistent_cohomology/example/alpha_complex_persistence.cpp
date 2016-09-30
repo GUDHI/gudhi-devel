@@ -9,6 +9,8 @@
 #include <string>
 #include <limits>  // for numeric_limits
 
+using Filtration_value = double;
+
 void program_options(int argc, char * argv[]
                      , std::string & off_file_points
                      , std::string & output_file_diag

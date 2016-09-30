@@ -29,6 +29,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/distance_functions.h>
 #include <gudhi/Persistent_cohomology.h>
+#include <gudhi/Rips_complex.h>
 
 #include <vector>
 
@@ -69,22 +70,26 @@ template<typename SkBlComplex> class Persistence_compute {
       points.emplace_back(std::move(pt_to_add));
     }
 
+    using Simplex_tree = Gudhi::Simplex_tree<>;
+    using Filtration_value = Simplex_tree::Filtration_value;
+    using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
+    using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
+    using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
+    
+    Rips_complex rips_complex(points, params.threshold, euclidean_distance<Point_t>);
 
-    Graph_t prox_graph = compute_proximity_graph(points, params.threshold, euclidean_distance<Point_t>);
-    Gudhi::Simplex_tree<> st;
-    st.insert_graph(prox_graph);
-    st.expansion(params.max_dim);
-
-    Gudhi::persistent_cohomology::Persistent_cohomology< Gudhi::Simplex_tree<>,
-        Gudhi::persistent_cohomology::Field_Zp > pcoh(st);
-    // initializes the coefficient field for homology
-    pcoh.init_coefficients(params.p);
-    // put params.min_pers
-    pcoh.compute_persistent_cohomology(params.min_pers);
-    stream << "persistence: \n";
-    stream << "p dimension birth death: \n";
-
-    pcoh.output_diagram(stream);
+    Simplex_tree st;
+    if (rips_complex.create_complex(st, params.max_dim)) {
+      Persistent_cohomology pcoh(st);
+      // initializes the coefficient field for homology
+      pcoh.init_coefficients(params.p);
+      // put params.min_pers
+      pcoh.compute_persistent_cohomology(params.min_pers);
+      stream << "persistence: \n";
+      stream << "p dimension birth death: \n";
+  
+      pcoh.output_diagram(stream);
+    }
   }
 };
 

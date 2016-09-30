@@ -70,6 +70,7 @@ using Vertex_list = std::list<Alpha_shape_3::Vertex_handle>;
 
 // gudhi type definition
 using ST = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
+using Filtration_value = ST::Filtration_value;
 using Simplex_tree_vertex = ST::Vertex_handle;
 using Alpha_shape_simplex_tree_map = std::map<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex >;
 using Alpha_shape_simplex_tree_pair = std::pair<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex>;

@@ -72,7 +72,7 @@ class Witness_complex {
   typedef std::vector< Point_t > Point_Vector;
 
   typedef std::vector< Vertex_handle > typeVectorVertex;
-  typedef std::pair< typeVectorVertex, Filtration_value> typeSimplex;
+  //typedef std::pair< typeVectorVertex, Filtration_value> typeSimplex;
   typedef std::pair< Simplex_handle, bool > typePairSimplexBool;
 
   typedef int Witness_id;

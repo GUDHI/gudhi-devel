@@ -47,7 +47,7 @@ namespace rips_complex {
  * \ingroup rips_complex
  * 
  * \details
- * The data structure is a 1-skeleton graph constructed from a point cloud, containing edges when the edge length is
+ * The data structure is a one skeleton graph constructed from a point cloud, containing edges when the edge length is
  * less or equal to a given threshold. Edge length is computed from a user given function.
  * 
  * The complex is a template class requiring a Filtration_value type.

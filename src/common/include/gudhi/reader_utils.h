@@ -77,6 +77,7 @@ inline void read_points(std::string file_name, std::vector< std::vector< double 
  * Every simplex must appear exactly once.
  * Simplices of dimension more than 1 are ignored.
  */
+template< typename Graph_t, typename Edge_t, typename Filtration_value, typename Vertex_handle >
 inline Graph_t read_graph(std::string file_name) {
   std::ifstream in_(file_name.c_str(), std::ios::in);
   if (!in_.is_open()) {
@@ -130,7 +131,7 @@ inline Graph_t read_graph(std::string file_name) {
   Graph_t skel_graph(edges.begin(), edges.end(), edges_fil.begin(), vertices.size());
   auto vertex_prop = boost::get(vertex_filtration_t(), skel_graph);
 
-  boost::graph_traits<Graph_t>::vertex_iterator vi, vi_end;
+  typename boost::graph_traits<Graph_t>::vertex_iterator vi, vi_end;
   auto v_it = vertices.begin();
   for (std::tie(vi, vi_end) = boost::vertices(skel_graph); vi != vi_end; ++vi, ++v_it) {
     boost::put(vertex_prop, *vi, v_it->second);

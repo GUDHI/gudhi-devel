@@ -25,6 +25,7 @@
 #include <gudhi/distance_functions.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
+#include <gudhi/Points_off_io.h>
 
 #include <boost/program_options.hpp>
 
@@ -32,7 +33,14 @@
 #include <vector>
 #include <limits>  // infinity
 
-typedef double Filtration_value;
+// Types definition
+using Simplex_tree = Gudhi::Simplex_tree</*Gudhi::Simplex_tree_options_fast_persistence*/>;
+using Filtration_value = Simplex_tree::Filtration_value;
+using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
+using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
+using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp >;
+using Point = std::vector<double>;
+using Points_off_reader = Gudhi::Points_off_reader<Point>;
 
 void program_options(int argc, char * argv[]
                      , std::string & off_file_points
@@ -52,22 +60,22 @@ int main(int argc, char * argv[]) {
 
   program_options(argc, argv, off_file_points, filediag, threshold, dim_max, p, min_persistence);
 
-  Gudhi::rips_complex::Rips_complex<> rips_complex_from_file(off_file_points);
+  Points_off_reader off_reader(off_file_points);
+  Rips_complex rips_complex_from_file(off_reader.get_point_cloud(), threshold,
+                                      euclidean_distance<Point>);
 
   // Construct the Rips complex in a Simplex Tree
-  using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
   Simplex_tree simplex_tree;
 
-  if (rips_complex_from_file.create_complex(simplex_tree, threshold, dim_max, euclidean_distance<std::vector<double>>)) {
+  if (rips_complex_from_file.create_complex(simplex_tree, dim_max)) {
     std::cout << "The complex contains " << simplex_tree.num_simplices() << " simplices \n";
     std::cout << "   and has dimension " << simplex_tree.dimension() << " \n";
   
     // Sort the simplices in the order of the filtration
     simplex_tree.initialize_filtration();
   
-    using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
     // Compute the persistence diagram of the complex
-    Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp > pcoh(simplex_tree);
+    Persistent_cohomology pcoh(simplex_tree);
     // initializes the coefficient field for homology
     pcoh.init_coefficients(p);
   

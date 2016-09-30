@@ -33,7 +33,7 @@
 #include <vector>
 
 typedef Gudhi::Simplex_tree<> Simplex_tree;
-typedef std::vector< Vertex_handle > typeVectorVertex;
+typedef std::vector< int > typeVectorVertex;
 typedef Gudhi::witness_complex::Witness_complex<Simplex_tree> WitnessComplex;
 
 BOOST_AUTO_TEST_CASE(simple_witness_complex) {
