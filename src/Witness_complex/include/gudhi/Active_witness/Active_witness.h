@@ -38,8 +38,9 @@ public:
   typedef Active_witness<Id_distance_pair, INS_range> ActiveWitness;
   typedef typename INS_range::iterator INS_iterator;
   typedef Active_witness_iterator< ActiveWitness, Id_distance_pair, INS_iterator > iterator;
+  typedef typename std::list<Id_distance_pair> Table;
   
-  std::vector<Id_distance_pair> nearest_landmark_table_;
+  Table nearest_landmark_table_;
   INS_range    search_range_;
   INS_iterator iterator_last_;
   INS_iterator iterator_end_;
@@ -60,8 +61,8 @@ public:
     return iterator(this);
   }
 
-  std::vector<Id_distance_pair> end_element_table_;
-  typename std::vector<Id_distance_pair>::iterator end_pointer = end_element_table_.end();
+  Table end_element_table_ = {Id_distance_pair(-1,0)};
+  typename Table::iterator end_pointer = end_element_table_.begin();
 };
 
 }

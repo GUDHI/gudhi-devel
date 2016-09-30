@@ -42,7 +42,7 @@ class Active_witness_iterator
   friend class boost::iterator_core_access;
   
   //typedef Active_witness<Id_distance_pair, INS_iterator> Active_witness;
-  typedef typename std::vector<Id_distance_pair>::iterator Pair_iterator;
+  typedef typename std::list<Id_distance_pair>::iterator Pair_iterator;
   typedef typename Gudhi::witness_complex::Active_witness_iterator<Active_witness, Id_distance_pair, INS_iterator> Iterator;
   
   
@@ -57,7 +57,8 @@ public:
   {
   }
 
-  Active_witness_iterator(Active_witness* aw, Pair_iterator lh_)
+  Active_witness_iterator(Active_witness* aw, Pair_iterator lh)
+    : aw_(aw), lh_(lh)
   {
   }
   

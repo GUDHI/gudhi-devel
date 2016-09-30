@@ -237,7 +237,7 @@ private:
       } 
     else if (dim == 0)
       for (; l_it->second - alpha2 <= norelax_dist2 && l_it != end; ++l_it) {
-        simplex.push_back(l_it->second);
+        simplex.push_back(l_it->first);
         double filtration_value = 0;
         // if norelax_dist is infinite, relaxation is 0.
         if (l_it->second > norelax_dist2) 

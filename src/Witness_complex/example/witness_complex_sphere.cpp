@@ -65,13 +65,12 @@ int main(int argc, char * const argv[]) {
   int number_of_landmarks = atoi(argv[1]);
   clock_t start, end;
 
-  // Construct the Simplex Tree
-  Gudhi::Simplex_tree<> simplex_tree;
-
   std::vector< std::pair<int, double> > l_time;
 
   // Read the point file
   for (int nbP = 500; nbP < 10000; nbP += 500) {
+    // Construct the Simplex Tree
+    Gudhi::Simplex_tree<> simplex_tree;
     Point_Vector point_vector, landmarks;
     generate_points_sphere(point_vector, nbP, 4);
     std::cout << "Successfully generated " << point_vector.size() << " points.\n";
@@ -91,8 +90,8 @@ int main(int argc, char * const argv[]) {
     double time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
     std::cout << "Witness complex for " << number_of_landmarks << " landmarks took "
         << time << " s. \n";
-    assert(1 == 0);
-    std::cout << simplex_tree << "\n";
+    //assert(1 == 0);
+    //std::cout << simplex_tree << "\n";
     std::cout << "Number of simplices is: " << simplex_tree.num_simplices() << "\n";
     l_time.push_back(std::make_pair(nbP, time));
   }
