@@ -57,7 +57,7 @@ Ver 1.0.}
 
 \section{Idea}
 
-When it comes to the statistics and machine learning, one need only very limited number of operations to be performed on a data to proceed. Let us think of some representation of persistence $\mathcal{A}$. To perform most of the statistical and machine learning operations one need to be able to compute average of objects of type $\mathcal{A}$ (so that the averaged object is also of a type $\mathcal{A}$). One need to be able to compute distance between objects of a type $\mathcal{A}$, and compute scalar product of objects of a type $\mathcal{A}$.
+When it comes to the statistics and machine learning, one need only very limited number of operations to be performed on a data to get the results. Let us think of some representation of persistence, of a type $\mathcal{A}$. To perform most of the statistical and machine learning operations one need to be able to compute average of objects of type $\mathcal{A}$ (so that the averaged object is also of a type $\mathcal{A}$). One need to be able to compute distance between objects of a type $\mathcal{A}$, and to compute scalar product of objects of a type $\mathcal{A}$.
 
 To put this statement into a context, let us assume we have two collections $c_1,...,c_n$ and $d_1,...,d_n$ of objects of a type $\mathcal{A}$. We want to verify if the average of those two collections are different by performing bootstrap.
 First of all, we compute averages of those two collections: $C =$ average of $c_1,...,c_n$ and $D =$ average of $d_1,...,d_n$. Note that both $C$ and $D$ are of a type $\mathcal{A}$. Then we compute $d(C,D)$, a distance between $C$ and $D$.
@@ -66,7 +66,7 @@ Later we put the two collections into one bin:\\
 Then we shuffle $B$, and we divide the shuffled version of $B$ into two classes: $B_1$ and $B_2$ (in this case, of the same cardinality). Note that again, $B_1$ and $B_2$ are of a type $\mathcal{A}$. We compute their distance $d(B_1,B_2)$. The procedure of shuffling and dividing the set $B$ is repeated $N$ times (where $N$ is reasonably large number).
 Then the p-value of a statement that the averages of  $c_1,...,c_n$ and $d_1,...,d_n$ is approximated by the number of times $d(B_1,B_2) > d(C,D)$ divided by $N$.
 
-As one can see, this procedure can be performed for any type $\mathcal{A}$ which can be averaged, and which allows for computations of distances. The idea of Gudhi stat is to take advantage of C++ (and later python) polymorphism and implement a few interfaces:
+As one can see, this procedure can be performed for any type $\mathcal{A}$ which can be averaged, and which allows for computations of distances. The idea of Gudhi\_stat is to take advantage of C++ (and later python) polymorphism and implement a few interfaces:
 \begin{enumerate}
 \item Interface of a representation of persistence that allows averaging (so that the average object is of the same type).
 \item Interface of representation of persistence that allows computations of distances.
@@ -83,8 +83,8 @@ And then to implement various currently known representations based on those int
 \end{enumerate}
 
 
-The main aim of this implementation is to be able to implement various statistical methods, both on the level of C++ and python, that operates on the interfaces that are required for that particular method (like, in the example above, the ability of averaging and computations of distances). Given those implementations of statistical methods, we are able to use any of representation that implement a given interface (including the future ones). 
-Doing so, we define a computational framework that joins topological methods that uses persistent homology with statistics and machine learning. This framework is very easy to being extend by new representations of persistence, and een more general, but any new type of representation.
+The main aim of this implementation is to be able to implement various statistical methods, both on the level of C++ and python, that operates on the interfaces that are required for that particular method (like, in the example above, the ability of averaging and computations of distances). Given those implementations of statistical methods, we are able to use any of representation that implement athe required collection of interfaces (that includes the future ones that has not been implemented yet). 
+Doing so, we define a computational framework that joins topological methods that uses persistent homology with statistics and machine learning. This framework is very easy to being extend by new representations of persistence, and even more general, but any new type of representation.
 
 Below we are discussing the representations which are currently implemented in Gudhi\_stat:
 
@@ -129,13 +129,13 @@ The detailed description of algorithms used to compute persistence landscapes ca
 
 \section{Persistence Landscapes on a grid}
 \label{sec:landscapes_on_grid}
-This is an alternative representation of persistence landscapes defined in the Section~\ref{sec:persistence_landscapes}. Unlike in the Section~\ref{sec:persistence_landscapes} we will build a non--exact representation by sampling persistence landscape on a finite, equally distributed grid off points. Since, the persistence landscapes computed based on persistence diagrams have slope $1$ OR $-1$, we have an estimate of an error made by such a sampling. 
+This is an alternative representation of persistence landscapes defined in the Section~\ref{sec:persistence_landscapes}. Unlike in the Section~\ref{sec:persistence_landscapes} we build a non--exact representation by sampling persistence landscape on a finite, equally distributed grid of points. Since, the persistence landscapes that originate from persistence diagrams have slope $1$ or $-1$, we have an estimate of an error made in between grid points by such a sampling. We do not have a similar estimation when a landscape is obtained from averaging process. 
 
-Due to a lack of rigorous description of the algorithms in the literature, we are giving a short discussion of them in below. Persistence landscapes are here represented by vector of vectors of real numbers. Assume that i-th vector consist of $n_i$ numbers sorted from larger to smaller. They represent the values of the functions $\lambda_1,\ldots,\lambda_{n_i}$ ($\lambda_{n_i+1}$ and further are zero) on the i-th point of a grid. 
+Due to a lack of rigorous description of the algorithms in the literature, we are giving a short discussion of them in below. Persistence landscapes are being represented by vector of vectors of real numbers. Assume that i-th vector consist of $n_i$ numbers sorted from larger to smaller. They represent the values of the functions $\lambda_1,\ldots,\lambda_{n_i}$ ($\lambda_{n_i+1}$ and further are zero) on the i-th point of a grid. 
 
-When averaging two persistence landscapes represented by a grid, we simply compute point-wise averages of the entries of corresponding vectors\footnote{If one vector is shorter than another, we assume that they have the same length and that the renaming components are zero.}
+When averaging two persistence landscapes represented by a grid, we simply compute point-wise averages of the entries of corresponding vectors\footnote{In this whole section we assume that if one vector is shorter than another, we extend the shorter one with zeros so that they have the same length.}
 
-Computations of distances between two persistence diagrams on a grid is not much different than in the rigorous case. In this case, we sum up the distances between the same levels of corresponding landscapes. For fixed level, we approximate the landscapes between the corresponding points, and compute the $l^p$ distance between them.
+Computations of distances between two persistence landscapes on a grid is not much different than in the rigorous case. In this case, we sum up the distances between the same levels of corresponding landscapes. For fixed level, we approximate the landscapes between the corresponding constitutive points of landscapes by linear functions, and compute the $L^p$ distance between them.
 
 Similarly as in case of distance, when computing the scalar product of two persistence landscapes on a grid, we sum up the scalar products of corresponding levels of landscapes. For each level, we assume that the persistence landscape on a grid between two grid points is approximated by linear function. Therefore to compute scalar product of two corresponding levels of landscapes, we sum up the integrals of products of line segments for every pair of constitutive grid points. 
 
@@ -149,15 +149,15 @@ Note that for this representation we need to specify a few parameters:
 Note that the same representation is used in TDA R-package~\cite{tda}.
 
 \section{Persistence heat maps}
-This is a general class of discrete structures which are based on idea of placing a Gaussian kernel in the points of persistence diagrams. This idea was discovered and re-discovered by many authors along last 15 years. As far as we know this idea was firstly described in the work of Bologna group in~\cite{bologna1} and~\cite{bologna2}. Later it has been described by Colorado State University group in~\cite{henry}. The presented paper in the first time provide a discussion of stability of the representation. Also, the same ideas are used in construction of two recent kernels used for machine learning:~\cite{yasu} and~\cite{uli}. Both the kernel's construction uses interesting ideas to ensure stability. In the kernel presented in~\cite{yasu}, a scaling function is used to multiply the Gaussian kernel in the way that the points close to diagonal do not have a big influence on the resulting total distribution. In~\cite{uli} for every point $(b,d)$ two Gaussian kernels are added. First, with a weight one in a point $(b,d)$, and the second, with the weight $-1$ for a point $(b,d)$. In both cases, the representations are stable with respect to 1-Wasserstein distance.
+This is a general class of discrete structures which are based on idea of placing a Gaussian kernel in the points of persistence diagrams. This idea appeared in work by many authors along the last 15 years. As far as we know this idea was firstly described in the work of Bologna group in~\cite{bologna1} and~\cite{bologna2}. Later it has been described by Colorado State University group in~\cite{Henry}. The presented paper in the first time provide a discussion of stability of the representation. Also, the same ideas are used in construction of two recent kernels used for machine learning:~\cite{yasu} and~\cite{uli}. Both the kernel's construction uses interesting ideas to ensure stability of the representation with respect to Wasserstein metric. In the kernel presented in~\cite{yasu}, a scaling function is used to multiply the Gaussian kernel in the way that the points close to diagonal got low weight and consequently do not have a big influence on the resulting total distribution. In~\cite{uli} for every point $(b,d)$ two Gaussian kernels are added. First, with a weight one in a point $(b,d)$, and the second, with the weight $-1$ for a point $(b,d)$. In both cases, the representations are stable with respect to 1-Wasserstein distance.
 
-In Gudhi\_stat we currently implement all the structures described above. THe base of this implementation is 2-dimensional arrays of pixels. Each pixel have assigned a real value. 
+In Gudhi\_stat we currently implement all the structures described above. The base of this implementation is 2-dimensional arrays of pixels. Each pixel have assigned a real value which is a sum of values of distributions induced by each point of the persistence diagram. 
 
 The parameters of the structure are as follows:
 \begin{enumerate}
 \item Size of the image (we always assume that the images are square).
-\item Standard deviation of a Gaussian kernel.
-\item The box $[x_0,x_1]\times [y_0,y_1]$ that contain the persistence image. 
+\item A filter: in practice a square matrix of a size $2k+1 \times 2k+1$. By default, this is a Gaussian kernel, but any other can be used instead.
+\item The box $[x_0,x_1]\times [y_0,y_1]$ bounding the domain of the persistence image. 
 \item Scaling function (each Gaussian kernel at point $(p,q)$ gets multiplied by the value of this function at the point $(p,q)$. 
 \item A boolean value determining if the space below diagonal should be erased or not. 
 \end{enumerate}
@@ -171,9 +171,9 @@ Given a persistence diagram $D = \{ (b_i,d_i) \}$, for every pair of birth--deat
 \item $d( (b_1,d_1) , (\frac{b_1,d_1}{2},\frac{b_1,d_1}{2}) )$.
 \item $d( (b_2,d_2) , (\frac{b_2,d_2}{2},\frac{b_2,d_2}{2}) )$.
 \end{enumerate}
-and we pick the smallest one. When this computation is done, we obtain a vector of numbers. We sort the obtained vector in decreasing order. The obtained vector is the persistence vector representing the diagram.
+We pick the smallest of those and add it to a vector. The obtained vector of numbers is then sorted in decreasing order. This way we obtain a \emph{persistence vector} representing the diagram.
 
-Given two persistence vectors, the computation of distances, averages and scalar products is straightforward. In each case, we compute distance (absolute value of differences), average and scalar product (a standard product) between each pair of corresponding numbers in the vectors and sum up the results. 
+Given two persistence vectors, the computation of distances, averages and scalar products is straightforward. Average is simply a coordinate-wise average of a collection of vectors. In this section we assume that the vectors are extended by zeros if they are of a different size. To compute distances we compute absolute value of differences between coordinates. A scalar product is a sum of products of values at the corresponding positions of two vectors. 
 
 
 \begin{thebibliography}{99}
