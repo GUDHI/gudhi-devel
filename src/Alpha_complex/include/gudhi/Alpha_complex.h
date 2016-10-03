@@ -168,7 +168,7 @@ class Alpha_complex {
    * @return The point found.
    * @exception std::out_of_range In case vertex is not found (cf. std::vector::at).
    */
-  Point_d get_point(std::size_t vertex) const {
+  const Point_d& get_point(std::size_t vertex) const {
     return vertex_handle_to_iterator_.at(vertex)->point();
   }
 
