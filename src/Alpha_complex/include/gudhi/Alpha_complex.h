@@ -114,7 +114,8 @@ class Alpha_complex {
 
  public:
   /** \brief Alpha_complex constructor from an OFF file name.
-   * Uses the Delaunay_triangulation_off_reader to construct the Delaunay triangulation required to initialize 
+   * 
+   * Uses the Points_off_reader to construct the Delaunay triangulation required to initialize 
    * the Alpha_complex.
    * 
    * Duplicate points are inserted once in the Alpha_complex. This is the reason why the vertices may be not contiguous.
@@ -140,8 +141,6 @@ class Alpha_complex {
    * 
    * The type InputPointRange must be a range for which std::begin and
    * std::end return input iterators on a Kernel::Point_d.
-   * 
-   * @post Compare num_simplices with InputPointRange points number (not the same in case of duplicate points). 
    */
   template<typename InputPointRange >
   Alpha_complex(const InputPointRange& points)
