@@ -53,11 +53,9 @@ struct SimplicialComplexForAlpha {
   /** Assigns the 'simplex' with the given 'filtration' value. */
   int assign_filtration(Simplex_handle simplex, Filtration_value filtration);
 
-  /** \brief Inserts a simplex with vertices from a given range 'vertex_range' in the simplicial complex with the given
-   * 'filtration' value. */
-  template< typedef Input_vertex_range >
-  Insertion_result_type insert_simplex_and_subfaces(Input_vertex_range const & vertex_range,
-                                                    Filtration_value filtration);
+  /** \brief Inserts a simplex with vertices from a given simplex (represented by a vector of Vertex_handle) in the
+   * simplicial complex with the given 'filtration' value. */
+  void insert_simplex_and_subfaces(std::vector<Vertex_handle> const & vertex_range, Filtration_value filtration);
 
   /** Browses the simplicial complex to make the filtration non-decreasing. */
   void make_filtration_non_decreasing();
