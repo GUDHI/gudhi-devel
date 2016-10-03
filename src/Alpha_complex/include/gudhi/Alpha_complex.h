@@ -148,9 +148,7 @@ class Alpha_complex {
     init_from_range(points);
   }
 
-  /** \brief Alpha_complex destructor.
-   *
-   * @warning Deletes the Delaunay triangulation.
+  /** \brief Alpha_complex destructor deletes the Delaunay triangulation.
    */
   ~Alpha_complex() {
     delete triangulation_;
@@ -211,7 +209,8 @@ class Alpha_complex {
     return create_complex(complex, std::numeric_limits<Filtration_value>::infinity());
   }
 
-  /** \brief Initialize the simplicial complex from the Delaunay triangulation.
+  /** \brief Inserts all Delaunay triangulation into the simplicial complex.
+   * It also computes the filtration values accordingly to the \ref createcomplexalgorithm
    *
    * \tparam SimplicialComplexForAlpha must meet `SimplicialComplexForAlpha` concept.
    * 
@@ -220,8 +219,9 @@ class Alpha_complex {
    * 
    * @return true if creation succeeds, false otherwise.
    * 
-   * @warning Delaunay triangulation must be already constructed with at least one vertex and dimension must be more 
+   * @pre Delaunay triangulation must be already constructed with at least one vertex and dimension must be more 
    * than 0.
+   * @pre The simplicial complex must be empty (no vertices)
    * 
    * Initialization can be launched once.
    */
