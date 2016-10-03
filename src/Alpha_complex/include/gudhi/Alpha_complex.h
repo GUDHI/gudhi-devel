@@ -54,9 +54,9 @@ namespace alpha_complex {
  * \ingroup alpha_complex
  * 
  * \details
- * The data structure can be constructed from a CGAL Delaunay triangulation (for more informations on CGAL Delaunay 
- * triangulation, please refer to the corresponding chapter in page http://doc.cgal.org/latest/Triangulation/) or from
- * an OFF file (cf. Points_off_reader).
+ * The data structure is constructing a CGAL Delaunay triangulation (for more informations on CGAL Delaunay 
+ * triangulation, please refer to the corresponding chapter in page http://doc.cgal.org/latest/Triangulation/) from a
+ * range of points or from an OFF file (cf. Points_off_reader).
  * 
  * Please refer to \ref alpha_complex for examples.
  *
