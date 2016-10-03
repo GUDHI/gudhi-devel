@@ -77,7 +77,7 @@ namespace witness_complex {
       chosen_landmarks.push_back(curr_max_w);
       unsigned i = 0;
       for (auto& p : points) {
-        double curr_dist = euclidean_distance(p, *(std::begin(points) + chosen_landmarks[current_number_of_landmarks]));
+        double curr_dist = euclidean_distance<double>(p, *(std::begin(points) + chosen_landmarks[current_number_of_landmarks]));
         wit_land_dist[i].push_back(curr_dist);
         knn[i].push_back(current_number_of_landmarks);
         if (curr_dist < dist_to_L[i])

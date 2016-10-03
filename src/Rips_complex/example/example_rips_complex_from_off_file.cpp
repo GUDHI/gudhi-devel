@@ -25,14 +25,15 @@ int main(int argc, char **argv) {
   // Type definitions
   using Point = std::vector<float>;
   using Simplex_tree = Gudhi::Simplex_tree<>;
-  using Rips_complex = Gudhi::rips_complex::Rips_complex<Simplex_tree::Filtration_value>;
+  using Filtration_value = Simplex_tree::Filtration_value;
+  using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
 
   // ----------------------------------------------------------------------------
   // Init of a rips complex from an OFF file
   // ----------------------------------------------------------------------------
   Gudhi::Points_off_reader<Point> off_reader(off_file_name);
   Rips_complex rips_complex_from_file(off_reader.get_point_cloud(), threshold,
-                                      euclidean_distance<Point>);
+                                      euclidean_distance<Filtration_value, Point>);
 
   std::streambuf* streambufffer;
   std::ofstream ouput_file_stream;

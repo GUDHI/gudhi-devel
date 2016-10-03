@@ -23,8 +23,9 @@ int main(int argc, char **argv) {
 
   // Type definitions
   using Point = std::vector<double>;
-  using Simplex_tree = Gudhi::Simplex_tree<>;
-  using Rips_complex = Gudhi::rips_complex::Rips_complex<Simplex_tree::Filtration_value>;
+  using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
+  using Filtration_value = Simplex_tree::Filtration_value;
+  using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
 
   std::vector<Point> points;
   points.push_back({1.0, 1.0});
@@ -38,10 +39,10 @@ int main(int argc, char **argv) {
   // ----------------------------------------------------------------------------
   // Init of a rips complex from points
   // ----------------------------------------------------------------------------
-  Rips_complex rips_complex_from_file(points, threshold, euclidean_distance<Point>);
+  Rips_complex rips_complex_from_points(points, threshold, euclidean_distance<Filtration_value, Point>);
 
   Simplex_tree simplex;
-  if (rips_complex_from_file.create_complex(simplex, 1)) {
+  if (rips_complex_from_points.create_complex(simplex, 1)) {
     // ----------------------------------------------------------------------------
     // Display information about the one skeleton rips complex
     // ----------------------------------------------------------------------------

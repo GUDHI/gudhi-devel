@@ -34,7 +34,7 @@
 #include <limits>  // infinity
 
 // Types definition
-using Simplex_tree = Gudhi::Simplex_tree</*Gudhi::Simplex_tree_options_fast_persistence*/>;
+using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
 using Filtration_value = Simplex_tree::Filtration_value;
 using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
@@ -62,7 +62,7 @@ int main(int argc, char * argv[]) {
 
   Points_off_reader off_reader(off_file_points);
   Rips_complex rips_complex_from_file(off_reader.get_point_cloud(), threshold,
-                                      euclidean_distance<Point>);
+                                      euclidean_distance<Filtration_value, Point>);
 
   // Construct the Rips complex in a Simplex Tree
   Simplex_tree simplex_tree;
