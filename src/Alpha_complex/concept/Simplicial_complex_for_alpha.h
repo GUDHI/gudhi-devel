@@ -41,9 +41,6 @@ struct SimplicialComplexForAlpha {
   /** Returns the number of vertices in the simplicial complex. */
   std::size_t num_vertices();
 
-  /** Gets the simplicial complex dimension. */
-  int dimension();
-
   /** Sets the simplicial complex dimension. */
   void set_dimension(int dimension);
 

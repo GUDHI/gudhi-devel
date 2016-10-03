@@ -292,7 +292,7 @@ class Alpha_complex {
     // Will be re-used many times
     Vector_of_CGAL_points pointVector;
     // ### For i : d -> 0
-    for (int decr_dim = complex.dimension(); decr_dim >= 0; decr_dim--) {
+    for (int decr_dim = triangulation_->maximal_dimension(); decr_dim >= 0; decr_dim--) {
       // ### Foreach Sigma of dim i
       for (Simplex_handle f_simplex : complex.skeleton_simplex_range(decr_dim)) {
         int f_simplex_dim = complex.dimension(f_simplex);
