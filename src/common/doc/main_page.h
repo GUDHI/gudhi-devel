@@ -200,8 +200,6 @@ make \endverbatim
  * 
  * The following example requires the <a target="_blank" href="http://gmplib.org/">GNU Multiple Precision Arithmetic
  * Library</a> (GMP) and will not be built if GMP is not installed:
- * \li <a href="_persistent_cohomology_2performance_rips_persistence_8cpp-example.html">
- * Persistent_cohomology/performance_rips_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2rips_multifield_persistence_8cpp-example.html">
  * Persistent_cohomology/rips_multifield_persistence.cpp</a>
  *
@@ -289,8 +287,6 @@ make \endverbatim
  * Persistent_cohomology/alpha_complex_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2rips_persistence_via_boundary_matrix_8cpp-example.html">
  * Persistent_cohomology/rips_persistence_via_boundary_matrix.cpp</a>
- * \li <a href="_persistent_cohomology_2performance_rips_persistence_8cpp-example.html">
- * Persistent_cohomology/performance_rips_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2persistence_from_file_8cpp-example.html">
  * Persistent_cohomology/persistence_from_file.cpp</a>
  * \li <a href="_persistent_cohomology_2persistence_from_simple_simplex_tree_8cpp-example.html">
@@ -343,7 +339,6 @@ make \endverbatim
  * @example Persistent_cohomology/alpha_complex_3d_persistence.cpp
  * @example Persistent_cohomology/alpha_complex_persistence.cpp
  * @example Persistent_cohomology/rips_persistence_via_boundary_matrix.cpp
- * @example Persistent_cohomology/performance_rips_persistence.cpp
  * @example Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp
  * @example Persistent_cohomology/persistence_from_file.cpp
  * @example Persistent_cohomology/persistence_from_simple_simplex_tree.cpp

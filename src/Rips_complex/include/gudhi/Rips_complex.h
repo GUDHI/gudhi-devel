@@ -52,8 +52,6 @@ namespace rips_complex {
  * 
  * The complex is a template class requiring a Filtration_value type.
  * 
- * \remark When Alpha_complex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
- * 
  * \tparam Filtration_value must meet `SimplicialComplexForRips` concept.
  */
 template<typename Filtration_value>
