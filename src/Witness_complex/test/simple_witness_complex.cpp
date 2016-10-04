@@ -25,6 +25,8 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
 
+#include <CGAL/Epick_d.h>
+
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Witness_complex.h>
 
@@ -34,26 +36,70 @@
 
 typedef Gudhi::Simplex_tree<> Simplex_tree;
 typedef std::vector< Vertex_handle > typeVectorVertex;
-typedef Gudhi::witness_complex::Witness_complex<Simplex_tree> WitnessComplex;
+typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> Kernel;
+typedef typename Kernel::FT FT;
+typedef typename Kernel::Point_d Point_d;
+typedef Gudhi::witness_complex::Witness_complex<Kernel> WitnessComplex;
+
+/* All landmarks and witnesses are taken on the grid in the following manner.
+   LWLWL  2W4W7
+   WW.WW  WW.WW
+   L...L  1...6
+   WW.WW  WW.WW
+   LWLWL  0W3W5
+
+   Witness complex consists of 8 vertices, 12 edges and 4 triangles
+ */
 
 BOOST_AUTO_TEST_CASE(simple_witness_complex) {
-  Simplex_tree complex;
-  std::vector< typeVectorVertex > knn;
+  Simplex_tree complex, relaxed_complex;
 
-  knn.push_back({1, 0, 5, 2, 6, 3, 4});
-  knn.push_back({2, 6, 4, 5, 0, 1, 3});
-  knn.push_back({3, 4, 2, 1, 5, 6, 0});
-  knn.push_back({4, 2, 1, 3, 5, 6, 0});
-  knn.push_back({5, 1, 6, 0, 2, 3, 4});
-  knn.push_back({6, 0, 5, 2, 1, 3, 4});
-  knn.push_back({0, 5, 6, 1, 2, 3, 4});
-  knn.push_back({2, 6, 4, 5, 3, 1, 0});
-  knn.push_back({1, 2, 5, 4, 3, 6, 0});
-  knn.push_back({3, 4, 0, 6, 5, 1, 2});
-  knn.push_back({5, 0, 1, 3, 6, 2, 4});
-  knn.push_back({5, 6, 1, 0, 2, 3, 4});
-  knn.push_back({1, 6, 0, 5, 2, 3, 4});
-  WitnessComplex witnessComplex(knn, 7, 7, complex);
+  std::vector<Point_d> witnesses, landmarks;
 
-  BOOST_CHECK(witnessComplex.is_witness_complex(knn, false));
+  landmarks.push_back(Point_d(std::vector<FT>{-2,-2}));
+  landmarks.push_back(Point_d(std::vector<FT>{-2, 0}));
+  landmarks.push_back(Point_d(std::vector<FT>{-2, 2}));
+  landmarks.push_back(Point_d(std::vector<FT>{ 0,-2}));
+  landmarks.push_back(Point_d(std::vector<FT>{ 0, 2}));
+  landmarks.push_back(Point_d(std::vector<FT>{ 2,-2}));
+  landmarks.push_back(Point_d(std::vector<FT>{ 2, 0}));
+  landmarks.push_back(Point_d(std::vector<FT>{ 2, 2}));
+  witnesses.push_back(Point_d(std::vector<FT>{-2,-1}));
+  witnesses.push_back(Point_d(std::vector<FT>{-2, 1}));
+  witnesses.push_back(Point_d(std::vector<FT>{-1,-2}));
+  witnesses.push_back(Point_d(std::vector<FT>{-1,-1}));
+  witnesses.push_back(Point_d(std::vector<FT>{-1, 1}));
+  witnesses.push_back(Point_d(std::vector<FT>{-1, 2}));
+  witnesses.push_back(Point_d(std::vector<FT>{ 1,-2}));
+  witnesses.push_back(Point_d(std::vector<FT>{ 1,-1}));
+  witnesses.push_back(Point_d(std::vector<FT>{ 1, 1}));
+  witnesses.push_back(Point_d(std::vector<FT>{ 1, 2}));
+  witnesses.push_back(Point_d(std::vector<FT>{ 2,-1}));
+  witnesses.push_back(Point_d(std::vector<FT>{ 2, 1}));
+
+  // landmarks.push_back(Point_d(std::vector<FT>{1,0}));
+  // landmarks.push_back(Point_d(std::vector<FT>{0,0}));
+  // landmarks.push_back(Point_d(std::vector<FT>{0,1}));
+  // witnesses.push_back(Point_d(std::vector<FT>{1,0}));
+  
+  WitnessComplex witness_complex(landmarks.begin(),
+                                 landmarks.end(),
+                                 witnesses.begin(),
+                                 witnesses.end());
+  // witness_complex.create_complex(complex, 0);
+
+  //std::cout << complex << "\n";
+
+  // BOOST_CHECK(complex.num_simplices() == 24);
+
+  witness_complex.create_complex(relaxed_complex, 8.01);
+  
+  std::cout << "Num_simplices: " << relaxed_complex.num_simplices() << "\n";
+  std::cout << relaxed_complex << "\n";
+
+  //BOOST_CHECK(relaxed_complex.num_simplices() == 24);
+  
+  //BOOST_CHECK(witnessComplex.is_witness_complex(knn, false));
+
+  
 }

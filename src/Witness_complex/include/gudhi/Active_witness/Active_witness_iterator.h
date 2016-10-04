@@ -64,7 +64,7 @@ public:
   
 private :
 
-  Id_distance_pair dereference() const
+  Id_distance_pair& dereference() const
   {
     return *lh_;
   }
@@ -76,9 +76,17 @@ private :
   
   void increment()
   {
+    // if neighbor search is at its end, check if lh_++ is end
+    if (aw_->iterator_last_ == aw_->iterator_end_) {
+      if (lh_++ == aw_->nearest_landmark_table_.end()) {
+        lh_ = aw_->end_pointer;
+        return;
+      }
+      return;
+    }
     // if the id of the current landmark is the same as the last one
     if (lh_->first == aw_->iterator_last_->first) {
-      // if the next iterator is end, lh_it = nullptr
+      // if the next iterator is end, lh_it = end pointer
       if (++(aw_->iterator_last_) == aw_->iterator_end_) {
         lh_ = aw_->end_pointer;
         return;

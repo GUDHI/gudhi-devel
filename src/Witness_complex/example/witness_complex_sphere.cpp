@@ -85,7 +85,7 @@ int main(int argc, char * const argv[]) {
                                     landmarks.end(),
                                     point_vector.begin(),
                                     point_vector.end());
-    witness_complex.create_complex(simplex_tree, 0);
+    witness_complex.create_complex(simplex_tree, 0.1);
     end = clock();
     double time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
     std::cout << "Witness complex for " << number_of_landmarks << " landmarks took "

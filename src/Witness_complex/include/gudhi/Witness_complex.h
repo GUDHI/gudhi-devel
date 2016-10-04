@@ -84,9 +84,9 @@ private:
   typedef FT Filtration_value;
 
   
-  typedef std::size_t Witness_id;
-  typedef std::size_t Landmark_id;
-  typedef std::pair<std::size_t, FT> Id_distance_pair;
+  typedef std::ptrdiff_t Witness_id;
+  typedef std::ptrdiff_t Landmark_id;
+  typedef std::pair<Landmark_id, FT> Id_distance_pair;
   typedef Active_witness<Id_distance_pair, Nearest_landmark_range> ActiveWitness;
   typedef std::list< ActiveWitness > ActiveWitnessList;
   typedef std::vector< Landmark_id > typeVectorVertex;
@@ -155,7 +155,7 @@ private:
     }
     typeVectorVertex vv;
     ActiveWitnessList active_witnesses;// = new ActiveWitnessList();
-    for (auto i = 0; i != nbL; ++i) {
+    for (unsigned i = 0; i != nbL; ++i) {
       // initial fill of 0-dimensional simplices
       // by doing it we don't assume that landmarks are necessarily witnesses themselves anymore
       //counter++;
@@ -166,10 +166,12 @@ private:
     unsigned k = 1; /* current dimension in iterative construction */
     for (auto w: witnesses_)
       active_witnesses.push_back(ActiveWitness(landmark_tree_.query_incremental_nearest_neighbors(w)));
+    ActiveWitness aw_copy(active_witnesses.front());
     while (!active_witnesses.empty() && k < nbL ) {
       typename ActiveWitnessList::iterator aw_it = active_witnesses.begin();
       while (aw_it != active_witnesses.end()) {
         std::vector<int> simplex;
+        //simplex.reserve(k+1);
         bool ok = add_all_faces_of_dimension(k,
                                              max_alpha_square,
                                              std::numeric_limits<double>::infinity(),
@@ -178,10 +180,13 @@ private:
                                              complex,
                                              aw_it->end());
         if (!ok)
-          active_witnesses.erase(aw_it++); //First increase the iterator and then erase the previous element
+          //{aw_it++;}
+        active_witnesses.erase(aw_it++); //First increase the iterator and then erase the previous element
         else
           aw_it++;
-      }
+      } 
+      std::cout << "Active witnesses after dim=" << k << " is finished: " << active_witnesses.size() << "\n";
+      std::cout << complex << "\n";
       k++;
     }
     return true;
@@ -190,7 +195,6 @@ private:
   //@}
 
  private:
-
   /* \brief Adds recursively all the faces of a certain dimension dim witnessed by the same witness
    * Iterator is needed to know until how far we can take landmarks to form simplexes
    * simplex is the prefix of the simplexes to insert
@@ -222,12 +226,13 @@ private:
                                                       sc,
                                                       end) || will_be_active;
         }
+        assert(!simplex.empty());
         simplex.pop_back();
         // If norelax_dist is infinity, change to first omitted distance
         if (l_it->second <= norelax_dist2)
           norelax_dist2 = l_it->second;
         typename ActiveWitness::iterator next_it = l_it;
-        will_be_active = add_all_faces_of_dimension(dim-1,
+        will_be_active = add_all_faces_of_dimension(dim,
                                                     alpha2,
                                                     norelax_dist2,
                                                     ++next_it,
@@ -240,12 +245,16 @@ private:
         simplex.push_back(l_it->first);
         double filtration_value = 0;
         // if norelax_dist is infinite, relaxation is 0.
+        //std::cout << "landmark_id=" << l_it->first << " distance=" << l_it->second << "\n";
+        // std::size_t landmark_id = l_it->first;
+        // double distance = l_it->second;
         if (l_it->second > norelax_dist2) 
           filtration_value = l_it->second - norelax_dist2; 
         if (all_faces_in(simplex, &filtration_value, sc)) {
           will_be_active = true;
           sc.insert_simplex(simplex, filtration_value);
         }
+        assert(!simplex.empty());
         simplex.pop_back();
         // If norelax_dist is infinity, change to first omitted distance
         if (l_it->second < norelax_dist2)
@@ -301,9 +310,23 @@ private:
   //   }
   //   return (fv_it == fvr.end());
   // }
-  
+
   
  public:
+  template < typename SimplicialComplexForWitness >
+  void print_complex(SimplicialComplexForWitness& complex)
+  {
+    std::cout << complex << "\n";
+  }
+
+  template < typename Container >
+  void print_container(Container& container)
+  {
+    for (auto l: container)
+      std::cout << l << ", ";
+    std::cout << "\n";
+  }
+
   // /*
   //  *  \brief Verification if every simplex in the complex is witnessed by witnesses in knn.
   //  *  \param print_output =true will print the witnesses for each simplex
