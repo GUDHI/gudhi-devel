@@ -25,6 +25,7 @@
 
 #include <boost/range/size.hpp>
 
+#include <cstddef>
 #include <random>     // random_device, mt19937
 #include <algorithm>  // shuffle
 #include <numeric>    // iota
@@ -48,13 +49,13 @@ namespace subsampling {
   template <typename Point_container,
             typename OutputIterator>
   void pick_n_random_points(Point_container const &points,
-                          unsigned final_size,
+                          std::size_t final_size,
                           OutputIterator output_it) {
 #ifdef GUDHI_SUBS_PROFILING
     Gudhi::Clock t;
 #endif
 
-    unsigned nbP = boost::size(points);
+    std::size_t nbP = boost::size(points);
     assert(nbP >= final_size);
     std::vector<int> landmarks(nbP);
     std::iota(landmarks.begin(), landmarks.end(), 0);
