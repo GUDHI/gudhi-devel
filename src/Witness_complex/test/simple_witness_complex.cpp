@@ -29,6 +29,7 @@
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Witness_complex.h>
+#include <gudhi/Strong_witness_complex.h>
 
 #include <iostream>
 #include <ctime>
@@ -40,6 +41,7 @@ typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> Kernel;
 typedef typename Kernel::FT FT;
 typedef typename Kernel::Point_d Point_d;
 typedef Gudhi::witness_complex::Witness_complex<Kernel> WitnessComplex;
+typedef Gudhi::witness_complex::Strong_witness_complex<Kernel> StrongWitnessComplex;
 
 /* All landmarks and witnesses are taken on the grid in the following manner.
    LWLWL  2W4W7
@@ -52,7 +54,7 @@ typedef Gudhi::witness_complex::Witness_complex<Kernel> WitnessComplex;
  */
 
 BOOST_AUTO_TEST_CASE(simple_witness_complex) {
-  Simplex_tree complex, relaxed_complex;
+  Simplex_tree complex, relaxed_complex, strong_relaxed_complex;
 
   std::vector<Point_d> witnesses, landmarks;
 
@@ -92,11 +94,20 @@ BOOST_AUTO_TEST_CASE(simple_witness_complex) {
 
   // BOOST_CHECK(complex.num_simplices() == 24);
 
-  witness_complex.create_complex(relaxed_complex, 8.01);
+  // witness_complex.create_complex(relaxed_complex, 8.01);
   
-  std::cout << "Num_simplices: " << relaxed_complex.num_simplices() << "\n";
-  std::cout << relaxed_complex << "\n";
+  // std::cout << "Num_simplices: " << relaxed_complex.num_simplices() << "\n";
+  // std::cout << relaxed_complex << "\n";
 
+  StrongWitnessComplex strong_witness_complex(landmarks.begin(),
+                                              landmarks.end(),
+                                              witnesses.begin(),
+                                              witnesses.end());
+
+  strong_witness_complex.create_complex(strong_relaxed_complex, 9.1);
+  std::cout << "Num_simplices: " << strong_relaxed_complex.num_simplices() << "\n";
+  std::cout << strong_relaxed_complex << "\n";
+  
   //BOOST_CHECK(relaxed_complex.num_simplices() == 24);
   
   //BOOST_CHECK(witnessComplex.is_witness_complex(knn, false));
