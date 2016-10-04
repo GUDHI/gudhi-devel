@@ -105,9 +105,9 @@ namespace subsampling {
   template < typename Kernel,
              typename Point_container,
              typename OutputIterator>
-  void choose_n_farthest_points( Kernel& k,
+  void choose_n_farthest_points( Kernel const& k,
                                  Point_container const &input_pts,
-                                 int final_size,
+                                 unsigned final_size,
                                  OutputIterator output_it)
   {
     // Choose randomly the first landmark 
