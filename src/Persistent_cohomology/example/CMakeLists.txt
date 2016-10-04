@@ -74,8 +74,8 @@ endif(GMP_FOUND)
         message(STATUS "Eigen3 version: ${EIGEN3_VERSION}.")
         include( ${EIGEN3_USE_FILE} )
 
-        #add_executable (alpha_complex_persistence alpha_complex_persistence.cpp)
-        #target_link_libraries(alpha_complex_persistence  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+        add_executable (alpha_complex_persistence alpha_complex_persistence.cpp)
+        target_link_libraries(alpha_complex_persistence  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
         add_executable(periodic_alpha_complex_3d_persistence periodic_alpha_complex_3d_persistence.cpp)
         target_link_libraries(periodic_alpha_complex_3d_persistence ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
