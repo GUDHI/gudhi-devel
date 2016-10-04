@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(test_sparsify_point_set)
 
   std::vector<Point_d> points;
   for (int i = 0 ; i < 500 ; ++i)
-    points.push_back(Point_d(std::array<FT,4>({rd.get_double(-1.,1),rd.get_double(-1.,1),rd.get_double(-1.,1),rd.get_double(-1.,1)})));
+    points.push_back(Point_d(rd.get_double(-1.,1),rd.get_double(-1.,1),rd.get_double(-1.,1),rd.get_double(-1.,1)));
 
   K k;
   std::vector<Point_d> results;
