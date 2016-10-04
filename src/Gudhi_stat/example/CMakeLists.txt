@@ -116,20 +116,4 @@ add_executable ( utilities/persistence_vectors/plot_persistence_vectors utilitie
 target_link_libraries(utilities/persistence_vectors/plot_persistence_vectors ${Boost_SYSTEM_LIBRARY})
 
 
-#PSSK
-#seems that this is not needed, since the only difference is the creation. The rest works the same as in the persitence heat maps. So, I have moved the creation of PSSK into the persitence heat maps folder, and use the methos from over there.
-#add_executable ( utilities/PSSK/average_pssk utilities/PSSK/average_pssk.cpp )
-#target_link_libraries(utilities/PSSK/average_pssk ${Boost_SYSTEM_LIBRARY})
-
-#add_executable ( utilities/PSSK/create_pssk utilities/PSSK/create_pssk.cpp )
-#target_link_libraries(utilities/PSSK/create_pssk ${Boost_SYSTEM_LIBRARY})
-
-#add_executable ( utilities/PSSK/plot_pssk utilities/PSSK/plot_pssk.cpp )
-#target_link_libraries(utilities/PSSK/plot_pssk ${Boost_SYSTEM_LIBRARY})
-
-#add_executable ( utilities/PSSK/compute_distance_of_pssk utilities/PSSK/compute_distance_of_pssk.cpp )
-#target_link_libraries(utilities/PSSK/compute_distance_of_pssk ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( utilities/PSSK/compute_scalar_product_of_pssk utilities/PSSK/compute_scalar_product_of_pssk.cpp )
-target_link_libraries(utilities/PSSK/compute_scalar_product_of_pssk ${Boost_SYSTEM_LIBRARY})
 

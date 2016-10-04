@@ -22,11 +22,11 @@
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
-#include <gudhi/Points_3D_off_io.h>
 #include <boost/variant.hpp>
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Delaunay_triangulation_3.h>
+#include <CGAL/Regular_triangulation_3.h>
+#include <CGAL/Regular_triangulation_euclidean_traits_3.h>
 #include <CGAL/Alpha_shape_3.h>
 #include <CGAL/iterator.h>
 
@@ -41,10 +41,11 @@
 
 // Alpha_shape_3 templates type definitions
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
-typedef CGAL::Alpha_shape_vertex_base_3<Kernel> Vb;
-typedef CGAL::Alpha_shape_cell_base_3<Kernel> Fb;
+typedef CGAL::Regular_triangulation_euclidean_traits_3<Kernel> Gt;
+typedef CGAL::Alpha_shape_vertex_base_3<Gt> Vb;
+typedef CGAL::Alpha_shape_cell_base_3<Gt> Fb;
 typedef CGAL::Triangulation_data_structure_3<Vb, Fb> Tds;
-typedef CGAL::Delaunay_triangulation_3<Kernel, Tds> Triangulation_3;
+typedef CGAL::Regular_triangulation_3<Gt, Tds> Triangulation_3;
 typedef CGAL::Alpha_shape_3<Triangulation_3> Alpha_shape_3;
 
 // From file type definition
@@ -138,18 +139,11 @@ int main(int argc, char * const argv[]) {
     usage(argv[0]);
   }
 
-  // Read points from file
-  std::string offInputFile(argv[1]);
-  // Read the OFF file (input file name given as parameter) and triangulate points
-  Gudhi::Points_3D_off_reader<Point_3> off_reader(offInputFile);
-  // Check the read operation was correct
-  if (!off_reader.is_valid()) {
-    std::cerr << "Unable to read file " << offInputFile << std::endl;
-    usage(argv[0]);
-  }
-
-  // Retrieve the triangulation
-  std::vector<Point_3> lp = off_reader.get_point_cloud();
+  std::vector<Gt::Weighted_point> lp;
+  lp.emplace_back(Point_3(0,0,0),0);
+  lp.emplace_back(Point_3(0,0,1),0);
+  lp.emplace_back(Point_3(0,1,0),.2);
+  lp.emplace_back(Point_3(1,0,0),0);
 
   // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode.
   Alpha_shape_3 as(lp.begin(), lp.end(), 0, Alpha_shape_3::GENERAL);
