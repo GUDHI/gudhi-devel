@@ -26,7 +26,7 @@
 
 namespace Gudhi {
 
-namespace Cubical_complex {
+namespace cubical_complex {
 
 /**  \defgroup cubical_complex Cubical complex
  *
@@ -63,7 +63,7 @@ namespace Cubical_complex {
  * For further details and theory of cubical complexes, please consult \cite kaczynski2004computational as well as the
  * following paper \cite peikert2012topological .
  *
- * \section datastructure Data structure.
+ * \section cubicalcomplexdatastructure Data structure.
  *
  * The implementation of Cubical complex provides a representation of complexes that occupy a rectangular region in
  * \f$\mathbb{R}^n\f$. This extra assumption allows for a memory efficient way of storing cubical complexes in a form
@@ -150,7 +150,9 @@ namespace Cubical_complex {
  */
 /** @} */  // end defgroup cubical_complex
 
-}  // namespace Cubical_complex
+}  // namespace cubical_complex
+
+namespace Cubical_complex = cubical_complex;
 
 }  // namespace Gudhi
 

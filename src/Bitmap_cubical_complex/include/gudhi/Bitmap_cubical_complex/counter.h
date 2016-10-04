@@ -28,7 +28,7 @@
 
 namespace Gudhi {
 
-namespace Cubical_complex {
+namespace cubical_complex {
 
 /**
  * @brief This is an implementation of a counter being a vector of integers. 
@@ -135,7 +135,9 @@ class counter {
   std::vector< unsigned > current;
 };
 
-}  // namespace Cubical_complex
+}  // namespace cubical_complex
+
+namespace Cubical_complex = cubical_complex;
 
 }  // namespace Gudhi
 

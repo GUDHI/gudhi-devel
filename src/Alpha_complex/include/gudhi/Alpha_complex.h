@@ -48,7 +48,7 @@
 
 namespace Gudhi {
 
-namespace alphacomplex {
+namespace alpha_complex {
 
 /**
  * \class Alpha_complex Alpha_complex.h gudhi/Alpha_complex.h
@@ -309,7 +309,7 @@ class Alpha_complex : public Simplex_tree<> {
           std::cout << std::endl;
 #endif  // DEBUG_TRACES
           // ### If filt(Sigma) is NaN : filt(Sigma) = alpha(Sigma)
-          if (isnan(filtration(f_simplex))) {
+          if (std::isnan(filtration(f_simplex))) {
             Filtration_value alpha_complex_filtration = 0.0;
             // No need to compute squared_radius on a single point - alpha is 0.0
             if (f_simplex_dim > 0) {
@@ -352,10 +352,10 @@ class Alpha_complex : public Simplex_tree<> {
         std::cout << vertex << " ";
       }
       std::cout << "is a face of Sigma\n";
-      std::cout << " | isnan(filtration(Tau)=" << isnan(filtration(f_boundary)) << std::endl;
+      std::cout << " | isnan(filtration(Tau)=" << std::isnan(filtration(f_boundary)) << std::endl;
 #endif  // DEBUG_TRACES
       // ### If filt(Tau) is not NaN
-      if (!isnan(filtration(f_boundary))) {
+      if (!std::isnan(filtration(f_boundary))) {
         // ### filt(Tau) = fmin(filt(Tau), filt(Sigma))
         Filtration_value alpha_complex_filtration = fmin(filtration(f_boundary), filtration(f_simplex));
         assign_filtration(f_boundary, alpha_complex_filtration);
@@ -410,7 +410,9 @@ class Alpha_complex : public Simplex_tree<> {
   }
 };
 
-}  // namespace alphacomplex
+}  // namespace alpha_complex
+
+namespace alphacomplex = alpha_complex;
 
 }  // namespace Gudhi
 

@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #ifndef SKELETON_BLOCKER_SIMPLIFIABLE_COMPLEX_H_
 #define SKELETON_BLOCKER_SIMPLIFIABLE_COMPLEX_H_
 
@@ -30,10 +31,10 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 /**
- * Returns true iff the blocker 'sigma' is popable.
+ * Returns true if the blocker 'sigma' is popable.
  * To define popable, let us call 'L' the complex that
  * consists in the current complex without the blocker 'sigma'.
  * A blocker 'sigma' is then "popable" if the link of 'sigma'
@@ -145,8 +146,7 @@ void Skeleton_blocker_complex<SkeletonBlockerDS>::remove_star(Vertex_handle v) {
  * whenever the dimension of tau is at least 2.
  */
 template<typename SkeletonBlockerDS>
-void Skeleton_blocker_complex<SkeletonBlockerDS>::update_blockers_after_remove_star_of_vertex_or_edge(
-    const Simplex& simplex_to_be_removed) {
+void Skeleton_blocker_complex<SkeletonBlockerDS>::update_blockers_after_remove_star_of_vertex_or_edge(const Simplex& simplex_to_be_removed) {
   std::list <Blocker_handle> blockers_to_update;
   if (simplex_to_be_removed.empty()) return;
 
@@ -223,8 +223,6 @@ void Skeleton_blocker_complex<SkeletonBlockerDS>::add_simplex(const Simplex& sig
   remove_blocker_include_in_simplex(sigma);
   add_blockers_after_simplex_insertion(sigma);
 }
-
-
 
 template<typename SkeletonBlockerDS>
 void Skeleton_blocker_complex<SkeletonBlockerDS>::add_blockers_after_simplex_insertion(Simplex sigma) {
@@ -385,7 +383,8 @@ Skeleton_blocker_complex<SkeletonBlockerDS>::contract_edge(Vertex_handle a, Vert
 
 template<typename SkeletonBlockerDS>
 void Skeleton_blocker_complex<SkeletonBlockerDS>::get_blockers_to_be_added_after_contraction(Vertex_handle a,
-    Vertex_handle b, std::set<Simplex>& blockers_to_add) {
+                                                                                             Vertex_handle b,
+                                                                                             std::set<Simplex>& blockers_to_add) {
   blockers_to_add.clear();
 
   typedef Skeleton_blocker_link_complex<Skeleton_blocker_complex<SkeletonBlockerDS> > LinkComplexType;
@@ -459,7 +458,9 @@ Skeleton_blocker_complex<SkeletonBlockerDS>::notify_changed_edges(Vertex_handle 
 }
 
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 

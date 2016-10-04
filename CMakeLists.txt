@@ -18,11 +18,18 @@ else()
 
   enable_testing()
 
+  # For "make user_version"
+  include(${CMAKE_MODULE_PATH}/GUDHI_user_version_target.txt)
+  # For "make doxygen"
+  include(${CMAKE_MODULE_PATH}/GUDHI_doxygen_target.txt)
+
   find_package(GMP)
   if(GMP_FOUND)
+    message(STATUS "GMP_LIBRARIES = ${GMP_LIBRARIES}")
     INCLUDE_DIRECTORIES(${GMP_INCLUDE_DIR})
     find_package(GMPXX)
     if(GMPXX_FOUND)
+      message(STATUS "GMPXX_LIBRARIES = ${GMPXX_LIBRARIES}")
       INCLUDE_DIRECTORIES(${GMPXX_INCLUDE_DIR})
     endif()
   endif()
@@ -40,6 +47,7 @@ else()
     unset(CGAL_FOUND)
   endif()
   if(CGAL_FOUND)
+    message(STATUS "CGAL version: ${CGAL_VERSION}.")
     include( ${CGAL_USE_FILE} )
   endif()
   
@@ -47,7 +55,7 @@ else()
     # Turn off some VC++ warnings
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4267 /wd4668 /wd4311 /wd4800 /wd4820 /wd4503 /wd4244 /wd4345 /wd4996 /wd4396 /wd4018")
   else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wpedantic -Wsign-compare")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pedantic")
   endif()
 
   if(CMAKE_BUILD_TYPE MATCHES Debug)
@@ -69,6 +77,13 @@ else()
     add_definitions(-DGUDHI_USE_TBB)
   endif()
 
+  find_package(Eigen3 3.1.0)
+  if (EIGEN3_FOUND)
+    message(STATUS "Eigen3 version: ${EIGEN3_VERSION}.")
+    include( ${EIGEN3_USE_FILE} )
+    #include_directories (BEFORE "../../include")
+  endif (EIGEN3_FOUND)
+
   # Required programs for unitary tests purpose
   FIND_PROGRAM( GCOVR_PATH gcovr )
   if (GCOVR_PATH)
@@ -79,10 +94,10 @@ else()
   if (GPROF_PATH)
     message("gprof found in ${GPROF_PATH}")
   endif()
-FIND_PROGRAM( DIFF_PATH diff )
-if (DIFF_PATH)
-  message("diff found in ${DIFF_PATH}")
-endif()
+  FIND_PROGRAM( DIFF_PATH diff )
+  if (DIFF_PATH)
+    message("diff found in ${DIFF_PATH}")
+  endif()
 
   # BOOST ISSUE result_of vs C++11
   add_definitions(-DBOOST_RESULT_OF_USE_DECLTYPE)

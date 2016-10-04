@@ -41,7 +41,7 @@ struct Geometry_trait : public CGAL::Cartesian_d<double> {
 typedef Geometry_trait::Point Point;
 
 using namespace Gudhi;
-using namespace Gudhi::skbl;
+using namespace Gudhi::skeleton_blocker;
 
 typedef Skeleton_blocker_simple_geometric_traits<Geometry_trait> Complex_geometric_traits;
 typedef Skeleton_blocker_geometric_complex< Complex_geometric_traits > Complex;

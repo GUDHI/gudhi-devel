@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Méditerranée (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
  * 
  */
 
-
 #ifndef SKELETON_BLOCKER_INTERNAL_TRIE_H_
 #define SKELETON_BLOCKER_INTERNAL_TRIE_H_
 
@@ -32,7 +31,7 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 template<typename SimplexHandle>
 struct Trie {
@@ -148,7 +147,7 @@ struct Trie {
   }
 
   void remove_leaf() {
-    assert(is_leaf);
+    assert(is_leaf());
     if (!is_root())
       parent_->childs.erase(this);
   }
@@ -240,7 +239,7 @@ struct Tries {
 
   std::vector<Simplex> next_dimension_simplices() const {
     std::vector<Simplex> res;
-    while (!to_see_.empty() && to_see_.front()->simplex().dimension() == current_dimension_) {
+    while (!(to_see_.empty()) && (to_see_.front()->simplex().dimension() == current_dimension_)) {
       res.emplace_back(to_see_.front()->simplex());
       for (auto child : to_see_.front()->childs)
         to_see_.push_back(child.get());
@@ -257,11 +256,13 @@ struct Tries {
 
  private:
   mutable std::deque<STrie*> to_see_;
-  mutable unsigned current_dimension_ = 0;
+  mutable int current_dimension_ = 0;
   std::vector<STrie*> cofaces_;
 };
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 

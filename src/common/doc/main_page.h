@@ -13,8 +13,8 @@
  * The current release of the GUDHI library includes:
  * 
  * \li Data structures to represent, construct and manipulate simplicial complexes.
- * \li Algorithms to compute persistent homology and multi-field persistent homology.
- * \li Simplication of simplicial complexes by edge contraction.
+ * \li Simplification of simplicial complexes by edge contraction.
+ * \li Algorithms to compute persistent homology persistent homology.
  * 
  * All data-structures are generic and several of their aspects can be parameterized via template classes.
  * We refer to \cite gudhilibrary_ICMS14 for a detailed description of the design of the library.
@@ -36,7 +36,7 @@
     values of the codimension 1 cofaces that make it not Gabriel otherwise.
     All simplices that have a filtration value strictly greater than a given alpha squared value are not inserted into
     the complex.<br>
-    <b>User manual:</b> \ref alpha_complex - <b>Reference manual:</b> Gudhi::alphacomplex::Alpha_complex
+    <b>User manual:</b> \ref alpha_complex - <b>Reference manual:</b> Gudhi::alpha_complex::Alpha_complex
     </td>
  </tr>
 </table>
@@ -52,7 +52,7 @@
     <td width="75%">
     The cubical complex is an example of a structured complex useful in computational mathematics (specially
     rigorous numerics) and image analysis.<br>
-    <b>User manual:</b> \ref cubical_complex - <b>Reference manual:</b> Gudhi::Cubical_complex::Bitmap_cubical_complex
+    <b>User manual:</b> \ref cubical_complex - <b>Reference manual:</b> Gudhi::cubical_complex::Bitmap_cubical_complex
     </td>
  </tr>
 </table>
@@ -89,7 +89,7 @@
     This data-structure handles all simplicial complexes operations such as simplex enumeration or simplex removal but
     operations that are particularly efficient are operations that do not require simplex enumeration such as edge
     iteration, link computation or simplex contraction.<br>
-    <b>User manual:</b> \ref skbl - <b>Reference manual:</b> Gudhi::skbl::Skeleton_blocker_complex
+    <b>User manual:</b> \ref skbl - <b>Reference manual:</b> Gudhi::skeleton_blocker::Skeleton_blocker_complex
     </td>
  </tr>
 </table>
@@ -154,6 +154,7 @@
 */
 
 /*! \page installation Gudhi installation
+ *  \tableofcontents
  * As Gudhi is a header only library, there is no need to install the library.
  * 
  * Examples of Gudhi headers inclusion can be found in \ref demos.
@@ -162,6 +163,20 @@
  * The library uses c++11 and requires <a target="_blank" href="http://www.boost.org/">Boost</a> with version 1.48.0 or
  * more recent. It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2015.
  * 
+ * \subsection demos Demos and examples
+ * To build the demos and examples, run the following commands in a terminal:
+\verbatim  cd /path-to-gudhi/
+mkdir build
+cd build/
+cmake ..
+make \endverbatim
+ * A list of examples is available <a href="examples.html">here</a>.
+ * 
+ * \subsection testsuites Test suites
+ * To test your build, run the following command in a terminal:
+ * \verbatim  make test \endverbatim
+ * 
+ * \section optionallibrary Optional third-party library
  * \subsection gmp GMP:
  * The multi-field persistent homology algorithm requires GMP which is a free library for arbitrary-precision
  * arithmetic, operating on signed integers, rational numbers, and floating point numbers.
@@ -176,7 +191,8 @@
  * Having GMP version 4.2 or higher installed is recommended.
  * 
  * \subsection cgal CGAL:
- * CGAL is a C++ library which provides easy access to efficient and reliable geometric algorithms.
+ * The \ref alpha_complex data structure and few examples requires CGAL, which is a C++ library which provides easy
+ * access to efficient and reliable geometric algorithms.
  * 
  * Having CGAL version 4.4 or higher installed is recommended. The procedure to install this library according to
  * your operating system is detailed here http://doc.cgal.org/latest/Manual/installation.html
@@ -187,10 +203,6 @@
  * Persistent_cohomology/alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_simplex_tree_2simplex_tree_from_alpha_shapes_3_8cpp-example.html">
  * Simplex_tree/simplex_tree_from_alpha_shapes_3.cpp</a>
- * \li <a href="_alpha_complex_2_alpha_complex_from_off_8cpp-example.html">
- *  Alpha_complex/Alpha_complex_from_off.cpp</a>
- * \li <a href="_alpha_complex_2_alpha_complex_from_points_8cpp-example.html">
- *  Alpha_complex/Alpha_complex_from_points.cpp</a>
  * 
  * The following example requires CGAL version &ge; 4.6:
  * \li <a href="_witness_complex_2witness_complex_sphere_8cpp-example.html">
@@ -209,6 +221,7 @@
  * Persistent_cohomology/custom_persistence_sort.cpp</a>
  * 
  * \subsection eigen3 Eigen3:
+ * The \ref alpha_complex data structure and few examples requires
  * <a target="_blank" href="http://eigen.tuxfamily.org/">Eigen3</a> is a C++ template library for linear algebra:
  * matrices, vectors, numerical solvers, and related algorithms.
  * 
@@ -253,8 +266,10 @@
  * Simplex_tree/simplex_tree_from_alpha_shapes_3.cpp</a>
  * \li <a href="_simplex_tree_2simplex_tree_from_cliques_of_graph_8cpp-example.html">
  * Simplex_tree/simplex_tree_from_cliques_of_graph.cpp</a>
- * \li <a href="_persistent_cohomology_2alpha_shapes_persistence_8cpp-example.html">
- * Persistent_cohomology/alpha_shapes_persistence.cpp</a>
+ * \li <a href="_persistent_cohomology_2alpha_complex_3d_persistence_8cpp-example.html">
+ * Persistent_cohomology/alpha_complex_3d_persistence.cpp</a>
+ * \li <a href="_persistent_cohomology_2alpha_complex_persistence_8cpp-example.html">
+ * Persistent_cohomology/alpha_complex_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2rips_persistence_via_boundary_matrix_8cpp-example.html">
  * Persistent_cohomology/rips_persistence_via_boundary_matrix.cpp</a>
  * \li <a href="_persistent_cohomology_2performance_rips_persistence_8cpp-example.html">
@@ -273,19 +288,6 @@
  * Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2custom_persistence_sort_8cpp-example.html">
  * Persistent_cohomology/custom_persistence_sort.cpp</a>
- * 
- * \subsection demos Demos and examples
- * To build the demos and examples, run the following commands in a terminal:
-\verbatim  cd /path-to-gudhi/
-mkdir build
-cd build/
-cmake ..
-make \endverbatim
- * A list of examples is available <a href="examples.html">here</a>.
- * 
- * \subsection testsuites Test suites
- * To test your build, run the following command in a terminal:
- * \verbatim  make test \endverbatim
  * 
  * \section Contributions Bug reports and contributions
  * Please help us improving the quality of the GUDHI library. You may report bugs or suggestions to:
@@ -313,8 +315,8 @@ make \endverbatim
  * @example Bitmap_cubical_complex/Bitmap_cubical_complex.cpp
  * @example Bitmap_cubical_complex/Bitmap_cubical_complex_periodic_boundary_conditions.cpp
  * @example Bitmap_cubical_complex/Random_bitmap_cubical_complex.cpp
- * @example common/CGAL_3D_points_off_reader.cpp
- * @example common/CGAL_points_off_reader.cpp
+ * @example common/example_CGAL_3D_points_off_reader.cpp
+ * @example common/example_CGAL_points_off_reader.cpp
  * @example Contraction/Garland_heckbert.cpp
  * @example Contraction/Rips_contraction.cpp
  * @example Persistent_cohomology/alpha_complex_3d_persistence.cpp

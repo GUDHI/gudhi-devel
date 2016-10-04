@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(GUDHISimplexTreeFromFile)
+project(Simplex_tree_examples)
 
 add_executable ( simplex_tree_from_cliques_of_graph simplex_tree_from_cliques_of_graph.cpp )
 if (TBB_FOUND)

@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #ifndef SKELETON_BLOCKER_ITERATORS_SKELETON_BLOCKERS_SIMPLICES_ITERATORS_H_
 #define SKELETON_BLOCKER_ITERATORS_SKELETON_BLOCKERS_SIMPLICES_ITERATORS_H_
 
@@ -35,7 +36,7 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 /**
  * Link may be Skeleton_blocker_link_complex<SkeletonBlockerComplex> to iterate over all
@@ -61,17 +62,18 @@ public boost::iterator_facade < Simplex_around_vertex_iterator<SkeletonBlockerCo
   // Link_vertex_handle == Complex_Vertex_handle but this renaming helps avoiding confusion
   typedef typename Link::Vertex_handle Link_vertex_handle;
 
-  typedef typename Gudhi::skbl::Trie<Simplex> Trie;
+  typedef typename Gudhi::skeleton_blocker::Trie<Simplex> Trie;
 
  private:
   const Complex* complex;
   Vertex_handle v;
   std::shared_ptr<Link> link_v;
   std::shared_ptr<Trie> trie;
-  std::list<Trie*> nodes_to_be_seen;  // todo deque
+  // TODO(DS): use a deque instead
+  std::list<Trie*> nodes_to_be_seen;
 
  public:
-  Simplex_around_vertex_iterator() : complex(0) {}
+  Simplex_around_vertex_iterator() : complex(0) { }
 
   Simplex_around_vertex_iterator(const Complex* complex_, Vertex_handle v_) :
       complex(complex_),
@@ -81,15 +83,16 @@ public boost::iterator_facade < Simplex_around_vertex_iterator<SkeletonBlockerCo
     compute_trie_and_nodes_to_be_seen();
   }
 
-  // todo avoid useless copy
-  // todo currently just work if copy begin iterator
+  // TODO(DS): avoid useless copy
+  // TODO(DS): currently just work if copy begin iterator
   Simplex_around_vertex_iterator(const Simplex_around_vertex_iterator& other) :
       complex(other.complex),
       v(other.v),
       link_v(other.link_v),
       trie(other.trie),
       nodes_to_be_seen(other.nodes_to_be_seen) {
-    if (!other.is_end()) {}
+    if (!other.is_end()) {
+    }
   }
 
   /**
@@ -159,7 +162,8 @@ public boost::iterator_facade < Simplex_around_vertex_iterator<SkeletonBlockerCo
 
     bool both_non_empty = !nodes_to_be_seen.empty() && !other.nodes_to_be_seen.empty();
 
-    if (!both_non_empty) return false;  // one is empty the other is not
+    // one is empty the other is not
+    if (!both_non_empty) return false;
 
     bool same_node = (**(nodes_to_be_seen.begin()) == **(other.nodes_to_be_seen.begin()));
     return same_node;
@@ -238,7 +242,6 @@ public boost::iterator_facade < Simplex_iterator<SkeletonBlockerComplex>
   }
 
  private:
-  // todo return to private
   Simplex_iterator(const Complex* complex, bool end) :
       complex_(complex) {
     set_end();
@@ -306,7 +309,7 @@ public boost::iterator_facade < Simplex_iterator<SkeletonBlockerComplex>
 
 /**
  * Iterator through the maximal faces of the coboundary of a simplex.
- */ 
+ */
 template<typename SkeletonBlockerComplex, typename Link>
 class Simplex_coboundary_iterator :
 public boost::iterator_facade < Simplex_coboundary_iterator<SkeletonBlockerComplex, Link>
@@ -329,12 +332,12 @@ public boost::iterator_facade < Simplex_coboundary_iterator<SkeletonBlockerCompl
   Complex_vertex_iterator link_vertex_end;
 
  public:
-  Simplex_coboundary_iterator() : complex(0) {}
+  Simplex_coboundary_iterator() : complex(0) { }
 
   Simplex_coboundary_iterator(const Complex* complex_, const Simplex& sigma_) :
       complex(complex_),
       sigma(sigma_),
-      //need only vertices of the link hence the true flag
+      // need only vertices of the link hence the true flag
       link(new Link(*complex_, sigma_, false, true)) {
     auto link_vertex_range = link->vertex_range();
     current_vertex = link_vertex_range.begin();
@@ -347,9 +350,9 @@ public boost::iterator_facade < Simplex_coboundary_iterator<SkeletonBlockerCompl
       link(other.link),
       current_vertex(other.current_vertex),
       link_vertex_end(other.link_vertex_end) { }
-  
+
   // returns an iterator to the end
-  Simplex_coboundary_iterator(const Complex* complex_,const Simplex& sigma_, bool end) :
+  Simplex_coboundary_iterator(const Complex* complex_, const Simplex& sigma_, bool end) :
       complex(complex_),
       sigma(sigma_) {
     // to represent an end iterator without having to build a useless link, we use
@@ -361,7 +364,7 @@ public boost::iterator_facade < Simplex_coboundary_iterator<SkeletonBlockerCompl
     return complex->convert_handle_from_another_complex(*link, link_vh);
   }
 
-public:
+ public:
   friend std::ostream& operator<<(std::ostream& stream, const Simplex_coboundary_iterator& sci) {
     return stream;
   }
@@ -369,8 +372,8 @@ public:
   // assume that iterator points to the same complex and comes from the same simplex
   bool equal(const Simplex_coboundary_iterator& other) const {
     assert(complex == other.complex && sigma == other.sigma);
-    if(is_end()) return other.is_end();
-    if(other.is_end()) return is_end();
+    if (is_end()) return other.is_end();
+    if (other.is_end()) return is_end();
     return *current_vertex == *(other.current_vertex);
   }
 
@@ -384,14 +387,15 @@ public:
     return res;
   }
 
-private:
+ private:
   bool is_end() const {
     return !link || current_vertex == link_vertex_end;
   }
 };
 
+}  // namespace skeleton_blocker
 
-}  // namespace skbl
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 

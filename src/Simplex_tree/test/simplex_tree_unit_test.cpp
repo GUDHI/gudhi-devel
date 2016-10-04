@@ -806,14 +806,14 @@ BOOST_AUTO_TEST_CASE(make_filtration_non_decreasing) {
   st.insert_simplex_and_subfaces({3, 0}, 2.0);
   st.insert_simplex_and_subfaces({3, 4, 5}, 2.0);
   
-  // Inserted simplex:
-  //    1
-  //    o
-  //   /X\
-  //  o---o---o---o
-  //  2   0   3\X/4
-  //            o
-  //            5
+  /* Inserted simplex:     */
+  /*    1                  */
+  /*    o                  */
+  /*   /X\                 */
+  /*  o---o---o---o        */
+  /*  2   0   3\X/4        */
+  /*            o          */
+  /*            5          */
 
   std::cout << "Check default insertion ensures the filtration values are non decreasing" << std::endl;
   BOOST_CHECK(!st.make_filtration_non_decreasing());

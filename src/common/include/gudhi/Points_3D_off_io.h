@@ -132,12 +132,12 @@ class Points_3D_off_visitor_reader {
  * 
  * @code template<class InputIterator > Point_3::Point_3(double x, double y, double z) @endcode
  * 
- * @section Example
+ * @section point3doffioexample Example
  *
  * This example loads points from an OFF file and builds a vector of CGAL points in dimension 3.
  * Then, it is asked to display the points.
  * 
- * @include common/CGAL_3D_points_off_reader.cpp
+ * @include common/example_CGAL_3D_points_off_reader.cpp
  * 
  * When launching:
  * 

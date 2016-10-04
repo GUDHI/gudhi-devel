@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #ifndef SKELETON_BLOCKER_SKELETON_BLOCKER_SIMPLE_GEOMETRIC_TRAITS_H_
 #define SKELETON_BLOCKER_SKELETON_BLOCKER_SIMPLE_GEOMETRIC_TRAITS_H_
 
@@ -29,7 +30,7 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 /**
  * @extends SkeletonBlockerGeometricDS
@@ -39,7 +40,7 @@ namespace skbl {
  */
 template<typename GeometryTrait>
 struct Skeleton_blocker_simple_geometric_traits :
-    public skbl::Skeleton_blocker_simple_traits {
+public Skeleton_blocker_simple_traits {
  public:
   typedef GeometryTrait GT;
   typedef typename GT::Point Point;
@@ -57,19 +58,20 @@ struct Skeleton_blocker_simple_geometric_traits :
     Point& point() {
       return point_;
     }
+
     const Point& point() const {
       return point_;
     }
   };
 
   class Simple_geometric_edge :
-      public Skeleton_blocker_simple_traits::Graph_edge {
+  public Skeleton_blocker_simple_traits::Graph_edge {
     int index_;
    public:
     Simple_geometric_edge()
         : Skeleton_blocker_simple_traits::Graph_edge(),
-          index_(-1) {
-    }
+        index_(-1) { }
+
     /**
      * @brief Allows to modify the index of the edge.
      * The indices of the edge are used to store heap information
@@ -78,6 +80,7 @@ struct Skeleton_blocker_simple_geometric_traits :
     int& index() {
       return index_;
     }
+
     int index() const {
       return index_;
     }
@@ -87,7 +90,9 @@ struct Skeleton_blocker_simple_geometric_traits :
   typedef Skeleton_blocker_simple_traits::Graph_edge Graph_edge;
 };
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 
