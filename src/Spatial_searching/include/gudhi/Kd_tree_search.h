@@ -56,7 +56,7 @@ namespace spatial_searching {
   * and the <i>incremental nearest or farthest neighbor query</i>, where no number of neighbors is provided during the call, as the
   * neighbors will be computed incrementally when the iterator on the range is incremented.
   *
-  * \tparam K must be a model of the <a target="_blank"
+  * \tparam Search_traits must be a model of the <a target="_blank"
   *   href="http://doc.cgal.org/latest/Spatial_searching/classSearchTraits.html">SearchTraits</a>
   *   concept, such as the <a target="_blank"
   *   href="http://doc.cgal.org/latest/Kernel_d/classCGAL_1_1Epick__d.html">CGAL::Epick_d</a> class, which
@@ -64,7 +64,7 @@ namespace spatial_searching {
   * \tparam Point_range is the type of the range that provides the points.
   *   It must be a range whose iterator type is a `RandomAccessIterator`.
   */
-template <typename K, typename Point_range>
+template <typename Search_traits, typename Point_range>
 class Kd_tree_search
 {
   typedef boost::iterator_property_map<
@@ -72,17 +72,17 @@ class Kd_tree_search
     CGAL::Identity_property_map<std::ptrdiff_t> >           Point_property_map;
 
 public:
-  /// The kernel.
-  typedef K                                                 Kernel;
+  /// The Traits.
+  typedef Search_traits                                     Traits;
   /// Number type used for distances.
-  typedef typename Kernel::FT                               FT;
+  typedef typename Traits::FT                               FT;
   /// The point type.
   typedef typename Point_range::value_type                  Point;
 
   typedef CGAL::Search_traits<
     FT, Point,
-    typename Kernel::Cartesian_const_iterator_d, 
-    typename Kernel::Construct_cartesian_const_iterator_d>  Traits_base;
+    typename Traits::Cartesian_const_iterator_d, 
+    typename Traits::Construct_cartesian_const_iterator_d>  Traits_base;
   
   typedef CGAL::Search_traits_adapter<
     std::ptrdiff_t,
