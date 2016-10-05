@@ -173,8 +173,6 @@ private:
         else
           aw_it++;
       } 
-      std::cout << "Active witnesses after dim=" << k << " is finished: " << active_witnesses.size() << "\n";
-      std::cout << complex << "\n";
       k++;
     }
     return true;
@@ -233,11 +231,8 @@ private:
         simplex.push_back(l_it->first);
         double filtration_value = 0;
         // if norelax_dist is infinite, relaxation is 0.
-        //std::cout << "landmark_id=" << l_it->first << " distance=" << l_it->second << "\n";
-        // std::size_t landmark_id = l_it->first;
-        // double distance = l_it->second;
         if (l_it->second > norelax_dist2) 
-          filtration_value = l_it->second - norelax_dist2; 
+          filtration_value = l_it->second - norelax_dist2;
         if (all_faces_in(simplex, &filtration_value, sc)) {
           will_be_active = true;
           sc.insert_simplex(simplex, filtration_value);

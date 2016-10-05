@@ -25,9 +25,10 @@
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Witness_complex.h>
-#include <gudhi/Construct_closest_landmark_table.h>
 #include <gudhi/pick_n_random_points.h>
 #include <gudhi/reader_utils.h>
+
+#include <CGAL/Epick_d.h>
 
 #include <iostream>
 #include <fstream>
@@ -35,8 +36,11 @@
 #include <string>
 #include <vector>
 
+typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> K;
+typedef typename K::Point_d Point_d;
+typedef typename Gudhi::witness_complex::Witness_complex<K> Witness_complex;
 typedef std::vector< Vertex_handle > typeVectorVertex;
-typedef std::vector< std::vector <double> > Point_Vector;
+typedef std::vector< Point_d > Point_vector;
 
 /**
  * \brief Customized version of read_points
@@ -44,7 +48,7 @@ typedef std::vector< std::vector <double> > Point_Vector;
  *
  */
 inline void
-read_points_cust(std::string file_name, std::vector< std::vector< double > > & points) {
+read_points_cust(std::string file_name, Point_vector & points) {
   std::ifstream in_file(file_name.c_str(), std::ios::in);
   if (!in_file.is_open()) {
     std::cerr << "Unable to open file " << file_name << std::endl;
@@ -59,44 +63,44 @@ read_points_cust(std::string file_name, std::vector< std::vector< double > > & p
       point.push_back(x);
     }
     if (point.size() != 1)
-      points.push_back(point);
+      points.push_back(Point_d(point));
   }
   in_file.close();
 }
 
 int main(int argc, char * const argv[]) {
-  if (argc != 3) {
+  if (argc != 4) {
     std::cerr << "Usage: " << argv[0]
-        << " path_to_point_file nbL \n";
+        << " path_to_point_file nbL alpha^2\n";
     return 0;
   }
 
   std::string file_name = argv[1];
   int nbL = atoi(argv[2]);
+  double alpha2 = atof(argv[3]);
   clock_t start, end;
 
   // Construct the Simplex Tree
   Gudhi::Simplex_tree<> simplex_tree;
 
   // Read the point file
-  Point_Vector point_vector, landmarks;
+  Point_vector point_vector, landmarks;
   read_points_cust(file_name, point_vector);
   std::cout << "Successfully read " << point_vector.size() << " points.\n";
-  std::cout << "Ambient dimension is " << point_vector[0].size() << ".\n";
+  std::cout << "Ambient dimension is " << point_vector[0].dimension() << ".\n";
 
   // Choose landmarks
-  start = clock();
-  std::vector<std::vector< int > > knn;
-  Gudhi::subsampling::pick_n_random_points(point_vector, 100, std::back_inserter(landmarks));
-  Gudhi::witness_complex::construct_closest_landmark_table(point_vector, landmarks, knn);
-  end = clock();
-  std::cout << "Landmark choice for " << nbL << " landmarks took "
-      << static_cast<double>(end - start) / CLOCKS_PER_SEC << " s. \n";
+  Gudhi::subsampling::pick_n_random_points(point_vector, nbL, std::back_inserter(landmarks));
 
   // Compute witness complex
   start = clock();
-  Gudhi::witness_complex::witness_complex(knn, nbL, point_vector[0].size(), simplex_tree);
+  Witness_complex witness_complex(landmarks.begin(),
+                                  landmarks.end(),
+                                  point_vector.begin(),
+                                  point_vector.end());
+  witness_complex.create_complex(simplex_tree, alpha2);
   end = clock();
   std::cout << "Witness complex took "
       << static_cast<double>(end - start) / CLOCKS_PER_SEC << " s. \n";
+  std::cout << "Number of simplices is: " << simplex_tree.num_simplices() << "\n";
 }
