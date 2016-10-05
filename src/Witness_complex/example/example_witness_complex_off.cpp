@@ -26,7 +26,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Witness_complex.h>
 #include <gudhi/pick_n_random_points.h>
-#include <gudhi/reader_utils.h>
+#include <gudhi/Points_off_io.h>
 
 #include <CGAL/Epick_d.h>
 
@@ -41,32 +41,6 @@ typedef typename K::Point_d Point_d;
 typedef typename Gudhi::witness_complex::Witness_complex<K> Witness_complex;
 typedef std::vector< Vertex_handle > typeVectorVertex;
 typedef std::vector< Point_d > Point_vector;
-
-/**
- * \brief Customized version of read_points
- * which takes into account a possible nbP first line
- *
- */
-inline void
-read_points_cust(std::string file_name, Point_vector & points) {
-  std::ifstream in_file(file_name.c_str(), std::ios::in);
-  if (!in_file.is_open()) {
-    std::cerr << "Unable to open file " << file_name << std::endl;
-    return;
-  }
-  std::string line;
-  double x;
-  while (getline(in_file, line)) {
-    std::vector< double > point;
-    std::istringstream iss(line);
-    while (iss >> x) {
-      point.push_back(x);
-    }
-    if (point.size() != 1)
-      points.push_back(Point_d(point));
-  }
-  in_file.close();
-}
 
 int main(int argc, char * const argv[]) {
   if (argc != 4) {
@@ -85,7 +59,13 @@ int main(int argc, char * const argv[]) {
 
   // Read the point file
   Point_vector point_vector, landmarks;
-  read_points_cust(file_name, point_vector);
+  Gudhi::Points_off_reader<Point_d> off_reader(file_name);
+  if (!off_reader.is_valid()) {
+      std::cerr << "Witness complex - Unable to read file " << file_name << "\n";
+      exit(-1);  // ----- >>
+    }
+  point_vector = Point_vector(off_reader.get_point_cloud());
+  
   std::cout << "Successfully read " << point_vector.size() << " points.\n";
   std::cout << "Ambient dimension is " << point_vector[0].dimension() << ".\n";
 

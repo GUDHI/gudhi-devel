@@ -44,11 +44,11 @@ typedef Gudhi::witness_complex::Witness_complex<Kernel> WitnessComplex;
 typedef Gudhi::witness_complex::Strong_witness_complex<Kernel> StrongWitnessComplex;
 
 /* All landmarks and witnesses are taken on the grid in the following manner.
-   LWLWL  2W4W7
-   WW.WW  WW.WW
-   L...L  1...6
-   WW.WW  WW.WW
-   LWLWL  0W3W5
+   LWLWL  
+   WW.WW  
+   L...L  
+   WW.WW  
+   LWLWL  
 
    Witness complex consists of 8 vertices, 12 edges and 4 triangles
  */
@@ -78,39 +78,26 @@ BOOST_AUTO_TEST_CASE(simple_witness_complex) {
   witnesses.push_back(Point_d(std::vector<FT>{ 1, 2}));
   witnesses.push_back(Point_d(std::vector<FT>{ 2,-1}));
   witnesses.push_back(Point_d(std::vector<FT>{ 2, 1}));
-
-  // landmarks.push_back(Point_d(std::vector<FT>{1,0}));
-  // landmarks.push_back(Point_d(std::vector<FT>{0,0}));
-  // landmarks.push_back(Point_d(std::vector<FT>{0,1}));
-  // witnesses.push_back(Point_d(std::vector<FT>{1,0}));
   
   WitnessComplex witness_complex(landmarks.begin(),
                                  landmarks.end(),
                                  witnesses.begin(),
                                  witnesses.end());
-  // witness_complex.create_complex(complex, 0);
+  witness_complex.create_complex(complex, 0);
 
-  //std::cout << complex << "\n";
+  BOOST_CHECK(complex.num_simplices() == 24);
 
-  // BOOST_CHECK(complex.num_simplices() == 24);
+  witness_complex.create_complex(relaxed_complex, 8.01);
 
-  // witness_complex.create_complex(relaxed_complex, 8.01);
+  BOOST_CHECK(relaxed_complex.num_simplices() == 239);
   
-  // std::cout << "Num_simplices: " << relaxed_complex.num_simplices() << "\n";
-  // std::cout << relaxed_complex << "\n";
-
   StrongWitnessComplex strong_witness_complex(landmarks.begin(),
                                               landmarks.end(),
                                               witnesses.begin(),
                                               witnesses.end());
 
   strong_witness_complex.create_complex(strong_relaxed_complex, 9.1);
-  std::cout << "Num_simplices: " << strong_relaxed_complex.num_simplices() << "\n";
-  std::cout << strong_relaxed_complex << "\n";
-  
-  //BOOST_CHECK(relaxed_complex.num_simplices() == 24);
-  
-  //BOOST_CHECK(witnessComplex.is_witness_complex(knn, false));
-
+    
+  BOOST_CHECK(strong_relaxed_complex.num_simplices() == 239);
   
 }

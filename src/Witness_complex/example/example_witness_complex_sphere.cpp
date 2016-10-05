@@ -27,7 +27,6 @@
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Witness_complex.h>
-#include <gudhi/Construct_closest_landmark_table.h>
 #include <gudhi/pick_n_random_points.h>
 #include <gudhi/reader_utils.h>
 
@@ -85,7 +84,7 @@ int main(int argc, char * const argv[]) {
                                     landmarks.end(),
                                     point_vector.begin(),
                                     point_vector.end());
-    witness_complex.create_complex(simplex_tree, 0.1);
+    witness_complex.create_complex(simplex_tree, 0);
     end = clock();
     double time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
     std::cout << "Witness complex for " << number_of_landmarks << " landmarks took "
