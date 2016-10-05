@@ -60,9 +60,6 @@ struct SimplicialComplexForAlpha {
   /** Prune the simplicial complex above 'filtration' value given as parameter. */
   void prune_above_filtration(Filtration_value filtration);
 
-  /** Sorts the filtration values in the simplicial complex. */
-  void initialize_filtration();
-
   /** \brief Iterator over vertices of a simplex.
    *
    * 'value type' must be 'Vertex_handle'.*/

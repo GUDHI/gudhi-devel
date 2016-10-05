@@ -235,3 +235,32 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_from_points) {
   }
 
 }
+
+BOOST_AUTO_TEST_CASE(Alpha_complex_from_empty_points) {
+  // ----------------------------------------------------------------------------
+  // Init of a list of points
+  // ----------------------------------------------------------------------------
+  Vector_of_points points;
+
+  // ----------------------------------------------------------------------------
+  // Init of an alpha complex from the list of points
+  // ----------------------------------------------------------------------------
+  Gudhi::alpha_complex::Alpha_complex<Kernel_s> alpha_complex_from_points(points);
+
+  std::cout << "========== Alpha_complex_from_empty_points ==========" << std::endl;
+
+  Gudhi::Simplex_tree<> simplex_tree;
+  BOOST_CHECK(alpha_complex_from_points.create_complex(simplex_tree));
+  
+  std::cout << "simplex_tree.num_simplices()=" << simplex_tree.num_simplices() << std::endl;
+  BOOST_CHECK(simplex_tree.num_simplices() == 0);
+
+  std::cout << "simplex_tree.dimension()=" << simplex_tree.dimension() << std::endl;
+  BOOST_CHECK(simplex_tree.dimension() == 4);
+  
+  std::cout << "simplex_tree.num_vertices()=" << simplex_tree.num_vertices() << std::endl;
+  BOOST_CHECK(simplex_tree.num_vertices() == 0);
+
+  // Test to the limit
+  BOOST_CHECK_THROW (alpha_complex_from_points.get_point(0), std::out_of_range);
+}

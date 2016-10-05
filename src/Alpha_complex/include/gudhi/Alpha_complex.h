@@ -175,30 +175,28 @@ class Alpha_complex {
   void init_from_range(const InputPointRange& points) {
     auto first = std::begin(points);
     auto last = std::end(points);
-    if (first != last) {
-      // point_dimension function initialization
-      Point_Dimension point_dimension = kernel_.point_dimension_d_object();
+    // point_dimension function initialization
+    Point_Dimension point_dimension = kernel_.point_dimension_d_object();
 
-      // Delaunay triangulation is point dimension.
-      triangulation_ = new Delaunay_triangulation(point_dimension(*first));
+    // Delaunay triangulation is point dimension.
+    triangulation_ = new Delaunay_triangulation(point_dimension(*first));
 
-      std::vector<Point_d> points(first, last);
+    std::vector<Point_d> point_cloud(first, last);
 
-      // Creates a vector {0, 1, ..., N-1}
-      std::vector<std::ptrdiff_t> indices(boost::counting_iterator<std::ptrdiff_t>(0),
-                                          boost::counting_iterator<std::ptrdiff_t>(points.size()));
+    // Creates a vector {0, 1, ..., N-1}
+    std::vector<std::ptrdiff_t> indices(boost::counting_iterator<std::ptrdiff_t>(0),
+                                        boost::counting_iterator<std::ptrdiff_t>(point_cloud.size()));
 
-      // Sort indices considering CGAL spatial sort
-      typedef CGAL::Spatial_sort_traits_adapter_d<Kernel, Point_d*> Search_traits_d;
-      spatial_sort(indices.begin(), indices.end(), Search_traits_d(&(points[0])));
+    // Sort indices considering CGAL spatial sort
+    typedef CGAL::Spatial_sort_traits_adapter_d<Kernel, Point_d*> Search_traits_d;
+    spatial_sort(indices.begin(), indices.end(), Search_traits_d(&(point_cloud[0])));
 
-      typename Delaunay_triangulation::Full_cell_handle hint;
-      for (auto index : indices) {
-        typename Delaunay_triangulation::Vertex_handle pos = triangulation_->insert(points[index], hint);
-        // Save index value as data to retrieve it after insertion
-        pos->data() = index;
-        hint = pos->full_cell();
-      }
+    typename Delaunay_triangulation::Full_cell_handle hint;
+    for (auto index : indices) {
+      typename Delaunay_triangulation::Vertex_handle pos = triangulation_->insert(point_cloud[index], hint);
+      // Save index value as data to retrieve it after insertion
+      pos->data() = index;
+      hint = pos->full_cell();
     }
   }
 
@@ -219,8 +217,7 @@ class Alpha_complex {
    * 
    * @return true if creation succeeds, false otherwise.
    * 
-   * @pre Delaunay triangulation must be already constructed with at least one vertex and dimension must be more 
-   * than 0.
+   * @pre Delaunay triangulation must be already constructed with dimension strictly greater than 0.
    * @pre The simplicial complex must be empty (no vertices)
    * 
    * Initialization can be launched once.
@@ -234,10 +231,6 @@ class Alpha_complex {
 
     if (triangulation_ == nullptr) {
       std::cerr << "Alpha_complex cannot create_complex from a NULL triangulation\n";
-      return false;  // ----- >>
-    }
-    if (triangulation_->number_of_vertices() < 1) {
-      std::cerr << "Alpha_complex cannot create_complex from a triangulation without vertices\n";
       return false;  // ----- >>
     }
     if (triangulation_->maximal_dimension() < 1) {
@@ -266,25 +259,27 @@ class Alpha_complex {
 
     // --------------------------------------------------------------------------------------------
     // Simplex_tree construction from loop on triangulation finite full cells list
-    for (auto cit = triangulation_->finite_full_cells_begin(); cit != triangulation_->finite_full_cells_end(); ++cit) {
-      Vector_vertex vertexVector;
+    if (triangulation_->number_of_vertices() > 0) {
+      for (auto cit = triangulation_->finite_full_cells_begin(); cit != triangulation_->finite_full_cells_end(); ++cit) {
+        Vector_vertex vertexVector;
 #ifdef DEBUG_TRACES
-      std::cout << "Simplex_tree insertion ";
+        std::cout << "Simplex_tree insertion ";
 #endif  // DEBUG_TRACES
-      for (auto vit = cit->vertices_begin(); vit != cit->vertices_end(); ++vit) {
-        if (*vit != nullptr) {
+        for (auto vit = cit->vertices_begin(); vit != cit->vertices_end(); ++vit) {
+          if (*vit != nullptr) {
 #ifdef DEBUG_TRACES
-          std::cout << " " << (*vit)->data();
+            std::cout << " " << (*vit)->data();
 #endif  // DEBUG_TRACES
-          // Vector of vertex construction for simplex_tree structure
-          vertexVector.push_back((*vit)->data());
+            // Vector of vertex construction for simplex_tree structure
+            vertexVector.push_back((*vit)->data());
+          }
         }
-      }
 #ifdef DEBUG_TRACES
-      std::cout << std::endl;
+        std::cout << std::endl;
 #endif  // DEBUG_TRACES
-      // Insert each simplex and its subfaces in the simplex tree - filtration is NaN
-      complex.insert_simplex_and_subfaces(vertexVector, std::numeric_limits<double>::quiet_NaN());
+        // Insert each simplex and its subfaces in the simplex tree - filtration is NaN
+        complex.insert_simplex_and_subfaces(vertexVector, std::numeric_limits<double>::quiet_NaN());
+      }
     }
     // --------------------------------------------------------------------------------------------
 
@@ -333,13 +328,9 @@ class Alpha_complex {
 
     // --------------------------------------------------------------------------------------------
     // As Alpha value is an approximation, we have to make filtration non decreasing while increasing the dimension
-    bool modified_filt = complex.make_filtration_non_decreasing();
+    complex.make_filtration_non_decreasing();
     // Remove all simplices that have a filtration value greater than max_alpha_square
-    // Remark: prune_above_filtration does not require initialize_filtration to be done before.
-    modified_filt |= complex.prune_above_filtration(max_alpha_square);
-    if (modified_filt) {
-      complex.initialize_filtration();
-    }
+    complex.prune_above_filtration(max_alpha_square);
     // --------------------------------------------------------------------------------------------
     return true;
   }
