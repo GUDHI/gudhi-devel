@@ -56,27 +56,27 @@ namespace subsampling {
              typename OutputIterator>
   void choose_n_farthest_points( Kernel const &k,
                                  Point_container const &input_pts,
-                                 unsigned final_size,
-                                 unsigned starting_point,
+                                 std::size_t final_size,
+                                 std::size_t starting_point,
                                  OutputIterator output_it)
   {
     typename Kernel::Squared_distance_d sqdist = k.squared_distance_d_object();
     
-    int nb_points = boost::size(input_pts);
+    std::size_t nb_points = boost::size(input_pts);
     assert(nb_points >= final_size);
 
-    unsigned current_number_of_landmarks = 0;  // counter for landmarks
+    std::size_t current_number_of_landmarks = 0;  // counter for landmarks
     double curr_max_dist = 0;  // used for defining the furhest point from L
     const double infty = std::numeric_limits<double>::infinity();  // infinity (see next entry)
     std::vector< double > dist_to_L(nb_points, infty);  // vector of current distances to L from input_pts
 
-    int curr_max_w = starting_point;
+    std::size_t curr_max_w = starting_point;
 
     for (current_number_of_landmarks = 0; current_number_of_landmarks != final_size; current_number_of_landmarks++) {
       // curr_max_w at this point is the next landmark
       *output_it++ = input_pts[curr_max_w];
       // std::cout << curr_max_w << "\n";
-      unsigned i = 0;
+      std::size_t i = 0;
       for (auto& p : input_pts) {
         double curr_dist = sqdist(p, *(std::begin(input_pts) + curr_max_w));
         if (curr_dist < dist_to_L[i])
