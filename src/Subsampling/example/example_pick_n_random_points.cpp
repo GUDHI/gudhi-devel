@@ -3,14 +3,12 @@
 #include <CGAL/Epick_d.h>
 #include <CGAL/Random.h>
 
-#include <array>
 #include <vector>
 #include <iterator>
 
 int main (void)
 {
   typedef CGAL::Epick_d<CGAL::Dimension_tag<4> >   K;
-  typedef typename K::FT                           FT;
   typedef typename K::Point_d                      Point_d;
   
   CGAL::Random rd;
