@@ -67,16 +67,6 @@ private:
   typedef typename Kd_tree::INS_range                             Nearest_landmark_range;
   typedef typename std::vector<Nearest_landmark_range>            Nearest_landmark_table;
   typedef typename Nearest_landmark_range::iterator               Nearest_landmark_row_iterator;
-  //typedef std::vector<std::pair<unsigned,FT>>                     Nearest_landmarks;
-  
-  // struct Active_witness {
-  //   int witness_id;
-  //   int landmark_id;
-
-  //   Active_witness(int witness_id_, int landmark_id_)
-  //       : witness_id(witness_id_),
-  //       landmark_id(landmark_id_) { }
-  // };
   
   typedef std::vector< double > Point_t;
   typedef std::vector< Point_t > Point_Vector;
@@ -84,9 +74,9 @@ private:
   typedef FT Filtration_value;
 
   
-  typedef std::ptrdiff_t Witness_id;
-  typedef std::ptrdiff_t Landmark_id;
-  typedef std::pair<Landmark_id, FT> Id_distance_pair;
+  typedef std::size_t Witness_id;
+  typedef typename Nearest_landmark_range::Point_with_transformed_distance Id_distance_pair;
+  typedef typename Id_distance_pair::first_type Landmark_id;
   typedef Active_witness<Id_distance_pair, Nearest_landmark_range> ActiveWitness;
   typedef std::list< ActiveWitness > ActiveWitnessList;
   typedef std::vector< Landmark_id > typeVectorVertex;
@@ -102,8 +92,6 @@ private:
    */
 
   //@{
-
-  // Witness_range<Closest_landmark_range<Vertex_handle>>
 
   /*
    *  \brief Iterative construction of the (weak) witness complex.
@@ -144,7 +132,7 @@ private:
   bool create_complex(SimplicialComplexForWitness& complex,
                       FT  max_alpha_square)       
   {
-    unsigned nbL = landmarks_.size();
+    std::size_t nbL = landmarks_.size();
     if (complex.num_vertices() > 0) {
       std::cerr << "Witness complex cannot create complex - complex is not empty.\n";
       return false;
@@ -169,9 +157,9 @@ private:
     ActiveWitness aw_copy(active_witnesses.front());
     while (!active_witnesses.empty() && k < nbL ) {
       typename ActiveWitnessList::iterator aw_it = active_witnesses.begin();
+      std::vector<int> simplex;
+      simplex.reserve(k+1);
       while (aw_it != active_witnesses.end()) {
-        std::vector<int> simplex;
-        //simplex.reserve(k+1);
         bool ok = add_all_faces_of_dimension(k,
                                              max_alpha_square,
                                              std::numeric_limits<double>::infinity(),
@@ -179,9 +167,9 @@ private:
                                              simplex,
                                              complex,
                                              aw_it->end());
+        assert(simplex.empty());
         if (!ok)
-          //{aw_it++;}
-        active_witnesses.erase(aw_it++); //First increase the iterator and then erase the previous element
+          active_witnesses.erase(aw_it++); //First increase the iterator and then erase the previous element
         else
           aw_it++;
       } 
@@ -289,113 +277,7 @@ private:
       }
     return true;
   }
-
-  // bool is_face(Simplex_handle face, Simplex_handle coface)
-  // {
-  //   // vertex range is sorted in decreasing order
-  //   auto fvr = sc.simplex_vertex_range(face);
-  //   auto cfvr = sc.simplex_vertex_range(coface);
-  //   auto fv_it = fvr.begin();
-  //   auto cfv_it = cfvr.begin();
-  //   while (fv_it != fvr.end() && cfv_it != cfvr.end()) {
-  //     if (*fv_it < *cfv_it)
-  //       ++cfv_it;
-  //     else if (*fv_it == *cfv_it) {
-  //       ++cfv_it;
-  //       ++fv_it;
-  //     }
-  //     else
-  //       return false;
-      
-  //   }
-  //   return (fv_it == fvr.end());
-  // }
-
-  
- public:
-  template < typename SimplicialComplexForWitness >
-  void print_complex(SimplicialComplexForWitness& complex)
-  {
-    std::cout << complex << "\n";
-  }
-
-  template < typename Container >
-  void print_container(Container& container)
-  {
-    for (auto l: container)
-      std::cout << l << ", ";
-    std::cout << "\n";
-  }
-
-  // /*
-  //  *  \brief Verification if every simplex in the complex is witnessed by witnesses in knn.
-  //  *  \param print_output =true will print the witnesses for each simplex
-  //  *  \remark Added for debugging purposes.
-  //  */
-  // template< class KNearestNeighbors >
-  // bool is_witness_complex(KNearestNeighbors const & knn, bool print_output) {
-  //   for (Simplex_handle sh : sc_.complex_simplex_range()) {
-  //     bool is_witnessed = false;
-  //     typeVectorVertex simplex;
-  //     int nbV = 0;  // number of verticed in the simplex
-  //     for (Vertex_handle v : sc_.simplex_vertex_range(sh))
-  //       simplex.push_back(v);
-  //     nbV = simplex.size();
-  //     for (typeVectorVertex w : knn) {
-  //       bool has_vertices = true;
-  //       for (Vertex_handle v : simplex)
-  //         if (std::find(w.begin(), w.begin() + nbV, v) == w.begin() + nbV) {
-  //           has_vertices = false;
-  //         }
-  //       if (has_vertices) {
-  //         is_witnessed = true;
-  //         if (print_output) {
-  //           std::cout << "The simplex ";
-  //           print_vector(simplex);
-  //           std::cout << " is witnessed by the witness ";
-  //           print_vector(w);
-  //           std::cout << std::endl;
-  //         }
-  //         break;
-  //       }
-  //     }
-  //     if (!is_witnessed) {
-  //       if (print_output) {
-  //         std::cout << "The following simplex is not witnessed ";
-  //         print_vector(simplex);
-  //         std::cout << std::endl;
-  //       }
-  //       assert(is_witnessed);
-  //       return false;
-  //     }
-  //   }
-  //   return true;
-  // }
 };
-
-  /**
-   *  \ingroup witness_complex
-   *  \brief Iterative construction of the witness complex.
-   *  \details The witness complex is written in simplicial complex sc_
-   *   basing on a matrix knn of
-   *  nearest neighbours of the form {witnesses}x{landmarks}.
-   *
-   *  The type KNearestNeighbors can be seen as
-   *  Witness_range<Closest_landmark_range<Vertex_handle>>, where
-   *  Witness_range and Closest_landmark_range are random access ranges.
-   *
-   *  Procedure takes into account at most (dim+1)
-   *  first landmarks from each landmark range to construct simplices.
-   *
-   *  Landmarks are supposed to be in [0,nbL_-1]
-   */
-  // template <class KNearestNeighbors, class SimplicialComplexForWitness>
-  // void witness_complex(KNearestNeighbors const & knn,
-  //                      int nbL,
-  //                      int dim,
-  //                      SimplicialComplexForWitness & sc) {
-  //   Witness_complex<SimplicialComplexForWitness>(knn, nbL, dim, sc);
-  // }
 
 }  // namespace witness_complex
 

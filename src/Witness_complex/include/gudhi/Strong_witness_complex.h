@@ -63,12 +63,6 @@ namespace Gudhi {
   
 namespace witness_complex {
 
-// /*
-//  *  \private
-//     \class Witness_complex
-//     \brief Constructs the witness complex for the given set of witnesses and landmarks.
-//     \ingroup witness_complex
-//  */
 template< class Kernel_ >
 class Strong_witness_complex {
 private:
@@ -80,16 +74,6 @@ private:
   typedef typename Kd_tree::INS_range                             Nearest_landmark_range;
   typedef typename std::vector<Nearest_landmark_range>            Nearest_landmark_table;
   typedef typename Nearest_landmark_range::iterator               Nearest_landmark_row_iterator;
-  //typedef std::vector<std::pair<unsigned,FT>>                     Nearest_landmarks;
-  
-  // struct Active_witness {
-  //   int witness_id;
-  //   int landmark_id;
-
-  //   Active_witness(int witness_id_, int landmark_id_)
-  //       : witness_id(witness_id_),
-  //       landmark_id(landmark_id_) { }
-  // };
   
   typedef std::vector< double > Point_t;
   typedef std::vector< Point_t > Point_Vector;
@@ -98,8 +82,8 @@ private:
 
   
   typedef std::ptrdiff_t Witness_id;
-  typedef std::ptrdiff_t Landmark_id;
-  typedef std::pair<Landmark_id, FT> Id_distance_pair;
+  typedef typename Nearest_landmark_range::Point_with_transformed_distance Id_distance_pair;
+  typedef typename Id_distance_pair::first_type Landmark_id;
   typedef Active_witness<Id_distance_pair, Nearest_landmark_range> ActiveWitness;
   typedef std::list< ActiveWitness > ActiveWitnessList;
   typedef std::vector< Landmark_id > typeVectorVertex;
