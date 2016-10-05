@@ -6,9 +6,9 @@ if (TBB_FOUND)
   target_link_libraries(simplex_tree_from_cliques_of_graph ${TBB_LIBRARIES})
 endif()
 add_test(simplex_tree_from_cliques_of_graph_2 ${CMAKE_CURRENT_BINARY_DIR}/simplex_tree_from_cliques_of_graph
-         ${CMAKE_SOURCE_DIR}/data/cliques_of_graph/Klein_bottle_complex.cog 2)
+         ${CMAKE_SOURCE_DIR}/data/filtered_simplicial_complex/Klein_bottle_complex.fsc 2)
 add_test(simplex_tree_from_cliques_of_graph_3 ${CMAKE_CURRENT_BINARY_DIR}/simplex_tree_from_cliques_of_graph
-         ${CMAKE_SOURCE_DIR}/data/cliques_of_graph/Klein_bottle_complex.cog 3)
+         ${CMAKE_SOURCE_DIR}/data/filtered_simplicial_complex/Klein_bottle_complex.fsc 3)
 
 add_executable ( simple_simplex_tree simple_simplex_tree.cpp )
 if (TBB_FOUND)
