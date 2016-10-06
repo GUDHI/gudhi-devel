@@ -31,7 +31,6 @@
 #include <boost/range/size.hpp>
 
 #include "Active_witness/Active_witness.h"
-#include <gudhi/distance_functions.h>
 #include <gudhi/Kd_tree_search.h>
 
 #include <algorithm>
@@ -175,6 +174,7 @@ private:
       } 
       k++;
     }
+    complex.set_dimension(k-1);
     return true;
   }
 

@@ -27,9 +27,6 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include <algorithm>
 #include <utility>
-#include "gudhi/reader_utils.h"
-#include "gudhi/distance_functions.h"
-#include "gudhi/Simplex_tree.h"
 #include <vector>
 #include <list>
 #include <set>
@@ -38,6 +35,11 @@
 #include <math.h>
 #include <ctime>
 #include <iostream>
+
+#include "Active_witness/Active_witness.h"
+#include <gudhi/Simplex_tree.h>
+#include <gudhi/Kd_tree_search.h>
+
 
 // Needed for nearest neighbours
 #include <CGAL/Cartesian_d.h>
@@ -142,6 +144,7 @@ private:
                       FT  max_alpha_square)       
   {
     unsigned nbL = landmarks_.size();
+    unsigned complex_dim = 0;
     if (complex.num_vertices() > 0) {
       std::cerr << "Witness complex cannot create complex - complex is not empty.\n";
       return false;
@@ -168,7 +171,10 @@ private:
         complex.insert_simplex_and_subfaces(simplex, aw_it->second - aw.begin()->second);
         aw_it++;
       }
+      if (simplex.size() - 1 > complex_dim)
+        complex_dim = simplex.size() - 1;
     }
+    complex.set_dimension(complex_dim);
     return true;
   }
 

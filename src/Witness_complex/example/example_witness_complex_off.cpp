@@ -53,8 +53,6 @@ int main(int argc, char * const argv[]) {
   int nbL = atoi(argv[2]);
   double alpha2 = atof(argv[3]);
   clock_t start, end;
-
-  // Construct the Simplex Tree
   Gudhi::Simplex_tree<> simplex_tree;
 
   // Read the point file
@@ -78,6 +76,7 @@ int main(int argc, char * const argv[]) {
                                   landmarks.end(),
                                   point_vector.begin(),
                                   point_vector.end());
+
   witness_complex.create_complex(simplex_tree, alpha2);
   end = clock();
   std::cout << "Witness complex took "
