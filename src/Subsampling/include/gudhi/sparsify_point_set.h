@@ -32,6 +32,7 @@
 #include <vector>
 
 namespace Gudhi {
+
 namespace subsampling {
 
 /**
@@ -54,15 +55,14 @@ namespace subsampling {
  * @param[in] min_squared_dist Minimum squared distance separating the output points.
  * @param[out] output_it The output iterator.
  */
-
 template <typename Kernel, typename Point_range, typename OutputIterator>
 void
 sparsify_point_set(
-  const Kernel &k, Point_range const& input_pts,
-  typename Kernel::FT min_squared_dist,
-  OutputIterator output_it) { 
+                   const Kernel &k, Point_range const& input_pts,
+                   typename Kernel::FT min_squared_dist,
+                   OutputIterator output_it) {
   typedef typename Gudhi::spatial_searching::Kd_tree_search<
-    Kernel, Point_range>  Points_ds;
+      Kernel, Point_range> Points_ds;
 
   typename Kernel::Squared_distance_d sqdist = k.squared_distance_d_object();
 
@@ -77,9 +77,9 @@ sparsify_point_set(
   // Parse the input points, and add them if they are not too close to
   // the other points
   std::size_t pt_idx = 0;
-  for (typename Point_range::const_iterator it_pt = input_pts.begin() ;
-    it_pt != input_pts.end();
-    ++it_pt, ++pt_idx) {
+  for (typename Point_range::const_iterator it_pt = input_pts.begin();
+       it_pt != input_pts.end();
+       ++it_pt, ++pt_idx) {
     if (dropped_points[pt_idx])
       continue;
 
@@ -105,7 +105,7 @@ sparsify_point_set(
 #ifdef GUDHI_SUBSAMPLING_PROFILING
   t.end();
   std::cerr << "Point set sparsified in " << t.num_seconds()
-    << " seconds." << std::endl;
+      << " seconds." << std::endl;
 #endif
 }
 

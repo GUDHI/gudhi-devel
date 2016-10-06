@@ -38,45 +38,44 @@
 namespace Gudhi {
 
 namespace subsampling {
-  
-  /**
-   *  \ingroup subsampling
-   * \brief Subsample a point set by picking random vertices.
-   *
-   *  \details It chooses `final_size` distinct points from a random access range `points`
-   *  and outputs them to the output iterator `output_it`.
-   *  Point_container::iterator should be ValueSwappable and RandomAccessIterator.
-   */
 
-  template <typename Point_container,
-            typename OutputIterator>
-  void pick_n_random_points(Point_container const &points,
+/**
+ *  \ingroup subsampling
+ * \brief Subsample a point set by picking random vertices.
+ *
+ *  \details It chooses `final_size` distinct points from a random access range `points`
+ *  and outputs them to the output iterator `output_it`.
+ *  Point_container::iterator should be ValueSwappable and RandomAccessIterator.
+ */
+template <typename Point_container,
+typename OutputIterator>
+void pick_n_random_points(Point_container const &points,
                           std::size_t final_size,
                           OutputIterator output_it) {
 #ifdef GUDHI_SUBS_PROFILING
-    Gudhi::Clock t;
+  Gudhi::Clock t;
 #endif
 
-    std::size_t nbP = boost::size(points);
-    assert(nbP >= final_size);
-    std::vector<int> landmarks(nbP);
-    std::iota(landmarks.begin(), landmarks.end(), 0);
+  std::size_t nbP = boost::size(points);
+  assert(nbP >= final_size);
+  std::vector<int> landmarks(nbP);
+  std::iota(landmarks.begin(), landmarks.end(), 0);
 
-    std::random_device rd;
-    std::mt19937 g(rd());
+  std::random_device rd;
+  std::mt19937 g(rd());
 
-    std::shuffle(landmarks.begin(), landmarks.end(), g);
-    landmarks.resize(final_size);
+  std::shuffle(landmarks.begin(), landmarks.end(), g);
+  landmarks.resize(final_size);
 
-    for (int l: landmarks)
-      *output_it++ = points[l];
+  for (int l : landmarks)
+    *output_it++ = points[l];
 
 #ifdef GUDHI_SUBS_PROFILING
-    t.end();
-    std::cerr << "Random landmark choice took " << t.num_seconds()
+  t.end();
+  std::cerr << "Random landmark choice took " << t.num_seconds()
       << " seconds." << std::endl;
 #endif
-  }
+}
 
 }  // namespace subsampling
 
