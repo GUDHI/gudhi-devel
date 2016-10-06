@@ -41,7 +41,7 @@ namespace contraction {
 
 \author David Salinas
 
-\section Introduction
+\section edgecontractionintroduction Introduction
 
 The purpose of this package is to offer a user-friendly interface for edge contraction simplification of huge simplicial complexes.
 It uses the \ref skbl data-structure whose size remains small  during simplification  

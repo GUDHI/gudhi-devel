@@ -139,7 +139,7 @@ namespace persistent_cohomology {
  by increasing filtration values (breaking ties so as a simplex appears after
  its subsimplices of same filtration value) provides an indexing scheme.
 
-\section Examples
+\section pcohexamples Examples
 
 We provide several example files: run these examples with -h for details on their use, and read the README file.
 
