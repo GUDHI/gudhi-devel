@@ -235,7 +235,7 @@ class Kd_tree_search {
   /// \brief Search incrementally for the farthest neighbors from a query point.
   /// @param[in] p The query point.
   /// @param[in] eps Approximation factor.
-  /// @return A range containing the neighbors sorted by their distance to p. 
+  /// @return A range containing the neighbors sorted by their distance to p.
   /// All the neighbors are not computed by this function, but they will be
   /// computed incrementally when the iterator on the range is incremented.
   INS_range query_incremental_farthest_neighbors(const Point &p, FT eps = FT(0)) const {
@@ -261,4 +261,4 @@ class Kd_tree_search {
 }  // namespace spatial_searching
 }  // namespace Gudhi
 
-#endif // KD_TREE_SEARCH_H_
+#endif  // KD_TREE_SEARCH_H_

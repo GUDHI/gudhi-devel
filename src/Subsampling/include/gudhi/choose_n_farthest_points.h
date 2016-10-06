@@ -66,7 +66,6 @@ void choose_n_farthest_points(Kernel const &k,
   assert(nb_points >= final_size);
 
   std::size_t current_number_of_landmarks = 0;  // counter for landmarks
-  double curr_max_dist = 0;  // used for defining the furhest point from L
   const double infty = std::numeric_limits<double>::infinity();  // infinity (see next entry)
   std::vector< double > dist_to_L(nb_points, infty);  // vector of current distances to L from input_pts
 
@@ -75,7 +74,6 @@ void choose_n_farthest_points(Kernel const &k,
   for (current_number_of_landmarks = 0; current_number_of_landmarks != final_size; current_number_of_landmarks++) {
     // curr_max_w at this point is the next landmark
     *output_it++ = input_pts[curr_max_w];
-    // std::cout << curr_max_w << "\n";
     std::size_t i = 0;
     for (auto& p : input_pts) {
       double curr_dist = sqdist(p, *(std::begin(input_pts) + curr_max_w));
@@ -84,7 +82,7 @@ void choose_n_farthest_points(Kernel const &k,
       ++i;
     }
     // choose the next curr_max_w
-    curr_max_dist = 0;
+    double curr_max_dist = 0;  // used for defining the furhest point from L
     for (i = 0; i < dist_to_L.size(); i++)
       if (dist_to_L[i] > curr_max_dist) {
         curr_max_dist = dist_to_L[i];
@@ -109,7 +107,7 @@ void choose_n_farthest_points(Kernel const& k,
                               Point_container const &input_pts,
                               unsigned final_size,
                               OutputIterator output_it) {
-  // Choose randomly the first landmark 
+  // Choose randomly the first landmark
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_int_distribution<> dis(1, 6);
