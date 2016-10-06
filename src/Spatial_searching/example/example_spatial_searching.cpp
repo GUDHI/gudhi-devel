@@ -7,11 +7,10 @@
 
 namespace gss = Gudhi::spatial_searching;
 
-int main (void)
-{
-  typedef CGAL::Epick_d<CGAL::Dimension_tag<4> >      K;
-  typedef typename K::Point_d                         Point;
-  typedef std::vector<Point>                          Points;
+int main(void) {
+  typedef CGAL::Epick_d<CGAL::Dimension_tag<4> > K;
+  typedef typename K::Point_d Point;
+  typedef std::vector<Point> Points;
 
   typedef gss::Kd_tree_search<K, Points> Points_ds;
 
@@ -19,7 +18,7 @@ int main (void)
 
   Points points;
   for (int i = 0; i < 500; ++i)
-    points.push_back(Point(rd.get_double(-1.,1), rd.get_double(-1.,1), rd.get_double(-1.,1), rd.get_double(-1.,1)));
+    points.push_back(Point(rd.get_double(-1., 1), rd.get_double(-1., 1), rd.get_double(-1., 1), rd.get_double(-1., 1)));
 
   Points_ds points_ds(points);
 
@@ -33,7 +32,7 @@ int main (void)
   std::cout << "Incremental nearest neighbors:\n";
   auto inn_range = points_ds.query_incremental_nearest_neighbors(points[45]);
   // Get the neighbors in distance order until we hit the first point
-  for (auto ins_iterator = inn_range.begin(); ins_iterator->first != 0 ; ++ins_iterator)
+  for (auto ins_iterator = inn_range.begin(); ins_iterator->first != 0; ++ins_iterator)
     std::cout << ins_iterator->first << " (sq. dist. = " << ins_iterator->second << ")\n";
 
   // 10-farthest neighbor query
@@ -46,8 +45,8 @@ int main (void)
   std::cout << "Incremental farthest neighbors:\n";
   auto ifn_range = points_ds.query_incremental_farthest_neighbors(points[45]);
   // Get the neighbors in distance reverse order until we hit the first point
-  for (auto ifs_iterator = ifn_range.begin(); ifs_iterator->first != 0 ; ++ifs_iterator)
+  for (auto ifs_iterator = ifn_range.begin(); ifs_iterator->first != 0; ++ifs_iterator)
     std::cout << ifs_iterator->first << " (sq. dist. = " << ifs_iterator->second << ")\n";
-  
+
   return 0;
 }
