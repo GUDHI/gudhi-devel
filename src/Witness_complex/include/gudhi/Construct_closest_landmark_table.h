@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LANDMARK_CHOICE_BY_RANDOM_POINT_H_
-#define LANDMARK_CHOICE_BY_RANDOM_POINT_H_
+#ifndef CONSTRUCT_CLOSEST_LANDMARK_TABLE_H_
+#define CONSTRUCT_CLOSEST_LANDMARK_TABLE_H_
 
 #include <boost/range/size.hpp>
 
@@ -37,10 +37,13 @@ namespace witness_complex {
 
   /**
    *  \ingroup witness_complex
-   * \brief Landmark choice strategy by taking random vertices for landmarks.
-   *  \details It chooses nbL distinct landmarks from a random access range `points`
-   *  and outputs a matrix {witness}*{closest landmarks} in knn.
+   * \brief Construct the closest landmark tables for all witnesses.
+   *  \details Output a table 'knn', each line of which represents a witness and
+   *   consists of landmarks sorted by
+   *   euclidean distance from the corresponding witness.
    *
+   *  The type WitnessContainer is a random access range and
+   *  the type LandmarkContainer is a range.
    *  The type KNearestNeighbors can be seen as 
    *  Witness_range<Closest_landmark_range<Vertex_handle>>, where
    *  Witness_range and Closest_landmark_range are random access ranges and
@@ -48,23 +51,14 @@ namespace witness_complex {
    *  Closest_landmark_range needs to have push_back operation.
    */
 
-  template <typename KNearestNeighbours,
-            typename Point_random_access_range>
-  void landmark_choice_by_random_point(Point_random_access_range const &points,
-                                       int nbL,
-                                       KNearestNeighbours &knn) {
+  template <typename WitnessContainer,
+            typename LandmarkContainer,
+            typename KNearestNeighbours>
+  void construct_closest_landmark_table(WitnessContainer const &points,
+                                        LandmarkContainer const &landmarks,
+                                        KNearestNeighbours &knn) {
     int nbP = boost::size(points);
-    assert(nbP >= nbL);
-    std::set<int> landmarks;
-    int current_number_of_landmarks = 0;  // counter for landmarks
-
-    // TODO(SK) Consider using rand_r(...) instead of rand(...) for improved thread safety
-    int chosen_landmark = rand() % nbP;
-    for (current_number_of_landmarks = 0; current_number_of_landmarks != nbL; current_number_of_landmarks++) {
-      while (landmarks.find(chosen_landmark) != landmarks.end())
-        chosen_landmark = rand() % nbP;
-      landmarks.insert(chosen_landmark);
-    }
+    assert(nbP >= boost::size(landmarks));
 
     int dim = boost::size(*std::begin(points));
     typedef std::pair<double, int> dist_i;
@@ -74,11 +68,11 @@ namespace witness_complex {
       std::priority_queue<dist_i, std::vector<dist_i>, comp> l_heap([](dist_i j1, dist_i j2) {
           return j1.first > j2.first;
         });
-      std::set<int>::iterator landmarks_it;
+      typename LandmarkContainer::const_iterator landmarks_it;
       int landmarks_i = 0;
       for (landmarks_it = landmarks.begin(), landmarks_i = 0; landmarks_it != landmarks.end();
            ++landmarks_it, landmarks_i++) {
-        dist_i dist = std::make_pair(euclidean_distance(points[points_i], points[*landmarks_it]), landmarks_i);
+        dist_i dist = std::make_pair(euclidean_distance(points[points_i], *landmarks_it), landmarks_i);
         l_heap.push(dist);
       }
       for (int i = 0; i < dim + 1; i++) {
@@ -93,4 +87,4 @@ namespace witness_complex {
 
 }  // namespace Gudhi
 
-#endif  // LANDMARK_CHOICE_BY_RANDOM_POINT_H_
+#endif  // CONSTRUCT_CLOSEST_LANDMARK_TABLE_H_
