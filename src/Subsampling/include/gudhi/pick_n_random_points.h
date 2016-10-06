@@ -20,8 +20,10 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PICK_RANDOM_POINTS_H_
-#define PICK_RANDOM_POINTS_H_
+#ifndef PICK_N_RANDOM_POINTS_H_
+#define PICK_N_RANDOM_POINTS_H_
+
+#include <gudhi/Clock.h>
 
 #include <boost/range/size.hpp>
 
@@ -30,7 +32,7 @@
 #include <algorithm>  // shuffle
 #include <numeric>    // iota
 #include <iterator>
-#include <gudhi/Clock.h>
+#include <vector>
 
 
 namespace Gudhi {
@@ -62,13 +64,13 @@ namespace subsampling {
 
     std::random_device rd;
     std::mt19937 g(rd());
- 
+
     std::shuffle(landmarks.begin(), landmarks.end(), g);
     landmarks.resize(final_size);
 
     for (int l: landmarks)
       *output_it++ = points[l];
-    
+
 #ifdef GUDHI_SUBS_PROFILING
     t.end();
     std::cerr << "Random landmark choice took " << t.num_seconds()
@@ -76,8 +78,8 @@ namespace subsampling {
 #endif
   }
 
-} // namesapce subsampling
-  
+}  // namespace subsampling
+
 }  // namespace Gudhi
 
-#endif  // PICK_RANDOM_POINTS_H_
+#endif  // PICK_N_RANDOM_POINTS_H_
