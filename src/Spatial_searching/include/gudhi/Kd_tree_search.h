@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GUDHI_SPATIAL_TREE_DS_H_
-#define GUDHI_SPATIAL_TREE_DS_H_
+#ifndef KD_TREE_SEARCH_H_
+#define KD_TREE_SEARCH_H_
 
 #include <CGAL/Orthogonal_k_neighbor_search.h>
 #include <CGAL/Orthogonal_incremental_neighbor_search.h>
@@ -65,13 +65,12 @@ namespace spatial_searching {
   *   It must be a range whose iterator type is a `RandomAccessIterator`.
   */
 template <typename Search_traits, typename Point_range>
-class Kd_tree_search
-{
+class Kd_tree_search {
   typedef boost::iterator_property_map<
     typename Point_range::const_iterator,
     CGAL::Identity_property_map<std::ptrdiff_t> >           Point_property_map;
 
-public:
+ public:
   /// The Traits.
   typedef Search_traits                                     Traits;
   /// Number type used for distances.
@@ -81,14 +80,14 @@ public:
 
   typedef CGAL::Search_traits<
     FT, Point,
-    typename Traits::Cartesian_const_iterator_d, 
+    typename Traits::Cartesian_const_iterator_d,
     typename Traits::Construct_cartesian_const_iterator_d>  Traits_base;
-  
+
   typedef CGAL::Search_traits_adapter<
     std::ptrdiff_t,
     Point_property_map,
     Traits_base>                                            STraits;
-  
+
   typedef CGAL::Orthogonal_k_neighbor_search<STraits>       K_neighbor_search;
   typedef typename K_neighbor_search::Tree                  Tree;
   typedef typename K_neighbor_search::Distance              Distance;
@@ -113,8 +112,7 @@ public:
     m_tree(boost::counting_iterator<std::ptrdiff_t>(0),
            boost::counting_iterator<std::ptrdiff_t>(points.size()),
            typename Tree::Splitter(),
-           STraits(std::begin(points)) )
-  {
+           STraits(std::begin(points))) {
     // Build the tree now (we don't want to wait for the first query)
     m_tree.build();
   }
@@ -132,8 +130,7 @@ public:
       m_tree(
         only_these_points.begin(), only_these_points.end(),
         typename Tree::Splitter(),
-        STraits(std::begin(points)))
-  {
+        STraits(std::begin(points))) {
     // Build the tree now (we don't want to wait for the first query)
     m_tree.build();
   }
@@ -151,16 +148,14 @@ public:
       boost::counting_iterator<std::ptrdiff_t>(begin_idx),
       boost::counting_iterator<std::ptrdiff_t>(past_the_end_idx),
       typename Tree::Splitter(),
-      STraits(std::begin(points)) )
-  {
+      STraits(std::begin(points))) {
     // Build the tree now (we don't want to wait for the first query)
     m_tree.build();
   }
 
   // Be careful, this function invalidates the tree,
   // which will be recomputed at the next query
-  void insert(std::ptrdiff_t point_idx)
-  {
+  void insert(std::ptrdiff_t point_idx) {
     m_tree.insert(point_idx);
   }
 
@@ -174,8 +169,7 @@ public:
     Point &p,
     unsigned int k,
     bool sorted = true,
-    FT eps = FT(0)) const
-  {
+    FT eps = FT(0)) const {
     // Initialize the search structure, and search all N points
     // Note that we need to pass the Distance explicitly since it needs to
     // know the property map
@@ -185,9 +179,8 @@ public:
       k,
       eps,
       true,
-      CGAL::Distance_adapter<std::ptrdiff_t,Point_property_map,CGAL::Euclidean_distance<Traits_base> >(
-        std::begin(m_points)),
-      sorted);
+      CGAL::Distance_adapter<std::ptrdiff_t, Point_property_map, CGAL::Euclidean_distance<Traits_base> >(
+        std::begin(m_points)), sorted);
 
     return search;
   }
@@ -195,11 +188,10 @@ public:
   /// \brief Search incrementally for the nearest neighbors from a query point.
   /// @param[in] p The query point.
   /// @param[in] eps Approximation factor.
-  /// @return A range containing the neighbors sorted by their distance to p. 
+  /// @return A range containing the neighbors sorted by their distance to p.
   /// All the neighbors are not computed by this function, but they will be
   /// computed incrementally when the iterator on the range is incremented.
-  INS_range query_incremental_nearest_neighbors(const Point &p, FT eps = FT(0)) const
-  {
+  INS_range query_incremental_nearest_neighbors(const Point &p, FT eps = FT(0)) const {
     // Initialize the search structure, and search all N points
     // Note that we need to pass the Distance explicitly since it needs to
     // know the property map
@@ -224,8 +216,7 @@ public:
     Point &p,
     unsigned int k,
     bool sorted = true,
-    FT eps = FT(0)) const
-  {
+    FT eps = FT(0)) const {
     // Initialize the search structure, and search all N points
     // Note that we need to pass the Distance explicitly since it needs to
     // know the property map
@@ -235,9 +226,8 @@ public:
       k,
       eps,
       false,
-      CGAL::Distance_adapter<std::ptrdiff_t,Point_property_map,CGAL::Euclidean_distance<Traits_base> >(
-        std::begin(m_points)),
-      sorted);
+      CGAL::Distance_adapter<std::ptrdiff_t, Point_property_map, CGAL::Euclidean_distance<Traits_base> >(
+        std::begin(m_points)), sorted);
 
     return search;
   }
@@ -248,8 +238,7 @@ public:
   /// @return A range containing the neighbors sorted by their distance to p. 
   /// All the neighbors are not computed by this function, but they will be
   /// computed incrementally when the iterator on the range is incremented.
-  INS_range query_incremental_farthest_neighbors(const Point &p, FT eps = FT(0)) const
-  {
+  INS_range query_incremental_farthest_neighbors(const Point &p, FT eps = FT(0)) const {
     // Initialize the search structure, and search all N points
     // Note that we need to pass the Distance explicitly since it needs to
     // know the property map
@@ -264,13 +253,12 @@ public:
     return search;
   }
 
-
-private:
+ private:
   Point_range const& m_points;
   Tree m_tree;
 };
 
-} // namespace spatial_searching
-} // namespace Gudhi
+}  // namespace spatial_searching
+}  // namespace Gudhi
 
-#endif // GUDHI_SPATIAL_TREE_DS_H_
+#endif // KD_TREE_SEARCH_H_
