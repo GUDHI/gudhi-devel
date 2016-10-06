@@ -29,7 +29,6 @@
 #include <CGAL/Epick_d.h>
 #include <CGAL/Random.h>
 
-#include <array>
 #include <vector>
 
 BOOST_AUTO_TEST_CASE(test_Kd_tree_search)

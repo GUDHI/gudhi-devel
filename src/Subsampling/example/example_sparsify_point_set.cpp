@@ -3,7 +3,6 @@
 #include <CGAL/Epick_d.h>
 #include <CGAL/Random.h>
 
-#include <array>
 #include <vector>
 #include <iterator>
 
