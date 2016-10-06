@@ -20,8 +20,9 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/Simplex_tree.h>
+#include <gudhi/Points_3D_off_io.h>
+
 #include <boost/variant.hpp>
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
@@ -118,24 +119,21 @@ int main(int argc, char * const argv[]) {
   // program args management
   if (argc != 2) {
     std::cerr << "Usage: " << argv[0]
-        << " path_to_file_graph \n";
+        << " path_to_off_file \n";
     return 0;
   }
 
   // Read points from file
-  std::string filegraph = argv[1];
-  std::list<Point> lp;
-  std::ifstream is(filegraph.c_str());
-  int n;
-  is >> n;
-#ifdef DEBUG_TRACES
-  std::cout << "Reading " << n << " points " << std::endl;
-#endif  // DEBUG_TRACES
-  Point p;
-  for (; n > 0; n--) {
-    is >> p;
-    lp.push_back(p);
+  std::string offInputFile(argv[1]);
+  // Read the OFF file (input file name given as parameter) and triangulate points
+  Gudhi::Points_3D_off_reader<Point> off_reader(offInputFile);
+  // Check the read operation was correct
+  if (!off_reader.is_valid()) {
+    std::cerr << "Unable to read file " << argv[1] << std::endl;
+    return 0;
   }
+  // Retrieve the triangulation
+  std::vector<Point> lp = off_reader.get_point_cloud();
 
   // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode.
   Alpha_shape_3 as(lp.begin(), lp.end(), 0, Alpha_shape_3::GENERAL);
