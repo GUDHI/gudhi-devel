@@ -34,7 +34,7 @@ namespace subsampling {
  * 
  * @{
  * 
- * \section introduction Introduction
+ * \section subsamplingintroduction Introduction
  * 
  * This Gudhi component offers methods to subsample a set of points.
  * 
