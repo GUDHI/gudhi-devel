@@ -138,19 +138,26 @@ private:
   /** \brief Outputs the (weak) witness complex with 
    *         squared relaxation parameter 'max_alpha_square'
    *         to simplicial complex 'complex'.
+   *         The parameter 'limit_dimension' represents the maximal dimension of the simplicial complex
+   *         (default value = no limit).
    */
   template < typename SimplicialComplexForWitness >
   bool create_complex(SimplicialComplexForWitness& complex,
-                      FT  max_alpha_square)       
+                      FT  max_alpha_square,
+                      Landmark_id limit_dimension = std::numeric_limits<Landmark_id>::max())       
   {
-    unsigned nbL = landmarks_.size();
-    unsigned complex_dim = 0;
+    std::size_t nbL = landmarks_.size();
+    Landmark_id complex_dim = 0;
     if (complex.num_vertices() > 0) {
-      std::cerr << "Witness complex cannot create complex - complex is not empty.\n";
+      std::cerr << "Strong witness complex cannot create complex - complex is not empty.\n";
       return false;
     }
     if (max_alpha_square < 0) {
-      std::cerr << "Witness complex cannot create complex - squared relaxation parameter must be non-negative.\n";
+      std::cerr << "Strong witness complex cannot create complex - squared relaxation parameter must be non-negative.\n";
+      return false;
+    }
+    if (limit_dimension < 0) {
+      std::cerr << "Strong witness complex cannot create complex - limit dimension must be non-negative.\n";
       return false;
     }
     typeVectorVertex vv;
@@ -165,13 +172,13 @@ private:
       ActiveWitness aw(landmark_tree_.query_incremental_nearest_neighbors(w));
       typeVectorVertex simplex;
       typename ActiveWitness::iterator aw_it = aw.begin();
-      float lim_d2 = aw.begin()->second + max_alpha_square;
-      while (aw_it != aw.end() && aw_it->second < lim_d2) {
+      float lim_dist2 = aw.begin()->second + max_alpha_square;
+      while ((Landmark_id)simplex.size() <= limit_dimension + 1 && aw_it != aw.end() && aw_it->second < lim_dist2) {
         simplex.push_back(aw_it->first);
         complex.insert_simplex_and_subfaces(simplex, aw_it->second - aw.begin()->second);
         aw_it++;
       }
-      if (simplex.size() - 1 > complex_dim)
+      if ((Landmark_id)simplex.size() - 1 > complex_dim)
         complex_dim = simplex.size() - 1;
     }
     complex.set_dimension(complex_dim);

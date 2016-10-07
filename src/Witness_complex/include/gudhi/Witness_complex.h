@@ -129,7 +129,8 @@ private:
    */
   template < typename SimplicialComplexForWitness >
   bool create_complex(SimplicialComplexForWitness& complex,
-                      FT  max_alpha_square)       
+                      FT  max_alpha_square,
+                      Landmark_id limit_dimension = std::numeric_limits<Landmark_id>::max())       
   {
     std::size_t nbL = landmarks_.size();
     if (complex.num_vertices() > 0) {
@@ -138,6 +139,10 @@ private:
     }
     if (max_alpha_square < 0) {
       std::cerr << "Witness complex cannot create complex - squared relaxation parameter must be non-negative.\n";
+      return false;
+    }
+    if (limit_dimension < 0) {
+      std::cerr << "Witness complex cannot create complex - limit dimension must be non-negative.\n";
       return false;
     }
     typeVectorVertex vv;
@@ -150,13 +155,13 @@ private:
       complex.insert_simplex(vv, Filtration_value(0.0));
       /* TODO Error if not inserted : normally no need here though*/
     }
-    unsigned k = 1; /* current dimension in iterative construction */
+    Landmark_id k = 1; /* current dimension in iterative construction */
     for (auto w: witnesses_)
       active_witnesses.push_back(ActiveWitness(landmark_tree_.query_incremental_nearest_neighbors(w)));
     ActiveWitness aw_copy(active_witnesses.front());
-    while (!active_witnesses.empty() && k < nbL ) {
+    while (!active_witnesses.empty() && k <= limit_dimension ) {
       typename ActiveWitnessList::iterator aw_it = active_witnesses.begin();
-      std::vector<int> simplex;
+      std::vector<Landmark_id> simplex;
       simplex.reserve(k+1);
       while (aw_it != active_witnesses.end()) {
         bool ok = add_all_faces_of_dimension(k,
@@ -191,7 +196,7 @@ private:
                                   double alpha2,
                                   double norelax_dist2,
                                   typename ActiveWitness::iterator curr_l,
-                                  std::vector<int>& simplex,
+                                  std::vector<Landmark_id>& simplex,
                                   SimplicialComplexForWitness& sc,
                                   typename ActiveWitness::iterator end)
   {
@@ -251,17 +256,17 @@ private:
    *  inserted_vertex is the handle of the (k+1)-th vertex witnessed by witness_id
    */
   template < typename SimplicialComplexForWitness >
-  bool all_faces_in(std::vector<int>& simplex,
+  bool all_faces_in(typeVectorVertex& simplex,
                     double* filtration_value,
                     SimplicialComplexForWitness& sc)
   {
     typedef typename SimplicialComplexForWitness::Simplex_handle Simplex_handle;
 
-    std::vector< int > facet;
-    for (std::vector<int>::iterator not_it = simplex.begin(); not_it != simplex.end(); ++not_it)
+    typeVectorVertex facet;
+    for (typename typeVectorVertex::iterator not_it = simplex.begin(); not_it != simplex.end(); ++not_it)
       {
         facet.clear();
-        for (std::vector<int>::iterator it = simplex.begin(); it != simplex.end(); ++it)
+        for (typename typeVectorVertex::iterator it = simplex.begin(); it != simplex.end(); ++it)
           if (it != not_it)
             facet.push_back(*it);
         Simplex_handle facet_sh = sc.find(facet);

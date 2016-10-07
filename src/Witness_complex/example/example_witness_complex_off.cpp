@@ -45,12 +45,12 @@ typedef std::vector< Point_d > Point_vector;
 int main(int argc, char * const argv[]) {
   if (argc != 4) {
     std::cerr << "Usage: " << argv[0]
-        << " path_to_point_file nbL alpha^2\n";
+        << " path_to_point_file number_of_landmarks max_squared_alpha limit_dimension\n";
     return 0;
   }
 
   std::string file_name = argv[1];
-  int nbL = atoi(argv[2]);
+  int nbL = atoi(argv[2]), lim_dim = atoi(argv[4]);
   double alpha2 = atof(argv[3]);
   clock_t start, end;
   Gudhi::Simplex_tree<> simplex_tree;
@@ -77,7 +77,7 @@ int main(int argc, char * const argv[]) {
                                   point_vector.begin(),
                                   point_vector.end());
 
-  witness_complex.create_complex(simplex_tree, alpha2);
+  witness_complex.create_complex(simplex_tree, alpha2, lim_dim);
   end = clock();
   std::cout << "Witness complex took "
       << static_cast<double>(end - start) / CLOCKS_PER_SEC << " s. \n";

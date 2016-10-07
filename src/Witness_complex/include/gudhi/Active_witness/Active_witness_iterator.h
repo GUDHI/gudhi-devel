@@ -31,6 +31,13 @@ namespace Gudhi {
 
 namespace witness_complex {
 
+  /** \brief Iterator in the nearest landmark list.
+   *  \detail After the iterator reaches the end of the list,
+   *          the list is augmented by a (nearest landmark, distance) pair if possible.
+   *          If all the landmarks are present in the list, iterator returns the specific end value
+   *          of the corresponding 'Active_witness' object.
+   */
+  
 template< typename Active_witness,
           typename Id_distance_pair,
           typename INS_iterator >

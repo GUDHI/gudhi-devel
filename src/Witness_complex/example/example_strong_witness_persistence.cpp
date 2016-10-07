@@ -53,17 +53,18 @@ void program_options(int argc, char * argv[]
                      , std::string & filediag
                      , Filtration_value & max_squared_alpha
                      , int & p
+                     , int & dim_max
                      , Filtration_value & min_persistence);
 
 int main(int argc, char * argv[]) {
   std::string file_name;
   std::string filediag;
   Filtration_value max_squared_alpha;
-  int p, nbL;
+  int p, nbL, lim_d;
   Filtration_value min_persistence;
   SimplexTree simplex_tree;
 
-  program_options(argc, argv, nbL, file_name, filediag, max_squared_alpha, p, min_persistence);
+  program_options(argc, argv, nbL, file_name, filediag, max_squared_alpha, p, lim_d, min_persistence);
 
   // Extract the points from the file file_name
   Point_vector witnesses, landmarks;
@@ -119,6 +120,7 @@ void program_options(int argc, char * argv[]
                      , std::string & filediag
                      , Filtration_value & max_squared_alpha
                      , int & p
+                     , int & dim_max
                      , Filtration_value & min_persistence) {
   
   namespace po = boost::program_options;
@@ -141,7 +143,9 @@ void program_options(int argc, char * argv[]
       ("field-charac,p", po::value<int>(&p)->default_value(11),
        "Characteristic p of the coefficient field Z/pZ for computing homology.")
       ("min-persistence,m", po::value<Filtration_value>(&min_persistence)->default_value(0),
-       "Minimal lifetime of homology feature to be recorded. Default is 0. Enter a negative value to see zero length intervals");
+       "Minimal lifetime of homology feature to be recorded. Default is 0. Enter a negative value to see zero length intervals")
+      ("cpx-dimension,d", po::value<int>(&dim_max)->default_value(std::numeric_limits<int>::max()),
+       "Maximal dimension of the strong witness complex we want to compute.");
  
   po::positional_options_description pos;
   pos.add("input-file", 1);
