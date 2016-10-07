@@ -23,25 +23,13 @@
 #ifndef WITNESS_COMPLEX_H_
 #define WITNESS_COMPLEX_H_
 
-// Needed for the adjacency graph in bad link search
-#include <boost/graph/graph_traits.hpp>
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/connected_components.hpp>
-
-#include <boost/range/size.hpp>
-
 #include "Active_witness/Active_witness.h"
 #include <gudhi/Kd_tree_search.h>
 
-#include <algorithm>
 #include <utility>
 #include <vector>
 #include <list>
-#include <set>
-#include <queue>
 #include <limits>
-#include <ctime>
-#include <iostream>
 
 namespace gss = Gudhi::spatial_searching;
 
@@ -93,18 +81,8 @@ private:
   //@{
 
   /*
-   *  \brief Iterative construction of the (weak) witness complex.
-   *  \details The witness complex is written in sc_ basing on a matrix knn of
-   *  nearest neighbours of the form {witnesses}x{landmarks}.
-   *
-   *  The type KNearestNeighbors can be seen as 
-   *  Witness_range<Closest_landmark_range<Vertex_handle>>, where
-   *  Witness_range and Closest_landmark_range are random access ranges.
-   *
-   *  Constructor takes into account at most (dim+1) 
-   *  first landmarks from each landmark range to construct simplices.
-   *
-   *  Landmarks are supposed to be in [0,nbL_-1]
+   *  \brief Initializes member variables before constructing simplicial complex.
+   *  \details The parameters should satisfy InputIterator C++ concepts.
    */
   template< typename InputIteratorLandmarks,
             typename InputIteratorWitnesses >
@@ -126,6 +104,8 @@ private:
   /** \brief Outputs the (weak) witness complex with 
    *         squared relaxation parameter 'max_alpha_square'
    *         to simplicial complex 'complex'.
+   *         The parameter 'limit_dimension' represents the maximal dimension of the simplicial complex
+   *         (default value = no limit).
    */
   template < typename SimplicialComplexForWitness >
   bool create_complex(SimplicialComplexForWitness& complex,
@@ -146,14 +126,12 @@ private:
       return false;
     }
     typeVectorVertex vv;
-    ActiveWitnessList active_witnesses;// = new ActiveWitnessList();
+    ActiveWitnessList active_witnesses;
     for (unsigned i = 0; i != nbL; ++i) {
       // initial fill of 0-dimensional simplices
       // by doing it we don't assume that landmarks are necessarily witnesses themselves anymore
-      //counter++;
       vv = {i};
       complex.insert_simplex(vv, Filtration_value(0.0));
-      /* TODO Error if not inserted : normally no need here though*/
     }
     Landmark_id k = 1; /* current dimension in iterative construction */
     for (auto w: witnesses_)

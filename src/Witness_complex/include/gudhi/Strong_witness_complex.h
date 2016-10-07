@@ -23,41 +23,13 @@
 #ifndef STRONG_WITNESS_COMPLEX_H_
 #define STRONG_WITNESS_COMPLEX_H_
 
-#include <boost/container/flat_map.hpp>
-#include <boost/iterator/transform_iterator.hpp>
-#include <algorithm>
 #include <utility>
 #include <vector>
 #include <list>
-#include <set>
-#include <queue>
 #include <limits>
-#include <math.h>
-#include <ctime>
-#include <iostream>
 
 #include "Active_witness/Active_witness.h"
-#include <gudhi/Simplex_tree.h>
 #include <gudhi/Kd_tree_search.h>
-
-
-// Needed for nearest neighbours
-#include <CGAL/Cartesian_d.h>
-#include <CGAL/Search_traits.h>
-#include <CGAL/Search_traits_adapter.h>
-#include <CGAL/property_map.h>
-#include <CGAL/Epick_d.h>
-#include <CGAL/Orthogonal_k_neighbor_search.h>
-
-#include <boost/tuple/tuple.hpp>
-#include <boost/iterator/zip_iterator.hpp>
-#include <boost/iterator/counting_iterator.hpp>
-#include <boost/range/iterator_range.hpp>
-
-// Needed for the adjacency graph in bad link search
-#include <boost/graph/graph_traits.hpp>
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/connected_components.hpp>
 
 namespace gss = Gudhi::spatial_searching;
 
@@ -102,21 +74,9 @@ private:
 
   //@{
 
-  // Witness_range<Closest_landmark_range<Vertex_handle>>
-
   /*
-   *  \brief Iterative construction of the (weak) witness complex.
-   *  \details The witness complex is written in sc_ basing on a matrix knn of
-   *  nearest neighbours of the form {witnesses}x{landmarks}.
-   *
-   *  The type KNearestNeighbors can be seen as 
-   *  Witness_range<Closest_landmark_range<Vertex_handle>>, where
-   *  Witness_range and Closest_landmark_range are random access ranges.
-   *
-   *  Constructor takes into account at most (dim+1) 
-   *  first landmarks from each landmark range to construct simplices.
-   *
-   *  Landmarks are supposed to be in [0,nbL_-1]
+   *  \brief Initializes member variables before constructing simplicial complex.
+   *  \details The parameters should satisfy InputIterator C++ concepts.
    */
   template< typename InputIteratorLandmarks,
             typename InputIteratorWitnesses >
@@ -135,7 +95,7 @@ private:
     return landmarks_[vertex];
   }
   
-  /** \brief Outputs the (weak) witness complex with 
+  /** \brief Outputs the (strong) witness complex with 
    *         squared relaxation parameter 'max_alpha_square'
    *         to simplicial complex 'complex'.
    *         The parameter 'limit_dimension' represents the maximal dimension of the simplicial complex
@@ -161,12 +121,10 @@ private:
       return false;
     }
     typeVectorVertex vv;
-    //ActiveWitnessList active_witnesses;// = new ActiveWitnessList();
     for (unsigned i = 0; i != nbL; ++i) {
       // initial fill of 0-dimensional simplices
       vv = {i};
       complex.insert_simplex(vv, Filtration_value(0.0));
-      /* TODO Error if not inserted : normally no need here though*/
     }
     for (auto w: witnesses_) {
       ActiveWitness aw(landmark_tree_.query_incremental_nearest_neighbors(w));
