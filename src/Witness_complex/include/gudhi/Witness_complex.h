@@ -37,12 +37,22 @@ namespace Gudhi {
   
 namespace witness_complex {
 
-// /*
-//  *  \private
-//     \class Witness_complex
-//     \brief Constructs the witness complex for the given set of witnesses and landmarks.
-//     \ingroup witness_complex
-//  */
+/**
+ * \private
+ * \class Witness_complex
+ * \brief Constructs (weak) witness complex for the given sets of witnesses and landmarks.
+ * \ingroup witness_complex
+ *
+ * \tparam Kernel_ requires a <a target="_blank"
+ * href="http://doc.cgal.org/latest/Kernel_d/classCGAL_1_1Epick__d.html">CGAL::Epick_d</a> class, which
+ * can be static if you know the ambiant dimension at compile-time, or dynamic if you don't.
+ * \tparam DimensionTag can be either <a target="_blank"
+ * href="http://doc.cgal.org/latest/Kernel_23/classCGAL_1_1Dimension__tag.html">Dimension_tag<d></a>
+ * if you know the intrinsic dimension at compile-time,
+ * or <a target="_blank"
+ * href="http://doc.cgal.org/latest/Kernel_23/classCGAL_1_1Dynamic__dimension__tag.html">CGAL::Dynamic_dimension_tag</a>
+ * if you don't.
+*/
 template< class Kernel_ >
 class Witness_complex {
 private:
@@ -69,6 +79,8 @@ private:
   typedef std::vector< Landmark_id > typeVectorVertex;
   typedef std::pair< typeVectorVertex, Filtration_value> typeSimplex;
 
+  typedef Landmark_id Vertex_handle;
+
  private:
   Point_range                         witnesses_, landmarks_;
   Kd_tree                             landmark_tree_;
@@ -80,9 +92,13 @@ private:
 
   //@{
 
-  /*
+  /**
    *  \brief Initializes member variables before constructing simplicial complex.
-   *  \details The parameters should satisfy InputIterator C++ concepts.
+   *  \details Records landmarks from the range [landmarks_first, landmarks_last) into a 
+   *           table internally, as well as witnesses from the range [witnesses_first, witnesses_last).
+   *           All iterator parameters should satisfy <a target="_blank"
+   *           href="http://en.cppreference.com/w/cpp/concept/InputIterator">InputIterator</a>
+   *           C++ concept.
    */
   template< typename InputIteratorLandmarks,
             typename InputIteratorWitnesses >
@@ -95,16 +111,18 @@ private:
   }
 
   /** \brief Returns the point corresponding to the given vertex.
+   *  @param[in] vertex Vertex handle of the point to retrieve.
    */
-  Point_d get_point( std::size_t vertex ) const
+  Point_d get_point( Vertex_handle vertex ) const
   {
     return landmarks_[vertex];
   }
   
-  /** \brief Outputs the (weak) witness complex with 
-   *         squared relaxation parameter 'max_alpha_square'
-   *         to simplicial complex 'complex'.
-   *         The parameter 'limit_dimension' represents the maximal dimension of the simplicial complex
+  /** \brief Outputs the (weak) witness complex in a simplicial complex data structure.
+   *  @param[out] complex Simplicial complex data structure compatible with 'find' and 'insert' operations.
+   *              (Cf SimplicialComplexForWitness)
+   *  @param[in] max_alpha_square Maximal squared relaxation parameter.
+   *  @param[in] limit_dimension Represents the maximal dimension of the simplicial complex
    *         (default value = no limit).
    */
   template < typename SimplicialComplexForWitness >
@@ -229,7 +247,7 @@ private:
     return will_be_active;
   }
   
-  /** \brief Check if the facets of the k-dimensional simplex witnessed 
+  /* \brief Check if the facets of the k-dimensional simplex witnessed 
    *  by witness witness_id are already in the complex.
    *  inserted_vertex is the handle of the (k+1)-th vertex witnessed by witness_id
    */
