@@ -11,7 +11,7 @@ if (GPROF_PATH)
 endif()
 
 if(CGAL_FOUND)
-  if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
+  if (NOT CGAL_VERSION VERSION_LESS 4.9.0)
     if (EIGEN3_FOUND)
       add_executable( Spatial_searching_test_Kd_tree_search test_Kd_tree_search.cpp )
       target_link_libraries(Spatial_searching_test_Kd_tree_search 
