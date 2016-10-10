@@ -18,13 +18,3 @@ add_test(NAME simple_witness_complex
   COMMAND ${CMAKE_CURRENT_BINARY_DIR}/Witness_complex_test_simple_witness_complex 
     # XML format for Jenkins xUnit plugin 
     --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/Witness_complex_test_simple_witness_complex.xml --log_level=test_suite --report_level=no)
-
-add_executable ( witness_complex_pointsUT witness_complex_points.cpp )
-target_link_libraries(witness_complex_pointsUT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
-
-# Unitary tests definition and xml result file generation
-add_test(NAME witness_complex_pointsUT
-  COMMAND ${CMAKE_CURRENT_BINARY_DIR}/witness_complex_pointsUT 
-    # XML format for Jenkins xUnit plugin 
-    --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/witness_complex_pointsUT.xml --log_level=test_suite --report_level=no)
-
