@@ -3,20 +3,18 @@ project(Subsampling_examples)
 
 if(CGAL_FOUND)
   if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
-    message(STATUS "CGAL version: ${CGAL_VERSION}.")
-
     if (EIGEN3_FOUND)
+      add_executable(Subsampling_example_pick_n_random_points example_pick_n_random_points.cpp)
+      add_executable(Subsampling_example_choose_n_farthest_points example_choose_n_farthest_points.cpp)
+      add_executable(Subsampling_example_sparsify_point_set example_sparsify_point_set.cpp)
+      target_link_libraries(Subsampling_example_sparsify_point_set ${CGAL_LIBRARY})
 
-    add_executable(Subsampling_example_pick_n_random_points example_pick_n_random_points.cpp)
-    add_executable(Subsampling_example_choose_n_farthest_points example_choose_n_farthest_points.cpp)
-    add_executable(Subsampling_example_sparsify_point_set example_sparsify_point_set.cpp)
-    target_link_libraries(Subsampling_example_sparsify_point_set ${CGAL_LIBRARY})
-    else()
-      message(WARNING "Eigen3 not found. Version 3.1.0 is required for Subsampling feature.")
+      add_test(Subsampling_example_pick_n_random_points
+               ${CMAKE_CURRENT_BINARY_DIR}/Subsampling_example_pick_n_random_points)
+      add_test(Subsampling_example_choose_n_farthest_points
+               ${CMAKE_CURRENT_BINARY_DIR}/Subsampling_example_choose_n_farthest_points)
+      add_test(Subsampling_example_sparsify_point_set
+               ${CMAKE_CURRENT_BINARY_DIR}/Subsampling_example_sparsify_point_set)
     endif()
-  else()
-    message(WARNING "CGAL version: ${CGAL_VERSION} is too old to compile Subsampling examples. Version 4.8.1 is required.")
   endif ()
-else()
-  message(WARNING "CGAL not found. It is required for the Subsampling examples.")
 endif()

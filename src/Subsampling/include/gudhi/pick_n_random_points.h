@@ -20,63 +20,65 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PICK_RANDOM_POINTS_H_
-#define PICK_RANDOM_POINTS_H_
+#ifndef PICK_N_RANDOM_POINTS_H_
+#define PICK_N_RANDOM_POINTS_H_
+
+#include <gudhi/Clock.h>
 
 #include <boost/range/size.hpp>
 
+#include <cstddef>
 #include <random>     // random_device, mt19937
 #include <algorithm>  // shuffle
 #include <numeric>    // iota
 #include <iterator>
-#include <gudhi/Clock.h>
+#include <vector>
 
 
 namespace Gudhi {
 
 namespace subsampling {
-  
-  /**
-   *  \ingroup subsampling
-   * \brief Subsample a point set by picking random vertices.
-   *
-   *  \details It chooses `final_size` distinct points from a random access range `points`
-   *  and outputs them to the output iterator `output_it`.
-   *  Point_container::iterator should be ValueSwappable and RandomAccessIterator.
-   */
 
-  template <typename Point_container,
-            typename OutputIterator>
-  void pick_n_random_points(Point_container const &points,
-                          unsigned final_size,
+/**
+ *  \ingroup subsampling
+ * \brief Subsample a point set by picking random vertices.
+ *
+ *  \details It chooses `final_size` distinct points from a random access range `points`
+ *  and outputs them to the output iterator `output_it`.
+ *  Point_container::iterator should be ValueSwappable and RandomAccessIterator.
+ */
+template <typename Point_container,
+typename OutputIterator>
+void pick_n_random_points(Point_container const &points,
+                          std::size_t final_size,
                           OutputIterator output_it) {
 #ifdef GUDHI_SUBS_PROFILING
-    Gudhi::Clock t;
+  Gudhi::Clock t;
 #endif
 
-    unsigned nbP = boost::size(points);
-    assert(nbP >= final_size);
-    std::vector<int> landmarks(nbP);
-    std::iota(landmarks.begin(), landmarks.end(), 0);
+  std::size_t nbP = boost::size(points);
+  assert(nbP >= final_size);
+  std::vector<int> landmarks(nbP);
+  std::iota(landmarks.begin(), landmarks.end(), 0);
 
-    std::random_device rd;
-    std::mt19937 g(rd());
- 
-    std::shuffle(landmarks.begin(), landmarks.end(), g);
-    landmarks.resize(final_size);
+  std::random_device rd;
+  std::mt19937 g(rd());
 
-    for (int l: landmarks)
-      *output_it++ = points[l];
-    
+  std::shuffle(landmarks.begin(), landmarks.end(), g);
+  landmarks.resize(final_size);
+
+  for (int l : landmarks)
+    *output_it++ = points[l];
+
 #ifdef GUDHI_SUBS_PROFILING
-    t.end();
-    std::cerr << "Random landmark choice took " << t.num_seconds()
+  t.end();
+  std::cerr << "Random landmark choice took " << t.num_seconds()
       << " seconds." << std::endl;
 #endif
-  }
+}
 
-} // namesapce subsampling
-  
+}  // namespace subsampling
+
 }  // namespace Gudhi
 
-#endif  // PICK_RANDOM_POINTS_H_
+#endif  // PICK_N_RANDOM_POINTS_H_

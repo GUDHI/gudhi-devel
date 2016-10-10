@@ -12,8 +12,6 @@ endif()
 
 if(CGAL_FOUND)
   if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
-    message(STATUS "CGAL version: ${CGAL_VERSION}.")
-
     if (EIGEN3_FOUND)
       add_executable( Subsampling_test_pick_n_random_points test_pick_n_random_points.cpp )
       target_link_libraries(Subsampling_test_pick_n_random_points ${CGAL_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
@@ -23,12 +21,18 @@ if(CGAL_FOUND)
 
       add_executable(Subsampling_test_sparsify_point_set test_sparsify_point_set.cpp)
       target_link_libraries(Subsampling_test_sparsify_point_set ${CGAL_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
-    else()
-      message(WARNING "Eigen3 not found. Version 3.1.0 is required for Subsampling feature.")
+
+      add_test(Subsampling_test_pick_n_random_points ${CMAKE_CURRENT_BINARY_DIR}/Subsampling_test_pick_n_random_points
+      # XML format for Jenkins xUnit plugin 
+      --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/Subsampling_test_pick_n_random_points_UT.xml --log_level=test_suite --report_level=no)
+
+      add_test(Subsampling_test_choose_n_farthest_points ${CMAKE_CURRENT_BINARY_DIR}/Subsampling_test_choose_n_farthest_points
+      # XML format for Jenkins xUnit plugin 
+      --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/Subsampling_test_choose_n_farthest_points_UT.xml --log_level=test_suite --report_level=no)
+
+      add_test(Subsampling_test_sparsify_point_set ${CMAKE_CURRENT_BINARY_DIR}/Subsampling_test_sparsify_point_set
+      # XML format for Jenkins xUnit plugin 
+      --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/Subsampling_test_sparsify_point_set_UT.xml --log_level=test_suite --report_level=no)
     endif()
-  else()
-    message(WARNING "CGAL version: ${CGAL_VERSION} is too old to compile Subsampling tests. Version 4.8.1 is required.")
   endif ()
-else()
-  message(WARNING "CGAL not found. It is required for the Subsampling tests.")
 endif()

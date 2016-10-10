@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GUDHI_SPARSIFY_POINT_SET_H
-#define GUDHI_SPARSIFY_POINT_SET_H
+#ifndef SPARSIFY_POINT_SET_H_
+#define SPARSIFY_POINT_SET_H_
 
 #include <gudhi/Kd_tree_search.h>
 #ifdef GUDHI_SUBSAMPLING_PROFILING
@@ -32,6 +32,7 @@
 #include <vector>
 
 namespace Gudhi {
+
 namespace subsampling {
 
 /**
@@ -54,16 +55,14 @@ namespace subsampling {
  * @param[in] min_squared_dist Minimum squared distance separating the output points.
  * @param[out] output_it The output iterator.
  */
-
 template <typename Kernel, typename Point_range, typename OutputIterator>
 void
 sparsify_point_set(
-  const Kernel &k, Point_range const& input_pts,
-  typename Kernel::FT min_squared_dist,
-  OutputIterator output_it)
-{ 
+                   const Kernel &k, Point_range const& input_pts,
+                   typename Kernel::FT min_squared_dist,
+                   OutputIterator output_it) {
   typedef typename Gudhi::spatial_searching::Kd_tree_search<
-    Kernel, Point_range>  Points_ds;
+      Kernel, Point_range> Points_ds;
 
   typename Kernel::Squared_distance_d sqdist = k.squared_distance_d_object();
 
@@ -78,10 +77,9 @@ sparsify_point_set(
   // Parse the input points, and add them if they are not too close to
   // the other points
   std::size_t pt_idx = 0;
-  for (typename Point_range::const_iterator it_pt = input_pts.begin() ;
-    it_pt != input_pts.end();
-    ++it_pt, ++pt_idx)
-  {
+  for (typename Point_range::const_iterator it_pt = input_pts.begin();
+       it_pt != input_pts.end();
+       ++it_pt, ++pt_idx) {
     if (dropped_points[pt_idx])
       continue;
 
@@ -90,30 +88,28 @@ sparsify_point_set(
     auto ins_range = points_ds.query_incremental_nearest_neighbors(*it_pt);
 
     // If another point Q is closer that min_squared_dist, mark Q to be dropped
-    for (auto const& neighbor : ins_range)
-    {
+    for (auto const& neighbor : ins_range) {
       std::size_t neighbor_point_idx = neighbor.first;
       // If the neighbor is too close, we drop the neighbor
-      if (neighbor.second < min_squared_dist)
-      {
-        // N.B.: If neighbor_point_idx < pt_idx, 
+      if (neighbor.second < min_squared_dist) {
+        // N.B.: If neighbor_point_idx < pt_idx,
         // dropped_points[neighbor_point_idx] is already true but adding a
         // test doesn't make things faster, so why bother?
         dropped_points[neighbor_point_idx] = true;
-      }
-      else
+      } else {
         break;
+      }
     }
   }
 
 #ifdef GUDHI_SUBSAMPLING_PROFILING
   t.end();
   std::cerr << "Point set sparsified in " << t.num_seconds()
-    << " seconds." << std::endl;
+      << " seconds." << std::endl;
 #endif
 }
 
-} // namespace subsampling
-} // namespace Gudhi
+}  // namespace subsampling
+}  // namespace Gudhi
 
-#endif // GUDHI_POINT_CLOUD_H
+#endif  // SPARSIFY_POINT_SET_H_

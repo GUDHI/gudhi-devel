@@ -35,10 +35,9 @@
 
 #include <CGAL/Epick_d.h>
 
-typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag>                K;
-typedef typename K::FT                                            FT;
-typedef typename K::Point_d                                       Point_d;
-
+typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> K;
+typedef typename K::FT FT;
+typedef typename K::Point_d Point_d;
 
 BOOST_AUTO_TEST_CASE(test_choose_farthest_point) {
   std::vector< Point_d > points, landmarks;
@@ -52,6 +51,6 @@ BOOST_AUTO_TEST_CASE(test_choose_farthest_point) {
   landmarks.clear();
   K k;
   Gudhi::subsampling::choose_n_farthest_points(k, points, 100, std::back_inserter(landmarks));
-  
+
   BOOST_CHECK(landmarks.size() == 100);
 }

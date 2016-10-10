@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GUDHI_SPATIAL_TREE_DS_H_
-#define GUDHI_SPATIAL_TREE_DS_H_
+#ifndef KD_TREE_SEARCH_H_
+#define KD_TREE_SEARCH_H_
 
 #include <CGAL/Orthogonal_k_neighbor_search.h>
 #include <CGAL/Orthogonal_incremental_neighbor_search.h>
@@ -41,22 +41,22 @@ namespace spatial_searching {
 
   /**
   * \class Kd_tree_search Kd_tree_search.h gudhi/Kd_tree_search.h
-  * \brief Spatial tree data structure to perform (approximate) nearest neighbor search.
+  * \brief Spatial tree data structure to perform (approximate) nearest and farthest neighbor search.
   *
   * \ingroup spatial_searching
   *
   * \details
   * The class Kd_tree_search is a tree-based data structure, based on
   * <a target="_blank" href="http://doc.cgal.org/latest/Spatial_searching/index.html">CGAL dD spatial searching data structures</a>.
-  * It provides a simplified API to perform (approximate) nearest neighbor searches. Contrary to CGAL default behavior, the tree
+  * It provides a simplified API to perform (approximate) nearest and farthest neighbor searches. Contrary to CGAL default behavior, the tree
   * does not store the points themselves, but stores indices.
   *
-  * There are two types of queries: the <i>k-nearest neighbor query</i>, where <i>k</i> is fixed and the <i>k</i> nearest points are 
-  * computed right away,
-  * and the <i>incremental nearest neighbor query</i>, where no number of neighbors is provided during the call, as the
+  * There are two types of queries: the <i>k-nearest or k-farthest neighbor query</i>, where <i>k</i> is fixed and the <i>k</i> nearest 
+  * or farthest points are computed right away,
+  * and the <i>incremental nearest or farthest neighbor query</i>, where no number of neighbors is provided during the call, as the
   * neighbors will be computed incrementally when the iterator on the range is incremented.
   *
-  * \tparam K must be a model of the <a target="_blank"
+  * \tparam Search_traits must be a model of the <a target="_blank"
   *   href="http://doc.cgal.org/latest/Spatial_searching/classSearchTraits.html">SearchTraits</a>
   *   concept, such as the <a target="_blank"
   *   href="http://doc.cgal.org/latest/Kernel_d/classCGAL_1_1Epick__d.html">CGAL::Epick_d</a> class, which
@@ -64,35 +64,34 @@ namespace spatial_searching {
   * \tparam Point_range is the type of the range that provides the points.
   *   It must be a range whose iterator type is a `RandomAccessIterator`.
   */
-template <typename K, typename Point_range>
-class Kd_tree_search
-{
+template <typename Search_traits, typename Point_range>
+class Kd_tree_search {
   typedef boost::iterator_property_map<
     typename Point_range::const_iterator,
     CGAL::Identity_property_map<std::ptrdiff_t> >           Point_property_map;
 
-public:
-  /// The kernel.
-  typedef K                                                 Kernel;
+ public:
+  /// The Traits.
+  typedef Search_traits                                     Traits;
   /// Number type used for distances.
-  typedef typename Kernel::FT                               FT;
+  typedef typename Traits::FT                               FT;
   /// The point type.
   typedef typename Point_range::value_type                  Point;
 
   typedef CGAL::Search_traits<
     FT, Point,
-    typename Kernel::Cartesian_const_iterator_d, 
-    typename Kernel::Construct_cartesian_const_iterator_d>  Traits_base;
-  
+    typename Traits::Cartesian_const_iterator_d,
+    typename Traits::Construct_cartesian_const_iterator_d>  Traits_base;
+
   typedef CGAL::Search_traits_adapter<
     std::ptrdiff_t,
     Point_property_map,
     Traits_base>                                            STraits;
-  
+
   typedef CGAL::Orthogonal_k_neighbor_search<STraits>       K_neighbor_search;
   typedef typename K_neighbor_search::Tree                  Tree;
   typedef typename K_neighbor_search::Distance              Distance;
-  /// \brief The range returned by a k-nearest neighbor search.
+  /// \brief The range returned by a k-nearest or k-farthest neighbor search.
   /// Its value type is `std::pair<std::size_t, FT>` where `first` is the index
   /// of a point P and `second` is the squared distance between P and the query point.
   typedef K_neighbor_search                                 KNS_range;
@@ -100,7 +99,7 @@ public:
   typedef CGAL::Orthogonal_incremental_neighbor_search<
     STraits, Distance, CGAL::Sliding_midpoint<STraits>, Tree>
                                                    Incremental_neighbor_search;
-  /// \brief The range returned by an incremental nearest neighbor search.
+  /// \brief The range returned by an incremental nearest or farthest neighbor search.
   /// Its value type is `std::pair<std::size_t, FT>` where `first` is the index
   /// of a point P and `second` is the squared distance between P and the query point.
   typedef Incremental_neighbor_search                       INS_range;
@@ -113,8 +112,7 @@ public:
     m_tree(boost::counting_iterator<std::ptrdiff_t>(0),
            boost::counting_iterator<std::ptrdiff_t>(points.size()),
            typename Tree::Splitter(),
-           STraits(std::begin(points)) )
-  {
+           STraits(std::begin(points))) {
     // Build the tree now (we don't want to wait for the first query)
     m_tree.build();
   }
@@ -132,8 +130,7 @@ public:
       m_tree(
         only_these_points.begin(), only_these_points.end(),
         typename Tree::Splitter(),
-        STraits(std::begin(points)))
-  {
+        STraits(std::begin(points))) {
     // Build the tree now (we don't want to wait for the first query)
     m_tree.build();
   }
@@ -151,16 +148,14 @@ public:
       boost::counting_iterator<std::ptrdiff_t>(begin_idx),
       boost::counting_iterator<std::ptrdiff_t>(past_the_end_idx),
       typename Tree::Splitter(),
-      STraits(std::begin(points)) )
-  {
+      STraits(std::begin(points))) {
     // Build the tree now (we don't want to wait for the first query)
     m_tree.build();
   }
 
   // Be careful, this function invalidates the tree,
   // which will be recomputed at the next query
-  void insert(std::ptrdiff_t point_idx)
-  {
+  void insert(std::ptrdiff_t point_idx) {
     m_tree.insert(point_idx);
   }
 
@@ -174,8 +169,7 @@ public:
     Point &p,
     unsigned int k,
     bool sorted = true,
-    FT eps = FT(0)) const
-  {
+    FT eps = FT(0)) const {
     // Initialize the search structure, and search all N points
     // Note that we need to pass the Distance explicitly since it needs to
     // know the property map
@@ -185,9 +179,8 @@ public:
       k,
       eps,
       true,
-      CGAL::Distance_adapter<std::ptrdiff_t,Point_property_map,CGAL::Euclidean_distance<Traits_base> >(
-        std::begin(m_points)),
-      sorted);
+      CGAL::Distance_adapter<std::ptrdiff_t, Point_property_map, CGAL::Euclidean_distance<Traits_base> >(
+        std::begin(m_points)), sorted);
 
     return search;
   }
@@ -195,11 +188,10 @@ public:
   /// \brief Search incrementally for the nearest neighbors from a query point.
   /// @param[in] p The query point.
   /// @param[in] eps Approximation factor.
-  /// @return A range containing the neighbors sorted by their distance to p. 
+  /// @return A range containing the neighbors sorted by their distance to p.
   /// All the neighbors are not computed by this function, but they will be
   /// computed incrementally when the iterator on the range is incremented.
-  INS_range query_incremental_nearest_neighbors(const Point &p, FT eps = FT(0)) const
-  {
+  INS_range query_incremental_nearest_neighbors(const Point &p, FT eps = FT(0)) const {
     // Initialize the search structure, and search all N points
     // Note that we need to pass the Distance explicitly since it needs to
     // know the property map
@@ -224,8 +216,7 @@ public:
     Point &p,
     unsigned int k,
     bool sorted = true,
-    FT eps = FT(0)) const
-  {
+    FT eps = FT(0)) const {
     // Initialize the search structure, and search all N points
     // Note that we need to pass the Distance explicitly since it needs to
     // know the property map
@@ -235,9 +226,8 @@ public:
       k,
       eps,
       false,
-      CGAL::Distance_adapter<std::ptrdiff_t,Point_property_map,CGAL::Euclidean_distance<Traits_base> >(
-        std::begin(m_points)),
-      sorted);
+      CGAL::Distance_adapter<std::ptrdiff_t, Point_property_map, CGAL::Euclidean_distance<Traits_base> >(
+        std::begin(m_points)), sorted);
 
     return search;
   }
@@ -245,11 +235,10 @@ public:
   /// \brief Search incrementally for the farthest neighbors from a query point.
   /// @param[in] p The query point.
   /// @param[in] eps Approximation factor.
-  /// @return A range containing the neighbors sorted by their distance to p. 
+  /// @return A range containing the neighbors sorted by their distance to p.
   /// All the neighbors are not computed by this function, but they will be
   /// computed incrementally when the iterator on the range is incremented.
-  INS_range query_incremental_farthest_neighbors(const Point &p, FT eps = FT(0)) const
-  {
+  INS_range query_incremental_farthest_neighbors(const Point &p, FT eps = FT(0)) const {
     // Initialize the search structure, and search all N points
     // Note that we need to pass the Distance explicitly since it needs to
     // know the property map
@@ -264,13 +253,12 @@ public:
     return search;
   }
 
-
-private:
+ private:
   Point_range const& m_points;
   Tree m_tree;
 };
 
-} // namespace spatial_searching
-} // namespace Gudhi
+}  // namespace spatial_searching
+}  // namespace Gudhi
 
-#endif // GUDHI_SPATIAL_TREE_DS_H_
+#endif  // KD_TREE_SEARCH_H_
