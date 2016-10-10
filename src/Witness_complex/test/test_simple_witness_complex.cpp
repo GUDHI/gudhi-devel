@@ -85,10 +85,12 @@ BOOST_AUTO_TEST_CASE(simple_witness_complex) {
                                  witnesses.end());
   witness_complex.create_complex(complex, 0);
 
+  std::cout << "complex.num_simplices() = " << complex.num_simplices() << std::endl; 
   BOOST_CHECK(complex.num_simplices() == 24);
 
   witness_complex.create_complex(relaxed_complex, 8.01);
 
+  std::cout << "relaxed_complex.num_simplices() = " << relaxed_complex.num_simplices() << std::endl; 
   BOOST_CHECK(relaxed_complex.num_simplices() == 239);
   
   StrongWitnessComplex strong_witness_complex(landmarks.begin(),
@@ -98,6 +100,7 @@ BOOST_AUTO_TEST_CASE(simple_witness_complex) {
 
   strong_witness_complex.create_complex(strong_relaxed_complex, 9.1);
     
+  std::cout << "strong_relaxed_complex.num_simplices() = " << strong_relaxed_complex.num_simplices() << std::endl; 
   BOOST_CHECK(strong_relaxed_complex.num_simplices() == 239);
   
 }
