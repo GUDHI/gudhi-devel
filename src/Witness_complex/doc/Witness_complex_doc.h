@@ -6,7 +6,7 @@
 
    \author Siargey Kachanovich
 
-   \image html "Witness_complex_representation.png" "Witness complex representation in a Simplex tree (from \cite boissonnatmariasimplextreealgorithmica)"
+   \image html "Witness_complex_representation.png" "Witness complex representation"
 
    \section Definitions
 
