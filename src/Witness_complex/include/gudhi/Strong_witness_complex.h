@@ -128,7 +128,7 @@ private:
   template < typename SimplicialComplexForWitness >
   bool create_complex(SimplicialComplexForWitness& complex,
                       FT  max_alpha_square,
-                      Landmark_id limit_dimension = std::numeric_limits<Landmark_id>::max())       
+                      Landmark_id limit_dimension = std::numeric_limits<Landmark_id>::max()-1)       
   {
     std::size_t nbL = landmarks_.size();
     Landmark_id complex_dim = 0;
