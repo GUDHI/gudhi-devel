@@ -3,14 +3,7 @@ project(Tangential_complex_examples)
 
 if(CGAL_FOUND)
   if (NOT CGAL_VERSION VERSION_LESS 4.8.0)
-    message(STATUS "CGAL version: ${CGAL_VERSION}.")
-
-    find_package(Eigen3 3.1.0)
     if (EIGEN3_FOUND)
-      message(STATUS "Eigen3 version: ${EIGEN3_VERSION}.")
-      include( ${EIGEN3_USE_FILE} )
-      include_directories (BEFORE "../../include")
-
       add_executable( Tangential_complex_example_basic example_basic.cpp )
       target_link_libraries(Tangential_complex_example_basic ${CGAL_LIBRARY} ${Boost_DATE_TIME_LIBRARY})
       add_executable( Tangential_complex_example_with_perturb example_with_perturb.cpp )
@@ -18,13 +11,13 @@ if(CGAL_FOUND)
       if (TBB_FOUND)
         target_link_libraries(Tangential_complex_example_basic ${TBB_LIBRARIES})
         target_link_libraries(Tangential_complex_example_with_perturb ${TBB_LIBRARIES})
-      endif()
-    else()
-      message(WARNING "Eigen3 not found. Version 3.1.0 is required for the Tangential_complex examples.")
-    endif()
-  else()
-    message(WARNING "CGAL version: ${CGAL_VERSION} is too old to compile Tangential_complex examples. Version 4.8.0 is required.")
-  endif ()
-else()
-  message(WARNING "CGAL not found. It is required for the Tangential_complex examples.")
-endif()
+      endif(TBB_FOUND)
+
+      add_test(Tangential_complex_example_basic
+               ${CMAKE_CURRENT_BINARY_DIR}/Tangential_complex_example_basic)
+
+      add_test(Tangential_complex_example_with_perturb
+               ${CMAKE_CURRENT_BINARY_DIR}/Tangential_complex_example_with_perturb)
+    endif(EIGEN3_FOUND)
+  endif(NOT CGAL_VERSION VERSION_LESS 4.8.0)
+endif(CGAL_FOUND)
