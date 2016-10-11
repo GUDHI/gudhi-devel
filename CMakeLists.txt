@@ -145,6 +145,7 @@ else()
   add_subdirectory(src/Alpha_complex/test)
   add_subdirectory(src/Gudhi_stat/test)
   add_subdirectory(src/Gudhi_stat/example)
+  add_subdirectory(src/Gudhi_stat/utilities)
 
   # data points generator
   add_subdirectory(data/points/generator)

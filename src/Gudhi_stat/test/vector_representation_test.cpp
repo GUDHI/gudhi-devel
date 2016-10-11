@@ -4,7 +4,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA Sophia-Saclay (France)
+ *    Copyright (C) 2015  INRIA (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 
 
 #include <gudhi/concretizations/Vector_distances_in_diagram.h>
-#include <gudhi/common.h>
+#include <gudhi/common_gudhi_stat.h>
 #include <iostream>
 
 #define BOOST_TEST_DYN_LINK

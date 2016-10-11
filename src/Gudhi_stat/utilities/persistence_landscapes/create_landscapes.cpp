@@ -20,35 +20,37 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef Abs_Real_valued_topological_data_H_
-#define Abs_Real_valued_topological_data_H_
+
 
 #include <gudhi/abstract_classes/Abs_Topological_data.h>
+#include <gudhi/concretizations/Persistence_landscape.h>
 
-namespace Gudhi 
+
+
+using namespace Gudhi;
+using namespace Gudhi::Gudhi_stat;
+
+#include <iostream>
+#include <sstream>
+
+
+int main( int argc , char** argv )
 {
-namespace Gudhi_stat 
-{
-
-
-
-/**
-* This is specialization of a topological data class allows computing various real-valued characterizations of topological data.
-**/
-
-class Abs_Real_valued_topological_data : public virtual Abs_Topological_data
-{
-public:
-	 Abs_Real_valued_topological_data():number_of_functions_for_projections_to_reals(0){} 
-	 Abs_Real_valued_topological_data( size_t number_of_functions_ ):number_of_functions_for_projections_to_reals(number_of_functions_){} 
-	 size_t number_of_projections_to_R(){return this->number_of_functions_for_projections_to_reals;};
-     virtual double project_to_R( int number_of_function ) = 0;
-     virtual ~Abs_Real_valued_topological_data(){}
-protected:
-	size_t number_of_functions_for_projections_to_reals;
-};
-
-}//namespace Gudhi_stat
-}//namespace Gudhi 
-
-#endif
+	std::cout << "This program creates persistence landscapes of diagrams provided as an input. Please call this program with the names of files with persistence diagrams \n";
+	std::vector< const char* > filenames;
+	for ( int i = 1 ; i < argc ; ++i )
+	{
+		filenames.push_back( argv[i] );
+	}
+	
+	std::cout << "Creating persistence landscapes...\n";	
+	for ( size_t i = 0 ; i != filenames.size() ; ++i )
+	{
+		Persistence_landscape l( filenames[i] , 1 );
+		std::stringstream ss;
+		ss << filenames[i] << ".land";
+		l.print_to_file( ss.str().c_str() );
+	}
+	std::cout << "Done \n";
+	return 0;
+}

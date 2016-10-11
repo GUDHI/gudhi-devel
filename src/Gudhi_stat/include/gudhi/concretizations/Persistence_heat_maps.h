@@ -4,7 +4,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA Sophia-Saclay (France)
+ *    Copyright (C) 2015  INRIA (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -19,6 +19,9 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#ifndef Persistence_heat_maps_H
+#define Persistence_heat_maps_H
  
 //standard include
 #include <vector>
@@ -36,7 +39,7 @@
 #include <gudhi/abstract_classes/Abs_Real_valued_topological_data.h>
 #include <gudhi/abstract_classes/Abs_Topological_data_with_scalar_product.h>
 #include <gudhi/concretizations/read_persitence_from_file.h>
-#include <gudhi/common.h>
+#include <gudhi/common_gudhi_stat.h>
 
 
 
@@ -311,7 +314,7 @@ public:
     std::vector<double> vectorize( int number_of_function );
 	double distance( const Abs_Topological_data_with_distances* second_ , double power = 1);
 	double project_to_R( int number_of_function );	
-	void compute_average( std::vector< Abs_Topological_data_with_averages* > to_average );	
+	void compute_average( const std::vector< Abs_Topological_data_with_averages* >& to_average );	
 	double compute_scalar_product( const Abs_Topological_data_with_scalar_product* second_ );
 	
 protected:
@@ -740,7 +743,7 @@ double Persistence_heat_maps::project_to_R( int number_of_function )
 	return result;
 }
 
-void Persistence_heat_maps::compute_average( std::vector< Abs_Topological_data_with_averages* > to_average )
+void Persistence_heat_maps::compute_average( const std::vector< Abs_Topological_data_with_averages* >& to_average )
 {
 	std::vector<Persistence_heat_maps*> maps;
 	maps.reserve( to_average.size() );
@@ -779,3 +782,6 @@ double Persistence_heat_maps::compute_scalar_product( const Abs_Topological_data
 
 }//namespace Gudhi_stat
 }//namespace Gudhi
+
+
+#endif

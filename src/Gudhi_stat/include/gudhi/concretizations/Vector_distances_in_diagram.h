@@ -4,7 +4,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA Sophia-Saclay (France)
+ *    Copyright (C) 2015  INRIA (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+
 #ifndef Vector_distances_in_diagram_H
 #define Vector_distances_in_diagram_H
 
@@ -38,7 +38,7 @@
 #include <gudhi/abstract_classes/Abs_Real_valued_topological_data.h>
 #include <gudhi/abstract_classes/Abs_Topological_data_with_scalar_product.h>
 #include <gudhi/concretizations/read_persitence_from_file.h>
-#include <gudhi/common.h>
+#include <gudhi/common_gudhi_stat.h>
 using namespace std;
 
 namespace Gudhi 
@@ -88,7 +88,7 @@ public:
     /**
 	* The constructor that takes as an input a multiset of persistence intervals (given as vector of birth-death pairs). The second parameter is the desiered length of the output vectors. 
 	**/
-    Vector_distances_in_diagram( std::vector< std::pair< double , double > > intervals , size_t where_to_cut );
+    Vector_distances_in_diagram( const std::vector< std::pair< double , double > >& intervals , size_t where_to_cut );
     
     /**
 	* The constructor taking as an input a file with birth-death pairs. The second parameter is the desiered length of the output vectors. 
@@ -112,9 +112,9 @@ public:
 	template <typename K>
     friend ostream& operator << ( ostream& out , const Vector_distances_in_diagram<K>& d )
     {
-        for ( size_t i = 0 ; i != std::min( d.sorted_vector_of_distnaces.size() , d.where_to_cut) ; ++i )
+        for ( size_t i = 0 ; i != std::min( d.sorted_vector_of_distances.size() , d.where_to_cut) ; ++i )
         {
-            out << d.sorted_vector_of_distnaces[i] << " ";
+            out << d.sorted_vector_of_distances[i] << " ";
         }
         return out;
     }
@@ -124,14 +124,14 @@ public:
 	**/ 
     inline double vector_in_position( size_t position )
     {
-        if ( position >= this->sorted_vector_of_distnaces.size() )throw("Wrong position in accessing Vector_distances_in_diagram::sorted_vector_of_distnaces\n");
-        return this->sorted_vector_of_distnaces[position];
+        if ( position >= this->sorted_vector_of_distances.size() )throw("Wrong position in accessing Vector_distances_in_diagram::sorted_vector_of_distances\n");
+        return this->sorted_vector_of_distances[position];
     }
 
 	/**
 	 * Return a size of a vector. 
 	**/
-    inline size_t size()const{return this->sorted_vector_of_distnaces.size();}
+    inline size_t size()const{return this->sorted_vector_of_distances.size();}
     
     /**
 	 * Write a vector to a file.
@@ -156,10 +156,10 @@ public:
     **/ 
     bool operator == ( const Vector_distances_in_diagram& second )
     {
-		if ( this->sorted_vector_of_distnaces.size() != second.sorted_vector_of_distnaces.size() )return false;
-		for ( size_t i = 0 ; i != this->sorted_vector_of_distnaces.size() ; ++i )
+		if ( this->sorted_vector_of_distances.size() != second.sorted_vector_of_distances.size() )return false;
+		for ( size_t i = 0 ; i != this->sorted_vector_of_distances.size() ; ++i )
 		{
-			if ( !almost_equal(this->sorted_vector_of_distnaces[i] , second.sorted_vector_of_distnaces[i]) )return false;
+			if ( !almost_equal(this->sorted_vector_of_distances[i] , second.sorted_vector_of_distances[i]) )return false;
 		}
 		return true;
 	}
@@ -183,7 +183,7 @@ public:
     /**
      * Compute a average of two persistent vectors.
     **/
-    void compute_average( std::vector< Abs_Topological_data_with_averages* > to_average );
+    void compute_average( const std::vector< Abs_Topological_data_with_averages* >& to_average );
     
     /**
      * Compute a distance of two persistent vectors.
@@ -200,7 +200,7 @@ public:
     **/
     std::vector< double > output_for_visualization()
     {
-		return this->sorted_vector_of_distnaces;
+		return this->sorted_vector_of_distances;
 	}
 	
 	/**
@@ -216,9 +216,9 @@ public:
 		out << "set style histogram cluster gap 1" << std::endl;
 		out << "set style fill solid border -1" << std::endl;
 		out << "plot '-' notitle" << std::endl;    
-		for ( size_t i = 0 ; i != this->sorted_vector_of_distnaces.size() ; ++i )
+		for ( size_t i = 0 ; i != this->sorted_vector_of_distances.size() ; ++i )
 		{
-			out << this->sorted_vector_of_distnaces[i]  << std::endl;
+			out << this->sorted_vector_of_distances[i]  << std::endl;
 		}		
 		out << endl;
 		out.close();
@@ -228,12 +228,12 @@ public:
 
 private:
     std::vector< std::pair< double , double > > intervals;
-    std::vector< double > sorted_vector_of_distnaces;
+    std::vector< double > sorted_vector_of_distances;
 
-    void compute_sorted_vector_of_distnaces_via_heap( size_t where_to_cut );
-    void compute_sorted_vector_of_distnaces_via_vector_sorting( size_t where_to_cut );
+    void compute_sorted_vector_of_distances_via_heap( size_t where_to_cut );
+    void compute_sorted_vector_of_distances_via_vector_sorting( size_t where_to_cut );
     
-    Vector_distances_in_diagram( const std::vector< double >& sorted_vector_of_distnaces_ ):sorted_vector_of_distnaces(sorted_vector_of_distnaces_)
+    Vector_distances_in_diagram( const std::vector< double >& sorted_vector_of_distances_ ):sorted_vector_of_distances(sorted_vector_of_distances_)
     {
 		this->set_up_numbers_of_functions_for_vectorization_and_projections_to_reals();
 	}
@@ -241,19 +241,19 @@ private:
     void set_up_numbers_of_functions_for_vectorization_and_projections_to_reals()
 	{		
 		//warning, this function can be only called after filling in the intervals vector.
-		this->number_of_functions_for_vectorization = this->sorted_vector_of_distnaces.size();
-		this->number_of_functions_for_projections_to_reals = this->sorted_vector_of_distnaces.size();
+		this->number_of_functions_for_vectorization = this->sorted_vector_of_distances.size();
+		this->number_of_functions_for_projections_to_reals = this->sorted_vector_of_distances.size();
 	}
 };
 
 
 template <typename F>
-Vector_distances_in_diagram<F>::Vector_distances_in_diagram( std::vector< std::pair< double,double > > intervals_ , size_t where_to_cut ):Abs_Vectorized_topological_data(where_to_cut)
+Vector_distances_in_diagram<F>::Vector_distances_in_diagram( const std::vector< std::pair< double,double > >& intervals_ , size_t where_to_cut ):Abs_Vectorized_topological_data(where_to_cut)
 {    
     std::vector< std::pair< double,double > > i( intervals_ );
     this->intervals = i;
-    //this->compute_sorted_vector_of_distnaces_via_heap( where_to_cut );
-    this->compute_sorted_vector_of_distnaces_via_vector_sorting(where_to_cut);
+    //this->compute_sorted_vector_of_distances_via_heap( where_to_cut );
+    this->compute_sorted_vector_of_distances_via_vector_sorting(where_to_cut);
     this->set_up_numbers_of_functions_for_vectorization_and_projections_to_reals();
 }
 
@@ -262,8 +262,8 @@ Vector_distances_in_diagram<F>::Vector_distances_in_diagram( const Vector_distan
 {
     std::vector< std::pair< double,double > > inter( org.intervals );
     this->intervals = inter;
-    std::vector< double > sorted_vector_of_distnaces( org.sorted_vector_of_distnaces );
-    this->sorted_vector_of_distnaces = sorted_vector_of_distnaces;
+    std::vector< double > sorted_vector_of_distances( org.sorted_vector_of_distances );
+    this->sorted_vector_of_distances = sorted_vector_of_distances;
     set_up_numbers_of_functions_for_vectorization_and_projections_to_reals();
 }
 
@@ -273,8 +273,8 @@ Vector_distances_in_diagram<F>& Vector_distances_in_diagram<F>::operator =( cons
 {
     std::vector< std::pair< double , double > > inter( org.intervals );
     this->intervals = inter;
-    std::vector< double > sorted_vector_of_distnaces( org.sorted_vector_of_distnaces );
-    this->sorted_vector_of_distnaces = sorted_vector_of_distnaces;
+    std::vector< double > sorted_vector_of_distances( org.sorted_vector_of_distances );
+    this->sorted_vector_of_distances = sorted_vector_of_distances;
     return *this;
 }
 
@@ -288,13 +288,13 @@ Vector_distances_in_diagram<F>::Vector_distances_in_diagram( const char* filenam
     //std::vector< std::pair< double , double > > intervals = read_gudhi_file( filename , dimension );    
      
     this->intervals = intervals;
-    this->compute_sorted_vector_of_distnaces_via_heap( where_to_cut );
-    //this->compute_sorted_vector_of_distnaces_via_vector_sorting( where_to_cut );
+    this->compute_sorted_vector_of_distances_via_heap( where_to_cut );
+    //this->compute_sorted_vector_of_distances_via_vector_sorting( where_to_cut );
     set_up_numbers_of_functions_for_vectorization_and_projections_to_reals();  
 }
 
 template < typename F>
-void Vector_distances_in_diagram<F>::compute_sorted_vector_of_distnaces_via_heap( size_t where_to_cut )
+void Vector_distances_in_diagram<F>::compute_sorted_vector_of_distances_via_heap( size_t where_to_cut )
 {
 
     bool dbg = false;
@@ -387,14 +387,14 @@ void Vector_distances_in_diagram<F>::compute_sorted_vector_of_distnaces_via_heap
 		std::cout << endl;
 	} 
 
-    this->sorted_vector_of_distnaces = heap;
+    this->sorted_vector_of_distances = heap;
 }
 
 
 
 
 template < typename F>
-void Vector_distances_in_diagram<F>::compute_sorted_vector_of_distnaces_via_vector_sorting( size_t where_to_cut )
+void Vector_distances_in_diagram<F>::compute_sorted_vector_of_distances_via_vector_sorting( size_t where_to_cut )
 {		
 	std::vector< double > distances;	
 	distances.reserve( (size_t)(0.5 * this->intervals.size() * ( this->intervals.size() - 1 ) + this->intervals.size()) );
@@ -421,7 +421,7 @@ void Vector_distances_in_diagram<F>::compute_sorted_vector_of_distnaces_via_vect
     std::sort( distances.begin() , distances.end() , std::greater<double>() );    
     if ( distances.size() > where_to_cut )distances.resize( where_to_cut );       
     
-    this->sorted_vector_of_distnaces =  distances;
+    this->sorted_vector_of_distances =  distances;
 }
 
 
@@ -436,13 +436,13 @@ double Vector_distances_in_diagram<F>::project_to_R( int number_of_function )
 	double result = 0;
 	for ( size_t i = 0 ; i != number_of_function ; ++i )
 	{
-		result += sorted_vector_of_distnaces[i];
+		result += sorted_vector_of_distances[i];
 	}
 	return result;
 }
 
 template <typename F>
-void Vector_distances_in_diagram<F>::compute_average( std::vector< Abs_Topological_data_with_averages* > to_average )
+void Vector_distances_in_diagram<F>::compute_average( const std::vector< Abs_Topological_data_with_averages* >& to_average )
 {
 	
 	if ( to_average.size() == 0 )
@@ -455,9 +455,9 @@ void Vector_distances_in_diagram<F>::compute_average( std::vector< Abs_Topologic
 	for ( size_t i = 0 ; i != to_average.size() ; ++i )
 	{
 		Vector_distances_in_diagram<F>* current = (Vector_distances_in_diagram<F>*)to_average[i];
-		if ( current->sorted_vector_of_distnaces.size() > maximal_length_of_vector )
+		if ( current->sorted_vector_of_distances.size() > maximal_length_of_vector )
 		{
-			maximal_length_of_vector = current->sorted_vector_of_distnaces.size();
+			maximal_length_of_vector = current->sorted_vector_of_distances.size();
 		}
 	}
 	
@@ -467,9 +467,9 @@ void Vector_distances_in_diagram<F>::compute_average( std::vector< Abs_Topologic
 	for ( size_t i = 0 ; i != to_average.size() ; ++i )
 	{
 		Vector_distances_in_diagram<F>* current = (Vector_distances_in_diagram<F>*)to_average[i];
-		for ( size_t j = 0  ; j != current->sorted_vector_of_distnaces.size() ; ++j )
+		for ( size_t j = 0  ; j != current->sorted_vector_of_distances.size() ; ++j )
 		{
-			av[j] += current->sorted_vector_of_distnaces[j];
+			av[j] += current->sorted_vector_of_distances[j];
 		}
 	}
 	
@@ -477,7 +477,7 @@ void Vector_distances_in_diagram<F>::compute_average( std::vector< Abs_Topologic
 	{
 		av[i] /= (double)to_average.size();
 	}
-	this->sorted_vector_of_distnaces = av;
+	this->sorted_vector_of_distances = av;
 	this->where_to_cut = av.size();
 }
 
@@ -498,40 +498,40 @@ double Vector_distances_in_diagram<F>::distance( const Abs_Topological_data_with
 	
 	
 	double result = 0;
-	for ( size_t i = 0 ; i != std::min(this->sorted_vector_of_distnaces.size(), second_->sorted_vector_of_distnaces.size())  ; ++i )
+	for ( size_t i = 0 ; i != std::min(this->sorted_vector_of_distances.size(), second_->sorted_vector_of_distances.size())  ; ++i )
 	{
 		if ( power == 1 )
 		{
 			if ( dbg )
 			{
-				cerr << "|" << this->sorted_vector_of_distnaces[i] << " -  " << second_->sorted_vector_of_distnaces[i] << " |  : " << fabs( this->sorted_vector_of_distnaces[i] - second_->sorted_vector_of_distnaces[i] ) << endl;
+				cerr << "|" << this->sorted_vector_of_distances[i] << " -  " << second_->sorted_vector_of_distances[i] << " |  : " << fabs( this->sorted_vector_of_distances[i] - second_->sorted_vector_of_distances[i] ) << endl;
 			}
-			result += fabs( this->sorted_vector_of_distnaces[i] - second_->sorted_vector_of_distnaces[i] );
+			result += fabs( this->sorted_vector_of_distances[i] - second_->sorted_vector_of_distances[i] );
 		}
 		else
 		{
-			result += std::pow( fabs( this->sorted_vector_of_distnaces[i] - second_->sorted_vector_of_distnaces[i] ) , power );
+			result += std::pow( fabs( this->sorted_vector_of_distances[i] - second_->sorted_vector_of_distances[i] ) , power );
 			if ( dbg )
 			{
-				cerr << "| " << this->sorted_vector_of_distnaces[i] << " - " << second_->sorted_vector_of_distnaces[i]  << " : " << fabs( this->sorted_vector_of_distnaces[i] - second_->sorted_vector_of_distnaces[i] ) << endl;
+				cerr << "| " << this->sorted_vector_of_distances[i] << " - " << second_->sorted_vector_of_distances[i]  << " : " << fabs( this->sorted_vector_of_distances[i] - second_->sorted_vector_of_distances[i] ) << endl;
 			}
 		}
 	}
-	if ( this->sorted_vector_of_distnaces.size() != second_->sorted_vector_of_distnaces.size() )
+	if ( this->sorted_vector_of_distances.size() != second_->sorted_vector_of_distances.size() )
 	{
-		if ( this->sorted_vector_of_distnaces.size() > second_->sorted_vector_of_distnaces.size() )
+		if ( this->sorted_vector_of_distances.size() > second_->sorted_vector_of_distances.size() )
 		{
-			for ( size_t i = second_->sorted_vector_of_distnaces.size() ; i != this->sorted_vector_of_distnaces.size() ; ++i )			
+			for ( size_t i = second_->sorted_vector_of_distances.size() ; i != this->sorted_vector_of_distances.size() ; ++i )			
 			{
-				result += fabs( this->sorted_vector_of_distnaces[i] );
+				result += fabs( this->sorted_vector_of_distances[i] );
 			}
 		}
 		else
 		{
-			//this->sorted_vector_of_distnaces.size() < second_->sorted_vector_of_distnaces.size()
-			for ( size_t i = this->sorted_vector_of_distnaces.size() ; i != second_->sorted_vector_of_distnaces.size() ; ++i )			
+			//this->sorted_vector_of_distances.size() < second_->sorted_vector_of_distances.size()
+			for ( size_t i = this->sorted_vector_of_distances.size() ; i != second_->sorted_vector_of_distances.size() ; ++i )			
 			{
-				result += fabs( second_->sorted_vector_of_distnaces[i] );
+				result += fabs( second_->sorted_vector_of_distances[i] );
 			}			
 		}
 	}
@@ -550,10 +550,10 @@ std::vector<double> Vector_distances_in_diagram<F>::vectorize( int number_of_fun
 	if ( number_of_function > this->number_of_functions_for_vectorization )throw "Wrong index of a function in a method Vector_distances_in_diagram<F>::vectorize";
 	if ( number_of_function < 0 )throw "Wrong index of a function in a method Vector_distances_in_diagram<F>::vectorize";
 	
-    std::vector< double > result( std::min( (size_t)number_of_function , this->sorted_vector_of_distnaces.size() ) );
-    for ( size_t i = 0 ; i != std::min( (size_t)number_of_function , this->sorted_vector_of_distnaces.size() ) ; ++i )
+    std::vector< double > result( std::min( (size_t)number_of_function , this->sorted_vector_of_distances.size() ) );
+    for ( size_t i = 0 ; i != std::min( (size_t)number_of_function , this->sorted_vector_of_distances.size() ) ; ++i )
     {
-        result[i] = this->sorted_vector_of_distnaces[i];
+        result[i] = this->sorted_vector_of_distances[i];
     }
     return result;
 }
@@ -565,9 +565,9 @@ void Vector_distances_in_diagram<F>::write_to_file( const char* filename )
 	std::ofstream out;
 	out.open( filename );
 	
-	for ( size_t i = 0 ; i != this->sorted_vector_of_distnaces.size() ; ++i )
+	for ( size_t i = 0 ; i != this->sorted_vector_of_distances.size() ; ++i )
 	{
-		out << this->sorted_vector_of_distnaces[i] << " ";
+		out << this->sorted_vector_of_distances[i] << " ";
 	}
 	
 	out.close();
@@ -590,7 +590,7 @@ void Vector_distances_in_diagram<F>::load_from_file( const char* filename )
 	{		
 		in >> number;
 		if ( in.eof() )break;
-		this->sorted_vector_of_distnaces.push_back(number);
+		this->sorted_vector_of_distances.push_back(number);
 	}	
 	in.close();
 }
@@ -601,9 +601,9 @@ double Vector_distances_in_diagram<F>::compute_scalar_product( const Abs_Topolog
 	Vector_distances_in_diagram<F>* second_vector = (Vector_distances_in_diagram<F>*)second;
 		
 	double result = 0;
-	for ( size_t i = 0 ; i != std::min(this->sorted_vector_of_distnaces.size(),second_vector->sorted_vector_of_distnaces.size()) ; ++i )
+	for ( size_t i = 0 ; i != std::min(this->sorted_vector_of_distances.size(),second_vector->sorted_vector_of_distances.size()) ; ++i )
 	{
-		result += this->sorted_vector_of_distnaces[i] * second_vector->sorted_vector_of_distnaces[i];
+		result += this->sorted_vector_of_distances[i] * second_vector->sorted_vector_of_distances[i];
 	}
 	return result;
 }

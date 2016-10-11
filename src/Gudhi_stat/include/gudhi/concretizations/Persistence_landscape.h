@@ -4,7 +4,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA Sophia-Saclay (France)
+ *    Copyright (C) 2015  INRIA (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@
 #include <gudhi/abstract_classes/Abs_Real_valued_topological_data.h>
 #include <gudhi/abstract_classes/Abs_Topological_data_with_scalar_product.h>
 #include <gudhi/concretizations/read_persitence_from_file.h>
-#include <gudhi/common.h>
+#include <gudhi/common_gudhi_stat.h>
 using namespace std;
 
 
@@ -446,7 +446,7 @@ public:
 		}
 		return v;
 	}
-    void compute_average( std::vector< Abs_Topological_data_with_averages* > to_average )
+    void compute_average( const std::vector< Abs_Topological_data_with_averages* >& to_average )
     {
 		bool dbg = false;
 

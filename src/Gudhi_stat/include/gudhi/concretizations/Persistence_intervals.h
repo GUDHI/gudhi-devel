@@ -4,7 +4,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA Sophia-Saclay (France)
+ *    Copyright (C) 2015  INRIA (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -517,7 +517,8 @@ std::vector< double > Persistence_intervals::k_n_n( size_t k , size_t where_to_c
     }
     std::vector< double > distances_from_diagonal( this->intervals.size() );
     std::fill( distances_from_diagonal.begin() , distances_from_diagonal.end() , 0 );
-    for ( size_t i = 0 ; i != this->intervals.size() ; ++i )
+
+    for ( size_t i = 0 ; i != this->intervals.size() ; ++i )
     {
         std::vector< double > distancesFromI;
         for ( size_t j = i+1 ; j != this->intervals.size() ; ++j )

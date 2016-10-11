@@ -20,35 +20,38 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef Abs_Real_valued_topological_data_H_
-#define Abs_Real_valued_topological_data_H_
 
+
+#include <gudhi/reader_utils.h>
 #include <gudhi/abstract_classes/Abs_Topological_data.h>
+#include <gudhi/concretizations/Persistence_intervals.h>
 
-namespace Gudhi 
+#include <iostream>
+
+
+
+using namespace Gudhi;
+using namespace Gudhi::Gudhi_stat;
+
+using namespace std;
+
+
+int main( int argc , char** argv )
 {
-namespace Gudhi_stat 
-{
+	std::cout << "This program compute the dominant intervals. A number of intervals to be displayed is a parameter of this program. \n";
+	if ( argc != 3 )
+	{
+		cout << "To run this program, please provide the name of a file with persistence diagram and number of dominant intervals you would like to get \n";
+		return 1;
+	}
 
-
-
-/**
-* This is specialization of a topological data class allows computing various real-valued characterizations of topological data.
-**/
-
-class Abs_Real_valued_topological_data : public virtual Abs_Topological_data
-{
-public:
-	 Abs_Real_valued_topological_data():number_of_functions_for_projections_to_reals(0){} 
-	 Abs_Real_valued_topological_data( size_t number_of_functions_ ):number_of_functions_for_projections_to_reals(number_of_functions_){} 
-	 size_t number_of_projections_to_R(){return this->number_of_functions_for_projections_to_reals;};
-     virtual double project_to_R( int number_of_function ) = 0;
-     virtual ~Abs_Real_valued_topological_data(){}
-protected:
-	size_t number_of_functions_for_projections_to_reals;
-};
-
-}//namespace Gudhi_stat
-}//namespace Gudhi 
-
-#endif
+	Persistence_intervals p( argv[1] );
+	std::vector< std::pair<double,double> > dominant_intervals = p.dominant_intervals( atoi( argv[2] ) );
+	cout << "Here are the dominant intervals : " << endl;
+	for ( size_t i = 0 ; i != dominant_intervals.size() ; ++i )
+	{
+		cout << " " << dominant_intervals[i].first<< "," << dominant_intervals[i].second  << " "<< endl;
+	}
+	
+	return 0;
+}

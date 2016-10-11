@@ -4,7 +4,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA Sophia-Saclay (France)
+ *    Copyright (C) 2015  INRIA (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -24,17 +24,13 @@
 #define Abs_Vectorized_topological_data_H_
 
 #include <gudhi/abstract_classes/Abs_Topological_data.h>
+#include "Abs_Topological_data.h"
+#include <vector>
 
 namespace Gudhi 
 {
 namespace Gudhi_stat 
 {
-
-//with this path it do not find the files
-//#include <gudhi/abstract_classes/Abs_Topological_data.h>
-#include "Abs_Topological_data.h"
-#include <vector>
-
 using namespace std;
 
 /**

@@ -1,3 +1,25 @@
+/*    This file is part of the Gudhi Library. The Gudhi library
+ *    (Geometric Understanding in Higher Dimensions) is a generic C++
+ *    library for computational topology.
+ *
+ *    Author(s):       Pawel Dlotko
+ *
+ *    Copyright (C) 2015  INRIA (France)
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef Persistence_landscape_on_grid_H_
 #define Persistence_landscape_on_grid_H_
 
@@ -20,6 +42,7 @@
 #include <gudhi/abstract_classes/Abs_Real_valued_topological_data.h>
 #include <gudhi/abstract_classes/Abs_Topological_data_with_scalar_product.h>
 #include <gudhi/concretizations/read_persitence_from_file.h>
+#include <gudhi/common_gudhi_stat.h>	
 
 
 
@@ -46,23 +69,6 @@ struct greater
     template<class T>
     bool operator()(T const &a, T const &b) const { return a > b; }
 };
-
-//double epsi = std::numeric_limits<double>::epsilon();
-double epsi = 0.000005;
-
-
-/**
- *  A procedure used to compare doubles. Typically gien two doubles A and B, comparing A == B is not good idea. In this case, we use the procedure almostEqual with the epsi defined at
- *  the top of the file. Setting up the epsi give the user a tolerance on what should be consider equal.
-**/
-inline bool almost_equal( double a , double b )
-{
-    if ( fabs(a-b) < epsi )
-        return true;
-    return false;
-}
-
-
 
 
 class Persistence_landscape_on_grid  :
@@ -739,7 +745,7 @@ public:
 	/**
 	 * A function to compute averaged persistence landscape on a grid, based on vector of persistence landscapes on grid (projected to Abs_Topological_data_with_averages*, since this is a concretization of a virtual method.
 	**/  
-    void compute_average( std::vector< Abs_Topological_data_with_averages* > to_average )
+    void compute_average( const std::vector< Abs_Topological_data_with_averages* >& to_average )
     {
 		
 		bool dbg = false;

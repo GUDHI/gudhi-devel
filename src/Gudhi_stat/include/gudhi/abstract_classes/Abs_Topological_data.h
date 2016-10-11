@@ -4,7 +4,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA Sophia-Saclay (France)
+ *    Copyright (C) 2015  INRIA (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -20,10 +20,10 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-//#ifndef ABS_Topological_data_H_
-//#define ABS_Topological_data_H_
+#ifndef ABS_Topological_data_H_
+#define ABS_Topological_data_H_
 
-#pragma once
+
 
 namespace Gudhi 
 {
@@ -44,4 +44,4 @@ class Abs_Topological_data
 }//namespace Gudhi_stat
 }//namespace Gudhi 
 
-//#endif
+#endif

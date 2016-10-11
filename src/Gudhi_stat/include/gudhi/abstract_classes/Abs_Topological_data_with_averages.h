@@ -5,7 +5,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA Sophia-Saclay (France)
+ *    Copyright (C) 2015  INRIA (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -23,14 +23,13 @@
 
 #ifndef Abs_Topological_data_with_averages_H_
 #define Abs_Topological_data_with_averages_H_
+#include <gudhi/abstract_classes/Abs_Topological_data.h>
+
 
 namespace Gudhi 
 {
 namespace Gudhi_stat 
 {
-	
-#include <gudhi/abstract_classes/Abs_Topological_data.h>
-
 
 /**
 * This is an abstract container to store topological information. Most typically, this information will be some representation of persistent homology.
@@ -46,7 +45,7 @@ public:
     //2) Function returns  Abs_Topological_data*, and compute the average of all the objects in the vector, plus (*this). 
     //virtual Abs_Topological_data* compute_average( std::vector< Abs_Topological_data_with_averages* > to_average ) = 0;
     //At the moment I will try to implement option (1). 
-    virtual void compute_average( std::vector< Abs_Topological_data_with_averages* > to_average ) = 0;
+    virtual void compute_average( const std::vector< Abs_Topological_data_with_averages* >& to_average ) = 0;
     virtual ~Abs_Topological_data_with_averages(){}
 protected:
 };

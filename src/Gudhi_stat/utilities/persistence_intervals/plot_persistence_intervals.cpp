@@ -20,35 +20,40 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef Abs_Real_valued_topological_data_H_
-#define Abs_Real_valued_topological_data_H_
 
+
+#include <gudhi/reader_utils.h>
 #include <gudhi/abstract_classes/Abs_Topological_data.h>
+#include <gudhi/concretizations/Persistence_intervals.h>
 
-namespace Gudhi 
+#include <iostream>
+
+
+
+using namespace Gudhi;
+using namespace Gudhi::Gudhi_stat;
+
+
+double epsilon = 0.0000005;
+
+using namespace std;
+
+	
+int main( int argc , char** argv )
 {
-namespace Gudhi_stat 
-{
+	if ( argc != 2 )
+	{
+		cout << "To run this program, please provide the name of a file with persistence diagram \n";
+		return 1;
+	}
+	Persistence_intervals b( argv[1] );
+	b.plot( argv[1] );
+	return 0;
+}
 
 
 
-/**
-* This is specialization of a topological data class allows computing various real-valued characterizations of topological data.
-**/
 
-class Abs_Real_valued_topological_data : public virtual Abs_Topological_data
-{
-public:
-	 Abs_Real_valued_topological_data():number_of_functions_for_projections_to_reals(0){} 
-	 Abs_Real_valued_topological_data( size_t number_of_functions_ ):number_of_functions_for_projections_to_reals(number_of_functions_){} 
-	 size_t number_of_projections_to_R(){return this->number_of_functions_for_projections_to_reals;};
-     virtual double project_to_R( int number_of_function ) = 0;
-     virtual ~Abs_Real_valued_topological_data(){}
-protected:
-	size_t number_of_functions_for_projections_to_reals;
-};
 
-}//namespace Gudhi_stat
-}//namespace Gudhi 
 
-#endif
+

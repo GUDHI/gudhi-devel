@@ -20,35 +20,36 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef Abs_Real_valued_topological_data_H_
-#define Abs_Real_valued_topological_data_H_
+
 
 #include <gudhi/abstract_classes/Abs_Topological_data.h>
+#include <gudhi/concretizations/Persistence_landscape_on_grid.h>
 
-namespace Gudhi 
+
+
+using namespace Gudhi;
+using namespace Gudhi::Gudhi_stat;
+
+#include <iostream>
+#include <sstream>
+
+
+int main( int argc , char** argv )
 {
-namespace Gudhi_stat 
-{
-
-
-
-/**
-* This is specialization of a topological data class allows computing various real-valued characterizations of topological data.
-**/
-
-class Abs_Real_valued_topological_data : public virtual Abs_Topological_data
-{
-public:
-	 Abs_Real_valued_topological_data():number_of_functions_for_projections_to_reals(0){} 
-	 Abs_Real_valued_topological_data( size_t number_of_functions_ ):number_of_functions_for_projections_to_reals(number_of_functions_){} 
-	 size_t number_of_projections_to_R(){return this->number_of_functions_for_projections_to_reals;};
-     virtual double project_to_R( int number_of_function ) = 0;
-     virtual ~Abs_Real_valued_topological_data(){}
-protected:
-	size_t number_of_functions_for_projections_to_reals;
-};
-
-}//namespace Gudhi_stat
-}//namespace Gudhi 
-
-#endif
+	std::cout << "This program plot persistence landscape on grid stored in a file (the file needs to be created beforehand). Please call the code with the name of a landsape on grid file \n";	
+	if ( argc == 1 )
+	{
+		std::cout << "Wrong parameters of a program call, the program will now terminate \n";
+		return 1;
+	}
+	Persistence_landscape_on_grid l;
+	l.load_landscape_from_file( argv[1] );
+	
+	std::stringstream ss;
+	ss << argv[1] << "_gnuplot_script";
+	l.plot( ss.str().c_str() );
+	
+	std::cout << "Done \n";
+		
+	return 0;
+}

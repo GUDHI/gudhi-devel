@@ -4,7 +4,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA Sophia-Saclay (France)
+ *    Copyright (C) 2015  INRIA (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -23,14 +23,15 @@
 #ifndef Abs_Topological_data_with_distances_H_
 #define Abs_Topological_data_with_distances_H_
 
+//#include "Abs_Topological_data.h"
+#include <gudhi/abstract_classes/Abs_Topological_data.h>
+
+
 namespace Gudhi 
 {
 namespace Gudhi_stat 
 {
 
-//with this path it do not find the files
-//#include <gudhi/abstract_classes/Abs_Topological_data.h>
-#include "Abs_Topological_data.h"
 
 /**
 * This is an abstract container to store topological information. Most typically, this information will be some representation of persistent homology.
