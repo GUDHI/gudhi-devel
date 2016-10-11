@@ -93,6 +93,25 @@
     </td>
  </tr>
 </table>
+ \subsection TangentialComplexDataStructure Tangential complex
+ \image html "tc_examples.png" "Tangential complex representation"
+<table border="0">
+  <tr>
+    <td width="25%">
+      <b>Author:</b> Cl&eacute;ment Jamin<br>
+      <b>Introduced in:</b> GUDHI 1.4.0<br>
+      <b>Copyright:</b> GPL v3<br>
+    </td>
+    <td width="75%">
+    A Tangential Delaunay complex is a <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
+    designed to reconstruct a \f$ k \f$-dimensional manifold embedded in \f$ d \f$-dimensional Euclidean space. 
+    The input is a point sample coming from an unknown manifold.
+    The running time depends only linearly on the extrinsic dimension \f$ d \f$
+    and exponentially on the intrinsic dimension \f$ k \f$.<br>
+    <b>User manual:</b> \ref tangential_complex - <b>Reference manual:</b> Gudhi::tangential_complex::Tangential_complex
+    </td>
+ </tr>
+</table>
  \subsection WitnessComplexDataStructure Witness complex
  \image html "Witness_complex_representation.png" "Witness complex representation"
 <table border="0">
@@ -337,6 +356,8 @@ make \endverbatim
  * @example Skeleton_blocker/Skeleton_blocker_from_simplices.cpp
  * @example Skeleton_blocker/Skeleton_blocker_iteration.cpp
  * @example Skeleton_blocker/Skeleton_blocker_link.cpp
+ * @example Tangential_complex/example_basic.cpp
+ * @example Tangential_complex/example_with_perturb.cpp
  * @example Witness_complex/witness_complex_from_file.cpp
  * @example Witness_complex/witness_complex_sphere.cpp
  */

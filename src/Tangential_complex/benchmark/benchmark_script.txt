@@ -1,0 +1,221 @@
+#---------------------------------------------------------------------------------------------------------------------------------------------------------
+# Input															PARAM1	PARAM2	PARAM3	NUM_P	AMB		INTR	SPARSITY	MAX_PERTURB	PERTURB	ADD_HDIM	COLLAPSE	FIX_TIME_LIMIT	NUM_ITERATIONS
+#---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#---------------------------------------------------------------- Alpha TC tests ------------------------------------------------------------------------
+#generate_sphere_d												1 		0		-		8		2		1		0.01		0.005		N		Y			N			3  				1 #No noise => OK: 6 2d with a perturb sometimes
+#generate_sphere_d												1 		0		-		50		2		1		0.01		0.005		N		Y			N			3  				1 #No noise => OK: 49 1d
+#generate_sphere_d												1 		1		-		50		2		1		0.01		0.005		N		Y			N			3  				1 #Noise => OK: 45 2d + 3 3d
+#generate_torus_d     											N		-		-		15  	2		1		0.01		0.05 		N		Y			N			10   			1
+#generate_sphere_d												0.302 	0		-		8		3		2		0.01		0.005		N		Y			N			60  			1 #No noise => OK: 7 3d with a perturb sometimes
+#generate_sphere_d												0.302 	0		-		50		3		2		0.01		0.005		N		Y			N			60  			1 #No noise => no inconsitencies
+#generate_sphere_d												0.302 	3		-		50		3		2		0.01		0.005		N		Y			N			60  			1 #Noise => OK: 90 2d + 3 3d
+#generate_sphere_d												1    	1		-		500		4		3		0.01		0.005		N		Y			N			60  			1 #Noise 1% => OK: 3113 3d + 35 4d
+#generate_sphere_d												1    	2		-		500		4		3		0.01		0.005		N		Y			N			60  			1 #Noise 2% => OK: 2969 3d + 91 4d
+#generate_sphere_d												1    	2		-		5000	4		3		0.01		0.005		N		Y			N			60  			1 #Noise 2% => OK: 27905 3d + 2485 4d
+#generate_sphere_d												0.302 	2		-		300		2		1		0.01		0.005		N		Y			N			60  			1
+#generate_torus_3D   											2		1		N		200   	3		2		0.01		0.05  		N		Y			N			600   			1 #OK: 1048 3d ~170s
+#generate_torus_3D   											2		1		N		2000   	3		2		0.01		0.05  		N		Y			N			600   			1 #OK: 3545 2d + 27 3d ~35s
+#generate_torus_d     											N		1		-		50  	4		2		0.01		0.05 		N		Y			N			3   			1 #OK: 431 4d
+#generate_torus_d     											N		1		-		500  	4		2		0.01		0.05 		N		Y			N			3   			1 #OK: 881 2d + 37 3d
+#generate_torus_d     											Y		1		-		250  	4		2		0.01		0.05 		N		Y			N			3   			1 #OK: 80 d2 + 185 d3
+#generate_torus_d    											N		-		-		50  	6		3		0.01		0.05 		Y		Y			N			10      		1 #
+#generate_torus_d    											Y		-		-		700  	6		3		0.01		0.05 		Y		Y			N			100      		1 #Grid
+#generate_torus_d    											N		-		-		10000  	6		3		0.01		0.05 		Y		Y			N			30000       	1
+#generate_moment_curve											0		1		-		10  	3		1		0.01		0.005		N		Y			N			60  			1
+#generate_two_spheres_d											3		4 		-		500  	3		2		0.01		0.05		N		Y			N			10  			1 #OK: 320 2d + 1167 3d
+#generate_klein_bottle_4D										40		15		-		500  	4		2		0.01		0.2			N		Y			N			60  			1 #OK: 901 d2 + 50 d3 + 1 d4
+#data/SO3_10000.xyz  											-		-		-		0		9 		3 		0.01		0.05 		Y		Y			N			300  			1 #Too long. Be careful with the memory consumption!
+#data/buddha_100kv.xyz 											-		-		-		0		3 		2 		0.01		0.005  		Y		Y			N			120  			1 #Too long...
+#data/fandisk.xyz 												-		-		-		0		3 		2 		0.01		0.005 		Y		Y			N			5   			1 #NOT OK: Tq & V do not intersect
+
+#---------------------------------------------------------- Spatial search benchmarking --------------------------------------------------------------
+#generate_torus_3D   											2		1		Y		10000   3		2		0			0  			Y		N			N			600   			1
+#data/buddha_100kv.xyz 											-		-		-		0		3 		2 		0			0     		N		Y			N			120  			1
+#generate_torus_d    											N		-		-		10000	30		15		0			0 			Y		N			N			3600   			1
+#generate_torus_d    											N		-		-		100000	12		6		0			0 			Y		N			N			3600   			1
+#data/SO3_50000.xyz  											-		-		-		0		9 		3 		0			0    		Y		N			N			60  			1
+#data/Cy8.xyz	 												-		-		-		0		24 		2 		0			0    		N		Y			N			60				1
+#generate_sphere_d												0.5 	-		-		10000	2		1		0			0			N		N			Y			60  			1
+#generate_sphere_d												0.5 	-		-		10000	3		2		0			0			N		N			Y			60  			1
+#generate_sphere_d												0.5 	-		-		10000	4		3		0			0			N		N			Y			60  			1
+#generate_sphere_d												0.5 	-		-		10000	5		4		0			0			N		N			Y			60  			1
+#generate_sphere_d												0.5 	-		-		10000	6		5		0			0			N		N			Y			60  			1
+#generate_sphere_d												0.5 	-		-		10000	7		6		0			0			N		N			Y			60  			1
+
+#---------------------------------------------------------- Very small cases for Debug mode --------------------------------------------------------------
+#generate_sphere_d												4		-		-		20		3		2		0.05		0.025 		Y		N			N			60  			1
+generate_sphere_d												3		10		-		70		3		2		0.05		0.025 		Y		N			N			60  			1
+#generate_sphere_d												3		-		-		1000 	3		2		0.05		0.025 		Y		N			N			60  			1
+#generate_sphere_d												3		-		-		10		4		3		0.05		0.025 		Y		N			N			60  			1
+#generate_sphere_d												3		-		-		70		5		4		0.05		0.025 		Y		N			N			60  			1
+#generate_klein_bottle_4D										4		3		-		70  	4		2		0.05		0.025 		Y		N			N			3   			1
+#generate_klein_bottle_variant_5D								4		3		-		70  	5		2		0.05		0.025 		Y		N			N			3   			1
+#data/SO3_10000.xyz  											-		-		-		0		9 		3 		0.7 		0.35 		Y		N			N			60  			1
+#generate_moment_curve											0		1		-		30  	3		1		0.005		0.0025 		Y		N			N			60  			1
+
+#------------------------------------------------------------------ From files --------------------------------------------------------------------------
+#data/SO3_50000.xyz  											-		-		-		0		9 		3 		0.05 		0.05 		Y		N			N			6000  			1
+#data/SO3_10000.xyz  											-		-		-		0		9 		3 		0.1 		0.1 		Y		N			N			60000  			1
+#data/cube3D_eps_0.1.xyz 										-		-		-		0		3 		2 		0.05 		0.05 		Y		N			N			3000			1
+#data/cube4D_eps_0.1.xyz 										-		-		-		0		4 		3 		0.05 		0.05 		N		Y			N			3000			1
+#data/cube5D_eps_0.1.xyz 										-		-		-		0		5 		4 		0.05 		0.05 		N		Y			N			3000			1
+#data/Cy8.xyz	 												-		-		-		0		24 		2 		0.1 		0.1 		N		Y			N			60				1
+#data/Kl.xyz 													-		-		-		0		5 		2 		0.05 		0.05 		N		Y			N			60  			1
+#data/S3.xyz 													-		-		-		0		4 		3 		0.05 		0.05 		N		Y			N			60  			1
+
+#data/Alvarez_variete_k2_D4_29700p.xyz							-       -       -       0       4       2       0.01  		0.01  		Y       N           N           60  			1 	# points on a "grid"
+#data/Alvarez_variete_k2_D4_10k_1x1_v2.xyz    					-       -       -       0       4       2       0.001  		0.001  		Y       N           N           200  			1
+#data/Alvarez_variete_k2_D4_30k_1x1_v2.xyz    					-       -       -       0       4       2       0.001  		0.001  		Y       N           N           6000  			1
+#data/Alvarez_variete_k2_D4_120k_2x2_denser_in_1x1.xyz   		-       -       -       0       4       2       0.002  		0.002  		Y       N           N           60000  			1
+#data/Alvarez_variete_k2_D4_300k_2x2.xyz   						-       -       -       0       4       2       0.005  		0.005  		Y       N           N           100000  		1
+#data/Alvarez_variete_k2_D4_300k_2x2.xyz   						-       -       -       0       4       2       0.05  		0.05  		Y       N           N           50000  			1   # heavy sparsification (e.g. 0.05 => 33k points)
+#data/Alvarez_variete_k2_D4_90k_2x2.xyz   						-       -       -       0       4       2       0.003  		0.003  		Y       N           N           6000  			1
+#data/Alvarez_variete_k2_D4_30k_10x10.xyz 						-       -       -       0       4       2       0.01  		0.01  		Y       N           N           60  			1
+#data/Alvarez_variete_k2_D4_60k_10x10.xyz 						-       -       -       0       4       2       0.01  		0.01  		Y       N           N           1800  			1
+
+#data/Alvarez_variete_k2_D8_9003p.xyz   						-       -       -       0       8       2       0.001  		0.001  		Y       N           N           60  			1
+#data/Alvarez_variete_k2_D8_90K.xyz   							-       -       -       0       8       2       0.001  		0.001  		Y       N           N           60  			1
+#data/Alvarez_variete_k2_D8_300k_10x10.xyz   					-       -       -       0       8       2       0.01  		0.01  		Y       N           N           60  			1   # heavy sparsification
+#data/Alvarez_variete_k2_D8_900k_2x2.xyz   						-       -       -       0       8       2       0.01  		0.01  		Y       N           N           60  			1   # heavy sparsification
+#data/Alvarez_variete_k2_D8_900k_10x10.xyz   					-       -       -       0       8       2       0.02  		0.02  		Y       N           N           60  			1   # heavy sparsification
+
+#data/Alvarez_courbeElliptique_k2_D8_200K_2x2.xyz     			-       -       -       0       8       2       0.006  		0.006  		Y       N           N           60  			1
+
+#data/Alvarez_surface_deg2_k2_D8_6000K_10x10.xyz     			-       -       -       0       8       2       0.01  		0.01  		Y       N           N           60  			1
+#data/Alvarez_surface_deg3_k2_D8_902K.xyz    					-       -       -       0       8       2       0.003  		0.003  		Y       N           N           3600  			1
+#data/Alvarez_surface_deg4_k2_D8_382K.xyz    					-       -       -       0       8       2       0.01  		0.01  		Y       N           N           60  			1
+#data/Alvarez_surface_deg5_k2_D8_112K.xyz    					-       -       -       0       8       2       0.001  		0.001  		Y       N           N           240  			1
+#data/Alvarez_surface_deg6_k2_D8_67K.xyz      					-       -       -       0       8       2       0.015  		0.015  		Y       N           N           60  			1
+#data/Alvarez_surface_deg7_k2_D8_48K.xyz      					-       -       -       0       8       2       0.01  		0.01  		Y       N           N           60  			1
+#data/Alvarez_surface_deg8_k2_D8_41K.xyz      					-       -       -       0       8       2       0.025  		0.025  		Y       N           N           60  			1
+#data/Alvarez_surface_deg9_k2_D8_42K.xyz      					-       -       -       0       8       2       0.01  		0.01  		Y       N           N           60  			1
+#data/Alvarez_surface_deg10_k2_D8_41K.xyz      					-       -       -       0       8       2       0.01  		0.01  		Y       N           N           60  			1
+
+#data/Alvarez_surface_deg8_k2_D8_41K.xyz      					-       -       -       0       8       2       0.02  		0.02  		Y       N           N           600  			1
+#data/sparsified/Alvarez_deg8_k2_D8_32K_sparsified_from_41K_0.01.xyz  	-	-	-       0       8       2       0.05  		0.05  		Y       N           N           600  			1
+
+# PAS VRAIMENT DE DIFFERENCE
+#data/Alvarez_surface_deg3_k2_D8_902K.xyz    					-       -       -       0       8       2       0.003  		0.007   	Y       N           N           3600  			1
+#data/Alvarez_surface_deg3_k2_D8_902K.xyz    					-       -       -       0       8       2       0.014  		0.007   	Y       N           N           3600  			1
+
+# PAS VRAIMENT DE DIFFERENCE
+#data/Alvarez_surface_deg7_k2_D8_48K.xyz      					-       -       -       0       8       2       0.01  		0.005  		Y       N           N           120  			1
+#data/Alvarez_surface_deg7_k2_D8_48K.xyz      					-       -       -       0       8       2       0.02  		0.005  		Y       N           N           120  			1
+
+# PAS VRAIMENT DE DIFFERENCE                                                                                               
+#data/Alvarez_surface_deg3_k2_D8_902K.xyz    					-       -       -       0       8       2       0.001  		0.01  		Y       N           N           3600  			1
+#data/Alvarez_surface_deg3_k2_D8_902K.xyz    					-       -       -       0       8       2       0.02  		0.01  		Y       N           N           3600  			1
+#data/sparsified/Alvarez_deg3_k2_D8_534k_sparsified_from_902K_0.001.xyz  -	-	-       0       8       2       0.01  		0.01  		Y       N           N           3600  			1
+
+# PAS TRES CLAIR, MAIS DIFFERENCE EN NOMBRE D'ETAPES (>100 vs 15-20) :                                                                             
+#data/sparsified/Alvarez_deg8_k2_D8_38K_sparsified_from_41K_0.005.xyz  	-	-	-       0       8       2       0.02  		0.02  		Y       N           N           600  			1
+#data/Alvarez_surface_deg8_k2_D8_41K.xyz      					-       -       -       0       8       2       0.001  		0.02    	Y       N           N           60  			1
+#data/Alvarez_surface_deg8_k2_D8_41K.xyz      					-       -       -       0       8       2       0.025  		0.02  		Y       N           N           60  			1
+
+# With pre-computed tangent spaces                                                                                          
+#data/test.pwt													-       -       -       0       4       2       0.01  		0.01  		N       N           N           500000   		1
+#data/Alvarez_variete_k2_D4_30000p.xyz							-       -       -       0       4       2       0.01  		0.01  		Y       N           N           500000   		1
+#data/Alvarez_variete_k2_D4_30000p_with_TSB.pwt					-       -       -       0       4       2       0.01  		0.01  		Y       N           N           500000   		1
+
+#---------------------------------------------------------------------- 3D meshes -----------------------------------------------------------------------
+#data/buddha_100kv.xyz 											-		-		-		0		3 		2 		0.005		0.005 		Y		N			N			3    			1
+#data/fandisk.xyz 												-		-		-		0		3 		2 		0.01 		0.01 		Y		N			N			3   			1
+#data/fertility.xyz  											-		-		-		0		3 		2 		0.4 		0.4 		Y		N			N			3   			1
+#data/bunny.xyz  												-		-		-		0		3 		2 		0.0006 		0.0003		Y		N			N			3000   			1
+#data/blob.xyz 													-		-		-		0		3 		2 		0.01 		0.01 		Y		N			N			3   			1
+#data/3holes.xyz 												-		-		-		0		3 		2 		0.01 		0.01 		Y		N			N			3   			1
+#data/785_hand_2500v.xyz										-		-		-		0		3 		2 		0.01 		0.01 		Y		N			N			3   			1
+#data/785_hand_50kv.xyz											-		-		-		0		3 		2 		0.01 		0.01 		Y		N			N			3   			1
+#data/bumpy_sphere.xyz											-		-		-		0		3 		2 		0.01 		0.01 		Y		N			N			3   			1
+#D:\INRIA\Data\_Models\Pointclouds\ajax_jotero.xyz				-		-		-		0		3 		2 		0.01 		0.01 		Y		N			N			3   			1
+#D:\INRIA\Data\_Models\Pointclouds\house.xyz  					-		-		-		0		3 		2 		0.01 		0.01 		Y		N			N			3   			1
+#D:\INRIA\Data\_Models\Pointclouds\lucy_14M.xyz  				-		-		-		0		3 		2 		0.6 		0.3 		Y		N			N			3   			1
+
+#----------------------------------------------------------- Generated point sets -----------------------------------------------------------------------
+#generate_sphere_d												3		-		-		4		3		2		0.05		0.05		Y		N			N			3000			1
+#generate_sphere_d												3		-		-		30000	2		1		0.005		0.005		Y		N			N			3000			1
+#generate_sphere_d												1		-		-		500000 	3		2		0.005		0.005		Y		N			N			3000			1
+#generate_sphere_d												3		-		-		30000	4		3		0.05		0.05		Y		N			N			3000			1
+#generate_sphere_d												3		0		-		300  	3		2		0.005		0.005		Y		N			N			60				1
+#generate_sphere_d												3		4		-		3000  	3		2		0.005		0.005		Y		N			N			60				1
+#generate_sphere_d												3		7		-		3000  	3		2		0.005		0.005		Y		N			N			60				1
+#generate_torus_3D   											2		1		N		300 	3		2		0.05  		0.05  		Y		N			N			600   			1
+#generate_torus_d     											N		-		-		200  	4		2		0.05 		0.05 		Y		N			N			600   			1
+
+#generate_torus_d     											Y		-		-		100  	6		3		0.1	 		0.19 		Y		N			N			600   			1
+#generate_torus_d     											Y		-		-		1000  	6		3		0.	 		0.19 		Y		N			N			600   			1
+#generate_torus_d     											Y		-		-		10000  	6		3		0.	 		0.19 		Y		N			N			600   			1
+#generate_torus_d     											Y		-		-		100000 	6		3		0.	 		0.19 		Y		N			N			600   			1
+#generate_plane													-		-		-		30000	3		2		0.005		0.005		Y		N			N			3000			1
+#generate_moment_curve											0		1		-		30000	6		1		0.005		0.005		Y		N			N			60  			1
+#generate_klein_bottle_4D										4		3		-		700 	4		2		0.05		0.05		Y		N			N			500   			20
+#generate_klein_bottle_variant_5D								4		3		-		30000	5		2		0.05		0.05		Y		N			N			600  			1
+#generate_klein_bottle_4D										8		5		-		5000	4		2		0.2			0.2			Y		N			N			60  			1	#Takes forever
+#data/sparsified/Flat_torus_195p_sparsified_0.05_from_200p.xyz 	N		-		-		0  		4		2		-1 			0.2 		Y		N			N			600   			1
+
+#----------------------------------------------------------- Performance testing ------------------------------------------------------------------------
+# TC: 5.55 / 1st fix step : 0.2                                                                                                                 
+#data/fertility.xyz  											-		-		-		0		3 		2 		0.1			0.1 		Y		N			N			10				1
+
+#---------------------------------------------------------- 04/04/2016 - for stats ----------------------------------------------------------
+
+#generate_torus_3D   											2		1		N		5000 	3		2		0.05  		0.05  		Y		N			N			120				1
+#generate_torus_d     											N		-		-		500  	4		2		0.05 		0.05 		Y		N			N			120				1
+#data/Alvarez_variete_k2_D8_900k_2x2.xyz   						-       -       -       0       8       2       0.005  		0.005  		Y       N           N           120  			1
+#data/Alvarez_surface_deg3_k2_D8_902K.xyz    					-       -       -       0       8       2       0.01  		0.01  		Y       N           N           120				1
+#data/Alvarez_surface_deg7_k2_D8_48K.xyz      					-       -       -       0       8       2       0.02  		0.02  		Y       N           N           600				10
+#data/Alvarez_surface_deg8_k2_D8_41K.xyz      					-       -       -       0       8       2       0.02  		0.02  		Y       N           N           120				1
+#data/Alvarez_surface_deg10_k2_D8_41K.xyz      					-       -       -       0       8       2       0.02  		0.02  		Y       N           N           120				1
+#generate_torus_d     											N		-		-		200000 	6		3		0.05 		0.05 		Y		N			N			1200				1
+
+#---------------------------------------------------------- 14/04/2016 - stats about noise ----------------------------------------------------------
+
+#generate_torus_d     											Y		0		-		1000  	4		2		0.05 		0.19 		Y		N			N			120   			4
+#generate_torus_d     											Y		1		-		1000  	4		2		0.05 		0.19 		Y		N			N			120   			4
+#generate_torus_d     											Y		2		-		1000  	4		2		0.05 		0.19 		Y		N			N			120   			4
+#generate_torus_d     											Y		3		-		1000  	4		2		0.05 		0.19 		Y		N			N			120   			4
+#generate_torus_d     											Y		4		-		1000  	4		2		0.05 		0.19 		Y		N			N			120   			4
+#generate_torus_d     											Y		5		-		1000  	4		2		0.05 		0.19 		Y		N			N			120   			4
+#generate_torus_d     											Y		6		-		1000  	4		2		0.05 		0.19 		Y		N			N			120   			4
+#generate_torus_d     											Y		7		-		1000  	4		2		0.05 		0.19 		Y		N			N			120   			4
+#generate_torus_d     											Y		8		-		1000  	4		2		0.05 		0.19 		Y		N			N			120   			4
+#generate_torus_d     											Y		9		-		1000  	4		2		0.05 		0.19 		Y		N			N			120   			4
+#generate_torus_d     											Y		10		-		1000  	4		2		0.05 		0.19 		Y		N			N			120   			4
+
+#generate_sphere_d												3		0		-		1000	4		3		0.05		0.05		Y		N			N			120				4
+#generate_sphere_d												3		1		-		1000	4		3		0.05		0.05		Y		N			N			120				4
+#generate_sphere_d												3		2		-		1000	4		3		0.05		0.05		Y		N			N			120				4
+#generate_sphere_d												3		3		-		1000	4		3		0.05		0.05		Y		N			N			120				4
+#generate_sphere_d												3		4		-		1000	4		3		0.05		0.05		Y		N			N			120				4
+#generate_sphere_d												3		5		-		1000	4		3		0.05		0.05		Y		N			N			120				4
+#generate_sphere_d												3		6		-		1000	4		3		0.05		0.05		Y		N			N			120				4
+#generate_sphere_d												3		7		-		1000	4		3		0.05		0.05		Y		N			N			120				4
+#generate_sphere_d												3		8		-		1000	4		3		0.05		0.05		Y		N			N			120				4
+#generate_sphere_d												3		9		-		1000	4		3		0.05		0.05		Y		N			N			120				4
+#generate_sphere_d												3		10		-		1000	4		3		0.05		0.05		Y		N			N			120				4
+
+#generate_klein_bottle_4D										4		3		0		5000 	4		2		0.05		0.05		Y		N			N			120   			4
+#generate_klein_bottle_4D										4		3		0.01	5000 	4		2		0.05		0.05		Y		N			N			120   			4
+#generate_klein_bottle_4D										4		3		0.02	5000 	4		2		0.05		0.05		Y		N			N			120   			4
+#generate_klein_bottle_4D										4		3		0.03	5000 	4		2		0.05		0.05		Y		N			N			120   			4
+#generate_klein_bottle_4D										4		3		0.04	5000 	4		2		0.05		0.05		Y		N			N			120   			4
+#generate_klein_bottle_4D										4		3		0.05	5000 	4		2		0.05		0.05		Y		N			N			120   			4
+#generate_klein_bottle_4D										4		3		0.06	5000 	4		2		0.05		0.05		Y		N			N			120   			4
+#generate_klein_bottle_4D										4		3		0.07	5000 	4		2		0.05		0.05		Y		N			N			120   			4
+
+#---------------------------------------------------------- 04/2016 - stats with different perturb techniques ----------------------------------------------------------
+
+# Tangential translation
+#data/SO3_50000.xyz  											-		-		-		0		9 		3 		0			0.05    	Y		N			N			500  			10
+#data/Alvarez_surface_deg7_k2_D8_48K.xyz      					-       -       -       0       8       2       0.02  		0.01  		Y       N           N           120				10
+#generate_klein_bottle_4D										4		3		0		5000 	4		2		0.05		0.05		Y		N			N			120   			10
+#generate_torus_d     											Y		0		-		1000  	4		2		0.05 		0.19 		Y		N			N			120   			10
+#generate_sphere_d												3		1		-		1000	4		3		0.05		0.05		Y		N			N			120				10
+
+# Weight
+#data/SO3_50000.xyz  											-		-		-		0		9 		3 		0.1			0.05    	Y		N			N			500  			10
+#data/Alvarez_surface_deg7_k2_D8_48K.xyz      					-       -       -       0       8       2       0.02  		0.01  		Y       N           N           120				10
+#generate_klein_bottle_4D										4		3		0		5000 	4		2		0.05		0.025		Y		N			N			20000  			10
+#generate_torus_d     											Y		0		-		1000  	4		2		0.05 		0.025 		Y		N			N			120   			10
+#generate_sphere_d												3		1		-		1000	4		3		0.05		0.025		Y		N			N			12000			10
