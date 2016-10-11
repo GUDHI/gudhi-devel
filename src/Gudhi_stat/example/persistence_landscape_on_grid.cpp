@@ -35,7 +35,65 @@ using namespace Gudhi::Gudhi_stat;
 
 int main( int argc , char** argv )
 {
-	/*
+	//create two simple vectors with birth--death pairs:
+	
+	std::vector< std::pair< double , double > > persistence1;
+	std::vector< std::pair< double , double > > persistence2;
+	
+	persistence1.push_back( std::make_pair(1,2) );
+	persistence1.push_back( std::make_pair(6,8) );
+	persistence1.push_back( std::make_pair(0,4) );
+	persistence1.push_back( std::make_pair(3,8) );
+	
+	persistence2.push_back( std::make_pair(2,9) );
+	persistence2.push_back( std::make_pair(1,6) );
+	persistence2.push_back( std::make_pair(3,5) );
+	persistence2.push_back( std::make_pair(6,10) );
+	
+	//create two persistence landscapes based on persistence1 and persistence2:
+	Persistence_landscape_on_grid l1( persistence1 , 0 , 11 , 20 );
+	Persistence_landscape_on_grid l2( persistence2 , 0 , 11 , 20 );
+	
+	//This is how to compute integral of landscapes:
+	std::cout << "Integral of the first landscape : " << l1.compute_integral_of_landscape() << endl;
+	std::cout << "Integral of the second landscape : " << l2.compute_integral_of_landscape() << endl;
+	
+	//And here how to write landscapes to stream:
+	std::cout << "l1 : " << l1 << std::endl;
+	std::cout << "l2 : " << l2 << std::endl;
+	
+	//here are the maxima of the functions:
+	std::cout << "Maximum of l1 : " << l1.compute_maximum() << std::endl;
+	std::cout << "Maximum of l2 : " << l2.compute_maximum() << std::endl;
+	
+	//here are the norms of landscapes:
+	std::cout << "L^1 Norm of l1 : " << l1.compute_norm_of_landscape( 1. ) << std::endl;
+	std::cout << "L^1 Norm of l2 : " << l2.compute_norm_of_landscape( 1. ) << std::endl;
+	
+	//here is the average of landscapes:
+	Persistence_landscape_on_grid average;
+	std::vector< Abs_Topological_data_with_averages* > to_average;
+	to_average.push_back( (Abs_Topological_data_with_averages*)(&l1) );
+	to_average.push_back( (Abs_Topological_data_with_averages*)(&l2) );
+	average.compute_average( to_average );
+	std::cout << "average : " << average << std::endl;
+	
+	//here is the distance of landscapes:
+	std::cout << "Distance : " << l1.distance( (Abs_Topological_data_with_distances*)(&l2) ) << std::endl;
+	
+	//here is the scalar product of landscapes:
+	std::cout << "Scalar product : " << l1.compute_scalar_product( (Abs_Topological_data_with_scalar_product*)(&l2) ) << std::endl;
+	
+	//here is how to create a file which is suitable for vizualization via gnuplot:
+	average.plot( "average_landscape" );
+		
+		
+	return 0;
+}
+
+
+//Below I am storing the code used to generate tests for that functionality.
+/*
 	Persistence_landscape_on_grid l( "file_with_diagram_1" , 100 );
 	l.print_to_file( "landscape_from_file_with_diagram_1" );
 	
@@ -132,7 +190,7 @@ int main( int argc , char** argv )
 	cerr <<  p.distance( &q , -1 ) << endl;
 	*/
 	
-
+/*
 	Persistence_landscape_on_grid p( "file_with_diagram", 0,1,10000 );
 	Persistence_landscape_on_grid q( "file_with_diagram_1", 0,1,10000 );
 	
@@ -141,7 +199,4 @@ int main( int argc , char** argv )
 	//Persistence_landscape_on_grid p( aa, 0,1,10 );
 	//Persistence_landscape_on_grid q( aa, 0,1,10 );
 	cerr <<  p.compute_scalar_product( &q ) << endl;
-
-		
-	return 0;
-}
+*/

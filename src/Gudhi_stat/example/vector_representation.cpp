@@ -37,13 +37,58 @@ using namespace Gudhi::Gudhi_stat;
 using namespace std;
 
 
-double epsilon = 0.000005;
-
 
 
 int main( int argc , char** argv )
 {
-	if ( argc < 2 )
+	//create two simple vectors with birth--death pairs:
+	
+	std::vector< std::pair< double , double > > persistence1;
+	std::vector< std::pair< double , double > > persistence2;
+	
+	persistence1.push_back( std::make_pair(1,2) );
+	persistence1.push_back( std::make_pair(6,8) );
+	persistence1.push_back( std::make_pair(0,4) );
+	persistence1.push_back( std::make_pair(3,8) );
+	
+	persistence2.push_back( std::make_pair(2,9) );
+	persistence2.push_back( std::make_pair(1,6) );
+	persistence2.push_back( std::make_pair(3,5) );
+	persistence2.push_back( std::make_pair(6,10) );
+	
+	//create two persistence vectors based on persistence1 and persistence2:
+	Vector_distances_in_diagram<euclidean_distance<double> > v1 = Vector_distances_in_diagram<euclidean_distance<double> >( persistence1 , std::numeric_limits<size_t>::max() );
+	Vector_distances_in_diagram<euclidean_distance<double> > v2 = Vector_distances_in_diagram<euclidean_distance<double> >( persistence2 , std::numeric_limits<size_t>::max() );
+	
+	//writing to a stream:
+	std::cout << "v1 : " << v1 << std::endl;
+	std::cout << "v2 : " << v2 << std::endl;
+	
+	//averages:
+	Vector_distances_in_diagram<euclidean_distance<double> > average;
+	std::vector< Abs_Topological_data_with_averages* > to_average;
+	to_average.push_back( (Abs_Topological_data_with_averages*)(&v1) );
+	to_average.push_back( (Abs_Topological_data_with_averages*)(&v2) );
+	average.compute_average( to_average );
+	std::cout << "Average : " << average << std::endl;
+	
+	//computations of distances:
+	std::cout << "l^1 distance : " << v1.distance( (Abs_Topological_data_with_distances*)(&v2) ) << std::endl;
+    
+   //computations of scalar product:
+    std::cout << "Scalar product of l1 and l2 : " << v1.compute_scalar_product( (Abs_Topological_data_with_scalar_product*)(&v2) ) << std::endl;
+    
+    //create a file with a gnuplot script:
+    v1.plot( "plot_of_vector_representation" );
+
+	return 0;
+}
+
+
+
+
+/*
+   if ( argc < 2 )
 	{
 		cout << "To run this program, please provide the name of a file with persistence diagram. If you provide two files, we will do distance, scalar produc and average computations \n";
 		return 1;
@@ -71,7 +116,4 @@ int main( int argc , char** argv )
 	
 		cout << "Here is an average : " << average << endl;
 	}
-	return 0;
-}
-
-
+*/

@@ -27,6 +27,7 @@
 #include <gudhi/concretizations/Persistence_heat_maps.h>
 
 #include <iostream>
+#include <vector>
 
 
 
@@ -40,13 +41,62 @@ using namespace std;
 
 	
 int main( int argc , char** argv )
-{
-	//if ( argc != 2 )
-	//{
-	//	cout << "To run this program, please provide the name of a file with persistence diagram \n";
-	//	return 1;
-	//}
+{	
+	//create two simple vectors with birth--death pairs:
 	
+	std::vector< std::pair< double , double > > persistence1;
+	std::vector< std::pair< double , double > > persistence2;
+	
+	persistence1.push_back( std::make_pair(1,2) );
+	persistence1.push_back( std::make_pair(6,8) );
+	persistence1.push_back( std::make_pair(0,4) );
+	persistence1.push_back( std::make_pair(3,8) );
+	
+	persistence2.push_back( std::make_pair(2,9) );
+	persistence2.push_back( std::make_pair(1,6) );
+	persistence2.push_back( std::make_pair(3,5) );
+	persistence2.push_back( std::make_pair(6,10) );
+	
+	//over here we define a function we sill put on a top on every birth--death pair in the persistence interval. It can be anything. Over here we will use standarg Gaussian
+	std::vector< std::vector<double> > filter = create_Gaussian_filter(5,1);
+			
+	//creating two heat maps. 
+	Persistence_heat_maps hm1( persistence1 , filter , constant_function, false , 20 , 0 , 11 );		
+	Persistence_heat_maps hm2( persistence2 , filter , constant_function, false , 20 , 0 , 11 );
+	
+	std::vector<Persistence_heat_maps*> vector_of_maps;
+	vector_of_maps.push_back( &hm1 );
+	vector_of_maps.push_back( &hm2 );
+	
+	//compute median/mean of a vector of heat maps:	
+	Persistence_heat_maps mean;
+	mean.compute_mean( vector_of_maps );	
+	Persistence_heat_maps median;
+	median.compute_median( vector_of_maps );
+	
+	//to compute L^1 disance between hm1 and hm2:
+	std::cout << "The L^1 distance is : " << hm1.distance( (Abs_Topological_data_with_distances*)(&hm2) , 1 ) << std::endl;
+	
+	//to average of hm1 and hm2:
+	std::vector< Abs_Topological_data_with_averages* > to_average;
+	to_average.push_back( (Abs_Topological_data_with_averages*)(&hm1) );
+	to_average.push_back( (Abs_Topological_data_with_averages*)(&hm2) );
+	Persistence_heat_maps av;	
+	av.compute_average( to_average );	
+	
+	//to compute scalar product of hm1 and hm2:
+	std::cout << "Scalar product is : " << hm1.compute_scalar_product( (Abs_Topological_data_with_scalar_product*)(&hm2) ) << std::endl;
+	
+	return 0;
+}
+
+
+
+
+
+
+
+//Below I am storing the code used to generate tests for that functionality.
 /*
 	std::vector< std::pair< double,double > > intervals;
 	intervals.push_back( std::make_pair(0.5,0.5) );	
@@ -166,7 +216,7 @@ int main( int argc , char** argv )
 */
 
 
-
+/*
 	std::vector< std::vector<double> > filter = create_Gaussian_filter(30,1);	
 	Persistence_heat_maps p( "file_with_diagram" , filter ,  constant_function, false , 1000 , 0 , 1 );
 	Persistence_heat_maps q( "file_with_diagram_1" , filter ,  constant_function, false , 1000 , 0 , 1 );
@@ -181,16 +231,4 @@ int main( int argc , char** argv )
 	
 	percentage_of_active.print_to_file( "template_percentage_of_active_of_heat_maps" );
 	//percentage_of_active.plot( "template_percentage_of_active_of_heat_maps" );
-	
-	
-
-	
-	return 0;
-}
-
-
-
-
-
-
-
+*/
