@@ -187,9 +187,11 @@ class Alpha_complex {
     std::vector<std::ptrdiff_t> indices(boost::counting_iterator<std::ptrdiff_t>(0),
                                         boost::counting_iterator<std::ptrdiff_t>(point_cloud.size()));
 
-    // Sort indices considering CGAL spatial sort
-    typedef CGAL::Spatial_sort_traits_adapter_d<Kernel, Point_d*> Search_traits_d;
-    spatial_sort(indices.begin(), indices.end(), Search_traits_d(&(point_cloud[0])));
+    typedef boost::iterator_property_map<typename std::vector<Point_d>::iterator,
+                                         CGAL::Identity_property_map<std::ptrdiff_t>> Point_property_map;
+    typedef CGAL::Spatial_sort_traits_adapter_d<Kernel, Point_property_map> Search_traits_d;
+    
+    CGAL::spatial_sort(indices.begin(), indices.end(), Search_traits_d(std::begin(point_cloud)));
 
     typename Delaunay_triangulation::Full_cell_handle hint;
     for (auto index : indices) {
