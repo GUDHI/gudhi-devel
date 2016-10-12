@@ -1,4 +1,7 @@
 #include <gudhi/Alpha_complex.h>
+// to construct a simplex_tree from alpha complex
+#include <gudhi/Simplex_tree.h>
+
 #include <CGAL/Epick_d.h>
 
 #include <iostream>
@@ -21,7 +24,7 @@ int main(int argc, char **argv) {
   // Init of an alpha complex from an OFF file
   // ----------------------------------------------------------------------------
   typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kernel;
-  Gudhi::alpha_complex::Alpha_complex<Kernel> alpha_complex_from_file(off_file_name, alpha_square_max_value);
+  Gudhi::alpha_complex::Alpha_complex<Kernel> alpha_complex_from_file(off_file_name);
 
   std::streambuf* streambufffer;
   std::ofstream ouput_file_stream;
@@ -33,23 +36,27 @@ int main(int argc, char **argv) {
     streambufffer = std::cout.rdbuf();
   }
 
-  std::ostream output_stream(streambufffer);
+  Gudhi::Simplex_tree<> simplex;
+  if (alpha_complex_from_file.create_complex(simplex, alpha_square_max_value)) {
+    std::ostream output_stream(streambufffer);
 
-  // ----------------------------------------------------------------------------
-  // Display information about the alpha complex
-  // ----------------------------------------------------------------------------
-  output_stream << "Alpha complex is of dimension " << alpha_complex_from_file.dimension() <<
-      " - " << alpha_complex_from_file.num_simplices() << " simplices - " <<
-      alpha_complex_from_file.num_vertices() << " vertices." << std::endl;
+    // ----------------------------------------------------------------------------
+    // Display information about the alpha complex
+    // ----------------------------------------------------------------------------
+    output_stream << "Alpha complex is of dimension " << simplex.dimension() <<
+        " - " << simplex.num_simplices() << " simplices - " <<
+        simplex.num_vertices() << " vertices." << std::endl;
 
-  output_stream << "Iterator on alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
-  for (auto f_simplex : alpha_complex_from_file.filtration_simplex_range()) {
-    output_stream << "   ( ";
-    for (auto vertex : alpha_complex_from_file.simplex_vertex_range(f_simplex)) {
-      output_stream << vertex << " ";
+    output_stream << "Iterator on alpha complex simplices in the filtration order, with [filtration value]:" <<
+        std::endl;
+    for (auto f_simplex : simplex.filtration_simplex_range()) {
+      output_stream << "   ( ";
+      for (auto vertex : simplex.simplex_vertex_range(f_simplex)) {
+        output_stream << vertex << " ";
+      }
+      output_stream << ") -> " << "[" << simplex.filtration(f_simplex) << "] ";
+      output_stream << std::endl;
     }
-    output_stream << ") -> " << "[" << alpha_complex_from_file.filtration(f_simplex) << "] ";
-    output_stream << std::endl;
   }
   ouput_file_stream.close();
   return 0;
