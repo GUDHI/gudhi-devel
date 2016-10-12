@@ -8,7 +8,7 @@ configure_file(GUDHIVersion.cmake.in "${CMAKE_SOURCE_DIR}/GUDHIVersion.cmake" @O
 find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework chrono timer date_time program_options thread REQUIRED)
 
 if(NOT Boost_FOUND)
-  message(FATAL_ERROR "NOTICE: This demo requires Boost and will not be compiled.")
+  message(FATAL_ERROR "NOTICE: This program requires Boost and will not be compiled.")
 else()
 
   set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
@@ -49,6 +49,10 @@ else()
   if(CGAL_FOUND)
     message(STATUS "CGAL version: ${CGAL_VERSION}.")
     include( ${CGAL_USE_FILE} )
+
+    if (NOT CGAL_VERSION VERSION_LESS 4.8.0)
+      include_directories(BEFORE "src/common/include/gudhi_patches")
+    endif()
   endif()
   
   if(MSVC)
@@ -125,6 +129,9 @@ else()
   include_directories(src/Persistent_cohomology/include/)
   include_directories(src/Simplex_tree/include/)
   include_directories(src/Skeleton_blocker/include/)
+  include_directories(src/Spatial_searching/include/)
+  include_directories(src/Subsampling/include/)
+  include_directories(src/Tangential_complex/include/)
   include_directories(src/Witness_complex/include/)
 
   add_subdirectory(src/common/example)
@@ -142,6 +149,13 @@ else()
   add_subdirectory(src/Bitmap_cubical_complex/example)
   add_subdirectory(src/Alpha_complex/example)
   add_subdirectory(src/Alpha_complex/test)
+  add_subdirectory(src/Spatial_searching/example)
+  add_subdirectory(src/Spatial_searching/test)
+  add_subdirectory(src/Subsampling/example)
+  add_subdirectory(src/Subsampling/test)
+  add_subdirectory(src/Tangential_complex/example)
+  add_subdirectory(src/Tangential_complex/test)
+  add_subdirectory(src/Tangential_complex/benchmark)
 
   # data points generator
   add_subdirectory(data/points/generator)

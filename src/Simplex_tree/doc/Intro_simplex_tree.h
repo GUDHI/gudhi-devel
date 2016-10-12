@@ -66,8 +66,8 @@ Expand the simplex tree in 3.8e-05 s.
 Information of the Simplex Tree: 
 Number of vertices = 10   Number of simplices = 98 \endcode
  * 
- * \li <a href="_simplex_tree_2simplex_tree_from_alpha_shapes_3_8cpp-example.html">
- * Simplex_tree/simplex_tree_from_alpha_shapes_3.cpp</a> - Simplex tree is computed and displayed from a 3D alpha
+ * \li <a href="_simplex_tree_2example_alpha_shapes_3_simplex_tree_from_off_file_8cpp-example.html">
+ * Simplex_tree/example_alpha_shapes_3_simplex_tree_from_off_file.cpp</a> - Simplex tree is computed and displayed from a 3D alpha
  * complex (Requires CGAL, GMP and GMPXX to be installed)
  * 
  * 

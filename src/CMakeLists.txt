@@ -12,7 +12,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/")
 find_package(Boost REQUIRED COMPONENTS system filesystem program_options chrono timer date_time REQUIRED)
 
 if(NOT Boost_FOUND)
-  message(FATAL_ERROR "NOTICE: This demo requires Boost and will not be compiled.")
+  message(FATAL_ERROR "NOTICE: This program requires Boost and will not be compiled.")
 else()
 
   # For "make doxygen"
@@ -47,6 +47,10 @@ else()
   if(CGAL_FOUND)
     message(STATUS "CGAL version: ${CGAL_VERSION}.")
     include( ${CGAL_USE_FILE} )
+    
+    if (NOT CGAL_VERSION VERSION_LESS 4.8.0)
+      include_directories(BEFORE "include/gudhi_patches")
+    endif()
   endif()
   
   if(MSVC)
@@ -108,6 +112,9 @@ else()
   add_subdirectory(example/Bitmap_cubical_complex)
   add_subdirectory(example/Witness_complex)
   add_subdirectory(example/Alpha_complex)
+  add_subdirectory(example/Spatial_searching)
+  add_subdirectory(example/Subsampling)
+  add_subdirectory(example/Tangential_complex)
 
   # data points generator
   add_subdirectory(data/points/generator)
