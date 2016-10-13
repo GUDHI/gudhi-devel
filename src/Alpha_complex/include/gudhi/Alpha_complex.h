@@ -33,6 +33,7 @@
 #include <CGAL/Delaunay_triangulation.h>
 #include <CGAL/Epick_d.h>
 #include <CGAL/Spatial_sort_traits_adapter_d.h>
+#include <CGAL/property_map.h>  // for CGAL::Identity_property_map
 
 #include <iostream>
 #include <vector>
