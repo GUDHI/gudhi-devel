@@ -191,7 +191,7 @@ class Alpha_complex {
     typedef boost::iterator_property_map<typename std::vector<Point_d>::iterator,
                                          CGAL::Identity_property_map<std::ptrdiff_t>> Point_property_map;
     typedef CGAL::Spatial_sort_traits_adapter_d<Kernel, Point_property_map> Search_traits_d;
-    
+
     CGAL::spatial_sort(indices.begin(), indices.end(), Search_traits_d(std::begin(point_cloud)));
 
     typename Delaunay_triangulation::Full_cell_handle hint;
