@@ -8,7 +8,7 @@
 
    \image html "Witness_complex_representation.png" "Witness complex representation"
 
-   \section Definitions
+   \section witnessdefinitions Definitions
 
    Witness complex is a simplicial complex defined on two sets of points in \f$\mathbb{R}^D\f$:
 
@@ -34,7 +34,7 @@
 
    which leads to definitions of **weak relaxed witness complex** (or just relaxed witness complex for short) and **strong relaxed witness complex** respectively.
 
-   \section Implementation
+   \section witnessimplementation Implementation
    
    The two complexes described above are implemented in the corresponding classes 
    - Gudhi::witness_complex::Witness_complex
@@ -47,7 +47,7 @@
 
    The constructors take on the step 1, while the function 'create_complex' executes the steps 2 and 3.
 
-   \section Examples
+   \section witnessexamples Examples
 
    Here is an example of constructing a strong witness complex filtration and computing persistence on it:
 

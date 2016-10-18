@@ -17,4 +17,4 @@ target_link_libraries(Witness_complex_test_simple_witness_complex ${Boost_SYSTEM
 add_test(NAME simple_witness_complex
   COMMAND ${CMAKE_CURRENT_BINARY_DIR}/Witness_complex_test_simple_witness_complex 
     # XML format for Jenkins xUnit plugin 
-    --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/Witness_complex_test_simple_witness_complex.xml --log_level=test_suite --report_level=no)
+    --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/Witness_complex_test_simple_witness_complexUT.xml --log_level=test_suite --report_level=no)
