@@ -23,7 +23,6 @@
 #ifndef ACTIVE_WITNESS_ITERATOR_H_
 #define ACTIVE_WITNESS_ITERATOR_H_
 
-//#include "Active_witness.h"
 #include <boost/iterator/iterator_facade.hpp>
 #include <vector>
 

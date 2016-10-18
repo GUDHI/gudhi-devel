@@ -23,7 +23,7 @@
 #ifndef ACTIVE_WITNESS_H_
 #define ACTIVE_WITNESS_H_
 
-#include "Active_witness_iterator.h"
+#include <gudhi/Active_witness/Active_witness_iterator.h>
 #include <vector>
 #include <utility>
 
