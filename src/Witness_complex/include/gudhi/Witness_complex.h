@@ -23,7 +23,7 @@
 #ifndef WITNESS_COMPLEX_H_
 #define WITNESS_COMPLEX_H_
 
-#include "Active_witness/Active_witness.h"
+#include <gudhi/Active_witness/Active_witness.h>
 #include <gudhi/Kd_tree_search.h>
 
 #include <utility>

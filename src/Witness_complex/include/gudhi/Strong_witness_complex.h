@@ -28,7 +28,7 @@
 #include <list>
 #include <limits>
 
-#include "Active_witness/Active_witness.h"
+#include <gudhi/Active_witness/Active_witness.h>
 #include <gudhi/Kd_tree_search.h>
 
 namespace gss = Gudhi::spatial_searching;
