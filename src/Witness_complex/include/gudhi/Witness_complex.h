@@ -46,12 +46,6 @@ namespace witness_complex {
  * \tparam Kernel_ requires a <a target="_blank"
  * href="http://doc.cgal.org/latest/Kernel_d/classCGAL_1_1Epick__d.html">CGAL::Epick_d</a> class, which
  * can be static if you know the ambiant dimension at compile-time, or dynamic if you don't.
- * \tparam DimensionTag can be either <a target="_blank"
- * href="http://doc.cgal.org/latest/Kernel_23/classCGAL_1_1Dimension__tag.html">Dimension_tag<d></a>
- * if you know the intrinsic dimension at compile-time,
- * or <a target="_blank"
- * href="http://doc.cgal.org/latest/Kernel_23/classCGAL_1_1Dynamic__dimension__tag.html">CGAL::Dynamic_dimension_tag</a>
- * if you don't.
 */
 template< class Kernel_ >
 class Witness_complex {
@@ -94,19 +88,14 @@ private:
 
   /**
    *  \brief Initializes member variables before constructing simplicial complex.
-   *  \details Records landmarks from the range [landmarks_first, landmarks_last) into a 
-   *           table internally, as well as witnesses from the range [witnesses_first, witnesses_last).
-   *           All iterator parameters should satisfy <a target="_blank"
-   *           href="http://en.cppreference.com/w/cpp/concept/InputIterator">InputIterator</a>
-   *           C++ concept.
+   *  \details Records landmarks from the range 'landmarks' into a 
+   *           table internally, as well as witnesses from the range 'witnesses'.
    */
-  template< typename InputIteratorLandmarks,
-            typename InputIteratorWitnesses >
-  Witness_complex(InputIteratorLandmarks landmarks_first,
-                  InputIteratorLandmarks landmarks_last,
-                  InputIteratorWitnesses witnesses_first,
-                  InputIteratorWitnesses witnesses_last)
-    : witnesses_(witnesses_first, witnesses_last), landmarks_(landmarks_first, landmarks_last), landmark_tree_(landmarks_)
+  template< typename LandmarkRange,
+            typename WitnessRange >
+  Witness_complex(const LandmarkRange & landmarks,
+                  const WitnessRange &  witnesses)
+    : witnesses_(witnesses), landmarks_(landmarks), landmark_tree_(landmarks_)
   {    
   }
 
@@ -118,9 +107,10 @@ private:
     return landmarks_[vertex];
   }
   
-  /** \brief Outputs the (weak) witness complex in a simplicial complex data structure.
-   *  @param[out] complex Simplicial complex data structure compatible with 'find' and 'insert' operations.
-   *              (Cf SimplicialComplexForWitness)
+  /** \brief Outputs the (weak) witness complex of relaxation 'max_alpha_square'
+   *         in a simplicial complex data structure.
+   *  @param[out] complex Simplicial complex data structure compatible which is a model of
+   *              SimplicialComplexForWitness concept.
    *  @param[in] max_alpha_square Maximal squared relaxation parameter.
    *  @param[in] limit_dimension Represents the maximal dimension of the simplicial complex
    *         (default value = no limit).

@@ -94,22 +94,18 @@ private:
 
   /**
    *  \brief Initializes member variables before constructing simplicial complex.
-   *  \details Records landmarks from the range [landmarks_first, landmarks_last) into a 
-   *           table internally, as well as witnesses from the range [witnesses_first, witnesses_last).
-   *           All iterator parameters should satisfy <a target="_blank"
-   *           href="http://en.cppreference.com/w/cpp/concept/InputIterator">InputIterator</a>
-   *           C++ concept.
+   *  \details Records landmarks from the range 'landmarks' into a 
+   *           table internally, as well as witnesses from the range 'witnesses'.
    */
-  template< typename InputIteratorLandmarks,
-            typename InputIteratorWitnesses >
-  Strong_witness_complex(InputIteratorLandmarks landmarks_first,
-                  InputIteratorLandmarks landmarks_last,
-                  InputIteratorWitnesses witnesses_first,
-                  InputIteratorWitnesses witnesses_last)
-    : witnesses_(witnesses_first, witnesses_last), landmarks_(landmarks_first, landmarks_last), landmark_tree_(landmarks_)
+  template< typename LandmarkRange,
+            typename WitnessRange >
+  Strong_witness_complex(const LandmarkRange & landmarks,
+                         const WitnessRange &  witnesses)
+    : witnesses_(witnesses), landmarks_(landmarks), landmark_tree_(landmarks_)
   {    
   }
 
+  
   /** \brief Returns the point corresponding to the given vertex.
    */
   template <typename Vertex_handle> 
@@ -118,9 +114,10 @@ private:
     return landmarks_[vertex];
   }
   
-  /** \brief Outputs the strong witness complex in a simplicial complex data structure.
-   *  @param[out] complex Simplicial complex data structure compatible with 'find' and 'insert' operations.
-   *              (Cf SimplicialComplexForWitness)
+  /** \brief Outputs the strong witness complex of relaxation 'max_alpha_square' 
+   *         in a simplicial complex data structure.
+   *  @param[out] complex Simplicial complex data structure, which is a model of
+   *              SimplicialComplexForWitness concept.
    *  @param[in] max_alpha_square Maximal squared relaxation parameter.
    *  @param[in] limit_dimension Represents the maximal dimension of the simplicial complex
    *         (default value = no limit).

@@ -17,7 +17,7 @@
 
    Even though often the set of landmarks \f$L\f$ is a subset of the set of witnesses \f$ W\f$, it is not a requirement for the current implementation.
 
-   The simplices are based on landmarks
+   Landmarks are the vertices of the simplicial complex
    and witnesses help to decide on which simplices are inserted via a predicate "is witnessed".
 
    De Silva and Carlsson in their paper \cite de2004topological differentiate **weak witnessing** and **strong witnessing**:
@@ -47,7 +47,13 @@
 
    The constructors take on the step 1, while the function 'create_complex' executes the steps 2 and 3.
 
-   \section witnessexamples Examples
+   \section witnessexample1 Example 1: Constructing weak relaxed witness complex from an off file
+
+   Let's start with a simple example, which reads an off point file and computes a weak witness complex.
+
+   \include Witness_complex/example_witness_complex_off.cpp
+
+   \section witnessexample2 Example2: Computing persistence using strong relaxed witness complex
 
    Here is an example of constructing a strong witness complex filtration and computing persistence on it:
 

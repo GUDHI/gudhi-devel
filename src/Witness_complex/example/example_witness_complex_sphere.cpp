@@ -1,24 +1,3 @@
-/*    This file is part of the Gudhi Library. The Gudhi library
- *    (Geometric Understanding in Higher Dimensions) is a generic C++
- *    library for computational topology.
- *
- *    Author(s):       Siargey Kachanovich
- *
- *    Copyright (C) 2015  INRIA (France)
- *
- *    This program is free software: you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation, either version 3 of the License, or
- *    (at your option) any later version.
- *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
- *
- *    You should have received a copy of the GNU General Public License
- *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 #define BOOST_PARAMETER_MAX_ARITY 12
 
 
@@ -80,10 +59,8 @@ int main(int argc, char * const argv[]) {
     Gudhi::subsampling::pick_n_random_points(point_vector, number_of_landmarks, std::back_inserter(landmarks));
 
     // Compute witness complex
-    Witness_complex witness_complex(landmarks.begin(),
-                                    landmarks.end(),
-                                    point_vector.begin(),
-                                    point_vector.end());
+    Witness_complex witness_complex(landmarks,
+                                    point_vector);
     witness_complex.create_complex(simplex_tree, 0);
     end = clock();
     double time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
