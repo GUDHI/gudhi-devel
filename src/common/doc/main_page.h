@@ -13,8 +13,8 @@
  * The current release of the GUDHI library includes:
  * 
  * \li Data structures to represent, construct and manipulate simplicial complexes.
- * \li Algorithms to compute persistent homology and multi-field persistent homology.
- * \li Simplication of simplicial complexes by edge contraction.
+ * \li Simplification of simplicial complexes by edge contraction.
+ * \li Algorithms to compute persistent homology persistent homology.
  * 
  * All data-structures are generic and several of their aspects can be parameterized via template classes.
  * We refer to \cite gudhilibrary_ICMS14 for a detailed description of the design of the library.
@@ -93,6 +93,25 @@
     </td>
  </tr>
 </table>
+ \subsection TangentialComplexDataStructure Tangential complex
+ \image html "tc_examples.png" "Tangential complex representation"
+<table border="0">
+  <tr>
+    <td width="25%">
+      <b>Author:</b> Cl&eacute;ment Jamin<br>
+      <b>Introduced in:</b> GUDHI 1.4.0<br>
+      <b>Copyright:</b> GPL v3<br>
+    </td>
+    <td width="75%">
+    A Tangential Delaunay complex is a <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
+    designed to reconstruct a \f$ k \f$-dimensional manifold embedded in \f$ d \f$-dimensional Euclidean space. 
+    The input is a point sample coming from an unknown manifold.
+    The running time depends only linearly on the extrinsic dimension \f$ d \f$
+    and exponentially on the intrinsic dimension \f$ k \f$.<br>
+    <b>User manual:</b> \ref tangential_complex - <b>Reference manual:</b> Gudhi::tangential_complex::Tangential_complex
+    </td>
+ </tr>
+</table>
  \subsection WitnessComplexDataStructure Witness complex
  \image html "Witness_complex_representation.png" "Witness complex representation"
 <table border="0">
@@ -154,6 +173,7 @@
 */
 
 /*! \page installation Gudhi installation
+ *  \tableofcontents
  * As Gudhi is a header only library, there is no need to install the library.
  * 
  * Examples of Gudhi headers inclusion can be found in \ref demos.
@@ -162,6 +182,20 @@
  * The library uses c++11 and requires <a target="_blank" href="http://www.boost.org/">Boost</a> with version 1.48.0 or
  * more recent. It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2015.
  * 
+ * \subsection demos Demos and examples
+ * To build the demos and examples, run the following commands in a terminal:
+\verbatim  cd /path-to-gudhi/
+mkdir build
+cd build/
+cmake ..
+make \endverbatim
+ * A list of examples is available <a href="examples.html">here</a>.
+ * 
+ * \subsection testsuites Test suites
+ * To test your build, run the following command in a terminal:
+ * \verbatim  make test \endverbatim
+ * 
+ * \section optionallibrary Optional third-party library
  * \subsection gmp GMP:
  * The multi-field persistent homology algorithm requires GMP which is a free library for arbitrary-precision
  * arithmetic, operating on signed integers, rational numbers, and floating point numbers.
@@ -176,7 +210,8 @@
  * Having GMP version 4.2 or higher installed is recommended.
  * 
  * \subsection cgal CGAL:
- * CGAL is a C++ library which provides easy access to efficient and reliable geometric algorithms.
+ * The \ref alpha_complex data structure and few examples requires CGAL, which is a C++ library which provides easy
+ * access to efficient and reliable geometric algorithms.
  * 
  * Having CGAL version 4.4 or higher installed is recommended. The procedure to install this library according to
  * your operating system is detailed here http://doc.cgal.org/latest/Manual/installation.html
@@ -185,8 +220,8 @@
  * Library</a> (CGAL \cite cgal:eb-15b) and will not be built if CGAL is not installed:
  * \li <a href="_persistent_cohomology_2alpha_complex_3d_persistence_8cpp-example.html">
  * Persistent_cohomology/alpha_complex_3d_persistence.cpp</a>
- * \li <a href="_simplex_tree_2simplex_tree_from_alpha_shapes_3_8cpp-example.html">
- * Simplex_tree/simplex_tree_from_alpha_shapes_3.cpp</a>
+ * \li <a href="_simplex_tree_2example_alpha_shapes_3_simplex_tree_from_off_file_8cpp-example.html">
+ * Simplex_tree/example_alpha_shapes_3_simplex_tree_from_off_file.cpp</a>
  * 
  * The following example requires CGAL version &ge; 4.6:
  * \li <a href="_witness_complex_2witness_complex_sphere_8cpp-example.html">
@@ -205,6 +240,7 @@
  * Persistent_cohomology/custom_persistence_sort.cpp</a>
  * 
  * \subsection eigen3 Eigen3:
+ * The \ref alpha_complex data structure and few examples requires
  * <a target="_blank" href="http://eigen.tuxfamily.org/">Eigen3</a> is a C++ template library for linear algebra:
  * matrices, vectors, numerical solvers, and related algorithms.
  * 
@@ -245,12 +281,14 @@
  * Persistent_cohomology/alpha_complex_persistence.cpp</a>
  * \li <a href="_simplex_tree_2simple_simplex_tree_8cpp-example.html">
  * Simplex_tree/simple_simplex_tree.cpp</a>
- * \li <a href="_simplex_tree_2simplex_tree_from_alpha_shapes_3_8cpp-example.html">
- * Simplex_tree/simplex_tree_from_alpha_shapes_3.cpp</a>
+ * \li <a href="_simplex_tree_2example_alpha_shapes_3_simplex_tree_from_off_file_8cpp-example.html">
+ * Simplex_tree/example_alpha_shapes_3_simplex_tree_from_off_file.cpp</a>
  * \li <a href="_simplex_tree_2simplex_tree_from_cliques_of_graph_8cpp-example.html">
  * Simplex_tree/simplex_tree_from_cliques_of_graph.cpp</a>
- * \li <a href="_persistent_cohomology_2alpha_shapes_persistence_8cpp-example.html">
- * Persistent_cohomology/alpha_shapes_persistence.cpp</a>
+ * \li <a href="_persistent_cohomology_2alpha_complex_3d_persistence_8cpp-example.html">
+ * Persistent_cohomology/alpha_complex_3d_persistence.cpp</a>
+ * \li <a href="_persistent_cohomology_2alpha_complex_persistence_8cpp-example.html">
+ * Persistent_cohomology/alpha_complex_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2rips_persistence_via_boundary_matrix_8cpp-example.html">
  * Persistent_cohomology/rips_persistence_via_boundary_matrix.cpp</a>
  * \li <a href="_persistent_cohomology_2performance_rips_persistence_8cpp-example.html">
@@ -269,19 +307,6 @@
  * Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2custom_persistence_sort_8cpp-example.html">
  * Persistent_cohomology/custom_persistence_sort.cpp</a>
- * 
- * \subsection demos Demos and examples
- * To build the demos and examples, run the following commands in a terminal:
-\verbatim  cd /path-to-gudhi/
-mkdir build
-cd build/
-cmake ..
-make \endverbatim
- * A list of examples is available <a href="examples.html">here</a>.
- * 
- * \subsection testsuites Test suites
- * To test your build, run the following command in a terminal:
- * \verbatim  make test \endverbatim
  * 
  * \section Contributions Bug reports and contributions
  * Please help us improving the quality of the GUDHI library. You may report bugs or suggestions to:
@@ -309,8 +334,8 @@ make \endverbatim
  * @example Bitmap_cubical_complex/Bitmap_cubical_complex.cpp
  * @example Bitmap_cubical_complex/Bitmap_cubical_complex_periodic_boundary_conditions.cpp
  * @example Bitmap_cubical_complex/Random_bitmap_cubical_complex.cpp
- * @example common/CGAL_3D_points_off_reader.cpp
- * @example common/CGAL_points_off_reader.cpp
+ * @example common/example_CGAL_3D_points_off_reader.cpp
+ * @example common/example_CGAL_points_off_reader.cpp
  * @example Contraction/Garland_heckbert.cpp
  * @example Contraction/Rips_contraction.cpp
  * @example Persistent_cohomology/alpha_complex_3d_persistence.cpp
@@ -326,11 +351,13 @@ make \endverbatim
  * @example Persistent_cohomology/custom_persistence_sort.cpp
  * @example Simplex_tree/mini_simplex_tree.cpp
  * @example Simplex_tree/simple_simplex_tree.cpp
- * @example Simplex_tree/simplex_tree_from_alpha_shapes_3.cpp
+ * @example Simplex_tree/example_alpha_shapes_3_simplex_tree_from_off_file.cpp
  * @example Simplex_tree/simplex_tree_from_cliques_of_graph.cpp
  * @example Skeleton_blocker/Skeleton_blocker_from_simplices.cpp
  * @example Skeleton_blocker/Skeleton_blocker_iteration.cpp
  * @example Skeleton_blocker/Skeleton_blocker_link.cpp
+ * @example Tangential_complex/example_basic.cpp
+ * @example Tangential_complex/example_with_perturb.cpp
  * @example Witness_complex/witness_complex_from_file.cpp
  * @example Witness_complex/witness_complex_sphere.cpp
  */

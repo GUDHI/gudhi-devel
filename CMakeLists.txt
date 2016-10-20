@@ -8,7 +8,7 @@ configure_file(GUDHIVersion.cmake.in "${CMAKE_SOURCE_DIR}/GUDHIVersion.cmake" @O
 find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework chrono timer date_time program_options thread REQUIRED)
 
 if(NOT Boost_FOUND)
-  message(FATAL_ERROR "NOTICE: This demo requires Boost and will not be compiled.")
+  message(FATAL_ERROR "NOTICE: This program requires Boost and will not be compiled.")
 else()
 
   set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
@@ -18,11 +18,18 @@ else()
 
   enable_testing()
 
+  # For "make user_version"
+  include(${CMAKE_MODULE_PATH}/GUDHI_user_version_target.txt)
+  # For "make doxygen"
+  include(${CMAKE_MODULE_PATH}/GUDHI_doxygen_target.txt)
+
   find_package(GMP)
   if(GMP_FOUND)
+    message(STATUS "GMP_LIBRARIES = ${GMP_LIBRARIES}")
     INCLUDE_DIRECTORIES(${GMP_INCLUDE_DIR})
     find_package(GMPXX)
     if(GMPXX_FOUND)
+      message(STATUS "GMPXX_LIBRARIES = ${GMPXX_LIBRARIES}")
       INCLUDE_DIRECTORIES(${GMPXX_INCLUDE_DIR})
     endif()
   endif()
@@ -40,14 +47,19 @@ else()
     unset(CGAL_FOUND)
   endif()
   if(CGAL_FOUND)
+    message(STATUS "CGAL version: ${CGAL_VERSION}.")
     include( ${CGAL_USE_FILE} )
+
+    if (NOT CGAL_VERSION VERSION_LESS 4.8.0)
+      include_directories(BEFORE "src/common/include/gudhi_patches")
+    endif()
   endif()
   
   if(MSVC)
     # Turn off some VC++ warnings
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4267 /wd4668 /wd4311 /wd4800 /wd4820 /wd4503 /wd4244 /wd4345 /wd4996 /wd4396 /wd4018")
   else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wpedantic -Wsign-compare")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pedantic")
   endif()
 
   if(CMAKE_BUILD_TYPE MATCHES Debug)
@@ -68,6 +80,13 @@ else()
     message("TBB found in ${TBB_LIBRARY_DIRS}")
     add_definitions(-DGUDHI_USE_TBB)
   endif()
+
+  find_package(Eigen3 3.1.0)
+  if (EIGEN3_FOUND)
+    message(STATUS "Eigen3 version: ${EIGEN3_VERSION}.")
+    include( ${EIGEN3_USE_FILE} )
+    #include_directories (BEFORE "../../include")
+  endif (EIGEN3_FOUND)
 
   # Required programs for unitary tests purpose
   FIND_PROGRAM( GCOVR_PATH gcovr )
@@ -109,6 +128,9 @@ else()
   include_directories(src/Persistent_cohomology/include/)
   include_directories(src/Simplex_tree/include/)
   include_directories(src/Skeleton_blocker/include/)
+  include_directories(src/Spatial_searching/include/)
+  include_directories(src/Subsampling/include/)
+  include_directories(src/Tangential_complex/include/)
   include_directories(src/Witness_complex/include/)
 
   add_subdirectory(src/common/example)
@@ -126,6 +148,13 @@ else()
   add_subdirectory(src/Bitmap_cubical_complex/example)
   add_subdirectory(src/Alpha_complex/example)
   add_subdirectory(src/Alpha_complex/test)
+  add_subdirectory(src/Spatial_searching/example)
+  add_subdirectory(src/Spatial_searching/test)
+  add_subdirectory(src/Subsampling/example)
+  add_subdirectory(src/Subsampling/test)
+  add_subdirectory(src/Tangential_complex/example)
+  add_subdirectory(src/Tangential_complex/test)
+  add_subdirectory(src/Tangential_complex/benchmark)
 
   # data points generator
   add_subdirectory(data/points/generator)

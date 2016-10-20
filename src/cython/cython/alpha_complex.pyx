@@ -34,7 +34,7 @@ __license__ = "GPL v3"
 cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
     cdef cppclass Alpha_complex_interface "Gudhi::alphacomplex::Alpha_complex_interface":
         Alpha_complex_interface(vector[vector[double]] points, double max_alpha_square)
-        # bool from_file is a workaround fro cython to find the correct signature
+        # bool from_file is a workaround for cython to find the correct signature
         Alpha_complex_interface(string off_file, double max_alpha_square, bool from_file)
         double filtration()
         double simplex_filtration(vector[int] simplex)
@@ -54,13 +54,9 @@ cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
                                                           int dimension)
         void remove_maximal_simplex(vector[int] simplex)
         vector[double] get_point(int vertex)
-
-cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
-    cdef cppclass Alpha_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::alphacomplex::Alpha_complex< CGAL::Epick_d< CGAL::Dynamic_dimension_tag > >>":
-        Alpha_complex_persistence_interface(Alpha_complex_interface * st)
         vector[pair[int, pair[double, double]]] get_persistence(int homology_coeff_field, double min_persistence)
-        vector[int] betti_numbers()
-        vector[int] persistent_betti_numbers(double from_value, double to_value)
+        vector[int] get_betti_numbers()
+        vector[int] get_persistent_betti_numbers(double from_value, double to_value)
 
 # AlphaComplex python interface
 cdef class AlphaComplex:
@@ -83,8 +79,6 @@ cdef class AlphaComplex:
     """
 
     cdef Alpha_complex_interface * thisptr
-
-    cdef Alpha_complex_persistence_interface * pcohptr
 
     # Fake constructor that does nothing but documenting the constructor
     def __init__(self, points=None, off_file='', max_alpha_square=float('inf')):
@@ -118,18 +112,11 @@ cdef class AlphaComplex:
     def __dealloc__(self):
         if self.thisptr != NULL:
             del self.thisptr
-        if self.pcohptr != NULL:
-            del self.pcohptr
 
     def __is_defined(self):
         """Returns true if AlphaComplex pointer is not NULL.
          """
         return self.thisptr != NULL
-
-    def __is_persistence_defined(self):
-        """Returns true if Persistence pointer is not NULL.
-         """
-        return self.pcohptr != NULL
 
     def get_filtration(self):
         """This function returns the main simplicial complex filtration value.
@@ -341,18 +328,10 @@ cdef class AlphaComplex:
             0.0.
             Sets min_persistence to -1.0 to see all values.
         :type min_persistence: float.
-        :returns: list of tuples(dimension, tuple(birth, death)) -- the
+        :note: list of pairs(dimension, pair(birth, death)) -- the
             persistence of the simplicial complex.
         """
-        if self.pcohptr != NULL:
-            del self.pcohptr
-        self.pcohptr = new Alpha_complex_persistence_interface(self.thisptr)
-        cdef vector[pair[int, pair[double, double]]] persistence_result
-        if self.pcohptr != NULL:
-            persistence_result \
-                = self.pcohptr.get_persistence(homology_coeff_field,
-                                               min_persistence)
-        return persistence_result
+        return self.thisptr.get_persistence(homology_coeff_field, min_persistence)
 
     def betti_numbers(self):
         """This function returns the Betti numbers of the simplicial complex.
@@ -362,13 +341,7 @@ cdef class AlphaComplex:
         :note: betti_numbers function requires persistence function to be
             launched first.
         """
-        cdef vector[int] bn_result
-        if self.pcohptr != NULL:
-            bn_result = self.pcohptr.betti_numbers()
-        else:
-            print("betti_numbers function requires persistence function"
-                  " to be launched first.")
-        return bn_result
+        return self.thisptr.get_betti_numbers()
 
     def persistent_betti_numbers(self, from_value, to_value):
         """This function returns the persistent Betti numbers of the
@@ -387,12 +360,4 @@ cdef class AlphaComplex:
         :note: persistent_betti_numbers function requires persistence
             function to be launched first.
         """
-        cdef vector[int] pbn_result
-        if self.pcohptr != NULL:
-            pbn_result \
-                = self.pcohptr.persistent_betti_numbers(<double>from_value,
-                                                        <double>to_value)
-        else:
-            print("persistent_betti_numbers function requires persistence "
-                  "function to be launched first.")
-        return pbn_result
+        return self.thisptr.get_persistent_betti_numbers(from_value, to_value)

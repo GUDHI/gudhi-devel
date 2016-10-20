@@ -1,6 +1,8 @@
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
+from libcpp.string cimport string
+from libcpp cimport bool
 
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
@@ -53,6 +55,8 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         void remove_maximal_simplex(vector[int] simplex)
         void graph_expansion(vector[vector[double]] points, int max_dimension,
                              double max_edge_length)
+        void graph_expansion(string off_file, int max_dimension,
+                             double max_edge_length, bool from_file)
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Rips_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>":
@@ -79,12 +83,18 @@ cdef class RipsComplex:
     cdef Rips_complex_persistence_interface * pcohptr
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, points=[], max_dimension=3,
-                 max_edge_length=float('inf')):
+    def __init__(self, points=[], off_file='', max_dimension=3,
+                  max_edge_length=float('inf')):
         """RipsComplex constructor.
 
         :param points: A list of points in d-Dimension.
         :type points: list of list of double
+
+        Or
+
+        :param off_file: An OFF file style name.
+        :type off_file: string
+
         :param max_dimension: Maximum dimension of the complex to be expanded.
         :type max_dimension: int
         :param max_edge_length: Maximum edge length value (rips radius).
@@ -92,11 +102,17 @@ cdef class RipsComplex:
         """
 
     # The real cython constructor
-    def __cinit__(self, points=[], max_dimension=3,
+    def __cinit__(self, points=[], off_file='', max_dimension=3,
                   max_edge_length=float('inf')):
         self.thisptr = new Rips_complex_interface()
         # Constructor from graph expansion
-        if points is not None:
+        if off_file is not '':
+            if os.path.isfile(off_file):
+                self.thisptr.graph_expansion(off_file, max_dimension,
+                                         max_edge_length, True)
+            else:
+                print("file " + off_file + " not found.")
+        else:
             self.thisptr.graph_expansion(points, max_dimension,
                                          max_edge_length)
 

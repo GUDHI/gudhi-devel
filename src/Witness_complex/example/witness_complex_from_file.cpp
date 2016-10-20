@@ -23,9 +23,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include <gudhi/Points_off_io.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Witness_complex.h>
-#include <gudhi/Landmark_choice_by_random_point.h>
+#include <gudhi/Construct_closest_landmark_table.h>
+#include <gudhi/pick_n_random_points.h>
 #include <gudhi/reader_utils.h>
 
 #include <iostream>
@@ -37,56 +39,37 @@
 typedef std::vector< Vertex_handle > typeVectorVertex;
 typedef std::vector< std::vector <double> > Point_Vector;
 
-/**
- * \brief Customized version of read_points
- * which takes into account a possible nbP first line
- *
- */
-inline void
-read_points_cust(std::string file_name, std::vector< std::vector< double > > & points) {
-  std::ifstream in_file(file_name.c_str(), std::ios::in);
-  if (!in_file.is_open()) {
-    std::cerr << "Unable to open file " << file_name << std::endl;
-    return;
-  }
-  std::string line;
-  double x;
-  while (getline(in_file, line)) {
-    std::vector< double > point;
-    std::istringstream iss(line);
-    while (iss >> x) {
-      point.push_back(x);
-    }
-    if (point.size() != 1)
-      points.push_back(point);
-  }
-  in_file.close();
-}
-
 int main(int argc, char * const argv[]) {
   if (argc != 3) {
     std::cerr << "Usage: " << argv[0]
-        << " path_to_point_file nbL \n";
+        << " path_to_point_file.off nbL \n";
     return 0;
   }
 
-  std::string file_name = argv[1];
+  std::string off_file_name = argv[1];
   int nbL = atoi(argv[2]);
   clock_t start, end;
 
   // Construct the Simplex Tree
   Gudhi::Simplex_tree<> simplex_tree;
 
+  // Read the OFF file (input file name given as parameter) and triangulate points
+  Gudhi::Points_off_reader<std::vector <double>> off_reader(off_file_name);
+  // Check the read operation was correct
+  if (!off_reader.is_valid()) {
+    std::cerr << "Unable to read file " << off_file_name << std::endl;
+  }
   // Read the point file
-  Point_Vector point_vector;
-  read_points_cust(file_name, point_vector);
+  Point_Vector point_vector = off_reader.get_point_cloud();
   std::cout << "Successfully read " << point_vector.size() << " points.\n";
   std::cout << "Ambient dimension is " << point_vector[0].size() << ".\n";
 
   // Choose landmarks
   start = clock();
   std::vector<std::vector< int > > knn;
-  Gudhi::witness_complex::landmark_choice_by_random_point(point_vector, nbL, knn);
+  Point_Vector landmarks;
+  Gudhi::subsampling::pick_n_random_points(point_vector, 100, std::back_inserter(landmarks));
+  Gudhi::witness_complex::construct_closest_landmark_table(point_vector, landmarks, knn);
   end = clock();
   std::cout << "Landmark choice for " << nbL << " landmarks took "
       << static_cast<double>(end - start) / CLOCKS_PER_SEC << " s. \n";

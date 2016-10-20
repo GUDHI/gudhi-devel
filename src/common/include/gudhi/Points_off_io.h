@@ -73,9 +73,8 @@ class Points_off_visitor_reader {
    * @details
    * Point_d must have a constructor with the following form:
    * 
-   * @code template<class InputIterator > Point_d::Point_d(int d, InputIterator first, InputIterator last) @endcode
+   * @code template<class InputIterator > Point_d::Point_d(InputIterator first, InputIterator last) @endcode
    * 
-   * where d is the point dimension. 		
    */
   void point(const std::vector<double>& point) {
 #ifdef DEBUG_TRACES
@@ -86,7 +85,7 @@ class Points_off_visitor_reader {
     std::cout << std::endl;
 #endif  // DEBUG_TRACES
     // Fill the point cloud
-    point_cloud.push_back(Point_d(point.size(), point.begin(), point.end()));
+    point_cloud.push_back(Point_d(point.begin(), point.end()));
   }
 
   // Off_reader visitor maximal_face implementation - Only points are read
@@ -115,16 +114,16 @@ class Points_off_visitor_reader {
  * 
  * where d is the point dimension. 		
  * 
- * \section Example
+ * \section pointoffioexample Example
  *
- * This example loads points from an OFF file and builds a vector of CGAL points in dimension d.
+ * This example loads points from an OFF file and builds a vector of points (vector of double).
  * Then, it is asked to display the points.
  * 
- * \include common/CGAL_points_off_reader.cpp
+ * \include common/example_vector_double_points_off_reader.cpp
  * 
  * When launching:
  * 
- * \code $> ./cgaloffreader ../../data/points/alphacomplexdoc.off
+ * \code $> ./vector_double_off_reader ../../data/points/alphacomplexdoc.off
  * \endcode
  *
  * the program output is:

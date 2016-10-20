@@ -5,116 +5,128 @@ FIND_PROGRAM( PYTHON_PATH python )
 FIND_PROGRAM( CYTHON_PATH cython )
 
 if(PYTHON_PATH AND CYTHON_PATH)
-  # Gudhi and CGAL compilation option
-  if(MSVC)
-    set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'/fp:strict', ")
-  else(MSVC)
-    set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-std=c++11', ")
-  endif(MSVC)
-  if(CMAKE_COMPILER_IS_GNUCXX)
-    set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-frounding-math', ")
-  endif(CMAKE_COMPILER_IS_GNUCXX)
-  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
-    set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-fp-model strict', ")
-  endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+  find_package(Boost REQUIRED COMPONENTS system REQUIRED)
 
-  find_package(Eigen3 3.1.0)
-  
-  if (EIGEN3_FOUND)
-    # No problem, even if no CGAL found
-    set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_EIGEN3_ENABLED', ")
-    set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${EIGEN3_INCLUDE_DIR}', ")
-  endif (EIGEN3_FOUND)
-  
-  # Copy recursively include, cython and test repositories before packages finding
-  # Some tests files are removed in case some packages are not found
-  file(COPY include DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-  file(COPY cython DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-  file(COPY test DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-  
-  if (CGAL_FOUND)
-    if (NOT CGAL_VERSION VERSION_LESS 4.7.0)
-      # If CGAL_VERSION >= 4.7.0, include alpha complex
-      set(GUDHI_CYTHON_LIBRARIES "${GUDHI_CYTHON_LIBRARIES}'CGAL', ")
-      set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${CGAL_LIBRARIES_DIR}', ")
-      # GMP and GMPXX are not required, but if present, CGAL will link with them.
-      if(GMP_FOUND)
-        set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_USE_GMP', ")
-        set(GUDHI_CYTHON_LIBRARIES "${GUDHI_CYTHON_LIBRARIES}'gmp', ")
-        set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${GMP_LIBRARIES_DIR}', ")
-        if(GMPXX_FOUND)
-          set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_USE_GMPXX', ")
-          set(GUDHI_CYTHON_LIBRARIES "${GUDHI_CYTHON_LIBRARIES}'gmpxx', ")
-          set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${GMPXX_LIBRARIES_DIR}', ")
-        endif(GMPXX_FOUND)
-      endif(GMP_FOUND)
-  
-      set(GUDHI_CYTHON_ALPHA_COMPLEX "include 'cython/alpha_complex.pyx'")
-    else (NOT CGAL_VERSION VERSION_LESS 4.7.0)
-      # Remove alpha complex unitary tests
-      file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_alpha_complex.py)
-    endif (NOT CGAL_VERSION VERSION_LESS 4.7.0)
-  endif (CGAL_FOUND)
-  
-  # Loop on INCLUDE_DIRECTORIES PROPERTY
-  get_property(GUDHI_INCLUDE_DIRECTORIES DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-  foreach(GUDHI_INCLUDE_DIRECTORY ${GUDHI_INCLUDE_DIRECTORIES})
-    set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${GUDHI_INCLUDE_DIRECTORY}', ")
-  endforeach()
-  set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${CMAKE_SOURCE_DIR}/${GUDHI_CYTHON_PATH}/include', ")
-  
-  # Generate cythonize_gudhi.py file to cythonize Gudhi
-  configure_file(cythonize_gudhi.py.in "${CMAKE_CURRENT_BINARY_DIR}/cythonize_gudhi.py" @ONLY)
-  # Generate gudhi.pyx - Gudhi cython file 
-  configure_file(gudhi.pyx.in "${CMAKE_CURRENT_BINARY_DIR}/gudhi.pyx" @ONLY)
-  
-  add_custom_command(
-      OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so"
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-      COMMAND python "${CMAKE_CURRENT_BINARY_DIR}/cythonize_gudhi.py" "build_ext" "--inplace")
-  
-  add_custom_target(cythonize_gudhi ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so"
-                    COMMENT "Do not forget to add ${CMAKE_CURRENT_BINARY_DIR}/gudhi.so to your PYTHONPATH before using examples")
+  if(NOT Boost_FOUND)
+    message(FATAL_ERROR "NOTICE: This demo requires Boost and will not be compiled.")
+  else(NOT Boost_FOUND)
 
-  # Unitary tests are available through py.test
-  find_program( PYTEST_PATH py.test )
-  if(PYTEST_PATH)
-    add_test(
-        NAME gudhi_cython_py_test
+    set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_RESULT_OF_USE_DECLTYPE', ")
+    set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_ALL_NO_LIB', ")
+    set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${Boost_INCLUDE_DIRS}', ")
+    set(GUDHI_CYTHON_LIBRARIES "${GUDHI_CYTHON_LIBRARIES}'boost_system', ")
+    set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${Boost_LIBRARY_DIRS}', ")
+
+    # Gudhi and CGAL compilation option
+    if(MSVC)
+      set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'/fp:strict', ")
+    else(MSVC)
+      set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-std=c++11', ")
+    endif(MSVC)
+    if(CMAKE_COMPILER_IS_GNUCXX)
+      set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-frounding-math', ")
+    endif(CMAKE_COMPILER_IS_GNUCXX)
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+      set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-fp-model strict', ")
+    endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+  
+    find_package(Eigen3 3.1.0)
+    
+    if (EIGEN3_FOUND)
+      # No problem, even if no CGAL found
+      set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_EIGEN3_ENABLED', ")
+      set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${EIGEN3_INCLUDE_DIR}', ")
+    endif (EIGEN3_FOUND)
+    
+    # Copy recursively include, cython and test repositories before packages finding
+    # Some tests files are removed in case some packages are not found
+    file(COPY include DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    file(COPY cython DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    file(COPY test DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    
+    if (CGAL_FOUND)
+      if (NOT CGAL_VERSION VERSION_LESS 4.7.0)
+        # If CGAL_VERSION >= 4.7.0, include alpha complex
+        set(GUDHI_CYTHON_LIBRARIES "${GUDHI_CYTHON_LIBRARIES}'CGAL', ")
+        set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${CGAL_LIBRARIES_DIR}', ")
+        # GMP and GMPXX are not required, but if present, CGAL will link with them.
+        if(GMP_FOUND)
+          set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_USE_GMP', ")
+          set(GUDHI_CYTHON_LIBRARIES "${GUDHI_CYTHON_LIBRARIES}'gmp', ")
+          set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${GMP_LIBRARIES_DIR}', ")
+          if(GMPXX_FOUND)
+            set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_USE_GMPXX', ")
+            set(GUDHI_CYTHON_LIBRARIES "${GUDHI_CYTHON_LIBRARIES}'gmpxx', ")
+            set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${GMPXX_LIBRARIES_DIR}', ")
+          endif(GMPXX_FOUND)
+        endif(GMP_FOUND)
+    
+        set(GUDHI_CYTHON_ALPHA_COMPLEX "include 'cython/alpha_complex.pyx'")
+      else (NOT CGAL_VERSION VERSION_LESS 4.7.0)
+        # Remove alpha complex unitary tests
+        file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_alpha_complex.py)
+      endif (NOT CGAL_VERSION VERSION_LESS 4.7.0)
+    endif (CGAL_FOUND)
+    
+    # Loop on INCLUDE_DIRECTORIES PROPERTY
+    get_property(GUDHI_INCLUDE_DIRECTORIES DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+    foreach(GUDHI_INCLUDE_DIRECTORY ${GUDHI_INCLUDE_DIRECTORIES})
+      set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${GUDHI_INCLUDE_DIRECTORY}', ")
+    endforeach()
+    set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${CMAKE_SOURCE_DIR}/${GUDHI_CYTHON_PATH}/include', ")
+    
+    # Generate cythonize_gudhi.py file to cythonize Gudhi
+    configure_file(cythonize_gudhi.py.in "${CMAKE_CURRENT_BINARY_DIR}/cythonize_gudhi.py" @ONLY)
+    # Generate gudhi.pyx - Gudhi cython file 
+    configure_file(gudhi.pyx.in "${CMAKE_CURRENT_BINARY_DIR}/gudhi.pyx" @ONLY)
+    
+    add_custom_command(
+        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so"
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        COMMAND ${PYTEST_PATH})
-    set_tests_properties(gudhi_cython_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
-  endif(PYTEST_PATH)
-
-  # Documentation generation is available through sphinx
-  find_program( SPHINX_PATH sphinx-build )
-  if(SPHINX_PATH)
-    file(COPY doc DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-    # Developper version
-    file(GLOB GUDHI_DEV_DOC_IMAGES "${CMAKE_SOURCE_DIR}/src/*/doc/*.png")
-    file(COPY ${GUDHI_DEV_DOC_IMAGES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/img")
-    # User version
-    file(GLOB GUDHI_USER_DOC_IMAGES "${CMAKE_SOURCE_DIR}/doc/*/*.png")
-    file(COPY ${GUDHI_USER_DOC_IMAGES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/img")
-    # Biblio
-    file(GLOB GUDHI_BIB_FILES "${CMAKE_SOURCE_DIR}/biblio/*.bib")
-    file(COPY ${GUDHI_BIB_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
-    # Cubical complex perseus doc example
-    file(GLOB GUDHI_CUBICAL_PERSEUS_FILES "${CMAKE_SOURCE_DIR}/data/bitmap/*cubicalcomplexdoc.txt")
-    file(COPY ${GUDHI_CUBICAL_PERSEUS_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
-    file(COPY "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
-    # Persistence graphical tools examples
-    file(COPY "${CMAKE_SOURCE_DIR}/data/bitmap/3d_torus.txt" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
-    file(COPY "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
-    if (UNIX)
-      add_custom_target(html 
-          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc
-          COMMAND make html && make doctest)
-    else (UNIX)
-      add_custom_target(html 
-          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc
-          COMMAND make.bat html)
-    endif (UNIX)
-  endif(SPHINX_PATH)
-
+        COMMAND python "${CMAKE_CURRENT_BINARY_DIR}/cythonize_gudhi.py" "build_ext" "--inplace")
+    
+    add_custom_target(cythonize_gudhi ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so"
+                      COMMENT "Do not forget to add ${CMAKE_CURRENT_BINARY_DIR}/gudhi.so to your PYTHONPATH before using examples")
+  
+    # Unitary tests are available through py.test
+    find_program( PYTEST_PATH py.test )
+    if(PYTEST_PATH)
+      add_test(
+          NAME gudhi_cython_py_test
+          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+          COMMAND ${PYTEST_PATH})
+      set_tests_properties(gudhi_cython_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+    endif(PYTEST_PATH)
+  
+    # Documentation generation is available through sphinx
+    find_program( SPHINX_PATH sphinx-build )
+    if(SPHINX_PATH)
+      file(COPY doc DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+      # Developper version
+      file(GLOB GUDHI_DEV_DOC_IMAGES "${CMAKE_SOURCE_DIR}/src/*/doc/*.png")
+      file(COPY ${GUDHI_DEV_DOC_IMAGES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/img")
+      # User version
+      file(GLOB GUDHI_USER_DOC_IMAGES "${CMAKE_SOURCE_DIR}/doc/*/*.png")
+      file(COPY ${GUDHI_USER_DOC_IMAGES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/img")
+      # Biblio
+      file(GLOB GUDHI_BIB_FILES "${CMAKE_SOURCE_DIR}/biblio/*.bib")
+      file(COPY ${GUDHI_BIB_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
+      # Cubical complex perseus doc example
+      file(GLOB GUDHI_CUBICAL_PERSEUS_FILES "${CMAKE_SOURCE_DIR}/data/bitmap/*cubicalcomplexdoc.txt")
+      file(COPY ${GUDHI_CUBICAL_PERSEUS_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
+      file(COPY "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
+      # Persistence graphical tools examples
+      file(COPY "${CMAKE_SOURCE_DIR}/data/bitmap/3d_torus.txt" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
+      file(COPY "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
+      if (UNIX)
+        add_custom_target(html 
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc
+            COMMAND make html && make doctest)
+      else (UNIX)
+        add_custom_target(html 
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc
+            COMMAND make.bat html)
+      endif (UNIX)
+    endif(SPHINX_PATH)
+  endif(NOT Boost_FOUND)
 endif(PYTHON_PATH AND CYTHON_PATH)

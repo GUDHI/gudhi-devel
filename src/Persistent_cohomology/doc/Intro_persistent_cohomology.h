@@ -46,7 +46,7 @@ namespace persistent_cohomology {
   composed of three elements: 
   topological spaces, their homology groups and an evolution scheme.
 
- <DT>Topological Spaces:</DT>
+ \section persistencetopolocalspaces Topological Spaces
  Topological spaces are represented by simplicial complexes.
  Let \f$V = \{1, \cdots ,|V|\}\f$ be a set of <EM>vertices</EM>.
  A <EM>simplex</EM> \f$\sigma\f$ is a subset of vertices
@@ -84,7 +84,7 @@ namespace persistent_cohomology {
  <CODE>Filtration_value filtration (Simplex_handle)</CODE> that returns the value of
  the filtration on the simplex represented by the handle.
 
- <DT>Homology:</DT>
+ \section persistencehomology Homology
  For a ring \f$\mathcal{R}\f$, the group of <EM>n-chains</EM>,
  denoted \f$\mathbf{C}_n(\mathbf{K},\mathcal{R})\f$, of \f$\mathbf{K}\f$ is the
  group of formal sums of
@@ -111,7 +111,7 @@ namespace persistent_cohomology {
  We refer to \cite Munkres-elementsalgtop1984 for an introduction to homology
  theory and to \cite DBLP:books/daglib/0025666 for an introduction to persistent homology.
 
- <DT>Indexing Scheme:</DT>
+ \section persistenceindexingscheme Indexing Scheme
  "Changing" a simplicial complex consists in applying a simplicial map.
  An <EM>indexing scheme</EM> is a directed graph together with a traversal
  order, such that two
@@ -139,18 +139,62 @@ namespace persistent_cohomology {
  by increasing filtration values (breaking ties so as a simplex appears after
  its subsimplices of same filtration value) provides an indexing scheme.
 
-\section Examples
-    We provide several example files: run these examples with -h for details on their use, and read the README file.
+\section pcohexamples Examples
 
-\li <CODE>rips_persistence.cpp</CODE> computes the Rips complex of a point cloud and its persistence diagram.
+We provide several example files: run these examples with -h for details on their use, and read the README file.
 
-\li <CODE>rips_multifield_persistence.cpp</CODE> computes the Rips complex of a point cloud and its persistence diagram 
-with a family of field coefficients.
+\li <a href="_persistent_cohomology_2rips_persistence_8cpp-example.html">
+Persistent_cohomology/rips_persistence.cpp</a> computes the Rips complex of a point cloud and its persistence diagram.
 
-\li <CODE>performance_rips_persistence.cpp</CODE> provides timings for the construction of the Rips complex on a set of 
-points sampling a Klein bottle in \f$\mathbb{R}^5\f$ with a simplex tree, its conversion to a 
+\li <a href="_persistent_cohomology_2rips_multifield_persistence_8cpp-example.html">
+Persistent_cohomology/rips_multifield_persistence.cpp</a> computes the Rips complex of a point cloud and its
+persistence diagram with a family of field coefficients.
+
+\li <a href="_persistent_cohomology_2performance_rips_persistence_8cpp-example.html">
+Persistent_cohomology/performance_rips_persistence.cpp</a> provides timings for the construction of the Rips complex
+on a set of points sampling a Klein bottle in \f$\mathbb{R}^5\f$ with a simplex tree, its conversion to a 
 Hasse diagram and the computation of persistent homology and multi-field persistent homology for the 
 different representations.
+
+\li <a href="_persistent_cohomology_2alpha_complex_3d_persistence_8cpp-example.html">
+Persistent_cohomology/alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
+\f$\mathbb{Z}/2\mathbb{Z}\f$ coefficients of the alpha complex on points sampling from an OFF file.
+\code $> ./alpha_complex_3d_persistence ../../data/points/tore3D_300.off 2 0.45 \endcode
+\code Simplex_tree dim: 3
+2  0 0 inf 
+2  1 0.0682162 1.0001 
+2  1 0.0934117 1.00003 
+2  2 0.56444 1.03938 \endcode
+
+\li <a href="_persistent_cohomology_2alpha_complex_persistence_8cpp-example.html">
+Persistent_cohomology/alpha_complex_persistence.cpp</a> computes the persistent homology with
+\f$\mathbb{Z}/p\mathbb{Z}\f$ coefficients of the alpha complex on points sampling from an OFF file.
+\code $> ./alpha_complex_persistence -r 32 -p 2 -m 0.45 ../../data/points/tore3D_300.off \endcode
+\code Alpha complex is of dimension 3 - 9273 simplices - 300 vertices.
+Simplex_tree dim: 3
+2  0 0 inf 
+2  1 0.0682162 1.0001 
+2  1 0.0934117 1.00003 
+2  2 0.56444 1.03938 \endcode
+
+\li <a href="_persistent_cohomology_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
+Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
+\f$\mathbb{Z}/2\mathbb{Z}\f$ coefficients of the periodic alpha complex on points sampling from an OFF file.
+\code $> ./periodic_alpha_complex_3d_persistence ../../data/points/grid_10_10_10_in_0_1.off 3 1.0 \endcode
+\code Periodic Delaunay computed.
+Simplex_tree dim: 3
+3  0 0 inf 
+3  1 0.0025 inf 
+3  1 0.0025 inf 
+3  1 0.0025 inf 
+3  2 0.005 inf 
+3  2 0.005 inf 
+3  2 0.005 inf 
+3  3 0.0075 inf \endcode
+
+\li <a href="_persistent_cohomology_2plain_homology_8cpp-example.html">
+Persistent_cohomology/plain_homology.cpp</a> computes the plain homology of a simple simplicial complex without
+filtration values.
 
  \copyright GNU General Public License v3.
  */

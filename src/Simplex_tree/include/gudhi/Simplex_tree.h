@@ -48,40 +48,9 @@
 #include <limits>  // Inf
 #include <initializer_list>
 #include <algorithm>  // for std::max
+#include <cstdint>  // for std::uint32_t
 
 namespace Gudhi {
-/** \defgroup simplex_tree Filtered Complexes
- * \author    Cl&eacute;ment Maria
- *
- * A simplicial complex \f$\mathbf{K}\f$
- * on a set of vertices \f$V = \{1, \cdots ,|V|\}\f$ is a collection of simplices
- * \f$\{\sigma\}\f$,
- * \f$\sigma \subseteq V\f$ such that \f$\tau \subseteq \sigma \in \mathbf{K} \rightarrow \tau \in
- * \mathbf{K}\f$. The
- * dimension \f$n=|\sigma|-1\f$ of \f$\sigma\f$ is its number of elements minus \f$1\f$.
- *
- * A filtration of a simplicial complex is
- * a function \f$f:\mathbf{K} \rightarrow \mathbb{R}\f$ satisfying \f$f(\tau)\leq f(\sigma)\f$ whenever
- * \f$\tau \subseteq \sigma\f$. Ordering the simplices by increasing filtration values
- * (breaking ties so as a simplex appears after its subsimplices of same filtration value)
- * provides an indexing scheme.
- *
-
- <DT>Implementations:</DT>
- There are two implementation of complexes. The first on is the Simplex_tree data structure.
- The simplex tree is an efficient and flexible
- data structure for representing general (filtered) simplicial complexes. The data structure
- is described in \cite boissonnatmariasimplextreealgorithmica
- \image html "Simplex_tree_representation.png" "Simplex tree representation"
-
- The second one is the Hasse_complex. The Hasse complex is a data structure representing
- explicitly all co-dimension 1 incidence relations in a complex. It is consequently faster
- when accessing the boundary of a simplex, but is less compact and harder to construct from
- scratch.
-
- * \copyright GNU General Public License v3.
- * @{
- */
 
 struct Simplex_tree_options_full_featured;
 
@@ -109,7 +78,7 @@ class Simplex_tree {
   typedef typename Options::Filtration_value Filtration_value;
   /** \brief Key associated to each simplex.
    *
-   * Must be a signed integer type. */
+   * Must be an integer type. */
   typedef typename Options::Simplex_key Simplex_key;
   /** \brief Type for the vertex handle.
    *
@@ -1297,25 +1266,31 @@ std::istream& operator>>(std::istream & is, Simplex_tree<T...> & st) {
   return is;
 }
 
-/// Model of SimplexTreeOptions.
+/** Model of SimplexTreeOptions.
+ * 
+ * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
+ * (about 4 billions of simplices). */
 struct Simplex_tree_options_full_featured {
   typedef linear_indexing_tag Indexing_tag;
   typedef int Vertex_handle;
   typedef double Filtration_value;
-  typedef int Simplex_key;
+  typedef std::uint32_t Simplex_key;
   static const bool store_key = true;
   static const bool store_filtration = true;
   static const bool contiguous_vertices = false;
 };
 
-/** Model of SimplexTreeOptions, faster than
-  `Simplex_tree_options_full_featured` but note the unsafe
-  `contiguous_vertices` option. */
+/** Model of SimplexTreeOptions, faster than `Simplex_tree_options_full_featured` but note the unsafe
+ * `contiguous_vertices` option.
+ * 
+ * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
+ * (about 4 billions of simplices). */
+
 struct Simplex_tree_options_fast_persistence {
   typedef linear_indexing_tag Indexing_tag;
   typedef int Vertex_handle;
   typedef float Filtration_value;
-  typedef int Simplex_key;
+  typedef std::uint32_t Simplex_key;
   static const bool store_key = true;
   static const bool store_filtration = true;
   static const bool contiguous_vertices = true;

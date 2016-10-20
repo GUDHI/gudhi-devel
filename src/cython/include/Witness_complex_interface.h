@@ -25,7 +25,8 @@
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Witness_complex.h>
-#include <gudhi/Landmark_choice_by_furthest_point.h>
+#include <gudhi/Construct_closest_landmark_table.h>
+#include <gudhi/pick_n_random_points.h>
 
 #include "Persistent_cohomology_interface.h"
 
@@ -48,10 +49,11 @@ class Witness_complex_interface {
   Witness_complex_interface(std::vector<std::vector<double>>&points, int number_of_landmarks)
   : pcoh_(nullptr) {
     std::vector<std::vector< int > > knn;
+    std::vector<std::vector<double>> landmarks;
+    Gudhi::subsampling::pick_n_random_points(points, number_of_landmarks, std::back_inserter(landmarks));
+    Gudhi::witness_complex::construct_closest_landmark_table(points, landmarks, knn);
 
-    Gudhi::witness_complex::landmark_choice_by_furthest_point(points, number_of_landmarks, knn);
     Gudhi::witness_complex::witness_complex(knn, number_of_landmarks, points[0].size(), simplex_tree_);
-
   }
 
   bool find_simplex(const Simplex& vh) {

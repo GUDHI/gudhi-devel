@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -159,7 +159,7 @@ class Skeleton_blocker_sub_complex : public ComplexType {
       if (simplex.contains(*blocker)) {
         Root_simplex_handle blocker_root(parent_complex.get_id(*(blocker)));
         Simplex blocker_restr(
-            *(this->get_simplex_address(blocker_root)));
+                              *(this->get_simplex_address(blocker_root)));
         this->add_blocker(new Simplex(blocker_restr));
       }
     }
@@ -190,14 +190,15 @@ class Skeleton_blocker_sub_complex : public ComplexType {
   //  */
   // boost::optional<Simplex> get_address(const Root_simplex_handle & s) const;
 
-// private:
+  // private:
   /**
    *  same as get_address except that it will return a simplex in any case.
    *  The vertices that were not found are not added.
    */
   // @remark should be private but problem with VS
+
   std::vector<boost::optional<Vertex_handle> > get_addresses(
-      const Root_simplex_handle & s) const {
+                                                             const Root_simplex_handle & s) const {
     std::vector < boost::optional<Vertex_handle> > res;
     for (auto i : s) {
       res.push_back(get_address(i));
@@ -214,14 +215,14 @@ class Skeleton_blocker_sub_complex : public ComplexType {
  */
 template<typename ComplexType>
 bool proper_face_in_union(
-    Skeleton_blocker_sub_complex<ComplexType> & link,
-    std::vector<boost::optional<typename ComplexType::Vertex_handle> > & addresses_sigma_in_link,
-    int vertex_to_be_ignored) {
+                          Skeleton_blocker_sub_complex<ComplexType> & link,
+                          std::vector<boost::optional<typename ComplexType::Vertex_handle> > & addresses_sigma_in_link,
+                          std::size_t vertex_to_be_ignored) {
   // we test that all vertices of 'addresses_sigma_in_link' but 'vertex_to_be_ignored'
   // are in link1 if it is the case we construct the corresponding simplex
   bool vertices_sigma_are_in_link = true;
   typename ComplexType::Simplex sigma_in_link;
-  for (int i = 0; i < addresses_sigma_in_link.size(); ++i) {
+  for (std::size_t i = 0; i < addresses_sigma_in_link.size(); ++i) {
     if (i != vertex_to_be_ignored) {
       if (!addresses_sigma_in_link[i]) {
         vertices_sigma_are_in_link = false;
@@ -236,43 +237,24 @@ bool proper_face_in_union(
   return vertices_sigma_are_in_link && link.contains(sigma_in_link);
 }
 
-/*
- template<typename ComplexType>
- bool
- proper_faces_in_union(Skeleton_blocker_simplex<typename ComplexType::Root_vertex_handle> & sigma, Skeleton_blocker_sub_complex<ComplexType> & link1, Skeleton_blocker_sub_complex<ComplexType> & link2)
- {
- typedef typename ComplexType::Vertex_handle  Vertex_handle;
- std::vector<boost::optional<Vertex_handle> > addresses_sigma_in_link1 = link1.get_addresses(sigma);
- std::vector<boost::optional<Vertex_handle> > addresses_sigma_in_link2 = link2.get_addresses(sigma);
-
- for (int current_index = 0; current_index < addresses_sigma_in_link1.size(); ++current_index)
- {
-
- if (!proper_face_in_union(link1, addresses_sigma_in_link1, current_index)
- && !proper_face_in_union(link2, addresses_sigma_in_link2, current_index)){
- return false;
- }
- }
- return true;
- }*/
-
 // Remark: this function should be friend in order to leave get_adresses private
 // however doing so seemes currently not possible due to a visual studio bug c2668
 // "the compiler does not support partial ordering of template functions as specified in the C++ Standard"
 // http://www.serkey.com/error-c2668-ambiguous-call-to-overloaded-function-bb45ft.html
+
 template<typename ComplexType>
 bool proper_faces_in_union(
-    Skeleton_blocker_simplex<typename ComplexType::Root_vertex_handle> & sigma,
-    Skeleton_blocker_sub_complex<ComplexType> & link1,
-    Skeleton_blocker_sub_complex<ComplexType> & link2) {
+                           Skeleton_blocker_simplex<typename ComplexType::Root_vertex_handle> & sigma,
+                           Skeleton_blocker_sub_complex<ComplexType> & link1,
+                           Skeleton_blocker_sub_complex<ComplexType> & link2) {
   typedef typename ComplexType::Vertex_handle Vertex_handle;
   std::vector < boost::optional<Vertex_handle> > addresses_sigma_in_link1 =
       link1.get_addresses(sigma);
   std::vector < boost::optional<Vertex_handle> > addresses_sigma_in_link2 =
       link2.get_addresses(sigma);
 
-  for (int current_index = 0; current_index < addresses_sigma_in_link1.size();
-      ++current_index) {
+  for (std::size_t current_index = 0; current_index < addresses_sigma_in_link1.size();
+       ++current_index) {
     if (!proper_face_in_union(link1, addresses_sigma_in_link1, current_index)
         && !proper_face_in_union(link2, addresses_sigma_in_link2,
                                  current_index)) {
@@ -289,4 +271,3 @@ namespace skbl = skeleton_blocker;
 }  // namespace Gudhi
 
 #endif  // SKELETON_BLOCKER_SKELETON_BLOCKER_SUB_COMPLEX_H_
-

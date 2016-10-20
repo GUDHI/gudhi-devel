@@ -73,7 +73,7 @@ template<typename SkBlComplex> class Furthest_point_epsilon_net {
       complex_(complex) {
     if (!complex.empty()) {
       init_filtration();
-      for (int k = 2; k < net_filtration_.size(); ++k) {
+      for (std::size_t k = 2; k < net_filtration_.size(); ++k) {
         update_radius_value(k);
       }
     }

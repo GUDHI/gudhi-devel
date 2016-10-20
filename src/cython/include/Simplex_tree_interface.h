@@ -26,6 +26,7 @@
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/distance_functions.h>
 #include <gudhi/Simplex_tree.h>
+#include <gudhi/Points_off_io.h>
 
 #include <vector>
 #include <utility>  // std::pair
@@ -114,6 +115,21 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     Simplex_tree<SimplexTreeOptions>::insert_graph(prox_graph);
     Simplex_tree<SimplexTreeOptions>::expansion(max_dimension);
     Simplex_tree<SimplexTreeOptions>::initialize_filtration();
+  }
+
+  void graph_expansion(std::string& off_file_name, int max_dimension, double max_edge_length, bool from_file=true) {
+    Gudhi::Points_off_reader<std::vector <double>> off_reader(off_file_name);
+    // Check the read operation was correct
+    if (!off_reader.is_valid()) {
+      std::cerr << "Unable to read file " << off_file_name << std::endl;
+    } else {
+      std::vector<std::vector <double>> points = off_reader.get_point_cloud();
+      Graph_t prox_graph = compute_proximity_graph(points, max_edge_length,
+                                                   euclidean_distance<std::vector<double>>);
+      Simplex_tree<SimplexTreeOptions>::insert_graph(prox_graph);
+      Simplex_tree<SimplexTreeOptions>::expansion(max_dimension);
+      Simplex_tree<SimplexTreeOptions>::initialize_filtration();
+    }
   }
 
 };
