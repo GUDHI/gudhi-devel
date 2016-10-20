@@ -24,6 +24,7 @@
 #ifndef Abs_Topological_data_with_averages_H_
 #define Abs_Topological_data_with_averages_H_
 #include <gudhi/abstract_classes/Abs_Topological_data.h>
+#include <vector>
 
 
 namespace Gudhi 

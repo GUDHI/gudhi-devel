@@ -100,4 +100,7 @@ add_executable ( persistence_vectors/plot_persistence_vectors persistence_vector
 target_link_libraries(persistence_vectors/plot_persistence_vectors ${Boost_SYSTEM_LIBRARY})
 
 
+#some stat libraries:
+#add_executable ( permutation_test permutation_test.cpp )
+#target_link_libraries(permutation_test ${Boost_SYSTEM_LIBRARY})
 

@@ -34,6 +34,114 @@ namespace Gudhi
 {
 namespace Gudhi_stat
 {
+			
+	
+/**
+ * This procedure reads birth-death dagta from a file. We assume that in the file, there may be one type of string 'inf' or 'Inf'. If the second parameter of the program is set to -1,
+ * then those vales are ignored. If the second parameter of this program is set to a positive value, then the infinite intervals will be substituted by that number.
+**/ 
+std::vector< std::pair< double,double > > read_file_names_that_may_contain_inf_string( char* filename , double what_to_substitute_for_infinite_bar = -1 )
+{
+	
+	bool dbg = true;
+	
+	if ( !( access( filename, F_OK ) != -1 ) )
+	{
+		cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
+		throw "The file from which you are trying to read do not exist. The program will now terminate \n";
+	}
+	
+	std::string line;
+    std::vector< std::pair<double,double> > barcode;
+
+	std::ifstream in;
+    in.open( filename );
+    while (!in.eof())
+    {
+        getline(in,line);        
+        if ( !(line.length() == 0 || line[0] == '#') )
+        {
+			std::stringstream lineSS;
+            lineSS << line;
+            double beginn, endd;
+			if ( (line.find("inf") != std::string::npos) || (line.find("Inf") != std::string::npos) )
+			{
+				if ( dbg )
+				{
+					std::cerr << "This line: " << line << " contains infinite interval. We will skip it. \n";
+				}
+				if ( what_to_substitute_for_infinite_bar != -1 )
+				{
+					lineSS >> beginn;
+					endd = what_to_substitute_for_infinite_bar;
+				}
+				else
+				{
+					continue;
+				}
+			}
+			else
+			{           				       
+				lineSS >> beginn;
+				lineSS >> endd;
+			}
+            if ( beginn > endd )
+            {
+                double b = beginn;
+                beginn = endd;
+                endd = b;
+            }  
+            if ( dbg )
+			{
+				std::cerr << "Getting an interval : " << beginn << "," << endd << std::endl;
+			}          
+			barcode.push_back( std::make_pair( beginn , endd ) );			
+        }
+	}
+	return barcode;    
+}//readFileNames	
+	
+	
+/**
+ * This procedure reads names of files which are stored in a file. 
+**/ 
+std::vector< std::string > readFileNames( char* filenameWithFilenames )
+{
+    bool dbg = false;
+    
+    if ( !( access( filenameWithFilenames, F_OK ) != -1 ) )
+	{
+		cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
+		throw "The file from which you are trying to read do not exist. The program will now terminate \n";
+	}
+
+    std::vector< std::string > result;
+    std::ifstream in;
+    in.open( filenameWithFilenames );
+    std::string line;
+    while (!in.eof())
+    {
+        getline(in,line);
+        line.erase( std::remove_if( line.begin(), line.end(), ::isspace) , line.end() );
+
+        if (dbg){std::cerr << "line : " << line << std::endl;}
+
+        if ( (line.length() == 0) || (line[0] == '#') )
+        {
+            //in this case we have a file name. First we should remove all the white spaces.
+            if ( dbg ){std::cerr << "This is a line with comment, it will be ignored n";}
+        }
+        else
+        {
+            result.push_back( line.c_str() );
+            if (dbg){std::cerr << "Line after removing white spaces : " << line << std::endl;}
+        }
+	}
+    in.close();
+
+    return result;
+}//readFileNames
+
 
 /**
  * This method reads persistence from standalone file. The format of the file is as follows:

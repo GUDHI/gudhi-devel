@@ -31,7 +31,6 @@
 #include <limits>
 
 
-
 #include <gudhi/abstract_classes/Abs_Vectorized_topological_data.h>
 #include <gudhi/abstract_classes/Abs_Topological_data_with_averages.h>
 #include <gudhi/abstract_classes/Abs_Topological_data_with_distances.h>

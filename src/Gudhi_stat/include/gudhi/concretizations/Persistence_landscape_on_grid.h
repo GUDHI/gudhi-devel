@@ -42,7 +42,7 @@
 #include <gudhi/abstract_classes/Abs_Real_valued_topological_data.h>
 #include <gudhi/abstract_classes/Abs_Topological_data_with_scalar_product.h>
 #include <gudhi/concretizations/read_persitence_from_file.h>
-#include <gudhi/common_gudhi_stat.h>	
+#include <gudhi/common_gudhi_stat.h>
 
 
 
@@ -53,23 +53,6 @@ namespace Gudhi
 {
 namespace Gudhi_stat
 {
-
-/**
- * Given two points in R^2, the procedure compute the parameters A and B of the line y = Ax + B that crosses those two points.
-**/
-std::pair<double,double> compute_parameters_of_a_line( std::pair<double,double> p1 , std::pair<double,double> p2 )
-{
-    double a = (p2.second-p1.second)/( p2.first - p1.first );
-    double b = p1.second - a*p1.first;
-    return std::make_pair(a,b);
-}
-
-struct greater
-{
-    template<class T>
-    bool operator()(T const &a, T const &b) const { return a > b; }
-};
-
 
 class Persistence_landscape_on_grid  :
 								public Abs_Vectorized_topological_data ,
@@ -994,7 +977,7 @@ void Persistence_landscape_on_grid::set_up_values_of_landscapes( const std::vect
 	//and now we need to sort the valuesL
 	for ( size_t pt = 0 ; pt != this->values_of_landscapes.size() ; ++pt )
 	{
-		std::sort( this->values_of_landscapes[pt].begin() , this->values_of_landscapes[pt].end() , greater() );	
+		std::sort( this->values_of_landscapes[pt].begin() , this->values_of_landscapes[pt].end() , greater_landscapes_on_grid() );	
 	}
 }//set_up_values_of_landscapes
 

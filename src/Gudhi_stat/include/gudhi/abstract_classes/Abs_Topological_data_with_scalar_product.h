@@ -20,11 +20,11 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef Abs_Topological_data_with_scalar_product_H
+#ifndef Abs_Topological_data_with_scalar_product_H_
 #define Abs_Topological_data_with_scalar_product_H_
 
 #include <gudhi/abstract_classes/Abs_Topological_data.h>
-
+#include <vector>
 
 namespace Gudhi 
 {

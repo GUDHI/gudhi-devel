@@ -148,6 +148,17 @@ double arc_tan_of_persistence_of_point( const std::pair< double , double >& poin
 	return atan( point_in_diagram.second - point_in_diagram.first );
 }
 
+class weight_by_setting_maximal_interval_to_have_length_one
+{
+public:
+	weight_by_setting_maximal_interval_to_have_length_one( double len ):letngth_of_maximal_interval(len){}
+	double operator()( const std::pair< double , double >& point_in_diagram )
+	{
+		return (point_in_diagram.second-point_in_diagram.first)/this->letngth_of_maximal_interval;
+	}
+private:
+	double letngth_of_maximal_interval;
+};
 
 
 
