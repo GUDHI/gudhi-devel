@@ -36,11 +36,7 @@
 
 
 //gudhi include
-#include <gudhi/abstract_classes/Abs_Vectorized_topological_data.h>
-#include <gudhi/abstract_classes/Abs_Topological_data_with_averages.h>
-#include <gudhi/abstract_classes/Abs_Topological_data_with_distances.h>
-#include <gudhi/abstract_classes/Abs_Real_valued_topological_data.h>
-#include <gudhi/abstract_classes/Abs_Topological_data_with_scalar_product.h>
+
 #include <gudhi/concretizations/read_persitence_from_file.h>
 #include <gudhi/common_gudhi_stat.h>
 
@@ -54,12 +50,9 @@ namespace Gudhi
 namespace Gudhi_stat
 {
 
-class Persistence_landscape_on_grid  :
-								public Abs_Vectorized_topological_data ,
-								public Abs_Topological_data_with_distances,
-								public Abs_Real_valued_topological_data,
-								public Abs_Topological_data_with_averages,
-								public Abs_Topological_data_with_scalar_product
+
+//this class implements the following concepts: Vectorized_topological_data, Topological_data_with_distances, Real_valued_topological_data, Topological_data_with_averages, Topological_data_with_scalar_product
+class Persistence_landscape_on_grid  
 {
 public:
 	/**
@@ -700,20 +693,120 @@ public:
 		}		
 		return result;
 	}
+	
+	
+	/**
+	 * Computations of L^{p} distance between two landscapes on a grid. p is the parameter of the procedure.
+	**/
+	friend double compute_discance_of_landscapes_on_grid( const Persistence_landscape_on_grid& first, const Persistence_landscape_on_grid& second , int p )
+	{		
+		bool dbg = false;
+		//This is what we want to compute: (\int_{- \infty}^{+\infty}| first-second |^p)^(1/p). We will do it one step at a time:
+
+		if ( dbg )
+		{
+			cerr << "first : " << first << endl;
+			cerr << "second : " << second << endl;
+			getchar();
+		}
+
+		//first-second :
+		Persistence_landscape_on_grid lan = first-second;
+		
+		if ( dbg )
+		{
+			cerr << "Difference : " << lan << endl;
+		}
+
+		//| first-second |:
+		lan.abs();
+		
+		if ( dbg )
+		{
+			cerr << "Abs : " << lan << endl;
+		}
+		
+		if ( p != -1 )
+		{
+			//\int_{- \infty}^{+\infty}| first-second |^p
+			double result;
+			if ( p != 1 )
+			{
+				if (dbg){cerr << "p : " << p << endl; getchar();}
+				result = lan.compute_integral_of_landscape( (double)p );				
+				if (dbg){cerr << "integral : " << result << endl;getchar();}
+			}
+			else
+			{
+				result = lan.compute_integral_of_landscape();			
+				if (dbg){cerr << "integral, wihtout power : " << result << endl;getchar();}
+			}
+			//(\int_{- \infty}^{+\infty}| first-second |^p)^(1/p)
+			return pow( result , 1/(double)p );
+		}
+		else
+		{
+			//p == -1
+			return lan.compute_maximum();
+		}
+	}
+	
 
 
 
 
-	//concretization of abstract functions:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	//Functions that are needed for that class to implement the concept.
 
 	/**
 	 * The number of projections to R is defined to the number of nonzero landscape functions. I-th projection is an integral of i-th landscape function over whole R.
+	 * This function is required by the Real_valued_topological_data concept. 
 	**/
     double project_to_R( int number_of_function )
     {
 		return this->compute_integral_of_landscape( (size_t)number_of_function );
 	}
+	
+	/**
+	 * The function gives the number of possible projections to R. This function is required by the Real_valued_topological_data concept.
+	**/ 
+	size_t number_of_projections_to_R()
+	{
+		return number_of_functions_for_projections_to_reals;
+	}
 
+
+
+
+	/**
+	 * This function produce a vector of doubles based on a landscape. It is required in a concept Vectorized_topological_data
+	*/ 
     std::vector<double> vectorize( int number_of_function )
     {
 		//TODO, think of something smarter over here
@@ -726,14 +819,27 @@ public:
 	}
 	
 	/**
-	 * A function to compute averaged persistence landscape on a grid, based on vector of persistence landscapes on grid (projected to Abs_Topological_data_with_averages*, since this is a concretization of a virtual method.
+	 * This function return the number of functions that allows vectorization of persistence laandscape. It is required in a concept Vectorized_topological_data.
+	 **/ 
+	size_t number_of_vectorize_functions()
+	{
+		return number_of_functions_for_vectorization;	
+	}
+
+
+
+
+	
+	/**
+	 * A function to compute averaged persistence landscape on a grid, based on vector of persistence landscapes on grid.
+	 * This function is required by Topological_data_with_averages concept.
 	**/  
-    void compute_average( const std::vector< Abs_Topological_data_with_averages* >& to_average )
+    void compute_average( const std::vector< Persistence_landscape_on_grid* >& to_average )
     {
 		
 		bool dbg = false;
 		//After execution of this procedure, the average is supposed to be in the current object. To make sure that this is the case, we need to do some cleaning first.
-		this->values_of_landscapes.clear();
+		this->values_of_landscapes .clear();
 		this->grid_min = this->grid_max = 0;
 		
 		//if there is nothing to averate, then the average is a zero landscape. 
@@ -792,85 +898,51 @@ public:
 	
 	
 	/**
-	 * Computations of L^{p} distance between two landscapes on a grid. p is the parameter of the procedure.
-	**/
-	friend double compute_discance_of_landscapes_on_grid( const Persistence_landscape_on_grid& first, const Persistence_landscape_on_grid& second , int p )
-	{		
-		bool dbg = false;
-		//This is what we want to compute: (\int_{- \infty}^{+\infty}| first-second |^p)^(1/p). We will do it one step at a time:
-
-		if ( dbg )
-		{
-			cerr << "first : " << first << endl;
-			cerr << "second : " << second << endl;
-			getchar();
-		}
-
-		//first-second :
-		Persistence_landscape_on_grid lan = first-second;
-		
-		if ( dbg )
-		{
-			cerr << "Difference : " << lan << endl;
-		}
-
-		//| first-second |:
-		lan.abs();
-		
-		if ( dbg )
-		{
-			cerr << "Abs : " << lan << endl;
-		}
-		
-		if ( p != -1 )
-		{
-			//\int_{- \infty}^{+\infty}| first-second |^p
-			double result;
-			if ( p != 1 )
-			{
-				if (dbg){cerr << "p : " << p << endl; getchar();}
-				result = lan.compute_integral_of_landscape( (double)p );				
-				if (dbg){cerr << "integral : " << result << endl;getchar();}
-			}
-			else
-			{
-				result = lan.compute_integral_of_landscape();			
-				if (dbg){cerr << "integral, wihtout power : " << result << endl;getchar();}
-			}
-			//(\int_{- \infty}^{+\infty}| first-second |^p)^(1/p)
-			return pow( result , 1/(double)p );
-		}
-		else
-		{
-			//p == -1
-			return lan.compute_maximum();
-		}
-	}
-
-	/**
 	* A function to compute distance between persistence landscape on a grid.
-	* The parameter of this functionis a persistence landscapes on grid (projected to Abs_Topological_data_with_averages*, since this is a concretization of a virtual method.
+	* The parameter of this functionis a Persistence_landscape_on_grid.
+	* This function is required in Topological_data_with_distances concept.
 	**/
-    double distance( const Abs_Topological_data_with_distances* second , double power = 1 )
+    double distance( const Persistence_landscape_on_grid& second , double power = 1 )
     {
 		if ( power != -1 )
 		{
-			return compute_discance_of_landscapes_on_grid( *this , *((Persistence_landscape_on_grid*)second) , power );
+			return compute_discance_of_landscapes_on_grid( *this , second , power );
 		}
 		else
 		{
-			return compute_max_norm_discance_of_landscapes( *this , *((Persistence_landscape_on_grid*)second) );
+			return compute_max_norm_discance_of_landscapes( *this , second );
 		}
 	}
 
 	/**
 	* A function to compute scalar product of persistence landscape on a grid.
-	* The parameter of this functionis a persistence landscapes on grid (projected to Abs_Topological_data_with_averages*, since this is a concretization of a virtual method.
+	* The parameter of this functionis a Persistence_landscape_on_grid.
+	* This function is required in Topological_data_with_scalar_product concept.
 	**/
-	double compute_scalar_product( const Abs_Topological_data_with_scalar_product* second )
+	double compute_scalar_product( const Persistence_landscape_on_grid& second )
 	{
-		return compute_inner_product( (*this) , *((Persistence_landscape_on_grid*)second) );
+		return compute_inner_product( (*this) , second );
 	}
+
+	//end of implementation of functions needed for concepts. 
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 
 	/**
@@ -891,6 +963,8 @@ protected:
 	double grid_min;
 	double grid_max;
 	std::vector< std::vector< double > > values_of_landscapes;
+	size_t number_of_functions_for_vectorization;
+	size_t number_of_functions_for_projections_to_reals;
 	
 	void set_up_numbers_of_functions_for_vectorization_and_projections_to_reals()
 	{

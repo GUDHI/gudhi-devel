@@ -315,7 +315,7 @@ BOOST_AUTO_TEST_CASE(check_distance_computations)
 	intervals[9] = std::pair<double,double>( 19,20 );		
 	Vector_distances_in_diagram< euclidean_distance<double> > p_bis( intervals , 10 );	
 	//cerr << "p_prime.distance( (Abs_Topological_data_with_distances*)(&p_bis) , 1 ) : " << p_prime.distance( (Abs_Topological_data_with_distances*)(&p_bis) , 1 ) << endl;	
-	BOOST_CHECK( almost_equal ( p_prime.distance( (Abs_Topological_data_with_distances*)(&p_bis) , 1 ) , 1.86428 ) );		
+	BOOST_CHECK( almost_equal ( p_prime.distance( p_bis , 1 ) , 1.86428 ) );		
 }
 
 
@@ -337,9 +337,9 @@ BOOST_AUTO_TEST_CASE(check_compute_average)
 	Vector_distances_in_diagram< euclidean_distance<double> > A( i1 , -1 );
 	Vector_distances_in_diagram< euclidean_distance<double> > B( i1 , -1 );
 	
-	std::vector< Abs_Topological_data_with_averages* > to_average;
-	to_average.push_back( (Abs_Topological_data_with_averages*)(&A) );
-	to_average.push_back( (Abs_Topological_data_with_averages*)(&B) );
+	std::vector< Vector_distances_in_diagram< euclidean_distance<double> >* > to_average;
+	to_average.push_back( &A );
+	to_average.push_back( &B );
 	
 	Vector_distances_in_diagram< euclidean_distance<double> > average; 
 	average.compute_average( to_average );

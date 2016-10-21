@@ -20,9 +20,6 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-
-#include <gudhi/abstract_classes/Abs_Topological_data.h>
 #include <gudhi/concretizations/Persistence_landscape.h>
 
 

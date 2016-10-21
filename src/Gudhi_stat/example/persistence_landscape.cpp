@@ -76,17 +76,17 @@ int main( int argc , char** argv )
 	
 	//here is the average of landscapes:
 	Persistence_landscape average;
-	std::vector< Abs_Topological_data_with_averages* > to_average;
-	to_average.push_back( (Abs_Topological_data_with_averages*)(&l1) );
-	to_average.push_back( (Abs_Topological_data_with_averages*)(&l2) );
+	std::vector< Persistence_landscape* > to_average;
+	to_average.push_back( &l1 );
+	to_average.push_back( &l2 );
 	average.compute_average( to_average );
 	std::cout << "average : " << average << std::endl;
 	
 	//here is the distance of landscapes:
-	std::cout << "Distance : " << l1.distance( (Abs_Topological_data_with_distances*)(&l2) ) << std::endl;
+	std::cout << "Distance : " << l1.distance( l2 ) << std::endl;
 	
 	//here is the scalar product of landscapes:
-	std::cout << "Scalar product : " << l1.compute_scalar_product( (Abs_Topological_data_with_scalar_product*)(&l2) ) << std::endl;
+	std::cout << "Scalar product : " << l1.compute_scalar_product( l2 ) << std::endl;
 	
 	//here is how to create a file which is suitable for vizualization via gnuplot:
 	average.plot( "average_landscape" );

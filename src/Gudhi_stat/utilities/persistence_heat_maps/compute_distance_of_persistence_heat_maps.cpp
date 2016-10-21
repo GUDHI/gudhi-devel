@@ -21,8 +21,6 @@
  */
 
 
-
-#include <gudhi/abstract_classes/Abs_Topological_data.h>
 #include <gudhi/concretizations/Persistence_heat_maps.h>
 
 
@@ -53,13 +51,13 @@ int main( int argc , char** argv )
 	{
 		filenames.push_back( argv[i] );
 	}
-	std::vector< Abs_Topological_data_with_distances* > maps;
+	std::vector< Persistence_heat_maps > maps;
 	maps.reserve( filenames.size() );
 	for ( size_t file_no = 0 ; file_no != filenames.size() ; ++file_no )
 	{
-		Persistence_heat_maps* l = new Persistence_heat_maps;
-		l->load_from_file( filenames[file_no] );
-		maps.push_back( (Abs_Topological_data_with_distances*)l );
+		Persistence_heat_maps l;
+		l.load_from_file( filenames[file_no] );
+		maps.push_back( l );
 	}
 		
 	//and now we will compute the scalar product of landscapes.
@@ -77,7 +75,7 @@ int main( int argc , char** argv )
 	{
 		for ( size_t j = i ; j != filenames.size() ; ++j )
 		{
-			distance[i][j] = distance[j][i] = ((Persistence_heat_maps*)maps[i])->distance( maps[j] , p ) ;
+			distance[i][j] = distance[j][i] = maps[i].distance( maps[j] , p ) ;
 		}
 	}
 	

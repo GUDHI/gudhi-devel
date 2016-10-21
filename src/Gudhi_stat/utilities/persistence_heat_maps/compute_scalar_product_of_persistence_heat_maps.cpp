@@ -21,8 +21,6 @@
  */
 
 
-
-#include <gudhi/abstract_classes/Abs_Topological_data.h>
 #include <gudhi/concretizations/Persistence_heat_maps.h>
 
 
@@ -44,12 +42,12 @@ int main( int argc , char** argv )
 	{
 		filenames.push_back( argv[i] );
 	}
-	std::vector< Persistence_heat_maps* > maps;
+	std::vector< Persistence_heat_maps > maps;
 	maps.reserve( filenames.size() );
 	for ( size_t file_no = 0 ; file_no != filenames.size() ; ++file_no )
 	{
-		Persistence_heat_maps* l = new Persistence_heat_maps;
-		l->load_from_file( filenames[file_no] );
+		Persistence_heat_maps l;
+		l.load_from_file( filenames[file_no] );
 		maps.push_back( l );
 	}
 		
@@ -68,7 +66,7 @@ int main( int argc , char** argv )
 	{
 		for ( size_t j = i ; j != maps.size() ; ++j )
 		{
-			scalar_product[i][j] = scalar_product[j][i] = ((Persistence_heat_maps*)maps[i])->compute_scalar_product( maps[j] ) ;
+			scalar_product[i][j] = scalar_product[j][i] = maps[i].compute_scalar_product( maps[j] ) ;
 		}
 	}
 	

@@ -21,8 +21,6 @@
  */
 
 
-
-#include <gudhi/abstract_classes/Abs_Topological_data.h>
 #include <gudhi/concretizations/Vector_distances_in_diagram.h>
 
 
@@ -51,12 +49,12 @@ int main( int argc , char** argv )
 	}
 	
 	std::cout << "Reading persistence vectors...\n";
-	std::vector< Abs_Topological_data_with_averages* > lands;
+	std::vector< Vector_distances_in_diagram< euclidean_distance<double> >* > lands;
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{		
 		Vector_distances_in_diagram< euclidean_distance<double> >* l = new Vector_distances_in_diagram< euclidean_distance<double> >;
 		l->load_from_file( filenames[i] );
-		lands.push_back( (Abs_Topological_data_with_averages*)l );
+		lands.push_back(l );
 	}
 	
 	Vector_distances_in_diagram< euclidean_distance<double> > av;

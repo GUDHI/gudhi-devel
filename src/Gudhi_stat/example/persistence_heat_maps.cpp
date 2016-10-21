@@ -75,17 +75,17 @@ int main( int argc , char** argv )
 	median.compute_median( vector_of_maps );
 	
 	//to compute L^1 disance between hm1 and hm2:
-	std::cout << "The L^1 distance is : " << hm1.distance( (Abs_Topological_data_with_distances*)(&hm2) , 1 ) << std::endl;
+	std::cout << "The L^1 distance is : " << hm1.distance( hm2 , 1 ) << std::endl;
 	
 	//to average of hm1 and hm2:
-	std::vector< Abs_Topological_data_with_averages* > to_average;
-	to_average.push_back( (Abs_Topological_data_with_averages*)(&hm1) );
-	to_average.push_back( (Abs_Topological_data_with_averages*)(&hm2) );
+	std::vector< Persistence_heat_maps* > to_average;
+	to_average.push_back( &hm1 );
+	to_average.push_back( &hm2 );
 	Persistence_heat_maps av;	
 	av.compute_average( to_average );	
 	
 	//to compute scalar product of hm1 and hm2:
-	std::cout << "Scalar product is : " << hm1.compute_scalar_product( (Abs_Topological_data_with_scalar_product*)(&hm2) ) << std::endl;
+	std::cout << "Scalar product is : " << hm1.compute_scalar_product( hm2 ) << std::endl;
 	
 	return 0;
 }

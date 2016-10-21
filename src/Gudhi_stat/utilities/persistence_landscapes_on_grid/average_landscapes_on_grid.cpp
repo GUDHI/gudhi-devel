@@ -20,9 +20,6 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-
-#include <gudhi/abstract_classes/Abs_Topological_data.h>
 #include <gudhi/concretizations/Persistence_landscape_on_grid.h>
 
 
@@ -50,12 +47,12 @@ int main( int argc , char** argv )
 	}
 	
 	std::cout << "Creating persistence landscapes...\n";
-	std::vector< Abs_Topological_data_with_averages* > lands;
+	std::vector< Persistence_landscape_on_grid* > lands;
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{
 		Persistence_landscape_on_grid* l = new Persistence_landscape_on_grid;
 		l->load_landscape_from_file( filenames[i] );
-		lands.push_back( (Abs_Topological_data_with_averages*)l );
+		lands.push_back( l );
 	}
 	
 	Persistence_landscape_on_grid av;

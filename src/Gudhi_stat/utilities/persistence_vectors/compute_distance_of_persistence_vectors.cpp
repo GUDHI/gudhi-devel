@@ -20,9 +20,6 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-
-#include <gudhi/abstract_classes/Abs_Topological_data.h>
 #include <gudhi/concretizations/Vector_distances_in_diagram.h>
 
 
@@ -53,13 +50,13 @@ int main( int argc , char** argv )
 	{
 		filenames.push_back( argv[i] );
 	}
-	std::vector< Vector_distances_in_diagram< euclidean_distance<double> >* > vectors;
+	std::vector< Vector_distances_in_diagram< euclidean_distance<double> > > vectors;
 	vectors.reserve( filenames.size() );
 	for ( size_t file_no = 0 ; file_no != filenames.size() ; ++file_no )
 	{
 		//cerr << filenames[file_no] << endl;
-		Vector_distances_in_diagram< euclidean_distance<double> >* l = new Vector_distances_in_diagram< euclidean_distance<double> >;
-		l->load_from_file( filenames[file_no] );
+		Vector_distances_in_diagram< euclidean_distance<double> > l;
+		l.load_from_file( filenames[file_no] );
 		vectors.push_back( l );
 	}
 		
@@ -78,7 +75,7 @@ int main( int argc , char** argv )
 	{
 		for ( size_t j = i+1 ; j != vectors.size() ; ++j )
 		{
-			distance[i][j] = distance[j][i] = ((Vector_distances_in_diagram< euclidean_distance<double> >*)vectors[i])->distance( vectors[j] , p ) ;
+			distance[i][j] = distance[j][i] = vectors[i].distance( vectors[j] , p ) ;
 		}
 	}
 	

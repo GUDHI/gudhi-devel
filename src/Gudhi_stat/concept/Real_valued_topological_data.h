@@ -20,28 +20,19 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gudhi/concretizations/Persistence_landscape.h>
-
-
-
-using namespace Gudhi;
-using namespace Gudhi::Gudhi_stat;
-
-#include <iostream>
-#include <sstream>
-
-
-int main( int argc , char** argv )
+/** \brief The concept Real_valued_topological_data describes the requirements 
+  * for a type to implement a container that allows computations of its projections to R. 
+  */
+class Real_valued_topological_data
 {
-	std::cout << "This program plot persistence landscape stored in a file (the file needs to be created beforehand). Please call the code with the name of a landsape file \n";	
-	Persistence_landscape l;
-	l.load_landscape_from_file( argv[1] );
-	
-	std::stringstream ss;
-	ss << argv[1] << "_gnuplot_script";
-	l.plot( ss.str().c_str() );
-	
-	std::cout << "Done \n";
-		
-	return 0;
-}
+public:
+	/**
+	 * Typically there are various ways data can be projected to R. This function give us the number of functions for vectorization provided by a given class. 
+	**/ 
+	 size_t number_of_projections_to_R();
+	   /**
+     * This is a function to compute the projection from this container to reals. The parameter of a function have to be between 0 and the value returned by number_of_projections_to_R().
+    **/ 
+     double project_to_R;  
+};
+

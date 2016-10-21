@@ -191,7 +191,7 @@ BOOST_AUTO_TEST_CASE(check_computations_of_averages)
 {
 	Persistence_landscape p( "data/file_with_diagram" );
 	Persistence_landscape q( "data/file_with_diagram_1" );
-	std::vector< Abs_Topological_data_with_averages* > to_average;
+	std::vector< Persistence_landscape* > to_average;
 	to_average.push_back( &p );
 	to_average.push_back( &q );
 	Persistence_landscape av;
@@ -209,9 +209,9 @@ BOOST_AUTO_TEST_CASE(check_computations_of_distances)
 {
 	Persistence_landscape p( "data/file_with_diagram" );
 	Persistence_landscape q( "data/file_with_diagram_1" );
-	BOOST_CHECK( fabs( p.distance( &q )- 25.5824) <= 0.00005 );	
-	BOOST_CHECK( fabs( p.distance( &q , 2) - 2.12636 ) <= 0.00001 );	
-	BOOST_CHECK( fabs( p.distance( &q , -1 )-0.359068 ) <= 0.00001 );	
+	BOOST_CHECK( fabs( p.distance( q )- 25.5824) <= 0.00005 );	
+	BOOST_CHECK( fabs( p.distance( q , 2) - 2.12636 ) <= 0.00001 );	
+	BOOST_CHECK( fabs( p.distance( q , -1 )-0.359068 ) <= 0.00001 );	
 }
 	
 
@@ -219,6 +219,6 @@ BOOST_AUTO_TEST_CASE(check_computations_of_scalar_product)
 {
 	Persistence_landscape p( "data/file_with_diagram" );
 	Persistence_landscape q( "data/file_with_diagram_1" );
-	BOOST_CHECK( fabs(  p.compute_scalar_product( &q ) - 0.754498 ) <= 0.00001 );	
+	BOOST_CHECK( fabs(  p.compute_scalar_product( q ) - 0.754498 ) <= 0.00001 );	
 }
 

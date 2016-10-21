@@ -33,11 +33,6 @@
 #include <algorithm>
 
 //gudhi include
-#include <gudhi/abstract_classes/Abs_Vectorized_topological_data.h>
-#include <gudhi/abstract_classes/Abs_Topological_data_with_averages.h>
-#include <gudhi/abstract_classes/Abs_Topological_data_with_distances.h>
-#include <gudhi/abstract_classes/Abs_Real_valued_topological_data.h>
-#include <gudhi/abstract_classes/Abs_Topological_data_with_scalar_product.h>
 #include <gudhi/concretizations/read_persitence_from_file.h>
 #include <gudhi/common_gudhi_stat.h>
 
@@ -161,13 +156,10 @@ private:
 };
 
 
-
-class Persistence_heat_maps :
-								public Abs_Vectorized_topological_data ,
-								public Abs_Topological_data_with_distances ,
-								public Abs_Real_valued_topological_data,
-								public Abs_Topological_data_with_averages,
-								public Abs_Topological_data_with_scalar_product
+/**
+ * This class implements the following concepts: Vectorized_topological_data, Topological_data_with_distances, Real_valued_topological_data, Topological_data_with_averages, Topological_data_with_scalar_product
+**/ 
+class Persistence_heat_maps
 {
 public:
     /**
@@ -321,16 +313,59 @@ public:
     void plot( const char* filename );
     
     
-    //Concretizations of virtual methods:    
-    std::vector<double> vectorize( int number_of_function );
-	double distance( const Abs_Topological_data_with_distances* second_ , double power = 1);
+    //Implementations of functions for various concepts.  
+    
+    /**
+	 * This function produce a vector of doubles based on a persisence heat map. It is required in a concept Vectorized_topological_data
+	*/
+    std::vector<double> vectorize( int number_of_function );    
+    /**
+	 * This function return the number of functions that allows vectorization of persistence heat map. It is required in a concept Vectorized_topological_data.
+	 **/ 
+	size_t number_of_vectorize_functions()
+	{
+		return this->number_of_functions_for_vectorization;	
+	}
+	
+	/**	 
+	 * This function is required by the Real_valued_topological_data concept. It returns various projections od the persistence heat map to a real line.
+	**/ 	
 	double project_to_R( int number_of_function );	
-	void compute_average( const std::vector< Abs_Topological_data_with_averages* >& to_average );	
-	double compute_scalar_product( const Abs_Topological_data_with_scalar_product* second_ );
+	/**
+	 * The function gives the number of possible projections to R. This function is required by the Real_valued_topological_data concept.
+	**/ 
+	size_t number_of_projections_to_R()
+	{
+		return this->number_of_functions_for_projections_to_reals;
+	}
+	
+	/**
+	* A function to compute distance between persistence heat maps.
+	* The parameter of this function is a const reference to an object of a class Persistence_heat_maps.
+	* This function is required in Topological_data_with_distances concept.
+	**/
+	double distance( const Persistence_heat_maps& second_ , double power = 1);
+	
+	/**
+	 * A function to compute averaged persistence heat map, based on vector of persistence heat maps.
+	 * This function is required by Topological_data_with_averages concept.
+	**/ 	
+	void compute_average( const std::vector< Persistence_heat_maps* >& to_average );	
+	
+	/**
+	* A function to compute scalar product of persistence heat maps.
+	* The parameter of this functionis a const reference to an object of a class Persistence_heat_maps.
+	* This function is required in Topological_data_with_scalar_product concept.
+	**/
+	double compute_scalar_product( const Persistence_heat_maps& second_ );
+	
+	//end of implementation of functions needed for concepts.
 	
 protected:
 	//private methods
 	std::vector< std::vector<double> > check_and_initialize_maps( const std::vector<Persistence_heat_maps*>& maps );
+	size_t number_of_functions_for_vectorization;
+	size_t number_of_functions_for_projections_to_reals;
     void construct( const std::vector< std::pair<double,double> >& intervals_  , 
 					std::vector< std::vector<double> > filter = create_Gaussian_filter(5,1),
                     double (*scalling_function_with_respect_to_distance_from_diagonal)( const std::pair< double , double >& point_in_diagram ) = constant_function, 
@@ -717,12 +752,10 @@ std::vector<double> Persistence_heat_maps::vectorize( int number_of_function )
 	return result;
 }
 
-double Persistence_heat_maps::distance( const Abs_Topological_data_with_distances* second_ , double power )
-{		
-	Persistence_heat_maps* second = (Persistence_heat_maps*)second_;
-	
+double Persistence_heat_maps::distance( const Persistence_heat_maps& second , double power )
+{			
 	//first we need to check if (*this) and second are defined on the same domain and have the same dimensions:
-	if ( !this->check_if_the_same(*second) )
+	if ( !this->check_if_the_same(second) )
 	{
 		std::cerr << "The persistence images are of noncompatible sizes. We cannot therefore compute distance between them. The program will now terminate";
 		throw "The persistence images are of noncompatible sizes. We cannot therefore compute distance between them. The program will now terminate";
@@ -735,7 +768,7 @@ double Persistence_heat_maps::distance( const Abs_Topological_data_with_distance
 	{
 		for ( size_t j = 0 ; j != this->heat_map[i].size() ; ++j )
 		{
-			distance += pow( abs(this->heat_map[i][j] - second->heat_map[i][j]) , power );
+			distance += pow( abs(this->heat_map[i][j] - second.heat_map[i][j]) , power );
 		}
 	}
 	return distance;
@@ -754,23 +787,15 @@ double Persistence_heat_maps::project_to_R( int number_of_function )
 	return result;
 }
 
-void Persistence_heat_maps::compute_average( const std::vector< Abs_Topological_data_with_averages* >& to_average )
-{
-	std::vector<Persistence_heat_maps*> maps;
-	maps.reserve( to_average.size() );
-	for ( size_t i = 0 ; i != to_average.size() ; ++i )
-	{
-		maps.push_back( (Persistence_heat_maps*)to_average[i] );
-	}					
-	this->compute_mean( maps );
+void Persistence_heat_maps::compute_average( const std::vector< Persistence_heat_maps* >& to_average )
+{				
+	this->compute_mean( to_average );
 }
 
-double Persistence_heat_maps::compute_scalar_product( const Abs_Topological_data_with_scalar_product* second_ )
-{
-	Persistence_heat_maps* second = (Persistence_heat_maps*)second_;
-	
+double Persistence_heat_maps::compute_scalar_product( const Persistence_heat_maps& second )
+{		
 	//first we need to check if (*this) and second are defined on the same domain and have the same dimensions:
-	if ( !this->check_if_the_same(*second) )
+	if ( !this->check_if_the_same(second) )
 	{
 		std::cerr << "The persistence images are of noncompatible sizes. We cannot therefore compute distance between them. The program will now terminate";
 		throw "The persistence images are of noncompatible sizes. We cannot therefore compute distance between them. The program will now terminate";
@@ -782,7 +807,7 @@ double Persistence_heat_maps::compute_scalar_product( const Abs_Topological_data
 	{
 		for ( size_t j = 0 ; j != this->heat_map[i].size() ; ++j )
 		{
-			scalar_prod += this->heat_map[i][j]*second->heat_map[i][j];
+			scalar_prod += this->heat_map[i][j]*second.heat_map[i][j];
 		}
 	}
 	return scalar_prod;

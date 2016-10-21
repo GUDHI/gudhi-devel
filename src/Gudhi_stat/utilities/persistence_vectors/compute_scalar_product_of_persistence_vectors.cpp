@@ -20,9 +20,6 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-
-#include <gudhi/abstract_classes/Abs_Topological_data.h>
 #include <gudhi/concretizations/Vector_distances_in_diagram.h>
 
 
@@ -44,12 +41,12 @@ int main( int argc , char** argv )
 	{
 		filenames.push_back( argv[i] );
 	}
-	std::vector< Vector_distances_in_diagram< euclidean_distance<double> >* > vectors;
+	std::vector< Vector_distances_in_diagram< euclidean_distance<double> > > vectors;
 	vectors.reserve( filenames.size() );
 	for ( size_t file_no = 0 ; file_no != filenames.size() ; ++file_no )
 	{
-		Vector_distances_in_diagram< euclidean_distance<double> >* l = new Vector_distances_in_diagram< euclidean_distance<double> >;
-		l->load_from_file( filenames[file_no] );
+		Vector_distances_in_diagram< euclidean_distance<double> > l;
+		l.load_from_file( filenames[file_no] );
 		vectors.push_back( l );
 	}
 		
@@ -68,7 +65,7 @@ int main( int argc , char** argv )
 	{
 		for ( size_t j = i ; j != vectors.size() ; ++j )
 		{
-			scalar_product[i][j] = scalar_product[j][i] = ((Vector_distances_in_diagram< euclidean_distance<double> >*)vectors[i])->compute_scalar_product( vectors[j] ) ;
+			scalar_product[i][j] = scalar_product[j][i] = vectors[i].compute_scalar_product( vectors[j] ) ;
 		}
 	}
 	
@@ -85,13 +82,6 @@ int main( int argc , char** argv )
 		cout << endl;
 		out << endl;
 	}
-	out.close();
-	
-	//cleaning up
-	for ( size_t i = 0 ; i != vectors.size() ; ++i )
-	{
-		delete vectors[i];
-	}
-		
+	out.close();	
 	return 0;
 }

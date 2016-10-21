@@ -36,11 +36,6 @@
 
 
 //gudhi include
-#include <gudhi/abstract_classes/Abs_Vectorized_topological_data.h>
-#include <gudhi/abstract_classes/Abs_Topological_data_with_averages.h>
-#include <gudhi/abstract_classes/Abs_Topological_data_with_distances.h>
-#include <gudhi/abstract_classes/Abs_Real_valued_topological_data.h>
-#include <gudhi/abstract_classes/Abs_Topological_data_with_scalar_product.h>
 #include <gudhi/concretizations/read_persitence_from_file.h>
 #include <gudhi/common_gudhi_stat.h>
 using namespace std;
@@ -62,13 +57,9 @@ namespace Gudhi_stat
  * A clas implementing persistence landascpes data structures. For theroretical desciritpion, please consult a paper ''Statistical topological data analysis using persistence landscapes'' by Peter Bubenik.
  * For details of algorithms, please consult ''A persistence landscapes toolbox for topological statistics'' by Peter Bubenik and Pawel Dlotko.
  * Persistence landscapes allow vertorization, computations of distances, computations of projections to Real, computations of averages and scalar products. Therefore they implement suitable interfaces.
+ * It implements the following concepts: Vectorized_topological_data, Topological_data_with_distances, Real_valued_topological_data, Topological_data_with_averages, Topological_data_with_scalar_product
 **/
-class Persistence_landscape :
-								public Abs_Vectorized_topological_data ,
-								public Abs_Topological_data_with_distances,
-								public Abs_Real_valued_topological_data,
-								public Abs_Topological_data_with_averages,
-								public Abs_Topological_data_with_scalar_product
+class Persistence_landscape
 {
 public:
 	/**
@@ -326,16 +317,39 @@ public:
 
 
 
-	//concretization of abstract functions:
+
+
+
+
+
+
+
+
+
+
+
+	//Implementations of functions for various concepts. 
 
 	/**
 	 * The number of projections to R is defined to the number of nonzero landscape functions. I-th projection is an integral of i-th landscape function over whole R.
+	 * This function is required by the Real_valued_topological_data concept.
 	**/
     double project_to_R( int number_of_function )
     {
 		return this->compute_integral_of_landscape( (size_t)number_of_function );
 	}
+	
+	/**
+	 * The function gives the number of possible projections to R. This function is required by the Real_valued_topological_data concept.
+	**/ 
+	size_t number_of_projections_to_R()
+	{
+		return this->number_of_functions_for_projections_to_reals;
+	}
 
+	/**
+	 * This function produce a vector of doubles based on a landscape. It is required in a concept Vectorized_topological_data
+	*/
     std::vector<double> vectorize( int number_of_function )
     {
 		//TODO, think of something smarter over here
@@ -351,14 +365,28 @@ public:
 		}
 		return v;
 	}
-    void compute_average( const std::vector< Abs_Topological_data_with_averages* >& to_average )
+	/**
+	 * This function return the number of functions that allows vectorization of persistence laandscape. It is required in a concept Vectorized_topological_data.
+	 **/ 
+	size_t number_of_vectorize_functions()
+	{
+		return this->number_of_functions_for_vectorization;	
+	}
+	
+	/**
+	 * A function to compute averaged persistence landscape, based on vector of persistence landscapes.
+	 * This function is required by Topological_data_with_averages concept.
+	**/ 
+    void compute_average( const std::vector< Persistence_landscape* >& to_average )
     {
-		bool dbg = false;
+		bool dbg = false;		
+		
+		if ( dbg ){std::cerr << "to_average.size() : " << to_average.size() << std::endl;}
 
 		std::vector< Persistence_landscape* > nextLevelMerge( to_average.size() );
         for ( size_t i = 0 ; i != to_average.size() ; ++i )
         {
-            nextLevelMerge[i] = (Persistence_landscape*)to_average[i];
+            nextLevelMerge[i] = to_average[i];            
         }
         bool is_this_first_level = true;//in the loop, we will create dynamically a unmber of intermediate complexes. We have to clean that up, but we cannot erase the initial andscapes we have
 										//to average. In this case, we simply check if the nextLevelMerge are the input landscapes or the ones created in that loop by usig this extra variable.
@@ -373,8 +401,8 @@ public:
                 if ( dbg ){cerr << "i : " << i << endl;}
                 Persistence_landscape* l = new Persistence_landscape;
                 if ( i+1 != nextLevelMerge.size() )
-                {
-                    (*l) = (*nextLevelMerge[i])+(*nextLevelMerge[i+1]);
+                {					
+                    (*l) = (*nextLevelMerge[i])+(*nextLevelMerge[i+1]);                    
                 }
                 else
                 {
@@ -382,7 +410,7 @@ public:
                 }
                 nextNextLevelMerge.push_back( l );
             }
-            if ( dbg ){cerr << "After this iteration \n";}
+            if ( dbg ){cerr << "After this iteration \n";getchar();}
 
             if ( !is_this_first_level )
             {
@@ -400,23 +428,53 @@ public:
 	}
 
 
-    double distance( const Abs_Topological_data_with_distances* second , double power = 1 )
+	/**
+	* A function to compute distance between persistence landscape.
+	* The parameter of this functionis a Persistence_landscape.
+	* This function is required in Topological_data_with_distances concept.
+	**/
+    double distance( const Persistence_landscape& second , double power = 1 )
     {
 		if ( power != -1 )
 		{
-			return compute_discance_of_landscapes( *this , *((Persistence_landscape*)second) , power );
+			return compute_discance_of_landscapes( *this , second , power );
 		}
 		else
 		{
-			return compute_max_norm_discance_of_landscapes( *this , *((Persistence_landscape*)second) );
+			return compute_max_norm_discance_of_landscapes( *this , second );
 		}
 	}
 
 
-	double compute_scalar_product( const Abs_Topological_data_with_scalar_product* second )
+	/**
+	* A function to compute scalar product of persistence landscapes.
+	* The parameter of this functionis a Persistence_landscape.
+	* This function is required in Topological_data_with_scalar_product concept.
+	**/
+	double compute_scalar_product( const Persistence_landscape& second )
 	{
-		return compute_inner_product( (*this) , *((Persistence_landscape*)second) );
-	}
+		return compute_inner_product( (*this) , second );
+	}	
+	//end of implementation of functions needed for concepts.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 	std::vector< std::vector< std::pair<double,double> > > output_for_visualization()
@@ -431,6 +489,8 @@ public:
 
 protected:
     std::vector< std::vector< std::pair<double,double> > > land;
+    size_t number_of_functions_for_vectorization;
+	size_t number_of_functions_for_projections_to_reals;
 
     void construct_persistence_landscape_from_barcode( const std::vector< std::pair< double , double > > & p );
     Persistence_landscape multiply_lanscape_by_real_number_not_overwrite( double x )const;
@@ -1019,6 +1079,16 @@ Persistence_landscape operation_on_pair_of_landscapes ( const Persistence_landsc
     std::vector< std::vector< std::pair<double,double> > > land( std::max( land1.land.size() , land2.land.size() ) );
     result.land = land;
     T oper;
+    
+    if ( operation_on_pair_of_landscapesDBG )
+    {
+		for ( size_t i = 0 ; i != std::min( land1.land.size() , land2.land.size() ) ; ++i )
+		{
+			std::cerr << "land1.land[" << i << "].size() : " << land1.land[i].size() << std::endl;
+            std::cerr << "land2.land[" << i << "].size() : " << land2.land[i].size() << std::endl;             
+		}
+		getchar();
+	}
 
     for ( size_t i = 0 ; i != std::min( land1.land.size() , land2.land.size() ) ; ++i )
     {
@@ -1031,8 +1101,13 @@ Persistence_landscape operation_on_pair_of_landscapes ( const Persistence_landsc
             {
                 std::cerr << "p : " << p << "\n";
                 std::cerr << "q : " << q << "\n";
+                std::cerr << "land1.land.size() : " << land1.land.size() << std::endl;
+                std::cerr << "land2.land.size() : " << land2.land.size() << std::endl;
+                std::cerr << "land1.land[" << i << "].size() : " << land1.land[i].size() << std::endl;
+                std::cerr << "land2.land[" << i << "].size() : " << land2.land[i].size() << std::endl;
                 std::cout << "land1.land[i][p].first : " << land1.land[i][p].first << "\n";
                 std::cout << "land2.land[i][q].first : " << land2.land[i][q].first << "\n";
+                //getchar();
             }
 
             if ( land1.land[i][p].first < land2.land[i][q].first )
@@ -1070,7 +1145,7 @@ Persistence_landscape operation_on_pair_of_landscapes ( const Persistence_landsc
                 lambda_n.push_back( std::make_pair( land2.land[i][q].first , oper( land1.land[i][p].second , land2.land[i][q].second ) ) );
                 ++p;++q;
             }
-            if (operation_on_pair_of_landscapesDBG){std::cout << "Next iteration \n";getchar();}
+            if (operation_on_pair_of_landscapesDBG){std::cout << "Next iteration \n";}
         }
         while ( (p+1 < land1.land[i].size())&&(q+1 >= land2.land[i].size()) )
         {
@@ -1125,7 +1200,7 @@ Persistence_landscape operation_on_pair_of_landscapes ( const Persistence_landsc
             result.land[i].swap(lambda_n);
         }
     }
-    if ( operation_on_pair_of_landscapesDBG ){std::cout << "operation_on_pair_of_landscapes\n";std::cin.ignore();}
+    if ( operation_on_pair_of_landscapesDBG ){std::cout << "operation_on_pair_of_landscapes END\n";std::cin.ignore();}
     return result;
 }//operation_on_pair_of_landscapes
 

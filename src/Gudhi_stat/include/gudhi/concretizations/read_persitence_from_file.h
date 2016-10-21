@@ -47,7 +47,7 @@ std::vector< std::pair< double,double > > read_file_names_that_may_contain_inf_s
 	
 	if ( !( access( filename, F_OK ) != -1 ) )
 	{
-		cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
+		std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
 		throw "The file from which you are trying to read do not exist. The program will now terminate \n";
 	}
 	
@@ -111,7 +111,7 @@ std::vector< std::string > readFileNames( char* filenameWithFilenames )
     
     if ( !( access( filenameWithFilenames, F_OK ) != -1 ) )
 	{
-		cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
+		std::cerr << "The file : " << filenameWithFilenames << " do not exist. The program will now terminate \n";
 		throw "The file from which you are trying to read do not exist. The program will now terminate \n";
 	}
 
@@ -174,6 +174,7 @@ std::vector< std::pair< double , double > > read_standard_file( const char* file
             double beginn, endd;
             lineSS >> beginn;
             lineSS >> endd;
+            if ( beginn == endd )continue;
             if ( beginn > endd )
             {
                 double b = beginn;

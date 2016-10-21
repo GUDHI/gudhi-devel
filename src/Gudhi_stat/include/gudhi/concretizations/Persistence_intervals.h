@@ -24,9 +24,6 @@
 #define Persistence_intervals_H_
 
 //gudhi include
-#include <gudhi/abstract_classes/Abs_Vectorized_topological_data.h>
-#include <gudhi/abstract_classes/Abs_Topological_data_with_distances.h>
-#include <gudhi/abstract_classes/Abs_Real_valued_topological_data.h>
 #include <gudhi/concretizations/read_persitence_from_file.h>
 
 //standard include
@@ -43,7 +40,10 @@ namespace Gudhi
 namespace Gudhi_stat 
 {
 
-class Persistence_intervals : public Abs_Vectorized_topological_data , public Abs_Topological_data_with_distances, public Abs_Real_valued_topological_data
+/**
+ * This class implements the following concepts: Vectorized_topological_data, Topological_data_with_distances, Real_valued_topological_data
+**/ 
+class Persistence_intervals
 {
 public:	   
 	/**
@@ -114,11 +114,11 @@ public:
 	/**
      * Operator that send the diagram to a stream. 
     **/    
-    friend ostream& operator << ( ostream& out , const Persistence_intervals& intervals )
+    friend std::ostream& operator << ( std::ostream& out , const Persistence_intervals& intervals )
     {
         for ( size_t i = 0 ; i != intervals.intervals.size() ; ++i )
         {
-            out << intervals.intervals[i].first << " " << intervals.intervals[i].second << endl;
+            out << intervals.intervals[i].first << " " << intervals.intervals[i].second << std::endl;
         }
         return out;
     }
@@ -129,38 +129,30 @@ public:
     void plot( const char* filename ) 
     {
 		//this program create a gnuplot script file that allows to plot persistence diagram.
-		ofstream out;
+		std::ofstream out;
 		
 		std::ostringstream nameSS;
 		nameSS << filename << "_GnuplotScript";
 		std::string nameStr = nameSS.str();
 		out.open( (char*)nameStr.c_str() );
 		std::pair<double,double> min_max_values = this->min_max();
-		out << "set xrange [" << min_max_values.first - 0.1*(min_max_values.second-min_max_values.first) << " : " << min_max_values.second + 0.1*(min_max_values.second-min_max_values.first) << " ]" << endl;
-		out << "set yrange [" << min_max_values.first - 0.1*(min_max_values.second-min_max_values.first) << " : " << min_max_values.second + 0.1*(min_max_values.second-min_max_values.first) << " ]" << endl;
-		out << "plot '-' using 1:2 notitle \"" << filename << "\", \\" << endl;
-		out << "     '-' using 1:2 notitle with lp" << endl;
+		out << "set xrange [" << min_max_values.first - 0.1*(min_max_values.second-min_max_values.first) << " : " << min_max_values.second + 0.1*(min_max_values.second-min_max_values.first) << " ]" << std::endl;
+		out << "set yrange [" << min_max_values.first - 0.1*(min_max_values.second-min_max_values.first) << " : " << min_max_values.second + 0.1*(min_max_values.second-min_max_values.first) << " ]" << std::endl;
+		out << "plot '-' using 1:2 notitle \"" << filename << "\", \\" << std::endl;
+		out << "     '-' using 1:2 notitle with lp" << std::endl;
 		for ( size_t i = 0 ; i != this->intervals.size() ; ++i )
 		{
-			out << this->intervals[i].first << " " << this->intervals[i].second << endl;
+			out << this->intervals[i].first << " " << this->intervals[i].second << std::endl;
 		}
-		out << "EOF" << endl;
-		out << min_max_values.first - 0.1*(min_max_values.second-min_max_values.first) << " " << min_max_values.first - 0.1*(min_max_values.second-min_max_values.first) << endl;
-		out << min_max_values.second + 0.1*(min_max_values.second-min_max_values.first) << " " << min_max_values.second + 0.1*(min_max_values.second-min_max_values.first) << endl;
+		out << "EOF" << std::endl;
+		out << min_max_values.first - 0.1*(min_max_values.second-min_max_values.first) << " " << min_max_values.first - 0.1*(min_max_values.second-min_max_values.first) << std::endl;
+		out << min_max_values.second + 0.1*(min_max_values.second-min_max_values.first) << " " << min_max_values.second + 0.1*(min_max_values.second-min_max_values.first) << std::endl;
 			
 		out.close();
 		
-		cout << "Gnuplot script to visualize persistence diagram written to the file: " << nameStr << ". Type load '" << nameStr << "' in gnuplot to visualize." << endl;
+		std::cout << "Gnuplot script to visualize persistence diagram written to the file: " << nameStr << ". Type load '" << nameStr << "' in gnuplot to visualize." << std::endl;
 	}
 
-	/**
-     * Return a familly of vectors obtained from the persistence diagram. The i-th vector consist of the lenfth of i dominant persistence intervals. 
-    **/
-    std::vector<double> vectorize( int number_of_function )//comment: in this case, number_of_functions (a static member of Abs_Vectorized_topological_data cannot be set a priori. 
-															//In this cas, maybe it is better not to make this parameter static.
-    {
-        return this->length_of_dominant_intervals( number_of_function );
-    }
 
 	/**
      * Retun numbr of points in the diagram.
@@ -176,22 +168,71 @@ public:
         return this->intervals[i];
     }
     
-    /**
-     *Computations of distance from the current persistnce diagram to the persistence diagram given as a parameter of this function.
-     *The last parameter, power, is here in case we would like to compute p=th Wasserstein distance. At the moment, for the bottleneck distances, it will be ignored.
-    **/
-    double distance( const Abs_Topological_data_with_distances* second , double power = 1) 
-    {
-		return 1;
-		//waiting for Francois Godi for the code. We will compute here the Bottleneck distnace. 
-	}
-	
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    //Implementations of functions for various concepts.  
 	/**
 	 * This is a simple function projectig the persistence intervals to a real number. The function we use here is a sum of squared lendgths of intervals. It can be naturally interpreted as
 	 * sum of step function, where the step hight it equal to the length of the interval.
 	 **/ 
-	double project_to_R( int number_of_function );
+	double project_to_R( int number_of_function );   
+	/**
+	 * The function gives the number of possible projections to R. This function is required by the Real_valued_topological_data concept.
+	**/ 
+	size_t number_of_projections_to_R()
+	{
+		return this->number_of_functions_for_projections_to_reals;
+	} 
+    
+    /**
+     * Return a familly of vectors obtained from the persistence diagram. The i-th vector consist of the lenfth of i dominant persistence intervals. 
+    **/
+    std::vector<double> vectorize( int number_of_function )
+    {
+        return this->length_of_dominant_intervals( number_of_function );
+    }
+    /**
+	* This function return the number of functions that allows vectorization of a persisence diagram. It is required in a concept Vectorized_topological_data.
+	**/ 
+	size_t number_of_vectorize_functions()
+	{
+		return this->number_of_functions_for_vectorization;	
+	}
+
+    /**
+     *Computations of distance from the current persistnce diagram to the persistence diagram given as a parameter of this function.
+     *The last parameter, power, is here in case we would like to compute p=th Wasserstein distance. At the moment, for the bottleneck distances, it will be ignored.
+    **/
+    double distance( const Persistence_intervals& second , double power = 1) 
+    {
+		return 1;
+		//waiting for Francois Godi for the code. We will compute here the Bottleneck distnace. 
+	}
+	//end of implementation of functions needed for concepts.
 	
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     //For visualization use output from vectorize and build histograms. 
      std::vector< std::pair< double,double > > output_for_visualization()
@@ -208,7 +249,9 @@ protected:
 		this->number_of_functions_for_projections_to_reals = 1;
 	}
 
-    std::vector< std::pair< double,double > > intervals;    
+    std::vector< std::pair< double,double > > intervals;   
+    size_t number_of_functions_for_vectorization;
+	size_t number_of_functions_for_projections_to_reals; 
 };
 
 
@@ -240,7 +283,7 @@ Persistence_intervals::Persistence_intervals( const char* filename )
     //    this->intervals.push_back( std::make_pair( first,second ) );
     //    if ( dbg )
     //    {
-    //        cerr << "Adding interval [ " << first << " , " << second << " ]\n";
+    //        std::cerr << "Adding interval [ " << first << " , " << second << " ]\n";
     //        getchar();
     //    }
     //}
@@ -303,7 +346,7 @@ std::vector< std::pair<double,double> > Persistence_intervals::dominant_interval
 	for ( size_t i = 0 ; i != std::min( where_to_cut , position_length_vector.size() ) ; ++i )
 	{
 		result.push_back( this->intervals[ position_length_vector[i].first ] );
-		if ( dbg )cerr << "Position : " << position_length_vector[i].first << " length : " << position_length_vector[i].second << endl;
+		if ( dbg )std::cerr << "Position : " << position_length_vector[i].first << " length : " << position_length_vector[i].second << std::endl;
 	}
 	
 	return result;
@@ -314,7 +357,7 @@ std::vector< size_t > Persistence_intervals::histograms_of_lengths( size_t numbe
 {
     bool dbg = false;
 
-    if ( dbg )cerr << "this->intervals.size() : " << this->intervals.size() << endl;
+    if ( dbg )std::cerr << "this->intervals.size() : " << this->intervals.size() << std::endl;
     //first find the length of the longest interval:
     double lengthOfLongest = 0;
     for ( size_t i = 0  ; i != this->intervals.size() ; ++i )
@@ -325,7 +368,7 @@ std::vector< size_t > Persistence_intervals::histograms_of_lengths( size_t numbe
         }
     }
 
-    if ( dbg ){cerr << "lengthOfLongest : " << lengthOfLongest << endl;}
+    if ( dbg ){std::cerr << "lengthOfLongest : " << lengthOfLongest << std::endl;}
 
 	//this is a container we will use to store the resulting histogram
     std::vector< size_t > result( number_of_bins + 1 , 0 );
@@ -344,16 +387,16 @@ std::vector< size_t > Persistence_intervals::histograms_of_lengths( size_t numbe
         
         if ( dbg )
         {
-            cerr << "i : " << i << endl;
-            cerr << "Interval : [" << this->intervals[i].first << " , " << this->intervals[i].second << " ] \n";
-            cerr << "relative_length_of_this_interval : " << relative_length_of_this_interval << endl;
-            cerr << "position : " << position << endl;
+            std::cerr << "i : " << i << std::endl;
+            std::cerr << "Interval : [" << this->intervals[i].first << " , " << this->intervals[i].second << " ] \n";
+            std::cerr << "relative_length_of_this_interval : " << relative_length_of_this_interval << std::endl;
+            std::cerr << "position : " << position << std::endl;
             getchar();
         }
     }
 
     
-    if ( dbg ){for ( size_t i = 0 ; i != result.size() ; ++i )cerr << result[i] << endl;}
+    if ( dbg ){for ( size_t i = 0 ; i != result.size() ; ++i )std::cerr << result[i] << std::endl;}
     return result;
 }
 
@@ -384,7 +427,7 @@ std::vector< double > Persistence_intervals::characteristic_function_of_diagram(
     {
         if ( dbg )
         {
-            cerr << "Interval : " << this->intervals[i].first << " , " << this->intervals[i].second << endl;
+            std::cerr << "Interval : " << this->intervals[i].first << " , " << this->intervals[i].second << std::endl;
         }
 
         size_t beginIt = 0;
@@ -407,8 +450,8 @@ std::vector< double > Persistence_intervals::characteristic_function_of_diagram(
 
         if ( dbg )
         {
-            cerr << "beginIt : " << beginIt << endl;
-            cerr << "endIt : " << endIt << endl;
+            std::cerr << "beginIt : " << beginIt << std::endl;
+            std::cerr << "endIt : " << endIt << std::endl;
         }
 
 
@@ -419,12 +462,12 @@ std::vector< double > Persistence_intervals::characteristic_function_of_diagram(
         //cerr << "x_max : " << x_max << " x_min : " << x_min << " , number_of_bins : " << number_of_bins << " this->intervals[i].second : " << this->intervals[i].second <<  " this->intervals[i].first : " << this->intervals[i].first << endl;
         if ( dbg )
         {
-            cerr << "Result at this stage \n";
+            std::cerr << "Result at this stage \n";
             for ( size_t aa = 0 ; aa != result.size() ; ++aa )
             {
-                cerr << result[aa] << " ";
+                std::cerr << result[aa] << " ";
             }
-            cerr << endl;
+            std::cerr << std::endl;
             //getchar();
         }
     }
@@ -498,10 +541,10 @@ std::vector< double > Persistence_intervals::k_n_n( size_t k , size_t where_to_c
     bool dbg = false;
     if ( dbg )
     {
-        cerr << "Here are the intervals : \n";
+        std::cerr << "Here are the intervals : \n";
         for ( size_t i = 0 ; i != this->intervals.size() ; ++i )
         {
-            cerr << "[ " << this->intervals[i].first << " , " << this->intervals[i].second << "] \n";
+            std::cerr << "[ " << this->intervals[i].first << " , " << this->intervals[i].second << "] \n";
         }
         getchar();
     }
@@ -532,12 +575,12 @@ std::vector< double > Persistence_intervals::k_n_n( size_t k , size_t where_to_c
 
         if ( dbg )
         {
-            cerr << "Here are the distances form the point : [" << this->intervals[i].first << " , " << this->intervals[i].second << "] in the diagram \n";
+            std::cerr << "Here are the distances form the point : [" << this->intervals[i].first << " , " << this->intervals[i].second << "] in the diagram \n";
             for ( size_t aa = 0 ; aa != distancesFromI.size() ; ++aa )
             {
-                cerr << "To : " << i+aa << " : " << distancesFromI[aa] << " ";
+                std::cerr << "To : " << i+aa << " : " << distancesFromI[aa] << " ";
             }
-            cerr << endl;
+            std::cerr << std::endl;
             getchar();
         }
 
@@ -550,21 +593,21 @@ std::vector< double > Persistence_intervals::k_n_n( size_t k , size_t where_to_c
     }
     if ( dbg )
     {
-        cerr << "Here is the distance matrix : \n";
+        std::cerr << "Here is the distance matrix : \n";
         for ( size_t i = 0 ; i != distances.size() ; ++i )
         {
             for ( size_t j = 0 ; j != distances.size() ; ++j )
             {
-                cerr << distances[i][j] << " ";
+                std::cerr << distances[i][j] << " ";
             }
-            cerr << endl;
+            std::cerr << std::endl;
         }
-        cerr << endl << endl << "And here are the distances to the diagonal : " << endl;
+        std::cerr << std::endl << std::endl << "And here are the distances to the diagonal : " << std::endl;
         for ( size_t i = 0 ; i != distances_from_diagonal. size() ; ++i )
         {
-            cerr << distances_from_diagonal[i] << " ";
+            std::cerr << distances_from_diagonal[i] << " ";
         }
-        cerr << endl << endl;
+        std::cerr << std::endl << std::endl;
         getchar();
     }
 
@@ -580,7 +623,7 @@ std::vector< double > Persistence_intervals::k_n_n( size_t k , size_t where_to_c
         {
             if ( dbg )
             {
-                cerr << "There are not enough neighbors in your set. We set the result to plus infty \n";
+                std::cerr << "There are not enough neighbors in your set. We set the result to plus infty \n";
             }
             result.push_back( std::numeric_limits<double>::max() );
         }
@@ -590,7 +633,7 @@ std::vector< double > Persistence_intervals::k_n_n( size_t k , size_t where_to_c
             {
                 if ( dbg )
                 {
-                    cerr << "The k-th n.n. is on a diagonal. Therefore we set up a distance to diagonal \n";
+                    std::cerr << "The k-th n.n. is on a diagonal. Therefore we set up a distance to diagonal \n";
                 }
                 result.push_back( distances_from_diagonal[i] );
             }

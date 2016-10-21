@@ -66,17 +66,17 @@ int main( int argc , char** argv )
 	
 	//averages:
 	Vector_distances_in_diagram<euclidean_distance<double> > average;
-	std::vector< Abs_Topological_data_with_averages* > to_average;
-	to_average.push_back( (Abs_Topological_data_with_averages*)(&v1) );
-	to_average.push_back( (Abs_Topological_data_with_averages*)(&v2) );
+	std::vector< Vector_distances_in_diagram<euclidean_distance<double> >* > to_average;
+	to_average.push_back( &v1 );
+	to_average.push_back( &v2 );
 	average.compute_average( to_average );
 	std::cout << "Average : " << average << std::endl;
 	
 	//computations of distances:
-	std::cout << "l^1 distance : " << v1.distance( (Abs_Topological_data_with_distances*)(&v2) ) << std::endl;
+	std::cout << "l^1 distance : " << v1.distance( v2 ) << std::endl;
     
    //computations of scalar product:
-    std::cout << "Scalar product of l1 and l2 : " << v1.compute_scalar_product( (Abs_Topological_data_with_scalar_product*)(&v2) ) << std::endl;
+    std::cout << "Scalar product of l1 and l2 : " << v1.compute_scalar_product( v2 ) << std::endl;
     
     //create a file with a gnuplot script:
     v1.plot( "plot_of_vector_representation" );

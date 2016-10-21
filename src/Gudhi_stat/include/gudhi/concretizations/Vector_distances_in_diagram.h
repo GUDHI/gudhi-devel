@@ -30,12 +30,7 @@
 #include <iostream>
 #include <limits>
 
-
-#include <gudhi/abstract_classes/Abs_Vectorized_topological_data.h>
-#include <gudhi/abstract_classes/Abs_Topological_data_with_averages.h>
-#include <gudhi/abstract_classes/Abs_Topological_data_with_distances.h>
-#include <gudhi/abstract_classes/Abs_Real_valued_topological_data.h>
-#include <gudhi/abstract_classes/Abs_Topological_data_with_scalar_product.h>
+//gudhi include
 #include <gudhi/concretizations/read_persitence_from_file.h>
 #include <gudhi/common_gudhi_stat.h>
 using namespace std;
@@ -67,16 +62,13 @@ struct maximum_distance
 
 /**
 * This is an implementation of idea presented in the paper by Steve, Matthew and Max. The parameter of the class is the class that computes distance used to construct the vectors. The typical function is
-* either Eucludean of maximum (Manhattan) distance. 
+* either Eucludean of maximum (Manhattan) distance.
+* This class implements the following concepts: Vectorized_topological_data, Topological_data_with_distances, Real_valued_topological_data, Topological_data_with_averages, Topological_data_with_scalar_product 
+* 
 **/
 
 template <typename F>
-class Vector_distances_in_diagram : 
-									public Abs_Vectorized_topological_data, 
-									public Abs_Topological_data_with_distances, 
-									public Abs_Real_valued_topological_data, 
-									public Abs_Topological_data_with_averages, 
-									public Abs_Topological_data_with_scalar_product
+class Vector_distances_in_diagram 
 {
 public:
 	/**
@@ -168,31 +160,66 @@ public:
 		return !( *this == second );
 	}
     
-    //concretization of abstract methods:
+    
+    
+    
+    //Implementations of functions for various concepts.  
      /**
-     * Compute projection to real numbers of persistence vector. 
+     * Compute projection to real numbers of persistence vector. This function is required by the Real_valued_topological_data concept
     **/
     double project_to_R( int number_of_function );
+    /**
+	 * The function gives the number of possible projections to R. This function is required by the Real_valued_topological_data concept.
+	**/ 
+	size_t number_of_projections_to_R()
+	{
+		return this->number_of_functions_for_projections_to_reals;
+	}
     
     /**
-     * Compute a vectorization of a persistent vectors.
+     * Compute a vectorization of a persistent vectors. It is required in a concept Vectorized_topological_data.
     **/
     std::vector<double> vectorize( int number_of_function );
+     /**
+	 * This function return the number of functions that allows vectorization of a persisence vector. It is required in a concept Vectorized_topological_data.
+	 **/ 
+	size_t number_of_vectorize_functions()
+	{
+		return this->number_of_functions_for_vectorization;	
+	}
     
     /**
-     * Compute a average of two persistent vectors.
+     * Compute a average of two persistent vectors. This function is required by Topological_data_with_averages concept.
     **/
-    void compute_average( const std::vector< Abs_Topological_data_with_averages* >& to_average );
+    void compute_average( const std::vector< Vector_distances_in_diagram* >& to_average );
     
     /**
-     * Compute a distance of two persistent vectors.
+     * Compute a distance of two persistent vectors. This function is required in Topological_data_with_distances concept.
     **/
-    double distance( const Abs_Topological_data_with_distances* second , double power = 1);
+    double distance( const Vector_distances_in_diagram& second , double power = 1);
     
     /**
-     * Compute a scalar product of two persistent vectors.
+     * Compute a scalar product of two persistent vectors. This function is required in Topological_data_with_scalar_product concept.
     **/ 
-    double compute_scalar_product( const Abs_Topological_data_with_scalar_product* second );
+    double compute_scalar_product( const Vector_distances_in_diagram& second );
+    //end of implementation of functions needed for concepts.
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     /**
     * For visualization use output from vectorize and build histograms. 
@@ -201,6 +228,7 @@ public:
     {
 		return this->sorted_vector_of_distances;
 	}
+	
 	
 	/**
 	 * Create a gnuplot script to vizualize the data structure. 
@@ -228,6 +256,9 @@ public:
 private:
     std::vector< std::pair< double , double > > intervals;
     std::vector< double > sorted_vector_of_distances;
+    size_t number_of_functions_for_vectorization;
+	size_t number_of_functions_for_projections_to_reals;
+	size_t where_to_cut;
 
     void compute_sorted_vector_of_distances_via_heap( size_t where_to_cut );
     void compute_sorted_vector_of_distances_via_vector_sorting( size_t where_to_cut );
@@ -247,7 +278,7 @@ private:
 
 
 template <typename F>
-Vector_distances_in_diagram<F>::Vector_distances_in_diagram( const std::vector< std::pair< double,double > >& intervals_ , size_t where_to_cut ):Abs_Vectorized_topological_data(where_to_cut)
+Vector_distances_in_diagram<F>::Vector_distances_in_diagram( const std::vector< std::pair< double,double > >& intervals_ , size_t where_to_cut_ ):where_to_cut(where_to_cut_)
 {    
     std::vector< std::pair< double,double > > i( intervals_ );
     this->intervals = i;
@@ -279,7 +310,7 @@ Vector_distances_in_diagram<F>& Vector_distances_in_diagram<F>::operator =( cons
 
 
 template <typename F>
-Vector_distances_in_diagram<F>::Vector_distances_in_diagram( const char* filename , size_t where_to_cut  ):Abs_Vectorized_topological_data(where_to_cut)
+Vector_distances_in_diagram<F>::Vector_distances_in_diagram( const char* filename , size_t where_to_cut  ):where_to_cut(where_to_cut)
 {   	
     //standard file with barcode
     std::vector< std::pair< double , double > > intervals = read_standard_file( filename );    
@@ -425,7 +456,7 @@ void Vector_distances_in_diagram<F>::compute_sorted_vector_of_distances_via_vect
 
 
 
-//concretization of abstract methods:
+//Implementations of functions for various concepts.  
 template <typename F>
 double Vector_distances_in_diagram<F>::project_to_R( int number_of_function )
 {
@@ -441,7 +472,7 @@ double Vector_distances_in_diagram<F>::project_to_R( int number_of_function )
 }
 
 template <typename F>
-void Vector_distances_in_diagram<F>::compute_average( const std::vector< Abs_Topological_data_with_averages* >& to_average )
+void Vector_distances_in_diagram<F>::compute_average( const std::vector< Vector_distances_in_diagram* >& to_average )
 {
 	
 	if ( to_average.size() == 0 )
@@ -452,23 +483,19 @@ void Vector_distances_in_diagram<F>::compute_average( const std::vector< Abs_Top
 	
 	size_t maximal_length_of_vector = 0;
 	for ( size_t i = 0 ; i != to_average.size() ; ++i )
-	{
-		Vector_distances_in_diagram<F>* current = (Vector_distances_in_diagram<F>*)to_average[i];
-		if ( current->sorted_vector_of_distances.size() > maximal_length_of_vector )
+	{		
+		if ( to_average[i]->sorted_vector_of_distances.size() > maximal_length_of_vector )
 		{
-			maximal_length_of_vector = current->sorted_vector_of_distances.size();
+			maximal_length_of_vector = to_average[i]->sorted_vector_of_distances.size();
 		}
-	}
-	
-	//cerr << "maximal_length_of_vector  : " << maximal_length_of_vector << endl;
+	}	
 	
 	std::vector< double > av(  maximal_length_of_vector , 0 );
 	for ( size_t i = 0 ; i != to_average.size() ; ++i )
-	{
-		Vector_distances_in_diagram<F>* current = (Vector_distances_in_diagram<F>*)to_average[i];
-		for ( size_t j = 0  ; j != current->sorted_vector_of_distances.size() ; ++j )
+	{		
+		for ( size_t j = 0  ; j != to_average[i]->sorted_vector_of_distances.size() ; ++j )
 		{
-			av[j] += current->sorted_vector_of_distances[j];
+			av[j] += to_average[i]->sorted_vector_of_distances[j];
 		}
 	}
 	
@@ -481,7 +508,7 @@ void Vector_distances_in_diagram<F>::compute_average( const std::vector< Abs_Top
 }
 
 template <typename F>
-double Vector_distances_in_diagram<F>::distance( const Abs_Topological_data_with_distances* second , double power )
+double Vector_distances_in_diagram<F>::distance( const Vector_distances_in_diagram& second_ , double power )
 {
 	bool dbg = false;
 	
@@ -490,47 +517,45 @@ double Vector_distances_in_diagram<F>::distance( const Abs_Topological_data_with
 		std::cerr << "Entering double Vector_distances_in_diagram<F>::distance( const Abs_Topological_data_with_distances* second , double power ) procedure \n";
 		std::cerr << "Power : " << power << std::endl;
 		std::cerr << "This : " << *this << std::endl;
-		std::cerr << "second : " << *((Vector_distances_in_diagram<F>*)second) << std::endl;
-	}
-	
-	Vector_distances_in_diagram<F>* second_ = ((Vector_distances_in_diagram<F>*)second);
+		std::cerr << "second : " << second_ << std::endl;
+	}		
 	
 	
 	double result = 0;
-	for ( size_t i = 0 ; i != std::min(this->sorted_vector_of_distances.size(), second_->sorted_vector_of_distances.size())  ; ++i )
+	for ( size_t i = 0 ; i != std::min(this->sorted_vector_of_distances.size(), second_.sorted_vector_of_distances.size())  ; ++i )
 	{
 		if ( power == 1 )
 		{
 			if ( dbg )
 			{
-				cerr << "|" << this->sorted_vector_of_distances[i] << " -  " << second_->sorted_vector_of_distances[i] << " |  : " << fabs( this->sorted_vector_of_distances[i] - second_->sorted_vector_of_distances[i] ) << endl;
+				cerr << "|" << this->sorted_vector_of_distances[i] << " -  " << second_.sorted_vector_of_distances[i] << " |  : " << fabs( this->sorted_vector_of_distances[i] - second_.sorted_vector_of_distances[i] ) << endl;
 			}
-			result += fabs( this->sorted_vector_of_distances[i] - second_->sorted_vector_of_distances[i] );
+			result += fabs( this->sorted_vector_of_distances[i] - second_.sorted_vector_of_distances[i] );
 		}
 		else
 		{
-			result += std::pow( fabs( this->sorted_vector_of_distances[i] - second_->sorted_vector_of_distances[i] ) , power );
+			result += std::pow( fabs( this->sorted_vector_of_distances[i] - second_.sorted_vector_of_distances[i] ) , power );
 			if ( dbg )
 			{
-				cerr << "| " << this->sorted_vector_of_distances[i] << " - " << second_->sorted_vector_of_distances[i]  << " : " << fabs( this->sorted_vector_of_distances[i] - second_->sorted_vector_of_distances[i] ) << endl;
+				cerr << "| " << this->sorted_vector_of_distances[i] << " - " << second_.sorted_vector_of_distances[i]  << " : " << fabs( this->sorted_vector_of_distances[i] - second_.sorted_vector_of_distances[i] ) << endl;
 			}
 		}
 	}
-	if ( this->sorted_vector_of_distances.size() != second_->sorted_vector_of_distances.size() )
+	if ( this->sorted_vector_of_distances.size() != second_.sorted_vector_of_distances.size() )
 	{
-		if ( this->sorted_vector_of_distances.size() > second_->sorted_vector_of_distances.size() )
+		if ( this->sorted_vector_of_distances.size() > second_.sorted_vector_of_distances.size() )
 		{
-			for ( size_t i = second_->sorted_vector_of_distances.size() ; i != this->sorted_vector_of_distances.size() ; ++i )			
+			for ( size_t i = second_.sorted_vector_of_distances.size() ; i != this->sorted_vector_of_distances.size() ; ++i )			
 			{
 				result += fabs( this->sorted_vector_of_distances[i] );
 			}
 		}
 		else
 		{
-			//this->sorted_vector_of_distances.size() < second_->sorted_vector_of_distances.size()
-			for ( size_t i = this->sorted_vector_of_distances.size() ; i != second_->sorted_vector_of_distances.size() ; ++i )			
+			//this->sorted_vector_of_distances.size() < second_.sorted_vector_of_distances.size()
+			for ( size_t i = this->sorted_vector_of_distances.size() ; i != second_.sorted_vector_of_distances.size() ; ++i )			
 			{
-				result += fabs( second_->sorted_vector_of_distances[i] );
+				result += fabs( second_.sorted_vector_of_distances[i] );
 			}			
 		}
 	}
@@ -595,14 +620,12 @@ void Vector_distances_in_diagram<F>::load_from_file( const char* filename )
 }
 
 template < typename F>
-double Vector_distances_in_diagram<F>::compute_scalar_product( const Abs_Topological_data_with_scalar_product* second )
+double Vector_distances_in_diagram<F>::compute_scalar_product( const Vector_distances_in_diagram& second_vector )
 {
-	Vector_distances_in_diagram<F>* second_vector = (Vector_distances_in_diagram<F>*)second;
-		
 	double result = 0;
-	for ( size_t i = 0 ; i != std::min(this->sorted_vector_of_distances.size(),second_vector->sorted_vector_of_distances.size()) ; ++i )
+	for ( size_t i = 0 ; i != std::min(this->sorted_vector_of_distances.size(),second_vector.sorted_vector_of_distances.size()) ; ++i )
 	{
-		result += this->sorted_vector_of_distances[i] * second_vector->sorted_vector_of_distances[i];
+		result += this->sorted_vector_of_distances[i] * second_vector.sorted_vector_of_distances[i];
 	}
 	return result;
 }

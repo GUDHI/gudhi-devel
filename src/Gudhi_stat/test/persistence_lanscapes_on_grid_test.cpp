@@ -219,7 +219,7 @@ BOOST_AUTO_TEST_CASE(check_computations_of_averages)
 {
 	Persistence_landscape_on_grid p( "data/file_with_diagram", 0,1,100 );
 	Persistence_landscape_on_grid q( "data/file_with_diagram_1", 0,1,100 );	
-	std::vector< Abs_Topological_data_with_averages* > to_average;
+	std::vector< Persistence_landscape_on_grid* > to_average;
 	to_average.push_back( &p );
 	to_average.push_back( &q );
 	Persistence_landscape_on_grid av;	
@@ -237,9 +237,9 @@ BOOST_AUTO_TEST_CASE(check_computations_of_distances)
 {
 	Persistence_landscape_on_grid p( "data/file_with_diagram", 0,1,10000 );
 	Persistence_landscape_on_grid q( "data/file_with_diagram_1", 0,1,10000 );
-	BOOST_CHECK( fabs( p.distance( &q )- 25.5779) <= 0.00005 );	
-	BOOST_CHECK( fabs( p.distance( &q , 2) - 2.04891) <= 0.00001 );	
-	BOOST_CHECK( fabs( p.distance( &q , -1 )-0.359		 ) <= 0.00001 );
+	BOOST_CHECK( fabs( p.distance( q )- 25.5779) <= 0.00005 );	
+	BOOST_CHECK( fabs( p.distance( q , 2) - 2.04891) <= 0.00001 );	
+	BOOST_CHECK( fabs( p.distance( q , -1 )-0.359		 ) <= 0.00001 );
 }
 	
 
@@ -247,8 +247,8 @@ BOOST_AUTO_TEST_CASE(check_computations_of_scalar_product)
 {
 	Persistence_landscape_on_grid p( "data/file_with_diagram" , 0,1,10000);
 	Persistence_landscape_on_grid q( "data/file_with_diagram_1", 0,1,10000 );
-	//std::cerr << p.compute_scalar_product( &q ) << std::endl;
-	BOOST_CHECK( almost_equal(  p.compute_scalar_product( &q ) , p.compute_scalar_product( &q ) ) );	
+	//std::cerr << p.compute_scalar_product( q ) << std::endl;
+	BOOST_CHECK( almost_equal(  p.compute_scalar_product( q ) , 0.754367 ) );	
 }
 
 
