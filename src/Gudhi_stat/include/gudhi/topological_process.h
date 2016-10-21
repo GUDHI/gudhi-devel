@@ -20,12 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PERMUTATION_TEST_H
-#define PERMUTATION_TEST_H
-//abstract classes:
-#include <gudhi/abstract_classes/Abs_Topological_data.h>
-#include <gudhi/abstract_classes/Abs_Topological_data_with_averages.h>
-#include <gudhi/abstract_classes/Abs_Topological_data_with_distances.h>
+#ifndef TOPOLOGICAL_PROCESS_H
+#define TOPOLOGICAL_PROCESS_H
 
 
 //concretizations
@@ -41,14 +37,48 @@ namespace Gudhi
 {
 namespace Gudhi_stat 
 {
+	
+
+template <typename Representation>
+std::vector< Representation* > construct_representation_from_file( const char* filename )	
+{
+	bool dbg = false;
+	std::vector< std::string > files = readFileNames( filename );	
+	
+	std::cout << "Here are the filenames in the file : " << filename << std::endl;
+	for ( size_t i = 0 ; i != files.size() ; ++i )
+	{
+		std::cout << files[i] << std::endl;
+	}
+	
+	std::vector< Representation* > result( files.size() );
+	for ( size_t i = 0 ; i != files.size() ; ++i )
+	{
+		std::vector< std::pair< double , double > > diag = read_standard_file( files[i].c_str() );	
+		
+		if ( dbg )
+		{
+			std::cerr << "Here is a diagram from a file : " << files[i].c_str() << std::endl;
+			for ( size_t aa = 0  ; aa != diag.size() ; ++aa )
+			{
+				std::cout << diag[aa].first << " " << diag[aa].second << std::endl;
+			}
+			getchar();
+		}
+						
+		Representation* l = new Representation( diag );			
+		result[i] = l;		
+	}
+	return result;
+}
+	
 
 template <typename Representation>
 class Topological_process
 {
 public:
 	Topological_process();
-	Topological_process( const std::vetor< Representation* >& data_ ):data(data_){}
-	Topological_process( const char* filename );//we assume that the filename contains a list of files with the diagrams. 
+	Topological_process( const std::vector< Representation* >& data_ ):data(data_){}
 	double distance( const Topological_process& second )
 	{
 		if ( this->data.size() != second.data.size() )
@@ -58,12 +88,12 @@ public:
 		double result = 0;
 		for ( size_t i = 0 ; i != this->data.size() ; ++i )
 		{
-			result += this->data[i].distance( secod.data[i] );
+			result += this->data[i]->distance( *second.data[i] );
 		}
 		return result;
 	}	
 	
-	compute_average( const std::vector< Representation* >& to_average )
+	void compute_average( const std::vector< Representation* >& to_average )
 	{
 		//since we will substitute whatever data we have in this object with an average, we clear the data in this object first:
 		this->data.clear();
@@ -80,20 +110,10 @@ public:
 	//scalar products?
 	//confidence bounds?
 private:
-	std::vetor< Representation* > data;
+	std::vector< Representation* > data;
 };
 
-template <typename Representation>
-Topological_process<Representation>::Topological_process( const char* filename )
-{
-	std::vector< std::string > filenames = readFileNames( filename );
-	this->data.reserve( filenames.size() );
-	for ( size_t file = 0 ; file != filenames.size() ; ++file )
-	{
-		std::vector< std::pair<double,double> > intervals_in_this_file = read_file_names_that_may_contain_inf_string( filenames[i] );
-		this-data[i] = new Representation( intervals_in_this_file );
-	}	
-}
+
 
 }//Gudhi_stat
 }//Gudhi

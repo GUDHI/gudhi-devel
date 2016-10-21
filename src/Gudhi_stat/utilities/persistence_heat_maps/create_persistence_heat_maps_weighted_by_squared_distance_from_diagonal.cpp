@@ -66,7 +66,7 @@ int main( int argc , char** argv )
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{		
 		std::cout << "Creating a heat map based on a file : " << filenames[i] << std::endl;
-		Persistence_heat_maps l( filenames[i] , filter, squared_distance_from_diagonal, false , size_of_grid , min_ , max_ );		
+		Persistence_heat_maps<squared_distance_from_diagonal_scaling> l( filenames[i] , filter, false , size_of_grid , min_ , max_ );		
 		
 		std::stringstream ss;
 		ss << filenames[i] << ".mps";

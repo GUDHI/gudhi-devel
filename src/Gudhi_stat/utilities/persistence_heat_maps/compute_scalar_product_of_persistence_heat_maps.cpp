@@ -42,11 +42,11 @@ int main( int argc , char** argv )
 	{
 		filenames.push_back( argv[i] );
 	}
-	std::vector< Persistence_heat_maps > maps;
+	std::vector< Persistence_heat_maps<constant_scaling_function> > maps;
 	maps.reserve( filenames.size() );
 	for ( size_t file_no = 0 ; file_no != filenames.size() ; ++file_no )
 	{
-		Persistence_heat_maps l;
+		Persistence_heat_maps<constant_scaling_function> l;
 		l.load_from_file( filenames[file_no] );
 		maps.push_back( l );
 	}

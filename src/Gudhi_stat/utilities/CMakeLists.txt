@@ -104,3 +104,5 @@ target_link_libraries(persistence_vectors/plot_persistence_vectors ${Boost_SYSTE
 add_executable ( permutation_test permutation_test.cpp )
 target_link_libraries(permutation_test ${Boost_SYSTEM_LIBRARY})
 
+add_executable ( topological_process topological_process.cpp )
+target_link_libraries(topological_process ${Boost_SYSTEM_LIBRARY})

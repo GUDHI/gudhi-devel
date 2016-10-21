@@ -23,7 +23,6 @@
 
 
 #include <gudhi/reader_utils.h>
-#include <gudhi/abstract_classes/Abs_Topological_data.h>
 #include <gudhi/concretizations/Persistence_heat_maps.h>
 
 #include <iostream>
@@ -61,27 +60,27 @@ int main( int argc , char** argv )
 	std::vector< std::vector<double> > filter = create_Gaussian_filter(5,1);
 			
 	//creating two heat maps. 
-	Persistence_heat_maps hm1( persistence1 , filter , constant_function, false , 20 , 0 , 11 );		
-	Persistence_heat_maps hm2( persistence2 , filter , constant_function, false , 20 , 0 , 11 );
+	Persistence_heat_maps<constant_scaling_function> hm1( persistence1 , filter , false , 20 , 0 , 11 );		
+	Persistence_heat_maps<constant_scaling_function> hm2( persistence2 , filter , false , 20 , 0 , 11 );
 	
-	std::vector<Persistence_heat_maps*> vector_of_maps;
+	std::vector<Persistence_heat_maps<constant_scaling_function>*> vector_of_maps;
 	vector_of_maps.push_back( &hm1 );
 	vector_of_maps.push_back( &hm2 );
 	
 	//compute median/mean of a vector of heat maps:	
-	Persistence_heat_maps mean;
+	Persistence_heat_maps<constant_scaling_function> mean;
 	mean.compute_mean( vector_of_maps );	
-	Persistence_heat_maps median;
+	Persistence_heat_maps<constant_scaling_function> median;
 	median.compute_median( vector_of_maps );
 	
 	//to compute L^1 disance between hm1 and hm2:
 	std::cout << "The L^1 distance is : " << hm1.distance( hm2 , 1 ) << std::endl;
 	
 	//to average of hm1 and hm2:
-	std::vector< Persistence_heat_maps* > to_average;
+	std::vector< Persistence_heat_maps<constant_scaling_function>* > to_average;
 	to_average.push_back( &hm1 );
 	to_average.push_back( &hm2 );
-	Persistence_heat_maps av;	
+	Persistence_heat_maps<constant_scaling_function> av;	
 	av.compute_average( to_average );	
 	
 	//to compute scalar product of hm1 and hm2:

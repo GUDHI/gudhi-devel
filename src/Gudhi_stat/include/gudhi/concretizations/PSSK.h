@@ -41,7 +41,7 @@ namespace Gudhi_stat
 * at (q,p)
 **/
 
-class PSSK : public Persistence_heat_maps
+class PSSK : public Persistence_heat_maps<constant_scaling_function>
 {
 public:
 	PSSK():Persistence_heat_maps(){}
@@ -103,7 +103,7 @@ void PSSK::construct( const std::vector< std::pair<double,double> >& intervals_ 
 
     this->min_ = min_;
     this->max_ = max_;    
-    this->scalling_function_with_respect_to_distance_from_diagonal = scalling_function_with_respect_to_distance_from_diagonal;
+
 
 
     //initialization of the structure heat_map

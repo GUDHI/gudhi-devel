@@ -49,15 +49,15 @@ int main( int argc , char** argv )
 	}
 	
 	std::cout << "Creating persistence landscapes...\n";
-	std::vector< Persistence_heat_maps* > maps;
+	std::vector< Persistence_heat_maps<constant_scaling_function>* > maps;
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{
-		Persistence_heat_maps* l = new Persistence_heat_maps;
+		Persistence_heat_maps<constant_scaling_function>* l = new Persistence_heat_maps<constant_scaling_function>;
 		l->load_from_file( filenames[i] );
 		maps.push_back( l );
 	}
 	
-	Persistence_heat_maps av;
+	Persistence_heat_maps<constant_scaling_function> av;
 	av.compute_average( maps );
 	
 	av.print_to_file( "average.mps" );

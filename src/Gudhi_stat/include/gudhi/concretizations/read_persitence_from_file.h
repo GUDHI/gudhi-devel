@@ -105,7 +105,7 @@ std::vector< std::pair< double,double > > read_file_names_that_may_contain_inf_s
 /**
  * This procedure reads names of files which are stored in a file. 
 **/ 
-std::vector< std::string > readFileNames( char* filenameWithFilenames )
+std::vector< std::string > readFileNames( const char* filenameWithFilenames )
 {
     bool dbg = false;
     
