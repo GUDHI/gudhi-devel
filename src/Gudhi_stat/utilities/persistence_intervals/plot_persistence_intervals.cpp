@@ -24,6 +24,7 @@
 
 #include <gudhi/reader_utils.h>
 #include <gudhi/concretizations/Persistence_intervals.h>
+#include <gudhi/concretizations/read_persitence_from_file.h>
 
 #include <iostream>
 
@@ -45,6 +46,7 @@ int main( int argc , char** argv )
 		cout << "To run this program, please provide the name of a file with persistence diagram \n";
 		return 1;
 	}
+	
 	Persistence_intervals b( argv[1] );
 	b.plot( argv[1] );
 	return 0;

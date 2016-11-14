@@ -106,3 +106,17 @@ target_link_libraries(permutation_test ${Boost_SYSTEM_LIBRARY})
 
 add_executable ( topological_process topological_process.cpp )
 target_link_libraries(topological_process ${Boost_SYSTEM_LIBRARY})
+
+add_executable ( topological_process_2 topological_process_2.cpp )
+target_link_libraries(topological_process_2 ${Boost_SYSTEM_LIBRARY})
+
+#add_executable ( Hausdorff_bootstrap Hausdorff_bootstrap.cpp )
+#target_link_libraries(Hausdorff_bootstrap ${Boost_SYSTEM_LIBRARY})
+
+
+add_executable ( Landscape_bootstrap Landscape_bootstrap.cpp )
+if (TBB_FOUND)
+target_link_libraries(Landscape_bootstrap ${TBB_LIBRARIES})
+endif(TBB_FOUND)
+target_link_libraries(Landscape_bootstrap ${Boost_SYSTEM_LIBRARY})
+

@@ -49,15 +49,15 @@ int main( int argc , char** argv )
 	}
 	
 	std::cout << "Reading persistence vectors...\n";
-	std::vector< Vector_distances_in_diagram< euclidean_distance<double> >* > lands;
+	std::vector< Vector_distances_in_diagram< Euclidean_distance<double> >* > lands;
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{		
-		Vector_distances_in_diagram< euclidean_distance<double> >* l = new Vector_distances_in_diagram< euclidean_distance<double> >;
+		Vector_distances_in_diagram< Euclidean_distance<double> >* l = new Vector_distances_in_diagram< Euclidean_distance<double> >;
 		l->load_from_file( filenames[i] );
 		lands.push_back(l );
 	}
 	
-	Vector_distances_in_diagram< euclidean_distance<double> > av;
+	Vector_distances_in_diagram< Euclidean_distance<double> > av;
 	av.compute_average( lands );
 	
 	av.print_to_file( "average.vect" );
