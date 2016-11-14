@@ -143,7 +143,8 @@ int main( int argc , char** argv )
 	std::cout << "(4) An real value p such that L^p distance is going to be computed. \n";
 	std::cout << "(5) A dimension of persistence that is to be taken into account (positive integer) \n";
 	std::cout << "(6) A maximal diameter to which complex is to be grown (positive integer) \n";
-	if ( argc != 7 )
+	std::cout << "(d) a squantile (real number between 0 and 1. If you do not know what to set, set it to 0.95." << std::endl;
+	if ( argc != 8 )
 	{
 		std::cerr << "Wrong number of parameters, the program will now terminate.\n";
 		return 1;
@@ -155,6 +156,7 @@ int main( int argc , char** argv )
 	double p = atoi( argv[4] );
 	int dimension = atoi( argv[5] );
 	double threshold = atof( argv[6] );
+	double quantile = atof( argv[7] );
 	
 	std::cout << "Now we will read points from the file : " << filename << " and then perform " << number_of_repetitions_of_bootstrap << " times the bootstrap on it by choosing subsample of a size " << size_of_subsample << std::endl;
 	
@@ -178,7 +180,7 @@ int main( int argc , char** argv )
 							   compute_persistence_landscape_of_a_point_cloud_in_certain_dimension , //CharacteristicFunction, in this case, we will need to compute persistence in a certain dimension.
 							   distance_between_landscapes //DistanceBetweenPointsCharacteristics. In this case
 							   >
-	( points.size() , characteristic_fun , distance , number_of_repetitions_of_bootstrap , size_of_subsample );
+	( points.size() , characteristic_fun , distance , number_of_repetitions_of_bootstrap , size_of_subsample , quantile );
 	
 	std::cout << "result of bootstrap : " << result << std::endl;
 	

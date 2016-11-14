@@ -37,8 +37,9 @@ int main( int argc , char** argv )
 	std::cout << "The parameters of this program are : " << std::endl;
 	std::cout << "(a) a name of a file with points," << std:: endl;
 	std::cout << "(b) a number of repetitions of bootstrap (integer)," << std::endl;
-	std::cout << "(c) a size of subsample (integer, smaller than the number of points. \n";
-	if ( argc != 4 )
+	std::cout << "(c) a size of subsample (integer, smaller than the number of points," << std::endl;
+	std::cout << "(d) a squantile (real number between 0 and 1. If you do not know what to set, set it to 0.95." << std::endl;
+	if ( argc != 5 )
 	{
 		std::cerr << "Wrong number of parameters, the program will now terminate.\n";
 		return 1;
@@ -47,6 +48,7 @@ int main( int argc , char** argv )
 	const char* filename = argv[1];
 	size_t number_of_repetitions_of_bootstrap = (size_t)atoi( argv[2] );
 	size_t size_of_subsample = (size_t)atoi( argv[3] );
+	double quantile = atof( argv[4] );
 	
 	std::cout << "Now we will read points from the file : " << filename << " and then perform " << number_of_repetitions_of_bootstrap << " times the bootstrap on it by choosing subsample of a size " << size_of_subsample << std::endl;
 	
@@ -70,7 +72,7 @@ int main( int argc , char** argv )
 							   identity< std::vector<size_t> > , //CharacteristicFunction
 							   Hausdorff_distance_between_subspace_and_the_whole_metric_space //DistanceBetweenPointsCharacteristics. This function have the information about point's coordinates. 
 							   >
-	( points.size() ,  identity_char , distance , number_of_repetitions_of_bootstrap , size_of_subsample );
+	( points.size() ,  identity_char , distance , number_of_repetitions_of_bootstrap , size_of_subsample , quantile );
 	
 	std::cout << "result of bootstrap : " << result << std::endl;
 	
