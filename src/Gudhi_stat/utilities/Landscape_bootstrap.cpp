@@ -143,7 +143,7 @@ int main( int argc , char** argv )
 	std::cout << "(4) An real value p such that L^p distance is going to be computed. \n";
 	std::cout << "(5) A dimension of persistence that is to be taken into account (positive integer) \n";
 	std::cout << "(6) A maximal diameter to which complex is to be grown (positive integer) \n";
-	std::cout << "(d) a squantile (real number between 0 and 1. If you do not know what to set, set it to 0.95." << std::endl;
+	std::cout << "(d) a quantile (real number between 0 and 1. If you do not know what to set, set it to 0.95." << std::endl;
 	if ( argc != 8 )
 	{
 		std::cerr << "Wrong number of parameters, the program will now terminate.\n";

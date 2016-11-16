@@ -257,6 +257,24 @@ public:
         }
         return maxValue;
     }
+    
+    
+    /**
+	 * Computations of minimum (y) value of landscape.
+	**/
+    double compute_minimum()const
+    {
+        double minValue = 0;
+        if ( this->land.size() )
+        {
+            minValue = std::numeric_limits<int>::max();
+            for ( size_t i = 0 ; i != this->land[0].size() ; ++i )
+            {
+                if ( this->land[0][i].second < minValue )minValue = this->land[0][i].second;
+            }
+        }
+        return minValue;
+    }
 
 	/**
 	 * Computations of a L^i norm of landscape, where i is the input parameter.
@@ -334,7 +352,7 @@ public:
 	 * The number of projections to R is defined to the number of nonzero landscape functions. I-th projection is an integral of i-th landscape function over whole R.
 	 * This function is required by the Real_valued_topological_data concept.
 	**/
-    double project_to_R( int number_of_function )
+    double project_to_R( int number_of_function )const
     {
 		return this->compute_integral_of_landscape( (size_t)number_of_function );
 	}
@@ -342,7 +360,7 @@ public:
 	/**
 	 * The function gives the number of possible projections to R. This function is required by the Real_valued_topological_data concept.
 	**/ 
-	size_t number_of_projections_to_R()
+	size_t number_of_projections_to_R()const
 	{
 		return this->number_of_functions_for_projections_to_reals;
 	}
@@ -350,7 +368,7 @@ public:
 	/**
 	 * This function produce a vector of doubles based on a landscape. It is required in a concept Vectorized_topological_data
 	*/
-    std::vector<double> vectorize( int number_of_function )
+    std::vector<double> vectorize( int number_of_function )const
     {
 		//TODO, think of something smarter over here
 		std::vector<double> v;
@@ -368,7 +386,7 @@ public:
 	/**
 	 * This function return the number of functions that allows vectorization of persistence laandscape. It is required in a concept Vectorized_topological_data.
 	 **/ 
-	size_t number_of_vectorize_functions()
+	size_t number_of_vectorize_functions()const
 	{
 		return this->number_of_functions_for_vectorization;	
 	}
@@ -433,7 +451,7 @@ public:
 	* The parameter of this functionis a Persistence_landscape.
 	* This function is required in Topological_data_with_distances concept.
 	**/
-    double distance( const Persistence_landscape& second , double power = 1 )
+    double distance( const Persistence_landscape& second , double power = 1 )const
     {
 		if ( power != -1 )
 		{
@@ -451,14 +469,50 @@ public:
 	* The parameter of this functionis a Persistence_landscape.
 	* This function is required in Topological_data_with_scalar_product concept.
 	**/
-	double compute_scalar_product( const Persistence_landscape& second )
+	double compute_scalar_product( const Persistence_landscape& second )const
 	{
 		return compute_inner_product( (*this) , second );
 	}	
 	//end of implementation of functions needed for concepts.
 
 
-
+	/**
+	 * This procedure returns x-range of a given level persistence landscape. If a default value is used, the x-range
+	 * of 0th level landscape is given (and this range contains the ranges of all other landscapes). 
+	**/ 
+	std::pair< double , double > gimme_x_range( size_t level = 0 )const
+	{
+		std::pair< double , double > result;
+		if ( level < this->land.size() )
+		{
+			result = std::make_pair( this->land[level][1].first , this->land[level][ this->land[level].size() - 2 ].first );
+		}
+		else
+		{
+			result = std::make_pair( 0,0 );
+		}
+		return result;
+	}
+	
+	/**
+	 * This procedure returns y-range of a given level persistence landscape. If a default value is used, the y-range
+	 * of 0th level landscape is given (and this range contains the ranges of all other landscapes). 
+	**/ 
+	std::pair< double , double > gimme_y_range( size_t level = 0 )const
+	{
+		std::pair< double , double > result;
+		if ( level < this->land.size() )
+		{
+			double maxx = this->compute_maximum();
+			double minn = this->compute_minimum();
+			result = std::make_pair( minn , maxx );
+		}
+		else
+		{
+			result = std::make_pair( 0,0 );
+		}
+		return result;
+	}
 
 
 
@@ -484,7 +538,7 @@ public:
 	
 	
 	//a function used to create a gnuplot script for visualization of landscapes
-	void plot( const char* filename ,int from = -1, int to = -1 ,  double xRangeBegin = -1 , double xRangeEnd = -1 , double yRangeBegin = -1 , double yRangeEnd = -1 );
+	void plot( const char* filename,  double xRangeBegin = -1 , double xRangeEnd = -1 , double yRangeBegin = -1 , double yRangeEnd = -1,int from = -1, int to = -1  );
 
 
 protected:
@@ -1436,7 +1490,7 @@ double compute_inner_product( const Persistence_landscape& l1 , const Persistenc
 }
 
 
-void Persistence_landscape::plot( const char* filename , int from, int to , double xRangeBegin , double xRangeEnd , double yRangeBegin , double yRangeEnd )
+void Persistence_landscape::plot( const char* filename,  double xRangeBegin , double xRangeEnd , double yRangeBegin , double yRangeEnd , int from , int to )
 {
     //this program create a gnuplot script file that allows to plot persistence diagram.
     ofstream out;

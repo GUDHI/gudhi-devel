@@ -61,55 +61,85 @@ public:
 	/**
 	 * The procedure returns a pair the first element of which is the leftmost end of the interval, and the second element of which is the rightmost end of the interval.  
 	**/
-    std::pair<double,double> min_max();
+    std::pair<double,double> min_max()const;
+    
+    /**
+	 * This procedure returns x-range of a given persistence diagram. 
+	**/ 
+	std::pair< double , double > gimme_x_range()const
+	{
+		 double min_ = std::numeric_limits<int>::max();
+		double max_ = -std::numeric_limits<int>::max();
+		for ( size_t i = 0 ; i != this->intervals.size() ; ++i )
+		{
+			if ( this->intervals[i].first < min_ )min_ = this->intervals[i].first;
+			if ( this->intervals[i].first > max_ )max_ = this->intervals[i].first;
+		}
+		return std::make_pair( min_ , max_ );
+	}
+	
+	/**
+	 * This procedure returns y-range of a given persistence diagram. 
+	**/ 
+	std::pair< double , double > gimme_y_range()const
+	{
+		 double min_ = std::numeric_limits<int>::max();
+		double max_ = -std::numeric_limits<int>::max();
+		for ( size_t i = 0 ; i != this->intervals.size() ; ++i )
+		{
+			if ( this->intervals[i].second < min_ )min_ = this->intervals[i].second;
+			if ( this->intervals[i].second > max_ )max_ = this->intervals[i].second;
+		}
+		return std::make_pair( min_ , max_ );
+	}
 
 	/**
 	 * Procedure that compute the vector of lengths of the dominant (i.e. the longest) persistence intervals. The list is truncated at the parameter of the call where_to_cut (set by default to 100).
 	**/ 
-    std::vector<double> length_of_dominant_intervals( size_t where_to_cut = 100 );
+    std::vector<double> length_of_dominant_intervals( size_t where_to_cut = 100 )const;
     
     
     /**
 	 * Procedure that compute the vector of the dominant (i.e. the longest) persistence intervals. The parameter of the procedure (set by default to 100) is the number of dominant intervals returned by the procedure.
 	**/ 
-    std::vector< std::pair<double,double> > dominant_intervals( size_t where_to_cut = 100 );
+    std::vector< std::pair<double,double> > dominant_intervals( size_t where_to_cut = 100 )const;
     
     /**
 	 * Procedure to compute a histogram of interva's length. A histogram is a block plot. The number of blocks is determined by the first parameter of the function (set by default to 10). 
 	 * For the sake of argument let us assume that the length of the longest interval is 1 and the number of bins is 10. In this case the i-th block correspond to a range between i-1/10 and i10. 
 	 * The vale of a block supported at the interval is the number of persistence intervals of a length between x_0 and x_1.
 	**/
-    std::vector< size_t > histograms_of_lengths( size_t number_of_bins = 10  );
+    std::vector< size_t > histograms_of_lengths( size_t number_of_bins = 10  )const;
     
     /**
      * Based on a histogram of intervals lengts computed by the function histograms_of_lengths H the procedure below computes the cumulative histogram. The i-th position of the resulting histogram
      * is the sume of values of H for the positions from 0 to i. 
     **/
-    std::vector< size_t > cumulative_histograms_of_lengths( size_t number_of_bins = 10 );
+    std::vector< size_t > cumulative_histograms_of_lengths( size_t number_of_bins = 10 )const;
     
     /**
      * In this procedure we assume that each barcode is a characteristic function of a hight equal to its length. The persistence diagram is a sum of such a functions. The procedure below construct a function being a 
      * sum of the characteristic functions of persistence intervals. The first two parameters are the range in which the function is to be computed and the last parameter is the number of bins in 
      * the discretization of the interval [_min,_max].
     **/ 
-    std::vector< double > characteristic_function_of_diagram( double x_min , double x_max , size_t number_of_bins = 10 );
+    std::vector< double > characteristic_function_of_diagram( double x_min , double x_max , size_t number_of_bins = 10 )const;
     
     /**
      * Cumulative version of the function characteristic_function_of_diagram
     **/ 
-    std::vector< double > cumulative_characteristic_function_of_diagram( double x_min , double x_max , size_t number_of_bins = 10 );
+    std::vector< double > cumulative_characteristic_function_of_diagram( double x_min , double x_max , size_t number_of_bins = 10 )const;
     
     /**
      * Compute the funtion of persistence Betti numbers. The returned value is a vector of pair. First element of each pair is a place where persistence Betti numbers change. 
      * Second element of each pair is the value of Persistence Betti numbers at that point.  
     **/ 
-    std::vector< std::pair< double , size_t > > compute_persistent_betti_numbers();
+    std::vector< std::pair< double , size_t > > compute_persistent_betti_numbers()const;
     
     /**
      *This is a non optimal procedure that compute vector of distances from each point of diagram to its k-th nearest neighbor (k is a parameted of the program). The resulting vector is by default truncated to 10 
      *elements (this value can be changed by using the second parameter of the program). The points are returned in order from the ones which are farthest away from their k-th nearest neighbors. 
     **/
-    std::vector< double > k_n_n( size_t k  , size_t where_to_cut = 10 );
+    std::vector< double > k_n_n( size_t k  , size_t where_to_cut = 10 )const;
 
 	/**
      * Operator that send the diagram to a stream. 
@@ -126,7 +156,7 @@ public:
     /**
      * Generating gnuplot script to plot the interval. 
     **/
-    void plot( const char* filename ) 
+    void plot( const char* filename , double min_x = -1 , double max_x = -1 , double min_y = -1 , double max_y = -1  ) const
     {
 		//this program create a gnuplot script file that allows to plot persistence diagram.
 		std::ofstream out;
@@ -135,9 +165,18 @@ public:
 		nameSS << filename << "_GnuplotScript";
 		std::string nameStr = nameSS.str();
 		out.open( (char*)nameStr.c_str() );
+		
 		std::pair<double,double> min_max_values = this->min_max();
-		out << "set xrange [" << min_max_values.first - 0.1*(min_max_values.second-min_max_values.first) << " : " << min_max_values.second + 0.1*(min_max_values.second-min_max_values.first) << " ]" << std::endl;
-		out << "set yrange [" << min_max_values.first - 0.1*(min_max_values.second-min_max_values.first) << " : " << min_max_values.second + 0.1*(min_max_values.second-min_max_values.first) << " ]" << std::endl;
+		if ( min_x == max_x )
+		{	
+			out << "set xrange [" << min_max_values.first - 0.1*(min_max_values.second-min_max_values.first) << " : " << min_max_values.second + 0.1*(min_max_values.second-min_max_values.first) << " ]" << std::endl;
+			out << "set yrange [" << min_max_values.first - 0.1*(min_max_values.second-min_max_values.first) << " : " << min_max_values.second + 0.1*(min_max_values.second-min_max_values.first) << " ]" << std::endl;
+		}
+		else
+		{
+			out << "set xrange [" << min_x << " : " << max_x << " ]" << std::endl;
+			out << "set yrange [" << min_y << " : " << max_y << " ]" << std::endl;			
+		}
 		out << "plot '-' using 1:2 notitle \"" << filename << "\", \\" << std::endl;
 		out << "     '-' using 1:2 notitle with lp" << std::endl;
 		for ( size_t i = 0 ; i != this->intervals.size() ; ++i )
@@ -152,6 +191,8 @@ public:
 		
 		std::cout << "Gnuplot script to visualize persistence diagram written to the file: " << nameStr << ". Type load '" << nameStr << "' in gnuplot to visualize." << std::endl;
 	}
+	
+	
 
 
 	/**
@@ -162,7 +203,7 @@ public:
     /**
      * Return the persistence interval at the given position. Note that intervals are not sorted with respect to their lengths. 
     **/
-    inline std::pair< double,double > operator [](size_t i)
+    inline std::pair< double,double > operator [](size_t i)const
     {
         if ( i >= this->intervals.size() )throw("Index out of range! Operator [], one_d_gaussians class\n");
         return this->intervals[i];
@@ -187,11 +228,11 @@ public:
 	 * This is a simple function projectig the persistence intervals to a real number. The function we use here is a sum of squared lendgths of intervals. It can be naturally interpreted as
 	 * sum of step function, where the step hight it equal to the length of the interval.
 	 **/ 
-	double project_to_R( int number_of_function );   
+	double project_to_R( int number_of_function )const;   
 	/**
 	 * The function gives the number of possible projections to R. This function is required by the Real_valued_topological_data concept.
 	**/ 
-	size_t number_of_projections_to_R()
+	size_t number_of_projections_to_R()const
 	{
 		return this->number_of_functions_for_projections_to_reals;
 	} 
@@ -199,14 +240,14 @@ public:
     /**
      * Return a familly of vectors obtained from the persistence diagram. The i-th vector consist of the lenfth of i dominant persistence intervals. 
     **/
-    std::vector<double> vectorize( int number_of_function )
+    std::vector<double> vectorize( int number_of_function )const
     {
         return this->length_of_dominant_intervals( number_of_function );
     }
     /**
 	* This function return the number of functions that allows vectorization of a persisence diagram. It is required in a concept Vectorized_topological_data.
 	**/ 
-	size_t number_of_vectorize_functions()
+	size_t number_of_vectorize_functions()const
 	{
 		return this->number_of_functions_for_vectorization;	
 	}
@@ -215,7 +256,7 @@ public:
      *Computations of distance from the current persistnce diagram to the persistence diagram given as a parameter of this function.
      *The last parameter, power, is here in case we would like to compute p=th Wasserstein distance. At the moment, for the bottleneck distances, it will be ignored.
     **/
-    double distance( const Persistence_intervals& second , double power = 1) 
+    double distance( const Persistence_intervals& second , double power = 1) const
     {
 		return 1;
 		//waiting for Francois Godi for the code. We will compute here the Bottleneck distnace. 
@@ -306,9 +347,8 @@ Persistence_intervals::Persistence_intervals( const std::vector< std::pair< doub
 }
 
 
-std::vector< double > Persistence_intervals::length_of_dominant_intervals( size_t where_to_cut )
-{
-	this->set_up_numbers_of_functions_for_vectorization_and_projections_to_reals();
+std::vector< double > Persistence_intervals::length_of_dominant_intervals( size_t where_to_cut )const
+{	
     std::vector< double > result( this->intervals.size() );
     for ( size_t i = 0 ; i != this->intervals.size() ; ++i )
     {
@@ -329,7 +369,7 @@ bool compare( const std::pair< size_t , double >& first , const std::pair< size_
 }
 
 
-std::vector< std::pair<double,double> > Persistence_intervals::dominant_intervals( size_t where_to_cut )
+std::vector< std::pair<double,double> > Persistence_intervals::dominant_intervals( size_t where_to_cut )const
 {
 	bool dbg = false;
 	std::vector< std::pair< size_t , double > > position_length_vector( this->intervals.size() );
@@ -353,7 +393,7 @@ std::vector< std::pair<double,double> > Persistence_intervals::dominant_interval
 }//dominant_intervals
 
 
-std::vector< size_t > Persistence_intervals::histograms_of_lengths( size_t number_of_bins )
+std::vector< size_t > Persistence_intervals::histograms_of_lengths( size_t number_of_bins )const
 {
     bool dbg = false;
 
@@ -401,7 +441,7 @@ std::vector< size_t > Persistence_intervals::histograms_of_lengths( size_t numbe
 }
 
 
-std::vector< size_t > Persistence_intervals::cumulative_histograms_of_lengths( size_t number_of_bins )
+std::vector< size_t > Persistence_intervals::cumulative_histograms_of_lengths( size_t number_of_bins )const
 {
     std::vector< size_t > histogram = this->histograms_of_lengths( number_of_bins );
     std::vector< size_t > result( histogram.size() );
@@ -416,7 +456,7 @@ std::vector< size_t > Persistence_intervals::cumulative_histograms_of_lengths( s
 }
 
 
-std::vector< double > Persistence_intervals::characteristic_function_of_diagram( double x_min , double x_max , size_t number_of_bins )
+std::vector< double > Persistence_intervals::characteristic_function_of_diagram( double x_min , double x_max , size_t number_of_bins )const
 {
     bool dbg = false;
 
@@ -476,7 +516,7 @@ std::vector< double > Persistence_intervals::characteristic_function_of_diagram(
 
 
 
-std::vector< double > Persistence_intervals::cumulative_characteristic_function_of_diagram( double x_min , double x_max , size_t number_of_bins )
+std::vector< double > Persistence_intervals::cumulative_characteristic_function_of_diagram( double x_min , double x_max , size_t number_of_bins )const
 {
     std::vector< double > intsOfBars = this->characteristic_function_of_diagram( x_min , x_max , number_of_bins );    
     std::vector< double > result( intsOfBars.size() );
@@ -497,7 +537,7 @@ bool compare_first_element_of_pair( const std::pair< T , bool >& f, const std::p
 }
 
 
-std::vector< std::pair< double , size_t > > Persistence_intervals::compute_persistent_betti_numbers()
+std::vector< std::pair< double , size_t > > Persistence_intervals::compute_persistent_betti_numbers()const
 {	
     std::vector< std::pair< double , bool > > places_where_pbs_change( 2*this->intervals.size() );
 
@@ -536,7 +576,7 @@ inline double compute_euclidean_distance( const std::pair< double,double > & f ,
 }
 
 
-std::vector< double > Persistence_intervals::k_n_n( size_t k , size_t where_to_cut )
+std::vector< double > Persistence_intervals::k_n_n( size_t k , size_t where_to_cut )const
 {
     bool dbg = false;
     if ( dbg )
@@ -650,7 +690,7 @@ std::vector< double > Persistence_intervals::k_n_n( size_t k , size_t where_to_c
 }
 
 
-std::pair<double,double> Persistence_intervals::min_max()
+std::pair<double,double> Persistence_intervals::min_max()const
 {
     double min_ = std::numeric_limits<int>::max();
     double max_ = -std::numeric_limits<int>::max();
@@ -662,7 +702,7 @@ std::pair<double,double> Persistence_intervals::min_max()
     return std::make_pair( min_ , max_ );
 }
 
-double Persistence_intervals::project_to_R( int number_of_function )
+double Persistence_intervals::project_to_R( int number_of_function )const
 {
 	double result = 0;
 	

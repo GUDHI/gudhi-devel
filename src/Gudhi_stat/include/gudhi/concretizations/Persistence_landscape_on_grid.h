@@ -512,6 +512,56 @@ public:
     }
     
     /**
+	 * This procedure returns x-range of a given level persistence landscape. If a default value is used, the x-range
+	 * of 0th level landscape is given (and this range contains the ranges of all other landscapes). 
+	**/ 
+	std::pair< double , double > gimme_x_range( size_t level = 0 )const
+	{
+		return std::make_pair( this->grid_min , this->grid_max );
+		//std::pair< double , double > result;
+		//if ( level < this->land.size() )
+		//{					
+		//	double dx = (this->grid_max - this->grid_min)/(double)this->values_of_landscapes.size();
+		//	size_t first_nonzero = 0;
+		//	while ( (first_nonzero != this->values_of_landscapes.size()) && (this->values_of_landscapes[level][first_nonzero] == 0) )++first_nonzero;
+		//							
+		//	if ( first_nonzero == 0 )
+		//	{
+		//		return std::make_pair( 0,0 );//this landscape is empty.
+		//	}						
+		//							
+		//	size_t last_nonzero = 0;
+		//	while ( (last_nonzero != 0) && (this->values_of_landscapes[level][last_nonzero] == 0) )--last_nonzero;
+		//	
+		//	result = std::make_pair( this->grid_min +first_nonzero*dx , this->grid_max - last_nonzero*dx   );
+		//}
+		//else
+		//{
+		//	result = std::make_pair( 0,0 );
+		//}
+		//return result;
+	}
+	
+	/**
+	 * This procedure returns y-range of a persistence landscape. If a default value is used, the y-range
+	 * of 0th level landscape is given (and this range contains the ranges of all other landscapes). 
+	**/ 
+	std::pair< double , double > gimme_y_range( size_t level = 0 )const
+	{
+		return this->compute_minimum_maximum();
+		//std::pair< double , double > result;
+		//if ( level < this->land.size() )
+		//{
+		//	result = this->compute_minimum_maximum()			
+		//}
+		//else
+		//{
+		//	result = std::make_pair( 0,0 );
+		//}
+		//return result;
+	}
+    
+    /**
      * This function computes maximal lambda for which lambda-level landscape is nonzero.
     **/
     size_t number_of_nonzero_levels()const
@@ -527,7 +577,7 @@ public:
 	/**
 	 * Computations of a L^i norm of landscape, where i is the input parameter.
 	**/
-    double compute_norm_of_landscape( double i )
+    double compute_norm_of_landscape( double i )const
     {
 		std::vector< std::pair< double , double > > p;
         Persistence_landscape_on_grid l(p,this->grid_min,this->grid_max,this->values_of_landscapes.size()-1);       
@@ -788,7 +838,7 @@ public:
 	 * The number of projections to R is defined to the number of nonzero landscape functions. I-th projection is an integral of i-th landscape function over whole R.
 	 * This function is required by the Real_valued_topological_data concept. 
 	**/
-    double project_to_R( int number_of_function )
+    double project_to_R( int number_of_function )const
     {
 		return this->compute_integral_of_landscape( (size_t)number_of_function );
 	}
@@ -796,7 +846,7 @@ public:
 	/**
 	 * The function gives the number of possible projections to R. This function is required by the Real_valued_topological_data concept.
 	**/ 
-	size_t number_of_projections_to_R()
+	size_t number_of_projections_to_R()const
 	{
 		return number_of_functions_for_projections_to_reals;
 	}
@@ -807,7 +857,7 @@ public:
 	/**
 	 * This function produce a vector of doubles based on a landscape. It is required in a concept Vectorized_topological_data
 	*/ 
-    std::vector<double> vectorize( int number_of_function )
+    std::vector<double> vectorize( int number_of_function )const
     {
 		//TODO, think of something smarter over here
 		if ( ( number_of_function < 0 ) || ( (size_t)number_of_function >= this->values_of_landscapes.size() ) )
@@ -821,7 +871,7 @@ public:
 	/**
 	 * This function return the number of functions that allows vectorization of persistence laandscape. It is required in a concept Vectorized_topological_data.
 	 **/ 
-	size_t number_of_vectorize_functions()
+	size_t number_of_vectorize_functions()const
 	{
 		return number_of_functions_for_vectorization;	
 	}
@@ -902,7 +952,7 @@ public:
 	* The parameter of this functionis a Persistence_landscape_on_grid.
 	* This function is required in Topological_data_with_distances concept.
 	**/
-    double distance( const Persistence_landscape_on_grid& second , double power = 1 )
+    double distance( const Persistence_landscape_on_grid& second , double power = 1 )const
     {
 		if ( power != -1 )
 		{
@@ -948,15 +998,23 @@ public:
 	/**
 	* A function that returns values of landsapes. It can be used for vizualization
 	**/
-	std::vector< std::vector< double > > output_for_visualization()
+	std::vector< std::vector< double > > output_for_visualization()const
 	{
 		return this->values_of_landscapes;
 	}
 	
 	/**
-	* function used to create a gnuplot script for visualization of landscapes
+	* function used to create a gnuplot script for visualization of landscapes. Over here we need to specify which landscapes do we want to plot.
 	**/ 
-	void plot( const char* filename , size_t from_ = std::numeric_limits<size_t>::max(), size_t to_ = std::numeric_limits<size_t>::max() );
+	void plot( const char* filename , size_t from_ , size_t to_ )const
+	{
+		this->plot( filename , from_ , to_ );
+	}
+	
+	/**
+	* function used to create a gnuplot script for visualization of landscapes. Over here we can restrict also x and y range of the landscape. 
+	**/ 
+	void plot( const char* filename, double min_x = -1 , double max_x = -1 , double min_y = -1 , double max_y = -1 , size_t from_ = std::numeric_limits<size_t>::max(), size_t to_= std::numeric_limits<size_t>::max()  )const;
 
 
 protected:
@@ -1158,7 +1216,7 @@ void Persistence_landscape_on_grid::print_to_file( const char* filename )const
 	out.close();
 }
 
-void Persistence_landscape_on_grid::plot( const char* filename , size_t from_ , size_t to_ )
+void Persistence_landscape_on_grid::plot( const char* filename, double min_x , double max_x , double min_y , double max_y, size_t from_ , size_t to_  )const
 {		
     //this program create a gnuplot script file that allows to plot persistence diagram.
     ofstream out;
@@ -1168,9 +1226,17 @@ void Persistence_landscape_on_grid::plot( const char* filename , size_t from_ , 
     std::string nameStr = nameSS.str();
     out.open( (char*)nameStr.c_str() );
 
-    std::pair<double,double> min_max = compute_minimum_maximum();
-    out << "set xrange [" << this->grid_min << " : " << this->grid_max << "]" << endl;
-    out << "set yrange [" << min_max.first << " : " << min_max.second << "]" << endl;
+	if ( min_x == max_x )
+	{
+		std::pair<double,double> min_max = compute_minimum_maximum();
+		out << "set xrange [" << this->grid_min << " : " << this->grid_max << "]" << endl;
+		out << "set yrange [" << min_max.first << " : " << min_max.second << "]" << endl;
+	}
+	else
+	{
+		out << "set xrange [" << min_x << " : " << max_x << "]" << endl;
+		out << "set yrange [" << min_y << " : " << max_y << "]" << endl;
+	}
     
     size_t number_of_nonzero_levels = this->number_of_nonzero_levels();
     double dx = ( this->grid_max - this->grid_min )/((double)this->values_of_landscapes.size()-1);

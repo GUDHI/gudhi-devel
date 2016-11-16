@@ -240,7 +240,7 @@ public:
      * In the first line, the values min and max of the image are stored
      * In the next lines, we have the persistence images in a form of a bitmap image. 
     **/
-    void print_to_file( const char* filename );
+    void print_to_file( const char* filename )const;
     
     /**
      * A function that load a heat map from file to the current object (and arase qhatever was stored in the current object before).
@@ -251,7 +251,7 @@ public:
     /**
      * The procedure checks if min_, max_ and this->heat_maps sizes are the same. 
     **/ 
-    inline bool check_if_the_same( const Persistence_heat_maps& second  )
+    inline bool check_if_the_same( const Persistence_heat_maps& second  )const
     {
 		bool dbg = false;
 		if ( this->heat_map.size() != second.heat_map.size() )
@@ -277,18 +277,18 @@ public:
 	/**
 	 * Return minimal range value of persistent image.
 	**/ 
-	inline double gimme_min(){return this->min_;}
+	inline double gimme_min()const{return this->min_;}
 
 	/**
 	 * Return maximal range value of persistent image.
 	**/ 
-	inline double gimme_max(){return this->max_;}
+	inline double gimme_max()const{return this->max_;}
 	
 	
 	/**
 	 * Operator == to check if to persistence heat maps are the same.
 	**/ 
-	bool operator == ( const Persistence_heat_maps& rhs )
+	bool operator == ( const Persistence_heat_maps& rhs )const
 	{
 		bool dbg = false;
 		if ( !this->check_if_the_same(rhs) )
@@ -317,7 +317,7 @@ public:
 	/**
 	 * Operator != to check if to persistence heat maps are different.
 	**/ 
-	bool operator != ( const Persistence_heat_maps& rhs )
+	bool operator != ( const Persistence_heat_maps& rhs )const
 	{
 		return !( (*this) == rhs );
 	}
@@ -326,7 +326,7 @@ public:
     /**
      * A function to generate a gnuplot script to vizualize the persistent image.  
     **/
-    void plot( const char* filename );
+    void plot( const char* filename )const;
     
     
     //Implementations of functions for various concepts.  
@@ -334,11 +334,11 @@ public:
     /**
 	 * This function produce a vector of doubles based on a persisence heat map. It is required in a concept Vectorized_topological_data
 	*/
-    std::vector<double> vectorize( int number_of_function );    
+    std::vector<double> vectorize( int number_of_function )const;    
     /**
 	 * This function return the number of functions that allows vectorization of persistence heat map. It is required in a concept Vectorized_topological_data.
 	 **/ 
-	size_t number_of_vectorize_functions()
+	size_t number_of_vectorize_functions()const
 	{
 		return this->number_of_functions_for_vectorization;	
 	}
@@ -346,7 +346,7 @@ public:
 	/**	 
 	 * This function is required by the Real_valued_topological_data concept. It returns various projections od the persistence heat map to a real line.
 	**/ 	
-	double project_to_R( int number_of_function );	
+	double project_to_R( int number_of_function )const;	
 	/**
 	 * The function gives the number of possible projections to R. This function is required by the Real_valued_topological_data concept.
 	**/ 
@@ -360,7 +360,7 @@ public:
 	* The parameter of this function is a const reference to an object of a class Persistence_heat_maps.
 	* This function is required in Topological_data_with_distances concept.
 	**/
-	double distance( const Persistence_heat_maps& second_ , double power = 1);
+	double distance( const Persistence_heat_maps& second_ , double power = 1)const;
 	
 	/**
 	 * A function to compute averaged persistence heat map, based on vector of persistence heat maps.
@@ -373,9 +373,29 @@ public:
 	* The parameter of this functionis a const reference to an object of a class Persistence_heat_maps.
 	* This function is required in Topological_data_with_scalar_product concept.
 	**/
-	double compute_scalar_product( const Persistence_heat_maps& second_ );
+	double compute_scalar_product( const Persistence_heat_maps& second_ )const;
 	
 	//end of implementation of functions needed for concepts.
+	
+	
+	/**
+	 * The x-range of the persistence heat map. 
+	**/ 
+	std::pair< double , double > gimme_x_range()const
+	{
+		return std::make_pair( this->min_ , this->max_ );
+	}
+	
+	/**
+	 * The y-range of the persistence heat map. 
+	**/ 
+	std::pair< double , double > gimme_y_range()const
+	{
+		return this->gimme_x_range();
+	}
+	
+	
+	
 	
 protected:
 	//private methods
@@ -644,11 +664,11 @@ void Persistence_heat_maps<Scalling_of_kernels>::compute_percentage_of_active( c
 
 
 template <typename Scalling_of_kernels>
-void Persistence_heat_maps<Scalling_of_kernels>::plot( const char* filename )
+void Persistence_heat_maps<Scalling_of_kernels>::plot( const char* filename )const
 {
 	ofstream out;
 	std::stringstream ss;
-	ss << filename << "_Gnuplot_script";
+	ss << filename << "_GnuplotScript";
 	
     out.open( ss.str().c_str() );
 	out << "plot      '-' matrix with image" << std::endl;
@@ -666,7 +686,7 @@ void Persistence_heat_maps<Scalling_of_kernels>::plot( const char* filename )
 
 
 template <typename Scalling_of_kernels>
-void Persistence_heat_maps<Scalling_of_kernels>::print_to_file( const char* filename )
+void Persistence_heat_maps<Scalling_of_kernels>::print_to_file( const char* filename )const
 {
 
 	ofstream out;
@@ -746,7 +766,7 @@ void Persistence_heat_maps<Scalling_of_kernels>::load_from_file( const char* fil
 
 //Concretizations of virtual methods:   
 template <typename Scalling_of_kernels> 
-std::vector<double> Persistence_heat_maps<Scalling_of_kernels>::vectorize( int number_of_function )
+std::vector<double> Persistence_heat_maps<Scalling_of_kernels>::vectorize( int number_of_function )const
 {
 	//convert this->heat_map into one large vector:
 	size_t size_of_result = 0;
@@ -770,7 +790,7 @@ std::vector<double> Persistence_heat_maps<Scalling_of_kernels>::vectorize( int n
 }
 
 template <typename Scalling_of_kernels>
-double Persistence_heat_maps<Scalling_of_kernels>::distance( const Persistence_heat_maps& second , double power )
+double Persistence_heat_maps<Scalling_of_kernels>::distance( const Persistence_heat_maps& second , double power )const
 {			
 	//first we need to check if (*this) and second are defined on the same domain and have the same dimensions:
 	if ( !this->check_if_the_same(second) )
@@ -793,7 +813,7 @@ double Persistence_heat_maps<Scalling_of_kernels>::distance( const Persistence_h
 }
 
 template <typename Scalling_of_kernels>
-double Persistence_heat_maps<Scalling_of_kernels>::project_to_R( int number_of_function )
+double Persistence_heat_maps<Scalling_of_kernels>::project_to_R( int number_of_function )const
 {
 	double result = 0;
 	for ( size_t i = 0 ; i != this->heat_map.size() ; ++i )
@@ -813,7 +833,7 @@ void Persistence_heat_maps<Scalling_of_kernels>::compute_average( const std::vec
 }
 
 template <typename Scalling_of_kernels>
-double Persistence_heat_maps<Scalling_of_kernels>::compute_scalar_product( const Persistence_heat_maps& second )
+double Persistence_heat_maps<Scalling_of_kernels>::compute_scalar_product( const Persistence_heat_maps& second )const
 {		
 	//first we need to check if (*this) and second are defined on the same domain and have the same dimensions:
 	if ( !this->check_if_the_same(second) )

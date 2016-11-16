@@ -51,10 +51,10 @@ BOOST_AUTO_TEST_CASE(check_read_write_to_files)
 	intervals.push_back( std::make_pair(4,7) );
 	intervals.push_back( std::make_pair(9,10) );
 	intervals.push_back( std::make_pair(3,11) );
-	Vector_distances_in_diagram< euclidean_distance<double> > p( intervals , -1 );
+	Vector_distances_in_diagram< Euclidean_distance<double> > p( intervals , -1 );
 	p.write_to_file( "test_vector_representation_write_read" );
 	
-	Vector_distances_in_diagram< euclidean_distance<double> > q;
+	Vector_distances_in_diagram< Euclidean_distance<double> > q;
 	q.load_from_file( "test_vector_representation_write_read" );
 	
 	BOOST_CHECK( p == q );
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(check_read_write_to_files)
 
 BOOST_AUTO_TEST_CASE(check_sortev_vector_distances_template) 
 {	
-	Vector_distances_in_diagram< euclidean_distance<double> > p( "data/file_with_diagram" , 100 );
+	Vector_distances_in_diagram< Euclidean_distance<double> > p( "data/file_with_diagram" , 100 );
 	std::vector< double > sortev_vector_distances_template;
 
 	sortev_vector_distances_template.push_back(	0.609968	);
@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE(check_sortev_vector_distances_template)
 
 BOOST_AUTO_TEST_CASE(check_projections_to_R) 
 {
-	Vector_distances_in_diagram< euclidean_distance<double> > p( "data/file_with_diagram" , 100 );
+	Vector_distances_in_diagram< Euclidean_distance<double> > p( "data/file_with_diagram" , 100 );
 	std::vector< double > proj;
 	proj.push_back(	0	);
 	proj.push_back(	0.6099679993	);
@@ -300,8 +300,8 @@ BOOST_AUTO_TEST_CASE(check_projections_to_R)
 
 BOOST_AUTO_TEST_CASE(check_distance_computations) 
 {
-	Vector_distances_in_diagram< euclidean_distance<double> > p( "data/file_with_diagram" , 100 );
-	Vector_distances_in_diagram< euclidean_distance<double> > p_prime( "data/file_with_diagram" , 10 );	
+	Vector_distances_in_diagram< Euclidean_distance<double> > p( "data/file_with_diagram" , 100 );
+	Vector_distances_in_diagram< Euclidean_distance<double> > p_prime( "data/file_with_diagram" , 10 );	
 	std::vector< std::pair<double,double> > intervals(10);
 	intervals[0] = std::pair<double,double>( 1,2 );
 	intervals[1] = std::pair<double,double>( 3,4 );
@@ -313,7 +313,7 @@ BOOST_AUTO_TEST_CASE(check_distance_computations)
 	intervals[7] = std::pair<double,double>( 15,16 );
 	intervals[8] = std::pair<double,double>( 17,18 );
 	intervals[9] = std::pair<double,double>( 19,20 );		
-	Vector_distances_in_diagram< euclidean_distance<double> > p_bis( intervals , 10 );	
+	Vector_distances_in_diagram< Euclidean_distance<double> > p_bis( intervals , 10 );	
 	//cerr << "p_prime.distance( (Abs_Topological_data_with_distances*)(&p_bis) , 1 ) : " << p_prime.distance( (Abs_Topological_data_with_distances*)(&p_bis) , 1 ) << endl;	
 	BOOST_CHECK( almost_equal ( p_prime.distance( p_bis , 1 ) , 1.86428 ) );		
 }
@@ -322,7 +322,7 @@ BOOST_AUTO_TEST_CASE(check_distance_computations)
 
 BOOST_AUTO_TEST_CASE(check_compute_average) 
 {
-	Vector_distances_in_diagram< euclidean_distance<double> > p( "data/file_with_diagram" , 100 );
+	Vector_distances_in_diagram< Euclidean_distance<double> > p( "data/file_with_diagram" , 100 );
 	//compute average 
 	std::vector< std::pair<double,double> > i1(3);
 	i1[0] = std::pair<double,double>( 1,2 );
@@ -334,17 +334,17 @@ BOOST_AUTO_TEST_CASE(check_compute_average)
 	i2[1] = std::pair<double,double>( 2,15);
 	i2[2] = std::pair<double,double>( 6,17 );
 	
-	Vector_distances_in_diagram< euclidean_distance<double> > A( i1 , -1 );
-	Vector_distances_in_diagram< euclidean_distance<double> > B( i1 , -1 );
+	Vector_distances_in_diagram< Euclidean_distance<double> > A( i1 , -1 );
+	Vector_distances_in_diagram< Euclidean_distance<double> > B( i1 , -1 );
 	
-	std::vector< Vector_distances_in_diagram< euclidean_distance<double> >* > to_average;
+	std::vector< Vector_distances_in_diagram< Euclidean_distance<double> >* > to_average;
 	to_average.push_back( &A );
 	to_average.push_back( &B );
 	
-	Vector_distances_in_diagram< euclidean_distance<double> > average; 
+	Vector_distances_in_diagram< Euclidean_distance<double> > average; 
 	average.compute_average( to_average );
 	
-	Vector_distances_in_diagram< euclidean_distance<double> > template_average; 
+	Vector_distances_in_diagram< Euclidean_distance<double> > template_average; 
 	template_average.load_from_file( "data/average_of_persistence_vectors" );
 		
 	BOOST_CHECK( template_average == average );

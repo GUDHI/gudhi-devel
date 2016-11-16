@@ -57,16 +57,16 @@ int main( int argc , char** argv )
 	persistence2.push_back( std::make_pair(6,10) );
 	
 	//create two persistence vectors based on persistence1 and persistence2:
-	Vector_distances_in_diagram<euclidean_distance<double> > v1 = Vector_distances_in_diagram<euclidean_distance<double> >( persistence1 , std::numeric_limits<size_t>::max() );
-	Vector_distances_in_diagram<euclidean_distance<double> > v2 = Vector_distances_in_diagram<euclidean_distance<double> >( persistence2 , std::numeric_limits<size_t>::max() );
+	Vector_distances_in_diagram<Euclidean_distance<double> > v1 = Vector_distances_in_diagram<Euclidean_distance<double> >( persistence1 , std::numeric_limits<size_t>::max() );
+	Vector_distances_in_diagram<Euclidean_distance<double> > v2 = Vector_distances_in_diagram<Euclidean_distance<double> >( persistence2 , std::numeric_limits<size_t>::max() );
 	
 	//writing to a stream:
 	std::cout << "v1 : " << v1 << std::endl;
 	std::cout << "v2 : " << v2 << std::endl;
 	
 	//averages:
-	Vector_distances_in_diagram<euclidean_distance<double> > average;
-	std::vector< Vector_distances_in_diagram<euclidean_distance<double> >* > to_average;
+	Vector_distances_in_diagram<Euclidean_distance<double> > average;
+	std::vector< Vector_distances_in_diagram<Euclidean_distance<double> >* > to_average;
 	to_average.push_back( &v1 );
 	to_average.push_back( &v2 );
 	average.compute_average( to_average );
@@ -94,7 +94,7 @@ int main( int argc , char** argv )
 		return 1;
 	}
 	
-	Vector_distances_in_diagram< euclidean_distance<double> > p( argv[1] , 100 );
+	Vector_distances_in_diagram< Euclidean_distance<double> > p( argv[1] , 100 );
 	cout << "This is a vector corresponding to the input persistence diagram : \n";	
 	cout << p << endl;
 
@@ -102,7 +102,7 @@ int main( int argc , char** argv )
 
 	if ( argc == 3 )
 	{
-		Vector_distances_in_diagram< euclidean_distance<double> > p_prime( argv[2] , 100);	
+		Vector_distances_in_diagram< Euclidean_distance<double> > p_prime( argv[2] , 100);	
 		
 		cout << "p_prime : " <<p_prime << endl;
 			
@@ -111,7 +111,7 @@ int main( int argc , char** argv )
 		to_average.push_back( (Abs_Topological_data_with_averages*)(&p) );
 		to_average.push_back( (Abs_Topological_data_with_averages*)(&p_prime) );
 	
-		Vector_distances_in_diagram< euclidean_distance<double> > average; 
+		Vector_distances_in_diagram< Euclidean_distance<double> > average; 
 		average.compute_average( to_average );
 	
 		cout << "Here is an average : " << average << endl;

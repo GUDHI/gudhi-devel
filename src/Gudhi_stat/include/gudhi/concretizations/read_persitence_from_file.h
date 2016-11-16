@@ -27,6 +27,8 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <vector>
+#include <algorithm>
 #include <unistd.h>
 
 
@@ -251,6 +253,43 @@ std::vector< std::pair< double , double > > read_gudhi_file( const char* filenam
 	in.close();
 	return barcode;
 }//read_gudhi_file
+
+
+std::vector< std::vector< double > > read_numbers_from_file_line_by_line( const char* filename )
+{
+	bool dbg = false;
+	if ( !( access( filename, F_OK ) != -1 ) )
+	{
+		std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
+		throw "The file from which you are trying to read the persistence landscape do not exist. The program will now terminate \n";
+	}
+	
+	std::vector< std::vector< double > > result;
+	double number;
+	
+	std::ifstream in(filename);
+	std::string line;
+	while ( in.good() )
+	{
+		std::getline(in,line);
+		std::stringstream ss;
+		ss << line;
+		
+		if ( dbg )std::cerr << "\n Reading line : " << line << std::endl;
+		
+		std::vector< double > this_line;
+		while ( ss.good() )
+		{
+			ss >> number;
+			this_line.push_back( number );
+			if ( dbg )std::cerr << number << " ";
+		}
+		if ( this_line.size() && in.good() ) result.push_back( this_line );
+	}		
+	in.close();
+	
+	return result;
+}//read_numbers_from_file_line_by_line
 
 }//namespace Gudhi_stat
 }//namespace Gudhi

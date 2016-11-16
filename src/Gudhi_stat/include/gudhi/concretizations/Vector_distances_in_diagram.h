@@ -33,6 +33,7 @@
 //gudhi include
 #include <gudhi/concretizations/read_persitence_from_file.h>
 #include <gudhi/common_gudhi_stat.h>
+
 using namespace std;
 
 namespace Gudhi 
@@ -42,16 +43,31 @@ namespace Gudhi_stat
 
 
 template <typename T>
-struct euclidean_distance
+struct Euclidean_distance
 {
     double operator() ( const std::pair< T,T >& f , const std::pair<T,T>& s )
     {
         return  sqrt( (f.first-s.first)*(f.first-s.first) + (f.second-s.second)*(f.second-s.second) );
     }
+    double operator() ( const std::vector< T >& f , const std::vector < T >& s )
+    {
+		if ( f.size() != s.size() )
+		{
+			std::cerr << "Not compatible points dimensions in the procedure to compute Euclidean distance. The program will now terminate. \n";
+			std::cout << f.size() << " , " << s.size() << std::endl;
+			throw "Not compatible points dimensions in the procedure to compute Euclidean distance. The program will now terminate. \n";
+		}
+		double result = 0;
+		for ( size_t i = 0 ; i != f.size() ; ++i )
+		{
+			result += ( f[i]-s[i] )*( f[i]-s[i] );
+		}  
+        return  sqrt( result );
+    }
 };
 
 template <typename T>
-struct maximum_distance
+struct Maximum_distance
 {
     double operator() ( const std::pair< T,T >& f , const std::pair<T,T>& s )
     {
@@ -113,7 +129,7 @@ public:
 	/**
 	* This procedure gives the value of a vector on a given position.  
 	**/ 
-    inline double vector_in_position( size_t position )
+    inline double vector_in_position( size_t position )const
     {
         if ( position >= this->sorted_vector_of_distances.size() )throw("Wrong position in accessing Vector_distances_in_diagram::sorted_vector_of_distances\n");
         return this->sorted_vector_of_distances[position];
@@ -127,12 +143,12 @@ public:
     /**
 	 * Write a vector to a file.
 	**/
-    void write_to_file( const char* filename );
+    void write_to_file( const char* filename )const;
     
      /**
 	 * Write a vector to a file.
 	**/
-    void print_to_file( const char* filename )
+    void print_to_file( const char* filename )const
     {
 		this->write_to_file( filename );
 	}  
@@ -145,7 +161,7 @@ public:
     /**
      * Comparision operators:
     **/ 
-    bool operator == ( const Vector_distances_in_diagram& second )
+    bool operator == ( const Vector_distances_in_diagram& second )const
     {
 		if ( this->sorted_vector_of_distances.size() != second.sorted_vector_of_distances.size() )return false;
 		for ( size_t i = 0 ; i != this->sorted_vector_of_distances.size() ; ++i )
@@ -155,7 +171,7 @@ public:
 		return true;
 	}
 	
-	bool operator != ( const Vector_distances_in_diagram& second )
+	bool operator != ( const Vector_distances_in_diagram& second )const
     {
 		return !( *this == second );
 	}
@@ -167,11 +183,11 @@ public:
      /**
      * Compute projection to real numbers of persistence vector. This function is required by the Real_valued_topological_data concept
     **/
-    double project_to_R( int number_of_function );
+    double project_to_R( int number_of_function )const;
     /**
 	 * The function gives the number of possible projections to R. This function is required by the Real_valued_topological_data concept.
 	**/ 
-	size_t number_of_projections_to_R()
+	size_t number_of_projections_to_R()const
 	{
 		return this->number_of_functions_for_projections_to_reals;
 	}
@@ -179,11 +195,11 @@ public:
     /**
      * Compute a vectorization of a persistent vectors. It is required in a concept Vectorized_topological_data.
     **/
-    std::vector<double> vectorize( int number_of_function );
+    std::vector<double> vectorize( int number_of_function )const;
      /**
 	 * This function return the number of functions that allows vectorization of a persisence vector. It is required in a concept Vectorized_topological_data.
 	 **/ 
-	size_t number_of_vectorize_functions()
+	size_t number_of_vectorize_functions()const
 	{
 		return this->number_of_functions_for_vectorization;	
 	}
@@ -196,12 +212,12 @@ public:
     /**
      * Compute a distance of two persistent vectors. This function is required in Topological_data_with_distances concept.
     **/
-    double distance( const Vector_distances_in_diagram& second , double power = 1);
+    double distance( const Vector_distances_in_diagram& second , double power = 1)const;
     
     /**
      * Compute a scalar product of two persistent vectors. This function is required in Topological_data_with_scalar_product concept.
     **/ 
-    double compute_scalar_product( const Vector_distances_in_diagram& second );
+    double compute_scalar_product( const Vector_distances_in_diagram& second )const;        
     //end of implementation of functions needed for concepts.
     
     
@@ -224,7 +240,7 @@ public:
     /**
     * For visualization use output from vectorize and build histograms. 
     **/
-    std::vector< double > output_for_visualization()
+    std::vector< double > output_for_visualization()const
     {
 		return this->sorted_vector_of_distances;
 	}
@@ -233,10 +249,10 @@ public:
 	/**
 	 * Create a gnuplot script to vizualize the data structure. 
 	 **/ 
-	void plot( const char* filename )
+	void plot( const char* filename )const
 	{
 		std::stringstream gnuplot_script;
-		gnuplot_script << filename << "_Gnuplot_script";
+		gnuplot_script << filename << "_GnuplotScript";
 		ofstream out;
 		out.open( gnuplot_script.str().c_str() );
 		out << "set style data histogram" << std::endl;
@@ -250,6 +266,23 @@ public:
 		out << endl;
 		out.close();
 		std::cout << "To vizualize, open gnuplot and type: load \'" << gnuplot_script.str().c_str() << "\'" <<  std::endl;			
+	}
+	
+	/**
+	 * The x-range of the persistence vector. 
+	**/ 
+	std::pair< double , double > gimme_x_range()const
+	{
+		return std::make_pair( 0 , this->sorted_vector_of_distances.size() );
+	}
+	
+	/**
+	 * The y-range of the persistence vector. 
+	**/ 
+	std::pair< double , double > gimme_y_range()const
+	{
+		if ( this->sorted_vector_of_distances.size() == 0 )return std::make_pair(0,0);
+		return std::make_pair( this->sorted_vector_of_distances[0] , 0);
 	}
     
 
@@ -458,7 +491,7 @@ void Vector_distances_in_diagram<F>::compute_sorted_vector_of_distances_via_vect
 
 //Implementations of functions for various concepts.  
 template <typename F>
-double Vector_distances_in_diagram<F>::project_to_R( int number_of_function )
+double Vector_distances_in_diagram<F>::project_to_R( int number_of_function )const
 {
 	if ( number_of_function > this->number_of_functions_for_projections_to_reals )throw "Wrong index of a function in a method Vector_distances_in_diagram<F>::project_to_R";
 	if ( number_of_function < 0 )throw "Wrong index of a function in a method Vector_distances_in_diagram<F>::project_to_R";
@@ -508,7 +541,7 @@ void Vector_distances_in_diagram<F>::compute_average( const std::vector< Vector_
 }
 
 template <typename F>
-double Vector_distances_in_diagram<F>::distance( const Vector_distances_in_diagram& second_ , double power )
+double Vector_distances_in_diagram<F>::distance( const Vector_distances_in_diagram& second_ , double power )const
 {
 	bool dbg = false;
 	
@@ -569,7 +602,7 @@ double Vector_distances_in_diagram<F>::distance( const Vector_distances_in_diagr
 }
     
 template < typename F>
-std::vector<double> Vector_distances_in_diagram<F>::vectorize( int number_of_function )
+std::vector<double> Vector_distances_in_diagram<F>::vectorize( int number_of_function )const
 {
 	if ( number_of_function > this->number_of_functions_for_vectorization )throw "Wrong index of a function in a method Vector_distances_in_diagram<F>::vectorize";
 	if ( number_of_function < 0 )throw "Wrong index of a function in a method Vector_distances_in_diagram<F>::vectorize";
@@ -584,7 +617,7 @@ std::vector<double> Vector_distances_in_diagram<F>::vectorize( int number_of_fun
 
 
 template < typename F>
-void Vector_distances_in_diagram<F>::write_to_file( const char* filename )
+void Vector_distances_in_diagram<F>::write_to_file( const char* filename )const
 {
 	std::ofstream out;
 	out.open( filename );
@@ -620,7 +653,7 @@ void Vector_distances_in_diagram<F>::load_from_file( const char* filename )
 }
 
 template < typename F>
-double Vector_distances_in_diagram<F>::compute_scalar_product( const Vector_distances_in_diagram& second_vector )
+double Vector_distances_in_diagram<F>::compute_scalar_product( const Vector_distances_in_diagram& second_vector )const
 {
 	double result = 0;
 	for ( size_t i = 0 ; i != std::min(this->sorted_vector_of_distances.size(),second_vector.sorted_vector_of_distances.size()) ; ++i )

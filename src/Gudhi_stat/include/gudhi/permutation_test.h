@@ -41,13 +41,16 @@ namespace Gudhi_stat
 template <typename Representation_of_persistence>
 double permutation_test( const std::vector<Representation_of_persistence*>& data_1 , const std::vector<Representation_of_persistence*>& data_2 , size_t number_of_permutations , double exponent = 1 )
 {	
+	bool dbg = true;
 	try
 	{
-		Representation_of_persistence* av_1 = new Representation_of_persistence;		
-		av_1->compute_average( data_1 );						
-		Representation_of_persistence* av_2 = new Representation_of_persistence;			
-	    av_2->compute_average( data_2 );	    	
-		double initial_distance = av_1->distance( *av_2 , exponent );
+		Representation_of_persistence av_1;// = new Representation_of_persistence;		
+		av_1.compute_average( data_1 );						
+		Representation_of_persistence av_2;// = new Representation_of_persistence;			
+	    av_2.compute_average( data_2 );	
+	    double initial_distance = av_1.distance( av_2 , exponent );
+		
+		
 		double counter = 0;
 		
 		for  ( size_t i = 0 ; i != number_of_permutations ; ++i )
@@ -60,10 +63,22 @@ double permutation_test( const std::vector<Representation_of_persistence*>& data
 			std::vector<Representation_of_persistence*> first_part(&all_data[0],&all_data[data_1.size()]);
 			std::vector<Representation_of_persistence*> second_part(&all_data[data_1.size()],&all_data[all_data.size()]);
 		
-			av_1->compute_average( first_part );
-			av_2->compute_average( second_part );			
-			double distance_after_permutations = av_1->distance( *av_2 , exponent );
+		
+			Representation_of_persistence av_1;// = new Representation_of_persistence;		
+			Representation_of_persistence av_2;// = new Representation_of_persistence;		
+			av_1.compute_average( first_part );					
+			av_2.compute_average( second_part );			
+			double distance_after_permutations = av_1.distance( av_2 , exponent );
+			//delete av_1;
+			//delete av_2;
 			if ( distance_after_permutations > initial_distance )++counter;
+			if ( dbg )
+			{
+				std::cerr << "Permutation number : " << i << std::endl;
+				std::cerr << "distance_after_permutations : " << distance_after_permutations << std::endl;
+				std::cerr << "initial_distance : " << initial_distance << std::endl;
+				std::cerr << "counter : " << counter << std::endl;
+			}
 		}
 		return counter / (double)number_of_permutations;
 	}
