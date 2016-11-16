@@ -26,7 +26,9 @@
 #include <gudhi/Points_off_io.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Witness_complex.h>
-#include <gudhi/Landmark_choice_by_random_point.h>
+#include <gudhi/Construct_closest_landmark_table.h>
+#include <gudhi/pick_n_random_points.h>
+#include <gudhi/reader_utils.h>
 
 #include <iostream>
 #include <fstream>
@@ -36,6 +38,7 @@
 
 typedef std::vector< int > typeVectorVertex;
 typedef std::vector< std::vector <double> > Point_Vector;
+typedef Gudhi::Simplex_tree<> Simplex_tree;
 
 int main(int argc, char * const argv[]) {
   if (argc != 3) {
@@ -49,7 +52,7 @@ int main(int argc, char * const argv[]) {
   clock_t start, end;
 
   // Construct the Simplex Tree
-  Gudhi::Simplex_tree<> simplex_tree;
+  Simplex_tree simplex_tree;
 
   // Read the OFF file (input file name given as parameter) and triangulate points
   Gudhi::Points_off_reader<std::vector <double>> off_reader(off_file_name);
@@ -65,7 +68,9 @@ int main(int argc, char * const argv[]) {
   // Choose landmarks
   start = clock();
   std::vector<std::vector< int > > knn;
-  Gudhi::witness_complex::landmark_choice_by_random_point(point_vector, nbL, knn);
+  Point_Vector landmarks;
+  Gudhi::subsampling::pick_n_random_points(point_vector, 100, std::back_inserter(landmarks));
+  Gudhi::witness_complex::construct_closest_landmark_table<Simplex_tree::Filtration_value>(point_vector, landmarks, knn);
   end = clock();
   std::cout << "Landmark choice for " << nbL << " landmarks took "
       << static_cast<double>(end - start) / CLOCKS_PER_SEC << " s. \n";

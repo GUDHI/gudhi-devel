@@ -27,8 +27,8 @@
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Witness_complex.h>
-#include <gudhi/Landmark_choice_by_random_point.h>
-#include <gudhi/Landmark_choice_by_furthest_point.h>
+#include <gudhi/Construct_closest_landmark_table.h>
+#include <gudhi/pick_n_random_points.h>
 
 #include <iostream>
 #include <vector>
@@ -40,7 +40,7 @@ typedef Gudhi::witness_complex::Witness_complex<Simplex_tree> WitnessComplex;
 
 BOOST_AUTO_TEST_CASE(witness_complex_points) {
   std::vector< typeVectorVertex > knn;
-  std::vector< Point > points;
+  std::vector< Point > points, landmarks;
   // Add grid points as witnesses
   for (double i = 0; i < 10; i += 1.0)
     for (double j = 0; j < 10; j += 1.0)
@@ -50,15 +50,9 @@ BOOST_AUTO_TEST_CASE(witness_complex_points) {
   bool b_print_output = false;
   // First test: random choice
   Simplex_tree complex1;
-  Gudhi::witness_complex::landmark_choice_by_random_point(points, 100, knn);
+  Gudhi::subsampling::pick_n_random_points(points, 100, std::back_inserter(landmarks));
+  Gudhi::witness_complex::construct_closest_landmark_table<Simplex_tree::Filtration_value>(points, landmarks, knn);
   assert(!knn.empty());
   WitnessComplex witnessComplex1(knn, 100, 3, complex1);
   BOOST_CHECK(witnessComplex1.is_witness_complex(knn, b_print_output));
-
-  // Second test: furthest choice
-  knn.clear();
-  Simplex_tree complex2;
-  Gudhi::witness_complex::landmark_choice_by_furthest_point(points, 100, knn);
-  WitnessComplex witnessComplex2(knn, 100, 3, complex2);
-  BOOST_CHECK(witnessComplex2.is_witness_complex(knn, b_print_output));
 }
