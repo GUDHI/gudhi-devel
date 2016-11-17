@@ -4,7 +4,7 @@
  *
  *    Author(s):       Vincent Rouvreau
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Méditerranée (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -29,13 +29,12 @@
 #include <utility>
 #include <vector>
 
-using namespace Gudhi;
-using namespace Gudhi::persistent_cohomology;
-
-typedef std::vector< Vertex_handle > typeVectorVertex;
-typedef std::pair<typeVectorVertex, Filtration_value> typeSimplex;
-typedef std::pair< Simplex_tree<>::Simplex_handle, bool > typePairSimplexBool;
-typedef Simplex_tree<> typeST;
+// Types definition
+using Simplex_tree = Gudhi::Simplex_tree<>;
+using Filtration_value = Simplex_tree::Filtration_value;
+using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
+using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp >;
+using typeVectorVertex = std::vector< Simplex_tree::Vertex_handle >;
 
 void usage(char * const progName) {
   std::cerr << "Usage: " << progName << " coeff_field_characteristic[integer > 0] min_persistence[float >= -1.0]\n";
@@ -66,7 +65,7 @@ int main(int argc, char * const argv[]) {
   // TEST OF INSERTION
   std::cout << "********************************************************************" << std::endl;
   std::cout << "TEST OF INSERTION" << std::endl;
-  typeST st;
+  Simplex_tree st;
 
   // ++ FIRST
   std::cout << "   - INSERT (0,1,2)" << std::endl;
@@ -166,7 +165,7 @@ int main(int argc, char * const argv[]) {
   std::cout << "**************************************************************" << std::endl;
 
   // Compute the persistence diagram of the complex
-  persistent_cohomology::Persistent_cohomology< Simplex_tree<>, Field_Zp > pcoh(st);
+  Persistent_cohomology pcoh(st);
   // initializes the coefficient field for homology
   pcoh.init_coefficients(coeff_field_characteristic);
 

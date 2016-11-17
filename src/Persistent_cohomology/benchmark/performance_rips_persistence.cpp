@@ -20,20 +20,26 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gudhi/reader_utils.h>
-#include <gudhi/graph_simplicial_complex.h>
+#include <gudhi/Rips_complex.h>
 #include <gudhi/distance_functions.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Persistent_cohomology/Multi_field.h>
 #include <gudhi/Hasse_complex.h>
+#include <gudhi/Points_off_io.h>
 
 #include <chrono>
 #include <string>
 #include <vector>
 
-using namespace Gudhi;
-using namespace Gudhi::persistent_cohomology;
+// Types definition
+using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
+using Filtration_value = Simplex_tree::Filtration_value;
+using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
+using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
+using Multi_field = Gudhi::persistent_cohomology::Multi_field;
+using Point = std::vector<double>;
+using Points_off_reader = Gudhi::Points_off_reader<Point>;
 
 /* Compute the persistent homology of the complex cpx with coefficients in Z/pZ. */
 template< typename FilteredComplex>
@@ -66,33 +72,30 @@ int main(int argc, char * argv[]) {
   int elapsed_sec;
   {
 
-  std::string filepoints = "../../../data/points/Kl.txt";
+  std::string off_file_points = "Kl.off";
   Filtration_value threshold = 0.27;
   int dim_max = 3;
   int p = 2;
   int q = 1223;
 
-  // Extract the points from the file filepoints
-  typedef std::vector<double> Point_t;
-  std::vector< Point_t > points;
-  read_points(filepoints, points);
+  // Extract the points from the file off_file_points
+  Points_off_reader off_reader(off_file_points);
 
   // Compute the proximity graph of the points
   start = std::chrono::system_clock::now();
-  Graph_t prox_graph = compute_proximity_graph(points, threshold
-                                               , euclidean_distance<Point_t>);
+  Rips_complex rips_complex_from_file(off_reader.get_point_cloud(), threshold,
+                                      euclidean_distance<Filtration_value, Point>);
   end = std::chrono::system_clock::now();
   elapsed_sec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
   std::cout << "Compute Rips graph in " << elapsed_sec << " ms.\n";
 
   // Construct the Rips complex in a Simplex Tree
-  Simplex_tree<Simplex_tree_options_fast_persistence> st;
+  Simplex_tree st;
   start = std::chrono::system_clock::now();
 
   // insert the proximity graph in the simplex tree
-  st.insert_graph(prox_graph);
   // expand the graph until dimension dim_max
-  st.expansion(dim_max);
+  rips_complex_from_file.create_complex(st, dim_max);
 
   end = std::chrono::system_clock::now();
   elapsed_sec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
@@ -120,7 +123,7 @@ int main(int argc, char * argv[]) {
 
   // Convert the simplex tree into a hasse diagram
   start = std::chrono::system_clock::now();
-  Hasse_complex<> hcpx(st);
+  Gudhi::Hasse_complex<> hcpx(st);
   end = std::chrono::system_clock::now();
   elapsed_sec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
   std::cout << "Convert the simplex tree into a Hasse diagram in " << elapsed_sec << " ms.\n";
@@ -152,7 +155,7 @@ timing_persistence(FilteredComplex & cpx
   int elapsed_sec;
   {
   start = std::chrono::system_clock::now();
-  Persistent_cohomology< FilteredComplex, Field_Zp > pcoh(cpx);
+  Gudhi::persistent_cohomology::Persistent_cohomology< FilteredComplex, Field_Zp > pcoh(cpx);
   end = std::chrono::system_clock::now();
   elapsed_sec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
   std::cout << "  Initialize pcoh in " << elapsed_sec << " ms.\n";
@@ -186,7 +189,7 @@ timing_persistence(FilteredComplex & cpx
   int elapsed_sec;
   {
   start = std::chrono::system_clock::now();
-  Persistent_cohomology< FilteredComplex, Multi_field > pcoh(cpx);
+  Gudhi::persistent_cohomology::Persistent_cohomology< FilteredComplex, Multi_field > pcoh(cpx);
   end = std::chrono::system_clock::now();
   elapsed_sec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
   std::cout << "  Initialize pcoh in " << elapsed_sec << " ms.\n";

@@ -4,7 +4,7 @@
  *
  *    Author(s):       Siargey Kachanovich
  *
- *    Copyright (C) 2015  INRIA Sophia Antipolis-Méditerranée (France)
+ *    Copyright (C) 2015  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -51,7 +51,8 @@ namespace witness_complex {
    *  Closest_landmark_range needs to have push_back operation.
    */
 
-  template <typename WitnessContainer,
+  template <typename FiltrationValue,
+            typename WitnessContainer,
             typename LandmarkContainer,
             typename KNearestNeighbours>
   void construct_closest_landmark_table(WitnessContainer const &points,
@@ -72,7 +73,8 @@ namespace witness_complex {
       int landmarks_i = 0;
       for (landmarks_it = landmarks.begin(), landmarks_i = 0; landmarks_it != landmarks.end();
            ++landmarks_it, landmarks_i++) {
-        dist_i dist = std::make_pair(euclidean_distance(points[points_i], *landmarks_it), landmarks_i);
+        dist_i dist = std::make_pair(euclidean_distance<FiltrationValue>(points[points_i], *landmarks_it),
+                                     landmarks_i);
         l_heap.push(dist);
       }
       for (int i = 0; i < dim + 1; i++) {

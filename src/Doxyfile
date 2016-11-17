@@ -846,6 +846,7 @@ IMAGE_PATH             = doc/Skeleton_blocker/ \
 	doc/Persistent_cohomology/ \
 	doc/Witness_complex/ \
 	doc/Bitmap_cubical_complex/ \
+	doc/Rips_complex/ \
 	doc/Subsampling/ \
 	doc/Spatial_searching/ \
 	doc/Tangential_complex/
