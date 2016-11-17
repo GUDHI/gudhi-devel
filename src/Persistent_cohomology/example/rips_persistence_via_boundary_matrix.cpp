@@ -4,8 +4,7 @@
  *
  *    Author(s):       Clément Maria, Marc Glisse
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Méditerranée (France),
- *                  2015  INRIA Saclay Île de France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by

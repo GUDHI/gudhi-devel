@@ -34,8 +34,8 @@
 #include <vector>
 
 typedef std::vector<double> Point;
-typedef std::vector< int > typeVectorVertex;
 typedef Gudhi::Simplex_tree<> Simplex_tree;
+typedef std::vector< Simplex_tree::Vertex_handle > typeVectorVertex;
 typedef Gudhi::witness_complex::Witness_complex<Simplex_tree> WitnessComplex;
 
 BOOST_AUTO_TEST_CASE(witness_complex_points) {

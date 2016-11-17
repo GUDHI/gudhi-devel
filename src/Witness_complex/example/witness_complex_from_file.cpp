@@ -4,7 +4,7 @@
  *
  *    Author(s):       Siargey Kachanovich
  *
- *    Copyright (C) 2015  INRIA Sophia Antipolis-Méditerranée (France)
+ *    Copyright (C) 2015  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -36,9 +36,9 @@
 #include <string>
 #include <vector>
 
-typedef std::vector< int > typeVectorVertex;
-typedef std::vector< std::vector <double> > Point_Vector;
 typedef Gudhi::Simplex_tree<> Simplex_tree;
+typedef std::vector< Simplex_tree::Vertex_handle > typeVectorVertex;
+typedef std::vector< std::vector <double> > Point_Vector;
 
 int main(int argc, char * const argv[]) {
   if (argc != 3) {

@@ -11,7 +11,8 @@
 #include <string>
 #include <limits>  // for numeric_limits
 
-using Filtration_value = double;
+using Simplex_tree = Gudhi::Simplex_tree<>;
+using Filtration_value = Simplex_tree::Filtration_value;
 
 void program_options(int argc, char * argv[]
                      , std::string & off_file_points
@@ -36,7 +37,7 @@ int main(int argc, char **argv) {
   using Kernel = CGAL::Epick_d< CGAL::Dynamic_dimension_tag >;
   Gudhi::alpha_complex::Alpha_complex<Kernel> alpha_complex_from_file(off_file_points);
 
-  Gudhi::Simplex_tree<> simplex;
+  Simplex_tree simplex;
   if (alpha_complex_from_file.create_complex(simplex, alpha_square_max_value)) {
     // ----------------------------------------------------------------------------
     // Display information about the alpha complex
@@ -50,7 +51,7 @@ int main(int argc, char **argv) {
 
     std::cout << "Simplex_tree dim: " << simplex.dimension() << std::endl;
     // Compute the persistence diagram of the complex
-    Gudhi::persistent_cohomology::Persistent_cohomology< Gudhi::Simplex_tree<>,
+    Gudhi::persistent_cohomology::Persistent_cohomology< Simplex_tree,
         Gudhi::persistent_cohomology::Field_Zp > pcoh(simplex);
     // initializes the coefficient field for homology
     pcoh.init_coefficients(coeff_field_characteristic);

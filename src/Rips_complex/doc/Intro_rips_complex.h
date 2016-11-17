@@ -2,9 +2,9 @@
  *    (Geometric Understanding in Higher Dimensions) is a generic C++
  *    library for computational topology.
  *
- *    Author(s):       Clément Maria & Vincent Rouvreau
+ *    Author(s):       Clément Maria, Vincent Rouvreau
  *
- *    Copyright (C) 2015  INRIA
+ *    Copyright (C) 2016  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ namespace rips_complex {
 
 /**  \defgroup rips_complex Rips complex
  * 
- * \author    Clément Maria and Vincent Rouvreau
+ * \author    Clément Maria, Vincent Rouvreau
  * 
  * @{
  * 

@@ -2,7 +2,7 @@
  *    (Geometric Understanding in Higher Dimensions) is a generic C++
  *    library for computational topology.
  *
- *    Author(s):       Clément Maria & Vincent Rouvreau
+ *    Author(s):       Clément Maria, Vincent Rouvreau
  *
  *    Copyright (C) 2016  INRIA
  *
