@@ -337,7 +337,9 @@ make \endverbatim
  * @example Skeleton_blocker/Skeleton_blocker_from_simplices.cpp
  * @example Skeleton_blocker/Skeleton_blocker_iteration.cpp
  * @example Skeleton_blocker/Skeleton_blocker_link.cpp
- * @example Witness_complex/witness_complex_from_file.cpp
- * @example Witness_complex/witness_complex_sphere.cpp
+ * @example Witness_complex/example_strong_witness_persistence.cpp
+ * @example Witness_complex/example_witness_complex_off.cpp
+ * @example Witness_complex/example_witness_complex_persistence.cpp
+ * @example Witness_complex/example_witness_complex_sphere.cpp
  */
 
