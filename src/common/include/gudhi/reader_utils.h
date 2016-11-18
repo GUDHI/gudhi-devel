@@ -2,9 +2,9 @@
  *    (Geometric Understanding in Higher Dimensions) is a generic C++ 
  *    library for computational topology.
  *
- *    Author(s):       Clément Maria
+ *    Author(s):       Clement Maria, Pawel Dlotko
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Méditerranée (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -195,5 +195,96 @@ bool read_hasse_simplex(std::istream & in_, std::vector< Simplex_key > & boundar
   in_ >> fil;
   return true;
 }
+
+/**
+ * \brief Read a lower triangular distance matrix from a csv file. We assume that the .csv store the whole
+ * (square) matrix.
+ * 
+ * \author Pawel Dlotko
+ *
+ * Square matrix file format:
+ * 0;D12;...;D1j
+ * D21;0;...;D2j
+ * ...
+ * Dj1;Dj2;...;0
+ *
+ * lower matrix file format:
+ * 0
+ * D21;
+ * D31;D32;
+ * ...
+ * Dj1;Dj2;...;Dj(j-1);
+ *
+ **/
+template< typename Filtration_value >
+std::vector< std::vector< Filtration_value > > read_lower_triangular_matrix_from_csv_file(std::string filename,
+                                                                                          const char separator=';') {
+  bool dbg = true;
+  if (dbg) {
+    std::cerr << "Using procedure read_lower_triangular_matrix_from_csv_file \n";
+  }
+  std::vector< std::vector< Filtration_value > > result;
+  std::ifstream in;
+  in.open(filename.c_str());
+  if (!in.is_open()) {
+    return result;
+  }
+
+  std::string line;
+
+  // the first line is emtpy, so we ignore it:
+  std::getline(in, line);
+  std::vector< Filtration_value > values_in_this_line;
+  result.push_back(values_in_this_line);
+
+  int number_of_line = 0;
+
+  // first, read the file line by line to a string:
+  while (std::getline(in, line)) {
+    // if line is empty, break
+    if (line.size() == 0)
+      break;
+
+    // if the last element of a string is comma:
+    if (line[ line.size() - 1 ] == separator) {
+      // then shrink the string by one
+      line.pop_back();
+    }
+
+    // replace all commas with spaces
+    std::replace(line.begin(), line.end(), separator, ' ');
+
+    // put the new line to a stream
+    std::istringstream iss(line);
+    // and now read the doubles.
+
+    int number_of_entry = 0;
+    std::vector< Filtration_value > values_in_this_line;
+    while (iss.good()) {
+      double entry;
+      iss >> entry;
+      if (number_of_entry <= number_of_line) {
+        values_in_this_line.push_back(entry);
+      }
+      ++number_of_entry;
+    }
+    if (!values_in_this_line.empty())result.push_back(values_in_this_line);
+    ++number_of_line;
+
+  }
+  in.close();
+
+  if (dbg) {
+    std::cerr << "Here is the matrix we read : \n";
+    for (size_t i = 0; i != result.size(); ++i) {
+      for (size_t j = 0; j != result[i].size(); ++j) {
+        std::cerr << result[i][j] << " ";
+      }
+      std::cerr << std::endl;
+    }
+  }
+
+  return result;
+}  // read_lower_triangular_matrix_from_csv_file
 
 #endif  // READER_UTILS_H_

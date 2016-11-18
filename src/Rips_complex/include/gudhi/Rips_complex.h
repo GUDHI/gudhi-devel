@@ -2,7 +2,7 @@
  *    (Geometric Understanding in Higher Dimensions) is a generic C++
  *    library for computational topology.
  *
- *    Author(s):       Clément Maria, Vincent Rouvreau
+ *    Author(s):       Clément Maria, Pawel Dlotko, Vincent Rouvreau
  *
  *    Copyright (C) 2016  INRIA
  *
@@ -58,12 +58,13 @@ template<typename Filtration_value>
 class Rips_complex {
  private:
   typedef typename boost::adjacency_list < boost::vecS, boost::vecS, boost::undirectedS
-      , boost::property < vertex_filtration_t, Filtration_value >
-      , boost::property < edge_filtration_t, Filtration_value >> Graph_t;
-  
+  , boost::property < vertex_filtration_t, Filtration_value >
+  , boost::property < edge_filtration_t, Filtration_value >> Graph_t;
+
   typedef int Vertex_handle;
-  
+
  public:
+
   /** \brief Rips_complex constructor from a list of points.
    *
    * @param[in] points Range of points.
@@ -72,47 +73,9 @@ class Rips_complex {
    * 
    * The type InputPointRange must be a range for which std::begin and std::end return input iterators on a point.
    */
-  template<typename InputPointRange, typename Point_d >
-  Rips_complex(const InputPointRange& points, Filtration_value threshold,
-               Filtration_value distance(const Point_d& p1,const Point_d& p2)) {
-    std::vector< std::pair< Vertex_handle, Vertex_handle > > edges;
-    std::vector< Filtration_value > edges_fil;
-    std::map< Vertex_handle, Filtration_value > vertices;
-
-    // Compute the proximity graph of the points.
-    // If points contains n elements, the proximity graph is the graph with n vertices, and an edge [u,v] iff the
-    // distance function between points u and v is smaller than threshold.
-    // --------------------------------------------------------------------------------------------
-    // Creates the vector of edges and its filtration values (returned by distance function)
-    Vertex_handle idx_u, idx_v;
-    Filtration_value fil;
-    idx_u = 0;
-    for (auto it_u = std::begin(points); it_u != std::end(points); ++it_u) {
-      idx_v = idx_u + 1;
-      for (auto it_v = it_u + 1; it_v != std::end(points); ++it_v, ++idx_v) {
-        fil = distance(*it_u, *it_v);
-        if (fil <= threshold) {
-          edges.emplace_back(idx_u, idx_v);
-          edges_fil.push_back(fil);
-        }
-      }
-      ++idx_u;
-    }
-
-    // --------------------------------------------------------------------------------------------
-    // Creates the proximity graph from edges and sets the property with the filtration value.
-    // Number of points is labeled from 0 to idx_u-1
-    rips_skeleton_graph_ = Graph_t(edges.begin() , edges.end() , edges_fil.begin() , idx_u);
-
-    auto vertex_prop = boost::get(vertex_filtration_t(), rips_skeleton_graph_);
-
-    using vertex_iterator = typename boost::graph_traits<Graph_t>::vertex_iterator;
-    vertex_iterator vi, vi_end;
-    for (std::tie(vi, vi_end) = boost::vertices(rips_skeleton_graph_);
-         vi != vi_end; ++vi) {
-      boost::put(vertex_prop, *vi, 0.);
-    }
-
+  template<typename InputPointRange, typename Distance >
+  Rips_complex(const InputPointRange& points, Filtration_value threshold, Distance distance) {
+    compute_proximity_graph<InputPointRange, Distance >(points, threshold, distance);
   }
 
   /** \brief Initializes the simplicial complex from the 1-skeleton graph and expands it until a given maximal
@@ -141,8 +104,62 @@ class Rips_complex {
     // --------------------------------------------------------------------------------------------
     return true;
   }
+
+ public:
+  /** \brief Output the proximity graph of the points.
+   *
+   * If points contains n elements, the proximity graph is the graph 
+   * with n vertices, and an edge [u,v] iff the distance function between 
+   * points u and v is smaller than threshold.
+   *
+   * The type PointCloud furnishes .begin() and .end() methods, that return
+   * iterators with value_type Point.
+   */
+  template< typename InputPointRange, typename Distance >
+  void compute_proximity_graph(const InputPointRange& points, Filtration_value threshold,
+               Distance distance) {
+    std::vector< std::pair< Vertex_handle, Vertex_handle > > edges;
+    std::vector< Filtration_value > edges_fil;
+    std::map< Vertex_handle, Filtration_value > vertices;
+
+    // Compute the proximity graph of the points.
+    // If points contains n elements, the proximity graph is the graph with n vertices, and an edge [u,v] iff the
+    // distance function between points u and v is smaller than threshold.
+    // --------------------------------------------------------------------------------------------
+    // Creates the vector of edges and its filtration values (returned by distance function)
+    Vertex_handle idx_u, idx_v;
+    Filtration_value fil;
+    idx_u = 0;
+    for (auto it_u = std::begin(points); it_u != std::end(points); ++it_u) {
+      idx_v = idx_u + 1;
+      for (auto it_v = it_u + 1; it_v != std::end(points); ++it_v, ++idx_v) {
+        fil = distance(*it_u, *it_v);
+        if (fil <= threshold) {
+          edges.emplace_back(idx_u, idx_v);
+          edges_fil.push_back(fil);
+        }
+      }
+      ++idx_u;
+    }
+
+    // --------------------------------------------------------------------------------------------
+    // Creates the proximity graph from edges and sets the property with the filtration value.
+    // Number of points is labeled from 0 to idx_u-1
+    rips_skeleton_graph_ = Graph_t(edges.begin(), edges.end(), edges_fil.begin(), idx_u);
+
+    auto vertex_prop = boost::get(vertex_filtration_t(), rips_skeleton_graph_);
+
+    using vertex_iterator = typename boost::graph_traits<Graph_t>::vertex_iterator;
+    vertex_iterator vi, vi_end;
+    for (std::tie(vi, vi_end) = boost::vertices(rips_skeleton_graph_);
+         vi != vi_end; ++vi) {
+      boost::put(vertex_prop, *vi, 0.);
+    }
+  }
+
  private:
   Graph_t rips_skeleton_graph_;
+
 };
 
 } // namespace rips_complex
