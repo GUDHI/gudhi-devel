@@ -60,7 +60,7 @@
 <table border="0">
   <tr>
     <td width="25%">
-      <b>Author:</b> Cl&eacute;ment Maria<br>
+      <b>Author:</b> Cl&eacute;ment Maria, Pawel Dlotko, Vincent Rouvreau<br>
       <b>Introduced in:</b> GUDHI 1.4.0<br>
       <b>Copyright:</b> GPL v3<br>
     </td>
@@ -68,6 +68,7 @@
     Rips_complex is a simplicial complex constructed from a one skeleton graph.<br>
     The filtration value of each edge is computed from a user-given distance function and is inserted until a
     user-given threshold value.<br>
+    This complex can be built from a point cloud and a distance function, or from a distance matrix.<br>
     <b>User manual:</b> \ref rips_complex - <b>Reference manual:</b> Gudhi::rips_complex::Rips_complex
     </td>
  </tr>

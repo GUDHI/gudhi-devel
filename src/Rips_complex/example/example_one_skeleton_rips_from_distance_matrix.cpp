@@ -20,24 +20,29 @@ int main(int argc, char **argv) {
   double threshold = atof(argv[1]);
 
   // Type definitions
-  using Point = std::vector<double>;
   using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
   using Filtration_value = Simplex_tree::Filtration_value;
   using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
+  using Distance_matrix = std::vector<std::vector<Filtration_value>>;
 
-  std::vector<Point> points;
-  points.push_back({1.0, 1.0});
-  points.push_back({7.0, 0.0});
-  points.push_back({4.0, 6.0});
-  points.push_back({9.0, 6.0});
-  points.push_back({0.0, 14.0});
-  points.push_back({2.0, 19.0});
-  points.push_back({9.0, 17.0});
+  // User defined distance matrix is:
+  // | 0    0.94 0.77 0.99 0.11  |
+  // | 0.94 0    0.26 0.99 0.39  |
+  // | 0.77 0.26 0    0.28 0.97  |
+  // | 0.99 0.99 0.28 0    0.30  |
+  // | 0.11 0.39 0.97 0.30 0     |
+
+  Distance_matrix distances;
+  distances.push_back({});
+  distances.push_back({0.94});
+  distances.push_back({0.77, 0.26});
+  distances.push_back({0.99, 0.99, 0.28});
+  distances.push_back({0.11, 0.39, 0.97, 0.30});
   
   // ----------------------------------------------------------------------------
   // Init of a rips complex from points
   // ----------------------------------------------------------------------------
-  Rips_complex rips_complex_from_points(points, threshold, euclidean_distance<Filtration_value, Point>);
+  Rips_complex rips_complex_from_points(distances, threshold);
 
   Simplex_tree simplex;
   if (rips_complex_from_points.create_complex(simplex, 1)) {

@@ -34,14 +34,20 @@
 #include <string>
 #include <vector>
 
+// Keep this file tag for Doxygen to parse the code, otherwise, functions are not documented.
+// It is required for global functions and variables.
+
+/** @file
+ * @brief This file includes common file reader for GUDHI
+ */
+
 /**
- * \brief Read a set of points to turn it
- * into a vector< vector<double> > by filling points
+ * @brief Read a set of points to turn it into a vector< vector<double> > by filling points.
  *
- * File format: 1 point per line
- * X11 X12 ... X1d 
- * X21 X22 ... X2d
- * etc
+ * File format: 1 point per line<br>
+ * X11 X12 ... X1d<br>
+ * X21 X22 ... X2d<br>
+ * etc<br>
  */
 inline void read_points(std::string file_name, std::vector< std::vector< double > > & points) {
   std::ifstream in_file(file_name.c_str(), std::ios::in);
@@ -66,12 +72,12 @@ inline void read_points(std::string file_name, std::vector< std::vector< double 
 }
 
 /**
- * \brief Read a graph from a file.
+ * @brief Read a graph from a file.
  *
- * File format: 1 simplex per line
- * Dim1 X11 X12 ... X1d Fil1 
- * Dim2 X21 X22 ... X2d Fil2
- * etc
+ * File format: 1 simplex per line<br>
+ * Dim1 X11 X12 ... X1d Fil1<br>
+ * Dim2 X21 X22 ... X2d Fil2<br>
+ * etc<br>
  *
  * The vertices must be labeled from 0 to n-1.
  * Every simplex must appear exactly once.
@@ -141,12 +147,12 @@ inline Graph_t read_graph(std::string file_name) {
 }
 
 /**
- * \brief Read a face from a file.
+ * @brief Read a face from a file.
  *
- * File format: 1 simplex per line
- * Dim1 X11 X12 ... X1d Fil1 
- * Dim2 X21 X22 ... X2d Fil2
- * etc
+ * File format: 1 simplex per line<br>
+ * Dim1 X11 X12 ... X1d Fil1<br>
+ * Dim2 X21 X22 ... X2d Fil2<br>
+ * etc<br>
  *
  * The vertices must be labeled from 0 to n-1.
  * Every simplex must appear exactly once.
@@ -167,18 +173,16 @@ bool read_simplex(std::istream & in_, std::vector< Vertex_handle > & simplex, Fi
 }
 
 /**
- * \brief Read a hasse simplex from a file.
+ * @brief Read a hasse simplex from a file.
  *
- * File format: 1 simplex per line
- * Dim1 k11 k12 ... k1Dim1 Fil1 
- * Dim2 k21 k22 ... k2Dim2 Fil2
- * etc
+ * File format: 1 simplex per line<br>
+ * Dim1 k11 k12 ... k1Dim1 Fil1<br>
+ * Dim2 k21 k22 ... k2Dim2 Fil2<br>
+ * etc<br>
  *
- * The key of a simplex is its position in the filtration order
- * and also the number of its row in the file.
- * Dimi ki1 ki2 ... kiDimi Fili means that the ith simplex in the 
- * filtration has dimension Dimi, filtration value fil1 and simplices with 
- * key ki1 ... kiDimi in its boundary.*/
+ * The key of a simplex is its position in the filtration order and also the number of its row in the file.
+ * Dimi ki1 ki2 ... kiDimi Fili means that the ith simplex in the filtration has dimension Dimi, filtration value
+ * fil1 and simplices with key ki1 ... kiDimi in its boundary.*/
 template< typename Simplex_key, typename Filtration_value >
 bool read_hasse_simplex(std::istream & in_, std::vector< Simplex_key > & boundary, Filtration_value & fil) {
   int dim;
@@ -197,27 +201,27 @@ bool read_hasse_simplex(std::istream & in_, std::vector< Simplex_key > & boundar
 }
 
 /**
- * \brief Read a lower triangular distance matrix from a csv file. We assume that the .csv store the whole
+ * @brief Read a lower triangular distance matrix from a csv file. We assume that the .csv store the whole
  * (square) matrix.
  * 
- * \author Pawel Dlotko
+ * @author Pawel Dlotko
  *
- * Square matrix file format:
- * 0;D12;...;D1j
- * D21;0;...;D2j
- * ...
- * Dj1;Dj2;...;0
+ * Square matrix file format:<br>
+ * 0;D12;...;D1j<br>
+ * D21;0;...;D2j<br>
+ * ...<br>
+ * Dj1;Dj2;...;0<br>
  *
- * lower matrix file format:
- * 0
- * D21;
- * D31;D32;
- * ...
- * Dj1;Dj2;...;Dj(j-1);
+ * lower matrix file format:<br>
+ * 0<br>
+ * D21;<br>
+ * D31;D32;<br>
+ * ...<br>
+ * Dj1;Dj2;...;Dj(j-1);<br>
  *
  **/
 template< typename Filtration_value >
-std::vector< std::vector< Filtration_value > > read_lower_triangular_matrix_from_csv_file(std::string filename,
+std::vector< std::vector< Filtration_value > > read_lower_triangular_matrix_from_csv_file(const std::string& filename,
                                                                                           const char separator=';') {
   bool dbg = false;
   if (dbg) {

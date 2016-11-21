@@ -4,7 +4,7 @@
  *
  *    Author(s):       Clément Maria
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Méditerranée (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -25,9 +25,12 @@
 
 #include <cmath>  // for std::sqrt
 
-/* Compute the Euclidean distance between two Points given
- * by a range of coordinates. The points are assumed to have 
- * the same dimension. */
+/** @file
+ * @brief Global distance functions
+ */
+
+/** @brief Compute the Euclidean distance between two Points given by a range of coordinates. The points are assumed to
+ * have the same dimension. */
 template< typename Filtration_value, typename Point >
 Filtration_value euclidean_distance(const Point &p1,const Point &p2) {
   Filtration_value dist = 0.;

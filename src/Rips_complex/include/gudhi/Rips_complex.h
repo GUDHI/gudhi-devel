@@ -78,6 +78,19 @@ class Rips_complex {
     compute_proximity_graph<InputPointRange, Distance >(points, threshold, distance);
   }
 
+  /** \brief Rips_complex constructor from a distance matrix.
+   *
+   * @param[in] distance_matrix Range of distances.
+   * @param[in] threshold rips value.
+   * 
+   * The type InputDistanceRange must be a range for which std::begin and std::end return input iterators on a point.
+   */
+  template<typename InputDistanceRange>
+  Rips_complex(const InputDistanceRange& distance_matrix, Filtration_value threshold) {
+    compute_proximity_graph(boost::irange((size_t)0,distance_matrix.size()), threshold,
+                            [&](size_t i, size_t j){return distance_matrix[j][i];});
+  }
+
   /** \brief Initializes the simplicial complex from the 1-skeleton graph and expands it until a given maximal
    * dimension.
    *

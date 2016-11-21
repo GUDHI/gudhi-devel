@@ -2,7 +2,7 @@
  *    (Geometric Understanding in Higher Dimensions) is a generic C++
  *    library for computational topology.
  *
- *    Author(s):       Clément Maria, Vincent Rouvreau
+ *    Author(s):       Clément Maria, Pawel Dlotko, Vincent Rouvreau
  *
  *    Copyright (C) 2016  INRIA
  *
@@ -29,7 +29,7 @@ namespace rips_complex {
 
 /**  \defgroup rips_complex Rips complex
  * 
- * \author    Clément Maria, Vincent Rouvreau
+ * \author    Clément Maria, Pawel Dlotko, Vincent Rouvreau
  * 
  * @{
  * 
@@ -54,7 +54,9 @@ namespace rips_complex {
  * value set with \f$max(filtration(4,5), filtration(4,6), filtration(5,6))\f$.
  * And so on for simplex (0,1,2,3).
  * 
- * \section ripspointsexample Example from points
+ * \section ripspointsdistance Point cloud and distance function
+ * 
+ * \subsection ripspointscloudexample Example from a point cloud and a distance function
  * 
  * This example builds the one skeleton graph from the given points, threshold value, and distance function.
  * Then it creates a `Simplex_tree` with it.
@@ -73,7 +75,7 @@ namespace rips_complex {
  * 
  * \include Rips_complex/one_skeleton_rips_points_for_doc.txt
  * 
- * \section ripsoffexample Example from OFF file
+ * \subsection ripsoffexample Example from OFF file
  * 
  * This example builds the one skeleton graph from the given points in an OFF file, threshold value, and distance
  * function.
@@ -92,6 +94,48 @@ namespace rips_complex {
  * the program output is:
  * 
  * \include Rips_complex/full_skeleton_rips_points_for_doc.txt
+ * 
+ * 
+ * 
+ * \section ripsdistancematrix Distance matrix
+ * 
+ * \subsection ripsdistancematrixexample Example from a distance matrix
+ * 
+ * This example builds the one skeleton graph from the given distance matrix and threshold value.
+ * Then it creates a `Simplex_tree` with it.
+ * 
+ * Then, it is asked to display information about the simplicial complex.
+ * 
+ * \include Rips_complex/example_one_skeleton_rips_from_distance_matrix.cpp
+ * 
+ * When launching (rips maximal distance between 2 points is 1.0, is expanded until dimension 1 - one skeleton graph
+ * with other words):
+ * 
+ * \code $> ./oneskeletonripsdistance 1.0
+ * \endcode
+ *
+ * the program output is:
+ * 
+ * \include Rips_complex/one_skeleton_rips_distance_for_doc.txt
+ * 
+ * \subsection ripscsvdistanceexample Example from a distance matrix read in a csv file
+ * 
+ * This example builds the one skeleton graph from the given distance matrix read in a csv file and threshold value.
+ * Then it creates a `Simplex_tree` with it.
+ * 
+ * 
+ * Then, it is asked to display information about the rips complex.
+ * 
+ * \include Rips_complex/example_rips_complex_from_csv_distance_matrix_file.cpp
+ * 
+ * When launching:
+ * 
+ * \code $> ./ripscsvdistancereader ../../data/distance_matrix/full_square_distance_matrix.csv 1.0 3
+ * \endcode
+ *
+ * the program output is:
+ * 
+ * \include Rips_complex/full_skeleton_rips_distance_for_doc.txt
  * 
  * \copyright GNU General Public License v3.                         
  * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
