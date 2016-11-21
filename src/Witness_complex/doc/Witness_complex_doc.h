@@ -34,7 +34,7 @@
 
    which leads to definitions of **weak relaxed witness complex** (or just relaxed witness complex for short) and **strong relaxed witness complex** respectively.
 
-   \image html "swit.svg" "Strong witness witnesses the whole simplex in the witnessing ball"
+   \image html "swit.svg" "Strongly witnessed simplex"
 
    In particular case of 0-relaxation, weak complex corresponds to **witness complex** introduced in \cite de2004topological, whereas 0-relaxed strong witness complex consists of just vertices and is not very interesting.
    Hence for small relaxation weak version is preferable.

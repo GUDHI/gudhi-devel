@@ -21,7 +21,7 @@ typedef std::vector< Vertex_handle > typeVectorVertex;
 typedef std::vector< Point_d > Point_vector;
 
 int main(int argc, char * const argv[]) {
-  if (argc != 4) {
+  if (argc != 5) {
     std::cerr << "Usage: " << argv[0]
         << " path_to_point_file number_of_landmarks max_squared_alpha limit_dimension\n";
     return 0;
