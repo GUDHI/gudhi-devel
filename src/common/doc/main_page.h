@@ -313,6 +313,8 @@ make \endverbatim
  * Persistent_cohomology/persistence_from_simple_simplex_tree.cpp</a>
  * \li <a href="_persistent_cohomology_2plain_homology_8cpp-example.html">
  * Persistent_cohomology/plain_homology.cpp</a>
+ * \li <a href="_persistent_cohomology_2rips_distance_matrix_persistence_8cpp-example.html">
+ * Persistent_cohomology/rips_distance_matrix_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2rips_multifield_persistence_8cpp-example.html">
  * Persistent_cohomology/rips_multifield_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2rips_persistence_8cpp-example.html">
@@ -364,6 +366,7 @@ make \endverbatim
  * @example Persistent_cohomology/persistence_from_simple_simplex_tree.cpp
  * @example Persistent_cohomology/plain_homology.cpp
  * @example Persistent_cohomology/rips_multifield_persistence.cpp
+ * @example Persistent_cohomology/rips_distance_matrix_persistence.cpp
  * @example Persistent_cohomology/rips_persistence.cpp
  * @example Persistent_cohomology/custom_persistence_sort.cpp
  * @example Rips_complex/example_one_skeleton_rips_from_points.cpp
