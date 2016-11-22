@@ -73,7 +73,7 @@ namespace rips_complex {
  *
  * the program output is:
  * 
- * \include Rips_complex/one_skeleton_rips_points_for_doc.txt
+ * \include Rips_complex/one_skeleton_rips_for_doc.txt
  * 
  * \subsection ripsoffexample Example from OFF file
  * 
@@ -93,7 +93,7 @@ namespace rips_complex {
  *
  * the program output is:
  * 
- * \include Rips_complex/full_skeleton_rips_points_for_doc.txt
+ * \include Rips_complex/full_skeleton_rips_for_doc.txt
  * 
  * 
  * 
@@ -116,7 +116,7 @@ namespace rips_complex {
  *
  * the program output is:
  * 
- * \include Rips_complex/one_skeleton_rips_distance_for_doc.txt
+ * \include Rips_complex/one_skeleton_rips_for_doc.txt
  * 
  * \subsection ripscsvdistanceexample Example from a distance matrix read in a csv file
  * 
@@ -135,7 +135,7 @@ namespace rips_complex {
  *
  * the program output is:
  * 
- * \include Rips_complex/full_skeleton_rips_distance_for_doc.txt
+ * \include Rips_complex/full_skeleton_rips_for_doc.txt
  * 
  * \copyright GNU General Public License v3.                         
  * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim

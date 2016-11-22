@@ -2,9 +2,9 @@
  *    (Geometric Understanding in Higher Dimensions) is a generic C++ 
  *    library for computational topology.
  *
- *    Author(s):       Clément Maria
+ *    Author(s):       Pawel Dlotko, Vincent Rouvreau
  *
- *    Copyright (C) 2014  INRIA
+ *    Copyright (C) 2016  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -21,11 +21,9 @@
  */
 
 #include <gudhi/Rips_complex.h>
-#include <gudhi/graph_simplicial_complex.h>
-#include <gudhi/distance_functions.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
-#include <gudhi/Points_off_io.h>
+#include <gudhi/reader_utils.h>
 
 #include <boost/program_options.hpp>
 
@@ -39,11 +37,10 @@ using Filtration_value = Simplex_tree::Filtration_value;
 using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp >;
-using Point = std::vector<double>;
-using Points_off_reader = Gudhi::Points_off_reader<Point>;
+using Distance_matrix = std::vector<std::vector<Filtration_value>>;
 
 void program_options(int argc, char * argv[]
-                     , std::string & off_file_points
+                     , std::string & csv_matrix_file
                      , std::string & filediag
                      , Filtration_value & threshold
                      , int & dim_max
@@ -51,18 +48,17 @@ void program_options(int argc, char * argv[]
                      , Filtration_value & min_persistence);
 
 int main(int argc, char * argv[]) {
-  std::string off_file_points;
+  std::string csv_matrix_file;
   std::string filediag;
   Filtration_value threshold;
   int dim_max;
   int p;
   Filtration_value min_persistence;
 
-  program_options(argc, argv, off_file_points, filediag, threshold, dim_max, p, min_persistence);
+  program_options(argc, argv, csv_matrix_file, filediag, threshold, dim_max, p, min_persistence);
 
-  Points_off_reader off_reader(off_file_points);
-  Rips_complex rips_complex_from_file(off_reader.get_point_cloud(), threshold,
-                                      euclidean_distance<Filtration_value, Point>);
+  Distance_matrix distances = read_lower_triangular_matrix_from_csv_file<Filtration_value>(csv_matrix_file);
+  Rips_complex rips_complex_from_file(distances, threshold);
 
   // Construct the Rips complex in a Simplex Tree
   Simplex_tree simplex_tree;
@@ -94,7 +90,7 @@ int main(int argc, char * argv[]) {
 }
 
 void program_options(int argc, char * argv[]
-                     , std::string & off_file_points
+                     , std::string & csv_matrix_file
                      , std::string & filediag
                      , Filtration_value & threshold
                      , int & dim_max
@@ -103,8 +99,8 @@ void program_options(int argc, char * argv[]
   namespace po = boost::program_options;
   po::options_description hidden("Hidden options");
   hidden.add_options()
-      ("input-file", po::value<std::string>(&off_file_points),
-       "Name of an OFF file containing a point set.\n");
+      ("input-file", po::value<std::string>(&csv_matrix_file),
+       "Name of file containing a distance matrix. Can be square or lower triangular matrix. Separator is ';'.");
 
   po::options_description visible("Allowed options", 100);
   visible.add_options()
@@ -135,7 +131,7 @@ void program_options(int argc, char * argv[]
   if (vm.count("help") || !vm.count("input-file")) {
     std::cout << std::endl;
     std::cout << "Compute the persistent homology with coefficient field Z/pZ \n";
-    std::cout << "of a Rips complex defined on a set of input points.\n \n";
+    std::cout << "of a Rips complex defined on a set of distance matrix.\n \n";
     std::cout << "The output diagram contains one bar per line, written with the convention: \n";
     std::cout << "   p   dim b d \n";
     std::cout << "where dim is the dimension of the homological feature,\n";

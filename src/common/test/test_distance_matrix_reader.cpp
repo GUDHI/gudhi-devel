@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE( full_square_distance_matrix )
     std::cout << std::endl;
   }
   std::cout << "from_full_square size = " << from_full_square.size() << std::endl;
-  BOOST_CHECK(from_full_square.size() == 5);
+  BOOST_CHECK(from_full_square.size() == 7);
   for (std::size_t i = 0; i < from_full_square.size(); i++) {
     std::cout << "from_full_square[" << i << "] size = " << from_full_square[i].size() << std::endl;
     BOOST_CHECK(from_full_square[i].size() == i);

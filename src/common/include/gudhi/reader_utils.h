@@ -223,10 +223,9 @@ bool read_hasse_simplex(std::istream & in_, std::vector< Simplex_key > & boundar
 template< typename Filtration_value >
 std::vector< std::vector< Filtration_value > > read_lower_triangular_matrix_from_csv_file(const std::string& filename,
                                                                                           const char separator=';') {
-  bool dbg = false;
-  if (dbg) {
-    std::cerr << "Using procedure read_lower_triangular_matrix_from_csv_file \n";
-  }
+#ifdef DEBUG_TRACES
+  std::cout << "Using procedure read_lower_triangular_matrix_from_csv_file \n";
+#endif  // DEBUG_TRACES
   std::vector< std::vector< Filtration_value > > result;
   std::ifstream in;
   in.open(filename.c_str());
@@ -278,15 +277,15 @@ std::vector< std::vector< Filtration_value > > read_lower_triangular_matrix_from
   }
   in.close();
 
-  if (dbg) {
-    std::cerr << "Here is the matrix we read : \n";
-    for (size_t i = 0; i != result.size(); ++i) {
-      for (size_t j = 0; j != result[i].size(); ++j) {
-        std::cerr << result[i][j] << " ";
-      }
-      std::cerr << std::endl;
+#ifdef DEBUG_TRACES
+  std::cerr << "Here is the matrix we read : \n";
+  for (size_t i = 0; i != result.size(); ++i) {
+    for (size_t j = 0; j != result[i].size(); ++j) {
+      std::cerr << result[i][j] << " ";
     }
+    std::cerr << std::endl;
   }
+#endif  // DEBUG_TRACES
 
   return result;
 }  // read_lower_triangular_matrix_from_csv_file
