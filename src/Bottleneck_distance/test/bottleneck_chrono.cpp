@@ -23,6 +23,7 @@
 #include <gudhi/Graph_matching.h>
 #include <chrono>
 #include <fstream>
+#include <random>
 
 using namespace Gudhi::bottleneck_distance;
 
