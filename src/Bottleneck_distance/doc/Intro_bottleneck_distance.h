@@ -37,10 +37,10 @@ namespace bottleneck_distance {
  * 
  * Bottleneck distance measures the similarity between two persistence diagrams. 
  * It's the shortest distance b for which there exists a perfect matching between 
- * the points of the two diagrams (+ all the diagonal points) such that 
+ * the points of the two diagrams (and also all the points of the diagonal) such that
  * any couple of matched points are at distance at most b.
  *
- * \image html perturb_pd.png Bottleneck distance is the length of the longest edge.
+ * \image html perturb_pd.png Bottleneck distance is the length of the longest edge on this picture.
  *
  */
 /** @} */  // end defgroup bottleneck_distance

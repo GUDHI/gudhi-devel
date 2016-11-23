@@ -20,7 +20,7 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gudhi/Graph_matching.h>
+#include <gudhi/Bottleneck.h>
 #include <chrono>
 #include <fstream>
 #include <random>

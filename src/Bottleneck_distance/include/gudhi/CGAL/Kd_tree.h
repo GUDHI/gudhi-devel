@@ -21,7 +21,7 @@
 #ifndef CGAL_KD_TREE_H
 #define CGAL_KD_TREE_H
 
-#include "CGAL/Kd_tree_node.h"
+#include "Kd_tree_node.h"
 
 #include <CGAL/basic.h>
 #include <CGAL/assertions.h>

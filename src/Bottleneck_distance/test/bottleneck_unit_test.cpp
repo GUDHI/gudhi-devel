@@ -26,7 +26,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <random>
-#include <gudhi/Graph_matching.h>
+#include <gudhi/Bottleneck.h>
 
 using namespace Gudhi::bottleneck_distance;
 

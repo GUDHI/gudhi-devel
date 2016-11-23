@@ -22,7 +22,7 @@
 
 #define CGAL_HAS_THREADS
 
-#include <gudhi/Graph_matching.h>
+#include <gudhi/Bottleneck.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
