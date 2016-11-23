@@ -21,9 +21,10 @@
  */
 
 
-#define BOOST_TEST_MODULE bottleneck test
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE "bottleneck distance"
+#include <boost/test/unit_test.hpp>
 
-#include <boost/test/included/unit_test.hpp>
 #include <random>
 #include <gudhi/Graph_matching.h>
 
