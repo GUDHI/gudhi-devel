@@ -23,9 +23,6 @@
 #ifndef PLANAR_NEIGHBORS_FINDER_H_
 #define PLANAR_NEIGHBORS_FINDER_H_
 
-#include <list>
-#include <map>
-
 // Inclusion order is important for CGAL patch
 #include "CGAL/Kd_tree_node.h"
 #include "CGAL/Kd_tree.h"
@@ -62,7 +59,7 @@ public:
     /** \internal \brief Provide and remove a V point near to the U point given as parameter, null_point_index() if there isn't such a point. */
     int pull_near(int u_point_index);
     /** \internal \brief Provide and remove all the V points near to the U point given as parameter. */
-    virtual std::shared_ptr< std::list<int> > pull_all_near(int u_point_index);
+    std::vector<int> pull_all_near(int u_point_index);
 
 private:
     double r;
@@ -91,7 +88,7 @@ public:
     /** \internal \brief Provide a V point near to the U point given as parameter, null_point_index() if there isn't such a point. */
     int pull_near(int u_point_index);
     /** \internal \brief Provide and remove all the V points near to the U point given as parameter. */
-    virtual std::shared_ptr< std::list<int> > pull_all_near(int u_point_index);
+    virtual std::vector<int> pull_all_near(int u_point_index);
 
 private:
     double r;
@@ -148,8 +145,8 @@ inline int Naive_pnf::pull_near(int u_point_index) {
     return null_point_index();
 }
 
-inline std::shared_ptr< std::list<int> > Naive_pnf::pull_all_near(int u_point_index) {
-    std::shared_ptr< std::list<int> > all_pull(new std::list<int>);
+inline std::vector<int> Naive_pnf::pull_all_near(int u_point_index) {
+    std::vector<int> all_pull;
     Internal_point u_point = G::get_u_point(u_point_index);
     int i0 = static_cast<int>(u_point.x()/r);
     int j0 = static_cast<int>(u_point.y()/r);
@@ -157,7 +154,7 @@ inline std::shared_ptr< std::list<int> > Naive_pnf::pull_all_near(int u_point_in
         for(int j = 1; j<= 3; j++)
             for(auto it = grid.find(std::make_pair(i0 +(i%3)-1, j0+(j%3)-1)); it!=grid.end();)
                 if (G::distance(u_point_index, it->second) <= r) {
-                    all_pull->emplace_back(it->second);
+                    all_pull.emplace_back(it->second);
                     it = grid.erase(it);
                 }
                 else it++;
@@ -206,11 +203,11 @@ inline int Cgal_pnf::pull_near(int u_point_index){
     return tmp;
 }
 
-inline std::shared_ptr< std::list<int> > Cgal_pnf::pull_all_near(int u_point_index) {
-    std::shared_ptr< std::list<int> > all_pull(new std::list<int>);
+inline std::vector<int> Cgal_pnf::pull_all_near(int u_point_index) {
+    std::vector<int> all_pull;
     int last_pull = pull_near(u_point_index);
     while (last_pull != null_point_index()) {
-        all_pull->emplace_back(last_pull);
+        all_pull.emplace_back(last_pull);
         last_pull = pull_near(u_point_index);
     }
     return all_pull;

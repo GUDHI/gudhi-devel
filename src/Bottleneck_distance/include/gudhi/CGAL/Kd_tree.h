@@ -28,7 +28,6 @@
 #include <vector>
 
 #include <CGAL/algorithm.h>
-#include <CGAL/Splitters.h>
 #include <CGAL/internal/Get_dimension_tag.h>
 #include <CGAL/Search_traits.h>
 

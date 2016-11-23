@@ -46,7 +46,7 @@ public:
     /** \internal \brief Returns and remove a V point near to the U point given as parameter, null_point_index() if there isn't such a point. */
     int pull_near(int u_point_index);
     /** \internal \brief Returns and remove all the V points near to the U point given as parameter. */
-    std::shared_ptr< std::list<int> > pull_all_near(int u_point_index);
+    std::vector<int> pull_all_near(int u_point_index);
 
 private:
     const double r;
@@ -118,11 +118,11 @@ inline int Neighbors_finder::pull_near(int u_point_index) {
     return tmp;
 }
 
-inline std::shared_ptr< std::list<int> > Neighbors_finder::pull_all_near(int u_point_index) {
-    std::shared_ptr< std::list<int> > all_pull(planar_neighbors_f.pull_all_near(u_point_index));
+inline std::vector<int> Neighbors_finder::pull_all_near(int u_point_index) {
+    std::vector<int> all_pull(planar_neighbors_f.pull_all_near(u_point_index));
     int last_pull = pull_near(u_point_index);
     while (last_pull != null_point_index()) {
-        all_pull->emplace_back(last_pull);
+        all_pull.emplace_back(last_pull);
         last_pull = pull_near(u_point_index);
     }
     return all_pull;

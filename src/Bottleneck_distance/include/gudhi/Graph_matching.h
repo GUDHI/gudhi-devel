@@ -23,8 +23,6 @@
 #ifndef GRAPH_MATCHING_H_
 #define GRAPH_MATCHING_H_
 
-#include <deque>
-
 #include <gudhi/Neighbors_finder.h>
 
 namespace Gudhi {
@@ -56,11 +54,11 @@ private:
     std::list<int> unmatched_in_u;
 
     /** \internal \brief Provides a Layered_neighbors_finder dividing the graph in layers. Basically a BFS. */
-    std::shared_ptr<Layered_neighbors_finder> layering() const;
+    Layered_neighbors_finder layering() const;
     /** \internal \brief Augments the matching with a simple path no longer than max_depth. Basically a DFS. */
     bool augment(Layered_neighbors_finder & layered_nf, int u_start_index, int max_depth);
     /** \internal \brief Update the matching with the simple augmenting path given as parameter. */
-    void update(std::deque<int> & path);
+    void update(std::vector<int> & path);
 };
 
 inline Graph_matching::Graph_matching()
@@ -83,7 +81,7 @@ inline bool Graph_matching::perfect() const {
 inline bool Graph_matching::multi_augment() {
     if (perfect())
         return false;
-    Layered_neighbors_finder layered_nf = *layering();
+    Layered_neighbors_finder layered_nf(layering());
     int max_depth = layered_nf.vlayers_number()*2 - 1;
     double rn = sqrt(G::size());
     // verification of a necessary criterion in order to shortcut if possible
@@ -103,7 +101,7 @@ inline void Graph_matching::set_r(double r) {
 
 inline bool Graph_matching::augment(Layered_neighbors_finder & layered_nf, int u_start_index, int max_depth) {
     //V vertices have at most one successor, thus when we backtrack from U we can directly pop_back 2 vertices.
-    std::deque<int> path;
+    std::vector<int> path;
     path.emplace_back(u_start_index);
     do {
         if (static_cast<int>(path.size()) > max_depth) {
@@ -129,19 +127,19 @@ inline bool Graph_matching::augment(Layered_neighbors_finder & layered_nf, int u
     return true;
 }
 
-inline std::shared_ptr<Layered_neighbors_finder> Graph_matching::layering() const {
+inline Layered_neighbors_finder Graph_matching::layering() const {
     std::list<int> u_vertices(unmatched_in_u);
     std::list<int> v_vertices;
     Neighbors_finder nf(r);
     for (int v_point_index = 0; v_point_index < G::size(); ++v_point_index)
         nf.add(v_point_index);
-    std::shared_ptr<Layered_neighbors_finder> layered_nf(new Layered_neighbors_finder(r));
+    Layered_neighbors_finder layered_nf(r);
     for(int layer = 0; !u_vertices.empty(); layer++) {
         // one layer is one step in the BFS
         for (auto it1 = u_vertices.cbegin(); it1 != u_vertices.cend(); ++it1) {
-            std::shared_ptr<std::list<int>> u_succ(nf.pull_all_near(*it1));
-            for (auto it2 = u_succ->begin(); it2 != u_succ->end(); ++it2) {
-                layered_nf->add(*it2, layer);
+            std::vector<int> u_succ(nf.pull_all_near(*it1));
+            for (auto it2 = u_succ.begin(); it2 != u_succ.end(); ++it2) {
+                layered_nf.add(*it2, layer);
                 v_vertices.emplace_back(*it2);
             }
         }
@@ -162,7 +160,7 @@ inline std::shared_ptr<Layered_neighbors_finder> Graph_matching::layering() cons
     return layered_nf;
 }
 
-inline void Graph_matching::update(std::deque<int>& path) {
+inline void Graph_matching::update(std::vector<int>& path) {
     unmatched_in_u.remove(path.front());
     for (auto it = path.cbegin(); it != path.cend(); ++it) {
         // Be careful, the iterator is incremented twice each time

@@ -25,11 +25,6 @@
 
 #include <vector>
 #include <set>
-#include <cmath>
-#include <utility>
-#include <algorithm>
-#include <math.h>
-#include <memory>
 #include <gudhi/Internal_point.h>
 
 namespace Gudhi {
@@ -60,7 +55,7 @@ public:
     /** \internal \brief Returns size = |U| = |V|. */
     static int size();
     /** \internal \brief Returns the O(n^2) sorted distances between the points. */
-    static std::shared_ptr< std::vector<double> > sorted_distances();
+    static std::vector<double> sorted_distances();
     /** \internal \brief Returns an upper bound of the diameter of the convex hull */
     static double diameter();
 
@@ -126,15 +121,14 @@ inline int G::size() {
     return static_cast<int> (u.size() + v.size());
 }
 
-inline std::shared_ptr< std::vector<double> > G::sorted_distances() {
+inline std::vector<double> G::sorted_distances() {
     // could be optimized
     std::set<double> sorted_distances;
     sorted_distances.emplace(0.);
     for (int u_point_index = 0; u_point_index < size(); ++u_point_index)
         for (int v_point_index = 0; v_point_index < size(); ++v_point_index)
             sorted_distances.emplace(distance(u_point_index, v_point_index));
-    std::shared_ptr< std::vector<double> > sd_up(new std::vector<double>(sorted_distances.cbegin(), sorted_distances.cend()));
-    return sd_up;
+    return std::vector<double>(sorted_distances.begin(),sorted_distances.end());
 }
 
 inline Internal_point G::get_u_point(int u_point_index) {

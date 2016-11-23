@@ -43,16 +43,16 @@ double compute_exactly(const Persistence_diagram1& diag1, const Persistence_diag
 template<typename Persistence_diagram1, typename Persistence_diagram2>
 double compute_exactly(const Persistence_diagram1 &diag1, const Persistence_diagram2 &diag2) {
     G::initialize(diag1, diag2, 0.);
-    std::shared_ptr< std::vector<double> > sd(G::sorted_distances());
+    std::vector<double> sd(G::sorted_distances());
     int idmin = 0;
-    int idmax = sd->size() - 1;
+    int idmax = sd.size() - 1;
     // alpha can be modified, this will change the complexity
-    double alpha = pow(sd->size(), 0.25);
+    double alpha = pow(sd.size(), 0.25);
     Graph_matching m;
     Graph_matching biggest_unperfect;
     while (idmin != idmax) {
         int step = static_cast<int>((idmax - idmin) / alpha);
-        m.set_r(sd->at(idmin + step));
+        m.set_r(sd.at(idmin + step));
         while (m.multi_augment());
         //The above while compute a maximum matching (according to the r setted before)
         if (m.perfect()) {
@@ -63,7 +63,7 @@ double compute_exactly(const Persistence_diagram1 &diag1, const Persistence_diag
             idmin = idmin + step + 1;
         }
     }
-    return sd->at(idmin);
+    return sd.at(idmin);
 }
 
 template<typename Persistence_diagram1, typename Persistence_diagram2>
