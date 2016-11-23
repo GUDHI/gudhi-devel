@@ -45,22 +45,6 @@ struct Internal_point {
         return point_index==p.point_index;
     }
     bool  operator!=(const Internal_point& p) const { return ! (*this == p); }
-/* 
-Useless
-    friend void swap(Internal_point& a, Internal_point& b)
-    {
-        using std::swap;
-        double x_tmp = a.vec[0];
-        double y_tmp = a.vec[1];
-        int pi_tmp = a.point_index;
-        a.vec[0] = b.vec[0];
-        a.vec[1] = b.vec[1];
-        a.point_index = b.point_index;
-        b.vec[0] =  x_tmp;
-        b.vec[1] = y_tmp;
-        b.point_index = pi_tmp;
-    }
-*/
 };
 
 inline int null_point_index() {

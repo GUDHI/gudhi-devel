@@ -35,7 +35,7 @@
 #include <CGAL/Search_traits.h>
 
 #include <gudhi/Persistence_diagrams_graph.h>
-#include <gudhi/Miscellaneous.h>
+#include <gudhi/Construct_coord_iterator.h>
 
 
 namespace Gudhi {
