@@ -186,4 +186,5 @@ BOOST_AUTO_TEST_CASE(global){
             v2.emplace_back(std::max(a,b),std::max(a,b)+y);
     }
     BOOST_CHECK(compute(v1, v2) <= upper_bound/100.);
+    BOOST_CHECK(compute(v1, v2, upper_bound/1000.) <= upper_bound/100. + upper_bound/1000.);
 }

@@ -83,10 +83,10 @@ inline void G::initialize(const Persistence_diagram1 &diag1,
     v.clear();
     for (auto it = diag1.cbegin(); it != diag1.cend(); ++it)
         if (it->second - it->first > e)
-            u.push_back(Internal_point(it->first, it->second, u.size()));
+            u.push_back(Internal_point(std::get<0>(*it), std::get<1>(*it), u.size()));
     for (auto it = diag2.cbegin(); it != diag2.cend(); ++it)
         if (it->second - it->first > e)
-            v.push_back(Internal_point(it->first, it->second, v.size()));
+            v.push_back(Internal_point(std::get<0>(*it), std::get<1>(*it), v.size()));
     if (u.size() < v.size())
         swap(u, v);
 }

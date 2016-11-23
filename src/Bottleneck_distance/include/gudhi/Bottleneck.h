@@ -29,17 +29,6 @@ namespace Gudhi {
 
 namespace bottleneck_distance {
 
-/** \brief Function to use in order to compute the Bottleneck distance between two persistence diagrams. You get an additive e-approximation.
- *
- *
- * \ingroup bottleneck_distance
- */
-template<typename Persistence_diagram1, typename Persistence_diagram2>
-double compute(const Persistence_diagram1& diag1, const Persistence_diagram2& diag2, double e = 0.);
-
-template<typename Persistence_diagram1, typename Persistence_diagram2>
-double compute_exactly(const Persistence_diagram1& diag1, const Persistence_diagram2& diag2);
-
 template<typename Persistence_diagram1, typename Persistence_diagram2>
 double compute_exactly(const Persistence_diagram1 &diag1, const Persistence_diagram2 &diag2) {
     G::initialize(diag1, diag2, 0.);
@@ -66,9 +55,14 @@ double compute_exactly(const Persistence_diagram1 &diag1, const Persistence_diag
     return sd.at(idmin);
 }
 
+/** \brief Function to use in order to compute the Bottleneck distance between two persistence diagrams.
+ * If the last parameter e is not 0 (default value if not explicited), you get an additive e-approximation.
+ *
+ * \ingroup bottleneck_distance
+ */
 template<typename Persistence_diagram1, typename Persistence_diagram2>
-double compute(const Persistence_diagram1 &diag1, const Persistence_diagram2 &diag2, double e) {
-    if(e< std::numeric_limits<double>::min())
+double compute(const Persistence_diagram1 &diag1, const Persistence_diagram2 &diag2, double e=0.) {
+    if(e == 0.)
         return compute_exactly(diag1, diag2);
     G::initialize(diag1, diag2, e);
     int in = G::diameter()/e;

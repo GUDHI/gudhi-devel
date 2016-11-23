@@ -27,23 +27,22 @@ namespace Gudhi {
 
 namespace bottleneck_distance {
 
-/** \brief Concept of persistence diagram point. The double first is the birth of the component and the double second is the death of the component.
+/** \brief Concept of persistence diagram point. get<0>() must return the birth of the component and get<1>() its death.
  *
  * \ingroup bottleneck_distance
  */
 struct Diagram_point{
-    double first;
-    double second;
+    double get<int>();
 };
 
-/** \brief Concept of persistence diagram.
+/** \brief Concept of persistence diagram. It's a range of Diagram_point.
  *
  * \ingroup bottleneck_distance
  */
 struct Persistence_Diagram
 {
-    const_iterator<Diagram_point> cbegin() const;
-    const_iterator<Diagram_point> cend() const;
+    const_iterator<Diagram_point> begin();
+    const_iterator<Diagram_point> end();
 };
 
 }  // namespace bottleneck_distance
