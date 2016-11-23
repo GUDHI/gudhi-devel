@@ -64,7 +64,6 @@ class Rips_complex {
   typedef int Vertex_handle;
 
  public:
-
   /** \brief Rips_complex constructor from a list of points.
    *
    * @param[in] points Range of points.
@@ -87,7 +86,7 @@ class Rips_complex {
    */
   template<typename InputDistanceRange>
   Rips_complex(const InputDistanceRange& distance_matrix, Filtration_value threshold) {
-    compute_proximity_graph(boost::irange((size_t)0,distance_matrix.size()), threshold,
+    compute_proximity_graph(boost::irange((size_t)0, distance_matrix.size()), threshold,
                             [&](size_t i, size_t j){return distance_matrix[j][i];});
   }
 
@@ -106,7 +105,7 @@ class Rips_complex {
   bool create_complex(SimplicialComplexForRips& complex, int dim_max) {
     if (complex.num_vertices() > 0) {
       std::cerr << "Rips_complex create_complex - complex is not empty\n";
-      return false; // ----- >>
+      return false;  // ----- >>
     }
 
     // insert the proximity graph in the simplicial complex
@@ -118,7 +117,7 @@ class Rips_complex {
     return true;
   }
 
- public:
+ private:
   /** \brief Output the proximity graph of the points.
    *
    * If points contains n elements, the proximity graph is the graph 
@@ -133,20 +132,17 @@ class Rips_complex {
                Distance distance) {
     std::vector< std::pair< Vertex_handle, Vertex_handle > > edges;
     std::vector< Filtration_value > edges_fil;
-    std::map< Vertex_handle, Filtration_value > vertices;
 
     // Compute the proximity graph of the points.
     // If points contains n elements, the proximity graph is the graph with n vertices, and an edge [u,v] iff the
     // distance function between points u and v is smaller than threshold.
     // --------------------------------------------------------------------------------------------
     // Creates the vector of edges and its filtration values (returned by distance function)
-    Vertex_handle idx_u, idx_v;
-    Filtration_value fil;
-    idx_u = 0;
+    Vertex_handle idx_u = 0;
     for (auto it_u = std::begin(points); it_u != std::end(points); ++it_u) {
-      idx_v = idx_u + 1;
+      Vertex_handle idx_v = idx_u + 1;
       for (auto it_v = it_u + 1; it_v != std::end(points); ++it_v, ++idx_v) {
-        fil = distance(*it_u, *it_v);
+        Filtration_value fil = distance(*it_u, *it_v);
         if (fil <= threshold) {
           edges.emplace_back(idx_u, idx_v);
           edges_fil.push_back(fil);
@@ -172,11 +168,10 @@ class Rips_complex {
 
  private:
   Graph_t rips_skeleton_graph_;
-
 };
 
-} // namespace rips_complex
+}  // namespace rips_complex
 
-} // namespace Gudhi
+}  // namespace Gudhi
 
 #endif  // RIPS_COMPLEX_H_

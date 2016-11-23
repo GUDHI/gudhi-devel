@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 void usage(int nbArgs, char * const progName) {
   std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";

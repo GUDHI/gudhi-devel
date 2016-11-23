@@ -26,6 +26,7 @@
 #include <iostream>
 #include <ctime>
 #include <string>
+#include <utility>  // for std::pair
 
 using namespace Gudhi;
 

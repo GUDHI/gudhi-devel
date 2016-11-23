@@ -222,7 +222,7 @@ bool read_hasse_simplex(std::istream & in_, std::vector< Simplex_key > & boundar
  **/
 template< typename Filtration_value >
 std::vector< std::vector< Filtration_value > > read_lower_triangular_matrix_from_csv_file(const std::string& filename,
-                                                                                          const char separator=';') {
+                                                                                          const char separator = ';') {
 #ifdef DEBUG_TRACES
   std::cout << "Using procedure read_lower_triangular_matrix_from_csv_file \n";
 #endif  // DEBUG_TRACES
@@ -273,7 +273,6 @@ std::vector< std::vector< Filtration_value > > read_lower_triangular_matrix_from
     }
     if (!values_in_this_line.empty())result.push_back(values_in_this_line);
     ++number_of_line;
-
   }
   in.close();
 

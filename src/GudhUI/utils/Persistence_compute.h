@@ -75,7 +75,7 @@ template<typename SkBlComplex> class Persistence_compute {
     using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
     using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
     using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
-    
+
     Rips_complex rips_complex(points, params.threshold, euclidean_distance<Filtration_value, Point_t>);
 
     Simplex_tree st;
@@ -87,7 +87,6 @@ template<typename SkBlComplex> class Persistence_compute {
       pcoh.compute_persistent_cohomology(params.min_pers);
       stream << "persistence: \n";
       stream << "p dimension birth death: \n";
-  
       pcoh.output_diagram(stream);
     }
   }

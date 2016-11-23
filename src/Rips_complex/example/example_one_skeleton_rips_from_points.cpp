@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 #include <limits>  // for std::numeric_limits
 
 void usage(int nbArgs, char * const progName) {
@@ -33,7 +34,7 @@ int main(int argc, char **argv) {
   points.push_back({0.0, 14.0});
   points.push_back({2.0, 19.0});
   points.push_back({9.0, 17.0});
-  
+
   // ----------------------------------------------------------------------------
   // Init of a rips complex from points
   // ----------------------------------------------------------------------------
