@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(persistence_diagrams_graph){
         v2.emplace_back(std::min(a,b), std::max(a,b));
     }
     G::initialize(v1, v2, 0.);
-    std::shared_ptr< std::vector<double> > d(G::sorted_distances());
+    std::vector<double> d(G::sorted_distances());
     //
     BOOST_CHECK(!G::on_the_u_diagonal(n1-1));
     BOOST_CHECK(!G::on_the_u_diagonal(n1));
@@ -68,25 +68,25 @@ BOOST_AUTO_TEST_CASE(persistence_diagrams_graph){
     //
     BOOST_CHECK(G::size()==(n1+n2));
     //
-    BOOST_CHECK((int) d->size() <= (n1+n2)*(n1+n2) - n1*n2 + 1);
-    BOOST_CHECK(std::count(d->begin(), d->end(), G::distance(0,0))==1);
-    BOOST_CHECK(std::count(d->begin(), d->end(), G::distance(0,n1-1))==1);
-    BOOST_CHECK(std::count(d->begin(), d->end(), G::distance(0,n1))==1);
-    BOOST_CHECK(std::count(d->begin(), d->end(), G::distance(0,n2-1))==1);
-    BOOST_CHECK(std::count(d->begin(), d->end(), G::distance(0,n2))==1);
-    BOOST_CHECK(std::count(d->begin(), d->end(), G::distance(0,(n1+n2)-1))==1);
-    BOOST_CHECK(std::count(d->begin(), d->end(), G::distance(n1,0))==1);
-    BOOST_CHECK(std::count(d->begin(), d->end(), G::distance(n1,n1-1))==1);
-    BOOST_CHECK(std::count(d->begin(), d->end(), G::distance(n1,n1))==1);
-    BOOST_CHECK(std::count(d->begin(), d->end(), G::distance(n1,n2-1))==1);
-    BOOST_CHECK(std::count(d->begin(), d->end(), G::distance(n1,n2))==1);
-    BOOST_CHECK(std::count(d->begin(), d->end(), G::distance(n1,(n1+n2)-1))==1);
-    BOOST_CHECK(std::count(d->begin(), d->end(), G::distance((n1+n2)-1,0))==1);
-    BOOST_CHECK(std::count(d->begin(), d->end(), G::distance((n1+n2)-1,n1-1))==1);
-    BOOST_CHECK(std::count(d->begin(), d->end(), G::distance((n1+n2)-1,n1))==1);
-    BOOST_CHECK(std::count(d->begin(), d->end(), G::distance((n1+n2)-1,n2-1))==1);
-    BOOST_CHECK(std::count(d->begin(), d->end(), G::distance((n1+n2)-1,n2))==1);
-    BOOST_CHECK(std::count(d->begin(), d->end(), G::distance((n1+n2)-1,(n1+n2)-1))==1);
+    BOOST_CHECK((int) d.size() <= (n1+n2)*(n1+n2) - n1*n2 + 1);
+    BOOST_CHECK(std::count(d.begin(), d.end(), G::distance(0,0))==1);
+    BOOST_CHECK(std::count(d.begin(), d.end(), G::distance(0,n1-1))==1);
+    BOOST_CHECK(std::count(d.begin(), d.end(), G::distance(0,n1))==1);
+    BOOST_CHECK(std::count(d.begin(), d.end(), G::distance(0,n2-1))==1);
+    BOOST_CHECK(std::count(d.begin(), d.end(), G::distance(0,n2))==1);
+    BOOST_CHECK(std::count(d.begin(), d.end(), G::distance(0,(n1+n2)-1))==1);
+    BOOST_CHECK(std::count(d.begin(), d.end(), G::distance(n1,0))==1);
+    BOOST_CHECK(std::count(d.begin(), d.end(), G::distance(n1,n1-1))==1);
+    BOOST_CHECK(std::count(d.begin(), d.end(), G::distance(n1,n1))==1);
+    BOOST_CHECK(std::count(d.begin(), d.end(), G::distance(n1,n2-1))==1);
+    BOOST_CHECK(std::count(d.begin(), d.end(), G::distance(n1,n2))==1);
+    BOOST_CHECK(std::count(d.begin(), d.end(), G::distance(n1,(n1+n2)-1))==1);
+    BOOST_CHECK(std::count(d.begin(), d.end(), G::distance((n1+n2)-1,0))==1);
+    BOOST_CHECK(std::count(d.begin(), d.end(), G::distance((n1+n2)-1,n1-1))==1);
+    BOOST_CHECK(std::count(d.begin(), d.end(), G::distance((n1+n2)-1,n1))==1);
+    BOOST_CHECK(std::count(d.begin(), d.end(), G::distance((n1+n2)-1,n2-1))==1);
+    BOOST_CHECK(std::count(d.begin(), d.end(), G::distance((n1+n2)-1,n2))==1);
+    BOOST_CHECK(std::count(d.begin(), d.end(), G::distance((n1+n2)-1,(n1+n2)-1))==1);
 }
 
 BOOST_AUTO_TEST_CASE(planar_neighbors_finder) {
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(planar_neighbors_finder) {
     int v_point_index_1 = pnf.pull_near(n2/2);
     BOOST_CHECK((v_point_index_1 == -1) || ((G::distance(n2/2,v_point_index_1)<=1.)));
     BOOST_CHECK(!pnf.contains(v_point_index_1));
-    std::list<int> l = *pnf.pull_all_near(n2/2);
+    std::vector<int> l = pnf.pull_all_near(n2/2);
     bool v = true;
     for(auto it = l.cbegin(); it != l.cend(); ++it)
         v = v && (G::distance(n2/2,*it)>1.);
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(neighbors_finder) {
     //
     int v_point_index_1 = nf.pull_near(n2/2);
     BOOST_CHECK((v_point_index_1 == -1) || (G::distance(n2/2,v_point_index_1)<=1.));
-    std::list<int> l = *nf.pull_all_near(n2/2);
+    std::vector<int> l = nf.pull_all_near(n2/2);
     bool v = true;
     for(auto it = l.cbegin(); it != l.cend(); ++it)
         v = v && (G::distance(n2/2,*it)>1.);
