@@ -31,11 +31,11 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 INRIA"
 __license__ = "GPL v3"
 
-cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
-    cdef cppclass Alpha_complex_interface "Gudhi::alpha_complex::Alpha_complex_interface":
-        Alpha_complex_interface(vector[vector[double]] points, double max_alpha_square)
+cdef extern from "Tangential_complex_interface.h" namespace "Gudhi":
+    cdef cppclass Tangential_complex_interface "Gudhi::tangential_complex::Tangential_complex_interface":
+        Tangential_complex_interface(vector[vector[double]] points, double max_alpha_square)
         # bool from_file is a workaround for cython to find the correct signature
-        Alpha_complex_interface(string off_file, double max_alpha_square, bool from_file)
+        Tangential_complex_interface(string off_file, double max_alpha_square, bool from_file)
         double filtration()
         double simplex_filtration(vector[int] simplex)
         void set_filtration(double filtration)
@@ -58,9 +58,9 @@ cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
         vector[int] get_betti_numbers()
         vector[int] get_persistent_betti_numbers(double from_value, double to_value)
 
-# AlphaComplex python interface
-cdef class AlphaComplex:
-    """AlphaComplex is a simplicial complex constructed from the finite cells
+# TangentialComplex python interface
+cdef class TangentialComplex:
+    """TangentialComplex is a simplicial complex constructed from the finite cells
     of a Delaunay Triangulation.
 
     The filtration value of each simplex is computed as the square of the
@@ -73,16 +73,16 @@ cdef class AlphaComplex:
 
     .. note::
 
-        When Alpha_complex is constructed with an infinite value of alpha, the
+        When Tangential_complex is constructed with an infinite value of alpha, the
         complex is a Delaunay complex.
 
     """
 
-    cdef Alpha_complex_interface * thisptr
+    cdef Tangential_complex_interface * thisptr
 
     # Fake constructor that does nothing but documenting the constructor
     def __init__(self, points=None, off_file='', max_alpha_square=float('inf')):
-        """AlphaComplex constructor.
+        """TangentialComplex constructor.
 
         :param points: A list of points in d-Dimension.
         :type points: list of list of double
@@ -92,7 +92,7 @@ cdef class AlphaComplex:
         :param off_file: An OFF file style name.
         :type off_file: string
 
-        :param max_alpha_square: Maximum Alpha square value. Default is :math:`\infty`
+        :param max_alpha_square: Maximum Tangential square value. Default is :math:`\infty`
         :type max_alpha_square: double
         """
 
@@ -100,12 +100,12 @@ cdef class AlphaComplex:
     def __cinit__(self, points=[], off_file='', max_alpha_square=float('inf')):
         if off_file is not '':
             if os.path.isfile(off_file):
-                self.thisptr = new Alpha_complex_interface(off_file,
+                self.thisptr = new Tangential_complex_interface(off_file,
                     max_alpha_square, True)
             else:
                 print("file " + off_file + " not found.")
         else:
-            self.thisptr = new Alpha_complex_interface(points,
+            self.thisptr = new Tangential_complex_interface(points,
                 max_alpha_square)
                 
 
@@ -114,7 +114,7 @@ cdef class AlphaComplex:
             del self.thisptr
 
     def __is_defined(self):
-        """Returns true if AlphaComplex pointer is not NULL.
+        """Returns true if TangentialComplex pointer is not NULL.
          """
         return self.thisptr != NULL
 

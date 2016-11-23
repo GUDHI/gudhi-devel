@@ -45,8 +45,8 @@ if(PYTHON_PATH AND CYTHON_PATH)
     file(COPY test DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     
     if (CGAL_FOUND)
-      if (NOT CGAL_VERSION VERSION_LESS 4.7.0)
-        # If CGAL_VERSION >= 4.7.0, include alpha complex
+      if (NOT CGAL_VERSION VERSION_LESS 4.8.0)
+        # If CGAL_VERSION >= 4.8.0, include alpha complex
         set(GUDHI_CYTHON_LIBRARIES "${GUDHI_CYTHON_LIBRARIES}'CGAL', ")
         set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${CGAL_LIBRARIES_DIR}', ")
         # GMP and GMPXX are not required, but if present, CGAL will link with them.
@@ -62,10 +62,12 @@ if(PYTHON_PATH AND CYTHON_PATH)
         endif(GMP_FOUND)
     
         set(GUDHI_CYTHON_ALPHA_COMPLEX "include 'cython/alpha_complex.pyx'")
-      else (NOT CGAL_VERSION VERSION_LESS 4.7.0)
+        set(GUDHI_CYTHON_TANGENTIAL_COMPLEX "include 'cython/tangential_complex.pyx'")
+      else (NOT CGAL_VERSION VERSION_LESS 4.8.0)
         # Remove alpha complex unitary tests
         file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_alpha_complex.py)
-      endif (NOT CGAL_VERSION VERSION_LESS 4.7.0)
+        file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_tangential_complex.py)
+      endif (NOT CGAL_VERSION VERSION_LESS 4.8.0)
     endif (CGAL_FOUND)
     
     # Loop on INCLUDE_DIRECTORIES PROPERTY
