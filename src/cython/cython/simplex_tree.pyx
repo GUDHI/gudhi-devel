@@ -75,7 +75,7 @@ cdef class SimplexTree:
     cdef Simplex_tree_persistence_interface * pcohptr
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, points=[], max_alpha_square=float('inf')):
+    def __init__(self):
         """SimplexTree constructor.
         """
 

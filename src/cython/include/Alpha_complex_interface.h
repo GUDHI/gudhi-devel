@@ -28,6 +28,7 @@
 #include <CGAL/Epick_d.h>
 
 #include "Persistent_cohomology_interface.h"
+#include "Simplex_tree_interface.h"
 
 #include <vector>
 #include <utility>  // std::pair
@@ -49,18 +50,14 @@ class Alpha_complex_interface {
   typedef typename Simplex_tree<>::Simplex_key Simplex_key;
 
  public:
-  Alpha_complex_interface(std::vector<std::vector<double>>&points, double max_alpha_square)
+  Alpha_complex_interface(std::vector<std::vector<double>>&points)
   : pcoh_(nullptr) {
     alpha_complex_ = new Alpha_complex<Dynamic_kernel>(points);
-    alpha_complex_->create_complex(simplex_tree_, max_alpha_square);
-    simplex_tree_.initialize_filtration();
   }
 
-  Alpha_complex_interface(std::string off_file_name, double max_alpha_square, bool from_file = true)
+  Alpha_complex_interface(std::string off_file_name, bool from_file = true)
   : pcoh_(nullptr) {
     alpha_complex_ = new Alpha_complex<Dynamic_kernel>(off_file_name);
-    alpha_complex_->create_complex(simplex_tree_, max_alpha_square);
-    simplex_tree_.initialize_filtration();
   }
 
   bool find_simplex(const Simplex& vh) {
@@ -194,6 +191,11 @@ class Alpha_complex_interface {
     return persistent_betti_numbers;
   }
   
+  void create_simplex_tree(Simplex_tree_interface<>& simplex_tree, double max_alpha_square) {
+    alpha_complex_->create_complex(simplex_tree, max_alpha_square);
+    simplex_tree.initialize_filtration();
+  }
+
  private:
   Simplex_tree<> simplex_tree_;
   Persistent_cohomology_interface<Simplex_tree<>>* pcoh_;
@@ -202,7 +204,6 @@ class Alpha_complex_interface {
 
 }  // namespace alpha_complex
 
-} // namespace Gudhi
+}  // namespace Gudhi
 
 #endif  // ALPHA_COMPLEX_INTERFACE_H
-

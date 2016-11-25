@@ -36,6 +36,7 @@ namespace Gudhi {
 
 template<typename SimplexTreeOptions = Simplex_tree_options_full_featured>
 class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
+ public:
   typedef typename Simplex_tree<SimplexTreeOptions>::Simplex_handle Simplex_handle;
   typedef typename std::pair<Simplex_handle, bool> Insertion_result;
   using Simplex = std::vector<Vertex_handle>;
@@ -50,6 +51,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
 
   bool insert_simplex_and_subfaces(const Simplex& complex, Filtration_value filtration = 0) {
     Insertion_result result = Simplex_tree<SimplexTreeOptions>::insert_simplex_and_subfaces(complex, filtration);
+    Simplex_tree<SimplexTreeOptions>::initialize_filtration();
     return (result.second);
   }
 
@@ -58,7 +60,8 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   }
 
   void remove_maximal_simplex(const Simplex& complex) {
-    return Simplex_tree<SimplexTreeOptions>::remove_maximal_simplex(Simplex_tree<SimplexTreeOptions>::find(complex));
+    Simplex_tree<SimplexTreeOptions>::remove_maximal_simplex(Simplex_tree<SimplexTreeOptions>::find(complex));
+    Simplex_tree<SimplexTreeOptions>::initialize_filtration();
   }
 
   Complex_tree get_filtered_tree() {
@@ -66,8 +69,10 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     for (auto f_simplex : Simplex_tree<SimplexTreeOptions>::filtration_simplex_range()) {
       Simplex simplex;
       for (auto vertex : Simplex_tree<SimplexTreeOptions>::simplex_vertex_range(f_simplex)) {
+        std::cout << " " << vertex;
         simplex.insert(simplex.begin(), vertex);
       }
+      std::cout << std::endl;
       filtered_tree.push_back(std::make_pair(simplex, Simplex_tree<SimplexTreeOptions>::filtration(f_simplex)));
     }
     return filtered_tree;

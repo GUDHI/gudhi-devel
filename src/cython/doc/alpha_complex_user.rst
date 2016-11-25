@@ -22,15 +22,17 @@ This example builds the Delaunay triangulation from the given points, and initia
 
 .. testcode::
 
-   import gudhi
-   alpha_complex = gudhi.AlphaComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]],
-                                      max_alpha_square=60.0)
-   result_str = 'Alpha complex is of dimension ' + repr(alpha_complex.dimension()) + ' - ' + \
-       repr(alpha_complex.num_simplices()) + ' simplices - ' + \
-       repr(alpha_complex.num_vertices()) + ' vertices.'
-   print(result_str)
-   for fitered_value in alpha_complex.get_filtered_tree():
-       print(fitered_value)
+    import gudhi
+    alpha_complex = gudhi.AlphaComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]])
+
+    simplex_tree = gudhi.SimplexTree()
+    alpha_complex.create_simplex_tree(simplex_tree, max_alpha_square=60.0)
+    result_str = 'Alpha complex is of dimension ' + repr(simplex_tree.dimension()) + ' - ' + \
+        repr(simplex_tree.num_simplices()) + ' simplices - ' + \
+        repr(simplex_tree.num_vertices()) + ' vertices.'
+    print(result_str)
+    for fitered_value in simplex_tree.get_filtered_tree():
+        print(fitered_value)
 
 The output is:
 
@@ -152,15 +154,16 @@ Then, it is asked to display information about the alpha complex:
 
 .. testcode::
 
-   import gudhi
-   alpha_complex = gudhi.AlphaComplex(off_file='alphacomplexdoc.off',
-                                      max_alpha_square=59.0)
-   result_str = 'Alpha complex is of dimension ' + repr(alpha_complex.dimension()) + ' - ' + \
-       repr(alpha_complex.num_simplices()) + ' simplices - ' + \
-       repr(alpha_complex.num_vertices()) + ' vertices.'
-   print(result_str)
-   for fitered_value in alpha_complex.get_filtered_tree():
-       print(fitered_value)
+    import gudhi
+    alpha_complex = gudhi.AlphaComplex(off_file='alphacomplexdoc.off')
+    simplex_tree = gudhi.SimplexTree()
+    alpha_complex.create_simplex_tree(simplex_tree, max_alpha_square=59.0)
+    result_str = 'Alpha complex is of dimension ' + repr(simplex_tree.dimension()) + ' - ' + \
+        repr(simplex_tree.num_simplices()) + ' simplices - ' + \
+        repr(simplex_tree.num_vertices()) + ' vertices.'
+    print(result_str)
+    for fitered_value in simplex_tree.get_filtered_tree():
+        print(fitered_value)
 
 the program output is:
 

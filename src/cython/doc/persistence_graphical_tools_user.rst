@@ -41,6 +41,7 @@ This function can display the persistence result as a diagram:
     import gudhi
     
     alpha_complex = gudhi.AlphaComplex(off_file='tore3D_300.off')
-    alpha_complex.initialize_filtration()
-    diag = alpha_complex.persistence()
+    simplex_tree = gudhi.SimplexTree()
+    alpha_complex.create_simplex_tree(simplex_tree)
+    diag = simplex_tree.persistence()
     gudhi.diagram_persistence(diag)

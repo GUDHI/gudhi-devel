@@ -3,6 +3,7 @@ from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 from libcpp.string cimport string
 from libcpp cimport bool
+from cython.operator cimport dereference as deref
 import os
 
 """This file is part of the Gudhi Library. The Gudhi library
@@ -33,9 +34,9 @@ __license__ = "GPL v3"
 
 cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
     cdef cppclass Alpha_complex_interface "Gudhi::alpha_complex::Alpha_complex_interface":
-        Alpha_complex_interface(vector[vector[double]] points, double max_alpha_square)
+        Alpha_complex_interface(vector[vector[double]] points)
         # bool from_file is a workaround for cython to find the correct signature
-        Alpha_complex_interface(string off_file, double max_alpha_square, bool from_file)
+        Alpha_complex_interface(string off_file, bool from_file)
         double filtration()
         double simplex_filtration(vector[int] simplex)
         void set_filtration(double filtration)
@@ -57,6 +58,7 @@ cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
         vector[pair[int, pair[double, double]]] get_persistence(int homology_coeff_field, double min_persistence)
         vector[int] get_betti_numbers()
         vector[int] get_persistent_betti_numbers(double from_value, double to_value)
+        void create_simplex_tree(Simplex_tree_interface_full_featured simplex_tree, double max_alpha_square)
 
 # AlphaComplex python interface
 cdef class AlphaComplex:
@@ -81,7 +83,7 @@ cdef class AlphaComplex:
     cdef Alpha_complex_interface * thisptr
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, points=None, off_file='', max_alpha_square=float('inf')):
+    def __init__(self, points=None, off_file=''):
         """AlphaComplex constructor.
 
         :param points: A list of points in d-Dimension.
@@ -91,22 +93,17 @@ cdef class AlphaComplex:
 
         :param off_file: An OFF file style name.
         :type off_file: string
-
-        :param max_alpha_square: Maximum Alpha square value. Default is :math:`\infty`
-        :type max_alpha_square: double
         """
 
     # The real cython constructor
-    def __cinit__(self, points=[], off_file='', max_alpha_square=float('inf')):
+    def __cinit__(self, points=[], off_file=''):
         if off_file is not '':
             if os.path.isfile(off_file):
-                self.thisptr = new Alpha_complex_interface(off_file,
-                    max_alpha_square, True)
+                self.thisptr = new Alpha_complex_interface(off_file, True)
             else:
                 print("file " + off_file + " not found.")
         else:
-            self.thisptr = new Alpha_complex_interface(points,
-                max_alpha_square)
+            self.thisptr = new Alpha_complex_interface(points)
                 
 
     def __dealloc__(self):
@@ -118,195 +115,6 @@ cdef class AlphaComplex:
          """
         return self.thisptr != NULL
 
-    def get_filtration(self):
-        """This function returns the main simplicial complex filtration value.
-
-        :returns:  float -- the simplicial complex filtration value.
-        """
-        return self.thisptr.filtration()
-
-    def filtration(self, simplex):
-        """This function returns the simplicial complex filtration value for a
-        given N-simplex.
-
-        :param simplex: The N-simplex, represented by a list of vertex.
-        :type simplex: list of int
-        :returns:  float -- the simplicial complex filtration value.
-        """
-        return self.thisptr.simplex_filtration(simplex)
-
-    def set_filtration(self, filtration):
-        """This function sets the main simplicial complex filtration value.
-
-        :param filtration: The filtration value.
-        :type filtration: float.
-        """
-        self.thisptr.set_filtration(<double> filtration)
-
-    def initialize_filtration(self):
-        """This function initializes and sorts the simplicial complex
-        filtration vector.
-
-        .. note::
-
-            This function must be launched before persistence, betti_numbers,
-            persistent_betti_numbers or get_filtered_tree after inserting or
-            removing simplices.
-        """
-        self.thisptr.initialize_filtration()
-
-    def num_vertices(self):
-        """This function returns the number of vertices of the simplicial
-        complex.
-
-        :returns:  int -- the simplicial complex number of vertices.
-        """
-        return self.thisptr.num_vertices()
-
-    def num_simplices(self):
-        """This function returns the number of simplices of the simplicial
-        complex.
-
-        :returns:  int -- the simplicial complex number of simplices.
-        """
-        return self.thisptr.num_simplices()
-
-    def dimension(self):
-        """This function returns the dimension of the simplicial complex.
-
-        :returns:  int -- the simplicial complex dimension.
-        """
-        return self.thisptr.dimension()
-
-    def set_dimension(self, dimension):
-        """This function sets the dimension of the simplicial complex.
-
-        :param dimension: The new dimension value.
-        :type dimension: int.
-        """
-        self.thisptr.set_dimension(<int>dimension)
-
-    def find(self, simplex):
-        """This function returns if the N-simplex was found in the simplicial
-        complex or not.
-
-        :param simplex: The N-simplex to find, represented by a list of vertex.
-        :type simplex: list of int.
-        :returns:  bool -- true if the simplex was found, false otherwise.
-        """
-        cdef vector[int] complex
-        for i in simplex:
-            complex.push_back(i)
-        return self.thisptr.find_simplex(complex)
-
-    def insert(self, simplex, filtration=0.0):
-        """This function inserts the given N-simplex with the given filtration
-        value (default value is '0.0').
-
-        :param simplex: The N-simplex to insert, represented by a list of
-            vertex.
-        :type simplex: list of int.
-        :param filtration: The filtration value of the simplex.
-        :type filtration: float.
-        :returns:  bool -- true if the simplex was found, false otherwise.
-        """
-        cdef vector[int] complex
-        for i in simplex:
-            complex.push_back(i)
-        return self.thisptr.insert_simplex_and_subfaces(complex,
-                                                        <double>filtration)
-
-    def get_filtered_tree(self):
-        """This function returns the tree sorted by increasing filtration
-        values.
-
-        :returns:  list of tuples(simplex, filtration) -- the tree sorted by
-            increasing filtration values.
-        """
-        cdef vector[pair[vector[int], double]] coface_tree \
-            = self.thisptr.get_filtered_tree()
-        ct = []
-        for filtered_complex in coface_tree:
-            v = []
-            for vertex in filtered_complex.first:
-                v.append(vertex)
-            ct.append((v, filtered_complex.second))
-        return ct
-
-    def get_skeleton_tree(self, dimension):
-        """This function returns the tree skeleton of a maximum given
-        dimension.
-
-        :param dimension: The skeleton dimension value.
-        :type dimension: int.
-        :returns:  list of tuples(simplex, filtration) -- the skeleton tree
-            of a maximum dimension.
-        """
-        cdef vector[pair[vector[int], double]] coface_tree \
-            = self.thisptr.get_skeleton_tree(<int>dimension)
-        ct = []
-        for filtered_complex in coface_tree:
-            v = []
-            for vertex in filtered_complex.first:
-                v.append(vertex)
-            ct.append((v, filtered_complex.second))
-        return ct
-
-    def get_star_tree(self, simplex):
-        """This function returns the star tree of a given N-simplex.
-
-        :param simplex: The N-simplex, represented by a list of vertex.
-        :type simplex: list of int.
-        :returns:  list of tuples(simplex, filtration) -- the star tree of a
-            simplex.
-        """
-        cdef vector[int] complex
-        for i in simplex:
-            complex.push_back(i)
-        cdef vector[pair[vector[int], double]] coface_tree \
-            = self.thisptr.get_star_tree(complex)
-        ct = []
-        for filtered_complex in coface_tree:
-            v = []
-            for vertex in filtered_complex.first:
-                v.append(vertex)
-            ct.append((v, filtered_complex.second))
-        return ct
-
-    def get_coface_tree(self, simplex, codimension):
-        """This function returns the coface tree of a given N-simplex with a
-        given codimension.
-
-        :param simplex: The N-simplex, represented by a list of vertex.
-        :type simplex: list of int.
-        :param codimension: The codimension. If codimension = 0, all cofaces
-            are returned (equivalent of get_star_tree function)
-        :type codimension: int.
-        :returns: list of tuples(simplex, filtration) -- the coface tree of a
-            simplex.
-        """
-        cdef vector[int] complex
-        for i in simplex:
-            complex.push_back(i)
-        cdef vector[pair[vector[int], double]] coface_tree \
-            = self.thisptr.get_coface_tree(complex, <int>codimension)
-        ct = []
-        for filtered_complex in coface_tree:
-            v = []
-            for vertex in filtered_complex.first:
-                v.append(vertex)
-            ct.append((v, filtered_complex.second))
-        return ct
-
-    def remove_maximal_simplex(self, simplex):
-        """This function removes a given maximal N-simplex from the simplicial
-        complex.
-
-        :param simplex: The N-simplex, represented by a list of vertex.
-        :type simplex: list of int.
-        """
-        self.thisptr.remove_maximal_simplex(simplex)
-
     def get_point(self, vertex):
         """This function returns the point corresponding to a given vertex.
 
@@ -317,47 +125,14 @@ cdef class AlphaComplex:
         cdef vector[double] point = self.thisptr.get_point(vertex)
         return point
 
-    def persistence(self, homology_coeff_field=11, min_persistence=0.0):
-        """This function returns the persistence of the simplicial complex.
+    def create_simplex_tree(self, SimplexTree simplex_tree, max_alpha_square=float('inf')):
+        """This function creates the given simplex tree from the Delaunay
+        Triangulation.
 
-        :param homology_coeff_field: The homology coefficient field. Must be a
-            prime number
-        :type homology_coeff_field: int.
-        :param min_persistence: The minimum persistence value to take into
-            account (strictly greater than min_persistence). Default value is
-            0.0.
-            Sets min_persistence to -1.0 to see all values.
-        :type min_persistence: float.
-        :note: list of pairs(dimension, pair(birth, death)) -- the
-            persistence of the simplicial complex.
+        :param simplex_tree: The simplex tree to create (must be empty)
+        :type simplex tree: gudhi.SimplexTree.
+        :param max_alpha_square: The maximum alpha square threshold the
+            simplices shall not exceed. Default is set to infinity.
+        :type max_alpha_square: float.
         """
-        return self.thisptr.get_persistence(homology_coeff_field, min_persistence)
-
-    def betti_numbers(self):
-        """This function returns the Betti numbers of the simplicial complex.
-
-        :returns: list of int -- The Betti numbers ([B0, B1, ..., Bn]).
-
-        :note: betti_numbers function requires persistence function to be
-            launched first.
-        """
-        return self.thisptr.get_betti_numbers()
-
-    def persistent_betti_numbers(self, from_value, to_value):
-        """This function returns the persistent Betti numbers of the
-        simplicial complex.
-
-        :param from_value: The persistence birth limit to be added in the
-            numbers (persistent birth <= from_value).
-        :type from_value: float.
-        :param to_value: The persistence death limit to be added in the
-            numbers (persistent death > to_value).
-        :type to_value: float.
-
-        :returns: list of int -- The persistent Betti numbers ([B0, B1, ...,
-            Bn]).
-
-        :note: persistent_betti_numbers function requires persistence
-            function to be launched first.
-        """
-        return self.thisptr.get_persistent_betti_numbers(from_value, to_value)
+        self.thisptr.create_simplex_tree(deref(simplex_tree.thisptr), max_alpha_square)

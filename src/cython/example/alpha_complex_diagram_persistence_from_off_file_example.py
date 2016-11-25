@@ -52,15 +52,17 @@ with open(args.file, 'r') as f:
         message = "AlphaComplex with max_edge_length=" + repr(args.max_alpha_square)
         print(message)
         
-        alpha_complex = gudhi.AlphaComplex(off_file=args.file, max_alpha_square=args.max_alpha_square)
+        alpha_complex = gudhi.AlphaComplex(off_file=args.file)
+        simplex_tree = gudhi.SimplexTree()
+        alpha_complex.create_simplex_tree(simplex_tree, max_alpha_square=args.max_alpha_square)
     
-        message = "Number of simplices=" + repr(alpha_complex.num_simplices())
+        message = "Number of simplices=" + repr(simplex_tree.num_simplices())
         print(message)
         
-        diag = alpha_complex.persistence()
+        diag = simplex_tree.persistence()
     
         print("betti_numbers()=")
-        print(alpha_complex.betti_numbers())
+        print(simplex_tree.betti_numbers())
     
         if args.no_diagram == False:
             gudhi.diagram_persistence(diag)

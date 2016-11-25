@@ -1,4 +1,4 @@
-from gudhi import AlphaComplex
+from gudhi import AlphaComplex, SimplexTree
 
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
@@ -28,30 +28,30 @@ __license__ = "GPL v3"
 
 
 def test_empty_alpha():
-    alpha_complex = AlphaComplex()
+    alpha_complex = AlphaComplex(points=[[0,0]])
     assert alpha_complex.__is_defined() == True
-    assert alpha_complex.__is_persistence_defined() == False
-    assert alpha_complex.num_simplices() == 0
-    assert alpha_complex.num_vertices() == 0
 
 def test_infinite_alpha():
     point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
     alpha_complex = AlphaComplex(points=point_list)
     assert alpha_complex.__is_defined() == True
-    assert alpha_complex.__is_persistence_defined() == False
 
-    assert alpha_complex.num_simplices() == 11
-    assert alpha_complex.num_vertices() == 4
+    simplex_tree = SimplexTree()
+    alpha_complex.create_simplex_tree(simplex_tree)
+    assert simplex_tree.__is_persistence_defined() == False
+
+    assert simplex_tree.num_simplices() == 11
+    assert simplex_tree.num_vertices() == 4
  
-    assert alpha_complex.get_filtered_tree() == \
+    assert simplex_tree.get_filtered_tree() == \
            [([0], 0.0), ([1], 0.0), ([2], 0.0), ([3], 0.0),
             ([0, 1], 0.25), ([0, 2], 0.25), ([1, 3], 0.25),
             ([2, 3], 0.25), ([1, 2], 0.5), ([0, 1, 2], 0.5),
             ([1, 2, 3], 0.5)]
-    assert alpha_complex.get_star_tree([0]) == \
+    assert simplex_tree.get_star_tree([0]) == \
            [([0], 0.0), ([0, 1], 0.25), ([0, 1, 2], 0.5),
            ([0, 2], 0.25)]
-    assert alpha_complex.get_coface_tree([0], 1) == \
+    assert simplex_tree.get_coface_tree([0], 1) == \
            [([0, 1], 0.25), ([0, 2], 0.25)]
  
     assert point_list[0] == alpha_complex.get_point(0)
@@ -63,11 +63,13 @@ def test_infinite_alpha():
 
 def test_filtered_alpha():
     point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
-    filtered_alpha = AlphaComplex(points=point_list,
-                                  max_alpha_square=0.25)
+    filtered_alpha = AlphaComplex(points=point_list)
 
-    assert filtered_alpha.num_simplices() == 8
-    assert filtered_alpha.num_vertices() == 4
+    simplex_tree = SimplexTree()
+    filtered_alpha.create_simplex_tree(simplex_tree, max_alpha_square=0.25)
+
+    assert simplex_tree.num_simplices() == 8
+    assert simplex_tree.num_vertices() == 4
 
     assert point_list[0] == filtered_alpha.get_point(0)
     assert point_list[1] == filtered_alpha.get_point(1)
@@ -76,11 +78,11 @@ def test_filtered_alpha():
     assert filtered_alpha.get_point(4) == []
     assert filtered_alpha.get_point(125) == []
 
-    assert filtered_alpha.get_filtered_tree() == \
+    assert simplex_tree.get_filtered_tree() == \
            [([0], 0.0), ([1], 0.0), ([2], 0.0), ([3], 0.0),
             ([0, 1], 0.25), ([0, 2], 0.25), ([1, 3], 0.25),
             ([2, 3], 0.25)]
-    assert filtered_alpha.get_star_tree([0]) == \
+    assert simplex_tree.get_star_tree([0]) == \
            [([0], 0.0), ([0, 1], 0.25), ([0, 2], 0.25)]
-    assert filtered_alpha.get_coface_tree([0], 1) == \
+    assert simplex_tree.get_coface_tree([0], 1) == \
            [([0, 1], 0.25), ([0, 2], 0.25)]
