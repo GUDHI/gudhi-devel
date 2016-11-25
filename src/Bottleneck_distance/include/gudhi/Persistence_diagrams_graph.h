@@ -2,9 +2,9 @@
  *    (Geometric Understanding in Higher Dimensions) is a generic C++
  *    library for computational topology.
  *
- *    Author(s):       Francois Godi
+ *    Author:       Francois Godi
  *
- *    Copyright (C) 2015  INRIA Sophia-Antipolis (France)
+ *    Copyright (C) 2015  INRIA (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -65,8 +65,7 @@ private:
     static Internal_point get_u_point(int u_point_index);
     static Internal_point get_v_point(int v_point_index);
 
-    friend class Naive_pnf;
-    friend class Cgal_pnf;
+    friend class Planar_neighbors_finder;
 };
 
 /** \internal \typedef \brief Shorter alias */

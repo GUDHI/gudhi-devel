@@ -2,9 +2,9 @@
  *    (Geometric Understanding in Higher Dimensions) is a generic C++
  *    library for computational topology.
  *
- *    Author(s):       Francois Godi
+ *    Author:       Francois Godi
  *
- *    Copyright (C) 2015  INRIA Sophia-Antipolis (France)
+ *    Copyright (C) 2015  INRIA (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ double compute(const Persistence_diagram1 &diag1, const Persistence_diagram2 &di
     if(e == 0.)
         return compute_exactly(diag1, diag2);
     G::initialize(diag1, diag2, e);
-    int in = G::diameter()/e;
+    int in = G::diameter()/e + 1;
     int idmin = 0;
     int idmax = in;
     // alpha can be modified, this will change the complexity
