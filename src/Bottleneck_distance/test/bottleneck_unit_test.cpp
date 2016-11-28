@@ -89,36 +89,6 @@ BOOST_AUTO_TEST_CASE(persistence_diagrams_graph){
     BOOST_CHECK(std::count(d.begin(), d.end(), G::distance((n1+n2)-1,(n1+n2)-1))==1);
 }
 
-BOOST_AUTO_TEST_CASE(planar_neighbors_finder) {
-    Planar_neighbors_finder pnf(1.);
-    for(int v_point_index=0; v_point_index<n1; v_point_index+=2)
-        pnf.add(v_point_index);
-    //
-    BOOST_CHECK(pnf.contains(0));
-    BOOST_CHECK(!pnf.contains(1));
-    BOOST_CHECK(pnf.contains(2));
-    BOOST_CHECK(!pnf.contains(3));
-    //
-    pnf.remove(0);
-    pnf.remove(1);
-    //
-    BOOST_CHECK(!pnf.contains(0));
-    BOOST_CHECK(!pnf.contains(1));
-    BOOST_CHECK(pnf.contains(2));
-    BOOST_CHECK(!pnf.contains(3));
-    //
-    int v_point_index_1 = pnf.pull_near(n2/2);
-    BOOST_CHECK((v_point_index_1 == -1) || ((G::distance(n2/2,v_point_index_1)<=1.)));
-    BOOST_CHECK(!pnf.contains(v_point_index_1));
-    std::vector<int> l = pnf.pull_all_near(n2/2);
-    bool v = true;
-    for(auto it = l.cbegin(); it != l.cend(); ++it)
-        v = v && (G::distance(n2/2,*it)>1.);
-    BOOST_CHECK(v);
-    int v_point_index_2 = pnf.pull_near(n2/2);
-    BOOST_CHECK(v_point_index_2 == -1);
-}
-
 BOOST_AUTO_TEST_CASE(neighbors_finder) {
     Neighbors_finder nf(1.);
     for(int v_point_index=1; v_point_index<((n2+n1)*9/10); v_point_index+=2)

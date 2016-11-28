@@ -23,8 +23,18 @@
 #ifndef NEIGHBORS_FINDER_H_
 #define NEIGHBORS_FINDER_H_
 
+// Inclusion order is important for CGAL patch
+#include "CGAL/Kd_tree_node.h"
+#include "CGAL/Kd_tree.h"
+#include "CGAL/Orthogonal_incremental_neighbor_search.h"
+
+#include <CGAL/Weighted_Minkowski_distance.h>
+#include <CGAL/Search_traits.h>
+
+#include <gudhi/Persistence_diagrams_graph.h>
+#include <gudhi/Construct_coord_iterator.h>
+
 #include <unordered_set>
-#include <gudhi/Planar_neighbors_finder.h>
 
 namespace Gudhi {
 
@@ -38,6 +48,13 @@ namespace bottleneck_distance {
  * \ingroup bottleneck_distance
  */
 class Neighbors_finder {
+
+    typedef CGAL::Dimension_tag<2> D;
+    typedef CGAL::Search_traits<double, Internal_point, const double*, CGAL::Construct_coord_iterator, D> Traits;
+    typedef CGAL::Weighted_Minkowski_distance<Traits> Distance;
+    typedef CGAL::Orthogonal_incremental_neighbor_search<Traits, Distance> K_neighbor_search;
+    typedef K_neighbor_search::Tree Kd_tree;
+
 public:
     /** \internal \brief Constructor taking the near distance definition as parameter. */
     Neighbors_finder(double r);
@@ -50,10 +67,8 @@ public:
 
 private:
     const double r;
-    Planar_neighbors_finder planar_neighbors_f;
+    Kd_tree kd_t;
     std::unordered_set<int> projections_f;
-    void remove(int v_point_index);
-    bool contains(int v_point_index);
 };
 
 /** \internal \brief data structure used to find any point (including projections) in V near to a query point from U
@@ -80,46 +95,44 @@ private:
 };
 
 inline Neighbors_finder::Neighbors_finder(double r) :
-    r(r), planar_neighbors_f(r), projections_f() { }
+    r(r), kd_t(), projections_f() { }
 
 inline void Neighbors_finder::add(int v_point_index) {
     if (G::on_the_v_diagonal(v_point_index))
         projections_f.emplace(v_point_index);
     else
-        planar_neighbors_f.add(v_point_index);
-}
-
-inline void Neighbors_finder::remove(int v_point_index) {
-    if(v_point_index == null_point_index())
-        return;
-    if (G::on_the_v_diagonal(v_point_index))
-        projections_f.erase(v_point_index);
-    else
-        planar_neighbors_f.remove(v_point_index);
-}
-
-inline bool Neighbors_finder::contains(int v_point_index) {
-    return planar_neighbors_f.contains(v_point_index) || (projections_f.count(v_point_index)>0);
+        kd_t.insert(G::get_v_point(v_point_index));
 }
 
 inline int Neighbors_finder::pull_near(int u_point_index) {
     int tmp;
     int c = G::corresponding_point_in_v(u_point_index);
-    if (G::on_the_u_diagonal(u_point_index) && !projections_f.empty())
+    if (G::on_the_u_diagonal(u_point_index) && !projections_f.empty()){
         //Any pair of projection is at distance 0
         tmp = *projections_f.cbegin();
-    else if (contains(c) && (G::distance(u_point_index, c) <= r))
+        projections_f.erase(tmp);
+    }
+    else if (projections_f.count(c) && (G::distance(u_point_index, c) <= r)){
         //Is the query point near to its projection ?
         tmp = c;
-    else
+        projections_f.erase(tmp);
+    }
+    else{
         //Is the query point near to a V point in the plane ?
-        tmp = planar_neighbors_f.pull_near(u_point_index);
-    remove(tmp);
+        Internal_point u_point = G::get_u_point(u_point_index);
+        std::vector<double> w = {1., 1.};
+        K_neighbor_search search(kd_t, u_point, 0., true, Distance(0, 2, w));
+        auto it = search.begin();
+        if(it==search.end() || G::distance(u_point_index, it->first.point_index) > r)
+            return null_point_index();
+        tmp = it->first.point_index;
+        kd_t.remove(G::get_v_point(tmp));
+    }
     return tmp;
 }
 
 inline std::vector<int> Neighbors_finder::pull_all_near(int u_point_index) {
-    std::vector<int> all_pull(planar_neighbors_f.pull_all_near(u_point_index));
+    std::vector<int> all_pull;
     int last_pull = pull_near(u_point_index);
     while (last_pull != null_point_index()) {
         all_pull.emplace_back(last_pull);

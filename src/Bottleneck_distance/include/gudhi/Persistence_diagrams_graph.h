@@ -65,7 +65,7 @@ private:
     static Internal_point get_u_point(int u_point_index);
     static Internal_point get_v_point(int v_point_index);
 
-    friend class Planar_neighbors_finder;
+    friend class Neighbors_finder;
 };
 
 /** \internal \typedef \brief Shorter alias */
