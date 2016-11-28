@@ -34,7 +34,7 @@ int main(){
     std::ofstream objetfichier;
     objetfichier.open("results.csv", std::ios::out);
 
-    int n = 1200;
+    for(int n = 400; n<=2000; n+=400){
     std::uniform_real_distribution<double> unif1(0.,upper_bound);
     std::uniform_real_distribution<double> unif2(upper_bound/1000.,upper_bound/100.);
     std::default_random_engine re;
@@ -57,5 +57,6 @@ int main(){
     typedef std::chrono::duration<int,std::milli> millisecs_t;
     millisecs_t duration(std::chrono::duration_cast<millisecs_t>(end-start));
     objetfichier << n << ";" << duration.count() << ";" << b << std::endl;
+    }
     objetfichier.close();
 }
