@@ -122,8 +122,8 @@ inline int Neighbors_finder::pull_near(int u_point_index) {
     else{
         //Is the query point near to a V point in the plane ?
         Internal_point u_point = g.get_u_point(u_point_index);
-        std::vector<double> w = {1., 1.};
-        K_neighbor_search search(kd_t, u_point, 0., true, Distance(0, 2, w));
+        std::array<double, 2> w = { {1., 1.} };
+         K_neighbor_search search(kd_t, u_point, 0., true, Distance(0, 2, w.begin(), w.end()));
         auto it = search.begin();
         if(it==search.end() || g.distance(u_point_index, it->first.point_index) > r)
             return null_point_index();
