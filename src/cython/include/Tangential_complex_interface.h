@@ -28,7 +28,6 @@
 #include <gudhi/Points_off_io.h>
 #include <CGAL/Epick_d.h>
 
-#include "Persistent_cohomology_interface.h"
 #include "Simplex_tree_interface.h"
 
 #include <vector>
@@ -50,20 +49,18 @@ class Tangential_complex_interface {
   using TC = Tangential_complex<Dynamic_kernel, CGAL::Dynamic_dimension_tag, CGAL::Parallel_tag>;
 
  public:
-  Tangential_complex_interface(std::vector<std::vector<double>>&points, double max_alpha_square)
-  : pcoh_(nullptr) {
+  Tangential_complex_interface(std::vector<std::vector<double>>&points) {
     Dynamic_kernel k;
     unsigned intrisic_dim = 0;
     if (points.size() > 0)
       intrisic_dim = points[0].size();
     
     tangential_complex_ = new TC(points, intrisic_dim, k);
-    tangential_complex_->create_complex(simplex_tree_, max_alpha_square);
-    simplex_tree_.initialize_filtration();
+    tangential_complex_->compute_tangential_complex();
+    num_inconsistencies_ = tangential_complex_->number_of_inconsistent_simplices();
   }
 
-  Tangential_complex_interface(std::string off_file_name, double max_alpha_square, bool from_file = true)
-  : pcoh_(nullptr) {
+  Tangential_complex_interface(std::string off_file_name, bool from_file = true) {
     Gudhi::Points_off_reader<Point_d> off_reader(off_file_name);
     Dynamic_kernel k;
     unsigned intrisic_dim = 0;
@@ -72,103 +69,8 @@ class Tangential_complex_interface {
       intrisic_dim = points[0].size();
 
     tangential_complex_ = new TC(points, intrisic_dim, k);
-    tangential_complex_->create_complex(simplex_tree_, max_alpha_square);
-    simplex_tree_.initialize_filtration();
-  }
-
-  bool find_simplex(const Simplex& vh) {
-    return (simplex_tree_.find(vh) != simplex_tree_.null_simplex());
-  }
-
-  bool insert_simplex_and_subfaces(const Simplex& complex, Filtration_value filtration = 0) {
-    Insertion_result result = simplex_tree_.insert_simplex_and_subfaces(complex, filtration);
-    return (result.second);
-  }
-
-  Filtration_value simplex_filtration(const Simplex& complex) {
-    return simplex_tree_.filtration(simplex_tree_.find(complex));
-  }
-
-  void remove_maximal_simplex(const Simplex& complex) {
-    return simplex_tree_.remove_maximal_simplex(simplex_tree_.find(complex));
-  }
-
-  Complex_tree get_filtered_tree() {
-    Complex_tree filtered_tree;
-    for (auto f_simplex : simplex_tree_.filtration_simplex_range()) {
-      Simplex simplex;
-      for (auto vertex : simplex_tree_.simplex_vertex_range(f_simplex)) {
-        simplex.insert(simplex.begin(), vertex);
-      }
-      filtered_tree.push_back(std::make_pair(simplex, simplex_tree_.filtration(f_simplex)));
-    }
-    return filtered_tree;
-
-  }
-
-  Complex_tree get_skeleton_tree(int dimension) {
-    Complex_tree skeleton_tree;
-    for (auto f_simplex : simplex_tree_.skeleton_simplex_range(dimension)) {
-      Simplex simplex;
-      for (auto vertex : simplex_tree_.simplex_vertex_range(f_simplex)) {
-        simplex.insert(simplex.begin(), vertex);
-      }
-      skeleton_tree.push_back(std::make_pair(simplex, simplex_tree_.filtration(f_simplex)));
-    }
-    return skeleton_tree;
-  }
-
-  Complex_tree get_star_tree(const Simplex& complex) {
-    Complex_tree star_tree;
-    for (auto f_simplex : simplex_tree_.star_simplex_range(simplex_tree_.find(complex))) {
-      Simplex simplex;
-      for (auto vertex : simplex_tree_.simplex_vertex_range(f_simplex)) {
-        simplex.insert(simplex.begin(), vertex);
-      }
-      star_tree.push_back(std::make_pair(simplex, simplex_tree_.filtration(f_simplex)));
-    }
-    return star_tree;
-  }
-
-  Complex_tree get_coface_tree(const Simplex& complex, int dimension) {
-    Complex_tree coface_tree;
-    for (auto f_simplex : simplex_tree_.cofaces_simplex_range(simplex_tree_.find(complex), dimension)) {
-      Simplex simplex;
-      for (auto vertex : simplex_tree_.simplex_vertex_range(f_simplex)) {
-        simplex.insert(simplex.begin(), vertex);
-      }
-      coface_tree.push_back(std::make_pair(simplex, simplex_tree_.filtration(f_simplex)));
-    }
-    return coface_tree;
-  }
-
-  // Specific to Witness complex because no inheritance
-  Filtration_value filtration() const {
-    return simplex_tree_.filtration();
-  }
-
-  void set_filtration(Filtration_value fil) {
-    simplex_tree_.set_filtration(fil);
-  }
-
-  void initialize_filtration() {
-    simplex_tree_.initialize_filtration();
-  }
-
-  size_t num_vertices() const {
-    return simplex_tree_.num_vertices();
-  }
-
-  size_t num_simplices() {
-    return simplex_tree_.num_simplices();
-  }
-
-  int dimension() const {
-    return simplex_tree_.dimension();
-  }
-
-  void set_dimension(int dimension) {
-    simplex_tree_.set_dimension(dimension);
+    tangential_complex_->compute_tangential_complex();
+    num_inconsistencies_ = tangential_complex_->number_of_inconsistent_simplices();
   }
 
   std::vector<double> get_point(int vh) {
@@ -183,34 +85,30 @@ class Tangential_complex_interface {
     return vd;
   }
 
-  std::vector<std::pair<int, std::pair<double, double>>> get_persistence(int homology_coeff_field, double min_persistence) {
-    if (pcoh_ != nullptr) {
-      delete pcoh_;
-    }
-    pcoh_ = new Persistent_cohomology_interface<Simplex_tree<>>(&simplex_tree_);
-    return pcoh_->get_persistence(homology_coeff_field, min_persistence);
-  }
-  
-  std::vector<int> get_betti_numbers() const {
-    if (pcoh_ != nullptr) {
-      return pcoh_->betti_numbers();
-    }
-    std::vector<int> betti_numbers;
-    return betti_numbers;
+  unsigned number_of_vertices() {
+    return tangential_complex_->number_of_vertices();
   }
 
-  std::vector<int> get_persistent_betti_numbers(Filtration_value from, Filtration_value to) const {
-    if (pcoh_ != nullptr) {
-      return pcoh_->persistent_betti_numbers(from, to);
-    }
-    std::vector<int> persistent_betti_numbers;
-    return persistent_betti_numbers;
+  unsigned number_of_simplices() {
+    return num_inconsistencies_.num_simplices;
   }
-  
+
+  unsigned number_of_inconsistent_simplices() {
+    return num_inconsistencies_.num_inconsistent_simplices;
+  }
+
+  unsigned number_of_inconsistent_stars() {
+    return num_inconsistencies_.num_inconsistent_stars;
+  }
+
+  void create_simplex_tree(Simplex_tree<>& simplex_tree) {
+    tangential_complex_->create_complex<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>(simplex_tree);
+    simplex_tree.initialize_filtration();
+  }
+
  private:
-  Simplex_tree<> simplex_tree_;
-  Persistent_cohomology_interface<Simplex_tree<>>* pcoh_;
   TC* tangential_complex_;
+  TC::Num_inconsistencies num_inconsistencies_;
 };
 
 }  // namespace tangential_complex
