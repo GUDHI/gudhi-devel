@@ -48,6 +48,11 @@ Simplex tree
 
 .. include:: simplex_tree_sum.rst
 
+Tangential complex
+==================
+
+.. include:: tangential_complex_sum.rst
+
 Witness complex
 ===============
 

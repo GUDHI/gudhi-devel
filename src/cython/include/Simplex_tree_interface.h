@@ -28,6 +28,8 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Points_off_io.h>
 
+#include "Persistent_cohomology_interface.h"
+
 #include <vector>
 #include <utility>  // std::pair
 #include <iostream>
@@ -69,10 +71,8 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     for (auto f_simplex : Simplex_tree<SimplexTreeOptions>::filtration_simplex_range()) {
       Simplex simplex;
       for (auto vertex : Simplex_tree<SimplexTreeOptions>::simplex_vertex_range(f_simplex)) {
-        std::cout << " " << vertex;
         simplex.insert(simplex.begin(), vertex);
       }
-      std::cout << std::endl;
       filtered_tree.push_back(std::make_pair(simplex, Simplex_tree<SimplexTreeOptions>::filtration(f_simplex)));
     }
     return filtered_tree;
@@ -135,6 +135,10 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
       Simplex_tree<SimplexTreeOptions>::expansion(max_dimension);
       Simplex_tree<SimplexTreeOptions>::initialize_filtration();
     }
+  }
+
+  void create_persistence(Gudhi::Persistent_cohomology_interface<Simplex_tree<SimplexTreeOptions>>* pcoh) {
+    pcoh = new Gudhi::Persistent_cohomology_interface<Simplex_tree<SimplexTreeOptions>>(*this);
   }
 
 };

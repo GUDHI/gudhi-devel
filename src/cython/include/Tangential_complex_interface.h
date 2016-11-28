@@ -29,6 +29,7 @@
 #include <CGAL/Epick_d.h>
 
 #include "Persistent_cohomology_interface.h"
+#include "Simplex_tree_interface.h"
 
 #include <vector>
 #include <utility>  // std::pair

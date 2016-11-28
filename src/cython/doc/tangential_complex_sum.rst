@@ -12,5 +12,5 @@
 |                                           | extrinsic dimension :math:`d` and exponentially on the intrinsic     |
 |                                           | dimension :math:`k`.                                                 |
 +-------------------------------------------+----------------------------------------------------------------------+
-| :doc:`tangential_complex_user`            | :doc:`tangential_complex_ref`                                             |
+| :doc:`tangential_complex_user`            | :doc:`tangential_complex_ref`                                        |
 +-------------------------------------------+----------------------------------------------------------------------+

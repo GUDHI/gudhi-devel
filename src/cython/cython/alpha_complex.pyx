@@ -37,27 +37,7 @@ cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
         Alpha_complex_interface(vector[vector[double]] points)
         # bool from_file is a workaround for cython to find the correct signature
         Alpha_complex_interface(string off_file, bool from_file)
-        double filtration()
-        double simplex_filtration(vector[int] simplex)
-        void set_filtration(double filtration)
-        void initialize_filtration()
-        int num_vertices()
-        int num_simplices()
-        void set_dimension(int dimension)
-        int dimension()
-        bint find_simplex(vector[int] simplex)
-        bint insert_simplex_and_subfaces(vector[int] simplex,
-                                         double filtration)
-        vector[pair[vector[int], double]] get_filtered_tree()
-        vector[pair[vector[int], double]] get_skeleton_tree(int dimension)
-        vector[pair[vector[int], double]] get_star_tree(vector[int] simplex)
-        vector[pair[vector[int], double]] get_coface_tree(vector[int] simplex,
-                                                          int dimension)
-        void remove_maximal_simplex(vector[int] simplex)
         vector[double] get_point(int vertex)
-        vector[pair[int, pair[double, double]]] get_persistence(int homology_coeff_field, double min_persistence)
-        vector[int] get_betti_numbers()
-        vector[int] get_persistent_betti_numbers(double from_value, double to_value)
         void create_simplex_tree(Simplex_tree_interface_full_featured simplex_tree, double max_alpha_square)
 
 # AlphaComplex python interface
@@ -119,7 +99,7 @@ cdef class AlphaComplex:
         """This function returns the point corresponding to a given vertex.
 
         :param vertex: The vertex.
-        :type vertex: int.
+        :type vertex: int
         :returns:  list of float -- the point.
         """
         cdef vector[double] point = self.thisptr.get_point(vertex)
@@ -130,9 +110,9 @@ cdef class AlphaComplex:
         Triangulation.
 
         :param simplex_tree: The simplex tree to create (must be empty)
-        :type simplex tree: gudhi.SimplexTree.
+        :type simplex_tree: SimplexTree
         :param max_alpha_square: The maximum alpha square threshold the
             simplices shall not exceed. Default is set to infinity.
-        :type max_alpha_square: float.
+        :type max_alpha_square: float
         """
         self.thisptr.create_simplex_tree(deref(simplex_tree.thisptr), max_alpha_square)
