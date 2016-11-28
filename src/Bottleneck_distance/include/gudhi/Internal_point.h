@@ -35,7 +35,7 @@ struct Internal_point {
     double vec[2];
     int point_index;
     Internal_point() {}
-    Internal_point(double x, double y, int p_i = null_point_index()) { vec[0]=x; vec[1]=y; point_index = p_i; }
+    Internal_point(double x, double y, int p_i) { vec[0]=x; vec[1]=y; point_index = p_i; }
     double x() const { return vec[ 0 ]; }
     double y() const { return vec[ 1 ]; }
     double& x() { return vec[ 0 ]; }
@@ -44,7 +44,7 @@ struct Internal_point {
     {
         return point_index==p.point_index;
     }
-    bool  operator!=(const Internal_point& p) const { return ! (*this == p); }
+    bool  operator!=(const Internal_point& p) const { return !(*this == p); }
 };
 
 inline int null_point_index() {
@@ -54,5 +54,19 @@ inline int null_point_index() {
 }  // namespace bottleneck_distance
 
 }  // namespace Gudhi
+
+namespace CGAL {
+
+typedef Gudhi::bottleneck_distance::Internal_point Internal_point;
+
+struct Construct_coord_iterator {
+    typedef  const double* result_type;
+    const double* operator()(const Internal_point& p) const
+    { return p.vec; }
+    const double* operator()(const Internal_point& p, int)  const
+    { return p.vec+2; }
+};
+
+} //namespace CGAL
 
 #endif  // INTERNAL_POINT_H_

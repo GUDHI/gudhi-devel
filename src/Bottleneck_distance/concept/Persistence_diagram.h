@@ -41,8 +41,8 @@ struct Diagram_point{
  */
 struct Persistence_Diagram
 {
-    const_iterator<Diagram_point> begin();
-    const_iterator<Diagram_point> end();
+    iterator<Diagram_point> begin();
+    iterator<Diagram_point> end();
 };
 
 }  // namespace bottleneck_distance

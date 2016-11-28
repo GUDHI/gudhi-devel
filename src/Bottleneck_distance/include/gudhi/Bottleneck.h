@@ -31,14 +31,14 @@ namespace bottleneck_distance {
 
 template<typename Persistence_diagram1, typename Persistence_diagram2>
 double compute_exactly(const Persistence_diagram1 &diag1, const Persistence_diagram2 &diag2) {
-    G::initialize(diag1, diag2, 0.);
-    std::vector<double> sd(G::sorted_distances());
+    Persistence_graph g(diag1, diag2, 0.);
+    std::vector<double> sd(g.sorted_distances());
     int idmin = 0;
     int idmax = sd.size() - 1;
-    // alpha can be modified, this will change the complexity
+    // alpha can change the complexity
     double alpha = pow(sd.size(), 0.25);
-    Graph_matching m;
-    Graph_matching biggest_unperfect;
+    Graph_matching m(g);
+    Graph_matching biggest_unperfect(g);
     while (idmin != idmax) {
         int step = static_cast<int>((idmax - idmin) / alpha);
         m.set_r(sd.at(idmin + step));
@@ -64,14 +64,14 @@ template<typename Persistence_diagram1, typename Persistence_diagram2>
 double compute(const Persistence_diagram1 &diag1, const Persistence_diagram2 &diag2, double e=0.) {
     if(e == 0.)
         return compute_exactly(diag1, diag2);
-    G::initialize(diag1, diag2, e);
-    int in = G::diameter()/e + 1;
+    Persistence_graph g(diag1, diag2, e);
+    int in = g.diameter_bound()/e + 1;
     int idmin = 0;
     int idmax = in;
-    // alpha can be modified, this will change the complexity
-    double alpha = pow(in, 0.25);
-    Graph_matching m;
-    Graph_matching biggest_unperfect;
+    // alpha can change the complexity
+    double alpha = pow(in, 0.10);
+    Graph_matching m(g);
+    Graph_matching biggest_unperfect(g);
     while (idmin != idmax) {
         int step = static_cast<int>((idmax - idmin) / alpha);
         m.set_r(e*(idmin + step));

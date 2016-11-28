@@ -31,8 +31,8 @@
 #include <CGAL/Weighted_Minkowski_distance.h>
 #include <CGAL/Search_traits.h>
 
-#include <gudhi/Persistence_diagrams_graph.h>
-#include <gudhi/Construct_coord_iterator.h>
+#include <gudhi/Persistence_graph.h>
+#include <gudhi/Internal_point.h>
 
 #include <unordered_set>
 
@@ -57,7 +57,7 @@ class Neighbors_finder {
 
 public:
     /** \internal \brief Constructor taking the near distance definition as parameter. */
-    Neighbors_finder(double r);
+    Neighbors_finder(const Persistence_graph& g, double r);
     /** \internal \brief A point added will be possibly pulled. */
     void add(int v_point_index);
     /** \internal \brief Returns and remove a V point near to the U point given as parameter, null_point_index() if there isn't such a point. */
@@ -66,6 +66,7 @@ public:
     std::vector<int> pull_all_near(int u_point_index);
 
 private:
+    const Persistence_graph& g;
     const double r;
     Kd_tree kd_t;
     std::unordered_set<int> projections_f;
@@ -81,7 +82,7 @@ private:
 class Layered_neighbors_finder {
 public:
     /** \internal \brief Constructor taking the near distance definition as parameter. */
-    Layered_neighbors_finder(double r);
+    Layered_neighbors_finder(const Persistence_graph& g, double r);
     /** \internal \brief A point added will be possibly pulled. */
     void add(int v_point_index, int vlayer);
     /** \internal \brief Returns and remove a V point near to the U point given as parameter, null_point_index() if there isn't such a point. */
@@ -90,43 +91,44 @@ public:
     int vlayers_number() const;
 
 private:
+    const Persistence_graph& g;
     const double r;
     std::vector<std::shared_ptr<Neighbors_finder>> neighbors_finder;
 };
 
-inline Neighbors_finder::Neighbors_finder(double r) :
-    r(r), kd_t(), projections_f() { }
+inline Neighbors_finder::Neighbors_finder(const Persistence_graph& g, double r) :
+    g(g), r(r), kd_t(), projections_f() { }
 
 inline void Neighbors_finder::add(int v_point_index) {
-    if (G::on_the_v_diagonal(v_point_index))
+    if (g.on_the_v_diagonal(v_point_index))
         projections_f.emplace(v_point_index);
     else
-        kd_t.insert(G::get_v_point(v_point_index));
+        kd_t.insert(g.get_v_point(v_point_index));
 }
 
 inline int Neighbors_finder::pull_near(int u_point_index) {
     int tmp;
-    int c = G::corresponding_point_in_v(u_point_index);
-    if (G::on_the_u_diagonal(u_point_index) && !projections_f.empty()){
+    int c = g.corresponding_point_in_v(u_point_index);
+    if (g.on_the_u_diagonal(u_point_index) && !projections_f.empty()){
         //Any pair of projection is at distance 0
         tmp = *projections_f.cbegin();
         projections_f.erase(tmp);
     }
-    else if (projections_f.count(c) && (G::distance(u_point_index, c) <= r)){
+    else if (projections_f.count(c) && (g.distance(u_point_index, c) <= r)){
         //Is the query point near to its projection ?
         tmp = c;
         projections_f.erase(tmp);
     }
     else{
         //Is the query point near to a V point in the plane ?
-        Internal_point u_point = G::get_u_point(u_point_index);
+        Internal_point u_point = g.get_u_point(u_point_index);
         std::vector<double> w = {1., 1.};
         K_neighbor_search search(kd_t, u_point, 0., true, Distance(0, 2, w));
         auto it = search.begin();
-        if(it==search.end() || G::distance(u_point_index, it->first.point_index) > r)
+        if(it==search.end() || g.distance(u_point_index, it->first.point_index) > r)
             return null_point_index();
         tmp = it->first.point_index;
-        kd_t.remove(G::get_v_point(tmp));
+        kd_t.remove(g.get_v_point(tmp));
     }
     return tmp;
 }
@@ -141,12 +143,12 @@ inline std::vector<int> Neighbors_finder::pull_all_near(int u_point_index) {
     return all_pull;
 }
 
-inline Layered_neighbors_finder::Layered_neighbors_finder(double r) :
-    r(r), neighbors_finder() { }
+inline Layered_neighbors_finder::Layered_neighbors_finder(const Persistence_graph& g, double r) :
+    g(g), r(r), neighbors_finder() { }
 
 inline void Layered_neighbors_finder::add(int v_point_index, int vlayer) {
     for (int l = neighbors_finder.size(); l <= vlayer; l++)
-        neighbors_finder.emplace_back(std::shared_ptr<Neighbors_finder>(new Neighbors_finder(r)));
+        neighbors_finder.emplace_back(std::shared_ptr<Neighbors_finder>(new Neighbors_finder(g, r)));
     neighbors_finder.at(vlayer)->add(v_point_index);
 }
 
