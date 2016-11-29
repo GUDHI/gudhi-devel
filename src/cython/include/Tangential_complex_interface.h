@@ -73,14 +73,12 @@ class Tangential_complex_interface {
     num_inconsistencies_ = tangential_complex_->number_of_inconsistent_simplices();
   }
 
-  std::vector<double> get_point(int vh) {
+  std::vector<double> get_point(unsigned vh) {
     std::vector<double> vd;
-    try {
+    if (vh < tangential_complex_->number_of_vertices()) {
       Point_d ph = tangential_complex_->get_point(vh);
       for (auto coord = ph.cartesian_begin(); coord < ph.cartesian_end(); coord++)
         vd.push_back(*coord);
-    } catch (std::out_of_range outofrange) {
-      // std::out_of_range is thrown in case not found. Other exceptions must be re-thrown
     }
     return vd;
   }
@@ -101,9 +99,11 @@ class Tangential_complex_interface {
     return num_inconsistencies_.num_inconsistent_stars;
   }
 
-  void create_simplex_tree(Simplex_tree<>& simplex_tree) {
-    tangential_complex_->create_complex<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>(simplex_tree);
-    simplex_tree.initialize_filtration();
+  void create_simplex_tree(Simplex_tree<>* simplex_tree) {
+    int max_dim = tangential_complex_->create_complex<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>(*simplex_tree);
+    // FIXME
+    simplex_tree->set_dimension(max_dim);
+    simplex_tree->initialize_filtration();
   }
 
  private:

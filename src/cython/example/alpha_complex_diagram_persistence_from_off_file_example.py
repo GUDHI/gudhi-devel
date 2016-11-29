@@ -53,8 +53,7 @@ with open(args.file, 'r') as f:
         print(message)
         
         alpha_complex = gudhi.AlphaComplex(off_file=args.file)
-        simplex_tree = gudhi.SimplexTree()
-        alpha_complex.create_simplex_tree(simplex_tree, max_alpha_square=args.max_alpha_square)
+        simplex_tree = alpha_complex.create_simplex_tree(max_alpha_square=args.max_alpha_square)
     
         message = "Number of simplices=" + repr(simplex_tree.num_simplices())
         print(message)

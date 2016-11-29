@@ -111,20 +111,55 @@ itself and/or after the perturbation process.
 Simple example
 --------------
 
-This example builds the Tangential complex of point set. Note that the
-dimension of the kernel here is dynamic, which is slower, but more flexible:
-the intrinsic and ambient dimensions does not have to be known at compile-time.
+This example builds the Tangential complex of point set.
 
-testcode::
+.. testcode::
 
-   import gudhi
-   tc = gudhi.TangentialComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]])
+    import gudhi
+    tc = gudhi.TangentialComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]])
+    result_str = 'Tangential contains ' + repr(tc.num_simplices()) + \
+        ' simplices - ' + repr(tc.num_vertices()) + ' vertices.'
+    print(result_str)
+
+    st = tc.create_simplex_tree()
+    result_str = 'Simplex tree is of dimension ' + repr(st.dimension()) + \
+        ' - ' + repr(st.num_simplices()) + ' simplices - ' + \
+        repr(st.num_vertices()) + ' vertices.'
+    print(result_str)
+    for filtered_value in st.get_filtered_tree():
+        print(filtered_value)
 
 The output is:
 
-testoutput::
+.. testoutput::
 
-   Tangential complex is of dimension 2 - 25 simplices - 7 vertices.
+    Tangential contains 18 simplices - 7 vertices.
+    Simplex tree is of dimension 2 - 25 simplices - 7 vertices.
+    ([0], 0.0)
+    ([1], 0.0)
+    ([0, 1], 0.0)
+    ([2], 0.0)
+    ([0, 2], 0.0)
+    ([1, 2], 0.0)
+    ([0, 1, 2], 0.0)
+    ([3], 0.0)
+    ([1, 3], 0.0)
+    ([2, 3], 0.0)
+    ([1, 2, 3], 0.0)
+    ([4], 0.0)
+    ([0, 4], 0.0)
+    ([2, 4], 0.0)
+    ([0, 2, 4], 0.0)
+    ([5], 0.0)
+    ([4, 5], 0.0)
+    ([6], 0.0)
+    ([2, 6], 0.0)
+    ([3, 6], 0.0)
+    ([2, 3, 6], 0.0)
+    ([4, 6], 0.0)
+    ([2, 4, 6], 0.0)
+    ([5, 6], 0.0)
+    ([4, 5, 6], 0.0)
 
 
 Example with perturbation

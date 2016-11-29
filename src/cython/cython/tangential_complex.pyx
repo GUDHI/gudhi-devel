@@ -37,12 +37,12 @@ cdef extern from "Tangential_complex_interface.h" namespace "Gudhi":
         Tangential_complex_interface(vector[vector[double]] points)
         # bool from_file is a workaround for cython to find the correct signature
         Tangential_complex_interface(string off_file, bool from_file)
-        vector[double] get_point(int vertex)
+        vector[double] get_point(unsigned vertex)
         unsigned number_of_vertices()
         unsigned number_of_simplices()
         unsigned number_of_inconsistent_simplices()
         unsigned number_of_inconsistent_stars()
-        void create_simplex_tree(Simplex_tree_interface_full_featured simplex_tree)
+        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree)
 
 # TangentialComplex python interface
 cdef class TangentialComplex:
@@ -137,11 +137,15 @@ cdef class TangentialComplex:
         """
         return self.thisptr.number_of_inconsistent_stars()
 
-    def create_simplex_tree(self, SimplexTree simplex_tree):
+    def create_simplex_tree(self):
         """This function creates the given simplex tree from the Delaunay
         Triangulation.
 
         :param simplex_tree: The simplex tree to create (must be empty)
         :type simplex_tree: SimplexTree
+        :returns: A simplex tree created from the Delaunay Triangulation.
+        :rtype: SimplexTree
         """
-        self.thisptr.create_simplex_tree(deref(simplex_tree.thisptr))
+        simplex_tree = SimplexTree()
+        self.thisptr.create_simplex_tree(simplex_tree.thisptr)
+        return simplex_tree

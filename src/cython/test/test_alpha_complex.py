@@ -36,8 +36,7 @@ def test_infinite_alpha():
     alpha_complex = AlphaComplex(points=point_list)
     assert alpha_complex.__is_defined() == True
 
-    simplex_tree = SimplexTree()
-    alpha_complex.create_simplex_tree(simplex_tree)
+    simplex_tree = alpha_complex.create_simplex_tree()
     assert simplex_tree.__is_persistence_defined() == False
 
     assert simplex_tree.num_simplices() == 11
@@ -65,8 +64,7 @@ def test_filtered_alpha():
     point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
     filtered_alpha = AlphaComplex(points=point_list)
 
-    simplex_tree = SimplexTree()
-    filtered_alpha.create_simplex_tree(simplex_tree, max_alpha_square=0.25)
+    simplex_tree = filtered_alpha.create_simplex_tree(max_alpha_square=0.25)
 
     assert simplex_tree.num_simplices() == 8
     assert simplex_tree.num_vertices() == 4

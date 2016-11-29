@@ -31,8 +31,7 @@ __license__ = "GPL v3"
 print("#####################################################################")
 print("AlphaComplex creation from points")
 alpha_complex = AlphaComplex(points=[[0, 0], [1, 0], [0, 1], [1, 1]])
-simplex_tree = SimplexTree()
-alpha_complex.create_simplex_tree(simplex_tree, max_alpha_square=60.0)
+simplex_tree = alpha_complex.create_simplex_tree(max_alpha_square=60.0)
 
 if simplex_tree.find([0, 1]):
     print("[0, 1] Found !!")

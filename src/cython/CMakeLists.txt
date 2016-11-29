@@ -29,6 +29,10 @@ if(PYTHON_PATH AND CYTHON_PATH)
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
       set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-fp-model strict', ")
     endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+    if (DEBUG_TRACES)
+      # For programs to be more verbose
+      set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DDEBUG_TRACES', ")
+    endif()
   
     find_package(Eigen3 3.1.0)
     

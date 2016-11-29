@@ -38,7 +38,7 @@ cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
         # bool from_file is a workaround for cython to find the correct signature
         Alpha_complex_interface(string off_file, bool from_file)
         vector[double] get_point(int vertex)
-        void create_simplex_tree(Simplex_tree_interface_full_featured simplex_tree, double max_alpha_square)
+        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square)
 
 # AlphaComplex python interface
 cdef class AlphaComplex:
@@ -100,19 +100,20 @@ cdef class AlphaComplex:
 
         :param vertex: The vertex.
         :type vertex: int
-        :returns:  list of float -- the point.
+        :rtype: list of float
+        :returns: the point.
         """
         cdef vector[double] point = self.thisptr.get_point(vertex)
         return point
 
-    def create_simplex_tree(self, SimplexTree simplex_tree, max_alpha_square=float('inf')):
-        """This function creates the given simplex tree from the Delaunay
-        Triangulation.
-
-        :param simplex_tree: The simplex tree to create (must be empty)
-        :type simplex_tree: SimplexTree
+    def create_simplex_tree(self, max_alpha_square=float('inf')):
+        """
         :param max_alpha_square: The maximum alpha square threshold the
             simplices shall not exceed. Default is set to infinity.
         :type max_alpha_square: float
+        :returns: A simplex tree created from the Delaunay Triangulation.
+        :rtype: SimplexTree
         """
-        self.thisptr.create_simplex_tree(deref(simplex_tree.thisptr), max_alpha_square)
+        simplex_tree = SimplexTree()
+        self.thisptr.create_simplex_tree(simplex_tree.thisptr, max_alpha_square)
+        return simplex_tree
