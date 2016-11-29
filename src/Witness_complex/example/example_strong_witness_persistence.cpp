@@ -62,7 +62,7 @@ int main(int argc, char * argv[]) {
   Strong_witness_complex strong_witness_complex(landmarks,
                                                 witnesses);
   
-  strong_witness_complex.create_complex(simplex_tree, max_squared_alpha);
+  strong_witness_complex.create_complex(simplex_tree, max_squared_alpha, lim_d);
   
   std::cout << "The complex contains " << simplex_tree.num_simplices() << " simplices \n";
   std::cout << "   and has dimension " << simplex_tree.dimension() << " \n";
