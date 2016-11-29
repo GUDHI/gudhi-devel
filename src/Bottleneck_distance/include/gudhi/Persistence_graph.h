@@ -24,7 +24,7 @@
 #define PERSISTENCE_GRAPH_H_
 
 #include <vector>
-#include <set>
+#include <algorithm>
 #include <gudhi/Internal_point.h>
 
 namespace Gudhi {
@@ -39,7 +39,7 @@ namespace bottleneck_distance {
  */
 class Persistence_graph {
 public:
-    /** \internal \brief Initializer taking 2 Point (concept) ranges as parameters. */
+    /** \internal \brief Constructor taking 2 Persistence_Diagrams (concept) as parameters. */
     template<typename Persistence_diagram1, typename Persistence_diagram2>
     Persistence_graph(const Persistence_diagram1& diag1, const Persistence_diagram2& diag2, double e);
     /** \internal \brief Is the given point from U the projection of a point in V ? */
@@ -54,9 +54,11 @@ public:
     double distance(int u_point_index, int v_point_index) const;
     /** \internal \brief Returns size = |U| = |V|. */
     int size() const;
+    /** \internal \brief Is there as many infinite points (alive components) in both diagrams ? */
+    bool alive_match() const;
     /** \internal \brief Returns the O(n^2) sorted distances between the points. */
     std::vector<double> sorted_distances() const;
-    /** \internal \brief Returns an upper bound of the diameter of the convex hull */
+    /** \internal \brief Returns an upper bound for the diameter of the convex hull of all non infinite points */
     double diameter_bound() const;
     /** \internal \brief Returns the corresponding internal point */
     Internal_point get_u_point(int u_point_index) const;
@@ -66,18 +68,23 @@ public:
 private:
     std::vector<Internal_point> u;
     std::vector<Internal_point> v;
+    int alive_count;
 };
 
 template<typename Persistence_diagram1, typename Persistence_diagram2>
 Persistence_graph::Persistence_graph(const Persistence_diagram1 &diag1,
                                      const Persistence_diagram2 &diag2, double e)
-    : u(), v()
+    : u(), v(), alive_count(0)
 {
     for (auto it = diag1.cbegin(); it != diag1.cend(); ++it)
-        if (it->second != std::numeric_limits<double>::infinity() && it->second - it->first > e)
+        if(it->second == std::numeric_limits<double>::infinity())
+            alive_count++;
+        else if (it->second - it->first > e)
             u.push_back(Internal_point(std::get<0>(*it), std::get<1>(*it), u.size()));
     for (auto it = diag2.cbegin(); it != diag2.cend(); ++it)
-        if (it->second != std::numeric_limits<double>::infinity() && it->second - it->first > e)
+        if(it->second == std::numeric_limits<double>::infinity())
+            alive_count--;
+        else if (it->second - it->first > e)
             v.push_back(Internal_point(std::get<0>(*it), std::get<1>(*it), v.size()));
     if (u.size() < v.size())
         swap(u, v);
@@ -113,15 +120,20 @@ inline int Persistence_graph::size() const {
     return static_cast<int> (u.size() + v.size());
 }
 
+inline bool Persistence_graph::alive_match() const{
+    return alive_count==0;
+}
+
 inline std::vector<double> Persistence_graph::sorted_distances() const {
-    // could be optimized
-    std::set<double> sorted_distances;
-    sorted_distances.emplace(0.);
-    for (int u_point_index = 0; u_point_index < size(); ++u_point_index)
+    std::vector<double> distances;
+    distances.push_back(0.);
+    for (int u_point_index = 0; u_point_index < size(); ++u_point_index){
+        distances.push_back(distance(u_point_index, corresponding_point_in_v(u_point_index)));
         for (int v_point_index = 0; v_point_index < size(); ++v_point_index)
-            sorted_distances.emplace(distance(u_point_index, v_point_index));
-    sorted_distances.emplace(std::numeric_limits<double>::infinity());
-    return std::vector<double>(sorted_distances.begin(),sorted_distances.end());
+            distances.push_back(distance(u_point_index, v_point_index));
+    }
+    std::sort(distances.begin(), distances.end());
+    return distances;
 }
 
 inline Internal_point Persistence_graph::get_u_point(int u_point_index) const {

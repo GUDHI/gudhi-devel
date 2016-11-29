@@ -37,17 +37,19 @@ namespace bottleneck_distance {
 template<typename Persistence_diagram1, typename Persistence_diagram2>
 double compute(const Persistence_diagram1 &diag1, const Persistence_diagram2 &diag2, double e=0.) {
     Persistence_graph g(diag1, diag2, e);
+    if(!g.alive_match())
+        return std::numeric_limits<double>::infinity();
     std::vector<double> sd;
     if(e == 0.)
         sd = g.sorted_distances();
-    int idmin = 0;
-    int idmax = e==0. ? sd.size() - 1 : g.diameter_bound()/e + 1;
+    long idmin = 0;
+    long idmax = e==0. ? sd.size() - 1 : g.diameter_bound()/e + 1;
     // alpha can change the complexity
     double alpha = pow(idmax, 0.25);
     Graph_matching m(g);
     Graph_matching biggest_unperfect(g);
     while (idmin != idmax) {
-        int step = static_cast<int>((idmax - idmin) / alpha);
+        long step = static_cast<long>((idmax - idmin) / alpha);
         m.set_r(e == 0. ?  sd.at(idmin + step) : e*(idmin + step));
         while (m.multi_augment());
         //The above while compute a maximum matching (according to the r setted before)

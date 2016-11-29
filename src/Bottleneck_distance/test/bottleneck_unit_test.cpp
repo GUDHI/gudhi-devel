@@ -70,25 +70,25 @@ BOOST_AUTO_TEST_CASE(persistence_graph){
     //
     BOOST_CHECK(g.size()==(n1+n2));
     //
-    BOOST_CHECK((int) d.size() <= (n1+n2)*(n1+n2) - n1*n2 + 2);
-    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(0,0))==1);
-    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(0,n1-1))==1);
-    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(0,n1))==1);
-    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(0,n2-1))==1);
-    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(0,n2))==1);
-    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(0,(n1+n2)-1))==1);
-    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(n1,0))==1);
-    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(n1,n1-1))==1);
-    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(n1,n1))==1);
-    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(n1,n2-1))==1);
-    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(n1,n2))==1);
-    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(n1,(n1+n2)-1))==1);
-    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance((n1+n2)-1,0))==1);
-    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance((n1+n2)-1,n1-1))==1);
-    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance((n1+n2)-1,n1))==1);
-    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance((n1+n2)-1,n2-1))==1);
-    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance((n1+n2)-1,n2))==1);
-    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance((n1+n2)-1,(n1+n2)-1))==1);
+    BOOST_CHECK((int) d.size() == (n1+n2)*(n1+n2) + n1 + n2 + 1);
+    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(0,0))>0);
+    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(0,n1-1))>0);
+    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(0,n1))>0);
+    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(0,n2-1))>0);
+    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(0,n2))>0);
+    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(0,(n1+n2)-1))>0);
+    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(n1,0))>0);
+    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(n1,n1-1))>0);
+    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(n1,n1))>0);
+    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(n1,n2-1))>0);
+    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(n1,n2))>0);
+    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(n1,(n1+n2)-1))>0);
+    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance((n1+n2)-1,0))>0);
+    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance((n1+n2)-1,n1-1))>0);
+    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance((n1+n2)-1,n1))>0);
+    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance((n1+n2)-1,n2-1))>0);
+    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance((n1+n2)-1,n2))>0);
+    BOOST_CHECK(std::count(d.begin(), d.end(), g.distance((n1+n2)-1,(n1+n2)-1))>0);
 }
 
 BOOST_AUTO_TEST_CASE(neighbors_finder) {
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(graph_matching) {
 
 BOOST_AUTO_TEST_CASE(global){
     std::uniform_real_distribution<double> unif1(0.,upper_bound);
-    std::uniform_real_distribution<double> unif2(upper_bound/1000.,upper_bound/100.);
+    std::uniform_real_distribution<double> unif2(upper_bound/10000.,upper_bound/100.);
     std::default_random_engine re;
     std::vector< std::pair<double, double> > v1, v2;
     for (int i = 0; i < n1; i++) {
@@ -162,5 +162,6 @@ BOOST_AUTO_TEST_CASE(global){
             v2.emplace_back(std::max(a,b),std::max(a,b)+y);
     }
     BOOST_CHECK(compute(v1, v2) <= upper_bound/100.);
-    BOOST_CHECK(compute(v1, v2, upper_bound/1000.) <= upper_bound/100. + upper_bound/1000.);
+    BOOST_CHECK(compute(v1, v2, upper_bound/10000.) <= upper_bound/100. + upper_bound/10000.);
+    BOOST_CHECK(std::abs(compute(v1, v2) - compute(v1, v2, upper_bound/10000.)) <=  upper_bound/10000.);
 }
