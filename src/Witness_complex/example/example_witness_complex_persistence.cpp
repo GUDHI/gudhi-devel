@@ -115,7 +115,7 @@ void program_options(int argc, char * argv[]
       ("output-file,o", po::value<std::string>(&filediag)->default_value(std::string()),
        "Name of file in which the persistence diagram is written. Default print in std::cout")
       ("max-sq-alpha,a", po::value<Filtration_value>(&max_squared_alpha)->default_value(std::numeric_limits<Filtration_value>::infinity()),
-       "Maximal length of an edge for the Rips complex construction.")
+       "Maximal squared relaxation parameter.")
       ("field-charac,p", po::value<int>(&p)->default_value(11),
        "Characteristic p of the coefficient field Z/pZ for computing homology.")
       ("min-persistence,m", po::value<Filtration_value>(&min_persistence)->default_value(0),
