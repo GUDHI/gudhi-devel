@@ -74,10 +74,10 @@ Persistence_graph::Persistence_graph(const Persistence_diagram1 &diag1,
     : u(), v()
 {
     for (auto it = diag1.cbegin(); it != diag1.cend(); ++it)
-        if (it->second - it->first > e)
+        if (it->second != std::numeric_limits<double>::infinity() && it->second - it->first > e)
             u.push_back(Internal_point(std::get<0>(*it), std::get<1>(*it), u.size()));
     for (auto it = diag2.cbegin(); it != diag2.cend(); ++it)
-        if (it->second - it->first > e)
+        if (it->second != std::numeric_limits<double>::infinity() && it->second - it->first > e)
             v.push_back(Internal_point(std::get<0>(*it), std::get<1>(*it), v.size()));
     if (u.size() < v.size())
         swap(u, v);
@@ -120,6 +120,7 @@ inline std::vector<double> Persistence_graph::sorted_distances() const {
     for (int u_point_index = 0; u_point_index < size(); ++u_point_index)
         for (int v_point_index = 0; v_point_index < size(); ++v_point_index)
             sorted_distances.emplace(distance(u_point_index, v_point_index));
+    sorted_distances.emplace(std::numeric_limits<double>::infinity());
     return std::vector<double>(sorted_distances.begin(),sorted_distances.end());
 }
 

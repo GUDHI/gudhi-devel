@@ -39,7 +39,7 @@ std::uniform_real_distribution<double> unif(0.,upper_bound);
 std::default_random_engine re;
 std::vector< std::pair<double, double> > v1, v2;
 
-BOOST_AUTO_TEST_CASE(persistence_diagrams_graph){
+BOOST_AUTO_TEST_CASE(persistence_graph){
     // Random construction
     for (int i = 0; i < n1; i++) {
         double a = unif(re);
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(persistence_diagrams_graph){
     //
     BOOST_CHECK(g.size()==(n1+n2));
     //
-    BOOST_CHECK((int) d.size() <= (n1+n2)*(n1+n2) - n1*n2 + 1);
+    BOOST_CHECK((int) d.size() <= (n1+n2)*(n1+n2) - n1*n2 + 2);
     BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(0,0))==1);
     BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(0,n1-1))==1);
     BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(0,n1))==1);

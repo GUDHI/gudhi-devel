@@ -67,7 +67,7 @@ int main( int argc , char** argv )
   }
   std::vector< std::pair< double , double > > diag1 = read_diagram_from_file( argv[1] );
   std::vector< std::pair< double , double > > diag2 = read_diagram_from_file( argv[2] );
-  double tolerance = 0;
+  double tolerance = 0.;
   if ( argc == 4 )
   {
       tolerance = atof( argv[3] );
