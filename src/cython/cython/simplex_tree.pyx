@@ -1,6 +1,7 @@
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
+from libcpp cimport bool
 
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
@@ -54,7 +55,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>":
-        Simplex_tree_persistence_interface(Simplex_tree_interface_full_featured * st)
+        Simplex_tree_persistence_interface(Simplex_tree_interface_full_featured * st, bool persistence_dim_max)
         vector[pair[int, pair[double, double]]] get_persistence(int homology_coeff_field, double min_persistence)
         vector[int] betti_numbers()
         vector[int] persistent_betti_numbers(double from_value, double to_value)
@@ -295,7 +296,7 @@ cdef class SimplexTree:
         """
         self.thisptr.remove_maximal_simplex(simplex)
 
-    def persistence(self, homology_coeff_field=11, min_persistence=0):
+    def persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
         """This function returns the persistence of the simplicial complex.
 
         :param homology_coeff_field: The homology coefficient field. Must be a
@@ -311,7 +312,7 @@ cdef class SimplexTree:
         """
         if self.pcohptr != NULL:
             del self.pcohptr
-        self.pcohptr = new Simplex_tree_persistence_interface(self.thisptr)
+        self.pcohptr = new Simplex_tree_persistence_interface(self.thisptr, persistence_dim_max)
         cdef vector[pair[int, pair[double, double]]] persistence_result
         if self.pcohptr != NULL:
             persistence_result = self.pcohptr.get_persistence(homology_coeff_field, min_persistence)

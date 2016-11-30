@@ -53,7 +53,7 @@ class Tangential_complex_interface {
     Dynamic_kernel k;
     unsigned intrisic_dim = 0;
     if (points.size() > 0)
-      intrisic_dim = points[0].size();
+      intrisic_dim = points[0].size() - 1;
     
     tangential_complex_ = new TC(points, intrisic_dim, k);
     tangential_complex_->compute_tangential_complex();
@@ -66,7 +66,7 @@ class Tangential_complex_interface {
     unsigned intrisic_dim = 0;
     std::vector<Point_d> points = off_reader.get_point_cloud();
     if (points.size() > 0)
-      intrisic_dim = points[0].size();
+      intrisic_dim = points[0].size() - 1;
 
     tangential_complex_ = new TC(points, intrisic_dim, k);
     tangential_complex_->compute_tangential_complex();
@@ -97,6 +97,11 @@ class Tangential_complex_interface {
 
   unsigned number_of_inconsistent_stars() {
     return num_inconsistencies_.num_inconsistent_stars;
+  }
+
+  void fix_inconsistencies_using_perturbation(double max_perturb, double time_limit) {
+      tangential_complex_->fix_inconsistencies_using_perturbation(max_perturb, time_limit);
+      num_inconsistencies_ = tangential_complex_->number_of_inconsistent_simplices();
   }
 
   void create_simplex_tree(Simplex_tree<>* simplex_tree) {

@@ -111,12 +111,12 @@ itself and/or after the perturbation process.
 Simple example
 --------------
 
-This example builds the Tangential complex of point set.
+This example builds the Tangential complex of point set read in an OFF file.
 
 .. testcode::
 
     import gudhi
-    tc = gudhi.TangentialComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]])
+    tc = gudhi.TangentialComplex(off_file='alphacomplexdoc.off')
     result_str = 'Tangential contains ' + repr(tc.num_simplices()) + \
         ' simplices - ' + repr(tc.num_vertices()) + ' vertices.'
     print(result_str)
@@ -169,11 +169,24 @@ This example builds the Tangential complex of a point set, then tries to solve
 inconsistencies by perturbing the positions of points involved in inconsistent
 simplices.
 
-testcode::
+.. testcode::
 
    import gudhi
-   tc = gudhi.TangentialComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]])
+   tc = gudhi.TangentialComplex(points=[[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
+   result_str = 'Tangential contains ' + repr(tc.num_vertices()) + ' vertices.'
+   print(result_str)
+
+   if tc.num_inconsistent_simplices() > 0:
+       print('Tangential contains inconsistencies.')
+
+   tc.fix_inconsistencies_using_perturbation(10, 60)
+   if tc.num_inconsistent_simplices() == 0:
+       print('Inconsistencies has been fixed.')
 
 The output is:
 
-testoutput::
+.. testoutput::
+
+    Tangential contains 4 vertices.
+    Tangential contains inconsistencies.
+    Inconsistencies has been fixed.

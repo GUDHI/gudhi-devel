@@ -29,15 +29,14 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 INRIA"
 __license__ = "GPL v3"
 
-parser = argparse.ArgumentParser(description='AlphaComplex creation from '
+parser = argparse.ArgumentParser(description='TangentialComplex creation from '
                                  'points read in a OFF file.',
                                  epilog='Example: '
-                                 'example/alpha_complex_diagram_persistence_from_off_file_example.py '
-                                 '-f ../data/points/tore3D_300.off -a 0.6'
-                                 '- Constructs a alpha complex with the '
-                                 'points from the given OFF file.')
+                                 'example/tangential_complex_plain_homology_from_off_file_example.py '
+                                 '-f ../data/points/tore3D_300.off'
+                                 '- Constructs a tangential complex with the '
+                                 'points from the given OFF file')
 parser.add_argument("-f", "--file", type=str, required=True)
-parser.add_argument("-a", "--max_alpha_square", type=float, default=0.5)
 parser.add_argument('--no-diagram', default=False, action='store_true' , help='Flag for not to display the diagrams')
 
 args = parser.parse_args()
@@ -46,21 +45,18 @@ with open(args.file, 'r') as f:
     first_line = f.readline()
     if (first_line == 'OFF\n') or (first_line == 'nOFF\n'):
         print("#####################################################################")
-        print("AlphaComplex creation from points read in a OFF file")
+        print("TangentialComplex creation from points read in a OFF file")
         
-        message = "AlphaComplex with max_edge_length=" + repr(args.max_alpha_square)
-        print(message)
-        
-        alpha_complex = gudhi.AlphaComplex(off_file=args.file)
-        simplex_tree = alpha_complex.create_simplex_tree(max_alpha_square=args.max_alpha_square)
+        tc = gudhi.TangentialComplex(off_file=args.file)
+        st = tc.create_simplex_tree()
     
-        message = "Number of simplices=" + repr(simplex_tree.num_simplices())
+        message = "Number of simplices=" + repr(st.num_simplices())
         print(message)
         
-        diag = simplex_tree.persistence()
+        diag = st.persistence(persistence_dim_max = True)
     
         print("betti_numbers()=")
-        print(simplex_tree.betti_numbers())
+        print(st.betti_numbers())
     
         if args.no_diagram == False:
             gudhi.diagram_persistence(diag)

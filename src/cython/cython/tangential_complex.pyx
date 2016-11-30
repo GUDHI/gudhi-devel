@@ -43,6 +43,7 @@ cdef extern from "Tangential_complex_interface.h" namespace "Gudhi":
         unsigned number_of_inconsistent_simplices()
         unsigned number_of_inconsistent_stars()
         void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree)
+        void fix_inconsistencies_using_perturbation(double max_perturb, double time_limit)
 
 # TangentialComplex python interface
 cdef class TangentialComplex:
@@ -149,3 +150,14 @@ cdef class TangentialComplex:
         simplex_tree = SimplexTree()
         self.thisptr.create_simplex_tree(simplex_tree.thisptr)
         return simplex_tree
+
+    def fix_inconsistencies_using_perturbation(self, max_perturb, time_limit=-1.0):
+        """Attempts to fix inconsistencies by perturbing the point positions.
+        :param max_perturb: Maximum length of the translations used by the
+        perturbation.
+        :type max_perturb: double
+        :param time_limit: Time limit in seconds. If -1, no time limit is set.
+        :type time_limit: double
+        """
+        self.thisptr.fix_inconsistencies_using_perturbation(max_perturb,
+                                                            time_limit)
