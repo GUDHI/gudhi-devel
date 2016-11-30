@@ -8,9 +8,12 @@ if(CGAL_FOUND)
       target_link_libraries(Tangential_complex_example_basic ${CGAL_LIBRARY} ${Boost_DATE_TIME_LIBRARY})
       add_executable( Tangential_complex_example_with_perturb example_with_perturb.cpp )
       target_link_libraries(Tangential_complex_example_with_perturb ${CGAL_LIBRARY} ${Boost_DATE_TIME_LIBRARY})
+      add_executable( tan_test tan_test.cpp )
+      target_link_libraries(tan_test ${CGAL_LIBRARY} ${Boost_DATE_TIME_LIBRARY})
       if (TBB_FOUND)
         target_link_libraries(Tangential_complex_example_basic ${TBB_LIBRARIES})
         target_link_libraries(Tangential_complex_example_with_perturb ${TBB_LIBRARIES})
+        target_link_libraries(tan_test ${TBB_LIBRARIES})
       endif(TBB_FOUND)
 
       add_test(Tangential_complex_example_basic
@@ -18,6 +21,9 @@ if(CGAL_FOUND)
 
       add_test(Tangential_complex_example_with_perturb
                ${CMAKE_CURRENT_BINARY_DIR}/Tangential_complex_example_with_perturb)
+
+      add_test(tan_test
+               ${CMAKE_CURRENT_BINARY_DIR}/tan_test)
     endif(EIGEN3_FOUND)
   endif(NOT CGAL_VERSION VERSION_LESS 4.8.0)
 endif(CGAL_FOUND)

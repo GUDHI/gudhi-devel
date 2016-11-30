@@ -26,8 +26,7 @@
 #include <cstddef>
 
 // ========================= Debugging & profiling =============================
-#define GUDHI_TC_PROFILING
-#define DEBUG_TRACES
+// #define GUDHI_TC_PROFILING
 // #define GUDHI_TC_VERY_VERBOSE
 // #define GUDHI_TC_PERFORM_EXTRA_CHECKS
 // #define GUDHI_TC_SHOW_DETAILED_STATS_FOR_INCONSISTENCIES
