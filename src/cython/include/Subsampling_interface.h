@@ -45,12 +45,32 @@ std::vector<std::vector<double>> subsampling_n_farthest_points(std::vector<std::
   std::vector<std::vector<double>> landmarks;
   Subsampling_dynamic_kernel k;
   choose_n_farthest_points(k, points, nb_points, std::back_inserter(landmarks));
-  std::cout << "output " << landmarks.size() << std::endl;
-
 
   return landmarks;
 }
 
+std::vector<std::vector<double>> subsampling_n_farthest_points(std::vector<std::vector<double>>& points, unsigned nb_points, unsigned starting_point) {
+  std::vector<Subsampling_point_d> input, output;
+  for (auto point : points)
+      input.push_back(Subsampling_point_d(point.size(), point.begin(), point.end()));
+  std::vector<std::vector<double>> landmarks;
+  Subsampling_dynamic_kernel k;
+  choose_n_farthest_points(k, points, nb_points, starting_point, std::back_inserter(landmarks));
+
+  return landmarks;
+}
+
+std::vector<std::vector<double>> subsampling_n_farthest_points_from_file(std::string& off_file, unsigned nb_points) {
+  Gudhi::Points_off_reader<std::vector<double>> off_reader(off_file);
+  std::vector<std::vector<double>> points = off_reader.get_point_cloud();
+  return subsampling_n_farthest_points(points, nb_points);
+}
+
+std::vector<std::vector<double>> subsampling_n_farthest_points_from_file(std::string& off_file, unsigned nb_points, unsigned starting_point) {
+    Gudhi::Points_off_reader<std::vector<double>> off_reader(off_file);
+    std::vector<std::vector<double>> points = off_reader.get_point_cloud();
+    return subsampling_n_farthest_points(points, nb_points, starting_point);
+}
 }  // namespace subsampling
 
 }  // namespace Gudhi

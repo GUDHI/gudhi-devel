@@ -171,35 +171,58 @@ class Alpha_complex {
     return vertex_handle_to_iterator_.at(vertex)->point();
   }
 
+  /** \brief number_of_vertices returns the number of vertices (same as the number of points).
+   *
+   * @return The number of vertices.
+   */
+  const std::size_t number_of_vertices() const {
+    return vertex_handle_to_iterator_.size();
+  }
+
  private:
   template<typename InputPointRange >
   void init_from_range(const InputPointRange& points) {
     auto first = std::begin(points);
     auto last = std::end(points);
-    // point_dimension function initialization
-    Point_Dimension point_dimension = kernel_.point_dimension_d_object();
 
-    // Delaunay triangulation is point dimension.
-    triangulation_ = new Delaunay_triangulation(point_dimension(*first));
+    if (first != last) {
+      // point_dimension function initialization
+      Point_Dimension point_dimension = kernel_.point_dimension_d_object();
 
-    std::vector<Point_d> point_cloud(first, last);
+      // Delaunay triangulation is point dimension.
+      triangulation_ = new Delaunay_triangulation(point_dimension(*first));
 
-    // Creates a vector {0, 1, ..., N-1}
-    std::vector<std::ptrdiff_t> indices(boost::counting_iterator<std::ptrdiff_t>(0),
-                                        boost::counting_iterator<std::ptrdiff_t>(point_cloud.size()));
-
-    typedef boost::iterator_property_map<typename std::vector<Point_d>::iterator,
-                                         CGAL::Identity_property_map<std::ptrdiff_t>> Point_property_map;
-    typedef CGAL::Spatial_sort_traits_adapter_d<Kernel, Point_property_map> Search_traits_d;
-    
-    CGAL::spatial_sort(indices.begin(), indices.end(), Search_traits_d(std::begin(point_cloud)));
-
-    typename Delaunay_triangulation::Full_cell_handle hint;
-    for (auto index : indices) {
-      typename Delaunay_triangulation::Vertex_handle pos = triangulation_->insert(point_cloud[index], hint);
-      // Save index value as data to retrieve it after insertion
-      pos->data() = index;
-      hint = pos->full_cell();
+      std::vector<Point_d> point_cloud(first, last);
+  
+      // Creates a vector {0, 1, ..., N-1}
+      std::vector<std::ptrdiff_t> indices(boost::counting_iterator<std::ptrdiff_t>(0),
+                                          boost::counting_iterator<std::ptrdiff_t>(point_cloud.size()));
+  
+      typedef boost::iterator_property_map<typename std::vector<Point_d>::iterator,
+                                           CGAL::Identity_property_map<std::ptrdiff_t>> Point_property_map;
+      typedef CGAL::Spatial_sort_traits_adapter_d<Kernel, Point_property_map> Search_traits_d;
+  
+      CGAL::spatial_sort(indices.begin(), indices.end(), Search_traits_d(std::begin(point_cloud)));
+  
+      typename Delaunay_triangulation::Full_cell_handle hint;
+      for (auto index : indices) {
+        typename Delaunay_triangulation::Vertex_handle pos = triangulation_->insert(point_cloud[index], hint);
+        // Save index value as data to retrieve it after insertion
+        pos->data() = index;
+        hint = pos->full_cell();
+      }
+      // --------------------------------------------------------------------------------------------
+      // double map to retrieve simplex tree vertex handles from CGAL vertex iterator and vice versa
+      // Loop on triangulation vertices list
+      for (CGAL_vertex_iterator vit = triangulation_->vertices_begin(); vit != triangulation_->vertices_end(); ++vit) {
+        if (!triangulation_->is_infinite(*vit)) {
+#ifdef DEBUG_TRACES
+          std::cout << "Vertex insertion - " << vit->data() << " -> " << vit->point() << std::endl;
+#endif  // DEBUG_TRACES
+          vertex_handle_to_iterator_.emplace(vit->data(), vit);
+        }
+      }
+      // --------------------------------------------------------------------------------------------
     }
   }
 
@@ -246,19 +269,6 @@ class Alpha_complex {
     }
 
     complex.set_dimension(triangulation_->maximal_dimension());
-
-    // --------------------------------------------------------------------------------------------
-    // double map to retrieve simplex tree vertex handles from CGAL vertex iterator and vice versa
-    // Loop on triangulation vertices list
-    for (CGAL_vertex_iterator vit = triangulation_->vertices_begin(); vit != triangulation_->vertices_end(); ++vit) {
-      if (!triangulation_->is_infinite(*vit)) {
-#ifdef DEBUG_TRACES
-        std::cout << "Vertex insertion - " << vit->data() << " -> " << vit->point() << std::endl;
-#endif  // DEBUG_TRACES
-        vertex_handle_to_iterator_.emplace(vit->data(), vit);
-      }
-    }
-    // --------------------------------------------------------------------------------------------
 
     // --------------------------------------------------------------------------------------------
     // Simplex_tree construction from loop on triangulation finite full cells list

@@ -62,7 +62,7 @@ cdef class AlphaComplex:
     cdef Alpha_complex_interface * thisptr
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, points=None, off_file=''):
+    def __init__(self, points=[], off_file=''):
         """AlphaComplex constructor.
 
         :param points: A list of points in d-Dimension.

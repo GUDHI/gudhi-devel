@@ -32,6 +32,42 @@ __license__ = "GPL v3"
 
 cdef extern from "Subsampling_interface.h" namespace "Gudhi::subsampling":
     vector[vector[double]] subsampling_n_farthest_points(vector[vector[double]] points, unsigned nb_points)
+    vector[vector[double]] subsampling_n_farthest_points(vector[vector[double]] points, unsigned nb_points, unsigned starting_point)
+    vector[vector[double]] subsampling_n_farthest_points_from_file(string off_file, unsigned nb_points)
+    vector[vector[double]] subsampling_n_farthest_points_from_file(string off_file, unsigned nb_points, unsigned starting_point)
 
-def choose_n_farthest_points(points, nb_points):
-    subsampling_n_farthest_points(points, nb_points)
+def choose_n_farthest_points(points=[], off_file='', nb_points=0, starting_point = ''):
+    """Subsample by a greedy strategy of iteratively adding the farthest point
+    from the current chosen point set to the subsampling.
+    The iteration starts with the landmark `starting point`.
+
+    :param points: The input point set.
+    :type points: vector[vector[double]].
+
+    Or
+
+    :param off_file: An OFF file style name.
+    :type off_file: string
+
+    :param nb_points: Number of points of the subsample.
+    :type nb_points: unsigned.
+    :param starting_point: The iteration starts with the landmark `starting \
+    point`,which is the index of the poit to start with. If not set, this \
+    index is choosen randomly.
+    :type starting_point: unsigned.
+    :returns:  The subsamplepoint set.
+    :rtype: vector[vector[double]]
+    """
+    if off_file is not '':
+        if os.path.isfile(off_file):
+            if starting_point is '':
+                return subsampling_n_farthest_points_from_file(off_file, nb_points)
+            else:
+                return subsampling_n_farthest_points_from_file(off_file, nb_points, starting_point)
+        else:
+            print("file " + off_file + " not found.")
+    else:
+        if starting_point is '':
+            return subsampling_n_farthest_points(points, nb_points)
+        else:
+            return subsampling_n_farthest_points(points, nb_points, starting_point)
