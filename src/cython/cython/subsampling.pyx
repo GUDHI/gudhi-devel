@@ -1,10 +1,16 @@
+from cython cimport numeric
+from libcpp.vector cimport vector
+from libcpp.string cimport string
+from libcpp cimport bool
+import os
+
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
    library for computational topology.
 
    Author(s):       Vincent Rouvreau
 
-   Copyright (C) 2016  INRIA
+   Copyright (C) 2016 INRIA
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -21,16 +27,11 @@
 """
 
 __author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016  INRIA"
+__copyright__ = "Copyright (C) 2016 INRIA"
 __license__ = "GPL v3"
 
-include "cython/simplex_tree.pyx"
-include "cython/mini_simplex_tree.pyx"
-include "cython/rips_complex.pyx"
-include "cython/cubical_complex.pyx"
-include "cython/periodic_cubical_complex.pyx"
-include "cython/persistence_graphical_tools.py"
-include "cython/witness_complex.pyx"
-@GUDHI_CYTHON_ALPHA_COMPLEX@
-@GUDHI_CYTHON_SUBSAMPLING@
-@GUDHI_CYTHON_TANGENTIAL_COMPLEX@
+cdef extern from "Subsampling_interface.h" namespace "Gudhi::subsampling":
+    vector[vector[double]] subsampling_n_farthest_points(vector[vector[double]] points, unsigned nb_points)
+
+def choose_n_farthest_points(points, nb_points):
+    subsampling_n_farthest_points(points, nb_points)

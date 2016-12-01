@@ -49,8 +49,16 @@ if(PYTHON_PATH AND CYTHON_PATH)
     file(COPY test DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     
     if (CGAL_FOUND)
+      if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
+          # If CGAL_VERSION >= 4.8.1, include subsampling
+          # CGAL things are done in CGAL_VERSION >= 4.8.0
+          set(GUDHI_CYTHON_SUBSAMPLING "include 'cython/subsampling.pyx'")
+      else (NOT CGAL_VERSION VERSION_LESS 4.8.1)
+        # Remove alpha complex unitary tests
+        file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_subsampling.py)
+      endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)
       if (NOT CGAL_VERSION VERSION_LESS 4.8.0)
-        # If CGAL_VERSION >= 4.8.0, include alpha complex
+        # If CGAL_VERSION >= 4.8.0, include alpha and tangential complex
         set(GUDHI_CYTHON_LIBRARIES "${GUDHI_CYTHON_LIBRARIES}'CGAL', ")
         set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${CGAL_LIBRARIES_DIR}', ")
         # GMP and GMPXX are not required, but if present, CGAL will link with them.

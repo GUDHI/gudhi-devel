@@ -3,7 +3,6 @@ from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 from libcpp.string cimport string
 from libcpp cimport bool
-from cython.operator cimport dereference as deref
 import os
 
 """This file is part of the Gudhi Library. The Gudhi library
