@@ -1,5 +1,4 @@
 import gudhi
-import os
 
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
@@ -29,7 +28,7 @@ __license__ = "GPL v3"
 
 
 def test_write_off_file_for_tests():
-    file = open("n_farthest.off", "w")
+    file = open("subsample.off", "w")
     file.write("nOFF\n")
     file.write("2 7 0 0\n")
     file.write("1.0 1.0\n")
@@ -66,18 +65,17 @@ def test_simple_choose_n_farthest_points_with_a_starting_point():
     assert gudhi.choose_n_farthest_points(points = [], nb_points = 0, starting_point = 1) == []
     assert gudhi.choose_n_farthest_points(points = [], nb_points = 1, starting_point = 1) == []
 
-    print(os.getcwd())
     # From off file test
     for i in range (0, 7):
-        assert len(gudhi.choose_n_farthest_points(off_file = 'n_farthest.off', nb_points = i, starting_point = i)) == i
+        assert len(gudhi.choose_n_farthest_points(off_file = 'subsample.off', nb_points = i, starting_point = i)) == i
 
 def test_simple_choose_n_farthest_points_randomed():
     point_set = [[0,1], [0,0], [1,0], [1,1]]
-
     # Test the limits
     assert gudhi.choose_n_farthest_points(points = [], nb_points = 0) == []
     assert gudhi.choose_n_farthest_points(points = [], nb_points = 1) == []
     assert gudhi.choose_n_farthest_points(points = point_set, nb_points = 0) == []
+
     # Go furter than point set on purpose
     for iter in range(1,10):
         sub_set = gudhi.choose_n_farthest_points(points = point_set, nb_points = iter)
@@ -86,9 +84,28 @@ def test_simple_choose_n_farthest_points_randomed():
             for point in point_set:
                 if point == sub:
                     found = True
+            # Check each sub set point is existing in the point set
             assert found == True
 
-    print(os.getcwd())
     # From off file test
     for i in range (0, 7):
-        assert len(gudhi.choose_n_farthest_points(off_file = 'n_farthest.off', nb_points = i)) == i
+        assert len(gudhi.choose_n_farthest_points(off_file = 'subsample.off', nb_points = i)) == i
+
+def test_simple_pick_n_random_points():
+    point_set = [[0,1], [0,0], [1,0], [1,1]]
+    # Test the limits
+    assert gudhi.pick_n_random_points(points = [], nb_points = 0) == []
+    assert gudhi.pick_n_random_points(points = [], nb_points = 1) == []
+    assert gudhi.pick_n_random_points(points = point_set, nb_points = 0) == []
+
+    # Go furter than point set on purpose
+    for iter in range(1,10):
+        sub_set = gudhi.pick_n_random_points(points = point_set, nb_points = iter)
+        print(5)
+        for sub in sub_set:
+            found = False
+            for point in point_set:
+                if point == sub:
+                    found = True
+            # Check each sub set point is existing in the point set
+            assert found == True

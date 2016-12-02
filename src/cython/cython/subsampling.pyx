@@ -35,6 +35,8 @@ cdef extern from "Subsampling_interface.h" namespace "Gudhi::subsampling":
     vector[vector[double]] subsampling_n_farthest_points(vector[vector[double]] points, unsigned nb_points, unsigned starting_point)
     vector[vector[double]] subsampling_n_farthest_points_from_file(string off_file, unsigned nb_points)
     vector[vector[double]] subsampling_n_farthest_points_from_file(string off_file, unsigned nb_points, unsigned starting_point)
+    vector[vector[double]] subsampling_n_random_points(vector[vector[double]] points, unsigned nb_points)
+    vector[vector[double]] subsampling_n_random_points_from_file(string off_file, unsigned nb_points)
 
 def choose_n_farthest_points(points=[], off_file='', nb_points=0, starting_point = ''):
     """Subsample by a greedy strategy of iteratively adding the farthest point
@@ -71,3 +73,27 @@ def choose_n_farthest_points(points=[], off_file='', nb_points=0, starting_point
             return subsampling_n_farthest_points(points, nb_points)
         else:
             return subsampling_n_farthest_points(points, nb_points, starting_point)
+
+def pick_n_random_points(points=[], off_file='', nb_points=0):
+    """Subsample a point set by picking random vertices.
+
+    :param points: The input point set.
+    :type points: vector[vector[double]].
+
+    Or
+
+    :param off_file: An OFF file style name.
+    :type off_file: string
+
+    :param nb_points: Number of points of the subsample.
+    :type nb_points: unsigned.
+    :returns:  The subsamplepoint set.
+    :rtype: vector[vector[double]]
+    """
+    if off_file is not '':
+        if os.path.isfile(off_file):
+            return subsampling_n_random_points_from_file(off_file, nb_points)
+        else:
+            print("file " + off_file + " not found.")
+    else:
+        return subsampling_n_random_points(points, nb_points)

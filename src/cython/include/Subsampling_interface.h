@@ -38,6 +38,7 @@ using Subsampling_dynamic_kernel = CGAL::Epick_d< CGAL::Dynamic_dimension_tag >;
 using Subsampling_point_d = Subsampling_dynamic_kernel::Point_d;
 using Subsampling_ft = Subsampling_dynamic_kernel::FT;
 
+// ------ choose_n_farthest_points ------
 std::vector<std::vector<double>> subsampling_n_farthest_points(std::vector<std::vector<double>>& points, unsigned nb_points) {
   std::vector<Subsampling_point_d> input, output;
   for (auto point : points)
@@ -71,6 +72,25 @@ std::vector<std::vector<double>> subsampling_n_farthest_points_from_file(std::st
     std::vector<std::vector<double>> points = off_reader.get_point_cloud();
     return subsampling_n_farthest_points(points, nb_points, starting_point);
 }
+
+// ------ pick_n_random_points ------
+std::vector<std::vector<double>> subsampling_n_random_points(std::vector<std::vector<double>>& points, unsigned nb_points) {
+  std::vector<Subsampling_point_d> input, output;
+  for (auto point : points)
+      input.push_back(Subsampling_point_d(point.size(), point.begin(), point.end()));
+  std::vector<std::vector<double>> landmarks;
+  pick_n_random_points(points, nb_points, std::back_inserter(landmarks));
+
+  return landmarks;
+}
+
+std::vector<std::vector<double>> subsampling_n_random_points_from_file(std::string& off_file, unsigned nb_points) {
+  Gudhi::Points_off_reader<std::vector<double>> off_reader(off_file);
+  std::vector<std::vector<double>> points = off_reader.get_point_cloud();
+  return subsampling_n_random_points(points, nb_points);
+}
+
+
 }  // namespace subsampling
 
 }  // namespace Gudhi
