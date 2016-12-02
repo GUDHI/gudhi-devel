@@ -41,7 +41,7 @@ namespace Gudhi_stat
 template <typename Representation_of_persistence>
 double permutation_test( const std::vector<Representation_of_persistence*>& data_1 , const std::vector<Representation_of_persistence*>& data_2 , size_t number_of_permutations , double exponent = 1 )
 {	
-	bool dbg = true;
+	bool dbg = false;
 	try
 	{
 		Representation_of_persistence av_1;// = new Representation_of_persistence;		
@@ -53,6 +53,8 @@ double permutation_test( const std::vector<Representation_of_persistence*>& data
 		
 		double counter = 0;
 		
+		
+		//TODO -- TBB. QUestion, why it uses memory. Where is the leak??
 		for  ( size_t i = 0 ; i != number_of_permutations ; ++i )
 		{					
 			std::vector<Representation_of_persistence*> all_data;
@@ -65,10 +67,11 @@ double permutation_test( const std::vector<Representation_of_persistence*>& data
 		
 		
 			Representation_of_persistence av_1;// = new Representation_of_persistence;		
-			Representation_of_persistence av_2;// = new Representation_of_persistence;		
+			Representation_of_persistence av_2;// = new Representation_of_persistence;	
+				
 			av_1.compute_average( first_part );					
 			av_2.compute_average( second_part );			
-			double distance_after_permutations = av_1.distance( av_2 , exponent );
+			double distance_after_permutations = av_1.distance( av_2 , exponent );			
 			//delete av_1;
 			//delete av_2;
 			if ( distance_after_permutations > initial_distance )++counter;
@@ -78,7 +81,7 @@ double permutation_test( const std::vector<Representation_of_persistence*>& data
 				std::cerr << "distance_after_permutations : " << distance_after_permutations << std::endl;
 				std::cerr << "initial_distance : " << initial_distance << std::endl;
 				std::cerr << "counter : " << counter << std::endl;
-			}
+			}			
 		}
 		return counter / (double)number_of_permutations;
 	}

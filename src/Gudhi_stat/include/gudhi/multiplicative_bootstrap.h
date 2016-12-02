@@ -56,7 +56,7 @@ public:
 	double operator()( const TopologicalObject& obj )const
 	{
 		TopologicalObject* empty = new TopologicalObject;	
-		double dist = empty->distance( obj );   
+		double dist = empty->distance( obj , -1 );   
 		delete empty;
 		return dist;
 	}
@@ -67,8 +67,6 @@ public:
 /**
 * This is a generic function to perform multiplicative bootstrap.
 **/
-
-
 template < typename TopologicalObject , typename OperationOnObjects , typename NormOnObjects >
 double multiplicative_bootstrap( const std::vector< TopologicalObject* >& topological_objects , size_t number_of_bootstrap_operations , const OperationOnObjects& oper , const NormOnObjects& norm ,  double quantile = 0.95 )
 {
@@ -99,14 +97,19 @@ double multiplicative_bootstrap( const std::vector< TopologicalObject* >& topolo
 		{
 			std::cout << "Still : " << number_of_bootstrap_operations-it_no << " tests to go. \n The subsampled vector consist of points number : ";
 		}				
+		
+		
 		//and compute the intermediate characteristic:		
 		TopologicalObject result;
 		for ( size_t i = 0 ; i != topological_objects.size() ; ++i )
-		{
-			double rand_variable = norm_distribution( generator );				
-			result += rand_variable*oper(*(topological_objects[i]) , average);
+		{				
+			double rand_variable = norm_distribution( generator );
+			result = result + rand_variable*oper(*(topological_objects[i]) , average);
 		}
-		result = result*(1.0/sqrt( topological_objects.size() ));									
+		//HERE THE NORM SEEMS TO BE MISSING!!
+		result = result.abs();
+		result = result*(1.0/sqrt( topological_objects.size() ));											
+		//NEED TO TAKE MAX
 		vector_of_intermediate_characteristics[it_no] = norm(result);		
 	}
 	#ifdef GUDHI_USE_TBB
