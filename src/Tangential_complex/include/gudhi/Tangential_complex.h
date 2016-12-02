@@ -121,11 +121,12 @@ class Vertex_data {
  * \tparam Triangulation_ is the type used for storing the local regular triangulations. We highly recommend to use the default value (`CGAL::Regular_triangulation`).
  *
  */
-template <
-typename Kernel_,  // ambiant kernel
-typename DimensionTag,  // intrinsic dimension
-typename Concurrency_tag = CGAL::Parallel_tag,
-typename Triangulation_ = CGAL::Default
+template
+<
+  typename Kernel_,  // ambiant kernel
+  typename DimensionTag,  // intrinsic dimension
+  typename Concurrency_tag = CGAL::Parallel_tag,
+  typename Triangulation_ = CGAL::Default
 >
 class Tangential_complex {
   typedef Kernel_ K;
@@ -136,19 +137,20 @@ class Tangential_complex {
 
   typedef typename CGAL::Default::Get
   <
-  Triangulation_,
-  CGAL::Regular_triangulation
-  <
-  CGAL::Epick_d<DimensionTag>,
-  CGAL::Triangulation_data_structure
-  <
-  typename CGAL::Epick_d<DimensionTag>::Dimension,
-  CGAL::Triangulation_vertex<CGAL::Regular_triangulation_traits_adapter<
-  CGAL::Epick_d<DimensionTag> >, Vertex_data >,
-  CGAL::Triangulation_full_cell<CGAL::Regular_triangulation_traits_adapter<
-  CGAL::Epick_d<DimensionTag> > >
-  >
-  >
+    Triangulation_,
+    CGAL::Regular_triangulation
+    <
+      CGAL::Epick_d<DimensionTag>,
+      CGAL::Triangulation_data_structure
+      <
+        typename CGAL::Epick_d<DimensionTag>::Dimension,
+        CGAL::Triangulation_vertex
+        <
+          CGAL::Regular_triangulation_traits_adapter< CGAL::Epick_d<DimensionTag> >, Vertex_data
+        >,
+        CGAL::Triangulation_full_cell<CGAL::Regular_triangulation_traits_adapter< CGAL::Epick_d<DimensionTag> > >
+      >
+    >
   >::type Triangulation;
   typedef typename Triangulation::Geom_traits Tr_traits;
   typedef typename Triangulation::Weighted_point Tr_point;
