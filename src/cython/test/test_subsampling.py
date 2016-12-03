@@ -109,3 +109,25 @@ def test_simple_pick_n_random_points():
                     found = True
             # Check each sub set point is existing in the point set
             assert found == True
+
+    # From off file test
+    for i in range (0, 7):
+        assert len(gudhi.pick_n_random_points(off_file = 'subsample.off', nb_points = i)) == i
+
+def test_simple_sparsify_points():
+    point_set = [[0,1], [0,0], [1,0], [1,1]]
+    # Test the limits
+    # assert gudhi.sparsify_point_set(points = [], min_squared_dist = 0.0) == []
+    # assert gudhi.sparsify_point_set(points = [], min_squared_dist = 10.0) == []
+    assert gudhi.sparsify_point_set(points = point_set, min_squared_dist = 0.0) == point_set
+    assert gudhi.sparsify_point_set(points = point_set, min_squared_dist = 1.0) == point_set
+    assert gudhi.sparsify_point_set(points = point_set, min_squared_dist = 2.0) == [[0,1], [1,0]]
+    assert gudhi.sparsify_point_set(points = point_set, min_squared_dist = 2.01) == [[0,1]]
+
+    assert len(gudhi.sparsify_point_set(off_file = 'subsample.off', min_squared_dist = 0.0)) == 7
+    assert len(gudhi.sparsify_point_set(off_file = 'subsample.off', min_squared_dist = 30.0)) == 5
+    assert len(gudhi.sparsify_point_set(off_file = 'subsample.off', min_squared_dist = 40.0)) == 4
+    assert len(gudhi.sparsify_point_set(off_file = 'subsample.off', min_squared_dist = 90.0)) == 3
+    assert len(gudhi.sparsify_point_set(off_file = 'subsample.off', min_squared_dist = 100.0)) == 2
+    assert len(gudhi.sparsify_point_set(off_file = 'subsample.off', min_squared_dist = 325.0)) == 2
+    assert len(gudhi.sparsify_point_set(off_file = 'subsample.off', min_squared_dist = 325.01)) == 1

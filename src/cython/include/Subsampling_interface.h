@@ -24,6 +24,8 @@
 #define	SUBSAMPLING_INTERFACE_H
 
 #include <gudhi/choose_n_farthest_points.h>
+#include <gudhi/pick_n_random_points.h>
+#include <gudhi/sparsify_point_set.h>
 #include <gudhi/Points_off_io.h>
 #include <CGAL/Epick_d.h>
 
@@ -40,9 +42,6 @@ using Subsampling_ft = Subsampling_dynamic_kernel::FT;
 
 // ------ choose_n_farthest_points ------
 std::vector<std::vector<double>> subsampling_n_farthest_points(std::vector<std::vector<double>>& points, unsigned nb_points) {
-  std::vector<Subsampling_point_d> input, output;
-  for (auto point : points)
-      input.push_back(Subsampling_point_d(point.size(), point.begin(), point.end()));
   std::vector<std::vector<double>> landmarks;
   Subsampling_dynamic_kernel k;
   choose_n_farthest_points(k, points, nb_points, std::back_inserter(landmarks));
@@ -51,9 +50,6 @@ std::vector<std::vector<double>> subsampling_n_farthest_points(std::vector<std::
 }
 
 std::vector<std::vector<double>> subsampling_n_farthest_points(std::vector<std::vector<double>>& points, unsigned nb_points, unsigned starting_point) {
-  std::vector<Subsampling_point_d> input, output;
-  for (auto point : points)
-      input.push_back(Subsampling_point_d(point.size(), point.begin(), point.end()));
   std::vector<std::vector<double>> landmarks;
   Subsampling_dynamic_kernel k;
   choose_n_farthest_points(k, points, nb_points, starting_point, std::back_inserter(landmarks));
@@ -75,9 +71,6 @@ std::vector<std::vector<double>> subsampling_n_farthest_points_from_file(std::st
 
 // ------ pick_n_random_points ------
 std::vector<std::vector<double>> subsampling_n_random_points(std::vector<std::vector<double>>& points, unsigned nb_points) {
-  std::vector<Subsampling_point_d> input, output;
-  for (auto point : points)
-      input.push_back(Subsampling_point_d(point.size(), point.begin(), point.end()));
   std::vector<std::vector<double>> landmarks;
   pick_n_random_points(points, nb_points, std::back_inserter(landmarks));
 
@@ -88,6 +81,26 @@ std::vector<std::vector<double>> subsampling_n_random_points_from_file(std::stri
   Gudhi::Points_off_reader<std::vector<double>> off_reader(off_file);
   std::vector<std::vector<double>> points = off_reader.get_point_cloud();
   return subsampling_n_random_points(points, nb_points);
+}
+
+// ------ sparsify_point_set ------
+std::vector<std::vector<double>> subsampling_sparsify_points(std::vector<std::vector<double>>& points, double min_squared_dist) {
+  std::vector<Subsampling_point_d> input, output;
+  for (auto point : points)
+      input.push_back(Subsampling_point_d(point.size(), point.begin(), point.end()));
+  Subsampling_dynamic_kernel k;
+  sparsify_point_set(k, input, min_squared_dist, std::back_inserter(output));
+
+  std::vector<std::vector<double>> landmarks;
+  for (auto point : output)
+      landmarks.push_back(std::vector<double>(point.cartesian_begin(), point.cartesian_end()));
+  return landmarks;
+}
+
+std::vector<std::vector<double>> subsampling_sparsify_points_from_file(std::string& off_file, double min_squared_dist) {
+  Gudhi::Points_off_reader<std::vector<double>> off_reader(off_file);
+  std::vector<std::vector<double>> points = off_reader.get_point_cloud();
+  return subsampling_sparsify_points(points, min_squared_dist);
 }
 
 

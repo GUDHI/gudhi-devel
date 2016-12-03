@@ -37,6 +37,8 @@ cdef extern from "Subsampling_interface.h" namespace "Gudhi::subsampling":
     vector[vector[double]] subsampling_n_farthest_points_from_file(string off_file, unsigned nb_points, unsigned starting_point)
     vector[vector[double]] subsampling_n_random_points(vector[vector[double]] points, unsigned nb_points)
     vector[vector[double]] subsampling_n_random_points_from_file(string off_file, unsigned nb_points)
+    vector[vector[double]] subsampling_sparsify_points(vector[vector[double]] points, double min_squared_dist)
+    vector[vector[double]] subsampling_sparsify_points_from_file(string off_file, double min_squared_dist)
 
 def choose_n_farthest_points(points=[], off_file='', nb_points=0, starting_point = ''):
     """Subsample by a greedy strategy of iteratively adding the farthest point
@@ -57,7 +59,7 @@ def choose_n_farthest_points(points=[], off_file='', nb_points=0, starting_point
     point`,which is the index of the poit to start with. If not set, this \
     index is choosen randomly.
     :type starting_point: unsigned.
-    :returns:  The subsamplepoint set.
+    :returns:  The subsample point set.
     :rtype: vector[vector[double]]
     """
     if off_file is not '':
@@ -87,7 +89,7 @@ def pick_n_random_points(points=[], off_file='', nb_points=0):
 
     :param nb_points: Number of points of the subsample.
     :type nb_points: unsigned.
-    :returns:  The subsamplepoint set.
+    :returns:  The subsample point set.
     :rtype: vector[vector[double]]
     """
     if off_file is not '':
@@ -97,3 +99,27 @@ def pick_n_random_points(points=[], off_file='', nb_points=0):
             print("file " + off_file + " not found.")
     else:
         return subsampling_n_random_points(points, nb_points)
+
+def sparsify_point_set(points=[], off_file='', min_squared_dist=0.0):
+    """Subsample a point set by picking random vertices.
+
+    :param points: The input point set.
+    :type points: vector[vector[double]].
+
+    Or
+
+    :param off_file: An OFF file style name.
+    :type off_file: string
+
+    :param min_squared_dist: Number of points of the subsample.
+    :type min_squared_dist: unsigned.
+    :returns:  The subsample point set.
+    :rtype: vector[vector[double]]
+    """
+    if off_file is not '':
+        if os.path.isfile(off_file):
+            return subsampling_sparsify_points_from_file(off_file, min_squared_dist)
+        else:
+            print("file " + off_file + " not found.")
+    else:
+        return subsampling_sparsify_points(points, min_squared_dist)
