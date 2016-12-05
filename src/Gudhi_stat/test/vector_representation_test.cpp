@@ -352,3 +352,54 @@ BOOST_AUTO_TEST_CASE(check_compute_average)
 }
 
 
+	
+BOOST_AUTO_TEST_CASE(check_arythmetic_operations) 
+{	
+	//compute average 
+	std::vector< std::pair<double,double> > i1(3);
+	i1[0] = std::pair<double,double>( 1,2 );
+	i1[1] = std::pair<double,double>( 3,8 );
+	i1[2] = std::pair<double,double>( 1,6 );
+	
+	std::vector< std::pair<double,double> > i2(3);
+	i2[0] = std::pair<double,double>( 2,9 );
+	i2[1] = std::pair<double,double>( 2,15);
+	i2[2] = std::pair<double,double>( 6,17 );
+	
+	Vector_distances_in_diagram< Euclidean_distance<double> > A( i1 , -1 );
+	Vector_distances_in_diagram< Euclidean_distance<double> > B( i1 , -1 );
+	
+	Vector_distances_in_diagram< Euclidean_distance<double> > sum = A+B;
+	Vector_distances_in_diagram< Euclidean_distance<double> > difference = A-B;
+		
+	BOOST_CHECK( almost_equal( sum.vector_in_position(0) , 7.07107) );
+	BOOST_CHECK( almost_equal( sum.vector_in_position(1) , 7.07107) );
+	BOOST_CHECK( almost_equal( sum.vector_in_position(2) , 5.65685) );
+	BOOST_CHECK( almost_equal( sum.vector_in_position(3) , 1.41421) );
+	BOOST_CHECK( almost_equal( sum.vector_in_position(4) , 1.41421) );
+	BOOST_CHECK( almost_equal( sum.vector_in_position(5) , 1.41421) );
+	
+	BOOST_CHECK( almost_equal( difference.vector_in_position(0) , 0) );
+	BOOST_CHECK( almost_equal( difference.vector_in_position(1) , 0) );
+	BOOST_CHECK( almost_equal( difference.vector_in_position(2) , 0) );
+	BOOST_CHECK( almost_equal( difference.vector_in_position(3) , 0) );
+	BOOST_CHECK( almost_equal( difference.vector_in_position(4) , 0) );
+	BOOST_CHECK( almost_equal( difference.vector_in_position(5) , 0) );
+	
+	Vector_distances_in_diagram< Euclidean_distance<double> > prod = 2.*A;
+	BOOST_CHECK( almost_equal( prod.vector_in_position(0) , 7.07107) );
+	BOOST_CHECK( almost_equal( prod.vector_in_position(1) , 7.07107) );
+	BOOST_CHECK( almost_equal( prod.vector_in_position(2) , 5.65685) );
+	BOOST_CHECK( almost_equal( prod.vector_in_position(3) , 1.41421) );
+	BOOST_CHECK( almost_equal( prod.vector_in_position(4) , 1.41421) );
+	BOOST_CHECK( almost_equal( prod.vector_in_position(5) , 1.41421) );
+	
+	Vector_distances_in_diagram< Euclidean_distance<double> > prod1 = A*2;
+	BOOST_CHECK( almost_equal( prod1.vector_in_position(0) , 7.07107) );
+	BOOST_CHECK( almost_equal( prod1.vector_in_position(1) , 7.07107) );
+	BOOST_CHECK( almost_equal( prod1.vector_in_position(2) , 5.65685) );
+	BOOST_CHECK( almost_equal( prod1.vector_in_position(3) , 1.41421) );
+	BOOST_CHECK( almost_equal( prod1.vector_in_position(4) , 1.41421) );
+	BOOST_CHECK( almost_equal( prod1.vector_in_position(5) , 1.41421) );
+	
+}

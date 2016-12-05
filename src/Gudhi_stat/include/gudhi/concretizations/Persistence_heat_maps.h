@@ -329,6 +329,122 @@ public:
     void plot( const char* filename )const;
     
     
+    //implementation of arythmetic operations:
+    
+    friend Persistence_heat_maps operation_on_pair_of_heat_maps( const Persistence_heat_maps& first ,  const Persistence_heat_maps& second , double (*opertion)( double,double ) )
+    {
+		//first check if the heat maps are compatible 
+		if ( !first.check_if_the_same( second ) )
+		{
+			std::cerr << "Sizes of the heat maps are not compatible. The program will now terminate \n";
+			throw "Sizes of the heat maps are not compatible. The program will now terminate \n";
+		}
+		Persistence_heat_maps result;
+		result.min_ = first.min_;
+		result.max_ = first.max_;
+		result.heat_map.reserve( first.heat_map.size() );
+		for ( size_t i = 0 ; i != first.heat_map.size() ; ++i )
+		{ 
+			std::vector< double > v;
+			v.reserve( first.heat_map[i].size() );
+			for ( size_t j = 0 ; j != first.heat_map[i].size() ; ++j )
+			{
+				v.push_back( opertion( first.heat_map[i][j] , second.heat_map[i][j] ) );
+			}
+			result.heat_map.push_back( v );
+		}
+		return result;
+	}//operation_on_pair_of_heat_maps
+	
+	Persistence_heat_maps multiply_by_scalar( double scalar )const 
+    {
+		Persistence_heat_maps result;
+		result.min_ = this->min_;
+		result.max_ = this->max_;
+		result.heat_map.reserve( this->heat_map.size() );
+		for ( size_t i = 0 ; i != this->heat_map.size() ; ++i )
+		{ 
+			std::vector< double > v;
+			v.reserve( this->heat_map[i].size() );
+			for ( size_t j = 0 ; j != this->heat_map[i].size() ; ++j )
+			{
+				v.push_back( this->heat_map[i][j] * scalar );
+			}
+			result.heat_map.push_back( v );
+		}
+		return result;
+	}
+	
+    /**
+     * This function computes a sum of two objects of a type Vector_distances_in_diagram.
+    **/    
+    friend Persistence_heat_maps operator+( const Persistence_heat_maps& first , const Persistence_heat_maps& second )
+    {
+		return operation_on_pair_of_heat_maps( first , second , plus_ );
+	}	
+	/**
+     * This function computes a difference of two objects of a type Vector_distances_in_diagram.
+    **/
+    friend Persistence_heat_maps operator-( const Persistence_heat_maps& first , const Persistence_heat_maps& second )
+    {
+		return operation_on_pair_of_heat_maps( first , second , minus_ );
+	}
+	/**
+     * This function computes a product of an object of a type Vector_distances_in_diagram with real number.
+    **/
+	friend Persistence_heat_maps operator*( double scalar , const Persistence_heat_maps& A )
+	{
+		return A.multiply_by_scalar( scalar );
+	}
+	/**
+     * This function computes a product of an object of a type Vector_distances_in_diagram with real number.
+    **/
+	friend Persistence_heat_maps operator*( const Persistence_heat_maps& A , double scalar )
+	{
+		return A.multiply_by_scalar( scalar );
+	}
+	/**
+     * This function computes a product of an object of a type Vector_distances_in_diagram with real number.
+    **/
+	Persistence_heat_maps operator*( double scalar )
+	{
+		return this->multiply_by_scalar( scalar );
+	}
+	/**
+	 * += operator for Vector_distances_in_diagram.
+	**/ 
+    Persistence_heat_maps operator += ( const Persistence_heat_maps& rhs )
+    {
+        *this = *this + rhs;
+        return *this;
+    }    
+    /**
+	 * -= operator for Vector_distances_in_diagram.
+	**/ 
+    Persistence_heat_maps operator -= ( const Persistence_heat_maps& rhs )
+    {
+        *this = *this - rhs;
+        return *this;
+    }
+    /**
+	 * *= operator for Vector_distances_in_diagram.
+	**/ 
+    Persistence_heat_maps operator *= ( double x )
+    {
+        *this = *this*x;
+        return *this;
+    }
+    /**
+	 * /= operator for Vector_distances_in_diagram.
+	**/ 
+    Persistence_heat_maps operator /= ( double x )
+    {
+        if ( x == 0 )throw( "In operator /=, division by 0. Program terminated." );
+        *this = *this * (1/x);
+        return *this;
+    }
+    
+    
     //Implementations of functions for various concepts.  
     
     /**

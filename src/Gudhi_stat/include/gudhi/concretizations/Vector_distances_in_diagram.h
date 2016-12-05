@@ -76,6 +76,8 @@ struct Maximum_distance
 };
 
 
+
+
 /**
 * This is an implementation of idea presented in the paper by Steve, Matthew and Max. The parameter of the class is the class that computes distance used to construct the vectors. The typical function is
 * either Eucludean of maximum (Manhattan) distance.
@@ -284,6 +286,124 @@ public:
 		if ( this->sorted_vector_of_distances.size() == 0 )return std::make_pair(0,0);
 		return std::make_pair( this->sorted_vector_of_distances[0] , 0);
 	}
+	
+	//arythmetic operations:	
+	/**
+	 * This is a generic function that allows to perform binary operations on two Vector_distances_in_diagram. It will be used later to defien sums and differences of Vector_distances_in_diagram.
+	**/ 
+	//template < typename Operation_type > 
+	friend Vector_distances_in_diagram operation_on_pair_of_vectors( const Vector_distances_in_diagram& first ,  const Vector_distances_in_diagram& second , double (*opertion)( double,double ) )
+    {
+		Vector_distances_in_diagram result;		
+		//Operation_type operation;		
+		result.sorted_vector_of_distances.reserve(std::max( first.sorted_vector_of_distances.size() , second.sorted_vector_of_distances.size() ) );
+        for ( size_t i = 0 ; i != std::min( first.sorted_vector_of_distances.size() , second.sorted_vector_of_distances.size() ) ; ++i )
+        {
+			result.sorted_vector_of_distances.push_back( opertion( first.sorted_vector_of_distances[i] , second.sorted_vector_of_distances[i]) );
+		}
+		if ( first.sorted_vector_of_distances.size() == std::min( first.sorted_vector_of_distances.size() , second.sorted_vector_of_distances.size() ) )
+		{
+			for ( size_t i = std::min( first.sorted_vector_of_distances.size() , second.sorted_vector_of_distances.size() ) ; 
+			i != std::max( first.sorted_vector_of_distances.size() , second.sorted_vector_of_distances.size() ) ; ++i )
+			{
+				result.sorted_vector_of_distances.push_back( opertion(0,second.sorted_vector_of_distances[i]) );
+			}
+		}
+		else
+		{
+			for ( size_t i = std::min( first.sorted_vector_of_distances.size() , second.sorted_vector_of_distances.size() ) ; 
+			i != std::max( first.sorted_vector_of_distances.size() , second.sorted_vector_of_distances.size() ) ; ++i )
+			{
+				result.sorted_vector_of_distances.push_back( opertion(first.sorted_vector_of_distances[i],0) );
+			}
+		}		
+		return result;
+    }//operation_on_pair_of_vectors
+    
+    /**
+     * This function implements an operation of multiplying Vector_distances_in_diagram by a scalar. 
+    **/ 
+    Vector_distances_in_diagram multiply_by_scalar( double scalar )const 
+    {
+		Vector_distances_in_diagram result;
+		result.sorted_vector_of_distances.reserve( this->sorted_vector_of_distances.size() );
+        for ( size_t i = 0 ; i != this->sorted_vector_of_distances.size() ; ++i )
+        {
+			result.sorted_vector_of_distances.push_back( scalar * this->sorted_vector_of_distances[i] );
+		}		
+		return result;
+    }//multiply_by_scalar
+    
+    
+    
+    /**
+     * This function computes a sum of two objects of a type Vector_distances_in_diagram.
+    **/    
+    friend Vector_distances_in_diagram operator+( const Vector_distances_in_diagram& first , const Vector_distances_in_diagram& second )
+    {
+		return operation_on_pair_of_vectors( first , second , plus_ );
+	}	
+	/**
+     * This function computes a difference of two objects of a type Vector_distances_in_diagram.
+    **/
+    friend Vector_distances_in_diagram operator-( const Vector_distances_in_diagram& first , const Vector_distances_in_diagram& second )
+    {
+		return operation_on_pair_of_vectors( first , second , minus_ );
+	}
+	/**
+     * This function computes a product of an object of a type Vector_distances_in_diagram with real number.
+    **/
+	friend Vector_distances_in_diagram operator*( double scalar , const Vector_distances_in_diagram& A )
+	{
+		return A.multiply_by_scalar( scalar );
+	}
+	/**
+     * This function computes a product of an object of a type Vector_distances_in_diagram with real number.
+    **/
+	friend Vector_distances_in_diagram operator*( const Vector_distances_in_diagram& A , double scalar )
+	{
+		return A.multiply_by_scalar( scalar );
+	}
+	/**
+     * This function computes a product of an object of a type Vector_distances_in_diagram with real number.
+    **/
+	Vector_distances_in_diagram operator*( double scalar )
+	{
+		return this->multiply_by_scalar( scalar );
+	}
+	/**
+	 * += operator for Vector_distances_in_diagram.
+	**/ 
+    Vector_distances_in_diagram operator += ( const Vector_distances_in_diagram& rhs )
+    {
+        *this = *this + rhs;
+        return *this;
+    }    
+    /**
+	 * -= operator for Vector_distances_in_diagram.
+	**/ 
+    Vector_distances_in_diagram operator -= ( const Vector_distances_in_diagram& rhs )
+    {
+        *this = *this - rhs;
+        return *this;
+    }
+    /**
+	 * *= operator for Vector_distances_in_diagram.
+	**/ 
+    Vector_distances_in_diagram operator *= ( double x )
+    {
+        *this = *this*x;
+        return *this;
+    }
+    /**
+	 * /= operator for Vector_distances_in_diagram.
+	**/ 
+    Vector_distances_in_diagram operator /= ( double x )
+    {
+        if ( x == 0 )throw( "In operator /=, division by 0. Program terminated." );
+        *this = *this * (1/x);
+        return *this;
+    }
     
 
 private:
@@ -493,11 +613,11 @@ void Vector_distances_in_diagram<F>::compute_sorted_vector_of_distances_via_vect
 template <typename F>
 double Vector_distances_in_diagram<F>::project_to_R( int number_of_function )const
 {
-	if ( number_of_function > this->number_of_functions_for_projections_to_reals )throw "Wrong index of a function in a method Vector_distances_in_diagram<F>::project_to_R";
+	if ( (size_t)number_of_function > this->number_of_functions_for_projections_to_reals )throw "Wrong index of a function in a method Vector_distances_in_diagram<F>::project_to_R";
 	if ( number_of_function < 0 )throw "Wrong index of a function in a method Vector_distances_in_diagram<F>::project_to_R";
 	
 	double result = 0;
-	for ( size_t i = 0 ; i != number_of_function ; ++i )
+	for ( size_t i = 0 ; i != (size_t)number_of_function ; ++i )
 	{
 		result += sorted_vector_of_distances[i];
 	}
@@ -604,7 +724,7 @@ double Vector_distances_in_diagram<F>::distance( const Vector_distances_in_diagr
 template < typename F>
 std::vector<double> Vector_distances_in_diagram<F>::vectorize( int number_of_function )const
 {
-	if ( number_of_function > this->number_of_functions_for_vectorization )throw "Wrong index of a function in a method Vector_distances_in_diagram<F>::vectorize";
+	if ( (size_t)number_of_function > this->number_of_functions_for_vectorization )throw "Wrong index of a function in a method Vector_distances_in_diagram<F>::vectorize";
 	if ( number_of_function < 0 )throw "Wrong index of a function in a method Vector_distances_in_diagram<F>::vectorize";
 	
     std::vector< double > result( std::min( (size_t)number_of_function , this->sorted_vector_of_distances.size() ) );
@@ -662,6 +782,8 @@ double Vector_distances_in_diagram<F>::compute_scalar_product( const Vector_dist
 	}
 	return result;
 }
+
+
 
 
 

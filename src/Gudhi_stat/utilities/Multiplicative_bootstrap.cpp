@@ -35,7 +35,7 @@ using namespace Gudhi::Gudhi_stat;
 int main( int argc , char** argv )
 {
 	std::cout << "The parameters of this program are : " << std::endl;
-	std::cout << "(a) a name of a file with names of files with points," << std:: endl;
+	std::cout << "(a) a name of a file with names of files with persistence diagrams," << std:: endl;
 	std::cout << "(b) a number of repetitions of bootstrap (integer)," << std::endl;
 	std::cout << "(c) a quantile (real number between 0 and 1. If you do not know what to set, set it to 0.95." << std::endl;
 	if ( argc != 4 )
@@ -61,7 +61,8 @@ int main( int argc , char** argv )
 	norm_of_objects<Persistence_landscape> norm;
 		
 	double result = 
-	multiplicative_bootstrap< Persistence_landscape , difference_of_objects<Persistence_landscape> , norm_of_objects<Persistence_landscape> >( collection_of_landscapes , number_of_repetitions_of_bootstrap , diff , norm , quantile );
+	multiplicative_bootstrap< Persistence_landscape , difference_of_objects<Persistence_landscape> , norm_of_objects<Persistence_landscape> >
+	( collection_of_landscapes , number_of_repetitions_of_bootstrap , diff , norm , quantile );
 	
 	std::cout << "result of bootstrap : " << result << std::endl;
 	return 0;	

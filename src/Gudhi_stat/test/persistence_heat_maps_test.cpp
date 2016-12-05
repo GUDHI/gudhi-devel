@@ -235,3 +235,31 @@ BOOST_AUTO_TEST_CASE(check_scalar_products_for_heat_maps)
 	BOOST_CHECK( fabs( r.compute_scalar_product( r ) - 0.672907)< 0.0005);
 	
 }
+
+
+
+BOOST_AUTO_TEST_CASE(check_arythmetic_operations_for_heat_maps) 
+{
+	std::vector< std::vector<double> > filter = create_Gaussian_filter(30,1);	
+	Persistence_heat_maps<constant_scaling_function> p( "data/file_with_diagram" , filter , false , 1000 , 0 , 1 );
+	Persistence_heat_maps<constant_scaling_function> q( "data/file_with_diagram_1" , filter , false , 1000 , 0 , 1 );
+	
+	Persistence_heat_maps<constant_scaling_function> sum = p + q;
+	Persistence_heat_maps<constant_scaling_function> difference = p - q;
+	Persistence_heat_maps<constant_scaling_function> multiply_by_scalar = 2*p;
+	
+	//sum.print_to_file( "sum" );
+	//difference.print_to_file( "difference" );
+	//multiply_by_scalar.print_to_file( "multiply_by_scalar" );		
+	
+	Persistence_heat_maps<constant_scaling_function> sum_template;
+	sum_template.load_from_file( "data/heat_map_sum" );
+	Persistence_heat_maps<constant_scaling_function> difference_template;
+	difference_template.load_from_file( "data/heat_map_difference" );
+	Persistence_heat_maps<constant_scaling_function> multiply_by_scalar_template;
+	multiply_by_scalar_template.load_from_file( "data/heat_map_multiply_by_scalar" );
+	
+	BOOST_CHECK( sum == sum_template );
+	
+}
+

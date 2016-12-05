@@ -130,3 +130,12 @@ target_link_libraries(Multiplicative_bootstrap ${TBB_LIBRARIES})
 endif(TBB_FOUND)
 target_link_libraries(Multiplicative_bootstrap ${Boost_SYSTEM_LIBRARY})
 
+
+
+
+#just for Pawel's tests:
+add_executable ( NN_classification NN_classification.cpp )
+target_link_libraries(NN_classification ${Boost_SYSTEM_LIBRARY})
+
+add_executable ( compute_distance_between_vectors compute_distance_between_vectors.cpp )
+target_link_libraries(compute_distance_between_vectors ${Boost_SYSTEM_LIBRARY})
