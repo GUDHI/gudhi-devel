@@ -76,16 +76,18 @@ Persistence_graph::Persistence_graph(const Persistence_diagram1 &diag1,
                                      const Persistence_diagram2 &diag2, double e)
     : u(), v(), alive_count(0)
 {
-    for (auto it = diag1.cbegin(); it != diag1.cend(); ++it)
-        if(it->second == std::numeric_limits<double>::infinity())
+    for (auto it = std::begin(diag1); it != std::end(diag1); ++it){
+        if(std::get<1>(*it) == std::numeric_limits<double>::infinity())
             alive_count++;
-        else if (it->second - it->first > e)
+        if (std::get<1>(*it) - std::get<0>(*it) > e)
             u.push_back(Internal_point(std::get<0>(*it), std::get<1>(*it), u.size()));
-    for (auto it = diag2.cbegin(); it != diag2.cend(); ++it)
-        if(it->second == std::numeric_limits<double>::infinity())
+    }
+    for (auto it = std::begin(diag2); it != std::end(diag2); ++it){
+        if(std::get<1>(*it) == std::numeric_limits<double>::infinity())
             alive_count--;
-        else if (it->second - it->first > e)
+        if (std::get<1>(*it) - std::get<0>(*it) > e)
             v.push_back(Internal_point(std::get<0>(*it), std::get<1>(*it), v.size()));
+    }
     if (u.size() < v.size())
         swap(u, v);
 }
@@ -113,6 +115,8 @@ inline double Persistence_graph::distance(int u_point_index, int v_point_index) 
         return 0.;
     Internal_point p_u = get_u_point(u_point_index);
     Internal_point p_v = get_v_point(v_point_index);
+    if(p_u.y() == p_v.y())
+        return std::fabs(p_u.x() - p_v.x());
     return std::max(std::fabs(p_u.x() - p_v.x()), std::fabs(p_u.y() - p_v.y()));
 }
 
@@ -155,9 +159,9 @@ inline Internal_point Persistence_graph::get_v_point(int v_point_index) const {
 inline double Persistence_graph::diameter_bound() const {
     double max = 0.;
     for(auto it = u.cbegin(); it != u.cend(); it++)
-        max = std::max(max,it->y());
+        max = std::max(max,it->y() == std::numeric_limits<double>::infinity() ? it->x() : it->y());
     for(auto it = v.cbegin(); it != v.cend(); it++)
-        max = std::max(max,it->y());
+        max = std::max(max,it->y() == std::numeric_limits<double>::infinity() ? it->x() : it->y());
     return max;
 }
 

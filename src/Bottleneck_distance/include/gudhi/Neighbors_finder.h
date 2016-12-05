@@ -26,7 +26,7 @@
 // Inclusion order is important for CGAL patch
 #include "CGAL/Kd_tree_node.h"
 #include "CGAL/Kd_tree.h"
-#include "CGAL/Orthogonal_incremental_neighbor_search.h"
+#include "CGAL/Orthogonal_k_neighbor_search.h"
 
 #include <CGAL/Weighted_Minkowski_distance.h>
 #include <CGAL/Search_traits.h>
@@ -50,9 +50,9 @@ namespace bottleneck_distance {
 class Neighbors_finder {
 
     typedef CGAL::Dimension_tag<2> D;
-    typedef CGAL::Search_traits<double, Internal_point, const double*, CGAL::Construct_coord_iterator, D> Traits;
+    typedef CGAL::Search_traits<double, Internal_point, const double*, Construct_coord_iterator, D> Traits;
     typedef CGAL::Weighted_Minkowski_distance<Traits> Distance;
-    typedef CGAL::Orthogonal_incremental_neighbor_search<Traits, Distance> K_neighbor_search;
+    typedef CGAL::Orthogonal_k_neighbor_search<Traits, Distance> K_neighbor_search;
     typedef K_neighbor_search::Tree Kd_tree;
 
 public:
@@ -93,7 +93,7 @@ public:
 private:
     const Persistence_graph& g;
     const double r;
-    std::vector<std::shared_ptr<Neighbors_finder>> neighbors_finder;
+    std::vector<std::unique_ptr<Neighbors_finder>> neighbors_finder;
 };
 
 inline Neighbors_finder::Neighbors_finder(const Persistence_graph& g, double r) :
@@ -123,7 +123,7 @@ inline int Neighbors_finder::pull_near(int u_point_index) {
         //Is the query point near to a V point in the plane ?
         Internal_point u_point = g.get_u_point(u_point_index);
         std::array<double, 2> w = { {1., 1.} };
-         K_neighbor_search search(kd_t, u_point, 0., true, Distance(0, 2, w.begin(), w.end()));
+         K_neighbor_search search(kd_t, u_point, 1, 0., true, Distance(0, 2, w.begin(), w.end()));
         auto it = search.begin();
         if(it==search.end() || g.distance(u_point_index, it->first.point_index) > r)
             return null_point_index();
@@ -148,7 +148,7 @@ inline Layered_neighbors_finder::Layered_neighbors_finder(const Persistence_grap
 
 inline void Layered_neighbors_finder::add(int v_point_index, int vlayer) {
     for (int l = neighbors_finder.size(); l <= vlayer; l++)
-        neighbors_finder.emplace_back(std::shared_ptr<Neighbors_finder>(new Neighbors_finder(g, r)));
+        neighbors_finder.emplace_back(std::unique_ptr<Neighbors_finder>(new Neighbors_finder(g, r)));
     neighbors_finder.at(vlayer)->add(v_point_index);
 }
 

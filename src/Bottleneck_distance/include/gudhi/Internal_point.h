@@ -51,14 +51,6 @@ inline int null_point_index() {
     return -1;
 }
 
-}  // namespace bottleneck_distance
-
-}  // namespace Gudhi
-
-namespace CGAL {
-
-typedef Gudhi::bottleneck_distance::Internal_point Internal_point;
-
 struct Construct_coord_iterator {
     typedef  const double* result_type;
     const double* operator()(const Internal_point& p) const
@@ -67,6 +59,12 @@ struct Construct_coord_iterator {
     { return p.vec+2; }
 };
 
-} //namespace CGAL
+}  // namespace bottleneck_distance
+
+}  // namespace Gudhi
+
+
+
+
 
 #endif  // INTERNAL_POINT_H_
