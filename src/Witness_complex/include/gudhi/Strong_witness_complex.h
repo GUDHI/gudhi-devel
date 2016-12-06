@@ -96,6 +96,7 @@ private:
    *  \brief Initializes member variables before constructing simplicial complex.
    *  \details Records landmarks from the range 'landmarks' into a 
    *           table internally, as well as witnesses from the range 'witnesses'.
+   *           Both ranges should have value_type Kernel_::Point_d.
    */
   template< typename LandmarkRange,
             typename WitnessRange >
@@ -116,6 +117,7 @@ private:
   
   /** \brief Outputs the strong witness complex of relaxation 'max_alpha_square' 
    *         in a simplicial complex data structure.
+   *  \details The function returns true if the construction is successful and false otherwise.
    *  @param[out] complex Simplicial complex data structure, which is a model of
    *              SimplicialComplexForWitness concept.
    *  @param[in] max_alpha_square Maximal squared relaxation parameter.
