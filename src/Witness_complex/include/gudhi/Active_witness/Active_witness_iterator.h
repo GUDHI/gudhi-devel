@@ -82,7 +82,7 @@ private :
   void increment()
   {
     // the neighbor search can't be at the end iterator of a list
-    assert(!is_end_ && lh_ != aw_->nearest_landmark_table_.end());
+    GUDHI_CHECK(!is_end_ && lh_ != aw_->nearest_landmark_table_.end(), std::logic_error("Wrong active witness increment."));
     // if the id of the current landmark is the same as the last one
     if (lh_->first == aw_->iterator_last_->first) {
       // if the next iterator is end, lh_it = end pointer
