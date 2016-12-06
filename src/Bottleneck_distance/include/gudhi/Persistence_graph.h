@@ -68,15 +68,16 @@ public:
 private:
     std::vector<Internal_point> u;
     std::vector<Internal_point> v;
-    std::vector<double> u_alive;
-    std::vector<double> v_alive;
+    double b_alive;
 };
 
 template<typename Persistence_diagram1, typename Persistence_diagram2>
 Persistence_graph::Persistence_graph(const Persistence_diagram1 &diag1,
                                      const Persistence_diagram2 &diag2, double e)
-    : u(), v(), u_alive(), v_alive()
+    : u(), v(), b_alive(0.)
 {
+    std::vector<double> u_alive;
+    std::vector<double> v_alive;
     for (auto it = std::begin(diag1); it != std::end(diag1); ++it){
         if(std::get<1>(*it) == std::numeric_limits<double>::infinity())
             u_alive.push_back(std::get<0>(*it));
@@ -89,10 +90,14 @@ Persistence_graph::Persistence_graph(const Persistence_diagram1 &diag1,
         else if (std::get<1>(*it) - std::get<0>(*it) > e)
             v.push_back(Internal_point(std::get<0>(*it), std::get<1>(*it), v.size()));
     }
-    std::sort(u_alive.begin(), u_alive.end());
-    std::sort(v_alive.begin(), v_alive.end());
     if (u.size() < v.size())
         swap(u, v);
+    std::sort(u_alive.begin(), u_alive.end());
+    std::sort(v_alive.begin(), v_alive.end());
+    if(u_alive.size() != v_alive.size())
+        b_alive = std::numeric_limits<double>::infinity();
+    else for(auto it_u=u_alive.cbegin(), it_v=v_alive.cbegin();it_u != u_alive.cend();++it_u, ++it_v)
+        b_alive = std::max(b_alive, std::fabs(*it_u - *it_v));
 }
 
 inline bool Persistence_graph::on_the_u_diagonal(int u_point_index) const {
@@ -126,12 +131,7 @@ inline int Persistence_graph::size() const {
 }
 
 inline double Persistence_graph::bottleneck_alive() const{
-    if(u_alive.size() != v_alive.size())
-        return std::numeric_limits<double>::infinity();
-    double max = 0.;
-    for(auto it_u=u_alive.cbegin(), it_v=v_alive.cbegin();it_u != u_alive.cend();++it_u, ++it_v)
-        max = std::max(max, std::fabs(*it_u - *it_v));
-    return max;
+    return b_alive;
 }
 
 inline std::vector<double> Persistence_graph::sorted_distances() const {
