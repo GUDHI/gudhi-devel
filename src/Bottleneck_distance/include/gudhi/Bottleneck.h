@@ -24,12 +24,13 @@
 #define BOTTLENECK_H_
 
 #include <gudhi/Graph_matching.h>
+#include <cmath>
 
 namespace Gudhi {
 
 namespace bottleneck_distance {
 
-/** \brief Function to use in order to compute the Bottleneck distance between two persistence diagrams.
+/** \brief Function to use in order to compute the Bottleneck distance between two persistence diagrams (see Concepts).
  * If the last parameter e is not 0 (default value if not explicited), you get an additive e-approximation.
  *
  * \ingroup bottleneck_distance
@@ -37,7 +38,8 @@ namespace bottleneck_distance {
 template<typename Persistence_diagram1, typename Persistence_diagram2>
 double compute(const Persistence_diagram1 &diag1, const Persistence_diagram2 &diag2, double e=0.) {
     Persistence_graph g(diag1, diag2, e);
-    if(!g.alive_match())
+    double b = g.bottleneck_alive();
+    if(b == std::numeric_limits<double>::infinity())
         return std::numeric_limits<double>::infinity();
     std::vector<double> sd;
     if(e == 0.)
@@ -45,7 +47,7 @@ double compute(const Persistence_diagram1 &diag1, const Persistence_diagram2 &di
     long idmin = 0;
     long idmax = e==0. ? sd.size() - 1 : g.diameter_bound()/e + 1;
     // alpha can change the complexity
-    double alpha = pow(idmax, 0.25);
+    double alpha = std::pow(idmax, 0.25);
     Graph_matching m(g);
     Graph_matching biggest_unperfect(g);
     while (idmin != idmax) {
@@ -61,7 +63,8 @@ double compute(const Persistence_diagram1 &diag1, const Persistence_diagram2 &di
             idmin = idmin + step + 1;
         }
     }
-    return e == 0. ? sd.at(idmin) : e*(idmin);
+    b = std::max(b, e == 0. ? sd.at(idmin) : e*(idmin));
+    return b;
 }
 
 
