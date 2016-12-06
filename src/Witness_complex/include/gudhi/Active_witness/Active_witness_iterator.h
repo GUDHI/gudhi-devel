@@ -81,14 +81,8 @@ private :
   
   void increment()
   {
-    // if neighbor search is at its end, check if lh_++ is end
-    if (aw_->iterator_last_ == aw_->iterator_end_) {
-      if (lh_++ == aw_->nearest_landmark_table_.end()) {
-        is_end_ = true;
-        return;
-      }
-      return;
-    }
+    // the neighbor search can't be at the end iterator of a list
+    assert(!is_end_ && lh_ != aw_->nearest_landmark_table_.end());
     // if the id of the current landmark is the same as the last one
     if (lh_->first == aw_->iterator_last_->first) {
       // if the next iterator is end, lh_it = end pointer
