@@ -61,8 +61,7 @@ BOOST_AUTO_TEST_CASE(RIPS_DOC_OFF_file) {
       rips_threshold << "==========" << std::endl;
 
   Gudhi::Points_off_reader<Point> off_reader(off_file_name);
-  Rips_complex rips_complex_from_file(off_reader.get_point_cloud(), rips_threshold,
-                                      euclidean_distance<Filtration_value, Point>);
+  Rips_complex rips_complex_from_file(off_reader.get_point_cloud(), rips_threshold, Euclidean_distance());
 
   const int DIMENSION_1 = 1;
   Simplex_tree st;
@@ -91,10 +90,10 @@ BOOST_AUTO_TEST_CASE(RIPS_DOC_OFF_file) {
         std::cout << vertex << ",";
         vp.push_back(off_reader.get_point_cloud().at(vertex));
       }
-      std::cout << ") - distance =" << euclidean_distance<double>(vp.at(0), vp.at(1)) <<
+      std::cout << ") - distance =" << Euclidean_distance()(vp.at(0), vp.at(1)) <<
           " - filtration =" << st.filtration(f_simplex) << std::endl;
       BOOST_CHECK(vp.size() == 2);
-      BOOST_CHECK(are_almost_the_same(st.filtration(f_simplex), euclidean_distance<double>(vp.at(0), vp.at(1))));
+      BOOST_CHECK(are_almost_the_same(st.filtration(f_simplex), Euclidean_distance()(vp.at(0), vp.at(1))));
     }
   }
 
@@ -157,19 +156,20 @@ bool is_point_in_list(Vector_of_points points_list, Point point) {
   return false;  // point not found
 }
 
-/* Compute the square value of Euclidean distance between two Points given by a range of coordinates.
- * The points are assumed to have the same dimension. */
-template< typename Point >
-double custom_square_euclidean_distance(const Point &p1,const Point &p2) {
-  double dist = 0.;
-  auto it1 = p1.begin();
-  auto it2 = p2.begin();
-  for (; it1 != p1.end(); ++it1, ++it2) {
-    double tmp = *it1 - *it2;
-    dist += tmp*tmp;
+class Custom_square_euclidean_distance {
+ public:
+  template< typename Point >
+  auto operator()(const Point& p1, const Point& p2) -> typename Point::value_type {
+    auto it1 = p1.begin();
+    auto it2 = p2.begin();
+    typename Point::value_type dist = 0.;
+    for (; it1 != p1.end(); ++it1, ++it2) {
+      typename Point::value_type tmp = (*it1) - (*it2);
+      dist += tmp*tmp;
+    }
+    return dist;
   }
-  return dist;
-}
+};
 
 BOOST_AUTO_TEST_CASE(Rips_complex_from_points) {
   // ----------------------------------------------------------------------------
@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE(Rips_complex_from_points) {
   // ----------------------------------------------------------------------------
   // Init of a rips complex from the list of points
   // ----------------------------------------------------------------------------
-  Rips_complex rips_complex_from_points(points, 2.0, custom_square_euclidean_distance<Point>);
+  Rips_complex rips_complex_from_points(points, 2.0, Custom_square_euclidean_distance());
 
   std::cout << "========== Rips_complex_from_points ==========" << std::endl;
   Simplex_tree st;

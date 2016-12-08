@@ -31,16 +31,19 @@
 
 /** @brief Compute the Euclidean distance between two Points given by a range of coordinates. The points are assumed to
  * have the same dimension. */
-template< typename Filtration_value, typename Point >
-Filtration_value euclidean_distance(const Point &p1, const Point &p2) {
-  Filtration_value dist = 0.;
-  auto it1 = p1.begin();
-  auto it2 = p2.begin();
-  for (; it1 != p1.end(); ++it1, ++it2) {
-    Filtration_value tmp = static_cast<double>(*it1) - static_cast<double>(*it2);
-    dist += tmp*tmp;
+class Euclidean_distance {
+ public:
+  template< typename Point >
+  auto operator()(const Point& p1, const Point& p2) -> typename Point::value_type {
+    auto it1 = p1.begin();
+    auto it2 = p2.begin();
+    typename Point::value_type dist = 0.;
+    for (; it1 != p1.end(); ++it1, ++it2) {
+      typename Point::value_type tmp = (*it1) - (*it2);
+      dist += tmp*tmp;
+    }
+    return std::sqrt(dist);
   }
-  return std::sqrt(dist);
-}
+};
 
 #endif  // DISTANCE_FUNCTIONS_H_

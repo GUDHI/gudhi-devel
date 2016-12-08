@@ -62,8 +62,7 @@ int main(int argc, char * argv[]) {
   program_options(argc, argv, off_file_points, filediag, threshold, dim_max, min_p, max_p, min_persistence);
 
   Points_off_reader off_reader(off_file_points);
-  Rips_complex rips_complex_from_file(off_reader.get_point_cloud(), threshold,
-                                      euclidean_distance<Filtration_value, Point>);
+  Rips_complex rips_complex_from_file(off_reader.get_point_cloud(), threshold, Euclidean_distance());
 
   // Construct the Rips complex in a Simplex Tree
   Simplex_tree simplex_tree;

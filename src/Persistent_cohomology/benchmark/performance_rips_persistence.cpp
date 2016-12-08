@@ -83,8 +83,7 @@ int main(int argc, char * argv[]) {
 
   // Compute the proximity graph of the points
   start = std::chrono::system_clock::now();
-  Rips_complex rips_complex_from_file(off_reader.get_point_cloud(), threshold,
-                                      euclidean_distance<Filtration_value, Point>);
+  Rips_complex rips_complex_from_file(off_reader.get_point_cloud(), threshold, Euclidean_distance());
   end = std::chrono::system_clock::now();
   elapsed_sec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
   std::cout << "Compute Rips graph in " << elapsed_sec << " ms.\n";

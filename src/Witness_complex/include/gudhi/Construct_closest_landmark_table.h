@@ -73,7 +73,7 @@ namespace witness_complex {
       int landmarks_i = 0;
       for (landmarks_it = landmarks.begin(), landmarks_i = 0; landmarks_it != landmarks.end();
            ++landmarks_it, landmarks_i++) {
-        dist_i dist = std::make_pair(euclidean_distance<FiltrationValue>(points[points_i], *landmarks_it),
+        dist_i dist = std::make_pair(Euclidean_distance()(points[points_i], *landmarks_it),
                                      landmarks_i);
         l_heap.push(dist);
       }

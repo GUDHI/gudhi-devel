@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
   // ----------------------------------------------------------------------------
   // Init of a rips complex from points
   // ----------------------------------------------------------------------------
-  Rips_complex rips_complex_from_points(points, threshold, euclidean_distance<Filtration_value, Point>);
+  Rips_complex rips_complex_from_points(points, threshold, Euclidean_distance());
 
   Simplex_tree simplex;
   if (rips_complex_from_points.create_complex(simplex, 1)) {
