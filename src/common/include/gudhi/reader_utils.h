@@ -74,6 +74,10 @@ inline void read_points(std::string file_name, std::vector< std::vector< double 
 /**
  * @brief Read a graph from a file.
  *
+ * \tparam Graph_t Type for the return graph. Must be constructible from iterators on pairs of Vertex_handle
+ * \tparam Filtration_value Type for the value of the read filtration
+ * \tparam Vertex_handle Type for the value of the read vertices
+ *
  * File format: 1 simplex per line<br>
  * Dim1 X11 X12 ... X1d Fil1<br>
  * Dim2 X21 X22 ... X2d Fil2<br>
@@ -83,13 +87,14 @@ inline void read_points(std::string file_name, std::vector< std::vector< double 
  * Every simplex must appear exactly once.
  * Simplices of dimension more than 1 are ignored.
  */
-template< typename Graph_t, typename Edge_t, typename Filtration_value, typename Vertex_handle >
-inline Graph_t read_graph(std::string file_name) {
+template< typename Graph_t, typename Filtration_value, typename Vertex_handle >
+Graph_t read_graph(std::string file_name) {
   std::ifstream in_(file_name.c_str(), std::ios::in);
   if (!in_.is_open()) {
     std::cerr << "Unable to open file " << file_name << std::endl;
   }
 
+  typedef std::pair< Vertex_handle, Vertex_handle > Edge_t;
   std::vector< Edge_t > edges;
   std::vector< Filtration_value > edges_fil;
   std::map< Vertex_handle, Filtration_value > vertices;
