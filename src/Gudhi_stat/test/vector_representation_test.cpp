@@ -336,13 +336,9 @@ BOOST_AUTO_TEST_CASE(check_compute_average)
 	
 	Vector_distances_in_diagram< Euclidean_distance<double> > A( i1 , -1 );
 	Vector_distances_in_diagram< Euclidean_distance<double> > B( i1 , -1 );
-	
-	std::vector< Vector_distances_in_diagram< Euclidean_distance<double> >* > to_average;
-	to_average.push_back( &A );
-	to_average.push_back( &B );
-	
+
 	Vector_distances_in_diagram< Euclidean_distance<double> > average; 
-	average.compute_average( to_average );
+	average.compute_average( {&A,&B} );
 	
 	Vector_distances_in_diagram< Euclidean_distance<double> > template_average; 
 	template_average.load_from_file( "data/average_of_persistence_vectors" );
@@ -354,8 +350,7 @@ BOOST_AUTO_TEST_CASE(check_compute_average)
 
 	
 BOOST_AUTO_TEST_CASE(check_arythmetic_operations) 
-{	
-	//compute average 
+{
 	std::vector< std::pair<double,double> > i1(3);
 	i1[0] = std::pair<double,double>( 1,2 );
 	i1[1] = std::pair<double,double>( 3,8 );

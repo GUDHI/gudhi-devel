@@ -43,7 +43,13 @@ int main( int argc , char** argv )
 		return 1;
 	}
 	
-	int p = atoi( argv[1] );
+	int pp = atoi( argv[1] );
+	double p = std::numeric_limits<double>::max();
+	if ( pp != -1 )
+	{
+		p = pp;
+	}
+	
 
 	std::vector< const char* > filenames;
 	for ( int i = 2 ; i < argc ; ++i )
@@ -75,23 +81,23 @@ int main( int argc , char** argv )
 	{
 		for ( size_t j = i ; j != landscaspes.size() ; ++j )
 		{			
-			distance[i][j] = distance[j][i] = compute_discance_of_landscapes( landscaspes[i], landscaspes[j] , p ) ;
+			distance[i][j] = distance[j][i] = compute_distance_of_landscapes( landscaspes[i], landscaspes[j] , p ) ;
 			
 		}
 	}
 	
 	//and now output the result to the screen and a file:
-	ofstream out;
+	std::ofstream out;
 	out.open( "distance" );
 	for ( size_t i = 0 ; i != distance.size() ; ++i )
 	{
 		for ( size_t j = 0 ; j != distance.size() ; ++j )
 		{
-			cout << distance[i][j] << " ";
+			std::cout << distance[i][j] << " ";
 			out << distance[i][j] << " ";
 		}
-		cout << endl;
-		out << endl;
+		std::cout << std::endl;
+		out << std::endl;
 	}
 	out.close();
 		

@@ -33,12 +33,11 @@
 #include <algorithm>
 
 //gudhi include
-#include <gudhi/concretizations/read_persitence_from_file.h>
+#include <gudhi/read_persitence_from_file.h>
 #include <gudhi/common_gudhi_stat.h>
 
 
 
-using namespace std;
 
 namespace Gudhi
 {
@@ -71,8 +70,8 @@ std::vector< std::vector<double> > create_Gaussian_filter( size_t pixel_radius ,
 	if ( dbg )
 	{
 		std::cerr << "Kernel initalize \n";	
-		cerr << "pixel_radius : " << pixel_radius << endl; 
-		std::cerr << "kernel.size() : " << kernel.size() << endl;
+		std::cerr << "pixel_radius : " << pixel_radius << std::endl; 
+		std::cerr << "kernel.size() : " << kernel.size() << std::endl;
 		getchar();
 	}
  
@@ -277,12 +276,12 @@ public:
 	/**
 	 * Return minimal range value of persistent image.
 	**/ 
-	inline double gimme_min()const{return this->min_;}
+	inline double give_me_min()const{return this->min_;}
 
 	/**
 	 * Return maximal range value of persistent image.
 	**/ 
-	inline double gimme_max()const{return this->max_;}
+	inline double give_me_max()const{return this->max_;}
 	
 	
 	/**
@@ -329,8 +328,9 @@ public:
     void plot( const char* filename )const;
     
     
-    //implementation of arythmetic operations:
-    
+    /**
+     * Binary (arythmetic) operation on two Persistence_heat_maps.
+    **/     
     friend Persistence_heat_maps operation_on_pair_of_heat_maps( const Persistence_heat_maps& first ,  const Persistence_heat_maps& second , double (*opertion)( double,double ) )
     {
 		//first check if the heat maps are compatible 
@@ -356,6 +356,10 @@ public:
 		return result;
 	}//operation_on_pair_of_heat_maps
 	
+	
+	/**
+	 * Multiplication of Persistence_heat_maps by scalar (so that all values of the heat map gets multiplied by that scalar). 
+	**/ 
 	Persistence_heat_maps multiply_by_scalar( double scalar )const 
     {
 		Persistence_heat_maps result;
@@ -376,42 +380,42 @@ public:
 	}
 	
     /**
-     * This function computes a sum of two objects of a type Vector_distances_in_diagram.
+     * This function computes a sum of two objects of a type Persistence_heat_maps.
     **/    
     friend Persistence_heat_maps operator+( const Persistence_heat_maps& first , const Persistence_heat_maps& second )
     {
 		return operation_on_pair_of_heat_maps( first , second , plus_ );
 	}	
 	/**
-     * This function computes a difference of two objects of a type Vector_distances_in_diagram.
+     * This function computes a difference of two objects of a type Persistence_heat_maps.
     **/
     friend Persistence_heat_maps operator-( const Persistence_heat_maps& first , const Persistence_heat_maps& second )
     {
 		return operation_on_pair_of_heat_maps( first , second , minus_ );
 	}
 	/**
-     * This function computes a product of an object of a type Vector_distances_in_diagram with real number.
+     * This function computes a product of an object of a type Persistence_heat_maps with real number.
     **/
 	friend Persistence_heat_maps operator*( double scalar , const Persistence_heat_maps& A )
 	{
 		return A.multiply_by_scalar( scalar );
 	}
 	/**
-     * This function computes a product of an object of a type Vector_distances_in_diagram with real number.
+     * This function computes a product of an object of a type Persistence_heat_maps with real number.
     **/
 	friend Persistence_heat_maps operator*( const Persistence_heat_maps& A , double scalar )
 	{
 		return A.multiply_by_scalar( scalar );
 	}
 	/**
-     * This function computes a product of an object of a type Vector_distances_in_diagram with real number.
+     * This function computes a product of an object of a type Persistence_heat_maps with real number.
     **/
 	Persistence_heat_maps operator*( double scalar )
 	{
 		return this->multiply_by_scalar( scalar );
 	}
 	/**
-	 * += operator for Vector_distances_in_diagram.
+	 * += operator for Persistence_heat_maps.
 	**/ 
     Persistence_heat_maps operator += ( const Persistence_heat_maps& rhs )
     {
@@ -419,7 +423,7 @@ public:
         return *this;
     }    
     /**
-	 * -= operator for Vector_distances_in_diagram.
+	 * -= operator for Persistence_heat_maps.
 	**/ 
     Persistence_heat_maps operator -= ( const Persistence_heat_maps& rhs )
     {
@@ -427,7 +431,7 @@ public:
         return *this;
     }
     /**
-	 * *= operator for Vector_distances_in_diagram.
+	 * *= operator for Persistence_heat_maps.
 	**/ 
     Persistence_heat_maps operator *= ( double x )
     {
@@ -435,7 +439,7 @@ public:
         return *this;
     }
     /**
-	 * /= operator for Vector_distances_in_diagram.
+	 * /= operator for Persistence_heat_maps.
 	**/ 
     Persistence_heat_maps operator /= ( double x )
     {
@@ -475,6 +479,7 @@ public:
 	* A function to compute distance between persistence heat maps.
 	* The parameter of this function is a const reference to an object of a class Persistence_heat_maps.
 	* This function is required in Topological_data_with_distances concept.
+    * For max norm distance, set power to std::numeric_limits<double>::max()
 	**/
 	double distance( const Persistence_heat_maps& second_ , double power = 1)const;
 	
@@ -497,7 +502,7 @@ public:
 	/**
 	 * The x-range of the persistence heat map. 
 	**/ 
-	std::pair< double , double > gimme_x_range()const
+	std::pair< double , double > give_me_x_range()const
 	{
 		return std::make_pair( this->min_ , this->max_ );
 	}
@@ -505,9 +510,9 @@ public:
 	/**
 	 * The y-range of the persistence heat map. 
 	**/ 
-	std::pair< double , double > gimme_y_range()const
+	std::pair< double , double > give_me_y_range()const
 	{
-		return this->gimme_x_range();
+		return this->give_me_x_range();
 	}
 	
 	
@@ -571,9 +576,9 @@ void Persistence_heat_maps<Scalling_of_kernels>::construct( const std::vector< s
 
 	if ( dbg )
 	{
-		cerr << "min_ : " << min_ << endl;
-		cerr << "max_ : " << max_ << endl;
-		cerr << "number_of_pixels : " << number_of_pixels << endl;
+		std::cerr << "min_ : " << min_ << std::endl;
+		std::cerr << "max_ : " << max_ << std::endl;
+		std::cerr << "number_of_pixels : " << number_of_pixels << std::endl;
 		getchar();
 	}
 
@@ -589,7 +594,7 @@ void Persistence_heat_maps<Scalling_of_kernels>::construct( const std::vector< s
     }
     this->heat_map = heat_map_;
 
-    if (dbg)cerr << "Done creating of the heat map, now we will fill in the structure \n";
+    if (dbg)std::cerr << "Done creating of the heat map, now we will fill in the structure \n";
 
 	for ( size_t pt_nr = 0 ; pt_nr != intervals_.size() ; ++pt_nr )
 	{
@@ -599,9 +604,9 @@ void Persistence_heat_maps<Scalling_of_kernels>::construct( const std::vector< s
 		
 		if ( dbg )
 		{
-			std::cerr << "point : " << intervals_[pt_nr].first << " , " << intervals_[pt_nr].second << endl;
-			std::cerr << "x_grid : " << x_grid << endl;
-			std::cerr << "y_grid : " << y_grid << endl;
+			std::cerr << "point : " << intervals_[pt_nr].first << " , " << intervals_[pt_nr].second << std::endl;
+			std::cerr << "x_grid : " << x_grid << std::endl;
+			std::cerr << "y_grid : " << y_grid << std::endl;
 		}
 		
 		//x_grid and y_grid gives a center of the kernel. We want to have its lower left cordner. To get this, we need to shift x_grid and y_grid by a grid diameter.		
@@ -612,8 +617,8 @@ void Persistence_heat_maps<Scalling_of_kernels>::construct( const std::vector< s
 		if ( dbg )
 		{
 			std::cerr << "After shift : \n";;
-			std::cerr << "x_grid : " << x_grid << endl;
-			std::cerr << "y_grid : " << y_grid << endl;
+			std::cerr << "x_grid : " << x_grid << std::endl;
+			std::cerr << "y_grid : " << y_grid << std::endl;
 		}
 				
 		double scaling_value = this->f(intervals_[pt_nr]);
@@ -782,7 +787,7 @@ void Persistence_heat_maps<Scalling_of_kernels>::compute_percentage_of_active( c
 template <typename Scalling_of_kernels>
 void Persistence_heat_maps<Scalling_of_kernels>::plot( const char* filename )const
 {
-	ofstream out;
+	std::ofstream out;
 	std::stringstream ss;
 	ss << filename << "_GnuplotScript";
 	
@@ -794,7 +799,7 @@ void Persistence_heat_maps<Scalling_of_kernels>::plot( const char* filename )con
         {
             out << this->heat_map[i][j] << " ";
         }
-        out << endl;
+        out << std::endl;
     }
     out.close();
     std::cout << "Gnuplot script have been created. Open gnuplot and type load \'" << ss.str().c_str() << "\' to see the picture." << std::endl; 
@@ -805,7 +810,7 @@ template <typename Scalling_of_kernels>
 void Persistence_heat_maps<Scalling_of_kernels>::print_to_file( const char* filename )const
 {
 
-	ofstream out;
+	std::ofstream out;
 	out.open( filename );
 	
 	//First we store this->min_ and this->max_ values:
@@ -816,7 +821,7 @@ void Persistence_heat_maps<Scalling_of_kernels>::print_to_file( const char* file
         {
             out << this->heat_map[i][j] << " ";
         }
-        out << endl;
+        out << std::endl;
     }
 	out.close();
 }
@@ -826,13 +831,13 @@ void Persistence_heat_maps<Scalling_of_kernels>::load_from_file( const char* fil
 {
 	bool dbg = false;	
 	
-	ifstream in;
+	std::ifstream in;
 	in.open( filename );
 	
 	//checking if the file exist / if it was open. 
 	if ( !( access( filename, F_OK ) != -1 ) )
 	{
-		cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
+		std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
 		throw "The file from which you are trying to read the persistence landscape do not exist. The program will now terminate \n";
 	}
 	
@@ -918,11 +923,28 @@ double Persistence_heat_maps<Scalling_of_kernels>::distance( const Persistence_h
 	//if we are here, we know that the two persistence iomages are defined on the same domain, so we can start computing their distances:
 	
 	double distance = 0;
-	for ( size_t i = 0 ; i != this->heat_map.size() ; ++i )
+	if ( power != std::numeric_limits<double>::max() )
 	{
-		for ( size_t j = 0 ; j != this->heat_map[i].size() ; ++j )
+		for ( size_t i = 0 ; i != this->heat_map.size() ; ++i )
 		{
-			distance += pow( abs(this->heat_map[i][j] - second.heat_map[i][j]) , power );
+			for ( size_t j = 0 ; j != this->heat_map[i].size() ; ++j )
+			{
+				distance += pow( fabs(this->heat_map[i][j] - second.heat_map[i][j]) , power );
+			}
+		}
+	}
+	else
+	{		
+		//in this case, we compute max norm distance
+		for ( size_t i = 0 ; i != this->heat_map.size() ; ++i )
+		{
+			for ( size_t j = 0 ; j != this->heat_map[i].size() ; ++j )
+			{
+				if ( distance < fabs(this->heat_map[i][j] - second.heat_map[i][j]) )
+				{
+					distance = fabs(this->heat_map[i][j] - second.heat_map[i][j]);
+				}
+			}
 		}
 	}
 	return distance;

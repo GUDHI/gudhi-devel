@@ -181,20 +181,17 @@ BOOST_AUTO_TEST_CASE(check_computations_of_maxima_and_norms)
 	BOOST_CHECK( fabs( p.compute_norm_of_landscape(1) - 2.34992 ) <= 0.00001 );
 	BOOST_CHECK( fabs( p.compute_norm_of_landscape(2) - 0.706095 ) <= 0.00001 );
 	BOOST_CHECK( fabs( p.compute_norm_of_landscape(3) - 0.501867 ) <= 0.00001 );
-	BOOST_CHECK( fabs( compute_discance_of_landscapes(p,sum,1) - 27.9323 ) <= 0.00005 );	
-	BOOST_CHECK( fabs( compute_discance_of_landscapes(p,sum,2) - 2.35199 ) <= 0.00001 );
-	BOOST_CHECK( fabs(compute_discance_of_landscapes(p,sum,-1) - 0.464478 ) <= 0.00001 );		
+	BOOST_CHECK( fabs( compute_distance_of_landscapes(p,sum,1) - 27.9323 ) <= 0.00005 );	
+	BOOST_CHECK( fabs( compute_distance_of_landscapes(p,sum,2) - 2.35199 ) <= 0.00001 );
+	BOOST_CHECK( fabs(compute_distance_of_landscapes( p , sum , std::numeric_limits<double>::max() ) - 0.464478 ) <= 0.00001 );		
 }
 
 BOOST_AUTO_TEST_CASE(check_computations_of_averages) 
 {
 	Persistence_landscape p( "data/file_with_diagram" );
 	Persistence_landscape q( "data/file_with_diagram_1" );
-	std::vector< Persistence_landscape* > to_average;
-	to_average.push_back( &p );
-	to_average.push_back( &q );
 	Persistence_landscape av;
-	av.compute_average( to_average );
+	av.compute_average( {&p,&q} );
 
 	Persistence_landscape template_average;
 	template_average.load_landscape_from_file( "data/average" );
@@ -210,7 +207,7 @@ BOOST_AUTO_TEST_CASE(check_computations_of_distances)
 	Persistence_landscape q( "data/file_with_diagram_1" );
 	BOOST_CHECK( fabs( p.distance( q )- 25.5824) <= 0.00005 );	
 	BOOST_CHECK( fabs( p.distance( q , 2) - 2.12636 ) <= 0.00001 );	
-	BOOST_CHECK( fabs( p.distance( q , -1 )-0.359068 ) <= 0.00001 );	
+	BOOST_CHECK( fabs( p.distance( q , std::numeric_limits<double>::max() )-0.359068 ) <= 0.00001 );	
 }
 	
 

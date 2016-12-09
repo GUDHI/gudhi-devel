@@ -95,9 +95,9 @@ void PSSK::construct( const std::vector< std::pair<double,double> >& intervals_ 
 
 	if ( dbg )
 	{
-		cerr << "min_ : " << min_ << endl;
-		cerr << "max_ : " << max_ << endl;
-		cerr << "number_of_pixels : " << number_of_pixels << endl;
+		std::cerr << "min_ : " << min_ << std::endl;
+		std::cerr << "max_ : " << max_ << std::endl;
+		std::cerr << "number_of_pixels : " << number_of_pixels << std::endl;
 		getchar();
 	}
 
@@ -115,7 +115,7 @@ void PSSK::construct( const std::vector< std::pair<double,double> >& intervals_ 
     }
     this->heat_map = heat_map_;
 
-    if (dbg)cerr << "Done creating of the heat map, now we will fill in the structure \n";
+    if (dbg)std::cerr << "Done creating of the heat map, now we will fill in the structure \n";
 
 	for ( size_t pt_nr = 0 ; pt_nr != intervals_.size() ; ++pt_nr )
 	{
@@ -125,9 +125,9 @@ void PSSK::construct( const std::vector< std::pair<double,double> >& intervals_ 
 		
 		if ( dbg )
 		{
-			std::cerr << "point : " << intervals_[pt_nr].first << " , " << intervals_[pt_nr].second << endl;
-			std::cerr << "x_grid : " << x_grid << endl;
-			std::cerr << "y_grid : " << y_grid << endl;
+			std::cerr << "point : " << intervals_[pt_nr].first << " , " << intervals_[pt_nr].second << std::endl;
+			std::cerr << "x_grid : " << x_grid << std::endl;
+			std::cerr << "y_grid : " << y_grid << std::endl;
 		}
 		
 		//x_grid and y_grid gives a center of the kernel. We want to have its lower left cordner. To get this, we need to shift x_grid and y_grid by a grid diameter.		
@@ -138,8 +138,8 @@ void PSSK::construct( const std::vector< std::pair<double,double> >& intervals_ 
 		if ( dbg )
 		{
 			std::cerr << "After shift : \n";;
-			std::cerr << "x_grid : " << x_grid << endl;
-			std::cerr << "y_grid : " << y_grid << endl;
+			std::cerr << "x_grid : " << x_grid << std::endl;
+			std::cerr << "y_grid : " << y_grid << std::endl;
 			std::cerr << "filter.size() : " << filter.size() << std::endl;
 			getchar();
 		}					

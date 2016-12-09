@@ -54,8 +54,8 @@ int main( int argc , char** argv )
 	Persistence_landscape_on_grid l2( persistence2 , 0 , 11 , 20 );
 	
 	//This is how to compute integral of landscapes:
-	std::cout << "Integral of the first landscape : " << l1.compute_integral_of_landscape() << endl;
-	std::cout << "Integral of the second landscape : " << l2.compute_integral_of_landscape() << endl;
+	std::cout << "Integral of the first landscape : " << l1.compute_integral_of_landscape() << std::endl;
+	std::cout << "Integral of the second landscape : " << l2.compute_integral_of_landscape() << std::endl;
 	
 	//And here how to write landscapes to stream:
 	std::cout << "l1 : " << l1 << std::endl;
@@ -70,11 +70,8 @@ int main( int argc , char** argv )
 	std::cout << "L^1 Norm of l2 : " << l2.compute_norm_of_landscape( 1. ) << std::endl;
 	
 	//here is the average of landscapes:
-	Persistence_landscape_on_grid average;
-	std::vector< Persistence_landscape_on_grid* > to_average;
-	to_average.push_back( &l1 );
-	to_average.push_back( &l2 );
-	average.compute_average( to_average );
+	Persistence_landscape_on_grid average;	
+	average.compute_average( {&l1,&l2} );
 	std::cout << "average : " << average << std::endl;
 	
 	//here is the distance of landscapes:
@@ -166,12 +163,9 @@ int main( int argc , char** argv )
 	
 	/*
 	Persistence_landscape_on_grid p( "file_with_diagram", 0,1,100 );
-	Persistence_landscape_on_grid q( "file_with_diagram_1", 0,1,100 );	
-	std::vector< Abs_Topological_data_with_averages* > to_average;
-	to_average.push_back( &p );
-	to_average.push_back( &q );
+	Persistence_landscape_on_grid q( "file_with_diagram_1", 0,1,100 );		
 	Persistence_landscape_on_grid av;	
-	av.compute_average( to_average );
+	av.compute_average( {&p,&q} );
 	av.print_to_file("average_on_a_grid");
 
 	Persistence_landscape_on_grid template_average;
@@ -186,7 +180,7 @@ int main( int argc , char** argv )
 	Persistence_landscape_on_grid q( "file_with_diagram_1" , 0,1,10000);
 	cerr <<  p.distance( &q )<< endl;
 	cerr <<  p.distance( &q , 2 ) << endl;
-	cerr <<  p.distance( &q , -1 ) << endl;
+	cerr <<  p.distance( &q , std::numeric_limits<double>::max() ) << endl;
 	*/
 	
 /*

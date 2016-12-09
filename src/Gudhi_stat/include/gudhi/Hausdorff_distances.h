@@ -29,6 +29,11 @@
 #include <cstdlib>
 #include <iostream>
 
+namespace Gudhi
+{
+namespace Gudhi_stat
+{
+
 
 /**
  * This file contains various implementations of Hausrodff distances between collections of points. It contains various implementations that can be used for specific case.
@@ -138,5 +143,7 @@ public:
 };
 
 
+}//namespace Gudhi_stat
+}//namespace Gudhi
 
 #endif

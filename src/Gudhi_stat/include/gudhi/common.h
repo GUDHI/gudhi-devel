@@ -20,8 +20,12 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once 
+#ifndef HAUSDORFF_DISTANCES_H
+#define HAUSDORFF_DISTANCES_H
  //this file contain an implementation of some common procedures used in Gudhi_stat.
+
+
+
 
  //double epsi = std::numeric_limits<double>::epsilon();
 double epsi = 0.000005;

@@ -66,10 +66,7 @@ int main( int argc , char** argv )
 	
 	//averages:
 	Vector_distances_in_diagram<Euclidean_distance<double> > average;
-	std::vector< Vector_distances_in_diagram<Euclidean_distance<double> >* > to_average;
-	to_average.push_back( &v1 );
-	to_average.push_back( &v2 );
-	average.compute_average( to_average );
+	average.compute_average( {&v1,&v2} );
 	std::cout << "Average : " << average << std::endl;
 	
 	//computations of distances:
@@ -106,13 +103,9 @@ int main( int argc , char** argv )
 		
 		cout << "p_prime : " <<p_prime << endl;
 			
-		cout << "Distance between input persistence diagrams : " << p.distance( (Abs_Topological_data_with_distances*)(&p_prime) ) << endl;	
-		std::vector< Abs_Topological_data_with_averages* > to_average;
-		to_average.push_back( (Abs_Topological_data_with_averages*)(&p) );
-		to_average.push_back( (Abs_Topological_data_with_averages*)(&p_prime) );
-	
+		cout << "Distance between input persistence diagrams : " << p.distance( (Abs_Topological_data_with_distances*)(&p_prime) ) << endl;
 		Vector_distances_in_diagram< Euclidean_distance<double> > average; 
-		average.compute_average( to_average );
+		average.compute_average( {&p,&p_prime} );
 	
 		cout << "Here is an average : " << average << endl;
 	}

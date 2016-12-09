@@ -23,7 +23,7 @@
 
 #include <gudhi/Hausdorff_distances.h>
 #include <gudhi/bootstrap.h>
-#include <gudhi/concretizations/read_persitence_from_file.h>
+#include <gudhi/read_persitence_from_file.h>
 #include <gudhi/concretizations/Vector_distances_in_diagram.h>
 
 using namespace std;

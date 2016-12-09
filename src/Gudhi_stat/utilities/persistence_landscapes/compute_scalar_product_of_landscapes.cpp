@@ -71,17 +71,17 @@ int main( int argc , char** argv )
 	}
 	
 	//and now output the result to the screen and a file:
-	ofstream out;
+	std::ofstream out;
 	out.open( "scalar_product" );
 	for ( size_t i = 0 ; i != scalar_product.size() ; ++i )
 	{
 		for ( size_t j = 0 ; j != scalar_product.size() ; ++j )
 		{
-			cout << scalar_product[i][j] << " ";
+			std::cout << scalar_product[i][j] << " ";
 			out << scalar_product[i][j] << " ";
 		}
-		cout << endl;
-		out << endl;
+		std::cout << std::endl;
+		out << std::endl;
 	}
 	out.close();
 		

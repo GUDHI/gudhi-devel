@@ -23,11 +23,6 @@
 #ifndef BOOTSTRAP_H
 #define BOOTSTRAP_H
 
-//concretizations
-#include <gudhi/concretizations/Vector_distances_in_diagram.h>
-#include <gudhi/concretizations/Persistence_landscape.h>
-#include <gudhi/concretizations/Persistence_landscape_on_grid.h>
-#include <gudhi/concretizations/Persistence_heat_maps.h>
 
 #ifdef GUDHI_USE_TBB
 #include <tbb/parallel_sort.h>
@@ -38,6 +33,11 @@
 #include <omp.h>
 #include <random>
 #include <ctime>
+
+namespace Gudhi
+{
+namespace Gudhi_stat
+{
 
 /**
 * This is a generic function to perform bootstrap.
@@ -139,5 +139,10 @@ double bootstrap( size_t number_of_points , CharacteristicFunction f , DistanceB
 	return vector_of_distances[ position_of_quantile ];
 	
 }//bootstrap
+
+
+
+}//namespace Gudhi_stat
+}//namespace Gudhi
 
 #endif

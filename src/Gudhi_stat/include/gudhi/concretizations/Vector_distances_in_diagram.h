@@ -31,10 +31,9 @@
 #include <limits>
 
 //gudhi include
-#include <gudhi/concretizations/read_persitence_from_file.h>
+#include <gudhi/read_persitence_from_file.h>
 #include <gudhi/common_gudhi_stat.h>
 
-using namespace std;
 
 namespace Gudhi 
 {
@@ -104,22 +103,12 @@ public:
 	**/
     Vector_distances_in_diagram( const char* filename , size_t where_to_cut );
 
-	/**
-	 *  Assignement operator.
-	**/ 
-    Vector_distances_in_diagram<F>& operator =( const Vector_distances_in_diagram& org );
-
-
-	/**
-	 *  Copy constructor. 
-	**/
-    Vector_distances_in_diagram( const Vector_distances_in_diagram& org );
 	
 	/**
 	 *  Writing to a stream. 
 	**/
 	template <typename K>
-    friend ostream& operator << ( ostream& out , const Vector_distances_in_diagram<K>& d )
+    friend std::ostream& operator << ( std::ostream& out , const Vector_distances_in_diagram<K>& d )
     {
         for ( size_t i = 0 ; i != std::min( d.sorted_vector_of_distances.size() , d.where_to_cut) ; ++i )
         {
@@ -213,6 +202,7 @@ public:
     
     /**
      * Compute a distance of two persistent vectors. This function is required in Topological_data_with_distances concept.
+     * For max norm distance, set power to std::numeric_limits<double>::max()
     **/
     double distance( const Vector_distances_in_diagram& second , double power = 1)const;
     
@@ -255,7 +245,7 @@ public:
 	{
 		std::stringstream gnuplot_script;
 		gnuplot_script << filename << "_GnuplotScript";
-		ofstream out;
+		std::ofstream out;
 		out.open( gnuplot_script.str().c_str() );
 		out << "set style data histogram" << std::endl;
 		out << "set style histogram cluster gap 1" << std::endl;
@@ -265,7 +255,7 @@ public:
 		{
 			out << this->sorted_vector_of_distances[i]  << std::endl;
 		}		
-		out << endl;
+		out <<std::endl;
 		out.close();
 		std::cout << "To vizualize, open gnuplot and type: load \'" << gnuplot_script.str().c_str() << "\'" <<  std::endl;			
 	}
@@ -273,7 +263,7 @@ public:
 	/**
 	 * The x-range of the persistence vector. 
 	**/ 
-	std::pair< double , double > gimme_x_range()const
+	std::pair< double , double > give_me_x_range()const
 	{
 		return std::make_pair( 0 , this->sorted_vector_of_distances.size() );
 	}
@@ -281,7 +271,7 @@ public:
 	/**
 	 * The y-range of the persistence vector. 
 	**/ 
-	std::pair< double , double > gimme_y_range()const
+	std::pair< double , double > give_me_y_range()const
 	{
 		if ( this->sorted_vector_of_distances.size() == 0 )return std::make_pair(0,0);
 		return std::make_pair( this->sorted_vector_of_distances[0] , 0);
@@ -441,28 +431,6 @@ Vector_distances_in_diagram<F>::Vector_distances_in_diagram( const std::vector< 
 }
 
 template <typename F>
-Vector_distances_in_diagram<F>::Vector_distances_in_diagram( const Vector_distances_in_diagram<F>& org )
-{
-    std::vector< std::pair< double,double > > inter( org.intervals );
-    this->intervals = inter;
-    std::vector< double > sorted_vector_of_distances( org.sorted_vector_of_distances );
-    this->sorted_vector_of_distances = sorted_vector_of_distances;
-    set_up_numbers_of_functions_for_vectorization_and_projections_to_reals();
-}
-
-
-template <typename F>
-Vector_distances_in_diagram<F>& Vector_distances_in_diagram<F>::operator =( const Vector_distances_in_diagram& org )
-{
-    std::vector< std::pair< double , double > > inter( org.intervals );
-    this->intervals = inter;
-    std::vector< double > sorted_vector_of_distances( org.sorted_vector_of_distances );
-    this->sorted_vector_of_distances = sorted_vector_of_distances;
-    return *this;
-}
-
-
-template <typename F>
 Vector_distances_in_diagram<F>::Vector_distances_in_diagram( const char* filename , size_t where_to_cut  ):where_to_cut(where_to_cut)
 {   	
     //standard file with barcode
@@ -483,10 +451,10 @@ void Vector_distances_in_diagram<F>::compute_sorted_vector_of_distances_via_heap
     bool dbg = false;
     if ( dbg )
     {
-        cerr << "Here are the intervals : \n";
+        std::cerr << "Here are the intervals : \n";
         for ( size_t i = 0 ; i != this->intervals.size() ; ++i )
         {
-            cerr << this->intervals[i].first << " , " << this->intervals[i].second << endl;
+            std::cerr << this->intervals[i].first << " , " << this->intervals[i].second <<std::endl;
         }
     }       
 	where_to_cut = std::min(where_to_cut , (size_t)(0.5 * this->intervals.size() * ( this->intervals.size() - 1 ) + this->intervals.size()));
@@ -510,14 +478,14 @@ void Vector_distances_in_diagram<F>::compute_sorted_vector_of_distances_via_heap
 
 							if ( dbg )
 							{
-								cerr << "Value : " << value << endl;
-								cerr << "heap.front() : " << heap.front() << endl;
+								std::cerr << "Value : " << value <<std::endl;
+								std::cerr << "heap.front() : " << heap.front() <<std::endl;
 								getchar();
 							}
 
             if ( -value < heap.front() )
             {
-                if ( dbg ){cerr << "Replacing : " << heap.front() << " with : " << -value << endl;getchar();}
+                if ( dbg ){std::cerr << "Replacing : " << heap.front() << " with : " << -value <<std::endl;getchar();}
                 //remove the first element from the heap
                 std::pop_heap (heap.begin(),heap.end());
                 //heap.pop_back();
@@ -535,7 +503,7 @@ void Vector_distances_in_diagram<F>::compute_sorted_vector_of_distances_via_heap
 		double value = f( this->intervals[i] , std::make_pair( 0.5*(this->intervals[i].first+this->intervals[i].second) , 0.5*(this->intervals[i].first+this->intervals[i].second) ) );
 		if ( -value < heap.front() )
             {
-                //cerr << "Replacing : " << heap.front() << " with : " << -value << endl;getchar();
+                //std::cerr << "Replacing : " << heap.front() << " with : " << -value <<std::endl;getchar();
                 //remove the first element from the heap
                 std::pop_heap (heap.begin(),heap.end());
                 //heap.pop_back();
@@ -567,7 +535,7 @@ void Vector_distances_in_diagram<F>::compute_sorted_vector_of_distances_via_heap
 		{
 			std::cout << heap[i] << " ";
 		} 
-		std::cout << endl;
+		std::cout <<std::endl;
 	} 
 
     this->sorted_vector_of_distances = heap;
@@ -681,16 +649,24 @@ double Vector_distances_in_diagram<F>::distance( const Vector_distances_in_diagr
 		{
 			if ( dbg )
 			{
-				cerr << "|" << this->sorted_vector_of_distances[i] << " -  " << second_.sorted_vector_of_distances[i] << " |  : " << fabs( this->sorted_vector_of_distances[i] - second_.sorted_vector_of_distances[i] ) << endl;
+				std::cerr << "|" << this->sorted_vector_of_distances[i] << " -  " << second_.sorted_vector_of_distances[i] << " |  : " << fabs( this->sorted_vector_of_distances[i] - second_.sorted_vector_of_distances[i] ) <<std::endl;
 			}
 			result += fabs( this->sorted_vector_of_distances[i] - second_.sorted_vector_of_distances[i] );
 		}
 		else
 		{
-			result += std::pow( fabs( this->sorted_vector_of_distances[i] - second_.sorted_vector_of_distances[i] ) , power );
+			if ( power != std::numeric_limits<double>::max() )
+			{
+				result += std::pow( fabs( this->sorted_vector_of_distances[i] - second_.sorted_vector_of_distances[i] ) , power );
+			}
+			else
+			{
+				//nax morm
+				if ( result < fabs( this->sorted_vector_of_distances[i] - second_.sorted_vector_of_distances[i] ) )result = fabs( this->sorted_vector_of_distances[i] - second_.sorted_vector_of_distances[i] );
+			}
 			if ( dbg )
 			{
-				cerr << "| " << this->sorted_vector_of_distances[i] << " - " << second_.sorted_vector_of_distances[i]  << " : " << fabs( this->sorted_vector_of_distances[i] - second_.sorted_vector_of_distances[i] ) << endl;
+				std::cerr << "| " << this->sorted_vector_of_distances[i] << " - " << second_.sorted_vector_of_distances[i]  << " : " << fabs( this->sorted_vector_of_distances[i] - second_.sorted_vector_of_distances[i] ) <<std::endl;
 			}
 		}
 	}
@@ -756,7 +732,7 @@ void Vector_distances_in_diagram<F>::load_from_file( const char* filename )
 	//check if the file exist.
 	if ( !( access( filename, F_OK ) != -1 ) )
 	{
-		cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
+		std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
 		throw "The file from which you are trying to read the persistence landscape do not exist. The program will now terminate \n";
 	}	
 	std::ifstream in;

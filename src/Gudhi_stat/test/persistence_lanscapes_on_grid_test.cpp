@@ -198,17 +198,17 @@ BOOST_AUTO_TEST_CASE(check_computations_of_maxima_and_norms)
 	//cerr <<  p.compute_norm_of_landscape(1) << endl;
 	//cerr << p.compute_norm_of_landscape(2) << endl;
 	//cerr <<  p.compute_norm_of_landscape(3) << endl;
-	//cerr <<  compute_discance_of_landscapes_on_grid(p,sum,1) << endl;
-	//cerr <<  compute_discance_of_landscapes_on_grid(p,sum,2) << endl;
-	//cerr <<  compute_discance_of_landscapes_on_grid(p,sum,-1)  << endl;
+	//cerr <<  compute_distance_of_landscapes_on_grid(p,sum,1) << endl;
+	//cerr <<  compute_distance_of_landscapes_on_grid(p,sum,2) << endl;
+	//cerr <<  compute_distance_of_landscapes_on_grid(p,sum,std::numeric_limits<double>::max())  << endl;
 	
 	BOOST_CHECK( fabs( p.compute_maximum() - 0.46 ) <= 0.00001 );
 	BOOST_CHECK( fabs( p.compute_norm_of_landscape(1) - 27.3373 ) <= 0.00001 );
 	BOOST_CHECK( fabs( p.compute_norm_of_landscape(2) - 1.84143 ) <= 0.00001 );
 	BOOST_CHECK( fabs( p.compute_norm_of_landscape(3) - 0.927067 ) <= 0.00001 );
-	BOOST_CHECK( fabs( compute_discance_of_landscapes_on_grid(p,sum,1) - 16.8519 ) <= 0.00005 );	
-	BOOST_CHECK( fabs( compute_discance_of_landscapes_on_grid(p,sum,2) - 1.44542 ) <= 0.00001 );
-	BOOST_CHECK( fabs(compute_discance_of_landscapes_on_grid(p,sum,-1) - 0.45 ) <= 0.00001 );		
+	BOOST_CHECK( fabs( compute_distance_of_landscapes_on_grid(p,sum,1) - 16.8519 ) <= 0.00005 );	
+	BOOST_CHECK( fabs( compute_distance_of_landscapes_on_grid(p,sum,2) - 1.44542 ) <= 0.00001 );	
+	BOOST_CHECK( fabs(compute_distance_of_landscapes_on_grid(p,sum,std::numeric_limits<double>::max()) - 0.45 ) <= 0.00001 );		
 }
 
 
@@ -217,12 +217,9 @@ BOOST_AUTO_TEST_CASE(check_computations_of_maxima_and_norms)
 BOOST_AUTO_TEST_CASE(check_computations_of_averages) 
 {
 	Persistence_landscape_on_grid p( "data/file_with_diagram", 0,1,100 );
-	Persistence_landscape_on_grid q( "data/file_with_diagram_1", 0,1,100 );	
-	std::vector< Persistence_landscape_on_grid* > to_average;
-	to_average.push_back( &p );
-	to_average.push_back( &q );
+	Persistence_landscape_on_grid q( "data/file_with_diagram_1", 0,1,100 );
 	Persistence_landscape_on_grid av;	
-	av.compute_average( to_average );
+	av.compute_average( {&p,&q} );
 	
 	Persistence_landscape_on_grid template_average;
 	template_average.load_landscape_from_file( "data/average_on_a_grid" );
@@ -238,7 +235,7 @@ BOOST_AUTO_TEST_CASE(check_computations_of_distances)
 	Persistence_landscape_on_grid q( "data/file_with_diagram_1", 0,1,10000 );
 	BOOST_CHECK( fabs( p.distance( q )- 25.5779) <= 0.00005 );	
 	BOOST_CHECK( fabs( p.distance( q , 2) - 2.04891) <= 0.00001 );	
-	BOOST_CHECK( fabs( p.distance( q , -1 )-0.359		 ) <= 0.00001 );
+	BOOST_CHECK( fabs( p.distance( q , std::numeric_limits<double>::max() )-0.359		 ) <= 0.00001 );
 }
 	
 

@@ -39,6 +39,11 @@
 #include <random>
 #include <ctime>
 
+namespace Gudhi
+{
+namespace Gudhi_stat
+{
+
 template < typename TopologicalObject > 
 class difference_of_objects
 {
@@ -138,6 +143,9 @@ double multiplicative_bootstrap( const std::vector< TopologicalObject* >& topolo
 	
 	return result;
 	
-}//bootstrap
+}//multiplicative_bootstrap
+
+}//namespace Gudhi_stat
+}//namespace Gudhi
 
 #endif

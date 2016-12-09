@@ -59,13 +59,9 @@ BOOST_AUTO_TEST_CASE(check_averages_of_heat_maps)
 	Persistence_heat_maps<constant_scaling_function> p( "data/file_with_diagram" , filter , false , 1000 , 0 , 10 );
 	Persistence_heat_maps<constant_scaling_function> q( "data/file_with_diagram_1" , filter , false , 1000 , 0 , 10 );
 	Persistence_heat_maps<constant_scaling_function> r( "data/file_with_diagram_2" , filter , false , 1000 , 0 , 10 );
-	
-	std::vector< Persistence_heat_maps<constant_scaling_function>* > to_average;
-	to_average.push_back( &p );
-	to_average.push_back( &q );
-	to_average.push_back( &r );
+
 	Persistence_heat_maps<constant_scaling_function> av;	
-	av.compute_average( to_average );
+	av.compute_average( {&p,&q,&r} );
 	
 	Persistence_heat_maps<constant_scaling_function> template_average;
 	template_average.load_from_file( "data/template_average_of_heat_maps" );

@@ -24,7 +24,7 @@
 #define Persistence_intervals_H_
 
 //gudhi include
-#include <gudhi/concretizations/read_persitence_from_file.h>
+#include <gudhi/read_persitence_from_file.h>
 
 //standard include
 #include <limits>
@@ -66,7 +66,7 @@ public:
     /**
 	 * This procedure returns x-range of a given persistence diagram. 
 	**/ 
-	std::pair< double , double > gimme_x_range()const
+	std::pair< double , double > give_me_x_range()const
 	{
 		 double min_ = std::numeric_limits<int>::max();
 		double max_ = -std::numeric_limits<int>::max();
@@ -81,7 +81,7 @@ public:
 	/**
 	 * This procedure returns y-range of a given persistence diagram. 
 	**/ 
-	std::pair< double , double > gimme_y_range()const
+	std::pair< double , double > give_me_y_range()const
 	{
 		 double min_ = std::numeric_limits<int>::max();
 		double max_ = -std::numeric_limits<int>::max();
@@ -478,7 +478,7 @@ std::vector< double > Persistence_intervals::characteristic_function_of_diagram(
             beginIt = number_of_bins*(this->intervals[i].first-x_min)/(x_max - x_min);
         }
 
-        size_t endIt;
+        size_t endIt = 0;
         if ( this->intervals[i].second < x_min )endIt = 0;
         if ( this->intervals[i].second >= x_max )endIt = result.size();
         if ( ( this->intervals[i].second > x_min ) && ( this->intervals[i].second < x_max ) )

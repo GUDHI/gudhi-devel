@@ -218,22 +218,6 @@ public:
 			delete this->data[i];
 		}
 	}
-	Topological_process( const Topological_process& org )
-	{
-		this->data = std::vector< Representation* >( org.data.size() );
-		for ( size_t i = 0 ; i != org.data.size() ; ++i )
-		{
-			this->data[i] = new Representation( *org.data[i] );
-		}		
-	}
-	Topological_process& operator = ( const Topological_process& rhs )
-	{
-		for ( size_t i = 0 ; i != rhs.data.size() ; ++i )
-		{
-			this->data[i] = new Representation( *rhs.data[i] );
-		}	
-		return *this;	
-	}
 	
 	Topological_process( const std::vector< Representation* >& data_ ):data(data_){}
 	double distance( const Topological_process& second , double exponent = 1 )
@@ -281,26 +265,26 @@ public:
 		}				
 	}
 	
-	std::pair< double , double > gimme_x_range()const
+	std::pair< double , double > give_me_x_range()const
 	{
 		double min_x = std::numeric_limits< double >::max();		
 		double max_x = -std::numeric_limits< double >::max();
 		for ( size_t i = 0 ; i != this->data.size() ; ++i )
 		{
-			std::pair< double , double > xrange = this->data[i]->gimme_x_range();			
+			std::pair< double , double > xrange = this->data[i]->give_me_x_range();			
 			if ( min_x > xrange.first )min_x = xrange.first;
 			if ( max_x < xrange.second )max_x = xrange.second;			
 		}
 		return std::make_pair( min_x , max_x );
 	}
 	
-	std::pair< double , double > gimme_y_range()const
+	std::pair< double , double > give_me_y_range()const
 	{
 		double min_y = std::numeric_limits< double >::max();		
 		double max_y = -std::numeric_limits< double >::max();
 		for ( size_t i = 0 ; i != this->data.size() ; ++i )
 		{
-			std::pair< double , double > yrange = this->data[i]->gimme_y_range();			
+			std::pair< double , double > yrange = this->data[i]->give_me_y_range();			
 			if ( min_y > yrange.first )min_y = yrange.first;
 			if ( max_y < yrange.second )max_y = yrange.second;			
 		}
@@ -313,11 +297,11 @@ public:
 	bool are_the_data_aligned()const
 	{
 		if ( this->data.size() == 0 )return true;//empty collection is aligned 
-		std::pair< double , double > x_range = this->data[0]->gimme_x_range();
-		std::pair< double , double > y_range = this->data[0]->gimme_y_range();
+		std::pair< double , double > x_range = this->data[0]->give_me_x_range();
+		std::pair< double , double > y_range = this->data[0]->give_me_y_range();
 		for ( size_t i = 1 ; i != this->data.size() ; ++i )
 		{
-			if ( (x_range != this->data[i]->gimme_x_range()) || (y_range != this->data[i]->gimme_y_range()) )
+			if ( (x_range != this->data[i]->give_me_x_range()) || (y_range != this->data[i]->give_me_y_range()) )
 			{
 				return false;
 			}
@@ -358,7 +342,7 @@ public:
 		std::stringstream gif_gnuplot_script_file_name;
 		gif_gnuplot_script_file_name << filename << "_gif_gnuplot_script";
 		
-		ofstream out;
+		std::ofstream out;
 		out.open( gif_gnuplot_script_file_name.str().c_str() );
 		out << "set terminal gif animate delay " << delay << std::endl;
 		out << "set output '" << gif_file_name.str() << "'" << std::endl;
@@ -378,7 +362,7 @@ public:
 	}//plot
 	
 	
-	std::vector< Representation* > gimme_data(){return this->data;}
+	std::vector< Representation* > give_me_data(){return this->data;}
 private:
 	std::vector< Representation* > data;
 };

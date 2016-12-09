@@ -36,9 +36,8 @@
 
 
 //gudhi include
-#include <gudhi/concretizations/read_persitence_from_file.h>
+#include <gudhi/read_persitence_from_file.h>
 #include <gudhi/common_gudhi_stat.h>
-using namespace std;
 
 
 
@@ -74,16 +73,6 @@ public:
 	 * Constructor that takes as an input a vector of birth-death pairs.
 	**/
     Persistence_landscape( const std::vector< std::pair< double , double > >& p );
-
-    /**
-	 * Assignement operator.
-	**/
-    Persistence_landscape& operator=( const Persistence_landscape& org );
-
-    /**
-	 * Copy constructor.
-	**/
-    Persistence_landscape(const Persistence_landscape&);
 
     /**
 	 * Constructor that reads persistence intervals from file and creates persistence landscape. The format of the input file is the following: in each line we put birth-death pair. Last line is assumed
@@ -141,7 +130,7 @@ public:
 
 
 	/**
-	 * A function that compute sum of two landscapes.
+	 *\private A function that compute sum of two landscapes.
 	**/
     friend Persistence_landscape add_two_landscapes ( const Persistence_landscape& land1 ,  const Persistence_landscape& land2 )
     {
@@ -149,7 +138,7 @@ public:
     }
 
     /**
-	 * A function that compute difference of two landscapes.
+	 *\private A function that compute difference of two landscapes.
 	**/
     friend Persistence_landscape subtract_two_landscapes ( const Persistence_landscape& land1 ,  const Persistence_landscape& land2 )
     {
@@ -189,7 +178,7 @@ public:
     }
 
 	/**
-	 * Operator +=. The second parameter is persistnece landwscape.
+	 * Operator +=. The second parameter is persistence landscape.
 	**/
     Persistence_landscape operator += ( const Persistence_landscape& rhs )
     {
@@ -198,7 +187,7 @@ public:
     }
 
 	/**
-	 * Operator -=. The second parameter is persistnece landwscape.
+	 * Operator -=. The second parameter is a persistence landscape.
 	**/
     Persistence_landscape operator -= ( const Persistence_landscape& rhs )
     {
@@ -282,13 +271,13 @@ public:
     double compute_norm_of_landscape( double i )
     {
         Persistence_landscape l;
-        if ( i != -1 )
+        if ( i != std::numeric_limits< double >::max() )
         {
-            return compute_discance_of_landscapes(*this,l,i);
+            return compute_distance_of_landscapes(*this,l,i);
         }
         else
         {
-            return compute_max_norm_discance_of_landscapes(*this,l);
+            return compute_max_norm_distance_of_landscapes(*this,l);
         }
     }
 
@@ -300,14 +289,14 @@ public:
 	/**
 	 * Computations of L^{\infty} distance between two landscapes.
 	**/
-    friend double compute_max_norm_discance_of_landscapes( const Persistence_landscape& first, const Persistence_landscape& second );
-    //friend double compute_max_norm_discance_of_landscapes( const Persistence_landscape& first, const Persistence_landscape& second , unsigned& nrOfLand , double&x , double& y1, double& y2 );
+    friend double compute_max_norm_distance_of_landscapes( const Persistence_landscape& first, const Persistence_landscape& second );
+    //friend double compute_max_norm_distance_of_landscapes( const Persistence_landscape& first, const Persistence_landscape& second , unsigned& nrOfLand , double&x , double& y1, double& y2 );
 
 
 	/**
 	 * Computations of L^{p} distance between two landscapes. p is the parameter of the procedure.
 	**/
-    friend double compute_discance_of_landscapes( const Persistence_landscape& first, const Persistence_landscape& second , int p );
+    friend double compute_distance_of_landscapes( const Persistence_landscape& first, const Persistence_landscape& second , double p );
 
 
 
@@ -411,12 +400,12 @@ public:
 
         while ( nextLevelMerge.size() != 1 )
         {
-            if ( dbg ){cerr << "nextLevelMerge.size() : " << nextLevelMerge.size() << endl;}
+            if ( dbg ){std::cerr << "nextLevelMerge.size() : " << nextLevelMerge.size() << std::endl;}
             std::vector< Persistence_landscape* > nextNextLevelMerge;
             nextNextLevelMerge.reserve( to_average.size() );
             for ( size_t i = 0 ; i < nextLevelMerge.size() ; i=i+2 )
             {
-                if ( dbg ){cerr << "i : " << i << endl;}
+                if ( dbg ){std::cerr << "i : " << i << std::endl;}
                 Persistence_landscape* l = new Persistence_landscape;
                 if ( i+1 != nextLevelMerge.size() )
                 {					
@@ -428,7 +417,7 @@ public:
                 }
                 nextNextLevelMerge.push_back( l );
             }
-            if ( dbg ){cerr << "After this iteration \n";getchar();}
+            if ( dbg ){std::cerr << "After this iteration \n";getchar();}
 
             if ( !is_this_first_level )
             {
@@ -450,16 +439,17 @@ public:
 	* A function to compute distance between persistence landscape.
 	* The parameter of this functionis a Persistence_landscape.
 	* This function is required in Topological_data_with_distances concept.
+	* For max norm distance, set power to std::numeric_limits<double>::max()
 	**/
     double distance( const Persistence_landscape& second , double power = 1 )const
     {
-		if ( power != -1 )
+		if ( power != std::numeric_limits<double>::max() )
 		{
-			return compute_discance_of_landscapes( *this , second , power );
+			return compute_distance_of_landscapes( *this , second , power );
 		}
 		else
 		{
-			return compute_max_norm_discance_of_landscapes( *this , second );
+			return compute_max_norm_distance_of_landscapes( *this , second );
 		}
 	}
 
@@ -480,7 +470,7 @@ public:
 	 * This procedure returns x-range of a given level persistence landscape. If a default value is used, the x-range
 	 * of 0th level landscape is given (and this range contains the ranges of all other landscapes). 
 	**/ 
-	std::pair< double , double > gimme_x_range( size_t level = 0 )const
+	std::pair< double , double > give_me_x_range( size_t level = 0 )const
 	{
 		std::pair< double , double > result;
 		if ( level < this->land.size() )
@@ -498,7 +488,7 @@ public:
 	 * This procedure returns y-range of a given level persistence landscape. If a default value is used, the y-range
 	 * of 0th level landscape is given (and this range contains the ranges of all other landscapes). 
 	**/ 
-	std::pair< double , double > gimme_y_range( size_t level = 0 )const
+	std::pair< double , double > give_me_y_range( size_t level = 0 )const
 	{
 		std::pair< double , double > result;
 		if ( level < this->land.size() )
@@ -561,17 +551,7 @@ protected:
 };
 
 
-Persistence_landscape::Persistence_landscape(const Persistence_landscape& oryginal)
-{
-    //std::cerr << "Running copy constructor \n";
-    std::vector< std::vector< std::pair<double,double> > > land( oryginal.land.size() );
-    for ( size_t i = 0 ; i != oryginal.land.size() ; ++i )
-    {
-        land[i].insert( land[i].end() , oryginal.land[i].begin() , oryginal.land[i].end() );
-    }
-    this->land = land;
-    this->set_up_numbers_of_functions_for_vectorization_and_projections_to_reals();
-}
+
 
 
 
@@ -615,7 +595,7 @@ bool Persistence_landscape::operator == ( const Persistence_landscape& rhs  )con
         {
             if ( !( almost_equal(this->land[level][i].first , rhs.land[level][i].first) && almost_equal(this->land[level][i].second , rhs.land[level][i].second) ) )
             {
-				//cerr<< this->land[level][i].first << " , " <<  rhs.land[level][i].first << " and " << this->land[level][i].second << " , " << rhs.land[level][i].second << endl;
+				//std::cerr<< this->land[level][i].first << " , " <<  rhs.land[level][i].first << " and " << this->land[level][i].second << " , " << rhs.land[level][i].second << std::endl;
                 if (operatorEqualDbg)std::cerr << "this->land[level][i] : " << this->land[level][i].first << " " << this->land[level][i].second << "\n";
                 if (operatorEqualDbg)std::cerr << "rhs.land[level][i] : " << rhs.land[level][i].first << " " << rhs.land[level][i].second	 << "\n";
                 if (operatorEqualDbg)std::cerr << "3\n";
@@ -626,17 +606,6 @@ bool Persistence_landscape::operator == ( const Persistence_landscape& rhs  )con
     return true;
 }
 
-
-Persistence_landscape& Persistence_landscape::operator=( const Persistence_landscape& oryginal )
-{
-    std::vector< std::vector< std::pair<double,double> > > land( oryginal.land.size() );
-    for ( size_t i = 0 ; i != oryginal.land.size() ; ++i )
-    {
-        land[i].insert( land[i].end() , oryginal.land[i].begin() , oryginal.land[i].end() );
-    }
-    this->land = land;
-    return *this;
-}
 
 
 
@@ -650,7 +619,7 @@ Persistence_landscape::Persistence_landscape( const std::vector< std::pair< doub
 void Persistence_landscape::construct_persistence_landscape_from_barcode( const std::vector< std::pair< double , double > > & p )
 {
 	bool dbg = false;
-    if ( dbg ){cerr << "Persistence_landscape::Persistence_landscape( const std::vector< std::pair< double , double > >& p )" << endl;}
+    if ( dbg ){std::cerr << "Persistence_landscape::Persistence_landscape( const std::vector< std::pair< double , double > >& p )" << std::endl;}
 
 	//this is a general algorithm to construct persistence landscapes.
 	std::vector< std::pair<double,double> > bars;
@@ -889,7 +858,7 @@ double Persistence_landscape::compute_value_at_a_given_point( unsigned level , d
 
     if ( compute_value_at_a_given_pointDbg )
     {
-        std::cerr << "Tutaj \n";
+        std::cerr << "Here \n";
         std::cerr << "x : " << x << "\n";
         std::cerr << "this->land[level][coordBegin].first : " << this->land[level][coordBegin].first << "\n";
         std::cerr << "this->land[level][coordEnd].first : " << this->land[level][coordEnd].first << "\n";
@@ -1074,7 +1043,7 @@ void Persistence_landscape::load_landscape_from_file( const char* filename )
     in.open( filename );
 	if ( !( access( filename, F_OK ) != -1 ) )
 	{
-		cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
+		std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
 		throw "The file from which you are trying to read the persistence landscape do not exist. The program will now terminate \n";
 	}
 
@@ -1326,7 +1295,7 @@ double compute_maximal_distance_non_symmetric( const Persistence_landscape& pl1,
 
 
 
-double compute_discance_of_landscapes( const Persistence_landscape& first, const Persistence_landscape& second , int p )
+double compute_distance_of_landscapes( const Persistence_landscape& first, const Persistence_landscape& second , double p )
 {
 	bool dbg = false;
     //This is what we want to compute: (\int_{- \infty}^{+\infty}| first-second |^p)^(1/p). We will do it one step at a time:
@@ -1337,9 +1306,9 @@ double compute_discance_of_landscapes( const Persistence_landscape& first, const
     //| first-second |:
     lan = lan.abs();
     
-    if ( dbg ){cerr << "Abs of difference ; " << lan << endl;getchar();}
+    if ( dbg ){std::cerr << "Abs of difference ; " << lan << std::endl;getchar();}
     
-	if ( p != -1 )
+	if ( p != std::numeric_limits<double>::max() )
 	{
 		//\int_{- \infty}^{+\infty}| first-second |^p
 		double result;
@@ -1358,13 +1327,13 @@ double compute_discance_of_landscapes( const Persistence_landscape& first, const
 	}
 	else
 	{
-		//p == -1
-		if ( dbg )std::cerr << "Power = -1, compute maximum \n";
+		//p == infty
+		if ( dbg )std::cerr << "Power = infty, compute maximum \n";
 		return lan.compute_maximum();
 	}
 }
 
-double compute_max_norm_discance_of_landscapes( const Persistence_landscape& first, const Persistence_landscape& second )
+double compute_max_norm_distance_of_landscapes( const Persistence_landscape& first, const Persistence_landscape& second )
 {
     return std::max( compute_maximal_distance_non_symmetric(first,second) , compute_maximal_distance_non_symmetric(second,first) );
 }
@@ -1385,7 +1354,7 @@ double compute_inner_product( const Persistence_landscape& l1 , const Persistenc
 
     for ( size_t level = 0 ; level != std::min( l1.size() , l2.size() ) ; ++level )
     {
-        if ( dbg ){cerr << "Computing inner product for a level : " << level << endl;getchar();}
+        if ( dbg ){std::cerr << "Computing inner product for a level : " << level << std::endl;getchar();}
         if ( l1.land[level].size() * l2.land[level].size() == 0 )continue;
 
         //endpoints of the interval on which we will compute the inner product of two locally linear functions:
@@ -1437,12 +1406,12 @@ double compute_inner_product( const Persistence_landscape& l1 , const Persistenc
 
             if ( dbg )
             {
-                cerr << "[l1.land[level][l1It].first,l1.land[level][l1It+1].first] : " << l1.land[level][l1It].first << " , " << l1.land[level][l1It+1].first << endl;
-                cerr << "[l2.land[level][l2It].first,l2.land[level][l2It+1].first] : " << l2.land[level][l2It].first << " , " << l2.land[level][l2It+1].first << endl;
-                cerr << "a : " << a << ", b : " << b << " , c: " << c << ", d : " << d << endl;
-                cerr << "x1 : " << x1 << " , x2 : " << x2 << endl;
-                cerr << "contributionFromThisPart : " << contributionFromThisPart << endl;
-                cerr << "result : " << result << endl;
+                std::cerr << "[l1.land[level][l1It].first,l1.land[level][l1It+1].first] : " << l1.land[level][l1It].first << " , " << l1.land[level][l1It+1].first << std::endl;
+                std::cerr << "[l2.land[level][l2It].first,l2.land[level][l2It+1].first] : " << l2.land[level][l2It].first << " , " << l2.land[level][l2It+1].first << std::endl;
+                std::cerr << "a : " << a << ", b : " << b << " , c: " << c << ", d : " << d << std::endl;
+                std::cerr << "x1 : " << x1 << " , x2 : " << x2 << std::endl;
+                std::cerr << "contributionFromThisPart : " << contributionFromThisPart << std::endl;
+                std::cerr << "result : " << result << std::endl;
                 getchar();
             }
 
@@ -1458,11 +1427,11 @@ double compute_inner_product( const Persistence_landscape& l1 , const Persistenc
                 {
                     //in this case, we increment both:
                     ++l2It;
-                    if ( dbg ){cerr << "Incrementing both \n";}
+                    if ( dbg ){std::cerr << "Incrementing both \n";}
                 }
                 else
                 {
-                    if ( dbg ){cerr << "Incrementing first \n";}
+                    if ( dbg ){std::cerr << "Incrementing first \n";}
                 }
                 ++l1It;
             }
@@ -1470,7 +1439,7 @@ double compute_inner_product( const Persistence_landscape& l1 , const Persistenc
             {
                 //in this case we increment l2It
                 ++l2It;
-                if ( dbg ){cerr << "Incrementing second \n";}
+                if ( dbg ){std::cerr << "Incrementing second \n";}
             }
             //Now, we shift x1 and x2:
             x1 = x2;
@@ -1493,7 +1462,7 @@ double compute_inner_product( const Persistence_landscape& l1 , const Persistenc
 void Persistence_landscape::plot( const char* filename,  double xRangeBegin , double xRangeEnd , double yRangeBegin , double yRangeEnd , int from , int to )
 {
     //this program create a gnuplot script file that allows to plot persistence diagram.
-    ofstream out;
+    std::ofstream out;
 
     std::ostringstream nameSS;
     nameSS << filename << "_GnuplotScript";
@@ -1502,8 +1471,8 @@ void Persistence_landscape::plot( const char* filename,  double xRangeBegin , do
 
     if ( (xRangeBegin != -1) || (xRangeEnd != -1) || (yRangeBegin != -1) || (yRangeEnd != -1)  )
     {
-        out << "set xrange [" << xRangeBegin << " : " << xRangeEnd << "]" << endl;
-        out << "set yrange [" << yRangeBegin << " : " << yRangeEnd << "]" << endl;
+        out << "set xrange [" << xRangeBegin << " : " << xRangeEnd << "]" << std::endl;
+        out << "set yrange [" << yRangeBegin << " : " << yRangeEnd << "]" << std::endl;
     }
 
     if ( from == -1 ){from = 0;}
@@ -1518,18 +1487,18 @@ void Persistence_landscape::plot( const char* filename,  double xRangeBegin , do
         {
             out << ", \\";
         }
-        out << endl;
+        out << std::endl;
     }
 
     for ( size_t lambda= std::min((size_t)from,this->land.size()) ; lambda != std::min((size_t)to,this->land.size()) ; ++lambda )
     {
         for ( size_t i = 1 ; i != this->land[lambda].size()-1 ; ++i )
         {
-            out << this->land[lambda][i].first << " " << this->land[lambda][i].second << endl;
+            out << this->land[lambda][i].first << " " << this->land[lambda][i].second << std::endl;
         }
-        out << "EOF" << endl;
+        out << "EOF" << std::endl;
     }
-    cout << "Gnuplot script to visualize persistence diagram written to the file: " << nameStr << ". Type load '" << nameStr << "' in gnuplot to visualize." << endl;
+    std::cout << "Gnuplot script to visualize persistence diagram written to the file: " << nameStr << ". Type load '" << nameStr << "' in gnuplot to visualize." << std::endl;
 }
 
 

@@ -54,8 +54,8 @@ int main( int argc , char** argv )
 	Persistence_landscape l2( persistence2 );
 	
 	//This is how to compute integral of landscapes:
-	std::cout << "Integral of the first landscape : " << l1.compute_integral_of_landscape() << endl;
-	std::cout << "Integral of the second landscape : " << l2.compute_integral_of_landscape() << endl;
+	std::cout << "Integral of the first landscape : " << l1.compute_integral_of_landscape() << std::endl;
+	std::cout << "Integral of the second landscape : " << l2.compute_integral_of_landscape() << std::endl;
 	
 	//And here how to write landscapes to stream:
 	std::cout << "l1 : " << l1 << std::endl;
@@ -75,10 +75,7 @@ int main( int argc , char** argv )
 	
 	//here is the average of landscapes:
 	Persistence_landscape average;
-	std::vector< Persistence_landscape* > to_average;
-	to_average.push_back( &l1 );
-	to_average.push_back( &l2 );
-	average.compute_average( to_average );
+	average.compute_average( {&l1,&l2} );
 	std::cout << "average : " << average << std::endl;
 	
 	//here is the distance of landscapes:
@@ -187,16 +184,13 @@ if ( argc != 2 )
 	
 	cout << "L^1 distance : " << compute_discance_of_landscapes(p,sum,1) << endl;
 	cout << "L^2 distance : " << compute_discance_of_landscapes(p,sum,2) << endl;
-	cout << "L^infty distance : " << compute_discance_of_landscapes(p,sum,-1) << endl;
+	cout << "L^infty distance : " << compute_discance_of_landscapes(p,sum,std::numeric_limits<double>::max() ) << endl;
 	
 	{
 		Persistence_landscape p( "../test/data/file_with_diagram" );
 		Persistence_landscape q( "../test/data/file_with_diagram_1" );
-		std::vector< Abs_Topological_data_with_averages* > to_average;
-		to_average.push_back( &p );
-		to_average.push_back( &q );
 		Persistence_landscape av;
-		av.compute_average( to_average );
+		av.compute_average( {&p,&q} );
 	
 		Persistence_landscape template_average;
 		template_average.load_landscape_from_file( "average" );
@@ -212,7 +206,7 @@ if ( argc != 2 )
 		Persistence_landscape q( "../test/data/file_with_diagram_1" );
 		cout << "L^1 distance : " <<  p.distance( &q ) << endl;
 		cout << "L^2 distance : " <<  p.distance( &q , 2) << endl;
-		cout << "L^infty distance : " <<  p.distance( &q , -1 ) << endl;
+		cout << "L^infty distance : " <<  p.distance( &q , std::numeric_limits<double>::max() ) << endl;
 	}
 	
 	

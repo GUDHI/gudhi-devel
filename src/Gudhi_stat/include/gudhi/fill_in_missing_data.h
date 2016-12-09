@@ -23,6 +23,11 @@
 #ifndef FILL_IN_MISSING_DATA_H
 #define FILL_IN_MISSING_DATA_H
 
+namespace Gudhi
+{
+namespace Gudhi_stat
+{
+
 /**
  * Quite often in biological sciences we are facing a problem of missing data. We may have for instance a number of sequences of observations made in between times A and B in a discrete 
  * collection of times A = t1, t2,...,tn = B. But quite typically some of the observations may be missing. Then quite often it is hard to estimate the values in the missing times. 
@@ -132,5 +137,8 @@ void fill_in_missing_data( std::vector< Representation_of_topology* >& data , st
 		}
 	}
 }//fill_in_missing_data
+
+}//namespace Gudhi_stat
+}//namespace Gudhi
 
 #endif
