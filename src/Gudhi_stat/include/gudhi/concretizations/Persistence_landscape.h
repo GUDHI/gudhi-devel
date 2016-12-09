@@ -104,7 +104,7 @@ public:
     /**
 	 * This function compute integral of the 'level'-level of a landscape.
 	**/
-    double compute_integral_of_landscape( size_t level )const;
+    double compute_integral_of_a_level_of_a_landscape( size_t level )const;
 
 
     /**
@@ -249,7 +249,7 @@ public:
     
     
     /**
-	 * Computations of minimum (y) value of landscape.
+	 *\private Computations of minimum (y) value of landscape.
 	**/
     double compute_minimum()const
     {
@@ -266,12 +266,12 @@ public:
     }
 
 	/**
-	 * Computations of a L^i norm of landscape, where i is the input parameter.
+	 *\private Computations of a L^i norm of landscape, where i is the input parameter.
 	**/
     double compute_norm_of_landscape( double i )
     {
         Persistence_landscape l;
-        if ( i != std::numeric_limits< double >::max() )
+        if ( i < std::numeric_limits< double >::max() )
         {
             return compute_distance_of_landscapes(*this,l,i);
         }
@@ -287,14 +287,14 @@ public:
     double operator()(unsigned level,double x)const{return this->compute_value_at_a_given_point(level,x);}
 
 	/**
-	 * Computations of L^{\infty} distance between two landscapes.
+	 *\private Computations of L^{\infty} distance between two landscapes.
 	**/
     friend double compute_max_norm_distance_of_landscapes( const Persistence_landscape& first, const Persistence_landscape& second );
     //friend double compute_max_norm_distance_of_landscapes( const Persistence_landscape& first, const Persistence_landscape& second , unsigned& nrOfLand , double&x , double& y1, double& y2 );
 
 
 	/**
-	 * Computations of L^{p} distance between two landscapes. p is the parameter of the procedure.
+	 *\private Computations of L^{p} distance between two landscapes. p is the parameter of the procedure.
 	**/
     friend double compute_distance_of_landscapes( const Persistence_landscape& first, const Persistence_landscape& second , double p );
 
@@ -317,7 +317,7 @@ public:
     double find_max( unsigned lambda )const;
 
 	/**
-	 * Function to compute inner (scalar) product of two landscapes.
+	 *\private Function to compute inner (scalar) product of two landscapes.
 	**/
     friend double compute_inner_product( const Persistence_landscape& l1 , const Persistence_landscape& l2 );
 
@@ -343,7 +343,7 @@ public:
 	**/
     double project_to_R( int number_of_function )const
     {
-		return this->compute_integral_of_landscape( (size_t)number_of_function );
+		return this->compute_integral_of_a_level_of_a_landscape( (size_t)number_of_function );
 	}
 	
 	/**
@@ -443,7 +443,7 @@ public:
 	**/
     double distance( const Persistence_landscape& second , double power = 1 )const
     {
-		if ( power != std::numeric_limits<double>::max() )
+		if ( power < std::numeric_limits<double>::max() )
 		{
 			return compute_distance_of_landscapes( *this , second , power );
 		}
@@ -470,7 +470,7 @@ public:
 	 * This procedure returns x-range of a given level persistence landscape. If a default value is used, the x-range
 	 * of 0th level landscape is given (and this range contains the ranges of all other landscapes). 
 	**/ 
-	std::pair< double , double > give_me_x_range( size_t level = 0 )const
+	std::pair< double , double > get_x_range( size_t level = 0 )const
 	{
 		std::pair< double , double > result;
 		if ( level < this->land.size() )
@@ -488,7 +488,7 @@ public:
 	 * This procedure returns y-range of a given level persistence landscape. If a default value is used, the y-range
 	 * of 0th level landscape is given (and this range contains the ranges of all other landscapes). 
 	**/ 
-	std::pair< double , double > give_me_y_range( size_t level = 0 )const
+	std::pair< double , double > get_y_range( size_t level = 0 )const
 	{
 		std::pair< double , double > result;
 		if ( level < this->land.size() )
@@ -504,31 +504,12 @@ public:
 		return result;
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	std::vector< std::vector< std::pair<double,double> > > output_for_visualization()
-	{
-		return this->land;
-	}
 	
 	
 	//a function used to create a gnuplot script for visualization of landscapes
-	void plot( const char* filename,  double xRangeBegin = -1 , double xRangeEnd = -1 , double yRangeBegin = -1 , double yRangeEnd = -1,int from = -1, int to = -1  );
+	void plot( const char* filename,  double xRangeBegin = std::numeric_limits<double>::max() , double xRangeEnd = std::numeric_limits<double>::max() , 
+									  double yRangeBegin = std::numeric_limits<double>::max() , double yRangeEnd = std::numeric_limits<double>::max(),
+									  int from = std::numeric_limits<int>::max(), int to = std::numeric_limits<int>::max()  );
 
 
 protected:
@@ -788,7 +769,7 @@ double Persistence_landscape::compute_integral_of_landscape()const
     return result;
 }
 
-double Persistence_landscape::compute_integral_of_landscape( size_t  level )const
+double Persistence_landscape::compute_integral_of_a_level_of_a_landscape( size_t  level )const
 {
     double result = 0;
     if ( level >= this->land.size() )
@@ -1308,7 +1289,7 @@ double compute_distance_of_landscapes( const Persistence_landscape& first, const
     
     if ( dbg ){std::cerr << "Abs of difference ; " << lan << std::endl;getchar();}
     
-	if ( p != std::numeric_limits<double>::max() )
+	if ( p < std::numeric_limits<double>::max() )
 	{
 		//\int_{- \infty}^{+\infty}| first-second |^p
 		double result;
@@ -1467,16 +1448,16 @@ void Persistence_landscape::plot( const char* filename,  double xRangeBegin , do
     std::ostringstream nameSS;
     nameSS << filename << "_GnuplotScript";
     std::string nameStr = nameSS.str();
-    out.open( (char*)nameStr.c_str() );
+    out.open( nameStr );
 
-    if ( (xRangeBegin != -1) || (xRangeEnd != -1) || (yRangeBegin != -1) || (yRangeEnd != -1)  )
+    if ( (xRangeBegin != std::numeric_limits<double>::max()) || (xRangeEnd != std::numeric_limits<double>::max()) || (yRangeBegin != std::numeric_limits<double>::max()) || (yRangeEnd != std::numeric_limits<double>::max())  )
     {
         out << "set xrange [" << xRangeBegin << " : " << xRangeEnd << "]" << std::endl;
         out << "set yrange [" << yRangeBegin << " : " << yRangeEnd << "]" << std::endl;
     }
 
-    if ( from == -1 ){from = 0;}
-    if ( to == -1 ){to = this->land.size();}
+    if ( from == std::numeric_limits<int>::max() ){from = 0;}
+    if ( to == std::numeric_limits<int>::max() ){to = this->land.size();}
 
     out << "plot ";
     for ( size_t lambda= std::min((size_t)from,this->land.size()) ; lambda != std::min((size_t)to,this->land.size()) ; ++lambda )

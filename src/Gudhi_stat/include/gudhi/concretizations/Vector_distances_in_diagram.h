@@ -263,7 +263,7 @@ public:
 	/**
 	 * The x-range of the persistence vector. 
 	**/ 
-	std::pair< double , double > give_me_x_range()const
+	std::pair< double , double > get_x_range()const
 	{
 		return std::make_pair( 0 , this->sorted_vector_of_distances.size() );
 	}
@@ -271,7 +271,7 @@ public:
 	/**
 	 * The y-range of the persistence vector. 
 	**/ 
-	std::pair< double , double > give_me_y_range()const
+	std::pair< double , double > get_y_range()const
 	{
 		if ( this->sorted_vector_of_distances.size() == 0 )return std::make_pair(0,0);
 		return std::make_pair( this->sorted_vector_of_distances[0] , 0);
@@ -655,7 +655,7 @@ double Vector_distances_in_diagram<F>::distance( const Vector_distances_in_diagr
 		}
 		else
 		{
-			if ( power != std::numeric_limits<double>::max() )
+			if ( power < std::numeric_limits<double>::max() )
 			{
 				result += std::pow( fabs( this->sorted_vector_of_distances[i] - second_.sorted_vector_of_distances[i] ) , power );
 			}

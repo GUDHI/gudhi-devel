@@ -155,8 +155,8 @@ int main( int argc , char** argv )
 	
 	
 	std::vector< Abs_Topological_data_with_averages* > to_average;
-	to_average.push_back( (Abs_Topological_data_with_averages*)(&p) );
-	to_average.push_back( (Abs_Topological_data_with_averages*)(&q) );
+	to_average.push_back( &p );
+	to_average.push_back( &q );
 	Persistence_heat_maps av;	
 	av.compute_average( to_average );
 	av.plot( "average" );
@@ -169,9 +169,9 @@ int main( int argc , char** argv )
 	Persistence_heat_maps r( "file_with_diagram_2" , filter ,  constant_function, false , 1000 , 0 , 10 );
 	
 	std::vector< Abs_Topological_data_with_averages* > to_average;
-	to_average.push_back( (Abs_Topological_data_with_averages*)(&p) );
-	to_average.push_back( (Abs_Topological_data_with_averages*)(&q) );
-	to_average.push_back( (Abs_Topological_data_with_averages*)(&r) );
+	to_average.push_back( &p );
+	to_average.push_back( &q );
+	to_average.push_back( &r );
 	Persistence_heat_maps av;	
 	av.compute_average( to_average );
 	

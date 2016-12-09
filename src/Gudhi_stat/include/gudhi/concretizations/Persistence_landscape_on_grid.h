@@ -502,7 +502,7 @@ public:
 	 * This procedure returns x-range of a given level persistence landscape. If a default value is used, the x-range
 	 * of 0th level landscape is given (and this range contains the ranges of all other landscapes). 
 	**/ 
-	std::pair< double , double > give_me_x_range( size_t level = 0 )const
+	std::pair< double , double > get_x_range( size_t level = 0 )const
 	{
 		return std::make_pair( this->grid_min , this->grid_max );
 		//std::pair< double , double > result;
@@ -533,7 +533,7 @@ public:
 	 * This procedure returns y-range of a persistence landscape. If a default value is used, the y-range
 	 * of 0th level landscape is given (and this range contains the ranges of all other landscapes). 
 	**/ 
-	std::pair< double , double > give_me_y_range( size_t level = 0 )const
+	std::pair< double , double > get_y_range( size_t level = 0 )const
 	{
 		return this->compute_minimum_maximum();
 		//std::pair< double , double > result;
@@ -569,7 +569,7 @@ public:
 		std::vector< std::pair< double , double > > p;
         Persistence_landscape_on_grid l(p,this->grid_min,this->grid_max,this->values_of_landscapes.size()-1);       
         
-        if ( i != std::numeric_limits<double>::max() )
+        if ( i < std::numeric_limits<double>::max() )
         {
             return compute_distance_of_landscapes_on_grid(*this,l,i);
         }
@@ -762,7 +762,7 @@ public:
 			std::cerr << "Abs : " << lan << std::endl;
 		}
 		
-		if ( p != std::numeric_limits< double >::max() )
+		if ( p < std::numeric_limits< double >::max() )
 		{
 			//\int_{- \infty}^{+\infty}| first-second |^p
 			double result;
@@ -941,7 +941,7 @@ public:
 	**/
     double distance( const Persistence_landscape_on_grid& second , double power = 1 )const
     {
-		if ( power != std::numeric_limits<double>::max() )
+		if ( power < std::numeric_limits<double>::max() )
 		{
 			return compute_distance_of_landscapes_on_grid( *this , second , power );
 		}
@@ -995,13 +995,13 @@ public:
 	**/ 
 	void plot( const char* filename , size_t from_ , size_t to_ )const
 	{
-		this->plot( filename , -1 , -1 , -1 , -1 , from_ , to_ );
+		this->plot( filename , std::numeric_limits<double>::max() , std::numeric_limits<double>::max(), std::numeric_limits<double>::max() , std::numeric_limits<double>::max() , from_ , to_ );
 	}
 	
 	/**
 	* function used to create a gnuplot script for visualization of landscapes. Over here we can restrict also x and y range of the landscape. 
 	**/ 
-	void plot( const char* filename, double min_x = -1 , double max_x = -1 , double min_y = -1 , double max_y = -1 , size_t from_ = std::numeric_limits<size_t>::max(), size_t to_= std::numeric_limits<size_t>::max()  )const;
+	void plot( const char* filename, double min_x = std::numeric_limits<double>::max() , double max_x = std::numeric_limits<double>::max() , double min_y = std::numeric_limits<double>::max() , double max_y = std::numeric_limits<double>::max() , size_t from_ = std::numeric_limits<size_t>::max(), size_t to_= std::numeric_limits<size_t>::max()  )const;
 
 
 protected:
@@ -1197,7 +1197,7 @@ void Persistence_landscape_on_grid::plot( const char* filename, double min_x , d
     std::ostringstream nameSS;
     nameSS << filename << "_GnuplotScript";
     std::string nameStr = nameSS.str();
-    out.open( (char*)nameStr.c_str() );
+    out.open( nameStr );
 
 	if ( min_x == max_x )
 	{

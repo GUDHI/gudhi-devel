@@ -32,7 +32,7 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
-#include <climits>
+#include <limits>
 #include <cmath>
 
 namespace Gudhi 
@@ -66,7 +66,7 @@ public:
     /**
 	 * This procedure returns x-range of a given persistence diagram. 
 	**/ 
-	std::pair< double , double > give_me_x_range()const
+	std::pair< double , double > get_x_range()const
 	{
 		 double min_ = std::numeric_limits<int>::max();
 		double max_ = -std::numeric_limits<int>::max();
@@ -81,7 +81,7 @@ public:
 	/**
 	 * This procedure returns y-range of a given persistence diagram. 
 	**/ 
-	std::pair< double , double > give_me_y_range()const
+	std::pair< double , double > get_y_range()const
 	{
 		 double min_ = std::numeric_limits<int>::max();
 		double max_ = -std::numeric_limits<int>::max();
@@ -156,7 +156,7 @@ public:
     /**
      * Generating gnuplot script to plot the interval. 
     **/
-    void plot( const char* filename , double min_x = -1 , double max_x = -1 , double min_y = -1 , double max_y = -1  ) const
+    void plot( const char* filename , double min_x = std::numeric_limits<double>::max() , double max_x = std::numeric_limits<double>::max() , double min_y = std::numeric_limits<double>::max() , double max_y = std::numeric_limits<double>::max()  ) const
     {
 		//this program create a gnuplot script file that allows to plot persistence diagram.
 		std::ofstream out;
@@ -164,7 +164,7 @@ public:
 		std::ostringstream nameSS;
 		nameSS << filename << "_GnuplotScript";
 		std::string nameStr = nameSS.str();
-		out.open( (char*)nameStr.c_str() );
+		out.open( nameStr );
 		
 		std::pair<double,double> min_max_values = this->min_max();
 		if ( min_x == max_x )

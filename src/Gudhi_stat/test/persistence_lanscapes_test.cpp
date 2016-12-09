@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(check_computations_of_integrals_for_each_level_separatelly)
 	
 	for ( size_t level = 0 ; level != p.size() ; ++level )
 	{
-		double integral = p.compute_integral_of_landscape( level );
+		double integral = p.compute_integral_of_a_level_of_a_landscape( level );
 		BOOST_CHECK( fabs( integral - integrals_fir_different_levels[level] ) <= 0.00001 );
 	}
 	
@@ -110,16 +110,16 @@ BOOST_AUTO_TEST_CASE(check_computations_of_integrals_of_powers_of_landscape)
 	Persistence_landscape p( "data/file_with_diagram" );	
 	
 	std::vector<double> integrals_fir_different_powers;
- 	integrals_fir_different_powers.push_back(	0.216432	);
-	integrals_fir_different_powers.push_back(	0.204763	);
-	integrals_fir_different_powers.push_back(	0.188793	);
-	integrals_fir_different_powers.push_back(	0.178856	);
-	integrals_fir_different_powers.push_back(	0.163142	);
+ 	integrals_fir_different_powers.push_back(	17.1692	);
+	integrals_fir_different_powers.push_back(	2.34992	);
+	integrals_fir_different_powers.push_back(	0.49857	);
+	integrals_fir_different_powers.push_back(	0.126405	);
+	integrals_fir_different_powers.push_back(	0.0355235	);
 	
 	for ( size_t power = 0 ; power != 5 ; ++power ) 
 	{
-		double integral = p.compute_integral_of_landscape( power );
-		BOOST_CHECK( fabs( integral - integrals_fir_different_powers[power] ) <= 0.00001 );
+		double integral = p.compute_integral_of_landscape( (double)power );		
+		BOOST_CHECK( fabs( integral - integrals_fir_different_powers[power] ) <= 0.00005 );
 	}
 }
 

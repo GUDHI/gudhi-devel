@@ -103,7 +103,7 @@ int main( int argc , char** argv )
 		
 		cout << "p_prime : " <<p_prime << endl;
 			
-		cout << "Distance between input persistence diagrams : " << p.distance( (Abs_Topological_data_with_distances*)(&p_prime) ) << endl;
+		cout << "Distance between input persistence diagrams : " << p.distance( &p_prime ) << endl;
 		Vector_distances_in_diagram< Euclidean_distance<double> > average; 
 		average.compute_average( {&p,&p_prime} );
 	

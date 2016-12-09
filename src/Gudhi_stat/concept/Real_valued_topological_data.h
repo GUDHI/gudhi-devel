@@ -33,6 +33,6 @@ public:
 	   /**
      * This is a function to compute the projection from this container to reals. The parameter of a function have to be between 0 and the value returned by number_of_projections_to_R().
     **/ 
-     double project_to_R;  
+     double project_to_R( size_t number_of_projection );
 };
 

@@ -30,6 +30,7 @@
 #include <gudhi/concretizations/Persistence_landscape_on_grid.h>
 #include <gudhi/concretizations/Persistence_heat_maps.h>
 #include <vector>
+#include <limits>
 
 //extras
 #include <gudhi/common_gudhi_stat.h>
@@ -163,7 +164,7 @@ std::vector< Representation* > construct_representation_from_file( const std::ve
 																   std::vector< std::vector<double> > filter = create_Gaussian_filter(5,1), 
 																   bool erase_below_diagonal = false , 
 																   size_t number_of_pixels = 1000 , 
-																   double min_ = -1 , double max_ = -1  )	
+																   double min_ = std::numeric_limits<double>::max() , double max_ = std::numeric_limits<double>::max()  )	
 {	
 	std::vector< Representation* > result( intervals_from_file.size() );
 	for ( size_t i = 0 ; i != intervals_from_file.size() ; ++i )
@@ -265,26 +266,26 @@ public:
 		}				
 	}
 	
-	std::pair< double , double > give_me_x_range()const
+	std::pair< double , double > get_x_range()const
 	{
 		double min_x = std::numeric_limits< double >::max();		
 		double max_x = -std::numeric_limits< double >::max();
 		for ( size_t i = 0 ; i != this->data.size() ; ++i )
 		{
-			std::pair< double , double > xrange = this->data[i]->give_me_x_range();			
+			std::pair< double , double > xrange = this->data[i]->get_x_range();			
 			if ( min_x > xrange.first )min_x = xrange.first;
 			if ( max_x < xrange.second )max_x = xrange.second;			
 		}
 		return std::make_pair( min_x , max_x );
 	}
 	
-	std::pair< double , double > give_me_y_range()const
+	std::pair< double , double > get_y_range()const
 	{
 		double min_y = std::numeric_limits< double >::max();		
 		double max_y = -std::numeric_limits< double >::max();
 		for ( size_t i = 0 ; i != this->data.size() ; ++i )
 		{
-			std::pair< double , double > yrange = this->data[i]->give_me_y_range();			
+			std::pair< double , double > yrange = this->data[i]->get_y_range();			
 			if ( min_y > yrange.first )min_y = yrange.first;
 			if ( max_y < yrange.second )max_y = yrange.second;			
 		}
@@ -297,11 +298,11 @@ public:
 	bool are_the_data_aligned()const
 	{
 		if ( this->data.size() == 0 )return true;//empty collection is aligned 
-		std::pair< double , double > x_range = this->data[0]->give_me_x_range();
-		std::pair< double , double > y_range = this->data[0]->give_me_y_range();
+		std::pair< double , double > x_range = this->data[0]->get_x_range();
+		std::pair< double , double > y_range = this->data[0]->get_y_range();
 		for ( size_t i = 1 ; i != this->data.size() ; ++i )
 		{
-			if ( (x_range != this->data[i]->give_me_x_range()) || (y_range != this->data[i]->give_me_y_range()) )
+			if ( (x_range != this->data[i]->get_x_range()) || (y_range != this->data[i]->get_y_range()) )
 			{
 				return false;
 			}
@@ -313,7 +314,7 @@ public:
 	//scalar products?
 	//confidence bounds?
 	
-	void plot( const char* filename , size_t delay = 30 , double min_x = -1 , double max_x = -1 , double min_y = -1 , double max_y = -1 )
+	void plot( const char* filename , size_t delay = 30 , double min_x = std::numeric_limits<double>::max() , double max_x = std::numeric_limits<double>::max() , double min_y = std::numeric_limits<double>::max() , double max_y = std::numeric_limits<double>::max() )
 	{				
 		std::vector< std::string > filenames;		
 		//over here we need to			
@@ -362,7 +363,7 @@ public:
 	}//plot
 	
 	
-	std::vector< Representation* > give_me_data(){return this->data;}
+	std::vector< Representation* > get_data(){return this->data;}
 private:
 	std::vector< Representation* > data;
 };
