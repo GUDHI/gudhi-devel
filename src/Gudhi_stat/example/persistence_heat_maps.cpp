@@ -154,11 +154,8 @@ int main( int argc , char** argv )
 	q.plot( "heat_map_2" );
 	
 	
-	std::vector< Abs_Topological_data_with_averages* > to_average;
-	to_average.push_back( &p );
-	to_average.push_back( &q );
 	Persistence_heat_maps av;	
-	av.compute_average( to_average );
+	av.compute_average( { &P , &q } );
 	av.plot( "average" );
 */
 
@@ -167,13 +164,8 @@ int main( int argc , char** argv )
 	Persistence_heat_maps p( "file_with_diagram" , filter ,  constant_function, false , 1000 , 0 , 10 );
 	Persistence_heat_maps q( "file_with_diagram_1" , filter ,  constant_function, false , 1000 , 0 , 10 );
 	Persistence_heat_maps r( "file_with_diagram_2" , filter ,  constant_function, false , 1000 , 0 , 10 );
-	
-	std::vector< Abs_Topological_data_with_averages* > to_average;
-	to_average.push_back( &p );
-	to_average.push_back( &q );
-	to_average.push_back( &r );
 	Persistence_heat_maps av;	
-	av.compute_average( to_average );
+	av.compute_average( {&p,&q,&r} );
 	
 	av.print_to_file( "template_average_of_heat_maps" );
 */	
@@ -190,11 +182,8 @@ int main( int argc , char** argv )
 	Persistence_heat_maps q( intervals2 , filter ,  constant_function, false , 10 , 0 , 10 );
 	q.plot( "heat_map_2" );
 	
-	std::vector< Persistence_heat_maps* > to_compute_median;
-	to_compute_median.push_back( &p );
-	to_compute_median.push_back( &q );	
 	Persistence_heat_maps median;	
-	median.compute_median( to_compute_median );
+	median.compute_median( {&p,&q} );
 	median.plot( "median" );
 */
 
@@ -203,14 +192,8 @@ int main( int argc , char** argv )
 	Persistence_heat_maps p( "file_with_diagram" , filter ,  constant_function, false , 1000 , 0 , 1 );
 	Persistence_heat_maps q( "file_with_diagram_1" , filter ,  constant_function, false , 1000 , 0 , 1 );
 	Persistence_heat_maps r( "file_with_diagram_2" , filter ,  constant_function, false , 1000 , 0 , 1 );
-	
-	std::vector< Persistence_heat_maps* > to_compute_median;
-	to_compute_median.push_back( &p );
-	to_compute_median.push_back( &q );
-	to_compute_median.push_back( &r );
 	Persistence_heat_maps median;	
-	median.compute_median( to_compute_median );
-	
+	median.compute_median( {&p,&q,&r} );	
 	median.print_to_file( "template_median_of_heat_maps" );
 */
 
@@ -221,12 +204,8 @@ int main( int argc , char** argv )
 	Persistence_heat_maps q( "file_with_diagram_1" , filter ,  constant_function, false , 1000 , 0 , 1 );
 	Persistence_heat_maps r( "file_with_diagram_2" , filter ,  constant_function, false , 1000 , 0 , 1 );
 	
-	std::vector< Persistence_heat_maps* > to_compute_percentage_of_active;
-	to_compute_percentage_of_active.push_back( &p );
-	to_compute_percentage_of_active.push_back( &q );
-	to_compute_percentage_of_active.push_back( &r );
 	Persistence_heat_maps percentage_of_active;	
-	percentage_of_active.compute_percentage_of_active( to_compute_percentage_of_active , 0.1 );
+	percentage_of_active.compute_percentage_of_active( {&p,&q,&r} , 0.1 );
 	
 	percentage_of_active.print_to_file( "template_percentage_of_active_of_heat_maps" );
 	//percentage_of_active.plot( "template_percentage_of_active_of_heat_maps" );
