@@ -156,9 +156,9 @@ int main( int argc , char** argv )
 	cerr << "2-norm : " << p.compute_norm_of_landscape(2) << endl;
 	cerr << "3-norm : " << p.compute_norm_of_landscape(3) << endl;
 	
-	cerr <<  compute_discance_of_landscapes_on_grid(p,sum,1) << endl;
-	cerr <<  compute_discance_of_landscapes_on_grid(p,sum,2) << endl;
-	cerr <<  compute_discance_of_landscapes_on_grid(p,sum,-1)  << endl;
+	cerr <<  compute_distance_of_landscapes_on_grid(p,sum,1) << endl;
+	cerr <<  compute_distance_of_landscapes_on_grid(p,sum,2) << endl;
+	cerr <<  compute_distance_of_landscapes_on_grid(p,sum,-1)  << endl;
 	*/
 	
 	/*

@@ -182,9 +182,9 @@ if ( argc != 2 )
 	cout << "L^3 norm : " << p.compute_norm_of_landscape(3) << endl;	
 	
 	
-	cout << "L^1 distance : " << compute_discance_of_landscapes(p,sum,1) << endl;
-	cout << "L^2 distance : " << compute_discance_of_landscapes(p,sum,2) << endl;
-	cout << "L^infty distance : " << compute_discance_of_landscapes(p,sum,std::numeric_limits<double>::max() ) << endl;
+	cout << "L^1 distance : " << compute_distance_of_landscapes(p,sum,1) << endl;
+	cout << "L^2 distance : " << compute_distance_of_landscapes(p,sum,2) << endl;
+	cout << "L^infty distance : " << compute_distance_of_landscapes(p,sum,std::numeric_limits<double>::max() ) << endl;
 	
 	{
 		Persistence_landscape p( "../test/data/file_with_diagram" );

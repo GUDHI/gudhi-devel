@@ -726,7 +726,7 @@ public:
 			previous_y_l1 = current_y_l1;
 			previous_y_l2 = current_y_l2;
 			
-		}		
+			}		
 		return result;
 	}
 	
