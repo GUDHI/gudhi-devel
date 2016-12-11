@@ -992,6 +992,9 @@ public:
 	
 	/**
 	* function used to create a gnuplot script for visualization of landscapes. Over here we need to specify which landscapes do we want to plot.
+	* In addition, the user may specify the range (min and max) where landscape is plot. The fefault values for min and max are std::numeric_limits<double>::max(). If the procedure detect those
+	* values, it will determine the range so that the whole landscape is supported there. If at least one min or max value is different from std::numeric_limits<double>::max(), then the values
+	* provided by the user will be used. 
 	**/ 
 	void plot( const char* filename , size_t from_ , size_t to_ )const
 	{

@@ -32,8 +32,6 @@
 using namespace Gudhi;
 using namespace Gudhi::Gudhi_stat;
 
-using namespace std;
-
 	
 int main( int argc , char** argv )
 {

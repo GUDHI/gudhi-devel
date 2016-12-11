@@ -70,7 +70,7 @@ void fill_in_missing_data( std::vector< Representation_of_topology* >& data , st
 			while ( (is_the_position_filled_in[i+j] == false) && ( i+j != data.size() ) )++j;
 			if ( dbg )
 			{
-				std::cout << "The position number : " << i << " is not filled in. The next filled-in position is : " << i+j << endl;
+				std::cout << "The position number : " << i << " is not filled in. The next filled-in position is : " << i+j << std::endl;
 			}
 			if ( i != 0 )
 			{
@@ -86,7 +86,7 @@ void fill_in_missing_data( std::vector< Representation_of_topology* >& data , st
 						is_the_position_filled_in[i+k] = true;
 						if ( dbg )
 						{
-							cerr << "We fill in a position : " << i+k << " with: position " << i-1 << " with weight " << weight1 << " and position " << i+j << " with weight " << weight2 << endl;
+							std::cerr << "We fill in a position : " << i+k << " with: position " << i-1 << " with weight " << weight1 << " and position " << i+j << " with weight " << weight2 << std::endl;
 						}
 					}
 				}					
@@ -115,7 +115,7 @@ void fill_in_missing_data( std::vector< Representation_of_topology* >& data , st
 			is_the_position_filled_in[j-1] = true;
 			if ( dbg )
 			{
-				cerr << "Filling in a position : " << j-1 << " by using: " << j << " and " << j+1 <<endl;
+				std::cerr << "Filling in a position : " << j-1 << " by using: " << j << " and " << j+1 <<std::endl;
 			}
 		}
 	}
@@ -132,7 +132,7 @@ void fill_in_missing_data( std::vector< Representation_of_topology* >& data , st
 			is_the_position_filled_in[j] = true;
 			if ( dbg )
 			{
-				cerr << "Filling in a position : " << j << " by using: " << j-1 << " and " << j-2 <<endl;
+				std::cerr << "Filling in a position : " << j << " by using: " << j-1 << " and " << j-2 <<std::endl;
 			}
 		}
 	}

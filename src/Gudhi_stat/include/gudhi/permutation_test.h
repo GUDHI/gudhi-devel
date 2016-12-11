@@ -31,7 +31,6 @@
 #include <algorithm>
 #include <gudhi/read_persitence_from_file.h>
 
-using namespace std;
 
 namespace Gudhi 
 {

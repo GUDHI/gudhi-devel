@@ -32,15 +32,13 @@
 using namespace Gudhi;
 using namespace Gudhi::Gudhi_stat;
 
-using namespace std;
-
 
 int main( int argc , char** argv )
 {
 	std::cout << "This program compute a plot of persistence Betti numbers. The input parameter is a file with persistence intervals. \n";
 	if ( argc != 2 )
 	{
-		cout << "To run this program, please provide the name of a file with persistence diagram and number of dominant intervals you would like to get \n";
+		std::cout << "To run this program, please provide the name of a file with persistence diagram and number of dominant intervals you would like to get \n";
 		return 1;
 	}
 	
@@ -48,7 +46,7 @@ int main( int argc , char** argv )
 	
 	std::stringstream gnuplot_script;
 	gnuplot_script << argv[1] << "_Gnuplot_script";
-	ofstream out;
+	std::ofstream out;
 	out.open( gnuplot_script.str().c_str() );
 	
 	Persistence_intervals p( argv[1] );
@@ -68,22 +66,22 @@ int main( int argc , char** argv )
 	yRangeEnd += yRangeEnd/100;
 	
 	
-	out << "set xrange [" << xRangeBegin << " : " << xRangeEnd << "]" << endl;
-    out << "set yrange [" << yRangeBegin << " : " << yRangeEnd << "]" << endl;	
+	out << "set xrange [" << xRangeBegin << " : " << xRangeEnd << "]" << std::endl;
+    out << "set yrange [" << yRangeBegin << " : " << yRangeEnd << "]" << std::endl;	
 	out << "plot '-' using 1:2 notitle with lp " << std::endl;    
 	double previous_y = 0;
 	for ( size_t i = 0 ; i != pbns.size() ; ++i )
 	{
-		out << pbns[i].first << " " << previous_y << endl;
+		out << pbns[i].first << " " << previous_y << std::endl;
 		out << pbns[i].first << " " << pbns[i].second << std::endl;
 		previous_y = pbns[i].second;
 	}		
-	out << endl;
+	out << std::endl;
 	out.close();
 	
 	//for ( size_t i = 0 ; i != pbns.size() ; ++i )
 	//{
-	//	cout << pbns[i].first << " " << pbns[i].second << std::endl;
+	//	std::cout << pbns[i].first << " " << pbns[i].second << std::endl;
 	//}	
 	
 	std::cout << "To vizualize, open gnuplot and type: load \'" << gnuplot_script.str().c_str() << "\'" << std::endl;

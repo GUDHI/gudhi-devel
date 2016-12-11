@@ -35,7 +35,6 @@
 
 
 
-using namespace std;
 using namespace Gudhi;
 using namespace Gudhi::Gudhi_stat;
 using namespace Gudhi::persistent_cohomology;

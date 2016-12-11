@@ -36,14 +36,12 @@ using namespace Gudhi::Gudhi_stat;
 
 double epsilon = 0.0000005;
 
-using namespace std;
-
 	
 int main( int argc , char** argv )
 {
 	if ( argc != 2 )
 	{
-		cout << "To run this program, please provide the name of a file with persistence diagram \n";
+		std::cout << "To run this program, please provide the name of a file with persistence diagram \n";
 		return 1;
 	}
 	

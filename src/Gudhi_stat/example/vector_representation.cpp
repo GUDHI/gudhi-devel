@@ -34,8 +34,6 @@
 using namespace Gudhi;
 using namespace Gudhi::Gudhi_stat;
 
-using namespace std;
-
 
 
 

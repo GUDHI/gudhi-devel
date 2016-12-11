@@ -32,15 +32,13 @@
 using namespace Gudhi;
 using namespace Gudhi::Gudhi_stat;
 
-using namespace std;
-
 
 int main( int argc , char** argv )
 {
 	std::cout << "This program compute a histogram of barcode's length. A number of bins in the histogram is a parameter of this program. \n";
 	if ( argc != 3 )
 	{
-		cout << "To run this program, please provide the name of a file with persistence diagram and number of dominant intervals you would like to get \n";
+		std::cout << "To run this program, please provide the name of a file with persistence diagram and number of dominant intervals you would like to get \n";
 		return 1;
 	}
 
@@ -50,7 +48,7 @@ int main( int argc , char** argv )
 	
 	std::stringstream gnuplot_script;
 	gnuplot_script << argv[1] << "_Gnuplot_script";
-	ofstream out;
+	std::ofstream out;
 	out.open( gnuplot_script.str().c_str() );
 	
 	out << "set style data histogram" << std::endl;
@@ -61,7 +59,7 @@ int main( int argc , char** argv )
 	{
 		out << histogram[i]  << std::endl;
 	}		
-	out << endl;
+	out << std::endl;
 	std::cout << "To vizualize, open gnuplot and type: load \'" << gnuplot_script.str().c_str() << "\'" <<  std::endl;	
 	out.close();	
 	return 0;

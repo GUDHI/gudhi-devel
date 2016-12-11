@@ -32,24 +32,22 @@
 using namespace Gudhi;
 using namespace Gudhi::Gudhi_stat;
 
-using namespace std;
-
 
 int main( int argc , char** argv )
 {
 	std::cout << "This program compute the dominant intervals. A number of intervals to be displayed is a parameter of this program. \n";
 	if ( argc != 3 )
 	{
-		cout << "To run this program, please provide the name of a file with persistence diagram and number of dominant intervals you would like to get \n";
+		std::cout << "To run this program, please provide the name of a file with persistence diagram and number of dominant intervals you would like to get \n";
 		return 1;
 	}
 
 	Persistence_intervals p( argv[1] );
 	std::vector< std::pair<double,double> > dominant_intervals = p.dominant_intervals( atoi( argv[2] ) );
-	cout << "Here are the dominant intervals : " << endl;
+	std::cout << "Here are the dominant intervals : " << std::endl;
 	for ( size_t i = 0 ; i != dominant_intervals.size() ; ++i )
 	{
-		cout << " " << dominant_intervals[i].first<< "," << dominant_intervals[i].second  << " "<< endl;
+		std::cout << " " << dominant_intervals[i].first<< "," << dominant_intervals[i].second  << " "<< std::endl;
 	}
 	
 	return 0;

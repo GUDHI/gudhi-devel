@@ -34,20 +34,18 @@
 using namespace Gudhi;
 using namespace Gudhi::Gudhi_stat;
 
-using namespace std;
-
 
 int main( int argc , char** argv )
 {
 	//std::cout << "This program compute minimum birth and the maximum death time for a collection of persistence intervals \n";
 	//if ( argc != 2 )
 	//{
-	//	cout << "To run this program, please provide the name of a file with persistence diagram \n";
+	//	std::cout << "To run this program, please provide the name of a file with persistence diagram \n";
 	//	return 1;
 	//}
 	//Persistence_intervals p( argv[1] );
 	//std::pair<double,double> min_max_ = p.min_max();
-	//cout << "Birth-death range : min: " <<  min_max_.first << ", max: " << min_max_.second << endl;
+	//std::cout << "Birth-death range : min: " <<  min_max_.first << ", max: " << min_max_.second << endl;
 	
 	std::vector< const char* > filenames;
 	for ( int i = 1 ; i < argc ; ++i )
@@ -66,6 +64,6 @@ int main( int argc , char** argv )
 		if ( min_max_.first < min_ )min_ = min_max_.first;
 		if ( min_max_.second > max_ )max_ = min_max_.second;
 	}
-	cout << "Birth-death range : min: " <<  min_ << ", max: " << max_ << endl;
+	std::cout << "Birth-death range : min: " <<  min_ << ", max: " << max_ << std::endl;
 	return 0;
 }

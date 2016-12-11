@@ -26,7 +26,7 @@
 #include <gudhi/read_persitence_from_file.h>
 #include <gudhi/concretizations/Vector_distances_in_diagram.h>
 
-using namespace std;
+
 using namespace Gudhi;
 using namespace Gudhi::Gudhi_stat;
 

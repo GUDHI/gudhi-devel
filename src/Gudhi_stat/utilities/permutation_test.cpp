@@ -26,7 +26,6 @@
 #include <iostream>
 #include <cstring>
 
-using namespace std;
 using namespace Gudhi;
 using namespace Gudhi::Gudhi_stat;
 

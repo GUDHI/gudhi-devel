@@ -36,7 +36,6 @@ using namespace Gudhi::Gudhi_stat;
 
 double epsilon = 0.0000005;
 
-using namespace std;
 
 	
 int main( int argc , char** argv )
