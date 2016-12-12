@@ -316,7 +316,7 @@ public:
     
 
 	/**
-	 * A function that compute sum of two landscapes.
+	 *\private A function that compute sum of two landscapes.
 	**/
     friend Persistence_landscape_on_grid add_two_landscapes ( const Persistence_landscape_on_grid& land1 ,  const Persistence_landscape_on_grid& land2 )
     {
@@ -324,7 +324,7 @@ public:
     }
 
     /**
-	 * A function that compute difference of two landscapes.
+	 *\private A function that compute difference of two landscapes.
 	**/
     friend Persistence_landscape_on_grid subtract_two_landscapes ( const Persistence_landscape_on_grid& land1 ,  const Persistence_landscape_on_grid& land2 )
     {

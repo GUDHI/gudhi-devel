@@ -281,8 +281,8 @@ public:
 	/**
 	 * This is a generic function that allows to perform binary operations on two Vector_distances_in_diagram. It will be used later to defien sums and differences of Vector_distances_in_diagram.
 	**/ 
-	//template < typename Operation_type > 
-	friend Vector_distances_in_diagram operation_on_pair_of_vectors( const Vector_distances_in_diagram& first ,  const Vector_distances_in_diagram& second , double (*opertion)( double,double ) )
+	template < typename Operation_type > 
+	friend Vector_distances_in_diagram operation_on_pair_of_vectors( const Vector_distances_in_diagram& first ,  const Vector_distances_in_diagram& second , Operation_type opertion )
     {
 		Vector_distances_in_diagram result;		
 		//Operation_type operation;		
@@ -331,14 +331,14 @@ public:
     **/    
     friend Vector_distances_in_diagram operator+( const Vector_distances_in_diagram& first , const Vector_distances_in_diagram& second )
     {
-		return operation_on_pair_of_vectors( first , second , plus_ );
+		return operation_on_pair_of_vectors( first , second , std::plus<double>() );
 	}	
 	/**
      * This function computes a difference of two objects of a type Vector_distances_in_diagram.
     **/
     friend Vector_distances_in_diagram operator-( const Vector_distances_in_diagram& first , const Vector_distances_in_diagram& second )
     {
-		return operation_on_pair_of_vectors( first , second , minus_ );
+		return operation_on_pair_of_vectors( first , second , std::minus<double>() );
 	}
 	/**
      * This function computes a product of an object of a type Vector_distances_in_diagram with real number.
