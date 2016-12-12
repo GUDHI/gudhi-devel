@@ -1905,7 +1905,7 @@ class Tangential_complex {
 #ifdef GUDHI_TC_EXPORT_ALL_COORDS_IN_OFF
     int num_coords = m_ambient_dim;
 #else
-    int num_coords = std::min(m_ambient_dim, 3);
+    int num_coords = (std::min)(m_ambient_dim, 3);
 #endif
 
 #ifdef GUDHI_TC_EXPORT_NORMALS
