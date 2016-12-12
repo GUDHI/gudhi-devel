@@ -118,14 +118,13 @@ class Rips_complex {
   }
 
  private:
-  /** \brief Output the proximity graph of the points.
+  /** \brief Computes the proximity graph of the points.
    *
-   * If points contains n elements, the proximity graph is the graph 
-   * with n vertices, and an edge [u,v] iff the distance function between 
-   * points u and v is smaller than threshold.
+   * If points contains n elements, the proximity graph is the graph with n vertices, and an edge [u,v] iff the
+   * distance function between points u and v is smaller than threshold.
    *
-   * The type PointCloud furnishes .begin() and .end() methods, that return
-   * iterators with value_type Point.
+   * \tparam The type InputPointRange furnishes .begin() and .end() methods, that return iterators with
+   * value_type Point.
    */
   template< typename InputPointRange, typename Distance >
   void compute_proximity_graph(const InputPointRange& points, Filtration_value threshold,
