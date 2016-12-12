@@ -47,8 +47,8 @@ namespace rips_complex {
  * \ingroup rips_complex
  * 
  * \details
- * The data structure is a one skeleton graph constructed from a point cloud, containing edges when the edge length is
- * less or equal to a given threshold. Edge length is computed from a user given function.
+ * The data structure is a one skeleton graph, or Rips graph, constructed from a point cloud, containing edges when
+ * the edge length is less or equal to a given threshold. Edge length is computed from a user given function.
  * 
  * The complex is a template class requiring a Filtration_value type.
  * 
@@ -90,7 +90,7 @@ class Rips_complex {
                             [&](size_t i, size_t j){return distance_matrix[j][i];});
   }
 
-  /** \brief Initializes the simplicial complex from the 1-skeleton graph and expands it until a given maximal
+  /** \brief Initializes the simplicial complex from the Rips graph and expands it until a given maximal
    * dimension.
    *
    * \tparam SimplicialComplexForRips must meet `SimplicialComplexForRips` concept.
