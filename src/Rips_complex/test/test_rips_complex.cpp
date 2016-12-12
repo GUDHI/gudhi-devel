@@ -33,7 +33,6 @@
 #include <gudhi/Rips_complex.h>
 // to construct Rips_complex from a OFF file of points
 #include <gudhi/Points_off_io.h>
-// to construct a simplex_tree from rips complex
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/distance_functions.h>
 #include <gudhi/reader_utils.h>
