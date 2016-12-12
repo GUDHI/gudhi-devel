@@ -45,25 +45,25 @@ int main(int argc, char **argv) {
     streambufffer = std::cout.rdbuf();
   }
 
-  Simplex_tree simplex;
-  if (rips_complex_from_file.create_complex(simplex, dim_max)) {
+  Simplex_tree stree;
+  if (rips_complex_from_file.create_complex(stree, dim_max)) {
     std::ostream output_stream(streambufffer);
 
     // ----------------------------------------------------------------------------
     // Display information about the rips complex
     // ----------------------------------------------------------------------------
-    output_stream << "Rips complex is of dimension " << simplex.dimension() <<
-        " - " << simplex.num_simplices() << " simplices - " <<
-        simplex.num_vertices() << " vertices." << std::endl;
+    output_stream << "Rips complex is of dimension " << stree.dimension() <<
+        " - " << stree.num_simplices() << " simplices - " <<
+        stree.num_vertices() << " vertices." << std::endl;
 
     output_stream << "Iterator on rips complex simplices in the filtration order, with [filtration value]:" <<
         std::endl;
-    for (auto f_simplex : simplex.filtration_simplex_range()) {
+    for (auto f_simplex : stree.filtration_simplex_range()) {
       output_stream << "   ( ";
-      for (auto vertex : simplex.simplex_vertex_range(f_simplex)) {
+      for (auto vertex : stree.simplex_vertex_range(f_simplex)) {
         output_stream << vertex << " ";
       }
-      output_stream << ") -> " << "[" << simplex.filtration(f_simplex) << "] ";
+      output_stream << ") -> " << "[" << stree.filtration(f_simplex) << "] ";
       output_stream << std::endl;
     }
   }

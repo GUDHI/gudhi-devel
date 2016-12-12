@@ -39,23 +39,23 @@ int main(int argc, char **argv) {
   // ----------------------------------------------------------------------------
   Rips_complex rips_complex_from_points(points, threshold, Euclidean_distance());
 
-  Simplex_tree simplex;
-  if (rips_complex_from_points.create_complex(simplex, 1)) {
+  Simplex_tree stree;
+  if (rips_complex_from_points.create_complex(stree, 1)) {
     // ----------------------------------------------------------------------------
     // Display information about the one skeleton rips complex
     // ----------------------------------------------------------------------------
-    std::cout << "Rips complex is of dimension " << simplex.dimension() <<
-        " - " << simplex.num_simplices() << " simplices - " <<
-        simplex.num_vertices() << " vertices." << std::endl;
+    std::cout << "Rips complex is of dimension " << stree.dimension() <<
+        " - " << stree.num_simplices() << " simplices - " <<
+        stree.num_vertices() << " vertices." << std::endl;
 
     std::cout << "Iterator on rips complex simplices in the filtration order, with [filtration value]:" <<
         std::endl;
-    for (auto f_simplex : simplex.filtration_simplex_range()) {
+    for (auto f_simplex : stree.filtration_simplex_range()) {
       std::cout << "   ( ";
-      for (auto vertex : simplex.simplex_vertex_range(f_simplex)) {
+      for (auto vertex : stree.simplex_vertex_range(f_simplex)) {
         std::cout << vertex << " ";
       }
-      std::cout << ") -> " << "[" << simplex.filtration(f_simplex) << "] ";
+      std::cout << ") -> " << "[" << stree.filtration(f_simplex) << "] ";
       std::cout << std::endl;
     }
   }
