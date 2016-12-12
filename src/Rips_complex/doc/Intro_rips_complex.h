@@ -37,10 +37,13 @@ namespace rips_complex {
  * 
  * Rips_complex
  * <a target="_blank" href="https://en.wikipedia.org/wiki/Vietoris%E2%80%93Rips_complex">(Wikipedia)</a> is a
+ * one skeleton graph that allows to construct a
  * <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
- * constructed from a one skeleton graph.
+ * from it.
+ * The input can be a point cloud with a given distance function, or a distance matrix.
  * 
- * The filtration value of each edge is computed from a user-given distance function.
+ * The filtration value of each edge is computed from a user-given distance function, or directly from the distance
+ * matrix.
  * 
  * All edges that have a filtration value strictly greater than a given threshold value are not inserted into
  * the complex.
@@ -77,7 +80,7 @@ namespace rips_complex {
  * 
  * \subsection ripsoffexample Example from OFF file
  * 
- * This example builds the one skeleton graph from the given points in an OFF file, threshold value, and distance
+ * This example builds the Rips_complex from the given points in an OFF file, threshold value, and distance
  * function.
  * Then it creates a `Simplex_tree` with it.
  * 
