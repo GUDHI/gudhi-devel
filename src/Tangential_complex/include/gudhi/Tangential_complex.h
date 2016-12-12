@@ -63,6 +63,7 @@
 #include <iterator>
 #include <cmath>  // for std::sqrt
 #include <string>
+#include <cstddef>  // for std::size_t
 
 #ifdef GUDHI_USE_TBB
 #include <tbb/parallel_for.h>
@@ -82,7 +83,7 @@ using namespace internal;
 
 class Vertex_data {
  public:
-  Vertex_data(std::size_t data = std::numeric_limits<std::size_t>::max())
+  Vertex_data(std::size_t data = (std::numeric_limits<std::size_t>::max)())
       : m_data(data) { }
 
   operator std::size_t() {
@@ -1048,7 +1049,7 @@ class Tangential_complex {
 #endif  // GUDHI_USE_TBB
 
   bool is_infinite(Simplex const& s) const {
-    return *s.rbegin() == std::numeric_limits<std::size_t>::max();
+    return *s.rbegin() == (std::numeric_limits<std::size_t>::max)();
   }
 
   // Output: "triangulation" is a Regular Triangulation containing at least the
@@ -1654,7 +1655,7 @@ class Tangential_complex {
     for (; it_point_idx != simplex.end(); ++it_point_idx) {
       std::size_t point_idx = *it_point_idx;
       // Don't check infinite simplices
-      if (point_idx == std::numeric_limits<std::size_t>::max())
+      if (point_idx == (std::numeric_limits<std::size_t>::max)())
         continue;
 
       Star const& star = m_stars[point_idx];
@@ -1693,7 +1694,7 @@ class Tangential_complex {
     for (; it_point_idx != s.end(); ++it_point_idx) {
       std::size_t point_idx = *it_point_idx;
       // Don't check infinite simplices
-      if (point_idx == std::numeric_limits<std::size_t>::max())
+      if (point_idx == (std::numeric_limits<std::size_t>::max)())
         continue;
 
       Star const& star = m_stars[point_idx];
@@ -1959,7 +1960,7 @@ class Tangential_complex {
       Triangulation const& tr = it_tr->tr();
       Tr_vertex_handle center_vh = it_tr->center_vertex();
 
-      if (&tr == NULL || tr.current_dimension() < m_intrinsic_dim)
+      if (tr.current_dimension() < m_intrinsic_dim)
         continue;
 
       // Color for this star
