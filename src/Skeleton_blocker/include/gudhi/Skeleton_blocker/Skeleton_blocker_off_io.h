@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #ifndef SKELETON_BLOCKER_SKELETON_BLOCKER_OFF_IO_H_
 #define SKELETON_BLOCKER_SKELETON_BLOCKER_OFF_IO_H_
 
@@ -30,7 +31,7 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 /**
  *@brief Off reader visitor that can be passed to Off_reader to read a Skeleton_blocker_complex.
@@ -49,8 +50,8 @@ class Skeleton_blocker_off_flag_visitor_reader {
       load_only_points_(load_only_points) { }
 
   void init(int dim, int num_vertices, int num_faces, int num_edges) {
-    // todo do an assert to check that this number are correctly read
-    // todo reserve size for vector points
+    // TODO(DS): do an assert to check that this number are correctly read
+    // TODO(DS): reserve size for vector points
   }
 
   void point(const std::vector<double>& point) {
@@ -61,7 +62,7 @@ class Skeleton_blocker_off_flag_visitor_reader {
     if (!load_only_points_) {
       for (size_t i = 0; i < face.size(); ++i)
         for (size_t j = i + 1; j < face.size(); ++j) {
-          complex_.add_edge(Vertex_handle(face[i]), Vertex_handle(face[j]));
+          complex_.add_edge_without_blockers(Vertex_handle(face[i]), Vertex_handle(face[j]));
         }
     }
   }
@@ -76,12 +77,12 @@ template<typename Complex>
 class Skeleton_blocker_off_visitor_reader {
   Complex& complex_;
   typedef typename Complex::Vertex_handle Vertex_handle;
-  typedef typename Complex::Simplex_handle Simplex_handle;
+  typedef typename Complex::Simplex Simplex;
   typedef typename Complex::Point Point;
 
   const bool load_only_points_;
   std::vector<Point> points_;
-  std::vector<Simplex_handle> maximal_faces_;
+  std::vector<Simplex> maximal_faces_;
 
  public:
   explicit Skeleton_blocker_off_visitor_reader(Complex& complex, bool load_only_points = false) :
@@ -99,7 +100,7 @@ class Skeleton_blocker_off_visitor_reader {
 
   void maximal_face(const std::vector<int>& face) {
     if (!load_only_points_) {
-      Simplex_handle s;
+      Simplex s;
       for (auto x : face)
         s.add_vertex(Vertex_handle(x));
       maximal_faces_.emplace_back(s);
@@ -108,7 +109,7 @@ class Skeleton_blocker_off_visitor_reader {
 
   void done() {
     complex_ = make_complex_from_top_faces<Complex>(maximal_faces_.begin(), maximal_faces_.end(),
-                                           points_.begin(), points_.end() );
+                                                    points_.begin(), points_.end());
   }
 };
 
@@ -140,7 +141,7 @@ class Skeleton_blocker_off_reader {
   }
 
   /**
-   * return true iff reading did not meet problems.
+   * return true if reading did not meet problems.
    */
   bool is_valid() const {
     return valid_;
@@ -193,7 +194,9 @@ class Skeleton_blocker_off_writer {
   }
 };
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 

@@ -71,9 +71,9 @@ class CGAL_geometric_flag_complex_wrapper {
 
   void maximal_face(std::vector<int> vertices) {
     if (!load_only_points_) {
-      std::cout << "size:" << vertices.size() << std::endl;
-      for (int i = 0; i < vertices.size(); ++i)
-        for (int j = i + 1; j < vertices.size(); ++j)
+      // std::cout << "size:" << vertices.size() << std::endl;
+      for (std::size_t i = 0; i < vertices.size(); ++i)
+        for (std::size_t j = i + 1; j < vertices.size(); ++j)
           complex_.add_edge(Vertex_handle(vertices[i]), Vertex_handle(vertices[j]));
     }
   }
@@ -187,7 +187,7 @@ class Model {
   }
 
   void contract_edges(unsigned num_contractions) {
-    Clock c;
+    Gudhi::Clock c;
     Edge_contractor<Complex> contractor(complex_, num_contractions);
     std::cout << "Time to simplify: " << c.num_seconds() << "s" << std::endl;
   }
@@ -248,8 +248,8 @@ class Model {
     unsigned num_simplices = 0;
     int euler = 0;
     int dimension = 0;
-    Clock clock;
-    for (const auto &s : complex_.simplex_range()) {
+    Gudhi::Clock clock;
+    for (const auto &s : complex_.complex_simplex_range()) {
       num_simplices++;
       dimension = (std::max)(s.dimension(), dimension);
       if (s.dimension() % 2 == 0)
@@ -271,7 +271,7 @@ class Model {
 #ifdef _WIN32
     std::cout << "Works only on linux x64 for the moment\n";
 #else
-    Clock clock;
+    Gudhi::Clock clock;
     run_chomp();
     clock.end();
 #endif
@@ -281,7 +281,7 @@ class Model {
     unsigned num_simplices = 0;
     int euler = 0;
     int dimension = 0;
-    for (const auto &s : complex_.simplex_range()) {
+    for (const auto &s : complex_.complex_simplex_range()) {
       num_simplices++;
       dimension = (std::max)(s.dimension(), dimension);
       if (s.dimension() % 2 == 0)
@@ -328,7 +328,7 @@ class Model {
   void save_complex_in_file_for_chomp() {
     std::ofstream file;
     file.open("chomp.sim");
-    for (const auto &s : complex_.simplex_range()) {
+    for (const auto &s : complex_.complex_simplex_range()) {
       bool first = true;
       file << "(";
       for (auto x : s) {

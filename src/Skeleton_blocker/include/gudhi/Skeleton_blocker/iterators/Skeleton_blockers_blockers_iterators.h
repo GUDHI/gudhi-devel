@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #ifndef SKELETON_BLOCKER_ITERATORS_SKELETON_BLOCKERS_BLOCKERS_ITERATORS_H_
 #define SKELETON_BLOCKER_ITERATORS_SKELETON_BLOCKERS_BLOCKERS_ITERATORS_H_
 
@@ -26,12 +27,12 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 /**
  * @brief Iterator through the blockers of a vertex.
  */
-// ReturnType = const Simplex_handle* or Simplex_handle*
+// ReturnType = const Simplex* or Simplex*
 // MapIteratorType = BlockerMapConstIterator or BlockerMapIterator
 
 template<typename MapIteratorType, typename ReturnType>
@@ -83,7 +84,7 @@ ReturnType
 /**
  * @brief Iterator through the blockers of a vertex
  */
-// ReturnType = const Simplex_handle* or Simplex_handle*
+// ReturnType = const Simplex* or Simplex*
 // MapIteratorType = BlockerMapConstIterator or BlockerMapIterator
 
 template<typename MapIteratorType, typename ReturnType>
@@ -124,7 +125,9 @@ ReturnType
   }
 };
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 

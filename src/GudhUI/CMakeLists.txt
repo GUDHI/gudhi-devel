@@ -33,25 +33,6 @@ if ( CGAL_FOUND AND Qt5_FOUND AND OPENGL_FOUND AND QGLVIEWER_FOUND )
 
   SET(Boost_USE_STATIC_LIBS ON)
   SET(Boost_USE_MULTITHREAD OFF)
-  INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
-  LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
-  
-  include(${CGAL_USE_FILE})
-  # In CMakeLists.txt, when include(${CGAL_USE_FILE}), CXX_FLAGS are overwritten.
-  # cf. http://doc.cgal.org/latest/Manual/installation.html#title40
-  # A workaround is to add "-std=c++11" again.
-  # A fix would be to use https://cmake.org/cmake/help/v3.1/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html 
-  # or even better https://cmake.org/cmake/help/v3.1/variable/CMAKE_CXX_STANDARD.html
-  # but it implies to use cmake version 3.1 at least.
-  if(NOT MSVC)
-    include(CheckCXXCompilerFlag)
-    CHECK_CXX_COMPILER_FLAG(-std=c++11 COMPILER_SUPPORTS_CXX11)
-    if(COMPILER_SUPPORTS_CXX11)
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-    endif()
-  endif()
-  # - End of workaround
-
   include_directories (${QGLVIEWER_INCLUDE_DIR})
  
   #####################################################################
@@ -69,6 +50,11 @@ if ( CGAL_FOUND AND Qt5_FOUND AND OPENGL_FOUND AND QGLVIEWER_FOUND )
   target_link_libraries( GudhUI Qt5::Widgets Qt5::Xml Qt5::OpenGL )
   target_link_libraries( GudhUI ${QGLVIEWER_LIBRARIES} )
   target_link_libraries( GudhUI ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY} )	
+if (TBB_FOUND)
+  target_link_libraries( GudhUI ${TBB_LIBRARIES})
+endif()
+
+###############################################################################
 
 else()
   message(STATUS "NOTICE: GudhUI requires CGAL, the QGLViewer, OpenGL and Qt5, and will not be compiled.")

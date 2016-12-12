@@ -44,8 +44,6 @@ echo $VERSION_DIR
 mkdir "$VERSION_DIR"
 
 # TOP LEVEL FILE COPY
-cp $VERSION_FILE $VERSION_DIR
-cp $ROOT_DIR/CMakeGUDHIVersion.txt $VERSION_DIR
 cp $ROOT_DIR/README $VERSION_DIR
 cp $ROOT_DIR/Conventions.txt $VERSION_DIR
 cp $ROOT_DIR/COPYING $VERSION_DIR
@@ -55,19 +53,20 @@ cp $ROOT_DIR/src/Doxyfile $VERSION_DIR
 cp -R $ROOT_DIR/biblio $VERSION_DIR
 cp $ROOT_DIR/src/GUDHIConfigVersion.cmake.in $VERSION_DIR
 cp $ROOT_DIR/src/GUDHIConfig.cmake.in $VERSION_DIR
+cp $ROOT_DIR/CMakeGUDHIVersion.txt $VERSION_DIR
 cp $ROOT_DIR/GUDHIVersion.cmake.in $VERSION_DIR
 
 # PACKAGE LEVEL COPY
 PACKAGE_INC_DIR="/include"
-#PACKAGE_SRC_DIR="/source"
 PACKAGE_EX_DIR="/example"
+PACKAGE_CONCEPT_DIR="/concept"
 PACKAGE_DOC_DIR="/doc"
 for package in `ls $ROOT_DIR/src/`
 do
-  echo $package
-  if [ -d "$ROOT_DIR/src/$package" ]
+  if [ -d "$ROOT_DIR/src/$package" ] && [ $package != "Bottleneck" ]
   then
-    if [ "$package" == "cmake" ]
+    echo $package
+    if [ "$package" == "cmake" ] || [ "$package" == "debian" ]
     then
       # SPECIFIC FOR CMAKE MODULES
       cp -R $ROOT_DIR/src/$package $VERSION_DIR
@@ -90,6 +89,11 @@ do
       then
         mkdir -p $VERSION_DIR$PACKAGE_EX_DIR/$package
         cp -R $ROOT_DIR/src/$package$PACKAGE_EX_DIR/* $VERSION_DIR$PACKAGE_EX_DIR/$package
+      fi
+      if [ -d "$ROOT_DIR/src/$package$PACKAGE_CONCEPT_DIR" ]
+      then
+        mkdir -p $VERSION_DIR$PACKAGE_CONCEPT_DIR/$package
+        cp -R $ROOT_DIR/src/$package$PACKAGE_CONCEPT_DIR/* $VERSION_DIR$PACKAGE_CONCEPT_DIR/$package
       fi
       if [ -d "$ROOT_DIR/src/$package$PACKAGE_DOC_DIR" ]
       then

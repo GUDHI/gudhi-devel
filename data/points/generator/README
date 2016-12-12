@@ -1,10 +1,13 @@
-To build the example, run in a Terminal:
+=========================== C++ generators =====================================
+
+To build the C++ generators, run in a Terminal:
 
 cd /path-to-gudhi/
 cmake .
 cd /path-to-data-generator/
 make
 
+=========================== hypergenerator =====================================
 
 Example of use :
 
@@ -24,3 +27,18 @@ Example of use :
 
 !! Warning: hypegenerator on cube is not available !!
 
+===================== aurelien_alvarez_surfaces_in_R8 ==========================
+
+This generator is written in Python.
+
+This code generates points on a family of surfaces living in CP^2. You can move
+in the family thanks to the parameter "degre". The parameter "nombrePoints"
+allows to choose the number of points on the chosen surface. Finally, to compute
+the points, we choose a chart in C^2 and take points randomly in the x-variable,
+so that you may also modify the window for x in the complex plane (parameter
+"module_x").
+
+After that, the program computes points in C^2, then maps them in R^8, so that
+the points live on a surface which is compact (which is not the case for the
+intersection of the surface with C^2). We end off with a bunch of points on a
+compact surface in R^8.

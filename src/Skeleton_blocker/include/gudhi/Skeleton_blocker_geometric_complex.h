@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -19,16 +19,17 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #ifndef SKELETON_BLOCKER_GEOMETRIC_COMPLEX_H_
 #define SKELETON_BLOCKER_GEOMETRIC_COMPLEX_H_
 
-#include <gudhi/Utils.h>
 #include <gudhi/Skeleton_blocker_complex.h>
 #include <gudhi/Skeleton_blocker/Skeleton_blocker_sub_complex.h>
+#include <gudhi/Debug_utils.h>
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 /**
  * @brief Class that represents a geometric complex that can be simplified.
@@ -46,7 +47,7 @@ public Skeleton_blocker_complex<SkeletonBlockerGeometricDS> {
   typedef typename SimplifiableSkeletonblocker::Vertex_handle Vertex_handle;
   typedef typename SimplifiableSkeletonblocker::Root_vertex_handle Root_vertex_handle;
   typedef typename SimplifiableSkeletonblocker::Edge_handle Edge_handle;
-  typedef typename SimplifiableSkeletonblocker::Simplex_handle Simplex_handle;
+  typedef typename SimplifiableSkeletonblocker::Simplex Simplex;
 
   typedef typename SimplifiableSkeletonblocker::Graph_vertex Graph_vertex;
 
@@ -140,7 +141,7 @@ public Skeleton_blocker_complex<SkeletonBlockerGeometricDS> {
    * Constructs the link of 'simplex' with points coordinates.
    */
   Geometric_link link(Vertex_handle v) const {
-    Geometric_link link(*this, Simplex_handle(v));
+    Geometric_link link(*this, Simplex(v));
     // we now add the point info
     add_points_to_link(link);
     return link;
@@ -149,7 +150,7 @@ public Skeleton_blocker_complex<SkeletonBlockerGeometricDS> {
   /**
    * Constructs the link of 'simplex' with points coordinates.
    */
-  Geometric_link link(const Simplex_handle& simplex) const {
+  Geometric_link link(const Simplex& simplex) const {
     Geometric_link link(*this, simplex);
     // we now add the point info
     add_points_to_link(link);
@@ -172,13 +173,13 @@ public Skeleton_blocker_complex<SkeletonBlockerGeometricDS> {
    * Constructs the abstract link of v (without points coordinates).
    */
   Abstract_link abstract_link(Vertex_handle v) const {
-    return Abstract_link(*this, Simplex_handle(v));
+    return Abstract_link(*this, Simplex(v));
   }
 
   /**
    * Constructs the link of 'simplex' with points coordinates.
    */
-  Abstract_link abstract_link(const Simplex_handle& simplex) const {
+  Abstract_link abstract_link(const Simplex& simplex) const {
     return Abstract_link(*this, simplex);
   }
 
@@ -217,7 +218,9 @@ SkeletonBlockerGeometricComplex make_complex_from_top_faces(
   return complex;
 }
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 

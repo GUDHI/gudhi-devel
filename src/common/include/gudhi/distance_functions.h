@@ -23,6 +23,8 @@
 #ifndef DISTANCE_FUNCTIONS_H_
 #define DISTANCE_FUNCTIONS_H_
 
+#include <cmath>  // for std::sqrt
+
 /* Compute the Euclidean distance between two Points given
  * by a range of coordinates. The points are assumed to have 
  * the same dimension. */
@@ -35,7 +37,7 @@ double euclidean_distance(Point &p1, Point &p2) {
     double tmp = *it1 - *it2;
     dist += tmp*tmp;
   }
-  return sqrt(dist);
+  return std::sqrt(dist);
 }
 
 #endif  // DISTANCE_FUNCTIONS_H_

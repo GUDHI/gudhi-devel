@@ -30,6 +30,7 @@
 
 #include <string>
 #include <vector>
+#include <limits>  // infinity
 
 using namespace Gudhi;
 using namespace Gudhi::persistent_cohomology;
@@ -65,7 +66,8 @@ int main(int argc, char * argv[]) {
                                                , euclidean_distance<Point_t>);
 
   // Construct the Rips complex in a Simplex Tree
-  Simplex_tree<> st;
+  typedef Simplex_tree<Simplex_tree_options_fast_persistence> ST;
+  ST st;
   // insert the proximity graph in the simplex tree
   st.insert_graph(prox_graph);
   // expand the graph until dimension dim_max
@@ -78,7 +80,7 @@ int main(int argc, char * argv[]) {
   st.initialize_filtration();
 
   // Compute the persistence diagram of the complex
-  persistent_cohomology::Persistent_cohomology< Simplex_tree<>, Field_Zp > pcoh(st);
+  persistent_cohomology::Persistent_cohomology<ST, Field_Zp > pcoh(st);
   // initializes the coefficient field for homology
   pcoh.init_coefficients(p);
 
@@ -114,7 +116,7 @@ void program_options(int argc, char * argv[]
       ("help,h", "produce help message")
       ("output-file,o", po::value<std::string>(&filediag)->default_value(std::string()),
        "Name of file in which the persistence diagram is written. Default print in std::cout")
-      ("max-edge-length,r", po::value<Filtration_value>(&threshold)->default_value(0),
+      ("max-edge-length,r", po::value<Filtration_value>(&threshold)->default_value(std::numeric_limits<Filtration_value>::infinity()),
        "Maximal length of an edge for the Rips complex construction.")
       ("cpx-dimension,d", po::value<int>(&dim_max)->default_value(1),
        "Maximal dimension of the Rips complex we want to compute.")

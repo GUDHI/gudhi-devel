@@ -23,6 +23,9 @@
 #ifndef GUI_MAINWINDOW_H_
 #define GUI_MAINWINDOW_H_
 
+// Workaround https://svn.boost.org/trac/boost/ticket/12534
+#include <boost/container/flat_map.hpp>
+
 #include <QMainWindow>
 #include "ui_main_window.h"
 #include "model/Model.h"

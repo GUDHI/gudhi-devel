@@ -65,7 +65,7 @@ template<typename SkBlComplex> class Edge_contractor {
 
     Placement_type operator()(const EdgeProfile& profile) const override {
       std::vector<double> mid_coords(profile.p0().dimension(), 0);
-      for (size_t i = 0; i < profile.p0().dimension(); ++i) {
+      for (int i = 0; i < profile.p0().dimension(); ++i) {
         mid_coords[i] = (profile.p0()[i] + profile.p1()[i]) / 2.;
       }
       return Point(profile.p0().dimension(), mid_coords.begin(), mid_coords.end());

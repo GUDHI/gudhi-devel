@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #ifndef SKELETON_BLOCKER_SKELETON_BLOCKER_LINK_SUPERIOR_H_
 #define SKELETON_BLOCKER_SKELETON_BLOCKER_LINK_SUPERIOR_H_
 
@@ -26,7 +27,7 @@
 
 namespace Gudhi {
 
-namespace skbl {
+namespace skeleton_blocker {
 
 template<class ComplexType> class Skeleton_blocker_sub_complex;
 
@@ -36,7 +37,7 @@ template<class ComplexType> class Skeleton_blocker_sub_complex;
  */
 template<typename ComplexType>
 class Skeleton_blocker_link_superior : public Skeleton_blocker_link_complex<
-    ComplexType> {
+ComplexType> {
   typedef typename ComplexType::Edge_handle Edge_handle;
 
   typedef typename ComplexType::boost_vertex_handle boost_vertex_handle;
@@ -44,33 +45,32 @@ class Skeleton_blocker_link_superior : public Skeleton_blocker_link_complex<
  public:
   typedef typename ComplexType::Vertex_handle Vertex_handle;
   typedef typename ComplexType::Root_vertex_handle Root_vertex_handle;
-  typedef typename ComplexType::Simplex_handle Simplex_handle;
+  typedef typename ComplexType::Simplex Simplex;
   typedef typename ComplexType::Root_simplex_handle Root_simplex_handle;
   typedef typename ComplexType::BlockerMap BlockerMap;
   typedef typename ComplexType::BlockerPair BlockerPair;
   typedef typename ComplexType::BlockerMapIterator BlockerMapIterator;
   typedef typename ComplexType::BlockerMapConstIterator BlockerMapConstIterator;
-  typedef typename ComplexType::Simplex_handle::Simplex_vertex_const_iterator AddressSimplexConstIterator;
+  typedef typename ComplexType::Simplex::Simplex_vertex_const_iterator AddressSimplexConstIterator;
   typedef typename ComplexType::Root_simplex_handle::Simplex_vertex_const_iterator IdSimplexConstIterator;
 
   Skeleton_blocker_link_superior()
-      : Skeleton_blocker_link_complex<ComplexType>(true) {
-  }
+      : Skeleton_blocker_link_complex<ComplexType>(true) { }
 
   Skeleton_blocker_link_superior(const ComplexType & parent_complex,
-                                 Simplex_handle& alpha_parent_adress)
+                                 Simplex& alpha_parent_adress)
       : Skeleton_blocker_link_complex<ComplexType>(parent_complex,
-                                                   alpha_parent_adress, true) {
-  }
+                                                   alpha_parent_adress, true) { }
 
   Skeleton_blocker_link_superior(const ComplexType & parent_complex,
                                  Vertex_handle a_parent_adress)
       : Skeleton_blocker_link_complex<ComplexType>(parent_complex,
-                                                   a_parent_adress, true) {
-  }
+                                                   a_parent_adress, true) { }
 };
 
-}  // namespace skbl
+}  // namespace skeleton_blocker
+
+namespace skbl = skeleton_blocker;
 
 }  // namespace Gudhi
 

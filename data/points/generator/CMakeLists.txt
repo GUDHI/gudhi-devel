@@ -1,32 +1,11 @@
 cmake_minimum_required(VERSION 2.6)
-project(GUDHIPointsGenerator)
+project(Data_points_generator)
 
 if(CGAL_FOUND)
   if (NOT CGAL_VERSION VERSION_LESS 4.6.0)
-    message(STATUS "CGAL version: ${CGAL_VERSION}.")
-
-    include( ${CGAL_USE_FILE} )
-    # In CMakeLists.txt, when include(${CGAL_USE_FILE}), CXX_FLAGS are overwritten.
-    # cf. http://doc.cgal.org/latest/Manual/installation.html#title40
-    # A workaround is to add "-std=c++11" again.
-    # A fix would be to use https://cmake.org/cmake/help/v3.1/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html 
-    # or even better https://cmake.org/cmake/help/v3.1/variable/CMAKE_CXX_STANDARD.html
-    # but it implies to use cmake version 3.1 at least.
-    if(NOT MSVC)
-      include(CheckCXXCompilerFlag)
-      CHECK_CXX_COMPILER_FLAG(-std=c++11 COMPILER_SUPPORTS_CXX11)
-      if(COMPILER_SUPPORTS_CXX11)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-      endif()
-    endif()
-    # - End of workaround
-
-    find_package(Eigen3 3.1.0)
     if (EIGEN3_FOUND)
-      include( ${EIGEN3_USE_FILE} )
-      include_directories (BEFORE "../../include")
-
       add_executable ( hypergenerator hypergenerator.cpp )
+      target_link_libraries(hypergenerator ${Boost_SYSTEM_LIBRARY})
       add_test(hypergenerator_on_sphere_3000_10_5.0 ${CMAKE_CURRENT_BINARY_DIR}/hypergenerator on sphere onSphere.off 3000 10 5.0)
       add_test(hypergenerator_on_sphere_10000_3 ${CMAKE_CURRENT_BINARY_DIR}/hypergenerator on sphere onSphere.off 10000 3)
       add_test(hypergenerator_in_sphere_7000_12_10.8 ${CMAKE_CURRENT_BINARY_DIR}/hypergenerator in sphere inSphere.off 7000 12 10.8)
@@ -34,8 +13,6 @@ if(CGAL_FOUND)
       # on cube is not available in CGAL
       add_test(hypergenerator_in_cube_7000_12_10.8 ${CMAKE_CURRENT_BINARY_DIR}/hypergenerator in cube inCube.off 7000 12 10.8)
       add_test(hypergenerator_in_cube_50000_2 ${CMAKE_CURRENT_BINARY_DIR}/hypergenerator in cube inCube.off 50000 3)
-      endif()
-  else()
-    message(WARNING "CGAL version: ${CGAL_VERSION} is too old to compile hypergenerator. Version 4.6.0 is required.")
-  endif ()
-endif()
+      endif(EIGEN3_FOUND)
+  endif(NOT CGAL_VERSION VERSION_LESS 4.6.0)
+endif(CGAL_FOUND)

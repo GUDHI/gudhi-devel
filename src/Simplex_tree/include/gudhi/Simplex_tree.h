@@ -30,64 +30,32 @@
 
 #include <gudhi/reader_utils.h>
 #include <gudhi/graph_simplicial_complex.h>
+#include <gudhi/Debug_utils.h>
 
 #include <boost/container/flat_map.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/range/adaptor/reversed.hpp>
 
-#include <algorithm>
+#ifdef GUDHI_USE_TBB
+#include <tbb/parallel_sort.h>
+#endif
+
 #include <utility>
 #include <vector>
 #include <functional>  // for greater<>
+#include <stdexcept>
+#include <limits>  // Inf
+#include <initializer_list>
+#include <algorithm>  // for std::max
+#include <cstdint>  // for std::uint32_t
 
 namespace Gudhi {
 
-/** \defgroup simplex_tree Filtered Complexes
- *
- * A simplicial complex \f$\mathbf{K}\f$
- * on a set of vertices \f$V = \{1, \cdots ,|V|\}\f$ is a collection of simplices
- * \f$\{\sigma\}\f$,
- * \f$\sigma \subseteq V\f$ such that \f$\tau \subseteq \sigma \in \mathbf{K} \rightarrow \tau \in
- * \mathbf{K}\f$. The
- * dimension \f$n=|\sigma|-1\f$ of \f$\sigma\f$ is its number of elements minus \f$1\f$.
- *
- * A filtration of a simplicial complex is
- * a function \f$f:\mathbf{K} \rightarrow \mathbb{R}\f$ satisfying \f$f(\tau)\leq f(\sigma)\f$ whenever
- * \f$\tau \subseteq \sigma\f$. Ordering the simplices by increasing filtration values
- * (breaking ties so as a simplex appears after its subsimplices of same filtration value)
- * provides an indexing scheme.
- *
-
- <DT>Implementations:</DT>
- There are two implementation of complexes. The first on is the Simplex_tree data structure.
- The simplex tree is an efficient and flexible
- data structure for representing general (filtered) simplicial complexes. The data structure
- is described in \cite boissonnatmariasimplextreealgorithmica
-
- The second one is the Hasse_complex. The Hasse complex is a data structure representing
- explicitly all co-dimension 1 incidence relations in a complex. It is consequently faster
- when accessing the boundary of a simplex, but is less compact and harder to construct from
- scratch.
-
-
- * \author    Clément Maria
- * \version   1.0
- * \date      2014
- * \copyright GNU General Public License v3.
- * @{
- */
-
-/// Model of SimplexTreeOptions.
-struct Simplex_tree_options_full_featured {
-  typedef linear_indexing_tag Indexing_tag;
-  typedef int Vertex_handle;
-  typedef double Filtration_value;
-  typedef int Simplex_key;
-  static const bool store_key = true;
-  static const bool store_filtration = true;
-};
+struct Simplex_tree_options_full_featured;
 
 /**
+ * \class Simplex_tree Simplex_tree.h gudhi/Simplex_tree.h
  * \brief Simplex Tree data structure for representing simplicial complexes.
  *
  * \details Every simplex \f$[v_0, \cdots ,v_d]\f$ admits a canonical orientation
@@ -110,7 +78,7 @@ class Simplex_tree {
   typedef typename Options::Filtration_value Filtration_value;
   /** \brief Key associated to each simplex.
    *
-   * Must be a signed integer type. */
+   * Must be an integer type. */
   typedef typename Options::Simplex_key Simplex_key;
   /** \brief Type for the vertex handle.
    *
@@ -141,7 +109,8 @@ class Simplex_tree {
     void assign_key(Simplex_key) { }
     Simplex_key key() const { assert(false); return -1; }
   };
-  typedef typename std::conditional<Options::store_key, Key_simplex_base_real, Key_simplex_base_dummy>::type Key_simplex_base;
+  typedef typename std::conditional<Options::store_key, Key_simplex_base_real, Key_simplex_base_dummy>::type
+      Key_simplex_base;
 
   struct Filtration_simplex_base_real {
     Filtration_simplex_base_real() : filt_(0) {}
@@ -307,7 +276,8 @@ class Simplex_tree {
    * of the simplex.
    *
    * @param[in] sh Simplex for which the boundary is computed. */
-  Boundary_simplex_range boundary_simplex_range(Simplex_handle sh) {
+  template<class SimplexHandle>
+  Boundary_simplex_range boundary_simplex_range(SimplexHandle sh) {
     return Boundary_simplex_range(Boundary_simplex_iterator(this, sh),
                                   Boundary_simplex_iterator(this));
   }
@@ -328,11 +298,10 @@ class Simplex_tree {
   Simplex_tree(const Simplex_tree& simplex_source)
       : null_vertex_(simplex_source.null_vertex_),
       threshold_(simplex_source.threshold_),
+      root_(nullptr, null_vertex_ , simplex_source.root_.members_),
       filtration_vect_(),
       dimension_(simplex_source.dimension_) {
     auto root_source = simplex_source.root_;
-    auto memb_source = root_source.members();
-    root_ = Siblings(nullptr, null_vertex_, memb_source);
     rec_copy(&root_, &root_source);
   }
 
@@ -344,7 +313,7 @@ class Simplex_tree {
         Siblings * newsib = new Siblings(sib, sh_source->first);
         newsib->members_.reserve(sh_source->second.children()->members().size());
         for (auto & child : sh_source->second.children()->members())
-          newsib->members_.emplace_hint(newsib->members_.end(), child.first, Node(sib, child.second.filtration()));
+          newsib->members_.emplace_hint(newsib->members_.end(), child.first, Node(newsib, child.second.filtration()));
         rec_copy(newsib, sh_source->second.children());
         sh->second.assign_children(newsib);
       }
@@ -449,6 +418,15 @@ class Simplex_tree {
     }
   }
 
+  /** \brief Sets the filtration value of a simplex.
+   * \exception std::invalid_argument In debug mode, if sh is a null_simplex.
+   */
+  void assign_filtration(Simplex_handle sh, Filtration_value fv) {
+    GUDHI_CHECK(sh != null_simplex(),
+                std::invalid_argument("Simplex_tree::assign_filtration - cannot assign filtration on null_simplex"));
+    sh->second.assign_filtration(fv);
+  }
+
   /** \brief Returns an upper bound of the filtration values of the simplices. */
   Filtration_value filtration() const {
     return threshold_;
@@ -518,9 +496,10 @@ class Simplex_tree {
     return dimension_;
   }
 
-  /** \brief Returns true iff the node in the simplex tree pointed by
+  /** \brief Returns true if the node in the simplex tree pointed by
    * sh has children.*/
-  bool has_children(Simplex_handle sh) const {
+  template<class SimplexHandle>
+  bool has_children(SimplexHandle sh) const {
     return (sh->second.children()->parent() == sh->first);
   }
 
@@ -531,7 +510,7 @@ class Simplex_tree {
    * The type InputVertexRange must be a range of <CODE>Vertex_handle</CODE>
    * on which we can call std::begin() function
    */
-  template<class InputVertexRange>
+  template<class InputVertexRange = std::initializer_list<Vertex_handle>>
   Simplex_handle find(const InputVertexRange & s) {
     auto first = std::begin(s);
     auto last = std::end(s);
@@ -567,13 +546,38 @@ class Simplex_tree {
   /** \brief Returns the Simplex_handle corresponding to the 0-simplex
    * representing the vertex with Vertex_handle v. */
   Simplex_handle find_vertex(Vertex_handle v) {
-    return root_.members_.begin() + v;
+    if (Options::contiguous_vertices) {
+      assert(contiguous_vertices());
+      return root_.members_.begin() + v;
+    } else {
+      return root_.members_.find(v);
+    }
   }
-  //{ return root_.members_.find(v); }
+
+ public:
+  /** \private \brief Test if the vertices have contiguous numbering: 0, 1, etc.  */
+  bool contiguous_vertices() const {
+    if (root_.members_.empty()) return true;
+    if (root_.members_.begin()->first != 0) return false;
+    if (std::prev(root_.members_.end())->first != static_cast<Vertex_handle>(root_.members_.size() - 1)) return false;
+    return true;
+  }
 
  private:
   /** \brief Inserts a simplex represented by a vector of vertex.
-   \warning the vector must be sorted by increasing vertex handle order */
+   * @param[in]  simplex    vector of Vertex_handles, representing the vertices of the new simplex. The vector must be
+   * sorted by increasing vertex handle order.
+   * @param[in]  filtration the filtration value assigned to the new simplex.
+   * @return If the new simplex is inserted successfully (i.e. it was not in the
+   * simplicial complex yet) the bool is set to true and the Simplex_handle is the handle assigned
+   * to the new simplex.
+   * If the insertion fails (the simplex is already there), the bool is set to false. If the insertion
+   * fails and the simplex already in the complex has a filtration value strictly bigger than 'filtration',
+   * we assign this simplex with the new value 'filtration', and set the Simplex_handle field of the
+   * output pair to the Simplex_handle of the simplex. Otherwise, we set the Simplex_handle part to
+   * null_simplex.
+   * 
+  */
   std::pair<Simplex_handle, bool> insert_vertex_vector(const std::vector<Vertex_handle>& simplex,
                                                      Filtration_value filtration) {
     Siblings * curr_sib = &root_;
@@ -606,7 +610,7 @@ class Simplex_tree {
    *
    * @param[in]  simplex    range of Vertex_handles, representing the vertices of the new simplex
    * @param[in]  filtration the filtration value assigned to the new simplex.
-   * The return type is a pair. If the new simplex is inserted successfully (i.e. it was not in the
+   * @return If the new simplex is inserted successfully (i.e. it was not in the
    * simplicial complex yet) the bool is set to true and the Simplex_handle is the handle assigned
    * to the new simplex.
    * If the insertion fails (the simplex is already there), the bool is set to false. If the insertion
@@ -625,7 +629,7 @@ class Simplex_tree {
    *
    * The type InputVertexRange must be a range for which .begin() and
    * .end() return input iterators, with 'value_type' Vertex_handle. */
-  template<class InputVertexRange>
+  template<class InputVertexRange = std::initializer_list<Vertex_handle>>
   std::pair<Simplex_handle, bool> insert_simplex(const InputVertexRange & simplex,
                                                  Filtration_value filtration = 0) {
     auto first = std::begin(simplex);
@@ -645,7 +649,7 @@ class Simplex_tree {
    *
    * @param[in]  Nsimplex   range of Vertex_handles, representing the vertices of the new N-simplex
    * @param[in]  filtration the filtration value assigned to the new N-simplex.
-   * The return type is a pair. If the new simplex is inserted successfully (i.e. it was not in the
+   * @return If the new simplex is inserted successfully (i.e. it was not in the
    * simplicial complex yet) the bool is set to true and the Simplex_handle is the handle assigned
    * to the new simplex.
    * If the insertion fails (the simplex is already there), the bool is set to false. If the insertion
@@ -654,7 +658,7 @@ class Simplex_tree {
    * output pair to the Simplex_handle of the simplex. Otherwise, we set the Simplex_handle part to
    * null_simplex.
    */
-  template<class InputVertexRange>
+  template<class InputVertexRange = std::initializer_list<Vertex_handle>>
   std::pair<Simplex_handle, bool> insert_simplex_and_subfaces(const InputVertexRange& Nsimplex,
                                    Filtration_value filtration = 0) {
     auto first = std::begin(Nsimplex);
@@ -708,7 +712,7 @@ class Simplex_tree {
     } else if (the_simplex.size() == 1) {
       // When reaching the end of recursivity, vector of simplices shall be empty and filled on back recursive
       if ((to_be_inserted.size() != 0) || (to_be_propagated.size() != 0)) {
-        std::cerr << "Simplex_tree::rec_insert_simplex_and_subfaces - Error vector not empty" << std::endl;
+        std::cerr << "Simplex_tree::rec_insert_simplex_and_subfaces - Error vector not empty\n";
         exit(-1);
       }
       std::vector<Vertex_handle> first_simplex(1, the_simplex.back());
@@ -717,7 +721,7 @@ class Simplex_tree {
 
       insert_result = insert_vertex_vector(first_simplex, filtration);
     } else {
-        std::cerr << "Simplex_tree::rec_insert_simplex_and_subfaces - Recursivity error" << std::endl;
+        std::cerr << "Simplex_tree::rec_insert_simplex_and_subfaces - Recursivity error\n";
         exit(-1);
     }
     return insert_result;
@@ -730,7 +734,6 @@ class Simplex_tree {
     sh->second.assign_key(key);
   }
 
- public:
   /** Returns the two Simplex_handle corresponding to the endpoints of
    * and edge. sh must point to a 1-dimensional simplex. This is an
    * optimized version of the boundary computation. */
@@ -740,7 +743,8 @@ class Simplex_tree {
   }
 
   /** Returns the Siblings containing a simplex.*/
-  Siblings * self_siblings(Simplex_handle sh) {
+  template<class SimplexHandle>
+  Siblings* self_siblings(SimplexHandle sh) {
     if (sh->second.children()->parent() == sh->first)
       return sh->second.children()->oncles();
     else
@@ -788,8 +792,11 @@ class Simplex_tree {
      * heuristic consists in inserting the cofaces of a simplex as soon as
      * possible.
      */
-    std::stable_sort(filtration_vect_.begin(), filtration_vect_.end(),
-                     is_before_in_filtration(this));
+#ifdef GUDHI_USE_TBB
+    tbb::parallel_sort(filtration_vect_.begin(), filtration_vect_.end(), is_before_in_filtration(this));
+#else
+    std::stable_sort(filtration_vect_.begin(), filtration_vect_.end(), is_before_in_filtration(this));
+#endif
   }
 
  private:
@@ -915,7 +922,7 @@ class Simplex_tree {
     bool operator()(const Simplex_handle sh1, const Simplex_handle sh2) const {
       // Not using st_->filtration(sh1) because it uselessly tests for null_simplex.
       if (sh1->second.filtration() != sh2->second.filtration()) {
-	return sh1->second.filtration() < sh2->second.filtration();
+        return sh1->second.filtration() < sh2->second.filtration();
       }
       // is sh1 a proper subface of sh2
       return st_->reverse_lexicographic_order(sh1, sh2);
@@ -1092,6 +1099,120 @@ class Simplex_tree {
     }
   }
 
+ public:
+  /** \brief Browse the simplex tree to ensure the filtration is not decreasing.
+   * The simplex tree is browsed starting from the root until the leaf, and the filtration values are set with their
+   * parent value (increased), in case the values are decreasing.
+   * @return The filtration modification information.
+   * \post Some simplex tree functions require the filtration to be valid. `make_filtration_non_decreasing()`
+   * function is not launching `initialize_filtration()` but returns the filtration modification information. If the
+   * complex has changed , please call `initialize_filtration()` to recompute it.
+   */
+  bool make_filtration_non_decreasing() {
+    bool modified = false;
+    // Loop must be from the end to the beginning, as higher dimension simplex are always on the left part of the tree
+    for (auto& simplex : boost::adaptors::reverse(root_.members())) {
+      if (has_children(&simplex)) {
+        modified |= rec_make_filtration_non_decreasing(simplex.second.children());
+      }
+    }
+    return modified;
+  }
+
+ private:
+  /** \brief Recursively Browse the simplex tree to ensure the filtration is not decreasing.
+   * @param[in] sib Siblings to be parsed.
+   * @return The filtration modification information in order to trigger initialize_filtration.
+   */
+  bool rec_make_filtration_non_decreasing(Siblings * sib) {
+    bool modified = false;
+
+    // Loop must be from the end to the beginning, as higher dimension simplex are always on the left part of the tree
+    for (auto& simplex : boost::adaptors::reverse(sib->members())) {
+      // Find the maximum filtration value in the border
+      Boundary_simplex_range boundary = boundary_simplex_range(&simplex);
+      Boundary_simplex_iterator max_border = std::max_element(std::begin(boundary), std::end(boundary),
+                                                              [](Simplex_handle sh1, Simplex_handle sh2) {
+                                                                return filtration(sh1) < filtration(sh2);
+                                                              });
+
+      Filtration_value max_filt_border_value = filtration(*max_border);
+      if (simplex.second.filtration() < max_filt_border_value) {
+        // Store the filtration modification information
+        modified = true;
+        simplex.second.assign_filtration(max_filt_border_value);
+      }
+      if (has_children(&simplex)) {
+        modified |= rec_make_filtration_non_decreasing(simplex.second.children());
+      }
+    }
+    // Make the modified information to be traced by upper call
+    return modified;
+  }
+
+ public:
+  /** \brief Prune above filtration value given as parameter.
+   * @param[in] filtration Maximum threshold value.
+   * @return The filtration modification information.
+   * \post Some simplex tree functions require the filtration to be valid. `prune_above_filtration()`
+   * function is not launching `initialize_filtration()` but returns the filtration modification information. If the
+   * complex has changed , please call `initialize_filtration()` to recompute it.
+   */
+  bool prune_above_filtration(Filtration_value filtration) {
+    return rec_prune_above_filtration(root(), filtration);
+  }
+
+ private:
+  bool rec_prune_above_filtration(Siblings* sib, Filtration_value filt) {
+    auto&& list = sib->members();
+    auto last = std::remove_if(list.begin(), list.end(), [=](Dit_value_t& simplex) {
+        if (simplex.second.filtration() <= filt) return false;
+        if (has_children(&simplex)) rec_delete(simplex.second.children());
+        return true;
+      });
+
+    bool modified = (last != list.end());
+    if (last == list.begin() && sib != root()) {
+      // Removing the whole siblings, parent becomes a leaf.
+      sib->oncles()->members()[sib->parent()].assign_children(sib->oncles());
+      delete sib;
+      return true;
+    } else {
+      // Keeping some elements of siblings. Remove the others, and recurse in the remaining ones.
+      list.erase(last, list.end());
+      for (auto&& simplex : list)
+        if (has_children(&simplex))
+          modified |= rec_prune_above_filtration(simplex.second.children(), filt);
+    }
+    return modified;
+  }
+
+ public:
+  /** \brief Remove a maximal simplex.
+   * @param[in] sh Simplex handle on the maximal simplex to remove.
+   * \pre Please check the simplex has no coface before removing it.
+   * \exception std::invalid_argument In debug mode, if sh has children.
+   * \post Be aware that removing is shifting data in a flat_map (initialize_filtration to be done).
+   */
+  void remove_maximal_simplex(Simplex_handle sh) {
+    // Guarantee the simplex has no children
+    GUDHI_CHECK(!has_children(sh),
+                std::invalid_argument("Simplex_tree::remove_maximal_simplex - argument has children"));
+
+    // Simplex is a leaf, it means the child is the Siblings owning the leaf
+    Siblings* child = sh->second.children();
+
+    if ((child->size() > 1) || (child == root())) {
+      // Not alone, just remove it from members
+      // Special case when child is the root of the simplex tree, just remove it from members
+      child->erase(sh);
+    } else {
+      // Sibling is emptied : must be deleted, and its parent must point on his own Sibling
+      child->oncles()->members().at(child->parent()).assign_children(child->oncles());
+      delete child;
+    }
+  }
+
  private:
   Vertex_handle null_vertex_;
   /** \brief Upper bound on the filtration values of the simplices.*/
@@ -1106,7 +1227,6 @@ class Simplex_tree {
 };
 
 // Print a Simplex_tree in os.
-
 template<typename...T>
 std::ostream& operator<<(std::ostream & os, Simplex_tree<T...> & st) {
   for (auto sh : st.filtration_simplex_range()) {
@@ -1145,6 +1265,37 @@ std::istream& operator>>(std::istream & is, Simplex_tree<T...> & st) {
 
   return is;
 }
+
+/** Model of SimplexTreeOptions.
+ * 
+ * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
+ * (about 4 billions of simplices). */
+struct Simplex_tree_options_full_featured {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::uint32_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = false;
+};
+
+/** Model of SimplexTreeOptions, faster than `Simplex_tree_options_full_featured` but note the unsafe
+ * `contiguous_vertices` option.
+ * 
+ * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
+ * (about 4 billions of simplices). */
+
+struct Simplex_tree_options_fast_persistence {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef float Filtration_value;
+  typedef std::uint32_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = true;
+};
+
 /** @} */  // end defgroup simplex_tree
 
 }  // namespace Gudhi

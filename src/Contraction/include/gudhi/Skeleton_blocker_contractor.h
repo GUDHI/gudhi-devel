@@ -37,7 +37,7 @@
 #include <gudhi/Contraction/policies/Contraction_visitor.h>
 
 #include <gudhi/Skeleton_blocker/Skeleton_blocker_complex_visitor.h>
-#include <gudhi/Utils.h>
+#include <gudhi/Debug_utils.h>
 
 
 #include <boost/scoped_array.hpp>
@@ -100,20 +100,15 @@ Contraction_visitor<Profile>* make_remove_popable_blockers_visitor() {
  *
  */
 template<class GeometricSimplifiableComplex, class EdgeProfile = Edge_profile<GeometricSimplifiableComplex>>
-class Skeleton_blocker_contractor : private skbl::Dummy_complex_visitor<
+class Skeleton_blocker_contractor : private skeleton_blocker::Dummy_complex_visitor<
 typename GeometricSimplifiableComplex::Vertex_handle> {
   GeometricSimplifiableComplex& complex_;
 
  public:
   typedef typename GeometricSimplifiableComplex::Graph_vertex Graph_vertex;
   typedef typename GeometricSimplifiableComplex::Vertex_handle Vertex_handle;
-  typedef typename GeometricSimplifiableComplex::Simplex_handle Simplex_handle;
-  typedef typename GeometricSimplifiableComplex::Simplex_handle_iterator Simplex_handle_iterator;
-
-
-
+  typedef typename GeometricSimplifiableComplex::Simplex Simplex;
   typedef typename GeometricSimplifiableComplex::Root_vertex_handle Root_vertex_handle;
-
   typedef typename GeometricSimplifiableComplex::Graph_edge Graph_edge;
   typedef typename GeometricSimplifiableComplex::Edge_handle Edge_handle;
   typedef typename GeometricSimplifiableComplex::Point Point;
@@ -535,14 +530,14 @@ typename GeometricSimplifiableComplex::Vertex_handle> {
    * All the edges that passes through the blocker may be edge-contractible
    * again and are thus reinserted in the heap.
    */
-  void on_delete_blocker(const Simplex_handle * blocker) override {
+  void on_delete_blocker(const Simplex * blocker) override {
     // we go for all pairs xy that belongs to the blocker
     // note that such pairs xy are necessarily edges of the complex
     // by definition of a blocker
 
     // todo uniqument utile pour la link condition
     // laisser a l'utilisateur ? booleen update_heap_on_removed_blocker?
-    Simplex_handle blocker_copy(*blocker);
+    Simplex blocker_copy(*blocker);
     for (auto x = blocker_copy.begin(); x != blocker_copy.end(); ++x) {
       for (auto y = x; ++y != blocker_copy.end();) {
         auto edge_descr(complex_[std::make_pair(*x, *y)]);

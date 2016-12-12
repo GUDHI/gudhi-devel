@@ -57,7 +57,7 @@ class Simplex_tree_siblings {
 
   /* Default constructor.*/
   Simplex_tree_siblings()
-      : oncles_(NULL),
+      : oncles_(nullptr),
         parent_(-1),
         members_() {
   }
@@ -114,6 +114,10 @@ class Simplex_tree_siblings {
 
   size_t size() const {
     return members_.size();
+  }
+
+  void erase(const Dictionary_it iterator) {
+    members_.erase(iterator);
   }
 
   Simplex_tree_siblings * oncles_;
