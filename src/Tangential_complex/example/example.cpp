@@ -43,7 +43,9 @@ int main(void) {
 
   // Export the TC into a Simplex_tree
   Gudhi::Simplex_tree<> stree;
-  tc.create_complex(stree);
+  int max_dim = tc.create_complex(stree);
+  stree.set_dimension(max_dim);
+  stree.initialize_filtration();
 
   std::cout << "********************************************************************\n";
   std::cout << "* The complex contains " << stree.num_simplices() << " simplices";
@@ -60,7 +62,9 @@ int main(void) {
   tc.fix_inconsistencies_using_perturbation(0.01, 30.0);
 
   // Export the TC into a Simplex_tree
-  tc.create_complex(stree);
+  max_dim = tc.create_complex(stree);
+  stree.set_dimension(max_dim);
+  stree.initialize_filtration();
 
   std::cout << "********************************************************************\n";
   std::cout << "* The complex contains " << stree.num_simplices() << " simplices\n";
