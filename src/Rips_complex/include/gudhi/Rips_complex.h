@@ -73,7 +73,8 @@ class Rips_complex {
    * The type InputPointRange must be a range for which std::begin and std::end return input iterators on a point.
    */
   template<typename InputPointRange, typename Distance >
-  Rips_complex(const InputPointRange& points, Filtration_value threshold, Distance distance) {
+  Rips_complex(const InputPointRange& points, Filtration_value threshold, Distance distance)
+    : rips_skeleton_graph_(nullptr) {
     compute_proximity_graph<InputPointRange, Distance >(points, threshold, distance);
   }
 
@@ -82,10 +83,13 @@ class Rips_complex {
    * @param[in] distance_matrix Range of distances.
    * @param[in] threshold rips value.
    * 
-   * The type InputDistanceRange must be a range for which std::begin and std::end return input iterators on a point.
+   * The type InputDistanceRange must have a \code size() \endcode method and on which distance_matrix[i][j] returns
+   * the distance between points \f$i\f$ and \f$j\f$ as long as \f$ 0 \subseteq i \subseteq j \subseteq
+   * distance_matrix.size().\f$
    */
   template<typename InputDistanceRange>
-  Rips_complex(const InputDistanceRange& distance_matrix, Filtration_value threshold) {
+  Rips_complex(const InputDistanceRange& distance_matrix, Filtration_value threshold)
+    : rips_skeleton_graph_(nullptr) {
     compute_proximity_graph(boost::irange((size_t)0, distance_matrix.size()), threshold,
                             [&](size_t i, size_t j){return distance_matrix[j][i];});
   }
@@ -107,9 +111,13 @@ class Rips_complex {
       std::cerr << "Rips_complex create_complex - complex is not empty\n";
       return false;  // ----- >>
     }
+    if (rips_skeleton_graph_ == nullptr) {
+      std::cerr << "Rips Skeleton Graph is not defined\n";
+      return false;  // ----- >>
+    }
 
     // insert the proximity graph in the simplicial complex
-    complex.insert_graph(rips_skeleton_graph_);
+    complex.insert_graph(*rips_skeleton_graph_);
     // expand the graph until dimension dim_max
     complex.expansion(dim_max);
 
@@ -153,20 +161,20 @@ class Rips_complex {
     // --------------------------------------------------------------------------------------------
     // Creates the proximity graph from edges and sets the property with the filtration value.
     // Number of points is labeled from 0 to idx_u-1
-    rips_skeleton_graph_ = Graph_t(edges.begin(), edges.end(), edges_fil.begin(), idx_u);
+    rips_skeleton_graph_ = new Graph_t(edges.begin(), edges.end(), edges_fil.begin(), idx_u);
 
-    auto vertex_prop = boost::get(vertex_filtration_t(), rips_skeleton_graph_);
+    auto vertex_prop = boost::get(vertex_filtration_t(), *rips_skeleton_graph_);
 
     using vertex_iterator = typename boost::graph_traits<Graph_t>::vertex_iterator;
     vertex_iterator vi, vi_end;
-    for (std::tie(vi, vi_end) = boost::vertices(rips_skeleton_graph_);
+    for (std::tie(vi, vi_end) = boost::vertices(*rips_skeleton_graph_);
          vi != vi_end; ++vi) {
       boost::put(vertex_prop, *vi, 0.);
     }
   }
 
  private:
-  Graph_t rips_skeleton_graph_;
+  Graph_t* rips_skeleton_graph_;
 };
 
 }  // namespace rips_complex
