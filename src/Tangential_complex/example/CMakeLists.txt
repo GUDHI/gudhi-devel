@@ -8,9 +8,12 @@ if(CGAL_FOUND)
       target_link_libraries(Tangential_complex_example_basic ${CGAL_LIBRARY} ${Boost_DATE_TIME_LIBRARY})
       add_executable( Tangential_complex_example_with_perturb example_with_perturb.cpp )
       target_link_libraries(Tangential_complex_example_with_perturb ${CGAL_LIBRARY} ${Boost_DATE_TIME_LIBRARY})
+      add_executable( example example.cpp )
+      target_link_libraries(example ${CGAL_LIBRARY} ${Boost_DATE_TIME_LIBRARY})
       if (TBB_FOUND)
         target_link_libraries(Tangential_complex_example_basic ${TBB_LIBRARIES})
         target_link_libraries(Tangential_complex_example_with_perturb ${TBB_LIBRARIES})
+        target_link_libraries(example ${TBB_LIBRARIES})
       endif(TBB_FOUND)
 
       add_test(Tangential_complex_example_basic
