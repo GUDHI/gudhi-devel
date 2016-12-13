@@ -331,7 +331,8 @@ public:
     /**
      * Binary (arythmetic) operation on two Persistence_heat_maps.
     **/     
-    friend Persistence_heat_maps operation_on_pair_of_heat_maps( const Persistence_heat_maps& first ,  const Persistence_heat_maps& second , double (*opertion)( double,double ) )
+    template<typename Operation_type>
+    friend Persistence_heat_maps operation_on_pair_of_heat_maps( const Persistence_heat_maps& first ,  const Persistence_heat_maps& second , Operation_type operation )
     {
 		//first check if the heat maps are compatible 
 		if ( !first.check_if_the_same( second ) )
@@ -349,7 +350,7 @@ public:
 			v.reserve( first.heat_map[i].size() );
 			for ( size_t j = 0 ; j != first.heat_map[i].size() ; ++j )
 			{
-				v.push_back( opertion( first.heat_map[i][j] , second.heat_map[i][j] ) );
+				v.push_back( operation( first.heat_map[i][j] , second.heat_map[i][j] ) );
 			}
 			result.heat_map.push_back( v );
 		}
@@ -384,14 +385,14 @@ public:
     **/    
     friend Persistence_heat_maps operator+( const Persistence_heat_maps& first , const Persistence_heat_maps& second )
     {
-		return operation_on_pair_of_heat_maps( first , second , plus_ );
+		return operation_on_pair_of_heat_maps( first , second , std::plus<double>() );
 	}	
 	/**
      * This function computes a difference of two objects of a type Persistence_heat_maps.
     **/
     friend Persistence_heat_maps operator-( const Persistence_heat_maps& first , const Persistence_heat_maps& second )
     {
-		return operation_on_pair_of_heat_maps( first , second , minus_ );
+		return operation_on_pair_of_heat_maps( first , second , std::minus<double>() );
 	}
 	/**
      * This function computes a product of an object of a type Persistence_heat_maps with real number.
