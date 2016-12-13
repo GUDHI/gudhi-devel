@@ -41,6 +41,9 @@ int main(void) {
   std::cout << "TC vertices = " << tc.number_of_vertices() << " - simplices = " << num_inc.num_simplices <<
                " - inconsistencies = " << num_inc.num_inconsistent_simplices << std::endl;
 
+  std::cout << "TC point[0] " << tc.get_point(0) << " - point[1]  " << tc.get_point(1) <<
+               " - point[2] " << tc.get_point(2) << " - point[3]  " << tc.get_point(3) << std::endl;
+
   // Export the TC into a Simplex_tree
   Gudhi::Simplex_tree<> stree;
   int max_dim = tc.create_complex(stree);
@@ -67,7 +70,7 @@ int main(void) {
   stree.initialize_filtration();
 
   std::cout << "********************************************************************\n";
-  std::cout << "* The complex contains " << stree.num_simplices() << " simplices\n";
+  std::cout << "* The complex contains " << stree.num_simplices() << " simplices";
   std::cout << "   - dimension " << stree.dimension() << "   - filtration " << stree.filtration() << "\n";
   std::cout << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
   for (auto f_simplex : stree.filtration_simplex_range()) {
