@@ -52,6 +52,7 @@ namespace subsampling {
  *          concept <a target="_blank"
  *   href="http://doc.cgal.org/latest/Kernel_d/classKernel__d_1_1Squared__distance__d.html">Kernel_d::Squared_distance_d</a>
  *   concept.
+ *  It must also contain a public member 'squared_distance_d_object' of this type.
  *  \tparam Point_range Range whose value type is Kernel::Point_d.  It must provide random-access 
  *         via `operator[]` and the points should be stored contiguously in memory.
  *  \tparam OutputIterator Output iterator whose value type is Kernel::Point_d.
@@ -112,6 +113,7 @@ void choose_n_farthest_points(Kernel const &k,
  *          concept <a target="_blank"
  *   href="http://doc.cgal.org/latest/Kernel_d/classKernel__d_1_1Squared__distance__d.html">Kernel_d::Squared_distance_d</a>
  *   concept.
+ *  It must also contain a public member 'squared_distance_d_object' of this type.
  *  \tparam Point_range Range whose value type is Kernel::Point_d.  It must provide random-access 
  *         via `operator[]` and the points should be stored contiguously in memory.
  *  \tparam OutputIterator Output iterator whose value type is Kernel::Point_d.
@@ -133,7 +135,7 @@ void choose_n_farthest_points(Kernel const& k,
   // Choose randomly the first landmark
   std::random_device rd;
   std::mt19937 gen(rd());
-  std::uniform_int_distribution<> dis(1, 6);
+  std::uniform_int_distribution<> dis(0, final_size);
   int starting_point = dis(gen);
   choose_n_farthest_points(k, input_pts, final_size, starting_point, output_it);
 }
