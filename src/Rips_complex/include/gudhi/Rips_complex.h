@@ -73,8 +73,7 @@ class Rips_complex {
    * The type InputPointRange must be a range for which std::begin and std::end return input iterators on a point.
    */
   template<typename InputPointRange, typename Distance >
-  Rips_complex(const InputPointRange& points, Filtration_value threshold, Distance distance)
-    : rips_skeleton_graph_(nullptr) {
+  Rips_complex(const InputPointRange& points, Filtration_value threshold, Distance distance) {
     compute_proximity_graph<InputPointRange, Distance >(points, threshold, distance);
   }
 
@@ -88,8 +87,7 @@ class Rips_complex {
    * distance_matrix.size().\f$
    */
   template<typename InputDistanceRange>
-  Rips_complex(const InputDistanceRange& distance_matrix, Filtration_value threshold)
-    : rips_skeleton_graph_(nullptr) {
+  Rips_complex(const InputDistanceRange& distance_matrix, Filtration_value threshold) {
     compute_proximity_graph(boost::irange((size_t)0, distance_matrix.size()), threshold,
                             [&](size_t i, size_t j){return distance_matrix[j][i];});
   }
@@ -101,28 +99,18 @@ class Rips_complex {
    * 
    * @param[in] complex SimplicialComplexForRips to be created.
    * @param[in] dim_max graph expansion for rips until this given maximal dimension.
-   * 
-   * @return true if creation succeeds, false otherwise.
-   * 
+   * @exception std::invalid_argument In debug mode, if \code complex.num_vertices() \endcode does not return 0.
+   *
    */
   template <typename SimplicialComplexForRips>
-  bool create_complex(SimplicialComplexForRips& complex, int dim_max) {
-    if (complex.num_vertices() > 0) {
-      std::cerr << "Rips_complex create_complex - complex is not empty\n";
-      return false;  // ----- >>
-    }
-    if (rips_skeleton_graph_ == nullptr) {
-      std::cerr << "Rips Skeleton Graph is not defined\n";
-      return false;  // ----- >>
-    }
+  void create_complex(SimplicialComplexForRips& complex, int dim_max) {
+    GUDHI_CHECK(complex.num_vertices() == 0,
+                std::invalid_argument("Rips_complex::create_complex - simplicial complex is not empty"));
 
     // insert the proximity graph in the simplicial complex
-    complex.insert_graph(*rips_skeleton_graph_);
+    complex.insert_graph(rips_skeleton_graph_);
     // expand the graph until dimension dim_max
     complex.expansion(dim_max);
-
-    // --------------------------------------------------------------------------------------------
-    return true;
   }
 
  private:
@@ -161,20 +149,23 @@ class Rips_complex {
     // --------------------------------------------------------------------------------------------
     // Creates the proximity graph from edges and sets the property with the filtration value.
     // Number of points is labeled from 0 to idx_u-1
-    rips_skeleton_graph_ = new Graph_t(edges.begin(), edges.end(), edges_fil.begin(), idx_u);
+    // --------------------------------------------------------------------------------------------
+    // Do not use : rips_skeleton_graph_ = Graph_t(...) -> deep copy of the graph (boost graph is not move-enabled)
+    rips_skeleton_graph_.~Graph_t();
+    new(&rips_skeleton_graph_)Graph_t(edges.begin(), edges.end(), edges_fil.begin(), idx_u);
 
-    auto vertex_prop = boost::get(vertex_filtration_t(), *rips_skeleton_graph_);
+    auto vertex_prop = boost::get(vertex_filtration_t(), rips_skeleton_graph_);
 
     using vertex_iterator = typename boost::graph_traits<Graph_t>::vertex_iterator;
     vertex_iterator vi, vi_end;
-    for (std::tie(vi, vi_end) = boost::vertices(*rips_skeleton_graph_);
+    for (std::tie(vi, vi_end) = boost::vertices(rips_skeleton_graph_);
          vi != vi_end; ++vi) {
       boost::put(vertex_prop, *vi, 0.);
     }
   }
 
  private:
-  Graph_t* rips_skeleton_graph_;
+  Graph_t rips_skeleton_graph_;
 };
 
 }  // namespace rips_complex

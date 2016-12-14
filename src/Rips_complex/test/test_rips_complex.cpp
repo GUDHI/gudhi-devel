@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(RIPS_DOC_OFF_file) {
 
   const int DIMENSION_1 = 1;
   Simplex_tree st;
-  BOOST_CHECK(rips_complex_from_file.create_complex(st, DIMENSION_1));
+  rips_complex_from_file.create_complex(st, DIMENSION_1);
   std::cout << "st.dimension()=" << st.dimension() << std::endl;
   BOOST_CHECK(st.dimension() == DIMENSION_1);
 
@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(RIPS_DOC_OFF_file) {
 
   const int DIMENSION_2 = 2;
   Simplex_tree st2;
-  BOOST_CHECK(rips_complex_from_file.create_complex(st2, DIMENSION_2));
+  rips_complex_from_file.create_complex(st2, DIMENSION_2);
   std::cout << "st2.dimension()=" << st2.dimension() << std::endl;
   BOOST_CHECK(st2.dimension() == DIMENSION_2);
   
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(RIPS_DOC_OFF_file) {
 
   const int DIMENSION_3 = 3;
   Simplex_tree st3;
-  BOOST_CHECK(rips_complex_from_file.create_complex(st3, DIMENSION_3));
+  rips_complex_from_file.create_complex(st3, DIMENSION_3);
   std::cout << "st3.dimension()=" << st3.dimension() << std::endl;
   BOOST_CHECK(st3.dimension() == DIMENSION_3);
   
@@ -192,7 +192,7 @@ BOOST_AUTO_TEST_CASE(Rips_complex_from_points) {
   std::cout << "========== Rips_complex_from_points ==========" << std::endl;
   Simplex_tree st;
   const int DIMENSION = 3;
-  BOOST_CHECK(rips_complex_from_points.create_complex(st, DIMENSION));
+  rips_complex_from_points.create_complex(st, DIMENSION);
 
   // Another way to check num_simplices
   std::cout << "Iterator on rips complex simplices in the filtration order, with [filtration value]:" << std::endl;
@@ -249,7 +249,7 @@ BOOST_AUTO_TEST_CASE(Rips_doc_csv_file) {
 
   const int DIMENSION_1 = 1;
   Simplex_tree st;
-  BOOST_CHECK(rips_complex_from_file.create_complex(st, DIMENSION_1));
+  rips_complex_from_file.create_complex(st, DIMENSION_1);
   std::cout << "st.dimension()=" << st.dimension() << std::endl;
   BOOST_CHECK(st.dimension() == DIMENSION_1);
 
@@ -282,7 +282,7 @@ BOOST_AUTO_TEST_CASE(Rips_doc_csv_file) {
 
   const int DIMENSION_2 = 2;
   Simplex_tree st2;
-  BOOST_CHECK(rips_complex_from_file.create_complex(st2, DIMENSION_2));
+  rips_complex_from_file.create_complex(st2, DIMENSION_2);
   std::cout << "st2.dimension()=" << st2.dimension() << std::endl;
   BOOST_CHECK(st2.dimension() == DIMENSION_2);
   
@@ -308,7 +308,7 @@ BOOST_AUTO_TEST_CASE(Rips_doc_csv_file) {
 
   const int DIMENSION_3 = 3;
   Simplex_tree st3;
-  BOOST_CHECK(rips_complex_from_file.create_complex(st3, DIMENSION_3));
+  rips_complex_from_file.create_complex(st3, DIMENSION_3);
   std::cout << "st3.dimension()=" << st3.dimension() << std::endl;
   BOOST_CHECK(st3.dimension() == DIMENSION_3);
   
@@ -327,3 +327,27 @@ BOOST_AUTO_TEST_CASE(Rips_doc_csv_file) {
   BOOST_CHECK(are_almost_the_same(f0123, std::max(f012, std::max(f123, std::max(f013, f023)))));
 
 }
+
+#ifdef GUDHI_DEBUG
+BOOST_AUTO_TEST_CASE(Rips_create_complex_throw) {
+  // ----------------------------------------------------------------------------
+  //
+  // Init of a rips complex from a OFF file
+  //
+  // ----------------------------------------------------------------------------
+  std::string off_file_name("alphacomplexdoc.off");
+  double rips_threshold = 12.0;
+  std::cout << "========== OFF FILE NAME = " << off_file_name << " - rips threshold=" <<
+      rips_threshold << "==========" << std::endl;
+
+  Gudhi::Points_off_reader<Point> off_reader(off_file_name);
+  Rips_complex rips_complex_from_file(off_reader.get_point_cloud(), rips_threshold, Euclidean_distance());
+
+  Simplex_tree stree;
+  std::vector<int> simplex = {0, 1, 2};
+  stree.insert_simplex_and_subfaces(simplex);
+  std::cout << "Check exception throw in debug mode" << std::endl;
+  // throw excpt because stree is not empty
+  BOOST_CHECK_THROW (rips_complex_from_file.create_complex(stree, 1), std::invalid_argument);
+}
+#endif
