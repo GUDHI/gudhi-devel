@@ -25,9 +25,9 @@ int main(void) {
   // [[0, 0], [1, 0], [0, 1], [1, 1]]
   std::vector<double> point = {0.0, 0.0};
   points.push_back(Point(point.size(), point.begin(), point.end()));
-  point = {1.0, 0.0};
+  point = {1.1, 0.0};
   points.push_back(Point(point.size(), point.begin(), point.end()));
-  point = {0.0, 1.0};
+  point = {0.2, 1.3};
   points.push_back(Point(point.size(), point.begin(), point.end()));
   point = {1.0, 1.0};
   points.push_back(Point(point.size(), point.begin(), point.end()));
