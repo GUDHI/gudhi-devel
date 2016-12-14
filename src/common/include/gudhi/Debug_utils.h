@@ -33,8 +33,10 @@
 // Could assert in release mode, but cmake sets NDEBUG (for "NO DEBUG") in this mode, means assert does nothing.
 #ifdef GUDHI_DEBUG
   #define GUDHI_CHECK(expression, excpt) if ((expression) == 0) throw excpt
+  #define GUDHI_CHECK_code(CODE) CODE
 #else
   #define GUDHI_CHECK(expression, excpt) (void) 0
+  #define GUDHI_CHECK_code(CODE)
 #endif
 
 #define PRINT(a) std::cerr << #a << ": " << (a) << " (DISP)" << std::endl

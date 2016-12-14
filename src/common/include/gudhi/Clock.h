@@ -27,47 +27,55 @@
 
 #include <string>
 
+namespace Gudhi {
+
 class Clock {
  public:
-  Clock() : end_called(false) {
-    startTime = boost::posix_time::microsec_clock::local_time();
-  }
+  // Construct and start the timer
+  Clock(const std::string& msg_ = std::string())
+      : startTime(boost::posix_time::microsec_clock::local_time()),
+      end_called(false),
+      msg(msg_) { }
 
-  Clock(const std::string& msg_) {
-    end_called = false;
-    begin();
-    msg = msg_;
-  }
-
+  // Restart the timer
   void begin() const {
     end_called = false;
     startTime = boost::posix_time::microsec_clock::local_time();
   }
 
+  // Stop the timer
   void end() const {
     end_called = true;
     endTime = boost::posix_time::microsec_clock::local_time();
   }
 
+  std::string message() const {
+    return msg;
+  }
+
+  // Print current value to std::cout
   void print() const {
     std::cout << *this << std::endl;
   }
 
   friend std::ostream& operator<<(std::ostream& stream, const Clock& clock) {
-    if (!clock.end_called)
-      clock.end();
+    if (!clock.msg.empty())
+      stream << clock.msg << ": ";
 
-    if (!clock.end_called) {
-      stream << "end not called";
-    } else {
-      stream << clock.msg << ":" << clock.num_seconds() << "s";
-    }
+    stream << clock.num_seconds() << "s";
     return stream;
   }
 
+  // Get the number of seconds between the timer start and:
+  // - the last call of end() if it was called
+  // - or now otherwise. In this case, the timer is not stopped.
   double num_seconds() const {
-    if (!end_called) return -1;
-    return (endTime - startTime).total_milliseconds() / 1000.;
+    if (!end_called) {
+      auto end = boost::posix_time::microsec_clock::local_time();
+      return (end - startTime).total_milliseconds() / 1000.;
+    } else {
+      return (endTime - startTime).total_milliseconds() / 1000.;
+    }
   }
 
  private:
@@ -76,4 +84,6 @@ class Clock {
   std::string msg;
 };
 
-#endif  // CLOCK_H_
+}  // namespace Gudhi
+
+#endif   // CLOCK_H_

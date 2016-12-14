@@ -187,7 +187,7 @@ class Model {
   }
 
   void contract_edges(unsigned num_contractions) {
-    Clock c;
+    Gudhi::Clock c;
     Edge_contractor<Complex> contractor(complex_, num_contractions);
     std::cout << "Time to simplify: " << c.num_seconds() << "s" << std::endl;
   }
@@ -248,7 +248,7 @@ class Model {
     unsigned num_simplices = 0;
     int euler = 0;
     int dimension = 0;
-    Clock clock;
+    Gudhi::Clock clock;
     for (const auto &s : complex_.complex_simplex_range()) {
       num_simplices++;
       dimension = (std::max)(s.dimension(), dimension);
@@ -271,7 +271,7 @@ class Model {
 #ifdef _WIN32
     std::cout << "Works only on linux x64 for the moment\n";
 #else
-    Clock clock;
+    Gudhi::Clock clock;
     run_chomp();
     clock.end();
 #endif
