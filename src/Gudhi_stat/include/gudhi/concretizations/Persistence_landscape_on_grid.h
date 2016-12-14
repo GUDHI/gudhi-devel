@@ -1096,10 +1096,10 @@ void Persistence_landscape_on_grid::set_up_values_of_landscapes( const std::vect
 		}  
 	}
 	
-	//and now we need to sort the valuesL
+	//and now we need to sort the values:
 	for ( size_t pt = 0 ; pt != this->values_of_landscapes.size() ; ++pt )
 	{
-		std::sort( this->values_of_landscapes[pt].begin() , this->values_of_landscapes[pt].end() , greater_landscapes_on_grid() );	
+		std::sort( this->values_of_landscapes[pt].begin() , this->values_of_landscapes[pt].end() , std::greater<double>() );	
 	}
 }//set_up_values_of_landscapes
 

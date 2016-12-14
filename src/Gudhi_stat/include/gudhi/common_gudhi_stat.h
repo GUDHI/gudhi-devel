@@ -34,8 +34,6 @@ namespace Gudhi_stat
 double epsi = 0.000005;
 
 
-double plus_( double a,double b ){return a+b;} 
-double minus_( double a,double b ){return a-b;}
 
 
 
@@ -105,7 +103,8 @@ double find_zero_of_a_line_segment_between_those_two_points ( std::pair<double,d
 
 //landscapes
 /**
- * Lexicographical ordering of points	.
+ * This method provides a comparision of points that is used in construction of persistence landscapes. The orderign is lexicographical for the first coordinate, and reverse-lexicographical for the 
+ * second coordinate. 
 **/
 bool compare_points_sorting( std::pair<double,double> f, std::pair<double,double> s )
 {
@@ -146,12 +145,7 @@ double function_value ( std::pair<double,double> p1, std::pair<double,double> p2
     return (a*x+b);
 }
 
-//landscapes on a grid
-struct greater_landscapes_on_grid
-{
-    template<class T>
-    bool operator()(T const &a, T const &b) const { return a > b; }
-};
+
 
 
 }//namespace Gudhi_stat
