@@ -1131,7 +1131,7 @@ class Tangential_complex {
 
         Tr_vertex_handle vh = triangulation.insert_if_in_star(proj_pt, center_vertex);
         // Tr_vertex_handle vh = triangulation.insert(proj_pt);
-        if (vh != Tr_vertex_handle()) {
+        if (vh != Tr_vertex_handle() && vh->data() == (std::numeric_limits<std::size_t>::max())) {
 #ifdef GUDHI_TC_VERY_VERBOSE
           ++num_inserted_points;
 #endif
@@ -1293,6 +1293,8 @@ class Tangential_complex {
         if (index != i)
           incident_simplex.insert(index);
       }
+      GUDHI_CHECK(incident_simplex.size() == cur_dim_plus_1 - 1,
+        std::logic_error("update_star: wrong size of incident simplex"));
       star.push_back(incident_simplex);
     }
   }
