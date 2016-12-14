@@ -39,7 +39,7 @@ int main(void) {
   tc.compute_tangential_complex();
   TC::Num_inconsistencies num_inc = tc.number_of_inconsistent_simplices();
   std::cout << "TC vertices = " << tc.number_of_vertices() << " - simplices = " << num_inc.num_simplices <<
-               " - inconsistencies = " << num_inc.num_inconsistent_simplices << std::endl;
+               " - inc simplices = " << num_inc.num_inconsistent_simplices << " - inc stars = " << num_inc.num_inconsistent_stars << std::endl;
 
   std::cout << "TC point[0] " << tc.get_point(0) << " - point[1]  " << tc.get_point(1) <<
                " - point[2] " << tc.get_point(2) << " - point[3]  " << tc.get_point(3) << std::endl;
