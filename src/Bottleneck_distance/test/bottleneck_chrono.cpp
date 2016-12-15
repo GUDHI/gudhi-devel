@@ -51,7 +51,6 @@ int main(){
         if(i%3==0)
             v2.emplace_back(std::max(a,b),std::max(a,b)+y);
     }
-    std::cout << std::numeric_limits<double>::max() / std::numeric_limits<double>::min() << std::endl;
     double epsilon = 0.0000000000000001;
     std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
     double b = bottleneck_distance(v1,v2, epsilon);

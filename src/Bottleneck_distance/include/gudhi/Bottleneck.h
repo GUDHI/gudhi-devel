@@ -49,7 +49,7 @@ double bottleneck_distance(const Persistence_diagram1 &diag1, const Persistence_
     double alpha = std::pow(g.size(), 1./5.);
     Graph_matching m(g);
     Graph_matching biggest_unperfect(g);
-    while (idmax - idmin > epsilon) {
+    while (idmin != idmax) {
         long step = static_cast<long>((idmax - idmin - 1)/alpha);
         m.set_r(e == 0. ?  sd.at(idmin + step) : e*(idmin + step));
         while (m.multi_augment());
