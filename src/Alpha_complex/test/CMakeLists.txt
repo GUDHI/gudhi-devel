@@ -10,8 +10,6 @@ if (GPROF_PATH)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
 endif()
 
-# need CGAL 4.7
-# cmake -DCGAL_DIR=~/workspace/CGAL-4.7-Ic-41 ../../..
 if(CGAL_FOUND)
   if (NOT CGAL_VERSION VERSION_LESS 4.7.0)
     if (EIGEN3_FOUND)
@@ -28,11 +26,7 @@ if(CGAL_FOUND)
       # XML format for Jenkins xUnit plugin 
       --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/AlphaComplexUT.xml --log_level=test_suite --report_level=no)
 
-    else()
-      message(WARNING "Eigen3 not found. Version 3.1.0 is required for Alpha complex unitary tests.")
-    endif()
-  else()
-    message(WARNING "CGAL version: ${CGAL_VERSION} is too old to compile Alpha complex unitary tests. Version 4.7.0 is required.")
-  endif ()
-endif()
+    endif(EIGEN3_FOUND)
+  endif (NOT CGAL_VERSION VERSION_LESS 4.7.0)
+endif(CGAL_FOUND)
 

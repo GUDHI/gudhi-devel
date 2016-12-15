@@ -4,7 +4,7 @@
  *
  *    Author(s):       Vincent Rouvreau
  *
- *    Copyright (C) 2015  INRIA Saclay (France)
+ *    Copyright (C) 2015  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -39,7 +39,8 @@ namespace alpha_complex {
  * Alpha_complex is a <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
  * constructed from the finite cells of a Delaunay Triangulation.
  * 
- * The filtration value of each simplex is computed as the square of the circumradius of the simplex if the circumsphere is empty (the simplex is then said to be Gabriel), and as the minimum of the filtration
+ * The filtration value of each simplex is computed as the square of the circumradius of the simplex if the
+ * circumsphere is empty (the simplex is then said to be Gabriel), and as the minimum of the filtration
  * values of the codimension 1 cofaces that make it not Gabriel otherwise.
  * 
  * All simplices that have a filtration value strictly greater than a given alpha squared value are not inserted into
@@ -47,23 +48,24 @@ namespace alpha_complex {
  * 
  * \image html "alpha_complex_representation.png" "Alpha-complex representation"
  * 
- * Alpha_complex is constructing a `Simplex_tree` using <a target="_blank"
+ * Alpha_complex is constructing a <a target="_blank"
  * href="http://doc.cgal.org/latest/Triangulation/index.html#Chapter_Triangulations">Delaunay Triangulation</a>
  * \cite cgal:hdj-t-15b from <a target="_blank" href="http://www.cgal.org/">CGAL</a> (the Computational Geometry
- * Algorithms Library \cite cgal:eb-15b).
+ * Algorithms Library \cite cgal:eb-15b) and is able to create a `SimplicialComplexForAlpha`.
  * 
  * The complex is a template class requiring an Epick_d <a target="_blank"
  * href="http://doc.cgal.org/latest/Kernel_d/index.html#Chapter_dD_Geometry_Kernel">dD Geometry Kernel</a>
  * \cite cgal:s-gkd-15b from CGAL as template parameter.
  * 
- * \remark When Alpha_complex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
+ * \remark When the simplicial complex is constructed with an infinite value of alpha, the complex is a Delaunay
+ * complex.
  * 
  * \section pointsexample Example from points
  * 
- * This example builds the Delaunay triangulation from the given points in a 2D static kernel, and initializes the
- * alpha complex with it.
+ * This example builds the Delaunay triangulation from the given points in a 2D static kernel, and creates a
+ * `Simplex_tree` with it.
  * 
- * Then, it is asked to display information about the alpha complex.
+ * Then, it is asked to display information about the simplicial complex.
  * 
  * \include Alpha_complex/Alpha_complex_from_points.cpp
  * 
@@ -76,13 +78,15 @@ namespace alpha_complex {
  * 
  * \include Alpha_complex/alphaoffreader_for_doc_60.txt
  * 
- * \section algorithm Algorithm
+ * \section createcomplexalgorithm Create complex algorithm
  * 
  * \subsection datastructure Data structure
  * 
- * In order to build the alpha complex, first, a Simplex tree is built from the cells of a Delaunay Triangulation.
- * (The filtration value is set to NaN, which stands for unknown value):
- * \image html "alpha_complex_doc.png" "Simplex tree structure construction example"
+ * In order to create the simplicial complex, first, it is built from the cells of the Delaunay Triangulation.
+ * The filtration values are set to NaN, which stands for unknown value.
+ * 
+ * In example, :
+ * \image html "alpha_complex_doc.png" "Simplicial complex structure construction example"
  *
  * \subsection filtrationcomputation Filtration value computation algorithm
  * 
@@ -129,12 +133,14 @@ namespace alpha_complex {
  * 
  * \subsubsection nondecreasing Non decreasing filtration values
  * 
- * As the squared radii computed by CGAL are an approximation, it might happen that these alpha squared values do not quite define a proper filtration (i.e. non-decreasing with respect to inclusion).
- * We fix that up by calling `Simplex_tree::make_filtration_non_decreasing()`.
+ * As the squared radii computed by CGAL are an approximation, it might happen that these alpha squared values do not
+ * quite define a proper filtration (i.e. non-decreasing with respect to inclusion).
+ * We fix that up by calling `SimplicialComplexForAlpha::make_filtration_non_decreasing()`.
  * 
  * \subsubsection pruneabove Prune above given filtration value
  * 
- * The simplex tree is pruned from the given maximum alpha squared value (cf. `Simplex_tree::prune_above_filtration()`).
+ * The simplex tree is pruned from the given maximum alpha squared value (cf.
+ * `SimplicialComplexForAlpha::prune_above_filtration()`).
  * In the following example, the value is given by the user as argument of the program.
  * 
  * 

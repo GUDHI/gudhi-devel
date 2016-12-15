@@ -846,6 +846,9 @@ IMAGE_PATH             = doc/Skeleton_blocker/ \
 	doc/Persistent_cohomology/ \
 	doc/Witness_complex/ \
 	doc/Bitmap_cubical_complex/ \
+	doc/Subsampling/ \
+	doc/Spatial_searching/ \
+	doc/Tangential_complex/ \
 	doc/Bottleneck_distance/
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should

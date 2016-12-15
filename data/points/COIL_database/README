@@ -1,5 +1,7 @@
 The datasets in this folder come from the Columbia University Image Library (COIL-100) dataset.
 
+Ambient dimension is 16384 (128*128)
+
 References:
 
 http://www.cs.columbia.edu/CAVE/software/softlib/coil-100.php
