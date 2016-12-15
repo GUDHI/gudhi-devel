@@ -1306,7 +1306,6 @@ class Tangential_complex {
                                             , bool normalize_basis = true
                                             , Orthogonal_space_basis *p_orth_space_basis = NULL
                                             ) {
-//    unsigned int num_pts_for_pca = static_cast<unsigned int> (std::pow(GUDHI_TC_BASE_VALUE_FOR_PCA, m_intrinsic_dim));
     unsigned int num_pts_for_pca = (std::min)(static_cast<unsigned int> (std::pow(GUDHI_TC_BASE_VALUE_FOR_PCA, m_intrinsic_dim)),
                                               static_cast<unsigned int> (m_points.size()));
 
@@ -1397,7 +1396,6 @@ class Tangential_complex {
   // on it. Note that most points are duplicated.
 
   Tangent_space_basis compute_tangent_space(const Simplex &s, bool normalize_basis = true) {
-//    unsigned int num_pts_for_pca = static_cast<unsigned int> (std::pow(GUDHI_TC_BASE_VALUE_FOR_PCA, m_intrinsic_dim));
     unsigned int num_pts_for_pca = (std::min)(static_cast<unsigned int> (std::pow(GUDHI_TC_BASE_VALUE_FOR_PCA, m_intrinsic_dim)),
                                               static_cast<unsigned int> (m_points.size()));
 

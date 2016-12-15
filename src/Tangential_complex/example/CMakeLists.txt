@@ -18,7 +18,6 @@ if(CGAL_FOUND)
 
       add_test(Tangential_complex_example_with_perturb
                ${CMAKE_CURRENT_BINARY_DIR}/Tangential_complex_example_with_perturb)
-
     endif(EIGEN3_FOUND)
   endif(NOT CGAL_VERSION VERSION_LESS 4.8.0)
 endif(CGAL_FOUND)
