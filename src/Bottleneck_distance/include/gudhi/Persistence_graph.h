@@ -29,7 +29,7 @@
 
 namespace Gudhi {
 
-namespace bottleneck_distance {
+namespace persistence_diagram {
 
 
 /** \internal \brief Structure representing an euclidean bipartite graph containing
@@ -172,7 +172,7 @@ inline double Persistence_graph::diameter_bound() const {
 }
 
 
-}  // namespace bottleneck_distance
+}  // namespace persistence_diagram
 
 }  // namespace Gudhi
 

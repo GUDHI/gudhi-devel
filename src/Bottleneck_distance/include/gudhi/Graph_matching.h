@@ -27,7 +27,7 @@
 
 namespace Gudhi {
 
-namespace bottleneck_distance {
+namespace persistence_diagram {
 
 /** \internal \brief Structure representing a graph matching. The graph is a Persistence_diagrams_graph.
  *
@@ -172,7 +172,7 @@ inline void Graph_matching::update(std::vector<int>& path) {
 }
 
 
-}  // namespace bottleneck_distance
+}  // namespace persistence_diagram
 
 }  // namespace Gudhi
 

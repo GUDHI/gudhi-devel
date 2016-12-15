@@ -28,7 +28,7 @@
 #include <random>
 #include <gudhi/Bottleneck.h>
 
-using namespace Gudhi::bottleneck_distance;
+using namespace Gudhi::persistence_diagram;
 
 int n1 = 81; // a natural number >0
 int n2 = 180; // a natural number >0
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(global){
         if(i%3==0)
             v2.emplace_back(std::max(a,b),std::max(a,b)+y);
     }
-    BOOST_CHECK(compute(v1, v2) <= upper_bound/100.);
-    BOOST_CHECK(compute(v1, v2, upper_bound/10000.) <= upper_bound/100. + upper_bound/10000.);
-    BOOST_CHECK(std::abs(compute(v1, v2) - compute(v1, v2, upper_bound/10000.)) <=  upper_bound/10000.);
+    BOOST_CHECK(bottleneck_distance(v1, v2, 0.) <= upper_bound/100.);
+    BOOST_CHECK(bottleneck_distance(v1, v2, upper_bound/10000.) <= upper_bound/100. + upper_bound/10000.);
+    BOOST_CHECK(std::abs(bottleneck_distance(v1, v2, 0.) - bottleneck_distance(v1, v2, upper_bound/10000.)) <=  upper_bound/10000.);
 }

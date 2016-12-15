@@ -37,11 +37,11 @@ int main() {
     v2.emplace_back(3.2, std::numeric_limits<double>::infinity());
 
 
-    double b = Gudhi::bottleneck_distance::compute(v1, v2);
+    double b = Gudhi::persistence_diagram::bottleneck_distance(v1, v2);
 
     std::cout << "Bottleneck distance = " << b << std::endl;
 
-    b = Gudhi::bottleneck_distance::compute(v1, v2, 0.1);
+    b = Gudhi::persistence_diagram::bottleneck_distance(v1, v2, 0.1);
 
     std::cout << "Approx bottleneck distance = " << b << std::endl;
 

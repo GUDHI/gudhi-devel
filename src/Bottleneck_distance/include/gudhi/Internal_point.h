@@ -25,7 +25,7 @@
 
 namespace Gudhi {
 
-namespace bottleneck_distance {
+namespace persistence_diagram {
 
 /** \internal \brief Returns the used index for encoding none of the points */
 int null_point_index();
@@ -59,7 +59,7 @@ struct Construct_coord_iterator {
     { return p.vec+2; }
 };
 
-}  // namespace bottleneck_distance
+}  // namespace persistence_diagram
 
 }  // namespace Gudhi
 

@@ -38,7 +38,7 @@
 
 namespace Gudhi {
 
-namespace bottleneck_distance {
+namespace persistence_diagram {
 
 /** \internal \brief data structure used to find any point (including projections) in V near to a query point from U
  * (which can be a projection).
@@ -162,7 +162,7 @@ inline int Layered_neighbors_finder::vlayers_number() const {
     return static_cast<int>(neighbors_finder.size());
 }
 
-}  // namespace bottleneck_distance
+}  // namespace persistence_diagram
 
 }  // namespace Gudhi
 

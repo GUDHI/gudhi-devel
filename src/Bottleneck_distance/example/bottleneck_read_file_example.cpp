@@ -72,6 +72,6 @@ int main( int argc , char** argv )
   {
       tolerance = atof( argv[3] );
   }
-  double b = Gudhi::bottleneck_distance::compute(diag1, diag2, tolerance);
+  double b = Gudhi::persistence_diagram::bottleneck_distance(diag1, diag2, tolerance);
   std::cout << "The distance between the diagrams is : " << b << ". The tolerance is : " << tolerance << std::endl;
 }

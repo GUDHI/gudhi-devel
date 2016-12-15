@@ -28,7 +28,7 @@
 
 namespace Gudhi {
 
-namespace bottleneck_distance {
+namespace persistence_diagram {
 
 /** \brief Function to use in order to compute the Bottleneck distance between two persistence diagrams (see Concepts).
  * If the last parameter e is not 0 (default value if not explicited), you get an additive e-approximation.
@@ -36,7 +36,7 @@ namespace bottleneck_distance {
  * \ingroup bottleneck_distance
  */
 template<typename Persistence_diagram1, typename Persistence_diagram2>
-double compute(const Persistence_diagram1 &diag1, const Persistence_diagram2 &diag2, double e=0.) {
+double bottleneck_distance(const Persistence_diagram1 &diag1, const Persistence_diagram2 &diag2, double e=0.) {
     Persistence_graph g(diag1, diag2, e);
     double b = g.bottleneck_alive();
     if(b == std::numeric_limits<double>::infinity())
@@ -69,7 +69,7 @@ double compute(const Persistence_diagram1 &diag1, const Persistence_diagram2 &di
 
 
 
-}  // namespace bottleneck_distance
+}  // namespace persistence_diagram
 
 }  // namespace Gudhi
 
