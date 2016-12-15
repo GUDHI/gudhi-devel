@@ -68,3 +68,63 @@ BOOST_AUTO_TEST_CASE(test_Spatial_tree_data_structure) {
   Gudhi::Simplex_tree<> stree;
   tc.create_complex(stree);
 }
+
+BOOST_AUTO_TEST_CASE(test_mini_tangential) {
+  typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> Kernel;
+  typedef Kernel::FT FT;
+  typedef Kernel::Point_d Point;
+  typedef Kernel::Vector_d Vector;
+  typedef tc::Tangential_complex<Kernel, CGAL::Dynamic_dimension_tag, CGAL::Parallel_tag> TC;
+
+
+  const int INTRINSIC_DIM = 1;
+
+  // Generate points on a 2-sphere
+  std::vector<Point> points;
+  // [[0, 0], [1, 0], [0, 1], [1, 1]]
+  std::vector<double> point = {0.0, 0.0};
+  points.push_back(Point(point.size(), point.begin(), point.end()));
+  point = {1.0, 0.0};
+  points.push_back(Point(point.size(), point.begin(), point.end()));
+  point = {0.0, 1.0};
+  points.push_back(Point(point.size(), point.begin(), point.end()));
+  point = {1.0, 1.0};
+  points.push_back(Point(point.size(), point.begin(), point.end()));
+  std::cout << "points = " << points.size() << std::endl;
+  Kernel k;
+
+  // Compute the TC
+  TC tc(points, INTRINSIC_DIM, k);
+  tc.compute_tangential_complex();
+  TC::Num_inconsistencies num_inc = tc.number_of_inconsistent_simplices();
+  std::cout << "TC vertices = " << tc.number_of_vertices() << " - simplices = " << num_inc.num_simplices <<
+               " - inc simplices = " << num_inc.num_inconsistent_simplices <<
+               " - inc stars = " << num_inc.num_inconsistent_stars << std::endl;
+
+  BOOST_CHECK(tc.number_of_vertices() == 4);
+  BOOST_CHECK(num_inc.num_simplices == 4);
+  BOOST_CHECK(num_inc.num_inconsistent_simplices == 0);
+  BOOST_CHECK(num_inc.num_inconsistent_stars == 0);
+
+  // Export the TC into a Simplex_tree
+  Gudhi::Simplex_tree<> stree;
+  tc.create_complex(stree);
+  std::cout << "ST vertices = " << stree.num_vertices() << " - simplices = " << stree.num_simplices() << std::endl;
+
+  BOOST_CHECK(stree.num_vertices() == 4);
+  BOOST_CHECK(stree.num_simplices() == 6);
+
+  tc.fix_inconsistencies_using_perturbation(0.01, 30.0);
+
+  BOOST_CHECK(tc.number_of_vertices() == 4);
+  BOOST_CHECK(num_inc.num_simplices == 4);
+  BOOST_CHECK(num_inc.num_inconsistent_simplices == 0);
+  BOOST_CHECK(num_inc.num_inconsistent_stars == 0);
+
+  // Export the TC into a Simplex_tree
+  tc.create_complex(stree);
+  std::cout << "ST vertices = " << stree.num_vertices() << " - simplices = " << stree.num_simplices() << std::endl;
+
+  BOOST_CHECK(stree.num_vertices() == 4);
+  BOOST_CHECK(stree.num_simplices() == 6);
+}
