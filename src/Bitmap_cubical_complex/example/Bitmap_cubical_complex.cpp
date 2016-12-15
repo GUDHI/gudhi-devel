@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
   Persistent_cohomology pcoh(b);
   pcoh.init_coefficients(p);  // initializes the coefficient field for homology
   pcoh.compute_persistent_cohomology(min_persistence);
-
+ 
   std::stringstream ss;
   ss << argv[1] << "_persistence";
   std::ofstream out(ss.str().c_str());

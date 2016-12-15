@@ -598,6 +598,25 @@ class Persistent_cohomology {
           << cpx_->filtration(get<1>(pair)) << std::endl;
     }
   }
+  
+  
+   /** @brief Vector of persistence intervals.
+   * @return A vector of persistence intervals on a fixed dimension. Each persistence pair is represented as a pair of objects of a type Filtration_value.
+   */  
+  std::vector< std::pair< Filtration_value , Filtration_value > > paris_in_dimension( unsigned dimension )
+  {
+	std::vector< std::pair< Filtration_value , Filtration_value > > result;
+	//should I initialize this somehow locally?? Even to the size of persistent_pairs_ list.
+	for (auto pair : persistent_pairs_) 
+	{      
+		if ( ( cpx_->dimension( get<0>(pair) ) == dimension ) && ( cpx_->null_simplex() != get<1>(pair) ) ) 
+		{      
+		   result.push_back( std::pair<Filtration_value , Filtration_value>(cpx_->filtration( get<0>(pair) ) , cpx_->filtration( get<1>(pair) ) ) );
+		}
+	}
+	return result;
+  }
+  
 
   /** @brief Returns Betti numbers.
    * @return A vector of Betti numbers.

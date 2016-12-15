@@ -733,6 +733,9 @@ public:
 	
 	/**
 	 * Computations of L^{p} distance between two landscapes on a grid. p is the parameter of the procedure.
+	 * FIXME: Note that, due to the grid representation, the method below may give non--accurate results in case when the landscape P and Q the difference of which we want to compute
+	 * are interxsecting. This is a consequence of a general way they are computed. In the future, an integral of absolute value of a difference of P and Q will be given as a separated
+	 * function to fix that inaccuracy. 
 	**/
 	friend double compute_distance_of_landscapes_on_grid( const Persistence_landscape_on_grid& first, const Persistence_landscape_on_grid& second , double p )
 	{		
