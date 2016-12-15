@@ -98,11 +98,13 @@ BOOST_AUTO_TEST_CASE(test_mini_tangential) {
   tc.compute_tangential_complex();
   TC::Num_inconsistencies num_inc = tc.number_of_inconsistent_simplices();
   std::cout << "TC vertices = " << tc.number_of_vertices() << " - simplices = " << num_inc.num_simplices <<
-               " - inconsistencies = " << num_inc.num_inconsistent_simplices << std::endl;
+               " - inc simplices = " << num_inc.num_inconsistent_simplices <<
+               " - inc stars = " << num_inc.num_inconsistent_stars << std::endl;
 
   BOOST_CHECK(tc.number_of_vertices() == 4);
   BOOST_CHECK(num_inc.num_simplices == 4);
-  BOOST_CHECK(num_inc.num_inconsistent_simplices == 2);
+  BOOST_CHECK(num_inc.num_inconsistent_simplices == 0);
+  BOOST_CHECK(num_inc.num_inconsistent_stars == 0);
 
   // Export the TC into a Simplex_tree
   Gudhi::Simplex_tree<> stree;
@@ -110,18 +112,19 @@ BOOST_AUTO_TEST_CASE(test_mini_tangential) {
   std::cout << "ST vertices = " << stree.num_vertices() << " - simplices = " << stree.num_simplices() << std::endl;
 
   BOOST_CHECK(stree.num_vertices() == 4);
-  BOOST_CHECK(stree.num_simplices() == 12);
+  BOOST_CHECK(stree.num_simplices() == 6);
 
   tc.fix_inconsistencies_using_perturbation(0.01, 30.0);
 
   BOOST_CHECK(tc.number_of_vertices() == 4);
   BOOST_CHECK(num_inc.num_simplices == 4);
-  BOOST_CHECK(num_inc.num_inconsistent_simplices == 2);
+  BOOST_CHECK(num_inc.num_inconsistent_simplices == 0);
+  BOOST_CHECK(num_inc.num_inconsistent_stars == 0);
 
   // Export the TC into a Simplex_tree
   tc.create_complex(stree);
   std::cout << "ST vertices = " << stree.num_vertices() << " - simplices = " << stree.num_simplices() << std::endl;
 
   BOOST_CHECK(stree.num_vertices() == 4);
-  BOOST_CHECK(stree.num_simplices() == 12);
+  BOOST_CHECK(stree.num_simplices() == 6);
 }

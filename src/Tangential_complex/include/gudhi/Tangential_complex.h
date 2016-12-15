@@ -1366,11 +1366,6 @@ class Tangential_complex {
                                  eig.eigenvectors().col(j).data() + m_ambient_dim));
       }
     }
-    for (auto v : tsb) {
-      for (int i = 0; i < 2; ++i)
-        std::cerr << coord(v, i) << ", ";
-      std::cerr << "\n";
-    }
 
     if (p_orth_space_basis) {
       p_orth_space_basis->set_origin(i);
