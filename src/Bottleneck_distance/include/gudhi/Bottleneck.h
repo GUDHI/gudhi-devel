@@ -46,12 +46,11 @@ double bottleneck_distance(const Persistence_diagram1 &diag1, const Persistence_
         sd = g.sorted_distances();
     long idmin = 0;
     long idmax = e==0. ? sd.size() - 1 : g.diameter_bound()/e + 1;
-    // alpha can change the complexity
-    double alpha = std::pow(idmax, 0.25);
+    double alpha = std::pow(g.size(), 1./5.);
     Graph_matching m(g);
     Graph_matching biggest_unperfect(g);
     while (idmin != idmax) {
-        long step = static_cast<long>((idmax - idmin) / alpha);
+        long step = static_cast<long>((idmax - idmin - 1)/alpha);
         m.set_r(e == 0. ?  sd.at(idmin + step) : e*(idmin + step));
         while (m.multi_augment());
         //The above while compute a maximum matching (according to the r setted before)
