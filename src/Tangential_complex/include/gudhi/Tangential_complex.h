@@ -1131,7 +1131,7 @@ class Tangential_complex {
 
         Tr_vertex_handle vh = triangulation.insert_if_in_star(proj_pt, center_vertex);
         // Tr_vertex_handle vh = triangulation.insert(proj_pt);
-        if (vh != Tr_vertex_handle() && vh->data() == (std::numeric_limits<std::size_t>::max())) {
+        if (vh != Tr_vertex_handle() && vh->data() == (std::numeric_limits<std::size_t>::max)()) {
 #ifdef GUDHI_TC_VERY_VERBOSE
           ++num_inserted_points;
 #endif
