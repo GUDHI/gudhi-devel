@@ -192,7 +192,7 @@ private:
     if (dim > 0)
       while (curr_it != vertices.end()) {
         simplex.push_back(*curr_it);
-        typename typeVectorVertex::iterator next_it = curr_it++;        
+        typename typeVectorVertex::iterator next_it = ++curr_it;        
         add_all_faces_of_dimension(dim-1,
                                    vertices,
                                    next_it,
@@ -209,7 +209,7 @@ private:
       } 
     else if (dim == 0) {
       simplex.push_back(aw_it->first);
-      sc.insert_simplex(simplex, aw_it->second);
+      sc.insert_simplex_and_subfaces(simplex, aw_it->second);
       simplex.pop_back();
     } 
   }      
