@@ -40,7 +40,7 @@ struct SimplicialComplexForRips {
   void insert_graph(const OneSkeletonGraph& skel_graph);
 
   /** \brief Expands the simplicial complex containing only its one skeleton until a given maximal dimension as
-   * defined in \ref ripsdefinition. */
+   * explained in \ref ripsdefinition. */
   void expansion(int max_dim);
 
   /** \brief Returns the number of vertices in the simplicial complex. */
