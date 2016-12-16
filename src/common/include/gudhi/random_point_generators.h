@@ -338,8 +338,6 @@ std::vector<typename Kernel::Point_d> generate_points_on_3sphere_and_circle(std:
   std::vector<Point> points;
   points.reserve(num_points);
 
-  typename Kernel::Translated_point_d k_transl =
-      k.translated_point_d_object();
   typename Kernel::Compute_coordinate_d k_coord =
       k.compute_coordinate_d_object();
   for (std::size_t i = 0; i < num_points;) {
