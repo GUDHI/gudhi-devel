@@ -689,6 +689,22 @@ class Persistent_cohomology {
     return persistent_pairs_;
   }
 
+  /** @brief Returns persistence intervals for a given dimension.
+   * @param[in] dimension Dimension to get the birth and death pairs from.
+   * @return A vector of persistence intervals (birth and death) on a fixed dimension.
+   */
+  std::vector< std::pair< Filtration_value , Filtration_value > >
+  intervals_in_dimension(int dimension) {
+    std::vector< std::pair< Filtration_value , Filtration_value > > result;
+    // auto && pair, to avoid unnecessary copying
+    for (auto && pair : persistent_pairs_) {
+      if (cpx_->dimension(get<0>(pair)) == dimension) {
+        result.emplace_back(cpx_->filtration(get<0>(pair)), cpx_->filtration(get<1>(pair)));
+      }
+    }
+    return result;
+  }
+
  private:
   /*
    * Structure representing a cocycle.

@@ -37,16 +37,12 @@ def test_tangential():
     assert st.__is_defined() == True
     assert st.__is_persistence_defined() == False
 
-    assert st.num_simplices() == 13
+    assert st.num_simplices() == 6
     assert st.num_vertices() == 4
  
     assert st.get_filtered_tree() == \
-           [([0], 0.0), ([1], 0.0), ([0, 1], 0.0), ([2], 0.0), ([0, 2], 0.0),
-            ([1, 2], 0.0), ([3], 0.0), ([0, 3], 0.0), ([1, 3], 0.0),
-            ([0, 1, 3], 0.0), ([2, 3], 0.0), ([0, 2, 3], 0.0),
-            ([1, 2, 3], 0.0)]
-    assert st.get_coface_tree([0], 1) == \
-           [([0, 1], 0.0), ([0, 2], 0.0), ([0, 3], 0.0)]
+        [([0], 0.0), ([1], 0.0), ([2], 0.0), ([0, 2], 0.0), ([3], 0.0), ([1, 3], 0.0)]
+    assert st.get_coface_tree([0], 1) == [([0, 2], 0.0)]
  
     assert point_list[0] == tc.get_point(0)
     assert point_list[1] == tc.get_point(1)
