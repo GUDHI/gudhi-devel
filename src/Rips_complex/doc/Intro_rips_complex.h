@@ -33,7 +33,7 @@ namespace rips_complex {
  * 
  * @{
  * 
- * \section ripsdefinition Definition
+ * \section ripsdefinition Rips complex definition
  * 
  * Rips_complex
  * <a target="_blank" href="https://en.wikipedia.org/wiki/Vietoris%E2%80%93Rips_complex">(Wikipedia)</a> is a

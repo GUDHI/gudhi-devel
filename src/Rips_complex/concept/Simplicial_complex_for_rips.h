@@ -34,11 +34,13 @@ struct SimplicialComplexForRips {
   /** \brief Handle to specify the simplex filtration value. */
   typedef unspecified Filtration_value;
 
-  /** \brief Inserts a given range `Gudhi::rips_complex::Rips_complex::OneSkeletonGraph` in the simplicial complex. */
+  /** \brief Inserts a given range `Gudhi::rips_complex::Rips_complex::OneSkeletonGraph` in the simplicial
+   * complex. */
   template<class OneSkeletonGraph>
   void insert_graph(const OneSkeletonGraph& skel_graph);
 
-  /** \brief Expands the simplicial complex containing only its one skeleton until a given maximal dimension. */
+  /** \brief Expands the simplicial complex containing only its one skeleton until a given maximal dimension as
+   * defined in \ref ripsdefinition. */
   void expansion(int max_dim);
 
   /** \brief Returns the number of vertices in the simplicial complex. */
