@@ -163,7 +163,7 @@ private:
       typeVectorVertex& vertices = simplex; //'simplex' now will be called vertices
       while (aw_it != aw.end() && aw_it->second < lim_dist2) {
         typeVectorVertex facet = {};
-        add_all_faces_of_dimension(limit_dimension, vertices, vertices.begin(), aw_it, facet, complex);
+        add_all_faces_of_dimension(limit_dimension, vertices, vertices.begin(), aw_it, aw_it->second - aw.begin()->second, facet, complex);
         vertices.push_back(aw_it->first);
         aw_it++;
       }
@@ -186,6 +186,7 @@ private:
                                   typeVectorVertex& vertices,
                                   typename typeVectorVertex::iterator curr_it,
                                   typename ActiveWitness::iterator aw_it,
+                                  FT filtration_value,
                                   typeVectorVertex& simplex,
                                   SimplicialComplexForWitness& sc)
   {
@@ -197,6 +198,7 @@ private:
                                    vertices,
                                    next_it,
                                    aw_it,
+                                   filtration_value,
                                    simplex,
                                    sc);
         simplex.pop_back();
@@ -204,12 +206,13 @@ private:
                                    vertices,
                                    next_it,
                                    aw_it,
+                                   filtration_value,
                                    simplex,
                                    sc);
       } 
     else if (dim == 0) {
       simplex.push_back(aw_it->first);
-      sc.insert_simplex_and_subfaces(simplex, aw_it->second);
+      sc.insert_simplex_and_subfaces(simplex, filtration_value);
       simplex.pop_back();
     } 
   }      
