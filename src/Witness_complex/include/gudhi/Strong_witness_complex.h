@@ -154,7 +154,7 @@ private:
       typeVectorVertex simplex;
       typename ActiveWitness::iterator aw_it = aw.begin();
       float lim_dist2 = aw.begin()->second + max_alpha_square;
-      while ((Landmark_id)simplex.size() <= limit_dimension + 1 && aw_it != aw.end() && aw_it->second < lim_dist2) {
+      while ((Landmark_id)simplex.size() < limit_dimension + 1 && aw_it != aw.end() && aw_it->second < lim_dist2) {
         simplex.push_back(aw_it->first);
         complex.insert_simplex_and_subfaces(simplex, aw_it->second - aw.begin()->second);
         aw_it++;

@@ -68,9 +68,7 @@ BOOST_AUTO_TEST_CASE(simple_witness_complex) {
 
   std::cout << "relaxed_complex.num_simplices() = " << relaxed_complex.num_simplices() << std::endl; 
   BOOST_CHECK(relaxed_complex.num_simplices() == 239);
-  // All edges but big diagonals are present.
-  //
-  // Simplex count (number:dimension):
+  // The corner simplex {0,2,5,7} and its cofaces are missing.
 
   
   StrongWitnessComplex strong_witness_complex(landmarks,
@@ -83,6 +81,6 @@ BOOST_AUTO_TEST_CASE(simple_witness_complex) {
   BOOST_CHECK(strong_relaxed_complex.num_simplices() == 239);
 
   std::cout << "strong_relaxed_complex2.num_simplices() = " << strong_relaxed_complex2.num_simplices() << std::endl;
-  BOOST_CHECK(strong_relaxed_complex2.num_simplices() == 101);
-  std::cout << strong_relaxed_complex2 << std::endl;
+  BOOST_CHECK(strong_relaxed_complex2.num_simplices() == 92);
+  // 8 vertices, 28 edges, 56 triangles
 }
