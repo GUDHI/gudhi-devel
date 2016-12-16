@@ -51,9 +51,8 @@ int main(){
         if(i%3==0)
             v2.emplace_back(std::max(a,b),std::max(a,b)+y);
     }
-    double epsilon =  std::numeric_limits<double>::epsilon();
     std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-    double b = bottleneck_distance(v1,v2, epsilon);
+    double b = bottleneck_distance(v1, v2);
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     typedef std::chrono::duration<int,std::milli> millisecs_t;
     millisecs_t duration(std::chrono::duration_cast<millisecs_t>(end-start));

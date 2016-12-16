@@ -29,7 +29,7 @@ namespace bottleneck_distance {
 
 /** \brief Concept of Diagram_point. std::get<0>(point) must return the birth of the corresponding component and std::get<1>(point) its death.
  * A valid implementation of this concept is std::pair<double,double>.
- * Birth must be 0 or positive, death should be larger than birth, death can be std::numeric_limits<double>::infinity() for components which stay alive.
+ * Death should be larger than birth, death can be std::numeric_limits<double>::infinity() for components which stay alive.
  *
  * \ingroup bottleneck_distance
  */
