@@ -699,12 +699,13 @@ class Persistent_cohomology {
     std::vector< std::pair< Filtration_value , Filtration_value > > result;
     // auto && pair, to avoid unnecessary copying
     for (auto && pair : persistent_pairs_) {
-      if (cpx_->dimension( get<0>(pair)) == dimension ) {
+      if (cpx_->dimension(get<0>(pair)) == dimension) {
         result.emplace_back(cpx_->filtration(get<0>(pair)), cpx_->filtration(get<1>(pair)));
       }
     }
     return result;
   }
+
  private:
   /*
    * Structure representing a cocycle.
