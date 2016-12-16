@@ -1314,14 +1314,6 @@ class Tangential_complex {
         m_k.construct_vector_d_object();
     typename K::Compute_coordinate_d coord =
         m_k.compute_coordinate_d_object();
-    typename K::Squared_length_d sqlen =
-        m_k.squared_length_d_object();
-    typename K::Scaled_vector_d scaled_vec =
-        m_k.scaled_vector_d_object();
-    typename K::Scalar_product_d scalar_pdct =
-        m_k.scalar_product_d_object();
-    typename K::Difference_of_vectors_d diff_vec =
-        m_k.difference_of_vectors_d_object();
 
 #ifdef GUDHI_TC_USE_ANOTHER_POINT_SET_FOR_TANGENT_SPACE_ESTIM
     KNS_range kns_range = m_points_ds_for_tse.query_k_nearest_neighbors(
@@ -2159,7 +2151,7 @@ class Tangential_complex {
       typedef std::vector<Simplex> Triangles;
       Triangles triangles;
 
-      std::size_t num_vertices = c.size();
+      int num_vertices = static_cast<int>(c.size());
       // Do not export smaller dimension simplices
       if (num_vertices < m_intrinsic_dim + 1)
         continue;
