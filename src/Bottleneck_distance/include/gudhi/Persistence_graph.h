@@ -96,7 +96,7 @@ Persistence_graph::Persistence_graph(const Persistence_diagram1 &diag1,
     std::sort(v_alive.begin(), v_alive.end());
     if(u_alive.size() != v_alive.size())
         b_alive = std::numeric_limits<double>::infinity();
-    else for(auto it_u=u_alive.cbegin(), it_v=v_alive.cbegin();it_u != u_alive.cend();++it_u, ++it_v)
+    else for(auto it_u=u_alive.cbegin(), it_v=v_alive.cbegin(); it_u != u_alive.cend(); ++it_u, ++it_v)
         b_alive = std::max(b_alive, std::fabs(*it_u - *it_v));
 }
 
@@ -136,7 +136,7 @@ inline double Persistence_graph::bottleneck_alive() const{
 
 inline std::vector<double> Persistence_graph::sorted_distances() const {
     std::vector<double> distances;
-    distances.push_back(0.);
+    distances.push_back(0.); //for empty diagrams
     for (int u_point_index = 0; u_point_index < size(); ++u_point_index){
         distances.push_back(distance(u_point_index, corresponding_point_in_v(u_point_index)));
         for (int v_point_index = 0; v_point_index < size(); ++v_point_index)
@@ -150,7 +150,7 @@ inline Internal_point Persistence_graph::get_u_point(int u_point_index) const {
     if (!on_the_u_diagonal(u_point_index))
         return u.at(u_point_index);
     Internal_point projector = v.at(corresponding_point_in_v(u_point_index));
-    double m = (projector.x() + projector.y()) / 2;
+    double m = (projector.x() + projector.y()) / 2.;
     return Internal_point(m,m,u_point_index);
 }
 
@@ -158,7 +158,7 @@ inline Internal_point Persistence_graph::get_v_point(int v_point_index) const {
     if (!on_the_v_diagonal(v_point_index))
         return v.at(v_point_index);
     Internal_point projector = u.at(corresponding_point_in_u(v_point_index));
-    double m = (projector.x() + projector.y()) / 2;
+    double m = (projector.x() + projector.y()) / 2.;
     return Internal_point(m,m,v_point_index);
 }
 

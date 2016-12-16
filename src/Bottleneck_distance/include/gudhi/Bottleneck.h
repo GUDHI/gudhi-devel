@@ -30,6 +30,49 @@ namespace Gudhi {
 
 namespace persistence_diagram {
 
+double bottleneck_distance_approx(Persistence_graph& g, double e) {
+    double b_lower_bound = 0.;
+    double b_upper_bound = g.diameter_bound();
+    const double alpha = std::pow(g.size(), 1./5.);
+    Graph_matching m(g);
+    Graph_matching biggest_unperfect(g);
+    while (b_upper_bound - b_lower_bound > 2*e) {
+        double step = b_lower_bound + (b_upper_bound - b_lower_bound)/alpha;
+        m.set_r(step);
+        while (m.multi_augment()); //compute a maximum matching (in the graph corresponding to the current r)
+        if (m.perfect()) {
+            m = biggest_unperfect;
+            b_upper_bound = step;
+        } else {
+            biggest_unperfect = m;
+            b_lower_bound = step;
+        }
+    }
+    return (b_lower_bound + b_upper_bound)/2.;
+}
+
+double bottleneck_distance_exact(Persistence_graph& g) {
+    std::vector<double> sd  = g.sorted_distances();
+    long lower_bound_i = 0;
+    long upper_bound_i = sd.size()-1;
+    const double alpha = std::pow(g.size(), 1./5.);
+    Graph_matching m(g);
+    Graph_matching biggest_unperfect(g);
+    while (lower_bound_i != upper_bound_i) {
+        long step = lower_bound_i + static_cast<long>((upper_bound_i - lower_bound_i - 1)/alpha);
+        m.set_r(sd.at(step));
+        while (m.multi_augment()); //compute a maximum matching (in the graph corresponding to the current r)
+        if (m.perfect()) {
+            m = biggest_unperfect;
+            upper_bound_i = step;
+        } else {
+            biggest_unperfect = m;
+            lower_bound_i = step + 1;
+        }
+    }
+    return sd.at(lower_bound_i);
+}
+
 /** \brief Function to use in order to compute the Bottleneck distance between two persistence diagrams (see Concepts).
  * If the last parameter e is not 0 (default value if not explicited), you get an additive e-approximation.
  *
@@ -38,35 +81,11 @@ namespace persistence_diagram {
 template<typename Persistence_diagram1, typename Persistence_diagram2>
 double bottleneck_distance(const Persistence_diagram1 &diag1, const Persistence_diagram2 &diag2, double e=0.) {
     Persistence_graph g(diag1, diag2, e);
-    double b = g.bottleneck_alive();
-    if(b == std::numeric_limits<double>::infinity())
+    if(g.bottleneck_alive() == std::numeric_limits<double>::infinity())
         return std::numeric_limits<double>::infinity();
-    std::vector<double> sd;
-    if(e == 0.)
-        sd = g.sorted_distances();
-    long idmin = 0;
-    long idmax = e==0. ? sd.size() - 1 : g.diameter_bound()/e + 1;
-    double alpha = std::pow(g.size(), 1./5.);
-    Graph_matching m(g);
-    Graph_matching biggest_unperfect(g);
-    while (idmin != idmax) {
-        long step = static_cast<long>((idmax - idmin - 1)/alpha);
-        m.set_r(e == 0. ?  sd.at(idmin + step) : e*(idmin + step));
-        while (m.multi_augment());
-        //The above while compute a maximum matching (according to the r setted before)
-        if (m.perfect()) {
-            idmax = idmin + step;
-            m = biggest_unperfect;
-        } else {
-            biggest_unperfect = m;
-            idmin = idmin + step + 1;
-        }
-    }
-    b = std::max(b, e == 0. ? sd.at(idmin) : e*(idmin));
-    return b;
+    double b = (e == 0. ? bottleneck_distance_exact(g) : bottleneck_distance_approx(g, e));
+    return std::max(g.bottleneck_alive(),b);
 }
-
-
 
 }  // namespace persistence_diagram
 
