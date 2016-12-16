@@ -33,14 +33,14 @@ namespace bottleneck_distance {
  *
  * \ingroup bottleneck_distance
  */
-struct Diagram_point;
+typename Diagram_point;
 
 /** \brief Concept of persistence diagram. It's a range of Diagram_point.
  * std::begin(diagram) and std::end(diagram) must return corresponding iterators.
  *
  * \ingroup bottleneck_distance
  */
-struct Persistence_Diagram;
+typename Persistence_Diagram;
 
 }  // namespace bottleneck_distance
 
