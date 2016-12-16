@@ -34,16 +34,12 @@ double bottleneck_distance_approx(Persistence_graph& g, double e) {
     double b_lower_bound = 0.;
     double b_upper_bound = g.diameter_bound();
     const double alpha = std::pow(g.size(), 1./5.);
-    if(e < std::numeric_limits<double>::epsilon() * alpha){
-        e = std::numeric_limits<double>::epsilon() * alpha;
-#ifdef DEBUG_TRACES
-         std::cout << "Epsilon user given value is less than eps_min. Forced to eps_min by the application" << std::endl;
-#endif  // DEBUG_TRACES
-    }
     Graph_matching m(g);
     Graph_matching biggest_unperfect(g);
     while (b_upper_bound - b_lower_bound > 2*e) {
         double step = b_lower_bound + (b_upper_bound - b_lower_bound)/alpha;
+        if(step <= b_lower_bound || step >= b_upper_bound) //Avoid precision problem
+            break;
         m.set_r(step);
         while (m.multi_augment()); //compute a maximum matching (in the graph corresponding to the current r)
         if (m.perfect()) {
@@ -86,7 +82,7 @@ double bottleneck_distance_exact(Persistence_graph& g) {
  * \ingroup bottleneck_distance
  */
 template<typename Persistence_diagram1, typename Persistence_diagram2>
-double bottleneck_distance(const Persistence_diagram1 &diag1, const Persistence_diagram2 &diag2, double e=std::numeric_limits<double>::epsilon()) {
+double bottleneck_distance(const Persistence_diagram1 &diag1, const Persistence_diagram2 &diag2, double e=std::numeric_limits<double>::min()) {
     Persistence_graph g(diag1, diag2, e);
     if(g.bottleneck_alive() == std::numeric_limits<double>::infinity())
         return std::numeric_limits<double>::infinity();

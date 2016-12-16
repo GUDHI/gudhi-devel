@@ -34,7 +34,7 @@ int main(){
     std::ofstream objetfichier;
     objetfichier.open("results.csv", std::ios::out);
 
-    for(int n = 1000; n<=4000; n+=1000){
+    for(int n = 1000; n<=10000; n+=1000){
     std::uniform_real_distribution<double> unif1(0.,upper_bound);
     std::uniform_real_distribution<double> unif2(upper_bound/1000.,upper_bound/100.);
     std::default_random_engine re;
