@@ -162,7 +162,8 @@ private:
       // continue inserting limD-faces of the following simplices
       typeVectorVertex& vertices = simplex; //'simplex' now will be called vertices
       while (aw_it != aw.end() && aw_it->second < lim_dist2) {
-        add_all_faces_of_dimension(limD, vertices, vertices.begin(), aw_it, typeVectorVertex({}), complex);
+        typeVectorVertex facet = {};
+        add_all_faces_of_dimension(limit_dimension, vertices, vertices.begin(), aw_it, facet, complex);
         vertices.push_back(aw_it->first);
         aw_it++;
       }
@@ -181,17 +182,17 @@ private:
    * The landmark pointed by aw_it is added to all formed simplices.
    */
   template < typename SimplicialComplexForWitness >
-  void add_all_faces_of_dimension(int dim,
-                                  std::vector<Landmark_id>& vertices,
+  void add_all_faces_of_dimension(Landmark_id dim,
+                                  typeVectorVertex& vertices,
                                   typename typeVectorVertex::iterator curr_it,
                                   typename ActiveWitness::iterator aw_it,
-                                  std::vector<Landmark_id>& simplex,
+                                  typeVectorVertex& simplex,
                                   SimplicialComplexForWitness& sc)
   {
     if (dim > 0)
       while (curr_it != vertices.end()) {
-        simplex.push_back(curr_it->first);
-        typename ActiveWitness::iterator next_it = curr_it++;        
+        simplex.push_back(*curr_it);
+        typename typeVectorVertex::iterator next_it = curr_it++;        
         add_all_faces_of_dimension(dim-1,
                                    vertices,
                                    next_it,

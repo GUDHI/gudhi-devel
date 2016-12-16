@@ -32,7 +32,7 @@ typedef Gudhi::witness_complex::Strong_witness_complex<Kernel> StrongWitnessComp
  */
 
 BOOST_AUTO_TEST_CASE(simple_witness_complex) {
-  Simplex_tree complex, relaxed_complex, strong_relaxed_complex;
+  Simplex_tree complex, relaxed_complex, strong_relaxed_complex, strong_relaxed_complex2;
 
   std::vector<Point_d> witnesses, landmarks;
 
@@ -73,8 +73,10 @@ BOOST_AUTO_TEST_CASE(simple_witness_complex) {
                                               witnesses);
 
   strong_witness_complex.create_complex(strong_relaxed_complex, 9.1);
-    
+  strong_witness_complex.create_complex(strong_relaxed_complex2, 9.1, 2);
+  
   std::cout << "strong_relaxed_complex.num_simplices() = " << strong_relaxed_complex.num_simplices() << std::endl; 
   BOOST_CHECK(strong_relaxed_complex.num_simplices() == 239);
-  
+
+  std::cout << "strong_relaxed_complex2.num_simplices() = " << strong_relaxed_complex2.num_simplices() << std::endl; 
 }
