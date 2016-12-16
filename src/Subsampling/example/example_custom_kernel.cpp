@@ -26,10 +26,10 @@ class Kernel {
 
    public:
     Squared_distance_d() {
-      matrix_.push_back(std::vector<FT>({0,1,2,4}));
-      matrix_.push_back(std::vector<FT>({1,0,4,2}));
-      matrix_.push_back(std::vector<FT>({2,4,0,1}));
-      matrix_.push_back(std::vector<FT>({4,2,1,0}));
+      matrix_.push_back(std::vector<FT>({0, 1, 2, 4}));
+      matrix_.push_back(std::vector<FT>({1, 0, 4, 2}));
+      matrix_.push_back(std::vector<FT>({2, 4, 0, 1}));
+      matrix_.push_back(std::vector<FT>({4, 2, 1, 0}));
     }
 
     FT operator()(Point_d p1, Point_d p2) {
