@@ -56,8 +56,8 @@ private:
   typedef std::vector<Point_d>                                    Point_range;
   typedef gss::Kd_tree_search<Kernel_, Point_range>               Kd_tree;
   typedef typename Kd_tree::INS_range                             Nearest_landmark_range;
-  typedef typename std::vector<Nearest_landmark_range>            Nearest_landmark_table;
-  typedef typename Nearest_landmark_range::iterator               Nearest_landmark_row_iterator;
+  //typedef typename std::vector<Nearest_landmark_range>            Nearest_landmark_table;
+  //typedef typename Nearest_landmark_range::iterator               Nearest_landmark_row_iterator;
   
   typedef std::vector< double > Point_t;
   typedef std::vector< Point_t > Point_Vector;

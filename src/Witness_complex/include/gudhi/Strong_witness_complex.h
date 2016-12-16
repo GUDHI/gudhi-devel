@@ -159,6 +159,13 @@ private:
         complex.insert_simplex_and_subfaces(simplex, aw_it->second - aw.begin()->second);
         aw_it++;
       }
+      // continue inserting limD-faces of the following simplices
+      typeVectorVertex& vertices = simplex; //'simplex' now will be called vertices
+      while (aw_it != aw.end() && aw_it->second < lim_dist2) {
+        add_all_faces_of_dimension(limD, vertices, vertices.begin(), aw_it, typeVectorVertex({}), complex);
+        vertices.push_back(aw_it->first);
+        aw_it++;
+      }
       if ((Landmark_id)simplex.size() - 1 > complex_dim)
         complex_dim = simplex.size() - 1;
     }
@@ -166,6 +173,46 @@ private:
     return true;
   }
 
+private:
+
+    /* \brief Adds recursively all the faces of a certain dimension dim-1 witnessed by the same witness.
+   * Iterator is needed to know until how far we can take landmarks to form simplexes.
+   * simplex is the prefix of the simplexes to insert.
+   * The landmark pointed by aw_it is added to all formed simplices.
+   */
+  template < typename SimplicialComplexForWitness >
+  void add_all_faces_of_dimension(int dim,
+                                  std::vector<Landmark_id>& vertices,
+                                  typename typeVectorVertex::iterator curr_it,
+                                  typename ActiveWitness::iterator aw_it,
+                                  std::vector<Landmark_id>& simplex,
+                                  SimplicialComplexForWitness& sc)
+  {
+    if (dim > 0)
+      while (curr_it != vertices.end()) {
+        simplex.push_back(curr_it->first);
+        typename ActiveWitness::iterator next_it = curr_it++;        
+        add_all_faces_of_dimension(dim-1,
+                                   vertices,
+                                   next_it,
+                                   aw_it,
+                                   simplex,
+                                   sc);
+        simplex.pop_back();
+        add_all_faces_of_dimension(dim,
+                                   vertices,
+                                   next_it,
+                                   aw_it,
+                                   simplex,
+                                   sc);
+      } 
+    else if (dim == 0) {
+      simplex.push_back(aw_it->first);
+      sc.insert_simplex(simplex, aw_it->second);
+      simplex.pop_back();
+    } 
+  }      
+  
   //@}
 };
 
