@@ -31,18 +31,18 @@ namespace rips_complex {
  * complex, that can be created from a `Rips_complex`.
  */
 struct SimplicialComplexForRips {
-  /** Handle to specify the simplex filtration value. */
+  /** \brief Handle to specify the simplex filtration value. */
   typedef unspecified Filtration_value;
 
-  /** Returns the number of vertices in the simplicial complex. */
-  std::size_t num_vertices();
-
-  /** \brief Inserts a a given range 'OneSkeletonGraph' in the simplicial complex. */
+  /** \brief Inserts a given range `Gudhi::rips_complex::Rips_complex::OneSkeletonGraph` in the simplicial complex. */
   template<class OneSkeletonGraph>
   void insert_graph(const OneSkeletonGraph& skel_graph);
 
   /** \brief Expands the simplicial complex containing only its one skeleton until a given maximal dimension. */
   void expansion(int max_dim);
+
+  /** \brief Returns the number of vertices in the simplicial complex. */
+  std::size_t num_vertices();
 
 };
 

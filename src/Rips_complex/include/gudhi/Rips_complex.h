@@ -47,20 +47,23 @@ namespace rips_complex {
  * \ingroup rips_complex
  * 
  * \details
- * The data structure is a one skeleton graph, or Rips graph, constructed from a point cloud, containing edges when
- * the edge length is less or equal to a given threshold. Edge length is computed from a user given function.
- * 
- * The complex is a template class requiring a Filtration_value type.
+ * The data structure is a one skeleton graph, or Rips graph, containing edges when the edge length is less or equal
+ * to a given threshold. Edge length is computed from a user given point cloud with a given distance function, or a
+ * distance matrix.
  * 
  * \tparam Filtration_value must meet `SimplicialComplexForRips` concept.
  */
 template<typename Filtration_value>
 class Rips_complex {
- private:
+ public:
+  /**
+   * \brief Type of the one skeleton graph stored inside the Rips complex structure.
+   */
   typedef typename boost::adjacency_list < boost::vecS, boost::vecS, boost::undirectedS
   , boost::property < vertex_filtration_t, Filtration_value >
-  , boost::property < edge_filtration_t, Filtration_value >> Graph_t;
+  , boost::property < edge_filtration_t, Filtration_value >> OneSkeletonGraph;
 
+ private:
   typedef int Vertex_handle;
 
  public:
@@ -68,9 +71,13 @@ class Rips_complex {
    *
    * @param[in] points Range of points.
    * @param[in] threshold rips value.
-   * @param[in] distance distance function that returns a Filtration_value from 2 given points.
+   * @param[in] distance distance function that returns a `Filtration_value` from 2 given points.
    * 
-   * The type InputPointRange must be a range for which std::begin and std::end return input iterators on a point.
+   * \tparam InputPointRange must be a range for which `std::begin` and `std::end` return input iterators on a
+   * point.
+   *
+   * \tparam Distance furnishes `operator()(const Point& p1, const Point& p2)`, where
+   * `Point` is a point from the `InputPointRange`, and that returns a `Filtration_value`.
    */
   template<typename InputPointRange, typename Distance >
   Rips_complex(const InputPointRange& points, Filtration_value threshold, Distance distance) {
@@ -82,9 +89,9 @@ class Rips_complex {
    * @param[in] distance_matrix Range of distances.
    * @param[in] threshold rips value.
    * 
-   * The type InputDistanceRange must have a \code size() \endcode method and on which distance_matrix[i][j] returns
-   * the distance between points \f$i\f$ and \f$j\f$ as long as \f$ 0 \subseteq i \subseteq j \subseteq
-   * distance_matrix.size().\f$
+   * \tparam InputDistanceRange must have a `size()` method and on which `distance_matrix[i][j]` returns
+   * the distance between points \f$i\f$ and \f$j\f$ as long as \f$ 0 \leqslant i \leqslant j \leqslant
+   * distance\_matrix.size().\f$
    */
   template<typename InputDistanceRange>
   Rips_complex(const InputDistanceRange& distance_matrix, Filtration_value threshold) {
@@ -99,7 +106,7 @@ class Rips_complex {
    * 
    * @param[in] complex SimplicialComplexForRips to be created.
    * @param[in] dim_max graph expansion for rips until this given maximal dimension.
-   * @exception std::invalid_argument In debug mode, if \code complex.num_vertices() \endcode does not return 0.
+   * @exception std::invalid_argument In debug mode, if `complex.num_vertices()` does not return 0.
    *
    */
   template <typename SimplicialComplexForRips>
@@ -119,8 +126,11 @@ class Rips_complex {
    * If points contains n elements, the proximity graph is the graph with n vertices, and an edge [u,v] iff the
    * distance function between points u and v is smaller than threshold.
    *
-   * \tparam The type InputPointRange furnishes .begin() and .end() methods, that return iterators with
-   * value_type Point.
+   * \tparam InputPointRange furnishes `.begin()` and `.end()`
+   * methods.
+   *
+   * \tparam Distance furnishes `operator()(const Point& p1, const Point& p2)`, where
+   * `Point` is a point from the `InputPointRange`, and that returns a `Filtration_value`.
    */
   template< typename InputPointRange, typename Distance >
   void compute_proximity_graph(const InputPointRange& points, Filtration_value threshold,
@@ -150,13 +160,13 @@ class Rips_complex {
     // Creates the proximity graph from edges and sets the property with the filtration value.
     // Number of points is labeled from 0 to idx_u-1
     // --------------------------------------------------------------------------------------------
-    // Do not use : rips_skeleton_graph_ = Graph_t(...) -> deep copy of the graph (boost graph is not move-enabled)
-    rips_skeleton_graph_.~Graph_t();
-    new(&rips_skeleton_graph_)Graph_t(edges.begin(), edges.end(), edges_fil.begin(), idx_u);
+    // Do not use : rips_skeleton_graph_ = OneSkeletonGraph(...) -> deep copy of the graph (boost graph is not move-enabled)
+    rips_skeleton_graph_.~OneSkeletonGraph();
+    new(&rips_skeleton_graph_)OneSkeletonGraph(edges.begin(), edges.end(), edges_fil.begin(), idx_u);
 
     auto vertex_prop = boost::get(vertex_filtration_t(), rips_skeleton_graph_);
 
-    using vertex_iterator = typename boost::graph_traits<Graph_t>::vertex_iterator;
+    using vertex_iterator = typename boost::graph_traits<OneSkeletonGraph>::vertex_iterator;
     vertex_iterator vi, vi_end;
     for (std::tie(vi, vi_end) = boost::vertices(rips_skeleton_graph_);
          vi != vi_end; ++vi) {
@@ -165,7 +175,7 @@ class Rips_complex {
   }
 
  private:
-  Graph_t rips_skeleton_graph_;
+  OneSkeletonGraph rips_skeleton_graph_;
 };
 
 }  // namespace rips_complex
