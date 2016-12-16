@@ -79,16 +79,15 @@ template<typename SkBlComplex> class Persistence_compute {
     Rips_complex rips_complex(points, params.threshold, Euclidean_distance());
 
     Simplex_tree st;
-    if (rips_complex.create_complex(st, params.max_dim)) {
-      Persistent_cohomology pcoh(st);
-      // initializes the coefficient field for homology
-      pcoh.init_coefficients(params.p);
-      // put params.min_pers
-      pcoh.compute_persistent_cohomology(params.min_pers);
-      stream << "persistence: \n";
-      stream << "p dimension birth death: \n";
-      pcoh.output_diagram(stream);
-    }
+    rips_complex.create_complex(st, params.max_dim);
+    Persistent_cohomology pcoh(st);
+    // initializes the coefficient field for homology
+    pcoh.init_coefficients(params.p);
+    // put params.min_pers
+    pcoh.compute_persistent_cohomology(params.min_pers);
+    stream << "persistence: \n";
+    stream << "p dimension birth death: \n";
+    pcoh.output_diagram(stream);
   }
 };
 
