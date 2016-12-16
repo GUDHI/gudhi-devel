@@ -34,6 +34,12 @@ double bottleneck_distance_approx(Persistence_graph& g, double e) {
     double b_lower_bound = 0.;
     double b_upper_bound = g.diameter_bound();
     const double alpha = std::pow(g.size(), 1./5.);
+    if(e < std::numeric_limits<double>::epsilon() * alpha){
+        e = std::numeric_limits<double>::epsilon() * alpha;
+#ifdef DEBUG_TRACES
+         std::cout << "Epsilon user given value is less than eps_min. Forced to eps_min by the application" << std::endl;
+#endif  // DEBUG_TRACES
+    }
     Graph_matching m(g);
     Graph_matching biggest_unperfect(g);
     while (b_upper_bound - b_lower_bound > 2*e) {
@@ -73,18 +79,18 @@ double bottleneck_distance_exact(Persistence_graph& g) {
     return sd.at(lower_bound_i);
 }
 
-/** \brief Function to use in order to compute the Bottleneck distance between two persistence diagrams (see Concepts).
- * If the last parameter e is not 0 (default value if not explicited), you get an additive e-approximation.
+/** \brief Function to use in order to compute the Bottleneck distance between two persistence diagrams (see concepts).
+ *  If the last parameter e is not 0, you get an additive e-approximation, which is a lot faster to compute whatever is e.
+ *  Thus, by default, e is a very small positive double, actually the smallest double possible such that the floating-point inaccuracies don't lead to a failure of the algorithm.
  *
  * \ingroup bottleneck_distance
  */
 template<typename Persistence_diagram1, typename Persistence_diagram2>
-double bottleneck_distance(const Persistence_diagram1 &diag1, const Persistence_diagram2 &diag2, double e=0.) {
+double bottleneck_distance(const Persistence_diagram1 &diag1, const Persistence_diagram2 &diag2, double e=std::numeric_limits<double>::epsilon()) {
     Persistence_graph g(diag1, diag2, e);
     if(g.bottleneck_alive() == std::numeric_limits<double>::infinity())
         return std::numeric_limits<double>::infinity();
-    double b = (e == 0. ? bottleneck_distance_exact(g) : bottleneck_distance_approx(g, e));
-    return std::max(g.bottleneck_alive(),b);
+    return std::max(g.bottleneck_alive(), e == 0. ? bottleneck_distance_exact(g) : bottleneck_distance_approx(g, e));
 }
 
 }  // namespace persistence_diagram
