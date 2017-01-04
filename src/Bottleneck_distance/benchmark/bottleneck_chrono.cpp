@@ -4,7 +4,7 @@
  *
  *    Author:       Francois Godi
  *
- *    Copyright (C) 2015  INRIA (France)
+ *    Copyright (C) 2015  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -28,35 +28,35 @@
 using namespace Gudhi::persistence_diagram;
 
 
-double upper_bound = 400.; // any real >0
+double upper_bound = 400.;  // any real > 0
 
-int main(){
-    std::ofstream objetfichier;
-    objetfichier.open("results.csv", std::ios::out);
+int main() {
+  std::ofstream result_file;
+  result_file.open("results.csv", std::ios::out);
 
-    for(int n = 1000; n<=10000; n+=1000){
-    std::uniform_real_distribution<double> unif1(0.,upper_bound);
-    std::uniform_real_distribution<double> unif2(upper_bound/1000.,upper_bound/100.);
+  for (int n = 1000; n <= 10000; n += 1000) {
+    std::uniform_real_distribution<double> unif1(0., upper_bound);
+    std::uniform_real_distribution<double> unif2(upper_bound / 1000., upper_bound / 100.);
     std::default_random_engine re;
     std::vector< std::pair<double, double> > v1, v2;
     for (int i = 0; i < n; i++) {
-        double a = unif1(re);
-        double b = unif1(re);
-        double x = unif2(re);
-        double y = unif2(re);
-        v1.emplace_back(std::min(a,b), std::max(a,b));
-        v2.emplace_back(std::min(a,b)+std::min(x,y), std::max(a,b)+std::max(x,y));
-        if(i%5==0)
-            v1.emplace_back(std::min(a,b),std::min(a,b)+x);
-        if(i%3==0)
-            v2.emplace_back(std::max(a,b),std::max(a,b)+y);
+      double a = unif1(re);
+      double b = unif1(re);
+      double x = unif2(re);
+      double y = unif2(re);
+      v1.emplace_back(std::min(a, b), std::max(a, b));
+      v2.emplace_back(std::min(a, b) + std::min(x, y), std::max(a, b) + std::max(x, y));
+      if (i % 5 == 0)
+        v1.emplace_back(std::min(a, b), std::min(a, b) + x);
+      if (i % 3 == 0)
+        v2.emplace_back(std::max(a, b), std::max(a, b) + y);
     }
     std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
     double b = bottleneck_distance(v1, v2);
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    typedef std::chrono::duration<int,std::milli> millisecs_t;
-    millisecs_t duration(std::chrono::duration_cast<millisecs_t>(end-start));
-    objetfichier << n << ";" << duration.count() << ";" << b << std::endl;
-    }
-    objetfichier.close();
+    typedef std::chrono::duration<int, std::milli> millisecs_t;
+    millisecs_t duration(std::chrono::duration_cast<millisecs_t>(end - start));
+    result_file << n << ";" << duration.count() << ";" << b << std::endl;
+  }
+  result_file.close();
 }

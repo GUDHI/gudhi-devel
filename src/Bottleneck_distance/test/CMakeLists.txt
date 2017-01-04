@@ -17,7 +17,6 @@ if(CGAL_FOUND)
   if (NOT CGAL_VERSION VERSION_LESS 4.8.0)
     if (EIGEN3_FOUND)
       add_executable ( bottleneckUT bottleneck_unit_test.cpp )
-      add_executable ( bottleneck_chrono bottleneck_chrono.cpp )
       target_link_libraries(bottleneckUT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
       # Unitary tests

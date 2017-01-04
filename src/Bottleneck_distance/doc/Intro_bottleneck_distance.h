@@ -4,7 +4,7 @@
  *
  *    Author:       François Godi
  *
- *    Copyright (C) 2015  INRIA (France)
+ *    Copyright (C) 2015  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DOC_BOTTLENECK_DISTANCE_H_
-#define DOC_BOTTLENECK_DISTANCE_H_
+#ifndef DOC_BOTTLENECK_DISTANCE_INTRO_BOTTLENECK_DISTANCE_H_
+#define DOC_BOTTLENECK_DISTANCE_INTRO_BOTTLENECK_DISTANCE_H_
 
 // needs namespace for Doxygen to link on classes
 namespace Gudhi {
@@ -48,3 +48,4 @@ namespace bottleneck_distance {
 
 }  // namespace Gudhi
 
+#endif  // DOC_BOTTLENECK_DISTANCE_INTRO_BOTTLENECK_DISTANCE_H_

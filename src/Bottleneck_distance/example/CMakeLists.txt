@@ -8,6 +8,8 @@ if(CGAL_FOUND)
     if (EIGEN3_FOUND)
       add_executable (bottleneck_read_file_example bottleneck_read_file_example.cpp)
       add_executable (bottleneck_basic_example bottleneck_basic_example.cpp)
+
+      add_test(bottleneck_basic_example ${CMAKE_CURRENT_BINARY_DIR}/bottleneck_basic_example)
     endif()
   endif ()
 endif()
