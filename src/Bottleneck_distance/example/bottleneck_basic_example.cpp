@@ -2,9 +2,9 @@
  *    (Geometric Understanding in Higher Dimensions) is a generic C++
  *    library for computational topology.
  *
- *    Author(s):       Francois Godi
+ *    Authors:       Francois Godi, small modifications by Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA Saclay (France)
+ *    Copyright (C) 2015  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -20,21 +20,29 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "gudhi/Graph_matching.h"
+#include <gudhi/Bottleneck.h>
 #include <iostream>
 
-using namespace Gudhi::bottleneck;
-
 int main() {
-  int n = 100;
+
   std::vector< std::pair<double, double> > v1, v2;
-  for (int i = 0; i < n; i++) {
-    int a = rand() % n;
-    v1.emplace_back(a, a + rand() % (n - a));
-    int b = rand() % n;
-    v2.emplace_back(b, b + rand() % (n - b));
-  }
-  // v1 and v2 are persistence diagrams containing each 100 randoms points.
-  double b = bottleneck_distance(v1, v2, 0);
-  std::cout << b << std::endl;
+
+  v1.emplace_back(2.7, 3.7);
+  v1.emplace_back(9.6, 14.);
+  v1.emplace_back(34.2, 34.974);
+  v1.emplace_back(3., std::numeric_limits<double>::infinity());
+
+  v2.emplace_back(2.8, 4.45);
+  v2.emplace_back(9.5, 14.1);
+  v2.emplace_back(3.2, std::numeric_limits<double>::infinity());
+
+
+  double b = Gudhi::persistence_diagram::bottleneck_distance(v1, v2);
+
+  std::cout << "Bottleneck distance = " << b << std::endl;
+
+  b = Gudhi::persistence_diagram::bottleneck_distance(v1, v2, 0.1);
+
+  std::cout << "Approx bottleneck distance = " << b << std::endl;
+
 }
