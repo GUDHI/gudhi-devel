@@ -145,7 +145,8 @@ void choose_n_farthest_points(Kernel const& k,
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_int_distribution<> dis(0, (input_pts.size() - 1));
-  int starting_point = dis(gen);
+  std::size_t starting_point = dis(gen);
+
   choose_n_farthest_points(k, input_pts, final_size, starting_point, output_it);
 }
 

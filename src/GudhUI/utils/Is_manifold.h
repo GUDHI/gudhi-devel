@@ -76,7 +76,6 @@ template<typename SkBlComplex> class Is_manifold {
 
   bool is_k_sphere(Vertex_handle v, int k) {
     auto link = input_complex_.link(v);
-    Edge_contractor<Complex> contractor(link, link.num_vertices() - 1);
     return (is_sphere_simplex(link) == k);
   }
 

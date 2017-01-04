@@ -57,7 +57,9 @@ void pick_n_random_points(Point_container const &points,
 #endif
 
   std::size_t nbP = boost::size(points);
-  assert(nbP >= final_size);
+  if (final_size > nbP)
+      final_size = nbP;
+
   std::vector<int> landmarks(nbP);
   std::iota(landmarks.begin(), landmarks.end(), 0);
 

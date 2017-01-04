@@ -192,10 +192,9 @@ static void generate_uniform_points_on_torus_d(const Kernel &k, int dim, std::si
                                                double radius_noise_percentage = 0.,
                                                std::vector<typename Kernel::FT> current_point = std::vector<typename Kernel::FT>()) {
   CGAL::Random rng;
-  if (current_point.size() == 2 * dim) {
-    *out++ = k.construct_point_d_object()(
-                                          static_cast<int> (current_point.size()),
-                                          current_point.begin(), current_point.end());
+  int point_size = static_cast<int>(current_point.size());
+  if (point_size == 2 * dim) {
+    *out++ = k.construct_point_d_object()(point_size, current_point.begin(), current_point.end());
   } else {
     for (std::size_t slice_idx = 0; slice_idx < num_slices; ++slice_idx) {
       double radius_noise_ratio = 1.;
