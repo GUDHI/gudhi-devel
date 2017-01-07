@@ -21,8 +21,7 @@
 #ifndef CGAL_ORTHOGONAL_INCREMENTAL_NEIGHBOR_SEARCH
 #define CGAL_ORTHOGONAL_INCREMENTAL_NEIGHBOR_SEARCH
 
-#include "CGAL/Kd_tree.h"
-
+#include <CGAL/Kd_tree.h>
 #include <cstring>
 #include <list>
 #include <queue>

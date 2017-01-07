@@ -96,6 +96,21 @@ if (NOT CMAKE_VERSION VERSION_LESS 2.8.11)
       endif()
     endforeach()
   
+    # Patches
+    file(GLOB GUDHI_PATCHES_FILES ${CMAKE_SOURCE_DIR}/src/${GUDHI_MODULE}/include/gudhi_patches/*)
+
+    foreach(GUDHI_PATCHES_FILE ${GUDHI_PATCHES_FILES})
+      get_filename_component(GUDHI_PATCHES_FILE_NAME ${GUDHI_PATCHES_FILE} NAME)
+      # GUDHI_PATCHES_FILE can be a file or a directory
+      if(IS_DIRECTORY ${GUDHI_PATCHES_FILE})
+        add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
+                           copy_directory ${GUDHI_PATCHES_FILE} ${GUDHI_USER_VERSION_DIR}/include/gudhi/${GUDHI_PATCHES_FILE_NAME})
+      else()
+        add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
+                           copy ${GUDHI_PATCHES_FILE} ${GUDHI_USER_VERSION_DIR}/include/gudhi/${GUDHI_PATCHES_FILE_NAME})
+      endif()
+    endforeach()
+
     # concept files
     file(GLOB GUDHI_CONCEPT_FILES ${CMAKE_SOURCE_DIR}/src/${GUDHI_MODULE}/concept/*.h)
   
