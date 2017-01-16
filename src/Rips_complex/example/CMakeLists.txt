@@ -22,9 +22,8 @@ if (TBB_FOUND)
   target_link_libraries(ripscsvdistancereader ${TBB_LIBRARIES})
 endif()
 
-add_test(oneskeletonripspoints ${CMAKE_CURRENT_BINARY_DIR}/oneskeletonripspoints 12.0)
-
-add_test(oneskeletonripsdistance ${CMAKE_CURRENT_BINARY_DIR}/oneskeletonripspoints 1.0)
+add_test(oneskeletonripspoints ${CMAKE_CURRENT_BINARY_DIR}/oneskeletonripspoints)
+add_test(oneskeletonripsdistance ${CMAKE_CURRENT_BINARY_DIR}/oneskeletonripsdistance)
 
 # Do not forget to copy test files in current binary dir
 file(COPY "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)

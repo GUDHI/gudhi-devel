@@ -7,18 +7,7 @@
 #include <vector>
 #include <limits>  // for std::numeric_limits
 
-void usage(int nbArgs, char * const progName) {
-  std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
-  std::cerr << "Usage: " << progName << " threshold\n";
-  std::cerr << "       i.e.: " << progName << " 12.0\n";
-  exit(-1);  // ----- >>
-}
-
-int main(int argc, char **argv) {
-  if (argc != 2) usage(argc, argv[0]);
-
-  double threshold = atof(argv[1]);
-
+int main() {
   // Type definitions
   using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
   using Filtration_value = Simplex_tree::Filtration_value;
@@ -42,6 +31,7 @@ int main(int argc, char **argv) {
   // ----------------------------------------------------------------------------
   // Init of a rips complex from points
   // ----------------------------------------------------------------------------
+  double threshold = 1.0;
   Rips_complex rips_complex_from_points(distances, threshold);
 
   Simplex_tree stree;

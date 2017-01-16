@@ -69,9 +69,9 @@ namespace rips_complex {
  * \include Rips_complex/example_one_skeleton_rips_from_points.cpp
  * 
  * When launching (rips maximal distance between 2 points is 12.0, is expanded until dimension 1 - one skeleton graph
- * with other words):
+ * in other words):
  * 
- * \code $> ./oneskeletonripspoints 12.0
+ * \code $> ./oneskeletonripspoints
  * \endcode
  *
  * the program output is:
@@ -114,7 +114,7 @@ namespace rips_complex {
  * When launching (rips maximal distance between 2 points is 1.0, is expanded until dimension 1 - one skeleton graph
  * with other words):
  * 
- * \code $> ./oneskeletonripsdistance 1.0
+ * \code $> ./oneskeletonripsdistance
  * \endcode
  *
  * the program output is:
