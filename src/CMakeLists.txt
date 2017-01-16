@@ -116,6 +116,7 @@ else()
   add_subdirectory(example/Spatial_searching)
   add_subdirectory(example/Subsampling)
   add_subdirectory(example/Tangential_complex)
+  add_subdirectory(example/Bottleneck_distance)
 
   # data points generator
   add_subdirectory(data/points/generator)

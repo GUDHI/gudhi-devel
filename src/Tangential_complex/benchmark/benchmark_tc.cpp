@@ -161,7 +161,7 @@ typename Kernel, typename OutputIteratorPoints>
 bool load_points_from_file(
                            const std::string &filename,
                            OutputIteratorPoints points,
-                           std::size_t only_first_n_points = std::numeric_limits<std::size_t>::max()) {
+                           std::size_t only_first_n_points = (std::numeric_limits<std::size_t>::max)()) {
   typedef typename Kernel::Point_d Point;
 
   std::ifstream in(filename);
@@ -196,7 +196,7 @@ bool load_points_and_tangent_space_basis_from_file(
                                                    OutputIteratorPoints points,
                                                    OutputIteratorTS tangent_spaces,
                                                    int intrinsic_dim,
-                                                   std::size_t only_first_n_points = std::numeric_limits<std::size_t>::max()) {
+                                                   std::size_t only_first_n_points = (std::numeric_limits<std::size_t>::max)()) {
   typedef typename Kernel::Point_d Point;
   typedef typename Kernel::Vector_d Vector;
 

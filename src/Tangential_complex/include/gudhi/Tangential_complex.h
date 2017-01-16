@@ -63,6 +63,7 @@
 #include <iterator>
 #include <cmath>  // for std::sqrt
 #include <string>
+#include <cstddef>  // for std::size_t
 
 #ifdef GUDHI_USE_TBB
 #include <tbb/parallel_for.h>
@@ -82,7 +83,7 @@ using namespace internal;
 
 class Vertex_data {
  public:
-  Vertex_data(std::size_t data = std::numeric_limits<std::size_t>::max())
+  Vertex_data(std::size_t data = (std::numeric_limits<std::size_t>::max)())
       : m_data(data) { }
 
   operator std::size_t() {
@@ -121,11 +122,12 @@ class Vertex_data {
  * \tparam Triangulation_ is the type used for storing the local regular triangulations. We highly recommend to use the default value (`CGAL::Regular_triangulation`).
  *
  */
-template <
-typename Kernel_,  // ambiant kernel
-typename DimensionTag,  // intrinsic dimension
-typename Concurrency_tag = CGAL::Parallel_tag,
-typename Triangulation_ = CGAL::Default
+template
+<
+  typename Kernel_,  // ambiant kernel
+  typename DimensionTag,  // intrinsic dimension
+  typename Concurrency_tag = CGAL::Parallel_tag,
+  typename Triangulation_ = CGAL::Default
 >
 class Tangential_complex {
   typedef Kernel_ K;
@@ -136,19 +138,20 @@ class Tangential_complex {
 
   typedef typename CGAL::Default::Get
   <
-  Triangulation_,
-  CGAL::Regular_triangulation
-  <
-  CGAL::Epick_d<DimensionTag>,
-  CGAL::Triangulation_data_structure
-  <
-  typename CGAL::Epick_d<DimensionTag>::Dimension,
-  CGAL::Triangulation_vertex<CGAL::Regular_triangulation_traits_adapter<
-  CGAL::Epick_d<DimensionTag> >, Vertex_data >,
-  CGAL::Triangulation_full_cell<CGAL::Regular_triangulation_traits_adapter<
-  CGAL::Epick_d<DimensionTag> > >
-  >
-  >
+    Triangulation_,
+    CGAL::Regular_triangulation
+    <
+      CGAL::Epick_d<DimensionTag>,
+      CGAL::Triangulation_data_structure
+      <
+        typename CGAL::Epick_d<DimensionTag>::Dimension,
+        CGAL::Triangulation_vertex
+        <
+          CGAL::Regular_triangulation_traits_adapter< CGAL::Epick_d<DimensionTag> >, Vertex_data
+        >,
+        CGAL::Triangulation_full_cell<CGAL::Regular_triangulation_traits_adapter< CGAL::Epick_d<DimensionTag> > >
+      >
+    >
   >::type Triangulation;
   typedef typename Triangulation::Geom_traits Tr_traits;
   typedef typename Triangulation::Weighted_point Tr_point;
@@ -1046,7 +1049,7 @@ class Tangential_complex {
 #endif  // GUDHI_USE_TBB
 
   bool is_infinite(Simplex const& s) const {
-    return *s.rbegin() == std::numeric_limits<std::size_t>::max();
+    return *s.rbegin() == (std::numeric_limits<std::size_t>::max)();
   }
 
   // Output: "triangulation" is a Regular Triangulation containing at least the
@@ -1128,7 +1131,7 @@ class Tangential_complex {
 
         Tr_vertex_handle vh = triangulation.insert_if_in_star(proj_pt, center_vertex);
         // Tr_vertex_handle vh = triangulation.insert(proj_pt);
-        if (vh != Tr_vertex_handle()) {
+        if (vh != Tr_vertex_handle() && vh->data() == (std::numeric_limits<std::size_t>::max)()) {
 #ifdef GUDHI_TC_VERY_VERBOSE
           ++num_inserted_points;
 #endif
@@ -1290,6 +1293,8 @@ class Tangential_complex {
         if (index != i)
           incident_simplex.insert(index);
       }
+      GUDHI_CHECK(incident_simplex.size() == cur_dim_plus_1 - 1,
+        std::logic_error("update_star: wrong size of incident simplex"));
       star.push_back(incident_simplex);
     }
   }
@@ -1301,21 +1306,14 @@ class Tangential_complex {
                                             , bool normalize_basis = true
                                             , Orthogonal_space_basis *p_orth_space_basis = NULL
                                             ) {
-    unsigned int num_pts_for_pca = static_cast<unsigned int> (std::pow(GUDHI_TC_BASE_VALUE_FOR_PCA, m_intrinsic_dim));
+    unsigned int num_pts_for_pca = (std::min)(static_cast<unsigned int> (std::pow(GUDHI_TC_BASE_VALUE_FOR_PCA, m_intrinsic_dim)),
+                                              static_cast<unsigned int> (m_points.size()));
 
     // Kernel functors
     typename K::Construct_vector_d constr_vec =
         m_k.construct_vector_d_object();
     typename K::Compute_coordinate_d coord =
         m_k.compute_coordinate_d_object();
-    typename K::Squared_length_d sqlen =
-        m_k.squared_length_d_object();
-    typename K::Scaled_vector_d scaled_vec =
-        m_k.scaled_vector_d_object();
-    typename K::Scalar_product_d scalar_pdct =
-        m_k.scalar_product_d_object();
-    typename K::Difference_of_vectors_d diff_vec =
-        m_k.difference_of_vectors_d_object();
 
 #ifdef GUDHI_TC_USE_ANOTHER_POINT_SET_FOR_TANGENT_SPACE_ESTIM
     KNS_range kns_range = m_points_ds_for_tse.query_k_nearest_neighbors(
@@ -1390,7 +1388,8 @@ class Tangential_complex {
   // on it. Note that most points are duplicated.
 
   Tangent_space_basis compute_tangent_space(const Simplex &s, bool normalize_basis = true) {
-    unsigned int num_pts_for_pca = static_cast<unsigned int> (std::pow(GUDHI_TC_BASE_VALUE_FOR_PCA, m_intrinsic_dim));
+    unsigned int num_pts_for_pca = (std::min)(static_cast<unsigned int> (std::pow(GUDHI_TC_BASE_VALUE_FOR_PCA, m_intrinsic_dim)),
+                                              static_cast<unsigned int> (m_points.size()));
 
     // Kernel functors
     typename K::Construct_vector_d constr_vec =
@@ -1648,7 +1647,7 @@ class Tangential_complex {
     for (; it_point_idx != simplex.end(); ++it_point_idx) {
       std::size_t point_idx = *it_point_idx;
       // Don't check infinite simplices
-      if (point_idx == std::numeric_limits<std::size_t>::max())
+      if (point_idx == (std::numeric_limits<std::size_t>::max)())
         continue;
 
       Star const& star = m_stars[point_idx];
@@ -1687,7 +1686,7 @@ class Tangential_complex {
     for (; it_point_idx != s.end(); ++it_point_idx) {
       std::size_t point_idx = *it_point_idx;
       // Don't check infinite simplices
-      if (point_idx == std::numeric_limits<std::size_t>::max())
+      if (point_idx == (std::numeric_limits<std::size_t>::max)())
         continue;
 
       Star const& star = m_stars[point_idx];
@@ -1898,7 +1897,7 @@ class Tangential_complex {
 #ifdef GUDHI_TC_EXPORT_ALL_COORDS_IN_OFF
     int num_coords = m_ambient_dim;
 #else
-    int num_coords = std::min(m_ambient_dim, 3);
+    int num_coords = (std::min)(m_ambient_dim, 3);
 #endif
 
 #ifdef GUDHI_TC_EXPORT_NORMALS
@@ -1953,7 +1952,7 @@ class Tangential_complex {
       Triangulation const& tr = it_tr->tr();
       Tr_vertex_handle center_vh = it_tr->center_vertex();
 
-      if (&tr == NULL || tr.current_dimension() < m_intrinsic_dim)
+      if (tr.current_dimension() < m_intrinsic_dim)
         continue;
 
       // Color for this star
@@ -2152,7 +2151,7 @@ class Tangential_complex {
       typedef std::vector<Simplex> Triangles;
       Triangles triangles;
 
-      std::size_t num_vertices = c.size();
+      int num_vertices = static_cast<int>(c.size());
       // Do not export smaller dimension simplices
       if (num_vertices < m_intrinsic_dim + 1)
         continue;
