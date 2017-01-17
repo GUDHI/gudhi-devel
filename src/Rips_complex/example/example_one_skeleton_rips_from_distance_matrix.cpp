@@ -9,7 +9,7 @@
 
 int main() {
   // Type definitions
-  using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
+  using Simplex_tree = Gudhi::Simplex_tree<>;
   using Filtration_value = Simplex_tree::Filtration_value;
   using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
   using Distance_matrix = std::vector<std::vector<Filtration_value>>;
