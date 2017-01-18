@@ -25,6 +25,7 @@
 
 #include <gudhi/Active_witness/Active_witness.h>
 #include <gudhi/Kd_tree_search.h>
+#include <gudhi/Witness_complex/all_faces_in.h>
 
 #include <utility>
 #include <vector>
@@ -208,35 +209,9 @@ private:
       } 
     return will_be_active;
   }
-  
-  /* \brief Check if the facets of the k-dimensional simplex witnessed 
-   *  by witness witness_id are already in the complex.
-   *  inserted_vertex is the handle of the (k+1)-th vertex witnessed by witness_id
-   */
-  template < typename SimplicialComplexForWitness >
-  bool all_faces_in(typeVectorVertex& simplex,
-                    double* filtration_value,
-                    SimplicialComplexForWitness& sc)
-  {
-    typedef typename SimplicialComplexForWitness::Simplex_handle Simplex_handle;
 
-    typeVectorVertex facet;
-    for (typename typeVectorVertex::iterator not_it = simplex.begin(); not_it != simplex.end(); ++not_it)
-      {
-        facet.clear();
-        for (typename typeVectorVertex::iterator it = simplex.begin(); it != simplex.end(); ++it)
-          if (it != not_it)
-            facet.push_back(*it);
-        Simplex_handle facet_sh = sc.find(facet);
-        if (facet_sh == sc.null_simplex())
-          return false;
-        else if (sc.filtration(facet_sh) > *filtration_value)
-          *filtration_value = sc.filtration(facet_sh);
-      }
-    return true;
-  }
 };
-
+  
 }  // namespace witness_complex
 
 }  // namespace Gudhi
