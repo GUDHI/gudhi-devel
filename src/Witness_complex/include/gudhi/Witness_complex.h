@@ -58,7 +58,6 @@ private:
   typedef Active_witness<Id_distance_pair, Nearest_landmark_range>   ActiveWitness;
   typedef std::list< ActiveWitness >                                 ActiveWitnessList;
   typedef std::vector< Landmark_id >                                 typeVectorVertex;
-  typedef std::pair< typeVectorVertex, Filtration_value>             typeSimplex;
 
   typedef Landmark_id Vertex_handle;
 

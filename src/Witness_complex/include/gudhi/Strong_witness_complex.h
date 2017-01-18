@@ -53,37 +53,21 @@ namespace witness_complex {
  * href="http://doc.cgal.org/latest/Kernel_23/classCGAL_1_1Dynamic__dimension__tag.html">CGAL::Dynamic_dimension_tag</a>
  * if you don't.
  */
-template< class Kernel_ >
+template< class Nearest_landmark_table_ >
 class Strong_witness_complex {
 private:
-  typedef Kernel_                                                 K;
-  typedef typename K::Point_d                                     Point_d;
-  typedef typename K::FT                                          FT;
-  typedef std::vector<Point_d>                                    Point_range;
-  typedef gss::Kd_tree_search<Kernel_, Point_range>               Kd_tree;
-  typedef typename Kd_tree::INS_range                             Nearest_landmark_range;
-  typedef typename std::vector<Nearest_landmark_range>            Nearest_landmark_table;
-  typedef typename Nearest_landmark_range::iterator               Nearest_landmark_row_iterator;
+  typedef typename Nearest_landmark_table_::value_type               Nearest_landmark_range;
+  typedef std::size_t                                                Witness_id;
+  typedef std::size_t                                                Landmark_id;
+  typedef std::pair<Landmark_id, double>                             Id_distance_pair;
+  typedef Active_witness<Id_distance_pair, Nearest_landmark_range>   ActiveWitness;
+  typedef std::list< ActiveWitness >                                 ActiveWitnessList;
+  typedef std::vector< Landmark_id >                                 typeVectorVertex;
   
-  typedef std::vector< double > Point_t;
-  typedef std::vector< Point_t > Point_Vector;
-
-  typedef FT Filtration_value;
-
-  
-  typedef std::size_t Witness_id;
-  typedef typename Nearest_landmark_range::Point_with_transformed_distance Id_distance_pair;
-  typedef typename Id_distance_pair::first_type Landmark_id;
-  typedef Active_witness<Id_distance_pair, Nearest_landmark_range> ActiveWitness;
-  typedef std::list< ActiveWitness > ActiveWitnessList;
-  typedef std::vector< Landmark_id > typeVectorVertex;
-  typedef std::pair< typeVectorVertex, Filtration_value> typeSimplex;
-
   typedef Landmark_id Vertex_handle;
   
  private:
-  Point_range                         witnesses_, landmarks_;
-  Kd_tree                             landmark_tree_;
+  Nearest_landmark_table_&              nearest_landmark_table_;
   
  public:
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -98,21 +82,9 @@ private:
    *           table internally, as well as witnesses from the range 'witnesses'.
    *           Both ranges should have value_type Kernel_::Point_d.
    */
-  template< typename LandmarkRange,
-            typename WitnessRange >
-  Strong_witness_complex(const LandmarkRange & landmarks,
-                         const WitnessRange &  witnesses)
-    : witnesses_(witnesses), landmarks_(landmarks), landmark_tree_(landmarks_)
+   Strong_witness_complex(Nearest_landmark_table_ & nearest_landmark_table)
+    : nearest_landmark_table_(nearest_landmark_table)
   {    
-  }
-
-  
-  /** \brief Returns the point corresponding to the given vertex.
-   */
-  template <typename Vertex_handle> 
-  Point_d get_point( Vertex_handle vertex ) const
-  {
-    return landmarks_[vertex];
   }
   
   /** \brief Outputs the strong witness complex of relaxation 'max_alpha_square' 
@@ -126,10 +98,9 @@ private:
    */
   template < typename SimplicialComplexForWitness >
   bool create_complex(SimplicialComplexForWitness& complex,
-                      FT  max_alpha_square,
+                      double  max_alpha_square,
                       Landmark_id limit_dimension = std::numeric_limits<Landmark_id>::max()-1)       
   {
-    std::size_t nbL = landmarks_.size();
     Landmark_id complex_dim = 0;
     if (complex.num_vertices() > 0) {
       std::cerr << "Strong witness complex cannot create complex - complex is not empty.\n";
@@ -143,14 +114,8 @@ private:
       std::cerr << "Strong witness complex cannot create complex - limit dimension must be non-negative.\n";
       return false;
     }
-    typeVectorVertex vv;
-    for (unsigned i = 0; i != nbL; ++i) {
-      // initial fill of 0-dimensional simplices
-      vv = {i};
-      complex.insert_simplex(vv, Filtration_value(0.0));
-    }
-    for (auto w: witnesses_) {
-      ActiveWitness aw(landmark_tree_.query_incremental_nearest_neighbors(w));
+    for (auto w: nearest_landmark_table_) {
+      ActiveWitness aw(w);
       typeVectorVertex simplex;
       typename ActiveWitness::iterator aw_it = aw.begin();
       float lim_dist2 = aw.begin()->second + max_alpha_square;
@@ -186,7 +151,7 @@ private:
                                   typeVectorVertex& vertices,
                                   typename typeVectorVertex::iterator curr_it,
                                   typename ActiveWitness::iterator aw_it,
-                                  FT filtration_value,
+                                  double filtration_value,
                                   typeVectorVertex& simplex,
                                   SimplicialComplexForWitness& sc)
   {

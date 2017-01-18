@@ -102,17 +102,33 @@ BOOST_AUTO_TEST_CASE(simple_witness_complex) {
   BOOST_CHECK(relaxed_complex_ne.num_simplices() == 239);
     
   
-  
-  EuclideanStrongWitnessComplex strong_witness_complex(landmarks,
-                                              witnesses);
+  // Strong complex : Euclidean version
+  EuclideanStrongWitnessComplex eucl_strong_witness_complex(landmarks,
+                                                            witnesses);
 
-  strong_witness_complex.create_complex(strong_relaxed_complex, 9.1);
-  strong_witness_complex.create_complex(strong_relaxed_complex2, 9.1, 2);
+  eucl_strong_witness_complex.create_complex(strong_relaxed_complex, 9.1);
+  eucl_strong_witness_complex.create_complex(strong_relaxed_complex2, 9.1, 2);
   
   std::cout << "strong_relaxed_complex.num_simplices() = " << strong_relaxed_complex.num_simplices() << std::endl; 
   BOOST_CHECK(strong_relaxed_complex.num_simplices() == 239);
 
   std::cout << "strong_relaxed_complex2.num_simplices() = " << strong_relaxed_complex2.num_simplices() << std::endl;
   BOOST_CHECK(strong_relaxed_complex2.num_simplices() == 92);
+
+
+  // Strong complex : non-Euclidean version
+  EuclideanStrongWitnessComplex strong_witness_complex(landmarks,
+                                                       witnesses);
+
+  strong_witness_complex.create_complex(strong_relaxed_complex_ne, 9.1);
+  strong_witness_complex.create_complex(strong_relaxed_complex2_ne, 9.1, 2);
+  
+  std::cout << "strong_relaxed_complex.num_simplices() = " << strong_relaxed_complex_ne.num_simplices() << std::endl; 
+  BOOST_CHECK(strong_relaxed_complex_ne.num_simplices() == 239);
+
+  std::cout << "strong_relaxed_complex2.num_simplices() = " << strong_relaxed_complex2_ne.num_simplices() << std::endl;
+  BOOST_CHECK(strong_relaxed_complex2_ne.num_simplices() == 92);
+
+
   // 8 vertices, 28 edges, 56 triangles
 }
