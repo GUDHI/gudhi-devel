@@ -41,12 +41,10 @@ namespace witness_complex {
 /**
  * \private
  * \class Witness_complex
- * \brief Constructs (weak) witness complex for the given sets of witnesses and landmarks.
+ * \brief Constructs (weak) witness complex for a given table of nearest landmarks with respect to witnesses.
  * \ingroup witness_complex
  *
- * \tparam Kernel_ requires a <a target="_blank"
- * href="http://doc.cgal.org/latest/Kernel_d/classCGAL_1_1Epick__d.html">CGAL::Epick_d</a> class, which
- * can be static if you know the ambiant dimension at compile-time, or dynamic if you don't.
+ * \tparam Nearest_landmark_table_ needs to be a range of a model of NearestLandmarkRange concept. 
 */
 template< class Nearest_landmark_table_ >
 class Witness_complex {
@@ -73,9 +71,8 @@ private:
 
   /**
    *  \brief Initializes member variables before constructing simplicial complex.
-   *  \details Records landmarks from the range 'landmarks' into a 
-   *           table internally, as well as witnesses from the range 'witnesses'.
-   *           Both ranges should have value_type Kernel_::Point_d.
+   *  \details Records nearest landmark table.
+      @param[in] nearest_landmark_table should be a range of a model of NearestLandmarkRange concept.
    */
 
   Witness_complex(Nearest_landmark_table_ & nearest_landmark_table)
@@ -98,7 +95,6 @@ private:
                       double  max_alpha_square,
                       Landmark_id limit_dimension = std::numeric_limits<Landmark_id>::max())       
   {
-    // std::size_t nbL = landmarks_.size();
     if (complex.num_vertices() > 0) {
       std::cerr << "Witness complex cannot create complex - complex is not empty.\n";
       return false;

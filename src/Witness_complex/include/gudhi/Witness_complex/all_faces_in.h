@@ -23,7 +23,7 @@ template < typename SimplicialComplexForWitness,
         for (typename Simplex::iterator it = simplex.begin(); it != simplex.end(); ++it)
           if (it != not_it)
             facet.push_back(*it);
-        typename SimplicialComplexForWitness::Simplex_handle facet_sh = sc.find(facet);
+        Simplex_handle facet_sh = sc.find(facet);
         if (facet_sh == sc.null_simplex())
           return false;
         else if (sc.filtration(facet_sh) > *filtration_value)
