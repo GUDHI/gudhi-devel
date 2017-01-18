@@ -27,7 +27,7 @@ namespace Gudhi {
 
 namespace witness_complex {
 
-/** \brief The concept Simplicial_Complex describes the requirements 
+/** \brief The concept SimplicialComplexForWitness describes the requirements 
  * for a type to implement a simplicial complex, 
  * used for example to build a Witness_complex. 
  */

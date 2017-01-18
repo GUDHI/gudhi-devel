@@ -44,7 +44,9 @@
    
    The two complexes described above are implemented in the corresponding classes 
    - Gudhi::witness_complex::Witness_complex
+   - Gudhi::witness_complex::Euclidean_witness_complex
    - Gudhi::witness_complex::Strong_witness_complex
+   - Gudhi::witness_complex::Euclidean_strong_witness_complex
 
    The construction of both of them follow the same scheme:
    1. Construct a search tree on landmarks (for that Gudhi::spatial_searching::Kd_tree_search is used internally).

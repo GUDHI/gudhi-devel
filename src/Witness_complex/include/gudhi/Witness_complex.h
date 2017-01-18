@@ -44,7 +44,9 @@ namespace witness_complex {
  * \brief Constructs (weak) witness complex for a given table of nearest landmarks with respect to witnesses.
  * \ingroup witness_complex
  *
- * \tparam Nearest_landmark_table_ needs to be a range of a model of NearestLandmarkRange concept. 
+ * \tparam Nearest_landmark_table_ needs to be a range of a range of nearest landmarks.
+ *         The range of nearest landmarks should admit a member type 'iterator'. The dereference type 
+ *         of the nearest landmark range iterator needs to be 'std::pair<std::size_t, double>'.
 */
 template< class Nearest_landmark_table_ >
 class Witness_complex {
@@ -72,7 +74,9 @@ private:
   /**
    *  \brief Initializes member variables before constructing simplicial complex.
    *  \details Records nearest landmark table.
-      @param[in] nearest_landmark_table should be a range of a model of NearestLandmarkRange concept.
+   *  @param[in] nearest_landmark_table needs to be a range of a range of nearest landmarks.
+   *         The range of nearest landmarks should admit a member type 'iterator'. The dereference type 
+   *         of the nearest landmark range iterator needs to be 'std::pair<std::size_t, double>'.
    */
 
   Witness_complex(Nearest_landmark_table_ & nearest_landmark_table)
