@@ -1,5 +1,5 @@
 #include <gudhi/Simplex_tree.h>
-#include <gudhi/Witness_complex.h>
+#include <gudhi/Euclidean_witness_complex.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Points_off_io.h>
 #include <gudhi/pick_n_random_points.h>
@@ -19,7 +19,7 @@ typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> K;
 typedef typename K::Point_d Point_d;
 
 typedef typename std::vector<Point_d> Point_vector;
-typedef typename Gudhi::witness_complex::Witness_complex<K> Witness_complex;
+typedef typename Gudhi::witness_complex::Euclidean_witness_complex<K> Witness_complex;
 typedef Gudhi::Simplex_tree<> SimplexTree;
 
 typedef int Vertex_handle;

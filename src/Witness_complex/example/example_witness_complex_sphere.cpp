@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 
 #include <gudhi/Simplex_tree.h>
-#include <gudhi/Witness_complex.h>
+#include <gudhi/Euclidean_witness_complex.h>
 #include <gudhi/pick_n_random_points.h>
 #include <gudhi/reader_utils.h>
 
@@ -32,7 +32,7 @@ void write_data(Data_range & data, std::string filename) {
 }
 
 int main(int argc, char * const argv[]) {
-  typedef Gudhi::witness_complex::Witness_complex<CGAL::Epick_d<CGAL::Dynamic_dimension_tag>> Witness_complex;
+  typedef Gudhi::witness_complex::Euclidean_witness_complex<CGAL::Epick_d<CGAL::Dynamic_dimension_tag>> Witness_complex;
   
   if (argc != 2) {
     std::cerr << "Usage: " << argv[0]
