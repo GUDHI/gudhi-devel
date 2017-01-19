@@ -45,7 +45,7 @@ int main(int argc, char * const argv[]) {
 
   std::vector< std::pair<int, double> > l_time;
 
-  // Read the point file
+  // Generate points
   for (int nbP = 500; nbP < 10000; nbP += 500) {
     // Construct the Simplex Tree
     Gudhi::Simplex_tree<> simplex_tree;
