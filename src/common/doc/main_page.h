@@ -346,6 +346,8 @@ make \endverbatim
  * Persistent_cohomology/rips_multifield_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2rips_persistence_8cpp-example.html">
  * Persistent_cohomology/rips_persistence.cpp</a>
+ * \li <a href="_persistent_cohomology_2rips_persistence_step_by_step_8cpp-example.html">
+ * Persistent_cohomology/rips_persistence_step_by_step.cpp</a>
  * \li <a href="_persistent_cohomology_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
  * Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2custom_persistence_sort_8cpp-example.html">
@@ -397,6 +399,7 @@ make \endverbatim
  * @example Persistent_cohomology/rips_distance_matrix_persistence.cpp
  * @example Persistent_cohomology/rips_persistence.cpp
  * @example Persistent_cohomology/custom_persistence_sort.cpp
+ * @example Persistent_cohomology/rips_persistence_step_by_step.cpp
  * @example Rips_complex/example_one_skeleton_rips_from_points.cpp
  * @example Rips_complex/example_rips_complex_from_off_file.cpp
  * @example Simplex_tree/mini_simplex_tree.cpp
