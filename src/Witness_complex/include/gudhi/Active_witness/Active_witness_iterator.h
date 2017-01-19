@@ -90,8 +90,10 @@ private :
         is_end_ = true;
         return;
       }
-      else 
+      else {
+        //aw_->iterator_last_ = ++(aw_->iterator_last_);
         aw_->nearest_landmark_table_.push_back(*(aw_->iterator_last_));
+      }
     }
     lh_++;
   }
