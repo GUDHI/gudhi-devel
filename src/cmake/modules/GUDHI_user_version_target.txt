@@ -48,7 +48,7 @@ if (NOT CMAKE_VERSION VERSION_LESS 2.8.11)
   add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                      copy_directory ${CMAKE_SOURCE_DIR}/src/GudhUI ${GUDHI_USER_VERSION_DIR}/GudhUI)
   
-  set(GUDHI_MODULES "common;Alpha_complex;Bitmap_cubical_complex;Contraction;Hasse_complex;Persistent_cohomology;Simplex_tree;Skeleton_blocker;Spatial_searching;Subsampling;Tangential_complex;Witness_complex")
+  set(GUDHI_MODULES "common;Alpha_complex;Bitmap_cubical_complex;Bottleneck_distance;Contraction;Hasse_complex;Persistent_cohomology;Simplex_tree;Skeleton_blocker;Spatial_searching;Subsampling;Tangential_complex;Witness_complex")
   
   foreach(GUDHI_MODULE ${GUDHI_MODULES})
     # doc files
@@ -81,21 +81,21 @@ if (NOT CMAKE_VERSION VERSION_LESS 2.8.11)
       endif()
     endforeach()
   
-    # include files
-    file(GLOB GUDHI_INCLUDE_FILES ${CMAKE_SOURCE_DIR}/src/${GUDHI_MODULE}/include/gudhi/*)
+    # include files and patches
+    file(GLOB GUDHI_INCLUDE_FILES ${CMAKE_SOURCE_DIR}/src/${GUDHI_MODULE}/include/*)
   
     foreach(GUDHI_INCLUDE_FILE ${GUDHI_INCLUDE_FILES})
       get_filename_component(GUDHI_INCLUDE_FILE_NAME ${GUDHI_INCLUDE_FILE} NAME)
       # GUDHI_INCLUDE_FILE can be a file or a directory
       if(IS_DIRECTORY ${GUDHI_INCLUDE_FILE})
         add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
-                           copy_directory ${GUDHI_INCLUDE_FILE} ${GUDHI_USER_VERSION_DIR}/include/gudhi/${GUDHI_INCLUDE_FILE_NAME})
+                           copy_directory ${GUDHI_INCLUDE_FILE} ${GUDHI_USER_VERSION_DIR}/include/${GUDHI_INCLUDE_FILE_NAME})
       else()
         add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
-                           copy ${GUDHI_INCLUDE_FILE} ${GUDHI_USER_VERSION_DIR}/include/gudhi/${GUDHI_INCLUDE_FILE_NAME})
+                           copy ${GUDHI_INCLUDE_FILE} ${GUDHI_USER_VERSION_DIR}/include/${GUDHI_INCLUDE_FILE_NAME})
       endif()
     endforeach()
-  
+
     # concept files
     file(GLOB GUDHI_CONCEPT_FILES ${CMAKE_SOURCE_DIR}/src/${GUDHI_MODULE}/concept/*.h)
   

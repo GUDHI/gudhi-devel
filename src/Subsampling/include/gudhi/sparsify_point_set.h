@@ -64,8 +64,6 @@ sparsify_point_set(
   typedef typename Gudhi::spatial_searching::Kd_tree_search<
       Kernel, Point_range> Points_ds;
 
-  typename Kernel::Squared_distance_d sqdist = k.squared_distance_d_object();
-
 #ifdef GUDHI_SUBSAMPLING_PROFILING
   Gudhi::Clock t;
 #endif

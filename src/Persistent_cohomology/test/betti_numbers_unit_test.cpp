@@ -84,6 +84,8 @@ BOOST_AUTO_TEST_CASE( plain_homology_betti_numbers )
   // 2  1 0 inf 
   // means that in Z/2Z-homology, the Betti numbers are b0=2 and b1=1.
   
+  std::cout << "BETTI NUMBERS" << std::endl;
+
   BOOST_CHECK(pcoh.betti_number(0) == 2);
   BOOST_CHECK(pcoh.betti_number(1) == 1);
   BOOST_CHECK(pcoh.betti_number(2) == 0);
@@ -93,6 +95,8 @@ BOOST_AUTO_TEST_CASE( plain_homology_betti_numbers )
   BOOST_CHECK(bns[0] == 2);
   BOOST_CHECK(bns[1] == 1);
   BOOST_CHECK(bns[2] == 0);
+
+  std::cout << "GET PERSISTENT PAIRS" << std::endl;
   
   // Custom sort and output persistence
   cmp_intervals_by_dim_then_length<Mini_simplex_tree> cmp(&st);
@@ -115,6 +119,33 @@ BOOST_AUTO_TEST_CASE( plain_homology_betti_numbers )
   BOOST_CHECK(st.dimension(get<0>(persistent_pairs[2])) == 0);
   BOOST_CHECK(st.filtration(get<0>(persistent_pairs[2])) == 0);
   BOOST_CHECK(get<1>(persistent_pairs[2]) == st.null_simplex());
+
+  std::cout << "INTERVALS IN DIMENSION" << std::endl;
+
+  auto intervals_in_dimension_0 = pcoh.intervals_in_dimension(0);
+  std::cout << "intervals_in_dimension_0.size() = " << intervals_in_dimension_0.size() << std::endl;
+  for (std::size_t i = 0; i < intervals_in_dimension_0.size(); i++)
+    std::cout << "intervals_in_dimension_0[" << i << "] = [" << intervals_in_dimension_0[i].first << "," <<
+                 intervals_in_dimension_0[i].second << "]" << std::endl;
+  BOOST_CHECK(intervals_in_dimension_0.size() == 2);
+  BOOST_CHECK(intervals_in_dimension_0[0].first == 0);
+  BOOST_CHECK(intervals_in_dimension_0[0].second == std::numeric_limits<Mini_simplex_tree::Filtration_value>::infinity());
+  BOOST_CHECK(intervals_in_dimension_0[1].first == 0);
+  BOOST_CHECK(intervals_in_dimension_0[1].second == std::numeric_limits<Mini_simplex_tree::Filtration_value>::infinity());
+
+
+  auto intervals_in_dimension_1 = pcoh.intervals_in_dimension(1);
+  std::cout << "intervals_in_dimension_1.size() = " << intervals_in_dimension_1.size() << std::endl;
+  for (std::size_t i = 0; i < intervals_in_dimension_1.size(); i++)
+    std::cout << "intervals_in_dimension_1[" << i << "] = [" << intervals_in_dimension_1[i].first << "," <<
+                 intervals_in_dimension_1[i].second << "]" << std::endl;
+  BOOST_CHECK(intervals_in_dimension_1.size() == 1);
+  BOOST_CHECK(intervals_in_dimension_1[0].first == 0);
+  BOOST_CHECK(intervals_in_dimension_1[0].second == std::numeric_limits<Mini_simplex_tree::Filtration_value>::infinity());
+
+  auto intervals_in_dimension_2 = pcoh.intervals_in_dimension(2);
+  std::cout << "intervals_in_dimension_2.size() = " << intervals_in_dimension_2.size() << std::endl;
+  BOOST_CHECK(intervals_in_dimension_2.size() == 0);
 }
 
 using Simplex_tree = Gudhi::Simplex_tree<>;
@@ -231,4 +262,30 @@ BOOST_AUTO_TEST_CASE( betti_numbers )
   BOOST_CHECK(st.dimension(get<0>(persistent_pairs[2])) == 0);
   BOOST_CHECK(st.filtration(get<0>(persistent_pairs[2])) == 1);
   BOOST_CHECK(get<1>(persistent_pairs[2]) == st.null_simplex());
+
+  std::cout << "INTERVALS IN DIMENSION" << std::endl;
+
+  auto intervals_in_dimension_0 = pcoh.intervals_in_dimension(0);
+  std::cout << "intervals_in_dimension_0.size() = " << intervals_in_dimension_0.size() << std::endl;
+  for (std::size_t i = 0; i < intervals_in_dimension_0.size(); i++)
+    std::cout << "intervals_in_dimension_0[" << i << "] = [" << intervals_in_dimension_0[i].first << "," <<
+                 intervals_in_dimension_0[i].second << "]" << std::endl;
+  BOOST_CHECK(intervals_in_dimension_0.size() == 2);
+  BOOST_CHECK(intervals_in_dimension_0[0].first == 2);
+  BOOST_CHECK(intervals_in_dimension_0[0].second == std::numeric_limits<Mini_simplex_tree::Filtration_value>::infinity());
+  BOOST_CHECK(intervals_in_dimension_0[1].first == 1);
+  BOOST_CHECK(intervals_in_dimension_0[1].second == std::numeric_limits<Mini_simplex_tree::Filtration_value>::infinity());
+
+  auto intervals_in_dimension_1 = pcoh.intervals_in_dimension(1);
+  std::cout << "intervals_in_dimension_1.size() = " << intervals_in_dimension_1.size() << std::endl;
+  for (std::size_t i = 0; i < intervals_in_dimension_1.size(); i++)
+    std::cout << "intervals_in_dimension_1[" << i << "] = [" << intervals_in_dimension_1[i].first << "," <<
+                 intervals_in_dimension_1[i].second << "]" << std::endl;
+  BOOST_CHECK(intervals_in_dimension_1.size() == 1);
+  BOOST_CHECK(intervals_in_dimension_1[0].first == 4);
+  BOOST_CHECK(intervals_in_dimension_1[0].second == std::numeric_limits<Mini_simplex_tree::Filtration_value>::infinity());
+
+  auto intervals_in_dimension_2 = pcoh.intervals_in_dimension(2);
+  std::cout << "intervals_in_dimension_2.size() = " << intervals_in_dimension_2.size() << std::endl;
+  BOOST_CHECK(intervals_in_dimension_2.size() == 0);
 }
