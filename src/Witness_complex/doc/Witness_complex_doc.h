@@ -48,10 +48,12 @@
    - Gudhi::witness_complex::Strong_witness_complex
    - Gudhi::witness_complex::Euclidean_strong_witness_complex
 
-   The construction of both of them follow the same scheme:
+   The construction of the Euclidean versions of complexes follow the same scheme:
    1. Construct a search tree on landmarks (for that Gudhi::spatial_searching::Kd_tree_search is used internally).
-   2. Construct lists of nearest landmarks for each witness (special internal structure Gudhi::witness_complex::Active_witness is used internally).
+   2. Construct lists of nearest landmarks for each witness (special structure Gudhi::witness_complex::Active_witness is used internally).
    3. Construct the witness complex for nearest landmark lists.
+
+   In the non-Euclidean classes, the lists of nearest landmarks are supposed to be given as input.
 
    The constructors take on the step 1, while the function 'create_complex' executes the steps 2 and 3.
 
