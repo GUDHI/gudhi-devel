@@ -31,6 +31,8 @@
 #include <string>
 #include <vector>
 #include <limits>  // infinity
+#include <utility>  // for pair
+#include <map>
 
 // Types definition
 using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
@@ -175,7 +177,6 @@ template< typename InputPointRange, typename Distance >
 Graph_t compute_proximity_graph(InputPointRange &points, Filtration_value threshold, Distance distance) {
   std::vector< Edge_t > edges;
   std::vector< Filtration_value > edges_fil;
-  std::map< Vertex_handle, Filtration_value > vertices;
 
   Vertex_handle idx_u, idx_v;
   Filtration_value fil;

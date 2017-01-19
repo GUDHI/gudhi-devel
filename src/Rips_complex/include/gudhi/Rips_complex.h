@@ -160,7 +160,8 @@ class Rips_complex {
     // Creates the proximity graph from edges and sets the property with the filtration value.
     // Number of points is labeled from 0 to idx_u-1
     // --------------------------------------------------------------------------------------------
-    // Do not use : rips_skeleton_graph_ = OneSkeletonGraph(...) -> deep copy of the graph (boost graph is not move-enabled)
+    // Do not use : rips_skeleton_graph_ = OneSkeletonGraph(...) -> deep copy of the graph (boost graph is not
+    // move-enabled)
     rips_skeleton_graph_.~OneSkeletonGraph();
     new(&rips_skeleton_graph_)OneSkeletonGraph(edges.begin(), edges.end(), edges_fil.begin(), idx_u);
 

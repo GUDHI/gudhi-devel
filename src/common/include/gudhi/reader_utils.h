@@ -30,9 +30,10 @@
 #include <iostream>
 #include <fstream>
 #include <map>
-#include <limits>  // for numeric_limits<>
+#include <limits>  // for numeric_limits
 #include <string>
 #include <vector>
+#include <utility>  // for pair
 
 // Keep this file tag for Doxygen to parse the code, otherwise, functions are not documented.
 // It is required for global functions and variables.
