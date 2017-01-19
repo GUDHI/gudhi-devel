@@ -55,7 +55,7 @@ output:
 
 and finally the computation with all Z/pZ for 2 <= p <= 71 (20 first prime numbers):
 
- ./rips_multifield_persistence ../../data/points/Kl.txt -r 0.25 -m 0.5 -d 3 -p 2 -q 71
+ ./rips_multifield_persistence ../../data/points/Kl.off -r 0.25 -m 0.5 -d 3 -p 2 -q 71
 
 output:
 557940830126698960967415390  0 0 inf 

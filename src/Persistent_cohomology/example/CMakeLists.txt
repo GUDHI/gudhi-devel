@@ -41,7 +41,7 @@ add_test(persistence_from_simple_simplex_tree ${CMAKE_CURRENT_BINARY_DIR}/persis
 add_test(rips_distance_matrix ${CMAKE_CURRENT_BINARY_DIR}/rips_distance_matrix_persistence ${CMAKE_SOURCE_DIR}/data/distance_matrix/full_square_distance_matrix.csv -r 1.0 -d 3 -p 3 -m 0)
 add_test(rips_persistence_3 ${CMAKE_CURRENT_BINARY_DIR}/rips_persistence ${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off -r 0.25 -m 0.5 -d 3 -p 3)
 add_test(rips_persistence_step_by_step_3 ${CMAKE_CURRENT_BINARY_DIR}/rips_persistence_step_by_step ${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off -r 0.25 -m 0.5 -d 3 -p 3)
-add_test(rips_persistence_via_boundary_matrix_3 ${CMAKE_CURRENT_BINARY_DIR}/rips_persistence_via_boundary_matrix ${CMAKE_SOURCE_DIR}/data/points/Kl.txt -r 0.16 -d 3 -p 3 -m 100)
+add_test(rips_persistence_via_boundary_matrix_3 ${CMAKE_CURRENT_BINARY_DIR}/rips_persistence_via_boundary_matrix ${CMAKE_SOURCE_DIR}/data/points/Kl.off -r 0.16 -d 3 -p 3 -m 100)
 add_test(persistence_from_file_3_2_0 ${CMAKE_CURRENT_BINARY_DIR}/persistence_from_file ${CMAKE_SOURCE_DIR}/data/filtered_simplicial_complex/bunny_5000_complex.fsc -p 2 -m 0)
 add_test(persistence_from_file_3_3_100 ${CMAKE_CURRENT_BINARY_DIR}/persistence_from_file ${CMAKE_SOURCE_DIR}/data/filtered_simplicial_complex/bunny_5000_complex.fsc -p 3 -m 100)
    
