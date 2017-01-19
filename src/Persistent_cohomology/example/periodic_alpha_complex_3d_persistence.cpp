@@ -39,6 +39,7 @@
 #include <utility>
 #include <list>
 #include <vector>
+#include <cstdlib>
 
 // Traits
 using K = CGAL::Exact_predicates_inexact_constructions_kernel;
@@ -137,19 +138,8 @@ int main(int argc, char * const argv[]) {
     usage(argv[0]);
   }
 
-  int coeff_field_characteristic = 0;
-  int returnedScanValue = sscanf(argv[3], "%d", &coeff_field_characteristic);
-  if ((returnedScanValue == EOF) || (coeff_field_characteristic <= 0)) {
-    std::cerr << "Error: " << argv[3] << " is not correct\n";
-    usage(argv[0]);
-  }
-
-  Filtration_value min_persistence = 0.0;
-  returnedScanValue = sscanf(argv[4], "%lf", &min_persistence);
-  if ((returnedScanValue == EOF) || (min_persistence < -1.0)) {
-    std::cerr << "Error: " << argv[4] << " is not correct\n";
-    usage(argv[0]);
-  }
+  int coeff_field_characteristic = atoi(argv[3]);
+  Filtration_value min_persistence = strtof(argv[4], nullptr);
 
   // Read points from file
   std::string offInputFile(argv[1]);
