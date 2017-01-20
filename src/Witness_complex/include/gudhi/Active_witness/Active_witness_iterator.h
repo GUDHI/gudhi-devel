@@ -63,8 +63,20 @@ public:
   }
 
   Active_witness_iterator(Active_witness* aw, Pair_iterator lh)
-    : aw_(aw), lh_(lh), is_end_(false)
-  {      
+    : aw_(aw), lh_(lh)
+  {
+    is_end_ = false;
+    if (lh_ == aw_->nearest_landmark_table_.end()) {
+      if (aw_->iterator_next_ == aw_->iterator_end_)
+        is_end_ = true;
+      else {
+        aw_->nearest_landmark_table_.push_back(*aw_->iterator_next_);
+        lh_ = --aw_->nearest_landmark_table_.end();
+        ++(aw_->iterator_next_);
+      }
+    }
+    else
+      lh_++;
   }
   
 private :
@@ -84,21 +96,18 @@ private :
     // the neighbor search can't be at the end iterator of a list
     GUDHI_CHECK(!is_end_ && lh_ != aw_->nearest_landmark_table_.end(), std::logic_error("Wrong active witness increment."));
     // if the id of the current landmark is the same as the last one
-    if (lh_->first == aw_->iterator_last_->first) {
-      // if the next iterator is end, lh_it = end pointer
-      INS_iterator next_it = aw_->iterator_last_; next_it++;
-      if (next_it == aw_->iterator_end_) {
+
+    lh_++;
+    if (lh_ == aw_->nearest_landmark_table_.end()) {
+      if (aw_->iterator_next_ == aw_->iterator_end_)
         is_end_ = true;
-        return;
-      }
       else {
-        ++(aw_->iterator_last_);
-        aw_->nearest_landmark_table_.push_back(*(aw_->iterator_last_));
+        aw_->nearest_landmark_table_.push_back(*aw_->iterator_next_);
+        lh_ = std::prev(aw_->nearest_landmark_table_.end());
+        ++(aw_->iterator_next_);
       }
     }
-    lh_++;
   }
-
 };
 
 }
