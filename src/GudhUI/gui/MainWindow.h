@@ -23,9 +23,6 @@
 #ifndef GUI_MAINWINDOW_H_
 #define GUI_MAINWINDOW_H_
 
-// Workaround for moc-qt4 not parsing boost headers
-#include <CGAL/config.h>
-
 // Workaround https://svn.boost.org/trac/boost/ticket/12534
 #include <boost/container/flat_map.hpp>
 
