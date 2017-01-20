@@ -4,7 +4,7 @@
  *
  *    Author(s):       Siargey Kachanovich
  *
- *    Copyright (C) 2015  INRIA Sophia Antipolis-Méditerranée (France)
+ *    Copyright (C) 2015  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -36,7 +36,8 @@
 #include <string>
 #include <vector>
 
-typedef std::vector< Vertex_handle > typeVectorVertex;
+typedef Gudhi::Simplex_tree<> Simplex_tree;
+typedef std::vector< Simplex_tree::Vertex_handle > typeVectorVertex;
 typedef std::vector< std::vector <double> > Point_Vector;
 
 int main(int argc, char * const argv[]) {
@@ -51,7 +52,7 @@ int main(int argc, char * const argv[]) {
   clock_t start, end;
 
   // Construct the Simplex Tree
-  Gudhi::Simplex_tree<> simplex_tree;
+  Simplex_tree simplex_tree;
 
   // Read the OFF file (input file name given as parameter) and triangulate points
   Gudhi::Points_off_reader<std::vector <double>> off_reader(off_file_name);
@@ -69,7 +70,7 @@ int main(int argc, char * const argv[]) {
   std::vector<std::vector< int > > knn;
   Point_Vector landmarks;
   Gudhi::subsampling::pick_n_random_points(point_vector, 100, std::back_inserter(landmarks));
-  Gudhi::witness_complex::construct_closest_landmark_table(point_vector, landmarks, knn);
+  Gudhi::witness_complex::construct_closest_landmark_table<Simplex_tree::Filtration_value>(point_vector, landmarks, knn);
   end = clock();
   std::cout << "Landmark choice for " << nbL << " landmarks took "
       << static_cast<double>(end - start) / CLOCKS_PER_SEC << " s. \n";

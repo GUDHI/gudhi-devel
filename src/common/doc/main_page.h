@@ -56,6 +56,24 @@
     <b>User manual:</b> \ref cubical_complex - <b>Reference manual:</b> Gudhi::cubical_complex::Bitmap_cubical_complex
     </td>
  </tr>
+ \subsection RipsComplexDataStructure Rips complex
+ \image html "rips_complex_representation.png" "Rips complex representation"
+<table border="0">
+  <tr>
+    <td width="25%">
+      <b>Author:</b> Cl&eacute;ment Maria, Pawel Dlotko, Vincent Rouvreau<br>
+      <b>Introduced in:</b> GUDHI 1.4.0<br>
+      <b>Copyright:</b> GPL v3<br>
+    </td>
+    <td width="75%">
+    Rips_complex is a simplicial complex constructed from a one skeleton graph.<br>
+    The filtration value of each edge is computed from a user-given distance function and is inserted until a
+    user-given threshold value.<br>
+    This complex can be built from a point cloud and a distance function, or from a distance matrix.<br>
+    <b>User manual:</b> \ref rips_complex - <b>Reference manual:</b> Gudhi::rips_complex::Rips_complex
+    </td>
+ </tr>
+</table>
 </table>
  \subsection SimplexTreeDataStructure Simplex tree
  \image html "Simplex_tree_representation.png" "Simplex tree representation"
@@ -223,8 +241,6 @@ make \endverbatim
  * 
  * The following example requires the <a target="_blank" href="http://gmplib.org/">GNU Multiple Precision Arithmetic
  * Library</a> (GMP) and will not be built if GMP is not installed:
- * \li <a href="_persistent_cohomology_2performance_rips_persistence_8cpp-example.html">
- * Persistent_cohomology/performance_rips_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2rips_multifield_persistence_8cpp-example.html">
  * Persistent_cohomology/rips_multifield_persistence.cpp</a>
  *
@@ -318,22 +334,28 @@ make \endverbatim
  * Persistent_cohomology/alpha_complex_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2rips_persistence_via_boundary_matrix_8cpp-example.html">
  * Persistent_cohomology/rips_persistence_via_boundary_matrix.cpp</a>
- * \li <a href="_persistent_cohomology_2performance_rips_persistence_8cpp-example.html">
- * Persistent_cohomology/performance_rips_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2persistence_from_file_8cpp-example.html">
  * Persistent_cohomology/persistence_from_file.cpp</a>
  * \li <a href="_persistent_cohomology_2persistence_from_simple_simplex_tree_8cpp-example.html">
  * Persistent_cohomology/persistence_from_simple_simplex_tree.cpp</a>
  * \li <a href="_persistent_cohomology_2plain_homology_8cpp-example.html">
  * Persistent_cohomology/plain_homology.cpp</a>
+ * \li <a href="_persistent_cohomology_2rips_distance_matrix_persistence_8cpp-example.html">
+ * Persistent_cohomology/rips_distance_matrix_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2rips_multifield_persistence_8cpp-example.html">
  * Persistent_cohomology/rips_multifield_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2rips_persistence_8cpp-example.html">
  * Persistent_cohomology/rips_persistence.cpp</a>
+ * \li <a href="_persistent_cohomology_2rips_persistence_step_by_step_8cpp-example.html">
+ * Persistent_cohomology/rips_persistence_step_by_step.cpp</a>
  * \li <a href="_persistent_cohomology_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
  * Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2custom_persistence_sort_8cpp-example.html">
  * Persistent_cohomology/custom_persistence_sort.cpp</a>
+ * \li <a href="_rips_complex_2example_one_skeleton_rips_from_points_8cpp-example.html">
+ * Rips_complex/example_one_skeleton_rips_from_points.cpp</a>
+ * \li <a href="_rips_complex_2example_rips_complex_from_off_file_8cpp-example.html">
+ * Rips_complex/example_rips_complex_from_off_file.cpp</a>
  * 
  * \section Contributions Bug reports and contributions
  * Please help us improving the quality of the GUDHI library. You may report bugs or suggestions to:
@@ -369,14 +391,17 @@ make \endverbatim
  * @example Persistent_cohomology/alpha_complex_3d_persistence.cpp
  * @example Persistent_cohomology/alpha_complex_persistence.cpp
  * @example Persistent_cohomology/rips_persistence_via_boundary_matrix.cpp
- * @example Persistent_cohomology/performance_rips_persistence.cpp
  * @example Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp
  * @example Persistent_cohomology/persistence_from_file.cpp
  * @example Persistent_cohomology/persistence_from_simple_simplex_tree.cpp
  * @example Persistent_cohomology/plain_homology.cpp
  * @example Persistent_cohomology/rips_multifield_persistence.cpp
+ * @example Persistent_cohomology/rips_distance_matrix_persistence.cpp
  * @example Persistent_cohomology/rips_persistence.cpp
  * @example Persistent_cohomology/custom_persistence_sort.cpp
+ * @example Persistent_cohomology/rips_persistence_step_by_step.cpp
+ * @example Rips_complex/example_one_skeleton_rips_from_points.cpp
+ * @example Rips_complex/example_rips_complex_from_off_file.cpp
  * @example Simplex_tree/mini_simplex_tree.cpp
  * @example Simplex_tree/simple_simplex_tree.cpp
  * @example Simplex_tree/example_alpha_shapes_3_simplex_tree_from_off_file.cpp
