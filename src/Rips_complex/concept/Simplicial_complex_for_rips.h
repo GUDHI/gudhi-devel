@@ -28,7 +28,7 @@ namespace Gudhi {
 namespace rips_complex {
 
 /** \brief The concept SimplicialComplexForRips describes the requirements for a type to implement a simplicial
- * complex, that can be created from a `Rips_complex`.
+ * complex, that can be created from a `Rips_complex`. The only available model for the moment is the `Simplex_tree`.
  */
 struct SimplicialComplexForRips {
   /** \brief Handle to specify the simplex filtration value. */

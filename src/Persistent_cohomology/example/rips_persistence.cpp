@@ -21,7 +21,6 @@
  */
 
 #include <gudhi/Rips_complex.h>
-#include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/distance_functions.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
