@@ -23,9 +23,11 @@
 #ifndef PERSISTENCE_GRAPH_H_
 #define PERSISTENCE_GRAPH_H_
 
+#include <gudhi/Internal_point.h>
+
 #include <vector>
 #include <algorithm>
-#include <gudhi/Internal_point.h>
+#include <limits>  // for numeric_limits
 
 namespace Gudhi {
 
@@ -92,10 +94,12 @@ Persistence_graph::Persistence_graph(const Persistence_diagram1 &diag1,
     swap(u, v);
   std::sort(u_alive.begin(), u_alive.end());
   std::sort(v_alive.begin(), v_alive.end());
-  if (u_alive.size() != v_alive.size())
+  if (u_alive.size() != v_alive.size()) {
     b_alive = std::numeric_limits<double>::infinity();
-  else for (auto it_u = u_alive.cbegin(), it_v = v_alive.cbegin(); it_u != u_alive.cend(); ++it_u, ++it_v)
+  } else {
+    for (auto it_u = u_alive.cbegin(), it_v = v_alive.cbegin(); it_u != u_alive.cend(); ++it_u, ++it_v)
       b_alive = std::max(b_alive, std::fabs(*it_u - *it_v));
+  }
 }
 
 inline bool Persistence_graph::on_the_u_diagonal(int u_point_index) const {

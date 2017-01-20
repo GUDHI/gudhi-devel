@@ -21,10 +21,13 @@
  */
 
 #include <gudhi/Bottleneck.h>
+
 #include <iostream>
+#include <vector>
+#include <utility>  // for pair
+#include <limits>  // for numeric_limits
 
 int main() {
-
   std::vector< std::pair<double, double> > v1, v2;
 
   v1.emplace_back(2.7, 3.7);
@@ -44,5 +47,4 @@ int main() {
   b = Gudhi::persistence_diagram::bottleneck_distance(v1, v2, 0.1);
 
   std::cout << "Approx bottleneck distance = " << b << std::endl;
-
 }

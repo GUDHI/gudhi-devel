@@ -24,6 +24,8 @@
 
 #include <gudhi/Bottleneck.h>
 #include <iostream>
+#include <vector>
+#include <utility>  // for pair
 #include <fstream>
 #include <sstream>
 #include <string>

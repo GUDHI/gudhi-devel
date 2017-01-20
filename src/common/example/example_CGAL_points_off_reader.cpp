@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
   // Retrieve the triangulation
   std::vector<Point_d> point_cloud = off_reader.get_point_cloud();
 
-  int n {0};
+  int n {};
   for (auto point : point_cloud) {
     std::cout << "Point[" << n << "] = ";
     for (std::size_t i {0}; i < point.size(); i++)
