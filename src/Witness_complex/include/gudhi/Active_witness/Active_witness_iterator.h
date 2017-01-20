@@ -75,8 +75,6 @@ public:
         ++(aw_->iterator_next_);
       }
     }
-    else
-      lh_++;
   }
   
 private :
