@@ -80,7 +80,6 @@ template<typename SkBlComplex> class Vertex_collapsor {
     if (link.empty()) return false;
     if (link.is_cone()) return true;
     if (link.num_connected_components() > 1) return false;
-    Edge_contractor<Complex> contractor(link, link.num_vertices() - 1);
     return (link.num_vertices() == 1);
   }
 };

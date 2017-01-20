@@ -28,6 +28,7 @@
       <b>Author:</b> Vincent Rouvreau<br>
       <b>Introduced in:</b> GUDHI 1.3.0<br>
       <b>Copyright:</b> GPL v3<br>
+      <b>Requires:</b> \ref cgal &ge; 4.7.0 and \ref eigen3
     </td>
     <td width="75%">
     Alpha_complex is a simplicial complex constructed from the finite cells of a Delaunay Triangulation.<br>
@@ -55,6 +56,24 @@
     <b>User manual:</b> \ref cubical_complex - <b>Reference manual:</b> Gudhi::cubical_complex::Bitmap_cubical_complex
     </td>
  </tr>
+ \subsection RipsComplexDataStructure Rips complex
+ \image html "rips_complex_representation.png" "Rips complex representation"
+<table border="0">
+  <tr>
+    <td width="25%">
+      <b>Author:</b> Cl&eacute;ment Maria, Pawel Dlotko, Vincent Rouvreau<br>
+      <b>Introduced in:</b> GUDHI 1.4.0<br>
+      <b>Copyright:</b> GPL v3<br>
+    </td>
+    <td width="75%">
+    Rips_complex is a simplicial complex constructed from a one skeleton graph.<br>
+    The filtration value of each edge is computed from a user-given distance function and is inserted until a
+    user-given threshold value.<br>
+    This complex can be built from a point cloud and a distance function, or from a distance matrix.<br>
+    <b>User manual:</b> \ref rips_complex - <b>Reference manual:</b> Gudhi::rips_complex::Rips_complex
+    </td>
+ </tr>
+</table>
 </table>
  \subsection SimplexTreeDataStructure Simplex tree
  \image html "Simplex_tree_representation.png" "Simplex tree representation"
@@ -130,6 +149,26 @@
 </table>
  
  \section Toolbox Toolbox
+ \subsection BottleneckDistanceToolbox Bottleneck distance
+ \image html "perturb_pd.png" "Bottleneck distance is the length of the longest edge"
+<table border="0">
+  <tr>
+    <td width="25%">
+      <b>Author:</b> Fran&ccedil;ois Godi<br>
+      <b>Introduced in:</b> GUDHI 1.4.0<br>
+      <b>Copyright:</b> GPL v3<br>
+      <b>Requires:</b> \ref cgal &ge; 4.8.0 and \ref eigen3
+    </td>
+    <td width="75%">
+    Bottleneck distance measures the similarity between two persistence diagrams. 
+    It's the shortest distance b for which there exists a perfect matching between 
+    the points of the two diagrams (+ all the diagonal points) such that 
+    any couple of matched points are at distance at most b.
+    <br>
+    <b>User manual:</b> \ref bottleneck_distance
+    </td>
+ </tr>
+</table>
  \subsection ContractionToolbox Contraction
  \image html "sphere_contraction_representation.png" "Sphere contraction example"
 <table border="0">
@@ -196,24 +235,22 @@ make \endverbatim
  * \verbatim  make test \endverbatim
  * 
  * \section optionallibrary Optional third-party library
- * \subsection gmp GMP:
+ * \subsection gmp GMP
  * The multi-field persistent homology algorithm requires GMP which is a free library for arbitrary-precision
  * arithmetic, operating on signed integers, rational numbers, and floating point numbers.
  * 
  * The following example requires the <a target="_blank" href="http://gmplib.org/">GNU Multiple Precision Arithmetic
  * Library</a> (GMP) and will not be built if GMP is not installed:
- * \li <a href="_persistent_cohomology_2performance_rips_persistence_8cpp-example.html">
- * Persistent_cohomology/performance_rips_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2rips_multifield_persistence_8cpp-example.html">
  * Persistent_cohomology/rips_multifield_persistence.cpp</a>
  *
  * Having GMP version 4.2 or higher installed is recommended.
  * 
- * \subsection cgal CGAL:
- * The \ref alpha_complex data structure and few examples requires CGAL, which is a C++ library which provides easy
- * access to efficient and reliable geometric algorithms.
+ * \subsection cgal CGAL
+ * The \ref alpha_complex data structure, \ref bottleneck_distance, and few examples requires CGAL, which is a C++
+ * library which provides easy access to efficient and reliable geometric algorithms.
  * 
- * Having CGAL version 4.4 or higher installed is recommended. The procedure to install this library according to
+ * Having CGAL version 4.4.0 or higher installed is recommended. The procedure to install this library according to
  * your operating system is detailed here http://doc.cgal.org/latest/Manual/installation.html
  * 
  * The following examples require the <a target="_blank" href="http://www.cgal.org/">Computational Geometry Algorithms
@@ -223,11 +260,11 @@ make \endverbatim
  * \li <a href="_simplex_tree_2example_alpha_shapes_3_simplex_tree_from_off_file_8cpp-example.html">
  * Simplex_tree/example_alpha_shapes_3_simplex_tree_from_off_file.cpp</a>
  * 
- * The following example requires CGAL version &ge; 4.6:
+ * The following example requires CGAL version &ge; 4.6.0:
  * \li <a href="_witness_complex_2witness_complex_sphere_8cpp-example.html">
  * Witness_complex/witness_complex_sphere.cpp</a>
  * 
- * The following example requires CGAL version &ge; 4.7:
+ * The following example requires CGAL version &ge; 4.7.0:
  * \li <a href="_alpha_complex_2_alpha_complex_from_off_8cpp-example.html">
  * Alpha_complex/Alpha_complex_from_off.cpp</a>
  * \li <a href="_alpha_complex_2_alpha_complex_from_points_8cpp-example.html">
@@ -239,7 +276,13 @@ make \endverbatim
  * \li <a href="_persistent_cohomology_2custom_persistence_sort_8cpp-example.html">
  * Persistent_cohomology/custom_persistence_sort.cpp</a>
  * 
- * \subsection eigen3 Eigen3:
+ * The following example requires CGAL version &ge; 4.8.0:
+ * \li <a href="_bottleneck_distance_2_bottleneck_basic_example_8cpp-example.html">
+ * Bottleneck_distance/bottleneck_basic_example.cpp</a>
+ * \li <a href="_bottleneck_distance_2_bottleneck_read_file_example_8cpp-example.html">
+ * Bottleneck_distance/bottleneck_read_file_example.cpp</a>
+ *
+ * \subsection eigen3 Eigen3
  * The \ref alpha_complex data structure and few examples requires
  * <a target="_blank" href="http://eigen.tuxfamily.org/">Eigen3</a> is a C++ template library for linear algebra:
  * matrices, vectors, numerical solvers, and related algorithms.
@@ -247,9 +290,13 @@ make \endverbatim
  * The following example requires the <a target="_blank" href="http://eigen.tuxfamily.org/">Eigen3</a> and will not be
  * built if Eigen3 is not installed:
  * \li <a href="_alpha_complex_2_alpha_complex_from_off_8cpp-example.html">
- * Alpha_complex/Alpha_complex_from_off.cpp</a> (requires also Eigen3)
+ * Alpha_complex/Alpha_complex_from_off.cpp</a>
  * \li <a href="_alpha_complex_2_alpha_complex_from_points_8cpp-example.html">
- * Alpha_complex/Alpha_complex_from_points.cpp</a> (requires also Eigen3)
+ * Alpha_complex/Alpha_complex_from_points.cpp</a>
+ * \li <a href="_bottleneck_distance_2_bottleneck_basic_example_8cpp-example.html">
+ * Bottleneck_distance/bottleneck_basic_example.cpp</a>
+ * \li <a href="_bottleneck_distance_2_bottleneck_read_file_example_8cpp-example.html">
+ * Bottleneck_distance/bottleneck_read_file_example.cpp</a>
  * \li <a href="_persistent_cohomology_2alpha_complex_persistence_8cpp-example.html">
  * Persistent_cohomology/alpha_complex_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
@@ -257,7 +304,7 @@ make \endverbatim
  * \li <a href="_persistent_cohomology_2custom_persistence_sort_8cpp-example.html">
  * Persistent_cohomology/custom_persistence_sort.cpp</a>
  * 
- * \subsection tbb Threading Building Blocks:
+ * \subsection tbb Threading Building Blocks
  * <a target="_blank" href="https://www.threadingbuildingblocks.org/">Intel&reg; TBB</a> lets you easily write parallel
  * C++ programs that take full advantage of multicore performance, that are portable and composable, and that have
  * future-proof scalability.
@@ -291,22 +338,28 @@ make \endverbatim
  * Persistent_cohomology/alpha_complex_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2rips_persistence_via_boundary_matrix_8cpp-example.html">
  * Persistent_cohomology/rips_persistence_via_boundary_matrix.cpp</a>
- * \li <a href="_persistent_cohomology_2performance_rips_persistence_8cpp-example.html">
- * Persistent_cohomology/performance_rips_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2persistence_from_file_8cpp-example.html">
  * Persistent_cohomology/persistence_from_file.cpp</a>
  * \li <a href="_persistent_cohomology_2persistence_from_simple_simplex_tree_8cpp-example.html">
  * Persistent_cohomology/persistence_from_simple_simplex_tree.cpp</a>
  * \li <a href="_persistent_cohomology_2plain_homology_8cpp-example.html">
  * Persistent_cohomology/plain_homology.cpp</a>
+ * \li <a href="_persistent_cohomology_2rips_distance_matrix_persistence_8cpp-example.html">
+ * Persistent_cohomology/rips_distance_matrix_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2rips_multifield_persistence_8cpp-example.html">
  * Persistent_cohomology/rips_multifield_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2rips_persistence_8cpp-example.html">
  * Persistent_cohomology/rips_persistence.cpp</a>
+ * \li <a href="_persistent_cohomology_2rips_persistence_step_by_step_8cpp-example.html">
+ * Persistent_cohomology/rips_persistence_step_by_step.cpp</a>
  * \li <a href="_persistent_cohomology_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
  * Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2custom_persistence_sort_8cpp-example.html">
  * Persistent_cohomology/custom_persistence_sort.cpp</a>
+ * \li <a href="_rips_complex_2example_one_skeleton_rips_from_points_8cpp-example.html">
+ * Rips_complex/example_one_skeleton_rips_from_points.cpp</a>
+ * \li <a href="_rips_complex_2example_rips_complex_from_off_file_8cpp-example.html">
+ * Rips_complex/example_rips_complex_from_off_file.cpp</a>
  * 
  * \section Contributions Bug reports and contributions
  * Please help us improving the quality of the GUDHI library. You may report bugs or suggestions to:
@@ -331,6 +384,8 @@ make \endverbatim
 /*! @file Examples
  * @example Alpha_complex/Alpha_complex_from_off.cpp
  * @example Alpha_complex/Alpha_complex_from_points.cpp
+ * @example Bottleneck_distance/bottleneck_basic_example.cpp
+ * @example Bottleneck_distance/bottleneck_read_file_example.cpp
  * @example Bitmap_cubical_complex/Bitmap_cubical_complex.cpp
  * @example Bitmap_cubical_complex/Bitmap_cubical_complex_periodic_boundary_conditions.cpp
  * @example Bitmap_cubical_complex/Random_bitmap_cubical_complex.cpp
@@ -341,14 +396,17 @@ make \endverbatim
  * @example Persistent_cohomology/alpha_complex_3d_persistence.cpp
  * @example Persistent_cohomology/alpha_complex_persistence.cpp
  * @example Persistent_cohomology/rips_persistence_via_boundary_matrix.cpp
- * @example Persistent_cohomology/performance_rips_persistence.cpp
  * @example Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp
  * @example Persistent_cohomology/persistence_from_file.cpp
  * @example Persistent_cohomology/persistence_from_simple_simplex_tree.cpp
  * @example Persistent_cohomology/plain_homology.cpp
  * @example Persistent_cohomology/rips_multifield_persistence.cpp
+ * @example Persistent_cohomology/rips_distance_matrix_persistence.cpp
  * @example Persistent_cohomology/rips_persistence.cpp
  * @example Persistent_cohomology/custom_persistence_sort.cpp
+ * @example Persistent_cohomology/rips_persistence_step_by_step.cpp
+ * @example Rips_complex/example_one_skeleton_rips_from_points.cpp
+ * @example Rips_complex/example_rips_complex_from_off_file.cpp
  * @example Simplex_tree/mini_simplex_tree.cpp
  * @example Simplex_tree/simple_simplex_tree.cpp
  * @example Simplex_tree/example_alpha_shapes_3_simplex_tree_from_off_file.cpp

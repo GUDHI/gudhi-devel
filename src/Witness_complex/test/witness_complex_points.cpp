@@ -34,8 +34,8 @@
 #include <vector>
 
 typedef std::vector<double> Point;
-typedef std::vector< Vertex_handle > typeVectorVertex;
 typedef Gudhi::Simplex_tree<> Simplex_tree;
+typedef std::vector< Simplex_tree::Vertex_handle > typeVectorVertex;
 typedef Gudhi::witness_complex::Witness_complex<Simplex_tree> WitnessComplex;
 
 BOOST_AUTO_TEST_CASE(witness_complex_points) {
@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(witness_complex_points) {
   // First test: random choice
   Simplex_tree complex1;
   Gudhi::subsampling::pick_n_random_points(points, 100, std::back_inserter(landmarks));
-  Gudhi::witness_complex::construct_closest_landmark_table(points, landmarks, knn);
+  Gudhi::witness_complex::construct_closest_landmark_table<Simplex_tree::Filtration_value>(points, landmarks, knn);
   assert(!knn.empty());
   WitnessComplex witnessComplex1(knn, 100, 3, complex1);
   BOOST_CHECK(witnessComplex1.is_witness_complex(knn, b_print_output));

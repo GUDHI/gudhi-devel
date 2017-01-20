@@ -4,7 +4,7 @@
  *
  *    Author(s):       Clément Maria
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Méditerranée (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -25,19 +25,25 @@
 
 #include <cmath>  // for std::sqrt
 
-/* Compute the Euclidean distance between two Points given
- * by a range of coordinates. The points are assumed to have 
- * the same dimension. */
-template< typename Point >
-double euclidean_distance(Point &p1, Point &p2) {
-  double dist = 0.;
-  auto it1 = p1.begin();
-  auto it2 = p2.begin();
-  for (; it1 != p1.end(); ++it1, ++it2) {
-    double tmp = *it1 - *it2;
-    dist += tmp*tmp;
+/** @file
+ * @brief Global distance functions
+ */
+
+/** @brief Compute the Euclidean distance between two Points given by a range of coordinates. The points are assumed to
+ * have the same dimension. */
+class Euclidean_distance {
+ public:
+  template< typename Point >
+  auto operator()(const Point& p1, const Point& p2) -> typename std::decay<decltype(*std::begin(p1))>::type {
+    auto it1 = p1.begin();
+    auto it2 = p2.begin();
+    typename Point::value_type dist = 0.;
+    for (; it1 != p1.end(); ++it1, ++it2) {
+      typename Point::value_type tmp = (*it1) - (*it2);
+      dist += tmp*tmp;
+    }
+    return std::sqrt(dist);
   }
-  return std::sqrt(dist);
-}
+};
 
 #endif  // DISTANCE_FUNCTIONS_H_

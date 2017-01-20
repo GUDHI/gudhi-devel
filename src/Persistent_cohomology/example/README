@@ -10,13 +10,13 @@ Example of use of RIPS:
 Computation of the persistent homology with Z/2Z coefficients of the Rips complex on points 
 sampling a Klein bottle:
 
-./rips_persistence ../../data/points/Kl.txt -r 0.25 -d 3 -p 2 -m 100
+./rips_persistence ../../data/points/tore3D_1307.off -r 0.25 -m 0.5 -d 3 -p 2
 
 output:
-210  0 0 inf
-210  1 0.0702103 inf
-2  1 0.0702103 inf
-2  2 0.159992 inf
+2  0 0 inf 
+2  1 0.0983494 inf 
+2  1 0.104347 inf 
+2  2 0.138335 inf 
 
 
 Every line is of this format: p1*...*pr   dim b d
@@ -29,31 +29,45 @@ where
 
 with Z/3Z coefficients:
 
-./rips_persistence ../../data/points/Kl.txt -r 0.25 -d 3 -p 3 -m 100
+./rips_persistence ../../data/points/tore3D_1307.off -r 0.25 -m 0.5 -d 3 -p 3
 
 output:
-3  0 0 inf
-3  1 0.0702103 inf
+3  0 0 inf 
+3  1 0.0983494 inf 
+3  1 0.104347 inf 
+3  2 0.138335 inf 
 
 and the computation with Z/2Z and Z/3Z coefficients simultaneously:
 
-./rips_multifield_persistence ../../data/points/Kl.txt -r 0.25 -d 3 -p 2 -q 3 -m 100
+./rips_multifield_persistence ../../data/points/tore3D_1307.off -r 0.25 -m 0.12 -d 3 -p 2 -q 3
 
 output:
-6  0 0 inf
-6  1 0.0702103 inf
-2  1 0.0702103 inf
-2  2 0.159992 inf
+6  0 0 inf 
+6  1 0.0983494 inf 
+6  1 0.104347 inf 
+6  2 0.138335 inf 
+6  0 0 0.122545 
+6  0 0 0.121171 
+6  0 0 0.120964 
+6  0 0 0.12057 
+6  0 0 0.12047 
+6  0 0 0.120414 
 
 and finally the computation with all Z/pZ for 2 <= p <= 71 (20 first prime numbers):
 
- ./rips_multifield_persistence ../../data/points/Kl.txt -r 0.25 -d 3 -p 2 -q 71 -m 100
+ ./rips_multifield_persistence ../../data/points/Kl.off -r 0.25 -m 0.5 -d 3 -p 2 -q 71
 
 output:
-557940830126698960967415390  0 0 inf
-557940830126698960967415390  1 0.0702103 inf
-2  1 0.0702103 inf
-2  2 0.159992 inf
+557940830126698960967415390  0 0 inf 
+557940830126698960967415390  1 0.0983494 inf 
+557940830126698960967415390  1 0.104347 inf 
+557940830126698960967415390  2 0.138335 inf 
+557940830126698960967415390  0 0 0.122545 
+557940830126698960967415390  0 0 0.121171 
+557940830126698960967415390  0 0 0.120964 
+557940830126698960967415390  0 0 0.12057 
+557940830126698960967415390  0 0 0.12047 
+557940830126698960967415390  0 0 0.120414 
 
 ***********************************************************************************************************************
 Example of use of ALPHA:
