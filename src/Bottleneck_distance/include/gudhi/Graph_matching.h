@@ -25,6 +25,9 @@
 
 #include <gudhi/Neighbors_finder.h>
 
+#include <vector>
+#include <list>
+
 namespace Gudhi {
 
 namespace persistence_diagram {

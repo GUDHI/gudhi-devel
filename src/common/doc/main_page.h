@@ -261,9 +261,11 @@ make \endverbatim
  * Persistent_cohomology/custom_persistence_sort.cpp</a>
  * 
  * The following example requires CGAL version &ge; 4.8.0:
- * \li <a href="_bottleneck_distance_2_bottleneck_example_8cpp-example.html">
- * 
- * Bottleneck_distance/bottleneck_example.cpp</a>
+ * \li <a href="_bottleneck_distance_2_bottleneck_basic_example_8cpp-example.html">
+ * Bottleneck_distance/bottleneck_basic_example.cpp</a>
+ * \li <a href="_bottleneck_distance_2_bottleneck_read_file_example_8cpp-example.html">
+ * Bottleneck_distance/bottleneck_read_file_example.cpp</a>
+ *
  * \subsection eigen3 Eigen3
  * The \ref alpha_complex data structure and few examples requires
  * <a target="_blank" href="http://eigen.tuxfamily.org/">Eigen3</a> is a C++ template library for linear algebra:
@@ -275,8 +277,10 @@ make \endverbatim
  * Alpha_complex/Alpha_complex_from_off.cpp</a>
  * \li <a href="_alpha_complex_2_alpha_complex_from_points_8cpp-example.html">
  * Alpha_complex/Alpha_complex_from_points.cpp</a>
- * \li <a href="_bottleneck_distance_2_bottleneck_example_8cpp-example.html">
- * Bottleneck_distance/bottleneck_example.cpp</a>
+ * \li <a href="_bottleneck_distance_2_bottleneck_basic_example_8cpp-example.html">
+ * Bottleneck_distance/bottleneck_basic_example.cpp</a>
+ * \li <a href="_bottleneck_distance_2_bottleneck_read_file_example_8cpp-example.html">
+ * Bottleneck_distance/bottleneck_read_file_example.cpp</a>
  * \li <a href="_persistent_cohomology_2alpha_complex_persistence_8cpp-example.html">
  * Persistent_cohomology/alpha_complex_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
@@ -358,7 +362,8 @@ make \endverbatim
 /*! @file Examples
  * @example Alpha_complex/Alpha_complex_from_off.cpp
  * @example Alpha_complex/Alpha_complex_from_points.cpp
- * @example Bottleneck_distance/bottleneck_example.cpp
+ * @example Bottleneck_distance/bottleneck_basic_example.cpp
+ * @example Bottleneck_distance/bottleneck_read_file_example.cpp
  * @example Bitmap_cubical_complex/Bitmap_cubical_complex.cpp
  * @example Bitmap_cubical_complex/Bitmap_cubical_complex_periodic_boundary_conditions.cpp
  * @example Bitmap_cubical_complex/Random_bitmap_cubical_complex.cpp
