@@ -86,12 +86,13 @@ private :
     // if the id of the current landmark is the same as the last one
     if (lh_->first == aw_->iterator_last_->first) {
       // if the next iterator is end, lh_it = end pointer
-      if (++(aw_->iterator_last_) == aw_->iterator_end_) {
+      INS_iterator next_it = aw_->iterator_last_; next_it++;
+      if (next_it == aw_->iterator_end_) {
         is_end_ = true;
         return;
       }
       else {
-        //aw_->iterator_last_ = ++(aw_->iterator_last_);
+        ++(aw_->iterator_last_);
         aw_->nearest_landmark_table_.push_back(*(aw_->iterator_last_));
       }
     }

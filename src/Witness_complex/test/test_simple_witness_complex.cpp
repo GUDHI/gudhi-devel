@@ -31,6 +31,7 @@ typedef Gudhi::spatial_searching::Kd_tree_search<Kernel, Point_range> Kd_tree;
 typedef Kd_tree::INS_range Nearest_landmark_range; 
 typedef std::vector<Nearest_landmark_range> Nearest_landmark_table;
 typedef Gudhi::witness_complex::Witness_complex<Nearest_landmark_table> WitnessComplex;
+typedef Gudhi::witness_complex::Strong_witness_complex<Nearest_landmark_table> StrongWitnessComplex;
 
 
 /* All landmarks and witnesses are taken on the grid in the following manner.
@@ -117,8 +118,7 @@ BOOST_AUTO_TEST_CASE(simple_witness_complex) {
 
 
   // Strong complex : non-Euclidean version
-  EuclideanStrongWitnessComplex strong_witness_complex(landmarks,
-                                                       witnesses);
+  StrongWitnessComplex strong_witness_complex(nearest_landmark_table);
 
   strong_witness_complex.create_complex(strong_relaxed_complex_ne, 9.1);
   strong_witness_complex.create_complex(strong_relaxed_complex2_ne, 9.1, 2);
