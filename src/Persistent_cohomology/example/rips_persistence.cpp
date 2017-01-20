@@ -4,7 +4,7 @@
  *
  *    Author(s):       Clément Maria
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Méditerranée (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -20,11 +20,11 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gudhi/reader_utils.h>
-#include <gudhi/graph_simplicial_complex.h>
+#include <gudhi/Rips_complex.h>
 #include <gudhi/distance_functions.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
+#include <gudhi/Points_off_io.h>
 
 #include <boost/program_options.hpp>
 
@@ -32,14 +32,17 @@
 #include <vector>
 #include <limits>  // infinity
 
-using namespace Gudhi;
-using namespace Gudhi::persistent_cohomology;
-
-typedef int Vertex_handle;
-typedef double Filtration_value;
+// Types definition
+using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
+using Filtration_value = Simplex_tree::Filtration_value;
+using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
+using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
+using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp >;
+using Point = std::vector<double>;
+using Points_off_reader = Gudhi::Points_off_reader<Point>;
 
 void program_options(int argc, char * argv[]
-                     , std::string & filepoints
+                     , std::string & off_file_points
                      , std::string & filediag
                      , Filtration_value & threshold
                      , int & dim_max
@@ -47,40 +50,30 @@ void program_options(int argc, char * argv[]
                      , Filtration_value & min_persistence);
 
 int main(int argc, char * argv[]) {
-  std::string filepoints;
+  std::string off_file_points;
   std::string filediag;
   Filtration_value threshold;
   int dim_max;
   int p;
   Filtration_value min_persistence;
 
-  program_options(argc, argv, filepoints, filediag, threshold, dim_max, p, min_persistence);
+  program_options(argc, argv, off_file_points, filediag, threshold, dim_max, p, min_persistence);
 
-  // Extract the points from the file filepoints
-  typedef std::vector<double> Point_t;
-  std::vector< Point_t > points;
-  read_points(filepoints, points);
-
-  // Compute the proximity graph of the points
-  Graph_t prox_graph = compute_proximity_graph(points, threshold
-                                               , euclidean_distance<Point_t>);
+  Points_off_reader off_reader(off_file_points);
+  Rips_complex rips_complex_from_file(off_reader.get_point_cloud(), threshold, Euclidean_distance());
 
   // Construct the Rips complex in a Simplex Tree
-  typedef Simplex_tree<Simplex_tree_options_fast_persistence> ST;
-  ST st;
-  // insert the proximity graph in the simplex tree
-  st.insert_graph(prox_graph);
-  // expand the graph until dimension dim_max
-  st.expansion(dim_max);
+  Simplex_tree simplex_tree;
 
-  std::cout << "The complex contains " << st.num_simplices() << " simplices \n";
-  std::cout << "   and has dimension " << st.dimension() << " \n";
+  rips_complex_from_file.create_complex(simplex_tree, dim_max);
+  std::cout << "The complex contains " << simplex_tree.num_simplices() << " simplices \n";
+  std::cout << "   and has dimension " << simplex_tree.dimension() << " \n";
 
   // Sort the simplices in the order of the filtration
-  st.initialize_filtration();
+  simplex_tree.initialize_filtration();
 
   // Compute the persistence diagram of the complex
-  persistent_cohomology::Persistent_cohomology<ST, Field_Zp > pcoh(st);
+  Persistent_cohomology pcoh(simplex_tree);
   // initializes the coefficient field for homology
   pcoh.init_coefficients(p);
 
@@ -99,7 +92,7 @@ int main(int argc, char * argv[]) {
 }
 
 void program_options(int argc, char * argv[]
-                     , std::string & filepoints
+                     , std::string & off_file_points
                      , std::string & filediag
                      , Filtration_value & threshold
                      , int & dim_max
@@ -108,15 +101,16 @@ void program_options(int argc, char * argv[]
   namespace po = boost::program_options;
   po::options_description hidden("Hidden options");
   hidden.add_options()
-      ("input-file", po::value<std::string>(&filepoints),
-       "Name of file containing a point set. Format is one point per line:   X1 ... Xd ");
+      ("input-file", po::value<std::string>(&off_file_points),
+       "Name of an OFF file containing a point set.\n");
 
   po::options_description visible("Allowed options", 100);
   visible.add_options()
       ("help,h", "produce help message")
       ("output-file,o", po::value<std::string>(&filediag)->default_value(std::string()),
        "Name of file in which the persistence diagram is written. Default print in std::cout")
-      ("max-edge-length,r", po::value<Filtration_value>(&threshold)->default_value(std::numeric_limits<Filtration_value>::infinity()),
+      ("max-edge-length,r",
+       po::value<Filtration_value>(&threshold)->default_value(std::numeric_limits<Filtration_value>::infinity()),
        "Maximal length of an edge for the Rips complex construction.")
       ("cpx-dimension,d", po::value<int>(&dim_max)->default_value(1),
        "Maximal dimension of the Rips complex we want to compute.")
