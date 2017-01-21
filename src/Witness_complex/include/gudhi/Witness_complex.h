@@ -97,7 +97,7 @@ private:
   template < typename SimplicialComplexForWitness >
   bool create_complex(SimplicialComplexForWitness& complex,
                       double  max_alpha_square,
-                      Landmark_id limit_dimension = std::numeric_limits<Landmark_id>::max())       
+                      Landmark_id limit_dimension = std::numeric_limits<Landmark_id>::max()) const      
   {
     if (complex.num_vertices() > 0) {
       std::cerr << "Witness complex cannot create complex - complex is not empty.\n";
@@ -156,7 +156,7 @@ private:
                                   typename ActiveWitness::iterator curr_l,
                                   std::vector<Landmark_id>& simplex,
                                   SimplicialComplexForWitness& sc,
-                                  typename ActiveWitness::iterator end)
+                                  typename ActiveWitness::iterator end) const
   {
     if (curr_l == end)
       return false;

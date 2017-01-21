@@ -93,7 +93,7 @@ private:
   template < typename SimplicialComplexForWitness >
   bool create_complex(SimplicialComplexForWitness& complex,
                       double  max_alpha_square,
-                      Landmark_id limit_dimension = std::numeric_limits<Landmark_id>::max()-1)       
+                      Landmark_id limit_dimension = std::numeric_limits<Landmark_id>::max()-1) const      
   {
     Landmark_id complex_dim = 0;
     if (complex.num_vertices() > 0) {
@@ -147,7 +147,7 @@ private:
                                   typename ActiveWitness::iterator aw_it,
                                   double filtration_value,
                                   typeVectorVertex& simplex,
-                                  SimplicialComplexForWitness& sc)
+                                  SimplicialComplexForWitness& sc) const
   {
     if (dim > 0)
       while (curr_it != vertices.end()) {

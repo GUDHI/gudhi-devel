@@ -62,7 +62,7 @@ public:
   {
   }
 
-  Active_witness_iterator(Active_witness* aw, Pair_iterator lh)
+  Active_witness_iterator(Active_witness* aw, const Pair_iterator& lh)
     : aw_(aw), lh_(lh)
   {
     is_end_ = false;
