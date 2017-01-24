@@ -1029,7 +1029,7 @@ class Simplex_tree {
     Dictionary_it next = siblings->members().begin();
     ++next;
 
-    static std::vector<std::pair<Vertex_handle, Node> > inter;  // static, not thread-safe.
+    thread_local std::vector<std::pair<Vertex_handle, Node> > inter;
     for (Dictionary_it s_h = siblings->members().begin();
          s_h != siblings->members().end(); ++s_h, ++next) {
       Simplex_handle root_sh = find_vertex(s_h->first);

@@ -4,7 +4,7 @@
  *
  *    Author(s):       Siargey Kachanovich
  *
- *    Copyright (C) 2015  INRIA Sophia Antipolis-Méditerranée (France)
+ *    Copyright (C) 2015  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -40,6 +40,8 @@
 
 #include "generators.h"
 
+typedef Gudhi::Simplex_tree<> Simplex_tree;
+
 /** Write a gnuplot readable file.
  *  Data range is a random access range of pairs (arg, value)
  */
@@ -62,7 +64,7 @@ int main(int argc, char * const argv[]) {
   clock_t start, end;
 
   // Construct the Simplex Tree
-  Gudhi::Simplex_tree<> simplex_tree;
+  Simplex_tree simplex_tree;
 
   std::vector< std::pair<int, double> > l_time;
 
@@ -77,7 +79,7 @@ int main(int argc, char * const argv[]) {
     start = clock();
     std::vector<std::vector< int > > knn;
     Gudhi::subsampling::pick_n_random_points(point_vector, 100, std::back_inserter(landmarks));
-    Gudhi::witness_complex::construct_closest_landmark_table(point_vector, landmarks, knn);
+    Gudhi::witness_complex::construct_closest_landmark_table<Simplex_tree::Filtration_value>(point_vector, landmarks, knn);
 
     // Compute witness complex
     Gudhi::witness_complex::witness_complex(knn, number_of_landmarks, point_vector[0].size(), simplex_tree);
