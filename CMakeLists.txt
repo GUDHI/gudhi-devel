@@ -161,7 +161,6 @@ else()
   add_subdirectory(src/Bottleneck_distance/example)
   add_subdirectory(src/Bottleneck_distance/test)
   add_subdirectory(src/Bottleneck_distance/benchmark)
-  add_subdirectory(src/Bottleneck_distance/utils)
   add_subdirectory(src/Rips_complex/example)
   add_subdirectory(src/Rips_complex/test)
 
