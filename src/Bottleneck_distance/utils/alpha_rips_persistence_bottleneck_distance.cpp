@@ -71,9 +71,9 @@ int main(int argc, char * argv[]) {
 
   Points_off_reader off_reader(off_file_points);
 
-  // ------------------------------------
+  // --------------------------------------------
   // Rips persistence
-  // ------------------------------------
+  // --------------------------------------------
   Rips_complex rips_complex(off_reader.get_point_cloud(), threshold, Euclidean_distance());
 
   // Construct the Rips complex in a Simplex Tree
@@ -90,14 +90,13 @@ int main(int argc, char * argv[]) {
   Persistent_cohomology rips_pcoh(rips_stree);
   // initializes the coefficient field for homology
   rips_pcoh.init_coefficients(p);
-
   rips_pcoh.compute_persistent_cohomology(min_persistence);
 
-  rips_pcoh.output_diagram();
+  // rips_pcoh.output_diagram();
 
-  // ------------------------------------
+  // --------------------------------------------
   // Alpha persistence
-  // ------------------------------------
+  // --------------------------------------------
   Gudhi::alpha_complex::Alpha_complex<Kernel> alpha_complex(off_reader.get_point_cloud());
 
   Simplex_tree alpha_stree;
@@ -112,12 +111,15 @@ int main(int argc, char * argv[]) {
   Persistent_cohomology alpha_pcoh(alpha_stree);
   // initializes the coefficient field for homology
   alpha_pcoh.init_coefficients(p);
-
   alpha_pcoh.compute_persistent_cohomology(min_persistence * min_persistence);
 
-  alpha_pcoh.output_diagram();
+  // alpha_pcoh.output_diagram();
 
-  for (int dim = 0; dim <= dim_max; dim ++) {
+  // --------------------------------------------
+  // Bottleneck distance between both persistence
+  // --------------------------------------------
+  double max_b_distance {};
+  for (int dim = 0; dim < dim_max; dim ++) {
     std::vector< std::pair< Filtration_value , Filtration_value > > rips_intervals;
     std::vector< std::pair< Filtration_value , Filtration_value > > alpha_intervals;
     rips_intervals = rips_pcoh.intervals_in_dimension(dim);
@@ -126,7 +128,11 @@ int main(int argc, char * argv[]) {
 
     double bottleneck_distance = Gudhi::persistence_diagram::bottleneck_distance(rips_intervals, alpha_intervals);
     std::cout << "In dimension " << dim << ", bottleneck distance = " << bottleneck_distance << std::endl;
+    if (bottleneck_distance > max_b_distance)
+      max_b_distance = bottleneck_distance;
   }
+  std::cout << "================================================================================" << std::endl;
+  std::cout << "Bottleneck distance is " << max_b_distance << std::endl;
 
   return 0;
 }
