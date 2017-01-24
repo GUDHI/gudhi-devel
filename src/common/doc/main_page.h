@@ -293,10 +293,6 @@ make \endverbatim
  * Alpha_complex/Alpha_complex_from_off.cpp</a>
  * \li <a href="_alpha_complex_2_alpha_complex_from_points_8cpp-example.html">
  * Alpha_complex/Alpha_complex_from_points.cpp</a>
- * \li <a href="_bottleneck_distance_2_bottleneck_basic_example_8cpp-example.html">
- * Bottleneck_distance/bottleneck_basic_example.cpp</a>
- * \li <a href="_bottleneck_distance_2_bottleneck_read_file_example_8cpp-example.html">
- * Bottleneck_distance/bottleneck_read_file_example.cpp</a>
  * \li <a href="_persistent_cohomology_2alpha_complex_persistence_8cpp-example.html">
  * Persistent_cohomology/alpha_complex_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2periodic_alpha_complex_3d_persistence_8cpp-example.html">

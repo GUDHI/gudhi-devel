@@ -25,7 +25,7 @@
 #define GUI_MENU_UNIFORM_NEIGHBORS_H_
 
 #include <QMainWindow>
-#include "gui/ui_UniformNeighborsMenu.h"
+#include "ui_UniformNeighborsMenu.h"
 
 class Menu_uniform_neighbors : public QDialog, public Ui::UniformMenu {
   Q_OBJECT
