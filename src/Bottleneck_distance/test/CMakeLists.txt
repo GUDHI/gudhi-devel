@@ -15,14 +15,12 @@ endif()
 # cmake -DCGAL_DIR=~/workspace/CGAL-4.8 ../../..
 if(CGAL_FOUND)
   if (NOT CGAL_VERSION VERSION_LESS 4.8.0)
-    if (EIGEN3_FOUND)
-      add_executable ( bottleneckUT bottleneck_unit_test.cpp )
-      target_link_libraries(bottleneckUT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+    add_executable ( bottleneckUT bottleneck_unit_test.cpp )
+    target_link_libraries(bottleneckUT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
-      # Unitary tests
-      add_test(NAME bottleneckUT COMMAND ${CMAKE_CURRENT_BINARY_DIR}/bottleneckUT
-        # XML format for Jenkins xUnit plugin 
-        --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/bottleneckUT.xml --log_level=test_suite --report_level=no)
-    endif()
+    # Unitary tests
+    add_test(NAME bottleneckUT COMMAND ${CMAKE_CURRENT_BINARY_DIR}/bottleneckUT
+      # XML format for Jenkins xUnit plugin
+      --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/bottleneckUT.xml --log_level=test_suite --report_level=no)
   endif ()
 endif()
