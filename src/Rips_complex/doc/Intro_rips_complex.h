@@ -59,6 +59,10 @@ namespace rips_complex {
  * value set with \f$max(filtration(4,5), filtration(4,6), filtration(5,6))\f$.
  * And so on for simplex (0,1,2,3).
  * 
+ * If the Rips_complex interfaces are not detailed enough for your need, please refer to
+ * <a href="_persistent_cohomology_2rips_persistence_step_by_step_8cpp-example.html">
+ * rips_persistence_step_by_step.cpp</a> example, where the graph construction over the Simplex_tree is more detailed.
+ *
  * \section ripspointsdistance Point cloud and distance function
  * 
  * \subsection ripspointscloudexample Example from a point cloud and a distance function
