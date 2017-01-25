@@ -51,7 +51,7 @@ namespace rips_complex {
  * to a given threshold. Edge length is computed from a user given point cloud with a given distance function, or a
  * distance matrix.
  * 
- * \tparam Filtration_value must meet `SimplicialComplexForRips` concept.
+ * \tparam Filtration_value  is the type used to store the filtration values of the simplicial complex.
  */
 template<typename Filtration_value>
 class Rips_complex {
@@ -70,7 +70,7 @@ class Rips_complex {
   /** \brief Rips_complex constructor from a list of points.
    *
    * @param[in] points Range of points.
-   * @param[in] threshold rips value.
+   * @param[in] threshold Rips value.
    * @param[in] distance distance function that returns a `Filtration_value` from 2 given points.
    * 
    * \tparam InputPointRange must be a range for which `std::begin` and `std::end` return input iterators on a
@@ -81,20 +81,20 @@ class Rips_complex {
    */
   template<typename InputPointRange, typename Distance >
   Rips_complex(const InputPointRange& points, Filtration_value threshold, Distance distance) {
-    compute_proximity_graph<InputPointRange, Distance >(points, threshold, distance);
+    compute_proximity_graph(points, threshold, distance);
   }
 
   /** \brief Rips_complex constructor from a distance matrix.
    *
    * @param[in] distance_matrix Range of distances.
-   * @param[in] threshold rips value.
+   * @param[in] threshold Rips value.
    * 
-   * \tparam InputDistanceRange must have a `size()` method and on which `distance_matrix[i][j]` returns
-   * the distance between points \f$i\f$ and \f$j\f$ as long as \f$ 0 \leqslant i \leqslant j \leqslant
+   * \tparam DistanceMatrix must have a `size()` method and on which `distance_matrix[i][j]` returns
+   * the distance between points \f$i\f$ and \f$j\f$ as long as \f$ 0 \leqslant i < j \leqslant
    * distance\_matrix.size().\f$
    */
-  template<typename InputDistanceRange>
-  Rips_complex(const InputDistanceRange& distance_matrix, Filtration_value threshold) {
+  template<typename DistanceMatrix>
+  Rips_complex(const DistanceMatrix& distance_matrix, Filtration_value threshold) {
     compute_proximity_graph(boost::irange((size_t)0, distance_matrix.size()), threshold,
                             [&](size_t i, size_t j){return distance_matrix[j][i];});
   }
@@ -105,7 +105,7 @@ class Rips_complex {
    * \tparam SimplicialComplexForRips must meet `SimplicialComplexForRips` concept.
    * 
    * @param[in] complex SimplicialComplexForRips to be created.
-   * @param[in] dim_max graph expansion for rips until this given maximal dimension.
+   * @param[in] dim_max graph expansion for Rips until this given maximal dimension.
    * @exception std::invalid_argument In debug mode, if `complex.num_vertices()` does not return 0.
    *
    */
@@ -144,7 +144,7 @@ class Rips_complex {
     // --------------------------------------------------------------------------------------------
     // Creates the vector of edges and its filtration values (returned by distance function)
     Vertex_handle idx_u = 0;
-    for (auto it_u = std::begin(points); it_u != std::end(points); ++it_u) {
+    for (auto it_u = std::begin(points); it_u != std::end(points); ++it_u, ++idx_u) {
       Vertex_handle idx_v = idx_u + 1;
       for (auto it_v = it_u + 1; it_v != std::end(points); ++it_v, ++idx_v) {
         Filtration_value fil = distance(*it_u, *it_v);
@@ -153,7 +153,6 @@ class Rips_complex {
           edges_fil.push_back(fil);
         }
       }
-      ++idx_u;
     }
 
     // --------------------------------------------------------------------------------------------

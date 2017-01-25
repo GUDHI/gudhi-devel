@@ -48,7 +48,7 @@ namespace rips_complex {
  * All edges that have a filtration value strictly greater than a given threshold value are not inserted into
  * the complex.
  * 
- * When creating a simplicial complex from this one skeleton graph, rips inserts the one skeleton graph into the data
+ * When creating a simplicial complex from this one skeleton graph, Rips inserts the one skeleton graph into the data
  * structure, and then expands the simplicial when required.
  * 
  * \image html "rips_complex_representation.png" "Rips-complex one skeleton graph representation"
@@ -68,7 +68,7 @@ namespace rips_complex {
  * 
  * \include Rips_complex/example_one_skeleton_rips_from_points.cpp
  * 
- * When launching (rips maximal distance between 2 points is 12.0, is expanded until dimension 1 - one skeleton graph
+ * When launching (Rips maximal distance between 2 points is 12.0, is expanded until dimension 1 - one skeleton graph
  * in other words):
  * 
  * \code $> ./oneskeletonripspoints
@@ -85,7 +85,7 @@ namespace rips_complex {
  * Then it creates a `Simplex_tree` with it.
  * 
  * 
- * Then, it is asked to display information about the rips complex.
+ * Then, it is asked to display information about the Rips complex.
  * 
  * \include Rips_complex/example_rips_complex_from_off_file.cpp
  * 
@@ -111,7 +111,7 @@ namespace rips_complex {
  * 
  * \include Rips_complex/example_one_skeleton_rips_from_distance_matrix.cpp
  * 
- * When launching (rips maximal distance between 2 points is 1.0, is expanded until dimension 1 - one skeleton graph
+ * When launching (Rips maximal distance between 2 points is 1.0, is expanded until dimension 1 - one skeleton graph
  * with other words):
  * 
  * \code $> ./oneskeletonripsdistance
@@ -127,7 +127,7 @@ namespace rips_complex {
  * Then it creates a `Simplex_tree` with it.
  * 
  * 
- * Then, it is asked to display information about the rips complex.
+ * Then, it is asked to display information about the Rips complex.
  * 
  * \include Rips_complex/example_rips_complex_from_csv_distance_matrix_file.cpp
  * 

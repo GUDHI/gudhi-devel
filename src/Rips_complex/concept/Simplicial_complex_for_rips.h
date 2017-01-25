@@ -31,11 +31,10 @@ namespace rips_complex {
  * complex, that can be created from a `Rips_complex`. The only available model for the moment is the `Simplex_tree`.
  */
 struct SimplicialComplexForRips {
-  /** \brief Handle to specify the simplex filtration value. */
+  /** \brief Type used to store the filtration values of the simplicial complex. */
   typedef unspecified Filtration_value;
 
-  /** \brief Inserts a given range `Gudhi::rips_complex::Rips_complex::OneSkeletonGraph` in the simplicial
-   * complex. */
+  /** \brief Inserts a given `Gudhi::rips_complex::Rips_complex::OneSkeletonGraph` in the simplicial complex. */
   template<class OneSkeletonGraph>
   void insert_graph(const OneSkeletonGraph& skel_graph);
 
