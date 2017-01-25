@@ -25,7 +25,6 @@ __copyright__ = "Copyright (C) 2016  INRIA"
 __license__ = "GPL v3"
 
 include "cython/simplex_tree.pyx"
-include "cython/mini_simplex_tree.pyx"
 include "cython/rips_complex.pyx"
 include "cython/cubical_complex.pyx"
 include "cython/periodic_cubical_complex.pyx"

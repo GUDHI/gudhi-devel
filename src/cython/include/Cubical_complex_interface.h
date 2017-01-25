@@ -27,9 +27,9 @@
 #include <gudhi/Bitmap_cubical_complex_base.h>
 #include <gudhi/Bitmap_cubical_complex_periodic_boundary_conditions_base.h>
 
-#include <vector>
-#include <utility>  // std::pair
 #include <iostream>
+#include <vector>
+#include <string>
 
 namespace Gudhi {
 

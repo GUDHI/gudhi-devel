@@ -31,9 +31,12 @@ __license__ = "GPL v3"
 print("#####################################################################")
 print("RipsComplex creation from points")
 rips = gudhi.RipsComplex(points=[[0, 0], [1, 0], [0, 1], [1, 1]],
-                         max_dimension=1, max_edge_length=42)
+                         max_edge_length=42)
 
-diag = rips.persistence(homology_coeff_field=2, min_persistence=0)
+simplex_tree = rips.create_simplex_tree(max_dimension=1)
+
+
+diag = simplex_tree.persistence(homology_coeff_field=2, min_persistence=0)
 print("diag=", diag)
 
 gudhi.diagram_persistence(diag)

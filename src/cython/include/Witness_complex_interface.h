@@ -40,6 +40,8 @@ namespace witness_complex {
 
 class Witness_complex_interface {
   typedef typename Simplex_tree<>::Simplex_handle Simplex_handle;
+  typedef typename Simplex_tree<>::Filtration_value Filtration_value;
+  typedef typename Simplex_tree<>::Vertex_handle Vertex_handle;
   typedef typename std::pair<Simplex_handle, bool> Insertion_result;
   using Simplex = std::vector<Vertex_handle>;
   using Filtered_complex = std::pair<Simplex, Filtration_value>;
@@ -51,7 +53,7 @@ class Witness_complex_interface {
     std::vector<std::vector< int > > knn;
     std::vector<std::vector<double>> landmarks;
     Gudhi::subsampling::pick_n_random_points(points, number_of_landmarks, std::back_inserter(landmarks));
-    Gudhi::witness_complex::construct_closest_landmark_table(points, landmarks, knn);
+    Gudhi::witness_complex::construct_closest_landmark_table<Filtration_value>(points, landmarks, knn);
 
     Gudhi::witness_complex::witness_complex(knn, number_of_landmarks, points[0].size(), simplex_tree_);
   }

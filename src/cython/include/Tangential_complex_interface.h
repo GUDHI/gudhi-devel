@@ -41,11 +41,6 @@ namespace tangential_complex {
 class Tangential_complex_interface {
   using Dynamic_kernel = CGAL::Epick_d< CGAL::Dynamic_dimension_tag >;
   using Point_d = Dynamic_kernel::Point_d;
-  typedef typename Simplex_tree<>::Simplex_handle Simplex_handle;
-  typedef typename std::pair<Simplex_handle, bool> Insertion_result;
-  using Simplex = std::vector<Vertex_handle>;
-  using Filtered_complex = std::pair<Simplex, Filtration_value>;
-  using Complex_tree = std::vector<Filtered_complex>;
   using TC = Tangential_complex<Dynamic_kernel, CGAL::Dynamic_dimension_tag, CGAL::Parallel_tag>;
 
  public:

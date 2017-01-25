@@ -30,15 +30,17 @@
 
 #include "Persistent_cohomology_interface.h"
 
+#include <iostream>
 #include <vector>
 #include <utility>  // std::pair
-#include <iostream>
 
 namespace Gudhi {
 
 template<typename SimplexTreeOptions = Simplex_tree_options_full_featured>
 class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
  public:
+  typedef typename Simplex_tree<SimplexTreeOptions>::Filtration_value Filtration_value;
+  typedef typename Simplex_tree<SimplexTreeOptions>::Vertex_handle Vertex_handle;
   typedef typename Simplex_tree<SimplexTreeOptions>::Simplex_handle Simplex_handle;
   typedef typename std::pair<Simplex_handle, bool> Insertion_result;
   using Simplex = std::vector<Vertex_handle>;
@@ -115,40 +117,10 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     return coface_tree;
   }
 
-  void graph_expansion(std::vector<std::vector<double>>&points, int max_dimension, double max_edge_length) {
-    Graph_t prox_graph = compute_proximity_graph(points, max_edge_length, euclidean_distance<std::vector<double>>);
-    Simplex_tree<SimplexTreeOptions>::insert_graph(prox_graph);
-    Simplex_tree<SimplexTreeOptions>::expansion(max_dimension);
-    Simplex_tree<SimplexTreeOptions>::initialize_filtration();
-  }
-
-  void graph_expansion(std::string& off_file_name, int max_dimension, double max_edge_length, bool from_file=true) {
-    Gudhi::Points_off_reader<std::vector <double>> off_reader(off_file_name);
-    // Check the read operation was correct
-    if (!off_reader.is_valid()) {
-      std::cerr << "Unable to read file " << off_file_name << std::endl;
-    } else {
-      std::vector<std::vector <double>> points = off_reader.get_point_cloud();
-      Graph_t prox_graph = compute_proximity_graph(points, max_edge_length,
-                                                   euclidean_distance<std::vector<double>>);
-      Simplex_tree<SimplexTreeOptions>::insert_graph(prox_graph);
-      Simplex_tree<SimplexTreeOptions>::expansion(max_dimension);
-      Simplex_tree<SimplexTreeOptions>::initialize_filtration();
-    }
-  }
-
   void create_persistence(Gudhi::Persistent_cohomology_interface<Simplex_tree<SimplexTreeOptions>>* pcoh) {
     pcoh = new Gudhi::Persistent_cohomology_interface<Simplex_tree<SimplexTreeOptions>>(*this);
   }
 
-};
-
-struct Simplex_tree_options_mini : Simplex_tree_options_full_featured {
-  // Not doing persistence, so we don't need those
-  static const bool store_key = true;
-  static const bool store_filtration = false;
-  // I have few vertices
-  typedef short Vertex_handle;
 };
 
 } // namespace Gudhi

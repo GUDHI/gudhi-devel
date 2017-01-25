@@ -29,8 +29,9 @@
 #include <gudhi/Points_off_io.h>
 #include <CGAL/Epick_d.h>
 
-#include <vector>
 #include <iostream>
+#include <vector>
+#include <string>
 
 namespace Gudhi {
 

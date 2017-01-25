@@ -21,8 +21,5 @@
 |  :doc:`persistent_cohomology_user`          | Please refer to each data structure that contains persistence        |
 |                                             | feature for reference:                                               |
 |                                             |                                                                      |
-|                                             | * :doc:`alpha_complex_ref`                                           |
-|                                             | * :doc:`cubical_complex_ref`                                         |
 |                                             | * :doc:`simplex_tree_ref`                                            |
-|                                             | * :doc:`witness_complex_ref`                                         |
 +---------------------------------------------+----------------------------------------------------------------------+

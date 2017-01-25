@@ -30,36 +30,39 @@ __license__ = "GPL v3"
 def test_empty_rips():
     rips_complex = RipsComplex()
     assert rips_complex.__is_defined() == True
-    assert rips_complex.__is_persistence_defined() == False
 
 def test_rips():
     point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
-    rips_complex = RipsComplex(points=point_list, max_dimension=1,
-                               max_edge_length=42)
-    assert rips_complex.__is_defined() == True
-    assert rips_complex.__is_persistence_defined() == False
+    rips_complex = RipsComplex(points=point_list, max_edge_length=42)
 
-    assert rips_complex.num_simplices() == 10
-    assert rips_complex.num_vertices() == 4
+    simplex_tree = rips_complex.create_simplex_tree(max_dimension=1)
 
-    assert rips_complex.get_filtered_tree() == \
+    assert simplex_tree.__is_defined() == True
+    assert simplex_tree.__is_persistence_defined() == False
+
+    assert simplex_tree.num_simplices() == 10
+    assert simplex_tree.num_vertices() == 4
+
+    assert simplex_tree.get_filtered_tree() == \
            [([0], 0.0), ([1], 0.0), ([2], 0.0), ([3], 0.0),
             ([0, 1], 1.0), ([0, 2], 1.0), ([1, 3], 1.0),
             ([2, 3], 1.0), ([1, 2], 1.4142135623730951),
             ([0, 3], 1.4142135623730951)]
-    assert rips_complex.get_star_tree([0]) == \
+    assert simplex_tree.get_star_tree([0]) == \
            [([0], 0.0), ([0, 1], 1.0), ([0, 2], 1.0),
             ([0, 3], 1.4142135623730951)]
-    assert rips_complex.get_coface_tree([0], 1) == \
+    assert simplex_tree.get_coface_tree([0], 1) == \
            [([0, 1], 1.0), ([0, 2], 1.0),
             ([0, 3], 1.4142135623730951)]
 
 def test_filtered_rips():
     point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
-    filtered_rips = RipsComplex(points=point_list, max_dimension=1,
-                                      max_edge_length=1.0)
-    assert filtered_rips.__is_defined() == True
-    assert filtered_rips.__is_persistence_defined() == False
+    filtered_rips = RipsComplex(points=point_list, max_edge_length=1.0)
 
-    assert filtered_rips.num_simplices() == 8
-    assert filtered_rips.num_vertices() == 4
+    simplex_tree = filtered_rips.create_simplex_tree(max_dimension=1)
+
+    assert simplex_tree.__is_defined() == True
+    assert simplex_tree.__is_persistence_defined() == False
+
+    assert simplex_tree.num_simplices() == 8
+    assert simplex_tree.num_vertices() == 4

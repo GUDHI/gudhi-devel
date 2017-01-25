@@ -29,9 +29,9 @@
 
 #include "Simplex_tree_interface.h"
 
-#include <vector>
-#include <utility>  // std::pair
 #include <iostream>
+#include <vector>
+#include <string>
 
 namespace Gudhi {
 
@@ -40,11 +40,6 @@ namespace alpha_complex {
 class Alpha_complex_interface {
   using Dynamic_kernel = CGAL::Epick_d< CGAL::Dynamic_dimension_tag >;
   using Point_d = Dynamic_kernel::Point_d;
-  typedef typename Simplex_tree<>::Simplex_handle Simplex_handle;
-  typedef typename std::pair<Simplex_handle, bool> Insertion_result;
-  using Simplex = std::vector<Vertex_handle>;
-  using Filtered_complex = std::pair<Simplex, Filtration_value>;
-  using Complex_tree = std::vector<Filtered_complex>;
 
   typedef typename Simplex_tree<>::Simplex_key Simplex_key;
 

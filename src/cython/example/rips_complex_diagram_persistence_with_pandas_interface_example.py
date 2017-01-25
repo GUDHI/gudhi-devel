@@ -53,16 +53,17 @@ message = "RipsComplex with max_edge_length=" + repr(args.max_edge_length)
 print(message)
 
 rips_complex = gudhi.RipsComplex(points=points.values,
-                                 max_dimension=len(points.values[0]), max_edge_length=args.max_edge_length)
+                                 max_edge_length=args.max_edge_length)
 
-message = "Number of simplices=" + repr(rips_complex.num_simplices())
+simplex_tree = rips_complex.create_simplex_tree(max_dimension=len(points.values[0]))
+
+message = "Number of simplices=" + repr(simplex_tree.num_simplices())
 print(message)
 
-rips_complex.initialize_filtration()
-diag = rips_complex.persistence()
+diag = simplex_tree.persistence()
 
 print("betti_numbers()=")
-print(rips_complex.betti_numbers())
+print(simplex_tree.betti_numbers())
 
 if args.no_diagram == False:
     gudhi.diagram_persistence(diag)
