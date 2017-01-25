@@ -50,6 +50,8 @@ namespace rips_complex {
  * 
  * When creating a simplicial complex from this one skeleton graph, Rips inserts the one skeleton graph into the data
  * structure, and then expands the simplicial when required.
+ *
+ * Vertex name correspond to the index of the point in the given range (aka. the point cloud).
  * 
  * \image html "rips_complex_representation.png" "Rips-complex one skeleton graph representation"
  * 
