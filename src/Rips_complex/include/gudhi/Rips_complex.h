@@ -51,7 +51,7 @@ namespace rips_complex {
  * to a given threshold. Edge length is computed from a user given point cloud with a given distance function, or a
  * distance matrix.
  * 
- * \tparam Filtration_value  is the type used to store the filtration values of the simplicial complex.
+ * \tparam Filtration_value is the type used to store the filtration values of the simplicial complex.
  */
 template<typename Filtration_value>
 class Rips_complex {
@@ -73,14 +73,14 @@ class Rips_complex {
    * @param[in] threshold Rips value.
    * @param[in] distance distance function that returns a `Filtration_value` from 2 given points.
    * 
-   * \tparam InputPointRange must be a range for which `std::begin` and `std::end` return input iterators on a
+   * \tparam ForwardPointRange must be a range for which `std::begin` and `std::end` return input iterators on a
    * point.
    *
    * \tparam Distance furnishes `operator()(const Point& p1, const Point& p2)`, where
-   * `Point` is a point from the `InputPointRange`, and that returns a `Filtration_value`.
+   * `Point` is a point from the `ForwardPointRange`, and that returns a `Filtration_value`.
    */
-  template<typename InputPointRange, typename Distance >
-  Rips_complex(const InputPointRange& points, Filtration_value threshold, Distance distance) {
+  template<typename ForwardPointRange, typename Distance >
+  Rips_complex(const ForwardPointRange& points, Filtration_value threshold, Distance distance) {
     compute_proximity_graph(points, threshold, distance);
   }
 
@@ -126,14 +126,14 @@ class Rips_complex {
    * If points contains n elements, the proximity graph is the graph with n vertices, and an edge [u,v] iff the
    * distance function between points u and v is smaller than threshold.
    *
-   * \tparam InputPointRange furnishes `.begin()` and `.end()`
+   * \tparam ForwardPointRange furnishes `.begin()` and `.end()`
    * methods.
    *
    * \tparam Distance furnishes `operator()(const Point& p1, const Point& p2)`, where
-   * `Point` is a point from the `InputPointRange`, and that returns a `Filtration_value`.
+   * `Point` is a point from the `ForwardPointRange`, and that returns a `Filtration_value`.
    */
-  template< typename InputPointRange, typename Distance >
-  void compute_proximity_graph(const InputPointRange& points, Filtration_value threshold,
+  template< typename ForwardPointRange, typename Distance >
+  void compute_proximity_graph(const ForwardPointRange& points, Filtration_value threshold,
                Distance distance) {
     std::vector< std::pair< Vertex_handle, Vertex_handle > > edges;
     std::vector< Filtration_value > edges_fil;
