@@ -25,24 +25,25 @@
 
 namespace Gudhi {
 
-namespace bottleneck_distance {
+namespace persistence_diagram {
 
-/** \brief Concept of Diagram_point. std::get<0>(point) must return the birth of the corresponding component and std::get<1>(point) its death.
+/** \brief Concept of point in a persistence diagram. std::get<0>(point) must return the birth of the corresponding component and std::get<1>(point) its death.
+ * Both should be convertible to `double`.
  * A valid implementation of this concept is std::pair<double,double>.
  * Death should be larger than birth, death can be std::numeric_limits<double>::infinity() for components which stay alive.
  *
  * \ingroup bottleneck_distance
  */
-typename Diagram_point;
+struct DiagramPoint{};
 
-/** \brief Concept of persistence diagram. It's a range of Diagram_point.
+/** \brief Concept of persistence diagram. It is a range of `DiagramPoint`.
  * std::begin(diagram) and std::end(diagram) must return corresponding iterators.
  *
  * \ingroup bottleneck_distance
  */
-typename Persistence_Diagram;
+struct PersistenceDiagram{};
 
-}  // namespace bottleneck_distance
+}  // namespace persistence_diagram
 
 }  // namespace Gudhi
 

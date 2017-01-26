@@ -75,10 +75,12 @@ if(PYTHON_PATH AND CYTHON_PATH)
     
         set(GUDHI_CYTHON_ALPHA_COMPLEX "include 'cython/alpha_complex.pyx'")
         set(GUDHI_CYTHON_TANGENTIAL_COMPLEX "include 'cython/tangential_complex.pyx'")
+        set(GUDHI_CYTHON_BOTTLENECK_DISTANCE "include 'cython/bottleneck_distance.pyx'")
       else (NOT CGAL_VERSION VERSION_LESS 4.8.0)
         # Remove alpha complex unitary tests
         file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_alpha_complex.py)
         file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_tangential_complex.py)
+        file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_bottleneck_distance.py)
       endif (NOT CGAL_VERSION VERSION_LESS 4.8.0)
     endif (CGAL_FOUND)
     
