@@ -63,13 +63,14 @@ class Graph_induced_complex {
    std::vector<std::vector<Cover_t> > cliques;
 
  public:
+   template<typename SimplicialComplexForGIC>
    void create_complex(SimplicialComplexForGIC & complex) {
      size_t sz = cliques.size();
      for(int i = 0; i < sz; i++)  complex.insert_simplex_and_subfaces(cliques[i]);
    }
 
  public:
-   void find_all_simplices(std::vector<Cover_t> & cliques, const std::vector<std::vector<Cover_t> > & cover_elts, int & token, std::vector<Cover_t> & simplex_tmp){
+   void find_all_simplices(std::vector<std::vector<Cover_t> > & cliques, const std::vector<std::vector<Cover_t> > & cover_elts, int & token, std::vector<Cover_t> & simplex_tmp){
      int num_nodes = cover_elts.size();
      if(token == num_nodes-1){
        int num_clus = cover_elts[token].size();
@@ -81,8 +82,8 @@ class Graph_induced_complex {
      else{
        int num_clus = cover_elts[token].size();
        for(int i = 0; i < num_clus; i++){
-         std::vector<Cover_elts> simplex = simplex_tmp; simplex.push_back(cover_elts[token][i]);
-         find_all_simplices(cliques, cover_elts, ++tok, simplex);
+         std::vector<Cover_t> simplex = simplex_tmp; simplex.push_back(cover_elts[token][i]);
+         find_all_simplices(cliques, cover_elts, ++token, simplex);
        }
      }
    }
@@ -97,11 +98,11 @@ class Graph_induced_complex {
     * `Cover_value`.
     *
     */
-   template<typename Graph_t, typename Cover>
-   Graph_induced_complex(const Graph_t& G, const Cover& C, const int& max_dim) {
+   template<typename Cover>
+   Graph_induced_complex(Simplex_tree & st, const Cover& C, const int& max_dim) {
 
      // Construct the Simplex Tree corresponding to the graph
-     Simplex_tree<> st; st.insert_graph(G); st.expansion(max_dim);
+     st.expansion(max_dim);
 
      // Find complexes of GIC
      cliques.clear();
