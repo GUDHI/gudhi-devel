@@ -40,7 +40,7 @@ namespace persistence_diagram {
  */
 class Persistence_graph {
  public:
-  /** \internal \brief Constructor taking 2 Persistence_Diagrams (concept) as parameters. */
+  /** \internal \brief Constructor taking 2 PersistenceDiagrams (concept) as parameters. */
   template<typename Persistence_diagram1, typename Persistence_diagram2>
   Persistence_graph(const Persistence_diagram1& diag1, const Persistence_diagram2& diag2, double e);
   /** \internal \brief Is the given point from U the projection of a point in V ? */
