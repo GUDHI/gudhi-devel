@@ -62,6 +62,11 @@ Witness complex
 Toolbox
 *******
 
+Bottleneck distance
+===================
+
+.. include:: bottleneck_distance_sum.rst
+
 Persistence cohomology
 ======================
 
