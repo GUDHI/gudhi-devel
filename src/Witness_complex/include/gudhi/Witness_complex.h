@@ -81,7 +81,7 @@ private:
    *         of the nearest landmark range iterator needs to be 'std::pair<std::size_t, double>'.
    */
 
-  Witness_complex(Nearest_landmark_table_ & nearest_landmark_table)
+  Witness_complex(Nearest_landmark_table_ const & nearest_landmark_table)
     : nearest_landmark_table_(nearest_landmark_table)
   {    
   }
