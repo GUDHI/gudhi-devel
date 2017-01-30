@@ -53,8 +53,6 @@
    2. Construct lists of nearest landmarks for each witness (special structure Gudhi::witness_complex::Active_witness is used internally).
    3. Construct the witness complex for nearest landmark lists.
 
-   All the computations of nearest landmarks in Euclidean case are exact thanks to Gudhi::spatial_searching::Kd_tree_search data structure.
-
    In the non-Euclidean classes, the lists of nearest landmarks are supposed to be given as input.
 
    The constructors take on the steps 1 and 2, while the function 'create_complex' executes the step 3.
