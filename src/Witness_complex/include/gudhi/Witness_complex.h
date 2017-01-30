@@ -32,8 +32,6 @@
 #include <list>
 #include <limits>
 
-namespace gss = Gudhi::spatial_searching;
-
 namespace Gudhi {
   
 namespace witness_complex {
