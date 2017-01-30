@@ -49,7 +49,7 @@ namespace rips_complex {
  * the complex.
  * 
  * When creating a simplicial complex from this one skeleton graph, rips inserts the one skeleton graph into the data
- * structure, and then expands the simplicial when required.
+ * structure, and then expands the simplicial complex when required.
  * 
  * \image html "rips_complex_representation.png" "Rips-complex one skeleton graph representation"
  * 
