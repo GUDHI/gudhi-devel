@@ -59,7 +59,7 @@ private:
 
   typedef Landmark_id Vertex_handle;
 
- private:
+ protected:
   Nearest_landmark_table_              nearest_landmark_table_;
   
  public:
@@ -69,6 +69,10 @@ private:
 
   //@{
 
+  Witness_complex()
+  {
+  }
+  
   /**
    *  \brief Initializes member variables before constructing simplicial complex.
    *  \details Records nearest landmark table.

@@ -28,6 +28,7 @@
 #include <list>
 #include <limits>
 
+#include <gudhi/Strong_witness_complex.h>
 #include <gudhi/Active_witness/Active_witness.h>
 #include <gudhi/Kd_tree_search.h>
 
@@ -45,33 +46,23 @@ namespace witness_complex {
  * href="http://doc.cgal.org/latest/Kernel_d/classCGAL_1_1Epick__d.html">CGAL::Epick_d</a> class.
  */
 template< class Kernel_ >
-class Euclidean_strong_witness_complex {
+class Euclidean_strong_witness_complex : public Strong_witness_complex<std::vector<typename Gudhi::spatial_searching::Kd_tree_search<Kernel_, std::vector<typename Kernel_::Point_d>>::INS_range>> {
 private:
   typedef Kernel_                                                                      K;
   typedef typename K::Point_d                                                          Point_d;
-  typedef typename K::FT                                                               FT;
   typedef std::vector<Point_d>                                                         Point_range;
   typedef Gudhi::spatial_searching::Kd_tree_search<Kernel_, Point_range>               Kd_tree;
   typedef typename Kd_tree::INS_range                                                  Nearest_landmark_range;
   typedef typename std::vector<Nearest_landmark_range>                                 Nearest_landmark_table;
-  typedef typename Nearest_landmark_range::iterator                                    Nearest_landmark_row_iterator;
-  
-  typedef FT Filtration_value;
 
-  
-  typedef std::size_t Witness_id;
   typedef typename Nearest_landmark_range::Point_with_transformed_distance Id_distance_pair;
   typedef typename Id_distance_pair::first_type Landmark_id;
-  typedef Active_witness<Id_distance_pair, Nearest_landmark_range> ActiveWitness;
-  typedef std::list< ActiveWitness > ActiveWitnessList;
-  typedef std::vector< Landmark_id > typeVectorVertex;
-  typedef std::pair< typeVectorVertex, Filtration_value> typeSimplex;
-
   typedef Landmark_id Vertex_handle;
   
  private:
-  Point_range                         witnesses_, landmarks_;
+  Point_range                         landmarks_;
   Kd_tree                             landmark_tree_;
+  using Strong_witness_complex<Nearest_landmark_table>::nearest_landmark_table_;
   
  public:
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -89,9 +80,11 @@ private:
   template< typename LandmarkRange,
             typename WitnessRange >
   Euclidean_strong_witness_complex(const LandmarkRange & landmarks,
-                         const WitnessRange &  witnesses)
-    : witnesses_(witnesses), landmarks_(landmarks), landmark_tree_(landmarks_)
-  {    
+                                   const WitnessRange &  witnesses)
+    : landmarks_(landmarks), landmark_tree_(landmarks_)
+  {
+    for (auto w: witnesses)
+      nearest_landmark_table_.push_back(landmark_tree_.query_incremental_nearest_neighbors(w));
   }
 
   
@@ -102,101 +95,6 @@ private:
   {
     return landmarks_[vertex];
   }
-  
-  /** \brief Outputs the strong witness complex of relaxation 'max_alpha_square' 
-   *         in a simplicial complex data structure.
-   *  \details The function returns true if the construction is successful and false otherwise.
-   *  @param[out] complex Simplicial complex data structure, which is a model of
-   *              SimplicialComplexForWitness concept.
-   *  @param[in] max_alpha_square Maximal squared relaxation parameter.
-   *  @param[in] limit_dimension Represents the maximal dimension of the simplicial complex
-   *         (default value = no limit).
-   */
-  template < typename SimplicialComplexForWitness >
-  bool create_complex(SimplicialComplexForWitness& complex,
-                      FT  max_alpha_square,
-                      Landmark_id limit_dimension = std::numeric_limits<Landmark_id>::max()-1)       
-  {
-    Landmark_id complex_dim = 0;
-    if (complex.num_vertices() > 0) {
-      std::cerr << "Euclidean strong witness complex cannot create complex - complex is not empty.\n";
-      return false;
-    }
-    if (max_alpha_square < 0) {
-      std::cerr << "Euclidean strong witness complex cannot create complex - squared relaxation parameter must be non-negative.\n";
-      return false;
-    }
-    if (limit_dimension < 0) {
-      std::cerr << "Euclidean strong witness complex cannot create complex - limit dimension must be non-negative.\n";
-      return false;
-    }
-    for (auto w: witnesses_) {
-      ActiveWitness aw(landmark_tree_.query_incremental_nearest_neighbors(w));
-      typeVectorVertex simplex;
-      typename ActiveWitness::iterator aw_it = aw.begin();
-      float lim_dist2 = aw.begin()->second + max_alpha_square;
-      while ((Landmark_id)simplex.size() < limit_dimension + 1 && aw_it != aw.end() && aw_it->second < lim_dist2) {
-        simplex.push_back(aw_it->first);
-        complex.insert_simplex_and_subfaces(simplex, aw_it->second - aw.begin()->second);
-        aw_it++;
-      }
-      // continue inserting limD-faces of the following simplices
-      typeVectorVertex& vertices = simplex; //'simplex' now will be called vertices
-      while (aw_it != aw.end() && aw_it->second < lim_dist2) {
-        typeVectorVertex facet = {};
-        add_all_faces_of_dimension(limit_dimension, vertices, vertices.begin(), aw_it, aw_it->second - aw.begin()->second, facet, complex);
-        vertices.push_back(aw_it->first);
-        aw_it++;
-      }
-      if ((Landmark_id)simplex.size() - 1 > complex_dim)
-        complex_dim = simplex.size() - 1;
-    }
-    complex.set_dimension(complex_dim);
-    return true;
-  }
-
-private:
-
-    /* \brief Adds recursively all the faces of a certain dimension dim-1 witnessed by the same witness.
-   * Iterator is needed to know until how far we can take landmarks to form simplexes.
-   * simplex is the prefix of the simplexes to insert.
-   * The landmark pointed by aw_it is added to all formed simplices.
-   */
-  template < typename SimplicialComplexForWitness >
-  void add_all_faces_of_dimension(Landmark_id dim,
-                                  typeVectorVertex& vertices,
-                                  typename typeVectorVertex::iterator curr_it,
-                                  typename ActiveWitness::iterator aw_it,
-                                  FT filtration_value,
-                                  typeVectorVertex& simplex,
-                                  SimplicialComplexForWitness& sc) const
-  {
-    if (dim > 0)
-      while (curr_it != vertices.end()) {
-        simplex.push_back(*curr_it);
-        typename typeVectorVertex::iterator next_it = ++curr_it;        
-        add_all_faces_of_dimension(dim-1,
-                                   vertices,
-                                   next_it,
-                                   aw_it,
-                                   filtration_value,
-                                   simplex,
-                                   sc);
-        simplex.pop_back();
-        add_all_faces_of_dimension(dim,
-                                   vertices,
-                                   next_it,
-                                   aw_it,
-                                   filtration_value,
-                                   simplex,
-                                   sc);
-      } 
-    else if (dim == 0) {
-      simplex.push_back(aw_it->first);
-      sc.insert_simplex_and_subfaces(simplex, filtration_value);
-      simplex.pop_back();
-    } 
-  }      
   
   //@}
 };
