@@ -148,3 +148,5 @@ Examples.
 ---------
 
 End user programs are available in cython/example/ folder.
+
+.. include:: biblio.rst

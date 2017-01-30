@@ -11,6 +11,7 @@ GUDHI's documentation
 
 Introduction
 ************
+:doc:`biblio`
 
 The Gudhi library (Geometry Understanding in Higher Dimensions) is a generic
 open source C++ library for Computational Topology and Topological Data
@@ -76,3 +77,5 @@ Persistence graphical tools
 ===========================
 
 .. include:: persistence_graphical_tools_sum.rst
+
+.. include:: biblio.rst

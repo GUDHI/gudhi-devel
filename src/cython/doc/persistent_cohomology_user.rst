@@ -99,3 +99,5 @@ We provide several example files: run these examples with -h for details on thei
 
 .. todo::
     examples for persistence
+
+.. include:: biblio.rst
