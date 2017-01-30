@@ -34,6 +34,13 @@
 #include <utility>  // for pair
 #include <map>
 
+// ----------------------------------------------------------------------------
+// rips_persistence_step_by_step is an example of each step that is required to
+// build a Rips over a Simplex_tree. Please refer to rips_persistence to see
+// how to do the same thing with the Rips_complex wrapper for less detailed
+// steps.
+// ----------------------------------------------------------------------------
+
 // Types definition
 using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
 using Vertex_handle = Simplex_tree::Vertex_handle;

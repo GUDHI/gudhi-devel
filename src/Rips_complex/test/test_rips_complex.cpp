@@ -51,12 +51,12 @@ bool are_almost_the_same(float a, float b) {
 BOOST_AUTO_TEST_CASE(RIPS_DOC_OFF_file) {
   // ----------------------------------------------------------------------------
   //
-  // Init of a rips complex from a OFF file
+  // Init of a Rips complex from a OFF file
   //
   // ----------------------------------------------------------------------------
   std::string off_file_name("alphacomplexdoc.off");
   double rips_threshold = 12.0;
-  std::cout << "========== OFF FILE NAME = " << off_file_name << " - rips threshold=" <<
+  std::cout << "========== OFF FILE NAME = " << off_file_name << " - Rips threshold=" <<
       rips_threshold << "==========" << std::endl;
 
   Gudhi::Points_off_reader<Point> off_reader(off_file_name);
@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE(Rips_complex_from_points) {
   points.push_back(Point(coords.begin(), coords.end()));
 
   // ----------------------------------------------------------------------------
-  // Init of a rips complex from the list of points
+  // Init of a Rips complex from the list of points
   // ----------------------------------------------------------------------------
   Rips_complex rips_complex_from_points(points, 2.0, Custom_square_euclidean_distance());
 
@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE(Rips_complex_from_points) {
   rips_complex_from_points.create_complex(st, DIMENSION);
 
   // Another way to check num_simplices
-  std::cout << "Iterator on rips complex simplices in the filtration order, with [filtration value]:" << std::endl;
+  std::cout << "Iterator on Rips complex simplices in the filtration order, with [filtration value]:" << std::endl;
   int num_simplices = 0;
   for (auto f_simplex : st.filtration_simplex_range()) {
     num_simplices++;
@@ -236,12 +236,12 @@ BOOST_AUTO_TEST_CASE(Rips_complex_from_points) {
 BOOST_AUTO_TEST_CASE(Rips_doc_csv_file) {
   // ----------------------------------------------------------------------------
   //
-  // Init of a rips complex from a OFF file
+  // Init of a Rips complex from a OFF file
   //
   // ----------------------------------------------------------------------------
   std::string csv_file_name("full_square_distance_matrix.csv");
   double rips_threshold = 12.0;
-  std::cout << "========== CSV FILE NAME = " << csv_file_name << " - rips threshold=" <<
+  std::cout << "========== CSV FILE NAME = " << csv_file_name << " - Rips threshold=" <<
       rips_threshold << "==========" << std::endl;
 
   Distance_matrix distances = read_lower_triangular_matrix_from_csv_file<Filtration_value>(csv_file_name);
@@ -332,12 +332,12 @@ BOOST_AUTO_TEST_CASE(Rips_doc_csv_file) {
 BOOST_AUTO_TEST_CASE(Rips_create_complex_throw) {
   // ----------------------------------------------------------------------------
   //
-  // Init of a rips complex from a OFF file
+  // Init of a Rips complex from a OFF file
   //
   // ----------------------------------------------------------------------------
   std::string off_file_name("alphacomplexdoc.off");
   double rips_threshold = 12.0;
-  std::cout << "========== OFF FILE NAME = " << off_file_name << " - rips threshold=" <<
+  std::cout << "========== OFF FILE NAME = " << off_file_name << " - Rips threshold=" <<
       rips_threshold << "==========" << std::endl;
 
   Gudhi::Points_off_reader<Point> off_reader(off_file_name);
