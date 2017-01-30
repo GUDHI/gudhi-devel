@@ -27,6 +27,9 @@
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/reader_utils.h>
 #include <gudhi/Simplex_tree.h>
+#include <gudhi/Rips_complex.h>
+#include <gudhi/Points_off_io.h>
+#include <gudhi/distance_functions.h>
 
 #include <boost/graph/adjacency_list.hpp>
 
@@ -36,7 +39,23 @@
 #include <string>
 #include <limits>  // for numeric_limits
 #include <utility>  // for pair<>
+#include <functional>  // for greater<>
+#include <stdexcept>
+#include <initializer_list>
+#include <algorithm>  // for std::max
+#include <cstdint>  // for std::uint32_t
 
+using Simplex_tree = Gudhi::Simplex_tree<>;
+using Filtration_value = Simplex_tree::Filtration_value;
+using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
+using Point = std::vector<float>;
+
+bool simplex_comp(const std::vector<int>& s1, const std::vector<int>& s2){
+  if(s1.size() == s2.size()){
+    return s1[0] < s2[0];
+  }
+  else  return s1.size() < s2.size();
+}
 
 namespace Gudhi {
 
@@ -62,20 +81,59 @@ class Graph_induced_complex {
  private:
    std::vector<std::vector<Cover_t> > cliques;
 
+ private:
+   std::map<int, std::vector<Cover_t> > Cov;
+
+ private:
+   int maximal_dim;
+
+ private:
+   Simplex_tree<> st;
+
  public:
-   template<typename SimplicialComplexForGIC>
-   void create_complex(SimplicialComplexForGIC & complex) {
-     size_t sz = cliques.size();
-     for(int i = 0; i < sz; i++)  complex.insert_simplex_and_subfaces(cliques[i]);
+   void set_cover(const std::string& cover_file_name){
+     int vertex_id = 0; Cover_t cov; std::vector<Cover_t> cov_elts, cov_number;
+     std::ifstream input(cover_file_name); std::string line;
+     while(std::getline(input,line)){
+       cov_elts.clear(); std::stringstream stream(line);
+       while(stream >> cov){cov_elts.push_back(cov); cov_number.push_back(cov);}
+       Cov.insert(std::pair<int, std::vector<Cover_t> >(vertex_id, cov_elts)); vertex_id++;
+     }
+     std::vector<Cover_t>::iterator it;
+     std::sort(cov_number.begin(),cov_number.end()); it = std::unique(cov_number.begin(),cov_number.end());
+     cov_number.resize(std::distance(cov_number.begin(),it)); maximal_dim = cov_number.size();
+     return;
    }
 
  public:
-   void find_all_simplices(std::vector<std::vector<Cover_t> > & cliques, const std::vector<std::vector<Cover_t> > & cover_elts, int & token, std::vector<Cover_t> & simplex_tmp){
+   void set_graph_simplex_tree(const double& threshold, const std::string& off_file_name){
+     Points_off_reader<Point> off_reader(off_file_name);
+     Rips_complex rips_complex_from_points(off_reader.get_point_cloud(), threshold, Euclidean_distance());
+     rips_complex_from_points.create_complex(st, 1);
+     return;}
+
+ public:
+   template<typename SimplicialComplexForGIC>
+   void create_complex(SimplicialComplexForGIC & complex) {
+     size_t sz = cliques.size(); int dimension = 0;
+     for(int i = 0; i < sz; i++){
+       complex.insert_simplex_and_subfaces(cliques[i]);
+       if(dimension < cliques[i].size()-1)  dimension = cliques[i].size()-1;
+     }
+     complex.set_dimension(dimension);
+   }
+
+ public:
+   void find_all_simplices(std::vector<std::vector<Cover_t> > & cliques, const std::vector<std::vector<Cover_t> > & cover_elts,\
+                           int & token, std::vector<Cover_t> & simplex_tmp){
      int num_nodes = cover_elts.size();
      if(token == num_nodes-1){
        int num_clus = cover_elts[token].size();
        for(int i = 0; i < num_clus; i++){
          std::vector<Cover_t> simplex = simplex_tmp; simplex.push_back(cover_elts[token][i]);
+         std::vector<Cover_t>::iterator it;
+         std::sort(simplex.begin(),simplex.end()); it = std::unique(simplex.begin(),simplex.end());
+         simplex.resize(std::distance(simplex.begin(),it));
          cliques.push_back(simplex);
        }
      }
@@ -89,34 +147,49 @@ class Graph_induced_complex {
    }
 
  public:
-   /** \brief Graph_induced_complex constructor from a graph and a cover.
-    *
-    * @param[in] graph built on point cloud.
-    * @param[in] cover of points.
-    *
-    * \tparam Cover must be a range for which `std::begin` and `std::end` return input iterators on a
-    * `Cover_value`.
-    *
-    */
-   template<typename Cover>
-   Graph_induced_complex(Simplex_tree & st, const Cover& C, const int& max_dim) {
+   void find_simplices() {
 
-     // Construct the Simplex Tree corresponding to the graph
-     st.expansion(max_dim);
+     // Find IDs of edges to remove
+     std::vector<int> simplex_to_remove; int simplex_id = 0;
+     for (auto simplex : st.complex_simplex_range()) {
+       if(st.dimension(simplex) == 1){
+         std::vector<std::vector<Cover_t> > comp;
+         for(auto vertex : st.simplex_vertex_range(simplex))  comp.push_back(Cov[vertex]);
+         if(comp[0].size() == 1 && comp[1].size() == 1 && comp[0][0] == comp[1][0])  simplex_to_remove.push_back(simplex_id);
 
-     // Find complexes of GIC
+       }
+       simplex_id++;
+     }
+
+     // Remove edges
+     int current_id = 0; auto simplex_tmp = st.complex_simplex_range().begin();
+     if(simplex_to_remove[current_id] == 0){st.remove_maximal_simplex(*simplex_tmp); current_id++;}
+     auto simplex = st.complex_simplex_range().begin();
+     for(int i = 1; i < --simplex_id; i++){
+         int j = i+1; auto simplex_tmp = simplex; simplex_tmp++;
+         if(j == simplex_to_remove[current_id]){st.remove_maximal_simplex(*simplex_tmp); current_id++; i++;}
+         simplex++;
+     }
+
+     // Build the Simplex Tree corresponding to the graph
+     st.expansion(maximal_dim);
+
+     // Find simplices of GIC
      cliques.clear();
      for (auto simplex : st.complex_simplex_range()) {
-       std::vector<std::vector<Cover_t> > cover_elts;
-       for (auto vertex : st.simplex_vertex_range(simplex)) {
-         cover_elts.push_back(C[vertex]);
-         find_all_simplices(cliques,cover_elts);
-       }
+       std::vector<std::vector<Cover_t> > cover_elts; int token = 0; std::vector<Cover_t> sim;
+       for (auto vertex : st.simplex_vertex_range(simplex))  cover_elts.push_back(Cov[vertex]);
+       find_all_simplices(cliques,cover_elts,token,sim);
      }
+     std::vector<std::vector<Cover_t> >::iterator it;
+     std::sort(cliques.begin(),cliques.end()); it = std::unique(cliques.begin(),cliques.end());
+     cliques.resize(std::distance(cliques.begin(),it));
    }
 
 };
 
-}
+} // namespace graph_induced_complex
 
-}
+} // namespace Gudhi
+
+#endif  // GIC_H_
