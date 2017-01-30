@@ -61,7 +61,7 @@ private:
   typedef Landmark_id Vertex_handle;
   
  private:
-  Nearest_landmark_table_&              nearest_landmark_table_;
+  Nearest_landmark_table_              nearest_landmark_table_;
   
  public:
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
