@@ -386,6 +386,8 @@ make \endverbatim
  * @example Skeleton_blocker/Skeleton_blocker_link.cpp
  * @example Tangential_complex/example_basic.cpp
  * @example Tangential_complex/example_with_perturb.cpp
+ * @example Witness_complex/example_nearest_landmark_table.cpp
+ * @example Witness_complex/example_strong_witness_complex_off.cpp
  * @example Witness_complex/example_strong_witness_persistence.cpp
  * @example Witness_complex/example_witness_complex_off.cpp
  * @example Witness_complex/example_witness_complex_persistence.cpp

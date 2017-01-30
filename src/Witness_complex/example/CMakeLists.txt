@@ -6,6 +6,7 @@ if(CGAL_FOUND)
   if (NOT CGAL_VERSION VERSION_LESS 4.6.0)
     if (EIGEN3_FOUND)
       add_executable( Witness_complex_example_off example_witness_complex_off.cpp )
+      add_executable( Witness_complex_example_strong_off example_strong_witness_complex_off.cpp )
       add_executable ( Witness_complex_example_sphere example_witness_complex_sphere.cpp )
 
       add_executable ( Witness_complex_example_witness_persistence example_witness_complex_persistence.cpp )
