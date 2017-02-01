@@ -83,6 +83,7 @@ private:
                                    const WitnessRange &  witnesses)
     : landmarks_(std::begin(landmarks), std::end(landmarks)), landmark_tree_(landmarks_)
   {
+    nearest_landmark_table_.reserve(boost::size(witnesses));
     for (auto w: witnesses)
       nearest_landmark_table_.push_back(landmark_tree_.query_incremental_nearest_neighbors(w));
   }
