@@ -155,10 +155,10 @@ private:
     if (dim > 0)
       while (curr_it != vertices.end()) {
         simplex.push_back(*curr_it);
-        typename typeVectorVertex::iterator next_it = ++curr_it;        
+        ++curr_it;        
         add_all_faces_of_dimension(dim-1,
                                    vertices,
-                                   next_it,
+                                   curr_it,
                                    aw_it,
                                    filtration_value,
                                    simplex,
@@ -166,7 +166,7 @@ private:
         simplex.pop_back();
         add_all_faces_of_dimension(dim,
                                    vertices,
-                                   next_it,
+                                   curr_it,
                                    aw_it,
                                    filtration_value,
                                    simplex,
