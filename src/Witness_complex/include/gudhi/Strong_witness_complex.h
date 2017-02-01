@@ -80,7 +80,7 @@ private:
  *         The range of nearest landmarks should admit a member type 'iterator'. The dereference type 
  *         of the nearest landmark range iterator needs to be 'std::pair<std::size_t, double>'.   */
    Strong_witness_complex(Nearest_landmark_table_ const & nearest_landmark_table)
-    : nearest_landmark_table_(nearest_landmark_table)
+     : nearest_landmark_table_(std::begin(nearest_landmark_table), std::end(nearest_landmark_table))
   {    
   }
   

@@ -82,7 +82,7 @@ private:
    */
 
   Witness_complex(Nearest_landmark_table_ const & nearest_landmark_table)
-    : nearest_landmark_table_(nearest_landmark_table)
+    : nearest_landmark_table_(std::begin(nearest_landmark_table), std::end(nearest_landmark_table))
   {    
   }
 

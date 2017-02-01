@@ -82,7 +82,7 @@ public:
             typename WitnessRange >
   Euclidean_witness_complex(const LandmarkRange & landmarks,
                             const WitnessRange &  witnesses)
-    : landmarks_(landmarks), landmark_tree_(landmarks)
+    : landmarks_(std::begin(landmarks), std::end(landmarks)), landmark_tree_(landmarks)
   {
     for (auto w: witnesses)
       nearest_landmark_table_.push_back(landmark_tree_.query_incremental_nearest_neighbors(w));
