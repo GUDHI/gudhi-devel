@@ -26,9 +26,9 @@ int main(int argc, char **argv) {
   // ----------------------------------------------------------------------------
 
   Gudhi::graph_induced_complex::Graph_induced_complex GIC;
-  GIC.set_graph_simplex_tree(threshold, off_file_name);
+  GIC.set_graph_from_rips(threshold, off_file_name);
   GIC.set_cover_from_function(function_file_name,resolution,gain,0);
-  GIC.find_simplices();
+  GIC.find_GIC_simplices();
   Simplex_tree stree; GIC.create_complex(stree);
 
   std::streambuf* streambufffer;

@@ -74,7 +74,7 @@ class Graph_induced_complex {
   typedef int Cover_t;
 
  private:
-   std::vector<std::vector<Cover_t> > cliques;
+   std::vector<std::vector<Cover_t> > simplices;
 
  private:
    std::map<int, std::vector<Cover_t> > cover;
@@ -113,7 +113,7 @@ class Graph_induced_complex {
    }
 
  public:
-   void set_cover(const std::string& cover_file_name){
+   void set_cover_from_file(const std::string& cover_file_name){
      int vertex_id = 0; Cover_t cov; std::vector<Cover_t> cov_elts, cov_number;
      std::ifstream input(cover_file_name); std::string line;
      while(std::getline(input,line)){
@@ -124,7 +124,6 @@ class Graph_induced_complex {
      std::vector<Cover_t>::iterator it;
      std::sort(cov_number.begin(),cov_number.end()); it = std::unique(cov_number.begin(),cov_number.end());
      cov_number.resize(std::distance(cov_number.begin(),it)); maximal_dim = cov_number.size();
-     return;
    }
 
  public:
@@ -162,18 +161,10 @@ class Graph_induced_complex {
        }
        std::pair<double, double> interM(x,maxf); intervals.push_back(interM); res = intervals.size();
      }
-     /*for (int i = 0; i < res; i++)
-       std::cout << "  " << intervals[i].first << " " << intervals[i].second << " " << std::endl;*/
-     //std::cout << maxf << " " << minf << std::endl;
 
      // Sort points according to function values
      std::vector<int> points(num_pts); for(int i = 0; i < num_pts; i++)  points[i] = i;
      std::sort(points.begin(),points.end(),functional_comp);
-
-     /*for(int i = 0; i < num_pts; i++){
-       std::cout << points[i] << "--" << func[points[i]] << " ";
-     }
-     std::cout << std::endl;*/
 
      // Build adjacency matrix
      std::map<int,std::vector<int> > G; std::vector<int> empty;
@@ -192,8 +183,6 @@ class Graph_induced_complex {
        // Find points in the preimage
        std::map<int,std::vector<int> > prop; prop.clear();
        std::pair<double, double> inter1 = intervals[i];
-       //std::map<int,std::vector<int> >::iterator pos = G.begin();
-       //std::map<int,std::vector<int> >::iterator tmp = pos;
        int tmp = pos;
 
        if(i != res-1){
@@ -206,12 +195,12 @@ class Graph_induced_complex {
          }
          std::pair<double, double> inter2 = intervals[i+1];
          while(func[points[tmp]] < inter2.first && tmp != num_pts){
-           prop.insert(std::pair<int,std::vector<int> >(points[tmp],G[points[tmp]])); //std::cout << func[points[tmp]] << " ";
+           prop.insert(std::pair<int,std::vector<int> >(points[tmp],G[points[tmp]]));
            tmp++;
          }
          pos = tmp;
          while(func[points[tmp]] < inter1.second && tmp != num_pts){
-           prop.insert(std::pair<int,std::vector<int> >(points[tmp],G[points[tmp]])); //std::cout << func[points[tmp]] << " ";
+           prop.insert(std::pair<int,std::vector<int> >(points[tmp],G[points[tmp]]));
            tmp++;
          }
 
@@ -223,14 +212,12 @@ class Graph_induced_complex {
            tmp++;
          }
          while(tmp != num_pts){
-           prop.insert(std::pair<int,std::vector<int> >(points[tmp],G[points[tmp]])); //std::cout << func[points[tmp]] << " ";
+           prop.insert(std::pair<int,std::vector<int> >(points[tmp],G[points[tmp]]));
            tmp++;
          }
 
        }
 
-       //std::cout << i << std::endl;
-       //std::cout << prop.empty() << std::endl;
        // Compute the connected components with DFS
        std::map<int,bool> visit;
        for(std::map<int, std::vector<int> >::iterator it = prop.begin(); it != prop.end(); it++)
@@ -241,36 +228,47 @@ class Graph_induced_complex {
              std::vector<int> cc; cc.clear();
              dfs(prop,it->first,cc,visit); int cci = cc.size();
              for(int i = 0; i < cci; i++)  cover[cc[i]].push_back(id);
-             //std::cout << " " << id << std::endl; id++;
+             id++;
            }
          }
        }
 
      }
 
+     maximal_dim = id;
+
    }
 
  public:
-   void set_graph_simplex_tree(const double& threshold, const std::string& off_file_name){
+   void set_graph_from_rips(const double& threshold, const std::string& off_file_name){
      Points_off_reader<Point> off_reader(off_file_name);
      Rips_complex rips_complex_from_points(off_reader.get_point_cloud(), threshold, Euclidean_distance());
      rips_complex_from_points.create_complex(st, 1);
-     return;}
+   }
+
+ public:
+   void set_graph_from_file(const std::string& graph_file_name){
+     int neighb; int vid; std::ifstream input(graph_file_name); std::string line; std::vector<int> edge(2);
+     while(std::getline(input,line)){
+       std::stringstream stream(line); stream >> vid; edge[0] = vid;
+       while(stream >> neighb){edge[1] = neighb; st.insert_simplex_and_subfaces(edge);}
+     }
+   }
 
  public:
    template<typename SimplicialComplexForGIC>
    void create_complex(SimplicialComplexForGIC & complex) {
-     size_t sz = cliques.size(); int dimension = 0;
+     size_t sz = simplices.size(); int dimension = 0;
      for(int i = 0; i < sz; i++){
-       complex.insert_simplex_and_subfaces(cliques[i]);
-       if(dimension < cliques[i].size()-1)  dimension = cliques[i].size()-1;
+       complex.insert_simplex_and_subfaces(simplices[i]);
+       if(dimension < simplices[i].size()-1)  dimension = simplices[i].size()-1;
      }
      complex.set_dimension(dimension);
    }
 
  public:
-   void find_all_simplices(std::vector<std::vector<Cover_t> > & cliques, const std::vector<std::vector<Cover_t> > & cover_elts,\
-                           int & token, std::vector<Cover_t> & simplex_tmp){
+   void find_all_simplices(const std::vector<std::vector<Cover_t> > & cover_elts,\
+                           int token, std::vector<Cover_t> & simplex_tmp){
      int num_nodes = cover_elts.size();
      if(token == num_nodes-1){
        int num_clus = cover_elts[token].size();
@@ -279,59 +277,72 @@ class Graph_induced_complex {
          std::vector<Cover_t>::iterator it;
          std::sort(simplex.begin(),simplex.end()); it = std::unique(simplex.begin(),simplex.end());
          simplex.resize(std::distance(simplex.begin(),it));
-         cliques.push_back(simplex);std::cout << "test2" << std::endl;
+         simplices.push_back(simplex);
        }
      }
      else{
        int num_clus = cover_elts[token].size();
        for(int i = 0; i < num_clus; i++){
-         std::vector<Cover_t> simplex = simplex_tmp; simplex.push_back(cover_elts[token][i]);std::cout << "test1" << std::endl;
-         find_all_simplices(cliques, cover_elts, ++token, simplex);
+         std::vector<Cover_t> simplex = simplex_tmp; simplex.push_back(cover_elts[token][i]);
+         find_all_simplices(cover_elts, token+1, simplex);
        }
      }
    }
 
  public:
-   void find_simplices() {
+   void find_Nerve_simplices(){
+     simplices.clear();
+     for(std::map<int,std::vector<Cover_t> >::iterator it = cover.begin(); it!=cover.end(); it++){
+       simplices.push_back(it->second);
+     }
+     std::vector<std::vector<Cover_t> >::iterator it;
+     std::sort(simplices.begin(),simplices.end()); it = std::unique(simplices.begin(),simplices.end());
+     simplices.resize(std::distance(simplices.begin(),it));
+   }
 
-     std::cout << "Removing edges" << std::endl;
+ public:
+   void find_GIC_simplices() {
+
      // Find IDs of edges to remove
      std::vector<int> simplex_to_remove; int simplex_id = 0;
      for (auto simplex : st.complex_simplex_range()) {
        if(st.dimension(simplex) == 1){
          std::vector<std::vector<Cover_t> > comp;
          for(auto vertex : st.simplex_vertex_range(simplex))  comp.push_back(cover[vertex]);
-         if(comp[0].size() == 1 && comp[1].size() == 1 && comp[0][0] == comp[1][0])  simplex_to_remove.push_back(simplex_id);
+         if(comp[0].size() == 1 && comp[1].size() == 1 && comp[0] == comp[1])  simplex_to_remove.push_back(simplex_id);
        }
        simplex_id++;
      }
 
      // Remove edges
-     int current_id = 0; auto simplex_tmp = st.complex_simplex_range().begin();
-     if(simplex_to_remove[current_id] == 0){st.remove_maximal_simplex(*simplex_tmp); current_id++;}
-     auto simplex = st.complex_simplex_range().begin();
-     for(int i = 1; i < --simplex_id; i++){
+     int current_id = 1;
+     auto simplex = st.complex_simplex_range().begin(); int num_rem = 0;
+     for(int i = 0; i < simplex_id-1; i++){
          int j = i+1; auto simplex_tmp = simplex; simplex_tmp++;
-         if(j == simplex_to_remove[current_id]){st.remove_maximal_simplex(*simplex_tmp); current_id++; i++;}
-         simplex++;
-     }
+         if(j == simplex_to_remove[current_id]){st.remove_maximal_simplex(*simplex_tmp); current_id++; num_rem++;}
+         else  simplex++;
+     } simplex = st.complex_simplex_range().begin();
+     for(int i = 0; i < simplex_to_remove[0]; i++)  simplex++;  st.remove_maximal_simplex(*simplex);
 
-     std::cout << "Find cliques" << std::endl;
      // Build the Simplex Tree corresponding to the graph
      st.expansion(maximal_dim);
 
-     std::cout << "Find simplices" << std::endl;
      // Find simplices of GIC
-     cliques.clear();
+     simplices.clear();
      for (auto simplex : st.complex_simplex_range()) {
-       std::vector<std::vector<Cover_t> > cover_elts; int token = 0; std::vector<Cover_t> sim;
-       for (auto vertex : st.simplex_vertex_range(simplex))  cover_elts.push_back(cover[vertex]);
-       find_all_simplices(cliques,cover_elts,token,sim);
+       if(!st.has_children(simplex)){
+         std::vector<std::vector<Cover_t> > cover_elts; std::vector<Cover_t> sim;
+         for (auto vertex : st.simplex_vertex_range(simplex))  cover_elts.push_back(cover[vertex]);
+         find_all_simplices(cover_elts,0,sim);
+       }
      }
      std::vector<std::vector<Cover_t> >::iterator it;
-     std::sort(cliques.begin(),cliques.end()); it = std::unique(cliques.begin(),cliques.end());
-     cliques.resize(std::distance(cliques.begin(),it));
+     std::sort(simplices.begin(),simplices.end()); it = std::unique(simplices.begin(),simplices.end());
+     simplices.resize(std::distance(simplices.begin(),it));
    }
+
+ public:
+   void find_GIC_simplices_with_functional_minimal_cover(){}
 
 };
 
