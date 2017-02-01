@@ -42,9 +42,9 @@ namespace witness_complex {
  * \brief Constructs (weak) witness complex for a given table of nearest landmarks with respect to witnesses.
  * \ingroup witness_complex
  *
- * \tparam Nearest_landmark_table_ needs to be a range of a range of nearest landmarks.
- *         The range of nearest landmarks should admit a member type 'iterator'. The dereference type 
- *         of the nearest landmark range iterator needs to be 'std::pair<std::size_t, double>'.
+ * \tparam Nearest_landmark_table_ needs to be a CopyConstructible range of a range of pairs of nearest landmarks and distances.
+ *         The range of pairs must admit a member type 'iterator'. The dereference type 
+ *         of the pair range iterator needs to be 'std::pair<std::size_t, double>'.
 */
 template< class Nearest_landmark_table_ >
 class Witness_complex {
@@ -76,9 +76,9 @@ private:
   /**
    *  \brief Initializes member variables before constructing simplicial complex.
    *  \details Records nearest landmark table.
-   *  @param[in] nearest_landmark_table needs to be a range of a range of nearest landmarks.
-   *         The range of nearest landmarks should admit a member type 'iterator'. The dereference type 
-   *         of the nearest landmark range iterator needs to be 'std::pair<std::size_t, double>'.
+   *  @param[in] nearest_landmark_table needs to be a CopyConstructible range of a range of pairs of nearest landmarks and distances.
+ *         The range of pairs must admit a member type 'iterator'. The dereference type 
+ *         of the pair range iterator needs to be 'std::pair<std::size_t, double>'.
    */
 
   Witness_complex(Nearest_landmark_table_ const & nearest_landmark_table)
@@ -99,7 +99,7 @@ private:
   template < typename SimplicialComplexForWitness >
   bool create_complex(SimplicialComplexForWitness& complex,
                       double  max_alpha_square,
-                      Landmark_id limit_dimension = std::numeric_limits<Landmark_id>::max()) const      
+                      std::size_t limit_dimension = std::numeric_limits<std::size_t>::max()) const      
   {
     if (complex.num_vertices() > 0) {
       std::cerr << "Witness complex cannot create complex - complex is not empty.\n";
