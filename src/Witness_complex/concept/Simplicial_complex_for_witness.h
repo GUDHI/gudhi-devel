@@ -29,7 +29,7 @@ namespace witness_complex {
 
 /** \brief The concept SimplicialComplexForWitness describes the requirements 
  * for a type to implement a simplicial complex, 
- * used for example to build a Witness_complex. 
+ * used for example to build a Witness_complex or Strong_witness_complex. 
  */
 struct SimplicialComplexForWitness {
   /** Handle to specify a simplex. */
@@ -37,10 +37,14 @@ struct SimplicialComplexForWitness {
   /** Handle to specify a vertex. Must be a non-negative integer. */
   typedef unspecified Vertex_handle;
 
-  /** Returns a Simplex_hanlde that is different from all simplex handles 
+  /** \brief Returns a Simplex_hanlde that is different from all simplex handles 
    * of the simplices. */
   Simplex_handle null_simplex();
 
+  /** Returns the number of vertices in the simplicial complex
+   */
+  std::size_t num_vertices();
+  
   /** \brief Iterator over the simplices of the complex,
    * in an arbitrary order.
    *
@@ -68,16 +72,42 @@ struct SimplicialComplexForWitness {
 
   /** \brief Inserts a simplex with vertices from a given range
    *  'vertex_range' in the simplicial complex.
+   *  The simplex is given the filtration value 'filtration'.
+   *  Filtration_value should be convertible from double.
+   *  The return type is not used.
    *  */
   template< typedef Input_vertex_range >
-  Insertion_result_type insert_simplex(Input_vertex_range const & vertex_range);
+  Insertion_result_type insert_simplex(Input_vertex_range const & vertex_range, Filtration_value filtration);
 
+  /** \brief Inserts a simplex and all its faces
+   *  with vertices from a given range
+   *  'vertex_range' in the simplicial complex.
+   *  All inserted simplices are given the filtration
+   *  value 'filtration'.
+   *  Filtration_value should be convertible from double.
+   *  The return type is not used.
+   */
+
+  template< typedef Input_vertex_range,
+            typedef Filtration_value>
+  Insertion_result_type insert_simplex_and_subfaces(Input_vertex_range const & vertex_range, Filtration_value filtration);
+  
   /** \brief Finds a simplex with vertices given by a range
    *
    * If a simplex exists, its Simplex_handle is returned.
    * Otherwise null_simplex() is returned. */
   template< typedef Input_vertex_range >
   Simplex_handle find(Input_vertex_range const & vertex_range);
+
+  /** \brief Sets the dimension of the simplicial complex to 
+   * 'dimension'.
+   */
+  void set_dimension(int dimension);
+
+  /** \brief Returns the filtration of the simplex given by
+   *  the simplex handle 'sh'.
+   */
+  double filtration(Simplex_handle sh);
 };
 
 }  // namespace witness_complex
