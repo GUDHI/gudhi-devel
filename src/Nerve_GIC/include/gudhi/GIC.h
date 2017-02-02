@@ -84,6 +84,7 @@ class Graph_induced_complex {
 
  private:
    Simplex_tree<> st;
+   std::map<int,std::vector<int> > adjacency_matrix;
 
 
  // Simplex comparator
@@ -167,13 +168,13 @@ class Graph_induced_complex {
      std::sort(points.begin(),points.end(),functional_comp);
 
      // Build adjacency matrix
-     std::map<int,std::vector<int> > G; std::vector<int> empty;
-     for(int i = 0; i < num_pts; i++)  G.insert(std::pair<int,std::vector<int> >(points[i],empty));
+     std::vector<int> empty;
+     for(int i = 0; i < num_pts; i++)  adjacency_matrix.insert(std::pair<int,std::vector<int> >(points[i],empty));
      for (auto simplex : st.complex_simplex_range()) {
        if(st.dimension(simplex) == 1){
          std::vector<int> vertices;
          for(auto vertex : st.simplex_vertex_range(simplex))  vertices.push_back(vertex);
-         G[vertices[0]].push_back(vertices[1]); G[vertices[1]].push_back(vertices[0]);
+         adjacency_matrix[vertices[0]].push_back(vertices[1]); adjacency_matrix[vertices[1]].push_back(vertices[0]);
        }
      }
 
@@ -189,18 +190,18 @@ class Graph_induced_complex {
          if(i != 0){
            std::pair<double, double> inter3 = intervals[i-1];
            while(func[points[tmp]] < inter3.second && tmp != num_pts){
-             prop.insert(std::pair<int,std::vector<int> >(points[tmp],G[points[tmp]]));
+             prop.insert(std::pair<int,std::vector<int> >(points[tmp],adjacency_matrix[points[tmp]]));
              tmp++;
            }
          }
          std::pair<double, double> inter2 = intervals[i+1];
          while(func[points[tmp]] < inter2.first && tmp != num_pts){
-           prop.insert(std::pair<int,std::vector<int> >(points[tmp],G[points[tmp]]));
+           prop.insert(std::pair<int,std::vector<int> >(points[tmp],adjacency_matrix[points[tmp]]));
            tmp++;
          }
          pos = tmp;
          while(func[points[tmp]] < inter1.second && tmp != num_pts){
-           prop.insert(std::pair<int,std::vector<int> >(points[tmp],G[points[tmp]]));
+           prop.insert(std::pair<int,std::vector<int> >(points[tmp],adjacency_matrix[points[tmp]]));
            tmp++;
          }
 
@@ -208,11 +209,11 @@ class Graph_induced_complex {
        else{
          std::pair<double, double> inter3 = intervals[i-1];
          while(func[points[tmp]] < inter3.second && tmp != num_pts){
-           prop.insert(std::pair<int,std::vector<int> >(points[tmp],G[points[tmp]]));
+           prop.insert(std::pair<int,std::vector<int> >(points[tmp],adjacency_matrix[points[tmp]]));
            tmp++;
          }
          while(tmp != num_pts){
-           prop.insert(std::pair<int,std::vector<int> >(points[tmp],G[points[tmp]]));
+           prop.insert(std::pair<int,std::vector<int> >(points[tmp],adjacency_matrix[points[tmp]]));
            tmp++;
          }
 
@@ -342,7 +343,33 @@ class Graph_induced_complex {
    }
 
  public:
-   void find_GIC_simplices_with_functional_minimal_cover(){}
+   void find_GIC_simplices_with_functional_minimal_cover(const double& resolution, const double& gain){
+     for(std::map<int,std::vector<Cover_t> >::iterator it = cover.begin(); it != cover.end(); it++){
+       int vid = it->first; std::vector<int> neighbors = adjacency_matrix[vid]; int num_neighb = neighbors.size();
+       for(int i = 0; i < num_neighb; i++){
+         int neighb = neighbors[i]; int v1, v2;
+         if(func[vid] > func[neighb]){
+           if(  func[vid]-func[neighb] <= resolution*(2-gain)  ){
+             if(cover[vid].size() == 2)  v1 = std::min(cover[vid][0],cover[vid][1]); else  v1 = cover[vid][0];
+             if(cover[neighb].size() == 2)  v2 = std::max(cover[neighb][0],cover[neighb][1]); else  v2 = cover[neighb][0];
+             std::vector<int> edge(2); edge[0] = v1; edge[1] = v2;
+             if(v1 > v2)  simplices.push_back(edge);
+           }
+         }
+         else{
+           if(  func[neighb]-func[vid] <= resolution*(2-gain)  ){
+               if(cover[vid].size() == 2)  v1 = std::max(cover[vid][0],cover[vid][1]); else  v1 = cover[vid][0];
+               if(cover[neighb].size() == 2)  v2 = std::min(cover[neighb][0],cover[neighb][1]); else  v2 = cover[neighb][0];
+               std::vector<int> edge(2); edge[0] = v1; edge[1] = v2;
+               if(v2 > v1)  simplices.push_back(edge);
+             }
+         }
+       }
+     }
+     std::vector<std::vector<Cover_t> >::iterator it;
+     std::sort(simplices.begin(),simplices.end()); it = std::unique(simplices.begin(),simplices.end());
+     simplices.resize(std::distance(simplices.begin(),it));
+   }
 
 };
 
