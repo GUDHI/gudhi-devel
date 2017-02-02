@@ -56,11 +56,12 @@ private:
   typedef Active_witness<Id_distance_pair, Nearest_landmark_range>   ActiveWitness;
   typedef std::list< ActiveWitness >                                 ActiveWitnessList;
   typedef std::vector< Landmark_id >                                 typeVectorVertex;
+  typedef std::vector<Nearest_landmark_range>                        Nearest_landmark_table_internal;
 
   typedef Landmark_id Vertex_handle;
 
  protected:
-  Nearest_landmark_table_              nearest_landmark_table_;
+  Nearest_landmark_table_internal              nearest_landmark_table_;
   
  public:
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
