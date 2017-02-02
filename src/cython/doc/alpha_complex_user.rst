@@ -74,10 +74,12 @@ Data structure
 In order to build the alpha complex, first, a Simplex tree is built from the cells of a Delaunay Triangulation.
 (The filtration value is set to NaN, which stands for unknown value):
 
-.. image::
+.. figure::
     img/alpha_complex_doc.png
-    :align: center
+    :figclass: align-center
     :alt: Simplex tree structure construction example
+
+    Simplex tree structure construction example
 
 Filtration value computation algorithm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -87,9 +89,9 @@ Filtration value computation algorithm
       **if** filtration(:math:`\sigma`) is NaN **then**
         filtration(:math:`\sigma`) = :math:`\alpha^2(\sigma)`
       **end if**
-  
+
       *//propagate alpha filtration value*
-  
+
       **for all** :math:`\tau` face of :math:`\sigma`
         **if** filtration(:math:`\tau`) is not NaN **then**
           filtration(:math:`\tau`) = filtration(:math:`\sigma`)
@@ -109,10 +111,12 @@ From the example above, it means the algorithm looks into each triangle ([0,1,2]
 computes the filtration value of the triangle, and then propagates the filtration value as described
 here:
 
-.. image::
+.. figure::
     img/alpha_complex_doc_420.png
-    :align: center
+    :figclass: align-center
     :alt: Filtration value propagation example
+
+    Filtration value propagation example
 
 Dimension 1
 ^^^^^^^^^^^

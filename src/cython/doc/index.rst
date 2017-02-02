@@ -11,7 +11,6 @@ GUDHI's documentation
 
 Introduction
 ************
-:doc:`biblio`
 
 The Gudhi library (Geometry Understanding in Higher Dimensions) is a generic
 open source C++ library for Computational Topology and Topological Data
@@ -43,6 +42,11 @@ Cubical complex
 ===============
 
 .. include:: cubical_complex_sum.rst
+
+Rips complex
+============
+
+.. include:: rips_complex_sum.rst
 
 Simplex tree
 ============

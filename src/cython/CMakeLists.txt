@@ -101,7 +101,7 @@ if(PYTHON_PATH AND CYTHON_PATH)
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMAND python "${CMAKE_CURRENT_BINARY_DIR}/cythonize_gudhi.py" "build_ext" "--inplace")
     
-    add_custom_target(cythonize_gudhi ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so"
+    add_custom_target(cython ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so"
                       COMMENT "Do not forget to add ${CMAKE_CURRENT_BINARY_DIR}/gudhi.so to your PYTHONPATH before using examples")
   
     # Unitary tests are available through py.test
@@ -135,11 +135,11 @@ if(PYTHON_PATH AND CYTHON_PATH)
       file(COPY "${CMAKE_SOURCE_DIR}/data/bitmap/3d_torus.txt" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
       file(COPY "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
       if (UNIX)
-        add_custom_target(html 
+        add_custom_target(sphinx
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc
             COMMAND make html && make doctest)
       else (UNIX)
-        add_custom_target(html 
+        add_custom_target(sphinx
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc
             COMMAND make.bat html)
       endif (UNIX)

@@ -5,7 +5,7 @@ Definition
 ----------
 
 =====================================  =====================================  =====================================
-:Author: Pawel Dlotko                  :Introduced in: GUDHI PYTHON 1.4.0     :Copyright: GPL v3
+:Author: Pawel Dlotko                  :Introduced in: GUDHI PYTHON 1.3.0     :Copyright: GPL v3
 =====================================  =====================================  =====================================
 
 +---------------------------------------------+----------------------------------------------------------------------+
@@ -59,10 +59,12 @@ of filtration. This, together with dimension of :math:`\mathcal{K}` and the size
 directions, allows to determine, dimension, neighborhood, boundary and coboundary of every cube
 :math:`C \in \mathcal{K}`.
 
-.. image::
+.. figure::
     img/Cubical_complex_representation.png
-    :align: center
     :alt: Cubical complex.
+    :figclass: align-center
+
+    Cubical complex.
 
 Note that the cubical complex in the figure above is, in a natural way, a product of one dimensional cubical
 complexes in :math:`\mathbb{R}`. The number of all cubes in each direction is equal :math:`2n+1`, where :math:`n` is
@@ -85,10 +87,12 @@ bitmap (2 in the example below). Next d lines are the numbers of top dimensional
 in the example below). Next, in lexicographical order, the filtration of top dimensional cubes is given (1 4 6 8
 20 4 7 6 5 in the example below).
 
-.. image::
+.. figure::
     img/exampleBitmap.png
-    :align: center
     :alt: Example of a input data.
+    :figclass: align-center
+
+    Example of a input data.
 
 The input file for the following complex is:
 

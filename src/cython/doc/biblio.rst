@@ -1,6 +1,5 @@
-============
 Bibliography
-============
+************
 
 .. bibliography:: bibliography.bib
    :filter: docnames

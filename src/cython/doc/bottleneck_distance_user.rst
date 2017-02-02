@@ -8,7 +8,7 @@ Definition
 
 Function
 --------
-.. automethod:: gudhi.bottleneck_distance
+.. autofunction:: gudhi.bottleneck_distance
 
 
 Basic example

@@ -40,22 +40,10 @@ cdef extern from "Rips_complex_interface.h" namespace "Gudhi":
 
 # RipsComplex python interface
 cdef class RipsComplex:
-    """RipsComplex is a simplicial complex constructed from the finite cells
-    of a Delaunay Triangulation.
-
-    The filtration value of each simplex is computed as the square of the
-    circumradius of the simplex if the circumsphere is empty (the simplex is
-    then said to be Gabriel), and as the minimum of the filtration values of
-    the codimension 1 cofaces that make it not Gabriel otherwise.
-
-    All simplices that have a filtration value strictly greater than a given
-    alpha squared value are not inserted into the complex.
-
-    .. note::
-
-        When Rips_complex is constructed with an infinite value of alpha, the
-        complex is a Delaunay complex.
-
+    """The data structure is a one skeleton graph, or Rips graph, containing
+    edges when the edge length is less or equal to a given threshold. Edge
+    length is computed from a user given point cloud with a given distance
+    function, or a distance matrix.
     """
 
     cdef Rips_complex_interface * thisptr
