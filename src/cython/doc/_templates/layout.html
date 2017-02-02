@@ -1,0 +1,42 @@
+{#
+    This file is part of the Gudhi Library. The Gudhi library
+    (Geometric Understanding in Higher Dimensions) is a generic C++
+    library for computational topology.
+
+    Author(s):       Vincent Rouvreau
+
+    Copyright (C) 2016 INRIA
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#}
+
+{% extends "!layout.html" %}
+
+{#
+    Redefine empties relbar1 and relbar2 to have no relbar
+#}
+{% block relbar1 %}{% endblock %}
+{% block relbar2 %}{% endblock %}
+
+{#
+    Add specific links in the sidebar
+#}
+{% block sidebartoc %}
+<h2><a href="index.html">GUDHI</a></h2>
+<h2><a href="installation.html">GUDHI installation</a></h2>
+<h2><a href="citation.html">Acknowledging the GUDHI library</a></h2>
+<h2><a href="genindex.html">Index</a></h2>
+<h2><a href="examples.html">Examples</a></h2>
+    {{ super() }}
+{% endblock %}
