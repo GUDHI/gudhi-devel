@@ -3,7 +3,9 @@
  * \image html "Gudhi_banner.png" "" width=20cm
  * 
  * \section Introduction Introduction
- * The Gudhi library (Geometry Understanding in Higher Dimensions) is a generic open source C++ library for
+ * The GUDHI library (Geometry Understanding in Higher Dimensions) is a generic open source
+ * <a class="el" target="_blank" href="http://gudhi.gforge.inria.fr/doc/latest/">C++ library</a>, with a
+ * <a class="el" target="_blank" href="http://gudhi.gforge.inria.fr/cython/latest/">cython interface</a>, for
  * Computational Topology and Topological Data Analysis
  * (<a class="el" target="_blank" href="https://en.wikipedia.org/wiki/Topological_data_analysis">TDA</a>).
  * The GUDHI library intends  to help the development of new algorithmic solutions in TDA and their transfer to
@@ -211,11 +213,11 @@
 </table>
 */
 
-/*! \page installation Gudhi installation
+/*! \page installation GUDHI installation
  *  \tableofcontents
- * As Gudhi is a header only library, there is no need to install the library.
+ * As GUDHI is a header only library, there is no need to install the library.
  * 
- * Examples of Gudhi headers inclusion can be found in \ref demos.
+ * Examples of GUDHI headers inclusion can be found in \ref demos.
  * 
  * \section compiling Compiling
  * The library uses c++11 and requires <a target="_blank" href="http://www.boost.org/">Boost</a> with version 1.48.0 or
@@ -361,7 +363,7 @@ make \endverbatim
  * Please help us improving the quality of the GUDHI library. You may report bugs or suggestions to:
  * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
  * 
- * Gudhi is open to external contributions. If you want to join our development team, please contact us.
+ * GUDHI is open to external contributions. If you want to join our development team, please contact us.
  * 
 */
 
@@ -376,7 +378,7 @@ make \endverbatim
  * \verbinclude  biblio/how_to_cite_gudhi.bib
 */
 
-// List of Gudhi examples - Doxygen needs at least a file tag to analyse comments
+// List of GUDHI examples - Doxygen needs at least a file tag to analyse comments
 /*! @file Examples
  * @example Alpha_complex/Alpha_complex_from_off.cpp
  * @example Alpha_complex/Alpha_complex_from_points.cpp
