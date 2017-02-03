@@ -47,9 +47,13 @@ help:
 	@echo "  doctest    to run all doctests embedded in the documentation (if enabled)"
 
 clean:
+	rm -f examples.inc
 	rm -rf $(BUILDDIR)/*
 
+# GUDHI specific : Examples.inc is generated with generate_examples.py (and deleted on clean)
+
 html:
+	./generate_examples.py
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."

@@ -42,10 +42,11 @@ if(PYTHON_PATH AND CYTHON_PATH)
       set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${EIGEN3_INCLUDE_DIR}', ")
     endif (EIGEN3_FOUND)
     
-    # Copy recursively include, cython and test repositories before packages finding
+    # Copy recursively include, cython, example and test repositories before packages finding
     # Some tests files are removed in case some packages are not found
     file(COPY include DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     file(COPY cython DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    file(COPY example DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     file(COPY test DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
     if (CGAL_FOUND)

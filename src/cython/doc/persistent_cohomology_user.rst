@@ -97,7 +97,13 @@ Examples
 
 We provide several example files: run these examples with -h for details on their use.
 
-.. todo::
-    examples for persistence
+.. only:: builder_html
+
+    * :download:`alpha_complex_from_points_example.py <../example/alpha_complex_from_points_example.py>`
+    * :download:`periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py <../example/periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py>`
+    * :download:`rips_complex_diagram_persistence_with_pandas_interface_example.py <../example/rips_complex_diagram_persistence_with_pandas_interface_example.py>`
+    * :download:`rips_persistence_diagram.py <../example/rips_persistence_diagram.py>`
+    * :download:`random_cubical_complex_persistence_example.py <../example/random_cubical_complex_persistence_example.py>`
+    * :download:`tangential_complex_plain_homology_from_off_file_example.py <../example/tangential_complex_plain_homology_from_off_file_example.py>`
 
 .. include:: biblio.rst

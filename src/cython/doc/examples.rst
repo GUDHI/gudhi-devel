@@ -1,4 +1,4 @@
 Examples
 ########
 
-
+.. include:: examples.inc

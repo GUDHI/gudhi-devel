@@ -41,6 +41,7 @@ if "%1" == "help" (
 )
 
 if "%1" == "clean" (
+	del examples.inc
 	for /d %%i in (%BUILDDIR%\*) do rmdir /q /s %%i
 	del /q /s %BUILDDIR%\*
 	goto end
@@ -60,7 +61,10 @@ if errorlevel 9009 (
 	exit /b 1
 )
 
+:: GUDHI specific : Examples.inc is generated with generate_examples.py (and deleted on clean)
+
 if "%1" == "html" (
+	generate_examples.py
 	%SPHINXBUILD% -b html %ALLSPHINXOPTS% %BUILDDIR%/html
 	if errorlevel 1 exit /b 1
 	echo.
