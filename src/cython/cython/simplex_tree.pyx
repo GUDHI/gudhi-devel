@@ -370,7 +370,7 @@ cdef class SimplexTree:
         :returns: The persistence intervals.
         :rtype:  list of pair of float
 
-        :note: betti_numbers function requires persistence function to be
+        :note: intervals_in_dim function requires persistence function to be
             launched first.
         """
         cdef vector[pair[double,double]] intervals_result
