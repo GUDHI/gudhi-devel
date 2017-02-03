@@ -5,7 +5,7 @@
  * \section Introduction Introduction
  * The GUDHI library (Geometry Understanding in Higher Dimensions) is a generic open source
  * <a class="el" target="_blank" href="http://gudhi.gforge.inria.fr/doc/latest/">C++ library</a>, with a
- * <a class="el" target="_blank" href="http://gudhi.gforge.inria.fr/cython/latest/">cython interface</a>, for
+ * <a class="el" target="_blank" href="http://gudhi.gforge.inria.fr/cython/latest/">Cython interface</a>, for
  * Computational Topology and Topological Data Analysis
  * (<a class="el" target="_blank" href="https://en.wikipedia.org/wiki/Topological_data_analysis">TDA</a>).
  * The GUDHI library intends  to help the development of new algorithmic solutions in TDA and their transfer to
@@ -236,6 +236,15 @@ make \endverbatim
  * To test your build, run the following command in a terminal:
  * \verbatim  make test \endverbatim
  * 
+ * \subsection documentationgeneration Documentation
+ * To generate the documentation, <a target="_blank" href="http://www.doxygen.org/">Doxygen</a> is required.
+ * Run the following command in a terminal:
+\verbatim
+make doxygen
+# Documentation will be generated in the folder YYYY-MM-DD-hh-mm-ss_GUDHI_X.Y.Z/doc/html/
+# You can customize the directory name by calling `cmake -DUSER_VERSION_DIR=/my/custom/folder`
+\endverbatim
+ *
  * \section optionallibrary Optional third-party library
  * \subsection gmp GMP
  * The multi-field persistent homology algorithm requires GMP which is a free library for arbitrary-precision
@@ -251,6 +260,10 @@ make \endverbatim
  * \subsection cgal CGAL
  * The \ref alpha_complex data structure, \ref bottleneck_distance, and few examples requires CGAL, which is a C++
  * library which provides easy access to efficient and reliable geometric algorithms.
+ *
+ * \note There is no need to install CGAL, you can just <CODE>cmake . && make</CODE> CGAL (or even
+ * <CODE>cmake -DCGAL_HEADER_ONLY=ON .</CODE> for CGAL version &ge; 4.8.0), thereafter you will be able to compile
+ * GUDHI by calling <CODE>cmake -DCGAL_DIR=/your/path/to/CGAL-X.Y .. && make</CODE>
  * 
  * Having CGAL version 4.4.0 or higher installed is recommended. The procedure to install this library according to
  * your operating system is detailed here http://doc.cgal.org/latest/Manual/installation.html
