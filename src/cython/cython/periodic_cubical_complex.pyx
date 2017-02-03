@@ -44,7 +44,7 @@ cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
         vector[pair[int, pair[double, double]]] get_persistence(int homology_coeff_field, double min_persistence)
         vector[int] betti_numbers()
         vector[int] persistent_betti_numbers(double from_value, double to_value)
-
+        vector[pair[double,double]] intervals_in_dimension(int dimension)
 
 # PeriodicCubicalComplex python interface
 cdef class PeriodicCubicalComplex:
@@ -175,3 +175,23 @@ cdef class PeriodicCubicalComplex:
         if self.pcohptr != NULL:
             pbn_result = self.pcohptr.persistent_betti_numbers(<double>from_value, <double>to_value)
         return pbn_result
+
+    def intervals_in_dim(self, dimension):
+        """This function returns the persistence intervals of the simplicial
+        complex in a specific dimension.
+
+        :param dimension: The specific dimension.
+        :type from_value: int.
+        :returns: The persistence intervals.
+        :rtype:  list of pair of float
+
+        :note: betti_numbers function requires persistence function to be
+            launched first.
+        """
+        cdef vector[pair[double,double]] intervals_result
+        if self.pcohptr != NULL:
+            intervals_result = self.pcohptr.intervals_in_dimension(dimension)
+        else:
+            print("intervals_in_dim function requires persistence function"
+                  " to be launched first.")
+        return intervals_result
