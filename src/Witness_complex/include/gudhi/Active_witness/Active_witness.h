@@ -31,10 +31,10 @@ namespace Gudhi {
 
 namespace witness_complex {
 
-  //  /** \class Active_witness
-  // *  \brief Class representing a list of nearest neighbors to a given witness.
-  // *  \details Every element is a pair of a landmark identifier and the squared distance to it.
-  // */
+  /* \class Active_witness
+   *  \brief Class representing a list of nearest neighbors to a given witness.
+   *  \details Every element is a pair of a landmark identifier and the squared distance to it.
+  */
 template< typename Id_distance_pair,
           typename INS_range >
 class Active_witness {
