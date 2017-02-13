@@ -118,7 +118,6 @@ private:
     Landmark_id k = 0; /* current dimension in iterative construction */
     for (auto w: nearest_landmark_table_)
       active_witnesses.push_back(ActiveWitness(w));
-    ActiveWitness aw_copy(active_witnesses.front());
     while (!active_witnesses.empty() && k <= limit_dimension ) {
       typename ActiveWitnessList::iterator aw_it = active_witnesses.begin();
       std::vector<Landmark_id> simplex;
