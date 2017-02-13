@@ -114,7 +114,6 @@ private:
       std::cerr << "Witness complex cannot create complex - limit dimension must be non-negative.\n";
       return false;
     }
-    typeVectorVertex vv;
     ActiveWitnessList active_witnesses;
     Landmark_id k = 0; /* current dimension in iterative construction */
     for (auto w: nearest_landmark_table_)
