@@ -62,7 +62,7 @@ cdef class AlphaComplex:
     cdef Alpha_complex_interface * thisptr
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, points=[], off_file=''):
+    def __init__(self, points=None, off_file=''):
         """AlphaComplex constructor.
 
         :param points: A list of points in d-Dimension.
@@ -75,13 +75,16 @@ cdef class AlphaComplex:
         """
 
     # The real cython constructor
-    def __cinit__(self, points=[], off_file=''):
+    def __cinit__(self, points=None, off_file=''):
         if off_file is not '':
             if os.path.isfile(off_file):
                 self.thisptr = new Alpha_complex_interface(off_file, True)
             else:
                 print("file " + off_file + " not found.")
         else:
+            if points is None:
+                # Empty Alpha construction
+                points=[]
             self.thisptr = new Alpha_complex_interface(points)
                 
 

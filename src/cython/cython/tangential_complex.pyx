@@ -80,13 +80,16 @@ cdef class TangentialComplex:
         """
 
     # The real cython constructor
-    def __cinit__(self, points=[], off_file=''):
+    def __cinit__(self, points=None, off_file=''):
         if off_file is not '':
             if os.path.isfile(off_file):
                 self.thisptr = new Tangential_complex_interface(off_file, True)
             else:
                 print("file " + off_file + " not found.")
         else:
+            if points is None:
+                # Empty tangential construction
+                points=[]
             self.thisptr = new Tangential_complex_interface(points)
                 
 

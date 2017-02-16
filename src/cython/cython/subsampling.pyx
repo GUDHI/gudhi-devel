@@ -40,7 +40,7 @@ cdef extern from "Subsampling_interface.h" namespace "Gudhi::subsampling":
     vector[vector[double]] subsampling_sparsify_points(vector[vector[double]] points, double min_squared_dist)
     vector[vector[double]] subsampling_sparsify_points_from_file(string off_file, double min_squared_dist)
 
-def choose_n_farthest_points(points=[], off_file='', nb_points=0, starting_point = ''):
+def choose_n_farthest_points(points=None, off_file='', nb_points=0, starting_point = ''):
     """Subsample by a greedy strategy of iteratively adding the farthest point
     from the current chosen point set to the subsampling.
     The iteration starts with the landmark `starting point`.
@@ -65,18 +65,25 @@ def choose_n_farthest_points(points=[], off_file='', nb_points=0, starting_point
     if off_file is not '':
         if os.path.isfile(off_file):
             if starting_point is '':
-                return subsampling_n_farthest_points_from_file(off_file, nb_points)
+                return subsampling_n_farthest_points_from_file(off_file,
+                                                               nb_points)
             else:
-                return subsampling_n_farthest_points_from_file(off_file, nb_points, starting_point)
+                return subsampling_n_farthest_points_from_file(off_file,
+                                                               nb_points,
+                                                               starting_point)
         else:
             print("file " + off_file + " not found.")
     else:
+        if points is None:
+            # Empty points
+            points=[]
         if starting_point is '':
             return subsampling_n_farthest_points(points, nb_points)
         else:
-            return subsampling_n_farthest_points(points, nb_points, starting_point)
+            return subsampling_n_farthest_points(points, nb_points,
+                                                 starting_point)
 
-def pick_n_random_points(points=[], off_file='', nb_points=0):
+def pick_n_random_points(points=None, off_file='', nb_points=0):
     """Subsample a point set by picking random vertices.
 
     :param points: The input point set.
@@ -98,9 +105,12 @@ def pick_n_random_points(points=[], off_file='', nb_points=0):
         else:
             print("file " + off_file + " not found.")
     else:
+        if points is None:
+            # Empty points
+            points=[]
         return subsampling_n_random_points(points, nb_points)
 
-def sparsify_point_set(points=[], off_file='', min_squared_dist=0.0):
+def sparsify_point_set(points=None, off_file='', min_squared_dist=0.0):
     """Subsample a point set by picking random vertices.
 
     :param points: The input point set.
@@ -118,8 +128,12 @@ def sparsify_point_set(points=[], off_file='', min_squared_dist=0.0):
     """
     if off_file is not '':
         if os.path.isfile(off_file):
-            return subsampling_sparsify_points_from_file(off_file, min_squared_dist)
+            return subsampling_sparsify_points_from_file(off_file,
+                                                         min_squared_dist)
         else:
             print("file " + off_file + " not found.")
     else:
+        if points is None:
+            # Empty points
+            points=[]
         return subsampling_sparsify_points(points, min_squared_dist)
