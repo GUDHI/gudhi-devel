@@ -27,6 +27,7 @@
 #include <gudhi/Rips_complex.h>
 #include <gudhi/Points_off_io.h>
 #include <gudhi/distance_functions.h>
+#include <gudhi/reader_utils.h>
 
 #include "Simplex_tree_interface.h"
 
@@ -41,17 +42,34 @@ namespace rips_complex {
 
 class Rips_complex_interface {
   using Point_d = std::vector<double>;
+  using Distance_matrix = std::vector<std::vector<Simplex_tree_interface<>::Filtration_value>>;
 
  public:
-  Rips_complex_interface(std::vector<std::vector<double>>&points, double threshold) {
-    rips_complex_ = new Rips_complex<Simplex_tree_interface<>::Filtration_value>(points, threshold,
-                                                                                 Euclidean_distance());
+  Rips_complex_interface(std::vector<std::vector<double>>&values, double threshold, bool euclidean) {
+    if (euclidean) {
+      // Rips construction where values is a vector of points
+      rips_complex_ = new Rips_complex<Simplex_tree_interface<>::Filtration_value>(values, threshold,
+                                                                                   Euclidean_distance());
+    } else {
+      // Rips construction where values is a distance matrix
+      rips_complex_ = new Rips_complex<Simplex_tree_interface<>::Filtration_value>(values, threshold);
+
+    }
   }
 
-  Rips_complex_interface(std::string off_file_name, double threshold, bool from_file = true) {
-    Gudhi::Points_off_reader<Point_d> off_reader(off_file_name);
-    rips_complex_ = new Rips_complex<Simplex_tree_interface<>::Filtration_value>(off_reader.get_point_cloud(),
-                                                                                 threshold, Euclidean_distance());
+  Rips_complex_interface(std::string file_name, double threshold, bool euclidean, bool from_file = true) {
+    if (euclidean) {
+      // Rips construction where file_name is an OFF file
+      Gudhi::Points_off_reader<Point_d> off_reader(file_name);
+      rips_complex_ = new Rips_complex<Simplex_tree_interface<>::Filtration_value>(off_reader.get_point_cloud(),
+                                                                                   threshold, Euclidean_distance());
+    } else {
+      // Rips construction where values is a distance matrix
+      Distance_matrix distances = read_lower_triangular_matrix_from_csv_file<Simplex_tree_interface<>::Filtration_value>(file_name);
+      rips_complex_ = new Rips_complex<Simplex_tree_interface<>::Filtration_value>(distances, threshold);
+
+    }
+
   }
 
   void create_simplex_tree(Simplex_tree_interface<>* simplex_tree, int dim_max) {

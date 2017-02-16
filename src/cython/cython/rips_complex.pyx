@@ -33,9 +33,9 @@ __license__ = "GPL v3"
 
 cdef extern from "Rips_complex_interface.h" namespace "Gudhi":
     cdef cppclass Rips_complex_interface "Gudhi::rips_complex::Rips_complex_interface":
-        Rips_complex_interface(vector[vector[double]] points, double threshold)
+        Rips_complex_interface(vector[vector[double]] values, double threshold, bool euclidean)
         # bool from_file is a workaround for cython to find the correct signature
-        Rips_complex_interface(string off_file, double threshold, bool from_file)
+        Rips_complex_interface(string file_name, double threshold, bool euclidean, bool from_file)
         void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, int dim_max)
 
 # RipsComplex python interface
@@ -49,8 +49,11 @@ cdef class RipsComplex:
     cdef Rips_complex_interface * thisptr
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, points=[], off_file='', max_edge_length=float('inf')):
+    def __init__(self, points=None, off_file='', distance_matrix=None, csv_file='', max_edge_length=float('inf')):
         """RipsComplex constructor.
+
+        :param max_edge_length: Rips value.
+        :type max_edge_length: int
 
         :param points: A list of points in d-Dimension.
         :type points: list of list of double
@@ -60,21 +63,44 @@ cdef class RipsComplex:
         :param off_file: An OFF file style name.
         :type off_file: string
 
-        :param max_edge_length: Rips value.
-        :type max_edge_length: int
+        Or
+
+        :param distance_matrix: A distance matrix (full square or lower
+        triangular).
+        :type points: list of list of double
+
+        Or
+
+        :param csv_file: A csv file style name containing a full square or a
+        lower triangular distance matrix.
+        :type csv_file: string
         """
 
     # The real cython constructor
-    def __cinit__(self, points=[], off_file='', max_edge_length=float('inf')):
+    def __cinit__(self, points=None, off_file='', distance_matrix=None, csv_file='', max_edge_length=float('inf')):
         if off_file is not '':
             if os.path.isfile(off_file):
                 self.thisptr = new Rips_complex_interface(off_file,
                                                           max_edge_length,
+                                                          True,
                                                           True)
             else:
                 print("file " + off_file + " not found.")
+        elif csv_file is not '':
+            if os.path.isfile(csv_file):
+                self.thisptr = new Rips_complex_interface(csv_file,
+                                                          max_edge_length,
+                                                          False,
+                                                          True)
+            else:
+                print("file " + csv_file + " not found.")
+        elif distance_matrix is not None:
+            self.thisptr = new Rips_complex_interface(distance_matrix, max_edge_length, False)
         else:
-            self.thisptr = new Rips_complex_interface(points, max_edge_length)
+            if points is None:
+                # Empty Rips construction
+                points=[]
+            self.thisptr = new Rips_complex_interface(points, max_edge_length, True)
 
 
     def __dealloc__(self):

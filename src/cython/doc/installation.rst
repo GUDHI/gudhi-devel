@@ -112,8 +112,9 @@ The following examples require the `Matplotlib <http://matplotlib.org>`_:
     * :download:`alpha_complex_diagram_persistence_from_off_file_example.py <../example/alpha_complex_diagram_persistence_from_off_file_example.py>`
     * :download:`gudhi_graphical_tools_example.py <../example/gudhi_graphical_tools_example.py>`
     * :download:`periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py <../example/periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py>`
-    * :download:`rips_complex_diagram_persistence_with_pandas_interface_example.py <../example/rips_complex_diagram_persistence_with_pandas_interface_example.py>`
+    * :download:`rips_complex_diagram_persistence_from_off_file_example.py <../example/rips_complex_diagram_persistence_from_off_file_example.py>`
     * :download:`rips_persistence_diagram.py <../example/rips_persistence_diagram.py>`
+    * :download:`rips_complex_diagram_persistence_from_distance_matrix_file_example.py <../example/rips_complex_diagram_persistence_from_distance_matrix_file_example.py>`
     * :download:`tangential_complex_plain_homology_from_off_file_example.py <../example/tangential_complex_plain_homology_from_off_file_example.py>`
 
 Numpy
@@ -130,6 +131,7 @@ The following examples require the `NumPy <http://numpy.org>`_:
     * :download:`alpha_complex_diagram_persistence_from_off_file_example.py <../example/alpha_complex_diagram_persistence_from_off_file_example.py>`
     * :download:`gudhi_graphical_tools_example.py <../example/gudhi_graphical_tools_example.py>`
     * :download:`periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py <../example/periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py>`
-    * :download:`rips_complex_diagram_persistence_with_pandas_interface_example.py <../example/rips_complex_diagram_persistence_with_pandas_interface_example.py>`
+    * :download:`rips_complex_diagram_persistence_from_off_file_example.py <../example/rips_complex_diagram_persistence_from_off_file_example.py>`
     * :download:`rips_persistence_diagram.py <../example/rips_persistence_diagram.py>`
+    * :download:`rips_complex_diagram_persistence_from_distance_matrix_file_example.py <../example/rips_complex_diagram_persistence_from_distance_matrix_file_example.py>`
     * :download:`tangential_complex_plain_homology_from_off_file_example.py <../example/tangential_complex_plain_homology_from_off_file_example.py>`
