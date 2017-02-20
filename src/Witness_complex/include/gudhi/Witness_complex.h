@@ -181,14 +181,6 @@ private:
         // If norelax_dist is infinity, change to first omitted distance
         if (l_it->second <= norelax_dist2)
           norelax_dist2 = l_it->second;
-        typename ActiveWitness::iterator next_it = l_it;
-        will_be_active = add_all_faces_of_dimension(dim,
-                                                    alpha2,
-                                                    norelax_dist2,
-                                                    ++next_it,
-                                                    simplex,
-                                                    sc,
-                                                    end) || will_be_active;
       } 
     else if (dim == 0)
       for (; l_it->second - alpha2 <= norelax_dist2 && l_it != end; ++l_it) {
