@@ -14,7 +14,7 @@ dimension. The running time depends only linearly on the extrinsic dimension
 :math:`d` and exponentially on the intrinsic dimension :math:`k`.
 
 An extensive description of the Tangential complex can be found in
-:cite:`tangentialcomplex2014`).
+:cite:`tangentialcomplex2014`.
 
 What is a Tangential Complex?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

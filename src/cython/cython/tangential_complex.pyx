@@ -46,22 +46,9 @@ cdef extern from "Tangential_complex_interface.h" namespace "Gudhi":
 
 # TangentialComplex python interface
 cdef class TangentialComplex:
-    """TangentialComplex is a simplicial complex constructed from the finite cells
-    of a Delaunay Triangulation.
-
-    The filtration value of each simplex is computed as the square of the
-    circumradius of the simplex if the circumsphere is empty (the simplex is
-    then said to be Gabriel), and as the minimum of the filtration values of
-    the codimension 1 cofaces that make it not Gabriel otherwise.
-
-    All simplices that have a filtration value strictly greater than a given
-    alpha squared value are not inserted into the complex.
-
-    .. note::
-
-        When Tangential_complex is constructed with an infinite value of alpha, the
-        complex is a Delaunay complex.
-
+    """The class Tangential_complex represents a tangential complex. After the
+    computation of the complex, an optional post-processing called perturbation
+    can be run to attempt to remove inconsistencies.
     """
 
     cdef Tangential_complex_interface * thisptr
@@ -107,46 +94,44 @@ cdef class TangentialComplex:
 
         :param vertex: The vertex.
         :type vertex: int.
-        :returns:  list of float -- the point.
+        :returns:  The point.
+        :rtype: list of float
         """
         cdef vector[double] point = self.thisptr.get_point(vertex)
         return point
 
     def num_vertices(self):
-        """This function returns the number of vertices.
-
-        :returns:  unsigned -- the number of vertices.
+        """
+        :returns:  The number of vertices.
+        :rtype: unsigned
         """
         return self.thisptr.number_of_vertices()
 
     def num_simplices(self):
-        """This function returns the number of simplices.
-
-        :returns:  unsigned -- the number of simplices.
+        """
+        :returns:  Total number of simplices in stars (including duplicates that appear in several stars).
+        :rtype: unsigned
         """
         return self.thisptr.number_of_simplices()
 
     def num_inconsistent_simplices(self):
-        """This function returns the number of inconsistent simplices.
-
-        :returns:  unsigned -- the number of inconsistent simplices.
+        """
+        :returns:  The number of inconsistent simplices.
+        :rtype: unsigned
         """
         return self.thisptr.number_of_inconsistent_simplices()
 
     def num_inconsistent_stars(self):
-        """This function returns the number of inconsistent stars.
-
-        :returns:  unsigned -- the number of inconsistent stars.
+        """
+        :returns:  The number of stars containing at least one inconsistent simplex.
+        :rtype: unsigned
         """
         return self.thisptr.number_of_inconsistent_stars()
 
     def create_simplex_tree(self):
-        """This function creates the given simplex tree from the Delaunay
-        Triangulation.
+        """Exports the complex into a simplex tree.
 
-        :param simplex_tree: The simplex tree to create (must be empty)
-        :type simplex_tree: SimplexTree
-        :returns: A simplex tree created from the Delaunay Triangulation.
+        :returns: A simplex tree created from the complex.
         :rtype: SimplexTree
         """
         simplex_tree = SimplexTree()
@@ -155,6 +140,7 @@ cdef class TangentialComplex:
 
     def fix_inconsistencies_using_perturbation(self, max_perturb, time_limit=-1.0):
         """Attempts to fix inconsistencies by perturbing the point positions.
+
         :param max_perturb: Maximum length of the translations used by the
         perturbation.
         :type max_perturb: double
