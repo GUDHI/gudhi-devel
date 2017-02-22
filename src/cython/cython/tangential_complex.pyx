@@ -142,7 +142,7 @@ cdef class TangentialComplex:
         """Attempts to fix inconsistencies by perturbing the point positions.
 
         :param max_perturb: Maximum length of the translations used by the
-        perturbation.
+            perturbation.
         :type max_perturb: double
         :param time_limit: Time limit in seconds. If -1, no time limit is set.
         :type time_limit: double
