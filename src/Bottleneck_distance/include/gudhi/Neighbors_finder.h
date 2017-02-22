@@ -34,6 +34,7 @@
 #include <gudhi/Internal_point.h>
 
 #include <unordered_set>
+#include <vector>
 
 namespace Gudhi {
 

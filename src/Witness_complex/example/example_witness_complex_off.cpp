@@ -17,7 +17,7 @@
 typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> K;
 typedef typename K::Point_d Point_d;
 typedef typename Gudhi::witness_complex::Euclidean_witness_complex<K> Witness_complex;
-typedef std::vector< Vertex_handle > typeVectorVertex;
+typedef std::vector< typename Gudhi::Simplex_tree<>::Vertex_handle > typeVectorVertex;
 typedef std::vector< Point_d > Point_vector;
 
 int main(int argc, char * const argv[]) {

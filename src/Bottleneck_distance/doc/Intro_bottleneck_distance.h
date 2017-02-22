@@ -26,7 +26,7 @@
 // needs namespace for Doxygen to link on classes
 namespace Gudhi {
 // needs namespace for Doxygen to link on classes
-namespace bottleneck_distance {
+namespace persistence_diagram {
 
 /**  \defgroup bottleneck_distance Bottleneck distance
  * 
@@ -35,7 +35,7 @@ namespace bottleneck_distance {
  * 
  * \section bottleneckdefinition Definition
  * 
- * The bottleneck distance measures the similarity between two persistence diagrams. It's the shortest distance b for which there exists a perfect matching between
+ * The bottleneck distance measures the similarity between two persistence diagrams. It is the shortest distance b for which there exists a perfect matching between
  * the points of the two diagrams (completed with all the points on the diagonal in order to ignore cardinality mismatchs) such that
  * any couple of matched points are at distance at most b.
  *
@@ -44,7 +44,7 @@ namespace bottleneck_distance {
  */
 /** @} */  // end defgroup bottleneck_distance
 
-}  // namespace bottleneck_distance
+}  // namespace persistence_diagram
 
 }  // namespace Gudhi
 

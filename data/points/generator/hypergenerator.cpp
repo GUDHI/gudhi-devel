@@ -29,7 +29,7 @@
 #include <iterator>
 #include <vector>
 #include <fstream>  // for std::ofstream
-
+#include <cstdlib>
 
 typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > K;
 typedef K::Point_d Point;
@@ -47,24 +47,22 @@ int main(int argc, char **argv) {
     usage(argv[0]);
   }
 
-  int points_number = 0;
-  int returnedScanValue = sscanf(argv[4], "%d", &points_number);
-  if ((returnedScanValue == EOF) || (points_number <= 0)) {
+  int points_number = atoi(argv[4]);
+  if (points_number <= 0) {
     std::cerr << "Error: " << argv[4] << " is not correct" << std::endl;
     usage(argv[0]);
   }
 
-  int dimension = 0;
-  returnedScanValue = sscanf(argv[5], "%d", &dimension);
-  if ((returnedScanValue == EOF) || (dimension <= 0)) {
+  int dimension = atoi(argv[5]);
+  if (dimension <= 0) {
     std::cerr << "Error: " << argv[5] << " is not correct" << std::endl;
     usage(argv[0]);
   }
 
   double radius = 1.0;
   if (argc == 7) {
-    returnedScanValue = sscanf(argv[6], "%lf", &radius);
-    if ((returnedScanValue == EOF) || (radius <= 0.0)) {
+    radius = atof(argv[6]);
+    if (radius <= 0.0) {
       std::cerr << "Error: " << argv[6] << " is not correct" << std::endl;
       usage(argv[0]);
     }

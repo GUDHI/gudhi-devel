@@ -5,11 +5,18 @@ project(Bottleneck_distance_examples)
 # cmake -DCGAL_DIR=~/workspace/CGAL-4.8 ../../..
 if(CGAL_FOUND)
   if (NOT CGAL_VERSION VERSION_LESS 4.8.0)
-    if (EIGEN3_FOUND)
-      add_executable (bottleneck_read_file_example bottleneck_read_file_example.cpp)
-      add_executable (bottleneck_basic_example bottleneck_basic_example.cpp)
+    add_executable (bottleneck_read_file_example bottleneck_read_file_example.cpp)
+    add_executable (bottleneck_basic_example bottleneck_basic_example.cpp)
 
-      add_test(bottleneck_basic_example ${CMAKE_CURRENT_BINARY_DIR}/bottleneck_basic_example)
-    endif()
+    add_test(bottleneck_basic_example ${CMAKE_CURRENT_BINARY_DIR}/bottleneck_basic_example)
+
+    add_executable (alpha_rips_persistence_bottleneck_distance alpha_rips_persistence_bottleneck_distance.cpp)
+    target_link_libraries(alpha_rips_persistence_bottleneck_distance ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+    if (TBB_FOUND)
+      target_link_libraries(alpha_rips_persistence_bottleneck_distance ${TBB_LIBRARIES})
+    endif(TBB_FOUND)
+    add_test(alpha_rips_persistence_bottleneck_distance ${CMAKE_CURRENT_BINARY_DIR}/alpha_rips_persistence_bottleneck_distance
+        ${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off -r 0.15 -m 0.12 -d 3 -p 3)
+
   endif ()
 endif()

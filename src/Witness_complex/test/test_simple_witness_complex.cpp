@@ -19,6 +19,7 @@
 #include <vector>
 
 typedef Gudhi::Simplex_tree<> Simplex_tree;
+typedef typename Simplex_tree::Vertex_handle Vertex_handle;
 typedef std::vector< Vertex_handle > typeVectorVertex;
 typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> Kernel;
 typedef typename Kernel::FT FT;
