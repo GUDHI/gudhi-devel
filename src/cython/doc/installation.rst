@@ -10,10 +10,10 @@ Mac OSX and Visual Studio 2015.
 It also requires cmake to generate makefiles, and cython to compile the
 library.
 
-Demos and examples
-==================
+GUDHI Cythonization
+===================
 
-To build the demos and examples, run the following commands in a terminal:
+To build the GUDHI cython module, run the following commands in a terminal:
 
 .. code-block:: bash
 
