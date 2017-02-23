@@ -42,6 +42,7 @@ namespace witness_complex {
  * \ingroup witness_complex
  *
  * \tparam Nearest_landmark_table_ needs to be a range of a range of pairs of nearest landmarks and distances.
+ *         The class Nearest_landmark_table_::value_type must be a copiable range.
  *         The range of pairs must admit a member type 'iterator'. The dereference type 
  *         of the pair range iterator needs to be 'std::pair<std::size_t, double>'.
  */
@@ -78,6 +79,7 @@ private:
    *  \brief Initializes member variables before constructing simplicial complex.
    *  \details Records nearest landmark table.
    *  @param[in] nearest_landmark_table needs to be a range of a range of pairs of nearest landmarks and distances.
+   *         The class Nearest_landmark_table_::value_type must be a copiable range.
    *         The range of pairs must admit a member type 'iterator'. The dereference type 
    *         of the pair range iterator needs to be 'std::pair<std::size_t, double>'.
    */
