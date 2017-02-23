@@ -48,7 +48,7 @@ generate the documentation. Run the following commands in a terminal:
 
 .. code-block:: bash
 
-    make sphynx
+    make sphinx
 
 Optional third-party library
 ****************************
