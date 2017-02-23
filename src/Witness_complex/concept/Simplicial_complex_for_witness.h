@@ -51,6 +51,9 @@ struct SimplicialComplexForWitness {
 
   /** \brief Inserts a simplex with vertices from a given range
    *  'vertex_range' in the simplicial complex.
+   *  The function is only used in Witness_complex class
+   *  and by construction, it is not necessary to check if 
+   *  the faces are in the simplicial complex before insertion. 
    *  The simplex is given the filtration value 'filtration'.
    *  Filtration_value should be convertible from double.
    *  The return type is not used.
@@ -61,6 +64,7 @@ struct SimplicialComplexForWitness {
   /** \brief Inserts a simplex and all its faces
    *  with vertices from a given range
    *  'vertex_range' in the simplicial complex.
+   *  The function is only used in Strong_witness_complex class.
    *  All inserted simplices are given the filtration
    *  value 'filtration'.
    *  Filtration_value should be convertible from double.
