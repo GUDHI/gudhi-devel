@@ -26,7 +26,6 @@
 #include <boost/range.hpp>
 
 #include <gudhi/Null_output_iterator.h>
-#include <gudhi/Clock.h>
 
 #include <iterator>
 #include <vector>
