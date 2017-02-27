@@ -40,12 +40,30 @@ if(PYTHON_PATH AND CYTHON_PATH)
       set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_EIGEN3_ENABLED', ")
     endif (EIGEN3_FOUND)
     
-    # Copy recursively include, cython, example and test repositories before packages finding
-    # Some tests files are removed in case some packages are not found
+    # Copy recursively include, cython, example, doc and test repositories before packages finding
+    # Some tests and doc files are removed in case some packages are not found
     file(COPY include DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     file(COPY cython DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     file(COPY example DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     file(COPY test DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    file(COPY doc DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    # Developper version for doc images
+    file(GLOB GUDHI_DEV_DOC_IMAGES "${CMAKE_SOURCE_DIR}/src/*/doc/*.png")
+    file(COPY ${GUDHI_DEV_DOC_IMAGES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/img")
+    # User version for doc images
+    file(GLOB GUDHI_USER_DOC_IMAGES "${CMAKE_SOURCE_DIR}/doc/*/*.png")
+    file(COPY ${GUDHI_USER_DOC_IMAGES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/img")
+    # Biblio
+    file(GLOB GUDHI_BIB_FILES "${CMAKE_SOURCE_DIR}/biblio/*.bib")
+    file(COPY ${GUDHI_BIB_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
+    # Cubical complex perseus doc example
+    file(GLOB GUDHI_CUBICAL_PERSEUS_FILES "${CMAKE_SOURCE_DIR}/data/bitmap/*cubicalcomplexdoc.txt")
+    file(COPY ${GUDHI_CUBICAL_PERSEUS_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
+    file(COPY "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
+    file(COPY "${CMAKE_SOURCE_DIR}/data/distance_matrix/full_square_distance_matrix.csv" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
+    # Persistence graphical tools examples
+    file(COPY "${CMAKE_SOURCE_DIR}/data/bitmap/3d_torus.txt" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
+    file(COPY "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
 
     if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
         # If CGAL_VERSION >= 4.8.1, include subsampling
@@ -54,6 +72,9 @@ if(PYTHON_PATH AND CYTHON_PATH)
     else (NOT CGAL_VERSION VERSION_LESS 4.8.1)
       # Remove alpha complex unitary tests
       file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_subsampling.py)
+      file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/subsampling_ref.rst")
+      file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/subsampling_sum.rst")
+      file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/subsampling_user.rst")
     endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)
     if (NOT CGAL_VERSION VERSION_LESS 4.8.0)
       # If CGAL_VERSION >= 4.8.0, include tangential complex
@@ -63,6 +84,12 @@ if(PYTHON_PATH AND CYTHON_PATH)
       # Remove tangential complex and bottleneck unitary tests
       file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_tangential_complex.py)
       file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_bottleneck_distance.py)
+      file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/bottleneck_distance_ref.rst")
+      file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/bottleneck_distance_sum.rst")
+      file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/bottleneck_distance_user.rst")
+      file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/tangential_complex_ref.rst")
+      file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/tangential_complex_sum.rst")
+      file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/tangential_complex_user.rst")
     endif (NOT CGAL_VERSION VERSION_LESS 4.8.0)
     if (NOT CGAL_VERSION VERSION_LESS 4.7.0)
       # If CGAL_VERSION >= 4.7.0, include alpha
@@ -70,6 +97,9 @@ if(PYTHON_PATH AND CYTHON_PATH)
     else (NOT CGAL_VERSION VERSION_LESS 4.7.0)
       # Remove alpha complex unitary tests
       file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_alpha_complex.py)
+      file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/alpha_complex_ref.rst")
+      file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/alpha_complex_sum.rst")
+      file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/alpha_complex_user.rst")
     endif (NOT CGAL_VERSION VERSION_LESS 4.7.0)
 
     if(CGAL_FOUND)
@@ -139,28 +169,10 @@ if(PYTHON_PATH AND CYTHON_PATH)
     # Documentation generation is available through sphinx
     find_program( SPHINX_PATH sphinx-build )
     if(SPHINX_PATH)
-      file(COPY doc DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-      # Developper version
-      file(GLOB GUDHI_DEV_DOC_IMAGES "${CMAKE_SOURCE_DIR}/src/*/doc/*.png")
-      file(COPY ${GUDHI_DEV_DOC_IMAGES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/img")
-      # User version
-      file(GLOB GUDHI_USER_DOC_IMAGES "${CMAKE_SOURCE_DIR}/doc/*/*.png")
-      file(COPY ${GUDHI_USER_DOC_IMAGES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/img")
-      # Biblio
-      file(GLOB GUDHI_BIB_FILES "${CMAKE_SOURCE_DIR}/biblio/*.bib")
-      file(COPY ${GUDHI_BIB_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
-      # Cubical complex perseus doc example
-      file(GLOB GUDHI_CUBICAL_PERSEUS_FILES "${CMAKE_SOURCE_DIR}/data/bitmap/*cubicalcomplexdoc.txt")
-      file(COPY ${GUDHI_CUBICAL_PERSEUS_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
-      file(COPY "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
-      file(COPY "${CMAKE_SOURCE_DIR}/data/distance_matrix/full_square_distance_matrix.csv" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
-      # Persistence graphical tools examples
-      file(COPY "${CMAKE_SOURCE_DIR}/data/bitmap/3d_torus.txt" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
-      file(COPY "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
       if (UNIX)
         add_custom_target(sphinx
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc
-            COMMAND make html && make doctest)
+            COMMAND make html doctest)
       else (UNIX)
         add_custom_target(sphinx
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc

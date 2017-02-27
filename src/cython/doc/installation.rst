@@ -135,3 +135,22 @@ The following examples require the `NumPy <http://numpy.org>`_:
     * :download:`rips_persistence_diagram.py <../example/rips_persistence_diagram.py>`
     * :download:`rips_complex_diagram_persistence_from_distance_matrix_file_example.py <../example/rips_complex_diagram_persistence_from_distance_matrix_file_example.py>`
     * :download:`tangential_complex_plain_homology_from_off_file_example.py <../example/tangential_complex_plain_homology_from_off_file_example.py>`
+
+Threading Building Blocks
+=========================
+
+`Intel® TBB <https://www.threadingbuildingblocks.org/>`_ lets you easily write
+parallel C++ programs that take full advantage of multicore performance, that
+are portable and composable, and that have future-proof scalability.
+
+Having Intel® TBB installed is recommended to parallelize and accelerate some
+GUDHI computations.
+
+Bug reports and contributions
+*****************************
+
+Please help us improving the quality of the GUDHI library. You may report bugs or suggestions to:
+
+    Contact: gudhi-users@lists.gforge.inria.fr
+
+GUDHI is open to external contributions. If you want to join our development team, please contact us.
