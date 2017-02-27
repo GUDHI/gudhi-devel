@@ -47,42 +47,48 @@ if(PYTHON_PATH AND CYTHON_PATH)
     file(COPY example DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     file(COPY test DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-    if (CGAL_FOUND)
-      if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
-          # If CGAL_VERSION >= 4.8.1, include subsampling
-          # CGAL things are done in CGAL_VERSION >= 4.8.0
-          set(GUDHI_CYTHON_SUBSAMPLING "include 'cython/subsampling.pyx'")
-      else (NOT CGAL_VERSION VERSION_LESS 4.8.1)
-        # Remove alpha complex unitary tests
-        file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_subsampling.py)
-      endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)
-      if (NOT CGAL_VERSION VERSION_LESS 4.8.0)
-        # If CGAL_VERSION >= 4.8.0, include alpha and tangential complex
-        set(GUDHI_CYTHON_LIBRARIES "${GUDHI_CYTHON_LIBRARIES}'CGAL', ")
-        set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${CGAL_LIBRARIES_DIR}', ")
-        # GMP and GMPXX are not required, but if present, CGAL will link with them.
-        if(GMP_FOUND)
-          set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_USE_GMP', ")
-          set(GUDHI_CYTHON_LIBRARIES "${GUDHI_CYTHON_LIBRARIES}'gmp', ")
-          set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${GMP_LIBRARIES_DIR}', ")
-          if(GMPXX_FOUND)
-            set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_USE_GMPXX', ")
-            set(GUDHI_CYTHON_LIBRARIES "${GUDHI_CYTHON_LIBRARIES}'gmpxx', ")
-            set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${GMPXX_LIBRARIES_DIR}', ")
-          endif(GMPXX_FOUND)
-        endif(GMP_FOUND)
-    
-        set(GUDHI_CYTHON_ALPHA_COMPLEX "include 'cython/alpha_complex.pyx'")
-        set(GUDHI_CYTHON_TANGENTIAL_COMPLEX "include 'cython/tangential_complex.pyx'")
-        set(GUDHI_CYTHON_BOTTLENECK_DISTANCE "include 'cython/bottleneck_distance.pyx'")
-      else (NOT CGAL_VERSION VERSION_LESS 4.8.0)
-        # Remove alpha complex unitary tests
-        file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_alpha_complex.py)
-        file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_tangential_complex.py)
-        file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_bottleneck_distance.py)
-      endif (NOT CGAL_VERSION VERSION_LESS 4.8.0)
-    endif (CGAL_FOUND)
-    
+    if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
+        # If CGAL_VERSION >= 4.8.1, include subsampling
+        # CGAL things are done in CGAL_VERSION >= 4.8.0
+        set(GUDHI_CYTHON_SUBSAMPLING "include 'cython/subsampling.pyx'")
+    else (NOT CGAL_VERSION VERSION_LESS 4.8.1)
+      # Remove alpha complex unitary tests
+      file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_subsampling.py)
+    endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)
+    if (NOT CGAL_VERSION VERSION_LESS 4.8.0)
+      # If CGAL_VERSION >= 4.8.0, include tangential complex
+      set(GUDHI_CYTHON_TANGENTIAL_COMPLEX "include 'cython/tangential_complex.pyx'")
+      set(GUDHI_CYTHON_BOTTLENECK_DISTANCE "include 'cython/bottleneck_distance.pyx'")
+    else (NOT CGAL_VERSION VERSION_LESS 4.8.0)
+      # Remove tangential complex and bottleneck unitary tests
+      file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_tangential_complex.py)
+      file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_bottleneck_distance.py)
+    endif (NOT CGAL_VERSION VERSION_LESS 4.8.0)
+    if (NOT CGAL_VERSION VERSION_LESS 4.7.0)
+      # If CGAL_VERSION >= 4.7.0, include alpha
+      set(GUDHI_CYTHON_ALPHA_COMPLEX "include 'cython/alpha_complex.pyx'")
+    else (NOT CGAL_VERSION VERSION_LESS 4.7.0)
+      # Remove alpha complex unitary tests
+      file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_alpha_complex.py)
+    endif (NOT CGAL_VERSION VERSION_LESS 4.7.0)
+
+    if(CGAL_FOUND)
+      # Add CGAL compilation args
+      set(GUDHI_CYTHON_LIBRARIES "${GUDHI_CYTHON_LIBRARIES}'CGAL', ")
+      set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${CGAL_LIBRARIES_DIR}', ")
+      # GMP and GMPXX are not required, but if present, CGAL will link with them.
+      if(GMP_FOUND)
+        set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_USE_GMP', ")
+        set(GUDHI_CYTHON_LIBRARIES "${GUDHI_CYTHON_LIBRARIES}'gmp', ")
+        set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${GMP_LIBRARIES_DIR}', ")
+        if(GMPXX_FOUND)
+          set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_USE_GMPXX', ")
+          set(GUDHI_CYTHON_LIBRARIES "${GUDHI_CYTHON_LIBRARIES}'gmpxx', ")
+          set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${GMPXX_LIBRARIES_DIR}', ")
+        endif(GMPXX_FOUND)
+      endif(GMP_FOUND)
+    endif(CGAL_FOUND)
+
     # Specific for Mac
     if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
         set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-mmacosx-version-min=10.9', ")
@@ -95,7 +101,14 @@ if(PYTHON_PATH AND CYTHON_PATH)
       set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${GUDHI_INCLUDE_DIRECTORY}', ")
     endforeach()
     set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${CMAKE_SOURCE_DIR}/${GUDHI_CYTHON_PATH}/include', ")
-    
+
+    if (TBB_FOUND)
+      set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DGUDHI_USE_TBB', ")
+      set(GUDHI_CYTHON_LIBRARIES "${GUDHI_CYTHON_LIBRARIES}'tbb', 'tbbmalloc', ")
+      set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${TBB_LIBRARY_DIRS}', ")
+      set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${TBB_INCLUDE_DIRS}', ")
+    endif()
+
     # Generate cythonize_gudhi.py file to cythonize Gudhi
     configure_file(cythonize_gudhi.py.in "${CMAKE_CURRENT_BINARY_DIR}/cythonize_gudhi.py" @ONLY)
     # Generate gudhi.pyx - Gudhi cython file 
@@ -107,8 +120,12 @@ if(PYTHON_PATH AND CYTHON_PATH)
         COMMAND python "${CMAKE_CURRENT_BINARY_DIR}/cythonize_gudhi.py" "build_ext" "--inplace")
     
     add_custom_target(cython ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so"
-                      COMMENT "Do not forget to add ${CMAKE_CURRENT_BINARY_DIR}/gudhi.so to your PYTHONPATH before using examples")
+                      COMMENT "Do not forget to add ${CMAKE_CURRENT_BINARY_DIR}/ to your PYTHONPATH before using examples or tests")
   
+    if(UNIX)
+        set( ENV{PYTHONPATH} $ENV{PYTHONPATH}:${CMAKE_CURRENT_BINARY_DIR}/ )
+    endif(UNIX)
+
     # Unitary tests are available through py.test
     find_program( PYTEST_PATH py.test )
     if(PYTEST_PATH)
