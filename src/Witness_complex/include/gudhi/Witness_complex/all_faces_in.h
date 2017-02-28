@@ -1,5 +1,5 @@
-#ifndef ALL_FACES_IN_H_
-#define ALL_FACES_IN_H_
+#ifndef WITNESS_COMPLEX_ALL_FACES_IN_H_
+#define WITNESS_COMPLEX_ALL_FACES_IN_H_
 
 /* \brief Check if the facets of the k-dimensional simplex witnessed 
  *  by witness witness_id are already in the complex.
@@ -32,4 +32,4 @@ template < typename SimplicialComplexForWitness,
     return true;
   }
 
-#endif
+#endif  // WITNESS_COMPLEX_ALL_FACES_IN_H_

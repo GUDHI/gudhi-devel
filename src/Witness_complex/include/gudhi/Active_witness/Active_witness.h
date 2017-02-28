@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ACTIVE_WITNESS_H_
-#define ACTIVE_WITNESS_H_
+#ifndef ACTIVE_WITNESS_ACTIVE_WITNESS_H_
+#define ACTIVE_WITNESS_ACTIVE_WITNESS_H_
 
 #include <gudhi/Active_witness/Active_witness_iterator.h>
 #include <vector>
@@ -68,4 +68,4 @@ public:
 }
 }
   
-#endif
+#endif  // ACTIVE_WITNESS_ACTIVE_WITNESS_H_

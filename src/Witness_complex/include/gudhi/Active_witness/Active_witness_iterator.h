@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ACTIVE_WITNESS_ITERATOR_H_
-#define ACTIVE_WITNESS_ITERATOR_H_
+#ifndef ACTIVE_WITNESS_ACTIVE_WITNESS_ITERATOR_H_
+#define ACTIVE_WITNESS_ACTIVE_WITNESS_ITERATOR_H_
 
 #include <boost/iterator/iterator_facade.hpp>
 #include <vector>
@@ -67,9 +67,9 @@ public:
   {
     is_end_ = false;
     if (lh_ == aw_->nearest_landmark_table_.end()) {
-      if (aw_->iterator_next_ == aw_->iterator_end_)
+      if (aw_->iterator_next_ == aw_->iterator_end_) {
         is_end_ = true;
-      else {
+      } else {
         aw_->nearest_landmark_table_.push_back(*aw_->iterator_next_);
         lh_ = --aw_->nearest_landmark_table_.end();
         ++(aw_->iterator_next_);
@@ -97,9 +97,9 @@ private :
 
     lh_++;
     if (lh_ == aw_->nearest_landmark_table_.end()) {
-      if (aw_->iterator_next_ == aw_->iterator_end_)
+      if (aw_->iterator_next_ == aw_->iterator_end_) {
         is_end_ = true;
-      else {
+      } else {
         aw_->nearest_landmark_table_.push_back(*aw_->iterator_next_);
         lh_ = std::prev(aw_->nearest_landmark_table_.end());
         ++(aw_->iterator_next_);
@@ -108,7 +108,7 @@ private :
   }
 };
 
-}
-}
+}  // namespace witness_complex
+}  // namespace Gudhi
   
-#endif
+#endif  // ACTIVE_WITNESS_ACTIVE_WITNESS_ITERATOR_H_
