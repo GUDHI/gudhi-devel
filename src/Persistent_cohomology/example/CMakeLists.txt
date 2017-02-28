@@ -1,10 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 project(Persistent_cohomology_examples)
 
-# problem with Visual Studio link on Boost program_options
-add_definitions( -DBOOST_ALL_NO_LIB )
-add_definitions( -DBOOST_ALL_DYN_LINK )
-
 add_executable(plain_homology plain_homology.cpp)
 target_link_libraries(plain_homology ${Boost_SYSTEM_LIBRARY})
 
