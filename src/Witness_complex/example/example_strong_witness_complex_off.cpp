@@ -14,11 +14,11 @@
 #include <string>
 #include <vector>
 
-typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> K;
-typedef typename K::Point_d Point_d;
+using K = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
+using Point_d = typename K::Point_d;
 typedef typename Gudhi::witness_complex::Euclidean_strong_witness_complex<K> Witness_complex;
-typedef std::vector< typename Gudhi::Simplex_tree<>::Vertex_handle > typeVectorVertex;
-typedef std::vector< Point_d > Point_vector;
+using typeVectorVertex = std::vector< typename Gudhi::Simplex_tree<>::Vertex_handle >;
+using Point_vector = std::vector< Point_d >;
 
 int main(int argc, char * const argv[]) {
   if (argc != 5) {
@@ -41,7 +41,7 @@ int main(int argc, char * const argv[]) {
       exit(-1);  // ----- >>
     }
   point_vector = Point_vector(off_reader.get_point_cloud());
-  
+
   std::cout << "Successfully read " << point_vector.size() << " points.\n";
   std::cout << "Ambient dimension is " << point_vector[0].dimension() << ".\n";
 
