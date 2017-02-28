@@ -190,4 +190,4 @@ private:
 
 }  // namespace Gudhi
 
-#endif
+#endif  // STRONG_WITNESS_COMPLEX_H_
