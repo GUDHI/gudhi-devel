@@ -120,6 +120,7 @@
       <b>Author:</b> Cl&eacute;ment Jamin<br>
       <b>Introduced in:</b> GUDHI 1.4.0<br>
       <b>Copyright:</b> GPL v3<br>
+      <b>Requires:</b> \ref cgal &ge; 4.8.0 and \ref eigen3
     </td>
     <td width="75%">
     A Tangential Delaunay complex is a <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
@@ -139,6 +140,7 @@
       <b>Author:</b> Siargey Kachanovich<br>
       <b>Introduced in:</b> GUDHI 1.3.0<br>
       <b>Copyright:</b> GPL v3<br>
+      <b>Requires:</b> \ref cgal &ge; 4.6.0 and \ref eigen3
     </td>
     <td width="75%">
     Witness complex \f$ Wit(W,L) \f$  is a simplicial complex defined on two sets of points in \f$\mathbb{R}^D\f$.

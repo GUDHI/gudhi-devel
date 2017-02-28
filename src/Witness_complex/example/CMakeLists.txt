@@ -22,12 +22,20 @@ if(CGAL_FOUND)
         target_link_libraries(Witness_complex_example_nearest_landmark_table ${TBB_LIBRARIES})
       endif()
 
+      add_test(Witness_complex_off_test_torus
+               ${CMAKE_CURRENT_BINARY_DIR}/Witness_complex_example_off
+               ${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off 20 1.0 3)
+      add_test(Witness_complex_strong_off_test_torus
+               ${CMAKE_CURRENT_BINARY_DIR}/Witness_complex_example_strong_off
+               ${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off 20 1.0 3)
+      add_test(Witness_complex_test_sphere_10 Witness_complex_example_sphere 10)
       add_test(Witness_complex_test_torus_persistence
                ${CMAKE_CURRENT_BINARY_DIR}/Witness_complex_example_witness_persistence
                ${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off -l 20 -a 0.5)
-      add_test(Witness_complex_test_torus_persistence
+      add_test(Witness_complex_strong_test_torus_persistence
                ${CMAKE_CURRENT_BINARY_DIR}/Witness_complex_example_strong_witness_persistence
                ${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off -l 20 -a 0.5)
+      add_test(Witness_complex_test_nearest_landmark_table Witness_complex_example_nearest_landmark_table)
     endif(EIGEN3_FOUND)
   endif (NOT CGAL_VERSION VERSION_LESS 4.6.0)
 endif()
