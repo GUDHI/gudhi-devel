@@ -1,5 +1,24 @@
-#include <sys/types.h>
-#include <sys/stat.h>
+/*    This file is part of the Gudhi Library. The Gudhi library
+ *    (Geometric Understanding in Higher Dimensions) is a generic C++
+ *    library for computational topology.
+ *
+ *    Author(s):       Siargey Kachanovich
+ *
+ *    Copyright (C) 2016  INRIA (France)
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Euclidean_strong_witness_complex.h>
@@ -16,9 +35,8 @@
 
 using K = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
 using Point_d = typename K::Point_d;
-typedef typename Gudhi::witness_complex::Euclidean_strong_witness_complex<K> Witness_complex;
-using typeVectorVertex = std::vector< typename Gudhi::Simplex_tree<>::Vertex_handle >;
-using Point_vector = std::vector< Point_d >;
+using Witness_complex = Gudhi::witness_complex::Euclidean_strong_witness_complex<K>;
+using Point_vector = std::vector<Point_d>;
 
 int main(int argc, char * const argv[]) {
   if (argc != 5) {

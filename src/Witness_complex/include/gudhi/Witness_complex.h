@@ -33,7 +33,7 @@
 #include <limits>
 
 namespace Gudhi {
-  
+
 namespace witness_complex {
 
 /**
@@ -49,7 +49,7 @@ namespace witness_complex {
 */
 template< class Nearest_landmark_table_ >
 class Witness_complex {
-private:
+ private:
   typedef typename Nearest_landmark_table_::value_type               Nearest_landmark_range;
   typedef std::size_t                                                Witness_id;
   typedef std::size_t                                                Landmark_id;
@@ -58,12 +58,11 @@ private:
   typedef std::list< ActiveWitness >                                 ActiveWitnessList;
   typedef std::vector< Landmark_id >                                 typeVectorVertex;
   typedef std::vector<Nearest_landmark_range>                        Nearest_landmark_table_internal;
-
   typedef Landmark_id Vertex_handle;
 
  protected:
   Nearest_landmark_table_internal              nearest_landmark_table_;
-  
+
  public:
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /* @name Constructor
@@ -71,10 +70,9 @@ private:
 
   //@{
 
-  Witness_complex()
-  {
+  Witness_complex() {
   }
-  
+
   /**
    *  \brief Initializes member variables before constructing simplicial complex.
    *  \details Records nearest landmark table.
@@ -85,11 +83,9 @@ private:
    */
 
   Witness_complex(Nearest_landmark_table_ const & nearest_landmark_table)
-    : nearest_landmark_table_(std::begin(nearest_landmark_table), std::end(nearest_landmark_table))
-  {    
+    : nearest_landmark_table_(std::begin(nearest_landmark_table), std::end(nearest_landmark_table)) {
   }
 
-    
   /** \brief Outputs the (weak) witness complex of relaxation 'max_alpha_square'
    *         in a simplicial complex data structure.
    *  \details The function returns true if the construction is successful and false otherwise.
@@ -102,8 +98,7 @@ private:
   template < typename SimplicialComplexForWitness >
   bool create_complex(SimplicialComplexForWitness& complex,
                       double  max_alpha_square,
-                      std::size_t limit_dimension = std::numeric_limits<std::size_t>::max()) const      
-  {
+                      std::size_t limit_dimension = std::numeric_limits<std::size_t>::max()) const {
     if (complex.num_vertices() > 0) {
       std::cerr << "Witness complex cannot create complex - complex is not empty.\n";
       return false;
@@ -118,9 +113,9 @@ private:
     }
     ActiveWitnessList active_witnesses;
     Landmark_id k = 0; /* current dimension in iterative construction */
-    for (auto w: nearest_landmark_table_)
+    for (auto w : nearest_landmark_table_)
       active_witnesses.push_back(ActiveWitness(w));
-    while (!active_witnesses.empty() && k <= limit_dimension ) {
+    while (!active_witnesses.empty() && k <= limit_dimension) {
       typename ActiveWitnessList::iterator aw_it = active_witnesses.begin();
       std::vector<Landmark_id> simplex;
       simplex.reserve(k+1);
@@ -134,10 +129,10 @@ private:
                                              aw_it->end());
         assert(simplex.empty());
         if (!ok)
-          active_witnesses.erase(aw_it++); //First increase the iterator and then erase the previous element
+          active_witnesses.erase(aw_it++);  // First increase the iterator and then erase the previous element
         else
           aw_it++;
-      } 
+      }
       k++;
     }
     complex.set_dimension(k-1);
@@ -159,13 +154,12 @@ private:
                                   typename ActiveWitness::iterator curr_l,
                                   std::vector<Landmark_id>& simplex,
                                   SimplicialComplexForWitness& sc,
-                                  typename ActiveWitness::iterator end) const
-  {
+                                  typename ActiveWitness::iterator end) const {
     if (curr_l == end)
       return false;
     bool will_be_active = false;
     typename ActiveWitness::iterator l_it = curr_l;
-    if (dim > 0)
+    if (dim > 0) {
       for (; l_it->second - alpha2 <= norelax_dist2 && l_it != end; ++l_it) {
         simplex.push_back(l_it->first);
         if (sc.find(simplex) != sc.null_simplex()) {
@@ -183,8 +177,8 @@ private:
         // If norelax_dist is infinity, change to first omitted distance
         if (l_it->second <= norelax_dist2)
           norelax_dist2 = l_it->second;
-      } 
-    else if (dim == 0)
+      }
+    } else if (dim == 0) {
       for (; l_it->second - alpha2 <= norelax_dist2 && l_it != end; ++l_it) {
         simplex.push_back(l_it->first);
         double filtration_value = 0;
@@ -200,12 +194,12 @@ private:
         // If norelax_dist is infinity, change to first omitted distance
         if (l_it->second < norelax_dist2)
           norelax_dist2 = l_it->second;
-      } 
+      }
+    }
     return will_be_active;
   }
-
 };
-  
+
 }  // namespace witness_complex
 
 }  // namespace Gudhi

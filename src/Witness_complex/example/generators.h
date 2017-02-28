@@ -32,12 +32,12 @@
 #include <vector>
 #include <cmath>
 
-typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> K;
-typedef K::FT FT;
-typedef K::Point_d Point_d;
-typedef std::vector<Point_d> Point_Vector;
-typedef CGAL::Random_points_in_cube_d<Point_d> Random_cube_iterator;
-typedef CGAL::Random_points_in_ball_d<Point_d> Random_point_iterator;
+using K = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
+using FT = K::FT;
+using Point_d = K::Point_d;
+using Point_Vector = std::vector<Point_d>;
+using Random_cube_iterator = CGAL::Random_points_in_cube_d<Point_d>;
+using Random_point_iterator = CGAL::Random_points_in_ball_d<Point_d>;
 
 /**
  * \brief Rock age method of reading off file
@@ -155,7 +155,7 @@ void generate_points_torus(Point_Vector& W, int nbP, int dim) {
   for (int i = 0; i < nbP; i++) {
     std::vector<FT> point;
     for (int j = 0; j < dim; j++) {
-      double alpha = rand.uniform_real((double)0, 2*pi);
+      double alpha = rand.uniform_real(static_cast<double>(0), 2*pi);
       point.push_back(sin(alpha));
       point.push_back(cos(alpha));
     }

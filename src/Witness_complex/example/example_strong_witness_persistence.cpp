@@ -1,3 +1,25 @@
+/*    This file is part of the Gudhi Library. The Gudhi library
+ *    (Geometric Understanding in Higher Dimensions) is a generic C++
+ *    library for computational topology.
+ *
+ *    Author(s):       Siargey Kachanovich
+ *
+ *    Copyright (C) 2016  INRIA (France)
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Euclidean_strong_witness_complex.h>
 #include <gudhi/Persistent_cohomology.h>
@@ -12,18 +34,17 @@
 #include <vector>
 #include <limits>  // infinity
 
-using namespace Gudhi;
-using namespace Gudhi::persistent_cohomology;
+using K = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
+using Point_d = K::Point_d;
 
-typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> K;
-typedef typename K::Point_d Point_d;
+using Point_vector = std::vector<Point_d>;
+using Strong_witness_complex = Gudhi::witness_complex::Euclidean_strong_witness_complex<K>;
+using SimplexTree = Gudhi::Simplex_tree<>;
 
-typedef typename std::vector<Point_d> Point_vector;
-typedef typename Gudhi::witness_complex::Euclidean_strong_witness_complex<K> Strong_witness_complex;
-typedef Gudhi::Simplex_tree<> SimplexTree;
+using Filtration_value = SimplexTree::Filtration_value;
 
-typedef int Vertex_handle;
-typedef double Filtration_value;
+using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
+using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<SimplexTree, Field_Zp>;
 
 void program_options(int argc, char * argv[]
                      , int & nbL
@@ -61,9 +82,9 @@ int main(int argc, char * argv[]) {
   // Compute witness complex
   Strong_witness_complex strong_witness_complex(landmarks,
                                                 witnesses);
-  
+
   strong_witness_complex.create_complex(simplex_tree, max_squared_alpha, lim_d);
-  
+
   std::cout << "The complex contains " << simplex_tree.num_simplices() << " simplices \n";
   std::cout << "   and has dimension " << simplex_tree.dimension() << " \n";
 
@@ -71,7 +92,7 @@ int main(int argc, char * argv[]) {
   simplex_tree.initialize_filtration();
 
   // Compute the persistence diagram of the complex
-  persistent_cohomology::Persistent_cohomology<SimplexTree, Field_Zp > pcoh(simplex_tree);
+  Persistent_cohomology pcoh(simplex_tree);
   // initializes the coefficient field for homology
   pcoh.init_coefficients(p);
 
@@ -89,7 +110,6 @@ int main(int argc, char * argv[]) {
   return 0;
 }
 
-
 void program_options(int argc, char * argv[]
                      , int & nbL
                      , std::string & file_name
@@ -98,14 +118,12 @@ void program_options(int argc, char * argv[]
                      , int & p
                      , int & dim_max
                      , Filtration_value & min_persistence) {
-  
   namespace po = boost::program_options;
-  
+
   po::options_description hidden("Hidden options");
   hidden.add_options()
       ("input-file", po::value<std::string>(&file_name),
       "Name of file containing a point set in off format.");
-  
 
   po::options_description visible("Allowed options", 100);
   visible.add_options()
@@ -122,7 +140,7 @@ void program_options(int argc, char * argv[]
        "Minimal lifetime of homology feature to be recorded. Default is 0. Enter a negative value to see zero length intervals")
       ("cpx-dimension,d", po::value<int>(&dim_max)->default_value(std::numeric_limits<int>::max()),
        "Maximal dimension of the strong witness complex we want to compute.");
- 
+
   po::positional_options_description pos;
   pos.add("input-file", 1);
 
@@ -133,7 +151,7 @@ void program_options(int argc, char * argv[]
   po::store(po::command_line_parser(argc, argv).
             options(all).positional(pos).run(), vm);
   po::notify(vm);
-  
+
   if (vm.count("help") || !vm.count("input-file")) {
     std::cout << std::endl;
     std::cout << "Compute the persistent homology with coefficient field Z/pZ \n";

@@ -1,15 +1,30 @@
+/*    This file is part of the Gudhi Library. The Gudhi library
+ *    (Geometric Understanding in Higher Dimensions) is a generic C++
+ *    library for computational topology.
+ *
+ *    Author(s):       Siargey Kachanovich
+ *
+ *    Copyright (C) 2016  INRIA (France)
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #define BOOST_PARAMETER_MAX_ARITY 12
-
-
-#include <sys/types.h>
-#include <sys/stat.h>
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Witness_complex.h>
-#include <gudhi/reader_utils.h>
 #include <gudhi/Persistent_cohomology.h>
-
-#include <CGAL/Epick_d.h>
 
 #include <iostream>
 #include <fstream>
@@ -24,6 +39,8 @@ int main(int argc, char * const argv[]) {
   using Nearest_landmark_table = std::vector<Nearest_landmark_range>;
   using Witness_complex = Gudhi::witness_complex::Witness_complex<Nearest_landmark_table>;
   using Simplex_tree = Gudhi::Simplex_tree<>;
+  using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
+  using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
 
   Simplex_tree simplex_tree;
   Nearest_landmark_table nlt;
@@ -45,8 +62,7 @@ int main(int argc, char * const argv[]) {
 
   std::cout << "Number of simplices: " << simplex_tree.num_simplices() << std::endl;
 
-  using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
-  Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp > pcoh(simplex_tree);
+  Persistent_cohomology pcoh(simplex_tree);
   // initializes the coefficient field for homology
   pcoh.init_coefficients(11);
 

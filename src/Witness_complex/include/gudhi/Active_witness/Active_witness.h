@@ -24,8 +24,7 @@
 #define ACTIVE_WITNESS_ACTIVE_WITNESS_H_
 
 #include <gudhi/Active_witness/Active_witness_iterator.h>
-#include <vector>
-#include <utility>
+#include <list>
 
 namespace Gudhi {
 
@@ -38,7 +37,7 @@ namespace witness_complex {
 template< typename Id_distance_pair,
           typename INS_range >
 class Active_witness {
-public:  
+ public:
   typedef Active_witness<Id_distance_pair, INS_range> ActiveWitness;
   typedef typename INS_range::iterator INS_iterator;
   typedef Active_witness_iterator< ActiveWitness, Id_distance_pair, INS_iterator > iterator;
@@ -50,22 +49,19 @@ public:
   INS_iterator iterator_end_;
 
   Active_witness(const INS_range& search_range)
-    : search_range_(search_range), iterator_next_(search_range_.begin()), iterator_end_(search_range_.end())
-  {
+    : search_range_(search_range), iterator_next_(search_range_.begin()), iterator_end_(search_range_.end()) {
   }
- 
-  iterator begin()
-  {
+
+  iterator begin() {
     return iterator(this, nearest_landmark_table_.begin());
   }
 
-  iterator end()
-  {
+  iterator end() {
     return iterator(this);
   }
 };
 
-}
-}
-  
+}  // namespace witness_complex
+}  // namespace Gudhi
+
 #endif  // ACTIVE_WITNESS_ACTIVE_WITNESS_H_
