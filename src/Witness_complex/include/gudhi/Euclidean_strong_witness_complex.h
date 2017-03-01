@@ -83,13 +83,13 @@ class Euclidean_strong_witness_complex
                                    const WitnessRange &  witnesses)
     : landmarks_(std::begin(landmarks), std::end(landmarks)), landmark_tree_(landmarks_) {
     nearest_landmark_table_.reserve(boost::size(witnesses));
-    for (auto w: witnesses)
+    for (auto w : witnesses)
       nearest_landmark_table_.push_back(landmark_tree_.query_incremental_nearest_neighbors(w));
   }
 
   /** \brief Returns the point corresponding to the given vertex.
    */
-  template <typename Vertex_handle> 
+  template <typename Vertex_handle>
   Point_d get_point(Vertex_handle vertex) const {
     return landmarks_[vertex];
   }
@@ -101,4 +101,4 @@ class Euclidean_strong_witness_complex
 
 }  // namespace Gudhi
 
-#endif // EUCLIDEAN_STRONG_WITNESS_COMPLEX_H_
+#endif  // EUCLIDEAN_STRONG_WITNESS_COMPLEX_H_

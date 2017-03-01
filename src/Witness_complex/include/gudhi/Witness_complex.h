@@ -183,7 +183,7 @@ class Witness_complex {
         simplex.push_back(l_it->first);
         double filtration_value = 0;
         // if norelax_dist is infinite, relaxation is 0.
-        if (l_it->second > norelax_dist2) 
+        if (l_it->second > norelax_dist2)
           filtration_value = l_it->second - norelax_dist2;
         if (all_faces_in(simplex, &filtration_value, sc)) {
           will_be_active = true;

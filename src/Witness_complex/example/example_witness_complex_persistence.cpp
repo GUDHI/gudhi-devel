@@ -34,18 +34,17 @@
 #include <vector>
 #include <limits>  // infinity
 
-using namespace Gudhi;
-using namespace Gudhi::persistent_cohomology;
+using K = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
+using Point_d = K::Point_d;
 
-typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> K;
-typedef typename K::Point_d Point_d;
+using Point_vector = std::vector<Point_d>;
+using Witness_complex = Gudhi::witness_complex::Euclidean_witness_complex<K>;
+using SimplexTree = Gudhi::Simplex_tree<>;
 
-typedef typename std::vector<Point_d> Point_vector;
-typedef typename Gudhi::witness_complex::Euclidean_witness_complex<K> Witness_complex;
-typedef Gudhi::Simplex_tree<> SimplexTree;
+using Filtration_value = SimplexTree::Filtration_value;
 
-typedef int Vertex_handle;
-typedef double Filtration_value;
+using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
+using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<SimplexTree, Field_Zp>;
 
 void program_options(int argc, char * argv[]
                      , int & nbL
@@ -83,9 +82,9 @@ int main(int argc, char * argv[]) {
   // Compute witness complex
   Witness_complex witness_complex(landmarks,
                                   witnesses);
-  
+
   witness_complex.create_complex(simplex_tree, max_squared_alpha, lim_d);
-  
+
   std::cout << "The complex contains " << simplex_tree.num_simplices() << " simplices \n";
   std::cout << "   and has dimension " << simplex_tree.dimension() << " \n";
 
@@ -93,7 +92,7 @@ int main(int argc, char * argv[]) {
   simplex_tree.initialize_filtration();
 
   // Compute the persistence diagram of the complex
-  persistent_cohomology::Persistent_cohomology<SimplexTree, Field_Zp > pcoh(simplex_tree);
+  Persistent_cohomology pcoh(simplex_tree);
   // initializes the coefficient field for homology
   pcoh.init_coefficients(p);
 
@@ -120,15 +119,14 @@ void program_options(int argc, char * argv[]
                      , int & p
                      , int & dim_max
                      , Filtration_value & min_persistence) {
-  
   namespace po = boost::program_options;
-  
+
   po::options_description hidden("Hidden options");
   hidden.add_options()
       ("input-file", po::value<std::string>(&file_name),
       "Name of file containing a point set in off format.");
-  
 
+  Filtration_value default_alpha = std::numeric_limits<Filtration_value>::infinity();
   po::options_description visible("Allowed options", 100);
   visible.add_options()
       ("help,h", "produce help message")
@@ -136,7 +134,7 @@ void program_options(int argc, char * argv[]
        "Number of landmarks to choose from the point cloud.")
       ("output-file,o", po::value<std::string>(&filediag)->default_value(std::string()),
        "Name of file in which the persistence diagram is written. Default print in std::cout")
-      ("max-sq-alpha,a", po::value<Filtration_value>(&max_squared_alpha)->default_value(std::numeric_limits<Filtration_value>::infinity()),
+      ("max-sq-alpha,a", po::value<Filtration_value>(&max_squared_alpha)->default_value(default_alpha),
        "Maximal squared relaxation parameter.")
       ("field-charac,p", po::value<int>(&p)->default_value(11),
        "Characteristic p of the coefficient field Z/pZ for computing homology.")
@@ -144,7 +142,7 @@ void program_options(int argc, char * argv[]
        "Minimal lifetime of homology feature to be recorded. Default is 0. Enter a negative value to see zero length intervals")
       ("cpx-dimension,d", po::value<int>(&dim_max)->default_value(std::numeric_limits<int>::max()),
        "Maximal dimension of the weak witness complex we want to compute.");
-  
+
   po::positional_options_description pos;
   pos.add("input-file", 1);
 
@@ -155,7 +153,7 @@ void program_options(int argc, char * argv[]
   po::store(po::command_line_parser(argc, argv).
             options(all).positional(pos).run(), vm);
   po::notify(vm);
-  
+
   if (vm.count("help") || !vm.count("input-file")) {
     std::cout << std::endl;
     std::cout << "Compute the persistent homology with coefficient field Z/pZ \n";
@@ -171,4 +169,3 @@ void program_options(int argc, char * argv[]
     std::abort();
   }
 }
-

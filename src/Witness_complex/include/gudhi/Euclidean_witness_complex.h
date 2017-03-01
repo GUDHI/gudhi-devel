@@ -33,7 +33,7 @@
 #include <limits>
 
 namespace Gudhi {
-  
+
 namespace witness_complex {
 
 /**
@@ -46,8 +46,10 @@ namespace witness_complex {
  * href="http://doc.cgal.org/latest/Kernel_d/classCGAL_1_1Epick__d.html">CGAL::Epick_d</a> class.
  */
 template< class Kernel_ >
-class Euclidean_witness_complex : public Witness_complex<std::vector<typename Gudhi::spatial_searching::Kd_tree_search<Kernel_, std::vector<typename Kernel_::Point_d>>::INS_range>> {
-private:
+class Euclidean_witness_complex
+    : public Witness_complex<std::vector<typename Gudhi::spatial_searching::Kd_tree_search<Kernel_,
+                                         std::vector<typename Kernel_::Point_d>>::INS_range>> {
+ private:
   typedef Kernel_                                                                      K;
   typedef typename K::Point_d                                                          Point_d;
   typedef std::vector<Point_d>                                                         Point_range;
@@ -64,7 +66,7 @@ private:
   Kd_tree                             landmark_tree_;
   using Witness_complex<Nearest_landmark_table>::nearest_landmark_table_;
 
-public:
+ public:
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /* @name Constructor
    */
@@ -81,24 +83,22 @@ public:
             typename WitnessRange >
   Euclidean_witness_complex(const LandmarkRange & landmarks,
                             const WitnessRange &  witnesses)
-    : landmarks_(std::begin(landmarks), std::end(landmarks)), landmark_tree_(landmarks)
-  {
+    : landmarks_(std::begin(landmarks), std::end(landmarks)), landmark_tree_(landmarks) {
     nearest_landmark_table_.reserve(boost::size(witnesses));
-    for (auto w: witnesses)
+    for (auto w : witnesses)
       nearest_landmark_table_.push_back(landmark_tree_.query_incremental_nearest_neighbors(w));
   }
 
   /** \brief Returns the point corresponding to the given vertex.
    *  @param[in] vertex Vertex handle of the point to retrieve.
    */
-  Point_d get_point( Vertex_handle vertex ) const
-  {
+  Point_d get_point(Vertex_handle vertex) const {
     return landmarks_[vertex];
   }
 
   //@}
 };
-  
+
 }  // namespace witness_complex
 
 }  // namespace Gudhi

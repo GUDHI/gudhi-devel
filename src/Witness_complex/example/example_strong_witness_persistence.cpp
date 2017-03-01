@@ -126,13 +126,14 @@ void program_options(int argc, char * argv[]
       "Name of file containing a point set in off format.");
 
   po::options_description visible("Allowed options", 100);
+  Filtration_value default_alpha = std::numeric_limits<Filtration_value>::infinity();
   visible.add_options()
       ("help,h", "produce help message")
       ("landmarks,l", po::value<int>(&nbL),
        "Number of landmarks to choose from the point cloud.")
       ("output-file,o", po::value<std::string>(&filediag)->default_value(std::string()),
        "Name of file in which the persistence diagram is written. Default print in std::cout")
-      ("max-sq-alpha,a", po::value<Filtration_value>(&max_squared_alpha)->default_value(std::numeric_limits<Filtration_value>::infinity()),
+      ("max-sq-alpha,a", po::value<Filtration_value>(&max_squared_alpha)->default_value(default_alpha),
        "Maximal squared relaxation parameter.")
       ("field-charac,p", po::value<int>(&p)->default_value(11),
        "Characteristic p of the coefficient field Z/pZ for computing homology.")

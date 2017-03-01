@@ -36,7 +36,6 @@ namespace witness_complex {
  *          If all the landmarks are present in the list, iterator returns the specific end value
  *          of the corresponding 'Active_witness' object.
  */
-  
 template< typename Active_witness,
           typename Id_distance_pair,
           typename INS_iterator >
@@ -47,15 +46,14 @@ class Active_witness_iterator
                                    Id_distance_pair const> {
   friend class boost::iterator_core_access;
 
-  //typedef Active_witness<Id_distance_pair, INS_iterator> Active_witness;
   typedef typename std::list<Id_distance_pair>::iterator Pair_iterator;
   typedef typename Gudhi::witness_complex::Active_witness_iterator<Active_witness,
                                                                    Id_distance_pair,
                                                                    INS_iterator> Iterator;
 
   Active_witness *aw_;
-  Pair_iterator lh_; // landmark handle
-  bool is_end_; // true only if the pointer is end and there are no more neighbors to add
+  Pair_iterator lh_;  // landmark handle
+  bool is_end_;  // true only if the pointer is end and there are no more neighbors to add
 
  public:
   Active_witness_iterator(Active_witness* aw)
@@ -87,7 +85,8 @@ class Active_witness_iterator
 
   void increment() {
     // the neighbor search can't be at the end iterator of a list
-    GUDHI_CHECK(!is_end_ && lh_ != aw_->nearest_landmark_table_.end(), std::logic_error("Wrong active witness increment."));
+    GUDHI_CHECK(!is_end_ && lh_ != aw_->nearest_landmark_table_.end(),
+                std::logic_error("Wrong active witness increment."));
     // if the id of the current landmark is the same as the last one
 
     lh_++;
@@ -105,5 +104,5 @@ class Active_witness_iterator
 
 }  // namespace witness_complex
 }  // namespace Gudhi
-  
+
 #endif  // ACTIVE_WITNESS_ACTIVE_WITNESS_ITERATOR_H_
