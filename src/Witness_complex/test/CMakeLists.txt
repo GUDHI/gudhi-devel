@@ -10,21 +10,12 @@ if (GPROF_PATH)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
 endif()
 
-add_executable ( simple_witness_complexUT simple_witness_complex.cpp )
-target_link_libraries(simple_witness_complexUT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+add_executable ( Witness_complex_test_simple_witness_complex test_simple_witness_complex.cpp )
+target_link_libraries(Witness_complex_test_simple_witness_complex ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+target_link_libraries(Witness_complex_test_simple_witness_complex ${TBB_LIBRARIES})
 
 # Unitary tests definition and xml result file generation
-add_test(NAME simple_witness_complexUT
-  COMMAND ${CMAKE_CURRENT_BINARY_DIR}/simple_witness_complexUT 
+add_test(NAME simple_witness_complex
+  COMMAND ${CMAKE_CURRENT_BINARY_DIR}/Witness_complex_test_simple_witness_complex 
     # XML format for Jenkins xUnit plugin 
-    --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/simple_witness_complexUT.xml --log_level=test_suite --report_level=no)
-
-add_executable ( witness_complex_pointsUT witness_complex_points.cpp )
-target_link_libraries(witness_complex_pointsUT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
-
-# Unitary tests definition and xml result file generation
-add_test(NAME witness_complex_pointsUT
-  COMMAND ${CMAKE_CURRENT_BINARY_DIR}/witness_complex_pointsUT 
-    # XML format for Jenkins xUnit plugin 
-    --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/witness_complex_pointsUT.xml --log_level=test_suite --report_level=no)
-
+    --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/Witness_complex_test_simple_witness_complexUT.xml --log_level=test_suite --report_level=no)
