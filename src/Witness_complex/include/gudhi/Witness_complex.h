@@ -160,7 +160,7 @@ class Witness_complex {
     bool will_be_active = false;
     typename ActiveWitness::iterator l_it = curr_l;
     if (dim > 0) {
-      for (; l_it->second - alpha2 <= norelax_dist2 && l_it != end; ++l_it) {
+      for (; l_it != end && l_it->second - alpha2 <= norelax_dist2; ++l_it) {
         simplex.push_back(l_it->first);
         if (sc.find(simplex) != sc.null_simplex()) {
           typename ActiveWitness::iterator next_it = l_it;

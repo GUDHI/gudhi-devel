@@ -28,11 +28,9 @@
 
 #include <iostream>
 #include <fstream>
-#include <ctime>
 #include <utility>
 #include <string>
 #include <vector>
-#include <list>
 
 int main(int argc, char * const argv[]) {
   using Nearest_landmark_range = std::vector<std::pair<std::size_t, double>>;
