@@ -1,8 +1,6 @@
 # Some functionnalities requires CMake 2.8.11 minimum
 if (NOT CMAKE_VERSION VERSION_LESS 2.8.11)
 
-  string(TIMESTAMP DATE_AND_TIME "%Y-%m-%d-%H-%M-%S")
-  
   # Definition of the custom target user_version
   add_custom_target(user_version)
   
@@ -11,6 +9,7 @@ if (NOT CMAKE_VERSION VERSION_LESS 2.8.11)
     set(GUDHI_USER_VERSION_DIR ${CMAKE_CURRENT_BINARY_DIR}/${USER_VERSION_DIR})
   else()
     # set the GUDHI_USER_VERSION_DIR with timestamp and Gudhi version number
+    string(TIMESTAMP DATE_AND_TIME "%Y-%m-%d-%H-%M-%S")
     set(GUDHI_USER_VERSION_DIR ${CMAKE_CURRENT_BINARY_DIR}/${DATE_AND_TIME}_GUDHI_${GUDHI_VERSION})
   endif()
 
