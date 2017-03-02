@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 project(Witness_complex_examples)
 
 add_executable ( Witness_complex_example_nearest_landmark_table example_nearest_landmark_table.cpp )
+target_link_libraries(Witness_complex_example_nearest_landmark_table ${Boost_SYSTEM_LIBRARY})
 if (TBB_FOUND)
   target_link_libraries(Witness_complex_example_nearest_landmark_table ${TBB_LIBRARIES})
 endif()
@@ -16,10 +17,10 @@ if(CGAL_FOUND)
       add_executable ( Witness_complex_example_sphere example_witness_complex_sphere.cpp )
 
       add_executable ( Witness_complex_example_witness_persistence example_witness_complex_persistence.cpp )
-      target_link_libraries(Witness_complex_example_witness_persistence ${Boost_PROGRAM_OPTIONS_LIBRARY})
+      target_link_libraries(Witness_complex_example_witness_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
       add_executable ( Witness_complex_example_strong_witness_persistence example_strong_witness_persistence.cpp )
-      target_link_libraries(Witness_complex_example_strong_witness_persistence ${Boost_PROGRAM_OPTIONS_LIBRARY})
+      target_link_libraries(Witness_complex_example_strong_witness_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
       if (TBB_FOUND)
         target_link_libraries(Witness_complex_example_witness_persistence ${TBB_LIBRARIES})
