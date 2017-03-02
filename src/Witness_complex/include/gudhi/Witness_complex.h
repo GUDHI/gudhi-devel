@@ -179,7 +179,7 @@ class Witness_complex {
           norelax_dist2 = l_it->second;
       }
     } else if (dim == 0) {
-      for (; l_it->second - alpha2 <= norelax_dist2 && l_it != end; ++l_it) {
+      for (;l_it != end && l_it->second - alpha2 <= norelax_dist2; ++l_it) {
         simplex.push_back(l_it->first);
         double filtration_value = 0;
         // if norelax_dist is infinite, relaxation is 0.
