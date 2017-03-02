@@ -21,6 +21,8 @@ if (NOT CMAKE_VERSION VERSION_LESS 2.8.11)
                      COMMENT "user_version creation in ${GUDHI_USER_VERSION_DIR}")
   
   add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
+                     copy ${CMAKE_SOURCE_DIR}/Conventions.txt ${GUDHI_USER_VERSION_DIR}/Conventions.txt)
+  add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                      copy ${CMAKE_SOURCE_DIR}/README ${GUDHI_USER_VERSION_DIR}/README)
   add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                      copy ${CMAKE_SOURCE_DIR}/COPYING ${GUDHI_USER_VERSION_DIR}/COPYING)
@@ -47,67 +49,44 @@ if (NOT CMAKE_VERSION VERSION_LESS 2.8.11)
                      copy_directory ${CMAKE_SOURCE_DIR}/src/GudhUI ${GUDHI_USER_VERSION_DIR}/GudhUI)
   
   set(GUDHI_MODULES "common;Alpha_complex;Bitmap_cubical_complex;Bottleneck_distance;Contraction;Hasse_complex;Persistent_cohomology;Rips_complex;Simplex_tree;Skeleton_blocker;Spatial_searching;Subsampling;Tangential_complex;Witness_complex")
-  
+  set(GUDHI_DIRECTORIES "doc;example;concept")
+  set(GUDHI_INCLUDE_DIRECTORIES "include/gudhi;include/gudhi_patches")
+
   foreach(GUDHI_MODULE ${GUDHI_MODULES})
-    # doc files
-    file(GLOB GUDHI_DOC_FILES ${CMAKE_SOURCE_DIR}/src/${GUDHI_MODULE}/doc/*)
-  
-    foreach(GUDHI_DOC_FILE ${GUDHI_DOC_FILES})
-      get_filename_component(GUDHI_DOC_FILE_NAME ${GUDHI_DOC_FILE} NAME)
-      # GUDHI_DOC_FILE can be a file or a directory
-      if(IS_DIRECTORY ${GUDHI_DOC_FILE})
-        add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
-                           copy_directory ${GUDHI_DOC_FILE} ${GUDHI_USER_VERSION_DIR}/doc/${GUDHI_MODULE}/${GUDHI_DOC_FILE_NAME})
-      else()
-        add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
-                           copy ${GUDHI_DOC_FILE} ${GUDHI_USER_VERSION_DIR}/doc/${GUDHI_MODULE}/${GUDHI_DOC_FILE_NAME})
-      endif()
-    endforeach()
-  
-    # example files
-    file(GLOB GUDHI_EXAMPLE_FILES ${CMAKE_SOURCE_DIR}/src/${GUDHI_MODULE}/example/*)
-  
-    foreach(GUDHI_EXAMPLE_FILE ${GUDHI_EXAMPLE_FILES})
-      get_filename_component(GUDHI_EXAMPLE_FILE_NAME ${GUDHI_EXAMPLE_FILE} NAME)
-      # GUDHI_EXAMPLE_FILE can be a file or a directory
-      if(IS_DIRECTORY ${GUDHI_EXAMPLE_FILE})
-        add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
-                           copy_directory ${GUDHI_EXAMPLE_FILE} ${GUDHI_USER_VERSION_DIR}/example/${GUDHI_MODULE}/${GUDHI_EXAMPLE_FILE_NAME})
-      else()
-        add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
-                           copy ${GUDHI_EXAMPLE_FILE} ${GUDHI_USER_VERSION_DIR}/example/${GUDHI_MODULE}/${GUDHI_EXAMPLE_FILE_NAME})
-      endif()
-    endforeach()
-  
-    # include files
-    file(GLOB GUDHI_INCLUDE_FILES ${CMAKE_SOURCE_DIR}/src/${GUDHI_MODULE}/include/gudhi/*)
-  
-    foreach(GUDHI_INCLUDE_FILE ${GUDHI_INCLUDE_FILES})
-      get_filename_component(GUDHI_INCLUDE_FILE_NAME ${GUDHI_INCLUDE_FILE} NAME)
-      # GUDHI_INCLUDE_FILE can be a file or a directory
-      if(IS_DIRECTORY ${GUDHI_INCLUDE_FILE})
-        add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
-                           copy_directory ${GUDHI_INCLUDE_FILE} ${GUDHI_USER_VERSION_DIR}/include/gudhi/${GUDHI_INCLUDE_FILE_NAME})
-      else()
-        add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
-                           copy ${GUDHI_INCLUDE_FILE} ${GUDHI_USER_VERSION_DIR}/include/gudhi/${GUDHI_INCLUDE_FILE_NAME})
-      endif()
-    endforeach()
-  
-    # concept files
-    file(GLOB GUDHI_CONCEPT_FILES ${CMAKE_SOURCE_DIR}/src/${GUDHI_MODULE}/concept/*.h)
-  
-    foreach(GUDHI_CONCEPT_FILE ${GUDHI_CONCEPT_FILES})
-      get_filename_component(GUDHI_CONCEPT_FILE_NAME ${GUDHI_CONCEPT_FILE} NAME)
-      # GUDHI_CONCEPT_FILE can be a file or a directory
-      if(IS_DIRECTORY ${GUDHI_CONCEPT_FILE})
-        add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
-                           copy_directory ${GUDHI_CONCEPT_FILE} ${GUDHI_USER_VERSION_DIR}/concept/${GUDHI_MODULE}/${GUDHI_CONCEPT_FILE_NAME})
-      else()
-        add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
-                           copy ${GUDHI_CONCEPT_FILE} ${GUDHI_USER_VERSION_DIR}/concept/${GUDHI_MODULE}/${GUDHI_CONCEPT_FILE_NAME})
-      endif()
-    endforeach()
-  endforeach()
+    foreach(GUDHI_DIRECTORY ${GUDHI_DIRECTORIES})
+      # Find files
+      file(GLOB GUDHI_FILES ${CMAKE_SOURCE_DIR}/src/${GUDHI_MODULE}/${GUDHI_DIRECTORY}/*)
+
+      foreach(GUDHI_FILE ${GUDHI_FILES})
+        get_filename_component(GUDHI_FILE_NAME ${GUDHI_FILE} NAME)
+        # GUDHI_FILE can be a file or a directory
+        if(IS_DIRECTORY ${GUDHI_FILE})
+          add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
+                             copy_directory ${GUDHI_FILE} ${GUDHI_USER_VERSION_DIR}/${GUDHI_DIRECTORY}/${GUDHI_MODULE}/${GUDHI_FILE_NAME})
+        else()
+          add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
+                             copy ${GUDHI_FILE} ${GUDHI_USER_VERSION_DIR}/${GUDHI_DIRECTORY}/${GUDHI_MODULE}/${GUDHI_FILE_NAME})
+        endif()
+      endforeach()
+    endforeach(GUDHI_DIRECTORY ${GUDHI_DIRECTORIES})
+
+    foreach(GUDHI_INCLUDE_DIRECTORY ${GUDHI_INCLUDE_DIRECTORIES})
+      # include files
+      file(GLOB GUDHI_INCLUDE_FILES ${CMAKE_SOURCE_DIR}/src/${GUDHI_MODULE}/${GUDHI_INCLUDE_DIRECTORY}/*)
+
+      foreach(GUDHI_INCLUDE_FILE ${GUDHI_INCLUDE_FILES})
+        get_filename_component(GUDHI_INCLUDE_FILE_NAME ${GUDHI_INCLUDE_FILE} NAME)
+        # GUDHI_INCLUDE_FILE can be a file or a directory
+        if(IS_DIRECTORY ${GUDHI_INCLUDE_FILE})
+          add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
+                             copy_directory ${GUDHI_INCLUDE_FILE} ${GUDHI_USER_VERSION_DIR}/${GUDHI_INCLUDE_DIRECTORY}/${GUDHI_INCLUDE_FILE_NAME})
+        else()
+          add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
+                             copy ${GUDHI_INCLUDE_FILE} ${GUDHI_USER_VERSION_DIR}/${GUDHI_INCLUDE_DIRECTORY}/${GUDHI_INCLUDE_FILE_NAME})
+        endif()
+      endforeach()
+    endforeach(GUDHI_INCLUDE_DIRECTORY ${GUDHI_INCLUDE_DIRECTORIES})
+
+  endforeach(GUDHI_MODULE ${GUDHI_MODULES})
 
 endif()
