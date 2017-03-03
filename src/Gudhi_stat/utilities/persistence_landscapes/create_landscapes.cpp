@@ -43,7 +43,7 @@ int main( int argc , char** argv )
 	std::cout << "Creating persistence landscapes...\n";	
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{
-		Persistence_landscape l( filenames[i] , 1 );
+		Persistence_landscape l( filenames[i] , 0 );
 		std::stringstream ss;
 		ss << filenames[i] << ".land";
 		l.print_to_file( ss.str().c_str() );

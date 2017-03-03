@@ -130,7 +130,7 @@ public:
 	}
 };
 
-class distance_from_diagonal_scalling
+class distance_from_diagonal_scaling
 {
 public:
 	double operator()( const std::pair< double , double >& point_in_diagram )
