@@ -81,7 +81,7 @@ namespace Gudhi_stat {
  *Below we are discussing the representations which are currently implemented in Gudhi\_stat:
  *
  *\section sec_persistence_landscapes Persistence Landscapes
- *Persistence landscapes were originally proposed by Bubenik in \cite landscapes1. Efficient algorithms to compute them rigorously were proposed by Bubenik and Dlotko in \cite landscapes2. The idea of 
+ *Persistence landscapes were originally proposed by Bubenik in \cite bubenik_landscapes_2015. Efficient algorithms to compute them rigorously were proposed by Bubenik and Dlotko in \cite bubenik_dlotko_landscapes_2016. The idea of 
  * persistence landscapes is shortly summarized in below.
  *
  *To begin with, suppose we are given a point \f$(b,d) \in \mathbb{R}^2\f$ in a
@@ -108,9 +108,9 @@ namespace Gudhi_stat {
  *function \f$L : \mathbb{N} \times \mathbb{R} \to [0,\infty)\f$ of two
  *variables, if we define \f$L(k,t) = \lambda_k(t)\f$.
  *
- *The detailed description of algorithms used to compute persistence landscapes can be found in \cite landscapes2. 
+ *The detailed description of algorithms used to compute persistence landscapes can be found in \cite bubenik_dlotko_landscapes_2016. 
  * Note that this implementation provides exact representation of landscapes. That have many advantages, but also a few drawbacks. For instance, as discussed 
- * in \cite landscapes2, the exact representation of landscape may be of quadratic size with respect to the input persistence diagram. It may therefore happen 
+ * in \cite bubenik_dlotko_landscapes_2016, the exact representation of landscape may be of quadratic size with respect to the input persistence diagram. It may therefore happen 
  * that, for very large diagrams, using this representation may be memory--prohibitive. In such a case, there are two possible ways to proceed:
  *
  *\li Use non exact representation on a grid described in the Section \ref sec_landscapes_on_grid.
@@ -148,15 +148,15 @@ namespace Gudhi_stat {
  *\li Number of points in a grid (positive integer \f$N\f$).
  *
  *
- *Note that the same representation is used in TDA R-package \cite tda.
+ *Note that the same representation is used in TDA R-package \cite Fasy_Kim_Lecci_Maria_tda.
  *
  *\section sec_persistence_heat_maps Persistence heat maps
  *This is a general class of discrete structures which are based on idea of placing a kernel in the points of persistence diagrams. 
- *This idea appeared in work by many authors over the last 15 years. As far as we know this idea was firstly described in the work of Bologna group in \cite bologna1 and \cite bologna2. 
- *Later it has been described by Colorado State University group in \cite Henry. The presented paper in the first time provide a discussion of stability of the representation. 
- *Also, the same ideas are used in construction of two recent kernels used for machine learning: \cite yasu and \cite uli. Both the kernel's construction uses interesting ideas to 
- *ensure stability of the representation with respect to Wasserstein metric. In the kernel presented in \cite yasu, a scaling function is used to multiply the Gaussian kernel in the 
- *way that the points close to diagonal got low weight and consequently do not have a big influence on the resulting distribution. In \cite uli for every point \f$(b,d)\f$ two Gaussian kernels 
+ *This idea appeared in work by many authors over the last 15 years. As far as we know this idea was firstly described in the work of Bologna group in \cite Ferri_Frosini_comparision_sheme_1 and \cite Ferri_Frosini_comparision_sheme_2. 
+ *Later it has been described by Colorado State University group in \cite Persistence_Images_2017. The presented paper in the first time provide a discussion of stability of the representation. 
+ *Also, the same ideas are used in construction of two recent kernels used for machine learning: \cite Kusano_Fukumizu_Hiraoka_PWGK and \cite Reininghaus_Huber_ALL_PSSK. Both the kernel's construction uses interesting ideas to 
+ *ensure stability of the representation with respect to Wasserstein metric. In the kernel presented in \cite Kusano_Fukumizu_Hiraoka_PWGK, a scaling function is used to multiply the Gaussian kernel in the 
+ *way that the points close to diagonal got low weight and consequently do not have a big influence on the resulting distribution. In \cite Reininghaus_Huber_ALL_PSSK for every point \f$(b,d)\f$ two Gaussian kernels 
  *are added: first, with a weight 1 in a point \f$(b,d)\f$, and the second, with the weight -1 for a point \f$(b,d)\f$. In both cases, the representations are stable with respect to 1-Wasserstein distance.
  *
  *In Gudhi\_stat we currently implement a discretization of the distributions described above. The base of this implementation is 2-dimensional array of pixels. Each pixel have assigned a real value which 
@@ -174,7 +174,7 @@ namespace Gudhi_stat {
  *
  *
  *\section sec_persistence_vectors Persistence vectors
- *This is a representation of persistent homology in a form of a vector which was designed for an application in 3d graphic in \cite vectors. Below we provide a short description of this representation.
+ *This is a representation of persistent homology in a form of a vector which was designed for an application in 3d graphic in \cite Carriere_Oudot_Ovsjanikov_top_signatures_3d. Below we provide a short description of this representation.
  *
  *Given a persistence diagram \f$D = \{ (b_i,d_i) \}\f$, for every pair of birth--death points \f$(b_1,d_1)\f$ and \f$(b_2,d_2)\f$ we compute the following three distances:
  *
