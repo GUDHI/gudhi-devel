@@ -172,6 +172,7 @@ if(PYTHON_PATH AND CYTHON_PATH)
       if (UNIX)
         add_custom_target(sphinx
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc
+            DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so"
             COMMAND make html doctest)
       else (UNIX)
         add_custom_target(sphinx

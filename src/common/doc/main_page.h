@@ -120,6 +120,7 @@
       <b>Author:</b> Cl&eacute;ment Jamin<br>
       <b>Introduced in:</b> GUDHI 1.4.0<br>
       <b>Copyright:</b> GPL v3<br>
+      <b>Requires:</b> \ref cgal &ge; 4.8.0 and \ref eigen3
     </td>
     <td width="75%">
     A Tangential Delaunay complex is a <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
@@ -139,6 +140,7 @@
       <b>Author:</b> Siargey Kachanovich<br>
       <b>Introduced in:</b> GUDHI 1.3.0<br>
       <b>Copyright:</b> GPL v3<br>
+      <b>Euclidean version requires:</b> \ref cgal &ge; 4.6.0 and \ref eigen3
     </td>
     <td width="75%">
     Witness complex \f$ Wit(W,L) \f$  is a simplicial complex defined on two sets of points in \f$\mathbb{R}^D\f$.
@@ -412,7 +414,11 @@ make \endverbatim
  * @example Skeleton_blocker/Skeleton_blocker_link.cpp
  * @example Tangential_complex/example_basic.cpp
  * @example Tangential_complex/example_with_perturb.cpp
- * @example Witness_complex/witness_complex_from_file.cpp
- * @example Witness_complex/witness_complex_sphere.cpp
+ * @example Witness_complex/example_nearest_landmark_table.cpp
+ * @example Witness_complex/example_strong_witness_complex_off.cpp
+ * @example Witness_complex/example_strong_witness_persistence.cpp
+ * @example Witness_complex/example_witness_complex_off.cpp
+ * @example Witness_complex/example_witness_complex_persistence.cpp
+ * @example Witness_complex/example_witness_complex_sphere.cpp
  */
 

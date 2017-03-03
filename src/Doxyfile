@@ -784,7 +784,6 @@ EXCLUDE                = data/ \
 	                     example/    \
 	                     GudhUI/     \
                              cmake/      \
-                             debian/     \
                              src/cython/ \
                              include/gudhi_patches/
 
