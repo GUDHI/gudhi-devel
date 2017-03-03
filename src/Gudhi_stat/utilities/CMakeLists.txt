@@ -104,11 +104,11 @@ target_link_libraries(persistence_vectors/plot_persistence_vectors ${Boost_SYSTE
 add_executable ( permutation_test permutation_test.cpp )
 target_link_libraries(permutation_test ${Boost_SYSTEM_LIBRARY})
 
-add_executable ( topological_process topological_process.cpp )
-target_link_libraries(topological_process ${Boost_SYSTEM_LIBRARY})
+#add_executable ( topological_process topological_process.cpp )
+#target_link_libraries(topological_process ${Boost_SYSTEM_LIBRARY})
 
-add_executable ( topological_process_2 topological_process_2.cpp )
-target_link_libraries(topological_process_2 ${Boost_SYSTEM_LIBRARY})
+#add_executable ( topological_process_2 topological_process_2.cpp )
+#target_link_libraries(topological_process_2 ${Boost_SYSTEM_LIBRARY})
 
 add_executable ( Hausdorff_bootstrap Hausdorff_bootstrap.cpp )
 if (TBB_FOUND)
@@ -134,8 +134,8 @@ target_link_libraries(Multiplicative_bootstrap ${Boost_SYSTEM_LIBRARY})
 
 
 #just for Pawel's tests:
-add_executable ( NN_classification NN_classification.cpp )
-target_link_libraries(NN_classification ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( compute_distance_between_vectors compute_distance_between_vectors.cpp )
-target_link_libraries(compute_distance_between_vectors ${Boost_SYSTEM_LIBRARY})
+#add_executable ( NN_classification NN_classification.cpp )
+#target_link_libraries(NN_classification ${Boost_SYSTEM_LIBRARY})
+#
+#add_executable ( compute_distance_between_vectors compute_distance_between_vectors.cpp )
+#target_link_libraries(compute_distance_between_vectors ${Boost_SYSTEM_LIBRARY})
