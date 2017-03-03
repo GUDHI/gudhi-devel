@@ -37,12 +37,12 @@ namespace Gudhi_stat {
 
  *In order to perform most of the statistical tests and machine learning algorithms on a data one need to be able to perform only a very limited number of operations on them. Let us fix a representation of data of a type A. To perform most of the statistical and machine learning operations one need to be able to compute average of objects of type A (so that the averaged object is also of a type A), to compute distance between objects of a type A, to vectorize object of a type A and to compute scalar product of a pair objects of a type A.
  *
- *To put this statement into a context, let us assume we have two collections \f[$c_1,...,c_n$\f] and \f[$d_1,...,d_n$/f] of objects of a type A. We want to verify if the average of those two collections are different by performing a permutation test.
- *First of all, we compute averages of those two collections: \f[$C =$\f] average of \f[$c_1,...,c_n$\f] and \f[$D =$\f] average of \f[$d_1,...,d_n$\f]. Note that both $C$ and $D$ are of a type A. Then we compute \f[$d(C,D)$\f], a distance between \f[$C$\f] and \f[$D$\f].
+ *To put this statement into a context, let us assume we have two collections \f[ c_1,\ldots,c_n\f] and \f[d_1,...,d_n\f] of objects of a type A. We want to verify if the average of those two collections are different by performing a permutation test.
+ *First of all, we compute averages of those two collections: C average of \f[ c_1,\ldots,c_n \f] and D average of \f[d_1,\ldots,d_n\f]. Note that both C and D are of a type A. Then we compute \f[d(C,D)\f], a distance between C and D.
  *Later we put the two collections into one bin:\\
- *\f[$B = \{ c_1,...,c_n,d_1,...,d_n \}$\f]
- *Then we shuffle \f[$B$\f], and we divide the shuffled version of \f[$B$\f] into two classes: \f[$B_1$\f] and \f[$B_2$\f] (in this case, of the same cardinality). Then we compute averages \f[$\hat{B_A}$\f] and \f[$\hat{B_2}$\f] of elements in \f[$B_1$\f] and \f[$B_2$\f]. Note that again, \f[$\hat{B_1}$\f] and \f[$\hat{B_2}$\f] are of a type A. Then we compute their distance \f[$d(\hat{B_1},\hat{B_2})$\f]. The procedure of shuffling and dividing the set \f[$B$\f] is repeated \f[$N$\f] times (where \f[$N$\f] is reasonably large number).
- *Then the p-value of a statement that the averages of  \f[$c_1,...,c_n$\f] and \f[$d_1,...,d_n$\f] is approximated by the number of times \f[$d(\hat{B_1},\hat{B_2}) > d(C,D)$\f] divided by \f[$N$\f].
+ *\f[B = \{ c_1,...,c_n,d_1,...,d_n \}\f]
+ *Then we shuffle B, and we divide the shuffled version of B into two classes: \f[B_1\f] and \f[B_2\f] (in this case, of the same cardinality). Then we compute averages \f[\hat{B_A}\f] and \f[\hat{B_2}\f] of elements in \f[B_1\f] and \f[B_2\f]. Note that again, \f[\hat{B_1}\f] and \f[\hat{B_2}\f] are of a type A. Then we compute their distance \f[d(\hat{B_1},\hat{B_2})\f]. The procedure of shuffling and dividing the set \f[B\f] is repeated \f[N\f] times (where \f[N\f] is reasonably large number).
+ *Then the p-value of a statement that the averages of  \f[c_1,...,c_n\f] and \f[d_1,...,d_n\f] is approximated by the number of times \f[d(\hat{B_1},\hat{B_2}) > d(C,D)\f] divided by \f[N\f].
  *
  *The permutation test reminded above can be performed for any type A which can be averaged, and which allows for computations of distances. 
  *
@@ -73,9 +73,9 @@ namespace Gudhi_stat {
  *\section sec_persistence_landscapes Persistence Landscapes
  *Persistence landscapes were originally proposed by Bubenik in \cite landscapes1. Efficient algorithms to compute them rigorously were proposed by Bubenik and D{\l}otko in \cite landscapes2. The idea of persistence landscapes is shortly summarized in below.
  *
- *To begin with, suppose we are given a point \f[$(b,d) \in \mathbb{R}^2$\f] in a
+ *To begin with, suppose we are given a point \f[(b,d) \in \mathbb{R}^2\f] in a
  *persistence diagram. With this point, we associate a piecewise
- *linear function \f[$f_{(b,d)} : \mathbb{R} \rightarrow [0,\infty)$\f], which is
+ *linear function \f[f_{(b,d)} : \mathbb{R} \rightarrow [0,\infty)\f], which is
  *defined as
  *
  *\begin{equation} \label{eq:basicLand}
@@ -90,13 +90,13 @@ namespace Gudhi_stat {
  *\end{equation}
  *
  *A \emph{persistence landscape} of the birth-death
- *pairs \f[$(b_i , d_i)$\f], where \f[$i = 1,\ldots,m$\f], which constitute the given
- *persistence diagram is the sequence of functions \f[$\lambda_k : \mathbb{R} \rightarrow [0,\infty)$\f] for \f[$k \in \mathbb{N}$\f], where \f[$\lambda_k(x)$\f]
- *denotes the \f[$k^{\rm th}$\f] largest value of the numbers \f[$f_{(b_i,d_i)}(x)$\f],
- *for \f[$i = 1, \ldots, m$\f], and we define \f[$\lambda_k(x) = 0$\f] if \f[$k > m$\f].
+ *pairs \f[(b_i , d_i)\f], where \f[i = 1,\ldots,m\f], which constitute the given
+ *persistence diagram is the sequence of functions \f[\lambda_k : \mathbb{R} \rightarrow [0,\infty)\f] for \f[k \in \mathbb{N}\f], where \f[\lambda_k(x)\f]
+ *denotes the \f[k^{\rm th}\f] largest value of the numbers \f[f_{(b_i,d_i)}(x)\f],
+ *for \f[i = 1, \ldots, m\f], and we define \f[\lambda_k(x) = 0\f] if \f[k > m\f].
  *Equivalently, this sequence of functions can be combined into a single
- *function \f[$L : \mathbb{N} \times \mathbb{R} \to [0,\infty)$\f] of two
- *variables, if we define \f[$L(k,t) = \lambda_k(t)$\f].
+ *function \f[L : \mathbb{N} \times \mathbb{R} \to [0,\infty)\f] of two
+ *variables, if we define \f[L(k,t) = \lambda_k(t)\f].
  *
  *The detailed description of algorithms used to compute persistence landscapes can be found in \cite landscapes2. Note that this implementation provides exact representation of landscapes. That have many advantages, but also a few drawbacks. For instance, as discussed in \cite landscapes2, the exact representation of landscape may be of quadratic size with respect to the input persistence diagram. It may therefore happen that, for very large diagrams, using this representation may be memory--prohibitive. In such a case, there are two possible ways to proceed:
  *\enumerate{
@@ -106,48 +106,48 @@ namespace Gudhi_stat {
  * 
  * 
  *\section sec_landscapes_on_grid Persistence Landscapes on a grid
- *This is an alternative, not--exact, representation of persistence landscapes defined in the Section \ref sec_persistence_landscapes. Unlike in the Section \ref sec_persistence_landscapes we build a representation of persistence landscape by sampling its values on a finite, equally distributed grid of points. Since, the persistence landscapes that originate from persistence diagrams have slope \f[$1$\f] or \f[$-1$\f], we have an estimate of a region between the grid points where the landscape cab be located. That allows to estimate an error make when performing various operations on landscape. Note that for average landscapes the slope is in range \f[$[-1,1]$\f] and similar estimate can be used. 
+ *This is an alternative, not--exact, representation of persistence landscapes defined in the Section \ref sec_persistence_landscapes. Unlike in the Section \ref sec_persistence_landscapes we build a representation of persistence landscape by sampling its values on a finite, equally distributed grid of points. Since, the persistence landscapes that originate from persistence diagrams have slope \f[1\f] or \f[-1\f], we have an estimate of a region between the grid points where the landscape cab be located. That allows to estimate an error make when performing various operations on landscape. Note that for average landscapes the slope is in range \f[[-1,1]\f] and similar estimate can be used. 
  *
  *Due to a lack of rigorous description of the algorithms to deal with this non--rigorous representaion of persistence landscapes in the literature, we are providing a short discussion of them in below.
  *
- *Let us assume that we want to compute persistence landscape on a interval \f[$[x,y]$\f]. Let us assume that we want to use \f[$N$\f] grid points for that purpose. Then we will sample the persistence landscape on points \f[$x_1 = x , x_2 = x + \frac{y-x}{N}, \ldots , x_{N} = y$\f]. Persistence landscapes are represented as a vector of vectors of real numbers. Assume that i-th vector consist of \f[$n_i$\f] numbers sorted from larger to smaller. They represent the values of the functions \f[$\lambda_1,\ldots,\lambda_{n_i}$ ($\lambda_{n_i+1}$\f] and the functions with larger indices are then zero functions) on the i-th point of a grid, i.e. \f[$x + i \frac{y-x}{N}$\f]. 
+ *Let us assume that we want to compute persistence landscape on a interval \f[[x,y]\f]. Let us assume that we want to use \f[N\f] grid points for that purpose. Then we will sample the persistence landscape on points \f[x_1 = x , x_2 = x + \frac{y-x}{N}, \ldots , x_{N} = y\f]. Persistence landscapes are represented as a vector of vectors of real numbers. Assume that i-th vector consist of \f[n_i\f] numbers sorted from larger to smaller. They represent the values of the functions \f[\lambda_1,\ldots,\lambda_{n_i} (\lambda_{n_i+1}\f] and the functions with larger indices are then zero functions) on the i-th point of a grid, i.e. \f[x + i \frac{y-x}{N}\f]. 
  *
- *When averaging two persistence landscapes represented by a grid we need to make sure that they are defined in a compatible grids. I.e. the intervals \f[$[x,y]$\f] on which they are defined are the same, and the numbers of grid points \f[$N$\f] are the same in both cases. If this is the case, we simply compute point-wise averages of the entries of corresponding vectors\footnote{In this whole section we assume that if one vector of numbers is shorter than another, we extend the shorter one with zeros so that they have the same length.}
+ *When averaging two persistence landscapes represented by a grid we need to make sure that they are defined in a compatible grids. I.e. the intervals \f[[x,y]\f] on which they are defined are the same, and the numbers of grid points \f[N\f] are the same in both cases. If this is the case, we simply compute point-wise averages of the entries of corresponding vectors\footnote{In this whole section we assume that if one vector of numbers is shorter than another, we extend the shorter one with zeros so that they have the same length.}
  *
- *Computations of distances between two persistence landscapes on a grid is not much different than in the rigorous case. In this case, we sum up the distances between the same levels of corresponding landscapes. For fixed level, we approximate the landscapes between the corresponding constitutive points of landscapes by linear functions, and compute the \f[$L^p$\f] distance between them.
+ *Computations of distances between two persistence landscapes on a grid is not much different than in the rigorous case. In this case, we sum up the distances between the same levels of corresponding landscapes. For fixed level, we approximate the landscapes between the corresponding constitutive points of landscapes by linear functions, and compute the \f[L^p\f] distance between them.
  *
  *Similarly as in case of distance, when computing the scalar product of two persistence landscapes on a grid, we sum up the scalar products of corresponding levels of landscapes. For each level, we assume that the persistence landscape on a grid between two grid points is approximated by linear function. Therefore to compute scalar product of two corresponding levels of landscapes, we sum up the integrals of products of line segments for every pair of constitutive grid points. 
  *
  *Note that for this representation we need to specify a few parameters:
  *\enumerate{
- *\li Begin and end point of a grid -- the interval \f[$[x,y]$\f] (real numbers).
- *\li Number of points in a grid (positive integer \f[$N$\f]).
+ *\li Begin and end point of a grid -- the interval \f[[x,y]\f] (real numbers).
+ *\li Number of points in a grid (positive integer \f[N\f]).
  *}
  *
  *Note that the same representation is used in TDA R-package \cite tda.
  *oka
  *\section sec_persistence_heat_maps Persistence heat maps
- *This is a general class of discrete structures which are based on idea of placing a kernel in the points of persistence diagrams. This idea appeared in work by many authors over the last 15 years. As far as we know this idea was firstly described in the work of Bologna group in \cite bologna1 and \cite bologna2. Later it has been described by Colorado State University group in \cite Henry. The presented paper in the first time provide a discussion of stability of the representation. Also, the same ideas are used in construction of two recent kernels used for machine learning: \cite yasu and \cite uli. Both the kernel's construction uses interesting ideas to ensure stability of the representation with respect to Wasserstein metric. In the kernel presented in \cite yasu, a scaling function is used to multiply the Gaussian kernel in the way that the points close to diagonal got low weight and consequently do not have a big influence on the resulting distribution. In \cite uli for every point \f[$(b,d)$\f] two Gaussian kernels are added: first, with a weight 1 in a point \f[$(b,d)$\f], and the second, with the weight -1 for a point \f[$(b,d)$\f]. In both cases, the representations are stable with respect to 1-Wasserstein distance.
+ *This is a general class of discrete structures which are based on idea of placing a kernel in the points of persistence diagrams. This idea appeared in work by many authors over the last 15 years. As far as we know this idea was firstly described in the work of Bologna group in \cite bologna1 and \cite bologna2. Later it has been described by Colorado State University group in \cite Henry. The presented paper in the first time provide a discussion of stability of the representation. Also, the same ideas are used in construction of two recent kernels used for machine learning: \cite yasu and \cite uli. Both the kernel's construction uses interesting ideas to ensure stability of the representation with respect to Wasserstein metric. In the kernel presented in \cite yasu, a scaling function is used to multiply the Gaussian kernel in the way that the points close to diagonal got low weight and consequently do not have a big influence on the resulting distribution. In \cite uli for every point \f[(b,d)\f] two Gaussian kernels are added: first, with a weight 1 in a point \f[(b,d)\f], and the second, with the weight -1 for a point \f[(b,d)\f]. In both cases, the representations are stable with respect to 1-Wasserstein distance.
  *
  *In Gudhi\_stat we currently implement a discretization of the distributions described above. The base of this implementation is 2-dimensional array of pixels. Each pixel have assigned a real value which is a sum of values of distributions induced by each point of the persistence diagram. At the moment we compute the sum of values on a center of a pixels. It can be easily extended to any other function (like for instance sum of integrals of the intermediate distribution on a pixel). 
  *
  *The parameters that determine the structure are the following:
  *\enumerate{
  *\li A positive integer k determining the size of the kernel we used (we always assume that the kernels are square).
- *\li A filter: in practice a square matrix of a size \f[$2k+1 \times 2k+1$\f]. By default, this is a discretization of N(0,1) kernel.
- *\li The box \f[$[x_0,x_1]\times [y_0,y_1]$\f] bounding the domain of the persistence image.
- *\li Scaling function. Each Gaussian kernel at point \f[$(p,q)$\f] gets multiplied by the value of this function at the point \f[$(p,q)$\f].
+ *\li A filter: in practice a square matrix of a size \f[2k+1 \times 2k+1\f]. By default, this is a discretization of N(0,1) kernel.
+ *\li The box \f[[x_0,x_1]\times [y_0,y_1]\f] bounding the domain of the persistence image.
+ *\li Scaling function. Each Gaussian kernel at point \f[(p,q)\f] gets multiplied by the value of this function at the point \f[(p,q)\f].
  *\li A boolean value determining if the space below diagonal should be erased or not. To be precise: when points close to diagonal are given then sometimes the kernel have support that reaches the region below the diagonal. If the value of this parameter is \emph{true}, then the values below diagonal can be erased.
  *}
  *
  *\section sec_persistence_vectors Persistence vectors
  *This is a representation of persistent homology in a form of a vector which was designed for an application in 3d graphic in \cite vectors. Below we provide a short description of this representation.
  *
- *Given a persistence diagram \f[$D = \{ (b_i,d_i) \}$\f], for every pair of birth--death points \f[$(b_1,d_1)$\f] and \f[$(b_2,d_2)$\f] we compute the following three distances:
+ *Given a persistence diagram \f[D = \{ (b_i,d_i) \}\f], for every pair of birth--death points \f[(b_1,d_1)\f] and \f[(b_2,d_2)\f] we compute the following three distances:
  *\enumerate{
- *\li \f[$d( (b_1,d_1) , (b_2,d_2) )$\f].
- *\li \f[$d( (b_1,d_1) , (\frac{b_1,d_1}{2},\frac{b_1,d_1}{2}) )$\f].
- *\li \f[$d( (b_2,d_2) , (\frac{b_2,d_2}{2},\frac{b_2,d_2}{2}) )$\f].
+ *\li \f[d( (b_1,d_1) , (b_2,d_2) )\f].
+ *\li \f[d( (b_1,d_1) , (\frac{b_1,d_1}{2},\frac{b_1,d_1}{2}) )\f].
+ *\li \f[d( (b_2,d_2) , (\frac{b_2,d_2}{2},\frac{b_2,d_2}{2}) )\f].
  *\}
  *We pick the smallest of those and add it to a vector. The obtained vector of numbers is then sorted in decreasing order. This way we obtain a \emph{persistence vector} representing the diagram.
  *
