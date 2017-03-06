@@ -4,7 +4,7 @@
  *
  *    Author(s):       Siargey Kachanovich
  *
- *    Copyright (C) 2015  INRIA
+ *    Copyright (C) 2016  INRIA (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -19,17 +19,15 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #define BOOST_PARAMETER_MAX_ARITY 12
 
-
-#include <sys/types.h>
-#include <sys/stat.h>
-
 #include <gudhi/Simplex_tree.h>
-#include <gudhi/Witness_complex.h>
-#include <gudhi/Construct_closest_landmark_table.h>
+#include <gudhi/Euclidean_witness_complex.h>
 #include <gudhi/pick_n_random_points.h>
 #include <gudhi/reader_utils.h>
+
+#include <CGAL/Epick_d.h>
 
 #include <iostream>
 #include <fstream>
@@ -39,8 +37,6 @@
 #include <vector>
 
 #include "generators.h"
-
-typedef Gudhi::Simplex_tree<> Simplex_tree;
 
 /** Write a gnuplot readable file.
  *  Data range is a random access range of pairs (arg, value)
@@ -54,6 +50,9 @@ void write_data(Data_range & data, std::string filename) {
 }
 
 int main(int argc, char * const argv[]) {
+  using Kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
+  using Witness_complex = Gudhi::witness_complex::Euclidean_witness_complex<Kernel>;
+
   if (argc != 2) {
     std::cerr << "Usage: " << argv[0]
         << " number_of_landmarks \n";
@@ -63,13 +62,12 @@ int main(int argc, char * const argv[]) {
   int number_of_landmarks = atoi(argv[1]);
   clock_t start, end;
 
-  // Construct the Simplex Tree
-  Simplex_tree simplex_tree;
-
   std::vector< std::pair<int, double> > l_time;
 
-  // Read the point file
+  // Generate points
   for (int nbP = 500; nbP < 10000; nbP += 500) {
+    // Construct the Simplex Tree
+    Gudhi::Simplex_tree<> simplex_tree;
     Point_Vector point_vector, landmarks;
     generate_points_sphere(point_vector, nbP, 4);
     std::cout << "Successfully generated " << point_vector.size() << " points.\n";
@@ -77,12 +75,12 @@ int main(int argc, char * const argv[]) {
 
     // Choose landmarks
     start = clock();
-    std::vector<std::vector< int > > knn;
-    Gudhi::subsampling::pick_n_random_points(point_vector, 100, std::back_inserter(landmarks));
-    Gudhi::witness_complex::construct_closest_landmark_table<Simplex_tree::Filtration_value>(point_vector, landmarks, knn);
+    Gudhi::subsampling::pick_n_random_points(point_vector, number_of_landmarks, std::back_inserter(landmarks));
 
     // Compute witness complex
-    Gudhi::witness_complex::witness_complex(knn, number_of_landmarks, point_vector[0].size(), simplex_tree);
+    Witness_complex witness_complex(landmarks,
+                                    point_vector);
+    witness_complex.create_complex(simplex_tree, 0);
     end = clock();
     double time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
     std::cout << "Witness complex for " << number_of_landmarks << " landmarks took "
