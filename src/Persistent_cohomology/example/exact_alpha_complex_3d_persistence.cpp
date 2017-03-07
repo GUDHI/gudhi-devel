@@ -43,11 +43,12 @@
 
 // Alpha_shape_3 templates type definitions
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
-typedef CGAL::Alpha_shape_vertex_base_3<Kernel> Vb;
-typedef CGAL::Alpha_shape_cell_base_3<Kernel> Fb;
+typedef CGAL::Tag_true Exact_tag;
+typedef CGAL::Alpha_shape_vertex_base_3<Kernel, CGAL::Default, Exact_tag> Vb;
+typedef CGAL::Alpha_shape_cell_base_3<Kernel, CGAL::Default, Exact_tag> Fb;
 typedef CGAL::Triangulation_data_structure_3<Vb, Fb> Tds;
 typedef CGAL::Delaunay_triangulation_3<Kernel, Tds> Triangulation_3;
-typedef CGAL::Alpha_shape_3<Triangulation_3> Alpha_shape_3;
+typedef CGAL::Alpha_shape_3<Triangulation_3, Exact_tag> Alpha_shape_3;
 
 // From file type definition
 typedef Kernel::Point_3 Point_3;
@@ -62,7 +63,8 @@ CGAL::cpp11::tuple<std::back_insert_iterator< std::vector<Object> >,
 typedef Alpha_shape_3::Cell_handle Cell_handle;
 typedef Alpha_shape_3::Facet Facet;
 typedef Alpha_shape_3::Edge Edge_3;
-typedef std::list<Alpha_shape_3::Vertex_handle> Vertex_list;
+typedef Alpha_shape_3::Vertex_handle Vertex_handle;
+typedef std::list<Vertex_handle> Vertex_list;
 
 // gudhi type definition
 typedef Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence> ST;
@@ -72,7 +74,7 @@ typedef std::pair<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex> Alpha_shape
 typedef std::vector< Simplex_tree_vertex > Simplex_tree_vector_vertex;
 typedef Gudhi::persistent_cohomology::Persistent_cohomology< ST, Gudhi::persistent_cohomology::Field_Zp > PCOH;
 
-void usage(const std::string& progName) {
+void usage(char * const progName) {
   std::cerr << "Usage: " << progName <<
       " path_to_file_graph coeff_field_characteristic[integer > 0] min_persistence[float >= -1.0]\n";
   exit(-1);
@@ -160,10 +162,9 @@ int main(int argc, char * const argv[]) {
         // Edge_3 is of dim 1
         dim_max = 1;
       }
-    } else if (const Alpha_shape_3::Vertex_handle * vertex =
-               CGAL::object_cast<Alpha_shape_3::Vertex_handle>(&object_iterator)) {
+    } else if (const Vertex_handle * vertex = CGAL::object_cast<Vertex_handle>(&object_iterator)) {
       count_vertices++;
-      vertex_list = from_vertex<Vertex_list, Alpha_shape_3::Vertex_handle>(*vertex);
+      vertex_list = from_vertex<Vertex_list, Vertex_handle>(*vertex);
     }
     // Construction of the vector of simplex_tree vertex from list of alpha_shapes vertex
     Simplex_tree_vector_vertex the_simplex_tree;
@@ -187,7 +188,7 @@ int main(int argc, char * const argv[]) {
       }
     }
     // Construction of the simplex_tree
-    Filtration_value filtr = /*std::sqrt*/(*the_alpha_value_iterator);
+    Filtration_value filtr = /*std::sqrt*/CGAL::to_double(the_alpha_value_iterator->approx());
 #ifdef DEBUG_TRACES
     std::cout << "filtration = " << filtr << std::endl;
 #endif  // DEBUG_TRACES
