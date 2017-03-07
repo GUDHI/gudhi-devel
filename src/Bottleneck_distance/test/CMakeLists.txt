@@ -17,6 +17,9 @@ if(CGAL_FOUND)
   if (NOT CGAL_VERSION VERSION_LESS 4.8.0)
     add_executable ( bottleneckUT bottleneck_unit_test.cpp )
     target_link_libraries(bottleneckUT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+    if (TBB_FOUND)
+      target_link_libraries(bottleneckUT ${TBB_LIBRARIES})
+    endif(TBB_FOUND)
 
     # Unitary tests
     add_test(NAME bottleneckUT COMMAND ${CMAKE_CURRENT_BINARY_DIR}/bottleneckUT
