@@ -24,7 +24,6 @@
 #define STRONG_WITNESS_COMPLEX_H_
 
 #include <gudhi/Active_witness/Active_witness.h>
-#include <gudhi/Kd_tree_search.h>
 
 #include <utility>
 #include <vector>
