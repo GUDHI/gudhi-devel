@@ -24,7 +24,6 @@
 #define WITNESS_COMPLEX_H_
 
 #include <gudhi/Active_witness/Active_witness.h>
-#include <gudhi/Kd_tree_search.h>
 #include <gudhi/Witness_complex/all_faces_in.h>
 
 #include <utility>
