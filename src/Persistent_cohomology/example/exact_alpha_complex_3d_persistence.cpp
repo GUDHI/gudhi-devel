@@ -42,37 +42,38 @@
 #include <vector>
 
 // Alpha_shape_3 templates type definitions
-typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
-typedef CGAL::Tag_true Exact_tag;
-typedef CGAL::Alpha_shape_vertex_base_3<Kernel, CGAL::Default, Exact_tag> Vb;
-typedef CGAL::Alpha_shape_cell_base_3<Kernel, CGAL::Default, Exact_tag> Fb;
-typedef CGAL::Triangulation_data_structure_3<Vb, Fb> Tds;
-typedef CGAL::Delaunay_triangulation_3<Kernel, Tds> Triangulation_3;
-typedef CGAL::Alpha_shape_3<Triangulation_3, Exact_tag> Alpha_shape_3;
+using Kernel = CGAL::Exact_predicates_inexact_constructions_kernel;
+using Exact_tag = CGAL::Tag_true;
+using Vb = CGAL::Alpha_shape_vertex_base_3<Kernel, CGAL::Default, Exact_tag>;
+using Fb = CGAL::Alpha_shape_cell_base_3<Kernel, CGAL::Default, Exact_tag>;
+using Tds = CGAL::Triangulation_data_structure_3<Vb, Fb>;
+using Triangulation_3 = CGAL::Delaunay_triangulation_3<Kernel, Tds>;
+using Alpha_shape_3 = CGAL::Alpha_shape_3<Triangulation_3, Exact_tag>;
 
 // From file type definition
-typedef Kernel::Point_3 Point_3;
+using Point_3 = Kernel::Point_3;
 
 // filtration with alpha values needed type definition
-typedef Alpha_shape_3::FT Alpha_value_type;
-typedef CGAL::Object Object;
-typedef CGAL::Dispatch_output_iterator<
-CGAL::cpp11::tuple<Object, Alpha_value_type>,
-CGAL::cpp11::tuple<std::back_insert_iterator< std::vector<Object> >,
-    std::back_insert_iterator< std::vector<Alpha_value_type> > > > Dispatch;
-typedef Alpha_shape_3::Cell_handle Cell_handle;
-typedef Alpha_shape_3::Facet Facet;
-typedef Alpha_shape_3::Edge Edge_3;
-typedef Alpha_shape_3::Vertex_handle Vertex_handle;
-typedef std::list<Vertex_handle> Vertex_list;
+using Alpha_value_type = Alpha_shape_3::FT;
+using Object = CGAL::Object;
+using Dispatch = CGAL::Dispatch_output_iterator<
+          CGAL::cpp11::tuple<Object, Alpha_value_type>,
+          CGAL::cpp11::tuple<std::back_insert_iterator< std::vector<Object> >,
+          std::back_insert_iterator< std::vector<Alpha_value_type> > > >;
+using Cell_handle = Alpha_shape_3::Cell_handle;
+using Facet = Alpha_shape_3::Facet;
+using Edge_3 = Alpha_shape_3::Edge;
+using Vertex_handle = Alpha_shape_3::Vertex_handle;
+using Vertex_list = std::list<Vertex_handle>;
 
 // gudhi type definition
-typedef Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence> ST;
-typedef ST::Vertex_handle Simplex_tree_vertex;
-typedef std::map<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex > Alpha_shape_simplex_tree_map;
-typedef std::pair<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex> Alpha_shape_simplex_tree_pair;
-typedef std::vector< Simplex_tree_vertex > Simplex_tree_vector_vertex;
-typedef Gudhi::persistent_cohomology::Persistent_cohomology< ST, Gudhi::persistent_cohomology::Field_Zp > PCOH;
+using ST = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
+using Filtration_value = ST::Filtration_value;
+using Simplex_tree_vertex = ST::Vertex_handle;
+using Alpha_shape_simplex_tree_map = std::map<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex >;
+using Alpha_shape_simplex_tree_pair = std::pair<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex>;
+using Simplex_tree_vector_vertex = std::vector< Simplex_tree_vertex >;
+using PCOH = Gudhi::persistent_cohomology::Persistent_cohomology< ST, Gudhi::persistent_cohomology::Field_Zp >;
 
 void usage(char * const progName) {
   std::cerr << "Usage: " << progName <<
@@ -90,7 +91,7 @@ int main(int argc, char * const argv[]) {
   int coeff_field_characteristic = atoi(argv[2]);
 
   Filtration_value min_persistence = 0.0;
-  int returnedScanValue = sscanf(argv[3], "%lf", &min_persistence);
+  int returnedScanValue = sscanf(argv[3], "%f", &min_persistence);
   if ((returnedScanValue == EOF) || (min_persistence < -1.0)) {
     std::cerr << "Error: " << argv[3] << " is not correct\n";
     usage(argv[0]);
@@ -188,7 +189,8 @@ int main(int argc, char * const argv[]) {
       }
     }
     // Construction of the simplex_tree
-    Filtration_value filtr = /*std::sqrt*/CGAL::to_double(the_alpha_value_iterator->approx());
+    // you can also use the_alpha_value_iterator->exact()
+    Filtration_value filtr = /*std::sqrt*/CGAL::to_double(the_alpha_value_iterator->exact());
 #ifdef DEBUG_TRACES
     std::cout << "filtration = " << filtr << std::endl;
 #endif  // DEBUG_TRACES

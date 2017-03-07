@@ -259,6 +259,8 @@ make \endverbatim
  * Library</a> (CGAL \cite cgal:eb-15b) and will not be built if CGAL is not installed:
  * \li <a href="_persistent_cohomology_2alpha_complex_3d_persistence_8cpp-example.html">
  * Persistent_cohomology/alpha_complex_3d_persistence.cpp</a>
+ * \li <a href="_persistent_cohomology_2exact_alpha_complex_3d_persistence_8cpp-example.html">
+ * Persistent_cohomology/exact_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_simplex_tree_2example_alpha_shapes_3_simplex_tree_from_off_file_8cpp-example.html">
  * Simplex_tree/example_alpha_shapes_3_simplex_tree_from_off_file.cpp</a>
  * 
@@ -350,6 +352,8 @@ make \endverbatim
  * Persistent_cohomology/rips_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2rips_persistence_step_by_step_8cpp-example.html">
  * Persistent_cohomology/rips_persistence_step_by_step.cpp</a>
+ * \li <a href="_persistent_cohomology_2exact_alpha_complex_3d_persistence_8cpp-example.html">
+ * Persistent_cohomology/exact_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
  * Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2custom_persistence_sort_8cpp-example.html">
@@ -394,6 +398,7 @@ make \endverbatim
  * @example Persistent_cohomology/alpha_complex_3d_persistence.cpp
  * @example Persistent_cohomology/alpha_complex_persistence.cpp
  * @example Persistent_cohomology/rips_persistence_via_boundary_matrix.cpp
+ * @example Persistent_cohomology/exact_alpha_complex_3d_persistence.cpp
  * @example Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp
  * @example Persistent_cohomology/persistence_from_file.cpp
  * @example Persistent_cohomology/persistence_from_simple_simplex_tree.cpp

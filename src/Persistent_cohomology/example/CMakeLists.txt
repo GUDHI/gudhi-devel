@@ -55,11 +55,15 @@ endif(GMP_FOUND)
 if(CGAL_FOUND)
   add_executable(alpha_complex_3d_persistence alpha_complex_3d_persistence.cpp)
   target_link_libraries(alpha_complex_3d_persistence ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
+  add_executable(exact_alpha_complex_3d_persistence exact_alpha_complex_3d_persistence.cpp)
+  target_link_libraries(exact_alpha_complex_3d_persistence ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
 
   if (TBB_FOUND)
     target_link_libraries(alpha_complex_3d_persistence ${TBB_LIBRARIES})
+    target_link_libraries(exact_alpha_complex_3d_persistence ${TBB_LIBRARIES})
   endif(TBB_FOUND)
   add_test(alpha_complex_3d_persistence_2_0_5 ${CMAKE_CURRENT_BINARY_DIR}/alpha_complex_3d_persistence ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off 2 0.45)
+  add_test(exact_alpha_complex_3d_persistence_2_0_5 ${CMAKE_CURRENT_BINARY_DIR}/exact_alpha_complex_3d_persistence ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off 2 0.45)
 
 
   if (NOT CGAL_VERSION VERSION_LESS 4.7.0)
