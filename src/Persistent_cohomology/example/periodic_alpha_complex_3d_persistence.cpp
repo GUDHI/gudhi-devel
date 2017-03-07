@@ -4,7 +4,7 @@
  *
  *    Author(s):       Vincent Rouvreau
  *
- *    Copyright (C) 2014  INRIA Saclay (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@
 #include <utility>
 #include <list>
 #include <vector>
+#include <cstdlib>
 
 // Traits
 using K = CGAL::Exact_predicates_inexact_constructions_kernel;
@@ -70,6 +71,7 @@ using Vertex_list = std::list<Alpha_shape_3::Vertex_handle>;
 
 // gudhi type definition
 using ST = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
+using Filtration_value = ST::Filtration_value;
 using Simplex_tree_vertex = ST::Vertex_handle;
 using Alpha_shape_simplex_tree_map = std::map<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex >;
 using Alpha_shape_simplex_tree_pair = std::pair<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex>;
@@ -136,19 +138,8 @@ int main(int argc, char * const argv[]) {
     usage(argv[0]);
   }
 
-  int coeff_field_characteristic = 0;
-  int returnedScanValue = sscanf(argv[3], "%d", &coeff_field_characteristic);
-  if ((returnedScanValue == EOF) || (coeff_field_characteristic <= 0)) {
-    std::cerr << "Error: " << argv[3] << " is not correct\n";
-    usage(argv[0]);
-  }
-
-  Filtration_value min_persistence = 0.0;
-  returnedScanValue = sscanf(argv[4], "%lf", &min_persistence);
-  if ((returnedScanValue == EOF) || (min_persistence < -1.0)) {
-    std::cerr << "Error: " << argv[4] << " is not correct\n";
-    usage(argv[0]);
-  }
+  int coeff_field_characteristic = atoi(argv[3]);
+  Filtration_value min_persistence = strtof(argv[4], nullptr);
 
   // Read points from file
   std::string offInputFile(argv[1]);

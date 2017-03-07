@@ -1,15 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 project(Tangential_complex_benchmark)
 
-if (GCOVR_PATH)
-  # for gcovr to make coverage reports - Corbera Jenkins plugin
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
-endif()
-if (GPROF_PATH)
-  # for gprof to make coverage reports - Jenkins
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
-endif()
-
 # need CGAL 4.8
 if(CGAL_FOUND)
   if (NOT CGAL_VERSION VERSION_LESS 4.8.0)

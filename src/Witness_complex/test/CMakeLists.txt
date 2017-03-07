@@ -10,21 +10,33 @@ if (GPROF_PATH)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
 endif()
 
-add_executable ( simple_witness_complexUT simple_witness_complex.cpp )
-target_link_libraries(simple_witness_complexUT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+add_executable ( Witness_complex_test_simple_witness_complex test_simple_witness_complex.cpp )
+target_link_libraries(Witness_complex_test_simple_witness_complex ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+if (TBB_FOUND)
+  target_link_libraries(Witness_complex_test_simple_witness_complex ${TBB_LIBRARIES})
+endif(TBB_FOUND)
 
 # Unitary tests definition and xml result file generation
-add_test(NAME simple_witness_complexUT
-  COMMAND ${CMAKE_CURRENT_BINARY_DIR}/simple_witness_complexUT 
+add_test(NAME simple_witness_complex
+  COMMAND ${CMAKE_CURRENT_BINARY_DIR}/Witness_complex_test_simple_witness_complex 
     # XML format for Jenkins xUnit plugin 
-    --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/simple_witness_complexUT.xml --log_level=test_suite --report_level=no)
+    --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/Witness_complex_test_simple_witness_complexUT.xml --log_level=test_suite --report_level=no)
 
-add_executable ( witness_complex_pointsUT witness_complex_points.cpp )
-target_link_libraries(witness_complex_pointsUT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+# CGAL and Eigen3 are required for Euclidean version of Witness
+if(CGAL_FOUND)
+  if (NOT CGAL_VERSION VERSION_LESS 4.6.0)
+    if (EIGEN3_FOUND)
+      add_executable ( Witness_complex_test_euclidean_simple_witness_complex test_euclidean_simple_witness_complex.cpp )
+      target_link_libraries(Witness_complex_test_euclidean_simple_witness_complex ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+      if (TBB_FOUND)
+        target_link_libraries(Witness_complex_test_euclidean_simple_witness_complex ${TBB_LIBRARIES})
+      endif(TBB_FOUND)
 
-# Unitary tests definition and xml result file generation
-add_test(NAME witness_complex_pointsUT
-  COMMAND ${CMAKE_CURRENT_BINARY_DIR}/witness_complex_pointsUT 
-    # XML format for Jenkins xUnit plugin 
-    --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/witness_complex_pointsUT.xml --log_level=test_suite --report_level=no)
-
+      # Unitary tests definition and xml result file generation
+      add_test(NAME euclidean_simple_witness_complex
+        COMMAND ${CMAKE_CURRENT_BINARY_DIR}/Witness_complex_test_euclidean_simple_witness_complex
+          # XML format for Jenkins xUnit plugin
+          --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/Witness_complex_test_euclidean_simple_witness_complexUT.xml --log_level=test_suite --report_level=no)
+    endif(EIGEN3_FOUND)
+  endif (NOT CGAL_VERSION VERSION_LESS 4.6.0)
+endif()

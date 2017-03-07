@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <algorithm>
 #include <utility> // std::pair, std::make_pair
@@ -19,19 +20,19 @@ using namespace Gudhi;
 
 typedef boost::mpl::list<Simplex_tree<>, Simplex_tree<Simplex_tree_options_fast_persistence>> list_of_tested_variants;
 
-const Vertex_handle DEFAULT_VERTEX_HANDLE = (const Vertex_handle) - 1;
-const Filtration_value DEFAULT_FILTRATION_VALUE = (const Filtration_value) 0.0;
 
 template<class typeST>
 void test_empty_simplex_tree(typeST& tst) {
-  BOOST_CHECK(tst.null_vertex() == DEFAULT_VERTEX_HANDLE);
-  BOOST_CHECK(tst.filtration() == DEFAULT_FILTRATION_VALUE);
+  typedef typename typeST::Vertex_handle Vertex_handle;
+  const Vertex_handle DEFAULT_VERTEX_VALUE = Vertex_handle(- 1);
+  BOOST_CHECK(tst.null_vertex() == DEFAULT_VERTEX_VALUE);
+  BOOST_CHECK(tst.filtration() == 0.0);
   BOOST_CHECK(tst.num_vertices() == (size_t) 0);
   BOOST_CHECK(tst.num_simplices() == (size_t) 0);
   typename typeST::Siblings* STRoot = tst.root();
   BOOST_CHECK(STRoot != nullptr);
   BOOST_CHECK(STRoot->oncles() == nullptr);
-  BOOST_CHECK(STRoot->parent() == DEFAULT_VERTEX_HANDLE);
+  BOOST_CHECK(STRoot->parent() == DEFAULT_VERTEX_VALUE);
   BOOST_CHECK(tst.dimension() == -1);
 }
 
@@ -59,7 +60,7 @@ void test_iterators_on_empty_simplex_tree(typeST& tst) {
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_when_empty, typeST, list_of_tested_variants) {
   typedef std::pair<typename typeST::Simplex_handle, bool> typePairSimplexBool;
-  typedef std::vector<Vertex_handle> typeVectorVertex;
+  typedef std::vector<typename typeST::Vertex_handle> typeVectorVertex;
 
   std::cout << "********************************************************************" << std::endl;
   std::cout << "TEST OF DEFAULT CONSTRUCTOR" << std::endl;
@@ -72,8 +73,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_when_empty, typeST, list_of_tested_va
   std::cout << "TEST OF EMPTY INSERTION" << std::endl;
   typeVectorVertex simplexVectorEmpty;
   BOOST_CHECK(simplexVectorEmpty.empty() == true);
-  typePairSimplexBool returnEmptyValue = st.insert_simplex(simplexVectorEmpty,
-                                                           DEFAULT_FILTRATION_VALUE);
+  typePairSimplexBool returnEmptyValue = st.insert_simplex(simplexVectorEmpty, 0.0);
   BOOST_CHECK(returnEmptyValue.first == typename typeST::Simplex_handle(nullptr));
   BOOST_CHECK(returnEmptyValue.second == true);
 
@@ -141,12 +141,13 @@ void test_simplex_tree_contains(typeST& simplexTree, typeSimplex& simplex, int p
 template<class typeST, class typePairSimplexBool>
 void test_simplex_tree_insert_returns_true(const typePairSimplexBool& returnValue) {
   BOOST_CHECK(returnValue.second == true);
-  typename typeST::Simplex_handle shReturned = returnValue.first; // Simplex_handle = boost::container::flat_map< Vertex_handle, Node >::iterator
+  // Simplex_handle = boost::container::flat_map< typeST::Vertex_handle, Node >::iterator
+  typename typeST::Simplex_handle shReturned = returnValue.first;
   BOOST_CHECK(shReturned != typename typeST::Simplex_handle(nullptr));
 }
 
 // Global variables
-Filtration_value max_fil = DEFAULT_FILTRATION_VALUE;
+double max_fil = 0.0;
 int dim_max = -1;
 
 template<class typeST, class Filtration_value>
@@ -179,8 +180,9 @@ void set_and_test_simplex_tree_dim_fil(typeST& simplexTree, int vectorSize, cons
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_variants) {
+  typedef typename typeST::Filtration_value Filtration_value;
   typedef std::pair<typename typeST::Simplex_handle, bool> typePairSimplexBool;
-  typedef std::vector<Vertex_handle> typeVectorVertex;
+  typedef std::vector<typename typeST::Vertex_handle> typeVectorVertex;
   typedef std::pair<typeVectorVertex, Filtration_value> typeSimplex;
   const Filtration_value FIRST_FILTRATION_VALUE = 0.1;
   const Filtration_value SECOND_FILTRATION_VALUE = 0.2;
@@ -188,7 +190,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
   const Filtration_value FOURTH_FILTRATION_VALUE = 0.4;
   // reset since we run the test several times
   dim_max = -1;
-  max_fil = DEFAULT_FILTRATION_VALUE;
+  max_fil = 0.0;
 
   // TEST OF INSERTION
   std::cout << "********************************************************************" << std::endl;
@@ -303,7 +305,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
   returnValue = st.insert_simplex(tenthSimplex.first, tenthSimplex.second);
 
   BOOST_CHECK(returnValue.second == false);
-  typename typeST::Simplex_handle shReturned = returnValue.first; // Simplex_handle = boost::container::flat_map< Vertex_handle, Node >::iterator
+  // Simplex_handle = boost::container::flat_map< typeST::Vertex_handle, Node >::iterator
+  typename typeST::Simplex_handle shReturned = returnValue.first;
   BOOST_CHECK(shReturned == typename typeST::Simplex_handle(nullptr));
   BOOST_CHECK(st.num_vertices() == (size_t) 4); // Not incremented !!
   BOOST_CHECK(st.dimension() == dim_max);
@@ -317,7 +320,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
   returnValue = st.insert_simplex(eleventhSimplex.first, eleventhSimplex.second);
 
   BOOST_CHECK(returnValue.second == false);
-  shReturned = returnValue.first; // Simplex_handle = boost::container::flat_map< Vertex_handle, Node >::iterator
+  // Simplex_handle = boost::container::flat_map< typeST::Vertex_handle, Node >::iterator
+  shReturned = returnValue.first;
   BOOST_CHECK(shReturned == typename typeST::Simplex_handle(nullptr));
   BOOST_CHECK(st.num_vertices() == (size_t) 4); // Not incremented !!
   BOOST_CHECK(st.dimension() == dim_max);
@@ -375,8 +379,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(NSimplexAndSubfaces_tree_insertion, typeST, list_of_tested_variants) {
   typedef std::pair<typename typeST::Simplex_handle, bool> typePairSimplexBool;
-  typedef std::vector<Vertex_handle> typeVectorVertex;
-  typedef std::pair<typeVectorVertex, Filtration_value> typeSimplex;
+  typedef std::vector<typename typeST::Vertex_handle> typeVectorVertex;
+  typedef std::pair<typeVectorVertex, typename typeST::Filtration_value> typeSimplex;
   std::cout << "********************************************************************" << std::endl;
   std::cout << "TEST OF RECURSIVE INSERTION" << std::endl;
   typeST st;
@@ -394,7 +398,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(NSimplexAndSubfaces_tree_insertion, typeST, list_o
   // Check it is well inserted
   BOOST_CHECK(true == returnValue.second);
   position = 0;
-  std::sort(SimplexVector1.begin(), SimplexVector1.end(), std::greater<Vertex_handle>());
+  std::sort(SimplexVector1.begin(), SimplexVector1.end(), std::greater<typename typeST::Vertex_handle>());
   for (auto vertex : st.simplex_vertex_range(returnValue.first)) {
     // Check returned Simplex_handle
     std::cout << "vertex = " << vertex << " | vector[" << position << "] = " << SimplexVector1[position] << std::endl;
@@ -413,7 +417,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(NSimplexAndSubfaces_tree_insertion, typeST, list_o
   // Check it is well inserted
   BOOST_CHECK(true == returnValue.second);
   position = 0;
-  std::sort(SimplexVector2.begin(), SimplexVector2.end(), std::greater<Vertex_handle>());
+  std::sort(SimplexVector2.begin(), SimplexVector2.end(), std::greater<typename typeST::Vertex_handle>());
   for (auto vertex : st.simplex_vertex_range(returnValue.first)) {
     // Check returned Simplex_handle
     std::cout << "vertex = " << vertex << " | vector[" << position << "] = " << SimplexVector2[position] << std::endl;
@@ -432,7 +436,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(NSimplexAndSubfaces_tree_insertion, typeST, list_o
   // Check it is well inserted
   BOOST_CHECK(true == returnValue.second);
   position = 0;
-  std::sort(SimplexVector3.begin(), SimplexVector3.end(), std::greater<Vertex_handle>());
+  std::sort(SimplexVector3.begin(), SimplexVector3.end(), std::greater<typename typeST::Vertex_handle>());
   for (auto vertex : st.simplex_vertex_range(returnValue.first)) {
     // Check returned Simplex_handle
     std::cout << "vertex = " << vertex << " | vector[" << position << "] = " << SimplexVector3[position] << std::endl;
@@ -462,7 +466,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(NSimplexAndSubfaces_tree_insertion, typeST, list_o
   // Check it is well inserted
   BOOST_CHECK(true == returnValue.second);
   position = 0;
-  std::sort(SimplexVector5.begin(), SimplexVector5.end(), std::greater<Vertex_handle>());
+  std::sort(SimplexVector5.begin(), SimplexVector5.end(), std::greater<typename typeST::Vertex_handle>());
   for (auto vertex : st.simplex_vertex_range(returnValue.first)) {
     // Check returned Simplex_handle
     std::cout << "vertex = " << vertex << " | vector[" << position << "] = " << SimplexVector5[position] << std::endl;
@@ -481,7 +485,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(NSimplexAndSubfaces_tree_insertion, typeST, list_o
   // Check it is well inserted
   BOOST_CHECK(true == returnValue.second);
   position = 0;
-  std::sort(SimplexVector6.begin(), SimplexVector6.end(), std::greater<Vertex_handle>());
+  std::sort(SimplexVector6.begin(), SimplexVector6.end(), std::greater<typename typeST::Vertex_handle>());
   for (auto vertex : st.simplex_vertex_range(returnValue.first)) {
     // Check returned Simplex_handle
     std::cout << "vertex = " << vertex << " | vector[" << position << "] = " << SimplexVector6[position] << std::endl;
@@ -504,12 +508,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(NSimplexAndSubfaces_tree_insertion, typeST, list_o
   /*   A facet [3,4,5]        */
   /*   A cell  [0,1,6,7]      */
 
-  typeSimplex simplexPair1 = std::make_pair(SimplexVector1, DEFAULT_FILTRATION_VALUE);
-  typeSimplex simplexPair2 = std::make_pair(SimplexVector2, DEFAULT_FILTRATION_VALUE);
-  typeSimplex simplexPair3 = std::make_pair(SimplexVector3, DEFAULT_FILTRATION_VALUE);
-  typeSimplex simplexPair4 = std::make_pair(SimplexVector4, DEFAULT_FILTRATION_VALUE);
-  typeSimplex simplexPair5 = std::make_pair(SimplexVector5, DEFAULT_FILTRATION_VALUE);
-  typeSimplex simplexPair6 = std::make_pair(SimplexVector6, DEFAULT_FILTRATION_VALUE);
+  typeSimplex simplexPair1 = std::make_pair(SimplexVector1, 0.0);
+  typeSimplex simplexPair2 = std::make_pair(SimplexVector2, 0.0);
+  typeSimplex simplexPair3 = std::make_pair(SimplexVector3, 0.0);
+  typeSimplex simplexPair4 = std::make_pair(SimplexVector4, 0.0);
+  typeSimplex simplexPair5 = std::make_pair(SimplexVector5, 0.0);
+  typeSimplex simplexPair6 = std::make_pair(SimplexVector6, 0.0);
   test_simplex_tree_contains(st, simplexPair1, 6); // (2,1,0) is in position 6
   test_simplex_tree_contains(st, simplexPair2, 7); // (3) is in position 7
   test_simplex_tree_contains(st, simplexPair3, 8); // (3,0) is in position 8
@@ -600,7 +604,7 @@ void test_cofaces(typeST& st, const std::vector<Vertex_handle>& expected, int di
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(coface_on_simplex_tree, typeST, list_of_tested_variants) {
-  typedef std::vector<Vertex_handle> typeVectorVertex;
+  typedef std::vector<typename typeST::Vertex_handle> typeVectorVertex;
   std::cout << "********************************************************************" << std::endl;
   std::cout << "TEST COFACE ALGORITHM" << std::endl;
   typeST st;
@@ -629,7 +633,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(coface_on_simplex_tree, typeST, list_of_tested_var
   // FIXME
   st.set_dimension(3);
 
-  std::vector<Vertex_handle> simplex_result;
+  std::vector<typename typeST::Vertex_handle> simplex_result;
   std::vector<typename typeST::Simplex_handle> result;
   std::cout << "First test - Star of (3):" << std::endl;
 
@@ -649,7 +653,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(coface_on_simplex_tree, typeST, list_of_tested_var
   result.push_back(st.find(simplex_result));
   simplex_result.clear();
 
-  std::vector<Vertex_handle> vertex = {3};
+  std::vector<typename typeST::Vertex_handle> vertex = {3};
   test_cofaces(st, vertex, 0, result);
   vertex.clear();
   result.clear();
@@ -699,7 +703,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(coface_on_simplex_tree, typeST, list_of_tested_var
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(copy_move_on_simplex_tree, typeST, list_of_tested_variants) {
-  typedef std::vector<Vertex_handle> typeVectorVertex;
+  typedef std::vector<typename typeST::Vertex_handle> typeVectorVertex;
   std::cout << "********************************************************************" << std::endl;
   std::cout << "TEST COPY MOVE CONSTRUCTORS" << std::endl;
   typeST st;
@@ -771,12 +775,11 @@ void test_simplex_is_vertex(typeST& st, typename typeST::Simplex_handle sh, type
 
 BOOST_AUTO_TEST_CASE(non_contiguous) {
   typedef Simplex_tree<> typeST;
-  typedef typeST::Vertex_handle Vertex_handle;
   typedef typeST::Simplex_handle Simplex_handle;
   std::cout << "********************************************************************" << std::endl;
   std::cout << "TEST NON-CONTIGUOUS VERTICES" << std::endl;
   typeST st;
-  Vertex_handle e[] = {3,-7};
+  typeST::Vertex_handle e[] = {3,-7};
   std::cout << "Insert" << std::endl;
   st.insert_simplex_and_subfaces(e);
   BOOST_CHECK(st.num_vertices() == 2);
