@@ -1,25 +1,17 @@
 =================================================================  ===================================  ===================================
 :Author: Siargey Kachanovich                                       :Introduced in: GUDHI 2.0.0          :Copyright: GPL v3
+:Euclidean version requires: CGAL :math:`\geq` 4.6.0               Eigen3
 =================================================================  ===================================  ===================================
 
 +-----------------------------------------------------------------+----------------------------------------------------------------------+
 | .. image::                                                      | Witness complex :math:`Wit(W,L)` is a simplicial complex defined on  |
-|      img/Witness_complex_representation.png                     | two sets of points in :math:`\mathbb{R}^D`:Wit(W,L)` is a simplicial |
-|                                                                 | complex defined on two sets of points in :math:`\mathbb{R}^D`:       |
-|                                                                 |                                                                      |
-|                                                                 | * :math:`W` set of **witnesses** and                                 |
-|                                                                 | * :math:`L \subseteq W` set of **landmarks**.                        |
-|                                                                 |                                                                      |
-|                                                                 | The simplices are based on landmarks and a simplex belongs to the    |
-|                                                                 | witness complex if and only if it is witnessed, that is:             |
-|                                                                 |                                                                      |
-|                                                                 | :math:`\sigma \subset L` is witnessed if there exists a point        |
-|                                                                 | :math:`w \in W` such that w is closer to the vertices of             |
-|                                                                 | :math:`\sigma` than other points in :math:`L` and all of its faces   |
-|                                                                 | are witnessed as well.                                               |
+|      img/Witness_complex_representation.png                     | two sets of points in :math:`\mathbb{R}^D`.                          |
 |                                                                 |                                                                      |
 |                                                                 | The data structure is described in                                   |
 |                                                                 | :cite:`boissonnatmariasimplextreealgorithmica`.                      |
 +-----------------------------------------------------------------+----------------------------------------------------------------------+
-| :doc:`witness_complex_user`                                     | :doc:`witness_complex_ref`                                           |
+| :doc:`witness_complex_user`                                     | * :doc:`witness_complex_ref`                                         |
+|                                                                 | * :doc:`strong_witness_complex_ref`                                  |
+|                                                                 | * :doc:`euclidean_witness_complex_ref`                               |
+|                                                                 | * :doc:`euclidean_strong_witness_complex_ref`                        |
 +-----------------------------------------------------------------+----------------------------------------------------------------------+
