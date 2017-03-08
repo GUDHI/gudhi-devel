@@ -44,7 +44,7 @@ cdef class WitnessComplex:
     cdef Witness_complex_interface * thisptr
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, points=None, number_of_landmarks=5):
+    def __init__(self, nearest_landmark_table=None):
         """WitnessComplex constructor.
 
         :param nearest_landmark_table: A list of nearest landmark.
