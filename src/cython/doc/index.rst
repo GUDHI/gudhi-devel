@@ -79,4 +79,9 @@ Persistence graphical tools
 
 .. include:: persistence_graphical_tools_sum.rst
 
-.. include:: biblio.rst
+Bibliography
+************
+
+.. bibliography:: bibliography.bib
+   :filter: docnames
+   :style: unsrt

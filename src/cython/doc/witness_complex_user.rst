@@ -81,5 +81,9 @@ Example2: Computing persistence using strong relaxed witness complex
 
 Here is an example of constructing a strong witness complex filtration and computing persistence on it:
 
-.. include:: biblio.rst
+Bibliography
+************
 
+.. bibliography:: bibliography.bib
+   :filter: docnames
+   :style: unsrt

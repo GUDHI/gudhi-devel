@@ -153,4 +153,9 @@ Examples.
 
 End user programs are available in cython/example/ folder.
 
-.. include:: biblio.rst
+Bibliography
+************
+
+.. bibliography:: bibliography.bib
+   :filter: docnames
+   :style: unsrt

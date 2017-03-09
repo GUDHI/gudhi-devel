@@ -196,4 +196,10 @@ the program output is:
    ([2, 3, 6], 36.5)
    ([2, 4, 6], 37.24489795918368)
 
-.. :include: how_to_cite_cgal.rst
+==============
+CGAL citations
+==============
+
+.. bibliography:: how_to_cite_cgal.bib
+   :filter: docnames
+   :style: unsrt

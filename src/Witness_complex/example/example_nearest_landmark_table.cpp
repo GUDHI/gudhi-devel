@@ -23,7 +23,7 @@
 #define BOOST_PARAMETER_MAX_ARITY 12
 
 #include <gudhi/Simplex_tree.h>
-#include <gudhi/Witness_complex.h>
+#include <gudhi/Strong_witness_complex.h>
 #include <gudhi/Persistent_cohomology.h>
 
 #include <iostream>
@@ -35,7 +35,7 @@
 int main(int argc, char * const argv[]) {
   using Nearest_landmark_range = std::vector<std::pair<std::size_t, double>>;
   using Nearest_landmark_table = std::vector<Nearest_landmark_range>;
-  using Witness_complex = Gudhi::witness_complex::Witness_complex<Nearest_landmark_table>;
+  using Witness_complex = Gudhi::witness_complex::Strong_witness_complex<Nearest_landmark_table>;
   using Simplex_tree = Gudhi::Simplex_tree<>;
   using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
   using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
@@ -56,7 +56,7 @@ int main(int argc, char * const argv[]) {
                                std::make_pair(2, 3), std::make_pair(3, 4)}; nlt.push_back(w4);
 
   Witness_complex witness_complex(nlt);
-  witness_complex.create_complex(simplex_tree, 4.1);
+  witness_complex.create_complex(simplex_tree, 4.1, 2);
 
   std::cout << "Number of simplices: " << simplex_tree.num_simplices() << std::endl;
 

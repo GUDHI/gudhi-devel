@@ -59,6 +59,13 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     return (result.second);
   }
 
+  // Do not interface this function, only used in strong witness interface for complex creation
+  bool insert_simplex_and_subfaces(const std::vector<std::size_t>& complex, Filtration_value filtration = 0) {
+    Insertion_result result = Simplex_tree<SimplexTreeOptions>::insert_simplex_and_subfaces(complex, filtration);
+    Simplex_tree<SimplexTreeOptions>::initialize_filtration();
+    return (result.second);
+  }
+
   Filtration_value simplex_filtration(const Simplex& complex) {
     return Simplex_tree<SimplexTreeOptions>::filtration(Simplex_tree<SimplexTreeOptions>::find(complex));
   }

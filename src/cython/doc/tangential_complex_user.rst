@@ -187,4 +187,9 @@ The output is:
     Tangential contains 4 vertices.
     Inconsistencies has been fixed.
 
-.. include:: biblio.rst
+Bibliography
+************
+
+.. bibliography:: bibliography.bib
+   :filter: docnames
+   :style: unsrt
