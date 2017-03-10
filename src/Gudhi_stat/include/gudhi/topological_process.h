@@ -362,6 +362,47 @@ public:
 		std::cout << std::endl << std::endl << std::endl << "Open gnuplot terminal and type load '" << gif_gnuplot_script_file_name.str() << "' to create an animated gif \n";
 	}//plot
 	
+	/**
+	 * This procedure compute veliocity of the data in the topological process. The veliocity is devine as distance (of persistence information) over time. In this implementation we assume that
+	 * the time points when the persistence information is sampled is equally distributed in time. Therefore that we may assume that time between two constitive persistence information is 1, in which
+	 * case veliocity is just distance between two constitutitve diagrams. 
+	 * There is an obvious intuition behinf the veliocity: large veliocity means large changes in the topoogy. 
+	**/
+	std::vector< double > compute_veliocity( double exponent = 1 )
+	{
+		std::vector< double > result;
+		result.reserve( this->data.size()-1 );
+		for ( size_t i = 0 ; i != this-data.size() - 1 ; ++i )
+		{
+			result.push_back( this->data[i]->distance( *this->data[i+1] , exponent ) );
+		}
+		return result;
+	} 
+	
+	/**
+	 * This procedure compute veliocity of the data in the topological process. Accleration is defined as an increase of veliocity over time. In this implementation we assume that
+	 * the time points when the persistence information is sampled is equally distributed in time. Therefore that we may assume that time between two constitive persistence information is 1, in which
+	 * case acceleration is simply an increase of veliocity (the number may be negative).
+	 * We have two versions of this procedure:
+	 * The first one compute the acceleration based on the raw data (computations of veliocity are need to be done first, and later the informationa about veliocity is lost). 
+	 * The second one takes as an input the vector of veliocities, and return the vector of acceleration.
+	 * There is an obvious intuition behid the acceleration: large (up to absolute value) value of acceleration implies large changes in the topology.  
+	**/ 
+	std::vector< double > compute_acceleration( const std::vector< double >& veliocity )
+	{
+		std::vector< double > acceleration;
+		acceleration.reserve( veliocity.size() - 1 );
+		for ( size_t i = 0 ; i != veliocity.size()-1 ; ++i )
+		{
+			acceleration.push_back( veliocity[i+1]-veliocity[i] );
+		}
+		return acceleration;
+	}
+	std::vector< double > compute_acceleration( double exponent = 1 )
+	{		
+		return this->compute_acceleration( this->compute_veliocity( exponent ) );
+	}	
+	
 	
 	std::vector< Representation* > get_data(){return this->data;}
 private:
