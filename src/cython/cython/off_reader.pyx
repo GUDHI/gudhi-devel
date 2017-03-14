@@ -1,10 +1,15 @@
+from cython cimport numeric
+from libcpp.vector cimport vector
+from libcpp.string cimport string
+import os
+
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
    library for computational topology.
 
    Author(s):       Vincent Rouvreau
 
-   Copyright (C) 2016  INRIA
+   Copyright (C) 2016 INRIA
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -21,19 +26,24 @@
 """
 
 __author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016  INRIA"
+__copyright__ = "Copyright (C) 2016 INRIA"
 __license__ = "GPL v3"
 
-include "cython/off_reader.pyx"
-include "cython/simplex_tree.pyx"
-include "cython/rips_complex.pyx"
-include "cython/cubical_complex.pyx"
-include "cython/periodic_cubical_complex.pyx"
-include "cython/persistence_graphical_tools.py"
-include "cython/witness_complex.pyx"
-include "cython/strong_witness_complex.pyx"
-@GUDHI_CYTHON_ALPHA_COMPLEX@
-@GUDHI_CYTHON_EUCLIDEAN_WITNESS_COMPLEX@
-@GUDHI_CYTHON_SUBSAMPLING@
-@GUDHI_CYTHON_TANGENTIAL_COMPLEX@
-@GUDHI_CYTHON_BOTTLENECK_DISTANCE@
+cdef extern from "Off_reader_interface.h" namespace "Gudhi":
+    vector[vector[double]] read_points_from_OFF_file(string off_file)
+
+def read_off(off_file=''):
+    """Read points from OFF file.
+
+    :param off_file: An OFF file style name.
+    :type off_file: string
+
+    :returns:  The point set.
+    :rtype: vector[vector[double]]
+    """
+    if off_file is not '':
+        if os.path.isfile(off_file):
+            return read_points_from_OFF_file(off_file)
+        else:
+            print("file " + off_file + " not found.")
+

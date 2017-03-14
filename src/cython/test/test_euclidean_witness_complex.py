@@ -1,10 +1,12 @@
+import gudhi
+
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
    library for computational topology.
 
    Author(s):       Vincent Rouvreau
 
-   Copyright (C) 2016  INRIA
+   Copyright (C) 2016 INRIA
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -21,19 +23,17 @@
 """
 
 __author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016  INRIA"
+__copyright__ = "Copyright (C) 2016 INRIA"
 __license__ = "GPL v3"
 
-include "cython/off_reader.pyx"
-include "cython/simplex_tree.pyx"
-include "cython/rips_complex.pyx"
-include "cython/cubical_complex.pyx"
-include "cython/periodic_cubical_complex.pyx"
-include "cython/persistence_graphical_tools.py"
-include "cython/witness_complex.pyx"
-include "cython/strong_witness_complex.pyx"
-@GUDHI_CYTHON_ALPHA_COMPLEX@
-@GUDHI_CYTHON_EUCLIDEAN_WITNESS_COMPLEX@
-@GUDHI_CYTHON_SUBSAMPLING@
-@GUDHI_CYTHON_TANGENTIAL_COMPLEX@
-@GUDHI_CYTHON_BOTTLENECK_DISTANCE@
+
+def test_empty_euclidean_witness_complex():
+    euclidean_witness = gudhi.EuclideanWitnessComplex()
+    assert euclidean_witness.__is_defined() == False
+
+def test_witness_complex():
+    point_cloud = [[1.0, 1.0], [7.0, 0.0], [4.0, 6.0], [9.0, 6.0],
+        [0.0, 14.0], [2.0, 19.0], [9.0, 17.0]]
+    landmarks = gudhi.pick_n_random_points(points=point_cloud,nb_points=3)
+    euclidean_witness_complex = gudhi.EuclideanWitnessComplex(landmarks=landmarks, witnesses = point_cloud)
+    simplex_tree = euclidean_witness_complex.create_simplex_tree(max_alpha_square=4.1)
