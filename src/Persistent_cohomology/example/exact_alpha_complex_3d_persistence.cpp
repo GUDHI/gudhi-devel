@@ -4,7 +4,7 @@
  *
  *    Author(s):       Vincent Rouvreau
  *
- *    Copyright (C) 2014  INRIA
+ *    Copyright (C) 2014  INRIA Saclay (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -26,8 +26,7 @@
 #include <boost/variant.hpp>
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Periodic_3_Delaunay_triangulation_traits_3.h>
-#include <CGAL/Periodic_3_Delaunay_triangulation_3.h>
+#include <CGAL/Delaunay_triangulation_3.h>
 #include <CGAL/Alpha_shape_3.h>
 #include <CGAL/iterator.h>
 
@@ -41,36 +40,31 @@
 #include <utility>
 #include <list>
 #include <vector>
-#include <cstdlib>
 
-// Traits
-using K = CGAL::Exact_predicates_inexact_constructions_kernel;
-using PK = CGAL::Periodic_3_Delaunay_triangulation_traits_3<K>;
-// Vertex type
-using DsVb = CGAL::Periodic_3_triangulation_ds_vertex_base_3<>;
-using Vb = CGAL::Triangulation_vertex_base_3<PK, DsVb>;
-using AsVb = CGAL::Alpha_shape_vertex_base_3<PK, Vb>;
-// Cell type
-using DsCb = CGAL::Periodic_3_triangulation_ds_cell_base_3<>;
-using Cb = CGAL::Triangulation_cell_base_3<PK, DsCb>;
-using AsCb = CGAL::Alpha_shape_cell_base_3<PK, Cb>;
-using Tds = CGAL::Triangulation_data_structure_3<AsVb, AsCb>;
-using P3DT3 = CGAL::Periodic_3_Delaunay_triangulation_3<PK, Tds>;
-using Alpha_shape_3 = CGAL::Alpha_shape_3<P3DT3>;
-using Point_3 = PK::Point_3;
+// Alpha_shape_3 templates type definitions
+using Kernel = CGAL::Exact_predicates_inexact_constructions_kernel;
+using Exact_tag = CGAL::Tag_true;
+using Vb = CGAL::Alpha_shape_vertex_base_3<Kernel, CGAL::Default, Exact_tag>;
+using Fb = CGAL::Alpha_shape_cell_base_3<Kernel, CGAL::Default, Exact_tag>;
+using Tds = CGAL::Triangulation_data_structure_3<Vb, Fb>;
+using Triangulation_3 = CGAL::Delaunay_triangulation_3<Kernel, Tds>;
+using Alpha_shape_3 = CGAL::Alpha_shape_3<Triangulation_3, Exact_tag>;
+
+// From file type definition
+using Point_3 = Kernel::Point_3;
 
 // filtration with alpha values needed type definition
 using Alpha_value_type = Alpha_shape_3::FT;
 using Object = CGAL::Object;
 using Dispatch = CGAL::Dispatch_output_iterator<
-    CGAL::cpp11::tuple<Object, Alpha_value_type>,
-    CGAL::cpp11::tuple<std::back_insert_iterator< std::vector<Object> >,
-    std::back_insert_iterator< std::vector<Alpha_value_type> > > >;
+          CGAL::cpp11::tuple<Object, Alpha_value_type>,
+          CGAL::cpp11::tuple<std::back_insert_iterator< std::vector<Object> >,
+          std::back_insert_iterator< std::vector<Alpha_value_type> > > >;
 using Cell_handle = Alpha_shape_3::Cell_handle;
 using Facet = Alpha_shape_3::Facet;
 using Edge_3 = Alpha_shape_3::Edge;
 using Vertex_handle = Alpha_shape_3::Vertex_handle;
-using Vertex_list = std::list<Alpha_shape_3::Vertex_handle>;
+using Vertex_list = std::list<Vertex_handle>;
 
 // gudhi type definition
 using ST = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
@@ -79,24 +73,29 @@ using Simplex_tree_vertex = ST::Vertex_handle;
 using Alpha_shape_simplex_tree_map = std::map<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex >;
 using Alpha_shape_simplex_tree_pair = std::pair<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex>;
 using Simplex_tree_vector_vertex = std::vector< Simplex_tree_vertex >;
-using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<
-    ST, Gudhi::persistent_cohomology::Field_Zp >;
+using PCOH = Gudhi::persistent_cohomology::Persistent_cohomology< ST, Gudhi::persistent_cohomology::Field_Zp >;
 
 void usage(char * const progName) {
   std::cerr << "Usage: " << progName <<
-      " path_to_file_graph path_to_iso_cuboid_3_file coeff_field_characteristic[integer > 0] min_persistence[float >= -1.0]\n";
+      " path_to_file_graph coeff_field_characteristic[integer > 0] min_persistence[float >= -1.0]\n";
   exit(-1);
 }
 
 int main(int argc, char * const argv[]) {
   // program args management
-  if (argc != 5) {
+  if (argc != 4) {
     std::cerr << "Error: Number of arguments (" << argc << ") is not correct\n";
     usage(argv[0]);
   }
 
-  int coeff_field_characteristic = atoi(argv[3]);
-  Filtration_value min_persistence = strtof(argv[4], nullptr);
+  int coeff_field_characteristic = atoi(argv[2]);
+
+  Filtration_value min_persistence = 0.0;
+  int returnedScanValue = sscanf(argv[3], "%f", &min_persistence);
+  if ((returnedScanValue == EOF) || (min_persistence < -1.0)) {
+    std::cerr << "Error: " << argv[3] << " is not correct\n";
+    usage(argv[0]);
+  }
 
   // Read points from file
   std::string offInputFile(argv[1]);
@@ -108,30 +107,14 @@ int main(int argc, char * const argv[]) {
     usage(argv[0]);
   }
 
-  // Read iso_cuboid_3 information from file
-  std::ifstream iso_cuboid_str(argv[2]);
-  double x_min, y_min, z_min, x_max, y_max, z_max;
-  if (iso_cuboid_str.good()) {
-    iso_cuboid_str >> x_min >> y_min >> z_min >> x_max >> y_max >> z_max;
-  } else {
-    std::cerr << "Unable to read file " << argv[2] << std::endl;
-    usage(argv[0]);
-  }
-
   // Retrieve the triangulation
   std::vector<Point_3> lp = off_reader.get_point_cloud();
 
-  // Define the periodic cube
-  P3DT3 pdt(PK::Iso_cuboid_3(x_min, y_min, z_min, x_max, y_max, z_max));
-  // Heuristic for inserting large point sets (if pts is reasonably large)
-  pdt.insert(lp.begin(), lp.end(), true);
-  // As pdt won't be modified anymore switch to 1-sheeted cover if possible
-  if (pdt.is_triangulation_in_1_sheet()) pdt.convert_to_1_sheeted_covering();
-  std::cout << "Periodic Delaunay computed." << std::endl;
-
-  // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode. This is the default mode
-  // Maybe need to set it to GENERAL mode
-  Alpha_shape_3 as(pdt, 0, Alpha_shape_3::GENERAL);
+  // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode.
+  Alpha_shape_3 as(lp.begin(), lp.end(), 0, Alpha_shape_3::GENERAL);
+#ifdef DEBUG_TRACES
+  std::cout << "Alpha shape computed in GENERAL mode" << std::endl;
+#endif  // DEBUG_TRACES
 
   // filtration with alpha values from alpha shape
   std::vector<Object> the_objects;
@@ -180,8 +163,7 @@ int main(int argc, char * const argv[]) {
         // Edge_3 is of dim 1
         dim_max = 1;
       }
-    } else if (const Alpha_shape_3::Vertex_handle * vertex =
-               CGAL::object_cast<Alpha_shape_3::Vertex_handle>(&object_iterator)) {
+    } else if (const Vertex_handle * vertex = CGAL::object_cast<Vertex_handle>(&object_iterator)) {
       count_vertices++;
       vertex_list = from_vertex<Vertex_list, Vertex_handle>(*vertex);
     }
@@ -207,7 +189,8 @@ int main(int argc, char * const argv[]) {
       }
     }
     // Construction of the simplex_tree
-    Filtration_value filtr = /*std::sqrt*/(*the_alpha_value_iterator);
+    // you can also use the_alpha_value_iterator->exact()
+    Filtration_value filtr = /*std::sqrt*/CGAL::to_double(the_alpha_value_iterator->exact());
 #ifdef DEBUG_TRACES
     std::cout << "filtration = " << filtr << std::endl;
 #endif  // DEBUG_TRACES
@@ -249,7 +232,7 @@ int main(int argc, char * const argv[]) {
 
   std::cout << "Simplex_tree dim: " << simplex_tree.dimension() << std::endl;
   // Compute the persistence diagram of the complex
-  Persistent_cohomology pcoh(simplex_tree, true);
+  PCOH pcoh(simplex_tree);
   // initializes the coefficient field for homology
   pcoh.init_coefficients(coeff_field_characteristic);
 

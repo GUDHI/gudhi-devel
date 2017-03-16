@@ -26,8 +26,8 @@
 #include <boost/variant.hpp>
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Periodic_3_Delaunay_triangulation_traits_3.h>
-#include <CGAL/Periodic_3_Delaunay_triangulation_3.h>
+#include <CGAL/Regular_triangulation_euclidean_traits_3.h>
+#include <CGAL/Regular_triangulation_3.h>
 #include <CGAL/Alpha_shape_3.h>
 #include <CGAL/iterator.h>
 
@@ -44,28 +44,25 @@
 #include <cstdlib>
 
 // Traits
-using K = CGAL::Exact_predicates_inexact_constructions_kernel;
-using PK = CGAL::Periodic_3_Delaunay_triangulation_traits_3<K>;
-// Vertex type
-using DsVb = CGAL::Periodic_3_triangulation_ds_vertex_base_3<>;
-using Vb = CGAL::Triangulation_vertex_base_3<PK, DsVb>;
-using AsVb = CGAL::Alpha_shape_vertex_base_3<PK, Vb>;
-// Cell type
-using DsCb = CGAL::Periodic_3_triangulation_ds_cell_base_3<>;
-using Cb = CGAL::Triangulation_cell_base_3<PK, DsCb>;
-using AsCb = CGAL::Alpha_shape_cell_base_3<PK, Cb>;
-using Tds = CGAL::Triangulation_data_structure_3<AsVb, AsCb>;
-using P3DT3 = CGAL::Periodic_3_Delaunay_triangulation_3<PK, Tds>;
-using Alpha_shape_3 = CGAL::Alpha_shape_3<P3DT3>;
-using Point_3 = PK::Point_3;
+using Kernel = CGAL::Exact_predicates_inexact_constructions_kernel;
+using Gt = CGAL::Regular_triangulation_euclidean_traits_3<Kernel>;
+using Vb = CGAL::Alpha_shape_vertex_base_3<Gt>;
+using Fb = CGAL::Alpha_shape_cell_base_3<Gt>;
+using Tds = CGAL::Triangulation_data_structure_3<Vb, Fb>;
+using Triangulation_3 = CGAL::Regular_triangulation_3<Gt,Tds>;
+using Alpha_shape_3 = CGAL::Alpha_shape_3<Triangulation_3>;
+
+// From file type definition
+using Point_3 = Gt::Bare_point;
+using Weighted_point_3 = Gt::Weighted_point;
 
 // filtration with alpha values needed type definition
 using Alpha_value_type = Alpha_shape_3::FT;
 using Object = CGAL::Object;
 using Dispatch = CGAL::Dispatch_output_iterator<
-    CGAL::cpp11::tuple<Object, Alpha_value_type>,
-    CGAL::cpp11::tuple<std::back_insert_iterator< std::vector<Object> >,
-    std::back_insert_iterator< std::vector<Alpha_value_type> > > >;
+          CGAL::cpp11::tuple<Object, Alpha_value_type>,
+          CGAL::cpp11::tuple<std::back_insert_iterator< std::vector<Object> >,
+          std::back_insert_iterator< std::vector<Alpha_value_type> > > >;
 using Cell_handle = Alpha_shape_3::Cell_handle;
 using Facet = Alpha_shape_3::Facet;
 using Edge_3 = Alpha_shape_3::Edge;
@@ -84,7 +81,7 @@ using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomolog
 
 void usage(char * const progName) {
   std::cerr << "Usage: " << progName <<
-      " path_to_file_graph path_to_iso_cuboid_3_file coeff_field_characteristic[integer > 0] min_persistence[float >= -1.0]\n";
+      " path_to_file_graph path_to_weight_file coeff_field_characteristic[integer > 0] min_persistence[float >= -1.0]\n";
   exit(-1);
 }
 
@@ -108,30 +105,35 @@ int main(int argc, char * const argv[]) {
     usage(argv[0]);
   }
 
-  // Read iso_cuboid_3 information from file
-  std::ifstream iso_cuboid_str(argv[2]);
-  double x_min, y_min, z_min, x_max, y_max, z_max;
-  if (iso_cuboid_str.good()) {
-    iso_cuboid_str >> x_min >> y_min >> z_min >> x_max >> y_max >> z_max;
+  // Retrieve the triangulation
+  std::vector<Point_3> lp = off_reader.get_point_cloud();
+
+  // Read weights information from file
+  std::ifstream weights_ifstr(argv[2]);
+  std::vector<Weighted_point_3> wp;
+  if (weights_ifstr.good()) {
+    double weight = 0.0;
+    std::size_t index = 0;
+    // Attempt read the weight in a double format, return false if it fails
+    while((weights_ifstr >> weight) && (index < lp.size()))
+    {
+      wp.push_back(Weighted_point_3(lp[index], weight));
+      index++;
+    }
+    if (index != lp.size()) {
+      std::cerr << "Bad number of weights in file " << argv[2] << std::endl;
+      usage(argv[0]);
+    }
   } else {
     std::cerr << "Unable to read file " << argv[2] << std::endl;
     usage(argv[0]);
   }
 
-  // Retrieve the triangulation
-  std::vector<Point_3> lp = off_reader.get_point_cloud();
-
-  // Define the periodic cube
-  P3DT3 pdt(PK::Iso_cuboid_3(x_min, y_min, z_min, x_max, y_max, z_max));
-  // Heuristic for inserting large point sets (if pts is reasonably large)
-  pdt.insert(lp.begin(), lp.end(), true);
-  // As pdt won't be modified anymore switch to 1-sheeted cover if possible
-  if (pdt.is_triangulation_in_1_sheet()) pdt.convert_to_1_sheeted_covering();
-  std::cout << "Periodic Delaunay computed." << std::endl;
-
-  // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode. This is the default mode
-  // Maybe need to set it to GENERAL mode
-  Alpha_shape_3 as(pdt, 0, Alpha_shape_3::GENERAL);
+  // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode.
+  Alpha_shape_3 as(lp.begin(), lp.end(), 0, Alpha_shape_3::GENERAL);
+#ifdef DEBUG_TRACES
+  std::cout << "Alpha shape computed in GENERAL mode" << std::endl;
+#endif  // DEBUG_TRACES
 
   // filtration with alpha values from alpha shape
   std::vector<Object> the_objects;
