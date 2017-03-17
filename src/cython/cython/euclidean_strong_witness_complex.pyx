@@ -38,8 +38,8 @@ cdef extern from "Euclidean_strong_witness_complex_interface.h" namespace "Gudhi
 
 # EuclideanStrongWitnessComplex python interface
 cdef class EuclideanStrongWitnessComplex:
-    """EuclideanStrongWitnessComplex is a simplicial complex constructed from ...
-
+    """Constructs strong witness complex for given sets of witnesses and
+    landmarks in Euclidean space.
     """
 
     cdef Euclidean_strong_witness_complex_interface * thisptr

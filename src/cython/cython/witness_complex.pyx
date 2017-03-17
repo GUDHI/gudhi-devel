@@ -37,8 +37,8 @@ cdef extern from "Witness_complex_interface.h" namespace "Gudhi":
 
 # WitnessComplex python interface
 cdef class WitnessComplex:
-    """WitnessComplex is a simplicial complex constructed from ...
-
+    """Constructs (weak) witness complex for a given table of nearest landmarks
+    with respect to witnesses.
     """
 
     cdef Witness_complex_interface * thisptr
