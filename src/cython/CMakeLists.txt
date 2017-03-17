@@ -128,7 +128,7 @@ if(PYTHON_PATH AND CYTHON_PATH)
     if (NOT CGAL_VERSION VERSION_LESS 4.6.0)
       # If CGAL_VERSION >= 4.6.0, include euclidean versions of witness complex
       set(GUDHI_CYTHON_EUCLIDEAN_WITNESS_COMPLEX
-          "include 'cython/euclidean_witness_complex.pyx'\n")
+          "include 'cython/euclidean_witness_complex.pyx'\ninclude 'cython/euclidean_strong_witness_complex.pyx'\n")
     else (NOT CGAL_VERSION VERSION_LESS 4.6.0)
       # Remove alpha complex unitary tests
       file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_euclidean_witness_complex.py)

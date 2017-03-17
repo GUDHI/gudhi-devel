@@ -41,8 +41,6 @@ class Alpha_complex_interface {
   using Dynamic_kernel = CGAL::Epick_d< CGAL::Dynamic_dimension_tag >;
   using Point_d = Dynamic_kernel::Point_d;
 
-  typedef typename Simplex_tree<>::Simplex_key Simplex_key;
-
  public:
   Alpha_complex_interface(std::vector<std::vector<double>>&points) {
     alpha_complex_ = new Alpha_complex<Dynamic_kernel>(points);

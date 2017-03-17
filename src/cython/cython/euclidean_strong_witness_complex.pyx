@@ -28,21 +28,21 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 INRIA"
 __license__ = "GPL v3"
 
-cdef extern from "Euclidean_witness_complex_interface.h" namespace "Gudhi":
-    cdef cppclass Euclidean_witness_complex_interface "Gudhi::witness_complex::Euclidean_witness_complex_interface":
-        Euclidean_witness_complex_interface(vector[vector[double]] landmarks, vector[vector[double]] witnesses)
+cdef extern from "Euclidean_strong_witness_complex_interface.h" namespace "Gudhi":
+    cdef cppclass Euclidean_strong_witness_complex_interface "Gudhi::witness_complex::Euclidean_strong_witness_complex_interface":
+        Euclidean_strong_witness_complex_interface(vector[vector[double]] landmarks, vector[vector[double]] witnesses)
         void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square)
         void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square,
             unsigned limit_dimension)
         vector[double] get_point(unsigned vertex)
 
-# EuclideanWitnessComplex python interface
-cdef class EuclideanWitnessComplex:
-    """EuclideanWitnessComplex is a simplicial complex constructed from ...
+# EuclideanStrongWitnessComplex python interface
+cdef class EuclideanStrongWitnessComplex:
+    """EuclideanStrongWitnessComplex is a simplicial complex constructed from ...
 
     """
 
-    cdef Euclidean_witness_complex_interface * thisptr
+    cdef Euclidean_strong_witness_complex_interface * thisptr
 
     # Fake constructor that does nothing but documenting the constructor
     def __init__(self, landmarks=None, witnesses=None):
@@ -58,7 +58,7 @@ cdef class EuclideanWitnessComplex:
     # The real cython constructor
     def __cinit__(self, landmarks=None, witnesses=None):
         if landmarks is not None and witnesses is not None:
-            self.thisptr = new Euclidean_witness_complex_interface(landmarks, witnesses)
+            self.thisptr = new Euclidean_strong_witness_complex_interface(landmarks, witnesses)
 
     def __dealloc__(self):
         if self.thisptr != NULL:

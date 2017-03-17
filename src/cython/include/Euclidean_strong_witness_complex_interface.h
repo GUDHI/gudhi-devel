@@ -20,11 +20,11 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EUCLIDEAN_WITNESS_COMPLEX_INTERFACE_H
-#define	EUCLIDEAN_WITNESS_COMPLEX_INTERFACE_H
+#ifndef EUCLIDEAN_STRONG_WITNESS_COMPLEX_INTERFACE_H
+#define	EUCLIDEAN_STRONG_WITNESS_COMPLEX_INTERFACE_H
 
 #include <gudhi/Simplex_tree.h>
-#include <gudhi/Euclidean_witness_complex.h>
+#include <gudhi/Euclidean_strong_witness_complex.h>
 
 #include "Simplex_tree_interface.h"
 
@@ -40,14 +40,14 @@ namespace Gudhi {
 namespace witness_complex {
 
 
-class Euclidean_witness_complex_interface {
+class Euclidean_strong_witness_complex_interface {
   using Dynamic_kernel = CGAL::Epick_d< CGAL::Dynamic_dimension_tag >;
   using Point_d = Dynamic_kernel::Point_d;
 
   typedef typename Simplex_tree<>::Simplex_key Simplex_key;
 
  public:
-  Euclidean_witness_complex_interface(std::vector<std::vector<double>>&landmarks, std::vector<std::vector<double>>&witnesses)
+  Euclidean_strong_witness_complex_interface(std::vector<std::vector<double>>&landmarks, std::vector<std::vector<double>>&witnesses)
     : landmarks_(landmarks.begin(), landmarks.end()),
       witnesses_(witnesses.begin(), witnesses.end()),
       witness_complex_(landmarks_, witnesses_) {
@@ -76,12 +76,12 @@ class Euclidean_witness_complex_interface {
  private:
   std::vector<Point_d> landmarks_;
   std::vector<Point_d> witnesses_;
-  Euclidean_witness_complex<Dynamic_kernel> witness_complex_;
+  Euclidean_strong_witness_complex<Dynamic_kernel> witness_complex_;
 };
 
 }  // namespace witness_complex
 
 } // namespace Gudhi
 
-#endif  // EUCLIDEAN_WITNESS_COMPLEX_INTERFACE_H
+#endif  // EUCLIDEAN_STRONG_WITNESS_COMPLEX_INTERFACE_H
 
