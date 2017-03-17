@@ -26,6 +26,7 @@
 
 #ifdef GUDHI_USE_TBB
 #include <tbb/parallel_sort.h>
+#include <tbb/task_scheduler_init.h>
 #endif
 
 #include <vector>
@@ -49,10 +50,15 @@ namespace Gudhi_stat
 **/
 
 
+
 template < typename PointCloudCharacteristics , typename CharacteristicFunction , typename DistanceBetweenPointsCharacteristics >
-double bootstrap( size_t number_of_points , CharacteristicFunction f , DistanceBetweenPointsCharacteristics distance , size_t number_of_repetitions , size_t size_of_subsample , double quantile = 0.95 )
+double bootstrap( size_t number_of_points , CharacteristicFunction f , DistanceBetweenPointsCharacteristics distance , size_t number_of_repetitions , size_t size_of_subsample , double quantile = 0.95 , size_t maximal_number_of_threads_in_TBB = std::numeric_limits<size_t>::max() )
 {
 	bool dbg = false;
+	
+	#ifdef GUDHI_USE_TBB
+	tbb::task_scheduler_init init(maximal_number_of_threads_in_TBB == std::numeric_limits<size_t>::max() ? tbb::task_scheduler_init::automatic : maximal_number_of_threads_in_TBB);
+	#endif
 	
 	if ( size_of_subsample >= number_of_points )
 	{
@@ -63,34 +69,40 @@ double bootstrap( size_t number_of_points , CharacteristicFunction f , DistanceB
 	//initialization of a random number generator:
     std::srand ( unsigned ( std::time(0) ) );
 	
-	//we will shuffle the vector of numbers 0,1,2,...,points.size()-1 in order to pick a subset of a size size_of_subsample
-	std::vector< size_t > numbers_to_sample( number_of_points );	
-	for ( size_t i = 0 ; i != number_of_points ; ++i )
-	{			
-		numbers_to_sample[i] = i;
-	}	
+	//we will shuffle the vector of numbers 0,1,2,...,points.size()-1 in order to pick a subset of a size size_of_subsample		
+	std::vector<size_t> numbers_to_sample_(number_of_points) ; //create vector of size_t of a size number_of_points
+	std::iota (std::begin(numbers_to_sample_), std::end(numbers_to_sample_), 0);//populate it with 1 2 3 ... number_of_points.
 	
 	//now we compute the characteristic od all the points:	
-	PointCloudCharacteristics characteristic_of_all_points = f( numbers_to_sample );
+	PointCloudCharacteristics characteristic_of_all_points = f( numbers_to_sample_ );
 	
 	//vector to keep the distances between characteristic_of_points and characteristic_of_subsample:
 	std::vector< double > vector_of_distances( number_of_repetitions , 0 );
 	
 
 
-	#ifdef GUDHI_USE_TBB
-    tbb::parallel_for ( tbb::blocked_range<size_t>(0, number_of_repetitions), [&](const tbb::blocked_range<size_t>& range) 
-    {
-    for  ( size_t it_no = range.begin() ;  it_no != range.end() ; ++it_no )
-	#else
+//TODO- at the moment, the operations I am doing over here do not seems to be threat safe. When using TBB, I am getting wrong results.
+//It is quite likelly because I am not using a method to compute persistence which is threat safe. VERIFY this as soon as I merge with 
+//the new metod to compute persistence. 
+
+//	#ifdef GUDHI_USE_TBB
+//    tbb::parallel_for ( tbb::blocked_range<size_t>(0, number_of_repetitions), [&](const tbb::blocked_range<size_t>& range) 
+//    {
+//    for  ( size_t it_no = range.begin() ;  it_no != range.end() ; ++it_no )
+//	#else
 	for ( size_t it_no = 0 ;  it_no < number_of_repetitions ; ++it_no )
-	#endif	
+//	#endif	
 	{
 		if ( dbg )
 		{
 			std::cout << "Still : " << number_of_repetitions-it_no << " tests to go. \n The subsampled vector consist of points number : ";
+			std::cout << "it_no : " << it_no << std::endl;
+			std::cout << "number_of_points : " << number_of_points << std::endl;
 		}
 		//do a random shuffle of vector_of_characteristics_of_poits
+		std::vector<size_t> numbers_to_sample(number_of_points) ; //create vector of size_t of a size number_of_points
+	    std::iota (std::begin(numbers_to_sample), std::end(numbers_to_sample), 0);//populate it with 1 2 3 ... number_of_points.	
+		//TODO: consider doing it in a smarter/faster way.
 		std::random_shuffle( numbers_to_sample.begin() , numbers_to_sample.end() );
 		
 		//construct a vector< PointType > of a size size_of_subsample:
@@ -110,14 +122,18 @@ double bootstrap( size_t number_of_points , CharacteristicFunction f , DistanceB
 		//and now we compute distance between characteristic_of_points and characteristic_of_subsample. Note that subsampled points go first, and this is neded, since sometimes all points are not needed.
 		double dist = distance( characteristic_of_subsampled_points , characteristic_of_all_points );
 		
-		if ( dbg ) std::cout << "The distance between characteristic of all points and the characteristic of subsample is : " << dist << std::endl;
+		if ( dbg )
+		{
+			 std::cout << "The distance between characteristic of all points and the characteristic of subsample is : " << dist << std::endl;
+			 getchar();
+		 }
 		
 		vector_of_distances[it_no] = dist;		
 	}
-	#ifdef GUDHI_USE_TBB
-    }
-    );
-	#endif
+//	#ifdef GUDHI_USE_TBB
+//    }
+//    );
+//	#endif
 		
 	size_t position_of_quantile = floor(quantile*vector_of_distances.size());
 	if ( position_of_quantile ) --position_of_quantile;

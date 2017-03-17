@@ -34,9 +34,9 @@ using namespace Gudhi::Gudhi_stat;
 
 int main( int argc , char** argv )
 {
-	std::cout << "This program compute dsitance of persistence landscapes stored in a file (the file needs to be created beforehand). \n";	
-	std::cout << "The first parameter of a program is an interger p. The program compute L^p distance of the two landscapes. For L^infty distance choose p = -1. \n";
-	std::cout << "The remaining parameters of this programs are names of files with persistence landscapes.\n";
+	std::cout << "This program compute dsitance of persistence heat maps stored in a file (the file needs to be created beforehand). \n";	
+	std::cout << "The first parameter of a program is an interger p. The program compute L^p distance of the two heat maps. For L^infty distance choose p = -1. \n";
+	std::cout << "The remaining parameters of this programs are names of files with persistence heat maps.\n";
 	
 	if ( argc < 3 )
 	{

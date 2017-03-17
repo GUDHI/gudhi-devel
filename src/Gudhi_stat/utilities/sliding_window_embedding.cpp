@@ -32,6 +32,7 @@ int main( int argc , char** argv )
      Sliding_window_embedding swe( time_series , 3 );
      swe.create_point_cloud("pt_cloud");
      
+     //persistent_cohomology::Persistent_cohomology<ST, Field_Zp >& a = 
      swe.compute_persistence_of_Vietoris_Rips_complex( 1 , 2 ); 
      
      

@@ -140,5 +140,11 @@ target_link_libraries(Multiplicative_bootstrap ${Boost_SYSTEM_LIBRARY})
 #add_executable ( compute_distance_between_vectors compute_distance_between_vectors.cpp )
 #target_link_libraries(compute_distance_between_vectors ${Boost_SYSTEM_LIBRARY})
 
-add_executable ( sliding_window_embedding sliding_window_embedding.cpp )
-target_link_libraries(sliding_window_embedding ${Boost_SYSTEM_LIBRARY} ${TBB_LIBRARIES})
+
+if(CGAL_FOUND)
+  add_executable ( sliding_window_embedding sliding_window_embedding.cpp )
+  target_link_libraries(sliding_window_embedding ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
+  if (TBB_FOUND)
+    target_link_libraries(sliding_window_embedding ${TBB_LIBRARIES})
+  endif(TBB_FOUND)
+endif(CGAL_FOUND)

@@ -31,6 +31,7 @@
 
 #ifdef GUDHI_USE_TBB
 #include <tbb/parallel_sort.h>
+#include <tbb/task_scheduler_init.h>
 #endif
 
 #include <vector>
@@ -58,13 +59,17 @@ template < typename TopologicalObject >
 class norm_of_objects
 {
 public:
+    norm_of_objects():power(1){}
+    norm_of_objects( double power_ ):power(power_){}
 	double operator()( const TopologicalObject& obj )const
 	{
-		TopologicalObject* empty = new TopologicalObject;	
-		double dist = empty->distance( obj , -1 );   
-		delete empty;
+		TopologicalObject empty;
+		double dist = empty.distance( obj , power );   	
+		//std::cerr << "dist : " << dist << std::endl;getchar();			
 		return dist;
 	}
+private:
+	double power;
 };
 
 
@@ -73,9 +78,13 @@ public:
 * This is a generic function to perform multiplicative bootstrap.
 **/
 template < typename TopologicalObject , typename OperationOnObjects , typename NormOnObjects >
-double multiplicative_bootstrap( const std::vector< TopologicalObject* >& topological_objects , size_t number_of_bootstrap_operations , const OperationOnObjects& oper , const NormOnObjects& norm ,  double quantile = 0.95 )
+double multiplicative_bootstrap( const std::vector< TopologicalObject* >& topological_objects , size_t number_of_bootstrap_operations , const OperationOnObjects& oper , const NormOnObjects& norm ,  double quantile = 0.95 , size_t maximal_number_of_threads_in_TBB = std::numeric_limits<size_t>::max() )
 {
 	bool dbg = false;
+	
+	#ifdef GUDHI_USE_TBB
+	tbb::task_scheduler_init init(maximal_number_of_threads_in_TBB == std::numeric_limits<size_t>::max() ? tbb::task_scheduler_init::automatic : maximal_number_of_threads_in_TBB);
+	#endif
 	
 	//initialization of a random number generator:
     std::random_device rd;
@@ -111,10 +120,30 @@ double multiplicative_bootstrap( const std::vector< TopologicalObject* >& topolo
 			double rand_variable = norm_distribution( generator );
 			result = result + rand_variable*oper(*(topological_objects[i]) , average);
 		}
+		if ( dbg )
+		{
+			std::cerr << "Result 1 : " << result << std::endl;
+			getchar();
+		}
 		//HERE THE NORM SEEMS TO BE MISSING!!
 		result = result.abs();
+		if ( dbg )
+		{
+			std::cerr << "Result 2 : " << result << std::endl;
+			getchar();
+		}
 		result = result*(1.0/sqrt( topological_objects.size() ));											
+		if ( dbg )
+		{
+			std::cerr << "Result 3 : " << result << std::endl;
+			getchar();
+		}
 		//NEED TO TAKE MAX
+		if ( dbg )
+		{
+			std::cerr << "Result 4 : " << norm(result) << std::endl;
+			getchar();
+		}
 		vector_of_intermediate_characteristics[it_no] = norm(result);		
 	}
 	#ifdef GUDHI_USE_TBB

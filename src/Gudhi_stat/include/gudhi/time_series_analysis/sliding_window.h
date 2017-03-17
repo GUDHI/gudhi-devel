@@ -31,6 +31,11 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
 
+//for alpha complexes. Should that be keept over here???
+//#include <CGAL/Epick_d.h>
+#include <gudhi/Alpha_complex.h>
+
+
 using namespace std;
 
 namespace Gudhi 
@@ -159,14 +164,17 @@ public:
 		out.close();
 	}
 	
+	
 	/**
 	 * This procedure compute persistence of the sliding window embedding point cloud by using Vietoris-Rips filtration.
 	**/
-	persistent_cohomology::Persistent_cohomology<ST, Field_Zp > compute_persistence_of_Vietoris_Rips_complex( double threshold , unsigned dim_max , unsigned field_coef = 2 , double min_persistence = 0 ) 
+	
+	//persistent_cohomology::Persistent_cohomology<ST, Field_Zp >
+	void compute_persistence_of_Vietoris_Rips_complex( double threshold , unsigned dim_max , unsigned field_coef = 2 , double min_persistence = 0 ) 
 	{	
 		//compute points of the sliding window embedding.
 		std::vector< std::vector< double > > points = this->create_point_cloud();
-		
+		/*
 		// Compute the proximity graph of the points.
 		Graph_t prox_graph = compute_proximity_graph(points, threshold , euclidean_distance< std::vector< double > >);
 
@@ -190,29 +198,29 @@ public:
 
 		//compute persistent cohomology.
 		pcoh.compute_persistent_cohomology(min_persistence);
-		return pcoh;
+		
+		//return pcoh;
 		pcoh.output_diagram();
+		*/
 	}//compute_persistence_of_Vietoris_Rips_complex
 	
 	/**
 	 * This procedure compute persistence of the sliding window embedding point cloud by using Alpha complex filtration.
 	**/ 
-	
+
 	/*persistent_cohomology::Persistent_cohomology<ST, Field_Zp >*/
-	/*void compute_persistence_of_Alpha_complex( double threshold , unsigned dim_max , unsigned field_coef = 2 , double min_persistence = 0 ) 
+	void compute_persistence_of_Alpha_complex( double threshold , unsigned dim_max , unsigned field_coef = 2 , double min_persistence = 0 ) 
 	{	
-		std::string off_file_points;
-		std::string output_file_diag;
-		Filtration_value alpha_square_max_value;
-		int coeff_field_characteristic;
-		Filtration_value min_persistence;
-
-		program_options(argc, argv, off_file_points, output_file_diag, alpha_square_max_value,
-			  coeff_field_characteristic, min_persistence);
-
-		// ----------------------------------------------------------------------------
-		// Init of an alpha complex from an OFF file
-		// ----------------------------------------------------------------------------
+		/*
+		//first we need to take out points and convert it to CGAL points.
+		std::vector< std::vector< double > > points = this->create_point_cloud();		
+		typedef CGAL::Epick_d< CGAL::Dimension_tag<2> > Kernel;
+		std::vector< Kernel::Point_d > Vector_of_points;
+		Vector_of_points.reserve( points.size() );		
+		for ( size_t i = 0 ; i != points.size() ; ++i )
+		{
+			Vector_of_points.push_back( Kernel::Point_d(points[i]) );
+		}
 		using Kernel = CGAL::Epick_d< CGAL::Dynamic_dimension_tag >;
 		Gudhi::alpha_complex::Alpha_complex<Kernel> alpha_complex_from_file(off_file_points, alpha_square_max_value);
 
@@ -233,19 +241,26 @@ public:
 		// initializes the coefficient field for homology
 		pcoh.init_coefficients(coeff_field_characteristic);
 
-		pcoh.compute_persistent_cohomology(min_persistence);
+		pcoh.compute_persistent_cohomology(min_persistence
+		
+		return pcoh;
 
 		// Output the diagram in filediag
-		if (output_file_diag.empty()) {
-		pcoh.output_diagram();
-		} else {
-		std::cout << "Result in file: " << output_file_diag << std::endl;
-		std::ofstream out(output_file_diag);
-		pcoh.output_diagram(out);
-		out.close();
+		if (output_file_diag.empty()) 
+		{
+			pcoh.output_diagram();
+		} 
+		else 
+		{
+			std::cout << "Result in file: " << output_file_diag << std::endl;
+			std::ofstream out(output_file_diag);
+			pcoh.output_diagram(out);
+			out.close();
 		}
+		//here we shoud merge it with what Vincent did to write down the pairs, and we will simply return those pairs.
+		*/ 
 	}//compute_persistence_of_Alpha_complex
-		*/
+
 
 	
 private:

@@ -164,8 +164,7 @@ int main( int argc , char** argv )
 	std::cout << "Read : " << points.size() << " points.\n";
 	
 	distance_between_landscapes distance( p );//L^p distance.
-	compute_persistence_landscape_of_a_point_cloud_in_certain_dimension characteristic_fun( points , dimension , threshold );
-		
+	compute_persistence_landscape_of_a_point_cloud_in_certain_dimension characteristic_fun( points , dimension , threshold );		
 		
 	//and now we can run the real bootstrap.
 	//template < typename PointCloudCharacteristics , typename CharacteristicFunction , typename DistanceBetweenPointsCharacteristics >

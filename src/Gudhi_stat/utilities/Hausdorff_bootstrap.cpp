@@ -65,7 +65,7 @@ int main( int argc , char** argv )
 	//template < typename PointCloudCharacteristics , typename CharacteristicFunction , typename DistanceBetweenPointsCharacteristics >
 	//In this case, the PointCloudCharacteristics is just a vector of numbers of points (in a order fixed on points vector). 
 	//CharacteristicFunction is just identity, transforming std::vector< size_t > to itself.
-	//DistanceBetweenPointsCharacteristics is the place were all happens. This class hace the information about the coordinates of the points, and allows to compute a Hausdorff distance between 
+	//DistanceBetweenPointsCharacteristics is the place were all happens. This class have the information about the coordinates of the points, and allows to compute a Hausdorff distance between 
 	//the collection of all points, and the subsample. 
 	double result = bootstrap< 
 							   std::vector< size_t > , //PointCloudCharacteristics

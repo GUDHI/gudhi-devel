@@ -51,7 +51,7 @@ int main( int argc , char** argv )
 	std::vector< Persistence_landscape* > collection_of_landscapes( filenames.size() );
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{
-		std::vector< std::pair< double , double > > diag = read_standard_file( filenames[i].c_str() );							
+		std::vector< std::pair< double , double > > diag = read_gudhi_file( filenames[i].c_str() , 1 );//read_standard_file( filenames[i].c_str() );									
 		collection_of_landscapes[i] = new Persistence_landscape( diag );		
 	}
 
@@ -61,7 +61,7 @@ int main( int argc , char** argv )
 		
 	double result = 
 	multiplicative_bootstrap< Persistence_landscape , difference_of_objects<Persistence_landscape> , norm_of_objects<Persistence_landscape> >
-	( collection_of_landscapes , number_of_repetitions_of_bootstrap , diff , norm , quantile );
+	( collection_of_landscapes , number_of_repetitions_of_bootstrap , diff , norm , quantile , 1 );
 	
 	std::cout << "result of bootstrap : " << result << std::endl;
 	return 0;	
