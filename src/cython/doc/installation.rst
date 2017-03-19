@@ -56,17 +56,25 @@ Optional third-party library
 CGAL
 ====
 
-The :doc:`Alpha complex </alpha_complex_user>` data structure and
-:doc:`Tangential complex </tangential_complex_user>` data structures,
+The :doc:`Alpha complex </alpha_complex_user>`,
+:doc:`Tangential complex </tangential_complex_user>` and
+:doc:`Witness complex </witness_complex_user>` data structures, and
 :doc:`Bottleneck distance </bottleneck_distance_user>` requires CGAL, which is a
 C++ library which provides easy access to efficient and reliable geometric
 algorithms.
 
-Having CGAL version 4.7.0 or higher installed is recommended. The procedure to
+Having CGAL version 4.6.0 or higher installed is recommended. The procedure to
 install this library according to your operating system is detailed
 `here <http://doc.cgal.org/latest/Manual/installation.html>`_.
 
 The following examples require the Computational Geometry Algorithms Library:
+
+.. only:: builder_html
+
+    * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
+    * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
+
+The following example requires CGAL version ≥ 4.7.0:
 
 .. only:: builder_html
 
@@ -83,8 +91,9 @@ The following example requires CGAL version ≥ 4.8.0:
 Eigen3
 ======
 
-The :doc:`Alpha complex </alpha_complex_user>` and
-:doc:`Tangential complex </tangential_complex_user>` data structures and few
+The :doc:`Alpha complex </alpha_complex_user>`,
+:doc:`Tangential complex </tangential_complex_user>` and
+:doc:`Witness complex </witness_complex_user>` data structures and few
 examples requires `Eigen3 <http://eigen.tuxfamily.org/>`_, a C++ template
 library for linear algebra: matrices, vectors, numerical solvers, and related
 algorithms.
@@ -96,6 +105,8 @@ The following examples require the `Eigen3 <http://eigen.tuxfamily.org/>`_:
     * :download:`alpha_complex_diagram_persistence_from_off_file_example.py <../example/alpha_complex_diagram_persistence_from_off_file_example.py>`
     * :download:`alpha_complex_from_points_example.py <../example/alpha_complex_from_points_example.py>`
     * :download:`tangential_complex_plain_homology_from_off_file_example.py <../example/tangential_complex_plain_homology_from_off_file_example.py>`
+    * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
+    * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
 
 Matplotlib
 ==========
@@ -116,6 +127,8 @@ The following examples require the `Matplotlib <http://matplotlib.org>`_:
     * :download:`rips_persistence_diagram.py <../example/rips_persistence_diagram.py>`
     * :download:`rips_complex_diagram_persistence_from_distance_matrix_file_example.py <../example/rips_complex_diagram_persistence_from_distance_matrix_file_example.py>`
     * :download:`tangential_complex_plain_homology_from_off_file_example.py <../example/tangential_complex_plain_homology_from_off_file_example.py>`
+    * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
+    * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
 
 Numpy
 =====
@@ -135,6 +148,8 @@ The following examples require the `NumPy <http://numpy.org>`_:
     * :download:`rips_persistence_diagram.py <../example/rips_persistence_diagram.py>`
     * :download:`rips_complex_diagram_persistence_from_distance_matrix_file_example.py <../example/rips_complex_diagram_persistence_from_distance_matrix_file_example.py>`
     * :download:`tangential_complex_plain_homology_from_off_file_example.py <../example/tangential_complex_plain_homology_from_off_file_example.py>`
+    * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
+    * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
 
 Threading Building Blocks
 =========================
