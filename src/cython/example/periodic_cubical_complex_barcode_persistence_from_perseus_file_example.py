@@ -71,6 +71,6 @@ if is_file_perseus(args.file):
     print("betti_numbers()=")
     print(periodic_cubical_complex.betti_numbers())
     if args.no_barcode == False:
-        gudhi.barcode_persistence(diag)
+        gudhi.plot_barcode_persistence(diag)
 else:
     print(args.file, "is not a valid perseus style file")

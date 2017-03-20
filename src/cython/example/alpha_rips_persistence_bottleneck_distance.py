@@ -42,8 +42,6 @@ parser.add_argument("-t", "--threshold", type=float, default=0.5)
 parser.add_argument("-d", "--max_dimension", type=int, default=1)
 
 args = parser.parse_args()
-print(repr(float('inf')))
-print(repr(math.sqrt(float('inf'))))
 with open(args.file, 'r') as f:
     first_line = f.readline()
     if (first_line == 'OFF\n') or (first_line == 'nOFF\n'):

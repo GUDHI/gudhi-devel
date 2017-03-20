@@ -34,7 +34,7 @@ parser = argparse.ArgumentParser(description='EuclideanWitnessComplex creation f
                                  epilog='Example: '
                                  'example/witness_complex_diagram_persistence_from_off_file_example.py '
                                  '-f ../data/points/tore3D_300.off -a 1.0 -n 20 -d 2'
-                                 '- Constructs a alpha complex with the '
+                                 '- Constructs a weak witness complex with the '
                                  'points from the given OFF file.')
 parser.add_argument("-f", "--file", type=str, required=True)
 parser.add_argument("-a", "--max_alpha_square", type=float, required=True)
@@ -70,7 +70,7 @@ with open(args.file, 'r') as f:
         print(simplex_tree.betti_numbers())
 
         if args.no_diagram == False:
-            gudhi.diagram_persistence(diag)
+            gudhi.plot_diagram_persistence(diag)
 
     else:
         print(args.file, "is not a valid OFF file")

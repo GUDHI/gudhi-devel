@@ -33,7 +33,7 @@ This function can display the persistence result as a barcode:
     
     periodic_cc = gudhi.PeriodicCubicalComplex(perseus_file='3d_torus.txt')
     diag = periodic_cc.persistence()
-    gudhi.barcode_persistence(diag)
+    gudhi.plot_barcode_persistence(diag)
 
 .. plot::
 
@@ -41,7 +41,7 @@ This function can display the persistence result as a barcode:
 
     periodic_cc = gudhi.PeriodicCubicalComplex(perseus_file='3d_torus.txt')
     diag = periodic_cc.persistence()
-    gudhi.barcode_persistence(diag)
+    gudhi.plot_barcode_persistence(diag)
 
 Show persistence as a diagram
 -----------------------------
@@ -55,7 +55,7 @@ This function can display the persistence result as a diagram:
     rips_complex = gudhi.RipsComplex(off_file='tore3D_300.off', max_edge_length=2.0)
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=3)
     diag = simplex_tree.persistence()
-    gudhi.diagram_persistence(diag)
+    gudhi.plot_diagram_persistence(diag)
 
 .. plot::
 
@@ -64,4 +64,4 @@ This function can display the persistence result as a diagram:
     rips_complex = gudhi.RipsComplex(off_file='tore3D_300.off', max_edge_length=2.0)
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=3)
     diag = simplex_tree.persistence()
-    gudhi.diagram_persistence(diag)
+    gudhi.plot_diagram_persistence(diag)

@@ -63,7 +63,7 @@ with open(args.file, 'r') as f:
         print(simplex_tree.betti_numbers())
     
         if args.no_diagram == False:
-            gudhi.diagram_persistence(diag)
+            gudhi.plot_diagram_persistence(diag)
     else:
         print(args.file, "is not a valid OFF file")
 
