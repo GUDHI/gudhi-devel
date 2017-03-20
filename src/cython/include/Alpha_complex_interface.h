@@ -42,11 +42,11 @@ class Alpha_complex_interface {
   using Point_d = Dynamic_kernel::Point_d;
 
  public:
-  Alpha_complex_interface(std::vector<std::vector<double>>&points) {
+  Alpha_complex_interface(const std::vector<std::vector<double>>& points) {
     alpha_complex_ = new Alpha_complex<Dynamic_kernel>(points);
   }
 
-  Alpha_complex_interface(std::string off_file_name, bool from_file = true) {
+  Alpha_complex_interface(const std::string& off_file_name, bool from_file = true) {
     alpha_complex_ = new Alpha_complex<Dynamic_kernel>(off_file_name);
   }
 

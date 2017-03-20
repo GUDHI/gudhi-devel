@@ -44,7 +44,7 @@ class Tangential_complex_interface {
   using TC = Tangential_complex<Dynamic_kernel, CGAL::Dynamic_dimension_tag, CGAL::Parallel_tag>;
 
  public:
-  Tangential_complex_interface(std::vector<std::vector<double>>&points) {
+  Tangential_complex_interface(const std::vector<std::vector<double>>& points) {
     Dynamic_kernel k;
     unsigned intrisic_dim = 0;
     if (points.size() > 0)
@@ -55,7 +55,7 @@ class Tangential_complex_interface {
     num_inconsistencies_ = tangential_complex_->number_of_inconsistent_simplices();
   }
 
-  Tangential_complex_interface(std::string off_file_name, bool from_file = true) {
+  Tangential_complex_interface(const std::string& off_file_name, bool from_file = true) {
     Gudhi::Points_off_reader<Point_d> off_reader(off_file_name);
     Dynamic_kernel k;
     unsigned intrisic_dim = 0;

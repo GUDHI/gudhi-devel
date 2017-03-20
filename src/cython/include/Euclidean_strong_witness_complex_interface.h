@@ -47,13 +47,15 @@ class Euclidean_strong_witness_complex_interface {
   typedef typename Simplex_tree<>::Simplex_key Simplex_key;
 
  public:
-  Euclidean_strong_witness_complex_interface(std::vector<std::vector<double>>&landmarks, std::vector<std::vector<double>>&witnesses)
+  Euclidean_strong_witness_complex_interface(const std::vector<std::vector<double>>& landmarks,
+                                             const std::vector<std::vector<double>>& witnesses)
     : landmarks_(landmarks.begin(), landmarks.end()),
       witnesses_(witnesses.begin(), witnesses.end()),
       witness_complex_(landmarks_, witnesses_) {
   }
 
-  void create_simplex_tree(Gudhi::Simplex_tree<>* simplex_tree, double max_alpha_square, std::size_t limit_dimension) {
+  void create_simplex_tree(Gudhi::Simplex_tree<>* simplex_tree, double max_alpha_square,
+                           std::size_t limit_dimension) {
     witness_complex_.create_complex(*simplex_tree, max_alpha_square, limit_dimension);
     simplex_tree->initialize_filtration();
   }

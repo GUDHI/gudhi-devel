@@ -45,7 +45,7 @@ class Rips_complex_interface {
   using Distance_matrix = std::vector<std::vector<Simplex_tree_interface<>::Filtration_value>>;
 
  public:
-  Rips_complex_interface(std::vector<std::vector<double>>&values, double threshold, bool euclidean) {
+  Rips_complex_interface(const std::vector<std::vector<double>>& values, double threshold, bool euclidean) {
     if (euclidean) {
       // Rips construction where values is a vector of points
       rips_complex_ = new Rips_complex<Simplex_tree_interface<>::Filtration_value>(values, threshold,
@@ -57,7 +57,7 @@ class Rips_complex_interface {
     }
   }
 
-  Rips_complex_interface(std::string file_name, double threshold, bool euclidean, bool from_file = true) {
+  Rips_complex_interface(const std::string& file_name, double threshold, bool euclidean, bool from_file = true) {
     if (euclidean) {
       // Rips construction where file_name is an OFF file
       Gudhi::Points_off_reader<Point_d> off_reader(file_name);

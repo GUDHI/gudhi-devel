@@ -34,14 +34,14 @@ namespace Gudhi {
 namespace persistence_diagram {
 
   // bottleneck_distance function renamed for the python function can be called bottleneck_dstance
-  double bottleneck(const std::vector<std::pair<double, double>> &diag1,
-                    const std::vector<std::pair<double, double>> &diag2,
+  double bottleneck(const std::vector<std::pair<double, double>>& diag1,
+                    const std::vector<std::pair<double, double>>& diag2,
                     double e) {
     return bottleneck_distance(diag1, diag2, e);
   }
 
-  double bottleneck(const std::vector<std::pair<double, double>> &diag1,
-                    const std::vector<std::pair<double, double>> &diag2) {
+  double bottleneck(const std::vector<std::pair<double, double>>& diag1,
+                    const std::vector<std::pair<double, double>>& diag2) {
     return bottleneck_distance(diag1, diag2);
   }
 

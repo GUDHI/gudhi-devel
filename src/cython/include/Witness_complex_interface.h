@@ -42,7 +42,7 @@ class Witness_complex_interface {
   using Nearest_landmark_table = std::vector<Nearest_landmark_range>;
 
  public:
-  Witness_complex_interface(Nearest_landmark_table& nlt) {
+  Witness_complex_interface(const Nearest_landmark_table& nlt) {
     witness_complex_ = new Witness_complex<Nearest_landmark_table>(nlt);
   }
 

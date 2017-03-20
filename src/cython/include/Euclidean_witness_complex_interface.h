@@ -47,7 +47,8 @@ class Euclidean_witness_complex_interface {
   typedef typename Simplex_tree<>::Simplex_key Simplex_key;
 
  public:
-  Euclidean_witness_complex_interface(std::vector<std::vector<double>>&landmarks, std::vector<std::vector<double>>&witnesses)
+  Euclidean_witness_complex_interface(const std::vector<std::vector<double>>& landmarks,
+                                      const std::vector<std::vector<double>>& witnesses)
     : landmarks_(landmarks.begin(), landmarks.end()),
       witnesses_(witnesses.begin(), witnesses.end()),
       witness_complex_(landmarks_, witnesses_) {

@@ -31,7 +31,7 @@
 
 namespace Gudhi {
 
-std::vector<std::vector<double>> read_points_from_OFF_file(std::string& off_file) {
+std::vector<std::vector<double>> read_points_from_OFF_file(const std::string& off_file) {
   Gudhi::Points_off_reader<std::vector<double>> off_reader(off_file);
   return off_reader.get_point_cloud();
 }
