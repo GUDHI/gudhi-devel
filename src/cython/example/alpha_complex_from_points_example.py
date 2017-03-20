@@ -61,7 +61,7 @@ else:
 print("dimension=", simplex_tree.dimension())
 print("filtered_tree=", simplex_tree.get_filtered_tree())
 print("star([0])=", simplex_tree.get_star_tree([0]))
-print("coface([0], 1)=", simplex_tree.get_coface_tree([0], 1))
+print("coface([0], 1)=", simplex_tree.get_cofaces([0], 1))
 
 print("point[0]=", alpha_complex.get_point(0))
 print("point[5]=", alpha_complex.get_point(5))

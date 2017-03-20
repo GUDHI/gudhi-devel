@@ -42,7 +42,7 @@ def test_tangential():
  
     assert st.get_filtered_tree() == \
         [([0], 0.0), ([1], 0.0), ([2], 0.0), ([0, 2], 0.0), ([3], 0.0), ([1, 3], 0.0)]
-    assert st.get_coface_tree([0], 1) == [([0, 2], 0.0)]
+    assert st.get_cofaces([0], 1) == [([0, 2], 0.0)]
  
     assert point_list[0] == tc.get_point(0)
     assert point_list[1] == tc.get_point(1)

@@ -113,7 +113,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     return star_tree;
   }
 
-  Complex_tree get_coface_tree(const Simplex& complex, int dimension) {
+  Complex_tree get_cofaces(const Simplex& complex, int dimension) {
     Complex_tree coface_tree;
     for (auto f_simplex : Base::cofaces_simplex_range(Base::find(complex), dimension)) {
       Simplex simplex;

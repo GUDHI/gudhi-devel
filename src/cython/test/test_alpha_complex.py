@@ -50,7 +50,7 @@ def test_infinite_alpha():
     assert simplex_tree.get_star_tree([0]) == \
            [([0], 0.0), ([0, 1], 0.25), ([0, 1, 2], 0.5),
            ([0, 2], 0.25)]
-    assert simplex_tree.get_coface_tree([0], 1) == \
+    assert simplex_tree.get_cofaces([0], 1) == \
            [([0, 1], 0.25), ([0, 2], 0.25)]
  
     assert point_list[0] == alpha_complex.get_point(0)
@@ -82,5 +82,5 @@ def test_filtered_alpha():
             ([2, 3], 0.25)]
     assert simplex_tree.get_star_tree([0]) == \
            [([0], 0.0), ([0, 1], 0.25), ([0, 2], 0.25)]
-    assert simplex_tree.get_coface_tree([0], 1) == \
+    assert simplex_tree.get_cofaces([0], 1) == \
            [([0, 1], 0.25), ([0, 2], 0.25)]

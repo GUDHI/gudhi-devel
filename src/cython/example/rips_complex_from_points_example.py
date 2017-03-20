@@ -37,4 +37,4 @@ simplex_tree = rips.create_simplex_tree(max_dimension=1)
 
 print("filtered_tree=", simplex_tree.get_filtered_tree())
 print("star([0])=", simplex_tree.get_star_tree([0]))
-print("coface([0], 1)=", simplex_tree.get_coface_tree([0], 1))
+print("coface([0], 1)=", simplex_tree.get_cofaces([0], 1))

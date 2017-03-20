@@ -49,7 +49,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         vector[pair[vector[int], double]] get_filtered_tree()
         vector[pair[vector[int], double]] get_skeleton_tree(int dimension)
         vector[pair[vector[int], double]] get_star_tree(vector[int] simplex)
-        vector[pair[vector[int], double]] get_coface_tree(vector[int] simplex,
+        vector[pair[vector[int], double]] get_cofaces(vector[int] simplex,
                                                           int dimension)
         void remove_maximal_simplex(vector[int] simplex)
 
@@ -263,7 +263,7 @@ cdef class SimplexTree:
             ct.append((v, filtered_complex.second))
         return ct
 
-    def get_coface_tree(self, simplex, codimension):
+    def get_cofaces(self, simplex, codimension):
         """This function returns the coface tree of a given N-simplex with a
         given codimension.
 
@@ -279,7 +279,7 @@ cdef class SimplexTree:
         for i in simplex:
             complex.push_back(i)
         cdef vector[pair[vector[int], double]] coface_tree \
-            = self.thisptr.get_coface_tree(complex, <int>codimension)
+            = self.thisptr.get_cofaces(complex, <int>codimension)
         ct = []
         for filtered_complex in coface_tree:
             v = []

@@ -75,7 +75,7 @@ def test_insertion():
         [([0], 0.0), ([1], 0.0), ([2], 4.0)]
 
     # remove_maximal_simplex test
-    assert st.get_coface_tree([0, 1, 2], 1) == []
+    assert st.get_cofaces([0, 1, 2], 1) == []
     st.remove_maximal_simplex([0, 1, 2])
     assert st.get_skeleton_tree(2) == \
         [([0, 1], 0.0), ([0, 2], 4.0), ([0], 0.0),
