@@ -361,7 +361,7 @@ cdef class SimplexTree:
                   " to be launched first.")
         return pbn_result
 
-    def intervals_in_dim(self, dimension):
+    def persistence_intervals_in_dimension(self, dimension):
         """This function returns the persistence intervals of the simplicial
         complex in a specific dimension.
 

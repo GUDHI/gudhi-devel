@@ -176,7 +176,7 @@ cdef class CubicalComplex:
             pbn_result = self.pcohptr.persistent_betti_numbers(<double>from_value, <double>to_value)
         return pbn_result
 
-    def intervals_in_dim(self, dimension):
+    def persistence_intervals_in_dimension(self, dimension):
         """This function returns the persistence intervals of the simplicial
         complex in a specific dimension.
 

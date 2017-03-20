@@ -81,10 +81,10 @@ with open(args.file, 'r') as f:
             # values are alpha square values
             funcs = [math.sqrt, math.sqrt]
             alpha_intervals = []
-            for interval in alpha_stree.intervals_in_dim(dim):
+            for interval in alpha_stree.persistence_intervals_in_dimension(dim):
                 alpha_intervals.append(map(lambda func,value: func(value), funcs, interval))
 
-            rips_intervals = rips_stree.intervals_in_dim(dim)
+            rips_intervals = rips_stree.persistence_intervals_in_dimension(dim)
             bottleneck_distance = gudhi.bottleneck_distance(rips_intervals, alpha_intervals)
             message = "In dimension " + repr(dim) + ", bottleneck distance = " + repr(bottleneck_distance)
             print(message)
