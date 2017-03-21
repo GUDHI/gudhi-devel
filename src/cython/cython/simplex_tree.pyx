@@ -169,6 +169,13 @@ cdef class SimplexTree:
     def set_dimension(self, dimension):
         """This function sets the dimension of the simplicial complex.
 
+        insert and remove_maximal_simplex functions do not update dimension
+        value of the `SimplexTree`.
+
+        `AlphaComplex`, `RipsComplex`, `TangentialComplex` and `WitnessComplex`
+        automatically sets the correct dimension in their `create_simplex_tree`
+        functions.
+
         :param dimension: The new dimension value.
         :type dimension: int.
         """
