@@ -48,26 +48,31 @@ class Euclidean_witness_complex_interface {
 
  public:
   Euclidean_witness_complex_interface(const std::vector<std::vector<double>>& landmarks,
-                                      const std::vector<std::vector<double>>& witnesses)
-    : landmarks_(landmarks.begin(), landmarks.end()),
-      witnesses_(witnesses.begin(), witnesses.end()),
-      witness_complex_(landmarks_, witnesses_) {
+                                      const std::vector<std::vector<double>>& witnesses) {
+    landmarks_.reserve(landmarks.size());
+    for(auto& landmark : landmarks)
+      landmarks_.emplace_back(landmark.begin(), landmark.end());
+    witness_complex_ = new Euclidean_witness_complex<Dynamic_kernel>(landmarks_, witnesses);
+  }
+
+  ~Euclidean_witness_complex_interface() {
+    delete witness_complex_;
   }
 
   void create_simplex_tree(Gudhi::Simplex_tree<>* simplex_tree, double max_alpha_square, std::size_t limit_dimension) {
-    witness_complex_.create_complex(*simplex_tree, max_alpha_square, limit_dimension);
+    witness_complex_->create_complex(*simplex_tree, max_alpha_square, limit_dimension);
     simplex_tree->initialize_filtration();
   }
 
   void create_simplex_tree(Gudhi::Simplex_tree<>* simplex_tree, double max_alpha_square) {
-    witness_complex_.create_complex(*simplex_tree, max_alpha_square);
+    witness_complex_->create_complex(*simplex_tree, max_alpha_square);
     simplex_tree->initialize_filtration();
   }
 
   std::vector<double> get_point(unsigned vh) {
     std::vector<double> vd;
     if (vh < landmarks_.size()) {
-      Point_d ph = witness_complex_.get_point(vh);
+      Point_d ph = witness_complex_->get_point(vh);
       for (auto coord = ph.cartesian_begin(); coord < ph.cartesian_end(); coord++)
         vd.push_back(*coord);
     }
@@ -76,8 +81,7 @@ class Euclidean_witness_complex_interface {
 
  private:
   std::vector<Point_d> landmarks_;
-  std::vector<Point_d> witnesses_;
-  Euclidean_witness_complex<Dynamic_kernel> witness_complex_;
+  Euclidean_witness_complex<Dynamic_kernel>* witness_complex_;
 };
 
 }  // namespace witness_complex

@@ -50,6 +50,10 @@ class Alpha_complex_interface {
     alpha_complex_ = new Alpha_complex<Dynamic_kernel>(off_file_name);
   }
 
+  ~Alpha_complex_interface() {
+    delete alpha_complex_;
+  }
+
   std::vector<double> get_point(int vh) {
     std::vector<double> vd;
     try {

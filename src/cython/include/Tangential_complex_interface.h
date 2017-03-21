@@ -68,6 +68,10 @@ class Tangential_complex_interface {
     num_inconsistencies_ = tangential_complex_->number_of_inconsistent_simplices();
   }
 
+  ~Tangential_complex_interface() {
+    delete tangential_complex_;
+  }
+
   std::vector<double> get_point(unsigned vh) {
     std::vector<double> vd;
     if (vh < tangential_complex_->number_of_vertices()) {
