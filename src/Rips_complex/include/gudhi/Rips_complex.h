@@ -116,6 +116,21 @@ class Rips_complex {
 
     // insert the proximity graph in the simplicial complex
     complex.insert_graph(rips_skeleton_graph_);
+
+    std::cout << "********************************************************************\n";
+    // Display the complex
+    std::cout << "* The complex contains " << complex.num_simplices() << " simplices\n";
+    std::cout << "   - dimension " << complex.dimension() << "   - filtration " << complex.filtration() << "\n";
+    std::cout << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
+    for (auto f_simplex : complex.filtration_simplex_range()) {
+      std::cout << "   " << "[" << complex.filtration(f_simplex) << "] ";
+      for (auto vertex : complex.simplex_vertex_range(f_simplex)) {
+        std::cout << static_cast<int>(vertex) << " ";
+      }
+      std::cout << std::endl;
+    }
+
+
     // expand the graph until dimension dim_max
     complex.expansion(dim_max);
   }

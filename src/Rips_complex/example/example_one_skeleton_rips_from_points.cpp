@@ -30,7 +30,8 @@ int main() {
   Rips_complex rips_complex_from_points(points, threshold, Euclidean_distance());
 
   Simplex_tree stree;
-  rips_complex_from_points.create_complex(stree, 1);
+  rips_complex_from_points.create_complex(stree, 3);
+  stree.initialize_filtration();
   // ----------------------------------------------------------------------------
   // Display information about the one skeleton Rips complex
   // ----------------------------------------------------------------------------

@@ -52,6 +52,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         vector[pair[vector[int], double]] get_cofaces(vector[int] simplex,
                                                           int dimension)
         void remove_maximal_simplex(vector[int] simplex)
+        void expansion(int max_dim)
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>":
@@ -303,6 +304,25 @@ cdef class SimplexTree:
         :type simplex: list of int.
         """
         self.thisptr.remove_maximal_simplex(simplex)
+
+    def expansion(self, max_dim):
+        """Expands the Simplex_tree containing only its one skeleton
+        until dimension max_dim.
+
+        The expanded simplicial complex until dimension :math:`d`
+        attached to a graph :math:`G` is the maximal simplicial complex of
+        dimension at most :math:`d` admitting the graph :math:`G` as
+        :math:`1`-skeleton.
+        The filtration value assigned to a simplex is the maximal filtration
+        value of one of its edges.
+
+        The Simplex_tree must contain no simplex of dimension bigger than
+        1 when calling the method.
+
+        :param max_dim: The maximal dimension.
+        :type max_dim: int.
+        """
+        self.thisptr.expansion(max_dim)
 
     def persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
         """This function returns the persistence of the simplicial complex.

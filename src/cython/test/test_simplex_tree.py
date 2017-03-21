@@ -96,3 +96,38 @@ def test_insertion():
     assert st.persistent_betti_numbers(3.9, 10000.0) == [1, 0]
     assert st.persistent_betti_numbers(4.0, 10000.0) == [1, 1]
     assert st.persistent_betti_numbers(9999.0, 10000.0) == [1, 1]
+
+def test_expansion():
+    st = SimplexTree()
+    assert st.__is_defined() == True
+    assert st.__is_persistence_defined() == False
+
+    # insert test
+    assert st.insert([3, 2], 0.1) == True
+    assert st.insert([2, 0], 0.2) == True
+    assert st.insert([1, 0], 0.3) == True
+    assert st.insert([3, 1], 0.4) == True
+    assert st.insert([2, 1], 0.5) == True
+    assert st.insert([6, 5], 0.6) == True
+    assert st.insert([4, 2], 0.7) == True
+    assert st.insert([3, 0], 0.8) == True
+    assert st.insert([6, 4], 0.9) == True
+    assert st.insert([6, 3], 1.0) == True
+
+    assert st.num_vertices() == 7
+    assert st.num_simplices() == 17
+    assert st.get_filtered_tree() == [([2], 0.1), ([3], 0.1), ([2, 3], 0.1),
+    ([0], 0.2), ([0, 2], 0.2), ([1], 0.3), ([0, 1], 0.3), ([1, 3], 0.4),
+    ([1, 2], 0.5), ([5], 0.6), ([6], 0.6), ([5, 6], 0.6), ([4], 0.7),
+    ([2, 4], 0.7), ([0, 3], 0.8), ([4, 6], 0.9), ([3, 6], 1.0)]
+
+    st.expansion(3)
+    assert st.num_vertices() == 7
+    assert st.num_simplices() == 22
+    st.initialize_filtration()
+
+    assert st.get_filtered_tree() == [([2], 0.1), ([3], 0.1), ([2, 3], 0.1),
+    ([0], 0.2), ([0, 2], 0.2), ([1], 0.3), ([0, 1], 0.3), ([1, 3], 0.4),
+    ([1, 2], 0.5), ([0, 1, 2], 0.5), ([1, 2, 3], 0.5), ([5], 0.6), ([6], 0.6),
+    ([5, 6], 0.6), ([4], 0.7), ([2, 4], 0.7), ([0, 3], 0.8), ([0, 1, 3], 0.8),
+    ([0, 2, 3], 0.8), ([0, 1, 2, 3], 0.8), ([4, 6], 0.9), ([3, 6], 1.0)]

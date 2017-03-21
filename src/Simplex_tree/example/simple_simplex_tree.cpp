@@ -250,5 +250,80 @@ int main(int argc, char * const argv[]) {
     std::cout << "***+ YES IT IS!\n";
   else
     std::cout << "***- NO IT ISN'T\n";
-  return 0;
+  //return 0;
+
+  /*    [0] 0
+  [0] 1
+  [0] 2
+  [0] 3
+  [0] 4
+  [0] 5
+  [0] 6
+  [5] 3 2
+  [5.38516] 5 4
+  [5.83095] 2 0
+  [6.08276] 1 0
+  [6.32456] 3 1
+  [6.7082] 2 1
+  [7.28011] 6 5
+  [8.94427] 4 2
+  [9.43398] 3 0
+  [9.48683] 6 4
+  [11] 6 3
+  */
+  Simplex_tree stree;
+  typeVectorVertex graph = { 3, 2 };
+  stree.insert_simplex(graph, Filtration_value(0.1));
+  graph = { 2, 0 };
+  stree.insert_simplex(graph, Filtration_value(0.1));
+  graph = { 1, 0 };
+  stree.insert_simplex(graph, Filtration_value(0.1));
+  graph = { 3, 1 };
+  stree.insert_simplex(graph, Filtration_value(0.1));
+  graph = { 2, 1 };
+  stree.insert_simplex(graph, Filtration_value(0.1));
+  graph = { 6, 5 };
+  stree.insert_simplex(graph, Filtration_value(0.1));
+  graph = { 4, 2 };
+  stree.insert_simplex(graph, Filtration_value(0.1));
+  graph = { 3, 0 };
+  stree.insert_simplex(graph, Filtration_value(0.1));
+  graph = { 6, 4 };
+  stree.insert_simplex(graph, Filtration_value(0.1));
+  graph = { 6, 3 };
+  stree.insert_simplex(graph, Filtration_value(0.1));
+
+
+  // ++ GENERAL VARIABLE SET
+  stree.set_filtration(0.1);  // Max filtration value
+  stree.set_dimension(2);  // Max dimension = 2 -> (2,1,0)
+
+  std::cout << "********************************************************************\n";
+  // Display the stree
+  std::cout << "* The complex contains " << stree.num_simplices() << " simplices\n";
+  std::cout << "   - dimension " << stree.dimension() << "   - filtration " << stree.filtration() << "\n";
+  std::cout << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
+  for (auto f_simplex : stree.filtration_simplex_range()) {
+    std::cout << "   " << "[" << stree.filtration(f_simplex) << "] ";
+    for (auto vertex : stree.simplex_vertex_range(f_simplex)) {
+      std::cout << static_cast<int>(vertex) << " ";
+    }
+    std::cout << std::endl;
+  }
+
+  stree.expansion(2);
+  stree.initialize_filtration();
+
+  std::cout << "********************************************************************\n";
+  // Display the stree
+  std::cout << "* The complex contains " << stree.num_simplices() << " simplices\n";
+  std::cout << "   - dimension " << stree.dimension() << "   - filtration " << stree.filtration() << "\n";
+  std::cout << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
+  for (auto f_simplex : stree.filtration_simplex_range()) {
+    std::cout << "   " << "[" << stree.filtration(f_simplex) << "] ";
+    for (auto vertex : stree.simplex_vertex_range(f_simplex)) {
+      std::cout << static_cast<int>(vertex) << " ";
+    }
+    std::cout << std::endl;
+  }
 }
