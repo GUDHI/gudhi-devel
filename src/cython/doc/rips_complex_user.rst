@@ -190,7 +190,7 @@ until dimension 1 - one skeleton graph in other words), the output is:
     ([4, 6], 9.4868329805)
     ([3, 6], 11.0)
 
-Example from OFF file
+Example from csv file
 ^^^^^^^^^^^^^^^^^^^^^
 
 This example builds the :doc:`Rips_complex <rips_complex_ref>` from the given

@@ -49,7 +49,7 @@ def test_rips_from_points():
             ([0, 1], 1.0), ([0, 2], 1.0), ([1, 3], 1.0),
             ([2, 3], 1.0), ([1, 2], 1.4142135623730951),
             ([0, 3], 1.4142135623730951)]
-    assert simplex_tree.get_star_tree([0]) == \
+    assert simplex_tree.get_stars([0]) == \
            [([0], 0.0), ([0, 1], 1.0), ([0, 2], 1.0),
             ([0, 3], 1.4142135623730951)]
     assert simplex_tree.get_cofaces([0], 1) == \
@@ -88,7 +88,7 @@ def test_rips_from_distance_matrix():
             ([0, 1], 1.0), ([0, 2], 1.0), ([1, 3], 1.0),
             ([2, 3], 1.0), ([1, 2], 1.4142135623730951),
             ([0, 3], 1.4142135623730951)]
-    assert simplex_tree.get_star_tree([0]) == \
+    assert simplex_tree.get_stars([0]) == \
            [([0], 0.0), ([0, 1], 1.0), ([0, 2], 1.0),
             ([0, 3], 1.4142135623730951)]
     assert simplex_tree.get_cofaces([0], 1) == \

@@ -45,8 +45,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   using Simplex_handle = typename Base::Simplex_handle;
   using Insertion_result = typename std::pair<Simplex_handle, bool>;
   using Simplex = std::vector<Vertex_handle>;
-  using Filtered_complex = std::pair<Simplex, Filtration_value>;
-  using Complex_tree = std::vector<Filtered_complex>;
+  using Complex = std::vector<std::pair<Simplex, Filtration_value>>;
 
  public:
 
@@ -54,8 +53,8 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     return (Base::find(vh) != Base::null_simplex());
   }
 
-  bool insert_simplex_and_subfaces(const Simplex& complex, Filtration_value filtration = 0) {
-    Insertion_result result = Base::insert_simplex_and_subfaces(complex, filtration);
+  bool insert_simplex_and_subfaces(const Simplex& simplex, Filtration_value filtration = 0) {
+    Insertion_result result = Base::insert_simplex_and_subfaces(simplex, filtration);
     Base::initialize_filtration();
     return (result.second);
   }
@@ -67,17 +66,17 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     return (result.second);
   }
 
-  Filtration_value simplex_filtration(const Simplex& complex) {
-    return Base::filtration(Base::find(complex));
+  Filtration_value simplex_filtration(const Simplex& simplex) {
+    return Base::filtration(Base::find(simplex));
   }
 
-  void remove_maximal_simplex(const Simplex& complex) {
-    Base::remove_maximal_simplex(Base::find(complex));
+  void remove_maximal_simplex(const Simplex& simplex) {
+    Base::remove_maximal_simplex(Base::find(simplex));
     Base::initialize_filtration();
   }
 
-  Complex_tree get_filtered_tree() {
-    Complex_tree filtered_tree;
+  Complex get_filtered_tree() {
+    Complex filtered_tree;
     for (auto f_simplex : Base::filtration_simplex_range()) {
       Simplex simplex;
       for (auto vertex : Base::simplex_vertex_range(f_simplex)) {
@@ -89,8 +88,8 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
 
   }
 
-  Complex_tree get_skeleton_tree(int dimension) {
-    Complex_tree skeleton_tree;
+  Complex get_skeleton_tree(int dimension) {
+    Complex skeleton_tree;
     for (auto f_simplex : Base::skeleton_simplex_range(dimension)) {
       Simplex simplex;
       for (auto vertex : Base::simplex_vertex_range(f_simplex)) {
@@ -101,28 +100,32 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     return skeleton_tree;
   }
 
-  Complex_tree get_star_tree(const Simplex& complex) {
-    Complex_tree star_tree;
-    for (auto f_simplex : Base::star_simplex_range(Base::find(complex))) {
-      Simplex simplex;
+  Complex get_stars(const Simplex& simplex) {
+    Complex stars;
+    for (auto f_simplex : Base::star_simplex_range(Base::find(simplex))) {
+      Simplex simplex_star;
       for (auto vertex : Base::simplex_vertex_range(f_simplex)) {
-        simplex.insert(simplex.begin(), vertex);
+        std::cout << vertex << " ";
+        simplex_star.insert(simplex_star.begin(), vertex);
       }
-      star_tree.push_back(std::make_pair(simplex, Base::filtration(f_simplex)));
+      std::cout << std::endl;
+      stars.push_back(std::make_pair(simplex_star, Base::filtration(f_simplex)));
     }
-    return star_tree;
+    return stars;
   }
 
-  Complex_tree get_cofaces(const Simplex& complex, int dimension) {
-    Complex_tree coface_tree;
-    for (auto f_simplex : Base::cofaces_simplex_range(Base::find(complex), dimension)) {
-      Simplex simplex;
+  Complex get_cofaces(const Simplex& simplex, int dimension) {
+    Complex cofaces;
+    for (auto f_simplex : Base::cofaces_simplex_range(Base::find(simplex), dimension)) {
+      Simplex simplex_coface;
       for (auto vertex : Base::simplex_vertex_range(f_simplex)) {
-        simplex.insert(simplex.begin(), vertex);
+        std::cout << vertex << " ";
+        simplex_coface.insert(simplex_coface.begin(), vertex);
       }
-      coface_tree.push_back(std::make_pair(simplex, Base::filtration(f_simplex)));
+      std::cout << std::endl;
+      cofaces.push_back(std::make_pair(simplex_coface, Base::filtration(f_simplex)));
     }
-    return coface_tree;
+    return cofaces;
   }
 
   void create_persistence(Gudhi::Persistent_cohomology_interface<Base>* pcoh) {
