@@ -113,8 +113,8 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     return skeleton_tree;
   }
 
-  Complex get_stars(const Simplex& simplex) {
-    Complex stars;
+  Complex get_star(const Simplex& simplex) {
+    Complex star;
     for (auto f_simplex : Base::star_simplex_range(Base::find(simplex))) {
       Simplex simplex_star;
       for (auto vertex : Base::simplex_vertex_range(f_simplex)) {
@@ -122,9 +122,9 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
         simplex_star.insert(simplex_star.begin(), vertex);
       }
       std::cout << std::endl;
-      stars.push_back(std::make_pair(simplex_star, Base::filtration(f_simplex)));
+      star.push_back(std::make_pair(simplex_star, Base::filtration(f_simplex)));
     }
-    return stars;
+    return star;
   }
 
   Complex get_cofaces(const Simplex& simplex, int dimension) {

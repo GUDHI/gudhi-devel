@@ -49,7 +49,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         bint insert_simplex(vector[int] simplex, double filtration)
         vector[pair[vector[int], double]] get_filtered_tree()
         vector[pair[vector[int], double]] get_skeleton_tree(int dimension)
-        vector[pair[vector[int], double]] get_stars(vector[int] simplex)
+        vector[pair[vector[int], double]] get_star(vector[int] simplex)
         vector[pair[vector[int], double]] get_cofaces(vector[int] simplex,
                                                           int dimension)
         void remove_maximal_simplex(vector[int] simplex)
@@ -268,7 +268,7 @@ cdef class SimplexTree:
             ct.append((v, filtered_complex.second))
         return ct
 
-    def get_stars(self, simplex):
+    def get_star(self, simplex):
         """This function returns the stars of a given N-simplex.
 
         :param simplex: The N-simplex, represented by a list of vertex.
@@ -280,7 +280,7 @@ cdef class SimplexTree:
         for i in simplex:
             complex.push_back(i)
         cdef vector[pair[vector[int], double]] stars \
-            = self.thisptr.get_stars(complex)
+            = self.thisptr.get_star(complex)
         ct = []
         for filtered_complex in stars:
             v = []
@@ -296,7 +296,7 @@ cdef class SimplexTree:
         :param simplex: The N-simplex, represented by a list of vertex.
         :type simplex: list of int.
         :param codimension: The codimension. If codimension = 0, all cofaces
-            are returned (equivalent of get_stars function)
+            are returned (equivalent of get_star function)
         :type codimension: int.
         :returns:  The coface tree of a simplex.
         :rtype:  list of tuples(simplex, filtration)
