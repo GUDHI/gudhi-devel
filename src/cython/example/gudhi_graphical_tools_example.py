@@ -39,9 +39,9 @@ print("Show barcode persistence example")
 persistence = [(2, (1.0, float('inf'))), (1, (1.4142135623730951, float('inf'))),
                (1, (1.4142135623730951, float('inf'))), (0, (0.0, float('inf'))),
                (0, (0.0, 1.0)), (0, (0.0, 1.0)), (0, (0.0, 1.0))]
-gudhi.plot_barcode_persistence(persistence)
+gudhi.plot_persistence_barcode(persistence)
 
 print("#####################################################################")
 print("Show diagram persistence example")
 
-gudhi.plot_diagram_persistence(persistence)
+gudhi.plot_persistence_diagram(persistence)

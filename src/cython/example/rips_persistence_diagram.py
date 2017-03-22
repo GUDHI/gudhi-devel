@@ -39,4 +39,4 @@ simplex_tree = rips.create_simplex_tree(max_dimension=1)
 diag = simplex_tree.persistence(homology_coeff_field=2, min_persistence=0)
 print("diag=", diag)
 
-gudhi.plot_diagram_persistence(diag)
+gudhi.plot_persistence_diagram(diag)

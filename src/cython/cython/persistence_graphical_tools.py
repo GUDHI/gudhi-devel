@@ -73,7 +73,7 @@ def show_palette_values(alpha=0.6):
 
     plt.show()
 
-def plot_barcode_persistence(persistence, alpha=0.6):
+def plot_persistence_barcode(persistence, alpha=0.6):
     """This function plots the persistence bar code.
 
     :param persistence: The persistence to plot.
@@ -108,7 +108,7 @@ def plot_barcode_persistence(persistence, alpha=0.6):
     plt.axis([axis_start, infinity, 0, ind])
     plt.show()
 
-def plot_diagram_persistence(persistence, alpha=0.6):
+def plot_persistence_diagram(persistence, alpha=0.6):
     """This function plots the persistence diagram.
 
     :param persistence: The persistence to plot.
