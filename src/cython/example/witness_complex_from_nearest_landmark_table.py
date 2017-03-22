@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from gudhi import WitnessComplex, SimplexTree
+from gudhi import StrongWitnessComplex, SimplexTree
 
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
@@ -36,7 +36,7 @@ nearest_landmark_table = [[[0, 0], [1, 1], [2, 2], [3, 3], [4, 4]],
                           [[3, 0], [4, 1], [0, 2], [1, 3], [2, 4]],
                           [[4, 0], [0, 1], [1, 2], [2, 3], [3, 4]]]
 
-witness_complex = WitnessComplex(nearest_landmark_table=nearest_landmark_table)
+witness_complex = StrongWitnessComplex(nearest_landmark_table=nearest_landmark_table)
 simplex_tree = witness_complex.create_simplex_tree(max_alpha_square=4.1)
 
 message = "Number of simplices: " + repr(simplex_tree.num_simplices())
