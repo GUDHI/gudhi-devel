@@ -33,8 +33,8 @@ def test_insertion():
     assert st.__is_persistence_defined() == False
 
     # insert test
-    assert st.insert([0, 1]) == True
-    assert st.insert([0, 1, 2], filtration=4.0) == True
+    assert st.insert_simplex([0, 1]) == True
+    assert st.insert_simplex_and_subfaces([0, 1, 2], filtration=4.0) == True
     # FIXME: Remove this line
     st.set_dimension(2)
     assert st.num_simplices() == 7
@@ -62,24 +62,24 @@ def test_insertion():
     assert st.filtration([2]) == 4.0
     assert st.filtration([0, 1]) == 0.0
     assert st.filtration([0]) == 0.0
-    assert st.filtration([1]) == 0.0
+    assert st.filtration([1]) == 4.0
 
     # skeleton_tree test
     assert st.get_skeleton_tree(2) == \
         [([0, 1, 2], 4.0), ([0, 1], 0.0), ([0, 2], 4.0),
-        ([0], 0.0), ([1, 2], 4.0), ([1], 0.0), ([2], 4.0)]
+        ([0], 0.0), ([1, 2], 4.0), ([1], 4.0), ([2], 4.0)]
     assert st.get_skeleton_tree(1) == \
         [([0, 1], 0.0), ([0, 2], 4.0), ([0], 0.0),
-        ([1, 2], 4.0), ([1], 0.0), ([2], 4.0)]
+        ([1, 2], 4.0), ([1], 4.0), ([2], 4.0)]
     assert st.get_skeleton_tree(0) == \
-        [([0], 0.0), ([1], 0.0), ([2], 4.0)]
+        [([0], 0.0), ([1], 4.0), ([2], 4.0)]
 
     # remove_maximal_simplex test
     assert st.get_cofaces([0, 1, 2], 1) == []
     st.remove_maximal_simplex([0, 1, 2])
     assert st.get_skeleton_tree(2) == \
         [([0, 1], 0.0), ([0, 2], 4.0), ([0], 0.0),
-        ([1, 2], 4.0), ([1], 0.0), ([2], 4.0)]
+        ([1, 2], 4.0), ([1], 4.0), ([2], 4.0)]
     assert st.find([0, 1, 2]) == False
     assert st.find([0, 1]) == True
     assert st.find([0, 2]) == True
@@ -103,16 +103,16 @@ def test_expansion():
     assert st.__is_persistence_defined() == False
 
     # insert test
-    assert st.insert([3, 2], 0.1) == True
-    assert st.insert([2, 0], 0.2) == True
-    assert st.insert([1, 0], 0.3) == True
-    assert st.insert([3, 1], 0.4) == True
-    assert st.insert([2, 1], 0.5) == True
-    assert st.insert([6, 5], 0.6) == True
-    assert st.insert([4, 2], 0.7) == True
-    assert st.insert([3, 0], 0.8) == True
-    assert st.insert([6, 4], 0.9) == True
-    assert st.insert([6, 3], 1.0) == True
+    assert st.insert_simplex_and_subfaces([3, 2], 0.1) == True
+    assert st.insert_simplex_and_subfaces([2, 0], 0.2) == True
+    assert st.insert_simplex_and_subfaces([1, 0], 0.3) == True
+    assert st.insert_simplex_and_subfaces([3, 1], 0.4) == True
+    assert st.insert_simplex_and_subfaces([2, 1], 0.5) == True
+    assert st.insert_simplex_and_subfaces([6, 5], 0.6) == True
+    assert st.insert_simplex_and_subfaces([4, 2], 0.7) == True
+    assert st.insert_simplex_and_subfaces([3, 0], 0.8) == True
+    assert st.insert_simplex_and_subfaces([6, 4], 0.9) == True
+    assert st.insert_simplex_and_subfaces([6, 3], 1.0) == True
 
     assert st.num_vertices() == 7
     assert st.num_simplices() == 17
