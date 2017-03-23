@@ -126,6 +126,10 @@ else()
   # Please let GudhUI in last compilation position as QT is known to modify CMAKE_CXX_FLAGS
   # GudhUI
   add_subdirectory(GudhUI)
+
+  # This variable is used by Cython CMakeLists.txt to know its path
+  set(GUDHI_CYTHON_PATH "cython")
+  add_subdirectory(${GUDHI_CYTHON_PATH})
   #---------------------------------------------------------------------------------------
 
   #---------------------------------------------------------------------------------------

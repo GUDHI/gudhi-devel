@@ -781,9 +781,10 @@ RECURSIVE              = YES
 # run.
 
 EXCLUDE                = data/ \
-	                     example/ \
-	                     GudhUI/  \
-                             cmake/   \
+	                     example/    \
+	                     GudhUI/     \
+                             cmake/      \
+                             src/cython/ \
                              include/gudhi_patches/
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
