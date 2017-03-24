@@ -20,6 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "alpha_complex_3d_helper.h"
+
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Points_3D_off_io.h>
@@ -29,8 +31,6 @@
 #include <CGAL/Delaunay_triangulation_3.h>
 #include <CGAL/Alpha_shape_3.h>
 #include <CGAL/iterator.h>
-
-#include "alpha_complex_3d_helper.h"
 
 #include <fstream>
 #include <cmath>

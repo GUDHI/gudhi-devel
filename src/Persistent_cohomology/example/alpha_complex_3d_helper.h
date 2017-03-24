@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EXAMPLE_PERSISTENT_COHOMOLOGY_ALPHA_COMPLEX_3D_HELPER_H_
-#define EXAMPLE_PERSISTENT_COHOMOLOGY_ALPHA_COMPLEX_3D_HELPER_H_
+#ifndef ALPHA_COMPLEX_3D_HELPER_H_
+#define ALPHA_COMPLEX_3D_HELPER_H_
 
 template<class Vertex_list, class Cell_handle>
 Vertex_list from_cell(const Cell_handle& ch) {
@@ -73,4 +73,4 @@ Vertex_list from_vertex(const Vertex_handle& vh) {
   return the_list;
 }
 
-#endif  // EXAMPLE_PERSISTENT_COHOMOLOGY_ALPHA_COMPLEX_3D_HELPER_H_
+#endif  // ALPHA_COMPLEX_3D_HELPER_H_

@@ -21,8 +21,8 @@
  * 
  */
 
-#ifndef ERROR_QUADRIC_H_
-#define ERROR_QUADRIC_H_
+#ifndef GARLAND_HECKBERT_ERROR_QUADRIC_H_
+#define GARLAND_HECKBERT_ERROR_QUADRIC_H_
 
 #include <boost/optional/optional.hpp>
 
@@ -179,4 +179,4 @@ template <typename Point> class Error_quadric {
   }
 };
 
-#endif  // ERROR_QUADRIC_H_
+#endif  // GARLAND_HECKBERT_ERROR_QUADRIC_H_

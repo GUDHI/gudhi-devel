@@ -24,19 +24,18 @@
 #include <iostream>
 #include <initializer_list>
 
-using namespace Gudhi;
-
-struct MyOptions : Simplex_tree_options_full_featured {
+struct MyOptions : Gudhi::Simplex_tree_options_full_featured {
   // Not doing persistence, so we don't need those
   static const bool store_key = false;
   static const bool store_filtration = false;
   // I have few vertices
   typedef short Vertex_handle;
 };
-typedef Simplex_tree<MyOptions> ST;
+
+using ST = Gudhi::Simplex_tree<MyOptions>;
 
 // Dictionary should be private, but for now this is the easiest way.
-static_assert(sizeof(ST::Dictionary::value_type) < sizeof(Simplex_tree<>::Dictionary::value_type),
+static_assert(sizeof(ST::Dictionary::value_type) < sizeof(Gudhi::Simplex_tree<>::Dictionary::value_type),
     "Not storing the filtration and key should save some space");
 
 int main() {
