@@ -20,12 +20,11 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "alpha_complex_3d_helper.h"
+#include <boost/variant.hpp>
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Points_3D_off_io.h>
-#include <boost/variant.hpp>
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Regular_triangulation_euclidean_traits_3.h>
@@ -42,6 +41,8 @@
 #include <list>
 #include <vector>
 #include <cstdlib>
+
+#include "alpha_complex_3d_helper.h"
 
 // Traits
 using Kernel = CGAL::Exact_predicates_inexact_constructions_kernel;
