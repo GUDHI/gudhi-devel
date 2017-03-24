@@ -122,7 +122,7 @@
       <b>Author:</b> Cl&eacute;ment Jamin<br>
       <b>Introduced in:</b> GUDHI 2.0.0<br>
       <b>Copyright:</b> GPL v3<br>
-      <b>Requires:</b> \ref cgal &ge; 4.8.0 and \ref eigen3
+      <b>Requires:</b> \ref cgal &ge; 4.8.1 and \ref eigen3
     </td>
     <td width="75%">
     A Tangential Delaunay complex is a <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
@@ -161,7 +161,7 @@
       <b>Author:</b> Fran&ccedil;ois Godi<br>
       <b>Introduced in:</b> GUDHI 2.0.0<br>
       <b>Copyright:</b> GPL v3<br>
-      <b>Requires:</b> \ref cgal &ge; 4.8.0 and \ref eigen3
+      <b>Requires:</b> \ref cgal &ge; 4.8.1 and \ref eigen3
     </td>
     <td width="75%">
     Bottleneck distance measures the similarity between two persistence diagrams. 
@@ -297,11 +297,27 @@ make doxygen
  * \li <a href="_persistent_cohomology_2custom_persistence_sort_8cpp-example.html">
  * Persistent_cohomology/custom_persistence_sort.cpp</a>
  * 
- * The following example requires CGAL version &ge; 4.8.0:
- * \li <a href="_bottleneck_distance_2_bottleneck_basic_example_8cpp-example.html">
+ * The following example requires CGAL version &ge; 4.8.1:
+ * \li <a href="_bottleneck_distance_2alpha_rips_persistence_bottleneck_distance_8cpp-example.html">
+ * Bottleneck_distance/alpha_rips_persistence_bottleneck_distance.cpp.cpp</a>
+ * \li <a href="_bottleneck_distance_2bottleneck_basic_example_8cpp-example.html">
  * Bottleneck_distance/bottleneck_basic_example.cpp</a>
- * \li <a href="_bottleneck_distance_2_bottleneck_read_file_example_8cpp-example.html">
+ * \li <a href="_bottleneck_distance_2bottleneck_read_file_example_8cpp-example.html">
  * Bottleneck_distance/bottleneck_read_file_example.cpp</a>
+ * \li <a href="_spatial_searching_2example_spatial_searching_8cpp-example.html">
+ * Spatial_searching/example_spatial_searching.cpp</a>
+ * \li <a href="_subsampling_2example_choose_n_farthest_points_8cpp-example.html">
+ * Subsampling/example_choose_n_farthest_points.cpp</a>
+ * \li <a href="_subsampling_2example_custom_kernel_8cpp-example.html">
+ * Subsampling/example_custom_kernel.cpp</a>
+ * \li <a href="_subsampling_2example_pick_n_random_points_8cpp-example.html">
+ * Subsampling/example_pick_n_random_points.cpp</a>
+ * \li <a href="_subsampling_2example_sparsify_point_set_8cpp-example.html">
+ * Subsampling/example_sparsify_point_set.cpp</a>
+ * \li <a href="_tangential_complex_2example_basic_8cpp-example.html">
+ * Tangential_complex/example_basic.cpp</a>
+ * \li <a href="_tangential_complex_2example_with_perturb_8cpp-example.html">
+ * Tangential_complex/example_with_perturb.cpp</a>
  *
  * \subsection eigen3 Eigen3
  * The \ref alpha_complex data structure and few examples requires
@@ -405,6 +421,7 @@ make doxygen
 /*! @file Examples
  * @example Alpha_complex/Alpha_complex_from_off.cpp
  * @example Alpha_complex/Alpha_complex_from_points.cpp
+ * @example Bottleneck_distance/alpha_rips_persistence_bottleneck_distance.cpp
  * @example Bottleneck_distance/bottleneck_basic_example.cpp
  * @example Bottleneck_distance/bottleneck_read_file_example.cpp
  * @example Bitmap_cubical_complex/Bitmap_cubical_complex.cpp
@@ -437,6 +454,11 @@ make doxygen
  * @example Skeleton_blocker/Skeleton_blocker_from_simplices.cpp
  * @example Skeleton_blocker/Skeleton_blocker_iteration.cpp
  * @example Skeleton_blocker/Skeleton_blocker_link.cpp
+ * @example Spatial_searching/example_spatial_searching.cpp
+ * @example Subsampling/example_choose_n_farthest_points.cpp
+ * @example Subsampling/example_custom_kernel.cpp
+ * @example Subsampling/example_pick_n_random_points.cpp
+ * @example Subsampling/example_sparsify_point_set.cpp
  * @example Tangential_complex/example_basic.cpp
  * @example Tangential_complex/example_with_perturb.cpp
  * @example Witness_complex/example_nearest_landmark_table.cpp

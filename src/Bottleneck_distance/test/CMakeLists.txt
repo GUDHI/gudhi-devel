@@ -11,19 +11,15 @@ if (GPROF_PATH)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
 endif()
 
-# requires CGAL 4.8
-# cmake -DCGAL_DIR=~/workspace/CGAL-4.8 ../../..
-if(CGAL_FOUND)
-  if (NOT CGAL_VERSION VERSION_LESS 4.8.0)
-    add_executable ( bottleneckUT bottleneck_unit_test.cpp )
-    target_link_libraries(bottleneckUT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
-    if (TBB_FOUND)
-      target_link_libraries(bottleneckUT ${TBB_LIBRARIES})
-    endif(TBB_FOUND)
+if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+  add_executable ( bottleneckUT bottleneck_unit_test.cpp )
+  target_link_libraries(bottleneckUT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+  if (TBB_FOUND)
+    target_link_libraries(bottleneckUT ${TBB_LIBRARIES})
+  endif(TBB_FOUND)
 
-    # Unitary tests
-    add_test(NAME bottleneckUT COMMAND ${CMAKE_CURRENT_BINARY_DIR}/bottleneckUT
-      # XML format for Jenkins xUnit plugin
-      --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/bottleneckUT.xml --log_level=test_suite --report_level=no)
-  endif ()
-endif()
+  # Unitary tests
+  add_test(NAME bottleneckUT COMMAND ${CMAKE_CURRENT_BINARY_DIR}/bottleneckUT
+    # XML format for Jenkins xUnit plugin
+    --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/bottleneckUT.xml --log_level=test_suite --report_level=no)
+endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
