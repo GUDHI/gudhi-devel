@@ -25,6 +25,7 @@
 
 /** \brief The concept Topological_data_with_averages describes the requirements 
   * for a type to implement a container that allows computations of averages. 
+  * Note that the average object after being computed is stored in *this. 
   */
 class Topological_data_with_averages 
 {

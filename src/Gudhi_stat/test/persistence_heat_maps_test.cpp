@@ -26,7 +26,7 @@
 #define BOOST_TEST_MODULE "gudhi_stat"
 #include <boost/test/unit_test.hpp>
 #include <gudhi/reader_utils.h>
-#include <gudhi/concretizations/Persistence_heat_maps.h>
+#include <gudhi/persistence_representations/Persistence_heat_maps.h>
 
 #include <iostream>
 
@@ -258,3 +258,121 @@ BOOST_AUTO_TEST_CASE(check_arythmetic_operations_for_heat_maps)
 	
 }
 
+
+
+
+//Below I am storing the code used to generate tests for that functionality.
+/*
+	std::vector< std::pair< double,double > > intervals;
+	intervals.push_back( std::make_pair(0.5,0.5) );	
+	std::vector< std::vector<double> > filter = create_Gaussian_filter(5,1);		
+	Persistence_heat_maps p( intervals , filter ,  constant_function, false , 100 , 0 , 1 );
+	p.plot( "heat_map_1" );
+
+	
+	std::vector< std::pair< double,double > > intervals2;
+	intervals2.push_back( std::make_pair(7,12) );		
+	Persistence_heat_maps q( intervals2 , filter ,  constant_function, false , 100 , 0 , 10 );
+	q.plot( "heat_map_2" );
+*/
+/*
+	std::vector< std::pair< double,double > > intervals;
+	intervals.push_back( std::make_pair(0.5,0.5) );	
+	std::vector< std::vector<double> > filter = create_Gaussian_filter(5,1);		
+	Persistence_heat_maps p( intervals , filter ,  constant_function, false , 10 , 0 , 1 );
+	p.write_to_file( "aaa" );
+	
+	Persistence_heat_maps q;
+	q.load_from_file( "aaa" );
+	
+	cerr << ( p == q ) << endl;
+	*/
+
+/*
+	std::vector< std::vector<double> > filter = create_Gaussian_filter(30,1);		
+	Persistence_heat_maps p( "file_with_diagram" , filter ,  constant_function, false , 100 , 0 , 1 );
+	p.plot( "heat_map_1" );
+*/ 
+	 
+/*   
+   //test to construct persistence heat map:
+    std::vector< std::vector<double> > filter = create_Gaussian_filter(100,1);		
+	Persistence_heat_maps p( "file_with_diagram" , filter ,  constant_function, false , 1000 , 0 , 1 );
+	p.print_to_file( "persistence_heat_map_from_file_with_diagram" );
+	
+	Persistence_heat_maps q;
+	q.load_from_file( "persistence_heat_map_from_file_with_diagram" );	
+	
+	cerr << (p == q) << endl;
+*/
+/*
+	//test of computations of a mean:
+	std::vector< std::pair< double,double > > intervals;
+	intervals.push_back( std::make_pair(5,5) );	
+	std::vector< std::vector<double> > filter = create_Gaussian_filter(5,1);		
+	Persistence_heat_maps p( intervals , filter ,  constant_function, false , 100 , 0 , 10 );
+	p.plot( "heat_map_1" );
+
+	
+	std::vector< std::pair< double,double > > intervals2;
+	intervals2.push_back( std::make_pair(7,7) );		
+	Persistence_heat_maps q( intervals2 , filter ,  constant_function, false , 100 , 0 , 10 );
+	q.plot( "heat_map_2" );
+	
+	
+	Persistence_heat_maps av;	
+	av.compute_average( { &P , &q } );
+	av.plot( "average" );
+*/
+
+/*
+	std::vector< std::vector<double> > filter = create_Gaussian_filter(30,1);	
+	Persistence_heat_maps p( "file_with_diagram" , filter ,  constant_function, false , 1000 , 0 , 10 );
+	Persistence_heat_maps q( "file_with_diagram_1" , filter ,  constant_function, false , 1000 , 0 , 10 );
+	Persistence_heat_maps r( "file_with_diagram_2" , filter ,  constant_function, false , 1000 , 0 , 10 );
+	Persistence_heat_maps av;	
+	av.compute_average( {&p,&q,&r} );
+	
+	av.print_to_file( "template_average_of_heat_maps" );
+*/	
+
+/*
+	std::vector< std::pair< double,double > > intervals;
+	intervals.push_back( std::make_pair(5,5) );	
+	std::vector< std::vector<double> > filter = create_Gaussian_filter(5,1);		
+	Persistence_heat_maps p( intervals , filter ,  constant_function, false , 10 , 0 , 10 );
+	p.plot( "heat_map_1" );
+	
+	std::vector< std::pair< double,double > > intervals2;
+	intervals2.push_back( std::make_pair(7,7) );		
+	Persistence_heat_maps q( intervals2 , filter ,  constant_function, false , 10 , 0 , 10 );
+	q.plot( "heat_map_2" );
+	
+	Persistence_heat_maps median;	
+	median.compute_median( {&p,&q} );
+	median.plot( "median" );
+*/
+
+/*
+	std::vector< std::vector<double> > filter = create_Gaussian_filter(30,1);	
+	Persistence_heat_maps p( "file_with_diagram" , filter ,  constant_function, false , 1000 , 0 , 1 );
+	Persistence_heat_maps q( "file_with_diagram_1" , filter ,  constant_function, false , 1000 , 0 , 1 );
+	Persistence_heat_maps r( "file_with_diagram_2" , filter ,  constant_function, false , 1000 , 0 , 1 );
+	Persistence_heat_maps median;	
+	median.compute_median( {&p,&q,&r} );	
+	median.print_to_file( "template_median_of_heat_maps" );
+*/
+
+
+/*
+	std::vector< std::vector<double> > filter = create_Gaussian_filter(30,1);	
+	Persistence_heat_maps p( "file_with_diagram" , filter ,  constant_function, false , 1000 , 0 , 1 );
+	Persistence_heat_maps q( "file_with_diagram_1" , filter ,  constant_function, false , 1000 , 0 , 1 );
+	Persistence_heat_maps r( "file_with_diagram_2" , filter ,  constant_function, false , 1000 , 0 , 1 );
+	
+	Persistence_heat_maps percentage_of_active;	
+	percentage_of_active.compute_percentage_of_active( {&p,&q,&r} , 0.1 );
+	
+	percentage_of_active.print_to_file( "template_percentage_of_active_of_heat_maps" );
+	//percentage_of_active.plot( "template_percentage_of_active_of_heat_maps" );
+*/

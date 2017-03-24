@@ -23,7 +23,7 @@
 
 
 #include <gudhi/reader_utils.h>
-#include <gudhi/concretizations/Persistence_intervals.h>
+#include <gudhi/persistence_representations/Persistence_intervals.h>
 
 #include <iostream>
 
@@ -44,7 +44,7 @@ int main( int argc , char** argv )
 
 	Persistence_intervals p( argv[1] );
 	std::vector< std::pair<double,double> > dominant_intervals = p.dominant_intervals( atoi( argv[2] ) );
-	std::vector< size_t > histogram = p.histograms_of_lengths( 10  );
+	std::vector< size_t > histogram = p.histogram_of_lengths( 10  );
 	
 	std::stringstream gnuplot_script;
 	gnuplot_script << argv[1] << "_Gnuplot_script";

@@ -22,7 +22,7 @@
 
 
 
-#include <gudhi/concretizations/Vector_distances_in_diagram.h>
+#include <gudhi/persistence_representations/Vector_distances_in_diagram.h>
 #include <iostream>
 
 
@@ -78,33 +78,3 @@ int main( int argc , char** argv )
 
 	return 0;
 }
-
-
-
-
-/*
-   if ( argc < 2 )
-	{
-		cout << "To run this program, please provide the name of a file with persistence diagram. If you provide two files, we will do distance, scalar produc and average computations \n";
-		return 1;
-	}
-	
-	Vector_distances_in_diagram< Euclidean_distance<double> > p( argv[1] , 100 );
-	cout << "This is a vector corresponding to the input persistence diagram : \n";	
-	cout << p << endl;
-
-
-
-	if ( argc == 3 )
-	{
-		Vector_distances_in_diagram< Euclidean_distance<double> > p_prime( argv[2] , 100);	
-		
-		cout << "p_prime : " <<p_prime << endl;
-			
-		cout << "Distance between input persistence diagrams : " << p.distance( &p_prime ) << endl;
-		Vector_distances_in_diagram< Euclidean_distance<double> > average; 
-		average.compute_average( {&p,&p_prime} );
-	
-		cout << "Here is an average : " << average << endl;
-	}
-*/

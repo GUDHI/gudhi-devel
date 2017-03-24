@@ -23,7 +23,7 @@
 
 
 #include <gudhi/reader_utils.h>
-#include <gudhi/concretizations/Persistence_intervals.h>
+#include <gudhi/persistence_representations/Persistence_intervals.h>
 
 #include <iostream>
 #include <vector>

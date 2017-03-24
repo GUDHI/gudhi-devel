@@ -20,7 +20,7 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gudhi/concretizations/Vector_distances_in_diagram.h>
+#include <gudhi/persistence_representations/Vector_distances_in_diagram.h>
 
 
 

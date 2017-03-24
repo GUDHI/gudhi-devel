@@ -24,10 +24,10 @@
 #define BOOTSTRAP_H
 
 //concretizations
-#include <gudhi/concretizations/Vector_distances_in_diagram.h>
-#include <gudhi/concretizations/Persistence_landscape.h>
-#include <gudhi/concretizations/Persistence_landscape_on_grid.h>
-#include <gudhi/concretizations/Persistence_heat_maps.h>
+#include <gudhi/persistence_representations/Vector_distances_in_diagram.h>
+#include <gudhi/persistence_representations/Persistence_landscape.h>
+#include <gudhi/persistence_representations/Persistence_landscape_on_grid.h>
+#include <gudhi/persistence_representations/Persistence_heat_maps.h>
 
 #ifdef GUDHI_USE_TBB
 #include <tbb/parallel_sort.h>

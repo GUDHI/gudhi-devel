@@ -21,7 +21,7 @@
  */
 
 
-#include <gudhi/concretizations/Vector_distances_in_diagram.h>
+#include <gudhi/persistence_representations/Vector_distances_in_diagram.h>
 
 
 

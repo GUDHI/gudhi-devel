@@ -20,7 +20,7 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gudhi/concretizations/PSSK.h>
+#include <gudhi/persistence_representations/PSSK.h>
 
 
 

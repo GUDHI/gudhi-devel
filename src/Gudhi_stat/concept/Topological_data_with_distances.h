@@ -22,6 +22,10 @@
 
 /** \brief The concept Topological_data_with_distances describes the requirements 
   * for a type to implement a container that allows computations of distance to another contained of that type. 
+  * The second parameter of the distance function allow to declare power of a distance. The exact meaning of that 
+  * number will be different for different distances. A few examples are given below:
+  * In case of p-Wasserstein distance, the power is equal to p. power = std::limit<double>::max() for bottleneck distance.
+  * In case of L^p landscape distance, the power is equal to p. s
   */
 class Topological_data_with_distances
 {

@@ -20,8 +20,7 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gudhi/concretizations/Persistence_landscape.h>
-
+#include <gudhi/persistence_representations/Persistence_landscape.h>
 
 
 using namespace Gudhi;
@@ -43,7 +42,8 @@ int main( int argc , char** argv )
 	std::cout << "Creating persistence landscapes...\n";	
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{
-		Persistence_landscape l( filenames[i] , 0 );
+		//std::vector< std::pair< double , double > > pers = read_standard_file( filename );
+		Persistence_landscape l( filenames[i] , 1 );
 		std::stringstream ss;
 		ss << filenames[i] << ".land";
 		l.print_to_file( ss.str().c_str() );

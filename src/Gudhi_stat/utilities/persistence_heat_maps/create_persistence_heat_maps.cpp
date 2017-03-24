@@ -22,7 +22,7 @@
 
 
 
-#include <gudhi/concretizations/Persistence_heat_maps.h>
+#include <gudhi/persistence_representations/Persistence_heat_maps.h>
 
 
 

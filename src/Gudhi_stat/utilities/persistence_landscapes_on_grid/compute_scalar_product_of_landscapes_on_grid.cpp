@@ -21,7 +21,7 @@
  */
 
 
-#include <gudhi/concretizations/Persistence_landscape_on_grid.h>
+#include <gudhi/persistence_representations/Persistence_landscape_on_grid.h>
 
 
 

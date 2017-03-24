@@ -22,7 +22,7 @@
 
 
 
-#include <gudhi/concretizations/Persistence_landscape.h>
+#include <gudhi/persistence_representations/Persistence_landscape.h>
 
 
 

@@ -22,7 +22,7 @@
 
 
 #include <gudhi/permutation_test.h>
-#include <gudhi/concretizations/Persistence_landscape.h>
+#include <gudhi/persistence_representations/Persistence_landscape.h>
 #include <iostream>
 #include <cstring>
 
