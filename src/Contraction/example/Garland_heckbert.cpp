@@ -63,10 +63,12 @@ typedef Skeleton_blocker_contractor<Complex> Complex_contractor;
  * the point minimizing the cost of the quadric.
  */
 class GH_placement : public Gudhi::contraction::Placement_policy<EdgeProfile> {
+  Complex& complex_;
+
  public:
   typedef Gudhi::contraction::Placement_policy<EdgeProfile>::Placement_type Placement_type;
 
-  GH_placement(Complex& complex) { }
+  GH_placement(Complex& complex) : complex_(complex) { (void)complex_; }
 
   Placement_type operator()(const EdgeProfile& profile) const override {
     auto sum_quad(profile.v0().quadric);
@@ -85,10 +87,12 @@ class GH_placement : public Gudhi::contraction::Placement_policy<EdgeProfile> {
  * which expresses a squared distances with triangles planes.
  */
 class GH_cost : public Gudhi::contraction::Cost_policy<EdgeProfile> {
+  Complex& complex_;
+
  public:
   typedef Gudhi::contraction::Cost_policy<EdgeProfile>::Cost_type Cost_type;
 
-  GH_cost(Complex& complex) { }
+  GH_cost(Complex& complex) : complex_(complex) { (void)complex_; }
 
   Cost_type operator()(EdgeProfile const& profile, boost::optional<Point> const& new_point) const override {
     Cost_type res;
@@ -107,8 +111,10 @@ class GH_cost : public Gudhi::contraction::Cost_policy<EdgeProfile> {
  * and we update them when contracting an edge (the quadric become the sum of both quadrics).
  */
 class GH_visitor : public Gudhi::contraction::Contraction_visitor<EdgeProfile> {
+  Complex& complex_;
+
  public:
-  GH_visitor(Complex& complex) { }
+  GH_visitor(Complex& complex) : complex_(complex) { (void)complex_; }
 
   // Compute quadrics for every vertex v
   // The quadric of v consists in the sum of quadric

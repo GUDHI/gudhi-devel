@@ -105,6 +105,9 @@ template<typename SkBlComplex> class Critical_points {
     if (link.empty())
       return 0;
 
+    Edge_contractor<Complex> contractor(link, link.num_vertices() - 1);
+    (void)contractor;
+
     if (link.num_connected_components() > 1)
       // one than more CC -> not contractible
       return 0;
