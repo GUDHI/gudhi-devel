@@ -25,17 +25,19 @@
 
 #include <CGAL/Epick_d.h>
 #include <CGAL/point_generators_d.h>
+#include <CGAL/Random.h>
 
 #include <fstream>
 #include <string>
 #include <vector>
+#include <cmath>
 
-typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> K;
-typedef K::FT FT;
-typedef K::Point_d Point_d;
-typedef std::vector<Point_d> Point_Vector;
-typedef CGAL::Random_points_in_cube_d<Point_d> Random_cube_iterator;
-typedef CGAL::Random_points_in_ball_d<Point_d> Random_point_iterator;
+using K = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
+using FT = K::FT;
+using Point_d = K::Point_d;
+using Point_Vector = std::vector<Point_d>;
+using Random_cube_iterator = CGAL::Random_points_in_cube_d<Point_d>;
+using Random_point_iterator = CGAL::Random_points_in_ball_d<Point_d>;
 
 /**
  * \brief Rock age method of reading off file
@@ -142,6 +144,23 @@ void generate_points_sphere(Point_Vector& W, int nbP, int dim) {
   CGAL::Random_points_on_sphere_d<Point_d> rp(dim, 1);
   for (int i = 0; i < nbP; i++)
     W.push_back(*rp++);
+}
+
+/** \brief Generate nbP points on a (flat) d-torus embedded in R^{2d}
+ *
+ */
+void generate_points_torus(Point_Vector& W, int nbP, int dim) {
+  CGAL::Random rand;
+  const double pi = std::acos(-1);
+  for (int i = 0; i < nbP; i++) {
+    std::vector<FT> point;
+    for (int j = 0; j < dim; j++) {
+      double alpha = rand.uniform_real(static_cast<double>(0), 2*pi);
+      point.push_back(sin(alpha));
+      point.push_back(cos(alpha));
+    }
+    W.push_back(Point_d(point));
+  }
 }
 
 #endif  // EXAMPLE_WITNESS_COMPLEX_GENERATORS_H_

@@ -1,5 +1,5 @@
 #include <gudhi/Rips_complex.h>
-// to construct Rips_complex from a OFF file of points
+// to construct Rips_complex from a csv file representing a distance matrix
 #include <gudhi/reader_utils.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/distance_functions.h>
@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
   using Distance_matrix = std::vector<std::vector<Filtration_value>>;
 
   // ----------------------------------------------------------------------------
-  // Init of a rips complex from a distance matrix in a csv file
+  // Init of a Rips complex from a distance matrix in a csv file
   // Default separator is ';'
   // ----------------------------------------------------------------------------
   Distance_matrix distances = read_lower_triangular_matrix_from_csv_file<Filtration_value>(csv_file_name);
@@ -50,13 +50,13 @@ int main(int argc, char **argv) {
   std::ostream output_stream(streambufffer);
 
   // ----------------------------------------------------------------------------
-  // Display information about the rips complex
+  // Display information about the Rips complex
   // ----------------------------------------------------------------------------
   output_stream << "Rips complex is of dimension " << stree.dimension() <<
                    " - " << stree.num_simplices() << " simplices - " <<
                    stree.num_vertices() << " vertices." << std::endl;
 
-  output_stream << "Iterator on rips complex simplices in the filtration order, with [filtration value]:" <<
+  output_stream << "Iterator on Rips complex simplices in the filtration order, with [filtration value]:" <<
                    std::endl;
   for (auto f_simplex : stree.filtration_simplex_range()) {
     output_stream << "   ( ";

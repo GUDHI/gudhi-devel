@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
   using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
 
   // ----------------------------------------------------------------------------
-  // Init of a rips complex from an OFF file
+  // Init of a Rips complex from an OFF file
   // ----------------------------------------------------------------------------
   Gudhi::Points_off_reader<Point> off_reader(off_file_name);
   Rips_complex rips_complex_from_file(off_reader.get_point_cloud(), threshold, Euclidean_distance());
@@ -49,13 +49,13 @@ int main(int argc, char **argv) {
   std::ostream output_stream(streambufffer);
 
   // ----------------------------------------------------------------------------
-  // Display information about the rips complex
+  // Display information about the Rips complex
   // ----------------------------------------------------------------------------
   output_stream << "Rips complex is of dimension " << stree.dimension() <<
                    " - " << stree.num_simplices() << " simplices - " <<
                    stree.num_vertices() << " vertices." << std::endl;
 
-  output_stream << "Iterator on rips complex simplices in the filtration order, with [filtration value]:" <<
+  output_stream << "Iterator on Rips complex simplices in the filtration order, with [filtration value]:" <<
                    std::endl;
   for (auto f_simplex : stree.filtration_simplex_range()) {
     output_stream << "   ( ";

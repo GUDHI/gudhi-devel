@@ -603,7 +603,7 @@ class Persistent_cohomology {
    */
   std::vector<int> betti_numbers() const {
     // Init Betti numbers vector with zeros until Simplicial complex dimension
-    std::vector<int> betti_numbers(cpx_->dimension(), 0);
+    std::vector<int> betti_numbers(dim_max_, 0);
 
     for (auto pair : persistent_pairs_) {
       // Count never ended persistence intervals
@@ -642,8 +642,7 @@ class Persistent_cohomology {
    */
   std::vector<int> persistent_betti_numbers(Filtration_value from, Filtration_value to) const {
     // Init Betti numbers vector with zeros until Simplicial complex dimension
-    std::vector<int> betti_numbers(cpx_->dimension(), 0);
-
+    std::vector<int> betti_numbers(dim_max_, 0);
     for (auto pair : persistent_pairs_) {
       // Count persistence intervals that covers the given interval
       // null_simplex test : if the function is called with to=+infinity, we still get something useful. And it will

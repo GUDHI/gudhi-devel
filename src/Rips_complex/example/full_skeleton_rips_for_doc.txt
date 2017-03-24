@@ -1,5 +1,5 @@
 Rips complex is of dimension 3 - 24 simplices - 7 vertices.
-Iterator on rips complex simplices in the filtration order, with [filtration value]:
+Iterator on Rips complex simplices in the filtration order, with [filtration value]:
    ( 0 ) -> [0] 
    ( 1 ) -> [0] 
    ( 2 ) -> [0] 

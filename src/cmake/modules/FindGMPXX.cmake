@@ -33,6 +33,10 @@ if(GMP_FOUND)
                DOC "Path to the GMPXX library"
                )
 
+  if ( GMPXX_LIBRARIES )
+    get_filename_component(GMPXX_LIBRARIES_DIR ${GMPXX_LIBRARIES} PATH CACHE )
+  endif()
+
   include(FindPackageHandleStandardArgs)
 
   find_package_handle_standard_args(GMPXX "DEFAULT_MSG" GMPXX_LIBRARIES GMPXX_INCLUDE_DIR )

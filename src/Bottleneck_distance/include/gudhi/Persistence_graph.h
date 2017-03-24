@@ -25,6 +25,10 @@
 
 #include <gudhi/Internal_point.h>
 
+#ifdef GUDHI_USE_TBB
+#include <tbb/parallel_sort.h>
+#endif
+
 #include <vector>
 #include <algorithm>
 #include <limits>  // for numeric_limits
@@ -40,7 +44,7 @@ namespace persistence_diagram {
  */
 class Persistence_graph {
  public:
-  /** \internal \brief Constructor taking 2 Persistence_Diagrams (concept) as parameters. */
+  /** \internal \brief Constructor taking 2 PersistenceDiagrams (concept) as parameters. */
   template<typename Persistence_diagram1, typename Persistence_diagram2>
   Persistence_graph(const Persistence_diagram1& diag1, const Persistence_diagram2& diag2, double e);
   /** \internal \brief Is the given point from U the projection of a point in V ? */
@@ -144,7 +148,11 @@ inline std::vector<double> Persistence_graph::sorted_distances() const {
     for (int v_point_index = 0; v_point_index < size(); ++v_point_index)
       distances.push_back(distance(u_point_index, v_point_index));
   }
+#ifdef GUDHI_USE_TBB
+  tbb::parallel_sort(distances.begin(), distances.end());
+#else
   std::sort(distances.begin(), distances.end());
+#endif
   return distances;
 }
 

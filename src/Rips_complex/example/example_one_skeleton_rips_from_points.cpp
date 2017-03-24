@@ -24,7 +24,7 @@ int main() {
   points.push_back({9.0, 17.0});
 
   // ----------------------------------------------------------------------------
-  // Init of a rips complex from points
+  // Init of a Rips complex from points
   // ----------------------------------------------------------------------------
   double threshold = 12.0;
   Rips_complex rips_complex_from_points(points, threshold, Euclidean_distance());
@@ -32,13 +32,13 @@ int main() {
   Simplex_tree stree;
   rips_complex_from_points.create_complex(stree, 1);
   // ----------------------------------------------------------------------------
-  // Display information about the one skeleton rips complex
+  // Display information about the one skeleton Rips complex
   // ----------------------------------------------------------------------------
   std::cout << "Rips complex is of dimension " << stree.dimension() <<
                " - " << stree.num_simplices() << " simplices - " <<
                stree.num_vertices() << " vertices." << std::endl;
 
-  std::cout << "Iterator on rips complex simplices in the filtration order, with [filtration value]:" <<
+  std::cout << "Iterator on Rips complex simplices in the filtration order, with [filtration value]:" <<
                std::endl;
   for (auto f_simplex : stree.filtration_simplex_range()) {
     std::cout << "   ( ";

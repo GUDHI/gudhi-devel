@@ -80,11 +80,22 @@ double bottleneck_distance_exact(Persistence_graph& g) {
   return sd.at(lower_bound_i);
 }
 
-/** \brief Function to use in order to compute the Bottleneck distance between two persistence diagrams (see concepts).
- * If the last parameter e is not 0, you get an additive e-approximation, which is a lot faster to compute whatever is
- * e.
- * Thus, by default, e is a very small positive double, actually the smallest double possible such that the
- * floating-point inaccuracies don't lead to a failure of the algorithm.
+/** \brief Function to compute the Bottleneck distance between two persistence diagrams.
+ *
+ * \tparam Persistence_diagram1,Persistence_diagram2
+ * models of the concept `PersistenceDiagram`.
+ * \param[in] e
+ * \parblock
+ * If `e` is 0, this uses an expensive algorithm to compute the exact distance.
+ *
+ * If `e` is not 0, it asks for an additive `e`-approximation, and currently
+ * also allows a small multiplicative error (the last 2 or 3 bits of the
+ * mantissa may be wrong). This version of the algorithm takes advantage of the
+ * limited precision of `double` and is usually a lot faster to compute,
+ * whatever the value of `e`.
+ *
+ * Thus, by default, `e` is the smallest positive double.
+ * \endparblock
  *
  * \ingroup bottleneck_distance
  */

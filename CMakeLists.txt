@@ -107,6 +107,8 @@ else()
   add_definitions(-DBOOST_RESULT_OF_USE_DECLTYPE)
   # BOOST ISSUE with Libraries name resolution under Windows
   add_definitions(-DBOOST_ALL_NO_LIB)
+  # problem with Visual Studio link on Boost program_options
+  add_definitions( -DBOOST_ALL_DYN_LINK )
 
   INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
   LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})                      
@@ -170,9 +172,11 @@ else()
   # data points generator
   add_subdirectory(data/points/generator)
 
-  # Please let GudhUI in last compilation position as QT is known to modify CMAKE_CXX_FLAGS
-  # GudhUI
   add_subdirectory(src/GudhUI)
+
+  # This variable is used by Cython CMakeLists.txt to know its path
+  set(GUDHI_CYTHON_PATH "src/cython")
+  add_subdirectory(${GUDHI_CYTHON_PATH})
 
 endif()  
 
