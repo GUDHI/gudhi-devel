@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EUCLIDEAN_STRONG_WITNESS_COMPLEX_INTERFACE_H
-#define	EUCLIDEAN_STRONG_WITNESS_COMPLEX_INTERFACE_H
+#ifndef INCLUDE_EUCLIDEAN_STRONG_WITNESS_COMPLEX_INTERFACE_H_
+#define INCLUDE_EUCLIDEAN_STRONG_WITNESS_COMPLEX_INTERFACE_H_
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Euclidean_strong_witness_complex.h>
@@ -50,7 +50,7 @@ class Euclidean_strong_witness_complex_interface {
   Euclidean_strong_witness_complex_interface(const std::vector<std::vector<double>>& landmarks,
                                              const std::vector<std::vector<double>>& witnesses) {
     landmarks_.reserve(landmarks.size());
-    for(auto& landmark : landmarks)
+    for (auto& landmark : landmarks)
       landmarks_.emplace_back(landmark.begin(), landmark.end());
     witness_complex_ = new Euclidean_strong_witness_complex<Dynamic_kernel>(landmarks_, witnesses);
   }
@@ -87,7 +87,7 @@ class Euclidean_strong_witness_complex_interface {
 
 }  // namespace witness_complex
 
-} // namespace Gudhi
+}  // namespace Gudhi
 
-#endif  // EUCLIDEAN_STRONG_WITNESS_COMPLEX_INTERFACE_H
+#endif  // INCLUDE_EUCLIDEAN_STRONG_WITNESS_COMPLEX_INTERFACE_H_
 

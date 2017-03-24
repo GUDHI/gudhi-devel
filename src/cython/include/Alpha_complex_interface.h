@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ALPHA_COMPLEX_INTERFACE_H
-#define	ALPHA_COMPLEX_INTERFACE_H
+#ifndef INCLUDE_ALPHA_COMPLEX_INTERFACE_H_
+#define INCLUDE_ALPHA_COMPLEX_INTERFACE_H_
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Alpha_complex.h>
@@ -79,4 +79,4 @@ class Alpha_complex_interface {
 
 }  // namespace Gudhi
 
-#endif  // ALPHA_COMPLEX_INTERFACE_H
+#endif  // INCLUDE_ALPHA_COMPLEX_INTERFACE_H_

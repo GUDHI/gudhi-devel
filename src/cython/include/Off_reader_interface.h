@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef OFF_READER_INTERFACE_H
-#define	OFF_READER_INTERFACE_H
+#ifndef INCLUDE_OFF_READER_INTERFACE_H_
+#define INCLUDE_OFF_READER_INTERFACE_H_
 
 #include <gudhi/Points_off_io.h>
 
@@ -38,5 +38,5 @@ std::vector<std::vector<double>> read_points_from_OFF_file(const std::string& of
 
 }  // namespace Gudhi
 
-#endif  // OFF_READER_INTERFACE_H
+#endif  // INCLUDE_OFF_READER_INTERFACE_H_
 

@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SUBSAMPLING_INTERFACE_H
-#define	SUBSAMPLING_INTERFACE_H
+#ifndef INCLUDE_SUBSAMPLING_INTERFACE_H_
+#define INCLUDE_SUBSAMPLING_INTERFACE_H_
 
 #include <gudhi/choose_n_farthest_points.h>
 #include <gudhi/pick_n_random_points.h>
@@ -112,10 +112,8 @@ std::vector<std::vector<double>> subsampling_sparsify_points_from_file(const std
   return subsampling_sparsify_points(points, min_squared_dist);
 }
 
-
 }  // namespace subsampling
 
 }  // namespace Gudhi
 
-#endif  // SUBSAMPLING_INTERFACE_H
-
+#endif  // INCLUDE_SUBSAMPLING_INTERFACE_H_

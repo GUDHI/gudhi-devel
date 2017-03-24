@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef RIPS_COMPLEX_INTERFACE_H
-#define	RIPS_COMPLEX_INTERFACE_H
+#ifndef INCLUDE_RIPS_COMPLEX_INTERFACE_H_
+#define INCLUDE_RIPS_COMPLEX_INTERFACE_H_
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Rips_complex.h>
@@ -53,7 +53,6 @@ class Rips_complex_interface {
     } else {
       // Rips construction where values is a distance matrix
       rips_complex_ = new Rips_complex<Simplex_tree_interface<>::Filtration_value>(values, threshold);
-
     }
   }
 
@@ -65,11 +64,10 @@ class Rips_complex_interface {
                                                                                    threshold, Euclidean_distance());
     } else {
       // Rips construction where values is a distance matrix
-      Distance_matrix distances = read_lower_triangular_matrix_from_csv_file<Simplex_tree_interface<>::Filtration_value>(file_name);
+      Distance_matrix distances =
+          read_lower_triangular_matrix_from_csv_file<Simplex_tree_interface<>::Filtration_value>(file_name);
       rips_complex_ = new Rips_complex<Simplex_tree_interface<>::Filtration_value>(distances, threshold);
-
     }
-
   }
 
   void create_simplex_tree(Simplex_tree_interface<>* simplex_tree, int dim_max) {
@@ -85,4 +83,4 @@ class Rips_complex_interface {
 
 }  // namespace Gudhi
 
-#endif  // RIPS_COMPLEX_INTERFACE_H
+#endif  // INCLUDE_RIPS_COMPLEX_INTERFACE_H_
