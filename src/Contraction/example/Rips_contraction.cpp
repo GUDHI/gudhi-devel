@@ -27,19 +27,15 @@
 #include <boost/timer/timer.hpp>
 #include <iostream>
 
-using namespace Gudhi;
-using namespace skeleton_blocker;
-using namespace contraction;
-
 struct Geometry_trait {
   typedef Point_d Point;
 };
 
-typedef Geometry_trait::Point Point;
-typedef Skeleton_blocker_simple_geometric_traits<Geometry_trait> Complex_geometric_traits;
-typedef Skeleton_blocker_geometric_complex< Complex_geometric_traits > Complex;
-typedef Edge_profile<Complex> Profile;
-typedef Skeleton_blocker_contractor<Complex> Complex_contractor;
+using Complex_geometric_traits = Gudhi::skeleton_blocker::Skeleton_blocker_simple_geometric_traits<Geometry_trait>;
+using Complex = Gudhi::skeleton_blocker::Skeleton_blocker_geometric_complex< Complex_geometric_traits >;
+using Profile = Gudhi::contraction::Edge_profile<Complex>;
+using Complex_contractor = Gudhi::contraction::Skeleton_blocker_contractor<Complex>;
+
 
 template<typename ComplexType>
 void build_rips(ComplexType& complex, double offset) {
@@ -62,7 +58,7 @@ int main(int argc, char *argv[]) {
   Complex complex;
 
   // load only the points
-  Skeleton_blocker_off_reader<Complex> off_reader(argv[1], complex, true);
+  Gudhi::skeleton_blocker::Skeleton_blocker_off_reader<Complex> off_reader(argv[1], complex, true);
   if (!off_reader.is_valid()) {
     std::cerr << "Unable to read file:" << argv[1] << std::endl;
     return EXIT_FAILURE;
@@ -79,10 +75,10 @@ int main(int argc, char *argv[]) {
       complex.num_edges() << " edges" << std::endl;
 
   Complex_contractor contractor(complex,
-                                new Edge_length_cost<Profile>,
-                                contraction::make_first_vertex_placement<Profile>(),
-                                contraction::make_link_valid_contraction<Profile>(),
-                                contraction::make_remove_popable_blockers_visitor<Profile>());
+                                new Gudhi::contraction::Edge_length_cost<Profile>,
+                                Gudhi::contraction::make_first_vertex_placement<Profile>(),
+                                Gudhi::contraction::make_link_valid_contraction<Profile>(),
+                                Gudhi::contraction::make_remove_popable_blockers_visitor<Profile>());
   contractor.contract_edges();
 
   std::cout << "Counting final number of simplices \n";

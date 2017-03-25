@@ -60,12 +60,12 @@ int main(int argc, char * const argv[]) {
   }
 
   int number_of_landmarks = atoi(argv[1]);
-  clock_t start, end;
 
   std::vector< std::pair<int, double> > l_time;
 
   // Generate points
   for (int nbP = 500; nbP < 10000; nbP += 500) {
+    clock_t start, end;
     // Construct the Simplex Tree
     Gudhi::Simplex_tree<> simplex_tree;
     Point_Vector point_vector, landmarks;

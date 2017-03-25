@@ -27,13 +27,11 @@
 #include <vector>
 #include <cstdint>  // for std::uint8_t
 
-using namespace Gudhi;
-
 /* We could perfectly well use the default Simplex_tree<> (which uses
  * Simplex_tree_options_full_featured), the following simply demonstrates
  * how to save on storage by not storing a filtration value.  */
 
-struct MyOptions : Simplex_tree_options_full_featured {
+struct MyOptions : Gudhi::Simplex_tree_options_full_featured {
   // Implicitly use 0 as filtration value for all simplices
   static const bool store_filtration = false;
   // The persistence algorithm needs this
@@ -43,7 +41,10 @@ struct MyOptions : Simplex_tree_options_full_featured {
   // Maximum number of simplices to compute persistence is 2^8 - 1 = 255. One is reserved for null_key
   typedef std::uint8_t Simplex_key;
 };
-typedef Simplex_tree<MyOptions> ST;
+
+using ST = Gudhi::Simplex_tree<MyOptions>;
+using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
+using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<ST, Field_Zp>;
 
 int main() {
   ST st;
@@ -70,7 +71,7 @@ int main() {
   st.initialize_filtration();
 
   // Class for homology computation
-  persistent_cohomology::Persistent_cohomology<ST, persistent_cohomology::Field_Zp> pcoh(st);
+  Persistent_cohomology pcoh(st);
 
   // Initialize the coefficient field Z/2Z for homology
   pcoh.init_coefficients(2);

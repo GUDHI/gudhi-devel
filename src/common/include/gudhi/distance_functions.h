@@ -24,8 +24,8 @@
 #define DISTANCE_FUNCTIONS_H_
 
 #include <cmath>  // for std::sqrt
-#include <type_traits> // for std::decay
-#include <iterator> // for std::begin, std::end
+#include <type_traits>  // for std::decay
+#include <iterator>  // for std::begin, std::end
 
 /** @file
  * @brief Global distance functions

@@ -88,7 +88,6 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
  private:
   // A copy
   FilteredComplex* stptr_;
-
 };
 
 }  // namespace Gudhi

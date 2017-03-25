@@ -81,28 +81,26 @@ if(CGAL_FOUND)
       ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.weights 2 0.45)
 
 
-  if (NOT CGAL_VERSION VERSION_LESS 4.7.0)
-    if (EIGEN3_FOUND)
-      add_executable (alpha_complex_persistence alpha_complex_persistence.cpp)
-      target_link_libraries(alpha_complex_persistence
-          ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+  if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
+    add_executable (alpha_complex_persistence alpha_complex_persistence.cpp)
+    target_link_libraries(alpha_complex_persistence
+        ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
-      add_executable(periodic_alpha_complex_3d_persistence periodic_alpha_complex_3d_persistence.cpp)
-      target_link_libraries(periodic_alpha_complex_3d_persistence ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
+    add_executable(periodic_alpha_complex_3d_persistence periodic_alpha_complex_3d_persistence.cpp)
+    target_link_libraries(periodic_alpha_complex_3d_persistence ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
 
-      add_executable(custom_persistence_sort custom_persistence_sort.cpp)
-      target_link_libraries(custom_persistence_sort ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
+    add_executable(custom_persistence_sort custom_persistence_sort.cpp)
+    target_link_libraries(custom_persistence_sort ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
 
-      if (TBB_FOUND)
-        target_link_libraries(alpha_complex_persistence ${TBB_LIBRARIES})
-        target_link_libraries(periodic_alpha_complex_3d_persistence ${TBB_LIBRARIES})
-        target_link_libraries(custom_persistence_sort ${TBB_LIBRARIES})
-      endif(TBB_FOUND)
-      add_test(alpha_complex_persistence_2_0_45 ${CMAKE_CURRENT_BINARY_DIR}/alpha_complex_persistence
-          ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -m 0.45 -p 2)
-      add_test(periodic_alpha_complex_3d_persistence_2_0 ${CMAKE_CURRENT_BINARY_DIR}/periodic_alpha_complex_3d_persistence
-          ${CMAKE_SOURCE_DIR}/data/points/grid_10_10_10_in_0_1.off ${CMAKE_SOURCE_DIR}/data/points/iso_cuboid_3_in_0_1.txt 2 0)
-      add_test(custom_persistence_sort ${CMAKE_CURRENT_BINARY_DIR}/custom_persistence_sort)
-    endif(EIGEN3_FOUND)
-  endif (NOT CGAL_VERSION VERSION_LESS 4.7.0)
+    if (TBB_FOUND)
+      target_link_libraries(alpha_complex_persistence ${TBB_LIBRARIES})
+      target_link_libraries(periodic_alpha_complex_3d_persistence ${TBB_LIBRARIES})
+      target_link_libraries(custom_persistence_sort ${TBB_LIBRARIES})
+    endif(TBB_FOUND)
+    add_test(alpha_complex_persistence_2_0_45 ${CMAKE_CURRENT_BINARY_DIR}/alpha_complex_persistence
+        ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -m 0.45 -p 2)
+    add_test(periodic_alpha_complex_3d_persistence_2_0 ${CMAKE_CURRENT_BINARY_DIR}/periodic_alpha_complex_3d_persistence
+        ${CMAKE_SOURCE_DIR}/data/points/grid_10_10_10_in_0_1.off ${CMAKE_SOURCE_DIR}/data/points/iso_cuboid_3_in_0_1.txt 2 0)
+    add_test(custom_persistence_sort ${CMAKE_CURRENT_BINARY_DIR}/custom_persistence_sort)
+  endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
 endif(CGAL_FOUND)

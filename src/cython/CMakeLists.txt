@@ -90,21 +90,16 @@ if(PYTHON_PATH AND CYTHON_PATH)
     file(COPY "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
 
     if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
-        # If CGAL_VERSION >= 4.8.1, include subsampling
-        # CGAL things are done in CGAL_VERSION >= 4.8.0
-        set(GUDHI_CYTHON_SUBSAMPLING "include 'cython/subsampling.pyx'")
+      # If CGAL_VERSION >= 4.8.1, include subsampling
+      set(GUDHI_CYTHON_SUBSAMPLING "include 'cython/subsampling.pyx'")
+      set(GUDHI_CYTHON_TANGENTIAL_COMPLEX "include 'cython/tangential_complex.pyx'")
+      set(GUDHI_CYTHON_BOTTLENECK_DISTANCE "include 'cython/bottleneck_distance.pyx'")
     else (NOT CGAL_VERSION VERSION_LESS 4.8.1)
-      # Remove alpha complex unitary tests
+      # Remove subsampling unitary tests
       file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_subsampling.py)
       file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/subsampling_ref.rst")
       file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/subsampling_sum.rst")
       file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/subsampling_user.rst")
-    endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)
-    if (NOT CGAL_VERSION VERSION_LESS 4.8.0)
-      # If CGAL_VERSION >= 4.8.0, include tangential complex
-      set(GUDHI_CYTHON_TANGENTIAL_COMPLEX "include 'cython/tangential_complex.pyx'")
-      set(GUDHI_CYTHON_BOTTLENECK_DISTANCE "include 'cython/bottleneck_distance.pyx'")
-    else (NOT CGAL_VERSION VERSION_LESS 4.8.0)
       # Remove tangential complex and bottleneck unitary tests
       file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_tangential_complex.py)
       file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_bottleneck_distance.py)
@@ -114,7 +109,7 @@ if(PYTHON_PATH AND CYTHON_PATH)
       file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/tangential_complex_ref.rst")
       file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/tangential_complex_sum.rst")
       file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/tangential_complex_user.rst")
-    endif (NOT CGAL_VERSION VERSION_LESS 4.8.0)
+    endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)
     if (NOT CGAL_VERSION VERSION_LESS 4.7.0)
       # If CGAL_VERSION >= 4.7.0, include alpha
       set(GUDHI_CYTHON_ALPHA_COMPLEX "include 'cython/alpha_complex.pyx'")
