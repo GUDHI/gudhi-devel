@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 2.8)
 project(GudhUI)
 
-find_package(CGAL COMPONENTS Qt5)
 find_package(Qt5 COMPONENTS Widgets Xml OpenGL)
 find_package(QGLViewer)
 find_package(OpenGL)
 
+if (CGAL_VERSION VERSION_EQUAL 4.8.0)
+  message(ERROR " GudhUI does not compile with CGAL 4.8.0. 4.8.1, 4.8.2 and 4.9 are OK.")
+endif()
 
 if (NOT CGAL_FOUND)
   message(ERROR " GudhUI requires CGAL and will not be compiled.")
@@ -25,7 +27,7 @@ endif()
 
 
 
-if ( CGAL_FOUND AND Qt5_FOUND AND OPENGL_FOUND AND QGLVIEWER_FOUND )
+if ( CGAL_FOUND AND Qt5_FOUND AND OPENGL_FOUND AND QGLVIEWER_FOUND AND NOT CGAL_VERSION VERSION_EQUAL 4.8.0)
 
   set(CMAKE_AUTOMOC ON)
   set(CMAKE_AUTOUIC ON)

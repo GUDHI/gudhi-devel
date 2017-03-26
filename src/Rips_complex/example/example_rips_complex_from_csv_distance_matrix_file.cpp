@@ -1,5 +1,5 @@
 #include <gudhi/Rips_complex.h>
-// to construct Rips_complex from a OFF file of points
+// to construct Rips_complex from a csv file representing a distance matrix
 #include <gudhi/reader_utils.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/distance_functions.h>

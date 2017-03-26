@@ -9,9 +9,9 @@
 #include <vector>
 #include <limits>  // for numeric limits
 
-typedef CGAL::Epick_d< CGAL::Dimension_tag<2> > Kernel;
-typedef Kernel::Point_d Point;
-typedef std::vector<Point> Vector_of_points;
+using Kernel = CGAL::Epick_d< CGAL::Dimension_tag<2> >;
+using Point = Kernel::Point_d;
+using Vector_of_points = std::vector<Point>;
 
 void usage(int nbArgs, char * const progName) {
   std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
   if ((argc != 1) && (argc != 2)) usage(argc, (argv[0] - 1));
 
   // Delaunay complex if alpha_square_max_value is not given by the user.
-  double alpha_square_max_value = std::numeric_limits<double>::infinity();
+  double alpha_square_max_value {std::numeric_limits<double>::infinity()};
   if (argc == 2)
     alpha_square_max_value = atof(argv[1]);
 

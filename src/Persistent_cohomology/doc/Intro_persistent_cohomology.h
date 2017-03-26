@@ -172,6 +172,28 @@ Persistent_cohomology/alpha_complex_3d_persistence.cpp</a> computes the persiste
 2  1 0.0934117 1.00003 
 2  2 0.56444 1.03938 \endcode
 
+\li <a href="_persistent_cohomology_2exact_alpha_complex_3d_persistence_8cpp-example.html">
+Persistent_cohomology/exact_alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
+\f$\mathbb{Z}/2\mathbb{Z}\f$ coefficients of the alpha complex on points sampling from an OFF file.
+Here, as CGAL computes the exact values, it is slower, but it is necessary when points are on a grid
+for instance.
+\code $> ./exact_alpha_complex_3d_persistence ../../data/points/sphere3D_pts_on_grid.off 2 0.1 \endcode
+\code Simplex_tree dim: 3
+2  0 0 inf
+2  2 0.0002 0.2028 \endcode
+
+\li <a href="_persistent_cohomology_2weighted_alpha_complex_3d_persistence_8cpp-example.html">
+Persistent_cohomology/weighted_alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
+\f$\mathbb{Z}/2\mathbb{Z}\f$ coefficients of the weighted alpha complex on points sampling from an OFF file
+and a weights file.
+\code $> ./weighted_alpha_complex_3d_persistence ../../data/points/tore3D_300.off
+../../data/points/tore3D_300.weights 2 0.45 \endcode
+\code Simplex_tree dim: 3
+2  -0 0 inf
+2  1 0.0682162 1.0001
+2  1 0.0934117 1.00003
+2  2 0.56444 1.03938 \endcode
+
 \li <a href="_persistent_cohomology_2alpha_complex_persistence_8cpp-example.html">
 Persistent_cohomology/alpha_complex_persistence.cpp</a> computes the persistent homology with
 \f$\mathbb{Z}/p\mathbb{Z}\f$ coefficients of the alpha complex on points sampling from an OFF file.

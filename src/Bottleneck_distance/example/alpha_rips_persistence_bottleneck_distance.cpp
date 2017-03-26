@@ -56,7 +56,7 @@ void program_options(int argc, char * argv[]
                      , int & p
                      , Filtration_value & min_persistence);
 
-static inline std::pair<double, double> compute_root_square (std::pair<double, double> input) {
+static inline std::pair<double, double> compute_root_square(std::pair<double, double> input) {
   return std::make_pair(std::sqrt(input.first), std::sqrt(input.second));
 }
 
