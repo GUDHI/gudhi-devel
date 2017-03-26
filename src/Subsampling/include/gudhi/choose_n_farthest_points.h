@@ -36,11 +36,21 @@ namespace Gudhi {
 
 namespace subsampling {
 
+/**
+ *  \ingroup subsampling
+ */
+enum : std::size_t {
+/**
+ *  Argument for `choose_n_farthest_points` to indicate that the starting point should be picked randomly.
+ */
+  random_first_landmark = std::size_t(-1)
+};
+
 /** 
  *  \ingroup subsampling
  *  \brief Subsample by a greedy strategy of iteratively adding the farthest point from the
  *  current chosen point set to the subsampling. 
- *  The iteration starts with the landmark `starting point` or, if `starting point==-1`, with a random landmark.
+ *  The iteration starts with the landmark `starting point` or, if `starting point==random_first_landmark`, with a random landmark.
  *  \tparam Kernel must provide a type Kernel::Squared_distance_d which is a model of the 
  *          concept <a target="_blank"
  *   href="http://doc.cgal.org/latest/Kernel_d/classKernel__d_1_1Squared__distance__d.html">Kernel_d::Squared_distance_d</a>
@@ -80,7 +90,7 @@ void choose_n_farthest_points(Kernel const &k,
   if (final_size < 1)
     return;
 
-  if (starting_point == std::size_t(-1)) {
+  if (starting_point == random_first_landmark) {
     // Choose randomly the first landmark
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -115,37 +125,6 @@ void choose_n_farthest_points(Kernel const &k,
         curr_max_w = i;
       }
   }
-}
-
-/** 
- *  \ingroup subsampling
- *  \brief Subsample by a greedy strategy of iteratively adding the farthest point from the
- *  current chosen point set to the subsampling. 
- *  The iteration starts with a random landmark.
- *  \tparam Kernel must provide a type Kernel::Squared_distance_d which is a model of the 
- *          concept <a target="_blank"
- *   href="http://doc.cgal.org/latest/Kernel_d/classKernel__d_1_1Squared__distance__d.html">Kernel_d::Squared_distance_d</a>
- *   concept.
- *  It must also contain a public member 'squared_distance_d_object' of this type.
- *  \tparam Point_range Range whose value type is Kernel::Point_d.  It must provide random-access 
- *         via `operator[]` and the points should be stored contiguously in memory.
- *  \tparam PointOutputIterator Output iterator whose value type is Kernel::Point_d.
- *  \details It chooses `final_size` points from a random access range `input_pts` and
- *  outputs it in the output iterator `output_it`.
- * @param[in] k A kernel object.
- * @param[in] input_pts Const reference to the input points.
- * @param[in] final_size The size of the subsample to compute.
- * @param[out] output_it The output iterator.
- *  
- */
-template < typename Kernel,
-typename Point_range,
-typename PointOutputIterator>
-void choose_n_farthest_points(Kernel const& k,
-                              Point_range const &input_pts,
-                              std::size_t final_size,
-                              PointOutputIterator output_it) {
-  choose_n_farthest_points(k, input_pts, final_size, -1, output_it);
 }
 
 }  // namespace subsampling
