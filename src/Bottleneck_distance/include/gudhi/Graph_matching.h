@@ -40,8 +40,6 @@ class Graph_matching {
  public:
   /** \internal \brief Constructor constructing an empty matching. */
   explicit Graph_matching(Persistence_graph &g);
-  /** \internal \brief Copy operator. */
-  Graph_matching& operator=(const Graph_matching& m);
   /** \internal \brief Is the matching perfect ? */
   bool perfect() const;
   /** \internal \brief Augments the matching with a maximal set of edge-disjoint shortest augmenting paths. */
@@ -50,7 +48,7 @@ class Graph_matching {
   void set_r(double r);
 
  private:
-  Persistence_graph& g;
+  Persistence_graph* gp;
   double r;
   /** \internal \brief Given a point from V, provides its matched point in U, null_point_index() if there isn't. */
   std::vector<int> v_to_u;
@@ -66,17 +64,9 @@ class Graph_matching {
 };
 
 inline Graph_matching::Graph_matching(Persistence_graph& g)
-    : g(g), r(0.), v_to_u(g.size(), null_point_index()), unmatched_in_u() {
+    : gp(&g), r(0.), v_to_u(g.size(), null_point_index()), unmatched_in_u() {
   for (int u_point_index = 0; u_point_index < g.size(); ++u_point_index)
     unmatched_in_u.emplace_back(u_point_index);
-}
-
-inline Graph_matching& Graph_matching::operator=(const Graph_matching& m) {
-  g = m.g;
-  r = m.r;
-  v_to_u = m.v_to_u;
-  unmatched_in_u = m.unmatched_in_u;
-  return *this;
 }
 
 inline bool Graph_matching::perfect() const {
@@ -88,7 +78,7 @@ inline bool Graph_matching::multi_augment() {
     return false;
   Layered_neighbors_finder layered_nf(layering());
   int max_depth = layered_nf.vlayers_number()*2 - 1;
-  double rn = sqrt(g.size());
+  double rn = sqrt(gp->size());
   // verification of a necessary criterion in order to shortcut if possible
   if (max_depth < 0 || (unmatched_in_u.size() > rn && max_depth >= rn))
     return false;
@@ -135,10 +125,10 @@ inline bool Graph_matching::augment(Layered_neighbors_finder & layered_nf, int u
 inline Layered_neighbors_finder Graph_matching::layering() const {
   std::list<int> u_vertices(unmatched_in_u);
   std::list<int> v_vertices;
-  Neighbors_finder nf(g, r);
-  for (int v_point_index = 0; v_point_index < g.size(); ++v_point_index)
+  Neighbors_finder nf(*gp, r);
+  for (int v_point_index = 0; v_point_index < gp->size(); ++v_point_index)
     nf.add(v_point_index);
-  Layered_neighbors_finder layered_nf(g, r);
+  Layered_neighbors_finder layered_nf(*gp, r);
   for (int layer = 0; !u_vertices.empty(); layer++) {
     // one layer is one step in the BFS
     for (auto it1 = u_vertices.cbegin(); it1 != u_vertices.cend(); ++it1) {
