@@ -43,14 +43,14 @@ enum : std::size_t {
 /**
  *  Argument for `choose_n_farthest_points` to indicate that the starting point should be picked randomly.
  */
-  random_first_landmark = std::size_t(-1)
+  random_starting_point = std::size_t(-1)
 };
 
 /** 
  *  \ingroup subsampling
  *  \brief Subsample by a greedy strategy of iteratively adding the farthest point from the
  *  current chosen point set to the subsampling. 
- *  The iteration starts with the landmark `starting point` or, if `starting point==random_first_landmark`, with a random landmark.
+ *  The iteration starts with the landmark `starting point` or, if `starting point==random_starting_point`, with a random landmark.
  *  \tparam Kernel must provide a type Kernel::Squared_distance_d which is a model of the 
  *          concept <a target="_blank"
  *   href="http://doc.cgal.org/latest/Kernel_d/classKernel__d_1_1Squared__distance__d.html">Kernel_d::Squared_distance_d</a>
@@ -90,7 +90,7 @@ void choose_n_farthest_points(Kernel const &k,
   if (final_size < 1)
     return;
 
-  if (starting_point == random_first_landmark) {
+  if (starting_point == random_starting_point) {
     // Choose randomly the first landmark
     std::random_device rd;
     std::mt19937 gen(rd());
