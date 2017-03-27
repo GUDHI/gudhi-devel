@@ -40,6 +40,33 @@ namespace Gudhi {
 
 namespace persistence_diagram {
 
+/** \internal \brief Variant of CGAL::Fuzzy_iso_box to ensure that the box ic closed. It isn't clear how necessary that is.
+ */
+struct Square_query {
+  typedef CGAL::Dimension_tag<2> D;
+  typedef Internal_point Point_d;
+  typedef double FT;
+  bool contains(Point_d p) const {
+    return std::abs(p.x()-c.x())<=size && std::abs(p.y()-c.y())<=size;
+  }
+  bool inner_range_intersects(CGAL::Kd_tree_rectangle<FT,D> const&r) const {
+    return
+      r.max_coord(0) >= c.x() - size &&
+      r.min_coord(0) <= c.x() + size &&
+      r.max_coord(1) >= c.y() - size &&
+      r.min_coord(1) <= c.y() + size;
+  }
+  bool outer_range_contains(CGAL::Kd_tree_rectangle<FT,D> const&r) const {
+    return
+      r.min_coord(0) >= c.x() - size &&
+      r.max_coord(0) <= c.x() + size &&
+      r.min_coord(1) >= c.y() - size &&
+      r.max_coord(1) <= c.y() + size;
+  }
+  Point_d c;
+  FT size;
+};
+
 /** \internal \brief data structure used to find any point (including projections) in V near to a query point from U
  * (which can be a projection).
  *
@@ -123,14 +150,10 @@ inline int Neighbors_finder::pull_near(int u_point_index) {
   } else {
     // Is the query point near to a V point in the plane ?
     Internal_point u_point = g.get_u_point(u_point_index);
-    std::array<double, 2> w = {
-      {1., 1.}
-    };
-    K_neighbor_search search(kd_t, u_point, 1, 0., true, Distance(0, 2, w.begin(), w.end()));
-    auto it = search.begin();
-    if (it == search.end() || g.distance(u_point_index, it->first.point_index) > r)
+    auto neighbor = kd_t.search_any_point(Square_query{u_point, r});
+    if(!neighbor)
       return null_point_index();
-    tmp = it->first.point_index;
+    tmp = neighbor->point_index;
     kd_t.remove(g.get_v_point(tmp));
   }
   return tmp;
