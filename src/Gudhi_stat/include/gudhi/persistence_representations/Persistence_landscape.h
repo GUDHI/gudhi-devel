@@ -57,6 +57,8 @@ namespace Gudhi_stat
  * For details of algorithms, please consult ''A persistence landscapes toolbox for topological statistics'' by Peter Bubenik and Pawel Dlotko.
  * Persistence landscapes allow vertorization, computations of distances, computations of projections to Real, computations of averages and scalar products. Therefore they implement suitable interfaces.
  * It implements the following concepts: Vectorized_topological_data, Topological_data_with_distances, Real_valued_topological_data, Topological_data_with_averages, Topological_data_with_scalar_product
+ * Note that at the moment, due to roundoff errors during the construction of persistence landscapes, elements which are different by 0.000005 are considered the same. If the scale in your persistence diagrams
+ * is comparable to this value, please rescale them before use this code.
 **/
 class Persistence_landscape
 {
@@ -466,23 +468,23 @@ public:
 	//end of implementation of functions needed for concepts.
 
 
-	/**
-	 * This procedure returns x-range of a given level persistence landscape. If a default value is used, the x-range
-	 * of 0th level landscape is given (and this range contains the ranges of all other landscapes). 
-	**/ 
-	std::pair< double , double > get_x_range( size_t level = 0 )const
-	{
-		std::pair< double , double > result;
-		if ( level < this->land.size() )
-		{
-			result = std::make_pair( this->land[level][1].first , this->land[level][ this->land[level].size() - 2 ].first );
-		}
-		else
-		{
-			result = std::make_pair( 0,0 );
-		}
-		return result;
-	}
+	//
+	// This procedure returns x-range of a given level persistence landscape. If a default value is used, the x-range
+	//of 0th level landscape is given (and this range contains the ranges of all other landscapes). 
+	// 
+	//std::pair< double , double > get_x_range( size_t level = 0 )const
+	//{
+	//	std::pair< double , double > result;
+	//	if ( level < this->land.size() )
+	//	{
+	//		result = std::make_pair( this->land[level][1].first , this->land[level][ this->land[level].size() - 2 ].first );
+	//	}
+	//	else
+	//	{
+	//		result = std::make_pair( 0,0 );
+	//	}
+	//	return result;
+	//}
 	
 	/**
 	 * This procedure returns y-range of a given level persistence landscape. If a default value is used, the y-range

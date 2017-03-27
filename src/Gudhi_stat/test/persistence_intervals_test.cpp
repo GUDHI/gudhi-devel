@@ -103,10 +103,10 @@ BOOST_AUTO_TEST_CASE(check_dominant_intervals)
 	}
 }
 
-BOOST_AUTO_TEST_CASE(check_histograms_of_lengths) 
+BOOST_AUTO_TEST_CASE(check_histogram_of_lengths) 
 {
 	Persistence_intervals p( "data/file_with_diagram" );
-	std::vector< size_t > histogram = p.histograms_of_lengths( 10  );
+	std::vector< size_t > histogram = p.histogram_of_lengths( 10  );
 	std::vector< size_t > template_histogram;
 	template_histogram.push_back(10); 
 	template_histogram.push_back(5); 
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(check_histograms_of_lengths)
 BOOST_AUTO_TEST_CASE(check_cumulative_histograms_of_lengths) 
 {
 	Persistence_intervals p( "data/file_with_diagram" );
-	std::vector< size_t > cumulative_histogram = p.cumulative_histograms_of_lengths( 10  );
+	std::vector< size_t > cumulative_histogram = p.cumulative_histogram_of_lengths( 10  );
 	std::vector< size_t > template_cumulative_histogram;
 	template_cumulative_histogram.push_back(10); 
 	template_cumulative_histogram.push_back(15); 

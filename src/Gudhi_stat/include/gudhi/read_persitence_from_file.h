@@ -42,7 +42,7 @@ namespace Gudhi_stat
  * This procedure reads birth-death dagta from a file. We assume that in the file, there may be one type of string 'inf' or 'Inf'. If the second parameter of the program is set to -1,
  * then those vales are ignored. If the second parameter of this program is set to a positive value, then the infinite intervals will be substituted by that number.
 **/ 
-std::vector< std::pair< double,double > > read_file_names_that_may_contain_inf_string( char* filename , double what_to_substitute_for_infinite_bar = -1 )
+std::vector< std::pair< double,double > > read_file_that_may_contain_inf_string( char* filename , double what_to_substitute_for_infinite_bar = -1 )
 {
 	
 	bool dbg = true;
@@ -63,8 +63,7 @@ std::vector< std::pair< double,double > > read_file_names_that_may_contain_inf_s
         getline(in,line);        
         if ( !(line.length() == 0 || line[0] == '#') )
         {
-			std::stringstream lineSS;
-            lineSS << line;
+			std::stringstream lineSS(line);           
             double beginn, endd;
 			if ( (line.find("inf") != std::string::npos) || (line.find("Inf") != std::string::npos) )
 			{
@@ -171,8 +170,7 @@ std::vector< std::pair< double , double > > read_standard_file( const char* file
         getline(in,line);
         if ( !(line.length() == 0 || line[0] == '#') )
         {
-            std::stringstream lineSS;
-            lineSS << line;
+            std::stringstream lineSS(line);            
             double beginn, endd;
             lineSS >> beginn;
             lineSS >> endd;
@@ -204,21 +202,23 @@ std::vector< std::pair< double , double > > read_standard_file( const char* file
  * A birth and a death time of a class.
  * Death time may be infitnity, in which case a string 'inf' is used.
  * If begin of the interval is greater than the end of the interval, those two numbers are swapped.
+ * Note that this procedure reads persistence in a single dimension. The dimension of intervals that
+ * are to be read are determined by the second parameter of the function.
 **/ 
 std::vector< std::pair< double , double > > read_gudhi_file( const char* filename , size_t dimension = 0 )
 {
 	bool dbg = false;
 	std::ifstream in;
-    in.open( filename );
+	in.open( filename );
 
-    std::string line;
-    std::vector< std::pair<double,double> > barcode;
+	std::string line;
+	std::vector< std::pair<double,double> > barcode;
 
-    while (!in.eof())
-    {
-        getline(in,line);
-        if ( !(line.length() == 0 || line[0] == '#') )
-        {
+	while (!in.eof())
+	{
+		getline(in,line);
+		if ( !(line.length() == 0 || line[0] == '#') )
+		{
 			if ( line.find("inf") != std::string::npos )
 			{
 				if ( dbg )
@@ -227,28 +227,27 @@ std::vector< std::pair< double , double > > read_gudhi_file( const char* filenam
 				}
 				continue;
 			}
-            std::stringstream lineSS;
-            lineSS << line;
-            double beginn, endd, field, dim;
-            lineSS >> field;
-            lineSS >> dim;
-            lineSS >> beginn;
-            lineSS >> endd;
-            if ( beginn > endd )
-            {
-                double b = beginn;
-                beginn = endd;
-                endd = b;
-            }
-            if ( dim == dimension )
-            { 
+			std::stringstream lineSS(line);			
+			double beginn, endd, field, dim;
+			lineSS >> field;
+			lineSS >> dim;
+			lineSS >> beginn;
+			lineSS >> endd;
+			if ( beginn > endd )
+			{
+				double b = beginn;
+				beginn = endd;
+				endd = b;
+			}
+			if ( dim == dimension )
+			{ 
 				barcode.push_back( std::make_pair( beginn , endd ) );
 				if (dbg)
 				{
 					std::cerr << beginn << " , " << endd << std::endl;
 				}
 			}
-        }
+		}
 	}
 	in.close();
 	return barcode;
@@ -263,20 +262,19 @@ std::vector< std::vector< double > > read_numbers_from_file_line_by_line( const 
 		std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
 		throw "The file from which you are trying to read the persistence landscape do not exist. The program will now terminate \n";
 	}
-	
+
 	std::vector< std::vector< double > > result;
 	double number;
-	
+
 	std::ifstream in(filename);
 	std::string line;
 	while ( in.good() )
 	{
 		std::getline(in,line);
-		std::stringstream ss;
-		ss << line;
-		
+		std::stringstream ss(line);		
+
 		if ( dbg )std::cerr << "\n Reading line : " << line << std::endl;
-		
+
 		std::vector< double > this_line;
 		while ( ss.good() )
 		{
@@ -287,7 +285,7 @@ std::vector< std::vector< double > > read_numbers_from_file_line_by_line( const 
 		if ( this_line.size() && in.good() ) result.push_back( this_line );
 	}		
 	in.close();
-	
+
 	return result;
 }//read_numbers_from_file_line_by_line
 
@@ -298,3 +296,4 @@ std::vector< std::vector< double > > read_numbers_from_file_line_by_line( const 
 
 
 #endif
+	

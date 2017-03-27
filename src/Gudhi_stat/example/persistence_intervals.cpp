@@ -60,7 +60,7 @@ int main( int argc , char** argv )
 		std::cout << "( " << ten_dominant_intervals[i].first<< "," << ten_dominant_intervals[i].second <<std::endl;
 	}
 	
-	std::vector< size_t > histogram = p.histograms_of_lengths( 10  );
+	std::vector< size_t > histogram = p.histogram_of_lengths( 10  );
 	std::cout << "Here is the histogram of barcode's length : " <<std::endl;
 	for ( size_t i = 0 ; i != histogram.size() ; ++i )
 	{
@@ -69,7 +69,7 @@ int main( int argc , char** argv )
 	std::cout <<std::endl;
 
 	
-	std::vector< size_t > cumulative_histogram = p.cumulative_histograms_of_lengths( 10  );
+	std::vector< size_t > cumulative_histogram = p.cumulative_histogram_of_lengths( 10  );
 	std::cout<< "Cumuative histogram : " <<std::endl;	
 	for ( size_t i = 0 ; i != cumulative_histogram.size() ; ++i )
 	{

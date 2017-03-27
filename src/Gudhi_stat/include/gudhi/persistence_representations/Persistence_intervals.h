@@ -330,9 +330,8 @@ Persistence_intervals::Persistence_intervals( const char* filename )
 }//Persistence_intervals
 
 
-Persistence_intervals::Persistence_intervals( const std::vector< std::pair< double , double > >& intervals_ )
+Persistence_intervals::Persistence_intervals( const std::vector< std::pair< double , double > >& intervals_ ):intervals(intervals_)
 {
-	this->intervals = intervals_;    
     this->set_up_numbers_of_functions_for_vectorization_and_projections_to_reals();
 }
 
