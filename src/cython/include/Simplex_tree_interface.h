@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SIMPLEX_TREE_INTERFACE_H
-#define	SIMPLEX_TREE_INTERFACE_H
+#ifndef INCLUDE_SIMPLEX_TREE_INTERFACE_H_
+#define INCLUDE_SIMPLEX_TREE_INTERFACE_H_
 
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/distance_functions.h>
@@ -48,7 +48,6 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   using Complex = std::vector<std::pair<Simplex, Filtration_value>>;
 
  public:
-
   bool find_simplex(const Simplex& vh) {
     return (Base::find(vh) != Base::null_simplex());
   }
@@ -98,7 +97,6 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
       filtered_tree.push_back(std::make_pair(simplex, Base::filtration(f_simplex)));
     }
     return filtered_tree;
-
   }
 
   Complex get_skeleton_tree(int dimension) {
@@ -144,10 +142,8 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   void create_persistence(Gudhi::Persistent_cohomology_interface<Base>* pcoh) {
     pcoh = new Gudhi::Persistent_cohomology_interface<Base>(*this);
   }
-
 };
 
-} // namespace Gudhi
+}  // namespace Gudhi
 
-#endif  // SIMPLEX_TREE_INTERFACE_H
-
+#endif  // INCLUDE_SIMPLEX_TREE_INTERFACE_H_

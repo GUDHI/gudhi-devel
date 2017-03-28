@@ -20,18 +20,17 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <boost/variant.hpp>
+
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Points_3D_off_io.h>
-#include <boost/variant.hpp>
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Periodic_3_Delaunay_triangulation_traits_3.h>
 #include <CGAL/Periodic_3_Delaunay_triangulation_3.h>
 #include <CGAL/Alpha_shape_3.h>
 #include <CGAL/iterator.h>
-
-#include "alpha_complex_3d_helper.h"
 
 #include <fstream>
 #include <cmath>
@@ -42,6 +41,8 @@
 #include <list>
 #include <vector>
 #include <cstdlib>
+
+#include "alpha_complex_3d_helper.h"
 
 // Traits
 using K = CGAL::Exact_predicates_inexact_constructions_kernel;

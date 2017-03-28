@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef STRONG_WITNESS_COMPLEX_INTERFACE_H
-#define	STRONG_WITNESS_COMPLEX_INTERFACE_H
+#ifndef INCLUDE_STRONG_WITNESS_COMPLEX_INTERFACE_H_
+#define INCLUDE_STRONG_WITNESS_COMPLEX_INTERFACE_H_
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Strong_witness_complex.h>
@@ -64,12 +64,10 @@ class Strong_witness_complex_interface {
 
  private:
   Strong_witness_complex<Nearest_landmark_table>* witness_complex_;
-
 };
 
 }  // namespace witness_complex
 
-} // namespace Gudhi
+}  // namespace Gudhi
 
-#endif  // STRONG_WITNESS_COMPLEX_INTERFACE_H
-
+#endif  // INCLUDE_STRONG_WITNESS_COMPLEX_INTERFACE_H_

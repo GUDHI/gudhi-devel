@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BOTTLENECK_DISTANCE_INTERFACE_H
-#define	BOTTLENECK_DISTANCE_INTERFACE_H
+#ifndef INCLUDE_BOTTLENECK_DISTANCE_INTERFACE_H_
+#define INCLUDE_BOTTLENECK_DISTANCE_INTERFACE_H_
 
 #include <gudhi/Bottleneck.h>
 
@@ -45,9 +45,9 @@ namespace persistence_diagram {
     return bottleneck_distance(diag1, diag2);
   }
 
-}  // namespace alpha_complex
+}  // namespace persistence_diagram
 
 }  // namespace Gudhi
 
 
-#endif  // BOTTLENECK_DISTANCE_INTERFACE_H
+#endif  // INCLUDE_BOTTLENECK_DISTANCE_INTERFACE_H_

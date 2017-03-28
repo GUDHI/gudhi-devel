@@ -20,18 +20,17 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <boost/variant.hpp>
+
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Points_3D_off_io.h>
-#include <boost/variant.hpp>
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Regular_triangulation_euclidean_traits_3.h>
 #include <CGAL/Regular_triangulation_3.h>
 #include <CGAL/Alpha_shape_3.h>
 #include <CGAL/iterator.h>
-
-#include "alpha_complex_3d_helper.h"
 
 #include <fstream>
 #include <cmath>
@@ -43,13 +42,15 @@
 #include <vector>
 #include <cstdlib>
 
+#include "alpha_complex_3d_helper.h"
+
 // Traits
 using Kernel = CGAL::Exact_predicates_inexact_constructions_kernel;
 using Gt = CGAL::Regular_triangulation_euclidean_traits_3<Kernel>;
 using Vb = CGAL::Alpha_shape_vertex_base_3<Gt>;
 using Fb = CGAL::Alpha_shape_cell_base_3<Gt>;
 using Tds = CGAL::Triangulation_data_structure_3<Vb, Fb>;
-using Triangulation_3 = CGAL::Regular_triangulation_3<Gt,Tds>;
+using Triangulation_3 = CGAL::Regular_triangulation_3<Gt, Tds>;
 using Alpha_shape_3 = CGAL::Alpha_shape_3<Triangulation_3>;
 
 // From file type definition
@@ -115,8 +116,7 @@ int main(int argc, char * const argv[]) {
     double weight = 0.0;
     std::size_t index = 0;
     // Attempt read the weight in a double format, return false if it fails
-    while((weights_ifstr >> weight) && (index < lp.size()))
-    {
+    while ((weights_ifstr >> weight) && (index < lp.size())) {
       wp.push_back(Weighted_point_3(lp[index], weight));
       index++;
     }

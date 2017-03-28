@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TANGENTIAL_COMPLEX_INTERFACE_H
-#define	TANGENTIAL_COMPLEX_INTERFACE_H
+#ifndef INCLUDE_TANGENTIAL_COMPLEX_INTERFACE_H_
+#define INCLUDE_TANGENTIAL_COMPLEX_INTERFACE_H_
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Tangential_complex.h>
@@ -33,6 +33,7 @@
 #include <vector>
 #include <utility>  // std::pair
 #include <iostream>
+#include <string>
 
 namespace Gudhi {
 
@@ -49,7 +50,7 @@ class Tangential_complex_interface {
     unsigned intrisic_dim = 0;
     if (points.size() > 0)
       intrisic_dim = points[0].size() - 1;
-    
+
     tangential_complex_ = new TC(points, intrisic_dim, k);
     tangential_complex_->compute_tangential_complex();
     num_inconsistencies_ = tangential_complex_->number_of_inconsistent_simplices();
@@ -117,7 +118,6 @@ class Tangential_complex_interface {
 
 }  // namespace tangential_complex
 
-} // namespace Gudhi
+}  // namespace Gudhi
 
-#endif  // TANGENTIAL_COMPLEX_INTERFACE_H
-
+#endif  // INCLUDE_TANGENTIAL_COMPLEX_INTERFACE_H_

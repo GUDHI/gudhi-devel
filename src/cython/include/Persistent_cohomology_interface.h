@@ -20,13 +20,14 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PERSISTENT_COHOMOLOGY_INTERFACE_H
-#define	PERSISTENT_COHOMOLOGY_INTERFACE_H
+#ifndef INCLUDE_PERSISTENT_COHOMOLOGY_INTERFACE_H_
+#define INCLUDE_PERSISTENT_COHOMOLOGY_INTERFACE_H_
 
 #include <gudhi/Persistent_cohomology.h>
 
 #include <vector>
 #include <utility>  // for std::pair
+#include <algorithm>  // for sort
 
 namespace Gudhi {
 
@@ -34,12 +35,10 @@ template<class FilteredComplex>
 class Persistent_cohomology_interface : public
 persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomology::Field_Zp> {
  private:
-
   /*
    * Compare two intervals by dimension, then by length.
    */
   struct cmp_intervals_by_dim_then_length {
-
     explicit cmp_intervals_by_dim_then_length(FilteredComplex * sc)
         : sc_(sc) { }
 
@@ -55,23 +54,26 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
   };
 
  public:
-
   Persistent_cohomology_interface(FilteredComplex* stptr)
       : persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomology::Field_Zp>(*stptr),
       stptr_(stptr) { }
 
   Persistent_cohomology_interface(FilteredComplex* stptr, bool persistence_dim_max)
-      : persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomology::Field_Zp>(*stptr,
-                                                                                                       persistence_dim_max),
-      stptr_(stptr) { }
+      : persistent_cohomology::Persistent_cohomology<FilteredComplex,
+          persistent_cohomology::Field_Zp>(*stptr, persistence_dim_max),
+        stptr_(stptr) { }
 
-  std::vector<std::pair<int, std::pair<double, double>>> get_persistence(int homology_coeff_field, double min_persistence) {
-    persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomology::Field_Zp>::init_coefficients(homology_coeff_field);
-    persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomology::Field_Zp>::compute_persistent_cohomology(min_persistence);
+  std::vector<std::pair<int, std::pair<double, double>>> get_persistence(int homology_coeff_field,
+                                                                         double min_persistence) {
+    persistent_cohomology::Persistent_cohomology<FilteredComplex,
+      persistent_cohomology::Field_Zp>::init_coefficients(homology_coeff_field);
+    persistent_cohomology::Persistent_cohomology<FilteredComplex,
+      persistent_cohomology::Field_Zp>::compute_persistent_cohomology(min_persistence);
 
     // Custom sort and output persistence
     cmp_intervals_by_dim_then_length cmp(stptr_);
-    auto persistent_pairs = persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomology::Field_Zp>::get_persistent_pairs();
+    auto persistent_pairs = persistent_cohomology::Persistent_cohomology<FilteredComplex,
+      persistent_cohomology::Field_Zp>::get_persistent_pairs();
     std::sort(std::begin(persistent_pairs), std::end(persistent_pairs), cmp);
 
     std::vector<std::pair<int, std::pair<double, double>>> persistence;
@@ -81,16 +83,13 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
                                                           stptr_->filtration(get<1>(pair)))));
     }
     return persistence;
-
   }
 
  private:
   // A copy
   FilteredComplex* stptr_;
-
 };
 
-} // namespace Gudhi
+}  // namespace Gudhi
 
-#endif  // PERSISTENT_COHOMOLOGY_INTERFACE_H
-
+#endif  // INCLUDE_PERSISTENT_COHOMOLOGY_INTERFACE_H_

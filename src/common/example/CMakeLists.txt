@@ -10,12 +10,10 @@ if(CGAL_FOUND)
   target_link_libraries(cgal_3D_off_reader  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
   add_test(cgal_3D_off_reader ${CMAKE_CURRENT_BINARY_DIR}/cgal_3D_off_reader ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off)
 
-  # need CGAL 4.7
-  if (NOT CGAL_VERSION VERSION_LESS 4.7.0)
-    if (EIGEN3_FOUND)
-      add_executable ( cgal_off_reader example_CGAL_points_off_reader.cpp )
-      target_link_libraries(cgal_off_reader  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
-      add_test(cgal_off_reader ${CMAKE_CURRENT_BINARY_DIR}/cgal_off_reader ${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off)
-    endif(EIGEN3_FOUND)
-  endif (NOT CGAL_VERSION VERSION_LESS 4.7.0)
+  # need CGAL 4.7and Eigen3
+  if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
+    add_executable ( cgal_off_reader example_CGAL_points_off_reader.cpp )
+    target_link_libraries(cgal_off_reader  ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
+    add_test(cgal_off_reader ${CMAKE_CURRENT_BINARY_DIR}/cgal_off_reader ${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off)
+  endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
 endif()

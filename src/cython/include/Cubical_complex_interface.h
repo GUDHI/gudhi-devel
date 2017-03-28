@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CUBICAL_COMPLEX_INTERFACE_H
-#define	CUBICAL_COMPLEX_INTERFACE_H
+#ifndef INCLUDE_CUBICAL_COMPLEX_INTERFACE_H_
+#define INCLUDE_CUBICAL_COMPLEX_INTERFACE_H_
 
 #include <gudhi/Bitmap_cubical_complex.h>
 #include <gudhi/Bitmap_cubical_complex_base.h>
@@ -38,7 +38,6 @@ namespace cubical_complex {
 template<typename CubicalComplexOptions = Bitmap_cubical_complex_base<double>>
 class Cubical_complex_interface : public Bitmap_cubical_complex<CubicalComplexOptions> {
  public:
-
   Cubical_complex_interface(const std::vector<unsigned>& dimensions,
                             const std::vector<double>& top_dimensional_cells)
   : Bitmap_cubical_complex<CubicalComplexOptions>(dimensions, top_dimensional_cells) {
@@ -47,12 +46,11 @@ class Cubical_complex_interface : public Bitmap_cubical_complex<CubicalComplexOp
   Cubical_complex_interface(const std::string& perseus_file)
   : Bitmap_cubical_complex<CubicalComplexOptions>(perseus_file.c_str()) {
   }
-
 };
 
 }  // namespace cubical_complex
 
 }  // namespace Gudhi
 
-#endif  // CUBICAL_COMPLEX_INTERFACE_H
+#endif  // INCLUDE_CUBICAL_COMPLEX_INTERFACE_H_
 
