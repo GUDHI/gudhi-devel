@@ -83,7 +83,7 @@ inline bool Graph_matching::multi_augment() {
   if (max_depth < 0 || (unmatched_in_u.size() > rn && max_depth >= rn))
     return false;
   bool successful = false;
-  std::list<int> tries(unmatched_in_u);
+  std::vector<int> tries(unmatched_in_u.cbegin(), unmatched_in_u.cend());
   for (auto it = tries.cbegin(); it != tries.cend(); it++)
     // 'augment' has side-effects which have to be always executed, don't change order
     successful = augment(layered_nf, *it, max_depth) || successful;
@@ -123,8 +123,8 @@ inline bool Graph_matching::augment(Layered_neighbors_finder & layered_nf, int u
 }
 
 inline Layered_neighbors_finder Graph_matching::layering() const {
-  std::list<int> u_vertices(unmatched_in_u);
-  std::list<int> v_vertices;
+  std::vector<int> u_vertices(unmatched_in_u.cbegin(), unmatched_in_u.cend());
+  std::vector<int> v_vertices;
   Neighbors_finder nf(*gp, r);
   for (int v_point_index = 0; v_point_index < gp->size(); ++v_point_index)
     nf.add(v_point_index);
