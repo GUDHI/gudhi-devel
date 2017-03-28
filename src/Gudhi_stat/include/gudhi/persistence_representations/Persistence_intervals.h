@@ -490,7 +490,7 @@ std::vector< double > Persistence_intervals::characteristic_function_of_diagram(
         }
         //cerr << "x_max : " << x_max << " x_min : " << x_min << " , number_of_bins : " << number_of_bins << " this->intervals[i].second : " << this->intervals[i].second <<  " this->intervals[i].first : " << this->intervals[i].first << endl;
         if ( dbg )
-        {
+        {	
             std::cerr << "Result at this stage \n";
             for ( size_t aa = 0 ; aa != result.size() ; ++aa )
             {
