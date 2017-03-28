@@ -26,7 +26,7 @@
 #include <gudhi/Neighbors_finder.h>
 
 #include <vector>
-#include <list>
+#include <algorithm>
 
 namespace Gudhi {
 
@@ -53,7 +53,7 @@ class Graph_matching {
   /** \internal \brief Given a point from V, provides its matched point in U, null_point_index() if there isn't. */
   std::vector<int> v_to_u;
   /** \internal \brief All the unmatched points in U. */
-  std::list<int> unmatched_in_u;
+  std::vector<int> unmatched_in_u;
 
   /** \internal \brief Provides a Layered_neighbors_finder dividing the graph in layers. Basically a BFS. */
   Layered_neighbors_finder layering() const;
@@ -83,7 +83,7 @@ inline bool Graph_matching::multi_augment() {
   if (max_depth < 0 || (unmatched_in_u.size() > rn && max_depth >= rn))
     return false;
   bool successful = false;
-  std::vector<int> tries(unmatched_in_u.cbegin(), unmatched_in_u.cend());
+  std::vector<int> tries(unmatched_in_u);
   for (auto it = tries.cbegin(); it != tries.cend(); it++)
     // 'augment' has side-effects which have to be always executed, don't change order
     successful = augment(layered_nf, *it, max_depth) || successful;
@@ -123,7 +123,7 @@ inline bool Graph_matching::augment(Layered_neighbors_finder & layered_nf, int u
 }
 
 inline Layered_neighbors_finder Graph_matching::layering() const {
-  std::vector<int> u_vertices(unmatched_in_u.cbegin(), unmatched_in_u.cend());
+  std::vector<int> u_vertices(unmatched_in_u);
   std::vector<int> v_vertices;
   Neighbors_finder nf(*gp, r);
   for (int v_point_index = 0; v_point_index < gp->size(); ++v_point_index)
@@ -156,7 +156,9 @@ inline Layered_neighbors_finder Graph_matching::layering() const {
 }
 
 inline void Graph_matching::update(std::vector<int>& path) {
-  unmatched_in_u.remove(path.front());
+  //TODO: if we don't care about the order in unmatched_in_u or if an element
+  //can only appear once in unmatched_in_u, we could remove more efficiently.
+  unmatched_in_u.erase(std::remove(unmatched_in_u.begin(), unmatched_in_u.end(), path.front()), unmatched_in_u.end());
   for (auto it = path.cbegin(); it != path.cend(); ++it) {
     // Be careful, the iterator is incremented twice each time
     int tmp = *it;
