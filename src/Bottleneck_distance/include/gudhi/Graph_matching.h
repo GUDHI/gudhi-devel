@@ -157,14 +157,18 @@ inline Layered_neighbors_finder Graph_matching::layering() const {
 }
 
 inline void Graph_matching::update(std::vector<int>& path) {
+  // Making unmatched_in_u an unordered_set<int> is simpler and almost as fast.
 #if 0
-  // Avoid an expensive erase in the middle of the vector, but break the ordering, so the search needs to be linear.
+  // Avoid an expensive erase in the middle of the vector, but break the
+  // ordering, so the search needs to be linear.
   auto p = std::find(unmatched_in_u.begin(), unmatched_in_u.end(), path.front());
   assert(p != unmatched_in_u.end());
   std::swap(*p, unmatched_in_u.back());
   unmatched_in_u.pop_back();
 #else
-  // Take advantage of the vector being sorted, but pay an expensive erase to maintain the order.
+  // Take advantage of the vector being sorted, but pay an expensive erase to
+  // maintain the order. This is essentially the same as making unmatched_in_u
+  // a boost flat_set.
   auto p = std::lower_bound(unmatched_in_u.begin(), unmatched_in_u.end(), path.front());
   assert(p != unmatched_in_u.end() && *p == path.front());
   unmatched_in_u.erase(p);
