@@ -41,8 +41,10 @@ Example
        print("[0, 1, 2] inserted")
    if st.find([0, 1]):
        print("[0, 1] found")
-   print("num_vertices=", st.num_vertices())
-   print("num_simplices=", st.num_simplices())
+   result_str = 'num_vertices=' + repr(st.num_vertices())
+   print(result_str)
+   result_str = 'num_simplices=' + repr(st.num_simplices())
+   print(result_str)
    print("skeleton_tree(2) =")
    for sk_value in st.get_skeleton_tree(2):
        print(sk_value)
@@ -55,8 +57,8 @@ The output is:
    [0, 1] inserted
    [0, 1, 2] inserted
    [0, 1] found
-   ('num_vertices=', 3)
-   ('num_simplices=', 7)
+   num_vertices=3
+   num_simplices=7
    skeleton_tree(2) =
    ([0, 1, 2], 4.0)
    ([0, 1], 0.0)
