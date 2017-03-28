@@ -46,7 +46,6 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         bint find_simplex(vector[int] simplex)
         bint insert_simplex_and_subfaces(vector[int] simplex,
                                          double filtration)
-        bint insert_simplex(vector[int] simplex, double filtration)
         vector[pair[vector[int], double]] get_filtered_tree()
         vector[pair[vector[int], double]] get_skeleton_tree(int dimension)
         vector[pair[vector[int], double]] get_star(vector[int] simplex)
@@ -197,24 +196,7 @@ cdef class SimplexTree:
             complex.push_back(i)
         return self.thisptr.find_simplex(complex)
 
-    def insert_simplex(self, simplex, filtration=0.0):
-        """This function inserts the given N-simplex with the given filtration
-        value (default value is '0.0').
-
-        :param simplex: The N-simplex to insert, represented by a list of
-            vertex.
-        :type simplex: list of int.
-        :param filtration: The filtration value of the simplex.
-        :type filtration: float.
-        :returns:  true if the simplex was found, false otherwise.
-        :rtype:  bool
-        """
-        cdef vector[int] complex
-        for i in simplex:
-            complex.push_back(i)
-        return self.thisptr.insert_simplex(complex, <double>filtration)
-
-    def insert_simplex_and_subfaces(self, simplex, filtration=0.0):
+    def insert(self, simplex, filtration=0.0):
         """This function inserts the given N-simplex and its subfaces with the
         given filtration value (default value is '0.0').
 
