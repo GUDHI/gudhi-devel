@@ -25,9 +25,6 @@ include(FindPythonInterp)
 if(PYTHONINTERP_FOUND)
   if(PYTHON_VERSION_MAJOR EQUAL 2)
     FIND_PROGRAM(CYTHON_PATH cython)
-    if(NOT CYTHON_PATH)
-      message(FATAL_ERROR "ERROR: Try to compile the Cython interface. Python is set to 2.X while no cython installed.")
-    endif(NOT CYTHON_PATH)
     # Unitary tests are available through py.test
     find_program( PYTEST_PATH py.test )
     # Documentation generation is available through sphinx
