@@ -80,7 +80,7 @@ cdef class RipsComplex:
     def __cinit__(self, points=None, off_file='', distance_matrix=None, csv_file='', max_edge_length=float('inf')):
         if off_file is not '':
             if os.path.isfile(off_file):
-                self.thisptr = new Rips_complex_interface(off_file,
+                self.thisptr = new Rips_complex_interface(str.encode(off_file),
                                                           max_edge_length,
                                                           True,
                                                           True)
@@ -88,7 +88,7 @@ cdef class RipsComplex:
                 print("file " + off_file + " not found.")
         elif csv_file is not '':
             if os.path.isfile(csv_file):
-                self.thisptr = new Rips_complex_interface(csv_file,
+                self.thisptr = new Rips_complex_interface(str.encode(csv_file),
                                                           max_edge_length,
                                                           False,
                                                           True)

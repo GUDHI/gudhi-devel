@@ -80,7 +80,7 @@ cdef class PeriodicCubicalComplex:
             self.thisptr = new Periodic_cubical_complex_base_interface(dimensions, top_dimensional_cells)
         elif (dimensions is None) and (top_dimensional_cells is None) and (perseus_file is not ''):
             if os.path.isfile(perseus_file):
-                self.thisptr = new Periodic_cubical_complex_base_interface(perseus_file)
+                self.thisptr = new Periodic_cubical_complex_base_interface(str.encode(perseus_file))
             else:
                 print("file " + perseus_file + " not found.")
         else:

@@ -43,7 +43,7 @@ def read_off(off_file=''):
     """
     if off_file is not '':
         if os.path.isfile(off_file):
-            return read_points_from_OFF_file(off_file)
+            return read_points_from_OFF_file(str.encode(off_file))
         else:
             print("file " + off_file + " not found.")
 
