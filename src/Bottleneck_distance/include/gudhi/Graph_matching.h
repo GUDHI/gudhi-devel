@@ -65,6 +65,7 @@ class Graph_matching {
 
 inline Graph_matching::Graph_matching(Persistence_graph& g)
     : gp(&g), r(0.), v_to_u(g.size(), null_point_index()), unmatched_in_u() {
+  unmatched_in_u.reserve(g.size());
   for (int u_point_index = 0; u_point_index < g.size(); ++u_point_index)
     unmatched_in_u.emplace_back(u_point_index);
 }
@@ -156,9 +157,18 @@ inline Layered_neighbors_finder Graph_matching::layering() const {
 }
 
 inline void Graph_matching::update(std::vector<int>& path) {
-  //TODO: if we don't care about the order in unmatched_in_u or if an element
-  //can only appear once in unmatched_in_u, we could remove more efficiently.
-  unmatched_in_u.erase(std::remove(unmatched_in_u.begin(), unmatched_in_u.end(), path.front()), unmatched_in_u.end());
+#if 0
+  // Avoid an expensive erase in the middle of the vector, but break the ordering, so the search needs to be linear.
+  auto p = std::find(unmatched_in_u.begin(), unmatched_in_u.end(), path.front());
+  assert(p != unmatched_in_u.end());
+  std::swap(*p, unmatched_in_u.back());
+  unmatched_in_u.pop_back();
+#else
+  // Take advantage of the vector being sorted, but pay an expensive erase to maintain the order.
+  auto p = std::lower_bound(unmatched_in_u.begin(), unmatched_in_u.end(), path.front());
+  assert(p != unmatched_in_u.end() && *p == path.front());
+  unmatched_in_u.erase(p);
+#endif
   for (auto it = path.cbegin(); it != path.cend(); ++it) {
     // Be careful, the iterator is incremented twice each time
     int tmp = *it;
