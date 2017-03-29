@@ -25,9 +25,6 @@
 
 // Inclusion order is important for CGAL patch
 #include <CGAL/Kd_tree.h>
-#include <CGAL/Kd_tree_node.h>
-#include <CGAL/Orthogonal_k_neighbor_search.h>
-#include <CGAL/Weighted_Minkowski_distance.h>
 #include <CGAL/Search_traits.h>
 
 #include <gudhi/Persistence_graph.h>
@@ -78,9 +75,7 @@ struct Square_query {
 class Neighbors_finder {
   typedef CGAL::Dimension_tag<2> D;
   typedef CGAL::Search_traits<double, Internal_point, const double*, Construct_coord_iterator, D> Traits;
-  typedef CGAL::Weighted_Minkowski_distance<Traits> Distance;
-  typedef CGAL::Orthogonal_k_neighbor_search<Traits, Distance> K_neighbor_search;
-  typedef K_neighbor_search::Tree Kd_tree;
+  typedef CGAL::Kd_tree<Traits> Kd_tree;
 
  public:
   /** \internal \brief Constructor taking the near distance definition as parameter. */
