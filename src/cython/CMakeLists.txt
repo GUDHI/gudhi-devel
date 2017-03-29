@@ -20,7 +20,7 @@ if(PYTHON_EXECUTABLE)
     message(FATAL_ERROR "ERROR: ${PYTHON_EXECUTABLE} does not exist.")
   endif(NOT EXISTS "${PYTHON_EXECUTABLE}")
 endif(PYTHON_EXECUTABLE)
-include(FindPythonInterp)
+find_package(PythonInterp)
 
 if(PYTHONINTERP_FOUND)
   if(PYTHON_VERSION_MAJOR EQUAL 2)
