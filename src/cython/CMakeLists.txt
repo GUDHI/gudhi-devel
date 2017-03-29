@@ -14,7 +14,8 @@ macro( find_the_lib placeholder THE_LIBS )
   endforeach(THE_LIB ${THE_LIBS})
 endmacro( find_the_lib )
 
-# Find the correct Python interpreter. Can be set with -DPYTHON_EXECUTABLE=/usr/bin/python3 for instance.
+# Find the correct Python interpreter.
+# Can be set with -DPYTHON_EXECUTABLE=/usr/bin/python3 or -DPython_ADDITIONAL_VERSIONS=3 for instance.
 if(PYTHON_EXECUTABLE)
   if(NOT EXISTS "${PYTHON_EXECUTABLE}")
     message(FATAL_ERROR "ERROR: ${PYTHON_EXECUTABLE} does not exist.")
@@ -23,6 +24,7 @@ endif(PYTHON_EXECUTABLE)
 find_package(PythonInterp)
 
 if(PYTHONINTERP_FOUND)
+  # Default found version 2
   if(PYTHON_VERSION_MAJOR EQUAL 2)
     FIND_PROGRAM(CYTHON_PATH cython)
     # Unitary tests are available through py.test
