@@ -1,47 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 project(Cython)
 
-macro( find_the_lib placeholder THE_LIBS )
-  set (THE_LIB_WE_FOUND "NO")
-  foreach(THE_LIB ${THE_LIBS})
-    if(EXISTS ${THE_LIB})
-      get_filename_component(THE_LIB_WE ${THE_LIB} NAME_WE)
-      if (NOT THE_LIB_WE_FOUND)
-        set (THE_LIB_WE_FOUND "YES")
-        set(returnValue "${THE_LIB_WE}")
-      endif(NOT THE_LIB_WE_FOUND)
-    endif(EXISTS ${THE_LIB})
-  endforeach(THE_LIB ${THE_LIBS})
-endmacro( find_the_lib )
-
-# Find the correct Python interpreter.
-# Can be set with -DPYTHON_EXECUTABLE=/usr/bin/python3 or -DPython_ADDITIONAL_VERSIONS=3 for instance.
-if(PYTHON_EXECUTABLE)
-  if(NOT EXISTS "${PYTHON_EXECUTABLE}")
-    message(FATAL_ERROR "ERROR: ${PYTHON_EXECUTABLE} does not exist.")
-  endif(NOT EXISTS "${PYTHON_EXECUTABLE}")
-endif(PYTHON_EXECUTABLE)
-find_package(PythonInterp)
-
-if(PYTHONINTERP_FOUND)
-  # Default found version 2
-  if(PYTHON_VERSION_MAJOR EQUAL 2)
-    FIND_PROGRAM(CYTHON_PATH cython)
-    # Unitary tests are available through py.test
-    find_program( PYTEST_PATH py.test )
-    # Documentation generation is available through sphinx
-    find_program( SPHINX_PATH sphinx-build )
-  elseif(PYTHON_VERSION_MAJOR EQUAL 3)
-    FIND_PROGRAM(CYTHON_PATH cython3)
-    # Unitary tests are available through py.test
-    find_program( PYTEST_PATH py.test )
-    # Documentation generation is available through sphinx
-    set(SPHINX_PATH "${CMAKE_CURRENT_BINARY_DIR}/doc/python3-sphinx-build")
-  else()
-    message(FATAL_ERROR "ERROR: Try to compile the Cython interface. Python version ${PYTHON_VERSION_STRING} is not valid.")
-  endif(PYTHON_VERSION_MAJOR EQUAL 2)
-endif(PYTHONINTERP_FOUND)
-
 if(CYTHON_PATH)
   message("${PYTHON_EXECUTABLE} v.${PYTHON_VERSION_STRING} - Cython is ${CYTHON_PATH} - py.test is ${PYTEST_PATH} - Sphinx is ${SPHINX_PATH}")
 

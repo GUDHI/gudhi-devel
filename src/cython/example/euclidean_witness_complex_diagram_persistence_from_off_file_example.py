@@ -32,7 +32,7 @@ __license__ = "GPL v3"
 parser = argparse.ArgumentParser(description='EuclideanWitnessComplex creation from '
                                  'points read in a OFF file.',
                                  epilog='Example: '
-                                 'example/witness_complex_diagram_persistence_from_off_file_example.py '
+                                 'example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py '
                                  '-f ../data/points/tore3D_300.off -a 1.0 -n 20 -d 2'
                                  '- Constructs a weak witness complex with the '
                                  'points from the given OFF file.')
