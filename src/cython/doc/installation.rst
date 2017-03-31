@@ -33,9 +33,9 @@ following command in a terminal:
 
 .. code-block:: bash
 
-    cd /path-to-gudhi/build/src/cython
+    cd /path-to-gudhi/build/cython
     # For windows, you have to set PYTHONPATH environment variable
-    export PYTHONPATH='$PYTHONPATH:/path-to-gudhi/build/src/cython'
+    export PYTHONPATH='$PYTHONPATH:/path-to-gudhi/build/cython'
     py.test
 
 Documentation
