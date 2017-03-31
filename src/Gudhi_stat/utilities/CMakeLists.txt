@@ -3,103 +3,6 @@ project(GUDHI_STAT)
 
 
 
-#persitence diagrams
-add_executable ( persistence_intervals/plot_persistence_intervals persistence_intervals/plot_persistence_intervals.cpp )
-target_link_libraries( persistence_intervals/plot_persistence_intervals ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( persistence_intervals/compute_birth_death_range_in_persistence_diagram persistence_intervals/compute_birth_death_range_in_persistence_diagram.cpp )
-target_link_libraries( persistence_intervals/compute_birth_death_range_in_persistence_diagram ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( persistence_intervals/compute_number_of_dominant_intervals persistence_intervals/compute_number_of_dominant_intervals.cpp )
-target_link_libraries( persistence_intervals/compute_number_of_dominant_intervals ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( persistence_intervals/plot_histogram_of_intervals_lengths persistence_intervals/plot_histogram_of_intervals_lengths.cpp )
-target_link_libraries( persistence_intervals/plot_histogram_of_intervals_lengths ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( persistence_intervals/plot_persistence_Betti_numebrs persistence_intervals/plot_persistence_Betti_numebrs.cpp )
-target_link_libraries( persistence_intervals/plot_persistence_Betti_numebrs ${Boost_SYSTEM_LIBRARY})
-
-#when we have bottleneck and wasserstein distance computations, add suitable programs here.
-
-
-#persitence landscapes
-add_executable ( persistence_landscapes/average_landscapes persistence_landscapes/average_landscapes.cpp )
-target_link_libraries(persistence_landscapes/average_landscapes ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( persistence_landscapes/create_landscapes persistence_landscapes/create_landscapes.cpp )
-target_link_libraries(persistence_landscapes/create_landscapes ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( persistence_landscapes/plot_landscapes persistence_landscapes/plot_landscapes.cpp )
-target_link_libraries(persistence_landscapes/plot_landscapes ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( persistence_landscapes/compute_distance_of_landscapes persistence_landscapes/compute_distance_of_landscapes.cpp )
-target_link_libraries(persistence_landscapes/compute_distance_of_landscapes ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( persistence_landscapes/compute_scalar_product_of_landscapes persistence_landscapes/compute_scalar_product_of_landscapes.cpp )
-target_link_libraries(persistence_landscapes/compute_scalar_product_of_landscapes ${Boost_SYSTEM_LIBRARY})
-
-#persitence landscapes on a grid
-add_executable ( persistence_landscapes_on_grid/average_landscapes_on_grid persistence_landscapes_on_grid/average_landscapes_on_grid.cpp )
-target_link_libraries(persistence_landscapes_on_grid/average_landscapes_on_grid ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( persistence_landscapes_on_grid/create_landscapes_on_grid persistence_landscapes_on_grid/create_landscapes_on_grid.cpp )
-target_link_libraries(persistence_landscapes_on_grid/create_landscapes_on_grid ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( persistence_landscapes_on_grid/plot_landscapes_on_grid persistence_landscapes_on_grid/plot_landscapes_on_grid.cpp )
-target_link_libraries(persistence_landscapes_on_grid/plot_landscapes_on_grid ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( persistence_landscapes_on_grid/compute_distance_of_landscapes_on_grid persistence_landscapes_on_grid/compute_distance_of_landscapes_on_grid.cpp )
-target_link_libraries(persistence_landscapes_on_grid/compute_distance_of_landscapes_on_grid ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( persistence_landscapes_on_grid/compute_scalar_product_of_landscapes_on_grid persistence_landscapes_on_grid/compute_scalar_product_of_landscapes_on_grid.cpp )
-target_link_libraries(persistence_landscapes_on_grid/compute_scalar_product_of_landscapes_on_grid ${Boost_SYSTEM_LIBRARY})
-
-#persitence heat maps
-add_executable ( persistence_heat_maps/average_persistence_heat_maps persistence_heat_maps/average_persistence_heat_maps.cpp )
-target_link_libraries(persistence_heat_maps/average_persistence_heat_maps ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( persistence_heat_maps/create_persistence_heat_maps persistence_heat_maps/create_persistence_heat_maps.cpp )
-target_link_libraries(persistence_heat_maps/create_persistence_heat_maps ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( persistence_heat_maps/plot_persistence_heat_map persistence_heat_maps/plot_persistence_heat_map.cpp )
-target_link_libraries(persistence_heat_maps/plot_persistence_heat_map ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( persistence_heat_maps/compute_distance_of_persistence_heat_maps persistence_heat_maps/compute_distance_of_persistence_heat_maps.cpp )
-target_link_libraries(persistence_heat_maps/compute_distance_of_persistence_heat_maps ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( persistence_heat_maps/compute_scalar_product_of_persistence_heat_maps persistence_heat_maps/compute_scalar_product_of_persistence_heat_maps.cpp )
-target_link_libraries(persistence_heat_maps/compute_scalar_product_of_persistence_heat_maps ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( persistence_heat_maps/create_pssk persistence_heat_maps/create_pssk.cpp )
-target_link_libraries(persistence_heat_maps/create_pssk ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( persistence_heat_maps/create_persistence_heat_maps_weighted_by_distance_from_diagonal persistence_heat_maps/create_persistence_heat_maps_weighted_by_distance_from_diagonal.cpp )
-target_link_libraries(persistence_heat_maps/create_persistence_heat_maps_weighted_by_distance_from_diagonal ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( persistence_heat_maps/create_persistence_heat_maps_weighted_by_squared_distance_from_diagonal persistence_heat_maps/create_persistence_heat_maps_weighted_by_squared_distance_from_diagonal.cpp )
-target_link_libraries(persistence_heat_maps/create_persistence_heat_maps_weighted_by_squared_distance_from_diagonal ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( persistence_heat_maps/create_persistence_heat_maps_weighted_by_arctan_of_their_persistence persistence_heat_maps/create_persistence_heat_maps_weighted_by_arctan_of_their_persistence.cpp )
-target_link_libraries(persistence_heat_maps/create_persistence_heat_maps_weighted_by_arctan_of_their_persistence ${Boost_SYSTEM_LIBRARY})
-
-
-#persitence vectors
-add_executable ( persistence_vectors/average_persistence_vectors persistence_vectors/average_persistence_vectors.cpp )
-target_link_libraries(persistence_vectors/average_persistence_vectors ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( persistence_vectors/create_persistence_vectors persistence_vectors/create_persistence_vectors.cpp )
-target_link_libraries(persistence_vectors/create_persistence_vectors ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( persistence_vectors/compute_distance_of_persistence_vectors persistence_vectors/compute_distance_of_persistence_vectors.cpp )
-target_link_libraries(persistence_vectors/compute_distance_of_persistence_vectors ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( persistence_vectors/compute_scalar_product_of_persistence_vectors persistence_vectors/compute_scalar_product_of_persistence_vectors.cpp )
-target_link_libraries(persistence_vectors/compute_scalar_product_of_persistence_vectors ${Boost_SYSTEM_LIBRARY})
-
-add_executable ( persistence_vectors/plot_persistence_vectors persistence_vectors/plot_persistence_vectors.cpp )
-target_link_libraries(persistence_vectors/plot_persistence_vectors ${Boost_SYSTEM_LIBRARY})
-
-
 #some stat libraries:
 add_executable ( permutation_test permutation_test.cpp )
 target_link_libraries(permutation_test ${Boost_SYSTEM_LIBRARY})
@@ -110,11 +13,11 @@ target_link_libraries(permutation_test ${Boost_SYSTEM_LIBRARY})
 #add_executable ( topological_process_2 topological_process_2.cpp )
 #target_link_libraries(topological_process_2 ${Boost_SYSTEM_LIBRARY})
 
-add_executable ( Hausdorff_bootstrap Hausdorff_bootstrap.cpp )
+add_executable ( Hausdorff_subsampling Hausdorff_subsampling.cpp )
 if (TBB_FOUND)
-target_link_libraries(Hausdorff_bootstrap ${TBB_LIBRARIES})
+target_link_libraries(Hausdorff_subsampling ${TBB_LIBRARIES})
 endif(TBB_FOUND)
-target_link_libraries(Hausdorff_bootstrap ${Boost_SYSTEM_LIBRARY})
+target_link_libraries(Hausdorff_subsampling ${Boost_SYSTEM_LIBRARY})
 
 
 add_executable ( Landscape_bootstrap Landscape_bootstrap.cpp )

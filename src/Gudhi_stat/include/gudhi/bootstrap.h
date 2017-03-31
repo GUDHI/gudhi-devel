@@ -1,4 +1,4 @@
-/*    This file is part of the Gudhi Library. The Gudhi library
+/*    Thicharacteristic_of_all_pointss file is part of the Gudhi Library. The Gudhi library
  *    (Geometric Understanding in Higher Dimensions) is a generic C++
  *    library for computational topology.
  *
@@ -135,20 +135,31 @@ double bootstrap( size_t number_of_points , CharacteristicFunction f , DistanceB
 //    );
 //	#endif
 		
+	//size_t position_of_quantile = floor(2*(1-quantile)*vector_of_distances.size());
+	
+	
 	size_t position_of_quantile = floor(quantile*vector_of_distances.size());
 	if ( position_of_quantile ) --position_of_quantile;
 	if ( dbg )
 	{
-		std::cout << "position_of_quantile : " << position_of_quantile << ", and here is the array : " << std::endl;
+		std::cerr << "quantile : " << quantile << std::endl;
+		std::cerr << "position_of_quantile : " << position_of_quantile << std::endl;
+		
+		std::sort( vector_of_distances.begin() , vector_of_distances.end() );
+		//std::cout << "position_of_quantile : " << position_of_quantile << ", and here is the array : " << std::endl;
 		for ( size_t i = 0 ; i != vector_of_distances.size() ; ++i )
 		{
-			std::cout << vector_of_distances[i] << std::endl;
+			std::cout << vector_of_distances[i] << " " ;
 		}
 		std::cout << std::endl;
 	}
 	  
 	//now we need to sort the vector_of_distances and find the quantile:
 	std::nth_element (vector_of_distances.begin(), vector_of_distances.begin()+position_of_quantile, vector_of_distances.end());
+	
+	
+	//for Hausdorff bootrstra I have to multily it by 2.
+	//In case of other bootsraps, I do not have to do it. We need a special variable saying if Ineed this multiplication or not.//This should be done outside the bootstrap, since the fact hat we need it do not come from bootstrab, but from geometry of bottleneck distance
 	
 	if ( dbg )std::cout << "Result : " << vector_of_distances[ position_of_quantile ] << std::endl;
 	

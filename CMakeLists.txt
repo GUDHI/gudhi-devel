@@ -146,6 +146,11 @@ else()
   add_subdirectory(src/Gudhi_stat/test)
   add_subdirectory(src/Gudhi_stat/example)
   add_subdirectory(src/Gudhi_stat/utilities)
+  add_subdirectory(src/Gudhi_stat/utilities/persistence_heat_maps)
+  add_subdirectory(src/Gudhi_stat/utilities/persistence_intervals)
+  add_subdirectory(src/Gudhi_stat/utilities/persistence_landscapes)
+  add_subdirectory(src/Gudhi_stat/utilities/persistence_landscapes_on_grid)
+  add_subdirectory(src/Gudhi_stat/utilities/persistence_vectors)
 
   # data points generator
   add_subdirectory(data/points/generator)
