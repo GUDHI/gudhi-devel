@@ -91,4 +91,3 @@ add_subdirectory(src/GudhUI)
 
 # specific for cython module
 add_subdirectory(${GUDHI_CYTHON_PATH})
-add_subdirectory(${GUDHI_CYTHON_PATH}/example)
