@@ -71,17 +71,12 @@ int main( int argc , char** argv )
 	points.push_back( point2 );
 	points.push_back( point3 );
 	points.push_back( point4 );
-	
-	
-	std::vector< std::vector<double> > all_to_all_distance_matrix_between_points = compute_all_to_all_distance_matrix_between_points< std::vector<double> , Euclidean_distance<double> >( points );
-	Hausdorff_distance_between_subspace_and_the_whole_metric_space distance( all_to_all_distance_matrix_between_points );
-	
-	std::vector<size_t> characteristic_of_all_points = {0,1,2,3};
-	std::vector<size_t> characteristic_of_subsampled_points = {2,3};	
-	std::cerr << "DISTANCE BETWEEN SAMPLE AND SUBSAMPLE: "  << distance( characteristic_of_subsampled_points , characteristic_of_all_points ) << std::endl;
+	size_of_subsample = 2;
 	*/
-	
-	
+//	std::vector< std::vector<double> > all_to_all_distance_matrix_between_points = compute_all_to_all_distance_matrix_between_points< std::vector<double> , Euclidean_distance<double> >( points );
+//	Hausdorff_distance_between_subspace_and_the_whole_metric_space distance( all_to_all_distance_matrix_between_points );
+		
+
 	std::cout << "Read : " << points.size() << " points.\n";
 	
 	//comute all-to-all distance matrix:
@@ -89,6 +84,9 @@ int main( int argc , char** argv )
 	Hausdorff_distance_between_subspace_and_the_whole_metric_space distance( all_to_all_distance_matrix_between_points );
 	identity< std::vector<size_t> > identity_char;
 	
+//	std::vector<size_t> characteristic_of_all_points = {0,1,2,3};
+//	std::vector<size_t> characteristic_of_subsampled_points = {2,3};	
+//	std::cerr << "DISTANCE BETWEEN SAMPLE AND SUBSAMPLE: "  << distance( characteristic_of_subsampled_points , characteristic_of_all_points ) << std::endl;
 	
 	
 	
@@ -107,7 +105,7 @@ int main( int argc , char** argv )
 							   >
 	( points.size() ,  identity_char , distance , number_of_repetitions_of_subsampling , size_of_subsample , quantile );
 	
-	std::cout << "result of the subsampling : " << result << std::endl;
+	std::cout << "result of the subsampling : " << 2*result << std::endl;
 	
 	
 	return 0;	

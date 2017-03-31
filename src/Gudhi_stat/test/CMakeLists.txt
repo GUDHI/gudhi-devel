@@ -16,9 +16,12 @@ endif()
 
 # copy data directory for tests purpose
 file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+# Do not forget to copy test files in current binary dir
+file(COPY "${CMAKE_SOURCE_DIR}/src/Gudhi_stat/test/data" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
 add_executable ( persistence_intervals_test persistence_intervals_test.cpp )
 target_link_libraries(persistence_intervals_test ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+
 
 # Unitary tests
 add_test(NAME persistence_intervals_test
