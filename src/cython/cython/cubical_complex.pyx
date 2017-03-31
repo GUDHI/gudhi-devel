@@ -64,7 +64,7 @@ cdef class CubicalComplex:
 
         :param dimensions: A list of number of top dimensional cells.
         :type dimensions: list of int
-        :param top_dimensional_cells: A list of top dimensional cells.
+        :param top_dimensional_cells: A list of cells filtration values.
         :type top_dimensional_cells: list of double
 
         Or
