@@ -55,7 +55,6 @@ def test_insertion():
     # filtration test
     st.set_filtration(5.0)
     st.initialize_filtration()
-    assert st.get_filtration() == 5.0
     assert st.filtration([0, 1, 2]) == 4.0
     assert st.filtration([0, 2]) == 4.0
     assert st.filtration([1, 2]) == 4.0
@@ -64,20 +63,20 @@ def test_insertion():
     assert st.filtration([0]) == 0.0
     assert st.filtration([1]) == 0.0
 
-    # skeleton_tree test
-    assert st.get_skeleton_tree(2) == \
+    # skeleton test
+    assert st.get_skeleton(2) == \
         [([0, 1, 2], 4.0), ([0, 1], 0.0), ([0, 2], 4.0),
         ([0], 0.0), ([1, 2], 4.0), ([1], 0.0), ([2], 4.0)]
-    assert st.get_skeleton_tree(1) == \
+    assert st.get_skeleton(1) == \
         [([0, 1], 0.0), ([0, 2], 4.0), ([0], 0.0),
         ([1, 2], 4.0), ([1], 0.0), ([2], 4.0)]
-    assert st.get_skeleton_tree(0) == \
+    assert st.get_skeleton(0) == \
         [([0], 0.0), ([1], 0.0), ([2], 4.0)]
 
     # remove_maximal_simplex test
     assert st.get_cofaces([0, 1, 2], 1) == []
     st.remove_maximal_simplex([0, 1, 2])
-    assert st.get_skeleton_tree(2) == \
+    assert st.get_skeleton(2) == \
         [([0, 1], 0.0), ([0, 2], 4.0), ([0], 0.0),
         ([1, 2], 4.0), ([1], 0.0), ([2], 4.0)]
     assert st.find([0, 1, 2]) == False
@@ -116,7 +115,7 @@ def test_expansion():
 
     assert st.num_vertices() == 7
     assert st.num_simplices() == 17
-    assert st.get_filtered_tree() == [([2], 0.1), ([3], 0.1), ([2, 3], 0.1),
+    assert st.get_filtration() == [([2], 0.1), ([3], 0.1), ([2, 3], 0.1),
     ([0], 0.2), ([0, 2], 0.2), ([1], 0.3), ([0, 1], 0.3), ([1, 3], 0.4),
     ([1, 2], 0.5), ([5], 0.6), ([6], 0.6), ([5, 6], 0.6), ([4], 0.7),
     ([2, 4], 0.7), ([0, 3], 0.8), ([4, 6], 0.9), ([3, 6], 1.0)]
@@ -126,7 +125,7 @@ def test_expansion():
     assert st.num_simplices() == 22
     st.initialize_filtration()
 
-    assert st.get_filtered_tree() == [([2], 0.1), ([3], 0.1), ([2, 3], 0.1),
+    assert st.get_filtration() == [([2], 0.1), ([3], 0.1), ([2, 3], 0.1),
     ([0], 0.2), ([0, 2], 0.2), ([1], 0.3), ([0, 1], 0.3), ([1, 3], 0.4),
     ([1, 2], 0.5), ([0, 1, 2], 0.5), ([1, 2, 3], 0.5), ([5], 0.6), ([6], 0.6),
     ([5, 6], 0.6), ([4], 0.7), ([2, 4], 0.7), ([0, 3], 0.8), ([0, 1, 3], 0.8),

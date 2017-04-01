@@ -59,7 +59,7 @@ else:
     print("[4] Not found...")
 
 print("dimension=", simplex_tree.dimension())
-print("filtered_tree=", simplex_tree.get_filtered_tree())
+print("filtrations=", simplex_tree.get_filtration())
 print("star([0])=", simplex_tree.get_star([0]))
 print("coface([0], 1)=", simplex_tree.get_cofaces([0], 1))
 

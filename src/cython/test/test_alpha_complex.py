@@ -42,7 +42,7 @@ def test_infinite_alpha():
     assert simplex_tree.num_simplices() == 11
     assert simplex_tree.num_vertices() == 4
  
-    assert simplex_tree.get_filtered_tree() == \
+    assert simplex_tree.get_filtration() == \
            [([0], 0.0), ([1], 0.0), ([2], 0.0), ([3], 0.0),
             ([0, 1], 0.25), ([0, 2], 0.25), ([1, 3], 0.25),
             ([2, 3], 0.25), ([1, 2], 0.5), ([0, 1, 2], 0.5),
@@ -76,7 +76,7 @@ def test_filtered_alpha():
     assert filtered_alpha.get_point(4) == []
     assert filtered_alpha.get_point(125) == []
 
-    assert simplex_tree.get_filtered_tree() == \
+    assert simplex_tree.get_filtration() == \
            [([0], 0.0), ([1], 0.0), ([2], 0.0), ([3], 0.0),
             ([0, 1], 0.25), ([0, 2], 0.25), ([1, 3], 0.25),
             ([2, 3], 0.25)]

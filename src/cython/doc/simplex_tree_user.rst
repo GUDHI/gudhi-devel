@@ -45,8 +45,8 @@ Example
    print(result_str)
    result_str = 'num_simplices=' + repr(st.num_simplices())
    print(result_str)
-   print("skeleton_tree(2) =")
-   for sk_value in st.get_skeleton_tree(2):
+   print("skeleton(2) =")
+   for sk_value in st.get_skeleton(2):
        print(sk_value)
 
 
@@ -59,7 +59,7 @@ The output is:
     [0, 1] found
     num_vertices=3
     num_simplices=7
-    skeleton_tree(2) =
+    skeleton(2) =
     ([0, 1, 2], 4.0)
     ([0, 1], 0.0)
     ([0, 2], 4.0)

@@ -46,8 +46,8 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         bint find_simplex(vector[int] simplex)
         bint insert_simplex_and_subfaces(vector[int] simplex,
                                          double filtration)
-        vector[pair[vector[int], double]] get_filtered_tree()
-        vector[pair[vector[int], double]] get_skeleton_tree(int dimension)
+        vector[pair[vector[int], double]] get_filtration()
+        vector[pair[vector[int], double]] get_skeleton(int dimension)
         vector[pair[vector[int], double]] get_star(vector[int] simplex)
         vector[pair[vector[int], double]] get_cofaces(vector[int] simplex,
                                                           int dimension)
@@ -102,14 +102,6 @@ cdef class SimplexTree:
          """
         return self.pcohptr != NULL
 
-    def get_filtration(self):
-        """This function returns the main simplicial complex filtration value.
-
-        :returns:  The simplicial complex filtration value.
-        :rtype:  float
-        """
-        return self.thisptr.filtration()
-
     def filtration(self, simplex):
         """This function returns the simplicial complex filtration value for a
         given N-simplex.
@@ -136,7 +128,7 @@ cdef class SimplexTree:
         .. note::
 
             This function must be launched before persistence, betti_numbers,
-            persistent_betti_numbers or get_filtered_tree after inserting or
+            persistent_betti_numbers or get_filtration after inserting or
             removing simplices.
         """
         self.thisptr.initialize_filtration()
@@ -214,36 +206,36 @@ cdef class SimplexTree:
         return self.thisptr.insert_simplex_and_subfaces(complex,
                                                         <double>filtration)
 
-    def get_filtered_tree(self):
-        """This function returns the tree sorted by increasing filtration
-        values.
+    def get_filtration(self):
+        """This function returns a list of all simplices with their given
+        filtration values.
 
-        :returns:  The tree sorted by increasing filtration values.
+        :returns:  The simplices sorted by increasing filtration values.
         :rtype:  list of tuples(simplex, filtration)
         """
-        cdef vector[pair[vector[int], double]] filtered_tree \
-            = self.thisptr.get_filtered_tree()
+        cdef vector[pair[vector[int], double]] filtration \
+            = self.thisptr.get_filtration()
         ct = []
-        for filtered_complex in filtered_tree:
+        for filtered_complex in filtration:
             v = []
             for vertex in filtered_complex.first:
                 v.append(vertex)
             ct.append((v, filtered_complex.second))
         return ct
 
-    def get_skeleton_tree(self, dimension):
-        """This function returns the tree skeleton of a maximum given
-        dimension.
+    def get_skeleton(self, dimension):
+        """This function returns the (simplices of the) skeleton of a maximum
+        given dimension.
 
         :param dimension: The skeleton dimension value.
         :type dimension: int.
-        :returns:  The skeleton tree of a maximum dimension.
+        :returns:  The (simplices of the) skeleton of a maximum dimension.
         :rtype:  list of tuples(simplex, filtration)
         """
-        cdef vector[pair[vector[int], double]] sk_tree \
-            = self.thisptr.get_skeleton_tree(<int>dimension)
+        cdef vector[pair[vector[int], double]] skeletons \
+            = self.thisptr.get_skeleton(<int>dimension)
         ct = []
-        for filtered_complex in sk_tree:
+        for filtered_complex in skeletons:
             v = []
             for vertex in filtered_complex.first:
                 v.append(vertex)
@@ -255,7 +247,7 @@ cdef class SimplexTree:
 
         :param simplex: The N-simplex, represented by a list of vertex.
         :type simplex: list of int.
-        :returns:  The star tree of a simplex.
+        :returns:  The (simplices of the) star of a simplex.
         :rtype:  list of tuples(simplex, filtration)
         """
         cdef vector[int] complex
@@ -280,7 +272,7 @@ cdef class SimplexTree:
         :param codimension: The codimension. If codimension = 0, all cofaces
             are returned (equivalent of get_star function)
         :type codimension: int.
-        :returns:  The coface tree of a simplex.
+        :returns:  The (simplices of the) cofaces of a simplex
         :rtype:  list of tuples(simplex, filtration)
         """
         cdef vector[int] complex
