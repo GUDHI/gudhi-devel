@@ -21,7 +21,7 @@ using namespace boost::unit_test;
 
 typedef Simplex_tree<> typeST;
 
-std::string test_rips_persistence(int min_coefficient, int max_coefficient, int min_persistence) {
+std::string test_rips_persistence(int min_coefficient, int max_coefficient, double min_persistence) {
   // file name is given as parameter from CMakeLists.txt
   const std::string inputFile(framework::master_test_suite().argv[1]);
 
@@ -74,7 +74,7 @@ void test_rips_persistence_in_dimension(int min_dimension, int max_dimension) {
   std::cout << "********************************************************************" << std::endl;
   std::cout << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_MULTI_FIELD MIN_DIM=" << min_dimension << " MAX_DIM=" << max_dimension << " MIN_PERS=0" << std::endl;
 
-  std::string str_rips_persistence = test_rips_persistence(min_dimension, max_dimension, static_cast<Filtration_value> (0.0));
+  std::string str_rips_persistence = test_rips_persistence(min_dimension, max_dimension, 0.0);
   std::cout << "str_rips_persistence=" << str_rips_persistence << std::endl;
 
   BOOST_CHECK(str_rips_persistence.find(value0) != std::string::npos); // Check found

@@ -1,0 +1,3 @@
+
+If you do not want to install the package, just launch the following command to help Python to find the compiled package :
+$> export PYTHONPATH=`pwd`:$PYTHONPATH

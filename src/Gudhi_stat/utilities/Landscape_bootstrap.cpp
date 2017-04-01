@@ -28,16 +28,14 @@
 #include <gudhi/persistence_representations/Vector_distances_in_diagram.h>
 //persistence part:
 #include <gudhi/reader_utils.h>
-#include <gudhi/graph_simplicial_complex.h>
+#include <gudhi/Rips_complex.h>
 #include <gudhi/distance_functions.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
 
 
 
-using namespace Gudhi;
-using namespace Gudhi::Gudhi_stat;
-using namespace Gudhi::persistent_cohomology;
+using Persistence_landscape = Gudhi::Gudhi_stat::Persistence_landscape;
 
 typedef int Vertex_handle;
 typedef double Filtration_value;
@@ -64,18 +62,18 @@ public:
 		{
 			points_in_subsample.push_back( this->points[ numbers_to_sample[i] ] );
 		}
-		//construct a Rips complex based on it and compute its persistence:
-		Graph_t prox_graph = compute_proximity_graph(points_in_subsample, this->threshold , euclidean_distance< std::vector< double > >);
-		// Construct the Rips complex in a Simplex Tree		
-		Simplex_tree<Simplex_tree_options_fast_persistence> st;
-		// insert the proximity graph in the simplex tree
-		st.insert_graph(prox_graph);
-		// expand the graph until dimension dim_max
-		st.expansion(this->dim + 1);		
-		// Sort the simplices in the order of the filtration
-		st.initialize_filtration();
-		// Compute the persistence diagram of the complex
-		persistent_cohomology::Persistent_cohomology<Simplex_tree<Simplex_tree_options_fast_persistence>, Field_Zp > pcoh(st);
+
+    using Stree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
+    using Filtration_value = Stree::Filtration_value;
+    using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
+    //construct a Rips complex based on it and compute its persistence:
+    Rips_complex rips_complex(points_in_subsample, this->threshold, Euclidean_distance());
+    // Construct the Rips complex in a Simplex Tree
+    Stree st;
+    // expand the graph until dimension dim_max
+    rips_complex.create_complex(st, this->dim + 1);
+    // Compute the persistence diagram of the complex
+    Gudhi::persistent_cohomology::Persistent_cohomology<Stree, Gudhi::persistent_cohomology::Field_Zp > pcoh(st);
 		// initializes the coefficient field for homology
 		pcoh.init_coefficients( this->coeficient_field );
 		pcoh.compute_persistent_cohomology(this->min_persistence);
@@ -159,7 +157,7 @@ int main( int argc , char** argv )
 	
 	std::cout << "Now we will read points from the file : " << filename << " and then perform " << number_of_repetitions_of_bootstrap << " times the bootstrap on it by choosing subsample of a size " << size_of_subsample << std::endl;
 	
-	std::vector< std::vector< double > > points = read_numbers_from_file_line_by_line( filename );
+  std::vector< std::vector< double > > points = Gudhi::Gudhi_stat::read_numbers_from_file_line_by_line( filename );
 	
 	std::cout << "Read : " << points.size() << " points.\n";
 	
@@ -172,7 +170,7 @@ int main( int argc , char** argv )
 	//CharacteristicFunction is just identity, transforming std::vector< size_t > to itself.
 	//DistanceBetweenPointsCharacteristics is the place were all happens. This class hace the information about the coordinates of the points, and allows to compute a Hausdorff distance between 
 	//the collection of all points, and the subsample. 
-	double result = bootstrap< 
+  double result = Gudhi::Gudhi_stat::bootstrap<
 							   Persistence_landscape , //PointCloudCharacteristics, persistence landascapes constructed based on vector of 
 																			 //pairs of birth--death values in a cartain dimension.
 							   compute_persistence_landscape_of_a_point_cloud_in_certain_dimension , //CharacteristicFunction, in this case, we will need to compute persistence in a certain dimension.

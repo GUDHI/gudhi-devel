@@ -66,13 +66,17 @@ do
   if [ -d "$ROOT_DIR/src/$package" ] && [ $package != "Bottleneck" ]
   then
     echo $package
-    if [ "$package" == "cmake" ] || [ "$package" == "debian" ]
+    if [ "$package" == "cmake" ]
     then
       # SPECIFIC FOR CMAKE MODULES
       cp -R $ROOT_DIR/src/$package $VERSION_DIR
     elif [ "$package" == "GudhUI" ]
     then
       # SPECIFIC FOR GUDHI USER INTERFACE
+      cp -R $ROOT_DIR/src/$package $VERSION_DIR
+    elif [ "$package" == "cython" ]
+    then
+      # SPECIFIC FOR CYTHON INTERFACE
       cp -R $ROOT_DIR/src/$package $VERSION_DIR
     else
       # PACKAGE COPY

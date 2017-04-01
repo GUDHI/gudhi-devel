@@ -4,7 +4,7 @@
  *
  *    Author(s):       Vincent Rouvreau
  *
- *    Copyright (C) 2014  INRIA Saclay (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -20,13 +20,14 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gudhi/Simplex_tree.h>
-#include <gudhi/Persistent_cohomology.h>
 #include <boost/variant.hpp>
 
+#include <gudhi/Simplex_tree.h>
+#include <gudhi/Persistent_cohomology.h>
+#include <gudhi/Points_3D_off_io.h>
+
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Regular_triangulation_3.h>
-#include <CGAL/Regular_triangulation_euclidean_traits_3.h>
+#include <CGAL/Delaunay_triangulation_3.h>
 #include <CGAL/Alpha_shape_3.h>
 #include <CGAL/iterator.h>
 
@@ -39,85 +40,42 @@
 #include <list>
 #include <vector>
 
+#include "alpha_complex_3d_helper.h"
+
 // Alpha_shape_3 templates type definitions
-typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
-typedef CGAL::Regular_triangulation_euclidean_traits_3<Kernel> Gt;
-typedef CGAL::Alpha_shape_vertex_base_3<Gt> Vb;
-typedef CGAL::Alpha_shape_cell_base_3<Gt> Fb;
-typedef CGAL::Triangulation_data_structure_3<Vb, Fb> Tds;
-typedef CGAL::Regular_triangulation_3<Gt, Tds> Triangulation_3;
-typedef CGAL::Alpha_shape_3<Triangulation_3> Alpha_shape_3;
+using Kernel = CGAL::Exact_predicates_inexact_constructions_kernel;
+using Vb = CGAL::Alpha_shape_vertex_base_3<Kernel>;
+using Fb = CGAL::Alpha_shape_cell_base_3<Kernel>;
+using Tds = CGAL::Triangulation_data_structure_3<Vb, Fb>;
+using Triangulation_3 = CGAL::Delaunay_triangulation_3<Kernel, Tds>;
+using Alpha_shape_3 = CGAL::Alpha_shape_3<Triangulation_3>;
 
 // From file type definition
-typedef Kernel::Point_3 Point_3;
+using Point_3 = Kernel::Point_3;
 
 // filtration with alpha values needed type definition
-typedef Alpha_shape_3::FT Alpha_value_type;
-typedef CGAL::Object Object;
-typedef CGAL::Dispatch_output_iterator<
-CGAL::cpp11::tuple<Object, Alpha_value_type>,
-CGAL::cpp11::tuple<std::back_insert_iterator< std::vector<Object> >,
-    std::back_insert_iterator< std::vector<Alpha_value_type> > > > Dispatch;
-typedef Alpha_shape_3::Cell_handle Cell_handle;
-typedef Alpha_shape_3::Facet Facet;
-typedef Alpha_shape_3::Edge Edge_3;
-typedef std::list<Alpha_shape_3::Vertex_handle> Vertex_list;
+using Alpha_value_type = Alpha_shape_3::FT;
+using Object = CGAL::Object;
+using Dispatch = CGAL::Dispatch_output_iterator<
+          CGAL::cpp11::tuple<Object, Alpha_value_type>,
+          CGAL::cpp11::tuple<std::back_insert_iterator< std::vector<Object> >,
+          std::back_insert_iterator< std::vector<Alpha_value_type> > > >;
+using Cell_handle = Alpha_shape_3::Cell_handle;
+using Facet = Alpha_shape_3::Facet;
+using Edge_3 = Alpha_shape_3::Edge;
+using Vertex_handle = Alpha_shape_3::Vertex_handle;
+using Vertex_list = std::list<Alpha_shape_3::Vertex_handle>;
 
 // gudhi type definition
-typedef Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence> ST;
-typedef ST::Vertex_handle Simplex_tree_vertex;
-typedef std::map<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex > Alpha_shape_simplex_tree_map;
-typedef std::pair<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex> Alpha_shape_simplex_tree_pair;
-typedef std::vector< Simplex_tree_vertex > Simplex_tree_vector_vertex;
-typedef Gudhi::persistent_cohomology::Persistent_cohomology< ST, Gudhi::persistent_cohomology::Field_Zp > PCOH;
+using ST = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
+using Filtration_value = ST::Filtration_value;
+using Simplex_tree_vertex = ST::Vertex_handle;
+using Alpha_shape_simplex_tree_map = std::map<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex >;
+using Alpha_shape_simplex_tree_pair = std::pair<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex>;
+using Simplex_tree_vector_vertex = std::vector< Simplex_tree_vertex >;
+using PCOH = Gudhi::persistent_cohomology::Persistent_cohomology< ST, Gudhi::persistent_cohomology::Field_Zp >;
 
-Vertex_list from(const Cell_handle& ch) {
-  Vertex_list the_list;
-  for (auto i = 0; i < 4; i++) {
-#ifdef DEBUG_TRACES
-    std::cout << "from cell[" << i << "]=" << ch->vertex(i)->point() << std::endl;
-#endif  // DEBUG_TRACES
-    the_list.push_back(ch->vertex(i));
-  }
-  return the_list;
-}
-
-Vertex_list from(const Facet& fct) {
-  Vertex_list the_list;
-  for (auto i = 0; i < 4; i++) {
-    if (fct.second != i) {
-#ifdef DEBUG_TRACES
-      std::cout << "from facet=[" << i << "]" << fct.first->vertex(i)->point() << std::endl;
-#endif  // DEBUG_TRACES
-      the_list.push_back(fct.first->vertex(i));
-    }
-  }
-  return the_list;
-}
-
-Vertex_list from(const Edge_3& edg) {
-  Vertex_list the_list;
-  for (auto i = 0; i < 4; i++) {
-    if ((edg.second == i) || (edg.third == i)) {
-#ifdef DEBUG_TRACES
-      std::cout << "from edge[" << i << "]=" << edg.first->vertex(i)->point() << std::endl;
-#endif  // DEBUG_TRACES
-      the_list.push_back(edg.first->vertex(i));
-    }
-  }
-  return the_list;
-}
-
-Vertex_list from(const Alpha_shape_3::Vertex_handle& vh) {
-  Vertex_list the_list;
-#ifdef DEBUG_TRACES
-  std::cout << "from vertex=" << vh->point() << std::endl;
-#endif  // DEBUG_TRACES
-  the_list.push_back(vh);
-  return the_list;
-}
-
-void usage(char * const progName) {
+void usage(const std::string& progName) {
   std::cerr << "Usage: " << progName <<
       " path_to_file_graph coeff_field_characteristic[integer > 0] min_persistence[float >= -1.0]\n";
   exit(-1);
@@ -133,17 +91,24 @@ int main(int argc, char * const argv[]) {
   int coeff_field_characteristic = atoi(argv[2]);
 
   Filtration_value min_persistence = 0.0;
-  int returnedScanValue = sscanf(argv[3], "%lf", &min_persistence);
+  int returnedScanValue = sscanf(argv[3], "%f", &min_persistence);
   if ((returnedScanValue == EOF) || (min_persistence < -1.0)) {
     std::cerr << "Error: " << argv[3] << " is not correct\n";
     usage(argv[0]);
   }
 
-  std::vector<Gt::Weighted_point> lp;
-  lp.emplace_back(Point_3(0,0,0),0);
-  lp.emplace_back(Point_3(0,0,1),0);
-  lp.emplace_back(Point_3(0,1,0),.2);
-  lp.emplace_back(Point_3(1,0,0),0);
+  // Read points from file
+  std::string offInputFile(argv[1]);
+  // Read the OFF file (input file name given as parameter) and triangulate points
+  Gudhi::Points_3D_off_reader<Point_3> off_reader(offInputFile);
+  // Check the read operation was correct
+  if (!off_reader.is_valid()) {
+    std::cerr << "Unable to read file " << offInputFile << std::endl;
+    usage(argv[0]);
+  }
+
+  // Retrieve the triangulation
+  std::vector<Point_3> lp = off_reader.get_point_cloud();
 
   // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode.
   Alpha_shape_3 as(lp.begin(), lp.end(), 0, Alpha_shape_3::GENERAL);
@@ -178,30 +143,29 @@ int main(int argc, char * const argv[]) {
   for (auto object_iterator : the_objects) {
     // Retrieve Alpha shape vertex list from object
     if (const Cell_handle * cell = CGAL::object_cast<Cell_handle>(&object_iterator)) {
-      vertex_list = from(*cell);
+      vertex_list = from_cell<Vertex_list, Cell_handle>(*cell);
       count_cells++;
       if (dim_max < 3) {
         // Cell is of dim 3
         dim_max = 3;
       }
     } else if (const Facet * facet = CGAL::object_cast<Facet>(&object_iterator)) {
-      vertex_list = from(*facet);
+      vertex_list = from_facet<Vertex_list, Facet>(*facet);
       count_facets++;
       if (dim_max < 2) {
         // Facet is of dim 2
         dim_max = 2;
       }
     } else if (const Edge_3 * edge = CGAL::object_cast<Edge_3>(&object_iterator)) {
-      vertex_list = from(*edge);
+      vertex_list = from_edge<Vertex_list, Edge_3>(*edge);
       count_edges++;
       if (dim_max < 1) {
         // Edge_3 is of dim 1
         dim_max = 1;
       }
-    } else if (const Alpha_shape_3::Vertex_handle * vertex =
-               CGAL::object_cast<Alpha_shape_3::Vertex_handle>(&object_iterator)) {
+    } else if (const Vertex_handle * vertex = CGAL::object_cast<Vertex_handle>(&object_iterator)) {
       count_vertices++;
-      vertex_list = from(*vertex);
+      vertex_list = from_vertex<Vertex_list, Vertex_handle>(*vertex);
     }
     // Construction of the vector of simplex_tree vertex from list of alpha_shapes vertex
     Simplex_tree_vector_vertex the_simplex_tree;

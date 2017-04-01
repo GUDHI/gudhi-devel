@@ -4,7 +4,7 @@
  *
  *    Author(s):       Vincent Rouvreau
  *
- *    Copyright (C) 2015  INRIA Saclay (France)
+ *    Copyright (C) 2015  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -23,9 +23,6 @@
 #ifndef ALPHA_COMPLEX_H_
 #define ALPHA_COMPLEX_H_
 
-// to construct a simplex_tree from Delaunay_triangulation
-#include <gudhi/graph_simplicial_complex.h>
-#include <gudhi/Simplex_tree.h>
 #include <gudhi/Debug_utils.h>
 // to construct Alpha_complex from a OFF file of points
 #include <gudhi/Points_off_io.h>
@@ -36,6 +33,7 @@
 #include <CGAL/Delaunay_triangulation.h>
 #include <CGAL/Epick_d.h>
 #include <CGAL/Spatial_sort_traits_adapter_d.h>
+#include <CGAL/property_map.h>  // for CGAL::Identity_property_map
 
 #include <iostream>
 #include <vector>
@@ -57,9 +55,9 @@ namespace alpha_complex {
  * \ingroup alpha_complex
  * 
  * \details
- * The data structure can be constructed from a CGAL Delaunay triangulation (for more informations on CGAL Delaunay 
- * triangulation, please refer to the corresponding chapter in page http://doc.cgal.org/latest/Triangulation/) or from
- * an OFF file (cf. Points_off_reader).
+ * The data structure is constructing a CGAL Delaunay triangulation (for more informations on CGAL Delaunay 
+ * triangulation, please refer to the corresponding chapter in page http://doc.cgal.org/latest/Triangulation/) from a
+ * range of points or from an OFF file (cf. Points_off_reader).
  * 
  * Please refer to \ref alpha_complex for examples.
  *
@@ -74,7 +72,7 @@ namespace alpha_complex {
  * 
  */
 template<class Kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>>
-class Alpha_complex : public Simplex_tree<> {
+class Alpha_complex {
  public:
   // Add an int in TDS to save point index in the structure
   typedef CGAL::Triangulation_data_structure<typename Kernel::Dimension,
@@ -90,13 +88,6 @@ class Alpha_complex : public Simplex_tree<> {
   typedef Kernel Geom_traits;
 
  private:
-  // From Simplex_tree
-  // Type required to insert into a simplex_tree (with or without subfaces).
-  typedef std::vector<Vertex_handle> Vector_vertex;
-
-  // Simplex_result is the type returned from simplex_tree insert function.
-  typedef typename std::pair<Simplex_handle, bool> Simplex_result;
-
   typedef typename Kernel::Compute_squared_radius_d Squared_Radius;
   typedef typename Kernel::Side_of_bounded_sphere_d Is_Gabriel;
   typedef typename Kernel::Point_dimension_d        Point_Dimension;
@@ -111,7 +102,7 @@ class Alpha_complex : public Simplex_tree<> {
   typedef typename Delaunay_triangulation::size_type size_type;
 
   // Map type to switch from simplex tree vertex handle to CGAL vertex iterator.
-  typedef typename std::map< Vertex_handle, CGAL_vertex_iterator > Vector_vertex_iterator;
+  typedef typename std::map< std::size_t, CGAL_vertex_iterator > Vector_vertex_iterator;
 
  private:
   /** \brief Vertex iterator vector to switch from simplex tree vertex handle to CGAL vertex iterator.
@@ -124,16 +115,15 @@ class Alpha_complex : public Simplex_tree<> {
 
  public:
   /** \brief Alpha_complex constructor from an OFF file name.
-   * Uses the Delaunay_triangulation_off_reader to construct the Delaunay triangulation required to initialize 
+   * 
+   * Uses the Points_off_reader to construct the Delaunay triangulation required to initialize 
    * the Alpha_complex.
    * 
    * Duplicate points are inserted once in the Alpha_complex. This is the reason why the vertices may be not contiguous.
    *
    * @param[in] off_file_name OFF file [path and] name.
-   * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$.
    */
-  Alpha_complex(const std::string& off_file_name,
-                Filtration_value max_alpha_square = std::numeric_limits<Filtration_value>::infinity())
+  Alpha_complex(const std::string& off_file_name)
       : triangulation_(nullptr) {
     Gudhi::Points_off_reader<Point_d> off_reader(off_file_name);
     if (!off_reader.is_valid()) {
@@ -141,7 +131,7 @@ class Alpha_complex : public Simplex_tree<> {
       exit(-1);  // ----- >>
     }
 
-    init_from_range(off_reader.get_point_cloud(), max_alpha_square);
+    init_from_range(off_reader.get_point_cloud());
   }
 
   /** \brief Alpha_complex constructor from a list of points.
@@ -149,23 +139,17 @@ class Alpha_complex : public Simplex_tree<> {
    * Duplicate points are inserted once in the Alpha_complex. This is the reason why the vertices may be not contiguous.
    * 
    * @param[in] points Range of points to triangulate. Points must be in Kernel::Point_d
-   * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$.
    * 
    * The type InputPointRange must be a range for which std::begin and
    * std::end return input iterators on a Kernel::Point_d.
-   * 
-   * @post Compare num_simplices with InputPointRange points number (not the same in case of duplicate points). 
    */
   template<typename InputPointRange >
-  Alpha_complex(const InputPointRange& points,
-                Filtration_value max_alpha_square = std::numeric_limits<Filtration_value>::infinity())
+  Alpha_complex(const InputPointRange& points)
       : triangulation_(nullptr) {
-    init_from_range(points, max_alpha_square);
+    init_from_range(points);
   }
 
-  /** \brief Alpha_complex destructor.
-   *
-   * @warning Deletes the Delaunay triangulation.
+  /** \brief Alpha_complex destructor deletes the Delaunay triangulation.
    */
   ~Alpha_complex() {
     delete triangulation_;
@@ -183,15 +167,24 @@ class Alpha_complex : public Simplex_tree<> {
    * @return The point found.
    * @exception std::out_of_range In case vertex is not found (cf. std::vector::at).
    */
-  Point_d get_point(Vertex_handle vertex) const {
+  const Point_d& get_point(std::size_t vertex) const {
     return vertex_handle_to_iterator_.at(vertex)->point();
+  }
+
+  /** \brief number_of_vertices returns the number of vertices (same as the number of points).
+   *
+   * @return The number of vertices.
+   */
+  const std::size_t number_of_vertices() const {
+    return vertex_handle_to_iterator_.size();
   }
 
  private:
   template<typename InputPointRange >
-  void init_from_range(const InputPointRange& points, Filtration_value max_alpha_square) {
+  void init_from_range(const InputPointRange& points) {
     auto first = std::begin(points);
     auto last = std::end(points);
+
     if (first != last) {
       // point_dimension function initialization
       Point_Dimension point_dimension = kernel_.point_dimension_d_object();
@@ -199,90 +192,107 @@ class Alpha_complex : public Simplex_tree<> {
       // Delaunay triangulation is point dimension.
       triangulation_ = new Delaunay_triangulation(point_dimension(*first));
 
-      std::vector<Point_d> points(first, last);
+      std::vector<Point_d> point_cloud(first, last);
 
       // Creates a vector {0, 1, ..., N-1}
       std::vector<std::ptrdiff_t> indices(boost::counting_iterator<std::ptrdiff_t>(0),
-                                          boost::counting_iterator<std::ptrdiff_t>(points.size()));
+                                          boost::counting_iterator<std::ptrdiff_t>(point_cloud.size()));
 
-      // Sort indices considering CGAL spatial sort
-      typedef CGAL::Spatial_sort_traits_adapter_d<Kernel, Point_d*> Search_traits_d;
-      spatial_sort(indices.begin(), indices.end(), Search_traits_d(&(points[0])));
+      typedef boost::iterator_property_map<typename std::vector<Point_d>::iterator,
+                                           CGAL::Identity_property_map<std::ptrdiff_t>> Point_property_map;
+      typedef CGAL::Spatial_sort_traits_adapter_d<Kernel, Point_property_map> Search_traits_d;
+
+      CGAL::spatial_sort(indices.begin(), indices.end(), Search_traits_d(std::begin(point_cloud)));
 
       typename Delaunay_triangulation::Full_cell_handle hint;
       for (auto index : indices) {
-        typename Delaunay_triangulation::Vertex_handle pos = triangulation_->insert(points[index], hint);
+        typename Delaunay_triangulation::Vertex_handle pos = triangulation_->insert(point_cloud[index], hint);
         // Save index value as data to retrieve it after insertion
         pos->data() = index;
         hint = pos->full_cell();
       }
-      init(max_alpha_square);
+      // --------------------------------------------------------------------------------------------
+      // double map to retrieve simplex tree vertex handles from CGAL vertex iterator and vice versa
+      // Loop on triangulation vertices list
+      for (CGAL_vertex_iterator vit = triangulation_->vertices_begin(); vit != triangulation_->vertices_end(); ++vit) {
+        if (!triangulation_->is_infinite(*vit)) {
+#ifdef DEBUG_TRACES
+          std::cout << "Vertex insertion - " << vit->data() << " -> " << vit->point() << std::endl;
+#endif  // DEBUG_TRACES
+          vertex_handle_to_iterator_.emplace(vit->data(), vit);
+        }
+      }
+      // --------------------------------------------------------------------------------------------
     }
   }
 
-  /** \brief Initialize the Alpha_complex from the Delaunay triangulation.
+ public:
+  template <typename SimplicialComplexForAlpha>
+  bool create_complex(SimplicialComplexForAlpha& complex) {
+    typedef typename SimplicialComplexForAlpha::Filtration_value Filtration_value;
+    return create_complex(complex, std::numeric_limits<Filtration_value>::infinity());
+  }
+
+  /** \brief Inserts all Delaunay triangulation into the simplicial complex.
+   * It also computes the filtration values accordingly to the \ref createcomplexalgorithm
    *
-   * @param[in] max_alpha_square maximum for alpha square value.
+   * \tparam SimplicialComplexForAlpha must meet `SimplicialComplexForAlpha` concept.
    * 
-   * @warning Delaunay triangulation must be already constructed with at least one vertex and dimension must be more 
-   * than 0.
+   * @param[in] complex SimplicialComplexForAlpha to be created.
+   * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$.
+   * 
+   * @return true if creation succeeds, false otherwise.
+   * 
+   * @pre Delaunay triangulation must be already constructed with dimension strictly greater than 0.
+   * @pre The simplicial complex must be empty (no vertices)
    * 
    * Initialization can be launched once.
    */
-  void init(Filtration_value max_alpha_square) {
+  template <typename SimplicialComplexForAlpha, typename Filtration_value>
+  bool create_complex(SimplicialComplexForAlpha& complex, Filtration_value max_alpha_square) {
+    // From SimplicialComplexForAlpha type required to insert into a simplicial complex (with or without subfaces).
+    typedef typename SimplicialComplexForAlpha::Vertex_handle Vertex_handle;
+    typedef typename SimplicialComplexForAlpha::Simplex_handle Simplex_handle;
+    typedef std::vector<Vertex_handle> Vector_vertex;
+
     if (triangulation_ == nullptr) {
-      std::cerr << "Alpha_complex init - Cannot init from a NULL triangulation\n";
-      return;  // ----- >>
-    }
-    if (triangulation_->number_of_vertices() < 1) {
-      std::cerr << "Alpha_complex init - Cannot init from a triangulation without vertices\n";
-      return;  // ----- >>
+      std::cerr << "Alpha_complex cannot create_complex from a NULL triangulation\n";
+      return false;  // ----- >>
     }
     if (triangulation_->maximal_dimension() < 1) {
-      std::cerr << "Alpha_complex init - Cannot init from a zero-dimension triangulation\n";
-      return;  // ----- >>
+      std::cerr << "Alpha_complex cannot create_complex from a zero-dimension triangulation\n";
+      return false;  // ----- >>
     }
-    if (num_vertices() > 0) {
-      std::cerr << "Alpha_complex init - Cannot init twice\n";
-      return;  // ----- >>
+    if (complex.num_vertices() > 0) {
+      std::cerr << "Alpha_complex create_complex - complex is not empty\n";
+      return false;  // ----- >>
     }
 
-    set_dimension(triangulation_->maximal_dimension());
-
-    // --------------------------------------------------------------------------------------------
-    // double map to retrieve simplex tree vertex handles from CGAL vertex iterator and vice versa
-    // Loop on triangulation vertices list
-    for (CGAL_vertex_iterator vit = triangulation_->vertices_begin(); vit != triangulation_->vertices_end(); ++vit) {
-      if (!triangulation_->is_infinite(*vit)) {
-#ifdef DEBUG_TRACES
-        std::cout << "Vertex insertion - " << vit->data() << " -> " << vit->point() << std::endl;
-#endif  // DEBUG_TRACES
-        vertex_handle_to_iterator_.emplace(vit->data(), vit);
-      }
-    }
-    // --------------------------------------------------------------------------------------------
+    complex.set_dimension(triangulation_->maximal_dimension());
 
     // --------------------------------------------------------------------------------------------
     // Simplex_tree construction from loop on triangulation finite full cells list
-    for (auto cit = triangulation_->finite_full_cells_begin(); cit != triangulation_->finite_full_cells_end(); ++cit) {
-      Vector_vertex vertexVector;
+    if (triangulation_->number_of_vertices() > 0) {
+      for (auto cit = triangulation_->finite_full_cells_begin(); cit != triangulation_->finite_full_cells_end(); ++cit) {
+        Vector_vertex vertexVector;
 #ifdef DEBUG_TRACES
-      std::cout << "Simplex_tree insertion ";
+        std::cout << "Simplex_tree insertion ";
 #endif  // DEBUG_TRACES
-      for (auto vit = cit->vertices_begin(); vit != cit->vertices_end(); ++vit) {
-        if (*vit != nullptr) {
+        for (auto vit = cit->vertices_begin(); vit != cit->vertices_end(); ++vit) {
+          if (*vit != nullptr) {
 #ifdef DEBUG_TRACES
-          std::cout << " " << (*vit)->data();
+            std::cout << " " << (*vit)->data();
 #endif  // DEBUG_TRACES
-          // Vector of vertex construction for simplex_tree structure
-          vertexVector.push_back((*vit)->data());
+            // Vector of vertex construction for simplex_tree structure
+            vertexVector.push_back((*vit)->data());
+          }
         }
-      }
 #ifdef DEBUG_TRACES
-      std::cout << std::endl;
+        std::cout << std::endl;
 #endif  // DEBUG_TRACES
-      // Insert each simplex and its subfaces in the simplex tree - filtration is NaN
-      insert_simplex_and_subfaces(vertexVector, std::numeric_limits<double>::quiet_NaN());
+        // Insert each simplex and its subfaces in the simplex tree - filtration is NaN
+        complex.insert_simplex_and_subfaces(vertexVector, std::numeric_limits<double>::quiet_NaN());
+      }
     }
     // --------------------------------------------------------------------------------------------
 
@@ -290,16 +300,16 @@ class Alpha_complex : public Simplex_tree<> {
     // Will be re-used many times
     Vector_of_CGAL_points pointVector;
     // ### For i : d -> 0
-    for (int decr_dim = dimension(); decr_dim >= 0; decr_dim--) {
+    for (int decr_dim = triangulation_->maximal_dimension(); decr_dim >= 0; decr_dim--) {
       // ### Foreach Sigma of dim i
-      for (auto f_simplex : skeleton_simplex_range(decr_dim)) {
-        int f_simplex_dim = dimension(f_simplex);
+      for (Simplex_handle f_simplex : complex.skeleton_simplex_range(decr_dim)) {
+        int f_simplex_dim = complex.dimension(f_simplex);
         if (decr_dim == f_simplex_dim) {
           pointVector.clear();
 #ifdef DEBUG_TRACES
           std::cout << "Sigma of dim " << decr_dim << " is";
 #endif  // DEBUG_TRACES
-          for (auto vertex : simplex_vertex_range(f_simplex)) {
+          for (auto vertex : complex.simplex_vertex_range(f_simplex)) {
             pointVector.push_back(get_point(vertex));
 #ifdef DEBUG_TRACES
             std::cout << " " << vertex;
@@ -309,7 +319,7 @@ class Alpha_complex : public Simplex_tree<> {
           std::cout << std::endl;
 #endif  // DEBUG_TRACES
           // ### If filt(Sigma) is NaN : filt(Sigma) = alpha(Sigma)
-          if (std::isnan(filtration(f_simplex))) {
+          if (std::isnan(complex.filtration(f_simplex))) {
             Filtration_value alpha_complex_filtration = 0.0;
             // No need to compute squared_radius on a single point - alpha is 0.0
             if (f_simplex_dim > 0) {
@@ -318,12 +328,12 @@ class Alpha_complex : public Simplex_tree<> {
 
               alpha_complex_filtration = squared_radius(pointVector.begin(), pointVector.end());
             }
-            assign_filtration(f_simplex, alpha_complex_filtration);
+            complex.assign_filtration(f_simplex, alpha_complex_filtration);
 #ifdef DEBUG_TRACES
-            std::cout << "filt(Sigma) is NaN : filt(Sigma) =" << filtration(f_simplex) << std::endl;
+            std::cout << "filt(Sigma) is NaN : filt(Sigma) =" << complex.filtration(f_simplex) << std::endl;
 #endif  // DEBUG_TRACES
           }
-          propagate_alpha_filtration(f_simplex, decr_dim);
+          propagate_alpha_filtration(complex, f_simplex, decr_dim);
         }
       }
     }
@@ -331,36 +341,41 @@ class Alpha_complex : public Simplex_tree<> {
 
     // --------------------------------------------------------------------------------------------
     // As Alpha value is an approximation, we have to make filtration non decreasing while increasing the dimension
-    bool modified_filt = make_filtration_non_decreasing();
+    complex.make_filtration_non_decreasing();
     // Remove all simplices that have a filtration value greater than max_alpha_square
-    // Remark: prune_above_filtration does not require initialize_filtration to be done before.
-    modified_filt |= prune_above_filtration(max_alpha_square);
-    if (modified_filt) {
-      initialize_filtration();
-    }
+    complex.prune_above_filtration(max_alpha_square);
     // --------------------------------------------------------------------------------------------
+    return true;
   }
 
-  template<typename Simplex_handle>
-  void propagate_alpha_filtration(Simplex_handle f_simplex, int decr_dim) {
+ private:
+  template <typename SimplicialComplexForAlpha, typename Simplex_handle>
+  void propagate_alpha_filtration(SimplicialComplexForAlpha& complex, Simplex_handle f_simplex, int decr_dim) {
+    // From SimplicialComplexForAlpha type required to assign filtration values.
+    typedef typename SimplicialComplexForAlpha::Filtration_value Filtration_value;
+#ifdef DEBUG_TRACES
+    typedef typename SimplicialComplexForAlpha::Vertex_handle Vertex_handle;
+#endif  // DEBUG_TRACES
+
     // ### Foreach Tau face of Sigma
-    for (auto f_boundary : boundary_simplex_range(f_simplex)) {
+    for (auto f_boundary : complex.boundary_simplex_range(f_simplex)) {
 #ifdef DEBUG_TRACES
       std::cout << " | --------------------------------------------------\n";
       std::cout << " | Tau ";
-      for (auto vertex : simplex_vertex_range(f_boundary)) {
+      for (auto vertex : complex.simplex_vertex_range(f_boundary)) {
         std::cout << vertex << " ";
       }
       std::cout << "is a face of Sigma\n";
-      std::cout << " | isnan(filtration(Tau)=" << std::isnan(filtration(f_boundary)) << std::endl;
+      std::cout << " | isnan(complex.filtration(Tau)=" << std::isnan(complex.filtration(f_boundary)) << std::endl;
 #endif  // DEBUG_TRACES
       // ### If filt(Tau) is not NaN
-      if (!std::isnan(filtration(f_boundary))) {
+      if (!std::isnan(complex.filtration(f_boundary))) {
         // ### filt(Tau) = fmin(filt(Tau), filt(Sigma))
-        Filtration_value alpha_complex_filtration = fmin(filtration(f_boundary), filtration(f_simplex));
-        assign_filtration(f_boundary, alpha_complex_filtration);
+        Filtration_value alpha_complex_filtration = fmin(complex.filtration(f_boundary),
+                                                                             complex.filtration(f_simplex));
+        complex.assign_filtration(f_boundary, alpha_complex_filtration);
 #ifdef DEBUG_TRACES
-        std::cout << " | filt(Tau) = fmin(filt(Tau), filt(Sigma)) = " << filtration(f_boundary) << std::endl;
+        std::cout << " | filt(Tau) = fmin(filt(Tau), filt(Sigma)) = " << complex.filtration(f_boundary) << std::endl;
 #endif  // DEBUG_TRACES
         // ### Else
       } else {
@@ -372,12 +387,12 @@ class Alpha_complex : public Simplex_tree<> {
 #ifdef DEBUG_TRACES
           Vertex_handle vertexForGabriel = Vertex_handle();
 #endif  // DEBUG_TRACES
-          for (auto vertex : simplex_vertex_range(f_boundary)) {
+          for (auto vertex : complex.simplex_vertex_range(f_boundary)) {
             pointVector.push_back(get_point(vertex));
           }
           // Retrieve the Sigma point that is not part of Tau - parameter for is_gabriel function
           Point_d point_for_gabriel;
-          for (auto vertex : simplex_vertex_range(f_simplex)) {
+          for (auto vertex : complex.simplex_vertex_range(f_simplex)) {
             point_for_gabriel = get_point(vertex);
             if (std::find(pointVector.begin(), pointVector.end(), point_for_gabriel) == pointVector.end()) {
 #ifdef DEBUG_TRACES
@@ -398,10 +413,10 @@ class Alpha_complex : public Simplex_tree<> {
           // ### If Tau is not Gabriel of Sigma
           if (false == is_gab) {
             // ### filt(Tau) = filt(Sigma)
-            Filtration_value alpha_complex_filtration = filtration(f_simplex);
-            assign_filtration(f_boundary, alpha_complex_filtration);
+            Filtration_value alpha_complex_filtration = complex.filtration(f_simplex);
+            complex.assign_filtration(f_boundary, alpha_complex_filtration);
 #ifdef DEBUG_TRACES
-            std::cout << " | filt(Tau) = filt(Sigma) = " << filtration(f_boundary) << std::endl;
+            std::cout << " | filt(Tau) = filt(Sigma) = " << complex.filtration(f_boundary) << std::endl;
 #endif  // DEBUG_TRACES
           }
         }

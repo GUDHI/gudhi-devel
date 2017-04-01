@@ -1,14 +1,17 @@
-#include <CGAL/Epick_d.h>
 #include <gudhi/Alpha_complex.h>
+// to construct a simplex_tree from alpha complex
+#include <gudhi/Simplex_tree.h>
+
+#include <CGAL/Epick_d.h>
 
 #include <iostream>
 #include <string>
 #include <vector>
 #include <limits>  // for numeric limits
 
-typedef CGAL::Epick_d< CGAL::Dimension_tag<2> > Kernel;
-typedef Kernel::Point_d Point;
-typedef std::vector<Point> Vector_of_points;
+using Kernel = CGAL::Epick_d< CGAL::Dimension_tag<2> >;
+using Point = Kernel::Point_d;
+using Vector_of_points = std::vector<Point>;
 
 void usage(int nbArgs, char * const progName) {
   std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
@@ -21,7 +24,7 @@ int main(int argc, char **argv) {
   if ((argc != 1) && (argc != 2)) usage(argc, (argv[0] - 1));
 
   // Delaunay complex if alpha_square_max_value is not given by the user.
-  double alpha_square_max_value = std::numeric_limits<double>::infinity();
+  double alpha_square_max_value {std::numeric_limits<double>::infinity()};
   if (argc == 2)
     alpha_square_max_value = atof(argv[1]);
 
@@ -40,23 +43,26 @@ int main(int argc, char **argv) {
   // ----------------------------------------------------------------------------
   // Init of an alpha complex from the list of points
   // ----------------------------------------------------------------------------
-  Gudhi::alpha_complex::Alpha_complex<Kernel> alpha_complex_from_points(points, alpha_square_max_value);
+  Gudhi::alpha_complex::Alpha_complex<Kernel> alpha_complex_from_points(points);
 
-  // ----------------------------------------------------------------------------
-  // Display information about the alpha complex
-  // ----------------------------------------------------------------------------
-  std::cout << "Alpha complex is of dimension " << alpha_complex_from_points.dimension() <<
-      " - " << alpha_complex_from_points.num_simplices() << " simplices - " <<
-      alpha_complex_from_points.num_vertices() << " vertices." << std::endl;
+  Gudhi::Simplex_tree<> simplex;
+  if (alpha_complex_from_points.create_complex(simplex, alpha_square_max_value)) {
+    // ----------------------------------------------------------------------------
+    // Display information about the alpha complex
+    // ----------------------------------------------------------------------------
+    std::cout << "Alpha complex is of dimension " << simplex.dimension() <<
+        " - " << simplex.num_simplices() << " simplices - " <<
+        simplex.num_vertices() << " vertices." << std::endl;
 
-  std::cout << "Iterator on alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
-  for (auto f_simplex : alpha_complex_from_points.filtration_simplex_range()) {
-    std::cout << "   ( ";
-    for (auto vertex : alpha_complex_from_points.simplex_vertex_range(f_simplex)) {
-      std::cout << vertex << " ";
+    std::cout << "Iterator on alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
+    for (auto f_simplex : simplex.filtration_simplex_range()) {
+      std::cout << "   ( ";
+      for (auto vertex : simplex.simplex_vertex_range(f_simplex)) {
+        std::cout << vertex << " ";
+      }
+      std::cout << ") -> " << "[" << simplex.filtration(f_simplex) << "] ";
+      std::cout << std::endl;
     }
-    std::cout << ") -> " << "[" << alpha_complex_from_points.filtration(f_simplex) << "] ";
-    std::cout << std::endl;
   }
   return 0;
 }

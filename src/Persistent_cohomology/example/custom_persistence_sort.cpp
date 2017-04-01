@@ -27,6 +27,8 @@
 
 #include <gudhi/Alpha_complex.h>
 #include <gudhi/Persistent_cohomology.h>
+// to construct a simplex_tree from alpha complex
+#include <gudhi/Simplex_tree.h>
 
 #include <iostream>
 #include <iterator>
@@ -38,6 +40,9 @@
 using Kernel = CGAL::Epick_d< CGAL::Dimension_tag<3> >;
 using Point = Kernel::Point_d;
 using Alpha_complex = Gudhi::alpha_complex::Alpha_complex<Kernel>;
+using Simplex_tree = Gudhi::Simplex_tree<>;
+using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology< Simplex_tree,
+      Gudhi::persistent_cohomology::Field_Zp >;
 
 std::vector<Point> random_points() {
   // Instanciate a random point generator
@@ -60,7 +65,7 @@ std::vector<Point> random_points() {
  * Compare two intervals by dimension, then by length.
  */
 struct cmp_intervals_by_dim_then_length {
-  explicit cmp_intervals_by_dim_then_length(Alpha_complex * sc)
+  explicit cmp_intervals_by_dim_then_length(Simplex_tree * sc)
       : sc_(sc) { }
 
   template<typename Persistent_interval>
@@ -71,46 +76,62 @@ struct cmp_intervals_by_dim_then_length {
     else
       return (sc_->dimension(get < 0 > (p1)) > sc_->dimension(get < 0 > (p2)));
   }
-  Alpha_complex* sc_;
+  Simplex_tree* sc_;
 };
 
 int main(int argc, char **argv) {
   std::vector<Point> points = random_points();
 
+  std::cout << "Points size=" << points.size() << std::endl;
   // Alpha complex persistence computation from generated points
-  Alpha_complex alpha_complex_from_points(points, 0.6);
+  Alpha_complex alpha_complex_from_points(points);
+  std::cout << "alpha_complex_from_points" << std::endl;
 
-  using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology< Alpha_complex,
-      Gudhi::persistent_cohomology::Field_Zp >;
-  Persistent_cohomology pcoh(alpha_complex_from_points);
+  Simplex_tree simplex;
+  std::cout << "simplex" << std::endl;
+  if (alpha_complex_from_points.create_complex(simplex, 0.6)) {
+    std::cout << "simplex" << std::endl;
+    // ----------------------------------------------------------------------------
+    // Display information about the alpha complex
+    // ----------------------------------------------------------------------------
+    std::cout << "Simplicial complex is of dimension " << simplex.dimension() <<
+        " - " << simplex.num_simplices() << " simplices - " <<
+        simplex.num_vertices() << " vertices." << std::endl;
 
-  // initializes the coefficient field for homology - Z/3Z
-  pcoh.init_coefficients(3);
-  pcoh.compute_persistent_cohomology(0.2);
+    // Sort the simplices in the order of the filtration
+    simplex.initialize_filtration();
 
-  // Custom sort and output persistence
-  cmp_intervals_by_dim_then_length cmp(&alpha_complex_from_points);
-  auto persistent_pairs = pcoh.get_persistent_pairs();
-  std::sort(std::begin(persistent_pairs), std::end(persistent_pairs), cmp);
-  for (auto pair : persistent_pairs) {
-    std::cout << alpha_complex_from_points.dimension(get<0>(pair)) << " "
-          << alpha_complex_from_points.filtration(get<0>(pair)) << " "
-          << alpha_complex_from_points.filtration(get<1>(pair)) << std::endl;
+    std::cout << "Simplex_tree dim: " << simplex.dimension() << std::endl;
+
+    Persistent_cohomology pcoh(simplex);
+
+    // initializes the coefficient field for homology - Z/3Z
+    pcoh.init_coefficients(3);
+    pcoh.compute_persistent_cohomology(0.2);
+
+    // Custom sort and output persistence
+    cmp_intervals_by_dim_then_length cmp(&simplex);
+    auto persistent_pairs = pcoh.get_persistent_pairs();
+    std::sort(std::begin(persistent_pairs), std::end(persistent_pairs), cmp);
+    for (auto pair : persistent_pairs) {
+      std::cout << simplex.dimension(get<0>(pair)) << " "
+            << simplex.filtration(get<0>(pair)) << " "
+            << simplex.filtration(get<1>(pair)) << std::endl;
+    }
+
+    // Persistent Betti numbers
+    std::cout << "The persistent Betti numbers in interval [0.40, 0.41] are : ";
+    for (int dim = 0; dim < simplex.dimension(); dim++)
+      std::cout << "b" << dim << " = " << pcoh.persistent_betti_number(dim, 0.40, 0.41) << " ; ";
+    std::cout << std::endl;
+
+    // Betti numbers
+    std::vector<int> betti_numbers = pcoh.betti_numbers();
+    std::cout << "The Betti numbers are : ";
+    for (std::size_t i = 0; i < betti_numbers.size(); i++)
+      std::cout << "b" << i << " = " << betti_numbers[i] << " ; ";
+    std::cout << std::endl;
   }
-
-  // Persistent Betti numbers
-  std::cout << "The persistent Betti numbers in interval [0.40, 0.41] are : ";
-  for (int dim = 0; dim < alpha_complex_from_points.dimension(); dim++)
-    std::cout << "b" << dim << " = " << pcoh.persistent_betti_number(dim, 0.40, 0.41) << " ; ";
-  std::cout << std::endl;
-
-  // Betti numbers
-  std::vector<int> betti_numbers = pcoh.betti_numbers();
-  std::cout << "The Betti numbers are : ";
-  for (std::size_t i = 0; i < betti_numbers.size(); i++)
-    std::cout << "b" << i << " = " << betti_numbers[i] << " ; ";
-  std::cout << std::endl;
-
   return 0;
 }
 

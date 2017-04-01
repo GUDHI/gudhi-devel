@@ -25,7 +25,7 @@
 #define GUI_MENU_PERSISTENCE_H_
 
 #include <QMainWindow>
-#include "gui/ui_PersistenceMenu.h"
+#include "ui_PersistenceMenu.h"
 
 class QWidget;
 

@@ -13,12 +13,21 @@ endif()
 add_executable ( poffreader_UT test_points_off_reader.cpp )
 target_link_libraries(poffreader_UT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
+add_executable ( distancematrixreader_UT test_distance_matrix_reader.cpp )
+target_link_libraries(distancematrixreader_UT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+
 # Do not forget to copy test files in current binary dir
 file(COPY "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+file(COPY "${CMAKE_SOURCE_DIR}/data/distance_matrix/lower_triangular_distance_matrix.csv" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+file(COPY "${CMAKE_SOURCE_DIR}/data/distance_matrix/full_square_distance_matrix.csv" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
 # Unitary tests
 add_test(poffreader_UT ${CMAKE_CURRENT_BINARY_DIR}/poffreader_UT
          # XML format for Jenkins xUnit plugin 
          --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/poffreader_UT.xml --log_level=test_suite --report_level=no)
+
+add_test(distancematrixreader_UT ${CMAKE_CURRENT_BINARY_DIR}/distancematrixreader_UT
+         # XML format for Jenkins xUnit plugin 
+         --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/distancematrixreader_UT.xml --log_level=test_suite --report_level=no)
 
 

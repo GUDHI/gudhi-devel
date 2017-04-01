@@ -38,7 +38,7 @@ PROJECT_NAME           = "GUDHI"
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = "1.3.1"
+PROJECT_NUMBER         = "2.0.0"
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -500,7 +500,7 @@ HIDE_SCOPE_NAMES       = NO
 # the files that are included by a file in the documentation of that file.
 # The default value is: YES.
 
-SHOW_INCLUDE_FILES     = YES
+SHOW_INCLUDE_FILES     = NO
 
 # If the SHOW_GROUPED_MEMB_INC tag is set to YES then Doxygen will add for each
 # grouped member an include statement to the documentation, telling the reader
@@ -781,10 +781,11 @@ RECURSIVE              = YES
 # run.
 
 EXCLUDE                = data/ \
-	                     example/ \
-	                     GudhUI/  \
-                             cmake/   \
-                             debian/
+	                     example/    \
+	                     GudhUI/     \
+                             cmake/      \
+                             src/cython/ \
+                             include/gudhi_patches/
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
@@ -845,7 +846,12 @@ IMAGE_PATH             = doc/Skeleton_blocker/ \
 	doc/Simplex_tree/ \
 	doc/Persistent_cohomology/ \
 	doc/Witness_complex/ \
-	doc/Bitmap_cubical_complex/
+	doc/Bitmap_cubical_complex/ \
+	doc/Rips_complex/ \
+	doc/Subsampling/ \
+	doc/Spatial_searching/ \
+	doc/Tangential_complex/ \
+	doc/Bottleneck_distance/
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should
 # invoke to filter for each input file. Doxygen will invoke the filter program
@@ -2147,7 +2153,7 @@ TEMPLATE_RELATIONS     = YES
 # The default value is: YES.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-INCLUDE_GRAPH          = YES
+INCLUDE_GRAPH          = NO
 
 # If the INCLUDED_BY_GRAPH, ENABLE_PREPROCESSING and SEARCH_INCLUDES tags are
 # set to YES then doxygen will generate a graph for each documented file showing
@@ -2156,7 +2162,7 @@ INCLUDE_GRAPH          = YES
 # The default value is: YES.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-INCLUDED_BY_GRAPH      = YES
+INCLUDED_BY_GRAPH      = NO
 
 # If the CALL_GRAPH tag is set to YES then doxygen will generate a call
 # dependency graph for every global function or class method.

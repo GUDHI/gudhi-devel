@@ -35,10 +35,6 @@
 
 #include "Garland_heckbert/Error_quadric.h"
 
-using namespace Gudhi;
-using namespace skeleton_blocker;
-using namespace contraction;
-
 struct Geometry_trait {
   typedef Point_d Point;
 };
@@ -46,7 +42,8 @@ struct Geometry_trait {
 /**
  * The vertex stored in the complex contains a quadric.
  */
-struct Garland_heckbert_traits : public Skeleton_blocker_simple_geometric_traits<Geometry_trait> {
+struct Garland_heckbert_traits
+    : public Gudhi::skeleton_blocker::Skeleton_blocker_simple_geometric_traits<Geometry_trait> {
  public:
   struct Garland_heckbert_vertex : public Simple_geometric_vertex {
     Error_quadric<Geometry_trait::Point> quadric;
@@ -54,9 +51,9 @@ struct Garland_heckbert_traits : public Skeleton_blocker_simple_geometric_traits
   typedef Garland_heckbert_vertex Graph_vertex;
 };
 
-typedef Skeleton_blocker_geometric_complex< Garland_heckbert_traits > Complex;
-typedef Edge_profile<Complex> EdgeProfile;
-typedef Skeleton_blocker_contractor<Complex> Complex_contractor;
+using Complex = Gudhi::skeleton_blocker::Skeleton_blocker_geometric_complex< Garland_heckbert_traits >;
+using EdgeProfile = Gudhi::contraction::Edge_profile<Complex>;
+using Complex_contractor = Gudhi::contraction::Skeleton_blocker_contractor<Complex>;
 
 /**
  * How the new vertex is placed after an edge collapse : here it is placed at
@@ -68,7 +65,7 @@ class GH_placement : public Gudhi::contraction::Placement_policy<EdgeProfile> {
  public:
   typedef Gudhi::contraction::Placement_policy<EdgeProfile>::Placement_type Placement_type;
 
-  GH_placement(Complex& complex) : complex_(complex) { }
+  GH_placement(Complex& complex) : complex_(complex) { (void)complex_; }
 
   Placement_type operator()(const EdgeProfile& profile) const override {
     auto sum_quad(profile.v0().quadric);
@@ -92,7 +89,7 @@ class GH_cost : public Gudhi::contraction::Cost_policy<EdgeProfile> {
  public:
   typedef Gudhi::contraction::Cost_policy<EdgeProfile>::Cost_type Cost_type;
 
-  GH_cost(Complex& complex) : complex_(complex) { }
+  GH_cost(Complex& complex) : complex_(complex) { (void)complex_; }
 
   Cost_type operator()(EdgeProfile const& profile, boost::optional<Point> const& new_point) const override {
     Cost_type res;
@@ -114,7 +111,7 @@ class GH_visitor : public Gudhi::contraction::Contraction_visitor<EdgeProfile> {
   Complex& complex_;
 
  public:
-  GH_visitor(Complex& complex) : complex_(complex) { }
+  GH_visitor(Complex& complex) : complex_(complex) { (void)complex_; }
 
   // Compute quadrics for every vertex v
   // The quadric of v consists in the sum of quadric
@@ -153,7 +150,7 @@ int main(int argc, char *argv[]) {
   typedef Complex::Vertex_handle Vertex_handle;
 
   // load the points
-  Skeleton_blocker_off_reader<Complex> off_reader(argv[1], complex);
+  Gudhi::skeleton_blocker::Skeleton_blocker_off_reader<Complex> off_reader(argv[1], complex);
   if (!off_reader.is_valid()) {
     std::cerr << "Unable to read file:" << argv[1] << std::endl;
     return EXIT_FAILURE;
@@ -174,7 +171,7 @@ int main(int argc, char *argv[]) {
   Complex_contractor contractor(complex,
                                 new GH_cost(complex),
                                 new GH_placement(complex),
-                                contraction::make_link_valid_contraction<EdgeProfile>(),
+                                Gudhi::contraction::make_link_valid_contraction<EdgeProfile>(),
                                 new GH_visitor(complex));
 
   std::cout << "Contract " << num_contractions << " edges" << std::endl;
@@ -186,7 +183,7 @@ int main(int argc, char *argv[]) {
       complex.num_triangles() << " triangles." << std::endl;
 
   // write simplified complex
-  Skeleton_blocker_off_writer<Complex> off_writer(argv[2], complex);
+  Gudhi::skeleton_blocker::Skeleton_blocker_off_writer<Complex> off_writer(argv[2], complex);
 
   return EXIT_SUCCESS;
 }

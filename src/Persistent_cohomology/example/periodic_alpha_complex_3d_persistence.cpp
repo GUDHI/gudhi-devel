@@ -4,7 +4,7 @@
  *
  *    Author(s):       Vincent Rouvreau
  *
- *    Copyright (C) 2014  INRIA Saclay (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -20,10 +20,11 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <boost/variant.hpp>
+
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Points_3D_off_io.h>
-#include <boost/variant.hpp>
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Periodic_3_Delaunay_triangulation_traits_3.h>
@@ -39,6 +40,9 @@
 #include <utility>
 #include <list>
 #include <vector>
+#include <cstdlib>
+
+#include "alpha_complex_3d_helper.h"
 
 // Traits
 using K = CGAL::Exact_predicates_inexact_constructions_kernel;
@@ -66,62 +70,18 @@ using Dispatch = CGAL::Dispatch_output_iterator<
 using Cell_handle = Alpha_shape_3::Cell_handle;
 using Facet = Alpha_shape_3::Facet;
 using Edge_3 = Alpha_shape_3::Edge;
+using Vertex_handle = Alpha_shape_3::Vertex_handle;
 using Vertex_list = std::list<Alpha_shape_3::Vertex_handle>;
 
 // gudhi type definition
 using ST = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
+using Filtration_value = ST::Filtration_value;
 using Simplex_tree_vertex = ST::Vertex_handle;
 using Alpha_shape_simplex_tree_map = std::map<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex >;
 using Alpha_shape_simplex_tree_pair = std::pair<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex>;
 using Simplex_tree_vector_vertex = std::vector< Simplex_tree_vertex >;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<
     ST, Gudhi::persistent_cohomology::Field_Zp >;
-
-Vertex_list from(const Cell_handle& ch) {
-  Vertex_list the_list;
-  for (auto i = 0; i < 4; i++) {
-#ifdef DEBUG_TRACES
-    std::cout << "from cell[" << i << "]=" << ch->vertex(i)->point() << std::endl;
-#endif  // DEBUG_TRACES
-    the_list.push_back(ch->vertex(i));
-  }
-  return the_list;
-}
-
-Vertex_list from(const Facet& fct) {
-  Vertex_list the_list;
-  for (auto i = 0; i < 4; i++) {
-    if (fct.second != i) {
-#ifdef DEBUG_TRACES
-      std::cout << "from facet=[" << i << "]" << fct.first->vertex(i)->point() << std::endl;
-#endif  // DEBUG_TRACES
-      the_list.push_back(fct.first->vertex(i));
-    }
-  }
-  return the_list;
-}
-
-Vertex_list from(const Edge_3& edg) {
-  Vertex_list the_list;
-  for (auto i = 0; i < 4; i++) {
-    if ((edg.second == i) || (edg.third == i)) {
-#ifdef DEBUG_TRACES
-      std::cout << "from edge[" << i << "]=" << edg.first->vertex(i)->point() << std::endl;
-#endif  // DEBUG_TRACES
-      the_list.push_back(edg.first->vertex(i));
-    }
-  }
-  return the_list;
-}
-
-Vertex_list from(const Alpha_shape_3::Vertex_handle& vh) {
-  Vertex_list the_list;
-#ifdef DEBUG_TRACES
-  std::cout << "from vertex=" << vh->point() << std::endl;
-#endif  // DEBUG_TRACES
-  the_list.push_back(vh);
-  return the_list;
-}
 
 void usage(char * const progName) {
   std::cerr << "Usage: " << progName <<
@@ -136,19 +96,8 @@ int main(int argc, char * const argv[]) {
     usage(argv[0]);
   }
 
-  int coeff_field_characteristic = 0;
-  int returnedScanValue = sscanf(argv[3], "%d", &coeff_field_characteristic);
-  if ((returnedScanValue == EOF) || (coeff_field_characteristic <= 0)) {
-    std::cerr << "Error: " << argv[3] << " is not correct\n";
-    usage(argv[0]);
-  }
-
-  Filtration_value min_persistence = 0.0;
-  returnedScanValue = sscanf(argv[4], "%lf", &min_persistence);
-  if ((returnedScanValue == EOF) || (min_persistence < -1.0)) {
-    std::cerr << "Error: " << argv[4] << " is not correct\n";
-    usage(argv[0]);
-  }
+  int coeff_field_characteristic = atoi(argv[3]);
+  Filtration_value min_persistence = strtof(argv[4], nullptr);
 
   // Read points from file
   std::string offInputFile(argv[1]);
@@ -212,21 +161,21 @@ int main(int argc, char * const argv[]) {
   for (auto object_iterator : the_objects) {
     // Retrieve Alpha shape vertex list from object
     if (const Cell_handle * cell = CGAL::object_cast<Cell_handle>(&object_iterator)) {
-      vertex_list = from(*cell);
+      vertex_list = from_cell<Vertex_list, Cell_handle>(*cell);
       count_cells++;
       if (dim_max < 3) {
         // Cell is of dim 3
         dim_max = 3;
       }
     } else if (const Facet * facet = CGAL::object_cast<Facet>(&object_iterator)) {
-      vertex_list = from(*facet);
+      vertex_list = from_facet<Vertex_list, Facet>(*facet);
       count_facets++;
       if (dim_max < 2) {
         // Facet is of dim 2
         dim_max = 2;
       }
     } else if (const Edge_3 * edge = CGAL::object_cast<Edge_3>(&object_iterator)) {
-      vertex_list = from(*edge);
+      vertex_list = from_edge<Vertex_list, Edge_3>(*edge);
       count_edges++;
       if (dim_max < 1) {
         // Edge_3 is of dim 1
@@ -235,7 +184,7 @@ int main(int argc, char * const argv[]) {
     } else if (const Alpha_shape_3::Vertex_handle * vertex =
                CGAL::object_cast<Alpha_shape_3::Vertex_handle>(&object_iterator)) {
       count_vertices++;
-      vertex_list = from(*vertex);
+      vertex_list = from_vertex<Vertex_list, Vertex_handle>(*vertex);
     }
     // Construction of the vector of simplex_tree vertex from list of alpha_shapes vertex
     Simplex_tree_vector_vertex the_simplex_tree;

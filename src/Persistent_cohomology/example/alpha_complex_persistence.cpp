@@ -4,10 +4,15 @@
 
 #include <gudhi/Alpha_complex.h>
 #include <gudhi/Persistent_cohomology.h>
+// to construct a simplex_tree from alpha complex
+#include <gudhi/Simplex_tree.h>
 
 #include <iostream>
 #include <string>
 #include <limits>  // for numeric_limits
+
+using Simplex_tree = Gudhi::Simplex_tree<>;
+using Filtration_value = Simplex_tree::Filtration_value;
 
 void program_options(int argc, char * argv[]
                      , std::string & off_file_points
@@ -30,35 +35,38 @@ int main(int argc, char **argv) {
   // Init of an alpha complex from an OFF file
   // ----------------------------------------------------------------------------
   using Kernel = CGAL::Epick_d< CGAL::Dynamic_dimension_tag >;
-  Gudhi::alpha_complex::Alpha_complex<Kernel> alpha_complex_from_file(off_file_points, alpha_square_max_value);
+  Gudhi::alpha_complex::Alpha_complex<Kernel> alpha_complex_from_file(off_file_points);
 
-  // ----------------------------------------------------------------------------
-  // Display information about the alpha complex
-  // ----------------------------------------------------------------------------
-  std::cout << "Alpha complex is of dimension " << alpha_complex_from_file.dimension() <<
-      " - " << alpha_complex_from_file.num_simplices() << " simplices - " <<
-      alpha_complex_from_file.num_vertices() << " vertices." << std::endl;
+  Simplex_tree simplex;
+  if (alpha_complex_from_file.create_complex(simplex, alpha_square_max_value)) {
+    // ----------------------------------------------------------------------------
+    // Display information about the alpha complex
+    // ----------------------------------------------------------------------------
+    std::cout << "Simplicial complex is of dimension " << simplex.dimension() <<
+        " - " << simplex.num_simplices() << " simplices - " <<
+        simplex.num_vertices() << " vertices." << std::endl;
 
-  // Sort the simplices in the order of the filtration
-  alpha_complex_from_file.initialize_filtration();
+    // Sort the simplices in the order of the filtration
+    simplex.initialize_filtration();
 
-  std::cout << "Simplex_tree dim: " << alpha_complex_from_file.dimension() << std::endl;
-  // Compute the persistence diagram of the complex
-  Gudhi::persistent_cohomology::Persistent_cohomology< Gudhi::alpha_complex::Alpha_complex<Kernel>,
-      Gudhi::persistent_cohomology::Field_Zp > pcoh(alpha_complex_from_file);
-  // initializes the coefficient field for homology
-  pcoh.init_coefficients(coeff_field_characteristic);
+    std::cout << "Simplex_tree dim: " << simplex.dimension() << std::endl;
+    // Compute the persistence diagram of the complex
+    Gudhi::persistent_cohomology::Persistent_cohomology< Simplex_tree,
+        Gudhi::persistent_cohomology::Field_Zp > pcoh(simplex);
+    // initializes the coefficient field for homology
+    pcoh.init_coefficients(coeff_field_characteristic);
 
-  pcoh.compute_persistent_cohomology(min_persistence);
+    pcoh.compute_persistent_cohomology(min_persistence);
 
-  // Output the diagram in filediag
-  if (output_file_diag.empty()) {
-    pcoh.output_diagram();
-  } else {
-    std::cout << "Result in file: " << output_file_diag << std::endl;
-    std::ofstream out(output_file_diag);
-    pcoh.output_diagram(out);
-    out.close();
+    // Output the diagram in filediag
+    if (output_file_diag.empty()) {
+      pcoh.output_diagram();
+    } else {
+      std::cout << "Result in file: " << output_file_diag << std::endl;
+      std::ofstream out(output_file_diag);
+      pcoh.output_diagram(out);
+      out.close();
+    }
   }
 
   return 0;

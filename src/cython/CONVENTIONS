@@ -1,0 +1,9 @@
+Gudhi is following PEP8 conventions.
+
+Please refer to:
+https://www.python.org/dev/peps/pep-0008/
+
+A summary:
+ - modules (filenames) should have short, all-lowercase names, and they can contain underscores.
+ - packages (directories) should have short, all-lowercase names, preferably without underscores.
+ - classes should use the CapWords convention.
