@@ -26,6 +26,7 @@
 #include <gudhi/Neighbors_finder.h>
 
 #include <vector>
+#include <unordered_set>
 #include <algorithm>
 
 namespace Gudhi {
@@ -53,7 +54,7 @@ class Graph_matching {
   /** \internal \brief Given a point from V, provides its matched point in U, null_point_index() if there isn't. */
   std::vector<int> v_to_u;
   /** \internal \brief All the unmatched points in U. */
-  std::vector<int> unmatched_in_u;
+  std::unordered_set<int> unmatched_in_u;
 
   /** \internal \brief Provides a Layered_neighbors_finder dividing the graph in layers. Basically a BFS. */
   Layered_neighbors_finder layering() const;
@@ -64,10 +65,9 @@ class Graph_matching {
 };
 
 inline Graph_matching::Graph_matching(Persistence_graph& g)
-    : gp(&g), r(0.), v_to_u(g.size(), null_point_index()), unmatched_in_u() {
-  unmatched_in_u.reserve(g.size());
+    : gp(&g), r(0.), v_to_u(g.size(), null_point_index()), unmatched_in_u(g.size()) {
   for (int u_point_index = 0; u_point_index < g.size(); ++u_point_index)
-    unmatched_in_u.emplace_back(u_point_index);
+    unmatched_in_u.insert(u_point_index);
 }
 
 inline bool Graph_matching::perfect() const {
@@ -84,7 +84,7 @@ inline bool Graph_matching::multi_augment() {
   if (max_depth < 0 || (unmatched_in_u.size() > rn && max_depth >= rn))
     return false;
   bool successful = false;
-  std::vector<int> tries(unmatched_in_u);
+  std::vector<int> tries(unmatched_in_u.cbegin(), unmatched_in_u.cend());
   for (auto it = tries.cbegin(); it != tries.cend(); it++)
     // 'augment' has side-effects which have to be always executed, don't change order
     successful = augment(layered_nf, *it, max_depth) || successful;
@@ -124,7 +124,7 @@ inline bool Graph_matching::augment(Layered_neighbors_finder & layered_nf, int u
 }
 
 inline Layered_neighbors_finder Graph_matching::layering() const {
-  std::vector<int> u_vertices(unmatched_in_u);
+  std::vector<int> u_vertices(unmatched_in_u.cbegin(), unmatched_in_u.cend());
   std::vector<int> v_vertices;
   Neighbors_finder nf(*gp, r);
   for (int v_point_index = 0; v_point_index < gp->size(); ++v_point_index)
@@ -157,22 +157,8 @@ inline Layered_neighbors_finder Graph_matching::layering() const {
 }
 
 inline void Graph_matching::update(std::vector<int>& path) {
-  // Making unmatched_in_u an unordered_set<int> is simpler and almost as fast.
-#if 0
-  // Avoid an expensive erase in the middle of the vector, but break the
-  // ordering, so the search needs to be linear.
-  auto p = std::find(unmatched_in_u.begin(), unmatched_in_u.end(), path.front());
-  assert(p != unmatched_in_u.end());
-  std::swap(*p, unmatched_in_u.back());
-  unmatched_in_u.pop_back();
-#else
-  // Take advantage of the vector being sorted, but pay an expensive erase to
-  // maintain the order. This is essentially the same as making unmatched_in_u
-  // a boost flat_set.
-  auto p = std::lower_bound(unmatched_in_u.begin(), unmatched_in_u.end(), path.front());
-  assert(p != unmatched_in_u.end() && *p == path.front());
-  unmatched_in_u.erase(p);
-#endif
+  // Must return 1.
+  unmatched_in_u.erase(path.front());
   for (auto it = path.cbegin(); it != path.cend(); ++it) {
     // Be careful, the iterator is incremented twice each time
     int tmp = *it;
