@@ -149,7 +149,9 @@ inline int Neighbors_finder::pull_near(int u_point_index) {
     if(!neighbor)
       return null_point_index();
     tmp = neighbor->point_index;
-    kd_t.remove(g.get_v_point(tmp));
+    auto point = g.get_v_point(tmp);
+    int idx = point.point_index;
+    kd_t.remove(point, [idx](Internal_point const&p){return p.point_index == idx;});
   }
   return tmp;
 }
