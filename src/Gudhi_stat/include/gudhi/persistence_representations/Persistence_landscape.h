@@ -128,7 +128,9 @@ public:
     friend std::ostream& operator<<(std::ostream& out, Persistence_landscape& land );
 
 
-
+protected:
+	template < typename oper > friend Persistence_landscape operation_on_pair_of_landscapes ( const Persistence_landscape& land1 ,  const Persistence_landscape& land2 );
+public:	
 
 
 	/**
@@ -521,8 +523,7 @@ protected:
 
     void construct_persistence_landscape_from_barcode( const std::vector< std::pair< double , double > > & p );
     Persistence_landscape multiply_lanscape_by_real_number_not_overwrite( double x )const;
-    void multiply_lanscape_by_real_number_overwrite( double x );
-    template < typename oper > friend Persistence_landscape operation_on_pair_of_landscapes ( const Persistence_landscape& land1 ,  const Persistence_landscape& land2 );
+    void multiply_lanscape_by_real_number_overwrite( double x );    
     friend double compute_maximal_distance_non_symmetric( const Persistence_landscape& pl1, const Persistence_landscape& pl2 );
 
     void set_up_numbers_of_functions_for_vectorization_and_projections_to_reals()

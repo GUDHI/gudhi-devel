@@ -415,7 +415,7 @@ public:
     bool operator == ( const Persistence_landscape_on_grid& rhs  )const
     {
 		bool dbg = true;
-		if ( ! this->values_of_landscapes.size() == rhs.values_of_landscapes.size() )
+		if ( this->values_of_landscapes.size() != rhs.values_of_landscapes.size() )
 		{
 			if (dbg) std::cerr << "values_of_landscapes of incompatable sizes\n";
 			return false;

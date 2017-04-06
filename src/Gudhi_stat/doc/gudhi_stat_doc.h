@@ -43,7 +43,7 @@ namespace Gudhi_stat {
  * are different by performing a permutation test.
  *First of all, we compute averages of those two collections: C average of \f$ c_1,\ldots,c_n \f$ and D average of \f$d_1,\ldots,d_n\f$. Note that both C and D are of a type A. Then we compute \f$d(C,D)\f$, 
  * a distance between C and D.
- *Later we put the two collections into one bin:\
+ *Later we put the two collections into one bin:
  *\f[B = \{ c_1,...,c_n,d_1,...,d_n \}\f]
  *Then we shuffle B, and we divide the shuffled version of B into two classes: \f$B_1\f$ and \f$B_2\f$ (in this case, of the same cardinality). Then we compute averages \f$\hat{B_1}\f$ and \f$\hat{B_2}\f$ 
  * of elements in \f$B_1\f$ and \f$B_2\f$. Note that again, \f$\hat{B_1}\f$ and \f$\hat{B_2}\f$ are of a type A. 

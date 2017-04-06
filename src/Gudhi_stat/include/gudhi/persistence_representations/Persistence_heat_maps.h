@@ -113,14 +113,19 @@ std::vector< std::vector<double> > create_Gaussian_filter( size_t pixel_radius ,
 }
 
 
-/**
- * There are various options to scale the poits depending on their location. One can for instance:
- * (1) do nothing (scale all of them with the weight 1), as in the function constant_function
- * (2) Scale them by the distance to the diagonal. This is implemented in function
- * (3) Scale them with the square of their distance to diagonal. This is implemented in function
- * (4) Scale them with 
-**/ 
+/*
+* There are various options to scale the poits depending on their location. One can for instance:
+* (1) do nothing (scale all of them with the weight 1), as in the function constant_function
+* (2) Scale them by the distance to the diagonal. This is implemented in function
+* (3) Scale them with the square of their distance to diagonal. This is implemented in function
+* (4) Scale them with 
+*/ 
 
+
+/**
+ * This is one of a scaling functions used to weight poits depending on their persistence and/or location in the diagram. 
+ * This particular functiona is a finction which always assign value 1 to a point in the diagram.
+**/ 
 class constant_scaling_function
 {
 public:
@@ -130,6 +135,11 @@ public:
 	}
 };
 
+
+/**
+ * This is one of a scaling functions used to weight poits depending on their persistence and/or location in the diagram. 
+ * The scaling given by this function to a point (b,d) is Euclidean distance of (b,d) from diagonal.
+**/ 
 class distance_from_diagonal_scaling
 {
 public:
@@ -140,6 +150,10 @@ public:
 	}
 };
 
+/**
+ * This is one of a scaling functions used to weight poits depending on their persistence and/or location in the diagram. 
+ * The scaling given by this function to a point (b,d) is a square of Euclidean distance of (b,d) from diagonal.
+**/ 
 class squared_distance_from_diagonal_scaling
 {
 public:
@@ -149,6 +163,10 @@ public:
 	}
 };
 
+/**
+ * This is one of a scaling functions used to weight poits depending on their persistence and/or location in the diagram. 
+ * The scaling given by this function to a point (b,d) is an arctan of a persistence of a point (i.e. arctan( b-d ).
+**/ 
 class arc_tan_of_persistence_of_point
 {
 public:
@@ -158,6 +176,12 @@ public:
 	}
 };
 
+/**
+ * This is one of a scaling functions used to weight poits depending on their persistence and/or location in the diagram. 
+ * This scaling function do not only depend on a point (p,d) in the diagram, but it depends on the whole diagram. 
+ * The longest persistence pair get a scaling 1. Any other pair get a scaling belong to [0,1], which is proportional 
+ * to the persistence of that pair.
+**/ 
 class weight_by_setting_maximal_interval_to_have_length_one
 {
 public:
@@ -327,10 +351,7 @@ public:
     **/
     void plot( const char* filename )const;
     
-    
-    /**
-     * Binary (arythmetic) operation on two Persistence_heat_maps.
-    **/     
+       
     template<typename Operation_type>
     friend Persistence_heat_maps operation_on_pair_of_heat_maps( const Persistence_heat_maps& first ,  const Persistence_heat_maps& second , Operation_type operation )
     {

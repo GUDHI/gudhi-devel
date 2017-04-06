@@ -281,10 +281,7 @@ public:
 		return std::make_pair( this->sorted_vector_of_distances[0] , 0);
 	}
 	
-	//arythmetic operations:	
-	/**
-	 * This is a generic function that allows to perform binary operations on two Vector_distances_in_diagram. It will be used later to defien sums and differences of Vector_distances_in_diagram.
-	**/ 
+	//arythmetic operations:		
 	template < typename Operation_type > 
 	friend Vector_distances_in_diagram operation_on_pair_of_vectors( const Vector_distances_in_diagram& first ,  const Vector_distances_in_diagram& second , Operation_type opertion )
     {
