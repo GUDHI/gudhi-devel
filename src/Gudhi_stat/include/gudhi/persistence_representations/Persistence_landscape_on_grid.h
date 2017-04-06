@@ -1115,9 +1115,9 @@ Persistence_landscape_on_grid::Persistence_landscape_on_grid( const std::vector<
 Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filename , double grid_min_, double grid_max_ , size_t number_of_points_ , size_t dimension )
 {
 	//standard file with barcode
-    std::vector< std::pair< double , double > > p = read_standard_file( filename );    
+    std::vector< std::pair< double , double > > p = read_standard_persistence_file( filename );    
     //gudhi file with barcode
-    //std::vector< std::pair< double , double > > p = read_gudhi_file( filename , dimension );        
+    //std::vector< std::pair< double , double > > p = read_gudhi_persistence_file_in_one_dimension( filename , dimension );
 	
 	this->set_up_values_of_landscapes( p , grid_min_ , grid_max_ , number_of_points_ );
 }
@@ -1125,9 +1125,9 @@ Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filenam
 Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filename , size_t number_of_points_ )
 {
 	//standard file with barcode
-    std::vector< std::pair< double , double > > p = read_standard_file( filename );    
+    std::vector< std::pair< double , double > > p = read_standard_persistence_file( filename );    
     //gudhi file with barcode
-    //std::vector< std::pair< double , double > > p = read_gudhi_file( filename , dimension );     
+    //std::vector< std::pair< double , double > > p = read_gudhi_persistence_file_in_one_dimension( filename , dimension );
     
     double grid_min_ = std::numeric_limits<double>::max();
     double grid_max_ = -std::numeric_limits<double>::max();

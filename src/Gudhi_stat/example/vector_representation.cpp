@@ -55,15 +55,15 @@ int main( int argc , char** argv )
 	persistence2.push_back( std::make_pair(6,10) );
 	
 	//create two persistence vectors based on persistence1 and persistence2:
-	Vector_distances_in_diagram<Euclidean_distance<double> > v1 = Vector_distances_in_diagram<Euclidean_distance<double> >( persistence1 , std::numeric_limits<size_t>::max() );
-	Vector_distances_in_diagram<Euclidean_distance<double> > v2 = Vector_distances_in_diagram<Euclidean_distance<double> >( persistence2 , std::numeric_limits<size_t>::max() );
+	Vector_distances_in_diagram<Euclidean_distance > v1 = Vector_distances_in_diagram<Euclidean_distance >( persistence1 , std::numeric_limits<size_t>::max() );
+	Vector_distances_in_diagram<Euclidean_distance > v2 = Vector_distances_in_diagram<Euclidean_distance >( persistence2 , std::numeric_limits<size_t>::max() );
 	
 	//writing to a stream:
 	std::cout << "v1 : " << v1 << std::endl;
 	std::cout << "v2 : " << v2 << std::endl;
 	
 	//averages:
-	Vector_distances_in_diagram<Euclidean_distance<double> > average;
+	Vector_distances_in_diagram<Euclidean_distance > average;
 	average.compute_average( {&v1,&v2} );
 	std::cout << "Average : " << average << std::endl;
 	

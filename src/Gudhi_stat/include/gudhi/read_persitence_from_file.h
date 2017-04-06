@@ -42,7 +42,7 @@ namespace Gudhi_stat
  * This procedure reads birth-death dagta from a file. We assume that in the file, there may be one type of string 'inf' or 'Inf'. If the second parameter of the program is set to -1,
  * then those vales are ignored. If the second parameter of this program is set to a positive value, then the infinite intervals will be substituted by that number.
 **/ 
-std::vector< std::pair< double,double > > read_file_that_may_contain_inf_string( char* filename , double what_to_substitute_for_infinite_bar = -1 )
+std::vector< std::pair< double,double > > read_persistence_file_that_may_contain_inf_string( char* filename , double what_to_substitute_for_infinite_bar = -1 )
 {
 	
 	bool dbg = true;
@@ -88,9 +88,7 @@ std::vector< std::pair< double,double > > read_file_that_may_contain_inf_string(
 			}
             if ( beginn > endd )
             {
-                double b = beginn;
-                beginn = endd;
-                endd = b;
+                std::swap(beginn,endd);
             }  
             if ( dbg )
 			{
@@ -150,7 +148,7 @@ std::vector< std::string > readFileNames( const char* filenameWithFilenames )
  *  like 'inf' are not allowed.
  * If begin of the interval is greater than the end of the interval, those two numbers are swapped.
 **/ 
-std::vector< std::pair< double , double > > read_standard_file( const char* filename )
+std::vector< std::pair< double , double > > read_standard_persistence_file( const char* filename )
 {
 	bool dbg = false;
 	
@@ -177,9 +175,7 @@ std::vector< std::pair< double , double > > read_standard_file( const char* file
             if ( beginn == endd )continue;
             if ( beginn > endd )
             {
-                double b = beginn;
-                beginn = endd;
-                endd = b;
+                std::swap(beginn,endd);                
             }
             barcode.push_back( std::make_pair( beginn , endd ) );
             if (dbg)
@@ -205,7 +201,7 @@ std::vector< std::pair< double , double > > read_standard_file( const char* file
  * Note that this procedure reads persistence in a single dimension. The dimension of intervals that
  * are to be read are determined by the second parameter of the function.
 **/ 
-std::vector< std::pair< double , double > > read_gudhi_file( const char* filename , size_t dimension = 0 )
+std::vector< std::pair< double , double > > read_gudhi_persistence_file_in_one_dimension( const char* filename , size_t dimension = 0 , double what_to_substitute_for_infinite_bar = -1)
 {
 	bool dbg = false;
 	std::ifstream in;
@@ -225,6 +221,29 @@ std::vector< std::pair< double , double > > read_gudhi_file( const char* filenam
 				{
 					std::cerr << "This line: " << line << " contains infinite interval. We will skip it. \n";
 				}
+				if ( what_to_substitute_for_infinite_bar != -1 )
+				{
+					double beginn, field, dim;
+					std::stringstream lineSS(line);			
+					lineSS >> field;
+					lineSS >> dim;
+					lineSS >> beginn;
+					if ( dim == dimension )
+					{
+						if ( beginn > what_to_substitute_for_infinite_bar )
+						{
+							barcode.push_back( std::make_pair( what_to_substitute_for_infinite_bar , beginn ) );
+						}
+						else
+						{
+							barcode.push_back( std::make_pair( beginn , what_to_substitute_for_infinite_bar ) );
+						}
+						if (dbg)
+						{
+							std::cerr << beginn << " , " << what_to_substitute_for_infinite_bar << std::endl;
+						}
+					} 
+				}
 				continue;
 			}
 			std::stringstream lineSS(line);			
@@ -235,9 +254,7 @@ std::vector< std::pair< double , double > > read_gudhi_file( const char* filenam
 			lineSS >> endd;
 			if ( beginn > endd )
 			{
-				double b = beginn;
-				beginn = endd;
-				endd = b;
+				std::swap(beginn,endd);				
 			}
 			if ( dim == dimension )
 			{ 

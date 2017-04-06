@@ -25,6 +25,8 @@
 
 //gudhi include
 #include <gudhi/read_persitence_from_file.h>
+//Bottleneck distance:
+//#include <gudhi/Bottleneck.h>
 
 //standard include
 #include <limits>
@@ -247,13 +249,24 @@ public:
 
     /**
      *Computations of distance from the current persistnce diagram to the persistence diagram given as a parameter of this function.
-     *The last parameter, power, is here in case we would like to compute p=th Wasserstein distance. At the moment, for the bottleneck distances, it will be ignored.
+     *The last parameter, power, is here in case we would like to compute p=th Wasserstein distance. At the moment, this method only implement Bottleneck distance,
+     * which is infinity Wasserstein distance. Therefore any power which is not the default std::numeric_limits< double >::max() will be ignored and an 
+     * exception will be thrown. 
     **/
-    double distance( const Persistence_intervals& second , double power = 1) const
+     double distance( const Persistence_intervals& second , double power = std::numeric_limits< double >::max() , double tolerance = 0.00000001 ) const
     {
-		return 1;
-		//waiting for Francois Godi for the code. We will compute here the Bottleneck distnace. 
+		if ( power == std::numeric_limits< double >::max() )
+		{
+			//return Gudhi::persistence_diagram::bottleneck_distance(this->intervals, second.intervals, tolerance); 		
+			return 1;
+		}
+		else
+		{
+			std::cerr << "At the moment Gudhi do not support Wasserstein distances. We only support Bottleneck distance." << std::endl;
+			throw "At the moment Gudhi do not support Wasserstein distances. We only support Bottleneck distance.";
+		}
 	}
+	//end of implementation of functions needed for concepts.
 	//end of implementation of functions needed for concepts.
 	
     
@@ -323,9 +336,9 @@ Persistence_intervals::Persistence_intervals( const char* filename )
     //}
     //in.close();
     //standard file with barcode
-    this->intervals = read_standard_file( filename );    
+    this->intervals = read_standard_persistence_file( filename );    
     //gudhi file with barcode
-    //this->intervals = read_gudhi_file( filename , dimension );       
+    //this->intervals = read_gudhi_persistence_file_in_one_dimension( filename , dimension );
     this->set_up_numbers_of_functions_for_vectorization_and_projections_to_reals();
 }//Persistence_intervals
 

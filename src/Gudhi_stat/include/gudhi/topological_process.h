@@ -62,7 +62,7 @@ std::vector< std::vector< std::pair< double , double > > > read_persistence_pair
 	
 	for ( size_t i = 0 ; i != files.size() ; ++i )
 	{
-		std::vector< std::pair< double , double > > diag = read_standard_file( files[i].c_str() );	
+		std::vector< std::pair< double , double > > diag = read_standard_persistence_file( files[i].c_str() );	
 		result.push_back( diag );		
 		if ( dbg )
 		{

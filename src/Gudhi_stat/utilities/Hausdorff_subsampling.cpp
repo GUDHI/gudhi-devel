@@ -73,16 +73,41 @@ int main( int argc , char** argv )
 	points.push_back( point4 );
 	size_of_subsample = 2;
 	*/
-//	std::vector< std::vector<double> > all_to_all_distance_matrix_between_points = compute_all_to_all_distance_matrix_between_points< std::vector<double> , Euclidean_distance<double> >( points );
+//	std::vector< std::vector<double> > all_to_all_distance_matrix_between_points = compute_all_to_all_distance_matrix_between_points< std::vector<double> , Euclidean_distance >( points );
 //	Hausdorff_distance_between_subspace_and_the_whole_metric_space distance( all_to_all_distance_matrix_between_points );
 		
 
 	std::cout << "Read : " << points.size() << " points.\n";
 	
 	//comute all-to-all distance matrix:
-	std::vector< std::vector<double> > all_to_all_distance_matrix_between_points = compute_all_to_all_distance_matrix_between_points< std::vector<double> , Euclidean_distance<double> >( points );
+	std::vector< std::vector<double> > all_to_all_distance_matrix_between_points = compute_all_to_all_distance_matrix_between_points< std::vector<double> , Euclidean_distance >( points );
 	Hausdorff_distance_between_subspace_and_the_whole_metric_space distance( all_to_all_distance_matrix_between_points );
 	identity< std::vector<size_t> > identity_char;
+	
+	
+	double max = -1;
+	for ( size_t i = 0 ; i != all_to_all_distance_matrix_between_points.size() ; ++i )
+	{
+		double min = 10000000;
+		for ( size_t j = 0 ; j != all_to_all_distance_matrix_between_points.size() ; ++j )
+		{
+			double distance = 0;
+			if ( i > j )
+			{
+				distance = all_to_all_distance_matrix_between_points[i][j];
+			}
+			else
+			{
+				if ( i < j )distance = all_to_all_distance_matrix_between_points[j][i];
+			}										
+			if ( (distance < min)&&(distance != 0) )min = distance;
+		}
+		std::cerr << "min : " << min << std::endl;					
+		//getchar();
+		if ( min > max )max = min;
+	}
+	std::cerr << "Max element in distance matrix : " << max << std::endl;
+	getchar();
 	
 //	std::vector<size_t> characteristic_of_all_points = {0,1,2,3};
 //	std::vector<size_t> characteristic_of_subsampled_points = {2,3};	

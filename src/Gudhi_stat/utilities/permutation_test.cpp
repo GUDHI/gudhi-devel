@@ -62,7 +62,7 @@ int main( int argc , char** argv )
 	std::vector< Persistence_landscape* > first_collection( first_group.size() );
 	for ( size_t i = 0 ; i != first_group.size() ; ++i )
 	{
-		std::vector< std::pair< double , double > > diag = read_standard_file( first_group[i].c_str() );					
+		std::vector< std::pair< double , double > > diag = read_standard_persistence_file( first_group[i].c_str() );					
 		Persistence_landscape* l = new Persistence_landscape( diag );			
 		first_collection[i] = l;		
 	}
@@ -70,7 +70,7 @@ int main( int argc , char** argv )
 	std::vector< Persistence_landscape* > second_collection( second_group.size() );
 	for ( size_t i = 0 ; i != second_group.size() ; ++i )
 	{
-		std::vector< std::pair< double , double > > diag = read_standard_file( second_group[i].c_str() );
+		std::vector< std::pair< double , double > > diag = read_standard_persistence_file( second_group[i].c_str() );
 		Persistence_landscape* l = new Persistence_landscape( diag );		
 		second_collection[i] = l;
 	}	

@@ -137,6 +137,9 @@ double bootstrap( size_t number_of_points , CharacteristicFunction f , DistanceB
 			
 	size_t position_of_quantile = floor(quantile*vector_of_distances.size());
 	if ( position_of_quantile ) --position_of_quantile;
+	
+	
+	
 	if ( dbg )
 	{
 		std::cerr << "quantile : " << quantile << std::endl;

@@ -44,7 +44,7 @@ int main( int argc , char** argv )
 		std::cout << "To run this program, please provide the name of a file with persistence diagram \n";
 		return 1;
 	}
-	std::vector< std::pair< double , double > > intervals = read_gudhi_file( argv[1] , 2 );
+	std::vector< std::pair< double , double > > intervals = read_gudhi_persistence_file_in_one_dimension( argv[1] , 2 );
 	Persistence_intervals b( intervals );
 	b.plot( argv[1] );
 	return 0;

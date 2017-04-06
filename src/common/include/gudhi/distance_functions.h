@@ -35,7 +35,7 @@
  * have the same dimension. */
 class Euclidean_distance {
  public:
-  template< typename Point >
+  template< typename Point >  
   auto operator()(const Point& p1, const Point& p2) const -> typename std::decay<decltype(*std::begin(p1))>::type {
     auto it1 = p1.begin();
     auto it2 = p2.begin();
@@ -45,6 +45,11 @@ class Euclidean_distance {
       dist += tmp*tmp;
     }
     return std::sqrt(dist);
+  }
+  template< typename T >  
+  T operator() ( const std::pair< T,T >& f , const std::pair< T,T >& s )
+  {
+	return  sqrt( (f.first-s.first)*(f.first-s.first) + (f.second-s.second)*(f.second-s.second) );
   }
 };
 

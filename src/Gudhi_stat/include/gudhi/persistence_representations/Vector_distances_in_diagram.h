@@ -33,6 +33,7 @@
 //gudhi include
 #include <gudhi/read_persitence_from_file.h>
 #include <gudhi/common_gudhi_stat.h>
+#include <gudhi/distance_functions.h>
 
 
 namespace Gudhi 
@@ -40,7 +41,7 @@ namespace Gudhi
 namespace Gudhi_stat 
 {
 
-
+/*
 template <typename T>
 struct Euclidean_distance
 {
@@ -64,13 +65,14 @@ struct Euclidean_distance
         return  sqrt( result );
     }
 };
+* */
 
 template <typename T>
 struct Maximum_distance
 {
     double operator() ( const std::pair< T,T >& f , const std::pair<T,T>& s )
     {
-        return  std::min( fabs( f.first - s.first ) , fabs( f.second - s.second ) );
+        return  std::max( fabs( f.first - s.first ) , fabs( f.second - s.second ) );
     }
 };
 
@@ -78,7 +80,9 @@ struct Maximum_distance
 
 
 /**
-* This is an implementation of idea presented in the paper by Steve, Matthew and Max. The parameter of the class is the class that computes distance used to construct the vectors. The typical function is
+* This is an implementation of idea presented in the paper 'Stable Topological Signatures for Points on 3D Shapes' by 
+* M. Carriere, S. Y. Oudot and M. Ovsjanikov published in Computer Graphics Forum (proc. SGP 2015). 
+* The parameter of the class is the class that computes distance used to construct the vectors. The typical function is
 * either Eucludean of maximum (Manhattan) distance.
 * This class implements the following concepts: Vectorized_topological_data, Topological_data_with_distances, Real_valued_topological_data, Topological_data_with_averages, Topological_data_with_scalar_product 
 * 
@@ -434,9 +438,9 @@ template <typename F>
 Vector_distances_in_diagram<F>::Vector_distances_in_diagram( const char* filename , size_t where_to_cut  ):where_to_cut(where_to_cut)
 {   	
     //standard file with barcode
-    std::vector< std::pair< double , double > > intervals = read_standard_file( filename );    
+    std::vector< std::pair< double , double > > intervals = read_standard_persistence_file( filename );    
     //gudhi file with barcode
-    //std::vector< std::pair< double , double > > intervals = read_gudhi_file( filename , dimension );    
+    //std::vector< std::pair< double , double > > intervals = read_gudhi_persistence_file( filename , dimension );    
      
     this->intervals = intervals;
     this->compute_sorted_vector_of_distances_via_heap( where_to_cut );
