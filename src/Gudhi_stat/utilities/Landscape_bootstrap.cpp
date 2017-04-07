@@ -25,7 +25,7 @@
 #include <gudhi/bootstrap.h>
 #include <gudhi/persistence_representations/Persistence_landscape.h>
 #include <gudhi/read_persitence_from_file.h>
-#include <gudhi/persistence_representations/Vector_distances_in_diagram.h>
+#include <gudhi/persistence_representations/persistence_vectors.h>
 //persistence part:
 #include <gudhi/reader_utils.h>
 #include <gudhi/Rips_complex.h>

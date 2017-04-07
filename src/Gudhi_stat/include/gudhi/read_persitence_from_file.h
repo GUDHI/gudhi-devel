@@ -42,7 +42,7 @@ namespace Gudhi_stat
  * This procedure reads birth-death dagta from a file. We assume that in the file, there may be one type of string 'inf' or 'Inf'. If the second parameter of the program is set to -1,
  * then those vales are ignored. If the second parameter of this program is set to a positive value, then the infinite intervals will be substituted by that number.
 **/ 
-std::vector< std::pair< double,double > > read_persistence_file_that_may_contain_inf_string( char* filename , double what_to_substitute_for_infinite_bar = -1 )
+std::vector< std::pair< double,double > > read_persistence_file_that_may_contain_inf_string( const char* filename , double what_to_substitute_for_infinite_bar = -1 )
 {
 	
 	bool dbg = true;
@@ -203,7 +203,12 @@ std::vector< std::pair< double , double > > read_standard_persistence_file( cons
 **/ 
 std::vector< std::pair< double , double > > read_gudhi_persistence_file_in_one_dimension( const char* filename , size_t dimension = 0 , double what_to_substitute_for_infinite_bar = -1)
 {
-	bool dbg = false;
+	bool dbg = false;	
+	if ( !( access( filename, F_OK ) != -1 ) )
+	{
+		std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
+		throw "The file from which you are trying to read the persistence landscape do not exist. The program will now terminate \n";
+	}
 	std::ifstream in;
 	in.open( filename );
 
@@ -305,6 +310,151 @@ std::vector< std::vector< double > > read_numbers_from_file_line_by_line( const 
 
 	return result;
 }//read_numbers_from_file_line_by_line
+
+
+/**
+ * Universal procedure to read files with persistence. It ignores the lines starting from # (treat them as comments). 
+ * It reads the fist line which is not a comment and assume that there are some numerical entries over there. The program assume
+ * that each other line in the file, which is not a comment, have the same number of numerical entries. 
+ * If there are two numerical entries per line, then the function assume that they are birth/death coordinates. 
+ * If there are three numerical entries per line, then the function assume that they are: dimension and birth/death coordinates. 
+ * If there are four numerical entries per line, then the function assume that they are: thc characteristic of a filed over which 
+ * persistence was computed, dimension and birth/death coordinates. 
+ * The procedure returns vector of persistence pairs. 
+**/ 
+std::vector<std::pair<double,double>> read_persistence_intervals_in_one_dimension_from_file(std::string const& filename, int dimension=-1 , double what_to_substitute_for_infinite_bar = -1 )
+{
+	bool dbg = false;
+	
+	//checking if the file exist:
+	if ( !( access( filename.c_str() , F_OK ) != -1 ) )
+	{
+		std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
+		throw "The file from which you are trying to read the persistence landscape do not exist. The program will now terminate \n";
+	}
+	
+	
+	std::ifstream in;
+	in.open( filename );
+
+	std::string line;
+	std::vector< std::pair<double,double> > barcode;
+	
+	int number_of_entries_per_line = -1;
+
+	while (!in.eof())
+	{
+		getline(in,line);
+		if ( dbg )std::cerr << "Reading line : " << line << std::endl;
+		if ( !(line.length() == 0 || line[0] == '#') )
+		{
+			if ( number_of_entries_per_line == -1 )
+			{
+				//check how many entries we have in the line.				
+				std::stringstream ss( line );
+				int number;
+				std::vector<int> this_line;
+				while ( ss >> number )
+				{
+					this_line.push_back( number );
+				}
+				number_of_entries_per_line = (int)this_line.size();
+				//if thie line contains 'inf' string, then we need to increment number_of_entries_per_line 
+				if ( line.find("inf") != std::string::npos )++number_of_entries_per_line;
+				if ( dbg )
+				{
+					std::cerr << "number_of_entries_per_line : " << number_of_entries_per_line << ". This number was obtained by analyzing this line : " << line << std::endl;
+				}
+				if ( (number_of_entries_per_line < 2) || ( number_of_entries_per_line > 4 ) )
+				{
+					std::cerr << "The input file you have provided have wrong number of numerical entries per line. The program will now terminate. \n";
+					throw "The input file you have provided have wrong number of numerical entries per line. The program will now terminate. \n";
+				}
+			}
+			if ( line.find("inf") != std::string::npos )
+			{
+				if ( dbg )
+				{
+					std::cerr << "This line: " << line << " contains infinite interval. \n";
+				}
+				if ( what_to_substitute_for_infinite_bar != -1 )
+				{
+					double beginn, field, dim;
+					std::stringstream lineSS(line);			
+					if ( number_of_entries_per_line == 4 )lineSS >> field;
+					if ( number_of_entries_per_line >= 3 )
+					{
+						 lineSS >> dim;
+					}
+					else
+					{
+						dim = dimension;
+					}
+					lineSS >> beginn;
+					if ( dim == dimension )
+					{
+						if ( beginn > what_to_substitute_for_infinite_bar )
+						{
+							barcode.push_back( std::make_pair( what_to_substitute_for_infinite_bar , beginn ) );
+						}
+						else
+						{
+							barcode.push_back( std::make_pair( beginn , what_to_substitute_for_infinite_bar ) );
+						}
+						if (dbg)
+						{
+							std::cerr << "this is the line that is going to the output : " << beginn << " , " << what_to_substitute_for_infinite_bar << std::endl;
+						}
+					} 
+				}
+				else
+				{
+					if ( dbg )
+					{
+						std::cerr << "We will skip it \n";
+					}
+				}
+				continue;
+			}
+			std::stringstream lineSS(line);			
+			double beginn, endd, field, dim;
+			if ( number_of_entries_per_line == 4 )lineSS >> field;
+			if ( number_of_entries_per_line >= 3 )
+			{
+				 lineSS >> dim;
+			}
+			else
+			{
+				dim = dimension;
+			}
+			lineSS >> beginn;
+			lineSS >> endd;
+			if ( beginn > endd )
+			{
+				std::swap(beginn,endd);				
+			}
+			if ( dim == dimension )
+			{ 
+				barcode.push_back( std::make_pair( beginn , endd ) );
+				if (dbg)
+				{
+					std::cerr << "This is a line that is going to the output : " <<  beginn << " , " << endd << std::endl;
+				}
+			}
+		}
+		else
+		{
+			if ( dbg )
+			{
+				std::cerr << "This is a comment line \n";
+			}
+		}
+	}
+	in.close();
+	if ( dbg )std::cerr << "End of reading \n";  
+	
+	return barcode;
+}//read_persistence_intervals_in_one_dimension_from_file
 
 }//namespace Gudhi_stat
 }//namespace Gudhi

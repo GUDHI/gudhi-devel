@@ -1,7 +1,7 @@
-/*    This file is part of the Gudhi Library. The Gudhi library
+/**    This file is part of the Gudhi Library. The Gudhi library
  *    (Geometric Understanding in Higher Dimensions) is a generic C++
  *    library for computational topology.
- *h
+ *
  *    Author(s):       Pawel Dlotko
  *
  *    Copyright (C) 2015  INRIA (France)
@@ -18,7 +18,7 @@
  *
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+ **/
 
 #ifndef Persistence_landscape_on_grid_H_
 #define Persistence_landscape_on_grid_H_

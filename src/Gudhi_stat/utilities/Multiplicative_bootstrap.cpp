@@ -24,7 +24,7 @@
 #include <gudhi/Hausdorff_distances.h>
 #include <gudhi/multiplicative_bootstrap.h>
 #include <gudhi/read_persitence_from_file.h>
-#include <gudhi/persistence_representations/Vector_distances_in_diagram.h>
+#include <gudhi/persistence_representations/persistence_vectors.h>
 
 using namespace Gudhi;
 using namespace Gudhi::Gudhi_stat;
