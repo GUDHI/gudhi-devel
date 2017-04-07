@@ -68,3 +68,13 @@ add_test(NAME persistence_heat_maps_test
   COMMAND ${CMAKE_CURRENT_BINARY_DIR}/persistence_heat_maps_test
   # XML format for Jenkins xUnit plugin
   --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/persistence_heat_maps_UT.xml --log_level=test_suite --report_level=no)
+
+
+add_executable ( read_persistence_from_file_test read_persistence_from_file_test.cpp )
+target_link_libraries(read_persistence_from_file_test ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+
+# Unitary tests
+add_test(NAME read_persistence_from_file_test
+  COMMAND ${CMAKE_CURRENT_BINARY_DIR}/read_persistence_from_file_test
+  # XML format for Jenkins xUnit plugin
+  --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/read_persistence_from_file_UT.xml --log_level=test_suite --report_level=no)
