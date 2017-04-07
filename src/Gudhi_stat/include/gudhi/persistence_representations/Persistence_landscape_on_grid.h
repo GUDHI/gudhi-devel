@@ -313,8 +313,11 @@ public:
 		//compute the value of the linear function parametrized by line on a point x:
 		return line.first*x+line.second;
 	}
+     
+    protected: 
+    template < typename oper > friend Persistence_landscape_on_grid operation_on_pair_of_landscapes_on_grid( const Persistence_landscape_on_grid& land1 ,  const Persistence_landscape_on_grid& land2 );
     
-
+    public:
 	/**
 	 *\private A function that compute sum of two landscapes.
 	**/
@@ -1024,8 +1027,7 @@ protected:
 		this->number_of_functions_for_projections_to_reals = this->values_of_landscapes.size();
 	}
 	
-	void set_up_values_of_landscapes( const std::vector< std::pair< double , double > >& p , double grid_min_ , double grid_max_ , size_t number_of_points_ );
-	template < typename oper > friend Persistence_landscape_on_grid operation_on_pair_of_landscapes_on_grid( const Persistence_landscape_on_grid& land1 ,  const Persistence_landscape_on_grid& land2 );
+	void set_up_values_of_landscapes( const std::vector< std::pair< double , double > >& p , double grid_min_ , double grid_max_ , size_t number_of_points_ );	
 	Persistence_landscape_on_grid multiply_lanscape_by_real_number_not_overwrite( double x )const;
 };
 
