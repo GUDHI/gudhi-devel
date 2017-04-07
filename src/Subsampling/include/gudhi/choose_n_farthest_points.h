@@ -53,9 +53,8 @@ enum : std::size_t {
  *  The iteration starts with the landmark `starting point` or, if `starting point==random_starting_point`, with a random landmark.
  *  \tparam Kernel must provide a type Kernel::Squared_distance_d which is a model of the 
  *          concept <a target="_blank"
- *   href="http://doc.cgal.org/latest/Kernel_d/classKernel__d_1_1Squared__distance__d.html">Kernel_d::Squared_distance_d</a>
- *   concept.
- *  It must also contain a public member 'squared_distance_d_object' of this type.
+ *   href="http://doc.cgal.org/latest/Kernel_d/classKernel__d_1_1Squared__distance__d.html">Kernel_d::Squared_distance_d</a> (despite the name, taken from CGAL, this can be any kind of metric or proximity measure).
+ *  It must also contain a public member `squared_distance_d_object()` that returns an object of this type.
  *  \tparam Point_range Range whose value type is Kernel::Point_d.  It must provide random-access 
  *         via `operator[]` and the points should be stored contiguously in memory.
  *  \tparam PointOutputIterator Output iterator whose value type is Kernel::Point_d.
