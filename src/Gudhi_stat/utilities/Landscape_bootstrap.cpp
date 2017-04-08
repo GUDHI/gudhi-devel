@@ -24,7 +24,7 @@
 #include <gudhi/Hausdorff_distances.h>
 #include <gudhi/bootstrap.h>
 #include <gudhi/persistence_representations/Persistence_landscape.h>
-#include <gudhi/read_persitence_from_file.h>
+#include <gudhi/read_persistence_from_file.h>
 #include <gudhi/persistence_representations/persistence_vectors.h>
 //persistence part:
 #include <gudhi/reader_utils.h>

@@ -24,7 +24,7 @@
 
 #include <gudhi/reader_utils.h>
 #include <gudhi/persistence_representations/Persistence_intervals.h>
-#include <gudhi/read_persitence_from_file.h>
+#include <gudhi/read_persistence_from_file.h>
 
 #include <iostream>
 

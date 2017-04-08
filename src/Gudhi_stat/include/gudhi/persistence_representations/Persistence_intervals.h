@@ -24,7 +24,7 @@
 #define Persistence_intervals_H_
 
 //gudhi include
-#include <gudhi/read_persitence_from_file.h>
+#include <gudhi/read_persistence_from_file.h>
 //Bottleneck distance:
 //#include <gudhi/Bottleneck.h>
 
@@ -249,13 +249,14 @@ public:
 
     /**
      *Computations of distance from the current persistnce diagram to the persistence diagram given as a parameter of this function.
-     *The last parameter, power, is here in case we would like to compute p=th Wasserstein distance. At the moment, this method only implement Bottleneck distance,
+     *The last but one parameter, power, is here in case we would like to compute p=th Wasserstein distance. At the moment, this method only implement Bottleneck distance,
      * which is infinity Wasserstein distance. Therefore any power which is not the default std::numeric_limits< double >::max() will be ignored and an 
      * exception will be thrown. 
+     * The last parameter, tolerance, it is an additiv error of the approimation, set by default to zero.
     **/
-     double distance( const Persistence_intervals& second , double power = std::numeric_limits< double >::max() , double tolerance = 0.00000001 ) const
+     double distance( const Persistence_intervals& second , double power = std::numeric_limits< double >::max() , double tolerance = 0) const
     {
-		if ( power == std::numeric_limits< double >::max() )
+		if ( power >= std::numeric_limits< double >::max() )
 		{
 			//return Gudhi::persistence_diagram::bottleneck_distance(this->intervals, second.intervals, tolerance); 		
 			return 1;

@@ -53,6 +53,27 @@ BOOST_AUTO_TEST_CASE(check_construction_of_landscape)
 	BOOST_CHECK( l == g );
 }
 
+BOOST_AUTO_TEST_CASE(check_construction_of_landscape_using_only_ten_levels) 
+{	
+	//TODO
+	size_t number = 10;
+	Persistence_landscape_on_grid l( "data/file_with_diagram_1" , 100  ,number );	
+	Persistence_landscape_on_grid g( "data/file_with_diagram_1" , 100 );
+	//cut all the elements of order > 10 in g. 
+	
+	for ( size_t level = 0 ; level != number ; ++level )
+	{
+		std::vector<double> v1 = l.vectorize(level);
+		std::vector<double> v2 = g.vectorize(level);				
+		BOOST_CHECK( v1.size() == v2.size() );
+		for ( size_t i = 0 ; i != v1.size() ; ++i )
+		{
+			BOOST_CHECK( v1[i] == v2[i] );
+		}
+	}	
+}
+
+
 
 BOOST_AUTO_TEST_CASE(check_computations_of_integrals) 
 {

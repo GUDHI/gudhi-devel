@@ -26,7 +26,7 @@
 #define BOOST_TEST_MODULE "gudhi_stat"
 #include <boost/test/unit_test.hpp>
 #include <gudhi/reader_utils.h>
-#include <gudhi/read_persitence_from_file.h>
+#include <gudhi/read_persistence_from_file.h>
 
 #include <iostream>
 

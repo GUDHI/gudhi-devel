@@ -29,7 +29,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <algorithm>
-#include <gudhi/read_persitence_from_file.h>
+#include <gudhi/read_persistence_from_file.h>
 
 
 namespace Gudhi 

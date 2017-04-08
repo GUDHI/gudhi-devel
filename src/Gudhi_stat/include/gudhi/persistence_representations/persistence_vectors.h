@@ -31,7 +31,7 @@
 #include <limits>
 
 //gudhi include
-#include <gudhi/read_persitence_from_file.h>
+#include <gudhi/read_persistence_from_file.h>
 #include <gudhi/common_gudhi_stat.h>
 #include <gudhi/distance_functions.h>
 

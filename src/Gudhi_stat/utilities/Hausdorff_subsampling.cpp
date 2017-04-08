@@ -23,7 +23,7 @@
 
 #include <gudhi/Hausdorff_distances.h>
 #include <gudhi/bootstrap.h>
-#include <gudhi/read_persitence_from_file.h>
+#include <gudhi/read_persistence_from_file.h>
 #include <gudhi/persistence_representations/persistence_vectors.h>
 
 
