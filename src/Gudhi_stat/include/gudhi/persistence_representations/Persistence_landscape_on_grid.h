@@ -1062,9 +1062,7 @@ protected:
 		this->number_of_functions_for_vectorization = this->values_of_landscapes.size();
 		this->number_of_functions_for_projections_to_reals = this->values_of_landscapes.size();
 	}
-	
-	void set_up_values_of_landscapes( const std::vector< std::pair< double , double > >& p , double grid_min_ , double grid_max_ , size_t number_of_points_ );
-	void set_up_values_of_landscapes( const std::vector< std::pair< double , double > >& p , double grid_min_ , double grid_max_ , size_t number_of_points_ , unsigned number_of_levels );	
+	void set_up_values_of_landscapes( const std::vector< std::pair< double , double > >& p , double grid_min_ , double grid_max_ , size_t number_of_points_ , unsigned number_of_levels = std::numeric_limits<unsigned>::max() );	
 	Persistence_landscape_on_grid multiply_lanscape_by_real_number_not_overwrite( double x )const;
 };
 
@@ -1103,7 +1101,10 @@ void Persistence_landscape_on_grid::set_up_values_of_landscapes( const std::vect
 		}
 	}
 	
-	this->values_of_landscapes = std::vector< std::vector< double > >( number_of_points_+1 );//over here we will use those vectors as heaps.
+	//if number_of_levels == std::numeric_limits<size_t>::max(), then we will have all the nonzero values of landscapes, and will store them in a vector
+	//if number_of_levels != std::numeric_limits<size_t>::max(), then we will use those vectors as heaps.
+	this->values_of_landscapes = std::vector< std::vector< double > >( number_of_points_+1 );
+	
 	
 	this->grid_min = grid_min_;
 	this->grid_max = grid_max_;
@@ -1137,35 +1138,11 @@ void Persistence_landscape_on_grid::set_up_values_of_landscapes( const std::vect
 			{
 				std::cerr << "Adding landscape value (going up) for a point : " << i << " equal : " << landscape_value << std::endl;
 			}
-			if ( this->values_of_landscapes[i].size() >= number_of_levels )
+			if ( number_of_levels != std::numeric_limits<unsigned>::max() )
 			{
-				//in this case, the full heap is build, and we need to check if the landscape_value is not larger than the smallest element in the heap.
-				if ( -landscape_value < this->values_of_landscapes[i].front() )
-				{
-					//if it is, we remove the largest value in the heap, and move on. 
-					std::pop_heap (this->values_of_landscapes[i].begin(),this->values_of_landscapes[i].end());            
-					this->values_of_landscapes[i][ this->values_of_landscapes[i].size()-1 ] = -landscape_value;
-					std::push_heap (this->values_of_landscapes[i].begin(),this->values_of_landscapes[i].end());
-				}
-			}
-			else
-			{
-				
-				//in this case we are still filling in the array.
-				this->values_of_landscapes[i].push_back( -landscape_value );
-				if ( this->values_of_landscapes[i].size() == number_of_levels-1 )
-				{
-					//this->values_of_landscapes[i].size() == number_of_levels
-					//in this case we need to create the heep. 
-					std::make_heap (this->values_of_landscapes[i].begin(),this->values_of_landscapes[i].end());
-				}
-			}						
-			landscape_value += dx;
-		}
-		for ( size_t i = grid_interval_midpoint ; i <= grid_interval_end ; ++i )
-		{						
-			if ( landscape_value > 0 ) 
-			{ 
+				//we have a heap of no more that number_of_levels values.
+				//Note that if we are using heaps, we want to know the shortest distance in the heap.
+				//This is achieved by putting -distance to the heap. 
 				if ( this->values_of_landscapes[i].size() >= number_of_levels )
 				{
 					//in this case, the full heap is build, and we need to check if the landscape_value is not larger than the smallest element in the heap.
@@ -1188,7 +1165,50 @@ void Persistence_landscape_on_grid::set_up_values_of_landscapes( const std::vect
 						//in this case we need to create the heep. 
 						std::make_heap (this->values_of_landscapes[i].begin(),this->values_of_landscapes[i].end());
 					}
-				}		
+				}						
+			}
+			else
+			{
+				//we have vector of all values
+				this->values_of_landscapes[i].push_back( landscape_value );
+			}
+			landscape_value += dx;
+		}
+		for ( size_t i = grid_interval_midpoint ; i <= grid_interval_end ; ++i )
+		{						
+			if ( landscape_value > 0 ) 
+			{ 
+				if ( number_of_levels != std::numeric_limits< unsigned >::max() )
+				{
+					//we have a heap of no more that number_of_levels values
+					if ( this->values_of_landscapes[i].size() >= number_of_levels )
+					{
+						//in this case, the full heap is build, and we need to check if the landscape_value is not larger than the smallest element in the heap.
+						if ( -landscape_value < this->values_of_landscapes[i].front() )
+						{
+							//if it is, we remove the largest value in the heap, and move on. 
+							std::pop_heap (this->values_of_landscapes[i].begin(),this->values_of_landscapes[i].end());            
+							this->values_of_landscapes[i][ this->values_of_landscapes[i].size()-1 ] = -landscape_value;
+							std::push_heap (this->values_of_landscapes[i].begin(),this->values_of_landscapes[i].end());
+						}
+					}
+					else
+					{
+						
+						//in this case we are still filling in the array.
+						this->values_of_landscapes[i].push_back( -landscape_value );
+						if ( this->values_of_landscapes[i].size() == number_of_levels-1 )
+						{
+							//this->values_of_landscapes[i].size() == number_of_levels
+							//in this case we need to create the heep. 
+							std::make_heap (this->values_of_landscapes[i].begin(),this->values_of_landscapes[i].end());
+						}
+					}		
+				}
+				else
+				{
+					this->values_of_landscapes[i].push_back( landscape_value );	
+				}
 				
 				
 				if ( dbg )
@@ -1200,116 +1220,29 @@ void Persistence_landscape_on_grid::set_up_values_of_landscapes( const std::vect
 		}  
 	}
 	
-	//first reverse all the values (note that they are negatie, since we were using heap:
-	for ( size_t pt = 0 ; pt != this->values_of_landscapes.size() ; ++pt )
+	if ( number_of_levels != std::numeric_limits< unsigned >::max() )
 	{
-		//std::cerr << this->values_of_landscapes[pt].size() <<std::endl;
-		for ( size_t j = 0 ; j != this->values_of_landscapes[pt].size() ; ++j )  
+		//in this case, vectors are used as heaps. And, since we want to have the smallest element at the top of 
+		//each heap, we store mminus distances. To get if right at the end, we need to multiply each value
+		//in the heap by -1 to get real vector of distances.		
+		for ( size_t pt = 0 ; pt != this->values_of_landscapes.size() ; ++pt )
 		{
-			this->values_of_landscapes[pt][j] *= -1;
-		}
-	}	
-	//and now we need to sort the values:
-	for ( size_t pt = 0 ; pt != this->values_of_landscapes.size() ; ++pt )
-	{
-		std::sort( this->values_of_landscapes[pt].begin() , this->values_of_landscapes[pt].end() , std::greater<double>() );	
-	}
-}//set_up_values_of_landscapes
-
-
-
-
-void Persistence_landscape_on_grid::set_up_values_of_landscapes( const std::vector< std::pair< double , double > >& p , double grid_min_ , double grid_max_ , size_t number_of_points_ )
-{
-	bool dbg = false;
-	if ( dbg )
-	{
-		std::cerr << "Here is the procedure : set_up_values_of_landscapes. The parameters are : grid_min_ : " << grid_min_ << ", grid_max_ : " << grid_max_ << ", number_of_points_ : " << number_of_points_ << std::endl;
-		//getchar();
-		std::cerr << "Here are the intervals at our disposal : \n";
-		for ( size_t i = 0 ; i != p.size() ; ++i )
-		{
-			std::cerr << p[i].first << " , " << p[i].second << std::endl;
-		} 
-	}
-	
-	if ( (grid_min_ == std::numeric_limits<double>::max()) || (grid_max_ == std::numeric_limits<double>::max()) )
-	{
-		//in this case, we need to find grid_min_ and grid_min_ based on the data.
-		double min = std::numeric_limits<double>::max();
-		double max = std::numeric_limits<double>::min();
-		for ( size_t i = 0 ; i != p.size() ; ++i )
-		{
-			if ( p[i].first < min )min = p[i].first;
-			if ( p[i].second > max )max = p[i].second;
-		}
-		if ( grid_min_ == std::numeric_limits<double>::max() )
-		{
-			grid_min_ = min;
-		}
-		else
-		{
-			//in this case grid_max_ == std::numeric_limits<double>::max()
-			grid_max_ = max;
-		}
-	}
-	
-	this->values_of_landscapes = std::vector< std::vector< double > >( number_of_points_+1 );
-	this->grid_min = grid_min_;
-	this->grid_max = grid_max_;
-	
-	if ( grid_max_ <= grid_min_ )
-	{
-		throw "Wrong parameters of grid_min and grid_max given to the procedure. THe grid have negative, or zero size. The program will now terminate.\n";
-	}
-	
-	double dx = ( grid_max_ - grid_min_ )/(double)(number_of_points_);		
-	//for every interval in the diagram:
-	for ( size_t int_no = 0 ; int_no != p.size() ; ++int_no )
-	{		
-		size_t grid_interval_begin = (p[int_no].first-grid_min_)/dx;
-		size_t grid_interval_end = (p[int_no].second-grid_min_)/dx;
-		size_t grid_interval_midpoint = (size_t)(0.5*(grid_interval_begin+grid_interval_end));
-		
-		if ( dbg )
-		{
-			std::cerr << "Considering an interval : " << p[int_no].first << "," << p[int_no].second << std::endl;
-		
-			std::cerr << "grid_interval_begin : " << grid_interval_begin << std::endl;
-			std::cerr << "grid_interval_end : " << grid_interval_end << std::endl;
-			std::cerr << "grid_interval_midpoint : " << grid_interval_midpoint << std::endl;	
-		}
-		
-		double landscape_value = dx;
-		for ( size_t i = grid_interval_begin+1 ; i < grid_interval_midpoint ; ++i )
-		{
-			if ( dbg )
+			//std::cerr << this->values_of_landscapes[pt].size() <<std::endl;
+			for ( size_t j = 0 ; j != this->values_of_landscapes[pt].size() ; ++j )  
 			{
-				std::cerr << "Adding landscape value (going up) for a point : " << i << " equal : " << landscape_value << std::endl;
+				this->values_of_landscapes[pt][j] *= -1;
 			}
-			this->values_of_landscapes[i].push_back( landscape_value );
-			landscape_value += dx;
 		}
-		for ( size_t i = grid_interval_midpoint ; i <= grid_interval_end ; ++i )
-		{						
-			if ( landscape_value > 0 ) 
-			{ 
-				this->values_of_landscapes[i].push_back( landscape_value );	
-				if ( dbg )
-				{				
-					std::cerr << "AAdding landscape value (going down) for a point : " << i << " equal : " << landscape_value << std::endl;
-				}
-			}
-			landscape_value -= dx;	
-		}  
 	}
-	
+		
 	//and now we need to sort the values:
 	for ( size_t pt = 0 ; pt != this->values_of_landscapes.size() ; ++pt )
 	{
 		std::sort( this->values_of_landscapes[pt].begin() , this->values_of_landscapes[pt].end() , std::greater<double>() );	
 	}
 }//set_up_values_of_landscapes
+
+
 
 Persistence_landscape_on_grid::Persistence_landscape_on_grid( const std::vector< std::pair< double , double > >& p , double grid_min_ , double grid_max_ , size_t number_of_points_ )
 {
