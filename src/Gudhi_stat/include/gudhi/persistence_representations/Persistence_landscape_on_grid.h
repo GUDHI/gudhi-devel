@@ -1070,7 +1070,7 @@ protected:
 
 
 void Persistence_landscape_on_grid::set_up_values_of_landscapes( const std::vector< std::pair< double , double > >& p , double grid_min_ , double grid_max_ , size_t number_of_points_, unsigned number_of_levels )
-{	
+{			
 	bool dbg = false;
 	if ( dbg )
 	{
@@ -1203,6 +1203,7 @@ void Persistence_landscape_on_grid::set_up_values_of_landscapes( const std::vect
 	//first reverse all the values (note that they are negatie, since we were using heap:
 	for ( size_t pt = 0 ; pt != this->values_of_landscapes.size() ; ++pt )
 	{
+		//std::cerr << this->values_of_landscapes[pt].size() <<std::endl;
 		for ( size_t j = 0 ; j != this->values_of_landscapes[pt].size() ; ++j )  
 		{
 			this->values_of_landscapes[pt][j] *= -1;
