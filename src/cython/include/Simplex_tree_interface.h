@@ -52,29 +52,32 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     return (Base::find(vh) != Base::null_simplex());
   }
 
-  bool insert_simplex(const Simplex& simplex, Filtration_value filtration = 0) {
-    Insertion_result result = Base::insert_simplex(simplex, filtration);
-    Base::initialize_filtration();
+  bool insert(const Simplex& simplex, Filtration_value filtration = 0) {
+    Insertion_result result = Base::insert_simplex_and_subfaces(simplex, filtration);
     return (result.second);
   }
 
+  // Do not interface this function, only used in alpha complex interface for complex creation
+  bool insert_simplex(const Simplex& simplex, Filtration_value filtration = 0) {
+    Insertion_result result = Base::insert_simplex(simplex, filtration);
+    return (result.second);
+  }
+
+  // Do not interface this function, only used in interface for complex creation
   bool insert_simplex_and_subfaces(const Simplex& simplex, Filtration_value filtration = 0) {
     Insertion_result result = Base::insert_simplex_and_subfaces(simplex, filtration);
-    Base::initialize_filtration();
     return (result.second);
   }
 
   // Do not interface this function, only used in strong witness interface for complex creation
   bool insert_simplex(const std::vector<std::size_t>& complex, Filtration_value filtration = 0) {
     Insertion_result result = Base::insert_simplex(complex, filtration);
-    Base::initialize_filtration();
     return (result.second);
   }
 
   // Do not interface this function, only used in strong witness interface for complex creation
   bool insert_simplex_and_subfaces(const std::vector<std::size_t>& complex, Filtration_value filtration = 0) {
     Insertion_result result = Base::insert_simplex_and_subfaces(complex, filtration);
-    Base::initialize_filtration();
     return (result.second);
   }
 
@@ -87,28 +90,29 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     Base::initialize_filtration();
   }
 
-  Complex get_filtered_tree() {
-    Complex filtered_tree;
+  Complex get_filtration() {
+    Base::initialize_filtration();
+    Complex filtrations;
     for (auto f_simplex : Base::filtration_simplex_range()) {
       Simplex simplex;
       for (auto vertex : Base::simplex_vertex_range(f_simplex)) {
         simplex.insert(simplex.begin(), vertex);
       }
-      filtered_tree.push_back(std::make_pair(simplex, Base::filtration(f_simplex)));
+      filtrations.push_back(std::make_pair(simplex, Base::filtration(f_simplex)));
     }
-    return filtered_tree;
+    return filtrations;
   }
 
-  Complex get_skeleton_tree(int dimension) {
-    Complex skeleton_tree;
+  Complex get_skeleton(int dimension) {
+    Complex skeletons;
     for (auto f_simplex : Base::skeleton_simplex_range(dimension)) {
       Simplex simplex;
       for (auto vertex : Base::simplex_vertex_range(f_simplex)) {
         simplex.insert(simplex.begin(), vertex);
       }
-      skeleton_tree.push_back(std::make_pair(simplex, Base::filtration(f_simplex)));
+      skeletons.push_back(std::make_pair(simplex, Base::filtration(f_simplex)));
     }
-    return skeleton_tree;
+    return skeletons;
   }
 
   Complex get_star(const Simplex& simplex) {
@@ -140,6 +144,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   }
 
   void create_persistence(Gudhi::Persistent_cohomology_interface<Base>* pcoh) {
+    Base::initialize_filtration();
     pcoh = new Gudhi::Persistent_cohomology_interface<Base>(*this);
   }
 };

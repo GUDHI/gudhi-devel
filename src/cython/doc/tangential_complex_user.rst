@@ -133,7 +133,7 @@ This example builds the Tangential complex of point set read in an OFF file.
         ' - ' + repr(st.num_simplices()) + ' simplices - ' + \
         repr(st.num_vertices()) + ' vertices.'
     print(result_str)
-    for filtered_value in st.get_filtered_tree():
+    for filtered_value in st.get_filtration():
         print(filtered_value)
 
 The output is:
