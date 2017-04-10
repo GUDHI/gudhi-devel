@@ -11,7 +11,7 @@ It also requires cmake to generate makefiles, and cython to compile the
 library.
 
 On `Windows <https://wiki.python.org/moin/WindowsCompilers>`_ , only Python
-3.5 and 3.6 are available because of required Visual Studio version.
+3.5 and 3.6 are available because of the required Visual Studio version.
 
 On other systems, if you have several Python/cython installed, the version 2.X
 will be used by default, but you can force it by adding
