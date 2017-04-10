@@ -2,6 +2,7 @@
 
 import gudhi
 import numpy
+from functools import reduce
 import argparse
 import operator
 

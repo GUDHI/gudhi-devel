@@ -49,7 +49,7 @@ def is_file_perseus(file):
         return False
 
 parser = argparse.ArgumentParser(description='Periodic cubical complex from a '
-                                 'perseus file style name.',
+                                 'Perseus-style file name.',
                                  epilog='Example: '
                                  './periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py'
                                  ' -f ../data/bitmap/CubicalTwoSphere.txt')

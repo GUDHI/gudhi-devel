@@ -45,7 +45,7 @@ def test_dimension_or_perseus_file_constructor():
     test_file.write('2\n3\n3\n0\n0\n0\n0\n100\n0\n0\n0\n0\n')
     test_file.close()
     # CubicalComplex can be constructed from dimensions and
-    # top_dimensional_cells OR from a perseus file style name.
+    # top_dimensional_cells OR from a Perseus-style file name.
     cub = CubicalComplex(dimensions=[3, 3],
                          top_dimensional_cells = [1,2,3,4,5,6,7,8,9],
                          perseus_file='CubicalOneSphere.txt')

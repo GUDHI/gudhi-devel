@@ -60,16 +60,16 @@ cdef class PeriodicCubicalComplex:
     def __init__(self, dimensions=None, top_dimensional_cells=None,
                   perseus_file=''):
         """PeriodicCubicalComplex constructor from dimensions and
-        top_dimensional_cells or from a perseus file style name.
+        top_dimensional_cells or from a Perseus-style file name.
 
         :param dimensions: A list of number of top dimensional cells.
         :type dimensions: list of int
-        :param top_dimensional_cells: A list of top dimensional cells.
+        :param top_dimensional_cells: A list of cells filtration values.
         :type top_dimensional_cells: list of double
 
         Or
 
-        :param perseus_file: A perseus file style name.
+        :param perseus_file: A Perseus-style file name.
         :type perseus_file: string
         """
 
@@ -85,7 +85,7 @@ cdef class PeriodicCubicalComplex:
                 print("file " + perseus_file + " not found.")
         else:
             print("CubicalComplex can be constructed from dimensions and "
-              "top_dimensional_cells or from a perseus file style name.")
+              "top_dimensional_cells or from a Perseus-style file name.")
 
     def __dealloc__(self):
         if self.thisptr != NULL:

@@ -13,6 +13,8 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/")
 set(GUDHI_USER_VERSION_DIR ${CMAKE_SOURCE_DIR})
 include(${CMAKE_MODULE_PATH}/GUDHI_doxygen_target.txt)
 
+# This variable is used by Cython CMakeLists.txt to know its path
+set(GUDHI_CYTHON_PATH "cython")
 # For third parties libraries management - To be done last as CGAL updates CMAKE_MODULE_PATH
 include("${CMAKE_MODULE_PATH}/GUDHI_third_party_libraries.txt")
 
@@ -56,12 +58,9 @@ add_subdirectory(example/Bottleneck_distance)
 # data points generator
 add_subdirectory(data/points/generator)
 
-# Please let GudhUI in last compilation position as QT is known to modify CMAKE_CXX_FLAGS
-# GudhUI
 add_subdirectory(GudhUI)
 
-# This variable is used by Cython CMakeLists.txt to know its path
-set(GUDHI_CYTHON_PATH "cython")
+# specific for cython module
 add_subdirectory(${GUDHI_CYTHON_PATH})
 #---------------------------------------------------------------------------------------
 

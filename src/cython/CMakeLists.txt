@@ -1,45 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 project(Cython)
 
-macro( find_the_lib placeholder THE_LIBS )
-  set (THE_LIB_WE_FOUND "NO")
-  foreach(THE_LIB ${THE_LIBS})
-    if(EXISTS ${THE_LIB})
-      get_filename_component(THE_LIB_WE ${THE_LIB} NAME_WE)
-      if (NOT THE_LIB_WE_FOUND)
-        set (THE_LIB_WE_FOUND "YES")
-        set(returnValue "${THE_LIB_WE}")
-      endif(NOT THE_LIB_WE_FOUND)
-    endif(EXISTS ${THE_LIB})
-  endforeach(THE_LIB ${THE_LIBS})
-endmacro( find_the_lib )
-
-# Find the correct Python interpreter. Can be set with -DPYTHON_EXECUTABLE=/usr/bin/python3 for instance.
-if(PYTHON_EXECUTABLE)
-  if(NOT EXISTS "${PYTHON_EXECUTABLE}")
-    message(FATAL_ERROR "ERROR: ${PYTHON_EXECUTABLE} does not exist.")
-  endif(NOT EXISTS "${PYTHON_EXECUTABLE}")
-endif(PYTHON_EXECUTABLE)
-include(FindPythonInterp)
-
-if(PYTHONINTERP_FOUND)
-  if(PYTHON_VERSION_MAJOR EQUAL 2)
-    FIND_PROGRAM(CYTHON_PATH cython)
-    # Unitary tests are available through py.test
-    find_program( PYTEST_PATH py.test )
-    # Documentation generation is available through sphinx
-    find_program( SPHINX_PATH sphinx-build )
-  elseif(PYTHON_VERSION_MAJOR EQUAL 3)
-    FIND_PROGRAM(CYTHON_PATH cython3)
-    # Unitary tests are available through py.test
-    find_program( PYTEST_PATH py.test )
-    # Documentation generation is available through sphinx
-    set(SPHINX_PATH "${CMAKE_CURRENT_BINARY_DIR}/doc/python3-sphinx-build")
-  else()
-    message(FATAL_ERROR "ERROR: Try to compile the Cython interface. Python version ${PYTHON_VERSION_STRING} is not valid.")
-  endif(PYTHON_VERSION_MAJOR EQUAL 2)
-endif(PYTHONINTERP_FOUND)
-
 if(CYTHON_PATH)
   message("${PYTHON_EXECUTABLE} v.${PYTHON_VERSION_STRING} - Cython is ${CYTHON_PATH} - py.test is ${PYTEST_PATH} - Sphinx is ${SPHINX_PATH}")
 
@@ -179,8 +140,8 @@ if(CYTHON_PATH)
 
   # Specific for Mac
   if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-      set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-mmacosx-version-min=10.9', ")
-      set(GUDHI_CYTHON_EXTRA_LINK_ARGS "${GUDHI_CYTHON_EXTRA_LINK_ARGS}'-mmacosx-version-min=10.9', ")
+      set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-mmacosx-version-min=10.12', ")
+      set(GUDHI_CYTHON_EXTRA_LINK_ARGS "${GUDHI_CYTHON_EXTRA_LINK_ARGS}'-mmacosx-version-min=10.12', ")
   endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
   # Loop on INCLUDE_DIRECTORIES PROPERTY
@@ -215,8 +176,88 @@ if(CYTHON_PATH)
                     COMMENT "Do not forget to add ${CMAKE_CURRENT_BINARY_DIR}/ to your PYTHONPATH before using examples or tests")
 
   if(UNIX)
-      set( ENV{PYTHONPATH} $ENV{PYTHONPATH}:${CMAKE_CURRENT_BINARY_DIR}/ )
+    set( ENV{PYTHONPATH} $ENV{PYTHONPATH}:${CMAKE_CURRENT_BINARY_DIR}/ )
   endif(UNIX)
+
+  # Test examples
+  add_test(NAME alpha_complex_from_points_example_py_test
+           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+           COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/alpha_complex_from_points_example.py")
+  set_tests_properties(alpha_complex_from_points_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+
+  add_test(NAME alpha_complex_diagram_persistence_from_off_file_example_py_test
+           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+           COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/alpha_complex_diagram_persistence_from_off_file_example.py"
+           --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 0.6)
+  set_tests_properties(alpha_complex_diagram_persistence_from_off_file_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+
+  add_test(NAME alpha_rips_persistence_bottleneck_distance_py_test
+           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+           COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/alpha_rips_persistence_bottleneck_distance.py"
+           -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -t 0.15 -d 3)
+  set_tests_properties(alpha_rips_persistence_bottleneck_distance_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+
+  add_test(NAME bottleneck_basic_example_py_test
+           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+           COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/bottleneck_basic_example.py")
+  set_tests_properties(bottleneck_basic_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+
+  add_test(NAME euclidean_strong_witness_complex_diagram_persistence_from_off_file_example_py_test
+           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+           COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py"
+           --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 1.0 -n 20 -d 2)
+  set_tests_properties(euclidean_strong_witness_complex_diagram_persistence_from_off_file_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+
+  add_test(NAME euclidean_witness_complex_diagram_persistence_from_off_file_example_py_test
+           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+           COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py"
+           --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 1.0 -n 20 -d 2)
+  set_tests_properties(euclidean_witness_complex_diagram_persistence_from_off_file_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+
+  add_test(NAME periodic_cubical_complex_barcode_persistence_from_perseus_file_example_py_test
+           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+           COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py"
+           --no-barcode -f ${CMAKE_SOURCE_DIR}/data/bitmap/CubicalTwoSphere.txt)
+  set_tests_properties(periodic_cubical_complex_barcode_persistence_from_perseus_file_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+
+  add_test(NAME random_cubical_complex_persistence_example_py_test
+           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+           COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/random_cubical_complex_persistence_example.py"
+           10 10 10)
+  set_tests_properties(random_cubical_complex_persistence_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+
+  add_test(NAME rips_complex_diagram_persistence_from_distance_matrix_file_example_py_test
+           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+           COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/rips_complex_diagram_persistence_from_distance_matrix_file_example.py"
+           --no-diagram -f ${CMAKE_SOURCE_DIR}/data/distance_matrix/lower_triangular_distance_matrix.csv -e 12.0 -d 3)
+  set_tests_properties(rips_complex_diagram_persistence_from_distance_matrix_file_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+
+  add_test(NAME rips_complex_diagram_persistence_from_off_file_example_py_test
+           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+           COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/example/rips_complex_diagram_persistence_from_off_file_example.py
+           --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off  -e 0.25 -d 3)
+  set_tests_properties(rips_complex_diagram_persistence_from_off_file_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+
+  add_test(NAME rips_complex_from_points_example_py_test
+           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+           COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/example/rips_complex_from_points_example.py)
+  set_tests_properties(rips_complex_from_points_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+
+  add_test(NAME simplex_tree_example_py_test
+           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+           COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/example/simplex_tree_example.py)
+  set_tests_properties(simplex_tree_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+
+  add_test(NAME tangential_complex_plain_homology_from_off_file_example_py_test
+           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+           COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/tangential_complex_plain_homology_from_off_file_example.py"
+           --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off)
+  set_tests_properties(tangential_complex_plain_homology_from_off_file_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+
+  add_test(NAME witness_complex_from_nearest_landmark_table_py_test
+           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+           COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/example/witness_complex_from_nearest_landmark_table.py)
+  set_tests_properties(witness_complex_from_nearest_landmark_table_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
 
   # Unitary tests are available through py.test
   if(PYTEST_PATH)

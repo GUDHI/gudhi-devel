@@ -4,11 +4,18 @@ Installation
 Compiling
 *********
 
-The library uses c++11 and requires `Boost <http://www.boost.org/>`_ with version
-1.48.0 or more recent. It is a multi-platform library and compiles on Linux,
-Mac OSX and Visual Studio 2015.
+The library uses c++11 and requires `Boost <http://www.boost.org/>`_ with
+version 1.48.0 or more recent. It is a multi-platform library and compiles on
+Linux, Mac OSX and Visual Studio 2015.
 It also requires cmake to generate makefiles, and cython to compile the
 library.
+
+On `Windows <https://wiki.python.org/moin/WindowsCompilers>`_ , only Python
+3.5 and 3.6 are available because of required Visual Studio version.
+
+On other systems, if you have several Python/cython installed, the version 2.X
+will be used by default, but you can force it by adding
+:code:`-DPython_ADDITIONAL_VERSIONS=3` to the cmake command.
 
 GUDHI Cythonization
 ===================
@@ -23,8 +30,6 @@ To build the GUDHI cython module, run the following commands in a terminal:
     cmake ..
     make cython
 
-A list of examples is available here.
-
 Test suites
 ===========
 
@@ -33,9 +38,9 @@ following command in a terminal:
 
 .. code-block:: bash
 
-    cd /path-to-gudhi/build/src/cython
+    cd /path-to-gudhi/build/cython
     # For windows, you have to set PYTHONPATH environment variable
-    export PYTHONPATH='$PYTHONPATH:/path-to-gudhi/build/src/cython'
+    export PYTHONPATH='$PYTHONPATH:/path-to-gudhi/build/cython'
     py.test
 
 Documentation
