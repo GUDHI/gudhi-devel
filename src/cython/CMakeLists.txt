@@ -140,8 +140,8 @@ if(CYTHON_PATH)
 
   # Specific for Mac
   if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-      set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-mmacosx-version-min=10.9', ")
-      set(GUDHI_CYTHON_EXTRA_LINK_ARGS "${GUDHI_CYTHON_EXTRA_LINK_ARGS}'-mmacosx-version-min=10.9', ")
+      set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-mmacosx-version-min=10.12', ")
+      set(GUDHI_CYTHON_EXTRA_LINK_ARGS "${GUDHI_CYTHON_EXTRA_LINK_ARGS}'-mmacosx-version-min=10.12', ")
   endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
   # Loop on INCLUDE_DIRECTORIES PROPERTY
