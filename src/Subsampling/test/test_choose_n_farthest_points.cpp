@@ -25,7 +25,7 @@
 // #endif
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE "witness_complex_points"
+#define BOOST_TEST_MODULE Subsampling - test choose_n_farthest_points
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
 
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_choose_farthest_point, Kernel, list_of_tested
 
   landmarks.clear();
   Kernel k;
-  Gudhi::subsampling::choose_n_farthest_points(k, points, 100, std::back_inserter(landmarks));
+  Gudhi::subsampling::choose_n_farthest_points(k, points, 100, Gudhi::subsampling::random_starting_point, std::back_inserter(landmarks));
 
   BOOST_CHECK(landmarks.size() == 100);
   for (auto landmark : landmarks)
