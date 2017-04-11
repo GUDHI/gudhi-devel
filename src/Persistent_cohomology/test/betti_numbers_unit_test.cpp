@@ -9,8 +9,8 @@
 #define BOOST_TEST_MODULE "betti_numbers"
 #include <boost/test/unit_test.hpp>
 
-#include "gudhi/Simplex_tree.h"
-#include "gudhi/Persistent_cohomology.h"
+#include <gudhi/Simplex_tree.h>
+#include <gudhi/Persistent_cohomology.h>
 
 struct MiniSTOptions : Gudhi::Simplex_tree_options_full_featured {
   // Implicitly use 0 as filtration value for all simplices
