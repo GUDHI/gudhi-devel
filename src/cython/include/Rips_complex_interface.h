@@ -61,7 +61,8 @@ class Rips_complex_interface {
       // Rips construction where file_name is an OFF file
       Gudhi::Points_off_reader<Point_d> off_reader(file_name);
       rips_complex_ = new Rips_complex<Simplex_tree_interface<>::Filtration_value>(off_reader.get_point_cloud(),
-                                                                                   threshold, Gudhi::Euclidean_distance());
+                                                                                   threshold,
+                                                                                   Gudhi::Euclidean_distance());
     } else {
       // Rips construction where values is a distance matrix
       Distance_matrix distances =
