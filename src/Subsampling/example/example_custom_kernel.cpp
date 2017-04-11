@@ -54,7 +54,9 @@ int main(void) {
   std::vector<Point_d> points = {0, 1, 2, 3};
   std::vector<Point_d> results;
 
-  Gudhi::subsampling::choose_n_farthest_points(k, points, 2, Gudhi::subsampling::random_starting_point, std::back_inserter(results));
+  Gudhi::subsampling::choose_n_farthest_points(k, points, 2,
+                                               Gudhi::subsampling::random_starting_point,
+                                               std::back_inserter(results));
   std::cout << "Before sparsification: " << points.size() << " points.\n";
   std::cout << "After  sparsification: " << results.size() << " points.\n";
   std::cout << "Result table: {" << results[0] << "," << results[1] << "}\n";

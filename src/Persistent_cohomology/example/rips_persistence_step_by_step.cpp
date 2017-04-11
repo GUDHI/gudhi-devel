@@ -82,7 +82,7 @@ int main(int argc, char * argv[]) {
 
   // Compute the proximity graph of the points
   Graph_t prox_graph = compute_proximity_graph(off_reader.get_point_cloud(), threshold
-                                               , Euclidean_distance());
+                                               , Gudhi::Euclidean_distance());
 
   // Construct the Rips complex in a Simplex Tree
   Simplex_tree st;

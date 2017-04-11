@@ -74,7 +74,7 @@ int main(int argc, char * argv[]) {
   // --------------------------------------------
   // Rips persistence
   // --------------------------------------------
-  Rips_complex rips_complex(off_reader.get_point_cloud(), threshold, Euclidean_distance());
+  Rips_complex rips_complex(off_reader.get_point_cloud(), threshold, Gudhi::Euclidean_distance());
 
   // Construct the Rips complex in a Simplex Tree
   Simplex_tree rips_stree;

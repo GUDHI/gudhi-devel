@@ -35,8 +35,8 @@ struct Null_output_iterator {
   typedef void                     pointer;
   typedef void                     reference;
 
-  Null_output_iterator& operator++(){return *this;}
-  Null_output_iterator operator++(int){return *this;}
+  Null_output_iterator& operator++() {return *this;}
+  Null_output_iterator operator++(int) {return *this;}
   struct proxy {
     template<class T>
     proxy& operator=(T&&){return *this;}

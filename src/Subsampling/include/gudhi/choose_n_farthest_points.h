@@ -74,13 +74,13 @@ enum : std::size_t {
 template < typename Kernel,
 typename Point_range,
 typename PointOutputIterator,
-typename DistanceOutputIterator=Null_output_iterator>
+typename DistanceOutputIterator = Null_output_iterator>
 void choose_n_farthest_points(Kernel const &k,
                               Point_range const &input_pts,
                               std::size_t final_size,
                               std::size_t starting_point,
                               PointOutputIterator output_it,
-                              DistanceOutputIterator dist_it={}) {
+                              DistanceOutputIterator dist_it = {}) {
   std::size_t nb_points = boost::size(input_pts);
   if (final_size > nb_points)
     final_size = nb_points;
