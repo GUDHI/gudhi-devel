@@ -60,7 +60,7 @@ Finally, it is asked to display information about the simplicial complex.
         repr(simplex_tree.num_simplices()) + ' simplices - ' + \
         repr(simplex_tree.num_vertices()) + ' vertices.'
     print(result_str)
-    for filtered_value in simplex_tree.get_filtered_tree():
+    for filtered_value in simplex_tree.get_filtration():
         print(filtered_value)
 
 When launching (Rips maximal distance between 2 points is 12.0, is expanded
@@ -107,7 +107,7 @@ Finally, it is asked to display information about the Rips complex.
         repr(simplex_tree.num_simplices()) + ' simplices - ' + \
         repr(simplex_tree.num_vertices()) + ' vertices.'
     print(result_str)
-    for filtered_value in simplex_tree.get_filtered_tree():
+    for filtered_value in simplex_tree.get_filtration():
         print(filtered_value)
 
 the program output is:
@@ -162,7 +162,7 @@ Finally, it is asked to display information about the simplicial complex.
         repr(simplex_tree.num_simplices()) + ' simplices - ' + \
         repr(simplex_tree.num_vertices()) + ' vertices.'
     print(result_str)
-    for filtered_value in simplex_tree.get_filtered_tree():
+    for filtered_value in simplex_tree.get_filtration():
         print(filtered_value)
 
 When launching (Rips maximal distance between 2 points is 12.0, is expanded
@@ -209,7 +209,7 @@ Finally, it is asked to display information about the Rips complex.
         repr(simplex_tree.num_simplices()) + ' simplices - ' + \
         repr(simplex_tree.num_vertices()) + ' vertices.'
     print(result_str)
-    for filtered_value in simplex_tree.get_filtered_tree():
+    for filtered_value in simplex_tree.get_filtration():
         print(filtered_value)
 
 the program output is:

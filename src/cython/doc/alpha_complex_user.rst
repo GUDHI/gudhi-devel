@@ -30,7 +30,7 @@ This example builds the Delaunay triangulation from the given points, and initia
         repr(simplex_tree.num_simplices()) + ' simplices - ' + \
         repr(simplex_tree.num_vertices()) + ' vertices.'
     print(result_str)
-    for filtered_value in simplex_tree.get_filtered_tree():
+    for filtered_value in simplex_tree.get_filtration():
         print(filtered_value)
 
 The output is:
@@ -164,7 +164,7 @@ Then, it is asked to display information about the alpha complex:
         repr(simplex_tree.num_simplices()) + ' simplices - ' + \
         repr(simplex_tree.num_vertices()) + ' vertices.'
     print(result_str)
-    for filtered_value in simplex_tree.get_filtered_tree():
+    for filtered_value in simplex_tree.get_filtration():
         print(filtered_value)
 
 the program output is:

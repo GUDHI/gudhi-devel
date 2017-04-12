@@ -16,6 +16,8 @@ enable_testing()
 include("${CMAKE_MODULE_PATH}/GUDHI_user_version_target.txt")
 # For "make doxygen"
 include("${CMAKE_MODULE_PATH}/GUDHI_doxygen_target.txt")
+# This variable is used by Cython CMakeLists.txt to know its path
+set(GUDHI_CYTHON_PATH "src/cython")
 # For third parties libraries management - To be done last as CGAL updates CMAKE_MODULE_PATH
 include("${CMAKE_MODULE_PATH}/GUDHI_third_party_libraries.txt")
 
@@ -87,6 +89,5 @@ add_subdirectory(data/points/generator)
 
 add_subdirectory(src/GudhUI)
 
-# This variable is used by Cython CMakeLists.txt to know its path
-set(GUDHI_CYTHON_PATH "src/cython")
+# specific for cython module
 add_subdirectory(${GUDHI_CYTHON_PATH})

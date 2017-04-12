@@ -27,7 +27,7 @@ int main() {
   // Init of a Rips complex from points
   // ----------------------------------------------------------------------------
   double threshold = 12.0;
-  Rips_complex rips_complex_from_points(points, threshold, Euclidean_distance());
+  Rips_complex rips_complex_from_points(points, threshold, Gudhi::Euclidean_distance());
 
   Simplex_tree stree;
   rips_complex_from_points.create_complex(stree, 1);
