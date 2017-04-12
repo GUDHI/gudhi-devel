@@ -33,7 +33,7 @@ cdef extern from "Bottleneck_distance_interface.h" namespace "Gudhi::persistence
     double bottleneck(vector[pair[double, double]], vector[pair[double, double]], double)
     double bottleneck(vector[pair[double, double]], vector[pair[double, double]])
 
-def bottleneck_distance(diagram_1, diagram_2, e=0.0):
+def bottleneck_distance(diagram_1, diagram_2, e=None):
     """This function returns the point corresponding to a given vertex.
 
     :param diagram_1: The first diagram.
@@ -53,7 +53,9 @@ def bottleneck_distance(diagram_1, diagram_2, e=0.0):
     :rtype: float
     :returns: the bottleneck distance.
     """
-    if e is 0.0:
+    if e is None:
+        # Default value is the smallest double value (not 0, 0 is for exact version)
         return bottleneck(diagram_1, diagram_2)
     else:
+        # Can be 0 for exact version
         return bottleneck(diagram_1, diagram_2, e)

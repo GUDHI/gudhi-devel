@@ -35,16 +35,18 @@ Example
 
    import gudhi
    st = gudhi.SimplexTree()
-   if st.insert_simplex([0, 1]):
+   if st.insert([0, 1]):
        print("[0, 1] inserted")
-   if st.insert_simplex_and_subfaces([0, 1, 2], filtration=4.0):
+   if st.insert([0, 1, 2], filtration=4.0):
        print("[0, 1, 2] inserted")
    if st.find([0, 1]):
        print("[0, 1] found")
-   print("num_vertices=", st.num_vertices())
-   print("num_simplices=", st.num_simplices())
-   print("skeleton_tree(2) =")
-   for sk_value in st.get_skeleton_tree(2):
+   result_str = 'num_vertices=' + repr(st.num_vertices())
+   print(result_str)
+   result_str = 'num_simplices=' + repr(st.num_simplices())
+   print(result_str)
+   print("skeleton(2) =")
+   for sk_value in st.get_skeleton(2):
        print(sk_value)
 
 
@@ -52,16 +54,16 @@ The output is:
 
 .. testoutput::
 
-   [0, 1] inserted
-   [0, 1, 2] inserted
-   [0, 1] found
-   ('num_vertices=', 3)
-   ('num_simplices=', 7)
-   skeleton_tree(2) =
-   ([0, 1, 2], 4.0)
-   ([0, 1], 0.0)
-   ([0, 2], 4.0)
-   ([0], 0.0)
-   ([1, 2], 4.0)
-   ([1], 4.0)
-   ([2], 4.0)
+    [0, 1] inserted
+    [0, 1, 2] inserted
+    [0, 1] found
+    num_vertices=3
+    num_simplices=7
+    skeleton(2) =
+    ([0, 1, 2], 4.0)
+    ([0, 1], 0.0)
+    ([0, 2], 4.0)
+    ([0], 0.0)
+    ([1, 2], 4.0)
+    ([1], 0.0)
+    ([2], 4.0)

@@ -44,7 +44,7 @@ def test_rips_from_points():
     assert simplex_tree.num_simplices() == 10
     assert simplex_tree.num_vertices() == 4
 
-    assert simplex_tree.get_filtered_tree() == \
+    assert simplex_tree.get_filtration() == \
            [([0], 0.0), ([1], 0.0), ([2], 0.0), ([3], 0.0),
             ([0, 1], 1.0), ([0, 2], 1.0), ([1, 3], 1.0),
             ([2, 3], 1.0), ([1, 2], 1.4142135623730951),
@@ -83,7 +83,7 @@ def test_rips_from_distance_matrix():
     assert simplex_tree.num_simplices() == 10
     assert simplex_tree.num_vertices() == 4
 
-    assert simplex_tree.get_filtered_tree() == \
+    assert simplex_tree.get_filtration() == \
            [([0], 0.0), ([1], 0.0), ([2], 0.0), ([3], 0.0),
             ([0, 1], 1.0), ([0, 2], 1.0), ([1, 3], 1.0),
             ([2, 3], 1.0), ([1, 2], 1.4142135623730951),
