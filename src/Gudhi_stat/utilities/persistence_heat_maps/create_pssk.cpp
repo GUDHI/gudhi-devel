@@ -38,8 +38,12 @@ int main( int argc , char** argv )
 	std::cout << "The first parameter of a program is an integer, a size of a grid.\n";
 	std::cout << "The second and third parameters are min and max of the grid. If you want those numbers to be computed based on the data, set them both to -1 \n";
 	std::cerr << "The fourth parameter is an integer, the standard deviation of a gaussian kernel expressed in a number of pixels \n";
+	std::cerr << "The fourth parameter is an integer, the standard deviation of a gaussian kernel expressed in a number of pixels \n";
+	std::cout << "The fifth parameter of this program is a dimension of persistence that will be used in creation of the persistence heat maps.";
+	std::cout << "If our input files contain persistence pairs of various dimension, as a fifth parameter of the procedure please provide the dimension of persistence you want to use.";
+	std::cout << "If in your file there are only birth-death pairs of the same dimension, set the first parameter to -1." << std::endl;					
 	std::cout << "The remaining parameters are the names of files with persistence diagrams. \n";
-	
+
 	if ( argc < 5 )
 	{
 		std::cout << "Wrong parameter list, the program will now terminate \n";
@@ -51,8 +55,15 @@ int main( int argc , char** argv )
 	double max_ = atof( argv[3] );
 	size_t stdiv = atof( argv[4] );
 	
+	unsigned dimension = std::numeric_limits<unsigned>::max();
+	int dim = atoi( argv[5] );	 
+	if ( (dim != -1) && (dim >= 0) )
+	{
+		dimension = (unsigned)dim;
+	}
+	
 	std::vector< const char* > filenames;
-	for ( int i = 5 ; i < argc ; ++i )
+	for ( int i = 6 ; i < argc ; ++i )
 	{
 		filenames.push_back( argv[i] );
 	}	
@@ -63,7 +74,7 @@ int main( int argc , char** argv )
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{		
 		std::cout << "Creating a heat map based on a file : " << filenames[i] << std::endl;
-		PSSK l( filenames[i] , filter , size_of_grid , min_ , max_ );		
+		PSSK l( filenames[i] , filter , size_of_grid , min_ , max_ , dimension );		
 		
 		std::stringstream ss;
 		ss << filenames[i] << ".pssk";

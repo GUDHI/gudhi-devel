@@ -39,6 +39,9 @@ namespace Gudhi
 {
 namespace Gudhi_stat 
 {
+
+
+//TODO, change reading procedures so that they also accept the value of dimension.
 	
 //over here we will need a few version of construct_representation_from_file procedure, since different representations may require different parameters. This is a procedure that in my 
 //oppinion cannot be standarize, since construction of representation cannot. But, the remaining part of the code in my opinion is free from any details of representation.
@@ -62,7 +65,7 @@ std::vector< std::vector< std::pair< double , double > > > read_persistence_pair
 	
 	for ( size_t i = 0 ; i != files.size() ; ++i )
 	{
-		std::vector< std::pair< double , double > > diag = read_standard_persistence_file( files[i].c_str() );	
+		std::vector< std::pair< double , double > > diag = read_persistence_intervals_in_one_dimension_from_file( files[i].c_str() );
 		result.push_back( diag );		
 		if ( dbg )
 		{

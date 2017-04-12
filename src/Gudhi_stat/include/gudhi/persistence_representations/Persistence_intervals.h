@@ -25,8 +25,6 @@
 
 //gudhi include
 #include <gudhi/read_persistence_from_file.h>
-//Bottleneck distance:
-//#include <gudhi/Bottleneck.h>
 
 //standard include
 #include <limits>
@@ -51,8 +49,9 @@ public:
 	/**
 	 * This is a constructor of a class Persistence_intervals from a text file. Each line of the input file is supposed to contain two numbers of a type doube (or convertable to double)
 	 * representing the birth and the death of the persistence interval. If the pairs are not sorted so that birth <= death, then the constructor will sort then that way. 
+	 * * The second parameter of a constructor is a dimension of intervals to be read from a file. If your file contains only birt-death pairs, use the default value.
 	**/ 
-    Persistence_intervals( const char* filename );
+    Persistence_intervals( const char* filename , unsigned dimension = std::numeric_limits<unsigned>::max() );
     
     /**
      * This is a constructor of a class Persistence_intervals from a vector of pairs. Each pair is assumed to represent a persistence interval. We assume that the first elemnets of pairs 
@@ -247,26 +246,6 @@ public:
 		return this->number_of_functions_for_vectorization;	
 	}
 
-    /**
-     *Computations of distance from the current persistnce diagram to the persistence diagram given as a parameter of this function.
-     *The last but one parameter, power, is here in case we would like to compute p=th Wasserstein distance. At the moment, this method only implement Bottleneck distance,
-     * which is infinity Wasserstein distance. Therefore any power which is not the default std::numeric_limits< double >::max() will be ignored and an 
-     * exception will be thrown. 
-     * The last parameter, tolerance, it is an additiv error of the approimation, set by default to zero.
-    **/
-     double distance( const Persistence_intervals& second , double power = std::numeric_limits< double >::max() , double tolerance = 0) const
-    {
-		if ( power >= std::numeric_limits< double >::max() )
-		{
-			//return Gudhi::persistence_diagram::bottleneck_distance(this->intervals, second.intervals, tolerance); 		
-			return 1;
-		}
-		else
-		{
-			std::cerr << "At the moment Gudhi do not support Wasserstein distances. We only support Bottleneck distance." << std::endl;
-			throw "At the moment Gudhi do not support Wasserstein distances. We only support Bottleneck distance.";
-		}
-	}
 	//end of implementation of functions needed for concepts.
 	//end of implementation of functions needed for concepts.
 	
@@ -303,7 +282,7 @@ protected:
 };
 
 
-Persistence_intervals::Persistence_intervals( const char* filename )
+Persistence_intervals::Persistence_intervals( const char* filename , unsigned dimension )
 {
     //bool dbg = false;
     //ifstream in;
@@ -336,10 +315,14 @@ Persistence_intervals::Persistence_intervals( const char* filename )
     //    }
     //}
     //in.close();
-    //standard file with barcode
-    this->intervals = read_standard_persistence_file( filename );    
-    //gudhi file with barcode
-    //this->intervals = read_gudhi_persistence_file_in_one_dimension( filename , dimension );
+    if ( dimension == std::numeric_limits<unsigned>::max() )
+    {
+       this->intervals = read_persistence_intervals_in_one_dimension_from_file( filename );
+    }
+    else
+    {
+       this->intervals = read_persistence_intervals_in_one_dimension_from_file( filename , dimension );
+    }
     this->set_up_numbers_of_functions_for_vectorization_and_projections_to_reals();
 }//Persistence_intervals
 

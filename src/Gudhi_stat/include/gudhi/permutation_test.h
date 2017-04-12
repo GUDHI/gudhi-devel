@@ -37,6 +37,8 @@ namespace Gudhi
 namespace Gudhi_stat 
 {
 
+//TODO change the reading procedures so that they accept the dimension value (by default std::nnumeric_limits<unsigned>::max().
+
 template <typename Representation_of_persistence>
 double permutation_test( const std::vector<Representation_of_persistence*>& data_1 , const std::vector<Representation_of_persistence*>& data_2 , size_t number_of_permutations , double exponent = 1 )
 {	

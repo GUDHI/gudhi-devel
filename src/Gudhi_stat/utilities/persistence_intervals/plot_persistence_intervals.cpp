@@ -42,9 +42,23 @@ int main( int argc , char** argv )
 	if ( argc != 2 )
 	{
 		std::cout << "To run this program, please provide the name of a file with persistence diagram \n";
+		std::cout << "The second optional parameter of a program is the dimension of the persistence that is to be used. If your file contains only birth-death pairs, you can skip this parameter\n";		
 		return 1;
 	}
-	std::vector< std::pair< double , double > > intervals = read_gudhi_persistence_file_in_one_dimension( argv[1] , 2 );
+	unsigned dimension = std::numeric_limits<unsigned>::max();
+	int dim = -1;
+	if ( argc > 2 )
+	{
+		dim = atoi( argv[2] );
+	} 
+	if ( (dim != -1) && (dim >= 0) )
+	{
+		dimension = (unsigned)dim;
+	}
+	
+	
+	
+	std::vector< std::pair< double , double > > intervals = read_persistence_intervals_in_one_dimension_from_file( argv[1] , dimension );
 	Persistence_intervals b( intervals );
 	b.plot( argv[1] );
 	return 0;

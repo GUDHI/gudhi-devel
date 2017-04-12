@@ -39,10 +39,21 @@ int main( int argc , char** argv )
 	if ( argc != 3 )
 	{
 		std::cout << "To run this program, please provide the name of a file with persistence diagram and number of dominant intervals you would like to get \n";
+		std::cout << "The second parameter of a program is the dimension of the persistence that is to be used. If your file contains only birth-death pairs, you can skip this parameter\n";
 		return 1;
 	}
+	unsigned dimension = std::numeric_limits<unsigned>::max();
+	int dim = -1;
+	if ( argc > 2 )
+	{
+		dim = atoi( argv[2] );
+	} 
+	if ( (dim != -1) && (dim >= 0) )
+	{
+		dimension = (unsigned)dim;
+	}
 
-	Persistence_intervals p( argv[1] );
+	Persistence_intervals p( argv[1] , dimension );
 	std::vector< std::pair<double,double> > dominant_intervals = p.dominant_intervals( atoi( argv[2] ) );
 	std::vector< size_t > histogram = p.histogram_of_lengths( 10  );
 	

@@ -36,12 +36,22 @@ using namespace Gudhi::Gudhi_stat;
 int main( int argc , char** argv )
 {
 	std::cout << "This program compute a plot of persistence Betti numbers. The input parameter is a file with persistence intervals. \n";
-	if ( argc != 2 )
+	std::cout << "The second optional parameter of a program is the dimension of the persistence that is to be used. If your file contains only birth-death pairs, you can skip this parameter\n";
+	if ( argc < 2 )
 	{
 		std::cout << "To run this program, please provide the name of a file with persistence diagram and number of dominant intervals you would like to get \n";
 		return 1;
 	}
-	
+	unsigned dimension = std::numeric_limits<unsigned>::max();
+	int dim = -1;
+	if ( argc > 2 )
+	{
+		dim = atoi( argv[2] );
+	} 
+	if ( (dim != -1) && (dim >= 0) )
+	{
+		dimension = (unsigned)dim;
+	}
 	
 	
 	std::stringstream gnuplot_script;
@@ -49,7 +59,7 @@ int main( int argc , char** argv )
 	std::ofstream out;
 	out.open( gnuplot_script.str().c_str() );
 	
-	Persistence_intervals p( argv[1] );
+	Persistence_intervals p( argv[1] , dimension );
 	std::vector< std::pair< double , size_t > > pbns = p.compute_persistent_betti_numbers();	
 	
 	//set up the ranges so that we see the image well.

@@ -53,10 +53,18 @@ public:
 	}
 	
 	 
-	 PSSK( const char* filename , std::vector< std::vector<double> > filter = create_Gaussian_filter(5,1) , size_t number_of_pixels = 1000 , double min_ = -1 , double max_ = -1  ):
+	 PSSK( const char* filename , std::vector< std::vector<double> > filter = create_Gaussian_filter(5,1) , size_t number_of_pixels = 1000 , double min_ = -1 , double max_ = -1  , unsigned dimension = std::numeric_limits<unsigned>::max() ):
 	    Persistence_heat_maps()
 	    {
-			std::vector< std::pair< double , double > > intervals_ = read_standard_persistence_file( filename );         
+			std::vector< std::pair< double , double > > intervals_;
+                        if ( dimension == std::numeric_limits<unsigned>::max() )
+                        {
+                           intervals_ = read_persistence_intervals_in_one_dimension_from_file( filename );
+                        }
+                        else
+                        {
+                           intervals_ = read_persistence_intervals_in_one_dimension_from_file( filename , dimension );
+                        }
 			this->construct( intervals_ , filter , number_of_pixels , min_ , max_ );
 		}
 

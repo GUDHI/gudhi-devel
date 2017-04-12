@@ -33,9 +33,19 @@ using namespace Gudhi::Gudhi_stat;
 
 int main( int argc , char** argv )
 {
-	std::cout << "This program creates persistence vectors of diagrams provided as an input. Please call this program with the names of files with persistence diagrams \n";
+	std::cout << "This program creates persistence vectors of diagrams provided as an input. The first parameter of this program is a dimension of persistence ";
+	std::cout << " that will be used in creation of the persistence vectors. If our input files contain persistence pairs of various dimension, as a second parameter of the ";
+	std::cout << " procedure please provide the dimension of persistence you want to use. If in your file there are only birth-death pairs of the same dimension, set the first parameter to -1." << std::endl;
+	std::cout << "The remaining parameters are the names of files with persistence diagrams. \n";
+	int dim = atoi( argv[1] );
+	unsigned dimension = std::numeric_limits<unsigned>::max();
+	if ( (dim != -1) && (dim >= 0) )
+	{
+		dimension = (unsigned)dim;
+	}
+	
 	std::vector< const char* > filenames;
-	for ( int i = 1 ; i < argc ; ++i )
+	for ( int i = 2 ; i < argc ; ++i )
 	{
 		filenames.push_back( argv[i] );
 	}
@@ -44,7 +54,7 @@ int main( int argc , char** argv )
 	{
 		std::cerr << "Creatign persistence vectors based on a file : " << filenames[i] << std::endl;
 		//std::vector< std::pair< double , double > > persistence_pairs = read_gudhi_persistence_file_in_one_dimension( filenames[i] , size_t dimension = 0 )
-		Vector_distances_in_diagram< Euclidean_distance > l( filenames[i] , -1 );				
+		Vector_distances_in_diagram< Euclidean_distance > l( filenames[i] , dimension );				
 		std::stringstream ss;
 		ss << filenames[i] << ".vect";
 		l.print_to_file( ss.str().c_str() );

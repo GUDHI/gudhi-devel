@@ -105,7 +105,7 @@ public:
     /**
 	* The constructor taking as an input a file with birth-death pairs. The second parameter is the desiered length of the output vectors. 
 	**/
-    Vector_distances_in_diagram( const char* filename , size_t where_to_cut );
+    Vector_distances_in_diagram( const char* filename , size_t where_to_cut , unsigned dimension = std::numeric_limits<unsigned>::max() );
 
 	
 	/**
@@ -432,13 +432,17 @@ Vector_distances_in_diagram<F>::Vector_distances_in_diagram( const std::vector< 
 }
 
 template <typename F>
-Vector_distances_in_diagram<F>::Vector_distances_in_diagram( const char* filename , size_t where_to_cut  ):where_to_cut(where_to_cut)
-{   	
-    //standard file with barcode
-    std::vector< std::pair< double , double > > intervals = read_standard_persistence_file( filename );    
-    //gudhi file with barcode
-    //std::vector< std::pair< double , double > > intervals = read_gudhi_persistence_file( filename , dimension );    
-     
+Vector_distances_in_diagram<F>::Vector_distances_in_diagram( const char* filename , size_t where_to_cut , unsigned dimension  ):where_to_cut(where_to_cut)
+{
+    std::vector< std::pair< double , double > > intervals;
+    if ( dimension == std::numeric_limits<unsigned>::max() )
+    {
+        intervals = read_persistence_intervals_in_one_dimension_from_file( filename );
+    }
+    else
+    {
+        intervals = read_persistence_intervals_in_one_dimension_from_file( filename , dimension );
+    }
     this->intervals = intervals;
     this->compute_sorted_vector_of_distances_via_heap( where_to_cut );
     //this->compute_sorted_vector_of_distances_via_vector_sorting( where_to_cut );

@@ -44,7 +44,7 @@ double epsilon = 0.0000005;
 
 BOOST_AUTO_TEST_CASE(check_construction_of_landscape) 
 {	
-	Persistence_landscape_on_grid l( "data/file_with_diagram_1" , 100 );
+	Persistence_landscape_on_grid l( "data/file_with_diagram_1" , 100 , std::numeric_limits<unsigned short>::max());
 	l.print_to_file( "landscape_from_file_with_diagram_1" );
 	
 	Persistence_landscape_on_grid g;
@@ -57,8 +57,8 @@ BOOST_AUTO_TEST_CASE(check_construction_of_landscape_using_only_ten_levels)
 {	
 	//TODO
 	unsigned number = 10;
-	Persistence_landscape_on_grid l( "data/file_with_diagram_1" , 100  ,number );		
-	Persistence_landscape_on_grid g( "data/file_with_diagram_1" , 100 );
+	Persistence_landscape_on_grid l( "data/file_with_diagram_1" , 100  , number );		
+	Persistence_landscape_on_grid g( "data/file_with_diagram_1" , 100 , std::numeric_limits<unsigned short>::max());
 	//cut all the elements of order > 10 in g. 
 	
 	for ( size_t level = 0 ; level != number ; ++level )
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(check_construction_of_landscape_using_only_ten_levels)
 
 BOOST_AUTO_TEST_CASE(check_computations_of_integrals) 
 {
-	Persistence_landscape_on_grid p( "data/file_with_diagram_1" , 100 );	
+	Persistence_landscape_on_grid p( "data/file_with_diagram_1" , 100 , std::numeric_limits<unsigned short>::max());	
 	double integral = p.compute_integral_of_landscape();
 	//cerr << "integral : " << integral << endl;getchar();
 	BOOST_CHECK( fabs( integral - 27.343 ) <= 0.00005 );
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(check_computations_of_integrals)
 
 BOOST_AUTO_TEST_CASE(check_computations_of_integrals_for_each_level_separatelly) 
 {
-	Persistence_landscape_on_grid p( "data/file_with_diagram_1" , 100 );	
+	Persistence_landscape_on_grid p( "data/file_with_diagram_1" , 100, std::numeric_limits<unsigned short>::max() );	
 	
 	std::vector< double > integrals_fir_different_levels;	
 	//integrals_fir_different_levels.push_back();
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(check_computations_of_integrals_for_each_level_separatelly)
 
 BOOST_AUTO_TEST_CASE(check_computations_of_integrals_of_powers_of_landscape) 
 {
-	Persistence_landscape_on_grid p( "data/file_with_diagram_1" , 100 );	
+	Persistence_landscape_on_grid p( "data/file_with_diagram_1" , 100, std::numeric_limits<unsigned short>::max() );	
 	
 	std::vector<double> integrals_fir_different_powers;
 	integrals_fir_different_powers.push_back(	0.241168);
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(check_computations_of_integrals_of_powers_of_landscape)
 
 BOOST_AUTO_TEST_CASE(check_computations_of_values_on_different_points) 
 {
-	Persistence_landscape_on_grid p( "data/file_with_diagram_1" , 100 );	
+	Persistence_landscape_on_grid p( "data/file_with_diagram_1" , 100, std::numeric_limits<unsigned short>::max() );	
 
 	std::vector< double > results_level_0;	
 	results_level_0.push_back(0.00997867);
@@ -184,8 +184,8 @@ BOOST_AUTO_TEST_CASE(check_computations_of_values_on_different_points)
 
 BOOST_AUTO_TEST_CASE(check_computations_sum_differences_and_multiplications) 
 {	
-	Persistence_landscape_on_grid p( "data/file_with_diagram_1" ,100 );	
-	Persistence_landscape_on_grid second("data/file_with_diagram_1" , 100 );	
+	Persistence_landscape_on_grid p( "data/file_with_diagram_1" ,100 , std::numeric_limits<unsigned short>::max());	
+	Persistence_landscape_on_grid second("data/file_with_diagram_1" , 100, std::numeric_limits<unsigned short>::max() );	
 	
 	Persistence_landscape_on_grid sum = p + second;
 	Persistence_landscape_on_grid difference = p - second;
@@ -210,8 +210,8 @@ BOOST_AUTO_TEST_CASE(check_computations_sum_differences_and_multiplications)
 
 BOOST_AUTO_TEST_CASE(check_computations_of_maxima_and_norms) 
 {	
-	Persistence_landscape_on_grid p( "data/file_with_diagram_1" , 0 , 1 , 100 );	
-	Persistence_landscape_on_grid second("data/file_with_diagram_2" , 0 , 1 , 100 );	
+	Persistence_landscape_on_grid p( "data/file_with_diagram_1" , 0. , 1. , 100 );	
+	Persistence_landscape_on_grid second("data/file_with_diagram_2" , 0. , 1. , 100 );	
 	Persistence_landscape_on_grid sum = p + second;
 	
 	//cerr << p.compute_maximum() << endl;
@@ -236,8 +236,8 @@ BOOST_AUTO_TEST_CASE(check_computations_of_maxima_and_norms)
 
 BOOST_AUTO_TEST_CASE(check_computations_of_averages) 
 {
-	Persistence_landscape_on_grid p( "data/file_with_diagram", 0,1,100 );
-	Persistence_landscape_on_grid q( "data/file_with_diagram_1", 0,1,100 );
+	Persistence_landscape_on_grid p( "data/file_with_diagram", 0.,1.,100 );
+	Persistence_landscape_on_grid q( "data/file_with_diagram_1", 0.,1.,100 );
 	Persistence_landscape_on_grid av;	
 	av.compute_average( {&p,&q} );
 	
@@ -251,8 +251,8 @@ BOOST_AUTO_TEST_CASE(check_computations_of_averages)
 
 BOOST_AUTO_TEST_CASE(check_computations_of_distances)
 {
-	Persistence_landscape_on_grid p( "data/file_with_diagram", 0,1,10000 );
-	Persistence_landscape_on_grid q( "data/file_with_diagram_1", 0,1,10000 );
+	Persistence_landscape_on_grid p( "data/file_with_diagram", 0.,1.,10000 );
+	Persistence_landscape_on_grid q( "data/file_with_diagram_1", 0.,1.,10000 );
 	BOOST_CHECK( fabs( p.distance( q )- 25.5779) <= 0.00005 );	
 	BOOST_CHECK( fabs( p.distance( q , 2) - 2.04891) <= 0.00001 );	
 	BOOST_CHECK( fabs( p.distance( q , std::numeric_limits<double>::max() )-0.359		 ) <= 0.00001 );
@@ -261,8 +261,8 @@ BOOST_AUTO_TEST_CASE(check_computations_of_distances)
 
 BOOST_AUTO_TEST_CASE(check_computations_of_scalar_product)
 {
-	Persistence_landscape_on_grid p( "data/file_with_diagram" , 0,1,10000);
-	Persistence_landscape_on_grid q( "data/file_with_diagram_1", 0,1,10000 );
+	Persistence_landscape_on_grid p( "data/file_with_diagram" , 0.,1.,10000);
+	Persistence_landscape_on_grid q( "data/file_with_diagram_1", 0.,1.,10000 );
 	//std::cerr << p.compute_scalar_product( q ) << std::endl;
 	BOOST_CHECK( almost_equal(  p.compute_scalar_product( q ) , 0.754367 ) );	
 }
@@ -375,3 +375,4 @@ BOOST_AUTO_TEST_CASE(check_computations_of_scalar_product)
 	//Persistence_landscape_on_grid q( aa, 0,1,10 );
 	cerr <<  p.compute_scalar_product( &q ) << endl;
 */
+

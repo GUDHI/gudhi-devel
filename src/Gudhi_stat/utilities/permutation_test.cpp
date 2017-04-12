@@ -62,7 +62,7 @@ int main( int argc , char** argv )
 	std::vector< Persistence_landscape* > first_collection( first_group.size() );
 	for ( size_t i = 0 ; i != first_group.size() ; ++i )
 	{
-		std::vector< std::pair< double , double > > diag = read_standard_persistence_file( first_group[i].c_str() );					
+		std::vector< std::pair< double , double > > diag = read_persistence_intervals_in_one_dimension_from_file( first_group[i].c_str() );
 		Persistence_landscape* l = new Persistence_landscape( diag );			
 		first_collection[i] = l;		
 	}

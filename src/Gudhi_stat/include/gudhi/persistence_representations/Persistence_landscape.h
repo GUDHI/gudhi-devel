@@ -80,7 +80,7 @@ public:
 	 * Constructor that reads persistence intervals from file and creates persistence landscape. The format of the input file is the following: in each line we put birth-death pair. Last line is assumed
 	 * to be empty. Even if the points within a line are not ordered, they will be ordered while the input is read.
 	**/
-    Persistence_landscape(const char* filename , size_t dimension = 0);
+    Persistence_landscape(const char* filename , size_t dimension = std::numeric_limits<unsigned>::max() );
 
 
 
@@ -548,13 +548,18 @@ Persistence_landscape::Persistence_landscape(const char* filename , size_t dimen
     if ( dbg )
     {
         std::cerr << "Using constructor : Persistence_landscape(char* filename)" << std::endl;
-    }   
-    //standard file with barcode
-    //std::vector< std::pair< double , double > > barcode = read_standard_persistence_file( filename );    
-    //gudhi file with barcode
-    std::vector< std::pair< double , double > > barcode = read_gudhi_persistence_file_in_one_dimension( filename , dimension );        
-	this->construct_persistence_landscape_from_barcode( barcode );
-	this->set_up_numbers_of_functions_for_vectorization_and_projections_to_reals();
+    }
+    std::vector< std::pair< double , double > > barcode;
+    if ( dimension == std::numeric_limits<unsigned>::max() )
+    {
+     barcode = read_persistence_intervals_in_one_dimension_from_file( filename );
+    }
+    else
+    {
+     barcode = read_persistence_intervals_in_one_dimension_from_file( filename , dimension );
+    }
+    this->construct_persistence_landscape_from_barcode( barcode );
+    this->set_up_numbers_of_functions_for_vectorization_and_projections_to_reals();
 }
 
 

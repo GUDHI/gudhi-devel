@@ -33,6 +33,7 @@
 #include <algorithm>
 #include <unistd.h>
 #include <cmath>
+#include <limits>
 
 
 //gudhi include
@@ -84,14 +85,14 @@ public:
 	 * to be empty. Even if the points within a line are not ordered, they will be ordered while the input is read. The additional parameters of this procedure are: ranges of grid, resoltion of a grid
 	 * number of landscape functions to be created and the dimension of intervals that are need to be read from a file (in case of Gudhi format files). 
 	**/
-    Persistence_landscape_on_grid(const char* filename , double grid_min_, double grid_max_ , size_t number_of_points_ , unsigned number_of_levels_of_landscape , size_t dimension_ = 0 );
+    Persistence_landscape_on_grid(const char* filename , double grid_min_, double grid_max_ , size_t number_of_points_ , unsigned number_of_levels_of_landscape , unsigned short dimension_ = std::numeric_limits<unsigned short>::max() );
     
      /**
 	 * Constructor that reads persistence intervals from file and creates persistence landscape. The format of the input file is the following: in each line we put birth-death pair. Last line is assumed
 	 * to be empty. Even if the points within a line are not ordered, they will be ordered while the input is read. The additional parameters of this procedure are: ranges of grid, resoltion of a grid
 	 * and the dimension of intervals that are need to be read from a file (in case of Gudhi format files). 
 	**/
-    Persistence_landscape_on_grid(const char* filename , double grid_min_, double grid_max_ , size_t number_of_points_ , size_t dimension_ = 0 );
+    Persistence_landscape_on_grid(const char* filename , double grid_min_, double grid_max_ , size_t number_of_points_ , unsigned short dimension_ = std::numeric_limits<unsigned short>::max() );
 
         
     /**
@@ -99,14 +100,15 @@ public:
 	 * to be empty. Even if the points within a line are not ordered, they will be ordered while the input is read. The additional parameter is the resoution of a grid and the number of landscape
 	 * functions to be created. The remaning parameters are calculated based on data. 
 	**/
-    Persistence_landscape_on_grid(const char* filename , size_t number_of_points , unsigned number_of_levels_of_landscape );
+    Persistence_landscape_on_grid(const char* filename , size_t number_of_points , unsigned number_of_levels_of_landscape , unsigned short dimension = std::numeric_limits<unsigned short>::max() );
     
       /**
 	 * Constructor that reads persistence intervals from file and creates persistence landscape. The format of the input file is the following: in each line we put birth-death pair. Last line is assumed
-	 * to be empty. Even if the points within a line are not ordered, they will be ordered while the input is read. The additional parameter is the resoution of a grid. The remaning paraameters are 
-	 * calculated based on data. 
+	 * to be empty. Even if the points within a line are not ordered, they will be ordered while the input is read. The additional parameter is the resoution of a grid. The last parameter is the dimension
+	 * of a persistence to read from the file. If your file contains only persistence pair in a single dimension, please set it up to std::numeric_limits<unsigned>::max().
+	 * The remaning parameters are calculated based on data. 
 	**/
-    Persistence_landscape_on_grid(const char* filename , size_t number_of_points );
+    Persistence_landscape_on_grid(const char* filename , size_t number_of_points , unsigned short dimension = std::numeric_limits<unsigned short>::max() );
 
 
     /**
@@ -1256,33 +1258,45 @@ Persistence_landscape_on_grid::Persistence_landscape_on_grid( const std::vector<
 }
 
 
-Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filename , double grid_min_, double grid_max_ , size_t number_of_points_ , size_t dimension )
+Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filename , double grid_min_, double grid_max_ , size_t number_of_points_ , unsigned short dimension )
 {
-	//standard file with barcode
-    std::vector< std::pair< double , double > > p = read_standard_persistence_file( filename );    
-    //gudhi file with barcode
-    //std::vector< std::pair< double , double > > p = read_gudhi_persistence_file_in_one_dimension( filename , dimension );
-	
-	this->set_up_values_of_landscapes( p , grid_min_ , grid_max_ , number_of_points_ );
+    std::vector< std::pair< double , double > > p;
+    if ( dimension == std::numeric_limits<unsigned short>::max() )
+    {
+       p = read_persistence_intervals_in_one_dimension_from_file( filename );
+    }
+    else
+    {
+       p = read_persistence_intervals_in_one_dimension_from_file( filename , dimension );
+    }
+    this->set_up_values_of_landscapes( p , grid_min_ , grid_max_ , number_of_points_ );
 }
 
-Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filename , double grid_min_, double grid_max_ , size_t number_of_points_, unsigned number_of_levels_of_landscape, size_t dimension )
+Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filename , double grid_min_, double grid_max_ , size_t number_of_points_, unsigned number_of_levels_of_landscape, unsigned short dimension )
 {
-	//standard file with barcode
-    std::vector< std::pair< double , double > > p = read_standard_persistence_file( filename );    
-    //gudhi file with barcode
-    //std::vector< std::pair< double , double > > p = read_gudhi_persistence_file_in_one_dimension( filename , dimension );
-	
-	this->set_up_values_of_landscapes( p , grid_min_ , grid_max_ , number_of_points_ , number_of_levels_of_landscape );
+    std::vector< std::pair< double , double > > p;
+    if ( dimension == std::numeric_limits<unsigned short>::max() )
+    {
+       p = read_persistence_intervals_in_one_dimension_from_file( filename );
+    }
+    else
+    {
+       p = read_persistence_intervals_in_one_dimension_from_file( filename , dimension );
+    }
+    this->set_up_values_of_landscapes( p , grid_min_ , grid_max_ , number_of_points_ , number_of_levels_of_landscape );
 }
 
-Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filename , size_t number_of_points_ )
+Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filename , size_t number_of_points_ , unsigned short dimension )
 {
-	//standard file with barcode
-    std::vector< std::pair< double , double > > p = read_standard_persistence_file( filename );    
-    //gudhi file with barcode
-    //std::vector< std::pair< double , double > > p = read_gudhi_persistence_file_in_one_dimension( filename , dimension );
-    
+    std::vector< std::pair< double , double > > p;
+    if ( dimension == std::numeric_limits<unsigned short>::max() )
+    {
+       p = read_persistence_intervals_in_one_dimension_from_file( filename );
+    }
+    else
+    {
+       p = read_persistence_intervals_in_one_dimension_from_file( filename , dimension );
+    }
     double grid_min_ = std::numeric_limits<double>::max();
     double grid_max_ = -std::numeric_limits<double>::max();
     for ( size_t i = 0 ; i != p.size() ; ++i )
@@ -1293,13 +1307,17 @@ Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filenam
 	this->set_up_values_of_landscapes( p , grid_min_ , grid_max_ , number_of_points_ );
 }
 
-Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filename , size_t number_of_points_ , unsigned number_of_levels_of_landscape )
+Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filename , size_t number_of_points_ , unsigned number_of_levels_of_landscape , unsigned short dimension )
 {
-	//standard file with barcode
-    std::vector< std::pair< double , double > > p = read_standard_persistence_file( filename );    
-    //gudhi file with barcode
-    //std::vector< std::pair< double , double > > p = read_gudhi_persistence_file_in_one_dimension( filename , dimension );
-    
+    std::vector< std::pair< double , double > > p;
+    if ( dimension == std::numeric_limits<unsigned short>::max() )
+    {
+       p = read_persistence_intervals_in_one_dimension_from_file( filename );
+    }
+    else
+    {
+       p = read_persistence_intervals_in_one_dimension_from_file( filename , dimension );
+    }
     double grid_min_ = std::numeric_limits<double>::max();
     double grid_max_ = -std::numeric_limits<double>::max();
     for ( size_t i = 0 ; i != p.size() ; ++i )

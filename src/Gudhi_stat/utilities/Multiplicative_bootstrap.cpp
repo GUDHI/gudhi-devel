@@ -51,7 +51,7 @@ int main( int argc , char** argv )
 	std::vector< Persistence_landscape* > collection_of_landscapes( filenames.size() );
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{
-		std::vector< std::pair< double , double > > diag = read_gudhi_persistence_file_in_one_dimension( filenames[i].c_str() , 1 );//read_standard_persistence_file( filenames[i].c_str() );									
+		std::vector< std::pair< double , double > > diag = read_persistence_intervals_in_one_dimension_from_file( filenames[i].c_str() );
 		collection_of_landscapes[i] = new Persistence_landscape( diag );		
 	}
 
