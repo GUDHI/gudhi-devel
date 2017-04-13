@@ -62,7 +62,7 @@ int main( int argc , char** argv )
 	{
 		std::cout << "Creating diagram based on a file : " << filenames[file_no] << std::endl;
 		Persistence_intervals p( filenames[file_no] , dimension );
-		std::pair<double,double> min_max_ = p.min_max();
+		std::pair<double,double> min_max_ = p.get_x_range();
 		if ( min_max_.first < min_ )min_ = min_max_.first;
 		if ( min_max_.second > max_ )max_ = min_max_.second;
 	}

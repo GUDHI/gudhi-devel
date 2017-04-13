@@ -42,7 +42,7 @@ int main( int argc , char** argv )
 	}
 	
 	Persistence_intervals p( argv[1] );
-	std::pair<double,double> min_max_ = p.min_max();	
+	std::pair<double,double> min_max_ = p.get_x_range();	
 	std::cout << "Birth-death range : " <<  min_max_.first << " " << min_max_.second << std::endl;
 	
 	

@@ -35,18 +35,7 @@ namespace Gudhi_stat
 class Persistence_intervals_with_distances : public Persistence_intervals
 {
 public:
-	/**
-	 * This is a constructor of a class Persistence_intervals_with_distances from a text file. Each line of the input file is supposed to contain two numbers of a type doube (or convertable to double)
-	 * representing the birth and the death of the persistence interval. If the pairs are not sorted so that birth <= death, then the constructor will sort then that way.
-	 * The second parameter of a constructor is a dimension of intervals to be read from a file. If your file contains only birt-death pairs, use the default value. 
-	**/ 
-    Persistence_intervals_with_distances( const char* filename , unsigned dimension = std::numeric_limits<unsigned>::max() ):Persistence_intervals( filename , dimension ){}
-    
-    /**
-     * This is a constructor of a class Persistence_intervals_with_distances from a vector of pairs. Each pair is assumed to represent a persistence interval. We assume that the first elemnets of pairs 
-     * are smaller or equal the second elements of pairs.
-    **/ 
-    Persistence_intervals_with_distances( const std::vector< std::pair< double,double > >& intervals ):Persistence_intervals( intervals ){}
+	using Persistence_intervals::Persistence_intervals;
 
     /**
      *Computations of distance from the current persistnce diagram to the persistence diagram given as a parameter of this function.

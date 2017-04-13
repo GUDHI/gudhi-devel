@@ -47,7 +47,7 @@ double epsilon = 0.0000005;
 BOOST_AUTO_TEST_CASE(check_min_max_function) 
 {
 	Persistence_intervals p( "data/file_with_diagram" );
-	std::pair<double,double> min_max_ = p.min_max();
+	std::pair<double,double> min_max_ = p.get_x_range();
 	
 	//cout << min_max_.first << " " << min_max_.second << std::endl;getchar();
 	
@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE(check_cumulative_histograms_of_lengths)
 BOOST_AUTO_TEST_CASE(check_characteristic_function_of_diagram) 
 {
 	Persistence_intervals p( "data/file_with_diagram" );
-	std::pair<double,double> min_max_ = p.min_max();
+	std::pair<double,double> min_max_ = p.get_x_range();
 	std::vector< double  > char_funct_diag = p.characteristic_function_of_diagram( min_max_.first , min_max_.second );	
 	std::vector< double > template_char_funct_diag;
 	template_char_funct_diag.push_back(	0.370665	);
@@ -183,7 +183,7 @@ BOOST_AUTO_TEST_CASE(check_characteristic_function_of_diagram)
 BOOST_AUTO_TEST_CASE(check_cumulative_characteristic_function_of_diagram) 
 {
 	Persistence_intervals p( "data/file_with_diagram" );
-	std::pair<double,double> min_max_ = p.min_max();
+	std::pair<double,double> min_max_ = p.get_x_range();
 	std::vector< double  > cumul_char_funct_diag = p.cumulative_characteristic_function_of_diagram( min_max_.first , min_max_.second );
 	std::vector< double > template_char_funct_diag_cumul;		
 	

@@ -58,18 +58,20 @@ public:
      * are smaller or equal the second elements of pairs.
     **/ 
     Persistence_intervals( const std::vector< std::pair< double,double > >& intervals );
-
-	/**
-	 * The procedure returns a pair the first element of which is the leftmost end of the interval, and the second element of which is the rightmost end of the interval.  
-	**/
-    std::pair<double,double> min_max()const;
     
     /**
 	 * This procedure returns x-range of a given persistence diagram. 
 	**/ 
 	std::pair< double , double > get_x_range()const
 	{
-		return this->min_max();		 
+		double min_ = std::numeric_limits<int>::max();
+		double max_ = -std::numeric_limits<int>::max();
+		for ( size_t i = 0 ; i != this->intervals.size() ; ++i )
+		{
+			if ( this->intervals[i].first < min_ )min_ = this->intervals[i].first;
+			if ( this->intervals[i].second > max_ )max_ = this->intervals[i].second;
+		}
+		return std::make_pair( min_ , max_ );		 
 	}
 	
 	/**
@@ -160,7 +162,7 @@ public:
 		std::string nameStr = nameSS.str();
 		out.open( nameStr );
 		
-		std::pair<double,double> min_max_values = this->min_max();
+		std::pair<double,double> min_max_values = this->get_x_range();
 		if ( min_x == max_x )
 		{	
 			out << "set xrange [" << min_max_values.first - 0.1*(min_max_values.second-min_max_values.first) << " : " << min_max_values.second + 0.1*(min_max_values.second-min_max_values.first) << " ]" << std::endl;
@@ -675,18 +677,6 @@ std::vector< double > Persistence_intervals::k_n_n( size_t k , size_t where_to_c
     return result;
 }
 
-
-std::pair<double,double> Persistence_intervals::min_max()const
-{
-    double min_ = std::numeric_limits<int>::max();
-    double max_ = -std::numeric_limits<int>::max();
-    for ( size_t i = 0 ; i != this->intervals.size() ; ++i )
-    {
-        if ( this->intervals[i].first < min_ )min_ = this->intervals[i].first;
-        if ( this->intervals[i].second > max_ )max_ = this->intervals[i].second;
-    }
-    return std::make_pair( min_ , max_ );
-}
 
 double Persistence_intervals::project_to_R( int number_of_function )const
 {
