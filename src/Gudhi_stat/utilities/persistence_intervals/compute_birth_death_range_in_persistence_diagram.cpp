@@ -45,7 +45,7 @@ int main( int argc , char** argv )
 	
 	int dim = atoi( argv[1] );
 	unsigned dimension = std::numeric_limits<unsigned>::max();
-	if ( (dim != -1) && (dim >= 0) )
+	if ( dim >= 0 )
 	{
 		dimension = (unsigned)dim;
 	}

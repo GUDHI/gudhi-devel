@@ -51,7 +51,7 @@ int main( int argc , char** argv )
 	{
 		dim = atoi( argv[2] );
 	} 
-	if ( (dim != -1) && (dim >= 0) )
+	if ( dim >= 0 )
 	{
 		dimension = (unsigned)dim;
 	}

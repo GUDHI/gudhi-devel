@@ -52,7 +52,7 @@ int main( int argc , char** argv )
 	double max_ = atof( argv[3] );
 	int dim = atoi( argv[4] );
 	unsigned dimension = std::numeric_limits<unsigned>::max();
-	if ( (dim != -1) && (dim >= 0) )
+	if ( dim >= 0 )
 	{
 		dimension = (unsigned)dim;
 	}

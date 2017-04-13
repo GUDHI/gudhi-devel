@@ -38,7 +38,7 @@
 using Persistence_landscape = Gudhi::Gudhi_stat::Persistence_landscape;
 
 typedef int Vertex_handle;
-typedef double Filtration_value;
+//typedef double Filtration_value;
 
 
 //if this variable is -1, then the infinite interals are ignored. If not, they infinite values are replaced with what_to_replace_infinite_intervals_with:

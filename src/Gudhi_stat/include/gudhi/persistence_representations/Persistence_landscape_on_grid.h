@@ -595,7 +595,7 @@ public:
 	}
 
 	/**
-	 * Computations of a L^i norm of landscape, where i is the input parameter.
+	 * Computations of a \f$L^i\f$ norm of landscape, where i is the input parameter.
 	**/
     double compute_norm_of_landscape( double i )const
     {
@@ -618,7 +618,7 @@ public:
     double operator()(unsigned level,double x)const{return this->compute_value_at_a_given_point(level,x);}
 
 	/**
-	 * Computations of L^{\infty} distance between two landscapes.
+	 * Computations of \f$L^{\infty}\f$ distance between two landscapes.
 	**/
     friend double compute_max_norm_distance_of_landscapes( const Persistence_landscape_on_grid& first, const Persistence_landscape_on_grid& second );
     //friend double compute_max_norm_distance_of_landscapes( const Persistence_landscape_on_grid& first, const Persistence_landscape_on_grid& second , unsigned& nrOfLand , double&x , double& y1, double& y2 );
@@ -765,7 +765,7 @@ public:
 	
 	
 	/**
-	 * Computations of L^{p} distance between two landscapes on a grid. p is the parameter of the procedure.
+	 * Computations of \f$L^{p}\f$ distance between two landscapes on a grid. p is the parameter of the procedure.
 	 * FIXME: Note that, due to the grid representation, the method below may give non--accurate results in case when the landscape P and Q the difference of which we want to compute
 	 * are interxsecting. This is a consequence of a general way they are computed. In the future, an integral of absolute value of a difference of P and Q will be given as a separated
 	 * function to fix that inaccuracy. 

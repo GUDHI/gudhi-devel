@@ -152,22 +152,6 @@
  </tr>
 </table>
 </table>
- \subsection Gudhi_stat Gudhi statistical sublibrary
- \image html "average_landscape.png" "Gudhi statistical sublibrary"
-<table border="0">
-  <tr>
-    <td width="25%">
-      <b>Author:</b> Pawel Dlotko<br>
-      <b>Introduced in:</b> GUDHI 2.0.0<br>
-      <b>Copyright:</b> GPL v3<br>      
-    </td>
-    <td width="75%">
-    This is a statistical library for gudhi. It contain implementation of various representations of persistence diagrams; diagrams themselves, persistence landscapes (rigorous and grid version), 
-    persistence heath maps, vectors and others. It implements basic functionalities which are neccessary to use persistence in statistics and machine learning. 
-    <b>User manual:</b> \ref gudhi_stat - <b>Reference manual:</b> Gudhi::Gudhi_stat
-    </td>
- </tr>
-</table>
  
  \section Toolbox Toolbox
  \subsection BottleneckDistanceToolbox Bottleneck distance
@@ -229,7 +213,25 @@
     <b>User manual:</b> \ref persistent_cohomology - <b>Reference manual:</b> Gudhi::persistent_cohomology::Persistent_cohomology
     </td>
  </tr>
+</table> 
+ \subsection Gudhi_stat_sublibrary Gudhi statistical sublibrary
+ \image html "average_landscape.png" "Gudhi statistical sublibrary"
+<table border="0">
+  <tr>
+    <td width="25%">
+      <b>Author:</b> Pawel Dlotko<br>
+      <b>Introduced in:</b> GUDHI 2.0.0<br>
+      <b>Copyright:</b> GPL v3<br>      
+    </td>
+    <td width="75%">
+    This is a statistical library for gudhi. It contain implementation of various representations of persistence diagrams; diagrams themselves, persistence landscapes (rigorous and grid version), 
+    persistence heath maps, vectors and others. It implements basic functionalities which are neccessary to use persistence in statistics and machine learning. 
+    <b>User manual:</b> \ref Gudhi_stat 
+    
+    </td>
+ </tr>
 </table>
+ 
 */
 
 /*! \page installation GUDHI installation

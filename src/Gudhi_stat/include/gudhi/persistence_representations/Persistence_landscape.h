@@ -270,7 +270,7 @@ public:
     }
 
 	/**
-	 *\private Computations of a L^i norm of landscape, where i is the input parameter.
+	 *\private Computations of a \f$L^i\f$ norm of landscape, where i is the input parameter.
 	**/
     double compute_norm_of_landscape( double i )
     {
@@ -291,14 +291,14 @@ public:
     double operator()(unsigned level,double x)const{return this->compute_value_at_a_given_point(level,x);}
 
 	/**
-	 *\private Computations of L^{\infty} distance between two landscapes.
+	 *\private Computations of \f$L^{\infty}\f$ distance between two landscapes.
 	**/
     friend double compute_max_norm_distance_of_landscapes( const Persistence_landscape& first, const Persistence_landscape& second );
     //friend double compute_max_norm_distance_of_landscapes( const Persistence_landscape& first, const Persistence_landscape& second , unsigned& nrOfLand , double&x , double& y1, double& y2 );
 
 
 	/**
-	 *\private Computations of L^{p} distance between two landscapes. p is the parameter of the procedure.
+	 *\private Computations of \f$L^{p}\f$ distance between two landscapes. p is the parameter of the procedure.
 	**/
     friend double compute_distance_of_landscapes( const Persistence_landscape& first, const Persistence_landscape& second , double p );
 
