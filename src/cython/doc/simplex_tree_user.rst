@@ -1,4 +1,3 @@
-========================
 Simplex tree user manual
 ========================
 Definition
