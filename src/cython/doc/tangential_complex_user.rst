@@ -1,4 +1,3 @@
-==============================
 Tangential complex user manual
 ==============================
 .. include:: tangential_complex_sum.rst
@@ -188,7 +187,7 @@ The output is:
     Inconsistencies has been fixed.
 
 Bibliography
-************
+============
 
 .. bibliography:: bibliography.bib
    :filter: docnames

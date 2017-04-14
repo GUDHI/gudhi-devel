@@ -1,4 +1,3 @@
-=========================
 Rips complex user manual
 =========================
 Definition

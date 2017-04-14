@@ -1,4 +1,3 @@
-=========================
 Alpha complex user manual
 =========================
 Definition
@@ -198,7 +197,6 @@ the program output is:
    [2, 3, 6] -> 36.50
    [2, 4, 6] -> 37.24
 
-==============
 CGAL citations
 ==============
 

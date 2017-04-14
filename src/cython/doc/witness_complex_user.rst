@@ -1,11 +1,7 @@
-===========================
 Witness complex user manual
 ===========================
-Definition
-----------
 
 .. include:: witness_complex_sum.rst
-
 
 Definitions
 -----------
@@ -128,7 +124,7 @@ Here is an example of constructing a strong witness complex filtration and compu
 * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py>`
 
 Bibliography
-************
+============
 
 .. bibliography:: bibliography.bib
    :filter: docnames

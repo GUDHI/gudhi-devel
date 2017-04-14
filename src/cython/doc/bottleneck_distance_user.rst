@@ -1,4 +1,3 @@
-===============================
 Bottleneck distance user manual
 ===============================
 Definition
