@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 2.6)
 project(GUDHIdev)
 
 include(CMakeGUDHIVersion.txt)
-# Generate GUDHI official version file
-configure_file(GUDHIVersion.cmake.in "${CMAKE_SOURCE_DIR}/GUDHIVersion.cmake" @ONLY)
 
 set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")

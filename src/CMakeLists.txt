@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 2.6)
 project(GUDHI)
 
 include("CMakeGUDHIVersion.txt")
-# Generate GUDHI official version file
-configure_file(GUDHIVersion.cmake.in "${CMAKE_SOURCE_DIR}/GUDHIVersion.cmake" @ONLY)
 
 enable_testing()
 

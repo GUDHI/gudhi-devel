@@ -35,8 +35,6 @@ if (NOT CMAKE_VERSION VERSION_LESS 2.8.11)
                      copy ${CMAKE_SOURCE_DIR}/src/GUDHIConfig.cmake.in ${GUDHI_USER_VERSION_DIR}/GUDHIConfig.cmake.in)
   add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                      copy ${CMAKE_SOURCE_DIR}/CMakeGUDHIVersion.txt ${GUDHI_USER_VERSION_DIR}/CMakeGUDHIVersion.txt)
-  add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
-                     copy ${CMAKE_SOURCE_DIR}/GUDHIVersion.cmake.in ${GUDHI_USER_VERSION_DIR}/GUDHIVersion.cmake.in)
   
   add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                      copy_directory ${CMAKE_SOURCE_DIR}/biblio ${GUDHI_USER_VERSION_DIR}/biblio)
