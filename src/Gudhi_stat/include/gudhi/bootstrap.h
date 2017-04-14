@@ -31,7 +31,6 @@
 
 #include <vector>
 #include <algorithm>
-#include <omp.h>
 #include <random>
 #include <ctime>
 
