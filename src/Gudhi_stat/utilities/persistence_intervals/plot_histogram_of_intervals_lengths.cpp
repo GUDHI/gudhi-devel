@@ -39,7 +39,7 @@ int main( int argc , char** argv )
 	if ( argc != 3 )
 	{
 		std::cout << "To run this program, please provide the name of a file with persistence diagram and number of dominant intervals you would like to get \n";
-		std::cout << "The second parameter of a program is the dimension of the persistence that is to be used. If your file contains only birth-death pairs, you can skip this parameter\n";
+		std::cout << "The third parameter of a program is the dimension of the persistence that is to be used. If your file contains only birth-death pairs, you can skip this parameter\n";
 		return 1;
 	}
 	unsigned dimension = std::numeric_limits<unsigned>::max();

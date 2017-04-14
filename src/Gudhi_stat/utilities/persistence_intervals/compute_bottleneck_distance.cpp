@@ -64,9 +64,7 @@ int main( int argc , char** argv )
 	std::vector< Persistence_intervals_with_distances > persistence_intervals;
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{
-		Persistence_intervals_with_distances pers(filenames[i] , dimension );
-		std::cerr << "perss : " << pers << std::endl;
-		getchar();	
+		Persistence_intervals_with_distances pers(filenames[i] , dimension );	
 		persistence_intervals.push_back( pers );
 	}
 	

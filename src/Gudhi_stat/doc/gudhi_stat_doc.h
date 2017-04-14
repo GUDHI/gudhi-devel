@@ -81,6 +81,7 @@ namespace Gudhi_stat {
  *Below we are discussing the representations which are currently implemented in Gudhi\_stat:
  *
  *\section sec_persistence_landscapes Persistence Landscapes
+ * Reference manual: \ref Gudhi::Gudhi_stat::Persistence_landscape
  *Persistence landscapes were originally proposed by Bubenik in \cite bubenik_landscapes_2015. Efficient algorithms to compute them rigorously were proposed by Bubenik and Dlotko in \cite bubenik_dlotko_landscapes_2016. The idea of 
  * persistence landscapes is shortly summarized in below.
  *
@@ -119,6 +120,7 @@ namespace Gudhi_stat {
  * 
  * 
  *\section sec_landscapes_on_grid Persistence Landscapes on a grid
+ * Reference manual: \ref Gudhi::Gudhi_stat::Persistence_landscape_on_grid
  *This is an alternative, not--exact, representation of persistence landscapes defined in the Section \ref sec_persistence_landscapes. Unlike in the Section \ref sec_persistence_landscapes we build a 
  * representation of persistence landscape by sampling its values on a finite, equally distributed grid of points. 
  * Since, the persistence landscapes that originate from persistence diagrams have slope \f$1\f$ or \f$-1\f$, we have an estimate of a region between the grid points where the landscape cab be located. 
@@ -151,6 +153,7 @@ namespace Gudhi_stat {
  *Note that the same representation is used in TDA R-package \cite Fasy_Kim_Lecci_Maria_tda.
  *
  *\section sec_persistence_heat_maps Persistence heat maps
+ * Reference manual: \ref Gudhi::Gudhi_stat::Persistence heat maps
  *This is a general class of discrete structures which are based on idea of placing a kernel in the points of persistence diagrams. 
  *This idea appeared in work by many authors over the last 15 years. As far as we know this idea was firstly described in the work of Bologna group in \cite Ferri_Frosini_comparision_sheme_1 and \cite Ferri_Frosini_comparision_sheme_2. 
  *Later it has been described by Colorado State University group in \cite Persistence_Images_2017. The presented paper in the first time provide a discussion of stability of the representation. 
@@ -174,6 +177,7 @@ namespace Gudhi_stat {
  *
  *
  *\section sec_persistence_vectors Persistence vectors
+ * Reference manual: \ref Gudhi::Gudhi_stat::Persistence vectors
  *This is a representation of persistent homology in a form of a vector which was designed for an application in 3d graphic in \cite Carriere_Oudot_Ovsjanikov_top_signatures_3d. Below we provide a short description of this representation.
  *
  *Given a persistence diagram \f$D = \{ (b_i,d_i) \}\f$, for every pair of birth--death points \f$(b_1,d_1)\f$ and \f$(b_2,d_2)\f$ we compute the following three distances:

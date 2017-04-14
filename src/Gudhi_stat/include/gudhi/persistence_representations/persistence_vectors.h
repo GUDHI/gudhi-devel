@@ -734,15 +734,15 @@ void Vector_distances_in_diagram<F>::write_to_file( const char* filename )const
 template < typename F>
 void Vector_distances_in_diagram<F>::load_from_file( const char* filename )
 {
+	std::ifstream in;
+	in.open( filename );
 	//check if the file exist.
-	if ( !( access( filename, F_OK ) != -1 ) )
+	if ( !in.good() )
 	{
 		std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
 		throw "The file from which you are trying to read the persistence landscape do not exist. The program will now terminate \n";
 	}	
-	std::ifstream in;
-	in.open( filename );
-	
+
 	double number;
 	while ( true )
 	{		

@@ -62,8 +62,10 @@ int main( int argc , char** argv )
 		dimension = (unsigned)dim;
 	}
 	
+	//std::cout << "Parameters of the program : size_of_grid : " << size_of_grid << ", min_ : " << min_ << ", max_ : " << max_ << ", stdiv: " << stdiv << ", dim : " << dim << std::endl;
+	
 	std::vector< const char* > filenames;
-	for ( int i = 6 ; i < argc ; ++i )
+	for ( int i = 6 ; i != argc ; ++i )
 	{
 		filenames.push_back( argv[i] );
 	}
@@ -76,7 +78,7 @@ int main( int argc , char** argv )
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{		
 		std::cout << "Creating a heat map based on a file : " << filenames[i] << std::endl;
-		Persistence_heat_maps<distance_from_diagonal_scaling> l( filenames[i] , filter , size_of_grid , min_ , max_ , dimension );
+		Persistence_heat_maps<distance_from_diagonal_scaling> l( filenames[i] , filter , false ,  size_of_grid , min_ , max_ , dimension );
 		
 		std::stringstream ss;
 		ss << filenames[i] << ".mps";

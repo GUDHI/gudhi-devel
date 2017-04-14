@@ -5,7 +5,6 @@
 #include <sstream>
 #include <cstdlib>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <string>
 
 #include <gudhi/time_series_analysis/sliding_window.h>

@@ -29,7 +29,7 @@
 #include <sstream>
 #include <vector>
 #include <algorithm>
-#include <unistd.h>
+
 
 
 namespace Gudhi
@@ -47,7 +47,8 @@ std::vector< std::pair< double,double > > read_persistence_file_that_may_contain
 	
 	bool dbg = true;
 	
-	if ( !( access( filename, F_OK ) != -1 ) )
+	std::ifstream in(filename);
+	if ( !in.good() )
 	{
 		std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
 		throw "The file from which you are trying to read do not exist. The program will now terminate \n";
@@ -55,9 +56,7 @@ std::vector< std::pair< double,double > > read_persistence_file_that_may_contain
 	
 	std::string line;
     std::vector< std::pair<double,double> > barcode;
-
-	std::ifstream in;
-    in.open( filename );
+	    
     while (!in.eof())
     {
         getline(in,line);        
@@ -108,15 +107,14 @@ std::vector< std::string > readFileNames( const char* filenameWithFilenames )
 {
     bool dbg = false;
     
-    if ( !( access( filenameWithFilenames, F_OK ) != -1 ) )
+    std::ifstream in(filenameWithFilenames);
+	if ( !in.good() )
 	{
 		std::cerr << "The file : " << filenameWithFilenames << " do not exist. The program will now terminate \n";
 		throw "The file from which you are trying to read do not exist. The program will now terminate \n";
 	}
 
-    std::vector< std::string > result;
-    std::ifstream in;
-    in.open( filenameWithFilenames );
+    std::vector< std::string > result;    
     std::string line;
     while (!in.eof())
     {
@@ -154,7 +152,7 @@ std::vector< std::pair< double , double > > read_standard_persistence_file( cons
 	
 	std::ifstream in;
     in.open( filename );
-    if ( !( access( filename, F_OK ) != -1 ) )
+    if ( !in.good() )
 	{
 		std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
 		throw "The file from which you are trying to read the persistence landscape do not exist. The program will now terminate \n";
@@ -204,13 +202,14 @@ std::vector< std::pair< double , double > > read_standard_persistence_file( cons
 std::vector< std::pair< double , double > > read_gudhi_persistence_file_in_one_dimension( const char* filename , size_t dimension = 0 , double what_to_substitute_for_infinite_bar = -1)
 {
 	bool dbg = false;	
-	if ( !( access( filename, F_OK ) != -1 ) )
+	std::ifstream in;
+	in.open( filename );
+	if ( !in.good() )
 	{
 		std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
 		throw "The file from which you are trying to read the persistence landscape do not exist. The program will now terminate \n";
 	}
-	std::ifstream in;
-	in.open( filename );
+
 
 	std::string line;
 	std::vector< std::pair<double,double> > barcode;
@@ -279,7 +278,8 @@ std::vector< std::pair< double , double > > read_gudhi_persistence_file_in_one_d
 std::vector< std::vector< double > > read_numbers_from_file_line_by_line( const char* filename )
 {
 	bool dbg = false;
-	if ( !( access( filename, F_OK ) != -1 ) )
+	std::ifstream in(filename);
+	if ( !in.good() )
 	{
 		std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
 		throw "The file from which you are trying to read the persistence landscape do not exist. The program will now terminate \n";
@@ -288,7 +288,7 @@ std::vector< std::vector< double > > read_numbers_from_file_line_by_line( const 
 	std::vector< std::vector< double > > result;
 	double number;
 
-	std::ifstream in(filename);
+	
 	std::string line;
 	while ( in.good() )
 	{
@@ -325,17 +325,17 @@ std::vector< std::vector< double > > read_numbers_from_file_line_by_line( const 
 std::vector<std::pair<double,double>> read_persistence_intervals_in_one_dimension_from_file(std::string const& filename, int dimension=-1 , double what_to_substitute_for_infinite_bar = -1 )
 {
 	bool dbg = false;
-	
+	std::ifstream in;
+	in.open( filename );
 	//checking if the file exist:
-	if ( !( access( filename.c_str() , F_OK ) != -1 ) )
+	if ( !in.good() )
 	{
 		std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
 		throw "The file from which you are trying to read the persistence landscape do not exist. The program will now terminate \n";
 	}
 	
 	
-	std::ifstream in;
-	in.open( filename );
+	
 
 	std::string line;
 	std::vector< std::pair<double,double> > barcode;
@@ -352,8 +352,8 @@ std::vector<std::pair<double,double>> read_persistence_intervals_in_one_dimensio
 			{
 				//check how many entries we have in the line.				
 				std::stringstream ss( line );
-				int number;
-				std::vector<int> this_line;
+				double number;
+				std::vector<double> this_line;
 				while ( ss >> number )
 				{
 					this_line.push_back( number );

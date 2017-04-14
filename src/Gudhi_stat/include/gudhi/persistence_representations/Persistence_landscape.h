@@ -32,7 +32,6 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-#include <unistd.h>
 
 
 //gudhi include
@@ -1028,9 +1027,9 @@ void Persistence_landscape::load_landscape_from_file( const char* filename )
 
 
 	//this constructor reads persistence landscape form a file. This file have to be created by this software beforehead
-    std::ifstream in;
-    in.open( filename );
-	if ( !( access( filename, F_OK ) != -1 ) )
+        std::ifstream in;
+        in.open( filename );
+	if ( !in.good() )
 	{
 		std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
 		throw "The file from which you are trying to read the persistence landscape do not exist. The program will now terminate \n";

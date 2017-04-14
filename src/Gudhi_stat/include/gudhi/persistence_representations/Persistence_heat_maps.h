@@ -576,9 +576,12 @@ void Persistence_heat_maps<Scalling_of_kernels>::construct( const std::vector< s
     if ( dbg )std::cerr << "Entering construct procedure \n";
     Scalling_of_kernels f;
     this->f = f;
+    
+    if ( dbg )std::cerr << "min and max passed to construct() procedure: " << min_ << " " << max_ << std::endl;
 
     if ( min_ == max_ )
     {
+		if (dbg)std::cerr << "min and max parameters will be etermined based on intervals \n";
         //in this case, we want the program to set up the min_ and max_ values by itself.
         min_ = std::numeric_limits<int>::max();
         max_ = -std::numeric_limits<int>::max();
@@ -705,8 +708,13 @@ Persistence_heat_maps<Scalling_of_kernels>::Persistence_heat_maps( const char* f
     else
     {
      intervals_ = read_persistence_intervals_in_one_dimension_from_file( filename , dimension );
-    }
-    this->construct( intervals_ ,  filter, erase_below_diagonal , number_of_pixels , min_ , max_ );
+    }    
+    //std::cerr << "intervals_.size() : " << intervals_.size() << std::endl;
+    //for ( size_t i = 0 ; i != intervals_.size() ; ++i )
+    //{
+	//	std::cerr << intervals_[i].first << " " << intervals_[i].second << std::endl;
+	//}    
+    this->construct( intervals_ ,  filter, erase_below_diagonal , number_of_pixels , min_ , max_ );    
     this->set_up_parameters_for_basic_classes();
 }
 
@@ -865,7 +873,7 @@ void Persistence_heat_maps<Scalling_of_kernels>::load_from_file( const char* fil
 	in.open( filename );
 	
 	//checking if the file exist / if it was open. 
-	if ( !( access( filename, F_OK ) != -1 ) )
+	if ( !in.good() )
 	{
 		std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
 		throw "The file from which you are trying to read the persistence landscape do not exist. The program will now terminate \n";

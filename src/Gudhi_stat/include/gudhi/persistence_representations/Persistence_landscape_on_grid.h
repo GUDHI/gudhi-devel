@@ -31,7 +31,6 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-#include <unistd.h>
 #include <cmath>
 #include <limits>
 
@@ -1018,7 +1017,7 @@ public:
 	
 	
 	
-	
+
 	
 	
 	
@@ -1328,16 +1327,17 @@ Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filenam
 	this->set_up_values_of_landscapes( p , grid_min_ , grid_max_ , number_of_points_ , number_of_levels_of_landscape );
 }
 
+
 void Persistence_landscape_on_grid::load_landscape_from_file( const char* filename )
 {
+    std::ifstream in;
+	in.open( filename );
 	//check if the file exist.
-	if ( !( access( filename, F_OK ) != -1 ) )
+	if ( !in.good() )
 	{
 		std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
 		throw "The file from which you are trying to read the persistence landscape do not exist. The program will now terminate \n";
 	}	
-	std::ifstream in;
-	in.open( filename );
 	
 	size_t number_of_points_in_the_grid = 0;
 	in >> this->grid_min >> this->grid_max >> number_of_points_in_the_grid;
