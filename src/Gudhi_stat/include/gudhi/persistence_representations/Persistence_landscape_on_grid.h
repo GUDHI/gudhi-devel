@@ -10,6 +10,7 @@
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation, either version 3 of the License, or
  *    (at your option) any later version.
+ * 
  *
  *    This program is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -47,6 +48,11 @@ namespace Gudhi
 {
 namespace Gudhi_stat
 {
+
+//predeclaration
+class Persistence_landscape_on_grid;
+template < typename operation > 
+Persistence_landscape_on_grid operation_on_pair_of_landscapes_on_grid( const Persistence_landscape_on_grid& land1 ,  const Persistence_landscape_on_grid& land2 );
 
 /**
  * A clas implementing persistence landascpes by approximating them on a collection of grid points.  * Persistence landscapes on grid allow vertorization, computations of distances, computations 
@@ -281,6 +287,9 @@ public:
 		}
 		return out;
 	}
+	
+	template < typename oper > 
+	friend Persistence_landscape_on_grid operation_on_pair_of_landscapes_on_grid( const Persistence_landscape_on_grid& land1 ,  const Persistence_landscape_on_grid& land2 );
 
 
     /**
@@ -344,8 +353,6 @@ public:
 		return line.first*x+line.second;
 	}
      
-    protected: 
-    template < typename oper > friend Persistence_landscape_on_grid operation_on_pair_of_landscapes_on_grid( const Persistence_landscape_on_grid& land1 ,  const Persistence_landscape_on_grid& land2 );
     
     public:
 	/**
