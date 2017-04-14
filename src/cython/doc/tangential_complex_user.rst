@@ -134,7 +134,7 @@ This example builds the Tangential complex of point set read in an OFF file.
         repr(st.num_vertices()) + ' vertices.'
     print(result_str)
     for filtered_value in st.get_filtration():
-        print(filtered_value)
+        print(filtered_value[0])
 
 The output is:
 
@@ -142,21 +142,21 @@ The output is:
 
     Tangential contains 12 simplices - 7 vertices.
     Simplex tree is of dimension 1 - 15 simplices - 7 vertices.
-    ([0], 0.0)
-    ([1], 0.0)
-    ([0, 1], 0.0)
-    ([2], 0.0)
-    ([0, 2], 0.0)
-    ([1, 2], 0.0)
-    ([3], 0.0)
-    ([1, 3], 0.0)
-    ([4], 0.0)
-    ([2, 4], 0.0)
-    ([5], 0.0)
-    ([4, 5], 0.0)
-    ([6], 0.0)
-    ([3, 6], 0.0)
-    ([5, 6], 0.0)
+    [0]
+    [1]
+    [0, 1]
+    [2]
+    [0, 2]
+    [1, 2]
+    [3]
+    [1, 3]
+    [4]
+    [2, 4]
+    [5]
+    [4, 5]
+    [6]
+    [3, 6]
+    [5, 6]
 
 
 Example with perturbation
