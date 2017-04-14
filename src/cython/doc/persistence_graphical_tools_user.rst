@@ -1,4 +1,3 @@
-=======================================
 Persistence graphical tools user manual
 =======================================
 Definition
