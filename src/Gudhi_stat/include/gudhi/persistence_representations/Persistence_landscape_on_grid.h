@@ -33,6 +33,7 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <functional>
 
 
 //gudhi include
