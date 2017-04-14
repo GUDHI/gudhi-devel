@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 project(Cython)
 
-if(CYTHON_PATH)
-  message("${PYTHON_EXECUTABLE} v.${PYTHON_VERSION_STRING} - Cython is ${CYTHON_PATH} - py.test is ${PYTEST_PATH} - Sphinx is ${SPHINX_PATH}")
+if(CYTHON_FOUND)
+  message("++ ${PYTHON_EXECUTABLE} v.${PYTHON_VERSION_STRING} - Cython is ${CYTHON_EXECUTABLE} - py.test is ${PYTEST_PATH} - Sphinx is ${SPHINX_PATH}")
 
   set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_RESULT_OF_USE_DECLTYPE', ")
   set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_ALL_NO_LIB', ")
@@ -281,4 +281,4 @@ if(CYTHON_PATH)
           COMMAND make.bat html doctest)
     endif (UNIX)
   endif(SPHINX_PATH)
-endif(CYTHON_PATH)
+endif(CYTHON_FOUND)
