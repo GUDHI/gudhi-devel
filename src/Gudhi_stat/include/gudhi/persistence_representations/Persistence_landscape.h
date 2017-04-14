@@ -48,6 +48,10 @@ namespace Gudhi_stat
 
 
 
+//predeclaration
+class Persistence_landscape;
+template < typename operation > 
+Persistence_landscape operation_on_pair_of_landscapes( const Persistence_landscape& land1 ,  const Persistence_landscape& land2 );
 
 
 
@@ -125,11 +129,11 @@ public:
      * Shall those points be joined with lines, we will obtain the i-th landscape function.
     **/
     friend std::ostream& operator<<(std::ostream& out, Persistence_landscape& land );
+    
+    template < typename operation > 
+	friend Persistence_landscape operation_on_pair_of_landscapes( const Persistence_landscape& land1 ,  const Persistence_landscape& land2 );
 
 
-protected:
-	template < typename oper > friend Persistence_landscape operation_on_pair_of_landscapes ( const Persistence_landscape& land1 ,  const Persistence_landscape& land2 );
-public:	
 
 
 	/**
