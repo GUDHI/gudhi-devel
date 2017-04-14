@@ -46,7 +46,7 @@ std::vector<std::vector<double>> subsampling_n_farthest_points(const std::vector
                                                                unsigned nb_points) {
   std::vector<std::vector<double>> landmarks;
   Subsampling_dynamic_kernel k;
-  choose_n_farthest_points(k, points, nb_points, std::back_inserter(landmarks));
+  choose_n_farthest_points(k, points, nb_points, random_starting_point, std::back_inserter(landmarks));
 
   return landmarks;
 }

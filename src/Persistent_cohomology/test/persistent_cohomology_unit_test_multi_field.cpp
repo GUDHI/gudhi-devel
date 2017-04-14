@@ -9,11 +9,11 @@
 #define BOOST_TEST_MODULE "persistent_cohomology_multi_field"
 #include <boost/test/unit_test.hpp>
 
-#include "gudhi/graph_simplicial_complex.h"
-#include "gudhi/reader_utils.h"
-#include "gudhi/Simplex_tree.h"
-#include "gudhi/Persistent_cohomology.h"
-#include "gudhi/Persistent_cohomology/Multi_field.h"
+#include <gudhi/graph_simplicial_complex.h>
+#include <gudhi/reader_utils.h>
+#include <gudhi/Simplex_tree.h>
+#include <gudhi/Persistent_cohomology.h>
+#include <gudhi/Persistent_cohomology/Multi_field.h>
 
 using namespace Gudhi;
 using namespace Gudhi::persistent_cohomology;

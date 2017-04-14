@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
   // Init of a Rips complex from an OFF file
   // ----------------------------------------------------------------------------
   Gudhi::Points_off_reader<Point> off_reader(off_file_name);
-  Rips_complex rips_complex_from_file(off_reader.get_point_cloud(), threshold, Euclidean_distance());
+  Rips_complex rips_complex_from_file(off_reader.get_point_cloud(), threshold, Gudhi::Euclidean_distance());
 
   std::streambuf* streambufffer;
   std::ofstream ouput_file_stream;
