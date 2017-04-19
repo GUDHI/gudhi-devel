@@ -86,7 +86,6 @@ class Graph_induced_complex {
    Simplex_tree<> st;
    std::map<int,std::vector<int> > adjacency_matrix;
 
-
  // Simplex comparator
  private:
    bool simplex_comp(const std::vector<Cover_t>& s1, const std::vector<Cover_t>& s2){
@@ -103,6 +102,7 @@ class Graph_induced_complex {
      else  return func[a] < func[b];
    }
 
+ // DFS
  private:
    void dfs(std::map<int,std::vector<int> >& G, const int& p, std::vector<int>& cc, std::map<int,bool>& visit){
      cc.push_back(p);
@@ -113,7 +113,50 @@ class Graph_induced_complex {
            dfs(G,G[p][i],cc,visit);
    }
 
- public:
+ // *******************************************************************************************************************
+ // Graphs.
+ // *******************************************************************************************************************
+
+ public: // Set graph from file.
+  void set_graph_from_file(const std::string& graph_file_name){
+    int neighb; int vid; std::ifstream input(graph_file_name); std::string line; std::vector<int> edge(2);
+    while(std::getline(input,line)){
+      std::stringstream stream(line); stream >> vid; edge[0] = vid;
+      while(stream >> neighb){edge[1] = neighb; st.insert_simplex_and_subfaces(edge);}
+    }
+  }
+
+ public: // Set graph from Rips complex.
+   void set_graph_from_rips(const double& threshold, const std::string& off_file_name){
+     Points_off_reader<Point> off_reader(off_file_name);
+     Rips_complex rips_complex_from_points(off_reader.get_point_cloud(), threshold, Euclidean_distance());
+     rips_complex_from_points.create_complex(st, 1);
+   }
+
+
+ // *******************************************************************************************************************
+ // Functions.
+ // *******************************************************************************************************************
+
+ public: // Set function from file.
+   void set_function_from_file(const std::string& func_file_name){
+     int vertex_id = 0; std::ifstream input(func_file_name); std::string line; double f;
+     while(std::getline(input,line)){
+       std::stringstream stream(line); stream >> f;
+       func.insert(std::pair<int,double>(vertex_id, f)); vertex_id++;
+     }
+   }
+
+ public: // Set function from vector.
+   void set_function_from_vector(const std::vector<double>& function){
+     for(int i = 0; i < function.size(); i++)  func.insert(std::pair<int,double>(i, function[i]));
+   }
+
+ // *******************************************************************************************************************
+ // Covers.
+ // *******************************************************************************************************************
+
+ public: // Set cover from file.
    void set_cover_from_file(const std::string& cover_file_name){
      int vertex_id = 0; Cover_t cov; std::vector<Cover_t> cov_elts, cov_number;
      std::ifstream input(cover_file_name); std::string line;
@@ -127,17 +170,12 @@ class Graph_induced_complex {
      cov_number.resize(std::distance(cov_number.begin(),it)); maximal_dim = cov_number.size();
    }
 
- public:
-   void set_cover_from_function(const std::string& func_file_name, const double& resolution, const double& gain, const bool& token){
+ public: // Set cover with preimages of function.
+   void set_cover_from_function(const double& resolution, const double& gain, const bool& token){
 
      // Read function values and compute min and max
-     int vertex_id = 0; double f; std::vector<double> range; double maxf, minf; minf = std::numeric_limits<float>::max(); maxf = std::numeric_limits<float>::min();
-     std::ifstream input(func_file_name); std::string line;
-     while(std::getline(input,line)){
-       std::stringstream stream(line);
-       stream >> f; range.push_back(f); minf = std::min(minf, f); maxf = std::max(maxf, f);
-       func.insert(std::pair<int,double>(vertex_id, f)); vertex_id++;
-     }
+     std::map<int, double>::iterator it; std::vector<double> range; double maxf, minf; minf = std::numeric_limits<float>::max(); maxf = std::numeric_limits<float>::min();
+     for(it = func.begin(); it != func.end(); it++){range.push_back(it->second); minf = std::min(minf, it->second); maxf = std::max(maxf, it->second);}
      int num_pts = func.size();
 
      // Compute cover of im(f)
@@ -240,21 +278,10 @@ class Graph_induced_complex {
 
    }
 
- public:
-   void set_graph_from_rips(const double& threshold, const std::string& off_file_name){
-     Points_off_reader<Point> off_reader(off_file_name);
-     Rips_complex rips_complex_from_points(off_reader.get_point_cloud(), threshold, Euclidean_distance());
-     rips_complex_from_points.create_complex(st, 1);
-   }
 
- public:
-   void set_graph_from_file(const std::string& graph_file_name){
-     int neighb; int vid; std::ifstream input(graph_file_name); std::string line; std::vector<int> edge(2);
-     while(std::getline(input,line)){
-       std::stringstream stream(line); stream >> vid; edge[0] = vid;
-       while(stream >> neighb){edge[1] = neighb; st.insert_simplex_and_subfaces(edge);}
-     }
-   }
+ // *******************************************************************************************************************
+ // *******************************************************************************************************************
+
 
  public:
    template<typename SimplicialComplexForGIC>
@@ -268,10 +295,14 @@ class Graph_induced_complex {
    }
 
  public:
-   void find_all_simplices(const std::vector<std::vector<Cover_t> > & cover_elts,\
-                           int token, std::vector<Cover_t> & simplex_tmp){
+   void find_all_simplices(const std::vector<std::vector<Cover_t> > & cover_elts\
+                           //int token, std::vector<Cover_t> & simplex_tmp
+                           ){
      int num_nodes = cover_elts.size();
-     if(token == num_nodes-1){
+
+     // Old method.
+
+     /*if(token == num_nodes-1){
        int num_clus = cover_elts[token].size();
        for(int i = 0; i < num_clus; i++){
          std::vector<Cover_t> simplex = simplex_tmp; simplex.push_back(cover_elts[token][i]);
@@ -287,7 +318,15 @@ class Graph_induced_complex {
          std::vector<Cover_t> simplex = simplex_tmp; simplex.push_back(cover_elts[token][i]);
          find_all_simplices(cover_elts, token+1, simplex);
        }
-     }
+     }*/
+
+     std::vector<Cover_t> simplex;
+     for(int i = 0; i < num_nodes; i++)
+       for(int j = 0; j < cover_elts[i].size(); j++)
+         simplex.push_back(cover_elts[i][j]);
+     std::sort(simplex.begin(),simplex.end()); it = std::unique(simplex.begin(),simplex.end());
+     simplex.resize(std::distance(simplex.begin(),it));
+     simplices.push_back(simplex);
    }
 
  public:
