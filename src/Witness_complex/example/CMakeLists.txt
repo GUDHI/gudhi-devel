@@ -6,7 +6,8 @@ target_link_libraries(Witness_complex_example_nearest_landmark_table ${Boost_SYS
 if (TBB_FOUND)
   target_link_libraries(Witness_complex_example_nearest_landmark_table ${TBB_LIBRARIES})
 endif()
-add_test(Witness_complex_test_nearest_landmark_table Witness_complex_example_nearest_landmark_table)
+add_test(NAME Witness_complex_example_nearest_landmark_table
+    COMMAND $<TARGET_FILE:Witness_complex_example_nearest_landmark_table>)
 
 # CGAL and Eigen3 are required for Euclidean version of Witness
 if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
@@ -28,17 +29,18 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
     target_link_libraries(Witness_complex_example_strong_witness_persistence ${TBB_LIBRARIES})
   endif()
 
-  add_test(Witness_complex_off_test_torus
-           ${CMAKE_CURRENT_BINARY_DIR}/Witness_complex_example_off
-           ${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off 20 1.0 3)
-  add_test(Witness_complex_strong_off_test_torus
-           ${CMAKE_CURRENT_BINARY_DIR}/Witness_complex_example_strong_off
-           ${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off 20 1.0 3)
-  add_test(Witness_complex_test_sphere_10 Witness_complex_example_sphere 10)
-  add_test(Witness_complex_test_torus_persistence
-           ${CMAKE_CURRENT_BINARY_DIR}/Witness_complex_example_witness_persistence
-           ${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off -l 20 -a 0.5)
-  add_test(Witness_complex_strong_test_torus_persistence
-           ${CMAKE_CURRENT_BINARY_DIR}/Witness_complex_example_strong_witness_persistence
-           ${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off -l 20 -a 0.5)
+  add_test(NAME Witness_complex_example_off_test_torus
+      COMMAND $<TARGET_FILE:Witness_complex_example_off>
+      "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" "20" "1.0" "3")
+  add_test(NAME Witness_complex_example_strong_off_test_torus
+      COMMAND $<TARGET_FILE:Witness_complex_example_strong_off>
+      "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" "20" "1.0" "3")
+  add_test(NAME Witness_complex_example_test_sphere_10
+      COMMAND $<TARGET_FILE:Witness_complex_example_sphere> "10")
+  add_test(NAME Witness_complex_example_test_torus_persistence
+      COMMAND $<TARGET_FILE:Witness_complex_example_witness_persistence>
+      "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" "-l" "20" "-a" "0.5")
+  add_test(NAME Witness_complex_example_strong_test_torus_persistence
+      COMMAND $<TARGET_FILE:Witness_complex_example_strong_witness_persistence>
+      "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" "-l" "20" "-a" "0.5")
 endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)

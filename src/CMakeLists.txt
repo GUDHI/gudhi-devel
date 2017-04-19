@@ -9,12 +9,12 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
 # For "make doxygen"
 set(GUDHI_USER_VERSION_DIR ${CMAKE_SOURCE_DIR})
-include(${CMAKE_MODULE_PATH}/GUDHI_doxygen_target.txt)
+include(GUDHI_doxygen_target)
 
 # This variable is used by Cython CMakeLists.txt to know its path
 set(GUDHI_CYTHON_PATH "cython")
 # For third parties libraries management - To be done last as CGAL updates CMAKE_MODULE_PATH
-include("${CMAKE_MODULE_PATH}/GUDHI_third_party_libraries.txt")
+include(GUDHI_third_party_libraries)
 
 if(MSVC)
   # Turn off some VC++ warnings
