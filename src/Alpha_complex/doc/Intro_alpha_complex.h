@@ -71,7 +71,7 @@ namespace alpha_complex {
  * 
  * When launching:
  * 
- * \code $> ./alphapoints
+ * \code $> ./Alpha_complex_example_from_points
  * \endcode
  *
  * the program output is:
@@ -155,7 +155,7 @@ namespace alpha_complex {
  * 
  * When launching:
  * 
- * \code $> ./alphaoffreader ../../data/points/alphacomplexdoc.off 32.0
+ * \code $> ./Alpha_complex_example_from_off ../../data/points/alphacomplexdoc.off 32.0
  * \endcode
  *
  * the program output is:

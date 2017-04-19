@@ -15,7 +15,6 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
 
   add_test(NAME Alpha_complex_example_from_points COMMAND $<TARGET_FILE:Alpha_complex_example_from_points>)
 
-  # Do not forget to copy test files in current binary dir
   add_test(NAME Alpha_complex_example_from_off_60 COMMAND $<TARGET_FILE:Alpha_complex_example_from_off>
       "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" "60.0" "${CMAKE_CURRENT_BINARY_DIR}/alphaoffreader_result_60.txt")
   add_test(NAME Alpha_complex_example_from_off_32 COMMAND $<TARGET_FILE:Alpha_complex_example_from_off>

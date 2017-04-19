@@ -9,7 +9,6 @@ if (GPROF_PATH)
 endif()
 
 function(gudhi_add_coverage_test unitary_test)
-  message("++  ${CMAKE_BINARY_DIR}/${unitary_test}_UT.xml")
   add_test(NAME ${unitary_test} COMMAND $<TARGET_FILE:${unitary_test}>
       "--log_format=XML" "--log_sink=${CMAKE_BINARY_DIR}/${unitary_test}_UT.xml" "--log_level=test_suite" "--report_level=no")
 endfunction()

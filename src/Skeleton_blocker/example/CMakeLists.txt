@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 2.6)
 project(Skeleton_blocker_examples)
 
-add_executable(SkeletonBlockerFromSimplices Skeleton_blocker_from_simplices.cpp)
-add_executable(SkeletonBlockerIteration Skeleton_blocker_iteration.cpp)
-add_executable(SkeletonBlockerLink Skeleton_blocker_link.cpp)
+add_executable(Skeleton_blocker_example_from_simplices Skeleton_blocker_from_simplices.cpp)
+add_executable(Skeleton_blocker_example_iteration Skeleton_blocker_iteration.cpp)
+add_executable(Skeleton_blocker_example_link Skeleton_blocker_link.cpp)
 
-target_link_libraries(SkeletonBlockerIteration ${Boost_TIMER_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+target_link_libraries(Skeleton_blocker_example_iteration ${Boost_TIMER_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 
-add_test(SkeletonBlockerFromSimplices ${CMAKE_CURRENT_BINARY_DIR}/SkeletonBlockerFromSimplices)
-add_test(SkeletonBlockerIteration ${CMAKE_CURRENT_BINARY_DIR}/SkeletonBlockerIteration)
-add_test(SkeletonBlockerLink ${CMAKE_CURRENT_BINARY_DIR}/SkeletonBlockerLink)
+add_test(NAME Skeleton_blocker_example_from_simplices COMMAND $<TARGET_FILE:Skeleton_blocker_example_from_simplices>)
+add_test(NAME Skeleton_blocker_example_iteration COMMAND $<TARGET_FILE:Skeleton_blocker_example_iteration>)
+add_test(NAME Skeleton_blocker_example_link COMMAND $<TARGET_FILE:Skeleton_blocker_example_link>)
