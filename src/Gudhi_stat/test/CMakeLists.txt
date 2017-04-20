@@ -19,6 +19,7 @@ file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 # Do not forget to copy test files in current binary dir
 file(COPY "${CMAKE_SOURCE_DIR}/src/Gudhi_stat/test/data" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
+file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 add_executable ( persistence_intervals_test persistence_intervals_test.cpp )
 target_link_libraries(persistence_intervals_test ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
@@ -30,7 +31,7 @@ add_test(NAME persistence_intervals_test
   # XML format for Jenkins xUnit plugin 
   --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/persistence_intervals_UT.xml --log_level=test_suite --report_level=no)
 
-
+file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 add_executable ( vector_representation_test vector_representation_test.cpp )
 target_link_libraries(vector_representation_test ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
@@ -41,7 +42,7 @@ add_test(NAME vector_representation_test
   # XML format for Jenkins xUnit plugin 
   --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/vector_representation_UT.xml --log_level=test_suite --report_level=no)
 
-
+file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 add_executable ( persistence_lanscapes_test persistence_lanscapes_test.cpp )
 target_link_libraries(persistence_lanscapes_test ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
@@ -52,7 +53,7 @@ add_test(NAME persistence_lanscapes_test
   # XML format for Jenkins xUnit plugin 
   --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/persistence_lanscapes_UT.xml --log_level=test_suite --report_level=no)
 
-
+file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 add_executable ( persistence_lanscapes_on_grid_test persistence_lanscapes_on_grid_test.cpp )
 target_link_libraries(persistence_lanscapes_on_grid_test ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
@@ -63,7 +64,7 @@ add_test(NAME persistence_lanscapes_on_grid_test
   # XML format for Jenkins xUnit plugin 
   --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/persistence_lanscapes_on_grid_UT.xml --log_level=test_suite --report_level=no)
 
-
+file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 add_executable ( persistence_heat_maps_test persistence_heat_maps_test.cpp )
 target_link_libraries(persistence_heat_maps_test ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
@@ -74,7 +75,7 @@ add_test(NAME persistence_heat_maps_test
   # XML format for Jenkins xUnit plugin
   --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/persistence_heat_maps_UT.xml --log_level=test_suite --report_level=no)
 
-
+file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 add_executable ( read_persistence_from_file_test read_persistence_from_file_test.cpp )
 target_link_libraries(read_persistence_from_file_test ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
