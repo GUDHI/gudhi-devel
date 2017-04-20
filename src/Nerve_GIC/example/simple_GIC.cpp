@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
 
   std::string off_file_name(argv[1]);
   double threshold = atof(argv[2]);
-  std::string function_file_name(argv[3]);
+  int coord = atoi(argv[3]);
   double resolution = atof(argv[4]);
   double gain = atof(argv[5]);
 
@@ -26,8 +26,10 @@ int main(int argc, char **argv) {
   // ----------------------------------------------------------------------------
 
   Gudhi::graph_induced_complex::Graph_induced_complex GIC;
+
   GIC.set_graph_from_rips(threshold, off_file_name);
-  GIC.set_cover_from_function(function_file_name,resolution,gain,0);
+  GIC.set_function_from_coordinate(coord, off_file_name);
+  GIC.set_cover_from_function(resolution,gain,0);
   //GIC.find_GIC_simplices();
   GIC.find_GIC_simplices_with_functional_minimal_cover(resolution,gain);
   Simplex_tree stree; GIC.create_complex(stree);
