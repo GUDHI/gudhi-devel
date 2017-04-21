@@ -53,7 +53,7 @@ add_subdirectory(example/Subsampling)
 add_subdirectory(example/Tangential_complex)
 add_subdirectory(example/Bottleneck_distance)
 add_subdirectory(example/Gudhi_stat)
-add_subdirectory(example/Gudhi_stat/utilities)
+add_subdirectory(utilities/Gudhi_stat)
 
 # data points generator
 add_subdirectory(data/points/generator)
