@@ -130,7 +130,7 @@ class Graph_induced_complex {
   void set_graph_from_OFF(const std::string& off_file_name){
     int numpts, numedges, numfaces, i; std::vector<int> edge(2); double x; int num; std::vector<int> simplex;
     std::ifstream input(off_file_name); std::string line; getline(input, line);
-    input >> numpts; input >> numedges; input >> numfaces;
+    input >> numpts; input >> numfaces; input >> numedges;
     i = 0;  while(i < numpts){input >> x; input >> x; input >> x; i++;}
     i = 0;  while(i < numfaces){
       simplex.clear(); input >> num;
@@ -293,7 +293,7 @@ class Graph_induced_complex {
          for(std::map<int, std::vector<int> >::iterator it = prop.begin(); it != prop.end(); it++){
            if (  !(visit[it->first])  ){
              std::vector<int> cc; cc.clear();
-             dfs(prop,it->first,cc,visit); int cci = cc.size(); std::cout << cci << std::endl;
+             dfs(prop,it->first,cc,visit); int cci = cc.size(); //std::cout << cci << std::endl;
              for(int i = 0; i < cci; i++)  cover[cc[i]].push_back(id);
              id++;
            }
@@ -354,7 +354,7 @@ class Graph_induced_complex {
          simplex.push_back(cover_elts[i][j]);
      std::sort(simplex.begin(),simplex.end()); std::vector<Cover_t>::iterator it = std::unique(simplex.begin(),simplex.end());
      simplex.resize(std::distance(simplex.begin(),it));
-     simplices.push_back(simplex);
+     simplices.push_back(simplex); for(int i = 0; i < simplex.size(); i++)  std::cout << simplex[i] << " "; std::cout << std::endl;
    }
 
  public:
@@ -410,27 +410,27 @@ class Graph_induced_complex {
    }
 
  public:
-   void find_GIC_simplices_with_functional_minimal_cover(const double& resolution, const double& gain){
-     for(std::map<int,std::vector<Cover_t> >::iterator it = cover.begin(); it != cover.end(); it++){
+   void find_GIC_simplices_with_functional_minimal_cover(){
+     for(std::map<int,std::vector<Cover_t> >::iterator it = cover.begin(); it != cover.end(); it++){         
        int vid = it->first; std::vector<int> neighbors = adjacency_matrix[vid]; int num_neighb = neighbors.size();
+       std::vector<int> vids(1); vids[0] = cover[vid][0]; simplices.push_back(vids);
        for(int i = 0; i < num_neighb; i++){
          int neighb = neighbors[i]; int v1, v2;
          if(func[vid] > func[neighb]){
-           if(  func[vid]-func[neighb] <= resolution*(2-gain)  ){
-             if(cover[vid].size() == 2)  v1 = std::min(cover[vid][0],cover[vid][1]); else  v1 = cover[vid][0];
-             if(cover[neighb].size() == 2)  v2 = std::max(cover[neighb][0],cover[neighb][1]); else  v2 = cover[neighb][0];
-             std::vector<int> edge(2); edge[0] = v1; edge[1] = v2;
-             if(v1 > v2)  simplices.push_back(edge);
-           }
+           if(cover[vid].size() == 2)  v1 = std::max(cover[vid][0],cover[vid][1]); else  v1 = cover[vid][0];
+           if(cover[neighb].size() == 2)  v2 = std::min(cover[neighb][0],cover[neighb][1]); else  v2 = cover[neighb][0];
+           std::vector<int> edge(2); edge[0] = v1; edge[1] = v2;
+           //std::cout << v1 << " " << v2 << std::endl;
+           if(v1 != v2)  simplices.push_back(edge);
          }
-         else{
+         /*else{
            if(  func[neighb]-func[vid] <= resolution*(2-gain)  ){
-               if(cover[vid].size() == 2)  v1 = std::max(cover[vid][0],cover[vid][1]); else  v1 = cover[vid][0];
-               if(cover[neighb].size() == 2)  v2 = std::min(cover[neighb][0],cover[neighb][1]); else  v2 = cover[neighb][0];
+               if(cover[vid].size() == 2)  v1 = std::min(cover[vid][0],cover[vid][1]); else  v1 = cover[vid][0];
+               if(cover[neighb].size() == 2)  v2 = std::max(cover[neighb][0],cover[neighb][1]); else  v2 = cover[neighb][0];
                std::vector<int> edge(2); edge[0] = v1; edge[1] = v2;
                if(v2 > v1)  simplices.push_back(edge);
              }
-         }
+         }*/
        }
      }
      std::vector<std::vector<Cover_t> >::iterator it;
