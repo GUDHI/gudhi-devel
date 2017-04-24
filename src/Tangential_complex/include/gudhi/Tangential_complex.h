@@ -1059,7 +1059,6 @@ class Tangential_complex {
                                 Triangulation &triangulation, bool verbose = false) {
     int tangent_space_dim = tsb.dimension();
     const Tr_traits &local_tr_traits = triangulation.geom_traits();
-    Tr_vertex_handle center_vertex;
 
     // Kernel functor & objects
     typename K::Squared_distance_d k_sqdist = m_k.squared_distance_d_object();
@@ -1084,7 +1083,7 @@ class Tangential_complex {
       proj_wp = project_point_and_compute_weight(wp, tsb, local_tr_traits);
     }
 
-    center_vertex = triangulation.insert(proj_wp);
+    Tr_vertex_handle center_vertex = triangulation.insert(proj_wp);
     center_vertex->data() = i;
     if (verbose)
       std::cerr << "* Inserted point #" << i << "\n";
@@ -1823,7 +1822,6 @@ class Tangential_complex {
     bool is_inconsistent = false;
 
     Star const& star = m_stars[tr_index];
-    Tr_vertex_handle center_vh = m_triangulations[tr_index].center_vertex();
 
     // For each incident simplex
     Star::const_iterator it_inc_simplex = star.begin();
@@ -1950,7 +1948,6 @@ class Tangential_complex {
       bool is_star_inconsistent = false;
 
       Triangulation const& tr = it_tr->tr();
-      Tr_vertex_handle center_vh = it_tr->center_vertex();
 
       if (tr.current_dimension() < m_intrinsic_dim)
         continue;
