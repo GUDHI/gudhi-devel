@@ -20,12 +20,11 @@ data structures.
 The current release of the GUDHI library includes:
 
 * Data structures to represent, construct and manipulate simplicial complexes.
-* Algorithms to compute persistent homology and multi-field persistent homology.
 * Simplication of simplicial complexes by edge contraction.
+* Algorithms to compute persistent homology and bottleneck distance.
 
-All data-structures are generic and several of their aspects can be
-parameterized via template classes. We refer to :cite:`gudhilibrary_ICMS14`
-for a detailed description of the design of the library.
+We refer to :cite:`gudhilibrary_ICMS14` for a detailed description of the
+design of the library.
 
 Data structures
 ***************
