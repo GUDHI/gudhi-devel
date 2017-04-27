@@ -20,12 +20,12 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gudhi/persistence_representations/Persistence_landscape_on_grid.h>
+#include <gudhi/Persistence_landscape_on_grid.h>
 
 
 
 using namespace Gudhi;
-using namespace Gudhi::Gudhi_stat;
+using namespace Gudhi::Persistence_representations;
 
 #include <iostream>
 

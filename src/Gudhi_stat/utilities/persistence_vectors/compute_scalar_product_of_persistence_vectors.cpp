@@ -20,12 +20,12 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gudhi/persistence_representations/persistence_vectors.h>
+#include <gudhi/persistence_vectors.h>
 
 
 
 using namespace Gudhi;
-using namespace Gudhi::Gudhi_stat;
+using namespace Gudhi::Persistence_representations;
 
 #include <iostream>
 #include <sstream>

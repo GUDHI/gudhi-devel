@@ -22,12 +22,13 @@
 
 
 #include <gudhi/permutation_test.h>
-#include <gudhi/persistence_representations/Persistence_landscape.h>
+#include <gudhi/Persistence_landscape.h>
 #include <iostream>
 #include <cstring>
 
 using namespace Gudhi;
 using namespace Gudhi::Gudhi_stat;
+using namespace Gudhi::Persistence_representations;
 
 int main( int argc , char** argv )
 {	

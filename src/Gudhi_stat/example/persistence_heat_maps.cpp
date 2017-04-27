@@ -23,7 +23,7 @@
 
 
 #include <gudhi/reader_utils.h>
-#include <gudhi/persistence_representations/Persistence_heat_maps.h>
+#include <gudhi/Persistence_heat_maps.h>
 
 #include <iostream>
 #include <vector>
@@ -31,7 +31,7 @@
 
 
 using namespace Gudhi;
-using namespace Gudhi::Gudhi_stat;
+using namespace Gudhi::Persistence_representations;
 
 
 double epsilon = 0.0000005;

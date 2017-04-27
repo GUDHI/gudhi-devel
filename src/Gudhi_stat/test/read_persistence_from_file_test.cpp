@@ -33,7 +33,7 @@
 
 
 using namespace Gudhi;
-using namespace Gudhi::Gudhi_stat;
+using namespace Gudhi::Persistence_representations;
 
 
 

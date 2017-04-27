@@ -23,9 +23,9 @@
 //stat part:
 #include <gudhi/Hausdorff_distances.h>
 #include <gudhi/bootstrap.h>
-#include <gudhi/persistence_representations/Persistence_landscape.h>
+#include <gudhi/Persistence_landscape.h>
 #include <gudhi/read_persistence_from_file.h>
-#include <gudhi/persistence_representations/persistence_vectors.h>
+#include <gudhi/persistence_vectors.h>
 //persistence part:
 #include <gudhi/reader_utils.h>
 #include <gudhi/Rips_complex.h>
@@ -34,8 +34,9 @@
 #include <gudhi/Persistent_cohomology.h>
 
 
-
-using Persistence_landscape = Gudhi::Gudhi_stat::Persistence_landscape;
+using namespace Gudhi::Gudhi_stat;
+using namespace Gudhi::Persistence_representations;
+using Persistence_landscape = Gudhi::Persistence_representations::Persistence_landscape;
 
 typedef int Vertex_handle;
 //typedef double Filtration_value;
@@ -157,7 +158,7 @@ int main( int argc , char** argv )
 	
 	std::cout << "Now we will read points from the file : " << filename << " and then perform " << number_of_repetitions_of_bootstrap << " times the bootstrap on it by choosing subsample of a size " << size_of_subsample << std::endl;
 	
-  std::vector< std::vector< double > > points = Gudhi::Gudhi_stat::read_numbers_from_file_line_by_line( filename );
+  std::vector< std::vector< double > > points = Gudhi::Persistence_representations::read_numbers_from_file_line_by_line( filename );
 	
 	std::cout << "Read : " << points.size() << " points.\n";
 	

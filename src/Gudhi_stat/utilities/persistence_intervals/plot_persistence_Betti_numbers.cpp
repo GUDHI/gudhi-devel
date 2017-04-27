@@ -23,14 +23,14 @@
 
 
 #include <gudhi/reader_utils.h>
-#include <gudhi/persistence_representations/Persistence_intervals.h>
+#include <gudhi/Persistence_intervals.h>
 
 #include <iostream>
 
 
 
 using namespace Gudhi;
-using namespace Gudhi::Gudhi_stat;
+using namespace Gudhi::Persistence_representations;
 
 
 int main( int argc , char** argv )

@@ -25,19 +25,19 @@
 
 
 //concretizations
-#include <gudhi/persistence_representations/Vector_distances_in_diagram.h>
-#include <gudhi/persistence_representations/Persistence_landscape.h>
-#include <gudhi/persistence_representations/Persistence_landscape_on_grid.h>
-#include <gudhi/persistence_representations/Persistence_heat_maps.h>
+#include <gudhi/Vector_distances_in_diagram.h>
+#include <gudhi/Persistence_landscape.h>
+#include <gudhi/Persistence_landscape_on_grid.h>
+#include <gudhi/Persistence_heat_maps.h>
 #include <vector>
 #include <limits>
 
 //extras
-#include <gudhi/common_gudhi_stat.h>
+#include <gudhi/common_persistence_representations.h>
 
 namespace Gudhi 
 {
-namespace Gudhi_stat 
+namespace Persistence_representations 
 {
 
 

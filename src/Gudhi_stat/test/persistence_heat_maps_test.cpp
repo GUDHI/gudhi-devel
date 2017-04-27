@@ -26,14 +26,14 @@
 #define BOOST_TEST_MODULE "gudhi_stat"
 #include <boost/test/unit_test.hpp>
 #include <gudhi/reader_utils.h>
-#include <gudhi/persistence_representations/Persistence_heat_maps.h>
+#include <gudhi/Persistence_heat_maps.h>
 
 #include <iostream>
 
 
 
 using namespace Gudhi;
-using namespace Gudhi::Gudhi_stat;
+using namespace Gudhi::Persistence_representations;
 
 
 

@@ -22,7 +22,7 @@
 
 
 
-#include <gudhi/persistence_representations/persistence_vectors.h>
+#include <gudhi/persistence_vectors.h>
 #include <iostream>
 
 
@@ -32,7 +32,7 @@
 #include <iomanip>
 
 using namespace Gudhi;
-using namespace Gudhi::Gudhi_stat;
+using namespace Gudhi::Persistence_representations;
 
 
 

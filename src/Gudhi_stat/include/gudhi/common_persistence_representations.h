@@ -26,7 +26,7 @@
 
 namespace Gudhi
 {
-namespace Gudhi_stat
+namespace Persistence_representations
 {
  //this file contain an implementation of some common procedures used in Gudhi_stat.
 

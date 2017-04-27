@@ -21,8 +21,8 @@
  */
 
 
-#include <gudhi/persistence_representations/persistence_vectors.h>
-#include <gudhi/common_gudhi_stat.h>
+#include <gudhi/persistence_vectors.h>
+#include <gudhi/common_persistence_representations.h>
 #include <iostream>
 
 #define BOOST_TEST_DYN_LINK
@@ -35,7 +35,7 @@
 
 
 using namespace Gudhi;
-using namespace Gudhi::Gudhi_stat;
+using namespace Gudhi::Persistence_representations;
 
 
 

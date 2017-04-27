@@ -37,7 +37,7 @@
 
 namespace Gudhi 
 {
-namespace Gudhi_stat 
+namespace Persistence_representations 
 {
 
 /**

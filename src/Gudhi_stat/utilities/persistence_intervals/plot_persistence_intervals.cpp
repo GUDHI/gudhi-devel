@@ -23,7 +23,7 @@
 
 
 #include <gudhi/reader_utils.h>
-#include <gudhi/persistence_representations/Persistence_intervals.h>
+#include <gudhi/Persistence_intervals.h>
 #include <gudhi/read_persistence_from_file.h>
 
 #include <iostream>
@@ -31,7 +31,7 @@
 
 
 using namespace Gudhi;
-using namespace Gudhi::Gudhi_stat;
+using namespace Gudhi::Persistence_representations;
 
 
 double epsilon = 0.0000005;
@@ -39,7 +39,7 @@ double epsilon = 0.0000005;
 	
 int main( int argc , char** argv )
 {
-	if ( argc != 2 )
+	if ( argc < 2 )
 	{
 		std::cout << "To run this program, please provide the name of a file with persistence diagram \n";
 		std::cout << "The second optional parameter of a program is the dimension of the persistence that is to be used. If your file contains only birth-death pairs, you can skip this parameter\n";		
@@ -54,10 +54,7 @@ int main( int argc , char** argv )
 	if ( dim >= 0 )
 	{
 		dimension = (unsigned)dim;
-	}
-	
-	
-	
+	}			
 	std::vector< std::pair< double , double > > intervals = read_persistence_intervals_in_one_dimension_from_file( argv[1] , dimension );
 	Persistence_intervals b( intervals );
 	b.plot( argv[1] );

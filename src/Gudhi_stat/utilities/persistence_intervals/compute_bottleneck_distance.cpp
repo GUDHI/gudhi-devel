@@ -20,13 +20,13 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gudhi/persistence_representations/Persistence_intervals_with_distances.h>
+#include <gudhi/Persistence_intervals_with_distances.h>
 #include <gudhi/read_persistence_from_file.h>
 
 
 
 using namespace Gudhi;
-using namespace Gudhi::Gudhi_stat;
+using namespace Gudhi::Persistence_representations;
 
 #include <iostream>
 #include <sstream>

@@ -29,7 +29,7 @@
 
 namespace Gudhi 
 {
-namespace Gudhi_stat 
+namespace Persistence_representations 
 {
 
 class Persistence_intervals_with_distances : public Persistence_intervals

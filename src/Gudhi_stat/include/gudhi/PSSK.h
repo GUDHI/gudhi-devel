@@ -25,12 +25,12 @@
 #define PSSK_H
 
 //gudhi include
-#include <gudhi/persistence_representations/Persistence_heat_maps.h>
+#include <gudhi/Persistence_heat_maps.h>
 
 
 namespace Gudhi
 {
-namespace Gudhi_stat
+namespace Persistence_representations
 {
 
 /**

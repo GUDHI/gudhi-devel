@@ -22,12 +22,12 @@
 
 
 
-#include <gudhi/persistence_representations/Persistence_landscape.h>
+#include <gudhi/Persistence_landscape.h>
 
 
 
 using namespace Gudhi;
-using namespace Gudhi::Gudhi_stat;
+using namespace Gudhi::Persistence_representations;
 
 #include <iostream>
 

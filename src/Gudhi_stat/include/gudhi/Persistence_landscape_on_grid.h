@@ -40,13 +40,13 @@
 //gudhi include
 
 #include <gudhi/read_persistence_from_file.h>
-#include <gudhi/common_gudhi_stat.h>
+#include <gudhi/common_persistence_representations.h>
 
 
 
 namespace Gudhi
 {
-namespace Gudhi_stat
+namespace Persistence_representations
 {
 
 //predeclaration

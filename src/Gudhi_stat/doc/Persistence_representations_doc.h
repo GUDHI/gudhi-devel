@@ -26,9 +26,9 @@
 
 namespace Gudhi {
 
-namespace Gudhi_stat {
+namespace Persistence_representations {
 
-/**  \defgroup Gudhi_stat Gudhi_stat
+/**  \defgroup Persistence_representations Persistence_representations
  *
  * \author   Pawel Dlotko
  *
@@ -52,7 +52,7 @@ namespace Gudhi_stat {
  *
  *The permutation test reminded above can be performed for any type A which can be averaged, and which allows for computations of distances. 
  *
- *The Gudhi\_stat contains a collection of various representations of persistent homology that implements various concepts described below:
+ *The Persistence\_representations contains a collection of various representations of persistent homology that implements various concepts described below:
  *
  *\li Concept of a representation of persistence that allows averaging (so that the average object is of the same type).
  *\li Concept of representation of persistence that allows computations of distances.
@@ -78,10 +78,10 @@ namespace Gudhi_stat {
  * by concepts. That means that the statistical and ML methods will be able to operate on any representation that implement the required concept (including the ones that are not in the library at the moment). 
  * That gives provides a framework, that is very easy to extend, for topological statistics.
  *
- *Below we are discussing the representations which are currently implemented in Gudhi\_stat:
+ *Below we are discussing the representations which are currently implemented in Persistence\_representations package:
  *
  *\section sec_persistence_landscapes Persistence Landscapes
- * Reference manual: \ref Gudhi::Gudhi_stat::Persistence_landscape
+ * Reference manual: \ref Gudhi::Persistence_representations::Persistence_landscape
  *Persistence landscapes were originally proposed by Bubenik in \cite bubenik_landscapes_2015. Efficient algorithms to compute them rigorously were proposed by Bubenik and Dlotko in \cite bubenik_dlotko_landscapes_2016. The idea of 
  * persistence landscapes is shortly summarized in below.
  *
@@ -120,7 +120,7 @@ namespace Gudhi_stat {
  * 
  * 
  *\section sec_landscapes_on_grid Persistence Landscapes on a grid
- * Reference manual: \ref Gudhi::Gudhi_stat::Persistence_landscape_on_grid
+ * Reference manual: \ref Gudhi::Persistence_representations::Persistence_landscape_on_grid
  *This is an alternative, not--exact, representation of persistence landscapes defined in the Section \ref sec_persistence_landscapes. Unlike in the Section \ref sec_persistence_landscapes we build a 
  * representation of persistence landscape by sampling its values on a finite, equally distributed grid of points. 
  * Since, the persistence landscapes that originate from persistence diagrams have slope \f$1\f$ or \f$-1\f$, we have an estimate of a region between the grid points where the landscape cab be located. 
@@ -153,7 +153,7 @@ namespace Gudhi_stat {
  *Note that the same representation is used in TDA R-package \cite Fasy_Kim_Lecci_Maria_tda.
  *
  *\section sec_persistence_heat_maps Persistence heat maps
- * Reference manual: \ref Gudhi::Gudhi_stat::Persistence heat maps
+ * Reference manual: \ref Gudhi::Persistence_representations::Persistence heat maps
  *This is a general class of discrete structures which are based on idea of placing a kernel in the points of persistence diagrams. 
  *This idea appeared in work by many authors over the last 15 years. As far as we know this idea was firstly described in the work of Bologna group in \cite Ferri_Frosini_comparision_sheme_1 and \cite Ferri_Frosini_comparision_sheme_2. 
  *Later it has been described by Colorado State University group in \cite Persistence_Images_2017. The presented paper in the first time provide a discussion of stability of the representation. 
@@ -162,7 +162,7 @@ namespace Gudhi_stat {
  *way that the points close to diagonal got low weight and consequently do not have a big influence on the resulting distribution. In \cite Reininghaus_Huber_ALL_PSSK for every point \f$(b,d)\f$ two Gaussian kernels 
  *are added: first, with a weight 1 in a point \f$(b,d)\f$, and the second, with the weight -1 for a point \f$(b,d)\f$. In both cases, the representations are stable with respect to 1-Wasserstein distance.
  *
- *In Gudhi\_stat we currently implement a discretization of the distributions described above. The base of this implementation is 2-dimensional array of pixels. Each pixel have assigned a real value which 
+ *In Persistence\_representations package we currently implement a discretization of the distributions described above. The base of this implementation is 2-dimensional array of pixels. Each pixel have assigned a real value which 
  * is a sum of values of distributions induced by each point of the persistence diagram. At the moment we compute the sum of values on a center of a pixels. It can be easily extended to any other function 
  * (like for instance sum of integrals of the intermediate distribution on a pixel). 
  *
@@ -177,7 +177,7 @@ namespace Gudhi_stat {
  *
  *
  *\section sec_persistence_vectors Persistence vectors
- * Reference manual: \ref Gudhi::Gudhi_stat::Persistence vectors
+ * Reference manual: \ref Gudhi::Persistence_representations::Persistence vectors
  *This is a representation of persistent homology in a form of a vector which was designed for an application in 3d graphic in \cite Carriere_Oudot_Ovsjanikov_top_signatures_3d. Below we provide a short description of this representation.
  *
  *Given a persistence diagram \f$D = \{ (b_i,d_i) \}\f$, for every pair of birth--death points \f$(b_1,d_1)\f$ and \f$(b_2,d_2)\f$ we compute the following three distances:
@@ -194,9 +194,9 @@ namespace Gudhi_stat {
  *
  * \copyright GNU General Public License v3.
  */
-/** @} */  // end defgroup Gudhi_stat
+/** @} */  // end defgroup Persistence_representations
 
-}  // namespace cubical_complex
+}  // namespace Persistence_representations
 }  // namespace Gudhi
 
-#endif  // DOC_GUDHI_STAT_H_
+#endif  // Persistence_representations
