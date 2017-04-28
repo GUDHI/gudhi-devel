@@ -23,7 +23,7 @@
 
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE "gudhi_stat"
+#define BOOST_TEST_MODULE "Persistence_representations"
 #include <boost/test/unit_test.hpp>
 #include <gudhi/reader_utils.h>
 #include <gudhi/Persistence_heat_maps.h>
@@ -254,8 +254,24 @@ BOOST_AUTO_TEST_CASE(check_arythmetic_operations_for_heat_maps)
 	Persistence_heat_maps<constant_scaling_function> multiply_by_scalar_template;
 	multiply_by_scalar_template.load_from_file( "data/heat_map_multiply_by_scalar" );
 	
-	BOOST_CHECK( sum == sum_template );
+	BOOST_CHECK( sum == sum_template );	
+}
+
+BOOST_AUTO_TEST_CASE(check_distance_of_heat_maps_infinite_power_parameters) 
+{	
+	std::vector< std::vector<double> > filter = create_Gaussian_filter(100,1);		
+	Persistence_heat_maps<constant_scaling_function> p( "data/file_with_diagram" , filter , false , 1000 , 0 , 1 );
 	
+	std::vector< std::vector<double> > filter_2 = create_Gaussian_filter(150,1);
+	Persistence_heat_maps<constant_scaling_function> q( "data/file_with_diagram" , filter_2 , true , 1000 , 0 , 1 );
+	
+	double distance_max_double_parameter = p.distance( q , std::numeric_limits<double>::max() );
+	double distance_inf_double_parameter = p.distance( q , std::numeric_limits<double>::infinity() );	
+		
+	//std::cerr << "distance_max_double_parameter: " << distance_max_double_parameter << std::endl;
+	//std::cerr << "distance_inf_double_parameter: " << distance_inf_double_parameter << std::endl;
+		
+	BOOST_CHECK( distance_max_double_parameter == distance_inf_double_parameter );
 }
 
 

@@ -23,12 +23,13 @@
 
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE "gudhi_stat"
+#define BOOST_TEST_MODULE "Persistence_representations"
 #include <boost/test/unit_test.hpp>
 #include <gudhi/reader_utils.h>
 #include <gudhi/Persistence_landscape.h>
 
 #include <iostream>
+#include <limits>
 
 
 
@@ -47,6 +48,16 @@ BOOST_AUTO_TEST_CASE(check_construction_of_landscape)
 	Persistence_landscape p( diag );	
 	Persistence_landscape q;
 	q.load_landscape_from_file( "data/file_with_landscape_from_file_with_diagram" );		
+	BOOST_CHECK( p == q );
+}
+
+
+BOOST_AUTO_TEST_CASE(check_construction_of_landscape_form_gudhi_style_file) 
+{		
+	Persistence_landscape p( "data/persistence_file_with_four_entries_per_line" , 1 );	
+	//p.print_to_file("persistence_file_with_four_entries_per_line_landscape");
+	Persistence_landscape q;
+	q.load_landscape_from_file( "data/persistence_file_with_four_entries_per_line_landscape" );		
 	BOOST_CHECK( p == q );
 }
 
@@ -188,6 +199,21 @@ BOOST_AUTO_TEST_CASE(check_computations_of_maxima_and_norms)
 	BOOST_CHECK( fabs( compute_distance_of_landscapes(p,sum,1) - 27.9323 ) <= 0.00005 );	
 	BOOST_CHECK( fabs( compute_distance_of_landscapes(p,sum,2) - 2.35199 ) <= 0.00001 );
 	BOOST_CHECK( fabs(compute_distance_of_landscapes( p , sum , std::numeric_limits<double>::max() ) - 0.464478 ) <= 0.00001 );		
+}
+
+
+BOOST_AUTO_TEST_CASE(check_default_parameters_of_distances ) 
+{	
+	std::vector< std::pair< double , double > > diag = read_standard_persistence_file( "data/file_with_diagram" );	
+	Persistence_landscape p( diag );
+	
+	std::vector< std::pair< double , double > > diag1 = read_standard_persistence_file( "data/file_with_diagram_1" );	
+	Persistence_landscape q( diag1 );
+	
+	double dist_numeric_limit_max = p.distance( q,std::numeric_limits<double>::max()  );
+	double dist_infinity = p.distance( q,std::numeric_limits<double>::infinity() );
+	
+	BOOST_CHECK( dist_numeric_limit_max == dist_infinity );	
 }
 
 BOOST_AUTO_TEST_CASE(check_computations_of_averages) 

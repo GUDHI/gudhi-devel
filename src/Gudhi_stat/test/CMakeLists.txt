@@ -85,3 +85,31 @@ add_test(NAME read_persistence_from_file_test
   file(COPY data DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/read_persistence_from_file_test/data")
   # XML format for Jenkins xUnit plugin
   --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/read_persistence_from_file_UT.xml --log_level=test_suite --report_level=no)
+
+file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+add_executable ( additional_tests additional_tests.cpp )
+target_link_libraries(additional_tests ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+
+# Unitary tests
+add_test(NAME additional_tests
+  COMMAND ${CMAKE_CURRENT_BINARY_DIR}/additional_tests
+  file(COPY data DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/additional_tests/data")
+  # XML format for Jenkins xUnit plugin
+  --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/additional_tests_UT.xml --log_level=test_suite --report_level=no)
+
+
+
+if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+add_executable ( persistence_intervals_with_distances_test persistence_intervals_with_distances_test.cpp )
+target_link_libraries(persistence_intervals_with_distances_test ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+if (TBB_FOUND)
+target_link_libraries(persistence_intervals_with_distances_test ${TBB_LIBRARIES})
+endif(TBB_FOUND)
+# Unitary tests
+add_test(NAME persistence_intervals_with_distances_test
+  COMMAND ${CMAKE_CURRENT_BINARY_DIR}/persistence_intervals_with_distances_test
+  file(COPY data DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/persistence_intervals_with_distances_test/data")
+  # XML format for Jenkins xUnit plugin
+  --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/persistence_intervals_with_distances_test_UT.xml --log_level=test_suite --report_level=no)
+endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)

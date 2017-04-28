@@ -23,7 +23,7 @@
 
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE "gudhi_stat"
+#define BOOST_TEST_MODULE "Persistence_representations"
 #include <boost/test/unit_test.hpp>
 #include <gudhi/reader_utils.h>
 #include <gudhi/Persistence_landscape_on_grid.h>
@@ -34,10 +34,6 @@
 
 using namespace Gudhi;
 using namespace Gudhi::Persistence_representations;
-
-
-double epsilon = 0.0000005;
-
 
 
 	
@@ -229,6 +225,20 @@ BOOST_AUTO_TEST_CASE(check_computations_of_maxima_and_norms)
 	BOOST_CHECK( fabs( compute_distance_of_landscapes_on_grid(p,sum,1) - 16.8519 ) <= 0.00005 );	
 	BOOST_CHECK( fabs( compute_distance_of_landscapes_on_grid(p,sum,2) - 1.44542 ) <= 0.00001 );	
 	BOOST_CHECK( fabs(compute_distance_of_landscapes_on_grid(p,sum,std::numeric_limits<double>::max()) - 0.45 ) <= 0.00001 );		
+}
+
+BOOST_AUTO_TEST_CASE(check_default_parameters_of_distances ) 
+{	
+	std::vector< std::pair< double , double > > diag = read_standard_persistence_file( "data/file_with_diagram" );	
+	Persistence_landscape_on_grid p( diag , 0. , 1. , 100 );
+	
+	std::vector< std::pair< double , double > > diag1 = read_standard_persistence_file( "data/file_with_diagram_1" );	
+	Persistence_landscape_on_grid q( diag1 , 0. , 1. , 100 );
+	
+	double dist_numeric_limit_max = p.distance( q,std::numeric_limits<double>::max()  );
+	double dist_infinity = p.distance( q,std::numeric_limits<double>::infinity() );
+	
+	BOOST_CHECK( dist_numeric_limit_max == dist_infinity );	
 }
 
 

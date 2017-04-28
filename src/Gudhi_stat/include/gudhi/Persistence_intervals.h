@@ -223,6 +223,8 @@ public:
 	/**
 	 * This is a simple function projectig the persistence intervals to a real number. The function we use here is a sum of squared lendgths of intervals. It can be naturally interpreted as
 	 * sum of step function, where the step hight it equal to the length of the interval.
+         * At the moment this function is not tested, since it is quite likelly to be changed in the future. Given this, when using it, keep in mind that it
+         * will be most likelly changed in the next versions.
 	 **/ 
 	double project_to_R( int number_of_function )const;   
 	/**

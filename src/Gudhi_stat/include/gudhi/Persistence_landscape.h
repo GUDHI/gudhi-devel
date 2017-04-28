@@ -347,6 +347,8 @@ public:
 	/**
 	 * The number of projections to R is defined to the number of nonzero landscape functions. I-th projection is an integral of i-th landscape function over whole R.
 	 * This function is required by the Real_valued_topological_data concept.
+         * At the moment this function is not tested, since it is quite likelly to be changed in the future. Given this, when using it, keep in mind that it
+         * will be most likelly changed in the next versions.
 	**/
     double project_to_R( int number_of_function )const
     {
@@ -543,24 +545,17 @@ protected:
 
 
 
-
 Persistence_landscape::Persistence_landscape(const char* filename , size_t dimension)
-{
-    bool dbg = false;
-
-    if ( dbg )
+{    
+    std::vector< std::pair< double , double > > barcode;    
+    if ( dimension < std::numeric_limits<double>::max() )
     {
-        std::cerr << "Using constructor : Persistence_landscape(char* filename)" << std::endl;
-    }
-    std::vector< std::pair< double , double > > barcode;
-    if ( dimension == std::numeric_limits<unsigned>::max() )
-    {
-     barcode = read_persistence_intervals_in_one_dimension_from_file( filename );
-    }
+		barcode = read_persistence_intervals_in_one_dimension_from_file( filename , dimension );	
+	}
     else
     {
-     barcode = read_persistence_intervals_in_one_dimension_from_file( filename , dimension );
-    }
+		barcode = read_persistence_intervals_in_one_dimension_from_file( filename );
+    }    
     this->construct_persistence_landscape_from_barcode( barcode );
     this->set_up_numbers_of_functions_for_vectorization_and_projections_to_reals();
 }

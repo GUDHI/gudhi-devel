@@ -23,7 +23,7 @@
 
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE "gudhi_stat"
+#define BOOST_TEST_MODULE "Persistence_representations"
 #include <boost/test/unit_test.hpp>
 #include <gudhi/reader_utils.h>
 #include <gudhi/read_persistence_from_file.h>

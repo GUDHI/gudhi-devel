@@ -26,7 +26,7 @@
 #include <iostream>
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE "gudhi_stat"
+#define BOOST_TEST_MODULE "Persistence_representations"
 #include <boost/test/unit_test.hpp>
 #include <gudhi/reader_utils.h>
 #include <vector>
@@ -315,6 +315,20 @@ BOOST_AUTO_TEST_CASE(check_distance_computations)
 	Vector_distances_in_diagram< Euclidean_distance > p_bis( intervals , 10 );	
 	//cerr << "p_prime.distance( (Abs_Topological_data_with_distances*)(&p_bis) , 1 ) : " << p_prime.distance( (Abs_Topological_data_with_distances*)(&p_bis) , 1 ) << endl;	
 	BOOST_CHECK( almost_equal ( p_prime.distance( p_bis , 1 ) , 1.86428 ) );		
+}
+
+BOOST_AUTO_TEST_CASE(check_default_parameters_of_distances ) 
+{	
+	std::vector< std::pair< double , double > > diag = read_standard_persistence_file( "data/file_with_diagram" );	
+	Vector_distances_in_diagram< Euclidean_distance > p( diag , 100 );
+	
+	std::vector< std::pair< double , double > > diag1 = read_standard_persistence_file( "data/file_with_diagram_1" );	
+	Vector_distances_in_diagram< Euclidean_distance > q( diag1 , 100 );
+	
+	double dist_numeric_limit_max = p.distance( q,std::numeric_limits<double>::max()  );
+	double dist_infinity = p.distance( q,std::numeric_limits<double>::infinity() );
+	
+	BOOST_CHECK( dist_numeric_limit_max == dist_infinity );	
 }
 
 

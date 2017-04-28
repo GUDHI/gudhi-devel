@@ -177,6 +177,8 @@ public:
     //Implementations of functions for various concepts.  
      /**
      * Compute projection to real numbers of persistence vector. This function is required by the Real_valued_topological_data concept
+     * At the moment this function is not tested, since it is quite likelly to be changed in the future. Given this, when using it, keep in mind that it
+     * will be most likelly changed in the next versions.
     **/
     double project_to_R( int number_of_function )const;
     /**

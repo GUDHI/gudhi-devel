@@ -24,7 +24,7 @@
 #define Persistence_intervals_WITH_DISTANCES_H_
 
 
-#include <gudhi/persistence_representations/Persistence_intervals.h>
+#include <gudhi/Persistence_intervals.h>
 #include <gudhi/Bottleneck.h>
 
 namespace Gudhi 
@@ -44,7 +44,7 @@ public:
      * exception will be thrown.
      * The last parameter, tolerance, it is an additiv error of the approimation, set by default to zero.
     **/
-     double distance( const Persistence_intervals_with_distances& second , double power = std::numeric_limits< double >::max() , double tolerance = 0) const
+    double distance( const Persistence_intervals_with_distances& second , double power = std::numeric_limits< double >::max() , double tolerance = 0) const
     {
 		if ( power >= std::numeric_limits< double >::max() )
 		{
