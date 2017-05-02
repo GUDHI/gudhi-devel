@@ -32,7 +32,7 @@ namespace Gudhi {
  * \author    Cl&eacute;ment Maria
  *
  * A simplicial complex \f$\mathbf{K}\f$ on a set of vertices \f$V = \{1, \cdots ,|V|\}\f$ is a collection of
- * implices \f$\{\sigma\}\f$, \f$\sigma \subseteq V\f$ such that
+ * simplices \f$\{\sigma\}\f$, \f$\sigma \subseteq V\f$ such that
  * \f$\tau \subseteq \sigma \in \mathbf{K} \rightarrow \tau \in \mathbf{K}\f$. The dimension \f$n=|\sigma|-1\f$ of
  * \f$\sigma\f$ is its number of elements minus \f$1\f$.
  *
