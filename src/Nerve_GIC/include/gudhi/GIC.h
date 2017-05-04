@@ -44,6 +44,10 @@
 #include <initializer_list>
 #include <algorithm>  // for std::max
 #include <cstdint>  // for std::uint32_t
+#include <random>
+
+#define CONSTANT 10
+#define ETA 0.001
 
 using Simplex_tree = Gudhi::Simplex_tree<>;
 using Filtration_value = Simplex_tree::Filtration_value;
@@ -116,6 +120,25 @@ class Graph_induced_complex {
            dfs(G,G[p][i],cc,visit);
    }
 
+ // Find random number in [0,1].
+ double GetUniform(){
+   static std::default_random_engine re;
+   static std::uniform_real_distribution<double> Dist(0,1);
+   return Dist(re);
+ }
+
+ // Subsample points.
+ void SampleWithoutReplacement(int populationSize, int sampleSize, std::vector<int> & samples){
+   int& n = sampleSize; int& N = populationSize;
+   int t = 0; int m = 0; double u;
+   while (m < n){
+     u = GetUniform();
+     if ( (N - t)*u >= n - m )
+       t++;
+      else{samples[m] = t; t++; m++;}
+   }
+ }
+
  // *******************************************************************************************************************
  // Graphs.
  // *******************************************************************************************************************
@@ -129,7 +152,7 @@ class Graph_induced_complex {
     }
   }
 
- public:
+ public: // Set graph from OFF file.
   void set_graph_from_OFF(const std::string& off_file_name){
     int numpts, numedges, numfaces, i; std::vector<int> edge(2); double x; int num; std::vector<int> simplex;
     std::ifstream input(off_file_name); std::string line; getline(input, line);
@@ -156,6 +179,42 @@ class Graph_induced_complex {
      rips_complex_from_points.create_complex(st, 1);
    }
 
+ public: // Automatic tuning of Rips complex.
+   void set_graph_from_automatic_rips(const int& N, const std::string& off_file_name){
+
+     Points_off_reader<Point> off_reader(off_file_name);
+     int n = off_reader.get_point_cloud().size();
+     int m = floor(n/pow(log(n)/log(CONSTANT),1+ETA)); m = std::min(m,n-1);
+     std::vector<int> samples(m); double delta = 0; int dim = off_reader.get_point_cloud()[0].size();
+
+     std::vector<std::vector<double> > dist; std::vector<double> dumb(n);
+     for(int i = 0; i < n; i++)  dist.push_back(dumb);
+
+     for(int i = 0; i < n; i++){
+       for(int j = i; j < n; j++){
+         double dis = 0; for(int k = 0; k < dim; k++)  dis += pow(off_reader.get_point_cloud()[i][k]-off_reader.get_point_cloud()[j][k],2);
+         dist[i][j] = std::sqrt(dis); dist[j][i] = std::sqrt(dis);
+       }
+     }
+
+     #pragma omp parallel for
+     for (int i = 0; i < N; i++){
+
+       SampleWithoutReplacement(n,m,samples);
+       double hausdorff_dist = 0;
+       for (int j = 0; j < n; j++){
+         double mj = dist[j][samples[0]]; for (int k = 1; k < m; k++)  mj = std::min(mj, dist[j][samples[k]]);
+         hausdorff_dist = std::max(hausdorff_dist, mj);
+       }
+       delta += hausdorff_dist/N;
+
+     }
+
+     Rips_complex rips_complex_from_points(off_reader.get_point_cloud(), delta, Euclidean_distance());
+     rips_complex_from_points.create_complex(st, 1);
+
+   }
+
 
  // *******************************************************************************************************************
  // Functions.
@@ -173,9 +232,8 @@ class Graph_induced_complex {
  public: // Set function from kth coordinate
    void set_function_from_coordinate(const int& k, const std::string& off_file_name){
      Points_off_reader<Point> off_reader(off_file_name);
-     //std::vector<Point> cloud = off_reader.get_point_cloud();
-     int numpts = off_reader.get_point_cloud().size(); //cloud.size();
-     for(int i = 0; i < numpts; i++)  func.insert(std::pair<int,double>(i,off_reader.get_point_cloud()[i][k])); //std::cout << cloud[i][k] << std::endl;
+     int numpts = off_reader.get_point_cloud().size();
+     for(int i = 0; i < numpts; i++)  func.insert(std::pair<int,double>(i,off_reader.get_point_cloud()[i][k]));
    }
 
  public: // Set function from vector.
@@ -199,6 +257,32 @@ class Graph_induced_complex {
      std::vector<Cover_t>::iterator it;
      std::sort(cov_number.begin(),cov_number.end()); it = std::unique(cov_number.begin(),cov_number.end());
      cov_number.resize(std::distance(cov_number.begin(),it)); maximal_dim = cov_number.size();
+   }
+
+ public: // Automatic tuning of resolution for Mapper Delta.
+   double set_automatic_resolution_for_GICMAP(){
+     double reso = 0;
+     for (auto simplex : st.complex_simplex_range()) {
+       if(st.dimension(simplex) == 1){
+         std::vector<int> vertices;
+         for(auto vertex : st.simplex_vertex_range(simplex))  vertices.push_back(vertex);
+         reso = std::max(reso, std::abs(func[vertices[0]] - func[vertices[1]]));
+       }
+     }
+     return reso;
+   }
+
+ public: // Automatic tuning of resolution for Mapper Point.
+   double set_automatic_resolution_for_MAP(const double& gain){
+     double reso = 0;
+     for (auto simplex : st.complex_simplex_range()) {
+       if(st.dimension(simplex) == 1){
+         std::vector<int> vertices;
+         for(auto vertex : st.simplex_vertex_range(simplex))  vertices.push_back(vertex);
+         reso = std::max(reso, (std::abs(func[vertices[0]] - func[vertices[1]]))/gain);
+       }
+     }
+     return reso;
    }
 
  public: // Set cover with preimages of function.
@@ -350,9 +434,7 @@ class Graph_induced_complex {
  public:
    void find_Nerve_simplices(){
      simplices.clear();
-     for(std::map<int,std::vector<Cover_t> >::iterator it = cover.begin(); it!=cover.end(); it++){
-       simplices.push_back(it->second); //std::cout << it->second[0] << std::endl;
-     }
+     for(std::map<int,std::vector<Cover_t> >::iterator it = cover.begin(); it!=cover.end(); it++)  simplices.push_back(it->second);
      std::vector<std::vector<Cover_t> >::iterator it;
      std::sort(simplices.begin(),simplices.end()); it = std::unique(simplices.begin(),simplices.end());
      simplices.resize(std::distance(simplices.begin(),it));
@@ -400,7 +482,7 @@ class Graph_induced_complex {
    }
 
  public:
-   void find_GIC_simplices_with_functional_minimal_cover(){
+   void find_GICMAP_simplices_with_functional_minimal_cover(){
 
      int v1, v2;
 
