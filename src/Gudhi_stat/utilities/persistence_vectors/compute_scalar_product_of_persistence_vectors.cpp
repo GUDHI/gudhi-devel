@@ -20,7 +20,7 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gudhi/persistence_vectors.h>
+#include <gudhi/Persistence_vectors.h>
 
 
 

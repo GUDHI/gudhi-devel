@@ -229,10 +229,10 @@ BOOST_AUTO_TEST_CASE(check_computations_of_maxima_and_norms)
 
 BOOST_AUTO_TEST_CASE(check_default_parameters_of_distances ) 
 {	
-	std::vector< std::pair< double , double > > diag = read_standard_persistence_file( "data/file_with_diagram" );	
+	std::vector< std::pair< double , double > > diag = read_persistence_intervals_in_one_dimension_from_file( "data/file_with_diagram" );	
 	Persistence_landscape_on_grid p( diag , 0. , 1. , 100 );
 	
-	std::vector< std::pair< double , double > > diag1 = read_standard_persistence_file( "data/file_with_diagram_1" );	
+	std::vector< std::pair< double , double > > diag1 = read_persistence_intervals_in_one_dimension_from_file( "data/file_with_diagram_1" );	
 	Persistence_landscape_on_grid q( diag1 , 0. , 1. , 100 );
 	
 	double dist_numeric_limit_max = p.distance( q,std::numeric_limits<double>::max()  );

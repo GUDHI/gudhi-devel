@@ -44,7 +44,7 @@ double epsilon = 0.0000005;
 
 BOOST_AUTO_TEST_CASE(check_construction_of_landscape) 
 {	
-	std::vector< std::pair< double , double > > diag = read_standard_persistence_file( "data/file_with_diagram" );
+	std::vector< std::pair< double , double > > diag = read_persistence_intervals_in_one_dimension_from_file( "data/file_with_diagram" );
 	Persistence_landscape p( diag );	
 	Persistence_landscape q;
 	q.load_landscape_from_file( "data/file_with_landscape_from_file_with_diagram" );		
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(check_construction_of_landscape_form_gudhi_style_file)
 
 BOOST_AUTO_TEST_CASE(check_computations_of_integrals) 
 {
-	std::vector< std::pair< double , double > > diag = read_standard_persistence_file( "data/file_with_diagram" );
+	std::vector< std::pair< double , double > > diag = read_persistence_intervals_in_one_dimension_from_file( "data/file_with_diagram" );
 	Persistence_landscape p( diag );
 	double integral = p.compute_integral_of_landscape();
 	//cerr << integral  << " " << 2.34992 << endl;
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(check_computations_of_integrals)
 
 BOOST_AUTO_TEST_CASE(check_computations_of_integrals_for_each_level_separatelly) 
 {
-	std::vector< std::pair< double , double > > diag = read_standard_persistence_file( "data/file_with_diagram" );
+	std::vector< std::pair< double , double > > diag = read_persistence_intervals_in_one_dimension_from_file( "data/file_with_diagram" );
 	Persistence_landscape p( diag );	
 	
 	std::vector< double > integrals_fir_different_levels;
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(check_computations_of_integrals_for_each_level_separatelly)
 
 BOOST_AUTO_TEST_CASE(check_computations_of_integrals_of_powers_of_landscape) 
 {
-	std::vector< std::pair< double , double > > diag = read_standard_persistence_file( "data/file_with_diagram" );
+	std::vector< std::pair< double , double > > diag = read_persistence_intervals_in_one_dimension_from_file( "data/file_with_diagram" );
 	Persistence_landscape p( diag );	
 	
 	std::vector<double> integrals_fir_different_powers;
@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE(check_computations_of_integrals_of_powers_of_landscape)
 
 BOOST_AUTO_TEST_CASE(check_computations_of_values_on_different_points) 
 {
-	std::vector< std::pair< double , double > > diag = read_standard_persistence_file( "data/file_with_diagram" );
+	std::vector< std::pair< double , double > > diag = read_persistence_intervals_in_one_dimension_from_file( "data/file_with_diagram" );
 	Persistence_landscape p( diag );	
 	
 	
@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE(check_computations_of_values_on_different_points)
 
 BOOST_AUTO_TEST_CASE(check_computations_sum_differences_and_multiplications) 
 {	
-	std::vector< std::pair< double , double > > diag = read_standard_persistence_file( "data/file_with_diagram" );
+	std::vector< std::pair< double , double > > diag = read_persistence_intervals_in_one_dimension_from_file( "data/file_with_diagram" );
 	Persistence_landscape p( diag );
 	Persistence_landscape second;
 	second.load_landscape_from_file("data/file_with_landscape_from_file_with_diagram_1" );
@@ -186,7 +186,7 @@ BOOST_AUTO_TEST_CASE(check_computations_sum_differences_and_multiplications)
 
 BOOST_AUTO_TEST_CASE(check_computations_of_maxima_and_norms) 
 {	
-	std::vector< std::pair< double , double > > diag = read_standard_persistence_file( "data/file_with_diagram" );
+	std::vector< std::pair< double , double > > diag = read_persistence_intervals_in_one_dimension_from_file( "data/file_with_diagram" );
 	Persistence_landscape p( diag );	
 	Persistence_landscape second;
 	second.load_landscape_from_file("data/file_with_landscape_from_file_with_diagram_1" );	
@@ -204,10 +204,10 @@ BOOST_AUTO_TEST_CASE(check_computations_of_maxima_and_norms)
 
 BOOST_AUTO_TEST_CASE(check_default_parameters_of_distances ) 
 {	
-	std::vector< std::pair< double , double > > diag = read_standard_persistence_file( "data/file_with_diagram" );	
+	std::vector< std::pair< double , double > > diag = read_persistence_intervals_in_one_dimension_from_file( "data/file_with_diagram" );	
 	Persistence_landscape p( diag );
 	
-	std::vector< std::pair< double , double > > diag1 = read_standard_persistence_file( "data/file_with_diagram_1" );	
+	std::vector< std::pair< double , double > > diag1 = read_persistence_intervals_in_one_dimension_from_file( "data/file_with_diagram_1" );	
 	Persistence_landscape q( diag1 );
 	
 	double dist_numeric_limit_max = p.distance( q,std::numeric_limits<double>::max()  );
@@ -218,9 +218,9 @@ BOOST_AUTO_TEST_CASE(check_default_parameters_of_distances )
 
 BOOST_AUTO_TEST_CASE(check_computations_of_averages) 
 {
-	std::vector< std::pair< double , double > > diag = read_standard_persistence_file( "data/file_with_diagram" );
+	std::vector< std::pair< double , double > > diag = read_persistence_intervals_in_one_dimension_from_file( "data/file_with_diagram" );
 	Persistence_landscape p( diag );
-	std::vector< std::pair< double , double > > diag2 = read_standard_persistence_file( "data/file_with_diagram_1" );
+	std::vector< std::pair< double , double > > diag2 = read_persistence_intervals_in_one_dimension_from_file( "data/file_with_diagram_1" );
 	Persistence_landscape q( diag2 );	
 	Persistence_landscape av;
 	av.compute_average( {&p,&q} );
@@ -235,9 +235,9 @@ BOOST_AUTO_TEST_CASE(check_computations_of_averages)
 
 BOOST_AUTO_TEST_CASE(check_computations_of_distances)
 {
-	std::vector< std::pair< double , double > > diag = read_standard_persistence_file( "data/file_with_diagram" );
+	std::vector< std::pair< double , double > > diag = read_persistence_intervals_in_one_dimension_from_file( "data/file_with_diagram" );
 	Persistence_landscape p( diag );
-	std::vector< std::pair< double , double > > diag2 = read_standard_persistence_file( "data/file_with_diagram_1" );
+	std::vector< std::pair< double , double > > diag2 = read_persistence_intervals_in_one_dimension_from_file( "data/file_with_diagram_1" );
 	Persistence_landscape q( diag2 );
 	BOOST_CHECK( fabs( p.distance( q )- 25.5824) <= 0.00005 );	
 	BOOST_CHECK( fabs( p.distance( q , 2) - 2.12636 ) <= 0.00001 );	
@@ -247,9 +247,9 @@ BOOST_AUTO_TEST_CASE(check_computations_of_distances)
 
 BOOST_AUTO_TEST_CASE(check_computations_of_scalar_product)
 {
-	std::vector< std::pair< double , double > > diag = read_standard_persistence_file( "data/file_with_diagram" );
+	std::vector< std::pair< double , double > > diag = read_persistence_intervals_in_one_dimension_from_file( "data/file_with_diagram" );
 	Persistence_landscape p( diag );
-	std::vector< std::pair< double , double > > diag2 = read_standard_persistence_file( "data/file_with_diagram_1" );
+	std::vector< std::pair< double , double > > diag2 = read_persistence_intervals_in_one_dimension_from_file( "data/file_with_diagram_1" );
 	Persistence_landscape q( diag2 );
 	BOOST_CHECK( fabs(  p.compute_scalar_product( q ) - 0.754498 ) <= 0.00001 );	
 }

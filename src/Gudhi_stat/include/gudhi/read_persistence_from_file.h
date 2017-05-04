@@ -38,67 +38,6 @@ namespace Persistence_representations
 {
 			
 	
-/**
- * This procedure reads birth-death dagta from a file. We assume that in the file, there may be one type of string 'inf' or 'Inf'. If the second parameter of the program is set to -1,
- * then those vales are ignored. If the second parameter of this program is set to a positive value, then the infinite intervals will be substituted by that number.
-**/ 
-std::vector< std::pair< double,double > > read_persistence_file_that_may_contain_inf_string( const char* filename , double what_to_substitute_for_infinite_bar = -1 )
-{
-	
-	bool dbg = true;
-	
-	std::ifstream in(filename);
-	if ( !in.good() )
-	{
-		std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
-		throw "The file from which you are trying to read do not exist. The program will now terminate \n";
-	}
-	
-	std::string line;
-    std::vector< std::pair<double,double> > barcode;
-	    
-    while (!in.eof())
-    {
-        getline(in,line);        
-        if ( !(line.length() == 0 || line[0] == '#') )
-        {
-			std::stringstream lineSS(line);           
-            double beginn, endd;
-			if ( (line.find("inf") != std::string::npos) || (line.find("Inf") != std::string::npos) )
-			{
-				if ( dbg )
-				{
-					std::cerr << "This line: " << line << " contains infinite interval. We will skip it. \n";
-				}
-				if ( what_to_substitute_for_infinite_bar != -1 )
-				{
-					lineSS >> beginn;
-					endd = what_to_substitute_for_infinite_bar;
-				}
-				else
-				{
-					continue;
-				}
-			}
-			else
-			{           				       
-				lineSS >> beginn;
-				lineSS >> endd;
-			}
-            if ( beginn > endd )
-            {
-                std::swap(beginn,endd);
-            }  
-            if ( dbg )
-			{
-				std::cerr << "Getting an interval : " << beginn << "," << endd << std::endl;
-			}          
-			barcode.push_back( std::make_pair( beginn , endd ) );			
-        }
-	}
-	return barcode;    
-}//readFileNames	
-	
 	
 /**
  * This procedure reads names of files which are stored in a file. 
@@ -130,7 +69,7 @@ std::vector< std::string > readFileNames( const char* filenameWithFilenames )
         }
         else
         {
-            result.push_back( line.c_str() );
+            result.push_back( line );
             if (dbg){std::cerr << "Line after removing white spaces : " << line << std::endl;}
         }
 	}
@@ -139,140 +78,6 @@ std::vector< std::string > readFileNames( const char* filenameWithFilenames )
     return result;
 }//readFileNames
 
-
-/**
- * This method reads persistence from standalone file. The format of the file is as follows:
- * In every line there are two numbers which denotes birth and death of a persistence interval. The file is not supposed to contains any nonwhite characters excet from digits. In particular symbols 
- *  like 'inf' are not allowed.
- * If begin of the interval is greater than the end of the interval, those two numbers are swapped.
-**/ 
-std::vector< std::pair< double , double > > read_standard_persistence_file( const char* filename )
-{
-	bool dbg = false;
-	
-	std::ifstream in;
-    in.open( filename );
-    if ( !in.good() )
-	{
-		std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
-		throw "The file from which you are trying to read the persistence landscape do not exist. The program will now terminate \n";
-	}
-
-    std::string line;
-    std::vector< std::pair<double,double> > barcode;
-
-    while (!in.eof())
-    {
-        getline(in,line);
-        if ( !(line.length() == 0 || line[0] == '#') )
-        {
-            std::stringstream lineSS(line);            
-            double beginn, endd;
-            lineSS >> beginn;
-            lineSS >> endd;
-            if ( beginn == endd )continue;
-            if ( beginn > endd )
-            {
-                std::swap(beginn,endd);                
-            }
-            barcode.push_back( std::make_pair( beginn , endd ) );
-            if (dbg)
-            {
-				std::cerr << beginn << " , " << endd << std::endl;
-			}
-        }
-	}
-	in.close();
-	return barcode;
-}//read_standard_file
-
-
-
-/**
- * This procedure reads Gudhi style file. The format of a Gudhi style file is as follows:
- * Each line consist of the following information:
- * A prime number p indicating that the class is nontrivial over Z_p field.
- * A positive numebr, being a dimension of a persistence class
- * A birth and a death time of a class.
- * Death time may be infitnity, in which case a string 'inf' is used.
- * If begin of the interval is greater than the end of the interval, those two numbers are swapped.
- * Note that this procedure reads persistence in a single dimension. The dimension of intervals that
- * are to be read are determined by the second parameter of the function.
-**/ 
-std::vector< std::pair< double , double > > read_gudhi_persistence_file_in_one_dimension( const char* filename , size_t dimension = 0 , double what_to_substitute_for_infinite_bar = -1)
-{
-	bool dbg = false;	
-	std::ifstream in;
-	in.open( filename );
-	if ( !in.good() )
-	{
-		std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
-		throw "The file from which you are trying to read the persistence landscape do not exist. The program will now terminate \n";
-	}
-
-
-	std::string line;
-	std::vector< std::pair<double,double> > barcode;
-
-	while (!in.eof())
-	{
-		getline(in,line);
-		if ( !(line.length() == 0 || line[0] == '#') )
-		{
-			if ( line.find("inf") != std::string::npos )
-			{
-				if ( dbg )
-				{
-					std::cerr << "This line: " << line << " contains infinite interval. We will skip it. \n";
-				}
-				if ( what_to_substitute_for_infinite_bar != -1 )
-				{
-					double beginn, field, dim;
-					std::stringstream lineSS(line);			
-					lineSS >> field;
-					lineSS >> dim;
-					lineSS >> beginn;
-					if ( dim == dimension )
-					{
-						if ( beginn > what_to_substitute_for_infinite_bar )
-						{
-							barcode.push_back( std::make_pair( what_to_substitute_for_infinite_bar , beginn ) );
-						}
-						else
-						{
-							barcode.push_back( std::make_pair( beginn , what_to_substitute_for_infinite_bar ) );
-						}
-						if (dbg)
-						{
-							std::cerr << beginn << " , " << what_to_substitute_for_infinite_bar << std::endl;
-						}
-					} 
-				}
-				continue;
-			}
-			std::stringstream lineSS(line);			
-			double beginn, endd, field, dim;
-			lineSS >> field;
-			lineSS >> dim;
-			lineSS >> beginn;
-			lineSS >> endd;
-			if ( beginn > endd )
-			{
-				std::swap(beginn,endd);				
-			}
-			if ( dim == dimension )
-			{ 
-				barcode.push_back( std::make_pair( beginn , endd ) );
-				if (dbg)
-				{
-					std::cerr << beginn << " , " << endd << std::endl;
-				}
-			}
-		}
-	}
-	in.close();
-	return barcode;
-}//read_gudhi_file
 
 
 std::vector< std::vector< double > > read_numbers_from_file_line_by_line( const char* filename )
@@ -315,14 +120,14 @@ std::vector< std::vector< double > > read_numbers_from_file_line_by_line( const 
 /**
  * Universal procedure to read files with persistence. It ignores the lines starting from # (treat them as comments). 
  * It reads the fist line which is not a comment and assume that there are some numerical entries over there. The program assume
- * that each other line in the file, which is not a comment, have the same number of numerical entries. 
+ * that each other line in the file, which is not a comment, have the same number of numerical entries (2, 3 or 4). 
  * If there are two numerical entries per line, then the function assume that they are birth/death coordinates. 
  * If there are three numerical entries per line, then the function assume that they are: dimension and birth/death coordinates. 
  * If there are four numerical entries per line, then the function assume that they are: thc characteristic of a filed over which 
  * persistence was computed, dimension and birth/death coordinates. 
  * The procedure returns vector of persistence pairs. 
 **/ 
-std::vector<std::pair<double,double>> read_persistence_intervals_in_one_dimension_from_file(std::string const& filename, int dimension=-1 , double what_to_substitute_for_infinite_bar = -1 )
+std::vector<std::pair<double,double> > read_persistence_intervals_in_one_dimension_from_file(std::string const& filename, int dimension=-1 , double what_to_substitute_for_infinite_bar = -1 )
 {
 	bool dbg = false;
 	std::ifstream in;
@@ -348,6 +153,7 @@ std::vector<std::pair<double,double>> read_persistence_intervals_in_one_dimensio
 		if ( dbg )std::cerr << "Reading line : " << line << std::endl;
 		if ( !(line.length() == 0 || line[0] == '#') )
 		{
+			//If we do not know how many entries per line we have, we check it in below.
 			if ( number_of_entries_per_line == -1 )
 			{
 				//check how many entries we have in the line.				
@@ -371,6 +177,7 @@ std::vector<std::pair<double,double>> read_persistence_intervals_in_one_dimensio
 					throw "The input file you have provided have wrong number of numerical entries per line. The program will now terminate. \n";
 				}
 			}
+			//In case there is an 'inf' string in this line, we are dealing with this situation in below.
 			if ( line.find("inf") != std::string::npos )
 			{
 				if ( dbg )
@@ -416,6 +223,7 @@ std::vector<std::pair<double,double>> read_persistence_intervals_in_one_dimensio
 				}
 				continue;
 			}
+			//Then, we read the content of the line:
 			std::stringstream lineSS(line);			
 			double beginn, endd, field, dim;
 			if ( number_of_entries_per_line == 4 )lineSS >> field;
@@ -439,6 +247,13 @@ std::vector<std::pair<double,double>> read_persistence_intervals_in_one_dimensio
 				if (dbg)
 				{
 					std::cerr << "This is a line that is going to the output : " <<  beginn << " , " << endd << std::endl;
+				}
+			}
+			else
+			{
+				if ( (number_of_entries_per_line==3) && (dimension == -1) )
+				{
+					barcode.push_back( std::make_pair( beginn , endd ) );
 				}
 			}
 		}

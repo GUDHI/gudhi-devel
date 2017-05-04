@@ -21,7 +21,7 @@
  */
 
 
-#include <gudhi/persistence_vectors.h>
+#include <gudhi/Persistence_vectors.h>
 
 
 

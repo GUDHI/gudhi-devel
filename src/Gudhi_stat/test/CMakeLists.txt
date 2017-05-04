@@ -113,3 +113,8 @@ add_test(NAME persistence_intervals_with_distances_test
   # XML format for Jenkins xUnit plugin
   --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/persistence_intervals_with_distances_test_UT.xml --log_level=test_suite --report_level=no)
 endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+
+
+
+#add_executable ( private_test private_test.cpp )
+#target_link_libraries(private_test ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
