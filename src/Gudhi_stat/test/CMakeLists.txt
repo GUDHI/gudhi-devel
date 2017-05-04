@@ -116,5 +116,3 @@ endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
 
 
 
-#add_executable ( private_test private_test.cpp )
-#target_link_libraries(private_test ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
