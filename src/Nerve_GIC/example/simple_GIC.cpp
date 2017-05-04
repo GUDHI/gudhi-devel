@@ -2,8 +2,8 @@
 
 void usage(int nbArgs, char * const progName) {
   std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
-  std::cerr << "Usage: " << progName << " filename.off threshold function resolution gain [ouput_file.txt]\n";
-  std::cerr << "       i.e.: " << progName << " ../../data/points/test.off 1.5 test_cov \n";
+  std::cerr << "Usage: " << progName << " filename.off threshold coordinate resolution gain [ouput_file.txt]\n";
+  std::cerr << "       i.e.: " << progName << " ../../data/points/test.off 1.5 1 10 0.3 \n";
   exit(-1);  // ----- >>
 }
 
@@ -31,7 +31,8 @@ int main(int argc, char **argv) {
   //GIC.set_graph_from_OFF(off_file_name);
   GIC.set_function_from_coordinate(coord, off_file_name);
   GIC.set_cover_from_function(resolution,gain,0);
-  GIC.find_GIC_simplices();
+  //GIC.find_GIC_simplices();
+  GIC.find_Nerve_simplices();
   //GIC.find_GIC_simplices_with_functional_minimal_cover();
   Simplex_tree stree; GIC.create_complex(stree);
 

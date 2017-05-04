@@ -83,6 +83,9 @@ class Graph_induced_complex {
    int maximal_dim;
 
  private:
+   std::map<Cover_t,int> cover_fct;
+
+ private:
    Simplex_tree<> st;
    std::map<int,std::vector<int> > adjacency_matrix;
 
@@ -202,8 +205,8 @@ class Graph_induced_complex {
    void set_cover_from_function(const double& resolution, const double& gain, const bool& token){
 
      // Read function values and compute min and max
-     std::map<int, double>::iterator it; /*std::vector<double> range;*/ double maxf, minf; minf = std::numeric_limits<float>::max(); maxf = std::numeric_limits<float>::min();
-     for(it = func.begin(); it != func.end(); it++){/*range.push_back(it->second);*/ minf = std::min(minf, it->second); maxf = std::max(maxf, it->second);}
+     std::map<int, double>::iterator it; double maxf, minf; minf = std::numeric_limits<float>::max(); maxf = std::numeric_limits<float>::min();
+     for(it = func.begin(); it != func.end(); it++){minf = std::min(minf, it->second); maxf = std::max(maxf, it->second);}
      int num_pts = func.size(); //std::cout << minf << " " << maxf << std::endl;
 
      // Compute cover of im(f)
@@ -218,6 +221,7 @@ class Graph_induced_complex {
        }
        x = minf + (resolution-1)*incr - alpha; y = maxf;
        std::pair<double, double> interM(x,y); intervals.push_back(interM); res = intervals.size();
+       //for(int i = 0; i < res; i++)  std::cout << intervals[i].first << " " << intervals[i].second << std::endl;
      }
      else{
        double x = minf; double y = x + resolution;
@@ -244,27 +248,31 @@ class Graph_induced_complex {
        }
      }
 
-     int id = 0; int pos = 0;
-     for(int i = 0; i < res; i++){
+     int id = 0; int pos = 0; double min_prop_int; double max_prop_int;
+
+     for(int i = 0; i < res; i++){       
 
        // Find points in the preimage
        std::map<int,std::vector<int> > prop; prop.clear();
-       std::pair<double, double> inter1 = intervals[i];
+       std::pair<double, double> inter1 = intervals[i]; min_prop_int = inter1.first;
        int tmp = pos;
 
        if(i != res-1){
+
          if(i != 0){
-           std::pair<double, double> inter3 = intervals[i-1];
+           std::pair<double, double> inter3 = intervals[i-1]; min_prop_int = inter3.second;
            while(func[points[tmp]] < inter3.second && tmp != num_pts){
              prop.insert(std::pair<int,std::vector<int> >(points[tmp],adjacency_matrix[points[tmp]]));
              tmp++;
            }
          }
-         std::pair<double, double> inter2 = intervals[i+1];
+
+         std::pair<double, double> inter2 = intervals[i+1]; max_prop_int = inter2.first;
          while(func[points[tmp]] < inter2.first && tmp != num_pts){
            prop.insert(std::pair<int,std::vector<int> >(points[tmp],adjacency_matrix[points[tmp]]));
            tmp++;
          }
+
          pos = tmp;
          while(func[points[tmp]] < inter1.second && tmp != num_pts){
            prop.insert(std::pair<int,std::vector<int> >(points[tmp],adjacency_matrix[points[tmp]]));
@@ -272,12 +280,16 @@ class Graph_induced_complex {
          }
 
        }
+
        else{
+
          std::pair<double, double> inter3 = intervals[i-1];
+         min_prop_int = inter3.second; max_prop_int = inter1.second;
          while(func[points[tmp]] < inter3.second && tmp != num_pts){
            prop.insert(std::pair<int,std::vector<int> >(points[tmp],adjacency_matrix[points[tmp]]));
            tmp++;
          }
+
          while(tmp != num_pts){
            prop.insert(std::pair<int,std::vector<int> >(points[tmp],adjacency_matrix[points[tmp]]));
            tmp++;
@@ -286,20 +298,21 @@ class Graph_induced_complex {
        }
 
        // Compute the connected components with DFS
-       std::map<int,bool> visit;
+       std::map<int,bool> visit; //std::cout << i << std::endl;
        for(std::map<int, std::vector<int> >::iterator it = prop.begin(); it != prop.end(); it++)
          visit.insert(std::pair<int,bool>(it->first, false));
        if (!(prop.empty())){
          for(std::map<int, std::vector<int> >::iterator it = prop.begin(); it != prop.end(); it++){
            if (  !(visit[it->first])  ){
              std::vector<int> cc; cc.clear();
-             dfs(prop,it->first,cc,visit); int cci = cc.size(); //std::cout << cci << std::endl;
-             for(int i = 0; i < cci; i++)  cover[cc[i]].push_back(id);
+             dfs(prop,it->first,cc,visit); int cci = cc.size(); //std::cout << cci << " ";
+             for(int j = 0; j < cci; j++)  cover[cc[j]].push_back(id);
+             cover_fct[id] = i;
              id++;
            }
          }
        }
-
+       //std::cout << std::endl;
      }
 
      maximal_dim = id;
@@ -323,45 +336,22 @@ class Graph_induced_complex {
    }
 
  public:
-   void find_all_simplices(const std::vector<std::vector<Cover_t> > & cover_elts\
-                           //int token, std::vector<Cover_t> & simplex_tmp
-                           ){
+   void find_all_simplices(const std::vector<std::vector<Cover_t> > & cover_elts){
      int num_nodes = cover_elts.size();
-
-     // Old method.
-
-     /*if(token == num_nodes-1){
-       int num_clus = cover_elts[token].size();
-       for(int i = 0; i < num_clus; i++){
-         std::vector<Cover_t> simplex = simplex_tmp; simplex.push_back(cover_elts[token][i]);
-         std::vector<Cover_t>::iterator it;
-         std::sort(simplex.begin(),simplex.end()); it = std::unique(simplex.begin(),simplex.end());
-         simplex.resize(std::distance(simplex.begin(),it));
-         simplices.push_back(simplex);
-       }
-     }
-     else{
-       int num_clus = cover_elts[token].size();
-       for(int i = 0; i < num_clus; i++){
-         std::vector<Cover_t> simplex = simplex_tmp; simplex.push_back(cover_elts[token][i]);
-         find_all_simplices(cover_elts, token+1, simplex);
-       }
-     }*/
-
      std::vector<Cover_t> simplex;
      for(int i = 0; i < num_nodes; i++)
        for(int j = 0; j < cover_elts[i].size(); j++)
          simplex.push_back(cover_elts[i][j]);
      std::sort(simplex.begin(),simplex.end()); std::vector<Cover_t>::iterator it = std::unique(simplex.begin(),simplex.end());
      simplex.resize(std::distance(simplex.begin(),it));
-     simplices.push_back(simplex); for(int i = 0; i < simplex.size(); i++)  std::cout << simplex[i] << " "; std::cout << std::endl;
+     simplices.push_back(simplex); //for(int i = 0; i < simplex.size(); i++)  std::cout << simplex[i] << " "; std::cout << std::endl;
    }
 
  public:
    void find_Nerve_simplices(){
      simplices.clear();
      for(std::map<int,std::vector<Cover_t> >::iterator it = cover.begin(); it!=cover.end(); it++){
-       simplices.push_back(it->second);
+       simplices.push_back(it->second); //std::cout << it->second[0] << std::endl;
      }
      std::vector<std::vector<Cover_t> >::iterator it;
      std::sort(simplices.begin(),simplices.end()); it = std::unique(simplices.begin(),simplices.end());
@@ -399,9 +389,9 @@ class Graph_induced_complex {
      simplices.clear();
      for (auto simplex : st.complex_simplex_range()) {
        if(!st.has_children(simplex)){
-         std::vector<std::vector<Cover_t> > cover_elts; //std::vector<Cover_t> sim;
+         std::vector<std::vector<Cover_t> > cover_elts;
          for (auto vertex : st.simplex_vertex_range(simplex))  cover_elts.push_back(cover[vertex]);
-         find_all_simplices(cover_elts/*,0,sim*/);
+         find_all_simplices(cover_elts);
        }
      }
      std::vector<std::vector<Cover_t> >::iterator it;
@@ -411,26 +401,31 @@ class Graph_induced_complex {
 
  public:
    void find_GIC_simplices_with_functional_minimal_cover(){
-     for(std::map<int,std::vector<Cover_t> >::iterator it = cover.begin(); it != cover.end(); it++){         
+
+     int v1, v2;
+
+     // Loop on all points.
+     for(std::map<int,std::vector<Cover_t> >::iterator it = cover.begin(); it != cover.end(); it++){
+
        int vid = it->first; std::vector<int> neighbors = adjacency_matrix[vid]; int num_neighb = neighbors.size();
-       std::vector<int> vids(1); vids[0] = cover[vid][0]; simplices.push_back(vids);
+       //std::cout << vid << " " << num_neighb << std::endl;
+
+       // Find cover of current point (vid).
+       if(cover[vid].size() == 2)  v1 = std::min(cover[vid][0],cover[vid][1]); else  v1 = cover[vid][0];
+
+       // Loop on neighbors.
        for(int i = 0; i < num_neighb; i++){
-         int neighb = neighbors[i]; int v1, v2;
-         if(func[vid] > func[neighb]){
-           if(cover[vid].size() == 2)  v1 = std::max(cover[vid][0],cover[vid][1]); else  v1 = cover[vid][0];
-           if(cover[neighb].size() == 2)  v2 = std::min(cover[neighb][0],cover[neighb][1]); else  v2 = cover[neighb][0];
-           std::vector<int> edge(2); edge[0] = v1; edge[1] = v2;
-           //std::cout << v1 << " " << v2 << std::endl;
-           if(v1 != v2)  simplices.push_back(edge);
+
+         int neighb = neighbors[i];
+
+         // Find cover of neighbor (neighb).
+         if(cover[neighb].size() == 2)  v2 = std::max(cover[neighb][0],cover[neighb][1]); else  v2 = cover[neighb][0];
+
+         // If neighbor is in next interval, add edge.
+         if(cover_fct[v2] == cover_fct[v1] + 1){
+           std::vector<int> edge(2); edge[0] = v1; edge[1] = v2; //std::cout << v1 << " " << v2 << std::endl;
+           simplices.push_back(edge);
          }
-         /*else{
-           if(  func[neighb]-func[vid] <= resolution*(2-gain)  ){
-               if(cover[vid].size() == 2)  v1 = std::min(cover[vid][0],cover[vid][1]); else  v1 = cover[vid][0];
-               if(cover[neighb].size() == 2)  v2 = std::max(cover[neighb][0],cover[neighb][1]); else  v2 = cover[neighb][0];
-               std::vector<int> edge(2); edge[0] = v1; edge[1] = v2;
-               if(v2 > v1)  simplices.push_back(edge);
-             }
-         }*/
        }
      }
      std::vector<std::vector<Cover_t> >::iterator it;
