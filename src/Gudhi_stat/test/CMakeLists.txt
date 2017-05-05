@@ -16,10 +16,6 @@ endif()
 
 # copy data directory for tests purpose. QUESTION -- DOEST IT WORK IF WE CREATE A NEW FOLDER FOR EACH TEST? i THINK THAT WE SHOULD MAKE THS COPYING TO EACH TEST FOLDER. 
 file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
-# Do not forget to copy test files in current binary dir
-file(COPY "${CMAKE_SOURCE_DIR}/src/Gudhi_stat/test/data" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
-
-file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 add_executable ( persistence_intervals_test persistence_intervals_test.cpp )
 target_link_libraries(persistence_intervals_test ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
@@ -27,69 +23,57 @@ target_link_libraries(persistence_intervals_test ${Boost_SYSTEM_LIBRARY} ${Boost
 # Unitary tests
 add_test(NAME persistence_intervals_test
   COMMAND ${CMAKE_CURRENT_BINARY_DIR}/persistence_intervals_test
-  file(COPY data DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/persistence_intervals_test/data")	 
   # XML format for Jenkins xUnit plugin 
   --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/persistence_intervals_UT.xml --log_level=test_suite --report_level=no)
 
-file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 add_executable ( vector_representation_test vector_representation_test.cpp )
 target_link_libraries(vector_representation_test ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 # Unitary tests
 add_test(NAME vector_representation_test
   COMMAND ${CMAKE_CURRENT_BINARY_DIR}/vector_representation_test
-  file(COPY data DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/vector_representation_test/data")
   # XML format for Jenkins xUnit plugin 
   --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/vector_representation_UT.xml --log_level=test_suite --report_level=no)
 
-file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 add_executable ( persistence_lanscapes_test persistence_lanscapes_test.cpp )
 target_link_libraries(persistence_lanscapes_test ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 # Unitary tests
 add_test(NAME persistence_lanscapes_test
   COMMAND ${CMAKE_CURRENT_BINARY_DIR}/persistence_lanscapes_test
-  file(COPY data DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/persistence_lanscapes_test/data")
   # XML format for Jenkins xUnit plugin 
   --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/persistence_lanscapes_UT.xml --log_level=test_suite --report_level=no)
 
-file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 add_executable ( persistence_lanscapes_on_grid_test persistence_lanscapes_on_grid_test.cpp )
 target_link_libraries(persistence_lanscapes_on_grid_test ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 # Unitary tests
 add_test(NAME persistence_lanscapes_on_grid_test
   COMMAND ${CMAKE_CURRENT_BINARY_DIR}/persistence_lanscapes_on_grid_test
-  file(COPY data DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/persistence_lanscapes_on_grid_test/data")
   # XML format for Jenkins xUnit plugin 
   --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/persistence_lanscapes_on_grid_UT.xml --log_level=test_suite --report_level=no)
 
-file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 add_executable ( persistence_heat_maps_test persistence_heat_maps_test.cpp )
 target_link_libraries(persistence_heat_maps_test ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 # Unitary tests
 add_test(NAME persistence_heat_maps_test
   COMMAND ${CMAKE_CURRENT_BINARY_DIR}/persistence_heat_maps_test
-  file(COPY data DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/persistence_heat_maps_test/data")
   # XML format for Jenkins xUnit plugin
   --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/persistence_heat_maps_UT.xml --log_level=test_suite --report_level=no)
 
-file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 add_executable ( read_persistence_from_file_test read_persistence_from_file_test.cpp )
 target_link_libraries(read_persistence_from_file_test ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 # Unitary tests
 add_test(NAME read_persistence_from_file_test
   COMMAND ${CMAKE_CURRENT_BINARY_DIR}/read_persistence_from_file_test
-  file(COPY data DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/read_persistence_from_file_test/data")
   # XML format for Jenkins xUnit plugin
   --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/read_persistence_from_file_UT.xml --log_level=test_suite --report_level=no)
 
 
 
 if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
-file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 add_executable ( persistence_intervals_with_distances_test persistence_intervals_with_distances_test.cpp )
 target_link_libraries(persistence_intervals_with_distances_test ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 if (TBB_FOUND)
@@ -98,7 +82,6 @@ endif(TBB_FOUND)
 # Unitary tests
 add_test(NAME persistence_intervals_with_distances_test
   COMMAND ${CMAKE_CURRENT_BINARY_DIR}/persistence_intervals_with_distances_test
-  file(COPY data DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/persistence_intervals_with_distances_test/data")
   # XML format for Jenkins xUnit plugin
   --log_format=XML --log_sink=${CMAKE_SOURCE_DIR}/persistence_intervals_with_distances_test_UT.xml --log_level=test_suite --report_level=no)
 endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
