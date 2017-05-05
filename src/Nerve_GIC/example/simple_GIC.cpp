@@ -12,6 +12,7 @@ int main(int argc, char **argv) {
 
   std::string off_file_name(argv[1]);
   double threshold = atof(argv[2]);
+  //std::string func_file_name = argv[3];
   int coord = atoi(argv[3]);
   double resolution = atof(argv[4]);
   double gain = atof(argv[5]);
@@ -30,12 +31,23 @@ int main(int argc, char **argv) {
   GIC.set_graph_from_automatic_rips(100, off_file_name);
   //GIC.set_graph_from_rips(threshold, off_file_name);
   //GIC.set_graph_from_OFF(off_file_name);
+
   GIC.set_function_from_coordinate(coord, off_file_name);
+  //GIC.set_function_from_file(func_file_name);
+
+  GIC.set_color_from_coordinate(coord, off_file_name);
+  //GIC.set_color_from_file(func_file_name);
+
   resolution = GIC.set_automatic_resolution_for_GICMAP();
+
   GIC.set_cover_from_function(resolution,gain,1);
+
   //GIC.find_GIC_simplices();
   //GIC.find_Nerve_simplices();
   GIC.find_GICMAP_simplices_with_functional_minimal_cover();
+
+  GIC.plot_with_KeplerMapper();
+
   Simplex_tree stree; GIC.create_complex(stree);
 
   std::streambuf* streambufffer;

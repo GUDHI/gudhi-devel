@@ -48,6 +48,7 @@
 
 #define CONSTANT 10
 #define ETA 0.001
+#define MASK 0
 
 using Simplex_tree = Gudhi::Simplex_tree<>;
 using Filtration_value = Simplex_tree::Filtration_value;
@@ -55,6 +56,7 @@ using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
 using Point = std::vector<float>;
 
 std::map<int, double> func;
+std::map<int, double> func_color;
 
 namespace Gudhi {
 
@@ -84,10 +86,13 @@ class Graph_induced_complex {
    std::map<int, std::vector<Cover_t> > cover;
 
  private:
-   int maximal_dim;
+   int maximal_dim; int data_dimension;
 
  private:
    std::map<Cover_t,int> cover_fct;
+
+ private:
+  std::map<Cover_t,std::pair<int,double> > cover_color;
 
  private:
    Simplex_tree<> st;
@@ -176,7 +181,7 @@ class Graph_induced_complex {
    void set_graph_from_rips(const double& threshold, const std::string& off_file_name){
      Points_off_reader<Point> off_reader(off_file_name);
      Rips_complex rips_complex_from_points(off_reader.get_point_cloud(), threshold, Euclidean_distance());
-     rips_complex_from_points.create_complex(st, 1);
+     rips_complex_from_points.create_complex(st, 1); data_dimension = off_reader.get_point_cloud()[0].size();
    }
 
  public: // Automatic tuning of Rips complex.
@@ -185,10 +190,40 @@ class Graph_induced_complex {
      Points_off_reader<Point> off_reader(off_file_name);
      int n = off_reader.get_point_cloud().size();
      int m = floor(n/pow(log(n)/log(CONSTANT),1+ETA)); m = std::min(m,n-1);
-     std::vector<int> samples(m); double delta = 0; int dim = off_reader.get_point_cloud()[0].size();
+     std::vector<int> samples(m); double delta = 0; int dim = off_reader.get_point_cloud()[0].size(); data_dimension = dim;
 
-     std::vector<std::vector<double> > dist; std::vector<double> dumb(n);
-     for(int i = 0; i < n; i++)  dist.push_back(dumb);
+     std::cout << n << " points in R^" << dim << std::endl;
+     std::cout << "Subsampling " << m << " points" << std::endl;
+
+     std::vector<std::vector<double> > dist(n); std::vector<double> dumb(n);
+     for(int i = 0; i < n; i++)  dist[i] = dumb;
+     double d;
+
+     char distances[100]; sprintf(distances,"%s_dist",(char*) off_file_name.c_str());
+     std::ifstream input(distances, std::ios::out | std::ios::binary);
+
+     if(input.good()){
+       std::cout << "Reading distances..." << std::endl;
+       for(int i = 0; i < n; i++){
+         for (int j = 0; j < n; j++){
+           input.read((char*) &d,8); dist[i][j] = d;
+         }
+       }
+       input.close();
+     }
+     else{
+       std::cout << "Computing distances..." << std::endl;
+       input.close(); std::ofstream output(distances, std::ios::out | std::ios::binary);
+       for(int i = 0; i < n; i++){
+         if( (int) floor( 100*(i*1.0+1)/(n*1.0) ) %10 == 0  )
+           std::cout << "\r" << floor( 100*(i*1.0+1)/(n*1.0) ) << "%" << std::flush;
+         for (int j = 0; j < n; j++){
+           double dis = 0; for(int k = 0; k < dim; k++)  dis += pow(off_reader.get_point_cloud()[i][k]-off_reader.get_point_cloud()[j][k],2);
+           dis = std::sqrt(dis); dist[i][j] = dis; output.write((char*) &dis,8);
+         }
+       }
+       output.close(); std::cout << std::endl;
+     }
 
      for(int i = 0; i < n; i++){
        for(int j = i; j < n; j++){
@@ -210,6 +245,7 @@ class Graph_induced_complex {
 
      }
 
+     std::cout << "delta = " << delta << std::endl;
      Rips_complex rips_complex_from_points(off_reader.get_point_cloud(), delta, Euclidean_distance());
      rips_complex_from_points.create_complex(st, 1);
 
@@ -269,6 +305,7 @@ class Graph_induced_complex {
          reso = std::max(reso, std::abs(func[vertices[0]] - func[vertices[1]]));
        }
      }
+     std::cout << "resolution = " << reso << std::endl;
      return reso;
    }
 
@@ -291,7 +328,7 @@ class Graph_induced_complex {
      // Read function values and compute min and max
      std::map<int, double>::iterator it; double maxf, minf; minf = std::numeric_limits<float>::max(); maxf = std::numeric_limits<float>::min();
      for(it = func.begin(); it != func.end(); it++){minf = std::min(minf, it->second); maxf = std::max(maxf, it->second);}
-     int num_pts = func.size(); //std::cout << minf << " " << maxf << std::endl;
+     int num_pts = func.size(); std::cout << "Min function value = " << minf << " and Max function value = " << maxf << std::endl;
 
      // Compute cover of im(f)
      std::vector<std::pair<double,double> > intervals; int res;
@@ -305,7 +342,7 @@ class Graph_induced_complex {
        }
        x = minf + (resolution-1)*incr - alpha; y = maxf;
        std::pair<double, double> interM(x,y); intervals.push_back(interM); res = intervals.size();
-       //for(int i = 0; i < res; i++)  std::cout << intervals[i].first << " " << intervals[i].second << std::endl;
+       for(int i = 0; i < res; i++)  std::cout << "Interval " << i << " = [" << intervals[i].first << ", " << intervals[i].second << "]" << std::endl;
      }
      else{
        double x = minf; double y = x + resolution;
@@ -315,6 +352,7 @@ class Graph_induced_complex {
          y = x + resolution;
        }
        std::pair<double, double> interM(x,maxf); intervals.push_back(interM); res = intervals.size();
+       for(int i = 0; i < res; i++)  std::cout << "Interval " << i << " = [" << intervals[i].first << ", " << intervals[i].second << "]" << std::endl;
      }
 
      // Sort points according to function values
@@ -382,27 +420,102 @@ class Graph_induced_complex {
        }
 
        // Compute the connected components with DFS
-       std::map<int,bool> visit; //std::cout << i << std::endl;
+       std::map<int,bool> visit; std::cout << "Preimage of interval " << i << std::endl;
        for(std::map<int, std::vector<int> >::iterator it = prop.begin(); it != prop.end(); it++)
          visit.insert(std::pair<int,bool>(it->first, false));
        if (!(prop.empty())){
          for(std::map<int, std::vector<int> >::iterator it = prop.begin(); it != prop.end(); it++){
            if (  !(visit[it->first])  ){
              std::vector<int> cc; cc.clear();
-             dfs(prop,it->first,cc,visit); int cci = cc.size(); //std::cout << cci << " ";
-             for(int j = 0; j < cci; j++)  cover[cc[j]].push_back(id);
-             cover_fct[id] = i;
+             dfs(prop,it->first,cc,visit); int cci = cc.size(); std::cout << "one CC with " << cci << " points, ";
+             double average_col = 0;
+             for(int j = 0; j < cci; j++){cover[cc[j]].push_back(id); average_col += func_color[cc[j]]/cci;}
+             cover_fct[id] = i; cover_color[id] = std::pair<int,double>(cci,average_col);
              id++;
            }
          }
        }
-       //std::cout << std::endl;
+       std::cout << std::endl;
      }
 
      maximal_dim = id;
 
    }
 
+ // *******************************************************************************************************************
+ // Visualization.
+ // *******************************************************************************************************************
+
+ public: // Set color from file.
+  void set_color_from_file(const std::string& color_file_name){
+    int vertex_id = 0; std::ifstream input(color_file_name); std::string line; double f;
+    while(std::getline(input,line)){
+      std::stringstream stream(line); stream >> f;
+      func_color.insert(std::pair<int,double>(vertex_id, f)); vertex_id++;
+    }
+  }
+
+ public: // Set color from kth coordinate
+  void set_color_from_coordinate(const int& k, const std::string& off_file_name){
+    Points_off_reader<Point> off_reader(off_file_name);
+    int numpts = off_reader.get_point_cloud().size();
+    for(int i = 0; i < numpts; i++)  func_color.insert(std::pair<int,double>(i,off_reader.get_point_cloud()[i][k]));
+  }
+
+ public: // Set color from vector.
+  void set_color_from_vector(const std::vector<double>& color){
+    for(int i = 0; i < color.size(); i++)  func_color.insert(std::pair<int,double>(i, color[i]));
+  }
+
+ public: // Create a .dot file that can be compiled with neato to produce a .pdf file
+  void plot_with_neato(){
+    char mapp[11] = "mapper.dot";   std::ofstream graphic(mapp); graphic << "graph Mapper {" << std::endl;
+    double maxv, minv; maxv = std::numeric_limits<double>::min(); minv = std::numeric_limits<double>::max();
+    for (std::map<Cover_t,std::pair<int,double> >::iterator iit = cover_color.begin(); iit != cover_color.end(); iit++){
+      maxv = std::max(maxv, iit->second.second);  minv = std::min(minv, iit->second.second);
+    }
+    int k = 0; std::vector<int> nodes; nodes.clear();
+    for (std::map<Cover_t,std::pair<int,double> >::iterator iit = cover_color.begin(); iit != cover_color.end(); iit++){
+      if(iit->second.first > MASK){
+        nodes.push_back(iit->first);
+        graphic << iit->first << "[shape=circle fontcolor=black color=black label=\"" \
+          << iit->first << ":" << iit->second.first << "\" style=filled fillcolor=\"" \
+          << (1-(maxv-iit->second.second)/(maxv-minv))*0.6 << ", 1, 1\"]" << std::endl;
+        k++;
+      }
+    }
+    int ke = 0; int num_simplices = simplices.size();
+    for (int i = 0; i < num_simplices; i++)
+      if (simplices[i].size() == 2)
+        if (cover_color[simplices[i][0]].first > MASK && cover_color[simplices[i][1]].first > MASK){
+          graphic << "  " << simplices[i][0] << " -- " << simplices[i][1] << " [weight=15];" << std::endl; ke++;}
+    graphic << "}"; graphic.close();
+  }
+
+ public: // Create a .txt file that can be compiled with KeplerMapper to produce a .html file
+  void plot_with_KeplerMapper(){
+
+    int num_simplices = simplices.size(); int num_edges = 0;
+    char mapp[11] = "mapper.txt";  std::ofstream graphic(mapp);
+    for (int i = 0; i < num_simplices; i++)
+      if (simplices[i].size() == 2)
+        if (cover_color[simplices[i][0]].first > MASK && cover_color[simplices[i][1]].first > MASK)
+          num_edges++;
+
+    graphic << "Cloud" << std::endl;
+    graphic << "Function" << std::endl;
+    graphic << 0 << " " << 0 << std::endl;
+    graphic << cover_color.size() << " " << num_edges << std::endl;
+
+    for (std::map<Cover_t,std::pair<int,double> >::iterator iit = cover_color.begin(); iit != cover_color.end(); iit++)
+      graphic << iit->first << " " << iit->second.second << " " << iit->second.first << std::endl;
+
+    for (int i = 0; i < num_simplices; i++)
+      if (simplices[i].size() == 2)
+        if (cover_color[simplices[i][0]].first > MASK && cover_color[simplices[i][1]].first > MASK)
+          graphic << simplices[i][0] << " " << simplices[i][1] << std::endl;
+    graphic.close();
+  }
 
  // *******************************************************************************************************************
  // *******************************************************************************************************************
@@ -490,10 +603,10 @@ class Graph_induced_complex {
      for(std::map<int,std::vector<Cover_t> >::iterator it = cover.begin(); it != cover.end(); it++){
 
        int vid = it->first; std::vector<int> neighbors = adjacency_matrix[vid]; int num_neighb = neighbors.size();
-       //std::cout << vid << " " << num_neighb << std::endl;
 
        // Find cover of current point (vid).
        if(cover[vid].size() == 2)  v1 = std::min(cover[vid][0],cover[vid][1]); else  v1 = cover[vid][0];
+       std::vector<int> node(1); node[0] = v1; simplices.push_back(node);
 
        // Loop on neighbors.
        for(int i = 0; i < num_neighb; i++){
@@ -505,7 +618,7 @@ class Graph_induced_complex {
 
          // If neighbor is in next interval, add edge.
          if(cover_fct[v2] == cover_fct[v1] + 1){
-           std::vector<int> edge(2); edge[0] = v1; edge[1] = v2; //std::cout << v1 << " " << v2 << std::endl;
+           std::vector<int> edge(2); edge[0] = v1; edge[1] = v2;
            simplices.push_back(edge);
          }
        }
