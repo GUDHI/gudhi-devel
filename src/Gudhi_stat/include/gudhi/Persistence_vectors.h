@@ -29,6 +29,7 @@
 #include <algorithm>
 #include <iostream>
 #include <limits>
+#include <functional>
 
 //gudhi include
 #include <gudhi/read_persistence_from_file.h>
