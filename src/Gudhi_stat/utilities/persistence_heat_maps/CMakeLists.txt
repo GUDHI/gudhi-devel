@@ -16,9 +16,9 @@ add_executable ( create_p_h_m_weighted_by_distance_from_diagonal create_p_h_m_we
 target_link_libraries(create_p_h_m_weighted_by_distance_from_diagonal ${Boost_SYSTEM_LIBRARY})
 add_test ( create_p_h_m_weighted_by_distance_from_diagonal ${CMAKE_CURRENT_BINARY_DIR}/create_p_h_m_weighted_by_distance_from_diagonal 10 -1 -1 4 -1   "${CMAKE_SOURCE_DIR}/data/persistence_diagram/simple_diagram.txt"  )
 
-add_executable ( create_p_h_m_weighted_by_squared_distance_from_diagonal create_p_h_m_weighted_by_squared_distance_from_diagonal.cpp )
-target_link_libraries(create_p_h_m_weighted_by_squared_distance_from_diagonal ${Boost_SYSTEM_LIBRARY})
-add_test ( create_p_h_m_weighted_by_squared_distance_from_diagonal ${CMAKE_CURRENT_BINARY_DIR}/create_p_h_m_weighted_by_squared_distance_from_diagonal    10 -1 -1 4 -1   "${CMAKE_SOURCE_DIR}/data/persistence_diagram/simple_diagram.txt"  )
+add_executable ( create_p_h_m_weighted_by_squared_diag_distance create_p_h_m_weighted_by_squared_diag_distance.cpp )
+target_link_libraries(create_p_h_m_weighted_by_squared_diag_distance ${Boost_SYSTEM_LIBRARY})
+add_test (create_p_h_m_weighted_by_squared_diag_distance ${CMAKE_CURRENT_BINARY_DIR}/create_p_h_m_weighted_by_squared_diag_distance    10 -1 -1 4 -1   "${CMAKE_SOURCE_DIR}/data/persistence_diagram/simple_diagram.txt"  )
 
 add_executable ( create_p_h_m_weighted_by_arctan_of_their_persistence create_p_h_m_weighted_by_arctan_of_their_persistence.cpp )
 target_link_libraries(create_p_h_m_weighted_by_arctan_of_their_persistence ${Boost_SYSTEM_LIBRARY})
