@@ -70,33 +70,36 @@ namespace graph_induced_complex {
  * \ingroup graph_induced_complex
  *
  * \details
- *
+ * The data structure is a simplicial complex, representing a
+ * Graph Induced simplicial Complex (GIC) or a Nerve,
+ * and whose simplices are computed with a cover C of a point
+ * cloud P, which often comes from the preimages of intervals
+ * covering the image of a function f defined on P.
+ * These intervals are parameterized by their resolution
+ * (either their length or their number)
+ * and their gain (percentage of overlap).
+ * To compute a GIC, one also needs a graph G built on top of P,
+ * whose cliques with vertices belonging to different elements of C
+ * correspond to the simplices of the GIC.
  *
  */
 
 class Graph_induced_complex {
 
  private:
-  typedef int Cover_t;
-
- private:
+   bool verbose;
+   typedef int Cover_t;
    std::vector<std::vector<Cover_t> > simplices;
-
- private:
    std::map<int, std::vector<Cover_t> > cover;
-
- private:
-   int maximal_dim; int data_dimension;
-
- private:
+   int maximal_dim;
+   int data_dimension;
    std::map<Cover_t,int> cover_fct;
-
- private:
-  std::map<Cover_t,std::pair<int,double> > cover_color;
-
- private:
+   std::map<Cover_t,std::pair<int,double> > cover_color;
    Simplex_tree<> st;
    std::map<int,std::vector<int> > adjacency_matrix;
+   int resolution_int;
+   double resolution_double;
+   double gain;
 
  // Simplex comparator
  private:
@@ -144,40 +147,58 @@ class Graph_induced_complex {
    }
  }
 
+ public:
+   void set_verbose(bool verb = 0){verbose = verb;}
+
  // *******************************************************************************************************************
  // Graphs.
  // *******************************************************************************************************************
 
  public: // Set graph from file.
-  void set_graph_from_file(const std::string& graph_file_name){
-    int neighb; int vid; std::ifstream input(graph_file_name); std::string line; std::vector<int> edge(2);
-    while(std::getline(input,line)){
-      std::stringstream stream(line); stream >> vid; edge[0] = vid;
-      while(stream >> neighb){edge[1] = neighb; st.insert_simplex_and_subfaces(edge);}
-    }
-  }
+   /** \brief Creates the graph G from a file containing the edges.
+    *
+    * @param[in] graph_file_name name of the input graph file.
+    *
+    */
+   void set_graph_from_file(const std::string& graph_file_name){
+     int neighb; int vid; std::ifstream input(graph_file_name); std::string line; std::vector<int> edge(2);
+     while(std::getline(input,line)){
+       std::stringstream stream(line); stream >> vid; edge[0] = vid;
+       while(stream >> neighb){edge[1] = neighb; st.insert_simplex_and_subfaces(edge);}
+     }
+   }
 
  public: // Set graph from OFF file.
-  void set_graph_from_OFF(const std::string& off_file_name){
-    int numpts, numedges, numfaces, i; std::vector<int> edge(2); double x; int num; std::vector<int> simplex;
-    std::ifstream input(off_file_name); std::string line; getline(input, line);
-    input >> numpts; input >> numfaces; input >> numedges;
-    i = 0;  while(i < numpts){input >> x; input >> x; input >> x; i++;}
-    i = 0;  while(i < numfaces){
-      simplex.clear(); input >> num;
-      for(int j = 0; j < num; j++){int k; input >> k; simplex.push_back(k);}
-      for(int j = 0; j < num; j++){
-        for(int k = j+1; k < num; k++){
-          edge[0] = simplex[j]; edge[1] = simplex[k];
-          st.insert_simplex_and_subfaces(edge);
-        }
-      }
-      i++;
-    }
-
-  }
+   /** \brief Creates the graph G from the triangulation given by an .OFF file.
+    *
+    * @param[in] off_file_name name of the input .OFF file.
+    *
+    */
+   void set_graph_from_OFF(const std::string& off_file_name){
+     int numpts, numedges, numfaces, i; std::vector<int> edge(2); double x; int num; std::vector<int> simplex;
+     std::ifstream input(off_file_name); std::string line; getline(input, line);
+     input >> numpts; input >> numfaces; input >> numedges;
+     i = 0;  while(i < numpts){input >> x; input >> x; input >> x; i++;}
+     i = 0;  while(i < numfaces){
+       simplex.clear(); input >> num;
+       for(int j = 0; j < num; j++){int k; input >> k; simplex.push_back(k);}
+       for(int j = 0; j < num; j++){
+         for(int k = j+1; k < num; k++){
+           edge[0] = simplex[j]; edge[1] = simplex[k];
+           st.insert_simplex_and_subfaces(edge);
+         }
+       }
+       i++;
+     }
+   }
 
  public: // Set graph from Rips complex.
+   /** \brief Creates the graph G from a Rips complex.
+    *
+    * @param[in] threshold threshold value for the Rips complex.
+    * @param[in] off_file_name name of the input .OFF file.
+    *
+    */
    void set_graph_from_rips(const double& threshold, const std::string& off_file_name){
      Points_off_reader<Point> off_reader(off_file_name);
      Rips_complex rips_complex_from_points(off_reader.get_point_cloud(), threshold, Euclidean_distance());
@@ -185,15 +206,21 @@ class Graph_induced_complex {
    }
 
  public: // Automatic tuning of Rips complex.
-   void set_graph_from_automatic_rips(const int& N, const std::string& off_file_name){
+   /** \brief Creates the graph G from a Rips complex whose threshold value is automatically tuned with subsampling.
+    *
+    * @param[in] off_file_name name of the input .OFF file.
+    * @param[in] N number of subsampling iteration (default value 100).
+    *
+    */
+   void set_graph_from_automatic_rips(const std::string& off_file_name, int N = 100){
 
      Points_off_reader<Point> off_reader(off_file_name);
      int n = off_reader.get_point_cloud().size();
      int m = floor(n/pow(log(n)/log(CONSTANT),1+ETA)); m = std::min(m,n-1);
      std::vector<int> samples(m); double delta = 0; int dim = off_reader.get_point_cloud()[0].size(); data_dimension = dim;
 
-     std::cout << n << " points in R^" << dim << std::endl;
-     std::cout << "Subsampling " << m << " points" << std::endl;
+     if(verbose)  std::cout << n << " points in R^" << dim << std::endl;
+     if(verbose)  std::cout << "Subsampling " << m << " points" << std::endl;
 
      std::vector<std::vector<double> > dist(n); std::vector<double> dumb(n);
      for(int i = 0; i < n; i++)  dist[i] = dumb;
@@ -203,7 +230,7 @@ class Graph_induced_complex {
      std::ifstream input(distances, std::ios::out | std::ios::binary);
 
      if(input.good()){
-       std::cout << "Reading distances..." << std::endl;
+       if(verbose)  std::cout << "Reading distances..." << std::endl;
        for(int i = 0; i < n; i++){
          for (int j = 0; j < n; j++){
            input.read((char*) &d,8); dist[i][j] = d;
@@ -212,17 +239,17 @@ class Graph_induced_complex {
        input.close();
      }
      else{
-       std::cout << "Computing distances..." << std::endl;
+       if(verbose)  std::cout << "Computing distances..." << std::endl;
        input.close(); std::ofstream output(distances, std::ios::out | std::ios::binary);
        for(int i = 0; i < n; i++){
          if( (int) floor( 100*(i*1.0+1)/(n*1.0) ) %10 == 0  )
-           std::cout << "\r" << floor( 100*(i*1.0+1)/(n*1.0) ) << "%" << std::flush;
+           if(verbose)  std::cout << "\r" << floor( 100*(i*1.0+1)/(n*1.0) ) << "%" << std::flush;
          for (int j = 0; j < n; j++){
            double dis = 0; for(int k = 0; k < dim; k++)  dis += pow(off_reader.get_point_cloud()[i][k]-off_reader.get_point_cloud()[j][k],2);
            dis = std::sqrt(dis); dist[i][j] = dis; output.write((char*) &dis,8);
          }
        }
-       output.close(); std::cout << std::endl;
+       output.close(); if(verbose)  std::cout << std::endl;
      }
 
      for(int i = 0; i < n; i++){
@@ -245,7 +272,7 @@ class Graph_induced_complex {
 
      }
 
-     std::cout << "delta = " << delta << std::endl;
+     if(verbose)  std::cout << "delta = " << delta << std::endl;
      Rips_complex rips_complex_from_points(off_reader.get_point_cloud(), delta, Euclidean_distance());
      rips_complex_from_points.create_complex(st, 1);
 
@@ -257,6 +284,11 @@ class Graph_induced_complex {
  // *******************************************************************************************************************
 
  public: // Set function from file.
+   /** \brief Creates the function f from a file containing the function values.
+    *
+    * @param[in] func_file_name name of the input function file.
+    *
+    */
    void set_function_from_file(const std::string& func_file_name){
      int vertex_id = 0; std::ifstream input(func_file_name); std::string line; double f;
      while(std::getline(input,line)){
@@ -266,6 +298,12 @@ class Graph_induced_complex {
    }
 
  public: // Set function from kth coordinate
+   /** \brief Creates the function f from the k-th coordinate of the point cloud P.
+    *
+    * @param[in] k coordinate to use (start at 0).
+    * @param[in] off_file_name name of the input .OFF file.
+    *
+    */
    void set_function_from_coordinate(const int& k, const std::string& off_file_name){
      Points_off_reader<Point> off_reader(off_file_name);
      int numpts = off_reader.get_point_cloud().size();
@@ -273,6 +311,11 @@ class Graph_induced_complex {
    }
 
  public: // Set function from vector.
+   /** \brief Creates the function f from a vector stored in memory.
+    *
+    * @param[in] function input vector of values.
+    *
+    */
    void set_function_from_vector(const std::vector<double>& function){
      for(int i = 0; i < function.size(); i++)  func.insert(std::pair<int,double>(i, function[i]));
    }
@@ -282,6 +325,12 @@ class Graph_induced_complex {
  // *******************************************************************************************************************
 
  public: // Set cover from file.
+   /** \brief Creates the cover C from a file containing the cover elements of each point (the order has to be the same
+    * as in the input file!).
+    *
+    * @param[in] cover_file_name name of the input cover file.
+    *
+    */
    void set_cover_from_file(const std::string& cover_file_name){
      int vertex_id = 0; Cover_t cov; std::vector<Cover_t> cov_elts, cov_number;
      std::ifstream input(cover_file_name); std::string line;
@@ -296,7 +345,9 @@ class Graph_induced_complex {
    }
 
  public: // Automatic tuning of resolution for Mapper Delta.
-   double set_automatic_resolution_for_GICMAP(){
+   /** \brief Computes the optimal length of intervals for a Mapper Delta.
+    */
+   void set_automatic_resolution_for_GICMAP(){
      double reso = 0;
      for (auto simplex : st.complex_simplex_range()) {
        if(st.dimension(simplex) == 1){
@@ -305,12 +356,34 @@ class Graph_induced_complex {
          reso = std::max(reso, std::abs(func[vertices[0]] - func[vertices[1]]));
        }
      }
-     std::cout << "resolution = " << reso << std::endl;
-     return reso;
+     if(verbose)  std::cout << "resolution = " << reso << std::endl;
+     resolution_double = reso;
    }
 
+ public:
+   /** \brief Sets a length of intervals from a value stored in memory.
+    *
+    * @param[in] reso length of intervals.
+    *
+    */
+   void set_resolution_double(double reso){resolution_double = reso;}
+   /** \brief Sets a number of intervals from a value stored in memory.
+    *
+    * @param[in] reso number of intervals.
+    *
+    */
+   void set_resolution_int(int reso){resolution_int = reso;}
+   /** \brief Sets a gain from a value stored in memory (default value 0.3).
+    *
+    * @param[in] g gain.
+    *
+    */
+   void set_gain(double g = 0.3){gain = g;}
+
  public: // Automatic tuning of resolution for Mapper Point.
-   double set_automatic_resolution_for_MAP(const double& gain){
+   /** \brief Computes the optimal length of intervals for a standard Mapper.
+    */
+   void set_automatic_resolution_for_MAP(const double& gain){
      double reso = 0;
      for (auto simplex : st.complex_simplex_range()) {
        if(st.dimension(simplex) == 1){
@@ -319,40 +392,49 @@ class Graph_induced_complex {
          reso = std::max(reso, (std::abs(func[vertices[0]] - func[vertices[1]]))/gain);
        }
      }
-     return reso;
+     if(verbose)  std::cout << "resolution = " << reso << std::endl;
+     resolution_double = reso;
    }
 
  public: // Set cover with preimages of function.
-   void set_cover_from_function(const double& resolution, const double& gain, const bool& token){
+   /** \brief Creates a cover C from the preimages of the function f.
+    *
+    * @param[in] token boolean specifying whether we use the length or the number of intervals for the cover of im(f).
+    *
+    */
+   void set_cover_from_function(const bool& token){
 
      // Read function values and compute min and max
      std::map<int, double>::iterator it; double maxf, minf; minf = std::numeric_limits<float>::max(); maxf = std::numeric_limits<float>::min();
      for(it = func.begin(); it != func.end(); it++){minf = std::min(minf, it->second); maxf = std::max(maxf, it->second);}
-     int num_pts = func.size(); std::cout << "Min function value = " << minf << " and Max function value = " << maxf << std::endl;
+     int num_pts = func.size(); if(verbose)  std::cout << "Min function value = " << minf << " and Max function value = " << maxf << std::endl;
 
      // Compute cover of im(f)
      std::vector<std::pair<double,double> > intervals; int res;
-     if(!token){
-       double incr = (maxf-minf)/resolution; double x = minf; double alpha = (incr*gain)/(2-2*gain);
+
+     if(!token){ // Case we use an integer for the number of intervals.
+       double incr = (maxf-minf)/resolution_int; double x = minf; double alpha = (incr*gain)/(2-2*gain);
        double y = minf + incr + alpha; std::pair<double, double> interm(x,y); intervals.push_back(interm);
-       for(int i = 1; i < resolution-1; i++){
+       for(int i = 1; i < resolution_int-1; i++){
          x = minf + i*incr - alpha;
          y = minf + (i+1)*incr + alpha;
          std::pair<double, double> inter(x,y); intervals.push_back(inter);
        }
-       x = minf + (resolution-1)*incr - alpha; y = maxf;
+       x = minf + (resolution_int-1)*incr - alpha; y = maxf;
        std::pair<double, double> interM(x,y); intervals.push_back(interM); res = intervals.size();
-       for(int i = 0; i < res; i++)  std::cout << "Interval " << i << " = [" << intervals[i].first << ", " << intervals[i].second << "]" << std::endl;
+       for(int i = 0; i < res; i++)
+         if(verbose)  std::cout << "Interval " << i << " = [" << intervals[i].first << ", " << intervals[i].second << "]" << std::endl;
      }
-     else{
-       double x = minf; double y = x + resolution;
-       while(y <= maxf && maxf - (y-gain*resolution) >= resolution){
+
+     else{ // Case we use a double for the length of the intervals.
+       double x = minf; double y = x + resolution_double;
+       while(y <= maxf && maxf - (y-gain*resolution_double) >= resolution_double){
          std::pair<double, double> inter(x,y); intervals.push_back(inter);
-         x = y - gain*resolution;
-         y = x + resolution;
+         x = y - gain*resolution_double;
+         y = x + resolution_double;
        }
        std::pair<double, double> interM(x,maxf); intervals.push_back(interM); res = intervals.size();
-       for(int i = 0; i < res; i++)  std::cout << "Interval " << i << " = [" << intervals[i].first << ", " << intervals[i].second << "]" << std::endl;
+       for(int i = 0; i < res; i++)  if(verbose)  std::cout << "Interval " << i << " = [" << intervals[i].first << ", " << intervals[i].second << "]" << std::endl;
      }
 
      // Sort points according to function values
@@ -420,14 +502,14 @@ class Graph_induced_complex {
        }
 
        // Compute the connected components with DFS
-       std::map<int,bool> visit; std::cout << "Preimage of interval " << i << std::endl;
+       std::map<int,bool> visit; if(verbose)  std::cout << "Preimage of interval " << i << std::endl;
        for(std::map<int, std::vector<int> >::iterator it = prop.begin(); it != prop.end(); it++)
          visit.insert(std::pair<int,bool>(it->first, false));
        if (!(prop.empty())){
          for(std::map<int, std::vector<int> >::iterator it = prop.begin(); it != prop.end(); it++){
            if (  !(visit[it->first])  ){
              std::vector<int> cc; cc.clear();
-             dfs(prop,it->first,cc,visit); int cci = cc.size(); std::cout << "one CC with " << cci << " points, ";
+             dfs(prop,it->first,cc,visit); int cci = cc.size(); if(verbose)  std::cout << "one CC with " << cci << " points, ";
              double average_col = 0;
              for(int j = 0; j < cci; j++){cover[cc[j]].push_back(id); average_col += func_color[cc[j]]/cci;}
              cover_fct[id] = i; cover_color[id] = std::pair<int,double>(cci,average_col);
@@ -435,7 +517,7 @@ class Graph_induced_complex {
            }
          }
        }
-       std::cout << std::endl;
+       if(verbose)  std::cout << std::endl;
      }
 
      maximal_dim = id;
@@ -447,81 +529,107 @@ class Graph_induced_complex {
  // *******************************************************************************************************************
 
  public: // Set color from file.
-  void set_color_from_file(const std::string& color_file_name){
-    int vertex_id = 0; std::ifstream input(color_file_name); std::string line; double f;
-    while(std::getline(input,line)){
-      std::stringstream stream(line); stream >> f;
-      func_color.insert(std::pair<int,double>(vertex_id, f)); vertex_id++;
-    }
-  }
+   /** \brief Computes the function used to color the nodes of the simplicial complex from a file containing the function values.
+    *
+    * @param[in] color_file_name name of the input color file.
+    *
+    */
+   void set_color_from_file(const std::string& color_file_name){
+     int vertex_id = 0; std::ifstream input(color_file_name); std::string line; double f;
+     while(std::getline(input,line)){
+       std::stringstream stream(line); stream >> f;
+       func_color.insert(std::pair<int,double>(vertex_id, f)); vertex_id++;
+     }
+   }
 
  public: // Set color from kth coordinate
-  void set_color_from_coordinate(const int& k, const std::string& off_file_name){
-    Points_off_reader<Point> off_reader(off_file_name);
-    int numpts = off_reader.get_point_cloud().size();
-    for(int i = 0; i < numpts; i++)  func_color.insert(std::pair<int,double>(i,off_reader.get_point_cloud()[i][k]));
-  }
+   /** \brief Computes the function used to color the nodes of the simplicial complex from the k-th coordinate.
+    *
+    * @param[in] k coordinate to use (start at 0).
+    * @param[in] off_file_name name of the input .OFF file.
+    *
+    */
+   void set_color_from_coordinate(int k = 0, const std::string& off_file_name){
+     Points_off_reader<Point> off_reader(off_file_name);
+     int numpts = off_reader.get_point_cloud().size();
+     for(int i = 0; i < numpts; i++)  func_color.insert(std::pair<int,double>(i,off_reader.get_point_cloud()[i][k]));
+   }
 
  public: // Set color from vector.
-  void set_color_from_vector(const std::vector<double>& color){
-    for(int i = 0; i < color.size(); i++)  func_color.insert(std::pair<int,double>(i, color[i]));
-  }
+   /** \brief Computes the function used to color the nodes of the simplicial complex from a vector stored in memory.
+    *
+    * @param[in] color input vector of values.
+    *
+    */
+   void set_color_from_vector(const std::vector<double>& color){
+     for(int i = 0; i < color.size(); i++)  func_color.insert(std::pair<int,double>(i, color[i]));
+   }
 
  public: // Create a .dot file that can be compiled with neato to produce a .pdf file
-  void plot_with_neato(){
-    char mapp[11] = "mapper.dot";   std::ofstream graphic(mapp); graphic << "graph Mapper {" << std::endl;
-    double maxv, minv; maxv = std::numeric_limits<double>::min(); minv = std::numeric_limits<double>::max();
-    for (std::map<Cover_t,std::pair<int,double> >::iterator iit = cover_color.begin(); iit != cover_color.end(); iit++){
-      maxv = std::max(maxv, iit->second.second);  minv = std::min(minv, iit->second.second);
-    }
-    int k = 0; std::vector<int> nodes; nodes.clear();
-    for (std::map<Cover_t,std::pair<int,double> >::iterator iit = cover_color.begin(); iit != cover_color.end(); iit++){
-      if(iit->second.first > MASK){
-        nodes.push_back(iit->first);
-        graphic << iit->first << "[shape=circle fontcolor=black color=black label=\"" \
-          << iit->first << ":" << iit->second.first << "\" style=filled fillcolor=\"" \
-          << (1-(maxv-iit->second.second)/(maxv-minv))*0.6 << ", 1, 1\"]" << std::endl;
-        k++;
-      }
-    }
-    int ke = 0; int num_simplices = simplices.size();
-    for (int i = 0; i < num_simplices; i++)
-      if (simplices[i].size() == 2)
-        if (cover_color[simplices[i][0]].first > MASK && cover_color[simplices[i][1]].first > MASK){
-          graphic << "  " << simplices[i][0] << " -- " << simplices[i][1] << " [weight=15];" << std::endl; ke++;}
-    graphic << "}"; graphic.close();
-  }
+   /** \brief Creates a .dot file for neato once the simplicial complex is computed to get a .pdf output.
+    */
+   void plot_with_neato(){
+     char mapp[11] = "mapper.dot";   std::ofstream graphic(mapp); graphic << "graph Mapper {" << std::endl;
+     double maxv, minv; maxv = std::numeric_limits<double>::min(); minv = std::numeric_limits<double>::max();
+     for (std::map<Cover_t,std::pair<int,double> >::iterator iit = cover_color.begin(); iit != cover_color.end(); iit++){
+       maxv = std::max(maxv, iit->second.second);  minv = std::min(minv, iit->second.second);
+     }
+     int k = 0; std::vector<int> nodes; nodes.clear();
+     for (std::map<Cover_t,std::pair<int,double> >::iterator iit = cover_color.begin(); iit != cover_color.end(); iit++){
+       if(iit->second.first > MASK){
+         nodes.push_back(iit->first);
+         graphic << iit->first << "[shape=circle fontcolor=black color=black label=\"" \
+           << iit->first << ":" << iit->second.first << "\" style=filled fillcolor=\"" \
+           << (1-(maxv-iit->second.second)/(maxv-minv))*0.6 << ", 1, 1\"]" << std::endl;
+         k++;
+       }
+     }
+     int ke = 0; int num_simplices = simplices.size();
+     for (int i = 0; i < num_simplices; i++)
+       if (simplices[i].size() == 2)
+         if (cover_color[simplices[i][0]].first > MASK && cover_color[simplices[i][1]].first > MASK){
+           graphic << "  " << simplices[i][0] << " -- " << simplices[i][1] << " [weight=15];" << std::endl; ke++;}
+     graphic << "}"; graphic.close();
+   }
 
  public: // Create a .txt file that can be compiled with KeplerMapper to produce a .html file
-  void plot_with_KeplerMapper(){
+   /** \brief Creates a .html file for KeplerMapper once the simplicial complex is computed to get a nice visualization in browser.
+    */
+   void plot_with_KeplerMapper(){
 
-    int num_simplices = simplices.size(); int num_edges = 0;
-    char mapp[11] = "mapper.txt";  std::ofstream graphic(mapp);
-    for (int i = 0; i < num_simplices; i++)
-      if (simplices[i].size() == 2)
-        if (cover_color[simplices[i][0]].first > MASK && cover_color[simplices[i][1]].first > MASK)
-          num_edges++;
+     int num_simplices = simplices.size(); int num_edges = 0;
+     char mapp[11] = "mapper.txt";  std::ofstream graphic(mapp);
+     for (int i = 0; i < num_simplices; i++)
+       if (simplices[i].size() == 2)
+         if (cover_color[simplices[i][0]].first > MASK && cover_color[simplices[i][1]].first > MASK)
+           num_edges++;
 
-    graphic << "Cloud" << std::endl;
-    graphic << "Function" << std::endl;
-    graphic << 0 << " " << 0 << std::endl;
-    graphic << cover_color.size() << " " << num_edges << std::endl;
+     graphic << "Cloud" << std::endl;
+     graphic << "Function" << std::endl;
+     graphic << 0 << " " << 0 << std::endl;
+     graphic << cover_color.size() << " " << num_edges << std::endl;
 
-    for (std::map<Cover_t,std::pair<int,double> >::iterator iit = cover_color.begin(); iit != cover_color.end(); iit++)
-      graphic << iit->first << " " << iit->second.second << " " << iit->second.first << std::endl;
+     for (std::map<Cover_t,std::pair<int,double> >::iterator iit = cover_color.begin(); iit != cover_color.end(); iit++)
+       graphic << iit->first << " " << iit->second.second << " " << iit->second.first << std::endl;
 
-    for (int i = 0; i < num_simplices; i++)
-      if (simplices[i].size() == 2)
-        if (cover_color[simplices[i][0]].first > MASK && cover_color[simplices[i][1]].first > MASK)
-          graphic << simplices[i][0] << " " << simplices[i][1] << std::endl;
-    graphic.close();
-  }
+     for (int i = 0; i < num_simplices; i++)
+       if (simplices[i].size() == 2)
+         if (cover_color[simplices[i][0]].first > MASK && cover_color[simplices[i][1]].first > MASK)
+           graphic << simplices[i][0] << " " << simplices[i][1] << std::endl;
+     graphic.close();
+   }
 
  // *******************************************************************************************************************
  // *******************************************************************************************************************
 
 
  public:
+   /** \brief Creates the simplicial complex.
+    *
+    * \tparam SimplicialComplexForGIC must meet `SimplicialComplexForRips` concept.
+    * @param[in] complex SimplicialComplexForGIC to be created.
+    *
+    */
    template<typename SimplicialComplexForGIC>
    void create_complex(SimplicialComplexForGIC & complex) {
      size_t sz = simplices.size(); int dimension = 0;
@@ -533,6 +641,11 @@ class Graph_induced_complex {
    }
 
  public:
+   /** \brief Finds the maximal clique formed by different elements of the cover in a set of points.
+    *
+    * @param[in] cover_elts vector of points represented by vectors of cover elements (the ones to which they belong).
+    *
+    */
    void find_all_simplices(const std::vector<std::vector<Cover_t> > & cover_elts){
      int num_nodes = cover_elts.size();
      std::vector<Cover_t> simplex;
@@ -541,12 +654,13 @@ class Graph_induced_complex {
          simplex.push_back(cover_elts[i][j]);
      std::sort(simplex.begin(),simplex.end()); std::vector<Cover_t>::iterator it = std::unique(simplex.begin(),simplex.end());
      simplex.resize(std::distance(simplex.begin(),it));
-     simplices.push_back(simplex); //for(int i = 0; i < simplex.size(); i++)  std::cout << simplex[i] << " "; std::cout << std::endl;
+     simplices.push_back(simplex);
    }
 
  public:
+   /** \brief Computes the simplices in the Nerve of the cover C.
+    */
    void find_Nerve_simplices(){
-     simplices.clear();
      for(std::map<int,std::vector<Cover_t> >::iterator it = cover.begin(); it!=cover.end(); it++)  simplices.push_back(it->second);
      std::vector<std::vector<Cover_t> >::iterator it;
      std::sort(simplices.begin(),simplices.end()); it = std::unique(simplices.begin(),simplices.end());
@@ -554,6 +668,8 @@ class Graph_induced_complex {
    }
 
  public:
+   /** \brief Computes the simplices in the GIC of the graph G and the cover C.
+    */
    void find_GIC_simplices() {
 
      // Find IDs of edges to remove
@@ -595,6 +711,8 @@ class Graph_induced_complex {
    }
 
  public:
+   /** \brief Computes the simplices in the Mapper Delta.
+    */
    void find_GICMAP_simplices_with_functional_minimal_cover(){
 
      int v1, v2;
