@@ -1,5 +1,5 @@
-GUDHI documentation
-###################
+GUDHI Python module documentation
+#################################
 
 .. image:: img/Gudhi_banner.png
    :align: center
@@ -7,9 +7,9 @@ GUDHI documentation
 Introduction
 ************
 
-The Gudhi library (Geometry Understanding in Higher Dimensions) is a generic
-open source `C++ library <http://gudhi.gforge.inria.fr/doc/latest/>`_, with a
-`Python interface <http://gudhi.gforge.inria.fr/python/latest/>`_, for
+The Python interface for the Gudhi library (Geometry Understanding in Higher
+Dimensions) is a generic open source
+`Python module <http://gudhi.gforge.inria.fr/python/latest/>`_, for
 Computational Topology and Topological Data Analysis
 (`TDA <https://en.wikipedia.org/wiki/Topological_data_analysis>`_).
 The GUDHI library intends to help the development of new algorithmic solutions
