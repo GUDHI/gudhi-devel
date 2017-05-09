@@ -45,6 +45,7 @@
 #include <algorithm>  // for std::max
 #include <cstdint>  // for std::uint32_t
 #include <random>
+#include <cassert>
 
 #define CONSTANT 10
 #define ETA 0.001
@@ -549,7 +550,7 @@ class Graph_induced_complex {
     * @param[in] off_file_name name of the input .OFF file.
     *
     */
-   void set_color_from_coordinate(int k = 0, const std::string& off_file_name){
+   void set_color_from_coordinate(const std::string& off_file_name, int k = 0){
      Points_off_reader<Point> off_reader(off_file_name);
      int numpts = off_reader.get_point_cloud().size();
      for(int i = 0; i < numpts; i++)  func_color.insert(std::pair<int,double>(i,off_reader.get_point_cloud()[i][k]));
@@ -569,7 +570,7 @@ class Graph_induced_complex {
    /** \brief Creates a .dot file for neato once the simplicial complex is computed to get a .pdf output.
     */
    void plot_with_neato(){
-     char mapp[11] = "mapper.dot";   std::ofstream graphic(mapp); graphic << "graph Mapper {" << std::endl;
+     char mapp[11] = "SC.dot";   std::ofstream graphic(mapp); graphic << "graph Mapper {" << std::endl;
      double maxv, minv; maxv = std::numeric_limits<double>::min(); minv = std::numeric_limits<double>::max();
      for (std::map<Cover_t,std::pair<int,double> >::iterator iit = cover_color.begin(); iit != cover_color.end(); iit++){
        maxv = std::max(maxv, iit->second.second);  minv = std::min(minv, iit->second.second);
@@ -598,7 +599,7 @@ class Graph_induced_complex {
    void plot_with_KeplerMapper(){
 
      int num_simplices = simplices.size(); int num_edges = 0;
-     char mapp[11] = "mapper.txt";  std::ofstream graphic(mapp);
+     char mapp[11] = "SC.txt";  std::ofstream graphic(mapp);
      for (int i = 0; i < num_simplices; i++)
        if (simplices[i].size() == 2)
          if (cover_color[simplices[i][0]].first > MASK && cover_color[simplices[i][1]].first > MASK)
@@ -711,11 +712,17 @@ class Graph_induced_complex {
    }
 
  public:
-   /** \brief Computes the simplices in the Mapper Delta.
+   /** \brief Computes the simplices in the Mapper Delta by looking at all the edges of the graph
+    * and adding the corresponding edges in the Mapper Delta if the images of the endpoints belong
+    * to consecutive intervals.
+    *
+    * \remark WARNING: the output of this function is correct ONLY if the cover is minimal, i.e.
+    * the gain is less than 0.5!!!
+    *
     */
    void find_GICMAP_simplices_with_functional_minimal_cover(){
 
-     int v1, v2;
+     int v1, v2; assert(gain < 0.5);
 
      // Loop on all points.
      for(std::map<int,std::vector<Cover_t> >::iterator it = cover.begin(); it != cover.end(); it++){

@@ -3,15 +3,15 @@
 void usage(int nbArgs, char * const progName) {
   std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
   std::cerr << "Usage: " << progName << " filename.off coordinate \n";
-  std::cerr << "       i.e.: " << progName << " ../../data/points/human.off 2 --v \n";
+  std::cerr << "       i.e.: " << progName << " ../../../data/points/human.off 2 --v \n";
   exit(-1);  // ----- >>
 }
 
 int main(int argc, char **argv) {
-  if ((argc != 6) && (argc != 7)) usage(argc, (argv[0] - 1));
+  if ((argc != 3) && (argc != 4)) usage(argc, (argv[0] - 1));
 
   std::string off_file_name(argv[1]);
-  int coord = atoi(argv[2]);
+  std::string func_file_name = argv[2];
   bool verb = 0; if(argc == 4)  verb = 1;
 
   // Type definitions
@@ -27,10 +27,9 @@ int main(int argc, char **argv) {
   GIC.set_verbose(verb);
 
   GIC.set_graph_from_automatic_rips(off_file_name);
-  GIC.set_function_from_coordinate(coord, off_file_name);
-  GIC.set_color_from_coordinate(coord, off_file_name);
-  GIC.set_automatic_resolution_for_GICMAP();
-  GIC.set_gain();
+  GIC.set_function_from_file(func_file_name);
+  GIC.set_color_from_file(func_file_name);
+  GIC.set_automatic_resolution_for_GICMAP(); GIC.set_gain();
   GIC.set_cover_from_function(1);
   GIC.find_GICMAP_simplices_with_functional_minimal_cover();
   GIC.plot_with_KeplerMapper();

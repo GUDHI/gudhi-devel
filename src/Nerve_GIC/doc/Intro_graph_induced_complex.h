@@ -33,9 +33,7 @@ namespace graph_induced_complex {
  * 
  * @{
  * 
- * \section complexes Graph induced complexes (GIC) and Nerves
- * 
- * GIC and Nerves are simplicial complexes built on top of a point cloud P.
+ * \section nerves Nerves
  *
  * \subsection nervedefinition Nerve definition
  *
@@ -46,78 +44,106 @@ namespace graph_induced_complex {
  *
  * \subsection nerveexample Example
  *
- * This example builds the Nerve of a point cloud sampled on a 3D human shape.
- * The cover C comes from the preimages of intervals covering the height function.
+ * This example builds the Nerve of a point cloud sampled on a 3D human shape (human.off).
+ * The cover C comes from the preimages of intervals (10 intervals with gain 0.3)
+ * covering the height function (coordinate 2),
+ * which are then refined into their connected components using the triangulation of the .OFF file.
  * All intervals have the resolution (either the length or the number of the intervals)
  * and gain (overlap percentage).
  *
- * \include
+ * \include Nerve_GIC/Nerve.cpp
  *
  * When launching:
  *
- * \code $>
+ * \code $> ./Nerve ../../../data/points/human.off 2 10 0.3
  * \endcode
  *
  * the program output is:
  *
- * \include
+ * \include Nerve_GIC/Nerve.txt
  *
- * \section gicdefinition GIC definition
+ * \section gic Graph Induced Complexes (GIC)
+ *
+ * \subsection gicdefinition GIC definition
  *
  * Again, assume you are given a cover C of your point cloud P. Moreover, assume
  * you are also given a graph G built on top of P. Then, for any clique in G
  * whose nodes all belong to different elements of C, the GIC includes a corresponding
  * simplex, whose dimension is the number of nodes in the clique minus one.
+ * See <a target="_blank" href="https://arxiv.org/abs/1304.0662"> this article </a>
+ * for more details.
  *
  * \subsection gicexample Example
  *
- * This example builds the GIC of a point cloud sampled on a 3D human shape.
- * The cover C comes from the preimages of intervals covering the height function,
- * and the graph G comes from a Rips complex built with a threshold parameter.
+ * This example builds the GIC of a point cloud sampled on a 3D human shape (human.off).
+ * The cover C comes from the preimages of intervals (with length 0.1 and gain 0)
+ * covering the height function (coordinate 2),
+ * and the graph G comes from a Rips complex built with threshold 0.1.
  * Note that if the gain is too big, the number of cliques increases a lot,
  * which make the computation time much larger.
  *
- * \include
+ * \include Nerve_GIC/GIC.cpp
  *
  * When launching:
  *
- * \code $>
+ * \code $> ./GIC ../../../data/points/human.off 0.1 2 0.1 0
  * \endcode
  *
  * the program output is:
  *
- * \include
+ * \include Nerve_GIC/GIC.txt
  *
  * \subsection mapperdeltadefinition Mapper Delta
  *
  * If one restricts to the cliques in G whose nodes all belong to preimages of consecutive
  * intervals (assuming the cover of the height function is minimal, i.e. no more than
  * two intervals can intersect at a time), the GIC is of dimension one, i.e. a graph.
- * We call this graph the Mapper Delta, since it is related to the usual Mapper (see
- * <a target="_blank" href="https://arxiv.org/abs/1511.05823"> this article </a>).
+ * We call this graph the Mapper Delta, since it is related to the usual Mapper. See
+ * <a target="_blank" href="https://arxiv.org/abs/1511.05823"> this article </a> for more details.
  *
  * \subsection mapperdeltaexample Example
  *
  * Mapper Delta comes with optimal selection for the Rips threshold,
  * the resolution and the gain of the function cover. In this example,
- * we compute the Mapper Delta of a point cloud sampled on a 3D human shape,
+ * we compute the Mapper Delta of a point cloud sampled on a 3D human shape (human.off),
  * where the graph G comes from a Rips complex with optimal threshold,
- * and the cover C comes from the preimages of intervals covering the height function,
+ * and the cover C comes from the preimages of intervals covering the height function (coordinate 2),
  * with optimal resolution and gain. Note that optimal threshold, resolution and gain
  * also exist for the Nerve of this cover.
  *
- * \include
+ * \include Nerve_GIC/MapperDeltaCoord.cpp
  *
  * When launching:
  *
- * \code $>
+ * \code $> ./MapperDeltaCoord ../../../data/points/human.off 2
  * \endcode
  *
  * the program output is:
  *
- * \include
+ * \include MapperDeltaCoord.txt
  *
- * 
+ * We also provide an example on a set of 72 pictures taken around the same object (lucky_cat.off).
+ * The function is now the first eigenfunction given by PCA, whose values
+ * are written in a file (lucky_cat_PCA1). Threshold, resolution and gain are automatically selected as before.
+ *
+ * \include Nerve_GIC/MapperDeltaFunc.cpp
+ *
+ * When launching:
+ *
+ * \code $> ./MapperDeltaFunc ../../../data/points/COIL_database/lucky_cat.off ../../../data/points/COIL_database/lucky_cat_PCA1
+ * \endcode
+ *
+ * the program output is:
+ *
+ * \include MapperDeltaFunc.txt
+ *
+ * If you have python and firefox, all the previous .txt files can then be plotted using
+ * <a target="_blank" href="https://github.com/MLWave/kepler-mapper"> Kepler-Mapper </a>
+ * with the following:
+ *
+ * \code python visu.py && firefox SC_visu.html
+ * \endcode
+ *
  * \copyright GNU General Public License v3.                         
  * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
  */

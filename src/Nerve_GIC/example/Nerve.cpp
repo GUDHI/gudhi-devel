@@ -3,16 +3,16 @@
 void usage(int nbArgs, char * const progName) {
   std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
   std::cerr << "Usage: " << progName << " filename.off coordinate resolution gain --v \n";
-  std::cerr << "       i.e.: " << progName << " ../../data/points/human.off 2 1 0.3 --v \n";
+  std::cerr << "       i.e.: " << progName << " ../../../data/points/human.off 2 10 0.3 --v \n";
   exit(-1);  // ----- >>
 }
 
 int main(int argc, char **argv) {
-  if ((argc != 6) && (argc != 7)) usage(argc, (argv[0] - 1));
+  if ((argc != 5) && (argc != 6)) usage(argc, (argv[0] - 1));
 
   std::string off_file_name(argv[1]);
   int coord = atoi(argv[2]);
-  double resolution = atof(argv[3]);
+  int resolution = atoi(argv[3]);
   double gain = atof(argv[4]);
   bool verb = 0; if(argc == 6)  verb = 1;
 
@@ -28,11 +28,11 @@ int main(int argc, char **argv) {
   Gudhi::graph_induced_complex::Graph_induced_complex GIC;
   GIC.set_verbose(verb);
 
+  GIC.set_graph_from_OFF(off_file_name);
   GIC.set_function_from_coordinate(coord, off_file_name);
-  GIC.set_color_from_coordinate(coord, off_file_name);
-  GIC.set_resolution_double(resolution);
-  GIC.set_gain(gain);
-  GIC.set_cover_from_function(1);
+  GIC.set_color_from_coordinate(off_file_name, --coord);
+  GIC.set_resolution_int(resolution); GIC.set_gain(gain);
+  GIC.set_cover_from_function(0);
   GIC.find_Nerve_simplices();
   GIC.plot_with_KeplerMapper();
 
