@@ -137,9 +137,10 @@ namespace graph_induced_complex {
  *
  * \include MapperDeltaFunc.txt
  *
- * If you have python and firefox, all the previous .txt files can then be plotted using
- * <a target="_blank" href="https://github.com/MLWave/kepler-mapper"> Kepler-Mapper </a>
- * with the following:
+ * If you have python and firefox, all the previous .txt files can then be displayed in a browser.
+ * We provide a .py file called visu.py that comes from the
+ * <a target="_blank" href="https://github.com/MLWave/kepler-mapper"> Kepler-Mapper </a> library.
+ * One can visualize data by launching:
  *
  * \code python visu.py && firefox SC_visu.html
  * \endcode
