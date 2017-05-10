@@ -33,14 +33,24 @@ namespace graph_induced_complex {
  * 
  * @{
  * 
+ * \section covers Covers
+ *
+ * Nerves and Graph Induced Complexes require a cover C of the input point cloud P,
+ * that is a set of subsets of P whose union is P itself.
+ * Very often, this cover is obtained from the preimage of a family of intervals covering
+ * the image of some scalar-valued function f defined on P. This family is parameterized
+ * by its resolution, which can be either the number or the length of the intervals,
+ * and its gain, which is the overlap percentage between consecutive intervals (ordered by their first values).
+ *
  * \section nerves Nerves
  *
  * \subsection nervedefinition Nerve definition
  *
- * Assume you are given a cover C of your point cloud P, that is a set of subsets of P
- * whose union is P itself. Then, the Nerve of this cover
+ * Assume you are given a cover C of your point cloud P. Then, the Nerve of this cover
  * is the simplicial complex that has one k-simplex per k-fold intersection of cover elements.
  * See also <a target="_blank" href="https://en.wikipedia.org/wiki/Nerve_of_a_covering"> Wikipedia </a>.
+ *
+ * \image html "nerve.png" "Nerve of a double torus"
  *
  * \subsection nerveexample Example
  *
@@ -48,8 +58,6 @@ namespace graph_induced_complex {
  * The cover C comes from the preimages of intervals (10 intervals with gain 0.3)
  * covering the height function (coordinate 2),
  * which are then refined into their connected components using the triangulation of the .OFF file.
- * All intervals have the resolution (either the length or the number of the intervals)
- * and gain (overlap percentage).
  *
  * \include Nerve_GIC/Nerve.cpp
  *
@@ -62,6 +70,13 @@ namespace graph_induced_complex {
  *
  * \include Nerve_GIC/Nerve.txt
  *
+ * The first three lines are requirements for visualization with Kepler-Mapper.
+ * The fourth line contains the number of vertices nv and edges ne of the Nerve.
+ * The next nv lines represent the vertices. Each line contains the vertex ID,
+ * the number of data points it contains, and their average color function value.
+ * Finally, the next ne lines represent the edges, characterized by the ID of their vertices.
+ *
+ *
  * \section gic Graph Induced Complexes (GIC)
  *
  * \subsection gicdefinition GIC definition
@@ -72,6 +87,8 @@ namespace graph_induced_complex {
  * simplex, whose dimension is the number of nodes in the clique minus one.
  * See <a target="_blank" href="https://arxiv.org/abs/1304.0662"> this article </a>
  * for more details.
+ *
+ * \image html "gic_complex.png" "GIC of a point cloud."
  *
  * \subsection gicexample Example
  *

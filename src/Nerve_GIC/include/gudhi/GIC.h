@@ -162,10 +162,21 @@ class Graph_induced_complex {
     *
     */
    void set_graph_from_file(const std::string& graph_file_name){
-     int neighb; int vid; std::ifstream input(graph_file_name); std::string line; std::vector<int> edge(2);
+     int neighb; int vid; std::ifstream input(graph_file_name); std::string line; std::vector<int> edge(2); int n = 0;
      while(std::getline(input,line)){
        std::stringstream stream(line); stream >> vid; edge[0] = vid;
        while(stream >> neighb){edge[1] = neighb; st.insert_simplex_and_subfaces(edge);}
+       n++;
+     }
+
+     std::vector<int> empty;
+     for(int i = 0; i < n; i++)  adjacency_matrix.insert(std::pair<int,std::vector<int> >(i,empty));
+     for (auto simplex : st.complex_simplex_range()) {
+       if(st.dimension(simplex) == 1){
+         std::vector<int> vertices;
+         for(auto vertex : st.simplex_vertex_range(simplex))  vertices.push_back(vertex);
+         adjacency_matrix[vertices[0]].push_back(vertices[1]); adjacency_matrix[vertices[1]].push_back(vertices[0]);
+       }
      }
    }
 
@@ -191,6 +202,16 @@ class Graph_induced_complex {
        }
        i++;
      }
+
+     std::vector<int> empty;
+     for(int i = 0; i < numpts; i++)  adjacency_matrix.insert(std::pair<int,std::vector<int> >(i,empty));
+     for (auto simplex : st.complex_simplex_range()) {
+       if(st.dimension(simplex) == 1){
+         std::vector<int> vertices;
+         for(auto vertex : st.simplex_vertex_range(simplex))  vertices.push_back(vertex);
+         adjacency_matrix[vertices[0]].push_back(vertices[1]); adjacency_matrix[vertices[1]].push_back(vertices[0]);
+       }
+     }
    }
 
  public: // Set graph from Rips complex.
@@ -204,6 +225,17 @@ class Graph_induced_complex {
      Points_off_reader<Point> off_reader(off_file_name);
      Rips_complex rips_complex_from_points(off_reader.get_point_cloud(), threshold, Euclidean_distance());
      rips_complex_from_points.create_complex(st, 1); data_dimension = off_reader.get_point_cloud()[0].size();
+
+     std::vector<int> empty; int n = off_reader.get_point_cloud().size();
+     for(int i = 0; i < n; i++)  adjacency_matrix.insert(std::pair<int,std::vector<int> >(i,empty));
+     for (auto simplex : st.complex_simplex_range()) {
+       if(st.dimension(simplex) == 1){
+         std::vector<int> vertices;
+         for(auto vertex : st.simplex_vertex_range(simplex))  vertices.push_back(vertex);
+         adjacency_matrix[vertices[0]].push_back(vertices[1]); adjacency_matrix[vertices[1]].push_back(vertices[0]);
+       }
+     }
+
    }
 
  public: // Automatic tuning of Rips complex.
@@ -277,6 +309,16 @@ class Graph_induced_complex {
      Rips_complex rips_complex_from_points(off_reader.get_point_cloud(), delta, Euclidean_distance());
      rips_complex_from_points.create_complex(st, 1);
 
+     std::vector<int> empty;
+     for(int i = 0; i < n; i++)  adjacency_matrix.insert(std::pair<int,std::vector<int> >(i,empty));
+     for (auto simplex : st.complex_simplex_range()) {
+       if(st.dimension(simplex) == 1){
+         std::vector<int> vertices;
+         for(auto vertex : st.simplex_vertex_range(simplex))  vertices.push_back(vertex);
+         adjacency_matrix[vertices[0]].push_back(vertices[1]); adjacency_matrix[vertices[1]].push_back(vertices[0]);
+       }
+     }
+
    }
 
 
@@ -337,7 +379,7 @@ class Graph_induced_complex {
      std::ifstream input(cover_file_name); std::string line;
      while(std::getline(input,line)){
        cov_elts.clear(); std::stringstream stream(line);
-       while(stream >> cov){cov_elts.push_back(cov); cov_number.push_back(cov);}
+       while(stream >> cov){cov_elts.push_back(cov); cov_number.push_back(cov); cover_fct.insert(std::pair<Cover_t,int>(cov,cov));}
        cover.insert(std::pair<int, std::vector<Cover_t> >(vertex_id, cov_elts)); vertex_id++;
      }
      std::vector<Cover_t>::iterator it;
@@ -441,17 +483,6 @@ class Graph_induced_complex {
      // Sort points according to function values
      std::vector<int> points(num_pts); for(int i = 0; i < num_pts; i++)  points[i] = i;
      std::sort(points.begin(),points.end(),functional_comp);
-
-     // Build adjacency matrix
-     std::vector<int> empty;
-     for(int i = 0; i < num_pts; i++)  adjacency_matrix.insert(std::pair<int,std::vector<int> >(points[i],empty));
-     for (auto simplex : st.complex_simplex_range()) {
-       if(st.dimension(simplex) == 1){
-         std::vector<int> vertices;
-         for(auto vertex : st.simplex_vertex_range(simplex))  vertices.push_back(vertex);
-         adjacency_matrix[vertices[0]].push_back(vertices[1]); adjacency_matrix[vertices[1]].push_back(vertices[0]);
-       }
-     }
 
      int id = 0; int pos = 0; double min_prop_int; double max_prop_int;
 
@@ -627,7 +658,6 @@ class Graph_induced_complex {
  public:
    /** \brief Creates the simplicial complex.
     *
-    * \tparam SimplicialComplexForGIC must meet `SimplicialComplexForRips` concept.
     * @param[in] complex SimplicialComplexForGIC to be created.
     *
     */
@@ -685,14 +715,16 @@ class Graph_induced_complex {
      }
 
      // Remove edges
-     int current_id = 1;
-     auto simplex = st.complex_simplex_range().begin(); int num_rem = 0;
-     for(int i = 0; i < simplex_id-1; i++){
+     if(simplex_to_remove.size() > 1){
+       int current_id = 1;
+       auto simplex = st.complex_simplex_range().begin(); int num_rem = 0;
+       for(int i = 0; i < simplex_id-1; i++){
          int j = i+1; auto simplex_tmp = simplex; simplex_tmp++;
          if(j == simplex_to_remove[current_id]){st.remove_maximal_simplex(*simplex_tmp); current_id++; num_rem++;}
          else  simplex++;
-     } simplex = st.complex_simplex_range().begin();
-     for(int i = 0; i < simplex_to_remove[0]; i++)  simplex++;  st.remove_maximal_simplex(*simplex);
+       } simplex = st.complex_simplex_range().begin();
+       for(int i = 0; i < simplex_to_remove[0]; i++)  simplex++;  st.remove_maximal_simplex(*simplex);
+     }
 
      // Build the Simplex Tree corresponding to the graph
      st.expansion(maximal_dim);
