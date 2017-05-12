@@ -14,11 +14,6 @@ int main(int argc, char **argv) {
   int coord = atoi(argv[2]);
   bool verb = 0; if(argc == 4)  verb = 1;
 
-  // Type definitions
-  using Graph_t = boost::adjacency_list < boost::vecS, boost::vecS, boost::undirectedS,\
-                                          boost::property < vertex_filtration_t, Filtration_value >,\
-                                          boost::property < edge_filtration_t, Filtration_value > >;
-
   // ---------------------------------------
   // Init of a Mapper Delta from an OFF file
   // ---------------------------------------
@@ -26,12 +21,16 @@ int main(int argc, char **argv) {
   Gudhi::graph_induced_complex::Graph_induced_complex GIC;
   GIC.set_verbose(verb);
 
-  GIC.set_graph_from_automatic_rips(off_file_name);
-  GIC.set_function_from_coordinate(coord, off_file_name);
   GIC.set_color_from_coordinate(off_file_name, coord);
+  GIC.set_function_from_coordinate(coord, off_file_name);
+
+  GIC.set_graph_from_automatic_rips(off_file_name);
+
   GIC.set_automatic_resolution_for_GICMAP(); GIC.set_gain();
   GIC.set_cover_from_function(1);
+
   GIC.find_GICMAP_simplices_with_functional_minimal_cover();
+
   GIC.plot_with_KeplerMapper();
 
   Simplex_tree stree; GIC.create_complex(stree);

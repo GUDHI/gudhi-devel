@@ -54,6 +54,7 @@ include_directories(src/Spatial_searching/include/)
 include_directories(src/Subsampling/include/)
 include_directories(src/Tangential_complex/include/)
 include_directories(src/Witness_complex/include/)
+include_directories(src/Nerve_GIC/include/)
 
 add_subdirectory(src/common/example)
 add_subdirectory(src/common/test)
@@ -83,6 +84,8 @@ add_subdirectory(src/Bottleneck_distance/test)
 add_subdirectory(src/Bottleneck_distance/benchmark)
 add_subdirectory(src/Rips_complex/example)
 add_subdirectory(src/Rips_complex/test)
+add_subdirectory(src/Nerve_GIC/example)
+add_subdirectory(src/Nerve_GIC/test)
 
 # data points generator
 add_subdirectory(data/points/generator)

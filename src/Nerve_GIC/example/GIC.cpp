@@ -3,7 +3,7 @@
 void usage(int nbArgs, char * const progName) {
   std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
   std::cerr << "Usage: " << progName << " filename.off threshold coordinate resolution gain\n";
-  std::cerr << "       i.e.: " << progName << " ../../../data/points/human.off 1.5 2 10 0.3 \n";
+  std::cerr << "       i.e.: " << progName << " ../../../data/points/human.off 0.075 2 10 0.3 \n";
   exit(-1);  // ----- >>
 }
 
@@ -17,11 +17,6 @@ int main(int argc, char **argv) {
   double gain = atof(argv[5]);
   bool verb = 0; if(argc == 7)  verb = 1;
 
-  // Type definitions
-  using Graph_t = boost::adjacency_list < boost::vecS, boost::vecS, boost::undirectedS,\
-                                          boost::property < vertex_filtration_t, Filtration_value >,\
-                                          boost::property < edge_filtration_t, Filtration_value > >;
-
   // ----------------------------------------------------------------------------
   // Init of a graph induced complex from an OFF file
   // ----------------------------------------------------------------------------
@@ -29,12 +24,16 @@ int main(int argc, char **argv) {
   Gudhi::graph_induced_complex::Graph_induced_complex GIC;
   GIC.set_verbose(verb);
 
-  GIC.set_graph_from_rips(threshold, off_file_name);
-  GIC.set_function_from_coordinate(coord, off_file_name);
   GIC.set_color_from_coordinate(off_file_name, coord);
+  GIC.set_function_from_coordinate(coord, off_file_name);
+
+  GIC.set_graph_from_rips(threshold, off_file_name);
+
   GIC.set_resolution_double(resolution); GIC.set_gain(gain);
   GIC.set_cover_from_function(1);
+
   GIC.find_GIC_simplices();
+
   GIC.plot_with_KeplerMapper();
 
   Simplex_tree stree; GIC.create_complex(stree);

@@ -16,11 +16,6 @@ int main(int argc, char **argv) {
   double gain = atof(argv[4]);
   bool verb = 0; if(argc == 6)  verb = 1;
 
-  // Type definitions
-  using Graph_t = boost::adjacency_list < boost::vecS, boost::vecS, boost::undirectedS,\
-                                          boost::property < vertex_filtration_t, Filtration_value >,\
-                                          boost::property < edge_filtration_t, Filtration_value > >;
-
   // --------------------------------
   // Init of a Nerve from an OFF file
   // --------------------------------
@@ -28,12 +23,16 @@ int main(int argc, char **argv) {
   Gudhi::graph_induced_complex::Graph_induced_complex GIC;
   GIC.set_verbose(verb);
 
-  GIC.set_graph_from_OFF(off_file_name);
+  GIC.set_color_from_coordinate(off_file_name, coord);
   GIC.set_function_from_coordinate(coord, off_file_name);
-  GIC.set_color_from_coordinate(off_file_name, --coord);
+
+  GIC.set_graph_from_OFF(off_file_name);
+
   GIC.set_resolution_int(resolution); GIC.set_gain(gain);
   GIC.set_cover_from_function(0);
+
   GIC.find_Nerve_simplices();
+
   GIC.plot_with_KeplerMapper();
 
   Simplex_tree stree; GIC.create_complex(stree);
