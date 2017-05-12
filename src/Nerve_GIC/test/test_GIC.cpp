@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(check_GICMAP) {
   BOOST_CHECK(stree.dimension() == 1);
 }
 
-BOOST_AUTO_TEST_CASE(check_GIC) {
+BOOST_AUTO_TEST_CASE(check_GICcover) {
 
   Gudhi::graph_induced_complex::Graph_induced_complex GIC;
   std::string graph_file_name("data/graph"); GIC.set_graph_from_file(graph_file_name);
@@ -74,6 +74,19 @@ BOOST_AUTO_TEST_CASE(check_GIC) {
   BOOST_CHECK(stree.num_vertices() == 3);
   BOOST_CHECK((stree.num_simplices()-stree.num_vertices()) == 4);
   BOOST_CHECK(stree.dimension() == 2);
+}
+
+BOOST_AUTO_TEST_CASE(check_GICvoronoi) {
+
+  Gudhi::graph_induced_complex::Graph_induced_complex GIC;
+  std::string cloud_file_name("data/cloud"); GIC.set_color_from_coordinate(cloud_file_name);
+  std::string graph_file_name("data/graph"); GIC.set_graph_from_file(graph_file_name);
+  GIC.set_cover_from_Voronoi(2,cloud_file_name);
+  GIC.find_GIC_simplices(); Simplex_tree stree; GIC.create_complex(stree);
+
+  BOOST_CHECK(stree.num_vertices() == 2);
+  BOOST_CHECK((stree.num_simplices()-stree.num_vertices()) == 1);
+  BOOST_CHECK(stree.dimension() == 1);
 }
 
 
