@@ -93,9 +93,9 @@ namespace graph_induced_complex {
  * \subsection gicexample Example
  *
  * This example builds the GIC of a point cloud sampled on a 3D human shape (human.off).
- * The cover C comes from the preimages of intervals (with length 0.1 and gain 0)
+ * The cover C comes from the preimages of intervals (with length 0.075 and gain 0)
  * covering the height function (coordinate 2),
- * and the graph G comes from a Rips complex built with threshold 0.1.
+ * and the graph G comes from a Rips complex built with threshold 0.075.
  * Note that if the gain is too big, the number of cliques increases a lot,
  * which make the computation time much larger.
  *
@@ -103,7 +103,7 @@ namespace graph_induced_complex {
  *
  * When launching:
  *
- * \code $> ./GIC ../../../data/points/human.off 0.1 2 0.1 0
+ * \code $> ./GIC ../../../data/points/human.off 0.075 2 0.075 0
  * \endcode
  *
  * the program output is:
@@ -159,7 +159,7 @@ namespace graph_induced_complex {
  * <a target="_blank" href="https://github.com/MLWave/kepler-mapper"> Kepler-Mapper </a> library.
  * One can visualize data by launching:
  *
- * \code python visu.py && firefox SC_visu.html
+ * \code python visu.py && firefox SC.html
  * \endcode
  *
  * \copyright GNU General Public License v3.                         

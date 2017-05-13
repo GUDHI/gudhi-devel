@@ -3,7 +3,7 @@
 void usage(int nbArgs, char * const progName) {
   std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
   std::cerr << "Usage: " << progName << " filename.off coordinate \n";
-  std::cerr << "       i.e.: " << progName << " ../../../data/points/human.off 2 --v \n";
+  std::cerr << "       i.e.: " << progName << " ../../../../data/points/COIL_database/lucky_cat.off ../../../../data/points/COIL_database/lucky_cat_PCA1 --v \n";
   exit(-1);  // ----- >>
 }
 
@@ -21,10 +21,12 @@ int main(int argc, char **argv) {
   Gudhi::graph_induced_complex::Graph_induced_complex GIC;
   GIC.set_verbose(verb);
 
+  GIC.read_point_cloud(off_file_name);
+
   GIC.set_color_from_file(func_file_name);
   GIC.set_function_from_file(func_file_name);
 
-  GIC.set_graph_from_automatic_rips(off_file_name);
+  GIC.set_graph_from_automatic_rips();
 
   GIC.set_automatic_resolution_for_GICMAP(); GIC.set_gain();
   GIC.set_cover_from_function(1);

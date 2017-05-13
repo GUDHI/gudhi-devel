@@ -13,9 +13,6 @@ target_link_libraries(MapperDeltaCoord  ${Boost_SYSTEM_LIBRARY})
 add_executable ( MapperDeltaFunc MapperDeltaFunc.cpp )
 target_link_libraries(MapperDeltaFunc  ${Boost_SYSTEM_LIBRARY})
 
-add_executable ( GICvoronoi GICvoronoi.cpp )
-target_link_libraries(GICvoronoi  ${Boost_SYSTEM_LIBRARY})
-
 file(COPY visu.py km.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
 if (TBB_FOUND)

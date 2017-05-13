@@ -67,6 +67,7 @@ typedef gss::Kd_tree_search<K, Pointsd> Points_ds;
 
 std::map<int, double> func;
 std::map<int, double> func_color;
+Gudhi::Points_off_reader<Point> off_reader("tmp");
 
 namespace Gudhi {
 
@@ -110,6 +111,10 @@ class Graph_induced_complex {
    int resolution_int;
    double resolution_double;
    double gain;
+   std::vector<int> subsamples;
+   std::string cover_name;
+   std::string point_cloud_name;
+   std::string color_name;
 
  // Simplex comparator
  private:
@@ -159,6 +164,12 @@ class Graph_induced_complex {
 
  public:
    void set_verbose(bool verb = 0){verbose = verb;}
+
+ public:
+   void read_point_cloud(const std::string& off_file_name){
+     off_reader = Points_off_reader<Point>(off_file_name);
+     point_cloud_name = off_file_name;
+   }
 
  // *******************************************************************************************************************
  // Graphs.
@@ -230,8 +241,7 @@ class Graph_induced_complex {
     * @param[in] off_file_name name of the input .OFF file.
     *
     */
-   void set_graph_from_rips(const double& threshold, const std::string& off_file_name){
-     Points_off_reader<Point> off_reader(off_file_name);
+   void set_graph_from_rips(const double& threshold){
      Rips_complex rips_complex_from_points(off_reader.get_point_cloud(), threshold, Euclidean_distance());
      rips_complex_from_points.create_complex(st, 1); data_dimension = off_reader.get_point_cloud()[0].size();
 
@@ -254,9 +264,8 @@ class Graph_induced_complex {
     * @param[in] N number of subsampling iteration (default value 100).
     *
     */
-   void set_graph_from_automatic_rips(const std::string& off_file_name, int N = 100){
+   void set_graph_from_automatic_rips(int N = 100){
 
-     Points_off_reader<Point> off_reader(off_file_name);
      int n = off_reader.get_point_cloud().size();
      int m = floor(n/pow(log(n)/log(CONSTANT),1+ETA)); m = std::min(m,n-1);
      std::vector<int> samples(m); double delta = 0; int dim = off_reader.get_point_cloud()[0].size(); data_dimension = dim;
@@ -268,7 +277,7 @@ class Graph_induced_complex {
      for(int i = 0; i < n; i++)  dist[i] = dumb;
      double d;
 
-     char distances[100]; sprintf(distances,"%s_dist",(char*) off_file_name.c_str());
+     char distances[100]; sprintf(distances,"%s_dist",(char*) point_cloud_name.c_str());
      std::ifstream input(distances, std::ios::out | std::ios::binary);
 
      if(input.good()){
@@ -347,6 +356,7 @@ class Graph_induced_complex {
        std::stringstream stream(line); stream >> f;
        func.insert(std::pair<int,double>(vertex_id, f)); vertex_id++;
      }
+     cover_name = func_file_name;
    }
 
  public: // Set function from kth coordinate
@@ -356,10 +366,11 @@ class Graph_induced_complex {
     * @param[in] off_file_name name of the input .OFF file.
     *
     */
-   void set_function_from_coordinate(const int& k, const std::string& off_file_name){
-     Points_off_reader<Point> off_reader(off_file_name);
+   void set_function_from_coordinate(const int& k){
      int n = off_reader.get_point_cloud().size();
      for(int i = 0; i < n; i++)  func.insert(std::pair<int,double>(i,off_reader.get_point_cloud()[i][k]));
+     char coordinate[100]; sprintf(coordinate, "coordinate %d", k);
+     cover_name = coordinate;
    }
 
  public: // Set function from vector.
@@ -399,7 +410,10 @@ class Graph_induced_complex {
      std::sort(cov_number.begin(),cov_number.end()); it = std::unique(cov_number.begin(),cov_number.end());
      cov_number.resize(std::distance(cov_number.begin(),it)); maximal_dim = cov_number.size()-1;
      for(int i = 0; i <= maximal_dim; i++)  cover_color[i].second /= cover_color[i].first;
+     cover_name = cover_file_name;
    }
+
+ /* TODO: complete method with nearest geodesic neighbor
 
  public: // Set cover from Voronoi
    /** \brief Creates the cover C from the Voronoï cells of a subsampling of the point cloud.
@@ -407,12 +421,12 @@ class Graph_induced_complex {
     * @param[in] m number of points in the subsample.
     * @param[in] off_file_name name of the input .OFF file.
     *
-    */
-   void set_cover_from_Voronoi(const int& m, const std::string& off_file_name){
-     Points_off_reader<Point> off_reader(off_file_name);
+
+   void set_cover_from_Voronoi(const int& m){
+
      int n = off_reader.get_point_cloud().size(); data_dimension = off_reader.get_point_cloud()[0].size();
      Pointsd pointsd(m+1); std::vector<int> samples(m); SampleWithoutReplacement(n,m,samples);
-     double* coord = new double[data_dimension];
+     double* coord = new double[data_dimension]; subsamples = samples;
 
      for(int i = 1; i <= m; i++){
        for(int j = 0; j < data_dimension; j++)  coord[j] = off_reader.get_point_cloud()[samples[i-1]][j];
@@ -424,7 +438,7 @@ class Graph_induced_complex {
        for(int j = 0; j < data_dimension; j++)  coord[j] = off_reader.get_point_cloud()[i][j];
        pointsd[0] = Pointd(data_dimension, coord+0, coord + data_dimension); Points_ds points_ds(pointsd);
        auto knn_range = points_ds.query_k_nearest_neighbors(pointsd[0], 2, true);
-       Cover_t cluster = (knn_range.begin()+1)->first-1;
+       Cover_t cluster; // = nearest geodesic neighbor.
        if(cluster >= 0){ // Case where i is not a subsample point.
          cover[i].push_back(cluster); cover_color[cluster].second += func_color[i]; cover_color[cluster].first++;
        }
@@ -437,9 +451,10 @@ class Graph_induced_complex {
      for(int i = 0; i < m; i++)  cover_color[i].second /= cover_color[i].first;
 
      delete [] coord;
-     maximal_dim = m-1;
+     maximal_dim = m-1; cover_name = "Voronoi";
 
    }
+   */
 
  public: // Automatic tuning of resolution for Mapper Delta.
    /** \brief Computes the optimal length of intervals for a Mapper Delta.
@@ -627,6 +642,7 @@ class Graph_induced_complex {
        std::stringstream stream(line); stream >> f;
        func_color.insert(std::pair<int,double>(vertex_id, f)); vertex_id++;
      }
+     color_name = color_file_name;
    }
 
  public: // Set color from kth coordinate
@@ -636,10 +652,11 @@ class Graph_induced_complex {
     * @param[in] off_file_name name of the input .OFF file.
     *
     */
-   void set_color_from_coordinate(const std::string& off_file_name, int k = 0){
-     Points_off_reader<Point> off_reader(off_file_name);
+   void set_color_from_coordinate(int k = 0){
      int n = off_reader.get_point_cloud().size();
      for(int i = 0; i < n; i++)  func_color[i] = off_reader.get_point_cloud()[i][k];
+     char coordinate[100]; sprintf(coordinate, "coordinate %d", k);
+     color_name = coordinate;
    }
 
  public: // Set color from vector.
@@ -652,8 +669,9 @@ class Graph_induced_complex {
      for(unsigned int i = 0; i < color.size(); i++)  func_color.insert(std::pair<int,double>(i, color[i]));
    }
 
- public: // Create a .dot file that can be compiled with neato to produce a .pdf file
+ public: // Create a .dot file that can be compiled with neato to produce a .pdf file.
    /** \brief Creates a .dot file for neato once the simplicial complex is computed to get a .pdf output.
+    * For Mapper Delta only.
     */
    void plot_with_neato(){
      char mapp[11] = "SC.dot";   std::ofstream graphic(mapp); graphic << "graph Mapper {" << std::endl;
@@ -682,8 +700,9 @@ class Graph_induced_complex {
      if(systemRet == -1)  std::cout << "Visualization failed. Do you have neato?" << std::endl;
    }
 
- public: // Create a .txt file that can be compiled with KeplerMapper to produce a .html file
-   /** \brief Creates a .html file for KeplerMapper once the simplicial complex is computed to get a nice visualization in browser.
+ public: // Create a .txt file that can be compiled with KeplerMapper to produce a .html file.
+   /** \brief Creates a .html file for KeplerMapper once the simplicial complex is computed to get a nice visualization
+    * of its 1_skeleton in browser.
     */
    void plot_with_KeplerMapper(){
 
@@ -694,9 +713,10 @@ class Graph_induced_complex {
          if (cover_color[simplices[i][0]].first > MASK && cover_color[simplices[i][1]].first > MASK)
            num_edges++;
 
-     graphic << "Cloud" << std::endl;
-     graphic << "Function" << std::endl;
-     graphic << 0 << " " << 0 << std::endl;
+     graphic << point_cloud_name << std::endl;
+     graphic << cover_name << std::endl;
+     graphic << color_name << std::endl;
+     graphic << resolution_double << " " << gain << std::endl;
      graphic << cover_color.size() << " " << num_edges << std::endl;
 
      for (std::map<Cover_t,std::pair<int,double> >::iterator iit = cover_color.begin(); iit != cover_color.end(); iit++)
@@ -707,10 +727,51 @@ class Graph_induced_complex {
          if (cover_color[simplices[i][0]].first > MASK && cover_color[simplices[i][1]].first > MASK)
            graphic << simplices[i][0] << " " << simplices[i][1] << std::endl;
      graphic.close();
-     char command[100]; sprintf(command, "python visu.py && firefox SC_visu.html");
+     char command[100]; sprintf(command, "python visu.py && firefox SC.html");
      int systemRet = system(command);
      if(systemRet == -1)  std::cout << "Visualization failed. Do you have python and firefox?" << std::endl;
    }
+
+ /*
+ public: // Create a .off file that can be visualized with Geomview.
+   /** \brief Creates a .off file for visualization with Geomview.
+    * For GIC computed with Voronoi only.
+    *
+   void plot_with_Geomview(){
+
+     assert(data_dimension <= 3);
+     char mapp[11] = "SC.off";  std::ofstream graphic(mapp);
+     graphic << "OFF" << std::endl; int m = subsamples.size(); int numedges = 0; int numfaces = 0;
+     std::vector<std::vector<int> > edges, faces; int numsimplices = simplices.size();
+     for (int i = 0; i < numsimplices; i++) {
+       if(simplices[i].size() == 2){ numedges++;
+         edges.push_back(simplices[i]);
+       }
+       if(simplices[i].size() == 3){ numfaces++;
+         faces.push_back(simplices[i]);
+       }
+     }
+     graphic << m << " " << numedges + numfaces << std::endl;
+     for(int i = 0; i < m; i++)  graphic << off_reader.get_point_cloud()[subsamples[i]][0] << " " \
+                                         << off_reader.get_point_cloud()[subsamples[i]][1] << " " \
+                                         << off_reader.get_point_cloud()[subsamples[i]][2] << std::endl;
+     for(int i = 0; i < numedges; i++)  graphic << 2 << " " << edges[i][0] << " " << edges[i][1] << std::endl;
+     for(int i = 0; i < numfaces; i++)  graphic << 3 << " " << faces[i][0] << " " << faces[i][1] << " " << faces[i][2] << std::endl;
+     graphic.close();
+
+     char cl[11] = "cloud.off";  std::ofstream cloud(cl);
+     cloud << "COFF" << std::endl << 4706 << " " << 9408 << std::endl;
+     for(int i = 0; i < off_reader.get_point_cloud().size(); i++)
+       cloud << off_reader.get_point_cloud()[i][0] << " " << off_reader.get_point_cloud()[i][1] << " " << off_reader.get_point_cloud()[i][2] << " " <<\
+                                                      cover[i][0]*1.0/(maximal_dim+1) << " " <<\
+                                                      0 << " " <<\
+                                                      cover[i][0]*1.0/(maximal_dim+1) << " " << 0.5 << std::endl;
+
+     char command[100]; sprintf(command, "geomview SC.off");
+     int systemRet = system(command);
+     if(systemRet == -1)  std::cout << "Visualization failed. Do you have geomview?" << std::endl;
+
+   }*/
 
  // *******************************************************************************************************************
  // *******************************************************************************************************************

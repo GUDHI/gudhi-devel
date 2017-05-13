@@ -1,6 +1,7 @@
-Cloud
-Function
-0 0
+../../../../data/points/COIL_database/lucky_cat.off
+../../../../data/points/COIL_database/lucky_cat_PCA1
+../../../../data/points/COIL_database/lucky_cat_PCA1
+2592.99 0.3
 6 6
 0 -1382.24 20
 1 385.162 3

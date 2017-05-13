@@ -22,15 +22,17 @@ int main(int argc, char **argv) {
   Gudhi::graph_induced_complex::Graph_induced_complex GIC;
   GIC.set_verbose(verb);
 
-  GIC.set_color_from_coordinate(off_file_name);
+  GIC.read_point_cloud(off_file_name);
+
+  GIC.set_color_from_coordinate();
 
   GIC.set_graph_from_OFF(off_file_name);
 
-  GIC.set_cover_from_Voronoi(m, off_file_name);
+  GIC.set_cover_from_Voronoi(m);
 
   GIC.find_GIC_simplices();
 
-  GIC.plot_with_KeplerMapper();
+  GIC.plot_with_Geomview();
 
   Simplex_tree stree; GIC.create_complex(stree);
 

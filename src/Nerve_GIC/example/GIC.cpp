@@ -3,7 +3,7 @@
 void usage(int nbArgs, char * const progName) {
   std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
   std::cerr << "Usage: " << progName << " filename.off threshold coordinate resolution gain\n";
-  std::cerr << "       i.e.: " << progName << " ../../../data/points/human.off 0.075 2 10 0.3 \n";
+  std::cerr << "       i.e.: " << progName << " ../../../../data/points/human.off 0.075 2 0.075 0 \n";
   exit(-1);  // ----- >>
 }
 
@@ -24,10 +24,12 @@ int main(int argc, char **argv) {
   Gudhi::graph_induced_complex::Graph_induced_complex GIC;
   GIC.set_verbose(verb);
 
-  GIC.set_color_from_coordinate(off_file_name, coord);
-  GIC.set_function_from_coordinate(coord, off_file_name);
+  GIC.read_point_cloud(off_file_name);
 
-  GIC.set_graph_from_rips(threshold, off_file_name);
+  GIC.set_color_from_coordinate(coord);
+  GIC.set_function_from_coordinate(coord);
+
+  GIC.set_graph_from_rips(threshold);
 
   GIC.set_resolution_double(resolution); GIC.set_gain(gain);
   GIC.set_cover_from_function(1);
