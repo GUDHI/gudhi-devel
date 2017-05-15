@@ -125,6 +125,7 @@ std::vector< std::vector< double > > read_numbers_from_file_line_by_line( const 
  * If there are three numerical entries per line, then the function assume that they are: dimension and birth/death coordinates. 
  * If there are four numerical entries per line, then the function assume that they are: thc characteristic of a filed over which 
  * persistence was computed, dimension and birth/death coordinates. 
+ * The 'inf' string can appear only as a last element of a line. 
  * The procedure returns vector of persistence pairs. 
 **/ 
 std::vector<std::pair<double,double> > read_persistence_intervals_in_one_dimension_from_file(std::string const& filename, int dimension=-1 , double what_to_substitute_for_infinite_bar = -1 )
@@ -155,18 +156,27 @@ std::vector<std::pair<double,double> > read_persistence_intervals_in_one_dimensi
 		{
 			//If we do not know how many entries per line we have, we check it in below.
 			if ( number_of_entries_per_line == -1 )
-			{
+			{	
+				number_of_entries_per_line = 0;
+				std::string line_copy = line;			
+				if ( line.find("inf") != std::string::npos )
+				{					
+					size_t np = line_copy.find("inf");
+					//replace symbols 'inf' in line_copy with whilespaces:					
+					line_copy[np] = ' ';
+					line_copy[np+1] = ' ';
+					line_copy[np+2] = ' ';		
+					number_of_entries_per_line = 1;			
+				}				
 				//check how many entries we have in the line.				
-				std::stringstream ss( line );
+				std::stringstream ss( line_copy );
 				double number;
 				std::vector<double> this_line;
 				while ( ss >> number )
 				{
 					this_line.push_back( number );
 				}
-				number_of_entries_per_line = (int)this_line.size();
-				//if thie line contains 'inf' string, then we need to increment number_of_entries_per_line 
-				if ( line.find("inf") != std::string::npos )++number_of_entries_per_line;
+				number_of_entries_per_line += (int)this_line.size();						
 				if ( dbg )
 				{
 					std::cerr << "number_of_entries_per_line : " << number_of_entries_per_line << ". This number was obtained by analyzing this line : " << line << std::endl;
@@ -184,6 +194,11 @@ std::vector<std::pair<double,double> > read_persistence_intervals_in_one_dimensi
 				{
 					std::cerr << "This line: " << line << " contains infinite interval. \n";
 				}
+				//first we substitute inf by whitespaces:
+				size_t np = line.find("inf");									
+				line[np] = ' ';
+				line[np+1] = ' ';
+				line[np+2] = ' ';	
 				if ( what_to_substitute_for_infinite_bar != -1 )
 				{
 					double beginn, field, dim;
@@ -223,7 +238,7 @@ std::vector<std::pair<double,double> > read_persistence_intervals_in_one_dimensi
 				}
 				continue;
 			}
-			//Then, we read the content of the line:
+			//Then, we read the content of the line. We know that it do not contain 'inf' substring.
 			std::stringstream lineSS(line);			
 			double beginn, endd, field, dim;
 			if ( number_of_entries_per_line == 4 )lineSS >> field;

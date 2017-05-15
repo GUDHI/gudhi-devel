@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(check_construction_of_landscape)
 
 BOOST_AUTO_TEST_CASE(check_construction_of_landscape_form_gudhi_style_file) 
 {		
-	Persistence_landscape p( "data/persistence_file_with_four_entries_per_line" , 1 );	
+	Persistence_landscape p( "data/persistence_file_with_four_entries_per_line" , 1 );		
 	//p.print_to_file("persistence_file_with_four_entries_per_line_landscape");
 	Persistence_landscape q;
 	q.load_landscape_from_file( "data/persistence_file_with_four_entries_per_line_landscape" );		
