@@ -2,7 +2,7 @@
 
 void usage(int nbArgs, char * const progName) {
   std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
-  std::cerr << "Usage: " << progName << " filename.off coordinate resolution gain --v \n";
+  std::cerr << "Usage: " << progName << " filename.off coordinate resolution gain [--v] \n";
   std::cerr << "       i.e.: " << progName << " ../../../../data/human.off 2 10 0.3 --v \n";
   exit(-1);  // ----- >>
 }

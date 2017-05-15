@@ -2,18 +2,17 @@
 
 void usage(int nbArgs, char * const progName) {
   std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
-  std::cerr << "Usage: " << progName << " filename.off threshold N\n";
-  std::cerr << "       i.e.: " << progName << " ../../../data/points/human.off 0.075 100 \n";
+  std::cerr << "Usage: " << progName << " filename.off N [--v] \n";
+  std::cerr << "       i.e.: " << progName << " ../../../../data/points/human.off 100 --v \n";
   exit(-1);  // ----- >>
 }
 
 int main(int argc, char **argv) {
-  if ((argc != 4) && (argc != 5)) usage(argc, (argv[0] - 1));
+  if ((argc != 3) && (argc != 4)) usage(argc, (argv[0] - 1));
 
   std::string off_file_name(argv[1]);
-  double threshold = atof(argv[2]);
-  int m = atoi(argv[3]);
-  bool verb = 0; if(argc == 5)  verb = 1;
+  int m = atoi(argv[2]);
+  bool verb = 0; if(argc == 4)  verb = 1;
 
   // ----------------------------------------------------------------------------
   // Init of a graph induced complex from an OFF file

@@ -248,9 +248,9 @@ class KeplerMapper(object):
       if custom_tooltips is not None:
         tooltip_s = "<h2>Cluster %s</h2>"%k + " ".join(str(custom_tooltips[complex["nodes"][k][0]]).split(" "))
         if maximum == minimum:
-          tooltip_i = int(30*(custom_tooltips[complex["nodes"][k][0]]-minimum)/(maximum-minimum))
-        else:
           tooltip_i = 0
+        else:
+          tooltip_i = int(30*(custom_tooltips[complex["nodes"][k][0]]-minimum)/(maximum-minimum))
         json_s["nodes"].append({"name": str(k), "tooltip": tooltip_s, "group": 2 * int(np.log(complex["nodes"][k][2])), "color": tooltip_i})
       else:
         tooltip_s = "<h2>Cluster %s</h2>Contains %s members."%(k,len(complex["nodes"][k]))

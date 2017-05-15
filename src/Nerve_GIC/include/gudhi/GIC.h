@@ -53,21 +53,13 @@
 #define ETA 0.001
 #define MASK 0
 
-namespace gss = Gudhi::spatial_searching;
-
 using Simplex_tree = Gudhi::Simplex_tree<>;
 using Filtration_value = Simplex_tree::Filtration_value;
 using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
 using Point = std::vector<float>;
 
-typedef CGAL::Epick_d<CGAL::Dimension_tag<4> > K;
-typedef typename K::Point_d Pointd;
-typedef std::vector<Pointd> Pointsd;
-typedef gss::Kd_tree_search<K, Pointsd> Points_ds;
-
 std::map<int, double> func;
 std::map<int, double> func_color;
-Gudhi::Points_off_reader<Point> off_reader("tmp");
 
 namespace Gudhi {
 
@@ -99,19 +91,22 @@ class Graph_induced_complex {
 
  private:
    bool verbose; // whether to display information.
+   std::vector<Point> point_cloud;
    typedef int Cover_t; // elements of cover C are indexed by integers.
    std::vector<std::vector<Cover_t> > simplices;
    std::map<int, std::vector<Cover_t> > cover;
    int maximal_dim; // maximal dimension of output simplicial complex.
    int data_dimension; // dimension of input data.
+   int n; // number of points.
    std::map<Cover_t,int> cover_fct; // integer-valued function that allows to state if two elements of the cover are consecutive or not.
    std::map<Cover_t,std::pair<int,double> > cover_color; // size and coloring of the vertices of the output simplicial complex.
    Simplex_tree<> st;
    std::map<int,std::vector<int> > adjacency_matrix;
+   std::vector<std::vector<double> > distances;
    int resolution_int;
    double resolution_double;
    double gain;
-   std::vector<int> subsamples;
+   std::vector<int> voronoi_subsamples;
    std::string cover_name;
    std::string point_cloud_name;
    std::string color_name;
@@ -167,8 +162,11 @@ class Graph_induced_complex {
 
  public:
    void read_point_cloud(const std::string& off_file_name){
-     off_reader = Points_off_reader<Point>(off_file_name);
+     Gudhi::Points_off_reader<Point> off_reader = Points_off_reader<Point>(off_file_name);
+     point_cloud = off_reader.get_point_cloud();
      point_cloud_name = off_file_name;
+     n = point_cloud.size();
+     data_dimension = point_cloud[0].size();
    }
 
  // *******************************************************************************************************************
@@ -207,7 +205,7 @@ class Graph_induced_complex {
     *
     */
    void set_graph_from_OFF(const std::string& off_file_name){
-     int n, numedges, numfaces, i; std::vector<int> edge(2); double x; int num; std::vector<int> simplex;
+     int numedges, numfaces, i; std::vector<int> edge(2); double x; int num; std::vector<int> simplex;
      std::ifstream input(off_file_name); std::string line; getline(input, line);
      input >> n; input >> numfaces; input >> numedges;
      i = 0;  while(i < n){input >> x; input >> x; input >> x; i++;}
@@ -242,10 +240,10 @@ class Graph_induced_complex {
     *
     */
    void set_graph_from_rips(const double& threshold){
-     Rips_complex rips_complex_from_points(off_reader.get_point_cloud(), threshold, Euclidean_distance());
-     rips_complex_from_points.create_complex(st, 1); data_dimension = off_reader.get_point_cloud()[0].size();
+     Rips_complex rips_complex_from_points(point_cloud, threshold, Euclidean_distance());
+     rips_complex_from_points.create_complex(st, 1);
 
-     std::vector<int> empty; int n = off_reader.get_point_cloud().size();
+     std::vector<int> empty;
      for(int i = 0; i < n; i++)  adjacency_matrix.insert(std::pair<int,std::vector<int> >(i,empty));
      for (auto simplex : st.complex_simplex_range()) {
        if(st.dimension(simplex) == 1){
@@ -253,6 +251,43 @@ class Graph_induced_complex {
          for(auto vertex : st.simplex_vertex_range(simplex))  vertices.push_back(vertex);
          adjacency_matrix[vertices[0]].push_back(vertices[1]); adjacency_matrix[vertices[1]].push_back(vertices[0]);
        }
+     }
+
+   }
+
+ public: // Pairwise distances.
+   /** \brief Computes all pairwise distances (Euclidean norm).
+    */
+   void compute_pairwise_distances(){
+
+     double d; std::vector<double> dumb(n); for(int i = 0; i < n; i++)  distances.push_back(dumb);
+     char distance[100]; sprintf(distance,"%s_dist",(char*) point_cloud_name.c_str());
+     std::ifstream input(distance, std::ios::out | std::ios::binary);
+
+     if(input.good()){
+       if(verbose)  std::cout << "Reading distances..." << std::endl;
+       for(int i = 0; i < n; i++){
+         for (int j = i; j < n; j++){
+           input.read((char*) &d,8); distances[i][j] = d; distances[j][i] = d;
+         }
+       }
+       input.close();
+     }
+
+     else{
+       if(verbose)  std::cout << "Computing distances..." << std::endl;
+       input.close(); std::ofstream output(distance, std::ios::out | std::ios::binary);
+       for(int i = 0; i < n; i++){
+         if( (int) floor( 100*(i*1.0+1)/(n*1.0) ) %10 == 0  )
+           if(verbose)  std::cout << "\r" << floor( 100*(i*1.0+1)/(n*1.0) ) << "%" << std::flush;
+         for (int j = i; j < n; j++){
+           double dis = 0; for(int k = 0; k < data_dimension; k++)
+               dis += pow(point_cloud[i][k]-point_cloud[j][k],2);
+           dis = std::sqrt(dis); distances[i][j] = dis; distances[j][i] = dis;
+           output.write((char*) &dis,8);
+         }
+       }
+       output.close(); if(verbose)  std::cout << std::endl;
      }
 
    }
@@ -266,49 +301,13 @@ class Graph_induced_complex {
     */
    void set_graph_from_automatic_rips(int N = 100){
 
-     int n = off_reader.get_point_cloud().size();
      int m = floor(n/pow(log(n)/log(CONSTANT),1+ETA)); m = std::min(m,n-1);
-     std::vector<int> samples(m); double delta = 0; int dim = off_reader.get_point_cloud()[0].size(); data_dimension = dim;
+     std::vector<int> samples(m); double delta = 0;
 
-     if(verbose)  std::cout << n << " points in R^" << dim << std::endl;
+     if(verbose)  std::cout << n << " points in R^" << data_dimension << std::endl;
      if(verbose)  std::cout << "Subsampling " << m << " points" << std::endl;
 
-     std::vector<std::vector<double> > dist(n); std::vector<double> dumb(n);
-     for(int i = 0; i < n; i++)  dist[i] = dumb;
-     double d;
-
-     char distances[100]; sprintf(distances,"%s_dist",(char*) point_cloud_name.c_str());
-     std::ifstream input(distances, std::ios::out | std::ios::binary);
-
-     if(input.good()){
-       if(verbose)  std::cout << "Reading distances..." << std::endl;
-       for(int i = 0; i < n; i++){
-         for (int j = 0; j < n; j++){
-           input.read((char*) &d,8); dist[i][j] = d;
-         }
-       }
-       input.close();
-     }
-     else{
-       if(verbose)  std::cout << "Computing distances..." << std::endl;
-       input.close(); std::ofstream output(distances, std::ios::out | std::ios::binary);
-       for(int i = 0; i < n; i++){
-         if( (int) floor( 100*(i*1.0+1)/(n*1.0) ) %10 == 0  )
-           if(verbose)  std::cout << "\r" << floor( 100*(i*1.0+1)/(n*1.0) ) << "%" << std::flush;
-         for (int j = 0; j < n; j++){
-           double dis = 0; for(int k = 0; k < dim; k++)  dis += pow(off_reader.get_point_cloud()[i][k]-off_reader.get_point_cloud()[j][k],2);
-           dis = std::sqrt(dis); dist[i][j] = dis; output.write((char*) &dis,8);
-         }
-       }
-       output.close(); if(verbose)  std::cout << std::endl;
-     }
-
-     for(int i = 0; i < n; i++){
-       for(int j = i; j < n; j++){
-         double dis = 0; for(int k = 0; k < dim; k++)  dis += pow(off_reader.get_point_cloud()[i][k]-off_reader.get_point_cloud()[j][k],2);
-         dist[i][j] = std::sqrt(dis); dist[j][i] = std::sqrt(dis);
-       }
-     }
+     if(distances.size() == 0)  compute_pairwise_distances();
 
      //#pragma omp parallel for
      for (int i = 0; i < N; i++){
@@ -316,7 +315,7 @@ class Graph_induced_complex {
        SampleWithoutReplacement(n,m,samples);
        double hausdorff_dist = 0;
        for (int j = 0; j < n; j++){
-         double mj = dist[j][samples[0]]; for (int k = 1; k < m; k++)  mj = std::min(mj, dist[j][samples[k]]);
+         double mj = distances[j][samples[0]]; for (int k = 1; k < m; k++)  mj = std::min(mj, distances[j][samples[k]]);
          hausdorff_dist = std::max(hausdorff_dist, mj);
        }
        delta += hausdorff_dist/N;
@@ -324,7 +323,7 @@ class Graph_induced_complex {
      }
 
      if(verbose)  std::cout << "delta = " << delta << std::endl;
-     Rips_complex rips_complex_from_points(off_reader.get_point_cloud(), delta, Euclidean_distance());
+     Rips_complex rips_complex_from_points(point_cloud, delta, Euclidean_distance());
      rips_complex_from_points.create_complex(st, 1);
 
      std::vector<int> empty;
@@ -363,12 +362,10 @@ class Graph_induced_complex {
    /** \brief Creates the function f from the k-th coordinate of the point cloud P.
     *
     * @param[in] k coordinate to use (start at 0).
-    * @param[in] off_file_name name of the input .OFF file.
     *
     */
    void set_function_from_coordinate(const int& k){
-     int n = off_reader.get_point_cloud().size();
-     for(int i = 0; i < n; i++)  func.insert(std::pair<int,double>(i,off_reader.get_point_cloud()[i][k]));
+     for(int i = 0; i < n; i++)  func.insert(std::pair<int,double>(i,point_cloud[i][k]));
      char coordinate[100]; sprintf(coordinate, "coordinate %d", k);
      cover_name = coordinate;
    }
@@ -380,7 +377,6 @@ class Graph_induced_complex {
     *
     */
    void set_function_from_vector(const std::vector<double>& function){
-     int n = function.size();
      for(int i = 0; i < n; i++)  func.insert(std::pair<int,double>(i, function[i]));
    }
 
@@ -413,48 +409,56 @@ class Graph_induced_complex {
      cover_name = cover_file_name;
    }
 
- /* TODO: complete method with nearest geodesic neighbor
-
  public: // Set cover from Voronoi
    /** \brief Creates the cover C from the Voronoï cells of a subsampling of the point cloud.
     *
     * @param[in] m number of points in the subsample.
-    * @param[in] off_file_name name of the input .OFF file.
     *
-
+    */
    void set_cover_from_Voronoi(const int& m){
 
-     int n = off_reader.get_point_cloud().size(); data_dimension = off_reader.get_point_cloud()[0].size();
-     Pointsd pointsd(m+1); std::vector<int> samples(m); SampleWithoutReplacement(n,m,samples);
-     double* coord = new double[data_dimension]; subsamples = samples;
+     voronoi_subsamples.resize(m); SampleWithoutReplacement(n,m,voronoi_subsamples);
+     if(distances.size() == 0)  compute_pairwise_distances();
+     std::vector<double> mindist(n); for(int j = 0; j < n; j++)  mindist[j] = std::numeric_limits<double>::max();
 
-     for(int i = 1; i <= m; i++){
-       for(int j = 0; j < data_dimension; j++)  coord[j] = off_reader.get_point_cloud()[samples[i-1]][j];
-       pointsd[i] = Pointd(data_dimension, coord+0, coord + data_dimension); cover_fct[i-1] = i-1;
-     } std::cout << std::endl;
+     // Compute the geodesic distances to subsamples with Dijkstra
+     for(int i = 0; i < m; i++){
+       if(verbose)  std::cout << "Computing geodesic distances to seed " << i << "..." << std::endl;
+       int seed = voronoi_subsamples[i];
+       std::vector<double> dist(n); std::vector<int> process(n);
+       for(int j = 0; j < n; j++){ dist[j] = std::numeric_limits<double>::max(); process[j] = j; }
+       dist[seed] = 0; int curr_size = process.size(); int min_point, min_index; double min_dist;
+       std::vector<int> neighbors; int num_neighbors;
 
-     int curr_subsample = 0;
-     for(int i = 0; i < n; i++){
-       for(int j = 0; j < data_dimension; j++)  coord[j] = off_reader.get_point_cloud()[i][j];
-       pointsd[0] = Pointd(data_dimension, coord+0, coord + data_dimension); Points_ds points_ds(pointsd);
-       auto knn_range = points_ds.query_k_nearest_neighbors(pointsd[0], 2, true);
-       Cover_t cluster; // = nearest geodesic neighbor.
-       if(cluster >= 0){ // Case where i is not a subsample point.
-         cover[i].push_back(cluster); cover_color[cluster].second += func_color[i]; cover_color[cluster].first++;
+       while(curr_size > 0){
+         min_dist = std::numeric_limits<double>::max(); min_index = -1; min_point = -1;
+         for(int j = 0; j < curr_size; j++){
+           if(dist[process[j]] < min_dist){
+             min_point = process[j]; min_dist = dist[process[j]]; min_index = j;
+           }
+         }
+         assert(min_index != -1); process.erase(process.begin() + min_index);
+         assert(min_point != -1); neighbors = adjacency_matrix[min_point]; num_neighbors = neighbors.size();
+         for(int j = 0; j < num_neighbors; j++){
+           double d = dist[min_point] + distances[min_point][neighbors[j]];
+           dist[neighbors[j]] = std::min(dist[neighbors[j]], d);
+         }
+         curr_size = process.size();
        }
-       else{ // Case where i is a subsample point.
-         cover[i].push_back(curr_subsample); cover_color[curr_subsample].second += func_color[i];
-         cover_color[curr_subsample].first++; curr_subsample++;
-       }
+
+       for(int j = 0; j < n; j++)
+         if(mindist[j] > dist[j]){
+           mindist[j] = dist[j];
+           if(cover[j].size() == 0) cover[j].push_back(i);
+           else cover[j][0] = i;
+         }
      }
 
+     for(int i = 0; i < n; i++){ cover_color[cover[i][0]].second += func_color[i]; cover_color[cover[i][0]].first++; }
      for(int i = 0; i < m; i++)  cover_color[i].second /= cover_color[i].first;
-
-     delete [] coord;
      maximal_dim = m-1; cover_name = "Voronoi";
 
    }
-   */
 
  public: // Automatic tuning of resolution for Mapper Delta.
    /** \brief Computes the optimal length of intervals for a Mapper Delta.
@@ -653,8 +657,7 @@ class Graph_induced_complex {
     *
     */
    void set_color_from_coordinate(int k = 0){
-     int n = off_reader.get_point_cloud().size();
-     for(int i = 0; i < n; i++)  func_color[i] = off_reader.get_point_cloud()[i][k];
+     for(int i = 0; i < n; i++)  func_color.insert(std::pair<int,double>(i, point_cloud[i][k]));
      char coordinate[100]; sprintf(coordinate, "coordinate %d", k);
      color_name = coordinate;
    }
@@ -670,15 +673,15 @@ class Graph_induced_complex {
    }
 
  public: // Create a .dot file that can be compiled with neato to produce a .pdf file.
-   /** \brief Creates a .dot file for neato once the simplicial complex is computed to get a .pdf output.
-    * For Mapper Delta only.
+   /** \brief Creates a .dot file for neato once the simplicial complex is computed to get a nice visualization
+    * of its 1-skeleton in a .pdf file.
     */
    void plot_with_neato(){
      char mapp[11] = "SC.dot";   std::ofstream graphic(mapp); graphic << "graph Mapper {" << std::endl;
      double maxv, minv; maxv = std::numeric_limits<double>::min(); minv = std::numeric_limits<double>::max();
      for (std::map<Cover_t,std::pair<int,double> >::iterator iit = cover_color.begin(); iit != cover_color.end(); iit++){
        maxv = std::max(maxv, iit->second.second);  minv = std::min(minv, iit->second.second);
-     } //std::cout << minv << " " << maxv << std::endl;
+     }
      int k = 0; std::vector<int> nodes; nodes.clear();
      for (std::map<Cover_t,std::pair<int,double> >::iterator iit = cover_color.begin(); iit != cover_color.end(); iit++){
        if(iit->second.first > MASK){
@@ -701,8 +704,8 @@ class Graph_induced_complex {
    }
 
  public: // Create a .txt file that can be compiled with KeplerMapper to produce a .html file.
-   /** \brief Creates a .html file for KeplerMapper once the simplicial complex is computed to get a nice visualization
-    * of its 1_skeleton in browser.
+   /** \brief Creates a .txt file for KeplerMapper once the simplicial complex is computed to get a nice visualization
+    * of its 1-skeleton in browser.
     */
    void plot_with_KeplerMapper(){
 
@@ -732,16 +735,16 @@ class Graph_induced_complex {
      if(systemRet == -1)  std::cout << "Visualization failed. Do you have python and firefox?" << std::endl;
    }
 
- /*
+
  public: // Create a .off file that can be visualized with Geomview.
    /** \brief Creates a .off file for visualization with Geomview.
     * For GIC computed with Voronoi only.
-    *
+    */
    void plot_with_Geomview(){
 
      assert(data_dimension <= 3);
-     char mapp[11] = "SC.off";  std::ofstream graphic(mapp);
-     graphic << "OFF" << std::endl; int m = subsamples.size(); int numedges = 0; int numfaces = 0;
+     char gic[11] = "SC.off";  std::ofstream graphic(gic);
+     graphic << "OFF" << std::endl; int m = voronoi_subsamples.size(); int numedges = 0; int numfaces = 0;
      std::vector<std::vector<int> > edges, faces; int numsimplices = simplices.size();
      for (int i = 0; i < numsimplices; i++) {
        if(simplices[i].size() == 2){ numedges++;
@@ -752,26 +755,18 @@ class Graph_induced_complex {
        }
      }
      graphic << m << " " << numedges + numfaces << std::endl;
-     for(int i = 0; i < m; i++)  graphic << off_reader.get_point_cloud()[subsamples[i]][0] << " " \
-                                         << off_reader.get_point_cloud()[subsamples[i]][1] << " " \
-                                         << off_reader.get_point_cloud()[subsamples[i]][2] << std::endl;
+     for(int i = 0; i < m; i++)  graphic << point_cloud[voronoi_subsamples[i]][0] << " " \
+                                         << point_cloud[voronoi_subsamples[i]][1] << " " \
+                                         << point_cloud[voronoi_subsamples[i]][2] << std::endl;
      for(int i = 0; i < numedges; i++)  graphic << 2 << " " << edges[i][0] << " " << edges[i][1] << std::endl;
      for(int i = 0; i < numfaces; i++)  graphic << 3 << " " << faces[i][0] << " " << faces[i][1] << " " << faces[i][2] << std::endl;
      graphic.close();
-
-     char cl[11] = "cloud.off";  std::ofstream cloud(cl);
-     cloud << "COFF" << std::endl << 4706 << " " << 9408 << std::endl;
-     for(int i = 0; i < off_reader.get_point_cloud().size(); i++)
-       cloud << off_reader.get_point_cloud()[i][0] << " " << off_reader.get_point_cloud()[i][1] << " " << off_reader.get_point_cloud()[i][2] << " " <<\
-                                                      cover[i][0]*1.0/(maximal_dim+1) << " " <<\
-                                                      0 << " " <<\
-                                                      cover[i][0]*1.0/(maximal_dim+1) << " " << 0.5 << std::endl;
 
      char command[100]; sprintf(command, "geomview SC.off");
      int systemRet = system(command);
      if(systemRet == -1)  std::cout << "Visualization failed. Do you have geomview?" << std::endl;
 
-   }*/
+   }
 
  // *******************************************************************************************************************
  // *******************************************************************************************************************

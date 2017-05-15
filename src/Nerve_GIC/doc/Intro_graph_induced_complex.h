@@ -33,6 +33,8 @@ namespace graph_induced_complex {
  * 
  * @{
  * 
+ * Visualizations of the simplicial complexes require neato, python and firefox!!
+ *
  * \section covers Covers
  *
  * Nerves and Graph Induced Complexes require a cover C of the input point cloud P,
@@ -63,7 +65,7 @@ namespace graph_induced_complex {
  *
  * When launching:
  *
- * \code $> ./Nerve ../../../data/points/human.off 2 10 0.3
+ * \code $> ./Nerve ../../../data/points/human.off 2 10 0.3 --v
  * \endcode
  *
  * the program output is:
@@ -90,7 +92,7 @@ namespace graph_induced_complex {
  *
  * \image html "gic_complex.png" "GIC of a point cloud."
  *
- * \subsection gicexample Example
+ * \subsection gicexample Example with cover from function
  *
  * This example builds the GIC of a point cloud sampled on a 3D human shape (human.off).
  * The cover C comes from the preimages of intervals (with length 0.075 and gain 0)
@@ -103,12 +105,31 @@ namespace graph_induced_complex {
  *
  * When launching:
  *
- * \code $> ./GIC ../../../data/points/human.off 0.075 2 0.075 0
+ * \code $> ./GIC ../../../data/points/human.off 0.075 2 0.075 0 --v
  * \endcode
  *
  * the program output is:
  *
  * \include Nerve_GIC/GIC.txt
+ *
+ * \subsection gicexamplevor Example with cover from Voronoï
+ *
+ * This example builds the GIC of a point cloud sampled on a 3D human shape (human.off).
+ * We randomly subsampled 100 points in the point cloud, which act as seeds of
+ * a geodesic Voronoï diagram. Each cell of the diagram is then an element of C.
+ * The graph G (used to compute both the geodesics for Voronoï and the GIC)
+ * comes from the triangulation of the human shape.
+ *
+ * \include Nerve_GIC/GICvoronoi.cpp
+ *
+ * When launching:
+ *
+ * \code $> ./GICvoronoi ../../../data/points/human.off 100 --v
+ * \endcode
+ *
+ * the program output is:
+ *
+ * \include Nerve_GIC/GICvoronoi.txt
  *
  * \subsection mapperdeltadefinition Mapper Delta
  *
@@ -132,7 +153,7 @@ namespace graph_induced_complex {
  *
  * When launching:
  *
- * \code $> ./MapperDeltaCoord ../../../data/points/human.off 2
+ * \code $> ./MapperDeltaCoord ../../../data/points/human.off 2 --v
  * \endcode
  *
  * the program output is:
@@ -147,20 +168,12 @@ namespace graph_induced_complex {
  *
  * When launching:
  *
- * \code $> ./MapperDeltaFunc ../../../data/points/COIL_database/lucky_cat.off ../../../data/points/COIL_database/lucky_cat_PCA1
+ * \code $> ./MapperDeltaFunc ../../../data/points/COIL_database/lucky_cat.off ../../../data/points/COIL_database/lucky_cat_PCA1 --v
  * \endcode
  *
  * the program output is:
  *
  * \include MapperDeltaFunc.txt
- *
- * If you have python and firefox, all the previous .txt files can then be displayed in a browser.
- * We provide a .py file called visu.py that comes from the
- * <a target="_blank" href="https://github.com/MLWave/kepler-mapper"> Kepler-Mapper </a> library.
- * One can visualize data by launching:
- *
- * \code python visu.py && firefox SC.html
- * \endcode
  *
  * \copyright GNU General Public License v3.                         
  * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
