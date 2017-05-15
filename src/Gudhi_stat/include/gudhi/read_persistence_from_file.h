@@ -158,8 +158,8 @@ std::vector<std::pair<double,double> > read_persistence_intervals_in_one_dimensi
 			if ( number_of_entries_per_line == -1 )
 			{	
 				number_of_entries_per_line = 0;
-				std::string line_copy = line;			
-				if ( line.find("inf") != std::string::npos )
+				std::string line_copy(line);			
+				if ( line_copy.find("inf") != std::string::npos )
 				{					
 					size_t np = line_copy.find("inf");
 					//replace symbols 'inf' in line_copy with whilespaces:					
@@ -231,6 +231,7 @@ std::vector<std::pair<double,double> > read_persistence_intervals_in_one_dimensi
 				}
 				else
 				{
+					//this is a line with infinity. Since the variable what_to_substitute_for_infinite_bar have not been set up, it means that this line will be skipped. 
 					if ( dbg )
 					{
 						std::cerr << "We will skip it \n";
@@ -238,37 +239,40 @@ std::vector<std::pair<double,double> > read_persistence_intervals_in_one_dimensi
 				}
 				continue;
 			}
-			//Then, we read the content of the line. We know that it do not contain 'inf' substring.
-			std::stringstream lineSS(line);			
-			double beginn, endd, field, dim;
-			if ( number_of_entries_per_line == 4 )lineSS >> field;
-			if ( number_of_entries_per_line >= 3 )
-			{
-				 lineSS >> dim;
-			}
 			else
 			{
-				dim = dimension;
-			}
-			lineSS >> beginn;
-			lineSS >> endd;
-			if ( beginn > endd )
-			{
-				std::swap(beginn,endd);				
-			}
-			if ( dim == dimension )
-			{ 
-				barcode.push_back( std::make_pair( beginn , endd ) );
-				if (dbg)
+				//Then, we read the content of the line. We know that it do not contain 'inf' substring.
+				std::stringstream lineSS(line);			
+				double beginn, endd, field, dim;
+				if ( number_of_entries_per_line == 4 )lineSS >> field;
+				if ( number_of_entries_per_line >= 3 )
 				{
-					std::cerr << "This is a line that is going to the output : " <<  beginn << " , " << endd << std::endl;
+					 lineSS >> dim;
 				}
-			}
-			else
-			{
-				if ( (number_of_entries_per_line==3) && (dimension == -1) )
+				else
 				{
+					dim = dimension;
+				}
+				lineSS >> beginn;
+				lineSS >> endd;
+				if ( beginn > endd )
+				{
+					std::swap(beginn,endd);				
+				}
+				if ( dim == dimension )
+				{ 
 					barcode.push_back( std::make_pair( beginn , endd ) );
+					if (dbg)
+					{
+						std::cerr << "This is a line that is going to the output : " <<  beginn << " , " << endd << std::endl;
+					}
+				}
+				else
+				{
+					if ( (number_of_entries_per_line==3) && (dimension == -1) )
+					{
+						barcode.push_back( std::make_pair( beginn , endd ) );
+					}
 				}
 			}
 		}
