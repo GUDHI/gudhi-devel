@@ -89,31 +89,64 @@ namespace alpha_complex {
  * \image html "alpha_complex_doc.png" "Simplicial complex structure construction example"
  *
  * \subsection filtrationcomputation Filtration value computation algorithm
- * 
- * \f{algorithm}{ 
- * \caption{Filtration value computation algorithm}\label{alpha}
- * \begin{algorithmic}
- * \For{i : dimension $\rightarrow$ 0}
- *   \ForAll{$\sigma$ of dimension i}
- *     \If {filtration($\sigma$) is NaN}
- *       \State filtration($\sigma$) = $\alpha^2(\sigma)$
- *     \EndIf
- *     \ForAll{$\tau$ face of $\sigma$} \Comment{propagate alpha filtration value}
- *       \If {filtration($\tau$) is not NaN} 
- *         \State filtration($\tau$) = min (filtration($\tau$), filtration($\sigma$))
- *       \Else
- *         \If {$\tau$ is not Gabriel for $\sigma$} 
- *           \State filtration($\tau$) = filtration($\sigma$)
- *         \EndIf
- *       \EndIf
- *     \EndFor
- *   \EndFor
- * \EndFor
- * \State make\_filtration\_non\_decreasing()
- * \State prune\_above\_filtration()
- * \end{algorithmic}
- * \f}
- * 
+ *
+ *
+ *
+ * <ul>
+ *   <li style="list-style-type: none;">\f$ \textbf{for } i : dimension \rightarrow 0 \textbf{ do} \f$
+ *     <ul>
+ *       <li style="list-style-type: none;">\f$\textbf{for all } \sigma of dimension i \f$
+ *         <ul>
+ *           <li style="list-style-type: none;">\f$\textbf{if } filtration( \sigma ) is NaN \textbf{ then} \f$
+ *             <ul>
+ *               <li style="list-style-type: none;">\f$ filtration( \sigma ) = \alpha^2( \sigma ) \f$
+ *               </li>
+ *             </ul>
+ *           </li>
+ *           <li style="list-style-type: none;">\f$\textbf{end if}\f$
+ *           </li>
+ *           <li style="list-style-type: none;">\f$\textbf{for all } \tau face of \sigma \textbf{ do} \f$
+ *             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// propagate alpha filtration value
+ *             <ul>
+ *               <li style="list-style-type: none;">\f$\textbf{if } filtration( \tau ) is not NaN \textbf{ then} \f$
+ *                 <ul>
+ *                   <li style="list-style-type: none;">\f$ filtration( \tau ) = min ( filtration( \tau ), filtration( \sigma ) ) \f$
+ *                   </li>
+ *                 </ul>
+ *               </li>
+ *               <li style="list-style-type: none;">\f$\textbf{else}\f$
+ *                 <ul>
+ *                   <li style="list-style-type: none;">\f$\textbf{if } \tau is not Gabriel for \sigma \textbf{ then} \f$
+ *                     <ul>
+ *                       <li style="list-style-type: none;">\f$ filtration( \tau ) = filtration( \sigma ) \f$
+ *                       </li>
+ *                     </ul>
+ *                   </li>
+ *                   <li style="list-style-type: none;">\f$\textbf{end if}\f$
+ *                   </li>
+ *                 </ul>
+ *               </li>
+ *               <li style="list-style-type: none;">\f$\textbf{end if}\f$
+ *               </li>
+ *             </ul>
+ *           </li>
+ *           <li style="list-style-type: none;">\f$\textbf{end for}\f$
+ *           </li>
+ *         </ul>
+ *       </li>
+ *       <li style="list-style-type: none;">\f$\textbf{end for}\f$
+ *       </li>
+ *     </ul>
+ *   </li>
+ *   <li style="list-style-type: none;">\f$\textbf{end for}\f$
+ *   </li>
+ *   <li style="list-style-type: none;">\f$make\_filtration\_non\_decreasing()\f$
+ *   </li>
+ *   <li style="list-style-type: none;">\f$prune\_above\_filtration()\f$
+ *   </li>
+ * </ul>
+ *
+ *
  * \subsubsection dimension2 Dimension 2
  * 
  * From the example above, it means the algorithm looks into each triangle ([0,1,2], [0,2,4], [1,2,3], ...),
