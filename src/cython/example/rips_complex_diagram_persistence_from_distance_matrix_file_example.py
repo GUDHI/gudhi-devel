@@ -43,29 +43,22 @@ parser.add_argument('--no-diagram', default=False, action='store_true' , help='F
 
 args = parser.parse_args()
 
-with open(args.file, 'r') as f:
-    first_line = f.readline()
-    if (first_line == 'OFF\n') or (first_line == 'nOFF\n'):
-        print("#####################################################################")
-        print("RipsComplex creation from distance matrix read in a csv file")
-        
-        message = "RipsComplex with max_edge_length=" + repr(args.max_edge_length)
-        print(message)
-        
-        rips_complex = gudhi.RipsComplex(off_file=args.file, max_edge_length=args.max_edge_length)
-        simplex_tree = rips_complex.create_simplex_tree(max_dimension=args.max_dimension)
-    
-        message = "Number of simplices=" + repr(simplex_tree.num_simplices())
-        print(message)
-        
-        diag = simplex_tree.persistence()
-    
-        print("betti_numbers()=")
-        print(simplex_tree.betti_numbers())
-    
-        if args.no_diagram == False:
-            gudhi.plot_persistence_diagram(diag)
-    else:
-        print(args.file, "is not a valid OFF file")
+print("#####################################################################")
+print("RipsComplex creation from distance matrix read in a csv file")
 
-    f.close()
+message = "RipsComplex with max_edge_length=" + repr(args.max_edge_length)
+print(message)
+
+rips_complex = gudhi.RipsComplex(csv_file=args.file, max_edge_length=args.max_edge_length)
+simplex_tree = rips_complex.create_simplex_tree(max_dimension=args.max_dimension)
+
+message = "Number of simplices=" + repr(simplex_tree.num_simplices())
+print(message)
+
+diag = simplex_tree.persistence()
+
+print("betti_numbers()=")
+print(simplex_tree.betti_numbers())
+
+if args.no_diagram == False:
+    gudhi.plot_persistence_diagram(diag)

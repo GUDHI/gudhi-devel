@@ -22,11 +22,9 @@ using namespace boost::unit_test;
 typedef Simplex_tree<> typeST;
 
 std::string test_rips_persistence(int min_coefficient, int max_coefficient, double min_persistence) {
-  // file name is given as parameter from CMakeLists.txt
-  const std::string inputFile(framework::master_test_suite().argv[1]);
-
+  // file is copied in CMakeLists.txt
   std::ifstream simplex_tree_stream;
-  simplex_tree_stream.open(inputFile.c_str());
+  simplex_tree_stream.open("simplex_tree_file_for_multi_field_unit_test.txt");
   typeST st;
   simplex_tree_stream >> st;
   simplex_tree_stream.close();

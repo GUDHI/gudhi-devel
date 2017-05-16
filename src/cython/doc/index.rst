@@ -1,5 +1,5 @@
-GUDHI documentation
-###################
+GUDHI Python module documentation
+#################################
 
 .. image:: img/Gudhi_banner.png
    :align: center
@@ -7,9 +7,9 @@ GUDHI documentation
 Introduction
 ************
 
-The Gudhi library (Geometry Understanding in Higher Dimensions) is a generic
-open source `C++ library <http://gudhi.gforge.inria.fr/doc/latest/>`_, with a
-`Cython interface <http://gudhi.gforge.inria.fr/cython/latest/>`_, for
+The Python interface for the Gudhi library (Geometry Understanding in Higher
+Dimensions) is a generic open source
+`Python module <http://gudhi.gforge.inria.fr/python/latest/>`_, for
 Computational Topology and Topological Data Analysis
 (`TDA <https://en.wikipedia.org/wiki/Topological_data_analysis>`_).
 The GUDHI library intends to help the development of new algorithmic solutions
@@ -20,12 +20,11 @@ data structures.
 The current release of the GUDHI library includes:
 
 * Data structures to represent, construct and manipulate simplicial complexes.
-* Algorithms to compute persistent homology and multi-field persistent homology.
-* Simplication of simplicial complexes by edge contraction.
+* Simplification of simplicial complexes by edge contraction.
+* Algorithms to compute persistent homology and bottleneck distance.
 
-All data-structures are generic and several of their aspects can be
-parameterized via template classes. We refer to :cite:`gudhilibrary_ICMS14`
-for a detailed description of the design of the library.
+We refer to :cite:`gudhilibrary_ICMS14` for a detailed description of the
+design of the library.
 
 Data structures
 ***************

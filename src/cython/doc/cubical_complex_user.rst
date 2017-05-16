@@ -1,4 +1,3 @@
-===========================
 Cubical complex user manual
 ===========================
 Definition
@@ -154,7 +153,7 @@ Examples.
 End user programs are available in cython/example/ folder.
 
 Bibliography
-************
+============
 
 .. bibliography:: bibliography.bib
    :filter: docnames

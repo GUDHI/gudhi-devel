@@ -1,11 +1,10 @@
-/*! \mainpage
+/*! \mainpage The C++ library
  *  \tableofcontents
  * \image html "Gudhi_banner.png" "" width=20cm
  * 
  * \section Introduction Introduction
  * The GUDHI library (Geometry Understanding in Higher Dimensions) is a generic open source
- * <a class="el" target="_blank" href="http://gudhi.gforge.inria.fr/doc/latest/">C++ library</a>, with a
- * <a class="el" target="_blank" href="http://gudhi.gforge.inria.fr/cython/latest/">Cython interface</a>, for
+ * <a class="el" target="_blank" href="http://gudhi.gforge.inria.fr/doc/latest/">C++ library</a> for
  * Computational Topology and Topological Data Analysis
  * (<a class="el" target="_blank" href="https://en.wikipedia.org/wiki/Topological_data_analysis">TDA</a>).
  * The GUDHI library intends  to help the development of new algorithmic solutions in TDA and their transfer to
@@ -16,7 +15,7 @@
  * 
  * \li Data structures to represent, construct and manipulate simplicial complexes.
  * \li Simplification of simplicial complexes by edge contraction.
- * \li Algorithms to compute persistent homology persistent homology.
+ * \li Algorithms to compute persistent homology and bottleneck distance.
  * 
  * All data-structures are generic and several of their aspects can be parameterized via template classes.
  * We refer to \cite gudhilibrary_ICMS14 for a detailed description of the design of the library.

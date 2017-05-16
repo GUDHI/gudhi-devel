@@ -77,7 +77,7 @@ namespace rips_complex {
  * When launching (Rips maximal distance between 2 points is 12.0, is expanded until dimension 1 - one skeleton graph
  * in other words):
  * 
- * \code $> ./oneskeletonripspoints
+ * \code $> ./Rips_complex_example_one_skeleton_from_points
  * \endcode
  *
  * the program output is:
@@ -97,7 +97,7 @@ namespace rips_complex {
  * 
  * When launching:
  * 
- * \code $> ./ripsoffreader ../../data/points/alphacomplexdoc.off 12.0 3
+ * \code $> ./Rips_complex_example_from_off ../../data/points/alphacomplexdoc.off 12.0 3
  * \endcode
  *
  * the program output is:
@@ -120,7 +120,7 @@ namespace rips_complex {
  * When launching (Rips maximal distance between 2 points is 1.0, is expanded until dimension 1 - one skeleton graph
  * with other words):
  * 
- * \code $> ./oneskeletonripsdistance
+ * \code $> ./Rips_complex_example_one_skeleton_from_distance_matrix
  * \endcode
  *
  * the program output is:
@@ -139,7 +139,7 @@ namespace rips_complex {
  * 
  * When launching:
  * 
- * \code $> ./ripscsvdistancereader ../../data/distance_matrix/full_square_distance_matrix.csv 1.0 3
+ * \code $> ./Rips_complex_example_from_csv_distance_matrix ../../data/distance_matrix/full_square_distance_matrix.csv 1.0 3
  * \endcode
  *
  * the program output is:

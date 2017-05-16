@@ -1,14 +1,15 @@
 cmake_minimum_required(VERSION 2.6)
-project(Data_points_generator)
+project(data_points_generator)
 
 if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
-  add_executable ( hypergenerator hypergenerator.cpp )
-  target_link_libraries(hypergenerator ${Boost_SYSTEM_LIBRARY})
-  add_test(hypergenerator_on_sphere_3000_10_5.0 ${CMAKE_CURRENT_BINARY_DIR}/hypergenerator on sphere onSphere.off 3000 10 5.0)
-  add_test(hypergenerator_on_sphere_10000_3 ${CMAKE_CURRENT_BINARY_DIR}/hypergenerator on sphere onSphere.off 10000 3)
-  add_test(hypergenerator_in_sphere_7000_12_10.8 ${CMAKE_CURRENT_BINARY_DIR}/hypergenerator in sphere inSphere.off 7000 12 10.8)
-  add_test(hypergenerator_in_sphere_50000_2 ${CMAKE_CURRENT_BINARY_DIR}/hypergenerator in sphere inSphere.off 50000 2)
+  add_executable ( data_points_generator hypergenerator.cpp )
+  target_link_libraries(data_points_generator ${Boost_SYSTEM_LIBRARY})
+  add_test(NAME data_points_generator_on_sphere_1000_3_15.2 COMMAND $<TARGET_FILE:data_points_generator>
+      "on" "sphere" "onSphere.off" "1000" "3" "15.2")
+  add_test(NAME data_points_generator_in_sphere_100_2 COMMAND $<TARGET_FILE:data_points_generator>
+      "in" "sphere" "inSphere.off" "100" "2")
+
   # on cube is not available in CGAL
-  add_test(hypergenerator_in_cube_7000_12_10.8 ${CMAKE_CURRENT_BINARY_DIR}/hypergenerator in cube inCube.off 7000 12 10.8)
-  add_test(hypergenerator_in_cube_50000_2 ${CMAKE_CURRENT_BINARY_DIR}/hypergenerator in cube inCube.off 50000 3)
+  add_test(NAME data_points_generator_in_cube_10000_3_5.8 COMMAND $<TARGET_FILE:data_points_generator>
+      "in" "cube" "inCube.off" "10000" "3" "5.8")
 endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)

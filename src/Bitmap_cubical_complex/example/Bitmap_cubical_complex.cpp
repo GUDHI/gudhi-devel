@@ -27,8 +27,9 @@
 
 // standard stuff
 #include <iostream>
-#include <sstream>
+#include <string>
 #include <vector>
+#include <cstddef>
 
 int main(int argc, char** argv) {
   std::cout << "This program computes persistent homology, by using bitmap_cubical_complex class, of cubical " <<
@@ -37,9 +38,6 @@ int main(int argc, char** argv) {
       "N denote product of the numbers in the lines between 2 and D. In the lines D+2 to D+2+N there are " <<
       "filtrations of top dimensional cells. We assume that the cells are in the lexicographical order. See " <<
       "CubicalOneSphere.txt or CubicalTwoSphere.txt for example.\n" << std::endl;
-
-  int p = 2;
-  double min_persistence = 0;
 
   if (argc != 2) {
     std::cerr << "Wrong number of parameters. Please provide the name of a file with a Perseus style bitmap at " <<
@@ -56,16 +54,26 @@ int main(int argc, char** argv) {
 
   // Compute the persistence diagram of the complex
   Persistent_cohomology pcoh(b);
+  int p = 2;
+  double min_persistence = 0;
+
   pcoh.init_coefficients(p);  // initializes the coefficient field for homology
   pcoh.compute_persistent_cohomology(min_persistence);
 
-  std::stringstream ss;
-  ss << argv[1] << "_persistence";
-  std::ofstream out(ss.str().c_str());
+  std::string output_file_name(argv[1]);
+  output_file_name += "_persistence";
+
+  std::size_t last_in_path = output_file_name.find_last_of("/\\");
+
+  if (last_in_path != std::string::npos) {
+    output_file_name = output_file_name.substr(last_in_path+1);
+  }
+
+  std::ofstream out(output_file_name.c_str());
   pcoh.output_diagram(out);
   out.close();
 
-  std::cout << "Result in file: " << ss.str().c_str() << "\n";
+  std::cout << "Result in file: " << output_file_name << "\n";
 
   return 0;
 }

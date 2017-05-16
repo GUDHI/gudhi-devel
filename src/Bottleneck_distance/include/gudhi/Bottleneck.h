@@ -101,11 +101,11 @@ double bottleneck_distance_exact(Persistence_graph& g) {
  */
 template<typename Persistence_diagram1, typename Persistence_diagram2>
 double bottleneck_distance(const Persistence_diagram1 &diag1, const Persistence_diagram2 &diag2,
-                           double e = std::numeric_limits<double>::min()) {
+                           double e = (std::numeric_limits<double>::min)()) {
   Persistence_graph g(diag1, diag2, e);
   if (g.bottleneck_alive() == std::numeric_limits<double>::infinity())
     return std::numeric_limits<double>::infinity();
-  return std::max(g.bottleneck_alive(), e == 0. ? bottleneck_distance_exact(g) : bottleneck_distance_approx(g, e));
+  return (std::max)(g.bottleneck_alive(), e == 0. ? bottleneck_distance_exact(g) : bottleneck_distance_approx(g, e));
 }
 
 }  // namespace persistence_diagram

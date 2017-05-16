@@ -105,10 +105,6 @@ class Strong_witness_complex {
                 << "non-negative.\n";
       return false;
     }
-    if (limit_dimension < 0) {
-      std::cerr << "Strong witness complex cannot create complex - limit dimension must be non-negative.\n";
-      return false;
-    }
     for (auto w : nearest_landmark_table_) {
       ActiveWitness aw(w);
       typeVectorVertex simplex;

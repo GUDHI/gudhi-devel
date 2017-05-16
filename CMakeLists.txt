@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 2.6)
 project(GUDHIdev)
 
 include(CMakeGUDHIVersion.txt)
-# Generate GUDHI official version file
-configure_file(GUDHIVersion.cmake.in "${CMAKE_SOURCE_DIR}/GUDHIVersion.cmake" @ONLY)
 
 set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
@@ -15,11 +13,11 @@ enable_testing()
 # For "make user_version"
 include("${CMAKE_MODULE_PATH}/GUDHI_user_version_target.txt")
 # For "make doxygen"
-include("${CMAKE_MODULE_PATH}/GUDHI_doxygen_target.txt")
+include(GUDHI_doxygen_target)
 # This variable is used by Cython CMakeLists.txt to know its path
 set(GUDHI_CYTHON_PATH "src/cython")
 # For third parties libraries management - To be done last as CGAL updates CMAKE_MODULE_PATH
-include("${CMAKE_MODULE_PATH}/GUDHI_third_party_libraries.txt")
+include(GUDHI_third_party_libraries)
 
 if(MSVC)
   # Turn off some VC++ warnings
