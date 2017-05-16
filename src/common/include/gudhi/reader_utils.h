@@ -2,7 +2,7 @@
  *    (Geometric Understanding in Higher Dimensions) is a generic C++ 
  *    library for computational topology.
  *
- *    Author(s):       Clement Maria, Pawel Dlotko
+ *    Author(s):       Clement Maria, Pawel Dlotko, Clement Jamin
  *
  *    Copyright (C) 2014  INRIA
  *
@@ -294,5 +294,41 @@ std::vector< std::vector< Filtration_value > > read_lower_triangular_matrix_from
 
   return result;
 }  // read_lower_triangular_matrix_from_csv_file
+
+/**
+Reads a file containing persistance intervals.
+Each line might contain 2, 3 or 4 values: [field] [dimension] birth death
+**/
+
+std::vector< std::pair<double, double> > read_persistence_diagram_from_file(std::string const& filename) {
+
+  std::vector< std::pair<double, double> > result;
+
+  std::ifstream in;
+  in.open(filename);
+  if (!in.is_open()) {
+#ifdef DEBUG_TRACES
+    std::cerr << "File \"" << filename << "\" does not exist.\n";
+#endif  // DEBUG_TRACES
+    return result;
+  }
+
+  std::string line;
+  while (!in.eof()) {
+    getline(in, line);
+    if (line.length() != 0 && line[0] != '#') {
+      double numbers[4];
+      int n = sscanf(line.c_str(), "%lf %lf %lf %lf", &numbers[0], &numbers[1], &numbers[2], &numbers[3]);
+      result.push_back(std::make_pair(numbers[n - 2], numbers[n - 1]));
+#ifdef DEBUG_TRACES
+      std::cerr << numbers[n - 2] << " - " << numbers[n - 1] << "\n";
+#endif  // DEBUG_TRACES
+    }
+  }
+
+  in.close();
+  return result;
+}  // read_diagram_from_file
+
 
 #endif  // READER_UTILS_H_
