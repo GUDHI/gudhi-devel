@@ -7,6 +7,9 @@ enable_testing()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
+# To be done first - Modules list can be found in CMAKE_MODULE_PATH/GUDHI_modules.cmake
+include(GUDHI_modules)
+
 # For "make doxygen"
 set(GUDHI_USER_VERSION_DIR ${CMAKE_SOURCE_DIR})
 include(GUDHI_doxygen_target)
@@ -39,27 +42,22 @@ endif()
 # Gudhi compilation part
 include_directories(include)
 
-add_subdirectory(example/common)
-add_subdirectory(example/Simplex_tree)
-add_subdirectory(example/Persistent_cohomology)
-add_subdirectory(example/Skeleton_blocker)
-add_subdirectory(example/Contraction)
-add_subdirectory(example/Bitmap_cubical_complex)
-add_subdirectory(example/Witness_complex)
-add_subdirectory(example/Alpha_complex)
-add_subdirectory(example/Rips_complex)
-add_subdirectory(example/Spatial_searching)
-add_subdirectory(example/Subsampling)
-add_subdirectory(example/Tangential_complex)
-add_subdirectory(example/Bottleneck_distance)
-
-# data points generator
-add_subdirectory(data/points/generator)
+# Include module CMake subdirectories
+# GUDHI_SUB_DIRECTORIES is managed in CMAKE_MODULE_PATH/GUDHI_modules.cmake
+foreach(GUDHI_MODULE ${GUDHI_MODULES})
+  foreach(GUDHI_SUB_DIRECTORY ${GUDHI_SUB_DIRECTORIES})
+    if(EXISTS ${CMAKE_SOURCE_DIR}/${GUDHI_SUB_DIRECTORY}/${GUDHI_MODULE}/CMakeLists.txt)
+      add_subdirectory(src/${GUDHI_MODULE}/${GUDHI_SUB_DIRECTORY}/)
+    endif(EXISTS ${CMAKE_SOURCE_DIR}/${GUDHI_SUB_DIRECTORY}/${GUDHI_MODULE}/CMakeLists.txt)
+  endforeach(GUDHI_SUB_DIRECTORY ${GUDHI_SUB_DIRECTORIES})
+endforeach(GUDHI_MODULE ${GUDHI_MODULES})
 
 add_subdirectory(GudhUI)
 
-# specific for cython module
-add_subdirectory(${GUDHI_CYTHON_PATH})
+if (NOT WITHOUT_GUDHI_PYTHON)
+  # specific for cython module
+  add_subdirectory(${GUDHI_CYTHON_PATH})
+endif()
 #---------------------------------------------------------------------------------------
 
 #---------------------------------------------------------------------------------------

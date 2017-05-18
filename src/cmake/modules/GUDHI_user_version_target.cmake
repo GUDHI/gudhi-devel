@@ -47,7 +47,6 @@ if (NOT CMAKE_VERSION VERSION_LESS 2.8.11)
   add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                      copy_directory ${CMAKE_SOURCE_DIR}/src/GudhUI ${GUDHI_USER_VERSION_DIR}/GudhUI)
   
-  set(GUDHI_MODULES "common;Alpha_complex;Bitmap_cubical_complex;Bottleneck_distance;Contraction;Hasse_complex;Persistent_cohomology;Rips_complex;Simplex_tree;Skeleton_blocker;Spatial_searching;Subsampling;Tangential_complex;Witness_complex")
   set(GUDHI_DIRECTORIES "doc;example;concept")
   set(GUDHI_INCLUDE_DIRECTORIES "include/gudhi;include/gudhi_patches")
 
