@@ -21,7 +21,6 @@
  */
 
 #define CGAL_HAS_THREADS
-#define DEBUG_TRACES
 
 #include <gudhi/Bottleneck.h>
 #include <gudhi/reader_utils.h>
