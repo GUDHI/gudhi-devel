@@ -47,7 +47,7 @@ if (NOT CMAKE_VERSION VERSION_LESS 2.8.11)
   add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                      copy_directory ${CMAKE_SOURCE_DIR}/src/GudhUI ${GUDHI_USER_VERSION_DIR}/GudhUI)
   
-  set(GUDHI_DIRECTORIES "doc;example;concept")
+  set(GUDHI_DIRECTORIES "doc;example;concept;utilities")
   set(GUDHI_INCLUDE_DIRECTORIES "include/gudhi;include/gudhi_patches")
 
   foreach(GUDHI_MODULE ${GUDHI_MODULES})

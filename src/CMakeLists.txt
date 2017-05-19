@@ -10,7 +10,24 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/")
 # To be done first - Modules list can be found in CMAKE_MODULE_PATH/GUDHI_modules.cmake
 include(GUDHI_modules)
 
-# For "make doxygen"
+# Add your new module in the list, order is not important
+
+add_gudhi_module(common)
+add_gudhi_module(Alpha_complex)
+add_gudhi_module(Bitmap_cubical_complex)
+add_gudhi_module(Bottleneck_distance)
+add_gudhi_module(Contraction)
+add_gudhi_module(Hasse_complex)
+add_gudhi_module(Persistent_cohomology)
+add_gudhi_module(Rips_complex)
+add_gudhi_module(Simplex_tree)
+add_gudhi_module(Skeleton_blocker)
+add_gudhi_module(Spatial_searching)
+add_gudhi_module(Subsampling)
+add_gudhi_module(Tangential_complex)
+add_gudhi_module(Witness_complex)
+
+# For "make doxygen" - Requires GUDHI_USER_VERSION_DIR to be set
 set(GUDHI_USER_VERSION_DIR ${CMAKE_SOURCE_DIR})
 include(GUDHI_doxygen_target)
 
@@ -47,10 +64,10 @@ include_directories(include)
 foreach(GUDHI_MODULE ${GUDHI_MODULES})
   foreach(GUDHI_SUB_DIRECTORY ${GUDHI_SUB_DIRECTORIES})
     if(EXISTS ${CMAKE_SOURCE_DIR}/${GUDHI_SUB_DIRECTORY}/${GUDHI_MODULE}/CMakeLists.txt)
-      add_subdirectory(src/${GUDHI_MODULE}/${GUDHI_SUB_DIRECTORY}/)
-    endif(EXISTS ${CMAKE_SOURCE_DIR}/${GUDHI_SUB_DIRECTORY}/${GUDHI_MODULE}/CMakeLists.txt)
-  endforeach(GUDHI_SUB_DIRECTORY ${GUDHI_SUB_DIRECTORIES})
-endforeach(GUDHI_MODULE ${GUDHI_MODULES})
+      add_subdirectory(${CMAKE_SOURCE_DIR}/${GUDHI_SUB_DIRECTORY}/${GUDHI_MODULE}/)
+    endif()
+  endforeach()
+endforeach()
 
 add_subdirectory(GudhUI)
 

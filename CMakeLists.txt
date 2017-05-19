@@ -37,6 +37,23 @@ endif()
 # Modules list can be found in CMAKE_MODULE_PATH/GUDHI_modules.cmake
 include(GUDHI_modules)
 
+# Add your new module in the list, order is not important
+
+add_gudhi_module(common)
+add_gudhi_module(Alpha_complex)
+add_gudhi_module(Bitmap_cubical_complex)
+add_gudhi_module(Bottleneck_distance)
+add_gudhi_module(Contraction)
+add_gudhi_module(Hasse_complex)
+add_gudhi_module(Persistent_cohomology)
+add_gudhi_module(Rips_complex)
+add_gudhi_module(Simplex_tree)
+add_gudhi_module(Skeleton_blocker)
+add_gudhi_module(Spatial_searching)
+add_gudhi_module(Subsampling)
+add_gudhi_module(Tangential_complex)
+add_gudhi_module(Witness_complex)
+
 # Include module headers
 foreach(GUDHI_MODULE ${GUDHI_MODULES})
   if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src/${GUDHI_MODULE}/include/)
@@ -63,5 +80,5 @@ endif()
 
 # For "make user_version" - Requires GUDHI_modules to be performed
 include(GUDHI_user_version_target)
-# For "make doxygen" - Requires GUDHI_user_version_target to be performed
+# For "make doxygen" - Requires GUDHI_USER_VERSION_DIR to be set - Done in GUDHI_user_version_target for dev version
 include(GUDHI_doxygen_target)
