@@ -236,7 +236,6 @@ class Graph_induced_complex {
    /** \brief Creates the graph G from a Rips complex.
     *
     * @param[in] threshold threshold value for the Rips complex.
-    * @param[in] off_file_name name of the input .OFF file.
     *
     */
    void set_graph_from_rips(const double& threshold){
@@ -295,7 +294,6 @@ class Graph_induced_complex {
  public: // Automatic tuning of Rips complex.
    /** \brief Creates the graph G from a Rips complex whose threshold value is automatically tuned with subsampling.
     *
-    * @param[in] off_file_name name of the input .OFF file.
     * @param[in] N number of subsampling iteration (default value 100).
     *
     */
