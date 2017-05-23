@@ -31,14 +31,25 @@
 #include <sstream>
 #include <string>
 
+struct Persistence_interval
+  : std::pair<double, double>
+{
+  Persistence_interval(std::tuple<int, double, double> data)
+    : std::pair<double, double>(std::make_pair(std::get<1>(data), std::get<2>(data)))
+  {}
+};
+
 int main(int argc, char** argv) {
   if (argc < 3) {
     std::cout << "To run this program please provide as an input two files with persistence diagrams. Each file " <<
         "should contain a birth-death pair per line. Third, optional parameter is an error bound on a bottleneck" <<
         " distance (set by default to zero). The program will now terminate \n";
   }
-  std::vector< std::pair< double, double > > diag1 = read_persistence_diagram_from_file(argv[1]);
-  std::vector< std::pair< double, double > > diag2 = read_persistence_diagram_from_file(argv[2]);
+  std::vector<Persistence_interval> diag1;
+  std::vector<Persistence_interval> diag2;
+  read_persistence_diagram_from_file(argv[1], std::back_inserter(diag1));
+  read_persistence_diagram_from_file(argv[2], std::back_inserter(diag2));
+
   double tolerance = 0.;
   if (argc == 4) {
     tolerance = atof(argv[3]);

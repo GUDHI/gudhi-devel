@@ -298,11 +298,11 @@ std::vector< std::vector< Filtration_value > > read_lower_triangular_matrix_from
 /**
 Reads a file containing persistance intervals.
 Each line might contain 2, 3 or 4 values: [field] [dimension] birth death
+The output iterator `out` is used this way: `*out++ = std::make_tuple(dim, birth, death);`
+where `dim` is an `int`, `birth` a `double`, and `death` a `double`.
 **/
-
-std::vector< std::pair<double, double> > read_persistence_diagram_from_file(std::string const& filename) {
-
-  std::vector< std::pair<double, double> > result;
+template <typename OutputIterator>
+void read_persistence_diagram_from_file(std::string const& filename, OutputIterator out) {
 
   std::ifstream in;
   in.open(filename);
@@ -310,7 +310,6 @@ std::vector< std::pair<double, double> > read_persistence_diagram_from_file(std:
 #ifdef DEBUG_TRACES
     std::cerr << "File \"" << filename << "\" does not exist.\n";
 #endif  // DEBUG_TRACES
-    return result;
   }
 
   std::string line;
@@ -319,7 +318,9 @@ std::vector< std::pair<double, double> > read_persistence_diagram_from_file(std:
     if (line.length() != 0 && line[0] != '#') {
       double numbers[4];
       int n = sscanf(line.c_str(), "%lf %lf %lf %lf", &numbers[0], &numbers[1], &numbers[2], &numbers[3]);
-      result.push_back(std::make_pair(numbers[n - 2], numbers[n - 1]));
+      //int field = (n == 4 ? static_cast<int>(numbers[0]) : -1);
+      int dim = (n >= 3 ? static_cast<int>(numbers[n - 3]) : -1);
+      *out++ = std::make_tuple(dim, numbers[n - 2], numbers[n - 1]);
 #ifdef DEBUG_TRACES
       std::cerr << numbers[n - 2] << " - " << numbers[n - 1] << "\n";
 #endif  // DEBUG_TRACES
@@ -327,8 +328,6 @@ std::vector< std::pair<double, double> > read_persistence_diagram_from_file(std:
   }
 
   in.close();
-  return result;
-}  // read_diagram_from_file
-
+} // read_persistence_diagram_from_file
 
 #endif  // READER_UTILS_H_
