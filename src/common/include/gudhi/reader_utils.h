@@ -310,24 +310,99 @@ void read_persistence_diagram_from_file(std::string const& filename, OutputItera
 #ifdef DEBUG_TRACES
     std::cerr << "File \"" << filename << "\" does not exist.\n";
 #endif  // DEBUG_TRACES
+    return;
   }
 
-  std::string line;
   while (!in.eof()) {
+    std::string line;
     getline(in, line);
     if (line.length() != 0 && line[0] != '#') {
       double numbers[4];
       int n = sscanf(line.c_str(), "%lf %lf %lf %lf", &numbers[0], &numbers[1], &numbers[2], &numbers[3]);
-      //int field = (n == 4 ? static_cast<int>(numbers[0]) : -1);
-      int dim = (n >= 3 ? static_cast<int>(numbers[n - 3]) : -1);
-      *out++ = std::make_tuple(dim, numbers[n - 2], numbers[n - 1]);
-#ifdef DEBUG_TRACES
-      std::cerr << numbers[n - 2] << " - " << numbers[n - 1] << "\n";
-#endif  // DEBUG_TRACES
+      if (n >= 2) {
+        //int field = (n == 4 ? static_cast<int>(numbers[0]) : -1);
+        int dim = (n >= 3 ? static_cast<int>(numbers[n - 3]) : -1);
+        *out++ = std::make_tuple(dim, numbers[n - 2], numbers[n - 1]);
+      }
     }
   }
 
   in.close();
+} // read_persistence_diagram_from_file
+
+/**
+Reads a file containing persistance intervals.
+Each line might contain 2, 3 or 4 values: [field] [dimension] birth death
+The return value is an `std::map[dim, std::vector[std::pair[birth, death]]]`
+where `dim` is an `int`, `birth` a `double`, and `death` a `double`.
+**/
+std::map<int, std::vector<std::pair<double, double>>> read_persistence_diagram_from_file(std::string const& filename) {
+
+  std::map<int, std::vector<std::pair<double, double>>> ret;
+
+  std::ifstream in;
+  in.open(filename);
+  if (!in.is_open()) {
+#ifdef DEBUG_TRACES
+    std::cerr << "File \"" << filename << "\" does not exist.\n";
+#endif  // DEBUG_TRACES
+    return ret;
+  }
+
+  while (!in.eof()) {
+    std::string line;
+    getline(in, line);
+    if (line.length() != 0 && line[0] != '#') {
+      double numbers[4];
+      int n = sscanf(line.c_str(), "%lf %lf %lf %lf", &numbers[0], &numbers[1], &numbers[2], &numbers[3]);
+      if (n >= 2) {
+        int dim = (n >= 3 ? static_cast<int>(numbers[n - 3]) : -1);
+        ret[dim].push_back(std::make_pair(numbers[n - 2], numbers[n - 1]));
+      }
+    }
+  }
+
+  in.close();
+  return ret;
+} // read_persistence_diagram_from_file
+
+
+/**
+Reads a file containing persistance intervals.
+Each line might contain 2, 3 or 4 values: [field] [dimension] birth death
+If `only_this_dim` = -1, dimension is ignored and all lines are returned.
+If `only_this_dim` is >= 0, only the lines where dimension = `only_this_dim` 
+(or where dimension is not specified) are returned.
+The return value is an `std::vector[std::pair[birth, death]]`
+where `dim` is an `int`, `birth` a `double`, and `death` a `double`.
+**/
+std::vector<std::pair<double, double>> read_persistence_diagram_from_file(std::string const& filename, int only_this_dim) {
+
+  std::vector<std::pair<double, double>> ret;
+
+  std::ifstream in;
+  in.open(filename);
+  if (!in.is_open()) {
+#ifdef DEBUG_TRACES
+    std::cerr << "File \"" << filename << "\" does not exist.\n";
+#endif  // DEBUG_TRACES
+    return ret;
+  }
+
+  while (!in.eof()) {
+    std::string line;
+    getline(in, line);
+    if (line.length() != 0 && line[0] != '#') {
+      double numbers[4];
+      int n = sscanf(line.c_str(), "%lf %lf %lf %lf", &numbers[0], &numbers[1], &numbers[2], &numbers[3]);
+      int dim = (n >= 3 ? static_cast<int>(numbers[n - 3]) : -1);
+      if (n >= 2 && (only_this_dim == -1 || dim == only_this_dim))
+        ret.push_back(std::make_pair(numbers[n - 2], numbers[n - 1]));
+    }
+  }
+
+  in.close();
+  return ret;
 } // read_persistence_diagram_from_file
 
 #endif  // READER_UTILS_H_

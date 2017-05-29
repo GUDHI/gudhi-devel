@@ -45,10 +45,8 @@ int main(int argc, char** argv) {
         "should contain a birth-death pair per line. Third, optional parameter is an error bound on a bottleneck" <<
         " distance (set by default to zero). The program will now terminate \n";
   }
-  std::vector<Persistence_interval> diag1;
-  std::vector<Persistence_interval> diag2;
-  read_persistence_diagram_from_file(argv[1], std::back_inserter(diag1));
-  read_persistence_diagram_from_file(argv[2], std::back_inserter(diag2));
+  std::vector<std::pair<double, double>> diag1 = read_persistence_diagram_from_file(argv[1], -1);
+  std::vector<std::pair<double, double>> diag2 = read_persistence_diagram_from_file(argv[2], -1);
 
   double tolerance = 0.;
   if (argc == 4) {
