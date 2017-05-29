@@ -33,10 +33,6 @@
 #include <gudhi/distance_functions.h>
 #include <gudhi/reader_utils.h>
 
-bool are_almost_the_same(float a, float b) {
-  return std::fabs(a - b) < std::numeric_limits<float>::epsilon();
-}
-
 BOOST_AUTO_TEST_CASE(check_nerve) {
 
   Gudhi::graph_induced_complex::Graph_induced_complex GIC;

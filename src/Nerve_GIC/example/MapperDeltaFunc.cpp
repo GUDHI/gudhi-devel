@@ -1,3 +1,25 @@
+/*    This file is part of the Gudhi Library. The Gudhi library
+ *    (Geometric Understanding in Higher Dimensions) is a generic C++
+ *    library for computational topology.
+ *
+ *    Author(s):       Mathieu Carrière
+ *
+ *    Copyright (C) 2017  INRIA Saclay (France)
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <gudhi/GIC.h>
 
 void usage(int nbArgs, char * const progName) {
@@ -21,40 +43,44 @@ int main(int argc, char **argv) {
   Gudhi::graph_induced_complex::Graph_induced_complex GIC;
   GIC.set_verbose(verb);
 
-  GIC.read_point_cloud(off_file_name);
+  bool check = GIC.read_point_cloud(off_file_name);
 
-  GIC.set_color_from_file(func_file_name);
-  GIC.set_function_from_file(func_file_name);
+  if(!check)  std::cout << "Incorrect OFF file." << std::endl;
+  else{
 
-  GIC.set_graph_from_automatic_rips();
+    GIC.set_color_from_file(func_file_name);
+    GIC.set_function_from_file(func_file_name);
 
-  GIC.set_automatic_resolution_for_GICMAP(); GIC.set_gain();
-  GIC.set_cover_from_function(1);
+    GIC.set_graph_from_automatic_rips();
 
-  GIC.find_GICMAP_simplices_with_functional_minimal_cover();
+    GIC.set_automatic_resolution_for_GICMAP(); GIC.set_gain();
+    GIC.set_cover_from_function(1);
 
-  GIC.plot_with_KeplerMapper();
+    GIC.find_GICMAP_simplices_with_functional_minimal_cover();
 
-  Simplex_tree stree; GIC.create_complex(stree);
+    GIC.plot_pdf();
 
-  std::streambuf* streambufffer = std::cout.rdbuf();
-  std::ostream output_stream(streambufffer);
+    Simplex_tree stree; GIC.create_complex(stree);
 
-  // ------------------------------------------
-  // Display information about the Mapper Delta
-  // ------------------------------------------
+    std::streambuf* streambufffer = std::cout.rdbuf();
+    std::ostream output_stream(streambufffer);
 
-  if(verb){
-    output_stream << "Mapper Delta is of dimension " << stree.dimension() <<
-                   " - " << stree.num_simplices() << " simplices - " <<
-                   stree.num_vertices() << " vertices." << std::endl;
+    // ------------------------------------------
+    // Display information about the Mapper Delta
+    // ------------------------------------------
 
-    output_stream << "Iterator on Mapper Delta simplices" << std::endl;
-    for (auto f_simplex : stree.filtration_simplex_range()) {
-      for (auto vertex : stree.simplex_vertex_range(f_simplex)) {
-        output_stream << vertex << " ";
+    if(verb){
+      output_stream << "Mapper Delta is of dimension " << stree.dimension() <<
+                     " - " << stree.num_simplices() << " simplices - " <<
+                     stree.num_vertices() << " vertices." << std::endl;
+
+      output_stream << "Iterator on Mapper Delta simplices" << std::endl;
+      for (auto f_simplex : stree.filtration_simplex_range()) {
+        for (auto vertex : stree.simplex_vertex_range(f_simplex)) {
+          output_stream << vertex << " ";
+        }
+        output_stream << std::endl;
       }
-      output_stream << std::endl;
     }
   }
 

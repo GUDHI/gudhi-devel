@@ -173,7 +173,7 @@ namespace graph_induced_complex {
  *
  * the program output is:
  *
- * \include MapperDeltaFunc.txt
+ * \include MapperDeltaFunc.dot
  *
  * \copyright GNU General Public License v3.                         
  * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
