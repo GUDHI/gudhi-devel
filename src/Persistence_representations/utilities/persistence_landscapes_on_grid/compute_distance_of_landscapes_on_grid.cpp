@@ -33,8 +33,8 @@ using namespace Gudhi::Persistence_representations;
 
 int main( int argc , char** argv )
 {
-	std::cout << "This program compute dsitance of persistence landscapes on grid stored in a file (the file needs to be created beforehand). \n";	
-	std::cout << "The first parameter of a program is an interger p. The program compute L^p distance of the the landscapes on grid. For L^infty distance choose p = -1. \n";
+	std::cout << "This program compute distance of persistence landscapes on grid stored in a file (the file needs to be created beforehand). \n";	
+	std::cout << "The first parameter of a program is an integer p. The program compute L^p distance of the landscapes on grid. For L^infty distance choose p = -1. \n";
 	std::cout << "The remaining parameters of this programs are names of files with persistence landscapes on grid.\n";
 	
 	if ( argc < 3 )
@@ -106,5 +106,3 @@ int main( int argc , char** argv )
 
 
 
-
-	

@@ -47,7 +47,7 @@ int main( int argc , char** argv )
 	
 	
 	std::vector<double> dominant_ten_intervals_length = p.length_of_dominant_intervals(10);
-	std::cout << "Lendth of ten dominant intervals : " <<std::endl;	
+	std::cout << "Length of ten dominant intervals : " <<std::endl;	
 	for ( size_t i = 0 ; i != dominant_ten_intervals_length.size() ; ++i )
 	{
 		std::cout << dominant_ten_intervals_length[i] <<std::endl;
@@ -70,7 +70,7 @@ int main( int argc , char** argv )
 
 	
 	std::vector< size_t > cumulative_histogram = p.cumulative_histogram_of_lengths( 10  );
-	std::cout<< "Cumuative histogram : " <<std::endl;	
+	std::cout<< "Cumulative histogram : " <<std::endl;	
 	for ( size_t i = 0 ; i != cumulative_histogram.size() ; ++i )
 	{
 		std::cout << cumulative_histogram[i] << " ";

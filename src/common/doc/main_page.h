@@ -212,19 +212,20 @@
     </td>
  </tr>
 </table> 
- \subsection Gudhi_stat_sublibrary Gudhi statistical sublibrary
- \image html "average_landscape.png" "Gudhi statistical sublibrary"
+ \subsection PersistenceRepresentationsToolbox Persistence representations
+ \image html "average_landscape.png" "Persistence representations"
 <table border="0">
   <tr>
     <td width="25%">
       <b>Author:</b> Pawel Dlotko<br>
-      <b>Introduced in:</b> GUDHI 2.0.0<br>
+      <b>Introduced in:</b> GUDHI 2.1.0<br>
       <b>Copyright:</b> GPL v3<br>      
     </td>
     <td width="75%">
-    This is a statistical library for gudhi. It contain implementation of various representations of persistence diagrams; diagrams themselves, persistence landscapes (rigorous and grid version), 
-    persistence heath maps, vectors and others. It implements basic functionalities which are neccessary to use persistence in statistics and machine learning. 
-    <b>User manual:</b> \ref Gudhi_stat 
+    It contain implementation of various representations of persistence diagrams; diagrams themselves, persistence
+    landscapes (rigorous and grid version), persistence heath maps, vectors and others. It implements basic
+    functionalities which are neccessary to use persistence in statistics and machine learning.<br>
+    <b>User manual:</b> \ref Persistence_representations
     
     </td>
  </tr>

@@ -80,7 +80,7 @@ int main( int argc , char** argv )
 	//here is the scalar product of landscapes:
 	std::cout << "Scalar product : " << l1.compute_scalar_product( l2 ) << std::endl;
 	
-	//here is how to create a file which is suitable for vizualization via gnuplot:
+	//here is how to create a file which is suitable for visualization via gnuplot:
 	average.plot( "average_landscape" );
 		
 		

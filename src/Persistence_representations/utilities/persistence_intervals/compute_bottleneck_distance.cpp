@@ -34,7 +34,7 @@ using namespace Gudhi::Persistence_representations;
 
 int main( int argc , char** argv )
 {
-	std::cout << "This program compute the bottleneck distance of persistence diarams stored in a files. \n";
+	std::cout << "This program compute the bottleneck distance of persistence diagrams stored in a files. \n";
 	std::cout << "The first parameter of the program is the dimension of persistence to be used to construct persistence landscapes. If your file contains ";
 	std::cout << "the information about dimension of persistence pairs, please provide here the dimension of persistence pairs you want to use. If your input files consist only ";
 	std::cout << "of birth-death pairs, please set this first parameter to -1 \n";	

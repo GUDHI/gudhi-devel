@@ -4,7 +4,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA (France)
+ *    Copyright (C) 2017  INRIA (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -20,6 +20,12 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef CONCEPT_VECTORIZED_TOPOLOGICAL_DATA_H_
+#define CONCEPT_VECTORIZED_TOPOLOGICAL_DATA_H_
+
+namespace Gudhi {
+
+namespace Persistence_representations {
 
 /** \brief The concept Vectorized_topological_data describes the requirements 
   * for a type to implement a container that allows vectorization. 
@@ -28,7 +34,7 @@ class Vectorized_topological_data
 {
 public:
 	/**
-	 * There are various ways data can be verctorized. This function give us the number of functions for vectorization provided by a given class. 
+	 * There are various ways data can be vectorized. This function give us the number of functions for vectorization provided by a given class. 
 	**/ 
     size_t number_of_vectorize_functions();
     /**
@@ -37,3 +43,8 @@ public:
     std::vector<double> vectorize( int number_of_function );    
 };
 
+}  // namespace Persistence_representations
+
+}  // namespace Gudhi
+
+#endif  // CONCEPT_VECTORIZED_TOPOLOGICAL_DATA_H_

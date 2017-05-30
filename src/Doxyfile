@@ -852,7 +852,7 @@ IMAGE_PATH             = doc/Skeleton_blocker/ \
 	doc/Spatial_searching/ \
 	doc/Tangential_complex/ \
 	doc/Bottleneck_distance/ \
-        doc/Gudhi_stat/
+        doc/Persistence_representations/
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should
 # invoke to filter for each input file. Doxygen will invoke the filter program
@@ -2116,7 +2116,7 @@ COLLABORATION_GRAPH    = NO
 # The default value is: YES.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-GROUP_GRAPHS           = YES
+GROUP_GRAPHS           = NO
 
 # If the UML_LOOK tag is set to YES doxygen will generate inheritance and
 # collaboration diagrams in a style similar to the OMG's Unified Modeling

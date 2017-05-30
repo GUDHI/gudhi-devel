@@ -4,7 +4,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA (France)
+ *    Copyright (C) 2017  INRIA (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef Persistence_intervals_H_
-#define Persistence_intervals_H_
+#ifndef PERSISTENCE_INTERVALS_H_
+#define PERSISTENCE_INTERVALS_H_
 
 //gudhi include
 #include <gudhi/read_persistence_from_file.h>
@@ -48,14 +48,14 @@ class Persistence_intervals
 {
 public:	   
 	/**
-	 * This is a constructor of a class Persistence_intervals from a text file. Each line of the input file is supposed to contain two numbers of a type doube (or convertable to double)
+	 * This is a constructor of a class Persistence_intervals from a text file. Each line of the input file is supposed to contain two numbers of a type double (or convertible to double)
 	 * representing the birth and the death of the persistence interval. If the pairs are not sorted so that birth <= death, then the constructor will sort then that way. 
-	 * * The second parameter of a constructor is a dimension of intervals to be read from a file. If your file contains only birt-death pairs, use the default value.
+	 * * The second parameter of a constructor is a dimension of intervals to be read from a file. If your file contains only birth-death pairs, use the default value.
 	**/ 
     Persistence_intervals( const char* filename , unsigned dimension = std::numeric_limits<unsigned>::max() );
     
     /**
-     * This is a constructor of a class Persistence_intervals from a vector of pairs. Each pair is assumed to represent a persistence interval. We assume that the first elemnets of pairs 
+     * This is a constructor of a class Persistence_intervals from a vector of pairs. Each pair is assumed to represent a persistence interval. We assume that the first elements of pairs 
      * are smaller or equal the second elements of pairs.
     **/ 
     Persistence_intervals( const std::vector< std::pair< double,double > >& intervals );
@@ -102,15 +102,15 @@ public:
     std::vector< std::pair<double,double> > dominant_intervals( size_t where_to_cut = 100 )const;
     
     /**
-	 * Procedure to compute a histogram of interva's length. A histogram is a block plot. The number of blocks is determined by the first parameter of the function (set by default to 10). 
+	 * Procedure to compute a histogram of interval's length. A histogram is a block plot. The number of blocks is determined by the first parameter of the function (set by default to 10). 
 	 * For the sake of argument let us assume that the length of the longest interval is 1 and the number of bins is 10. In this case the i-th block correspond to a range between i-1/10 and i10. 
 	 * The vale of a block supported at the interval is the number of persistence intervals of a length between x_0 and x_1.
 	**/
     std::vector< size_t > histogram_of_lengths( size_t number_of_bins = 10  )const;
     
     /**
-     * Based on a histogram of intervals lengts computed by the function histogram_of_lengths H the procedure below computes the cumulative histogram. The i-th position of the resulting histogram
-     * is the sume of values of H for the positions from 0 to i. 
+     * Based on a histogram of intervals lengths computed by the function histogram_of_lengths H the procedure below computes the cumulative histogram. The i-th position of the resulting histogram
+     * is the sum of values of H for the positions from 0 to i. 
     **/
     std::vector< size_t > cumulative_histogram_of_lengths( size_t number_of_bins = 10 )const;
     
@@ -127,13 +127,13 @@ public:
     std::vector< double > cumulative_characteristic_function_of_diagram( double x_min , double x_max , size_t number_of_bins = 10 )const;
     
     /**
-     * Compute the funtion of persistence Betti numbers. The returned value is a vector of pair. First element of each pair is a place where persistence Betti numbers change. 
+     * Compute the function of persistence Betti numbers. The returned value is a vector of pair. First element of each pair is a place where persistence Betti numbers change. 
      * Second element of each pair is the value of Persistence Betti numbers at that point.  
     **/ 
     std::vector< std::pair< double , size_t > > compute_persistent_betti_numbers()const;
     
     /**
-     *This is a non optimal procedure that compute vector of distances from each point of diagram to its k-th nearest neighbor (k is a parameted of the program). The resulting vector is by default truncated to 10 
+     *This is a non optimal procedure that compute vector of distances from each point of diagram to its k-th nearest neighbor (k is a parameter of the program). The resulting vector is by default truncated to 10 
      *elements (this value can be changed by using the second parameter of the program). The points are returned in order from the ones which are farthest away from their k-th nearest neighbors. 
     **/
     std::vector< double > k_n_n( size_t k  , size_t where_to_cut = 10 )const;
@@ -188,12 +188,9 @@ public:
 		
 		std::cout << "Gnuplot script to visualize persistence diagram written to the file: " << nameStr << ". Type load '" << nameStr << "' in gnuplot to visualize." << std::endl;
 	}
-	
-	
-
 
 	/**
-     * Retun numbr of points in the diagram.
+     * Return number of points in the diagram.
     **/
     size_t size()const{return this->intervals.size();}
     
@@ -207,25 +204,12 @@ public:
     }
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     //Implementations of functions for various concepts.  
 	/**
-	 * This is a simple function projectig the persistence intervals to a real number. The function we use here is a sum of squared lendgths of intervals. It can be naturally interpreted as
+	 * This is a simple function projecting the persistence intervals to a real number. The function we use here is a sum of squared lengths of intervals. It can be naturally interpreted as
 	 * sum of step function, where the step hight it equal to the length of the interval.
-         * At the moment this function is not tested, since it is quite likelly to be changed in the future. Given this, when using it, keep in mind that it
-         * will be most likelly changed in the next versions.
+         * At the moment this function is not tested, since it is quite likely to be changed in the future. Given this, when using it, keep in mind that it
+         * will be most likely changed in the next versions.
 	 **/ 
 	double project_to_R( int number_of_function )const;   
 	/**
@@ -237,14 +221,14 @@ public:
 	} 
     
     /**
-     * Return a familly of vectors obtained from the persistence diagram. The i-th vector consist of the lenfth of i dominant persistence intervals. 
+     * Return a family of vectors obtained from the persistence diagram. The i-th vector consist of the length of i dominant persistence intervals. 
     **/
     std::vector<double> vectorize( int number_of_function )const
     {
         return this->length_of_dominant_intervals( number_of_function );
     }
     /**
-	* This function return the number of functions that allows vectorization of a persisence diagram. It is required in a concept Vectorized_topological_data.
+	* This function return the number of functions that allows vectorization of a persistence diagram. It is required in a concept Vectorized_topological_data.
 	**/ 
 	size_t number_of_vectorize_functions()const
 	{
@@ -252,19 +236,7 @@ public:
 	}
 
 	//end of implementation of functions needed for concepts.
-	//end of implementation of functions needed for concepts.
-	
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     
     //For visualization use output from vectorize and build histograms. 
      std::vector< std::pair< double,double > > output_for_visualization()
@@ -289,37 +261,6 @@ protected:
 
 Persistence_intervals::Persistence_intervals( const char* filename , unsigned dimension )
 {
-    //bool dbg = false;
-    //ifstream in;
-    //in.open( filename );
-
-    //if ( !in.good() )
-    //{
-    //    throw("File with the persistence diagram do not exist, the program will now terminate.\n");
-    //}
-
-    //while ( true )
-    //{
-    //    double first;
-    //    double second;
-    //    in >> first >> second;
-
-    //    if ( first > second )
-    //    {
-    //        double buf = first;
-    //        first = second;
-    //        second = buf;
-    //    }
-
-    //    if ( in.eof() )break;
-    //    this->intervals.push_back( std::make_pair( first,second ) );
-    //    if ( dbg )
-    //    {
-    //        std::cerr << "Adding interval [ " << first << " , " << second << " ]\n";
-    //        getchar();
-    //    }
-    //}
-    //in.close();
     if ( dimension == std::numeric_limits<unsigned>::max() )
     {
        this->intervals = read_persistence_intervals_in_one_dimension_from_file( filename );
@@ -490,7 +431,6 @@ std::vector< double > Persistence_intervals::characteristic_function_of_diagram(
         {
             result[pos] += ( (x_max - x_min)/(double)number_of_bins ) * ( this->intervals[i].second - this->intervals[i].first );
         }
-        //cerr << "x_max : " << x_max << " x_min : " << x_min << " , number_of_bins : " << number_of_bins << " this->intervals[i].second : " << this->intervals[i].second <<  " this->intervals[i].first : " << this->intervals[i].first << endl;
         if ( dbg )
         {	
             std::cerr << "Result at this stage \n";
@@ -499,7 +439,6 @@ std::vector< double > Persistence_intervals::characteristic_function_of_diagram(
                 std::cerr << result[aa] << " ";
             }
             std::cerr << std::endl;
-            //getchar();
         }
     }
     return result;
@@ -599,8 +538,7 @@ std::vector< double > Persistence_intervals::k_n_n( size_t k , size_t where_to_c
         {
             distancesFromI.push_back( compute_euclidean_distance( this->intervals[i] , this->intervals[j] ) );
         }
-        //distances.push_back( distancesFromI );
-        //also add a distance from this guy to daigonal:
+        //also add a distance from this guy to diagonal:
         double distanceToDiagonal = compute_euclidean_distance( this->intervals[i] , std::make_pair( 0.5*(this->intervals[i].first + this->intervals[i].second) , 0.5*(this->intervals[i].first + this->intervals[i].second) ) );
         distances_from_diagonal[i] = distanceToDiagonal;
 
@@ -694,7 +632,7 @@ double Persistence_intervals::project_to_R( int number_of_function )const
 }
 
 
-}//namespace gudhi stat
-}//namespace gudhi
+}  // namespace Persistence_representations
+}  // namespace gudhi
 
-#endif
+#endif  // PERSISTENCE_INTERVALS_H_

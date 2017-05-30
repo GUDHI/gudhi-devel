@@ -4,7 +4,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA (France)
+ *    Copyright (C) 2017  INRIA (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef Persistence_heat_maps_H
-#define Persistence_heat_maps_H
+#ifndef PERSISTENCE_HEAT_MAPS_H_
+#define PERSISTENCE_HEAT_MAPS_H_
  
 //standard include
 #include <vector>
@@ -69,7 +69,7 @@ std::vector< std::vector<double> > create_Gaussian_filter( size_t pixel_radius ,
 	
 	if ( dbg )
 	{
-		std::cerr << "Kernel initalize \n";	
+		std::cerr << "Kernel initialize \n";	
 		std::cerr << "pixel_radius : " << pixel_radius << std::endl; 
 		std::cerr << "kernel.size() : " << kernel.size() << std::endl;
 		getchar();
@@ -114,7 +114,7 @@ std::vector< std::vector<double> > create_Gaussian_filter( size_t pixel_radius ,
 
 
 /*
-* There are various options to scale the poits depending on their location. One can for instance:
+* There are various options to scale the points depending on their location. One can for instance:
 * (1) do nothing (scale all of them with the weight 1), as in the function constant_function
 * (2) Scale them by the distance to the diagonal. This is implemented in function
 * (3) Scale them with the square of their distance to diagonal. This is implemented in function
@@ -123,8 +123,8 @@ std::vector< std::vector<double> > create_Gaussian_filter( size_t pixel_radius ,
 
 
 /**
- * This is one of a scaling functions used to weight poits depending on their persistence and/or location in the diagram. 
- * This particular functiona is a finction which always assign value 1 to a point in the diagram.
+ * This is one of a scaling functions used to weight points depending on their persistence and/or location in the diagram. 
+ * This particular functionality is a function which always assign value 1 to a point in the diagram.
 **/ 
 class constant_scaling_function
 {
@@ -137,7 +137,7 @@ public:
 
 
 /**
- * This is one of a scaling functions used to weight poits depending on their persistence and/or location in the diagram. 
+ * This is one of a scaling functions used to weight points depending on their persistence and/or location in the diagram. 
  * The scaling given by this function to a point (b,d) is Euclidean distance of (b,d) from diagonal.
 **/ 
 class distance_from_diagonal_scaling
@@ -151,7 +151,7 @@ public:
 };
 
 /**
- * This is one of a scaling functions used to weight poits depending on their persistence and/or location in the diagram. 
+ * This is one of a scaling functions used to weight points depending on their persistence and/or location in the diagram. 
  * The scaling given by this function to a point (b,d) is a square of Euclidean distance of (b,d) from diagonal.
 **/ 
 class squared_distance_from_diagonal_scaling
@@ -164,7 +164,7 @@ public:
 };
 
 /**
- * This is one of a scaling functions used to weight poits depending on their persistence and/or location in the diagram. 
+ * This is one of a scaling functions used to weight points depending on their persistence and/or location in the diagram. 
  * The scaling given by this function to a point (b,d) is an arctan of a persistence of a point (i.e. arctan( b-d ).
 **/ 
 class arc_tan_of_persistence_of_point
@@ -177,7 +177,7 @@ public:
 };
 
 /**
- * This is one of a scaling functions used to weight poits depending on their persistence and/or location in the diagram. 
+ * This is one of a scaling functions used to weight points depending on their persistence and/or location in the diagram. 
  * This scaling function do not only depend on a point (p,d) in the diagram, but it depends on the whole diagram. 
  * The longest persistence pair get a scaling 1. Any other pair get a scaling belong to [0,1], which is proportional 
  * to the persistence of that pair.
@@ -196,14 +196,19 @@ private:
 
 
 /**
- * This class implements the following concepts: Vectorized_topological_data, Topological_data_with_distances, Real_valued_topological_data, Topological_data_with_averages, Topological_data_with_scalar_product
-**/ 
+ * \class Persistence_heat_maps Persistence_heat_maps.h gudhi/Persistence_heat_maps.h
+ * \brief A class implementing persistence heat maps.
+ *
+ * \ingroup Persistence_representations
+**/
+
+// This class implements the following concepts: Vectorized_topological_data, Topological_data_with_distances, Real_valued_topological_data, Topological_data_with_averages, Topological_data_with_scalar_product
 template <typename Scalling_of_kernels = constant_scaling_function>
 class Persistence_heat_maps
 {
 public:
     /**
-     * The default constructor. A scaling function from the diagonal is set up to a constant function. The image is not erased below the diagonal. The gaussian have diameter 5. 	 
+     * The default constructor. A scaling function from the diagonal is set up to a constant function. The image is not erased below the diagonal. The Gaussian have diameter 5. 	 
     **/ 
 	Persistence_heat_maps()
 	{
@@ -217,7 +222,7 @@ public:
 	/**
 	 * Construction that takes at the input the following parameters:
 	 * (1) A vector of pairs of doubles (representing persistence intervals). All other parameters are optional. They are:
-	 * (2) a Gausian filter generated by create_Gaussian_filter filter (the default value of this vaiable is a Gaussian filter of a radius 5), 
+	 * (2) a Gaussian filter generated by create_Gaussian_filter filter (the default value of this variable is a Gaussian filter of a radius 5), 
 	 * (3) a boolean value which determines if the area of image below diagonal should, or should not be erased (it will be erased by default). 
 	 * (4) a number of pixels in each direction (set to 1000 by default). 
 	 * (5) a min x and y value of points that are to be taken into account. By default it is set to std::numeric_limits<double>::max(), in which case the program compute the values based on the data,
@@ -226,12 +231,12 @@ public:
     Persistence_heat_maps( const std::vector< std::pair< double,double > >  & interval , std::vector< std::vector<double> > filter = create_Gaussian_filter(5,1) , bool erase_below_diagonal = false , size_t number_of_pixels = 1000 , double min_ = std::numeric_limits<double>::max() , double max_ = std::numeric_limits<double>::max()  );
     
     /**
-	 * Construction that takes at the input a name of a file with persistence intervals, a filter (radius 5 by default), a scaling function (constant by default), a boolean value which determines if the area of image below diagonal should, or should not be erased (should by default). The next parameter is the number of pixels in each direction (set to 1000 by default). and min and max values of images (both set to std::numeric_limits<double>::max() by defaulet. If this is the case, the program will pick the right values based on the data).
+	 * Construction that takes at the input a name of a file with persistence intervals, a filter (radius 5 by default), a scaling function (constant by default), a boolean value which determines if the area of image below diagonal should, or should not be erased (should by default). The next parameter is the number of pixels in each direction (set to 1000 by default) and min and max values of images (both set to std::numeric_limits<double>::max() by default. If this is the case, the program will pick the right values based on the data).
 	**/  
 	/**
 	 * Construction that takes at the input the following parameters:
-	 * (1) A a name of a file with persistence intervals. The file shold be readable by the function read_persistence_intervals_in_one_dimension_from_file. All other parameters are optional. They are:
-	 * (2) a Gausian filter generated by create_Gaussian_filter filter (the default value of this vaiable is a Gaussian filter of a radius 5), 	
+	 * (1) A name of a file with persistence intervals. The file should be readable by the function read_persistence_intervals_in_one_dimension_from_file. All other parameters are optional. They are:
+	 * (2) a Gaussian filter generated by create_Gaussian_filter filter (the default value of this variable is a Gaussian filter of a radius 5), 	
 	 * (3) a boolean value which determines if the area of image below diagonal should, or should not be erased (it will be erased by default). 
 	 * (4) a number of pixels in each direction (set to 1000 by default). 
 	 * (5) a min x and y value of points that are to be taken into account. By default it is set to std::numeric_limits<double>::max(), in which case the program compute the values based on the data,
@@ -259,14 +264,14 @@ public:
     
     //put to file subroutine
     /**
-     * The function outputs the perssitence image to a text file. The format as follow:
+     * The function outputs the persistence image to a text file. The format as follow:
      * In the first line, the values min and max of the image are stored
      * In the next lines, we have the persistence images in a form of a bitmap image. 
     **/
     void print_to_file( const char* filename )const;
     
     /**
-     * A function that load a heat map from file to the current object (and arase qhatever was stored in the current object before).
+     * A function that load a heat map from file to the current object (and erase whatever was stored in the current object before).
     **/
     void load_from_file( const char* filename );
     
@@ -347,7 +352,7 @@ public:
     
     
     /**
-     * A function to generate a gnuplot script to vizualize the persistent image.  
+     * A function to generate a gnuplot script to visualize the persistent image.  
     **/
     void plot( const char* filename )const;
     
@@ -474,7 +479,7 @@ public:
     //Implementations of functions for various concepts.  
     
     /**
-	 * This function produce a vector of doubles based on a persisence heat map. It is required in a concept Vectorized_topological_data
+	 * This function produce a vector of doubles based on a persistence heat map. It is required in a concept Vectorized_topological_data
 	*/
     std::vector<double> vectorize( int number_of_function )const;    
     /**
@@ -486,9 +491,9 @@ public:
 	}
 	
 	/**	 
-	 * This function is required by the Real_valued_topological_data concept. It returns various projections od the persistence heat map to a real line.
-         * At the moment this function is not tested, since it is quite likelly to be changed in the future. Given this, when using it, keep in mind that it
-         * will be most likelly changed in the next versions.
+	 * This function is required by the Real_valued_topological_data concept. It returns various projections on the persistence heat map to a real line.
+         * At the moment this function is not tested, since it is quite likely to be changed in the future. Given this, when using it, keep in mind that it
+         * will be most likely changed in the next versions.
 	**/ 	
 	double project_to_R( int number_of_function )const;	
 	/**
@@ -515,7 +520,7 @@ public:
 	
 	/**
 	* A function to compute scalar product of persistence heat maps.
-	* The parameter of this functionis a const reference to an object of a class Persistence_heat_maps.
+	* The parameter of this function is a const reference to an object of a class Persistence_heat_maps.
 	* This function is required in Topological_data_with_scalar_product concept.
 	**/
 	double compute_scalar_product( const Persistence_heat_maps& second_ )const;
@@ -559,7 +564,6 @@ protected:
 	}
     
     //data    
-    //double (*scalling_function_with_respect_to_distance_from_diagonal)( const std::pair< double , double >& point_in_diagram );    
     Scalling_of_kernels f;
     bool erase_below_diagonal;
     double min_;
@@ -583,7 +587,7 @@ void Persistence_heat_maps<Scalling_of_kernels>::construct( const std::vector< s
 
     if ( min_ == max_ )
     {
-		if (dbg)std::cerr << "min and max parameters will be etermined based on intervals \n";
+		if (dbg)std::cerr << "min and max parameters will be determined based on intervals \n";
         //in this case, we want the program to set up the min_ and max_ values by itself.
         min_ = std::numeric_limits<int>::max();
         max_ = -std::numeric_limits<int>::max();
@@ -636,7 +640,7 @@ void Persistence_heat_maps<Scalling_of_kernels>::construct( const std::vector< s
 			std::cerr << "y_grid : " << y_grid << std::endl;
 		}
 		
-		//x_grid and y_grid gives a center of the kernel. We want to have its lower left cordner. To get this, we need to shift x_grid and y_grid by a grid diameter.		
+		//x_grid and y_grid gives a center of the kernel. We want to have its lower left corner. To get this, we need to shift x_grid and y_grid by a grid diameter.		
 		x_grid -= filter.size()/2;
 		y_grid -= filter.size()/2;
 		//note that the numbers x_grid and y_grid may be negative. 
@@ -711,11 +715,6 @@ Persistence_heat_maps<Scalling_of_kernels>::Persistence_heat_maps( const char* f
     {
      intervals_ = read_persistence_intervals_in_one_dimension_from_file( filename , dimension );
     }    
-    //std::cerr << "intervals_.size() : " << intervals_.size() << std::endl;
-    //for ( size_t i = 0 ; i != intervals_.size() ; ++i )
-    //{
-	//	std::cerr << intervals_[i].first << " " << intervals_[i].second << std::endl;
-	//}    
     this->construct( intervals_ ,  filter, erase_below_diagonal , number_of_pixels , min_ , max_ );    
     this->set_up_parameters_for_basic_classes();
 }
@@ -956,11 +955,11 @@ double Persistence_heat_maps<Scalling_of_kernels>::distance( const Persistence_h
 	//first we need to check if (*this) and second are defined on the same domain and have the same dimensions:
 	if ( !this->check_if_the_same(second) )
 	{
-		std::cerr << "The persistence images are of noncompatible sizes. We cannot therefore compute distance between them. The program will now terminate";
-		throw "The persistence images are of noncompatible sizes. We cannot therefore compute distance between them. The program will now terminate";
+		std::cerr << "The persistence images are of non compatible sizes. We cannot therefore compute distance between them. The program will now terminate";
+		throw "The persistence images are of non compatible sizes. We cannot therefore compute distance between them. The program will now terminate";
 	}
 	
-	//if we are here, we know that the two persistence iomages are defined on the same domain, so we can start computing their distances:
+	//if we are here, we know that the two persistence images are defined on the same domain, so we can start computing their distances:
 	
 	double distance = 0;
 	if ( power < std::numeric_limits<double>::max() )
@@ -1016,11 +1015,11 @@ double Persistence_heat_maps<Scalling_of_kernels>::compute_scalar_product( const
 	//first we need to check if (*this) and second are defined on the same domain and have the same dimensions:
 	if ( !this->check_if_the_same(second) )
 	{
-		std::cerr << "The persistence images are of noncompatible sizes. We cannot therefore compute distance between them. The program will now terminate";
-		throw "The persistence images are of noncompatible sizes. We cannot therefore compute distance between them. The program will now terminate";
+		std::cerr << "The persistence images are of non compatible sizes. We cannot therefore compute distance between them. The program will now terminate";
+		throw "The persistence images are of non compatible sizes. We cannot therefore compute distance between them. The program will now terminate";
 	}
 	
-	//if we are here, we know that the two persistence iomages are defined on the same domain, so we can start computing their scalar product:
+	//if we are here, we know that the two persistence images are defined on the same domain, so we can start computing their scalar product:
 	double scalar_prod = 0;
 	for ( size_t i = 0 ; i != this->heat_map.size() ; ++i )
 	{
@@ -1035,8 +1034,8 @@ double Persistence_heat_maps<Scalling_of_kernels>::compute_scalar_product( const
 
 
 
-}//namespace Gudhi_stat
-}//namespace Gudhi
+}  // namespace Persistence_representations
+}  // namespace Gudhi
 
 
-#endif
+#endif  // PERSISTENCE_HEAT_MAPS_H_

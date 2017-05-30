@@ -71,7 +71,7 @@ int main( int argc , char** argv )
 		out << histogram[i]  << std::endl;
 	}		
 	out << std::endl;
-	std::cout << "To vizualize, open gnuplot and type: load \'" << gnuplot_script.str().c_str() << "\'" <<  std::endl;	
+	std::cout << "To visualize, open gnuplot and type: load \'" << gnuplot_script.str().c_str() << "\'" <<  std::endl;	
 	out.close();	
 	return 0;
 }

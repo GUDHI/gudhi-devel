@@ -28,12 +28,12 @@ namespace Gudhi {
 
 namespace Persistence_representations {
 
-/**  \defgroup Persistence_representations Persistence_representations
+/**  \defgroup Persistence_representations Persistence representations
  *
  * \author   Pawel Dlotko
  *
  * @{
- *\section idea Idea
+ *\section Persistence_representations_idea Idea
 
  *In order to perform most of the statistical tests and machine learning algorithms on a data one need to be able to perform only a very limited number of operations on them. Let us fix a representation of 
  * data of a type A. To perform most of the statistical and machine learning operations one need to be able to compute average of objects of type A (so that the averaged object is also of a type A), to 
@@ -71,24 +71,24 @@ namespace Persistence_representations {
  *\li Persistence diagrams / barcodes (allow computation of distances, vectorizations and real value characteristics).
  *
  *
- *Note that at the while functionalities like averaging, distances and scalar products are fixed, there is no canonical way of vectorizing and computing real valued characteristics of objects. Therefore the 
+ * Note that at the while functionalities like averaging, distances and scalar products are fixed, there is no canonical way of vectorizing and computing real valued characteristics of objects. Therefore the
  * vectorizations and computation of real value characteristics procedures are quite likely to evolve in the furthering versions of the library. 
  *
- *The main aim of this implementation is to be able to implement various statistical methods, both on the level of C++ and on the level of python. The methods will operate on the functionalities offered 
+ * The main aim of this implementation is to be able to implement various statistical methods, both on the level of C++ and on the level of python. The methods will operate on the functionalities offered
  * by concepts. That means that the statistical and ML methods will be able to operate on any representation that implement the required concept (including the ones that are not in the library at the moment). 
  * That gives provides a framework, that is very easy to extend, for topological statistics.
  *
- *Below we are discussing the representations which are currently implemented in Persistence\_representations package:
+ * Below we are discussing the representations which are currently implemented in Persistence\_representations package:
  *
- *\section sec_persistence_landscapes Persistence Landscapes
- * Reference manual: \ref Gudhi::Persistence_representations::Persistence_landscape
- *Persistence landscapes were originally proposed by Bubenik in \cite bubenik_landscapes_2015. Efficient algorithms to compute them rigorously were proposed by Bubenik and Dlotko in \cite bubenik_dlotko_landscapes_2016. The idea of 
+ * \section sec_persistence_landscapes Persistence Landscapes
+ * <b>Reference manual:</b> \ref Gudhi::Persistence_representations::Persistence_landscape <br>
+ * Persistence landscapes were originally proposed by Bubenik in \cite bubenik_landscapes_2015. Efficient algorithms to compute them rigorously were proposed by Bubenik and Dlotko in \cite bubenik_dlotko_landscapes_2016. The idea of
  * persistence landscapes is shortly summarized in below.
  *
- *To begin with, suppose we are given a point \f$(b,d) \in \mathbb{R}^2\f$ in a
- *persistence diagram. With this point, we associate a piecewise
- *linear function \f$f_{(b,d)} : \mathbb{R} \rightarrow [0,\infty)\f$, which is
- *defined as
+ * To begin with, suppose we are given a point \f$(b,d) \in \mathbb{R}^2\f$ in a
+ * persistence diagram. With this point, we associate a piecewise
+ * linear function \f$f_{(b,d)} : \mathbb{R} \rightarrow [0,\infty)\f$, which is
+ * defined as
  *
  *  \f[f_{(b,d)}(x) =
  *  \left\{ \begin{array}{ccl}
@@ -100,16 +100,16 @@ namespace Persistence_representations {
  *  \end{array} \right.
  *\f]
  *
- *A persistence landscape of the birth-death
- *pairs \f$(b_i , d_i)\f$, where \f$i = 1,\ldots,m\f$, which constitute the given
- *persistence diagram is the sequence of functions \f$\lambda_k : \mathbb{R} \rightarrow [0,\infty)\f$ for \f$k \in \mathbb{N}\f$, where \f$\lambda_k(x)\f$
- *denotes the \f$k^{\rm th}\f$ largest value of the numbers \f$f_{(b_i,d_i)}(x)\f$,
- *for \f$i = 1, \ldots, m\f$, and we define \f$\lambda_k(x) = 0\f$ if \f$k > m\f$.
- *Equivalently, this sequence of functions can be combined into a single
- *function \f$L : \mathbb{N} \times \mathbb{R} \to [0,\infty)\f$ of two
- *variables, if we define \f$L(k,t) = \lambda_k(t)\f$.
+ * A persistence landscape of the birth-death
+ * pairs \f$(b_i , d_i)\f$, where \f$i = 1,\ldots,m\f$, which constitute the given
+ * persistence diagram is the sequence of functions \f$\lambda_k : \mathbb{R} \rightarrow [0,\infty)\f$ for \f$k \in \mathbb{N}\f$, where \f$\lambda_k(x)\f$
+ * denotes the \f$k^{\rm th}\f$ largest value of the numbers \f$f_{(b_i,d_i)}(x)\f$,
+ * for \f$i = 1, \ldots, m\f$, and we define \f$\lambda_k(x) = 0\f$ if \f$k > m\f$.
+ * Equivalently, this sequence of functions can be combined into a single
+ * function \f$L : \mathbb{N} \times \mathbb{R} \to [0,\infty)\f$ of two
+ * variables, if we define \f$L(k,t) = \lambda_k(t)\f$.
  *
- *The detailed description of algorithms used to compute persistence landscapes can be found in \cite bubenik_dlotko_landscapes_2016. 
+ * The detailed description of algorithms used to compute persistence landscapes can be found in \cite bubenik_dlotko_landscapes_2016.
  * Note that this implementation provides exact representation of landscapes. That have many advantages, but also a few drawbacks. For instance, as discussed 
  * in \cite bubenik_dlotko_landscapes_2016, the exact representation of landscape may be of quadratic size with respect to the input persistence diagram. It may therefore happen 
  * that, for very large diagrams, using this representation may be memory--prohibitive. In such a case, there are two possible ways to proceed:
@@ -120,13 +120,13 @@ namespace Persistence_representations {
  * 
  * 
  *\section sec_landscapes_on_grid Persistence Landscapes on a grid
- * Reference manual: \ref Gudhi::Persistence_representations::Persistence_landscape_on_grid
- *This is an alternative, not--exact, representation of persistence landscapes defined in the Section \ref sec_persistence_landscapes. Unlike in the Section \ref sec_persistence_landscapes we build a 
+ * <b>Reference manual:</b> \ref Gudhi::Persistence_representations::Persistence_landscape_on_grid <br>
+ * This is an alternative, not--exact, representation of persistence landscapes defined in the Section \ref sec_persistence_landscapes. Unlike in the Section \ref sec_persistence_landscapes we build a
  * representation of persistence landscape by sampling its values on a finite, equally distributed grid of points. 
  * Since, the persistence landscapes that originate from persistence diagrams have slope \f$1\f$ or \f$-1\f$, we have an estimate of a region between the grid points where the landscape cab be located. 
  * That allows to estimate an error make when performing various operations on landscape. Note that for average landscapes the slope is in range \f$[-1,1]\f$ and similar estimate can be used. 
  *
- *Due to a lack of rigorous description of the algorithms to deal with this non--rigorous representaion of persistence landscapes in the literature, we are providing a short discussion of them in below.
+ * Due to a lack of rigorous description of the algorithms to deal with this non--rigorous representation of persistence landscapes in the literature, we are providing a short discussion of them in below.
  *
  *Let us assume that we want to compute persistence landscape on a interval \f$[x,y]\f$. Let us assume that we want to use \f$N\f$ grid points for that purpose. 
  * Then we will sample the persistence landscape on points \f$x_1 = x , x_2 = x + \frac{y-x}{N}, \ldots , x_{N} = y\f$. Persistence landscapes are represented as a vector of 
@@ -153,7 +153,7 @@ namespace Persistence_representations {
  *Note that the same representation is used in TDA R-package \cite Fasy_Kim_Lecci_Maria_tda.
  *
  *\section sec_persistence_heat_maps Persistence heat maps
- * Reference manual: \ref Gudhi::Persistence_representations::Persistence heat maps
+ * <b>Reference manual:</b> \ref Gudhi::Persistence_representations::Persistence_heat_maps <br>
  *This is a general class of discrete structures which are based on idea of placing a kernel in the points of persistence diagrams. 
  *This idea appeared in work by many authors over the last 15 years. As far as we know this idea was firstly described in the work of Bologna group in \cite Ferri_Frosini_comparision_sheme_1 and \cite Ferri_Frosini_comparision_sheme_2. 
  *Later it has been described by Colorado State University group in \cite Persistence_Images_2017. The presented paper in the first time provide a discussion of stability of the representation. 
@@ -177,7 +177,7 @@ namespace Persistence_representations {
  *
  *
  *\section sec_persistence_vectors Persistence vectors
- * Reference manual: \ref Gudhi::Persistence_representations::Persistence vectors
+ * <b>Reference manual:</b> \ref Gudhi::Persistence_representations::Vector_distances_in_diagram <br>
  *This is a representation of persistent homology in a form of a vector which was designed for an application in 3d graphic in \cite Carriere_Oudot_Ovsjanikov_top_signatures_3d. Below we provide a short description of this representation.
  *
  *Given a persistence diagram \f$D = \{ (b_i,d_i) \}\f$, for every pair of birth--death points \f$(b_1,d_1)\f$ and \f$(b_2,d_2)\f$ we compute the following three distances:

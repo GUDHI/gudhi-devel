@@ -4,7 +4,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA (France)
+ *    Copyright (C) 2017  INRIA (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@
  */
 
 
-#ifndef Vector_distances_in_diagram_H
-#define Vector_distances_in_diagram_H
+#ifndef PERSISTENCE_VECTORS_H_
+#define PERSISTENCE_VECTORS_H_
 
 #include <fstream>
 #include <cmath>
@@ -42,32 +42,6 @@ namespace Gudhi
 namespace Persistence_representations 
 {
 
-/*
-template <typename T>
-struct Euclidean_distance
-{
-    double operator() ( const std::pair< T,T >& f , const std::pair<T,T>& s )
-    {
-        return  sqrt( (f.first-s.first)*(f.first-s.first) + (f.second-s.second)*(f.second-s.second) );
-    }
-    double operator() ( const std::vector< T >& f , const std::vector < T >& s )
-    {
-		if ( f.size() != s.size() )
-		{
-			std::cerr << "Not compatible points dimensions in the procedure to compute Euclidean distance. The program will now terminate. \n";
-			std::cout << f.size() << " , " << s.size() << std::endl;
-			throw "Not compatible points dimensions in the procedure to compute Euclidean distance. The program will now terminate. \n";
-		}
-		double result = 0;
-		for ( size_t i = 0 ; i != f.size() ; ++i )
-		{
-			result += ( f[i]-s[i] )*( f[i]-s[i] );
-		}  
-        return  sqrt( result );
-    }
-};
-* */
-
 template <typename T>
 struct Maximum_distance
 {
@@ -79,16 +53,21 @@ struct Maximum_distance
 
 
 
-
 /**
-* This is an implementation of idea presented in the paper 'Stable Topological Signatures for Points on 3D Shapes' by 
-* M. Carriere, S. Y. Oudot and M. Ovsjanikov published in Computer Graphics Forum (proc. SGP 2015). 
-* The parameter of the class is the class that computes distance used to construct the vectors. The typical function is
-* either Eucludean of maximum (Manhattan) distance.
-* This class implements the following concepts: Vectorized_topological_data, Topological_data_with_distances, Real_valued_topological_data, Topological_data_with_averages, Topological_data_with_scalar_product 
-* 
-**/
-
+ * \class Vector_distances_in_diagram Vector_distances_in_diagram.h gudhi/Vector_distances_in_diagram.h
+ * \brief A class implementing persistence vectors.
+ *
+ * \ingroup Persistence_representations
+ *
+ * \details
+ * This is an implementation of idea presented in the paper <i>Stable Topological Signatures for Points on 3D
+ * Shapes</i> \cite Carriere_Oudot_Ovsjanikov_top_signatures_3d .<br>
+ * The parameter of the class is the class that computes distance used to construct the vectors. The typical function
+ * is either Euclidean of maximum (Manhattan) distance.
+ *
+ * This class implements the following concepts: Vectorized_topological_data, Topological_data_with_distances,
+ * Real_valued_topological_data, Topological_data_with_averages, Topological_data_with_scalar_product
+ **/
 template <typename F>
 class Vector_distances_in_diagram 
 {
@@ -99,12 +78,12 @@ public:
     Vector_distances_in_diagram(){};
         
     /**
-	* The constructor that takes as an input a multiset of persistence intervals (given as vector of birth-death pairs). The second parameter is the desiered length of the output vectors. 
+	* The constructor that takes as an input a multiset of persistence intervals (given as vector of birth-death pairs). The second parameter is the desired length of the output vectors. 
 	**/
     Vector_distances_in_diagram( const std::vector< std::pair< double , double > >& intervals , size_t where_to_cut );
     
     /**
-	* The constructor taking as an input a file with birth-death pairs. The second parameter is the desiered length of the output vectors. 
+	* The constructor taking as an input a file with birth-death pairs. The second parameter is the desired length of the output vectors. 
 	**/
     Vector_distances_in_diagram( const char* filename , size_t where_to_cut , unsigned dimension = std::numeric_limits<unsigned>::max() );
 
@@ -155,7 +134,7 @@ public:
     void load_from_file( const char* filename );
     
     /**
-     * Comparision operators:
+     * Comparison operators:
     **/ 
     bool operator == ( const Vector_distances_in_diagram& second )const
     {
@@ -172,14 +151,11 @@ public:
 		return !( *this == second );
 	}
     
-    
-    
-    
-    //Implementations of functions for various concepts.  
+   //Implementations of functions for various concepts.
      /**
      * Compute projection to real numbers of persistence vector. This function is required by the Real_valued_topological_data concept
-     * At the moment this function is not tested, since it is quite likelly to be changed in the future. Given this, when using it, keep in mind that it
-     * will be most likelly changed in the next versions.
+     * At the moment this function is not tested, since it is quite likely to be changed in the future. Given this, when using it, keep in mind that it
+     * will be most likely changed in the next versions.
     **/
     double project_to_R( int number_of_function )const;
     /**
@@ -195,7 +171,7 @@ public:
     **/
     std::vector<double> vectorize( int number_of_function )const;
      /**
-	 * This function return the number of functions that allows vectorization of a persisence vector. It is required in a concept Vectorized_topological_data.
+	 * This function return the number of functions that allows vectorization of a persistence vector. It is required in a concept Vectorized_topological_data.
 	 **/ 
 	size_t number_of_vectorize_functions()const
 	{
@@ -220,22 +196,6 @@ public:
     //end of implementation of functions needed for concepts.
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     /**
     * For visualization use output from vectorize and build histograms. 
     **/
@@ -246,7 +206,7 @@ public:
 	
 	
 	/**
-	 * Create a gnuplot script to vizualize the data structure. 
+	 * Create a gnuplot script to visualize the data structure. 
 	 **/ 
 	void plot( const char* filename )const
 	{
@@ -264,7 +224,7 @@ public:
 		}		
 		out <<std::endl;
 		out.close();
-		std::cout << "To vizualize, open gnuplot and type: load \'" << gnuplot_script.str().c_str() << "\'" <<  std::endl;			
+		std::cout << "To visualize, open gnuplot and type: load \'" << gnuplot_script.str().c_str() << "\'" <<  std::endl;			
 	}
 	
 	/**
@@ -284,7 +244,7 @@ public:
 		return std::make_pair( this->sorted_vector_of_distances[0] , 0);
 	}
 	
-	//arythmetic operations:		
+	//arithmetic operations:		
 	template < typename Operation_type > 
 	friend Vector_distances_in_diagram operation_on_pair_of_vectors( const Vector_distances_in_diagram& first ,  const Vector_distances_in_diagram& second , Operation_type opertion )
     {
@@ -511,7 +471,6 @@ void Vector_distances_in_diagram<F>::compute_sorted_vector_of_distances_via_heap
 		double value = f( this->intervals[i] , std::make_pair( 0.5*(this->intervals[i].first+this->intervals[i].second) , 0.5*(this->intervals[i].first+this->intervals[i].second) ) );
 		if ( -value < heap.front() )
             {
-                //std::cerr << "Replacing : " << heap.front() << " with : " << -value <<std::endl;getchar();
                 //remove the first element from the heap
                 std::pop_heap (heap.begin(),heap.end());
                 //heap.pop_back();
@@ -669,7 +628,7 @@ double Vector_distances_in_diagram<F>::distance( const Vector_distances_in_diagr
 			}
 			else
 			{
-				//nax morm
+				// max norm
 				if ( result < fabs( this->sorted_vector_of_distances[i] - second_.sorted_vector_of_distances[i] ) )result = fabs( this->sorted_vector_of_distances[i] - second_.sorted_vector_of_distances[i] );
 			}
 			if ( dbg )
@@ -767,12 +726,8 @@ double Vector_distances_in_diagram<F>::compute_scalar_product( const Vector_dist
 	return result;
 }
 
-
-
-
-
-}//namespace Gudhi_stat 
+}//namespace Persistence_representations
 }//namespace Gudhi
 
 
-#endif // Vector_distances_in_diagram_H
+#endif  // PERSISTENCE_VECTORS_H_

@@ -34,7 +34,7 @@ using namespace Gudhi::Persistence_representations;
 
 int main( int argc , char** argv )
 {
-	std::cout << "This program plot persistence landscape stored in a file (the file needs to be created beforehand). Please call the code with the name of a landsape file \n";	
+	std::cout << "This program plot persistence landscape stored in a file (the file needs to be created beforehand). Please call the code with the name of a landscape file \n";	
 	Persistence_heat_maps<constant_scaling_function> l;
 	l.load_from_file( argv[1] );		
 	l.plot( argv[1] );	

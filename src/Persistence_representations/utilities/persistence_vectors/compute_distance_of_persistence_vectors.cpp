@@ -34,7 +34,7 @@ using namespace Gudhi::Persistence_representations;
 int main( int argc , char** argv )
 {
 	std::cout << "This program compute distance of persistence vectors stored in a file (the file needs to be created beforehand). \n";	
-	std::cout << "The first parameter of a program is an interger p. The program compute l^p distance of the vectors. For l^infty distance choose p = -1. \n";
+	std::cout << "The first parameter of a program is an integer p. The program compute l^p distance of the vectors. For l^infty distance choose p = -1. \n";
 	std::cout << "The remaining parameters of this programs are names of files with persistence vectors.\n";
 	
 	if ( argc < 3 )
@@ -60,7 +60,6 @@ int main( int argc , char** argv )
 	vectors.reserve( filenames.size() );
 	for ( size_t file_no = 0 ; file_no != filenames.size() ; ++file_no )
 	{
-		//cerr << filenames[file_no] << endl;
 		Vector_distances_in_diagram< Euclidean_distance > l;
 		l.load_from_file( filenames[file_no] );
 		vectors.push_back( l );

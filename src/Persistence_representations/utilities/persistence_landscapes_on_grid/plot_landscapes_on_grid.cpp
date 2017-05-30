@@ -33,7 +33,7 @@ using namespace Gudhi::Persistence_representations;
 
 int main( int argc , char** argv )
 {
-	std::cout << "This program plot persistence landscape on grid stored in a file (the file needs to be created beforehand). Please call the code with the name of a landsape on grid file \n";	
+	std::cout << "This program plot persistence landscape on grid stored in a file (the file needs to be created beforehand). Please call the code with the name of a landscape on grid file \n";	
 	if ( argc == 1 )
 	{
 		std::cout << "Wrong parameters of a program call, the program will now terminate \n";

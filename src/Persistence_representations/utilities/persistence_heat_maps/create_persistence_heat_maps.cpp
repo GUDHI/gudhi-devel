@@ -39,7 +39,7 @@ int main( int argc , char** argv )
 	std::cout << "This program creates persistence heat map of diagrams provided as an input.\n";
 	std::cout << "The first parameter of a program is an integer, a size of a grid.\n";
 	std::cout << "The second and third parameters are min and max of the grid. If you want those numbers to be computed based on the data, set them both to -1 \n";
-	std::cerr << "The fourth parameter is an integer, the standard deviation of a gaussian kernel expressed in a number of pixels \n";
+	std::cerr << "The fourth parameter is an integer, the standard deviation of a Gaussian kernel expressed in a number of pixels \n";
 	
 	std::cout << "The fifth parameter of this program is a dimension of persistence that will be used in creation of the persistence heat maps.";
 	std::cout << "If our input files contain persistence pairs of various dimension, as a fifth parameter of the procedure please provide the dimension of persistence you want to use.";

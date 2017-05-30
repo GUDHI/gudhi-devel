@@ -4,7 +4,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA (France)
+ *    Copyright (C) 2017  INRIA (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -20,9 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
-#ifndef PSSK_H
-#define PSSK_H
+#ifndef PSSK_H_
+#define PSSK_H_
 
 //gudhi include
 #include <gudhi/Persistence_heat_maps.h>
@@ -138,7 +137,7 @@ void PSSK::construct( const std::vector< std::pair<double,double> >& intervals_ 
 			std::cerr << "y_grid : " << y_grid << std::endl;
 		}
 		
-		//x_grid and y_grid gives a center of the kernel. We want to have its lower left cordner. To get this, we need to shift x_grid and y_grid by a grid diameter.		
+		//x_grid and y_grid gives a center of the kernel. We want to have its lower left corner. To get this, we need to shift x_grid and y_grid by a grid diameter.		
 		x_grid -= filter.size()/2;
 		y_grid -= filter.size()/2;
 		//note that the numbers x_grid and y_grid may be negative. 
@@ -174,8 +173,8 @@ void PSSK::construct( const std::vector< std::pair<double,double> >& intervals_ 
 	}
 }//construct
 
+}  //namespace Persistence_representations
+}  //namespace Gudhi
 
-#endif
 
-}//namespace Gudhi_stat
-}//namespace Gudhi
+#endif  // PSSK_H_

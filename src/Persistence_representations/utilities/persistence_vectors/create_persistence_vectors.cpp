@@ -52,8 +52,7 @@ int main( int argc , char** argv )
 	
 	for ( size_t i = 0 ; i != filenames.size() ; ++i )
 	{
-		std::cerr << "Creatign persistence vectors based on a file : " << filenames[i] << std::endl;
-		//std::vector< std::pair< double , double > > persistence_pairs = read_gudhi_persistence_file_in_one_dimension( filenames[i] , size_t dimension = 0 )
+		std::cerr << "Creating persistence vectors based on a file : " << filenames[i] << std::endl;
 		Vector_distances_in_diagram< Euclidean_distance > l( filenames[i] , dimension );				
 		std::stringstream ss;
 		ss << filenames[i] << ".vect";

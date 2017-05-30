@@ -5,7 +5,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA (France)
+ *    Copyright (C) 2017  INRIA (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -21,7 +21,12 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef CONCEPT_TOPOLOGICAL_DATA_WITH_AVERAGES_H_
+#define CONCEPT_TOPOLOGICAL_DATA_WITH_AVERAGES_H_
 
+namespace Gudhi {
+
+namespace Persistence_representations {
 
 /** \brief The concept Topological_data_with_averages describes the requirements 
   * for a type to implement a container that allows computations of averages. 
@@ -33,4 +38,8 @@ public:
     void compute_average( const std::vector< Topological_data_with_averages* >& to_average ); 
 };
 
+}  // namespace Persistence_representations
 
+}  // namespace Gudhi
+
+#endif  // CONCEPT_TOPOLOGICAL_DATA_WITH_AVERAGES_H_

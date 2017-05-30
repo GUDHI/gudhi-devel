@@ -4,7 +4,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA (France)
+ *    Copyright (C) 2017  INRIA (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef Persistence_intervals_WITH_DISTANCES_H_
-#define Persistence_intervals_WITH_DISTANCES_H_
+#ifndef PERSISTENCE_INTERVALS_WITH_DISTANCES_H_
+#define PERSISTENCE_INTERVALS_WITH_DISTANCES_H_
 
 
 #include <gudhi/Persistence_intervals.h>
@@ -59,7 +59,7 @@ public:
 };
 
 
-}//namespace gudhi stat
-}//namespace gudhi
+}  // namespace Persistence_representations
+}  // namespace gudhi
 
-#endif
+#endif  // PERSISTENCE_INTERVALS_WITH_DISTANCES_H_

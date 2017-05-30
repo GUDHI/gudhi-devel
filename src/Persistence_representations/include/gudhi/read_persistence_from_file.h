@@ -4,7 +4,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA (France)
+ *    Copyright (C) 2017  INRIA (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@
  */
 
 
-#ifndef Read_Persitence_From_File_H
-#define Read_Persitence_From_File_H
+#ifndef READ_PERSISTENCE_FROM_FILE_H_
+#define READ_PERSISTENCE_FROM_FILE_H_
 
 #include <iostream>
 #include <fstream>
@@ -36,86 +36,6 @@ namespace Gudhi
 {
 namespace Persistence_representations
 {
-			
-	
-	
-/**
- * This procedure reads names of files which are stored in a file. 
-**/ 
-std::vector< std::string > readFileNames( const char* filenameWithFilenames )
-{
-    bool dbg = false;
-    
-    std::ifstream in(filenameWithFilenames);
-	if ( !in.good() )
-	{
-		std::cerr << "The file : " << filenameWithFilenames << " do not exist. The program will now terminate \n";
-		throw "The file from which you are trying to read do not exist. The program will now terminate \n";
-	}
-
-    std::vector< std::string > result;    
-    std::string line;
-    while (!in.eof())
-    {
-        getline(in,line);
-        line.erase( std::remove_if( line.begin(), line.end(), ::isspace) , line.end() );
-
-        if (dbg){std::cerr << "line : " << line << std::endl;}
-
-        if ( (line.length() == 0) || (line[0] == '#') )
-        {
-            //in this case we have a file name. First we should remove all the white spaces.
-            if ( dbg ){std::cerr << "This is a line with comment, it will be ignored n";}
-        }
-        else
-        {
-            result.push_back( line );
-            if (dbg){std::cerr << "Line after removing white spaces : " << line << std::endl;}
-        }
-	}
-    in.close();
-
-    return result;
-}//readFileNames
-
-
-
-std::vector< std::vector< double > > read_numbers_from_file_line_by_line( const char* filename )
-{
-	bool dbg = false;
-	std::ifstream in(filename);
-	if ( !in.good() )
-	{
-		std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
-		throw "The file from which you are trying to read the persistence landscape do not exist. The program will now terminate \n";
-	}
-
-	std::vector< std::vector< double > > result;
-	double number;
-
-	
-	std::string line;
-	while ( in.good() )
-	{
-		std::getline(in,line);
-		std::stringstream ss(line);		
-
-		if ( dbg )std::cerr << "\n Reading line : " << line << std::endl;
-
-		std::vector< double > this_line;
-		while ( ss.good() )
-		{
-			ss >> number;
-			this_line.push_back( number );
-			if ( dbg )std::cerr << number << " ";
-		}
-		if ( this_line.size() && in.good() ) result.push_back( this_line );
-	}		
-	in.close();
-
-	return result;
-}//read_numbers_from_file_line_by_line
-
 
 /**
  * Universal procedure to read files with persistence. It ignores the lines starting from # (treat them as comments). 
@@ -123,7 +43,7 @@ std::vector< std::vector< double > > read_numbers_from_file_line_by_line( const 
  * that each other line in the file, which is not a comment, have the same number of numerical entries (2, 3 or 4). 
  * If there are two numerical entries per line, then the function assume that they are birth/death coordinates. 
  * If there are three numerical entries per line, then the function assume that they are: dimension and birth/death coordinates. 
- * If there are four numerical entries per line, then the function assume that they are: thc characteristic of a filed over which 
+ * If there are four numerical entries per line, then the function assume that they are: the characteristic of a filed over which 
  * persistence was computed, dimension and birth/death coordinates. 
  * The 'inf' string can appear only as a last element of a line. 
  * The procedure returns vector of persistence pairs. 
@@ -162,7 +82,7 @@ std::vector<std::pair<double,double> > read_persistence_intervals_in_one_dimensi
 				if ( line_copy.find("inf") != std::string::npos )
 				{					
 					size_t np = line_copy.find("inf");
-					//replace symbols 'inf' in line_copy with whilespaces:					
+					//replace symbols 'inf' in line_copy with white spaces:					
 					line_copy[np] = ' ';
 					line_copy[np+1] = ' ';
 					line_copy[np+2] = ' ';		
@@ -194,7 +114,7 @@ std::vector<std::pair<double,double> > read_persistence_intervals_in_one_dimensi
 				{
 					std::cerr << "This line: " << line << " contains infinite interval. \n";
 				}
-				//first we substitute inf by whitespaces:
+				//first we substitute inf by white spaces:
 				size_t np = line.find("inf");									
 				line[np] = ' ';
 				line[np+1] = ' ';
@@ -288,13 +208,9 @@ std::vector<std::pair<double,double> > read_persistence_intervals_in_one_dimensi
 	if ( dbg )std::cerr << "End of reading \n";  
 	
 	return barcode;
-}//read_persistence_intervals_in_one_dimension_from_file
+}  // read_persistence_intervals_in_one_dimension_from_file
 
-}//namespace Gudhi_stat
-}//namespace Gudhi
+}  // namespace Persistence_representations
+}  // namespace Gudhi
 
-
-
-
-#endif
-	
+#endif  // READ_PERSISTENCE_FROM_FILE_H_

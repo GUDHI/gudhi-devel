@@ -55,7 +55,7 @@ int main( int argc , char** argv )
 	persistence2.push_back( std::make_pair(3,5) );
 	persistence2.push_back( std::make_pair(6,10) );
 	
-	//over here we define a function we sill put on a top on every birth--death pair in the persistence interval. It can be anything. Over here we will use standarg Gaussian
+	//over here we define a function we sill put on a top on every birth--death pair in the persistence interval. It can be anything. Over here we will use standard Gaussian
 	std::vector< std::vector<double> > filter = create_Gaussian_filter(5,1);
 			
 	//creating two heat maps. 
@@ -72,7 +72,7 @@ int main( int argc , char** argv )
 	Persistence_heat_maps<constant_scaling_function> median;
 	median.compute_median( vector_of_maps );
 	
-	//to compute L^1 disance between hm1 and hm2:
+	//to compute L^1 distance between hm1 and hm2:
 	std::cout << "The L^1 distance is : " << hm1.distance( hm2 , 1 ) << std::endl;
 	
 	//to average of hm1 and hm2:
