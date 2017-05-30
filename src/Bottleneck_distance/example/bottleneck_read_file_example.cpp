@@ -29,14 +29,6 @@
 #include <sstream>
 #include <string>
 
-struct Persistence_interval
-  : std::pair<double, double>
-{
-  Persistence_interval(std::tuple<int, double, double> data)
-    : std::pair<double, double>(std::make_pair(std::get<1>(data), std::get<2>(data)))
-  {}
-};
-
 int main(int argc, char** argv) {
   if (argc < 3) {
     std::cout << "To run this program please provide as an input two files with persistence diagrams. Each file " <<
