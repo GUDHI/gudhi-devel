@@ -168,16 +168,23 @@ if(CYTHON_FOUND)
   configure_file(gudhi.pyx.in "${CMAKE_CURRENT_BINARY_DIR}/gudhi.pyx" @ONLY)
 
   add_custom_command(
-      OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so"
+      OUTPUT gudhi.so
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
       COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/cythonize_gudhi.py" "build_ext" "--inplace")
 
-  add_custom_target(cython ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so"
+  add_custom_target(cython ALL DEPENDS gudhi.so
                     COMMENT "Do not forget to add ${CMAKE_CURRENT_BINARY_DIR}/ to your PYTHONPATH before using examples or tests")
 
   if(UNIX)
     set( ENV{PYTHONPATH} $ENV{PYTHONPATH}:${CMAKE_CURRENT_BINARY_DIR}/ )
   endif(UNIX)
+
+  # For installation purpose
+  # TODO(VR) : files matching pattern mechanism is copying all cython directory
+  install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}" DESTINATION "${PYTHON_SITE_PACKAGES}/" FILES_MATCHING
+      PATTERN "*.so"
+      PATTERN "*.dylib"
+      PATTERN "*.pyd")
 
   # Test examples
   add_test(NAME alpha_complex_from_points_example_py_test

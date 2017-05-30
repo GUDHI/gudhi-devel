@@ -29,4 +29,8 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
     add_test(Alpha_complex_example_from_off_32_diff_files ${DIFF_PATH}
         ${CMAKE_CURRENT_BINARY_DIR}/alphaoffreader_result_32.txt ${CMAKE_CURRENT_BINARY_DIR}/alphaoffreader_for_doc_32.txt)
   endif()
+
+  install(TARGETS Alpha_complex_example_from_points DESTINATION bin)
+  install(TARGETS Alpha_complex_example_from_off DESTINATION bin)
+
 endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
