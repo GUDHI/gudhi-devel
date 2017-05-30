@@ -20,8 +20,6 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define CGAL_HAS_THREADS
-
 #include <gudhi/Bottleneck.h>
 #include <gudhi/reader_utils.h>
 #include <iostream>
