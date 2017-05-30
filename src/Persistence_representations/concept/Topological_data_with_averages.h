@@ -5,7 +5,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2017  INRIA (France)
+ *    Copyright (C) 2016  INRIA (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
