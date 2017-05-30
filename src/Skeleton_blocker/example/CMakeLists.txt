@@ -10,3 +10,7 @@ target_link_libraries(Skeleton_blocker_example_iteration ${Boost_TIMER_LIBRARY} 
 add_test(NAME Skeleton_blocker_example_from_simplices COMMAND $<TARGET_FILE:Skeleton_blocker_example_from_simplices>)
 add_test(NAME Skeleton_blocker_example_iteration COMMAND $<TARGET_FILE:Skeleton_blocker_example_iteration>)
 add_test(NAME Skeleton_blocker_example_link COMMAND $<TARGET_FILE:Skeleton_blocker_example_link>)
+
+install(TARGETS Skeleton_blocker_example_from_simplices DESTINATION bin)
+install(TARGETS Skeleton_blocker_example_iteration DESTINATION bin)
+install(TARGETS Skeleton_blocker_example_link DESTINATION bin)

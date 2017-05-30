@@ -47,7 +47,15 @@ add_test(NAME Persistent_cohomology_example_from_file_3_2_0 COMMAND $<TARGET_FIL
     "${CMAKE_SOURCE_DIR}/data/filtered_simplicial_complex/bunny_5000_complex.fsc" "-p" "2" "-m" "0")
 add_test(NAME Persistent_cohomology_example_from_file_3_3_100 COMMAND $<TARGET_FILE:persistence_from_file>
     "${CMAKE_SOURCE_DIR}/data/filtered_simplicial_complex/bunny_5000_complex.fsc" "-p" "3" "-m" "100")
-   
+
+install(TARGETS plain_homology DESTINATION bin)
+install(TARGETS persistence_from_simple_simplex_tree DESTINATION bin)
+install(TARGETS rips_distance_matrix_persistence DESTINATION bin)
+install(TARGETS rips_persistence DESTINATION bin)
+install(TARGETS rips_persistence_step_by_step DESTINATION bin)
+install(TARGETS rips_persistence_via_boundary_matrix DESTINATION bin)
+install(TARGETS persistence_from_file DESTINATION bin)
+
 if(GMP_FOUND)
    if(GMPXX_FOUND)
       add_executable(rips_multifield_persistence rips_multifield_persistence.cpp )
@@ -56,8 +64,9 @@ if(GMP_FOUND)
       if (TBB_FOUND)
         target_link_libraries(rips_multifield_persistence ${TBB_LIBRARIES})
       endif(TBB_FOUND)
-   add_test(NAME Persistent_cohomology_example_multifield_2_71 COMMAND $<TARGET_FILE:rips_multifield_persistence>
-       "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" "-r" "0.25" "-m" "0.5" "-d" "3" "-p" "2" "-q" "71")
+      add_test(NAME Persistent_cohomology_example_multifield_2_71 COMMAND $<TARGET_FILE:rips_multifield_persistence>
+          "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" "-r" "0.25" "-m" "0.5" "-d" "3" "-p" "2" "-q" "71")
+      install(TARGETS rips_multifield_persistence DESTINATION bin)
    endif(GMPXX_FOUND)
 endif(GMP_FOUND)
 
@@ -81,6 +90,10 @@ if(CGAL_FOUND)
   add_test(NAME Persistent_cohomology_example_weighted_alpha_complex_3d COMMAND $<TARGET_FILE:weighted_alpha_complex_3d_persistence>
       "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.weights" "2" "0.45")
 
+  install(TARGETS alpha_complex_3d_persistence DESTINATION bin)
+  install(TARGETS exact_alpha_complex_3d_persistence DESTINATION bin)
+  install(TARGETS weighted_alpha_complex_3d_persistence DESTINATION bin)
+
   if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
     add_executable (alpha_complex_persistence alpha_complex_persistence.cpp)
     target_link_libraries(alpha_complex_persistence
@@ -102,5 +115,10 @@ if(CGAL_FOUND)
     add_test(NAME Persistent_cohomology_example_periodic_alpha_complex_3d COMMAND $<TARGET_FILE:periodic_alpha_complex_3d_persistence>
         "${CMAKE_SOURCE_DIR}/data/points/grid_10_10_10_in_0_1.off" "${CMAKE_SOURCE_DIR}/data/points/iso_cuboid_3_in_0_1.txt" "2" "0")
     add_test(NAME Persistent_cohomology_example_custom_persistence_sort COMMAND $<TARGET_FILE:custom_persistence_sort>)
+
+    install(TARGETS alpha_complex_persistence DESTINATION bin)
+    install(TARGETS periodic_alpha_complex_3d_persistence DESTINATION bin)
+    install(TARGETS custom_persistence_sort DESTINATION bin)
+
   endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
 endif(CGAL_FOUND)
