@@ -34,3 +34,7 @@ add_test(NAME Bitmap_cubical_complex_example_periodic_boundary_conditions_2d_tor
 add_test(NAME Bitmap_cubical_complex_example_periodic_boundary_conditions_3d_torus
     COMMAND $<TARGET_FILE:Bitmap_cubical_complex_periodic_boundary_conditions>
     "${CMAKE_SOURCE_DIR}/data/bitmap/3d_torus.txt")
+
+install(TARGETS Bitmap_cubical_complex DESTINATION bin)
+install(TARGETS Random_bitmap_cubical_complex DESTINATION bin)
+install(TARGETS Bitmap_cubical_complex_periodic_boundary_conditions DESTINATION bin)
