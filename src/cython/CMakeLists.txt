@@ -180,6 +180,7 @@ if(CYTHON_FOUND)
   endif(UNIX)
 
   # For installation purpose
+  # TODO(VR) : files matching pattern mechanism is copying all cython directory
   install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}" DESTINATION "${PYTHON_SITE_PACKAGES}/" FILES_MATCHING
       PATTERN "*.so"
       PATTERN "*.dylib"
