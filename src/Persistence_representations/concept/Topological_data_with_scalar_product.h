@@ -27,14 +27,12 @@ namespace Gudhi {
 
 namespace Persistence_representations {
 
-
-/** \brief The concept Topological_data_with_scalar_product describes the requirements 
-  * for a type to implement a container that allows computations of scalar products. 
+/** \brief The concept Topological_data_with_scalar_product describes the requirements
+  * for a type to implement a container that allows computations of scalar products.
   */
-class Topological_data_with_scalar_product
-{
-public:  
-    double compute_scalar_product( const Topological_data_with_scalar_product& second );    
+class Topological_data_with_scalar_product {
+ public:
+  double compute_scalar_product(const Topological_data_with_scalar_product& second);
 };
 
 }  // namespace Persistence_representations

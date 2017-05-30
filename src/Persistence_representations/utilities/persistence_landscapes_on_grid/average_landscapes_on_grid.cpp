@@ -22,50 +22,44 @@
 
 #include <gudhi/Persistence_landscape_on_grid.h>
 
-
-
 using namespace Gudhi;
 using namespace Gudhi::Persistence_representations;
 
 #include <iostream>
 
+int main(int argc, char** argv) {
+  std::cout << "This program computes average persistence landscape on grid of persistence landscapes on grid created "
+               "based on persistence diagrams provided as an input. Please call this program with the names of files "
+               "with persistence diagrams \n";
+  std::vector<const char*> filenames;
 
-int main( int argc , char** argv )
-{
-	std::cout << "This program computes average persistence landscape on grid of persistence landscapes on grid created based on persistence diagrams provided as an input. Please call this program with the names of files with persistence diagrams \n";
-	std::vector< const char* > filenames;
-	
-	if ( argc == 1 )
-	{
-		std::cout << "No input files given, the program will now terminate \n";
-		return 1;
-	}
-	
-	for ( int i = 1 ; i < argc ; ++i )
-	{
-		filenames.push_back( argv[i] );
-	}
-	
-	std::cout << "Creating persistence landscapes...\n";
-	std::vector< Persistence_landscape_on_grid* > lands;
-	for ( size_t i = 0 ; i != filenames.size() ; ++i )
-	{
-		Persistence_landscape_on_grid* l = new Persistence_landscape_on_grid;
-		l->load_landscape_from_file( filenames[i] );
-		lands.push_back( l );
-	}
-	
-	Persistence_landscape_on_grid av;
-	av.compute_average( lands );
-	
-	av.print_to_file( "average.g_land" );
-	
-	for ( size_t i = 0 ; i != filenames.size() ; ++i )
-	{
-		delete lands[i];
-	}
-	
-	std::cout << "Done \n";
+  if (argc == 1) {
+    std::cout << "No input files given, the program will now terminate \n";
+    return 1;
+  }
 
-	return 0;
+  for (int i = 1; i < argc; ++i) {
+    filenames.push_back(argv[i]);
+  }
+
+  std::cout << "Creating persistence landscapes...\n";
+  std::vector<Persistence_landscape_on_grid*> lands;
+  for (size_t i = 0; i != filenames.size(); ++i) {
+    Persistence_landscape_on_grid* l = new Persistence_landscape_on_grid;
+    l->load_landscape_from_file(filenames[i]);
+    lands.push_back(l);
+  }
+
+  Persistence_landscape_on_grid av;
+  av.compute_average(lands);
+
+  av.print_to_file("average.g_land");
+
+  for (size_t i = 0; i != filenames.size(); ++i) {
+    delete lands[i];
+  }
+
+  std::cout << "Done \n";
+
+  return 0;
 }

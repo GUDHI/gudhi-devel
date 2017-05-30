@@ -29,42 +29,33 @@
 
 #include <iostream>
 
-
-
 using namespace Gudhi;
 using namespace Gudhi::Persistence_representations;
 
+BOOST_AUTO_TEST_CASE(check_bottleneck_distances_computation) {
+  Persistence_intervals_with_distances p("data/file_with_diagram");
+  Persistence_intervals_with_distances q("data/file_with_diagram_1");
 
-BOOST_AUTO_TEST_CASE(check_bottleneck_distances_computation) 
-{
-	Persistence_intervals_with_distances p( "data/file_with_diagram" );
-	Persistence_intervals_with_distances q( "data/file_with_diagram_1" );
-	
-	double dist = p.distance( q );
-	
-	//std::cout << "dist : " << dist << std::endl;
-	
-	BOOST_CHECK( almost_equal(dist,0.389043) );
+  double dist = p.distance(q);
+
+  // std::cout << "dist : " << dist << std::endl;
+
+  BOOST_CHECK(almost_equal(dist, 0.389043));
 }
 
+BOOST_AUTO_TEST_CASE(check_default_parameters_in_distance) {
+  Persistence_intervals_with_distances p("data/file_with_diagram");
+  Persistence_intervals_with_distances q("data/file_with_diagram_1");
 
-BOOST_AUTO_TEST_CASE(check_default_parameters_in_distance) 
-{
-	Persistence_intervals_with_distances p( "data/file_with_diagram" );
-	Persistence_intervals_with_distances q( "data/file_with_diagram_1" );
-	
-	double default_parameter_distance = p.distance( q );
-	double max_parameter_distance = p.distance( q , std::numeric_limits< double >::max() );
-	double inf_parameter_distance = p.distance( q , std::numeric_limits<double>::infinity() );
-	
-	//std::cout << "default_parameter_distance : " << default_parameter_distance << std::endl;
-	//std::cout << "max_parameter_distance : " << max_parameter_distance << std::endl;
-	//std::cout << "inf_parameter_distance : " << inf_parameter_distance << std::endl;
-	
-	BOOST_CHECK( default_parameter_distance == max_parameter_distance );
-	BOOST_CHECK( inf_parameter_distance == max_parameter_distance );
-	BOOST_CHECK( inf_parameter_distance == max_parameter_distance );
+  double default_parameter_distance = p.distance(q);
+  double max_parameter_distance = p.distance(q, std::numeric_limits<double>::max());
+  double inf_parameter_distance = p.distance(q, std::numeric_limits<double>::infinity());
+
+  // std::cout << "default_parameter_distance : " << default_parameter_distance << std::endl;
+  // std::cout << "max_parameter_distance : " << max_parameter_distance << std::endl;
+  // std::cout << "inf_parameter_distance : " << inf_parameter_distance << std::endl;
+
+  BOOST_CHECK(default_parameter_distance == max_parameter_distance);
+  BOOST_CHECK(inf_parameter_distance == max_parameter_distance);
+  BOOST_CHECK(inf_parameter_distance == max_parameter_distance);
 }
-
-
-

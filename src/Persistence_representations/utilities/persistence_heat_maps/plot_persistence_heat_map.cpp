@@ -20,10 +20,7 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #include <gudhi/Persistence_heat_maps.h>
-
-
 
 using namespace Gudhi;
 using namespace Gudhi::Persistence_representations;
@@ -31,12 +28,11 @@ using namespace Gudhi::Persistence_representations;
 #include <iostream>
 #include <sstream>
 
-
-int main( int argc , char** argv )
-{
-	std::cout << "This program plot persistence landscape stored in a file (the file needs to be created beforehand). Please call the code with the name of a landscape file \n";	
-	Persistence_heat_maps<constant_scaling_function> l;
-	l.load_from_file( argv[1] );		
-	l.plot( argv[1] );	
-	return 0;
+int main(int argc, char** argv) {
+  std::cout << "This program plot persistence landscape stored in a file (the file needs to be created beforehand). "
+               "Please call the code with the name of a landscape file \n";
+  Persistence_heat_maps<constant_scaling_function> l;
+  l.load_from_file(argv[1]);
+  l.plot(argv[1]);
+  return 0;
 }

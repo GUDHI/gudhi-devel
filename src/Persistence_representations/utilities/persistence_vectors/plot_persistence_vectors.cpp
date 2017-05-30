@@ -22,27 +22,22 @@
 
 #include <gudhi/Persistence_vectors.h>
 
-
-
 using namespace Gudhi;
 using namespace Gudhi::Persistence_representations;
 
 #include <iostream>
 #include <sstream>
 
+int main(int argc, char** argv) {
+  std::cout << "This program create a Gnuplot script to plot persistence vector. Please call this program with the "
+               "name of file with persistence vector. \n";
+  if (argc != 2) {
+    std::cout << "Wrong number of parameters, the program will now terminate. \n";
+    return 1;
+  }
+  Vector_distances_in_diagram<Euclidean_distance> l;
+  l.load_from_file(argv[1]);
+  l.plot(argv[1]);
 
-int main( int argc , char** argv )
-{
-	std::cout << "This program create a Gnuplot script to plot persistence vector. Please call this program with the name of file with persistence vector. \n";
-	if ( argc != 2 )
-	{
-		std::cout << "Wrong number of parameters, the program will now terminate. \n";
-		return 1;
-	}
-	Vector_distances_in_diagram< Euclidean_distance > l;
-	l.load_from_file( argv[1] );
-	l.plot( argv[1] );
-	
-	return 0;
+  return 0;
 }
-

@@ -20,54 +20,46 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #include <gudhi/Persistence_vectors.h>
-
-
 
 using namespace Gudhi;
 using namespace Gudhi::Persistence_representations;
 
 #include <iostream>
 
+int main(int argc, char** argv) {
+  std::cout << "This program computes average persistence vector of persistence vectors created based on persistence "
+               "diagrams provided as an input. \n";
+  std::cout << "Please call this program with the names of files with persistence diagrams \n";
+  std::vector<const char*> filenames;
 
-int main( int argc , char** argv )
-{
-	std::cout << "This program computes average persistence vector of persistence vectors created based on persistence diagrams provided as an input. \n";
-	std::cout << "Please call this program with the names of files with persistence diagrams \n";
-	std::vector< const char* > filenames;
-	
-	if ( argc == 1 )
-	{
-		std::cout << "No input files given, the program will now terminate \n";
-		return 1;
-	}
-	
-	for ( int i = 1 ; i < argc ; ++i )
-	{
-		filenames.push_back( argv[i] );
-	}
-	
-	std::cout << "Reading persistence vectors...\n";
-	std::vector< Vector_distances_in_diagram< Euclidean_distance >* > lands;
-	for ( size_t i = 0 ; i != filenames.size() ; ++i )
-	{		
-		Vector_distances_in_diagram< Euclidean_distance >* l = new Vector_distances_in_diagram< Euclidean_distance >;
-		l->load_from_file( filenames[i] );
-		lands.push_back(l );
-	}
-	
-	Vector_distances_in_diagram< Euclidean_distance > av;
-	av.compute_average( lands );
-	
-	av.print_to_file( "average.vect" );
-	
-	for ( size_t i = 0 ; i != filenames.size() ; ++i )
-	{
-		delete lands[i];
-	}
-	
-	std::cout << "Done \n";
+  if (argc == 1) {
+    std::cout << "No input files given, the program will now terminate \n";
+    return 1;
+  }
 
-	return 0;
+  for (int i = 1; i < argc; ++i) {
+    filenames.push_back(argv[i]);
+  }
+
+  std::cout << "Reading persistence vectors...\n";
+  std::vector<Vector_distances_in_diagram<Euclidean_distance>*> lands;
+  for (size_t i = 0; i != filenames.size(); ++i) {
+    Vector_distances_in_diagram<Euclidean_distance>* l = new Vector_distances_in_diagram<Euclidean_distance>;
+    l->load_from_file(filenames[i]);
+    lands.push_back(l);
+  }
+
+  Vector_distances_in_diagram<Euclidean_distance> av;
+  av.compute_average(lands);
+
+  av.print_to_file("average.vect");
+
+  for (size_t i = 0; i != filenames.size(); ++i) {
+    delete lands[i];
+  }
+
+  std::cout << "Done \n";
+
+  return 0;
 }
