@@ -54,7 +54,7 @@ struct Maximum_distance
 
 
 /**
- * \class Vector_distances_in_diagram Vector_distances_in_diagram.h gudhi/Vector_distances_in_diagram.h
+ * \class Vector_distances_in_diagram Persistence_vectors.h gudhi/Persistence_vectors.h
  * \brief A class implementing persistence vectors.
  *
  * \ingroup Persistence_representations

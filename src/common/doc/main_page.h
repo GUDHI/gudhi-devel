@@ -222,11 +222,10 @@
       <b>Copyright:</b> GPL v3<br>      
     </td>
     <td width="75%">
-    It contain implementation of various representations of persistence diagrams; diagrams themselves, persistence
+    It contains implementation of various representations of persistence diagrams; diagrams themselves, persistence
     landscapes (rigorous and grid version), persistence heath maps, vectors and others. It implements basic
     functionalities which are neccessary to use persistence in statistics and machine learning.<br>
     <b>User manual:</b> \ref Persistence_representations
-    
     </td>
  </tr>
 </table>
