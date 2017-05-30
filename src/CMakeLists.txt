@@ -52,6 +52,12 @@ add_subdirectory(example/Spatial_searching)
 add_subdirectory(example/Subsampling)
 add_subdirectory(example/Tangential_complex)
 add_subdirectory(example/Bottleneck_distance)
+add_subdirectory(example/Gudhi_stat)
+add_subdirectory(utilities/Gudhi_stat/persistence_heat_maps)
+add_subdirectory(utilities/Gudhi_stat/persistence_intervals)
+add_subdirectory(utilities/Gudhi_stat/persistence_landscapes)
+add_subdirectory(utilities/Gudhi_stat/persistence_landscapes_on_grid)
+add_subdirectory(utilities/Gudhi_stat/persistence_vectors)
 
 # data points generator
 add_subdirectory(data/points/generator)
