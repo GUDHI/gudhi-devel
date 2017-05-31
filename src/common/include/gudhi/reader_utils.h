@@ -330,7 +330,7 @@ void read_persistence_diagram_from_file(std::string const& filename, OutputItera
 /**
 Reads a file containing persistence intervals.
 Each line might contain 2, 3 or 4 values: [[field] dimension] birth death
-The return value is an `std::map[dim, std::vector[std::pair[birth, death]]]`
+The return value is an `std::map<dim, std::vector<std::pair<birth, death>>>`
 where `dim` is an `int`, `birth` a `double`, and `death` a `double`.
 **/
 std::map<int, std::vector<std::pair<double, double>>> read_persistence_diagram_from_file(std::string const& filename) {
@@ -368,7 +368,7 @@ Each line might contain 2, 3 or 4 values: [[field] dimension] birth death
 If `only_this_dim` = -1, dimension is ignored and all lines are returned.
 If `only_this_dim` is >= 0, only the lines where dimension = `only_this_dim` 
 (or where dimension is not specified) are returned.
-The return value is an `std::vector[std::pair[birth, death]]`
+The return value is an `std::vector<std::pair<birth, death>>`
 where `dim` is an `int`, `birth` a `double`, and `death` a `double`.
 **/
 std::vector<std::pair<double, double>> read_persistence_diagram_from_file(std::string const& filename, int only_this_dim) {
