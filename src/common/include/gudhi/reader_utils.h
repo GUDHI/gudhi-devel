@@ -24,6 +24,7 @@
 #define READER_UTILS_H_
 
 #include <gudhi/graph_simplicial_complex.h>
+#include <gudhi/Debug_utils.h>
 
 #include <boost/graph/adjacency_list.hpp>
 
@@ -321,6 +322,7 @@ void read_persistence_diagram_from_file(std::string const& filename, OutputItera
       if (n >= 2) {
         //int field = (n == 4 ? static_cast<int>(numbers[0]) : -1);
         int dim = (n >= 3 ? static_cast<int>(numbers[n - 3]) : -1);
+        GUDHI_CHECK(numbers[n - 2] <= numbers[n - 1], "Error: birth > death.");
         *out++ = std::make_tuple(dim, numbers[n - 2], numbers[n - 1]);
       }
     }
@@ -353,6 +355,7 @@ std::map<int, std::vector<std::pair<double, double>>> read_persistence_diagram_f
       int n = sscanf(line.c_str(), "%lf %lf %lf %lf", &numbers[0], &numbers[1], &numbers[2], &numbers[3]);
       if (n >= 2) {
         int dim = (n >= 3 ? static_cast<int>(numbers[n - 3]) : -1);
+        GUDHI_CHECK(numbers[n - 2] <= numbers[n - 1], "Error: birth > death.");
         ret[dim].push_back(std::make_pair(numbers[n - 2], numbers[n - 1]));
       }
     }
@@ -391,7 +394,10 @@ std::vector<std::pair<double, double>> read_persistence_diagram_from_file(std::s
       int n = sscanf(line.c_str(), "%lf %lf %lf %lf", &numbers[0], &numbers[1], &numbers[2], &numbers[3]);
       int dim = (n >= 3 ? static_cast<int>(numbers[n - 3]) : -1);
       if (n >= 2 && (only_this_dim == -1 || dim == only_this_dim))
+      {
+        GUDHI_CHECK(numbers[n - 2] <= numbers[n - 1], "Error: birth > death.");
         ret.push_back(std::make_pair(numbers[n - 2], numbers[n - 1]));
+      }
     }
   }
 
