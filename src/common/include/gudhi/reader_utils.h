@@ -297,15 +297,14 @@ std::vector< std::vector< Filtration_value > > read_lower_triangular_matrix_from
 
 /**
 Reads a file containing persistance intervals.
-Each line might contain 2, 3 or 4 values: [field] [dimension] birth death
+Each line might contain 2, 3 or 4 values: [[field] dimension] birth death
 The output iterator `out` is used this way: `*out++ = std::make_tuple(dim, birth, death);`
 where `dim` is an `int`, `birth` a `double`, and `death` a `double`.
 **/
 template <typename OutputIterator>
 void read_persistence_diagram_from_file(std::string const& filename, OutputIterator out) {
 
-  std::ifstream in;
-  in.open(filename);
+  std::ifstream in(filename);
   if (!in.is_open()) {
 #ifdef DEBUG_TRACES
     std::cerr << "File \"" << filename << "\" does not exist.\n";
@@ -326,13 +325,11 @@ void read_persistence_diagram_from_file(std::string const& filename, OutputItera
       }
     }
   }
-
-  in.close();
 } // read_persistence_diagram_from_file
 
 /**
 Reads a file containing persistance intervals.
-Each line might contain 2, 3 or 4 values: [field] [dimension] birth death
+Each line might contain 2, 3 or 4 values: [[field] dimension] birth death
 The return value is an `std::map[dim, std::vector[std::pair[birth, death]]]`
 where `dim` is an `int`, `birth` a `double`, and `death` a `double`.
 **/
@@ -340,8 +337,7 @@ std::map<int, std::vector<std::pair<double, double>>> read_persistence_diagram_f
 
   std::map<int, std::vector<std::pair<double, double>>> ret;
 
-  std::ifstream in;
-  in.open(filename);
+  std::ifstream in(filename);
   if (!in.is_open()) {
 #ifdef DEBUG_TRACES
     std::cerr << "File \"" << filename << "\" does not exist.\n";
@@ -362,14 +358,13 @@ std::map<int, std::vector<std::pair<double, double>>> read_persistence_diagram_f
     }
   }
 
-  in.close();
   return ret;
 } // read_persistence_diagram_from_file
 
 
 /**
 Reads a file containing persistance intervals.
-Each line might contain 2, 3 or 4 values: [field] [dimension] birth death
+Each line might contain 2, 3 or 4 values: [[field] dimension] birth death
 If `only_this_dim` = -1, dimension is ignored and all lines are returned.
 If `only_this_dim` is >= 0, only the lines where dimension = `only_this_dim` 
 (or where dimension is not specified) are returned.
@@ -380,8 +375,7 @@ std::vector<std::pair<double, double>> read_persistence_diagram_from_file(std::s
 
   std::vector<std::pair<double, double>> ret;
 
-  std::ifstream in;
-  in.open(filename);
+  std::ifstream in(filename);
   if (!in.is_open()) {
 #ifdef DEBUG_TRACES
     std::cerr << "File \"" << filename << "\" does not exist.\n";
@@ -401,7 +395,6 @@ std::vector<std::pair<double, double>> read_persistence_diagram_from_file(std::s
     }
   }
 
-  in.close();
   return ret;
 } // read_persistence_diagram_from_file
 
