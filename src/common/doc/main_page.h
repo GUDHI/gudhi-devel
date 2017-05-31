@@ -269,7 +269,7 @@ make doxygen
  * Having CGAL version 4.4.0 or higher installed is recommended. The procedure to install this library according to
  * your operating system is detailed here http://doc.cgal.org/latest/Manual/installation.html
  * 
- * The following examples require the <a target="_blank" href="http://www.cgal.org/">Computational Geometry Algorithms
+ * The following examples/utilities require the <a target="_blank" href="http://www.cgal.org/">Computational Geometry Algorithms
  * Library</a> (CGAL \cite cgal:eb-15b) and will not be built if CGAL is not installed:
  * \li <a href="_persistent_cohomology_2alpha_complex_3d_persistence_8cpp-example.html">
  * Persistent_cohomology/alpha_complex_3d_persistence.cpp</a>
@@ -343,7 +343,7 @@ make doxygen
  * 
  * Having Intel&reg; TBB installed is recommended to parallelize and accelerate some GUDHI computations.
  * 
- * The following examples are using Intel&reg; TBB if installed:
+ * The following examples/utilities are using Intel&reg; TBB if installed:
  * \li <a href="_alpha_complex_2_alpha_complex_from_off_8cpp-example.html">
  * Alpha_complex/Alpha_complex_from_off.cpp</a>
  * \li <a href="_alpha_complex_2_alpha_complex_from_points_8cpp-example.html">
