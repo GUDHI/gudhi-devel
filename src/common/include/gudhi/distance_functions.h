@@ -50,8 +50,8 @@ class Euclidean_distance {
     return std::sqrt(dist);
   }
   template< typename T >
-  T operator() ( const std::pair< T, T >& f , const std::pair< T, T >& s ) {
-    return  sqrt( (f.first-s.first)*(f.first-s.first) + (f.second-s.second)*(f.second-s.second) );
+  T operator() (const std::pair< T, T >& f, const std::pair< T, T >& s) {
+    return  sqrt((f.first-s.first)*(f.first-s.first) + (f.second-s.second)*(f.second-s.second));
   }
 };
 

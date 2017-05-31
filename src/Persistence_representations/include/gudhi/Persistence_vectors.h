@@ -68,7 +68,7 @@ class Vector_distances_in_diagram {
   /**
   * The default constructor.
   **/
-  Vector_distances_in_diagram(){}
+  Vector_distances_in_diagram() {}
 
   /**
       * The constructor that takes as an input a multiset of persistence intervals (given as vector of birth-death
