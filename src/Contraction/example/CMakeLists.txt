@@ -3,10 +3,8 @@ project(Contraction_examples)
 
 
 add_executable(RipsContraction Rips_contraction.cpp)
-add_executable(GarlandHeckbert Garland_heckbert.cpp)
 
-target_link_libraries(RipsContraction ${Boost_TIMER_LIBRARY} ${Boost_SYSTEM_LIBRARY})	
-target_link_libraries(GarlandHeckbert ${Boost_TIMER_LIBRARY} ${Boost_SYSTEM_LIBRARY})	
+target_link_libraries(RipsContraction ${Boost_TIMER_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 
 
 add_test(NAME Contraction_example_tore3D_0.2 COMMAND $<TARGET_FILE:RipsContraction>
@@ -18,4 +16,3 @@ add_test(NAME Contraction_example_tore3D_0.2 COMMAND $<TARGET_FILE:RipsContracti
 #    "${CMAKE_SOURCE_DIR}/data/points/SO3_10000.off" "0.3")
 
 install(TARGETS RipsContraction DESTINATION bin)
-install(TARGETS GarlandHeckbert DESTINATION bin)

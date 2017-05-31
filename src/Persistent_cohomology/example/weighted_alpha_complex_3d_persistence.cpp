@@ -42,7 +42,7 @@
 #include <vector>
 #include <cstdlib>
 
-#include "alpha_complex_3d_helper.h"
+#include "../utilities/alpha_complex_3d_helper.h"
 
 // Traits
 using Kernel = CGAL::Exact_predicates_inexact_constructions_kernel;
