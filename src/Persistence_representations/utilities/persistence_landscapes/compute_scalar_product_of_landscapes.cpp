@@ -27,6 +27,7 @@ using namespace Gudhi::Persistence_representations;
 
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 int main(int argc, char** argv) {
   std::cout << "This program compute scalar product of persistence landscapes stored in a file (the file needs to be "

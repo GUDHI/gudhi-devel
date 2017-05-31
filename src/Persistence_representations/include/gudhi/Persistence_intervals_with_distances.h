@@ -26,6 +26,8 @@
 #include <gudhi/Persistence_intervals.h>
 #include <gudhi/Bottleneck.h>
 
+#include <limits>
+
 namespace Gudhi {
 namespace Persistence_representations {
 
@@ -56,6 +58,6 @@ class Persistence_intervals_with_distances : public Persistence_intervals {
 };
 
 }  // namespace Persistence_representations
-}  // namespace gudhi
+}  // namespace Gudhi
 
 #endif  // PERSISTENCE_INTERVALS_WITH_DISTANCES_H_

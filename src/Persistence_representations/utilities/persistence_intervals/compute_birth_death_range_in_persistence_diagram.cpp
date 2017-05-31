@@ -26,6 +26,7 @@
 #include <iostream>
 #include <vector>
 #include <limits>
+#include <utility>
 
 using namespace Gudhi;
 using namespace Gudhi::Persistence_representations;

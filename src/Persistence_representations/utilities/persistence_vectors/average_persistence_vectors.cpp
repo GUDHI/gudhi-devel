@@ -26,6 +26,7 @@ using namespace Gudhi;
 using namespace Gudhi::Persistence_representations;
 
 #include <iostream>
+#include <vector>
 
 int main(int argc, char** argv) {
   std::cout << "This program computes average persistence vector of persistence vectors created based on persistence "

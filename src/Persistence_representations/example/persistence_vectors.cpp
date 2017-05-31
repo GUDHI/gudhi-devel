@@ -21,12 +21,14 @@
  */
 
 #include <gudhi/Persistence_vectors.h>
-#include <iostream>
-
 #include <gudhi/reader_utils.h>
+
+#include <iostream>
 #include <vector>
 #include <cmath>
 #include <iomanip>
+#include <limits>
+#include <utility>
 
 using namespace Gudhi;
 using namespace Gudhi::Persistence_representations;

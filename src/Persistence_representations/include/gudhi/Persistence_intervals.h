@@ -32,9 +32,10 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
-#include <limits>
 #include <cmath>
 #include <functional>
+#include <utility>
+#include <string>
 
 namespace Gudhi {
 namespace Persistence_representations {
@@ -402,7 +403,7 @@ std::vector<double> Persistence_intervals::characteristic_function_of_diagram(do
 
     for (size_t pos = beginIt; pos != endIt; ++pos) {
       result[pos] +=
-          ((x_max - x_min) / (double)number_of_bins) * (this->intervals[i].second - this->intervals[i].first);
+          ((x_max - x_min) / static_cast<double>(number_of_bins)) * (this->intervals[i].second - this->intervals[i].first);
     }
     if (dbg) {
       std::cerr << "Result at this stage \n";
@@ -564,6 +565,6 @@ double Persistence_intervals::project_to_R(int number_of_function) const {
 }
 
 }  // namespace Persistence_representations
-}  // namespace gudhi
+}  // namespace Gudhi
 
 #endif  // PERSISTENCE_INTERVALS_H_

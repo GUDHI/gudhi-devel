@@ -24,6 +24,9 @@
 #include <gudhi/Persistence_intervals.h>
 
 #include <iostream>
+#include <limits>
+#include <vector>
+#include <utility>
 
 using namespace Gudhi;
 using namespace Gudhi::Persistence_representations;

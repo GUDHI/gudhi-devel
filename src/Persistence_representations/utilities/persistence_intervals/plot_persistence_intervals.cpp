@@ -25,6 +25,9 @@
 #include <gudhi/read_persistence_from_file.h>
 
 #include <iostream>
+#include <limits>
+#include <vector>
+#include <utility>
 
 using namespace Gudhi;
 using namespace Gudhi::Persistence_representations;

@@ -28,6 +28,8 @@
 #include <sstream>
 #include <vector>
 #include <algorithm>
+#include <string>
+#include <utility>
 
 namespace Gudhi {
 namespace Persistence_representations {
@@ -54,7 +56,7 @@ std::vector<std::pair<double, double> > read_persistence_intervals_in_one_dimens
   // checking if the file exist:
   if (!in.good()) {
     std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
-    throw "The file from which you are trying to read the persistence landscape do not exist. The program will now terminate \n";
+    throw "The persistence landscape file do not exist. The program will now terminate \n";
   }
 
   std::string line;
@@ -85,7 +87,7 @@ std::vector<std::pair<double, double> > read_persistence_intervals_in_one_dimens
         while (ss >> number) {
           this_line.push_back(number);
         }
-        number_of_entries_per_line += (int)this_line.size();
+        number_of_entries_per_line += static_cast<int>(this_line.size());
         if (dbg) {
           std::cerr << "number_of_entries_per_line : " << number_of_entries_per_line
                     << ". This number was obtained by analyzing this line : " << line << std::endl;
@@ -93,7 +95,7 @@ std::vector<std::pair<double, double> > read_persistence_intervals_in_one_dimens
         if ((number_of_entries_per_line < 2) || (number_of_entries_per_line > 4)) {
           std::cerr << "The input file you have provided have wrong number of numerical entries per line. The program "
                        "will now terminate. \n";
-          throw "The input file you have provided have wrong number of numerical entries per line. The program will now terminate. \n";
+          throw "Wrong number of numerical entries per line in the input file. The program will now terminate. \n";
         }
       }
       // In case there is an 'inf' string in this line, we are dealing with this situation in below.

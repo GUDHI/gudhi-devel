@@ -23,6 +23,10 @@
 #ifndef PERSISTENCE_LANDSCAPE_H_
 #define PERSISTENCE_LANDSCAPE_H_
 
+// gudhi include
+#include <gudhi/read_persistence_from_file.h>
+#include <gudhi/common_persistence_representations.h>
+
 // standard include
 #include <cmath>
 #include <iostream>
@@ -31,10 +35,9 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-
-// gudhi include
-#include <gudhi/read_persistence_from_file.h>
-#include <gudhi/common_persistence_representations.h>
+#include <string>
+#include <utility>
+#include <functional>
 
 namespace Gudhi {
 namespace Persistence_representations {
@@ -323,7 +326,7 @@ class Persistence_landscape {
    * Vectorized_topological_data
   */
   std::vector<double> vectorize(int number_of_function) const {
-    // TODO, think of something smarter over here
+    // TODO(PD) think of something smarter over here
     std::vector<double> v;
     if ((size_t)number_of_function > this->land.size()) {
       return v;
@@ -393,7 +396,7 @@ class Persistence_landscape {
       nextLevelMerge.swap(nextNextLevelMerge);
     }
     (*this) = (*nextLevelMerge[0]);
-    (*this) *= 1 / ((double)to_average.size());
+    (*this) *= 1 / static_cast<double>(to_average.size());
   }
 
   /**
@@ -882,7 +885,7 @@ void Persistence_landscape::load_landscape_from_file(const char* filename) {
   in.open(filename);
   if (!in.good()) {
     std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
-    throw "The file from which you are trying to read the persistence landscape do not exist. The program will now terminate \n";
+    throw "The persistence landscape file do not exist. The program will now terminate \n";
   }
 
   std::string line;
@@ -971,7 +974,7 @@ Persistence_landscape operation_on_pair_of_landscapes(const Persistence_landscap
         }
         lambda_n.push_back(
             std::make_pair(land1.land[i][p].first,
-                           oper((double)land1.land[i][p].second,
+                           oper(static_cast<double>(land1.land[i][p].second),
                                 function_value(land2.land[i][q - 1], land2.land[i][q], land1.land[i][p].first))));
         ++p;
         continue;
@@ -1085,8 +1088,8 @@ double compute_maximal_distance_non_symmetric(const Persistence_landscape& pl1, 
     }
 
     int p2Count = 0;
-    for (size_t i = 1; i != pl1.land[level].size() - 1; ++i)  // In this case, I consider points at the infinity
-    {
+    // In this case, I consider points at the infinity
+    for (size_t i = 1; i != pl1.land[level].size() - 1; ++i) {
       while (true) {
         if ((pl1.land[level][i].first >= pl2.land[level][p2Count].first) &&
             (pl1.land[level][i].first <= pl2.land[level][p2Count + 1].first))
@@ -1142,17 +1145,17 @@ double compute_distance_of_landscapes(const Persistence_landscape& first, const 
   }
 
   if (p < std::numeric_limits<double>::max()) {
-    //\int_{- \infty}^{+\infty}| first-second |^p
+    // \int_{- \infty}^{+\infty}| first-second |^p
     double result;
     if (p != 1) {
       if (dbg) std::cerr << "Power != 1, compute integral to the power p\n";
-      result = lan.compute_integral_of_landscape((double)p);
+      result = lan.compute_integral_of_landscape(p);
     } else {
       if (dbg) std::cerr << "Power = 1, compute integral \n";
       result = lan.compute_integral_of_landscape();
     }
-    //(\int_{- \infty}^{+\infty}| first-second |^p)^(1/p)
-    return pow(result, 1 / (double)p);
+    // (\int_{- \infty}^{+\infty}| first-second |^p)^(1/p)
+    return pow(result, 1.0 / p);
   } else {
     // p == infty
     if (dbg) std::cerr << "Power = infty, compute maximum \n";
@@ -1232,9 +1235,9 @@ double compute_inner_product(const Persistence_landscape& l1, const Persistence_
       }
 
       // we have two intervals in which functions are constant:
-      //[l1.land[level][l1It].first , l1.land[level][l1It+1].first]
+      // [l1.land[level][l1It].first , l1.land[level][l1It+1].first]
       // and
-      //[l2.land[level][l2It].first , l2.land[level][l2It+1].first]
+      // [l2.land[level][l2It].first , l2.land[level][l2It+1].first]
       // We also have an interval [x1,x2]. Since the intervals in the landscapes cover the whole R, then it is clear
       // that x2
       // is either l1.land[level][l1It+1].first of l2.land[level][l2It+1].first or both. Lets test it.
@@ -1316,6 +1319,6 @@ void Persistence_landscape::plot(const char* filename, double xRangeBegin, doubl
 }
 
 }  // namespace Persistence_representations
-}  // namespace gudhi
+}  // namespace Gudhi
 
 #endif  // PERSISTENCE_LANDSCAPE_H_

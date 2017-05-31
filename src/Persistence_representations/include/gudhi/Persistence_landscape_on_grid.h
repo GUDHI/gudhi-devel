@@ -24,6 +24,10 @@
 #ifndef PERSISTENCE_LANDSCAPE_ON_GRID_H_
 #define PERSISTENCE_LANDSCAPE_ON_GRID_H_
 
+// gudhi include
+#include <gudhi/read_persistence_from_file.h>
+#include <gudhi/common_persistence_representations.h>
+
 // standard include
 #include <iostream>
 #include <vector>
@@ -32,14 +36,9 @@
 #include <sstream>
 #include <algorithm>
 #include <cmath>
-#include <limits>
 #include <functional>
-#include <functional>
-
-// gudhi include
-
-#include <gudhi/read_persistence_from_file.h>
-#include <gudhi/common_persistence_representations.h>
+#include <utility>
+#include <string>
 
 namespace Gudhi {
 namespace Persistence_representations {
@@ -165,7 +164,7 @@ class Persistence_landscape_on_grid {
   double compute_integral_of_landscape(size_t level) const {
     bool dbg = false;
     double result = 0;
-    double dx = (this->grid_max - this->grid_min) / (double)(this->values_of_landscapes.size() - 1);
+    double dx = (this->grid_max - this->grid_min) / static_cast<double>(this->values_of_landscapes.size() - 1);
 
     if (dbg) {
       std::cerr << "this->grid_max : " << this->grid_max << std::endl;
@@ -220,7 +219,7 @@ class Persistence_landscape_on_grid {
     bool dbg = false;
 
     double result = 0;
-    double dx = (this->grid_max - this->grid_min) / (double)(this->values_of_landscapes.size() - 1);
+    double dx = (this->grid_max - this->grid_min) / static_cast<double>(this->values_of_landscapes.size() - 1);
     double previous_x = this->grid_min;
     double previous_y = 0;
     if (this->values_of_landscapes[0].size() > level) previous_y = this->values_of_landscapes[0][level];
@@ -279,7 +278,7 @@ class Persistence_landscape_on_grid {
 * Shall those points be joined with lines, we will obtain the i-th landscape function.
 **/
   friend std::ostream& operator<<(std::ostream& out, const Persistence_landscape_on_grid& land) {
-    double dx = (land.grid_max - land.grid_min) / (double)(land.values_of_landscapes.size() - 1);
+    double dx = (land.grid_max - land.grid_min) / static_cast<double>(land.values_of_landscapes.size() - 1);
     double x = land.grid_min;
     for (size_t i = 0; i != land.values_of_landscapes.size(); ++i) {
       out << x << " : ";
@@ -306,7 +305,7 @@ class Persistence_landscape_on_grid {
     if ((x < this->grid_min) || (x > this->grid_max)) return 0;
 
     // find a position of a vector closest to x:
-    double dx = (this->grid_max - this->grid_min) / (double)(this->values_of_landscapes.size() - 1);
+    double dx = (this->grid_max - this->grid_min) / static_cast<double>(this->values_of_landscapes.size() - 1);
     size_t position = size_t((x - this->grid_min) / dx);
 
     if (dbg) {
@@ -338,7 +337,6 @@ class Persistence_landscape_on_grid {
               std::make_pair(position * dx + this->grid_min, this->values_of_landscapes[position][level]),
               std::make_pair((position + 1) * dx + this->grid_min, 0));
         } else {
-          //(this->values_of_landscapes[position+1].size() > level)
           line = compute_parameters_of_a_line(
               std::make_pair(position * dx + this->grid_min, 0),
               std::make_pair((position + 1) * dx + this->grid_min, this->values_of_landscapes[position + 1][level]));
@@ -623,7 +621,7 @@ class Persistence_landscape_on_grid {
       throw "Landscapes are not defined on the same grid, the program will now terminate";
     double result = 0;
 
-    double dx = (l1.grid_max - l1.grid_min) / (double)(l1.values_of_landscapes.size() - 1);
+    double dx = (l1.grid_max - l1.grid_min) / static_cast<double>(l1.values_of_landscapes.size() - 1);
 
     double previous_x = l1.grid_min - dx;
     double previous_y_l1 = 0;
@@ -737,14 +735,14 @@ class Persistence_landscape_on_grid {
     }
 
     if (p < std::numeric_limits<double>::max()) {
-      //\int_{- \infty}^{+\infty}| first-second |^p
+      // \int_{- \infty}^{+\infty}| first-second |^p
       double result;
       if (p != 1) {
         if (dbg) {
           std::cerr << "p : " << p << std::endl;
           getchar();
         }
-        result = lan.compute_integral_of_landscape((double)p);
+        result = lan.compute_integral_of_landscape(p);
         if (dbg) {
           std::cerr << "integral : " << result << std::endl;
           getchar();
@@ -756,8 +754,8 @@ class Persistence_landscape_on_grid {
           getchar();
         }
       }
-      //(\int_{- \infty}^{+\infty}| first-second |^p)^(1/p)
-      return pow(result, 1 / (double)p);
+      // (\int_{- \infty}^{+\infty}| first-second |^p)^(1/p)
+      return pow(result, 1.0 / p);
     } else {
       // p == infty
       return lan.compute_maximum();
@@ -789,7 +787,7 @@ class Persistence_landscape_on_grid {
    * Vectorized_topological_data
   */
   std::vector<double> vectorize(int number_of_function) const {
-    // TODO, think of something smarter over here
+    // TODO(PD) think of something smarter over here
     if ((number_of_function < 0) || ((size_t)number_of_function >= this->values_of_landscapes.size())) {
       throw "Wrong number of function\n";
     }
@@ -864,7 +862,7 @@ class Persistence_landscape_on_grid {
       }
       // normalizing:
       for (size_t i = 0; i != this->values_of_landscapes[grid_point].size(); ++i) {
-        this->values_of_landscapes[grid_point][i] /= (double)to_average.size();
+        this->values_of_landscapes[grid_point][i] /= static_cast<double>(to_average.size());
       }
     }
   }  // compute_average
@@ -979,10 +977,10 @@ void Persistence_landscape_on_grid::set_up_values_of_landscapes(const std::vecto
   this->grid_max = grid_max_;
 
   if (grid_max_ <= grid_min_) {
-    throw "Wrong parameters of grid_min and grid_max given to the procedure. The grid have negative, or zero size. The program will now terminate.\n";
+    throw "Wrong parameters of grid_min and grid_max given to the procedure. The program will now terminate.\n";
   }
 
-  double dx = (grid_max_ - grid_min_) / (double)(number_of_points_);
+  double dx = (grid_max_ - grid_min_) / static_cast<double>(number_of_points_);
   // for every interval in the diagram:
   for (size_t int_no = 0; int_no != p.size(); ++int_no) {
     size_t grid_interval_begin = (p[int_no].first - grid_min_) / dx;
@@ -1161,7 +1159,7 @@ void Persistence_landscape_on_grid::load_landscape_from_file(const char* filenam
   // check if the file exist.
   if (!in.good()) {
     std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
-    throw "The file from which you are trying to read the persistence landscape do not exist. The program will now terminate \n";
+    throw "The persistence landscape file do not exist. The program will now terminate \n";
   }
 
   size_t number_of_points_in_the_grid = 0;
@@ -1223,7 +1221,7 @@ void Persistence_landscape_on_grid::plot(const char* filename, double min_x, dou
   }
 
   size_t number_of_nonzero_levels = this->number_of_nonzero_levels();
-  double dx = (this->grid_max - this->grid_min) / ((double)this->values_of_landscapes.size() - 1);
+  double dx = (this->grid_max - this->grid_min) / static_cast<double>(this->values_of_landscapes.size() - 1);
 
   size_t from = 0;
   if (from_ != std::numeric_limits<size_t>::max()) {

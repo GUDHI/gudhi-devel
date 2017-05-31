@@ -23,6 +23,9 @@
 #ifndef COMMON_PERSISTENCE_REPRESENTATIONS_H_
 #define COMMON_PERSISTENCE_REPRESENTATIONS_H_
 
+#include <utility>
+#include <string>
+
 namespace Gudhi {
 namespace Persistence_representations {
 // this file contain an implementation of some common procedures used in Persistence_representations.

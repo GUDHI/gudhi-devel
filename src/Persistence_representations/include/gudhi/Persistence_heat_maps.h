@@ -23,18 +23,20 @@
 #ifndef PERSISTENCE_HEAT_MAPS_H_
 #define PERSISTENCE_HEAT_MAPS_H_
 
+// gudhi include
+#include <gudhi/read_persistence_from_file.h>
+#include <gudhi/common_persistence_representations.h>
+
 // standard include
 #include <vector>
 #include <sstream>
 #include <iostream>
 #include <cmath>
 #include <limits>
-#include <vector>
 #include <algorithm>
-
-// gudhi include
-#include <gudhi/read_persistence_from_file.h>
-#include <gudhi/common_persistence_representations.h>
+#include <utility>
+#include <string>
+#include <functional>
 
 namespace Gudhi {
 namespace Persistence_representations {
@@ -68,8 +70,8 @@ std::vector<std::vector<double> > create_Gaussian_filter(size_t pixel_radius, do
     getchar();
   }
 
-  for (int x = -pixel_radius; x <= (int)pixel_radius; x++) {
-    for (int y = -pixel_radius; y <= (int)pixel_radius; y++) {
+  for (int x = -pixel_radius; x <= static_cast<int>(pixel_radius); x++) {
+    for (int y = -pixel_radius; y <= static_cast<int>(pixel_radius); y++) {
       double real_x = 2 * sigma * x / pixel_radius;
       double real_y = 2 * sigma * y / pixel_radius;
       r = sqrt(real_x * real_x + real_y * real_y);
@@ -123,7 +125,7 @@ class constant_scaling_function {
 class distance_from_diagonal_scaling {
  public:
   double operator()(const std::pair<double, double>& point_in_diagram) {
-    //(point_in_diagram.first+point_in_diagram.second)/2.0
+    // (point_in_diagram.first+point_in_diagram.second)/2.0
     return sqrt(pow((point_in_diagram.first - (point_in_diagram.first + point_in_diagram.second) / 2.0), 2) +
                 pow((point_in_diagram.second - (point_in_diagram.first + point_in_diagram.second) / 2.0), 2));
   }
@@ -194,7 +196,7 @@ class Persistence_heat_maps {
     this->erase_below_diagonal = false;
     this->min_ = this->max_ = 0;
     this->set_up_parameters_for_basic_classes();
-  };
+  }
 
   /**
    * Construction that takes at the input the following parameters:
@@ -580,8 +582,8 @@ void Persistence_heat_maps<Scalling_of_kernels>::construct(const std::vector<std
 
   for (size_t pt_nr = 0; pt_nr != intervals_.size(); ++pt_nr) {
     // compute the value of intervals_[pt_nr] in the grid:
-    int x_grid = (int)((intervals_[pt_nr].first - this->min_) / (this->max_ - this->min_) * number_of_pixels);
-    int y_grid = (int)((intervals_[pt_nr].second - this->min_) / (this->max_ - this->min_) * number_of_pixels);
+    int x_grid = static_cast<int>((intervals_[pt_nr].first - this->min_) / (this->max_ - this->min_) * number_of_pixels);
+    int y_grid = static_cast<int>((intervals_[pt_nr].second - this->min_) / (this->max_ - this->min_) * number_of_pixels);
 
     if (dbg) {
       std::cerr << "point : " << intervals_[pt_nr].first << " , " << intervals_[pt_nr].second << std::endl;
@@ -597,7 +599,6 @@ void Persistence_heat_maps<Scalling_of_kernels>::construct(const std::vector<std
 
     if (dbg) {
       std::cerr << "After shift : \n";
-      ;
       std::cerr << "x_grid : " << x_grid << std::endl;
       std::cerr << "y_grid : " << y_grid << std::endl;
     }
@@ -706,7 +707,7 @@ void Persistence_heat_maps<Scalling_of_kernels>::compute_mean(const std::vector<
       for (size_t map_no = 0; map_no != maps.size(); ++map_no) {
         mean += maps[map_no]->heat_map[i][j];
       }
-      heat_maps[i][j] = mean / (double)maps.size();
+      heat_maps[i][j] = mean / static_cast<double>(maps.size());
     }
   }
   this->heat_map = heat_maps;
@@ -782,7 +783,7 @@ void Persistence_heat_maps<Scalling_of_kernels>::load_from_file(const char* file
   // checking if the file exist / if it was open.
   if (!in.good()) {
     std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
-    throw "The file from which you are trying to read the persistence landscape do not exist. The program will now terminate \n";
+    throw "The persistence landscape file do not exist. The program will now terminate \n";
   }
 
   // now we read the file one by one.
@@ -848,7 +849,7 @@ double Persistence_heat_maps<Scalling_of_kernels>::distance(const Persistence_he
   if (!this->check_if_the_same(second)) {
     std::cerr << "The persistence images are of non compatible sizes. We cannot therefore compute distance between "
                  "them. The program will now terminate";
-    throw "The persistence images are of non compatible sizes. We cannot therefore compute distance between them. The program will now terminate";
+    throw "The persistence images are of non compatible sizes. The program will now terminate";
   }
 
   // if we are here, we know that the two persistence images are defined on the same domain, so we can start computing
@@ -897,7 +898,7 @@ double Persistence_heat_maps<Scalling_of_kernels>::compute_scalar_product(const 
   if (!this->check_if_the_same(second)) {
     std::cerr << "The persistence images are of non compatible sizes. We cannot therefore compute distance between "
                  "them. The program will now terminate";
-    throw "The persistence images are of non compatible sizes. We cannot therefore compute distance between them. The program will now terminate";
+    throw "The persistence images are of non compatible sizes. The program will now terminate";
   }
 
   // if we are here, we know that the two persistence images are defined on the same domain, so we can start computing

@@ -28,6 +28,8 @@ using namespace Gudhi::Persistence_representations;
 
 #include <iostream>
 #include <sstream>
+#include <limits>
+#include <vector>
 
 int main(int argc, char** argv) {
   std::cout << "This program compute the bottleneck distance of persistence diagrams stored in a files. \n";

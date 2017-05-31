@@ -26,6 +26,10 @@
 // gudhi include
 #include <gudhi/Persistence_heat_maps.h>
 
+#include <limits>
+#include <utility>
+#include <vector>
+
 namespace Gudhi {
 namespace Persistence_representations {
 
@@ -117,8 +121,8 @@ void PSSK::construct(const std::vector<std::pair<double, double> >& intervals_,
 
   for (size_t pt_nr = 0; pt_nr != intervals_.size(); ++pt_nr) {
     // compute the value of intervals_[pt_nr] in the grid:
-    int x_grid = (int)((intervals_[pt_nr].first - this->min_) / (this->max_ - this->min_) * number_of_pixels);
-    int y_grid = (int)((intervals_[pt_nr].second - this->min_) / (this->max_ - this->min_) * number_of_pixels);
+    int x_grid = static_cast<int>((intervals_[pt_nr].first - this->min_) / (this->max_ - this->min_) * number_of_pixels);
+    int y_grid = static_cast<int>((intervals_[pt_nr].second - this->min_) / (this->max_ - this->min_) * number_of_pixels);
 
     if (dbg) {
       std::cerr << "point : " << intervals_[pt_nr].first << " , " << intervals_[pt_nr].second << std::endl;
@@ -134,7 +138,6 @@ void PSSK::construct(const std::vector<std::pair<double, double> >& intervals_,
 
     if (dbg) {
       std::cerr << "After shift : \n";
-      ;
       std::cerr << "x_grid : " << x_grid << std::endl;
       std::cerr << "y_grid : " << y_grid << std::endl;
       std::cerr << "filter.size() : " << filter.size() << std::endl;

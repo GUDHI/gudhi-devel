@@ -27,6 +27,8 @@ using namespace Gudhi::Persistence_representations;
 
 #include <iostream>
 #include <sstream>
+#include <limits>
+#include <vector>
 
 int main(int argc, char** argv) {
   std::cout << "This program creates persistence heat map of diagrams provided as an input. The Gaussian kernels are "

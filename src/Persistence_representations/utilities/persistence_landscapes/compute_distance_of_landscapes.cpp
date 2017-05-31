@@ -27,6 +27,7 @@ using namespace Gudhi::Persistence_representations;
 
 #include <iostream>
 #include <sstream>
+#include <limits>
 
 int main(int argc, char** argv) {
   std::cout << "This program compute distance of persistence landscapes stored in a file (the file needs to be created "

@@ -27,6 +27,8 @@ using namespace Gudhi::Persistence_representations;
 
 #include <iostream>
 #include <sstream>
+#include <limits>
+#include <vector>
 
 int main(int argc, char** argv) {
   std::cout << "This program creates persistence landscape on grid of diagrams provided as an input.\n";
@@ -66,7 +68,7 @@ int main(int argc, char** argv) {
     if ((min_ != -1) || (max_ != -1)) {
       l = Persistence_landscape_on_grid(filenames[i], min_, max_, size_of_grid, dimension);
     } else {
-      //(min_ == -1) && (max_ == -1), in this case the program will find min_ and max_ based on the data.
+      // (min_ == -1) && (max_ == -1), in this case the program will find min_ and max_ based on the data.
       l = Persistence_landscape_on_grid(filenames[i], size_of_grid, dimension);
     }
     std::stringstream ss;

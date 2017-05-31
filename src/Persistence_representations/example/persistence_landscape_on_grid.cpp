@@ -22,10 +22,12 @@
 
 #include <gudhi/Persistence_landscape_on_grid.h>
 
+#include <iostream>
+#include <utility>
+#include <vector>
+
 using namespace Gudhi;
 using namespace Gudhi::Persistence_representations;
-
-#include <iostream>
 
 int main(int argc, char** argv) {
   // create two simple vectors with birth--death pairs:

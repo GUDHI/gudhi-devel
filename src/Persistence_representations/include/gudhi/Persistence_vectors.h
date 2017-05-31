@@ -23,17 +23,19 @@
 #ifndef PERSISTENCE_VECTORS_H_
 #define PERSISTENCE_VECTORS_H_
 
+// gudhi include
+#include <gudhi/read_persistence_from_file.h>
+#include <gudhi/common_persistence_representations.h>
+#include <gudhi/distance_functions.h>
+
 #include <fstream>
 #include <cmath>
 #include <algorithm>
 #include <iostream>
 #include <limits>
 #include <functional>
-
-// gudhi include
-#include <gudhi/read_persistence_from_file.h>
-#include <gudhi/common_persistence_representations.h>
-#include <gudhi/distance_functions.h>
+#include <utility>
+#include <vector>
 
 namespace Gudhi {
 namespace Persistence_representations {
@@ -66,7 +68,7 @@ class Vector_distances_in_diagram {
   /**
   * The default constructor.
   **/
-  Vector_distances_in_diagram(){};
+  Vector_distances_in_diagram(){}
 
   /**
       * The constructor that takes as an input a multiset of persistence intervals (given as vector of birth-death
@@ -517,7 +519,7 @@ void Vector_distances_in_diagram<F>::compute_average(const std::vector<Vector_di
   }
 
   for (size_t i = 0; i != maximal_length_of_vector; ++i) {
-    av[i] /= (double)to_average.size();
+    av[i] /= static_cast<double>(to_average.size());
   }
   this->sorted_vector_of_distances = av;
   this->where_to_cut = av.size();
@@ -611,7 +613,7 @@ void Vector_distances_in_diagram<F>::load_from_file(const char* filename) {
   // check if the file exist.
   if (!in.good()) {
     std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
-    throw "The file from which you are trying to read the persistence landscape do not exist. The program will now terminate \n";
+    throw "The persistence landscape file do not exist. The program will now terminate \n";
   }
 
   double number;
