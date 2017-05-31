@@ -16,3 +16,6 @@ add_test(NAME Contraction_example_tore3D_0.2 COMMAND $<TARGET_FILE:RipsContracti
 #    "${CMAKE_SOURCE_DIR}/data/points/sphere3D_2646.off" "0.2")
 #add_test(NAME Contraction_example_SO3_0.3 COMMAND $<TARGET_FILE:RipsContraction>
 #    "${CMAKE_SOURCE_DIR}/data/points/SO3_10000.off" "0.3")
+
+install(TARGETS RipsContraction DESTINATION bin)
+install(TARGETS GarlandHeckbert DESTINATION bin)

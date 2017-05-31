@@ -19,6 +19,9 @@ add_test(NAME Simplex_tree_example_simple_simplex_tree COMMAND $<TARGET_FILE:Sim
 add_executable ( Simplex_tree_example_mini_simplex_tree mini_simplex_tree.cpp )
 add_test(NAME Simplex_tree_example_mini_simplex_tree COMMAND $<TARGET_FILE:Simplex_tree_example_mini_simplex_tree>)
 
+install(TARGETS Simplex_tree_example_from_cliques_of_graph DESTINATION bin)
+install(TARGETS Simplex_tree_example_simple_simplex_tree DESTINATION bin)
+install(TARGETS Simplex_tree_example_mini_simplex_tree DESTINATION bin)
 
 # An example with Simplex-tree using CGAL alpha_shapes_3
 if(GMP_FOUND AND CGAL_FOUND)
@@ -29,4 +32,7 @@ if(GMP_FOUND AND CGAL_FOUND)
   endif()
   add_test(NAME Simplex_tree_example_alpha_shapes_3_from_off COMMAND $<TARGET_FILE:Simplex_tree_example_alpha_shapes_3_from_off>
       "${CMAKE_SOURCE_DIR}/data/points/bunny_5000.off")
+
+  install(TARGETS Simplex_tree_example_alpha_shapes_3_from_off DESTINATION bin)
+
 endif()
