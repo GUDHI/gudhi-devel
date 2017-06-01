@@ -25,6 +25,7 @@
 
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/Debug_utils.h>
+#include <boost/function_output_iterator.hpp>
 
 #include <boost/graph/adjacency_list.hpp>
 
@@ -338,29 +339,9 @@ where `dim` is an `int`, `birth` a `double`, and `death` a `double`.
 std::map<int, std::vector<std::pair<double, double>>> read_persistence_diagram_from_file(std::string const& filename) {
 
   std::map<int, std::vector<std::pair<double, double>>> ret;
-
-  std::ifstream in(filename);
-  if (!in.is_open()) {
-#ifdef DEBUG_TRACES
-    std::cerr << "File \"" << filename << "\" does not exist.\n";
-#endif  // DEBUG_TRACES
-    return ret;
-  }
-
-  while (!in.eof()) {
-    std::string line;
-    getline(in, line);
-    if (line.length() != 0 && line[0] != '#') {
-      double numbers[4];
-      int n = sscanf(line.c_str(), "%lf %lf %lf %lf", &numbers[0], &numbers[1], &numbers[2], &numbers[3]);
-      if (n >= 2) {
-        int dim = (n >= 3 ? static_cast<int>(numbers[n - 3]) : -1);
-        GUDHI_CHECK(numbers[n - 2] <= numbers[n - 1], "Error: birth > death.");
-        ret[dim].push_back(std::make_pair(numbers[n - 2], numbers[n - 1]));
-      }
-    }
-  }
-
+  read_persistence_diagram_from_file(
+    filename,
+    boost::make_function_output_iterator([&ret](auto t) { ret[get<0>(t)].push_back(std::make_pair(get<1>(t), get<2>(t))); }));
   return ret;
 } // read_persistence_diagram_from_file
 
@@ -377,30 +358,9 @@ where `dim` is an `int`, `birth` a `double`, and `death` a `double`.
 std::vector<std::pair<double, double>> read_persistence_diagram_from_file(std::string const& filename, int only_this_dim) {
 
   std::vector<std::pair<double, double>> ret;
-
-  std::ifstream in(filename);
-  if (!in.is_open()) {
-#ifdef DEBUG_TRACES
-    std::cerr << "File \"" << filename << "\" does not exist.\n";
-#endif  // DEBUG_TRACES
-    return ret;
-  }
-
-  while (!in.eof()) {
-    std::string line;
-    getline(in, line);
-    if (line.length() != 0 && line[0] != '#') {
-      double numbers[4];
-      int n = sscanf(line.c_str(), "%lf %lf %lf %lf", &numbers[0], &numbers[1], &numbers[2], &numbers[3]);
-      int dim = (n >= 3 ? static_cast<int>(numbers[n - 3]) : -1);
-      if (n >= 2 && (only_this_dim == -1 || dim == only_this_dim))
-      {
-        GUDHI_CHECK(numbers[n - 2] <= numbers[n - 1], "Error: birth > death.");
-        ret.push_back(std::make_pair(numbers[n - 2], numbers[n - 1]));
-      }
-    }
-  }
-
+  read_persistence_diagram_from_file(
+    filename, 
+    boost::make_function_output_iterator([&ret](auto t) { ret.emplace_back(get<1>(t), get<2>(t)); }));
   return ret;
 } // read_persistence_diagram_from_file
 
