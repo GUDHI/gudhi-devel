@@ -1,0 +1,114 @@
+To build the utilities, run in a Terminal:
+
+cd /path-to-utilities/
+cmake .
+make
+
+***********************************************************************************************************************
+Example of use of RIPS:
+
+Computation of the persistent homology with Z/2Z coefficients of the Rips complex on points 
+sampling a 3D torus:
+
+./rips_persistence ../../data/points/tore3D_1307.off -r 0.25 -m 0.5 -d 3 -p 2
+
+output:
+2  0 0 inf 
+2  1 0.0983494 inf 
+2  1 0.104347 inf 
+2  2 0.138335 inf 
+
+
+Every line is of this format: p1*...*pr   dim b d
+where
+ 	p1*...*pr is the product of prime numbers pi such that the homology feature exists in homology with Z/piZ coefficients. 
+	dim is the dimension of the homological feature,
+    b and d are respectively the birth and death of the feature and
+   
+
+
+with Z/3Z coefficients:
+
+./rips_persistence ../../data/points/tore3D_1307.off -r 0.25 -m 0.5 -d 3 -p 3
+
+output:
+3  0 0 inf 
+3  1 0.0983494 inf 
+3  1 0.104347 inf 
+3  2 0.138335 inf 
+
+***********************************************************************************************************************
+Example of use of ALPHA:
+
+For a more verbose mode, please run cmake with option "DEBUG_TRACES=TRUE" and recompile the programs.
+
+1) 3D special case
+------------------
+Computation of the persistent homology with Z/2Z coefficients of the alpha complex on points 
+sampling a torus 3D:
+
+./alpha_complex_3d_persistence ../../data/points/tore3D_300.off 2 0.45
+
+output:
+Simplex_tree dim: 3
+2  0 0 inf 
+2  1 0.0682162 1.0001 
+2  1 0.0934117 1.00003 
+2  2 0.56444 1.03938 
+
+Here we retrieve expected Betti numbers on a tore 3D:
+Betti numbers[0] = 1
+Betti numbers[1] = 2
+Betti numbers[2] = 1
+
+N.B.: - alpha_complex_3d_persistence accepts only OFF files in 3D dimension.
+      - filtration values are alpha square values
+
+2) d-Dimension case
+-------------------
+Computation of the persistent homology with Z/2Z coefficients of the alpha complex on points 
+sampling a torus 3D:
+
+./alpha_complex_persistence -r 32 -p 2 -m 0.45 ../../data/points/tore3D_300.off
+
+output:
+Alpha complex is of dimension 3 - 9273 simplices - 300 vertices.
+Simplex_tree dim: 3
+2  0 0 inf 
+2  1 0.0682162 1.0001 
+2  1 0.0934117 1.00003 
+2  2 0.56444 1.03938 
+
+Here we retrieve expected Betti numbers on a tore 3D:
+Betti numbers[0] = 1
+Betti numbers[1] = 2
+Betti numbers[2] = 1
+
+N.B.: - alpha_complex_persistence accepts OFF files in d-Dimension.
+      - filtration values are alpha square values
+
+3) 3D periodic special case
+---------------------------
+./periodic_alpha_complex_3d_persistence ../../data/points/grid_10_10_10_in_0_1.off ../../data/points/iso_cuboid_3_in_0_1.txt 3 1.0
+
+output:
+Periodic Delaunay computed.
+Simplex_tree dim: 3
+3  0 0 inf 
+3  1 0.0025 inf 
+3  1 0.0025 inf 
+3  1 0.0025 inf 
+3  2 0.005 inf 
+3  2 0.005 inf 
+3  2 0.005 inf 
+3  3 0.0075 inf 
+
+Here we retrieve expected Betti numbers on a tore 3D:
+Betti numbers[0] = 1
+Betti numbers[1] = 3
+Betti numbers[2] = 3
+Betti numbers[3] = 1
+
+N.B.: - periodic_alpha_complex_3d_persistence accepts only OFF files in 3D dimension. In this example, the periodic cube
+is hard coded to { x = [0,1]; y = [0,1]; z = [0,1] }
+      - filtration values are alpha square values
