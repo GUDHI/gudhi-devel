@@ -27,7 +27,8 @@
 #include <limits>
 #include <vector>
 
-using squared_distance_from_diagonal_scaling = Gudhi::Persistence_representations::squared_distance_from_diagonal_scaling;
+using squared_distance_from_diagonal_scaling =
+  Gudhi::Persistence_representations::squared_distance_from_diagonal_scaling;
 using Persistence_heat_maps =
   Gudhi::Persistence_representations::Persistence_heat_maps<squared_distance_from_diagonal_scaling>;
 

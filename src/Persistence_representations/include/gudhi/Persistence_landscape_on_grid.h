@@ -39,6 +39,7 @@
 #include <functional>
 #include <utility>
 #include <string>
+#include <cstdint>
 
 namespace Gudhi {
 namespace Persistence_representations {
@@ -101,7 +102,7 @@ class Persistence_landscape_on_grid {
       **/
   Persistence_landscape_on_grid(const char* filename, double grid_min_, double grid_max_, size_t number_of_points_,
                                 unsigned number_of_levels_of_landscape,
-                                unsigned short dimension_ = std::numeric_limits<unsigned short>::max());
+                                uint16_t dimension_ = std::numeric_limits<uint16_t>::max());
 
   /**
       * Constructor that reads persistence intervals from file and creates persistence landscape. The format of the
@@ -111,7 +112,7 @@ class Persistence_landscape_on_grid {
       * and the dimension of intervals that are need to be read from a file (in case of Gudhi format files).
      **/
   Persistence_landscape_on_grid(const char* filename, double grid_min_, double grid_max_, size_t number_of_points_,
-                                unsigned short dimension_ = std::numeric_limits<unsigned short>::max());
+                                uint16_t dimension_ = std::numeric_limits<uint16_t>::max());
 
   /**
        * Constructor that reads persistence intervals from file and creates persistence landscape. The format of the
@@ -121,7 +122,7 @@ class Persistence_landscape_on_grid {
        * functions to be created. The remaining parameters are calculated based on data.
       **/
   Persistence_landscape_on_grid(const char* filename, size_t number_of_points, unsigned number_of_levels_of_landscape,
-                                unsigned short dimension = std::numeric_limits<unsigned short>::max());
+                                uint16_t dimension = std::numeric_limits<uint16_t>::max());
 
   /**
      * Constructor that reads persistence intervals from file and creates persistence landscape. The format of the input
@@ -133,7 +134,7 @@ class Persistence_landscape_on_grid {
      * The remaining parameters are calculated based on data.
     **/
   Persistence_landscape_on_grid(const char* filename, size_t number_of_points,
-                                unsigned short dimension = std::numeric_limits<unsigned short>::max());
+                                uint16_t dimension = std::numeric_limits<uint16_t>::max());
 
   /**
    * This procedure loads a landscape from file. It erase all the data that was previously stored in this landscape.
@@ -1095,9 +1096,9 @@ Persistence_landscape_on_grid::Persistence_landscape_on_grid(const std::vector<s
 }
 
 Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filename, double grid_min_, double grid_max_,
-                                                             size_t number_of_points_, unsigned short dimension) {
+                                                             size_t number_of_points_, uint16_t dimension) {
   std::vector<std::pair<double, double> > p;
-  if (dimension == std::numeric_limits<unsigned short>::max()) {
+  if (dimension == std::numeric_limits<uint16_t>::max()) {
     p = read_persistence_intervals_in_one_dimension_from_file(filename);
   } else {
     p = read_persistence_intervals_in_one_dimension_from_file(filename, dimension);
@@ -1108,9 +1109,9 @@ Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filenam
 Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filename, double grid_min_, double grid_max_,
                                                              size_t number_of_points_,
                                                              unsigned number_of_levels_of_landscape,
-                                                             unsigned short dimension) {
+                                                             uint16_t dimension) {
   std::vector<std::pair<double, double> > p;
-  if (dimension == std::numeric_limits<unsigned short>::max()) {
+  if (dimension == std::numeric_limits<uint16_t>::max()) {
     p = read_persistence_intervals_in_one_dimension_from_file(filename);
   } else {
     p = read_persistence_intervals_in_one_dimension_from_file(filename, dimension);
@@ -1119,9 +1120,9 @@ Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filenam
 }
 
 Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filename, size_t number_of_points_,
-                                                             unsigned short dimension) {
+                                                             uint16_t dimension) {
   std::vector<std::pair<double, double> > p;
-  if (dimension == std::numeric_limits<unsigned short>::max()) {
+  if (dimension == std::numeric_limits<uint16_t>::max()) {
     p = read_persistence_intervals_in_one_dimension_from_file(filename);
   } else {
     p = read_persistence_intervals_in_one_dimension_from_file(filename, dimension);
@@ -1137,9 +1138,9 @@ Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filenam
 
 Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filename, size_t number_of_points_,
                                                              unsigned number_of_levels_of_landscape,
-                                                             unsigned short dimension) {
+                                                             uint16_t dimension) {
   std::vector<std::pair<double, double> > p;
-  if (dimension == std::numeric_limits<unsigned short>::max()) {
+  if (dimension == std::numeric_limits<uint16_t>::max()) {
     p = read_persistence_intervals_in_one_dimension_from_file(filename);
   } else {
     p = read_persistence_intervals_in_one_dimension_from_file(filename, dimension);
