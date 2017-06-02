@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
     std::cout << "Wrong number of parameters, the program will now terminate. \n";
     return 1;
   }
-  Vector_distances_in_diagram<Euclidean_distance> l;
+  Vector_distances_in_diagram l;
   l.load_from_file(argv[1]);
   l.plot(argv[1]);
 
