@@ -25,6 +25,7 @@
 
 #include <utility>
 #include <string>
+#include <cmath>
 
 namespace Gudhi {
 namespace Persistence_representations {
@@ -39,7 +40,7 @@ double epsi = 0.000005;
  *  the top of the file. Setting up the epsi gives the user a tolerance on what should be consider equal.
 **/
 inline bool almost_equal(double a, double b) {
-  if (fabs(a - b) < epsi) return true;
+  if (std::fabs(a - b) < epsi) return true;
   return false;
 }
 
