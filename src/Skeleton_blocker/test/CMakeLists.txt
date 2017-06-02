@@ -4,11 +4,11 @@ project(Skeleton_blocker_tests)
 include(GUDHI_test_coverage)
 
 add_executable ( Skeleton_blocker_test_unit test_skeleton_blocker_complex.cpp )
-target_link_libraries(Skeleton_blocker_test_unit ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+target_link_libraries(Skeleton_blocker_test_unit ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 add_executable ( Skeleton_blocker_test_geometric_complex test_skeleton_blocker_geometric_complex.cpp )
-target_link_libraries(Skeleton_blocker_test_geometric_complex ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+target_link_libraries(Skeleton_blocker_test_geometric_complex ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 add_executable ( Skeleton_blocker_test_simplifiable test_skeleton_blocker_simplifiable.cpp )
-target_link_libraries(Skeleton_blocker_test_simplifiable ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+target_link_libraries(Skeleton_blocker_test_simplifiable ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 # Do not forget to copy test files in current binary dir
 file(COPY "test2.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)

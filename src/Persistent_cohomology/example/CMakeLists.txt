@@ -2,25 +2,23 @@ cmake_minimum_required(VERSION 2.6)
 project(Persistent_cohomology_examples)
 
 add_executable(plain_homology plain_homology.cpp)
-target_link_libraries(plain_homology ${Boost_SYSTEM_LIBRARY})
 
 add_executable(persistence_from_simple_simplex_tree persistence_from_simple_simplex_tree.cpp)
-target_link_libraries(persistence_from_simple_simplex_tree ${Boost_SYSTEM_LIBRARY})
 
 add_executable(rips_distance_matrix_persistence rips_distance_matrix_persistence.cpp)
-target_link_libraries(rips_distance_matrix_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(rips_distance_matrix_persistence ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 add_executable(rips_persistence rips_persistence.cpp)
-target_link_libraries(rips_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(rips_persistence ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 add_executable(rips_persistence_step_by_step rips_persistence_step_by_step.cpp)
-target_link_libraries(rips_persistence_step_by_step ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(rips_persistence_step_by_step ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 add_executable(rips_persistence_via_boundary_matrix rips_persistence_via_boundary_matrix.cpp)
-target_link_libraries(rips_persistence_via_boundary_matrix ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(rips_persistence_via_boundary_matrix ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 add_executable(persistence_from_file persistence_from_file.cpp)
-target_link_libraries(persistence_from_file ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(persistence_from_file ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 if (TBB_FOUND)
   target_link_libraries(plain_homology ${TBB_LIBRARIES})
@@ -60,7 +58,7 @@ if(GMP_FOUND)
    if(GMPXX_FOUND)
       add_executable(rips_multifield_persistence rips_multifield_persistence.cpp )
       target_link_libraries(rips_multifield_persistence
-          ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES})
+          ${Boost_PROGRAM_OPTIONS_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES})
       if (TBB_FOUND)
         target_link_libraries(rips_multifield_persistence ${TBB_LIBRARIES})
       endif(TBB_FOUND)
@@ -72,11 +70,11 @@ endif(GMP_FOUND)
 
 if(CGAL_FOUND)
   add_executable(alpha_complex_3d_persistence alpha_complex_3d_persistence.cpp)
-  target_link_libraries(alpha_complex_3d_persistence ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
+  target_link_libraries(alpha_complex_3d_persistence ${CGAL_LIBRARY})
   add_executable(exact_alpha_complex_3d_persistence exact_alpha_complex_3d_persistence.cpp)
-  target_link_libraries(exact_alpha_complex_3d_persistence ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
+  target_link_libraries(exact_alpha_complex_3d_persistence ${CGAL_LIBRARY})
   add_executable(weighted_alpha_complex_3d_persistence weighted_alpha_complex_3d_persistence.cpp)
-  target_link_libraries(weighted_alpha_complex_3d_persistence ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
+  target_link_libraries(weighted_alpha_complex_3d_persistence ${CGAL_LIBRARY})
 
   if (TBB_FOUND)
     target_link_libraries(alpha_complex_3d_persistence ${TBB_LIBRARIES})
@@ -97,13 +95,13 @@ if(CGAL_FOUND)
   if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
     add_executable (alpha_complex_persistence alpha_complex_persistence.cpp)
     target_link_libraries(alpha_complex_persistence
-        ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+        ${CGAL_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
     add_executable(periodic_alpha_complex_3d_persistence periodic_alpha_complex_3d_persistence.cpp)
-    target_link_libraries(periodic_alpha_complex_3d_persistence ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
+    target_link_libraries(periodic_alpha_complex_3d_persistence ${CGAL_LIBRARY})
 
     add_executable(custom_persistence_sort custom_persistence_sort.cpp)
-    target_link_libraries(custom_persistence_sort ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
+    target_link_libraries(custom_persistence_sort ${CGAL_LIBRARY})
 
     if (TBB_FOUND)
       target_link_libraries(alpha_complex_persistence ${TBB_LIBRARIES})
