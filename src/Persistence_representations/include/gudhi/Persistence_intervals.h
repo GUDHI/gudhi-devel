@@ -403,7 +403,8 @@ std::vector<double> Persistence_intervals::characteristic_function_of_diagram(do
 
     for (size_t pos = beginIt; pos != endIt; ++pos) {
       result[pos] +=
-          ((x_max - x_min) / static_cast<double>(number_of_bins)) * (this->intervals[i].second - this->intervals[i].first);
+          ((x_max - x_min) / static_cast<double>(number_of_bins)) *
+           (this->intervals[i].second - this->intervals[i].first);
     }
     if (dbg) {
       std::cerr << "Result at this stage \n";

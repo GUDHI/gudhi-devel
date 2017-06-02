@@ -22,13 +22,14 @@
 
 #include <gudhi/Persistence_vectors.h>
 
-using namespace Gudhi;
-using namespace Gudhi::Persistence_representations;
-
 #include <iostream>
 #include <sstream>
 #include <limits>
 #include <vector>
+
+using Euclidean_distance = Gudhi::Euclidean_distance;
+using Vector_distances_in_diagram =
+  Gudhi::Persistence_representations::Vector_distances_in_diagram<Euclidean_distance>;
 
 int main(int argc, char** argv) {
   std::cout << "This program compute distance of persistence vectors stored in a file (the file needs to be created "
@@ -52,10 +53,10 @@ int main(int argc, char** argv) {
   for (int i = 2; i < argc; ++i) {
     filenames.push_back(argv[i]);
   }
-  std::vector<Vector_distances_in_diagram<Euclidean_distance> > vectors;
+  std::vector<Vector_distances_in_diagram> vectors;
   vectors.reserve(filenames.size());
   for (size_t file_no = 0; file_no != filenames.size(); ++file_no) {
-    Vector_distances_in_diagram<Euclidean_distance> l;
+    Vector_distances_in_diagram l;
     l.load_from_file(filenames[file_no]);
     vectors.push_back(l);
   }

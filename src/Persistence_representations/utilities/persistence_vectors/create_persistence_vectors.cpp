@@ -22,13 +22,14 @@
 
 #include <gudhi/Persistence_vectors.h>
 
-using namespace Gudhi;
-using namespace Gudhi::Persistence_representations;
-
 #include <iostream>
 #include <sstream>
 #include <limits>
 #include <vector>
+
+using Euclidean_distance = Gudhi::Euclidean_distance;
+using Vector_distances_in_diagram =
+  Gudhi::Persistence_representations::Vector_distances_in_diagram<Euclidean_distance>;
 
 int main(int argc, char** argv) {
   std::cout << "This program creates persistence vectors of diagrams provided as an input. The first parameter of this "
@@ -52,7 +53,7 @@ int main(int argc, char** argv) {
 
   for (size_t i = 0; i != filenames.size(); ++i) {
     std::cerr << "Creating persistence vectors based on a file : " << filenames[i] << std::endl;
-    Vector_distances_in_diagram<Euclidean_distance> l(filenames[i], dimension);
+    Vector_distances_in_diagram l(filenames[i], dimension);
     std::stringstream ss;
     ss << filenames[i] << ".vect";
     l.print_to_file(ss.str().c_str());

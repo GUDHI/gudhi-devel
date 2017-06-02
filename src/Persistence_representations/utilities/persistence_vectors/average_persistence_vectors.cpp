@@ -22,11 +22,12 @@
 
 #include <gudhi/Persistence_vectors.h>
 
-using namespace Gudhi;
-using namespace Gudhi::Persistence_representations;
-
 #include <iostream>
 #include <vector>
+
+using Euclidean_distance = Gudhi::Euclidean_distance;
+using Vector_distances_in_diagram =
+  Gudhi::Persistence_representations::Vector_distances_in_diagram<Euclidean_distance>;
 
 int main(int argc, char** argv) {
   std::cout << "This program computes average persistence vector of persistence vectors created based on persistence "
@@ -44,14 +45,14 @@ int main(int argc, char** argv) {
   }
 
   std::cout << "Reading persistence vectors...\n";
-  std::vector<Vector_distances_in_diagram<Euclidean_distance>*> lands;
+  std::vector<Vector_distances_in_diagram*> lands;
   for (size_t i = 0; i != filenames.size(); ++i) {
-    Vector_distances_in_diagram<Euclidean_distance>* l = new Vector_distances_in_diagram<Euclidean_distance>;
+    Vector_distances_in_diagram* l = new Vector_distances_in_diagram;
     l->load_from_file(filenames[i]);
     lands.push_back(l);
   }
 
-  Vector_distances_in_diagram<Euclidean_distance> av;
+  Vector_distances_in_diagram av;
   av.compute_average(lands);
 
   av.print_to_file("average.vect");
