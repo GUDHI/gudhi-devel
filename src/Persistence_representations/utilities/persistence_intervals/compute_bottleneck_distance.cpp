@@ -23,13 +23,12 @@
 #include <gudhi/Persistence_intervals_with_distances.h>
 #include <gudhi/read_persistence_from_file.h>
 
-using namespace Gudhi;
-using namespace Gudhi::Persistence_representations;
-
 #include <iostream>
 #include <sstream>
 #include <limits>
 #include <vector>
+
+using Persistence_intervals_with_distances = Gudhi::Persistence_representations::Persistence_intervals_with_distances;
 
 int main(int argc, char** argv) {
   std::cout << "This program compute the bottleneck distance of persistence diagrams stored in a files. \n";

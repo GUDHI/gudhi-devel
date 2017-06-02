@@ -22,13 +22,12 @@
 
 #include <gudhi/Persistence_landscape_on_grid.h>
 
-using namespace Gudhi;
-using namespace Gudhi::Persistence_representations;
-
 #include <iostream>
 #include <sstream>
 #include <limits>
 #include <vector>
+
+using Persistence_landscape_on_grid = Gudhi::Persistence_representations::Persistence_landscape_on_grid;
 
 int main(int argc, char** argv) {
   std::cout << "This program creates persistence landscape on grid of diagrams provided as an input.\n";

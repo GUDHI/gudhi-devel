@@ -22,12 +22,11 @@
 
 #include <gudhi/Persistence_landscape.h>
 
-using namespace Gudhi;
-using namespace Gudhi::Persistence_representations;
-
 #include <iostream>
 #include <sstream>
 #include <vector>
+
+using Persistence_landscape = Gudhi::Persistence_representations::Persistence_landscape;
 
 int main(int argc, char** argv) {
   std::cout << "This program compute scalar product of persistence landscapes stored in a file (the file needs to be "

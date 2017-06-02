@@ -28,8 +28,7 @@
 #include <vector>
 #include <utility>
 
-using namespace Gudhi;
-using namespace Gudhi::Persistence_representations;
+using Persistence_intervals = Gudhi::Persistence_representations::Persistence_intervals;
 
 int main(int argc, char** argv) {
   std::cout << "This program compute the dominant intervals. A number of intervals to be displayed is a parameter of "

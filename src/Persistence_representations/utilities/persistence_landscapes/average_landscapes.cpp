@@ -22,11 +22,10 @@
 
 #include <gudhi/Persistence_landscape.h>
 
-using namespace Gudhi;
-using namespace Gudhi::Persistence_representations;
-
 #include <iostream>
 #include <vector>
+
+using Persistence_landscape = Gudhi::Persistence_representations::Persistence_landscape;
 
 int main(int argc, char** argv) {
   std::cout << "This program computes average persistence landscape of persistence landscapes created based on "

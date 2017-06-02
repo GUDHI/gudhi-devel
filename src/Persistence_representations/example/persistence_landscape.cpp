@@ -26,8 +26,7 @@
 #include <vector>
 #include <utility>
 
-using namespace Gudhi;
-using namespace Gudhi::Persistence_representations;
+using Persistence_landscape = Gudhi::Persistence_representations::Persistence_landscape;
 
 int main(int argc, char** argv) {
   // create two simple vectors with birth--death pairs:

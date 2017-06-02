@@ -21,7 +21,6 @@
  */
 
 #include <gudhi/Persistence_vectors.h>
-#include <gudhi/reader_utils.h>
 
 #include <iostream>
 #include <vector>
@@ -30,8 +29,8 @@
 #include <limits>
 #include <utility>
 
-using namespace Gudhi;
-using namespace Gudhi::Persistence_representations;
+using Vector_distances_in_diagram =
+  Gudhi::Persistence_representations::Vector_distances_in_diagram<Gudhi::Euclidean_distance>;
 
 int main(int argc, char** argv) {
   // create two simple vectors with birth--death pairs:
@@ -50,17 +49,15 @@ int main(int argc, char** argv) {
   persistence2.push_back(std::make_pair(6, 10));
 
   // create two persistence vectors based on persistence1 and persistence2:
-  Vector_distances_in_diagram<Euclidean_distance> v1 =
-      Vector_distances_in_diagram<Euclidean_distance>(persistence1, std::numeric_limits<size_t>::max());
-  Vector_distances_in_diagram<Euclidean_distance> v2 =
-      Vector_distances_in_diagram<Euclidean_distance>(persistence2, std::numeric_limits<size_t>::max());
+  Vector_distances_in_diagram v1(persistence1, std::numeric_limits<size_t>::max());
+  Vector_distances_in_diagram v2(persistence2, std::numeric_limits<size_t>::max());
 
   // writing to a stream:
   std::cout << "v1 : " << v1 << std::endl;
   std::cout << "v2 : " << v2 << std::endl;
 
   // averages:
-  Vector_distances_in_diagram<Euclidean_distance> average;
+  Vector_distances_in_diagram average;
   average.compute_average({&v1, &v2});
   std::cout << "Average : " << average << std::endl;
 

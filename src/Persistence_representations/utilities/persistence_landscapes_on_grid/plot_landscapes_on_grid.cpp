@@ -22,11 +22,10 @@
 
 #include <gudhi/Persistence_landscape_on_grid.h>
 
-using namespace Gudhi;
-using namespace Gudhi::Persistence_representations;
-
 #include <iostream>
 #include <sstream>
+
+using Persistence_landscape_on_grid = Gudhi::Persistence_representations::Persistence_landscape_on_grid;
 
 int main(int argc, char** argv) {
   std::cout << "This program plot persistence landscape on grid stored in a file (the file needs to be created "

@@ -1,11 +1,10 @@
 cmake_minimum_required(VERSION 2.6)
-project(GUDHI_STAT)
+project(Persistence_representations_heat_maps_utilities)
 
 #persitence heat maps
 
 add_executable ( create_persistence_heat_maps create_persistence_heat_maps.cpp )
 target_link_libraries(create_persistence_heat_maps ${Boost_SYSTEM_LIBRARY})
-#add_test ( create_persistence_heat_maps ${CMAKE_CURRENT_BINARY_DIR}/create_persistence_heat_maps   10 -1 -1 4 -1  simple_diagram.txt )
 add_test ( create_persistence_heat_maps ${CMAKE_CURRENT_BINARY_DIR}/create_persistence_heat_maps   10 -1 -1 4 -1   "${CMAKE_SOURCE_DIR}/data/persistence_diagram/simple_diagram.txt" )
 
 add_executable ( create_pssk create_pssk.cpp )

@@ -28,8 +28,7 @@
 #include <limits>
 #include <utility>
 
-using namespace Gudhi;
-using namespace Gudhi::Persistence_representations;
+using Persistence_intervals = Gudhi::Persistence_representations::Persistence_intervals;
 
 int main(int argc, char** argv) {
   std::cout << "This program compute a histogram of barcode's length. A number of bins in the histogram is a parameter "

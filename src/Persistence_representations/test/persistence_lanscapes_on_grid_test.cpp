@@ -21,7 +21,7 @@
  */
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE "Persistence_representations"
+#define BOOST_TEST_MODULE "Persistence_landscapes_on_grid_test"
 #include <boost/test/unit_test.hpp>
 #include <gudhi/reader_utils.h>
 #include <gudhi/Persistence_landscape_on_grid.h>

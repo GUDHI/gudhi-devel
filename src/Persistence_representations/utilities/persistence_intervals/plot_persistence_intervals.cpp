@@ -29,10 +29,7 @@
 #include <vector>
 #include <utility>
 
-using namespace Gudhi;
-using namespace Gudhi::Persistence_representations;
-
-double epsilon = 0.0000005;
+using Persistence_intervals = Gudhi::Persistence_representations::Persistence_intervals;
 
 int main(int argc, char** argv) {
   if (argc < 2) {
@@ -50,7 +47,7 @@ int main(int argc, char** argv) {
     dimension = (unsigned)dim;
   }
   std::vector<std::pair<double, double> > intervals =
-      read_persistence_intervals_in_one_dimension_from_file(argv[1], dimension);
+      Gudhi::Persistence_representations::read_persistence_intervals_in_one_dimension_from_file(argv[1], dimension);
   Persistence_intervals b(intervals);
   b.plot(argv[1]);
   return 0;

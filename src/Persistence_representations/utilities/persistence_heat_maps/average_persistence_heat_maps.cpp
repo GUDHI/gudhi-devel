@@ -22,11 +22,11 @@
 
 #include <gudhi/Persistence_heat_maps.h>
 
-using namespace Gudhi;
-using namespace Gudhi::Persistence_representations;
-
 #include <iostream>
 #include <vector>
+
+using constant_scaling_function = Gudhi::Persistence_representations::constant_scaling_function;
+using Persistence_heat_maps = Gudhi::Persistence_representations::Persistence_heat_maps<constant_scaling_function>;
 
 int main(int argc, char** argv) {
   std::cout << "This program computes average persistence landscape of persistence landscapes created based on "
@@ -44,14 +44,14 @@ int main(int argc, char** argv) {
   }
 
   std::cout << "Creating persistence landscapes...\n";
-  std::vector<Persistence_heat_maps<constant_scaling_function>*> maps;
+  std::vector<Persistence_heat_maps*> maps;
   for (size_t i = 0; i != filenames.size(); ++i) {
-    Persistence_heat_maps<constant_scaling_function>* l = new Persistence_heat_maps<constant_scaling_function>;
+    Persistence_heat_maps* l = new Persistence_heat_maps;
     l->load_from_file(filenames[i]);
     maps.push_back(l);
   }
 
-  Persistence_heat_maps<constant_scaling_function> av;
+  Persistence_heat_maps av;
   av.compute_average(maps);
 
   av.print_to_file("average.mps");

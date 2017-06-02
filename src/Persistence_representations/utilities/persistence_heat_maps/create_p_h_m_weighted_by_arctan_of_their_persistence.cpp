@@ -22,13 +22,14 @@
 
 #include <gudhi/Persistence_heat_maps.h>
 
-using namespace Gudhi;
-using namespace Gudhi::Persistence_representations;
-
 #include <iostream>
 #include <sstream>
 #include <limits>
 #include <vector>
+
+using arc_tan_of_persistence_of_point = Gudhi::Persistence_representations::arc_tan_of_persistence_of_point;
+using Persistence_heat_maps =
+  Gudhi::Persistence_representations::Persistence_heat_maps<arc_tan_of_persistence_of_point>;
 
 int main(int argc, char** argv) {
   std::cout << "This program creates persistence heat map of diagrams provided as an input. The Gaussian kernels are "
@@ -68,12 +69,11 @@ int main(int argc, char** argv) {
   }
 
   std::cout << "Creating persistence heat maps...\n";
-  std::vector<std::vector<double> > filter = create_Gaussian_filter(stdiv, 1);
+  std::vector<std::vector<double> > filter = Gudhi::Persistence_representations::create_Gaussian_filter(stdiv, 1);
 
   for (size_t i = 0; i != filenames.size(); ++i) {
     std::cout << "Creating a heat map based on a file : " << filenames[i] << std::endl;
-    Persistence_heat_maps<arc_tan_of_persistence_of_point> l(filenames[i], filter, false, size_of_grid, min_, max_,
-                                                             dimension);
+    Persistence_heat_maps l(filenames[i], filter, false, size_of_grid, min_, max_, dimension);
 
     std::stringstream ss;
     ss << filenames[i] << ".mps";

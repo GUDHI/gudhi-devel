@@ -22,13 +22,12 @@
 
 #include <gudhi/PSSK.h>
 
-using namespace Gudhi;
-using namespace Gudhi::Persistence_representations;
-
 #include <iostream>
 #include <sstream>
 #include <limits>
 #include <vector>
+
+using PSSK = Gudhi::Persistence_representations::PSSK;
 
 int main(int argc, char** argv) {
   std::cout << "This program creates PSSK of diagrams provided as an input.\n";
@@ -67,7 +66,7 @@ int main(int argc, char** argv) {
   }
 
   std::cout << "Creating persistence heat maps...\n";
-  std::vector<std::vector<double> > filter = create_Gaussian_filter(stdiv, 1);
+  std::vector<std::vector<double> > filter = Gudhi::Persistence_representations::create_Gaussian_filter(stdiv, 1);
 
   for (size_t i = 0; i != filenames.size(); ++i) {
     std::cout << "Creating a heat map based on a file : " << filenames[i] << std::endl;
