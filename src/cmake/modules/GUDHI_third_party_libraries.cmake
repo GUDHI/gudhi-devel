@@ -99,6 +99,8 @@ add_definitions(-DBOOST_RESULT_OF_USE_DECLTYPE)
 add_definitions(-DBOOST_ALL_NO_LIB)
 # problem with Visual Studio link on Boost program_options
 add_definitions( -DBOOST_ALL_DYN_LINK )
+# problem on Mac with boost_system and boost_thread
+#add_definitions( -DBOOST_SYSTEM_NO_DEPRECATED )
 
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})

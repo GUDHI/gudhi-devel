@@ -3,17 +3,17 @@ project(Rips_complex_examples)
 
 # Point cloud
 add_executable ( Rips_complex_example_from_off example_rips_complex_from_off_file.cpp )
-target_link_libraries(Rips_complex_example_from_off  ${Boost_SYSTEM_LIBRARY})
+#target_link_libraries(Rips_complex_example_from_off  ${Boost_SYSTEM_LIBRARY})
 
 add_executable ( Rips_complex_example_one_skeleton_from_points example_one_skeleton_rips_from_points.cpp )
-target_link_libraries(Rips_complex_example_one_skeleton_from_points  ${Boost_SYSTEM_LIBRARY})
+#target_link_libraries(Rips_complex_example_one_skeleton_from_points  ${Boost_SYSTEM_LIBRARY})
 
 # Distance matrix
 add_executable ( Rips_complex_example_one_skeleton_from_distance_matrix example_one_skeleton_rips_from_distance_matrix.cpp )
-target_link_libraries(Rips_complex_example_one_skeleton_from_distance_matrix  ${Boost_SYSTEM_LIBRARY})
+#target_link_libraries(Rips_complex_example_one_skeleton_from_distance_matrix  ${Boost_SYSTEM_LIBRARY})
 
 add_executable ( Rips_complex_example_from_csv_distance_matrix example_rips_complex_from_csv_distance_matrix_file.cpp )
-target_link_libraries(Rips_complex_example_from_csv_distance_matrix  ${Boost_SYSTEM_LIBRARY})
+#target_link_libraries(Rips_complex_example_from_csv_distance_matrix  ${Boost_SYSTEM_LIBRARY})
 
 if (TBB_FOUND)
   target_link_libraries(Rips_complex_example_from_off ${TBB_LIBRARIES})
