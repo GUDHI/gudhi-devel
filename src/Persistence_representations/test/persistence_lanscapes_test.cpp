@@ -239,7 +239,7 @@ if ( argc != 2 )
                 std::cerr << "To run this program, please provide a name of a file with persistence landscape \n";
                 //return 1;
         }
-        Persistence_landscape p("../test/data/file_with_diagram");
+        Persistence_landscape p("data/file_with_diagram");
 
         Persistence_landscape q;
         q.load_landscape_from_file( "file_with_landscape_from_file_with_diagram" );
@@ -329,8 +329,8 @@ if ( argc != 2 )
 endl;
 
         {
-                Persistence_landscape p( "../test/data/file_with_diagram" );
-                Persistence_landscape q( "../test/data/file_with_diagram_1" );
+                Persistence_landscape p( "data/file_with_diagram" );
+                Persistence_landscape q( "data/file_with_diagram_1" );
                 Persistence_landscape av;
                 av.compute_average( {&p,&q} );
 
@@ -344,8 +344,8 @@ endl;
 
 
         {
-                Persistence_landscape p( "../test/data/file_with_diagram" );
-                Persistence_landscape q( "../test/data/file_with_diagram_1" );
+                Persistence_landscape p( "data/file_with_diagram" );
+                Persistence_landscape q( "data/file_with_diagram_1" );
                 cout << "L^1 distance : " <<  p.distance( &q ) << endl;
                 cout << "L^2 distance : " <<  p.distance( &q , 2) << endl;
                 cout << "L^infty distance : " <<  p.distance( &q , std::numeric_limits<double>::max() ) << endl;
@@ -353,8 +353,8 @@ endl;
 
 
         {
-                Persistence_landscape p( "../test/data/file_with_diagram" );
-                Persistence_landscape q( "../test/data/file_with_diagram_1" );
+                Persistence_landscape p( "data/file_with_diagram" );
+                Persistence_landscape q( "data/file_with_diagram_1" );
                 cout << "Scalar product : " <<  p.compute_scalar_product( &q ) << endl;
         }
 */

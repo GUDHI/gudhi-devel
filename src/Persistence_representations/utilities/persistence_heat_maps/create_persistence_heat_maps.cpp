@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
 
   std::cout << "The fifth parameter of this program is a dimension of persistence that will be used in creation of the "
                "persistence heat maps.";
-  std::cout << "If our input files contain persistence pairs of various dimension, as a fifth parameter of the "
+  std::cout << "If your input file contains persistence pairs of various dimension, as a fifth parameter of the "
                "procedure please provide the dimension of persistence you want to use.";
   std::cout << "If in your file there are only birth-death pairs of the same dimension, set the first parameter to -1."
             << std::endl;

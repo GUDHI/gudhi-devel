@@ -30,7 +30,7 @@ using constant_scaling_function = Gudhi::Persistence_representations::constant_s
 using Persistence_heat_maps = Gudhi::Persistence_representations::Persistence_heat_maps<constant_scaling_function>;
 
 int main(int argc, char** argv) {
-  std::cout << "This program compute scalar product of persistence landscapes stored in a file (the file needs to be "
+  std::cout << "This program computes scalar product of persistence landscapes stored in a file (the file needs to be "
                "created beforehand). \n";
   std::cout << "The parameters of this programs are names of files with persistence landscapes.\n";
 

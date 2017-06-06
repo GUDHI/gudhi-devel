@@ -31,11 +31,11 @@ using constant_scaling_function = Gudhi::Persistence_representations::constant_s
 using Persistence_heat_maps = Gudhi::Persistence_representations::Persistence_heat_maps<constant_scaling_function>;
 
 int main(int argc, char** argv) {
-  std::cout << "This program compute distance of persistence heat maps stored in a file (the file needs to be created "
+  std::cout << "This program computes distance of persistence heat maps stored in a file (the file needs to be created "
                "beforehand). \n";
   std::cout << "The first parameter of a program is an integer p. The program compute L^p distance of the two heat "
                "maps. For L^infty distance choose p = -1. \n";
-  std::cout << "The remaining parameters of this programs are names of files with persistence heat maps.\n";
+  std::cout << "The remaining parameters of this program are names of files with persistence heat maps.\n";
 
   if (argc < 3) {
     std::cout << "Wrong number of parameters, the program will now terminate \n";
