@@ -34,11 +34,9 @@ if (DEBUG_TRACES)
   add_definitions(-DDEBUG_TRACES)
 endif()
 
-# Modules list can be found in CMAKE_MODULE_PATH/GUDHI_modules.cmake
-include(GUDHI_modules)
-include_directories(src/Persistence_representations/include/)
-
 # Add your new module in the list, order is not important
+include(GUDHI_modules)
+
 add_gudhi_module(common)
 add_gudhi_module(Alpha_complex)
 add_gudhi_module(Bitmap_cubical_complex)
@@ -55,12 +53,7 @@ add_gudhi_module(Subsampling)
 add_gudhi_module(Tangential_complex)
 add_gudhi_module(Witness_complex)
 
-# Include module headers
-foreach(GUDHI_MODULE ${GUDHI_MODULES})
-  if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src/${GUDHI_MODULE}/include/)
-    include_directories(src/${GUDHI_MODULE}/include/)
-  endif()
-endforeach()
+message("++ GUDHI_MODULES list is:\"${GUDHI_MODULES}\"")
 
 # Include module CMake subdirectories
 # GUDHI_SUB_DIRECTORIES is managed in CMAKE_MODULE_PATH/GUDHI_modules.cmake
@@ -74,7 +67,7 @@ endforeach()
 
 add_subdirectory(src/GudhUI)
 
-if (NOT WITHOUT_GUDHI_PYTHON)
+if (WITH_GUDHI_PYTHON)
   # specific for cython module
   add_subdirectory(${GUDHI_CYTHON_PATH})
 endif()

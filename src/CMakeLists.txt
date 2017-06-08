@@ -7,10 +7,8 @@ enable_testing()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
-# To be done first - Modules list can be found in CMAKE_MODULE_PATH/GUDHI_modules.cmake
-include(GUDHI_modules)
-
 # Add your new module in the list, order is not important
+include(GUDHI_modules)
 
 add_gudhi_module(common)
 add_gudhi_module(Alpha_complex)
@@ -27,6 +25,8 @@ add_gudhi_module(Spatial_searching)
 add_gudhi_module(Subsampling)
 add_gudhi_module(Tangential_complex)
 add_gudhi_module(Witness_complex)
+
+message("++ GUDHI_MODULES list is:\"${GUDHI_MODULES}\"")
 
 # For "make doxygen" - Requires GUDHI_USER_VERSION_DIR to be set
 set(GUDHI_USER_VERSION_DIR ${CMAKE_SOURCE_DIR})
@@ -72,7 +72,7 @@ endforeach()
 
 add_subdirectory(GudhUI)
 
-if (NOT WITHOUT_GUDHI_PYTHON)
+if (WITH_GUDHI_PYTHON)
   # specific for cython module
   add_subdirectory(${GUDHI_CYTHON_PATH})
 endif()
