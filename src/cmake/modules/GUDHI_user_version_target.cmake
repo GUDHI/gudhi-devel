@@ -50,7 +50,7 @@ if (NOT CMAKE_VERSION VERSION_LESS 2.8.11)
   set(GUDHI_DIRECTORIES "doc;example;concept;utilities")
   set(GUDHI_INCLUDE_DIRECTORIES "include/gudhi;include/gudhi_patches")
 
-  foreach(GUDHI_MODULE ${GUDHI_MODULES})
+  foreach(GUDHI_MODULE ${GUDHI_MODULES_FULL_LIST})
     foreach(GUDHI_DIRECTORY ${GUDHI_DIRECTORIES})
       # Find files
       file(GLOB GUDHI_FILES ${CMAKE_SOURCE_DIR}/src/${GUDHI_MODULE}/${GUDHI_DIRECTORY}/*)
@@ -85,6 +85,6 @@ if (NOT CMAKE_VERSION VERSION_LESS 2.8.11)
       endforeach()
     endforeach(GUDHI_INCLUDE_DIRECTORY ${GUDHI_INCLUDE_DIRECTORIES})
 
-  endforeach(GUDHI_MODULE ${GUDHI_MODULES})
+  endforeach(GUDHI_MODULE ${GUDHI_MODULES_FULL_LIST})
 
 endif()
