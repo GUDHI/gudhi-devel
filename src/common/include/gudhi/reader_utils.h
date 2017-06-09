@@ -304,7 +304,7 @@ The output iterator `out` is used this way: `*out++ = std::make_tuple(dim, birth
 where `dim` is an `int`, `birth` a `double`, and `death` a `double`.
 **/
 template <typename OutputIterator>
-void read_persistence_diagram_from_file(std::string const& filename, OutputIterator out) {
+void read_persistence_intervals_and_dimension(std::string const& filename, OutputIterator out) {
 
   std::ifstream in(filename);
   if (!in.is_open()) {
@@ -336,10 +336,10 @@ Each line might contain 2, 3 or 4 values: [[field] dimension] birth death
 The return value is an `std::map<dim, std::vector<std::pair<birth, death>>>`
 where `dim` is an `int`, `birth` a `double`, and `death` a `double`.
 **/
-std::map<int, std::vector<std::pair<double, double>>> read_persistence_diagram_from_file(std::string const& filename) {
+std::map<int, std::vector<std::pair<double, double>>> read_persistence_intervals_grouped_by_dimension(std::string const& filename) {
 
   std::map<int, std::vector<std::pair<double, double>>> ret;
-  read_persistence_diagram_from_file(
+  read_persistence_intervals_and_dimension(
     filename,
     boost::make_function_output_iterator([&ret](auto t) { ret[get<0>(t)].push_back(std::make_pair(get<1>(t), get<2>(t))); }));
   return ret;
@@ -355,10 +355,10 @@ If `only_this_dim` is >= 0, only the lines where dimension = `only_this_dim`
 The return value is an `std::vector<std::pair<birth, death>>`
 where `dim` is an `int`, `birth` a `double`, and `death` a `double`.
 **/
-std::vector<std::pair<double, double>> read_persistence_diagram_from_file(std::string const& filename, int only_this_dim) {
+std::vector<std::pair<double, double>> read_persistence_intervals_in_dimension(std::string const& filename, int only_this_dim = -1) {
 
   std::vector<std::pair<double, double>> ret;
-  read_persistence_diagram_from_file(
+  read_persistence_intervals_and_dimension(
     filename, 
     boost::make_function_output_iterator([&ret](auto t) { ret.emplace_back(get<1>(t), get<2>(t)); }));
   return ret;
