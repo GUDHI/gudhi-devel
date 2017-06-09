@@ -23,9 +23,9 @@
 #ifndef CLOCK_H_
 #define CLOCK_H_
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-
+#include <iostream>
 #include <string>
+#include <chrono>
 
 namespace Gudhi {
 
@@ -33,20 +33,20 @@ class Clock {
  public:
   // Construct and start the timer
   Clock(const std::string& msg_ = std::string())
-      : startTime(boost::posix_time::microsec_clock::local_time()),
+      : startTime(std::chrono::system_clock::now()),
       end_called(false),
       msg(msg_) { }
 
   // Restart the timer
   void begin() const {
     end_called = false;
-    startTime = boost::posix_time::microsec_clock::local_time();
+    startTime = std::chrono::system_clock::now();
   }
 
   // Stop the timer
   void end() const {
     end_called = true;
-    endTime = boost::posix_time::microsec_clock::local_time();
+    endTime = std::chrono::system_clock::now();
   }
 
   std::string message() const {
@@ -71,15 +71,15 @@ class Clock {
   // - or now otherwise. In this case, the timer is not stopped.
   double num_seconds() const {
     if (!end_called) {
-      auto end = boost::posix_time::microsec_clock::local_time();
-      return (end - startTime).total_milliseconds() / 1000.;
+      auto end = std::chrono::system_clock::now();
+      return std::chrono::duration_cast<std::chrono::milliseconds>(end-startTime).count() / 1000.;
     } else {
-      return (endTime - startTime).total_milliseconds() / 1000.;
+      return std::chrono::duration_cast<std::chrono::milliseconds>(endTime-startTime).count() / 1000.;
     }
   }
 
  private:
-  mutable boost::posix_time::ptime startTime, endTime;
+  mutable std::chrono::time_point<std::chrono::system_clock> startTime, endTime;
   mutable bool end_called;
   std::string msg;
 };
