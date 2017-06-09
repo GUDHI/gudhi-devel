@@ -94,7 +94,10 @@ template< typename Graph_t, typename Filtration_value, typename Vertex_handle >
 Graph_t read_graph(std::string file_name) {
   std::ifstream in_(file_name.c_str(), std::ios::in);
   if (!in_.is_open()) {
-    std::cerr << "Unable to open file " << file_name << std::endl;
+    std::string error_str("read_graph - Unable to open file ");
+    error_str.append(file_name);
+    std::cerr << error_str << std::endl;
+    throw std::invalid_argument(error_str);
   }
 
   typedef std::pair< Vertex_handle, Vertex_handle > Edge_t;
@@ -308,10 +311,10 @@ void read_persistence_intervals_and_dimension(std::string const& filename, Outpu
 
   std::ifstream in(filename);
   if (!in.is_open()) {
-#ifdef DEBUG_TRACES
-    std::cerr << "File \"" << filename << "\" does not exist.\n";
-#endif  // DEBUG_TRACES
-    return;
+    std::string error_str("read_persistence_intervals_and_dimension - Unable to open file ");
+    error_str.append(filename);
+    std::cerr << error_str << std::endl;
+    throw std::invalid_argument(error_str);
   }
 
   while (!in.eof()) {
