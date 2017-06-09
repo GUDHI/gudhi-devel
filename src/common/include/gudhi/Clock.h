@@ -62,7 +62,7 @@ class Clock {
     if (!clock.msg.empty())
       stream << clock.msg << ": ";
 
-    stream << clock.num_seconds() << "s";
+    stream << clock.num_seconds() << "s\n";
     return stream;
   }
 
