@@ -30,7 +30,6 @@
 #include <gudhi/Skeleton_blocker.h>
 #include <gudhi/Off_reader.h>
 
-#include <boost/timer/timer.hpp>
 #include <iostream>
 
 #include "Garland_heckbert/Error_quadric.h"
@@ -164,8 +163,6 @@ int main(int argc, char *argv[]) {
   std::cout << "Load complex with " << complex.num_vertices() << " vertices" << std::endl;
 
   int num_contractions = atoi(argv[3]);
-
-  boost::timer::auto_cpu_timer t;
 
   // constructs the contractor object with Garland Heckbert policies.
   Complex_contractor contractor(complex,

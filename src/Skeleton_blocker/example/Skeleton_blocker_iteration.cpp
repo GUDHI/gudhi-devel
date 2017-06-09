@@ -22,8 +22,6 @@
 
 #include <gudhi/Skeleton_blocker.h>
 
-#include <boost/timer/timer.hpp>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -47,8 +45,6 @@ Complex build_complete_complex(int n) {
 }
 
 int main(int argc, char *argv[]) {
-  boost::timer::auto_cpu_timer t;
-
   const int n = 15;
 
   // build a full complex with n vertices and 2^n-1 simplices
