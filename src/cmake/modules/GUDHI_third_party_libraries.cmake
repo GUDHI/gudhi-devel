@@ -108,19 +108,6 @@ LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 message(STATUS "boost include dirs:" ${Boost_INCLUDE_DIRS})
 message(STATUS "boost library dirs:" ${Boost_LIBRARY_DIRS})
 
-macro( find_the_lib placeholder THE_LIBS )
-  set (THE_LIB_WE_FOUND "NO")
-  foreach(THE_LIB ${THE_LIBS})
-    if(EXISTS ${THE_LIB})
-      get_filename_component(THE_LIB_WE ${THE_LIB} NAME_WE)
-      if (NOT THE_LIB_WE_FOUND)
-        set (THE_LIB_WE_FOUND "YES")
-        set(returnValue "${THE_LIB_WE}")
-      endif(NOT THE_LIB_WE_FOUND)
-    endif(EXISTS ${THE_LIB})
-  endforeach(THE_LIB ${THE_LIBS})
-endmacro( find_the_lib )
-
 # Find the correct Python interpreter.
 # Can be set with -DPYTHON_EXECUTABLE=/usr/bin/python3 or -DPython_ADDITIONAL_VERSIONS=3 for instance.
 find_package(Cython)
