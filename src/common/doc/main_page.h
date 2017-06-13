@@ -468,5 +468,4 @@ make doxygen
  * @example Witness_complex/example_witness_complex_persistence.cpp
  * @example Witness_complex/example_witness_complex_sphere.cpp
  */
-
-#include "file_formats.h"
+ 
