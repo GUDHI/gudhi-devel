@@ -19,6 +19,10 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
       COMMAND $<TARGET_FILE:alpha_rips_persistence_bottleneck_distance>
       "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" "-r" "0.15" "-m" "0.12" "-d" "3" "-p" "3")
 
+  add_test(NAME Bottleneck_read_file_example
+      COMMAND $<TARGET_FILE:bottleneck_read_file_example>
+      "${CMAKE_SOURCE_DIR}/data/persistence_diagram/first.pers" "${CMAKE_SOURCE_DIR}/data/persistence_diagram/second.pers")
+
   install(TARGETS bottleneck_read_file_example DESTINATION bin)
   install(TARGETS bottleneck_basic_example DESTINATION bin)
   install(TARGETS alpha_rips_persistence_bottleneck_distance DESTINATION bin)
