@@ -42,7 +42,7 @@ setup(
     name = 'gudhi',
     author='Vincent Rouvreau',
     author_email='gudhi-contact@lists.gforge.inria.fr',
-    version='0.1.0',
+    version='@GUDHI_VERSION@',
     url='http://gudhi.gforge.inria.fr/',
     ext_modules = cythonize(gudhi),
 )
