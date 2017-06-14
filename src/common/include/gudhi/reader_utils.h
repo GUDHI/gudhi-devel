@@ -305,6 +305,7 @@ Reads a file containing persistence intervals.
 Each line might contain 2, 3 or 4 values: [[field] dimension] birth death
 The output iterator `out` is used this way: `*out++ = std::make_tuple(dim, birth, death);`
 where `dim` is an `int`, `birth` a `double`, and `death` a `double`.
+Note: the function does not check that birth <= death.
 **/
 template <typename OutputIterator>
 void read_persistence_intervals_and_dimension(std::string const& filename, OutputIterator out) {
@@ -326,7 +327,6 @@ void read_persistence_intervals_and_dimension(std::string const& filename, Outpu
       if (n >= 2) {
         //int field = (n == 4 ? static_cast<int>(numbers[0]) : -1);
         int dim = (n >= 3 ? static_cast<int>(numbers[n - 3]) : -1);
-        GUDHI_CHECK(numbers[n - 2] <= numbers[n - 1], "Error: birth > death.");
         *out++ = std::make_tuple(dim, numbers[n - 2], numbers[n - 1]);
       }
     }
@@ -338,6 +338,7 @@ Reads a file containing persistence intervals.
 Each line might contain 2, 3 or 4 values: [[field] dimension] birth death
 The return value is an `std::map<dim, std::vector<std::pair<birth, death>>>`
 where `dim` is an `int`, `birth` a `double`, and `death` a `double`.
+Note: the function does not check that birth <= death.
 **/
 std::map<int, std::vector<std::pair<double, double>>> read_persistence_intervals_grouped_by_dimension(std::string const& filename) {
 
@@ -357,6 +358,7 @@ If `only_this_dim` is >= 0, only the lines where dimension = `only_this_dim`
 (or where dimension is not specified) are returned.
 The return value is an `std::vector<std::pair<birth, death>>`
 where `dim` is an `int`, `birth` a `double`, and `death` a `double`.
+Note: the function does not check that birth <= death.
 **/
 std::vector<std::pair<double, double>> read_persistence_intervals_in_dimension(std::string const& filename, int only_this_dim = -1) {
 
