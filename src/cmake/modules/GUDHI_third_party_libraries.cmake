@@ -10,10 +10,6 @@ find_package(GMP)
 if(GMP_FOUND)
   message(STATUS "GMP_LIBRARIES = ${GMP_LIBRARIES}")
   INCLUDE_DIRECTORIES(${GMP_INCLUDE_DIR})
-  get_filename_component(lib_we ${GMP_LIBRARIES} NAME_WE)
-
-  message("++ lib_we = ${lib_we}")
-
   find_package(GMPXX)
   if(GMPXX_FOUND)
     message(STATUS "GMPXX_LIBRARIES = ${GMPXX_LIBRARIES}")
