@@ -25,8 +25,8 @@
 
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/Debug_utils.h>
-#include <boost/function_output_iterator.hpp>
 
+#include <boost/function_output_iterator.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
 #include <iostream>
@@ -340,12 +340,12 @@ The return value is an `std::map<dim, std::vector<std::pair<birth, death>>>`
 where `dim` is an `int`, `birth` a `double`, and `death` a `double`.
 Note: the function does not check that birth <= death.
 **/
-std::map<int, std::vector<std::pair<double, double>>> read_persistence_intervals_grouped_by_dimension(std::string const& filename) {
+inline std::map<int, std::vector<std::pair<double, double>>> read_persistence_intervals_grouped_by_dimension(std::string const& filename) {
 
   std::map<int, std::vector<std::pair<double, double>>> ret;
   read_persistence_intervals_and_dimension(
     filename,
-    boost::make_function_output_iterator([&ret](auto t) { ret[get<0>(t)].push_back(std::make_pair(get<1>(t), get<2>(t))); }));
+    boost::make_function_output_iterator([&ret](std::tuple<int, double, double> t) { ret[get<0>(t)].push_back(std::make_pair(get<1>(t), get<2>(t))); }));
   return ret;
 } // read_persistence_diagram_from_file
 
@@ -360,12 +360,12 @@ The return value is an `std::vector<std::pair<birth, death>>`
 where `dim` is an `int`, `birth` a `double`, and `death` a `double`.
 Note: the function does not check that birth <= death.
 **/
-std::vector<std::pair<double, double>> read_persistence_intervals_in_dimension(std::string const& filename, int only_this_dim = -1) {
+inline std::vector<std::pair<double, double>> read_persistence_intervals_in_dimension(std::string const& filename, int only_this_dim = -1) {
 
   std::vector<std::pair<double, double>> ret;
   read_persistence_intervals_and_dimension(
     filename, 
-    boost::make_function_output_iterator([&ret](auto t) { ret.emplace_back(get<1>(t), get<2>(t)); }));
+    boost::make_function_output_iterator([&ret](std::tuple<int, double, double> t) { ret.emplace_back(get<1>(t), get<2>(t)); }));
   return ret;
 } // read_persistence_diagram_from_file
 
