@@ -22,6 +22,15 @@ if(CYTHON_FOUND)
   set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_ALL_NO_LIB', ")
   set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_SYSTEM_NO_DEPRECATED', ")
 
+  # TODO: Something more clever could be done.
+  # This is because of https://github.com/CGAL/cgal/blob/master/Installation/include/CGAL/tss.h
+  # CGAL is using boost thread if thread_local is not ready (requires XCode 8 for Mac).
+  # The test in https://github.com/CGAL/cgal/blob/master/Installation/include/CGAL/config.h
+  #   #if __has_feature(cxx_thread_local) || \
+  #       ( (__GNUC__ * 100 + __GNUC_MINOR__) >= 408 && __cplusplus >= 201103L ) || \
+  #       ( _MSC_VER >= 1900 )
+  #   #define CGAL_CAN_USE_CXX11_THREAD_LOCAL
+  #   #endif
   if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     add_gudhi_cython_lib(${Boost_THREAD_LIBRARY})
     set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${Boost_LIBRARY_DIRS}', ")
