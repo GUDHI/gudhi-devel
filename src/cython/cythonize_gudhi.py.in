@@ -35,6 +35,7 @@ gudhi = Extension(
     extra_link_args=[@GUDHI_CYTHON_EXTRA_LINK_ARGS@],
     libraries=[@GUDHI_CYTHON_LIBRARIES@],
     library_dirs=[@GUDHI_CYTHON_LIBRARY_DIRS@],
+    runtime_library_dirs=[@GUDHI_CYTHON_LIBRARY_DIRS@],
     include_dirs = [@GUDHI_CYTHON_INCLUDE_DIRS@],
 )
 
