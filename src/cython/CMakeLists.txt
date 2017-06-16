@@ -170,6 +170,10 @@ if(CYTHON_FOUND)
     set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${TBB_INCLUDE_DIRS}', ")
   endif()
 
+  if(UNIX)
+    set( GUDHI_CYTHON_RUNTIME_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}")
+  endif(UNIX)
+
   # set sphinx-build in make files
   configure_file(doc/Makefile.in "${CMAKE_CURRENT_BINARY_DIR}/doc/Makefile" @ONLY)
   configure_file(doc/make.bat.in "${CMAKE_CURRENT_BINARY_DIR}/doc/make.bat" @ONLY)
@@ -186,10 +190,6 @@ if(CYTHON_FOUND)
 
   add_custom_target(cython ALL DEPENDS gudhi.so
                     COMMENT "Do not forget to add ${CMAKE_CURRENT_BINARY_DIR}/ to your PYTHONPATH before using examples or tests")
-
-  if(UNIX)
-    set( ENV{PYTHONPATH} $ENV{PYTHONPATH}:${CMAKE_CURRENT_BINARY_DIR}/ )
-  endif(UNIX)
 
   # For installation purpose
   # TODO(VR) : files matching pattern mechanism is copying all cython directory
