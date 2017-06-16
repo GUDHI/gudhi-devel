@@ -3,10 +3,7 @@ project(GUDHIdev)
 
 include(CMakeGUDHIVersion.txt)
 
-set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
-message("CMAKE_PREFIX_PATH = ${CMAKE_PREFIX_PATH}")
-message("CMAKE_MODULE_PATH = ${CMAKE_MODULE_PATH}")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
 
 enable_testing()
 

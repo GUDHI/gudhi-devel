@@ -152,6 +152,7 @@
 </table>
  
  \section Toolbox Toolbox
+ 
  \subsection BottleneckDistanceToolbox Bottleneck distance
  \image html "perturb_pd.png" "Bottleneck distance is the length of the longest edge"
 <table border="0">
@@ -485,4 +486,4 @@ make doxygen
  * @example Witness_complex/example_witness_complex_persistence.cpp
  * @example Witness_complex/example_witness_complex_sphere.cpp
  */
-
+ 
