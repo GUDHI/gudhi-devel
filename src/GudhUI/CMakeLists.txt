@@ -56,6 +56,8 @@ if (TBB_FOUND)
   target_link_libraries( GudhUI ${TBB_LIBRARIES})
 endif()
 
+  install(TARGETS GudhUI DESTINATION bin)
+
 ###############################################################################
 
 else()

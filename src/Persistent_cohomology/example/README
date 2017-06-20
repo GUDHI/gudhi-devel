@@ -121,7 +121,7 @@ N.B.: - alpha_complex_persistence accepts OFF files in d-Dimension.
 
 3) 3D periodic special case
 ---------------------------
-./periodic_alpha_complex_3d_persistence ../../data/points/grid_10_10_10_in_0_1.off 3 1.0
+./periodic_alpha_complex_3d_persistence ../../data/points/grid_10_10_10_in_0_1.off ../../data/points/iso_cuboid_3_in_0_1.txt 3 1.0
 
 output:
 Periodic Delaunay computed.

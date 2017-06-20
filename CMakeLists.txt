@@ -2,24 +2,15 @@ cmake_minimum_required(VERSION 2.6)
 project(GUDHIdev)
 
 include(CMakeGUDHIVersion.txt)
-# Generate GUDHI official version file
-configure_file(GUDHIVersion.cmake.in "${CMAKE_SOURCE_DIR}/GUDHIVersion.cmake" @ONLY)
 
-set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
-message("CMAKE_PREFIX_PATH = ${CMAKE_PREFIX_PATH}")
-message("CMAKE_MODULE_PATH = ${CMAKE_MODULE_PATH}")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
 
 enable_testing()
 
-# For "make user_version"
-include("${CMAKE_MODULE_PATH}/GUDHI_user_version_target.txt")
-# For "make doxygen"
-include("${CMAKE_MODULE_PATH}/GUDHI_doxygen_target.txt")
 # This variable is used by Cython CMakeLists.txt to know its path
 set(GUDHI_CYTHON_PATH "src/cython")
 # For third parties libraries management - To be done last as CGAL updates CMAKE_MODULE_PATH
-include("${CMAKE_MODULE_PATH}/GUDHI_third_party_libraries.txt")
+include(GUDHI_third_party_libraries)
 
 if(MSVC)
   # Turn off some VC++ warnings
@@ -40,54 +31,44 @@ if (DEBUG_TRACES)
   add_definitions(-DDEBUG_TRACES)
 endif()
 
-include_directories(src/common/include/)
-include_directories(src/Alpha_complex/include/)
-include_directories(src/Bitmap_cubical_complex/include/)
-include_directories(src/Bottleneck_distance/include/)
-include_directories(src/Contraction/include/)
-include_directories(src/Hasse_complex/include/)
-include_directories(src/Persistent_cohomology/include/)
-include_directories(src/Rips_complex/include/)
-include_directories(src/Simplex_tree/include/)
-include_directories(src/Skeleton_blocker/include/)
-include_directories(src/Spatial_searching/include/)
-include_directories(src/Subsampling/include/)
-include_directories(src/Tangential_complex/include/)
-include_directories(src/Witness_complex/include/)
+# Add your new module in the list, order is not important
+include(GUDHI_modules)
 
-add_subdirectory(src/common/example)
-add_subdirectory(src/common/test)
-add_subdirectory(src/Simplex_tree/test)
-add_subdirectory(src/Simplex_tree/example)
-add_subdirectory(src/Persistent_cohomology/test)
-add_subdirectory(src/Persistent_cohomology/example)
-add_subdirectory(src/Persistent_cohomology/benchmark)
-add_subdirectory(src/Skeleton_blocker/test)
-add_subdirectory(src/Skeleton_blocker/example)
-add_subdirectory(src/Contraction/example)
-add_subdirectory(src/Witness_complex/test)
-add_subdirectory(src/Witness_complex/example)
-add_subdirectory(src/Bitmap_cubical_complex/test)
-add_subdirectory(src/Bitmap_cubical_complex/example)
-add_subdirectory(src/Alpha_complex/example)
-add_subdirectory(src/Alpha_complex/test)
-add_subdirectory(src/Spatial_searching/example)
-add_subdirectory(src/Spatial_searching/test)
-add_subdirectory(src/Subsampling/example)
-add_subdirectory(src/Subsampling/test)
-add_subdirectory(src/Tangential_complex/example)
-add_subdirectory(src/Tangential_complex/test)
-add_subdirectory(src/Tangential_complex/benchmark)
-add_subdirectory(src/Bottleneck_distance/example)
-add_subdirectory(src/Bottleneck_distance/test)
-add_subdirectory(src/Bottleneck_distance/benchmark)
-add_subdirectory(src/Rips_complex/example)
-add_subdirectory(src/Rips_complex/test)
+add_gudhi_module(common)
+add_gudhi_module(Alpha_complex)
+add_gudhi_module(Bitmap_cubical_complex)
+add_gudhi_module(Bottleneck_distance)
+add_gudhi_module(Contraction)
+add_gudhi_module(Hasse_complex)
+add_gudhi_module(Persistent_cohomology)
+add_gudhi_module(Rips_complex)
+add_gudhi_module(Simplex_tree)
+add_gudhi_module(Skeleton_blocker)
+add_gudhi_module(Spatial_searching)
+add_gudhi_module(Subsampling)
+add_gudhi_module(Tangential_complex)
+add_gudhi_module(Witness_complex)
 
-# data points generator
-add_subdirectory(data/points/generator)
+message("++ GUDHI_MODULES list is:\"${GUDHI_MODULES}\"")
+
+# Include module CMake subdirectories
+# GUDHI_SUB_DIRECTORIES is managed in CMAKE_MODULE_PATH/GUDHI_modules.cmake
+foreach(GUDHI_MODULE ${GUDHI_MODULES})
+  foreach(GUDHI_SUB_DIRECTORY ${GUDHI_SUB_DIRECTORIES})
+    if(EXISTS ${CMAKE_SOURCE_DIR}/src/${GUDHI_MODULE}/${GUDHI_SUB_DIRECTORY}/CMakeLists.txt)
+      add_subdirectory(src/${GUDHI_MODULE}/${GUDHI_SUB_DIRECTORY}/)
+    endif()
+  endforeach()
+endforeach()
 
 add_subdirectory(src/GudhUI)
 
-# specific for cython module
-add_subdirectory(${GUDHI_CYTHON_PATH})
+if (WITH_GUDHI_PYTHON)
+  # specific for cython module
+  add_subdirectory(${GUDHI_CYTHON_PATH})
+endif()
+
+# For "make user_version" - Requires GUDHI_modules to be performed
+include(GUDHI_user_version_target)
+# For "make doxygen" - Requires GUDHI_USER_VERSION_DIR to be set - Done in GUDHI_user_version_target for dev version
+include(GUDHI_doxygen_target)

@@ -102,7 +102,7 @@ Persistence_graph::Persistence_graph(const Persistence_diagram1 &diag1,
     b_alive = std::numeric_limits<double>::infinity();
   } else {
     for (auto it_u = u_alive.cbegin(), it_v = v_alive.cbegin(); it_u != u_alive.cend(); ++it_u, ++it_v)
-      b_alive = std::max(b_alive, std::fabs(*it_u - *it_v));
+      b_alive = (std::max)(b_alive, std::fabs(*it_u - *it_v));
   }
 }
 
@@ -129,7 +129,7 @@ inline double Persistence_graph::distance(int u_point_index, int v_point_index) 
     return 0.;
   Internal_point p_u = get_u_point(u_point_index);
   Internal_point p_v = get_v_point(v_point_index);
-  return std::max(std::fabs(p_u.x() - p_v.x()), std::fabs(p_u.y() - p_v.y()));
+  return (std::max)(std::fabs(p_u.x() - p_v.x()), std::fabs(p_u.y() - p_v.y()));
 }
 
 inline int Persistence_graph::size() const {
@@ -175,9 +175,9 @@ inline Internal_point Persistence_graph::get_v_point(int v_point_index) const {
 inline double Persistence_graph::diameter_bound() const {
   double max = 0.;
   for (auto it = u.cbegin(); it != u.cend(); it++)
-    max = std::max(max, it->y());
+    max = (std::max)(max, it->y());
   for (auto it = v.cbegin(); it != v.cend(); it++)
-    max = std::max(max, it->y());
+    max = (std::max)(max, it->y());
   return max;
 }
 

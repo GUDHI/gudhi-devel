@@ -106,10 +106,6 @@ class Witness_complex {
       std::cerr << "Witness complex cannot create complex - squared relaxation parameter must be non-negative.\n";
       return false;
     }
-    if (limit_dimension < 0) {
-      std::cerr << "Witness complex cannot create complex - limit dimension must be non-negative.\n";
-      return false;
-    }
     ActiveWitnessList active_witnesses;
     Landmark_id k = 0; /* current dimension in iterative construction */
     for (auto w : nearest_landmark_table_)

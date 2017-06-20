@@ -33,7 +33,7 @@ To build the GUDHI cython module, run the following commands in a terminal:
 Test suites
 ===========
 
-To test your build, `py.test <http://doc.pytest.org>`_ is required. Run the
+To test your build, `py.test <http://doc.pytest.org>`_ is optional. Run the
 following command in a terminal:
 
 .. code-block:: bash
@@ -41,7 +41,7 @@ following command in a terminal:
     cd /path-to-gudhi/build/cython
     # For windows, you have to set PYTHONPATH environment variable
     export PYTHONPATH='$PYTHONPATH:/path-to-gudhi/build/cython'
-    py.test
+    ctest -R py_test
 
 Documentation
 =============

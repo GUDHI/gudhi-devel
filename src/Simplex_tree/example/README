@@ -10,7 +10,7 @@ Example of use :
 
 *** Simple simplex tree construction
 
-./simple_simplex_tree
+./Simplex_tree_example_simple_simplex_tree
 
 ********************************************************************
 EXAMPLE OF SIMPLE INSERTION
@@ -52,7 +52,7 @@ EXAMPLE OF SIMPLE INSERTION
 
 *** Simplex tree construction with Z/2Z coefficients on weighted graph Klein bottle file:
 
-./simplex_tree_from_cliques_of_graph ../../../data/points/Klein_bottle_complex.txt 2
+./Simplex_tree_example_from_cliques_of_graph ../../../data/points/Klein_bottle_complex.txt 2
 Insert the 1-skeleton in the simplex tree in 0 s. 
 Expand the simplex tree in 0 s. 
 Information of the Simplex Tree: 
@@ -60,7 +60,7 @@ Information of the Simplex Tree:
 
 with Z/3Z coefficients:
 
-./simplex_tree_from_cliques_of_graph ../../../data/points/Klein_bottle_complex.txt 3
+./Simplex_tree_example_from_cliques_of_graph ../../../data/points/Klein_bottle_complex.txt 3
 
 Insert the 1-skeleton in the simplex tree in 0 s.
 Expand the simplex tree in 0 s.
@@ -70,4 +70,4 @@ Information of the Simplex Tree:
 *** Simplex_tree computed and displayed from a 3D alpha complex:
     [ Requires CGAL, GMP and GMPXX to be installed]
 
-./simplex_tree_from_alpha_shapes_3 ../../../data/points/bunny_5000
+./Simplex_tree_example_alpha_shapes_3_from_off ../../../data/points/bunny_5000

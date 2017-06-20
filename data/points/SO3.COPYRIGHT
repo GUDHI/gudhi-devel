@@ -7,3 +7,5 @@ This software is an implementation of the two following papers:
 J. C. Mitchell. Discrete Uniform Sampling of Rotation Groups Using Orthogonal Images. SIAM Journal of Scientific Computing, 30(1):525-547, 2007. 
 
 A. Yershova, S. Jain, S. M. LaValle, and J. C. Mitchell. Generating Uniform Incremental Grids on SO(3) Using the Hopf Fibration International Journal of Robotics Research, November 2009. 
+
+This software copyright is GNU General Public License as published by the Free Software Foundation version 2.

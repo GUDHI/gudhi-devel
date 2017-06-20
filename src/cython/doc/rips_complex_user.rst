@@ -1,4 +1,3 @@
-=========================
 Rips complex user manual
 =========================
 Definition
@@ -60,8 +59,9 @@ Finally, it is asked to display information about the simplicial complex.
         repr(simplex_tree.num_simplices()) + ' simplices - ' + \
         repr(simplex_tree.num_vertices()) + ' vertices.'
     print(result_str)
+    fmt = '%s -> %.2f'
     for filtered_value in simplex_tree.get_filtration():
-        print(filtered_value)
+        print(fmt % tuple(filtered_value))
 
 When launching (Rips maximal distance between 2 points is 12.0, is expanded
 until dimension 1 - one skeleton graph in other words), the output is:
@@ -69,24 +69,24 @@ until dimension 1 - one skeleton graph in other words), the output is:
 .. testoutput::
 
     Rips complex is of dimension 1 - 18 simplices - 7 vertices.
-    ([0], 0.0)
-    ([1], 0.0)
-    ([2], 0.0)
-    ([3], 0.0)
-    ([4], 0.0)
-    ([5], 0.0)
-    ([6], 0.0)
-    ([2, 3], 5.0)
-    ([4, 5], 5.385164807134504)
-    ([0, 2], 5.830951894845301)
-    ([0, 1], 6.082762530298219)
-    ([1, 3], 6.324555320336759)
-    ([1, 2], 6.708203932499369)
-    ([5, 6], 7.280109889280518)
-    ([2, 4], 8.94427190999916)
-    ([0, 3], 9.433981132056603)
-    ([4, 6], 9.486832980505138)
-    ([3, 6], 11.0)
+    [0] -> 0.00
+    [1] -> 0.00
+    [2] -> 0.00
+    [3] -> 0.00
+    [4] -> 0.00
+    [5] -> 0.00
+    [6] -> 0.00
+    [2, 3] -> 5.00
+    [4, 5] -> 5.39
+    [0, 2] -> 5.83
+    [0, 1] -> 6.08
+    [1, 3] -> 6.32
+    [1, 2] -> 6.71
+    [5, 6] -> 7.28
+    [2, 4] -> 8.94
+    [0, 3] -> 9.43
+    [4, 6] -> 9.49
+    [3, 6] -> 11.00
 
 Example from OFF file
 ^^^^^^^^^^^^^^^^^^^^^
@@ -107,32 +107,33 @@ Finally, it is asked to display information about the Rips complex.
         repr(simplex_tree.num_simplices()) + ' simplices - ' + \
         repr(simplex_tree.num_vertices()) + ' vertices.'
     print(result_str)
+    fmt = '%s -> %.2f'
     for filtered_value in simplex_tree.get_filtration():
-        print(filtered_value)
+        print(fmt % tuple(filtered_value))
 
 the program output is:
 
 .. testoutput::
 
     Rips complex is of dimension 1 - 18 simplices - 7 vertices.
-    ([0], 0.0)
-    ([1], 0.0)
-    ([2], 0.0)
-    ([3], 0.0)
-    ([4], 0.0)
-    ([5], 0.0)
-    ([6], 0.0)
-    ([2, 3], 5.0)
-    ([4, 5], 5.385164807134504)
-    ([0, 2], 5.830951894845301)
-    ([0, 1], 6.082762530298219)
-    ([1, 3], 6.324555320336759)
-    ([1, 2], 6.708203932499369)
-    ([5, 6], 7.280109889280518)
-    ([2, 4], 8.94427190999916)
-    ([0, 3], 9.433981132056603)
-    ([4, 6], 9.486832980505138)
-    ([3, 6], 11.0)
+    [0] -> 0.00
+    [1] -> 0.00
+    [2] -> 0.00
+    [3] -> 0.00
+    [4] -> 0.00
+    [5] -> 0.00
+    [6] -> 0.00
+    [2, 3] -> 5.00
+    [4, 5] -> 5.39
+    [0, 2] -> 5.83
+    [0, 1] -> 6.08
+    [1, 3] -> 6.32
+    [1, 2] -> 6.71
+    [5, 6] -> 7.28
+    [2, 4] -> 8.94
+    [0, 3] -> 9.43
+    [4, 6] -> 9.49
+    [3, 6] -> 11.00
 
 Distance matrix
 ---------------
@@ -162,8 +163,9 @@ Finally, it is asked to display information about the simplicial complex.
         repr(simplex_tree.num_simplices()) + ' simplices - ' + \
         repr(simplex_tree.num_vertices()) + ' vertices.'
     print(result_str)
+    fmt = '%s -> %.2f'
     for filtered_value in simplex_tree.get_filtration():
-        print(filtered_value)
+        print(fmt % tuple(filtered_value))
 
 When launching (Rips maximal distance between 2 points is 12.0, is expanded
 until dimension 1 - one skeleton graph in other words), the output is:
@@ -171,24 +173,24 @@ until dimension 1 - one skeleton graph in other words), the output is:
 .. testoutput::
 
     Rips complex is of dimension 1 - 18 simplices - 7 vertices.
-    ([0], 0.0)
-    ([1], 0.0)
-    ([2], 0.0)
-    ([3], 0.0)
-    ([4], 0.0)
-    ([5], 0.0)
-    ([6], 0.0)
-    ([2, 3], 5.0)
-    ([4, 5], 5.3851648071)
-    ([0, 2], 5.8309518948)
-    ([0, 1], 6.0827625303)
-    ([1, 3], 6.3245553203)
-    ([1, 2], 6.7082039325)
-    ([5, 6], 7.2801098893)
-    ([2, 4], 8.94427191)
-    ([0, 3], 9.4339811321)
-    ([4, 6], 9.4868329805)
-    ([3, 6], 11.0)
+    [0] -> 0.00
+    [1] -> 0.00
+    [2] -> 0.00
+    [3] -> 0.00
+    [4] -> 0.00
+    [5] -> 0.00
+    [6] -> 0.00
+    [2, 3] -> 5.00
+    [4, 5] -> 5.39
+    [0, 2] -> 5.83
+    [0, 1] -> 6.08
+    [1, 3] -> 6.32
+    [1, 2] -> 6.71
+    [5, 6] -> 7.28
+    [2, 4] -> 8.94
+    [0, 3] -> 9.43
+    [4, 6] -> 9.49
+    [3, 6] -> 11.00
 
 Example from csv file
 ^^^^^^^^^^^^^^^^^^^^^
@@ -209,29 +211,30 @@ Finally, it is asked to display information about the Rips complex.
         repr(simplex_tree.num_simplices()) + ' simplices - ' + \
         repr(simplex_tree.num_vertices()) + ' vertices.'
     print(result_str)
+    fmt = '%s -> %.2f'
     for filtered_value in simplex_tree.get_filtration():
-        print(filtered_value)
+        print(fmt % tuple(filtered_value))
 
 the program output is:
 
 .. testoutput::
 
     Rips complex is of dimension 1 - 18 simplices - 7 vertices.
-    ([0], 0.0)
-    ([1], 0.0)
-    ([2], 0.0)
-    ([3], 0.0)
-    ([4], 0.0)
-    ([5], 0.0)
-    ([6], 0.0)
-    ([2, 3], 5.0)
-    ([4, 5], 5.3851648071)
-    ([0, 2], 5.8309518948)
-    ([0, 1], 6.0827625303)
-    ([1, 3], 6.3245553203)
-    ([1, 2], 6.7082039325)
-    ([5, 6], 7.2801098893)
-    ([2, 4], 8.94427191)
-    ([0, 3], 9.4339811321)
-    ([4, 6], 9.4868329805)
-    ([3, 6], 11.0)
+    [0] -> 0.00
+    [1] -> 0.00
+    [2] -> 0.00
+    [3] -> 0.00
+    [4] -> 0.00
+    [5] -> 0.00
+    [6] -> 0.00
+    [2, 3] -> 5.00
+    [4, 5] -> 5.39
+    [0, 2] -> 5.83
+    [0, 1] -> 6.08
+    [1, 3] -> 6.32
+    [1, 2] -> 6.71
+    [5, 6] -> 7.28
+    [2, 4] -> 8.94
+    [0, 3] -> 9.43
+    [4, 6] -> 9.49
+    [3, 6] -> 11.00
