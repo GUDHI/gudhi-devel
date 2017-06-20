@@ -88,6 +88,10 @@ class Kd_tree_search {
     std::ptrdiff_t,
     Point_property_map,
     Traits_base>                                            STraits;
+  typedef CGAL::Distance_adapter<
+    std::ptrdiff_t,
+    Point_property_map,
+    CGAL::Euclidean_distance<Traits_base> >                 Orthogonal_distance;
 
   typedef CGAL::Orthogonal_k_neighbor_search<STraits>       K_neighbor_search;
   typedef typename K_neighbor_search::Tree                  Tree;
