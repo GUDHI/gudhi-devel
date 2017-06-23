@@ -36,27 +36,3 @@ if(GMP_FOUND AND CGAL_FOUND)
   install(TARGETS Simplex_tree_example_alpha_shapes_3_from_off DESTINATION bin)
 
 endif()
-
-
-add_executable(rips_step_by_step rips_step_by_step.cpp)
-target_link_libraries(rips_step_by_step ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
-if (TBB_FOUND)
-  target_link_libraries(rips_step_by_step ${TBB_LIBRARIES})
-endif()
-
-add_executable(cgal_rips_step_by_step cgal_rips_step_by_step.cpp)
-target_link_libraries(cgal_rips_step_by_step ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
-if (TBB_FOUND)
-  target_link_libraries(cgal_rips_step_by_step ${TBB_LIBRARIES})
-endif()
-
-add_executable(cgal_euclidean_distance cgal_euclidean_distance.cpp)
-if (TBB_FOUND)
-  target_link_libraries(cgal_euclidean_distance ${TBB_LIBRARIES})
-endif()
-
-add_executable(subsamp_rips_step_by_step subsamp_rips_step_by_step.cpp)
-target_link_libraries(subsamp_rips_step_by_step ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
-if (TBB_FOUND)
-  target_link_libraries(subsamp_rips_step_by_step ${TBB_LIBRARIES})
-endif()

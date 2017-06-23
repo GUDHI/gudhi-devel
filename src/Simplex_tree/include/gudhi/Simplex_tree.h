@@ -1007,11 +1007,35 @@ class Simplex_tree {
    * The Simplex_tree must contain no simplex of dimension bigger than
    * 1 when calling the method. */
   void expansion(int max_dim) {
+    expansion_with_blockers(max_dim,
+                            [](Simplex_handle origin_sh,
+                               Simplex_handle dict1_sh,
+                               Simplex_handle dict2_sh) {
+                                 // Default blocker is always insert with the maximal filtration value between
+                                 // origin, dict1 and dict2
+                                 return std::make_pair(true, (std::max)({origin_sh->second.filtration(),
+                                                                         dict1_sh->second.filtration(),
+                                                                         dict2_sh->second.filtration()})); });
+  }
+
+  /** \brief Expands the Simplex_tree containing only its one skeleton
+   * until dimension max_dim.
+   *
+   * The expanded simplicial complex until dimension \f$d\f$
+   * attached to a graph \f$G\f$ is the maximal simplicial complex of
+   * dimension at most \f$d\f$ admitting the graph \f$G\f$ as \f$1\f$-skeleton.
+   * The filtration value assigned to a simplex is the maximal filtration
+   * value of one of its edges.
+   *
+   * The Simplex_tree must contain no simplex of dimension bigger than
+   * 1 when calling the method. */
+  template< typename Blocker >
+  void expansion_with_blockers(int max_dim, Blocker blocker_expansion_function) {
     dimension_ = max_dim;
     for (Dictionary_it root_it = root_.members_.begin();
          root_it != root_.members_.end(); ++root_it) {
       if (has_children(root_it)) {
-        siblings_expansion(root_it->second.children(), max_dim - 1);
+        siblings_expansion_with_blockers(root_it->second.children(), max_dim - 1, blocker_expansion_function);
       }
     }
     dimension_ = max_dim - dimension_;
@@ -1019,8 +1043,9 @@ class Simplex_tree {
 
  private:
   /** \brief Recursive expansion of the simplex tree.*/
-  void siblings_expansion(Siblings * siblings,  // must contain elements
-                          int k) {
+  template< typename Blocker >
+  void siblings_expansion_with_blockers(Siblings * siblings,  // must contain elements
+                          int k, Blocker blocker_expansion_function) {
     if (dimension_ > k) {
       dimension_ = k;
     }
@@ -1034,20 +1059,21 @@ class Simplex_tree {
          s_h != siblings->members().end(); ++s_h, ++next) {
       Simplex_handle root_sh = find_vertex(s_h->first);
       if (has_children(root_sh)) {
-        intersection(
-                     inter,  // output intersection
-                     next,  // begin
-                     siblings->members().end(),  // end
-                     root_sh->second.children()->members().begin(),
-                     root_sh->second.children()->members().end(),
-                     s_h->second.filtration());
+        intersection_with_blockers(
+                                   inter,  // output intersection
+                                   next,  // begin
+                                   siblings->members().end(),  // end
+                                   root_sh->second.children()->members().begin(),
+                                   root_sh->second.children()->members().end(),
+                                   s_h, blocker_expansion_function);
         if (inter.size() != 0) {
           Siblings * new_sib = new Siblings(siblings,  // oncles
                                             s_h->first,  // parent
                                             inter);  // boost::container::ordered_unique_range_t
+          // As siblings_expansion_with_blockers is recusively called, inter must be cleared before
           inter.clear();
           s_h->second.assign_children(new_sib);
-          siblings_expansion(new_sib, k - 1);
+          siblings_expansion_with_blockers(new_sib, k - 1, blocker_expansion_function);
         } else {
           // ensure the children property
           s_h->second.assign_children(siblings);
@@ -1059,16 +1085,19 @@ class Simplex_tree {
 
   /** \brief Intersects Dictionary 1 [begin1;end1) with Dictionary 2 [begin2,end2)
    * and assigns the maximal possible Filtration_value to the Nodes. */
-  static void intersection(std::vector<std::pair<Vertex_handle, Node> >& intersection,
+  template< typename Blocker >
+  static void intersection_with_blockers(std::vector<std::pair<Vertex_handle, Node> >& intersection,
                            Dictionary_it begin1, Dictionary_it end1,
                            Dictionary_it begin2, Dictionary_it end2,
-                           Filtration_value filtration_) {
+                           Dictionary_it origin_sh,
+                           Blocker blocker_expansion_function) {
     if (begin1 == end1 || begin2 == end2)
       return;  // ----->>
     while (true) {
       if (begin1->first == begin2->first) {
-        Filtration_value filt = (std::max)({begin1->second.filtration(), begin2->second.filtration(), filtration_});
-        intersection.emplace_back(begin1->first, Node(nullptr, filt));
+        std::pair<bool, Filtration_value> blocker_result = blocker_expansion_function(origin_sh, begin1, begin2);
+        if (blocker_result.first)
+          intersection.emplace_back(begin1->first, Node(nullptr, blocker_result.second));
         if (++begin1 == end1 || ++begin2 == end2)
           return;  // ----->>
       } else if (begin1->first < begin2->first) {
