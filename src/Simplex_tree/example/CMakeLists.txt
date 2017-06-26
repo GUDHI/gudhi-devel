@@ -36,3 +36,12 @@ if(GMP_FOUND AND CGAL_FOUND)
   install(TARGETS Simplex_tree_example_alpha_shapes_3_from_off DESTINATION bin)
 
 endif()
+
+add_executable ( Simplex_tree_example_cech_complex_step_by_step cech_complex_step_by_step.cpp)
+target_link_libraries(Simplex_tree_example_cech_complex_step_by_step ${Boost_PROGRAM_OPTIONS_LIBRARY})
+if (TBB_FOUND)
+  target_link_libraries(Simplex_tree_example_cech_complex_step_by_step ${TBB_LIBRARIES})
+endif()
+add_test(NAME Simplex_tree_example_cech_complex_step_by_step COMMAND $<TARGET_FILE:Simplex_tree_example_cech_complex_step_by_step>
+    "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" "-r" "12." "-d" "3")
+install(TARGETS Simplex_tree_example_cech_complex_step_by_step DESTINATION bin)

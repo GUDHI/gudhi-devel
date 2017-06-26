@@ -1010,7 +1010,8 @@ class Simplex_tree {
     expansion_with_blockers(max_dim,
                             [](Simplex_handle origin_sh,
                                Simplex_handle dict1_sh,
-                               Simplex_handle dict2_sh) {
+                               Simplex_handle dict2_sh,
+                               Siblings* siblings) {
                                  // Default blocker is always insert with the maximal filtration value between
                                  // origin, dict1 and dict2
                                  return std::make_pair(true, (std::max)({origin_sh->second.filtration(),
@@ -1044,7 +1045,7 @@ class Simplex_tree {
  private:
   /** \brief Recursive expansion of the simplex tree.*/
   template< typename Blocker >
-  void siblings_expansion_with_blockers(Siblings * siblings,  // must contain elements
+  void siblings_expansion_with_blockers(Siblings* siblings,  // must contain elements
                           int k, Blocker blocker_expansion_function) {
     if (dimension_ > k) {
       dimension_ = k;
@@ -1065,7 +1066,8 @@ class Simplex_tree {
                                    siblings->members().end(),  // end
                                    root_sh->second.children()->members().begin(),
                                    root_sh->second.children()->members().end(),
-                                   s_h, blocker_expansion_function);
+                                   s_h, siblings,
+                                   blocker_expansion_function);
         if (inter.size() != 0) {
           Siblings * new_sib = new Siblings(siblings,  // oncles
                                             s_h->first,  // parent
@@ -1090,12 +1092,13 @@ class Simplex_tree {
                            Dictionary_it begin1, Dictionary_it end1,
                            Dictionary_it begin2, Dictionary_it end2,
                            Dictionary_it origin_sh,
+                           Siblings* siblings,
                            Blocker blocker_expansion_function) {
     if (begin1 == end1 || begin2 == end2)
       return;  // ----->>
     while (true) {
       if (begin1->first == begin2->first) {
-        std::pair<bool, Filtration_value> blocker_result = blocker_expansion_function(origin_sh, begin1, begin2);
+        std::pair<bool, Filtration_value> blocker_result = blocker_expansion_function(origin_sh, begin1, begin2, siblings);
         if (blocker_result.first)
           intersection.emplace_back(begin1->first, Node(nullptr, blocker_result.second));
         if (++begin1 == end1 || ++begin2 == end2)

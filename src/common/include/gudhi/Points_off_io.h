@@ -85,7 +85,7 @@ class Points_off_visitor_reader {
     std::cout << std::endl;
 #endif  // DEBUG_TRACES
     // Fill the point cloud
-    point_cloud.push_back(Point_d(point.begin(), point.end()));
+    point_cloud.push_back(Point_d(point.end() - point.begin(), point.begin(), point.end()));
   }
 
   // Off_reader visitor maximal_face implementation - Only points are read
