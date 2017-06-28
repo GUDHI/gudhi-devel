@@ -23,8 +23,8 @@
 #include <gudhi/Skeleton_blocker.h>
 #include <gudhi/Off_reader.h>
 #include <gudhi/Point.h>
+#include <gudhi/Clock.h>
 
-#include <boost/timer/timer.hpp>
 #include <iostream>
 
 struct Geometry_trait {
@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
 
   build_rips(complex, atof(argv[2]));
 
-  boost::timer::auto_cpu_timer t;
+  Gudhi::Clock contraction_chrono("Time to simplify and enumerate simplices");
 
   std::cout << "Initial complex has " <<
       complex.num_vertices() << " vertices and " <<
@@ -90,8 +90,7 @@ int main(int argc, char *argv[]) {
       complex.num_blockers() << " blockers and " <<
       num_simplices << " simplices" << std::endl;
 
-
-  std::cout << "Time to simplify and enumerate simplices:\n";
+  std::cout << contraction_chrono;
 
   return EXIT_SUCCESS;
 }

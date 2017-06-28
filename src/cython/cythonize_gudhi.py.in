@@ -36,13 +36,14 @@ gudhi = Extension(
     libraries=[@GUDHI_CYTHON_LIBRARIES@],
     library_dirs=[@GUDHI_CYTHON_LIBRARY_DIRS@],
     include_dirs = [@GUDHI_CYTHON_INCLUDE_DIRS@],
+    runtime_library_dirs=[@GUDHI_CYTHON_RUNTIME_LIBRARY_DIRS@],
 )
 
 setup(
     name = 'gudhi',
     author='Vincent Rouvreau',
     author_email='gudhi-contact@lists.gforge.inria.fr',
-    version='0.1.0',
+    version='@GUDHI_VERSION@',
     url='http://gudhi.gforge.inria.fr/',
     ext_modules = cythonize(gudhi),
 )
