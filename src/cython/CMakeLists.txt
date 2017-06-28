@@ -151,6 +151,7 @@ if(CYTHON_FOUND)
     else(CGAL_HEADER_ONLY)
       add_gudhi_cython_lib(${CGAL_LIBRARIES})
       set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${CGAL_LIBRARIES_DIR}', ")
+      # If CGAL is not header only, CGAL library may link with boost system,
       add_gudhi_cython_lib(${Boost_SYSTEM_LIBRARY})
       set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${Boost_LIBRARY_DIRS}', ")
     endif(CGAL_HEADER_ONLY)
