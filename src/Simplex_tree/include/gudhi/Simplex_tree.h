@@ -1007,18 +1007,87 @@ class Simplex_tree {
    * The Simplex_tree must contain no simplex of dimension bigger than
    * 1 when calling the method. */
   void expansion(int max_dim) {
-    expansion_with_blockers(max_dim,
-                            [](Simplex_handle origin_sh,
-                               Simplex_handle dict1_sh,
-                               Simplex_handle dict2_sh,
-                               Siblings* siblings) {
-                                 // Default blocker is always insert with the maximal filtration value between
-                                 // origin, dict1 and dict2
-                                 return std::make_pair(true, (std::max)({origin_sh->second.filtration(),
-                                                                         dict1_sh->second.filtration(),
-                                                                         dict2_sh->second.filtration()})); });
+    dimension_ = max_dim;
+    for (Dictionary_it root_it = root_.members_.begin();
+         root_it != root_.members_.end(); ++root_it) {
+      if (has_children(root_it)) {
+        siblings_expansion(root_it->second.children(), max_dim - 1);
+      }
+    }
+    dimension_ = max_dim - dimension_;
   }
 
+ private:
+  /** \brief Recursive expansion of the simplex tree.*/
+  void siblings_expansion(Siblings * siblings,  // must contain elements
+                          int k) {
+    if (dimension_ > k) {
+      dimension_ = k;
+    }
+    if (k == 0)
+      return;
+    Dictionary_it next = siblings->members().begin();
+    ++next;
+
+    thread_local std::vector<std::pair<Vertex_handle, Node> > inter;
+    for (Dictionary_it s_h = siblings->members().begin();
+         s_h != siblings->members().end(); ++s_h, ++next) {
+      Simplex_handle root_sh = find_vertex(s_h->first);
+      if (has_children(root_sh)) {
+        intersection(
+                     inter,  // output intersection
+                     next,  // begin
+                     siblings->members().end(),  // end
+                     root_sh->second.children()->members().begin(),
+                     root_sh->second.children()->members().end(),
+                     s_h->second.filtration());
+        if (inter.size() != 0) {
+          Siblings * new_sib = new Siblings(siblings,  // oncles
+                                            s_h->first,  // parent
+                                            inter);  // boost::container::ordered_unique_range_t
+          inter.clear();
+          s_h->second.assign_children(new_sib);
+          siblings_expansion(new_sib, k - 1);
+        } else {
+          // ensure the children property
+          s_h->second.assign_children(siblings);
+          inter.clear();
+        }
+      }
+    }
+  }
+
+  /** \brief Intersects Dictionary 1 [begin1;end1) with Dictionary 2 [begin2,end2)
+   * and assigns the maximal possible Filtration_value to the Nodes. */
+  static void intersection(std::vector<std::pair<Vertex_handle, Node> >& intersection,
+                           Dictionary_it begin1, Dictionary_it end1,
+                           Dictionary_it begin2, Dictionary_it end2,
+                           Filtration_value filtration_) {
+    if (begin1 == end1 || begin2 == end2)
+      return;  // ----->>
+    while (true) {
+      if (begin1->first == begin2->first) {
+        Filtration_value filt = (std::max)({begin1->second.filtration(), begin2->second.filtration(), filtration_});
+        intersection.emplace_back(begin1->first, Node(nullptr, filt));
+        if (++begin1 == end1 || ++begin2 == end2)
+          return;  // ----->>
+      } else if (begin1->first < begin2->first) {
+        if (++begin1 == end1)
+          return;
+      } else /* begin1->first > begin2->first */ {
+        if (++begin2 == end2)
+          return;  // ----->>
+      }
+    }
+  }
+
+
+
+  /*-------------------------------------------------------------------------------------------------------------------------*/
+  /*-------------------------------------------------------------------------------------------------------------------------*/
+  /*-------------------------------------------------------------------------------------------------------------------------*/
+
+ public:
   /** \brief Expands the Simplex_tree containing only its one skeleton
    * until dimension max_dim.
    *
@@ -1033,10 +1102,11 @@ class Simplex_tree {
   template< typename Blocker >
   void expansion_with_blockers(int max_dim, Blocker blocker_expansion_function) {
     dimension_ = max_dim;
-    for (Dictionary_it root_it = root_.members_.begin();
-         root_it != root_.members_.end(); ++root_it) {
-      if (has_children(root_it)) {
-        siblings_expansion_with_blockers(root_it->second.children(), max_dim - 1, blocker_expansion_function);
+    // Loop must be from the end to the beginning, as higher dimension simplex are always on the left part of the tree
+    for (auto& simplex : boost::adaptors::reverse(root_.members())) {
+      if (has_children(&simplex)) {
+        std::cout << " *** root on " << static_cast<int>(simplex.first) << std::endl;
+        siblings_expansion_with_blockers(simplex.second.children(), max_dim - 1, blocker_expansion_function);
       }
     }
     dimension_ = max_dim - dimension_;
@@ -1052,66 +1122,69 @@ class Simplex_tree {
     }
     if (k == 0)
       return;
-    Dictionary_it next = siblings->members().begin();
-    ++next;
+    // No need to go deeper
+    if (siblings->members().size() < 2)
+      return;
+    // Reverse loop starting before the last one for 'next' to be the last one
+    for (auto simplex = siblings->members().rbegin() + 1; simplex != siblings->members().rend(); simplex++) {
+      auto next = siblings->members().rbegin();
+      std::vector<std::pair<Vertex_handle, Node> > intersection;
+      while(next != simplex) {
+        bool to_be_inserted = true;
+        std::cout << "to_be_inserted = " << to_be_inserted << " dim = " << k << " simplex = " << simplex->first << " - next = " << next->first << std::endl;
 
-    thread_local std::vector<std::pair<Vertex_handle, Node> > inter;
-    for (Dictionary_it s_h = siblings->members().begin();
-         s_h != siblings->members().end(); ++s_h, ++next) {
-      Simplex_handle root_sh = find_vertex(s_h->first);
-      if (has_children(root_sh)) {
-        intersection_with_blockers(
-                                   inter,  // output intersection
-                                   next,  // begin
-                                   siblings->members().end(),  // end
-                                   root_sh->second.children()->members().begin(),
-                                   root_sh->second.children()->members().end(),
-                                   s_h, siblings,
-                                   blocker_expansion_function);
-        if (inter.size() != 0) {
-          Siblings * new_sib = new Siblings(siblings,  // oncles
-                                            s_h->first,  // parent
-                                            inter);  // boost::container::ordered_unique_range_t
-          // As siblings_expansion_with_blockers is recusively called, inter must be cleared before
-          inter.clear();
-          s_h->second.assign_children(new_sib);
-          siblings_expansion_with_blockers(new_sib, k - 1, blocker_expansion_function);
-        } else {
-          // ensure the children property
-          s_h->second.assign_children(siblings);
-          inter.clear();
+        for (auto& border : boundary_simplex_range(simplex)) {
+          to_be_inserted = to_be_inserted && find_child(border, next->first);
+
+          for (auto vertex : simplex_vertex_range(border)) {
+            std::cout << "(" << vertex << ")";
+          }
+          std::cout << " | ";
         }
+        std::cout << std::endl;
+        if (to_be_inserted) {
+          std::cout << next->first << " to be inserted." << std::endl;
+          intersection.emplace_back(next->first, Node(nullptr, 0.0));
+        }
+
+        // loop until simplex is reached
+        next++;
       }
+      if (intersection.size() != 0) {
+        // Reverse the order to insert
+        std::reverse(std::begin(intersection), std::end(intersection));
+        Siblings * new_sib = new Siblings(siblings,  // oncles
+                                          simplex->first,  // parent
+                                          intersection);  // boost::container::ordered_unique_range_t
+        // intersection must be cleared before the function to be called recursively
+        intersection.clear();
+        simplex->second.assign_children(new_sib);
+        siblings_expansion_with_blockers(new_sib, k - 1, blocker_expansion_function);
+      } else {
+        // ensure the children property
+        simplex->second.assign_children(siblings);
+        intersection.clear();
+      }
+
     }
+
   }
 
-  /** \brief Intersects Dictionary 1 [begin1;end1) with Dictionary 2 [begin2,end2)
-   * and assigns the maximal possible Filtration_value to the Nodes. */
-  template< typename Blocker >
-  static void intersection_with_blockers(std::vector<std::pair<Vertex_handle, Node> >& intersection,
-                           Dictionary_it begin1, Dictionary_it end1,
-                           Dictionary_it begin2, Dictionary_it end2,
-                           Dictionary_it origin_sh,
-                           Siblings* siblings,
-                           Blocker blocker_expansion_function) {
-    if (begin1 == end1 || begin2 == end2)
-      return;  // ----->>
-    while (true) {
-      if (begin1->first == begin2->first) {
-        std::pair<bool, Filtration_value> blocker_result = blocker_expansion_function(origin_sh, begin1, begin2, siblings);
-        if (blocker_result.first)
-          intersection.emplace_back(begin1->first, Node(nullptr, blocker_result.second));
-        if (++begin1 == end1 || ++begin2 == end2)
-          return;  // ----->>
-      } else if (begin1->first < begin2->first) {
-        if (++begin1 == end1)
-          return;
-      } else /* begin1->first > begin2->first */ {
-        if (++begin2 == end2)
-          return;  // ----->>
-      }
+  /** \private Returns true if vh is a member of sh*/
+  bool find_child(Simplex_handle sh, Vertex_handle vh) {
+    std::vector<Vertex_handle> child = {vh};
+    std::cout << "+" << vh;
+    for (auto vertex : simplex_vertex_range(sh)) {
+      std::cout << "+" << vertex;
+      child.push_back(vertex);
     }
+    std::cout << " => " << (find(child) != null_simplex()) << "___ ";
+    return find(child) != null_simplex();
   }
+
+  /*-------------------------------------------------------------------------------------------------------------------------*/
+  /*-------------------------------------------------------------------------------------------------------------------------*/
+  /*-------------------------------------------------------------------------------------------------------------------------*/
 
  public:
   /** \brief Write the hasse diagram of the simplicial complex in os.

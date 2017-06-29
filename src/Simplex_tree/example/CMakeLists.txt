@@ -45,3 +45,20 @@ endif()
 add_test(NAME Simplex_tree_example_cech_complex_step_by_step COMMAND $<TARGET_FILE:Simplex_tree_example_cech_complex_step_by_step>
     "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" "-r" "12." "-d" "3")
 install(TARGETS Simplex_tree_example_cech_complex_step_by_step DESTINATION bin)
+
+
+#
+# TO BE REMOVED !!
+#
+
+#add_executable ( rips_step_by_step rips_step_by_step.cpp)
+#target_link_libraries(rips_step_by_step ${Boost_PROGRAM_OPTIONS_LIBRARY})
+#if (TBB_FOUND)
+#  target_link_libraries(rips_step_by_step ${TBB_LIBRARIES})
+#endif()
+
+
+add_executable ( block block.cpp )
+if (TBB_FOUND)
+  target_link_libraries(block ${TBB_LIBRARIES})
+endif()
