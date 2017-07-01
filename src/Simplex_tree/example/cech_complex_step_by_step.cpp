@@ -28,9 +28,9 @@
 // #include <CGAL/Epick_d.h>
 // #include <CGAL/Euclidean_distance.h>
 // #include <CGAL/Search_traits_d.h>
-#include <CGAL/Cartesian_d.h>
-#include <CGAL/Optimisation_d_traits_d.h>
-#include <CGAL/Min_sphere_d.h>
+#include <CGAL/Epick_d.h>
+#include <CGAL/Min_sphere_of_spheres_d.h>
+#include <CGAL/Min_sphere_of_points_d_traits_d.h>
 
 #include <boost/program_options.hpp>
 
@@ -59,44 +59,34 @@ using Graph_t = boost::adjacency_list < boost::vecS, boost::vecS, boost::undirec
 >;
 using Edge_t = std::pair< Vertex_handle, Vertex_handle >;
 
-// using Kernel = CGAL::Epick_d< CGAL::Dimension_tag<2> >;// CGAL::Dynamic_dimension_tag >;
-typedef CGAL::Cartesian_d<double>              Kernel;
-typedef CGAL::Optimisation_d_traits_d<Kernel>  Traits;
-typedef CGAL::Min_sphere_d<Traits>             Min_sphere;
-
+using Kernel = CGAL::Epick_d< CGAL::Dimension_tag<2> >;// CGAL::Dynamic_dimension_tag >;
 using Point = Kernel::Point_d;
+using Traits = CGAL::Min_sphere_of_points_d_traits_d<Kernel,Filtration_value,2>;
+using Min_sphere = CGAL::Min_sphere_of_spheres_d<Traits>;
+
 using Points_off_reader = Gudhi::Points_off_reader<Point>;
-// using Min_sphere = CGAL::Min_sphere_d<Kernel>;
 
 class Cech_blocker {
  public:
-  std::pair<bool, Filtration_value> operator()(Simplex_handle origin_sh, Simplex_handle dict1_sh, Simplex_handle dict2_sh, Siblings* siblings) {
-    //std::vector<Vertex_handle> path = {dict1_sh->first, origin_sh->first};
-    Siblings* sib_path = siblings;
-    std::vector<Point> sphere_points = {point_cloud_[dict1_sh->first], point_cloud_[origin_sh->first]};
-    do {
-      //path.push_back(sib_path->parent());
-      sphere_points.push_back(point_cloud_[sib_path->parent()]);
-      sib_path = sib_path->oncles();
-    } while (sib_path->oncles() != nullptr);
-    /*std::cout << square_threshold_ << "-";
-    for (auto vh : path) {
-      std::cout << vh << " ";
+  bool operator()(Simplex_handle sh) {
+    std::vector<Point> points;
+    for (auto vertex : simplex_tree_.simplex_vertex_range(sh)) {
+      points.push_back(point_cloud_[vertex]);
+      std::cout << "#(" << vertex << ")#";
     }
-    std::cout << std::endl;*/
-    Min_sphere min_sphere(sphere_points.begin(), sphere_points.end());
-    //std::cout << min_sphere.squared_radius() << std::endl;
-    Filtration_value squared_diameter = min_sphere.squared_radius() * 4.;
-    // Default blocker is always insert with the maximal filtration value between
-    // origin, dict1 and dict2
-    return std::make_pair(squared_diameter < square_threshold_,
-                          squared_diameter);
+    Min_sphere ms(points.begin(),points.end());
+    Filtration_value radius = ms.radius();
+    std::cout << "radius = " << radius << " - " << (radius > threshold_) << std::endl;
+    simplex_tree_.assign_filtration(sh, radius);
+    return (radius > threshold_);
   }
-  Cech_blocker(Filtration_value threshold, const std::vector<Point>& point_cloud)
-    : square_threshold_(threshold * threshold),
+  Cech_blocker(Simplex_tree& simplex_tree, Filtration_value threshold, const std::vector<Point>& point_cloud)
+    : simplex_tree_(simplex_tree),
+      threshold_(threshold),
       point_cloud_(point_cloud) { }
  private:
-  Filtration_value square_threshold_;
+  Simplex_tree simplex_tree_;
+  Filtration_value threshold_;
   std::vector<Point> point_cloud_;
 };
 
@@ -127,7 +117,7 @@ int main(int argc, char * argv[]) {
   // insert the proximity graph in the simplex tree
   st.insert_graph(prox_graph);
   // expand the graph until dimension dim_max
-  st.expansion_with_blockers(dim_max, Cech_blocker(threshold, off_reader.get_point_cloud()));
+  st.expansion_with_blockers(dim_max, Cech_blocker(st, threshold, off_reader.get_point_cloud()));
 
   std::cout << "The complex contains " << st.num_simplices() << " simplices \n";
   std::cout << "   and has dimension " << st.dimension() << " \n";
@@ -206,8 +196,6 @@ Graph_t compute_proximity_graph(InputPointRange &points, Filtration_value thresh
   std::vector< Filtration_value > edges_fil;
 
   Kernel k;
-  Filtration_value square_threshold = threshold * threshold;
-
   Vertex_handle idx_u, idx_v;
   Filtration_value fil;
   idx_u = 0;
@@ -215,7 +203,9 @@ Graph_t compute_proximity_graph(InputPointRange &points, Filtration_value thresh
     idx_v = idx_u + 1;
     for (auto it_v = it_u + 1; it_v != points.end(); ++it_v, ++idx_v) {
       fil = k.squared_distance_d_object()(*it_u, *it_v);
-      if (fil <= square_threshold) {
+      // For Cech Complex, threshold is a radius (distance /2)
+      fil = std::sqrt(fil) / 2.;
+      if (fil <= threshold) {
         edges.emplace_back(idx_u, idx_v);
         edges_fil.push_back(fil);
       }

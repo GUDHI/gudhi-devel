@@ -28,31 +28,27 @@
 #include <vector>
 
 using Simplex_tree = Gudhi::Simplex_tree<>;
-using Vertex_handle = Simplex_tree::Vertex_handle;
-using Filtration_value = Simplex_tree::Filtration_value;
-using typeVectorVertex = std::vector< Vertex_handle >;
-using typePairSimplexBool = std::pair< Simplex_tree::Simplex_handle, bool >;
+using Simplex_handle = Simplex_tree::Simplex_handle;
 
 int main(int argc, char * const argv[]) {
 
   // Construct the Simplex Tree
   Simplex_tree simplexTree;
 
-  simplexTree.insert_simplex({0, 1});
-  simplexTree.insert_simplex({0, 2});
-  simplexTree.insert_simplex({0, 3});
-  simplexTree.insert_simplex({1, 2});
-  simplexTree.insert_simplex({1, 3});
-  simplexTree.insert_simplex({2, 3});
-  simplexTree.insert_simplex({2, 4});
-  simplexTree.insert_simplex({3, 6});
-  simplexTree.insert_simplex({4, 5});
-  simplexTree.insert_simplex({4, 6});
-  simplexTree.insert_simplex({5, 6});
-  simplexTree.insert_simplex({6});
+  simplexTree.insert_simplex({0, 1}, 0.);
+  simplexTree.insert_simplex({0, 2}, 1.);
+  simplexTree.insert_simplex({0, 3}, 2.);
+  simplexTree.insert_simplex({1, 2}, 3.);
+  simplexTree.insert_simplex({1, 3}, 4.);
+  simplexTree.insert_simplex({2, 3}, 5.);
+  simplexTree.insert_simplex({2, 4}, 6.);
+  simplexTree.insert_simplex({3, 6}, 7.);
+  simplexTree.insert_simplex({4, 5}, 8.);
+  simplexTree.insert_simplex({4, 6}, 9.);
+  simplexTree.insert_simplex({5, 6}, 10.);
+  simplexTree.insert_simplex({6}, 11.);
 
   std::cout << "********************************************************************\n";
-  // Display the Simplex_tree - Can not be done in the middle of 2 inserts
   std::cout << "* The complex contains " << simplexTree.num_simplices() << " simplices\n";
   std::cout << "   - dimension " << simplexTree.dimension() << "   - filtration " << simplexTree.filtration() << "\n";
   std::cout << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
@@ -63,11 +59,19 @@ int main(int argc, char * const argv[]) {
     std::cout << std::endl;
   }
 
-  simplexTree.expansion_with_blockers(3, [](){return true;});
+  simplexTree.expansion_with_blockers(3, [&](Simplex_handle sh){
+      bool result = false;
+      for (auto vertex : simplexTree.simplex_vertex_range(sh)) {
+        if (vertex == 6)
+          result = true;
+        std::cout << "#(" << vertex << ")#";
+      }
+      std::cout << std::endl;
+      return result;
+    });
 
   simplexTree.initialize_filtration();
   std::cout << "********************************************************************\n";
-  // Display the Simplex_tree - Can not be done in the middle of 2 inserts
   std::cout << "* The complex contains " << simplexTree.num_simplices() << " simplices\n";
   std::cout << "   - dimension " << simplexTree.dimension() << "   - filtration " << simplexTree.filtration() << "\n";
   std::cout << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
