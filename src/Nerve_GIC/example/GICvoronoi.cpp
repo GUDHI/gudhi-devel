@@ -32,6 +32,8 @@ void usage(int nbArgs, char * const progName) {
 int main(int argc, char **argv) {
   if ((argc != 3) && (argc != 4)) usage(argc, (argv[0] - 1));
 
+  using Point = std::vector<float>;
+
   std::string off_file_name(argv[1]);
   int m = atoi(argv[2]);
   bool verb = 0; if(argc == 4)  verb = 1;
@@ -40,8 +42,8 @@ int main(int argc, char **argv) {
   // Init of a graph induced complex from an OFF file
   // ----------------------------------------------------------------------------
 
-  Gudhi::graph_induced_complex::Graph_induced_complex GIC;
-  GIC.set_verbose(verb);
+  Gudhi::graph_induced_complex::Graph_induced_complex<Point> GIC;
+  GIC.set_verbose(verb); GIC.set_mask();
 
   bool check = GIC.read_point_cloud(off_file_name);
 
@@ -52,13 +54,13 @@ int main(int argc, char **argv) {
 
     GIC.set_graph_from_OFF(off_file_name);
 
-    GIC.set_cover_from_Voronoi(m);
+    GIC.set_cover_from_Voronoi(Gudhi::Euclidean_distance(),m);
 
     GIC.find_GIC_simplices();
 
     GIC.plot_OFF();
 
-    Simplex_tree stree; GIC.create_complex(stree);
+    Gudhi::graph_induced_complex::Simplex_tree stree; GIC.create_complex(stree);
 
     std::streambuf* streambufffer = std::cout.rdbuf();
     std::ostream output_stream(streambufffer);

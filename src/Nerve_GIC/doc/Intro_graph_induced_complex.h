@@ -33,7 +33,10 @@ namespace graph_induced_complex {
  * 
  * @{
  * 
- * Visualizations of the simplicial complexes require neato, python and firefox!!
+ * Visualizations of the simplicial complexes can be done with either
+ * <a target="_blank" href=""> neato </a>,
+ * <a target="_blank" href=""> geomview </a>, or
+ * <a target="_blank" href=""> python </a> + <a target="_blank" href=""> firefox </a>.
  *
  * \section covers Covers
  *
@@ -65,19 +68,27 @@ namespace graph_induced_complex {
  *
  * When launching:
  *
- * \code $> ./Nerve ../../../data/points/human.off 2 10 0.3 --v
+ * \code $> ./Nerve ../../../../data/points/human.off 2 10 0.3 --v
  * \endcode
  *
  * the program output is:
  *
  * \include Nerve_GIC/Nerve.txt
  *
- * The first three lines are requirements for visualization with Kepler-Mapper.
+ * The program also writes a file SC.txt.
+ * The first three lines in this file are requirements for visualization with Kepler-Mapper.
  * The fourth line contains the number of vertices nv and edges ne of the Nerve.
  * The next nv lines represent the vertices. Each line contains the vertex ID,
  * the number of data points it contains, and their average color function value.
  * Finally, the next ne lines represent the edges, characterized by the ID of their vertices.
+ * Using e.g.
  *
+ * \code $> python visu.py && firefox SC.html
+ * \endcode
+ *
+ * one can obtain the following visualization:
+ *
+ * \image html "nervevisu.png" "Visualization with Kepler Mapper"
  *
  * \section gic Graph Induced Complexes (GIC)
  *
@@ -90,7 +101,8 @@ namespace graph_induced_complex {
  * See <a target="_blank" href="https://arxiv.org/abs/1304.0662"> this article </a>
  * for more details.
  *
- * \image html "gic_complex.png" "GIC of a point cloud."
+ * \image html "gic_complex.png" "GIC of a point cloud. Image taken from
+ * <a target="_blank" href="https://arxiv.org/abs/1304.0662"> this article </a>"
  *
  * \subsection gicexample Example with cover from function
  *
@@ -105,12 +117,12 @@ namespace graph_induced_complex {
  *
  * When launching:
  *
- * \code $> ./GIC ../../../data/points/human.off 0.075 2 0.075 0 --v
+ * \code $> ./GIC ../../../../data/points/human.off 0.075 2 0.075 0 --v
  * \endcode
  *
- * the program output is:
+ * the program outputs SC.txt, which can be visualized with python and firefox as before:
  *
- * \include Nerve_GIC/GIC.txt
+ * \image html "gicvisu.png" "Visualization with Kepler Mapper"
  *
  * \subsection gicexamplevor Example with cover from Voronoï
  *
@@ -124,12 +136,17 @@ namespace graph_induced_complex {
  *
  * When launching:
  *
- * \code $> ./GICvoronoi ../../../data/points/human.off 100 --v
+ * \code $> ./GICvoronoi ../../../../data/points/human.off 100 --v
  * \endcode
  *
- * the program output is:
+ * the program outputs SC.off. Using e.g.
  *
- * \include Nerve_GIC/GICvoronoi.txt
+ * \code $> geomview SC.off
+ * \endcode
+ *
+ * one can obtain the following visualization:
+ *
+ * \image html "gicvoronoivisu.png" "Visualization with Geomview"
  *
  * \subsection mapperdeltadefinition Mapper Delta
  *
@@ -143,9 +160,9 @@ namespace graph_induced_complex {
  *
  * Mapper Delta comes with optimal selection for the Rips threshold,
  * the resolution and the gain of the function cover. In this example,
- * we compute the Mapper Delta of a point cloud sampled on a 3D human shape (human.off),
+ * we compute the Mapper Delta of a Klein bottle embedded in R^5,
  * where the graph G comes from a Rips complex with optimal threshold,
- * and the cover C comes from the preimages of intervals covering the height function (coordinate 2),
+ * and the cover C comes from the preimages of intervals covering the first coordinate,
  * with optimal resolution and gain. Note that optimal threshold, resolution and gain
  * also exist for the Nerve of this cover.
  *
@@ -153,12 +170,17 @@ namespace graph_induced_complex {
  *
  * When launching:
  *
- * \code $> ./MapperDeltaCoord ../../../data/points/human.off 2 --v
+ * \code $> ./MapperDeltaCoord ../../../../data/points/KleinBottle5D.off 0 --v
  * \endcode
  *
- * the program output is:
+ * the program outputs SC.dot. Using e.g.
  *
- * \include MapperDeltaCoord.txt
+ * \code $> neato SC.dot -Tpdf -o SC.pdf
+ * \endcode
+ *
+ * one can obtain the following visualization:
+ *
+ * \image html "mapperdeltacoordvisu2.pdf" "Visualization with Neato"
  *
  * We also provide an example on a set of 72 pictures taken around the same object (lucky_cat.off).
  * The function is now the first eigenfunction given by PCA, whose values
@@ -168,12 +190,12 @@ namespace graph_induced_complex {
  *
  * When launching:
  *
- * \code $> ./MapperDeltaFunc ../../../data/points/COIL_database/lucky_cat.off ../../../data/points/COIL_database/lucky_cat_PCA1 --v
+ * \code $> ./MapperDeltaFunc ../../../../data/points/COIL_database/lucky_cat.off ../../../../data/points/COIL_database/lucky_cat_PCA1 --v
  * \endcode
  *
- * the program output is:
+ * the program outputs again SC.dot which gives the following visualization after using neato:
  *
- * \include MapperDeltaFunc.dot
+ * \image html "mapperdeltafuncvisu.pdf" "Visualization with Neato"
  *
  * \copyright GNU General Public License v3.                         
  * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim

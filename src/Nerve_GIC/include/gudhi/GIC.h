@@ -41,21 +41,13 @@
 #include <random>
 #include <cassert>
 
-#define CONSTANT 10
-#define ETA 0.001
-#define MASK 0
+namespace Gudhi {
+
+namespace graph_induced_complex {
 
 using Simplex_tree = Gudhi::Simplex_tree<>;
 using Filtration_value = Simplex_tree::Filtration_value;
 using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
-using Point = std::vector<float>;
-
-std::map<int, double> func;
-std::map<int, double> func_color;
-
-namespace Gudhi {
-
-namespace graph_induced_complex {
 
 
 /**
@@ -78,10 +70,11 @@ namespace graph_induced_complex {
  * correspond to the simplices of the GIC.
  *
  */
-
+template<typename Point>
 class Graph_induced_complex {
 
  private:
+   //Graph_induced_complex(std::map<int, double> fun){func = fun;}
    bool verbose; // whether to display information.
    std::vector<Point> point_cloud;
    typedef int Cover_t; // elements of cover C are indexed by integers.
@@ -92,23 +85,28 @@ class Graph_induced_complex {
    int n; // number of points.
    std::map<Cover_t,int> cover_fct; // integer-valued function that allows to state if two elements of the cover are consecutive or not.
    std::map<Cover_t,std::pair<int,double> > cover_color; // size and coloring of the vertices of the output simplicial complex.
-   Simplex_tree<> st;
+   Simplex_tree st;
    std::map<int,std::vector<int> > adjacency_matrix;
    std::vector<std::vector<double> > distances;
    int resolution_int;
    double resolution_double;
    double gain;
+   double rate_constant; // Constant in the subsampling.
+   double rate_power; // Power in the subsampling.
+   int mask; // Ignore nodes containing less than mask points.
+   std::map<int, double> func;
+   std::map<int, double> func_color;
    std::vector<int> voronoi_subsamples;
    std::string cover_name;
    std::string point_cloud_name;
    std::string color_name;
 
- // Point comparator
- private:
-   static bool functional_comp(int a, int b){
-     if(func[a] == func[b])  return a < b;
-     else  return func[a] < func[b];
-   }
+   // Point comparator
+   struct Less{
+     Less(std::map<int, double> func){Fct = func;}
+     std::map<int, double> Fct;
+     bool operator()(int a, int b){if(Fct[a] == Fct[b])  return a < b;  else  return Fct[a] < Fct[b];}
+   };
 
  // DFS
  private:
@@ -140,8 +138,25 @@ class Graph_induced_complex {
    }
  }
 
+ private:
+   void fill_adjacency_matrix_from_st(){
+     std::vector<int> empty;
+     for(int i = 0; i < n; i++)  adjacency_matrix.insert(std::pair<int,std::vector<int> >(i,empty));
+     for (auto simplex : st.complex_simplex_range()) {
+       if(st.dimension(simplex) == 1){
+         std::vector<int> vertices;
+         for(auto vertex : st.simplex_vertex_range(simplex))  vertices.push_back(vertex);
+         adjacency_matrix[vertices[0]].push_back(vertices[1]); adjacency_matrix[vertices[1]].push_back(vertices[0]);
+       }
+     }
+   }
+
  public:
    void set_verbose(bool verb = 0){verbose = verb;}
+ public:
+   void set_subsampling(double constant = 10, double power = 0.001){rate_constant = constant; rate_power = power;}
+ public:
+   void set_mask(int nodemask = 0){mask = nodemask;}
 
  public:
    bool read_point_cloud(std::string off_file_name){
@@ -164,25 +179,21 @@ class Graph_induced_complex {
    /** \brief Creates the graph G from a file containing the edges.
     *
     * @param[in] graph_file_name name of the input graph file.
+    * The graph file contains one edge per line,
+    * each edge being represented by the IDs of its two nodes.
     *
     */
    void set_graph_from_file(std::string graph_file_name){
-     int neighb; int vid; std::ifstream input(graph_file_name); std::string line; std::vector<int> edge(2); int n = 0;
+     int neighb; std::ifstream input(graph_file_name);
+     std::string line; int edge[2]; int n = 0;
      while(std::getline(input,line)){
-       std::stringstream stream(line); stream >> vid; edge[0] = vid;
+       std::stringstream stream(line); stream >> edge[0];
        while(stream >> neighb){edge[1] = neighb; st.insert_simplex_and_subfaces(edge);}
        n++;
      }
 
-     std::vector<int> empty;
-     for(int i = 0; i < n; i++)  adjacency_matrix.insert(std::pair<int,std::vector<int> >(i,empty));
-     for (auto simplex : st.complex_simplex_range()) {
-       if(st.dimension(simplex) == 1){
-         std::vector<int> vertices;
-         for(auto vertex : st.simplex_vertex_range(simplex))  vertices.push_back(vertex);
-         adjacency_matrix[vertices[0]].push_back(vertices[1]); adjacency_matrix[vertices[1]].push_back(vertices[0]);
-       }
-     }
+     fill_adjacency_matrix_from_st();
+
    }
 
  public: // Set graph from OFF file.
@@ -208,15 +219,8 @@ class Graph_induced_complex {
        i++;
      }
 
-     std::vector<int> empty;
-     for(int i = 0; i < n; i++)  adjacency_matrix.insert(std::pair<int,std::vector<int> >(i,empty));
-     for (auto simplex : st.complex_simplex_range()) {
-       if(st.dimension(simplex) == 1){
-         std::vector<int> vertices;
-         for(auto vertex : st.simplex_vertex_range(simplex))  vertices.push_back(vertex);
-         adjacency_matrix[vertices[0]].push_back(vertices[1]); adjacency_matrix[vertices[1]].push_back(vertices[0]);
-       }
-     }
+     fill_adjacency_matrix_from_st();
+
    }
 
  public: // Set graph from Rips complex.
@@ -225,26 +229,18 @@ class Graph_induced_complex {
     * @param[in] threshold threshold value for the Rips complex.
     *
     */
-   void set_graph_from_rips(double threshold){
-     Rips_complex rips_complex_from_points(point_cloud, threshold, Euclidean_distance());
-     rips_complex_from_points.create_complex(st, 1);
+   template<typename Distance> void set_graph_from_rips(double threshold, Distance distance){
 
-     std::vector<int> empty;
-     for(int i = 0; i < n; i++)  adjacency_matrix.insert(std::pair<int,std::vector<int> >(i,empty));
-     for (auto simplex : st.complex_simplex_range()) {
-       if(st.dimension(simplex) == 1){
-         std::vector<int> vertices;
-         for(auto vertex : st.simplex_vertex_range(simplex))  vertices.push_back(vertex);
-         adjacency_matrix[vertices[0]].push_back(vertices[1]); adjacency_matrix[vertices[1]].push_back(vertices[0]);
-       }
-     }
+     Rips_complex rips_complex_from_points(point_cloud, threshold, distance);
+     rips_complex_from_points.create_complex(st, 1);
+     fill_adjacency_matrix_from_st();
 
    }
 
  public: // Pairwise distances.
-   /** \brief Computes all pairwise distances (Euclidean norm).
+   /** \private \brief Computes all pairwise distances.
     */
-   void compute_pairwise_distances(){
+   template<typename Distance> void compute_pairwise_distances(Distance ref_distance){
 
      double d; std::vector<double> zeros(n); for(int i = 0; i < n; i++)  distances.push_back(zeros);
      std::string distance = point_cloud_name; distance.append("_dist");
@@ -267,9 +263,8 @@ class Graph_induced_complex {
          int state = (int) floor( 100*(i*1.0+1)/n ) %10;
          if( state == 0  && verbose)  std::cout << "\r" << state << "%" << std::flush;
          for (int j = i; j < n; j++){
-           double dis = 0; for(int k = 0; k < data_dimension; k++)
-               dis += pow(point_cloud[i][k]-point_cloud[j][k],2);
-           dis = std::sqrt(dis); distances[i][j] = dis; distances[j][i] = dis;
+           double dis = ref_distance(point_cloud[i],point_cloud[j]);
+           distances[i][j] = dis; distances[j][i] = dis;
            output.write((char*) &dis,8);
          }
        }
@@ -284,15 +279,16 @@ class Graph_induced_complex {
     * @param[in] N number of subsampling iteration (default value 100).
     *
     */
-   void set_graph_from_automatic_rips(int N = 100){
+   template<typename Distance> void set_graph_from_automatic_rips(Distance distance, int N = 100){
 
-     int m = floor(n/pow(log(n)/log(CONSTANT),1+ETA)); m = std::min(m,n-1);
+     int m = floor(n/   std::exp((1+rate_power)*std::log(std::log(n)/std::log(rate_constant)))   );
+     m = std::min(m,n-1);
      std::vector<int> samples(m); double delta = 0;
 
      if(verbose)  std::cout << n << " points in R^" << data_dimension << std::endl;
      if(verbose)  std::cout << "Subsampling " << m << " points" << std::endl;
 
-     if(distances.size() == 0)  compute_pairwise_distances();
+     if(distances.size() == 0)  compute_pairwise_distances(distance);
 
      //#pragma omp parallel for
      for (int i = 0; i < N; i++){
@@ -308,18 +304,9 @@ class Graph_induced_complex {
      }
 
      if(verbose)  std::cout << "delta = " << delta << std::endl;
-     Rips_complex rips_complex_from_points(point_cloud, delta, Euclidean_distance());
+     Rips_complex rips_complex_from_points(point_cloud, delta, distance);
      rips_complex_from_points.create_complex(st, 1);
-
-     std::vector<int> empty;
-     for(int i = 0; i < n; i++)  adjacency_matrix.insert(std::pair<int,std::vector<int> >(i,empty));
-     for (auto simplex : st.complex_simplex_range()) {
-       if(st.dimension(simplex) == 1){
-         std::vector<int> vertices;
-         for(auto vertex : st.simplex_vertex_range(simplex))  vertices.push_back(vertex);
-         adjacency_matrix[vertices[0]].push_back(vertices[1]); adjacency_matrix[vertices[1]].push_back(vertices[0]);
-       }
-     }
+     fill_adjacency_matrix_from_st();
 
    }
 
@@ -338,7 +325,7 @@ class Graph_induced_complex {
      int vertex_id = 0; std::ifstream input(func_file_name); std::string line; double f;
      while(std::getline(input,line)){
        std::stringstream stream(line); stream >> f;
-       func.insert(std::pair<int,double>(vertex_id, f)); vertex_id++;
+       func.emplace(vertex_id, f); vertex_id++;
      }
      cover_name = func_file_name;
    }
@@ -350,7 +337,7 @@ class Graph_induced_complex {
     *
     */
    void set_function_from_coordinate(int k){
-     for(int i = 0; i < n; i++)  func.insert(std::pair<int,double>(i,point_cloud[i][k]));
+     for(int i = 0; i < n; i++)  func.emplace(i,point_cloud[i][k]);
      char coordinate[100]; sprintf(coordinate, "coordinate %d", k);
      cover_name = coordinate;
    }
@@ -362,88 +349,12 @@ class Graph_induced_complex {
     *
     */
    void set_function_from_vector(std::vector<double> function){
-     for(int i = 0; i < n; i++)  func.insert(std::pair<int,double>(i, function[i]));
+     for(int i = 0; i < n; i++)  func.emplace(i, function[i]);
    }
 
  // *******************************************************************************************************************
  // Covers.
  // *******************************************************************************************************************
-
- public: // Set cover from file.
-   /** \brief Creates the cover C from a file containing the cover elements of each point (the order has to be the same
-    * as in the input file!).
-    *
-    * @param[in] cover_file_name name of the input cover file.
-    *
-    */
-   void set_cover_from_file(std::string cover_file_name){
-     int vertex_id = 0; Cover_t cov; std::vector<Cover_t> cov_elts, cov_number;
-     std::ifstream input(cover_file_name); std::string line;
-     while(std::getline(input,line)){
-       cov_elts.clear(); std::stringstream stream(line);
-       while(stream >> cov){
-         cov_elts.push_back(cov); cov_number.push_back(cov);
-         cover_fct[cov] = cov; cover_color[cov].second += func_color[vertex_id]; cover_color[cov].first++;
-       }
-       cover[vertex_id] = cov_elts; vertex_id++;
-     }
-     std::vector<Cover_t>::iterator it;
-     std::sort(cov_number.begin(),cov_number.end()); it = std::unique(cov_number.begin(),cov_number.end());
-     cov_number.resize(std::distance(cov_number.begin(),it)); maximal_dim = cov_number.size()-1;
-     for(int i = 0; i <= maximal_dim; i++)  cover_color[i].second /= cover_color[i].first;
-     cover_name = cover_file_name;
-   }
-
- public: // Set cover from Voronoi
-   /** \brief Creates the cover C from the Voronoï cells of a subsampling of the point cloud.
-    *
-    * @param[in] m number of points in the subsample.
-    *
-    */
-   void set_cover_from_Voronoi(int m = 100){
-
-     voronoi_subsamples.resize(m); SampleWithoutReplacement(n,m,voronoi_subsamples);
-     if(distances.size() == 0)  compute_pairwise_distances();
-     std::vector<double> mindist(n); for(int j = 0; j < n; j++)  mindist[j] = std::numeric_limits<double>::max();
-
-     // Compute the geodesic distances to subsamples with Dijkstra
-     for(int i = 0; i < m; i++){
-       if(verbose)  std::cout << "Computing geodesic distances to seed " << i << "..." << std::endl;
-       int seed = voronoi_subsamples[i];
-       std::vector<double> dist(n); std::vector<int> process(n);
-       for(int j = 0; j < n; j++){ dist[j] = std::numeric_limits<double>::max(); process[j] = j; }
-       dist[seed] = 0; int curr_size = process.size(); int min_point, min_index; double min_dist;
-       std::vector<int> neighbors; int num_neighbors;
-
-       while(curr_size > 0){
-         min_dist = std::numeric_limits<double>::max(); min_index = -1; min_point = -1;
-         for(int j = 0; j < curr_size; j++){
-           if(dist[process[j]] < min_dist){
-             min_point = process[j]; min_dist = dist[process[j]]; min_index = j;
-           }
-         }
-         assert(min_index != -1); process.erase(process.begin() + min_index);
-         assert(min_point != -1); neighbors = adjacency_matrix[min_point]; num_neighbors = neighbors.size();
-         for(int j = 0; j < num_neighbors; j++){
-           double d = dist[min_point] + distances[min_point][neighbors[j]];
-           dist[neighbors[j]] = std::min(dist[neighbors[j]], d);
-         }
-         curr_size = process.size();
-       }
-
-       for(int j = 0; j < n; j++)
-         if(mindist[j] > dist[j]){
-           mindist[j] = dist[j];
-           if(cover[j].size() == 0) cover[j].push_back(i);
-           else cover[j][0] = i;
-         }
-     }
-
-     for(int i = 0; i < n; i++){ cover_color[cover[i][0]].second += func_color[i]; cover_color[cover[i][0]].first++; }
-     for(int i = 0; i < m; i++)  cover_color[i].second /= cover_color[i].first;
-     maximal_dim = m-1; cover_name = "Voronoi";
-
-   }
 
  public: // Automatic tuning of resolution for Mapper Delta.
    /** \brief Computes the optimal length of intervals for a Mapper Delta.
@@ -542,8 +453,7 @@ class Graph_induced_complex {
 
      // Sort points according to function values
      std::vector<int> points(n); for(int i = 0; i < n; i++)  points[i] = i;
-     std::sort(points.begin(),points.end(),functional_comp);
-
+     std::sort(points.begin(),points.end(),Less(this->func));
      int id = 0; int pos = 0;
 
      for(int i = 0; i < res; i++){       
@@ -615,6 +525,82 @@ class Graph_induced_complex {
 
    }
 
+ public: // Set cover from file.
+   /** \brief Creates the cover C from a file containing the cover elements of each point (the order has to be the same
+   * as in the input file!).
+   *
+   * @param[in] cover_file_name name of the input cover file.
+   *
+   */
+   void set_cover_from_file(std::string cover_file_name){
+     int vertex_id = 0; Cover_t cov; std::vector<Cover_t> cov_elts, cov_number;
+     std::ifstream input(cover_file_name); std::string line;
+     while(std::getline(input,line)){
+       cov_elts.clear(); std::stringstream stream(line);
+       while(stream >> cov){
+         cov_elts.push_back(cov); cov_number.push_back(cov);
+         cover_fct[cov] = cov; cover_color[cov].second += func_color[vertex_id]; cover_color[cov].first++;
+       }
+       cover[vertex_id] = cov_elts; vertex_id++;
+     }
+     std::vector<Cover_t>::iterator it;
+     std::sort(cov_number.begin(),cov_number.end()); it = std::unique(cov_number.begin(),cov_number.end());
+     cov_number.resize(std::distance(cov_number.begin(),it)); maximal_dim = cov_number.size()-1;
+     for(int i = 0; i <= maximal_dim; i++)  cover_color[i].second /= cover_color[i].first;
+     cover_name = cover_file_name;
+   }
+
+ public: // Set cover from Voronoi
+   /** \brief Creates the cover C from the Voronoï cells of a subsampling of the point cloud.
+   *
+   * @param[in] m number of points in the subsample.
+   *
+   */
+   template<typename Distance> void set_cover_from_Voronoi(Distance distance, int m = 100){
+
+     voronoi_subsamples.resize(m); SampleWithoutReplacement(n,m,voronoi_subsamples);
+     if(distances.size() == 0)  compute_pairwise_distances(distance);
+     std::vector<double> mindist(n); for(int j = 0; j < n; j++)  mindist[j] = std::numeric_limits<double>::max();
+
+     // Compute the geodesic distances to subsamples with Dijkstra
+     for(int i = 0; i < m; i++){
+       if(verbose)  std::cout << "Computing geodesic distances to seed " << i << "..." << std::endl;
+       int seed = voronoi_subsamples[i];
+       std::vector<double> dist(n); std::vector<int> process(n);
+       for(int j = 0; j < n; j++){ dist[j] = std::numeric_limits<double>::max(); process[j] = j; }
+       dist[seed] = 0; int curr_size = process.size(); int min_point, min_index; double min_dist;
+       std::vector<int> neighbors; int num_neighbors;
+
+       while(curr_size > 0){
+         min_dist = std::numeric_limits<double>::max(); min_index = -1; min_point = -1;
+         for(int j = 0; j < curr_size; j++){
+           if(dist[process[j]] < min_dist){
+             min_point = process[j]; min_dist = dist[process[j]]; min_index = j;
+           }
+         }
+         assert(min_index != -1); process.erase(process.begin() + min_index);
+         assert(min_point != -1); neighbors = adjacency_matrix[min_point]; num_neighbors = neighbors.size();
+         for(int j = 0; j < num_neighbors; j++){
+           double d = dist[min_point] + distances[min_point][neighbors[j]];
+           dist[neighbors[j]] = std::min(dist[neighbors[j]], d);
+         }
+         curr_size = process.size();
+       }
+
+       for(int j = 0; j < n; j++)
+         if(mindist[j] > dist[j]){
+           mindist[j] = dist[j];
+           if(cover[j].size() == 0) cover[j].push_back(i);
+           else cover[j][0] = i;
+         }
+     }
+
+     for(int i = 0; i < n; i++){ cover_color[cover[i][0]].second += func_color[i]; cover_color[cover[i][0]].first++; }
+     for(int i = 0; i < m; i++)  cover_color[i].second /= cover_color[i].first;
+     maximal_dim = m-1; cover_name = "Voronoi";
+
+   }
+
  // *******************************************************************************************************************
  // Visualization.
  // *******************************************************************************************************************
@@ -629,7 +615,7 @@ class Graph_induced_complex {
      int vertex_id = 0; std::ifstream input(color_file_name); std::string line; double f;
      while(std::getline(input,line)){
        std::stringstream stream(line); stream >> f;
-       func_color.insert(std::pair<int,double>(vertex_id, f)); vertex_id++;
+       func_color.emplace(vertex_id, f); vertex_id++;
      }
      color_name = color_file_name;
    }
@@ -642,7 +628,7 @@ class Graph_induced_complex {
     *
     */
    void set_color_from_coordinate(int k = 0){
-     for(int i = 0; i < n; i++)  func_color.insert(std::pair<int,double>(i, point_cloud[i][k]));
+     for(int i = 0; i < n; i++)  func_color.emplace(i, point_cloud[i][k]);
      color_name = "coordinate "; color_name.append(std::to_string(k));
    }
 
@@ -653,7 +639,7 @@ class Graph_induced_complex {
     *
     */
    void set_color_from_vector(std::vector<double> color){
-     for(unsigned int i = 0; i < color.size(); i++)  func_color.insert(std::pair<int,double>(i, color[i]));
+     for(unsigned int i = 0; i < color.size(); i++)  func_color.emplace(i, color[i]);
    }
 
  public: // Create a .dot file that can be compiled with neato to produce a .pdf file.
@@ -668,7 +654,7 @@ class Graph_induced_complex {
      }
      int k = 0; std::vector<int> nodes; nodes.clear();
      for (std::map<Cover_t,std::pair<int,double> >::iterator iit = cover_color.begin(); iit != cover_color.end(); iit++){
-       if(iit->second.first > MASK){
+       if(iit->second.first > mask){
          nodes.push_back(iit->first);
          graphic << iit->first << "[shape=circle fontcolor=black color=black label=\"" \
            << iit->first << ":" << iit->second.first << "\" style=filled fillcolor=\"" \
@@ -679,7 +665,7 @@ class Graph_induced_complex {
      int ke = 0; int num_simplices = simplices.size();
      for (int i = 0; i < num_simplices; i++)
        if (simplices[i].size() == 2)
-         if (cover_color[simplices[i][0]].first > MASK && cover_color[simplices[i][1]].first > MASK){
+         if (cover_color[simplices[i][0]].first > mask && cover_color[simplices[i][1]].first > mask){
            graphic << "  " << simplices[i][0] << " -- " << simplices[i][1] << " [weight=15];" << std::endl; ke++;}
      graphic << "}"; graphic.close();
      std::cout << "SC.dot generated. It can be visualized with e.g. neato." << std::endl;
@@ -695,7 +681,7 @@ class Graph_induced_complex {
      char mapp[11] = "SC.txt";  std::ofstream graphic(mapp);
      for (int i = 0; i < num_simplices; i++)
        if (simplices[i].size() == 2)
-         if (cover_color[simplices[i][0]].first > MASK && cover_color[simplices[i][1]].first > MASK)
+         if (cover_color[simplices[i][0]].first > mask && cover_color[simplices[i][1]].first > mask)
            num_edges++;
 
      graphic << point_cloud_name << std::endl;
@@ -709,7 +695,7 @@ class Graph_induced_complex {
 
      for (int i = 0; i < num_simplices; i++)
        if (simplices[i].size() == 2)
-         if (cover_color[simplices[i][0]].first > MASK && cover_color[simplices[i][1]].first > MASK)
+         if (cover_color[simplices[i][0]].first > mask && cover_color[simplices[i][1]].first > mask)
            graphic << simplices[i][0] << " " << simplices[i][1] << std::endl;
      graphic.close();
      std::cout << "SC.txt generated. It can be visualized with e.g. python visu.py and firefox." << std::endl;
@@ -771,7 +757,7 @@ class Graph_induced_complex {
     * @param[in] cover_elts vector of points represented by vectors of cover elements (the ones to which they belong).
     *
     */
-   void find_all_simplices(std::vector<std::vector<Cover_t> > cover_elts){
+   void find_maximal_clique(std::vector<std::vector<Cover_t> > cover_elts){
      int num_nodes = cover_elts.size();
      std::vector<Cover_t> simplex;
      for(int i = 0; i < num_nodes; i++)
@@ -829,7 +815,7 @@ class Graph_induced_complex {
        if(!st.has_children(simplex)){
          std::vector<std::vector<Cover_t> > cover_elts;
          for (auto vertex : st.simplex_vertex_range(simplex))  cover_elts.push_back(cover[vertex]);
-         find_all_simplices(cover_elts);
+         find_maximal_clique(cover_elts);
        }
      }
      std::vector<std::vector<Cover_t> >::iterator it;
