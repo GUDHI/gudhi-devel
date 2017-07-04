@@ -34,9 +34,9 @@ namespace graph_induced_complex {
  * @{
  * 
  * Visualizations of the simplicial complexes can be done with either
- * <a target="_blank" href=""> neato </a>,
- * <a target="_blank" href=""> geomview </a>, or
- * <a target="_blank" href=""> python </a> + <a target="_blank" href=""> firefox </a>.
+ * neato (from <a target="_blank" href="http://www.graphviz.org/"> graphviz </a>),
+ * <a target="_blank" href="http://www.geomview.org/"> geomview </a>, or
+ * <a target="_blank" href="https://www.python.org/"> python </a> + <a target="_blank" href="https://www.mozilla.org/fr/firefox/new/"> firefox </a>.
  *
  * \section covers Covers
  *
@@ -88,7 +88,7 @@ namespace graph_induced_complex {
  *
  * one can obtain the following visualization:
  *
- * \image html "nervevisu.png" "Visualization with Kepler Mapper"
+ * \image html "nervevisu.jpg" "Visualization with Kepler Mapper"
  *
  * \section gic Graph Induced Complexes (GIC)
  *
@@ -101,8 +101,7 @@ namespace graph_induced_complex {
  * See <a target="_blank" href="https://arxiv.org/abs/1304.0662"> this article </a>
  * for more details.
  *
- * \image html "gic_complex.png" "GIC of a point cloud. Image taken from
- * <a target="_blank" href="https://arxiv.org/abs/1304.0662"> this article </a>"
+ * \image html "gic_complex.png" "GIC of a point cloud. Courtesy of Tamal Dey."
  *
  * \subsection gicexample Example with cover from function
  *
@@ -122,7 +121,7 @@ namespace graph_induced_complex {
  *
  * the program outputs SC.txt, which can be visualized with python and firefox as before:
  *
- * \image html "gicvisu.png" "Visualization with Kepler Mapper"
+ * \image html "gicvisu.jpg" "Visualization with Kepler Mapper"
  *
  * \subsection gicexamplevor Example with cover from Voronoï
  *
@@ -130,13 +129,14 @@ namespace graph_induced_complex {
  * We randomly subsampled 100 points in the point cloud, which act as seeds of
  * a geodesic Voronoï diagram. Each cell of the diagram is then an element of C.
  * The graph G (used to compute both the geodesics for Voronoï and the GIC)
- * comes from the triangulation of the human shape.
+ * comes from the triangulation of the human shape. Note that the resulting simplicial complex is in dimension 3
+ * in this example.
  *
  * \include Nerve_GIC/GICvoronoi.cpp
  *
  * When launching:
  *
- * \code $> ./GICvoronoi ../../../../data/points/human.off 100 --v
+ * \code $> ./GICvoronoi ../../../../data/points/human.off 700 --v
  * \endcode
  *
  * the program outputs SC.off. Using e.g.
@@ -146,7 +146,7 @@ namespace graph_induced_complex {
  *
  * one can obtain the following visualization:
  *
- * \image html "gicvoronoivisu.png" "Visualization with Geomview"
+ * \image html "gicvoronoivisu.jpg" "Visualization with Geomview"
  *
  * \subsection mapperdeltadefinition Mapper Delta
  *
@@ -180,7 +180,10 @@ namespace graph_induced_complex {
  *
  * one can obtain the following visualization:
  *
- * \image html "mapperdeltacoordvisu2.pdf" "Visualization with Neato"
+ * \image html "mapperdeltacoordvisu2.jpg" "Visualization with Neato"
+ *
+ * where nodes are colored by the filter function values and, for each node, the first number is its ID
+ * and the second is the number of data points that its contain.
  *
  * We also provide an example on a set of 72 pictures taken around the same object (lucky_cat.off).
  * The function is now the first eigenfunction given by PCA, whose values
@@ -195,7 +198,7 @@ namespace graph_induced_complex {
  *
  * the program outputs again SC.dot which gives the following visualization after using neato:
  *
- * \image html "mapperdeltafuncvisu.pdf" "Visualization with Neato"
+ * \image html "mapperdeltafuncvisu.jpg" "Visualization with Neato"
  *
  * \copyright GNU General Public License v3.                         
  * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
