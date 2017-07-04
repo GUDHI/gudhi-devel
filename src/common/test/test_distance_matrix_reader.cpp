@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE( lower_triangular_distance_matrix )
 {
   Distance_matrix from_lower_triangular;
   // Read lower_triangular_distance_matrix.csv file where the separator is a ','
-  from_lower_triangular = read_lower_triangular_matrix_from_csv_file<double>("lower_triangular_distance_matrix.csv",
+  from_lower_triangular = Gudhi::read_lower_triangular_matrix_from_csv_file<double>("lower_triangular_distance_matrix.csv",
                                                                              ',');
   for (auto& i : from_lower_triangular) {
     for (auto j : i) {
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE( full_square_distance_matrix )
 {
   Distance_matrix from_full_square;
   // Read full_square_distance_matrix.csv file where the separator is the default one ';'
-  from_full_square = read_lower_triangular_matrix_from_csv_file<double>("full_square_distance_matrix.csv");
+  from_full_square = Gudhi::read_lower_triangular_matrix_from_csv_file<double>("full_square_distance_matrix.csv");
   for (auto& i : from_full_square) {
     for (auto j : i) {
       std::cout << j << " ";

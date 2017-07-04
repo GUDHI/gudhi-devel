@@ -37,6 +37,8 @@
 #include <vector>
 #include <utility>  // for pair
 
+namespace Gudhi {
+
 // Keep this file tag for Doxygen to parse the code, otherwise, functions are not documented.
 // It is required for global functions and variables.
 
@@ -331,7 +333,7 @@ void read_persistence_intervals_and_dimension(std::string const& filename, Outpu
       }
     }
   }
-} // read_persistence_diagram_from_file
+}  // read_persistence_diagram_from_file
 
 /**
 Reads a file containing persistence intervals.
@@ -347,7 +349,7 @@ inline std::map<int, std::vector<std::pair<double, double>>> read_persistence_in
     filename,
     boost::make_function_output_iterator([&ret](std::tuple<int, double, double> t) { ret[get<0>(t)].push_back(std::make_pair(get<1>(t), get<2>(t))); }));
   return ret;
-} // read_persistence_diagram_from_file
+}  // read_persistence_diagram_from_file
 
 
 /**
@@ -367,6 +369,8 @@ inline std::vector<std::pair<double, double>> read_persistence_intervals_in_dime
     filename, 
     boost::make_function_output_iterator([&ret](std::tuple<int, double, double> t) { ret.emplace_back(get<1>(t), get<2>(t)); }));
   return ret;
-} // read_persistence_diagram_from_file
+}  // read_persistence_diagram_from_file
+
+}  // namespace Gudhi
 
 #endif  // READER_UTILS_H_

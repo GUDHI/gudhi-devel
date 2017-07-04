@@ -57,7 +57,7 @@ int main(int argc, char * argv[]) {
 
   program_options(argc, argv, csv_matrix_file, filediag, threshold, dim_max, p, min_persistence);
 
-  Distance_matrix distances = read_lower_triangular_matrix_from_csv_file<Filtration_value>(csv_matrix_file);
+  Distance_matrix distances = Gudhi::read_lower_triangular_matrix_from_csv_file<Filtration_value>(csv_matrix_file);
   Rips_complex rips_complex_from_file(distances, threshold);
 
   // Construct the Rips complex in a Simplex Tree

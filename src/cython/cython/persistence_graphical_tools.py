@@ -5,7 +5,7 @@ import numpy as np
    (Geometric Understanding in Higher Dimensions) is a generic C++
    library for computational topology.
 
-   Author(s):       Vincent Rouvreau
+   Author(s):       Vincent Rouvreau, Bertrand Michel
 
    Copyright (C) 2016 INRIA
 
@@ -27,11 +27,13 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 INRIA"
 __license__ = "GPL v3"
 
-def __min_birth_max_death(persistence):
+def __min_birth_max_death(persistence, band_boot=0.):
     """This function returns (min_birth, max_death) from the persistence.
 
     :param persistence: The persistence to plot.
     :type persistence: list of tuples(dimension, tuple(birth, death)).
+    :param band_boot: bootstrap band
+    :type band_boot: float.
     :returns: (float, float) -- (min_birth, max_death).
     """
     # Look for minimum birth date and maximum death date for plot optimisation
@@ -45,6 +47,8 @@ def __min_birth_max_death(persistence):
             max_death = float(interval[1][0])
         if float(interval[1][0]) < min_birth:
             min_birth = float(interval[1][0])
+    if band_boot > 0.:
+        max_death += band_boot
     return (min_birth, max_death)
 
 """
@@ -108,16 +112,18 @@ def plot_persistence_barcode(persistence, alpha=0.6):
     plt.axis([axis_start, infinity, 0, ind])
     plt.show()
 
-def plot_persistence_diagram(persistence, alpha=0.6):
-    """This function plots the persistence diagram.
+def plot_persistence_diagram(persistence, alpha=0.6, band_boot=0.):
+    """This function plots the persistence diagram with confidence band.
 
     :param persistence: The persistence to plot.
     :type persistence: list of tuples(dimension, tuple(birth, death)).
     :param alpha: alpha value in [0.0, 1.0] for points and horizontal infinity line (default is 0.6).
     :type alpha: float.
-    :returns: plot -- An diagram plot of persistence.
+    :param band_boot: bootstrap band
+    :type band_boot: float.
+    :returns: plot -- A diagram plot of persistence.
     """
-    (min_birth, max_death) = __min_birth_max_death(persistence)
+    (min_birth, max_death) = __min_birth_max_death(persistence, band_boot)
     ind = 0
     delta = ((max_death - min_birth) / 10.0)
     # Replace infinity values with max_death + delta for diagram to be more
@@ -131,6 +137,9 @@ def plot_persistence_diagram(persistence, alpha=0.6):
     plt.plot(x, x, color='k', linewidth=1.0)
     plt.plot(x, [infinity] * len(x), linewidth=1.0, color='k', alpha=alpha)
     plt.text(axis_start, infinity, r'$\infty$', color='k', alpha=alpha)
+    # bootstrap band
+    if band_boot > 0.:
+        plt.fill_between(x, x, x+band_boot, alpha=alpha, facecolor='red')
 
     # Draw points in loop
     for interval in reversed(persistence):
@@ -149,4 +158,4 @@ def plot_persistence_diagram(persistence, alpha=0.6):
     plt.ylabel('Death')
     # Ends plot on infinity value and starts a little bit before min_birth
     plt.axis([axis_start, infinity, axis_start, infinity + delta])
-    plt.show()
+    return plt
