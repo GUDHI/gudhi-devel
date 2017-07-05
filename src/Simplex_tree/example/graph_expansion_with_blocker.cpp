@@ -20,7 +20,6 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/Simplex_tree.h>
 
 #include <iostream>
