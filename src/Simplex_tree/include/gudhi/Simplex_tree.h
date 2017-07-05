@@ -1081,31 +1081,23 @@ class Simplex_tree {
     }
   }
 
-
-
-  /*-------------------------------------------------------------------------------------------------------------------------*/
-  /*-------------------------------------------------------------------------------------------------------------------------*/
-  /*-------------------------------------------------------------------------------------------------------------------------*/
-
  public:
-  /** \brief Expands the Simplex_tree containing only its one skeleton
-   * until dimension max_dim.
+  /** \brief Expands the Simplex_tree containing only its one skeleton until dimension max_dim according with a user
+   * given blocker expansion oracle
    *
-   * The expanded simplicial complex until dimension \f$d\f$
-   * attached to a graph \f$G\f$ is the maximal simplicial complex of
-   * dimension at most \f$d\f$ admitting the graph \f$G\f$ as \f$1\f$-skeleton.
-   * The filtration value assigned to a simplex is the maximal filtration
-   * value of one of its edges.
+   * The expanded simplicial complex until dimension \f$d\f$ attached to a graph \f$G\f$ is the maximal simplicial
+   * complex of dimension at most \f$d\f$ admitting the graph \f$G\f$ as \f$1\f$-skeleton.
+   * The filtration value assigned to a simplex is the maximal filtration value of one of its edges.
+   * The blocker expansion oracle shall answer true on a Simplex_handle if this Simplex_handle has to be removed,
+   * false otherwise. The blocker expansion oracle can re-assign the filtration value.
    *
-   * The Simplex_tree must contain no simplex of dimension bigger than
-   * 1 when calling the method. */
+   * The Simplex_tree must contain no simplex of dimension bigger than 1 when calling the method. */
   template< typename Blocker >
   void expansion_with_blockers(int max_dim, Blocker blocker_expansion_function) {
     dimension_ = max_dim;
     // Loop must be from the end to the beginning, as higher dimension simplex are always on the left part of the tree
     for (auto& simplex : boost::adaptors::reverse(root_.members())) {
       if (has_children(&simplex)) {
-        std::cout << " *** root on " << static_cast<int>(simplex.first) << std::endl;
         siblings_expansion_with_blockers(simplex.second.children(), max_dim - 1, blocker_expansion_function);
       }
     }
@@ -1113,7 +1105,7 @@ class Simplex_tree {
   }
 
  private:
-  /** \brief Recursive expansion of the simplex tree.*/
+  /** \brief Recursive expansion with blockers of the simplex tree.*/
   template< typename Blocker >
   void siblings_expansion_with_blockers(Siblings* siblings,  // must contain elements
                           int k, Blocker blocker_expansion_function) {
@@ -1131,22 +1123,16 @@ class Simplex_tree {
       std::vector<std::pair<Vertex_handle, Node> > intersection;
       while(next != simplex) {
         bool to_be_inserted = true;
-        std::cout << "to_be_inserted = " << to_be_inserted << " dim = " << k << " simplex = " << simplex->first << " - next = " << next->first << std::endl;
-
+        Filtration_value filt = simplex->second.filtration();
+        // If all the boundaries are present, 'next' needs to be inserted
         for (auto& border : boundary_simplex_range(simplex)) {
-          to_be_inserted = to_be_inserted && find_child(border, next->first);
-
-          for (auto vertex : simplex_vertex_range(border)) {
-            std::cout << "(" << vertex << ")";
-          }
-          std::cout << " | ";
+          Simplex_handle border_child = find_child(border, next->first);
+          to_be_inserted = to_be_inserted && (border_child != null_simplex());
+          filt = std::max(filt, filtration(border_child));
         }
-        std::cout << std::endl;
         if (to_be_inserted) {
-          std::cout << next->first << " to be inserted." << std::endl;
-          intersection.emplace_back(next->first, Node(nullptr, 0.0));
+          intersection.emplace_back(next->first, Node(nullptr, filt));
         }
-
         // loop until simplex is reached
         next++;
       }
@@ -1158,33 +1144,49 @@ class Simplex_tree {
                                           intersection);  // boost::container::ordered_unique_range_t
         // intersection must be cleared before the function to be called recursively
         intersection.clear();
-        simplex->second.assign_children(new_sib);
-        siblings_expansion_with_blockers(new_sib, k - 1, blocker_expansion_function);
+
+        std::vector<Simplex_handle> blocked_new_sib_list;
+        // As all intersections are inserted, we can call the blocker function on all new_sib members
+        for (auto new_sib_member = new_sib->members().begin();
+             new_sib_member != new_sib->members().end();
+             new_sib_member++) {
+           bool blocker_result = blocker_expansion_function(new_sib_member);
+           // new_sib member has been blocked by the blocker function
+           // add it to the list to be removed - do not perform it while looping on it
+           if (blocker_result)
+             blocked_new_sib_list.push_back(new_sib_member);
+        }
+        bool removed = false;
+        for (auto& blocked_new_sib_member : blocked_new_sib_list){
+          removed = removed || remove_maximal_simplex(blocked_new_sib_member);
+        }
+        if (removed) {
+          // ensure the children property
+          simplex->second.assign_children(siblings);
+        } else {
+          // ensure recursive call
+          simplex->second.assign_children(new_sib);
+          siblings_expansion_with_blockers(new_sib, k - 1, blocker_expansion_function);
+        }
       } else {
         // ensure the children property
         simplex->second.assign_children(siblings);
         intersection.clear();
       }
-
     }
-
   }
 
-  /** \private Returns true if vh is a member of sh*/
-  bool find_child(Simplex_handle sh, Vertex_handle vh) {
+  /* \private Returns the Simplex_handle composed of the vertex list (from the Simplex_handle), plus the given
+   * Vertex_handle.
+   * Returns null_simplex() if it does not exist
+  */
+  Simplex_handle find_child(Simplex_handle sh, Vertex_handle vh) {
     std::vector<Vertex_handle> child = {vh};
-    std::cout << "+" << vh;
     for (auto vertex : simplex_vertex_range(sh)) {
-      std::cout << "+" << vertex;
       child.push_back(vertex);
     }
-    std::cout << " => " << (find(child) != null_simplex()) << "___ ";
-    return find(child) != null_simplex();
+    return find(child);
   }
-
-  /*-------------------------------------------------------------------------------------------------------------------------*/
-  /*-------------------------------------------------------------------------------------------------------------------------*/
-  /*-------------------------------------------------------------------------------------------------------------------------*/
 
  public:
   /** \brief Write the hasse diagram of the simplicial complex in os.
@@ -1295,11 +1297,12 @@ class Simplex_tree {
  public:
   /** \brief Remove a maximal simplex.
    * @param[in] sh Simplex handle on the maximal simplex to remove.
+   * @return true if siblings was deleted, false otherwise.
    * \pre Please check the simplex has no coface before removing it.
    * \exception std::invalid_argument In debug mode, if sh has children.
    * \post Be aware that removing is shifting data in a flat_map (initialize_filtration to be done).
    */
-  void remove_maximal_simplex(Simplex_handle sh) {
+  bool remove_maximal_simplex(Simplex_handle sh) {
     // Guarantee the simplex has no children
     GUDHI_CHECK(!has_children(sh),
                 std::invalid_argument("Simplex_tree::remove_maximal_simplex - argument has children"));
@@ -1315,7 +1318,9 @@ class Simplex_tree {
       // Sibling is emptied : must be deleted, and its parent must point on his own Sibling
       child->oncles()->members().at(child->parent()).assign_children(child->oncles());
       delete child;
+      return true;
     }
+    return false;
   }
 
  private:

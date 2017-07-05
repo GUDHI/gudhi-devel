@@ -24,15 +24,13 @@
 #include <gudhi/Simplex_tree.h>
 
 #include <iostream>
-#include <utility>  // for pair
-#include <vector>
 
 using Simplex_tree = Gudhi::Simplex_tree<>;
 using Simplex_handle = Simplex_tree::Simplex_handle;
 
 int main(int argc, char * const argv[]) {
 
-  // Construct the Simplex Tree
+  // Construct the Simplex Tree with a 1-skeleton graph example
   Simplex_tree simplexTree;
 
   simplexTree.insert_simplex({0, 1}, 0.);
@@ -46,31 +44,27 @@ int main(int argc, char * const argv[]) {
   simplexTree.insert_simplex({4, 5}, 8.);
   simplexTree.insert_simplex({4, 6}, 9.);
   simplexTree.insert_simplex({5, 6}, 10.);
-  simplexTree.insert_simplex({6}, 11.);
-
-  std::cout << "********************************************************************\n";
-  std::cout << "* The complex contains " << simplexTree.num_simplices() << " simplices\n";
-  std::cout << "   - dimension " << simplexTree.dimension() << "   - filtration " << simplexTree.filtration() << "\n";
-  std::cout << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
-  for (auto f_simplex : simplexTree.filtration_simplex_range()) {
-    std::cout << "   " << "[" << simplexTree.filtration(f_simplex) << "] ";
-    for (auto vertex : simplexTree.simplex_vertex_range(f_simplex))
-      std::cout << "(" << vertex << ")";
-    std::cout << std::endl;
-  }
+  simplexTree.insert_simplex({6}, 10.);
 
   simplexTree.expansion_with_blockers(3, [&](Simplex_handle sh){
       bool result = false;
+      std::cout << "Blocker on [";
+      // User can loop on the vertices from the given simplex_handle i.e.
       for (auto vertex : simplexTree.simplex_vertex_range(sh)) {
+        // We block the expansion, if the vertex '6' is in the given list of vertices
         if (vertex == 6)
           result = true;
-        std::cout << "#(" << vertex << ")#";
+        std::cout << vertex << ", ";
       }
-      std::cout << std::endl;
+      std::cout << "] ( " << simplexTree.filtration(sh);
+      // User can re-assign a new filtration value directly in the blocker (default is the maximal value of boudaries)
+      simplexTree.assign_filtration(sh, simplexTree.filtration(sh) + 1.);
+
+      std::cout << " + 1. ) = " << result << std::endl;
+
       return result;
     });
 
-  simplexTree.initialize_filtration();
   std::cout << "********************************************************************\n";
   std::cout << "* The complex contains " << simplexTree.num_simplices() << " simplices\n";
   std::cout << "   - dimension " << simplexTree.dimension() << "   - filtration " << simplexTree.filtration() << "\n";

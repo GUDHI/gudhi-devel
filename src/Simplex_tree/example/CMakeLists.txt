@@ -34,24 +34,7 @@ if(GMP_FOUND AND CGAL_FOUND)
       "${CMAKE_SOURCE_DIR}/data/points/bunny_5000.off")
 
   install(TARGETS Simplex_tree_example_alpha_shapes_3_from_off DESTINATION bin)
-
-  #
-  # TO BE REMOVED !!
-  #
-
-  add_executable ( Simplex_tree_example_cech_complex_step_by_step cech_complex_step_by_step.cpp )
-  target_link_libraries(Simplex_tree_example_cech_complex_step_by_step ${GMP_LIBRARIES} ${CGAL_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
-  if (TBB_FOUND)
-    target_link_libraries(Simplex_tree_example_cech_complex_step_by_step ${TBB_LIBRARIES})
-  endif()
-  add_test(NAME Simplex_tree_example_cech_complex_step_by_step COMMAND $<TARGET_FILE:Simplex_tree_example_cech_complex_step_by_step>
-      "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" "-d" "3" "-r" "6.0")
-
 endif()
-
-#
-# TO BE REMOVED !!
-#
 
 add_executable ( Simplex_tree_example_block block.cpp )
 if (TBB_FOUND)
