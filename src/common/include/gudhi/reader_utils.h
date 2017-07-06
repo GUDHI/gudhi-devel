@@ -359,7 +359,7 @@ If `only_this_dim` = -1, dimension is ignored and all lines are returned.
 If `only_this_dim` is >= 0, only the lines where dimension = `only_this_dim` 
 (or where dimension is not specified) are returned.
 The return value is an `std::vector<std::pair<birth, death>>`
-where `dim` is an `int`, `birth` a `double`, and `death` a `double`.
+where `birth` a `double`, and `death` a `double`.
 Note: the function does not check that birth <= death.
 **/
 inline std::vector<std::pair<double, double>> read_persistence_intervals_in_dimension(std::string const& filename, int only_this_dim = -1) {

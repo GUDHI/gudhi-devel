@@ -113,13 +113,13 @@ def plot_persistence_barcode(persistence, alpha=0.6):
     plt.show()
 
 def plot_persistence_diagram(persistence, alpha=0.6, band_boot=0.):
-    """This function plots the persistence diagram with confidence band.
+    """This function plots the persistence diagram with an optional confidence band.
 
     :param persistence: The persistence to plot.
     :type persistence: list of tuples(dimension, tuple(birth, death)).
     :param alpha: alpha value in [0.0, 1.0] for points and horizontal infinity line (default is 0.6).
     :type alpha: float.
-    :param band_boot: bootstrap band
+    :param band_boot: bootstrap band (not displayed if :math:`\leq` 0.)
     :type band_boot: float.
     :returns: plot -- A diagram plot of persistence.
     """

@@ -100,7 +100,7 @@ if(CYTHON_FOUND)
   file(COPY "${CMAKE_SOURCE_DIR}/data/distance_matrix/full_square_distance_matrix.csv" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
   # Persistence graphical tools examples
   file(COPY "${CMAKE_SOURCE_DIR}/data/bitmap/3d_torus.txt" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
-  file(COPY "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
+  file(COPY "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
 
   if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
     # If CGAL_VERSION >= 4.8.1, include subsampling
