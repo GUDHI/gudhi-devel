@@ -52,7 +52,7 @@ typename OutputIterator>
 void pick_n_random_points(Point_container const &points,
                           std::size_t final_size,
                           OutputIterator output_it) {
-#ifdef GUDHI_SUBS_PROFILING
+#ifdef GUDHI_SUBSAMPLING_PROFILING
   Gudhi::Clock t;
 #endif
 
@@ -72,7 +72,7 @@ void pick_n_random_points(Point_container const &points,
   for (int l : landmarks)
     *output_it++ = points[l];
 
-#ifdef GUDHI_SUBS_PROFILING
+#ifdef GUDHI_SUBSAMPLING_PROFILING
   t.end();
   std::cerr << "Random landmark choice took " << t.num_seconds()
       << " seconds." << std::endl;

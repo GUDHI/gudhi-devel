@@ -26,7 +26,7 @@ install(TARGETS Simplex_tree_example_mini_simplex_tree DESTINATION bin)
 # An example with Simplex-tree using CGAL alpha_shapes_3
 if(GMP_FOUND AND CGAL_FOUND)
   add_executable ( Simplex_tree_example_alpha_shapes_3_from_off example_alpha_shapes_3_simplex_tree_from_off_file.cpp )
-  target_link_libraries(Simplex_tree_example_alpha_shapes_3_from_off ${GMP_LIBRARIES} ${CGAL_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+  target_link_libraries(Simplex_tree_example_alpha_shapes_3_from_off ${GMP_LIBRARIES} ${CGAL_LIBRARY})
   if (TBB_FOUND)
     target_link_libraries(Simplex_tree_example_alpha_shapes_3_from_off ${TBB_LIBRARIES})
   endif()

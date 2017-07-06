@@ -2,7 +2,7 @@
  *    (Geometric Understanding in Higher Dimensions) is a generic C++ 
  *    library for computational topology.
  *
- *    Author(s):       Clement Maria, Pawel Dlotko
+ *    Author(s):       Clement Maria, Pawel Dlotko, Clement Jamin
  *
  *    Copyright (C) 2014  INRIA
  *
@@ -24,7 +24,9 @@
 #define READER_UTILS_H_
 
 #include <gudhi/graph_simplicial_complex.h>
+#include <gudhi/Debug_utils.h>
 
+#include <boost/function_output_iterator.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
 #include <iostream>
@@ -92,7 +94,10 @@ template< typename Graph_t, typename Filtration_value, typename Vertex_handle >
 Graph_t read_graph(std::string file_name) {
   std::ifstream in_(file_name.c_str(), std::ios::in);
   if (!in_.is_open()) {
-    std::cerr << "Unable to open file " << file_name << std::endl;
+    std::string error_str("read_graph - Unable to open file ");
+    error_str.append(file_name);
+    std::cerr << error_str << std::endl;
+    throw std::invalid_argument(error_str);
   }
 
   typedef std::pair< Vertex_handle, Vertex_handle > Edge_t;
@@ -294,5 +299,74 @@ std::vector< std::vector< Filtration_value > > read_lower_triangular_matrix_from
 
   return result;
 }  // read_lower_triangular_matrix_from_csv_file
+
+/**
+Reads a file containing persistence intervals.
+Each line might contain 2, 3 or 4 values: [[field] dimension] birth death
+The output iterator `out` is used this way: `*out++ = std::make_tuple(dim, birth, death);`
+where `dim` is an `int`, `birth` a `double`, and `death` a `double`.
+Note: the function does not check that birth <= death.
+**/
+template <typename OutputIterator>
+void read_persistence_intervals_and_dimension(std::string const& filename, OutputIterator out) {
+
+  std::ifstream in(filename);
+  if (!in.is_open()) {
+    std::string error_str("read_persistence_intervals_and_dimension - Unable to open file ");
+    error_str.append(filename);
+    std::cerr << error_str << std::endl;
+    throw std::invalid_argument(error_str);
+  }
+
+  while (!in.eof()) {
+    std::string line;
+    getline(in, line);
+    if (line.length() != 0 && line[0] != '#') {
+      double numbers[4];
+      int n = sscanf(line.c_str(), "%lf %lf %lf %lf", &numbers[0], &numbers[1], &numbers[2], &numbers[3]);
+      if (n >= 2) {
+        //int field = (n == 4 ? static_cast<int>(numbers[0]) : -1);
+        int dim = (n >= 3 ? static_cast<int>(numbers[n - 3]) : -1);
+        *out++ = std::make_tuple(dim, numbers[n - 2], numbers[n - 1]);
+      }
+    }
+  }
+} // read_persistence_diagram_from_file
+
+/**
+Reads a file containing persistence intervals.
+Each line might contain 2, 3 or 4 values: [[field] dimension] birth death
+The return value is an `std::map<dim, std::vector<std::pair<birth, death>>>`
+where `dim` is an `int`, `birth` a `double`, and `death` a `double`.
+Note: the function does not check that birth <= death.
+**/
+inline std::map<int, std::vector<std::pair<double, double>>> read_persistence_intervals_grouped_by_dimension(std::string const& filename) {
+
+  std::map<int, std::vector<std::pair<double, double>>> ret;
+  read_persistence_intervals_and_dimension(
+    filename,
+    boost::make_function_output_iterator([&ret](std::tuple<int, double, double> t) { ret[get<0>(t)].push_back(std::make_pair(get<1>(t), get<2>(t))); }));
+  return ret;
+} // read_persistence_diagram_from_file
+
+
+/**
+Reads a file containing persistence intervals.
+Each line might contain 2, 3 or 4 values: [[field] dimension] birth death
+If `only_this_dim` = -1, dimension is ignored and all lines are returned.
+If `only_this_dim` is >= 0, only the lines where dimension = `only_this_dim` 
+(or where dimension is not specified) are returned.
+The return value is an `std::vector<std::pair<birth, death>>`
+where `dim` is an `int`, `birth` a `double`, and `death` a `double`.
+Note: the function does not check that birth <= death.
+**/
+inline std::vector<std::pair<double, double>> read_persistence_intervals_in_dimension(std::string const& filename, int only_this_dim = -1) {
+
+  std::vector<std::pair<double, double>> ret;
+  read_persistence_intervals_and_dimension(
+    filename, 
+    boost::make_function_output_iterator([&ret](std::tuple<int, double, double> t) { ret.emplace_back(get<1>(t), get<2>(t)); }));
+  return ret;
+} // read_persistence_diagram_from_file
 
 #endif  // READER_UTILS_H_

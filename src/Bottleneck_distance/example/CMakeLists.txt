@@ -6,7 +6,7 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
   add_executable (bottleneck_basic_example bottleneck_basic_example.cpp)
 
   add_executable (alpha_rips_persistence_bottleneck_distance alpha_rips_persistence_bottleneck_distance.cpp)
-  target_link_libraries(alpha_rips_persistence_bottleneck_distance ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+  target_link_libraries(alpha_rips_persistence_bottleneck_distance ${Boost_PROGRAM_OPTIONS_LIBRARY})
   if (TBB_FOUND)
     target_link_libraries(bottleneck_read_file_example ${TBB_LIBRARIES})
     target_link_libraries(bottleneck_basic_example ${TBB_LIBRARIES})
@@ -18,6 +18,10 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
   add_test(NAME Bottleneck_distance_example_alpha_rips_persistence_bottleneck
       COMMAND $<TARGET_FILE:alpha_rips_persistence_bottleneck_distance>
       "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" "-r" "0.15" "-m" "0.12" "-d" "3" "-p" "3")
+
+  add_test(NAME Bottleneck_read_file_example
+      COMMAND $<TARGET_FILE:bottleneck_read_file_example>
+      "${CMAKE_SOURCE_DIR}/data/persistence_diagram/first.pers" "${CMAKE_SOURCE_DIR}/data/persistence_diagram/second.pers")
 
   install(TARGETS bottleneck_read_file_example DESTINATION bin)
   install(TARGETS bottleneck_basic_example DESTINATION bin)
