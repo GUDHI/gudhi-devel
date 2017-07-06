@@ -67,10 +67,13 @@ Information of the Simplex Tree:
 Number of vertices = 10   Number of simplices = 98 \endcode
  * 
  * \li <a href="_simplex_tree_2example_alpha_shapes_3_simplex_tree_from_off_file_8cpp-example.html">
- * Simplex_tree/example_alpha_shapes_3_simplex_tree_from_off_file.cpp</a> - Simplex tree is computed and displayed from a 3D alpha
- * complex (Requires CGAL, GMP and GMPXX to be installed)
+ * Simplex_tree/example_alpha_shapes_3_simplex_tree_from_off_file.cpp</a> - Simplex tree is computed and displayed
+ * from a 3D alpha complex (Requires CGAL, GMP and GMPXX to be installed).
  * 
- * 
+ * \li <a href="_simplex_tree_2graph_expansion_with_blocker_8cpp-example.html">
+ * Simplex_tree/graph_expansion_with_blocker.cpp</a> - Simple simplex tree construction from a one-skeleton graph with
+ * a simple blocker expansion method.
+ *
  * \subsection filteredcomplexeshassecomplex Hasse complex
  * The second one is the Hasse_complex. The Hasse complex is a data structure representing explicitly all co-dimension
  * 1 incidence relations in a complex. It is consequently faster when accessing the boundary of a simplex, but is less

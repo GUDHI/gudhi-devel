@@ -1089,7 +1089,7 @@ class Simplex_tree {
    * complex of dimension at most \f$d\f$ admitting the graph \f$G\f$ as \f$1\f$-skeleton.
    * The filtration value assigned to a simplex is the maximal filtration value of one of its edges.
    * The blocker expansion oracle shall answer true on a Simplex_handle if this Simplex_handle has to be removed,
-   * false otherwise. The blocker expansion oracle can re-assign the filtration value.
+   * false otherwise. The blocker expansion oracle can re-assign the filtration value if needed.
    *
    * The Simplex_tree must contain no simplex of dimension bigger than 1 when calling the method. */
   template< typename Blocker >
