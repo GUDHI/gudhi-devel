@@ -250,7 +250,6 @@ int main(int argc, char * const argv[]) {
   else
     std::cout << "***- NO IT ISN'T\n";
 
-  invSimplexVector = { 0, 1 };
   simplexFound = simplexTree.find({ 0, 1 });
   std::cout << "**************IS THE SIMPLEX {0,1} IN THE SIMPLEX TREE ?\n";
   if (simplexFound != simplexTree.null_simplex())
