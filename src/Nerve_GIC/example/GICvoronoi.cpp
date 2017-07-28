@@ -30,7 +30,7 @@ void usage(int nbArgs, char * const progName) {
 }
 
 int main(int argc, char **argv) {
-  if ((argc != 3) && (argc != 4)) usage(argc, (argv[0] - 1));
+  if ((argc != 3) && (argc != 4)) usage(argc, argv[0]);
 
   using Point = std::vector<float>;
 
@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
 
     GIC.set_color_from_coordinate();
 
-    GIC.set_graph_from_OFF(off_file_name);
+    GIC.set_graph_from_OFF();
 
     GIC.set_cover_from_Voronoi(Gudhi::Euclidean_distance(),m);
 
@@ -62,24 +62,21 @@ int main(int argc, char **argv) {
 
     Gudhi::graph_induced_complex::Simplex_tree stree; GIC.create_complex(stree);
 
-    std::streambuf* streambufffer = std::cout.rdbuf();
-    std::ostream output_stream(streambufffer);
-
     // ----------------------------------------------------------------------------
     // Display information about the graph induced complex
     // ----------------------------------------------------------------------------
 
     if(verb){
-      output_stream << "Graph induced complex is of dimension " << stree.dimension() <<
+      std::cout << "Graph induced complex is of dimension " << stree.dimension() <<
                      " - " << stree.num_simplices() << " simplices - " <<
                      stree.num_vertices() << " vertices." << std::endl;
 
-      output_stream << "Iterator on graph induced complex simplices" << std::endl;
+      std::cout << "Iterator on graph induced complex simplices" << std::endl;
       for (auto f_simplex : stree.filtration_simplex_range()) {
         for (auto vertex : stree.simplex_vertex_range(f_simplex)) {
-          output_stream << vertex << " ";
+          std::cout << vertex << " ";
         }
-        output_stream << std::endl;
+        std::cout << std::endl;
       }
     }
   }

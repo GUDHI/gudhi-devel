@@ -30,7 +30,7 @@ void usage(int nbArgs, char * const progName) {
 }
 
 int main(int argc, char **argv) {
-  if ((argc != 5) && (argc != 6)) usage(argc, (argv[0] - 1));
+  if ((argc != 5) && (argc != 6)) usage(argc, argv[0]);
 
   using Point = std::vector<float>;
 
@@ -55,35 +55,32 @@ int main(int argc, char **argv) {
     GIC.set_color_from_coordinate(coord);
     GIC.set_function_from_coordinate(coord);
 
-    GIC.set_graph_from_OFF(off_file_name);
+    GIC.set_graph_from_OFF();
 
-    GIC.set_resolution_int(resolution); GIC.set_gain(gain);
-    GIC.set_cover_from_function(0);
+    GIC.set_resolution_with_interval_number(resolution); GIC.set_gain(gain);
+    GIC.set_cover_from_function();
 
     GIC.find_Nerve_simplices();
 
-    GIC.plot_txt();
+    GIC.plot_TXT_for_KeplerMapper();
 
     Gudhi::graph_induced_complex::Simplex_tree stree; GIC.create_complex(stree);
-
-    std::streambuf* streambufffer = std::cout.rdbuf();
-    std::ostream output_stream(streambufffer);
 
     // ----------------------------------------------------------------------------
     // Display information about the graph induced complex
     // ----------------------------------------------------------------------------
 
     if(verb){
-      output_stream << "Nerve is of dimension " << stree.dimension() <<
+      std::cout << "Nerve is of dimension " << stree.dimension() <<
                      " - " << stree.num_simplices() << " simplices - " <<
                      stree.num_vertices() << " vertices." << std::endl;
 
-      output_stream << "Iterator on Nerve simplices" << std::endl;
+      std::cout << "Iterator on Nerve simplices" << std::endl;
       for (auto f_simplex : stree.filtration_simplex_range()) {
         for (auto vertex : stree.simplex_vertex_range(f_simplex)) {
-          output_stream << vertex << " ";
+          std::cout << vertex << " ";
         }
-        output_stream << std::endl;
+        std::cout << std::endl;
       }
     }
   }

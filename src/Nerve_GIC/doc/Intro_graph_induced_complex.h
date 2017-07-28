@@ -164,7 +164,7 @@ namespace graph_induced_complex {
  * where the graph G comes from a Rips complex with optimal threshold,
  * and the cover C comes from the preimages of intervals covering the first coordinate,
  * with optimal resolution and gain. Note that optimal threshold, resolution and gain
- * also exist for the Nerve of this cover.
+ * can be computed as well for the Nerve.
  *
  * \include Nerve_GIC/MapperDeltaCoord.cpp
  *
