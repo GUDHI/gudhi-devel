@@ -61,9 +61,9 @@ def test_read_persistence_intervals_without_dimension():
     test_file.write('# Simple persistence diagram without dimension\n2.7 3.7\n9.6 14.\n34.2 34.974\n3. inf')
     test_file.close()
     persistence = gudhi.read_persistence_intervals_in_dimension(persistence_file='persistence_intervals_without_dimension.pers')
-    assert persistence == [[2.7, 3.7], [9.6, 14.], [34.2, 34.974], [3., float('Inf')]]
+    assert persistence == [(2.7, 3.7), (9.6, 14.), (34.2, 34.974), (3., float('Inf'))]
     persistence = gudhi.read_persistence_intervals_in_dimension(persistence_file='persistence_intervals_without_dimension.pers', only_this_dim=15)
-    assert persistence == [[2.7, 3.7], [9.6, 14.], [34.2, 34.974], [3., float('Inf')]]
+    assert persistence == [(2.7, 3.7), (9.6, 14.), (34.2, 34.974), (3., float('Inf'))]
     persistence = gudhi.read_persistence_intervals_grouped_by_dimension(persistence_file='persistence_intervals_without_dimension.pers')
     assert persistence == {-1: [(2.7, 3.7), (9.6, 14.0), (34.2, 34.974), (3.0, float('Inf'))]}
 
@@ -73,9 +73,9 @@ def test_read_persistence_intervals_with_dimension():
     test_file.write('# Simple persistence diagram with dimension\n0 2.7 3.7\n1 9.6 14.\n3 34.2 34.974\n1 3. inf')
     test_file.close()
     persistence = gudhi.read_persistence_intervals_in_dimension(persistence_file='persistence_intervals_with_dimension.pers')
-    assert persistence == [[2.7, 3.7], [9.6, 14.], [34.2, 34.974], [3., float('Inf')]]
+    assert persistence == [(2.7, 3.7), (9.6, 14.), (34.2, 34.974), (3., float('Inf'))]
     persistence = gudhi.read_persistence_intervals_in_dimension(persistence_file='persistence_intervals_with_dimension.pers', only_this_dim=1)
     # BUG !!!
-    assert persistence == [[2.7, 3.7], [9.6, 14.], [34.2, 34.974], [3., float('Inf')]]
+    assert persistence == [(2.7, 3.7), (9.6, 14.), (34.2, 34.974), (3., float('Inf'))]
     persistence = gudhi.read_persistence_intervals_grouped_by_dimension(persistence_file='persistence_intervals_with_dimension.pers')
     assert persistence == {0: [(2.7, 3.7)], 1: [(9.6, 14.0), (3.0, float('Inf'))], 3: [(34.2, 34.974)]}
