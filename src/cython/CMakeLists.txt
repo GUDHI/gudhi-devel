@@ -1,20 +1,55 @@
 cmake_minimum_required(VERSION 2.8)
 project(Cython)
 
+function( add_gudhi_cython_lib THE_LIB )
+  if(EXISTS ${THE_LIB})
+    get_filename_component(THE_LIB_FILE_NAME ${THE_LIB} NAME_WE)
+    if(WIN32)
+      message("++ ${THE_LIB} => THE_LIB_FILE_NAME = ${THE_LIB_FILE_NAME}")
+      set(GUDHI_CYTHON_LIBRARIES "${GUDHI_CYTHON_LIBRARIES}'${THE_LIB_FILE_NAME}', " PARENT_SCOPE)
+    else(WIN32)
+      STRING(REGEX REPLACE "lib" "" UNIX_LIB_FILE_NAME ${THE_LIB_FILE_NAME})
+      message("++ ${THE_LIB} => UNIX_LIB_FILE_NAME = ${UNIX_LIB_FILE_NAME}")
+      set(GUDHI_CYTHON_LIBRARIES "${GUDHI_CYTHON_LIBRARIES}'${UNIX_LIB_FILE_NAME}', " PARENT_SCOPE)
+    endif(WIN32)
+  endif(EXISTS ${THE_LIB})
+endfunction( add_gudhi_cython_lib )
+
 if(CYTHON_FOUND)
   message("++ ${PYTHON_EXECUTABLE} v.${PYTHON_VERSION_STRING} - Cython is ${CYTHON_EXECUTABLE} - py.test is ${PYTEST_PATH} - Sphinx is ${SPHINX_PATH}")
 
   set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_RESULT_OF_USE_DECLTYPE', ")
   set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_ALL_NO_LIB', ")
-  set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${Boost_LIBRARY_DIRS}', ")
-  if(WIN32)
-    set( returnValue "" )
-    find_the_lib (${returnValue} ${Boost_SYSTEM_LIBRARY})
-    set(BOOST_SYSTEM_LIB_NAME ${returnValue})
-  else()
-      set(BOOST_SYSTEM_LIB_NAME "boost_system")
-      endif()
-  set(GUDHI_CYTHON_LIBRARIES "${GUDHI_CYTHON_LIBRARIES}'${BOOST_SYSTEM_LIB_NAME}', ")
+  set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_SYSTEM_NO_DEPRECATED', ")
+
+  # This is because of https://github.com/CGAL/cgal/blob/master/Installation/include/CGAL/tss.h
+  # CGAL is using boost thread if thread_local is not ready (requires XCode 8 for Mac).
+  # The test in https://github.com/CGAL/cgal/blob/master/Installation/include/CGAL/config.h
+  #   #if __has_feature(cxx_thread_local) || \
+  #       ( (__GNUC__ * 100 + __GNUC_MINOR__) >= 408 && __cplusplus >= 201103L ) || \
+  #       ( _MSC_VER >= 1900 )
+  #   #define CGAL_CAN_USE_CXX11_THREAD_LOCAL
+  #   #endif
+  set(CGAL_CAN_USE_CXX11_THREAD_LOCAL "
+      int main() {
+      #ifndef __has_feature
+        #define __has_feature(x) 0  // Compatibility with non-clang compilers.
+      #endif
+      #if __has_feature(cxx_thread_local) || \
+          ( (__GNUC__ * 100 + __GNUC_MINOR__) >= 408 && __cplusplus >= 201103L ) || \
+          ( _MSC_VER >= 1900 )
+        bool has_feature_thread_local = true;
+      #else
+        // Explicit error of compilation for CMake test purpose - has_feature_thread_local is not defined
+      #endif
+        bool result = has_feature_thread_local;
+      }  ")
+  check_cxx_source_compiles("${CGAL_CAN_USE_CXX11_THREAD_LOCAL}" CGAL_CAN_USE_CXX11_THREAD_LOCAL_RESULT)
+
+  if (NOT CGAL_CAN_USE_CXX11_THREAD_LOCAL_RESULT)
+    add_gudhi_cython_lib(${Boost_THREAD_LIBRARY})
+    set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${Boost_LIBRARY_DIRS}', ")
+  endif()
 
   # Gudhi and CGAL compilation option
   if(MSVC)
@@ -25,9 +60,9 @@ if(CYTHON_FOUND)
   if(CMAKE_COMPILER_IS_GNUCXX)
     set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-frounding-math', ")
   endif(CMAKE_COMPILER_IS_GNUCXX)
-  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+  if (CMAKE_CXX_COMPILER_ID MATCHES Intel)
     set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-fp-model strict', ")
-  endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+  endif(CMAKE_CXX_COMPILER_ID MATCHES Intel)
   if (DEBUG_TRACES)
     # For programs to be more verbose
     set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DDEBUG_TRACES', ")
@@ -114,25 +149,20 @@ if(CYTHON_FOUND)
     if(CGAL_HEADER_ONLY)
       set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_HEADER_ONLY', ")
     else(CGAL_HEADER_ONLY)
-      if(WIN32)
-        set(GUDHI_CYTHON_LIBRARIES "${GUDHI_CYTHON_LIBRARIES}'CGAL-vc140-mt-4.7', ")
-      else(WIN32)
-        set(GUDHI_CYTHON_LIBRARIES "${GUDHI_CYTHON_LIBRARIES}'CGAL', ")
-      endif(WIN32)
+      add_gudhi_cython_lib(${CGAL_LIBRARIES})
       set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${CGAL_LIBRARIES_DIR}', ")
+      # If CGAL is not header only, CGAL library may link with boost system,
+      add_gudhi_cython_lib(${Boost_SYSTEM_LIBRARY})
+      set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${Boost_LIBRARY_DIRS}', ")
     endif(CGAL_HEADER_ONLY)
     # GMP and GMPXX are not required, but if present, CGAL will link with them.
     if(GMP_FOUND)
       set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_USE_GMP', ")
-      if(WIN32)
-        set(GUDHI_CYTHON_LIBRARIES "${GUDHI_CYTHON_LIBRARIES}'libgmp-10', ")
-      else(WIN32)
-        set(GUDHI_CYTHON_LIBRARIES "${GUDHI_CYTHON_LIBRARIES}'gmp', ")
-      endif(WIN32)
-        set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${GMP_LIBRARIES_DIR}', ")
+      add_gudhi_cython_lib(${GMP_LIBRARIES})
+      set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${GMP_LIBRARIES_DIR}', ")
       if(GMPXX_FOUND)
         set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_USE_GMPXX', ")
-        set(GUDHI_CYTHON_LIBRARIES "${GUDHI_CYTHON_LIBRARIES}'gmpxx', ")
+        add_gudhi_cython_lib(${GMPXX_LIBRARIES})
         set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${GMPXX_LIBRARIES_DIR}', ")
       endif(GMPXX_FOUND)
     endif(GMP_FOUND)
@@ -153,31 +183,32 @@ if(CYTHON_FOUND)
 
   if (TBB_FOUND)
     set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DGUDHI_USE_TBB', ")
-    set(GUDHI_CYTHON_LIBRARIES "${GUDHI_CYTHON_LIBRARIES}'tbb', 'tbbmalloc', ")
+    add_gudhi_cython_lib(${TBB_RELEASE_LIBRARY})
+    add_gudhi_cython_lib(${TBB_MALLOC_RELEASE_LIBRARY})
     set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${TBB_LIBRARY_DIRS}', ")
     set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${TBB_INCLUDE_DIRS}', ")
   endif()
+
+  if(UNIX)
+    set( GUDHI_CYTHON_RUNTIME_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}")
+  endif(UNIX)
 
   # set sphinx-build in make files
   configure_file(doc/Makefile.in "${CMAKE_CURRENT_BINARY_DIR}/doc/Makefile" @ONLY)
   configure_file(doc/make.bat.in "${CMAKE_CURRENT_BINARY_DIR}/doc/make.bat" @ONLY)
 
-  # Generate cythonize_gudhi.py file to cythonize Gudhi
-  configure_file(cythonize_gudhi.py.in "${CMAKE_CURRENT_BINARY_DIR}/cythonize_gudhi.py" @ONLY)
+  # Generate setup.py file to cythonize Gudhi - This file must be named setup.py by convention
+  configure_file(setup.py.in "${CMAKE_CURRENT_BINARY_DIR}/setup.py" @ONLY)
   # Generate gudhi.pyx - Gudhi cython file
   configure_file(gudhi.pyx.in "${CMAKE_CURRENT_BINARY_DIR}/gudhi.pyx" @ONLY)
 
   add_custom_command(
       OUTPUT gudhi.so
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-      COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/cythonize_gudhi.py" "build_ext" "--inplace")
+      COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/setup.py" "build_ext" "--inplace")
 
   add_custom_target(cython ALL DEPENDS gudhi.so
                     COMMENT "Do not forget to add ${CMAKE_CURRENT_BINARY_DIR}/ to your PYTHONPATH before using examples or tests")
-
-  if(UNIX)
-    set( ENV{PYTHONPATH} $ENV{PYTHONPATH}:${CMAKE_CURRENT_BINARY_DIR}/ )
-  endif(UNIX)
 
   # For installation purpose
   # TODO(VR) : files matching pattern mechanism is copying all cython directory
@@ -187,39 +218,52 @@ if(CYTHON_FOUND)
       PATTERN "*.pyd")
 
   # Test examples
-  add_test(NAME alpha_complex_from_points_example_py_test
-           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-           COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/alpha_complex_from_points_example.py")
-  set_tests_properties(alpha_complex_from_points_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+  if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
+    add_test(NAME alpha_rips_persistence_bottleneck_distance_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/alpha_rips_persistence_bottleneck_distance.py"
+             -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -t 0.15 -d 3)
+    set_tests_properties(alpha_rips_persistence_bottleneck_distance_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
 
-  add_test(NAME alpha_complex_diagram_persistence_from_off_file_example_py_test
-           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-           COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/alpha_complex_diagram_persistence_from_off_file_example.py"
-           --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 0.6)
-  set_tests_properties(alpha_complex_diagram_persistence_from_off_file_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+    add_test(NAME bottleneck_basic_example_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/bottleneck_basic_example.py")
+    set_tests_properties(bottleneck_basic_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
 
-  add_test(NAME alpha_rips_persistence_bottleneck_distance_py_test
-           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-           COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/alpha_rips_persistence_bottleneck_distance.py"
-           -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -t 0.15 -d 3)
-  set_tests_properties(alpha_rips_persistence_bottleneck_distance_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+    add_test(NAME tangential_complex_plain_homology_from_off_file_example_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/tangential_complex_plain_homology_from_off_file_example.py"
+             --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off)
+    set_tests_properties(tangential_complex_plain_homology_from_off_file_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
 
-  add_test(NAME bottleneck_basic_example_py_test
-           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-           COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/bottleneck_basic_example.py")
-  set_tests_properties(bottleneck_basic_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+    add_test(NAME euclidean_strong_witness_complex_diagram_persistence_from_off_file_example_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py"
+             --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 1.0 -n 20 -d 2)
+    set_tests_properties(euclidean_strong_witness_complex_diagram_persistence_from_off_file_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
 
-  add_test(NAME euclidean_strong_witness_complex_diagram_persistence_from_off_file_example_py_test
-           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-           COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py"
-           --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 1.0 -n 20 -d 2)
-  set_tests_properties(euclidean_strong_witness_complex_diagram_persistence_from_off_file_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+    add_test(NAME euclidean_witness_complex_diagram_persistence_from_off_file_example_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py"
+             --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 1.0 -n 20 -d 2)
+    set_tests_properties(euclidean_witness_complex_diagram_persistence_from_off_file_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+  endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)
 
-  add_test(NAME euclidean_witness_complex_diagram_persistence_from_off_file_example_py_test
-           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-           COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py"
-           --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 1.0 -n 20 -d 2)
-  set_tests_properties(euclidean_witness_complex_diagram_persistence_from_off_file_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+  if (NOT CGAL_VERSION VERSION_LESS 4.7.0)
+    add_test(NAME alpha_complex_from_points_example_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/alpha_complex_from_points_example.py")
+    set_tests_properties(alpha_complex_from_points_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+
+    add_test(NAME alpha_complex_diagram_persistence_from_off_file_example_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/alpha_complex_diagram_persistence_from_off_file_example.py"
+             --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 0.6)
+    set_tests_properties(alpha_complex_diagram_persistence_from_off_file_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+  endif (NOT CGAL_VERSION VERSION_LESS 4.7.0)
+
+  if (NOT CGAL_VERSION VERSION_LESS 4.6.0)
+  endif (NOT CGAL_VERSION VERSION_LESS 4.6.0)
 
   add_test(NAME periodic_cubical_complex_barcode_persistence_from_perseus_file_example_py_test
            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -254,12 +298,6 @@ if(CYTHON_FOUND)
            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
            COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/example/simplex_tree_example.py)
   set_tests_properties(simplex_tree_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
-
-  add_test(NAME tangential_complex_plain_homology_from_off_file_example_py_test
-           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-           COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/tangential_complex_plain_homology_from_off_file_example.py"
-           --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off)
-  set_tests_properties(tangential_complex_plain_homology_from_off_file_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
 
   add_test(NAME witness_complex_from_nearest_landmark_table_py_test
            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}

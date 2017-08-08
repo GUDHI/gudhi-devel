@@ -183,10 +183,10 @@ cdef class SimplexTree:
         :returns:  true if the simplex was found, false otherwise.
         :rtype:  bool
         """
-        cdef vector[int] complex
+        cdef vector[int] csimplex
         for i in simplex:
-            complex.push_back(i)
-        return self.thisptr.find_simplex(complex)
+            csimplex.push_back(i)
+        return self.thisptr.find_simplex(csimplex)
 
     def insert(self, simplex, filtration=0.0):
         """This function inserts the given N-simplex and its subfaces with the
@@ -200,10 +200,10 @@ cdef class SimplexTree:
         :returns:  true if the simplex was found, false otherwise.
         :rtype:  bool
         """
-        cdef vector[int] complex
+        cdef vector[int] csimplex
         for i in simplex:
-            complex.push_back(i)
-        return self.thisptr.insert_simplex_and_subfaces(complex,
+            csimplex.push_back(i)
+        return self.thisptr.insert_simplex_and_subfaces(csimplex,
                                                         <double>filtration)
 
     def get_filtration(self):
@@ -232,35 +232,35 @@ cdef class SimplexTree:
         :returns:  The (simplices of the) skeleton of a maximum dimension.
         :rtype:  list of tuples(simplex, filtration)
         """
-        cdef vector[pair[vector[int], double]] skeletons \
+        cdef vector[pair[vector[int], double]] skeleton \
             = self.thisptr.get_skeleton(<int>dimension)
         ct = []
-        for filtered_complex in skeletons:
+        for filtered_simplex in skeleton:
             v = []
-            for vertex in filtered_complex.first:
+            for vertex in filtered_simplex.first:
                 v.append(vertex)
-            ct.append((v, filtered_complex.second))
+            ct.append((v, filtered_simplex.second))
         return ct
 
     def get_star(self, simplex):
-        """This function returns the stars of a given N-simplex.
+        """This function returns the star of a given N-simplex.
 
         :param simplex: The N-simplex, represented by a list of vertex.
         :type simplex: list of int.
         :returns:  The (simplices of the) star of a simplex.
         :rtype:  list of tuples(simplex, filtration)
         """
-        cdef vector[int] complex
+        cdef vector[int] csimplex
         for i in simplex:
-            complex.push_back(i)
-        cdef vector[pair[vector[int], double]] stars \
-            = self.thisptr.get_star(complex)
+            csimplex.push_back(i)
+        cdef vector[pair[vector[int], double]] star \
+            = self.thisptr.get_star(csimplex)
         ct = []
-        for filtered_complex in stars:
+        for filtered_simplex in star:
             v = []
-            for vertex in filtered_complex.first:
+            for vertex in filtered_simplex.first:
                 v.append(vertex)
-            ct.append((v, filtered_complex.second))
+            ct.append((v, filtered_simplex.second))
         return ct
 
     def get_cofaces(self, simplex, codimension):
@@ -275,17 +275,17 @@ cdef class SimplexTree:
         :returns:  The (simplices of the) cofaces of a simplex
         :rtype:  list of tuples(simplex, filtration)
         """
-        cdef vector[int] complex
+        cdef vector[int] csimplex
         for i in simplex:
-            complex.push_back(i)
+            csimplex.push_back(i)
         cdef vector[pair[vector[int], double]] cofaces \
-            = self.thisptr.get_cofaces(complex, <int>codimension)
+            = self.thisptr.get_cofaces(csimplex, <int>codimension)
         ct = []
-        for filtered_complex in cofaces:
+        for filtered_simplex in cofaces:
             v = []
-            for vertex in filtered_complex.first:
+            for vertex in filtered_simplex.first:
                 v.append(vertex)
-            ct.append((v, filtered_complex.second))
+            ct.append((v, filtered_simplex.second))
         return ct
 
     def remove_maximal_simplex(self, simplex):

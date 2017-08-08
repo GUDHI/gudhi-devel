@@ -48,5 +48,13 @@ int main(void) {
   for (auto ifs_iterator = ifn_range.begin(); ifs_iterator->first != 0; ++ifs_iterator)
     std::cout << ifs_iterator->first << " (sq. dist. = " << ifs_iterator->second << ")\n";
 
+  // Radius search
+  std::cout << "Radius search:\n";
+  std::vector<std::size_t> rs_result;
+  points_ds.radius_search(points[45], 0.5, std::back_inserter(rs_result));
+  K k;
+  for (auto const& p_idx : rs_result)
+    std::cout << p_idx << " (sq. dist. = " << k.squared_distance_d_object()(points[p_idx], points[45]) << ")\n";
+
   return 0;
 }

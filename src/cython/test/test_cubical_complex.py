@@ -67,7 +67,7 @@ def test_dimension_constructor():
                          top_dimensional_cells = [1,2,3,4,5,6,7,8,9])
     assert cub.__is_defined() == True
     assert cub.__is_persistence_defined() == False
-    assert cub.persistence() == [(1, (0.0, 100.0)), (0, (0.0, 1.8446744073709552e+19))]
+    assert cub.persistence() == [(1, (0.0, 100.0)), (0, (0.0, float('inf')))]
     assert cub.__is_persistence_defined() == True
     assert cub.betti_numbers() == [1, 0]
     assert cub.persistent_betti_numbers(0, 1000) == [0, 0]
@@ -80,7 +80,7 @@ def test_dimension_constructor():
     cub = CubicalComplex(perseus_file='CubicalOneSphere.txt')
     assert cub.__is_defined() == True
     assert cub.__is_persistence_defined() == False
-    assert cub.persistence() == [(1, (0.0, 100.0)), (0, (0.0, 1.8446744073709552e+19))]
+    assert cub.persistence() == [(1, (0.0, 100.0)), (0, (0.0, float('inf')))]
     assert cub.__is_persistence_defined() == True
     assert cub.betti_numbers() == [1, 0, 0]
     assert cub.persistent_betti_numbers(0, 1000) == [1, 0, 0]
