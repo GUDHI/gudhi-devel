@@ -62,8 +62,10 @@ def test_read_persistence_intervals_without_dimension():
     test_file.close()
     persistence = gudhi.read_persistence_intervals_in_dimension(persistence_file='persistence_intervals_without_dimension.pers')
     assert persistence == [(2.7, 3.7), (9.6, 14.), (34.2, 34.974), (3., float('Inf'))]
-    persistence = gudhi.read_persistence_intervals_in_dimension(persistence_file='persistence_intervals_without_dimension.pers', only_this_dim=15)
-    assert persistence == [(2.7, 3.7), (9.6, 14.), (34.2, 34.974), (3., float('Inf'))]
+    persistence = gudhi.read_persistence_intervals_in_dimension(persistence_file='persistence_intervals_without_dimension.pers', only_this_dim=0)
+    assert persistence == []
+    persistence = gudhi.read_persistence_intervals_in_dimension(persistence_file='persistence_intervals_without_dimension.pers', only_this_dim=1)
+    assert persistence == []
     persistence = gudhi.read_persistence_intervals_grouped_by_dimension(persistence_file='persistence_intervals_without_dimension.pers')
     assert persistence == {-1: [(2.7, 3.7), (9.6, 14.0), (34.2, 34.974), (3.0, float('Inf'))]}
 
@@ -74,8 +76,13 @@ def test_read_persistence_intervals_with_dimension():
     test_file.close()
     persistence = gudhi.read_persistence_intervals_in_dimension(persistence_file='persistence_intervals_with_dimension.pers')
     assert persistence == [(2.7, 3.7), (9.6, 14.), (34.2, 34.974), (3., float('Inf'))]
+    persistence = gudhi.read_persistence_intervals_in_dimension(persistence_file='persistence_intervals_with_dimension.pers', only_this_dim=0)
+    assert persistence == [(2.7, 3.7)]
     persistence = gudhi.read_persistence_intervals_in_dimension(persistence_file='persistence_intervals_with_dimension.pers', only_this_dim=1)
-    # BUG !!!
-    assert persistence == [(2.7, 3.7), (9.6, 14.), (34.2, 34.974), (3., float('Inf'))]
+    assert persistence == [(9.6, 14.), (3., float('Inf'))]
+    persistence = gudhi.read_persistence_intervals_in_dimension(persistence_file='persistence_intervals_with_dimension.pers', only_this_dim=2)
+    assert persistence == []
+    persistence = gudhi.read_persistence_intervals_in_dimension(persistence_file='persistence_intervals_with_dimension.pers', only_this_dim=3)
+    assert persistence == [(34.2, 34.974)]
     persistence = gudhi.read_persistence_intervals_grouped_by_dimension(persistence_file='persistence_intervals_with_dimension.pers')
     assert persistence == {0: [(2.7, 3.7)], 1: [(9.6, 14.0), (3.0, float('Inf'))], 3: [(34.2, 34.974)]}
