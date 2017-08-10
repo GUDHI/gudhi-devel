@@ -49,7 +49,7 @@ def read_lower_triangular_matrix_from_csv_file(csv_file='', separator=';'):
     """
     if csv_file is not '':
         if os.path.isfile(csv_file):
-            return read_matrix_from_csv_file(str.encode(csv_file), str.encode(separator)[0])
+            return read_matrix_from_csv_file(str.encode(csv_file), ord(separator[0]))
     print("file " + csv_file + " not set or not found.")
     return []
 
