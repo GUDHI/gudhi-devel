@@ -139,7 +139,7 @@ namespace Persistence_representations {
  possible ways to proceed:
 
  \li Use non exact representation on a grid described in the Section \ref sec_landscapes_on_grid.
- \li Compute just a number of initial nonzero landscapes. This option is available from C++ level.
+ \li Compute just a number of initial nonzero landscapes. This option is available from C++ level as a last parameter of the constructor of persistence landscape (set by default to std::numeric_limits<size_t>::max()).
 
 
 

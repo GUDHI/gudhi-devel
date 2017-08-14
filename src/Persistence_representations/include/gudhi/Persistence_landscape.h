@@ -77,16 +77,16 @@ class Persistence_landscape {
   Persistence_landscape() { this->set_up_numbers_of_functions_for_vectorization_and_projections_to_reals(); }
 
   /**
-       * Constructor that takes as an input a vector of birth-death pairs.
-      **/
-  Persistence_landscape(const std::vector<std::pair<double, double> >& p);
+  * Constructor that takes as an input a vector of birth-death pairs.
+  **/
+  Persistence_landscape(const std::vector<std::pair<double, double> >& p, size_t number_of_levels = std::numeric_limits<size_t>::max() );
 
   /**
        * Constructor that reads persistence intervals from file and creates persistence landscape. The format of the
     *input file is the following: in each line we put birth-death pair. Last line is assumed
        * to be empty. Even if the points within a line are not ordered, they will be ordered while the input is read.
       **/
-  Persistence_landscape(const char* filename, size_t dimension = std::numeric_limits<unsigned>::max());
+  Persistence_landscape(const char* filename, size_t dimension = std::numeric_limits<unsigned>::max() , size_t number_of_levels = std::numeric_limits<size_t>::max() );
 
   /**
    * This procedure loads a landscape from file. It erase all the data that was previously stored in this landscape.
@@ -451,7 +451,7 @@ class Persistence_landscape {
   size_t number_of_functions_for_vectorization;
   size_t number_of_functions_for_projections_to_reals;
 
-  void construct_persistence_landscape_from_barcode(const std::vector<std::pair<double, double> >& p);
+  void construct_persistence_landscape_from_barcode(const std::vector<std::pair<double, double> >& p , size_t number_of_levels = std::numeric_limits<size_t>::max());
   Persistence_landscape multiply_lanscape_by_real_number_not_overwrite(double x) const;
   void multiply_lanscape_by_real_number_overwrite(double x);
   friend double compute_maximal_distance_non_symmetric(const Persistence_landscape& pl1,
@@ -464,14 +464,14 @@ class Persistence_landscape {
   }
 };
 
-Persistence_landscape::Persistence_landscape(const char* filename, size_t dimension) {
+Persistence_landscape::Persistence_landscape(const char* filename, size_t dimension, size_t number_of_levels) {
   std::vector<std::pair<double, double> > barcode;
   if (dimension < std::numeric_limits<double>::max()) {
     barcode = read_persistence_intervals_in_one_dimension_from_file(filename, dimension);
   } else {
     barcode = read_persistence_intervals_in_one_dimension_from_file(filename);
   }
-  this->construct_persistence_landscape_from_barcode(barcode);
+  this->construct_persistence_landscape_from_barcode(barcode,number_of_levels);
   this->set_up_numbers_of_functions_for_vectorization_and_projections_to_reals();
 }
 
@@ -504,13 +504,14 @@ bool Persistence_landscape::operator==(const Persistence_landscape& rhs) const {
   return true;
 }
 
-Persistence_landscape::Persistence_landscape(const std::vector<std::pair<double, double> >& p) {
-  this->construct_persistence_landscape_from_barcode(p);
+Persistence_landscape::Persistence_landscape(const std::vector<std::pair<double, double> >& p,size_t number_of_levels) {
+  this->construct_persistence_landscape_from_barcode(p,number_of_levels);
   this->set_up_numbers_of_functions_for_vectorization_and_projections_to_reals();
 }
 
 void Persistence_landscape::construct_persistence_landscape_from_barcode(
-    const std::vector<std::pair<double, double> >& p) {
+    const std::vector<std::pair<double, double> >& p, size_t number_of_levels) 
+    {
   bool dbg = false;
   if (dbg) {
     std::cerr << "Persistence_landscape::Persistence_landscape( const std::vector< std::pair< double , double > >& p )"
@@ -536,6 +537,7 @@ void Persistence_landscape::construct_persistence_landscape_from_barcode(
         std::make_pair((bars[i].first + bars[i].second) / 2.0, (bars[i].second - bars[i].first) / 2.0);
   }
   std::vector<std::vector<std::pair<double, double> > > Persistence_landscape;
+  size_t number_of_levels_in_the_landscape = 0;
   while (!characteristicPoints.empty()) {
     if (dbg) {
       for (size_t i = 0; i != characteristicPoints.size(); ++i) {
@@ -644,6 +646,12 @@ void Persistence_landscape::construct_persistence_landscape_from_barcode(
 
     lambda_n.erase(std::unique(lambda_n.begin(), lambda_n.end()), lambda_n.end());
     this->land.push_back(lambda_n);
+    
+    ++number_of_levels_in_the_landscape;
+    if ( number_of_levels == number_of_levels_in_the_landscape )
+    {
+		break;
+	}
   }
 }
 

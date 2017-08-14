@@ -34,12 +34,12 @@ using namespace Gudhi::Persistence_representations;
 
 double epsilon = 0.0000005;
 
-BOOST_AUTO_TEST_CASE(check_construction_of_landscape) {
+BOOST_AUTO_TEST_CASE(check_construction_of_landscape) {	
   std::vector<std::pair<double, double> > diag =
-      read_persistence_intervals_in_one_dimension_from_file("data/file_with_diagram");
+  read_persistence_intervals_in_one_dimension_from_file("data/file_with_diagram");  
   Persistence_landscape p(diag);
-  Persistence_landscape q;
-  q.load_landscape_from_file("data/file_with_landscape_from_file_with_diagram");
+  Persistence_landscape q;  
+  q.load_landscape_from_file("data/file_with_landscape_from_file_with_diagram");   
   BOOST_CHECK(p == q);
 }
 
@@ -47,9 +47,11 @@ BOOST_AUTO_TEST_CASE(check_construction_of_landscape_form_gudhi_style_file) {
   Persistence_landscape p("data/persistence_file_with_four_entries_per_line", 1);
   // p.print_to_file("persistence_file_with_four_entries_per_line_landscape");
   Persistence_landscape q;
-  q.load_landscape_from_file("data/persistence_file_with_four_entries_per_line_landscape");
+  q.load_landscape_from_file("data/persistence_file_with_four_entries_per_line_landscape");  
   BOOST_CHECK(p == q);
 }
+
+
 
 BOOST_AUTO_TEST_CASE(check_computations_of_integrals) {
   std::vector<std::pair<double, double> > diag =
@@ -217,9 +219,7 @@ BOOST_AUTO_TEST_CASE(check_computations_of_distances) {
   Persistence_landscape q(diag2);
   BOOST_CHECK(fabs(p.distance(q) - 25.5824) <= 0.00005);
   BOOST_CHECK(fabs(p.distance(q, 2) - 2.12636) <= 0.00001);
-  BOOST_CHECK(fabs(p.distance(q, std::numeric_limits<double>::max()) - 0.359068) <= 0.00001);
-  std::cerr << "p.distance( q , std::numeric_limits<double>::max() ) : "
-            << p.distance(q, std::numeric_limits<double>::max()) << std::endl;
+  BOOST_CHECK(fabs(p.distance(q, std::numeric_limits<double>::max()) - 0.359068) <= 0.00001);  
 }
 
 BOOST_AUTO_TEST_CASE(check_computations_of_scalar_product) {
@@ -231,6 +231,30 @@ BOOST_AUTO_TEST_CASE(check_computations_of_scalar_product) {
   Persistence_landscape q(diag2);
   BOOST_CHECK(fabs(p.compute_scalar_product(q) - 0.754498) <= 0.00001);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Below I am storing the code used to generate tests for that functionality.
 /*

@@ -22,6 +22,7 @@
 
 #include <gudhi/Persistence_vectors.h>
 #include <gudhi/common_persistence_representations.h>
+#include <gudhi/read_persistence_from_file.h>
 #include <iostream>
 
 #define BOOST_TEST_DYN_LINK
@@ -295,11 +296,11 @@ BOOST_AUTO_TEST_CASE(check_distance_computations) {
 
 BOOST_AUTO_TEST_CASE(check_default_parameters_of_distances) {
   std::vector<std::pair<double, double> > diag =
-      read_persistence_intervals_in_one_dimension_from_file("data/file_with_diagram");
+      read_persistence_intervals_in_dimension("data/file_with_diagram");
   Vector_distances_in_diagram<Euclidean_distance> p(diag, 100);
 
   std::vector<std::pair<double, double> > diag1 =
-      read_persistence_intervals_in_one_dimension_from_file("data/file_with_diagram_1");
+      read_persistence_intervals_in_dimension("data/file_with_diagram_1");
   Vector_distances_in_diagram<Euclidean_distance> q(diag1, 100);
 
   double dist_numeric_limit_max = p.distance(q, std::numeric_limits<double>::max());
