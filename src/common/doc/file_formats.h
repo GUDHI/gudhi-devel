@@ -26,7 +26,7 @@
 namespace Gudhi {
 
 /*! \page fileformats File formats
- 
+
  \tableofcontents
 
  \section FileFormatsPers Persistence Diagram
@@ -49,6 +49,10 @@ namespace Gudhi {
  \endverbatim
 
  Other sample files can be found in the `data/persistence_diagram` folder.
+
+ Such files can be generated with `Gudhi::persistent_cohomology::Persistent_cohomology::output_diagram()` and read with
+ `Gudhi::read_persistence_intervals_and_dimension()`, `Gudhi::read_persistence_intervals_grouped_by_dimension()` or
+ `Gudhi::read_persistence_intervals_in_dimension()`.
 */
 }  // namespace Gudhi
 

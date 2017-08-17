@@ -117,8 +117,6 @@ if(NOT GUDHI_CYTHON_PATH)
 endif(NOT GUDHI_CYTHON_PATH)
 
 if(PYTHONINTERP_FOUND AND CYTHON_FOUND)
-  # Unitary tests are available through py.test
-  find_program( PYTEST_PATH py.test )
   # Default found version 2
   if(PYTHON_VERSION_MAJOR EQUAL 2)
     # Documentation generation is available through sphinx
