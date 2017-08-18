@@ -1,16 +1,16 @@
 File formats
 ############
 
-To find the correct function to read the files, please refer to :doc:`reader_utils_ref`
-
 Persistence Diagram
 *******************
 
-Such a file, whose extension is usually ``.pers``, contains a list of persistence intervals.
+Such a file, whose extension is usually ``.pers``, contains a list of
+persistence intervals.
 
 Lines starting with ``#`` are ignored (comments).
 
-Other lines might contain 2, 3 or 4 values (the number of values on each line must be the same for all lines)::
+Other lines might contain 2, 3 or 4 values (the number of values on each line
+must be the same for all lines)::
 
     [[field] dimension] birth death
 
@@ -25,6 +25,9 @@ Here is a simple sample file::
 
 Other sample files can be found in the data/persistence_diagram folder.
 
-Such files can be generated with :meth:`gudhi.SimplexTree.write_persistence_diagram` and read with
+Such files can be generated with
+:meth:`gudhi.SimplexTree.write_persistence_diagram`, read with
 :meth:`gudhi.read_persistence_intervals_grouped_by_dimension`, or
-:meth:`gudhi.read_persistence_intervals_in_dimension`.
+:meth:`gudhi.read_persistence_intervals_in_dimension` and displayed with
+:meth:`gudhi.plot_persistence_barcode` or
+:meth:`gudhi.plot_persistence_diagram`.
