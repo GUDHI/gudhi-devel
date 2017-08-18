@@ -194,6 +194,7 @@ if(CYTHON_FOUND)
   endif(UNIX)
 
   # set sphinx-build in make files
+  configure_file(doc/python3-sphinx-build.in "${CMAKE_CURRENT_BINARY_DIR}/doc/python3-sphinx-build" @ONLY)
   configure_file(doc/Makefile.in "${CMAKE_CURRENT_BINARY_DIR}/doc/Makefile" @ONLY)
   configure_file(doc/make.bat.in "${CMAKE_CURRENT_BINARY_DIR}/doc/make.bat" @ONLY)
 
