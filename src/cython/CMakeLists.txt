@@ -16,7 +16,7 @@ function( add_gudhi_cython_lib THE_LIB )
 endfunction( add_gudhi_cython_lib )
 
 if(CYTHON_FOUND)
-  message("++ ${PYTHON_EXECUTABLE} v.${PYTHON_VERSION_STRING} - Cython is ${CYTHON_EXECUTABLE} - py.test is ${PYTEST_PATH} - Sphinx is ${SPHINX_PATH}")
+  message("++ ${PYTHON_EXECUTABLE} v.${PYTHON_VERSION_STRING} - Cython is ${CYTHON_EXECUTABLE} - Sphinx is ${SPHINX_PATH}")
 
   set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_RESULT_OF_USE_DECLTYPE', ")
   set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_ALL_NO_LIB', ")
@@ -100,7 +100,7 @@ if(CYTHON_FOUND)
   file(COPY "${CMAKE_SOURCE_DIR}/data/distance_matrix/full_square_distance_matrix.csv" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
   # Persistence graphical tools examples
   file(COPY "${CMAKE_SOURCE_DIR}/data/bitmap/3d_torus.txt" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
-  file(COPY "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
+  file(COPY "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
 
   if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
     # If CGAL_VERSION >= 4.8.1, include subsampling
@@ -194,6 +194,7 @@ if(CYTHON_FOUND)
   endif(UNIX)
 
   # set sphinx-build in make files
+  configure_file(doc/python3-sphinx-build.in "${CMAKE_CURRENT_BINARY_DIR}/doc/python3-sphinx-build" @ONLY)
   configure_file(doc/Makefile.in "${CMAKE_CURRENT_BINARY_DIR}/doc/Makefile" @ONLY)
   configure_file(doc/make.bat.in "${CMAKE_CURRENT_BINARY_DIR}/doc/make.bat" @ONLY)
 
@@ -305,13 +306,11 @@ if(CYTHON_FOUND)
   set_tests_properties(witness_complex_from_nearest_landmark_table_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
 
   # Unitary tests are available through py.test
-  if(PYTEST_PATH)
-    add_test(
-        NAME gudhi_cython_py_test
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        COMMAND ${PYTHON_EXECUTABLE} "${PYTEST_PATH}")
-    set_tests_properties(gudhi_cython_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
-  endif(PYTEST_PATH)
+  add_test(
+      NAME gudhi_cython_py_test
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+      COMMAND ${PYTHON_EXECUTABLE} -m pytest)
+  set_tests_properties(gudhi_cython_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
 
   # Documentation generation is available through sphinx
   if(SPHINX_PATH)

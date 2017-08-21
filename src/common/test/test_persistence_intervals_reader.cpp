@@ -27,6 +27,7 @@
 #include <utility>  // for pair
 #include <tuple>
 #include <limits>  // for inf
+#include <map>
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "persistence_intervals_reader"
@@ -44,7 +45,7 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_without_dimension )
   expected_intervals_by_dimension[-1].push_back(std::make_pair(3., std::numeric_limits<double>::infinity()));
 
   Persistence_intervals_by_dimension persistence_intervals_by_dimension =
-      read_persistence_intervals_grouped_by_dimension("persistence_intervals_without_dimension.pers");
+      Gudhi::read_persistence_intervals_grouped_by_dimension("persistence_intervals_without_dimension.pers");
 
   std::cout << "\nread_persistence_intervals_grouped_by_dimension - expected\n";
   for (auto map_iter : expected_intervals_by_dimension) {
@@ -69,7 +70,7 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_without_dimension )
   expected_intervals_in_dimension.push_back(std::make_pair(3., std::numeric_limits<double>::infinity()));
 
   Persistence_intervals persistence_intervals_in_dimension =
-      read_persistence_intervals_in_dimension("persistence_intervals_without_dimension.pers");
+      Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_without_dimension.pers");
 
   std::cout << "\nread_persistence_intervals_in_dimension - expected\n";
   for (auto vec_iter : expected_intervals_in_dimension)
@@ -83,22 +84,22 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_without_dimension )
 
   expected_intervals_in_dimension.clear();
   persistence_intervals_in_dimension =
-        read_persistence_intervals_in_dimension("persistence_intervals_without_dimension.pers", 0);
+        Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_without_dimension.pers", 0);
   BOOST_CHECK(persistence_intervals_in_dimension == expected_intervals_in_dimension);
 
   expected_intervals_in_dimension.clear();
   persistence_intervals_in_dimension =
-        read_persistence_intervals_in_dimension("persistence_intervals_without_dimension.pers", 1);
+        Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_without_dimension.pers", 1);
   BOOST_CHECK(persistence_intervals_in_dimension == expected_intervals_in_dimension);
 
   expected_intervals_in_dimension.clear();
   persistence_intervals_in_dimension =
-        read_persistence_intervals_in_dimension("persistence_intervals_without_dimension.pers", 2);
+        Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_without_dimension.pers", 2);
   BOOST_CHECK(persistence_intervals_in_dimension == expected_intervals_in_dimension);
 
   expected_intervals_in_dimension.clear();
   persistence_intervals_in_dimension =
-        read_persistence_intervals_in_dimension("persistence_intervals_without_dimension.pers", 3);
+        Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_without_dimension.pers", 3);
   BOOST_CHECK(persistence_intervals_in_dimension == expected_intervals_in_dimension);
 
 }
@@ -112,7 +113,7 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_with_dimension )
   expected_intervals_by_dimension[1].push_back(std::make_pair(3., std::numeric_limits<double>::infinity()));
 
   Persistence_intervals_by_dimension persistence_intervals_by_dimension =
-      read_persistence_intervals_grouped_by_dimension("persistence_intervals_with_dimension.pers");
+      Gudhi::read_persistence_intervals_grouped_by_dimension("persistence_intervals_with_dimension.pers");
 
   std::cout << "\nread_persistence_intervals_grouped_by_dimension - expected\n";
   for (auto map_iter : expected_intervals_by_dimension) {
@@ -137,7 +138,7 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_with_dimension )
   expected_intervals_in_dimension.push_back(std::make_pair(3., std::numeric_limits<double>::infinity()));
 
   Persistence_intervals persistence_intervals_in_dimension =
-      read_persistence_intervals_in_dimension("persistence_intervals_with_dimension.pers");
+      Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_with_dimension.pers");
 
   std::cout << "\nread_persistence_intervals_in_dimension - expected\n";
   for (auto vec_iter : expected_intervals_in_dimension)
@@ -152,7 +153,7 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_with_dimension )
   expected_intervals_in_dimension.clear();
   expected_intervals_in_dimension.push_back(std::make_pair(2.7, 3.7));
   persistence_intervals_in_dimension =
-        read_persistence_intervals_in_dimension("persistence_intervals_with_dimension.pers", 0);
+        Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_with_dimension.pers", 0);
 
   std::cout << "\nread_persistence_intervals_in_dimension 0 - expected\n";
   for (auto vec_iter : expected_intervals_in_dimension)
@@ -168,7 +169,7 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_with_dimension )
   expected_intervals_in_dimension.push_back(std::make_pair(9.6, 14.));
   expected_intervals_in_dimension.push_back(std::make_pair(3., std::numeric_limits<double>::infinity()));
   persistence_intervals_in_dimension =
-        read_persistence_intervals_in_dimension("persistence_intervals_with_dimension.pers", 1);
+        Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_with_dimension.pers", 1);
 
   std::cout << "\nread_persistence_intervals_in_dimension 1 - expected\n";
   for (auto vec_iter : expected_intervals_in_dimension)
@@ -182,7 +183,7 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_with_dimension )
 
   expected_intervals_in_dimension.clear();
   persistence_intervals_in_dimension =
-        read_persistence_intervals_in_dimension("persistence_intervals_with_dimension.pers", 2);
+        Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_with_dimension.pers", 2);
 
   std::cout << "\nread_persistence_intervals_in_dimension 2 - expected\n";
   for (auto vec_iter : expected_intervals_in_dimension)
@@ -197,7 +198,7 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_with_dimension )
   expected_intervals_in_dimension.clear();
   expected_intervals_in_dimension.push_back(std::make_pair(34.2, 34.974));
   persistence_intervals_in_dimension =
-        read_persistence_intervals_in_dimension("persistence_intervals_with_dimension.pers", 3);
+        Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_with_dimension.pers", 3);
 
   std::cout << "\nread_persistence_intervals_in_dimension 3 - expected\n";
   for (auto vec_iter : expected_intervals_in_dimension)
@@ -221,7 +222,7 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_with_field )
   expected_intervals_by_dimension[1].push_back(std::make_pair(3., std::numeric_limits<double>::infinity()));
 
   Persistence_intervals_by_dimension persistence_intervals_by_dimension =
-      read_persistence_intervals_grouped_by_dimension("persistence_intervals_with_field.pers");
+      Gudhi::read_persistence_intervals_grouped_by_dimension("persistence_intervals_with_field.pers");
 
   std::cout << "\nread_persistence_intervals_grouped_by_dimension - expected\n";
   for (auto map_iter : expected_intervals_by_dimension) {
@@ -246,7 +247,7 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_with_field )
   expected_intervals_in_dimension.push_back(std::make_pair(3., std::numeric_limits<double>::infinity()));
 
   Persistence_intervals persistence_intervals_in_dimension =
-      read_persistence_intervals_in_dimension("persistence_intervals_with_field.pers");
+      Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_with_field.pers");
 
   std::cout << "\nread_persistence_intervals_in_dimension - expected\n";
   for (auto vec_iter : expected_intervals_in_dimension)
@@ -261,7 +262,7 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_with_field )
   expected_intervals_in_dimension.clear();
   expected_intervals_in_dimension.push_back(std::make_pair(2.7, 3.7));
   persistence_intervals_in_dimension =
-        read_persistence_intervals_in_dimension("persistence_intervals_with_field.pers", 0);
+        Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_with_field.pers", 0);
 
   std::cout << "\nread_persistence_intervals_in_dimension 0 - expected\n";
   for (auto vec_iter : expected_intervals_in_dimension)
@@ -277,7 +278,7 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_with_field )
   expected_intervals_in_dimension.push_back(std::make_pair(9.6, 14.));
   expected_intervals_in_dimension.push_back(std::make_pair(3., std::numeric_limits<double>::infinity()));
   persistence_intervals_in_dimension =
-        read_persistence_intervals_in_dimension("persistence_intervals_with_field.pers", 1);
+        Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_with_field.pers", 1);
 
   std::cout << "\nread_persistence_intervals_in_dimension 1 - expected\n";
   for (auto vec_iter : expected_intervals_in_dimension)
@@ -291,7 +292,7 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_with_field )
 
   expected_intervals_in_dimension.clear();
   persistence_intervals_in_dimension =
-        read_persistence_intervals_in_dimension("persistence_intervals_with_field.pers", 2);
+        Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_with_field.pers", 2);
 
   std::cout << "\nread_persistence_intervals_in_dimension 2 - expected\n";
   for (auto vec_iter : expected_intervals_in_dimension)
@@ -306,7 +307,7 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_with_field )
   expected_intervals_in_dimension.clear();
   expected_intervals_in_dimension.push_back(std::make_pair(34.2, 34.974));
   persistence_intervals_in_dimension =
-        read_persistence_intervals_in_dimension("persistence_intervals_with_field.pers", 3);
+        Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_with_field.pers", 3);
 
   std::cout << "\nread_persistence_intervals_in_dimension 3 - expected\n";
   for (auto vec_iter : expected_intervals_in_dimension)

@@ -1,2 +1,3 @@
 import gudhi
-gudhi.show_palette_values(alpha=1.0)
+plt = gudhi.show_palette_values(alpha=1.0)
+plt.show()

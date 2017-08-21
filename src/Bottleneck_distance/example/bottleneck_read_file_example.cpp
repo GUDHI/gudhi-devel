@@ -36,8 +36,8 @@ int main(int argc, char** argv) {
         " distance (set by default to zero). The program will now terminate \n";
     return -1;
   }
-  std::vector<std::pair<double, double>> diag1 = read_persistence_intervals_in_dimension(argv[1]);
-  std::vector<std::pair<double, double>> diag2 = read_persistence_intervals_in_dimension(argv[2]);
+  std::vector<std::pair<double, double>> diag1 = Gudhi::read_persistence_intervals_in_dimension(argv[1]);
+  std::vector<std::pair<double, double>> diag2 = Gudhi::read_persistence_intervals_in_dimension(argv[2]);
 
   double tolerance = 0.;
   if (argc == 4) {

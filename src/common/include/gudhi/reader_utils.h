@@ -38,6 +38,8 @@
 #include <utility>  // for pair
 #include <tuple>  // for std::make_tuple
 
+namespace Gudhi {
+
 // Keep this file tag for Doxygen to parse the code, otherwise, functions are not documented.
 // It is required for global functions and variables.
 
@@ -361,5 +363,7 @@ inline std::vector<std::pair<double, double>> read_persistence_intervals_in_dime
       }));
   return ret;
 }
+
+}  // namespace Gudhi
 
 #endif  // READER_UTILS_H_
