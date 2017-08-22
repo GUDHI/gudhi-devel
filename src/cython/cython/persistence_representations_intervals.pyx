@@ -40,7 +40,7 @@ This is a promisse that there will be a class in this file with the following fu
 According to Vincent, most of the tutorials in cython suggest to separate pre-declaration below with the definition of the method. Hovewer it seems to create problems, that is why we keep them both here. 
 """
     
-cdef extern from "persistence_representations_diagrams.h" namespace "Gudhi::Persistence_representations":
+cdef extern from "persistence_representations_intervals.h" namespace "Gudhi::Persistence_representations":
 	cdef cppclass Persistence_intervals_interface "Gudhi::Persistence_representations::Persistence_intervals_interface":        
 		Persistence_intervals_interface()
 		Persistence_intervals_interface(const char* , unsigned )
@@ -67,11 +67,11 @@ to separate the function, use newline. Put there only C++ signature
 
  
  
-#convention for python class is PersistenceDiagrams instead of Persistence_diagrams 
+#convention for python class is PersistenceIntervals instead of Persistence_intervals
 #for methods it is def num_simplices(self).
 cdef class PersistenceIntervals:
 	"""
-	Persistence interals is a standard representation of persistent homology. This file provide implementation of a number of operations on persistence diagrams. 
+	Persistence intrvals is a standard representation of persistent homology. This file provide implementation of a number of operations on persistence diagrams.
 	"""
         
 	cdef Persistence_intervals_interface * thisptr

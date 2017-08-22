@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_PERSISTENCE_REPRESENTATIONS_DIAGRAMS_
-#define INCLUDE_PERSISTENCE_REPRESENTATIONS_DIAGRAMS_
+#ifndef INCLUDE_PERSISTENCE_REPRESENTATIONS_INTERVALS_
+#define INCLUDE_PERSISTENCE_REPRESENTATIONS_INTERVALS_
 
 #include <gudhi/Persistence_intervals.h>
 
