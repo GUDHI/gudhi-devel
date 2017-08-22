@@ -43,6 +43,7 @@ class Persistence_intervals_interface : public Persistence_intervals
  public: 
 	Persistence_intervals_interface(const char* filename, unsigned dimension = std::numeric_limits<unsigned>::max())
 	: Persistence_intervals(filename, dimension) {
+		std::cout << "CONTSTRUCTOR \n";
 	}
 
 	Persistence_intervals_interface(const std::vector<std::pair<double, double> >& intervals)
@@ -51,7 +52,9 @@ class Persistence_intervals_interface : public Persistence_intervals
 
 	std::pair<double, double> get_x_range_interface() const 
 	{
-		return this->get_x_range();
+		std::pair<double, double> range = 	this->get_x_range();
+		std::cout << std::endl << std::endl << range.first << " " << range.second << std::endl << std::endl <<std::endl;
+		return range;
 	}
 
 	std::pair<double, double> get_y_range_interface() const 	

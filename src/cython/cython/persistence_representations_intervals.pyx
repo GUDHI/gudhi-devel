@@ -91,11 +91,14 @@ cdef class PersistenceIntervals:
 
 
 	# The real cython constructor
-	def __cinit__(self, vector_of_intervals=None, dimension = None, file_with_intervals=''):
+	def __cinit__(self, vector_of_intervals=None, dimension = None, file_with_intervals=''):				
 		if (vector_of_intervals is None) and (file_with_intervals is not ''):
-			self.thisptr = new Persistence_intervals_interface(file_with_intervals, dimension) 
-		elif (file_with_intervals is not '') and (vector_of_intervals is not None):
-			if os.path.isfile(file_with_intervals):
+			if ( dimension is not None ):
+				self.thisptr = new Persistence_intervals_interface(file_with_intervals, dimension) 			
+			else:
+				self.thisptr = new Persistence_intervals_interface(file_with_intervals) 			
+		elif (file_with_intervals is '') and (vector_of_intervals is not None):			
+			if os.path.isfile(file_with_intervals):				
 				self.thisptr = new Persistence_intervals_interface(str.encode(file_with_intervals))
 			else:
 				print("file " + file_with_intervals + " not found.")

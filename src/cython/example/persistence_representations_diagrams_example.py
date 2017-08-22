@@ -33,15 +33,6 @@ print("#####################################################################")
 print("Persistence representations diagrams example")
 
 
-
-
-
-
-
-
-
-
-
 parser = argparse.ArgumentParser(description='Statistics od persistence diagrams from file ',
                                  epilog='Example: '
                                  'example/persistence_representations_diagrams_example.py '
@@ -53,55 +44,27 @@ args = parser.parse_args()
 
 print "Here are the parameters of the program: ",args.file," , " ,args.dimension
 
-
-p = gudhi.PersistenceIntervals(args.file,args.dimension);
+p = gudhi.PersistenceDiagrams(None,args.dimension,args.file);
 min_max_ = p.get_x_range();
-print( "Birth-death range : ", min_max_)
-"""
-std::vector<double> dominant_ten_intervals_length = p.length_of_dominant_intervals(10);
-std::cout << "Length of ten dominant intervals : " << std::endl;
-for (size_t i = 0; i != dominant_ten_intervals_length.size(); ++i) {
-std::cout << dominant_ten_intervals_length[i] << std::endl;
-}
+print "Birth-death range : ", min_max_ 
 
-std::vector<std::pair<double, double> > ten_dominant_intervals = p.dominant_intervals(10);
-std::cout << "Here are the dominant intervals : " << std::endl;
-for (size_t i = 0; i != ten_dominant_intervals.size(); ++i) {
-std::cout << "( " << ten_dominant_intervals[i].first << "," << ten_dominant_intervals[i].second << std::endl;
-}
+dominant_ten_intervals_length = p.length_of_dominant_intervals(10)
+print "Length of ten dominant intervals : ",  dominant_ten_intervals_length
 
-std::vector<size_t> histogram = p.histogram_of_lengths(10);
-std::cout << "Here is the histogram of barcode's length : " << std::endl;
-for (size_t i = 0; i != histogram.size(); ++i) {
-std::cout << histogram[i] << " ";
-}
-std::cout << std::endl;
+ten_dominant_intervals = p.dominant_intervals(10);
+print "Here are the dominant intervals : " , ten_dominant_intervals
 
-std::vector<size_t> cumulative_histogram = p.cumulative_histogram_of_lengths(10);
-std::cout << "Cumulative histogram : " << std::endl;
-for (size_t i = 0; i != cumulative_histogram.size(); ++i) {
-std::cout << cumulative_histogram[i] << " ";
-}
-std::cout << std::endl;
+histogram = p.histogram_of_lengths(10);
+print "Here is the histogram of barcode's length : ", histogram
 
-std::vector<double> char_funct_diag = p.characteristic_function_of_diagram(min_max_.first, min_max_.second);
-std::cout << "Characteristic function of diagram : " << std::endl;
-for (size_t i = 0; i != char_funct_diag.size(); ++i) {
-std::cout << char_funct_diag[i] << " ";
-}
-std::cout << std::endl;
+cumulative_histogram = p.cumulative_histogram_of_lengths(10)
+print "Cumulative histogram : " ,cumulative_histogram
 
-std::vector<double> cumul_char_funct_diag =
-  p.cumulative_characteristic_function_of_diagram(min_max_.first, min_max_.second);
-std::cout << "Cumulative characteristic function of diagram : " << std::endl;
-for (size_t i = 0; i != cumul_char_funct_diag.size(); ++i) {
-std::cout << cumul_char_funct_diag[i] << " ";
-}
-std::cout << std::endl;
+char_funct_diag = p.characteristic_function_of_diagram(min_max_[0], min_max_[1],None)
+print "Characteristic function of diagram : ",char_funct_diag
 
-std::cout << "Persistence Betti numbers \n";
-std::vector<std::pair<double, size_t> > pbns = p.compute_persistent_betti_numbers();
-for (size_t i = 0; i != pbns.size(); ++i) {
-std::cout << pbns[i].first << " " << pbns[i].second << std::endl;
-}
-"""
+cumul_char_funct_diag = p.cumulative_characteristic_function_of_diagram(min_max_[0], min_max_[1],None)
+print "Cumulative characteristic function of diagram : ",cumul_char_funct_diag
+
+pbns = p.compute_persistent_betti_numbers()
+print "Persistence Betti numbers ", pbns
