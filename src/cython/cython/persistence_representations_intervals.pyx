@@ -40,7 +40,7 @@ This is a promisse that there will be a class in this file with the following fu
 According to Vincent, most of the tutorials in cython suggest to separate pre-declaration below with the definition of the method. Hovewer it seems to create problems, that is why we keep them both here. 
 """
     
-cdef extern from "persistence_representations_intervals.h" namespace "Gudhi::Persistence_representations":
+cdef extern from "Persistence_intervals_interface.h" namespace "Gudhi::Persistence_representations":
 	cdef cppclass Persistence_intervals_interface "Gudhi::Persistence_representations::Persistence_intervals_interface":        
 		Persistence_intervals_interface()
 		Persistence_intervals_interface(const char* , unsigned )

@@ -44,7 +44,7 @@ args = parser.parse_args()
 
 print "Here are the parameters of the program: ",args.file," , " ,args.dimension
 
-p = gudhi.PersistenceDiagrams(None,args.dimension,args.file);
+p = gudhi.PersistenceIntervals(None,args.dimension,args.file);
 min_max_ = p.get_x_range();
 print "Birth-death range : ", min_max_ 
 
