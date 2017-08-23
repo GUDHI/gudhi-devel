@@ -91,7 +91,20 @@ cdef class PersistenceIntervals:
 
 
 	# The real cython constructor
-	def __cinit__(self, vector_of_intervals=None, dimension = None, file_with_intervals=''):				
+	def __cinit__(self, vector_of_intervals=None, dimension = None, file_with_intervals=''):
+   """
+   This is a constructor of a class Persistence_intervals. It either take text file and a positive integer, or a vector of pairs.
+   In case of file, each line of the input file is supposed to contain two numbers of a type double (or convertible to double)
+   representing the birth and the death of the persistence interval. If the pairs are not sorted so that birth <=
+   death, then the constructor will sort then that way.
+   In case of vector of pairs, it simply accept vector of pair of doubles. 
+   :param vector_of_intervals -- vector of pairs of doubles with birth-death pairs. None if we construct it from file. 
+   :type vector of pairs of doubles or None
+   :param dimension -- diension of intervals to be extracted from file
+   :type nonnegative integer or None
+   :param file_with_intervals - a path to Gudhi style file with persistence interfals.
+   :type string of None. 
+   """				
 		if (vector_of_intervals is None) and (file_with_intervals is not ''):
 			if ( dimension is not None ):
 				self.thisptr = new Persistence_intervals_interface(file_with_intervals, dimension) 			
@@ -108,6 +121,9 @@ cdef class PersistenceIntervals:
 			
 			
 	def __dealloc__(self):
+	"""
+	destructor
+	"""
 		if self.thisptr != NULL:
 			del self.thisptr      
 		
@@ -115,14 +131,26 @@ cdef class PersistenceIntervals:
 	#from here on this is my try. Do we need to specify the returned type?? 
 	#no, we do not. 
 	def get_x_range(self):
+	"""
+	This procedure returns x-range of a given persistence diagram.
+	"""
 		if self.thisptr != NULL:
 			return self.thisptr.get_x_range_interface()
 								
 	def get_y_range(self):
+	"""
+	This procedure returns y-range of a given persistence diagram.
+	"""		
 		if self.thisptr != NULL:
 			return self.thisptr.get_y_range_interface()
 
 	def length_of_dominant_intervals(self,where_to_cut):
+	"""
+	Procedure that compute the vector of lengths of the dominant (i.e. the longest) persistence intervals. The list is
+    truncated at the parameter of the call where_to_cut (set by default to 100).
+    :param where_to_cut -- number of domiannt intervals to be returned.
+    :type positive integer.
+	"""
 		if (self.thisptr != NULL) and (where_to_cut is not None):
 			return self.thisptr.length_of_dominant_intervals_interface(where_to_cut)   
 		else:
@@ -130,6 +158,12 @@ cdef class PersistenceIntervals:
 				return self.thisptr.dominant_intervals_interface(100)#default argument	 		     
 
 	def dominant_intervals(self,where_to_cut):
+	"""
+	Procedure that compute the vector of the dominant (i.e. the longest) persistence intervals. The parameter of
+    the procedure (set by default to 100) is the number of dominant intervals returned by the procedure.
+    :param where_to_cut -- number of lengths of domiannt intervals to be returned.
+    :type positive integer.
+	"""
 		if (self.thisptr != NULL) and (where_to_cut is not None):
 			return self.thisptr.dominant_intervals_interface(where_to_cut)   	 
 		else:
@@ -137,6 +171,16 @@ cdef class PersistenceIntervals:
 				return self.thisptr.dominant_intervals_interface(100)#default argument 	 
 		 
 	def histogram_of_lengths(self,number_of_bins):
+	"""
+	Procedure to compute a histogram of interval's length. A histogram is a block plot. The number of blocks is
+    determined by the first parameter of the function (set by default to 10).
+    For the sake of argument let us assume that the length of the longest interval is 1 and the number of bins is
+    10. In this case the i-th block correspond to a range between i-1/10 and i10.
+    The vale of a block supported at the interval is the number of persistence intervals of a length between x_0
+    and x_1.
+    :param where_to_cut -- number of bins in the histogram.
+    :type positive integer.
+	"""
 		if (self.thisptr != NULL) and (number_of_bins is not None):
 			return self.thisptr.histogram_of_lengths_interface(number_of_bins)	
 		else:
@@ -144,6 +188,13 @@ cdef class PersistenceIntervals:
 				return self.thisptr.dominant_intervals_interface(100) #default argument 	 		 				
 		 
 	def cumulative_histogram_of_lengths(self,number_of_bins):
+	"""
+	Based on a histogram of intervals lengths computed by the function histogram_of_lengths H the procedure below
+    computes the cumulative histogram. The i-th position of the resulting histogram
+    is the sum of values of H for the positions from 0 to i.
+    :param where_to_cut -- number of bins in the histogram.
+    :type positive integer.
+	"""
 		if (self.thisptr != NULL) and (number_of_bins is not None):
 			return self.thisptr.cumulative_histogram_of_lengths_interface(number_of_bins)
 		else:
@@ -151,6 +202,19 @@ cdef class PersistenceIntervals:
 				return self.thisptr.cumulative_histogram_of_lengths_interface(10)#default argument 	
 		 
 	def characteristic_function_of_diagram(self,x_min,x_max,number_of_bins):
+	"""
+	In this procedure we assume that each barcode is a characteristic function of a hight equal to its length. The
+    persistence diagram is a sum of such a functions. The procedure below construct a function being a
+    sum of the characteristic functions of persistence intervals. The first two parameters are the range in which the
+    function is to be computed and the last parameter is the number of bins in
+    the discretization of the interval [_min,_max]
+    :param x_min -- Begin of range of function.
+    :type real number
+    :param x_max -- End of range of function.
+    :type real number
+    :param number_of_bins -- Number of bins in characteristic function.
+    :type positive integer
+	"""
 		if (self.thisptr != NULL) and ( x_min is not None ) and ( x_max is not None ) and ( number_of_bins is not None ):
 			return self.thisptr.characteristic_function_of_diagram_interface( x_min , x_max , number_of_bins )
 		else:
@@ -158,6 +222,15 @@ cdef class PersistenceIntervals:
 				return self.thisptr.characteristic_function_of_diagram_interface( x_min , x_max ,10 )	#default argument 	
 		 
 	def cumulative_characteristic_function_of_diagram(self,x_min,x_max,number_of_bins):
+	"""
+	Cumulative version of the function characteristic_function_of_diagram.
+	:param x_min -- Begin of range of function.
+    :type real number
+    :param x_max -- End of range of function.
+    :type real number
+    :param number_of_bins -- Number of bins in characteristic function.
+    :type positive integer
+	"""
 		if (self.thisptr != NULL) and ( x_min is not None ) and ( x_max is not None ) and ( number_of_bins is not None ):
 			return self.thisptr.cumulative_characteristic_function_of_diagram_interface( x_min , x_max , number_of_bins )
 		else:
@@ -165,22 +238,51 @@ cdef class PersistenceIntervals:
 				return self.thisptr.cumulative_characteristic_function_of_diagram_interface( x_min , x_max , 10)	#default argument  				
 		 
 	def compute_persistent_betti_numbers(self):
+	"""
+	Compute the function of persistence Betti numbers. The returned value is a vector of pair. First element of each
+    pair is a place where persistence Betti numbers change.
+    Second element of each pair is the value of Persistence Betti numbers at that point.
+	"""
 		if self.thisptr != NULL:
 			return self.thisptr.compute_persistent_betti_numbers_interface()
 					
 	def project_to_R(self,number_of_function):
+	"""
+	This is a simple function projecting the persistence intervals to a real number. The function we use here is a sum
+    of squared lengths of intervals. It can be naturally interpreted as
+    sum of step function, where the step hight it equal to the length of the interval.
+    At the moment this function is not tested, since it is quite likely to be changed in the future. Given this, when
+    using it, keep in mind that it
+    will be most likely changed in the next versions.
+    :param number of projection
+    :type positive integer.
+	"""
 		if (self.thisptr != NULL) and (number_of_function is not None):
 			return self.thisptr.project_to_R_interface(number_of_function)
 		 
 	def number_of_projections_to_R(self):
+	"""
+	The function gives the number of possible projections to R. This function is required by the
+    Real_valued_topological_data concept.
+	"""
 		if self.thisptr != NULL:
 			return self.thisptr.number_of_projections_to_R_interface()
 		 
 	def vectorize(self,number_of_function):
+	"""
+	Return a family of vectors obtained from the persistence diagram. The i-th vector consist of the length of i
+    dominant persistence intervals.
+    :param number of function to vectorizes
+    :type positive integer.    
+	"""	
 		if (self.thisptr != NULL) and ( number_of_function is not None ):
 			return self.thisptr.vectorize_interface(number_of_function)
 		 
 	def number_of_vectorize_functions(self):
+	"""
+	This function return the number of functions that allows vectorization of a persistence diagram. It is required
+    in a concept Vectorized_topological_data
+	"""
 		if (self.thisptr != NULL):
 			return self.thisptr.number_of_vectorize_functions_interface()			 			 			 
 			
