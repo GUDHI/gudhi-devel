@@ -53,7 +53,6 @@ class Persistence_intervals_interface : public Persistence_intervals
 	std::pair<double, double> get_x_range_interface() const 
 	{
 		std::pair<double, double> range = 	this->get_x_range();
-		std::cout << std::endl << std::endl << range.first << " " << range.second << std::endl << std::endl <<std::endl;
 		return range;
 	}
 
