@@ -121,14 +121,14 @@ cdef class PersistenceIntervals:
         """
         if (vector_of_intervals is None) and (file_with_intervals is not ''):
             if (dimension is not None):
-                                self.thisptr = new Persistence_intervals_interface(file_with_intervals, dimension)
+                if os.path.isfile(file_with_intervals):
+                    self.thisptr = new Persistence_intervals_interface(file_with_intervals, dimension)
+                else:
+                    print("file " + file_with_intervals + " not found.")
             else:
-                                self.thisptr = new Persistence_intervals_interface(file_with_intervals)
-        elif (file_with_intervals is '') and (vector_of_intervals is not None):
-            if os.path.isfile(file_with_intervals):
-                                self.thisptr = new Persistence_intervals_interface(str.encode(file_with_intervals))
-            else:
-                print("file " + file_with_intervals + " not found.")
+                    self.thisptr = new Persistence_intervals_interface(file_with_intervals)
+        elif (file_with_intervals is '') and (vector_of_intervals is not None):            
+            self.thisptr = new Persistence_intervals_interface(vector_of_intervals)            
         else:
             print("Persistence interals can be constructed from vector of birth-death pairs,  vector_of_intervals or a Gudhi-style file.")
 
