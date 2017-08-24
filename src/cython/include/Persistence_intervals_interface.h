@@ -43,78 +43,12 @@ class Persistence_intervals_interface : public Persistence_intervals
  public: 
 	Persistence_intervals_interface(const char* filename, unsigned dimension = std::numeric_limits<unsigned>::max())
 	: Persistence_intervals(filename, dimension) {
-		std::cout << "CONTSTRUCTOR \n";
-	}
+  }
 
 	Persistence_intervals_interface(const std::vector<std::pair<double, double> >& intervals)
 	: Persistence_intervals(intervals) {
 	}
 
-	std::pair<double, double> get_x_range_interface() const 
-	{
-		std::pair<double, double> range = 	this->get_x_range();
-		return range;
-	}
-
-	std::pair<double, double> get_y_range_interface() const 	
-	{
-		return this->get_y_range();
-	}
-
-	std::vector<double> length_of_dominant_intervals_interface(size_t where_to_cut = 100) const	
-	{
-		return this->length_of_dominant_intervals(where_to_cut);
-	}
-
-	std::vector<std::pair<double, double> > dominant_intervals_interface(size_t where_to_cut = 100) const
-	{
-		return this->dominant_intervals(where_to_cut);
-	}	
-
-	std::vector<size_t> histogram_of_lengths_interface(size_t number_of_bins = 10) const
-	{
-		return this->histogram_of_lengths(number_of_bins);
-	}
-
-	std::vector<size_t> cumulative_histogram_of_lengths_interface(size_t number_of_bins = 10) const
-	{
-		return this->cumulative_histogram_of_lengths(number_of_bins);
-	}
-
-	std::vector<double> characteristic_function_of_diagram_interface(double x_min, double x_max, size_t number_of_bins = 10) const
-	{
-		return this->characteristic_function_of_diagram(x_min,x_max,number_of_bins);
-	}	
-
-	std::vector<double> cumulative_characteristic_function_of_diagram_interface(double x_min, double x_max, size_t number_of_bins = 10) const
-	{
-		return this->cumulative_characteristic_function_of_diagram(x_min,x_max,number_of_bins);
-	}
-                                                                    
-	std::vector<std::pair<double, size_t> > compute_persistent_betti_numbers_interface() const
-	{
-		return this->compute_persistent_betti_numbers();
-	}
-
-	double project_to_R_interface(int number_of_function) const
-	{
-		return this->project_to_R(number_of_function);
-	}
-
-	size_t number_of_projections_to_R_interface() const
-	{
-		return this->number_of_projections_to_R();
-	}	
-
-	std::vector<double> vectorize_interface(int number_of_function) const
-	{
-		return this->vectorize(number_of_function);
-	}
-
-	size_t number_of_vectorize_functions_interface() const
-	{
-		return this->number_of_vectorize_functions();
-	}                                                                  
 };
 
 }  // namespace Persistence_representations
