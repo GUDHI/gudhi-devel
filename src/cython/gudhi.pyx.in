@@ -33,6 +33,7 @@ include "cython/persistence_graphical_tools.py"
 include "cython/witness_complex.pyx"
 include "cython/strong_witness_complex.pyx"
 include "cython/persistence_representations_intervals.pyx"
+include "cython/persistence_representations_landscapes.pyx"
 @GUDHI_CYTHON_ALPHA_COMPLEX@
 @GUDHI_CYTHON_EUCLIDEAN_WITNESS_COMPLEX@
 @GUDHI_CYTHON_SUBSAMPLING@
