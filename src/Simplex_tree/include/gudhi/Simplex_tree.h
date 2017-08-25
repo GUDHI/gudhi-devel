@@ -1189,11 +1189,16 @@ class Simplex_tree {
    * Returns null_simplex() if it does not exist
   */
   Simplex_handle find_child(Simplex_handle sh, Vertex_handle vh) {
-    std::vector<Vertex_handle> child = {vh};
-    for (auto vertex : simplex_vertex_range(sh)) {
-      child.push_back(vertex);
-    }
-    return find(child);
+    if (!has_children(sh))
+      return null_simplex();
+
+    Simplex_handle child = sh->second.children()->find(vh);
+    // Specific case of boost::flat_map does not find, returns boost::flat_map::end()
+    // in simplex tree we want a null_simplex()
+    if (child == sh->second.children()->members().end())
+      return null_simplex();
+
+    return child;
   }
 
  public:
