@@ -1138,10 +1138,10 @@ class Simplex_tree {
       }
       if (intersection.size() != 0) {
         // Reverse the order to insert
-        std::reverse(std::begin(intersection), std::end(intersection));
+        //std::reverse(std::begin(intersection), std::end(intersection));
         Siblings * new_sib = new Siblings(siblings,  // oncles
                                           simplex->first,  // parent
-                                          intersection);  // boost::container::ordered_unique_range_t
+                                          boost::adaptors::reverse(intersection));  // boost::container::ordered_unique_range_t
         // intersection must be cleared before the function to be called recursively
         intersection.clear();
 
@@ -1297,7 +1297,7 @@ class Simplex_tree {
  public:
   /** \brief Remove a maximal simplex.
    * @param[in] sh Simplex handle on the maximal simplex to remove.
-   * @return true if siblings was deleted, false otherwise.
+   * @return true if simplex was deleted, false otherwise.
    * \pre Please check the simplex has no coface before removing it.
    * \exception std::invalid_argument In debug mode, if sh has children.
    * \post Be aware that removing is shifting data in a flat_map (initialize_filtration to be done).
