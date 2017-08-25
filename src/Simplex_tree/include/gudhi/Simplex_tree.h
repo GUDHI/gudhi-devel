@@ -1102,23 +1102,20 @@ class Simplex_tree {
    */
   template< typename Blocker >
   void expansion_with_blockers(int max_dim, Blocker block_simplex) {
-    dimension_ = max_dim;
     // Loop must be from the end to the beginning, as higher dimension simplex are always on the left part of the tree
     for (auto& simplex : boost::adaptors::reverse(root_.members())) {
       if (has_children(&simplex)) {
-        siblings_expansion_with_blockers(simplex.second.children(), max_dim - 1, block_simplex);
+        siblings_expansion_with_blockers(simplex.second.children(), max_dim, max_dim - 1, block_simplex);
       }
     }
-    dimension_ = max_dim - dimension_;
   }
 
  private:
   /** \brief Recursive expansion with blockers of the simplex tree.*/
   template< typename Blocker >
-  void siblings_expansion_with_blockers(Siblings* siblings,  // must contain elements
-                          int k, Blocker block_simplex) {
-    if (dimension_ > k) {
-      dimension_ = k;
+  void siblings_expansion_with_blockers(Siblings* siblings, int max_dim, int k, Blocker block_simplex) {
+    if (dimension_ < max_dim - k) {
+      dimension_ = max_dim - k;
     }
     if (k == 0)
       return;
@@ -1170,7 +1167,7 @@ class Simplex_tree {
         } else {
           // ensure recursive call
           simplex->second.assign_children(new_sib);
-          siblings_expansion_with_blockers(new_sib, k - 1, block_simplex);
+          siblings_expansion_with_blockers(new_sib, max_dim, k - 1, block_simplex);
         }
       } else {
         // ensure the children property
