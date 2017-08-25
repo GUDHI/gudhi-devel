@@ -1146,13 +1146,9 @@ class Simplex_tree {
       }
       if (intersection.size() != 0) {
         // Reverse the order to insert
-        //std::reverse(std::begin(intersection), std::end(intersection));
         Siblings * new_sib = new Siblings(siblings,  // oncles
                                           simplex->first,  // parent
                                           boost::adaptors::reverse(intersection));  // boost::container::ordered_unique_range_t
-        // intersection must be cleared before the function to be called recursively
-        intersection.clear();
-
         std::vector<Simplex_handle> blocked_new_sib_list;
         // As all intersections are inserted, we can call the blocker function on all new_sib members
         for (auto new_sib_member = new_sib->members().begin();
@@ -1179,7 +1175,6 @@ class Simplex_tree {
       } else {
         // ensure the children property
         simplex->second.assign_children(siblings);
-        intersection.clear();
       }
     }
   }
