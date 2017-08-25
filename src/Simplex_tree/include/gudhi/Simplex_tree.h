@@ -1082,23 +1082,31 @@ class Simplex_tree {
   }
 
  public:
-  /** \brief Expands the Simplex_tree containing only its one skeleton until dimension max_dim according with a user
-   * given blocker expansion oracle
+  /** \brief Expands a simplex tree containing only a graph. Simplices corresponding to cliques in the graph are added
+   * incrementally, faces before cofaces, unless the simplex has dimension larger than `max_dim` or `block_simplex`
+   * returns true for this simplex.
    *
-   * The expanded simplicial complex until dimension \f$d\f$ attached to a graph \f$G\f$ is the maximal simplicial
-   * complex of dimension at most \f$d\f$ admitting the graph \f$G\f$ as \f$1\f$-skeleton.
-   * The filtration value assigned to a simplex is the maximal filtration value of one of its edges.
-   * The blocker expansion oracle shall answer true on a Simplex_handle if this Simplex_handle has to be removed,
-   * false otherwise. The blocker expansion oracle can re-assign the filtration value if needed.
+   * @param[in] max_dim Expansion maximal dimension value.
+   * @param[in] block_simplex Blocker oracle. Its concept is <CODE>bool block_simplex(Simplex_handle sh)</CODE>
    *
-   * The Simplex_tree must contain no simplex of dimension bigger than 1 when calling the method. */
+   * The function identifies a candidate simplex whose faces are all already in the complex, inserts
+   * it with a filtration value corresponding to the maximum of the filtration values of the faces, then calls
+   * `block_simplex` on a `Simplex_handle` for this new simplex. If `block_simplex` returns true, the simplex is
+   * removed, otherwise it is kept. Note that the evaluation of `block_simplex` is a good time to update the
+   * filtration value of the simplex if you want a customized value. The algorithm then proceeds with the next
+   * candidate.
+   *
+   * @warning several candidates of the same dimension may be inserted simultaneously before calling `block_simplex`,
+   * so if you examine the complex in `block_simplex`, you may hit a few simplices that have not been vetted by
+   * `block_simplex` yet.
+   */
   template< typename Blocker >
-  void expansion_with_blockers(int max_dim, Blocker blocker_expansion_function) {
+  void expansion_with_blockers(int max_dim, Blocker block_simplex) {
     dimension_ = max_dim;
     // Loop must be from the end to the beginning, as higher dimension simplex are always on the left part of the tree
     for (auto& simplex : boost::adaptors::reverse(root_.members())) {
       if (has_children(&simplex)) {
-        siblings_expansion_with_blockers(simplex.second.children(), max_dim - 1, blocker_expansion_function);
+        siblings_expansion_with_blockers(simplex.second.children(), max_dim - 1, block_simplex);
       }
     }
     dimension_ = max_dim - dimension_;
@@ -1108,7 +1116,7 @@ class Simplex_tree {
   /** \brief Recursive expansion with blockers of the simplex tree.*/
   template< typename Blocker >
   void siblings_expansion_with_blockers(Siblings* siblings,  // must contain elements
-                          int k, Blocker blocker_expansion_function) {
+                          int k, Blocker block_simplex) {
     if (dimension_ > k) {
       dimension_ = k;
     }
@@ -1150,7 +1158,7 @@ class Simplex_tree {
         for (auto new_sib_member = new_sib->members().begin();
              new_sib_member != new_sib->members().end();
              new_sib_member++) {
-           bool blocker_result = blocker_expansion_function(new_sib_member);
+           bool blocker_result = block_simplex(new_sib_member);
            // new_sib member has been blocked by the blocker function
            // add it to the list to be removed - do not perform it while looping on it
            if (blocker_result)
@@ -1166,7 +1174,7 @@ class Simplex_tree {
         } else {
           // ensure recursive call
           simplex->second.assign_children(new_sib);
-          siblings_expansion_with_blockers(new_sib, k - 1, blocker_expansion_function);
+          siblings_expansion_with_blockers(new_sib, k - 1, block_simplex);
         }
       } else {
         // ensure the children property
