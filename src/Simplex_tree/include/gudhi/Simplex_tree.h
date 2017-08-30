@@ -1132,7 +1132,10 @@ class Simplex_tree {
         // If all the boundaries are present, 'next' needs to be inserted
         for (auto& border : boundary_simplex_range(simplex)) {
           Simplex_handle border_child = find_child(border, next->first);
-          to_be_inserted = to_be_inserted && (border_child != null_simplex());
+          if (border_child == null_simplex()) {
+            to_be_inserted=false;
+            break;
+          }
           filt = std::max(filt, filtration(border_child));
         }
         if (to_be_inserted) {
