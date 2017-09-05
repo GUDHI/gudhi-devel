@@ -29,7 +29,7 @@ __license__ = "GPL v3"
 
 gudhi = Extension(
     "gudhi",
-    sources = ['gudhi.pyx',],
+    sources = ['@CMAKE_CURRENT_BINARY_DIR@/gudhi.pyx',],
     language = 'c++',
     extra_compile_args=[@GUDHI_CYTHON_EXTRA_COMPILE_ARGS@],
     extra_link_args=[@GUDHI_CYTHON_EXTRA_LINK_ARGS@],
