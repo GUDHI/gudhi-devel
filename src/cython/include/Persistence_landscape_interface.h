@@ -36,8 +36,29 @@ class Persistence_landscape_interface : public Persistence_landscape
 
   Persistence_landscape_interface(const std::vector<std::pair<double, double> >& p, size_t number_of_levels = std::numeric_limits<size_t>::max() ):Persistence_landscape(p,number_of_levels){}
 
-
   Persistence_landscape_interface(const char* filename, size_t dimension = std::numeric_limits<unsigned>::max() , size_t number_of_levels = std::numeric_limits<size_t>::max() ):Persistence_landscape(filename,dimension,number_of_levels){}  
+  
+  Persistence_landscape_interface* copy() 
+  {
+	Persistence_landscape_interface* copy = new Persistence_landscape_interface(*this);		
+	return copy;
+  }
+  
+  Persistence_landscape_interface* new_abs_interface()
+  {
+	   return (Persistence_landscape_interface*)this->new_abs();
+  }
+  
+  void new_compute_average(const std::vector<Persistence_landscape_interface*>& to_average) 
+  {
+	  std::vector<Persistence_landscape*> to_average_new;
+	  to_average_new.reserve( to_average.size() );
+	  for ( size_t i = 0 ; i != to_average.size() ; ++i )
+	  {
+		  to_average_new.push_back( (Persistence_landscape*)to_average[i] );
+	  }
+	  this->compute_average(to_average_new);
+  }
 
 /*
   void load_landscape_from_file_interface(const char* filename)
@@ -86,6 +107,7 @@ class Persistence_landscape_interface : public Persistence_landscape
   {
 	  return this->compute_minimum();
   }
+  
   
   
   double compute_norm_of_landscape_interface(double i) 
@@ -161,6 +183,7 @@ class Persistence_landscape_interface : public Persistence_landscape
 	  return this->get_y_range( level );
   }
   */
+};
 
 }  // namespace Persistence_representations
 }  // namespace Gudhi

@@ -33,7 +33,7 @@ print("#####################################################################")
 print("Persistence representations diagrams example")
 
 
-parser = argparse.ArgumentParser(description='Statistics od persistence diagrams from file ',
+parser = argparse.ArgumentParser(description='Statistics of persistence diagrams from file ',
                                  epilog='Example: '
                                  'example/persistence_representations_diagrams_example.py '
                                  '-f file_with_diagram -d 1')

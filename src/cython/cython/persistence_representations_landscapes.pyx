@@ -2,6 +2,7 @@ from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 from libcpp cimport bool  
+from cython.operator cimport dereference as deref
 import os
 import sys
 
@@ -47,18 +48,18 @@ cdef extern from "Persistence_landscape_interface.h" namespace "Gudhi::Persisten
         double compute_maximum()const
         double compute_minimum()const
         double compute_norm_of_landscape(double)
-        Persistence_landscape_interface abs()
+        Persistence_landscape_interface* new_abs_interface()
         size_t size()const
-        double find_max_(unsigned)const
+        double find_max(unsigned)const
         double project_to_R(int)const
         size_t number_of_projections_to_R()const
         vector[double] vectorize(int)const
-        size_t number_of_vectorize_function()const
+        size_t number_of_vectorize_functions()const
         void compute_average(const vector[Persistence_landscape_interface*]&)
+        void new_compute_average(const vector[Persistence_landscape_interface*]&) 
         double distance(const Persistence_landscape_interface&, double)
         double compute_scalar_product(const Persistence_landscape_interface&)const
         pair[double, double] get_y_range(size_t)const
-
 
 
 
@@ -67,12 +68,12 @@ cdef extern from "Persistence_landscape_interface.h" namespace "Gudhi::Persisten
 #for methods it is def num_simplices(self).
 cdef class PersistenceLandscapes:
 
-    cdef Persistence_landscape_interface * thisptr
+    cdef Persistence_landscape_interface* thisptr
 
 
 
 #Can we have only one constructor, or can we have more
-    def __init__(self, vector_of_intervals=None, dimension = None, file_with_intervals=''):
+    def __init__(self):
         """
         This is a class implementing persistence landscapes data structures.
         For theoretical description, please consult <i>Statistical topological
@@ -92,6 +93,7 @@ cdef class PersistenceLandscapes:
         considered the same. If the scale in your persistence diagrams is
         comparable to this value, please rescale them before use this code.
         """
+   
 
 
     def __cinit__(self, vector_of_intervals=None, dimension=None, file_with_intervals='',number_of_levels=sys.maxint):
@@ -100,7 +102,7 @@ cdef class PersistenceLandscapes:
         It either take text file and a positive integer, or a vector
         of pairs. The last optional parameter is the nunmer of levels of
         the landscapes to be generated. If not set, all the levels will
-        be generated. In case of file, each line of the input file is
+        be generated. In case of file, each line of the input file is,
         supposed to contain two numbers of a type double
         (or convertible to double) representing the birth and the death
         of the persistence interval. If the pairs are not sorted so that
@@ -226,7 +228,7 @@ cdef class PersistenceLandscapes:
         :param i
         """
         if ( self.thisptr != NULL ) and ( i is not None ):
-            return self.thisptr.compute_norm_of_landscape(i)
+            return self.thisptr.compute_norm_of_landscape(i)          
 
     def abs( self ):
         """
@@ -240,7 +242,10 @@ cdef class PersistenceLandscapes:
         this procedure.
         """
         if ( self.thisptr != NULL ):
-            return self.thisptr.abs()
+            abs_ = PersistenceLandscapes()
+            abs_.thisptr = self.thisptr.new_abs_interface()
+            return abs_
+
 
     def size( self ):
         """
@@ -249,14 +254,14 @@ cdef class PersistenceLandscapes:
         if ( self.thisptr != NULL ):
             return self.thisptr.size()
 
-    def find_max_(self, lambda_):
+    def find_max(self, lambda_):
         """
         Compute maximal value of lambda-level landscape.
         :param level of landscape
         :type nonnegative integer
         """
         if ( self.thisptr != NULL ) and ( lambda_ is not None ):
-            return self.thisptr.find_max_(lambda_)
+            return self.thisptr.find_max(lambda_)
 
     def project_to_R(self, number_of_function):
         """
@@ -294,7 +299,7 @@ cdef class PersistenceLandscapes:
         if ( self.thisptr != NULL ) and ( number_of_function is not None ):
             return self.thisptr.vectorize(number_of_function)
 
-    def number_of_vectorize_function(self):
+    def number_of_vectorize_functions(self):
         """
         The number of projections to R is defined to the number of nonzero
         landscape functions. I-th projection is an
@@ -306,21 +311,25 @@ cdef class PersistenceLandscapes:
         will be most likely changed in the next versions
         """
         if ( self.thisptr != NULL ):
-            return self.thisptr.number_of_vectorize_function()
+            return self.thisptr.number_of_vectorize_functions()
 
-    def compute_average(self,to_average):
+    def compute_average( self,to_average=[] ):
         """
         A function to compute averaged persistence landscape, based on vector
         of persistence landscapes.
         This function is required by Topological_data_with_averages concept.
         :param vector of persistence landscapes to average
         :type vectors of references to persistence landscapes
-        """
-        if ( self.thisptr != NULL ) and ( to_average is not None ):
-            return self.thisptr.compute_average(to_average)
+        """            
+        cdef vector[Persistence_landscape_interface*] cpp_list    
+        if ( self.thisptr != NULL ) and ( to_average is not None ):	
+            for elt in to_average: 
+                cpp_list.push_back((<PersistenceLandscapes>elt).thisptr)
+            self.thisptr.new_compute_average( cpp_list )                
+            
 
 
-    def distance(self, second, power):
+    def distance(self, PersistenceLandscapes second, power):
         """
         A function to compute distance between persistence landscape.
         The parameter of this function is a Persistence_landscape.
@@ -330,9 +339,9 @@ cdef class PersistenceLandscapes:
         :type PersistenceLandscape
         """
         if ( self.thisptr != NULL ) and ( second is not None ) and ( power is not None ):
-            return self.thisptr.distance(second, power)
+            return self.thisptr.distance( deref(second.thisptr), power)
  
-    def compute_scalar_product(self, second):
+    def compute_scalar_product(self, PersistenceLandscapes second):
         """
         A function to compute scalar product of persistence landscapes.
         The parameter of this function is a Persistence_landscape.
@@ -341,7 +350,7 @@ cdef class PersistenceLandscapes:
         :type PersistenceLandscape
         """
         if ( self.thisptr != NULL ) and ( second is not None ):
-            return self.thisptr.compute_scalar_product(second)
+            return self.thisptr.compute_scalar_product( deref(second.thisptr) )
 
     def get_y_range(self, level):
         """
@@ -352,6 +361,6 @@ cdef class PersistenceLandscapes:
         :param The level of lrandscape
         :type nonnegative integer
         """
-        if ( self.thisptr != NULL ) and ( second is not None ):
+        if ( self.thisptr != NULL ):
             return self.thisptr.get_y_range(level)
 

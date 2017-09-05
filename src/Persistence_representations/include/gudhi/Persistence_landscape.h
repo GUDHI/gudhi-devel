@@ -285,6 +285,8 @@ class Persistence_landscape {
    *distance, we need to take its absolute value. This is the purpose of this procedure.
   **/
   Persistence_landscape abs();
+  
+  Persistence_landscape* new_abs();
 
   /**
    * Computes the number of landscape functions.
@@ -854,6 +856,58 @@ Persistence_landscape Persistence_landscape::abs() {
   }
   return result;
 }
+
+
+Persistence_landscape* Persistence_landscape::new_abs() 
+{
+	Persistence_landscape* result = new Persistence_landscape(*this);	 
+	for (size_t level = 0; level != this->land.size(); ++level) 
+	{
+		if (AbsDbg) 
+		{
+			std::cout << "level: " << level << std::endl;
+		}
+		std::vector<std::pair<double, double> > lambda_n;
+		lambda_n.push_back(std::make_pair(-std::numeric_limits<int>::max(), 0));
+		for (size_t i = 1; i != this->land[level].size(); ++i) 
+		{
+			if (AbsDbg) 
+			{
+				std::cout << "this->land[" << level << "][" << i << "] : " << this->land[level][i].first << " "
+					  << this->land[level][i].second << std::endl;
+			}
+			// if a line segment between this->land[level][i-1] and this->land[level][i] crosses the x-axis, then we have to
+			// add one landscape point t o result
+			if ((this->land[level][i - 1].second) * (this->land[level][i].second) < 0) {
+			double zero =
+				find_zero_of_a_line_segment_between_those_two_points(this->land[level][i - 1], this->land[level][i]);
+
+			lambda_n.push_back(std::make_pair(zero, 0));
+			lambda_n.push_back(std::make_pair(this->land[level][i].first, fabs(this->land[level][i].second)));
+			if (AbsDbg) 
+			{
+				std::cout << "Adding pair : (" << zero << ",0)" << std::endl;
+				std::cout << "In the same step adding pair : (" << this->land[level][i].first << ","
+						<< fabs(this->land[level][i].second) << ") " << std::endl;
+				std::cin.ignore();
+			}
+			} 
+			else 
+			{
+				lambda_n.push_back(std::make_pair(this->land[level][i].first, fabs(this->land[level][i].second)));
+				if (AbsDbg) 
+				{
+					std::cout << "Adding pair : (" << this->land[level][i].first << "," << fabs(this->land[level][i].second)
+							<< ") " << std::endl;
+					std::cin.ignore();
+				}
+			}
+	   }
+	result->land.push_back(lambda_n);
+	}	
+	return result;
+}
+
 
 Persistence_landscape Persistence_landscape::multiply_lanscape_by_real_number_not_overwrite(double x) const {
   std::vector<std::vector<std::pair<double, double> > > result(this->land.size());
