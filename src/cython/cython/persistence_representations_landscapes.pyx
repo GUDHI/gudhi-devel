@@ -73,7 +73,7 @@ cdef class PersistenceLandscapes:
 
 
 #Can we have only one constructor, or can we have more
-    def __init__(self):
+    def __init__(self, vector_of_intervals=None, dimension=None, file_with_intervals='',number_of_levels=sys.maxsize):
         """
         This is a class implementing persistence landscapes data structures.
         For theoretical description, please consult <i>Statistical topological
@@ -96,7 +96,7 @@ cdef class PersistenceLandscapes:
    
 
 
-    def __cinit__(self, vector_of_intervals=None, dimension=None, file_with_intervals='',number_of_levels=sys.maxint):
+    def __cinit__(self, vector_of_intervals=None, dimension=None, file_with_intervals='',number_of_levels=sys.maxsize):
         """
         This is a constructor of a class PersistenceLandscapes.
         It either take text file and a positive integer, or a vector

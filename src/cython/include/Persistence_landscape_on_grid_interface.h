@@ -59,7 +59,24 @@ class Persistence_landscape_on_grid_interface : public Persistence_landscape_on_
   Persistence_landscape_on_grid_interface(const char* filename, size_t number_of_points, uint16_t dimension = std::numeric_limits<uint16_t>::max()):
   Persistence_landscape_on_grid(filename,number_of_points,dimension){}
 
+  Persistence_landscape_on_grid_interface* new_abs_interface()
+  {
+	   return (Persistence_landscape_on_grid_interface*)this->new_abs();
+  }
+  
+  void new_compute_average(const std::vector<Persistence_landscape_on_grid_interface*>& to_average) 
+  {
+	  std::vector<Persistence_landscape_on_grid*> to_average_new;
+	  to_average_new.reserve( to_average.size() );
+	  for ( size_t i = 0 ; i != to_average.size() ; ++i )
+	  {
+		  to_average_new.push_back( (Persistence_landscape_on_grid*)to_average[i] );
+	  }
+	  this->compute_average(to_average_new);
+  }
 
+
+/*
   void load_landscape_from_file_interface(const char* filename)
   {
 	  this->load_landscape_from_file(filename);
@@ -180,6 +197,8 @@ class Persistence_landscape_on_grid_interface : public Persistence_landscape_on_
   {
 	  return this->get_y_range( level );
   }
+  */
+};   
 
 }  // namespace Persistence_representations
 }  // namespace Gudhi
