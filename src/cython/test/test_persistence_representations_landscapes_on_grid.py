@@ -34,15 +34,15 @@ epsilon = 0.0000005;
 def test_check_construction_of_landscape:
     l = gudhi.PersistenceLandscapeOnGrid("data/file_with_diagram_1", 100,sys.maxsize)
     l.print_to_file("landscape_from_file_with_diagram_1")
-    g = gudhi.PersistenceLandscapeOnGrid
+    g = gudhi.PersistenceLandscapeOnGrid()
     g.load_landscape_from_file("landscape_from_file_with_diagram_1")
     assert l == g
 
 
 def test_check_construction_of_landscape_using_only_ten_levels:
     number = 10
-    gudhi.PersistenceLandscapeOnGrid l("data/file_with_diagram_1", 100, number)
-    gudhi.PersistenceLandscapeOnGrid g("data/file_with_diagram_1", 100, sys.maxsize)
+    l = gudhi.PersistenceLandscapeOnGrid("data/file_with_diagram_1", 100, number)
+    g = gudhi.PersistenceLandscapeOnGrid("data/file_with_diagram_1", 100, sys.maxsize)
     for level in range(0,number):
         v1 = l.vectorize(level)
         v2 = g.vectorize(level)
@@ -98,10 +98,10 @@ def test_check_default_parameters_of_distances:
 def test_check_computations_of_averages:
     p = gudhi.PersistenceLandscapeOnGrid("data/file_with_diagram", 0., 1., 100)
     q = gudhi.PersistenceLandscapeOnGrid("data/file_with_diagram_1", 0., 1., 100)
-    av = gudhi.PersistenceLandscapeOnGrid
+    av = gudhi.PersistenceLandscapeOnGrid()
     av.compute_average({&p, &q)
 
-    template_average = gudhi.PersistenceLandscapeOnGrid
+    template_average = gudhi.PersistenceLandscapeOnGrid()
     template_average.load_landscape_from_file("data/average_on_a_grid")
     assert template_average == av
 

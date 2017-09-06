@@ -133,7 +133,8 @@ cdef class PersistenceLandscapes:
             self.thisptr = new Persistence_landscape_interface(vector_of_intervals, number_of_levels)
         else:
             print("Persistence interals can be constructed from vector of birth-death pairs,  vector_of_intervals or a Gudhi-style file.")                     
-
+            self.thisptr = new Persistence_landscape_interface()
+            
     def __dealloc__(self):
         """
         destructor
@@ -321,6 +322,7 @@ cdef class PersistenceLandscapes:
         :param vector of persistence landscapes to average
         :type vectors of references to persistence landscapes
         """            
+        #TODO -- add a check if all objects in the to_average are of the same type. 
         cdef vector[Persistence_landscape_interface*] cpp_list    
         if ( self.thisptr != NULL ) and ( to_average is not None ):	
             for elt in to_average: 

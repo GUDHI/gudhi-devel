@@ -30,7 +30,54 @@ __copyright__ = "Copyright (C) 2017 Swansea University"
 __license__ = "GPL v3"
 
 print("#####################################################################")
-print("Persistence representations landscapes example")
+print("Persistence representations landscapes on a grid example")
+
+persistence1 = [(1, 2),(6, 8),(0, 4),(3, 8)]
+persistence2 = [(2, 9),(1, 6),(3, 5),(6, 10)]
+
+#create two persistence landscapes based on persistence1 and persistence2:
+l1 = PersistenceLandscapeOnGrid(persistence1, 0, 11, 20)
+l2 = PersistenceLandscapeOnGrid(persistence2, 0, 11, 20)
+
+#This is how to compute integral of landscapes:
+print "Integral of the first landscape : " , l1.compute_integral_of_landscape() 
+print "Integral of the second landscape : " , l2.compute_integral_of_landscape() 
+
+#here are the maxima of the functions:
+print "Maximum of l1 : " , l1.compute_maximum() 
+print "Maximum of l2 : " , l2.compute_maximum() 
+
+#here are the norms of landscapes:
+print "L^1 Norm of l1 : " , l1.compute_norm_of_landscape(1.) 
+print "L^1 Norm of l2 : " , l2.compute_norm_of_landscape(1.) 
+
+#here is the average of landscapes:
+average = PersistenceLandscapeOnGrid();
+average.compute_average(to_average=[l1, l2]);
+
+
+#here is the distance of landscapes:
+print "Distance : " , l1.distance(l2) 
+
+#here is the scalar product of landscapes:
+print "Scalar product : " , l1.compute_scalar_product(l2) 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 persistence1 = [(1,2),(6,8),(0,4),(3,8)]
 persistence2 = [(2,9),(1,6),(3,5),(6,10)]

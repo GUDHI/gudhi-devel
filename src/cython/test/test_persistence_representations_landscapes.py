@@ -31,14 +31,14 @@ epsilon = 0.0000005;
 
 def test_check_construction_of_landscape():    
     p = gudhi.Persistence_landscape("data/file_with_diagram",0)
-    q = gudhi.Persistence_landscape
+    q = gudhi.Persistence_landscape()
     q.load_landscape_from_file("data/file_with_landscape_from_file_with_diagram")
     assert p == q
 
 
 def test_check_construction_of_landscape_form_gudhi_style_file():
     p = gudhi.Persistence_landscape("data/persistence_file_with_four_entries_per_line", 1)
-    q = gudhi.Persistence_landscape
+    q = gudhi.Persistence_landscape()
     q.load_landscape_from_file("data/persistence_file_with_four_entries_per_line_landscape");  
     assert p == q;
 
@@ -85,7 +85,7 @@ def test_check_computations_of_values_on_different_points():
 def test_check_computations_of_maxima_and_norms():
     diag = read_persistence_intervals_in_one_dimension_from_file("data/file_with_diagram")
     p = gudhi.Persistence_landscape(diag)
-    second = gudhi.Persistence_landscape
+    second = gudhi.Persistence_landscape()
     second.load_landscape_from_file("data/file_with_landscape_from_file_with_diagram_1")
     sum_ = gudhi.Persistence_landscape()
     sum_ = p + second;
@@ -113,9 +113,9 @@ def test_check_computations_of_averages():
     p = gudhi.Persistence_landscape(diag)
     diag2 = read_persistence_intervals_in_one_dimension_from_file("data/file_with_diagram_1")
     q = gudhi.Persistence_landscape(diag2)
-    av = gudhi.Persistence_landscape
+    av = gudhi.Persistence_landscape()
     av.compute_average({p, q})
-    template_average = Persistence_landscape
+    template_average = Persistence_landscape()
     template_averagetemplate_average.load_landscape_from_file("data/average")
     assert template_average == av
 

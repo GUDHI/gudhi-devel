@@ -259,8 +259,7 @@ cdef class PersistenceIntervals:
             return self.thisptr.cumulative_characteristic_function_of_diagram(x_min, x_max, number_of_bins)
         else:
             if (self.thisptr != NULL) and (x_min is not None) and (x_max is not None):
-                return
-                self.thisptr.cumulative_characteristic_function_of_diagram(x_min, x_max, 10)
+                return self.thisptr.cumulative_characteristic_function_of_diagram(x_min, x_max, 10)
 
     def compute_persistent_betti_numbers(self):
         """
