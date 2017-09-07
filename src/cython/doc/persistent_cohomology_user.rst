@@ -109,6 +109,6 @@ We provide several example files: run these examples with -h for details on thei
 Bibliography
 ============
 
-.. bibliography:: bibliography.bib
+.. bibliography:: ../../biblio/bibliography.bib
    :filter: docnames
    :style: unsrt

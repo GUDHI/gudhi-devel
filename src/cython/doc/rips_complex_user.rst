@@ -26,7 +26,7 @@ structure, and then expands the simplicial complex when required.
 Vertex name correspond to the index of the point in the given range (aka. the point cloud).
 
 .. figure::
-    img/rips_complex_representation.png
+    ../../doc/Rips_complex/rips_complex_representation.png
     :align: center
 
     Rips-complex one skeleton graph representation

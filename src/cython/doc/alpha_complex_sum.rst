@@ -5,7 +5,7 @@
 
 +----------------------------------------------------------------+------------------------------------------------------------------------+
 | .. figure::                                                    | Alpha_complex is a simplicial complex constructed from the finite      |
-|      img/alpha_complex_representation.png                      | cells of a Delaunay Triangulation.                                     |
+|      ../../doc/Alpha_complex/alpha_complex_representation.png  | cells of a Delaunay Triangulation.                                     |
 |      :alt: Alpha complex representation                        |                                                                        |
 |      :figclass: align-center                                   | The filtration value of each simplex is computed as the square of the  |
 |                                                                | circumradius of the simplex if the circumsphere is empty (the simplex  |

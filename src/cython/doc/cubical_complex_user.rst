@@ -157,6 +157,6 @@ End user programs are available in cython/example/ folder.
 Bibliography
 ============
 
-.. bibliography:: bibliography.bib
+.. bibliography:: ../../bibliography.bib
    :filter: docnames
    :style: unsrt

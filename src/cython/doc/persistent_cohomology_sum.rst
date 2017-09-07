@@ -4,7 +4,7 @@
 
 +-----------------------------------------------------------------+-----------------------------------------------------------------------+
 | .. figure::                                                     | The theory of homology consists in attaching to a topological space   |
-|      img/3DTorus_poch.png                                       | a sequence of (homology) groups, capturing global topological         |
+|      ../../doc/Persistent_cohomology/3DTorus_poch.png           | a sequence of (homology) groups, capturing global topological         |
 |      :figclass: align-center                                    | features like connected components, holes, cavities, etc. Persistent  |
 |                                                                 | homology studies the evolution -- birth, life and death -- of these   |
 |      Rips Persistent Cohomology on a 3D                         | features when the topological space is changing. Consequently, the    |

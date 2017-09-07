@@ -22,7 +22,7 @@ Let us start with the description of the Tangential complex of a simple
 example, with :math:`k = 1` and :math:`d = 2`. The input data is 4 points
 :math:`P` located on a curve embedded in 2D.
 
-.. figure:: img/tc_example_01.png
+.. figure:: ../../doc/Tangential_complex/tc_example_01.png
     :alt: The input
     :figclass: align-center
 
@@ -31,7 +31,7 @@ example, with :math:`k = 1` and :math:`d = 2`. The input data is 4 points
 For each point :math:`p`, estimate its tangent subspace :math:`T_p` (e.g.
 using PCA). 
 
-.. figure:: img/tc_example_02.png
+.. figure:: ../../doc/Tangential_complex/tc_example_02.png
     :alt: The estimated normals
     :figclass: align-center
 
@@ -42,7 +42,7 @@ Let us add the Voronoi diagram of the points in orange. For each point
 :math:`p`, construct its star in the Delaunay triangulation of :math:`P`
 restricted to :math:`T_p`.
 
-.. figure:: img/tc_example_03.png
+.. figure:: ../../doc/Tangential_complex/tc_example_03.png
     :alt: The Voronoi diagram
     :figclass: align-center
 
@@ -62,7 +62,7 @@ simplex is not in the star of all its vertices.
 
 Let us take the same example.
 
-.. figure:: img/tc_example_07_before.png
+.. figure:: ../../doc/Tangential_complex/tc_example_07_before.png
     :alt: Before
     :figclass: align-center
 
@@ -70,7 +70,7 @@ Let us take the same example.
 
 Let us slightly move the tangent subspace :math:`T_q`
 
-.. figure:: img/tc_example_07_after.png
+.. figure:: ../../doc/Tangential_complex/tc_example_07_after.png
     :alt: After
     :figclass: align-center
 
@@ -79,7 +79,7 @@ Let us slightly move the tangent subspace :math:`T_q`
 Now, the star of :math:`Q` contains :math:`QP`, but the star of :math:`P` does
 not contain :math:`QP`. We have an inconsistency.
 
-.. figure:: img/tc_example_08.png
+.. figure:: ../../doc/Tangential_complex/tc_example_08.png
     :alt: After
     :figclass: align-center
 
@@ -191,6 +191,6 @@ The output is:
 Bibliography
 ============
 
-.. bibliography:: bibliography.bib
+.. bibliography:: ../../biblio/bibliography.bib
    :filter: docnames
    :style: unsrt
