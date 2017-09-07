@@ -158,7 +158,8 @@ Then, it is asked to display information about the alpha complex:
 .. testcode::
 
     import gudhi
-    alpha_complex = gudhi.AlphaComplex(off_file='alphacomplexdoc.off')
+    alpha_complex = gudhi.AlphaComplex(off_file=gudhi.__root_source_dir__ + \
+        '/data/points/alphacomplexdoc.off')
     simplex_tree = alpha_complex.create_simplex_tree(max_alpha_square=59.0)
     result_str = 'Alpha complex is of dimension ' + repr(simplex_tree.dimension()) + ' - ' + \
         repr(simplex_tree.num_simplices()) + ' simplices - ' + \
