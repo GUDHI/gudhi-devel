@@ -37,6 +37,21 @@ class Persistence_landscape_interface : public Persistence_landscape
   Persistence_landscape_interface(const std::vector<std::pair<double, double> >& p, size_t number_of_levels = std::numeric_limits<size_t>::max() ):Persistence_landscape(p,number_of_levels){}
 
   Persistence_landscape_interface(const char* filename, size_t dimension = std::numeric_limits<unsigned>::max() , size_t number_of_levels = std::numeric_limits<size_t>::max() ):Persistence_landscape(filename,dimension,number_of_levels){}  
+  
+  
+  //****************
+  static Persistence_landscape_interface* construct_from_file( const char* filename, size_t dimension = std::numeric_limits<unsigned>::max() , size_t number_of_levels = std::numeric_limits<size_t>::max() )
+  {
+	  Persistence_landscape_interface* result = new Persistence_landscape_interface(filename,dimension,number_of_levels);
+	  return result;  
+  }
+  static Persistence_landscape_interface* construct_from_vector_of_pairs( const std::vector<std::pair<double, double> >& p, size_t number_of_levels = std::numeric_limits<size_t>::max() )
+  {
+	  Persistence_landscape_interface* result = new Persistence_landscape_interface(p,number_of_levels);
+	  return result;  
+  }
+    
+  //****************
 
   
   Persistence_landscape_interface* new_abs_interface()

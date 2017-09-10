@@ -57,7 +57,8 @@ class Persistence_landscape_on_grid_interface : public Persistence_landscape_on_
 
 
   Persistence_landscape_on_grid_interface(const char* filename, size_t number_of_points, uint16_t dimension = std::numeric_limits<uint16_t>::max()):
-  Persistence_landscape_on_grid(filename,number_of_points,dimension){}
+  Persistence_landscape_on_grid(filename,number_of_points,dimension){}  
+  
 
   Persistence_landscape_on_grid_interface* new_abs_interface()
   {
