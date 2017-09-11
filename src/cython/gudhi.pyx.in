@@ -30,6 +30,7 @@ include "cython/rips_complex.pyx"
 include "cython/cubical_complex.pyx"
 include "cython/periodic_cubical_complex.pyx"
 include "cython/persistence_graphical_tools.py"
+include "cython/reader_utils.pyx"
 include "cython/witness_complex.pyx"
 include "cython/strong_witness_complex.pyx"
 @GUDHI_CYTHON_ALPHA_COMPLEX@

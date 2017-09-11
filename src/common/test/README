@@ -7,7 +7,7 @@ make
 To launch with details:
 ***********************
 
-./dtoffrw_UT --report_level=detailed --log_level=all 
+./Common_test_points_off_reader --report_level=detailed --log_level=all
 
    ==> echo $? returns 0 in case of success (non-zero otherwise)
 

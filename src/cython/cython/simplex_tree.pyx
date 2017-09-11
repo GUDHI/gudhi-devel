@@ -2,6 +2,7 @@ from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 from libcpp cimport bool
+from libcpp.string cimport string
 
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
@@ -61,6 +62,7 @@ cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
         vector[int] betti_numbers()
         vector[int] persistent_betti_numbers(double from_value, double to_value)
         vector[pair[double,double]] intervals_in_dimension(int dimension)
+        void write_output_diagram(string diagram_file_name)
 
 # SimplexTree python interface
 cdef class SimplexTree:
@@ -183,10 +185,10 @@ cdef class SimplexTree:
         :returns:  true if the simplex was found, false otherwise.
         :rtype:  bool
         """
-        cdef vector[int] complex
+        cdef vector[int] csimplex
         for i in simplex:
-            complex.push_back(i)
-        return self.thisptr.find_simplex(complex)
+            csimplex.push_back(i)
+        return self.thisptr.find_simplex(csimplex)
 
     def insert(self, simplex, filtration=0.0):
         """This function inserts the given N-simplex and its subfaces with the
@@ -200,10 +202,10 @@ cdef class SimplexTree:
         :returns:  true if the simplex was found, false otherwise.
         :rtype:  bool
         """
-        cdef vector[int] complex
+        cdef vector[int] csimplex
         for i in simplex:
-            complex.push_back(i)
-        return self.thisptr.insert_simplex_and_subfaces(complex,
+            csimplex.push_back(i)
+        return self.thisptr.insert_simplex_and_subfaces(csimplex,
                                                         <double>filtration)
 
     def get_filtration(self):
@@ -232,35 +234,35 @@ cdef class SimplexTree:
         :returns:  The (simplices of the) skeleton of a maximum dimension.
         :rtype:  list of tuples(simplex, filtration)
         """
-        cdef vector[pair[vector[int], double]] skeletons \
+        cdef vector[pair[vector[int], double]] skeleton \
             = self.thisptr.get_skeleton(<int>dimension)
         ct = []
-        for filtered_complex in skeletons:
+        for filtered_simplex in skeleton:
             v = []
-            for vertex in filtered_complex.first:
+            for vertex in filtered_simplex.first:
                 v.append(vertex)
-            ct.append((v, filtered_complex.second))
+            ct.append((v, filtered_simplex.second))
         return ct
 
     def get_star(self, simplex):
-        """This function returns the stars of a given N-simplex.
+        """This function returns the star of a given N-simplex.
 
         :param simplex: The N-simplex, represented by a list of vertex.
         :type simplex: list of int.
         :returns:  The (simplices of the) star of a simplex.
         :rtype:  list of tuples(simplex, filtration)
         """
-        cdef vector[int] complex
+        cdef vector[int] csimplex
         for i in simplex:
-            complex.push_back(i)
-        cdef vector[pair[vector[int], double]] stars \
-            = self.thisptr.get_star(complex)
+            csimplex.push_back(i)
+        cdef vector[pair[vector[int], double]] star \
+            = self.thisptr.get_star(csimplex)
         ct = []
-        for filtered_complex in stars:
+        for filtered_simplex in star:
             v = []
-            for vertex in filtered_complex.first:
+            for vertex in filtered_simplex.first:
                 v.append(vertex)
-            ct.append((v, filtered_complex.second))
+            ct.append((v, filtered_simplex.second))
         return ct
 
     def get_cofaces(self, simplex, codimension):
@@ -275,17 +277,17 @@ cdef class SimplexTree:
         :returns:  The (simplices of the) cofaces of a simplex
         :rtype:  list of tuples(simplex, filtration)
         """
-        cdef vector[int] complex
+        cdef vector[int] csimplex
         for i in simplex:
-            complex.push_back(i)
+            csimplex.push_back(i)
         cdef vector[pair[vector[int], double]] cofaces \
-            = self.thisptr.get_cofaces(complex, <int>codimension)
+            = self.thisptr.get_cofaces(csimplex, <int>codimension)
         ct = []
-        for filtered_complex in cofaces:
+        for filtered_simplex in cofaces:
             v = []
-            for vertex in filtered_complex.first:
+            for vertex in filtered_simplex.first:
                 v.append(vertex)
-            ct.append((v, filtered_complex.second))
+            ct.append((v, filtered_simplex.second))
         return ct
 
     def remove_maximal_simplex(self, simplex):
@@ -385,7 +387,7 @@ cdef class SimplexTree:
         complex in a specific dimension.
 
         :param dimension: The specific dimension.
-        :type from_value: int.
+        :type dimension: int.
         :returns: The persistence intervals.
         :rtype:  list of pair of float
 
@@ -399,3 +401,22 @@ cdef class SimplexTree:
             print("intervals_in_dim function requires persistence function"
                   " to be launched first.")
         return intervals_result
+
+    def write_persistence_diagram(self, persistence_file=''):
+        """This function writes the persistence intervals of the simplicial
+        complex in a user given file name.
+
+        :param persistence_file: The specific dimension.
+        :type persistence_file: string.
+
+        :note: intervals_in_dim function requires persistence function to be
+            launched first.
+        """
+        if self.pcohptr != NULL:
+            if persistence_file != '':
+                self.pcohptr.write_output_diagram(str.encode(persistence_file))
+            else:
+                print("persistence_file must be specified")
+        else:
+            print("intervals_in_dim function requires persistence function"
+                  " to be launched first.")

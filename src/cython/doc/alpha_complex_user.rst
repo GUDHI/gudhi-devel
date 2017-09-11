@@ -142,7 +142,7 @@ Prune above given filtration value
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The simplex tree is pruned from the given maximum alpha squared value (cf. `Simplex_tree::prune_above_filtration()`
-int he `C++ version <http://gudhi.gforge.inria.fr/doc/latest/index.html>`_).
+in the `C++ version <http://gudhi.gforge.inria.fr/doc/latest/index.html>`_).
 In the following example, the value is given by the user as argument of the program.
 
 

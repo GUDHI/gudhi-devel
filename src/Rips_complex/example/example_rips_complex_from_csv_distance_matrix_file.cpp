@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
   // Init of a Rips complex from a distance matrix in a csv file
   // Default separator is ';'
   // ----------------------------------------------------------------------------
-  Distance_matrix distances = read_lower_triangular_matrix_from_csv_file<Filtration_value>(csv_file_name);
+  Distance_matrix distances = Gudhi::read_lower_triangular_matrix_from_csv_file<Filtration_value>(csv_file_name);
   Rips_complex rips_complex_from_file(distances, threshold);
 
   std::streambuf* streambufffer;

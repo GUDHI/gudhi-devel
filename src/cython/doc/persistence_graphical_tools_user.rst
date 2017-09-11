@@ -14,12 +14,14 @@ This function is useful to show the color palette values of dimension:
 .. testcode::
 
     import gudhi
-    gudhi.show_palette_values(alpha=1.0)
+    plt = gudhi.show_palette_values(alpha=1.0)
+    plt.show()
 
 .. plot::
 
     import gudhi
-    gudhi.show_palette_values(alpha=1.0)
+    plt = gudhi.show_palette_values(alpha=1.0)
+    plt.show()
 
 Show persistence as a barcode
 -----------------------------
@@ -32,7 +34,8 @@ This function can display the persistence result as a barcode:
     
     periodic_cc = gudhi.PeriodicCubicalComplex(perseus_file='3d_torus.txt')
     diag = periodic_cc.persistence()
-    gudhi.plot_persistence_barcode(diag)
+    plt = gudhi.plot_persistence_barcode(diag)
+    plt.show()
 
 .. plot::
 
@@ -40,7 +43,8 @@ This function can display the persistence result as a barcode:
 
     periodic_cc = gudhi.PeriodicCubicalComplex(perseus_file='3d_torus.txt')
     diag = periodic_cc.persistence()
-    gudhi.plot_persistence_barcode(diag)
+    plt = gudhi.plot_persistence_barcode(diag)
+    plt.show()
 
 Show persistence as a diagram
 -----------------------------
@@ -51,16 +55,18 @@ This function can display the persistence result as a diagram:
 
     import gudhi
     
-    rips_complex = gudhi.RipsComplex(off_file='tore3D_300.off', max_edge_length=2.0)
+    rips_complex = gudhi.RipsComplex(off_file='tore3D_1307.off', max_edge_length=0.2)
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=3)
     diag = simplex_tree.persistence()
-    gudhi.plot_persistence_diagram(diag)
+    plt = gudhi.plot_persistence_diagram(diag, band_boot=0.13)
+    plt.show()
 
 .. plot::
 
     import gudhi
 
-    rips_complex = gudhi.RipsComplex(off_file='tore3D_300.off', max_edge_length=2.0)
+    rips_complex = gudhi.RipsComplex(off_file='tore3D_1307.off', max_edge_length=0.2)
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=3)
     diag = simplex_tree.persistence()
-    gudhi.plot_persistence_diagram(diag)
+    plt = gudhi.plot_persistence_diagram(diag, band_boot=0.13)
+    plt.show()

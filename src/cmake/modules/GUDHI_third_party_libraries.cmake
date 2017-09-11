@@ -117,15 +117,13 @@ if(NOT GUDHI_CYTHON_PATH)
 endif(NOT GUDHI_CYTHON_PATH)
 
 if(PYTHONINTERP_FOUND AND CYTHON_FOUND)
-  # Unitary tests are available through py.test
-  find_program( PYTEST_PATH py.test )
   # Default found version 2
   if(PYTHON_VERSION_MAJOR EQUAL 2)
     # Documentation generation is available through sphinx
     find_program( SPHINX_PATH sphinx-build )
   elseif(PYTHON_VERSION_MAJOR EQUAL 3)
     # No sphinx-build in Pyton3, just hack it
-    set(SPHINX_PATH "${CMAKE_SOURCE_DIR}/${GUDHI_CYTHON_PATH}/doc/python3-sphinx-build")
+    set(SPHINX_PATH "${CMAKE_CURRENT_BINARY_DIR}/${GUDHI_CYTHON_PATH}/doc/python3-sphinx-build")
   else()
     message(FATAL_ERROR "ERROR: Try to compile the Cython interface. Python version ${PYTHON_VERSION_STRING} is not valid.")
   endif(PYTHON_VERSION_MAJOR EQUAL 2)
