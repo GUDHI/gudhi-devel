@@ -326,6 +326,7 @@ if(CYTHON_FOUND)
     # set sphinx-build in make files
     configure_file(doc/python3-sphinx-build.in "${CMAKE_CURRENT_BINARY_DIR}/doc/python3-sphinx-build" @ONLY)
 
+    # sphinx target requires gudhi.so, because conf.py reads gudhi version from it
     add_custom_target(sphinx
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc
         COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
