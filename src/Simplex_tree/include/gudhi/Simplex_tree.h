@@ -1129,7 +1129,7 @@ class Simplex_tree {
         bool to_be_inserted = true;
         Filtration_value filt = simplex->second.filtration();
         // If all the boundaries are present, 'next' needs to be inserted
-        for (auto& border : boundary_simplex_range(simplex)) {
+        for (Simplex_handle border : boundary_simplex_range(simplex)) {
           Simplex_handle border_child = find_child(border, next->first);
           if (border_child == null_simplex()) {
             to_be_inserted=false;
