@@ -1124,9 +1124,8 @@ class Simplex_tree {
       return;
     // Reverse loop starting before the last one for 'next' to be the last one
     for (auto simplex = siblings->members().rbegin() + 1; simplex != siblings->members().rend(); simplex++) {
-      auto next = siblings->members().rbegin();
       std::vector<std::pair<Vertex_handle, Node> > intersection;
-      while(next != simplex) {
+      for(auto next = siblings->members().rbegin(); next != simplex; next++) {
         bool to_be_inserted = true;
         Filtration_value filt = simplex->second.filtration();
         // If all the boundaries are present, 'next' needs to be inserted
@@ -1141,8 +1140,6 @@ class Simplex_tree {
         if (to_be_inserted) {
           intersection.emplace_back(next->first, Node(nullptr, filt));
         }
-        // loop until simplex is reached
-        next++;
       }
       if (intersection.size() != 0) {
         // Reverse the order to insert
@@ -1183,7 +1180,7 @@ class Simplex_tree {
    * Vertex_handle.
    * Returns null_simplex() if it does not exist
   */
-  Simplex_handle find_child(Simplex_handle sh, Vertex_handle vh) {
+  Simplex_handle find_child(Simplex_handle sh, Vertex_handle vh) const {
     if (!has_children(sh))
       return null_simplex();
 
