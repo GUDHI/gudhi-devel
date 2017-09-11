@@ -37,8 +37,8 @@ __license__ = "GPL v3"
 cdef extern from "Persistence_landscape_interface.h" namespace "Gudhi::Persistence_representations":
     cdef cppclass Persistence_landscape_interface "Gudhi::Persistence_representations::Persistence_landscape_interface":
         Persistence_landscape_interface()
-        Persistence_landscape_interface(vector[pair[double, double]], bool, size_t)
-        Persistence_landscape_interface(const char*, size_t , size_t)
+        #Persistence_landscape_interface(vector[pair[double, double]], bool, size_t)
+        #Persistence_landscape_interface(const char*, size_t , size_t)
         void load_landscape_from_file(const char*)
         void print_to_file(const char*)const
         double compute_integral_of_landscape()const
@@ -63,9 +63,9 @@ cdef extern from "Persistence_landscape_interface.h" namespace "Gudhi::Persisten
         #**************
         #static methods
         @staticmethod
-        Persistence_landscape_interface* construct_from_file( const char*, size_t, size_t)                
-        #@staticmethod 
-        #cdef Persistence_landscape_interface* Persistence_landscape_interface_construct_from_vector_of_pairs "Persistence_landscape_interface::construct_from_vector_of_pairs"( const vector[pair[double, double]], size_t)
+        Persistence_landscape_interface* construct_from_file( const char*, size_t, size_t)
+        @staticmethod
+        Persistence_landscape_interface* construct_from_vector_of_pairs( const vector[pair[double, double]], size_t)
         #***************
 
 
@@ -132,15 +132,15 @@ cdef class PersistenceLandscapes:
             if (dimension is not None):
                 if os.path.isfile(file_with_intervals):
                     #self.thisptr = new Persistence_landscape_interface(file_with_intervals, dimension, number_of_levels)
-                    self.thisptr = Persistence_landscape_interface::construct_from_file(file_with_intervals, dimension, number_of_levels)
+                    self.thisptr = Persistence_landscape_interface.construct_from_file(file_with_intervals, dimension, number_of_levels)
                 else:
                     print("file " + file_with_intervals + " not found.")
             else:
                     #self.thisptr = new Persistence_landscape_interface(file_with_intervals, number_of_levels)
-                    self.thisptr = Persistence_landscape_interface::construct_from_file(file_with_intervals,0, number_of_levels)
+                    self.thisptr = Persistence_landscape_interface.construct_from_file(file_with_intervals,0, number_of_levels)
         elif (file_with_intervals is '') and (vector_of_intervals is not None):
             #self.thisptr = new Persistence_landscape_interface(vector_of_intervals, true, number_of_levels)
-            self.thisptr = Persistence_landscape_interface::construct_from_vector_of_pairs(vector_of_intervals, number_of_levels)
+            self.thisptr = Persistence_landscape_interface.construct_from_vector_of_pairs(vector_of_intervals, number_of_levels)
         else:
             print("Persistence interals can be constructed from vector of birth-death pairs,  vector_of_intervals or a Gudhi-style file.")                     
             self.thisptr = new Persistence_landscape_interface()
