@@ -1097,8 +1097,8 @@ class Simplex_tree {
    * candidate.
    *
    * @warning several candidates of the same dimension may be inserted simultaneously before calling `block_simplex`,
-   * so if you examine the complex in `block_simplex`, you may hit a few simplices that have not been vetted by
-   * `block_simplex` yet.
+   * so if you examine the complex in `block_simplex`, you may hit a few simplices of the same dimension that have not
+   * been vetted by `block_simplex` yet, or have already been rejected but not yet removed.
    */
   template< typename Blocker >
   void expansion_with_blockers(int max_dim, Blocker block_simplex) {
