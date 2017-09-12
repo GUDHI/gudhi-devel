@@ -124,6 +124,7 @@ if(PYTHONINTERP_FOUND AND CYTHON_FOUND)
   elseif(PYTHON_VERSION_MAJOR EQUAL 3)
     execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "from sphinx import main"
                     RESULT_VARIABLE SPHINX_MODULE_IS_INSTALLED)
+    message("  --- SPHINX_MODULE_IS_INSTALLED --- ${SPHINX_MODULE_IS_INSTALLED}")
     if(SPHINX_MODULE_IS_INSTALLED)
       # No sphinx-build in Pyton3, just hack it
       set(SPHINX_PATH "${CMAKE_CURRENT_BINARY_DIR}/${GUDHI_CYTHON_PATH}/doc/python3-sphinx-build")
