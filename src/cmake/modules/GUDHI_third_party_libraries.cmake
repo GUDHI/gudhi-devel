@@ -122,8 +122,12 @@ if(PYTHONINTERP_FOUND AND CYTHON_FOUND)
     # Documentation generation is available through sphinx
     find_program( SPHINX_PATH sphinx-build )
   elseif(PYTHON_VERSION_MAJOR EQUAL 3)
-    # No sphinx-build in Pyton3, just hack it
-    set(SPHINX_PATH "${CMAKE_CURRENT_BINARY_DIR}/${GUDHI_CYTHON_PATH}/doc/python3-sphinx-build")
+    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "from sphinx import main"
+                    RESULT_VARIABLE SPHINX_MODULE_IS_INSTALLED)
+    if(SPHINX_MODULE_IS_INSTALLED)
+      # No sphinx-build in Pyton3, just hack it
+      set(SPHINX_PATH "${CMAKE_CURRENT_BINARY_DIR}/${GUDHI_CYTHON_PATH}/doc/python3-sphinx-build")
+    endif(SPHINX_MODULE_IS_INSTALLED)
   else()
     message(FATAL_ERROR "ERROR: Try to compile the Cython interface. Python version ${PYTHON_VERSION_STRING} is not valid.")
   endif(PYTHON_VERSION_MAJOR EQUAL 2)
