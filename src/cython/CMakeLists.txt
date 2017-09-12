@@ -73,10 +73,12 @@ if(CYTHON_FOUND)
     set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_EIGEN3_ENABLED', ")
   endif (EIGEN3_FOUND)
 
+  if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
+    set(GUDHI_CYTHON_BOTTLENECK_DISTANCE "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/bottleneck_distance.pyx'")
+  endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
   if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
     set(GUDHI_CYTHON_SUBSAMPLING "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/subsampling.pyx'")
     set(GUDHI_CYTHON_TANGENTIAL_COMPLEX "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/tangential_complex.pyx'")
-    set(GUDHI_CYTHON_BOTTLENECK_DISTANCE "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/bottleneck_distance.pyx'")
   endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
   if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
     set(GUDHI_CYTHON_ALPHA_COMPLEX "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/alpha_complex.pyx'")
@@ -157,21 +159,12 @@ if(CYTHON_FOUND)
 
   # Test examples
   if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
-    # Bottleneck
+    # Bottleneck and Alpha
     add_test(NAME alpha_rips_persistence_bottleneck_distance_py_test
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
              COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
              ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_rips_persistence_bottleneck_distance.py"
              -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -t 0.15 -d 3)
-
-    add_test(NAME bottleneck_basic_example_py_test
-             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-             COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/bottleneck_basic_example.py")
-
-    add_test(NAME test_bottleneck_distance_py_test
-             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-             COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/test/test_bottleneck_distance.py)
 
     # Tangential
     add_test(NAME tangential_complex_plain_homology_from_off_file_example_py_test
@@ -190,6 +183,17 @@ if(CYTHON_FOUND)
              COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/test/test_subsampling.py)
 
   endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+  if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
+    # Bottleneck
+    add_test(NAME bottleneck_basic_example_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/bottleneck_basic_example.py")
+
+    add_test(NAME test_bottleneck_distance_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/test/test_bottleneck_distance.py)
+  endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)
 
   if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
     # Alpha
