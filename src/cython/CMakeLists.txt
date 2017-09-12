@@ -73,47 +73,18 @@ if(CYTHON_FOUND)
     set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_EIGEN3_ENABLED', ")
   endif (EIGEN3_FOUND)
 
-  if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
-    # If CGAL_VERSION >= 4.8.1, include subsampling
+  if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
     set(GUDHI_CYTHON_SUBSAMPLING "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/subsampling.pyx'")
     set(GUDHI_CYTHON_TANGENTIAL_COMPLEX "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/tangential_complex.pyx'")
     set(GUDHI_CYTHON_BOTTLENECK_DISTANCE "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/bottleneck_distance.pyx'")
-  else (NOT CGAL_VERSION VERSION_LESS 4.8.1)
-    # Remove subsampling unitary tests
-    file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_subsampling.py)
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/subsampling_ref.rst")
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/subsampling_sum.rst")
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/subsampling_user.rst")
-    # Remove tangential complex and bottleneck unitary tests
-    file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_tangential_complex.py)
-    file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_bottleneck_distance.py)
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/bottleneck_distance_ref.rst")
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/bottleneck_distance_sum.rst")
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/bottleneck_distance_user.rst")
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/tangential_complex_ref.rst")
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/tangential_complex_sum.rst")
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/tangential_complex_user.rst")
-  endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)
-  if (NOT CGAL_VERSION VERSION_LESS 4.7.0)
-    # If CGAL_VERSION >= 4.7.0, include alpha
+  endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+  if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
     set(GUDHI_CYTHON_ALPHA_COMPLEX "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/alpha_complex.pyx'")
-  else (NOT CGAL_VERSION VERSION_LESS 4.7.0)
-    # Remove alpha complex unitary tests
-    file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_alpha_complex.py)
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/alpha_complex_ref.rst")
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/alpha_complex_sum.rst")
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/alpha_complex_user.rst")
-  endif (NOT CGAL_VERSION VERSION_LESS 4.7.0)
-  if (NOT CGAL_VERSION VERSION_LESS 4.6.0)
-    # If CGAL_VERSION >= 4.6.0, include euclidean versions of witness complex
+  endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
+  if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
     set(GUDHI_CYTHON_EUCLIDEAN_WITNESS_COMPLEX
         "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/euclidean_witness_complex.pyx'\ninclude '${CMAKE_CURRENT_SOURCE_DIR}/cython/euclidean_strong_witness_complex.pyx'\n")
-  else (NOT CGAL_VERSION VERSION_LESS 4.6.0)
-    # Remove euclidean witness complex unitary tests
-    file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_euclidean_witness_complex.py)
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/euclidean_witness_complex_ref.rst")
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/euclidean_strong_witness_complex_ref.rst")
-  endif (NOT CGAL_VERSION VERSION_LESS 4.6.0)
+  endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
 
   if(CGAL_FOUND)
     # Add CGAL compilation args
@@ -185,7 +156,7 @@ if(CYTHON_FOUND)
       PATTERN "*.pyd")
 
   # Test examples
-  if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
+  if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
     # Bottleneck
     add_test(NAME alpha_rips_persistence_bottleneck_distance_py_test
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -213,6 +184,33 @@ if(CYTHON_FOUND)
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
              COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/test/test_tangential_complex.py)
 
+    # Subsampling
+    add_test(NAME test_subsampling_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/test/test_subsampling.py)
+
+  endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+
+  if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
+    # Alpha
+    add_test(NAME alpha_complex_from_points_example_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_complex_from_points_example.py")
+
+    add_test(NAME alpha_complex_diagram_persistence_from_off_file_example_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_complex_diagram_persistence_from_off_file_example.py"
+             --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 0.6)
+
+    add_test(NAME test_alpha_complex_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/test/test_alpha_complex.py)
+
+  endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
+
+  if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
     # Euclidean witness
     add_test(NAME euclidean_strong_witness_complex_diagram_persistence_from_off_file_example_py_test
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -230,26 +228,7 @@ if(CYTHON_FOUND)
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
              COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/test/test_euclidean_witness_complex.py)
 
-  endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)
-
-  if (NOT CGAL_VERSION VERSION_LESS 4.7.0)
-    # Alpha
-    add_test(NAME alpha_complex_from_points_example_py_test
-             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-             COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_complex_from_points_example.py")
-
-    add_test(NAME alpha_complex_diagram_persistence_from_off_file_example_py_test
-             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-             COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_complex_diagram_persistence_from_off_file_example.py"
-             --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 0.6)
-
-    add_test(NAME test_alpha_complex_py_test
-             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-             COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/test/test_alpha_complex.py)
-
-  endif (NOT CGAL_VERSION VERSION_LESS 4.7.0)
+  endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
 
   # Cubical
   add_test(NAME periodic_cubical_complex_barcode_persistence_from_perseus_file_example_py_test
@@ -315,13 +294,8 @@ if(CYTHON_FOUND)
            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
            COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/test/test_reader_utils.py)
 
-  # Subsampling
-  add_test(NAME test_subsampling_py_test
-           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-           COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/test/test_subsampling.py)
-
   # Documentation generation is available through sphinx - requires all modules
-  if(SPHINX_PATH AND NOT CGAL_VERSION VERSION_LESS 4.8.1)
+  if(SPHINX_PATH AND NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
     # set sphinx-build in make files
     configure_file(doc/python3-sphinx-build.in "${CMAKE_CURRENT_BINARY_DIR}/doc/python3-sphinx-build" @ONLY)
 
@@ -337,5 +311,5 @@ if(CYTHON_FOUND)
              COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
              ${SPHINX_PATH} -b doctest ${CMAKE_CURRENT_SOURCE_DIR}/doc "${CMAKE_CURRENT_BINARY_DIR}/sphinx")
 
-  endif(SPHINX_PATH AND NOT CGAL_VERSION VERSION_LESS 4.8.1)
+  endif(SPHINX_PATH AND NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
 endif(CYTHON_FOUND)
