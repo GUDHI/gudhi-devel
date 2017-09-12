@@ -75,7 +75,7 @@ if(CYTHON_FOUND)
 
   if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
     set(GUDHI_CYTHON_BOTTLENECK_DISTANCE "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/bottleneck_distance.pyx'")
-  endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+  endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)
   if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
     set(GUDHI_CYTHON_SUBSAMPLING "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/subsampling.pyx'")
     set(GUDHI_CYTHON_TANGENTIAL_COMPLEX "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/tangential_complex.pyx'")
@@ -300,20 +300,17 @@ if(CYTHON_FOUND)
 
   # Documentation generation is available through sphinx - requires all modules
   if(SPHINX_PATH AND NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
-    # set sphinx-build in make files
-    configure_file(doc/python3-sphinx-build.in "${CMAKE_CURRENT_BINARY_DIR}/doc/python3-sphinx-build" @ONLY)
-
     # sphinx target requires gudhi.so, because conf.py reads gudhi version from it
     add_custom_target(sphinx
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc
         COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-        ${SPHINX_PATH} -b html . "${CMAKE_CURRENT_BINARY_DIR}/sphinx"
+        ${SPHINX_PATH} -b html ${CMAKE_CURRENT_SOURCE_DIR}/doc sphinx
         DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so")
 
     add_test(NAME sphinx_py_test
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
              COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-             ${SPHINX_PATH} -b doctest ${CMAKE_CURRENT_SOURCE_DIR}/doc "${CMAKE_CURRENT_BINARY_DIR}/sphinx")
+             ${SPHINX_PATH} -b doctest ${CMAKE_CURRENT_SOURCE_DIR}/doc doctest)
 
   endif(SPHINX_PATH AND NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
 endif(CYTHON_FOUND)
