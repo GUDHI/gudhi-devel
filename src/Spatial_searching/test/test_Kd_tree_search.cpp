@@ -110,10 +110,10 @@ BOOST_AUTO_TEST_CASE(test_Kd_tree_search) {
   // Same result for KFN and IFN?
   BOOST_CHECK(kfn_result == ifn_result);
 
-  // Test radius search
+  // Test near search
   Point rs_q(rd.get_double(-1., 1), rd.get_double(-1., 1), rd.get_double(-1., 1), rd.get_double(-1., 1));
   std::vector<std::size_t> rs_result;
-  points_ds.radius_search(rs_q, 0.5, std::back_inserter(rs_result));
+  points_ds.near_search(rs_q, 0.5, std::back_inserter(rs_result));
   K k;
   for (auto const& p_idx : rs_result)
     BOOST_CHECK(k.squared_distance_d_object()(points[p_idx], rs_q) <= 0.5);

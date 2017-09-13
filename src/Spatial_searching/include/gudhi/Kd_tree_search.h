@@ -264,7 +264,7 @@ class Kd_tree_search {
   ///                Note: `it` is used this way: `*it++ = each_point`.
   /// @param[in] eps Approximation factor.
   template <typename OutputIterator>
-  void radius_search(
+  void near_search(
     Point const& p,
     FT radius,
     OutputIterator it,
