@@ -300,17 +300,24 @@ if(CYTHON_FOUND)
 
   # Documentation generation is available through sphinx - requires all modules
   if(SPHINX_PATH AND NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+    set (GUDHI_SPHINX_MESSAGE "Generating API documentation with Sphinx in ${CMAKE_CURRENT_BINARY_DIR}/sphinx/")
+    # User warning - Sphinx is a static pages generator, and configured to work fine with user_version
+    # Images and biblio warnings because not found on developper version
+    if (GUDHI_CYTHON_PATH STREQUAL "src/cython")
+      set (GUDHI_SPHINX_MESSAGE "${GUDHI_SPHINX_MESSAGE} \n WARNING : Sphinx is configured for user version, you run it on developper version. Images and biblio will miss")
+    endif()
     # sphinx target requires gudhi.so, because conf.py reads gudhi version from it
     add_custom_target(sphinx
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc
         COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-        ${SPHINX_PATH} -b html ${CMAKE_CURRENT_SOURCE_DIR}/doc sphinx
-        DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so")
+        ${SPHINX_PATH} -b html ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/sphinx
+        DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so"
+        COMMENT "${GUDHI_SPHINX_MESSAGE}" VERBATIM)
 
     add_test(NAME sphinx_py_test
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
              COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-             ${SPHINX_PATH} -b doctest ${CMAKE_CURRENT_SOURCE_DIR}/doc doctest)
+             ${SPHINX_PATH} -b doctest ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/doctest)
 
   endif(SPHINX_PATH AND NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
 endif(CYTHON_FOUND)
