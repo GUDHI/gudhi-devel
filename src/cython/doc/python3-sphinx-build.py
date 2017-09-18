@@ -1,4 +1,4 @@
-#!@PYTHON_EXECUTABLE@
+#!/usr/bin/python3
 
 """
 Emulate sphinx-build for python3

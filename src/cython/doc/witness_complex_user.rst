@@ -33,7 +33,7 @@ Both definitions can be relaxed by a real value :math:`\alpha`:
 which leads to definitions of **weak relaxed witness complex** (or just relaxed witness complex for short) and
 **strong relaxed witness complex** respectively.
 
-.. figure:: img/swit.svg
+.. figure:: ../../doc/Witness_complex/swit.svg
     :alt: Strongly witnessed simplex
     :figclass: align-center
 
@@ -126,6 +126,6 @@ Here is an example of constructing a strong witness complex filtration and compu
 Bibliography
 ============
 
-.. bibliography:: bibliography.bib
+.. bibliography:: ../../biblio/bibliography.bib
    :filter: docnames
    :style: unsrt

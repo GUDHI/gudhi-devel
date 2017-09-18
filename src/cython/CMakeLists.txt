@@ -15,6 +15,16 @@ function( add_gudhi_cython_lib THE_LIB )
   endif(EXISTS ${THE_LIB})
 endfunction( add_gudhi_cython_lib )
 
+# THE_TEST is the python test file name (without .py extension) containing tests functions
+function( add_gudhi_py_test THE_TEST )
+  # use ${PYTHON_EXECUTABLE} -B, otherwise a __pycache__ directory is created in sources by python
+  # use py.test no cache provider, otherwise a .cache file is created in sources by py.test
+  add_test(NAME ${THE_TEST}_py_test
+           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+           COMMAND ${PYTHON_EXECUTABLE} -B -m pytest -p no:cacheprovider ${CMAKE_CURRENT_SOURCE_DIR}/test/${THE_TEST}.py)
+endfunction( add_gudhi_py_test )
+
+
 if(CYTHON_FOUND)
   message("++ ${PYTHON_EXECUTABLE} v.${PYTHON_VERSION_STRING} - Cython is ${CYTHON_EXECUTABLE} - Sphinx is ${SPHINX_PATH}")
 
@@ -73,76 +83,20 @@ if(CYTHON_FOUND)
     set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_EIGEN3_ENABLED', ")
   endif (EIGEN3_FOUND)
 
-  # Copy recursively include, cython, example, doc and test repositories before packages finding
-  # Some tests and doc files are removed in case some packages are not found
-  file(COPY include DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-  file(COPY cython DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-  file(COPY example DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-  file(COPY test DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-  file(COPY doc DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-  # Developper version for doc images
-  file(GLOB GUDHI_DEV_DOC_IMAGES "${CMAKE_SOURCE_DIR}/src/*/doc/*.png")
-  file(COPY ${GUDHI_DEV_DOC_IMAGES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/img")
-  file(GLOB GUDHI_DEV_DOC_IMAGES "${CMAKE_SOURCE_DIR}/src/*/doc/*.svg")
-  file(COPY ${GUDHI_DEV_DOC_IMAGES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/img")
-  # User version for doc images
-  file(GLOB GUDHI_USER_DOC_IMAGES "${CMAKE_SOURCE_DIR}/doc/*/*.png")
-  file(COPY ${GUDHI_USER_DOC_IMAGES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/img")
-  file(GLOB GUDHI_USER_DOC_IMAGES "${CMAKE_SOURCE_DIR}/doc/*/*.svg")
-  file(COPY ${GUDHI_USER_DOC_IMAGES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/img")
-  # Biblio
-  file(GLOB GUDHI_BIB_FILES "${CMAKE_SOURCE_DIR}/biblio/*.bib")
-  file(COPY ${GUDHI_BIB_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
-  # Cubical complex perseus doc example
-  file(GLOB GUDHI_CUBICAL_PERSEUS_FILES "${CMAKE_SOURCE_DIR}/data/bitmap/*cubicalcomplexdoc.txt")
-  file(COPY ${GUDHI_CUBICAL_PERSEUS_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
-  file(COPY "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
-  file(COPY "${CMAKE_SOURCE_DIR}/data/distance_matrix/full_square_distance_matrix.csv" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
-  # Persistence graphical tools examples
-  file(COPY "${CMAKE_SOURCE_DIR}/data/bitmap/3d_torus.txt" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
-  file(COPY "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/doc/")
-
   if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
-    # If CGAL_VERSION >= 4.8.1, include subsampling
-    set(GUDHI_CYTHON_SUBSAMPLING "include 'cython/subsampling.pyx'")
-    set(GUDHI_CYTHON_TANGENTIAL_COMPLEX "include 'cython/tangential_complex.pyx'")
-    set(GUDHI_CYTHON_BOTTLENECK_DISTANCE "include 'cython/bottleneck_distance.pyx'")
-  else (NOT CGAL_VERSION VERSION_LESS 4.8.1)
-    # Remove subsampling unitary tests
-    file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_subsampling.py)
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/subsampling_ref.rst")
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/subsampling_sum.rst")
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/subsampling_user.rst")
-    # Remove tangential complex and bottleneck unitary tests
-    file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_tangential_complex.py)
-    file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_bottleneck_distance.py)
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/bottleneck_distance_ref.rst")
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/bottleneck_distance_sum.rst")
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/bottleneck_distance_user.rst")
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/tangential_complex_ref.rst")
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/tangential_complex_sum.rst")
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/tangential_complex_user.rst")
+    set(GUDHI_CYTHON_BOTTLENECK_DISTANCE "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/bottleneck_distance.pyx'")
   endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)
-  if (NOT CGAL_VERSION VERSION_LESS 4.7.0)
-    # If CGAL_VERSION >= 4.7.0, include alpha
-    set(GUDHI_CYTHON_ALPHA_COMPLEX "include 'cython/alpha_complex.pyx'")
-  else (NOT CGAL_VERSION VERSION_LESS 4.7.0)
-    # Remove alpha complex unitary tests
-    file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_alpha_complex.py)
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/alpha_complex_ref.rst")
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/alpha_complex_sum.rst")
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/alpha_complex_user.rst")
-  endif (NOT CGAL_VERSION VERSION_LESS 4.7.0)
-  if (NOT CGAL_VERSION VERSION_LESS 4.6.0)
-    # If CGAL_VERSION >= 4.6.0, include euclidean versions of witness complex
+  if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+    set(GUDHI_CYTHON_SUBSAMPLING "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/subsampling.pyx'")
+    set(GUDHI_CYTHON_TANGENTIAL_COMPLEX "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/tangential_complex.pyx'")
+  endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+  if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
+    set(GUDHI_CYTHON_ALPHA_COMPLEX "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/alpha_complex.pyx'")
+  endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
+  if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
     set(GUDHI_CYTHON_EUCLIDEAN_WITNESS_COMPLEX
-        "include 'cython/euclidean_witness_complex.pyx'\ninclude 'cython/euclidean_strong_witness_complex.pyx'\n")
-  else (NOT CGAL_VERSION VERSION_LESS 4.6.0)
-    # Remove alpha complex unitary tests
-    file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/test/test_euclidean_witness_complex.py)
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/euclidean_witness_complex_ref.rst")
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/doc/euclidean_strong_witness_complex_ref.rst")
-  endif (NOT CGAL_VERSION VERSION_LESS 4.6.0)
+        "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/euclidean_witness_complex.pyx'\ninclude '${CMAKE_CURRENT_SOURCE_DIR}/cython/euclidean_strong_witness_complex.pyx'\n")
+  endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
 
   if(CGAL_FOUND)
     # Add CGAL compilation args
@@ -193,11 +147,6 @@ if(CYTHON_FOUND)
     set( GUDHI_CYTHON_RUNTIME_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}")
   endif(UNIX)
 
-  # set sphinx-build in make files
-  configure_file(doc/python3-sphinx-build.in "${CMAKE_CURRENT_BINARY_DIR}/doc/python3-sphinx-build" @ONLY)
-  configure_file(doc/Makefile.in "${CMAKE_CURRENT_BINARY_DIR}/doc/Makefile" @ONLY)
-  configure_file(doc/make.bat.in "${CMAKE_CURRENT_BINARY_DIR}/doc/make.bat" @ONLY)
-
   # Generate setup.py file to cythonize Gudhi - This file must be named setup.py by convention
   configure_file(setup.py.in "${CMAKE_CURRENT_BINARY_DIR}/setup.py" @ONLY)
   # Generate gudhi.pyx - Gudhi cython file
@@ -219,110 +168,146 @@ if(CYTHON_FOUND)
       PATTERN "*.pyd")
 
   # Test examples
-  if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
+  if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+    # Bottleneck and Alpha
     add_test(NAME alpha_rips_persistence_bottleneck_distance_py_test
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-             COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/alpha_rips_persistence_bottleneck_distance.py"
+             COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_rips_persistence_bottleneck_distance.py"
              -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -t 0.15 -d 3)
-    set_tests_properties(alpha_rips_persistence_bottleneck_distance_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
 
-    add_test(NAME bottleneck_basic_example_py_test
-             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-             COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/bottleneck_basic_example.py")
-    set_tests_properties(bottleneck_basic_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
-
+    # Tangential
     add_test(NAME tangential_complex_plain_homology_from_off_file_example_py_test
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-             COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/tangential_complex_plain_homology_from_off_file_example.py"
+             COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/tangential_complex_plain_homology_from_off_file_example.py"
              --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off)
-    set_tests_properties(tangential_complex_plain_homology_from_off_file_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
 
-    add_test(NAME euclidean_strong_witness_complex_diagram_persistence_from_off_file_example_py_test
-             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-             COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py"
-             --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 1.0 -n 20 -d 2)
-    set_tests_properties(euclidean_strong_witness_complex_diagram_persistence_from_off_file_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+    add_gudhi_py_test(test_tangential_complex)
 
-    add_test(NAME euclidean_witness_complex_diagram_persistence_from_off_file_example_py_test
+    # Subsampling
+    add_gudhi_py_test(test_subsampling)
+
+  endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+  if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
+    # Bottleneck
+    add_test(NAME bottleneck_basic_example_py_test
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-             COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py"
-             --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 1.0 -n 20 -d 2)
-    set_tests_properties(euclidean_witness_complex_diagram_persistence_from_off_file_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+             COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/bottleneck_basic_example.py")
+
+    add_gudhi_py_test(test_bottleneck_distance)
   endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)
 
-  if (NOT CGAL_VERSION VERSION_LESS 4.7.0)
+  if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
+    # Alpha
     add_test(NAME alpha_complex_from_points_example_py_test
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-             COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/alpha_complex_from_points_example.py")
-    set_tests_properties(alpha_complex_from_points_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+             COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_complex_from_points_example.py")
 
     add_test(NAME alpha_complex_diagram_persistence_from_off_file_example_py_test
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-             COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/alpha_complex_diagram_persistence_from_off_file_example.py"
+             COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_complex_diagram_persistence_from_off_file_example.py"
              --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 0.6)
-    set_tests_properties(alpha_complex_diagram_persistence_from_off_file_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
-  endif (NOT CGAL_VERSION VERSION_LESS 4.7.0)
 
-  if (NOT CGAL_VERSION VERSION_LESS 4.6.0)
-  endif (NOT CGAL_VERSION VERSION_LESS 4.6.0)
+    add_gudhi_py_test(test_alpha_complex)
 
+  endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
+
+  if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
+    # Euclidean witness
+    add_test(NAME euclidean_strong_witness_complex_diagram_persistence_from_off_file_example_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py"
+             --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 1.0 -n 20 -d 2)
+
+    add_test(NAME euclidean_witness_complex_diagram_persistence_from_off_file_example_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py"
+             --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 1.0 -n 20 -d 2)
+
+    add_gudhi_py_test(test_euclidean_witness_complex)
+
+  endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
+
+  # Cubical
   add_test(NAME periodic_cubical_complex_barcode_persistence_from_perseus_file_example_py_test
            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-           COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py"
+           COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+           ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py"
            --no-barcode -f ${CMAKE_SOURCE_DIR}/data/bitmap/CubicalTwoSphere.txt)
-  set_tests_properties(periodic_cubical_complex_barcode_persistence_from_perseus_file_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
 
   add_test(NAME random_cubical_complex_persistence_example_py_test
            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-           COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/random_cubical_complex_persistence_example.py"
+           COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+           ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/random_cubical_complex_persistence_example.py"
            10 10 10)
-  set_tests_properties(random_cubical_complex_persistence_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
 
+  add_gudhi_py_test(test_cubical_complex)
+
+  # Rips
   add_test(NAME rips_complex_diagram_persistence_from_distance_matrix_file_example_py_test
            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-           COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/example/rips_complex_diagram_persistence_from_distance_matrix_file_example.py"
+           COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+           ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/rips_complex_diagram_persistence_from_distance_matrix_file_example.py"
            --no-diagram -f ${CMAKE_SOURCE_DIR}/data/distance_matrix/lower_triangular_distance_matrix.csv -e 12.0 -d 3)
-  set_tests_properties(rips_complex_diagram_persistence_from_distance_matrix_file_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
 
   add_test(NAME rips_complex_diagram_persistence_from_off_file_example_py_test
            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-           COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/example/rips_complex_diagram_persistence_from_off_file_example.py
+           COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+           ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/example/rips_complex_diagram_persistence_from_off_file_example.py
            --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off  -e 0.25 -d 3)
-  set_tests_properties(rips_complex_diagram_persistence_from_off_file_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
 
   add_test(NAME rips_complex_from_points_example_py_test
            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-           COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/example/rips_complex_from_points_example.py)
-  set_tests_properties(rips_complex_from_points_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+           COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+           ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/example/rips_complex_from_points_example.py)
 
+  add_gudhi_py_test(test_rips_complex)
+
+  # Simplex tree
   add_test(NAME simplex_tree_example_py_test
            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-           COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/example/simplex_tree_example.py)
-  set_tests_properties(simplex_tree_example_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+           COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+           ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/example/simplex_tree_example.py)
 
+  add_gudhi_py_test(test_simplex_tree)
+
+  # Witness
   add_test(NAME witness_complex_from_nearest_landmark_table_py_test
            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-           COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/example/witness_complex_from_nearest_landmark_table.py)
-  set_tests_properties(witness_complex_from_nearest_landmark_table_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+           COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+           ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/example/witness_complex_from_nearest_landmark_table.py)
 
-  # Unitary tests are available through py.test
-  add_test(
-      NAME gudhi_cython_py_test
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-      COMMAND ${PYTHON_EXECUTABLE} -m pytest)
-  set_tests_properties(gudhi_cython_py_test PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}")
+  add_gudhi_py_test(test_witness_complex)
 
-  # Documentation generation is available through sphinx
-  if(SPHINX_PATH)
-    if (UNIX)
-      add_custom_target(sphinx
-          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc
-          DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so"
-          COMMAND make html doctest)
-    else (UNIX)
-      add_custom_target(sphinx
-          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc
-          COMMAND make.bat html doctest)
-    endif (UNIX)
-  endif(SPHINX_PATH)
+  # Reader utils
+  add_gudhi_py_test(test_reader_utils)
+
+  # Documentation generation is available through sphinx - requires all modules
+  if(SPHINX_PATH AND NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+    set (GUDHI_SPHINX_MESSAGE "Generating API documentation with Sphinx in ${CMAKE_CURRENT_BINARY_DIR}/sphinx/")
+    # User warning - Sphinx is a static pages generator, and configured to work fine with user_version
+    # Images and biblio warnings because not found on developper version
+    if (GUDHI_CYTHON_PATH STREQUAL "src/cython")
+      set (GUDHI_SPHINX_MESSAGE "${GUDHI_SPHINX_MESSAGE} \n WARNING : Sphinx is configured for user version, you run it on developper version. Images and biblio will miss")
+    endif()
+    # sphinx target requires gudhi.so, because conf.py reads gudhi version from it
+    add_custom_target(sphinx
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc
+        COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+        ${SPHINX_PATH} -b html ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/sphinx
+        DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so"
+        COMMENT "${GUDHI_SPHINX_MESSAGE}" VERBATIM)
+
+    add_test(NAME sphinx_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+             ${SPHINX_PATH} -b doctest ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/doctest)
+
+  endif(SPHINX_PATH AND NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
 endif(CYTHON_FOUND)

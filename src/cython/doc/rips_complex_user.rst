@@ -26,7 +26,7 @@ structure, and then expands the simplicial complex when required.
 Vertex name correspond to the index of the point in the given range (aka. the point cloud).
 
 .. figure::
-    img/rips_complex_representation.png
+    ../../doc/Rips_complex/rips_complex_representation.png
     :align: center
 
     Rips-complex one skeleton graph representation
@@ -101,7 +101,8 @@ Finally, it is asked to display information about the Rips complex.
 .. testcode::
 
     import gudhi
-    rips_complex = gudhi.RipsComplex(off_file='alphacomplexdoc.off', max_edge_length=12.0)
+    rips_complex = gudhi.RipsComplex(off_file=gudhi.__root_source_dir__ + \
+        '/data/points/alphacomplexdoc.off', max_edge_length=12.0)
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=1)
     result_str = 'Rips complex is of dimension ' + repr(simplex_tree.dimension()) + ' - ' + \
         repr(simplex_tree.num_simplices()) + ' simplices - ' + \
@@ -205,7 +206,8 @@ Finally, it is asked to display information about the Rips complex.
 .. testcode::
 
     import gudhi
-    rips_complex = gudhi.RipsComplex(csv_file='full_square_distance_matrix.csv', max_edge_length=12.0)
+    rips_complex = gudhi.RipsComplex(csv_file=gudhi.__root_source_dir__ + \
+        '/data/distance_matrix/full_square_distance_matrix.csv', max_edge_length=12.0)
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=1)
     result_str = 'Rips complex is of dimension ' + repr(simplex_tree.dimension()) + ' - ' + \
         repr(simplex_tree.num_simplices()) + ' simplices - ' + \

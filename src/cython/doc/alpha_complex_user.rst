@@ -75,7 +75,7 @@ In order to build the alpha complex, first, a Simplex tree is built from the cel
 (The filtration value is set to NaN, which stands for unknown value):
 
 .. figure::
-    img/alpha_complex_doc.png
+    ../../doc/Alpha_complex/alpha_complex_doc.png
     :figclass: align-center
     :alt: Simplex tree structure construction example
 
@@ -112,7 +112,7 @@ computes the filtration value of the triangle, and then propagates the filtratio
 here:
 
 .. figure::
-    img/alpha_complex_doc_420.png
+    ../../doc/Alpha_complex/alpha_complex_doc_420.png
     :figclass: align-center
     :alt: Filtration value propagation example
 
@@ -158,7 +158,8 @@ Then, it is asked to display information about the alpha complex:
 .. testcode::
 
     import gudhi
-    alpha_complex = gudhi.AlphaComplex(off_file='alphacomplexdoc.off')
+    alpha_complex = gudhi.AlphaComplex(off_file=gudhi.__root_source_dir__ + \
+        '/data/points/alphacomplexdoc.off')
     simplex_tree = alpha_complex.create_simplex_tree(max_alpha_square=59.0)
     result_str = 'Alpha complex is of dimension ' + repr(simplex_tree.dimension()) + ' - ' + \
         repr(simplex_tree.num_simplices()) + ' simplices - ' + \
@@ -200,6 +201,6 @@ the program output is:
 CGAL citations
 ==============
 
-.. bibliography:: how_to_cite_cgal.bib
+.. bibliography:: ../../biblio/how_to_cite_cgal.bib
    :filter: docnames
    :style: unsrt
