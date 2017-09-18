@@ -15,6 +15,16 @@ function( add_gudhi_cython_lib THE_LIB )
   endif(EXISTS ${THE_LIB})
 endfunction( add_gudhi_cython_lib )
 
+# THE_TEST is the python test file name (without .py extension) containing tests functions
+function( add_gudhi_py_test THE_TEST )
+  # use ${PYTHON_EXECUTABLE} -B, otherwise a __pycache__ directory is created in sources by python
+  # use py.test no cache provider, otherwise a .cache file is created in sources by py.test
+  add_test(NAME ${THE_TEST}_py_test
+           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+           COMMAND ${PYTHON_EXECUTABLE} -B -m pytest -p no:cacheprovider ${CMAKE_CURRENT_SOURCE_DIR}/test/${THE_TEST}.py)
+endfunction( add_gudhi_py_test )
+
+
 if(CYTHON_FOUND)
   message("++ ${PYTHON_EXECUTABLE} v.${PYTHON_VERSION_STRING} - Cython is ${CYTHON_EXECUTABLE} - Sphinx is ${SPHINX_PATH}")
 
@@ -173,14 +183,10 @@ if(CYTHON_FOUND)
              ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/tangential_complex_plain_homology_from_off_file_example.py"
              --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off)
 
-    add_test(NAME test_tangential_complex_py_test
-             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-             COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/test/test_tangential_complex.py)
+    add_gudhi_py_test(test_tangential_complex)
 
     # Subsampling
-    add_test(NAME test_subsampling_py_test
-             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-             COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/test/test_subsampling.py)
+    add_gudhi_py_test(test_subsampling)
 
   endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
   if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
@@ -190,9 +196,7 @@ if(CYTHON_FOUND)
              COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
              ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/bottleneck_basic_example.py")
 
-    add_test(NAME test_bottleneck_distance_py_test
-             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-             COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/test/test_bottleneck_distance.py)
+    add_gudhi_py_test(test_bottleneck_distance)
   endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)
 
   if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
@@ -208,9 +212,7 @@ if(CYTHON_FOUND)
              ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_complex_diagram_persistence_from_off_file_example.py"
              --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 0.6)
 
-    add_test(NAME test_alpha_complex_py_test
-             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-             COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/test/test_alpha_complex.py)
+    add_gudhi_py_test(test_alpha_complex)
 
   endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
 
@@ -228,9 +230,7 @@ if(CYTHON_FOUND)
              ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py"
              --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 1.0 -n 20 -d 2)
 
-    add_test(NAME test_euclidean_witness_complex_py_test
-             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-             COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/test/test_euclidean_witness_complex.py)
+    add_gudhi_py_test(test_euclidean_witness_complex)
 
   endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
 
@@ -247,9 +247,7 @@ if(CYTHON_FOUND)
            ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/random_cubical_complex_persistence_example.py"
            10 10 10)
 
-  add_test(NAME test_cubical_complex_py_test
-           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-           COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/test/test_cubical_complex.py)
+  add_gudhi_py_test(test_cubical_complex)
 
   # Rips
   add_test(NAME rips_complex_diagram_persistence_from_distance_matrix_file_example_py_test
@@ -269,9 +267,7 @@ if(CYTHON_FOUND)
            COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
            ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/example/rips_complex_from_points_example.py)
 
-  add_test(NAME test_rips_complex_py_test
-           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-           COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/test/test_rips_complex.py)
+  add_gudhi_py_test(test_rips_complex)
 
   # Simplex tree
   add_test(NAME simplex_tree_example_py_test
@@ -279,9 +275,7 @@ if(CYTHON_FOUND)
            COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
            ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/example/simplex_tree_example.py)
 
-  add_test(NAME test_simplex_tree_py_test
-           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-           COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/test/test_simplex_tree.py)
+  add_gudhi_py_test(test_simplex_tree)
 
   # Witness
   add_test(NAME witness_complex_from_nearest_landmark_table_py_test
@@ -289,14 +283,10 @@ if(CYTHON_FOUND)
            COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
            ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/example/witness_complex_from_nearest_landmark_table.py)
 
-  add_test(NAME test_witness_complex_py_test
-           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-           COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/test/test_witness_complex.py)
+  add_gudhi_py_test(test_witness_complex)
 
   # Reader utils
-  add_test(NAME test_reader_utils_py_test
-           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-           COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/test/test_reader_utils.py)
+  add_gudhi_py_test(test_reader_utils)
 
   # Documentation generation is available through sphinx - requires all modules
   if(SPHINX_PATH AND NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
