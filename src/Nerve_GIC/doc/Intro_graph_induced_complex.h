@@ -83,7 +83,7 @@ namespace graph_induced_complex {
  * Finally, the next ne lines represent the edges, characterized by the ID of their vertices.
  * Using e.g.
  *
- * \code $> python visu.py && firefox SC.html
+ * \code $> python KeplerMapperVisuFromTxtFile.py && firefox SC.html
  * \endcode
  *
  * one can obtain the following visualization:

@@ -142,7 +142,7 @@ class Graph_induced_complex {
  private:
    void fill_adjacency_matrix_from_st(){
      std::vector<int> empty;
-     for(int i = 0; i < n; i++)  adjacency_matrix.insert(std::pair<int,std::vector<int> >(i,empty));
+     for(int i = 0; i < n; i++)  adjacency_matrix[i] = empty;
      for (auto simplex : st.complex_simplex_range()) {
        if(st.dimension(simplex) == 1){
          std::vector<int> vertices;
@@ -188,6 +188,7 @@ class Graph_induced_complex {
      int numedges, numfaces, i, num; std::vector<int> edge(2);
      std::vector<int> simplex;
      std::ifstream input(off_file_name); std::string line; getline(input, line);
+     if(std::strcmp((char*) line.c_str(),"nOFF")==0)  input >> data_dimension; else data_dimension = 3;
      input >> n; input >> numfaces; input >> numedges; getline(input, line);
 
      i = 0; while(i < n){
@@ -195,7 +196,7 @@ class Graph_induced_complex {
        std::vector<double> point; std::istringstream iss(line);
        point.assign(std::istream_iterator<double>(iss), std::istream_iterator<double>());
        point_cloud.push_back(Point(point.begin(),point.end())); i++;
-     } data_dimension = point_cloud[0].size();
+     }
 
      i = 0;  while(i < numfaces){
        simplex.clear(); input >> num;
@@ -304,10 +305,10 @@ class Graph_induced_complex {
  public: // Automatic tuning of Rips complex.
    /** \brief Creates the graph G from a Rips complex whose threshold value is automatically tuned with subsampling.
     *
-    * @param[in] N number of subsampling iteration (default value 100).
+    * @param[in] N number of subsampling iteration (the default reasonable value is 100, but there is no guarantee on how to choose it).
     *
     */
-   template<typename Distance> void set_graph_from_automatic_rips(Distance distance, int N = 100){
+   template<typename Distance> double set_graph_from_automatic_rips(Distance distance, int N = 100){
 
      int m = floor(n/   std::exp((1+rate_power)*std::log(std::log(n)/std::log(rate_constant)))   );
      m = std::min(m,n-1);
@@ -335,6 +336,8 @@ class Graph_induced_complex {
      Rips_complex rips_complex_from_points(point_cloud, delta, distance);
      rips_complex_from_points.create_complex(st, 1);
      fill_adjacency_matrix_from_st();
+
+     return delta;
 
    }
 
@@ -511,20 +514,20 @@ class Graph_induced_complex {
          if(i != 0){
            std::pair<double, double> inter3 = intervals[i-1];
            while(func[points[tmp]] < inter3.second && tmp != n){
-             prop.insert(std::make_pair(points[tmp],adjacency_matrix[points[tmp]]));
+             prop[points[tmp]] = adjacency_matrix[points[tmp]];
              tmp++;
            }
          }
 
          std::pair<double, double> inter2 = intervals[i+1];
          while(func[points[tmp]] < inter2.first && tmp != n){
-           prop.insert(std::make_pair(points[tmp],adjacency_matrix[points[tmp]]));
+           prop[points[tmp]] = adjacency_matrix[points[tmp]];
            tmp++;
          }
 
          pos = tmp;
          while(func[points[tmp]] < inter1.second && tmp != n){
-           prop.insert(std::make_pair(points[tmp],adjacency_matrix[points[tmp]]));
+           prop[points[tmp]] = adjacency_matrix[points[tmp]];
            tmp++;
          }
 
@@ -534,12 +537,12 @@ class Graph_induced_complex {
 
          std::pair<double, double> inter3 = intervals[i-1];
          while(func[points[tmp]] < inter3.second && tmp != n){
-           prop.insert(std::make_pair(points[tmp],adjacency_matrix[points[tmp]]));
+           prop[points[tmp]] = adjacency_matrix[points[tmp]];
            tmp++;
          }
 
          while(tmp != n){
-           prop.insert(std::make_pair(points[tmp],adjacency_matrix[points[tmp]]));
+           prop[points[tmp]] = adjacency_matrix[points[tmp]];
            tmp++;
          }
 
@@ -548,7 +551,7 @@ class Graph_induced_complex {
        // Compute the connected components with DFS
        std::map<int,bool> visit; if(verbose)  std::cout << "Preimage of interval " << i << std::endl;
        for(std::map<int, std::vector<int> >::iterator it = prop.begin(); it != prop.end(); it++)
-         visit.insert(std::pair<int,bool>(it->first, false));
+         visit[it->first] = false;
        if (!(prop.empty())){
          for(std::map<int, std::vector<int> >::iterator it = prop.begin(); it != prop.end(); it++){
            if (  !(visit[it->first])  ){
@@ -785,10 +788,10 @@ class Graph_induced_complex {
     */
    template<typename SimplicialComplexForGIC>
    void create_complex(SimplicialComplexForGIC & complex) {
-     size_t sz = simplices.size(); unsigned int dimension = 0;
-     for(unsigned int i = 0; i < sz; i++){
-       complex.insert_simplex_and_subfaces(simplices[i]);
-       if(dimension < simplices[i].size()-1)  dimension = simplices[i].size()-1;
+     unsigned int dimension = 0;
+     for(auto const& simplex : simplices){
+       complex.insert_simplex_and_subfaces(simplex);
+       if(dimension < simplex.size()-1)  dimension = simplex.size()-1;
      }
      complex.set_dimension(dimension);
    }
