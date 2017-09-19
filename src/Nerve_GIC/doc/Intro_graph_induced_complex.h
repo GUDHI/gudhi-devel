@@ -101,7 +101,7 @@ namespace graph_induced_complex {
  * See <a target="_blank" href="https://arxiv.org/abs/1304.0662"> this article </a>
  * for more details.
  *
- * \image html "gic_complex.png" "GIC of a point cloud. Courtesy of Tamal Dey."
+ * \image html "GIC.jpg" "GIC of a point cloud."
  *
  * \subsection gicexample Example with cover from function
  *
