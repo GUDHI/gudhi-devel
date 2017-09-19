@@ -71,6 +71,10 @@ class Rips_complex_interface {
     }
   }
 
+  ~Rips_complex_interface() {
+    delete rips_complex_;
+  }
+
   void create_simplex_tree(Simplex_tree_interface<>* simplex_tree, int dim_max) {
     rips_complex_->create_complex(*simplex_tree, dim_max);
     simplex_tree->initialize_filtration();
