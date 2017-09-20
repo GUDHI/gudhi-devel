@@ -148,16 +148,9 @@ void test_simplex_tree_insert_returns_true(const typePairSimplexBool& returnValu
 
 // Global variables
 double max_fil = 0.0;
-int dim_max = -1;
 
 template<class typeST, class Filtration_value>
 void set_and_test_simplex_tree_dim_fil(typeST& simplexTree, int vectorSize, const Filtration_value& fil) {
-  if (vectorSize > dim_max + 1) {
-    dim_max = vectorSize - 1;
-    simplexTree.set_dimension(dim_max);
-    std::cout << "   set_and_test_simplex_tree_dim_fil - dim_max=" << dim_max
-        << std::endl;
-  }
   if (fil > max_fil) {
     max_fil = fil;
     simplexTree.set_filtration(max_fil);
@@ -165,7 +158,7 @@ void set_and_test_simplex_tree_dim_fil(typeST& simplexTree, int vectorSize, cons
         << std::endl;
   }
 
-  BOOST_CHECK(simplexTree.dimension() == dim_max);
+  BOOST_CHECK(simplexTree.dimension() >= vectorSize - 1);
   BOOST_CHECK(AreAlmostTheSame(simplexTree.filtration(), max_fil));
 
   // Another way to count simplices:
@@ -189,7 +182,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
   const Filtration_value THIRD_FILTRATION_VALUE = 0.3;
   const Filtration_value FOURTH_FILTRATION_VALUE = 0.4;
   // reset since we run the test several times
-  dim_max = -1;
   max_fil = 0.0;
 
   // TEST OF INSERTION
@@ -308,8 +300,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
   // Simplex_handle = boost::container::flat_map< typeST::Vertex_handle, Node >::iterator
   typename typeST::Simplex_handle shReturned = returnValue.first;
   BOOST_CHECK(shReturned == typename typeST::Simplex_handle(nullptr));
+  std::cout << "st.num_vertices()=" << st.num_vertices() << std::endl;
   BOOST_CHECK(st.num_vertices() == (size_t) 4); // Not incremented !!
-  BOOST_CHECK(st.dimension() == dim_max);
   BOOST_CHECK(AreAlmostTheSame(st.filtration(), max_fil));
 
   // ++ ELEVENTH
@@ -324,7 +316,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
   shReturned = returnValue.first;
   BOOST_CHECK(shReturned == typename typeST::Simplex_handle(nullptr));
   BOOST_CHECK(st.num_vertices() == (size_t) 4); // Not incremented !!
-  BOOST_CHECK(st.dimension() == dim_max);
+  std::cout << "   - INSERT (2,1,0) (already inserted)" << std::endl;
+  BOOST_CHECK(st.dimension() == 2);
   BOOST_CHECK(AreAlmostTheSame(st.filtration(), max_fil));
 
   /* Inserted simplex:        */
@@ -630,9 +623,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(coface_on_simplex_tree, typeST, list_of_tested_var
   /*            o             */
   /*            5             */
 
-  // FIXME
-  st.set_dimension(3);
-
   std::vector<typename typeST::Vertex_handle> simplex_result;
   std::vector<typename typeST::Simplex_handle> result;
   std::cout << "First test - Star of (3):" << std::endl;
@@ -728,9 +718,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(copy_move_on_simplex_tree, typeST, list_of_tested_
   /*  2   0   3\X/4           */
   /*            o             */
   /*            5             */
-
-  // FIXME
-  st.set_dimension(3);
 
   std::cout << "Printing st - address = " << &st << std::endl;
 
@@ -881,272 +868,4 @@ BOOST_AUTO_TEST_CASE(make_filtration_non_decreasing) {
   BOOST_CHECK(!st.make_filtration_non_decreasing());
   BOOST_CHECK(st == st_other_copy);
   
-}
-
-struct MyOptions : Simplex_tree_options_full_featured {
-  // Not doing persistence, so we don't need those
-  static const bool store_key = false;
-  static const bool store_filtration = false;
-  // I have few vertices
-  typedef short Vertex_handle;
-};
-
-BOOST_AUTO_TEST_CASE(remove_maximal_simplex) {
-  std::cout << "********************************************************************" << std::endl;
-  std::cout << "REMOVE MAXIMAL SIMPLEX" << std::endl;
-
-
-  typedef Simplex_tree<MyOptions> miniST;
-  miniST st;
-
-  // FIXME
-  st.set_dimension(3);
-
-  st.insert_simplex_and_subfaces({0, 1, 6, 7});
-  st.insert_simplex_and_subfaces({3, 4, 5});
-
-  // Constructs a copy at this state for further test purpose
-  miniST st_pruned = st;
-
-  st.insert_simplex_and_subfaces({3, 0});
-  st.insert_simplex_and_subfaces({2, 1, 0});
-
-  // Constructs a copy at this state for further test purpose
-  miniST st_complete = st;
-  // st_complete and st:
-  //    1   6
-  //    o---o
-  //   /X\7/
-  //  o---o---o---o
-  //  2   0   3\X/4
-  //            o
-  //            5
-  // st_pruned:
-  //    1   6
-  //    o---o
-  //     \7/
-  //      o   o---o
-  //      0   3\X/4
-  //            o
-  //            5
-
-#ifdef GUDHI_DEBUG
-  std::cout << "Check exception throw in debug mode" << std::endl;
-  // throw excpt because sh has children
-  BOOST_CHECK_THROW (st.remove_maximal_simplex(st.find({0, 1, 6})), std::invalid_argument);
-  BOOST_CHECK_THROW (st.remove_maximal_simplex(st.find({3})), std::invalid_argument);
-  BOOST_CHECK(st == st_complete);
-#endif
-  
-  st.remove_maximal_simplex(st.find({0, 2}));
-  st.remove_maximal_simplex(st.find({0, 1, 2}));
-  st.remove_maximal_simplex(st.find({1, 2}));
-  st.remove_maximal_simplex(st.find({2}));
-  st.remove_maximal_simplex(st.find({0, 3}));
-  
-  BOOST_CHECK(st == st_pruned);
-  // Remove all, but as the simplex tree is not storing filtration, there is no modification
-  st.prune_above_filtration(0.0);
-  BOOST_CHECK(st == st_pruned);
-  
-  miniST st_wo_seven;
-  // FIXME
-  st_wo_seven.set_dimension(3);
-
-  st_wo_seven.insert_simplex_and_subfaces({0, 1, 6});
-  st_wo_seven.insert_simplex_and_subfaces({3, 4, 5});
-  // st_wo_seven:
-  //    1   6
-  //    o---o
-  //     \X/
-  //      o   o---o
-  //      0   3\X/4
-  //            o
-  //            5
-
-  // Remove all 7 to test the both remove_maximal_simplex cases (when _members is empty or not)
-  st.remove_maximal_simplex(st.find({0, 1, 6, 7}));
-  st.remove_maximal_simplex(st.find({0, 1, 7}));
-  st.remove_maximal_simplex(st.find({0, 6, 7}));
-  st.remove_maximal_simplex(st.find({0, 7}));
-  st.remove_maximal_simplex(st.find({1, 6, 7}));
-  st.remove_maximal_simplex(st.find({1, 7}));
-  st.remove_maximal_simplex(st.find({6, 7}));
-  st.remove_maximal_simplex(st.find({7}));
-  
-  BOOST_CHECK(st == st_wo_seven);
-}
-
-BOOST_AUTO_TEST_CASE(prune_above_filtration) {
-  std::cout << "********************************************************************" << std::endl;
-  std::cout << "PRUNE ABOVE FILTRATION" << std::endl;
-  typedef Simplex_tree<> typeST;
-  typeST st;
-
-  // FIXME
-  st.set_dimension(3);
-
-  st.insert_simplex_and_subfaces({0, 1, 6, 7}, 1.0);
-  st.insert_simplex_and_subfaces({3, 4, 5}, 2.0);
-
-  // Constructs a copy at this state for further test purpose
-  typeST st_pruned = st;
-  st_pruned.initialize_filtration();  // reset
-
-  st.insert_simplex_and_subfaces({3, 0}, 3.0);
-  st.insert_simplex_and_subfaces({2, 1, 0}, 4.0);
-
-  // Constructs a copy at this state for further test purpose
-  typeST st_complete = st;
-  // st_complete and st:
-  //    1   6
-  //    o---o
-  //   /X\7/
-  //  o---o---o---o
-  //  2   0   3\X/4
-  //            o
-  //            5
-  // st_pruned:
-  //    1   6
-  //    o---o
-  //     \7/
-  //      o   o---o
-  //      0   3\X/4
-  //            o
-  //            5
-
-  bool simplex_is_changed = false;
-  // Check the no action cases
-  // greater than initial filtration value
-  simplex_is_changed = st.prune_above_filtration(10.0);
-  if (simplex_is_changed)
-    st.initialize_filtration();
-  BOOST_CHECK(st == st_complete);
-  BOOST_CHECK(!simplex_is_changed);
-  // equal to initial filtration value
-  simplex_is_changed = st.prune_above_filtration(6.0);
-  if (simplex_is_changed)
-    st.initialize_filtration();
-  BOOST_CHECK(st == st_complete);
-  BOOST_CHECK(!simplex_is_changed);
-  // lower than initial filtration value, but still greater than the maximum filtration value
-  simplex_is_changed = st.prune_above_filtration(5.0);
-  if (simplex_is_changed)
-    st.initialize_filtration();
-  BOOST_CHECK(st == st_complete);
-  BOOST_CHECK(!simplex_is_changed);
-
-  // Display the Simplex_tree
-  std::cout << "The complex contains " << st.num_simplices() << " simplices";
-  std::cout << " - dimension " << st.dimension() << std::endl;
-  std::cout << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
-  for (auto f_simplex : st.filtration_simplex_range()) {
-    std::cout << "   " << "[" << st.filtration(f_simplex) << "] ";
-    for (auto vertex : st.simplex_vertex_range(f_simplex)) {
-      std::cout << (int) vertex << " ";
-    }
-    std::cout << std::endl;
-  }
-
-  // Check the pruned cases
-  simplex_is_changed = st.prune_above_filtration(2.5);
-  if (simplex_is_changed)
-    st.initialize_filtration();
-  BOOST_CHECK(st == st_pruned);
-  BOOST_CHECK(simplex_is_changed);
-
-  // Display the Simplex_tree
-  std::cout << "The complex pruned at 2.5 contains " << st.num_simplices() << " simplices";
-  std::cout << " - dimension " << st.dimension() << std::endl;
-
-  simplex_is_changed = st.prune_above_filtration(2.0);
-  if (simplex_is_changed)
-    st.initialize_filtration();
-  
-  std::cout << "The complex pruned at 2.0 contains " << st.num_simplices() << " simplices";
-  std::cout << " - dimension " << st.dimension() << std::endl;
-
-  BOOST_CHECK(st == st_pruned);
-  BOOST_CHECK(!simplex_is_changed);
-
-  typeST st_empty;
-  // FIXME
-  st_empty.set_dimension(3);
-  simplex_is_changed = st.prune_above_filtration(0.0);
-  if (simplex_is_changed)
-    st.initialize_filtration();
-
-  // Display the Simplex_tree
-  std::cout << "The complex pruned at 0.0 contains " << st.num_simplices() << " simplices";
-  std::cout << " - dimension " << st.dimension() << std::endl;
-
-  BOOST_CHECK(st == st_empty);
-  BOOST_CHECK(simplex_is_changed);
-
-  // Test case to the limit
-  simplex_is_changed = st.prune_above_filtration(-1.0);
-  if (simplex_is_changed)
-    st.initialize_filtration();
-  BOOST_CHECK(st == st_empty);
-  BOOST_CHECK(!simplex_is_changed);
-}
-
-BOOST_AUTO_TEST_CASE(mini_prune_above_filtration) {
-  std::cout << "********************************************************************" << std::endl;
-  std::cout << "MINI PRUNE ABOVE FILTRATION" << std::endl;
-  typedef Simplex_tree<MyOptions> typeST;
-  typeST st;
-
-  // FIXME
-  st.set_dimension(3);
-
-  st.insert_simplex_and_subfaces({0, 1, 6, 7});
-  st.insert_simplex_and_subfaces({3, 4, 5});
-  st.insert_simplex_and_subfaces({3, 0});
-  st.insert_simplex_and_subfaces({2, 1, 0});
-
-  // st:
-  //    1   6
-  //    o---o
-  //   /X\7/
-  //  o---o---o---o
-  //  2   0   3\X/4
-  //            o
-  //            5
-
-  st.initialize_filtration();
-  
-  // Display the Simplex_tree
-  std::cout << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
-  BOOST_CHECK(st.num_simplices() == 27);
-
-  // Test case to the limit - With these options, there is no filtration, which means filtration is 0
-  bool simplex_is_changed = st.prune_above_filtration(1.0);
-  if (simplex_is_changed)
-    st.initialize_filtration();
-  // Display the Simplex_tree
-  std::cout << "The complex pruned at 1.0 contains " << st.num_simplices() << " simplices" << std::endl;
-  BOOST_CHECK(!simplex_is_changed);
-  BOOST_CHECK(st.num_simplices() == 27);
-
-  simplex_is_changed = st.prune_above_filtration(0.0);
-  if (simplex_is_changed)
-    st.initialize_filtration();
-  // Display the Simplex_tree
-  std::cout << "The complex pruned at 0.0 contains " << st.num_simplices() << " simplices" << std::endl;
-  BOOST_CHECK(!simplex_is_changed);
-  BOOST_CHECK(st.num_simplices() == 27);
-
-  // Test case to the limit
-  simplex_is_changed = st.prune_above_filtration(-1.0);
-  if (simplex_is_changed)
-    st.initialize_filtration();
-  // Display the Simplex_tree
-  std::cout << "The complex pruned at -1.0 contains " << st.num_simplices() << " simplices" << std::endl;
-  BOOST_CHECK(simplex_is_changed);
-  BOOST_CHECK(st.num_simplices() == 0);
-
-  // Display the Simplex_tree
-  std::cout << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
-
 }

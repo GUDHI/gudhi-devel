@@ -601,7 +601,11 @@ class Simplex_tree {
       // if filtration value unchanged
       return std::pair<Simplex_handle, bool>(null_simplex(), false);
     }
-    // otherwise the insertion has succeeded
+    // otherwise the insertion has succeeded - size is a size_type
+    if (static_cast<int>(simplex.size()) - 1 > dimension_) {
+      // Update dimension if needed
+      dimension_ = static_cast<int>(simplex.size()) - 1;
+    }
     return res_insert;
   }
 
@@ -1159,7 +1163,11 @@ class Simplex_tree {
    * complex has changed , please call `initialize_filtration()` to recompute it.
    */
   bool prune_above_filtration(Filtration_value filtration) {
-    return rec_prune_above_filtration(root(), filtration);
+    bool modified = rec_prune_above_filtration(root(), filtration);
+    if (modified) {
+      auto_dimension_set(dimension());
+    }
+    return modified;
   }
 
  private:
@@ -1187,6 +1195,33 @@ class Simplex_tree {
     return modified;
   }
 
+ private:
+  /** \brief Resets the Simplex_tree dimension.
+   * @param[in] old_dimension The former dimension value until the loop stopped when it is reached.
+   * @return The dimension modification information.
+   * \pre Please check the simplex has not a too low dimension value.
+   * This cannot happen if set_dimension has not been performed.
+   */
+  bool auto_dimension_set(int old_dimension) {
+    int new_dimension = -1;
+    for (Simplex_handle sh : skeleton_simplex_range(old_dimension)) {
+#ifdef DEBUG_TRACES
+      for (auto vertex : simplex_vertex_range(sh)) {
+        std::cout << " " << vertex;
+      }
+      std::cout << std::endl;
+#endif  // DEBUG_TRACES
+
+      int sh_dimension = dimension(sh);
+      if (sh_dimension >= old_dimension)
+        return false;
+      new_dimension = std::max<int>(new_dimension, sh_dimension);
+    }
+    set_dimension(new_dimension);
+    return true;
+  }
+
+
  public:
   /** \brief Remove a maximal simplex.
    * @param[in] sh Simplex handle on the maximal simplex to remove.
@@ -1207,9 +1242,17 @@ class Simplex_tree {
       // Special case when child is the root of the simplex tree, just remove it from members
       child->erase(sh);
     } else {
+      // Keep information before remove action
+      int sh_dim = dimension(sh);
+
       // Sibling is emptied : must be deleted, and its parent must point on his own Sibling
       child->oncles()->members().at(child->parent()).assign_children(child->oncles());
       delete child;
+
+      // No need to reset dimension in case maximal simplex is not the maximal dimension one
+      if (sh_dim >= dimension()) {
+        auto_dimension_set(sh_dim);
+      }
     }
   }
 

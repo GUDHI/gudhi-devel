@@ -268,8 +268,6 @@ class Alpha_complex {
       return false;  // ----- >>
     }
 
-    complex.set_dimension(triangulation_->maximal_dimension());
-
     // --------------------------------------------------------------------------------------------
     // Simplex_tree construction from loop on triangulation finite full cells list
     if (triangulation_->number_of_vertices() > 0) {

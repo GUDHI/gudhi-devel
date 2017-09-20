@@ -142,7 +142,6 @@ int main(int argc, char * const argv[]) {
   /*   An edge [11,6]         */
   /*   An edge [10,12,2]      */
 
-  st.set_dimension(2);
   st.set_filtration(0.4);
 
   std::cout << "The complex contains " << st.num_simplices() << " simplices - " << st.num_vertices() << " vertices "
