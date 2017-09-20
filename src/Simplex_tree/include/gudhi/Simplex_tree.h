@@ -763,7 +763,6 @@ class Simplex_tree {
 
   /** Set an upper bound for the filtration values. */
   void set_filtration(Filtration_value fil) {
-    if (Options::store_filtration)
       threshold_ = fil;
   }
 
