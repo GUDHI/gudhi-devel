@@ -763,7 +763,8 @@ class Simplex_tree {
 
   /** Set an upper bound for the filtration values. */
   void set_filtration(Filtration_value fil) {
-    threshold_ = fil;
+    if (Options::store_filtration)
+      threshold_ = fil;
   }
 
   /** Set a dimension for the simplicial complex. */
@@ -1288,14 +1289,8 @@ std::istream& operator>>(std::istream & is, Simplex_tree<T...> & st) {
   std::vector<typename ST::Vertex_handle> simplex;
   typename ST::Filtration_value fil;
   typename ST::Filtration_value max_fil = 0;
-  int max_dim = -1;
   while (read_simplex(is, simplex, fil)) {
     // read all simplices in the file as a list of vertices
-    // Warning : simplex_size needs to be casted in int - Can be 0
-    int dim = static_cast<int> (simplex.size() - 1);
-    if (max_dim < dim) {
-      max_dim = dim;
-    }
     if (max_fil < fil) {
       max_fil = fil;
     }
@@ -1303,7 +1298,6 @@ std::istream& operator>>(std::istream & is, Simplex_tree<T...> & st) {
     st.insert_simplex(simplex, fil);
     simplex.clear();
   }
-  st.set_dimension(max_dim);
   st.set_filtration(max_fil);
 
   return is;

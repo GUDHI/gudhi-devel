@@ -86,41 +86,6 @@ bool AreAlmostTheSame(float a, float b) {
   return std::fabs(a - b) < std::numeric_limits<float>::epsilon();
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_from_file, typeST, list_of_tested_variants) {
-  // TEST OF INSERTION
-  std::cout << "********************************************************************" << std::endl;
-  std::cout << "TEST OF SIMPLEX TREE FROM A FILE" << std::endl;
-  typeST st;
-
-  std::string inputFile("simplex_tree_for_unit_test.txt");
-  std::ifstream simplex_tree_stream(inputFile.c_str());
-  simplex_tree_stream >> st;
-
-  // Display the Simplex_tree
-  std::cout << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
-  std::cout << "   - dimension " << st.dimension() << "   - filtration " << st.filtration() << std::endl;
-
-  // Check
-  BOOST_CHECK(st.num_simplices() == 143353);
-  BOOST_CHECK(st.dimension() == 3);
-  BOOST_CHECK(AreAlmostTheSame(st.filtration(), 0.4));
-
-  int previous_size = 0;
-  for (auto f_simplex : st.filtration_simplex_range()) {
-    // Size of simplex
-    int size = 0;
-    for (auto vertex : st.simplex_vertex_range(f_simplex)) {
-      // Remove warning
-      (void) vertex;
-      size++;
-    }
-    BOOST_CHECK(AreAlmostTheSame(st.filtration(f_simplex), (0.1 * size))); // Specific test: filtration = 0.1 * simplex_size
-    BOOST_CHECK(previous_size <= size); // Check list is sorted (because of sorted filtrations in simplex_tree.txt)
-    previous_size = size;
-  }
-  simplex_tree_stream.close();
-}
-
 template<class typeST, class typeSimplex>
 void test_simplex_tree_contains(typeST& simplexTree, typeSimplex& simplex, int pos) {
   auto f_simplex = simplexTree.filtration_simplex_range().begin() + pos;

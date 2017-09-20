@@ -3,7 +3,6 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "simplex_tree_remove"
 #include <boost/test/unit_test.hpp>
-#include <boost/mpl/list.hpp>
 
 //  ^
 // /!\ Nothing else from Simplex_tree shall be included to test includes are well defined.
