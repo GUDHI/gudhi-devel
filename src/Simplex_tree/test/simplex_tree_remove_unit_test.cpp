@@ -169,6 +169,56 @@ BOOST_AUTO_TEST_CASE(auto_dimension_set) {
   st.remove_maximal_simplex(st.find({0, 1, 3, 4}));
   BOOST_CHECK(st.dimension() == 2);
 
+  std::cout << "st.insert_simplex_and_subfaces({1, 2, 3, 5})" << std::endl;
+  st.insert_simplex_and_subfaces({1, 2, 3, 5});
+  BOOST_CHECK(st.dimension() == 3);
+
+  std::cout << "st.insert_simplex_and_subfaces({1, 2, 3, 4})" << std::endl;
+  st.insert_simplex_and_subfaces({1, 2, 3, 4});
+  BOOST_CHECK(st.dimension() == 3);
+
+  // Check you can override the dimension
+  // This is a limit test case - shall not happen
+  st.set_dimension(1);
+  BOOST_CHECK(st.dimension() == 1);
+
+  // Here no siblings is erased - automatic dimension is not launched.
+  std::cout << "st.remove_maximal_simplex({1, 2, 3, 4})" << std::endl;
+  st.remove_maximal_simplex(st.find({1, 2, 3, 4}));
+  BOOST_CHECK(st.dimension() == 1);
+
+  // Here sibling is erased - automatic dimension is launched.
+  std::cout << "st.remove_maximal_simplex({1, 2, 3, 5})" << std::endl;
+  st.remove_maximal_simplex(st.find({1, 2, 3, 5}));
+  BOOST_CHECK(st.dimension() == 2);
+
+  std::cout << "st.insert_simplex_and_subfaces({1, 2, 3, 5})" << std::endl;
+  st.insert_simplex_and_subfaces({1, 2, 3, 5});
+  BOOST_CHECK(st.dimension() == 3);
+
+  std::cout << "st.insert_simplex_and_subfaces({1, 2, 3, 4})" << std::endl;
+  st.insert_simplex_and_subfaces({1, 2, 3, 4});
+  BOOST_CHECK(st.dimension() == 3);
+
+  // Check you can override the dimension
+  // This is a limit test case - shall not happen
+  st.set_dimension(6);
+  BOOST_CHECK(st.dimension() == 6);
+
+  // Here no siblings is erased - automatic dimension is not launched.
+  std::cout << "st.remove_maximal_simplex({1, 2, 3, 5})" << std::endl;
+  st.remove_maximal_simplex(st.find({1, 2, 3, 5}));
+  BOOST_CHECK(st.dimension() == 6);
+
+  // Here sibling is erased - automatic dimension is launched but dim is always than te one set.
+  std::cout << "st.remove_maximal_simplex({1, 2, 3, 4})" << std::endl;
+  st.remove_maximal_simplex(st.find({1, 2, 3, 4}));
+  BOOST_CHECK(st.dimension() == 6);
+
+  // Reset with the correct value
+  st.set_dimension(2);
+  BOOST_CHECK(st.dimension() == 2);
+
   std::cout << "st.insert_simplex_and_subfaces({0, 1, 2, 3, 4, 5, 6})" << std::endl;
   st.insert_simplex_and_subfaces({0, 1, 2, 3, 4, 5, 6});
   BOOST_CHECK(st.dimension() == 6);
