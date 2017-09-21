@@ -186,7 +186,6 @@ int main(int argc, char * const argv[]) {
 
   // ++ GENERAL VARIABLE SET
   simplexTree.set_filtration(FOURTH_FILTRATION_VALUE);  // Max filtration value
-  simplexTree.set_dimension(2);  // Max dimension = 2 -> (2,1,0)
 
   std::cout << "********************************************************************\n";
   // Display the Simplex_tree - Can not be done in the middle of 2 inserts
