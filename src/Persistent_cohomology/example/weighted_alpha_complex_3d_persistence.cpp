@@ -115,6 +115,7 @@ int main(int argc, char * const argv[]) {
   if (weights_ifstr.good()) {
     double weight = 0.0;
     std::size_t index = 0;
+    wp.reserve(lp.size());
     // Attempt read the weight in a double format, return false if it fails
     while ((weights_ifstr >> weight) && (index < lp.size())) {
       wp.push_back(Weighted_point_3(lp[index], weight));
@@ -130,7 +131,7 @@ int main(int argc, char * const argv[]) {
   }
 
   // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode.
-  Alpha_shape_3 as(lp.begin(), lp.end(), 0, Alpha_shape_3::GENERAL);
+  Alpha_shape_3 as(wp.begin(), wp.end(), 0, Alpha_shape_3::GENERAL);
 #ifdef DEBUG_TRACES
   std::cout << "Alpha shape computed in GENERAL mode" << std::endl;
 #endif  // DEBUG_TRACES
