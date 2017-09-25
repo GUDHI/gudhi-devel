@@ -8,6 +8,9 @@ add_executable(persistence_from_simple_simplex_tree persistence_from_simple_simp
 add_executable(rips_distance_matrix_persistence rips_distance_matrix_persistence.cpp)
 target_link_libraries(rips_distance_matrix_persistence ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
+add_executable(rips_correlation_matrix_persistence rips_correlation_matrix_persistence.cpp)
+target_link_libraries(rips_correlation_matrix_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
 add_executable(rips_persistence rips_persistence.cpp)
 target_link_libraries(rips_persistence ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
@@ -24,6 +27,7 @@ if (TBB_FOUND)
   target_link_libraries(plain_homology ${TBB_LIBRARIES})
   target_link_libraries(persistence_from_simple_simplex_tree ${TBB_LIBRARIES})
   target_link_libraries(rips_distance_matrix_persistence ${TBB_LIBRARIES})
+  target_link_libraries(rips_correlation_matrix_persistence ${TBB_LIBRARIES})
   target_link_libraries(rips_persistence ${TBB_LIBRARIES})
   target_link_libraries(rips_persistence_step_by_step ${TBB_LIBRARIES})
   target_link_libraries(rips_persistence_via_boundary_matrix ${TBB_LIBRARIES})
@@ -35,6 +39,8 @@ add_test(NAME Persistent_cohomology_example_from_simple_simplex_tree COMMAND $<T
     "1" "0")
 add_test(NAME Persistent_cohomology_example_from_rips_distance_matrix COMMAND $<TARGET_FILE:rips_distance_matrix_persistence>
     "${CMAKE_SOURCE_DIR}/data/distance_matrix/full_square_distance_matrix.csv" "-r" "1.0" "-d" "3" "-p" "3" "-m" "0")
+add_test(rips_distance_matrix ${CMAKE_CURRENT_BINARY_DIR}/rips_distance_matrix_persistence
+    ${CMAKE_SOURCE_DIR}/data/distance_matrix/full_correlation_matrix.csv.csv -r 1.0 -d 3 -p 3 -m 0)
 add_test(NAME Persistent_cohomology_example_from_rips_on_tore_3D COMMAND $<TARGET_FILE:rips_persistence>
     "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" "-r" "0.25" "-m" "0.5" "-d" "3" "-p" "3")
 add_test(NAME Persistent_cohomology_example_from_rips_step_by_step_on_tore_3D COMMAND $<TARGET_FILE:rips_persistence_step_by_step>

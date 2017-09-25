@@ -160,7 +160,18 @@ persistence diagram with a family of field coefficients.
 
 \li <a href="_persistent_cohomology_2rips_distance_matrix_persistence_8cpp-example.html">
 Persistent_cohomology/rips_distance_matrix_persistence.cpp</a> computes the Rips complex of a distance matrix and
-outputs its persistence diagram.
+outputs its persistence diagram. The file should contain lower diagonal distance matrix with semicolons as separators.
+The code do not check if it is dealing with a distance matrix. It is the user responsibility to provide a valid input.
+Please refer to data/distance_matrix/lower_triangular_distance_matrix.csv for an example of a file. 
+
+\li <a href="_persistent_cohomology_2rips_correlation_matrix_persistence_8cpp-example.html">
+Persistent_cohomology/rips_correlation_matrix_persistence.cpp</a>
+computes the Rips complex of a correlation matrix and
+outputs its persistence diagram. Note that no check is performed if
+the matrix given as the input is a correlation matrix. 
+It is the user responsibility to ensure that this is the case. The
+input is to be given either as a lower triangular matrix. 
+Please refer to data/distance_matrix/lower_triangular_correlation_matrix.csv for an example of a file. 
 
 \li <a href="_persistent_cohomology_2alpha_complex_3d_persistence_8cpp-example.html">
 Persistent_cohomology/alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
