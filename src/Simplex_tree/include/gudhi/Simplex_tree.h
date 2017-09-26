@@ -1302,10 +1302,11 @@ class Simplex_tree {
  public:
   /** \brief Remove a maximal simplex.
    * @param[in] sh Simplex handle on the maximal simplex to remove.
-   * @return true if the leaf's branch has no other leaves (branch's children has been re-assigned), false otherwise.
+   * @return a boolean value that is an implementation detail, and that the user is supposed to ignore
    * \pre Please check the simplex has no coface before removing it.
    * \exception std::invalid_argument In debug mode, if sh has children.
    * \post Be aware that removing is shifting data in a flat_map (initialize_filtration to be done).
+   * \internal @return true if the leaf's branch has no other leaves (branch's children has been re-assigned), false otherwise.
    */
   bool remove_maximal_simplex(Simplex_handle sh) {
     // Guarantee the simplex has no children
