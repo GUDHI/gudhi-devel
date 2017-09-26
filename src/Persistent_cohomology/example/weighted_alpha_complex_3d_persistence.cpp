@@ -136,129 +136,129 @@ int main(int argc, char * const argv[]) {
   std::cout << "Alpha shape computed in GENERAL mode" << std::endl;
 #endif  // DEBUG_TRACES
 
-  // filtration with alpha values from alpha shape
-  std::vector<Object> the_objects;
-  std::vector<Alpha_value_type> the_alpha_values;
+	  // filtration with alpha values from alpha shape
+	  std::vector<Object> the_objects;
+	  std::vector<Alpha_value_type> the_alpha_values;
 
-  Dispatch disp = CGAL::dispatch_output<Object, Alpha_value_type>(std::back_inserter(the_objects),
-                                                                  std::back_inserter(the_alpha_values));
+	  Dispatch disp = CGAL::dispatch_output<Object, Alpha_value_type>(std::back_inserter(the_objects),
+																	  std::back_inserter(the_alpha_values));
 
-  as.filtration_with_alpha_values(disp);
-#ifdef DEBUG_TRACES
-  std::cout << "filtration_with_alpha_values returns : " << the_objects.size() << " objects" << std::endl;
-#endif  // DEBUG_TRACES
+	  as.filtration_with_alpha_values(disp);
+	#ifdef DEBUG_TRACES
+	  std::cout << "filtration_with_alpha_values returns : " << the_objects.size() << " objects" << std::endl;
+	#endif  // DEBUG_TRACES
 
-  Alpha_shape_3::size_type count_vertices = 0;
-  Alpha_shape_3::size_type count_edges = 0;
-  Alpha_shape_3::size_type count_facets = 0;
-  Alpha_shape_3::size_type count_cells = 0;
+	  Alpha_shape_3::size_type count_vertices = 0;
+	  Alpha_shape_3::size_type count_edges = 0;
+	  Alpha_shape_3::size_type count_facets = 0;
+	  Alpha_shape_3::size_type count_cells = 0;
 
-  // Loop on objects vector
-  Vertex_list vertex_list;
-  ST simplex_tree;
-  Alpha_shape_simplex_tree_map map_cgal_simplex_tree;
-  std::vector<Alpha_value_type>::iterator the_alpha_value_iterator = the_alpha_values.begin();
-  int dim_max = 0;
-  Filtration_value filtration_max = 0.0;
-  for (auto object_iterator : the_objects) {
-    // Retrieve Alpha shape vertex list from object
-    if (const Cell_handle * cell = CGAL::object_cast<Cell_handle>(&object_iterator)) {
-      vertex_list = from_cell<Vertex_list, Cell_handle>(*cell);
-      count_cells++;
-      if (dim_max < 3) {
-        // Cell is of dim 3
-        dim_max = 3;
-      }
-    } else if (const Facet * facet = CGAL::object_cast<Facet>(&object_iterator)) {
-      vertex_list = from_facet<Vertex_list, Facet>(*facet);
-      count_facets++;
-      if (dim_max < 2) {
-        // Facet is of dim 2
-        dim_max = 2;
-      }
-    } else if (const Edge_3 * edge = CGAL::object_cast<Edge_3>(&object_iterator)) {
-      vertex_list = from_edge<Vertex_list, Edge_3>(*edge);
-      count_edges++;
-      if (dim_max < 1) {
-        // Edge_3 is of dim 1
-        dim_max = 1;
-      }
-    } else if (const Alpha_shape_3::Vertex_handle * vertex =
-               CGAL::object_cast<Alpha_shape_3::Vertex_handle>(&object_iterator)) {
-      count_vertices++;
-      vertex_list = from_vertex<Vertex_list, Vertex_handle>(*vertex);
-    }
-    // Construction of the vector of simplex_tree vertex from list of alpha_shapes vertex
-    Simplex_tree_vector_vertex the_simplex_tree;
-    for (auto the_alpha_shape_vertex : vertex_list) {
-      Alpha_shape_simplex_tree_map::iterator the_map_iterator = map_cgal_simplex_tree.find(the_alpha_shape_vertex);
-      if (the_map_iterator == map_cgal_simplex_tree.end()) {
-        // alpha shape not found
-        Simplex_tree_vertex vertex = map_cgal_simplex_tree.size();
-#ifdef DEBUG_TRACES
-        std::cout << "vertex [" << the_alpha_shape_vertex->point() << "] not found - insert " << vertex << std::endl;
-#endif  // DEBUG_TRACES
-        the_simplex_tree.push_back(vertex);
-        map_cgal_simplex_tree.insert(Alpha_shape_simplex_tree_pair(the_alpha_shape_vertex, vertex));
-      } else {
-        // alpha shape found
-        Simplex_tree_vertex vertex = the_map_iterator->second;
-#ifdef DEBUG_TRACES
-        std::cout << "vertex [" << the_alpha_shape_vertex->point() << "] found in " << vertex << std::endl;
-#endif  // DEBUG_TRACES
-        the_simplex_tree.push_back(vertex);
-      }
-    }
-    // Construction of the simplex_tree
-    Filtration_value filtr = /*std::sqrt*/(*the_alpha_value_iterator);
-#ifdef DEBUG_TRACES
-    std::cout << "filtration = " << filtr << std::endl;
-#endif  // DEBUG_TRACES
-    if (filtr > filtration_max) {
-      filtration_max = filtr;
-    }
-    simplex_tree.insert_simplex(the_simplex_tree, filtr);
-    if (the_alpha_value_iterator != the_alpha_values.end())
-      ++the_alpha_value_iterator;
-    else
-      std::cout << "This shall not happen" << std::endl;
-  }
-  simplex_tree.set_filtration(filtration_max);
-  simplex_tree.set_dimension(dim_max);
+	  // Loop on objects vector
+	  Vertex_list vertex_list;
+	  ST simplex_tree;
+	  Alpha_shape_simplex_tree_map map_cgal_simplex_tree;
+	  std::vector<Alpha_value_type>::iterator the_alpha_value_iterator = the_alpha_values.begin();
+	  int dim_max = 0;
+	  Filtration_value filtration_max = 0.0;
+	  for (auto object_iterator : the_objects) {
+		// Retrieve Alpha shape vertex list from object
+		if (const Cell_handle * cell = CGAL::object_cast<Cell_handle>(&object_iterator)) {
+		  vertex_list = from_cell<Vertex_list, Cell_handle>(*cell);
+		  count_cells++;
+		  if (dim_max < 3) {
+			// Cell is of dim 3
+			dim_max = 3;
+		  }
+		} else if (const Facet * facet = CGAL::object_cast<Facet>(&object_iterator)) {
+		  vertex_list = from_facet<Vertex_list, Facet>(*facet);
+		  count_facets++;
+		  if (dim_max < 2) {
+			// Facet is of dim 2
+			dim_max = 2;
+		  }
+		} else if (const Edge_3 * edge = CGAL::object_cast<Edge_3>(&object_iterator)) {
+		  vertex_list = from_edge<Vertex_list, Edge_3>(*edge);
+		  count_edges++;
+		  if (dim_max < 1) {
+			// Edge_3 is of dim 1
+			dim_max = 1;
+		  }
+		} else if (const Alpha_shape_3::Vertex_handle * vertex =
+				   CGAL::object_cast<Alpha_shape_3::Vertex_handle>(&object_iterator)) {
+		  count_vertices++;
+		  vertex_list = from_vertex<Vertex_list, Vertex_handle>(*vertex);
+		}
+		// Construction of the vector of simplex_tree vertex from list of alpha_shapes vertex
+		Simplex_tree_vector_vertex the_simplex_tree;
+		for (auto the_alpha_shape_vertex : vertex_list) {
+		  Alpha_shape_simplex_tree_map::iterator the_map_iterator = map_cgal_simplex_tree.find(the_alpha_shape_vertex);
+		  if (the_map_iterator == map_cgal_simplex_tree.end()) {
+			// alpha shape not found
+			Simplex_tree_vertex vertex = map_cgal_simplex_tree.size();
+	#ifdef DEBUG_TRACES
+			std::cout << "vertex [" << the_alpha_shape_vertex->point() << "] not found - insert " << vertex << std::endl;
+	#endif  // DEBUG_TRACES
+			the_simplex_tree.push_back(vertex);
+			map_cgal_simplex_tree.insert(Alpha_shape_simplex_tree_pair(the_alpha_shape_vertex, vertex));
+		  } else {
+			// alpha shape found
+			Simplex_tree_vertex vertex = the_map_iterator->second;
+	#ifdef DEBUG_TRACES
+			std::cout << "vertex [" << the_alpha_shape_vertex->point() << "] found in " << vertex << std::endl;
+	#endif  // DEBUG_TRACES
+			the_simplex_tree.push_back(vertex);
+		  }
+		}
+		// Construction of the simplex_tree
+		Filtration_value filtr = /*std::sqrt*/(*the_alpha_value_iterator);
+	#ifdef DEBUG_TRACES
+		std::cout << "filtration = " << filtr << std::endl;
+	#endif  // DEBUG_TRACES
+		if (filtr > filtration_max) {
+		  filtration_max = filtr;
+		}
+		simplex_tree.insert_simplex(the_simplex_tree, filtr);
+		if (the_alpha_value_iterator != the_alpha_values.end())
+		  ++the_alpha_value_iterator;
+		else
+		  std::cout << "This shall not happen" << std::endl;
+	  }
+	  simplex_tree.set_filtration(filtration_max);
+	  simplex_tree.set_dimension(dim_max);
 
-#ifdef DEBUG_TRACES
-  std::cout << "vertices \t\t" << count_vertices << std::endl;
-  std::cout << "edges \t\t" << count_edges << std::endl;
-  std::cout << "facets \t\t" << count_facets << std::endl;
-  std::cout << "cells \t\t" << count_cells << std::endl;
+	#ifdef DEBUG_TRACES
+	  std::cout << "vertices \t\t" << count_vertices << std::endl;
+	  std::cout << "edges \t\t" << count_edges << std::endl;
+	  std::cout << "facets \t\t" << count_facets << std::endl;
+	  std::cout << "cells \t\t" << count_cells << std::endl;
 
 
-  std::cout << "Information of the Simplex Tree: " << std::endl;
-  std::cout << "  Number of vertices = " << simplex_tree.num_vertices() << " ";
-  std::cout << "  Number of simplices = " << simplex_tree.num_simplices() << std::endl << std::endl;
-  std::cout << "  Dimension = " << simplex_tree.dimension() << " ";
-  std::cout << "  filtration = " << simplex_tree.filtration() << std::endl << std::endl;
-#endif  // DEBUG_TRACES
+	  std::cout << "Information of the Simplex Tree: " << std::endl;
+	  std::cout << "  Number of vertices = " << simplex_tree.num_vertices() << " ";
+	  std::cout << "  Number of simplices = " << simplex_tree.num_simplices() << std::endl << std::endl;
+	  std::cout << "  Dimension = " << simplex_tree.dimension() << " ";
+	  std::cout << "  filtration = " << simplex_tree.filtration() << std::endl << std::endl;
+	#endif  // DEBUG_TRACES
 
-#ifdef DEBUG_TRACES
-  std::cout << "Iterator on vertices: " << std::endl;
-  for (auto vertex : simplex_tree.complex_vertex_range()) {
-    std::cout << vertex << " ";
-  }
-#endif  // DEBUG_TRACES
+	#ifdef DEBUG_TRACES
+	  std::cout << "Iterator on vertices: " << std::endl;
+	  for (auto vertex : simplex_tree.complex_vertex_range()) {
+		std::cout << vertex << " ";
+	  }
+	#endif  // DEBUG_TRACES
 
-  // Sort the simplices in the order of the filtration
-  simplex_tree.initialize_filtration();
+	  // Sort the simplices in the order of the filtration
+	  simplex_tree.initialize_filtration();
 
-  std::cout << "Simplex_tree dim: " << simplex_tree.dimension() << std::endl;
-  // Compute the persistence diagram of the complex
-  Persistent_cohomology pcoh(simplex_tree, true);
-  // initializes the coefficient field for homology
-  pcoh.init_coefficients(coeff_field_characteristic);
+	  std::cout << "Simplex_tree dim: " << simplex_tree.dimension() << std::endl;
+	  // Compute the persistence diagram of the complex
+	  Persistent_cohomology pcoh(simplex_tree, true);
+	  // initializes the coefficient field for homology
+	  pcoh.init_coefficients(coeff_field_characteristic);
 
-  pcoh.compute_persistent_cohomology(min_persistence);
+	  pcoh.compute_persistent_cohomology(min_persistence);
 
-  pcoh.output_diagram();
+	  pcoh.output_diagram();
 
   return 0;
 }
