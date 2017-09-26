@@ -76,8 +76,9 @@ using Simplex_tree_vector_vertex = std::vector< Simplex_tree_vertex >;
 using PCOH = Gudhi::persistent_cohomology::Persistent_cohomology< ST, Gudhi::persistent_cohomology::Field_Zp >;
 
 void usage(const std::string& progName) {
-  std::cerr << "Usage: " << progName <<
-      " path_to_file_graph coeff_field_characteristic[integer > 0] min_persistence[float >= -1.0]\n";
+  std::cerr << "Usage:\n" << progName << " path_to_OFF_file coeff_field_characteristic[integer " <<
+               "> 0] min_persistence[float >= -1.0]\n";
+  std::cerr << "  path_to_OFF_file is the path to your points cloud in OFF format.\n";
   exit(-1);
 }
 
