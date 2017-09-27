@@ -84,8 +84,16 @@ using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomolog
     ST, Gudhi::persistent_cohomology::Field_Zp >;
 
 void usage(char * const progName) {
-  std::cerr << "Usage: " << progName <<
-      " path_to_file_graph path_to_iso_cuboid_3_file coeff_field_characteristic[integer > 0] min_persistence[float >= -1.0]\n";
+  std::cerr << "Usage:\n" << progName << " path_to_OFF_file path_to_iso_cuboid_3_file coeff_field_characteristic[" <<
+               "integer > 0] min_persistence[float >= -1.0]\n" <<
+               "  path_to_OFF_file is the path to your points cloud in OFF format.\n" <<
+               "  path_to_iso_cuboid_3_file is the path to the iso cuboid file with the following format :\n" <<
+               "    x_min y_min z_min x_max y_max z_max\n" <<
+               "  In this example, the periodic cube will be " <<
+               "{ x = [x_min,x_max]; y = [y_min,y_max]; z = [z_min,z_max] }.\n" <<
+               "  For more information, please refer to\n" <<
+               "    https://doc.cgal.org/latest/Kernel_23/classCGAL_1_1Iso__cuboid__3.html\n";
+
   exit(-1);
 }
 
