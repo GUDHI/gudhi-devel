@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <utility>  // for pair
 #include <vector>
+#include <limits>  // for infinity value
 
 #ifdef GUDHI_USE_TBB
 #include <tbb/parallel_for.h>
@@ -155,7 +156,7 @@ class Hasse_complex {
 
   Filtration_value filtration(Simplex_handle sh) {
     if (sh == null_simplex()) {
-      return INFINITY;
+      return std::numeric_limits<Filtration_value>::infinity();
     }
     return complex_[sh].filtration_;
   }

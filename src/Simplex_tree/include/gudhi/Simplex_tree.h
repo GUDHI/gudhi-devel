@@ -402,14 +402,14 @@ class Simplex_tree {
 
   /** \brief Returns the filtration value of a simplex.
    *
-   * Called on the null_simplex, returns INFINITY.
+   * Called on the null_simplex, it returns infinity.
    * If SimplexTreeOptions::store_filtration is false, returns 0.
    */
   static Filtration_value filtration(Simplex_handle sh) {
     if (sh != null_simplex()) {
       return sh->second.filtration();
     } else {
-      return INFINITY;
+      return std::numeric_limits<Filtration_value>::infinity();
     }
   }
 
