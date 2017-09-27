@@ -193,7 +193,7 @@ class Kd_tree_search {
   /// \brief Search incrementally for the nearest neighbors from a query point.
   /// @param[in] p The query point.
   /// @param[in] eps Approximation factor.
-  /// @return A range (whose `value_type` is `std::size_t`) containing the 
+  /// @return A range (whose `value_type` is `std::size_t`) containing the
   /// neighbors sorted by their distance to p.
   /// All the neighbors are not computed by this function, but they will be
   /// computed incrementally when the iterator on the range is incremented.
@@ -239,7 +239,7 @@ class Kd_tree_search {
   /// \brief Search incrementally for the farthest neighbors from a query point.
   /// @param[in] p The query point.
   /// @param[in] eps Approximation factor.
-  /// @return A range (whose `value_type` is `std::size_t`) 
+  /// @return A range (whose `value_type` is `std::size_t`)
   /// containing the neighbors sorted by their distance to p.
   /// All the neighbors are not computed by this function, but they will be
   /// computed incrementally when the iterator on the range is incremented.
@@ -264,12 +264,10 @@ class Kd_tree_search {
   ///                Note: `it` is used this way: `*it++ = each_point`.
   /// @param[in] eps Approximation factor.
   template <typename OutputIterator>
-  void near_search(
-    Point const& p,
-    FT radius,
-    OutputIterator it,
-    FT eps = FT(0)) const {
-    
+  void near_search(Point const& p,
+                   FT radius,
+                   OutputIterator it,
+                   FT eps = FT(0)) const {
     m_tree.search(it, Fuzzy_sphere(p, radius, eps, m_tree.traits()));
   }
 
