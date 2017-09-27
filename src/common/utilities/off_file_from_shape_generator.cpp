@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
       usage(argv[0]);
   }
 
-  enum class Data_shape { sphere, cube, curve, torus, klein, undefined } ;
+  enum class Data_shape { sphere, cube, curve, torus, klein, undefined};
 
   Data_shape shape = Data_shape::undefined;
   if (memcmp(argv[2], "sphere", sizeof("sphere")) == 0) {

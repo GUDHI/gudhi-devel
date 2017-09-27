@@ -143,11 +143,10 @@ int main(int argc, char * const argv[]) {
   /*   An edge [10,12,2]      */
 
   st.set_dimension(2);
-  st.set_filtration(0.4);
 
   std::cout << "The complex contains " << st.num_simplices() << " simplices - " << st.num_vertices() << " vertices "
       << std::endl;
-  std::cout << "   - dimension " << st.dimension() << "   - filtration " << st.filtration() << std::endl;
+  std::cout << "   - dimension " << st.dimension() << std::endl;
   std::cout << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:"
       << std::endl;
   std::cout << "**************************************************************" << std::endl;

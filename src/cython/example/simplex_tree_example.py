@@ -52,7 +52,6 @@ else:
 st.set_dimension(3)
 print("dimension=", st.dimension())
 
-st.set_filtration(4.0)
 st.initialize_filtration()
 print("filtration=", st.get_filtration())
 print("filtration[1, 2]=", st.filtration([1, 2]))

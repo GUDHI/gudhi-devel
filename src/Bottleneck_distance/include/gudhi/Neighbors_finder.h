@@ -44,16 +44,16 @@ struct Square_query {
   typedef Internal_point Point_d;
   typedef double FT;
   bool contains(Point_d p) const {
-    return std::abs(p.x()-c.x())<=size && std::abs(p.y()-c.y())<=size;
+    return std::abs(p.x()-c.x()) <= size && std::abs(p.y()-c.y()) <= size;
   }
-  bool inner_range_intersects(CGAL::Kd_tree_rectangle<FT,D> const&r) const {
+  bool inner_range_intersects(CGAL::Kd_tree_rectangle<FT, D> const&r) const {
     return
       r.max_coord(0) >= c.x() - size &&
       r.min_coord(0) <= c.x() + size &&
       r.max_coord(1) >= c.y() - size &&
       r.min_coord(1) <= c.y() + size;
   }
-  bool outer_range_contains(CGAL::Kd_tree_rectangle<FT,D> const&r) const {
+  bool outer_range_contains(CGAL::Kd_tree_rectangle<FT, D> const&r) const {
     return
       r.min_coord(0) >= c.x() - size &&
       r.max_coord(0) <= c.x() + size &&
@@ -146,7 +146,7 @@ inline int Neighbors_finder::pull_near(int u_point_index) {
     // Is the query point near to a V point in the plane ?
     Internal_point u_point = g.get_u_point(u_point_index);
     auto neighbor = kd_t.search_any_point(Square_query{u_point, r});
-    if(!neighbor)
+    if (!neighbor)
       return null_point_index();
     tmp = neighbor->point_index;
     auto point = g.get_v_point(tmp);

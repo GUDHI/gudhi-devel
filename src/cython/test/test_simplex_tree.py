@@ -53,7 +53,6 @@ def test_insertion():
     assert st.find([2, 3]) == False
 
     # filtration test
-    st.set_filtration(5.0)
     st.initialize_filtration()
     assert st.filtration([0, 1, 2]) == 4.0
     assert st.filtration([0, 2]) == 4.0

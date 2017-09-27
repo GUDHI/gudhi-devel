@@ -228,7 +228,6 @@ int main(int argc, char * const argv[]) {
     else
       std::cout << "This shall not happen" << std::endl;
   }
-  simplex_tree.set_filtration(filtration_max);
   simplex_tree.set_dimension(dim_max);
 
 #ifdef DEBUG_TRACES
@@ -242,7 +241,6 @@ int main(int argc, char * const argv[]) {
   std::cout << "  Number of vertices = " << simplex_tree.num_vertices() << " ";
   std::cout << "  Number of simplices = " << simplex_tree.num_simplices() << std::endl << std::endl;
   std::cout << "  Dimension = " << simplex_tree.dimension() << " ";
-  std::cout << "  filtration = " << simplex_tree.filtration() << std::endl << std::endl;
 #endif  // DEBUG_TRACES
 
 #ifdef DEBUG_TRACES

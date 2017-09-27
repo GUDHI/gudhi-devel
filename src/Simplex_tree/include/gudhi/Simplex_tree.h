@@ -289,7 +289,6 @@ class Simplex_tree {
   /** \brief Constructs an empty simplex tree. */
   Simplex_tree()
       : null_vertex_(-1),
-      threshold_(0),
       root_(nullptr, null_vertex_),
       filtration_vect_(),
       dimension_(-1) { }
@@ -297,7 +296,6 @@ class Simplex_tree {
   /** \brief User-defined copy constructor reproduces the whole tree structure. */
   Simplex_tree(const Simplex_tree& simplex_source)
       : null_vertex_(simplex_source.null_vertex_),
-      threshold_(simplex_source.threshold_),
       root_(nullptr, null_vertex_ , simplex_source.root_.members_),
       filtration_vect_(),
       dimension_(simplex_source.dimension_) {
@@ -323,12 +321,10 @@ class Simplex_tree {
   /** \brief User-defined move constructor moves the whole tree structure. */
   Simplex_tree(Simplex_tree && old)
       : null_vertex_(std::move(old.null_vertex_)),
-      threshold_(std::move(old.threshold_)),
       root_(std::move(old.root_)),
       filtration_vect_(std::move(old.filtration_vect_)),
       dimension_(std::move(old.dimension_)) {
     old.dimension_ = -1;
-    old.threshold_ = 0;
     old.root_ = Siblings(nullptr, null_vertex_);
   }
 
@@ -356,7 +352,6 @@ class Simplex_tree {
   /** \brief Checks if two simplex trees are equal. */
   bool operator==(Simplex_tree& st2) {
     if ((null_vertex_ != st2.null_vertex_) ||
-        (threshold_ != st2.threshold_) ||
         (dimension_ != st2.dimension_))
       return false;
     return rec_equal(&root_, &st2.root_);
@@ -407,14 +402,14 @@ class Simplex_tree {
 
   /** \brief Returns the filtration value of a simplex.
    *
-   * Called on the null_simplex, returns INFINITY.
+   * Called on the null_simplex, it returns infinity.
    * If SimplexTreeOptions::store_filtration is false, returns 0.
    */
   static Filtration_value filtration(Simplex_handle sh) {
     if (sh != null_simplex()) {
       return sh->second.filtration();
     } else {
-      return INFINITY;
+      return std::numeric_limits<Filtration_value>::infinity();
     }
   }
 
@@ -425,11 +420,6 @@ class Simplex_tree {
     GUDHI_CHECK(sh != null_simplex(),
                 std::invalid_argument("Simplex_tree::assign_filtration - cannot assign filtration on null_simplex"));
     sh->second.assign_filtration(fv);
-  }
-
-  /** \brief Returns an upper bound of the filtration values of the simplices. */
-  Filtration_value filtration() const {
-    return threshold_;
   }
 
   /** \brief Returns a Simplex_handle different from all Simplex_handles
@@ -755,11 +745,6 @@ class Simplex_tree {
   /** Returns a pointer to the root nodes of the simplex tree. */
   Siblings * root() {
     return &root_;
-  }
-
-  /** Set an upper bound for the filtration values. */
-  void set_filtration(Filtration_value fil) {
-    threshold_ = fil;
   }
 
   /** Set a dimension for the simplicial complex. */
@@ -1215,8 +1200,6 @@ class Simplex_tree {
 
  private:
   Vertex_handle null_vertex_;
-  /** \brief Upper bound on the filtration values of the simplices.*/
-  Filtration_value threshold_;
   /** \brief Total number of simplices in the complex, without the empty simplex.*/
   /** \brief Set of simplex tree Nodes representing the vertices.*/
   Siblings root_;
@@ -1244,7 +1227,6 @@ std::istream& operator>>(std::istream & is, Simplex_tree<T...> & st) {
   typedef Simplex_tree<T...> ST;
   std::vector<typename ST::Vertex_handle> simplex;
   typename ST::Filtration_value fil;
-  typename ST::Filtration_value max_fil = 0;
   int max_dim = -1;
   while (read_simplex(is, simplex, fil)) {
     // read all simplices in the file as a list of vertices
@@ -1253,15 +1235,11 @@ std::istream& operator>>(std::istream & is, Simplex_tree<T...> & st) {
     if (max_dim < dim) {
       max_dim = dim;
     }
-    if (max_fil < fil) {
-      max_fil = fil;
-    }
     // insert every simplex in the simplex tree
     st.insert_simplex(simplex, fil);
     simplex.clear();
   }
   st.set_dimension(max_dim);
-  st.set_filtration(max_fil);
 
   return is;
 }
