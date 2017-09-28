@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <utility>  // for pair
 #include <vector>
+#include <limits>  // for infinity value
 
 #ifdef GUDHI_USE_TBB
 #include <tbb/parallel_for.h>
@@ -104,7 +105,6 @@ class Hasse_complex {
   Hasse_complex(Complex_ds & cpx)
       : complex_(cpx.num_simplices())
       , vertices_()
-      , threshold_(cpx.filtration())
       , num_vertices_()
       , dim_max_(cpx.dimension()) {
     int size = complex_.size();
@@ -125,7 +125,6 @@ class Hasse_complex {
   Hasse_complex()
       : complex_()
       , vertices_()
-      , threshold_(0)
       , num_vertices_(0)
       , dim_max_(-1) { }
 
@@ -157,13 +156,9 @@ class Hasse_complex {
 
   Filtration_value filtration(Simplex_handle sh) {
     if (sh == null_simplex()) {
-      return filtration();
+      return std::numeric_limits<Filtration_value>::infinity();
     }
     return complex_[sh].filtration_;
-  }
-
-  Filtration_value filtration() {
-    return threshold_;
   }
 
   int dimension(Simplex_handle sh) {
@@ -206,7 +201,6 @@ class Hasse_complex {
 
   std::vector< Hasse_simp, Gudhi::no_init_allocator<Hasse_simp> > complex_;
   std::vector<Simplex_handle> vertices_;
-  Filtration_value threshold_;
   size_t num_vertices_;
   int dim_max_;
 };
@@ -245,7 +239,6 @@ std::istream& operator>>(std::istream & is
   }
 
   hcpx.dim_max_ = max_dim;
-  hcpx.threshold_ = max_fil;
 
   return is;
 }

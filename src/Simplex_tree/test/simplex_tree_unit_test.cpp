@@ -26,7 +26,6 @@ void test_empty_simplex_tree(typeST& tst) {
   typedef typename typeST::Vertex_handle Vertex_handle;
   const Vertex_handle DEFAULT_VERTEX_VALUE = Vertex_handle(- 1);
   BOOST_CHECK(tst.null_vertex() == DEFAULT_VERTEX_VALUE);
-  BOOST_CHECK(tst.filtration() == 0.0);
   BOOST_CHECK(tst.num_vertices() == (size_t) 0);
   BOOST_CHECK(tst.num_simplices() == (size_t) 0);
   typename typeST::Siblings* STRoot = tst.root();
@@ -98,12 +97,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_from_file, typeST, list_of_tested_var
 
   // Display the Simplex_tree
   std::cout << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
-  std::cout << "   - dimension " << st.dimension() << "   - filtration " << st.filtration() << std::endl;
+  std::cout << "   - dimension " << st.dimension() << std::endl;
 
   // Check
   BOOST_CHECK(st.num_simplices() == 143353);
   BOOST_CHECK(st.dimension() == 3);
-  BOOST_CHECK(AreAlmostTheSame(st.filtration(), 0.4));
 
   int previous_size = 0;
   for (auto f_simplex : st.filtration_simplex_range()) {
@@ -147,7 +145,6 @@ void test_simplex_tree_insert_returns_true(const typePairSimplexBool& returnValu
 }
 
 // Global variables
-double max_fil = 0.0;
 int dim_max = -1;
 
 template<class typeST, class Filtration_value>
@@ -158,15 +155,8 @@ void set_and_test_simplex_tree_dim_fil(typeST& simplexTree, int vectorSize, cons
     std::cout << "   set_and_test_simplex_tree_dim_fil - dim_max=" << dim_max
         << std::endl;
   }
-  if (fil > max_fil) {
-    max_fil = fil;
-    simplexTree.set_filtration(max_fil);
-    std::cout << "   set_and_test_simplex_tree_dim_fil - max_fil=" << max_fil
-        << std::endl;
-  }
 
   BOOST_CHECK(simplexTree.dimension() == dim_max);
-  BOOST_CHECK(AreAlmostTheSame(simplexTree.filtration(), max_fil));
 
   // Another way to count simplices:
   size_t num_simp = 0;
@@ -190,7 +180,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
   const Filtration_value FOURTH_FILTRATION_VALUE = 0.4;
   // reset since we run the test several times
   dim_max = -1;
-  max_fil = 0.0;
 
   // TEST OF INSERTION
   std::cout << "********************************************************************" << std::endl;
@@ -310,7 +299,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
   BOOST_CHECK(shReturned == typename typeST::Simplex_handle(nullptr));
   BOOST_CHECK(st.num_vertices() == (size_t) 4); // Not incremented !!
   BOOST_CHECK(st.dimension() == dim_max);
-  BOOST_CHECK(AreAlmostTheSame(st.filtration(), max_fil));
 
   // ++ ELEVENTH
   std::cout << "   - INSERT (2,1,0) (already inserted)" << std::endl;
@@ -325,7 +313,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
   BOOST_CHECK(shReturned == typename typeST::Simplex_handle(nullptr));
   BOOST_CHECK(st.num_vertices() == (size_t) 4); // Not incremented !!
   BOOST_CHECK(st.dimension() == dim_max);
-  BOOST_CHECK(AreAlmostTheSame(st.filtration(), max_fil));
 
   /* Inserted simplex:        */
   /*    1                     */
@@ -365,7 +352,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
 
   // Display the Simplex_tree - Can not be done in the middle of 2 inserts
   std::cout << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
-  std::cout << "   - dimension " << st.dimension() << "   - filtration " << st.filtration() << std::endl;
+  std::cout << "   - dimension " << st.dimension() << std::endl;
   std::cout << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
   for (auto f_simplex : st.filtration_simplex_range()) {
     std::cout << "   " << "[" << st.filtration(f_simplex) << "] ";
@@ -575,7 +562,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(NSimplexAndSubfaces_tree_insertion, typeST, list_o
 
   // Display the Simplex_tree - Can not be done in the middle of 2 inserts
   std::cout << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
-  std::cout << "   - dimension " << st.dimension() << "   - filtration " << st.filtration() << std::endl;
+  std::cout << "   - dimension " << st.dimension() << std::endl;
   std::cout << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
   for (auto f_simplex : st.filtration_simplex_range()) {
     std::cout << "   " << "[" << st.filtration(f_simplex) << "] ";
@@ -756,7 +743,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(copy_move_on_simplex_tree, typeST, list_of_tested_
   typeST st_empty;
   // Check st has been emptied by the move
   BOOST_CHECK(st == st_empty);
-  BOOST_CHECK(st.filtration() == 0);
   BOOST_CHECK(st.dimension() == -1);
   BOOST_CHECK(st.num_simplices() == 0);
   BOOST_CHECK(st.num_vertices() == (size_t)0);

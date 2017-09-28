@@ -36,9 +36,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
 
     cdef cppclass Simplex_tree_interface_full_featured "Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>":
         Simplex_tree()
-        double filtration()
         double simplex_filtration(vector[int] simplex)
-        void set_filtration(double filtration)
         void initialize_filtration()
         int num_vertices()
         int num_simplices()
@@ -114,14 +112,6 @@ cdef class SimplexTree:
         :rtype:  float
         """
         return self.thisptr.simplex_filtration(simplex)
-
-    def set_filtration(self, filtration):
-        """This function sets the main simplicial complex filtration value.
-
-        :param filtration: The filtration value.
-        :type filtration: float.
-        """
-        self.thisptr.set_filtration(<double> filtration)
 
     def initialize_filtration(self):
         """This function initializes and sorts the simplicial complex

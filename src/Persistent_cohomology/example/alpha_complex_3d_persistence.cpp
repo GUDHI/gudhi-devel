@@ -76,8 +76,9 @@ using Simplex_tree_vector_vertex = std::vector< Simplex_tree_vertex >;
 using PCOH = Gudhi::persistent_cohomology::Persistent_cohomology< ST, Gudhi::persistent_cohomology::Field_Zp >;
 
 void usage(const std::string& progName) {
-  std::cerr << "Usage: " << progName <<
-      " path_to_file_graph coeff_field_characteristic[integer > 0] min_persistence[float >= -1.0]\n";
+  std::cerr << "Usage:\n" << progName << " path_to_OFF_file coeff_field_characteristic[integer " <<
+               "> 0] min_persistence[float >= -1.0]\n";
+  std::cerr << "  path_to_OFF_file is the path to your points cloud in OFF format.\n";
   exit(-1);
 }
 
@@ -202,7 +203,6 @@ int main(int argc, char * const argv[]) {
     else
       std::cout << "This shall not happen" << std::endl;
   }
-  simplex_tree.set_filtration(filtration_max);
   simplex_tree.set_dimension(dim_max);
 
 #ifdef DEBUG_TRACES
@@ -216,7 +216,6 @@ int main(int argc, char * const argv[]) {
   std::cout << "  Number of vertices = " << simplex_tree.num_vertices() << " ";
   std::cout << "  Number of simplices = " << simplex_tree.num_simplices() << std::endl << std::endl;
   std::cout << "  Dimension = " << simplex_tree.dimension() << " ";
-  std::cout << "  filtration = " << simplex_tree.filtration() << std::endl << std::endl;
 #endif  // DEBUG_TRACES
 
 #ifdef DEBUG_TRACES

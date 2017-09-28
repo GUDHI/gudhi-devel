@@ -31,12 +31,11 @@ std::string test_rips_persistence(int min_coefficient, int max_coefficient, doub
 
   // Display the Simplex_tree
   std::cout << "The complex contains " << st.num_simplices() << " simplices" << " - dimension= " << st.dimension()
-      << " - filtration= " << st.filtration() << std::endl;
+      << std::endl;
 
   // Check
   BOOST_CHECK(st.num_simplices() == 58);
   BOOST_CHECK(st.dimension() == 3);
-  BOOST_CHECK(st.filtration() == 0.4);
 
   // Sort the simplices in the order of the filtration
   st.initialize_filtration();

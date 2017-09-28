@@ -25,21 +25,21 @@
 #include <iostream>
 #include <vector>
 #include <utility>  // for pair
-#include <fstream>
-#include <sstream>
 #include <string>
+#include <limits>  // for numeric_limits
 
 int main(int argc, char** argv) {
   if (argc < 3) {
-    std::cout << "To run this program please provide as an input two files with persistence diagrams. Each file " <<
-        "should contain a birth-death pair per line. Third, optional parameter is an error bound on a bottleneck" <<
-        " distance (set by default to zero). The program will now terminate \n";
+    std::cout << "To run this program please provide as an input two files with persistence diagrams. Each file" <<
+        " should contain a birth-death pair per line. Third, optional parameter is an error bound on a bottleneck" <<
+        " distance (set by default to the smallest positive double value). If you set the error bound to 0, be" <<
+        " aware this version is exact but expensive. The program will now terminate \n";
     return -1;
   }
   std::vector<std::pair<double, double>> diag1 = Gudhi::read_persistence_intervals_in_dimension(argv[1]);
   std::vector<std::pair<double, double>> diag2 = Gudhi::read_persistence_intervals_in_dimension(argv[2]);
 
-  double tolerance = 0.;
+  double tolerance = std::numeric_limits<double>::min();
   if (argc == 4) {
     tolerance = atof(argv[3]);
   }
