@@ -456,11 +456,15 @@ make doxygen
  * @example Persistent_cohomology/persistence_from_simple_simplex_tree.cpp
  * @example Persistent_cohomology/plain_homology.cpp
  * @example Persistent_cohomology/rips_multifield_persistence.cpp
+ * @example Persistent_cohomology/rips_correlation_matrix_persistence.cpp
  * @example Persistent_cohomology/rips_distance_matrix_persistence.cpp
  * @example Persistent_cohomology/rips_persistence.cpp
  * @example Persistent_cohomology/custom_persistence_sort.cpp
  * @example Persistent_cohomology/rips_persistence_step_by_step.cpp
+ * @example Rips_complex/example_one_skeleton_rips_from_correlation_matrix.cpp
+ * @example Rips_complex/example_one_skeleton_rips_from_distance_matrix.cpp
  * @example Rips_complex/example_one_skeleton_rips_from_points.cpp
+ * @example Rips_complex/example_rips_complex_from_csv_distance_matrix_file.cpp
  * @example Rips_complex/example_rips_complex_from_off_file.cpp
  * @example Simplex_tree/mini_simplex_tree.cpp
  * @example Simplex_tree/simple_simplex_tree.cpp

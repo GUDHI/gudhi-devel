@@ -21,7 +21,6 @@ int main() {
   // |0.01	0.01	0.72	1	    0.7 |
   // |0.89	0.61	0.03	0.7	    1   |
 
-
   Distance_matrix correlations;
   correlations.push_back({});
   correlations.push_back({0.06});
@@ -32,24 +31,21 @@ int main() {
   // ----------------------------------------------------------------------------
   // Convert correlation matrix to a distance matrix:
   // ----------------------------------------------------------------------------
-  for ( size_t i = 0 ; i != correlations.size() ; ++i )
-  {
-	  for ( size_t j = 0 ; j != correlations[i].size() ; ++j )
-	  {
-		  correlations[i][j] = 1-correlations[i][j];
-		  if ( correlations[i][j] < 0 )
-		  {
-			  std::cerr << "The input matrix is not a correlation matrix. \n";
-			  throw "The input matrix is not a correlation matrix. \n";
-		  }		  
-	  }
-  } 
-  
+  for (size_t i = 0; i != correlations.size(); ++i) {
+    for (size_t j = 0; j != correlations[i].size(); ++j) {
+      correlations[i][j] = 1 - correlations[i][j];
+      if (correlations[i][j] < 0) {
+        std::cerr << "The input matrix is not a correlation matrix. \n";
+        throw "The input matrix is not a correlation matrix. \n";
+      }
+    }
+  }
+
   //-----------------------------------------------------------------------------
-  // Now the correlation matrix is really the distance matrix and can be processed further. 
+  // Now the correlation matrix is really the distance matrix and can be processed further.
   //-----------------------------------------------------------------------------
   Distance_matrix distances = correlations;
-  
+
   double threshold = 1.0;
   Rips_complex rips_complex_from_points(distances, threshold);
 
@@ -58,18 +54,17 @@ int main() {
   // ----------------------------------------------------------------------------
   // Display information about the one skeleton Rips complex
   // ----------------------------------------------------------------------------
-  std::cout << "Rips complex is of dimension " << stree.dimension() <<
-               " - " << stree.num_simplices() << " simplices - " <<
-               stree.num_vertices() << " vertices." << std::endl;
+  std::cout << "Rips complex is of dimension " << stree.dimension() << " - " << stree.num_simplices() << " simplices - "
+            << stree.num_vertices() << " vertices." << std::endl;
 
-  std::cout << "Iterator on Rips complex simplices in the filtration order, with [filtration value]:" <<
-               std::endl;
+  std::cout << "Iterator on Rips complex simplices in the filtration order, with [filtration value]:" << std::endl;
   for (auto f_simplex : stree.filtration_simplex_range()) {
     std::cout << "   ( ";
     for (auto vertex : stree.simplex_vertex_range(f_simplex)) {
       std::cout << vertex << " ";
     }
-    std::cout << ") -> " << "[" << stree.filtration(f_simplex) << "] ";
+    std::cout << ") -> "
+              << "[" << stree.filtration(f_simplex) << "] ";
     std::cout << std::endl;
   }
 

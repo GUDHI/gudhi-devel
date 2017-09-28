@@ -40,7 +40,7 @@ add_test(NAME Persistent_cohomology_example_from_simple_simplex_tree COMMAND $<T
 add_test(NAME Persistent_cohomology_example_from_rips_distance_matrix COMMAND $<TARGET_FILE:rips_distance_matrix_persistence>
     "${CMAKE_SOURCE_DIR}/data/distance_matrix/full_square_distance_matrix.csv" "-r" "1.0" "-d" "3" "-p" "3" "-m" "0")
 add_test(rips_distance_matrix ${CMAKE_CURRENT_BINARY_DIR}/rips_distance_matrix_persistence
-    ${CMAKE_SOURCE_DIR}/data/distance_matrix/full_correlation_matrix.csv.csv -r 1.0 -d 3 -p 3 -m 0)
+    ${CMAKE_SOURCE_DIR}/data/correlation_matrix/full_correlation_matrix.csv.csv -r 1.0 -d 3 -p 3 -m 0)
 add_test(NAME Persistent_cohomology_example_from_rips_on_tore_3D COMMAND $<TARGET_FILE:rips_persistence>
     "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" "-r" "0.25" "-m" "0.5" "-d" "3" "-p" "3")
 add_test(NAME Persistent_cohomology_example_from_rips_step_by_step_on_tore_3D COMMAND $<TARGET_FILE:rips_persistence_step_by_step>

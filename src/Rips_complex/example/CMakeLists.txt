@@ -9,23 +9,25 @@ add_executable ( Rips_complex_example_one_skeleton_from_points example_one_skele
 # Distance matrix
 add_executable ( Rips_complex_example_one_skeleton_from_distance_matrix example_one_skeleton_rips_from_distance_matrix.cpp )
 
-add_executable ( example_one_skeleton_rips_from_correlation_matrix example_one_skeleton_rips_from_correlation_matrix.cpp )
-
-
 add_executable ( Rips_complex_example_from_csv_distance_matrix example_rips_complex_from_csv_distance_matrix_file.cpp )
+
+# Correlation matrix
+add_executable (  Rips_complex_example_one_skeleton_rips_from_correlation_matrix example_one_skeleton_rips_from_correlation_matrix.cpp )
 
 if (TBB_FOUND)
   target_link_libraries(Rips_complex_example_from_off ${TBB_LIBRARIES})
   target_link_libraries(Rips_complex_example_one_skeleton_from_points ${TBB_LIBRARIES})
   target_link_libraries(Rips_complex_example_one_skeleton_from_distance_matrix ${TBB_LIBRARIES})
-  target_link_libraries(example_one_skeleton_rips_from_correlation_matrix ${TBB_LIBRARIES})
   target_link_libraries(Rips_complex_example_from_csv_distance_matrix ${TBB_LIBRARIES})
+  target_link_libraries(Rips_complex_example_one_skeleton_rips_from_correlation_matrix ${TBB_LIBRARIES})
 endif()
 
 add_test(NAME Rips_complex_example_one_skeleton_from_points
     COMMAND $<TARGET_FILE:Rips_complex_example_one_skeleton_from_points>)
 add_test(NAME Rips_complex_example_one_skeleton_from_distance_matrix
     COMMAND $<TARGET_FILE:Rips_complex_example_one_skeleton_from_distance_matrix>)
+add_test(NAME Rips_complex_example_one_skeleton_rips_from_correlation_matrix
+    COMMAND $<TARGET_FILE:Rips_complex_example_one_skeleton_rips_from_correlation_matrix>)
 
 add_test(NAME Rips_complex_example_from_off_doc_12_1 COMMAND $<TARGET_FILE:Rips_complex_example_from_off>
     "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" "12.0" "1" "${CMAKE_CURRENT_BINARY_DIR}/ripsoffreader_result_12_1.txt")
@@ -61,3 +63,4 @@ install(TARGETS Rips_complex_example_from_off DESTINATION bin)
 install(TARGETS Rips_complex_example_one_skeleton_from_points DESTINATION bin)
 install(TARGETS Rips_complex_example_one_skeleton_from_distance_matrix DESTINATION bin)
 install(TARGETS Rips_complex_example_from_csv_distance_matrix DESTINATION bin)
+install(TARGETS Rips_complex_example_one_skeleton_rips_from_correlation_matrix DESTINATION bin)

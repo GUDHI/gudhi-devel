@@ -50,7 +50,8 @@ print("RipsComplex creation from distance matrix read in a csv file")
 message = "RipsComplex with max_edge_length=" + repr(args.max_edge_length)
 print(message)
 
-rips_complex = gudhi.RipsComplex(csv_file=args.file, max_edge_length=args.max_edge_length)
+distance_matrix = gudhi.read_lower_triangular_matrix_from_csv_file(csv_file=args.file)
+rips_complex = gudhi.RipsComplex(distance_matrix=distance_matrix, max_edge_length=args.max_edge_length)
 simplex_tree = rips_complex.create_simplex_tree(max_dimension=args.max_dimension)
 
 message = "Number of simplices=" + repr(simplex_tree.num_simplices())
