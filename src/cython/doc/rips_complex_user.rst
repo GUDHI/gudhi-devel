@@ -197,7 +197,7 @@ Example from csv file
 ^^^^^^^^^^^^^^^^^^^^^
 
 This example builds the :doc:`Rips_complex <rips_complex_ref>` from the given
-points in an OFF file, and max_edge_length value.
+distance matrix in a csv file, and max_edge_length value.
 Then it creates a :doc:`Simplex_tree <simplex_tree_ref>` with it.
 
 Finally, it is asked to display information about the Rips complex.
