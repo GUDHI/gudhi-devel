@@ -95,7 +95,7 @@ in the example below). Next, in lexicographical order, the filtration of top dim
 
 The input file for the following complex is:
 
-.. literalinclude:: cubicalcomplexdoc.txt
+.. literalinclude:: ../../data/bitmap/cubicalcomplexdoc.txt
 
 .. centered:: ../../data/bitmap/cubicalcomplexdoc.txt
 
@@ -128,7 +128,7 @@ complex with periodic boundary conditions. One can also use Perseus style input 
 conditions in a given direction, then number of top dimensional cells in this direction have to be multiplied by -1.
 For instance:
 
-.. literalinclude:: periodiccubicalcomplexdoc.txt
+.. literalinclude:: ../../data/bitmap/periodiccubicalcomplexdoc.txt
 
 .. centered:: ../../data/bitmap/periodiccubicalcomplexdoc.txt
 
