@@ -46,7 +46,7 @@ namespace spatial_searching {
  * 
  * \section spatial_searching_examples Example
  * 
- * This example generates 500 random points, then performs near search, and queries for nearest and farthest points using different methods.
+ * This example generates 500 random points, then performs all-near-neighbors searches, and queries for nearest and furthest neighbors using different methods.
  * 
  * \include Spatial_searching/example_spatial_searching.cpp
  * 
