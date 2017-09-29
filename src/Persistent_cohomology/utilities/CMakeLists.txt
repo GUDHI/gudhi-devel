@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 2.6)
 project(Persistent_cohomology_utilities)
 
 add_executable(rips_distance_matrix_persistence rips_distance_matrix_persistence.cpp)
-target_link_libraries(rips_distance_matrix_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(rips_distance_matrix_persistence ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 add_executable(rips_persistence rips_persistence.cpp)
-target_link_libraries(rips_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(rips_persistence ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 if (TBB_FOUND)
   target_link_libraries(rips_distance_matrix_persistence ${TBB_LIBRARIES})
@@ -22,7 +22,7 @@ install(TARGETS rips_persistence DESTINATION bin)
 
 if(CGAL_FOUND)
   add_executable(alpha_complex_3d_persistence alpha_complex_3d_persistence.cpp)
-  target_link_libraries(alpha_complex_3d_persistence ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
+  target_link_libraries(alpha_complex_3d_persistence ${CGAL_LIBRARY})
 
   if (TBB_FOUND)
     target_link_libraries(alpha_complex_3d_persistence ${TBB_LIBRARIES})
@@ -35,10 +35,10 @@ if(CGAL_FOUND)
   if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
     add_executable (alpha_complex_persistence alpha_complex_persistence.cpp)
     target_link_libraries(alpha_complex_persistence
-        ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+        ${CGAL_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
     add_executable(periodic_alpha_complex_3d_persistence periodic_alpha_complex_3d_persistence.cpp)
-    target_link_libraries(periodic_alpha_complex_3d_persistence ${Boost_SYSTEM_LIBRARY} ${CGAL_LIBRARY})
+    target_link_libraries(periodic_alpha_complex_3d_persistence ${CGAL_LIBRARY})
 
     if (TBB_FOUND)
       target_link_libraries(alpha_complex_persistence ${TBB_LIBRARIES})

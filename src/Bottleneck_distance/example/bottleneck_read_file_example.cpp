@@ -20,53 +20,31 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define CGAL_HAS_THREADS
-
 #include <gudhi/Bottleneck.h>
+#include <gudhi/reader_utils.h>
 #include <iostream>
 #include <vector>
 #include <utility>  // for pair
-#include <fstream>
-#include <sstream>
 #include <string>
-
-std::vector< std::pair<double, double> > read_diagram_from_file(const char* filename) {
-  std::ifstream in;
-  in.open(filename);
-  std::vector< std::pair<double, double> > result;
-  if (!in.is_open()) {
-    std::cerr << "File : " << filename << " do not exist. The program will now terminate \n";
-    throw "File do not exist \n";
-  }
-
-  std::string line;
-  while (!in.eof()) {
-    getline(in, line);
-    if (line.length() != 0) {
-      std::stringstream lineSS;
-      lineSS << line;
-      double beginn, endd;
-      lineSS >> beginn;
-      lineSS >> endd;
-      result.push_back(std::make_pair(beginn, endd));
-    }
-  }
-  in.close();
-  return result;
-}  // read_diagram_from_file
+#include <limits>  // for numeric_limits
 
 int main(int argc, char** argv) {
   if (argc < 3) {
-    std::cout << "To run this program please provide as an input two files with persistence diagrams. Each file " <<
-        "should contain a birth-death pair per line. Third, optional parameter is an error bound on a bottleneck" <<
-        " distance (set by default to zero). The program will now terminate \n";
+    std::cout << "To run this program please provide as an input two files with persistence diagrams. Each file" <<
+        " should contain a birth-death pair per line. Third, optional parameter is an error bound on a bottleneck" <<
+        " distance (set by default to the smallest positive double value). If you set the error bound to 0, be" <<
+        " aware this version is exact but expensive. The program will now terminate \n";
+    return -1;
   }
-  std::vector< std::pair< double, double > > diag1 = read_diagram_from_file(argv[1]);
-  std::vector< std::pair< double, double > > diag2 = read_diagram_from_file(argv[2]);
-  double tolerance = 0.;
+  std::vector<std::pair<double, double>> diag1 = Gudhi::read_persistence_intervals_in_dimension(argv[1]);
+  std::vector<std::pair<double, double>> diag2 = Gudhi::read_persistence_intervals_in_dimension(argv[2]);
+
+  double tolerance = std::numeric_limits<double>::min();
   if (argc == 4) {
     tolerance = atof(argv[3]);
   }
   double b = Gudhi::persistence_diagram::bottleneck_distance(diag1, diag2, tolerance);
   std::cout << "The distance between the diagrams is : " << b << ". The tolerance is : " << tolerance << std::endl;
+
+  return 0;
 }

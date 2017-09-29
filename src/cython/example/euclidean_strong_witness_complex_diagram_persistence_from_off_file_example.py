@@ -40,6 +40,7 @@ parser.add_argument("-f", "--file", type=str, required=True)
 parser.add_argument("-a", "--max_alpha_square", type=float, required=True)
 parser.add_argument("-n", "--number_of_landmarks", type=int, required=True)
 parser.add_argument("-d", "--limit_dimension", type=int, required=True)
+parser.add_argument("-b", "--band_boot", type=float, default=0.)
 parser.add_argument('--no-diagram', default=False, action='store_true' , help='Flag for not to display the diagrams')
 
 args = parser.parse_args()
@@ -70,8 +71,8 @@ with open(args.file, 'r') as f:
         print(simplex_tree.betti_numbers())
 
         if args.no_diagram == False:
-            gudhi.plot_persistence_diagram(diag)
-
+            pplot = gudhi.plot_persistence_diagram(diag, band_boot=args.band_boot)
+            pplot.show()
     else:
         print(args.file, "is not a valid OFF file")
 

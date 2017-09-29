@@ -1,6 +1,6 @@
 # This files manage third party libraries required by GUDHI
 
-find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework chrono timer date_time program_options thread)
+find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework program_options thread)
 
 if(NOT Boost_FOUND)
   message(FATAL_ERROR "NOTICE: This program requires Boost and will not be compiled.")
@@ -99,25 +99,14 @@ add_definitions(-DBOOST_RESULT_OF_USE_DECLTYPE)
 add_definitions(-DBOOST_ALL_NO_LIB)
 # problem with Visual Studio link on Boost program_options
 add_definitions( -DBOOST_ALL_DYN_LINK )
+# problem on Mac with boost_system and boost_thread
+add_definitions( -DBOOST_SYSTEM_NO_DEPRECATED )
 
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
 message(STATUS "boost include dirs:" ${Boost_INCLUDE_DIRS})
 message(STATUS "boost library dirs:" ${Boost_LIBRARY_DIRS})
-
-macro( find_the_lib placeholder THE_LIBS )
-  set (THE_LIB_WE_FOUND "NO")
-  foreach(THE_LIB ${THE_LIBS})
-    if(EXISTS ${THE_LIB})
-      get_filename_component(THE_LIB_WE ${THE_LIB} NAME_WE)
-      if (NOT THE_LIB_WE_FOUND)
-        set (THE_LIB_WE_FOUND "YES")
-        set(returnValue "${THE_LIB_WE}")
-      endif(NOT THE_LIB_WE_FOUND)
-    endif(EXISTS ${THE_LIB})
-  endforeach(THE_LIB ${THE_LIBS})
-endmacro( find_the_lib )
 
 # Find the correct Python interpreter.
 # Can be set with -DPYTHON_EXECUTABLE=/usr/bin/python3 or -DPython_ADDITIONAL_VERSIONS=3 for instance.
@@ -128,15 +117,13 @@ if(NOT GUDHI_CYTHON_PATH)
 endif(NOT GUDHI_CYTHON_PATH)
 
 if(PYTHONINTERP_FOUND AND CYTHON_FOUND)
-  # Unitary tests are available through py.test
-  find_program( PYTEST_PATH py.test )
   # Default found version 2
   if(PYTHON_VERSION_MAJOR EQUAL 2)
     # Documentation generation is available through sphinx
     find_program( SPHINX_PATH sphinx-build )
   elseif(PYTHON_VERSION_MAJOR EQUAL 3)
     # No sphinx-build in Pyton3, just hack it
-    set(SPHINX_PATH "${CMAKE_SOURCE_DIR}/${GUDHI_CYTHON_PATH}/doc/python3-sphinx-build")
+    set(SPHINX_PATH "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/${GUDHI_CYTHON_PATH}/doc/python3-sphinx-build.py")
   else()
     message(FATAL_ERROR "ERROR: Try to compile the Cython interface. Python version ${PYTHON_VERSION_STRING} is not valid.")
   endif(PYTHON_VERSION_MAJOR EQUAL 2)

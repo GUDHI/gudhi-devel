@@ -4,10 +4,10 @@ project(Witness_complex_utilities)
 # CGAL and Eigen3 are required for Euclidean version of Witness
 if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
   add_executable( Witness_complex_example_strong_off example_strong_witness_complex_off.cpp )
-  target_link_libraries(Witness_complex_example_strong_off ${Boost_SYSTEM_LIBRARY})
+  target_link_libraries(Witness_complex_example_strong_off)
 
   add_executable ( Witness_complex_example_strong_witness_persistence example_strong_witness_persistence.cpp )
-  target_link_libraries(Witness_complex_example_strong_witness_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+  target_link_libraries(Witness_complex_example_strong_witness_persistence ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
   if (TBB_FOUND)
     target_link_libraries(Witness_complex_example_strong_witness_persistence ${TBB_LIBRARIES})

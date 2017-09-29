@@ -4,7 +4,7 @@
 
 +----------------------------------------------------------------+------------------------------------------------------------------------+
 | .. figure::                                                    | The simplex tree is an efficient and flexible data structure for       |
-|      img/Simplex_tree_representation.png                       | representing general (filtered) simplicial complexes.                  |
+|      ../../doc/Simplex_tree/Simplex_tree_representation.png    | representing general (filtered) simplicial complexes.                  |
 |      :alt: Simplex tree representation                         |                                                                        |
 |      :figclass: align-center                                   | The data structure is described in                                     |
 |                                                                | :cite:`boissonnatmariasimplextreealgorithmica`                         |

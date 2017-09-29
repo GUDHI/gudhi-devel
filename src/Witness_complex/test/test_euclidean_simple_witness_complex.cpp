@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(simple_witness_complex) {
   Kd_tree landmark_tree(landmarks);
   Nearest_landmark_table nearest_landmark_table;
   for (auto w: witnesses)
-    nearest_landmark_table.push_back(landmark_tree.query_incremental_nearest_neighbors(w));
+    nearest_landmark_table.push_back(landmark_tree.incremental_nearest_neighbors(w));
 
   // Weak witness complex: Euclidean version
   EuclideanWitnessComplex eucl_witness_complex(landmarks,

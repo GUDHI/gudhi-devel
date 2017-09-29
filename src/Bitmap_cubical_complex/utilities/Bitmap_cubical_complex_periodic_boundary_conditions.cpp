@@ -30,6 +30,7 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <string>
 
 int main(int argc, char** argv) {
   std::cout << "This program computes persistent homology, by using " <<

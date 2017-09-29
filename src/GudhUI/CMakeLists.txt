@@ -5,28 +5,6 @@ find_package(Qt5 COMPONENTS Widgets Xml OpenGL)
 find_package(QGLViewer)
 find_package(OpenGL)
 
-if (CGAL_VERSION VERSION_EQUAL 4.8.0)
-  message(ERROR " GudhUI does not compile with CGAL 4.8.0. 4.8.1, 4.8.2 and 4.9 are OK.")
-endif()
-
-if (NOT CGAL_FOUND)
-  message(ERROR " GudhUI requires CGAL and will not be compiled.")
-endif()
-
-if (NOT Qt5_FOUND)
-  message(ERROR " GudhUI requires Qt5 and will not be compiled.")
-endif()
-
-if (NOT OPENGL_FOUND)
-  message(ERROR " GudhUI requires OpenGL and will not be compiled.")
-endif()
-
-if (NOT QGLVIEWER_FOUND)
-  message(ERROR " GudhUI requires QGLViewer and will not be compiled.")
-endif()
-
-
-
 if ( CGAL_FOUND AND Qt5_FOUND AND OPENGL_FOUND AND QGLVIEWER_FOUND AND NOT CGAL_VERSION VERSION_EQUAL 4.8.0)
 
   set(CMAKE_AUTOMOC ON)
@@ -37,8 +15,6 @@ if ( CGAL_FOUND AND Qt5_FOUND AND OPENGL_FOUND AND QGLVIEWER_FOUND AND NOT CGAL_
   SET(Boost_USE_MULTITHREAD OFF)
   include_directories (${QGLVIEWER_INCLUDE_DIR})
  
-  #####################################################################
-
   add_executable  ( GudhUI 
     gui/gudhui.cpp
     gui/MainWindow.cpp
@@ -52,14 +28,10 @@ if ( CGAL_FOUND AND Qt5_FOUND AND OPENGL_FOUND AND QGLVIEWER_FOUND AND NOT CGAL_
   target_link_libraries( GudhUI Qt5::Widgets Qt5::Xml Qt5::OpenGL )
   target_link_libraries( GudhUI ${QGLVIEWER_LIBRARIES} )
   target_link_libraries( GudhUI ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY} )	
-if (TBB_FOUND)
-  target_link_libraries( GudhUI ${TBB_LIBRARIES})
-endif()
+  if (TBB_FOUND)
+    target_link_libraries( GudhUI ${TBB_LIBRARIES})
+  endif()
 
   install(TARGETS GudhUI DESTINATION bin)
 
-###############################################################################
-
-else()
-  message(STATUS "NOTICE: GudhUI requires CGAL, the QGLViewer, OpenGL and Qt5, and will not be compiled.")
 endif()

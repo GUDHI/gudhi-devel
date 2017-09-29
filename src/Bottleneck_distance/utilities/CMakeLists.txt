@@ -3,10 +3,8 @@ project(Bottleneck_distance_utilities)
 
 if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
   add_executable (alpha_rips_persistence_bottleneck_distance alpha_rips_persistence_bottleneck_distance.cpp)
-  target_link_libraries(alpha_rips_persistence_bottleneck_distance ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+  target_link_libraries(alpha_rips_persistence_bottleneck_distance ${Boost_PROGRAM_OPTIONS_LIBRARY})
   if (TBB_FOUND)
-    target_link_libraries(bottleneck_read_file_example ${TBB_LIBRARIES})
-    target_link_libraries(bottleneck_basic_example ${TBB_LIBRARIES})
     target_link_libraries(alpha_rips_persistence_bottleneck_distance ${TBB_LIBRARIES})
   endif(TBB_FOUND)
 

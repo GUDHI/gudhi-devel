@@ -44,4 +44,11 @@ gudhi.plot_persistence_barcode(persistence)
 print("#####################################################################")
 print("Show diagram persistence example")
 
-gudhi.plot_persistence_diagram(persistence)
+pplot = gudhi.plot_persistence_diagram(persistence)
+pplot.show()
+
+print("#####################################################################")
+print("Show diagram persistence example with a confidence band")
+
+pplot = gudhi.plot_persistence_diagram(persistence, band_boot=0.2)
+pplot.show()

@@ -66,9 +66,13 @@ class Rips_complex_interface {
     } else {
       // Rips construction where values is a distance matrix
       Distance_matrix distances =
-          read_lower_triangular_matrix_from_csv_file<Simplex_tree_interface<>::Filtration_value>(file_name);
+          Gudhi::read_lower_triangular_matrix_from_csv_file<Simplex_tree_interface<>::Filtration_value>(file_name);
       rips_complex_ = new Rips_complex<Simplex_tree_interface<>::Filtration_value>(distances, threshold);
     }
+  }
+
+  ~Rips_complex_interface() {
+    delete rips_complex_;
   }
 
   void create_simplex_tree(Simplex_tree_interface<>* simplex_tree, int dim_max) {

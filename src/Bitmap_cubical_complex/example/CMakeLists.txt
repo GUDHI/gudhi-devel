@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 2.6)
 project(Bitmap_cubical_complex_examples)
 
 add_executable ( Random_bitmap_cubical_complex Random_bitmap_cubical_complex.cpp )
-target_link_libraries(Random_bitmap_cubical_complex ${Boost_SYSTEM_LIBRARY})
 if (TBB_FOUND)
   target_link_libraries(Random_bitmap_cubical_complex ${TBB_LIBRARIES})
 endif()

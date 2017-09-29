@@ -61,8 +61,7 @@ int main(int argc, char * argv[]) {
   simplex_tree_stream >> simplex_tree;
 
   std::cout << "The complex contains " << simplex_tree.num_simplices() << " simplices" << std::endl;
-  std::cout << "   - dimension " << simplex_tree.dimension() << "   - filtration " << simplex_tree.filtration()
-      << std::endl;
+  std::cout << "   - dimension " << simplex_tree.dimension() << std::endl;
 
   /*
   std::cout << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
