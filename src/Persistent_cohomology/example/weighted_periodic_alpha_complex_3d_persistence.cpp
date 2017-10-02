@@ -147,12 +147,12 @@ int main(int argc, char* const argv[]) {
     usage(argv[0]);
   }
 
-  std::cout << "wp.size() : " << wp.size() << std::endl;
-
   // Define the periodic cube
   P3RT3 prt(PK::Iso_cuboid_3(x_min, y_min, z_min, x_max, y_max, z_max));
+  std::cout << "1 " << std::endl;
   // Heuristic for inserting large point sets (if pts is reasonably large)
   prt.insert(wp.begin(), wp.end(), true);
+  std::cout << "2 " << std::endl;
   // As prt won't be modified anymore switch to 1-sheeted cover if possible
   if (prt.is_triangulation_in_1_sheet()) prt.convert_to_1_sheeted_covering();
   std::cout << "Periodic Delaunay computed." << std::endl;
