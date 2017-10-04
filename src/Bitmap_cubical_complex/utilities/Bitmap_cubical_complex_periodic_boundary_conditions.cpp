@@ -33,9 +33,9 @@
 #include <string>
 
 int main(int argc, char** argv) {
-  std::cout << "This program computes persistent homology, by using " <<
+  std::cout << "This program computes persistent homology, by using the " <<
       "Bitmap_cubical_complex_periodic_boundary_conditions class, of cubical complexes provided in text files in " <<
-      "Perseus style (the only numbered in the first line is a dimension D of a bitmap. In the lines I between 2 " <<
+      "Perseus style. The only number in the first line is a dimension D of a bitmap. In the lines I between 2 " <<
       "and D+1 there are numbers of top dimensional cells in the direction I. Let N denote product of the numbers " <<
       "in the lines between 2 and D. In the lines D+2 to D+2+N there are filtrations of top dimensional cells. We " <<
       "assume that the cells are in the lexicographical order. See CubicalOneSphere.txt or CubicalTwoSphere.txt for" <<
