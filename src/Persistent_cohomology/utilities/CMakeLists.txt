@@ -19,5 +19,3 @@ add_test(NAME Persistent_cohomology_example_from_rips_on_tore_3D COMMAND $<TARGE
 
 install(TARGETS rips_distance_matrix_persistence DESTINATION bin)
 install(TARGETS rips_persistence DESTINATION bin)
-
-endif(CGAL_FOUND)
