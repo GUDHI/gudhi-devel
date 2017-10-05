@@ -1177,7 +1177,7 @@ class Simplex_tree {
   }
 
   /* \private Returns the Simplex_handle composed of the vertex list (from the Simplex_handle), plus the given
-   * Vertex_handle.
+   * Vertex_handle if the Vertex_handle is found in the Simplex_handle children list.
    * Returns null_simplex() if it does not exist
   */
   Simplex_handle find_child(Simplex_handle sh, Vertex_handle vh) const {
