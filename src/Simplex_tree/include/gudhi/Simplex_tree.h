@@ -1161,8 +1161,9 @@ class Simplex_tree {
    * \post Some simplex tree functions require the filtration to be valid. `prune_above_filtration()`
    * function is not launching `initialize_filtration()` but returns the filtration modification information. If the
    * complex has changed , please call `initialize_filtration()` to recompute it.
-   * \post Be aware that `prune_above_filtration()` may change the simplex tree dimension (`automatic_dimension_set()`
-   * to be done).
+   * \post Note that the dimension of the simplicial complex may be lower after calling `prune_above_filtration()`
+   * than it was before. However, `Simplex_tree::dimension()` will return the old value, which remains a valid upper
+   * bound. If you care, you can call `automatic_dimension_set()` to recompute the exact dimension.
    */
   bool prune_above_filtration(Filtration_value filtration) {
     return rec_prune_above_filtration(root(), filtration);
