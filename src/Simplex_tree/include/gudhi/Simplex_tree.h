@@ -1196,7 +1196,7 @@ class Simplex_tree {
 
  public:
   /** \brief Deep search simplex tree dimension reset.
-   * @return The dimension modification information.
+   * @return True if the dimension was modified, false otherwise.
    * \pre Be sure the simplex tree has not a too low dimension value as the deep search stops when the former dimension
    * has been reached (cf. `dimension()` and `set_dimension()` methods).
    */
