@@ -271,8 +271,8 @@ make doxygen
  * 
  * The following examples/utilities require the <a target="_blank" href="http://www.cgal.org/">Computational Geometry Algorithms
  * Library</a> (CGAL \cite cgal:eb-15b) and will not be built if CGAL is not installed:
- * \li <a href="_persistent_cohomology_2alpha_complex_3d_persistence_8cpp-example.html">
- * Persistent_cohomology/alpha_complex_3d_persistence.cpp</a>
+ * \li <a href="_alpha_complex_2alpha_complex_3d_persistence_8cpp-example.html">
+ * Alpha_complex/alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2exact_alpha_complex_3d_persistence_8cpp-example.html">
  * Persistent_cohomology/exact_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2weighted_alpha_complex_3d_persistence_8cpp-example.html">
@@ -289,10 +289,10 @@ make doxygen
  * Alpha_complex/Alpha_complex_from_off.cpp</a>
  * \li <a href="_alpha_complex_2_alpha_complex_from_points_8cpp-example.html">
  * Alpha_complex/Alpha_complex_from_points.cpp</a>
- * \li <a href="_persistent_cohomology_2alpha_complex_persistence_8cpp-example.html">
- * Persistent_cohomology/alpha_complex_persistence.cpp</a>
- * \li <a href="_persistent_cohomology_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
- * Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp</a>
+ * \li <a href="_alpha_complex_2alpha_complex_persistence_8cpp-example.html">
+ * Alpha_complex/alpha_complex_persistence.cpp</a>
+ * \li <a href="_alpha_complex_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
+ * Alpha_complex/periodic_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2custom_persistence_sort_8cpp-example.html">
  * Persistent_cohomology/custom_persistence_sort.cpp</a>
  * 
@@ -329,12 +329,12 @@ make doxygen
  * Alpha_complex/Alpha_complex_from_off.cpp</a>
  * \li <a href="_alpha_complex_2_alpha_complex_from_points_8cpp-example.html">
  * Alpha_complex/Alpha_complex_from_points.cpp</a>
+ * \li <a href="_alpha_complex_2alpha_complex_persistence_8cpp-example.html">
+ * Alpha_complex/alpha_complex_persistence.cpp</a>
+ * \li <a href="_alpha_complex_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
+ * Alpha_complex/periodic_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_bottleneck_distance_2alpha_rips_persistence_bottleneck_distance_8cpp-example.html">
  * Bottleneck_distance/alpha_rips_persistence_bottleneck_distance.cpp.cpp</a>
- * \li <a href="_persistent_cohomology_2alpha_complex_persistence_8cpp-example.html">
- * Persistent_cohomology/alpha_complex_persistence.cpp</a>
- * \li <a href="_persistent_cohomology_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
- * Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2custom_persistence_sort_8cpp-example.html">
  * Persistent_cohomology/custom_persistence_sort.cpp</a>
  * \li <a href="_spatial_searching_2example_spatial_searching_8cpp-example.html">
@@ -364,26 +364,24 @@ make doxygen
  * Alpha_complex/Alpha_complex_from_off.cpp</a>
  * \li <a href="_alpha_complex_2_alpha_complex_from_points_8cpp-example.html">
  * Alpha_complex/Alpha_complex_from_points.cpp</a>
+ * \li <a href="_alpha_complex_2alpha_complex_3d_persistence_8cpp-example.html">
+ * Alpha_complex/alpha_complex_3d_persistence.cpp</a>
+ * \li <a href="_alpha_complex_2alpha_complex_persistence_8cpp-example.html">
+ * Alpha_complex/alpha_complex_persistence.cpp</a>
+ * \li <a href="_alpha_complex_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
+ * Alpha_complex/periodic_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_bitmap_cubical_complex_2_bitmap_cubical_complex_8cpp-example.html">
  * Bitmap_cubical_complex/Bitmap_cubical_complex.cpp</a>
  * \li <a href="_bitmap_cubical_complex_2_bitmap_cubical_complex_periodic_boundary_conditions_8cpp-example.html">
  * Bitmap_cubical_complex/Bitmap_cubical_complex_periodic_boundary_conditions.cpp</a>
  * \li <a href="_bitmap_cubical_complex_2_random_bitmap_cubical_complex_8cpp-example.html">
  * Bitmap_cubical_complex/Random_bitmap_cubical_complex.cpp</a>
- * \li <a href="_persistent_cohomology_2alpha_complex_3d_persistence_8cpp-example.html">
- * Persistent_cohomology/alpha_complex_3d_persistence.cpp</a>
- * \li <a href="_persistent_cohomology_2alpha_complex_persistence_8cpp-example.html">
- * Persistent_cohomology/alpha_complex_persistence.cpp</a>
  * \li <a href="_simplex_tree_2simple_simplex_tree_8cpp-example.html">
  * Simplex_tree/simple_simplex_tree.cpp</a>
  * \li <a href="_simplex_tree_2example_alpha_shapes_3_simplex_tree_from_off_file_8cpp-example.html">
  * Simplex_tree/example_alpha_shapes_3_simplex_tree_from_off_file.cpp</a>
  * \li <a href="_simplex_tree_2simplex_tree_from_cliques_of_graph_8cpp-example.html">
  * Simplex_tree/simplex_tree_from_cliques_of_graph.cpp</a>
- * \li <a href="_persistent_cohomology_2alpha_complex_3d_persistence_8cpp-example.html">
- * Persistent_cohomology/alpha_complex_3d_persistence.cpp</a>
- * \li <a href="_persistent_cohomology_2alpha_complex_persistence_8cpp-example.html">
- * Persistent_cohomology/alpha_complex_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2rips_persistence_via_boundary_matrix_8cpp-example.html">
  * Persistent_cohomology/rips_persistence_via_boundary_matrix.cpp</a>
  * \li <a href="_persistent_cohomology_2persistence_from_file_8cpp-example.html">
@@ -392,26 +390,24 @@ make doxygen
  * Persistent_cohomology/persistence_from_simple_simplex_tree.cpp</a>
  * \li <a href="_persistent_cohomology_2plain_homology_8cpp-example.html">
  * Persistent_cohomology/plain_homology.cpp</a>
- * \li <a href="_persistent_cohomology_2rips_distance_matrix_persistence_8cpp-example.html">
- * Persistent_cohomology/rips_distance_matrix_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2rips_multifield_persistence_8cpp-example.html">
  * Persistent_cohomology/rips_multifield_persistence.cpp</a>
- * \li <a href="_persistent_cohomology_2rips_persistence_8cpp-example.html">
- * Persistent_cohomology/rips_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2rips_persistence_step_by_step_8cpp-example.html">
  * Persistent_cohomology/rips_persistence_step_by_step.cpp</a>
  * \li <a href="_persistent_cohomology_2exact_alpha_complex_3d_persistence_8cpp-example.html">
  * Persistent_cohomology/exact_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2weighted_alpha_complex_3d_persistence_8cpp-example.html">
  * Persistent_cohomology/weighted_alpha_complex_3d_persistence.cpp</a>
- * \li <a href="_persistent_cohomology_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
- * Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2custom_persistence_sort_8cpp-example.html">
  * Persistent_cohomology/custom_persistence_sort.cpp</a>
  * \li <a href="_rips_complex_2example_one_skeleton_rips_from_points_8cpp-example.html">
  * Rips_complex/example_one_skeleton_rips_from_points.cpp</a>
  * \li <a href="_rips_complex_2example_rips_complex_from_off_file_8cpp-example.html">
  * Rips_complex/example_rips_complex_from_off_file.cpp</a>
+ * \li <a href="_rips_complex_2rips_distance_matrix_persistence_8cpp-example.html">
+ * Rips_complex/rips_distance_matrix_persistence.cpp</a>
+ * \li <a href="_rips_complex_2rips_persistence_8cpp-example.html">
+ * Rips_complex/rips_persistence.cpp</a>
  * 
  * \section Contributions Bug reports and contributions
  * Please help us improving the quality of the GUDHI library. You may report bugs or suggestions to:
@@ -436,6 +432,9 @@ make doxygen
 /*! @file Examples
  * @example Alpha_complex/Alpha_complex_from_off.cpp
  * @example Alpha_complex/Alpha_complex_from_points.cpp
+ * @example Alpha_complex/alpha_complex_3d_persistence.cpp
+ * @example Alpha_complex/alpha_complex_persistence.cpp
+ * @example Alpha_complex/periodic_alpha_complex_3d_persistence.cpp
  * @example Bottleneck_distance/alpha_rips_persistence_bottleneck_distance.cpp
  * @example Bottleneck_distance/bottleneck_basic_example.cpp
  * @example Bottleneck_distance/bottleneck_read_file_example.cpp
@@ -446,22 +445,19 @@ make doxygen
  * @example common/example_CGAL_points_off_reader.cpp
  * @example Contraction/Garland_heckbert.cpp
  * @example Contraction/Rips_contraction.cpp
- * @example Persistent_cohomology/alpha_complex_3d_persistence.cpp
- * @example Persistent_cohomology/alpha_complex_persistence.cpp
  * @example Persistent_cohomology/rips_persistence_via_boundary_matrix.cpp
  * @example Persistent_cohomology/exact_alpha_complex_3d_persistence.cpp
  * @example Persistent_cohomology/weighted_alpha_complex_3d_persistence.cpp
- * @example Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp
  * @example Persistent_cohomology/persistence_from_file.cpp
  * @example Persistent_cohomology/persistence_from_simple_simplex_tree.cpp
  * @example Persistent_cohomology/plain_homology.cpp
  * @example Persistent_cohomology/rips_multifield_persistence.cpp
- * @example Persistent_cohomology/rips_distance_matrix_persistence.cpp
- * @example Persistent_cohomology/rips_persistence.cpp
  * @example Persistent_cohomology/custom_persistence_sort.cpp
  * @example Persistent_cohomology/rips_persistence_step_by_step.cpp
  * @example Rips_complex/example_one_skeleton_rips_from_points.cpp
  * @example Rips_complex/example_rips_complex_from_off_file.cpp
+ * @example Rips_complex/rips_persistence.cpp
+ * @example Rips_complex/rips_distance_matrix_persistence.cpp
  * @example Simplex_tree/mini_simplex_tree.cpp
  * @example Simplex_tree/simple_simplex_tree.cpp
  * @example Simplex_tree/example_alpha_shapes_3_simplex_tree_from_off_file.cpp

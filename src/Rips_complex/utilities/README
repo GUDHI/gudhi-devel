@@ -1,4 +1,4 @@
-# Persistent_cohomology #
+# Rips_complex #
 
 ## `rips_persistence` ##
 This program computes the persistent homology with coefficient field *Z/pZ* of a Rips complex defined on a set of input points. The output diagram contains one bar per line, written with the convention:

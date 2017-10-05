@@ -143,8 +143,8 @@ namespace persistent_cohomology {
 
 We provide several example files: run these examples with -h for details on their use, and read the README file.
 
-\li <a href="_persistent_cohomology_2rips_persistence_8cpp-example.html">
-Persistent_cohomology/rips_persistence.cpp</a> computes the Rips complex of a point cloud and outputs its persistence
+\li <a href="_rips_complex_2rips_persistence_8cpp-example.html">
+Rips_complex/rips_persistence.cpp</a> computes the Rips complex of a point cloud and outputs its persistence
 diagram.
 \code $> ./rips_persistence ../../data/points/tore3D_1307.off -r 0.25 -m 0.5 -d 3 -p 3 \endcode
 \code The complex contains 177838 simplices 
@@ -158,12 +158,12 @@ diagram.
 Persistent_cohomology/rips_multifield_persistence.cpp</a> computes the Rips complex of a point cloud and outputs its
 persistence diagram with a family of field coefficients.
 
-\li <a href="_persistent_cohomology_2rips_distance_matrix_persistence_8cpp-example.html">
-Persistent_cohomology/rips_distance_matrix_persistence.cpp</a> computes the Rips complex of a distance matrix and
+\li <a href="_rips_complex_2rips_distance_matrix_persistence_8cpp-example.html">
+Rips_complex/rips_distance_matrix_persistence.cpp</a> computes the Rips complex of a distance matrix and
 outputs its persistence diagram.
 
-\li <a href="_persistent_cohomology_2alpha_complex_3d_persistence_8cpp-example.html">
-Persistent_cohomology/alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
+\li <a href="_alpha_complex_2alpha_complex_3d_persistence_8cpp-example.html">
+Alpha_complex/alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
 \f$\mathbb{Z}/2\mathbb{Z}\f$ coefficients of the alpha complex on points sampling from an OFF file.
 \code $> ./alpha_complex_3d_persistence ../../data/points/tore3D_300.off 2 0.45 \endcode
 \code Simplex_tree dim: 3
@@ -194,8 +194,8 @@ and a weights file.
 2  1 0.0934117 1.00003
 2  2 0.56444 1.03938 \endcode
 
-\li <a href="_persistent_cohomology_2alpha_complex_persistence_8cpp-example.html">
-Persistent_cohomology/alpha_complex_persistence.cpp</a> computes the persistent homology with
+\li <a href="_alpha_complex_2alpha_complex_persistence_8cpp-example.html">
+Alpha_complex/alpha_complex_persistence.cpp</a> computes the persistent homology with
 \f$\mathbb{Z}/p\mathbb{Z}\f$ coefficients of the alpha complex on points sampling from an OFF file.
 \code $> ./alpha_complex_persistence -r 32 -p 2 -m 0.45 ../../data/points/tore3D_300.off \endcode
 \code Alpha complex is of dimension 3 - 9273 simplices - 300 vertices.
@@ -205,8 +205,8 @@ Simplex_tree dim: 3
 2  1 0.0934117 1.00003 
 2  2 0.56444 1.03938 \endcode
 
-\li <a href="_persistent_cohomology_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
-Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
+\li <a href="_alpha_complex_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
+Alpha_complex/periodic_alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
 \f$\mathbb{Z}/2\mathbb{Z}\f$ coefficients of the periodic alpha complex on points sampling from an OFF file.
 \code $> ./periodic_alpha_complex_3d_persistence ../../data/points/grid_10_10_10_in_0_1.off 3 1.0 \endcode
 \code Periodic Delaunay computed.
