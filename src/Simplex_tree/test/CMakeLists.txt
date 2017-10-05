@@ -13,3 +13,11 @@ endif()
 file(COPY "simplex_tree_for_unit_test.txt" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
 gudhi_add_coverage_test(Simplex_tree_test_unit)
+
+add_executable ( Simplex_tree_test_unit_graph_expansion simplex_tree_graph_expansion_unit_test.cpp )
+target_link_libraries(Simplex_tree_test_unit_graph_expansion ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+if (TBB_FOUND)
+  target_link_libraries(Simplex_tree_test_unit_graph_expansion ${TBB_LIBRARIES})
+endif()
+
+gudhi_add_coverage_test(Simplex_tree_test_unit_graph_expansion)

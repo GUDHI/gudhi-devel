@@ -380,6 +380,8 @@ make doxygen
  * Simplex_tree/example_alpha_shapes_3_simplex_tree_from_off_file.cpp</a>
  * \li <a href="_simplex_tree_2simplex_tree_from_cliques_of_graph_8cpp-example.html">
  * Simplex_tree/simplex_tree_from_cliques_of_graph.cpp</a>
+ * \li <a href="_simplex_tree_2graph_expansion_with_blocker_8cpp-example.html">
+ * Simplex_tree/graph_expansion_with_blocker.cpp</a>
  * \li <a href="_persistent_cohomology_2alpha_complex_3d_persistence_8cpp-example.html">
  * Persistent_cohomology/alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2alpha_complex_persistence_8cpp-example.html">
@@ -466,6 +468,7 @@ make doxygen
  * @example Simplex_tree/simple_simplex_tree.cpp
  * @example Simplex_tree/example_alpha_shapes_3_simplex_tree_from_off_file.cpp
  * @example Simplex_tree/simplex_tree_from_cliques_of_graph.cpp
+ * @example Simplex_tree/graph_expansion_with_blocker.cpp
  * @example Skeleton_blocker/Skeleton_blocker_from_simplices.cpp
  * @example Skeleton_blocker/Skeleton_blocker_iteration.cpp
  * @example Skeleton_blocker/Skeleton_blocker_link.cpp
