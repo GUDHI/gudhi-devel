@@ -34,9 +34,10 @@ namespace graph_induced_complex {
  * @{
  * 
  * Visualizations of the simplicial complexes can be done with either
- * neato (from <a target="_blank" href="http://www.graphviz.org/"> graphviz </a>),
- * <a target="_blank" href="http://www.geomview.org/"> geomview </a>, or
- * <a target="_blank" href="https://www.python.org/"> python </a> + <a target="_blank" href="https://www.mozilla.org/fr/firefox/new/"> firefox </a>.
+ * neato (from <a target="_blank" href="http://www.graphviz.org/">graphviz</a>),
+ * <a target="_blank" href="http://www.geomview.org/">geomview</a>,
+ * <a target="_blank" href="https://github.com/MLWave/kepler-mapper">KeplerMapper</a>.
+ * Input point clouds are assumed to be <a target="_blank" href="http://www.geomview.org/docs/html/OFF.html">OFF files</a>.
  *
  * \section covers Covers
  *
@@ -75,20 +76,15 @@ namespace graph_induced_complex {
  *
  * \include Nerve_GIC/Nerve.txt
  *
- * The program also writes a file SC.txt.
- * The first three lines in this file are requirements for visualization with Kepler-Mapper.
+ * The program also writes a file SC.txt. The first three lines in this file are the location of the input point cloud and the function used to compute the cover.
  * The fourth line contains the number of vertices nv and edges ne of the Nerve.
  * The next nv lines represent the vertices. Each line contains the vertex ID,
  * the number of data points it contains, and their average color function value.
  * Finally, the next ne lines represent the edges, characterized by the ID of their vertices.
- * Using e.g.
  *
- * \code $> python KeplerMapperVisuFromTxtFile.py && firefox SC.html
- * \endcode
+ * Using KeplerMapper, one can obtain the following visualization:
  *
- * one can obtain the following visualization:
- *
- * \image html "nervevisu.jpg" "Visualization with Kepler Mapper"
+ * \image html "nervevisu.jpg" "Visualization with KeplerMapper"
  *
  * \section gic Graph Induced Complexes (GIC)
  *
@@ -98,12 +94,99 @@ namespace graph_induced_complex {
  * you are also given a graph G built on top of P. Then, for any clique in G
  * whose nodes all belong to different elements of C, the GIC includes a corresponding
  * simplex, whose dimension is the number of nodes in the clique minus one.
- * See <a target="_blank" href="https://arxiv.org/abs/1304.0662"> this article </a>
- * for more details.
+ * See \cite Dey13 for more details.
  *
  * \image html "GIC.jpg" "GIC of a point cloud."
  *
- * \subsection gicexample Example with cover from function
+ * \subsection gicexamplevor Example with cover from Voronoï
+ *
+ * This example builds the GIC of a point cloud sampled on a 3D human shape (human.off).
+ * We randomly subsampled 100 points in the point cloud, which act as seeds of
+ * a geodesic Voronoï diagram. Each cell of the diagram is then an element of C.
+ * The graph G (used to compute both the geodesics for Voronoï and the GIC)
+ * comes from the triangulation of the human shape. Note that the resulting simplicial complex is in dimension 3
+ * in this example.
+ *
+ * \include Nerve_GIC/VoronoiGIC.cpp
+ *
+ * When launching:
+ *
+ * \code $> ./VoronoiGIC ../../../../data/points/human.off 700 --v
+ * \endcode
+ *
+ * the program outputs SC.off. Using e.g.
+ *
+ * \code $> geomview SC.off
+ * \endcode
+ *
+ * one can obtain the following visualization:
+ *
+ * \image html "gicvoronoivisu.jpg" "Visualization with Geomview"
+ *
+ * \subsection functionalGICdefinition Functional GIC
+ *
+ * If one restricts to the cliques in G whose nodes all belong to preimages of consecutive
+ * intervals (assuming the cover of the height function is minimal, i.e. no more than
+ * two intervals can intersect at a time), the GIC is of dimension one, i.e. a graph.
+ * We call this graph the functional GIC. See \cite Carriere16 for more details.
+ *
+ * \subsection functionalGICexample Example
+ *
+ * Functional GIC comes with optimal selection for the Rips threshold,
+ * the resolution and the gain of the function cover. In this example,
+ * we compute the functional GIC of a Klein bottle embedded in R^5,
+ * where the graph G comes from a Rips complex with optimal threshold,
+ * and the cover C comes from the preimages of intervals covering the first coordinate,
+ * with optimal resolution and gain. Note that optimal threshold, resolution and gain
+ * can be computed as well for the Nerve.
+ *
+ * \include Nerve_GIC/CoordGIC.cpp
+ *
+ * When launching:
+ *
+ * \code $> ./CoordGIC ../../../../data/points/KleinBottle5D.off 0 --v
+ * \endcode
+ *
+ * the program outputs SC.dot. Using e.g.
+ *
+ * \code $> neato SC.dot -Tpdf -o SC.pdf
+ * \endcode
+ *
+ * one can obtain the following visualization:
+ *
+ * \image html "coordGICvisu2.jpg" "Visualization with Neato"
+ *
+ * where nodes are colored by the filter function values and, for each node, the first number is its ID
+ * and the second is the number of data points that its contain.
+ *
+ * We also provide an example on a set of 72 pictures taken around the same object (lucky_cat.off).
+ * The function is now the first eigenfunction given by PCA, whose values
+ * are written in a file (lucky_cat_PCA1). Threshold, resolution and gain are automatically selected as before.
+ *
+ * \include Nerve_GIC/FuncGIC.cpp
+ *
+ * When launching:
+ *
+ * \code $> ./FuncGIC ../../../../data/points/COIL_database/lucky_cat.off ../../../../data/points/COIL_database/lucky_cat_PCA1 --v
+ * \endcode
+ *
+ * the program outputs again SC.dot which gives the following visualization after using neato:
+ *
+ * \image html "funcGICvisu.jpg" "Visualization with neato"
+ *
+ * \copyright GNU General Public License v3.                         
+ * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
+ */
+/** @} */  // end defgroup graph_induced_complex
+
+}  // namespace graph_induced_complex
+
+}  // namespace Gudhi
+
+#endif  // DOC_GRAPH_INDUCED_COMPLEX_INTRO_GRAPH_INDUCED_COMPLEX_H_
+
+
+/* * \subsection gicexample Example with cover from function
  *
  * This example builds the GIC of a point cloud sampled on a 3D human shape (human.off).
  * The cover C comes from the preimages of intervals (with length 0.075 and gain 0)
@@ -121,92 +204,11 @@ namespace graph_induced_complex {
  *
  * the program outputs SC.txt, which can be visualized with python and firefox as before:
  *
- * \image html "gicvisu.jpg" "Visualization with Kepler Mapper"
- *
- * \subsection gicexamplevor Example with cover from Voronoï
- *
- * This example builds the GIC of a point cloud sampled on a 3D human shape (human.off).
- * We randomly subsampled 100 points in the point cloud, which act as seeds of
- * a geodesic Voronoï diagram. Each cell of the diagram is then an element of C.
- * The graph G (used to compute both the geodesics for Voronoï and the GIC)
- * comes from the triangulation of the human shape. Note that the resulting simplicial complex is in dimension 3
- * in this example.
- *
- * \include Nerve_GIC/GICvoronoi.cpp
- *
- * When launching:
- *
- * \code $> ./GICvoronoi ../../../../data/points/human.off 700 --v
- * \endcode
- *
- * the program outputs SC.off. Using e.g.
- *
- * \code $> geomview SC.off
- * \endcode
- *
- * one can obtain the following visualization:
- *
- * \image html "gicvoronoivisu.jpg" "Visualization with Geomview"
- *
- * \subsection mapperdeltadefinition Mapper Delta
- *
- * If one restricts to the cliques in G whose nodes all belong to preimages of consecutive
- * intervals (assuming the cover of the height function is minimal, i.e. no more than
- * two intervals can intersect at a time), the GIC is of dimension one, i.e. a graph.
- * We call this graph the Mapper Delta, since it is related to the usual Mapper. See
- * <a target="_blank" href="https://arxiv.org/abs/1511.05823"> this article </a> for more details.
- *
- * \subsection mapperdeltaexample Example
- *
- * Mapper Delta comes with optimal selection for the Rips threshold,
- * the resolution and the gain of the function cover. In this example,
- * we compute the Mapper Delta of a Klein bottle embedded in R^5,
- * where the graph G comes from a Rips complex with optimal threshold,
- * and the cover C comes from the preimages of intervals covering the first coordinate,
- * with optimal resolution and gain. Note that optimal threshold, resolution and gain
- * can be computed as well for the Nerve.
- *
- * \include Nerve_GIC/MapperDeltaCoord.cpp
- *
- * When launching:
- *
- * \code $> ./MapperDeltaCoord ../../../../data/points/KleinBottle5D.off 0 --v
- * \endcode
- *
- * the program outputs SC.dot. Using e.g.
- *
- * \code $> neato SC.dot -Tpdf -o SC.pdf
- * \endcode
- *
- * one can obtain the following visualization:
- *
- * \image html "mapperdeltacoordvisu2.jpg" "Visualization with Neato"
- *
- * where nodes are colored by the filter function values and, for each node, the first number is its ID
- * and the second is the number of data points that its contain.
- *
- * We also provide an example on a set of 72 pictures taken around the same object (lucky_cat.off).
- * The function is now the first eigenfunction given by PCA, whose values
- * are written in a file (lucky_cat_PCA1). Threshold, resolution and gain are automatically selected as before.
- *
- * \include Nerve_GIC/MapperDeltaFunc.cpp
- *
- * When launching:
- *
- * \code $> ./MapperDeltaFunc ../../../../data/points/COIL_database/lucky_cat.off ../../../../data/points/COIL_database/lucky_cat_PCA1 --v
- * \endcode
- *
- * the program outputs again SC.dot which gives the following visualization after using neato:
- *
- * \image html "mapperdeltafuncvisu.jpg" "Visualization with Neato"
- *
- * \copyright GNU General Public License v3.                         
- * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
- */
-/** @} */  // end defgroup graph_induced_complex
+ * \image html "gicvisu.jpg" "Visualization with KeplerMapper"
+ * */
 
-}  // namespace graph_induced_complex
 
-}  // namespace Gudhi
-
-#endif  // DOC_GRAPH_INDUCED_COMPLEX_INTRO_GRAPH_INDUCED_COMPLEX_H_
+/* * Using e.g.
+ *
+ * \code $> python KeplerMapperVisuFromTxtFile.py && firefox SC.html
+ * \endcode */

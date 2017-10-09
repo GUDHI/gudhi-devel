@@ -38,12 +38,12 @@ int main(int argc, char **argv) {
   int coord = atoi(argv[2]);
   bool verb = 0; if(argc == 4)  verb = 1;
 
-  // ---------------------------------------
-  // Init of a Mapper Delta from an OFF file
-  // ---------------------------------------
+  // -----------------------------------------
+  // Init of a functional GIC from an OFF file
+  // -----------------------------------------
 
   Gudhi::graph_induced_complex::Graph_induced_complex<Point> GIC;
-  GIC.set_verbose(verb); GIC.set_mask(); GIC.set_subsampling();
+  GIC.set_verbose(verb);
 
   bool check = GIC.read_point_cloud(off_file_name);
 
@@ -55,25 +55,25 @@ int main(int argc, char **argv) {
 
     GIC.set_graph_from_automatic_rips(Gudhi::Euclidean_distance());
 
-    GIC.set_automatic_resolution_for_GICMAP(); GIC.set_gain();
+    GIC.set_automatic_resolution_for_GIC(); GIC.set_gain();
     GIC.set_cover_from_function();
 
-    GIC.find_GICMAP_simplices_with_functional_minimal_cover();
+    GIC.find_GIC_simplices_with_functional_minimal_cover();
 
-    GIC.plot_DOT_for_neato();
+    GIC.plot_DOT();
 
-    Gudhi::graph_induced_complex::Simplex_tree stree; GIC.create_complex(stree);
+    Gudhi::Simplex_tree<> stree; GIC.create_complex(stree);
 
-    // ------------------------------------------
-    // Display information about the Mapper Delta
-    // ------------------------------------------
+    // --------------------------------------------
+    // Display information about the functional GIC
+    // --------------------------------------------
 
     if(verb){
-      std::cout << "Mapper Delta is of dimension " << stree.dimension() <<
+      std::cout << "Functional GIC is of dimension " << stree.dimension() <<
                      " - " << stree.num_simplices() << " simplices - " <<
                      stree.num_vertices() << " vertices." << std::endl;
 
-      std::cout << "Iterator on Mapper Delta simplices" << std::endl;
+      std::cout << "Iterator on functional GIC simplices" << std::endl;
       for (auto f_simplex : stree.filtration_simplex_range()) {
         for (auto vertex : stree.simplex_vertex_range(f_simplex)) {
           std::cout << vertex << " ";

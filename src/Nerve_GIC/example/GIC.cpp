@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
   // ----------------------------------------------------------------------------
 
   Gudhi::graph_induced_complex::Graph_induced_complex<Point> GIC;
-  GIC.set_verbose(verb); GIC.set_mask();
+  GIC.set_verbose(verb);
 
   bool check = GIC.read_point_cloud(off_file_name);
 
@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
 
     GIC.plot_TXT_for_KeplerMapper();
 
-    Gudhi::graph_induced_complex::Simplex_tree stree; GIC.create_complex(stree);
+    Gudhi::Simplex_tree<> stree; GIC.create_complex(stree);
 
     // ----------------------------------------------------------------------------
     // Display information about the graph induced complex

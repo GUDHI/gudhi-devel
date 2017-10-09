@@ -41,35 +41,35 @@ BOOST_AUTO_TEST_CASE(check_nerve) {
   std::string graph_file_name("data/graph"); GIC.set_graph_from_file(graph_file_name);
   std::string cover_file_name("data/cover"); GIC.set_cover_from_file(cover_file_name);
   GIC.set_color_from_coordinate();
-  GIC.find_Nerve_simplices(); Gudhi::graph_induced_complex::Simplex_tree stree; GIC.create_complex(stree);
+  GIC.find_Nerve_simplices(); Gudhi::Simplex_tree<> stree; GIC.create_complex(stree);
 
   BOOST_CHECK(stree.num_vertices() == 3);
   BOOST_CHECK((stree.num_simplices()-stree.num_vertices()) == 0);
   BOOST_CHECK(stree.dimension() == 0);
 }
 
-BOOST_AUTO_TEST_CASE(check_GICMAP) {
+BOOST_AUTO_TEST_CASE(check_funcGIC) {
 
   using Point = std::vector<float>;
   Gudhi::graph_induced_complex::Graph_induced_complex<Point> GIC;
   std::string cloud_file_name("data/cloud"); GIC.read_point_cloud(cloud_file_name); GIC.set_color_from_coordinate();
   std::string graph_file_name("data/graph"); GIC.set_graph_from_file(graph_file_name);
   std::string cover_file_name("data/cover"); GIC.set_cover_from_file(cover_file_name);
-  GIC.find_GICMAP_simplices_with_functional_minimal_cover(); Gudhi::graph_induced_complex::Simplex_tree stree; GIC.create_complex(stree);
+  GIC.find_GIC_simplices_with_functional_minimal_cover(); Gudhi::Simplex_tree<> stree; GIC.create_complex(stree);
 
   BOOST_CHECK(stree.num_vertices() == 3);
   BOOST_CHECK((stree.num_simplices()-stree.num_vertices()) == 2);
   BOOST_CHECK(stree.dimension() == 1);
 }
 
-BOOST_AUTO_TEST_CASE(check_GICcover) {
+BOOST_AUTO_TEST_CASE(check_regGIC) {
 
   using Point = std::vector<float>;
   Gudhi::graph_induced_complex::Graph_induced_complex<Point> GIC;
   std::string cloud_file_name("data/cloud"); GIC.read_point_cloud(cloud_file_name); GIC.set_color_from_coordinate();
   std::string graph_file_name("data/graph"); GIC.set_graph_from_file(graph_file_name);
   std::string cover_file_name("data/cover"); GIC.set_cover_from_file(cover_file_name);
-  GIC.find_GIC_simplices(); Gudhi::graph_induced_complex::Simplex_tree stree; GIC.create_complex(stree);
+  GIC.find_GIC_simplices(); Gudhi::Simplex_tree<> stree; GIC.create_complex(stree);
 
   BOOST_CHECK(stree.num_vertices() == 3);
   BOOST_CHECK((stree.num_simplices()-stree.num_vertices()) == 4);
@@ -77,14 +77,14 @@ BOOST_AUTO_TEST_CASE(check_GICcover) {
 }
 
 
-BOOST_AUTO_TEST_CASE(check_GICvoronoi) {
+BOOST_AUTO_TEST_CASE(check_voronoiGIC) {
 
   using Point = std::vector<float>;
   Gudhi::graph_induced_complex::Graph_induced_complex<Point> GIC;
   std::string cloud_file_name("data/cloud"); GIC.read_point_cloud(cloud_file_name); GIC.set_color_from_coordinate();
   std::string graph_file_name("data/graph"); GIC.set_graph_from_file(graph_file_name);
   GIC.set_cover_from_Voronoi(Gudhi::Euclidean_distance(),2);
-  GIC.find_GIC_simplices(); Gudhi::graph_induced_complex::Simplex_tree stree; GIC.create_complex(stree);
+  GIC.find_GIC_simplices(); Gudhi::Simplex_tree<> stree; GIC.create_complex(stree);
 
   BOOST_CHECK(stree.num_vertices() == 2);
   BOOST_CHECK((stree.num_simplices()-stree.num_vertices()) == 1);

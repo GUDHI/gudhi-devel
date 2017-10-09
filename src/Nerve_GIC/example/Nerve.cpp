@@ -39,13 +39,14 @@ int main(int argc, char **argv) {
   int resolution = atoi(argv[3]);
   double gain = atof(argv[4]);
   bool verb = 0; if(argc == 6)  verb = 1;
+  //int mask = 0;
 
   // --------------------------------
   // Init of a Nerve from an OFF file
   // --------------------------------
 
   Gudhi::graph_induced_complex::Graph_induced_complex<Point> GIC;
-  GIC.set_verbose(verb); GIC.set_mask();
+  GIC.set_verbose(verb);
 
   bool check = GIC.read_point_cloud(off_file_name);
 
@@ -62,9 +63,9 @@ int main(int argc, char **argv) {
 
     GIC.find_Nerve_simplices();
 
-    GIC.plot_TXT_for_KeplerMapper();
+    GIC.plot_TXT();
 
-    Gudhi::graph_induced_complex::Simplex_tree stree; GIC.create_complex(stree);
+    Gudhi::Simplex_tree<> stree; GIC.create_complex(stree);
 
     // ----------------------------------------------------------------------------
     // Display information about the graph induced complex

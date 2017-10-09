@@ -24,8 +24,8 @@
 
 void usage(int nbArgs, char * const progName) {
   std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
-  std::cerr << "Usage: " << progName << " filename.off N [--v] \n";
-  std::cerr << "       i.e.: " << progName << " ../../../../data/points/human.off 100 --v \n";
+  std::cerr << "Usage: " << progName << " filename.off function [--v] \n";
+  std::cerr << "       i.e.: " << progName << " ../../../../data/points/COIL_database/lucky_cat.off ../../../../data/points/COIL_database/lucky_cat_PCA1 --v \n";
   exit(-1);  // ----- >>
 }
 
@@ -35,43 +35,45 @@ int main(int argc, char **argv) {
   using Point = std::vector<float>;
 
   std::string off_file_name(argv[1]);
-  int m = atoi(argv[2]);
+  std::string func_file_name = argv[2];
   bool verb = 0; if(argc == 4)  verb = 1;
 
-  // ----------------------------------------------------------------------------
-  // Init of a graph induced complex from an OFF file
-  // ----------------------------------------------------------------------------
+  // -----------------------------------------
+  // Init of a functional GIC from an OFF file
+  // -----------------------------------------
 
   Gudhi::graph_induced_complex::Graph_induced_complex<Point> GIC;
-  GIC.set_verbose(verb); GIC.set_mask();
+  GIC.set_verbose(verb);
 
   bool check = GIC.read_point_cloud(off_file_name);
 
   if(!check)  std::cout << "Incorrect OFF file." << std::endl;
   else{
 
-    GIC.set_color_from_coordinate();
+    GIC.set_color_from_file(func_file_name);
+    GIC.set_function_from_file(func_file_name);
 
-    GIC.set_graph_from_OFF();
+    GIC.set_graph_from_automatic_rips(Gudhi::Euclidean_distance());
 
-    GIC.set_cover_from_Voronoi(Gudhi::Euclidean_distance(),m);
+    GIC.set_automatic_resolution_for_GIC(); GIC.set_gain();
+    GIC.set_cover_from_function();
 
-    GIC.find_GIC_simplices();
+    GIC.find_GIC_simplices_with_functional_minimal_cover();
 
-    GIC.plot_OFF();
+    GIC.plot_DOT();
 
-    Gudhi::graph_induced_complex::Simplex_tree stree; GIC.create_complex(stree);
+    Gudhi::Simplex_tree<> stree; GIC.create_complex(stree);
 
-    // ----------------------------------------------------------------------------
-    // Display information about the graph induced complex
-    // ----------------------------------------------------------------------------
+    // --------------------------------------------
+    // Display information about the functional GIC
+    // --------------------------------------------
 
     if(verb){
-      std::cout << "Graph induced complex is of dimension " << stree.dimension() <<
+      std::cout << "Functional GIC is of dimension " << stree.dimension() <<
                      " - " << stree.num_simplices() << " simplices - " <<
                      stree.num_vertices() << " vertices." << std::endl;
 
-      std::cout << "Iterator on graph induced complex simplices" << std::endl;
+      std::cout << "Iterator on functional GIC simplices" << std::endl;
       for (auto f_simplex : stree.filtration_simplex_range()) {
         for (auto vertex : stree.simplex_vertex_range(f_simplex)) {
           std::cout << vertex << " ";

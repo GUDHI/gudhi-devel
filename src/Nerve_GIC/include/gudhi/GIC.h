@@ -92,9 +92,9 @@ class Graph_induced_complex {
    int resolution_int = -1;
    double resolution_double = -1;
    double gain = -1;
-   double rate_constant; // Constant in the subsampling.
-   double rate_power; // Power in the subsampling.
-   int mask; // Ignore nodes containing less than mask points.
+   double rate_constant = 10; // Constant in the subsampling.
+   double rate_power = 0.001; // Power in the subsampling.
+   int mask = 0; // Ignore nodes containing less than mask points.
    std::map<int, double> func;
    std::map<int, double> func_color;
    std::vector<int> voronoi_subsamples;
@@ -112,7 +112,7 @@ class Graph_induced_complex {
  // DFS
  private:
    void dfs(std::map<int,std::vector<int> >& G, int p, std::vector<int>& cc, std::map<int,bool>& visit){
-     cc.push_back(p);
+     cc.emplace_back(p);
      visit[p] = true; int neighb = G[p].size();
      for (int i = 0; i < neighb; i++)
        if (  visit.find(G[p][i]) != visit.end() )
@@ -129,11 +129,10 @@ class Graph_induced_complex {
 
  // Subsample points.
  void SampleWithoutReplacement(int populationSize, int sampleSize, std::vector<int> & samples){
-   int& n = sampleSize; int& N = populationSize;
    int t = 0; int m = 0; double u;
-   while (m < n){
+   while (m < sampleSize){
      u = GetUniform();
-     if ( (N - t)*u >= n - m )
+     if ( (populationSize - t)*u >= sampleSize - m )
        t++;
       else{samples[m] = t; t++; m++;}
    }
@@ -146,8 +145,8 @@ class Graph_induced_complex {
      for (auto simplex : st.complex_simplex_range()) {
        if(st.dimension(simplex) == 1){
          std::vector<int> vertices;
-         for(auto vertex : st.simplex_vertex_range(simplex))  vertices.push_back(vertex);
-         adjacency_matrix[vertices[0]].push_back(vertices[1]); adjacency_matrix[vertices[1]].push_back(vertices[0]);
+         for(auto vertex : st.simplex_vertex_range(simplex))  vertices.emplace_back(vertex);
+         adjacency_matrix[vertices[0]].emplace_back(vertices[1]); adjacency_matrix[vertices[1]].emplace_back(vertices[0]);
        }
      }
    }
@@ -158,55 +157,67 @@ class Graph_induced_complex {
     * @param[in] verb boolean (true = display info, false = do not display info).
     *
     */
-   void set_verbose(bool verb = 0){verbose = verb;}
+   void set_verbose(bool verb = false){verbose = verb;}
+
  public:
    /** \brief Sets the constants used to subsample the data set. These constants are
-    * explained in "Statistical Analysis and Parameter Selection for the Mapper".
+    * explained in \cite Carriere17c.
     *
     * @param[in] constant double.
     * @param[in] power double.
     *
     */
-   void set_subsampling(double constant = 10, double power = 0.001){rate_constant = constant; rate_power = power;}
+   void set_subsampling(double constant, double power){rate_constant = constant; rate_power = power;}
+
  public:
-   /** \brief Sets the mask, which is a threshold integer such that nodes in the complex that contain less data points
-    * than this threshold are not displayed.
+   /** \brief Sets the mask, which is a threshold integer such that nodes in the complex that contain a number of data points which is less than or equal to
+    * this threshold are not displayed.
     *
     * @param[in] nodemask integer.
     *
     */
-   void set_mask(int nodemask = 0){mask = nodemask;}
+   void set_mask(int nodemask){mask = nodemask;}
 
  public:
    /** \brief Reads and stores the input point cloud.
     *
-    * @param[in] off_file_name name of the input .OFF file.
+    * @param[in] off_file_name name of the input .OFF or .nOFF file.
     *
     */
    bool read_point_cloud(std::string off_file_name){
-     point_cloud_name = off_file_name;
-     int numedges, numfaces, i, num; std::vector<int> edge(2);
-     std::vector<int> simplex;
-     std::ifstream input(off_file_name); std::string line; getline(input, line);
-     if(std::strcmp((char*) line.c_str(),"nOFF")==0)  input >> data_dimension; else data_dimension = 3;
-     input >> n; input >> numfaces; input >> numedges; getline(input, line);
+
+     point_cloud_name = off_file_name; std::ifstream input(off_file_name); std::string line;
+
+     char comment = '#';
+     while(comment == '#'){getline(input, line); if(!line.empty() && !std::all_of(line.begin(),line.end(),isspace)) comment = line[line.find_first_not_of(' ')];}
+     if(std::strcmp((char*) line.c_str(),"nOFF")==0){
+       comment = '#'; while(comment == '#'){getline(input, line); if(!line.empty() && !std::all_of(line.begin(),line.end(),isspace)) comment = line[line.find_first_not_of(' ')];}
+       std::stringstream stream(line); stream >> data_dimension;
+     }
+     else data_dimension = 3;
+
+     comment = '#'; int numedges, numfaces, i, num;
+     while(comment == '#'){getline(input, line); if(!line.empty() && !std::all_of(line.begin(),line.end(),isspace)) comment = line[line.find_first_not_of(' ')];}
+     std::stringstream stream(line); stream >> n; stream >> numfaces; stream >> numedges;
 
      i = 0; while(i < n){
        getline(input, line);
-       std::vector<double> point; std::istringstream iss(line);
-       point.assign(std::istream_iterator<double>(iss), std::istream_iterator<double>());
-       point_cloud.push_back(Point(point.begin(),point.end())); i++;
+       if(!line.empty() && line[line.find_first_not_of(' ')] != '#' && !std::all_of(line.begin(),line.end(),isspace)){
+         std::vector<double> point; std::istringstream iss(line);
+         point.assign(std::istream_iterator<double>(iss), std::istream_iterator<double>());
+         point_cloud.emplace_back(Point(point.begin(),point.begin()+data_dimension)); i++;
+       }
      }
 
      i = 0;  while(i < numfaces){
-       simplex.clear(); input >> num;
-       for(int j = 0; j < num; j++){int k; input >> k; simplex.push_back(k);}
-       for(int j = 0; j < num; j++){
-         for(int k = j+1; k < num; k++){
-           edge[0] = simplex[j]; edge[1] = simplex[k]; one_skeleton.push_back(edge);
-         }
+       getline(input, line);
+       if(!line.empty() && line[line.find_first_not_of(' ')] != '#' && !std::all_of(line.begin(),line.end(),isspace)){
+         std::vector<int> simplex; std::istringstream iss(line);
+         simplex.assign(std::istream_iterator<int>(iss), std::istream_iterator<int>());
+         num = simplex[0]; std::vector<int> edge(2);
+         for(int j = 1; j <= num; j++){ for(int k = j+1; k <= num; k++){ edge[0] = simplex[j]; edge[1] = simplex[k]; one_skeleton.emplace_back(edge); } }
+         i++;
        }
-       i++;
      }
 
      return input.is_open();
@@ -256,6 +267,7 @@ class Graph_induced_complex {
    /** \brief Creates the graph G from a Rips complex.
     *
     * @param[in] threshold threshold value for the Rips complex.
+    * @param[in] distance distance used to compute the Rips complex.
     *
     */
    template<typename Distance> void set_graph_from_rips(double threshold, Distance distance){
@@ -271,7 +283,7 @@ class Graph_induced_complex {
     */
    template<typename Distance> void compute_pairwise_distances(Distance ref_distance){
 
-     double d; std::vector<double> zeros(n); for(int i = 0; i < n; i++)  distances.push_back(zeros);
+     double d; std::vector<double> zeros(n); for(int i = 0; i < n; i++)  distances.emplace_back(zeros);
      std::string distance = point_cloud_name; distance.append("_dist");
      std::ifstream input(distance.c_str(), std::ios::out | std::ios::binary);
 
@@ -303,9 +315,11 @@ class Graph_induced_complex {
    }
 
  public: // Automatic tuning of Rips complex.
-   /** \brief Creates the graph G from a Rips complex whose threshold value is automatically tuned with subsampling.
+   /** \brief Creates the graph G from a Rips complex whose threshold value is automatically tuned with subsampling---see \cite Carriere17c.
     *
-    * @param[in] N number of subsampling iteration (the default reasonable value is 100, but there is no guarantee on how to choose it).
+    * @param[in] distance distance between data points.
+    * @param[in]  N number of subsampling iteration (the default reasonable value is 100, but there is no guarantee on how to choose it).
+    * @param[out] delta threshold used for computing the Rips complex.
     *
     */
    template<typename Distance> double set_graph_from_automatic_rips(Distance distance, int N = 100){
@@ -380,27 +394,31 @@ class Graph_induced_complex {
     *
     */
    void set_function_from_vector(std::vector<double> function){
-     for(int i = 0; i < n; i++)  func.emplace(i, function[i]);
+     int index = 0; for(auto v : function){func.emplace(index, v); index++;}
    }
 
  // *******************************************************************************************************************
  // Covers.
  // *******************************************************************************************************************
 
- public: // Automatic tuning of resolution for Mapper Delta.
-   /** \brief Computes the optimal length of intervals for a Mapper Delta.
+ public: // Automatic tuning of resolution for GIC.
+   /** \brief Computes the optimal length of intervals (i.e. the smallest interval length avoiding discretization artifacts---see \cite Carriere17c) for a GIC computed with a functional cover.
+    *
+    * @param[out] reso interval length used to compute the cover.
+    *
     */
-   void set_automatic_resolution_for_GICMAP(){
+   double set_automatic_resolution_for_GIC(){
      double reso = 0;
      for (auto simplex : st.complex_simplex_range()) {
        if(st.dimension(simplex) == 1){
          std::vector<int> vertices;
-         for(auto vertex : st.simplex_vertex_range(simplex))  vertices.push_back(vertex);
+         for(auto vertex : st.simplex_vertex_range(simplex))  vertices.emplace_back(vertex);
          reso = std::max(reso, std::abs(func[vertices[0]] - func[vertices[1]]));
        }
      }
      if(verbose)  std::cout << "resolution = " << reso << std::endl;
      resolution_double = reso;
+     return reso;
    }
 
  public:
@@ -423,20 +441,25 @@ class Graph_induced_complex {
     */
    void set_gain(double g = 0.3){gain = g;}
 
- public: // Automatic tuning of resolution for Mapper Point.
-   /** \brief Computes the optimal length of intervals for a standard Mapper.
+ public: // Automatic tuning of resolution for Nerve.
+   /** \brief Computes the optimal length of intervals (i.e. the smallest interval length avoiding discretization artifacts---see \cite Carriere17c) for a Nerve computed with a functional cover.
+    *
+    * @param[in] g gain.
+    * @param[out] reso interval length used to compute the cover.
+    *
     */
-   void set_automatic_resolution_for_MAP(double gain){
+   double set_automatic_resolution_for_Nerve(double gain){
      double reso = 0;
      for (auto simplex : st.complex_simplex_range()) {
        if(st.dimension(simplex) == 1){
          std::vector<int> vertices;
-         for(auto vertex : st.simplex_vertex_range(simplex))  vertices.push_back(vertex);
+         for(auto vertex : st.simplex_vertex_range(simplex))  vertices.emplace_back(vertex);
          reso = std::max(reso, (std::abs(func[vertices[0]] - func[vertices[1]]))/gain);
        }
      }
      if(verbose)  std::cout << "resolution = " << reso << std::endl;
      resolution_double = reso;
+     return reso;
    }
 
  public: // Set cover with preimages of function.
@@ -459,14 +482,14 @@ class Graph_induced_complex {
 
      if(resolution_double == -1){ // Case we use an integer for the number of intervals.
        double incr = (maxf-minf)/resolution_int; double x = minf; double alpha = (incr*gain)/(2-2*gain);
-       double y = minf + incr + alpha; std::pair<double, double> interm(x,y); intervals.push_back(interm);
+       double y = minf + incr + alpha; std::pair<double, double> interm(x,y); intervals.emplace_back(interm);
        for(int i = 1; i < resolution_int-1; i++){
          x = minf + i*incr - alpha;
          y = minf + (i+1)*incr + alpha;
-         std::pair<double, double> inter(x,y); intervals.push_back(inter);
+         std::pair<double, double> inter(x,y); intervals.emplace_back(inter);
        }
        x = minf + (resolution_int-1)*incr - alpha; y = maxf;
-       std::pair<double, double> interM(x,y); intervals.push_back(interM); res = intervals.size();
+       std::pair<double, double> interM(x,y); intervals.emplace_back(interM); res = intervals.size();
        if(verbose)
          for(int i = 0; i < res; i++)  std::cout << "Interval " << i << " = [" << intervals[i].first << ", " << intervals[i].second << "]" << std::endl;
      }
@@ -475,11 +498,11 @@ class Graph_induced_complex {
        if(resolution_int == -1){ // Case we use a double for the length of the intervals.
          double x = minf; double y = x + resolution_double;
          while(y <= maxf && maxf - (y-gain*resolution_double) >= resolution_double){
-           std::pair<double, double> inter(x,y); intervals.push_back(inter);
+           std::pair<double, double> inter(x,y); intervals.emplace_back(inter);
            x = y - gain*resolution_double;
            y = x + resolution_double;
          }
-         std::pair<double, double> interM(x,maxf); intervals.push_back(interM); res = intervals.size();
+         std::pair<double, double> interM(x,maxf); intervals.emplace_back(interM); res = intervals.size();
          if(verbose)
            for(int i = 0; i < res; i++)  std::cout << "Interval " << i << " = [" << intervals[i].first << ", " << intervals[i].second << "]" << std::endl;
        }
@@ -487,7 +510,7 @@ class Graph_induced_complex {
        else{ // Case we use an integer and a double for the length of the intervals.
          double x = minf; double y = x + resolution_double; int count = 0;
          while(count < resolution_int && y <= maxf && maxf - (y-gain*resolution_double) >= resolution_double){
-             std::pair<double, double> inter(x,y); intervals.push_back(inter);  count++;
+             std::pair<double, double> inter(x,y); intervals.emplace_back(inter);  count++;
              x = y - gain*resolution_double;
              y = x + resolution_double;
            }
@@ -558,7 +581,7 @@ class Graph_induced_complex {
              std::vector<int> cc; cc.clear();
              dfs(prop,it->first,cc,visit); int cci = cc.size(); if(verbose)  std::cout << "one CC with " << cci << " points, ";
              double average_col = 0;
-             for(int j = 0; j < cci; j++){cover[cc[j]].push_back(id); average_col += func_color[cc[j]]/cci;}
+             for(int j = 0; j < cci; j++){cover[cc[j]].emplace_back(id); average_col += func_color[cc[j]]/cci;}
              cover_fct[id] = i; cover_color[id] = std::pair<int,double>(cci,average_col);
              id++;
            }
@@ -584,7 +607,7 @@ class Graph_induced_complex {
      while(std::getline(input,line)){
        cov_elts.clear(); std::stringstream stream(line);
        while(stream >> cov){
-         cov_elts.push_back(cov); cov_number.push_back(cov);
+         cov_elts.emplace_back(cov); cov_number.emplace_back(cov);
          cover_fct[cov] = cov; cover_color[cov].second += func_color[vertex_id]; cover_color[cov].first++;
        }
        cover[vertex_id] = cov_elts; vertex_id++;
@@ -599,6 +622,7 @@ class Graph_induced_complex {
  public: // Set cover from Voronoi
    /** \brief Creates the cover C from the Voronoï cells of a subsampling of the point cloud.
    *
+   * @param[in] distance distance between the points.
    * @param[in] m number of points in the subsample.
    *
    */
@@ -636,7 +660,7 @@ class Graph_induced_complex {
        for(int j = 0; j < n; j++)
          if(mindist[j] > dist[j]){
            mindist[j] = dist[j];
-           if(cover[j].size() == 0) cover[j].push_back(i);
+           if(cover[j].size() == 0) cover[j].emplace_back(i);
            else cover[j][0] = i;
          }
      }
@@ -688,11 +712,11 @@ class Graph_induced_complex {
    }
 
  public: // Create a .dot file that can be compiled with neato to produce a .pdf file.
-   /** \brief Creates a .dot file for neato (part of the graphviz package) once the simplicial complex is computed to get a visualization
+   /** \brief Creates a .dot file called SC.dot for neato (part of the graphviz package) once the simplicial complex is computed to get a visualization
     * of its 1-skeleton in a .pdf file.
     */
-   void plot_DOT_for_neato(){
-     char mapp[11] = "SC.dot";   std::ofstream graphic(mapp); graphic << "graph Mapper {" << std::endl;
+   void plot_DOT(){
+     char mapp[11] = "SC.dot";   std::ofstream graphic(mapp); graphic << "graph GIC {" << std::endl;
      double maxv, minv; maxv = std::numeric_limits<double>::min(); minv = std::numeric_limits<double>::max();
      for (std::map<Cover_t,std::pair<int,double> >::iterator iit = cover_color.begin(); iit != cover_color.end(); iit++){
        maxv = std::max(maxv, iit->second.second);  minv = std::min(minv, iit->second.second);
@@ -700,7 +724,7 @@ class Graph_induced_complex {
      int k = 0; std::vector<int> nodes; nodes.clear();
      for (std::map<Cover_t,std::pair<int,double> >::iterator iit = cover_color.begin(); iit != cover_color.end(); iit++){
        if(iit->second.first > mask){
-         nodes.push_back(iit->first);
+         nodes.emplace_back(iit->first);
          graphic << iit->first << "[shape=circle fontcolor=black color=black label=\"" \
            << iit->first << ":" << iit->second.first << "\" style=filled fillcolor=\"" \
            << (1-(maxv-iit->second.second)/(maxv-minv))*0.6 << ", 1, 1\"]" << std::endl;
@@ -716,11 +740,10 @@ class Graph_induced_complex {
      std::cout << "SC.dot generated. It can be visualized with e.g. neato." << std::endl;
    }
 
- public: // Create a .txt file that can be compiled with KeplerMapper to produce a .html file.
-   /** \brief Creates a .txt file for KeplerMapper once the simplicial complex is computed to get a visualization
-    * of its 1-skeleton in browser.
+ public: // Create a .txt file that can be compiled with KeplerMapper.
+   /** \brief Creates a .txt file called SC.txt describing the 1-skeleton, which can then be plotted with e.g. KeplerMapper.
     */
-   void plot_TXT_for_KeplerMapper(){
+   void plot_TXT(){
 
      int num_simplices = simplices.size(); int num_edges = 0;
      char mapp[11] = "SC.txt";  std::ofstream graphic(mapp);
@@ -748,27 +771,29 @@ class Graph_induced_complex {
 
 
  public: // Create a .off file that can be visualized (e.g. with Geomview).
-   /** \brief Creates a .off file for visualization.
-    * For GIC computed with Voronoi only.
+   /** \brief Creates a .off file called SC.off for 3D visualization, which contains the 2-skeleton of the GIC.
+    * This function assumes that the cover has been computed with Voronoi. If data points are in 1D or 2D,
+    * the remaining coordinates of the points embedded in 3D are set to 0.
     */
    void plot_OFF(){
 
-     assert(data_dimension <= 3);
+     assert(!cover_name.compare("Voronoi"));
      char gic[11] = "SC.off";  std::ofstream graphic(gic);
      graphic << "OFF" << std::endl; int m = voronoi_subsamples.size(); int numedges = 0; int numfaces = 0;
      std::vector<std::vector<int> > edges, faces; int numsimplices = simplices.size();
      for (int i = 0; i < numsimplices; i++) {
-       if(simplices[i].size() == 2){ numedges++;
-         edges.push_back(simplices[i]);
-       }
-       if(simplices[i].size() == 3){ numfaces++;
-         faces.push_back(simplices[i]);
-       }
+       if(simplices[i].size() == 2){ numedges++; edges.emplace_back(simplices[i]); }
+       if(simplices[i].size() == 3){ numfaces++; faces.emplace_back(simplices[i]); }
      }
      graphic << m << " " << numedges + numfaces << std::endl;
-     for(int i = 0; i < m; i++)  graphic << point_cloud[voronoi_subsamples[i]][0] << " " \
-                                         << point_cloud[voronoi_subsamples[i]][1] << " " \
-                                         << point_cloud[voronoi_subsamples[i]][2] << std::endl;
+     for(int i = 0; i < m; i++){
+       if(data_dimension <= 3){
+         for(int j = 0; j < data_dimension; j++)  graphic << point_cloud[voronoi_subsamples[i]][j] << " ";
+         for(int j = data_dimension; j < 3; j++)  graphic << 0 << " ";
+         graphic << std::endl;
+       }
+       else  for(int j = 0; j < 3; j++)  graphic << point_cloud[voronoi_subsamples[i]][j] << " ";
+     }
      for(int i = 0; i < numedges; i++)  graphic << 2 << " " << edges[i][0] << " " << edges[i][1] << std::endl;
      for(int i = 0; i < numfaces; i++)  graphic << 3 << " " << faces[i][0] << " " << faces[i][1] << " " << faces[i][2] << std::endl;
      graphic.close();
@@ -783,11 +808,11 @@ class Graph_induced_complex {
  public:
    /** \brief Creates the simplicial complex.
     *
-    * @param[in] complex SimplicialComplexForGIC to be created.
+    * @param[in] complex SimplicialComplexForRips to be created.
     *
     */
-   template<typename SimplicialComplexForGIC>
-   void create_complex(SimplicialComplexForGIC & complex) {
+   template<typename SimplicialComplexForRips>
+   void create_complex(SimplicialComplexForRips & complex) {
      unsigned int dimension = 0;
      for(auto const& simplex : simplices){
        complex.insert_simplex_and_subfaces(simplex);
@@ -796,7 +821,7 @@ class Graph_induced_complex {
      complex.set_dimension(dimension);
    }
 
- public:
+ private:
    /** \brief Finds the maximal clique formed by different elements of the cover in a set of points.
     *
     * @param[in] cover_elts vector of points represented by vectors of cover elements (the ones to which they belong).
@@ -807,24 +832,24 @@ class Graph_induced_complex {
      std::vector<Cover_t> simplex;
      for(int i = 0; i < num_nodes; i++)
        for(unsigned int j = 0; j < cover_elts[i].size(); j++)
-         simplex.push_back(cover_elts[i][j]);
+         simplex.emplace_back(cover_elts[i][j]);
      std::sort(simplex.begin(),simplex.end()); std::vector<Cover_t>::iterator it = std::unique(simplex.begin(),simplex.end());
      simplex.resize(std::distance(simplex.begin(),it));
-     simplices.push_back(simplex);
+     simplices.emplace_back(simplex);
    }
 
  public:
-   /** \brief Computes the simplices in the Nerve of the cover C.
+   /** \brief Computes the simplices for a Nerve.
     */
    void find_Nerve_simplices(){
-     for(std::map<int,std::vector<Cover_t> >::iterator it = cover.begin(); it!=cover.end(); it++)  simplices.push_back(it->second);
+     for(std::map<int,std::vector<Cover_t> >::iterator it = cover.begin(); it!=cover.end(); it++)  simplices.emplace_back(it->second);
      std::vector<std::vector<Cover_t> >::iterator it;
      std::sort(simplices.begin(),simplices.end()); it = std::unique(simplices.begin(),simplices.end());
      simplices.resize(std::distance(simplices.begin(),it));
    }
 
  public:
-   /** \brief Computes the simplices in the GIC of the graph G and the cover C.
+   /** \brief Computes the simplices for a GIC.
     */
    void find_GIC_simplices() {
 
@@ -833,8 +858,8 @@ class Graph_induced_complex {
      for (auto simplex : st.complex_simplex_range()) {
        if(st.dimension(simplex) == 1){
          std::vector<std::vector<Cover_t> > comp;
-         for(auto vertex : st.simplex_vertex_range(simplex))  comp.push_back(cover[vertex]);
-         if(comp[0].size() == 1 && comp[0] == comp[1])  simplex_to_remove.push_back(simplex_id);
+         for(auto vertex : st.simplex_vertex_range(simplex))  comp.emplace_back(cover[vertex]);
+         if(comp[0].size() == 1 && comp[0] == comp[1])  simplex_to_remove.emplace_back(simplex_id);
        }
        simplex_id++;
      }
@@ -859,7 +884,7 @@ class Graph_induced_complex {
      for (auto simplex : st.complex_simplex_range()) {
        if(!st.has_children(simplex)){
          std::vector<std::vector<Cover_t> > cover_elts;
-         for (auto vertex : st.simplex_vertex_range(simplex))  cover_elts.push_back(cover[vertex]);
+         for (auto vertex : st.simplex_vertex_range(simplex))  cover_elts.emplace_back(cover[vertex]);
          find_maximal_clique(cover_elts);
        }
      }
@@ -869,14 +894,14 @@ class Graph_induced_complex {
    }
 
  public:
-   /** \brief Computes the simplices in the Mapper Delta by looking at all the edges of the graph
-    * and adding the corresponding edges in the Mapper Delta if the images of the endpoints belong
-    * to consecutive intervals.
+   /** \brief Speed-up special case for simplices computation for a GIC computed with a functional cover.
     *
-    * @exception std::invalid_argument In case the gain is greater or equal to 0.5 (causes incorrect output).
+    * @exception std::invalid_argument in case the gain is greater than or equal to 0.5 (causes incorrect output).
     *
     */
-   void find_GICMAP_simplices_with_functional_minimal_cover(){
+   void find_GIC_simplices_with_functional_minimal_cover(){
+
+     // Computes the simplices in the GIC by looking at all the edges of the graph and adding the corresponding edges in the GIC if the images of the endpoints belong to consecutive intervals.
 
      if (gain >= 0.5)
        throw std::invalid_argument("the output of this function is correct ONLY if the cover is minimal, i.e. the gain is less than 0.5.");
@@ -890,7 +915,7 @@ class Graph_induced_complex {
 
        // Find cover of current point (vid).
        if(cover[vid].size() == 2)  v1 = std::min(cover[vid][0],cover[vid][1]); else  v1 = cover[vid][0];
-       std::vector<int> node(1); node[0] = v1; simplices.push_back(node);
+       std::vector<int> node(1); node[0] = v1; simplices.emplace_back(node);
 
        // Loop on neighbors.
        for(int i = 0; i < num_neighb; i++){
@@ -903,7 +928,7 @@ class Graph_induced_complex {
          // If neighbor is in next interval, add edge.
          if(cover_fct[v2] == cover_fct[v1] + 1){
            std::vector<int> edge(2); edge[0] = v1; edge[1] = v2;
-           simplices.push_back(edge);
+           simplices.emplace_back(edge);
          }
        }
      }
