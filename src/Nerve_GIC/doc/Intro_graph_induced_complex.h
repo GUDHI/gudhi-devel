@@ -132,12 +132,12 @@ namespace graph_induced_complex {
  *
  * \subsection functionalGICexample Example
  *
- * Functional GIC comes with optimal selection for the Rips threshold,
- * the resolution and the gain of the function cover. In this example,
+ * Functional GIC comes with automatic selection of the Rips threshold,
+ * the resolution and the gain of the function cover. See \cite Carriere17c for more details. In this example,
  * we compute the functional GIC of a Klein bottle embedded in R^5,
- * where the graph G comes from a Rips complex with optimal threshold,
+ * where the graph G comes from a Rips complex with automatic threshold,
  * and the cover C comes from the preimages of intervals covering the first coordinate,
- * with optimal resolution and gain. Note that optimal threshold, resolution and gain
+ * with automatic resolution and gain. Note that automatic threshold, resolution and gain
  * can be computed as well for the Nerve.
  *
  * \include Nerve_GIC/CoordGIC.cpp
