@@ -127,15 +127,9 @@ if(CGAL_FOUND)
 
     install(TARGETS weighted_periodic_alpha_complex_3d_persistence DESTINATION bin)
 
-    # On CGAL 4.11, the weighted alpha shape 3 interface was changed - the new interface
-    add_executable(weighted_alpha_complex_3d_persistence weighted_alpha_complex_3d_persistence.cpp)
-  else(NOT CGAL_VERSION VERSION_LESS 4.11.0)
-    # On CGAL 4.11, the weighted alpha shape 3 interface was changed - the old interface
-    add_executable(weighted_alpha_complex_3d_persistence weighted_alpha_complex_3d_persistence_old_cgal_interface.cpp)
   endif (NOT CGAL_VERSION VERSION_LESS 4.11.0)
 
-  # cf. if (NOT CGAL_VERSION VERSION_LESS 4.11.0) and else(NOT CGAL_VERSION VERSION_LESS 4.11.0)
-  # same target name on purpose
+  add_executable(weighted_alpha_complex_3d_persistence weighted_alpha_complex_3d_persistence.cpp)
   target_link_libraries(weighted_alpha_complex_3d_persistence ${CGAL_LIBRARY})
   if (TBB_FOUND)
     target_link_libraries(weighted_alpha_complex_3d_persistence ${TBB_LIBRARIES})
