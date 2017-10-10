@@ -86,8 +86,8 @@ using Simplex_tree_vector_vertex = std::vector<Simplex_tree_vertex>;
 using Persistent_cohomology =
     Gudhi::persistent_cohomology::Persistent_cohomology<ST, Gudhi::persistent_cohomology::Field_Zp>;
 
-void usage(char* const progName) {
-  std::cerr << "Usage: " << progName << " path_to_the_OFF_File path_to_weight_file path_to_the_cuboid_file "
+void usage(const std::string& progName) {
+  std::cerr << "Usage: " << progName << " path_to_the_OFF_file path_to_weight_file path_to_the_cuboid_file "
                                         "coeff_field_characteristic[integer > 0] min_persistence[float >= -1.0]\n";
   exit(-1);
 }
@@ -96,7 +96,6 @@ int main(int argc, char* const argv[]) {
   // program args management
   if (argc != 6) {
     std::cerr << "Error: Number of arguments (" << argc << ") is not correct\n";
-    // file with points, file with weights, cuboid file, field characteristics, minimum persistence.
     usage(argv[0]);
   }
 
@@ -206,8 +205,7 @@ int main(int argc, char* const argv[]) {
         // Edge_3 is of dim 1
         dim_max = 1;
       }
-    } else if (const Alpha_shape_3::Vertex_handle* vertex =
-                   CGAL::object_cast<Alpha_shape_3::Vertex_handle>(&object_iterator)) {
+    } else if (const Vertex_handle* vertex = CGAL::object_cast<Vertex_handle>(&object_iterator)) {
       count_vertices++;
       vertex_list = from_vertex<Vertex_list, Vertex_handle>(*vertex);
     }

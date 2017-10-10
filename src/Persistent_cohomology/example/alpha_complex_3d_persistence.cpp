@@ -39,6 +39,7 @@
 #include <utility>
 #include <list>
 #include <vector>
+#include <cstdlib>
 
 #include "alpha_complex_3d_helper.h"
 
@@ -78,7 +79,7 @@ using Persistent_cohomology =
 
 void usage(const std::string& progName) {
   std::cerr << "Usage: " << progName
-            << " path_to_file_graph coeff_field_characteristic[integer > 0] min_persistence[float >= -1.0]\n";
+            << " path_to_the_OFF_file coeff_field_characteristic[integer > 0] min_persistence[float >= -1.0]\n";
   exit(-1);
 }
 
@@ -90,13 +91,7 @@ int main(int argc, char* const argv[]) {
   }
 
   int coeff_field_characteristic = atoi(argv[2]);
-
-  Filtration_value min_persistence = 0.0;
-  int returnedScanValue = sscanf(argv[3], "%f", &min_persistence);
-  if ((returnedScanValue == EOF) || (min_persistence < -1.0)) {
-    std::cerr << "Error: " << argv[3] << " is not correct\n";
-    usage(argv[0]);
-  }
+  Filtration_value min_persistence = strtof(argv[3], nullptr);
 
   // Read points from file
   std::string offInputFile(argv[1]);

@@ -49,6 +49,7 @@
 
 #include "alpha_complex_3d_helper.h"
 
+// Alpha_shape_3 templates type definitions
 using Kernel = CGAL::Exact_predicates_inexact_constructions_kernel;
 
 // For CGAL < 4.11
@@ -102,8 +103,8 @@ using Simplex_tree_vector_vertex = std::vector<Simplex_tree_vertex>;
 using Persistent_cohomology =
     Gudhi::persistent_cohomology::Persistent_cohomology<ST, Gudhi::persistent_cohomology::Field_Zp>;
 
-void usage(char* const progName) {
-  std::cerr << "Usage: " << progName << " path_to_file_graph path_to_weight_file coeff_field_characteristic[integer > "
+void usage(const std::string& progName) {
+  std::cerr << "Usage: " << progName << " path_to_the_OFF_file path_to_weight_file coeff_field_characteristic[integer > "
                                         "0] min_persistence[float >= -1.0]\n";
   exit(-1);
 }

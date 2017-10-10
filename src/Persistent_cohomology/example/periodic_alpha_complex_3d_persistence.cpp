@@ -83,8 +83,8 @@ using Simplex_tree_vector_vertex = std::vector<Simplex_tree_vertex>;
 using Persistent_cohomology =
     Gudhi::persistent_cohomology::Persistent_cohomology<ST, Gudhi::persistent_cohomology::Field_Zp>;
 
-void usage(char* const progName) {
-  std::cerr << "Usage: " << progName << " path_to_file_graph path_to_iso_cuboid_3_file "
+void usage(const std::string& progName) {
+  std::cerr << "Usage: " << progName << " path_to_the_OFF_file path_to_iso_cuboid_3_file "
                                         "coeff_field_characteristic[integer > 0] min_persistence[float >= -1.0]\n";
   exit(-1);
 }
