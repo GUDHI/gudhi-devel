@@ -21,6 +21,7 @@
  */
 
 #include <gudhi/Simplex_tree.h>
+#include <gudhi/Fake_simplex_tree.h>
 #include <gudhi/Euclidean_strong_witness_complex.h>
 #include <gudhi/pick_n_random_points.h>
 #include <gudhi/Points_off_io.h>
@@ -49,7 +50,8 @@ int main(int argc, char * const argv[]) {
   int nbL = atoi(argv[2]), lim_dim = atoi(argv[4]);
   double alpha2 = atof(argv[3]);
   clock_t start, end;
-  Gudhi::Simplex_tree<> simplex_tree;
+  //Gudhi::Simplex_tree<> simplex_tree;
+  Gudhi::Fake_simplex_tree simplex_tree;
 
   // Read the point file
   Point_vector point_vector, landmarks;

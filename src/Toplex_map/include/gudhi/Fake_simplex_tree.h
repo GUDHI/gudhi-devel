@@ -26,7 +26,7 @@ public:
     void expansion(int max_dim);
 
     /** \brief Returns the number of vertices in the simplicial complex. */
-    std::size_t num_vertices();
+    std::size_t num_vertices() const;
 
     Simplex_ptr_set candidates() const;
 
@@ -34,7 +34,7 @@ public:
 
     std::size_t num_simplices() const;
 
-    std::size_t num_vertices() const;
+    void set_dimension(int d);
 
     Simplex simplex_vertex_range(Simplex_ptr &sptr) const;
 
@@ -58,6 +58,10 @@ protected:
     bool all_facets_inside(const Input_vertex_range &vertex_range) const;
 
 };
+
+void Fake_simplex_tree::set_dimension(int d){
+
+}
 
 template<class OneSkeletonGraph>
 void Fake_simplex_tree::insert_graph(const OneSkeletonGraph& skel_graph){
@@ -149,6 +153,11 @@ Simplex Fake_simplex_tree::simplex_vertex_range(Simplex_ptr& sptr) const {
 
 std::unordered_set<Simplex_ptr> Fake_simplex_tree::filtration_simplex_range() const{
     std::vector<Simplex_ptr> m = max_simplices();
+    std::cout << m.size()<< std::endl;
+    std::cout << m.size()<< std::endl;
+
+    std::cout << m.size()<< std::endl;
+
     std::unordered_set<Simplex_ptr> seen;
     while(m.begin()!=m.end()){
         Simplex_ptr& sptr = m.back();
