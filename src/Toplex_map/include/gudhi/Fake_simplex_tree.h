@@ -14,6 +14,8 @@ public:
 
     typedef Simplex_ptr Simplex_handle;
 
+    typedef void Insertion_result_type;
+
     /** \brief Inserts a given range `Gudhi::rips_complex::Rips_complex::OneSkeletonGraph` in the simplicial
      * complex. */
     template<class OneSkeletonGraph>
