@@ -1202,7 +1202,7 @@ class Simplex_tree {
    */
   bool automatic_dimension_set() {
     int new_dimension = -1;
-    // Browse the tree from te left to the right as higher dimension cells are more likely on the left part of the tree
+    // Browse the tree from the left to the right as higher dimension cells are more likely on the left part of the tree
     for (Simplex_handle sh : skeleton_simplex_range(dimension_)) {
 #ifdef DEBUG_TRACES
       for (auto vertex : simplex_vertex_range(sh)) {
@@ -1215,7 +1215,7 @@ class Simplex_tree {
       if (sh_dimension >= dimension_)
         // Stop browsing as soon as the dimension is reached, no need to go furter
         return false;
-      new_dimension = std::max<int>(new_dimension, sh_dimension);
+      new_dimension = std::max(new_dimension, sh_dimension);
     }
     dimension_ = new_dimension;
     return true;
