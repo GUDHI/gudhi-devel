@@ -1228,7 +1228,9 @@ class Simplex_tree {
    * \pre Please check the simplex has no coface before removing it.
    * \exception std::invalid_argument In debug mode, if sh has children.
    * \post Be aware that removing is shifting data in a flat_map (`initialize_filtration()` to be done).
-   * \post Be aware that removing may change the simplex tree dimension (`automatic_dimension_set()` to be done).
+   * \post Note that the dimension of the simplicial complex may be lower after calling `remove_maximal_simplex()`
+   * than it was before. However, `Simplex_tree::dimension()` will return the old value, which remains a valid upper
+   * bound. If you care, you can call `automatic_dimension_set()` to recompute the exact dimension.
    */
   void remove_maximal_simplex(Simplex_handle sh) {
     // Guarantee the simplex has no children
