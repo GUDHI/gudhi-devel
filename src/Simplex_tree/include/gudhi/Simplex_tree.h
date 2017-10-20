@@ -1203,7 +1203,7 @@ class Simplex_tree {
   bool downgrade_dimension() {
     int new_dimension = -1;
     // Browse the tree from the left to the right as higher dimension cells are more likely on the left part of the tree
-    for (Simplex_handle sh : skeleton_simplex_range(dimension_)) {
+    for (Simplex_handle sh : complex_simplex_range()) {
 #ifdef DEBUG_TRACES
       for (auto vertex : simplex_vertex_range(sh)) {
         std::cout << " " << vertex;
