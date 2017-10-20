@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(remove_maximal_simplex) {
   std::cout << "st.dimension()=" << st.dimension() << std::endl;
   BOOST_CHECK(st.dimension() == 3);
 
-  st.automatic_dimension_set();
+  st.downgrade_dimension();
 
   std::cout << "st.dimension()=" << st.dimension() << " | st_wo_seven.dimension()=" << st_wo_seven.dimension() << std::endl;
   BOOST_CHECK(st == st_wo_seven);
@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE(auto_dimension_set) {
   st.remove_maximal_simplex(st.find({1, 2, 3, 5}));
   std::cout << "st.dimension()=" << st.dimension() << std::endl;
   BOOST_CHECK(st.dimension() == 3);
-  st.automatic_dimension_set();
+  st.downgrade_dimension();
   std::cout << "st.dimension()=" << st.dimension() << std::endl;
   BOOST_CHECK(st.dimension() == 2);
 
@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE(auto_dimension_set) {
   st.remove_maximal_simplex(st.find({1, 2, 3, 4}));
   std::cout << "st.dimension()=" << st.dimension() << std::endl;
   BOOST_CHECK(st.dimension() == 3);
-  st.automatic_dimension_set();
+  st.downgrade_dimension();
   std::cout << "st.dimension()=" << st.dimension() << std::endl;
   BOOST_CHECK(st.dimension() == 2);
 
@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE(auto_dimension_set) {
   st.remove_maximal_simplex(st.find({0, 1, 3, 4}));
   std::cout << "st.dimension()=" << st.dimension() << std::endl;
   BOOST_CHECK(st.dimension() == 3);
-  st.automatic_dimension_set();
+  st.downgrade_dimension();
   std::cout << "st.dimension()=" << st.dimension() << std::endl;
   BOOST_CHECK(st.dimension() == 2);
 
@@ -208,9 +208,9 @@ BOOST_AUTO_TEST_CASE(auto_dimension_set) {
   st.set_dimension(1);
   std::cout << "st.dimension()=" << st.dimension() << std::endl;
   BOOST_CHECK(st.dimension() == 1);
-  st.automatic_dimension_set();
+  st.downgrade_dimension();
   std::cout << "st.dimension()=" << st.dimension() << std::endl;
-  // check automatic_dimension_set() is not giving the rigt answer because dimension is too low
+  // check downgrade_dimension() is not giving the rigt answer because dimension is too low
   BOOST_CHECK(st.dimension() == 1);
 
 
@@ -219,9 +219,9 @@ BOOST_AUTO_TEST_CASE(auto_dimension_set) {
   st.set_dimension(6);
   std::cout << "st.dimension()=" << st.dimension() << std::endl;
   BOOST_CHECK(st.dimension() == 6);
-  st.automatic_dimension_set();
+  st.downgrade_dimension();
   std::cout << "st.dimension()=" << st.dimension() << std::endl;
-  // check automatic_dimension_set() resets the correct dimension
+  // check downgrade_dimension() resets the correct dimension
   BOOST_CHECK(st.dimension() == 3);
 
 
@@ -239,7 +239,7 @@ BOOST_AUTO_TEST_CASE(auto_dimension_set) {
   st.remove_maximal_simplex(st.find({0, 1, 2, 3, 4, 5, 6}));
   std::cout << "st.dimension()=" << st.dimension() << std::endl;
   BOOST_CHECK(st.dimension() == 6);
-  st.automatic_dimension_set();
+  st.downgrade_dimension();
   std::cout << "st.dimension()=" << st.dimension() << std::endl;
   BOOST_CHECK(st.dimension() == 5);
 
@@ -344,7 +344,7 @@ BOOST_AUTO_TEST_CASE(prune_above_filtration) {
   std::cout << " - dimension " << st.dimension() << std::endl;
   BOOST_CHECK(st.dimension() == 3);
 
-  st.automatic_dimension_set();
+  st.downgrade_dimension();
   std::cout << "dimension=" << st.dimension() << std::endl;
   BOOST_CHECK(st.dimension() == -1);
 

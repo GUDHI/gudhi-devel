@@ -1163,7 +1163,7 @@ class Simplex_tree {
    * complex has changed , please call `initialize_filtration()` to recompute it.
    * \post Note that the dimension of the simplicial complex may be lower after calling `prune_above_filtration()`
    * than it was before. However, `Simplex_tree::dimension()` will return the old value, which remains a valid upper
-   * bound. If you care, you can call `automatic_dimension_set()` to recompute the exact dimension.
+   * bound. If you care, you can call `downgrade_dimension()` to recompute the exact dimension.
    */
   bool prune_above_filtration(Filtration_value filtration) {
     return rec_prune_above_filtration(root(), filtration);
@@ -1195,12 +1195,12 @@ class Simplex_tree {
   }
 
  public:
-  /** \brief Deep search simplex tree dimension reset.
+  /** \brief Deep search simplex tree dimension recompute.
    * @return True if the dimension was modified, false otherwise.
    * \pre Be sure the simplex tree has not a too low dimension value as the deep search stops when the former dimension
    * has been reached (cf. `dimension()` and `set_dimension()` methods).
    */
-  bool automatic_dimension_set() {
+  bool downgrade_dimension() {
     int new_dimension = -1;
     // Browse the tree from the left to the right as higher dimension cells are more likely on the left part of the tree
     for (Simplex_handle sh : skeleton_simplex_range(dimension_)) {
@@ -1230,7 +1230,7 @@ class Simplex_tree {
    * \post Be aware that removing is shifting data in a flat_map (`initialize_filtration()` to be done).
    * \post Note that the dimension of the simplicial complex may be lower after calling `remove_maximal_simplex()`
    * than it was before. However, `Simplex_tree::dimension()` will return the old value, which remains a valid upper
-   * bound. If you care, you can call `automatic_dimension_set()` to recompute the exact dimension.
+   * bound. If you care, you can call `downgrade_dimension()` to recompute the exact dimension.
    */
   void remove_maximal_simplex(Simplex_handle sh) {
     // Guarantee the simplex has no children
