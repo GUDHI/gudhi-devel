@@ -39,33 +39,34 @@ int main(int argc, char **argv) {
   int resolution = atoi(argv[3]);
   double gain = atof(argv[4]);
   bool verb = 0; if(argc == 6)  verb = 1;
-  //int mask = 0;
 
   // --------------------------------
   // Init of a Nerve from an OFF file
   // --------------------------------
 
-  Gudhi::graph_induced_complex::Graph_induced_complex<Point> GIC;
-  GIC.set_verbose(verb);
+  Gudhi::graph_induced_complex::Graph_induced_complex<Point> SC;
+  SC.set_verbose(verb);
 
-  bool check = GIC.read_point_cloud(off_file_name);
+  bool check = SC.read_point_cloud(off_file_name);
 
   if(!check)  std::cout << "Incorrect OFF file." << std::endl;
   else{
 
-    GIC.set_color_from_coordinate(coord);
-    GIC.set_function_from_coordinate(coord);
+    SC.set_type("Nerve");
 
-    GIC.set_graph_from_OFF();
+    SC.set_color_from_coordinate(coord);
+    SC.set_function_from_coordinate(coord);
 
-    GIC.set_resolution_with_interval_number(resolution); GIC.set_gain(gain);
-    GIC.set_cover_from_function();
+    SC.set_graph_from_OFF();
 
-    GIC.find_Nerve_simplices();
+    SC.set_resolution_with_interval_number(resolution); SC.set_gain(gain);
+    SC.set_cover_from_function();
 
-    GIC.plot_TXT();
+    SC.find_simplices();
 
-    Gudhi::Simplex_tree<> stree; GIC.create_complex(stree);
+    SC.write_info();
+
+    Gudhi::Simplex_tree<> stree; SC.create_complex(stree);
 
     // ----------------------------------------------------------------------------
     // Display information about the graph induced complex

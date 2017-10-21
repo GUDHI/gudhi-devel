@@ -50,15 +50,17 @@ int main(int argc, char **argv) {
   if(!check)  std::cout << "Incorrect OFF file." << std::endl;
   else{
 
+    GIC.set_type("GIC");
+
     GIC.set_color_from_file(func_file_name);
     GIC.set_function_from_file(func_file_name);
 
     GIC.set_graph_from_automatic_rips(Gudhi::Euclidean_distance());
 
-    GIC.set_automatic_resolution_for_GIC(); GIC.set_gain();
+    GIC.set_automatic_resolution(); GIC.set_gain();
     GIC.set_cover_from_function();
 
-    GIC.find_GIC_simplices_with_functional_minimal_cover();
+    GIC.find_simplices();
 
     GIC.plot_DOT();
 

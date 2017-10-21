@@ -101,6 +101,8 @@ class Graph_induced_complex {
    std::string cover_name;
    std::string point_cloud_name;
    std::string color_name;
+   std::string type;
+   bool functional_cover = false;
 
    // Point comparator
    struct Less{
@@ -112,7 +114,7 @@ class Graph_induced_complex {
  // DFS
  private:
    void dfs(std::map<int,std::vector<int> >& G, int p, std::vector<int>& cc, std::map<int,bool>& visit){
-     cc.emplace_back(p);
+     cc.push_back(p);
      visit[p] = true; int neighb = G[p].size();
      for (int i = 0; i < neighb; i++)
        if (  visit.find(G[p][i]) != visit.end() )
@@ -145,11 +147,19 @@ class Graph_induced_complex {
      for (auto simplex : st.complex_simplex_range()) {
        if(st.dimension(simplex) == 1){
          std::vector<int> vertices;
-         for(auto vertex : st.simplex_vertex_range(simplex))  vertices.emplace_back(vertex);
-         adjacency_matrix[vertices[0]].emplace_back(vertices[1]); adjacency_matrix[vertices[1]].emplace_back(vertices[0]);
+         for(auto vertex : st.simplex_vertex_range(simplex))  vertices.push_back(vertex);
+         adjacency_matrix[vertices[0]].push_back(vertices[1]); adjacency_matrix[vertices[1]].push_back(vertices[0]);
        }
      }
    }
+
+  public:
+    /** \brief Specifies whether the type of the output simplicial complex.
+     *
+     * @param[in] t string (either "GIC" or "Nerve").
+     *
+     */
+    void set_type(std::string t){type = t;}
 
  public:
    /** \brief Specifies whether the program should display information or not.
@@ -205,7 +215,7 @@ class Graph_induced_complex {
        if(!line.empty() && line[line.find_first_not_of(' ')] != '#' && !std::all_of(line.begin(),line.end(),isspace)){
          std::vector<double> point; std::istringstream iss(line);
          point.assign(std::istream_iterator<double>(iss), std::istream_iterator<double>());
-         point_cloud.emplace_back(Point(point.begin(),point.begin()+data_dimension)); i++;
+         point_cloud.emplace_back(point.begin(),point.begin()+data_dimension); i++;
        }
      }
 
@@ -215,7 +225,7 @@ class Graph_induced_complex {
          std::vector<int> simplex; std::istringstream iss(line);
          simplex.assign(std::istream_iterator<int>(iss), std::istream_iterator<int>());
          num = simplex[0]; std::vector<int> edge(2);
-         for(int j = 1; j <= num; j++){ for(int k = j+1; k <= num; k++){ edge[0] = simplex[j]; edge[1] = simplex[k]; one_skeleton.emplace_back(edge); } }
+         for(int j = 1; j <= num; j++){ for(int k = j+1; k <= num; k++){ edge[0] = simplex[j]; edge[1] = simplex[k]; one_skeleton.push_back(edge); } }
          i++;
        }
      }
@@ -283,7 +293,7 @@ class Graph_induced_complex {
     */
    template<typename Distance> void compute_pairwise_distances(Distance ref_distance){
 
-     double d; std::vector<double> zeros(n); for(int i = 0; i < n; i++)  distances.emplace_back(zeros);
+     double d; std::vector<double> zeros(n); for(int i = 0; i < n; i++)  distances.push_back(zeros);
      std::string distance = point_cloud_name; distance.append("_dist");
      std::ifstream input(distance.c_str(), std::ios::out | std::ios::binary);
 
@@ -372,6 +382,7 @@ class Graph_induced_complex {
        std::stringstream stream(line); stream >> f;
        func.emplace(vertex_id, f); vertex_id++;
      }
+     functional_cover = true;
      cover_name = func_file_name;
    }
 
@@ -384,6 +395,7 @@ class Graph_induced_complex {
    void set_function_from_coordinate(int k){
      for(int i = 0; i < n; i++)  func.emplace(i,point_cloud[i][k]);
      char coordinate[100]; sprintf(coordinate, "coordinate %d", k);
+     functional_cover = true;
      cover_name = coordinate;
    }
 
@@ -393,7 +405,8 @@ class Graph_induced_complex {
     * @param[in] function input vector of values.
     *
     */
-   void set_function_from_vector(std::vector<double> function){
+   template<class InputRange> void set_function_from_range(InputRange const & function){
+     functional_cover = true;
      int index = 0; for(auto v : function){func.emplace(index, v); index++;}
    }
 
@@ -401,24 +414,45 @@ class Graph_induced_complex {
  // Covers.
  // *******************************************************************************************************************
 
- public: // Automatic tuning of resolution for GIC.
-   /** \brief Computes the optimal length of intervals (i.e. the smallest interval length avoiding discretization artifacts---see \cite Carriere17c) for a GIC computed with a functional cover.
+ public: // Automatic tuning of resolution.
+   /** \brief Computes the optimal length of intervals
+    * (i.e. the smallest interval length avoiding discretization artifacts---see \cite Carriere17c) for a functional cover.
     *
     * @param[out] reso interval length used to compute the cover.
     *
     */
-   double set_automatic_resolution_for_GIC(){
+   double set_automatic_resolution(){
+
+     if(!functional_cover){std::cout << "Cover needs to come from the preimages of a function." << std::endl; return 0;}
+
      double reso = 0;
-     for (auto simplex : st.complex_simplex_range()) {
-       if(st.dimension(simplex) == 1){
-         std::vector<int> vertices;
-         for(auto vertex : st.simplex_vertex_range(simplex))  vertices.emplace_back(vertex);
-         reso = std::max(reso, std::abs(func[vertices[0]] - func[vertices[1]]));
+
+     if(type.compare("GIC") == 0){
+       for (auto simplex : st.complex_simplex_range()) {
+         if(st.dimension(simplex) == 1){
+           std::vector<int> vertices;
+           for(auto vertex : st.simplex_vertex_range(simplex))  vertices.push_back(vertex);
+           reso = std::max(reso, std::abs(func[vertices[0]] - func[vertices[1]]));
+         }
        }
+       if(verbose)  std::cout << "resolution = " << reso << std::endl;
+       resolution_double = reso;
      }
-     if(verbose)  std::cout << "resolution = " << reso << std::endl;
-     resolution_double = reso;
+
+     if(type.compare("Nerve") == 0){
+       for (auto simplex : st.complex_simplex_range()) {
+         if(st.dimension(simplex) == 1){
+           std::vector<int> vertices;
+           for(auto vertex : st.simplex_vertex_range(simplex))  vertices.push_back(vertex);
+           reso = std::max(reso, (std::abs(func[vertices[0]] - func[vertices[1]]))/gain);
+         }
+       }
+       if(verbose)  std::cout << "resolution = " << reso << std::endl;
+       resolution_double = reso;
+     }
+
      return reso;
+
    }
 
  public:
@@ -441,26 +475,6 @@ class Graph_induced_complex {
     */
    void set_gain(double g = 0.3){gain = g;}
 
- public: // Automatic tuning of resolution for Nerve.
-   /** \brief Computes the optimal length of intervals (i.e. the smallest interval length avoiding discretization artifacts---see \cite Carriere17c) for a Nerve computed with a functional cover.
-    *
-    * @param[in] g gain.
-    * @param[out] reso interval length used to compute the cover.
-    *
-    */
-   double set_automatic_resolution_for_Nerve(double gain){
-     double reso = 0;
-     for (auto simplex : st.complex_simplex_range()) {
-       if(st.dimension(simplex) == 1){
-         std::vector<int> vertices;
-         for(auto vertex : st.simplex_vertex_range(simplex))  vertices.emplace_back(vertex);
-         reso = std::max(reso, (std::abs(func[vertices[0]] - func[vertices[1]]))/gain);
-       }
-     }
-     if(verbose)  std::cout << "resolution = " << reso << std::endl;
-     resolution_double = reso;
-     return reso;
-   }
 
  public: // Set cover with preimages of function.
    /** \brief Creates a cover C from the preimages of the function f.
@@ -482,14 +496,14 @@ class Graph_induced_complex {
 
      if(resolution_double == -1){ // Case we use an integer for the number of intervals.
        double incr = (maxf-minf)/resolution_int; double x = minf; double alpha = (incr*gain)/(2-2*gain);
-       double y = minf + incr + alpha; std::pair<double, double> interm(x,y); intervals.emplace_back(interm);
+       double y = minf + incr + alpha; std::pair<double, double> interm(x,y); intervals.push_back(interm);
        for(int i = 1; i < resolution_int-1; i++){
          x = minf + i*incr - alpha;
          y = minf + (i+1)*incr + alpha;
-         std::pair<double, double> inter(x,y); intervals.emplace_back(inter);
+         std::pair<double, double> inter(x,y); intervals.push_back(inter);
        }
        x = minf + (resolution_int-1)*incr - alpha; y = maxf;
-       std::pair<double, double> interM(x,y); intervals.emplace_back(interM); res = intervals.size();
+       std::pair<double, double> interM(x,y); intervals.push_back(interM); res = intervals.size();
        if(verbose)
          for(int i = 0; i < res; i++)  std::cout << "Interval " << i << " = [" << intervals[i].first << ", " << intervals[i].second << "]" << std::endl;
      }
@@ -498,11 +512,11 @@ class Graph_induced_complex {
        if(resolution_int == -1){ // Case we use a double for the length of the intervals.
          double x = minf; double y = x + resolution_double;
          while(y <= maxf && maxf - (y-gain*resolution_double) >= resolution_double){
-           std::pair<double, double> inter(x,y); intervals.emplace_back(inter);
+           std::pair<double, double> inter(x,y); intervals.push_back(inter);
            x = y - gain*resolution_double;
            y = x + resolution_double;
          }
-         std::pair<double, double> interM(x,maxf); intervals.emplace_back(interM); res = intervals.size();
+         std::pair<double, double> interM(x,maxf); intervals.push_back(interM); res = intervals.size();
          if(verbose)
            for(int i = 0; i < res; i++)  std::cout << "Interval " << i << " = [" << intervals[i].first << ", " << intervals[i].second << "]" << std::endl;
        }
@@ -510,7 +524,7 @@ class Graph_induced_complex {
        else{ // Case we use an integer and a double for the length of the intervals.
          double x = minf; double y = x + resolution_double; int count = 0;
          while(count < resolution_int && y <= maxf && maxf - (y-gain*resolution_double) >= resolution_double){
-             std::pair<double, double> inter(x,y); intervals.emplace_back(inter);  count++;
+             std::pair<double, double> inter(x,y); intervals.push_back(inter);  count++;
              x = y - gain*resolution_double;
              y = x + resolution_double;
            }
@@ -581,7 +595,7 @@ class Graph_induced_complex {
              std::vector<int> cc; cc.clear();
              dfs(prop,it->first,cc,visit); int cci = cc.size(); if(verbose)  std::cout << "one CC with " << cci << " points, ";
              double average_col = 0;
-             for(int j = 0; j < cci; j++){cover[cc[j]].emplace_back(id); average_col += func_color[cc[j]]/cci;}
+             for(int j = 0; j < cci; j++){cover[cc[j]].push_back(id); average_col += func_color[cc[j]]/cci;}
              cover_fct[id] = i; cover_color[id] = std::pair<int,double>(cci,average_col);
              id++;
            }
@@ -607,7 +621,7 @@ class Graph_induced_complex {
      while(std::getline(input,line)){
        cov_elts.clear(); std::stringstream stream(line);
        while(stream >> cov){
-         cov_elts.emplace_back(cov); cov_number.emplace_back(cov);
+         cov_elts.push_back(cov); cov_number.push_back(cov);
          cover_fct[cov] = cov; cover_color[cov].second += func_color[vertex_id]; cover_color[cov].first++;
        }
        cover[vertex_id] = cov_elts; vertex_id++;
@@ -660,7 +674,7 @@ class Graph_induced_complex {
        for(int j = 0; j < n; j++)
          if(mindist[j] > dist[j]){
            mindist[j] = dist[j];
-           if(cover[j].size() == 0) cover[j].emplace_back(i);
+           if(cover[j].size() == 0) cover[j].push_back(i);
            else cover[j][0] = i;
          }
      }
@@ -724,7 +738,7 @@ class Graph_induced_complex {
      int k = 0; std::vector<int> nodes; nodes.clear();
      for (std::map<Cover_t,std::pair<int,double> >::iterator iit = cover_color.begin(); iit != cover_color.end(); iit++){
        if(iit->second.first > mask){
-         nodes.emplace_back(iit->first);
+         nodes.push_back(iit->first);
          graphic << iit->first << "[shape=circle fontcolor=black color=black label=\"" \
            << iit->first << ":" << iit->second.first << "\" style=filled fillcolor=\"" \
            << (1-(maxv-iit->second.second)/(maxv-minv))*0.6 << ", 1, 1\"]" << std::endl;
@@ -743,7 +757,7 @@ class Graph_induced_complex {
  public: // Create a .txt file that can be compiled with KeplerMapper.
    /** \brief Creates a .txt file called SC.txt describing the 1-skeleton, which can then be plotted with e.g. KeplerMapper.
     */
-   void plot_TXT(){
+   void write_info(){
 
      int num_simplices = simplices.size(); int num_edges = 0;
      char mapp[11] = "SC.txt";  std::ofstream graphic(mapp);
@@ -782,8 +796,8 @@ class Graph_induced_complex {
      graphic << "OFF" << std::endl; int m = voronoi_subsamples.size(); int numedges = 0; int numfaces = 0;
      std::vector<std::vector<int> > edges, faces; int numsimplices = simplices.size();
      for (int i = 0; i < numsimplices; i++) {
-       if(simplices[i].size() == 2){ numedges++; edges.emplace_back(simplices[i]); }
-       if(simplices[i].size() == 3){ numfaces++; faces.emplace_back(simplices[i]); }
+       if(simplices[i].size() == 2){ numedges++; edges.push_back(simplices[i]); }
+       if(simplices[i].size() == 3){ numfaces++; faces.push_back(simplices[i]); }
      }
      graphic << m << " " << numedges + numfaces << std::endl;
      for(int i = 0; i < m; i++){
@@ -832,109 +846,110 @@ class Graph_induced_complex {
      std::vector<Cover_t> simplex;
      for(int i = 0; i < num_nodes; i++)
        for(unsigned int j = 0; j < cover_elts[i].size(); j++)
-         simplex.emplace_back(cover_elts[i][j]);
+         simplex.push_back(cover_elts[i][j]);
      std::sort(simplex.begin(),simplex.end()); std::vector<Cover_t>::iterator it = std::unique(simplex.begin(),simplex.end());
      simplex.resize(std::distance(simplex.begin(),it));
-     simplices.emplace_back(simplex);
+     simplices.push_back(simplex);
    }
 
  public:
-   /** \brief Computes the simplices for a Nerve.
+   /** \brief Computes the simplices of the simplicial complex.
     */
-   void find_Nerve_simplices(){
-     for(std::map<int,std::vector<Cover_t> >::iterator it = cover.begin(); it!=cover.end(); it++)  simplices.emplace_back(it->second);
-     std::vector<std::vector<Cover_t> >::iterator it;
-     std::sort(simplices.begin(),simplices.end()); it = std::unique(simplices.begin(),simplices.end());
-     simplices.resize(std::distance(simplices.begin(),it));
-   }
+   void find_simplices(){
 
- public:
-   /** \brief Computes the simplices for a GIC.
-    */
-   void find_GIC_simplices() {
-
-     // Find IDs of edges to remove
-     std::vector<int> simplex_to_remove; int simplex_id = 0;
-     for (auto simplex : st.complex_simplex_range()) {
-       if(st.dimension(simplex) == 1){
-         std::vector<std::vector<Cover_t> > comp;
-         for(auto vertex : st.simplex_vertex_range(simplex))  comp.emplace_back(cover[vertex]);
-         if(comp[0].size() == 1 && comp[0] == comp[1])  simplex_to_remove.emplace_back(simplex_id);
-       }
-       simplex_id++;
+     if(type.compare("Nerve") == 0){
+       for(std::map<int,std::vector<Cover_t> >::iterator it = cover.begin(); it!=cover.end(); it++)  simplices.push_back(it->second);
+       std::vector<std::vector<Cover_t> >::iterator it;
+       std::sort(simplices.begin(),simplices.end()); it = std::unique(simplices.begin(),simplices.end());
+       simplices.resize(std::distance(simplices.begin(),it));
      }
 
-     // Remove edges
-     if(simplex_to_remove.size() > 1){
-       int current_id = 1;
-       auto simplex = st.complex_simplex_range().begin(); int num_rem = 0;
-       for(int i = 0; i < simplex_id-1; i++){
-         int j = i+1; auto simplex_tmp = simplex; simplex_tmp++;
-         if(j == simplex_to_remove[current_id]){st.remove_maximal_simplex(*simplex_tmp); current_id++; num_rem++;}
-         else  simplex++;
-       } simplex = st.complex_simplex_range().begin();
-       for(int i = 0; i < simplex_to_remove[0]; i++)  simplex++;  st.remove_maximal_simplex(*simplex);
-     }
+     if(type.compare("GIC") == 0){
 
-     // Build the Simplex Tree corresponding to the graph
-     st.expansion(maximal_dim);
+       if(functional_cover){
 
-     // Find simplices of GIC
-     simplices.clear();
-     for (auto simplex : st.complex_simplex_range()) {
-       if(!st.has_children(simplex)){
-         std::vector<std::vector<Cover_t> > cover_elts;
-         for (auto vertex : st.simplex_vertex_range(simplex))  cover_elts.emplace_back(cover[vertex]);
-         find_maximal_clique(cover_elts);
-       }
-     }
-     std::vector<std::vector<Cover_t> >::iterator it;
-     std::sort(simplices.begin(),simplices.end()); it = std::unique(simplices.begin(),simplices.end());
-     simplices.resize(std::distance(simplices.begin(),it));
-   }
+         // Computes the simplices in the GIC by looking at all the edges of the graph and adding the
+         // corresponding edges in the GIC if the images of the endpoints belong to consecutive intervals.
 
- public:
-   /** \brief Speed-up special case for simplices computation for a GIC computed with a functional cover.
-    *
-    * @exception std::invalid_argument in case the gain is greater than or equal to 0.5 (causes incorrect output).
-    *
-    */
-   void find_GIC_simplices_with_functional_minimal_cover(){
+         if (gain >= 0.5)
+           throw std::invalid_argument("the output of this function is correct ONLY if the cover is minimal, i.e. the gain is less than 0.5.");
 
-     // Computes the simplices in the GIC by looking at all the edges of the graph and adding the corresponding edges in the GIC if the images of the endpoints belong to consecutive intervals.
+         int v1, v2;
 
-     if (gain >= 0.5)
-       throw std::invalid_argument("the output of this function is correct ONLY if the cover is minimal, i.e. the gain is less than 0.5.");
+         // Loop on all points.
+         for(std::map<int,std::vector<Cover_t> >::iterator it = cover.begin(); it != cover.end(); it++){
 
-     int v1, v2;
+           int vid = it->first; std::vector<int> neighbors = adjacency_matrix[vid]; int num_neighb = neighbors.size();
 
-     // Loop on all points.
-     for(std::map<int,std::vector<Cover_t> >::iterator it = cover.begin(); it != cover.end(); it++){
+           // Find cover of current point (vid).
+           if(cover[vid].size() == 2)  v1 = std::min(cover[vid][0],cover[vid][1]); else  v1 = cover[vid][0];
+           std::vector<int> node(1); node[0] = v1; simplices.push_back(node);
 
-       int vid = it->first; std::vector<int> neighbors = adjacency_matrix[vid]; int num_neighb = neighbors.size();
+           // Loop on neighbors.
+           for(int i = 0; i < num_neighb; i++){
 
-       // Find cover of current point (vid).
-       if(cover[vid].size() == 2)  v1 = std::min(cover[vid][0],cover[vid][1]); else  v1 = cover[vid][0];
-       std::vector<int> node(1); node[0] = v1; simplices.emplace_back(node);
+             int neighb = neighbors[i];
 
-       // Loop on neighbors.
-       for(int i = 0; i < num_neighb; i++){
+             // Find cover of neighbor (neighb).
+             if(cover[neighb].size() == 2)  v2 = std::max(cover[neighb][0],cover[neighb][1]); else  v2 = cover[neighb][0];
 
-         int neighb = neighbors[i];
-
-         // Find cover of neighbor (neighb).
-         if(cover[neighb].size() == 2)  v2 = std::max(cover[neighb][0],cover[neighb][1]); else  v2 = cover[neighb][0];
-
-         // If neighbor is in next interval, add edge.
-         if(cover_fct[v2] == cover_fct[v1] + 1){
-           std::vector<int> edge(2); edge[0] = v1; edge[1] = v2;
-           simplices.emplace_back(edge);
+             // If neighbor is in next interval, add edge.
+             if(cover_fct[v2] == cover_fct[v1] + 1){
+               std::vector<int> edge(2); edge[0] = v1; edge[1] = v2;
+               simplices.push_back(edge);
+             }
+           }
          }
+         std::vector<std::vector<Cover_t> >::iterator it;
+         std::sort(simplices.begin(),simplices.end()); it = std::unique(simplices.begin(),simplices.end());
+         simplices.resize(std::distance(simplices.begin(),it));
+
+       }
+
+       else{
+
+         // Find IDs of edges to remove
+         std::vector<int> simplex_to_remove; int simplex_id = 0;
+         for (auto simplex : st.complex_simplex_range()) {
+           if(st.dimension(simplex) == 1){
+             std::vector<std::vector<Cover_t> > comp;
+             for(auto vertex : st.simplex_vertex_range(simplex))  comp.push_back(cover[vertex]);
+             if(comp[0].size() == 1 && comp[0] == comp[1])  simplex_to_remove.push_back(simplex_id);
+           }
+           simplex_id++;
+         }
+
+         // Remove edges
+         if(simplex_to_remove.size() > 1){
+           int current_id = 1;
+           auto simplex = st.complex_simplex_range().begin(); int num_rem = 0;
+           for(int i = 0; i < simplex_id-1; i++){
+             int j = i+1; auto simplex_tmp = simplex; simplex_tmp++;
+             if(j == simplex_to_remove[current_id]){st.remove_maximal_simplex(*simplex_tmp); current_id++; num_rem++;}
+             else  simplex++;
+           } simplex = st.complex_simplex_range().begin();
+           for(int i = 0; i < simplex_to_remove[0]; i++)  simplex++;  st.remove_maximal_simplex(*simplex);
+         }
+
+         // Build the Simplex Tree corresponding to the graph
+         st.expansion(maximal_dim);
+
+         // Find simplices of GIC
+         simplices.clear();
+         for (auto simplex : st.complex_simplex_range()) {
+           if(!st.has_children(simplex)){
+             std::vector<std::vector<Cover_t> > cover_elts;
+             for (auto vertex : st.simplex_vertex_range(simplex))  cover_elts.push_back(cover[vertex]);
+             find_maximal_clique(cover_elts);
+           }
+         }
+         std::vector<std::vector<Cover_t> >::iterator it;
+         std::sort(simplices.begin(),simplices.end()); it = std::unique(simplices.begin(),simplices.end());
+         simplices.resize(std::distance(simplices.begin(),it));
+
        }
      }
-     std::vector<std::vector<Cover_t> >::iterator it;
-     std::sort(simplices.begin(),simplices.end()); it = std::unique(simplices.begin(),simplices.end());
-     simplices.resize(std::distance(simplices.begin(),it));
+
    }
 
 };
