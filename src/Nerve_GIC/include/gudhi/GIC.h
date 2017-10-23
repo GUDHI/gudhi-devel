@@ -43,7 +43,7 @@
 
 namespace Gudhi {
 
-namespace graph_induced_complex {
+namespace cover_complex {
 
 using Simplex_tree = Gudhi::Simplex_tree<>;
 using Filtration_value = Simplex_tree::Filtration_value;
@@ -71,7 +71,7 @@ using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
  *
  */
 template<typename Point>
-class Graph_induced_complex {
+class Cover_complex {
 
  private:
    //Graph_induced_complex(std::map<int, double> fun){func = fun;}

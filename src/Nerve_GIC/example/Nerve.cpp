@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
   // Init of a Nerve from an OFF file
   // --------------------------------
 
-  Gudhi::graph_induced_complex::Graph_induced_complex<Point> SC;
+  Gudhi::cover_complex::Cover_complex<Point> SC;
   SC.set_verbose(verb);
 
   bool check = SC.read_point_cloud(off_file_name);

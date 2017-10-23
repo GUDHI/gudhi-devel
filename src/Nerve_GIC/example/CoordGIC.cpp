@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
   // Init of a functional GIC from an OFF file
   // -----------------------------------------
 
-  Gudhi::graph_induced_complex::Graph_induced_complex<Point> GIC;
+  Gudhi::cover_complex::Cover_complex<Point> GIC;
   GIC.set_verbose(verb);
 
   bool check = GIC.read_point_cloud(off_file_name);
