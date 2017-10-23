@@ -101,8 +101,8 @@ class Graph_induced_complex {
    std::string cover_name;
    std::string point_cloud_name;
    std::string color_name;
-   std::string type;
-   bool functional_cover = false;
+   std::string type; // Nerve or GIC
+   bool functional_cover = false; // whether we use a cover with preimages of a function or not
 
    // Point comparator
    struct Less{
@@ -835,23 +835,6 @@ class Graph_induced_complex {
      complex.set_dimension(dimension);
    }
 
- private:
-   /** \brief Finds the maximal clique formed by different elements of the cover in a set of points.
-    *
-    * @param[in] cover_elts vector of points represented by vectors of cover elements (the ones to which they belong).
-    *
-    */
-   void find_maximal_clique(std::vector<std::vector<Cover_t> > cover_elts){
-     int num_nodes = cover_elts.size();
-     std::vector<Cover_t> simplex;
-     for(int i = 0; i < num_nodes; i++)
-       for(unsigned int j = 0; j < cover_elts[i].size(); j++)
-         simplex.push_back(cover_elts[i][j]);
-     std::sort(simplex.begin(),simplex.end()); std::vector<Cover_t>::iterator it = std::unique(simplex.begin(),simplex.end());
-     simplex.resize(std::distance(simplex.begin(),it));
-     simplices.push_back(simplex);
-   }
-
  public:
    /** \brief Computes the simplices of the simplicial complex.
     */
@@ -939,8 +922,19 @@ class Graph_induced_complex {
          for (auto simplex : st.complex_simplex_range()) {
            if(!st.has_children(simplex)){
              std::vector<std::vector<Cover_t> > cover_elts;
+
              for (auto vertex : st.simplex_vertex_range(simplex))  cover_elts.push_back(cover[vertex]);
-             find_maximal_clique(cover_elts);
+             int num_nodes = cover_elts.size();
+
+             // Find maximal clique of cover_elts
+             std::vector<Cover_t> simplex;
+             for(int i = 0; i < num_nodes; i++)
+               for(unsigned int j = 0; j < cover_elts[i].size(); j++)
+                 simplex.push_back(cover_elts[i][j]);
+             std::sort(simplex.begin(),simplex.end()); std::vector<Cover_t>::iterator it = std::unique(simplex.begin(),simplex.end());
+             simplex.resize(std::distance(simplex.begin(),it));
+             simplices.push_back(simplex);
+
            }
          }
          std::vector<std::vector<Cover_t> >::iterator it;
