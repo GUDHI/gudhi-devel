@@ -56,7 +56,6 @@ int main(int argc, char **argv) {
     GIC.set_function_from_file(func_file_name);
 
     GIC.set_graph_from_automatic_rips(Gudhi::Euclidean_distance());
-
     GIC.set_automatic_resolution(); GIC.set_gain();
     GIC.set_cover_from_function();
 

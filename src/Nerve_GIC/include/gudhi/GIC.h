@@ -87,14 +87,17 @@ class Graph_induced_complex {
    std::map<Cover_t,int> cover_fct; // integer-valued function that allows to state if two elements of the cover are consecutive or not.
    std::map<Cover_t,std::pair<int,double> > cover_color; // size and coloring of the vertices of the output simplicial complex.
    Simplex_tree st;
+
    std::map<int,std::vector<int> > adjacency_matrix;
    std::vector<std::vector<double> > distances;
+
    int resolution_int = -1;
    double resolution_double = -1;
    double gain = -1;
    double rate_constant = 10; // Constant in the subsampling.
    double rate_power = 0.001; // Power in the subsampling.
    int mask = 0; // Ignore nodes containing less than mask points.
+
    std::map<int, double> func;
    std::map<int, double> func_color;
    std::vector<int> voronoi_subsamples;
@@ -238,7 +241,7 @@ class Graph_induced_complex {
  // *******************************************************************************************************************
 
  public: // Set graph from file.
-   /** \brief Creates the graph G from a file containing the edges.
+   /** \brief Creates a graph G from a file containing the edges.
     *
     * @param[in] graph_file_name name of the input graph file.
     * The graph file contains one edge per line,
@@ -258,8 +261,9 @@ class Graph_induced_complex {
 
    }
 
+
  public: // Set graph from OFF file.
-   /** \brief Creates the graph G from the triangulation given by the input .OFF file.
+   /** \brief Creates a graph G from the triangulation given by the input .OFF file.
     *
     */
    void set_graph_from_OFF(){
@@ -274,7 +278,7 @@ class Graph_induced_complex {
    }
 
  public: // Set graph from Rips complex.
-   /** \brief Creates the graph G from a Rips complex.
+   /** \brief Creates a graph G from a Rips complex.
     *
     * @param[in] threshold threshold value for the Rips complex.
     * @param[in] distance distance used to compute the Rips complex.
@@ -287,6 +291,8 @@ class Graph_induced_complex {
      fill_adjacency_matrix_from_st();
 
    }
+
+
 
  public: // Pairwise distances.
    /** \private \brief Computes all pairwise distances.
@@ -325,7 +331,7 @@ class Graph_induced_complex {
    }
 
  public: // Automatic tuning of Rips complex.
-   /** \brief Creates the graph G from a Rips complex whose threshold value is automatically tuned with subsampling---see \cite Carriere17c.
+   /** \brief Creates a graph G from a Rips complex whose threshold value is automatically tuned with subsampling---see \cite Carriere17c.
     *
     * @param[in] distance distance between data points.
     * @param[in]  N number of subsampling iteration (the default reasonable value is 100, but there is no guarantee on how to choose it).

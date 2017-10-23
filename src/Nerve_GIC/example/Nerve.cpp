@@ -58,7 +58,6 @@ int main(int argc, char **argv) {
     SC.set_function_from_coordinate(coord);
 
     SC.set_graph_from_OFF();
-
     SC.set_resolution_with_interval_number(resolution); SC.set_gain(gain);
     SC.set_cover_from_function();
 

@@ -55,7 +55,6 @@ int main(int argc, char **argv) {
     GIC.set_color_from_coordinate();
 
     GIC.set_graph_from_OFF();
-
     GIC.set_cover_from_Voronoi(Gudhi::Euclidean_distance(),m);
 
     GIC.find_simplices();
