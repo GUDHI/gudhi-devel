@@ -51,10 +51,10 @@ using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
 
 
 /**
- * \class Graph_induced_complex
- * \brief Graph induced complex data structure.
+ * \class Cover_complex
+ * \brief Cover complex data structure.
  *
- * \ingroup graph_induced_complex
+ * \ingroup cover_complex
  *
  * \details
  * The data structure is a simplicial complex, representing a

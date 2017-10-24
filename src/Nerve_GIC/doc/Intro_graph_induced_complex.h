@@ -25,9 +25,9 @@
 
 namespace Gudhi {
 
-namespace graph_induced_complex {
+namespace cover_complex {
 
-/**  \defgroup graph_induced_complex Graph induced complex
+/**  \defgroup cover_complex Cover complex
  * 
  * \author    Mathieu Carrière
  * 
