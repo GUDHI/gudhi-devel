@@ -50,8 +50,8 @@ int main(int argc, char * const argv[]) {
   int nbL = atoi(argv[2]), lim_dim = atoi(argv[4]);
   double alpha2 = atof(argv[3]);
   clock_t start, end;
-  //Gudhi::Simplex_tree<> simplex_tree;
-  Gudhi::Fake_simplex_tree simplex_tree;
+  Gudhi::Simplex_tree<> simplex_tree;
+  //Gudhi::Fake_simplex_tree simplex_tree;
 
   // Read the point file
   Point_vector point_vector, landmarks;

@@ -8,11 +8,11 @@
 
 namespace Gudhi {
 
-typedef double Filtration_value;
-
 class Filtered_toplex_map {
 
 public:
+    typedef double Filtration_value;
+
     template <typename Input_vertex_range>
     void insert_simplex_and_subfaces(const Input_vertex_range &vertex_range, Filtration_value f = filtration_upper_bound);
 
@@ -21,7 +21,7 @@ public:
 
 protected:
     std::unordered_map<Filtration_value, Toplex_map> toplex_maps;
-    std::unordered_map<Simplex_ptr, Filtration_value> filtrations;
+    std::unordered_map<Simplex_ptr, Filtration_value, Sptr_hash, Sptr_equal> filtrations;
 
 };
 
@@ -33,7 +33,7 @@ void Filtered_toplex_map::insert_simplex_and_subfaces(const Input_vertex_range &
 }
 
 template <typename Input_vertex_range>
-Filtration_value Filtered_toplex_map::filtration(const Input_vertex_range &vertex_range) const{
+Filtered_toplex_map::Filtration_value Filtered_toplex_map::filtration(const Input_vertex_range &vertex_range) const{
     for(auto kv : toplex_maps)
         if(kv.second.membership(vertex_range))
             return kv.first;

@@ -4,6 +4,8 @@ project(Rips_complex_examples)
 # Point cloud
 add_executable ( Rips_complex_example_from_off example_rips_complex_from_off_file.cpp )
 
+add_executable ( Rips_complex_example_from_fvecs example_rips_complex_from_fvecs.cpp )
+
 add_executable ( Rips_complex_example_one_skeleton_from_points example_one_skeleton_rips_from_points.cpp )
 
 # Distance matrix

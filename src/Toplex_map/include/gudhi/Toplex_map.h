@@ -5,6 +5,7 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <memory>
+#include <limits>
 
 #define vertex_upper_bound std::numeric_limits<Vertex>::max()
 
@@ -18,22 +19,22 @@ typedef std::size_t Vertex;
  * \ingroup toplex_map   */
 typedef std::unordered_set<Vertex> Simplex;
 
+/** The type of the pointers to maximal simplices.
+ * \ingroup toplex_map   */
+typedef std::shared_ptr<Simplex> Simplex_ptr;
+
+struct Sptr_hash{ std::size_t operator()(const Simplex_ptr& s) const; };
+struct Sptr_equal{ std::size_t operator()(const Simplex_ptr& a, const Simplex_ptr& b) const; };
+/** The type of the sets of Simplex_ptr.
+ * \ingroup toplex_map   */
+typedef std::unordered_set<Simplex_ptr, Sptr_hash, Sptr_equal> Simplex_ptr_set;
+
 /** A Toplex_map represents the simplicial complex.
  * A "toplex" is a maximal simplex.
  * \ingroup toplex_map   */
 class Toplex_map {
 
 public:
-    /** The type of the pointers to maximal simplices.
-     * \ingroup toplex_map   */
-    typedef std::shared_ptr<Simplex> Simplex_ptr;
-
-    struct Sptr_hash{ std::size_t operator()(const Simplex_ptr& s) const; };
-    struct Sptr_equal{ std::size_t operator()(const Simplex_ptr& a, const Simplex_ptr& b) const; };
-    /** The type of the sets of Simplex_ptr.
-     * \ingroup toplex_map   */
-    typedef std::unordered_set<Simplex_ptr, Sptr_hash, Sptr_equal> Simplex_ptr_set;
-
     /** \brief Adds the given simplex to the complex.
      * Nothing happens if the simplex has a coface in the complex.
      * \ingroup toplex_map   */
@@ -75,7 +76,6 @@ public:
     template <typename Input_vertex_range>
     void insert_independent_simplex(const Input_vertex_range &vertex_range);
 
-
     /** \internal Removes a toplex without adding facets after.
      * \ingroup toplex_map   */
     void erase_maximal(const Simplex_ptr& sptr);
@@ -98,11 +98,7 @@ protected:
     /** \internal The map from vertices to toplices
      * \ingroup toplex_map   */
     std::unordered_map<Vertex, Simplex_ptr_set> t0;
-
 };
-
-typedef Toplex_map::Simplex_ptr Simplex_ptr;
-typedef Toplex_map::Simplex_ptr_set Simplex_ptr_set;
 
 // Pointers are also used as key in the hash sets.
 template <typename Input_vertex_range>
@@ -261,13 +257,13 @@ Vertex Toplex_map::best_index(const Input_vertex_range &vertex_range) const{
     return arg_min;
 }
 
-std::size_t Toplex_map::Sptr_equal::operator()(const Simplex_ptr& s1, const Simplex_ptr& s2) const {
+std::size_t Sptr_equal::operator()(const Simplex_ptr& s1, const Simplex_ptr& s2) const {
     if (s1->size() != s2->size()) return false;
     return included(*s1,*s2);
     // inclusion tests equality for same size simplices
 }
 
-std::size_t Toplex_map::Sptr_hash::operator()(const Simplex_ptr& s) const {
+std::size_t Sptr_hash::operator()(const Simplex_ptr& s) const {
     std::hash<double> h_f;
     //double hash works better than int hash
     size_t h = 0;
