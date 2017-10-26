@@ -323,7 +323,7 @@ make doxygen
  * <a target="_blank" href="http://eigen.tuxfamily.org/">Eigen3</a> is a C++ template library for linear algebra:
  * matrices, vectors, numerical solvers, and related algorithms.
  * 
- * The following example requires the <a target="_blank" href="http://eigen.tuxfamily.org/">Eigen3</a> and will not be
+ * The following examples/utilities require the <a target="_blank" href="http://eigen.tuxfamily.org/">Eigen3</a> and will not be
  * built if Eigen3 is not installed:
  * \li <a href="_alpha_complex_2_alpha_complex_from_off_8cpp-example.html">
  * Alpha_complex/Alpha_complex_from_off.cpp</a>
