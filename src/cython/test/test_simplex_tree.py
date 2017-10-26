@@ -94,12 +94,12 @@ def test_insertion():
     assert st.persistence(persistence_dim_max = True) == [(1, (4.0, float('inf'))), (0, (0.0, float('inf')))]
     assert st.__is_persistence_defined() == True
 
-    assert st.betti_numbers() == [1, 1, 0]
-    assert st.persistent_betti_numbers(-0.1, 10000.0) == [0, 0, 0]
-    assert st.persistent_betti_numbers(0.0, 10000.0) == [1, 0, 0]
-    assert st.persistent_betti_numbers(3.9, 10000.0) == [1, 0, 0]
-    assert st.persistent_betti_numbers(4.0, 10000.0) == [1, 1, 0]
-    assert st.persistent_betti_numbers(9999.0, 10000.0) == [1, 1, 0]
+    assert st.betti_numbers() == [1, 1]
+    assert st.persistent_betti_numbers(-0.1, 10000.0) == [0, 0]
+    assert st.persistent_betti_numbers(0.0, 10000.0) == [1, 0]
+    assert st.persistent_betti_numbers(3.9, 10000.0) == [1, 0]
+    assert st.persistent_betti_numbers(4.0, 10000.0) == [1, 1]
+    assert st.persistent_betti_numbers(9999.0, 10000.0) == [1, 1]
 
 def test_expansion():
     st = SimplexTree()

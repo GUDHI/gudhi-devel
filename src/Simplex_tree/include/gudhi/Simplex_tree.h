@@ -492,7 +492,16 @@ class Simplex_tree {
   }
 
   /** \brief Returns an upper bound on the dimension of the simplicial complex. */
-  int dimension() const {
+  int upper_bound_dimension() const {
+    return dimension_;
+  }
+
+  /** \brief Returns the dimension of the simplicial complex.
+      \details This function is not constant time because it can trigger `lower_upper_bound_dimension()` if required.
+  */
+  int dimension() {
+    if (dimension_to_be_lowered_)
+      lower_upper_bound_dimension();
     return dimension_;
   }
 
@@ -1162,8 +1171,8 @@ class Simplex_tree {
    * function is not launching `initialize_filtration()` but returns the filtration modification information. If the
    * complex has changed , please call `initialize_filtration()` to recompute it.
    * \post Note that the dimension of the simplicial complex may be lower after calling `prune_above_filtration()`
-   * than it was before. However, `Simplex_tree::dimension()` will return the old value, which remains a valid upper
-   * bound. If you care, you can call `downgrade_dimension()` to recompute the exact dimension.
+   * than it was before. However, `upper_bond_dimension()` will return the old value, which remains a valid upper
+   * bound. If you care, you can call `dimension()` to recompute the exact dimension.
    */
   bool prune_above_filtration(Filtration_value filtration) {
     return rec_prune_above_filtration(root(), filtration);
@@ -1175,6 +1184,8 @@ class Simplex_tree {
     auto last = std::remove_if(list.begin(), list.end(), [=](Dit_value_t& simplex) {
         if (simplex.second.filtration() <= filt) return false;
         if (has_children(&simplex)) rec_delete(simplex.second.children());
+        // dimension may need to be lowered
+        dimension_to_be_lowered_ = true;
         return true;
       });
 
@@ -1183,6 +1194,8 @@ class Simplex_tree {
       // Removing the whole siblings, parent becomes a leaf.
       sib->oncles()->members()[sib->parent()].assign_children(sib->oncles());
       delete sib;
+      // dimension may need to be lowered
+      dimension_to_be_lowered_ = true;
       return true;
     } else {
       // Keeping some elements of siblings. Remove the others, and recurse in the remaining ones.
@@ -1194,13 +1207,15 @@ class Simplex_tree {
     return modified;
   }
 
- public:
+ private:
   /** \brief Deep search simplex tree dimension recompute.
    * @return True if the dimension was modified, false otherwise.
    * \pre Be sure the simplex tree has not a too low dimension value as the deep search stops when the former dimension
-   * has been reached (cf. `dimension()` and `set_dimension()` methods).
+   * has been reached (cf. `upper_bound_dimension()` and `set_dimension()` methods).
    */
-  bool downgrade_dimension() {
+  bool lower_upper_bound_dimension() {
+    // reset automatic detection to recompute
+    dimension_to_be_lowered_ = false;
     int new_dimension = -1;
     // Browse the tree from the left to the right as higher dimension cells are more likely on the left part of the tree
     for (Simplex_handle sh : complex_simplex_range()) {
@@ -1229,8 +1244,8 @@ class Simplex_tree {
    * \exception std::invalid_argument In debug mode, if sh has children.
    * \post Be aware that removing is shifting data in a flat_map (`initialize_filtration()` to be done).
    * \post Note that the dimension of the simplicial complex may be lower after calling `remove_maximal_simplex()`
-   * than it was before. However, `Simplex_tree::dimension()` will return the old value, which remains a valid upper
-   * bound. If you care, you can call `downgrade_dimension()` to recompute the exact dimension.
+   * than it was before. However, `upper_bond_dimension()` will return the old value, which remains a valid upper
+   * bound. If you care, you can call `dimension()` to recompute the exact dimension.
    */
   void remove_maximal_simplex(Simplex_handle sh) {
     // Guarantee the simplex has no children
@@ -1248,6 +1263,8 @@ class Simplex_tree {
       // Sibling is emptied : must be deleted, and its parent must point on his own Sibling
       child->oncles()->members().at(child->parent()).assign_children(child->oncles());
       delete child;
+      // dimension may need to be lowered
+      dimension_to_be_lowered_ = true;
     }
   }
 
@@ -1262,6 +1279,7 @@ class Simplex_tree {
   std::vector<Simplex_handle> filtration_vect_;
   /** \brief Upper bound on the dimension of the simplicial complex.*/
   int dimension_;
+  bool dimension_to_be_lowered_ = false;
 };
 
 // Print a Simplex_tree in os.

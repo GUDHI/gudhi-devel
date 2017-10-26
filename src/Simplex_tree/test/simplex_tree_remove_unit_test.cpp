@@ -109,11 +109,15 @@ BOOST_AUTO_TEST_CASE(remove_maximal_simplex) {
   std::cout << "st.remove_maximal_simplex({7})" << std::endl;
   st.remove_maximal_simplex(st.find({7}));
 
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
-  BOOST_CHECK(st.dimension() == 3);
+  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  BOOST_CHECK(st.upper_bound_dimension() == 3);
 
-  st.downgrade_dimension();
+  // Check dimension calls lower_upper_bound_dimension to recompute dimension
+  BOOST_CHECK(st.dimension() == 2);
+  BOOST_CHECK(st.upper_bound_dimension() == 2);
 
+  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension()
+            << " | st_wo_seven.upper_bound_dimension()=" << st_wo_seven.upper_bound_dimension() << std::endl;
   std::cout << "st.dimension()=" << st.dimension() << " | st_wo_seven.dimension()=" << st_wo_seven.dimension() << std::endl;
   BOOST_CHECK(st == st_wo_seven);
 }
@@ -131,116 +135,121 @@ BOOST_AUTO_TEST_CASE(auto_dimension_set) {
   st.insert_simplex_and_subfaces({6, 7, 8, 9});
   st.insert_simplex_and_subfaces({6, 7, 8, 10});
 
+  BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 3);
 
   std::cout << "st.remove_maximal_simplex({6, 7, 8, 10})" << std::endl;
   st.remove_maximal_simplex(st.find({6, 7, 8, 10}));
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
+  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 3);
 
   std::cout << "st.remove_maximal_simplex({6, 7, 8, 9})" << std::endl;
   st.remove_maximal_simplex(st.find({6, 7, 8, 9}));
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
+  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 3);
 
   std::cout << "st.remove_maximal_simplex({1, 2, 3, 4})" << std::endl;
   st.remove_maximal_simplex(st.find({1, 2, 3, 4}));
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
+  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 3);
 
   std::cout << "st.remove_maximal_simplex({1, 2, 3, 5})" << std::endl;
   st.remove_maximal_simplex(st.find({1, 2, 3, 5}));
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
-  BOOST_CHECK(st.dimension() == 3);
-  st.downgrade_dimension();
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
+  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 2);
+  std::cout << "st.dimension()=" << st.dimension() << std::endl;
 
   std::cout << "st.insert_simplex_and_subfaces({1, 2, 3, 5})" << std::endl;
   st.insert_simplex_and_subfaces({1, 2, 3, 5});
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
+  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 3);
 
   std::cout << "st.insert_simplex_and_subfaces({1, 2, 3, 4})" << std::endl;
   st.insert_simplex_and_subfaces({1, 2, 3, 4});
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
+  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 3);
+
 
   std::cout << "st.remove_maximal_simplex({1, 2, 3, 5})" << std::endl;
   st.remove_maximal_simplex(st.find({1, 2, 3, 5}));
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
+  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 3);
+
 
   std::cout << "st.remove_maximal_simplex({1, 2, 3, 4})" << std::endl;
   st.remove_maximal_simplex(st.find({1, 2, 3, 4}));
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
-  BOOST_CHECK(st.dimension() == 3);
-  st.downgrade_dimension();
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
+  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 2);
+  std::cout << "st.dimension()=" << st.dimension() << std::endl;
 
   std::cout << "st.insert_simplex_and_subfaces({0, 1, 3, 4})" << std::endl;
   st.insert_simplex_and_subfaces({0, 1, 3, 4});
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
+  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 3);
 
   std::cout << "st.remove_maximal_simplex({0, 1, 3, 4})" << std::endl;
   st.remove_maximal_simplex(st.find({0, 1, 3, 4}));
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
-  BOOST_CHECK(st.dimension() == 3);
-  st.downgrade_dimension();
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
+  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 2);
+  std::cout << "st.dimension()=" << st.dimension() << std::endl;
 
   std::cout << "st.insert_simplex_and_subfaces({1, 2, 3, 5})" << std::endl;
   st.insert_simplex_and_subfaces({1, 2, 3, 5});
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
+  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 3);
 
   std::cout << "st.insert_simplex_and_subfaces({1, 2, 3, 4})" << std::endl;
   st.insert_simplex_and_subfaces({1, 2, 3, 4});
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
+  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 3);
 
 
   // Check you can override the dimension
   // This is a limit test case - shall not happen
   st.set_dimension(1);
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
-  BOOST_CHECK(st.dimension() == 1);
-  st.downgrade_dimension();
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
-  // check downgrade_dimension() is not giving the rigt answer because dimension is too low
+  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  BOOST_CHECK(st.upper_bound_dimension() == 1);
+  // check dimension() and lower_upper_bound_dimension() is not giving the right answer because dimension is too low
   BOOST_CHECK(st.dimension() == 1);
 
 
   // Check you can override the dimension
   // This is a limit test case - shall not happen
   st.set_dimension(6);
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
+  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  BOOST_CHECK(st.upper_bound_dimension() == 6);
+  // check dimension() do not launch lower_upper_bound_dimension()
   BOOST_CHECK(st.dimension() == 6);
-  st.downgrade_dimension();
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
-  // check downgrade_dimension() resets the correct dimension
-  BOOST_CHECK(st.dimension() == 3);
 
 
   // Reset with the correct value
   st.set_dimension(3);
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
+  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 3);
 
   std::cout << "st.insert_simplex_and_subfaces({0, 1, 2, 3, 4, 5, 6})" << std::endl;
   st.insert_simplex_and_subfaces({0, 1, 2, 3, 4, 5, 6});
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
+  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  BOOST_CHECK(st.upper_bound_dimension() == 6);
   BOOST_CHECK(st.dimension() == 6);
 
   std::cout << "st.remove_maximal_simplex({0, 1, 2, 3, 4, 5, 6})" << std::endl;
   st.remove_maximal_simplex(st.find({0, 1, 2, 3, 4, 5, 6}));
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
-  BOOST_CHECK(st.dimension() == 6);
-  st.downgrade_dimension();
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
+  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  BOOST_CHECK(st.upper_bound_dimension() == 6);
   BOOST_CHECK(st.dimension() == 5);
 
 }
@@ -336,17 +345,18 @@ BOOST_AUTO_TEST_CASE(prune_above_filtration) {
 
   Stree st_empty;
   simplex_is_changed = st.prune_above_filtration(0.0);
+  BOOST_CHECK(simplex_is_changed == true);
   if (simplex_is_changed)
     st.initialize_filtration();
 
   // Display the Simplex_tree
   std::cout << "The complex pruned at 0.0 contains " << st.num_simplices() << " simplices";
-  std::cout << " - dimension " << st.dimension() << std::endl;
-  BOOST_CHECK(st.dimension() == 3);
+  std::cout << " - upper_bound_dimension " << st.upper_bound_dimension() << std::endl;
+  BOOST_CHECK(st.upper_bound_dimension() == 3);
 
-  st.downgrade_dimension();
-  std::cout << "dimension=" << st.dimension() << std::endl;
   BOOST_CHECK(st.dimension() == -1);
+  std::cout << "upper_bound_dimension=" << st.upper_bound_dimension() << std::endl;
+  BOOST_CHECK(st.upper_bound_dimension() == -1);
 
   BOOST_CHECK(st == st_empty);
   BOOST_CHECK(simplex_is_changed);
