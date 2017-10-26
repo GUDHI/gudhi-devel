@@ -5,9 +5,25 @@
 #include <gudhi/Filtered_toplex_map.h>
 
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/bron_kerbosch_all_cliques.hpp>
 
+#define filtration_upper_bound std::numeric_limits<Filtration_value>::max()
 
 namespace Gudhi {
+
+struct Visitor {
+    Toplex_map* tm;
+
+    Visitor(Toplex_map* tm)
+        :tm(tm)
+    {}
+
+    template <typename Clique, typename Graph>
+    void clique(const Clique& c, const Graph& g)
+    {
+        tm->insert_simplex(c);
+    }
+};
 
 class Fake_simplex_tree : public Filtered_toplex_map {
 
@@ -31,13 +47,11 @@ public:
     /** \brief Returns the number of vertices in the simplicial complex. */
     std::size_t num_vertices() const;
 
-    Simplex_ptr_set candidates() const;
+    Simplex_ptr_set candidates(int min_dim=-1) const;
 
     std::size_t dimension() const;
 
     std::size_t num_simplices() const;
-
-    void set_dimension(int d);
 
     Simplex simplex_vertex_range(const Simplex& s) const;
 
@@ -58,87 +72,26 @@ protected:
 
 };
 
-void Fake_simplex_tree::set_dimension(int d){
-
-}
-
 template<class OneSkeletonGraph>
 void Fake_simplex_tree::insert_graph(const OneSkeletonGraph& skel_graph){
-    if (boost::num_vertices(skel_graph) == 0) return;
-    typename boost::graph_traits<OneSkeletonGraph>::vertex_iterator v_it, v_it_end;
-    for (std::tie(v_it, v_it_end) = boost::vertices(skel_graph); v_it != v_it_end; ++v_it){
-        Simplex s;
-        s.insert(*v_it);
-        insert_simplex_and_subfaces(s, boost::get(vertex_filtration_t(), skel_graph, *v_it));
-    }
-
-    typename boost::graph_traits<OneSkeletonGraph>::edge_iterator e_it, e_it_end;
-    for (std::tie(e_it, e_it_end) = boost::edges(skel_graph); e_it != e_it_end; ++e_it) {
-        Vertex u = source(*e_it, skel_graph);
-        Vertex v = target(*e_it, skel_graph);
-        if (u < v) {
-            Simplex s;
-            s.insert(u);
-            s.insert(v);
-            insert_simplex_and_subfaces(s, boost::get(edge_filtration_t(), skel_graph, *e_it));
-        }
-    }
+    toplex_maps.emplace(filtration_upper_bound,Toplex_map());
+    bron_kerbosch_all_cliques(skel_graph, Visitor(&(this->toplex_maps.at(filtration_upper_bound))));
 }
 
-void Fake_simplex_tree::expansion(int max_dim){
-    for(int d=2; d <= max_dim; d++){
-        Simplex_ptr_set cs = candidates(); //dimension ?
-        if(cs.empty()) std::cout << d << std::endl;
-        if(cs.empty()) return;
-        for(const Simplex_ptr& sptr: cs)
-            insert_simplex_and_subfaces(*sptr); //filtration ?
-    }
-}
+void Fake_simplex_tree::expansion(int max_dim){}
 
 template <typename Input_vertex_range>
 bool Fake_simplex_tree::all_facets_inside(const Input_vertex_range &vertex_range) const{
     Simplex sigma(vertex_range);
     for(const Simplex& s : facets(sigma))
-        if(!filtrations.count(get_key(s))) return false;
+        if(!membership(s)) return false;
     return true;
-}
-
-Simplex_ptr_set Fake_simplex_tree::candidates() const{
-    Simplex_ptr_set c;
-    std::unordered_map<Simplex_ptr, std::vector<Vertex>, Sptr_hash, Sptr_equal> facets_to_max;
-    for(const auto& kv : filtrations){
-        Simplex sigma (*(kv.first));
-        if(sigma.size()>1)
-            for(Vertex v : *(kv.first)){
-                sigma.erase(v);
-                auto sptr = get_key(sigma);
-                if(!facets_to_max.count(sptr))
-                    facets_to_max.emplace(sptr, std::vector<Vertex>());
-                facets_to_max.at(sptr).emplace_back(v);
-                sigma.insert(v);
-            }
-    }
-    for(const auto& kv : facets_to_max){
-        std::unordered_set<Vertex> facets(kv.second.begin(), kv.second.end());
-        for(Vertex v : kv.second){
-            facets.erase(v);
-            for(Vertex w : facets){
-                Simplex sigma(*(kv.first));
-                sigma.insert(v);
-                sigma.insert(w);
-                if(all_facets_inside(sigma))
-                    c.emplace(get_key(sigma));
-            }
-            facets.emplace(v);
-        }
-    }
-    return c;
 }
 
 std::size_t Fake_simplex_tree::dimension() const {
     std::size_t max = 0;
-    for(auto kv : filtrations)
-        max = std::max(max, kv.first->size());
+    for(const Simplex& s : max_simplices())
+        max = std::max(max, s.size());
     return max-1;
 }
 
@@ -149,8 +102,8 @@ std::size_t Fake_simplex_tree::num_simplices() const {
 
 std::size_t Fake_simplex_tree::num_vertices() const {
     std::unordered_set<Vertex> vertices;
-    for(auto kv : filtrations)
-        for (Vertex v : *(kv.first))
+    for(const Simplex& s : max_simplices())
+        for (Vertex v : s)
             vertices.emplace(v);
     return vertices.size();
 }
@@ -179,17 +132,18 @@ std::vector<Simplex> Fake_simplex_tree::filtration_simplex_range() const{
 
 std::vector<Simplex> Fake_simplex_tree::skeleton_simplex_range(int d) const{
     std::vector<Simplex> simplices;
-    for(auto s: filtration_simplex_range())
+    for(const Simplex& s : max_simplices())
         if(s.size()<=d)
             simplices.emplace_back(s);
     return simplices;
 }
 
 std::vector<Simplex> Fake_simplex_tree::max_simplices() const{
-    std::vector<Simplex> s;
-    for(auto kv : filtrations)
-        s.emplace_back(*(kv.first));
-    return s;
+    std::vector<Simplex> max_s;
+    for(auto kv : toplex_maps)
+        for(const Simplex_ptr& sptr : kv.second.maximal_cofaces(Simplex()))
+            max_s.emplace_back(*sptr);
+    return max_s;
 }
 
 std::size_t Fake_simplex_tree::dimension(Simplex_ptr& sptr) const{

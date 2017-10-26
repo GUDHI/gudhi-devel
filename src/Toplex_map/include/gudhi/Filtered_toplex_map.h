@@ -19,18 +19,19 @@ public:
     template <typename Input_vertex_range>
     Filtration_value filtration(const Input_vertex_range &vertex_range) const;
 
+    template <typename Input_vertex_range>
+    bool membership(const Input_vertex_range &vertex_range) const;
+
 protected:
     std::unordered_map<Filtration_value, Toplex_map> toplex_maps;
-    std::unordered_map<Simplex_ptr, Filtration_value, Sptr_hash, Sptr_equal> filtrations;
-
 };
 
 template <typename Input_vertex_range>
 void Filtered_toplex_map::insert_simplex_and_subfaces(const Input_vertex_range &vertex_range, Filtration_value f){
     if(!toplex_maps.count(f)) toplex_maps.emplace(f,Toplex_map());
     toplex_maps.at(f).insert_simplex(vertex_range);
-    filtrations.emplace(get_key(vertex_range),f);
 }
+
 
 template <typename Input_vertex_range>
 Filtered_toplex_map::Filtration_value Filtered_toplex_map::filtration(const Input_vertex_range &vertex_range) const{
@@ -38,6 +39,14 @@ Filtered_toplex_map::Filtration_value Filtered_toplex_map::filtration(const Inpu
         if(kv.second.membership(vertex_range))
             return kv.first;
     return filtration_upper_bound;
+}
+
+template <typename Input_vertex_range>
+bool Filtered_toplex_map::membership(const Input_vertex_range &vertex_range) const{
+    for(auto kv : toplex_maps)
+        if(kv.second.membership(vertex_range))
+            return true;
+    return false;
 }
 
 } //namespace Gudhi
