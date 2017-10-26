@@ -14,7 +14,7 @@ public:
     typedef double Filtration_value;
 
     template <typename Input_vertex_range>
-    void insert_simplex_and_subfaces(const Input_vertex_range &vertex_range, Filtration_value f = filtration_upper_bound);
+    std::pair<Simplex, bool> insert_simplex_and_subfaces(const Input_vertex_range &vertex_range, Filtration_value f = filtration_upper_bound);
 
     template <typename Input_vertex_range>
     Filtration_value filtration(const Input_vertex_range &vertex_range) const;
@@ -27,9 +27,12 @@ protected:
 };
 
 template <typename Input_vertex_range>
-void Filtered_toplex_map::insert_simplex_and_subfaces(const Input_vertex_range &vertex_range, Filtration_value f){
+std::pair<Simplex, bool> Filtered_toplex_map::insert_simplex_and_subfaces(const Input_vertex_range &vertex_range, Filtration_value f){
+    Simplex s(vertex_range.begin(),vertex_range.end());
+    if(membership(s)) return make_pair(s,false);
     if(!toplex_maps.count(f)) toplex_maps.emplace(f,Toplex_map());
     toplex_maps.at(f).insert_simplex(vertex_range);
+    return make_pair(s,true);
 }
 
 
