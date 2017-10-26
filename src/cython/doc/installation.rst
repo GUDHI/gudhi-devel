@@ -68,30 +68,31 @@ The :doc:`Alpha complex </alpha_complex_user>`,
 C++ library which provides easy access to efficient and reliable geometric
 algorithms.
 
-Having CGAL version 4.6.0 or higher installed is recommended. The procedure to
-install this library according to your operating system is detailed
+Having CGAL,  the Computational Geometry Algorithms Library, version 4.7.0 or
+higher installed is recommended. The procedure to install this library
+according to your operating system is detailed
 `here <http://doc.cgal.org/latest/Manual/installation.html>`_.
 
-The following examples require the Computational Geometry Algorithms Library:
-
-.. only:: builder_html
-
-    * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
-    * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
-
-The following example requires CGAL version ≥ 4.7.0:
+The following examples requires CGAL version ≥ 4.7.0:
 
 .. only:: builder_html
 
     * :download:`alpha_complex_diagram_persistence_from_off_file_example.py <../example/alpha_complex_diagram_persistence_from_off_file_example.py>`
     * :download:`alpha_complex_from_points_example.py <../example/alpha_complex_from_points_example.py>`
 
-The following example requires CGAL version ≥ 4.8.0:
+The following examples requires CGAL version ≥ 4.8.0:
 
 .. only:: builder_html
 
     * :download:`bottleneck_basic_example.py <../example/bottleneck_basic_example.py>`
     * :download:`tangential_complex_plain_homology_from_off_file_example.py <../example/tangential_complex_plain_homology_from_off_file_example.py>`
+
+The following examples requires CGAL version ≥ 4.8.1:
+
+.. only:: builder_html
+
+    * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
+    * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
 
 Eigen3
 ======

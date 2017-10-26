@@ -189,10 +189,10 @@ and a weights file.
 \code $> ./weighted_alpha_complex_3d_persistence ../../data/points/tore3D_300.off
 ../../data/points/tore3D_300.weights 2 0.45 \endcode
 \code Simplex_tree dim: 3
-2  -0 0 inf
-2  1 0.0682162 1.0001
-2  1 0.0934117 1.00003
-2  2 0.56444 1.03938 \endcode
+2  0 -1 inf
+2  1 -0.931784 0.000103311
+2  1 -0.906588 2.60165e-05
+2  2 -0.43556 0.0393798 \endcode
 
 \li <a href="_persistent_cohomology_2alpha_complex_persistence_8cpp-example.html">
 Persistent_cohomology/alpha_complex_persistence.cpp</a> computes the persistent homology with
@@ -208,7 +208,8 @@ Simplex_tree dim: 3
 \li <a href="_persistent_cohomology_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
 Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
 \f$\mathbb{Z}/2\mathbb{Z}\f$ coefficients of the periodic alpha complex on points sampling from an OFF file.
-\code $> ./periodic_alpha_complex_3d_persistence ../../data/points/grid_10_10_10_in_0_1.off 3 1.0 \endcode
+\code $> ./periodic_alpha_complex_3d_persistence ../../data/points/grid_10_10_10_in_0_1.off
+../../data/points/iso_cuboid_3_in_0_1.txt 3 1.0 \endcode
 \code Periodic Delaunay computed.
 Simplex_tree dim: 3
 3  0 0 inf 

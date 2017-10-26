@@ -59,7 +59,7 @@ directions, allows to determine, dimension, neighborhood, boundary and coboundar
 :math:`C \in \mathcal{K}`.
 
 .. figure::
-    img/Cubical_complex_representation.png
+    ../../doc/Bitmap_cubical_complex/Cubical_complex_representation.png
     :alt: Cubical complex.
     :figclass: align-center
 
@@ -87,7 +87,7 @@ in the example below). Next, in lexicographical order, the filtration of top dim
 20 4 7 6 5 in the example below).
 
 .. figure::
-    img/exampleBitmap.png
+    ../../doc/Bitmap_cubical_complex/exampleBitmap.png
     :alt: Example of a input data.
     :figclass: align-center
 
@@ -95,9 +95,9 @@ in the example below). Next, in lexicographical order, the filtration of top dim
 
 The input file for the following complex is:
 
-.. literalinclude:: cubicalcomplexdoc.txt
+.. literalinclude:: ../../data/bitmap/cubicalcomplexdoc.txt
 
-.. centered:: data/bitmap/cubicalcomplexdoc.txt
+.. centered:: ../../data/bitmap/cubicalcomplexdoc.txt
 
 .. testcode::
 
@@ -128,9 +128,9 @@ complex with periodic boundary conditions. One can also use Perseus style input 
 conditions in a given direction, then number of top dimensional cells in this direction have to be multiplied by -1.
 For instance:
 
-.. literalinclude:: periodiccubicalcomplexdoc.txt
+.. literalinclude:: ../../data/bitmap/periodiccubicalcomplexdoc.txt
 
-.. centered:: data/bitmap/periodiccubicalcomplexdoc.txt
+.. centered:: ../../data/bitmap/periodiccubicalcomplexdoc.txt
 
 Indicate that we have imposed periodic boundary conditions in the direction x, but not in the direction y.
 

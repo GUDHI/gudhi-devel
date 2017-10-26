@@ -185,18 +185,16 @@ int main(int argc, char * const argv[]) {
   }
 
   // ++ GENERAL VARIABLE SET
-  simplexTree.set_filtration(FOURTH_FILTRATION_VALUE);  // Max filtration value
 
   std::cout << "********************************************************************\n";
   // Display the Simplex_tree - Can not be done in the middle of 2 inserts
   std::cout << "* The complex contains " << simplexTree.num_simplices() << " simplices\n";
-  std::cout << "   - dimension " << simplexTree.dimension() << "   - filtration " << simplexTree.filtration() << "\n";
+  std::cout << "   - dimension " << simplexTree.dimension() << "\n";
   std::cout << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
   for (auto f_simplex : simplexTree.filtration_simplex_range()) {
     std::cout << "   " << "[" << simplexTree.filtration(f_simplex) << "] ";
-    for (auto vertex : simplexTree.simplex_vertex_range(f_simplex)) {
-      std::cout << static_cast<int>(vertex) << " ";
-    }
+    for (auto vertex : simplexTree.simplex_vertex_range(f_simplex))
+      std::cout << "(" << vertex << ")";
     std::cout << std::endl;
   }
   //   [0.1] 0
@@ -249,5 +247,34 @@ int main(int argc, char * const argv[]) {
     std::cout << "***+ YES IT IS!\n";
   else
     std::cout << "***- NO IT ISN'T\n";
+
+  simplexFound = simplexTree.find({ 0, 1 });
+  std::cout << "**************IS THE SIMPLEX {0,1} IN THE SIMPLEX TREE ?\n";
+  if (simplexFound != simplexTree.null_simplex())
+    std::cout << "***+ YES IT IS!\n";
+  else
+    std::cout << "***- NO IT ISN'T\n";
+
+  std::cout << "**************COFACES OF {0,1} IN CODIMENSION 1 ARE\n";
+  for (auto& simplex : simplexTree.cofaces_simplex_range(simplexTree.find({0,1}), 1)) {
+    for (auto vertex : simplexTree.simplex_vertex_range(simplex))
+      std::cout << "(" << vertex << ")";
+    std::cout << std::endl;
+  }
+
+  std::cout << "**************STARS OF {0,1} ARE\n";
+  for (auto& simplex : simplexTree.star_simplex_range(simplexTree.find({0,1}))) {
+    for (auto vertex : simplexTree.simplex_vertex_range(simplex))
+      std::cout << "(" << vertex << ")";
+    std::cout << std::endl;
+  }
+
+  std::cout << "**************BOUNDARIES OF {0,1,2} ARE\n";
+  for (auto& simplex : simplexTree.boundary_simplex_range(simplexTree.find({0,1,2}))) {
+    for (auto vertex : simplexTree.simplex_vertex_range(simplex))
+      std::cout << "(" << vertex << ")";
+    std::cout << std::endl;
+  }
+
   return 0;
 }

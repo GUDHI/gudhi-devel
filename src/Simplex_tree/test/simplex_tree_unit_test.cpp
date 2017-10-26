@@ -26,7 +26,6 @@ void test_empty_simplex_tree(typeST& tst) {
   typedef typename typeST::Vertex_handle Vertex_handle;
   const Vertex_handle DEFAULT_VERTEX_VALUE = Vertex_handle(- 1);
   BOOST_CHECK(tst.null_vertex() == DEFAULT_VERTEX_VALUE);
-  BOOST_CHECK(tst.filtration() == 0.0);
   BOOST_CHECK(tst.num_vertices() == (size_t) 0);
   BOOST_CHECK(tst.num_simplices() == (size_t) 0);
   typename typeST::Siblings* STRoot = tst.root();
@@ -86,6 +85,40 @@ bool AreAlmostTheSame(float a, float b) {
   return std::fabs(a - b) < std::numeric_limits<float>::epsilon();
 }
 
+BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_from_file, typeST, list_of_tested_variants) {
+  // TEST OF INSERTION
+  std::cout << "********************************************************************" << std::endl;
+  std::cout << "TEST OF SIMPLEX TREE FROM A FILE" << std::endl;
+  typeST st;
+
+  std::string inputFile("simplex_tree_for_unit_test.txt");
+  std::ifstream simplex_tree_stream(inputFile.c_str());
+  simplex_tree_stream >> st;
+
+  // Display the Simplex_tree
+  std::cout << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
+  std::cout << "   - dimension " << st.dimension() << std::endl;
+
+  // Check
+  BOOST_CHECK(st.num_simplices() == 143353);
+  BOOST_CHECK(st.dimension() == 3);
+
+  int previous_size = 0;
+  for (auto f_simplex : st.filtration_simplex_range()) {
+    // Size of simplex
+    int size = 0;
+    for (auto vertex : st.simplex_vertex_range(f_simplex)) {
+      // Remove warning
+      (void) vertex;
+      size++;
+    }
+    BOOST_CHECK(AreAlmostTheSame(st.filtration(f_simplex), (0.1 * size))); // Specific test: filtration = 0.1 * simplex_size
+    BOOST_CHECK(previous_size <= size); // Check list is sorted (because of sorted filtrations in simplex_tree.txt)
+    previous_size = size;
+  }
+  simplex_tree_stream.close();
+}
+
 template<class typeST, class typeSimplex>
 void test_simplex_tree_contains(typeST& simplexTree, typeSimplex& simplex, int pos) {
   auto f_simplex = simplexTree.filtration_simplex_range().begin() + pos;
@@ -112,19 +145,18 @@ void test_simplex_tree_insert_returns_true(const typePairSimplexBool& returnValu
 }
 
 // Global variables
-double max_fil = 0.0;
+int dim_max = -1;
 
 template<class typeST, class Filtration_value>
 void set_and_test_simplex_tree_dim_fil(typeST& simplexTree, int vectorSize, const Filtration_value& fil) {
-  if (fil > max_fil) {
-    max_fil = fil;
-    simplexTree.set_filtration(max_fil);
-    std::cout << "   set_and_test_simplex_tree_dim_fil - max_fil=" << max_fil
+  if (vectorSize > dim_max + 1) {
+    dim_max = vectorSize - 1;
+    simplexTree.set_dimension(dim_max);
+    std::cout << "   set_and_test_simplex_tree_dim_fil - dim_max=" << dim_max
         << std::endl;
   }
 
-  BOOST_CHECK(simplexTree.dimension() >= vectorSize - 1);
-  BOOST_CHECK(AreAlmostTheSame(simplexTree.filtration(), max_fil));
+  BOOST_CHECK(simplexTree.dimension() == dim_max);
 
   // Another way to count simplices:
   size_t num_simp = 0;
@@ -147,7 +179,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
   const Filtration_value THIRD_FILTRATION_VALUE = 0.3;
   const Filtration_value FOURTH_FILTRATION_VALUE = 0.4;
   // reset since we run the test several times
-  max_fil = 0.0;
+  dim_max = -1;
 
   // TEST OF INSERTION
   std::cout << "********************************************************************" << std::endl;
@@ -267,7 +299,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
   BOOST_CHECK(shReturned == typename typeST::Simplex_handle(nullptr));
   std::cout << "st.num_vertices()=" << st.num_vertices() << std::endl;
   BOOST_CHECK(st.num_vertices() == (size_t) 4); // Not incremented !!
-  BOOST_CHECK(AreAlmostTheSame(st.filtration(), max_fil));
+  BOOST_CHECK(st.dimension() == dim_max);
 
   // ++ ELEVENTH
   std::cout << "   - INSERT (2,1,0) (already inserted)" << std::endl;
@@ -281,9 +313,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
   shReturned = returnValue.first;
   BOOST_CHECK(shReturned == typename typeST::Simplex_handle(nullptr));
   BOOST_CHECK(st.num_vertices() == (size_t) 4); // Not incremented !!
-  std::cout << "   - INSERT (2,1,0) (already inserted)" << std::endl;
-  BOOST_CHECK(st.dimension() == 2);
-  BOOST_CHECK(AreAlmostTheSame(st.filtration(), max_fil));
+  BOOST_CHECK(st.dimension() == dim_max);
 
   /* Inserted simplex:        */
   /*    1                     */
@@ -323,7 +353,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
 
   // Display the Simplex_tree - Can not be done in the middle of 2 inserts
   std::cout << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
-  std::cout << "   - dimension " << st.dimension() << "   - filtration " << st.filtration() << std::endl;
+  std::cout << "   - dimension " << st.dimension() << std::endl;
   std::cout << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
   for (auto f_simplex : st.filtration_simplex_range()) {
     std::cout << "   " << "[" << st.filtration(f_simplex) << "] ";
@@ -533,7 +563,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(NSimplexAndSubfaces_tree_insertion, typeST, list_o
 
   // Display the Simplex_tree - Can not be done in the middle of 2 inserts
   std::cout << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
-  std::cout << "   - dimension " << st.dimension() << "   - filtration " << st.filtration() << std::endl;
+  std::cout << "   - dimension " << st.dimension() << std::endl;
   std::cout << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
   for (auto f_simplex : st.filtration_simplex_range()) {
     std::cout << "   " << "[" << st.filtration(f_simplex) << "] ";
@@ -708,7 +738,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(copy_move_on_simplex_tree, typeST, list_of_tested_
   typeST st_empty;
   // Check st has been emptied by the move
   BOOST_CHECK(st == st_empty);
-  BOOST_CHECK(st.filtration() == 0);
   BOOST_CHECK(st.dimension() == -1);
   BOOST_CHECK(st.num_simplices() == 0);
   BOOST_CHECK(st.num_vertices() == (size_t)0);

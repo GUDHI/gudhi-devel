@@ -25,7 +25,7 @@ This example computes the bottleneck distance from 2 persistence diagrams:
     message = "Bottleneck distance approximation=" + '%.2f' % gudhi.bottleneck_distance(diag1, diag2, 0.1)
     print(message)
 
-    message = "Bottleneck distance exact value=" + '%.2f' % gudhi.bottleneck_distance(diag1, diag2, 0)
+    message = "Bottleneck distance value=" + '%.2f' % gudhi.bottleneck_distance(diag1, diag2)
     print(message)
 
 The output is:
@@ -33,4 +33,4 @@ The output is:
 .. testoutput::
 
     Bottleneck distance approximation=0.81
-    Bottleneck distance exact value=0.75
+    Bottleneck distance value=0.75
