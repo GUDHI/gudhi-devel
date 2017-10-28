@@ -1,0 +1,14 @@
+To compile:
+***********
+
+cmake .
+make
+
+To launch with details:
+***********************
+
+./Common_test_points_off_reader --report_level=detailed --log_level=all
+
+   ==> echo $? returns 0 in case of success (non-zero otherwise)
+
+

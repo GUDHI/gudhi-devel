@@ -1,0 +1,73 @@
+To build the example, run in a Terminal:
+
+cd /path-to-gudhi/
+cmake .
+cd /path-to-example/
+make
+
+
+Example of use :
+
+*** Simple simplex tree construction
+
+./Simplex_tree_example_simple_simplex_tree
+
+********************************************************************
+EXAMPLE OF SIMPLE INSERTION
+   * INSERT 0
+   + 0 INSERTED
+   * INSERT 1
+   + 1 INSERTED
+   * INSERT (0,1)
+   + (0,1) INSERTED
+   * INSERT 2
+   + 2 INSERTED
+   * INSERT (2,0)
+   + (2,0) INSERTED
+   * INSERT (2,1)
+   + (2,1) INSERTED
+   * INSERT (2,1,0)
+   + (2,1,0) INSERTED
+   * INSERT 3
+   + 3 INSERTED
+   * INSERT (3,0)
+   + (3,0) INSERTED
+   * INSERT 0 (already inserted)
+   - 0 NOT INSERTED
+   * INSERT (2,1,0) (already inserted)
+   - (2,1,0) NOT INSERTED
+********************************************************************
+* The complex contains 9 simplices
+   - dimension 2   - filtration 0.4
+* Iterator on Simplices in the filtration, with [filtration value]:
+   [0.1] 0 
+   [0.1] 1 
+   [0.1] 2 
+   [0.1] 3 
+   [0.2] 1 0 
+   [0.2] 2 0 
+   [0.2] 2 1 
+   [0.2] 3 0 
+   [0.3] 2 1 0 
+
+*** Simplex tree construction with Z/2Z coefficients on weighted graph Klein bottle file:
+
+./Simplex_tree_example_from_cliques_of_graph ../../../data/points/Klein_bottle_complex.txt 2
+Insert the 1-skeleton in the simplex tree in 0 s. 
+Expand the simplex tree in 0 s. 
+Information of the Simplex Tree: 
+  Number of vertices = 10   Number of simplices = 82
+
+with Z/3Z coefficients:
+
+./Simplex_tree_example_from_cliques_of_graph ../../../data/points/Klein_bottle_complex.txt 3
+
+Insert the 1-skeleton in the simplex tree in 0 s.
+Expand the simplex tree in 0 s.
+Information of the Simplex Tree:
+  Number of vertices = 10   Number of simplices = 106
+
+*** Simplex_tree computed and displayed from a 3D alpha complex:
+    [ Requires CGAL, GMP and GMPXX to be installed]
+
+./Simplex_tree_example_alpha_shapes_3_from_off ../../../data/points/bunny_5000

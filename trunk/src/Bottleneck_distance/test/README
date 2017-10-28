@@ -1,0 +1,12 @@
+To compile:
+***********
+
+cmake .
+make
+
+To launch with details:
+***********************
+
+./Bottleneck_distance_unit_test --report_level=detailed --log_level=all
+
+   ==> echo $? returns 0 in case of success (non-zero otherwise)

@@ -1,0 +1,29 @@
+To compile:
+***********
+
+cd /path-to-gudhi/
+cmake .
+cd /path-to-test/
+make
+
+To launch with details:
+***********************
+
+SINGLE FIELD
+------------
+./Persistent_cohomology_test_unit --report_level=detailed --log_level=all
+
+   ==> echo $? returns 0 in case of success (non-zero otherwise)
+
+MULTI FIELD
+-----------
+./Persistent_cohomology_test_unit_multi_field --report_level=detailed --log_level=all
+
+   ==> echo $? returns 0 in case of success (non-zero otherwise)
+
+BETTI NUMBERS
+-------------
+./Persistent_cohomology_test_betti_numbers --report_level=detailed --log_level=all
+
+   ==> echo $? returns 0 in case of success (non-zero otherwise)
+

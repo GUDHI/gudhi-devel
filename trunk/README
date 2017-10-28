@@ -1,0 +1,11 @@
+The Gudhi library is release under the GNU GENERAL PUBLIC LICENSE Version 3. A 
+copy of the licence may be found in the file COPYING.
+
+
+To build the library, run in a Terminal:
+
+cd /path-to-gudhi/
+mkdir build
+cd build/
+cmake ..
+make
