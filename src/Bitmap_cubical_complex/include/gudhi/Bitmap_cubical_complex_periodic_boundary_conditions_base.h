@@ -105,27 +105,29 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
   
   
   /**
-   * This procedure compute incidence numbers between cells. 
-   * Note that first parameter is the address of a cell of dimension n,
-   * and the second parameter is the address of adjusted cell in dimension
+   * This procedure compute incidence numbers between cells. For a cell A of
+   * dimension n and a cell B \subset A of dimension n-1, an incidence
+   * between A and B is the integer with which B appears in the boundary of A. 
+   * Note that first parameter is a cell of dimension n,
+   * and the second parameter is an adjusted cell in dimension
    * n-1. 
   **/ 
-  virtual int compute_incidence_between_cells( size_t coBoundary , size_t boundary )
+  virtual int compute_incidence_between_cells( size_t coface , size_t face )
   {	  	  
 	  //first get the counters for coBoundary and boundary:
-	  std::vector<unsigned> cbd_counter = this->compute_counter_for_given_cell( coBoundary );
-	  std::vector<unsigned> bd_counter = this->compute_counter_for_given_cell( boundary );
+	  std::vector<unsigned> coface_counter = this->compute_counter_for_given_cell( coface );
+	  std::vector<unsigned> face_counter = this->compute_counter_for_given_cell( face );
 	  
 	  //cbd_counter and bd_counter should agree at all positions except from one:
 	  int number_of_position_in_which_counters_do_not_agree = -1;
 	  size_t number_of_full_faces_that_comes_before = 0;
-	  for ( size_t i = 0 ; i != cbd_counter.size() ; ++i )
+	  for ( size_t i = 0 ; i != coface_counter.size() ; ++i )
 	  {
-		  if ( (cbd_counter[i]%2 == 1)&&(number_of_position_in_which_counters_do_not_agree==-1) )
+		  if ( (coface_counter[i]%2 == 1)&&(number_of_position_in_which_counters_do_not_agree==-1) )
 		  {
 			  ++number_of_full_faces_that_comes_before;
 		  }
-		  if ( cbd_counter[i] != bd_counter[i] )
+		  if ( coface_counter[i] != face_counter[i] )
 		  {
 			  if ( number_of_position_in_which_counters_do_not_agree != -1 )
 			  {
@@ -139,13 +141,13 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
 	  int incidence = 1;
 	  if ( number_of_full_faces_that_comes_before%2 )incidence = -1;	 	  
 	  //if the boundary cell is on the right from coboundary cell:
-	  if ( (cbd_counter[number_of_position_in_which_counters_do_not_agree]+1 == 
-	       bd_counter[number_of_position_in_which_counters_do_not_agree])
+	  if ( (coface_counter[number_of_position_in_which_counters_do_not_agree]+1 == 
+	       face_counter[number_of_position_in_which_counters_do_not_agree])
 	       ||
 	       (  
-	       (cbd_counter[number_of_position_in_which_counters_do_not_agree] != 1) 
+	       (coface_counter[number_of_position_in_which_counters_do_not_agree] != 1) 
 	       &&
-	       (bd_counter[number_of_position_in_which_counters_do_not_agree]==0)
+	       (face_counter[number_of_position_in_which_counters_do_not_agree]==0)
 	       )
 	     )
 	     {
