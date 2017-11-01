@@ -1,4 +1,4 @@
-/*    This file is part of the Gudhi Library. The Gudhi library
+/*    This file is part of the Gudhi Library. The Gudhi 
  *    (Geometric Understanding in Higher Dimensions) is a generic C++
  *    library for computational topology.
  *
@@ -100,6 +100,8 @@ class Bitmap_cubical_complex_base {
    * non-negative integer, indicating a position of a cube in the data structure.
    * In the case of functions that compute (co)boundary, the output is a vector if non-negative integers pointing to
    * the positions of (co)boundary element of the input cell.
+   * The boundary elements are guaranteed to be returned so that the 
+   * incidence coeficcients are alternating.
    */
   virtual inline std::vector< size_t > get_boundary_of_a_cell(size_t cell)const;
   /**
@@ -112,12 +114,66 @@ class Bitmap_cubical_complex_base {
    * In the case of functions that compute (co)boundary, the output is a vector if
    * non-negative integers pointing to the
    * positions of (co)boundary element of the input cell.
+   * Note that unlike in the case of boundary, over here the elements are 
+   * not guaranteed to be returned with alternating incidence numbers.
+   * 
    **/
   virtual inline std::vector< size_t > get_coboundary_of_a_cell(size_t cell)const;
   /**
    * In the case of get_dimension_of_a_cell function, the output is a non-negative integer
    * indicating the dimension of a cell.
+   * Note that unlike in the case of boundary, over here the elements are 
+   * not guaranteed to be returned with alternating incidence numbers.
+   * To compute incidence between cells use compute_incidence_between_cells
+   * procedure
    **/
+   
+   /**
+   * This procedure compute incidence numbers between cells. 
+   * Note that first parameter is the address of a cell of dimension n,
+   * and the second parameter is the address of adjusted cell in dimension
+   * n-1. 
+  **/ 
+  virtual int compute_incidence_between_cells( size_t coBoundary , size_t boundary )
+  {	  	  
+	  
+	  //first get the counters for coBoundary and boundary:
+	  std::vector<unsigned> cbd_counter = this->compute_counter_for_given_cell( coBoundary );
+	  std::vector<unsigned> bd_counter = this->compute_counter_for_given_cell( boundary );
+	  
+	  //cbd_counter and bd_counter should agree at all positions except from one:
+	  int number_of_position_in_which_counters_do_not_agree = -1;
+	  size_t number_of_full_faces_that_comes_before = 0;
+	  for ( size_t i = 0 ; i != cbd_counter.size() ; ++i )
+	  {
+		  if ( (cbd_counter[i]%2 == 1)&&(number_of_position_in_which_counters_do_not_agree==-1) )
+		  {
+			  ++number_of_full_faces_that_comes_before;
+		  }
+		  if ( cbd_counter[i] != bd_counter[i] )
+		  {
+			  if ( number_of_position_in_which_counters_do_not_agree != -1 )
+			  {
+				  std::cout <<  "Cells given to compute_incidence_between_cells procedure do not form a pair of coboundary-boundary.\n";
+				  throw "Cells given to compute_incidence_between_cells procedure do not form a pair of coboundary-boundary.";
+			  }
+			  number_of_position_in_which_counters_do_not_agree = i;
+		  }
+	  }
+	  
+	  int incidence = 1;
+	  if ( number_of_full_faces_that_comes_before%2 )incidence = -1;	 	  
+	  //if the boundary cell is on the right from coboundary cell:
+	  if ( cbd_counter[number_of_position_in_which_counters_do_not_agree]+1 == 
+	       bd_counter[number_of_position_in_which_counters_do_not_agree]
+	     )
+	     {
+			 incidence *= -1;
+		 }		
+	 	 	  
+	  return incidence;
+  }
+   
   inline unsigned get_dimension_of_a_cell(size_t cell)const;
   /**
    * In the case of get_cell_data, the output parameter is a reference to the value of a cube in a given position.
@@ -289,7 +345,7 @@ class Bitmap_cubical_complex_base {
    * boundary_simplex_range creates an object of a Boundary_simplex_range class
    * that provides ranges for the Boundary_simplex_iterator.
    **/
-  Boundary_range boundary_range(size_t sh) {
+  Boundary_range boundary_range(size_t sh) {	  	  
     return this->get_boundary_of_a_cell(sh);
   }
 
@@ -668,21 +724,32 @@ Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const char* perseus_
 }
 
 template <typename T>
-std::vector< size_t > Bitmap_cubical_complex_base<T>::get_boundary_of_a_cell(size_t cell)const {
+std::vector< size_t > Bitmap_cubical_complex_base<T>::get_boundary_of_a_cell(size_t cell)const {	
   std::vector< size_t > boundary_elements;
 
   // Speed traded of for memory. Check if it is better in practice.
   boundary_elements.reserve(this->dimension()*2);
 
-  size_t cell1 = cell;
+  size_t sum_of_dimensions = 0;
+  size_t cell1 = cell;  
   for (size_t i = this->multipliers.size(); i != 0; --i) {
     unsigned position = cell1 / this->multipliers[i - 1];
     if (position % 2 == 1) {
-      boundary_elements.push_back(cell - this->multipliers[ i - 1 ]);
-      boundary_elements.push_back(cell + this->multipliers[ i - 1 ]);
+	  if ( sum_of_dimensions%2 )
+	  {
+		  boundary_elements.push_back(cell + this->multipliers[ i - 1 ]);
+		  boundary_elements.push_back(cell - this->multipliers[ i - 1 ]);
+	  }
+	  else
+	  {			  
+		  boundary_elements.push_back(cell - this->multipliers[ i - 1 ]);
+		  boundary_elements.push_back(cell + this->multipliers[ i - 1 ]);
+	  }      
+      ++sum_of_dimensions;
     }
     cell1 = cell1 % this->multipliers[i - 1];
-  }
+  }    
+  
   return boundary_elements;
 }
 
@@ -690,22 +757,23 @@ template <typename T>
 std::vector< size_t > Bitmap_cubical_complex_base<T>::get_coboundary_of_a_cell(size_t cell)const {
   std::vector<unsigned> counter = this->compute_counter_for_given_cell(cell);
   std::vector< size_t > coboundary_elements;
-  size_t cell1 = cell;
+  size_t cell1 = cell;  
   for (size_t i = this->multipliers.size(); i != 0; --i) {
     unsigned position = cell1 / this->multipliers[i - 1];
     if (position % 2 == 0) {
-      if ((cell > this->multipliers[i - 1]) && (counter[i - 1] != 0)) {
-        coboundary_elements.push_back(cell - this->multipliers[i - 1]);
-      }
-      if (
-          (cell + this->multipliers[i - 1] < this->data.size()) && (counter[i - 1] != 2 * this->sizes[i - 1])) {
-        coboundary_elements.push_back(cell + this->multipliers[i - 1]);
-      }
+	  if ((cell > this->multipliers[i - 1]) && (counter[i - 1] != 0)) {
+		coboundary_elements.push_back(cell - this->multipliers[i - 1]);
+	  }
+	  if (
+		  (cell + this->multipliers[i - 1] < this->data.size()) && (counter[i - 1] != 2 * this->sizes[i - 1])) {
+		coboundary_elements.push_back(cell + this->multipliers[i - 1]);
+	  }	     
     }
     cell1 = cell1 % this->multipliers[i - 1];
-  }
+  }     
   return coboundary_elements;
 }
+
 
 template <typename T>
 unsigned Bitmap_cubical_complex_base<T>::get_dimension_of_a_cell(size_t cell)const {

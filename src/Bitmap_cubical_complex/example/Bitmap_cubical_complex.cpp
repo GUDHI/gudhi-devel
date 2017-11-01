@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
 
   // Compute the persistence diagram of the complex
   Persistent_cohomology pcoh(b);
-  int p = 2;
+  int p = 11;
   double min_persistence = 0;
 
   pcoh.init_coefficients(p);  // initializes the coefficient field for homology
