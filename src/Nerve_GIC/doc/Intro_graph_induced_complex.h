@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DOC_GRAPH_INDUCED_COMPLEX_INTRO_GRAPH_INDUCED_COMPLEX_H_
-#define DOC_GRAPH_INDUCED_COMPLEX_INTRO_GRAPH_INDUCED_COMPLEX_H_
+#ifndef DOC_COVER_COMPLEX_INTRO_COVER_COMPLEX_H_
+#define DOC_COVER_COMPLEX_INTRO_COVER_COMPLEX_H_
 
 namespace Gudhi {
 
@@ -177,13 +177,13 @@ namespace cover_complex {
  * \copyright GNU General Public License v3.                         
  * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
  */
-/** @} */  // end defgroup graph_induced_complex
+/** @} */  // end defgroup cover_complex
 
-}  // namespace graph_induced_complex
+}  // namespace cover_complex
 
 }  // namespace Gudhi
 
-#endif  // DOC_GRAPH_INDUCED_COMPLEX_INTRO_GRAPH_INDUCED_COMPLEX_H_
+#endif  // DOC_COVER_COMPLEX_INTRO_COVER_COMPLEX_H_
 
 
 /* * \subsection gicexample Example with cover from function

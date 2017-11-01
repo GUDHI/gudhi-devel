@@ -75,12 +75,13 @@ class Cover_complex {
 
  private:
    //Graph_induced_complex(std::map<int, double> fun){func = fun;}
-   bool verbose; // whether to display information.
+   bool verbose = false; // whether to display information.
    std::vector<Point> point_cloud;
    std::vector<std::vector<int> > one_skeleton;
    typedef int Cover_t; // elements of cover C are indexed by integers.
    std::vector<std::vector<Cover_t> > simplices;
    std::map<int, std::vector<Cover_t> > cover;
+   std::map<Cover_t, std::vector<int> > cover_back;
    int maximal_dim; // maximal dimension of output simplicial complex.
    int data_dimension; // dimension of input data.
    int n; // number of points.
@@ -162,7 +163,7 @@ class Cover_complex {
      * @param[in] t string (either "GIC" or "Nerve").
      *
      */
-    void set_type(std::string t){type = t;}
+    void set_type(const std::string & t){type = t;}
 
  public:
    /** \brief Specifies whether the program should display information or not.
@@ -197,7 +198,7 @@ class Cover_complex {
     * @param[in] off_file_name name of the input .OFF or .nOFF file.
     *
     */
-   bool read_point_cloud(std::string off_file_name){
+   bool read_point_cloud(const std::string & off_file_name){
 
      point_cloud_name = off_file_name; std::ifstream input(off_file_name); std::string line;
 
@@ -248,7 +249,7 @@ class Cover_complex {
     * each edge being represented by the IDs of its two nodes.
     *
     */
-   void set_graph_from_file(std::string graph_file_name){
+   void set_graph_from_file(const std::string & graph_file_name){
      int neighb; std::ifstream input(graph_file_name);
      std::string line; int edge[2]; int n = 0;
      while(std::getline(input,line)){
@@ -335,7 +336,7 @@ class Cover_complex {
     *
     * @param[in] distance distance between data points.
     * @param[in]  N number of subsampling iteration (the default reasonable value is 100, but there is no guarantee on how to choose it).
-    * @param[out] delta threshold used for computing the Rips complex.
+    * @result delta threshold used for computing the Rips complex.
     *
     */
    template<typename Distance> double set_graph_from_automatic_rips(Distance distance, int N = 100){
@@ -382,7 +383,7 @@ class Cover_complex {
     * @param[in] func_file_name name of the input function file.
     *
     */
-   void set_function_from_file(std::string func_file_name){
+   void set_function_from_file(const std::string & func_file_name){
      int vertex_id = 0; std::ifstream input(func_file_name); std::string line; double f;
      while(std::getline(input,line)){
        std::stringstream stream(line); stream >> f;
@@ -424,16 +425,17 @@ class Cover_complex {
    /** \brief Computes the optimal length of intervals
     * (i.e. the smallest interval length avoiding discretization artifacts---see \cite Carriere17c) for a functional cover.
     *
-    * @param[out] reso interval length used to compute the cover.
+    * @result reso interval length used to compute the cover.
     *
     */
    double set_automatic_resolution(){
 
      if(!functional_cover){std::cout << "Cover needs to come from the preimages of a function." << std::endl; return 0;}
+     if(type != "Nerve" && type != "GIC"){std::cout << "Type of complex needs to be specified." << std::endl; return 0;}
 
      double reso = 0;
 
-     if(type.compare("GIC") == 0){
+     if(type == "GIC"){
        for (auto simplex : st.complex_simplex_range()) {
          if(st.dimension(simplex) == 1){
            std::vector<int> vertices;
@@ -445,7 +447,7 @@ class Cover_complex {
        resolution_double = reso;
      }
 
-     if(type.compare("Nerve") == 0){
+     if(type == "Nerve"){
        for (auto simplex : st.complex_simplex_range()) {
          if(st.dimension(simplex) == 1){
            std::vector<int> vertices;
@@ -601,7 +603,7 @@ class Cover_complex {
              std::vector<int> cc; cc.clear();
              dfs(prop,it->first,cc,visit); int cci = cc.size(); if(verbose)  std::cout << "one CC with " << cci << " points, ";
              double average_col = 0;
-             for(int j = 0; j < cci; j++){cover[cc[j]].push_back(id); average_col += func_color[cc[j]]/cci;}
+             for(int j = 0; j < cci; j++){cover[cc[j]].push_back(id); cover_back[id].push_back(cc[j]); average_col += func_color[cc[j]]/cci;}
              cover_fct[id] = i; cover_color[id] = std::pair<int,double>(cci,average_col);
              id++;
            }
@@ -621,14 +623,14 @@ class Cover_complex {
    * @param[in] cover_file_name name of the input cover file.
    *
    */
-   void set_cover_from_file(std::string cover_file_name){
+   void set_cover_from_file(const std::string & cover_file_name){
      int vertex_id = 0; Cover_t cov; std::vector<Cover_t> cov_elts, cov_number;
      std::ifstream input(cover_file_name); std::string line;
      while(std::getline(input,line)){
        cov_elts.clear(); std::stringstream stream(line);
        while(stream >> cov){
          cov_elts.push_back(cov); cov_number.push_back(cov);
-         cover_fct[cov] = cov; cover_color[cov].second += func_color[vertex_id]; cover_color[cov].first++;
+         cover_fct[cov] = cov; cover_color[cov].second += func_color[vertex_id]; cover_color[cov].first++; cover_back[cov].push_back(vertex_id);
        }
        cover[vertex_id] = cov_elts; vertex_id++;
      }
@@ -680,15 +682,26 @@ class Cover_complex {
        for(int j = 0; j < n; j++)
          if(mindist[j] > dist[j]){
            mindist[j] = dist[j];
-           if(cover[j].size() == 0) cover[j].push_back(i);
+           if(cover[j].size() == 0)  cover[j].push_back(i);
            else cover[j][0] = i;
          }
      }
 
-     for(int i = 0; i < n; i++){ cover_color[cover[i][0]].second += func_color[i]; cover_color[cover[i][0]].first++; }
+     for(int i = 0; i < n; i++){ cover_back[cover[i][0]].push_back(i); cover_color[cover[i][0]].second += func_color[i]; cover_color[cover[i][0]].first++; }
      for(int i = 0; i < m; i++)  cover_color[i].second /= cover_color[i].first;
      maximal_dim = m-1; cover_name = "Voronoi";
 
+   }
+
+ public: // return subset of data corresponding to a node
+   /** \brief Returns the data subset corresponding to a specific node of the created complex.
+   *
+   * @param[in] c ID of the node.
+   * @result cover_back(c) vector of IDs of data points.
+   *
+   */
+   std::vector<int> subpopulation(Cover_t c){
+     return cover_back[c];
    }
 
  // *******************************************************************************************************************
@@ -701,7 +714,7 @@ class Cover_complex {
     * @param[in] color_file_name name of the input color file.
     *
     */
-   void set_color_from_file(std::string color_file_name){
+   void set_color_from_file(const std::string & color_file_name){
      int vertex_id = 0; std::ifstream input(color_file_name); std::string line; double f;
      while(std::getline(input,line)){
        std::stringstream stream(line); stream >> f;
@@ -797,7 +810,7 @@ class Cover_complex {
     */
    void plot_OFF(){
 
-     assert(!cover_name.compare("Voronoi"));
+     assert(cover_name == "Voronoi");
      char gic[11] = "SC.off";  std::ofstream graphic(gic);
      graphic << "OFF" << std::endl; int m = voronoi_subsamples.size(); int numedges = 0; int numfaces = 0;
      std::vector<std::vector<int> > edges, faces; int numsimplices = simplices.size();
@@ -846,14 +859,16 @@ class Cover_complex {
     */
    void find_simplices(){
 
-     if(type.compare("Nerve") == 0){
+     if(type != "Nerve" && type != "GIC"){std::cout << "Type of complex needs to be specified." << std::endl; return;}
+
+     if(type == "Nerve"){
        for(std::map<int,std::vector<Cover_t> >::iterator it = cover.begin(); it!=cover.end(); it++)  simplices.push_back(it->second);
        std::vector<std::vector<Cover_t> >::iterator it;
        std::sort(simplices.begin(),simplices.end()); it = std::unique(simplices.begin(),simplices.end());
        simplices.resize(std::distance(simplices.begin(),it));
      }
 
-     if(type.compare("GIC") == 0){
+     if(type == "GIC"){
 
        if(functional_cover){
 
@@ -927,19 +942,18 @@ class Cover_complex {
          simplices.clear();
          for (auto simplex : st.complex_simplex_range()) {
            if(!st.has_children(simplex)){
-             std::vector<std::vector<Cover_t> > cover_elts;
 
-             for (auto vertex : st.simplex_vertex_range(simplex))  cover_elts.push_back(cover[vertex]);
-             int num_nodes = cover_elts.size();
+             std::vector<Cover_t> simplx;
+             for (auto vertex : st.simplex_vertex_range(simplex)){
+               unsigned int sz = cover[vertex].size();
+               for(unsigned int i = 0; i < sz; i++){
+                 simplx.push_back(cover[vertex][i]);
+               }
+             }
 
-             // Find maximal clique of cover_elts
-             std::vector<Cover_t> simplex;
-             for(int i = 0; i < num_nodes; i++)
-               for(unsigned int j = 0; j < cover_elts[i].size(); j++)
-                 simplex.push_back(cover_elts[i][j]);
-             std::sort(simplex.begin(),simplex.end()); std::vector<Cover_t>::iterator it = std::unique(simplex.begin(),simplex.end());
-             simplex.resize(std::distance(simplex.begin(),it));
-             simplices.push_back(simplex);
+             std::sort(simplx.begin(),simplx.end()); std::vector<Cover_t>::iterator it = std::unique(simplx.begin(),simplx.end());
+             simplx.resize(std::distance(simplx.begin(),it));
+             simplices.push_back(simplx);
 
            }
          }
@@ -954,7 +968,7 @@ class Cover_complex {
 
 };
 
-} // namespace graph_induced_complex
+} // namespace cover_complex
 
 } // namespace Gudhi
 
