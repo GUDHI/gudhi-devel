@@ -1,4 +1,4 @@
-/*    This 	file is part of the Gudhi Library. The Gudhi library
+/*    This file is part of the Gudhi Library. The Gudhi library
  *    (Geometric Understanding in Higher Dimensions) is a generic C++
  *    library for computational topology.
  *
