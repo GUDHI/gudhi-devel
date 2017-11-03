@@ -42,17 +42,28 @@ int main() {
   }
 
   //-----------------------------------------------------------------------------
-  // Now the correlation matrix is really the distance matrix and can be processed further.
+  // Now the correlation matrix is a distance matrix and can be processed further. 
   //-----------------------------------------------------------------------------
   Distance_matrix distances = correlations;
 
+  //------------------------------------------------------------------------------
+  //Note that this treshold mean that the points in the distance 1, i.e. corelation
+  //0 will be connected. 
+  //------------------------------------------------------------------------------
   double threshold = 1.0;
+  
+  
   Rips_complex rips_complex_from_points(distances, threshold);
 
   Simplex_tree stree;
   rips_complex_from_points.create_complex(stree, 1);
   // ----------------------------------------------------------------------------
-  // Display information about the one skeleton Rips complex
+  // Display information about the one skeleton Rips complex. Note that
+  // the filtration displayed here comes from the distance matrix computed
+  // above, which is 1 - initial correlation matrix. Only this way, we obtain
+  // a complex with filtration. If a correlation matrix is used instead, we would
+  // have a reverse filtration (i.e. filtration of boundary of each simplex S
+  // is greater or equal to the filtration of S). 
   // ----------------------------------------------------------------------------
   std::cout << "Rips complex is of dimension " << stree.dimension() << " - " << stree.num_simplices() << " simplices - "
             << stree.num_vertices() << " vertices." << std::endl;
