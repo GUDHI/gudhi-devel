@@ -112,22 +112,23 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
   * Note that first parameter is a cube of dimension n,
   * and the second parameter is an adjusted cube in dimension n-1.
   * Given \f$A = [b_1,e_1] \times \ldots \ [b_{j-1},e_{j-1}] \times [b_{j},e_{j}] \times [b_{j+1},e_{j+1}] \times \ldots \times [b_{n},e_{n}] \f$
-  * and \f$B = [b_1,e_1] \times \ldots \ [b_{j-1},e_{j-1}] \times [a,a] \times [b_{j+1},e_{j+1}] \times \ldots \times [b_{n},e_{n}] c
+  * such that \f$ b_{j} \neq e_{j} \f$
+  * and \f$B = [b_1,e_1] \times \ldots \ [b_{j-1},e_{j-1}] \times [a,a] \times [b_{j+1},e_{j+1}] \times \ldots \times [b_{n},e_{n}]s \f$
   * where \f$ a = b_{j}\f$ or \f$ a = e_{j}\f$, the incidence between \f$A\f$ and \f$B\f$
   * computed by this procedure is given by formula:
-  * \f$ c\ (-1)^{\sum_{i=1}^{j-1}} dim [b_{i},e_{i}]  \f$
+  * \f$ c\ (-1)^{\sum_{i=1}^{j-1} dim [b_{i},e_{i}]}  \f$
   * Where \f$ dim [b_{i},e_{i}] = 0 \f$ if \f$ b_{i}=e_{i} \f$ and 1 in other case. 
   * c is -1 if \f$ a = b_{j}\f$ and 1 if \f$ a = e_{j}\f$. 
   * @exception std::logic_error In case when the cube \f$B\f$ is not n-1
   * dimensional face of a cube \f$A\f$.
-  **/ 
+  **/
   virtual int compute_incidence_between_cells( size_t coface , size_t face )
   {	  	  
-	  //first get the counters for coBoundary and boundary:
+	  //first get the counters for cofaxe and face:
 	  std::vector<unsigned> coface_counter = this->compute_counter_for_given_cell( coface );
 	  std::vector<unsigned> face_counter = this->compute_counter_for_given_cell( face );
 	  
-	  //cbd_counter and bd_counter should agree at all positions except from one:
+	  //coface_counter and face_counter should agree at all positions except from one:
 	  int number_of_position_in_which_counters_do_not_agree = -1;
 	  size_t number_of_full_faces_that_comes_before = 0;
 	  for ( size_t i = 0 ; i != coface_counter.size() ; ++i )
@@ -140,8 +141,8 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
 		  {
 			  if ( number_of_position_in_which_counters_do_not_agree != -1 )
 			  {
-				  std::cout <<  "Cells given to compute_incidence_between_cells procedure do not form a pair of coboundary-boundary.\n";
-				  throw std::logic_error("Cells given to compute_incidence_between_cells procedure do not form a pair of coboundary-boundary.");
+				  std::cout <<  "Cells given to compute_incidence_between_cells procedure do not form a pair of coface-face.\n";
+				  throw std::logic_error("Cells given to compute_incidence_between_cells procedure do not form a pair of coface-face.");
 			  }
 			  number_of_position_in_which_counters_do_not_agree = i;
 		  }
@@ -149,7 +150,7 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
 	  
 	  int incidence = 1;
 	  if ( number_of_full_faces_that_comes_before%2 )incidence = -1;	 	  
-	  //if the boundary cell is on the right from coboundary cell:
+	  //if the face cell is on the right from coface cell:
 	  if ( (coface_counter[number_of_position_in_which_counters_do_not_agree]+1 == 
 	       face_counter[number_of_position_in_which_counters_do_not_agree])
 	       ||
@@ -189,6 +190,10 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
   Bitmap_cubical_complex_periodic_boundary_conditions_base(const std::vector<unsigned>& sizes);
   Bitmap_cubical_complex_periodic_boundary_conditions_base(const std::vector<unsigned>& dimensions,
                                                            const std::vector<T>& topDimensionalCells);
+                                                           
+  /**
+   * A procedure used to construct the data structures in the class.
+  **/                                                    
   void construct_complex_based_on_top_dimensional_cells(const std::vector<unsigned>& dimensions,
                                                         const std::vector<T>& topDimensionalCells,
                                                         const std::vector<bool>& directions_in_which_periodic_b_cond_are_to_be_imposed);
