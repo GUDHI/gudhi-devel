@@ -141,7 +141,7 @@ class Bitmap_cubical_complex_base {
   virtual int compute_incidence_between_cells( size_t coface , size_t face )const
   {	  	  
 	  
-	  //first get the counters for coBoucofacendary and face:
+	  //first get the counters for coface and face:
 	  std::vector<unsigned> coface_counter = this->compute_counter_for_given_cell( coface );
 	  std::vector<unsigned> face_counter = this->compute_counter_for_given_cell( face );
 	  

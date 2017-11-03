@@ -124,7 +124,7 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
   **/
   virtual int compute_incidence_between_cells( size_t coface , size_t face )
   {	  	  
-	  //first get the counters for cofaxe and face:
+	  //first get the counters for coface and face:
 	  std::vector<unsigned> coface_counter = this->compute_counter_for_given_cell( coface );
 	  std::vector<unsigned> face_counter = this->compute_counter_for_given_cell( face );
 	  
