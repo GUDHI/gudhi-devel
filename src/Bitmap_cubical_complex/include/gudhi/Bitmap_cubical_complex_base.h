@@ -1,4 +1,4 @@
-/*    This file is part of the Gudhi Library. The Gudhi library
+/*    This 	file is part of the Gudhi Library. The Gudhi library
  *    (Geometric Understanding in Higher Dimensions) is a generic C++
  *    library for computational topology.
  *
@@ -158,7 +158,7 @@ class Bitmap_cubical_complex_base {
 			  if ( number_of_position_in_which_counters_do_not_agree != -1 )
 			  {
 				  std::cout <<  "Cells given to compute_incidence_between_cells procedure do not form a pair of coboundary-boundary.\n";				  
-				  throw logic_error("Cells given to compute_incidence_between_cells procedure do not form a pair of coboundary-boundary.");
+				  throw std::logic_error("Cells given to compute_incidence_between_cells procedure do not form a pair of coboundary-boundary.");
 			  }
 			  number_of_position_in_which_counters_do_not_agree = i;
 		  }
