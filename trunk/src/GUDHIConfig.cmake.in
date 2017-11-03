@@ -1,7 +1,0 @@
-# - Config file for the GUDHI package
-# It defines the following variables
-#  GUDHI_INCLUDE_DIRS - include directories for GUDHI
-
-# Compute paths
-set(GUDHI_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
-

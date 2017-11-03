@@ -28,6 +28,7 @@
 #include <cmath>
 #include <limits>  // for numeric_limits<>
 #include <vector>
+#include <stdexcept>
 
 namespace Gudhi {
 
@@ -89,7 +90,7 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
    * A version of a function that return boundary of a given cell for an object of
    * Bitmap_cubical_complex_periodic_boundary_conditions_base class.
    * The boundary elements are guaranteed to be returned so that the 
-   * incidence coeficcients are alternating.
+   * incidence coefficients are alternating.
    */
   virtual std::vector< size_t > get_boundary_of_a_cell(size_t cell) const;
 
@@ -105,12 +106,20 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
   
   
   /**
-   * This procedure compute incidence numbers between cells. For a cell A of
-   * dimension n and a cell B \subset A of dimension n-1, an incidence
-   * between A and B is the integer with which B appears in the boundary of A. 
-   * Note that first parameter is a cell of dimension n,
-   * and the second parameter is an adjusted cell in dimension
-   * n-1. 
+  * This procedure compute incidence numbers between cubes. For a cube \f$A\f$ of
+  * dimension n and a cube \f$B \subset A\f$ of dimension n-1, an incidence
+  * between \f$A\f$ and \f$B\f$ is the integer with which \f$B\f$ appears in the boundary of \f$A\f$.
+  * Note that first parameter is a cube of dimension n,
+  * and the second parameter is an adjusted cube in dimension n-1.
+  * Given \f$A = [b_1,e_1] \times \ldots \ [b_{j-1},e_{j-1}] \times [b_{j},e_{j}] \times [b_{j+1},e_{j+1}] \times \ldots \times [b_{n},e_{n}] \f$
+  * and \f$B = [b_1,e_1] \times \ldots \ [b_{j-1},e_{j-1}] \times [a,a] \times [b_{j+1},e_{j+1}] \times \ldots \times [b_{n},e_{n}] c
+  * where \f$ a = b_{j}\f$ or \f$ a = e_{j}\f$, the incidence between \f$A\f$ and \f$B\f$
+  * computed by this procedure is given by formula:
+  * \f$ c\ (-1)^{\sum_{i=1}^{j-1}} dim [b_{i},e_{i}]  \f$
+  * Where \f$ dim [b_{i},e_{i}] = 0 \f$ if \f$ b_{i}=e_{i} \f$ and 1 in other case. 
+  * c is -1 if \f$ a = b_{j}\f$ and 1 if \f$ a = e_{j}\f$. 
+  * @exception std::logic_error In case when the cube \f$B\f$ is not n-1
+  * dimensional face of a cube \f$A\f$.
   **/ 
   virtual int compute_incidence_between_cells( size_t coface , size_t face )
   {	  	  
@@ -132,7 +141,7 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
 			  if ( number_of_position_in_which_counters_do_not_agree != -1 )
 			  {
 				  std::cout <<  "Cells given to compute_incidence_between_cells procedure do not form a pair of coboundary-boundary.\n";
-				  throw "Cells given to compute_incidence_between_cells procedure do not form a pair of coboundary-boundary.";
+				  throw logic_error("Cells given to compute_incidence_between_cells procedure do not form a pair of coboundary-boundary.");
 			  }
 			  number_of_position_in_which_counters_do_not_agree = i;
 		  }
