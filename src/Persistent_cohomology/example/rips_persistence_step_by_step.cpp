@@ -88,9 +88,6 @@ int main(int argc, char * argv[]) {
   Simplex_tree st;
   // insert the proximity graph in the simplex tree
   st.insert_graph(prox_graph);
-  std::cout << "The complex contains " << st.num_simplices() << " simplices \n";
-  std::cout << "   and has dimension " << st.dimension() << " \n";
-/*
   // expand the graph until dimension dim_max
   st.expansion(dim_max);
 
@@ -115,7 +112,7 @@ int main(int argc, char * argv[]) {
     pcoh.output_diagram(out);
     out.close();
   }
-*/
+
   return 0;
 }
 
