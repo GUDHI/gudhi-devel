@@ -1268,7 +1268,7 @@ class Simplex_tree {
    * function is not launching `initialize_filtration()` but returns the filtration modification information. If the
    * complex has changed , please call `initialize_filtration()` to recompute it.
    * \post Note that the dimension of the simplicial complex may be lower after calling `prune_above_filtration()`
-   * than it was before. However, `upper_bond_dimension()` will return the old value, which remains a valid upper
+   * than it was before. However, `upper_bound_dimension()` will return the old value, which remains a valid upper
    * bound. If you care, you can call `dimension()` to recompute the exact dimension.
    */
   bool prune_above_filtration(Filtration_value filtration) {
@@ -1342,7 +1342,7 @@ class Simplex_tree {
    * \exception std::invalid_argument In debug mode, if sh has children.
    * \post Be aware that removing is shifting data in a flat_map (`initialize_filtration()` to be done).
    * \post Note that the dimension of the simplicial complex may be lower after calling `remove_maximal_simplex()`
-   * than it was before. However, `upper_bond_dimension()` will return the old value, which remains a valid upper
+   * than it was before. However, `upper_bound_dimension()` will return the old value, which remains a valid upper
    * bound. If you care, you can call `dimension()` to recompute the exact dimension.
    * \internal @return true if the leaf's branch has no other leaves (branch's children has been re-assigned), false otherwise.
    */
