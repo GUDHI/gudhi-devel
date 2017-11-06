@@ -26,16 +26,11 @@
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Points_3D_off_io.h>
 
-#include <CGAL/config.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Regular_triangulation_3.h>
+#include <CGAL/Periodic_3_regular_triangulation_traits_3.h>
+#include <CGAL/Periodic_3_regular_triangulation_3.h>
 #include <CGAL/Alpha_shape_3.h>
 #include <CGAL/iterator.h>
-
-// For CGAL < 4.11
-#if CGAL_VERSION_NR < 1041100000
-#include <CGAL/Regular_triangulation_euclidean_traits_3.h>
-#endif  // CGAL_VERSION_NR < 1041100000
 
 #include <fstream>
 #include <cmath>
@@ -49,36 +44,24 @@
 
 #include "alpha_complex_3d_helper.h"
 
-// Alpha_shape_3 templates type definitions
+// Traits
 using Kernel = CGAL::Exact_predicates_inexact_constructions_kernel;
+using PK = CGAL::Periodic_3_regular_triangulation_traits_3<Kernel>;
 
-// For CGAL < 4.11
-#if CGAL_VERSION_NR < 1041100000
-using Gt = CGAL::Regular_triangulation_euclidean_traits_3<Kernel>;
-using Vb = CGAL::Alpha_shape_vertex_base_3<Gt>;
-using Fb = CGAL::Alpha_shape_cell_base_3<Gt>;
-using Tds = CGAL::Triangulation_data_structure_3<Vb, Fb>;
-using Triangulation_3 = CGAL::Regular_triangulation_3<Gt, Tds>;
+// Vertex type
+using DsVb = CGAL::Periodic_3_triangulation_ds_vertex_base_3<>;
+using Vb = CGAL::Regular_triangulation_vertex_base_3<PK,DsVb>;
+using AsVb = CGAL::Alpha_shape_vertex_base_3<PK,Vb>;
+// Cell type
+using DsCb = CGAL::Periodic_3_triangulation_ds_cell_base_3<>;
+using Cb = CGAL::Regular_triangulation_cell_base_3<PK,DsCb>;
+using AsCb = CGAL::Alpha_shape_cell_base_3<PK,Cb>;
+using Tds = CGAL::Triangulation_data_structure_3<AsVb,AsCb>;
+using P3RT3 = CGAL::Periodic_3_regular_triangulation_3<PK,Tds>;
+using Alpha_shape_3 = CGAL::Alpha_shape_3<P3RT3>;
 
-// From file type definition
-using Point_3 = Gt::Bare_point;
-using Weighted_point_3 = Gt::Weighted_point;
-
-// For CGAL >= 4.11
-#else  // CGAL_VERSION_NR < 1041100000
-using Rvb = CGAL::Regular_triangulation_vertex_base_3<Kernel>;
-using Vb = CGAL::Alpha_shape_vertex_base_3<Kernel,Rvb>;
-using Rcb = CGAL::Regular_triangulation_cell_base_3<Kernel>;
-using Cb = CGAL::Alpha_shape_cell_base_3<Kernel,Rcb>;
-using Tds = CGAL::Triangulation_data_structure_3<Vb,Cb>;
-using Triangulation_3 = CGAL::Regular_triangulation_3<Kernel,Tds>;
-
-// From file type definition
-using Point_3 = Triangulation_3::Bare_point;
-using Weighted_point_3 = Triangulation_3::Weighted_point;
-#endif  // CGAL_VERSION_NR < 1041100000
-
-using Alpha_shape_3 = CGAL::Alpha_shape_3<Triangulation_3>;
+using Point_3 = P3RT3::Bare_point;
+using Weighted_point_3 = P3RT3::Weighted_point;
 
 // filtration with alpha values needed type definition
 using Alpha_value_type = Alpha_shape_3::FT;
@@ -104,20 +87,20 @@ using Persistent_cohomology =
     Gudhi::persistent_cohomology::Persistent_cohomology<ST, Gudhi::persistent_cohomology::Field_Zp>;
 
 void usage(const std::string& progName) {
-  std::cerr << "Usage: " << progName << " path_to_the_OFF_file path_to_weight_file coeff_field_characteristic[integer > "
-                                        "0] min_persistence[float >= -1.0]\n";
+  std::cerr << "Usage: " << progName << " path_to_the_OFF_file path_to_weight_file path_to_the_cuboid_file "
+                                        "coeff_field_characteristic[integer > 0] min_persistence[float >= -1.0]\n";
   exit(-1);
 }
 
 int main(int argc, char* const argv[]) {
   // program args management
-  if (argc != 5) {
+  if (argc != 6) {
     std::cerr << "Error: Number of arguments (" << argc << ") is not correct\n";
     usage(argv[0]);
   }
 
-  int coeff_field_characteristic = atoi(argv[3]);
-  Filtration_value min_persistence = strtof(argv[4], nullptr);
+  int coeff_field_characteristic = atoi(argv[4]);
+  Filtration_value min_persistence = strtof(argv[5], nullptr);
 
   // Read points from file
   std::string offInputFile(argv[1]);
@@ -153,11 +136,27 @@ int main(int argc, char* const argv[]) {
     usage(argv[0]);
   }
 
-  // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode.
-  Alpha_shape_3 as(wp.begin(), wp.end(), 0, Alpha_shape_3::GENERAL);
-#ifdef DEBUG_TRACES
-  std::cout << "Alpha shape computed in GENERAL mode" << std::endl;
-#endif  // DEBUG_TRACES
+  // Read iso_cuboid_3 information from file
+  std::ifstream iso_cuboid_str(argv[3]);
+  double x_min, y_min, z_min, x_max, y_max, z_max;
+  if (iso_cuboid_str.good()) {
+    iso_cuboid_str >> x_min >> y_min >> z_min >> x_max >> y_max >> z_max;
+  } else {
+    std::cerr << "Unable to read file " << argv[3] << std::endl;
+    usage(argv[0]);
+  }
+
+  // Define the periodic cube
+  P3RT3 prt(PK::Iso_cuboid_3(x_min, y_min, z_min, x_max, y_max, z_max));
+  // Heuristic for inserting large point sets (if pts is reasonably large)
+  prt.insert(wp.begin(), wp.end(), true);
+  // As prt won't be modified anymore switch to 1-sheeted cover if possible
+  if (prt.is_triangulation_in_1_sheet()) prt.convert_to_1_sheeted_covering();
+  std::cout << "Periodic Delaunay computed." << std::endl;
+
+  // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode. This is the default mode
+  // Maybe need to set it to GENERAL mode
+  Alpha_shape_3 as(prt, 0, Alpha_shape_3::GENERAL);
 
   // filtration with alpha values from alpha shape
   std::vector<Object> the_objects;
@@ -245,7 +244,6 @@ int main(int argc, char* const argv[]) {
     else
       std::cout << "This shall not happen" << std::endl;
   }
-  simplex_tree.set_dimension(dim_max);
 
 #ifdef DEBUG_TRACES
   std::cout << "vertices \t\t" << count_vertices << std::endl;
