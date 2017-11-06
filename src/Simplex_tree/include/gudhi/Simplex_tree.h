@@ -487,7 +487,8 @@ class Simplex_tree {
   }
 
   /** \brief Returns the dimension of the simplicial complex.
-      \details This function is not constant time because it can trigger `lower_upper_bound_dimension()` if required.
+      \details This function is not constant time because it can recompute dimension if required (can be triggered by
+      `remove_maximal_simplex()` or `prune_above_filtration()`).
   */
   int dimension() {
     if (dimension_to_be_lowered_)
