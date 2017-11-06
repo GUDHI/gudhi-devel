@@ -62,8 +62,6 @@ BOOST_AUTO_TEST_CASE( plain_homology_betti_numbers )
   st.insert_simplex_and_subfaces(edge04);
   st.insert_simplex(edge14);
   st.insert_simplex(vertex5);
-  // FIXME: Remove this line
-  st.set_dimension(3);
 
   // Sort the simplices in the order of the filtration
   st.initialize_filtration();
@@ -170,8 +168,6 @@ BOOST_AUTO_TEST_CASE( betti_numbers )
   st.insert_simplex_and_subfaces(edge04, 2.0);
   st.insert_simplex(edge14, 2.0);
   st.insert_simplex(vertex5, 1.0);
-  // FIXME: Remove this line
-  st.set_dimension(3);
 
   // Sort the simplices in the order of the filtration
   st.initialize_filtration();

@@ -34,9 +34,13 @@ def test_insertion():
 
     # insert test
     assert st.insert([0, 1]) == True
+
+    assert st.dimension() == 1
+
     assert st.insert([0, 1, 2], filtration=4.0) == True
-    # FIXME: Remove this line
-    st.set_dimension(2)
+
+    assert st.dimension() == 2
+
     assert st.num_simplices() == 7
     assert st.num_vertices() == 3
 
@@ -86,8 +90,9 @@ def test_insertion():
     assert st.find([2]) == True
 
     st.initialize_filtration()
-    assert st.persistence() == [(1, (4.0, float('inf'))), (0, (0.0, float('inf')))]
+    assert st.persistence(persistence_dim_max = True) == [(1, (4.0, float('inf'))), (0, (0.0, float('inf')))]
     assert st.__is_persistence_defined() == True
+
     assert st.betti_numbers() == [1, 1]
     assert st.persistent_betti_numbers(-0.1, 10000.0) == [0, 0]
     assert st.persistent_betti_numbers(0.0, 10000.0) == [1, 0]

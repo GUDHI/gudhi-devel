@@ -229,7 +229,6 @@ int main(int argc, char * const argv[]) {
     else
       std::cout << "This shall not happen" << std::endl;
   }
-  simplex_tree.set_dimension(dim_max);
 
 #ifdef DEBUG_TRACES
   std::cout << "vertices \t\t" << count_vertices << std::endl;
