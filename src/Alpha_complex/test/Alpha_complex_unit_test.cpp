@@ -159,7 +159,7 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_from_points) {
   BOOST_CHECK(simplex_tree.num_simplices() == 15);
 
   std::cout << "simplex_tree.dimension()=" << simplex_tree.dimension() << std::endl;
-  BOOST_CHECK(simplex_tree.dimension() == 4);
+  BOOST_CHECK(simplex_tree.dimension() == 3);
   std::cout << "simplex_tree.num_vertices()=" << simplex_tree.num_vertices() << std::endl;
   BOOST_CHECK(simplex_tree.num_vertices() == 4);
 
@@ -232,7 +232,7 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_from_points) {
   BOOST_CHECK(simplex_tree.num_simplices() == 10);
 
   std::cout << "simplex_tree.dimension()=" << simplex_tree.dimension() << std::endl;
-  BOOST_CHECK(simplex_tree.dimension() == 4);
+  BOOST_CHECK(simplex_tree.dimension() == 1);
   std::cout << "simplex_tree.num_vertices()=" << simplex_tree.num_vertices() << std::endl;
   BOOST_CHECK(simplex_tree.num_vertices() == 4);
 

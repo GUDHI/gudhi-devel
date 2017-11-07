@@ -52,8 +52,6 @@ int main() {
   auto edge03 = {0, 3};
   st.insert_simplex_and_subfaces(triangle012);
   st.insert_simplex_and_subfaces(edge03);
-  // FIXME: Remove this line
-  st.set_dimension(2);
 
   auto edge02 = {0, 2};
   ST::Simplex_handle e = st.find(edge02);
