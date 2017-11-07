@@ -1,15 +1,15 @@
 cmake_minimum_required(VERSION 2.6)
 project(Bottleneck_distance_tests)
 
-if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
   include(GUDHI_test_coverage)
 
   add_executable ( Bottleneck_distance_test_unit bottleneck_unit_test.cpp )
-  target_link_libraries(Bottleneck_distance_test_unit ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+  target_link_libraries(Bottleneck_distance_test_unit ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
   if (TBB_FOUND)
     target_link_libraries(Bottleneck_distance_test_unit ${TBB_LIBRARIES})
   endif(TBB_FOUND)
 
   gudhi_add_coverage_test(Bottleneck_distance_test_unit)
 
-endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)

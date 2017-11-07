@@ -4,7 +4,7 @@
 
 +----------------------------------------------------------------+------------------------------------------------------------------------+
 | .. figure::                                                    | Rips complex is a simplicial complex constructed from a one skeleton   |
-|      img/rips_complex_representation.png                       | graph.                                                                 |
+|      ../../doc/Rips_complex/rips_complex_representation.png    | graph.                                                                 |
 |      :figclass: align-center                                   |                                                                        |
 |                                                                | The filtration value of each edge is computed from a user-given        |
 |      Rips complex representation                               | distance function and is inserted until a user-given threshold         |

@@ -1,8 +1,10 @@
 GUDHI Python module documentation
 #################################
 
-.. image:: img/Gudhi_banner.png
-   :align: center
+.. figure::
+     ../../doc/common/Gudhi_banner.png
+     :alt: Gudhi banner
+     :figclass: align-center
 
 Introduction
 ************
@@ -81,6 +83,6 @@ Persistence graphical tools
 Bibliography
 ************
 
-.. bibliography:: bibliography.bib
+.. bibliography:: ../../biblio/bibliography.bib
    :filter: docnames
    :style: unsrt

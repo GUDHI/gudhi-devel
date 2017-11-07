@@ -81,8 +81,13 @@ using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomolog
     ST, Gudhi::persistent_cohomology::Field_Zp >;
 
 void usage(char * const progName) {
-  std::cerr << "Usage: " << progName <<
-      " path_to_file_graph path_to_weight_file coeff_field_characteristic[integer > 0] min_persistence[float >= -1.0]\n";
+  std::cerr << "Usage:\n" << progName << " path_to_OFF_file path_to_weight_file coeff_field_characteristic[integer " <<
+               "> 0] min_persistence[float >= -1.0]\n";
+  std::cerr << "  path_to_OFF_file is the path to your points cloud in OFF format.\n";
+  std::cerr << "  path_to_weight_file is the path to the weights of your points cloud (one value per line.)\n";
+  std::cerr << "  Weights values are explained on CGAL documentation:\n";
+  std::cerr << "    https://doc.cgal.org/latest/Alpha_shapes_3/index.html#title0\n";
+  std::cerr << "    https://doc.cgal.org/latest/Triangulation_3/index.html#Triangulation3secclassRegulartriangulation\n";
   exit(-1);
 }
 
@@ -115,6 +120,7 @@ int main(int argc, char * const argv[]) {
   if (weights_ifstr.good()) {
     double weight = 0.0;
     std::size_t index = 0;
+    wp.reserve(lp.size());
     // Attempt read the weight in a double format, return false if it fails
     while ((weights_ifstr >> weight) && (index < lp.size())) {
       wp.push_back(Weighted_point_3(lp[index], weight));
@@ -130,7 +136,7 @@ int main(int argc, char * const argv[]) {
   }
 
   // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode.
-  Alpha_shape_3 as(lp.begin(), lp.end(), 0, Alpha_shape_3::GENERAL);
+  Alpha_shape_3 as(wp.begin(), wp.end(), 0, Alpha_shape_3::GENERAL);
 #ifdef DEBUG_TRACES
   std::cout << "Alpha shape computed in GENERAL mode" << std::endl;
 #endif  // DEBUG_TRACES
@@ -222,8 +228,6 @@ int main(int argc, char * const argv[]) {
     else
       std::cout << "This shall not happen" << std::endl;
   }
-  simplex_tree.set_filtration(filtration_max);
-  simplex_tree.set_dimension(dim_max);
 
 #ifdef DEBUG_TRACES
   std::cout << "vertices \t\t" << count_vertices << std::endl;
@@ -236,7 +240,6 @@ int main(int argc, char * const argv[]) {
   std::cout << "  Number of vertices = " << simplex_tree.num_vertices() << " ";
   std::cout << "  Number of simplices = " << simplex_tree.num_simplices() << std::endl << std::endl;
   std::cout << "  Dimension = " << simplex_tree.dimension() << " ";
-  std::cout << "  filtration = " << simplex_tree.filtration() << std::endl << std::endl;
 #endif  // DEBUG_TRACES
 
 #ifdef DEBUG_TRACES

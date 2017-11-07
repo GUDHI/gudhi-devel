@@ -178,7 +178,7 @@
       <b>Author:</b> Fran&ccedil;ois Godi<br>
       <b>Introduced in:</b> GUDHI 2.0.0<br>
       <b>Copyright:</b> GPL v3<br>
-      <b>Requires:</b> \ref cgal &ge; 4.8.1 and \ref eigen3
+      <b>Requires:</b> \ref cgal &ge; 4.8.1
     </td>
     <td width="75%">
     Bottleneck distance measures the similarity between two persistence diagrams. 
@@ -347,13 +347,29 @@ make doxygen
  * Alpha_complex/Alpha_complex_from_off.cpp</a>
  * \li <a href="_alpha_complex_2_alpha_complex_from_points_8cpp-example.html">
  * Alpha_complex/Alpha_complex_from_points.cpp</a>
+ * \li <a href="_bottleneck_distance_2alpha_rips_persistence_bottleneck_distance_8cpp-example.html">
+ * Bottleneck_distance/alpha_rips_persistence_bottleneck_distance.cpp.cpp</a>
  * \li <a href="_persistent_cohomology_2alpha_complex_persistence_8cpp-example.html">
  * Persistent_cohomology/alpha_complex_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
  * Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2custom_persistence_sort_8cpp-example.html">
  * Persistent_cohomology/custom_persistence_sort.cpp</a>
- * 
+ * \li <a href="_spatial_searching_2example_spatial_searching_8cpp-example.html">
+ * Spatial_searching/example_spatial_searching.cpp</a>
+ * \li <a href="_subsampling_2example_choose_n_farthest_points_8cpp-example.html">
+ * Subsampling/example_choose_n_farthest_points.cpp</a>
+ * \li <a href="_subsampling_2example_custom_kernel_8cpp-example.html">
+ * Subsampling/example_custom_kernel.cpp</a>
+ * \li <a href="_subsampling_2example_pick_n_random_points_8cpp-example.html">
+ * Subsampling/example_pick_n_random_points.cpp</a>
+ * \li <a href="_subsampling_2example_sparsify_point_set_8cpp-example.html">
+ * Subsampling/example_sparsify_point_set.cpp</a>
+ * \li <a href="_tangential_complex_2example_basic_8cpp-example.html">
+ * Tangential_complex/example_basic.cpp</a>
+ * \li <a href="_tangential_complex_2example_with_perturb_8cpp-example.html">
+ * Tangential_complex/example_with_perturb.cpp</a>
+ *
  * \subsection tbb Threading Building Blocks
  * <a target="_blank" href="https://www.threadingbuildingblocks.org/">Intel&reg; TBB</a> lets you easily write parallel
  * C++ programs that take full advantage of multicore performance, that are portable and composable, and that have
@@ -382,6 +398,8 @@ make doxygen
  * Simplex_tree/example_alpha_shapes_3_simplex_tree_from_off_file.cpp</a>
  * \li <a href="_simplex_tree_2simplex_tree_from_cliques_of_graph_8cpp-example.html">
  * Simplex_tree/simplex_tree_from_cliques_of_graph.cpp</a>
+ * \li <a href="_simplex_tree_2graph_expansion_with_blocker_8cpp-example.html">
+ * Simplex_tree/graph_expansion_with_blocker.cpp</a>
  * \li <a href="_persistent_cohomology_2alpha_complex_3d_persistence_8cpp-example.html">
  * Persistent_cohomology/alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2alpha_complex_persistence_8cpp-example.html">
@@ -468,6 +486,7 @@ make doxygen
  * @example Simplex_tree/simple_simplex_tree.cpp
  * @example Simplex_tree/example_alpha_shapes_3_simplex_tree_from_off_file.cpp
  * @example Simplex_tree/simplex_tree_from_cliques_of_graph.cpp
+ * @example Simplex_tree/graph_expansion_with_blocker.cpp
  * @example Skeleton_blocker/Skeleton_blocker_from_simplices.cpp
  * @example Skeleton_blocker/Skeleton_blocker_iteration.cpp
  * @example Skeleton_blocker/Skeleton_blocker_link.cpp

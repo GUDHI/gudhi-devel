@@ -84,8 +84,16 @@ using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomolog
     ST, Gudhi::persistent_cohomology::Field_Zp >;
 
 void usage(char * const progName) {
-  std::cerr << "Usage: " << progName <<
-      " path_to_file_graph path_to_iso_cuboid_3_file coeff_field_characteristic[integer > 0] min_persistence[float >= -1.0]\n";
+  std::cerr << "Usage:\n" << progName << " path_to_OFF_file path_to_iso_cuboid_3_file coeff_field_characteristic[" <<
+               "integer > 0] min_persistence[float >= -1.0]\n" <<
+               "  path_to_OFF_file is the path to your points cloud in OFF format.\n" <<
+               "  path_to_iso_cuboid_3_file is the path to the iso cuboid file with the following format :\n" <<
+               "    x_min y_min z_min x_max y_max z_max\n" <<
+               "  In this example, the periodic cube will be " <<
+               "{ x = [x_min,x_max]; y = [y_min,y_max]; z = [z_min,z_max] }.\n" <<
+               "  For more information, please refer to\n" <<
+               "    https://doc.cgal.org/latest/Kernel_23/classCGAL_1_1Iso__cuboid__3.html\n";
+
   exit(-1);
 }
 
@@ -221,8 +229,6 @@ int main(int argc, char * const argv[]) {
     else
       std::cout << "This shall not happen" << std::endl;
   }
-  simplex_tree.set_filtration(filtration_max);
-  simplex_tree.set_dimension(dim_max);
 
 #ifdef DEBUG_TRACES
   std::cout << "vertices \t\t" << count_vertices << std::endl;
@@ -235,7 +241,6 @@ int main(int argc, char * const argv[]) {
   std::cout << "  Number of vertices = " << simplex_tree.num_vertices() << " ";
   std::cout << "  Number of simplices = " << simplex_tree.num_simplices() << std::endl << std::endl;
   std::cout << "  Dimension = " << simplex_tree.dimension() << " ";
-  std::cout << "  filtration = " << simplex_tree.filtration() << std::endl << std::endl;
 #endif  // DEBUG_TRACES
 
 #ifdef DEBUG_TRACES

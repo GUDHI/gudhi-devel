@@ -7,7 +7,27 @@ enable_testing()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
-# For "make doxygen"
+# Add your new module in the list, order is not important
+include(GUDHI_modules)
+
+add_gudhi_module(common)
+add_gudhi_module(Alpha_complex)
+add_gudhi_module(Bitmap_cubical_complex)
+add_gudhi_module(Bottleneck_distance)
+add_gudhi_module(Contraction)
+add_gudhi_module(Hasse_complex)
+add_gudhi_module(Persistent_cohomology)
+add_gudhi_module(Rips_complex)
+add_gudhi_module(Simplex_tree)
+add_gudhi_module(Skeleton_blocker)
+add_gudhi_module(Spatial_searching)
+add_gudhi_module(Subsampling)
+add_gudhi_module(Tangential_complex)
+add_gudhi_module(Witness_complex)
+
+message("++ GUDHI_MODULES list is:\"${GUDHI_MODULES}\"")
+
+# For "make doxygen" - Requires GUDHI_USER_VERSION_DIR to be set
 set(GUDHI_USER_VERSION_DIR ${CMAKE_SOURCE_DIR})
 include(GUDHI_doxygen_target)
 
@@ -39,28 +59,23 @@ endif()
 # Gudhi compilation part
 include_directories(include)
 
-add_subdirectory(example/common)
-add_subdirectory(example/Simplex_tree)
-add_subdirectory(example/Persistent_cohomology)
-add_subdirectory(example/Skeleton_blocker)
-add_subdirectory(example/Contraction)
-add_subdirectory(example/Bitmap_cubical_complex)
-add_subdirectory(example/Witness_complex)
-add_subdirectory(example/Alpha_complex)
-add_subdirectory(example/Rips_complex)
-add_subdirectory(example/Spatial_searching)
-add_subdirectory(example/Subsampling)
-add_subdirectory(example/Tangential_complex)
-add_subdirectory(example/Bottleneck_distance)
+# Include module CMake subdirectories
+# GUDHI_SUB_DIRECTORIES is managed in CMAKE_MODULE_PATH/GUDHI_modules.cmake
+foreach(GUDHI_MODULE ${GUDHI_MODULES})
+  foreach(GUDHI_SUB_DIRECTORY ${GUDHI_SUB_DIRECTORIES})
+    if(EXISTS ${CMAKE_SOURCE_DIR}/${GUDHI_SUB_DIRECTORY}/${GUDHI_MODULE}/CMakeLists.txt)
+      add_subdirectory(${CMAKE_SOURCE_DIR}/${GUDHI_SUB_DIRECTORY}/${GUDHI_MODULE}/)
+    endif()
+  endforeach()
+endforeach()
 add_subdirectory(example/Nerve_GIC)
-
-# data points generator
-add_subdirectory(data/points/generator)
 
 add_subdirectory(GudhUI)
 
-# specific for cython module
-add_subdirectory(${GUDHI_CYTHON_PATH})
+if (WITH_GUDHI_PYTHON)
+  # specific for cython module
+  add_subdirectory(${GUDHI_CYTHON_PATH})
+endif()
 #---------------------------------------------------------------------------------------
 
 #---------------------------------------------------------------------------------------

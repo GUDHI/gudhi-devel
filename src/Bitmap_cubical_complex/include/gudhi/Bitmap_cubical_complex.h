@@ -97,7 +97,7 @@ class Bitmap_cubical_complex : public T {
    * with filtration on top dimensional cells.
    **/
   Bitmap_cubical_complex(const std::vector<unsigned>& dimensions,
-                         const std::vector<typename T::filtration_type>& top_dimensional_cells) :
+                         const std::vector<Filtration_value>& top_dimensional_cells) :
       T(dimensions, top_dimensional_cells),
       key_associated_to_simplex(this->total_number_of_cells + 1) {
     for (size_t i = 0; i != this->total_number_of_cells; ++i) {
@@ -111,13 +111,13 @@ class Bitmap_cubical_complex : public T {
 
   /**
    * Constructor that requires vector of elements of type unsigned, which gives number of top dimensional cells
-   * in the following directions and vector of element of a type T::filtration_type
+   * in the following directions and vector of element of a type Filtration_value
    * with filtration on top dimensional cells. The last parameter of the constructor is a vector of boolean of a length
    * equal to the dimension of cubical complex.
    * If the position i on this vector is true, then we impose periodic boundary conditions in this direction.
    **/
   Bitmap_cubical_complex(const std::vector<unsigned>& dimensions,
-                         const std::vector<typename T::filtration_type>& top_dimensional_cells,
+                         const std::vector<Filtration_value>& top_dimensional_cells,
                          std::vector< bool > directions_in_which_periodic_b_cond_are_to_be_imposed) :
       T(dimensions, top_dimensional_cells, directions_in_which_periodic_b_cond_are_to_be_imposed),
       key_associated_to_simplex(this->total_number_of_cells + 1) {
@@ -170,20 +170,20 @@ class Bitmap_cubical_complex : public T {
     if (globalDbg) {
       std::cerr << "unsigned dimension(const Simplex_handle& sh)\n";
     }
-    if (sh != std::numeric_limits<Simplex_handle>::max()) return this->get_dimension_of_a_cell(sh);
+    if (sh != null_simplex()) return this->get_dimension_of_a_cell(sh);
     return -1;
   }
 
   /**
    * Return the filtration of a cell pointed by the Simplex_handle.
    **/
-  typename T::filtration_type filtration(Simplex_handle sh) {
+  Filtration_value filtration(Simplex_handle sh) {
     if (globalDbg) {
-      std::cerr << "T::filtration_type filtration(const Simplex_handle& sh)\n";
+      std::cerr << "Filtration_value filtration(const Simplex_handle& sh)\n";
     }
     // Returns the filtration value of a simplex.
-    if (sh != std::numeric_limits<Simplex_handle>::max()) return this->data[sh];
-    return std::numeric_limits<Simplex_handle>::max();
+    if (sh != null_simplex()) return this->data[sh];
+    return std::numeric_limits<Filtration_value>::infinity();
   }
 
   /**
@@ -203,7 +203,7 @@ class Bitmap_cubical_complex : public T {
     if (globalDbg) {
       std::cerr << "Simplex_key key(const Simplex_handle& sh)\n";
     }
-    if (sh != std::numeric_limits<Simplex_handle>::max()) {
+    if (sh != null_simplex()) {
       return this->key_associated_to_simplex[sh];
     }
     return this->null_key();
@@ -216,7 +216,7 @@ class Bitmap_cubical_complex : public T {
     if (globalDbg) {
       std::cerr << "Simplex_handle simplex(Simplex_key key)\n";
     }
-    if (key != std::numeric_limits<Simplex_handle>::max()) {
+    if (key != null_key()) {
       return this->simplex_associated_to_key[ key ];
     }
     return null_simplex();
@@ -229,7 +229,7 @@ class Bitmap_cubical_complex : public T {
     if (globalDbg) {
       std::cerr << "void assign_key(Simplex_handle& sh, Simplex_key key)\n";
     }
-    if (key == std::numeric_limits<Simplex_handle>::max()) return;
+    if (key == null_key()) return;
     this->key_associated_to_simplex[sh] = key;
     this->simplex_associated_to_key[key] = sh;
   }
@@ -566,8 +566,9 @@ class is_before_in_filtration {
   bool operator()(const typename Bitmap_cubical_complex<T>::Simplex_handle& sh1,
                   const typename Bitmap_cubical_complex<T>::Simplex_handle& sh2) const {
     // Not using st_->filtration(sh1) because it uselessly tests for null_simplex.
-    typename T::filtration_type fil1 = CC_->data[sh1];
-    typename T::filtration_type fil2 = CC_->data[sh2];
+    typedef typename T::filtration_type Filtration_value;
+    Filtration_value fil1 = CC_->data[sh1];
+    Filtration_value fil2 = CC_->data[sh2];
     if (fil1 != fil2) {
       return fil1 < fil2;
     }

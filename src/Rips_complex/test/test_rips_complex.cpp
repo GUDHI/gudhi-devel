@@ -244,7 +244,7 @@ BOOST_AUTO_TEST_CASE(Rips_doc_csv_file) {
   std::cout << "========== CSV FILE NAME = " << csv_file_name << " - Rips threshold=" <<
       rips_threshold << "==========" << std::endl;
 
-  Distance_matrix distances = read_lower_triangular_matrix_from_csv_file<Filtration_value>(csv_file_name);
+  Distance_matrix distances = Gudhi::read_lower_triangular_matrix_from_csv_file<Filtration_value>(csv_file_name);
   Rips_complex rips_complex_from_file(distances, rips_threshold);
 
   const int DIMENSION_1 = 1;

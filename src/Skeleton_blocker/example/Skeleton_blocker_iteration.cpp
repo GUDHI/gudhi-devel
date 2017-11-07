@@ -21,8 +21,7 @@
  */
 
 #include <gudhi/Skeleton_blocker.h>
-
-#include <boost/timer/timer.hpp>
+#include <gudhi/Clock.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -47,8 +46,7 @@ Complex build_complete_complex(int n) {
 }
 
 int main(int argc, char *argv[]) {
-  boost::timer::auto_cpu_timer t;
-
+  Gudhi::Clock skbl_chrono("Time to build the complete complex, enumerate simplices and Euler Characteristic");
   const int n = 15;
 
   // build a full complex with n vertices and 2^n-1 simplices
@@ -82,5 +80,6 @@ int main(int argc, char *argv[]) {
   std::cout << "Saw " << num_vertices << " vertices, " << num_edges << " edges and " << num_simplices << " simplices"
       << std::endl;
   std::cout << "The Euler Characteristic is " << euler << std::endl;
+  std::cout << skbl_chrono;
   return EXIT_SUCCESS;
 }

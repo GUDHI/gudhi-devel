@@ -31,12 +31,11 @@ std::string test_rips_persistence(int coefficient, int min_persistence) {
 
   // Display the Simplex_tree
   std::cout << "The complex contains " << st.num_simplices() << " simplices" << " - dimension= " << st.dimension()
-      << " - filtration= " << st.filtration() << std::endl;
+      << std::endl;
 
   // Check
   BOOST_CHECK(st.num_simplices() == 98);
   BOOST_CHECK(st.dimension() == 3);
-  BOOST_CHECK(st.filtration() == 1.89);
 
   // Sort the simplices in the order of the filtration
   st.initialize_filtration();
@@ -197,8 +196,6 @@ BOOST_AUTO_TEST_CASE( persistence_constructor_exception )
   // To make number of simplices = 255
   const short simplex_0[] = {0, 1, 2, 3, 4, 5, 6, 7};
   st.insert_simplex_and_subfaces(simplex_0);
-  // FIXME: Remove this line
-  st.set_dimension(8);
 
   // Sort the simplices in the order of the filtration
   st.initialize_filtration();
