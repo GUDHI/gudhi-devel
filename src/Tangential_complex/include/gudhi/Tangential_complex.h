@@ -155,7 +155,7 @@ class Tangential_complex {
   >::type Triangulation;
   typedef typename Triangulation::Geom_traits Tr_traits;
   typedef typename Triangulation::Weighted_point Tr_point;
-  typedef typename Triangulation::Bare_point Tr_bare_point;
+  typedef typename Tr_traits::Base::Point_d Tr_bare_point;
   typedef typename Triangulation::Vertex_handle Tr_vertex_handle;
   typedef typename Triangulation::Full_cell_handle Tr_full_cell_handle;
   typedef typename Tr_traits::Vector_d Tr_vector;

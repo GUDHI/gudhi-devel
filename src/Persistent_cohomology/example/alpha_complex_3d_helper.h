@@ -23,7 +23,7 @@
 #ifndef ALPHA_COMPLEX_3D_HELPER_H_
 #define ALPHA_COMPLEX_3D_HELPER_H_
 
-template<class Vertex_list, class Cell_handle>
+template <class Vertex_list, class Cell_handle>
 Vertex_list from_cell(const Cell_handle& ch) {
   Vertex_list the_list;
   for (auto i = 0; i < 4; i++) {
@@ -35,7 +35,7 @@ Vertex_list from_cell(const Cell_handle& ch) {
   return the_list;
 }
 
-template<class Vertex_list, class Facet>
+template <class Vertex_list, class Facet>
 Vertex_list from_facet(const Facet& fct) {
   Vertex_list the_list;
   for (auto i = 0; i < 4; i++) {
@@ -49,7 +49,7 @@ Vertex_list from_facet(const Facet& fct) {
   return the_list;
 }
 
-template<class Vertex_list, class Edge_3>
+template <class Vertex_list, class Edge_3>
 Vertex_list from_edge(const Edge_3& edg) {
   Vertex_list the_list;
   for (auto i = 0; i < 4; i++) {
@@ -63,7 +63,7 @@ Vertex_list from_edge(const Edge_3& edg) {
   return the_list;
 }
 
-template<class Vertex_list, class Vertex_handle>
+template <class Vertex_list, class Vertex_handle>
 Vertex_list from_vertex(const Vertex_handle& vh) {
   Vertex_list the_list;
 #ifdef DEBUG_TRACES
