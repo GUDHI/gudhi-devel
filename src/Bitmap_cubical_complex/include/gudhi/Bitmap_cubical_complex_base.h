@@ -32,7 +32,7 @@
 #include <algorithm>
 #include <iterator>
 #include <limits>
-#include <utility> 
+#include <utility>
 #include <stdexcept>
 
 namespace Gudhi {
@@ -66,8 +66,7 @@ class Bitmap_cubical_complex_base {
   /**
    *Default constructor
    **/
-  Bitmap_cubical_complex_base() :
-      total_number_of_cells(0) { }
+  Bitmap_cubical_complex_base() : total_number_of_cells(0) {}
   /**
    * There are a few constructors of a Bitmap_cubical_complex_base class.
    * First one, that takes vector<unsigned>, creates an empty bitmap of a dimension equal
@@ -91,7 +90,7 @@ class Bitmap_cubical_complex_base {
   /**
    * Destructor of the Bitmap_cubical_complex_base class.
    **/
-  virtual ~Bitmap_cubical_complex_base() { }
+  virtual ~Bitmap_cubical_complex_base() {}
 
   /**
    * The functions get_boundary_of_a_cell, get_coboundary_of_a_cell, get_dimension_of_a_cell
@@ -101,10 +100,10 @@ class Bitmap_cubical_complex_base {
    * non-negative integer, indicating a position of a cube in the data structure.
    * In the case of functions that compute (co)boundary, the output is a vector if non-negative integers pointing to
    * the positions of (co)boundary element of the input cell.
-   * The boundary elements are guaranteed to be returned so that the 
+   * The boundary elements are guaranteed to be returned so that the
    * incidence coefficients of boundary elements are alternating.
    */
-  virtual inline std::vector< size_t > get_boundary_of_a_cell(size_t cell)const;
+  virtual inline std::vector<size_t> get_boundary_of_a_cell(size_t cell) const;
   /**
    * The functions get_coboundary_of_a_cell, get_coboundary_of_a_cell,
    * get_dimension_of_a_cell and get_cell_data are the basic
@@ -115,79 +114,74 @@ class Bitmap_cubical_complex_base {
    * In the case of functions that compute (co)boundary, the output is a vector if
    * non-negative integers pointing to the
    * positions of (co)boundary element of the input cell.
-   * Note that unlike in the case of boundary, over here the elements are 
+   * Note that unlike in the case of boundary, over here the elements are
    * not guaranteed to be returned with alternating incidence numbers.
-   * 
+   *
    **/
-  virtual inline std::vector< size_t > get_coboundary_of_a_cell(size_t cell)const;
-   
+  virtual inline std::vector<size_t> get_coboundary_of_a_cell(size_t cell) const;
+
   /**
   * This procedure compute incidence numbers between cubes. For a cube \f$A\f$ of
   * dimension n and a cube \f$B \subset A\f$ of dimension n-1, an incidence
   * between \f$A\f$ and \f$B\f$ is the integer with which \f$B\f$ appears in the boundary of \f$A\f$.
   * Note that first parameter is a cube of dimension n,
   * and the second parameter is an adjusted cube in dimension n-1.
-  * Given \f$A = [b_1,e_1] \times \ldots \ [b_{j-1},e_{j-1}] \times [b_{j},e_{j}] \times [b_{j+1},e_{j+1}] \times \ldots \times [b_{n},e_{n}] \f$
+  * Given \f$A = [b_1,e_1] \times \ldots \ [b_{j-1},e_{j-1}] \times [b_{j},e_{j}] \times [b_{j+1},e_{j+1}] \times \ldots
+  *\times [b_{n},e_{n}] \f$
   * such that \f$ b_{j} \neq e_{j} \f$
-  * and \f$B = [b_1,e_1] \times \ldots \ [b_{j-1},e_{j-1}] \times [a,a] \times [b_{j+1},e_{j+1}] \times \ldots \times [b_{n},e_{n}] \f$
+  * and \f$B = [b_1,e_1] \times \ldots \ [b_{j-1},e_{j-1}] \times [a,a] \times [b_{j+1},e_{j+1}] \times \ldots \times
+  *[b_{n},e_{n}] \f$
   * where \f$ a = b_{j}\f$ or \f$ a = e_{j}\f$, the incidence between \f$A\f$ and \f$B\f$
   * computed by this procedure is given by formula:
   * \f$ c\ (-1)^{\sum_{i=1}^{j-1} dim [b_{i},e_{i}]}  \f$
-  * Where \f$ dim [b_{i},e_{i}] = 0 \f$ if \f$ b_{i}=e_{i} \f$ and 1 in other case. 
-  * c is -1 if \f$ a = b_{j}\f$ and 1 if \f$ a = e_{j}\f$. 
+  * Where \f$ dim [b_{i},e_{i}] = 0 \f$ if \f$ b_{i}=e_{i} \f$ and 1 in other case.
+  * c is -1 if \f$ a = b_{j}\f$ and 1 if \f$ a = e_{j}\f$.
   * @exception std::logic_error In case when the cube \f$B\f$ is not n-1
   * dimensional face of a cube \f$A\f$.
-  **/ 
-  virtual int compute_incidence_between_cells( size_t coface , size_t face )const
-  {	  	  
-	  
-	  //first get the counters for coface and face:
-	  std::vector<unsigned> coface_counter = this->compute_counter_for_given_cell( coface );
-	  std::vector<unsigned> face_counter = this->compute_counter_for_given_cell( face );
-	  
-	  //coface_counter and face_counter should agree at all positions except from one:
-	  int number_of_position_in_which_counters_do_not_agree = -1;
-	  size_t number_of_full_faces_that_comes_before = 0;
-	  for ( size_t i = 0 ; i != coface_counter.size() ; ++i )
-	  {
-		  if ( (coface_counter[i]%2 == 1)&&(number_of_position_in_which_counters_do_not_agree==-1) )
-		  {
-			  ++number_of_full_faces_that_comes_before;
-		  }
-		  if ( coface_counter[i] != face_counter[i] )
-		  {
-			  if ( number_of_position_in_which_counters_do_not_agree != -1 )
-			  {
-				  std::cout <<  "Cells given to compute_incidence_between_cells procedure do not form a pair of coface-face.\n";				  
-				  throw std::logic_error("Cells given to compute_incidence_between_cells procedure do not form a pair of coface-face.");
-			  }
-			  number_of_position_in_which_counters_do_not_agree = i;
-		  }
-	  }	  	 
-	  
-	  int incidence = 1;
-	  if ( number_of_full_faces_that_comes_before%2 )incidence = -1;	 	  
-	  //if the face cell is on the right from coface cell:
-	  if ( coface_counter[number_of_position_in_which_counters_do_not_agree]+1 == 
-	       face_counter[number_of_position_in_which_counters_do_not_agree]
-	     )
-	     {
-			 incidence *= -1;
-		 }		
-	 	 	  
-	  return incidence;
+  **/
+  virtual int compute_incidence_between_cells(size_t coface, size_t face) const {
+    // first get the counters for coface and face:
+    std::vector<unsigned> coface_counter = this->compute_counter_for_given_cell(coface);
+    std::vector<unsigned> face_counter = this->compute_counter_for_given_cell(face);
+
+    // coface_counter and face_counter should agree at all positions except from one:
+    int number_of_position_in_which_counters_do_not_agree = -1;
+    size_t number_of_full_faces_that_comes_before = 0;
+    for (size_t i = 0; i != coface_counter.size(); ++i) {
+      if ((coface_counter[i] % 2 == 1) && (number_of_position_in_which_counters_do_not_agree == -1)) {
+        ++number_of_full_faces_that_comes_before;
+      }
+      if (coface_counter[i] != face_counter[i]) {
+        if (number_of_position_in_which_counters_do_not_agree != -1) {
+          std::cout << "Cells given to compute_incidence_between_cells procedure do not form a pair of coface-face.\n";
+          throw std::logic_error(
+              "Cells given to compute_incidence_between_cells procedure do not form a pair of coface-face.");
+        }
+        number_of_position_in_which_counters_do_not_agree = i;
+      }
+    }
+
+    int incidence = 1;
+    if (number_of_full_faces_that_comes_before % 2) incidence = -1;
+    // if the face cell is on the right from coface cell:
+    if (coface_counter[number_of_position_in_which_counters_do_not_agree] + 1 ==
+        face_counter[number_of_position_in_which_counters_do_not_agree]) {
+      incidence *= -1;
+    }
+
+    return incidence;
   }
-   
-     /**
-   * In the case of get_dimension_of_a_cell function, the output is a non-negative integer
-   * indicating the dimension of a cell.
-   * Note that unlike in the case of boundary, over here the elements are 
-   * not guaranteed to be returned with alternating incidence numbers.
-   * To compute incidence between cells use compute_incidence_between_cells
-   * procedure
-   **/
-  inline unsigned get_dimension_of_a_cell(size_t cell)const;
-  
+
+  /**
+* In the case of get_dimension_of_a_cell function, the output is a non-negative integer
+* indicating the dimension of a cell.
+* Note that unlike in the case of boundary, over here the elements are
+* not guaranteed to be returned with alternating incidence numbers.
+* To compute incidence between cells use compute_incidence_between_cells
+* procedure
+**/
+  inline unsigned get_dimension_of_a_cell(size_t cell) const;
+
   /**
    * In the case of get_cell_data, the output parameter is a reference to the value of a cube in a given position.
    * This allows reading and changing the value of filtration. Note that if the value of a filtration is changed, the
@@ -195,7 +189,6 @@ class Bitmap_cubical_complex_base {
    * not smaller than the value of a filtration of its boundary and not greater than the value of its coboundary.
    **/
   inline T& get_cell_data(size_t cell);
-
 
   /**
    * Typical input used to construct a baseBitmap class is a filtration given at the top dimensional cells.
@@ -210,23 +203,19 @@ class Bitmap_cubical_complex_base {
   /**
    * Returns dimension of a complex.
    **/
-  inline unsigned dimension()const {
-    return sizes.size();
-  }
+  inline unsigned dimension() const { return sizes.size(); }
 
   /**
    * Returns number of all cubes in the data structure.
    **/
-  inline unsigned size()const {
-    return this->data.size();
-  }
+  inline unsigned size() const { return this->data.size(); }
 
   /**
    * Writing to stream operator. By using it we get the values T of cells in order in which they are stored in the
    * structure. This procedure is used for debugging purposes.
    **/
   template <typename K>
-  friend std::ostream& operator<<(std::ostream & os, const Bitmap_cubical_complex_base<K>& b);
+  friend std::ostream& operator<<(std::ostream& os, const Bitmap_cubical_complex_base<K>& b);
 
   /**
    * Function that put the input data to bins. By putting data to bins we mean rounding them to a sequence of values
@@ -253,7 +242,7 @@ class Bitmap_cubical_complex_base {
   /**
    * Functions to find min and max values of filtration.
    **/
-  std::pair< T, T > min_max_filtration();
+  std::pair<T, T> min_max_filtration();
 
   // ITERATORS
 
@@ -261,11 +250,9 @@ class Bitmap_cubical_complex_base {
    * @brief Iterator through all cells in the complex (in order they appear in the structure -- i.e.
    * in lexicographical order).
    **/
-  class All_cells_iterator : std::iterator< std::input_iterator_tag, T > {
+  class All_cells_iterator : std::iterator<std::input_iterator_tag, T> {
    public:
-    All_cells_iterator() {
-      this->counter = 0;
-    }
+    All_cells_iterator() { this->counter = 0; }
 
     All_cells_iterator operator++() {
       // first find first element of the counter that can be increased:
@@ -284,14 +271,12 @@ class Bitmap_cubical_complex_base {
       return *this;
     }
 
-    bool operator==(const All_cells_iterator& rhs)const {
-      if (this->counter != rhs.counter)return false;
+    bool operator==(const All_cells_iterator& rhs) const {
+      if (this->counter != rhs.counter) return false;
       return true;
     }
 
-    bool operator!=(const All_cells_iterator& rhs)const {
-      return !(*this == rhs);
-    }
+    bool operator!=(const All_cells_iterator& rhs) const { return !(*this == rhs); }
 
     /*
      * The operator * returns position of a cube in the structure of cubical complex. This position can be then used as
@@ -300,10 +285,9 @@ class Bitmap_cubical_complex_base {
      * boundary and coboundary and dimension
      * and in function get_cell_data to get a filtration of a cell.
      */
-    size_t operator*() {
-      return this->counter;
-    }
+    size_t operator*() { return this->counter; }
     friend class Bitmap_cubical_complex_base;
+
    protected:
     size_t counter;
   };
@@ -330,57 +314,47 @@ class Bitmap_cubical_complex_base {
    **/
   class All_cells_range {
    public:
-    All_cells_range(Bitmap_cubical_complex_base* b) : b(b) { }
+    All_cells_range(Bitmap_cubical_complex_base* b) : b(b) {}
 
-    All_cells_iterator begin() {
-      return b->all_cells_iterator_begin();
-    }
+    All_cells_iterator begin() { return b->all_cells_iterator_begin(); }
 
-    All_cells_iterator end() {
-      return b->all_cells_iterator_end();
-    }
+    All_cells_iterator end() { return b->all_cells_iterator_end(); }
+
    private:
     Bitmap_cubical_complex_base<T>* b;
   };
 
-  All_cells_range all_cells_range() {
-    return All_cells_range(this);
-  }
-
+  All_cells_range all_cells_range() { return All_cells_range(this); }
 
   /**
    * Boundary_range class provides ranges for boundary iterators.
    **/
-  typedef typename std::vector< size_t >::const_iterator Boundary_iterator;
-  typedef typename std::vector< size_t > Boundary_range;
+  typedef typename std::vector<size_t>::const_iterator Boundary_iterator;
+  typedef typename std::vector<size_t> Boundary_range;
 
   /**
    * boundary_simplex_range creates an object of a Boundary_simplex_range class
    * that provides ranges for the Boundary_simplex_iterator.
    **/
-  Boundary_range boundary_range(size_t sh) {	  	  
-    return this->get_boundary_of_a_cell(sh);
-  }
+  Boundary_range boundary_range(size_t sh) { return this->get_boundary_of_a_cell(sh); }
 
   /**
    * Coboundary_range class provides ranges for boundary iterators.
    **/
-  typedef typename std::vector< size_t >::const_iterator Coboundary_iterator;
-  typedef typename std::vector< size_t > Coboundary_range;
+  typedef typename std::vector<size_t>::const_iterator Coboundary_iterator;
+  typedef typename std::vector<size_t> Coboundary_range;
 
   /**
    * boundary_simplex_range creates an object of a Boundary_simplex_range class
    * that provides ranges for the Boundary_simplex_iterator.
    **/
-  Coboundary_range coboundary_range(size_t sh) {
-    return this->get_coboundary_of_a_cell(sh);
-  }
+  Coboundary_range coboundary_range(size_t sh) { return this->get_coboundary_of_a_cell(sh); }
 
   /**
    * @brief Iterator through top dimensional cells of the complex. The cells appear in order they are stored
    * in the structure (i.e. in lexicographical order)
    **/
-  class Top_dimensional_cells_iterator : std::iterator< std::input_iterator_tag, T > {
+  class Top_dimensional_cells_iterator : std::iterator<std::input_iterator_tag, T> {
    public:
     Top_dimensional_cells_iterator(Bitmap_cubical_complex_base& b) : b(b) {
       this->counter = std::vector<size_t>(b.dimension());
@@ -390,7 +364,7 @@ class Bitmap_cubical_complex_base {
     Top_dimensional_cells_iterator operator++() {
       // first find first element of the counter that can be increased:
       size_t dim = 0;
-      while ((dim != this->b.dimension()) && (this->counter[dim] == this->b.sizes[dim] - 1))++dim;
+      while ((dim != this->b.dimension()) && (this->counter[dim] == this->b.sizes[dim] - 1)) ++dim;
 
       if (dim != this->b.dimension()) {
         ++this->counter[dim];
@@ -415,18 +389,16 @@ class Bitmap_cubical_complex_base {
       return *this;
     }
 
-    bool operator==(const Top_dimensional_cells_iterator& rhs)const {
-      if (&this->b != &rhs.b)return false;
-      if (this->counter.size() != rhs.counter.size())return false;
+    bool operator==(const Top_dimensional_cells_iterator& rhs) const {
+      if (&this->b != &rhs.b) return false;
+      if (this->counter.size() != rhs.counter.size()) return false;
       for (size_t i = 0; i != this->counter.size(); ++i) {
-        if (this->counter[i] != rhs.counter[i])return false;
+        if (this->counter[i] != rhs.counter[i]) return false;
       }
       return true;
     }
 
-    bool operator!=(const Top_dimensional_cells_iterator& rhs)const {
-      return !(*this == rhs);
-    }
+    bool operator!=(const Top_dimensional_cells_iterator& rhs) const { return !(*this == rhs); }
 
     /*
      * The operator * returns position of a cube in the structure of cubical complex. This position can be then used as
@@ -435,11 +407,9 @@ class Bitmap_cubical_complex_base {
      * boundary and coboundary and dimension
      * and in function get_cell_data to get a filtration of a cell.
      */
-    size_t operator*() {
-      return this->compute_index_in_bitmap();
-    }
+    size_t operator*() { return this->compute_index_in_bitmap(); }
 
-    size_t compute_index_in_bitmap()const {
+    size_t compute_index_in_bitmap() const {
       size_t index = 0;
       for (size_t i = 0; i != this->counter.size(); ++i) {
         index += (2 * this->counter[i] + 1) * this->b.multipliers[i];
@@ -447,14 +417,15 @@ class Bitmap_cubical_complex_base {
       return index;
     }
 
-    void print_counter()const {
+    void print_counter() const {
       for (size_t i = 0; i != this->counter.size(); ++i) {
         std::cout << this->counter[i] << " ";
       }
     }
     friend class Bitmap_cubical_complex_base;
+
    protected:
-    std::vector< size_t > counter;
+    std::vector<size_t> counter;
     Bitmap_cubical_complex_base& b;
   };
 
@@ -483,32 +454,24 @@ class Bitmap_cubical_complex_base {
    **/
   class Top_dimensional_cells_range {
    public:
-    Top_dimensional_cells_range(Bitmap_cubical_complex_base* b) : b(b) { }
+    Top_dimensional_cells_range(Bitmap_cubical_complex_base* b) : b(b) {}
 
-    Top_dimensional_cells_iterator begin() {
-      return b->top_dimensional_cells_iterator_begin();
-    }
+    Top_dimensional_cells_iterator begin() { return b->top_dimensional_cells_iterator_begin(); }
 
-    Top_dimensional_cells_iterator end() {
-      return b->top_dimensional_cells_iterator_end();
-    }
+    Top_dimensional_cells_iterator end() { return b->top_dimensional_cells_iterator_end(); }
+
    private:
     Bitmap_cubical_complex_base<T>* b;
   };
 
-  Top_dimensional_cells_range top_dimensional_cells_range() {
-    return Top_dimensional_cells_range(this);
-  }
-
+  Top_dimensional_cells_range top_dimensional_cells_range() { return Top_dimensional_cells_range(this); }
 
   //****************************************************************************************************************//
   //****************************************************************************************************************//
   //****************************************************************************************************************//
   //****************************************************************************************************************//
 
-  inline size_t number_cells()const {
-    return this->total_number_of_cells;
-  }
+  inline size_t number_cells() const { return this->total_number_of_cells; }
 
   //****************************************************************************************************************//
   //****************************************************************************************************************//
@@ -532,7 +495,7 @@ class Bitmap_cubical_complex_base {
     this->total_number_of_cells = multiplier;
   }
 
-  size_t compute_position_in_bitmap(const std::vector< unsigned >& counter) {
+  size_t compute_position_in_bitmap(const std::vector<unsigned>& counter) {
     size_t position = 0;
     for (size_t i = 0; i != this->multipliers.size(); ++i) {
       position += this->multipliers[i] * counter[i];
@@ -540,7 +503,7 @@ class Bitmap_cubical_complex_base {
     return position;
   }
 
-  std::vector<unsigned> compute_counter_for_given_cell(size_t cell)const {
+  std::vector<unsigned> compute_counter_for_given_cell(size_t cell) const {
     std::vector<unsigned> counter;
     counter.reserve(this->sizes.size());
     for (size_t dim = this->sizes.size(); dim != 0; --dim) {
@@ -555,8 +518,7 @@ class Bitmap_cubical_complex_base {
                                                         const std::vector<T>& top_dimensional_cells);
   Bitmap_cubical_complex_base(const char* perseus_style_file, std::vector<bool> directions);
   Bitmap_cubical_complex_base(const std::vector<unsigned>& sizes, std::vector<bool> directions);
-  Bitmap_cubical_complex_base(const std::vector<unsigned>& dimensions,
-                              const std::vector<T>& top_dimensional_cells,
+  Bitmap_cubical_complex_base(const std::vector<unsigned>& dimensions, const std::vector<T>& top_dimensional_cells,
                               std::vector<bool> directions);
 };
 
@@ -564,8 +526,8 @@ template <typename T>
 void Bitmap_cubical_complex_base<T>::put_data_to_bins(size_t number_of_bins) {
   bool bdg = false;
 
-  std::pair< T, T > min_max = this->min_max_filtration();
-  T dx = (min_max.second - min_max.first) / (T) number_of_bins;
+  std::pair<T, T> min_max = this->min_max_filtration();
+  T dx = (min_max.second - min_max.first) / (T)number_of_bins;
 
   // now put the data into the appropriate bins:
   for (size_t i = 0; i != this->data.size(); ++i) {
@@ -583,7 +545,7 @@ void Bitmap_cubical_complex_base<T>::put_data_to_bins(size_t number_of_bins) {
 template <typename T>
 void Bitmap_cubical_complex_base<T>::put_data_to_bins(T diameter_of_bin) {
   bool bdg = false;
-  std::pair< T, T > min_max = this->min_max_filtration();
+  std::pair<T, T> min_max = this->min_max_filtration();
 
   size_t number_of_bins = (min_max.second - min_max.first) / diameter_of_bin;
   // now put the data into the appropriate bins:
@@ -600,33 +562,32 @@ void Bitmap_cubical_complex_base<T>::put_data_to_bins(T diameter_of_bin) {
 }
 
 template <typename T>
-std::pair< T, T > Bitmap_cubical_complex_base<T>::min_max_filtration() {
-  std::pair< T, T > min_max(std::numeric_limits<T>::max(), std::numeric_limits<T>::min());
+std::pair<T, T> Bitmap_cubical_complex_base<T>::min_max_filtration() {
+  std::pair<T, T> min_max(std::numeric_limits<T>::max(), std::numeric_limits<T>::min());
   for (size_t i = 0; i != this->data.size(); ++i) {
-    if (this->data[i] < min_max.first)min_max.first = this->data[i];
-    if (this->data[i] > min_max.second)min_max.second = this->data[i];
+    if (this->data[i] < min_max.first) min_max.first = this->data[i];
+    if (this->data[i] > min_max.second) min_max.second = this->data[i];
   }
   return min_max;
 }
 
 template <typename K>
-std::ostream& operator<<(std::ostream & out, const Bitmap_cubical_complex_base<K>& b) {
-  for (typename Bitmap_cubical_complex_base<K>::all_cells_const_iterator
-       it = b.all_cells_const_begin(); it != b.all_cells_const_end(); ++it) {
+std::ostream& operator<<(std::ostream& out, const Bitmap_cubical_complex_base<K>& b) {
+  for (typename Bitmap_cubical_complex_base<K>::all_cells_const_iterator it = b.all_cells_const_begin();
+       it != b.all_cells_const_end(); ++it) {
     out << *it << " ";
   }
   return out;
 }
 
 template <typename T>
-Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base
-(const std::vector<unsigned>& sizes) {
+Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const std::vector<unsigned>& sizes) {
   this->set_up_containers(sizes);
 }
 
 template <typename T>
-void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_top_dimensional_cells_list(const std::vector<unsigned>& sizes_in_following_directions,
-                                                                                      const std::vector<T>& top_dimensional_cells) {
+void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_top_dimensional_cells_list(
+    const std::vector<unsigned>& sizes_in_following_directions, const std::vector<T>& top_dimensional_cells) {
   this->set_up_containers(sizes_in_following_directions);
 
   size_t number_of_top_dimensional_elements = 1;
@@ -635,12 +596,13 @@ void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_top_dimensional_cells
   }
   if (number_of_top_dimensional_elements != top_dimensional_cells.size()) {
     std::cerr << "Error in constructor Bitmap_cubical_complex_base ( std::vector<size_t> sizes_in_following_directions"
-        << ", std::vector<T> top_dimensional_cells ). Number of top dimensional elements that follow from "
-        << "sizes_in_following_directions vector is different than the size of top_dimensional_cells vector."
-        << std::endl;
-    throw("Error in constructor Bitmap_cubical_complex_base( std::vector<size_t> sizes_in_following_directions,"
-           "std::vector<T> top_dimensional_cells ). Number of top dimensional elements that follow from "
-           "sizes_in_following_directions vector is different than the size of top_dimensional_cells vector.");
+              << ", std::vector<T> top_dimensional_cells ). Number of top dimensional elements that follow from "
+              << "sizes_in_following_directions vector is different than the size of top_dimensional_cells vector."
+              << std::endl;
+    throw(
+        "Error in constructor Bitmap_cubical_complex_base( std::vector<size_t> sizes_in_following_directions,"
+        "std::vector<T> top_dimensional_cells ). Number of top dimensional elements that follow from "
+        "sizes_in_following_directions vector is different than the size of top_dimensional_cells vector.");
   }
 
   Bitmap_cubical_complex_base<T>::Top_dimensional_cells_iterator it(*this);
@@ -653,8 +615,8 @@ void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_top_dimensional_cells
 }
 
 template <typename T>
-Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base
-(const std::vector<unsigned>& sizes_in_following_directions, const std::vector<T>& top_dimensional_cells) {
+Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const std::vector<unsigned>& sizes_in_following_directions,
+                                                            const std::vector<T>& top_dimensional_cells) {
   this->setup_bitmap_based_on_top_dimensional_cells_list(sizes_in_following_directions, top_dimensional_cells);
 }
 
@@ -690,11 +652,9 @@ void Bitmap_cubical_complex_base<T>::read_perseus_style_file(const char* perseus
     T filtrationLevel;
     inFiltration >> filtrationLevel;
     if (dbg) {
-      std::cerr << "Cell of an index : "
-          << it.compute_index_in_bitmap()
-          << " and dimension: "
-          << this->get_dimension_of_a_cell(it.compute_index_in_bitmap())
-          << " get the value : " << filtrationLevel << std::endl;
+      std::cerr << "Cell of an index : " << it.compute_index_in_bitmap()
+                << " and dimension: " << this->get_dimension_of_a_cell(it.compute_index_in_bitmap())
+                << " get the value : " << filtrationLevel << std::endl;
     }
     this->get_cell_data(*it) = filtrationLevel;
     ++it;
@@ -737,59 +697,54 @@ Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const char* perseus_
 }
 
 template <typename T>
-std::vector< size_t > Bitmap_cubical_complex_base<T>::get_boundary_of_a_cell(size_t cell)const {	
-  std::vector< size_t > boundary_elements;
+std::vector<size_t> Bitmap_cubical_complex_base<T>::get_boundary_of_a_cell(size_t cell) const {
+  std::vector<size_t> boundary_elements;
 
   // Speed traded of for memory. Check if it is better in practice.
-  boundary_elements.reserve(this->dimension()*2);
+  boundary_elements.reserve(this->dimension() * 2);
 
   size_t sum_of_dimensions = 0;
-  size_t cell1 = cell;  
+  size_t cell1 = cell;
   for (size_t i = this->multipliers.size(); i != 0; --i) {
     unsigned position = cell1 / this->multipliers[i - 1];
     if (position % 2 == 1) {
-	  if ( sum_of_dimensions%2 )
-	  {
-		  boundary_elements.push_back(cell + this->multipliers[ i - 1 ]);
-		  boundary_elements.push_back(cell - this->multipliers[ i - 1 ]);
-	  }
-	  else
-	  {			  
-		  boundary_elements.push_back(cell - this->multipliers[ i - 1 ]);
-		  boundary_elements.push_back(cell + this->multipliers[ i - 1 ]);
-	  }      
+      if (sum_of_dimensions % 2) {
+        boundary_elements.push_back(cell + this->multipliers[i - 1]);
+        boundary_elements.push_back(cell - this->multipliers[i - 1]);
+      } else {
+        boundary_elements.push_back(cell - this->multipliers[i - 1]);
+        boundary_elements.push_back(cell + this->multipliers[i - 1]);
+      }
       ++sum_of_dimensions;
     }
     cell1 = cell1 % this->multipliers[i - 1];
-  }    
-  
+  }
+
   return boundary_elements;
 }
 
 template <typename T>
-std::vector< size_t > Bitmap_cubical_complex_base<T>::get_coboundary_of_a_cell(size_t cell)const {
+std::vector<size_t> Bitmap_cubical_complex_base<T>::get_coboundary_of_a_cell(size_t cell) const {
   std::vector<unsigned> counter = this->compute_counter_for_given_cell(cell);
-  std::vector< size_t > coboundary_elements;
-  size_t cell1 = cell;  
+  std::vector<size_t> coboundary_elements;
+  size_t cell1 = cell;
   for (size_t i = this->multipliers.size(); i != 0; --i) {
     unsigned position = cell1 / this->multipliers[i - 1];
     if (position % 2 == 0) {
-	  if ((cell > this->multipliers[i - 1]) && (counter[i - 1] != 0)) {
-		coboundary_elements.push_back(cell - this->multipliers[i - 1]);
-	  }
-	  if (
-		  (cell + this->multipliers[i - 1] < this->data.size()) && (counter[i - 1] != 2 * this->sizes[i - 1])) {
-		coboundary_elements.push_back(cell + this->multipliers[i - 1]);
-	  }	     
+      if ((cell > this->multipliers[i - 1]) && (counter[i - 1] != 0)) {
+        coboundary_elements.push_back(cell - this->multipliers[i - 1]);
+      }
+      if ((cell + this->multipliers[i - 1] < this->data.size()) && (counter[i - 1] != 2 * this->sizes[i - 1])) {
+        coboundary_elements.push_back(cell + this->multipliers[i - 1]);
+      }
     }
     cell1 = cell1 % this->multipliers[i - 1];
-  }     
+  }
   return coboundary_elements;
 }
 
-
 template <typename T>
-unsigned Bitmap_cubical_complex_base<T>::get_dimension_of_a_cell(size_t cell)const {
+unsigned Bitmap_cubical_complex_base<T>::get_dimension_of_a_cell(size_t cell) const {
   bool dbg = false;
   if (dbg) std::cerr << "\n\n\n Computing position o a cell of an index : " << cell << std::endl;
   unsigned dimension = 0;
@@ -827,7 +782,7 @@ void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration() {
 
   size_t size_to_reserve = 1;
   for (size_t i = 0; i != this->multipliers.size(); ++i) {
-    size_to_reserve *= (size_t) ((this->multipliers[i] - 1) / 2);
+    size_to_reserve *= (size_t)((this->multipliers[i] - 1) / 2);
   }
 
   std::vector<size_t> indices_to_consider;
@@ -852,22 +807,22 @@ void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration() {
       std::vector<size_t> bd = this->get_boundary_of_a_cell(indices_to_consider[i]);
       for (size_t boundaryIt = 0; boundaryIt != bd.size(); ++boundaryIt) {
         if (dbg) {
-          std::cerr << "filtration of a cell : " << bd[boundaryIt] << " is : " << this->data[ bd[boundaryIt] ]
-              << " while of a cell: " << indices_to_consider[i] << " is: " << this->data[ indices_to_consider[i] ]
-              << std::endl;
+          std::cerr << "filtration of a cell : " << bd[boundaryIt] << " is : " << this->data[bd[boundaryIt]]
+                    << " while of a cell: " << indices_to_consider[i] << " is: " << this->data[indices_to_consider[i]]
+                    << std::endl;
           getchar();
         }
-        if (this->data[ bd[boundaryIt] ] > this->data[ indices_to_consider[i] ]) {
-          this->data[ bd[boundaryIt] ] = this->data[ indices_to_consider[i] ];
+        if (this->data[bd[boundaryIt]] > this->data[indices_to_consider[i]]) {
+          this->data[bd[boundaryIt]] = this->data[indices_to_consider[i]];
           if (dbg) {
-            std::cerr << "Setting the value of a cell : " << bd[boundaryIt] << " to : "
-                << this->data[ indices_to_consider[i] ] << std::endl;
+            std::cerr << "Setting the value of a cell : " << bd[boundaryIt]
+                      << " to : " << this->data[indices_to_consider[i]] << std::endl;
             getchar();
           }
         }
-        if (is_this_cell_considered[ bd[boundaryIt] ] == false) {
+        if (is_this_cell_considered[bd[boundaryIt]] == false) {
           new_indices_to_consider.push_back(bd[boundaryIt]);
-          is_this_cell_considered[ bd[boundaryIt] ] = true;
+          is_this_cell_considered[bd[boundaryIt]] = true;
         }
       }
     }
@@ -876,8 +831,8 @@ void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration() {
 }
 
 template <typename T>
-bool compareFirstElementsOfTuples(const std::pair< std::pair< T, size_t >, char >& first,
-                                  const std::pair< std::pair< T, size_t >, char >& second) {
+bool compareFirstElementsOfTuples(const std::pair<std::pair<T, size_t>, char>& first,
+                                  const std::pair<std::pair<T, size_t>, char>& second) {
   if (first.first.first < second.first.first) {
     return true;
   } else {

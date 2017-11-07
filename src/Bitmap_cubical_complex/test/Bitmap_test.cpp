@@ -33,19 +33,16 @@
 #include <sstream>
 #include <vector>
 
-
 typedef Gudhi::cubical_complex::Bitmap_cubical_complex_base<double> Bitmap_cubical_complex_base;
 typedef Gudhi::cubical_complex::Bitmap_cubical_complex<Bitmap_cubical_complex_base> Bitmap_cubical_complex;
 
 typedef Gudhi::cubical_complex::Bitmap_cubical_complex_periodic_boundary_conditions_base<double>
-Bitmap_cubical_complex_periodic_boundary_conditions_base;
+    Bitmap_cubical_complex_periodic_boundary_conditions_base;
 typedef Gudhi::cubical_complex::Bitmap_cubical_complex<Bitmap_cubical_complex_periodic_boundary_conditions_base>
-Bitmap_cubical_complex_periodic_boundary_conditions;
-
-
+    Bitmap_cubical_complex_periodic_boundary_conditions;
 
 BOOST_AUTO_TEST_CASE(check_dimension) {
-  std::vector< double > increasingFiltrationOfTopDimensionalCells({1, 2, 3, 4, 5, 6, 7, 8, 9});
+  std::vector<double> increasingFiltrationOfTopDimensionalCells({1, 2, 3, 4, 5, 6, 7, 8, 9});
 
   std::vector<unsigned> dimensions({3, 3});
 
@@ -54,29 +51,28 @@ BOOST_AUTO_TEST_CASE(check_dimension) {
 }
 
 BOOST_AUTO_TEST_CASE(topDimensionalCellsIterator_test) {
-  std::vector< double > expectedFiltrationValues1({0, 0, 0, 0, 100, 0, 0, 0, 0});
+  std::vector<double> expectedFiltrationValues1({0, 0, 0, 0, 100, 0, 0, 0, 0});
 
-  std::vector< double > expectedFiltrationValues2({1, 2, 3, 4, 5, 6, 7, 8, 9});
+  std::vector<double> expectedFiltrationValues2({1, 2, 3, 4, 5, 6, 7, 8, 9});
 
-  std::vector< double > increasingFiltrationOfTopDimensionalCells({1, 2, 3, 4, 5, 6, 7, 8, 9});
+  std::vector<double> increasingFiltrationOfTopDimensionalCells({1, 2, 3, 4, 5, 6, 7, 8, 9});
 
-  std::vector< double > oneDimensionalCycle({0, 0, 0, 0, 100, 0, 0, 0, 0});
+  std::vector<double> oneDimensionalCycle({0, 0, 0, 0, 100, 0, 0, 0, 0});
 
   std::vector<unsigned> dimensions({3, 3});
 
   Bitmap_cubical_complex increasing(dimensions, increasingFiltrationOfTopDimensionalCells);
   Bitmap_cubical_complex hole(dimensions, oneDimensionalCycle);
 
-
   int i = 0;
-  for (Bitmap_cubical_complex::Top_dimensional_cells_iterator
-       it = increasing.top_dimensional_cells_iterator_begin(); it != increasing.top_dimensional_cells_iterator_end(); ++it) {
+  for (Bitmap_cubical_complex::Top_dimensional_cells_iterator it = increasing.top_dimensional_cells_iterator_begin();
+       it != increasing.top_dimensional_cells_iterator_end(); ++it) {
     BOOST_CHECK(increasing.get_cell_data(*it) == expectedFiltrationValues2[i]);
     ++i;
   }
   i = 0;
-  for (Bitmap_cubical_complex::Top_dimensional_cells_iterator
-       it = hole.top_dimensional_cells_iterator_begin(); it != hole.top_dimensional_cells_iterator_end(); ++it) {
+  for (Bitmap_cubical_complex::Top_dimensional_cells_iterator it = hole.top_dimensional_cells_iterator_begin();
+       it != hole.top_dimensional_cells_iterator_end(); ++it) {
     BOOST_CHECK(hole.get_cell_data(*it) == expectedFiltrationValues1[i]);
     ++i;
   }
@@ -216,7 +212,7 @@ BOOST_AUTO_TEST_CASE(compute_boundary_test_1) {
   boundary47.push_back(46);
   boundary47.push_back(48);
   std::vector<double> boundary48;
-  std::vector< std::vector<double> > boundaries;
+  std::vector<std::vector<double> > boundaries;
   boundaries.push_back(boundary0);
   boundaries.push_back(boundary1);
   boundaries.push_back(boundary2);
@@ -267,30 +263,25 @@ BOOST_AUTO_TEST_CASE(compute_boundary_test_1) {
   boundaries.push_back(boundary47);
   boundaries.push_back(boundary48);
 
-
-
-  std::vector< double > increasingFiltrationOfTopDimensionalCells({1, 2, 3, 4, 5, 6, 7, 8, 9});
+  std::vector<double> increasingFiltrationOfTopDimensionalCells({1, 2, 3, 4, 5, 6, 7, 8, 9});
 
   std::vector<unsigned> dimensions({3, 3});
 
   Bitmap_cubical_complex increasing(dimensions, increasingFiltrationOfTopDimensionalCells);
   for (size_t i = 0; i != increasing.size(); ++i) {
-    std::vector< size_t > bd = increasing.get_boundary_of_a_cell(i);
+    std::vector<size_t> bd = increasing.get_boundary_of_a_cell(i);
     for (size_t j = 0; j != bd.size(); ++j) {
-      BOOST_CHECK(boundaries[i][j] == bd[j]);            
-    }   
+      BOOST_CHECK(boundaries[i][j] == bd[j]);
+    }
   }
 }
 
-
-
 BOOST_AUTO_TEST_CASE(compute_boundary_test_2) {
-  std::vector< double > increasingFiltrationOfTopDimensionalCells({1, 2, 3, 4, 5, 6, 7, 8, 9});
+  std::vector<double> increasingFiltrationOfTopDimensionalCells({1, 2, 3, 4, 5, 6, 7, 8, 9});
 
   std::vector<unsigned> dimensions({3, 3});
 
   Bitmap_cubical_complex increasing(dimensions, increasingFiltrationOfTopDimensionalCells);
-
 
   std::vector<double> coboundaryElements;
   coboundaryElements.push_back(7);
@@ -377,21 +368,19 @@ BOOST_AUTO_TEST_CASE(compute_boundary_test_2) {
   coboundaryElements.push_back(40);
   coboundaryElements.push_back(41);
   coboundaryElements.push_back(47);
-   
+
   size_t number = 0;
   for (size_t i = 0; i != increasing.size(); ++i) {
-    std::vector< size_t > bd = increasing.get_coboundary_of_a_cell(i);
+    std::vector<size_t> bd = increasing.get_coboundary_of_a_cell(i);
     for (size_t j = 0; j != bd.size(); ++j) {
       BOOST_CHECK(coboundaryElements[number] == bd[j]);
-      ++number;      
-    }   
+      ++number;
+    }
   }
 }
 
-
-
 BOOST_AUTO_TEST_CASE(compute_boundary_test_3) {
-  std::vector< double > increasingFiltrationOfTopDimensionalCells({1, 2, 3, 4, 5, 6, 7, 8, 9});
+  std::vector<double> increasingFiltrationOfTopDimensionalCells({1, 2, 3, 4, 5, 6, 7, 8, 9});
 
   std::vector<unsigned> dimensions({3, 3});
 
@@ -454,13 +443,13 @@ BOOST_AUTO_TEST_CASE(compute_boundary_test_3) {
 }
 
 BOOST_AUTO_TEST_CASE(Filtration_simplex_iterator_test) {
-  std::vector< double > increasingFiltrationOfTopDimensionalCells({1, 2, 3, 4, 5, 6, 7, 8, 9});
+  std::vector<double> increasingFiltrationOfTopDimensionalCells({1, 2, 3, 4, 5, 6, 7, 8, 9});
 
   std::vector<unsigned> dimensions({3, 3});
 
   Bitmap_cubical_complex increasing(dimensions, increasingFiltrationOfTopDimensionalCells);
 
-  std::vector< unsigned > dim;
+  std::vector<unsigned> dim;
   dim.push_back(0);
   dim.push_back(0);
   dim.push_back(0);
@@ -562,7 +551,6 @@ BOOST_AUTO_TEST_CASE(Filtration_simplex_iterator_test) {
   fil.push_back(9);
   fil.push_back(9);
 
-
   Bitmap_cubical_complex::Filtration_simplex_range range = increasing.filtration_simplex_range();
   size_t position = 0;
   for (Bitmap_cubical_complex::Filtration_simplex_iterator it = range.begin(); it != range.end(); ++it) {
@@ -573,7 +561,7 @@ BOOST_AUTO_TEST_CASE(Filtration_simplex_iterator_test) {
 }
 
 BOOST_AUTO_TEST_CASE(boudary_operator_2d_bitmap_with_periodic_bcond) {
-  std::vector< double > filtration({0, 0, 0, 0});
+  std::vector<double> filtration({0, 0, 0, 0});
 
   std::vector<unsigned> dimensions({2, 2});
 
@@ -581,7 +569,6 @@ BOOST_AUTO_TEST_CASE(boudary_operator_2d_bitmap_with_periodic_bcond) {
 
   Bitmap_cubical_complex_periodic_boundary_conditions cmplx(dimensions, filtration, periodic_directions);
   BOOST_CHECK(cmplx.dimension() == 2);
-
 
   std::vector<double> boundary0;
   std::vector<double> boundary1;
@@ -632,7 +619,7 @@ BOOST_AUTO_TEST_CASE(boudary_operator_2d_bitmap_with_periodic_bcond) {
   boundary15.push_back(14);
   boundary15.push_back(12);
 
-  std::vector< std::vector<double> > boundaries;
+  std::vector<std::vector<double> > boundaries;
   boundaries.push_back(boundary0);
   boundaries.push_back(boundary1);
   boundaries.push_back(boundary2);
@@ -651,15 +638,15 @@ BOOST_AUTO_TEST_CASE(boudary_operator_2d_bitmap_with_periodic_bcond) {
   boundaries.push_back(boundary15);
 
   for (size_t i = 0; i != cmplx.size(); ++i) {
-    std::vector< size_t > bd = cmplx.get_boundary_of_a_cell(i);
+    std::vector<size_t> bd = cmplx.get_boundary_of_a_cell(i);
     for (size_t j = 0; j != bd.size(); ++j) {
       BOOST_CHECK(boundaries[i][j] == bd[j]);
-    }    
+    }
   }
 }
 
 BOOST_AUTO_TEST_CASE(coboudary_operator_2d_bitmap_with_periodic_bcond) {
-  std::vector< double > filtration({0, 0, 0, 0});
+  std::vector<double> filtration({0, 0, 0, 0});
 
   std::vector<unsigned> dimensions({2, 2});
 
@@ -667,7 +654,6 @@ BOOST_AUTO_TEST_CASE(coboudary_operator_2d_bitmap_with_periodic_bcond) {
 
   Bitmap_cubical_complex_periodic_boundary_conditions cmplx(dimensions, filtration, periodic_directions);
   BOOST_CHECK(cmplx.dimension() == 2);
-
 
   std::vector<double> coboundary0;
   coboundary0.push_back(4);
@@ -718,7 +704,7 @@ BOOST_AUTO_TEST_CASE(coboudary_operator_2d_bitmap_with_periodic_bcond) {
   coboundary14.push_back(15);
   std::vector<double> coboundary15;
 
-  std::vector< std::vector<double> > coboundaries;
+  std::vector<std::vector<double> > coboundaries;
   coboundaries.push_back(coboundary0);
   coboundaries.push_back(coboundary1);
   coboundaries.push_back(coboundary2);
@@ -737,7 +723,7 @@ BOOST_AUTO_TEST_CASE(coboudary_operator_2d_bitmap_with_periodic_bcond) {
   coboundaries.push_back(coboundary15);
 
   for (size_t i = 0; i != cmplx.size(); ++i) {
-    std::vector< size_t > cbd = cmplx.get_coboundary_of_a_cell(i);
+    std::vector<size_t> cbd = cmplx.get_coboundary_of_a_cell(i);
     for (size_t j = 0; j != cbd.size(); ++j) {
       BOOST_CHECK(coboundaries[i][j] == cbd[j]);
     }
@@ -745,7 +731,7 @@ BOOST_AUTO_TEST_CASE(coboudary_operator_2d_bitmap_with_periodic_bcond) {
 }
 
 BOOST_AUTO_TEST_CASE(bitmap_2d_with_periodic_bcond_filtration) {
-  std::vector< double > filtrationOrg({0, 1, 2, 3});
+  std::vector<double> filtrationOrg({0, 1, 2, 3});
 
   std::vector<unsigned> dimensions({2, 2});
 
@@ -753,7 +739,6 @@ BOOST_AUTO_TEST_CASE(bitmap_2d_with_periodic_bcond_filtration) {
 
   Bitmap_cubical_complex_periodic_boundary_conditions cmplx(dimensions, filtrationOrg, periodic_directions);
   BOOST_CHECK(cmplx.dimension() == 2);
-
 
   std::vector<double> filtration;
   filtration.push_back(0);  // 0
@@ -773,902 +758,821 @@ BOOST_AUTO_TEST_CASE(bitmap_2d_with_periodic_bcond_filtration) {
   filtration.push_back(2);  // 14
   filtration.push_back(3);  // 15
 
-
   for (size_t i = 0; i != cmplx.size(); ++i) {
     BOOST_CHECK(filtration[i] == cmplx.get_cell_data(i));
   }
 }
 
+BOOST_AUTO_TEST_CASE(all_cells_iterator_and_boundary_iterators_in_Bitmap_cubical_complex_base_check) {
+  std::vector<double> expected_filtration;
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(1);
+  expected_filtration.push_back(1);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(1);
+  expected_filtration.push_back(1);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(1);
+  expected_filtration.push_back(1);
+  expected_filtration.push_back(2);
+  expected_filtration.push_back(2);
+  expected_filtration.push_back(2);
+  expected_filtration.push_back(3);
+  expected_filtration.push_back(3);
+  expected_filtration.push_back(2);
+  expected_filtration.push_back(2);
+  expected_filtration.push_back(2);
+  expected_filtration.push_back(3);
+  expected_filtration.push_back(3);
 
-BOOST_AUTO_TEST_CASE(all_cells_iterator_and_boundary_iterators_in_Bitmap_cubical_complex_base_check)
-{
-    std::vector< double > expected_filtration;
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(1);
-    expected_filtration.push_back(1);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(1);
-    expected_filtration.push_back(1);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(1);
-    expected_filtration.push_back(1);
-    expected_filtration.push_back(2);
-    expected_filtration.push_back(2);
-    expected_filtration.push_back(2);
-    expected_filtration.push_back(3);
-    expected_filtration.push_back(3);
-    expected_filtration.push_back(2);
-    expected_filtration.push_back(2);
-    expected_filtration.push_back(2);
-    expected_filtration.push_back(3);
-    expected_filtration.push_back(3);
+  std::vector<unsigned> expected_dimension;
+  expected_dimension.push_back(0);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(0);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(0);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(2);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(2);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(0);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(0);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(0);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(2);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(2);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(0);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(0);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(0);
 
-    std::vector<unsigned> expected_dimension;
-    expected_dimension.push_back(0);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(0);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(0);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(2);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(2);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(0);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(0);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(0);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(2);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(2);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(0);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(0);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(0);
+  std::vector<size_t> expected_boundary;
+  expected_boundary.push_back(0);
+  expected_boundary.push_back(2);
+  expected_boundary.push_back(2);
+  expected_boundary.push_back(4);
+  expected_boundary.push_back(0);
+  expected_boundary.push_back(10);
+  expected_boundary.push_back(1);
+  expected_boundary.push_back(11);
+  expected_boundary.push_back(7);
+  expected_boundary.push_back(5);
+  expected_boundary.push_back(2);
+  expected_boundary.push_back(12);
+  expected_boundary.push_back(3);
+  expected_boundary.push_back(13);
+  expected_boundary.push_back(9);
+  expected_boundary.push_back(7);
+  expected_boundary.push_back(4);
+  expected_boundary.push_back(14);
+  expected_boundary.push_back(10);
+  expected_boundary.push_back(12);
+  expected_boundary.push_back(12);
+  expected_boundary.push_back(14);
+  expected_boundary.push_back(10);
+  expected_boundary.push_back(20);
+  expected_boundary.push_back(11);
+  expected_boundary.push_back(21);
+  expected_boundary.push_back(17);
+  expected_boundary.push_back(15);
+  expected_boundary.push_back(12);
+  expected_boundary.push_back(22);
+  expected_boundary.push_back(13);
+  expected_boundary.push_back(23);
+  expected_boundary.push_back(19);
+  expected_boundary.push_back(17);
+  expected_boundary.push_back(14);
+  expected_boundary.push_back(24);
+  expected_boundary.push_back(20);
+  expected_boundary.push_back(22);
+  expected_boundary.push_back(22);
+  expected_boundary.push_back(24);
 
-    std::vector<size_t> expected_boundary;
-    expected_boundary.push_back(0);
-    expected_boundary.push_back(2);
-    expected_boundary.push_back(2);
-    expected_boundary.push_back(4);
-    expected_boundary.push_back(0);
-    expected_boundary.push_back(10);
-    expected_boundary.push_back(1);
-    expected_boundary.push_back(11);
-    expected_boundary.push_back(7);
-    expected_boundary.push_back(5);
-    expected_boundary.push_back(2);
-    expected_boundary.push_back(12);
-    expected_boundary.push_back(3);
-    expected_boundary.push_back(13);
-    expected_boundary.push_back(9);
-    expected_boundary.push_back(7);
-    expected_boundary.push_back(4);
-    expected_boundary.push_back(14);
-    expected_boundary.push_back(10);
-    expected_boundary.push_back(12);
-    expected_boundary.push_back(12);
-    expected_boundary.push_back(14);
-    expected_boundary.push_back(10);
-    expected_boundary.push_back(20);
-    expected_boundary.push_back(11);
-    expected_boundary.push_back(21);
-    expected_boundary.push_back(17);
-    expected_boundary.push_back(15);
-    expected_boundary.push_back(12);
-    expected_boundary.push_back(22);
-    expected_boundary.push_back(13);
-    expected_boundary.push_back(23);
-    expected_boundary.push_back(19);
-    expected_boundary.push_back(17);
-    expected_boundary.push_back(14);
-    expected_boundary.push_back(24);
-    expected_boundary.push_back(20);
-    expected_boundary.push_back(22);
-    expected_boundary.push_back(22);
-    expected_boundary.push_back(24);
+  std::vector<size_t> expected_coboundary;
+  expected_coboundary.push_back(5);
+  expected_coboundary.push_back(1);
+  expected_coboundary.push_back(6);
+  expected_coboundary.push_back(7);
+  expected_coboundary.push_back(1);
+  expected_coboundary.push_back(3);
+  expected_coboundary.push_back(8);
+  expected_coboundary.push_back(9);
+  expected_coboundary.push_back(3);
+  expected_coboundary.push_back(6);
+  expected_coboundary.push_back(6);
+  expected_coboundary.push_back(8);
+  expected_coboundary.push_back(8);
+  expected_coboundary.push_back(5);
+  expected_coboundary.push_back(15);
+  expected_coboundary.push_back(11);
+  expected_coboundary.push_back(6);
+  expected_coboundary.push_back(16);
+  expected_coboundary.push_back(7);
+  expected_coboundary.push_back(17);
+  expected_coboundary.push_back(11);
+  expected_coboundary.push_back(13);
+  expected_coboundary.push_back(8);
+  expected_coboundary.push_back(18);
+  expected_coboundary.push_back(9);
+  expected_coboundary.push_back(19);
+  expected_coboundary.push_back(13);
+  expected_coboundary.push_back(16);
+  expected_coboundary.push_back(16);
+  expected_coboundary.push_back(18);
+  expected_coboundary.push_back(18);
+  expected_coboundary.push_back(15);
+  expected_coboundary.push_back(21);
+  expected_coboundary.push_back(16);
+  expected_coboundary.push_back(17);
+  expected_coboundary.push_back(21);
+  expected_coboundary.push_back(23);
+  expected_coboundary.push_back(18);
+  expected_coboundary.push_back(19);
+  expected_coboundary.push_back(23);
 
+  std::vector<unsigned> sizes(2);
+  sizes[0] = 2;
+  sizes[1] = 2;
 
-    std::vector<size_t> expected_coboundary;
-    expected_coboundary.push_back(5);
-    expected_coboundary.push_back(1);
-    expected_coboundary.push_back(6);
-    expected_coboundary.push_back(7);
-    expected_coboundary.push_back(1);
-    expected_coboundary.push_back(3);
-    expected_coboundary.push_back(8);
-    expected_coboundary.push_back(9);
-    expected_coboundary.push_back(3);
-    expected_coboundary.push_back(6);
-    expected_coboundary.push_back(6);
-    expected_coboundary.push_back(8);
-    expected_coboundary.push_back(8);
-    expected_coboundary.push_back(5);
-    expected_coboundary.push_back(15);
-    expected_coboundary.push_back(11);
-    expected_coboundary.push_back(6);
-    expected_coboundary.push_back(16);
-    expected_coboundary.push_back(7);
-    expected_coboundary.push_back(17);
-    expected_coboundary.push_back(11);
-    expected_coboundary.push_back(13);
-    expected_coboundary.push_back(8);
-    expected_coboundary.push_back(18);
-    expected_coboundary.push_back(9);
-    expected_coboundary.push_back(19);
-    expected_coboundary.push_back(13);
-    expected_coboundary.push_back(16);
-    expected_coboundary.push_back(16);
-    expected_coboundary.push_back(18);
-    expected_coboundary.push_back(18);
-    expected_coboundary.push_back(15);
-    expected_coboundary.push_back(21);
-    expected_coboundary.push_back(16);
-    expected_coboundary.push_back(17);
-    expected_coboundary.push_back(21);
-    expected_coboundary.push_back(23);
-    expected_coboundary.push_back(18);
-    expected_coboundary.push_back(19);
-    expected_coboundary.push_back(23);
+  std::vector<double> data(4);
+  data[0] = 0;
+  data[1] = 1;
+  data[2] = 2;
+  data[3] = 3;
 
+  Bitmap_cubical_complex_base ba(sizes, data);
+  int i = 0;
+  int bd_it = 0;
+  int cbd_it = 0;
+  for (Bitmap_cubical_complex_base::All_cells_iterator it = ba.all_cells_iterator_begin();
+       it != ba.all_cells_iterator_end(); ++it) {
+    BOOST_CHECK(expected_filtration[i] == ba.get_cell_data(*it));
+    BOOST_CHECK(expected_dimension[i] == ba.get_dimension_of_a_cell(*it));
 
-
-    std::vector< unsigned > sizes(2);
-    sizes[0] = 2;
-    sizes[1] = 2;
-
-    std::vector< double > data(4);
-    data[0] = 0;
-    data[1] = 1;
-    data[2] = 2;
-    data[3] = 3;
-
-    Bitmap_cubical_complex_base ba( sizes , data );
-    int i = 0;
-    int bd_it = 0;
-    int cbd_it = 0;
-    for ( Bitmap_cubical_complex_base::All_cells_iterator it = ba.all_cells_iterator_begin() ; it != ba.all_cells_iterator_end() ; ++it )
-    {
-        BOOST_CHECK( expected_filtration[i] == ba.get_cell_data( *it ) );
-        BOOST_CHECK( expected_dimension[i] == ba.get_dimension_of_a_cell( *it ) );
-
-        Bitmap_cubical_complex_base::Boundary_range bdrange = ba.boundary_range(*it);
-        for ( Bitmap_cubical_complex_base::Boundary_iterator bd = bdrange.begin() ; bd != bdrange.end() ; ++bd )
-        {
-            BOOST_CHECK( expected_boundary[bd_it] == *bd );                                    
-            ++bd_it;
-        }
-
-        Bitmap_cubical_complex_base::Coboundary_range cbdrange = ba.coboundary_range(*it);
-        for ( Bitmap_cubical_complex_base::Coboundary_iterator cbd = cbdrange.begin() ; cbd != cbdrange.end() ; ++cbd )
-        {
-             BOOST_CHECK( expected_coboundary[cbd_it] == *cbd );
-            ++cbd_it;
-        }
-        ++i;
+    Bitmap_cubical_complex_base::Boundary_range bdrange = ba.boundary_range(*it);
+    for (Bitmap_cubical_complex_base::Boundary_iterator bd = bdrange.begin(); bd != bdrange.end(); ++bd) {
+      BOOST_CHECK(expected_boundary[bd_it] == *bd);
+      ++bd_it;
     }
+
+    Bitmap_cubical_complex_base::Coboundary_range cbdrange = ba.coboundary_range(*it);
+    for (Bitmap_cubical_complex_base::Coboundary_iterator cbd = cbdrange.begin(); cbd != cbdrange.end(); ++cbd) {
+      BOOST_CHECK(expected_coboundary[cbd_it] == *cbd);
+      ++cbd_it;
+    }
+    ++i;
+  }
 }
 
+BOOST_AUTO_TEST_CASE(all_cells_iterator_and_boundary_iterators_in_Bitmap_cubical_complex_base_check_range_check_2) {
+  std::vector<double> expected_filtration;
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(1);
+  expected_filtration.push_back(1);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(1);
+  expected_filtration.push_back(1);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(1);
+  expected_filtration.push_back(1);
+  expected_filtration.push_back(2);
+  expected_filtration.push_back(2);
+  expected_filtration.push_back(2);
+  expected_filtration.push_back(3);
+  expected_filtration.push_back(3);
+  expected_filtration.push_back(2);
+  expected_filtration.push_back(2);
+  expected_filtration.push_back(2);
+  expected_filtration.push_back(3);
+  expected_filtration.push_back(3);
 
+  std::vector<unsigned> expected_dimension;
+  expected_dimension.push_back(0);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(0);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(0);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(2);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(2);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(0);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(0);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(0);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(2);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(2);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(0);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(0);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(0);
 
+  std::vector<size_t> expected_boundary;
+  expected_boundary.push_back(0);
+  expected_boundary.push_back(2);
+  expected_boundary.push_back(2);
+  expected_boundary.push_back(4);
+  expected_boundary.push_back(0);
+  expected_boundary.push_back(10);
+  expected_boundary.push_back(1);
+  expected_boundary.push_back(11);
+  expected_boundary.push_back(7);
+  expected_boundary.push_back(5);
+  expected_boundary.push_back(2);
+  expected_boundary.push_back(12);
+  expected_boundary.push_back(3);
+  expected_boundary.push_back(13);
+  expected_boundary.push_back(9);
+  expected_boundary.push_back(7);
+  expected_boundary.push_back(4);
+  expected_boundary.push_back(14);
+  expected_boundary.push_back(10);
+  expected_boundary.push_back(12);
+  expected_boundary.push_back(12);
+  expected_boundary.push_back(14);
+  expected_boundary.push_back(10);
+  expected_boundary.push_back(20);
+  expected_boundary.push_back(11);
+  expected_boundary.push_back(21);
+  expected_boundary.push_back(17);
+  expected_boundary.push_back(15);
+  expected_boundary.push_back(12);
+  expected_boundary.push_back(22);
+  expected_boundary.push_back(13);
+  expected_boundary.push_back(23);
+  expected_boundary.push_back(19);
+  expected_boundary.push_back(17);
+  expected_boundary.push_back(14);
+  expected_boundary.push_back(24);
+  expected_boundary.push_back(20);
+  expected_boundary.push_back(22);
+  expected_boundary.push_back(22);
+  expected_boundary.push_back(24);
 
+  std::vector<size_t> expected_coboundary;
+  expected_coboundary.push_back(5);
+  expected_coboundary.push_back(1);
+  expected_coboundary.push_back(6);
+  expected_coboundary.push_back(7);
+  expected_coboundary.push_back(1);
+  expected_coboundary.push_back(3);
+  expected_coboundary.push_back(8);
+  expected_coboundary.push_back(9);
+  expected_coboundary.push_back(3);
+  expected_coboundary.push_back(6);
+  expected_coboundary.push_back(6);
+  expected_coboundary.push_back(8);
+  expected_coboundary.push_back(8);
+  expected_coboundary.push_back(5);
+  expected_coboundary.push_back(15);
+  expected_coboundary.push_back(11);
+  expected_coboundary.push_back(6);
+  expected_coboundary.push_back(16);
+  expected_coboundary.push_back(7);
+  expected_coboundary.push_back(17);
+  expected_coboundary.push_back(11);
+  expected_coboundary.push_back(13);
+  expected_coboundary.push_back(8);
+  expected_coboundary.push_back(18);
+  expected_coboundary.push_back(9);
+  expected_coboundary.push_back(19);
+  expected_coboundary.push_back(13);
+  expected_coboundary.push_back(16);
+  expected_coboundary.push_back(16);
+  expected_coboundary.push_back(18);
+  expected_coboundary.push_back(18);
+  expected_coboundary.push_back(15);
+  expected_coboundary.push_back(21);
+  expected_coboundary.push_back(16);
+  expected_coboundary.push_back(17);
+  expected_coboundary.push_back(21);
+  expected_coboundary.push_back(23);
+  expected_coboundary.push_back(18);
+  expected_coboundary.push_back(19);
+  expected_coboundary.push_back(23);
 
+  std::vector<unsigned> sizes(2);
+  sizes[0] = 2;
+  sizes[1] = 2;
 
+  std::vector<double> data(4);
+  data[0] = 0;
+  data[1] = 1;
+  data[2] = 2;
+  data[3] = 3;
 
+  Bitmap_cubical_complex_base ba(sizes, data);
+  int i = 0;
+  int bd_it = 0;
+  int cbd_it = 0;
 
-BOOST_AUTO_TEST_CASE(all_cells_iterator_and_boundary_iterators_in_Bitmap_cubical_complex_base_check_range_check_2)
-{
-    std::vector< double > expected_filtration;
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(1);
-    expected_filtration.push_back(1);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(1);
-    expected_filtration.push_back(1);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(1);
-    expected_filtration.push_back(1);
-    expected_filtration.push_back(2);
-    expected_filtration.push_back(2);
-    expected_filtration.push_back(2);
-    expected_filtration.push_back(3);
-    expected_filtration.push_back(3);
-    expected_filtration.push_back(2);
-    expected_filtration.push_back(2);
-    expected_filtration.push_back(2);
-    expected_filtration.push_back(3);
-    expected_filtration.push_back(3);
+  Bitmap_cubical_complex_base::All_cells_range range(&ba);
+  for (Bitmap_cubical_complex_base::All_cells_iterator it = range.begin(); it != range.end(); ++it) {
+    BOOST_CHECK(expected_filtration[i] == ba.get_cell_data(*it));
+    BOOST_CHECK(expected_dimension[i] == ba.get_dimension_of_a_cell(*it));
 
-    std::vector<unsigned> expected_dimension;
-    expected_dimension.push_back(0);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(0);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(0);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(2);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(2);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(0);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(0);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(0);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(2);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(2);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(0);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(0);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(0);
-
-    std::vector<size_t> expected_boundary;
-    expected_boundary.push_back(0);
-    expected_boundary.push_back(2);
-    expected_boundary.push_back(2);
-    expected_boundary.push_back(4);
-    expected_boundary.push_back(0);
-    expected_boundary.push_back(10);
-    expected_boundary.push_back(1);
-    expected_boundary.push_back(11);
-    expected_boundary.push_back(7);
-    expected_boundary.push_back(5);
-    expected_boundary.push_back(2);
-    expected_boundary.push_back(12);
-    expected_boundary.push_back(3);
-    expected_boundary.push_back(13);
-    expected_boundary.push_back(9);
-    expected_boundary.push_back(7);
-    expected_boundary.push_back(4);
-    expected_boundary.push_back(14);
-    expected_boundary.push_back(10);
-    expected_boundary.push_back(12);
-    expected_boundary.push_back(12);
-    expected_boundary.push_back(14);
-    expected_boundary.push_back(10);
-    expected_boundary.push_back(20);
-    expected_boundary.push_back(11);
-    expected_boundary.push_back(21);
-    expected_boundary.push_back(17);
-    expected_boundary.push_back(15);
-    expected_boundary.push_back(12);
-    expected_boundary.push_back(22);
-    expected_boundary.push_back(13);
-    expected_boundary.push_back(23);
-    expected_boundary.push_back(19);
-    expected_boundary.push_back(17);
-    expected_boundary.push_back(14);
-    expected_boundary.push_back(24);
-    expected_boundary.push_back(20);
-    expected_boundary.push_back(22);
-    expected_boundary.push_back(22);
-    expected_boundary.push_back(24);
-
-
-    std::vector<size_t> expected_coboundary;
-    expected_coboundary.push_back(5);
-    expected_coboundary.push_back(1);
-    expected_coboundary.push_back(6);
-    expected_coboundary.push_back(7);
-    expected_coboundary.push_back(1);
-    expected_coboundary.push_back(3);
-    expected_coboundary.push_back(8);
-    expected_coboundary.push_back(9);
-    expected_coboundary.push_back(3);
-    expected_coboundary.push_back(6);
-    expected_coboundary.push_back(6);
-    expected_coboundary.push_back(8);
-    expected_coboundary.push_back(8);
-    expected_coboundary.push_back(5);
-    expected_coboundary.push_back(15);
-    expected_coboundary.push_back(11);
-    expected_coboundary.push_back(6);
-    expected_coboundary.push_back(16);
-    expected_coboundary.push_back(7);
-    expected_coboundary.push_back(17);
-    expected_coboundary.push_back(11);
-    expected_coboundary.push_back(13);
-    expected_coboundary.push_back(8);
-    expected_coboundary.push_back(18);
-    expected_coboundary.push_back(9);
-    expected_coboundary.push_back(19);
-    expected_coboundary.push_back(13);
-    expected_coboundary.push_back(16);
-    expected_coboundary.push_back(16);
-    expected_coboundary.push_back(18);
-    expected_coboundary.push_back(18);
-    expected_coboundary.push_back(15);
-    expected_coboundary.push_back(21);
-    expected_coboundary.push_back(16);
-    expected_coboundary.push_back(17);
-    expected_coboundary.push_back(21);
-    expected_coboundary.push_back(23);
-    expected_coboundary.push_back(18);
-    expected_coboundary.push_back(19);
-    expected_coboundary.push_back(23);
-
-
-
-    std::vector< unsigned > sizes(2);
-    sizes[0] = 2;
-    sizes[1] = 2;
-
-    std::vector< double > data(4);
-    data[0] = 0;
-    data[1] = 1;
-    data[2] = 2;
-    data[3] = 3;
-
-    Bitmap_cubical_complex_base ba( sizes , data );
-    int i = 0;
-    int bd_it = 0;
-    int cbd_it = 0;
-
-    Bitmap_cubical_complex_base::All_cells_range range(&ba);
-    for ( Bitmap_cubical_complex_base::All_cells_iterator it = range.begin() ; it != range.end() ; ++it )
-    {
-        BOOST_CHECK( expected_filtration[i] == ba.get_cell_data( *it ) );
-        BOOST_CHECK( expected_dimension[i] == ba.get_dimension_of_a_cell( *it ) );
-
-        Bitmap_cubical_complex_base::Boundary_range bdrange = ba.boundary_range(*it);
-        for ( Bitmap_cubical_complex_base::Boundary_iterator bd = bdrange.begin() ; bd != bdrange.end() ; ++bd )
-        {
-            BOOST_CHECK( expected_boundary[bd_it] == *bd );            
-            ++bd_it;
-        }
-
-        Bitmap_cubical_complex_base::Coboundary_range cbdrange = ba.coboundary_range(*it);
-        for ( Bitmap_cubical_complex_base::Coboundary_iterator cbd = cbdrange.begin() ; cbd != cbdrange.end() ; ++cbd )
-        {
-             BOOST_CHECK( expected_coboundary[cbd_it] == *cbd );
-            ++cbd_it;
-        }
-        ++i;
+    Bitmap_cubical_complex_base::Boundary_range bdrange = ba.boundary_range(*it);
+    for (Bitmap_cubical_complex_base::Boundary_iterator bd = bdrange.begin(); bd != bdrange.end(); ++bd) {
+      BOOST_CHECK(expected_boundary[bd_it] == *bd);
+      ++bd_it;
     }
+
+    Bitmap_cubical_complex_base::Coboundary_range cbdrange = ba.coboundary_range(*it);
+    for (Bitmap_cubical_complex_base::Coboundary_iterator cbd = cbdrange.begin(); cbd != cbdrange.end(); ++cbd) {
+      BOOST_CHECK(expected_coboundary[cbd_it] == *cbd);
+      ++cbd_it;
+    }
+    ++i;
+  }
 }
 
+BOOST_AUTO_TEST_CASE(all_cells_iterator_and_boundary_iterators_in_Bitmap_cubical_complex_base_check_range_check) {
+  std::vector<double> expected_filtration;
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(1);
+  expected_filtration.push_back(1);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(1);
+  expected_filtration.push_back(1);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(1);
+  expected_filtration.push_back(1);
+  expected_filtration.push_back(2);
+  expected_filtration.push_back(2);
+  expected_filtration.push_back(2);
+  expected_filtration.push_back(3);
+  expected_filtration.push_back(3);
+  expected_filtration.push_back(2);
+  expected_filtration.push_back(2);
+  expected_filtration.push_back(2);
+  expected_filtration.push_back(3);
+  expected_filtration.push_back(3);
 
+  std::vector<unsigned> expected_dimension;
+  expected_dimension.push_back(0);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(0);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(0);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(2);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(2);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(0);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(0);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(0);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(2);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(2);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(0);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(0);
+  expected_dimension.push_back(1);
+  expected_dimension.push_back(0);
 
+  std::vector<size_t> expected_boundary;
+  expected_boundary.push_back(0);
+  expected_boundary.push_back(2);
+  expected_boundary.push_back(2);
+  expected_boundary.push_back(4);
+  expected_boundary.push_back(0);
+  expected_boundary.push_back(10);
+  expected_boundary.push_back(1);
+  expected_boundary.push_back(11);
+  expected_boundary.push_back(7);
+  expected_boundary.push_back(5);
+  expected_boundary.push_back(2);
+  expected_boundary.push_back(12);
+  expected_boundary.push_back(3);
+  expected_boundary.push_back(13);
+  expected_boundary.push_back(9);
+  expected_boundary.push_back(7);
+  expected_boundary.push_back(4);
+  expected_boundary.push_back(14);
+  expected_boundary.push_back(10);
+  expected_boundary.push_back(12);
+  expected_boundary.push_back(12);
+  expected_boundary.push_back(14);
+  expected_boundary.push_back(10);
+  expected_boundary.push_back(20);
+  expected_boundary.push_back(11);
+  expected_boundary.push_back(21);
+  expected_boundary.push_back(17);
+  expected_boundary.push_back(15);
+  expected_boundary.push_back(12);
+  expected_boundary.push_back(22);
+  expected_boundary.push_back(13);
+  expected_boundary.push_back(23);
+  expected_boundary.push_back(19);
+  expected_boundary.push_back(17);
+  expected_boundary.push_back(14);
+  expected_boundary.push_back(24);
+  expected_boundary.push_back(20);
+  expected_boundary.push_back(22);
+  expected_boundary.push_back(22);
+  expected_boundary.push_back(24);
 
+  std::vector<size_t> expected_coboundary;
+  expected_coboundary.push_back(5);
+  expected_coboundary.push_back(1);
+  expected_coboundary.push_back(6);
+  expected_coboundary.push_back(7);
+  expected_coboundary.push_back(1);
+  expected_coboundary.push_back(3);
+  expected_coboundary.push_back(8);
+  expected_coboundary.push_back(9);
+  expected_coboundary.push_back(3);
+  expected_coboundary.push_back(6);
+  expected_coboundary.push_back(6);
+  expected_coboundary.push_back(8);
+  expected_coboundary.push_back(8);
+  expected_coboundary.push_back(5);
+  expected_coboundary.push_back(15);
+  expected_coboundary.push_back(11);
+  expected_coboundary.push_back(6);
+  expected_coboundary.push_back(16);
+  expected_coboundary.push_back(7);
+  expected_coboundary.push_back(17);
+  expected_coboundary.push_back(11);
+  expected_coboundary.push_back(13);
+  expected_coboundary.push_back(8);
+  expected_coboundary.push_back(18);
+  expected_coboundary.push_back(9);
+  expected_coboundary.push_back(19);
+  expected_coboundary.push_back(13);
+  expected_coboundary.push_back(16);
+  expected_coboundary.push_back(16);
+  expected_coboundary.push_back(18);
+  expected_coboundary.push_back(18);
+  expected_coboundary.push_back(15);
+  expected_coboundary.push_back(21);
+  expected_coboundary.push_back(16);
+  expected_coboundary.push_back(17);
+  expected_coboundary.push_back(21);
+  expected_coboundary.push_back(23);
+  expected_coboundary.push_back(18);
+  expected_coboundary.push_back(19);
+  expected_coboundary.push_back(23);
 
+  std::vector<unsigned> sizes(2);
+  sizes[0] = 2;
+  sizes[1] = 2;
 
-BOOST_AUTO_TEST_CASE(all_cells_iterator_and_boundary_iterators_in_Bitmap_cubical_complex_base_check_range_check)
-{
-    std::vector< double > expected_filtration;
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(1);
-    expected_filtration.push_back(1);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(1);
-    expected_filtration.push_back(1);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(1);
-    expected_filtration.push_back(1);
-    expected_filtration.push_back(2);
-    expected_filtration.push_back(2);
-    expected_filtration.push_back(2);
-    expected_filtration.push_back(3);
-    expected_filtration.push_back(3);
-    expected_filtration.push_back(2);
-    expected_filtration.push_back(2);
-    expected_filtration.push_back(2);
-    expected_filtration.push_back(3);
-    expected_filtration.push_back(3);
+  std::vector<double> data(4);
+  data[0] = 0;
+  data[1] = 1;
+  data[2] = 2;
+  data[3] = 3;
 
-    std::vector<unsigned> expected_dimension;
-    expected_dimension.push_back(0);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(0);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(0);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(2);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(2);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(0);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(0);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(0);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(2);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(2);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(0);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(0);
-    expected_dimension.push_back(1);
-    expected_dimension.push_back(0);
+  Bitmap_cubical_complex_base ba(sizes, data);
+  int i = 0;
+  int bd_it = 0;
+  int cbd_it = 0;
 
-    std::vector<size_t> expected_boundary;
-    expected_boundary.push_back(0);
-    expected_boundary.push_back(2);
-    expected_boundary.push_back(2);
-    expected_boundary.push_back(4);
-    expected_boundary.push_back(0);
-    expected_boundary.push_back(10);
-    expected_boundary.push_back(1);
-    expected_boundary.push_back(11);
-    expected_boundary.push_back(7);
-    expected_boundary.push_back(5);
-    expected_boundary.push_back(2);
-    expected_boundary.push_back(12);
-    expected_boundary.push_back(3);
-    expected_boundary.push_back(13);
-    expected_boundary.push_back(9);
-    expected_boundary.push_back(7);
-    expected_boundary.push_back(4);
-    expected_boundary.push_back(14);
-    expected_boundary.push_back(10);
-    expected_boundary.push_back(12);
-    expected_boundary.push_back(12);
-    expected_boundary.push_back(14);
-    expected_boundary.push_back(10);
-    expected_boundary.push_back(20);
-    expected_boundary.push_back(11);
-    expected_boundary.push_back(21);
-    expected_boundary.push_back(17);
-    expected_boundary.push_back(15);
-    expected_boundary.push_back(12);
-    expected_boundary.push_back(22);
-    expected_boundary.push_back(13);
-    expected_boundary.push_back(23);
-    expected_boundary.push_back(19);
-    expected_boundary.push_back(17);
-    expected_boundary.push_back(14);
-    expected_boundary.push_back(24);
-    expected_boundary.push_back(20);
-    expected_boundary.push_back(22);
-    expected_boundary.push_back(22);
-    expected_boundary.push_back(24);
+  Bitmap_cubical_complex_base::All_cells_range range = ba.all_cells_range();
+  for (Bitmap_cubical_complex_base::All_cells_iterator it = range.begin(); it != range.end(); ++it) {
+    BOOST_CHECK(expected_filtration[i] == ba.get_cell_data(*it));
+    BOOST_CHECK(expected_dimension[i] == ba.get_dimension_of_a_cell(*it));
 
-
-    std::vector<size_t> expected_coboundary;
-    expected_coboundary.push_back(5);
-    expected_coboundary.push_back(1);
-    expected_coboundary.push_back(6);
-    expected_coboundary.push_back(7);
-    expected_coboundary.push_back(1);
-    expected_coboundary.push_back(3);
-    expected_coboundary.push_back(8);
-    expected_coboundary.push_back(9);
-    expected_coboundary.push_back(3);
-    expected_coboundary.push_back(6);
-    expected_coboundary.push_back(6);
-    expected_coboundary.push_back(8);
-    expected_coboundary.push_back(8);
-    expected_coboundary.push_back(5);
-    expected_coboundary.push_back(15);
-    expected_coboundary.push_back(11);
-    expected_coboundary.push_back(6);
-    expected_coboundary.push_back(16);
-    expected_coboundary.push_back(7);
-    expected_coboundary.push_back(17);
-    expected_coboundary.push_back(11);
-    expected_coboundary.push_back(13);
-    expected_coboundary.push_back(8);
-    expected_coboundary.push_back(18);
-    expected_coboundary.push_back(9);
-    expected_coboundary.push_back(19);
-    expected_coboundary.push_back(13);
-    expected_coboundary.push_back(16);
-    expected_coboundary.push_back(16);
-    expected_coboundary.push_back(18);
-    expected_coboundary.push_back(18);
-    expected_coboundary.push_back(15);
-    expected_coboundary.push_back(21);
-    expected_coboundary.push_back(16);
-    expected_coboundary.push_back(17);
-    expected_coboundary.push_back(21);
-    expected_coboundary.push_back(23);
-    expected_coboundary.push_back(18);
-    expected_coboundary.push_back(19);
-    expected_coboundary.push_back(23);
-
-
-
-    std::vector< unsigned > sizes(2);
-    sizes[0] = 2;
-    sizes[1] = 2;
-
-    std::vector< double > data(4);
-    data[0] = 0;
-    data[1] = 1;
-    data[2] = 2;
-    data[3] = 3;
-
-    Bitmap_cubical_complex_base ba( sizes , data );
-    int i = 0;
-    int bd_it = 0;
-    int cbd_it = 0;
-
-    Bitmap_cubical_complex_base::All_cells_range range = ba.all_cells_range();
-    for ( Bitmap_cubical_complex_base::All_cells_iterator it = range.begin() ; it != range.end() ; ++it )
-    {
-        BOOST_CHECK( expected_filtration[i] == ba.get_cell_data( *it ) );
-        BOOST_CHECK( expected_dimension[i] == ba.get_dimension_of_a_cell( *it ) );
-
-        Bitmap_cubical_complex_base::Boundary_range bdrange = ba.boundary_range(*it);
-        for ( Bitmap_cubical_complex_base::Boundary_iterator bd = bdrange.begin() ; bd != bdrange.end() ; ++bd )
-        {
-            BOOST_CHECK( expected_boundary[bd_it] == *bd );                        
-            ++bd_it;
-        }
-
-        Bitmap_cubical_complex_base::Coboundary_range cbdrange = ba.coboundary_range(*it);
-        for ( Bitmap_cubical_complex_base::Coboundary_iterator cbd = cbdrange.begin() ; cbd != cbdrange.end() ; ++cbd )
-        {
-             BOOST_CHECK( expected_coboundary[cbd_it] == *cbd );
-            ++cbd_it;
-        }
-        ++i;
+    Bitmap_cubical_complex_base::Boundary_range bdrange = ba.boundary_range(*it);
+    for (Bitmap_cubical_complex_base::Boundary_iterator bd = bdrange.begin(); bd != bdrange.end(); ++bd) {
+      BOOST_CHECK(expected_boundary[bd_it] == *bd);
+      ++bd_it;
     }
+
+    Bitmap_cubical_complex_base::Coboundary_range cbdrange = ba.coboundary_range(*it);
+    for (Bitmap_cubical_complex_base::Coboundary_iterator cbd = cbdrange.begin(); cbd != cbdrange.end(); ++cbd) {
+      BOOST_CHECK(expected_coboundary[cbd_it] == *cbd);
+      ++cbd_it;
+    }
+    ++i;
+  }
 }
 
-BOOST_AUTO_TEST_CASE(Top_dimensional_cells_iterator_range_check)
-{
-    std::vector< double > expected_filtration;
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(1);
-    expected_filtration.push_back(1);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(1);
-    expected_filtration.push_back(1);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(0);
-    expected_filtration.push_back(1);
-    expected_filtration.push_back(1);
-    expected_filtration.push_back(2);
-    expected_filtration.push_back(2);
-    expected_filtration.push_back(2);
-    expected_filtration.push_back(3);
-    expected_filtration.push_back(3);
-    expected_filtration.push_back(2);
-    expected_filtration.push_back(2);
-    expected_filtration.push_back(2);
-    expected_filtration.push_back(3);
-    expected_filtration.push_back(3);
+BOOST_AUTO_TEST_CASE(Top_dimensional_cells_iterator_range_check) {
+  std::vector<double> expected_filtration;
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(1);
+  expected_filtration.push_back(1);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(1);
+  expected_filtration.push_back(1);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(0);
+  expected_filtration.push_back(1);
+  expected_filtration.push_back(1);
+  expected_filtration.push_back(2);
+  expected_filtration.push_back(2);
+  expected_filtration.push_back(2);
+  expected_filtration.push_back(3);
+  expected_filtration.push_back(3);
+  expected_filtration.push_back(2);
+  expected_filtration.push_back(2);
+  expected_filtration.push_back(2);
+  expected_filtration.push_back(3);
+  expected_filtration.push_back(3);
 
+  std::vector<unsigned> sizes(2);
+  sizes[0] = 2;
+  sizes[1] = 2;
 
-    std::vector< unsigned > sizes(2);
-    sizes[0] = 2;
-    sizes[1] = 2;
+  std::vector<double> data(4);
+  data[0] = 0;
+  data[1] = 1;
+  data[2] = 2;
+  data[3] = 3;
 
-    std::vector< double > data(4);
-    data[0] = 0;
-    data[1] = 1;
-    data[2] = 2;
-    data[3] = 3;
+  Bitmap_cubical_complex_base ba(sizes, data);
+  int i = 0;
 
-    Bitmap_cubical_complex_base ba( sizes , data );
-    int i = 0;
-
-    Bitmap_cubical_complex_base::Top_dimensional_cells_range range = ba.top_dimensional_cells_range();
-    for ( Bitmap_cubical_complex_base::Top_dimensional_cells_iterator it = range.begin() ; it != range.end() ; ++it )
-    {
-        BOOST_CHECK( data[i] == ba.get_cell_data( *it ) );
-        BOOST_CHECK( ba.get_dimension_of_a_cell( *it ) == 2 );
-        ++i;
-    }
+  Bitmap_cubical_complex_base::Top_dimensional_cells_range range = ba.top_dimensional_cells_range();
+  for (Bitmap_cubical_complex_base::Top_dimensional_cells_iterator it = range.begin(); it != range.end(); ++it) {
+    BOOST_CHECK(data[i] == ba.get_cell_data(*it));
+    BOOST_CHECK(ba.get_dimension_of_a_cell(*it) == 2);
+    ++i;
+  }
 }
 
+BOOST_AUTO_TEST_CASE(check_if_boundary_of_boundary_is_zero_non_periodic_case_3_d) {
+  std::vector<unsigned> sizes(3);
+  sizes[0] = 5;
+  sizes[1] = 5;
+  sizes[2] = 5;
 
+  std::vector<double> data(125, 0);
 
-
-BOOST_AUTO_TEST_CASE( check_if_boundary_of_boundary_is_zero_non_periodic_case_3_d )
-{	
-    std::vector< unsigned > sizes(3);
-    sizes[0] = 5;
-    sizes[1] = 5;
-    sizes[2] = 5;
-
-    std::vector< double > data(125 , 0);
-    
-    int number_of_all_elements = (2*sizes[0]+1)*(2*sizes[1]+1)*(2*sizes[2]+1);  
-    Bitmap_cubical_complex_base ba( sizes , data );
-    for ( Bitmap_cubical_complex_base::All_cells_iterator it = ba.all_cells_iterator_begin() ; it != ba.all_cells_iterator_end() ; ++it )
-    {		
-        std::vector< int > elems_in_boundary( number_of_all_elements,0 );   
-        int i = 1;
-        Bitmap_cubical_complex_base::Boundary_range bdrange = ba.boundary_range(*it);
-        for ( Bitmap_cubical_complex_base::Boundary_iterator bd = bdrange.begin() ; bd != bdrange.end() ; ++bd )
-        {			
-            Bitmap_cubical_complex_base::Boundary_range second_bdrange = ba.boundary_range(*bd);
-            int j = 1;
-            for ( Bitmap_cubical_complex_base::Boundary_iterator bd2 = second_bdrange.begin() ; bd2 != second_bdrange.end() ; ++bd2 )
-			{
-				elems_in_boundary[ *bd2 ] += i*j;											
-				j *= -1;
-			}
-            i *= -1;
-        }        
-        //check if there is anything nonzero in elems_in_boundary
-        for ( size_t i = 0 ; i != elems_in_boundary.size() ; ++i )
-        {
-			BOOST_CHECK( elems_in_boundary[i] == 0 );
-		}          
+  int number_of_all_elements = (2 * sizes[0] + 1) * (2 * sizes[1] + 1) * (2 * sizes[2] + 1);
+  Bitmap_cubical_complex_base ba(sizes, data);
+  for (Bitmap_cubical_complex_base::All_cells_iterator it = ba.all_cells_iterator_begin();
+       it != ba.all_cells_iterator_end(); ++it) {
+    std::vector<int> elems_in_boundary(number_of_all_elements, 0);
+    int i = 1;
+    Bitmap_cubical_complex_base::Boundary_range bdrange = ba.boundary_range(*it);
+    for (Bitmap_cubical_complex_base::Boundary_iterator bd = bdrange.begin(); bd != bdrange.end(); ++bd) {
+      Bitmap_cubical_complex_base::Boundary_range second_bdrange = ba.boundary_range(*bd);
+      int j = 1;
+      for (Bitmap_cubical_complex_base::Boundary_iterator bd2 = second_bdrange.begin(); bd2 != second_bdrange.end();
+           ++bd2) {
+        elems_in_boundary[*bd2] += i * j;
+        j *= -1;
+      }
+      i *= -1;
     }
+    // check if there is anything nonzero in elems_in_boundary
+    for (size_t i = 0; i != elems_in_boundary.size(); ++i) {
+      BOOST_CHECK(elems_in_boundary[i] == 0);
+    }
+  }
 }
 
+BOOST_AUTO_TEST_CASE(check_if_boundary_of_boundary_is_zero_non_periodic_case_4_d) {
+  std::vector<unsigned> sizes(4);
+  sizes[0] = 3;
+  sizes[1] = 3;
+  sizes[2] = 3;
+  sizes[3] = 3;
 
-BOOST_AUTO_TEST_CASE( check_if_boundary_of_boundary_is_zero_non_periodic_case_4_d )
-{	
-    std::vector< unsigned > sizes(4);
-    sizes[0] = 3;
-    sizes[1] = 3;
-    sizes[2] = 3;
-    sizes[3] = 3;
+  std::vector<double> data(81, 0);
 
-    std::vector< double > data(81		 , 0);
-    
-    int number_of_all_elements = (2*sizes[0]+1)*(2*sizes[1]+1)*(2*sizes[2]+1)*(2*sizes[3]+1);  
-    Bitmap_cubical_complex_base ba( sizes , data );
-    for ( Bitmap_cubical_complex_base::All_cells_iterator it = ba.all_cells_iterator_begin() ; it != ba.all_cells_iterator_end() ; ++it )
-    {					
-        std::vector< int > elems_in_boundary( number_of_all_elements,0 );   
-        int i = 1;
-        Bitmap_cubical_complex_base::Boundary_range bdrange = ba.boundary_range(*it);
-        for ( Bitmap_cubical_complex_base::Boundary_iterator bd = bdrange.begin() ; bd != bdrange.end() ; ++bd )
-        {			
-            Bitmap_cubical_complex_base::Boundary_range second_bdrange = ba.boundary_range(*bd);
-            int j = 1;
-            for ( Bitmap_cubical_complex_base::Boundary_iterator bd2 = second_bdrange.begin() ; bd2 != second_bdrange.end() ; ++bd2 )
-			{
-				elems_in_boundary[ *bd2 ] += i*j;
-				j *= -1;
-			}
-            i *= -1;
-        }        
-        //check if there is anything nonzero in elems_in_boundary
-        for ( size_t i = 0 ; i != elems_in_boundary.size() ; ++i )
-        {
-			BOOST_CHECK( elems_in_boundary[i] == 0 );
-		}          
+  int number_of_all_elements = (2 * sizes[0] + 1) * (2 * sizes[1] + 1) * (2 * sizes[2] + 1) * (2 * sizes[3] + 1);
+  Bitmap_cubical_complex_base ba(sizes, data);
+  for (Bitmap_cubical_complex_base::All_cells_iterator it = ba.all_cells_iterator_begin();
+       it != ba.all_cells_iterator_end(); ++it) {
+    std::vector<int> elems_in_boundary(number_of_all_elements, 0);
+    int i = 1;
+    Bitmap_cubical_complex_base::Boundary_range bdrange = ba.boundary_range(*it);
+    for (Bitmap_cubical_complex_base::Boundary_iterator bd = bdrange.begin(); bd != bdrange.end(); ++bd) {
+      Bitmap_cubical_complex_base::Boundary_range second_bdrange = ba.boundary_range(*bd);
+      int j = 1;
+      for (Bitmap_cubical_complex_base::Boundary_iterator bd2 = second_bdrange.begin(); bd2 != second_bdrange.end();
+           ++bd2) {
+        elems_in_boundary[*bd2] += i * j;
+        j *= -1;
+      }
+      i *= -1;
     }
+    // check if there is anything nonzero in elems_in_boundary
+    for (size_t i = 0; i != elems_in_boundary.size(); ++i) {
+      BOOST_CHECK(elems_in_boundary[i] == 0);
+    }
+  }
 }
 
+BOOST_AUTO_TEST_CASE(check_if_boundary_of_boundary_is_zero_periodic_case_2d) {
+  std::vector<unsigned> sizes(2);
+  sizes[0] = 10;
+  sizes[1] = 10;
 
+  std::vector<bool> directions_of_periodicity(2, true);
+  std::vector<double> data(100, 0);
 
+  int number_of_all_elements = (2 * sizes[0]) * (2 * sizes[1]);  // *(2*sizes[2]);
+  Bitmap_cubical_complex_periodic_boundary_conditions ba(sizes, data, directions_of_periodicity);
+  for (Bitmap_cubical_complex_periodic_boundary_conditions::All_cells_iterator it = ba.all_cells_iterator_begin();
+       it != ba.all_cells_iterator_end(); ++it) {
+    std::vector<int> elems_in_boundary(number_of_all_elements, 0);
+    int i = 1;
 
+    // std::cout << "Element : " << *it << std::endl;
 
-
-BOOST_AUTO_TEST_CASE( check_if_boundary_of_boundary_is_zero_periodic_case_2d )
-{	
-    std::vector< unsigned > sizes(2);
-    sizes[0] = 10;
-    sizes[1] = 10;    
-    
-    std::vector<bool> directions_of_periodicity(2,true);
-    std::vector< double > data(100 , 0);
-    
-    int number_of_all_elements = (2*sizes[0])*(2*sizes[1]);// *(2*sizes[2]);  
-    Bitmap_cubical_complex_periodic_boundary_conditions ba( sizes , data , directions_of_periodicity );
-    for ( Bitmap_cubical_complex_periodic_boundary_conditions::All_cells_iterator it = ba.all_cells_iterator_begin() ; it != ba.all_cells_iterator_end() ; ++it )
-    {		
-        std::vector< int > elems_in_boundary( number_of_all_elements,0 );   
-        int i = 1;       
-        
-        //std::cout << "Element : " << *it << std::endl;         
-        
-        Bitmap_cubical_complex_periodic_boundary_conditions_base::Boundary_range bdrange = ba.boundary_range(*it);
-        for ( Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_iterator bd = bdrange.begin() ; bd != bdrange.end() ; ++bd )
-        {
-			//std::cout <<  *bd << " ";
-            Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_range second_bdrange = ba.boundary_range(*bd);
-            int j = 1;
-            for ( Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_iterator bd2 = second_bdrange.begin() ; bd2 != second_bdrange.end() ; ++bd2 )
-			{
-				elems_in_boundary[ *bd2 ] += i*j;
-				j *= -1;
-			}
-            i *= -1;
-        }   
-        //getchar();        
-             
-        //check if there is anything nonzero in elems_in_boundary
-        for ( size_t i = 0 ; i != elems_in_boundary.size() ; ++i )
-        {	
-			BOOST_CHECK( elems_in_boundary[i] == 0 );		
-		}          
+    Bitmap_cubical_complex_periodic_boundary_conditions_base::Boundary_range bdrange = ba.boundary_range(*it);
+    for (Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_iterator bd = bdrange.begin();
+         bd != bdrange.end(); ++bd) {
+      // std::cout <<  *bd << " ";
+      Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_range second_bdrange = ba.boundary_range(*bd);
+      int j = 1;
+      for (Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_iterator bd2 = second_bdrange.begin();
+           bd2 != second_bdrange.end(); ++bd2) {
+        elems_in_boundary[*bd2] += i * j;
+        j *= -1;
+      }
+      i *= -1;
     }
+    // getchar();
+
+    // check if there is anything nonzero in elems_in_boundary
+    for (size_t i = 0; i != elems_in_boundary.size(); ++i) {
+      BOOST_CHECK(elems_in_boundary[i] == 0);
+    }
+  }
 }
 
+BOOST_AUTO_TEST_CASE(check_if_boundary_of_boundary_is_zero_periodic_case_3d) {
+  std::vector<unsigned> sizes(3);
+  sizes[0] = 5;
+  sizes[1] = 5;
+  sizes[2] = 5;
 
+  std::vector<bool> directions_of_periodicity(3, true);
 
-BOOST_AUTO_TEST_CASE( check_if_boundary_of_boundary_is_zero_periodic_case_3d )
-{	
-    std::vector< unsigned > sizes(3);
-    sizes[0] = 5;
-    sizes[1] = 5;
-    sizes[2] = 5;
-    
-    std::vector<bool> directions_of_periodicity(3,true);
+  std::vector<double> data(125, 0);
 
-    std::vector< double > data(125 , 0);
-    
-    int number_of_all_elements = (2*sizes[0])*(2*sizes[1])*(2*sizes[2]);  
-    Bitmap_cubical_complex_periodic_boundary_conditions ba( sizes , data , directions_of_periodicity );
-    for ( Bitmap_cubical_complex_periodic_boundary_conditions::All_cells_iterator it = ba.all_cells_iterator_begin() ; it != ba.all_cells_iterator_end() ; ++it )
-    {		
-		//std::cout << "Element : " << *it << std::endl;
-		
-        std::vector< int > elems_in_boundary( number_of_all_elements,0 );   
-        int i = 1;                
-        
-        Bitmap_cubical_complex_periodic_boundary_conditions_base::Boundary_range bdrange = ba.boundary_range(*it);
-        for ( Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_iterator bd = bdrange.begin() ; bd != bdrange.end() ; ++bd )
-        {
-            Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_range second_bdrange = ba.boundary_range(*bd);
-            //std::cout << *bd << " ";
-            int j = 1;
-            for ( Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_iterator bd2 = second_bdrange.begin() ; bd2 != second_bdrange.end() ; ++bd2 )
-			{				
-				elems_in_boundary[ *bd2 ] += i*j;
-				j *= -1;
-			}
-            i *= -1;
-        }                   
-        //getchar();
-             
-        //check if there is anything nonzero in elems_in_boundary
-        for ( size_t i = 0 ; i != elems_in_boundary.size() ; ++i )
-        {
-			BOOST_CHECK( elems_in_boundary[i] == 0 );		
-		}          
+  int number_of_all_elements = (2 * sizes[0]) * (2 * sizes[1]) * (2 * sizes[2]);
+  Bitmap_cubical_complex_periodic_boundary_conditions ba(sizes, data, directions_of_periodicity);
+  for (Bitmap_cubical_complex_periodic_boundary_conditions::All_cells_iterator it = ba.all_cells_iterator_begin();
+       it != ba.all_cells_iterator_end(); ++it) {
+    // std::cout << "Element : " << *it << std::endl;
+
+    std::vector<int> elems_in_boundary(number_of_all_elements, 0);
+    int i = 1;
+
+    Bitmap_cubical_complex_periodic_boundary_conditions_base::Boundary_range bdrange = ba.boundary_range(*it);
+    for (Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_iterator bd = bdrange.begin();
+         bd != bdrange.end(); ++bd) {
+      Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_range second_bdrange = ba.boundary_range(*bd);
+      // std::cout << *bd << " ";
+      int j = 1;
+      for (Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_iterator bd2 = second_bdrange.begin();
+           bd2 != second_bdrange.end(); ++bd2) {
+        elems_in_boundary[*bd2] += i * j;
+        j *= -1;
+      }
+      i *= -1;
     }
+    // getchar();
+
+    // check if there is anything nonzero in elems_in_boundary
+    for (size_t i = 0; i != elems_in_boundary.size(); ++i) {
+      BOOST_CHECK(elems_in_boundary[i] == 0);
+    }
+  }
 }
 
+BOOST_AUTO_TEST_CASE(check_if_boundary_of_boundary_is_zero_periodic_case_4d) {
+  std::vector<unsigned> sizes(4);
+  sizes[0] = 4;
+  sizes[1] = 4;
+  sizes[2] = 4;
+  sizes[3] = 4;
 
+  std::vector<bool> directions_of_periodicity(4, true);
 
+  std::vector<double> data(256, 0);
 
+  int number_of_all_elements = (2 * sizes[0]) * (2 * sizes[1]) * (2 * sizes[2]) * (2 * sizes[3]);
+  Bitmap_cubical_complex_periodic_boundary_conditions ba(sizes, data, directions_of_periodicity);
+  for (Bitmap_cubical_complex_periodic_boundary_conditions::All_cells_iterator it = ba.all_cells_iterator_begin();
+       it != ba.all_cells_iterator_end(); ++it) {
+    std::vector<int> elems_in_boundary(number_of_all_elements, 0);
+    int i = 1;
 
-
-BOOST_AUTO_TEST_CASE( check_if_boundary_of_boundary_is_zero_periodic_case_4d )
-{	
-    std::vector< unsigned > sizes(4);
-    sizes[0] = 4;
-    sizes[1] = 4;
-    sizes[2] = 4;
-    sizes[3] = 4;
-    
-    std::vector<bool> directions_of_periodicity(4,true);
-
-    std::vector< double > data(256 , 0);
-    
-    int number_of_all_elements = (2*sizes[0])*(2*sizes[1])*(2*sizes[2])*(2*sizes[3]);  
-    Bitmap_cubical_complex_periodic_boundary_conditions ba( sizes , data , directions_of_periodicity );
-    for ( Bitmap_cubical_complex_periodic_boundary_conditions::All_cells_iterator it = ba.all_cells_iterator_begin() ; it != ba.all_cells_iterator_end() ; ++it )
-    {		
-        std::vector< int > elems_in_boundary( number_of_all_elements,0 );   
-        int i = 1;                
-        
-        Bitmap_cubical_complex_periodic_boundary_conditions_base::Boundary_range bdrange = ba.boundary_range(*it);
-        for ( Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_iterator bd = bdrange.begin() ; bd != bdrange.end() ; ++bd )
-        {
-            Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_range second_bdrange = ba.boundary_range(*bd);
-            int j = 1;
-            for ( Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_iterator bd2 = second_bdrange.begin() ; bd2 != second_bdrange.end() ; ++bd2 )
-			{
-				elems_in_boundary[ *bd2 ] += i*j;
-				j *= -1;
-			}
-            i *= -1;
-        }           
-             
-        //check if there is anything nonzero in elems_in_boundary
-        for ( size_t i = 0 ; i != elems_in_boundary.size() ; ++i )
-        {
-			BOOST_CHECK( elems_in_boundary[i] == 0 );		
-		}          
+    Bitmap_cubical_complex_periodic_boundary_conditions_base::Boundary_range bdrange = ba.boundary_range(*it);
+    for (Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_iterator bd = bdrange.begin();
+         bd != bdrange.end(); ++bd) {
+      Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_range second_bdrange = ba.boundary_range(*bd);
+      int j = 1;
+      for (Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_iterator bd2 = second_bdrange.begin();
+           bd2 != second_bdrange.end(); ++bd2) {
+        elems_in_boundary[*bd2] += i * j;
+        j *= -1;
+      }
+      i *= -1;
     }
+
+    // check if there is anything nonzero in elems_in_boundary
+    for (size_t i = 0; i != elems_in_boundary.size(); ++i) {
+      BOOST_CHECK(elems_in_boundary[i] == 0);
+    }
+  }
 }
 
+BOOST_AUTO_TEST_CASE(compute_incidence_between_cells_test) {
+  std::vector<unsigned> sizes(3);
+  sizes[0] = 5;
+  sizes[1] = 5;
+  sizes[2] = 5;
 
+  std::vector<double> data(125, 0);
 
-
-BOOST_AUTO_TEST_CASE( compute_incidence_between_cells_test )
-{	
-    std::vector< unsigned > sizes(3);
-    sizes[0] = 5;
-    sizes[1] = 5;    
-    sizes[2] = 5;
-        
-    std::vector< double > data(125 , 0);
-    
-    int number_of_all_elements = (2*sizes[0]+1)*(2*sizes[1]+1)*(2*sizes[1]+1);
-    Bitmap_cubical_complex_base ba( sizes , data );
-    for ( Bitmap_cubical_complex_base::All_cells_iterator it = ba.all_cells_iterator_begin() ; it != ba.all_cells_iterator_end() ; ++it )
-    {		
-        std::vector< int > elems_in_boundary( number_of_all_elements,0 );                                         
-        Bitmap_cubical_complex_base::Boundary_range bdrange = ba.boundary_range(*it);
-        for ( Bitmap_cubical_complex_base::Boundary_iterator bd = bdrange.begin() ; bd != bdrange.end() ; ++bd )
-        {
-            Bitmap_cubical_complex_base::Boundary_range second_bdrange = ba.boundary_range(*bd);         
-            for ( Bitmap_cubical_complex_base::Boundary_iterator bd2 = second_bdrange.begin() ; bd2 != second_bdrange.end() ; ++bd2 )
-			{
-				elems_in_boundary[ *bd2 ] += 
-				ba.compute_incidence_between_cells( *it , *bd ) * 
-				ba.compute_incidence_between_cells( *bd , *bd2 );					
-			}
-        }                        
-        //check if there is anything nonzero in elems_in_boundary
-        for ( size_t i = 0 ; i != elems_in_boundary.size() ; ++i )
-        {	
-			BOOST_CHECK( elems_in_boundary[i] == 0 );		
-		}          
+  int number_of_all_elements = (2 * sizes[0] + 1) * (2 * sizes[1] + 1) * (2 * sizes[1] + 1);
+  Bitmap_cubical_complex_base ba(sizes, data);
+  for (Bitmap_cubical_complex_base::All_cells_iterator it = ba.all_cells_iterator_begin();
+       it != ba.all_cells_iterator_end(); ++it) {
+    std::vector<int> elems_in_boundary(number_of_all_elements, 0);
+    Bitmap_cubical_complex_base::Boundary_range bdrange = ba.boundary_range(*it);
+    for (Bitmap_cubical_complex_base::Boundary_iterator bd = bdrange.begin(); bd != bdrange.end(); ++bd) {
+      Bitmap_cubical_complex_base::Boundary_range second_bdrange = ba.boundary_range(*bd);
+      for (Bitmap_cubical_complex_base::Boundary_iterator bd2 = second_bdrange.begin(); bd2 != second_bdrange.end();
+           ++bd2) {
+        elems_in_boundary[*bd2] +=
+            ba.compute_incidence_between_cells(*it, *bd) * ba.compute_incidence_between_cells(*bd, *bd2);
+      }
     }
+    // check if there is anything nonzero in elems_in_boundary
+    for (size_t i = 0; i != elems_in_boundary.size(); ++i) {
+      BOOST_CHECK(elems_in_boundary[i] == 0);
+    }
+  }
 }
 
+BOOST_AUTO_TEST_CASE(compute_incidence_between_cells_test_periodic_boundary_conditions) {
+  std::vector<unsigned> sizes(3);
+  sizes[0] = 5;
+  sizes[1] = 5;
+  sizes[2] = 5;
 
+  std::vector<bool> directions_of_periodicity(3, true);
+  std::vector<double> data(125, 0);
 
-
-BOOST_AUTO_TEST_CASE( compute_incidence_between_cells_test_periodic_boundary_conditions )
-{	
-    std::vector< unsigned > sizes(3);
-    sizes[0] = 5;
-    sizes[1] = 5;    
-    sizes[2] = 5;    
-    
-    std::vector<bool> directions_of_periodicity(3,true);
-    std::vector< double > data(125 , 0);
-    
-    int number_of_all_elements = (2*sizes[0])*(2*sizes[1])*(2*sizes[2]);  
-    Bitmap_cubical_complex_periodic_boundary_conditions ba( sizes , data , directions_of_periodicity );
-    for ( Bitmap_cubical_complex_periodic_boundary_conditions::All_cells_iterator it = ba.all_cells_iterator_begin() ; it != ba.all_cells_iterator_end() ; ++it )
-    {		
-        std::vector< int > elems_in_boundary( number_of_all_elements,0 );                            	        
-        Bitmap_cubical_complex_periodic_boundary_conditions_base::Boundary_range bdrange = ba.boundary_range(*it);
-        for ( Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_iterator bd = bdrange.begin() ; bd != bdrange.end() ; ++bd )
-        {
-			//std::cout <<  *bd << " ";
-            Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_range second_bdrange = ba.boundary_range(*bd);            
-            for ( Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_iterator bd2 = second_bdrange.begin() ; bd2 != second_bdrange.end() ; ++bd2 )
-			{
-				elems_in_boundary[ *bd2 ] += 
-				ba.compute_incidence_between_cells( *it , *bd ) * 
-				ba.compute_incidence_between_cells( *bd , *bd2 );																								
-			}
-        }                
-        //check if there is anything nonzero in elems_in_boundary
-        for ( size_t i = 0 ; i != elems_in_boundary.size() ; ++i )
-        {	
-			BOOST_CHECK( elems_in_boundary[i] == 0 );		
-		}          
+  int number_of_all_elements = (2 * sizes[0]) * (2 * sizes[1]) * (2 * sizes[2]);
+  Bitmap_cubical_complex_periodic_boundary_conditions ba(sizes, data, directions_of_periodicity);
+  for (Bitmap_cubical_complex_periodic_boundary_conditions::All_cells_iterator it = ba.all_cells_iterator_begin();
+       it != ba.all_cells_iterator_end(); ++it) {
+    std::vector<int> elems_in_boundary(number_of_all_elements, 0);
+    Bitmap_cubical_complex_periodic_boundary_conditions_base::Boundary_range bdrange = ba.boundary_range(*it);
+    for (Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_iterator bd = bdrange.begin();
+         bd != bdrange.end(); ++bd) {
+      // std::cout <<  *bd << " ";
+      Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_range second_bdrange = ba.boundary_range(*bd);
+      for (Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_iterator bd2 = second_bdrange.begin();
+           bd2 != second_bdrange.end(); ++bd2) {
+        elems_in_boundary[*bd2] +=
+            ba.compute_incidence_between_cells(*it, *bd) * ba.compute_incidence_between_cells(*bd, *bd2);
+      }
     }
+    // check if there is anything nonzero in elems_in_boundary
+    for (size_t i = 0; i != elems_in_boundary.size(); ++i) {
+      BOOST_CHECK(elems_in_boundary[i] == 0);
+    }
+  }
 }
-
-
-
