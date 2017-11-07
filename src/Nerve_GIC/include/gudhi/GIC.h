@@ -700,7 +700,7 @@ class Cover_complex {
    * @result cover_back(c) vector of IDs of data points.
    *
    */
-   std::vector<int> subpopulation(Cover_t c){
+   const std::vector<int> & subpopulation(Cover_t c){
      return cover_back[c];
    }
 

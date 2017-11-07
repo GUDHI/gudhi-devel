@@ -93,8 +93,8 @@
     </td>
  </tr>
 </table>
- \subsection GICDataStructure Nerves and Graph Induced Complexes
- \image html "gic_complex.png" "Graph Induced Complex of a point cloud."
+ \subsection CoverComplexDataStructure Cover Complexes: Nerves and Graph Induced Complexes
+ \image html "gicvisu.jpg" "Graph Induced Complex of a point cloud."
 <table border="0">
   <tr>
     <td width="25%">
@@ -103,11 +103,11 @@
       <b>Copyright:</b> GPL v3<br>
     </td>
     <td width="75%">
-    Nerves and Graph Induced Complexes are simplicial complexes that provably contain
+    Nerves and Graph Induced Complexes are cover complexes, i.e. simplicial complexes that provably contain
     topological information about the input data. They can be computed with a cover of the
-    data, that often comes from the preimage of a family of intervals covering the image
+    data, that comes i.e. from the preimage of a family of intervals covering the image
     of a scalar-valued function defined on the data. <br>
-    <b>User manual:</b> \ref graph_induced_complex - <b>Reference manual:</b> Gudhi::graph_induced_complex::Graph_induced_complex
+    <b>User manual:</b> \ref cover_complex - <b>Reference manual:</b> Gudhi::cover_complex::Cover_complex
     </td>
  </tr>
 </table>

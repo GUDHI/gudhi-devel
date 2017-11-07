@@ -33,7 +33,6 @@ endif()
 
 # Add your new module in the list, order is not important
 include(GUDHI_modules)
-include_directories(src/Nerve_GIC/include/)
 
 add_gudhi_module(common)
 add_gudhi_module(Alpha_complex)
@@ -49,8 +48,8 @@ add_gudhi_module(Spatial_searching)
 add_gudhi_module(Subsampling)
 add_gudhi_module(Tangential_complex)
 add_gudhi_module(Witness_complex)
+add_gudhi_module(Nerve_GIC)
 add_subdirectory(src/Nerve_GIC/example)
-add_subdirectory(src/Nerve_GIC/test)
 
 message("++ GUDHI_MODULES list is:\"${GUDHI_MODULES}\"")
 
