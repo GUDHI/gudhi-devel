@@ -1335,11 +1335,11 @@ BOOST_AUTO_TEST_CASE(Top_dimensional_cells_iterator_range_check) {
 
 BOOST_AUTO_TEST_CASE(check_if_boundary_of_boundary_is_zero_non_periodic_case_3_d) {
   std::vector<unsigned> sizes(3);
-  sizes[0] = 5;
-  sizes[1] = 5;
-  sizes[2] = 5;
+  sizes[0] = 3;
+  sizes[1] = 3;
+  sizes[2] = 3;
 
-  std::vector<double> data(125, 0);
+  std::vector<double> data(27, 0);
 
   int number_of_all_elements = (2 * sizes[0] + 1) * (2 * sizes[1] + 1) * (2 * sizes[2] + 1);
   Bitmap_cubical_complex_base ba(sizes, data);
@@ -1400,11 +1400,11 @@ BOOST_AUTO_TEST_CASE(check_if_boundary_of_boundary_is_zero_non_periodic_case_4_d
 
 BOOST_AUTO_TEST_CASE(check_if_boundary_of_boundary_is_zero_periodic_case_2d) {
   std::vector<unsigned> sizes(2);
-  sizes[0] = 10;
-  sizes[1] = 10;
+  sizes[0] = 3;
+  sizes[1] = 3;
 
   std::vector<bool> directions_of_periodicity(2, true);
-  std::vector<double> data(100, 0);
+  std::vector<double> data(9, 0);
 
   int number_of_all_elements = (2 * sizes[0]) * (2 * sizes[1]);  // *(2*sizes[2]);
   Bitmap_cubical_complex_periodic_boundary_conditions ba(sizes, data, directions_of_periodicity);
@@ -1439,13 +1439,13 @@ BOOST_AUTO_TEST_CASE(check_if_boundary_of_boundary_is_zero_periodic_case_2d) {
 
 BOOST_AUTO_TEST_CASE(check_if_boundary_of_boundary_is_zero_periodic_case_3d) {
   std::vector<unsigned> sizes(3);
-  sizes[0] = 5;
-  sizes[1] = 5;
-  sizes[2] = 5;
+  sizes[0] = 3;
+  sizes[1] = 3;
+  sizes[2] = 3;
 
   std::vector<bool> directions_of_periodicity(3, true);
 
-  std::vector<double> data(125, 0);
+  std::vector<double> data(27, 0);
 
   int number_of_all_elements = (2 * sizes[0]) * (2 * sizes[1]) * (2 * sizes[2]);
   Bitmap_cubical_complex_periodic_boundary_conditions ba(sizes, data, directions_of_periodicity);
@@ -1469,7 +1469,6 @@ BOOST_AUTO_TEST_CASE(check_if_boundary_of_boundary_is_zero_periodic_case_3d) {
       }
       i *= -1;
     }
-    // getchar();
 
     // check if there is anything nonzero in elems_in_boundary
     for (size_t i = 0; i != elems_in_boundary.size(); ++i) {
@@ -1480,14 +1479,14 @@ BOOST_AUTO_TEST_CASE(check_if_boundary_of_boundary_is_zero_periodic_case_3d) {
 
 BOOST_AUTO_TEST_CASE(check_if_boundary_of_boundary_is_zero_periodic_case_4d) {
   std::vector<unsigned> sizes(4);
-  sizes[0] = 4;
-  sizes[1] = 4;
-  sizes[2] = 4;
-  sizes[3] = 4;
+  sizes[0] = 3;
+  sizes[1] = 3;
+  sizes[2] = 3;
+  sizes[3] = 3;
 
   std::vector<bool> directions_of_periodicity(4, true);
 
-  std::vector<double> data(256, 0);
+  std::vector<double> data(81, 0);
 
   int number_of_all_elements = (2 * sizes[0]) * (2 * sizes[1]) * (2 * sizes[2]) * (2 * sizes[3]);
   Bitmap_cubical_complex_periodic_boundary_conditions ba(sizes, data, directions_of_periodicity);
@@ -1518,11 +1517,11 @@ BOOST_AUTO_TEST_CASE(check_if_boundary_of_boundary_is_zero_periodic_case_4d) {
 
 BOOST_AUTO_TEST_CASE(compute_incidence_between_cells_test) {
   std::vector<unsigned> sizes(3);
-  sizes[0] = 5;
-  sizes[1] = 5;
-  sizes[2] = 5;
+  sizes[0] = 3;
+  sizes[1] = 3;
+  sizes[2] = 3;
 
-  std::vector<double> data(125, 0);
+  std::vector<double> data(27, 0);
 
   int number_of_all_elements = (2 * sizes[0] + 1) * (2 * sizes[1] + 1) * (2 * sizes[1] + 1);
   Bitmap_cubical_complex_base ba(sizes, data);
@@ -1547,12 +1546,12 @@ BOOST_AUTO_TEST_CASE(compute_incidence_between_cells_test) {
 
 BOOST_AUTO_TEST_CASE(compute_incidence_between_cells_test_periodic_boundary_conditions) {
   std::vector<unsigned> sizes(3);
-  sizes[0] = 5;
-  sizes[1] = 5;
-  sizes[2] = 5;
+  sizes[0] = 3;
+  sizes[1] = 3;
+  sizes[2] = 3;
 
   std::vector<bool> directions_of_periodicity(3, true);
-  std::vector<double> data(125, 0);
+  std::vector<double> data(27, 0);
 
   int number_of_all_elements = (2 * sizes[0]) * (2 * sizes[1]) * (2 * sizes[2]);
   Bitmap_cubical_complex_periodic_boundary_conditions ba(sizes, data, directions_of_periodicity);
