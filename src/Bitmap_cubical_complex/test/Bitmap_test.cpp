@@ -1342,10 +1342,10 @@ BOOST_AUTO_TEST_CASE(check_if_boundary_of_boundary_is_zero_non_periodic_case_3_d
   std::vector<double> data(27, 0);
 
   int number_of_all_elements = (2 * sizes[0] + 1) * (2 * sizes[1] + 1) * (2 * sizes[2] + 1);
+  std::vector<int> elems_in_boundary(number_of_all_elements, 0);
   Bitmap_cubical_complex_base ba(sizes, data);
   for (Bitmap_cubical_complex_base::All_cells_iterator it = ba.all_cells_iterator_begin();
-       it != ba.all_cells_iterator_end(); ++it) {
-    std::vector<int> elems_in_boundary(number_of_all_elements, 0);
+       it != ba.all_cells_iterator_end(); ++it) {    
     int i = 1;
     Bitmap_cubical_complex_base::Boundary_range bdrange = ba.boundary_range(*it);
     for (Bitmap_cubical_complex_base::Boundary_iterator bd = bdrange.begin(); bd != bdrange.end(); ++bd) {
@@ -1375,10 +1375,10 @@ BOOST_AUTO_TEST_CASE(check_if_boundary_of_boundary_is_zero_non_periodic_case_4_d
   std::vector<double> data(81, 0);
 
   int number_of_all_elements = (2 * sizes[0] + 1) * (2 * sizes[1] + 1) * (2 * sizes[2] + 1) * (2 * sizes[3] + 1);
+  std::vector<int> elems_in_boundary(number_of_all_elements, 0);
   Bitmap_cubical_complex_base ba(sizes, data);
   for (Bitmap_cubical_complex_base::All_cells_iterator it = ba.all_cells_iterator_begin();
-       it != ba.all_cells_iterator_end(); ++it) {
-    std::vector<int> elems_in_boundary(number_of_all_elements, 0);
+       it != ba.all_cells_iterator_end(); ++it) {    
     int i = 1;
     Bitmap_cubical_complex_base::Boundary_range bdrange = ba.boundary_range(*it);
     for (Bitmap_cubical_complex_base::Boundary_iterator bd = bdrange.begin(); bd != bdrange.end(); ++bd) {
@@ -1407,10 +1407,10 @@ BOOST_AUTO_TEST_CASE(check_if_boundary_of_boundary_is_zero_periodic_case_2d) {
   std::vector<double> data(9, 0);
 
   int number_of_all_elements = (2 * sizes[0]) * (2 * sizes[1]);  // *(2*sizes[2]);
+  std::vector<int> elems_in_boundary(number_of_all_elements, 0);
   Bitmap_cubical_complex_periodic_boundary_conditions ba(sizes, data, directions_of_periodicity);
   for (Bitmap_cubical_complex_periodic_boundary_conditions::All_cells_iterator it = ba.all_cells_iterator_begin();
-       it != ba.all_cells_iterator_end(); ++it) {
-    std::vector<int> elems_in_boundary(number_of_all_elements, 0);
+       it != ba.all_cells_iterator_end(); ++it) {    
     int i = 1;
 
     // std::cout << "Element : " << *it << std::endl;
@@ -1449,11 +1449,11 @@ BOOST_AUTO_TEST_CASE(check_if_boundary_of_boundary_is_zero_periodic_case_3d) {
 
   int number_of_all_elements = (2 * sizes[0]) * (2 * sizes[1]) * (2 * sizes[2]);
   Bitmap_cubical_complex_periodic_boundary_conditions ba(sizes, data, directions_of_periodicity);
+  std::vector<int> elems_in_boundary(number_of_all_elements, 0);
   for (Bitmap_cubical_complex_periodic_boundary_conditions::All_cells_iterator it = ba.all_cells_iterator_begin();
        it != ba.all_cells_iterator_end(); ++it) {
     // std::cout << "Element : " << *it << std::endl;
-
-    std::vector<int> elems_in_boundary(number_of_all_elements, 0);
+    
     int i = 1;
 
     Bitmap_cubical_complex_periodic_boundary_conditions_base::Boundary_range bdrange = ba.boundary_range(*it);
@@ -1489,10 +1489,10 @@ BOOST_AUTO_TEST_CASE(check_if_boundary_of_boundary_is_zero_periodic_case_4d) {
   std::vector<double> data(81, 0);
 
   int number_of_all_elements = (2 * sizes[0]) * (2 * sizes[1]) * (2 * sizes[2]) * (2 * sizes[3]);
+  std::vector<int> elems_in_boundary(number_of_all_elements, 0);
   Bitmap_cubical_complex_periodic_boundary_conditions ba(sizes, data, directions_of_periodicity);
   for (Bitmap_cubical_complex_periodic_boundary_conditions::All_cells_iterator it = ba.all_cells_iterator_begin();
-       it != ba.all_cells_iterator_end(); ++it) {
-    std::vector<int> elems_in_boundary(number_of_all_elements, 0);
+       it != ba.all_cells_iterator_end(); ++it) {    
     int i = 1;
 
     Bitmap_cubical_complex_periodic_boundary_conditions_base::Boundary_range bdrange = ba.boundary_range(*it);
@@ -1525,9 +1525,9 @@ BOOST_AUTO_TEST_CASE(compute_incidence_between_cells_test) {
 
   int number_of_all_elements = (2 * sizes[0] + 1) * (2 * sizes[1] + 1) * (2 * sizes[1] + 1);
   Bitmap_cubical_complex_base ba(sizes, data);
+  std::vector<int> elems_in_boundary(number_of_all_elements, 0);
   for (Bitmap_cubical_complex_base::All_cells_iterator it = ba.all_cells_iterator_begin();
-       it != ba.all_cells_iterator_end(); ++it) {
-    std::vector<int> elems_in_boundary(number_of_all_elements, 0);
+       it != ba.all_cells_iterator_end(); ++it) {    
     Bitmap_cubical_complex_base::Boundary_range bdrange = ba.boundary_range(*it);
     for (Bitmap_cubical_complex_base::Boundary_iterator bd = bdrange.begin(); bd != bdrange.end(); ++bd) {
       Bitmap_cubical_complex_base::Boundary_range second_bdrange = ba.boundary_range(*bd);
@@ -1555,9 +1555,10 @@ BOOST_AUTO_TEST_CASE(compute_incidence_between_cells_test_periodic_boundary_cond
 
   int number_of_all_elements = (2 * sizes[0]) * (2 * sizes[1]) * (2 * sizes[2]);
   Bitmap_cubical_complex_periodic_boundary_conditions ba(sizes, data, directions_of_periodicity);
+  
+  std::vector<int> elems_in_boundary(number_of_all_elements, 0);  
   for (Bitmap_cubical_complex_periodic_boundary_conditions::All_cells_iterator it = ba.all_cells_iterator_begin();
-       it != ba.all_cells_iterator_end(); ++it) {
-    std::vector<int> elems_in_boundary(number_of_all_elements, 0);
+       it != ba.all_cells_iterator_end(); ++it) {    
     Bitmap_cubical_complex_periodic_boundary_conditions_base::Boundary_range bdrange = ba.boundary_range(*it);
     for (Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_iterator bd = bdrange.begin();
          bd != bdrange.end(); ++bd) {
