@@ -54,10 +54,12 @@ if(CGAL_FOUND)
       endforeach(CGAL_INCLUDE_DIR ${CGAL_INCLUDE_DIRS})
     endif(NOT CGAL_VERSION VERSION_GREATER 4.9.0)
 
-    # For dev version
-    include_directories(BEFORE "src/common/include/gudhi_patches")
-    # For user version
-    include_directories(BEFORE "include/gudhi_patches")
+    if (NOT CGAL_VERSION VERSION_GREATER 4.11.0)
+      # For dev version
+      include_directories(BEFORE "src/common/include/gudhi_patches")
+      # For user version
+      include_directories(BEFORE "include/gudhi_patches")
+    endif (NOT CGAL_VERSION VERSION_GREATER 4.11.0)
   endif()
 endif()
 

@@ -155,7 +155,7 @@ class Tangential_complex {
   >::type Triangulation;
   typedef typename Triangulation::Geom_traits Tr_traits;
   typedef typename Triangulation::Weighted_point Tr_point;
-  typedef typename Triangulation::Bare_point Tr_bare_point;
+  typedef typename Tr_traits::Base::Point_d Tr_bare_point;
   typedef typename Triangulation::Vertex_handle Tr_vertex_handle;
   typedef typename Triangulation::Full_cell_handle Tr_full_cell_handle;
   typedef typename Tr_traits::Vector_d Tr_vector;
@@ -1093,8 +1093,8 @@ class Tangential_complex {
     std::size_t num_inserted_points = 1;
 #endif
     // const int NUM_NEIGHBORS = 150;
-    // KNS_range ins_range = m_points_ds.query_k_nearest_neighbors(center_pt, NUM_NEIGHBORS);
-    INS_range ins_range = m_points_ds.query_incremental_nearest_neighbors(center_pt);
+    // KNS_range ins_range = m_points_ds.k_nearest_neighbors(center_pt, NUM_NEIGHBORS);
+    INS_range ins_range = m_points_ds.incremental_nearest_neighbors(center_pt);
 
     // While building the local triangulation, we keep the radius
     // of the sphere "star sphere" centered at "center_vertex"
@@ -1203,7 +1203,7 @@ class Tangential_complex {
     Point center_point = compute_perturbed_point(i);
     // Among updated point, what is the closer from our center point?
     std::size_t closest_pt_index =
-        updated_pts_ds.query_k_nearest_neighbors(center_point, 1, false).begin()->first;
+        updated_pts_ds.k_nearest_neighbors(center_point, 1, false).begin()->first;
 
     typename K::Construct_weighted_point_d k_constr_wp =
         m_k.construct_weighted_point_d_object();
@@ -1315,11 +1315,10 @@ class Tangential_complex {
         m_k.compute_coordinate_d_object();
 
 #ifdef GUDHI_TC_USE_ANOTHER_POINT_SET_FOR_TANGENT_SPACE_ESTIM
-    KNS_range kns_range = m_points_ds_for_tse.query_k_nearest_neighbors(
-                                                                        p, num_pts_for_pca, false);
+    KNS_range kns_range = m_points_ds_for_tse.k_nearest_neighbors(p, num_pts_for_pca, false);
     const Points &points_for_pca = m_points_for_tse;
 #else
-    KNS_range kns_range = m_points_ds.query_k_nearest_neighbors(p, num_pts_for_pca, false);
+    KNS_range kns_range = m_points_ds.k_nearest_neighbors(p, num_pts_for_pca, false);
     const Points &points_for_pca = m_points;
 #endif
 
@@ -1413,11 +1412,10 @@ class Tangential_complex {
       const Point &p = m_points[*it_index];
 
 #ifdef GUDHI_TC_USE_ANOTHER_POINT_SET_FOR_TANGENT_SPACE_ESTIM
-      KNS_range kns_range = m_points_ds_for_tse.query_k_nearest_neighbors(
-                                                                          p, num_pts_for_pca, false);
+      KNS_range kns_range = m_points_ds_for_tse.k_nearest_neighbors(p, num_pts_for_pca, false);
       const Points &points_for_pca = m_points_for_tse;
 #else
-      KNS_range kns_range = m_points_ds.query_k_nearest_neighbors(p, num_pts_for_pca, false);
+      KNS_range kns_range = m_points_ds.k_nearest_neighbors(p, num_pts_for_pca, false);
       const Points &points_for_pca = m_points;
 #endif
 

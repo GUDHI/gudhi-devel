@@ -482,7 +482,17 @@ class Simplex_tree {
   }
 
   /** \brief Returns an upper bound on the dimension of the simplicial complex. */
-  int dimension() const {
+  int upper_bound_dimension() const {
+    return dimension_;
+  }
+
+  /** \brief Returns the dimension of the simplicial complex.
+      \details This function is not constant time because it can recompute dimension if required (can be triggered by
+      `remove_maximal_simplex()` or `prune_above_filtration()`).
+  */
+  int dimension() {
+    if (dimension_to_be_lowered_)
+      lower_upper_bound_dimension();
     return dimension_;
   }
 
@@ -591,7 +601,11 @@ class Simplex_tree {
       // if filtration value unchanged
       return std::pair<Simplex_handle, bool>(null_simplex(), false);
     }
-    // otherwise the insertion has succeeded
+    // otherwise the insertion has succeeded - size is a size_type
+    if (static_cast<int>(simplex.size()) - 1 > dimension_) {
+      // Update dimension if needed
+      dimension_ = static_cast<int>(simplex.size()) - 1;
+    }
     return res_insert;
   }
 
@@ -1067,6 +1081,118 @@ class Simplex_tree {
   }
 
  public:
+  /** \brief Expands a simplex tree containing only a graph. Simplices corresponding to cliques in the graph are added
+   * incrementally, faces before cofaces, unless the simplex has dimension larger than `max_dim` or `block_simplex`
+   * returns true for this simplex.
+   *
+   * @param[in] max_dim Expansion maximal dimension value.
+   * @param[in] block_simplex Blocker oracle. Its concept is <CODE>bool block_simplex(Simplex_handle sh)</CODE>
+   *
+   * The function identifies a candidate simplex whose faces are all already in the complex, inserts
+   * it with a filtration value corresponding to the maximum of the filtration values of the faces, then calls
+   * `block_simplex` on a `Simplex_handle` for this new simplex. If `block_simplex` returns true, the simplex is
+   * removed, otherwise it is kept. Note that the evaluation of `block_simplex` is a good time to update the
+   * filtration value of the simplex if you want a customized value. The algorithm then proceeds with the next
+   * candidate.
+   *
+   * @warning several candidates of the same dimension may be inserted simultaneously before calling `block_simplex`,
+   * so if you examine the complex in `block_simplex`, you may hit a few simplices of the same dimension that have not
+   * been vetted by `block_simplex` yet, or have already been rejected but not yet removed.
+   */
+  template< typename Blocker >
+  void expansion_with_blockers(int max_dim, Blocker block_simplex) {
+    // Loop must be from the end to the beginning, as higher dimension simplex are always on the left part of the tree
+    for (auto& simplex : boost::adaptors::reverse(root_.members())) {
+      if (has_children(&simplex)) {
+        siblings_expansion_with_blockers(simplex.second.children(), max_dim, max_dim - 1, block_simplex);
+      }
+    }
+  }
+
+ private:
+  /** \brief Recursive expansion with blockers of the simplex tree.*/
+  template< typename Blocker >
+  void siblings_expansion_with_blockers(Siblings* siblings, int max_dim, int k, Blocker block_simplex) {
+    if (dimension_ < max_dim - k) {
+      dimension_ = max_dim - k;
+    }
+    if (k == 0)
+      return;
+    // No need to go deeper
+    if (siblings->members().size() < 2)
+      return;
+    // Reverse loop starting before the last one for 'next' to be the last one
+    for (auto simplex = siblings->members().rbegin() + 1; simplex != siblings->members().rend(); simplex++) {
+      std::vector<std::pair<Vertex_handle, Node> > intersection;
+      for(auto next = siblings->members().rbegin(); next != simplex; next++) {
+        bool to_be_inserted = true;
+        Filtration_value filt = simplex->second.filtration();
+        // If all the boundaries are present, 'next' needs to be inserted
+        for (Simplex_handle border : boundary_simplex_range(simplex)) {
+          Simplex_handle border_child = find_child(border, next->first);
+          if (border_child == null_simplex()) {
+            to_be_inserted=false;
+            break;
+          }
+          filt = std::max(filt, filtration(border_child));
+        }
+        if (to_be_inserted) {
+          intersection.emplace_back(next->first, Node(nullptr, filt));
+        }
+      }
+      if (intersection.size() != 0) {
+        // Reverse the order to insert
+        Siblings * new_sib = new Siblings(siblings,  // oncles
+                                          simplex->first,  // parent
+                                          boost::adaptors::reverse(intersection));  // boost::container::ordered_unique_range_t
+        std::vector<Simplex_handle> blocked_new_sib_list;
+        // As all intersections are inserted, we can call the blocker function on all new_sib members
+        for (auto new_sib_member = new_sib->members().begin();
+             new_sib_member != new_sib->members().end();
+             new_sib_member++) {
+           bool blocker_result = block_simplex(new_sib_member);
+           // new_sib member has been blocked by the blocker function
+           // add it to the list to be removed - do not perform it while looping on it
+           if (blocker_result)
+             blocked_new_sib_list.push_back(new_sib_member);
+        }
+        bool removed = false;
+        for (auto& blocked_new_sib_member : blocked_new_sib_list){
+          removed = removed || remove_maximal_simplex(blocked_new_sib_member);
+        }
+        if (removed) {
+          // ensure the children property
+          simplex->second.assign_children(siblings);
+        } else {
+          // ensure recursive call
+          simplex->second.assign_children(new_sib);
+          siblings_expansion_with_blockers(new_sib, max_dim, k - 1, block_simplex);
+        }
+      } else {
+        // ensure the children property
+        simplex->second.assign_children(siblings);
+      }
+    }
+  }
+
+  /* \private Returns the Simplex_handle composed of the vertex list (from the Simplex_handle), plus the given
+   * Vertex_handle if the Vertex_handle is found in the Simplex_handle children list.
+   * Returns null_simplex() if it does not exist
+  */
+  Simplex_handle find_child(Simplex_handle sh, Vertex_handle vh) const {
+    if (!has_children(sh))
+      return null_simplex();
+
+    Simplex_handle child = sh->second.children()->find(vh);
+    // Specific case of boost::flat_map does not find, returns boost::flat_map::end()
+    // in simplex tree we want a null_simplex()
+    if (child == sh->second.children()->members().end())
+      return null_simplex();
+
+    return child;
+  }
+
+ public:
   /** \brief Write the hasse diagram of the simplicial complex in os.
    *
    * Each row in the file correspond to a simplex. A line is written:
@@ -1142,6 +1268,9 @@ class Simplex_tree {
    * \post Some simplex tree functions require the filtration to be valid. `prune_above_filtration()`
    * function is not launching `initialize_filtration()` but returns the filtration modification information. If the
    * complex has changed , please call `initialize_filtration()` to recompute it.
+   * \post Note that the dimension of the simplicial complex may be lower after calling `prune_above_filtration()`
+   * than it was before. However, `upper_bound_dimension()` will return the old value, which remains a valid upper
+   * bound. If you care, you can call `dimension()` to recompute the exact dimension.
    */
   bool prune_above_filtration(Filtration_value filtration) {
     return rec_prune_above_filtration(root(), filtration);
@@ -1153,6 +1282,8 @@ class Simplex_tree {
     auto last = std::remove_if(list.begin(), list.end(), [=](Dit_value_t& simplex) {
         if (simplex.second.filtration() <= filt) return false;
         if (has_children(&simplex)) rec_delete(simplex.second.children());
+        // dimension may need to be lowered
+        dimension_to_be_lowered_ = true;
         return true;
       });
 
@@ -1161,6 +1292,8 @@ class Simplex_tree {
       // Removing the whole siblings, parent becomes a leaf.
       sib->oncles()->members()[sib->parent()].assign_children(sib->oncles());
       delete sib;
+      // dimension may need to be lowered
+      dimension_to_be_lowered_ = true;
       return true;
     } else {
       // Keeping some elements of siblings. Remove the others, and recurse in the remaining ones.
@@ -1172,14 +1305,49 @@ class Simplex_tree {
     return modified;
   }
 
+ private:
+  /** \brief Deep search simplex tree dimension recompute.
+   * @return True if the dimension was modified, false otherwise.
+   * \pre Be sure the simplex tree has not a too low dimension value as the deep search stops when the former dimension
+   * has been reached (cf. `upper_bound_dimension()` and `set_dimension()` methods).
+   */
+  bool lower_upper_bound_dimension() {
+    // reset automatic detection to recompute
+    dimension_to_be_lowered_ = false;
+    int new_dimension = -1;
+    // Browse the tree from the left to the right as higher dimension cells are more likely on the left part of the tree
+    for (Simplex_handle sh : complex_simplex_range()) {
+#ifdef DEBUG_TRACES
+      for (auto vertex : simplex_vertex_range(sh)) {
+        std::cout << " " << vertex;
+      }
+      std::cout << std::endl;
+#endif  // DEBUG_TRACES
+
+      int sh_dimension = dimension(sh);
+      if (sh_dimension >= dimension_)
+        // Stop browsing as soon as the dimension is reached, no need to go furter
+        return false;
+      new_dimension = std::max(new_dimension, sh_dimension);
+    }
+    dimension_ = new_dimension;
+    return true;
+  }
+
+
  public:
   /** \brief Remove a maximal simplex.
    * @param[in] sh Simplex handle on the maximal simplex to remove.
+   * @return a boolean value that is an implementation detail, and that the user is supposed to ignore
    * \pre Please check the simplex has no coface before removing it.
    * \exception std::invalid_argument In debug mode, if sh has children.
-   * \post Be aware that removing is shifting data in a flat_map (initialize_filtration to be done).
+   * \post Be aware that removing is shifting data in a flat_map (`initialize_filtration()` to be done).
+   * \post Note that the dimension of the simplicial complex may be lower after calling `remove_maximal_simplex()`
+   * than it was before. However, `upper_bound_dimension()` will return the old value, which remains a valid upper
+   * bound. If you care, you can call `dimension()` to recompute the exact dimension.
+   * \internal @return true if the leaf's branch has no other leaves (branch's children has been re-assigned), false otherwise.
    */
-  void remove_maximal_simplex(Simplex_handle sh) {
+  bool remove_maximal_simplex(Simplex_handle sh) {
     // Guarantee the simplex has no children
     GUDHI_CHECK(!has_children(sh),
                 std::invalid_argument("Simplex_tree::remove_maximal_simplex - argument has children"));
@@ -1195,7 +1363,11 @@ class Simplex_tree {
       // Sibling is emptied : must be deleted, and its parent must point on his own Sibling
       child->oncles()->members().at(child->parent()).assign_children(child->oncles());
       delete child;
+      // dimension may need to be lowered
+      dimension_to_be_lowered_ = true;
+      return true;
     }
+    return false;
   }
 
  private:
@@ -1207,6 +1379,7 @@ class Simplex_tree {
   std::vector<Simplex_handle> filtration_vect_;
   /** \brief Upper bound on the dimension of the simplicial complex.*/
   int dimension_;
+  bool dimension_to_be_lowered_ = false;
 };
 
 // Print a Simplex_tree in os.

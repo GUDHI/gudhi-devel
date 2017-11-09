@@ -68,8 +68,8 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  //If the treshold, being minimal corelation is in the range [0,1], 
-  //change it to 1-threshold
+  // If the threshold, being minimal correlation is in the range [0,1],
+  // change it to 1-threshold
   if ( ( threshold>=0 ) && ( threshold<=1 ) )
   {
 	  threshold = 1-threshold;
@@ -95,7 +95,7 @@ int main(int argc, char* argv[]) {
   pcoh.compute_persistent_cohomology(min_persistence);
     
   
-  //invert the persistence diagram 
+  // invert the persistence diagram
   auto pairs = pcoh.get_persistent_pairs();
   std::vector< intervals_common > processed_persistence_intervals;
   processed_persistence_intervals.reserve( pairs.size() );
@@ -128,34 +128,34 @@ void program_options(int argc, char* argv[], std::string& csv_matrix_file, std::
                      Filtration_value& threshold, int& dim_max, int& p, Filtration_value& min_persistence) {
   namespace po = boost::program_options;
   po::options_description hidden("Hidden options");
-  hidden.add_options()(
-      "input-file", po::value<std::string>(&csv_matrix_file),
-      "Name of file containing a distance matrix. Can be square or lower triangular matrix. Separator is ';'.");
+  // hidden.add_options()(
+  //     "input-file", po::value<std::string>(&csv_matrix_file),
+  //     "Name of file containing a correlation matrix. Can be square or lower triangular matrix. Separator is ';'.");
   hidden.add_options()
       ("input-file", po::value<std::string>(&csv_matrix_file),
-       "Name of file containing a corelation matrix. Can be square or lower triangular matrix. Separator is ';'.");
+       "Name of file containing a correlation matrix. Can be square or lower triangular matrix. Separator is ';'.");
 
   po::options_description visible("Allowed options", 100);
-  visible.add_options()("help,h", "produce help message")(
-      "output-file,o", po::value<std::string>(&filediag)->default_value(std::string()),
-      "Name of file in which the persistence diagram is written. Default print in std::cout")(
-      "max-edge-length,r",
-      po::value<Filtration_value>(&threshold)->default_value(std::numeric_limits<Filtration_value>::infinity()),
-      "Maximal length of an edge for the Rips complex construction.")(
-      "cpx-dimension,d", po::value<int>(&dim_max)->default_value(1),
-      "Maximal dimension of the Rips complex we want to compute.")(
-      "field-charac,p", po::value<int>(&p)->default_value(11),
-      "Characteristic p of the coefficient field Z/pZ for computing homology.")(
-      "min-persistence,m", po::value<Filtration_value>(&min_persistence),
-      "Minimal lifetime of homology feature to be recorded. Default is 0. Enter a negative value to see zero length "
-      "intervals");
+  // visible.add_options()("help,h", "produce help message")(
+  //     "output-file,o", po::value<std::string>(&filediag)->default_value(std::string()),
+  //     "Name of file in which the persistence diagram is written. Default print in std::cout")(
+  //     "max-edge-length,r",
+  //     po::value<Filtration_value>(&threshold)->default_value(std::numeric_limits<Filtration_value>::infinity()),
+  //     "Maximal length of an edge for the Rips complex construction.")(
+  //     "cpx-dimension,d", po::value<int>(&dim_max)->default_value(1),
+  //     "Maximal dimension of the Rips complex we want to compute.")(
+  //     "field-charac,p", po::value<int>(&p)->default_value(11),
+  //     "Characteristic p of the coefficient field Z/pZ for computing homology.")(
+  //     "min-persistence,m", po::value<Filtration_value>(&min_persistence),
+  //     "Minimal lifetime of homology feature to be recorded. Default is 0. Enter a negative value to see zero length "
+  //     "intervals");
   visible.add_options()
       ("help,h", "produce help message")
       ("output-file,o", po::value<std::string>(&filediag)->default_value(std::string()),
        "Name of file in which the persistence diagram is written. Default print in std::cout")
-      ("min-edge-corelation,c",
+      ("min-edge-correlation,c",
        po::value<Filtration_value>(&threshold)->default_value(std::numeric_limits<Filtration_value>::infinity()),
-       "Minimal corelation of an edge for the Rips complex construction.")
+       "Minimal correlation of an edge for the Rips complex construction.")
       ("cpx-dimension,d", po::value<int>(&dim_max)->default_value(1),
        "Maximal dimension of the Rips complex we want to compute.")
       ("field-charac,p", po::value<int>(&p)->default_value(11),
@@ -176,7 +176,7 @@ void program_options(int argc, char* argv[], std::string& csv_matrix_file, std::
   if (vm.count("help") || !vm.count("input-file")) {
     std::cout << std::endl;
     std::cout << "Compute the persistent homology with coefficient field Z/pZ \n";
-    std::cout << "of a Rips complex defined on a corelation matrix.\n \n";
+    std::cout << "of a Rips complex defined on a correlation matrix.\n \n";
     std::cout << "The output diagram contains one bar per line, written with the convention: \n";
     std::cout << "   p   dim b d \n";
     std::cout << "where dim is the dimension of the homological feature,\n";

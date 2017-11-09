@@ -48,8 +48,6 @@ if st.insert([0, 1, 2], filtration=4.0):
 else:
     print("Not inserted...")
 
-# FIXME: Remove this line
-st.set_dimension(3)
 print("dimension=", st.dimension())
 
 st.initialize_filtration()

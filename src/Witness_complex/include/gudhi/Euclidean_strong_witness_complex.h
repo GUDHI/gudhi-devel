@@ -84,7 +84,7 @@ class Euclidean_strong_witness_complex
     : landmarks_(std::begin(landmarks), std::end(landmarks)), landmark_tree_(landmarks_) {
     nearest_landmark_table_.reserve(boost::size(witnesses));
     for (auto w : witnesses)
-      nearest_landmark_table_.push_back(landmark_tree_.query_incremental_nearest_neighbors(w));
+      nearest_landmark_table_.push_back(landmark_tree_.incremental_nearest_neighbors(w));
   }
 
   /** \brief Returns the point corresponding to the given vertex.

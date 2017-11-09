@@ -185,6 +185,19 @@ if(CYTHON_FOUND)
 
     add_gudhi_py_test(test_tangential_complex)
 
+    # Witness complex AND Subsampling
+    add_test(NAME euclidean_strong_witness_complex_diagram_persistence_from_off_file_example_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py"
+             --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 1.0 -n 20 -d 2)
+
+    add_test(NAME euclidean_witness_complex_diagram_persistence_from_off_file_example_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py"
+             --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 1.0 -n 20 -d 2)
+
     # Subsampling
     add_gudhi_py_test(test_subsampling)
 
@@ -218,18 +231,6 @@ if(CYTHON_FOUND)
 
   if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
     # Euclidean witness
-    add_test(NAME euclidean_strong_witness_complex_diagram_persistence_from_off_file_example_py_test
-             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-             COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py"
-             --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 1.0 -n 20 -d 2)
-
-    add_test(NAME euclidean_witness_complex_diagram_persistence_from_off_file_example_py_test
-             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-             COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py"
-             --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 1.0 -n 20 -d 2)
-
     add_gudhi_py_test(test_euclidean_witness_complex)
 
   endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
