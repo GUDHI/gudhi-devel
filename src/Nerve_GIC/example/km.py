@@ -53,15 +53,15 @@ class KeplerMapper(object):
     self.projection = str(projection)
     
     # Detect if projection is a class (for scikit-learn)
-    if str(type(projection))[1:6] == "class": #TODO: de-ugly-fy
-      reducer = projection
-      if self.verbose > 0:
-        try:    
-          projection.set_params(**{"verbose":self.verbose})
-        except:
-          pass
-        print("\n..Projecting data using: \n\t%s\n"%str(projection))
-      X = reducer.fit_transform(X)
+    #if str(type(projection))[1:6] == "class": #TODO: de-ugly-fy
+    #  reducer = projection
+    #  if self.verbose > 0:
+    #    try:    
+    #      projection.set_params(**{"verbose":self.verbose})
+    #    except:
+    #      pass
+    #    print("\n..Projecting data using: \n\t%s\n"%str(projection))
+    #  X = reducer.fit_transform(X)
     
     # Detect if projection is a string (for standard functions)
     if isinstance(projection, str):
