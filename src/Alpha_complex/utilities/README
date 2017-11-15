@@ -5,14 +5,14 @@ This program computes the persistent homology with coefficient field Z/pZ of the
 
 `p dim b d`
 
-where `dim` is the dimension of the homological feature, `b` and `d` are respectively the birth and death of the feature, and `p` is the characteristic of the field *Z/pZ* used for homology coefficients (`p = p1*...*pr` is the product of prime numbers *pi* such that the homology feature exists in homology with *Z/piZ* coefficients).
+where `dim` is the dimension of the homological feature, `b` and `d` are respectively the birth and death of the feature, and `p` is the characteristic of the field *Z/pZ* used for homology coefficients (`p` must be a prime number).
 
 **Usage**
 `alpha_complex_3d_persistence <input OFF file> <p> <min_persistence>` 
 where
 `<input OFF file>` is the path to the input point cloud in OFF format.
 `<p>` is the characteristic p of the coefficient field *Z/pZ* for computing homology. It must be a stricly positive integer.
-`<min_persistence>` is the minimal lifetime of homology feature to be recorded. Enter a negative value to see zero length intervals. It must be a floating-point number >= -1.
+`<min_persistence>` is the minimal lifetime of homology feature to be recorded. Enter a negative value to see zero length intervals.
 
 **Example**
 `alpha_complex_3d_persistence ../../data/points/tore3D_300.off 2 0.45`
@@ -45,14 +45,14 @@ This program computes the persistent homology with coefficient field Z/pZ of the
 
 `p dim b d`
 
-where `dim` is the dimension of the homological feature, `b` and `d` are respectively the birth and death of the feature, and `p` is the characteristic of the field *Z/pZ* used for homology coefficients (`p = p1*...*pr` is the product of prime numbers *pi* such that the homology feature exists in homology with *Z/piZ* coefficients).
+where `dim` is the dimension of the homological feature, `b` and `d` are respectively the birth and death of the feature, and `p` is the characteristic of the field *Z/pZ* used for homology coefficients (`p` must be a prime number).
 
 **Usage**
 `periodic_alpha_complex_3d_persistence <input OFF file> <p> <min_persistence>`
 where
 `<input OFF file>` is the path to the input point cloud in OFF format.
 `<p>` is the characteristic p of the coefficient field *Z/pZ* for computing homology. It must be a stricly positive integer.
-`<min_persistence>` is the minimal lifetime of homology feature to be recorded. Enter a negative value to see zero length intervals. It must be a floating-point number >= -1.
+`<min_persistence>` is the minimal lifetime of homology feature to be recorded. Enter a negative value to see zero length intervals.
 
 **Example**
 `periodic_alpha_complex_3d_persistence ../../data/points/grid_10_10_10_in_0_1.off ../../data/points/iso_cuboid_3_in_0_1.txt 3 1.0`
@@ -93,7 +93,7 @@ This program computes the persistent homology with coefficient field Z/pZ of the
 
 `p dim b d`
 
-where `dim` is the dimension of the homological feature, `b` and `d` are respectively the birth and death of the feature, and `p` is the characteristic of the field *Z/pZ* used for homology coefficients (`p = p1*...*pr` is the product of prime numbers pi such that the homology feature exists in homology with Z/piZ coefficients).
+where `dim` is the dimension of the homological feature, `b` and `d` are respectively the birth and death of the feature, and `p` is the characteristic of the field *Z/pZ* used for homology coefficients (`p` must be a prime number).
 
 **Usage**
 `alpha_complex_persistence [options] <OFF input file>`

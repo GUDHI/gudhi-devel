@@ -31,7 +31,7 @@
 int main(int argc, char** argv) {
   if (argc < 3) {
     std::cout << "To run this program please provide as an input two files with persistence diagrams. Each file" <<
-        " should contain a birth-death pair per line. Third, optional parameter is an error bound on a bottleneck" <<
+        " should contain a birth-death pair per line. Third, optional parameter is an error bound on the bottleneck" <<
         " distance (set by default to the smallest positive double value). If you set the error bound to 0, be" <<
         " aware this version is exact but expensive. The program will now terminate \n";
     return -1;
