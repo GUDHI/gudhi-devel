@@ -5,6 +5,6 @@ This program computes the Bottleneck distance between two persistence diagram fi
 
 Usage:
 `bottleneck_read_file_example <file_1.pers> <file_2.pers> [<tolerance>]`
-
-<file_1.pers> and <file_2.pers> must be in the format described [here](http://gudhi.gforge.inria.fr/doc/latest/fileformats.html#FileFormatsPers).
-<tolerance> is an error bound on the bottleneck distance (set by default to the smallest positive double value).
+where
+`<file_1.pers>` and `<file_2.pers>` must be in the format described [here](http://gudhi.gforge.inria.fr/doc/latest/fileformats.html#FileFormatsPers).
+`<tolerance>` is an error bound on the bottleneck distance (set by default to the smallest positive double value).
