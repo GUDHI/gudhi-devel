@@ -39,6 +39,23 @@ N.B.:
 
 
 
+## `exact_alpha_complex_3d_persistence` ##
+Same as `alpha_complex_3d_persistence`, but using exact computation. It is slower, but it is necessary when points are on a grid for instance.
+
+
+
+## `weighted_alpha_complex_3d_persistence` ##
+Same as `alpha_complex_3d_persistence`, but using weighted points.
+
+**Usage**
+`weighted_alpha_complex_3d_persistence <input OFF file> <input weights file> <p> <min_persistence>` 
+where
+`<input OFF file>` is the path to the input point cloud in OFF format.
+`<input weights file>` is the path to the file containing the weights of the points (one value per line).
+`<p>` is the characteristic p of the coefficient field *Z/pZ* for computing homology. It must be a stricly positive integer.
+`<min_persistence>` is the minimal lifetime of homology feature to be recorded. Enter a negative value to see zero length intervals.
+
+
 
 ## `periodic_alpha_complex_3d_persistence` ##
 This program computes the persistent homology with coefficient field Z/pZ of the 3D periodic alpha complex built from a 3D point cloud. The output diagram contains one bar per line, written with the convention:

@@ -17,9 +17,9 @@ if(CGAL_FOUND)
   
   add_test(NAME Alpha_complex_utilities_alpha_complex_3d_persistence COMMAND $<TARGET_FILE:alpha_complex_3d_persistence>
       "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "2" "0.45")
-  add_test(NAME Persistent_cohomology_example_exact_alpha_complex_3d COMMAND $<TARGET_FILE:exact_alpha_complex_3d_persistence>
+  add_test(NAME Alpha_complex_utilities_exact_alpha_complex_3d COMMAND $<TARGET_FILE:exact_alpha_complex_3d_persistence>
       "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "2" "0.45")
-  add_test(NAME Persistent_cohomology_example_weighted_alpha_complex_3d COMMAND $<TARGET_FILE:weighted_alpha_complex_3d_persistence>
+  add_test(NAME Alpha_complex_utilities_weighted_alpha_complex_3d COMMAND $<TARGET_FILE:weighted_alpha_complex_3d_persistence>
       "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.weights" "2" "0.45")
 
   install(TARGETS alpha_complex_3d_persistence DESTINATION bin)
