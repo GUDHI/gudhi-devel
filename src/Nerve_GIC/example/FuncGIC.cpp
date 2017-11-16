@@ -22,10 +22,11 @@
 
 #include <gudhi/GIC.h>
 
-void usage(int nbArgs, char * const progName) {
+void usage(int nbArgs, char *const progName) {
   std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
   std::cerr << "Usage: " << progName << " filename.off function [--v] \n";
-  std::cerr << "       i.e.: " << progName << " ../../../../data/points/COIL_database/lucky_cat.off ../../../../data/points/COIL_database/lucky_cat_PCA1 --v \n";
+  std::cerr << "       i.e.: " << progName << " ../../data/points/COIL_database/lucky_cat.off "
+                                              "../../data/points/COIL_database/lucky_cat_PCA1 --v \n";
   exit(-1);  // ----- >>
 }
 
@@ -36,7 +37,8 @@ int main(int argc, char **argv) {
 
   std::string off_file_name(argv[1]);
   std::string func_file_name = argv[2];
-  bool verb = 0; if(argc == 4)  verb = 1;
+  bool verb = 0;
+  if (argc == 4) verb = 1;
 
   // -----------------------------------------
   // Init of a functional GIC from an OFF file
@@ -47,32 +49,33 @@ int main(int argc, char **argv) {
 
   bool check = GIC.read_point_cloud(off_file_name);
 
-  if(!check)  std::cout << "Incorrect OFF file." << std::endl;
-  else{
-
+  if (!check) {
+    std::cout << "Incorrect OFF file." << std::endl;
+  } else {
     GIC.set_type("GIC");
 
     GIC.set_color_from_file(func_file_name);
     GIC.set_function_from_file(func_file_name);
 
     GIC.set_graph_from_automatic_rips(Gudhi::Euclidean_distance());
-    GIC.set_automatic_resolution(); GIC.set_gain();
+    GIC.set_automatic_resolution();
+    GIC.set_gain();
     GIC.set_cover_from_function();
 
     GIC.find_simplices();
 
     GIC.plot_DOT();
 
-    Gudhi::Simplex_tree<> stree; GIC.create_complex(stree);
+    Gudhi::Simplex_tree<> stree;
+    GIC.create_complex(stree);
 
     // --------------------------------------------
     // Display information about the functional GIC
     // --------------------------------------------
 
-    if(verb){
-      std::cout << "Functional GIC is of dimension " << stree.dimension() <<
-                     " - " << stree.num_simplices() << " simplices - " <<
-                     stree.num_vertices() << " vertices." << std::endl;
+    if (verb) {
+      std::cout << "Functional GIC is of dimension " << stree.dimension() << " - " << stree.num_simplices()
+                << " simplices - " << stree.num_vertices() << " vertices." << std::endl;
 
       std::cout << "Iterator on functional GIC simplices" << std::endl;
       for (auto f_simplex : stree.filtration_simplex_range()) {

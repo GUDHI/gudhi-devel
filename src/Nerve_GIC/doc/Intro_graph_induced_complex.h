@@ -37,7 +37,8 @@ namespace cover_complex {
  * neato (from <a target="_blank" href="http://www.graphviz.org/">graphviz</a>),
  * <a target="_blank" href="http://www.geomview.org/">geomview</a>,
  * <a target="_blank" href="https://github.com/MLWave/kepler-mapper">KeplerMapper</a>.
- * Input point clouds are assumed to be <a target="_blank" href="http://www.geomview.org/docs/html/OFF.html">OFF files</a>.
+ * Input point clouds are assumed to be
+ * <a target="_blank" href="http://www.geomview.org/docs/html/OFF.html">OFF files</a>.
  *
  * \section covers Covers
  *
@@ -76,7 +77,8 @@ namespace cover_complex {
  *
  * \include Nerve_GIC/Nerve.txt
  *
- * The program also writes a file SC.txt. The first three lines in this file are the location of the input point cloud and the function used to compute the cover.
+ * The program also writes a file SC.txt. The first three lines in this file are the location of the input point cloud
+ * and the function used to compute the cover.
  * The fourth line contains the number of vertices nv and edges ne of the Nerve.
  * The next nv lines represent the vertices. Each line contains the vertex ID,
  * the number of data points it contains, and their average color function value.
@@ -167,7 +169,7 @@ namespace cover_complex {
  *
  * When launching:
  *
- * \code $> ./FuncGIC ../../../../data/points/COIL_database/lucky_cat.off ../../../../data/points/COIL_database/lucky_cat_PCA1 --v
+ * \code $> ./FuncGIC ../../data/points/COIL_database/lucky_cat.off ../../data/points/COIL_database/lucky_cat_PCA1 --v
  * \endcode
  *
  * the program outputs again SC.dot which gives the following visualization after using neato:
