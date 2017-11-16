@@ -4,7 +4,7 @@
  *
  *    Author(s):       Vincent Rouvreau
  *
- *    Copyright (C) 2014  INRIA Saclay (France)
+ *    Copyright (C) 2014  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@
 #include <utility>
 #include <list>
 #include <vector>
+#include <cstdlib>
 
 #include "alpha_complex_3d_helper.h"
 
@@ -57,10 +58,10 @@ using Point_3 = Kernel::Point_3;
 // filtration with alpha values needed type definition
 using Alpha_value_type = Alpha_shape_3::FT;
 using Object = CGAL::Object;
-using Dispatch = CGAL::Dispatch_output_iterator<
-          CGAL::cpp11::tuple<Object, Alpha_value_type>,
-          CGAL::cpp11::tuple<std::back_insert_iterator< std::vector<Object> >,
-          std::back_insert_iterator< std::vector<Alpha_value_type> > > >;
+using Dispatch =
+    CGAL::Dispatch_output_iterator<CGAL::cpp11::tuple<Object, Alpha_value_type>,
+                                   CGAL::cpp11::tuple<std::back_insert_iterator<std::vector<Object> >,
+                                                      std::back_insert_iterator<std::vector<Alpha_value_type> > > >;
 using Cell_handle = Alpha_shape_3::Cell_handle;
 using Facet = Alpha_shape_3::Facet;
 using Edge_3 = Alpha_shape_3::Edge;
@@ -71,19 +72,19 @@ using Vertex_list = std::list<Vertex_handle>;
 using ST = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
 using Filtration_value = ST::Filtration_value;
 using Simplex_tree_vertex = ST::Vertex_handle;
-using Alpha_shape_simplex_tree_map = std::map<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex >;
+using Alpha_shape_simplex_tree_map = std::map<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex>;
 using Alpha_shape_simplex_tree_pair = std::pair<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex>;
-using Simplex_tree_vector_vertex = std::vector< Simplex_tree_vertex >;
-using PCOH = Gudhi::persistent_cohomology::Persistent_cohomology< ST, Gudhi::persistent_cohomology::Field_Zp >;
+using Simplex_tree_vector_vertex = std::vector<Simplex_tree_vertex>;
+using Persistent_cohomology =
+    Gudhi::persistent_cohomology::Persistent_cohomology<ST, Gudhi::persistent_cohomology::Field_Zp>;
 
-void usage(char * const progName) {
-  std::cerr << "Usage:\n" << progName << " path_to_OFF_file coeff_field_characteristic[integer " <<
-               "> 0] min_persistence[float >= -1.0]\n";
-  std::cerr << "  path_to_OFF_file is the path to your points cloud in OFF format.\n";
+void usage(const std::string& progName) {
+  std::cerr << "Usage: " << progName
+            << " path_to_the_OFF_file coeff_field_characteristic[integer > 0] min_persistence[float >= -1.0]\n";
   exit(-1);
 }
 
-int main(int argc, char * const argv[]) {
+int main(int argc, char* const argv[]) {
   // program args management
   if (argc != 4) {
     std::cerr << "Error: Number of arguments (" << argc << ") is not correct\n";
@@ -91,13 +92,7 @@ int main(int argc, char * const argv[]) {
   }
 
   int coeff_field_characteristic = atoi(argv[2]);
-
-  Filtration_value min_persistence = 0.0;
-  int returnedScanValue = sscanf(argv[3], "%f", &min_persistence);
-  if ((returnedScanValue == EOF) || (min_persistence < -1.0)) {
-    std::cerr << "Error: " << argv[3] << " is not correct\n";
-    usage(argv[0]);
-  }
+  Filtration_value min_persistence = strtof(argv[3], nullptr);
 
   // Read points from file
   std::string offInputFile(argv[1]);
@@ -144,28 +139,28 @@ int main(int argc, char * const argv[]) {
   Filtration_value filtration_max = 0.0;
   for (auto object_iterator : the_objects) {
     // Retrieve Alpha shape vertex list from object
-    if (const Cell_handle * cell = CGAL::object_cast<Cell_handle>(&object_iterator)) {
+    if (const Cell_handle* cell = CGAL::object_cast<Cell_handle>(&object_iterator)) {
       vertex_list = from_cell<Vertex_list, Cell_handle>(*cell);
       count_cells++;
       if (dim_max < 3) {
         // Cell is of dim 3
         dim_max = 3;
       }
-    } else if (const Facet * facet = CGAL::object_cast<Facet>(&object_iterator)) {
+    } else if (const Facet* facet = CGAL::object_cast<Facet>(&object_iterator)) {
       vertex_list = from_facet<Vertex_list, Facet>(*facet);
       count_facets++;
       if (dim_max < 2) {
         // Facet is of dim 2
         dim_max = 2;
       }
-    } else if (const Edge_3 * edge = CGAL::object_cast<Edge_3>(&object_iterator)) {
+    } else if (const Edge_3* edge = CGAL::object_cast<Edge_3>(&object_iterator)) {
       vertex_list = from_edge<Vertex_list, Edge_3>(*edge);
       count_edges++;
       if (dim_max < 1) {
         // Edge_3 is of dim 1
         dim_max = 1;
       }
-    } else if (const Vertex_handle * vertex = CGAL::object_cast<Vertex_handle>(&object_iterator)) {
+    } else if (const Vertex_handle* vertex = CGAL::object_cast<Vertex_handle>(&object_iterator)) {
       count_vertices++;
       vertex_list = from_vertex<Vertex_list, Vertex_handle>(*vertex);
     }
@@ -212,7 +207,6 @@ int main(int argc, char * const argv[]) {
   std::cout << "facets \t\t" << count_facets << std::endl;
   std::cout << "cells \t\t" << count_cells << std::endl;
 
-
   std::cout << "Information of the Simplex Tree: " << std::endl;
   std::cout << "  Number of vertices = " << simplex_tree.num_vertices() << " ";
   std::cout << "  Number of simplices = " << simplex_tree.num_simplices() << std::endl << std::endl;
@@ -231,7 +225,7 @@ int main(int argc, char * const argv[]) {
 
   std::cout << "Simplex_tree dim: " << simplex_tree.dimension() << std::endl;
   // Compute the persistence diagram of the complex
-  PCOH pcoh(simplex_tree);
+  Persistent_cohomology pcoh(simplex_tree, true);
   // initializes the coefficient field for homology
   pcoh.init_coefficients(coeff_field_characteristic);
 

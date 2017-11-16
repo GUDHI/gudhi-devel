@@ -312,7 +312,7 @@ cdef class SimplexTree:
         """This function returns the persistence of the simplicial complex.
 
         :param homology_coeff_field: The homology coefficient field. Must be a
-            prime number
+            prime number. Default value is 11.
         :type homology_coeff_field: int.
         :param min_persistence: The minimum persistence value to take into
             account (strictly greater than min_persistence). Default value is

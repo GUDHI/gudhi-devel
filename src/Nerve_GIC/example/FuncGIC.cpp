@@ -4,7 +4,7 @@
  *
  *    Author(s):       Mathieu Carrière
  *
- *    Copyright (C) 2017  INRIA Saclay (France)
+ *    Copyright (C) 2017  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by

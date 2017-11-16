@@ -799,7 +799,7 @@ class Cover_complex {
          if (cover_color[simplices[i][0]].first > mask && cover_color[simplices[i][1]].first > mask)
            graphic << simplices[i][0] << " " << simplices[i][1] << std::endl;
      graphic.close();
-     std::cout << "SC.txt generated. It can be visualized with e.g. python visu.py and firefox." << std::endl;
+     std::cout << "SC.txt generated. It can be visualized with e.g. python KeplerMapperVisuFromTxtFile.py and firefox." << std::endl;
    }
 
 
