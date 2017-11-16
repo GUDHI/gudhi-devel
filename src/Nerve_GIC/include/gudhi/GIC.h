@@ -619,10 +619,11 @@ class Cover_complex {
         std::pair<double, double> interM(x, maxf);
         intervals.push_back(interM);
         res = intervals.size();
-        if (verbose)
+        if (verbose) {
           for (int i = 0; i < res; i++)
             std::cout << "Interval " << i << " = [" << intervals[i].first << ", " << intervals[i].second << "]"
                       << std::endl;
+        }
       } else {  // Case we use an integer and a double for the length of the intervals.
         double x = minf;
         double y = x + resolution_double;
@@ -635,10 +636,11 @@ class Cover_complex {
           y = x + resolution_double;
         }
         res = intervals.size();
-        if (verbose)
+        if (verbose) {
           for (int i = 0; i < res; i++)
             std::cout << "Interval " << i << " = [" << intervals[i].first << ", " << intervals[i].second << "]"
                       << std::endl;
+        }
       }
     }
 
@@ -920,11 +922,12 @@ class Cover_complex {
     int ke = 0;
     int num_simplices = simplices.size();
     for (int i = 0; i < num_simplices; i++)
-      if (simplices[i].size() == 2)
+      if (simplices[i].size() == 2) {
         if (cover_color[simplices[i][0]].first > mask && cover_color[simplices[i][1]].first > mask) {
           graphic << "  " << simplices[i][0] << " -- " << simplices[i][1] << " [weight=15];" << std::endl;
           ke++;
         }
+      }
     graphic << "}";
     graphic.close();
     std::cout << "SC.dot generated. It can be visualized with e.g. neato." << std::endl;
