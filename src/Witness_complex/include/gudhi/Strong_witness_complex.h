@@ -127,7 +127,6 @@ class Strong_witness_complex {
       if ((Landmark_id)simplex.size() - 1 > complex_dim)
         complex_dim = simplex.size() - 1;
     }
-    complex.set_dimension(complex_dim);
     return true;
   }
 

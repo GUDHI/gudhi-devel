@@ -12,4 +12,4 @@ Manual, as well as for publications directly related to the GUDHI library.
 GUDHI bibtex
 ************
 
-.. literalinclude:: how_to_cite_gudhi.bib
+.. literalinclude:: ../../biblio/how_to_cite_gudhi.bib

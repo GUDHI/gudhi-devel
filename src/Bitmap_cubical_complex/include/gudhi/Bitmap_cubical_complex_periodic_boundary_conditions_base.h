@@ -28,6 +28,7 @@
 #include <cmath>
 #include <limits>  // for numeric_limits<>
 #include <vector>
+#include <stdexcept>
 
 namespace Gudhi {
 
@@ -41,7 +42,8 @@ namespace cubical_complex {
 /**
  * @brief Cubical complex with periodic boundary conditions represented as a bitmap.
  * @ingroup cubical_complex
- * @details This is a class implementing a bitmap data structure with periodic boundary conditions. Most of the functions are
+ * @details This is a class implementing a bitmap data structure with periodic boundary conditions. Most of the
+ * functions are
  * identical to the functions from Bitmap_cubical_complex_base.
  * The ones that needed to be updated are the constructors and get_boundary_of_a_cell and get_coboundary_of_a_cell.
  */
@@ -53,7 +55,7 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
   /**
    * Default constructor of Bitmap_cubical_complex_periodic_boundary_conditions_base class.
    */
-  Bitmap_cubical_complex_periodic_boundary_conditions_base() { }
+  Bitmap_cubical_complex_periodic_boundary_conditions_base() {}
   /**
    * A constructor of Bitmap_cubical_complex_periodic_boundary_conditions_base class that takes the following
    * parameters: (1) vector with numbers of top dimensional cells in all dimensions and (2) vector of booleans. If
@@ -61,8 +63,9 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
    * imposed in this direction. In case of false, the periodic boundary conditions will not be imposed in the direction
    * i.
    */
-  Bitmap_cubical_complex_periodic_boundary_conditions_base(const std::vector<unsigned>& sizes,
-                                                           const std::vector<bool>& directions_in_which_periodic_b_cond_are_to_be_imposed);
+  Bitmap_cubical_complex_periodic_boundary_conditions_base(
+      const std::vector<unsigned>& sizes,
+      const std::vector<bool>& directions_in_which_periodic_b_cond_are_to_be_imposed);
   /**
    * A constructor of Bitmap_cubical_complex_periodic_boundary_conditions_base class that takes the name of Perseus
    * style file as an input. Please consult the documentation about the specification of the file.
@@ -75,9 +78,9 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
    * value, that means that periodic boundary conditions are to be imposed in this direction. In case of false, the
    * periodic boundary conditions will not be imposed in the direction i.
    */
-  Bitmap_cubical_complex_periodic_boundary_conditions_base(const std::vector<unsigned>& dimensions,
-                                                           const std::vector<T>& topDimensionalCells,
-                                                           const std::vector< bool >& directions_in_which_periodic_b_cond_are_to_be_imposed);
+  Bitmap_cubical_complex_periodic_boundary_conditions_base(
+      const std::vector<unsigned>& dimensions, const std::vector<T>& topDimensionalCells,
+      const std::vector<bool>& directions_in_which_periodic_b_cond_are_to_be_imposed);
 
   /**
    * Destructor of the Bitmap_cubical_complex_periodic_boundary_conditions_base class.
@@ -88,17 +91,77 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
   /**
    * A version of a function that return boundary of a given cell for an object of
    * Bitmap_cubical_complex_periodic_boundary_conditions_base class.
+   * The boundary elements are guaranteed to be returned so that the
+   * incidence coefficients are alternating.
    */
-  virtual std::vector< size_t > get_boundary_of_a_cell(size_t cell) const;
+  virtual std::vector<size_t> get_boundary_of_a_cell(size_t cell) const;
 
   /**
    * A version of a function that return coboundary of a given cell for an object of
    * Bitmap_cubical_complex_periodic_boundary_conditions_base class.
+   * Note that unlike in the case of boundary, over here the elements are
+   * not guaranteed to be returned with alternating incidence numbers.
+   * To compute incidence between cells use compute_incidence_between_cells
+   * procedure
    */
-  virtual std::vector< size_t > get_coboundary_of_a_cell(size_t cell) const;
+  virtual std::vector<size_t> get_coboundary_of_a_cell(size_t cell) const;
+
+  /**
+  * This procedure compute incidence numbers between cubes. For a cube \f$A\f$ of
+  * dimension n and a cube \f$B \subset A\f$ of dimension n-1, an incidence
+  * between \f$A\f$ and \f$B\f$ is the integer with which \f$B\f$ appears in the boundary of \f$A\f$.
+  * Note that first parameter is a cube of dimension n,
+  * and the second parameter is an adjusted cube in dimension n-1.
+  * Given \f$A = [b_1,e_1] \times \ldots \ [b_{j-1},e_{j-1}] \times [b_{j},e_{j}] \times [b_{j+1},e_{j+1}] \times \ldots
+  *\times [b_{n},e_{n}] \f$
+  * such that \f$ b_{j} \neq e_{j} \f$
+  * and \f$B = [b_1,e_1] \times \ldots \ [b_{j-1},e_{j-1}] \times [a,a] \times [b_{j+1},e_{j+1}] \times \ldots \times
+  *[b_{n},e_{n}]s \f$
+  * where \f$ a = b_{j}\f$ or \f$ a = e_{j}\f$, the incidence between \f$A\f$ and \f$B\f$
+  * computed by this procedure is given by formula:
+  * \f$ c\ (-1)^{\sum_{i=1}^{j-1} dim [b_{i},e_{i}]}  \f$
+  * Where \f$ dim [b_{i},e_{i}] = 0 \f$ if \f$ b_{i}=e_{i} \f$ and 1 in other case.
+  * c is -1 if \f$ a = b_{j}\f$ and 1 if \f$ a = e_{j}\f$.
+  * @exception std::logic_error In case when the cube \f$B\f$ is not n-1
+  * dimensional face of a cube \f$A\f$.
+  **/
+  virtual int compute_incidence_between_cells(size_t coface, size_t face) {
+    // first get the counters for coface and face:
+    std::vector<unsigned> coface_counter = this->compute_counter_for_given_cell(coface);
+    std::vector<unsigned> face_counter = this->compute_counter_for_given_cell(face);
+
+    // coface_counter and face_counter should agree at all positions except from one:
+    int number_of_position_in_which_counters_do_not_agree = -1;
+    size_t number_of_full_faces_that_comes_before = 0;
+    for (size_t i = 0; i != coface_counter.size(); ++i) {
+      if ((coface_counter[i] % 2 == 1) && (number_of_position_in_which_counters_do_not_agree == -1)) {
+        ++number_of_full_faces_that_comes_before;
+      }
+      if (coface_counter[i] != face_counter[i]) {
+        if (number_of_position_in_which_counters_do_not_agree != -1) {
+          std::cout << "Cells given to compute_incidence_between_cells procedure do not form a pair of coface-face.\n";
+          throw std::logic_error(
+              "Cells given to compute_incidence_between_cells procedure do not form a pair of coface-face.");
+        }
+        number_of_position_in_which_counters_do_not_agree = i;
+      }
+    }
+
+    int incidence = 1;
+    if (number_of_full_faces_that_comes_before % 2) incidence = -1;
+    // if the face cell is on the right from coface cell:
+    if ((coface_counter[number_of_position_in_which_counters_do_not_agree] + 1 ==
+         face_counter[number_of_position_in_which_counters_do_not_agree]) ||
+        ((coface_counter[number_of_position_in_which_counters_do_not_agree] != 1) &&
+         (face_counter[number_of_position_in_which_counters_do_not_agree] == 0))) {
+      incidence *= -1;
+    }
+
+    return incidence;
+  }
 
  protected:
-  std::vector< bool > directions_in_which_periodic_b_cond_are_to_be_imposed;
+  std::vector<bool> directions_in_which_periodic_b_cond_are_to_be_imposed;
 
   void set_up_containers(const std::vector<unsigned>& sizes) {
     unsigned multiplier = 1;
@@ -119,15 +182,19 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
   Bitmap_cubical_complex_periodic_boundary_conditions_base(const std::vector<unsigned>& sizes);
   Bitmap_cubical_complex_periodic_boundary_conditions_base(const std::vector<unsigned>& dimensions,
                                                            const std::vector<T>& topDimensionalCells);
-  void construct_complex_based_on_top_dimensional_cells(const std::vector<unsigned>& dimensions,
-                                                        const std::vector<T>& topDimensionalCells,
-                                                        const std::vector<bool>& directions_in_which_periodic_b_cond_are_to_be_imposed);
+
+  /**
+   * A procedure used to construct the data structures in the class.
+  **/
+  void construct_complex_based_on_top_dimensional_cells(
+      const std::vector<unsigned>& dimensions, const std::vector<T>& topDimensionalCells,
+      const std::vector<bool>& directions_in_which_periodic_b_cond_are_to_be_imposed);
 };
 
 template <typename T>
-void Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::construct_complex_based_on_top_dimensional_cells(const std::vector<unsigned>& dimensions,
-                                                                                                                   const std::vector<T>& topDimensionalCells,
-                                                                                                                   const std::vector<bool>& directions_in_which_periodic_b_cond_are_to_be_imposed) {
+void Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::construct_complex_based_on_top_dimensional_cells(
+    const std::vector<unsigned>& dimensions, const std::vector<T>& topDimensionalCells,
+    const std::vector<bool>& directions_in_which_periodic_b_cond_are_to_be_imposed) {
   this->directions_in_which_periodic_b_cond_are_to_be_imposed = directions_in_which_periodic_b_cond_are_to_be_imposed;
   this->set_up_containers(dimensions);
 
@@ -140,14 +207,16 @@ void Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::construct_comp
 }
 
 template <typename T>
-Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_complex_periodic_boundary_conditions_base(const std::vector<unsigned>& sizes,
-                                                                                                                      const std::vector<bool>& directions_in_which_periodic_b_cond_are_to_be_imposed) {
+Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_complex_periodic_boundary_conditions_base(
+    const std::vector<unsigned>& sizes,
+    const std::vector<bool>& directions_in_which_periodic_b_cond_are_to_be_imposed) {
   this->directions_in_which_periodic_b_cond_are_to_be_imposed(directions_in_which_periodic_b_cond_are_to_be_imposed);
   this->set_up_containers(sizes);
 }
 
 template <typename T>
-Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_complex_periodic_boundary_conditions_base(const char* perseus_style_file) {
+Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_complex_periodic_boundary_conditions_base(
+    const char* perseus_style_file) {
   // for Perseus style files:
   bool dbg = false;
 
@@ -176,14 +245,12 @@ Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_comp
   while (!inFiltration.eof()) {
     double filtrationLevel;
     inFiltration >> filtrationLevel;
-    if (inFiltration.eof())break;
+    if (inFiltration.eof()) break;
 
     if (dbg) {
-      std::cerr << "Cell of an index : "
-          << it.compute_index_in_bitmap()
-          << " and dimension: "
-          << this->get_dimension_of_a_cell(it.compute_index_in_bitmap())
-          << " get the value : " << filtrationLevel << std::endl;
+      std::cerr << "Cell of an index : " << it.compute_index_in_bitmap()
+                << " and dimension: " << this->get_dimension_of_a_cell(it.compute_index_in_bitmap())
+                << " get the value : " << filtrationLevel << std::endl;
     }
     this->get_cell_data(*it) = filtrationLevel;
     ++it;
@@ -193,24 +260,24 @@ Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_comp
 }
 
 template <typename T>
-Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_complex_periodic_boundary_conditions_base(const std::vector<unsigned>& sizes) {
+Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_complex_periodic_boundary_conditions_base(
+    const std::vector<unsigned>& sizes) {
   this->directions_in_which_periodic_b_cond_are_to_be_imposed = std::vector<bool>(sizes.size(), false);
   this->set_up_containers(sizes);
 }
 
 template <typename T>
-Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_complex_periodic_boundary_conditions_base(const std::vector<unsigned>& dimensions,
-                                                                                                                      const std::vector<T>& topDimensionalCells) {
+Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_complex_periodic_boundary_conditions_base(
+    const std::vector<unsigned>& dimensions, const std::vector<T>& topDimensionalCells) {
   std::vector<bool> directions_in_which_periodic_b_cond_are_to_be_imposed = std::vector<bool>(dimensions.size(), false);
   this->construct_complex_based_on_top_dimensional_cells(dimensions, topDimensionalCells,
                                                          directions_in_which_periodic_b_cond_are_to_be_imposed);
 }
 
 template <typename T>
-Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::
-Bitmap_cubical_complex_periodic_boundary_conditions_base(const std::vector<unsigned>& dimensions,
-                                                         const std::vector<T>& topDimensionalCells,
-                                                         const std::vector<bool>& directions_in_which_periodic_b_cond_are_to_be_imposed) {
+Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_complex_periodic_boundary_conditions_base(
+    const std::vector<unsigned>& dimensions, const std::vector<T>& topDimensionalCells,
+    const std::vector<bool>& directions_in_which_periodic_b_cond_are_to_be_imposed) {
   this->construct_complex_based_on_top_dimensional_cells(dimensions, topDimensionalCells,
                                                          directions_in_which_periodic_b_cond_are_to_be_imposed);
 }
@@ -218,46 +285,65 @@ Bitmap_cubical_complex_periodic_boundary_conditions_base(const std::vector<unsig
 // ***********************Methods************************ //
 
 template <typename T>
-std::vector< size_t > Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::get_boundary_of_a_cell(size_t cell) const {
+std::vector<size_t> Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::get_boundary_of_a_cell(
+    size_t cell) const {
   bool dbg = false;
   if (dbg) {
     std::cerr << "Computations of boundary of a cell : " << cell << std::endl;
   }
 
-  std::vector< size_t > boundary_elements;
+  std::vector<size_t> boundary_elements;
+  boundary_elements.reserve(this->dimension() * 2);
   size_t cell1 = cell;
+  size_t sum_of_dimensions = 0;
+
   for (size_t i = this->multipliers.size(); i != 0; --i) {
     unsigned position = cell1 / this->multipliers[i - 1];
     // this cell have a nonzero length in this direction, therefore we can compute its boundary in this direction.
-
     if (position % 2 == 1) {
       // if there are no periodic boundary conditions in this direction, we do not have to do anything.
       if (!directions_in_which_periodic_b_cond_are_to_be_imposed[i - 1]) {
         // std::cerr << "A\n";
-        boundary_elements.push_back(cell - this->multipliers[ i - 1 ]);
-        boundary_elements.push_back(cell + this->multipliers[ i - 1 ]);
+        if (sum_of_dimensions % 2) {
+          boundary_elements.push_back(cell - this->multipliers[i - 1]);
+          boundary_elements.push_back(cell + this->multipliers[i - 1]);
+        } else {
+          boundary_elements.push_back(cell + this->multipliers[i - 1]);
+          boundary_elements.push_back(cell - this->multipliers[i - 1]);
+        }
         if (dbg) {
-          std::cerr << cell - this->multipliers[ i - 1 ] << " " << cell + this->multipliers[ i - 1 ] << " ";
+          std::cerr << cell - this->multipliers[i - 1] << " " << cell + this->multipliers[i - 1] << " ";
         }
       } else {
         // in this direction we have to do boundary conditions. Therefore, we need to check if we are not at the end.
-        if (position != 2 * this->sizes[ i - 1 ] - 1) {
+        if (position != 2 * this->sizes[i - 1] - 1) {
           // std::cerr << "B\n";
-          boundary_elements.push_back(cell - this->multipliers[ i - 1 ]);
-          boundary_elements.push_back(cell + this->multipliers[ i - 1 ]);
+          if (sum_of_dimensions % 2) {
+            boundary_elements.push_back(cell - this->multipliers[i - 1]);
+            boundary_elements.push_back(cell + this->multipliers[i - 1]);
+          } else {
+            boundary_elements.push_back(cell + this->multipliers[i - 1]);
+            boundary_elements.push_back(cell - this->multipliers[i - 1]);
+          }
           if (dbg) {
-            std::cerr << cell - this->multipliers[ i - 1 ] << " " << cell + this->multipliers[ i - 1 ] << " ";
+            std::cerr << cell - this->multipliers[i - 1] << " " << cell + this->multipliers[i - 1] << " ";
           }
         } else {
           // std::cerr << "C\n";
-          boundary_elements.push_back(cell - this->multipliers[ i - 1 ]);
-          boundary_elements.push_back(cell - (2 * this->sizes[ i - 1 ] - 1) * this->multipliers[ i - 1 ]);
+          if (sum_of_dimensions % 2) {
+            boundary_elements.push_back(cell - this->multipliers[i - 1]);
+            boundary_elements.push_back(cell - (2 * this->sizes[i - 1] - 1) * this->multipliers[i - 1]);
+          } else {
+            boundary_elements.push_back(cell - (2 * this->sizes[i - 1] - 1) * this->multipliers[i - 1]);
+            boundary_elements.push_back(cell - this->multipliers[i - 1]);
+          }
           if (dbg) {
-            std::cerr << cell - this->multipliers[ i - 1 ] << " " <<
-                cell - (2 * this->sizes[ i - 1 ] - 1) * this->multipliers[ i - 1 ] << " ";
+            std::cerr << cell - this->multipliers[i - 1] << " "
+                      << cell - (2 * this->sizes[i - 1] - 1) * this->multipliers[i - 1] << " ";
           }
         }
       }
+      ++sum_of_dimensions;
     }
     cell1 = cell1 % this->multipliers[i - 1];
   }
@@ -265,9 +351,10 @@ std::vector< size_t > Bitmap_cubical_complex_periodic_boundary_conditions_base<T
 }
 
 template <typename T>
-std::vector< size_t > Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::get_coboundary_of_a_cell(size_t cell) const {
+std::vector<size_t> Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::get_coboundary_of_a_cell(
+    size_t cell) const {
   std::vector<unsigned> counter = this->compute_counter_for_given_cell(cell);
-  std::vector< size_t > coboundary_elements;
+  std::vector<size_t> coboundary_elements;
   size_t cell1 = cell;
   for (size_t i = this->multipliers.size(); i != 0; --i) {
     unsigned position = cell1 / this->multipliers[i - 1];
@@ -289,7 +376,7 @@ std::vector< size_t > Bitmap_cubical_complex_periodic_boundary_conditions_base<T
         } else {
           // in this case counter[i-1] == 0.
           coboundary_elements.push_back(cell + this->multipliers[i - 1]);
-          coboundary_elements.push_back(cell + (2 * this->sizes[ i - 1 ] - 1) * this->multipliers[i - 1]);
+          coboundary_elements.push_back(cell + (2 * this->sizes[i - 1] - 1) * this->multipliers[i - 1]);
         }
       }
     }

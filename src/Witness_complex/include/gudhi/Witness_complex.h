@@ -130,7 +130,6 @@ class Witness_complex {
       }
       k++;
     }
-    complex.set_dimension(k-1);
     return true;
   }
 

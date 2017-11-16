@@ -8,6 +8,7 @@ if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
 
   if (TBB_FOUND)
     target_link_libraries(alpha_rips_persistence_bottleneck_distance ${TBB_LIBRARIES})
+    target_link_libraries(bottleneck_basic_example ${TBB_LIBRARIES})
   endif(TBB_FOUND)
   
   add_test(NAME Bottleneck_distance_example_basic COMMAND $<TARGET_FILE:bottleneck_basic_example>)

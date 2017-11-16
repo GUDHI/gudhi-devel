@@ -273,17 +273,25 @@ make doxygen
  * Library</a> (CGAL \cite cgal:eb-15b) and will not be built if CGAL is not installed:
  * \li <a href="_alpha_complex_2alpha_complex_3d_persistence_8cpp-example.html">
  * Alpha_complex/alpha_complex_3d_persistence.cpp</a>
- * \li <a href="_persistent_cohomology_2exact_alpha_complex_3d_persistence_8cpp-example.html">
- * Persistent_cohomology/exact_alpha_complex_3d_persistence.cpp</a>
- * \li <a href="_persistent_cohomology_2weighted_alpha_complex_3d_persistence_8cpp-example.html">
- * Persistent_cohomology/weighted_alpha_complex_3d_persistence.cpp</a>
+ * \li <a href="_alpha_complex_2exact_alpha_complex_3d_persistence_8cpp-example.html">
+ * Alpha_complex/exact_alpha_complex_3d_persistence.cpp</a>
+ * \li <a href="_alpha_complex_2weighted_alpha_complex_3d_persistence_8cpp-example.html">
+ * Alpha_complex/weighted_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_simplex_tree_2example_alpha_shapes_3_simplex_tree_from_off_file_8cpp-example.html">
  * Simplex_tree/example_alpha_shapes_3_simplex_tree_from_off_file.cpp</a>
  * 
- * The following example requires CGAL version &ge; 4.6.0:
- * \li <a href="_witness_complex_2witness_complex_sphere_8cpp-example.html">
- * Witness_complex/witness_complex_sphere.cpp</a>
- * 
+ * The following examples/utilities require CGAL version &ge; 4.6.0:
+ * \li <a href="_witness_complex_2strong_witness_persistence_8cpp-example.html">
+ * Witness_complex/strong_witness_persistence.cpp</a>
+ * \li <a href="_witness_complex_2weak_witness_persistence_8cpp-example.html">
+ * Witness_complex/weak_witness_persistence.cpp</a>
+ * \li <a href="_witness_complex_2example_strong_witness_complex_off_8cpp-example.html">
+ * Witness_complex/example_strong_witness_complex_off.cpp</a>
+ * \li <a href="_witness_complex_2example_witness_complex_off_8cpp-example.html">
+ * Witness_complex/example_witness_complex_off.cpp</a>
+ * \li <a href="_witness_complex_2example_witness_complex_sphere_8cpp-example.html">
+ * Witness_complex/example_witness_complex_sphere.cpp</a>
+ *
  * The following example requires CGAL version &ge; 4.7.0:
  * \li <a href="_alpha_complex_2_alpha_complex_from_off_8cpp-example.html">
  * Alpha_complex/Alpha_complex_from_off.cpp</a>
@@ -301,8 +309,8 @@ make doxygen
  * Bottleneck_distance/alpha_rips_persistence_bottleneck_distance.cpp.cpp</a>
  * \li <a href="_bottleneck_distance_2bottleneck_basic_example_8cpp-example.html">
  * Bottleneck_distance/bottleneck_basic_example.cpp</a>
- * \li <a href="_bottleneck_distance_2bottleneck_read_file_example_8cpp-example.html">
- * Bottleneck_distance/bottleneck_read_file_example.cpp</a>
+ * \li <a href="_bottleneck_distance_2bottleneck_read_file_8cpp-example.html">
+ * Bottleneck_distance/bottleneck_read_file.cpp</a>
  * \li <a href="_spatial_searching_2example_spatial_searching_8cpp-example.html">
  * Spatial_searching/example_spatial_searching.cpp</a>
  * \li <a href="_subsampling_2example_choose_n_farthest_points_8cpp-example.html">
@@ -351,6 +359,16 @@ make doxygen
  * Tangential_complex/example_basic.cpp</a>
  * \li <a href="_tangential_complex_2example_with_perturb_8cpp-example.html">
  * Tangential_complex/example_with_perturb.cpp</a>
+ * \li <a href="_witness_complex_2strong_witness_persistence_8cpp-example.html">
+ * Witness_complex/strong_witness_persistence.cpp</a>
+ * \li <a href="_witness_complex_2weak_witness_persistence_8cpp-example.html">
+ * Witness_complex/weak_witness_persistence.cpp</a>
+ * \li <a href="_witness_complex_2example_strong_witness_complex_off_8cpp-example.html">
+ * Witness_complex/example_strong_witness_complex_off.cpp</a>
+ * \li <a href="_witness_complex_2example_witness_complex_off_8cpp-example.html">
+ * Witness_complex/example_witness_complex_off.cpp</a>
+ * \li <a href="_witness_complex_2example_witness_complex_sphere_8cpp-example.html">
+ * Witness_complex/example_witness_complex_sphere.cpp</a>
  *
  * \subsection tbb Threading Building Blocks
  * <a target="_blank" href="https://www.threadingbuildingblocks.org/">Intel&reg; TBB</a> lets you easily write parallel
@@ -368,8 +386,12 @@ make doxygen
  * Alpha_complex/alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_alpha_complex_2alpha_complex_persistence_8cpp-example.html">
  * Alpha_complex/alpha_complex_persistence.cpp</a>
+ * \li <a href="_alpha_complex_2exact_alpha_complex_3d_persistence_8cpp-example.html">
+ * Alpha_complex/exact_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_alpha_complex_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
  * Alpha_complex/periodic_alpha_complex_3d_persistence.cpp</a>
+ * \li <a href="_alpha_complex_2weighted_alpha_complex_3d_persistence_8cpp-example.html">
+ * Alpha_complex/weighted_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_bitmap_cubical_complex_2_bitmap_cubical_complex_8cpp-example.html">
  * Bitmap_cubical_complex/Bitmap_cubical_complex.cpp</a>
  * \li <a href="_bitmap_cubical_complex_2_bitmap_cubical_complex_periodic_boundary_conditions_8cpp-example.html">
@@ -382,6 +404,12 @@ make doxygen
  * Simplex_tree/example_alpha_shapes_3_simplex_tree_from_off_file.cpp</a>
  * \li <a href="_simplex_tree_2simplex_tree_from_cliques_of_graph_8cpp-example.html">
  * Simplex_tree/simplex_tree_from_cliques_of_graph.cpp</a>
+ * \li <a href="_simplex_tree_2graph_expansion_with_blocker_8cpp-example.html">
+ * Simplex_tree/graph_expansion_with_blocker.cpp</a>
+ * \li <a href="_persistent_cohomology_2alpha_complex_3d_persistence_8cpp-example.html">
+ * Persistent_cohomology/alpha_complex_3d_persistence.cpp</a>
+ * \li <a href="_persistent_cohomology_2alpha_complex_persistence_8cpp-example.html">
+ * Persistent_cohomology/alpha_complex_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2rips_persistence_via_boundary_matrix_8cpp-example.html">
  * Persistent_cohomology/rips_persistence_via_boundary_matrix.cpp</a>
  * \li <a href="_persistent_cohomology_2persistence_from_file_8cpp-example.html">
@@ -408,7 +436,13 @@ make doxygen
  * Rips_complex/rips_distance_matrix_persistence.cpp</a>
  * \li <a href="_rips_complex_2rips_persistence_8cpp-example.html">
  * Rips_complex/rips_persistence.cpp</a>
- * 
+ * \li <a href="_witness_complex_2strong_witness_persistence_8cpp-example.html">
+ * Witness_complex/strong_witness_persistence.cpp</a>
+ * \li <a href="_witness_complex_2weak_witness_persistence_8cpp-example.html">
+ * Witness_complex/weak_witness_persistence.cpp</a>
+ * \li <a href="_witness_complex_2example_nearest_landmark_table_8cpp-example.html">
+ * Witness_complex/example_nearest_landmark_table.cpp</a>
+ *
  * \section Contributions Bug reports and contributions
  * Please help us improving the quality of the GUDHI library. You may report bugs or suggestions to:
  * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
@@ -434,10 +468,12 @@ make doxygen
  * @example Alpha_complex/Alpha_complex_from_points.cpp
  * @example Alpha_complex/alpha_complex_3d_persistence.cpp
  * @example Alpha_complex/alpha_complex_persistence.cpp
+ * @example Alpha_complex/exact_alpha_complex_3d_persistence.cpp
  * @example Alpha_complex/periodic_alpha_complex_3d_persistence.cpp
+ * @example Alpha_complex/weighted_alpha_complex_3d_persistence.cpp
  * @example Bottleneck_distance/alpha_rips_persistence_bottleneck_distance.cpp
  * @example Bottleneck_distance/bottleneck_basic_example.cpp
- * @example Bottleneck_distance/bottleneck_read_file_example.cpp
+ * @example Bottleneck_distance/bottleneck_read_file.cpp
  * @example Bitmap_cubical_complex/Bitmap_cubical_complex.cpp
  * @example Bitmap_cubical_complex/Bitmap_cubical_complex_periodic_boundary_conditions.cpp
  * @example Bitmap_cubical_complex/Random_bitmap_cubical_complex.cpp
@@ -446,8 +482,6 @@ make doxygen
  * @example Contraction/Garland_heckbert.cpp
  * @example Contraction/Rips_contraction.cpp
  * @example Persistent_cohomology/rips_persistence_via_boundary_matrix.cpp
- * @example Persistent_cohomology/exact_alpha_complex_3d_persistence.cpp
- * @example Persistent_cohomology/weighted_alpha_complex_3d_persistence.cpp
  * @example Persistent_cohomology/persistence_from_file.cpp
  * @example Persistent_cohomology/persistence_from_simple_simplex_tree.cpp
  * @example Persistent_cohomology/plain_homology.cpp
@@ -462,6 +496,7 @@ make doxygen
  * @example Simplex_tree/simple_simplex_tree.cpp
  * @example Simplex_tree/example_alpha_shapes_3_simplex_tree_from_off_file.cpp
  * @example Simplex_tree/simplex_tree_from_cliques_of_graph.cpp
+ * @example Simplex_tree/graph_expansion_with_blocker.cpp
  * @example Skeleton_blocker/Skeleton_blocker_from_simplices.cpp
  * @example Skeleton_blocker/Skeleton_blocker_iteration.cpp
  * @example Skeleton_blocker/Skeleton_blocker_link.cpp
@@ -474,9 +509,9 @@ make doxygen
  * @example Tangential_complex/example_with_perturb.cpp
  * @example Witness_complex/example_nearest_landmark_table.cpp
  * @example Witness_complex/example_strong_witness_complex_off.cpp
- * @example Witness_complex/example_strong_witness_persistence.cpp
  * @example Witness_complex/example_witness_complex_off.cpp
- * @example Witness_complex/example_witness_complex_persistence.cpp
  * @example Witness_complex/example_witness_complex_sphere.cpp
+ * @example Witness_complex/weak_witness_persistence.cpp
+ * @example Witness_complex/strong_witness_persistence.cpp
  */
 

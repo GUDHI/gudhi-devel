@@ -106,8 +106,6 @@ class Tangential_complex_interface {
 
   void create_simplex_tree(Simplex_tree<>* simplex_tree) {
     int max_dim = tangential_complex_->create_complex<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>(*simplex_tree);
-    // FIXME
-    simplex_tree->set_dimension(max_dim);
     simplex_tree->initialize_filtration();
   }
 
