@@ -69,7 +69,6 @@ foreach(GUDHI_MODULE ${GUDHI_MODULES})
     endif()
   endforeach()
 endforeach()
-add_subdirectory(example/Nerve_GIC)
 
 add_subdirectory(GudhUI)
 

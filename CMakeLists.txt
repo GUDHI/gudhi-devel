@@ -49,7 +49,6 @@ add_gudhi_module(Subsampling)
 add_gudhi_module(Tangential_complex)
 add_gudhi_module(Witness_complex)
 add_gudhi_module(Nerve_GIC)
-add_subdirectory(src/Nerve_GIC/example)
 
 message("++ GUDHI_MODULES list is:\"${GUDHI_MODULES}\"")
 
