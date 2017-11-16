@@ -30,6 +30,8 @@
 #include <CGAL/Periodic_3_regular_triangulation_traits_3.h>
 #include <CGAL/Periodic_3_regular_triangulation_3.h>
 #include <CGAL/Alpha_shape_3.h>
+#include <CGAL/Alpha_shape_vertex_base_3.h>
+#include <CGAL/Alpha_shape_cell_base_3.h>
 #include <CGAL/iterator.h>
 
 #include <fstream>
