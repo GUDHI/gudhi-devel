@@ -14,12 +14,9 @@
 using Simplex_tree = Gudhi::Simplex_tree<>;
 using Filtration_value = Simplex_tree::Filtration_value;
 
-void program_options(int argc, char * argv[]
-                     , std::string & off_file_points
-                     , std::string & output_file_diag
-                     , Filtration_value & alpha_square_max_value
-                     , int & coeff_field_characteristic
-                     , Filtration_value & min_persistence);
+void program_options(int argc, char *argv[], std::string &off_file_points, std::string &output_file_diag,
+                     Filtration_value &alpha_square_max_value, int &coeff_field_characteristic,
+                     Filtration_value &min_persistence);
 
 int main(int argc, char **argv) {
   std::string off_file_points;
@@ -28,13 +25,13 @@ int main(int argc, char **argv) {
   int coeff_field_characteristic;
   Filtration_value min_persistence;
 
-  program_options(argc, argv, off_file_points, output_file_diag, alpha_square_max_value,
-                  coeff_field_characteristic, min_persistence);
+  program_options(argc, argv, off_file_points, output_file_diag, alpha_square_max_value, coeff_field_characteristic,
+                  min_persistence);
 
   // ----------------------------------------------------------------------------
   // Init of an alpha complex from an OFF file
   // ----------------------------------------------------------------------------
-  using Kernel = CGAL::Epick_d< CGAL::Dynamic_dimension_tag >;
+  using Kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
   Gudhi::alpha_complex::Alpha_complex<Kernel> alpha_complex_from_file(off_file_points);
 
   Simplex_tree simplex;
@@ -42,17 +39,16 @@ int main(int argc, char **argv) {
     // ----------------------------------------------------------------------------
     // Display information about the alpha complex
     // ----------------------------------------------------------------------------
-    std::cout << "Simplicial complex is of dimension " << simplex.dimension() <<
-        " - " << simplex.num_simplices() << " simplices - " <<
-        simplex.num_vertices() << " vertices." << std::endl;
+    std::cout << "Simplicial complex is of dimension " << simplex.dimension() << " - " << simplex.num_simplices()
+              << " simplices - " << simplex.num_vertices() << " vertices." << std::endl;
 
     // Sort the simplices in the order of the filtration
     simplex.initialize_filtration();
 
     std::cout << "Simplex_tree dim: " << simplex.dimension() << std::endl;
     // Compute the persistence diagram of the complex
-    Gudhi::persistent_cohomology::Persistent_cohomology< Simplex_tree,
-        Gudhi::persistent_cohomology::Field_Zp > pcoh(simplex);
+    Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Gudhi::persistent_cohomology::Field_Zp> pcoh(
+        simplex);
     // initializes the coefficient field for homology
     pcoh.init_coefficients(coeff_field_characteristic);
 
@@ -72,30 +68,26 @@ int main(int argc, char **argv) {
   return 0;
 }
 
-void program_options(int argc, char * argv[]
-                     , std::string & off_file_points
-                     , std::string & output_file_diag
-                     , Filtration_value & alpha_square_max_value
-                     , int & coeff_field_characteristic
-                     , Filtration_value & min_persistence) {
+void program_options(int argc, char *argv[], std::string &off_file_points, std::string &output_file_diag,
+                     Filtration_value &alpha_square_max_value, int &coeff_field_characteristic,
+                     Filtration_value &min_persistence) {
   namespace po = boost::program_options;
   po::options_description hidden("Hidden options");
-  hidden.add_options()
-      ("input-file", po::value<std::string>(&off_file_points),
-       "Name of file containing a point set. Format is one point per line:   X1 ... Xd ");
+  hidden.add_options()("input-file", po::value<std::string>(&off_file_points),
+                       "Name of file containing a point set. Format is one point per line:   X1 ... Xd ");
 
   po::options_description visible("Allowed options", 100);
-  visible.add_options()
-      ("help,h", "produce help message")
-      ("output-file,o", po::value<std::string>(&output_file_diag)->default_value(std::string()),
-       "Name of file in which the persistence diagram is written. Default print in std::cout")
-      ("max-alpha-square-value,r",
-      po::value<Filtration_value>(&alpha_square_max_value)->default_value(std::numeric_limits<Filtration_value>::infinity()),
-       "Maximal alpha square value for the Alpha complex construction.")
-      ("field-charac,p", po::value<int>(&coeff_field_characteristic)->default_value(11),
-       "Characteristic p of the coefficient field Z/pZ for computing homology.")
-      ("min-persistence,m", po::value<Filtration_value>(&min_persistence),
-       "Minimal lifetime of homology feature to be recorded. Default is 0. Enter a negative value to see zero length intervals");
+  visible.add_options()("help,h", "produce help message")(
+      "output-file,o", po::value<std::string>(&output_file_diag)->default_value(std::string()),
+      "Name of file in which the persistence diagram is written. Default print in std::cout")(
+      "max-alpha-square-value,r", po::value<Filtration_value>(&alpha_square_max_value)
+                                      ->default_value(std::numeric_limits<Filtration_value>::infinity()),
+      "Maximal alpha square value for the Alpha complex construction.")(
+      "field-charac,p", po::value<int>(&coeff_field_characteristic)->default_value(11),
+      "Characteristic p of the coefficient field Z/pZ for computing homology.")(
+      "min-persistence,m", po::value<Filtration_value>(&min_persistence),
+      "Minimal lifetime of homology feature to be recorded. Default is 0. Enter a negative value to see zero length "
+      "intervals");
 
   po::positional_options_description pos;
   pos.add("input-file", 1);
@@ -104,8 +96,7 @@ void program_options(int argc, char * argv[]
   all.add(visible).add(hidden);
 
   po::variables_map vm;
-  po::store(po::command_line_parser(argc, argv).
-            options(all).positional(pos).run(), vm);
+  po::store(po::command_line_parser(argc, argv).options(all).positional(pos).run(), vm);
   po::notify(vm);
 
   if (vm.count("help") || !vm.count("input-file")) {

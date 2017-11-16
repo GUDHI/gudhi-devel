@@ -13,6 +13,7 @@ where `dim` is the dimension of the homological feature, `b` and `d` are respect
 **Allowed options**
 
 * `-h [ --help ]` Produce help message
+* `-o [ --output-file ]` Name of file in which the persistence diagram is written. Default print in standard output.
 * `-r [ --max-edge-length ]` (default = inf) Maximal length of an edge for the Rips complex construction.
 * `-d [ --cpx-dimension ]` (default = 1) Maximal dimension of the Rips complex we want to compute.
 * `-p [ --field-charac ]` (default = 11)     Characteristic p of the coefficient field Z/pZ for computing homology.
@@ -45,7 +46,7 @@ outputs:
 
 
 ## `rips_distance_matrix_persistence` ##
-Same as `rips_persistence` but taking an distance matrix as input.
+Same as `rips_persistence` but taking a distance matrix as input.
 
 **Example**
 `rips_distance_matrix_persistence data/distance_matrix/full_square_distance_matrix.csv -r 15 -d 3 -p 3 -m 0`

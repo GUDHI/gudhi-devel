@@ -20,6 +20,7 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <boost/program_options.hpp>
 #include <boost/variant.hpp>
 
 #include <gudhi/Simplex_tree.h>
@@ -42,7 +43,7 @@
 #include <vector>
 #include <cstdlib>
 
-#include "../utilities/alpha_complex_3d_helper.h"
+#include "alpha_complex_3d_helper.h"
 
 // Traits
 using Kernel = CGAL::Exact_predicates_inexact_constructions_kernel;
@@ -60,10 +61,10 @@ using Weighted_point_3 = Gt::Weighted_point;
 // filtration with alpha values needed type definition
 using Alpha_value_type = Alpha_shape_3::FT;
 using Object = CGAL::Object;
-using Dispatch = CGAL::Dispatch_output_iterator<
-          CGAL::cpp11::tuple<Object, Alpha_value_type>,
-          CGAL::cpp11::tuple<std::back_insert_iterator< std::vector<Object> >,
-          std::back_insert_iterator< std::vector<Alpha_value_type> > > >;
+using Dispatch =
+    CGAL::Dispatch_output_iterator<CGAL::cpp11::tuple<Object, Alpha_value_type>,
+                                   CGAL::cpp11::tuple<std::back_insert_iterator<std::vector<Object> >,
+                                                      std::back_insert_iterator<std::vector<Alpha_value_type> > > >;
 using Cell_handle = Alpha_shape_3::Cell_handle;
 using Facet = Alpha_shape_3::Facet;
 using Edge_3 = Alpha_shape_3::Edge;
@@ -74,48 +75,38 @@ using Vertex_list = std::list<Alpha_shape_3::Vertex_handle>;
 using ST = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
 using Filtration_value = ST::Filtration_value;
 using Simplex_tree_vertex = ST::Vertex_handle;
-using Alpha_shape_simplex_tree_map = std::map<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex >;
+using Alpha_shape_simplex_tree_map = std::map<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex>;
 using Alpha_shape_simplex_tree_pair = std::pair<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex>;
-using Simplex_tree_vector_vertex = std::vector< Simplex_tree_vertex >;
-using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<
-    ST, Gudhi::persistent_cohomology::Field_Zp >;
+using Simplex_tree_vector_vertex = std::vector<Simplex_tree_vertex>;
+using Persistent_cohomology =
+    Gudhi::persistent_cohomology::Persistent_cohomology<ST, Gudhi::persistent_cohomology::Field_Zp>;
 
-void usage(char * const progName) {
-  std::cerr << "Usage:\n" << progName << " path_to_OFF_file path_to_weight_file coeff_field_characteristic[integer " <<
-               "> 0] min_persistence[float >= -1.0]\n";
-  std::cerr << "  path_to_OFF_file is the path to your points cloud in OFF format.\n";
-  std::cerr << "  path_to_weight_file is the path to the weights of your points cloud (one value per line.)\n";
-  std::cerr << "  Weights values are explained on CGAL documentation:\n";
-  std::cerr << "    https://doc.cgal.org/latest/Alpha_shapes_3/index.html#title0\n";
-  std::cerr << "    https://doc.cgal.org/latest/Triangulation_3/index.html#Triangulation3secclassRegulartriangulation\n";
-  exit(-1);
-}
+void program_options(int argc, char *argv[], std::string &off_file_points, std::string &weight_file,
+                     std::string &output_file_diag, int &coeff_field_characteristic, Filtration_value &min_persistence);
 
-int main(int argc, char * const argv[]) {
-  // program args management
-  if (argc != 5) {
-    std::cerr << "Error: Number of arguments (" << argc << ") is not correct\n";
-    usage(argv[0]);
-  }
+int main(int argc, char **argv) {
+  std::string off_file_points;
+  std::string weight_file;
+  std::string output_file_diag;
+  int coeff_field_characteristic;
+  Filtration_value min_persistence;
 
-  int coeff_field_characteristic = atoi(argv[3]);
-  Filtration_value min_persistence = strtof(argv[4], nullptr);
+  program_options(argc, argv, off_file_points, weight_file, output_file_diag, coeff_field_characteristic,
+                  min_persistence);
 
-  // Read points from file
-  std::string offInputFile(argv[1]);
   // Read the OFF file (input file name given as parameter) and triangulate points
-  Gudhi::Points_3D_off_reader<Point_3> off_reader(offInputFile);
+  Gudhi::Points_3D_off_reader<Point_3> off_reader(off_file_points);
   // Check the read operation was correct
   if (!off_reader.is_valid()) {
-    std::cerr << "Unable to read file " << offInputFile << std::endl;
-    usage(argv[0]);
+    std::cerr << "Unable to read OFF file " << off_file_points << std::endl;
+    exit(-1);
   }
 
   // Retrieve the triangulation
   std::vector<Point_3> lp = off_reader.get_point_cloud();
 
   // Read weights information from file
-  std::ifstream weights_ifstr(argv[2]);
+  std::ifstream weights_ifstr(weight_file);
   std::vector<Weighted_point_3> wp;
   if (weights_ifstr.good()) {
     double weight = 0.0;
@@ -127,12 +118,12 @@ int main(int argc, char * const argv[]) {
       index++;
     }
     if (index != lp.size()) {
-      std::cerr << "Bad number of weights in file " << argv[2] << std::endl;
-      usage(argv[0]);
+      std::cerr << "Bad number of weights in file " << weight_file << std::endl;
+      exit(-1);
     }
   } else {
-    std::cerr << "Unable to read file " << argv[2] << std::endl;
-    usage(argv[0]);
+    std::cerr << "Unable to read weights file " << weight_file << std::endl;
+    exit(-1);
   }
 
   // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode.
@@ -167,29 +158,29 @@ int main(int argc, char * const argv[]) {
   Filtration_value filtration_max = 0.0;
   for (auto object_iterator : the_objects) {
     // Retrieve Alpha shape vertex list from object
-    if (const Cell_handle * cell = CGAL::object_cast<Cell_handle>(&object_iterator)) {
+    if (const Cell_handle *cell = CGAL::object_cast<Cell_handle>(&object_iterator)) {
       vertex_list = from_cell<Vertex_list, Cell_handle>(*cell);
       count_cells++;
       if (dim_max < 3) {
         // Cell is of dim 3
         dim_max = 3;
       }
-    } else if (const Facet * facet = CGAL::object_cast<Facet>(&object_iterator)) {
+    } else if (const Facet *facet = CGAL::object_cast<Facet>(&object_iterator)) {
       vertex_list = from_facet<Vertex_list, Facet>(*facet);
       count_facets++;
       if (dim_max < 2) {
         // Facet is of dim 2
         dim_max = 2;
       }
-    } else if (const Edge_3 * edge = CGAL::object_cast<Edge_3>(&object_iterator)) {
+    } else if (const Edge_3 *edge = CGAL::object_cast<Edge_3>(&object_iterator)) {
       vertex_list = from_edge<Vertex_list, Edge_3>(*edge);
       count_edges++;
       if (dim_max < 1) {
         // Edge_3 is of dim 1
         dim_max = 1;
       }
-    } else if (const Alpha_shape_3::Vertex_handle * vertex =
-               CGAL::object_cast<Alpha_shape_3::Vertex_handle>(&object_iterator)) {
+    } else if (const Alpha_shape_3::Vertex_handle *vertex =
+                   CGAL::object_cast<Alpha_shape_3::Vertex_handle>(&object_iterator)) {
       count_vertices++;
       vertex_list = from_vertex<Vertex_list, Vertex_handle>(*vertex);
     }
@@ -215,7 +206,7 @@ int main(int argc, char * const argv[]) {
       }
     }
     // Construction of the simplex_tree
-    Filtration_value filtr = /*std::sqrt*/(*the_alpha_value_iterator);
+    Filtration_value filtr = /*std::sqrt*/ (*the_alpha_value_iterator);
 #ifdef DEBUG_TRACES
     std::cout << "filtration = " << filtr << std::endl;
 #endif  // DEBUG_TRACES
@@ -235,7 +226,6 @@ int main(int argc, char * const argv[]) {
   std::cout << "edges \t\t" << count_edges << std::endl;
   std::cout << "facets \t\t" << count_facets << std::endl;
   std::cout << "cells \t\t" << count_cells << std::endl;
-
 
   std::cout << "Information of the Simplex Tree: " << std::endl;
   std::cout << "  Number of vertices = " << simplex_tree.num_vertices() << " ";
@@ -264,4 +254,51 @@ int main(int argc, char * const argv[]) {
   pcoh.output_diagram();
 
   return 0;
+}
+
+void program_options(int argc, char *argv[], std::string &off_file_points, std::string &weight_file,
+                     std::string &output_file_diag, int &coeff_field_characteristic,
+                     Filtration_value &min_persistence) {
+  namespace po = boost::program_options;
+  po::options_description hidden("Hidden options");
+  hidden.add_options()("input-file", po::value<std::string>(&off_file_points),
+                       "Name of file containing a point set. Format is one point per line:   X1 ... Xd ")(
+      "weight-file", po::value<std::string>(&weight_file),
+      "Name of file containing a point weights. Format is one weigt per line:   W1\n...\nWn ");
+
+  po::options_description visible("Allowed options", 100);
+  visible.add_options()("help,h", "produce help message")(
+      "output-file,o", po::value<std::string>(&output_file_diag)->default_value(std::string()),
+      "Name of file in which the persistence diagram is written. Default print in std::cout")(
+      "field-charac,p", po::value<int>(&coeff_field_characteristic)->default_value(11),
+      "Characteristic p of the coefficient field Z/pZ for computing homology.")(
+      "min-persistence,m", po::value<Filtration_value>(&min_persistence),
+      "Minimal lifetime of homology feature to be recorded. Default is 0. Enter a negative value to see zero length "
+      "intervals");
+
+  po::positional_options_description pos;
+  pos.add("input-file", 1);
+  pos.add("weight-file", 2);
+
+  po::options_description all;
+  all.add(visible).add(hidden);
+
+  po::variables_map vm;
+  po::store(po::command_line_parser(argc, argv).options(all).positional(pos).run(), vm);
+  po::notify(vm);
+
+  if (vm.count("help") || !vm.count("input-file") || !vm.count("weight-file")) {
+    std::cout << std::endl;
+    std::cout << "Compute the persistent homology with coefficient field Z/pZ \n";
+    std::cout << "of a weighted 3D Alpha complex defined on a set of input points.\n \n";
+    std::cout << "The output diagram contains one bar per line, written with the convention: \n";
+    std::cout << "   p   dim b d \n";
+    std::cout << "where dim is the dimension of the homological feature,\n";
+    std::cout << "b and d are respectively the birth and death of the feature and \n";
+    std::cout << "p is the characteristic of the field Z/pZ used for homology coefficients." << std::endl << std::endl;
+
+    std::cout << "Usage: " << argv[0] << " [options] input-file weight-file" << std::endl << std::endl;
+    std::cout << visible << std::endl;
+    std::abort();
+  }
 }
