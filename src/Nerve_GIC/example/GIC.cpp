@@ -22,6 +22,9 @@
 
 #include <gudhi/GIC.h>
 
+#include <string>
+#include <vector>
+
 void usage(int nbArgs, char *const progName) {
   std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
   std::cerr << "Usage: " << progName << " filename.off threshold coordinate resolution gain [--v] \n";

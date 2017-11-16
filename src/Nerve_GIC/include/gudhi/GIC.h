@@ -145,9 +145,9 @@ class Cover_complex {
     double u;
     while (m < sampleSize) {
       u = GetUniform();
-      if ((populationSize - t) * u >= sampleSize - m)
+      if ((populationSize - t) * u >= sampleSize - m) {
         t++;
-      else {
+      } else {
         samples[m] = t;
         t++;
         m++;
@@ -233,8 +233,9 @@ class Cover_complex {
       }
       std::stringstream stream(line);
       stream >> data_dimension;
-    } else
+    } else {
       data_dimension = 3;
+    }
 
     comment = '#';
     int numedges, numfaces, i, num;
@@ -324,8 +325,9 @@ class Cover_complex {
     if (num_edges > 0) {
       for (int i = 0; i < num_edges; i++) st.insert_simplex_and_subfaces(one_skeleton[i]);
       fill_adjacency_matrix_from_st();
-    } else
+    } else {
       std::cout << "No triangulation read in OFF file!" << std::endl;
+    }
   }
 
  public:  // Set graph from Rips complex.
@@ -364,9 +366,7 @@ class Cover_complex {
         }
       }
       input.close();
-    }
-
-    else {
+    } else {
       if (verbose) std::cout << "Computing distances..." << std::endl;
       input.close();
       std::ofstream output(distance, std::ios::out | std::ios::binary);
@@ -407,7 +407,7 @@ class Cover_complex {
 
     if (distances.size() == 0) compute_pairwise_distances(distance);
 
-    //#pragma omp parallel for
+    // #pragma omp parallel for
     for (int i = 0; i < N; i++) {
       SampleWithoutReplacement(n, m, samples);
       double hausdorff_dist = 0;
@@ -601,13 +601,12 @@ class Cover_complex {
       std::pair<double, double> interM(x, y);
       intervals.push_back(interM);
       res = intervals.size();
-      if (verbose)
+      if (verbose) {
         for (int i = 0; i < res; i++)
           std::cout << "Interval " << i << " = [" << intervals[i].first << ", " << intervals[i].second << "]"
                     << std::endl;
-    }
-
-    else {
+      }
+    } else {
       if (resolution_int == -1) {  // Case we use a double for the length of the intervals.
         double x = minf;
         double y = x + resolution_double;
@@ -624,9 +623,7 @@ class Cover_complex {
           for (int i = 0; i < res; i++)
             std::cout << "Interval " << i << " = [" << intervals[i].first << ", " << intervals[i].second << "]"
                       << std::endl;
-      }
-
-      else {  // Case we use an integer and a double for the length of the intervals.
+      } else {  // Case we use an integer and a double for the length of the intervals.
         double x = minf;
         double y = x + resolution_double;
         int count = 0;
@@ -679,9 +676,7 @@ class Cover_complex {
           tmp++;
         }
 
-      }
-
-      else {
+      } else {
         std::pair<double, double> inter3 = intervals[i - 1];
         while (func[points[tmp]] < inter3.second && tmp != n) {
           prop[points[tmp]] = adjacency_matrix[points[tmp]];
@@ -998,8 +993,9 @@ class Cover_complex {
         for (int j = 0; j < data_dimension; j++) graphic << point_cloud[voronoi_subsamples[i]][j] << " ";
         for (int j = data_dimension; j < 3; j++) graphic << 0 << " ";
         graphic << std::endl;
-      } else
+      } else {
         for (int j = 0; j < 3; j++) graphic << point_cloud[voronoi_subsamples[i]][j] << " ";
+      }
     }
     for (int i = 0; i < numedges; i++) graphic << 2 << " " << edges[i][0] << " " << edges[i][1] << std::endl;
     for (int i = 0; i < numfaces; i++)
@@ -1095,9 +1091,7 @@ class Cover_complex {
         it = std::unique(simplices.begin(), simplices.end());
         simplices.resize(std::distance(simplices.begin(), it));
 
-      }
-
-      else {
+      } else {
         // Find IDs of edges to remove
         std::vector<int> simplex_to_remove;
         int simplex_id = 0;
@@ -1123,8 +1117,9 @@ class Cover_complex {
               st.remove_maximal_simplex(*simplex_tmp);
               current_id++;
               num_rem++;
-            } else
+            } else {
               simplex++;
+            }
           }
           simplex = st.complex_simplex_range().begin();
           for (int i = 0; i < simplex_to_remove[0]; i++) simplex++;
