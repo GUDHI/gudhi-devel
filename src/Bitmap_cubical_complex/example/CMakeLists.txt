@@ -6,16 +6,6 @@ if (TBB_FOUND)
   target_link_libraries(Bitmap_cubical_complex ${TBB_LIBRARIES})
 endif()
 
-add_executable ( cc_wit_hiraoka cc_wit_hiraoka.cpp )
-if (TBB_FOUND)
-  target_link_libraries(cc_wit_hiraoka ${TBB_LIBRARIES})
-endif()
-
-add_executable ( cc_wit_hiraoka_img cc_wit_hiraoka_img.cpp )
-if (TBB_FOUND)
-  target_link_libraries(cc_wit_hiraoka_img ${TBB_LIBRARIES})
-endif()
-
 add_test(NAME Bitmap_cubical_complex_example_persistence_one_sphere COMMAND $<TARGET_FILE:Bitmap_cubical_complex>
     "${CMAKE_SOURCE_DIR}/data/bitmap/CubicalOneSphere.txt")
 
