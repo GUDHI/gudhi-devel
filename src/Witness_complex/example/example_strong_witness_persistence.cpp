@@ -76,7 +76,7 @@ int main(int argc, char * argv[]) {
   std::cout << "Successfully read " << witnesses.size() << " points.\n";
   std::cout << "Ambient dimension is " << witnesses[0].dimension() << ".\n";
 
-  // Choose landmarks from witnesses
+  // Choose landmarks from witnesses (one can also use Gudhi::subsampling::choose_n_farthest_points)
   Gudhi::subsampling::pick_n_random_points(witnesses, nbL, std::back_inserter(landmarks));
 
   // Compute witness complex
