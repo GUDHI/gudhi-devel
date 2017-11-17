@@ -34,7 +34,7 @@ namespace Gudhi {
 
 namespace witness_complex {
 
-/* \private
+/* 
  * \class Strong_witness_complex
  * \brief Constructs strong witness complex for a given table of nearest landmarks with respect to witnesses.
  * \ingroup witness_complex

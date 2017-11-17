@@ -60,7 +60,7 @@
    \section witnessexample1 Example 1: Constructing weak relaxed witness complex from an off file
 
    Let's start with a simple example, which reads an off point file and computes a weak witness complex.
-   In this example, instead of choosing landmarks randomly, one can also use the farthest point selection provided by Gudhi::subsampling::choose_n_farthest_points.
+   In this example, instead of choosing landmarks randomly, one can also use the farthest point selection provided by Gudhi::subsampling::choose_n_farthest_points().
 
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
    
@@ -91,7 +91,7 @@ int main(int argc, char * const argv[]) {
   Gudhi::Points_off_reader<Point_d> off_reader(file_name);
   point_vector = Point_vector(off_reader.get_point_cloud());
 
-  // Choose landmarks (one can also use Gudhi::subsampling::choose_n_farthest_points)
+  // Choose landmarks (one can also use Gudhi::subsampling::choose_n_farthest_points())
   Gudhi::subsampling::pick_n_random_points(point_vector, nbL, std::back_inserter(landmarks));
 
   // Compute witness complex
