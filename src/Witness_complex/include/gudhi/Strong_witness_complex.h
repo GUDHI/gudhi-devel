@@ -34,7 +34,7 @@ namespace Gudhi {
 
 namespace witness_complex {
 
-/* 
+/* \private
  * \class Strong_witness_complex
  * \brief Constructs strong witness complex for a given table of nearest landmarks with respect to witnesses.
  * \ingroup witness_complex
@@ -130,6 +130,8 @@ class Strong_witness_complex {
     return true;
   }
 
+  //@}
+
  private:
     /* \brief Adds recursively all the faces of a certain dimension dim-1 witnessed by the same witness.
      * Iterator is needed to know until how far we can take landmarks to form simplexes.
@@ -170,7 +172,6 @@ class Strong_witness_complex {
       simplex.pop_back();
     }
   }
-  //@}
 };
 
 }  // namespace witness_complex
