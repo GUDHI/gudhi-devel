@@ -60,6 +60,7 @@
    \section witnessexample1 Example 1: Constructing weak relaxed witness complex from an off file
 
    Let's start with a simple example, which reads an off point file and computes a weak witness complex.
+   In this example, instead of choosing landmarks randomly, one can also use the farthest point selection provided by Gudhi::subsampling::choose_n_farthest_points.
 
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
    
@@ -90,7 +91,7 @@ int main(int argc, char * const argv[]) {
   Gudhi::Points_off_reader<Point_d> off_reader(file_name);
   point_vector = Point_vector(off_reader.get_point_cloud());
 
-  // Choose landmarks
+  // Choose landmarks (one can also use Gudhi::subsampling::choose_n_farthest_points)
   Gudhi::subsampling::pick_n_random_points(point_vector, nbL, std::back_inserter(landmarks));
 
   // Compute witness complex
@@ -108,6 +109,13 @@ int main(int argc, char * const argv[]) {
    Here is an example of constructing a strong witness complex filtration and computing persistence on it:
 
    \include Witness_complex/example_strong_witness_persistence.cpp
+
+   \section witnessexample3 Example3: Computing relaxed witness complex persistence from a distance matrix 
+
+   In this example we compute the relaxed witness complex persistence from a given matrix of closest landmarks to each witness.
+   Each landmark is given as the couple (index, distance).
+
+   \include Witness_complex/example_nearest_landmark_table.cpp
 
    \copyright GNU General Public License v3.
 
