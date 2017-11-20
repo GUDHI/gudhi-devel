@@ -154,6 +154,9 @@ def test_automatic_dimension():
     assert st.dimension() == 2
     assert st.upper_bound_dimension() == 2
 
+    st.assign_filtration([0, 1, 3], 0.7)
+    assert st.filtration([0, 1, 3]) == 0.7
+
     st.remove_maximal_simplex([0, 1, 3])
     assert st.upper_bound_dimension() == 2
     assert st.dimension() == 1
