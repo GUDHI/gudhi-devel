@@ -134,3 +134,27 @@ def test_expansion():
     ([1, 2], 0.5), ([0, 1, 2], 0.5), ([1, 2, 3], 0.5), ([5], 0.6), ([6], 0.6),
     ([5, 6], 0.6), ([4], 0.7), ([2, 4], 0.7), ([0, 3], 0.8), ([0, 1, 3], 0.8),
     ([0, 2, 3], 0.8), ([0, 1, 2, 3], 0.8), ([4, 6], 0.9), ([3, 6], 1.0)]
+
+def test_automatic_dimension():
+    st = SimplexTree()
+    assert st.__is_defined() == True
+    assert st.__is_persistence_defined() == False
+
+    # insert test
+    assert st.insert([0,1,3], filtration=0.5) == True
+    assert st.insert([0,1,2], filtration=1.) == True
+
+    assert st.num_vertices() == 4
+    assert st.num_simplices() == 11
+
+    assert st.dimension() == 2
+    assert st.upper_bound_dimension() == 2
+
+    assert st.prune_above_filtration(0.6) == True
+    assert st.dimension() == 2
+    assert st.upper_bound_dimension() == 2
+
+    st.remove_maximal_simplex([0, 1, 3])
+    assert st.upper_bound_dimension() == 2
+    assert st.dimension() == 1
+    assert st.upper_bound_dimension() == 1

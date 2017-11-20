@@ -42,6 +42,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         int num_simplices()
         void set_dimension(int dimension)
         int dimension()
+        int upper_bound_dimension()
         bint find_simplex(vector[int] simplex)
         bint insert_simplex_and_subfaces(vector[int] simplex,
                                          double filtration)
@@ -50,8 +51,9 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         vector[pair[vector[int], double]] get_star(vector[int] simplex)
         vector[pair[vector[int], double]] get_cofaces(vector[int] simplex,
                                                           int dimension)
-        void remove_maximal_simplex(vector[int] simplex)
         void expansion(int max_dim)
+        void remove_maximal_simplex(vector[int] simplex)
+        bool prune_above_filtration(double filtration)
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>":
@@ -148,21 +150,36 @@ cdef class SimplexTree:
 
         :returns:  the simplicial complex dimension.
         :rtype:  int
+
+        .. note::
+
+            This function is not constant time because it can recompute
+            dimension if required (can be triggered by
+            remove_maximal_simplex or prune_above_filtration methods).
         """
         return self.thisptr.dimension()
+
+    def upper_bound_dimension(self):
+        """This function returns a valid dimension upper bound of the
+        simplicial complex.
+
+        :returns:  an upper bound on the dimension of the simplicial complex.
+        :rtype:  int
+        """
+        return self.thisptr.upper_bound_dimension()
 
     def set_dimension(self, dimension):
         """This function sets the dimension of the simplicial complex.
 
-        insert and remove_maximal_simplex functions do not update dimension
-        value of the `SimplexTree`.
-
-        `AlphaComplex`, `RipsComplex`, `TangentialComplex` and `WitnessComplex`
-        automatically sets the correct dimension in their `create_simplex_tree`
-        functions.
-
         :param dimension: The new dimension value.
         :type dimension: int.
+
+        .. note::
+
+            This function must be used with caution because it disables
+            dimension recomputation when required
+            (this recomputation can be triggered by remove_maximal_simplex
+            or prune_above_filtration methods.
         """
         self.thisptr.set_dimension(<int>dimension)
 
@@ -286,8 +303,48 @@ cdef class SimplexTree:
 
         :param simplex: The N-simplex, represented by a list of vertex.
         :type simplex: list of int.
+
+        .. note::
+
+            Be aware that removing is shifting data in a flat_map
+            (initialize_filtration to be done).
+
+        .. note::
+
+            The dimension of the simplicial complex may be lower after calling
+            remove_maximal_simplex than it was before. However,
+            upper_bound_dimension method will return the old value, which
+            remains a valid upper bound. If you care, you can call dimension
+            to recompute the exact dimension.
         """
         self.thisptr.remove_maximal_simplex(simplex)
+
+    def prune_above_filtration(self, filtration):
+        """Prune above filtration value given as parameter.
+
+        :param filtration: Maximum threshold value.
+        :type filtration: float.
+        :returns: The filtration modification information.
+        :rtype: bint
+
+
+        .. note::
+
+            Some simplex tree functions require the filtration to be valid.
+            prune_above_filtration function is not launching
+            initialize_filtration but returns the filtration modification
+            information. If the complex has changed , please call
+            initialize_filtration to recompute it.
+
+        .. note::
+
+            Note that the dimension of the simplicial complex may be lower
+            after calling prune_above_filtration than it was before. However,
+            upper_bound_dimension will return the old value, which remains a
+            valid upper bound. If you care, you can call dimension method to
+            recompute the exact dimension.
+        """
+        return self.thisptr.prune_above_filtration(filtration)
 
     def expansion(self, max_dim):
         """Expands the Simplex_tree containing only its one skeleton
