@@ -23,6 +23,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Euclidean_strong_witness_complex.h>
 #include <gudhi/pick_n_random_points.h>
+#include <gudhi/choose_n_farthest_points.h>
 #include <gudhi/Points_off_io.h>
 
 #include <CGAL/Epick_d.h>
@@ -63,9 +64,10 @@ int main(int argc, char * const argv[]) {
   std::cout << "Successfully read " << point_vector.size() << " points.\n";
   std::cout << "Ambient dimension is " << point_vector[0].dimension() << ".\n";
 
-  // Choose landmarks
-  Gudhi::subsampling::pick_n_random_points(point_vector, nbL, std::back_inserter(landmarks));
-
+  // Choose landmarks (decomment one of the following two lines)
+  // Gudhi::subsampling::pick_n_random_points(point_vector, nbL, std::back_inserter(landmarks));
+  Gudhi::subsampling::choose_n_farthest_points(K(), point_vector, nbL, Gudhi::subsampling::random_starting_point, std::back_inserter(landmarks));
+  
   // Compute witness complex
   start = clock();
   Witness_complex witness_complex(landmarks,

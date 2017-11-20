@@ -25,6 +25,7 @@
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Points_off_io.h>
 #include <gudhi/pick_n_random_points.h>
+#include <gudhi/choose_n_farthest_points.h>
 
 #include <boost/program_options.hpp>
 
@@ -76,8 +77,9 @@ int main(int argc, char * argv[]) {
   std::cout << "Successfully read " << witnesses.size() << " points.\n";
   std::cout << "Ambient dimension is " << witnesses[0].dimension() << ".\n";
 
-  // Choose landmarks from witnesses
-  Gudhi::subsampling::pick_n_random_points(witnesses, nbL, std::back_inserter(landmarks));
+  // Choose landmarks (decomment one of the following two lines)
+  // Gudhi::subsampling::pick_n_random_points(point_vector, nbL, std::back_inserter(landmarks));
+  Gudhi::subsampling::choose_n_farthest_points(K(), witnesses, nbL, Gudhi::subsampling::random_starting_point, std::back_inserter(landmarks));
 
   // Compute witness complex
   Strong_witness_complex strong_witness_complex(landmarks,
