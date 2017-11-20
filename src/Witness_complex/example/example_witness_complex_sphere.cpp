@@ -25,6 +25,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Euclidean_witness_complex.h>
 #include <gudhi/pick_n_random_points.h>
+#include <gudhi/choose_n_farthest_points.h>
 #include <gudhi/reader_utils.h>
 
 #include <CGAL/Epick_d.h>
@@ -75,7 +76,8 @@ int main(int argc, char * const argv[]) {
 
     // Choose landmarks
     start = clock();
-    Gudhi::subsampling::pick_n_random_points(point_vector, number_of_landmarks, std::back_inserter(landmarks));
+    // Gudhi::subsampling::pick_n_random_points(point_vector, number_of_landmarks, std::back_inserter(landmarks));
+    Gudhi::subsampling::choose_n_farthest_points(K(), point_vector, number_of_landmarks, Gudhi::subsampling::random_starting_point, std::back_inserter(landmarks));
 
     // Compute witness complex
     Witness_complex witness_complex(landmarks,
