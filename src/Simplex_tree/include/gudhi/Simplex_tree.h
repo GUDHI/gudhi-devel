@@ -391,13 +391,13 @@ class Simplex_tree {
     return sh->second.key();
   }
 
-  /** \brief Returns the simplex associated to a key.
+  /** \brief Returns the simplex that has index idx in the filtration.
    *
    * The filtration must be initialized.
    * \pre SimplexTreeOptions::store_key
    */
-  Simplex_handle simplex(Simplex_key key) const {
-    return filtration_vect_[key];
+  Simplex_handle simplex(Simplex_key idx) const {
+    return filtration_vect_[idx];
   }
 
   /** \brief Returns the filtration value of a simplex.
