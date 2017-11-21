@@ -33,15 +33,15 @@ namespace Gudhi {
  * 
  * \section toplexmapdefinition Definition
  * 
- * Let's consider a simplicial complex, denote by $d$ its dimension
- * and by $k$ its number of maximal simplices.
- * Furthermore, denote by $\gamma_0$ the maximal number of toplices, i.e. maximal simplices,
+ * Let's consider a simplicial complex, denote by \f$d\f$ its dimension
+ * and by \f$k\f$ its number of maximal simplices.
+ * Furthermore, denote by \f$\gamma_0\f$ the maximal number of toplices, i.e. maximal simplices,
  * that contain a same vertex.
  *
  * The goal of the Toplex Map is both to represent the complex in optimal
  * O(kd) space and to provide fast standard operations such as : insertion, removal
  * and membership of a simplex, contraction of an edge, collapses. The time needed
- * for these operation is linear or quadratic in $\gamma_0$ and $d$.
+ * for these operation is linear or quadratic in \f$\gamma_0\f$ and \f$d\f$.
  *
  * Toplex map is composed firstly of a raw storage of toplices and secondly of a
  * map which associate any vertex to a set of pointers toward all toplices

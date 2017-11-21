@@ -2,9 +2,8 @@
 #define FILTERED_TOPLEX_MAP_H
 
 #include <gudhi/Toplex_map.h>
+#include <map>
 #include <limits>
-
-#define filtration_upper_bound std::numeric_limits<Filtration_value>::max()
 
 namespace Gudhi {
 
@@ -14,7 +13,7 @@ public:
     typedef double Filtration_value;
 
     template <typename Input_vertex_range>
-    std::pair<Simplex, bool> insert_simplex_and_subfaces(const Input_vertex_range &vertex_range, Filtration_value f = filtration_upper_bound);
+    std::pair<Simplex, bool> insert_simplex_and_subfaces(const Input_vertex_range &vertex_range, Filtration_value f = nan(""));
 
     template <typename Input_vertex_range>
     Filtration_value filtration(const Input_vertex_range &vertex_range) const;
@@ -23,7 +22,7 @@ public:
     bool membership(const Input_vertex_range &vertex_range) const;
 
 protected:
-    std::unordered_map<Filtration_value, Toplex_map> toplex_maps;
+    std::map<Filtration_value, Toplex_map> toplex_maps;
 };
 
 template <typename Input_vertex_range>
@@ -40,8 +39,8 @@ template <typename Input_vertex_range>
 Filtered_toplex_map::Filtration_value Filtered_toplex_map::filtration(const Input_vertex_range &vertex_range) const{
     for(auto kv : toplex_maps)
         if(kv.second.membership(vertex_range))
-            return kv.first;
-    return filtration_upper_bound;
+            return kv.first; //min only because a map is ordered
+    return nan("");
 }
 
 template <typename Input_vertex_range>

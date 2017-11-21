@@ -1,13 +1,13 @@
 #ifndef FAKE_SIMPLEX_TREE_H
 #define FAKE_SIMPLEX_TREE_H
 
+#include <cmath>
+
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Filtered_toplex_map.h>
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/bron_kerbosch_all_cliques.hpp>
-
-#define filtration_upper_bound std::numeric_limits<Filtration_value>::max()
 
 namespace Gudhi {
 
@@ -35,21 +35,20 @@ public:
 
     typedef void Insertion_result_type;
 
-    /** \brief Inserts a given range `Gudhi::rips_complex::Rips_complex::OneSkeletonGraph` in the simplicial
+    /** \brief Inserts the flag complex of a given range `Gudhi::rips_complex::Rips_complex::OneSkeletonGraph` in the simplicial
      * complex. */
     template<class OneSkeletonGraph>
     void insert_graph(const OneSkeletonGraph& skel_graph);
 
-    /** \brief Expands the simplicial complex containing only its one skeleton until a given maximal dimension as
-     * explained in \ref ripsdefinition. */
+    /** \brief Do nothing */
     void expansion(int max_dim);
 
-    /** \brief Returns the number of vertices in the simplicial complex. */
+    /** \brief Returns the number of vertices stored i.e. the number of max simplices */
     std::size_t num_vertices() const;
 
-    Simplex_ptr_set candidates(int min_dim=-1) const;
-
     std::size_t dimension() const;
+
+    std::size_t dimension(Simplex_ptr& sptr) const;
 
     std::size_t num_simplices() const;
 
@@ -57,11 +56,10 @@ public:
 
     std::vector<Simplex> max_simplices() const;
 
-    std::vector<Simplex> filtration_simplex_range() const;
+    std::vector<Simplex> filtration_simplex_range(int d=std::numeric_limits<int>::max()) const;
 
-    std::vector<Simplex> skeleton_simplex_range(int d=std::numeric_limits<int>::max()) const;
+    std::vector<Simplex> skeleton_simplex_range(int d) const;
 
-    std::size_t dimension(Simplex_ptr& sptr) const;
 
 protected:
 
@@ -74,8 +72,8 @@ protected:
 
 template<class OneSkeletonGraph>
 void Fake_simplex_tree::insert_graph(const OneSkeletonGraph& skel_graph){
-    toplex_maps.emplace(filtration_upper_bound,Toplex_map());
-    bron_kerbosch_all_cliques(skel_graph, Visitor(&(this->toplex_maps.at(filtration_upper_bound))));
+    toplex_maps.emplace(nan(""),Toplex_map());
+    bron_kerbosch_all_cliques(skel_graph, Visitor(&(this->toplex_maps.at(nan("")))));
 }
 
 void Fake_simplex_tree::expansion(int max_dim){}
@@ -95,6 +93,10 @@ std::size_t Fake_simplex_tree::dimension() const {
     return max-1;
 }
 
+std::size_t Fake_simplex_tree::dimension(Simplex_ptr& sptr) const{
+    return sptr->size();
+}
+
 std::size_t Fake_simplex_tree::num_simplices() const {
     //return filtration_simplex_range().size();
     return max_simplices().size();
@@ -112,32 +114,6 @@ Simplex Fake_simplex_tree::simplex_vertex_range(const Simplex& s) const {
     return s;
 }
 
-std::vector<Simplex> Fake_simplex_tree::filtration_simplex_range() const{
-    std::vector<Simplex> m = max_simplices();
-    std::vector<Simplex> seen1;
-    Simplex_ptr_set seen2;
-    while(m.begin()!=m.end()){
-        Simplex s(m.back());
-        m.pop_back();
-        if(seen2.find(get_key(s))==seen2.end()){
-            seen1.emplace_back(s);
-            seen2.emplace(get_key(s));
-            if(s.size()>0)
-                for(Simplex& sigma : facets(s))
-                    m.emplace_back(sigma);
-        }
-    }
-    return seen1;
-}
-
-std::vector<Simplex> Fake_simplex_tree::skeleton_simplex_range(int d) const{
-    std::vector<Simplex> simplices;
-    for(const Simplex& s : max_simplices())
-        if(s.size()<=d)
-            simplices.emplace_back(s);
-    return simplices;
-}
-
 std::vector<Simplex> Fake_simplex_tree::max_simplices() const{
     std::vector<Simplex> max_s;
     for(auto kv : toplex_maps)
@@ -146,8 +122,27 @@ std::vector<Simplex> Fake_simplex_tree::max_simplices() const{
     return max_s;
 }
 
-std::size_t Fake_simplex_tree::dimension(Simplex_ptr& sptr) const{
-    return sptr->size();
+std::vector<Simplex> Fake_simplex_tree::filtration_simplex_range(int d) const{
+    std::vector<Simplex> m = max_simplices();
+    std::vector<Simplex> range;
+    Simplex_ptr_set seen;
+    while(m.begin()!=m.end()){
+        Simplex s(m.back());
+        m.pop_back();
+        if(seen.find(get_key(s))==seen.end()){
+            if(s.size()-1<=d)
+                range.emplace_back(s);
+            seen.emplace(get_key(s));
+            if(s.size()>0)
+                for(Simplex& sigma : facets(s))
+                    m.emplace_back(sigma);
+        }
+    }
+    return range;
+}
+
+std::vector<Simplex> Fake_simplex_tree::skeleton_simplex_range(int d) const{
+    return filtration_simplex_range(d);
 }
 
 } //namespace Gudhi
