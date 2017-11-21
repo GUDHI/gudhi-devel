@@ -108,7 +108,7 @@ int main(int argc, char * const argv[]) {
 
    Here is an example of constructing a strong witness complex filtration and computing persistence on it:
 
-   \include Witness_complex/example_strong_witness_persistence.cpp
+   \include Witness_complex/strong_witness_persistence.cpp
 
    \section witnessexample3 Example3: Computing relaxed witness complex persistence from a distance matrix 
 

@@ -53,6 +53,21 @@ namespace Gudhi {
  Such files can be generated with `Gudhi::persistent_cohomology::Persistent_cohomology::output_diagram()` and read with
  `Gudhi::read_persistence_intervals_and_dimension()`, `Gudhi::read_persistence_intervals_grouped_by_dimension()` or
  `Gudhi::read_persistence_intervals_in_dimension()`.
+ 
+
+ \section FileFormatsIsoCuboid Iso-cuboid
+
+ Such a file describes an iso-oriented cuboid with diagonal opposite vertices (min_hx, min_hy, min_hz,...) and (max_hx, max_hy, max_hz, ...). The format is:<br>
+ \verbatim
+   min_hx min_hy [min_hz ...]
+   max_hx max_hy [max_hz ...]
+ \endverbatim
+
+ Here is a simple sample file in the 3D case:
+ \verbatim
+   -1. -1. -1.
+   1. 1. 1.
+ \endverbatim
 */
 }  // namespace Gudhi
 
