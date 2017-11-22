@@ -1149,7 +1149,7 @@ class Simplex_tree {
         Siblings * new_sib = new Siblings(siblings,  // oncles
                                           simplex->first,  // parent
                                           boost::adaptors::reverse(intersection));  // boost::container::ordered_unique_range_t
-        std::vector<Simplex_handle> blocked_new_sib_list;
+        std::vector<Vertex_handle> blocked_new_sib_vertex_list;
         // As all intersections are inserted, we can call the blocker function on all new_sib members
         for (auto new_sib_member = new_sib->members().begin();
              new_sib_member != new_sib->members().end();
@@ -1157,17 +1157,19 @@ class Simplex_tree {
            bool blocker_result = block_simplex(new_sib_member);
            // new_sib member has been blocked by the blocker function
            // add it to the list to be removed - do not perform it while looping on it
-           if (blocker_result)
-             blocked_new_sib_list.push_back(new_sib_member);
+           if (blocker_result) {
+             blocked_new_sib_vertex_list.push_back(new_sib_member->first);
+           }
         }
-        bool removed = false;
-        for (auto& blocked_new_sib_member : blocked_new_sib_list){
-          removed = removed || remove_maximal_simplex(blocked_new_sib_member);
-        }
-        if (removed) {
+        if (blocked_new_sib_vertex_list.size() == new_sib->members().size()) {
+          // Specific case where all have to be deleted
+          delete new_sib;
           // ensure the children property
           simplex->second.assign_children(siblings);
         } else {
+          for (auto& blocked_new_sib_member : blocked_new_sib_vertex_list) {
+            new_sib->members().erase(blocked_new_sib_member);
+          }
           // ensure recursive call
           simplex->second.assign_children(new_sib);
           siblings_expansion_with_blockers(new_sib, max_dim, k - 1, block_simplex);
@@ -1342,16 +1344,14 @@ class Simplex_tree {
  public:
   /** \brief Remove a maximal simplex.
    * @param[in] sh Simplex handle on the maximal simplex to remove.
-   * @return a boolean value that is an implementation detail, and that the user is supposed to ignore
    * \pre Please check the simplex has no coface before removing it.
    * \exception std::invalid_argument In debug mode, if sh has children.
-   * \post Be aware that removing is shifting data in a flat_map (`initialize_filtration()` to be done).
+   * \post Be aware that removing is shifting data in a flat_map (initialize_filtration to be done).
    * \post Note that the dimension of the simplicial complex may be lower after calling `remove_maximal_simplex()`
    * than it was before. However, `upper_bound_dimension()` will return the old value, which remains a valid upper
    * bound. If you care, you can call `dimension()` to recompute the exact dimension.
-   * \internal @return true if the leaf's branch has no other leaves (branch's children has been re-assigned), false otherwise.
    */
-  bool remove_maximal_simplex(Simplex_handle sh) {
+  void remove_maximal_simplex(Simplex_handle sh) {
     // Guarantee the simplex has no children
     GUDHI_CHECK(!has_children(sh),
                 std::invalid_argument("Simplex_tree::remove_maximal_simplex - argument has children"));
@@ -1369,9 +1369,7 @@ class Simplex_tree {
       delete child;
       // dimension may need to be lowered
       dimension_to_be_lowered_ = true;
-      return true;
     }
-    return false;
   }
 
  private:
