@@ -19,6 +19,8 @@ where `dim` is the dimension of the homological feature, `birth` and `death` are
 * `-p [ --field-charac ]` (default = 11)     Characteristic p of the coefficient field Z/pZ for computing homology.
 * `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature to be recorded. Enter a negative value to see zero length intervals.
 
+Beware: this program may use a lot of RAM and take a lot of time if `max-edge-length` is set to a large value.
+
 **Example 1 with Z/2Z coefficients**
 `rips_persistence ../../data/points/tore3D_1307.off -r 0.25 -m 0.5 -d 3 -p 2`
 
