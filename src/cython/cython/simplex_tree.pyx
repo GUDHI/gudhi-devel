@@ -37,11 +37,13 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_interface_full_featured "Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>":
         Simplex_tree()
         double simplex_filtration(vector[int] simplex)
+        void assign_simplex_filtration(vector[int] simplex, double filtration)
         void initialize_filtration()
         int num_vertices()
         int num_simplices()
         void set_dimension(int dimension)
         int dimension()
+        int upper_bound_dimension()
         bint find_simplex(vector[int] simplex)
         bint insert_simplex_and_subfaces(vector[int] simplex,
                                          double filtration)
@@ -50,8 +52,9 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         vector[pair[vector[int], double]] get_star(vector[int] simplex)
         vector[pair[vector[int], double]] get_cofaces(vector[int] simplex,
                                                           int dimension)
-        void remove_maximal_simplex(vector[int] simplex)
         void expansion(int max_dim)
+        void remove_maximal_simplex(vector[int] simplex)
+        bool prune_above_filtration(double filtration)
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>":
@@ -113,15 +116,31 @@ cdef class SimplexTree:
         """
         return self.thisptr.simplex_filtration(simplex)
 
+    def assign_filtration(self, simplex, filtration):
+        """This function assigns the simplicial complex filtration value for a
+        given N-simplex.
+
+        :param simplex: The N-simplex, represented by a list of vertex.
+        :type simplex: list of int.
+        :param filtration:  The simplicial complex filtration value.
+        :type filtration:  float
+        """
+        self.thisptr.assign_simplex_filtration(simplex, filtration)
+
     def initialize_filtration(self):
         """This function initializes and sorts the simplicial complex
         filtration vector.
 
         .. note::
 
-            This function must be launched before persistence, betti_numbers,
-            persistent_betti_numbers or get_filtration after inserting or
-            removing simplices.
+            This function must be launched before
+            :func:`persistence()<gudhi.SimplexTree.persistence>`,
+            :func:`betti_numbers()<gudhi.SimplexTree.betti_numbers>`,
+            :func:`persistent_betti_numbers()<gudhi.SimplexTree.persistent_betti_numbers>`,
+            or :func:`get_filtration()<gudhi.SimplexTree.get_filtration>`
+            after :func:`inserting<gudhi.SimplexTree.insert>` or
+            :func:`removing<gudhi.SimplexTree.remove_maximal_simplex>`
+            simplices.
         """
         self.thisptr.initialize_filtration()
 
@@ -148,21 +167,42 @@ cdef class SimplexTree:
 
         :returns:  the simplicial complex dimension.
         :rtype:  int
+
+        .. note::
+
+            This function is not constant time because it can recompute
+            dimension if required (can be triggered by
+            :func:`remove_maximal_simplex()<gudhi.SimplexTree.remove_maximal_simplex>`
+            or
+            :func:`prune_above_filtration()<gudhi.SimplexTree.prune_above_filtration>`
+            methods).
         """
         return self.thisptr.dimension()
+
+    def upper_bound_dimension(self):
+        """This function returns a valid dimension upper bound of the
+        simplicial complex.
+
+        :returns:  an upper bound on the dimension of the simplicial complex.
+        :rtype:  int
+        """
+        return self.thisptr.upper_bound_dimension()
 
     def set_dimension(self, dimension):
         """This function sets the dimension of the simplicial complex.
 
-        insert and remove_maximal_simplex functions do not update dimension
-        value of the `SimplexTree`.
-
-        `AlphaComplex`, `RipsComplex`, `TangentialComplex` and `WitnessComplex`
-        automatically sets the correct dimension in their `create_simplex_tree`
-        functions.
-
         :param dimension: The new dimension value.
         :type dimension: int.
+
+        .. note::
+
+            This function must be used with caution because it disables
+            dimension recomputation when required
+            (this recomputation can be triggered by
+            :func:`remove_maximal_simplex()<gudhi.SimplexTree.remove_maximal_simplex>`
+            or
+            :func:`prune_above_filtration()<gudhi.SimplexTree.prune_above_filtration>`
+            ).
         """
         self.thisptr.set_dimension(<int>dimension)
 
@@ -286,8 +326,56 @@ cdef class SimplexTree:
 
         :param simplex: The N-simplex, represented by a list of vertex.
         :type simplex: list of int.
+
+        .. note::
+
+            Be aware that removing is shifting data in a flat_map
+            (:func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>` to be done).
+
+        .. note::
+
+            The dimension of the simplicial complex may be lower after calling
+            remove_maximal_simplex than it was before. However,
+            :func:`upper_bound_dimension()<gudhi.SimplexTree.upper_bound_dimension>`
+            method will return the old value, which
+            remains a valid upper bound. If you care, you can call
+            :func:`dimension()<gudhi.SimplexTree.dimension>`
+            to recompute the exact dimension.
         """
         self.thisptr.remove_maximal_simplex(simplex)
+
+    def prune_above_filtration(self, filtration):
+        """Prune above filtration value given as parameter.
+
+        :param filtration: Maximum threshold value.
+        :type filtration: float.
+        :returns: The filtration modification information.
+        :rtype: bint
+
+
+        .. note::
+
+            Some simplex tree functions require the filtration to be valid.
+            prune_above_filtration function is not launching
+            :func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>`
+            but returns the filtration modification
+            information. If the complex has changed , please call
+            :func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>`
+            to recompute it.
+
+        .. note::
+
+            Note that the dimension of the simplicial complex may be lower
+            after calling
+            :func:`prune_above_filtration()<gudhi.SimplexTree.prune_above_filtration>`
+            than it was before. However,
+            :func:`upper_bound_dimension()<gudhi.SimplexTree.upper_bound_dimension>`
+            will return the old value, which remains a
+            valid upper bound. If you care, you can call
+            :func:`dimension()<gudhi.SimplexTree.dimension>`
+            method to recompute the exact dimension.
+        """
+        return self.thisptr.prune_above_filtration(filtration)
 
     def expansion(self, max_dim):
         """Expands the Simplex_tree containing only its one skeleton
@@ -336,8 +424,9 @@ cdef class SimplexTree:
         :returns: The Betti numbers ([B0, B1, ..., Bn]).
         :rtype:  list of int
 
-        :note: betti_numbers function requires persistence function to be
-            launched first.
+        :note: betti_numbers function requires
+            :func:`persistence()<gudhi.SimplexTree.persistence>`
+            function to be launched first.
         """
         cdef vector[int] bn_result
         if self.pcohptr != NULL:
@@ -361,7 +450,8 @@ cdef class SimplexTree:
         :returns: The persistent Betti numbers ([B0, B1, ..., Bn]).
         :rtype:  list of int
 
-        :note: persistent_betti_numbers function requires persistence
+        :note: persistent_betti_numbers function requires
+            :func:`persistence()<gudhi.SimplexTree.persistence>`
             function to be launched first.
         """
         cdef vector[int] pbn_result
@@ -381,8 +471,9 @@ cdef class SimplexTree:
         :returns: The persistence intervals.
         :rtype:  list of pair of float
 
-        :note: intervals_in_dim function requires persistence function to be
-            launched first.
+        :note: intervals_in_dim function requires
+            :func:`persistence()<gudhi.SimplexTree.persistence>`
+            function to be launched first.
         """
         cdef vector[pair[double,double]] intervals_result
         if self.pcohptr != NULL:
@@ -399,8 +490,9 @@ cdef class SimplexTree:
         :param persistence_file: The specific dimension.
         :type persistence_file: string.
 
-        :note: intervals_in_dim function requires persistence function to be
-            launched first.
+        :note: intervals_in_dim function requires
+            :func:`persistence()<gudhi.SimplexTree.persistence>`
+            function to be launched first.
         """
         if self.pcohptr != NULL:
             if persistence_file != '':

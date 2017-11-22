@@ -761,8 +761,12 @@ class Simplex_tree {
     return &root_;
   }
 
-  /** Set a dimension for the simplicial complex. */
+  /** \brief Set a dimension for the simplicial complex.
+   *  \details This function must be used with caution because it disables dimension recomputation when required
+   * (this recomputation can be triggered by `remove_maximal_simplex()` or `prune_above_filtration()`).
+   */
   void set_dimension(int dimension) {
+    dimension_to_be_lowered_ = false;
     dimension_ = dimension;
   }
 
