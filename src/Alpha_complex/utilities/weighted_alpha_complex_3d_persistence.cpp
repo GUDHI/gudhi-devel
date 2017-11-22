@@ -27,13 +27,16 @@
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Points_3D_off_io.h>
 
+#include <CGAL/config.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Regular_triangulation_euclidean_traits_3.h>
 #include <CGAL/Regular_triangulation_3.h>
 #include <CGAL/Alpha_shape_3.h>
-#include <CGAL/Alpha_shape_vertex_base_3.h>
-#include <CGAL/Alpha_shape_cell_base_3.h>
 #include <CGAL/iterator.h>
+
+// For CGAL < 4.11
+#if CGAL_VERSION_NR < 1041100000
+#include <CGAL/Regular_triangulation_euclidean_traits_3.h>
+#endif  // CGAL_VERSION_NR < 1041100000
 
 #include <fstream>
 #include <cmath>
@@ -47,18 +50,36 @@
 
 #include "alpha_complex_3d_helper.h"
 
-// Traits
+// Alpha_shape_3 templates type definitions
 using Kernel = CGAL::Exact_predicates_inexact_constructions_kernel;
+
+// For CGAL < 4.11
+#if CGAL_VERSION_NR < 1041100000
 using Gt = CGAL::Regular_triangulation_euclidean_traits_3<Kernel>;
 using Vb = CGAL::Alpha_shape_vertex_base_3<Gt>;
 using Fb = CGAL::Alpha_shape_cell_base_3<Gt>;
 using Tds = CGAL::Triangulation_data_structure_3<Vb, Fb>;
 using Triangulation_3 = CGAL::Regular_triangulation_3<Gt, Tds>;
-using Alpha_shape_3 = CGAL::Alpha_shape_3<Triangulation_3>;
 
 // From file type definition
 using Point_3 = Gt::Bare_point;
 using Weighted_point_3 = Gt::Weighted_point;
+
+// For CGAL >= 4.11
+#else  // CGAL_VERSION_NR < 1041100000
+using Rvb = CGAL::Regular_triangulation_vertex_base_3<Kernel>;
+using Vb = CGAL::Alpha_shape_vertex_base_3<Kernel,Rvb>;
+using Rcb = CGAL::Regular_triangulation_cell_base_3<Kernel>;
+using Cb = CGAL::Alpha_shape_cell_base_3<Kernel,Rcb>;
+using Tds = CGAL::Triangulation_data_structure_3<Vb,Cb>;
+using Triangulation_3 = CGAL::Regular_triangulation_3<Kernel,Tds>;
+
+// From file type definition
+using Point_3 = Triangulation_3::Bare_point;
+using Weighted_point_3 = Triangulation_3::Weighted_point;
+#endif  // CGAL_VERSION_NR < 1041100000
+
+using Alpha_shape_3 = CGAL::Alpha_shape_3<Triangulation_3>;
 
 // filtration with alpha values needed type definition
 using Alpha_value_type = Alpha_shape_3::FT;
@@ -160,29 +181,28 @@ int main(int argc, char **argv) {
   Filtration_value filtration_max = 0.0;
   for (auto object_iterator : the_objects) {
     // Retrieve Alpha shape vertex list from object
-    if (const Cell_handle *cell = CGAL::object_cast<Cell_handle>(&object_iterator)) {
+    if (const Cell_handle* cell = CGAL::object_cast<Cell_handle>(&object_iterator)) {
       vertex_list = from_cell<Vertex_list, Cell_handle>(*cell);
       count_cells++;
       if (dim_max < 3) {
         // Cell is of dim 3
         dim_max = 3;
       }
-    } else if (const Facet *facet = CGAL::object_cast<Facet>(&object_iterator)) {
+    } else if (const Facet* facet = CGAL::object_cast<Facet>(&object_iterator)) {
       vertex_list = from_facet<Vertex_list, Facet>(*facet);
       count_facets++;
       if (dim_max < 2) {
         // Facet is of dim 2
         dim_max = 2;
       }
-    } else if (const Edge_3 *edge = CGAL::object_cast<Edge_3>(&object_iterator)) {
+    } else if (const Edge_3* edge = CGAL::object_cast<Edge_3>(&object_iterator)) {
       vertex_list = from_edge<Vertex_list, Edge_3>(*edge);
       count_edges++;
       if (dim_max < 1) {
         // Edge_3 is of dim 1
         dim_max = 1;
       }
-    } else if (const Alpha_shape_3::Vertex_handle *vertex =
-                   CGAL::object_cast<Alpha_shape_3::Vertex_handle>(&object_iterator)) {
+    } else if (const Vertex_handle* vertex = CGAL::object_cast<Vertex_handle>(&object_iterator)) {
       count_vertices++;
       vertex_list = from_vertex<Vertex_list, Vertex_handle>(*vertex);
     }
@@ -221,7 +241,6 @@ int main(int argc, char **argv) {
     else
       std::cout << "This shall not happen" << std::endl;
   }
-  simplex_tree.set_dimension(dim_max);
 
 #ifdef DEBUG_TRACES
   std::cout << "vertices \t\t" << count_vertices << std::endl;
@@ -253,7 +272,15 @@ int main(int argc, char **argv) {
 
   pcoh.compute_persistent_cohomology(min_persistence);
 
-  pcoh.output_diagram();
+  // Output the diagram in filediag
+  if (output_file_diag.empty()) {
+    pcoh.output_diagram();
+  } else {
+    std::cout << "Result in file: " << output_file_diag << std::endl;
+    std::ofstream out(output_file_diag);
+    pcoh.output_diagram(out);
+    out.close();
+  }
 
   return 0;
 }

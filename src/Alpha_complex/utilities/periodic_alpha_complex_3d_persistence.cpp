@@ -31,8 +31,6 @@
 #include <CGAL/Periodic_3_Delaunay_triangulation_traits_3.h>
 #include <CGAL/Periodic_3_Delaunay_triangulation_3.h>
 #include <CGAL/Alpha_shape_3.h>
-#include <CGAL/Alpha_shape_vertex_base_3.h>
-#include <CGAL/Alpha_shape_cell_base_3.h>
 #include <CGAL/iterator.h>
 
 #include <fstream>
@@ -158,29 +156,28 @@ int main(int argc, char **argv) {
   Filtration_value filtration_max = 0.0;
   for (auto object_iterator : the_objects) {
     // Retrieve Alpha shape vertex list from object
-    if (const Cell_handle *cell = CGAL::object_cast<Cell_handle>(&object_iterator)) {
+    if (const Cell_handle* cell = CGAL::object_cast<Cell_handle>(&object_iterator)) {
       vertex_list = from_cell<Vertex_list, Cell_handle>(*cell);
       count_cells++;
       if (dim_max < 3) {
         // Cell is of dim 3
         dim_max = 3;
       }
-    } else if (const Facet *facet = CGAL::object_cast<Facet>(&object_iterator)) {
+    } else if (const Facet* facet = CGAL::object_cast<Facet>(&object_iterator)) {
       vertex_list = from_facet<Vertex_list, Facet>(*facet);
       count_facets++;
       if (dim_max < 2) {
         // Facet is of dim 2
         dim_max = 2;
       }
-    } else if (const Edge_3 *edge = CGAL::object_cast<Edge_3>(&object_iterator)) {
+    } else if (const Edge_3* edge = CGAL::object_cast<Edge_3>(&object_iterator)) {
       vertex_list = from_edge<Vertex_list, Edge_3>(*edge);
       count_edges++;
       if (dim_max < 1) {
         // Edge_3 is of dim 1
         dim_max = 1;
       }
-    } else if (const Alpha_shape_3::Vertex_handle *vertex =
-                   CGAL::object_cast<Alpha_shape_3::Vertex_handle>(&object_iterator)) {
+    } else if (const Vertex_handle* vertex = CGAL::object_cast<Vertex_handle>(&object_iterator)) {
       count_vertices++;
       vertex_list = from_vertex<Vertex_list, Vertex_handle>(*vertex);
     }
@@ -219,7 +216,6 @@ int main(int argc, char **argv) {
     else
       std::cout << "This shall not happen" << std::endl;
   }
-  simplex_tree.set_dimension(dim_max);
 
 #ifdef DEBUG_TRACES
   std::cout << "vertices \t\t" << count_vertices << std::endl;
@@ -251,7 +247,15 @@ int main(int argc, char **argv) {
 
   pcoh.compute_persistent_cohomology(min_persistence);
 
-  pcoh.output_diagram();
+  // Output the diagram in filediag
+  if (output_file_diag.empty()) {
+    pcoh.output_diagram();
+  } else {
+    std::cout << "Result in file: " << output_file_diag << std::endl;
+    std::ofstream out(output_file_diag);
+    pcoh.output_diagram(out);
+    out.close();
+  }
 
   return 0;
 }

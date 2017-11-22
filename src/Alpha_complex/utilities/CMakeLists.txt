@@ -46,4 +46,20 @@ if(CGAL_FOUND)
     install(TARGETS periodic_alpha_complex_3d_persistence DESTINATION bin)
 
   endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
+
+  if (NOT CGAL_VERSION VERSION_LESS 4.11.0)
+    add_executable(weighted_periodic_alpha_complex_3d_persistence weighted_periodic_alpha_complex_3d_persistence.cpp)
+    target_link_libraries(weighted_periodic_alpha_complex_3d_persistence ${CGAL_LIBRARY})
+    if (TBB_FOUND)
+      target_link_libraries(weighted_periodic_alpha_complex_3d_persistence ${TBB_LIBRARIES})
+    endif(TBB_FOUND)
+
+    add_test(NAME Persistent_cohomology_example_weigted_periodic_alpha_complex_3d COMMAND $<TARGET_FILE:weighted_periodic_alpha_complex_3d_persistence>
+        "${CMAKE_SOURCE_DIR}/data/points/grid_10_10_10_in_0_1.off" "${CMAKE_SOURCE_DIR}/data/points/grid_10_10_10_in_0_1.weights"
+        "${CMAKE_SOURCE_DIR}/data/points/iso_cuboid_3_in_0_1.txt" "3" "1.0")
+
+    install(TARGETS weighted_periodic_alpha_complex_3d_persistence DESTINATION bin)
+
+  endif (NOT CGAL_VERSION VERSION_LESS 4.11.0)
+
 endif(CGAL_FOUND)
