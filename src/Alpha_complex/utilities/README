@@ -3,9 +3,9 @@
 ## `alpha_complex_3d_persistence` ##
 This program computes the persistent homology with coefficient field Z/pZ of the 3D alpha complex built from a 3D point cloud. The output diagram contains one bar per line, written with the convention:
 
-`p dim b d`
+`p dim birth death`
 
-where `dim` is the dimension of the homological feature, `b` and `d` are respectively the birth and death of the feature, and `p` is the characteristic of the field *Z/pZ* used for homology coefficients (`p` must be a prime number).
+where `dim` is the dimension of the homological feature, `birth` and `death` are respectively the birth and death of the feature, and `p` is the characteristic of the field *Z/pZ* used for homology coefficients (`p` must be a prime number).
 
 **Usage**
 `alpha_complex_3d_persistence [options] <input OFF file>`
@@ -136,9 +136,9 @@ N.B.:
 ## `alpha_complex_persistence` ##
 This program computes the persistent homology with coefficient field Z/pZ of the dD alpha complex built from a dD point cloud. The output diagram contains one bar per line, written with the convention:
 
-`p dim b d`
+`p dim birth death`
 
-where `dim` is the dimension of the homological feature, `b` and `d` are respectively the birth and death of the feature, and `p` is the characteristic of the field *Z/pZ* used for homology coefficients (`p` must be a prime number).
+where `dim` is the dimension of the homological feature, `birth` and `death` are respectively the birth and death of the feature, and `p` is the characteristic of the field *Z/pZ* used for homology coefficients (`p` must be a prime number).
 
 **Usage**
 `alpha_complex_persistence [options] <input OFF file>`
