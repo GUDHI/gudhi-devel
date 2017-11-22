@@ -144,7 +144,7 @@ namespace cubical_complex {
  * Indicate that we have imposed periodic boundary conditions in the direction x, but not in the direction y.
 
  * \section BitmapExamples Examples
- * End user programs are available in example/Bitmap_cubical_complex folder.
+ * End user programs are available in example/Bitmap_cubical_complex and utilities/Bitmap_cubical_complex folders.
  * 
  * \copyright GNU General Public License v3.
  */

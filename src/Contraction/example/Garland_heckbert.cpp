@@ -29,7 +29,6 @@
 #include <gudhi/Edge_contraction.h>
 #include <gudhi/Skeleton_blocker.h>
 #include <gudhi/Off_reader.h>
-#include <gudhi/Clock.h>
 
 #include <iostream>
 
@@ -165,8 +164,6 @@ int main(int argc, char *argv[]) {
 
   int num_contractions = atoi(argv[3]);
 
-  Gudhi::Clock contraction_chrono("Time to simplify and enumerate simplices");
-
   // constructs the contractor object with Garland Heckbert policies.
   Complex_contractor contractor(complex,
                                 new GH_cost(complex),
@@ -181,8 +178,6 @@ int main(int argc, char *argv[]) {
       complex.num_vertices() << " vertices, " <<
       complex.num_edges() << " edges and " <<
       complex.num_triangles() << " triangles." << std::endl;
-
-  std::cout << contraction_chrono;
 
   // write simplified complex
   Gudhi::skeleton_blocker::Skeleton_blocker_off_writer<Complex> off_writer(argv[2], complex);

@@ -133,9 +133,14 @@ cdef class SimplexTree:
 
         .. note::
 
-            This function must be launched before persistence, betti_numbers,
-            persistent_betti_numbers or get_filtration after inserting or
-            removing simplices.
+            This function must be launched before
+            :func:`persistence()<gudhi.SimplexTree.persistence>`,
+            :func:`betti_numbers()<gudhi.SimplexTree.betti_numbers>`,
+            :func:`persistent_betti_numbers()<gudhi.SimplexTree.persistent_betti_numbers>`,
+            or :func:`get_filtration()<gudhi.SimplexTree.get_filtration>`
+            after :func:`inserting<gudhi.SimplexTree.insert>` or
+            :func:`removing<gudhi.SimplexTree.remove_maximal_simplex>`
+            simplices.
         """
         self.thisptr.initialize_filtration()
 
@@ -167,7 +172,10 @@ cdef class SimplexTree:
 
             This function is not constant time because it can recompute
             dimension if required (can be triggered by
-            remove_maximal_simplex or prune_above_filtration methods).
+            :func:`remove_maximal_simplex()<gudhi.SimplexTree.remove_maximal_simplex>`
+            or
+            :func:`prune_above_filtration()<gudhi.SimplexTree.prune_above_filtration>`
+            methods).
         """
         return self.thisptr.dimension()
 
@@ -190,8 +198,11 @@ cdef class SimplexTree:
 
             This function must be used with caution because it disables
             dimension recomputation when required
-            (this recomputation can be triggered by remove_maximal_simplex
-            or prune_above_filtration methods.
+            (this recomputation can be triggered by
+            :func:`remove_maximal_simplex()<gudhi.SimplexTree.remove_maximal_simplex>`
+            or
+            :func:`prune_above_filtration()<gudhi.SimplexTree.prune_above_filtration>`
+            ).
         """
         self.thisptr.set_dimension(<int>dimension)
 
@@ -319,14 +330,16 @@ cdef class SimplexTree:
         .. note::
 
             Be aware that removing is shifting data in a flat_map
-            (initialize_filtration to be done).
+            (:func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>` to be done).
 
         .. note::
 
             The dimension of the simplicial complex may be lower after calling
             remove_maximal_simplex than it was before. However,
-            upper_bound_dimension method will return the old value, which
-            remains a valid upper bound. If you care, you can call dimension
+            :func:`upper_bound_dimension()<gudhi.SimplexTree.upper_bound_dimension>`
+            method will return the old value, which
+            remains a valid upper bound. If you care, you can call
+            :func:`dimension()<gudhi.SimplexTree.dimension>`
             to recompute the exact dimension.
         """
         self.thisptr.remove_maximal_simplex(simplex)
@@ -344,17 +357,23 @@ cdef class SimplexTree:
 
             Some simplex tree functions require the filtration to be valid.
             prune_above_filtration function is not launching
-            initialize_filtration but returns the filtration modification
+            :func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>`
+            but returns the filtration modification
             information. If the complex has changed , please call
-            initialize_filtration to recompute it.
+            :func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>`
+            to recompute it.
 
         .. note::
 
             Note that the dimension of the simplicial complex may be lower
-            after calling prune_above_filtration than it was before. However,
-            upper_bound_dimension will return the old value, which remains a
-            valid upper bound. If you care, you can call dimension method to
-            recompute the exact dimension.
+            after calling
+            :func:`prune_above_filtration()<gudhi.SimplexTree.prune_above_filtration>`
+            than it was before. However,
+            :func:`upper_bound_dimension()<gudhi.SimplexTree.upper_bound_dimension>`
+            will return the old value, which remains a
+            valid upper bound. If you care, you can call
+            :func:`dimension()<gudhi.SimplexTree.dimension>`
+            method to recompute the exact dimension.
         """
         return self.thisptr.prune_above_filtration(filtration)
 
@@ -405,8 +424,9 @@ cdef class SimplexTree:
         :returns: The Betti numbers ([B0, B1, ..., Bn]).
         :rtype:  list of int
 
-        :note: betti_numbers function requires persistence function to be
-            launched first.
+        :note: betti_numbers function requires
+            :func:`persistence()<gudhi.SimplexTree.persistence>`
+            function to be launched first.
         """
         cdef vector[int] bn_result
         if self.pcohptr != NULL:
@@ -430,7 +450,8 @@ cdef class SimplexTree:
         :returns: The persistent Betti numbers ([B0, B1, ..., Bn]).
         :rtype:  list of int
 
-        :note: persistent_betti_numbers function requires persistence
+        :note: persistent_betti_numbers function requires
+            :func:`persistence()<gudhi.SimplexTree.persistence>`
             function to be launched first.
         """
         cdef vector[int] pbn_result
@@ -450,8 +471,9 @@ cdef class SimplexTree:
         :returns: The persistence intervals.
         :rtype:  list of pair of float
 
-        :note: intervals_in_dim function requires persistence function to be
-            launched first.
+        :note: intervals_in_dim function requires
+            :func:`persistence()<gudhi.SimplexTree.persistence>`
+            function to be launched first.
         """
         cdef vector[pair[double,double]] intervals_result
         if self.pcohptr != NULL:
@@ -468,8 +490,9 @@ cdef class SimplexTree:
         :param persistence_file: The specific dimension.
         :type persistence_file: string.
 
-        :note: intervals_in_dim function requires persistence function to be
-            launched first.
+        :note: intervals_in_dim function requires
+            :func:`persistence()<gudhi.SimplexTree.persistence>`
+            function to be launched first.
         """
         if self.pcohptr != NULL:
             if persistence_file != '':
