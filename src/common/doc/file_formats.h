@@ -57,10 +57,10 @@ namespace Gudhi {
 
  \section FileFormatsIsoCuboid Iso-cuboid
 
- Such a file describes an iso-oriented cuboid with diagonal opposite vertices (min_hx, min_hy, min_hz,...) and (max_hx, max_hy, max_hz, ...). The format is:<br>
+ Such a file describes an iso-oriented cuboid with diagonal opposite vertices (min_x, min_y, min_z,...) and (max_x, max_y, max_z, ...). The format is:<br>
  \verbatim
-   min_hx min_hy [min_hz ...]
-   max_hx max_hy [max_hz ...]
+   min_x min_y [min_z ...]
+   max_x max_y [max_z ...]
  \endverbatim
 
  Here is a simple sample file in the 3D case:
