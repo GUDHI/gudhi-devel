@@ -175,7 +175,7 @@ std::vector<Simplex> Fake_simplex_tree::filtration_simplex_range(int d) const{
         Simplex s(m.back());
         m.pop_back();
         if(seen.find(get_key(s))==seen.end()){
-            if(s.size()-1<=d)
+            if((int) s.size()-1 <=d)
                 range.emplace_back(s);
             seen.emplace(get_key(s));
             if(s.size()>0)
