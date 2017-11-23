@@ -11,30 +11,31 @@
 
 namespace Gudhi {
 
-/** Vertex is the type of vertices.
- * \ingroup toplex_map   */
-typedef std::size_t Vertex;
-
-/** Simplex is the type of simplices.
- * \ingroup toplex_map   */
-typedef std::unordered_set<Vertex> Simplex;
-
-/** The type of the pointers to maximal simplices.
- * \ingroup toplex_map   */
-typedef std::shared_ptr<Simplex> Simplex_ptr;
-
-struct Sptr_hash{ std::size_t operator()(const Simplex_ptr& s) const; };
-struct Sptr_equal{ std::size_t operator()(const Simplex_ptr& a, const Simplex_ptr& b) const; };
-/** The type of the sets of Simplex_ptr.
- * \ingroup toplex_map   */
-typedef std::unordered_set<Simplex_ptr, Sptr_hash, Sptr_equal> Simplex_ptr_set;
-
 /** A Toplex_map represents the simplicial complex.
  * A "toplex" is a maximal simplex.
  * \ingroup toplex_map   */
 class Toplex_map {
 
 public:
+
+    /** Vertex is the type of vertices.
+     * \ingroup toplex_map   */
+    typedef std::size_t Vertex;
+
+    /** Simplex is the type of simplices.
+     * \ingroup toplex_map   */
+    typedef std::unordered_set<Vertex> Simplex;
+
+    /** The type of the pointers to maximal simplices.
+     * \ingroup toplex_map   */
+    typedef std::shared_ptr<Simplex> Simplex_ptr;
+
+    struct Sptr_hash{ std::size_t operator()(const Simplex_ptr& s) const; };
+    struct Sptr_equal{ std::size_t operator()(const Simplex_ptr& a, const Simplex_ptr& b) const; };
+    /** The type of the sets of Simplex_ptr.
+     * \ingroup toplex_map   */
+    typedef std::unordered_set<Simplex_ptr, Sptr_hash, Sptr_equal> Simplex_ptr_set;
+
     /** \brief Adds the given simplex to the complex.
      * Nothing happens if the simplex has a coface in the complex.
      * \ingroup toplex_map   */
@@ -58,7 +59,7 @@ public:
     bool maximality(const Input_vertex_range &vertex_range) const;
 
     /** Gives a set of pointers to the maximal cofaces of a simplex.
-     * Gives the toplices if given the empty simplex.
+     * Gives all the toplices if given the empty simplex.
      * Gives not more than max_number maximal cofaces if max_number is strictly positive.
      * \ingroup toplex_map   */
     template <typename Input_vertex_range>
@@ -85,8 +86,7 @@ public:
     void remove_vertex(const Vertex x);
 
     /** \brief Number of maximal simplices.
-         * /!\ Not efficient !
-         * \ingroup toplex_map   */
+      * \ingroup toplex_map   */
     std::size_t num_simplices() const;
 
 protected:

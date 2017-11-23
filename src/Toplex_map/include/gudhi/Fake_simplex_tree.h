@@ -25,39 +25,78 @@ struct Visitor {
     }
 };
 
+/** Fake_simplex_tree is a wrapper for Filtered_toplex_map which has the interface of the Simplex_tree.
+ * Mostly for retro-compatibility purpose. If you use a function that output non maximal simplices, it will be non efficient.
+ * \ingroup toplex_map   */
 class Fake_simplex_tree : public Filtered_toplex_map {
 
 public:
+    /** Vertex is the type of vertices.
+     * \ingroup toplex_map   */
+    typedef Toplex_map::Vertex Vertex;
 
+    /** Simplex is the type of simplices.
+     * \ingroup toplex_map   */
+    typedef Toplex_map::Simplex Simplex;
+
+    /** The type of the pointers to maximal simplices.
+     * \ingroup toplex_map   */
+    typedef Toplex_map::Simplex_ptr Simplex_ptr;
+
+    /** The type of the sets of Simplex_ptr.
+     * \ingroup toplex_map   */
+    typedef Toplex_map::Simplex_ptr_set Simplex_ptr_set;
+
+    /** Handle type to a vertex contained in the simplicial complex.
+     * \ingroup toplex_map   */
     typedef Vertex Vertex_handle;
 
+    /**  Handle type to a simplex contained in the simplicial complex.
+     * \ingroup toplex_map   */
     typedef Simplex Simplex_handle;
 
     typedef void Insertion_result_type;
 
-    /** \brief Inserts the flag complex of a given range `Gudhi::rips_complex::Rips_complex::OneSkeletonGraph` in the simplicial
-     * complex. */
+    /**  Inserts the flag complex of a given range `Gudhi::rips_complex::Rips_complex::OneSkeletonGraph`
+     * in the simplicial complex.
+     * \ingroup toplex_map   */
     template<class OneSkeletonGraph>
     void insert_graph(const OneSkeletonGraph& skel_graph);
 
-    /** \brief Do nothing */
+    /**  Do actually nothing.
+     * \ingroup toplex_map   */
     void expansion(int max_dim);
 
-    /** \brief Returns the number of vertices stored i.e. the number of max simplices */
+    /**  Returns the number of vertices stored i.e. the number of max simplices
+     *  \ingroup toplex_map   */
     std::size_t num_vertices() const;
 
+    /**  Returns the dimension of the complex.
+      * \ingroup toplex_map   */
     std::size_t dimension() const;
 
+    /**  Returns the dimension of a given simplex in the complex.
+      * \ingroup toplex_map   */
     std::size_t dimension(Simplex_ptr& sptr) const;
 
+    /**  Returns the number of simplices stored i.e. the number of maximal simplices.
+      * \ingroup toplex_map   */
     std::size_t num_simplices() const;
 
+    /**  Returns a range over the vertices of a simplex.
+      * \ingroup toplex_map   */
     Simplex simplex_vertex_range(const Simplex& s) const;
 
+    /**  Returns a set of all maximal (critical if there is filtration values) simplices.
+      * \ingroup toplex_map   */
     std::vector<Simplex> max_simplices() const;
 
+    /** Returns all the simplices, of max dimension d if a parameter d is given.
+      * \ingroup toplex_map   */
     std::vector<Simplex> filtration_simplex_range(int d=std::numeric_limits<int>::max()) const;
 
+    /** Returns all the simplices of max dimension d
+      * \ingroup toplex_map   */
     std::vector<Simplex> skeleton_simplex_range(int d) const;
 
 
@@ -73,6 +112,12 @@ protected:
 template<class OneSkeletonGraph>
 void Fake_simplex_tree::insert_graph(const OneSkeletonGraph& skel_graph){
     toplex_maps.emplace(nan(""),Toplex_map());
+    using vertex_iterator = typename boost::graph_traits<OneSkeletonGraph>::vertex_iterator;
+    vertex_iterator vi, vi_end;
+    for (std::tie(vi, vi_end) = boost::vertices(skel_graph); vi != vi_end; ++vi) {
+        Simplex s; s.insert(*vi);
+        insert_simplex_and_subfaces(s);
+    }
     bron_kerbosch_all_cliques(skel_graph, Visitor(&(this->toplex_maps.at(nan("")))));
 }
 

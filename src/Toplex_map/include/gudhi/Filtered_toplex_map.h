@@ -7,17 +7,45 @@
 
 namespace Gudhi {
 
+/** A Filtered_toplex_map represents the simplicial complex with a filtration.
+ * A "toplex" is a critical simplex.
+ * \ingroup toplex_map   */
 class Filtered_toplex_map {
 
 public:
+    /** Vertex is the type of vertices.
+     * \ingroup toplex_map   */
+    typedef Toplex_map::Vertex Vertex;
+
+    /** Simplex is the type of simplices.
+     * \ingroup toplex_map   */
+    typedef Toplex_map::Simplex Simplex;
+
+    /** The type of the pointers to maximal simplices.
+     * \ingroup toplex_map   */
+    typedef Toplex_map::Simplex_ptr Simplex_ptr;
+
+    /** The type of the sets of Simplex_ptr.
+     * \ingroup toplex_map   */
+    typedef Toplex_map::Simplex_ptr_set Simplex_ptr_set;
+
+    /** The type of the filtration values.
+     * \ingroup toplex_map   */
     typedef double Filtration_value;
 
+    /** Add a simplex and its subfaces with the given filtration value
+     * in the Filtered_toplex_map.
+     * \ingroup toplex_map   */
     template <typename Input_vertex_range>
     std::pair<Simplex, bool> insert_simplex_and_subfaces(const Input_vertex_range &vertex_range, Filtration_value f = nan(""));
 
+    /** Gives the filtration of the input simplex.
+     * \ingroup toplex_map   */
     template <typename Input_vertex_range>
     Filtration_value filtration(const Input_vertex_range &vertex_range) const;
 
+    /** Is the input simplex member of the complex ?
+     * \ingroup toplex_map   */
     template <typename Input_vertex_range>
     bool membership(const Input_vertex_range &vertex_range) const;
 
