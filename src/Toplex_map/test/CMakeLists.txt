@@ -6,7 +6,7 @@ target_link_libraries(ToplexMapUT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAM
 
 
 # Unitary tests
-add_test(NAME SalUT 
+add_test(NAME ToplexMapUT 
   COMMAND ${CMAKE_CURRENT_BINARY_DIR}/ToplexMapUT
     ${CMAKE_SOURCE_DIR}/src/Toplex_map/test/test.txt
     # XML format for Jenkins xUnit plugin 
