@@ -1,7 +1,7 @@
 # Bitmap_cubical_complex #
 
 ## `cubical_complex_persistence` ##
-This program computes persistent homology, by using the Bitmap_cubical_complex class, of cubical complexes provided in text files in Perseus style. See the "Input Format" section of the [User Manual](http://gudhi.gforge.inria.fr/doc/latest/group__cubical__complex.html) for a description of the file format.
+This program computes persistent homology, by using the Bitmap_cubical_complex class, of cubical complexes provided in text files in Perseus style. See [here](http://gudhi.gforge.inria.fr/doc/latest/fileformats.html#FileFormatsPerseus) for a description of the file format.
 
 Example:
 
