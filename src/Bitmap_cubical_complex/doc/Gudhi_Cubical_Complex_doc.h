@@ -63,7 +63,7 @@ namespace cubical_complex {
  * For further details and theory of cubical complexes, please consult \cite kaczynski2004computational as well as the
  * following paper \cite peikert2012topological .
  *
- * \section cubicalcomplexdatastructure Data structure.
+ * \section cubicalcomplexdatastructure Data structure
  *
  * The implementation of Cubical complex provides a representation of complexes that occupy a rectangular region in
  * \f$\mathbb{R}^n\f$. This extra assumption allows for a memory efficient way of storing cubical complexes in a form
@@ -85,7 +85,7 @@ namespace cubical_complex {
  * present in the product that gives the cube \f$C\f$. In a similar way, we can compute boundary and the coboundary of
  * each cube. Further details can be found in the literature.
  *
- * \section inputformat Input Format.
+ * \section inputformat Input Format
  *
  * In the current implantation, filtration is given at the maximal cubes, and it is then extended by the lower star
  * filtration to all cubes. There are a number of constructors that can be used to construct cubical complex by users
