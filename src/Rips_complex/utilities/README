@@ -48,7 +48,12 @@ outputs:
 
 
 ## `rips_distance_matrix_persistence` ##
-Same as `rips_persistence` but taking a distance matrix as input.
+Same as `rips_persistence` but taking a distance matrix as input. 
+
+**Usage**
+`rips_persistence [options] <CSV input file>`
+where
+`<CSV input file>` is the path to the file containing a distance matrix. Can be square or lower triangular matrix. Separator is ';'.
 
 **Example**
 `rips_distance_matrix_persistence data/distance_matrix/full_square_distance_matrix.csv -r 15 -d 3 -p 3 -m 0`
