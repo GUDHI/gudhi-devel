@@ -68,6 +68,55 @@ namespace Gudhi {
    -1. -1. -1.
    1. 1. 1.
  \endverbatim
+
+
+ \section FileFormatsPerseus Perseus
+
+ This file format is the format used by the Perseus software
+ (http://www.sas.upenn.edu/~vnanda/perseus/) by Vidit Nanda.
+ The first line contains a number d begin the dimension of the
+ bitmap (2 in the example below). Next d lines are the numbers of top dimensional cubes in each dimensions (3 and 3
+ in the example below). Next, in lexicographical order, the filtration of top dimensional cubes is given (1 4 6 8
+ 20 4 7 6 5 in the example below).
+ 
+ \image html "exampleBitmap.png" "Example of a input data."
+ 
+ The input file for the following complex is:
+ \verbatim
+ 2
+ 3
+ 3
+ 1
+ 4
+ 6
+ 8
+ 20
+ 4
+ 7
+ 6
+ 5
+ \endverbatim
+
+ To indicate periodic boundary conditions in a
+ given direction, then number of top dimensional cells in this direction have to be multiplied by -1. For instance:
+
+ \verbatim
+ 2
+ -3
+ 3
+ 1
+ 4
+ 6
+ 8
+ 20
+ 4
+ 7
+ 6
+ 5
+ \endverbatim
+
+ Indicate that we have imposed periodic boundary conditions in the direction x, but not in the direction y.
+
 */
 }  // namespace Gudhi
 
