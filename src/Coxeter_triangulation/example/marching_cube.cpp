@@ -1,5 +1,7 @@
 #include <iostream>
+#include <cmath>
 #include <vector>
+#include <map>
 
 #include <gudhi/Points_off_io.h>
 #include <gudhi/Ad_simplex.h>
@@ -9,6 +11,8 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 
+#include "cxx-prettyprint/prettyprint.hpp"
+
 using K = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
 using FT = K::FT;
 using Point_d = K::Point_d;
@@ -16,6 +20,27 @@ using Point_vector = std::vector< Point_d >;
 
 using Matrix = Eigen::SparseMatrix<FT>;
 using Triplet = Eigen::Triplet<FT>;
+using Simplex_id = std::vector<int>;
+using Pointer_range = typename std::vector<Point_vector::iterator>;
+
+struct Lexicographic {
+  bool operator() (const Simplex_id &lhs, const Simplex_id &rhs) {
+    assert (lhs.size() == rhs.size());
+    auto l_it = lhs.begin();
+    auto r_it = rhs.begin();
+    for (; l_it != lhs.end(); ++l_it, ++r_it)
+      if (*l_it < *r_it)
+        return true;
+      else if (*l_it > *r_it)
+        return false;
+    return false;
+  }
+};
+
+using Map = std::map<Simplex_id, Pointer_range, Lexicographic>;
+
+/** Pretty vector printing */
+
 
 /** A conversion from Cartesian coordinates to root coordinates.
  *  The matrix' rows are root vectors (or normal vectors of a simplex in general).
@@ -107,7 +132,7 @@ int main(int argc, char * const argv[]) {
     r_t_triplets.push_back(Triplet(i,i,1.0));
   }
   for (int i = 0; i < d; i++) {
-    r_t_triplets.push_back(Triplet(d,i,1.0));
+    r_t_triplets.push_back(Triplet(d,i,-1.0));
   }
   Matrix r_t(d+1,d);
   r_t.setFromTriplets(r_t_triplets.begin(), r_t_triplets.end()); 
@@ -117,13 +142,34 @@ int main(int argc, char * const argv[]) {
   std::cout << "norm_t =" << std::endl << root_t << std::endl;
   
   // Compute the root coordinates the root matrix
-  std::cout << "First point is:";
-  for (auto x: point_vector[0])
-    std::cout << " " << x;
+  // std::cout << "First point is:";
+  // for (auto x: point_vector[0])
+  //   std::cout << " " << x;
   point_vector = root_coordinates_range(point_vector, root_t);
-  std::cout << ", the root coordinates are";
-  Point_d p_r = root_coordinates(point_vector[0], root_t, d);
-  for (auto x: p_r)
-    std::cout << " " << x;
-  std::cout << ".\n";
+  // std::cout << ", the root coordinates are";
+  // Point_d p_r = root_coordinates(point_vector[0], root_t, d);
+  // for (auto x: p_r)
+  //   std::cout << " " << x;
+  // std::cout << ".\n";
+
+  // The first fill of a map: simplex coordinates -> points
+  std::cout << point_vector[0] << std::endl;
+  for (auto x: point_vector[0])
+    std::cout << std::floor(x) << " ";
+  std::cout << std::endl;
+  Map map;
+  for (auto p_it = point_vector.begin(); p_it != point_vector.end(); ++p_it) {
+    Simplex_id s_id(1,1);
+    for (auto x: *p_it)
+      s_id.push_back(std::floor(x));
+    auto m_it = map.find(s_id);
+    if (m_it == map.end())
+      map.emplace(s_id, Pointer_range(1,p_it));
+    else
+      m_it->second.push_back(p_it);
+  }
+  std::cout << "Map composition:\n";
+  for (auto m: map) {
+    std::cout << m.first << ": " << m.second.size() << " elements.\n";
+  }  
 }
