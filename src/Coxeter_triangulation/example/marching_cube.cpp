@@ -17,6 +17,47 @@ using Point_vector = std::vector< Point_d >;
 using Matrix = Eigen::SparseMatrix<FT>;
 using Triplet = Eigen::Triplet<FT>;
 
+/** A conversion from Cartesian coordinates to root coordinates.
+ *  The matrix' rows are root vectors (or normal vectors of a simplex in general).
+ */
+template <class Point,
+          class Matrix>
+Point root_coordinates(Point p, Matrix& root_t, short d)
+{
+  // short d = p.size();
+  std::vector<double> p_r;
+  for (int i = 0; i < d+1; i++) {
+    FT sc_prod = 0;
+    /* for now no root normalization takes place */
+    // FT root_norm_sq = 0;
+    // for (int j = 0; j < d; j++)
+    //   root_norm_sq += root_t.coeff(i,j)*root_t.coeff(i,j);
+    // FT root_norm = sqrt()
+    for (int j = 0; j < d; j++) {
+      sc_prod += root_t.coeff(i,j) * p[j];
+    }
+    p_r.push_back(sc_prod);
+  }
+  return Point(p_r);
+}
+
+/** A conversion from Cartesian coordinates to root coordinates in a point range.
+ *  The matrix' rows are root vectors (or normal vectors of a simplex in general).
+ *  The input point range is rewritten.
+ */
+template <class Point_list,
+          class Matrix>
+Point_list root_coordinates_range(Point_list& points, Matrix& root_t)
+{
+  short d = points[0].size();
+  Point_list points_r;
+  for (auto p: points) {
+    points_r.push_back(root_coordinates(p,root_t,d));
+  }
+  return points_r;
+}
+
+
 /** Current state of the algorithm.
  *  Input: a point cloud 'point_vector'
  *  Output: a reconstruction (a simplicial complex?, a Czech-like complex?)
@@ -37,8 +78,8 @@ int main(int argc, char * const argv[]) {
     }
   point_vector = Point_vector(off_reader.get_point_cloud());
   int N = point_vector.size();
-  // short d = point_vector[0].size();
-  short d = 2;
+  short d = point_vector[0].size();
+  // short d = 2;
   std::cout << "Successfully read " << N << " points in dimension " << d << std::endl;
 
   // The A root vectors, computed as a matrix
@@ -72,8 +113,17 @@ int main(int argc, char * const argv[]) {
   r_t.setFromTriplets(r_t_triplets.begin(), r_t_triplets.end()); 
   std::cout << "r_t =" << std::endl << r_t << std::endl;
 
-  Matrix norm_t = r_t * do_vect;
-  std::cout << "norm_t =" << std::endl << norm_t << std::endl;
+  Matrix root_t = r_t * do_vect;
+  std::cout << "norm_t =" << std::endl << root_t << std::endl;
   
-
+  // Compute the root coordinates the root matrix
+  std::cout << "First point is:";
+  for (auto x: point_vector[0])
+    std::cout << " " << x;
+  point_vector = root_coordinates_range(point_vector, root_t);
+  std::cout << ", the root coordinates are";
+  Point_d p_r = root_coordinates(point_vector[0], root_t, d);
+  for (auto x: p_r)
+    std::cout << " " << x;
+  std::cout << ".\n";
 }
