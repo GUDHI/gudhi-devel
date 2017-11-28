@@ -41,7 +41,17 @@ struct Lexicographic {
 
 using SPMap = std::map<Simplex_id, Pointer_range, Lexicographic>;
 using SPointer_range = typename std::vector<SPMap::iterator>;
-using VSMap = std::map<Vertex_id, SPointer_range, Lexicographic>;
+using VSMap = std::map<Vertex_id, std::vector<int>, Lexicographic>;
+
+struct Lexicographic_ptr {
+  bool operator() (const SPMap::iterator &lhs, const SPMap::iterator &rhs) {
+    Lexicographic lx;
+    return lx(lhs->first,rhs->first);
+  }
+};
+
+using SiMap = std::map<SPMap::iterator, int, Lexicographic_ptr>;
+
 
 int gcd(int a, int b) {
     return b == 0 ? a : gcd(b, a % b);
@@ -185,19 +195,29 @@ int main(int argc, char * const argv[]) {
       s_id.push_back(std::floor(x));
     auto find_it = sp_map.find(s_id);
     if (find_it == sp_map.end())
-      sp_map.emplace(s_id, Pointer_range(1,p_it));
+      sp_map.emplace(s_id, Pointer_range(1, p_it));
     else
       find_it->second.push_back(p_it);
   }
-  std::cout << "SVMap composition:\n";
-  for (auto m: sp_map) {
-    std::cout << m.first << ": " << m.second.size() << " elements.\n";
-  }
+  // std::cout << "SPMap composition:\n";
+  // for (auto m: sp_map) {
+  //   std::cout << m.first << ": " << m.second.size() << " elements.\n";
+  // }
 
   // small test
   Simplex_id p1 = {4,12,10,-8};
   std::cout << "Non-reduced: " << p1 << ", reduced: " << reduced_id(p1) << ".\n";
 
+  SiMap si_map;
+  int si_index = 0;
+  for (auto m_it = sp_map.begin(); m_it != sp_map.end(); ++m_it, si_index++)
+    si_map.emplace(m_it, si_index);
+
+  std::cout << "SIMap composition:\n";
+  for (auto m: si_map) {
+    std::cout << m.first->first << ": index " << m.second << ".\n";
+  }
+  
   // map : vertex coordinates -> simplex coordinates
   VSMap vs_map;
   for (auto m_it = sp_map.begin(); m_it != sp_map.end(); ++m_it) {
@@ -207,14 +227,14 @@ int main(int argc, char * const argv[]) {
       v_id = reduced_id(v_id);
       auto find_it = vs_map.find(v_id);
       if (find_it == vs_map.end())
-        vs_map.emplace(v_id, SPointer_range(1,m_it));
+        vs_map.emplace(v_id, std::vector<int>(1, si_map[m_it]));
       else
-        find_it->second.push_back(m_it);
+        find_it->second.push_back(si_map[m_it]);
     }
   }
   std::cout << "VSMap composition:\n";
   for (auto m: vs_map) {
-    std::cout << m.first << ": " << m.second.size() << " elements.\n";
+    std::cout << m.first << ": " << m.second << ".\n";
   }
   
 }
