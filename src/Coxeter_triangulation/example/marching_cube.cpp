@@ -21,7 +21,9 @@ using Point_vector = std::vector< Point_d >;
 using Matrix = Eigen::SparseMatrix<FT>;
 using Triplet = Eigen::Triplet<FT>;
 using Simplex_id = std::vector<int>;
+using Vertex_id = Simplex_id;
 using Pointer_range = typename std::vector<Point_vector::iterator>;
+
 
 struct Lexicographic {
   bool operator() (const Simplex_id &lhs, const Simplex_id &rhs) {
@@ -37,10 +39,29 @@ struct Lexicographic {
   }
 };
 
-using Map = std::map<Simplex_id, Pointer_range, Lexicographic>;
+using SPMap = std::map<Simplex_id, Pointer_range, Lexicographic>;
+using SPointer_range = typename std::vector<SPMap::iterator>;
+using VSMap = std::map<Vertex_id, SPointer_range, Lexicographic>;
 
-/** Pretty vector printing */
+int gcd(int a, int b) {
+    return b == 0 ? a : gcd(b, a % b);
+}
 
+/** Common gcd simplification */
+template <class Id>
+Id reduced_id(Id& id) {
+  int common_gcd = 0;
+  for (auto i: id) {
+    common_gcd = gcd(i, common_gcd);
+    if (common_gcd == 1)
+      return id;
+  }
+  Id id_red(id);
+  for (auto i_it = id_red.begin(); i_it != id_red.end(); ++i_it) {
+    *i_it = *i_it / common_gcd;
+  }
+  return id_red;
+}
 
 /** A conversion from Cartesian coordinates to root coordinates.
  *  The matrix' rows are root vectors (or normal vectors of a simplex in general).
@@ -157,19 +178,43 @@ int main(int argc, char * const argv[]) {
   for (auto x: point_vector[0])
     std::cout << std::floor(x) << " ";
   std::cout << std::endl;
-  Map map;
+  SPMap sp_map;
   for (auto p_it = point_vector.begin(); p_it != point_vector.end(); ++p_it) {
     Simplex_id s_id(1,1);
     for (auto x: *p_it)
       s_id.push_back(std::floor(x));
-    auto m_it = map.find(s_id);
-    if (m_it == map.end())
-      map.emplace(s_id, Pointer_range(1,p_it));
+    auto find_it = sp_map.find(s_id);
+    if (find_it == sp_map.end())
+      sp_map.emplace(s_id, Pointer_range(1,p_it));
     else
-      m_it->second.push_back(p_it);
+      find_it->second.push_back(p_it);
   }
-  std::cout << "Map composition:\n";
-  for (auto m: map) {
+  std::cout << "SVMap composition:\n";
+  for (auto m: sp_map) {
     std::cout << m.first << ": " << m.second.size() << " elements.\n";
-  }  
+  }
+
+  // small test
+  Simplex_id p1 = {4,12,10,-8};
+  std::cout << "Non-reduced: " << p1 << ", reduced: " << reduced_id(p1) << ".\n";
+
+  // map : vertex coordinates -> simplex coordinates
+  VSMap vs_map;
+  for (auto m_it = sp_map.begin(); m_it != sp_map.end(); ++m_it) {
+    for (int i = 1; i <= d; i++) {
+      Vertex_id v_id(m_it->first);
+      v_id[i] += 1;
+      v_id = reduced_id(v_id);
+      auto find_it = vs_map.find(v_id);
+      if (find_it == vs_map.end())
+        vs_map.emplace(v_id, SPointer_range(1,m_it));
+      else
+        find_it->second.push_back(m_it);
+    }
+  }
+  std::cout << "VSMap composition:\n";
+  for (auto m: vs_map) {
+    std::cout << m.first << ": " << m.second.size() << " elements.\n";
+  }
+  
 }
