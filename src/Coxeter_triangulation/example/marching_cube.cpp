@@ -5,6 +5,9 @@
 
 #include <gudhi/Points_off_io.h>
 #include <gudhi/Ad_simplex.h>
+#include <gudhi/Simplex_tree.h>
+#include <gudhi/Persistent_cohomology.h>
+#include <gudhi/output_tikz.h>
 
 #include <CGAL/Epick_d.h>
 
@@ -52,6 +55,102 @@ struct Lexicographic_ptr {
 
 using SiMap = std::map<SPMap::iterator, int, Lexicographic_ptr>;
 
+
+struct Simplex_tree_options_no_persistence {
+  typedef Gudhi::linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef FT Filtration_value;
+  typedef std::uint32_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = false;
+  static constexpr bool contiguous_vertices = true;
+};
+using Simplex_tree = Gudhi::Simplex_tree<Simplex_tree_options_no_persistence>;
+using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
+using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
+
+std::vector<FT> bounding_box_dimensions(Point_vector& points) {
+  std::vector<FT> lower, upper, difference;
+  for (auto x: points[0]) {
+    lower.push_back(x);
+    upper.push_back(x);
+  }
+  for (auto p: points)
+    for (int i = 0; i < p.size(); i++) {
+      if (p[i] < lower[i])
+        lower[i] = p[i];
+      if (p[i] > upper[i])
+        upper[i] = p[i];
+    }
+  for (int i = 0; i < lower.size(); i++)
+    difference.push_back(upper[i]-lower[i]);
+  return difference;
+}
+
+/** \brief Write triangles (tetrahedra in 3d) of a simplicial complex in a file, compatible with medit.
+ *  `landmarks_ind` represents the set of landmark indices in W  
+ *  `st` is the Simplex_tree to be visualized,
+ *  `shr` is the Simplex_handle_range of simplices in `st` to be visualized
+ *  `is2d` should be true if the simplicial complex is 2d, false if 3d
+ *  `l_is_v` = landmark is vertex
+ */
+void write_coxeter_mesh(Point_vector& W, SiMap& map, Matrix& root_t, std::string file_name = "coxeter.mesh")
+{
+  short d = W[0].size();
+  assert(d < 4);
+
+  std::vector<FT> bbox_dimensions = bounding_box_dimensions(W);
+  std::cout << bbox_dimensions << "\n";
+  
+  std::ofstream ofs (file_name, std::ofstream::out);
+  if (d <= 2)
+    ofs << "MeshVersionFormatted 1\nDimension 2\n";
+  else
+    ofs << "MeshVersionFormatted 1\nDimension 3\n";
+  
+  int num_vertices = W.size(), num_edges = 0, num_triangles = 0, num_tetrahedra = 0;
+  // if (d <= 2) {
+  //   num_triangles = W.size();
+  //   num_edges = W.size()*3;
+  //   num_vertices += W.size()*3;
+  // }
+  // else {
+  //   num_tetrahedra = W.size();
+  //   num_triangles = W.size()*4;
+  //   num_edges = W.size()*6;
+  //   num_vertices += W.size()*4;
+  // }
+
+  ofs << "Vertices\n" << num_vertices << "\n";
+  
+  for (auto p: W) {
+    for (auto coord = p.cartesian_begin(); coord != p.cartesian_end() && coord != p.cartesian_begin()+3 ; ++coord)
+      ofs << *coord << " ";
+    ofs << "508\n";
+  }
+  // for (auto m: map) {
+  //   FT denom = m.first->first[0];
+  //   Eigen::VectorXf x(d+1);
+  //   for (int i = 0; i < d; i++) {
+  //     x(i) = m.first->first[i+1]/denom;
+  //   }
+    
+  // }
+  
+  ofs << "Edges " << num_edges << "\n";
+  for (int i = 1; i <= W.size(); i++) 
+    ofs << i << " " << i << " " << "100\n";
+  ofs << "Triangles " << num_triangles << "\n";
+  for (int i = 1; i <= W.size(); i++) 
+    ofs << i << " " << i << " " << i << " " << "100\n";
+  if (d == 3) {
+    ofs << "Tetrahedra " << num_tetrahedra << "\n";  
+    for (int i = 1; i <= W.size(); i++) 
+      ofs << i << " " << i << " " << i << " " << i << " " << "100\n";
+    ofs << "End\n";
+    ofs.close();
+  }
+}
 
 int gcd(int a, int b) {
     return b == 0 ? a : gcd(b, a % b);
@@ -176,7 +275,7 @@ int main(int argc, char * const argv[]) {
   // std::cout << "First point is:";
   // for (auto x: point_vector[0])
   //   std::cout << " " << x;
-  point_vector = root_coordinates_range(point_vector, root_t);
+  Point_vector rc_point_vector = root_coordinates_range(point_vector, root_t);
   // std::cout << ", the root coordinates are";
   // Point_d p_r = root_coordinates(point_vector[0], root_t, d);
   // for (auto x: p_r)
@@ -184,12 +283,12 @@ int main(int argc, char * const argv[]) {
   // std::cout << ".\n";
 
   // The first fill of a map: simplex coordinates -> points
-  std::cout << point_vector[0] << std::endl;
-  for (auto x: point_vector[0])
+  std::cout << rc_point_vector[0] << std::endl;
+  for (auto x: rc_point_vector[0])
     std::cout << std::floor(x) << " ";
   std::cout << std::endl;
   SPMap sp_map;
-  for (auto p_it = point_vector.begin(); p_it != point_vector.end(); ++p_it) {
+  for (auto p_it = rc_point_vector.begin(); p_it != rc_point_vector.end(); ++p_it) {
     Simplex_id s_id(1,1);
     for (auto x: *p_it)
       s_id.push_back(std::floor(x));
@@ -236,5 +335,20 @@ int main(int argc, char * const argv[]) {
   for (auto m: vs_map) {
     std::cout << m.first << ": " << m.second << ".\n";
   }
-  
+
+  // simplex tree construction
+  Simplex_tree st;
+  for (auto m: vs_map) {
+    st.insert_simplex_and_subfaces(m.second);
+  }
+  std::cout << st;
+
+  Persistent_cohomology pcoh(st);
+  // initializes the coefficient field for homology
+  pcoh.init_coefficients(11);
+
+  pcoh.compute_persistent_cohomology(-0.1);
+  pcoh.output_diagram();
+
+  write_coxeter_mesh(point_vector, si_map, root_t, "coxeter.mesh");
 }
