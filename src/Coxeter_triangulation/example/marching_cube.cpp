@@ -108,7 +108,7 @@ void write_coxeter_mesh(Point_vector& W, SiMap& map, Matrix& root_t, std::string
   else
     ofs << "MeshVersionFormatted 1\nDimension 3\n";
   
-  int num_vertices = W.size(), num_edges = 0, num_triangles = 0, num_tetrahedra = 0;
+  int num_vertices = (d+1)*W.size(), num_edges = 0, num_triangles = 0, num_tetrahedra = 0;
   // if (d <= 2) {
   //   num_triangles = W.size();
   //   num_edges = W.size()*3;
@@ -122,11 +122,22 @@ void write_coxeter_mesh(Point_vector& W, SiMap& map, Matrix& root_t, std::string
   // }
 
   ofs << "Vertices\n" << num_vertices << "\n";
-  
+
+  FT p_prop = 0.005;
+  int p_col = 208;
   for (auto p: W) {
-    for (auto coord = p.cartesian_begin(); coord != p.cartesian_end() && coord != p.cartesian_begin()+3 ; ++coord)
-      ofs << *coord << " ";
+    for (auto coord = p.cartesian_begin(); coord != p.cartesian_end() && coord != p.cartesian_begin()+3 ; ++coord) 
+      ofs << *coord << " "; 
     ofs << "508\n";
+    for (int i = 0; i < d; i++) {
+      int j = 0;
+      for (auto coord = p.cartesian_begin(); coord != p.cartesian_end() && coord != p.cartesian_begin()+3 ; ++coord, j++)
+        if (j == i)
+          ofs << *coord + bbox_dimensions[i]*p_prop << " ";
+        else
+          ofs << *coord << " ";
+      ofs << "508\n";
+    }
   }
   // for (auto m: map) {
   //   FT denom = m.first->first[0];
@@ -137,12 +148,28 @@ void write_coxeter_mesh(Point_vector& W, SiMap& map, Matrix& root_t, std::string
     
   // }
   
+  num_edges = (d+1)*d*W.size()/2;
   ofs << "Edges " << num_edges << "\n";
-  for (int i = 1; i <= W.size(); i++) 
-    ofs << i << " " << i << " " << "100\n";
+  for (int i = 0; i < W.size(); i++) {
+    ofs << (d+1)*i+1 << " " << (d+1)*i+2 << " " << p_col << "\n";
+    ofs << (d+1)*i+1 << " " << (d+1)*i+3 << " " << p_col << "\n";
+    ofs << (d+1)*i+2 << " " << (d+1)*i+3 << " " << p_col << "\n";
+    if (d == 3) {
+      ofs << (d+1)*i+1 << " " << (d+1)*i+4 << " " << p_col << "\n";
+      ofs << (d+1)*i+2 << " " << (d+1)*i+4 << " " << p_col << "\n";
+      ofs << (d+1)*i+3 << " " << (d+1)*i+4 << " " << p_col << "\n";
+    }
+  }
+  num_triangles = (d+1)*d*(d-1)*W.size()/6;
   ofs << "Triangles " << num_triangles << "\n";
-  for (int i = 1; i <= W.size(); i++) 
-    ofs << i << " " << i << " " << i << " " << "100\n";
+  for (int i = 0; i < W.size(); i++) {
+    ofs << (d+1)*i+1 << " " << (d+1)*i+2 << " " << (d+1)*i+3 << " " << p_col << "\n";
+    if (d == 3) {
+      ofs << (d+1)*i+1 << " " << (d+1)*i+2 << " " << (d+1)*i+4 << " " << p_col << "\n";
+      ofs << (d+1)*i+1 << " " << (d+1)*i+3 << " " << (d+1)*i+4 << " " << p_col << "\n";
+      ofs << (d+1)*i+2 << " " << (d+1)*i+3 << " " << (d+1)*i+4 << " " << p_col << "\n";
+    }
+  }
   if (d == 3) {
     ofs << "Tetrahedra " << num_tetrahedra << "\n";  
     for (int i = 1; i <= W.size(); i++) 
