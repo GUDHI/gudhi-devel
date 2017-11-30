@@ -128,31 +128,18 @@ int main(int argc, char **argv) {
   ST simplex_tree;
   Alpha_shape_simplex_tree_map map_cgal_simplex_tree;
   std::vector<Alpha_value_type>::iterator the_alpha_value_iterator = the_alpha_values.begin();
-  int dim_max = 0;
   Filtration_value filtration_max = 0.0;
   for (auto object_iterator : the_objects) {
     // Retrieve Alpha shape vertex list from object
     if (const Cell_handle* cell = CGAL::object_cast<Cell_handle>(&object_iterator)) {
       vertex_list = from_cell<Vertex_list, Cell_handle>(*cell);
       count_cells++;
-      if (dim_max < 3) {
-        // Cell is of dim 3
-        dim_max = 3;
-      }
     } else if (const Facet* facet = CGAL::object_cast<Facet>(&object_iterator)) {
       vertex_list = from_facet<Vertex_list, Facet>(*facet);
       count_facets++;
-      if (dim_max < 2) {
-        // Facet is of dim 2
-        dim_max = 2;
-      }
     } else if (const Edge_3* edge = CGAL::object_cast<Edge_3>(&object_iterator)) {
       vertex_list = from_edge<Vertex_list, Edge_3>(*edge);
       count_edges++;
-      if (dim_max < 1) {
-        // Edge_3 is of dim 1
-        dim_max = 1;
-      }
     } else if (const Vertex_handle* vertex = CGAL::object_cast<Vertex_handle>(&object_iterator)) {
       count_vertices++;
       vertex_list = from_vertex<Vertex_list, Vertex_handle>(*vertex);
