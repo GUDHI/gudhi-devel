@@ -176,7 +176,6 @@ int main(int argc, char **argv) {
   ST simplex_tree;
   Alpha_shape_simplex_tree_map map_cgal_simplex_tree;
   std::vector<Alpha_value_type>::iterator the_alpha_value_iterator = the_alpha_values.begin();
-  Filtration_value filtration_max = 0.0;
   for (auto object_iterator : the_objects) {
     // Retrieve Alpha shape vertex list from object
     if (const Cell_handle* cell = CGAL::object_cast<Cell_handle>(&object_iterator)) {
@@ -218,9 +217,6 @@ int main(int argc, char **argv) {
 #ifdef DEBUG_TRACES
     std::cout << "filtration = " << filtr << std::endl;
 #endif  // DEBUG_TRACES
-    if (filtr > filtration_max) {
-      filtration_max = filtr;
-    }
     simplex_tree.insert_simplex(the_simplex_tree, filtr);
     if (the_alpha_value_iterator != the_alpha_values.end())
       ++the_alpha_value_iterator;
