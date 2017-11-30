@@ -38,7 +38,6 @@
 #include <tuple>
 #include <map>
 #include <utility>
-#include <list>
 #include <vector>
 #include <cstdlib>
 
@@ -66,7 +65,7 @@ using Cell_handle = Alpha_shape_3::Cell_handle;
 using Facet = Alpha_shape_3::Facet;
 using Edge_3 = Alpha_shape_3::Edge;
 using Vertex_handle = Alpha_shape_3::Vertex_handle;
-using Vertex_list = std::list<Alpha_shape_3::Vertex_handle>;
+using Vertex_list = std::vector<Alpha_shape_3::Vertex_handle>;
 
 // gudhi type definition
 using ST = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
