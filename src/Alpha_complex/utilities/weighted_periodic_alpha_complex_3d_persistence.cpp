@@ -110,7 +110,7 @@ int main(int argc, char* const argv[]) {
     usage(argv[0]);
   }
 
-  // Retrieve the triangulation
+  // Retrieve the points
   std::vector<Point_3> lp = off_reader.get_point_cloud();
 
   // Read weights information from file

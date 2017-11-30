@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
     exit(-1);
   }
 
-  // Retrieve the triangulation
+  // Retrieve the points
   std::vector<Point_3> lp = off_reader.get_point_cloud();
 
   // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode.
