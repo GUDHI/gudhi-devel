@@ -220,7 +220,7 @@ int main(int argc, char* const argv[]) {
         std::cout << "vertex [" << the_alpha_shape_vertex->point() << "] not found - insert " << vertex << std::endl;
 #endif  // DEBUG_TRACES
         the_simplex_tree.push_back(vertex);
-        map_cgal_simplex_tree.insert(Alpha_shape_simplex_tree_pair(the_alpha_shape_vertex, vertex));
+        map_cgal_simplex_tree.emplace(the_alpha_shape_vertex, vertex);
       } else {
         // alpha shape found
         Simplex_tree_vertex vertex = the_map_iterator->second;
