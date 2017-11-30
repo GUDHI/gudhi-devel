@@ -169,10 +169,9 @@ int main(int argc, char **argv) {
     std::cout << "filtration = " << filtr << std::endl;
 #endif  // DEBUG_TRACES
     simplex_tree.insert_simplex(the_simplex, filtr);
-    if (the_alpha_value_iterator != the_alpha_values.end())
-      ++the_alpha_value_iterator;
-    else
-      std::cout << "This shall not happen" << std::endl;
+    GUDHI_CHECK(the_alpha_value_iterator != the_alpha_values.end(),
+        "CGAL provided more simplices than values");
+    ++the_alpha_value_iterator;
   }
 
 #ifdef DEBUG_TRACES
