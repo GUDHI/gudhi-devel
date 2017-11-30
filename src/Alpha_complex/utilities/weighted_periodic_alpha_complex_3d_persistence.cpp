@@ -194,7 +194,7 @@ int main(int argc, char* const argv[]) {
       vertex_list = from_vertex<Vertex_list, Vertex_handle>(*vertex);
     }
     // Construction of the vector of simplex_tree vertex from list of alpha_shapes vertex
-    Simplex_tree_vector_vertex the_simplex_tree;
+    Simplex_tree_vector_vertex the_simplex;
     for (auto the_alpha_shape_vertex : vertex_list) {
       Alpha_shape_simplex_tree_map::iterator the_map_iterator = map_cgal_simplex_tree.find(the_alpha_shape_vertex);
       if (the_map_iterator == map_cgal_simplex_tree.end()) {
@@ -203,7 +203,7 @@ int main(int argc, char* const argv[]) {
 #ifdef DEBUG_TRACES
         std::cout << "vertex [" << the_alpha_shape_vertex->point() << "] not found - insert " << vertex << std::endl;
 #endif  // DEBUG_TRACES
-        the_simplex_tree.push_back(vertex);
+        the_simplex.push_back(vertex);
         map_cgal_simplex_tree.emplace(the_alpha_shape_vertex, vertex);
       } else {
         // alpha shape found
@@ -211,7 +211,7 @@ int main(int argc, char* const argv[]) {
 #ifdef DEBUG_TRACES
         std::cout << "vertex [" << the_alpha_shape_vertex->point() << "] found in " << vertex << std::endl;
 #endif  // DEBUG_TRACES
-        the_simplex_tree.push_back(vertex);
+        the_simplex.push_back(vertex);
       }
     }
     // Construction of the simplex_tree
@@ -219,7 +219,7 @@ int main(int argc, char* const argv[]) {
 #ifdef DEBUG_TRACES
     std::cout << "filtration = " << filtr << std::endl;
 #endif  // DEBUG_TRACES
-    simplex_tree.insert_simplex(the_simplex_tree, filtr);
+    simplex_tree.insert_simplex(the_simplex, filtr);
     if (the_alpha_value_iterator != the_alpha_values.end())
       ++the_alpha_value_iterator;
     else
