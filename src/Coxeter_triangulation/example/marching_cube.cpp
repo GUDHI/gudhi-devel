@@ -65,7 +65,7 @@ struct Simplex_tree_options_no_persistence {
   static const bool store_filtration = false;
   static constexpr bool contiguous_vertices = true;
 };
-using Simplex_tree = Gudhi::Simplex_tree<Simplex_tree_options_no_persistence>;
+using Simplex_tree = Gudhi::Simplex_tree<>;
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
 
@@ -273,7 +273,63 @@ Simplex_id alcove_coordinates(Point& p, Matrix& root_t)
   return s_id;
 }
 
+/** Add the vertices of the given simplex to a vertex-simplex map.
+ * The size of si_it->first is d*(d+1)/2.
+ */
+template <class S_id_iterator>
+void rec_add_vertices_to_map(Vertex_id& v_id, S_id_iterator s_it, int index, VSMap& vs_map, unsigned d)
+{
+  unsigned k = v_id.size();
+  if (k == d+1) {
+    Vertex_id v_id_red = reduced_id(v_id);
+    auto find_it = vs_map.find(v_id_red);
+    if (find_it == vs_map.end())
+      vs_map.emplace(v_id_red, std::vector<int>(1, index));
+    else
+      find_it->second.push_back(index);    
+    return;
+  }
+  int simplex_coord = *s_it; s_it++;
+  v_id.push_back(simplex_coord);
+  int sum = simplex_coord;
+  S_id_iterator s_it_copy(s_it);
+  bool valid = true;
+  for (unsigned i = 1; i < k && valid; i++) {
+    sum += v_id[k-i];
+    if (sum < *s_it_copy || sum > *s_it_copy + 1)
+      valid = false;
+    s_it_copy++;
+  }
+  if (valid)
+    rec_add_vertices_to_map(v_id, s_it_copy, index, vs_map, d);
+  v_id.pop_back();
 
+  v_id.push_back(simplex_coord + 1);
+  sum = simplex_coord + 1;
+  s_it_copy = s_it;
+  valid = true;
+  for (unsigned i = 1; i < k && valid; i++) {
+    sum += v_id[k-i];
+    if (sum < *s_it_copy || sum > *s_it_copy + 1)
+      valid = false;
+    s_it_copy++;
+  }
+  if (valid)
+    rec_add_vertices_to_map(v_id, s_it_copy, index, vs_map, d);
+  v_id.pop_back();
+}
+  
+/** Add the vertices of the given simplex to a vertex-simplex map.
+ * The size of si_it->first is d*(d+1)/2.
+ */
+template <class Si_map_iterator>
+void add_vertices_to_map(Si_map_iterator si_it, VSMap& vs_map)
+{
+  unsigned d = (-1+std::round(std::sqrt(1+8*si_it->first->first.size())))/2;
+  Vertex_id v_id(1,*si_it->first->first.begin());
+  v_id.reserve(d+1);
+  rec_add_vertices_to_map(v_id, si_it->first->first.begin()+1, si_it->second, vs_map, d);
+}
 
 /** Current state of the algorithm.
  *  Input: a point cloud 'point_vector'
@@ -339,9 +395,9 @@ int main(int argc, char * const argv[]) {
   //   std::cout << m.first << ": " << m.second.size() << " elements.\n";
   // }
 
-  // small test
-  Simplex_id p1 = {4,12,10,-8};
-  std::cout << "Non-reduced: " << p1 << ", reduced: " << reduced_id(p1) << ".\n";
+  // // small test
+  // Simplex_id p1 = {4,12,10,-8};
+  // std::cout << "Non-reduced: " << p1 << ", reduced: " << reduced_id(p1) << ".\n";
 
   SiMap si_map;
   int si_index = 0;
@@ -355,18 +411,9 @@ int main(int argc, char * const argv[]) {
   
   // map : vertex coordinates -> simplex coordinates
   VSMap vs_map;
-  for (auto m_it = sp_map.begin(); m_it != sp_map.end(); ++m_it) {
-    for (int i = 1; i <= d; i++) {
-      Vertex_id v_id(m_it->first);
-      v_id[i] += 1;
-      v_id = reduced_id(v_id);
-      auto find_it = vs_map.find(v_id);
-      if (find_it == vs_map.end())
-        vs_map.emplace(v_id, std::vector<int>(1, si_map[m_it]));
-      else
-        find_it->second.push_back(si_map[m_it]);
-    }
-  }
+  // add_vertices_to_map(si_map.begin(), vs_map);
+  for (auto si_it = si_map.begin(); si_it != si_map.end(); ++si_it)
+    add_vertices_to_map(si_it, vs_map);
   std::cout << "VSMap composition:\n";
   for (auto m: vs_map) {
     std::cout << m.first << ": " << m.second << ".\n";
@@ -375,9 +422,9 @@ int main(int argc, char * const argv[]) {
   // simplex tree construction
   Simplex_tree st;
   for (auto m: vs_map) {
-    st.insert_simplex_and_subfaces(m.second);
+    st.insert_simplex_and_subfaces(m.second, m.first[0]);
   }
-  std::cout << st;
+  // std::cout << st;
 
   Persistent_cohomology pcoh(st);
   // initializes the coefficient field for homology
