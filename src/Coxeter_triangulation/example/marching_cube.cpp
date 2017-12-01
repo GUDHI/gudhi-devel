@@ -121,25 +121,24 @@ void write_coxeter_mesh(Point_vector& W, VSMap& vs_map, Matrix& root_t, std::str
   ofs << "Vertices\n" << num_vertices << "\n";
 
   W.clear();
-  Matrix root_t_top = root_t.topLeftCorner(d, d);
   for (auto m: vs_map) {
     FT denom = m.first[0];
     Eigen::VectorXd b(d);
     for (int i = 0; i < d; i++) {
       b(i) = m.first[i+1]/denom;
-    }    
-    Eigen::SimplicialCholesky<Matrix> chol(root_t_top);
+    }
+    Eigen::SimplicialLDLT<Matrix, Eigen::Upper> chol(root_t);
     Eigen::VectorXd x = chol.solve(b);
-    for (int i = 0; i < d; ++i)
-      ofs << x(i) << " ";
-    ofs << "508\n";
+    if(chol.info()!=Eigen::Success) {
+      std::cout << "solving failed\n";
+    }
     std::vector<FT> np;
     for (int i = 0; i < d; i++)
       np.push_back(x(i));
     W.push_back(Point_d(np));
   }
   
-  FT p_prop = 0.00005;
+  FT p_prop = 0.001;
   int p_col = 208;
   std::vector<FT> bbox_dimensions = bounding_box_dimensions(W);
   std::cout << bbox_dimensions << "\n";
@@ -154,7 +153,7 @@ void write_coxeter_mesh(Point_vector& W, VSMap& vs_map, Matrix& root_t, std::str
           ofs << *coord + bbox_dimensions[i]*p_prop << " ";
         else
           ofs << *coord << " ";
-      ofs << "508\n";
+      ofs << "108\n";
     }
   }
   num_edges = ((d+1)*d/2)*W.size()/2;
@@ -431,7 +430,7 @@ int main(int argc, char * const argv[]) {
   pcoh.init_coefficients(11);
 
   pcoh.compute_persistent_cohomology(-0.1);
-  pcoh.output_diagram();
+  // pcoh.output_diagram();
 
   write_coxeter_mesh(point_vector, vs_map, root_t, "coxeter.mesh");
 }
