@@ -43,6 +43,12 @@ class Cubical_complex_interface : public Bitmap_cubical_complex<CubicalComplexOp
   : Bitmap_cubical_complex<CubicalComplexOptions>(dimensions, top_dimensional_cells) {
   }
 
+  Cubical_complex_interface(const std::vector<unsigned>& dimensions,
+                            const std::vector<double>& top_dimensional_cells,
+                            const std::vector<bool>& periodic_dimensions)
+  : Bitmap_cubical_complex<CubicalComplexOptions>(dimensions, top_dimensional_cells, periodic_dimensions) {
+  }
+
   Cubical_complex_interface(const std::string& perseus_file)
   : Bitmap_cubical_complex<CubicalComplexOptions>(perseus_file.c_str()) {
   }

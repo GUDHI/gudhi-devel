@@ -33,7 +33,7 @@ __license__ = "GPL v3"
 
 cdef extern from "Cubical_complex_interface.h" namespace "Gudhi":
     cdef cppclass Periodic_cubical_complex_base_interface "Gudhi::Cubical_complex::Cubical_complex_interface<Gudhi::cubical_complex::Bitmap_cubical_complex_periodic_boundary_conditions_base<double>>":
-        Periodic_cubical_complex_base_interface(vector[unsigned] dimensions, vector[double] top_dimensional_cells)
+        Periodic_cubical_complex_base_interface(vector[unsigned] dimensions, vector[double] top_dimensional_cells, vector[bool] periodic_dimensions)
         Periodic_cubical_complex_base_interface(string perseus_file)
         int num_simplices()
         int dimension()
@@ -58,7 +58,7 @@ cdef class PeriodicCubicalComplex:
 
     # Fake constructor that does nothing but documenting the constructor
     def __init__(self, dimensions=None, top_dimensional_cells=None,
-                  perseus_file=''):
+                  periodic_dimensions=None, perseus_file=''):
         """PeriodicCubicalComplex constructor from dimensions and
         top_dimensional_cells or from a Perseus-style file name.
 
@@ -66,6 +66,8 @@ cdef class PeriodicCubicalComplex:
         :type dimensions: list of int
         :param top_dimensional_cells: A list of cells filtration values.
         :type top_dimensional_cells: list of double
+        :param periodic_dimensions: A list of top dimensional cells periodicity value.
+        :type periodic_dimensions: list of boolean
 
         Or
 
@@ -75,10 +77,10 @@ cdef class PeriodicCubicalComplex:
 
     # The real cython constructor
     def __cinit__(self, dimensions=None, top_dimensional_cells=None,
-                  perseus_file=''):
-        if (dimensions is not None) and (top_dimensional_cells is not None) and (perseus_file is ''):
-            self.thisptr = new Periodic_cubical_complex_base_interface(dimensions, top_dimensional_cells)
-        elif (dimensions is None) and (top_dimensional_cells is None) and (perseus_file is not ''):
+                  periodic_dimensions=None, perseus_file=''):
+        if (dimensions is not None) and (top_dimensional_cells is not None) and (periodic_dimensions is not None) and (perseus_file is ''):
+            self.thisptr = new Periodic_cubical_complex_base_interface(dimensions, top_dimensional_cells, periodic_dimensions)
+        elif (dimensions is None) and (top_dimensional_cells is None) and (periodic_dimensions is None) and (perseus_file is not ''):
             if os.path.isfile(perseus_file):
                 self.thisptr = new Periodic_cubical_complex_base_interface(str.encode(perseus_file))
             else:
