@@ -11,7 +11,7 @@
 
 #include <CGAL/Epick_d.h>
 
-#include <Eigen/Dense>
+//#include <Eigen/Dense>
 #include <Eigen/Sparse>
 
 #include "cxx-prettyprint/prettyprint.hpp"
@@ -76,13 +76,13 @@ std::vector<FT> bounding_box_dimensions(Point_vector& points) {
     upper.push_back(x);
   }
   for (auto p: points)
-    for (int i = 0; i < p.size(); i++) {
+    for (unsigned i = 0; i < p.size(); i++) {
       if (p[i] < lower[i])
         lower[i] = p[i];
       if (p[i] > upper[i])
         upper[i] = p[i];
     }
-  for (int i = 0; i < lower.size(); i++)
+  for (unsigned i = 0; i < lower.size(); i++)
     difference.push_back(upper[i]-lower[i]);
   return difference;
 }
@@ -94,13 +94,10 @@ std::vector<FT> bounding_box_dimensions(Point_vector& points) {
  *  `is2d` should be true if the simplicial complex is 2d, false if 3d
  *  `l_is_v` = landmark is vertex
  */
-void write_coxeter_mesh(Point_vector& W, SiMap& map, Matrix& root_t, std::string file_name = "coxeter.mesh")
+void write_coxeter_mesh(Point_vector& W, VSMap& vs_map, Matrix& root_t, std::string file_name = "coxeter.mesh")
 {
   short d = W[0].size();
   assert(d < 4);
-
-  std::vector<FT> bbox_dimensions = bounding_box_dimensions(W);
-  std::cout << bbox_dimensions << "\n";
   
   std::ofstream ofs (file_name, std::ofstream::out);
   if (d <= 2)
@@ -108,7 +105,7 @@ void write_coxeter_mesh(Point_vector& W, SiMap& map, Matrix& root_t, std::string
   else
     ofs << "MeshVersionFormatted 1\nDimension 3\n";
   
-  int num_vertices = (d+1)*W.size(), num_edges = 0, num_triangles = 0, num_tetrahedra = 0;
+  int num_vertices = (d+1)*W.size() + vs_map.size(), num_edges = 0, num_triangles = 0, num_tetrahedra = 0;
   // if (d <= 2) {
   //   num_triangles = W.size();
   //   num_edges = W.size()*3;
@@ -123,7 +120,26 @@ void write_coxeter_mesh(Point_vector& W, SiMap& map, Matrix& root_t, std::string
 
   ofs << "Vertices\n" << num_vertices << "\n";
 
-  FT p_prop = 0.005;
+  W.clear();
+  Matrix root_t_top = root_t.topLeftCorner(d, d);
+  for (auto m: vs_map) {
+    FT denom = m.first[0];
+    Eigen::VectorXd b(d);
+    for (int i = 0; i < d; i++) {
+      b(i) = m.first[i+1]/denom;
+    }    
+    Eigen::SimplicialCholesky<Matrix> chol(root_t_top);
+    Eigen::VectorXd x = chol.solve(b);
+    for (int i = 0; i < d; ++i)
+      ofs << x(i) << " ";
+    ofs << "508\n";
+    std::vector<FT> np;
+    for (int i = 0; i < d; i++)
+      np.push_back(x(i));
+    W.push_back(Point_d(np));
+  }
+  
+  FT p_prop = 0.00005;
   int p_col = 208;
   for (auto p: W) {
     for (auto coord = p.cartesian_begin(); coord != p.cartesian_end() && coord != p.cartesian_begin()+3 ; ++coord) 
@@ -139,18 +155,14 @@ void write_coxeter_mesh(Point_vector& W, SiMap& map, Matrix& root_t, std::string
       ofs << "508\n";
     }
   }
-  // for (auto m: map) {
-  //   FT denom = m.first->first[0];
-  //   Eigen::VectorXf x(d+1);
-  //   for (int i = 0; i < d; i++) {
-  //     x(i) = m.first->first[i+1]/denom;
-  //   }
-    
-  // }
+  num_edges = ((d+1)*d/2)*W.size()/2;
+  num_triangles = ((d+1)*d*(d-1)/6)*W.size();
+  num_tetrahedra = W.size();
   
-  num_edges = (d+1)*d*W.size()/2;
+  std::vector<FT> bbox_dimensions = bounding_box_dimensions(W);
+  std::cout << bbox_dimensions << "\n";
   ofs << "Edges " << num_edges << "\n";
-  for (int i = 0; i < W.size(); i++) {
+  for (unsigned i = 0; i < W.size(); i++) {
     ofs << (d+1)*i+1 << " " << (d+1)*i+2 << " " << p_col << "\n";
     ofs << (d+1)*i+1 << " " << (d+1)*i+3 << " " << p_col << "\n";
     ofs << (d+1)*i+2 << " " << (d+1)*i+3 << " " << p_col << "\n";
@@ -160,9 +172,8 @@ void write_coxeter_mesh(Point_vector& W, SiMap& map, Matrix& root_t, std::string
       ofs << (d+1)*i+3 << " " << (d+1)*i+4 << " " << p_col << "\n";
     }
   }
-  num_triangles = (d+1)*d*(d-1)*W.size()/6;
   ofs << "Triangles " << num_triangles << "\n";
-  for (int i = 0; i < W.size(); i++) {
+  for (unsigned i = 0; i < W.size(); i++) {
     ofs << (d+1)*i+1 << " " << (d+1)*i+2 << " " << (d+1)*i+3 << " " << p_col << "\n";
     if (d == 3) {
       ofs << (d+1)*i+1 << " " << (d+1)*i+2 << " " << (d+1)*i+4 << " " << p_col << "\n";
@@ -172,8 +183,8 @@ void write_coxeter_mesh(Point_vector& W, SiMap& map, Matrix& root_t, std::string
   }
   if (d == 3) {
     ofs << "Tetrahedra " << num_tetrahedra << "\n";  
-    for (int i = 1; i <= W.size(); i++) 
-      ofs << i << " " << i << " " << i << " " << i << " " << "100\n";
+    for (unsigned i = 0; i < W.size(); i++) 
+      ofs << (d+1)*i+1 << " " << (d+1)*i+2 << " " << (d+1)*i+3 << " " << (d+1)*i+4 << " " << p_col << "\n";
     ofs << "End\n";
     ofs.close();
   }
@@ -377,5 +388,5 @@ int main(int argc, char * const argv[]) {
   pcoh.compute_persistent_cohomology(-0.1);
   pcoh.output_diagram();
 
-  write_coxeter_mesh(point_vector, si_map, root_t, "coxeter.mesh");
+  write_coxeter_mesh(point_vector, vs_map, root_t, "coxeter.mesh");
 }
