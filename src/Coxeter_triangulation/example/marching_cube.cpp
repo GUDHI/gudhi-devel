@@ -97,7 +97,7 @@ std::vector<FT> bounding_box_dimensions(Point_vector& points) {
 void write_coxeter_mesh(Point_vector& W, VSMap& vs_map, Matrix& root_t, std::string file_name = "coxeter.mesh")
 {
   short d = W[0].size();
-  assert(d < 4);
+  if (d > 3);
   
   std::ofstream ofs (file_name, std::ofstream::out);
   if (d <= 2)
@@ -137,6 +137,19 @@ void write_coxeter_mesh(Point_vector& W, VSMap& vs_map, Matrix& root_t, std::str
       np.push_back(x(i));
     W.push_back(Point_d(np));
   }
+  std::map<int,std::vector<int>> sv_map;
+  int j = 1;
+  for (auto m: vs_map) {
+    for (auto s: m.second) {
+      auto find_it = sv_map.find(s);
+      if (find_it == sv_map.end())
+        sv_map.emplace(s, std::vector<int>(1,j));
+      else
+        find_it->second.push_back(j);
+    }
+    j++;
+  }
+
   
   FT p_prop = 0.001;
   int p_col = 208;
@@ -146,46 +159,46 @@ void write_coxeter_mesh(Point_vector& W, VSMap& vs_map, Matrix& root_t, std::str
     for (auto coord = p.cartesian_begin(); coord != p.cartesian_end() && coord != p.cartesian_begin()+3 ; ++coord) 
       ofs << *coord << " "; 
     ofs << "508\n";
-    for (int i = 0; i < d; i++) {
-      int j = 0;
-      for (auto coord = p.cartesian_begin(); coord != p.cartesian_end() && coord != p.cartesian_begin()+3 ; ++coord, j++)
-        if (j == i)
-          ofs << *coord + bbox_dimensions[i]*p_prop << " ";
-        else
-          ofs << *coord << " ";
-      ofs << "108\n";
-    }
+    // for (int i = 0; i < d; i++) {
+    //   int j = 0;
+    //   for (auto coord = p.cartesian_begin(); coord != p.cartesian_end() && coord != p.cartesian_begin()+3 ; ++coord, j++)
+    //     if (j == i)
+    //       ofs << *coord + bbox_dimensions[i]*p_prop << " ";
+    //     else
+    //       ofs << *coord << " ";
+    //   ofs << "108\n";
+    // }
   }
   num_edges = ((d+1)*d/2)*W.size()/2;
   num_triangles = ((d+1)*d*(d-1)/6)*W.size();
   num_tetrahedra = W.size();
   
-  ofs << "Edges " << num_edges << "\n";
-  for (unsigned i = 0; i < W.size(); i++) {
-    ofs << (d+1)*i+1 << " " << (d+1)*i+2 << " " << p_col << "\n";
-    ofs << (d+1)*i+1 << " " << (d+1)*i+3 << " " << p_col << "\n";
-    ofs << (d+1)*i+2 << " " << (d+1)*i+3 << " " << p_col << "\n";
-    if (d == 3) {
-      ofs << (d+1)*i+1 << " " << (d+1)*i+4 << " " << p_col << "\n";
-      ofs << (d+1)*i+2 << " " << (d+1)*i+4 << " " << p_col << "\n";
-      ofs << (d+1)*i+3 << " " << (d+1)*i+4 << " " << p_col << "\n";
-    }
-  }
-  ofs << "Triangles " << num_triangles << "\n";
-  for (unsigned i = 0; i < W.size(); i++) {
-    ofs << (d+1)*i+1 << " " << (d+1)*i+2 << " " << (d+1)*i+3 << " " << p_col << "\n";
-    if (d == 3) {
-      ofs << (d+1)*i+1 << " " << (d+1)*i+2 << " " << (d+1)*i+4 << " " << p_col << "\n";
-      ofs << (d+1)*i+1 << " " << (d+1)*i+3 << " " << (d+1)*i+4 << " " << p_col << "\n";
-      ofs << (d+1)*i+2 << " " << (d+1)*i+3 << " " << (d+1)*i+4 << " " << p_col << "\n";
+  // ofs << "Edges " << num_edges << "\n";
+  // for (unsigned i = 0; i < W.size(); i++) {
+  //   ofs << (d+1)*i+1 << " " << (d+1)*i+2 << " " << p_col << "\n";
+  //   ofs << (d+1)*i+1 << " " << (d+1)*i+3 << " " << p_col << "\n";
+  //   ofs << (d+1)*i+2 << " " << (d+1)*i+3 << " " << p_col << "\n";
+  //   if (d == 3) {
+  //     ofs << (d+1)*i+1 << " " << (d+1)*i+4 << " " << p_col << "\n";
+  //     ofs << (d+1)*i+2 << " " << (d+1)*i+4 << " " << p_col << "\n";
+  //     ofs << (d+1)*i+3 << " " << (d+1)*i+4 << " " << p_col << "\n";
+  //   }
+  // }
+  if (d == 2) {
+    ofs << "Triangles " << sv_map.size() << "\n";
+    for (auto m: sv_map) {
+      for (auto i: m.second)
+        ofs << i << " ";
+      ofs << p_col << "\n";
     }
   }
   if (d == 3) {
-    ofs << "Tetrahedra " << num_tetrahedra << "\n";  
-    for (unsigned i = 0; i < W.size(); i++) 
-      ofs << (d+1)*i+1 << " " << (d+1)*i+2 << " " << (d+1)*i+3 << " " << (d+1)*i+4 << " " << p_col << "\n";
-    ofs << "End\n";
-    ofs.close();
+    ofs << "Tetrahedra " << sv_map.size() << "\n";  
+    for (auto m: sv_map) {
+      for (auto i: m.second)
+        ofs << i << " ";
+      ofs << p_col << "\n";
+    }
   }
 }
 
@@ -419,17 +432,17 @@ int main(int argc, char * const argv[]) {
   }
 
   // simplex tree construction
-  Simplex_tree st;
-  for (auto m: vs_map) {
-    st.insert_simplex_and_subfaces(m.second, m.first[0]);
-  }
+  // Simplex_tree st;
+  // for (auto m: vs_map) {
+  //   st.insert_simplex_and_subfaces(m.second, m.first[0]);
+  // }
   // std::cout << st;
 
-  Persistent_cohomology pcoh(st);
-  // initializes the coefficient field for homology
-  pcoh.init_coefficients(11);
+  // Persistent_cohomology pcoh(st);
+  // // initializes the coefficient field for homology
+  // pcoh.init_coefficients(11);
 
-  pcoh.compute_persistent_cohomology(-0.1);
+  // pcoh.compute_persistent_cohomology(-0.1);
   // pcoh.output_diagram();
 
   write_coxeter_mesh(point_vector, vs_map, root_t, "coxeter.mesh");
