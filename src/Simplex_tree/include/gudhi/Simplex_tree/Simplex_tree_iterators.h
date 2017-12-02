@@ -23,6 +23,8 @@
 #ifndef SIMPLEX_TREE_SIMPLEX_TREE_ITERATORS_H_
 #define SIMPLEX_TREE_SIMPLEX_TREE_ITERATORS_H_
 
+#include <gudhi/Debug_utils.h>
+
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/version.hpp>
 #if BOOST_VERSION >= 105600
@@ -109,11 +111,18 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
       : last_(sh->first),
         sib_(nullptr),
         st_(st) {
+    // Only check once at the beginning instead of for every increment, as this is expensive.
+    if (SimplexTree::Options::contiguous_vertices)
+      GUDHI_CHECK(st_->contiguous_vertices(), "The set of vertices is not { 0, ..., n } without holes");
     Siblings * sib = st->self_siblings(sh);
     next_ = sib->parent();
     sib_ = sib->oncles();
     if (sib_ != nullptr) {
-      sh_ = sib_->find(next_);
+      if (SimplexTree::Options::contiguous_vertices && sib_->oncles() == nullptr)
+        // Only relevant for edges
+        sh_ = sib_->members_.begin()+next_;
+      else
+        sh_ = sib_->find(next_);
     } else {
       sh_ = st->null_simplex();
     }  // vertex: == end()
@@ -140,14 +149,19 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
     Siblings * for_sib = sib_;
     Siblings * new_sib = sib_->oncles();
     auto rit = suffix_.rbegin();
-    if (SimplexTree::Options::contiguous_vertices && new_sib == nullptr && rit != suffix_.rend()) {
-      // We reached the root, use a short-cut to find a vertex. We could also
-      // optimize finding the second vertex of a segment, but people are
-      // expected to call endpoints().
-      assert(st_->contiguous_vertices());
-      sh_ = for_sib->members_.begin()+*rit;
-      for_sib = sh_->second.children();
-      ++rit;
+    if (SimplexTree::Options::contiguous_vertices && new_sib == nullptr) {
+      // We reached the root, use a short-cut to find a vertex.
+      if (rit == suffix_.rend()) {
+        // Segment, this vertex is the last boundary simplex
+        sh_ = for_sib->members_.begin()+last_;
+        sib_ = nullptr;
+        return;
+      } else {
+        // Dim >= 2, initial step of the descent
+        sh_ = for_sib->members_.begin()+*rit;
+        for_sib = sh_->second.children();
+        ++rit;
+      }
     }
     for (; rit != suffix_.rend(); ++rit) {
       sh_ = for_sib->find(*rit);
