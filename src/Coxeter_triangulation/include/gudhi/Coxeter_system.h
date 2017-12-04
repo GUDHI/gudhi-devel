@@ -131,11 +131,6 @@ public:
     rec_combine_chunks(chunks.begin(), vertices, v_id);
     return vertices;
   }
-
-  std::vector<Alcove_id> subdivision_of_alcove(Alcove_id& ai_id) {
-    int level = ai_id.front();
-    
-  }
   
 };
 

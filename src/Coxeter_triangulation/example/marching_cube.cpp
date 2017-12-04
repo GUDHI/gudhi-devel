@@ -7,9 +7,7 @@
 
 #include <gudhi/Points_off_io.h>
 #include <gudhi/Coxeter_system.h>
-#include <gudhi/Simplex_tree.h>
-#include <gudhi/Persistent_cohomology.h>
-#include <gudhi/output_tikz.h>
+#include <gudhi/Coxeter_complex.h>
 
 #include <CGAL/Epick_d.h>
 
@@ -22,38 +20,6 @@ using K = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
 using FT = K::FT;
 using Point_d = K::Point_d;
 using Point_vector = std::vector< Point_d >;
-
-using Matrix = Eigen::SparseMatrix<FT>;
-using Triplet = Eigen::Triplet<FT>;
-using Simplex_id = std::vector<int>;
-using Vertex_id = Simplex_id;
-using Pointer_range = typename std::vector<Point_vector::iterator>;
-
-using SPMap = std::map<Simplex_id, Pointer_range>;
-using SPointer_range = typename std::vector<SPMap::iterator>;
-using VSMap = std::map<Vertex_id, std::vector<int>>;
-
-struct Lexicographic_ptr {
-  bool operator() (const SPMap::iterator &lhs, const SPMap::iterator &rhs) {
-    return std::lexicographical_compare(lhs->first.begin(), lhs->first.end(), rhs->first.begin(), rhs->first.end());
-  }
-};
-
-using SiMap = std::map<SPMap::iterator, int, Lexicographic_ptr>;
-
-
-struct Simplex_tree_options_no_persistence {
-  typedef Gudhi::linear_indexing_tag Indexing_tag;
-  typedef int Vertex_handle;
-  typedef FT Filtration_value;
-  typedef std::uint32_t Simplex_key;
-  static const bool store_key = true;
-  static const bool store_filtration = false;
-  static constexpr bool contiguous_vertices = true;
-};
-using Simplex_tree = Gudhi::Simplex_tree<>;
-using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
-using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
 
 std::vector<FT> bounding_box_dimensions(Point_vector& points) {
   std::vector<FT> lower, upper, difference;
@@ -80,6 +46,8 @@ std::vector<FT> bounding_box_dimensions(Point_vector& points) {
  *  `is2d` should be true if the simplicial complex is 2d, false if 3d
  *  `l_is_v` = landmark is vertex
  */
+template <class VSMap,
+          class Matrix>
 void write_coxeter_mesh(Point_vector& W, VSMap& vs_map, Matrix& root_t, std::string file_name = "coxeter.mesh")
 {
   short d = W[0].size();
@@ -194,55 +162,13 @@ void rec_test(std::vector<unsigned>& decomposition, Coxeter_system& cs, Point_ve
     unsigned num_vertices = 1;
     for (auto d_it = decomposition.begin()+1; d_it != decomposition.end(); ++d_it) {
       num_vertices *= *d_it + 1;
-      if (num_vertices > 1000000)
+      if (num_vertices > 1000000) {
+        std::cout << "Configuration " << decomposition << ": too many vertices. Abandon.\n";
         return;
-    }
-    
-    std::cout << std::vector<unsigned>(decomposition.begin()+1, decomposition.end()) << std::endl;
-    clock_t start, end, global_start;
-    global_start = clock();
-
-    start = clock();
-    SPMap sp_map;
-    for (auto p_it = point_vector.begin(); p_it != point_vector.end(); ++p_it) {
-      Simplex_id s_id = cs.alcove_coordinates(*p_it, 1); 
-      auto find_it = sp_map.find(s_id);
-      if (find_it == sp_map.end())
-        sp_map.emplace(s_id, Pointer_range(1, p_it));
-      else
-        find_it->second.push_back(p_it);
-    }
-    end = clock();
-    double time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
-    std::cout << "Computed alcove coordinate map in " << time << " s. \n";
-
-    start = clock();
-    SiMap si_map;
-    int si_index = 0;
-    for (auto m_it = sp_map.begin(); m_it != sp_map.end(); ++m_it, si_index++)
-      si_map.emplace(m_it, si_index);
-    end = clock();
-    time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
-    std::cout << "Computed alcove index  map in " << time << " s. \n";
-
-    start = clock();
-    VSMap vs_map;
-    for (auto si_it = si_map.begin(); si_it != si_map.end(); ++si_it) {
-      std::vector<Vertex_id> vertices = cs.vertices_of_alcove(si_it->first->first);
-      for (Vertex_id v: vertices) {
-        auto find_it = vs_map.find(v);
-        if (find_it == vs_map.end())
-          vs_map.emplace(v, std::vector<int>(1, si_it->second));
-        else
-          find_it->second.push_back(si_it->second);    
       }
     }
-    end = clock();
-    time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
-    std::cout << "Computed vertex alcove map in " << time << " s. \n";
-    end = clock();
-    time = static_cast<double>(end - global_start) / CLOCKS_PER_SEC;
-    std::cout << "Total time: " << time << " s. \n";
+    std::cout << std::vector<unsigned>(decomposition.begin()+1, decomposition.end()) << std::endl;
+    Test(point_vector, cs);
     return;
   }
   unsigned i = decomposition.back();
@@ -257,22 +183,6 @@ void rec_test(std::vector<unsigned>& decomposition, Coxeter_system& cs, Point_ve
     decomposition[0] -= i;
     decomposition.pop_back();
   }
-}
-
-/** A conversion from Cartesian coordinates to root coordinates in a point range.
- *  The matrix' rows are root vectors (or normal vectors of a simplex in general).
- *  The input point range is rewritten.
- */
-template <class Point_list,
-          class Matrix>
-Point_list root_coordinates_range(Point_list& points, Matrix& root_t)
-{
-  short d = points[0].size();
-  Point_list points_r;
-  for (auto p: points) {
-    points_r.push_back(root_coordinates(p,root_t,d));
-  }
-  return points_r;
 }
 
 /** Current state of the algorithm.

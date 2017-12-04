@@ -24,7 +24,6 @@ public:
   Matrix root_t_;
   char family_;
   unsigned short dimension_;
-  std::vector<Local_changes> positive_root_differences_;
   
   Simple_coxeter_system() {
   }
@@ -49,12 +48,6 @@ public:
       Eigen::SimplicialLLT<Matrix, Eigen::Lower> chol(cartan);
       root_t_ = chol.matrixL();
       // std::cout << "root^t =" << std::endl << root_t_ << std::endl;
-      for (unsigned i = 0; i < d; i++) {
-        positive_root_differences_.emplace_back(Local_changes(1, Change_range()));
-        for (int j = i-1; j >= 0; j--) {
-          positive_root_differences_[i].emplace_back(Change_range(1, std::make_pair(j, 1)));
-        }
-      }
       break;
     }
     default :
