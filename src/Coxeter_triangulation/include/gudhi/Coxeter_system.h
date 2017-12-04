@@ -113,7 +113,7 @@ public:
       for (unsigned i = 0; i < pos_root_count; i++) {
         ai_id_part.push_back(*ai_it++);
       }
-      chunks.emplace_back(scs.vertices_of_simplex(ai_id));
+      chunks.emplace_back(scs.vertices_of_simplex(ai_id_part));
     }
     // std::vector<std::vector<Vertex_id>::iterator> iterators;
     // for (auto chunk: chunks)

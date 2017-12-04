@@ -324,5 +324,5 @@ int main(int argc, char * const argv[]) {
   // pcoh.compute_persistent_cohomology(-0.1);
   // pcoh.output_diagram();
 
-  write_coxeter_mesh(point_vector, vs_map, root_t, "coxeter.mesh");
+  // write_coxeter_mesh(point_vector, vs_map, root_t, "coxeter.mesh");
 }
