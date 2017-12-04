@@ -24,7 +24,7 @@ class Coxeter_system  {
 public:
 
   Coxeter_system()
-    : dimension_(0){
+    : dimension_(0) {
   }
   
   Coxeter_system(char family, short dimension)
@@ -110,7 +110,7 @@ private:
 
 public:  
   
-  std::vector<Vertex_id> vertices_of_alcove(Alcove_id ai_id)
+  std::vector<Vertex_id> vertices_of_alcove(const Alcove_id& ai_id)
   {
     std::vector<Vertex_id> vertices;
     std::vector<std::vector<Vertex_id>> chunks;
@@ -130,6 +130,11 @@ public:
     Vertex_id v_id(1, level);
     rec_combine_chunks(chunks.begin(), vertices, v_id);
     return vertices;
+  }
+
+  std::vector<Alcove_id> subdivision_of_alcove(Alcove_id& ai_id) {
+    int level = ai_id.front();
+    
   }
   
 };

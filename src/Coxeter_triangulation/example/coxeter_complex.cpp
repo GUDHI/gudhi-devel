@@ -188,75 +188,28 @@ void write_coxeter_mesh(Point_vector& W, VSMap& vs_map, Matrix& root_t, std::str
   }
 }
 
-void rec_test(std::vector<unsigned>& decomposition, Coxeter_system& cs, Point_vector& point_vector) {
-  if (decomposition[0] == point_vector[0].size()) {
-    // test if the number of vertices of 1 alcove is more than 10^6
-    unsigned num_vertices = 1;
-    for (auto d_it = decomposition.begin()+1; d_it != decomposition.end(); ++d_it) {
-      num_vertices *= *d_it + 1;
-      if (num_vertices > 1000000)
-        return;
+/** A conversion from Cartesian coordinates to root coordinates.
+ *  The matrix' rows are root vectors (or normal vectors of a simplex in general).
+ */
+template <class Point,
+          class Matrix>
+Point root_coordinates(Point p, Matrix& root_t, short d)
+{
+  // short d = p.size();
+  std::vector<double> p_r;
+  for (int i = 0; i < d; i++) {
+    FT sc_prod = 0;
+    /* for now no root normalization takes place */
+    // FT root_norm_sq = 0;
+    // for (int j = 0; j < d; j++)
+    //   root_norm_sq += root_t.coeff(i,j)*root_t.coeff(i,j);
+    // FT root_norm = sqrt()
+    for (int j = 0; j < d; j++) {
+      sc_prod += root_t.coeff(i,j) * p[j];
     }
-    
-    std::cout << std::vector<unsigned>(decomposition.begin()+1, decomposition.end()) << std::endl;
-    clock_t start, end, global_start;
-    global_start = clock();
-
-    start = clock();
-    SPMap sp_map;
-    for (auto p_it = point_vector.begin(); p_it != point_vector.end(); ++p_it) {
-      Simplex_id s_id = cs.alcove_coordinates(*p_it, 1); 
-      auto find_it = sp_map.find(s_id);
-      if (find_it == sp_map.end())
-        sp_map.emplace(s_id, Pointer_range(1, p_it));
-      else
-        find_it->second.push_back(p_it);
-    }
-    end = clock();
-    double time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
-    std::cout << "Computed alcove coordinate map in " << time << " s. \n";
-
-    start = clock();
-    SiMap si_map;
-    int si_index = 0;
-    for (auto m_it = sp_map.begin(); m_it != sp_map.end(); ++m_it, si_index++)
-      si_map.emplace(m_it, si_index);
-    end = clock();
-    time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
-    std::cout << "Computed alcove index  map in " << time << " s. \n";
-
-    start = clock();
-    VSMap vs_map;
-    for (auto si_it = si_map.begin(); si_it != si_map.end(); ++si_it) {
-      std::vector<Vertex_id> vertices = cs.vertices_of_alcove(si_it->first->first);
-      for (Vertex_id v: vertices) {
-        auto find_it = vs_map.find(v);
-        if (find_it == vs_map.end())
-          vs_map.emplace(v, std::vector<int>(1, si_it->second));
-        else
-          find_it->second.push_back(si_it->second);    
-      }
-    }
-    end = clock();
-    time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
-    std::cout << "Computed vertex alcove map in " << time << " s. \n";
-    end = clock();
-    time = static_cast<double>(end - global_start) / CLOCKS_PER_SEC;
-    std::cout << "Total time: " << time << " s. \n";
-    return;
+    p_r.push_back(sc_prod);
   }
-  unsigned i = decomposition.back();
-  if (decomposition.back() == 0)
-    i = 1;
-  for (; i <= point_vector[0].size() - decomposition[0]; ++i) {
-    decomposition.push_back(i);
-    decomposition[0] += i;
-    cs.emplace_back('A', i);
-    rec_test(decomposition, cs, point_vector);
-    cs.pop_back();
-    decomposition[0] -= i;
-    decomposition.pop_back();
-  }
+  return Point(p_r);
 }
 
 /** A conversion from Cartesian coordinates to root coordinates in a point range.
@@ -298,9 +251,56 @@ int main(int argc, char * const argv[]) {
   short d = point_vector[0].size();
   // short d = 2;
   std::cout << "Successfully read " << N << " points in dimension " << d << std::endl;
-  
-  std::vector<unsigned> decomposition(1,0); // first coordinate is the sum
-  decomposition.reserve(d+1);
-  Coxeter_system cs;
-  rec_test(decomposition, cs, point_vector);
+
+  // The A root vectors, computed as a matrix
+
+  clock_t start, end, global_start;
+  global_start = clock();
+  start = clock();
+  Coxeter_system cs('A', d);
+  end = clock();
+  double time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+  std::cout << "Created Coxeter system object in " << time << " s. \n";
+
+  start = clock();
+  SPMap sp_map;
+  for (auto p_it = point_vector.begin(); p_it != point_vector.end(); ++p_it) {
+    Simplex_id s_id = cs.alcove_coordinates(*p_it, 1); 
+    auto find_it = sp_map.find(s_id);
+    if (find_it == sp_map.end())
+      sp_map.emplace(s_id, Pointer_range(1, p_it));
+    else
+      find_it->second.push_back(p_it);
+  }
+  end = clock();
+  time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+  std::cout << "Computed alcove coordinate map in " << time << " s. \n";
+
+  start = clock();
+  SiMap si_map;
+  int si_index = 0;
+  for (auto m_it = sp_map.begin(); m_it != sp_map.end(); ++m_it, si_index++)
+    si_map.emplace(m_it, si_index);
+  end = clock();
+  time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+  std::cout << "Computed alcove index  map in " << time << " s. \n";
+
+  start = clock();
+  VSMap vs_map;
+  for (auto si_it = si_map.begin(); si_it != si_map.end(); ++si_it) {
+    std::vector<Vertex_id> vertices = cs.vertices_of_alcove(si_it->first->first);
+    for (Vertex_id v: vertices) {
+      auto find_it = vs_map.find(v);
+      if (find_it == vs_map.end())
+        vs_map.emplace(v, std::vector<int>(1, si_it->second));
+      else
+        find_it->second.push_back(si_it->second);    
+    }
+  }
+  end = clock();
+  time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+  std::cout << "Computed vertex alcove map in " << time << " s. \n";
+  end = clock();
+  time = static_cast<double>(end - global_start) / CLOCKS_PER_SEC;
+  std::cout << "Total time: " << time << " s. \n";
 }
