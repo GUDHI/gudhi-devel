@@ -2,6 +2,7 @@
 #include <cmath>
 #include <vector>
 #include <map>
+#include <algorithm>
 
 #include <gudhi/Points_off_io.h>
 #include <gudhi/Coxeter_system.h>
@@ -27,29 +28,13 @@ using Simplex_id = std::vector<int>;
 using Vertex_id = Simplex_id;
 using Pointer_range = typename std::vector<Point_vector::iterator>;
 
-
-struct Lexicographic {
-  bool operator() (const Simplex_id &lhs, const Simplex_id &rhs) {
-    assert (lhs.size() == rhs.size());
-    auto l_it = lhs.begin();
-    auto r_it = rhs.begin();
-    for (; l_it != lhs.end(); ++l_it, ++r_it)
-      if (*l_it < *r_it)
-        return true;
-      else if (*l_it > *r_it)
-        return false;
-    return false;
-  }
-};
-
-using SPMap = std::map<Simplex_id, Pointer_range, Lexicographic>;
+using SPMap = std::map<Simplex_id, Pointer_range>;
 using SPointer_range = typename std::vector<SPMap::iterator>;
-using VSMap = std::map<Vertex_id, std::vector<int>, Lexicographic>;
+using VSMap = std::map<Vertex_id, std::vector<int>>;
 
 struct Lexicographic_ptr {
   bool operator() (const SPMap::iterator &lhs, const SPMap::iterator &rhs) {
-    Lexicographic lx;
-    return lx(lhs->first,rhs->first);
+    return std::lexicographical_compare(lhs->first.begin(), lhs->first.end(), rhs->first.begin(), rhs->first.end());
   }
 };
 
@@ -202,26 +187,6 @@ void write_coxeter_mesh(Point_vector& W, VSMap& vs_map, Matrix& root_t, std::str
   }
 }
 
-int gcd(int a, int b) {
-    return b == 0 ? a : gcd(b, a % b);
-}
-
-/** Common gcd simplification */
-template <class Id>
-Id reduced_id(Id& id) {
-  int common_gcd = 0;
-  for (auto i: id) {
-    common_gcd = gcd(i, common_gcd);
-    if (common_gcd == 1)
-      return id;
-  }
-  Id id_red(id);
-  for (auto i_it = id_red.begin(); i_it != id_red.end(); ++i_it) {
-    *i_it = *i_it / common_gcd;
-  }
-  return id_red;
-}
-
 /** A conversion from Cartesian coordinates to root coordinates.
  *  The matrix' rows are root vectors (or normal vectors of a simplex in general).
  */
@@ -260,64 +225,6 @@ Point_list root_coordinates_range(Point_list& points, Matrix& root_t)
     points_r.push_back(root_coordinates(p,root_t,d));
   }
   return points_r;
-}
-
-/** Add the vertices of the given simplex to a vertex-simplex map.
- * The size of si_it->first is d*(d+1)/2.
- */
-template <class S_id_iterator>
-void rec_add_vertices_to_map(Vertex_id& v_id, S_id_iterator s_it, int index, VSMap& vs_map, unsigned d)
-{
-  unsigned k = v_id.size();
-  if (k == d+1) {
-    Vertex_id v_id_red = reduced_id(v_id);
-    auto find_it = vs_map.find(v_id_red);
-    if (find_it == vs_map.end())
-      vs_map.emplace(v_id_red, std::vector<int>(1, index));
-    else
-      find_it->second.push_back(index);    
-    return;
-  }
-  int simplex_coord = *s_it; s_it++;
-  v_id.push_back(simplex_coord);
-  int sum = simplex_coord;
-  S_id_iterator s_it_copy(s_it);
-  bool valid = true;
-  for (unsigned i = 1; i < k && valid; i++) {
-    sum += v_id[k-i];
-    if (sum < *s_it_copy || sum > *s_it_copy + 1)
-      valid = false;
-    s_it_copy++;
-  }
-  if (valid)
-    rec_add_vertices_to_map(v_id, s_it_copy, index, vs_map, d);
-  v_id.pop_back();
-
-  v_id.push_back(simplex_coord + 1);
-  sum = simplex_coord + 1;
-  s_it_copy = s_it;
-  valid = true;
-  for (unsigned i = 1; i < k && valid; i++) {
-    sum += v_id[k-i];
-    if (sum < *s_it_copy || sum > *s_it_copy + 1)
-      valid = false;
-    s_it_copy++;
-  }
-  if (valid)
-    rec_add_vertices_to_map(v_id, s_it_copy, index, vs_map, d);
-  v_id.pop_back();
-}
-  
-/** Add the vertices of the given simplex to a vertex-simplex map.
- * The size of si_it->first is d*(d+1)/2.
- */
-template <class Si_map_iterator>
-void add_vertices_to_map(Si_map_iterator si_it, VSMap& vs_map)
-{
-  unsigned d = (-1+std::round(std::sqrt(1+8*si_it->first->first.size())))/2;
-  Vertex_id v_id(1,*si_it->first->first.begin());
-  v_id.reserve(d+1);
-  rec_add_vertices_to_map(v_id, si_it->first->first.begin()+1, si_it->second, vs_map, d);
 }
 
 /** Current state of the algorithm.
@@ -388,8 +295,16 @@ int main(int argc, char * const argv[]) {
   // map : vertex coordinates -> simplex coordinates
   VSMap vs_map;
   // add_vertices_to_map(si_map.begin(), vs_map);
-  for (auto si_it = si_map.begin(); si_it != si_map.end(); ++si_it)
-    add_vertices_to_map(si_it, vs_map);
+  for (auto si_it = si_map.begin(); si_it != si_map.end(); ++si_it) {
+    std::vector<Vertex_id> vertices = cs.vertices_of_alcove(si_it->first->first);
+    for (Vertex_id v: vertices) {
+      auto find_it = vs_map.find(v);
+      if (find_it == vs_map.end())
+        vs_map.emplace(v, std::vector<int>(1, si_it->second));
+      else
+        find_it->second.push_back(si_it->second);    
+    }
+  }
   std::cout << "VSMap composition:\n";
   for (auto m: vs_map) {
     std::cout << m.first << ": " << m.second << ".\n";

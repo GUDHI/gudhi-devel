@@ -18,12 +18,11 @@ class Coxeter_system  {
   class wrong_family : public std::exception {  
   } wrong_family_exception_;
 
+  std::vector<Simple_coxeter_system> simple_system_range_;
   unsigned short dimension_;
   
 public:
-  
-  std::vector<Simple_coxeter_system> simple_system_range_;
-  
+    
   Coxeter_system(char family, short dimension)
     : simple_system_range_(1, Simple_coxeter_system(family, dimension)), dimension_(dimension) {
   }
@@ -63,7 +62,46 @@ public:
     return a_id;
   }
 
-  std::vector<Vertex_id> vertices_of_simplex(Alcove_id ai_id)
+private:
+
+  int gcd(int a, int b) {
+    return b == 0 ? a : gcd(b, a % b);
+  }
+
+  /** Common gcd simplification */
+  template <class Id>
+  Id reduced_id(Id& id) {
+    int common_gcd = 0;
+    for (auto i: id) {
+      common_gcd = gcd(i, common_gcd);
+      if (common_gcd == 1)
+        return id;
+    }
+    Id id_red(id);
+    for (auto i_it = id_red.begin(); i_it != id_red.end(); ++i_it) {
+      *i_it = *i_it / common_gcd;
+    }
+    return id_red;
+  }
+
+  
+  void rec_combine_chunks(std::vector<std::vector<Vertex_id>>::iterator chunks_it, std::vector<Vertex_id>& vertices, Vertex_id& v_id) {
+    int k = v_id.size()-1;
+    if (k == dimension_) {
+      vertices.push_back(reduced_id(v_id));
+      return;
+    }
+    for (auto chunk: *chunks_it) {
+      for (auto c_it = chunk.begin()+1; c_it != chunk.end(); ++c_it)
+        v_id.push_back(*c_it);
+      rec_combine_chunks(chunks_it+1, vertices, v_id);
+      v_id.resize(v_id.size()-chunk.size()+1);
+    }
+  }
+
+public:  
+  
+  std::vector<Vertex_id> vertices_of_alcove(Alcove_id ai_id)
   {
     std::vector<Vertex_id> vertices;
     std::vector<std::vector<Vertex_id>> chunks;
@@ -77,14 +115,11 @@ public:
       }
       chunks.emplace_back(scs.vertices_of_simplex(ai_id));
     }
-    std::vector<std::vector<Vertex_id>::iterator> iterators;
-    for (auto chunk: chunks)
-      iterators.emplace_back(chunk.begin());
+    // std::vector<std::vector<Vertex_id>::iterator> iterators;
+    // for (auto chunk: chunks)
+    //   iterators.emplace_back(chunk.begin());
     Vertex_id v_id(1, level);
-    // while (iterator[0] != chunks[0].end()) {
-    //   if (v_id.size() == dimension_+1)
-    //     vertices.emplace_back(v_id);
-    // }
+    rec_combine_chunks(chunks.begin(), vertices, v_id);
     return vertices;
   }
   
