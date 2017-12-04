@@ -188,46 +188,6 @@ void write_coxeter_mesh(Point_vector& W, VSMap& vs_map, Matrix& root_t, std::str
   }
 }
 
-/** A conversion from Cartesian coordinates to root coordinates.
- *  The matrix' rows are root vectors (or normal vectors of a simplex in general).
- */
-template <class Point,
-          class Matrix>
-Point root_coordinates(Point p, Matrix& root_t, short d)
-{
-  // short d = p.size();
-  std::vector<double> p_r;
-  for (int i = 0; i < d; i++) {
-    FT sc_prod = 0;
-    /* for now no root normalization takes place */
-    // FT root_norm_sq = 0;
-    // for (int j = 0; j < d; j++)
-    //   root_norm_sq += root_t.coeff(i,j)*root_t.coeff(i,j);
-    // FT root_norm = sqrt()
-    for (int j = 0; j < d; j++) {
-      sc_prod += root_t.coeff(i,j) * p[j];
-    }
-    p_r.push_back(sc_prod);
-  }
-  return Point(p_r);
-}
-
-/** A conversion from Cartesian coordinates to root coordinates in a point range.
- *  The matrix' rows are root vectors (or normal vectors of a simplex in general).
- *  The input point range is rewritten.
- */
-template <class Point_list,
-          class Matrix>
-Point_list root_coordinates_range(Point_list& points, Matrix& root_t)
-{
-  short d = points[0].size();
-  Point_list points_r;
-  for (auto p: points) {
-    points_r.push_back(root_coordinates(p,root_t,d));
-  }
-  return points_r;
-}
-
 /** Current state of the algorithm.
  *  Input: a point cloud 'point_vector'
  *  Output: a reconstruction (a simplicial complex?, a Czech-like complex?)
@@ -248,7 +208,7 @@ int main(int argc, char * const argv[]) {
     }
   point_vector = Point_vector(off_reader.get_point_cloud());
   int N = point_vector.size();
-  short d = point_vector[0].size();
+  unsigned short d = point_vector[0].size();
   // short d = 2;
   std::cout << "Successfully read " << N << " points in dimension " << d << std::endl;
 
@@ -261,7 +221,7 @@ int main(int argc, char * const argv[]) {
   end = clock();
   double time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
   std::cout << "Created Coxeter system object in " << time << " s. \n";
-
+  
   start = clock();
   SPMap sp_map;
   for (auto p_it = point_vector.begin(); p_it != point_vector.end(); ++p_it) {
@@ -303,4 +263,11 @@ int main(int argc, char * const argv[]) {
   end = clock();
   time = static_cast<double>(end - global_start) / CLOCKS_PER_SEC;
   std::cout << "Total time: " << time << " s. \n";
+
+  std::size_t max_dim = 0; 
+  for (auto m: vs_map) {
+    if (m.second.size()-1 > max_dim)
+      max_dim = m.second.size()-1;
+  }
+  std::cout << "Dimension of the complex is " << max_dim << ".\n";
 }

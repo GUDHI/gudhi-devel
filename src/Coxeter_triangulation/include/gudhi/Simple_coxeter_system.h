@@ -13,6 +13,8 @@ class Simple_coxeter_system {
   typedef Eigen::Triplet<FT> Triplet;
   typedef std::vector<int> Alcove_id;
   typedef Alcove_id Vertex_id;
+  typedef std::vector<std::pair<int,int>> Change_range;
+  typedef std::vector<Change_range> Local_changes;
   
   class wrong_family : public std::exception {  
   } wrong_family_exception_;
@@ -22,6 +24,7 @@ public:
   Matrix root_t_;
   char family_;
   unsigned short dimension_;
+  std::vector<Local_changes> positive_root_differences_;
   
   Simple_coxeter_system() {
   }
@@ -46,6 +49,12 @@ public:
       Eigen::SimplicialLLT<Matrix, Eigen::Lower> chol(cartan);
       root_t_ = chol.matrixL();
       // std::cout << "root^t =" << std::endl << root_t_ << std::endl;
+      for (unsigned i = 0; i < d; i++) {
+        positive_root_differences_.emplace_back(Local_changes(1, Change_range()));
+        for (int j = i-1; j >= 0; j--) {
+          positive_root_differences_[i].emplace_back(Change_range(1, std::make_pair(j, 1)));
+        }
+      }
       break;
     }
     default :
