@@ -22,7 +22,11 @@ class Coxeter_system  {
   unsigned short dimension_;
   
 public:
-    
+
+  Coxeter_system()
+    : dimension_(0){
+  }
+  
   Coxeter_system(char family, short dimension)
     : simple_system_range_(1, Simple_coxeter_system(family, dimension)), dimension_(dimension) {
   }
@@ -34,14 +38,19 @@ public:
       dimension_ += scs.dimension();
   }
   
-  void emplace(const Simple_coxeter_system& rhs) {
+  void emplace_back(const Simple_coxeter_system& rhs) {
     simple_system_range_.emplace_back(rhs);
     dimension_ += rhs.dimension();
   }
 
-  void emplace(char family, short dimension) {
+  void emplace_back(char family, short dimension) {
     simple_system_range_.emplace_back(Simple_coxeter_system(family, dimension));
     dimension_ += dimension;
+  }
+
+  void pop_back() {
+    dimension_ -= simple_system_range_.back().dimension();
+    simple_system_range_.pop_back();
   }
   
   /** A conversion from Cartesian coordinates to the coordinates of the alcove containing the point.
