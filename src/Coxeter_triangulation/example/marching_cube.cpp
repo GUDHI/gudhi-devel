@@ -4,7 +4,7 @@
 #include <map>
 
 #include <gudhi/Points_off_io.h>
-#include <gudhi/Ad_simplex.h>
+#include <gudhi/Coxeter_system.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/output_tikz.h>
@@ -105,7 +105,7 @@ void write_coxeter_mesh(Point_vector& W, VSMap& vs_map, Matrix& root_t, std::str
   else
     ofs << "MeshVersionFormatted 1\nDimension 3\n";
   
-  int num_vertices = (d+1)*W.size() + vs_map.size(), num_edges = 0, num_triangles = 0, num_tetrahedra = 0;
+  // int num_vertices = (d+1)*W.size() + vs_map.size(), num_edges = 0, num_triangles = 0, num_tetrahedra = 0;
   // if (d <= 2) {
   //   num_triangles = W.size();
   //   num_edges = W.size()*3;
@@ -118,7 +118,7 @@ void write_coxeter_mesh(Point_vector& W, VSMap& vs_map, Matrix& root_t, std::str
   //   num_vertices += W.size()*4;
   // }
 
-  ofs << "Vertices\n" << num_vertices << "\n";
+  ofs << "Vertices\n" << vs_map.size() << "\n";
 
   W.clear();
   for (auto m: vs_map) {
@@ -151,7 +151,7 @@ void write_coxeter_mesh(Point_vector& W, VSMap& vs_map, Matrix& root_t, std::str
   }
 
   
-  FT p_prop = 0.001;
+  // FT p_prop = 0.001;
   int p_col = 208;
   std::vector<FT> bbox_dimensions = bounding_box_dimensions(W);
   std::cout << bbox_dimensions << "\n";
@@ -169,9 +169,9 @@ void write_coxeter_mesh(Point_vector& W, VSMap& vs_map, Matrix& root_t, std::str
     //   ofs << "108\n";
     // }
   }
-  num_edges = ((d+1)*d/2)*W.size()/2;
-  num_triangles = ((d+1)*d*(d-1)/6)*W.size();
-  num_tetrahedra = W.size();
+  // num_edges = ((d+1)*d/2)*W.size()/2;
+  // num_triangles = ((d+1)*d*(d-1)/6)*W.size();
+  // num_tetrahedra = W.size();
   
   // ofs << "Edges " << num_edges << "\n";
   // for (unsigned i = 0; i < W.size(); i++) {
@@ -262,29 +262,6 @@ Point_list root_coordinates_range(Point_list& points, Matrix& root_t)
   return points_r;
 }
 
-/** A conversion from Cartesian coordinates to the coordinates of the alcove containing the point.
- *  The matrix' rows are simple root vectors.
- */
-template <class Point,
-          class Matrix>
-Simplex_id alcove_coordinates(Point& p, Matrix& root_t)
-{
-  short d = p.size();
-  Simplex_id s_id(1,1);
-  Eigen::VectorXd p_vect(d);
-  for (short i = 0; i < d; i++)
-    p_vect(i) = p[i];
-  Eigen::VectorXd scalprod_vect = root_t * p_vect;
-  for (short i = 0; i < d; i++) {
-    FT root_scalprod = 0;
-    for (short j = i; j >= 0; j--) {
-      root_scalprod += scalprod_vect(j);
-      s_id.push_back(std::floor(root_scalprod));
-    }
-  }
-  return s_id;
-}
-
 /** Add the vertices of the given simplex to a vertex-simplex map.
  * The size of si_it->first is d*(d+1)/2.
  */
@@ -369,33 +346,20 @@ int main(int argc, char * const argv[]) {
 
   // The A root vectors, computed as a matrix
 
-  std::vector<Triplet> cartan_triplets;
-  cartan_triplets.reserve(3*d-2);
-  for (int i = 0; i < d; i++) {
-    cartan_triplets.push_back(Triplet(i,i,2.0));
-  }
-  for (int i = 1; i < d; i++) {
-    cartan_triplets.push_back(Triplet(i-1,i,-1.0));
-    cartan_triplets.push_back(Triplet(i,i-1,-1.0));
-  }
-  Matrix cartan(d,d);
-  cartan.setFromTriplets(cartan_triplets.begin(), cartan_triplets.end());
-  std::cout << "cartan =" << std::endl << cartan << std::endl;
+  Coxeter_system cs('A', d-1);
+  cs.emplace('A', 1);
 
-  Eigen::SimplicialLLT<Matrix, Eigen::Lower> chol(cartan);
-  Matrix root_t = chol.matrixL();
-  std::cout << "root^t =" << std::endl << root_t << std::endl;
-    
+  Matrix root_t;// = cs.root_t_;
   // Point_vector rc_point_vector = root_coordinates_range(point_vector, root_t);
 
   // The first fill of a map: simplex coordinates -> points
   std::cout << "Point cartesian coordinates: " << point_vector[0] << std::endl
-            << "Simple root root coordinates: " << root_coordinates(point_vector[0], root_t, d) << std::endl
-            << "Alcove coordinates: " << alcove_coordinates(point_vector[0], root_t) << std::endl;
+    // << "Simple root root coordinates: " << root_coordinates(point_vector[0], root_t, d) << std::endl
+            << "Alcove coordinates: " << cs.alcove_coordinates(point_vector[0], 1) << std::endl;
   // std::cout << std::endl;
   SPMap sp_map;
   for (auto p_it = point_vector.begin(); p_it != point_vector.end(); ++p_it) {
-    Simplex_id s_id = alcove_coordinates(*p_it, root_t); 
+    Simplex_id s_id = cs.alcove_coordinates(*p_it, 1); 
     auto find_it = sp_map.find(s_id);
     if (find_it == sp_map.end())
       sp_map.emplace(s_id, Pointer_range(1, p_it));
