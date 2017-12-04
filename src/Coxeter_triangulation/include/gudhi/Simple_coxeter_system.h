@@ -42,10 +42,10 @@ public:
       }
       Matrix cartan(d,d);
       cartan.setFromTriplets(cartan_triplets.begin(), cartan_triplets.end());
-      std::cout << "cartan =" << std::endl << cartan << std::endl;
+      // std::cout << "cartan =" << std::endl << cartan << std::endl;
       Eigen::SimplicialLLT<Matrix, Eigen::Lower> chol(cartan);
       root_t_ = chol.matrixL();
-      std::cout << "root^t =" << std::endl << root_t_ << std::endl;
+      // std::cout << "root^t =" << std::endl << root_t_ << std::endl;
       break;
     }
     default :

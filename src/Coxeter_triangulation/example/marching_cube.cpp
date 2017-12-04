@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <ctime>
 
 #include <gudhi/Points_off_io.h>
 #include <gudhi/Coxeter_system.h>
@@ -253,17 +254,16 @@ int main(int argc, char * const argv[]) {
 
   // The A root vectors, computed as a matrix
 
+  clock_t start, end, global_start;
+  global_start = clock();
+  start = clock();
   Coxeter_system cs('A', d-1);
   cs.emplace('A', 1);
+  end = clock();
+  double time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+  std::cout << "Created Coxeter system object in " << time << " s. \n";
 
-  Matrix root_t;// = cs.root_t_;
-  // Point_vector rc_point_vector = root_coordinates_range(point_vector, root_t);
-
-  // The first fill of a map: simplex coordinates -> points
-  std::cout << "Point cartesian coordinates: " << point_vector[0] << std::endl
-    // << "Simple root root coordinates: " << root_coordinates(point_vector[0], root_t, d) << std::endl
-            << "Alcove coordinates: " << cs.alcove_coordinates(point_vector[0], 1) << std::endl;
-  // std::cout << std::endl;
+  start = clock();
   SPMap sp_map;
   for (auto p_it = point_vector.begin(); p_it != point_vector.end(); ++p_it) {
     Simplex_id s_id = cs.alcove_coordinates(*p_it, 1); 
@@ -273,28 +273,21 @@ int main(int argc, char * const argv[]) {
     else
       find_it->second.push_back(p_it);
   }
-  // std::cout << "SPMap composition:\n";
-  // for (auto m: sp_map) {
-  //   std::cout << m.first << ": " << m.second.size() << " elements.\n";
-  // }
+  end = clock();
+  time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+  std::cout << "Computed alcove coordinate map in " << time << " s. \n";
 
-  // // small test
-  // Simplex_id p1 = {4,12,10,-8};
-  // std::cout << "Non-reduced: " << p1 << ", reduced: " << reduced_id(p1) << ".\n";
-
+  start = clock();
   SiMap si_map;
   int si_index = 0;
   for (auto m_it = sp_map.begin(); m_it != sp_map.end(); ++m_it, si_index++)
     si_map.emplace(m_it, si_index);
+  end = clock();
+  time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+  std::cout << "Computed alcove index  map in " << time << " s. \n";
 
-  std::cout << "SIMap composition:\n";
-  for (auto m: si_map) {
-    std::cout << m.first->first << ": index " << m.second << ".\n";
-  }
-  
-  // map : vertex coordinates -> simplex coordinates
+  start = clock();
   VSMap vs_map;
-  // add_vertices_to_map(si_map.begin(), vs_map);
   for (auto si_it = si_map.begin(); si_it != si_map.end(); ++si_it) {
     std::vector<Vertex_id> vertices = cs.vertices_of_alcove(si_it->first->first);
     for (Vertex_id v: vertices) {
@@ -305,24 +298,10 @@ int main(int argc, char * const argv[]) {
         find_it->second.push_back(si_it->second);    
     }
   }
-  std::cout << "VSMap composition:\n";
-  for (auto m: vs_map) {
-    std::cout << m.first << ": " << m.second << ".\n";
-  }
-
-  // simplex tree construction
-  // Simplex_tree st;
-  // for (auto m: vs_map) {
-  //   st.insert_simplex_and_subfaces(m.second, m.first[0]);
-  // }
-  // std::cout << st;
-
-  // Persistent_cohomology pcoh(st);
-  // // initializes the coefficient field for homology
-  // pcoh.init_coefficients(11);
-
-  // pcoh.compute_persistent_cohomology(-0.1);
-  // pcoh.output_diagram();
-
-  // write_coxeter_mesh(point_vector, vs_map, root_t, "coxeter.mesh");
+  end = clock();
+  time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+  std::cout << "Computed vertex alcove map in " << time << " s. \n";
+  end = clock();
+  time = static_cast<double>(end - global_start) / CLOCKS_PER_SEC;
+  std::cout << "Total time: " << time << " s. \n";
 }
