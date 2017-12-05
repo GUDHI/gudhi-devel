@@ -131,6 +131,20 @@ public:
     rec_combine_chunks(chunks.begin(), vertices, v_id);
     return vertices;
   }
+
+  bool is_adjacent(const Vertex_id& v_id, const Alcove_id& a_id) const {
+    int i = 1, j = 1;
+    for (auto scs: simple_system_range_) {
+      if (!scs.is_adjacent(Vertex_id(v_id.begin() + i,
+                                     v_id.begin() + (i + scs.dimension())),
+                           Alcove_id(a_id.begin() + j,
+                                     a_id.begin() + (j + scs.pos_root_count()))))
+        return false;
+      i += scs.dimension();
+      j += scs.pos_root_count();
+    }
+    return true;
+  }
   
 };
 

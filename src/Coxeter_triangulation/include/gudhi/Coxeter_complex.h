@@ -20,8 +20,8 @@ class Coxeter_complex {
   
 public:
   
-  using Simplex_id = std::vector<int>;
-  using Vertex_id = Simplex_id;    
+  using Alcove_id = std::vector<int>;
+  using Vertex_id = Alcove_id;    
 
   using Index_range = std::vector<std::size_t>;
   using Vertex_map = std::map<Vertex_id, Index_range>;
@@ -29,7 +29,7 @@ public:
   using Point_pointers = std::vector<typename Point_range::const_iterator>;
   using Vertex_pointers = std::vector<typename Vertex_map::iterator>;
   using Alcove = std::tuple<std::size_t, Point_pointers, Vertex_pointers>;
-  using Alcove_map = std::map<Simplex_id, Alcove>;
+  using Alcove_map = std::map<Alcove_id, Alcove>;
   
   const Point_range& point_vector_;
   const Coxeter_system& cs_;
@@ -40,7 +40,6 @@ public:
   
   template <class AMap_iterator>
   void subdivide_alcove(AMap_iterator a_it) {
-    // remove from vertices
     for (auto v_it: std::get<2>(a_it->second)) {
       auto find_it = std::find(v_it->second.begin(), v_it->second.end(), std::get<0>(a_it->second));
       v_it->second.erase(find_it);
@@ -48,7 +47,7 @@ public:
         v_map.erase(v_it);
     }
     for (auto p_it: std::get<1>(a_it->second)) {
-      Simplex_id s_id = cs_.alcove_coordinates(*p_it, 2 * a_it->first[0]); 
+      Alcove_id s_id = cs_.alcove_coordinates(*p_it, 2 * a_it->first[0]); 
       auto new_a_it = a_map.find(s_id);
       if (new_a_it == a_map.end()) {
         auto success_pair = a_map.emplace(s_id, std::make_tuple(max_id++, Point_pointers(1, p_it), Vertex_pointers()));
@@ -62,6 +61,17 @@ public:
         if (new_v_it == v_map.end()) {
           auto success_pair = v_map.emplace(v, Index_range(1, std::get<0>(new_a_it->second)));
           new_v_it = success_pair.first;
+          // add the coarser alcoves to the adjacency of the new vertex on the new level
+          if (v[0] == new_a_it->first[0]) {
+            auto a_it = a_map.begin();
+            while (a_it != a_map.end() && a_it->first[0] < new_a_it->first[0]) {
+              if (cs_.is_adjacent(new_v_it->first, a_it->first)) {
+                std::get<2>(a_it->second).push_back(new_v_it);
+                new_v_it->second.push_back(std::get<0>(a_it->second));
+              }
+              a_it++;
+            }
+          }
         }
         else
           new_v_it->second.push_back(std::get<0>(new_a_it->second));
@@ -78,7 +88,7 @@ public:
     global_start = clock();
     start = clock();
     for (auto p_it = point_vector.begin(); p_it != point_vector.end(); ++p_it) {
-      Simplex_id s_id = cs.alcove_coordinates(*p_it, 1); 
+      Alcove_id s_id = cs.alcove_coordinates(*p_it, 1); 
       auto a_it = a_map.find(s_id);
       if (a_it == a_map.end())
         a_map.emplace(s_id, std::make_tuple(max_id++, Point_pointers(1, p_it), Vertex_pointers()));

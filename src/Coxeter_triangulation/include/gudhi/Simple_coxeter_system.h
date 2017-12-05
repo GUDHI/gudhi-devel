@@ -167,6 +167,25 @@ public:
     rec_vertices_of_simplex(v_id, ai_id.begin()+1, d, vertices);
     return vertices;
   }
+
+  /** Check if the given simplex and vertex are adjacent.
+   */
+  bool is_adjacent(const Vertex_id& v_id, const Alcove_id& a_id) const {
+    auto alcove_it = a_id.begin()+1;
+    for (unsigned i = 1; i < v_id.size(); ++i) {
+      int sum = 0; 
+      for (unsigned j = i; j >= 1; ++j) {
+        sum += v_id[i];
+        double
+          v_plane = ((double)sum)/v_id[0],
+          a_plane = ((double)*alcove_it++)/a_id[0];
+        if (v_plane < a_plane || v_plane > a_plane + 1)
+          return false;
+      }
+    }
+    return true;
+  }
+
   
 };
 
