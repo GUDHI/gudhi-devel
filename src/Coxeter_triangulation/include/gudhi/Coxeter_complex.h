@@ -143,7 +143,7 @@ public:
     bool subdivision_needed = true;
     int current_level = 1;
     while (subdivision_needed) {
-      std::cout << "Subdivision level " << current_level << std::endl;
+      std::cout << "Subdivision level " << 2*current_level << std::endl;
       subdivision_needed = false;
       auto a_it = a_map.begin();
       while (a_it != a_map.end() && a_it->first[0] == current_level) {

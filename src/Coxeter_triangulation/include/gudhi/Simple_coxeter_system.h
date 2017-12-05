@@ -174,8 +174,8 @@ public:
     auto alcove_it = a_id.begin()+1;
     for (unsigned i = 1; i < v_id.size(); ++i) {
       int sum = 0; 
-      for (unsigned j = i; j >= 1; ++j) {
-        sum += v_id[i];
+      for (unsigned j = i; j >= 1; --j) {
+        sum += v_id[j];
         double
           v_plane = ((double)sum)/v_id[0],
           a_plane = ((double)*alcove_it++)/a_id[0];

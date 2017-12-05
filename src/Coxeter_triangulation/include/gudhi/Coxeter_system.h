@@ -135,14 +135,15 @@ public:
   bool is_adjacent(const Vertex_id& v_id, const Alcove_id& a_id) const {
     int i = 1, j = 1;
     for (auto scs: simple_system_range_) {
-      if (!scs.is_adjacent(Vertex_id(v_id.begin() + i,
-                                     v_id.begin() + (i + scs.dimension())),
-                           Alcove_id(a_id.begin() + j,
-                                     a_id.begin() + (j + scs.pos_root_count()))))
+      Vertex_id chunk_v(1, v_id[0]);
+      for (unsigned ii = 0; ii < scs.dimension(); i++, ii++)
+        chunk_v.push_back(v_id[i]);
+      Alcove_id chunk_a(1, a_id[0]);
+      for (unsigned jj = 0; jj < scs.pos_root_count(); j++, jj++)
+        chunk_a.push_back(a_id[j]);
+      if (!scs.is_adjacent(chunk_v, chunk_a))
         return false;
-      i += scs.dimension();
-      j += scs.pos_root_count();
-    }
+     }
     return true;
   }
   
