@@ -146,8 +146,8 @@ public:
       std::cout << "Subdivision level " << 2*current_level << std::endl;
       subdivision_needed = false;
       auto a_it = a_map.begin();
-      while (a_it != a_map.end() && a_it->first[0] == current_level) {
-        if (std::get<1>(a_it->second).size() > 1) {
+      while (a_it != a_map.end() && a_it->first[0] <= current_level) {
+        if (std::get<1>(a_it->second).size() > 2) {
           subdivision_needed = true;
           subdivide_alcove(a_it++);
         }
