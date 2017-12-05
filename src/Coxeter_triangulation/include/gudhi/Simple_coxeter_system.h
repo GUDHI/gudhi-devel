@@ -67,7 +67,7 @@ public:
    */
   template <class Point,
             class OutputIterator>
-  void alcove_coordinates(Point& p, int level, OutputIterator output_it)
+  void alcove_coordinates(const Point& p, int level, OutputIterator output_it) const
   {
     unsigned short d = p.size();
     assert(d == dimension_);

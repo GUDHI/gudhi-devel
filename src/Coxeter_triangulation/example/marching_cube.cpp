@@ -20,6 +20,7 @@ using K = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
 using FT = K::FT;
 using Point_d = K::Point_d;
 using Point_vector = std::vector< Point_d >;
+using Coxeter_complex = Gudhi::Coxeter_complex<Point_vector, Coxeter_system>;
 
 std::vector<FT> bounding_box_dimensions(Point_vector& points) {
   std::vector<FT> lower, upper, difference;
@@ -168,7 +169,7 @@ void rec_test(std::vector<unsigned>& decomposition, Coxeter_system& cs, Point_ve
       }
     }
     std::cout << std::vector<unsigned>(decomposition.begin()+1, decomposition.end()) << std::endl;
-    Test(point_vector, cs);
+    Coxeter_complex(point_vector, cs);
     return;
   }
   unsigned i = decomposition.back();

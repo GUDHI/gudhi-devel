@@ -57,7 +57,7 @@ public:
    *  The matrix' rows are simple root vectors.
    */
   template <class Point>
-  Alcove_id alcove_coordinates(Point& p, int level)
+  Alcove_id alcove_coordinates(const Point& p, int level) const
   {
     Alcove_id a_id(1, level);
     auto p_it = p.begin();
@@ -73,13 +73,13 @@ public:
 
 private:
 
-  int gcd(int a, int b) {
+  int gcd(int a, int b) const {
     return b == 0 ? a : gcd(b, a % b);
   }
 
   /** Common gcd simplification */
   template <class Id>
-  Id reduced_id(Id& id) {
+  Id reduced_id(const Id& id) const {
     int common_gcd = 0;
     for (auto i: id) {
       common_gcd = gcd(i, common_gcd);
@@ -94,7 +94,7 @@ private:
   }
 
   
-  void rec_combine_chunks(std::vector<std::vector<Vertex_id>>::iterator chunks_it, std::vector<Vertex_id>& vertices, Vertex_id& v_id) {
+  void rec_combine_chunks(std::vector<std::vector<Vertex_id>>::iterator chunks_it, std::vector<Vertex_id>& vertices, Vertex_id& v_id) const {
     int k = v_id.size()-1;
     if (k == dimension_) {
       vertices.push_back(reduced_id(v_id));
@@ -110,7 +110,7 @@ private:
 
 public:  
   
-  std::vector<Vertex_id> vertices_of_alcove(const Alcove_id& ai_id)
+  std::vector<Vertex_id> vertices_of_alcove(const Alcove_id& ai_id) const
   {
     std::vector<Vertex_id> vertices;
     std::vector<std::vector<Vertex_id>> chunks;
