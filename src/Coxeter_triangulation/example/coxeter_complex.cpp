@@ -15,6 +15,7 @@ using K = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
 using FT = K::FT;
 using Point_d = K::Point_d;
 using Point_vector = std::vector< Point_d >;
+using Coxeter_complex = Gudhi::Coxeter_complex<Point_vector, Coxeter_system>;
 
 std::vector<FT> bounding_box_dimensions(Point_vector& points) {
   std::vector<FT> lower, upper, difference;
@@ -178,5 +179,5 @@ int main(int argc, char * const argv[]) {
   // The A root vectors, computed as a matrix
 
   Coxeter_system cs('A', d);
-  Test(point_vector, cs);  
+  Coxeter_complex(point_vector, cs);  
 }
