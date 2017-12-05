@@ -524,39 +524,37 @@ class Bitmap_cubical_complex_base {
 
 template <typename T>
 void Bitmap_cubical_complex_base<T>::put_data_to_bins(size_t number_of_bins) {
-  bool bdg = false;
+  bool dbg = false;
 
   std::pair<T, T> min_max = this->min_max_filtration();
   T dx = (min_max.second - min_max.first) / (T)number_of_bins;
 
   // now put the data into the appropriate bins:
   for (size_t i = 0; i != this->data.size(); ++i) {
-    if (bdg) {
+    if (dbg) {
       std::cerr << "Before binning : " << this->data[i] << std::endl;
     }
     this->data[i] = min_max.first + dx * (this->data[i] - min_max.first) / number_of_bins;
-    if (bdg) {
+    if (dbg) {
       std::cerr << "After binning : " << this->data[i] << std::endl;
-      getchar();
     }
   }
 }
 
 template <typename T>
 void Bitmap_cubical_complex_base<T>::put_data_to_bins(T diameter_of_bin) {
-  bool bdg = false;
+  bool dbg = false;
   std::pair<T, T> min_max = this->min_max_filtration();
 
   size_t number_of_bins = (min_max.second - min_max.first) / diameter_of_bin;
   // now put the data into the appropriate bins:
   for (size_t i = 0; i != this->data.size(); ++i) {
-    if (bdg) {
+    if (dbg) {
       std::cerr << "Before binning : " << this->data[i] << std::endl;
     }
     this->data[i] = min_max.first + diameter_of_bin * (this->data[i] - min_max.first) / number_of_bins;
-    if (bdg) {
+    if (dbg) {
       std::cerr << "After binning : " << this->data[i] << std::endl;
-      getchar();
     }
   }
 }
@@ -630,15 +628,17 @@ void Bitmap_cubical_complex_base<T>::read_perseus_style_file(const char* perseus
 
   if (dbg) {
     std::cerr << "dimensionOfData : " << dimensionOfData << std::endl;
-    getchar();
   }
 
   std::vector<unsigned> sizes;
   sizes.reserve(dimensionOfData);
+  // all dimensions multiplied
+  unsigned dimensions = 1;
   for (size_t i = 0; i != dimensionOfData; ++i) {
     unsigned size_in_this_dimension;
     inFiltration >> size_in_this_dimension;
     sizes.push_back(size_in_this_dimension);
+    dimensions *= size_in_this_dimension;
     if (dbg) {
       std::cerr << "size_in_this_dimension : " << size_in_this_dimension << std::endl;
     }
@@ -648,9 +648,11 @@ void Bitmap_cubical_complex_base<T>::read_perseus_style_file(const char* perseus
   Bitmap_cubical_complex_base<T>::Top_dimensional_cells_iterator it(*this);
   it = this->top_dimensional_cells_iterator_begin();
 
-  while (!inFiltration.eof()) {
-    T filtrationLevel;
-    inFiltration >> filtrationLevel;
+  T filtrationLevel;
+  for (size_t i = 0; i < dimensions; ++i) {
+    if (!(inFiltration >> filtrationLevel) || (inFiltration.eof())) {
+      throw std::ios_base::failure("Bad Perseus file format.");
+    }
     if (dbg) {
       std::cerr << "Cell of an index : " << it.compute_index_in_bitmap()
                 << " and dimension: " << this->get_dimension_of_a_cell(it.compute_index_in_bitmap())
@@ -659,6 +661,7 @@ void Bitmap_cubical_complex_base<T>::read_perseus_style_file(const char* perseus
     this->get_cell_data(*it) = filtrationLevel;
     ++it;
   }
+
   inFiltration.close();
   this->impose_lower_star_filtration();
 }
@@ -756,7 +759,6 @@ unsigned Bitmap_cubical_complex_base<T>::get_dimension_of_a_cell(size_t cell) co
       std::cerr << "cell : " << cell << std::endl;
       std::cerr << "position : " << position << std::endl;
       std::cerr << "multipliers[" << i - 1 << "] = " << this->multipliers[i - 1] << std::endl;
-      getchar();
     }
 
     if (position % 2 == 1) {
@@ -800,7 +802,6 @@ void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration() {
       for (size_t i = 0; i != indices_to_consider.size(); ++i) {
         std::cout << indices_to_consider[i] << "  ";
       }
-      getchar();
     }
     std::vector<size_t> new_indices_to_consider;
     for (size_t i = 0; i != indices_to_consider.size(); ++i) {
@@ -810,14 +811,12 @@ void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration() {
           std::cerr << "filtration of a cell : " << bd[boundaryIt] << " is : " << this->data[bd[boundaryIt]]
                     << " while of a cell: " << indices_to_consider[i] << " is: " << this->data[indices_to_consider[i]]
                     << std::endl;
-          getchar();
         }
         if (this->data[bd[boundaryIt]] > this->data[indices_to_consider[i]]) {
           this->data[bd[boundaryIt]] = this->data[indices_to_consider[i]];
           if (dbg) {
             std::cerr << "Setting the value of a cell : " << bd[boundaryIt]
                       << " to : " << this->data[indices_to_consider[i]] << std::endl;
-            getchar();
           }
         }
         if (is_this_cell_considered[bd[boundaryIt]] == false) {
