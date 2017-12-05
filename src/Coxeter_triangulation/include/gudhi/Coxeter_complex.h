@@ -52,31 +52,31 @@ public:
       if (new_a_it == a_map.end()) {
         auto success_pair = a_map.emplace(s_id, std::make_tuple(max_id++, Point_pointers(1, p_it), Vertex_pointers()));
         new_a_it = success_pair.first;
-      }
-      else
-        std::get<1>(new_a_it->second).push_back(p_it);
-      std::vector<Vertex_id> vertices = cs_.vertices_of_alcove(s_id);
-      for (Vertex_id v: vertices) {
-        auto new_v_it = v_map.find(v);
-        if (new_v_it == v_map.end()) {
-          auto success_pair = v_map.emplace(v, Index_range(1, std::get<0>(new_a_it->second)));
-          new_v_it = success_pair.first;
-          // add the coarser alcoves to the adjacency of the new vertex on the new level
-          if (v[0] == new_a_it->first[0]) {
-            auto a_it = a_map.begin();
-            while (a_it != a_map.end() && a_it->first[0] < new_a_it->first[0]) {
-              if (cs_.is_adjacent(new_v_it->first, a_it->first)) {
-                std::get<2>(a_it->second).push_back(new_v_it);
-                new_v_it->second.push_back(std::get<0>(a_it->second));
+        std::vector<Vertex_id> vertices = cs_.vertices_of_alcove(s_id);
+        for (Vertex_id v: vertices) {
+          auto new_v_it = v_map.find(v);
+          if (new_v_it == v_map.end()) {
+            auto success_pair = v_map.emplace(v, Index_range(1, std::get<0>(new_a_it->second)));
+            new_v_it = success_pair.first;
+            // add the coarser alcoves to the adjacency of the new vertex on the new level
+            if (v[0] == new_a_it->first[0]) {
+              auto m_it = a_map.begin();
+              while (m_it != a_map.end() && m_it->first[0] < new_a_it->first[0]) {
+                if (cs_.is_adjacent(new_v_it->first, m_it->first)) {
+                  std::get<2>(m_it->second).push_back(new_v_it);
+                  new_v_it->second.push_back(std::get<0>(m_it->second));
+                }
+                m_it++;
               }
-              a_it++;
             }
           }
+          else
+            new_v_it->second.push_back(std::get<0>(new_a_it->second));
+          std::get<2>(new_a_it->second).push_back(new_v_it);
         }
-        else
-          new_v_it->second.push_back(std::get<0>(new_a_it->second));
-        std::get<2>(new_a_it->second).push_back(new_v_it);
       }
+      else
+        std::get<1>(new_a_it->second).push_back(p_it);      
     }
     a_map.erase(a_it);
   }
