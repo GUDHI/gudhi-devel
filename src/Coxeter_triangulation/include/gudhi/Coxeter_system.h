@@ -74,7 +74,7 @@ public:
 private:
 
   int gcd(int a, int b) const {
-    return b == 0 ? a : gcd(b, a % b);
+    return b == 0 ? std::abs(a) : gcd(b, a % b);
   }
 
   /** Common gcd simplification */

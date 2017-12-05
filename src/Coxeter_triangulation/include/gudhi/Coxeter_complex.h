@@ -9,6 +9,9 @@
 #include <utility>
 #include <CGAL/Epick_d.h>
 
+#include "../../example/cxx-prettyprint/prettyprint.hpp"
+
+
 namespace Gudhi {
 
 template <class Point_range,
@@ -36,7 +39,7 @@ public:
   std::size_t max_id;
   
   template <class AMap_iterator>
-  void subdivide_cell(AMap_iterator a_it) {
+  void subdivide_alcove(AMap_iterator a_it) {
     // remove from vertices
     for (auto v_it: std::get<2>(a_it->second)) {
       auto find_it = std::find(v_it->second.begin(), v_it->second.end(), std::get<0>(a_it->second));
@@ -45,7 +48,7 @@ public:
         v_map.erase(v_it);
     }
     for (auto p_it: std::get<1>(a_it->second)) {
-      Simplex_id s_id = cs_.alcove_coordinates(*p_it, a_it->first[0]); 
+      Simplex_id s_id = cs_.alcove_coordinates(*p_it, 2 * a_it->first[0]); 
       auto new_a_it = a_map.find(s_id);
       if (new_a_it == a_map.end()) {
         auto success_pair = a_map.emplace(s_id, std::make_tuple(max_id++, Point_pointers(1, p_it), Vertex_pointers()));
@@ -112,9 +115,50 @@ public:
       if (m.second.size()-1 > max_dim)
         max_dim = m.second.size()-1;
     }
-    std::cout << "Dimension of the complex is " << max_dim << ".\n";    
-  }
+    std::cout << "Dimension of the complex is " << max_dim << ".\n\n";    
 
+    // subdivision part
+    
+    std::cout << "AMap:\n";
+    for (auto m: a_map) 
+      std::cout << m.first << ": " << std::get<0>(m.second) << ", "
+                << "size=" << std::get<1>(m.second).size() << std::endl;    
+    std::cout << "\n";
+    
+    std::cout << "VMap:\n";
+    for (auto m: v_map) 
+      std::cout << m.first << ": " << m.second << std::endl;
+    std::cout << "\n";
+    
+    bool subdivision_needed = true;
+    int current_level = 1;
+    while (subdivision_needed) {
+      std::cout << "Subdivision level " << current_level << std::endl;
+      subdivision_needed = false;
+      auto a_it = a_map.begin();
+      while (a_it != a_map.end() && a_it->first[0] == current_level) {
+        if (std::get<1>(a_it->second).size() > 1) {
+          subdivision_needed = true;
+          subdivide_alcove(a_it++);
+        }
+        else
+          a_it++;
+      }
+      current_level *= 2;
+      std::cout << "AMap:\n";
+      for (auto m: a_map) 
+        std::cout << m.first << ": " << std::get<0>(m.second) << ", "
+                  << "size=" << std::get<1>(m.second).size() << std::endl;    
+      std::cout << "\n";
+    
+      std::cout << "VMap:\n";
+      for (auto m: v_map) 
+        std::cout << m.first << ": " << m.second << std::endl;
+      std::cout << "\n";
+
+    }
+  }
+ 
 };
 
 }
