@@ -854,7 +854,8 @@ IMAGE_PATH             = doc/Skeleton_blocker/ \
 	doc/Tangential_complex/ \
 	doc/Bottleneck_distance/ \
 	doc/Nerve_GIC/ \
-        doc/Persistence_representations/
+        doc/Persistence_representations/ \
+        doc/Kernels/
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should
 # invoke to filter for each input file. Doxygen will invoke the filter program
