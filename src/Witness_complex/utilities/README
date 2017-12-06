@@ -1,11 +1,13 @@
 # Witness_complex #
 
+For more details about the witness complex, please read the [user manual of the package](http://gudhi.gforge.inria.fr/doc/latest/group__witness__complex.html).
+
 ## `weak_witness_persistence` ##
 This program computes the persistent homology with coefficient field *Z/pZ* of a Weak witness complex defined on a set of input points. The output diagram contains one bar per line, written with the convention:
 
-`p dim b d`
+`p dim birth death`
 
-where `dim` is the dimension of the homological feature, `b` and `d` are respectively the birth and death of the feature, and `p` is the characteristic of the field *Z/pZ* used for homology coefficients.
+where `dim` is the dimension of the homological feature, `birth` and `death` are respectively the birth and death of the feature, and `p` is the characteristic of the field *Z/pZ* used for homology coefficients.
 
 *Usage*
 `weak_witness_persistence [options] <OFF input file>`
@@ -39,9 +41,9 @@ N.B.: output is random as the 20 landmarks are chosen randomly.
 ## `strong_witness_persistence` ##
 This program computes the persistent homology with coefficient field *Z/pZ* of a Strong witness complex defined on a set of input points. The output diagram contains one bar per line, written with the convention:
 
-`p dim b d`
+`p dim birth death`
 
-where `dim` is the dimension of the homological feature, `b` and `d` are respectively the birth and death of the feature, and `p` is the characteristic of the field *Z/pZ* used for homology coefficients.
+where `dim` is the dimension of the homological feature, `birth` and `death` are respectively the birth and death of the feature, and `p` is the characteristic of the field *Z/pZ* used for homology coefficients.
 
 *Usage*
 `strong_witness_persistence [options] <OFF input file>`

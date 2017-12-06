@@ -3,14 +3,17 @@
 ## `alpha_complex_3d_persistence` ##
 This program computes the persistent homology with coefficient field Z/pZ of the 3D alpha complex built from a 3D point cloud. The output diagram contains one bar per line, written with the convention:
 
-`p dim b d`
+`p dim birth death`
 
-where `dim` is the dimension of the homological feature, `b` and `d` are respectively the birth and death of the feature, and `p` is the characteristic of the field *Z/pZ* used for homology coefficients (`p` must be a prime number).
+where `dim` is the dimension of the homological feature, `birth` and `death` are respectively the birth and death of the feature, and `p` is the characteristic of the field *Z/pZ* used for homology coefficients (`p` must be a prime number).
 
 **Usage**
-`alpha_complex_3d_persistence [options] <OFF input file>`
+`alpha_complex_3d_persistence [options] <input OFF file>`
+where
+`<input OFF file>` is the path to the input point cloud in [nOFF ASCII format](http://www.geomview.org/docs/html/OFF.html).
 
 **Allowed options**
+
 * `-h [ --help ]` Produce help message
 * `-o [ --output-file ]` Name of file in which the persistence diagram is written. Default print in standard output.
 * `-p [ --field-charac ]` (default=11) Characteristic p of the coefficient field Z/pZ for computing homology.
@@ -50,9 +53,13 @@ Same as `alpha_complex_3d_persistence`, but using exact computation. It is slowe
 Same as `alpha_complex_3d_persistence`, but using weighted points.
 
 **Usage**
-`weighted_alpha_complex_3d_persistence [options] <OFF input file> <weights input file>`
+`weighted_alpha_complex_3d_persistence [options] <input OFF file> <weights input file>`
+where
+`<input OFF file>` is the path to the input point cloud in [nOFF ASCII format](http://www.geomview.org/docs/html/OFF.html).
+`<input weights file>` is the path to the file containing the weights of the points (one value per line).
 
 **Allowed options**
+
 * `-h [ --help ]` Produce help message
 * `-o [ --output-file ]` Name of file in which the persistence diagram is written. Default print in standard output.
 * `-p [ --field-charac ]` (default=11) Characteristic p of the coefficient field Z/pZ for computing homology.
@@ -78,19 +85,16 @@ and [Regular triangulation](https://doc.cgal.org/latest/Triangulation_3/index.ht
 
 ## `periodic_alpha_complex_3d_persistence` ##
 Same as `alpha_complex_3d_persistence`, but using periodic alpha shape 3d.
+Refer to the [CGAL's 3D Periodic Triangulations User Manual](https://doc.cgal.org/latest/Periodic_3_triangulation_3/index.html) for more details.
 
 **Usage**
-`periodic_alpha_complex_3d_persistence <input OFF file> <cuboid file> <p> <min_persistence>`
+`periodic_alpha_complex_3d_persistence [options] <input OFF file> <cuboid file>`
 where
-`<input OFF file>` is the path to the input point cloud in OFF format.
+`<input OFF file>` is the path to the input point cloud in [nOFF ASCII format](http://www.geomview.org/docs/html/OFF.html).
 `<cuboid file>` is the path to the file describing the periodic domain. It must be in the format described [here](http://gudhi.gforge.inria.fr/doc/latest/fileformats.html#FileFormatsIsoCuboid).
-`<p>` is the characteristic p of the coefficient field *Z/pZ* for computing homology. It must be a stricly positive integer.
-`<min_persistence>` is the minimal lifetime of homology feature to be recorded. Enter a negative value to see zero length intervals.
-
-**Usage**
-`./periodic_alpha_complex_3d_persistence [options] input-file cuboid-file`
 
 **Allowed options**
+
 * `-h [ --help ]` Produce help message
 * `-o [ --output-file ]` Name of file in which the persistence diagram is written. Default print in standard output.
 * `-p [ --field-charac ]` (default=11) Characteristic p of the coefficient field Z/pZ for computing homology.
@@ -132,12 +136,14 @@ N.B.:
 ## `alpha_complex_persistence` ##
 This program computes the persistent homology with coefficient field Z/pZ of the dD alpha complex built from a dD point cloud. The output diagram contains one bar per line, written with the convention:
 
-`p dim b d`
+`p dim birth death`
 
-where `dim` is the dimension of the homological feature, `b` and `d` are respectively the birth and death of the feature, and `p` is the characteristic of the field *Z/pZ* used for homology coefficients (`p` must be a prime number).
+where `dim` is the dimension of the homological feature, `birth` and `death` are respectively the birth and death of the feature, and `p` is the characteristic of the field *Z/pZ* used for homology coefficients (`p` must be a prime number).
 
 **Usage**
-`alpha_complex_persistence [options] <OFF input file>`
+`alpha_complex_persistence [options] <input OFF file>`
+where
+`<input OFF file>` is the path to the input point cloud in [nOFF ASCII format](http://www.geomview.org/docs/html/OFF.html).
 
 **Allowed options**
 
@@ -167,6 +173,5 @@ Betti numbers[1] = 2
 Betti numbers[2] = 1
 ```
 
-N.B.: 
-* `alpha_complex_persistence` only accepts OFF files in dimension d.
+N.B.:
 * Filtration values are alpha square values.
