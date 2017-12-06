@@ -26,6 +26,7 @@
 #include <cmath>  // for std::sqrt
 #include <type_traits>  // for std::decay
 #include <iterator>  // for std::begin, std::end
+#include <utility>
 
 namespace Gudhi {
 
@@ -47,6 +48,10 @@ class Euclidean_distance {
       dist += tmp*tmp;
     }
     return std::sqrt(dist);
+  }
+  template< typename T >
+  T operator() (const std::pair< T, T >& f, const std::pair< T, T >& s) {
+    return  sqrt((f.first-s.first)*(f.first-s.first) + (f.second-s.second)*(f.second-s.second));
   }
 };
 

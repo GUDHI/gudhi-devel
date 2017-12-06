@@ -170,6 +170,7 @@
 </table>
  
  \section Toolbox Toolbox
+ 
  \subsection BottleneckDistanceToolbox Bottleneck distance
  \image html "perturb_pd.png" "Bottleneck distance is the length of the longest edge"
 <table border="0">
@@ -229,7 +230,25 @@
     <b>User manual:</b> \ref persistent_cohomology - <b>Reference manual:</b> Gudhi::persistent_cohomology::Persistent_cohomology
     </td>
  </tr>
+</table> 
+ \subsection PersistenceRepresentationsToolbox Persistence representations
+ \image html "average_landscape.png" "Persistence representations"
+<table border="0">
+  <tr>
+    <td width="25%">
+      <b>Author:</b> Pawel Dlotko<br>
+      <b>Introduced in:</b> GUDHI 2.1.0<br>
+      <b>Copyright:</b> GPL v3<br>      
+    </td>
+    <td width="75%">
+    It contains implementation of various representations of persistence diagrams; diagrams themselves, persistence
+    landscapes (rigorous and grid version), persistence heath maps, vectors and others. It implements basic
+    functionalities which are neccessary to use persistence in statistics and machine learning.<br>
+    <b>User manual:</b> \ref Persistence_representations
+    </td>
+ </tr>
 </table>
+ 
 */
 
 /*! \page installation GUDHI installation
@@ -532,4 +551,4 @@ make doxygen
  * @example Witness_complex/weak_witness_persistence.cpp
  * @example Witness_complex/strong_witness_persistence.cpp
  */
-
+ 
