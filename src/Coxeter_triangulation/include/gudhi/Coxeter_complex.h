@@ -129,44 +129,44 @@ public:
 
     // subdivision part
     
-    std::cout << "AMap:\n";
-    for (auto m: a_map) 
-      std::cout << m.first << ": " << std::get<0>(m.second) << ", "
-                << "size=" << std::get<1>(m.second).size() << std::endl;    
-    std::cout << "\n";
+    // std::cout << "AMap:\n";
+    // for (auto m: a_map) 
+    //   std::cout << m.first << ": " << std::get<0>(m.second) << ", "
+    //             << "size=" << std::get<1>(m.second).size() << std::endl;    
+    // std::cout << "\n";
     
-    std::cout << "VMap:\n";
-    for (auto m: v_map) 
-      std::cout << m.first << ": " << m.second << std::endl;
-    std::cout << "\n";
+    // std::cout << "VMap:\n";
+    // for (auto m: v_map) 
+    //   std::cout << m.first << ": " << m.second << std::endl;
+    // std::cout << "\n";
     
-    bool subdivision_needed = true;
-    int current_level = 1;
-    while (subdivision_needed) {
-      std::cout << "Subdivision level " << 2*current_level << std::endl;
-      subdivision_needed = false;
-      auto a_it = a_map.begin();
-      while (a_it != a_map.end() && a_it->first[0] <= current_level) {
-        if (std::get<1>(a_it->second).size() > 2) {
-          subdivision_needed = true;
-          subdivide_alcove(a_it++);
-        }
-        else
-          a_it++;
-      }
-      current_level *= 2;
-      std::cout << "AMap:\n";
-      for (auto m: a_map) 
-        std::cout << m.first << ": " << std::get<0>(m.second) << ", "
-                  << "size=" << std::get<1>(m.second).size() << std::endl;    
-      std::cout << "\n";
+    // bool subdivision_needed = true;
+    // int current_level = 1;
+    // while (subdivision_needed) {
+    //   std::cout << "Subdivision level " << 2*current_level << std::endl;
+    //   subdivision_needed = false;
+    //   auto a_it = a_map.begin();
+    //   while (a_it != a_map.end() && a_it->first[0] <= current_level) {
+    //     if (std::get<1>(a_it->second).size() > 2) {
+    //       subdivision_needed = true;
+    //       subdivide_alcove(a_it++);
+    //     }
+    //     else
+    //       a_it++;
+    //   }
+    //   current_level *= 2;
+    //   std::cout << "AMap:\n";
+    //   for (auto m: a_map) 
+    //     std::cout << m.first << ": " << std::get<0>(m.second) << ", "
+    //               << "size=" << std::get<1>(m.second).size() << std::endl;    
+    //   std::cout << "\n";
     
-      std::cout << "VMap:\n";
-      for (auto m: v_map) 
-        std::cout << m.first << ": " << m.second << std::endl;
-      std::cout << "\n";
+    //   std::cout << "VMap:\n";
+    //   for (auto m: v_map) 
+    //     std::cout << m.first << ": " << m.second << std::endl;
+    //   std::cout << "\n";
 
-    }
+    // }
   }
  
 };

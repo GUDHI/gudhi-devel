@@ -50,11 +50,32 @@ public:
       // std::cout << "root^t =" << std::endl << root_t_ << std::endl;
       break;
     }
+    case 'D': {
+      unsigned short d = dimension;
+      assert(d >= 4);
+      std::vector<Triplet> cartan_triplets;
+      cartan_triplets.reserve(3*d-2);
+      for (unsigned i = 0; i < d; i++) {
+        cartan_triplets.push_back(Triplet(i,i,2.0));
+      }
+      for (int i = 0; i < d-1; i++) {
+        cartan_triplets.push_back(Triplet(i-1,i,-1.0));
+        cartan_triplets.push_back(Triplet(i,i-1,-1.0));
+      }
+      cartan_triplets.push_back(Triplet(d-1,d-3,-1.0));
+      cartan_triplets.push_back(Triplet(d-3,d-1,-1.0));
+      Matrix cartan(d,d);
+      cartan.setFromTriplets(cartan_triplets.begin(), cartan_triplets.end());
+      // std::cout << "cartan =" << std::endl << cartan << std::endl;
+      Eigen::SimplicialLLT<Matrix, Eigen::Lower> chol(cartan);
+      root_t_ = chol.matrixL();
+      // std::cout << "root^t =" << std::endl << root_t_ << std::endl;
+      break;
+    }  
     default :
       std::cerr << "Simple_coxeter_system : The family " << family << " is not supported. "
-                << "Please use A family for the constructor (in capital).\n";
+                << "Please use A or D family for the constructor (in capital).\n";
       throw wrong_family_exception_;
-      break;
     }
   }
 
@@ -69,23 +90,66 @@ public:
             class OutputIterator>
   void alcove_coordinates(const Point& p, int level, OutputIterator output_it) const
   {
-    unsigned short d = p.size();
-    assert(d == dimension_);
-    Eigen::VectorXd p_vect(d);
-    for (short i = 0; i < d; i++)
-      p_vect(i) = p[i];
-    Eigen::VectorXd scalprod_vect = root_t_ * p_vect;
-    for (short i = 0; i < d; i++) {
-      FT root_scalprod = 0;
-      for (short j = i; j >= 0; j--) {
-        root_scalprod += scalprod_vect(j);
-       *output_it++ = std::floor(level * root_scalprod);
+    switch (family_) {
+    case 'A': {
+      unsigned short d = p.size();
+      assert(d == dimension_);
+      Eigen::VectorXd p_vect(d);
+      for (short i = 0; i < d; i++)
+        p_vect(i) = p[i];
+      Eigen::VectorXd scalprod_vect = root_t_ * p_vect;
+      for (short i = 0; i < d; i++) {
+        FT root_scalprod = 0;
+        for (short j = i; j >= 0; j--) {
+          root_scalprod += scalprod_vect(j);
+          *output_it++ = std::floor(level * root_scalprod);
+        }
       }
+      break;
+    }
+    case 'D': {
+      unsigned short d = p.size();
+      assert(d == dimension_);
+      Eigen::VectorXd p_vect(d);
+      for (short i = 0; i < d; i++)
+        p_vect(i) = p[i];
+      Eigen::VectorXd scalprod_vect = root_t_ * p_vect;
+      // e_i - e_j
+      for (short i = 0; i < d-1; i++) {
+        FT root_scalprod = 0;
+        for (short j = i; j >= 0; j--) {
+          root_scalprod += scalprod_vect(j);
+          *output_it++ = std::floor(level * root_scalprod);
+        }
+      }
+      // e_i + e_j
+      FT global_scalprod = -scalprod_vect(d-1) - scalprod_vect(d-2);
+      for (short i = d-1; i >= 0; i--) {
+        global_scalprod += 2*scalprod_vect(i);
+        FT root_scalprod = global_scalprod;
+        for (short j = i-1; j >= 0; j--) {
+          root_scalprod += scalprod_vect(j);
+          *output_it++ = std::floor(level * root_scalprod);
+        }
+      }
+      break;
+    }
+    default :
+      std::cerr << "Simple_coxeter_system::alcove_coordinates : The family " << family_ << " is not supported. "
+                << "Please use A or D family for the constructor (in capital).\n";
+      throw wrong_family_exception_;
     }
   }
 
   unsigned pos_root_count() {
-    return dimension_*(dimension_ + 1)/2 ; 
+    switch (family_) {
+    case 'A': { return dimension_*(dimension_ + 1)/2; break; } 
+    case 'D': { return dimension_*(dimension_ - 1); break; }
+    default :
+      std::cerr << "Simple_coxeter_system::alcove_coordinates : The family " << family_ << " is not supported. "
+                << "Please use A or D family for the constructor (in capital).\n";
+      throw wrong_family_exception_;
+    }
   }
   
 private:  
@@ -110,9 +174,53 @@ private:
     return id_red;
   }
 
+  template <class S_id_iterator>
+  bool valid_coordinate(const Vertex_id& v_id, S_id_iterator& s_it, unsigned d) {
+    unsigned k = v_id.size();
+    switch (family_) {
+    case 'A': {
+      int sum = 0;
+      for (unsigned i = k; i >= 1; i--) {
+        sum += v_id[i];
+        if (sum < *s_it || sum > *s_it + 1)
+          return false;
+        s_it++;
+      }
+      return true;
+    }
+    case 'D': {
+      if (k == d) {
+        int glob_sum = -v_id[d]-v_id[d-1];
+        for (unsigned i = d; i >= 1; i--) {
+          glob_sum += 2*v_id[i];
+          int sum = glob_sum;
+          for (short j = i-1; j >= 1; j--) {
+            sum += v_id[j];
+            if (sum < *s_it || sum > *s_it + 1)
+              return false;
+            s_it++;
+          }
+        }
+        return true;
+      }
+      int sum = 0;
+      for (unsigned i = k; i >= 1; i--) {
+        sum += v_id[i];
+        if (sum < *s_it || sum > *s_it + 1)
+          return false;
+        s_it++;
+      }
+      return true;
+    }
+    default :
+      std::cerr << "Simple_coxeter_system::alcove_coordinates : The family " << family_ << " is not supported. "
+                << "Please use A or D family for the constructor (in capital).\n";
+      throw wrong_family_exception_;
+    }
+    
+  }
   
   /** Add the vertices of the given simplex to a vertex-simplex map.
-   * The size of si_it->first is d*(d+1)/2.
    */
   template <class S_id_iterator>
   void rec_vertices_of_simplex(Vertex_id& v_id, S_id_iterator s_it, unsigned d, std::vector<Vertex_id>& vertices)
@@ -122,32 +230,15 @@ private:
       vertices.emplace_back(v_id);
       return;
     }
-    int simplex_coord = *s_it; s_it++;
-    v_id.push_back(simplex_coord);
-    int sum = simplex_coord;
+    v_id.push_back(*s_it);
     S_id_iterator s_it_copy(s_it);
-    bool valid = true;
-    for (unsigned i = 1; i < k && valid; i++) {
-      sum += v_id[k-i];
-      if (sum < *s_it_copy || sum > *s_it_copy + 1)
-        valid = false;
-      s_it_copy++;
-    }
-    if (valid)
+    if (valid_coordinate(v_id, s_it_copy, d))
       rec_vertices_of_simplex(v_id, s_it_copy, d, vertices);
     v_id.pop_back();
 
-    v_id.push_back(simplex_coord + 1);
-    sum = simplex_coord + 1;
+    v_id.push_back(*s_it + 1);
     s_it_copy = s_it;
-    valid = true;
-    for (unsigned i = 1; i < k && valid; i++) {
-      sum += v_id[k-i];
-      if (sum < *s_it_copy || sum > *s_it_copy + 1)
-        valid = false;
-      s_it_copy++;
-    }
-    if (valid)
+    if (valid_coordinate(v_id, s_it_copy, d))
       rec_vertices_of_simplex(v_id, s_it_copy, d, vertices);
     v_id.pop_back();
   }
