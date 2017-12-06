@@ -594,9 +594,10 @@ void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_top_dimensional_cells
     number_of_top_dimensional_elements *= sizes_in_following_directions[i];
   }
   if (number_of_top_dimensional_elements != top_dimensional_cells.size()) {
-    std::cerr << "Error in constructor Bitmap_cubical_complex_base ( std::vector<std::size_t> sizes_in_following_directions"
-              << ", std::vector<T> top_dimensional_cells ). Number of top dimensional elements that follow from "
-              << "sizes_in_following_directions vector is different than the size of top_dimensional_cells vector."
+    std::cerr << "Error in constructor Bitmap_cubical_complex_base ( std::vector<std::size_t> "
+              << "sizes_in_following_directions, std::vector<T> top_dimensional_cells ). Number of top dimensional "
+              << "elements that follow from sizes_in_following_directions vector is different than the size of "
+              << "top_dimensional_cells vector."
               << std::endl;
     throw(
         "Error in constructor Bitmap_cubical_complex_base( std::vector<std::size_t> sizes_in_following_directions,"
