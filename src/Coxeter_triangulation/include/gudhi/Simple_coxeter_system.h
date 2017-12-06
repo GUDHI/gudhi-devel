@@ -180,7 +180,7 @@ private:
     switch (family_) {
     case 'A': {
       int sum = 0;
-      for (unsigned i = k; i >= 1; i--) {
+      for (unsigned i = k-1; i >= 1; i--) {
         sum += v_id[i];
         if (sum < *s_it || sum > *s_it + 1)
           return false;
@@ -191,7 +191,7 @@ private:
     case 'D': {
       if (k == d) {
         int glob_sum = -v_id[d]-v_id[d-1];
-        for (unsigned i = d; i >= 1; i--) {
+        for (unsigned i = d-1; i >= 1; i--) {
           glob_sum += 2*v_id[i];
           int sum = glob_sum;
           for (short j = i-1; j >= 1; j--) {
@@ -204,7 +204,7 @@ private:
         return true;
       }
       int sum = 0;
-      for (unsigned i = k; i >= 1; i--) {
+      for (unsigned i = k-1; i >= 1; i--) {
         sum += v_id[i];
         if (sum < *s_it || sum > *s_it + 1)
           return false;
