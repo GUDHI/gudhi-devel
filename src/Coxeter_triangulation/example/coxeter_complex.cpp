@@ -178,6 +178,14 @@ int main(int argc, char * const argv[]) {
 
   // The A root vectors, computed as a matrix
 
-  Coxeter_system cs('D', d);
-  Coxeter_complex(point_vector, cs);  
+  // Coxeter_system cs_A('A', d);
+  // Coxeter_complex(point_vector, cs_A);  
+  Coxeter_system cs_B('B', d);
+  Coxeter_complex(point_vector, cs_B);
+  // Coxeter_system cs_C('C', d);
+  // Coxeter_complex(point_vector, cs_C);
+  // Coxeter_system cs_D('D', d);
+  // Coxeter_complex(point_vector, cs_D);  
+
+
 }

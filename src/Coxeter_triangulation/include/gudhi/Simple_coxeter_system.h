@@ -24,6 +24,7 @@ public:
   Matrix root_t_;
   char family_;
   unsigned short dimension_;
+  unsigned short vertex_level_ = 1;
   
   Simple_coxeter_system() {
   }
@@ -33,6 +34,7 @@ public:
     switch (family) {
     case 'A': {
       unsigned short d = dimension;
+      vertex_level_ = 1;
       std::vector<Triplet> cartan_triplets;
       cartan_triplets.reserve(3*d-2);
       for (unsigned i = 0; i < d; i++) {
@@ -50,15 +52,62 @@ public:
       // std::cout << "root^t =" << std::endl << root_t_ << std::endl;
       break;
     }
+    case 'B': {
+      unsigned short d = dimension;
+      vertex_level_ = 2;
+      assert(d >= 2);
+      std::vector<Triplet> cartan_triplets;
+      cartan_triplets.reserve(3*d-2);
+      for (int i = 0; i < d-1; i++) {
+        cartan_triplets.push_back(Triplet(i,i,4.0));
+      }
+      cartan_triplets.push_back(Triplet(d-1,d-1,2.0));
+      for (int i = 1; i < d; i++) {
+        cartan_triplets.push_back(Triplet(i-1,i,-2.0));
+        cartan_triplets.push_back(Triplet(i,i-1,-2.0));
+      }
+      Matrix cartan(d,d);
+      cartan.setFromTriplets(cartan_triplets.begin(), cartan_triplets.end());
+      std::cout << "cartan =" << std::endl << cartan << std::endl;
+      Eigen::SimplicialLLT<Matrix, Eigen::Lower> chol(cartan);
+      root_t_ = chol.matrixL();
+      std::cout << "root^t =" << std::endl << root_t_ << std::endl;
+      break;
+    }  
+    case 'C': {
+      unsigned short d = dimension;
+      vertex_level_ = 2;
+      assert(d >= 2);
+      std::vector<Triplet> cartan_triplets;
+      cartan_triplets.reserve(3*d-2);
+      for (int i = 0; i < d-1; i++) {
+        cartan_triplets.push_back(Triplet(i,i,2.0));
+      }
+      cartan_triplets.push_back(Triplet(d-1,d-1,4.0));
+      for (int i = 1; i < d-1; i++) {
+        cartan_triplets.push_back(Triplet(i-1,i,-1.0));
+        cartan_triplets.push_back(Triplet(i,i-1,-1.0));
+      }
+      cartan_triplets.push_back(Triplet(d-1,d-2,-2.0));
+      cartan_triplets.push_back(Triplet(d-2,d-1,-2.0));
+      Matrix cartan(d,d);
+      cartan.setFromTriplets(cartan_triplets.begin(), cartan_triplets.end());
+      std::cout << "cartan =" << std::endl << cartan << std::endl;
+      Eigen::SimplicialLLT<Matrix, Eigen::Lower> chol(cartan);
+      root_t_ = chol.matrixL();
+      // std::cout << "root^t =" << std::endl << root_t_ << std::endl;
+      break;
+    }  
     case 'D': {
       unsigned short d = dimension;
+      vertex_level_ = 2;
       assert(d >= 4);
       std::vector<Triplet> cartan_triplets;
       cartan_triplets.reserve(3*d-2);
       for (unsigned i = 0; i < d; i++) {
         cartan_triplets.push_back(Triplet(i,i,2.0));
       }
-      for (int i = 0; i < d-1; i++) {
+      for (int i = 1; i < d-1; i++) {
         cartan_triplets.push_back(Triplet(i-1,i,-1.0));
         cartan_triplets.push_back(Triplet(i,i-1,-1.0));
       }
@@ -66,7 +115,7 @@ public:
       cartan_triplets.push_back(Triplet(d-3,d-1,-1.0));
       Matrix cartan(d,d);
       cartan.setFromTriplets(cartan_triplets.begin(), cartan_triplets.end());
-      // std::cout << "cartan =" << std::endl << cartan << std::endl;
+      std::cout << "cartan =" << std::endl << cartan << std::endl;
       Eigen::SimplicialLLT<Matrix, Eigen::Lower> chol(cartan);
       root_t_ = chol.matrixL();
       // std::cout << "root^t =" << std::endl << root_t_ << std::endl;
@@ -90,14 +139,15 @@ public:
             class OutputIterator>
   void alcove_coordinates(const Point& p, int level, OutputIterator output_it) const
   {
+    unsigned short d = p.size();
+    assert(d == dimension_);
+    Eigen::VectorXd p_vect(d);
+    for (short i = 0; i < d; i++)
+      p_vect(i) = p[i];
+    Eigen::VectorXd scalprod_vect = root_t_ * p_vect;
     switch (family_) {
     case 'A': {
-      unsigned short d = p.size();
-      assert(d == dimension_);
-      Eigen::VectorXd p_vect(d);
-      for (short i = 0; i < d; i++)
-        p_vect(i) = p[i];
-      Eigen::VectorXd scalprod_vect = root_t_ * p_vect;
+      // e_i - e_j
       for (short i = 0; i < d; i++) {
         FT root_scalprod = 0;
         for (short j = i; j >= 0; j--) {
@@ -107,19 +157,43 @@ public:
       }
       break;
     }
-    case 'D': {
-      unsigned short d = p.size();
-      assert(d == dimension_);
-      Eigen::VectorXd p_vect(d);
-      for (short i = 0; i < d; i++)
-        p_vect(i) = p[i];
-      Eigen::VectorXd scalprod_vect = root_t_ * p_vect;
+    case 'B': {
       // e_i - e_j
       for (short i = 0; i < d-1; i++) {
         FT root_scalprod = 0;
         for (short j = i; j >= 0; j--) {
           root_scalprod += scalprod_vect(j);
           *output_it++ = std::floor(level * root_scalprod);
+        }
+      }
+      // e_i
+      FT root_scalprod = 0;
+      for (short i = d-1; i >= 0; i--) {
+        root_scalprod += scalprod_vect(i);
+        *output_it++ = std::floor(level * root_scalprod);
+      }
+      // e_i + e_j
+      FT global_scalprod = 0;
+      for (short i = d-1; i >= 0; i--) {
+        global_scalprod += 2*scalprod_vect(i);
+        FT root_scalprod = global_scalprod;
+        for (short j = i-1; j >= 0; j--) {
+          root_scalprod += scalprod_vect(j);
+          *output_it++ = std::floor(level * root_scalprod);
+        }
+      }
+      break;
+    }
+    case 'D': {
+      // e_i - e_j
+      for (short i = 0; i < d-1; i++) {
+        FT root_scalprod = 0;
+        for (short j = i; j >= 0; j--) {
+          root_scalprod += scalprod_vect(j);
+          if (i == j && (i == 0 || i == d-2))
+            *output_it++ = 2 * std::floor(level * root_scalprod);
+          else
+            *output_it++ = std::floor(2 * level * root_scalprod);
         }
       }
       // e_i + e_j
@@ -129,7 +203,10 @@ public:
         FT root_scalprod = global_scalprod;
         for (short j = i-1; j >= 0; j--) {
           root_scalprod += scalprod_vect(j);
-          *output_it++ = std::floor(level * root_scalprod);
+          if ((i == d-1 && j == d-2) || (i == 0 && j == 0))
+            *output_it++ = 2 * std::floor(level * root_scalprod);
+          else
+            *output_it++ = std::floor(2 * level * root_scalprod);
         }
       }
       break;
@@ -144,6 +221,8 @@ public:
   unsigned pos_root_count() {
     switch (family_) {
     case 'A': { return dimension_*(dimension_ + 1)/2; break; } 
+    case 'B': { return dimension_*dimension_; break; } 
+    case 'C': { return dimension_*dimension_; break; } 
     case 'D': { return dimension_*(dimension_ - 1); break; }
     default :
       std::cerr << "Simple_coxeter_system::alcove_coordinates : The family " << family_ << " is not supported. "
@@ -175,28 +254,71 @@ private:
   }
 
   template <class S_id_iterator>
-  bool valid_coordinate(const Vertex_id& v_id, S_id_iterator& s_it, unsigned d) {
+  bool valid_coordinate(const Vertex_id& v_id, S_id_iterator& s_it, unsigned d, unsigned& integers) {
     unsigned k = v_id.size();
     switch (family_) {
     case 'A': {
+      // e_i - e_j
       int sum = 0;
       for (unsigned i = k-1; i >= 1; i--) {
         sum += v_id[i];
         if (sum < *s_it || sum > *s_it + 1)
           return false;
+        if (sum % v_id[0] == 0)
+          integers++;
+        s_it++;
+      }
+      return true;
+    }
+    case 'B': {
+      if (k == d+1) {
+        // e_i
+        int sum = 0;
+        for (unsigned i = d; i >= 1; i--) {
+          sum += v_id[i];
+          if (sum < 2*(*s_it) || sum > 2*(*s_it) + 2)
+            return false;
+          if (sum % v_id[0] == 0)
+            integers++;
+          s_it++;
+        }
+        // e_i + e_j
+        int glob_sum = 0;
+        for (unsigned i = d; i >= 1; i--) {
+          glob_sum += 2*v_id[i];
+          int sum = glob_sum;
+          for (short j = i-1; j >= 1; j--) {
+            sum += v_id[j];
+            if (sum < 2*(*s_it) || sum > 2*(*s_it) + 2)
+              return false;
+            if (sum % v_id[0] == 0)
+              integers++;
+            s_it++;
+          }
+        }
+        return true;
+      }
+      // e_i - e_j
+      int sum = 0;
+      for (unsigned i = k-1; i >= 1; i--) {
+        sum += v_id[i];
+        if (sum < 2*(*s_it) || sum > 2*(*s_it) + 2)
+          return false;
+        if (sum % v_id[0] == 0)
+          integers++;
         s_it++;
       }
       return true;
     }
     case 'D': {
       if (k == d) {
-        int glob_sum = -v_id[d]-v_id[d-1];
+        int glob_sum = -v_id[d-1]-v_id[d-2];
         for (unsigned i = d-1; i >= 1; i--) {
           glob_sum += 2*v_id[i];
           int sum = glob_sum;
           for (short j = i-1; j >= 1; j--) {
             sum += v_id[j];
-            if (sum < *s_it || sum > *s_it + 1)
+            if (sum < *s_it || sum > *s_it + 2)
               return false;
             s_it++;
           }
@@ -206,14 +328,14 @@ private:
       int sum = 0;
       for (unsigned i = k-1; i >= 1; i--) {
         sum += v_id[i];
-        if (sum < *s_it || sum > *s_it + 1)
+        if (sum < *s_it || sum > *s_it + 2)
           return false;
         s_it++;
       }
       return true;
     }
     default :
-      std::cerr << "Simple_coxeter_system::alcove_coordinates : The family " << family_ << " is not supported. "
+      std::cerr << "Simple_coxeter_system::valid_coordinate : The family " << family_ << " is not supported. "
                 << "Please use A or D family for the constructor (in capital).\n";
       throw wrong_family_exception_;
     }
@@ -223,24 +345,22 @@ private:
   /** Add the vertices of the given simplex to a vertex-simplex map.
    */
   template <class S_id_iterator>
-  void rec_vertices_of_simplex(Vertex_id& v_id, S_id_iterator s_it, unsigned d, std::vector<Vertex_id>& vertices)
+  void rec_vertices_of_simplex(Vertex_id& v_id, S_id_iterator s_it, unsigned d, std::vector<Vertex_id>& vertices, unsigned integers)
   {
     unsigned k = v_id.size();
     if (k == d+1) {
-      vertices.emplace_back(v_id);
+      if (integers >= d)
+        vertices.emplace_back(v_id);
       return;
     }
-    v_id.push_back(*s_it);
-    S_id_iterator s_it_copy(s_it);
-    if (valid_coordinate(v_id, s_it_copy, d))
-      rec_vertices_of_simplex(v_id, s_it_copy, d, vertices);
-    v_id.pop_back();
-
-    v_id.push_back(*s_it + 1);
-    s_it_copy = s_it;
-    if (valid_coordinate(v_id, s_it_copy, d))
-      rec_vertices_of_simplex(v_id, s_it_copy, d, vertices);
-    v_id.pop_back();
+    for (unsigned i = 0; i <= vertex_level_; i++) {
+      v_id.push_back(vertex_level_*(*s_it) + i);
+      S_id_iterator s_it_copy(s_it);
+      unsigned integers_copy = integers;
+      if (valid_coordinate(v_id, s_it_copy, d, integers_copy))
+        rec_vertices_of_simplex(v_id, s_it_copy, d, vertices, integers_copy);
+      v_id.pop_back();
+    }
   }
 
 public:  
@@ -251,11 +371,11 @@ public:
   std::vector<Vertex_id> vertices_of_simplex(Alcove_id ai_id)
   {
     unsigned d = dimension_;
-    Vertex_id v_id(1,*ai_id.begin());
+    Vertex_id v_id(1,*ai_id.begin() * vertex_level_);
     v_id.reserve(d+1);
     std::vector<Vertex_id> vertices;
     vertices.reserve(d+1);
-    rec_vertices_of_simplex(v_id, ai_id.begin()+1, d, vertices);
+    rec_vertices_of_simplex(v_id, ai_id.begin()+1, d, vertices, 0);
     return vertices;
   }
 
