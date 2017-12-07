@@ -49,11 +49,11 @@ public:
 
     /** Handle type to a vertex contained in the simplicial complex.
      * \ingroup toplex_map   */
-    typedef Vertex Vertex_handle;
+    typedef Toplex_map::Vertex Vertex_handle;
 
     /**  Handle type to a simplex contained in the simplicial complex.
      * \ingroup toplex_map   */
-    typedef Simplex Simplex_handle;
+    typedef Toplex_map::Simplex Simplex_handle;
 
     typedef void Insertion_result_type;
 
@@ -85,19 +85,19 @@ public:
 
     /**  Returns a range over the vertices of a simplex.
       * \ingroup toplex_map   */
-    Simplex simplex_vertex_range(const Simplex& s) const;
+    Toplex_map::Simplex simplex_vertex_range(const Simplex& s) const;
 
     /**  Returns a set of all maximal (critical if there is filtration values) simplices.
       * \ingroup toplex_map   */
-    std::vector<Simplex> max_simplices() const;
+    std::vector<Toplex_map::Simplex> max_simplices() const;
 
     /** Returns all the simplices, of max dimension d if a parameter d is given.
       * \ingroup toplex_map   */
-    std::vector<Simplex> filtration_simplex_range(int d=std::numeric_limits<int>::max()) const;
+    std::vector<Toplex_map::Simplex> filtration_simplex_range(int d=std::numeric_limits<int>::max()) const;
 
     /** Returns all the simplices of max dimension d
       * \ingroup toplex_map   */
-    std::vector<Simplex> skeleton_simplex_range(int d) const;
+    std::vector<Toplex_map::Simplex> skeleton_simplex_range(int d) const;
 
 
 protected:
@@ -148,31 +148,31 @@ std::size_t Fake_simplex_tree::num_simplices() const {
 }
 
 std::size_t Fake_simplex_tree::num_vertices() const {
-    std::unordered_set<Vertex> vertices;
-    for(const Simplex& s : max_simplices())
-        for (Vertex v : s)
+    std::unordered_set<Toplex_map::Vertex> vertices;
+    for(const Toplex_map::Simplex& s : max_simplices())
+        for (Toplex_map::Vertex v : s)
             vertices.emplace(v);
     return vertices.size();
 }
 
-Simplex Fake_simplex_tree::simplex_vertex_range(const Simplex& s) const {
+Toplex_map::Simplex Fake_simplex_tree::simplex_vertex_range(const Simplex& s) const {
     return s;
 }
 
-std::vector<Simplex> Fake_simplex_tree::max_simplices() const{
-    std::vector<Simplex> max_s;
+std::vector<Toplex_map::Simplex> Fake_simplex_tree::max_simplices() const{
+    std::vector<Toplex_map::Simplex> max_s;
     for(auto kv : toplex_maps)
-        for(const Simplex_ptr& sptr : kv.second.maximal_cofaces(Simplex()))
+        for(const Toplex_map::Simplex_ptr& sptr : kv.second.maximal_cofaces(Simplex()))
             max_s.emplace_back(*sptr);
     return max_s;
 }
 
-std::vector<Simplex> Fake_simplex_tree::filtration_simplex_range(int d) const{
-    std::vector<Simplex> m = max_simplices();
-    std::vector<Simplex> range;
-    Simplex_ptr_set seen;
+std::vector<Toplex_map::Simplex> Fake_simplex_tree::filtration_simplex_range(int d) const{
+    std::vector<Toplex_map::Simplex> m = max_simplices();
+    std::vector<Toplex_map::Simplex> range;
+    Toplex_map::Simplex_ptr_set seen;
     while(m.begin()!=m.end()){
-        Simplex s(m.back());
+        Toplex_map::Simplex s(m.back());
         m.pop_back();
         if(seen.find(get_key(s))==seen.end()){
             if((int) s.size()-1 <=d)
@@ -186,7 +186,7 @@ std::vector<Simplex> Fake_simplex_tree::filtration_simplex_range(int d) const{
     return range;
 }
 
-std::vector<Simplex> Fake_simplex_tree::skeleton_simplex_range(int d) const{
+std::vector<Toplex_map::Simplex> Fake_simplex_tree::skeleton_simplex_range(int d) const{
     return filtration_simplex_range(d);
 }
 

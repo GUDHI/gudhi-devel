@@ -1,4 +1,4 @@
-#ifndef FILTERED_TOPLEX_MAP_H
+    #ifndef FILTERED_TOPLEX_MAP_H
 #define FILTERED_TOPLEX_MAP_H
 
 #include <gudhi/Toplex_map.h>
@@ -54,7 +54,7 @@ protected:
 };
 
 template <typename Input_vertex_range>
-std::pair<Simplex, bool> Filtered_toplex_map::insert_simplex_and_subfaces(const Input_vertex_range &vertex_range, Filtration_value f){
+std::pair<Toplex_map::Simplex, bool> Filtered_toplex_map::insert_simplex_and_subfaces(const Input_vertex_range &vertex_range, Filtration_value f){
     Simplex s(vertex_range.begin(),vertex_range.end());
     if(membership(s)) return make_pair(s,false);
     if(!toplex_maps.count(f)) toplex_maps.emplace(f,Toplex_map());
