@@ -95,7 +95,7 @@ public:
       std::cout << "cartan =" << std::endl << cartan << std::endl;
       Eigen::SimplicialLLT<Matrix, Eigen::Lower> chol(cartan);
       root_t_ = chol.matrixL();
-      // std::cout << "root^t =" << std::endl << root_t_ << std::endl;
+      std::cout << "root^t =" << std::endl << root_t_ << std::endl;
       break;
     }  
     case 'D': {
@@ -174,6 +174,33 @@ public:
       }
       // e_i + e_j
       FT global_scalprod = 0;
+      for (short i = d-1; i >= 0; i--) {
+        global_scalprod += 2*scalprod_vect(i);
+        FT root_scalprod = global_scalprod;
+        for (short j = i-1; j >= 0; j--) {
+          root_scalprod += scalprod_vect(j);
+          *output_it++ = std::floor(level * root_scalprod);
+        }
+      }
+      break;
+    }
+    case 'C': {
+      // e_i - e_j
+      for (short i = 0; i < d-1; i++) {
+        FT root_scalprod = 0;
+        for (short j = i; j >= 0; j--) {
+          root_scalprod += scalprod_vect(j);
+          *output_it++ = std::floor(level * root_scalprod);
+        }
+      }
+      // 2*e_i
+      FT root_scalprod = -scalprod_vect(d-1);
+      for (short i = d-1; i >= 0; i--) {
+        root_scalprod += 2*scalprod_vect(i);
+        *output_it++ = std::floor(level * root_scalprod);
+      }
+      // e_i + e_j
+      FT global_scalprod = -scalprod_vect(d-1);
       for (short i = d-1; i >= 0; i--) {
         global_scalprod += 2*scalprod_vect(i);
         FT root_scalprod = global_scalprod;
@@ -284,6 +311,46 @@ private:
         }
         // e_i + e_j
         int glob_sum = 0;
+        for (unsigned i = d; i >= 1; i--) {
+          glob_sum += 2*v_id[i];
+          int sum = glob_sum;
+          for (short j = i-1; j >= 1; j--) {
+            sum += v_id[j];
+            if (sum < 2*(*s_it) || sum > 2*(*s_it) + 2)
+              return false;
+            if (sum % v_id[0] == 0)
+              integers++;
+            s_it++;
+          }
+        }
+        return true;
+      }
+      // e_i - e_j
+      int sum = 0;
+      for (unsigned i = k-1; i >= 1; i--) {
+        sum += v_id[i];
+        if (sum < 2*(*s_it) || sum > 2*(*s_it) + 2)
+          return false;
+        if (sum % v_id[0] == 0)
+          integers++;
+        s_it++;
+      }
+      return true;
+    }
+    case 'C': {
+      if (k == d+1) {
+        // 2*e_i
+        int sum = -v_id[d];
+        for (unsigned i = d; i >= 1; i--) {
+          sum += 2*v_id[i];
+          if (sum < 2*(*s_it) || sum > 2*(*s_it) + 2)
+            return false;
+          if (sum % v_id[0] == 0)
+            integers++;
+          s_it++;
+        }
+        // e_i + e_j
+        int glob_sum = -v_id[d];
         for (unsigned i = d; i >= 1; i--) {
           glob_sum += 2*v_id[i];
           int sum = glob_sum;
