@@ -117,6 +117,8 @@ namespace Gudhi {
 
  Indicate that we have imposed periodic boundary conditions in the direction x, but not in the direction y.
 
+ Other sample files can be found in the `data/bitmap` folder.
+
 */
 }  // namespace Gudhi
 
