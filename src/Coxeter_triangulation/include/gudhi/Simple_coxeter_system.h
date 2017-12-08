@@ -101,7 +101,7 @@ public:
     case 'D': {
       unsigned short d = dimension;
       vertex_level_ = 2;
-      assert(d >= 4);
+      assert(d >= 3);
       std::vector<Triplet> cartan_triplets;
       cartan_triplets.reserve(3*d-2);
       for (unsigned i = 0; i < d; i++) {
@@ -123,7 +123,7 @@ public:
     }  
     default :
       std::cerr << "Simple_coxeter_system : The family " << family << " is not supported. "
-                << "Please use A or D family for the constructor (in capital).\n";
+                << "Please use A, B, C or D family for the constructor (in capital).\n";
       throw wrong_family_exception_;
     }
   }
@@ -217,30 +217,24 @@ public:
         FT root_scalprod = 0;
         for (short j = i; j >= 0; j--) {
           root_scalprod += scalprod_vect(j);
-          if (i == j && (i == 0 || i == d-2))
-            *output_it++ = 2 * std::floor(level * root_scalprod);
-          else
-            *output_it++ = std::floor(2 * level * root_scalprod);
+          *output_it++ = std::floor(level * root_scalprod);
         }
       }
       // e_i + e_j
       FT global_scalprod = -scalprod_vect(d-1) - scalprod_vect(d-2);
-      for (short i = d-1; i >= 0; i--) {
+      for (short i = d-1; i >= 1; i--) {
         global_scalprod += 2*scalprod_vect(i);
         FT root_scalprod = global_scalprod;
         for (short j = i-1; j >= 0; j--) {
           root_scalprod += scalprod_vect(j);
-          if ((i == d-1 && j == d-2) || (i == 0 && j == 0))
-            *output_it++ = 2 * std::floor(level * root_scalprod);
-          else
-            *output_it++ = std::floor(2 * level * root_scalprod);
+          *output_it++ = std::floor(level * root_scalprod);
         }
       }
       break;
     }
     default :
       std::cerr << "Simple_coxeter_system::alcove_coordinates : The family " << family_ << " is not supported. "
-                << "Please use A or D family for the constructor (in capital).\n";
+                << "Please use A, B, C or D family for the constructor (in capital).\n";
       throw wrong_family_exception_;
     }
   }
@@ -253,7 +247,7 @@ public:
     case 'D': { return dimension_*(dimension_ - 1); break; }
     default :
       std::cerr << "Simple_coxeter_system::alcove_coordinates : The family " << family_ << " is not supported. "
-                << "Please use A or D family for the constructor (in capital).\n";
+                << "Please use A, B, C or D family for the constructor (in capital).\n";
       throw wrong_family_exception_;
     }
   }
@@ -289,7 +283,7 @@ private:
       int sum = 0;
       for (unsigned i = k-1; i >= 1; i--) {
         sum += v_id[i];
-        if (sum < *s_it || sum > *s_it + 1)
+        if (sum < vertex_level_*(*s_it) || sum > vertex_level_*(*s_it + 1))
           return false;
         if (sum % v_id[0] == 0)
           integers++;
@@ -378,32 +372,38 @@ private:
       return true;
     }
     case 'D': {
-      if (k == d) {
-        int glob_sum = -v_id[d-1]-v_id[d-2];
-        for (unsigned i = d-1; i >= 1; i--) {
+      if (k == d+1) {
+        // e_i + e_j
+        int glob_sum = -v_id[d]-v_id[d-1];
+        for (unsigned i = d; i >= 1; i--) {
           glob_sum += 2*v_id[i];
           int sum = glob_sum;
           for (short j = i-1; j >= 1; j--) {
             sum += v_id[j];
-            if (sum < *s_it || sum > *s_it + 2)
+            if (sum < 2*(*s_it) || sum > 2*(*s_it) + 2)
               return false;
+            if (sum % v_id[0] == 0)
+              integers++;
             s_it++;
           }
         }
         return true;
       }
+      // e_i - e_j
       int sum = 0;
       for (unsigned i = k-1; i >= 1; i--) {
         sum += v_id[i];
-        if (sum < *s_it || sum > *s_it + 2)
+        if (sum < 2*(*s_it) || sum > 2*(*s_it) + 2)
           return false;
+        if (sum % v_id[0] == 0)
+          integers++;
         s_it++;
       }
       return true;
     }
     default :
       std::cerr << "Simple_coxeter_system::valid_coordinate : The family " << family_ << " is not supported. "
-                << "Please use A or D family for the constructor (in capital).\n";
+                << "Please use A, B, C or D family for the constructor (in capital).\n";
       throw wrong_family_exception_;
     }
     
@@ -455,8 +455,8 @@ public:
       for (unsigned j = i; j >= 1; --j) {
         sum += v_id[j];
         double
-          v_plane = ((double)sum)/v_id[0],
-          a_plane = ((double)*alcove_it++)/a_id[0];
+          v_plane = ((double)sum)/v_id[0]/vertex_level_,
+          a_plane = ((double)*alcove_it++)/a_id[0]/vertex_level_;
         if (v_plane < a_plane || v_plane > a_plane + 1)
           return false;
       }
