@@ -29,21 +29,20 @@ using constant_scaling_function = Gudhi::Persistence_representations::constant_s
 using Persistence_heat_maps = Gudhi::Persistence_representations::Persistence_heat_maps<constant_scaling_function>;
 
 int main(int argc, char** argv) {
-  std::cout << "This program computes average persistence landscape of persistence landscapes created based on "
-               "persistence diagrams provided as an input. Please call this program with the names of files with "
-               "persistence diagrams \n";
-  std::vector<const char*> filenames;
+  std::cout << "This program computes average of persistence heat maps stored in files (the files needs to be "
+            << "created beforehand).\n"
+            << "The parameters of this programs are names of files with persistence heat maps.\n";
 
-  if (argc == 1) {
-    std::cout << "No input files given, the program will now terminate \n";
+  if (argc < 3) {
+    std::cout << "Wrong number of parameters, the program will now terminate \n";
     return 1;
   }
 
+  std::vector<const char*> filenames;
   for (int i = 1; i < argc; ++i) {
     filenames.push_back(argv[i]);
   }
 
-  std::cout << "Creating persistence landscapes...\n";
   std::vector<Persistence_heat_maps*> maps;
   for (size_t i = 0; i != filenames.size(); ++i) {
     Persistence_heat_maps* l = new Persistence_heat_maps;
@@ -53,13 +52,12 @@ int main(int argc, char** argv) {
 
   Persistence_heat_maps av;
   av.compute_average(maps);
-
   av.print_to_file("average.mps");
 
   for (size_t i = 0; i != filenames.size(); ++i) {
     delete maps[i];
   }
 
-  std::cout << "Done \n";
+  std::cout << "Average can be found in 'average.mps' file\n";
   return 0;
 }

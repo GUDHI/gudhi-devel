@@ -201,7 +201,8 @@ class Vector_distances_in_diagram {
     }
     out << std::endl;
     out.close();
-    std::cout << "To visualize, open gnuplot and type: load \'" << gnuplot_script.str().c_str() << "\'" << std::endl;
+    std::cout << "To visualize, install gnuplot and type the command: gnuplot -persist -e \"load \'"
+              << gnuplot_script.str().c_str() << "\'\"" << std::endl;
   }
 
   /**

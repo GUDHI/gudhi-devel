@@ -30,13 +30,20 @@
 using Persistence_landscape = Gudhi::Persistence_representations::Persistence_landscape;
 
 int main(int argc, char** argv) {
-  std::cout << "This program creates persistence landscapes of diagrams provided as an input. \n";
-  std::cout << "The first parameter of the program is the dimension of persistence to be used to construct persistence "
-               "landscapes. If your file contains ";
-  std::cout << "the information about dimension of persistence pairs, please provide here the dimension of persistence "
-               "pairs you want to use. If your input files consist only ";
-  std::cout << "of birth-death pairs, please set this first parameter to -1 \n";
-  std::cout << "The remaining parameters of the program are the names of files with persistence diagrams. \n";
+  std::cout << "This program creates persistence landscapes files (*.land) of persistence diagrams files (*.pers) "
+            << "provided as an input.\n"
+            << "The first parameter of this program is a dimension of persistence that will be used in creation of "
+            << "the persistence heat maps."
+            << "If your input files contains persistence pairs of various dimension, as a first parameter of the "
+            << "procedure please provide the dimension of persistence you want to use."
+            << "If in your files there are only birth-death pairs of the same dimension, set the first parameter to "
+            << "-1.\n"
+            << "The remaining parameters are the names of files with persistence diagrams. \n";
+
+  if (argc < 3) {
+    std::cout << "Wrong parameter list, the program will now terminate \n";
+    return 1;
+  }
   std::vector<const char*> filenames;
   int dim = atoi(argv[1]);
   unsigned dimension = std::numeric_limits<unsigned>::max();
@@ -47,13 +54,12 @@ int main(int argc, char** argv) {
     filenames.push_back(argv[i]);
   }
 
-  std::cout << "Creating persistence landscapes...\n";
   for (size_t i = 0; i != filenames.size(); ++i) {
+    std::cout << "Creating a landscape based on file : " << filenames[i] << std::endl;
     Persistence_landscape l(filenames[i], dimension);
     std::stringstream ss;
     ss << filenames[i] << ".land";
     l.print_to_file(ss.str().c_str());
   }
-  std::cout << "Done \n";
   return 0;
 }

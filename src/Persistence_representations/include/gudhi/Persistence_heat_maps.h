@@ -743,10 +743,10 @@ void Persistence_heat_maps<Scalling_of_kernels>::compute_percentage_of_active(
 template <typename Scalling_of_kernels>
 void Persistence_heat_maps<Scalling_of_kernels>::plot(const char* filename) const {
   std::ofstream out;
-  std::stringstream ss;
-  ss << filename << "_GnuplotScript";
+  std::stringstream gnuplot_script;
+  gnuplot_script << filename << "_GnuplotScript";
 
-  out.open(ss.str().c_str());
+  out.open(gnuplot_script.str().c_str());
   out << "plot      '-' matrix with image" << std::endl;
   for (size_t i = 0; i != this->heat_map.size(); ++i) {
     for (size_t j = 0; j != this->heat_map[i].size(); ++j) {
@@ -755,8 +755,8 @@ void Persistence_heat_maps<Scalling_of_kernels>::plot(const char* filename) cons
     out << std::endl;
   }
   out.close();
-  std::cout << "Gnuplot script have been created. Open gnuplot and type load \'" << ss.str().c_str()
-            << "\' to see the picture." << std::endl;
+  std::cout << "To visualize, install gnuplot and type the command: gnuplot -persist -e \"load \'"
+            << gnuplot_script.str().c_str() << "\'\"" << std::endl;
 }
 
 template <typename Scalling_of_kernels>

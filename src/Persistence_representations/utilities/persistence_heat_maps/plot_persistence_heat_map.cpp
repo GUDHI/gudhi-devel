@@ -29,8 +29,12 @@ using constant_scaling_function = Gudhi::Persistence_representations::constant_s
 using Persistence_heat_maps = Gudhi::Persistence_representations::Persistence_heat_maps<constant_scaling_function>;
 
 int main(int argc, char** argv) {
-  std::cout << "This program plot persistence landscape stored in a file (the file needs to be created beforehand). "
-               "Please call the code with the name of a landscape file \n";
+  std::cout << "This program creates a gnuplot script from a persistence heat maps stored in a file (the file needs "
+            << "to be created beforehand). Please call the code with the name of a single heat maps file \n";
+  if (argc != 2) {
+    std::cout << "Wrong parameter list, the program will now terminate \n";
+    return 1;
+  }
   Persistence_heat_maps l;
   l.load_from_file(argv[1]);
   l.plot(argv[1]);

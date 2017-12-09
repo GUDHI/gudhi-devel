@@ -32,13 +32,21 @@ using Vector_distances_in_diagram =
   Gudhi::Persistence_representations::Vector_distances_in_diagram<Euclidean_distance>;
 
 int main(int argc, char** argv) {
-  std::cout << "This program creates persistence vectors of diagrams provided as an input. The first parameter of this "
-               "program is a dimension of persistence ";
-  std::cout << " that will be used in creation of the persistence vectors. If our input files contain persistence "
-               "pairs of various dimension, as a second parameter of the ";
-  std::cout << " procedure please provide the dimension of persistence you want to use. If in your file there are only "
-               "birth-death pairs of the same dimension, set the first parameter to -1."
-            << std::endl;
+  std::cout << "This program creates persistence vectors files (*.vect) of persistence diagrams files (*.pers) "
+            << "provided as an input.\n"
+            << "The first parameter of this program is a dimension of persistence that will be used in creation of "
+            << "the persistence heat maps."
+            << "If your input files contains persistence pairs of various dimension, as a first parameter of the "
+            << "procedure please provide the dimension of persistence you want to use."
+            << "If in your files there are only birth-death pairs of the same dimension, set the first parameter to "
+            << "-1.\n"
+            << "The remaining parameters are the names of files with persistence diagrams. \n";
+
+  if (argc < 3) {
+    std::cout << "Wrong parameter list, the program will now terminate \n";
+    return 1;
+  }
+
   std::cout << "The remaining parameters are the names of files with persistence diagrams. \n";
   int dim = atoi(argv[1]);
   unsigned dimension = std::numeric_limits<unsigned>::max();
@@ -58,6 +66,5 @@ int main(int argc, char** argv) {
     ss << filenames[i] << ".vect";
     l.print_to_file(ss.str().c_str());
   }
-  std::cout << "Done \n";
   return 0;
 }

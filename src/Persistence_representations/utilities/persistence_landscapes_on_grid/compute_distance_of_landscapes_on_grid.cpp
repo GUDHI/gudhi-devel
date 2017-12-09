@@ -30,11 +30,11 @@
 using Persistence_landscape_on_grid = Gudhi::Persistence_representations::Persistence_landscape_on_grid;
 
 int main(int argc, char** argv) {
-  std::cout << "This program compute distance of persistence landscapes on grid stored in a file (the file needs to be "
-               "created beforehand). \n";
-  std::cout << "The first parameter of a program is an integer p. The program compute L^p distance of the landscapes "
-               "on grid. For L^infty distance choose p = -1. \n";
-  std::cout << "The remaining parameters of this programs are names of files with persistence landscapes on grid.\n";
+  std::cout << "This program computes distance of persistence landscapes on grid stored in files (the files needs to "
+            << "be created beforehand).\n"
+            << "The first parameter of a program is an integer p. The program compute L^p distance of the two heat "
+            << "maps. For L^infty distance choose p = -1. \n"
+            << "The remaining parameters of this program are names of files with persistence landscapes on grid.\n";
 
   if (argc < 3) {
     std::cout << "Wrong number of parameters, the program will now terminate \n";
@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
 
   // and now output the result to the screen and a file:
   std::ofstream out;
-  out.open("distance");
+  out.open("distance.g_land");
   for (size_t i = 0; i != distance.size(); ++i) {
     for (size_t j = 0; j != distance.size(); ++j) {
       std::cout << distance[i][j] << " ";
@@ -88,5 +88,6 @@ int main(int argc, char** argv) {
   }
   out.close();
 
+  std::cout << "Distance can be found in 'distance.g_land' file\n";
   return 0;
 }
