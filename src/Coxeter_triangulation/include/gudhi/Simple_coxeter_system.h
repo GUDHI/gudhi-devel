@@ -464,6 +464,8 @@ private:
             glob_triplets_for_root.push_back(Triplet(integers,i-1,1.0));
           else if (i == d-1)
             glob_triplets_for_root.push_back(Triplet(integers,i-1,1.0));
+          else
+            glob_triplets_for_root.push_back(Triplet(integers,i-1,2.0));
           int sum = glob_sum;
           std::vector<Triplet> triplets_for_root = glob_triplets_for_root;
           for (short j = i-1; j >= 1; j--) {
