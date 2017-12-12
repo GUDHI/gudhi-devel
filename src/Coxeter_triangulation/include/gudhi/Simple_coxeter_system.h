@@ -286,21 +286,10 @@ private:
     case 'A': {
       // e_i - e_j
       int sum = 0;
-      // std::vector<Triplet> triplets_for_root;
       for (unsigned i = k-1; i >= 1; i--) {
         sum += v_id[i];
-        // triplets_for_root.push_back(Triplet(integers,i-1,1.0));
         if (sum < *s_it || sum > *s_it + 1)
           return false;
-        // if (sum % v_id[0] == 0) {
-        //   integers++;
-        //   std::vector<Triplet> new_triplets_for_root;
-        //   for (auto t: triplets_for_root) {
-        //     triplets.push_back(t);
-        //     new_triplets_for_root.push_back(Triplet(t.row()+1, t.col(), t.value()));
-        //   }
-        //   triplets_for_root = new_triplets_for_root;
-        // }
         s_it++;
       }
       return true;
@@ -309,48 +298,29 @@ private:
       if (k == d+1) {
         // e_i
         int sum = 0;
-        std::vector<Triplet> triplets_for_root;
         for (unsigned i = d; i >= 1; i--) {
           sum += v_id[i];
-          triplets_for_root.push_back(Triplet(integers,i-1,1.0));
           if (sum < 2*(*s_it) || sum > 2*(*s_it) + 2)
             return false;
           if (sum % v_id[0] == 0) {
+            triplets.push_back(Triplet(integers, i-1, 1.0));
             integers++;
-            std::vector<Triplet> new_triplets_for_root;
-            for (auto t: triplets_for_root) {
-              triplets.push_back(t);
-              new_triplets_for_root.push_back(Triplet(t.row()+1, t.col(), t.value()));
-            }
-            triplets_for_root = new_triplets_for_root;
           }
           s_it++;
         }
         // e_i + e_j
         int glob_sum = 0;
-        std::vector<Triplet> glob_triplets_for_root;
         for (unsigned i = d; i >= 1; i--) {
           glob_sum += 2*v_id[i];
-          glob_triplets_for_root.push_back(Triplet(integers,i-1,2.0));
           int sum = glob_sum;
-          std::vector<Triplet> triplets_for_root = glob_triplets_for_root;
           for (short j = i-1; j >= 1; j--) {
             sum += v_id[j];
-            triplets_for_root.push_back(Triplet(integers,j-1,1.0));
             if (sum < 2*(*s_it) || sum > 2*(*s_it) + 2)
               return false;
             if (sum % v_id[0] == 0) {
+              triplets.push_back(Triplet(integers, i-1, 1.0));
+              triplets.push_back(Triplet(integers, j-1, 1.0));
               integers++;
-              std::vector<Triplet> new_triplets_for_root;
-              for (auto t: triplets_for_root) {
-                triplets.push_back(t);
-                new_triplets_for_root.push_back(Triplet(t.row()+1, t.col(), t.value()));
-              }
-              triplets_for_root = new_triplets_for_root;
-              std::vector<Triplet> new_glob_triplets_for_root;
-              for (auto t: glob_triplets_for_root)
-                new_glob_triplets_for_root.push_back(Triplet(t.row()+1, t.col(), t.value()));
-              glob_triplets_for_root = new_glob_triplets_for_root;
             }
             s_it++;
           }
@@ -359,20 +329,14 @@ private:
       }
       // e_i - e_j
       int sum = 0;
-      std::vector<Triplet> triplets_for_root;
       for (unsigned i = k-1; i >= 1; i--) {
         sum += v_id[i];
-        triplets_for_root.push_back(Triplet(integers,i-1,1.0));
         if (sum < 2*(*s_it) || sum > 2*(*s_it + 1))
           return false;
         if (sum % v_id[0] == 0) {
+          triplets.push_back(Triplet(integers, i-1, 1.0));
+          triplets.push_back(Triplet(integers, k-1, -1.0));
           integers++;
-          std::vector<Triplet> new_triplets_for_root;
-          for (auto t: triplets_for_root) {
-            triplets.push_back(t);
-            new_triplets_for_root.push_back(Triplet(t.row()+1, t.col(), t.value()));
-          }
-          triplets_for_root = new_triplets_for_root;
         }
         s_it++;
       }
@@ -382,54 +346,29 @@ private:
       if (k == d+1) {
         // 2*e_i
         int sum = -v_id[d];
-        std::vector<Triplet> triplets_for_root;
         for (unsigned i = d; i >= 1; i--) {
           sum += 2*v_id[i];
-          if (i == d)
-            triplets_for_root.push_back(Triplet(integers,i-1,1.0));
-          else
-            triplets_for_root.push_back(Triplet(integers,i-1,2.0));
           if (sum < 2*(*s_it) || sum > 2*(*s_it) + 2)
             return false;
           if (sum % v_id[0] == 0) {
+            triplets.push_back(Triplet(integers, i-1, 2.0));
             integers++;
-            std::vector<Triplet> new_triplets_for_root;
-            for (auto t: triplets_for_root) {
-              triplets.push_back(t);
-              new_triplets_for_root.push_back(Triplet(t.row()+1, t.col(), t.value()));
-            }
-            triplets_for_root = new_triplets_for_root;
           }
           s_it++;
         }
         // e_i + e_j
         int glob_sum = -v_id[d];
-        std::vector<Triplet> glob_triplets_for_root;
         for (unsigned i = d; i >= 1; i--) {
           glob_sum += 2*v_id[i];
-          if (i == d)
-            glob_triplets_for_root.push_back(Triplet(integers,i-1,1.0));
-          else
-            glob_triplets_for_root.push_back(Triplet(integers,i-1,2.0));
           int sum = glob_sum;
-          std::vector<Triplet> triplets_for_root = glob_triplets_for_root;
           for (short j = i-1; j >= 1; j--) {
             sum += v_id[j];
-            triplets_for_root.push_back(Triplet(integers,j-1,1.0));
             if (sum < 2*(*s_it) || sum > 2*(*s_it) + 2)
               return false;
             if (sum % v_id[0] == 0) {
+              triplets.push_back(Triplet(integers, i-1, 1.0));
+              triplets.push_back(Triplet(integers, j-1, 1.0));
               integers++;
-              std::vector<Triplet> new_triplets_for_root;
-              for (auto t: triplets_for_root) {
-                triplets.push_back(t);
-                new_triplets_for_root.push_back(Triplet(t.row()+1, t.col(), t.value()));
-              }
-              triplets_for_root = new_triplets_for_root;
-              std::vector<Triplet> new_glob_triplets_for_root;
-              for (auto t: glob_triplets_for_root)
-                new_glob_triplets_for_root.push_back(Triplet(t.row()+1, t.col(), t.value()));
-              glob_triplets_for_root = new_glob_triplets_for_root;
             }
             s_it++;
           }
@@ -438,20 +377,14 @@ private:
       }
       // e_i - e_j
       int sum = 0;
-      std::vector<Triplet> triplets_for_root;
       for (unsigned i = k-1; i >= 1; i--) {
         sum += v_id[i];
-        triplets_for_root.push_back(Triplet(integers,i-1,1.0));
         if (sum < 2*(*s_it) || sum > 2*(*s_it + 1))
           return false;
         if (sum % v_id[0] == 0) {
+          triplets.push_back(Triplet(integers, i-1, 1.0));
+          triplets.push_back(Triplet(integers, k-1, -1.0));
           integers++;
-          std::vector<Triplet> new_triplets_for_root;
-          for (auto t: triplets_for_root) {
-            triplets.push_back(t);
-            new_triplets_for_root.push_back(Triplet(t.row()+1, t.col(), t.value()));
-          }
-          triplets_for_root = new_triplets_for_root;
         }
         s_it++;
       }
@@ -461,35 +394,17 @@ private:
       if (k == d+1) {
         // e_i + e_j
         int glob_sum = -v_id[d]-v_id[d-1];
-        std::vector<Triplet> glob_triplets_for_root;
         for (int i = d; i >= 1; i--) {
           glob_sum += 2*v_id[i];
-          if (i == d)
-            glob_triplets_for_root.push_back(Triplet(integers,i-1,1.0));
-          else if (i == d-1)
-            glob_triplets_for_root.push_back(Triplet(integers,i-1,1.0));
-          else
-            glob_triplets_for_root.push_back(Triplet(integers,i-1,2.0));
           int sum = glob_sum;
-          std::vector<Triplet> triplets_for_root = glob_triplets_for_root;
           for (short j = i-1; j >= 1; j--) {
             sum += v_id[j];
-            if (j != d-1)
-              triplets_for_root.push_back(Triplet(integers,j-1,1.0));
             if (sum < 2*(*s_it) || sum > 2*(*s_it) + 2)
               return false;
             if (sum % v_id[0] == 0) {
+              triplets.push_back(Triplet(integers, i-1, 1.0));
+              triplets.push_back(Triplet(integers, j-1, 1.0));
               integers++;
-              std::vector<Triplet> new_triplets_for_root;
-              for (auto t: triplets_for_root) {
-                triplets.push_back(t);
-                new_triplets_for_root.push_back(Triplet(t.row()+1, t.col(), t.value()));
-              }
-              triplets_for_root = new_triplets_for_root;
-              std::vector<Triplet> new_glob_triplets_for_root;
-              for (auto t: glob_triplets_for_root)
-                new_glob_triplets_for_root.push_back(Triplet(t.row()+1, t.col(), t.value()));
-              glob_triplets_for_root = new_glob_triplets_for_root;
             }
             s_it++;
           }
@@ -498,20 +413,14 @@ private:
       }
       // e_i - e_j
       int sum = 0;
-      std::vector<Triplet> triplets_for_root;
       for (unsigned i = k-1; i >= 1; i--) {
         sum += v_id[i];
-        triplets_for_root.push_back(Triplet(integers,i-1,1.0));
         if (sum < 2*(*s_it) || sum > 2*(*s_it + 1))
           return false;
         if (sum % v_id[0] == 0) {
+          triplets.push_back(Triplet(integers, i-1, 1.0));
+          triplets.push_back(Triplet(integers, k-1, -1.0));             
           integers++;
-          std::vector<Triplet> new_triplets_for_root;
-          for (auto t: triplets_for_root) {
-            triplets.push_back(t);
-            new_triplets_for_root.push_back(Triplet(t.row()+1, t.col(), t.value()));
-          }
-          triplets_for_root = new_triplets_for_root;
         }
         s_it++;
       }
@@ -547,6 +456,8 @@ private:
     }
     else {
       if (k == d+1) {
+        if (integers < d)
+          return;
         Matrix int_roots(integers, d);
         int_roots.setFromTriplets(triplets.begin(), triplets.end());
         Eigen::SparseQR<Matrix, Eigen::COLAMDOrdering<int>> spQR(int_roots);
@@ -585,7 +496,7 @@ public:
   }
 
   /** Check if the given simplex and vertex are adjacent.
-   */
+   */ 
   bool is_adjacent(const Vertex_id& v_id, const Alcove_id& a_id) const {
     auto alcove_it = a_id.begin()+1;
     for (unsigned i = 1; i < v_id.size(); ++i) {
