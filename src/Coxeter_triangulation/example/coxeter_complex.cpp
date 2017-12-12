@@ -180,12 +180,12 @@ int main(int argc, char * const argv[]) {
 
   // Coxeter_system cs_A('A', d);
   // Coxeter_complex(point_vector, cs_A);  
-  Coxeter_system cs_B('B', d);
-  Coxeter_complex(point_vector, cs_B);
-  Coxeter_system cs_C('C', d);
-  Coxeter_complex(point_vector, cs_C);
-  // Coxeter_system cs_D('D', d);
-  // Coxeter_complex(point_vector, cs_D);  
+  // Coxeter_system cs_B('B', d);
+  // Coxeter_complex(point_vector, cs_B);
+  // Coxeter_system cs_C('C', d);
+  // Coxeter_complex(point_vector, cs_C);
+  Coxeter_system cs_D('D', d);
+  Coxeter_complex(point_vector, cs_D);  
 
 
 }

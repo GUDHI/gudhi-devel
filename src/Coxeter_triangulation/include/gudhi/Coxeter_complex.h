@@ -129,16 +129,16 @@ public:
 
     // subdivision part
     
-    std::cout << "AMap:\n";
-    for (auto m: a_map) 
-      std::cout << m.first << ": " << std::get<0>(m.second) << ", "
-                << "size=" << std::get<1>(m.second).size() << std::endl;    
-    std::cout << "\n";
+    // std::cout << "AMap:\n";
+    // for (auto m: a_map) 
+    //   std::cout << m.first << ": " << std::get<0>(m.second) << ", "
+    //             << "size=" << std::get<1>(m.second).size() << std::endl;    
+    // std::cout << "\n";
     
-    std::cout << "VMap:\n";
-    for (auto m: v_map) 
-      std::cout << m.first << ": " << m.second << std::endl;
-    std::cout << "\n";
+    // std::cout << "VMap:\n";
+    // for (auto m: v_map) 
+    //   std::cout << m.first << ": " << m.second << std::endl;
+    // std::cout << "\n";
     
     // bool subdivision_needed = true;
     // int current_level = 1;

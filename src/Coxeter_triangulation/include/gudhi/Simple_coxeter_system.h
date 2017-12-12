@@ -68,10 +68,10 @@ public:
       }
       Matrix cartan(d,d);
       cartan.setFromTriplets(cartan_triplets.begin(), cartan_triplets.end());
-      std::cout << "cartan =" << std::endl << cartan << std::endl;
+      // std::cout << "cartan =" << std::endl << cartan << std::endl;
       Eigen::SimplicialLLT<Matrix, Eigen::Lower> chol(cartan);
       root_t_ = chol.matrixL();
-      std::cout << "root^t =" << std::endl << root_t_ << std::endl;
+      // std::cout << "root^t =" << std::endl << root_t_ << std::endl;
       break;
     }  
     case 'C': {
@@ -92,13 +92,13 @@ public:
       cartan_triplets.push_back(Triplet(d-2,d-1,-2.0));
       Matrix cartan(d,d);
       cartan.setFromTriplets(cartan_triplets.begin(), cartan_triplets.end());
-      std::cout << "cartan =" << std::endl << cartan << std::endl;
+      // std::cout << "cartan =" << std::endl << cartan << std::endl;
       Eigen::SimplicialLLT<Matrix, Eigen::Lower> chol(cartan);
       root_t_ = chol.matrixL();
-      std::cout << "root^t =" << std::endl << root_t_ << std::endl;
+      // std::cout << "root^t =" << std::endl << root_t_ << std::endl;
       break;
     }  
-    case 'D': {
+    case 'D': {   
       unsigned short d = dimension;
       vertex_level_ = 2;
       assert(d >= 3);
@@ -115,7 +115,7 @@ public:
       cartan_triplets.push_back(Triplet(d-3,d-1,-1.0));
       Matrix cartan(d,d);
       cartan.setFromTriplets(cartan_triplets.begin(), cartan_triplets.end());
-      std::cout << "cartan =" << std::endl << cartan << std::endl;
+      // std::cout << "cartan =" << std::endl << cartan << std::endl;
       Eigen::SimplicialLLT<Matrix, Eigen::Lower> chol(cartan);
       root_t_ = chol.matrixL();
       // std::cout << "root^t =" << std::endl << root_t_ << std::endl;
@@ -131,7 +131,11 @@ public:
   unsigned short dimension() const {
     return dimension_;
   }
-  
+
+  char family() const {
+    return family_;
+  }
+
   /** A conversion from Cartesian coordinates to the coordinates of the alcove containing the point.
    *  The matrix' rows are simple root vectors.
    */
@@ -282,21 +286,21 @@ private:
     case 'A': {
       // e_i - e_j
       int sum = 0;
-      std::vector<Triplet> triplets_for_root;
+      // std::vector<Triplet> triplets_for_root;
       for (unsigned i = k-1; i >= 1; i--) {
         sum += v_id[i];
-        triplets_for_root.push_back(Triplet(integers,i-1,1.0));
-        if (sum < vertex_level_*(*s_it) || sum > vertex_level_*(*s_it + 1))
+        // triplets_for_root.push_back(Triplet(integers,i-1,1.0));
+        if (sum < *s_it || sum > *s_it + 1)
           return false;
-        if (sum % v_id[0] == 0) {
-          integers++;
-          std::vector<Triplet> new_triplets_for_root;
-          for (auto t: triplets_for_root) {
-            triplets.push_back(t);
-            new_triplets_for_root.push_back(Triplet(t.row()+1, t.col(), t.value()));
-          }
-          triplets_for_root = new_triplets_for_root;
-        }
+        // if (sum % v_id[0] == 0) {
+        //   integers++;
+        //   std::vector<Triplet> new_triplets_for_root;
+        //   for (auto t: triplets_for_root) {
+        //     triplets.push_back(t);
+        //     new_triplets_for_root.push_back(Triplet(t.row()+1, t.col(), t.value()));
+        //   }
+        //   triplets_for_root = new_triplets_for_root;
+        // }
         s_it++;
       }
       return true;
@@ -359,7 +363,7 @@ private:
       for (unsigned i = k-1; i >= 1; i--) {
         sum += v_id[i];
         triplets_for_root.push_back(Triplet(integers,i-1,1.0));
-        if (sum < vertex_level_*(*s_it) || sum > vertex_level_*(*s_it + 1))
+        if (sum < 2*(*s_it) || sum > 2*(*s_it + 1))
           return false;
         if (sum % v_id[0] == 0) {
           integers++;
@@ -438,7 +442,7 @@ private:
       for (unsigned i = k-1; i >= 1; i--) {
         sum += v_id[i];
         triplets_for_root.push_back(Triplet(integers,i-1,1.0));
-        if (sum < vertex_level_*(*s_it) || sum > vertex_level_*(*s_it + 1))
+        if (sum < 2*(*s_it) || sum > 2*(*s_it + 1))
           return false;
         if (sum % v_id[0] == 0) {
           integers++;
@@ -498,7 +502,7 @@ private:
       for (unsigned i = k-1; i >= 1; i--) {
         sum += v_id[i];
         triplets_for_root.push_back(Triplet(integers,i-1,1.0));
-        if (sum < vertex_level_*(*s_it) || sum > vertex_level_*(*s_it + 1))
+        if (sum < 2*(*s_it) || sum > 2*(*s_it + 1))
           return false;
         if (sum % v_id[0] == 0) {
           integers++;
@@ -524,26 +528,41 @@ private:
   /** Add the vertices of the given simplex to a vertex-simplex map.
    */
   template <class S_id_iterator>
-  void rec_vertices_of_simplex(Vertex_id& v_id, S_id_iterator s_it, std::vector<Vertex_id>& vertices, unsigned integers, std::vector<Triplet> triplets)
+  void rec_vertices_of_simplex(Vertex_id& v_id, S_id_iterator s_it, std::vector<Vertex_id>& vertices, unsigned& integers, std::vector<Triplet>& triplets)
   {
     unsigned short d = dimension_;
     int k = v_id.size();
-    if (k == d+1) {
-      Matrix int_roots(integers, d);
-      int_roots.setFromTriplets(triplets.begin(), triplets.end());
-      Eigen::SparseQR<Matrix, Eigen::COLAMDOrdering<int>> spQR(int_roots);
-      if (spQR.rank() == d)
+    if (family_ == 'A') {
+      if (k == d+1) {
         vertices.emplace_back(v_id);
-      return;
+        return;
+      }
+      for (unsigned i = 0; i <= vertex_level_; i++) {
+        v_id.push_back(vertex_level_*(*s_it) + i);
+        S_id_iterator s_it_copy(s_it);
+        if (valid_coordinate(v_id, s_it_copy, integers, triplets))
+          rec_vertices_of_simplex(v_id, s_it_copy, vertices, integers, triplets);
+        v_id.pop_back();
+      }
     }
-    for (unsigned i = 0; i <= vertex_level_; i++) {
-      v_id.push_back(vertex_level_*(*s_it) + i);
-      S_id_iterator s_it_copy(s_it);
-      unsigned integers_copy = integers;
-      std::vector<Triplet> triplets_copy(triplets);
-      if (valid_coordinate(v_id, s_it_copy, integers_copy, triplets_copy))
-        rec_vertices_of_simplex(v_id, s_it_copy, vertices, integers_copy, triplets_copy);
-      v_id.pop_back();
+    else {
+      if (k == d+1) {
+        Matrix int_roots(integers, d);
+        int_roots.setFromTriplets(triplets.begin(), triplets.end());
+        Eigen::SparseQR<Matrix, Eigen::COLAMDOrdering<int>> spQR(int_roots);
+        if (spQR.rank() == d)
+          vertices.emplace_back(v_id);
+        return;
+      }
+      for (unsigned i = 0; i <= vertex_level_; i++) {
+        v_id.push_back(vertex_level_*(*s_it) + i);
+        S_id_iterator s_it_copy(s_it);
+        unsigned integers_copy = integers;
+        std::vector<Triplet> triplets_copy(triplets);
+        if (valid_coordinate(v_id, s_it_copy, integers_copy, triplets_copy))
+          rec_vertices_of_simplex(v_id, s_it_copy, vertices, integers_copy, triplets_copy);
+        v_id.pop_back();
+      }
     }
   }
 
@@ -559,7 +578,9 @@ public:
     v_id.reserve(d+1);
     std::vector<Vertex_id> vertices;
     vertices.reserve(d+1);
-    rec_vertices_of_simplex(v_id, ai_id.begin()+1, vertices, 0, std::vector<Triplet>());
+    unsigned integers = 0;
+    std::vector<Triplet> triplets;
+    rec_vertices_of_simplex(v_id, ai_id.begin()+1, vertices, integers, triplets);
     return vertices;
   }
 
@@ -580,8 +601,13 @@ public:
     }
     return true;
   }
-
   
 };
+
+// Print the Simple_coxeter_system in os.
+std::ostream& operator<<(std::ostream & os, Simple_coxeter_system & scs) {
+  os << scs.family() << scs.dimension();
+  return os;
+}
 
 #endif

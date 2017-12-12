@@ -157,30 +157,48 @@ void write_coxeter_mesh(Point_vector& W, VSMap& vs_map, Matrix& root_t, std::str
   }
 }
 
-void rec_test(std::vector<unsigned>& decomposition, Coxeter_system& cs, Point_vector& point_vector) {
+void rec_test(std::vector<unsigned>& decomposition, Coxeter_system& cs, Point_vector& point_vector, char last_family) {
   if (decomposition[0] == point_vector[0].size()) {
     // test if the number of vertices of 1 alcove is more than 10^6
     unsigned num_vertices = 1;
     for (auto d_it = decomposition.begin()+1; d_it != decomposition.end(); ++d_it) {
       num_vertices *= *d_it + 1;
       if (num_vertices > 1000000) {
-        std::cout << "Configuration " << decomposition << ": too many vertices. Abandon.\n";
+        std::cout << "Configuration " << cs << ": too many vertices. Abandon.\n";
         return;
       }
     }
-    std::cout << std::vector<unsigned>(decomposition.begin()+1, decomposition.end()) << std::endl;
+    std::cout << cs << std::endl;
     Coxeter_complex(point_vector, cs);
     return;
   }
+  unsigned prev_dim = decomposition.back();
   unsigned i = decomposition.back();
   if (decomposition.back() == 0)
     i = 1;
   for (; i <= point_vector[0].size() - decomposition[0]; ++i) {
     decomposition.push_back(i);
     decomposition[0] += i;
-    cs.emplace_back('A', i);
-    rec_test(decomposition, cs, point_vector);
-    cs.pop_back();
+    if (i != prev_dim || last_family <= 'A') {
+      cs.emplace_back('A', i);
+      rec_test(decomposition, cs, point_vector, 'A');
+      cs.pop_back();
+    }
+    if (i >= 3 && (i != prev_dim || last_family <= 'B')) {
+      cs.emplace_back('B', i);
+      rec_test(decomposition, cs, point_vector, 'B');
+      cs.pop_back();
+    }
+    if (i >= 2 && (i != prev_dim || last_family <= 'C')) {
+      cs.emplace_back('C', i);
+      rec_test(decomposition, cs, point_vector, 'C');
+      cs.pop_back();
+    }
+    if (i >= 4 && (i != prev_dim || last_family <= 'D')) {
+      cs.emplace_back('D', i);
+      rec_test(decomposition, cs, point_vector, 'D');
+      cs.pop_back();
+    }
     decomposition[0] -= i;
     decomposition.pop_back();
   }
@@ -213,5 +231,5 @@ int main(int argc, char * const argv[]) {
   std::vector<unsigned> decomposition(1,0); // first coordinate is the sum
   decomposition.reserve(d+1);
   Coxeter_system cs;
-  rec_test(decomposition, cs, point_vector);
+  rec_test(decomposition, cs, point_vector, 0);
 }

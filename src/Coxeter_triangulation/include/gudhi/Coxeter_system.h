@@ -6,6 +6,7 @@
 #include <exception>
 #include <Eigen/Sparse>
 #include <gudhi/Simple_coxeter_system.h>
+#include "../../example/cxx-prettyprint/prettyprint.hpp"
 
 class Coxeter_system  {
 
@@ -20,6 +21,9 @@ class Coxeter_system  {
 
   std::vector<Simple_coxeter_system> simple_system_range_;
   unsigned short dimension_;
+
+protected:
+  
   
 public:
 
@@ -52,7 +56,15 @@ public:
     dimension_ -= simple_system_range_.back().dimension();
     simple_system_range_.pop_back();
   }
-  
+
+  std::vector<Simple_coxeter_system>::iterator simple_coxeter_system_begin() {
+    return simple_system_range_.begin();
+  }
+
+  std::vector<Simple_coxeter_system>::iterator simple_coxeter_system_end() {
+    return simple_system_range_.end();
+  }
+
   /** A conversion from Cartesian coordinates to the coordinates of the alcove containing the point.
    *  The matrix' rows are simple root vectors.
    */
@@ -148,5 +160,18 @@ public:
   }
   
 };
+
+  // Print the Coxeter_system in os.
+std::ostream& operator<<(std::ostream & os, Coxeter_system& cs) {
+  os << "[";
+  auto scs_it = cs.simple_coxeter_system_begin();
+  if (scs_it != cs.simple_coxeter_system_end())
+    os << *scs_it++;
+  for (; scs_it != cs.simple_coxeter_system_end(); ++scs_it)
+    os << ", " << *scs_it;
+  os << "]" << std::endl;
+  return os;
+}
+
 
 #endif
