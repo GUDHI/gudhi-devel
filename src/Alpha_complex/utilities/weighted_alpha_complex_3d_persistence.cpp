@@ -44,7 +44,6 @@
 #include <tuple>
 #include <map>
 #include <utility>
-#include <list>
 #include <vector>
 #include <cstdlib>
 
@@ -92,14 +91,13 @@ using Cell_handle = Alpha_shape_3::Cell_handle;
 using Facet = Alpha_shape_3::Facet;
 using Edge_3 = Alpha_shape_3::Edge;
 using Vertex_handle = Alpha_shape_3::Vertex_handle;
-using Vertex_list = std::list<Alpha_shape_3::Vertex_handle>;
+using Vertex_list = std::vector<Alpha_shape_3::Vertex_handle>;
 
 // gudhi type definition
 using ST = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
 using Filtration_value = ST::Filtration_value;
 using Simplex_tree_vertex = ST::Vertex_handle;
 using Alpha_shape_simplex_tree_map = std::map<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex>;
-using Alpha_shape_simplex_tree_pair = std::pair<Alpha_shape_3::Vertex_handle, Simplex_tree_vertex>;
 using Simplex_tree_vector_vertex = std::vector<Simplex_tree_vertex>;
 using Persistent_cohomology =
     Gudhi::persistent_cohomology::Persistent_cohomology<ST, Gudhi::persistent_cohomology::Field_Zp>;
@@ -125,7 +123,7 @@ int main(int argc, char **argv) {
     exit(-1);
   }
 
-  // Retrieve the triangulation
+  // Retrieve the points
   std::vector<Point_3> lp = off_reader.get_point_cloud();
 
   // Read weights information from file
@@ -177,37 +175,23 @@ int main(int argc, char **argv) {
   ST simplex_tree;
   Alpha_shape_simplex_tree_map map_cgal_simplex_tree;
   std::vector<Alpha_value_type>::iterator the_alpha_value_iterator = the_alpha_values.begin();
-  int dim_max = 0;
-  Filtration_value filtration_max = 0.0;
   for (auto object_iterator : the_objects) {
     // Retrieve Alpha shape vertex list from object
     if (const Cell_handle* cell = CGAL::object_cast<Cell_handle>(&object_iterator)) {
       vertex_list = from_cell<Vertex_list, Cell_handle>(*cell);
       count_cells++;
-      if (dim_max < 3) {
-        // Cell is of dim 3
-        dim_max = 3;
-      }
     } else if (const Facet* facet = CGAL::object_cast<Facet>(&object_iterator)) {
       vertex_list = from_facet<Vertex_list, Facet>(*facet);
       count_facets++;
-      if (dim_max < 2) {
-        // Facet is of dim 2
-        dim_max = 2;
-      }
     } else if (const Edge_3* edge = CGAL::object_cast<Edge_3>(&object_iterator)) {
       vertex_list = from_edge<Vertex_list, Edge_3>(*edge);
       count_edges++;
-      if (dim_max < 1) {
-        // Edge_3 is of dim 1
-        dim_max = 1;
-      }
     } else if (const Vertex_handle* vertex = CGAL::object_cast<Vertex_handle>(&object_iterator)) {
       count_vertices++;
       vertex_list = from_vertex<Vertex_list, Vertex_handle>(*vertex);
     }
     // Construction of the vector of simplex_tree vertex from list of alpha_shapes vertex
-    Simplex_tree_vector_vertex the_simplex_tree;
+    Simplex_tree_vector_vertex the_simplex;
     for (auto the_alpha_shape_vertex : vertex_list) {
       Alpha_shape_simplex_tree_map::iterator the_map_iterator = map_cgal_simplex_tree.find(the_alpha_shape_vertex);
       if (the_map_iterator == map_cgal_simplex_tree.end()) {
@@ -216,15 +200,15 @@ int main(int argc, char **argv) {
 #ifdef DEBUG_TRACES
         std::cout << "vertex [" << the_alpha_shape_vertex->point() << "] not found - insert " << vertex << std::endl;
 #endif  // DEBUG_TRACES
-        the_simplex_tree.push_back(vertex);
-        map_cgal_simplex_tree.insert(Alpha_shape_simplex_tree_pair(the_alpha_shape_vertex, vertex));
+        the_simplex.push_back(vertex);
+        map_cgal_simplex_tree.emplace(the_alpha_shape_vertex, vertex);
       } else {
         // alpha shape found
         Simplex_tree_vertex vertex = the_map_iterator->second;
 #ifdef DEBUG_TRACES
         std::cout << "vertex [" << the_alpha_shape_vertex->point() << "] found in " << vertex << std::endl;
 #endif  // DEBUG_TRACES
-        the_simplex_tree.push_back(vertex);
+        the_simplex.push_back(vertex);
       }
     }
     // Construction of the simplex_tree
@@ -232,10 +216,7 @@ int main(int argc, char **argv) {
 #ifdef DEBUG_TRACES
     std::cout << "filtration = " << filtr << std::endl;
 #endif  // DEBUG_TRACES
-    if (filtr > filtration_max) {
-      filtration_max = filtr;
-    }
-    simplex_tree.insert_simplex(the_simplex_tree, filtr);
+    simplex_tree.insert_simplex(the_simplex, filtr);
     if (the_alpha_value_iterator != the_alpha_values.end())
       ++the_alpha_value_iterator;
     else

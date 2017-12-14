@@ -44,7 +44,7 @@ struct Square_query {
   typedef Internal_point Point_d;
   typedef double FT;
   bool contains(Point_d p) const {
-    return std::abs(p.x()-c.x()) <= size && std::abs(p.y()-c.y()) <= size;
+    return std::max(std::abs(p.x()-c.x()), std::abs(p.y()-c.y())) <= size;
   }
   bool inner_range_intersects(CGAL::Kd_tree_rectangle<FT, D> const&r) const {
     return

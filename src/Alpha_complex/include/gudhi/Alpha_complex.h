@@ -175,7 +175,7 @@ class Alpha_complex {
    *
    * @return The number of vertices.
    */
-  const std::size_t number_of_vertices() const {
+  std::size_t number_of_vertices() const {
     return vertex_handle_to_iterator_.size();
   }
 
