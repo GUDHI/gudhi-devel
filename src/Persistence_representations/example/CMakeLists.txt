@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 project(Persistence_representations_example)
 
-#file(COPY "${CMAKE_SOURCE_DIR}/data/persistence_diagram/simple_diagram.txt" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/")
-
 add_executable ( Persistence_representations_example_landscape_on_grid persistence_landscape_on_grid.cpp )
 target_link_libraries(Persistence_representations_example_landscape_on_grid ${Boost_SYSTEM_LIBRARY})
 add_test(NAME Persistence_representations_example_landscape_on_grid
