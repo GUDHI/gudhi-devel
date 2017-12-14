@@ -20,7 +20,6 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gudhi/reader_utils.h>
 #include <gudhi/Persistence_intervals.h>
 
 #include <iostream>
@@ -31,16 +30,21 @@
 using Persistence_intervals = Gudhi::Persistence_representations::Persistence_intervals;
 
 int main(int argc, char** argv) {
-  std::cout << "This program compute the range of birth and death times of persistence pairs in diagrams provided as "
-               "an input. \n";
-  std::cout << "The first parameter of the program is the dimension of persistence to be used. If your file contains ";
-  std::cout << "the information about dimension of persistence pairs, please provide here the dimension of persistence "
-               "pairs you want to use. If your input files consist only ";
-  std::cout << "of birth-death pairs, please set this first parameter to -1 \n";
-  std::cout << "The remaining parameters of the program are the names of files with persistence diagrams. \n";
+  std::cout << "This program computes the range of birth and death times of persistence pairs in diagrams provided as "
+            << "an input.\n"
+            << "The first parameter is the dimension of persistence to be used to create persistence intervals. "
+            << "If your file contains the information about dimension of persistence pairs, please provide here the "
+            << "dimension of persistence pairs you want to use. "
+            << "If your input files consist only of birth-death pairs, please set this first parameter to -1.\n"
+            << "The remaining parameters of the program are the names of files with persistence diagrams.\n";
 
-  int dim = atoi(argv[1]);
+  if (argc < 3) {
+    std::cout << "Wrong parameter list, the program will now terminate \n";
+    return 1;
+  }
+
   unsigned dimension = std::numeric_limits<unsigned>::max();
+  int dim = atoi(argv[1]);
   if (dim >= 0) {
     dimension = (unsigned)dim;
   }

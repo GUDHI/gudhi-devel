@@ -18,13 +18,13 @@ function(add_persistence_representation_plot_utility plot_utility tool_extension
     # as the function is called in a subdirectory level, need to '../' to find persistence heat maps files
     add_test(NAME Persistence_representation_utilities_${plot_utility}_first COMMAND $<TARGET_FILE:${plot_utility}>
         "${CMAKE_CURRENT_BINARY_DIR}/../first.pers${tool_extension}")
-    add_test(NAME Persistence_representation_utilities_${plot_utility}_second COMMAND $<TARGET_FILE:${plot_utility}>
-        "${CMAKE_CURRENT_BINARY_DIR}/../second.pers${tool_extension}")
+    #add_test(NAME Persistence_representation_utilities_${plot_utility}_second COMMAND $<TARGET_FILE:${plot_utility}>
+    #    "${CMAKE_CURRENT_BINARY_DIR}/../second.pers${tool_extension}")
     if(GNUPLOT_PATH)
         add_test(NAME Persistence_representation_utilities_${plot_utility}_first_gnuplot COMMAND ${GNUPLOT_PATH}
             "-e" "load '${CMAKE_CURRENT_BINARY_DIR}/../first.pers${tool_extension}_GnuplotScript'")
-        add_test(NAME Persistence_representation_utilities_${plot_utility}_second_gnuplot COMMAND ${GNUPLOT_PATH}
-            "-e" "load '${CMAKE_CURRENT_BINARY_DIR}/../second.pers${tool_extension}_GnuplotScript'")
+        #add_test(NAME Persistence_representation_utilities_${plot_utility}_second_gnuplot COMMAND ${GNUPLOT_PATH}
+        #    "-e" "load '${CMAKE_CURRENT_BINARY_DIR}/../second.pers${tool_extension}_GnuplotScript'")
     endif()
 endfunction(add_persistence_representation_plot_utility)
 
@@ -51,4 +51,3 @@ add_subdirectory(persistence_intervals)
 add_subdirectory(persistence_landscapes)
 add_subdirectory(persistence_landscapes_on_grid)
 add_subdirectory(persistence_vectors)
-

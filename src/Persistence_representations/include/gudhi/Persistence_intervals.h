@@ -167,10 +167,10 @@ class Persistence_intervals {
     // this program create a gnuplot script file that allows to plot persistence diagram.
     std::ofstream out;
 
-    std::ostringstream nameSS;
-    nameSS << filename << "_GnuplotScript";
-    std::string nameStr = nameSS.str();
-    out.open(nameStr);
+    std::stringstream gnuplot_script;
+    gnuplot_script << filename << "_GnuplotScript";
+
+    out.open(gnuplot_script.str().c_str());
 
     std::pair<double, double> min_max_values = this->get_x_range();
     if (min_x == max_x) {
@@ -195,8 +195,8 @@ class Persistence_intervals {
 
     out.close();
 
-    std::cout << "Gnuplot script to visualize persistence diagram written to the file: " << nameStr << ". Type load '"
-              << nameStr << "' in gnuplot to visualize." << std::endl;
+    std::cout << "To visualize, install gnuplot and type the command: gnuplot -persist -e \"load \'"
+              << gnuplot_script.str().c_str() << "\'\"" << std::endl;
   }
 
   /**
