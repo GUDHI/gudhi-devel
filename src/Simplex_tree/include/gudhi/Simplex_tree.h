@@ -942,7 +942,8 @@ class Simplex_tree {
    *
    * Inserts all vertices and edges given by a OneSkeletonGraph.
    * OneSkeletonGraph must be a model of
-   * boost::EdgeListGraph and boost::PropertyGraph.
+   * <a href="http://www.boost.org/doc/libs/1_65_1/libs/graph/doc/EdgeListGraph.html">boost::EdgeListGraph</a>
+   * and <a href="http://www.boost.org/doc/libs/1_65_1/libs/graph/doc/PropertyGraph.html">boost::PropertyGraph</a>.
    *
    * The vertex filtration value is accessible through the property tag
    * vertex_filtration_t.
