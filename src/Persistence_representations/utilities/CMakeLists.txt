@@ -1,0 +1,6 @@
+add_subdirectory(persistence_heat_maps)
+add_subdirectory(persistence_intervals)
+add_subdirectory(persistence_landscapes)
+add_subdirectory(persistence_landscapes_on_grid)
+add_subdirectory(persistence_vectors)
+

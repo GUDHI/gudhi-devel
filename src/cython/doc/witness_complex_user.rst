@@ -121,7 +121,7 @@ Example2: Computing persistence using strong relaxed witness complex
 
 Here is an example of constructing a strong witness complex filtration and computing persistence on it:
 
-* :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py>`
+* :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
 
 Bibliography
 ============

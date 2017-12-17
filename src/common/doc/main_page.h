@@ -99,7 +99,7 @@
   <tr>
     <td width="25%">
       <b>Author:</b> Mathieu Carri&egrave;re<br>
-      <b>Introduced in:</b> GUDHI 2.0.1<br>
+      <b>Introduced in:</b> GUDHI 2.1.0<br>
       <b>Copyright:</b> GPL v3<br>
     </td>
     <td width="75%">
@@ -170,6 +170,7 @@
 </table>
  
  \section Toolbox Toolbox
+ 
  \subsection BottleneckDistanceToolbox Bottleneck distance
  \image html "perturb_pd.png" "Bottleneck distance is the length of the longest edge"
 <table border="0">
@@ -229,7 +230,25 @@
     <b>User manual:</b> \ref persistent_cohomology - <b>Reference manual:</b> Gudhi::persistent_cohomology::Persistent_cohomology
     </td>
  </tr>
+</table> 
+ \subsection PersistenceRepresentationsToolbox Persistence representations
+ \image html "average_landscape.png" "Persistence representations"
+<table border="0">
+  <tr>
+    <td width="25%">
+      <b>Author:</b> Pawel Dlotko<br>
+      <b>Introduced in:</b> GUDHI 2.1.0<br>
+      <b>Copyright:</b> GPL v3<br>      
+    </td>
+    <td width="75%">
+    It contains implementation of various representations of persistence diagrams; diagrams themselves, persistence
+    landscapes (rigorous and grid version), persistence heath maps, vectors and others. It implements basic
+    functionalities which are neccessary to use persistence in statistics and machine learning.<br>
+    <b>User manual:</b> \ref Persistence_representations
+    </td>
+ </tr>
 </table>
+ 
 */
 
 /*! \page installation GUDHI installation
@@ -328,7 +347,7 @@ make doxygen
  * \li <a href="_bottleneck_distance_2bottleneck_basic_example_8cpp-example.html">
  * Bottleneck_distance/bottleneck_basic_example.cpp</a>
  * \li <a href="_bottleneck_distance_2bottleneck_read_file_8cpp-example.html">
- * Bottleneck_distance/bottleneck_read_file.cpp</a>
+ * Bottleneck_distance/bottleneck_distance.cpp</a>
  * \li <a href="_spatial_searching_2example_spatial_searching_8cpp-example.html">
  * Spatial_searching/example_spatial_searching.cpp</a>
  * \li <a href="_subsampling_2example_choose_n_farthest_points_8cpp-example.html">
@@ -411,9 +430,9 @@ make doxygen
  * \li <a href="_alpha_complex_2weighted_alpha_complex_3d_persistence_8cpp-example.html">
  * Alpha_complex/weighted_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_bitmap_cubical_complex_2_bitmap_cubical_complex_8cpp-example.html">
- * Bitmap_cubical_complex/Bitmap_cubical_complex.cpp</a>
+ * Bitmap_cubical_complex/cubical_complex_persistence.cpp</a>
  * \li <a href="_bitmap_cubical_complex_2_bitmap_cubical_complex_periodic_boundary_conditions_8cpp-example.html">
- * Bitmap_cubical_complex/Bitmap_cubical_complex_periodic_boundary_conditions.cpp</a>
+ * Bitmap_cubical_complex/periodic_cubical_complex_persistence.cpp</a>
  * \li <a href="_bitmap_cubical_complex_2_random_bitmap_cubical_complex_8cpp-example.html">
  * Bitmap_cubical_complex/Random_bitmap_cubical_complex.cpp</a>
  * \li <a href="_simplex_tree_2simple_simplex_tree_8cpp-example.html">
@@ -491,9 +510,9 @@ make doxygen
  * @example Alpha_complex/weighted_alpha_complex_3d_persistence.cpp
  * @example Bottleneck_distance/alpha_rips_persistence_bottleneck_distance.cpp
  * @example Bottleneck_distance/bottleneck_basic_example.cpp
- * @example Bottleneck_distance/bottleneck_read_file.cpp
- * @example Bitmap_cubical_complex/Bitmap_cubical_complex.cpp
- * @example Bitmap_cubical_complex/Bitmap_cubical_complex_periodic_boundary_conditions.cpp
+ * @example Bottleneck_distance/bottleneck_distance.cpp
+ * @example Bitmap_cubical_complex/cubical_complex_persistence.cpp
+ * @example Bitmap_cubical_complex/periodic_cubical_complex_persistence.cpp
  * @example Bitmap_cubical_complex/Random_bitmap_cubical_complex.cpp
  * @example common/example_CGAL_3D_points_off_reader.cpp
  * @example common/example_CGAL_points_off_reader.cpp
@@ -532,4 +551,4 @@ make doxygen
  * @example Witness_complex/weak_witness_persistence.cpp
  * @example Witness_complex/strong_witness_persistence.cpp
  */
-
+ 

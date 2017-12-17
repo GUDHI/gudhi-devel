@@ -81,23 +81,7 @@ filtration to all cubes. There are a number of constructors that can be used to 
 who want to use the code directly. They can be found in the :doc:`cubical_complex_ref`.
 Currently one input from a text file is used. It uses a format used already in
 `Perseus software <http://www.sas.upenn.edu/~vnanda/perseus/>`_ by Vidit Nanda.
-Below we are providing a description of the format. The first line contains a number d begin the dimension of the
-bitmap (2 in the example below). Next d lines are the numbers of top dimensional cubes in each dimensions (3 and 3
-in the example below). Next, in lexicographical order, the filtration of top dimensional cubes is given (1 4 6 8
-20 4 7 6 5 in the example below).
-
-.. figure::
-    ../../doc/Bitmap_cubical_complex/exampleBitmap.png
-    :alt: Example of a input data.
-    :figclass: align-center
-
-    Example of a input data.
-
-The input file for the following complex is:
-
-.. literalinclude:: ../../data/bitmap/cubicalcomplexdoc.txt
-
-.. centered:: ../../data/bitmap/cubicalcomplexdoc.txt
+The file format is described here: :doc:`Perseus <fileformats>`.
 
 .. testcode::
 
@@ -124,15 +108,9 @@ Imposing periodic boundary conditions in the direction i, means that the left an
 :math:`\mathcal{K}` are considered the same. In particular, if for a bitmap :math:`\mathcal{K}` periodic boundary
 conditions are imposed in all directions, then complex :math:`\mathcal{K}` became n-dimensional torus. One can use
 various constructors from the file Bitmap_cubical_complex_periodic_boundary_conditions_base.h to construct cubical
-complex with periodic boundary conditions. One can also use Perseus style input files. To indicate periodic boundary
-conditions in a given direction, then number of top dimensional cells in this direction have to be multiplied by -1.
-For instance:
+complex with periodic boundary conditions.
 
-.. literalinclude:: ../../data/bitmap/periodiccubicalcomplexdoc.txt
-
-.. centered:: ../../data/bitmap/periodiccubicalcomplexdoc.txt
-
-Indicate that we have imposed periodic boundary conditions in the direction x, but not in the direction y.
+One can also use Perseus style input files (see :doc:`Perseus <fileformats>`) for the specific periodic case:
 
 .. testcode::
 
@@ -149,6 +127,23 @@ the program output is:
     
     Periodic cubical complex is of dimension 2 - 42 simplices.
 
+Or it can be defined as follows:
+
+.. testcode::
+
+    from gudhi import PeriodicCubicalComplex as pcc
+    periodic_cc = pcc(dimensions=[3,3],
+         top_dimensional_cells= [0, 0, 0, 0, 1, 0, 0, 0, 0],
+         periodic_dimensions=[True, False])
+    result_str = 'Periodic cubical complex is of dimension ' + repr(periodic_cc.dimension()) + ' - ' + \
+        repr(periodic_cc.num_simplices()) + ' simplices.'
+    print(result_str)
+
+the program output is:
+
+.. testoutput::
+
+    Periodic cubical complex is of dimension 2 - 42 simplices.
 Examples.
 ---------
 
