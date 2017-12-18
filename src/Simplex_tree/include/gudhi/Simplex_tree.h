@@ -106,8 +106,9 @@ class Simplex_tree {
   };
   struct Key_simplex_base_dummy {
     Key_simplex_base_dummy() {}
-    void assign_key(Simplex_key) { }
-    Simplex_key key() const { assert(false); return -1; }
+    // Undefined so it will not link
+    void assign_key(Simplex_key);
+    Simplex_key key() const;
   };
   typedef typename std::conditional<Options::store_key, Key_simplex_base_real, Key_simplex_base_dummy>::type
       Key_simplex_base;
@@ -121,7 +122,7 @@ class Simplex_tree {
   };
   struct Filtration_simplex_base_dummy {
     Filtration_simplex_base_dummy() {}
-    void assign_filtration(Filtration_value f) { assert(f == 0); }
+    void assign_filtration(Filtration_value GUDHI_CHECK_code(f)) { GUDHI_CHECK(f == 0, "filtration value specified for a complex that does not store them"); }
     Filtration_value filtration() const { return 0; }
   };
   typedef typename std::conditional<Options::store_filtration, Filtration_simplex_base_real,
