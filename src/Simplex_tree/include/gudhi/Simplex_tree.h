@@ -665,71 +665,63 @@ class Simplex_tree {
    */
   template<class InputVertexRange = std::initializer_list<Vertex_handle>>
   std::pair<Simplex_handle, bool> insert_simplex_and_subfaces(const InputVertexRange& Nsimplex,
-                                   Filtration_value filtration = 0) {
+				    Filtration_value filtration = 0) {
     auto first = std::begin(Nsimplex);
     auto last = std::end(Nsimplex);
 
     if (first == last)
-      return std::pair<Simplex_handle, bool>(null_simplex(), true);  // ----->>
+      return { null_simplex(), true };  // ----->>
 
     // Copy before sorting
-    std::vector<Vertex_handle> copy(first, last);
+    thread_local std::vector<Vertex_handle> copy;
+    copy.clear();
+    copy.insert(copy.end(), first, last);
     std::sort(std::begin(copy), std::end(copy));
 
-    std::vector<std::vector<Vertex_handle>> to_be_inserted;
-    std::vector<std::vector<Vertex_handle>> to_be_propagated;
-    return rec_insert_simplex_and_subfaces(copy, to_be_inserted, to_be_propagated, filtration);
+    return insert_simplex_and_subfaces_sorted(copy, filtration);
   }
 
  private:
-  std::pair<Simplex_handle, bool> rec_insert_simplex_and_subfaces(std::vector<Vertex_handle>& the_simplex,
-                                                             std::vector<std::vector<Vertex_handle>>& to_be_inserted,
-                                                             std::vector<std::vector<Vertex_handle>>& to_be_propagated,
-                                                             Filtration_value filtration = 0.0) {
-    std::pair<Simplex_handle, bool> insert_result;
-    if (the_simplex.size() > 1) {
-      // Get and remove last vertex
-      Vertex_handle last_vertex = the_simplex.back();
-      the_simplex.pop_back();
-      // Recursive call after last vertex removal
-      insert_result = rec_insert_simplex_and_subfaces(the_simplex, to_be_inserted, to_be_propagated, filtration);
-
-      // Concatenation of to_be_inserted and to_be_propagated
-      to_be_inserted.insert(to_be_inserted.begin(), to_be_propagated.begin(), to_be_propagated.end());
-      to_be_propagated = to_be_inserted;
-
-      // to_be_inserted treatment
-      for (auto& simplex_tbi : to_be_inserted) {
-        simplex_tbi.push_back(last_vertex);
+  /// Same as insert_simplex_and_subfaces but assumes that the range of vertices is sorted
+  template<class ForwardVertexRange = std::initializer_list<Vertex_handle>>
+  std::pair<Simplex_handle, bool> insert_simplex_and_subfaces_sorted(const ForwardVertexRange& Nsimplex, Filtration_value filt = 0) {
+    auto first = std::begin(Nsimplex);
+    auto last = std::end(Nsimplex);
+    if (first == last)
+      return { null_simplex(), true }; // FIXME: false would make more sense to me.
+    GUDHI_CHECK(std::is_sorted(first, last), "simplex vertices listed in unsorted order");
+    // Update dimension if needed. We could wait to see if the insertion succeeds, but I doubt there is much to gain.
+    dimension_ = std::max(dimension_, static_cast<int>(std::distance(first, last)) - 1);
+    return rec_insert_simplex_and_subfaces_sorted(root(), first, last, filt);
+  }
+  // To insert {1,2,3,4}, we insert {2,3,4} twice, once at the root, and once below 1.
+  template<class ForwardVertexIterator>
+  std::pair<Simplex_handle, bool> rec_insert_simplex_and_subfaces_sorted(Siblings* sib, ForwardVertexIterator first, ForwardVertexIterator last, Filtration_value filt) {
+    // An alternative strategy would be:
+    // - try to find the complete simplex, if found (and low filtration) exit
+    // - insert all the vertices at once in sib
+    // - loop over those (new or not) simplices, with a recursive call(++first, last)
+    Vertex_handle vertex_one = *first;
+    auto&& dict = sib->members();
+    auto insertion_result = dict.emplace(vertex_one, Node(sib, filt));
+    Simplex_handle simplex_one = insertion_result.first;
+    bool one_is_new = insertion_result.second;
+    if (!one_is_new) {
+      if (filtration(simplex_one) > filt) {
+	assign_filtration(simplex_one, filt);
+      } else {
+	// FIXME: this interface makes no sense, and it doesn't seem to be tested.
+	insertion_result.first = null_simplex();
       }
-      std::vector<Vertex_handle> last_simplex(1, last_vertex);
-      to_be_inserted.insert(to_be_inserted.begin(), last_simplex);
-      // i.e. (0,1,2) =>
-      // [to_be_inserted | to_be_propagated] = [(1) (0,1) | (0)]
-      // [to_be_inserted | to_be_propagated] = [(2) (0,2) (1,2) (0,1,2) | (0) (1) (0,1)]
-      // N.B. : it is important the last inserted to be the highest in dimension
-      // in order to return the "last" insert_simplex result
-
-      // insert all to_be_inserted
-      for (auto& simplex_tbi : to_be_inserted) {
-        insert_result = insert_vertex_vector(simplex_tbi, filtration);
-      }
-    } else if (the_simplex.size() == 1) {
-      // When reaching the end of recursivity, vector of simplices shall be empty and filled on back recursive
-      if ((to_be_inserted.size() != 0) || (to_be_propagated.size() != 0)) {
-        std::cerr << "Simplex_tree::rec_insert_simplex_and_subfaces - Error vector not empty\n";
-        exit(-1);
-      }
-      std::vector<Vertex_handle> first_simplex(1, the_simplex.back());
-      // i.e. (0,1,2) => [to_be_inserted | to_be_propagated] = [(0) | ]
-      to_be_inserted.push_back(first_simplex);
-
-      insert_result = insert_vertex_vector(first_simplex, filtration);
-    } else {
-        std::cerr << "Simplex_tree::rec_insert_simplex_and_subfaces - Recursivity error\n";
-        exit(-1);
     }
-    return insert_result;
+    if (++first == last) return insertion_result;
+    if (!has_children(simplex_one))
+      // TODO: have special code here, we know we are building the whole subtree from scratch.
+      simplex_one->second.assign_children(new Siblings(sib, vertex_one));
+    auto res = rec_insert_simplex_and_subfaces_sorted(simplex_one->second.children(), first, last, filt);
+    // No need to continue if the full simplex was already there with a low enough filtration value.
+    if (res.first != null_simplex()) rec_insert_simplex_and_subfaces_sorted(sib, first, last, filt);
+    return res;
   }
 
  public:
