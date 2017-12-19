@@ -1063,10 +1063,11 @@ class Cover_complex {
             for(int j = 0; j < numt; j++){
               int vt = cover[index[target(*ei, one_skeleton)]][j];
               if(cover_fct[vs] == cover_fct[vt] + 1 || cover_fct[vt] == cover_fct[vs] + 1){
-                vector<int> edge(2); edge[0] = vs; edge[1] = vt; simplices.push_back(edge);
+                vector<int> edge(2); edge[0] = vs; edge[1] = vt; simplices.push_back(edge); goto afterLoop;
               }
             }
           }
+          afterLoop: ;
         }
         sort(simplices.begin(), simplices.end());
         vector<vector<int> >::iterator it = unique(simplices.begin(), simplices.end());
