@@ -98,7 +98,13 @@ public:
     end = clock();
     time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
     std::cout << "Computed alcove coordinate map in " << time << " s. \n";
-            
+
+    // std::cout << "AMap:\n";
+    // for (auto m: a_map) 
+    //   std::cout << m.first << ": " << std::get<0>(m.second) << ", "
+    //             << "size=" << std::get<1>(m.second).size() << std::endl;    
+    // std::cout << "\n";
+    
     start = clock();
     for (auto a_it = a_map.begin(); a_it != a_map.end(); ++a_it) {
       std::vector<Vertex_id> vertices = cs_.vertices_of_alcove(a_it->first);
@@ -129,11 +135,6 @@ public:
 
     // subdivision part
     
-    // std::cout << "AMap:\n";
-    // for (auto m: a_map) 
-    //   std::cout << m.first << ": " << std::get<0>(m.second) << ", "
-    //             << "size=" << std::get<1>(m.second).size() << std::endl;    
-    // std::cout << "\n";
     
     // std::cout << "VMap:\n";
     // for (auto m: v_map) 

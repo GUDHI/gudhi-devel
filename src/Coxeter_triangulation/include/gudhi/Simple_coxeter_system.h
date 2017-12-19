@@ -5,6 +5,7 @@
 #include <vector>
 #include <exception>
 #include <Eigen/Sparse>
+// #include <Eigen/SPQRSupport>
 
 class Simple_coxeter_system {
 
@@ -119,6 +120,58 @@ public:
       Eigen::SimplicialLLT<Matrix, Eigen::Lower> chol(cartan);
       root_t_ = chol.matrixL();
       // std::cout << "root^t =" << std::endl << root_t_ << std::endl;
+      break;
+    }  
+    case 'E': {   
+      unsigned short d = dimension;
+      vertex_level_ = 2;
+      assert(d >= 6 && d <= 8);
+      std::vector<Triplet> cartan_triplets;
+      cartan_triplets.reserve(3*d-2);
+      for (unsigned i = 0; i < d; i++) {
+        cartan_triplets.push_back(Triplet(i,i,2.0));
+      }
+      for (int i = 3; i < d; i++) {
+        cartan_triplets.push_back(Triplet(i-1,i,-1.0));
+        cartan_triplets.push_back(Triplet(i,i-1,-1.0));
+      }
+      cartan_triplets.push_back(Triplet(2,0,-1.0));
+      cartan_triplets.push_back(Triplet(3,1,-1.0));
+      cartan_triplets.push_back(Triplet(0,2,-1.0));
+      cartan_triplets.push_back(Triplet(1,3,-1.0));
+      Matrix cartan(d,d);
+      cartan.setFromTriplets(cartan_triplets.begin(), cartan_triplets.end());
+      std::cout << "cartan =" << std::endl << cartan << std::endl;
+      Eigen::SimplicialLLT<Matrix, Eigen::Lower> chol(cartan);
+      root_t_ = chol.matrixL();
+      std::cout << "root^t =" << std::endl << root_t_ << std::endl;
+      Eigen::MatrixXf base(8,8);      
+      std::vector<Triplet> base_triplets;
+      base(0,0) = 0.5;
+      base(7,0) = 0.5;
+      base(1,0) = -0.5;
+      base(2,0) = -0.5;
+      base(3,0) = -0.5;
+      base(4,0) = -0.5;
+      base(5,0) = -0.5;
+      base(6,0) = -0.5;
+      base(0,1) = 1.0;
+      base(1,1) = 1.0;
+      for (int i = 0; i < d-2; ++i) {
+        base(i, i+2) =  -1.0;
+        base(i+1, i+2) =  1.0;
+      }
+      if (d <= 6) {
+        base(5,6) = 1.0;
+        base(6,6) = -1.0;
+      }
+      if (d <= 7) {
+        base(6,7) = 1.0;
+        base(7,7) = 1.0;
+      }
+      std::cout << "base = " << std::endl << base << std::endl;
+      std::cout << "base^{-1} = " << std::endl << base.inverse() << std::endl;
+      // for (int i = )
       break;
     }  
     default :
@@ -236,6 +289,58 @@ public:
       }
       break;
     }
+      
+    case 'E': {
+      // r1
+      *output_it++ = std::floor(level * scalprod_vect(0));
+      // // r2
+      // *output_it++ = std::floor(level * scalprod_vect(1));
+      for (short k = 1; k < d; k++) {
+        // e_i - e_j OK
+        FT root_scalprod = 0;
+        for (short j = k; j >= 3; j--) {
+          root_scalprod += scalprod_vect(j);
+          *output_it++ = std::floor(level * root_scalprod);
+        }
+        // e_i + e_j OK
+        FT global_scalprod = -scalprod_vect(1)-scalprod_vect(2);
+        for (short i = 2; i <= k; i++) {
+          global_scalprod += 2*scalprod_vect(i);
+          FT root_scalprod = global_scalprod;
+          for (short j = i+1; j <= k; j++) {
+            root_scalprod += scalprod_vect(j);
+          }
+          *output_it++ = std::floor(level * root_scalprod);
+        }
+        // 1/2(prefix + sum of 1 - sum of (2d-8)) OK
+        root_scalprod = scalprod_vect(0);
+        for (short i = k; i >= 3; i--)
+          root_scalprod += scalprod_vect(i);
+        *output_it++ = std::floor(level * root_scalprod);
+        // 1/2(prefix + sum of 3 - sum of (2d-10))
+        global_scalprod = scalprod_vect(0) + scalprod_vect(3) + scalprod_vect(4) + scalprod_vect(5);
+        for (short i = 1; i < k-1; i++) {
+          global_scalprod += scalprod_vect(i) + scalprod_vect(i+1);
+          *output_it++ = std::floor(level * global_scalprod);
+          root_scalprod = global_scalprod;
+          for (short j = i+2; j < k; j++) {
+            root_scalprod += scalprod_vect(j);
+            *output_it++ = std::floor(level * root_scalprod);
+          }
+        }
+        // 1/2(prefix + sum of 5 - sum of (2d-12))
+        for (short i = 1; i < k-4; i++) {
+          root_scalprod = scalprod_vect(0) + 2*scalprod_vect(1) + 2*scalprod_vect(2) + 3*scalprod_vect(3) + 2*scalprod_vect(4) + scalprod_vect(5);
+          *output_it++ = std::floor(level * root_scalprod);
+        }
+        // 1/2(prefix + sum of 7 - sum of (2d-14))
+        if (d == 8) {
+          root_scalprod = scalprod_vect(0) + 2*scalprod_vect(1) + 2*scalprod_vect(2) + 3*scalprod_vect(3) + 2*scalprod_vect(4) + scalprod_vect(5);
+          *output_it++ = std::floor(level * root_scalprod);
+        }
+      }
+      break;
+    }
     default :
       std::cerr << "Simple_coxeter_system::alcove_coordinates : The family " << family_ << " is not supported. "
                 << "Please use A, B, C or D family for the constructor (in capital).\n";
@@ -249,8 +354,15 @@ public:
     case 'B': { return dimension_*dimension_; break; } 
     case 'C': { return dimension_*dimension_; break; } 
     case 'D': { return dimension_*(dimension_ - 1); break; }
+    case 'E': {
+      switch (dimension_) {
+      case 6: return 36;
+      case 7: return 63;
+      case 8: return 120;
+      }
+    }
     default :
-      std::cerr << "Simple_coxeter_system::alcove_coordinates : The family " << family_ << " is not supported. "
+      std::cerr << "Simple_coxeter_system::pos_root_count : The family " << family_ << " is not supported. "
                 << "Please use A, B, C or D family for the constructor (in capital).\n";
       throw wrong_family_exception_;
     }
@@ -460,7 +572,9 @@ private:
           return;
         Matrix int_roots(integers, d);
         int_roots.setFromTriplets(triplets.begin(), triplets.end());
-        Eigen::SparseQR<Matrix, Eigen::COLAMDOrdering<int>> spQR(int_roots);
+        // Eigen::SparseQR<Matrix, Eigen::COLAMDOrdering<int>> spQR(int_roots);
+        Eigen::SparseQR<Matrix, Eigen::NaturalOrdering<int>> spQR(int_roots);
+        // Eigen::SPQR<Matrix> spQR(int_roots);
         if (spQR.rank() == d)
           vertices.emplace_back(v_id);
         return;
