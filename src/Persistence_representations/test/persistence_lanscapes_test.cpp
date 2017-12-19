@@ -25,6 +25,7 @@
 #include <boost/test/unit_test.hpp>
 #include <gudhi/reader_utils.h>
 #include <gudhi/Persistence_landscape.h>
+#include <gudhi/Unitary_tests_utils.h>
 
 #include <iostream>
 #include <limits>
@@ -32,7 +33,7 @@
 using namespace Gudhi;
 using namespace Gudhi::Persistence_representations;
 
-double epsilon = 0.0000005;
+double epsilon = 0.0005;
 
 BOOST_AUTO_TEST_CASE(check_construction_of_landscape) {	
   std::vector<std::pair<double, double> > diag =
@@ -57,9 +58,9 @@ BOOST_AUTO_TEST_CASE(check_computations_of_integrals) {
   std::vector<std::pair<double, double> > diag =
       read_persistence_intervals_in_one_dimension_from_file("data/file_with_diagram");
   Persistence_landscape p(diag);
-  double integral = p.compute_integral_of_landscape();
-  // cerr << integral  << " " << 2.34992 << endl;
-  BOOST_CHECK(fabs(integral - 2.34992) <= 0.00001);
+  //double integral = p.compute_integral_of_landscape();
+  //BOOST_CHECK(fabs(integral - 2.34992) <= 0.00001);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_integral_of_landscape(), 2.34992, epsilon);
 }
 
 BOOST_AUTO_TEST_CASE(check_computations_of_integrals_for_each_level_separatelly) {
@@ -67,37 +68,39 @@ BOOST_AUTO_TEST_CASE(check_computations_of_integrals_for_each_level_separatelly)
       read_persistence_intervals_in_one_dimension_from_file("data/file_with_diagram");
   Persistence_landscape p(diag);
 
-  std::vector<double> integrals_fir_different_levels;
-  integrals_fir_different_levels.push_back(0.216432);
-  integrals_fir_different_levels.push_back(0.204763);
-  integrals_fir_different_levels.push_back(0.188793);
-  integrals_fir_different_levels.push_back(0.178856);
-  integrals_fir_different_levels.push_back(0.163142);
-  integrals_fir_different_levels.push_back(0.155015);
-  integrals_fir_different_levels.push_back(0.143046);
-  integrals_fir_different_levels.push_back(0.133765);
-  integrals_fir_different_levels.push_back(0.123531);
-  integrals_fir_different_levels.push_back(0.117393);
-  integrals_fir_different_levels.push_back(0.111269);
-  integrals_fir_different_levels.push_back(0.104283);
-  integrals_fir_different_levels.push_back(0.0941308);
-  integrals_fir_different_levels.push_back(0.0811208);
-  integrals_fir_different_levels.push_back(0.0679001);
-  integrals_fir_different_levels.push_back(0.0580801);
-  integrals_fir_different_levels.push_back(0.0489647);
-  integrals_fir_different_levels.push_back(0.0407936);
-  integrals_fir_different_levels.push_back(0.0342599);
-  integrals_fir_different_levels.push_back(0.02896);
-  integrals_fir_different_levels.push_back(0.0239881);
-  integrals_fir_different_levels.push_back(0.0171792);
-  integrals_fir_different_levels.push_back(0.0071511);
-  integrals_fir_different_levels.push_back(0.00462067);
-  integrals_fir_different_levels.push_back(0.00229033);
-  integrals_fir_different_levels.push_back(0.000195296);
+  std::vector<double> integrals_for_different_levels;
+  integrals_for_different_levels.push_back(0.216432);
+  integrals_for_different_levels.push_back(0.204763);
+  integrals_for_different_levels.push_back(0.188793);
+  integrals_for_different_levels.push_back(0.178856);
+  integrals_for_different_levels.push_back(0.163142);
+  integrals_for_different_levels.push_back(0.155015);
+  integrals_for_different_levels.push_back(0.143046);
+  integrals_for_different_levels.push_back(0.133765);
+  integrals_for_different_levels.push_back(0.123531);
+  integrals_for_different_levels.push_back(0.117393);
+  integrals_for_different_levels.push_back(0.111269);
+  integrals_for_different_levels.push_back(0.104283);
+  integrals_for_different_levels.push_back(0.0941308);
+  integrals_for_different_levels.push_back(0.0811208);
+  integrals_for_different_levels.push_back(0.0679001);
+  integrals_for_different_levels.push_back(0.0580801);
+  integrals_for_different_levels.push_back(0.0489647);
+  integrals_for_different_levels.push_back(0.0407936);
+  integrals_for_different_levels.push_back(0.0342599);
+  integrals_for_different_levels.push_back(0.02896);
+  integrals_for_different_levels.push_back(0.0239881);
+  integrals_for_different_levels.push_back(0.0171792);
+  integrals_for_different_levels.push_back(0.0071511);
+  integrals_for_different_levels.push_back(0.00462067);
+  integrals_for_different_levels.push_back(0.00229033);
+  integrals_for_different_levels.push_back(0.000195296);
 
   for (size_t level = 0; level != p.size(); ++level) {
-    double integral = p.compute_integral_of_a_level_of_a_landscape(level);
-    BOOST_CHECK(fabs(integral - integrals_fir_different_levels[level]) <= 0.00001);
+    //double integral = p.compute_integral_of_a_level_of_a_landscape(level);
+    GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_integral_of_a_level_of_a_landscape(level),
+                                    integrals_for_different_levels[level], epsilon);
+    //BOOST_CHECK(fabs(integral - integrals_for_different_levels[level]) <= 0.00001);
   }
 }
 
@@ -106,16 +109,16 @@ BOOST_AUTO_TEST_CASE(check_computations_of_integrals_of_powers_of_landscape) {
       read_persistence_intervals_in_one_dimension_from_file("data/file_with_diagram");
   Persistence_landscape p(diag);
 
-  std::vector<double> integrals_fir_different_powers;
-  integrals_fir_different_powers.push_back(17.1692);
-  integrals_fir_different_powers.push_back(2.34992);
-  integrals_fir_different_powers.push_back(0.49857);
-  integrals_fir_different_powers.push_back(0.126405);
-  integrals_fir_different_powers.push_back(0.0355235);
+  std::vector<double> integrals_for_different_powers;
+  integrals_for_different_powers.push_back(17.1692);
+  integrals_for_different_powers.push_back(2.34992);
+  integrals_for_different_powers.push_back(0.49857);
+  integrals_for_different_powers.push_back(0.126405);
+  integrals_for_different_powers.push_back(0.0355235);
 
   for (size_t power = 0; power != 5; ++power) {
-    double integral = p.compute_integral_of_landscape((double)power);
-    BOOST_CHECK(fabs(integral - integrals_fir_different_powers[power]) <= 0.00005);
+    GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_integral_of_landscape((double)power),
+                                    integrals_for_different_powers[power], epsilon);
   }
 }
 
