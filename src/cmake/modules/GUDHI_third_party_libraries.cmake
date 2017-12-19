@@ -1,6 +1,6 @@
 # This files manage third party libraries required by GUDHI
 
-find_package(Boost 1.56.0 REQUIRED COMPONENTS system filesystem unit_test_framework program_options thread)
+find_package(Boost 1.48.0 REQUIRED COMPONENTS system filesystem unit_test_framework program_options thread)
 
 if(NOT Boost_FOUND)
   message(FATAL_ERROR "NOTICE: This program requires Boost and will not be compiled.")

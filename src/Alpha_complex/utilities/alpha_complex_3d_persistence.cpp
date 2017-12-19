@@ -20,9 +20,13 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <boost/version.hpp>
 #include <boost/program_options.hpp>
 #include <boost/variant.hpp>
+
+#if BOOST_VERSION >= 105400
 #include <boost/container/static_vector.hpp>
+#endif
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
@@ -66,7 +70,12 @@ using Cell_handle = Alpha_shape_3::Cell_handle;
 using Facet = Alpha_shape_3::Facet;
 using Edge_3 = Alpha_shape_3::Edge;
 using Vertex_handle = Alpha_shape_3::Vertex_handle;
+
+#if BOOST_VERSION >= 105400
 using Vertex_list = boost::container::static_vector<Alpha_shape_3::Vertex_handle, 4>;
+#else
+using Vertex_list = std::vector<Alpha_shape_3::Vertex_handle>;
+#endif
 
 // gudhi type definition
 using ST = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;

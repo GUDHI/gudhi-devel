@@ -5,7 +5,7 @@ Compiling
 *********
 
 The library uses c++11 and requires `Boost <http://www.boost.org/>`_ with
-version 1.56.0 or more recent. It is a multi-platform library and compiles on
+version 1.48.0 or more recent. It is a multi-platform library and compiles on
 Linux, Mac OSX and Visual Studio 2015.
 It also requires cmake to generate makefiles, and cython to compile the
 library.
