@@ -127,18 +127,18 @@ BOOST_AUTO_TEST_CASE(check_computations_of_values_on_different_points) {
       read_persistence_intervals_in_one_dimension_from_file("data/file_with_diagram");
   Persistence_landscape p(diag);
 
-  BOOST_CHECK(fabs(p.compute_value_at_a_given_point(1, 0.0)) <= 0.00001);
-  BOOST_CHECK(fabs(p.compute_value_at_a_given_point(1, 0.1) - 0.0692324) <= 0.00001);
-  BOOST_CHECK(fabs(p.compute_value_at_a_given_point(1, 0.2) - 0.163369) <= 0.00001);
-  BOOST_CHECK(fabs(p.compute_value_at_a_given_point(1, 0.3) - 0.217115) <= 0.00001);
-  BOOST_CHECK(fabs(p.compute_value_at_a_given_point(2, 0.0)) <= 0.00001);
-  BOOST_CHECK(fabs(p.compute_value_at_a_given_point(2, 0.1) - 0.0633688) <= 0.00001);
-  BOOST_CHECK(fabs(p.compute_value_at_a_given_point(2, 0.2) - 0.122361) <= 0.00001);
-  BOOST_CHECK(fabs(p.compute_value_at_a_given_point(2, 0.3) - 0.195401) <= 0.00001);
-  BOOST_CHECK(fabs(p.compute_value_at_a_given_point(3, 0.0)) <= 0.00001);
-  BOOST_CHECK(fabs(p.compute_value_at_a_given_point(3, 0.1) - 0.0455386) <= 0.00001);
-  BOOST_CHECK(fabs(p.compute_value_at_a_given_point(3, 0.2) - 0.0954012) <= 0.00001);
-  BOOST_CHECK(fabs(p.compute_value_at_a_given_point(3, 0.3) - 0.185282) <= 0.00001);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_value_at_a_given_point(1, 0.0), 0.       , epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_value_at_a_given_point(1, 0.1), 0.0692324, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_value_at_a_given_point(1, 0.2), 0.163369 , epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_value_at_a_given_point(1, 0.3), 0.217115 , epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_value_at_a_given_point(2, 0.0), 0.       , epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_value_at_a_given_point(2, 0.1), 0.0633688, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_value_at_a_given_point(2, 0.2), 0.122361 , epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_value_at_a_given_point(2, 0.3), 0.195401 , epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_value_at_a_given_point(3, 0.0), 0.       , epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_value_at_a_given_point(3, 0.1), 0.0455386, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_value_at_a_given_point(3, 0.2), 0.0954012, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_value_at_a_given_point(3, 0.3), 0.185282 , epsilon);
 }
 
 BOOST_AUTO_TEST_CASE(check_computations_sum_differences_and_multiplications) {
@@ -174,13 +174,14 @@ BOOST_AUTO_TEST_CASE(check_computations_of_maxima_and_norms) {
   second.load_landscape_from_file("data/file_with_landscape_from_file_with_diagram_1");
   Persistence_landscape sum = p + second;
 
-  BOOST_CHECK(fabs(p.compute_maximum() - 0.431313) <= 0.00001);
-  BOOST_CHECK(fabs(p.compute_norm_of_landscape(1) - 2.34992) <= 0.00001);
-  BOOST_CHECK(fabs(p.compute_norm_of_landscape(2) - 0.706095) <= 0.00001);
-  BOOST_CHECK(fabs(p.compute_norm_of_landscape(3) - 0.501867) <= 0.00001);
-  BOOST_CHECK(fabs(compute_distance_of_landscapes(p, sum, 1) - 27.9323) <= 0.00005);
-  BOOST_CHECK(fabs(compute_distance_of_landscapes(p, sum, 2) - 2.35199) <= 0.00001);
-  BOOST_CHECK(fabs(compute_distance_of_landscapes(p, sum, std::numeric_limits<double>::max()) - 0.464478) <= 0.00001);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_maximum()           , 0.431313, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_norm_of_landscape(1), 2.34992 , epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_norm_of_landscape(2), 0.706095, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_norm_of_landscape(3), 0.501867, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(compute_distance_of_landscapes(p, sum, 1), 27.9323, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(compute_distance_of_landscapes(p, sum, 2), 2.35199, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(compute_distance_of_landscapes(p, sum, std::numeric_limits<double>::max()),
+                                  0.464478, epsilon);
 }
 
 BOOST_AUTO_TEST_CASE(check_default_parameters_of_distances) {
@@ -195,7 +196,7 @@ BOOST_AUTO_TEST_CASE(check_default_parameters_of_distances) {
   double dist_numeric_limit_max = p.distance(q, std::numeric_limits<double>::max());
   double dist_infinity = p.distance(q, std::numeric_limits<double>::infinity());
 
-  BOOST_CHECK(dist_numeric_limit_max == dist_infinity);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(dist_numeric_limit_max, dist_infinity);
 }
 
 BOOST_AUTO_TEST_CASE(check_computations_of_averages) {
@@ -220,13 +221,9 @@ BOOST_AUTO_TEST_CASE(check_computations_of_distances) {
   std::vector<std::pair<double, double> > diag2 =
       read_persistence_intervals_in_one_dimension_from_file("data/file_with_diagram_1");
   Persistence_landscape q(diag2);
-  std::cout << "p.distance(q) = " << p.distance(q) << std::endl;
-  BOOST_CHECK(fabs(p.distance(q) - 25.5824) <= 0.00005);
-  std::cout << "p.distance(q, 2) = " << p.distance(q, 2) << std::endl;
-  BOOST_CHECK(fabs(p.distance(q, 2) - 2.1264) <= 0.0001);
-  std::cout << "p.distance(q, std::numeric_limits<double>::max()) = " <<
-               p.distance(q, std::numeric_limits<double>::max()) << std::endl;
-  BOOST_CHECK(fabs(p.distance(q, std::numeric_limits<double>::max()) - 0.359068) <= 0.00001);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.distance(q), 25.5824, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.distance(q, 2), 2.1264, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.distance(q, std::numeric_limits<double>::max()), 0.359068, epsilon);
 }
 
 BOOST_AUTO_TEST_CASE(check_computations_of_scalar_product) {
@@ -236,7 +233,7 @@ BOOST_AUTO_TEST_CASE(check_computations_of_scalar_product) {
   std::vector<std::pair<double, double> > diag2 =
       read_persistence_intervals_in_one_dimension_from_file("data/file_with_diagram_1");
   Persistence_landscape q(diag2);
-  BOOST_CHECK(fabs(p.compute_scalar_product(q) - 0.754498) <= 0.00001);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_scalar_product(q), 0.754498, epsilon);
 }
 
 
