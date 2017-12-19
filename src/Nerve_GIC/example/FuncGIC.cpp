@@ -71,6 +71,7 @@ int main(int argc, char **argv) {
 
     Gudhi::Simplex_tree<> stree;
     GIC.create_complex(stree);
+    GIC.compute_PD<Gudhi::Simplex_tree<> >();
 
     // --------------------------------------------
     // Display information about the functional GIC

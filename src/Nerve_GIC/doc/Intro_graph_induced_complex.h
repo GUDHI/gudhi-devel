@@ -169,7 +169,7 @@ namespace cover_complex {
  *
  * When launching:
  *
- * \code $> ./FuncGIC ../../data/points/COIL_database/lucky_cat.off ../../data/points/COIL_database/lucky_cat_PCA1 --v
+ * \code $> ./FuncGIC ../../../../data/points/COIL_database/lucky_cat.off ../../../../data/points/COIL_database/lucky_cat_PCA1 --v
  * \endcode
  *
  * the program outputs again SC.dot which gives the following visualization after using neato:

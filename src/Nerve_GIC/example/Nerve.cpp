@@ -25,19 +25,21 @@
 #include <string>
 #include <vector>
 
+using namespace std;
+
 void usage(int nbArgs, char *const progName) {
-  std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
-  std::cerr << "Usage: " << progName << " filename.off coordinate resolution gain [--v] \n";
-  std::cerr << "       i.e.: " << progName << " ../../data/points/human.off 2 10 0.3 --v \n";
+  cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
+  cerr << "Usage: " << progName << " filename.off coordinate resolution gain [--v] \n";
+  cerr << "       i.e.: " << progName << " ../../data/points/human.off 2 10 0.3 --v \n";
   exit(-1);  // ----- >>
 }
 
 int main(int argc, char **argv) {
   if ((argc != 5) && (argc != 6)) usage(argc, argv[0]);
 
-  using Point = std::vector<float>;
+  using Point = vector<float>;
 
-  std::string off_file_name(argv[1]);
+  string off_file_name(argv[1]);
   int coord = atoi(argv[2]);
   int resolution = atoi(argv[3]);
   double gain = atof(argv[4]);
@@ -54,7 +56,7 @@ int main(int argc, char **argv) {
   bool check = SC.read_point_cloud(off_file_name);
 
   if (!check) {
-    std::cout << "Incorrect OFF file." << std::endl;
+    cout << "Incorrect OFF file." << endl;
   } else {
     SC.set_type("Nerve");
 
@@ -72,6 +74,7 @@ int main(int argc, char **argv) {
 
     Gudhi::Simplex_tree<> stree;
     SC.create_complex(stree);
+    SC.compute_PD<Gudhi::Simplex_tree<> >();
 
     // ----------------------------------------------------------------------------
     // Display information about the graph induced complex
