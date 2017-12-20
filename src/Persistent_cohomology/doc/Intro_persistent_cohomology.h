@@ -165,7 +165,7 @@ outputs its persistence diagram.
 \li <a href="_alpha_complex_2alpha_complex_3d_persistence_8cpp-example.html">
 Alpha_complex/alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
 \f$\mathbb{Z}/2\mathbb{Z}\f$ coefficients of the alpha complex on points sampling from an OFF file.
-\code $> ./alpha_complex_3d_persistence ../../data/points/tore3D_300.off 2 0.45 \endcode
+\code $> ./alpha_complex_3d_persistence ../../data/points/tore3D_300.off -p 2 -m 0.45 \endcode
 \code Simplex_tree dim: 3
 2  0 0 inf 
 2  1 0.0682162 1.0001 
@@ -177,7 +177,7 @@ Alpha_complex/exact_alpha_complex_3d_persistence.cpp</a> computes the persistent
 \f$\mathbb{Z}/2\mathbb{Z}\f$ coefficients of the alpha complex on points sampling from an OFF file.
 Here, as CGAL computes the exact values, it is slower, but it is necessary when points are on a grid
 for instance.
-\code $> ./exact_alpha_complex_3d_persistence ../../data/points/sphere3D_pts_on_grid.off 2 0.1 \endcode
+\code $> ./exact_alpha_complex_3d_persistence ../../data/points/sphere3D_pts_on_grid.off -p 2 -m 0.1 \endcode
 \code Simplex_tree dim: 3
 2  0 0 inf
 2  2 0.0002 0.2028 \endcode
@@ -187,7 +187,7 @@ Alpha_complex/weighted_alpha_complex_3d_persistence.cpp</a> computes the persist
 \f$\mathbb{Z}/2\mathbb{Z}\f$ coefficients of the weighted alpha complex on points sampling from an OFF file
 and a weights file.
 \code $> ./weighted_alpha_complex_3d_persistence ../../data/points/tore3D_300.off
-../../data/points/tore3D_300.weights 2 0.45 \endcode
+../../data/points/tore3D_300.weights -p 2 -m 0.45 \endcode
 \code Simplex_tree dim: 3
 2  0 -1 inf
 2  1 -0.931784 0.000103311
@@ -208,8 +208,10 @@ Simplex_tree dim: 3
 \li <a href="_alpha_complex_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
 Alpha_complex/periodic_alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
 \f$\mathbb{Z}/2\mathbb{Z}\f$ coefficients of the periodic alpha complex on points sampling from an OFF file.
+The second parameter is a \ref FileFormatsIsoCuboid file with coordinates of the periodic cuboid.
+Note that the lengths of the sides of the periodic cuboid have to be the same.
 \code $> ./periodic_alpha_complex_3d_persistence ../../data/points/grid_10_10_10_in_0_1.off
-../../data/points/iso_cuboid_3_in_0_1.txt 3 1.0 \endcode
+../../data/points/iso_cuboid_3_in_0_1.txt -p 3 -m 1.0 \endcode
 \code Periodic Delaunay computed.
 Simplex_tree dim: 3
 3  0 0 inf 
@@ -220,6 +222,28 @@ Simplex_tree dim: 3
 3  2 0.005 inf 
 3  2 0.005 inf 
 3  3 0.0075 inf \endcode
+
+\li <a href="_persistent_cohomology_2weighted_periodic_alpha_complex_3d_persistence_8cpp-example.html">
+Persistent_cohomology/weighted_periodic_alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
+\f$\mathbb{Z}/2\mathbb{Z}\f$ coefficients of the periodic alpha complex on weighted points from an OFF file. The
+additional parameters of this program are:<br>
+(a) The file with the weights of points. The file consist of a sequence of numbers (as many as points).
+Note that the weight of each single point have to be bounded by 1/64 times the square of the diameter of
+the cuboid.<br>
+(b) A \ref FileFormatsIsoCuboid file with coordinates of the periodic cuboid.
+Note that the lengths of the sides of the periodic cuboid have to be the same.<br>
+\code $> ./weighted_periodic_alpha_complex_3d_persistence ../../data/points/shifted_sphere.off
+../../data/points/shifted_sphere.weights ../../data/points/iso_cuboid_3_in_0_10.txt 3 1.0 \endcode
+\code Weighted Periodic Delaunay computed.
+Simplex_tree dim: 3
+3  0 -0.0001 inf
+3  1 16.0264 inf
+3  1 16.0273 inf
+3  1 16.0303 inf
+3  2 36.8635 inf
+3  2 36.8704 inf
+3  2 36.8838 inf
+3  3 58.6783 inf  \endcode
 
 \li <a href="_persistent_cohomology_2plain_homology_8cpp-example.html">
 Persistent_cohomology/plain_homology.cpp</a> computes the plain homology of a simple simplicial complex without

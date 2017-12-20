@@ -3,6 +3,7 @@
  *    library for computational topology.
  *
  *    Author(s):       Vincent Rouvreau
+ *                     Pawel Dlotko - 2017 - Swansea University, UK
  *
  *    Copyright (C) 2014  INRIA
  *
@@ -113,6 +114,24 @@ int main(int argc, char* const argv[]) {
   // Retrieve the points
   std::vector<Point_3> lp = off_reader.get_point_cloud();
 
+  // Read iso_cuboid_3 information from file
+  std::ifstream iso_cuboid_str(argv[3]);
+  double x_min, y_min, z_min, x_max, y_max, z_max;
+  if (iso_cuboid_str.good()) {
+    iso_cuboid_str >> x_min >> y_min >> z_min >> x_max >> y_max >> z_max;
+  } else {
+    std::cerr << "Unable to read file " << argv[3] << std::endl;
+    usage(argv[0]);
+  }
+  //Checking if the cuboid is the same in x,y and z direction. If not, CGAL will not process it.
+  if ((x_max-x_min != y_max-y_min) || (x_max-x_min != z_max-z_min) || (z_max-z_min != y_max-y_min))
+  {
+    std::cerr << "The size of the cuboid in every directions is not the same." << std::endl;
+    exit(-1);
+  }
+
+  double maximal_possible_weigth = 0.015625 * (x_max-x_min) * (x_max-x_min);
+
   // Read weights information from file
   std::ifstream weights_ifstr(argv[2]);
   std::vector<Weighted_point_3> wp;
@@ -122,6 +141,14 @@ int main(int argc, char* const argv[]) {
     wp.reserve(lp.size());
     // Attempt read the weight in a double format, return false if it fails
     while ((weights_ifstr >> weight) && (index < lp.size())) {
+      if (weight >= maximal_possible_weigth)
+      {
+        std::cerr << "At line " << (index + 1) << ", the weight (" << weight
+                  << ") is more or equal to maximal possible weight (" << maximal_possible_weigth
+                  << ") = 1/64*cuboid length squared, which is not an acceptable input." << std::endl;
+        exit(-1);
+      }
+
       wp.push_back(Weighted_point_3(lp[index], weight));
       index++;
     }
@@ -134,23 +161,18 @@ int main(int argc, char* const argv[]) {
     usage(argv[0]);
   }
 
-  // Read iso_cuboid_3 information from file
-  std::ifstream iso_cuboid_str(argv[3]);
-  double x_min, y_min, z_min, x_max, y_max, z_max;
-  if (iso_cuboid_str.good()) {
-    iso_cuboid_str >> x_min >> y_min >> z_min >> x_max >> y_max >> z_max;
-  } else {
-    std::cerr << "Unable to read file " << argv[3] << std::endl;
-    usage(argv[0]);
-  }
-
   // Define the periodic cube
   P3RT3 prt(PK::Iso_cuboid_3(x_min, y_min, z_min, x_max, y_max, z_max));
   // Heuristic for inserting large point sets (if pts is reasonably large)
   prt.insert(wp.begin(), wp.end(), true);
   // As prt won't be modified anymore switch to 1-sheeted cover if possible
-  if (prt.is_triangulation_in_1_sheet()) prt.convert_to_1_sheeted_covering();
-  std::cout << "Periodic Delaunay computed." << std::endl;
+  if (prt.is_triangulation_in_1_sheet()) {
+    prt.convert_to_1_sheeted_covering();
+  } else {
+    std::cerr << "ERROR: we were not able to construct a triangulation within a single periodic domain." << std::endl;
+    exit(-1);
+  }
+  std::cout << "Weighted Periodic Delaunay computed." << std::endl;
 
   // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode. This is the default mode
   // Maybe need to set it to GENERAL mode

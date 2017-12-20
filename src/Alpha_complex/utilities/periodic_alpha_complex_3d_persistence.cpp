@@ -3,6 +3,7 @@
  *    library for computational topology.
  *
  *    Author(s):       Vincent Rouvreau
+ *                     Pawel Dlotko - 2017 - Swansea University, UK
  *
  *    Copyright (C) 2014  INRIA
  *
@@ -112,6 +113,12 @@ int main(int argc, char **argv) {
     std::cerr << "Unable to read file " << cuboid_file << std::endl;
     exit(-1);
   }
+  //Checking if the cuboid is the same in x,y and z direction. If not, CGAL will not process it.
+  if ((x_max-x_min != y_max-y_min) || (x_max-x_min != z_max-z_min) || (z_max-z_min != y_max-y_min))
+  {
+    std::cerr << "The size of the cuboid in every directions is not the same." << std::endl;
+    exit(-1);
+  }
 
   // Retrieve the points
   std::vector<Point_3> lp = off_reader.get_point_cloud();
@@ -121,7 +128,12 @@ int main(int argc, char **argv) {
   // Heuristic for inserting large point sets (if pts is reasonably large)
   pdt.insert(lp.begin(), lp.end(), true);
   // As pdt won't be modified anymore switch to 1-sheeted cover if possible
-  if (pdt.is_triangulation_in_1_sheet()) pdt.convert_to_1_sheeted_covering();
+  if (pdt.is_triangulation_in_1_sheet()) {
+    pdt.convert_to_1_sheeted_covering();
+  } else {
+    std::cerr << "ERROR: we were not able to construct a triangulation within a single periodic domain." << std::endl;
+    exit(-1);
+  }
   std::cout << "Periodic Delaunay computed." << std::endl;
 
   // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode. This is the default mode
