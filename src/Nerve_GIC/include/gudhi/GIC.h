@@ -942,58 +942,83 @@ class Cover_complex {
   /** \brief Computes the extended persistence diagram of the complex.
    *
    */
-  //template <typename SimplicialComplex>
   void compute_PD(){
 
-    Simplex_tree sc; 
+    Graph G;
 
-    // Add magic point
-    std::vector<int> node = {-2};   sc.insert_simplex(node); 
-    
     // Compute max and min
-    double maxf = std::numeric_limits<double>::lowest(); double minf = std::numeric_limits<double>::max();
+    std::map<int, int> transf, transf_inv;
+    double maxf = std::numeric_limits<double>::lowest(); double minf = std::numeric_limits<double>::max(); int id = 0;
     for(std::map<int, double>::iterator it = cover_std.begin(); it != cover_std.end(); it++){
-      maxf = std::max(maxf, it->second); minf = std::min(minf, it->second);
+      maxf = std::max(maxf, it->second); minf = std::min(minf, it->second); boost::add_vertex(id, G); transf[id] = it->first; transf_inv[it->first] = id; id++;
     }
 
-    // Build filtration
-    for (auto const & simplex : simplices) {
-      int numvert = simplex.size(); double filta = std::numeric_limits<double>::lowest(); double filts = filta;
-      for(int i = 0; i < numvert; i++)  filta = std::max( -2 + (cover_std[simplex[i]] - minf)/(maxf - minf), filta );
-      for(int i = 0; i < numvert; i++)  filts = std::max(  2 - (cover_std[simplex[i]] - minf)/(maxf - minf), filts );
-      std::vector<int> splx = simplex; splx.push_back(node[0]);
-      sc.insert_simplex_and_subfaces(simplex, filta); sc.insert_simplex_and_subfaces(splx, filts);
-      //for(int i = 0; i < numvert; i++)      std::cout << simplex[i] << ", "; std::cout << std::endl << "    with filter value " << filta << std::endl;
-      //for(int i = 0; i < numvert + 1; i++)  std::cout << splx[i]    << ", "; std::cout << std::endl << "    with filter value " << filts << std::endl;
+    // Build graph
+    for(auto const & simplex : simplices){
+      int numvert = simplex.size();
+      for(int i = 0; i < numvert; i++)  for(int j = 0; j < numvert; j++)  boost::add_edge(transf_inv[simplex[i]], transf_inv[simplex[j]], G);
     }
 
-    // Compute PD
-    sc.initialize_filtration(); Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Gudhi::persistent_cohomology::Field_Zp> pcoh(sc);
-    pcoh.init_coefficients(2); pcoh.compute_persistent_cohomology();
+    // Find connected components of G
+    int numvert = cover_std.size(); std::vector<int> component(numvert); boost::connected_components(G, &component[0]);
+    int numcomp = 0; for(int i = 0; i < numvert; i++)  numcomp = std::max(numcomp, component[i]); numcomp += 1;
 
-    // Output PD
-    std::vector<std::pair<double, double> > bars = pcoh.intervals_in_dimension(0); double birth_cc, death_cc;
-    int num_bars = bars.size(); std::cout << num_bars - 1 << " interval(s) in dimension 0:" << std::endl;
-    bool found_birth = false; bool found_death = false;
-    for(int j = 0; j < num_bars; j++){
-      double birth = bars[j].first; double death = bars[j].second;
-      if(birth == 0){   std::cout << birth << " " << death << std::endl;          if(found_birth)  birth = birth_cc; else{death_cc = death; found_death = true; continue;} }
-      if(std::isinf(death)){    std::cout << birth << " " << death << std::endl;  if(found_death)  death = death_cc; else{birth_cc = birth; found_birth = true; continue;} }
-      if(birth < 0)  birth = minf + (birth + 2)*(maxf - minf);  else  birth = minf + (2 - birth)*(maxf - minf); 
-      if(death < 0)  death = minf + (death + 2)*(maxf - minf);  else  death = minf + (2 - death)*(maxf - minf); 
-      std::cout << "  " << birth << ", " << death << std::endl;
+    std::map<int, Simplex_tree> complexes;
+    for(auto const & simplex : simplices){
+      // Identify connected component
+      int compid = component[transf_inv[simplex[0]]];
+      // Add simplices
+      complexes[compid].insert_simplex_and_subfaces(simplex);
+      // Add cone on simplices
+      std::vector<int> splx = simplex; splx.push_back(-2); complexes[compid].insert_simplex_and_subfaces(splx);
     }
+    
 
-    for(int i = 1; i < sc.dimension(); i++){
-      bars = pcoh.intervals_in_dimension(i); num_bars = bars.size(); std::cout << num_bars << " interval(s) in dimension " << i << ":" << std::endl;
+    for(std::map<int, Simplex_tree>::iterator it = complexes.begin(); it != complexes.end(); it++){
+
+      if(verbose)  std::cout << "PD of connected component " << it->first << ":" << std::endl;
+      Simplex_tree sc = it->second;
+
+      // Build filtration
+      for(auto simplex : sc.complex_simplex_range()){
+        double filta = std::numeric_limits<double>::lowest(); double filts = filta; bool ascending = true;
+        for(auto vertex : sc.simplex_vertex_range(simplex)){
+          if(vertex == -2){ascending  = false; continue;}
+          filta = std::max( -2 + (cover_std[vertex] - minf)/(maxf - minf), filta );
+          filts = std::max(  2 - (cover_std[vertex] - minf)/(maxf - minf), filts );
+        }
+        if(ascending)  sc.assign_filtration(simplex, filta);  else  sc.assign_filtration(simplex, filts); std::vector<int> magic = {-2}; sc.assign_filtration(sc.find(magic), 0);
+      }
+
+      // Compute PD
+      sc.initialize_filtration(); Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Gudhi::persistent_cohomology::Field_Zp> pcoh(sc);
+      pcoh.init_coefficients(2); pcoh.compute_persistent_cohomology();
+
+      // Output PD
+      std::vector<std::pair<double, double> > bars = pcoh.intervals_in_dimension(0); double birth_cc, death_cc;
+      int num_bars = bars.size(); std::cout << num_bars - 1 << " interval(s) in dimension 0:" << std::endl;
+      bool found_birth = false; bool found_death = false;
       for(int j = 0; j < num_bars; j++){
         double birth = bars[j].first; double death = bars[j].second;
-        if(birth < 0)  birth = minf + (birth + 2)*(maxf - minf);  else  birth = minf + (2 - birth)*(maxf - minf); 
-        if(death < 0)  death = minf + (death + 2)*(maxf - minf);  else  death = minf + (2 - death)*(maxf - minf); 
-        std::cout << "  " << birth << ", " << death << std::endl;
+        if(birth == 0){          if(found_birth)  birth = birth_cc; else{death_cc = death; found_death = true; continue;} }
+        if(std::isinf(death)){   if(found_death)  death = death_cc; else{birth_cc = birth; found_birth = true; continue;} }
+        if(birth < 0)  birth = minf + (birth + 2)*(maxf - minf);  else  birth = minf + (2 - birth)*(maxf - minf);
+        if(death < 0)  death = minf + (death + 2)*(maxf - minf);  else  death = minf + (2 - death)*(maxf - minf);
+        PD.push_back(std::pair<double,double>(birth, death));
+        if(verbose)  std::cout << "  " << birth << ", " << death << std::endl;
+      }
+
+      for(int i = 1; i < sc.dimension(); i++){
+        bars = pcoh.intervals_in_dimension(i); num_bars = bars.size(); std::cout << num_bars << " interval(s) in dimension " << i << ":" << std::endl;
+        for(int j = 0; j < num_bars; j++){
+          double birth = bars[j].first; double death = bars[j].second;
+          if(birth < 0)  birth = minf + (birth + 2)*(maxf - minf);  else  birth = minf + (2 - birth)*(maxf - minf);
+          if(death < 0)  death = minf + (death + 2)*(maxf - minf);  else  death = minf + (2 - death)*(maxf - minf);
+          PD.push_back(std::pair<double,double>(birth, death));
+          if(verbose)  std::cout << "  " << birth << ", " << death << std::endl;
+        }
       }
     }
-
   }
 
  public:
@@ -1025,7 +1050,7 @@ class Cover_complex {
         Cboot.set_automatic_resolution(); Cboot.set_gain(); Cboot.set_cover_from_function();
         Cboot.find_simplices(); Cboot.compute_PD();
 
-        //distribution.push_back(Gudhi::persistence_diagram::bottleneck_distance(this->PD,Cboot.PD));
+        distribution.push_back(Gudhi::persistence_diagram::bottleneck_distance(this->PD,Cboot.PD));
 
       }
 
