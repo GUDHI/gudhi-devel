@@ -228,8 +228,7 @@ Persistent_cohomology/weighted_periodic_alpha_complex_3d_persistence.cpp</a> com
 \f$\mathbb{Z}/2\mathbb{Z}\f$ coefficients of the periodic alpha complex on weighted points from an OFF file. The
 additional parameters of this program are:<br>
 (a) The file with the weights of points. The file consist of a sequence of numbers (as many as points).
-Note that the weight of each single point have to be bounded by 1/64 times the square of the diameter of
-the cuboid.<br>
+Note that the weight of each single point have to be bounded by 1/64 times the square of the cuboid edge length.<br>
 (b) A \ref FileFormatsIsoCuboid file with coordinates of the periodic cuboid.
 Note that the lengths of the sides of the periodic cuboid have to be the same.<br>
 \code $> ./weighted_periodic_alpha_complex_3d_persistence ../../data/points/shifted_sphere.off

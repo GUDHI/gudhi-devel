@@ -117,8 +117,12 @@ int main(int argc, char* const argv[]) {
   // Read iso_cuboid_3 information from file
   std::ifstream iso_cuboid_str(argv[3]);
   double x_min, y_min, z_min, x_max, y_max, z_max;
-  if (iso_cuboid_str.good()) {
-    iso_cuboid_str >> x_min >> y_min >> z_min >> x_max >> y_max >> z_max;
+  if (iso_cuboid_str.is_open()) {
+    if (!(iso_cuboid_str >> x_min >> y_min >> z_min >> x_max >> y_max >> z_max)) {
+      std::cerr << argv[3] << " - Bad file format." << std::endl;
+      usage(argv[0]);
+    }
+
   } else {
     std::cerr << "Unable to read file " << argv[3] << std::endl;
     usage(argv[0]);
@@ -130,21 +134,21 @@ int main(int argc, char* const argv[]) {
     exit(-1);
   }
 
-  double maximal_possible_weigth = 0.015625 * (x_max-x_min) * (x_max-x_min);
+  double maximal_possible_weight = 0.015625 * (x_max-x_min) * (x_max-x_min);
 
   // Read weights information from file
   std::ifstream weights_ifstr(argv[2]);
   std::vector<Weighted_point_3> wp;
-  if (weights_ifstr.good()) {
+  if (weights_ifstr.is_open()) {
     double weight = 0.0;
     std::size_t index = 0;
     wp.reserve(lp.size());
     // Attempt read the weight in a double format, return false if it fails
     while ((weights_ifstr >> weight) && (index < lp.size())) {
-      if (weight >= maximal_possible_weigth)
+      if ((weight >= maximal_possible_weight) || (weight < 0))
       {
         std::cerr << "At line " << (index + 1) << ", the weight (" << weight
-                  << ") is more or equal to maximal possible weight (" << maximal_possible_weigth
+                  << ") is negative or more than or equal to maximal possible weight (" << maximal_possible_weight
                   << ") = 1/64*cuboid length squared, which is not an acceptable input." << std::endl;
         exit(-1);
       }
