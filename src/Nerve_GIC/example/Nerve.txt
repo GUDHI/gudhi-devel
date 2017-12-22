@@ -1,43 +1,63 @@
+Min function value = -0.979672 and Max function value = 0.816414
+Interval 0 = [-0.979672, -0.761576]
+Interval 1 = [-0.838551, -0.581967]
+Interval 2 = [-0.658942, -0.402359]
+Interval 3 = [-0.479334, -0.22275]
+Interval 4 = [-0.299725, -0.0431415]
+Interval 5 = [-0.120117, 0.136467]
+Interval 6 = [0.059492, 0.316076]
+Interval 7 = [0.239101, 0.495684]
+Interval 8 = [0.418709, 0.675293]
+Interval 9 = [0.598318, 0.816414]
+Computing preimages...
+Computing connected components...
+.txt generated. It can be visualized with e.g. python KeplerMapperVisuFromTxtFile.py and firefox.
+5 interval(s) in dimension 0:
+  [-0.909111, 0.00817529]
+  [-0.171433, 0.367392]
+  [-0.171433, 0.367392]
+  [-0.909111, 0.745853]
+0 interval(s) in dimension 1:
 Nerve is of dimension 1 - 41 simplices - 21 vertices.
 Iterator on Nerve simplices
-0 
 1 
-2 
-2 0 
-3 
-3 1 
+0 
 4 
-4 3 
-5 
-5 2 
-6 
-6 4 
-7 
-7 5 
+4 0 
+2 
+2 1 
 8 
+8 2 
+5 
+5 4 
 9 
-9 6 
-10 
-10 7 
-11 
-12 
-12 8 
+9 8 
 13 
-13 9 
-13 10 
+13 5 
 14 
-14 11 
-15 
-15 13 
-16 
-16 12 
-17 
-17 14 
-18 
-18 15 
-18 16 
-18 17 
+14 9 
 19 
-19 18 
+19 13 
+25 
+32 
 20 
-20 19 
+32 20 
+33 
+33 25 
+26 
+26 14 
+26 19 
+42 
+42 26 
+34 
+34 33 
+27 
+27 20 
+35 
+35 27 
+35 34 
+42 35 
+44 
+44 35 
+54 
+54 44 

@@ -89,32 +89,32 @@ class Cover_complex {
  private:
 
   bool verbose = false;  // whether to display information.
+  std::string type;      // Nerve or GIC
 
-  std::vector<Point> point_cloud;
-  int maximal_dim;     // maximal dimension of output simplicial complex.
-  int data_dimension;  // dimension of input data.
-  int n;               // number of points.
-
-  std::vector<std::vector<double> > distances;
+  std::vector<Point> point_cloud;               // input point cloud.
+  std::vector<std::vector<double> > distances;  // all pairwise distances.
+  int maximal_dim;                              // maximal dimension of output simplicial complex.
+  int data_dimension;                           // dimension of input data.
+  int n;                                        // number of points.
 
   std::map<int, double> func;          // function used to compute the output simplicial complex.
   std::map<int, double> func_color;    // function used to compute the colors of the nodes of the output simplicial complex.
-  bool functional_cover = false;  // whether we use a cover with preimages of a function or not.
+  bool functional_cover = false;       // whether we use a cover with preimages of a function or not.
 
-  Graph one_skeleton_OFF;   // one-skeleton given by the input OFF file (if it exists).
-  Graph one_skeleton;       // one-skeleton used to compute the connected components.
-  std::vector<vertex_t> vertices;
-  std::vector<std::vector<int> > simplices;
+  Graph one_skeleton_OFF;          // one-skeleton given by the input OFF file (if it exists).
+  Graph one_skeleton;              // one-skeleton used to compute the connected components.
+  std::vector<vertex_t> vertices;  // vertices of one_skeleton.
 
-  std::vector<int> voronoi_subsamples;
+  std::vector<std::vector<int> > simplices; // simplices of output simplicial complex.
+  std::vector<int> voronoi_subsamples;      // Voronoi germs (in case of Voronoi cover).
 
   PersistenceDiagram PD;
   std::vector<double> distribution;
 
-  std::map<int, std::vector<int> > cover;
-  std::map<int, std::vector<int> > cover_back;
-  std::map<int, double> cover_std;                // standard function (induced by func) used to compute the extended persistence diagram of the output simplicial complex.
-  std::map<int, int> cover_fct;                   // integer-valued function that allows to state if two elements of the cover are consecutive or not.
+  std::map<int, std::vector<int> > cover;              // function associating to each data point its vectors of cover elements to which it belongs.
+  std::map<int, std::vector<int> > cover_back;         // inverse of cover, in order to get the data points associated to a specific cover element.
+  std::map<int, double> cover_std;                     // standard function (induced by func) used to compute the extended persistence diagram of the output simplicial complex.
+  std::map<int, int> cover_fct;                        // integer-valued function that allows to state if two elements of the cover are consecutive or not.
   std::map<int, std::pair<int, double> > cover_color;  // size and coloring (induced by func_color) of the vertices of the output simplicial complex.
 
   int resolution_int = -1;
@@ -129,7 +129,15 @@ class Cover_complex {
   std::string cover_name;
   std::string point_cloud_name;
   std::string color_name;
-  std::string type;               // Nerve or GIC
+
+
+
+
+
+
+
+
+
 
   // Point comparator
   struct Less {
@@ -166,6 +174,14 @@ class Cover_complex {
     }
   }
 
+
+
+
+
+
+  // *******************************************************************************************************************
+  // Utils.
+  // *******************************************************************************************************************
 
  public:
   /** \brief Specifies whether the type of the output simplicial complex.
@@ -272,6 +288,23 @@ class Cover_complex {
 
     return input.is_open();
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // *******************************************************************************************************************
   // Graphs.
@@ -408,6 +441,29 @@ class Cover_complex {
     return delta;
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // *******************************************************************************************************************
   // Functions.
   // *******************************************************************************************************************
@@ -452,6 +508,27 @@ class Cover_complex {
     for (int i = 0; i < n; i++) func.emplace(i, f[i]);
     functional_cover = true;
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // *******************************************************************************************************************
   // Covers.
@@ -640,6 +717,7 @@ class Cover_complex {
     }
 
     if(verbose)  std::cout << "Computing connected components..." << std::endl;
+    // #pragma omp parallel for
     for (int i = 0; i < res; i++){
 
       // Compute connected components
@@ -724,6 +802,7 @@ class Cover_complex {
     std::vector<double> mindist(n); for (int j = 0; j < n; j++) mindist[j] = std::numeric_limits<double>::max();
 
     // Compute the geodesic distances to subsamples with Dijkstra
+    // #pragma omp parallel for
     for (int i = 0; i < m; i++) {
 
       if (verbose) std::cout << "Computing geodesic distances to seed " << i << "..." << std::endl;
@@ -756,6 +835,18 @@ class Cover_complex {
           *
           */
   const std::vector<int> & subpopulation(int c) { return cover_back[name2idinv[c]]; }
+
+
+
+
+
+
+
+
+
+
+
+
 
   // *******************************************************************************************************************
   // Visualization.
@@ -917,26 +1008,30 @@ class Cover_complex {
     std::cout << ".off generated. It can be visualized with e.g. geomview." << std::endl;
   }
 
-  // *******************************************************************************************************************
-  // *******************************************************************************************************************
 
- public:
-  /** \brief Creates the simplicial complex.
-   *
-   * @param[in] complex SimplicialComplex to be created.
-   *
-   */
-  template <typename SimplicialComplex>
-  void create_complex(SimplicialComplex& complex){
-    unsigned int dimension = 0;
-    for (auto const& simplex : simplices) {
-      int numvert = simplex.size(); double filt = std::numeric_limits<double>::lowest();
-      for(int i = 0; i < numvert; i++)  filt = std::max(cover_color[simplex[i]].second, filt);
-      complex.insert_simplex_and_subfaces(simplex, filt);
-      if (dimension < simplex.size() - 1) dimension = simplex.size() - 1;
-    }
-    //complex.set_dimension(dimension);
-  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // *******************************************************************************************************************
+  // Extended Persistence Diagrams.
+  // *******************************************************************************************************************
 
  public:
   /** \brief Computes the extended persistence diagram of the complex.
@@ -944,82 +1039,53 @@ class Cover_complex {
    */
   void compute_PD(){
 
-    Graph G;
+    Simplex_tree st;
 
     // Compute max and min
-    std::map<int, int> transf, transf_inv;
-    double maxf = std::numeric_limits<double>::lowest(); double minf = std::numeric_limits<double>::max(); int id = 0;
+    double maxf = std::numeric_limits<double>::lowest(); double minf = std::numeric_limits<double>::max();
     for(std::map<int, double>::iterator it = cover_std.begin(); it != cover_std.end(); it++){
-      maxf = std::max(maxf, it->second); minf = std::min(minf, it->second); boost::add_vertex(id, G); transf[id] = it->first; transf_inv[it->first] = id; id++;
-    }
-
-    // Build graph
-    for(auto const & simplex : simplices){
-      int numvert = simplex.size();
-      for(int i = 0; i < numvert; i++)  for(int j = 0; j < numvert; j++)  boost::add_edge(transf_inv[simplex[i]], transf_inv[simplex[j]], G);
-    }
-
-    // Find connected components of G
-    int numvert = cover_std.size(); std::vector<int> component(numvert); boost::connected_components(G, &component[0]);
-    int numcomp = 0; for(int i = 0; i < numvert; i++)  numcomp = std::max(numcomp, component[i]); numcomp += 1;
-
-    std::map<int, Simplex_tree> complexes;
-    for(auto const & simplex : simplices){
-      // Identify connected component
-      int compid = component[transf_inv[simplex[0]]];
-      // Add simplices
-      complexes[compid].insert_simplex_and_subfaces(simplex);
-      // Add cone on simplices
-      std::vector<int> splx = simplex; splx.push_back(-2); complexes[compid].insert_simplex_and_subfaces(splx);
+      maxf = std::max(maxf, it->second); minf = std::min(minf, it->second);
     }
     
+    for(auto const & simplex : simplices){
+      // Add simplices
+      st.insert_simplex_and_subfaces(simplex);
+      // Add cone on simplices
+      std::vector<int> splx = simplex; splx.push_back(-2); st.insert_simplex_and_subfaces(splx);
+    }
 
-    for(std::map<int, Simplex_tree>::iterator it = complexes.begin(); it != complexes.end(); it++){
-
-      if(verbose)  std::cout << "PD of connected component " << it->first << ":" << std::endl;
-      Simplex_tree sc = it->second;
-
-      // Build filtration
-      for(auto simplex : sc.complex_simplex_range()){
-        double filta = std::numeric_limits<double>::lowest(); double filts = filta; bool ascending = true;
-        for(auto vertex : sc.simplex_vertex_range(simplex)){
-          if(vertex == -2){ascending  = false; continue;}
-          filta = std::max( -2 + (cover_std[vertex] - minf)/(maxf - minf), filta );
-          filts = std::max(  2 - (cover_std[vertex] - minf)/(maxf - minf), filts );
-        }
-        if(ascending)  sc.assign_filtration(simplex, filta);  else  sc.assign_filtration(simplex, filts); std::vector<int> magic = {-2}; sc.assign_filtration(sc.find(magic), 0);
+    // Build filtration
+    for(auto simplex : st.complex_simplex_range()){
+      double filta = std::numeric_limits<double>::lowest(); double filts = filta; bool ascending = true;
+      for(auto vertex : st.simplex_vertex_range(simplex)){
+        if(vertex == -2){ascending  = false; continue;}
+        filta = std::max( -2 + (cover_std[vertex] - minf)/(maxf - minf), filta );
+        filts = std::max(  2 - (cover_std[vertex] - minf)/(maxf - minf), filts );
       }
+      if(ascending)  st.assign_filtration(simplex, filta);  else  st.assign_filtration(simplex, filts);
+    }
+    std::vector<int> magic = {-2}; st.assign_filtration(st.find(magic), -3);
 
-      // Compute PD
-      sc.initialize_filtration(); Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Gudhi::persistent_cohomology::Field_Zp> pcoh(sc);
-      pcoh.init_coefficients(2); pcoh.compute_persistent_cohomology();
+    // Compute PD
+    st.initialize_filtration(); Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Gudhi::persistent_cohomology::Field_Zp> pcoh(st);
+    pcoh.init_coefficients(2); pcoh.compute_persistent_cohomology();
 
-      // Output PD
-      std::vector<std::pair<double, double> > bars = pcoh.intervals_in_dimension(0); double birth_cc, death_cc;
-      int num_bars = bars.size(); std::cout << num_bars - 1 << " interval(s) in dimension 0:" << std::endl;
-      bool found_birth = false; bool found_death = false;
+    // Output PD
+    int max_dim = st.dimension();
+    for(int i = 0; i < max_dim; i++){
+      std::vector<std::pair<double, double> > bars = pcoh.intervals_in_dimension(i); int num_bars = bars.size(); std::cout << num_bars << " interval(s) in dimension " << i << ":" << std::endl;
       for(int j = 0; j < num_bars; j++){
         double birth = bars[j].first; double death = bars[j].second;
-        if(birth == 0){          if(found_birth)  birth = birth_cc; else{death_cc = death; found_death = true; continue;} }
-        if(std::isinf(death)){   if(found_death)  death = death_cc; else{birth_cc = birth; found_birth = true; continue;} }
+        if(i == 0 && std::isinf(death))  continue;
         if(birth < 0)  birth = minf + (birth + 2)*(maxf - minf);  else  birth = minf + (2 - birth)*(maxf - minf);
         if(death < 0)  death = minf + (death + 2)*(maxf - minf);  else  death = minf + (2 - death)*(maxf - minf);
         PD.push_back(std::pair<double,double>(birth, death));
-        if(verbose)  std::cout << "  " << birth << ", " << death << std::endl;
-      }
-
-      for(int i = 1; i < sc.dimension(); i++){
-        bars = pcoh.intervals_in_dimension(i); num_bars = bars.size(); std::cout << num_bars << " interval(s) in dimension " << i << ":" << std::endl;
-        for(int j = 0; j < num_bars; j++){
-          double birth = bars[j].first; double death = bars[j].second;
-          if(birth < 0)  birth = minf + (birth + 2)*(maxf - minf);  else  birth = minf + (2 - birth)*(maxf - minf);
-          if(death < 0)  death = minf + (death + 2)*(maxf - minf);  else  death = minf + (2 - death)*(maxf - minf);
-          PD.push_back(std::pair<double,double>(birth, death));
-          if(verbose)  std::cout << "  " << birth << ", " << death << std::endl;
-        }
+        if(verbose)  std::cout << "  [" << birth << ", " << death << "]" << std::endl;
       }
     }
+
   }
+
 
  public:
   /** \brief Computes bootstrapped distances distribution.
@@ -1050,7 +1116,7 @@ class Cover_complex {
         Cboot.set_automatic_resolution(); Cboot.set_gain(); Cboot.set_cover_from_function();
         Cboot.find_simplices(); Cboot.compute_PD();
 
-        distribution.push_back(Gudhi::persistence_diagram::bottleneck_distance(this->PD,Cboot.PD));
+        //distribution.push_back(Gudhi::persistence_diagram::bottleneck_distance(this->PD,Cboot.PD));
 
       }
 
@@ -1060,7 +1126,7 @@ class Cover_complex {
   }
 
  public:
-  /** \brief Computes the bottleneck distance corresponding to a specific confidence level.
+  /** \brief Computes the bottleneck distance threshold corresponding to a specific confidence level.
    *
    * @param[in] alpha Confidence level.
    *
@@ -1071,7 +1137,7 @@ class Cover_complex {
   }
 
  public:
-  /** \brief Computes the confidence level of a specific bottleneck distance.
+  /** \brief Computes the confidence level of a specific bottleneck distance threshold.
    *
    * @param[in] d Bottleneck distance.
    *
@@ -1090,6 +1156,42 @@ class Cover_complex {
     double distancemin = -std::numeric_limits<double>::lowest();
     int N = PD.size(); for(int i = 0; i < N; i++)  distancemin = std::min(distancemin, 0.5*(PD[i].second - PD[i].first));
     return 1-compute_confidence_level_from_distance(distancemin);
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // *******************************************************************************************************************
+  // Computation of simplices.
+  // *******************************************************************************************************************
+
+ public:
+  /** \brief Creates the simplicial complex.
+   *
+   * @param[in] complex SimplicialComplex to be created.
+   *
+   */
+  template <typename SimplicialComplex>
+  void create_complex(SimplicialComplex& complex){
+    unsigned int dimension = 0;
+    for (auto const& simplex : simplices) {
+      int numvert = simplex.size(); double filt = std::numeric_limits<double>::lowest();
+      for(int i = 0; i < numvert; i++)  filt = std::max(cover_color[simplex[i]].second, filt);
+      complex.insert_simplex_and_subfaces(simplex, filt);
+      if (dimension < simplex.size() - 1) dimension = simplex.size() - 1;
+    }
   }
 
  public:
