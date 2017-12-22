@@ -500,6 +500,7 @@ class Simplex_tree {
    * sh has children.*/
   template<class SimplexHandle>
   bool has_children(SimplexHandle sh) const {
+    // Here we rely on the root using null_vertex(), which cannot match any real vertex.
     return (sh->second.children()->parent() == sh->first);
   }
 
