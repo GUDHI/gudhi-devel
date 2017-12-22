@@ -56,8 +56,8 @@
 #include <chrono>
 #include <ctime>
 
-#include "../../figtree-0.9.3/include/figtree.h"
-#include "../../figtree-0.9.3/external/ann_1.1.1/include/ANN/ANN.h"
+#include "figtree.h"
+#include "ANN.h"
 
 using PD = std::vector<std::pair<double,double> >;
 
