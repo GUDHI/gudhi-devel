@@ -531,7 +531,20 @@ class Simplex_tree {
     Siblings * tmp_sib = &root_;
     Dictionary_it tmp_dit;
     Vertex_handle last = simplex.back();
-    for (auto v : simplex) {
+    auto vi = simplex.begin();
+    if (Options::contiguous_vertices) {
+      GUDHI_CHECK(contiguous_vertices(), "non-contiguous vertices");
+      Vertex_handle v = *vi++;
+      if(v < 0 || v >= static_cast<Vertex_handle>(root_.members_.size()))
+        return null_simplex();
+      tmp_dit = root_.members_.begin() + v;
+      if (!has_children(tmp_dit) && v != last) {
+        return null_simplex();
+      }
+      tmp_sib = tmp_dit->second.children();
+    }
+    for (; vi != simplex.end(); ++vi) {
+      Vertex_handle v = *vi;
       tmp_dit = tmp_sib->members_.find(v);
       if (tmp_dit == tmp_sib->members_.end()) {
         return null_simplex();
