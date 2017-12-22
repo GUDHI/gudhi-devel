@@ -584,12 +584,14 @@ class Simplex_tree {
     std::pair<Simplex_handle, bool> res_insert;
     auto vi = simplex.begin();
     for (; vi != simplex.end() - 1; ++vi) {
+      GUDHI_CHECK(*vi != null_vertex(), "cannot use the dummy null_vertex() as a real vertex");
       res_insert = curr_sib->members_.emplace(*vi, Node(curr_sib, filtration));
       if (!(has_children(res_insert.first))) {
         res_insert.first->second.assign_children(new Siblings(curr_sib, *vi));
       }
       curr_sib = res_insert.first->second.children();
     }
+    GUDHI_CHECK(*vi != null_vertex(), "cannot use the dummy null_vertex() as a real vertex");
     res_insert = curr_sib->members_.emplace(*vi, Node(curr_sib, filtration));
     if (!res_insert.second) {
       // if already in the complex
@@ -674,6 +676,10 @@ class Simplex_tree {
     // Copy before sorting
     std::vector<Vertex_handle> copy(first, last);
     std::sort(std::begin(copy), std::end(copy));
+    GUDHI_CHECK_code(
+      for (Vertex_handle v : copy)
+        GUDHI_CHECK(v != null_vertex(), "cannot use the dummy null_vertex() as a real vertex");
+    )
 
     std::vector<std::vector<Vertex_handle>> to_be_inserted;
     std::vector<std::vector<Vertex_handle>> to_be_propagated;
