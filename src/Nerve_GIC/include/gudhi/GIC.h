@@ -31,7 +31,7 @@
 #include <gudhi/Points_off_io.h>
 #include <gudhi/distance_functions.h>
 #include <gudhi/Persistent_cohomology.h>
-//#include <gudhi/Bottleneck.h>
+#include <gudhi/Bottleneck.h>
 
 #include <boost/config.hpp>
 #include <boost/graph/graph_traits.hpp>
@@ -1116,7 +1116,7 @@ class Cover_complex {
         Cboot.set_automatic_resolution(); Cboot.set_gain(); Cboot.set_cover_from_function();
         Cboot.find_simplices(); Cboot.compute_PD();
 
-        //distribution.push_back(Gudhi::persistence_diagram::bottleneck_distance(this->PD,Cboot.PD));
+        distribution.push_back(Gudhi::persistence_diagram::bottleneck_distance(this->PD,Cboot.PD));
 
       }
 
