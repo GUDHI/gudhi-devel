@@ -72,6 +72,7 @@ double pss_weight(std::pair<double,double> P){
 // ********************************************************************
 
 /** \brief Computes the Linear Persistence Weighted Gaussian Kernel between two persistence diagrams.
+ *  \ingroup kernel
  *
  * @param[in] PD1      first persistence diagram.
  * @param[in] PD2      second persistence diagram.
@@ -88,6 +89,7 @@ double lpwg(PD PD1, PD PD2, double sigma, double (*weight)(std::pair<double,doub
 }
 
 /** \brief Computes the Persistence Scale Space Kernel between two persistence diagrams.
+ * \ingroup kernel
  *
  * @param[in] PD1      first persistence diagram.
  * @param[in] PD2      second persistence diagram.
@@ -101,6 +103,7 @@ double pss(PD PD1, PD PD2, double sigma){
 }
 
 /** \brief Computes the Gaussian Persistence Weighted Gaussian Kernel between two persistence diagrams.
+ * \ingroup kernel
  *
  * @param[in] PD1      first persistence diagram.
  * @param[in] PD2      second persistence diagram.
@@ -117,6 +120,7 @@ double gpwg(PD PD1, PD PD2, double sigma, double tau, double (*weight)(std::pair
 }
 
 /** \brief Computes the RKHS distance induced by the Gaussian Kernel Embedding between two persistence diagrams.
+ * \ingroup kernel
  *
  * @param[in] PD1      first persistence diagram.
  * @param[in] PD2      second persistence diagram.
@@ -214,6 +218,7 @@ double compute_sw(const std::vector<std::vector<std::pair<int,double> > > & V1, 
 }
 
 /** \brief Computes the Sliced Wasserstein distance between two persistence diagrams.
+ * \ingroup kernel
  *
  * @param[in] PD1 first persistence diagram.
  * @param[in] PD2 second persistence diagram.
@@ -356,6 +361,7 @@ std::vector<std::pair<double,double> > random_Fourier(double sigma, int M = 1000
 
 
 /** \brief Computes an approximation of the Linear Persistence Weighted Gaussian Kernel between two persistence diagrams with random Fourier features.
+ * \ingroup kernel
  *
  * @param[in] PD1       first persistence diagram.
  * @param[in] PD2       second persistence diagram.
@@ -372,6 +378,7 @@ double approx_lpwg(PD PD1, PD PD2, double sigma, double (*weight)(std::pair<doub
 }
 
 /** \brief Computes an approximation of the Persistence Scale Space Kernel between two persistence diagrams with random Fourier features.
+ * \ingroup kernel
  *
  * @param[in] PD1       first persistence diagram.
  * @param[in] PD2       second persistence diagram.
@@ -387,6 +394,7 @@ double approx_pss(PD PD1, PD PD2, double sigma, int M = 1000){
 
 
 /** \brief Computes an approximation of the Gaussian Persistence Weighted Gaussian Kernel between two persistence diagrams with random Fourier features.
+ * \ingroup kernel
  *
  * @param[in] PD1       first persistence diagram.
  * @param[in] PD2       second persistence diagram.
@@ -405,6 +413,7 @@ double approx_gpwg(PD PD1, PD PD2, double sigma, double tau, double (*weight)(st
 
 
 /** \brief Computes an approximation of the Sliced Wasserstein distance between two persistence diagrams.
+ * \ingroup kernel
  *
  * @param[in] PD1       first persistence diagram.
  * @param[in] PD2       second persistence diagram.
