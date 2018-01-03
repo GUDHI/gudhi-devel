@@ -20,29 +20,41 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define NUMPI 3.14159265359
 #include <gudhi/kernel.h>
 
-int main() {
+void usage(int nbArgs, char *const progName) {
+  std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
+  std::cerr << "Usage: " << progName << " PD1 PD2 \n";
+  std::cerr << "       i.e.: " << progName << " ../../../../data/persistence_diagram/PD1 ../../../../data/persistence_diagram/PD2 \n";
+  exit(-1);  // ----- >>
+}
 
-  std::vector< std::pair<double, double> > v1, v2;
+int main(int argc, char **argv) {
+
+  if (argc != 3) usage(argc, argv[0]);
 
   double sigma = 2; double tau = 5;
 
-  v1.emplace_back(2.7, 3.7);
-  v1.emplace_back(9.6, 14.);
-  v1.emplace_back(34.2, 34.974);
+  std::string PDname1(argv[1]); std::string PDname2(argv[2]);
+  std::vector< std::pair<double, double> > v1, v2; std::string line; double b,d;
 
-  v2.emplace_back(2.8, 4.45);
-  v2.emplace_back(9.5, 14.1);
+  std::ifstream input1(PDname1);
+  while(std::getline(input1,line)){
+    std::stringstream stream(line); stream >> b; stream >> d; v1.push_back(std::pair<double,double>(b,d));
+  }
 
-  std::cout << "SW exact = "    << Gudhi::kernel::sw             (v1, v2)          << std::endl;
-  std::cout << "SW approx = "   << Gudhi::kernel::approx_sw      (v1, v2)          << std::endl;
-  std::cout << "PSS exact = "   << Gudhi::kernel::pss            (v1,v2,sigma)     << std::endl;
-  std::cout << "PSS approx = "  << Gudhi::kernel::approx_pss     (v1,v2,sigma)     << std::endl;
-  std::cout << "PWG exact = "   << Gudhi::kernel::lpwg           (v1,v2,sigma)     << std::endl;
-  std::cout << "PWG approx = "  << Gudhi::kernel::approx_lpwg    (v1,v2,sigma)     << std::endl;
-  std::cout << "GPWG exact = "  << Gudhi::kernel::gpwg           (v1,v2,sigma,tau) << std::endl;
-  std::cout << "GPWG approx = " << Gudhi::kernel::approx_gpwg    (v1,v2,sigma,tau) << std::endl;
+  std::ifstream input2(PDname2);
+  while(std::getline(input2,line)){
+    std::stringstream stream(line); stream >> b; stream >> d; v2.push_back(std::pair<double,double>(b,d));
+  }
+
+  std::cout << "SWK exact = "    << Gudhi::kernel::swk             (v1,v2,sigma)     << std::endl;
+  std::cout << "SWK approx = "   << Gudhi::kernel::approx_swk      (v1,v2,sigma)     << std::endl;
+  std::cout << "PSSK exact = "   << Gudhi::kernel::pssk            (v1,v2,sigma)     << std::endl;
+  std::cout << "PSSK approx = "  << Gudhi::kernel::approx_pssk     (v1,v2,sigma)     << std::endl;
+  std::cout << "LPWGK exact = "  << Gudhi::kernel::lpwgk           (v1,v2,sigma)     << std::endl;
+  std::cout << "LPWGK approx = " << Gudhi::kernel::approx_lpwgk    (v1,v2,sigma)     << std::endl;
+  std::cout << "GPWGK exact = "  << Gudhi::kernel::gpwgk           (v1,v2,sigma,tau) << std::endl;
+  std::cout << "GPWGK approx = " << Gudhi::kernel::approx_gpwgk    (v1,v2,sigma,tau) << std::endl;
 
 }

@@ -23,8 +23,6 @@
 #ifndef KERNEL_H_
 #define KERNEL_H_
 
-#define NUMPI 3.14159265359
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <cstdlib>
@@ -80,7 +78,7 @@ double pss_weight(std::pair<double,double> P){
  * @param[in] weight   weight function for the points in the diagrams.
  *
  */
-double lpwg(PD PD1, PD PD2, double sigma, double (*weight)(std::pair<double,double>) = [](std::pair<double,double> P){return atan(P.second - P.first);}){
+double lpwgk(PD PD1, PD PD2, double sigma, double (*weight)(std::pair<double,double>) = [](std::pair<double,double> P){return atan(P.second - P.first);}){
   int num_pts1 = PD1.size(); int num_pts2 = PD2.size(); double k = 0;
   for(int i = 0; i < num_pts1; i++)
     for(int j = 0; j < num_pts2; j++)
@@ -96,10 +94,10 @@ double lpwg(PD PD1, PD PD2, double sigma, double (*weight)(std::pair<double,doub
  * @param[in] sigma    bandwidth parameter of the Gaussian Kernel used for the Kernel Mean Embedding of the diagrams.
  *
  */
-double pss(PD PD1, PD PD2, double sigma){
+double pssk(PD PD1, PD PD2, double sigma){
   PD pd1 = PD1; int numpts = PD1.size();    for(int i = 0; i < numpts; i++)  pd1.push_back(std::pair<double,double>(PD1[i].second,PD1[i].first));
   PD pd2 = PD2;     numpts = PD2.size();    for(int i = 0; i < numpts; i++)  pd2.push_back(std::pair<double,double>(PD2[i].second,PD2[i].first));
-  return lpwg(pd1, pd2, 2*sqrt(sigma), &pss_weight) / (2*8*NUMPI*sigma);
+  return lpwgk(pd1, pd2, 2*sqrt(sigma), &pss_weight) / (2*8*3.14159265359*sigma);
 }
 
 /** \brief Computes the Gaussian Persistence Weighted Gaussian Kernel between two persistence diagrams.
@@ -112,10 +110,10 @@ double pss(PD PD1, PD PD2, double sigma){
  * @param[in] weight   weight function for the points in the diagrams.
  *
  */
-double gpwg(PD PD1, PD PD2, double sigma, double tau, double (*weight)(std::pair<double,double>) = [](std::pair<double,double> P){return atan(P.second - P.first);}){
-  double k1 = lpwg(PD1,PD1,sigma,weight);
-  double k2 = lpwg(PD2,PD2,sigma,weight);
-  double k3 = lpwg(PD1,PD2,sigma,weight);
+double gpwgk(PD PD1, PD PD2, double sigma, double tau, double (*weight)(std::pair<double,double>) = [](std::pair<double,double> P){return atan(P.second - P.first);}){
+  double k1 = lpwgk(PD1,PD1,sigma,weight);
+  double k2 = lpwgk(PD2,PD2,sigma,weight);
+  double k3 = lpwgk(PD1,PD2,sigma,weight);
   return exp( - (k1+k2-2*k3) / (2*pow(tau,2))  );
 }
 
@@ -129,9 +127,9 @@ double gpwg(PD PD1, PD PD2, double sigma, double tau, double (*weight)(std::pair
  *
  */
 double dpwg(PD PD1, PD PD2, double sigma, double (*weight)(std::pair<double,double>) = [](std::pair<double,double> P){return atan(P.second - P.first);}){
-  double k1 = lpwg(PD1,PD1,sigma,weight);
-  double k2 = lpwg(PD2,PD2,sigma,weight);
-  double k3 = lpwg(PD1,PD2,sigma,weight);
+  double k1 = lpwgk(PD1,PD1,sigma,weight);
+  double k2 = lpwgk(PD2,PD2,sigma,weight);
+  double k3 = lpwgk(PD1,PD2,sigma,weight);
   return std::sqrt(k1+k2-2*k3);
 }
 
@@ -160,24 +158,24 @@ double compute_angle(const PD & PersDiag, const int & i, const int & j){
 // Valid only if alpha is in [-pi,pi] and beta-alpha is in [0,pi]
 double compute_int_cos(const double & alpha, const double & beta){
   double res = 0;
-  assert((alpha >= 0 && alpha <= NUMPI) || (alpha >= -NUMPI && alpha <= 0));
-  if (alpha >= 0 && alpha <= NUMPI){
+  assert((alpha >= 0 && alpha <= 3.14159265359) || (alpha >= -3.14159265359 && alpha <= 0));
+  if (alpha >= 0 && alpha <= 3.14159265359){
     if (cos(alpha) >= 0){
-      if(NUMPI/2 <= beta){res = 2-sin(alpha)-sin(beta);}
+      if(3.14159265359/2 <= beta){res = 2-sin(alpha)-sin(beta);}
       else{res = sin(beta)-sin(alpha);}
     }
     else{
-      if(1.5*NUMPI <= beta){res = 2+sin(alpha)+sin(beta);}
+      if(1.5*3.14159265359 <= beta){res = 2+sin(alpha)+sin(beta);}
       else{res = sin(alpha)-sin(beta);}
     }
   }
-  if (alpha >= -NUMPI && alpha <= 0){
+  if (alpha >= -3.14159265359 && alpha <= 0){
     if (cos(alpha) <= 0){
-      if(-NUMPI/2 <= beta){res = 2+sin(alpha)+sin(beta);}
+      if(-3.14159265359/2 <= beta){res = 2+sin(alpha)+sin(beta);}
       else{res = sin(alpha)-sin(beta);}
     }
     else{
-      if(NUMPI/2 <= beta){res = 2-sin(alpha)-sin(beta);}
+      if(3.14159265359/2 <= beta){res = 2-sin(alpha)-sin(beta);}
       else{res = sin(beta)-sin(alpha);}
     }
   }
@@ -202,9 +200,9 @@ double compute_sw(const std::vector<std::vector<std::pair<int,double> > > & V1, 
   int N = V1.size(); double sw = 0;
   for (int i = 0; i < N; i++){
     std::vector<std::pair<int,double> > U,V; U = V1[i]; V = V2[i];
-    double theta1, theta2; theta1 = -NUMPI/2;
+    double theta1, theta2; theta1 = -3.14159265359/2;
     unsigned int ku, kv; ku = 0; kv = 0; theta2 = std::min(U[ku].second,V[kv].second);
-    while(theta1 != NUMPI/2){
+    while(theta1 != 3.14159265359/2){
       if(PD1[U[ku].first].first != PD2[V[kv].first].first || PD1[U[ku].first].second != PD2[V[kv].first].second)
         if(theta1 != theta2)
           sw += compute_int(theta1, theta2, U[ku].first, V[kv].first, PD1, PD2);
@@ -214,7 +212,7 @@ double compute_sw(const std::vector<std::vector<std::pair<int,double> > > & V1, 
       theta2 = std::min(U[ku].second, V[kv].second);
     }
   }
-  return sw/NUMPI;
+  return sw/3.14159265359;
 }
 
 /** \brief Computes the Sliced Wasserstein distance between two persistence diagrams.
@@ -292,8 +290,8 @@ double compute_sw(const std::vector<std::vector<std::pair<int,double> > > & V1, 
   }
 
   for (int i = 0; i < N; i++){
-    anglePerm1[order1[i]].push_back(std::pair<int, double>(i,NUMPI/2));
-    anglePerm2[order2[i]].push_back(std::pair<int, double>(i,NUMPI/2));
+    anglePerm1[order1[i]].push_back(std::pair<int, double>(i,3.14159265359/2));
+    anglePerm2[order2[i]].push_back(std::pair<int, double>(i,3.14159265359/2));
   }
 
   // Compute the SW distance with the list of inversions.
@@ -301,6 +299,17 @@ double compute_sw(const std::vector<std::vector<std::pair<int,double> > > & V1, 
 
 }
 
+ /** \brief Computes the Sliced Wasserstein Kernel between two persistence diagrams.
+  * \ingroup kernel
+  *
+  * @param[in] PD1     first persistence diagram.
+  * @param[in] PD2     second persistence diagram.
+  * @param[in] sigma   bandwidth parameter.
+  *
+  */
+  double swk(PD PD1, PD PD2, double sigma){
+    return exp( - sw(PD1,PD2) / (2*pow(sigma, 2)) );
+  }
 
 
 
@@ -370,7 +379,7 @@ std::vector<std::pair<double,double> > random_Fourier(double sigma, int M = 1000
  * @param[in] M         number of Fourier features.
  *
  */
-double approx_lpwg(PD PD1, PD PD2, double sigma, double (*weight)(std::pair<double,double>) = [](std::pair<double,double> P){return atan(P.second - P.first);}, int M = 1000){
+double approx_lpwgk(PD PD1, PD PD2, double sigma, double (*weight)(std::pair<double,double>) = [](std::pair<double,double> P){return atan(P.second - P.first);}, int M = 1000){
   std::vector<std::pair<double,double> > Z =  random_Fourier(sigma, M);
   std::vector<std::pair<double,double> > B1 = Fourier_feat(PD1,Z,weight);
   std::vector<std::pair<double,double> > B2 = Fourier_feat(PD2,Z,weight);
@@ -386,10 +395,10 @@ double approx_lpwg(PD PD1, PD PD2, double sigma, double (*weight)(std::pair<doub
  * @param[in] M         number of Fourier features.
  *
  */
-double approx_pss(PD PD1, PD PD2, double sigma, int M = 1000){
+double approx_pssk(PD PD1, PD PD2, double sigma, int M = 1000){
   PD pd1 = PD1; int numpts = PD1.size();    for(int i = 0; i < numpts; i++)  pd1.push_back(std::pair<double,double>(PD1[i].second,PD1[i].first));
   PD pd2 = PD2;     numpts = PD2.size();    for(int i = 0; i < numpts; i++)  pd2.push_back(std::pair<double,double>(PD2[i].second,PD2[i].first));
-  return approx_lpwg(pd1, pd2, 2*sqrt(sigma), &pss_weight, M) / (2*8*NUMPI*sigma);
+  return approx_lpwgk(pd1, pd2, 2*sqrt(sigma), &pss_weight, M) / (2*8*3.14159265359*sigma);
 }
 
 
@@ -404,7 +413,7 @@ double approx_pss(PD PD1, PD PD2, double sigma, int M = 1000){
  * @param[in] M         number of Fourier features.
  *
  */
-double approx_gpwg(PD PD1, PD PD2, double sigma, double tau, double (*weight)(std::pair<double,double>) = [](std::pair<double,double> P){return atan(P.second - P.first);}, int M = 1000){
+double approx_gpwgk(PD PD1, PD PD2, double sigma, double tau, double (*weight)(std::pair<double,double>) = [](std::pair<double,double> P){return atan(P.second - P.first);}, int M = 1000){
   std::vector<std::pair<double,double> > Z =  random_Fourier(sigma, M);
   std::vector<std::pair<double,double> > B1 = Fourier_feat(PD1,Z,weight);
   std::vector<std::pair<double,double> > B2 = Fourier_feat(PD2,Z,weight);
@@ -422,7 +431,7 @@ double approx_gpwg(PD PD1, PD PD2, double sigma, double tau, double (*weight)(st
  */
 double approx_sw(PD PD1, PD PD2, int N = 100){
 
-  double step = NUMPI/N; double sw = 0;
+  double step = 3.14159265359/N; double sw = 0;
 
   // Add projections onto diagonal.
   int n1, n2; n1 = PD1.size(); n2 = PD2.size();
@@ -437,14 +446,27 @@ double approx_sw(PD PD1, PD PD2, int N = 100){
   for (int i = 0; i < N; i++){
     std::vector<std::pair<int,double> > L1, L2;
     for (int j = 0; j < n; j++){
-      L1.push_back(   std::pair<int,double>(j, PD1[j].first*cos(-NUMPI/2+i*step) + PD1[j].second*sin(-NUMPI/2+i*step))   );
-      L2.push_back(   std::pair<int,double>(j, PD2[j].first*cos(-NUMPI/2+i*step) + PD2[j].second*sin(-NUMPI/2+i*step))   );
+      L1.push_back(   std::pair<int,double>(j, PD1[j].first*cos(-3.14159265359/2+i*step) + PD1[j].second*sin(-3.14159265359/2+i*step))   );
+      L2.push_back(   std::pair<int,double>(j, PD2[j].first*cos(-3.14159265359/2+i*step) + PD2[j].second*sin(-3.14159265359/2+i*step))   );
     }
     std::sort(L1.begin(),L1.end(), myComp); std::sort(L2.begin(),L2.end(), myComp);
     double f = 0; for (int j = 0; j < n; j++)  f += std::abs(L1[j].second - L2[j].second);
     sw += f*step;
   }
-  return sw/NUMPI;
+  return sw/3.14159265359;
+}
+
+/** \brief Computes an approximation of the Sliced Wasserstein Kernel between two persistence diagrams.
+ * \ingroup kernel
+ *
+ * @param[in] PD1       first persistence diagram.
+ * @param[in] PD2       second persistence diagram.
+ * @param[in] sigma     bandwidth parameter.
+ * @param[in] N         number of points sampled on the circle.
+ *
+ */
+double approx_swk(PD PD1, PD PD2, double sigma, int N = 100){
+  return exp( - approx_sw(PD1,PD2,N) / (2*pow(sigma,2)));
 }
 
 
