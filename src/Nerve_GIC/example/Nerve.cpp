@@ -30,7 +30,7 @@ using namespace std;
 void usage(int nbArgs, char *const progName) {
   cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
   cerr << "Usage: " << progName << " filename.off coordinate resolution gain [--v] \n";
-  cerr << "       i.e.: " << progName << " ../../data/points/human.off 2 10 0.3 --v \n";
+  cerr << "       i.e.: " << progName << " ../../../../data/points/human.off 2 10 0.3 --v \n";
   exit(-1);  // ----- >>
 }
 
