@@ -954,7 +954,8 @@ void Persistence_landscape::load_landscape_from_file(const char* filename) {
   std::vector<std::pair<double, double> > landscapeAtThisLevel;
 
   bool isThisAFirsLine = true;
-  while (!in.eof()) {
+  //change
+  while (in.good()) {
     getline(in, line);
     if (!(line.length() == 0 || line[0] == '#')) {
       std::stringstream lineSS;

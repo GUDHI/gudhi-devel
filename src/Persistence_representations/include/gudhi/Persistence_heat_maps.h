@@ -797,8 +797,8 @@ void Persistence_heat_maps<Scalling_of_kernels>::load_from_file(const char* file
 
   std::string temp;
   std::getline(in, temp);
-
-  while (!in.eof()) {
+  //change 
+  while (in.good()) {
     std::getline(in, temp);
     std::stringstream lineSS;
     lineSS << temp;

@@ -216,13 +216,9 @@ BOOST_AUTO_TEST_CASE(check_computations_of_distances) {
   Persistence_landscape p(diag);
   std::vector<std::pair<double, double> > diag2 =
       read_persistence_intervals_in_one_dimension_from_file("data/file_with_diagram_1");
-  Persistence_landscape q(diag2);
-  std::cout << "p.distance(q) = " << p.distance(q) << std::endl;
-  BOOST_CHECK(fabs(p.distance(q) - 25.5824) <= 0.00005);
-  std::cout << "p.distance(q, 2) = " << p.distance(q, 2) << std::endl;
-  BOOST_CHECK(fabs(p.distance(q, 2) - 2.1264) <= 0.0001);
-  std::cout << "p.distance(q, std::numeric_limits<double>::max()) = " <<
-               p.distance(q, std::numeric_limits<double>::max()) << std::endl;
+  Persistence_landscape q(diag2);  
+  BOOST_CHECK(fabs(p.distance(q) - 25.5824) <= 0.00005);  
+  BOOST_CHECK(fabs(p.distance(q, 2) - 2.1264) <= 0.0001);  
   BOOST_CHECK(fabs(p.distance(q, std::numeric_limits<double>::max()) - 0.359068) <= 0.00001);
 }
 

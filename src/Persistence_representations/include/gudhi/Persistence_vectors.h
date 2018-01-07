@@ -617,9 +617,8 @@ void Vector_distances_in_diagram<F>::load_from_file(const char* filename) {
   }
 
   double number;
-  while (true) {
-    in >> number;
-    if (in.eof()) break;
+  //change
+  while (in >> number) {    
     this->sorted_vector_of_distances.push_back(number);
   }
   in.close();

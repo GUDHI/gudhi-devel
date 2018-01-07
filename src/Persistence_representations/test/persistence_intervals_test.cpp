@@ -35,8 +35,7 @@ double epsilon = 0.0000005;
 
 // cout << "Left most end of the interval : " << min_max_.first << std::endl;
 // cout << "Right most end of the interval : " << min_max_.second << std::endl;
-BOOST_AUTO_TEST_CASE(check_min_max_function) {
-	std::cerr << "First test \n";
+BOOST_AUTO_TEST_CASE(check_min_max_function) {	
   Persistence_intervals p("data/file_with_diagram");
   std::pair<double, double> min_max_ = p.get_x_range();
 
