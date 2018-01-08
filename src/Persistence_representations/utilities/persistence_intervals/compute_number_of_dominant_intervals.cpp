@@ -20,7 +20,6 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gudhi/reader_utils.h>
 #include <gudhi/Persistence_intervals.h>
 
 #include <iostream>

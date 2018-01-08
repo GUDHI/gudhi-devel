@@ -1331,10 +1331,9 @@ void Persistence_landscape::plot(const char* filename, double xRangeBegin, doubl
   // this program create a gnuplot script file that allows to plot persistence diagram.
   std::ofstream out;
 
-  std::ostringstream nameSS;
-  nameSS << filename << "_GnuplotScript";
-  std::string nameStr = nameSS.str();
-  out.open(nameStr);
+  std::ostringstream gnuplot_script;
+  gnuplot_script << filename << "_GnuplotScript";
+  out.open(gnuplot_script.str().c_str());
 
   if ((xRangeBegin != std::numeric_limits<double>::max()) || (xRangeEnd != std::numeric_limits<double>::max()) ||
       (yRangeBegin != std::numeric_limits<double>::max()) || (yRangeEnd != std::numeric_limits<double>::max())) {
@@ -1367,8 +1366,8 @@ void Persistence_landscape::plot(const char* filename, double xRangeBegin, doubl
     }
     out << "EOF" << std::endl;
   }
-  std::cout << "Gnuplot script to visualize persistence diagram written to the file: " << nameStr << ". Type load '"
-            << nameStr << "' in gnuplot to visualize." << std::endl;
+  std::cout << "To visualize, install gnuplot and type the command: gnuplot -persist -e \"load \'"
+            << gnuplot_script.str().c_str() << "\'\"" << std::endl;
 }
 
 }  // namespace Persistence_representations

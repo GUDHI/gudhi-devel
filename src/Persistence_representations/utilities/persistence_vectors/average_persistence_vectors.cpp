@@ -30,21 +30,20 @@ using Vector_distances_in_diagram =
   Gudhi::Persistence_representations::Vector_distances_in_diagram<Euclidean_distance>;
 
 int main(int argc, char** argv) {
-  std::cout << "This program computes average persistence vector of persistence vectors created based on persistence "
-               "diagrams provided as an input. \n";
-  std::cout << "Please call this program with the names of files with persistence diagrams \n";
-  std::vector<const char*> filenames;
+  std::cout << "This program computes average of persistence vectors stored in files (the files needs to "
+            << "be created beforehand).\n"
+            << "The parameters of this programs are names of files with persistence vectors.\n";
 
-  if (argc == 1) {
-    std::cout << "No input files given, the program will now terminate \n";
+  if (argc < 3) {
+    std::cout << "Wrong number of parameters, the program will now terminate \n";
     return 1;
   }
 
+  std::vector<const char*> filenames;
   for (int i = 1; i < argc; ++i) {
     filenames.push_back(argv[i]);
   }
 
-  std::cout << "Reading persistence vectors...\n";
   std::vector<Vector_distances_in_diagram*> lands;
   for (size_t i = 0; i != filenames.size(); ++i) {
     Vector_distances_in_diagram* l = new Vector_distances_in_diagram;

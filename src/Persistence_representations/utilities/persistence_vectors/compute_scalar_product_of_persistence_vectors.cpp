@@ -32,9 +32,14 @@ using Vector_distances_in_diagram =
   Gudhi::Persistence_representations::Vector_distances_in_diagram<Euclidean_distance>;
 
 int main(int argc, char** argv) {
-  std::cout << "This program compute scalar product of persistence vectors stored in a file (the file needs to be "
-               "created beforehand). \n";
-  std::cout << "The parameters of this programs are names of files with persistence vectors.\n";
+  std::cout << "This program computes scalar product of persistence vectors stored in a file (the file needs to "
+            << "be created beforehand). \n"
+            << "The parameters of this programs are names of files with persistence vectors.\n";
+
+  if (argc < 3) {
+    std::cout << "Wrong number of parameters, the program will now terminate \n";
+    return 1;
+  }
 
   std::vector<const char*> filenames;
   for (int i = 1; i < argc; ++i) {
@@ -66,7 +71,7 @@ int main(int argc, char** argv) {
 
   // and now output the result to the screen and a file:
   std::ofstream out;
-  out.open("scalar_product");
+  out.open("scalar_product.vect");
   for (size_t i = 0; i != scalar_product.size(); ++i) {
     for (size_t j = 0; j != scalar_product.size(); ++j) {
       std::cout << scalar_product[i][j] << " ";
@@ -76,5 +81,7 @@ int main(int argc, char** argv) {
     out << std::endl;
   }
   out.close();
+
+  std::cout << "Distance can be found in 'scalar_product.vect' file\n";
   return 0;
 }

@@ -25,11 +25,14 @@
 #include <boost/test/unit_test.hpp>
 #include <gudhi/reader_utils.h>
 #include <gudhi/Persistence_landscape_on_grid.h>
+#include <gudhi/Unitary_tests_utils.h>
 
 #include <iostream>
 
 using namespace Gudhi;
 using namespace Gudhi::Persistence_representations;
+
+double epsilon = 0.0005;
 
 BOOST_AUTO_TEST_CASE(check_construction_of_landscape) {
   Persistence_landscape_on_grid l("data/file_with_diagram_1", 100, std::numeric_limits<unsigned short>::max());
@@ -53,16 +56,14 @@ BOOST_AUTO_TEST_CASE(check_construction_of_landscape_using_only_ten_levels) {
     std::vector<double> v2 = g.vectorize(level);
     BOOST_CHECK(v1.size() == v2.size());
     for (size_t i = 0; i != v1.size(); ++i) {
-      BOOST_CHECK(v1[i] == v2[i]);
+      GUDHI_TEST_FLOAT_EQUALITY_CHECK(v1[i], v2[i]);
     }
   }
 }
 
 BOOST_AUTO_TEST_CASE(check_computations_of_integrals) {
   Persistence_landscape_on_grid p("data/file_with_diagram_1", 100, std::numeric_limits<unsigned short>::max());
-  double integral = p.compute_integral_of_landscape();
-  // cerr << "integral : " << integral << endl;getchar();
-  BOOST_CHECK(fabs(integral - 27.343) <= 0.00005);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_integral_of_landscape(), 27.343, epsilon);
 }
 
 BOOST_AUTO_TEST_CASE(check_computations_of_integrals_for_each_level_separatelly) {
@@ -92,9 +93,8 @@ BOOST_AUTO_TEST_CASE(check_computations_of_integrals_for_each_level_separatelly)
   integrals_fir_different_levels.push_back(0.202633);
 
   for (size_t level = 0; level != integrals_fir_different_levels.size(); ++level) {
-    double integral = p.compute_integral_of_landscape(level);
-    // cerr << integral << endl;
-    BOOST_CHECK(fabs(integral - integrals_fir_different_levels[level]) <= 0.00005);
+    GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_integral_of_landscape(level), integrals_fir_different_levels[level],
+                                    epsilon);
   }
 }
 
@@ -109,9 +109,8 @@ BOOST_AUTO_TEST_CASE(check_computations_of_integrals_of_powers_of_landscape) {
   integrals_fir_different_powers.push_back(0.23011);
 
   for (size_t power = 0; power != 5; ++power) {
-    double integral = p.compute_integral_of_landscape(power);
-    // cerr << integral << endl;
-    BOOST_CHECK(fabs(integral - integrals_fir_different_powers[power]) <= 0.00001);
+    GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_integral_of_landscape(power), integrals_fir_different_powers[power],
+                                    epsilon);
   }
 }
 
@@ -145,8 +144,8 @@ BOOST_AUTO_TEST_CASE(check_computations_of_values_on_different_points) {
   double x = 0.0012321;
   double dx = 0.05212;
   for (size_t i = 0; i != 10; ++i) {
-    BOOST_CHECK(almost_equal(p.compute_value_at_a_given_point(0, x), results_level_0[i]));
-    BOOST_CHECK(almost_equal(p.compute_value_at_a_given_point(10, x), results_level_10[i]));
+    GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_value_at_a_given_point(0, x), results_level_0[i], epsilon);
+    GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_value_at_a_given_point(10, x), results_level_10[i], epsilon);
     x += dx;
   }
 }
@@ -179,22 +178,14 @@ BOOST_AUTO_TEST_CASE(check_computations_of_maxima_and_norms) {
   Persistence_landscape_on_grid second("data/file_with_diagram_2", 0., 1., 100);
   Persistence_landscape_on_grid sum = p + second;
 
-  // cerr << p.compute_maximum() << endl;
-  // cerr <<  p.compute_norm_of_landscape(1) << endl;
-  // cerr << p.compute_norm_of_landscape(2) << endl;
-  // cerr <<  p.compute_norm_of_landscape(3) << endl;
-  // cerr <<  compute_distance_of_landscapes_on_grid(p,sum,1) << endl;
-  // cerr <<  compute_distance_of_landscapes_on_grid(p,sum,2) << endl;
-  // cerr <<  compute_distance_of_landscapes_on_grid(p,sum,std::numeric_limits<double>::max())  << endl;
-
-  BOOST_CHECK(fabs(p.compute_maximum() - 0.46) <= 0.00001);
-  BOOST_CHECK(fabs(p.compute_norm_of_landscape(1) - 27.3373) <= 0.00001);
-  BOOST_CHECK(fabs(p.compute_norm_of_landscape(2) - 1.84143) <= 0.00001);
-  BOOST_CHECK(fabs(p.compute_norm_of_landscape(3) - 0.927067) <= 0.00001);
-  BOOST_CHECK(fabs(compute_distance_of_landscapes_on_grid(p, sum, 1) - 16.8519) <= 0.00005);
-  BOOST_CHECK(fabs(compute_distance_of_landscapes_on_grid(p, sum, 2) - 1.44542) <= 0.00001);
-  BOOST_CHECK(fabs(compute_distance_of_landscapes_on_grid(p, sum, std::numeric_limits<double>::max()) - 0.45) <=
-              0.00001);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_maximum(), 0.46, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_norm_of_landscape(1), 27.3373 , epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_norm_of_landscape(2), 1.84143 , epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_norm_of_landscape(3), 0.927067, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(compute_distance_of_landscapes_on_grid(p, sum, 1), 16.8519, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(compute_distance_of_landscapes_on_grid(p, sum, 2), 1.44542, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(compute_distance_of_landscapes_on_grid(p, sum, std::numeric_limits<double>::max()),
+                                  0.45, epsilon);
 }
 
 BOOST_AUTO_TEST_CASE(check_default_parameters_of_distances) {
@@ -209,7 +200,7 @@ BOOST_AUTO_TEST_CASE(check_default_parameters_of_distances) {
   double dist_numeric_limit_max = p.distance(q, std::numeric_limits<double>::max());
   double dist_infinity = p.distance(q, std::numeric_limits<double>::infinity());
 
-  BOOST_CHECK(dist_numeric_limit_max == dist_infinity);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(dist_numeric_limit_max, dist_infinity);
 }
 
 BOOST_AUTO_TEST_CASE(check_computations_of_averages) {
@@ -226,16 +217,15 @@ BOOST_AUTO_TEST_CASE(check_computations_of_averages) {
 BOOST_AUTO_TEST_CASE(check_computations_of_distances) {
   Persistence_landscape_on_grid p("data/file_with_diagram", 0., 1., 10000);
   Persistence_landscape_on_grid q("data/file_with_diagram_1", 0., 1., 10000);
-  BOOST_CHECK(fabs(p.distance(q) - 25.5779) <= 0.00005);
-  BOOST_CHECK(fabs(p.distance(q, 2) - 2.04891) <= 0.00001);
-  BOOST_CHECK(fabs(p.distance(q, std::numeric_limits<double>::max()) - 0.359) <= 0.00001);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.distance(q), 25.5779, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.distance(q, 2), 2.04891, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.distance(q, std::numeric_limits<double>::max()), 0.359, epsilon);
 }
 
 BOOST_AUTO_TEST_CASE(check_computations_of_scalar_product) {
   Persistence_landscape_on_grid p("data/file_with_diagram", 0., 1., 10000);
   Persistence_landscape_on_grid q("data/file_with_diagram_1", 0., 1., 10000);
-  // std::cerr << p.compute_scalar_product( q ) << std::endl;
-  BOOST_CHECK(almost_equal(p.compute_scalar_product(q), 0.754367));
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_scalar_product(q), 0.754367, epsilon);
 }
 
 // Below I am storing the code used to generate tests for that functionality.

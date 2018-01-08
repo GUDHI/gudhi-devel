@@ -21,7 +21,7 @@
  */
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE "Persistence_representations"
+#define BOOST_TEST_MODULE "read_persistence_from_file_test"
 #include <boost/test/unit_test.hpp>
 #include <gudhi/read_persistence_from_file.h>
 

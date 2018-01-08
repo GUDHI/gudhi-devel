@@ -85,7 +85,6 @@ FIND_PROGRAM( GCOVR_PATH gcovr )
 if (GCOVR_PATH)
   message("gcovr found in ${GCOVR_PATH}")
 endif()
-# Required programs for unitary tests purpose
 FIND_PROGRAM( GPROF_PATH gprof )
 if (GPROF_PATH)
   message("gprof found in ${GPROF_PATH}")
@@ -93,6 +92,10 @@ endif()
 FIND_PROGRAM( DIFF_PATH diff )
 if (DIFF_PATH)
   message("diff found in ${DIFF_PATH}")
+endif()
+FIND_PROGRAM( GNUPLOT_PATH gnuplot )
+if (GNUPLOT_PATH)
+  message("gnuplot found in ${GNUPLOT_PATH}")
 endif()
 
 # BOOST ISSUE result_of vs C++11

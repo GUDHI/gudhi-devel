@@ -28,14 +28,13 @@
 using Persistence_landscape = Gudhi::Persistence_representations::Persistence_landscape;
 
 int main(int argc, char** argv) {
-  std::cout << "This program computes average persistence landscape of persistence landscapes created based on "
-               "persistence diagrams provided as an input (you must create them first).\n";
-  std::cout << "Please call this program with the names of files with persistence landscapes. The program will create "
-               "a persistence landscape which will be their average \n";
+  std::cout << "This program computes average of persistence landscapes stored in files (the files needs to be "
+            << "created beforehand).\n"
+            << "The parameters of this programs are names of files with persistence landscapes.\n";
   std::vector<const char*> filenames;
 
-  if (argc == 1) {
-    std::cout << "No input files given, the program will now terminate \n";
+  if (argc < 3) {
+    std::cout << "Wrong number of parameters, the program will now terminate \n";
     return 1;
   }
 
@@ -43,7 +42,6 @@ int main(int argc, char** argv) {
     filenames.push_back(argv[i]);
   }
 
-  std::cout << "Creating persistence landscapes...\n";
   std::vector<Persistence_landscape*> lands;
   for (size_t i = 0; i != filenames.size(); ++i) {
     Persistence_landscape* l = new Persistence_landscape;
@@ -60,7 +58,6 @@ int main(int argc, char** argv) {
     delete lands[i];
   }
 
-  std::cout << "Done \n";
-
+  std::cout << "Average can be found in 'average.land' file\n";
   return 0;
 }

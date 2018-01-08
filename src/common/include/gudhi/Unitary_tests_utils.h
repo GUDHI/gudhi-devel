@@ -2,9 +2,9 @@
  *    (Geometric Understanding in Higher Dimensions) is a generic C++
  *    library for computational topology.
  *
- *    Author(s):       Pawel Dlotko
+ *    Author(s):       Vincent Rouvreau
  *
- *    Copyright (C) 2016  INRIA (France)
+ *    Copyright (C) 2017  INRIA
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -19,24 +19,21 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef UNITARY_TESTS_UTILS_H_
+#define UNITARY_TESTS_UTILS_H_
 
-#include <gudhi/Persistence_heat_maps.h>
+#include <boost/test/unit_test.hpp>
 
 #include <iostream>
-#include <sstream>
 
-using constant_scaling_function = Gudhi::Persistence_representations::constant_scaling_function;
-using Persistence_heat_maps = Gudhi::Persistence_representations::Persistence_heat_maps<constant_scaling_function>;
-
-int main(int argc, char** argv) {
-  std::cout << "This program creates a gnuplot script from a persistence heat maps stored in a file (the file needs "
-            << "to be created beforehand). Please call the code with the name of a single heat maps file \n";
-  if (argc != 2) {
-    std::cout << "Wrong parameter list, the program will now terminate \n";
-    return 1;
-  }
-  Persistence_heat_maps l;
-  l.load_from_file(argv[1]);
-  l.plot(argv[1]);
-  return 0;
+template<typename FloatingType >
+void GUDHI_TEST_FLOAT_EQUALITY_CHECK(FloatingType a, FloatingType b,
+                                     FloatingType epsilon = std::numeric_limits<FloatingType>::epsilon()) {
+#ifdef DEBUG_TRACES
+  std::cout << "GUDHI_TEST_FLOAT_EQUALITY_CHECK - " << a << " versus " << b
+            << " | diff = " << std::fabs(a - b) << " - epsilon = " << epsilon << std::endl;
+#endif
+  BOOST_CHECK(std::fabs(a - b) < epsilon);
 }
+
+#endif  // UNITARY_TESTS_UTILS_H_

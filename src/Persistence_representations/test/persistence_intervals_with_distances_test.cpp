@@ -24,8 +24,9 @@
 #define BOOST_TEST_MODULE "Persistence_intervals_with_distances_test"
 #include <boost/test/unit_test.hpp>
 #include <gudhi/reader_utils.h>
-#include "gudhi/Persistence_intervals_with_distances.h"
-#include "gudhi/common_persistence_representations.h"
+#include <gudhi/Persistence_intervals_with_distances.h>
+#include <gudhi/common_persistence_representations.h>
+#include <gudhi/Unitary_tests_utils.h>
 
 #include <iostream>
 
@@ -38,9 +39,7 @@ BOOST_AUTO_TEST_CASE(check_bottleneck_distances_computation) {
 
   double dist = p.distance(q);
 
-  // std::cout << "dist : " << dist << std::endl;
-
-  BOOST_CHECK(almost_equal(dist, 0.389043));
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(dist, 0.389043, Gudhi::Persistence_representations::epsi);
 }
 
 BOOST_AUTO_TEST_CASE(check_default_parameters_in_distance) {
@@ -51,11 +50,7 @@ BOOST_AUTO_TEST_CASE(check_default_parameters_in_distance) {
   double max_parameter_distance = p.distance(q, std::numeric_limits<double>::max());
   double inf_parameter_distance = p.distance(q, std::numeric_limits<double>::infinity());
 
-  // std::cout << "default_parameter_distance : " << default_parameter_distance << std::endl;
-  // std::cout << "max_parameter_distance : " << max_parameter_distance << std::endl;
-  // std::cout << "inf_parameter_distance : " << inf_parameter_distance << std::endl;
-
-  BOOST_CHECK(default_parameter_distance == max_parameter_distance);
-  BOOST_CHECK(inf_parameter_distance == max_parameter_distance);
-  BOOST_CHECK(inf_parameter_distance == max_parameter_distance);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(default_parameter_distance, max_parameter_distance);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(inf_parameter_distance, max_parameter_distance);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(inf_parameter_distance, max_parameter_distance);
 }
