@@ -50,81 +50,73 @@ namespace Persistence_representations {
  * The procedure returns vector of persistence pairs.
 **/
 std::vector<std::pair<double, double> > read_persistence_intervals_in_one_dimension_from_file(
-    std::string const& filename, int dimension = -1, double what_to_substitute_for_infinite_bar = -1) {  
+    std::string const& filename, int dimension = -1, double what_to_substitute_for_infinite_bar = -1) {
   bool dbg = false;
 
   std::string line;
-  std::vector<std::pair<double, double> > barcode_initial = read_persistence_intervals_in_dimension(filename,(int)dimension);
+  std::vector<std::pair<double, double> > barcode_initial =
+      read_persistence_intervals_in_dimension(filename, (int)dimension);
   std::vector<std::pair<double, double> > final_barcode;
-  final_barcode.reserve( barcode_initial.size() );
-  
-  if ( dbg ) 
-  {
-	  std::cerr << "Here are the intervals that we read from the file : \n";
-	  for ( size_t i = 0 ; i != barcode_initial.size() ; ++i )
-	  {
-		  std::cout << barcode_initial[i].first << " " << barcode_initial[i].second << std::endl;
-	  }
-	  getchar();
+  final_barcode.reserve(barcode_initial.size());
+
+  if (dbg) {
+    std::cerr << "Here are the intervals that we read from the file : \n";
+    for (size_t i = 0; i != barcode_initial.size(); ++i) {
+      std::cout << barcode_initial[i].first << " " << barcode_initial[i].second << std::endl;
+    }
+    getchar();
   }
-  
-  for ( size_t i = 0 ; i != barcode_initial.size() ; ++i )
-  {
-	   if ( dbg )
-	   {
-		   std::cout << "COnsidering interval : " << barcode_initial[i].first << " " << barcode_initial[i].second << std::endl;
-	   }
-	   // if ( barcode_initial[i].first == barcode_initial[i].second )
-	   //{
-	   //		if ( dbg )std::cout << "It has zero length \n";
-	   //		continue;//zero length intervals are not relevant, so we skip all of them.
-	   //}
-	
-		if ( barcode_initial[i].first > barcode_initial[i].second )//note that in this case barcode_initial[i].second != std::numeric_limits<double>::infinity()
-		{
-			if ( dbg )std::cout << "Swap and enter \n";
-			//swap them to make sure that birth < death
-			final_barcode.push_back( std::pair<double,double>( barcode_initial[i].second , barcode_initial[i].first ) );
-			continue;
-		}
-		else
-		{
-			if ( barcode_initial[i].second != std::numeric_limits<double>::infinity() )
-			{
-				if ( dbg )std::cout << "Simply enters\n";
-				//in this case, due to the previous conditions we know that barcode_initial[i].first < barcode_initial[i].second, so we put them as they are
-				final_barcode.push_back( std::pair<double,double>( barcode_initial[i].first , barcode_initial[i].second ) );
-			}
-		}
-	
-		if ( (barcode_initial[i].second == std::numeric_limits<double>::infinity() ) && ( what_to_substitute_for_infinite_bar != -1 ) )
-		{								
-			if ( barcode_initial[i].first < what_to_substitute_for_infinite_bar )//if only birth < death.
-			{ 
-				final_barcode.push_back( std::pair<double,double>( barcode_initial[i].first , what_to_substitute_for_infinite_bar ) );
-			}
-		}
-		else
-		{
-			//if the variable what_to_substitute_for_infinite_bar is not set, then we ignore all the infinite bars. 
-		}		
+
+  for (size_t i = 0; i != barcode_initial.size(); ++i) {
+    if (dbg) {
+      std::cout << "COnsidering interval : " << barcode_initial[i].first << " " << barcode_initial[i].second
+                << std::endl;
+    }
+    // if ( barcode_initial[i].first == barcode_initial[i].second )
+    //{
+    //		if ( dbg )std::cout << "It has zero length \n";
+    //		continue;//zero length intervals are not relevant, so we skip all of them.
+    //}
+
+    if (barcode_initial[i].first >
+        barcode_initial[i]
+            .second)  // note that in this case barcode_initial[i].second != std::numeric_limits<double>::infinity()
+    {
+      if (dbg) std::cout << "Swap and enter \n";
+      // swap them to make sure that birth < death
+      final_barcode.push_back(std::pair<double, double>(barcode_initial[i].second, barcode_initial[i].first));
+      continue;
+    } else {
+      if (barcode_initial[i].second != std::numeric_limits<double>::infinity()) {
+        if (dbg) std::cout << "Simply enters\n";
+        // in this case, due to the previous conditions we know that barcode_initial[i].first <
+        // barcode_initial[i].second, so we put them as they are
+        final_barcode.push_back(std::pair<double, double>(barcode_initial[i].first, barcode_initial[i].second));
+      }
+    }
+
+    if ((barcode_initial[i].second == std::numeric_limits<double>::infinity()) &&
+        (what_to_substitute_for_infinite_bar != -1)) {
+      if (barcode_initial[i].first < what_to_substitute_for_infinite_bar)  // if only birth < death.
+      {
+        final_barcode.push_back(
+            std::pair<double, double>(barcode_initial[i].first, what_to_substitute_for_infinite_bar));
+      }
+    } else {
+      // if the variable what_to_substitute_for_infinite_bar is not set, then we ignore all the infinite bars.
+    }
   }
-  
-    
-  if ( dbg ) 
-  {
-	  std::cerr << "Here are the final bars that we are sending further : \n";
-	  for ( size_t i = 0 ; i != final_barcode.size() ; ++i )
-	  {
-		  std::cout << final_barcode[i].first << " " << final_barcode[i].second << std::endl;
-	  }
-	  std::cerr << "final_barcode.size() : " << final_barcode.size() << std::endl;
-	  getchar();
+
+  if (dbg) {
+    std::cerr << "Here are the final bars that we are sending further : \n";
+    for (size_t i = 0; i != final_barcode.size(); ++i) {
+      std::cout << final_barcode[i].first << " " << final_barcode[i].second << std::endl;
+    }
+    std::cerr << "final_barcode.size() : " << final_barcode.size() << std::endl;
+    getchar();
   }
-  
-  
-  
-  return final_barcode;  
+
+  return final_barcode;
 }  // read_persistence_intervals_in_one_dimension_from_file
 
 }  // namespace Persistence_representations
