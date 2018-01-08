@@ -49,6 +49,7 @@
 #include <initializer_list>
 #include <algorithm>  // for std::max
 #include <cstdint>  // for std::uint32_t
+#include <iterator>  // for std::distance
 
 namespace Gudhi {
 
