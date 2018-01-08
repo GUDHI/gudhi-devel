@@ -692,7 +692,7 @@ class Simplex_tree {
       return { null_simplex(), true }; // FIXME: false would make more sense to me.
     GUDHI_CHECK(std::is_sorted(first, last), "simplex vertices listed in unsorted order");
     // Update dimension if needed. We could wait to see if the insertion succeeds, but I doubt there is much to gain.
-    dimension_ = std::max(dimension_, static_cast<int>(std::distance(first, last)) - 1);
+    dimension_ = (std::max)(dimension_, static_cast<int>(std::distance(first, last)) - 1);
     return rec_insert_simplex_and_subfaces_sorted(root(), first, last, filt);
   }
   // To insert {1,2,3,4}, we insert {2,3,4} twice, once at the root, and once below 1.
@@ -1132,7 +1132,7 @@ class Simplex_tree {
             to_be_inserted=false;
             break;
           }
-          filt = std::max(filt, filtration(border_child));
+          filt = (std::max)(filt, filtration(border_child));
         }
         if (to_be_inserted) {
           intersection.emplace_back(next->first, Node(nullptr, filt));
@@ -1328,7 +1328,7 @@ class Simplex_tree {
       if (sh_dimension >= dimension_)
         // Stop browsing as soon as the dimension is reached, no need to go furter
         return false;
-      new_dimension = std::max(new_dimension, sh_dimension);
+      new_dimension = (std::max)(new_dimension, sh_dimension);
     }
     dimension_ = new_dimension;
     return true;
