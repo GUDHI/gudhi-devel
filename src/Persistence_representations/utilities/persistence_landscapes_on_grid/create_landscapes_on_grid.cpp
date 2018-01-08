@@ -48,7 +48,6 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-
   size_t size_of_grid = (size_t)atoi(argv[1]);
   double min_ = atof(argv[2]);
   double max_ = atof(argv[3]);

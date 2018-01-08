@@ -28,8 +28,7 @@
 #include <vector>
 
 using Euclidean_distance = Gudhi::Euclidean_distance;
-using Vector_distances_in_diagram =
-  Gudhi::Persistence_representations::Vector_distances_in_diagram<Euclidean_distance>;
+using Vector_distances_in_diagram = Gudhi::Persistence_representations::Vector_distances_in_diagram<Euclidean_distance>;
 
 int main(int argc, char** argv) {
   std::cout << "This program computes scalar product of persistence vectors stored in a file (the file needs to "

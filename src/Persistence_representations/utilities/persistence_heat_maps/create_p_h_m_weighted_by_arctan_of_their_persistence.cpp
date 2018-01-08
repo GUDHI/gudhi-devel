@@ -29,7 +29,7 @@
 
 using arc_tan_of_persistence_of_point = Gudhi::Persistence_representations::arc_tan_of_persistence_of_point;
 using Persistence_heat_maps =
-  Gudhi::Persistence_representations::Persistence_heat_maps<arc_tan_of_persistence_of_point>;
+    Gudhi::Persistence_representations::Persistence_heat_maps<arc_tan_of_persistence_of_point>;
 
 int main(int argc, char** argv) {
   std::cout << "This program creates persistence heat map files (*.mps) of persistence diagrams files (*.pers) "

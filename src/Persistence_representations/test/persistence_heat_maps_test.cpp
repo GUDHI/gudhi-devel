@@ -142,15 +142,15 @@ BOOST_AUTO_TEST_CASE(check_distance_for_heat_maps) {
   Persistence_heat_maps<constant_scaling_function> q("data/file_with_diagram_1", filter, false, 1000, 0, 1);
   Persistence_heat_maps<constant_scaling_function> r("data/file_with_diagram_2", filter, false, 1000, 0, 1);
 
-  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.distance(p), 0.,      epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.distance(p), 0., epsilon);
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.distance(q), 624.183, epsilon);
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.distance(r), 415.815, epsilon);
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(q.distance(p), 624.183, epsilon);
-  GUDHI_TEST_FLOAT_EQUALITY_CHECK(q.distance(q), 0.,      epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(q.distance(q), 0., epsilon);
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(q.distance(r), 528.066, epsilon);
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(r.distance(p), 415.815, epsilon);
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(r.distance(q), 528.066, epsilon);
-  GUDHI_TEST_FLOAT_EQUALITY_CHECK(r.distance(r), 0.,      epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(r.distance(r), 0., epsilon);
 }
 
 BOOST_AUTO_TEST_CASE(check_projections_to_R_for_heat_maps) {
@@ -174,11 +174,11 @@ BOOST_AUTO_TEST_CASE(check_scalar_products_for_heat_maps) {
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_scalar_product(q), 0.0509357, epsilon);
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_scalar_product(r), 0.0375608, epsilon);
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(q.compute_scalar_product(p), 0.0509357, epsilon);
-  GUDHI_TEST_FLOAT_EQUALITY_CHECK(q.compute_scalar_product(q), 1.31293  , epsilon);
-  GUDHI_TEST_FLOAT_EQUALITY_CHECK(q.compute_scalar_product(r), 0.536799 , epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(q.compute_scalar_product(q), 1.31293, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(q.compute_scalar_product(r), 0.536799, epsilon);
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(r.compute_scalar_product(p), 0.0375608, epsilon);
-  GUDHI_TEST_FLOAT_EQUALITY_CHECK(r.compute_scalar_product(q), 0.536799 , epsilon);
-  GUDHI_TEST_FLOAT_EQUALITY_CHECK(r.compute_scalar_product(r), 0.672907 , epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(r.compute_scalar_product(q), 0.536799, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(r.compute_scalar_product(r), 0.672907, epsilon);
 }
 
 BOOST_AUTO_TEST_CASE(check_arythmetic_operations_for_heat_maps) {

@@ -179,8 +179,8 @@ BOOST_AUTO_TEST_CASE(check_computations_of_maxima_and_norms) {
   Persistence_landscape_on_grid sum = p + second;
 
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_maximum(), 0.46, epsilon);
-  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_norm_of_landscape(1), 27.3373 , epsilon);
-  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_norm_of_landscape(2), 1.84143 , epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_norm_of_landscape(1), 27.3373, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_norm_of_landscape(2), 1.84143, epsilon);
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_norm_of_landscape(3), 0.927067, epsilon);
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(compute_distance_of_landscapes_on_grid(p, sum, 1), 16.8519, epsilon);
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(compute_distance_of_landscapes_on_grid(p, sum, 2), 1.44542, epsilon);
@@ -189,12 +189,10 @@ BOOST_AUTO_TEST_CASE(check_computations_of_maxima_and_norms) {
 }
 
 BOOST_AUTO_TEST_CASE(check_default_parameters_of_distances) {
-  std::vector<std::pair<double, double> > diag =
-      read_persistence_intervals_in_dimension("data/file_with_diagram");
+  std::vector<std::pair<double, double> > diag = read_persistence_intervals_in_dimension("data/file_with_diagram");
   Persistence_landscape_on_grid p(diag, 0., 1., 100);
 
-  std::vector<std::pair<double, double> > diag1 =
-      read_persistence_intervals_in_dimension("data/file_with_diagram_1");
+  std::vector<std::pair<double, double> > diag1 = read_persistence_intervals_in_dimension("data/file_with_diagram_1");
   Persistence_landscape_on_grid q(diag1, 0., 1., 100);
 
   double dist_numeric_limit_max = p.distance(q, std::numeric_limits<double>::max());

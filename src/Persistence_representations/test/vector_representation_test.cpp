@@ -295,12 +295,10 @@ BOOST_AUTO_TEST_CASE(check_distance_computations) {
 }
 
 BOOST_AUTO_TEST_CASE(check_default_parameters_of_distances) {
-  std::vector<std::pair<double, double> > diag =
-      read_persistence_intervals_in_dimension("data/file_with_diagram");
+  std::vector<std::pair<double, double> > diag = read_persistence_intervals_in_dimension("data/file_with_diagram");
   Vector_distances_in_diagram<Euclidean_distance> p(diag, 100);
 
-  std::vector<std::pair<double, double> > diag1 =
-      read_persistence_intervals_in_dimension("data/file_with_diagram_1");
+  std::vector<std::pair<double, double> > diag1 = read_persistence_intervals_in_dimension("data/file_with_diagram_1");
   Vector_distances_in_diagram<Euclidean_distance> q(diag1, 100);
 
   double dist_numeric_limit_max = p.distance(q, std::numeric_limits<double>::max());

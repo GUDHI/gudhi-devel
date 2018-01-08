@@ -266,8 +266,7 @@ BOOST_AUTO_TEST_CASE(check_compute_persistent_betti_numbers) {
 
   std::vector<std::pair<double, size_t> > pbns_new = p.compute_persistent_betti_numbers();
   for (size_t i = 0; i != pbns.size(); ++i) {
-    GUDHI_TEST_FLOAT_EQUALITY_CHECK(pbns[i].first, pbns_new[i].first,
-                                    Gudhi::Persistence_representations::epsi);
+    GUDHI_TEST_FLOAT_EQUALITY_CHECK(pbns[i].first, pbns_new[i].first, Gudhi::Persistence_representations::epsi);
     BOOST_CHECK(pbns[i].second == pbns_new[i].second);
   }
 }
@@ -288,7 +287,6 @@ BOOST_AUTO_TEST_CASE(check_k_n_n) {
   knn_template.push_back(0.786945);
 
   for (size_t i = 0; i != knn.size(); ++i) {
-    GUDHI_TEST_FLOAT_EQUALITY_CHECK(knn[i], knn_template[i],
-                                    Gudhi::Persistence_representations::epsi);
+    GUDHI_TEST_FLOAT_EQUALITY_CHECK(knn[i], knn_template[i], Gudhi::Persistence_representations::epsi);
   }
 }

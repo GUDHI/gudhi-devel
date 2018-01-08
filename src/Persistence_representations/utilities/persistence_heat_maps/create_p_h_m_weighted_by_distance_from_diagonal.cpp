@@ -28,8 +28,7 @@
 #include <vector>
 
 using distance_from_diagonal_scaling = Gudhi::Persistence_representations::distance_from_diagonal_scaling;
-using Persistence_heat_maps =
-  Gudhi::Persistence_representations::Persistence_heat_maps<distance_from_diagonal_scaling>;
+using Persistence_heat_maps = Gudhi::Persistence_representations::Persistence_heat_maps<distance_from_diagonal_scaling>;
 
 int main(int argc, char** argv) {
   std::cout << "This program creates persistence heat map files (*.mps) of persistence diagrams files (*.pers) "

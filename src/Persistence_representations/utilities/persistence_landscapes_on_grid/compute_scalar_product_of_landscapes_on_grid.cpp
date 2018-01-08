@@ -29,9 +29,10 @@
 using Persistence_landscape_on_grid = Gudhi::Persistence_representations::Persistence_landscape_on_grid;
 
 int main(int argc, char** argv) {
-  std::cout << "This program computes scalar product of persistence landscapes on grid stored in a file (the file needs to "
-            << "be created beforehand). \n"
-            << "The parameters of this programs are names of files with persistence landscapes on grid.\n";
+  std::cout
+      << "This program computes scalar product of persistence landscapes on grid stored in a file (the file needs to "
+      << "be created beforehand). \n"
+      << "The parameters of this programs are names of files with persistence landscapes on grid.\n";
 
   if (argc < 3) {
     std::cout << "Wrong number of parameters, the program will now terminate \n";
