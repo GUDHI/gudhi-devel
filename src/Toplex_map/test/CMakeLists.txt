@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 project(Toplex_map_tests)
 
-add_executable ( ToplexMapUT test.cpp )
+add_executable ( ToplexMapUT toplex_map_unit_test.cpp )
 target_link_libraries(ToplexMapUT ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 

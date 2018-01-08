@@ -31,18 +31,6 @@ struct Visitor {
 class Fake_simplex_tree : public Filtered_toplex_map {
 
 public:
-    /** Vertex is the type of vertices.
-     * \ingroup toplex_map   */
-    typedef Toplex_map::Vertex Vertex;
-
-    /** Simplex is the type of simplices.
-     * \ingroup toplex_map   */
-    typedef Toplex_map::Simplex Simplex;
-
-    /** The type of the pointers to maximal simplices.
-     * \ingroup toplex_map   */
-    typedef Toplex_map::Simplex_ptr Simplex_ptr;
-
     /** The type of the sets of Simplex_ptr.
      * \ingroup toplex_map   */
     typedef Toplex_map::Simplex_ptr_set Simplex_ptr_set;

@@ -49,6 +49,11 @@ namespace Gudhi {
  *
  * \image html map.png
  *
+ * The performances are a lot better than in simplex tree as soon you use maximal simplices and not simplices,
+ * here the construction of a strong witness complex of a point set with growing parameter :
+ *
+ * \image html graph.png
+ *
  */
 /** @} */  // end defgroup toplex_map
 
