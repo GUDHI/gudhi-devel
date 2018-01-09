@@ -645,7 +645,7 @@ public:
 
     // std::vector<std::vector<double>> W;
     for (auto m: v_map) {
-      FT denom = m.first[0];
+      FT denom = m.first[0]*vertex_level_;
       Eigen::VectorXd b(d);
       for (int i = 0; i < d; i++) {
         b(i) = m.first[i+1]/denom;

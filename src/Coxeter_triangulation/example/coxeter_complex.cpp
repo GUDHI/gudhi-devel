@@ -179,18 +179,26 @@ int main(int argc, char * const argv[]) {
   // short d = 2;
   std::cout << "Successfully read " << N << " points in dimension " << d << std::endl;
 
-  // Coxeter_system cs_A('A', d);
-  // Coxeter_complex cc(point_vector, cs_A, init_level);  
-  Coxeter_system cs_B('B', d);
-  Coxeter_complex cc(point_vector, cs_B, init_level);
-  // Coxeter_system cs_C('C', d);
-  // Coxeter_complex(point_vector, cs_C);
-  // Coxeter_system cs_D('D', d);
+  {
+    Coxeter_system cs_A('A', d);
+    Coxeter_complex cc(point_vector, cs_A, init_level);  
+    cc.write_coxeter_mesh("sphere_coxeter_complex_A.mesh");
+  }
+  {
+    Coxeter_system cs_B('B', d);
+    Coxeter_complex cc(point_vector, cs_B, init_level);
+    cc.write_coxeter_mesh("sphere_coxeter_complex_B.mesh");
+  }
+  {
+    Coxeter_system cs_C('C', d);
+    Coxeter_complex cc(point_vector, cs_C, init_level); 
+    cc.write_coxeter_mesh("sphere_coxeter_complex_C.mesh");
+  }
+ // Coxeter_system cs_D('D', d);
   // Coxeter_complex(point_vector, cs_D);  
   // Coxeter_system cs_E6('E', 6);
   // cs_E6.emplace_back('A', d-6);
   // Coxeter_complex(point_vector, cs_E6);  
 
-  cc.write_coxeter_mesh("sphere_coxeter_complex.mesh");
   
 }
