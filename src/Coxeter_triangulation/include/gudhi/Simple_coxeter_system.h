@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <utility>
 #include <exception>
 #include <Eigen/Sparse>
 // #include <Eigen/SPQRSupport>
@@ -414,7 +415,7 @@ private:
           sum += v_id[i];
           if (sum < 2*(*s_it) || sum > 2*(*s_it) + 2)
             return false;
-          if (sum % v_id[0] == 0) {
+          if (sum % 2 == 0) {
             triplets.push_back(Triplet(integers, i-1, 1.0));
             integers++;
           }
@@ -429,7 +430,7 @@ private:
             sum += v_id[j];
             if (sum < 2*(*s_it) || sum > 2*(*s_it) + 2)
               return false;
-            if (sum % v_id[0] == 0) {
+            if (sum % 2 == 0) {
               triplets.push_back(Triplet(integers, i-1, 1.0));
               triplets.push_back(Triplet(integers, j-1, 1.0));
               integers++;
@@ -445,7 +446,7 @@ private:
         sum += v_id[i];
         if (sum < 2*(*s_it) || sum > 2*(*s_it + 1))
           return false;
-        if (sum % v_id[0] == 0) {
+        if (sum % 2 == 0) {
           triplets.push_back(Triplet(integers, i-1, 1.0));
           triplets.push_back(Triplet(integers, k-1, -1.0));
           integers++;
@@ -462,7 +463,7 @@ private:
           sum += 2*v_id[i];
           if (sum < 2*(*s_it) || sum > 2*(*s_it) + 2)
             return false;
-          if (sum % v_id[0] == 0) {
+          if (sum % 2 == 0) {
             triplets.push_back(Triplet(integers, i-1, 2.0));
             integers++;
           }
@@ -477,7 +478,7 @@ private:
             sum += v_id[j];
             if (sum < 2*(*s_it) || sum > 2*(*s_it) + 2)
               return false;
-            if (sum % v_id[0] == 0) {
+            if (sum % 2 == 0) {
               triplets.push_back(Triplet(integers, i-1, 1.0));
               triplets.push_back(Triplet(integers, j-1, 1.0));
               integers++;
@@ -493,7 +494,7 @@ private:
         sum += v_id[i];
         if (sum < 2*(*s_it) || sum > 2*(*s_it + 1))
           return false;
-        if (sum % v_id[0] == 0) {
+        if (sum % 2 == 0) {
           triplets.push_back(Triplet(integers, i-1, 1.0));
           triplets.push_back(Triplet(integers, k-1, -1.0));
           integers++;
@@ -513,7 +514,7 @@ private:
             sum += v_id[j];
             if (sum < 2*(*s_it) || sum > 2*(*s_it) + 2)
               return false;
-            if (sum % v_id[0] == 0) {
+            if (sum % 2 == 0) {
               triplets.push_back(Triplet(integers, i-1, 1.0));
               triplets.push_back(Triplet(integers, j-1, 1.0));
               integers++;
@@ -529,7 +530,7 @@ private:
         sum += v_id[i];
         if (sum < 2*(*s_it) || sum > 2*(*s_it + 1))
           return false;
-        if (sum % v_id[0] == 0) {
+        if (sum % 2 == 0) {
           triplets.push_back(Triplet(integers, i-1, 1.0));
           triplets.push_back(Triplet(integers, k-1, -1.0));             
           integers++;
@@ -559,7 +560,7 @@ private:
         return;
       }
       for (unsigned i = 0; i <= vertex_level_; i++) {
-        v_id.push_back(vertex_level_*(*s_it) + i);
+        v_id.push_back(vertex_level_*(*s_it) + (int)i);
         S_id_iterator s_it_copy(s_it);
         if (valid_coordinate(v_id, s_it_copy, integers, triplets))
           rec_vertices_of_simplex(v_id, s_it_copy, vertices, integers, triplets);
@@ -580,7 +581,7 @@ private:
         return;
       }
       for (unsigned i = 0; i <= vertex_level_; i++) {
-        v_id.push_back(vertex_level_*(*s_it) + i);
+        v_id.push_back(vertex_level_*(*s_it) + (int)i);
         S_id_iterator s_it_copy(s_it);
         unsigned integers_copy = integers;
         std::vector<Triplet> triplets_copy(triplets);
@@ -626,6 +627,82 @@ public:
     }
     return true;
   }
+
+  template <class VMap,
+            class AMap>
+  void write_coxeter_mesh(VMap& v_map, AMap& a_map, std::string file_name = "coxeter.mesh") const
+  {
+    short d = dimension_;
+    if (d > 3);
+  
+    std::ofstream ofs (file_name, std::ofstream::out);
+    if (d <= 2)
+      ofs << "MeshVersionFormatted 1\nDimension 2\n";
+    else
+      ofs << "MeshVersionFormatted 1\nDimension 3\n";
+  
+    ofs << "Vertices\n" << v_map.size() << "\n";
+
+    // std::vector<std::vector<double>> W;
+    for (auto m: v_map) {
+      FT denom = m.first[0];
+      Eigen::VectorXd b(d);
+      for (int i = 0; i < d; i++) {
+        b(i) = m.first[i+1]/denom;
+      }
+      // std::cout << b << "\n\n";
+      // Eigen::SimplicialLDLT<Matrix, Eigen::Lower> chol(root_t_);
+      Eigen::SparseLU<Matrix, Eigen::COLAMDOrdering<int>> chol(root_t_);
+      Eigen::VectorXd x = chol.solve(b);
+      if(chol.info()!=Eigen::Success) {
+        std::cout << "solving failed\n";
+      }
+      // std::cout << x << "\n\n";
+      for (int i = 0; i < d; i++)
+        ofs << x(i) << " ";
+      // std::vector<double> np;
+      // for (int i = 0; i < d; i++)
+      //   np.push_back(x(i));
+      // W.push_back(np);
+      ofs << "516" << std::endl;
+    }
+    // std::map<int,std::vector<int>> sv_map;
+    // int j = 1;
+    // for (auto m: v_map) {
+    //   for (auto s: m.second) {
+    //     auto find_it = sv_map.find(s);
+    //     if (find_it == sv_map.end())
+    //       sv_map.emplace(s, std::vector<int>(1,j));
+    //     else
+    //       find_it->second.push_back(j);
+    //   }
+    //   j++;
+    // }
+
+    struct Pointer_compare {
+      typedef typename VMap::iterator Pointer;
+      bool operator()(const Pointer& lhs, const Pointer& rhs) const { 
+        return lhs->first < rhs->first; // NB. intentionally ignores y
+      }
+    };    
+    std::map<typename VMap::iterator, int, Pointer_compare> vi_map;
+    unsigned index = 1;
+    for (auto v_it = v_map.begin(); v_it != v_map.end(); ++v_it, ++index)
+      vi_map.emplace(v_it, index);
+
+    if (d == 2)
+      ofs << "Triangles " << a_map.size() << "\n";
+    else
+      ofs << "Tetrahedra " << a_map.size() << "\n";
+    
+    for (auto a: a_map) {
+      for (auto m_it: std::get<2>(a.second)) {
+        ofs << vi_map[m_it] << " ";
+      }
+      ofs << "516" << std::endl;
+    }
+  }
+
   
 };
 

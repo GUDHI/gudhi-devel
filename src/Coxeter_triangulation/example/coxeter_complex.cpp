@@ -159,12 +159,15 @@ void write_coxeter_mesh(Point_vector& W, VSMap& vs_map, Matrix& root_t, std::str
 
 int main(int argc, char * const argv[]) {
   std::cout << "Marching cube adaptation for Coxeter triangulations\n";
-  if (argc != 2) {
+  if (argc > 3 || argc < 2) {
     std::cerr << "Usage: " << argv[0]
-        << " path_to_off_point_file\n";
+        << " path_to_off_point_file [initial level]\n";
     return 0;
   }
   Point_vector point_vector;
+  int init_level = 1;
+  if (argc == 3)
+    init_level = atoi(argv[2]);
   Gudhi::Points_off_reader<Point_d> off_reader(argv[1]);
   if (!off_reader.is_valid()) {
       std::cerr << "Coxeter triangulations - Unable to read file " << argv[1] << "\n";
@@ -176,10 +179,10 @@ int main(int argc, char * const argv[]) {
   // short d = 2;
   std::cout << "Successfully read " << N << " points in dimension " << d << std::endl;
 
-  Coxeter_system cs_A('A', d);
-  Coxeter_complex(point_vector, cs_A);  
-  // Coxeter_system cs_B('B', d);
-  // Coxeter_complex(point_vector, cs_B);
+  // Coxeter_system cs_A('A', d);
+  // Coxeter_complex cc(point_vector, cs_A, init_level);  
+  Coxeter_system cs_B('B', d);
+  Coxeter_complex cc(point_vector, cs_B, init_level);
   // Coxeter_system cs_C('C', d);
   // Coxeter_complex(point_vector, cs_C);
   // Coxeter_system cs_D('D', d);
@@ -188,4 +191,6 @@ int main(int argc, char * const argv[]) {
   // cs_E6.emplace_back('A', d-6);
   // Coxeter_complex(point_vector, cs_E6);  
 
+  cc.write_coxeter_mesh("sphere_coxeter_complex.mesh");
+  
 }

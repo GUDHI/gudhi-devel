@@ -158,7 +158,14 @@ public:
      }
     return true;
   }
-  
+
+  template <class VMap,
+            class AMap>
+  void write_coxeter_mesh(VMap& v_map, AMap& a_map, std::string file_name = "coxeter.mesh") const {
+    if (simple_system_range_.size() == 1)
+      if (simple_system_range_.begin()->dimension() == 2 || simple_system_range_.begin()->dimension() == 3)
+        simple_system_range_.begin()->write_coxeter_mesh(v_map, a_map, file_name);
+  }
 };
 
   // Print the Coxeter_system in os.

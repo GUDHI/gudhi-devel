@@ -11,6 +11,9 @@
 
 #include "../../example/cxx-prettyprint/prettyprint.hpp"
 
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/connected_components.hpp>
 
 namespace Gudhi {
 
@@ -81,14 +84,14 @@ public:
     a_map.erase(a_it);
   }
 
-  Coxeter_complex(const Point_range& point_vector, const Coxeter_system& cs)
+  Coxeter_complex(const Point_range& point_vector, const Coxeter_system& cs, int init_level=1)
     : point_vector_(point_vector), cs_(cs), max_id(0) {
     clock_t start, end, global_start;
     double time;
     global_start = clock();
     start = clock();
     for (auto p_it = point_vector.begin(); p_it != point_vector.end(); ++p_it) {
-      Alcove_id s_id = cs.alcove_coordinates(*p_it, 1); 
+      Alcove_id s_id = cs.alcove_coordinates(*p_it, init_level); 
       auto a_it = a_map.find(s_id);
       if (a_it == a_map.end())
         a_map.emplace(s_id, std::make_tuple(max_id++, Point_pointers(1, p_it), Vertex_pointers()));
@@ -133,6 +136,51 @@ public:
     }
     std::cout << "Dimension of the complex is " << max_dim << ".\n\n";    
 
+    // graph part to test the proximity
+
+    // typedef typename boost::adjacency_list<boost::setS, boost::vecS, boost::undirectedS> Adj_graph;
+    // typedef boost::graph_traits<Adj_graph>::vertex_descriptor Vertex_t;
+    // typedef boost::graph_traits<Adj_graph>::edge_descriptor Edge_t;
+    // typedef boost::graph_traits<Adj_graph>::adjacency_iterator Adj_it;
+    // typedef std::pair<Adj_it, Adj_it> Out_edge_it;
+
+    // typedef boost::container::flat_map<std::size_t, Vertex_t> Graph_map;
+    // typedef boost::container::flat_map<Vertex_t, std::size_t> Inv_graph_map;    
+
+    // Adj_graph adj_graph;
+    // Graph_map g_map;
+    // Inv_graph_map ig_map;
+    // Vertex_t vert;
+    // for (auto a_it = a_map.begin(); a_it != a_map.end(); a_it++) {
+    //   vert = boost::add_vertex(adj_graph);
+    //   g_map.emplace(std::get<0>(a_it->second), vert);
+    //   ig_map.emplace(vert, std::get<0>(a_it->second));
+    // }
+    // for (auto v_it = v_map.begin(); v_it != v_map.end(); v_it++)
+    //   for (auto al_it1 = v_it->second.begin(); al_it1 != v_it->second.end(); ++al_it1)
+    //     for (auto al_it2 = al_it1+1; al_it2 != v_it->second.end(); ++al_it2)
+    //       boost::add_edge(g_map[*al_it1], g_map[*al_it2], adj_graph);
+
+    std::map<typename Vertex_map::iterator, typename Point_range::value_type> vp_map;
+    for (auto v_it = v_map.begin(); v_it != v_map.end(); v_it++) {
+      
+    }
+    
+    std::vector<std::vector<bool>> adj_table(a_map.size(), std::vector<bool>(a_map.size(), false));
+    for (auto a_it = a_map.begin(); a_it != a_map.end(); a_it++) {
+      Vertex_pointers& v_list = std::get<2>(a_it->second);
+      for (auto v_it = v_list.begin(); v_it != v_list.end(); v_it++)
+        for (auto aa: (*v_it)->second)
+          adj_table[std::get<0>(a_it->second)][aa] = true;
+    }
+
+    for (unsigned i = 0; i != adj_table.size(); i++)
+      for (unsigned j = 0; j != adj_table[i].size(); j++)
+        if (!adj_table[i][j]) {
+          
+        }
+          
+    
     // subdivision part
     
     
@@ -162,14 +210,18 @@ public:
     //               << "size=" << std::get<1>(m.second).size() << std::endl;    
     //   std::cout << "\n";
     
-    //   std::cout << "VMap:\n";
-    //   for (auto m: v_map) 
-    //     std::cout << m.first << ": " << m.second << std::endl;
-    //   std::cout << "\n";
+      // std::cout << "VMap:\n";
+      // for (auto m: v_map) 
+      //   std::cout << m.first << ": " << m.second << std::endl;
+      // std::cout << "\n";
 
     // }
   }
- 
+
+  void write_coxeter_mesh(std::string file_name = "coxeter.mesh") {
+    cs_.write_coxeter_mesh(v_map, a_map, file_name);
+  }
+  
 };
 
 }
