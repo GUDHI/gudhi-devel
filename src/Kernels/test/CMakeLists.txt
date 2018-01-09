@@ -9,6 +9,4 @@ if (TBB_FOUND)
   target_link_libraries(kernel_test_unit ${TBB_LIBRARIES})
 endif()
 
-file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
-
 gudhi_add_coverage_test(kernel_test_unit)
