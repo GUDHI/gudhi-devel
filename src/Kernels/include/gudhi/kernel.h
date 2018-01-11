@@ -4,7 +4,7 @@
  *
  *    Author(s):       Mathieu Carrière
  *
- *    Copyright (C) 2017  INRIA (France)
+ *    Copyright (C) 2018  INRIA (France)
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -23,43 +23,30 @@
 #ifndef KERNEL_H_
 #define KERNEL_H_
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <cstdlib>
-#include <cstdio>
-#include <iomanip>
-#include <string>
-#include <iostream>
-#include <sstream>
-#include <fstream>
-#include <set>
-#include <map>
 #include <vector>
 #include <algorithm>
-#include <limits>
-#include <assert.h>
 #include <cmath>
-#include <math.h>
-#include <memory>
-#include <stdexcept>
-#include <omp.h>
-//#include <gmp.h>
-//#include <gmpxx.h>
 #include <random>
-#include <chrono>
-#include <ctime>
+#include <boost/math/constants/constants.hpp>
 
-using PD = std::vector<std::pair<double,double> >;
-bool sortAngle(const std::pair<double, std::pair<int,int> >& p1, const std::pair<double, std::pair<int,int> >& p2){return (p1.first < p2.first);}
-bool myComp(const std::pair<int,double> & P1, const std::pair<int,double> & P2){return P1.second < P2.second;}
 
 namespace Gudhi {
 namespace kernel {
 
+using PD = std::vector<std::pair<double,double> >;
+double pi = boost::math::constants::pi<double>();
+
+bool sortAngle(const std::pair<double, std::pair<int,int> >& p1, const std::pair<double, std::pair<int,int> >& p2){return (p1.first < p2.first);}
+bool myComp(const std::pair<int,double> & P1, const std::pair<int,double> & P2){return P1.second < P2.second;}
 
 double pss_weight(std::pair<double,double> P){
   if(P.second > P.first)  return 1;
   else return -1;
+}
+
+double arctan_weight(std::pair<double,double> P){
+  return atan(P.second - P.first);
 }
 
 
@@ -78,7 +65,8 @@ double pss_weight(std::pair<double,double> P){
  * @param[in] weight   weight function for the points in the diagrams.
  *
  */
-double lpwgk(PD PD1, PD PD2, double sigma, double (*weight)(std::pair<double,double>) = [](std::pair<double,double> P){return atan(P.second - P.first);}){
+template<class Weight = double(*)(std::pair<double,double>) >
+double lpwgk(const PD & PD1, const PD & PD2, double sigma, Weight weight = arctan_weight){
   int num_pts1 = PD1.size(); int num_pts2 = PD2.size(); double k = 0;
   for(int i = 0; i < num_pts1; i++)
     for(int j = 0; j < num_pts2; j++)
@@ -94,10 +82,10 @@ double lpwgk(PD PD1, PD PD2, double sigma, double (*weight)(std::pair<double,dou
  * @param[in] sigma    bandwidth parameter of the Gaussian Kernel used for the Kernel Mean Embedding of the diagrams.
  *
  */
-double pssk(PD PD1, PD PD2, double sigma){
+double pssk(const PD & PD1, const PD & PD2, double sigma){
   PD pd1 = PD1; int numpts = PD1.size();    for(int i = 0; i < numpts; i++)  pd1.push_back(std::pair<double,double>(PD1[i].second,PD1[i].first));
   PD pd2 = PD2;     numpts = PD2.size();    for(int i = 0; i < numpts; i++)  pd2.push_back(std::pair<double,double>(PD2[i].second,PD2[i].first));
-  return lpwgk(pd1, pd2, 2*sqrt(sigma), &pss_weight) / (2*8*3.14159265359*sigma);
+  return lpwgk(pd1, pd2, 2*sqrt(sigma), &pss_weight) / (2*8*pi*sigma);
 }
 
 /** \brief Computes the Gaussian Persistence Weighted Gaussian Kernel between two persistence diagrams.
@@ -110,7 +98,8 @@ double pssk(PD PD1, PD PD2, double sigma){
  * @param[in] weight   weight function for the points in the diagrams.
  *
  */
-double gpwgk(PD PD1, PD PD2, double sigma, double tau, double (*weight)(std::pair<double,double>) = [](std::pair<double,double> P){return atan(P.second - P.first);}){
+template<class Weight = double(*)(std::pair<double,double>) >
+double gpwgk(const PD & PD1, const PD & PD2, double sigma, double tau, Weight weight = arctan_weight){
   double k1 = lpwgk(PD1,PD1,sigma,weight);
   double k2 = lpwgk(PD2,PD2,sigma,weight);
   double k3 = lpwgk(PD1,PD2,sigma,weight);
@@ -126,7 +115,8 @@ double gpwgk(PD PD1, PD PD2, double sigma, double tau, double (*weight)(std::pai
  * @param[in] weight   weight function for the points in the diagrams.
  *
  */
-double dpwg(PD PD1, PD PD2, double sigma, double (*weight)(std::pair<double,double>) = [](std::pair<double,double> P){return atan(P.second - P.first);}){
+template<class Weight = double(*)(std::pair<double,double>) >
+double dpwg(const PD & PD1, const PD & PD2, double sigma, Weight weight = arctan_weight){
   double k1 = lpwgk(PD1,PD1,sigma,weight);
   double k2 = lpwgk(PD2,PD2,sigma,weight);
   double k3 = lpwgk(PD1,PD2,sigma,weight);
@@ -158,24 +148,24 @@ double compute_angle(const PD & PersDiag, const int & i, const int & j){
 // Valid only if alpha is in [-pi,pi] and beta-alpha is in [0,pi]
 double compute_int_cos(const double & alpha, const double & beta){
   double res = 0;
-  assert((alpha >= 0 && alpha <= 3.14159265359) || (alpha >= -3.14159265359 && alpha <= 0));
-  if (alpha >= 0 && alpha <= 3.14159265359){
+  //assert((alpha >= 0 && alpha <= pi) || (alpha >= -pi && alpha <= 0));
+  if (alpha >= 0 && alpha <= pi){
     if (cos(alpha) >= 0){
-      if(3.14159265359/2 <= beta){res = 2-sin(alpha)-sin(beta);}
+      if(pi/2 <= beta){res = 2-sin(alpha)-sin(beta);}
       else{res = sin(beta)-sin(alpha);}
     }
     else{
-      if(1.5*3.14159265359 <= beta){res = 2+sin(alpha)+sin(beta);}
+      if(1.5*pi <= beta){res = 2+sin(alpha)+sin(beta);}
       else{res = sin(alpha)-sin(beta);}
     }
   }
-  if (alpha >= -3.14159265359 && alpha <= 0){
+  if (alpha >= -pi && alpha <= 0){
     if (cos(alpha) <= 0){
-      if(-3.14159265359/2 <= beta){res = 2+sin(alpha)+sin(beta);}
+      if(-pi/2 <= beta){res = 2+sin(alpha)+sin(beta);}
       else{res = sin(alpha)-sin(beta);}
     }
     else{
-      if(3.14159265359/2 <= beta){res = 2-sin(alpha)-sin(beta);}
+      if(pi/2 <= beta){res = 2-sin(alpha)-sin(beta);}
       else{res = sin(beta)-sin(alpha);}
     }
   }
@@ -200,9 +190,9 @@ double compute_sw(const std::vector<std::vector<std::pair<int,double> > > & V1, 
   int N = V1.size(); double sw = 0;
   for (int i = 0; i < N; i++){
     std::vector<std::pair<int,double> > U,V; U = V1[i]; V = V2[i];
-    double theta1, theta2; theta1 = -3.14159265359/2;
+    double theta1, theta2; theta1 = -pi/2;
     unsigned int ku, kv; ku = 0; kv = 0; theta2 = std::min(U[ku].second,V[kv].second);
-    while(theta1 != 3.14159265359/2){
+    while(theta1 != pi/2){
       if(PD1[U[ku].first].first != PD2[V[kv].first].first || PD1[U[ku].first].second != PD2[V[kv].first].second)
         if(theta1 != theta2)
           sw += compute_int(theta1, theta2, U[ku].first, V[kv].first, PD1, PD2);
@@ -212,7 +202,7 @@ double compute_sw(const std::vector<std::vector<std::pair<int,double> > > & V1, 
       theta2 = std::min(U[ku].second, V[kv].second);
     }
   }
-  return sw/3.14159265359;
+  return sw/pi;
 }
 
 /** \brief Computes the Sliced Wasserstein distance between two persistence diagrams.
@@ -234,7 +224,7 @@ double compute_sw(const std::vector<std::vector<std::pair<int,double> > > & V1, 
     max_ordinate = std::max(max_ordinate, PD1[i].second);
     PD2.push_back(  std::pair<double,double>(  ((PD1[i].first+PD1[i].second)/2), ((PD1[i].first+PD1[i].second)/2)  )   );
   }
-  int N = PD1.size(); assert(N==PD2.size());
+  int N = PD1.size();
 
   // Slightly perturb the points so that the PDs are in generic positions.
   int mag = 0; while(max_ordinate > 10){mag++; max_ordinate/=10;}
@@ -290,8 +280,8 @@ double compute_sw(const std::vector<std::vector<std::pair<int,double> > > & V1, 
   }
 
   for (int i = 0; i < N; i++){
-    anglePerm1[order1[i]].push_back(std::pair<int, double>(i,3.14159265359/2));
-    anglePerm2[order2[i]].push_back(std::pair<int, double>(i,3.14159265359/2));
+    anglePerm1[order1[i]].push_back(std::pair<int, double>(i,pi/2));
+    anglePerm2[order2[i]].push_back(std::pair<int, double>(i,pi/2));
   }
 
   // Compute the SW distance with the list of inversions.
@@ -344,7 +334,8 @@ double approx_dpwg_Fourier(const std::vector<std::pair<double,double> >& B1, con
   return std::sqrt((1.0/M)*(d1+d2)-2*d3);
 }
 
-std::vector<std::pair<double,double> > Fourier_feat(PD D, std::vector<std::pair<double,double> > Z, double (*weight)(std::pair<double,double>) = [](std::pair<double,double> P){return atan(P.second - P.first);}){
+template<class Weight = double(*)(std::pair<double,double>) >
+std::vector<std::pair<double,double> > Fourier_feat(PD D, std::vector<std::pair<double,double> > Z, Weight weight = arctan_weight){
   int m = D.size(); std::vector<std::pair<double,double> > B; int M = Z.size();
   for(int i = 0; i < M; i++){
     double d1 = 0; double d2 = 0; double zx = Z[i].first; double zy = Z[i].second;
@@ -379,7 +370,8 @@ std::vector<std::pair<double,double> > random_Fourier(double sigma, int M = 1000
  * @param[in] M         number of Fourier features.
  *
  */
-double approx_lpwgk(PD PD1, PD PD2, double sigma, double (*weight)(std::pair<double,double>) = [](std::pair<double,double> P){return atan(P.second - P.first);}, int M = 1000){
+template<class Weight = double(*)(std::pair<double,double>) >
+double approx_lpwgk(const PD & PD1, const PD & PD2, double sigma, Weight weight = arctan_weight, int M = 1000){
   std::vector<std::pair<double,double> > Z =  random_Fourier(sigma, M);
   std::vector<std::pair<double,double> > B1 = Fourier_feat(PD1,Z,weight);
   std::vector<std::pair<double,double> > B2 = Fourier_feat(PD2,Z,weight);
@@ -395,10 +387,10 @@ double approx_lpwgk(PD PD1, PD PD2, double sigma, double (*weight)(std::pair<dou
  * @param[in] M         number of Fourier features.
  *
  */
-double approx_pssk(PD PD1, PD PD2, double sigma, int M = 1000){
+double approx_pssk(const PD & PD1, const PD & PD2, double sigma, int M = 1000){
   PD pd1 = PD1; int numpts = PD1.size();    for(int i = 0; i < numpts; i++)  pd1.push_back(std::pair<double,double>(PD1[i].second,PD1[i].first));
   PD pd2 = PD2;     numpts = PD2.size();    for(int i = 0; i < numpts; i++)  pd2.push_back(std::pair<double,double>(PD2[i].second,PD2[i].first));
-  return approx_lpwgk(pd1, pd2, 2*sqrt(sigma), &pss_weight, M) / (2*8*3.14159265359*sigma);
+  return approx_lpwgk(pd1, pd2, 2*sqrt(sigma), &pss_weight, M) / (2*8*pi*sigma);
 }
 
 
@@ -413,7 +405,8 @@ double approx_pssk(PD PD1, PD PD2, double sigma, int M = 1000){
  * @param[in] M         number of Fourier features.
  *
  */
-double approx_gpwgk(PD PD1, PD PD2, double sigma, double tau, double (*weight)(std::pair<double,double>) = [](std::pair<double,double> P){return atan(P.second - P.first);}, int M = 1000){
+template<class Weight = double(*)(std::pair<double,double>) >
+double approx_gpwgk(const PD & PD1, const PD & PD2, double sigma, double tau, Weight weight = arctan_weight, int M = 1000){
   std::vector<std::pair<double,double> > Z =  random_Fourier(sigma, M);
   std::vector<std::pair<double,double> > B1 = Fourier_feat(PD1,Z,weight);
   std::vector<std::pair<double,double> > B2 = Fourier_feat(PD2,Z,weight);
@@ -431,7 +424,7 @@ double approx_gpwgk(PD PD1, PD PD2, double sigma, double tau, double (*weight)(s
  */
 double approx_sw(PD PD1, PD PD2, int N = 100){
 
-  double step = 3.14159265359/N; double sw = 0;
+  double step = pi/N; double sw = 0;
 
   // Add projections onto diagonal.
   int n1, n2; n1 = PD1.size(); n2 = PD2.size();
@@ -446,14 +439,14 @@ double approx_sw(PD PD1, PD PD2, int N = 100){
   for (int i = 0; i < N; i++){
     std::vector<std::pair<int,double> > L1, L2;
     for (int j = 0; j < n; j++){
-      L1.push_back(   std::pair<int,double>(j, PD1[j].first*cos(-3.14159265359/2+i*step) + PD1[j].second*sin(-3.14159265359/2+i*step))   );
-      L2.push_back(   std::pair<int,double>(j, PD2[j].first*cos(-3.14159265359/2+i*step) + PD2[j].second*sin(-3.14159265359/2+i*step))   );
+      L1.push_back(   std::pair<int,double>(j, PD1[j].first*cos(-pi/2+i*step) + PD1[j].second*sin(-pi/2+i*step))   );
+      L2.push_back(   std::pair<int,double>(j, PD2[j].first*cos(-pi/2+i*step) + PD2[j].second*sin(-pi/2+i*step))   );
     }
     std::sort(L1.begin(),L1.end(), myComp); std::sort(L2.begin(),L2.end(), myComp);
     double f = 0; for (int j = 0; j < n; j++)  f += std::abs(L1[j].second - L2[j].second);
     sw += f*step;
   }
-  return sw/3.14159265359;
+  return sw/pi;
 }
 
 /** \brief Computes an approximation of the Sliced Wasserstein Kernel between two persistence diagrams.

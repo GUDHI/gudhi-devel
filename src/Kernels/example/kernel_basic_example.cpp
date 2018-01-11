@@ -21,6 +21,11 @@
  */
 
 #include <gudhi/kernel.h>
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <sstream>
+
 
 void usage(int nbArgs, char *const progName) {
   std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
