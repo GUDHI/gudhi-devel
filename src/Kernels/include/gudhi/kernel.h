@@ -43,8 +43,8 @@
 #include <memory>
 #include <stdexcept>
 #include <omp.h>
-#include <gmp.h>
-#include <gmpxx.h>
+//#include <gmp.h>
+//#include <gmpxx.h>
 #include <random>
 #include <chrono>
 #include <ctime>
