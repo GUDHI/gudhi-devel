@@ -507,7 +507,7 @@ public:
 		Fake_simplex_tree new_st;
      	sparseMatrix sparseColpsdMxSimplices     =  sparseMatrix(rows,cols); // Just for debudding purpose.
     	int j = 0;
-		for(int co = 0 ; co < simpDomnIndicator.size() ; ++co)
+		for(unsigned co = 0 ; co < simpDomnIndicator.size() ; ++co)
 		{
 			if(not simpDomnIndicator[co]) 				//If the current column is not dominated
 			{

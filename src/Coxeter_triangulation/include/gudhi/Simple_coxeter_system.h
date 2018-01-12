@@ -682,7 +682,7 @@ public:
     struct Pointer_compare {
       typedef typename VMap::iterator Pointer;
       bool operator()(const Pointer& lhs, const Pointer& rhs) const { 
-        return lhs->first < rhs->first; // NB. intentionally ignores y
+        return lhs->first < rhs->first;
       }
     };    
     std::map<typename VMap::iterator, int, Pointer_compare> vi_map;

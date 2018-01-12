@@ -12,6 +12,11 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
   endif()
 endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
 
+add_executable ( generate_sphere_product generate_sphere_product.cpp )
+target_link_libraries(generate_sphere_product ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+target_link_libraries(generate_sphere_product ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(generate_sphere_product ${TBB_LIBRARIES})
+
 # add_executable ( Witness_complex_example_nearest_landmark_table example_nearest_landmark_table.cpp )
 # if (TBB_FOUND)
 #   target_link_libraries(Witness_complex_example_nearest_landmark_table ${TBB_LIBRARIES})

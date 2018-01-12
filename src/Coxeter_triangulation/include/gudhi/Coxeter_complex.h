@@ -9,6 +9,10 @@
 #include <utility>
 #include <CGAL/Epick_d.h>
 
+#include <gudhi/SparseMsMatrix.h>
+#include <gudhi/Fake_simplex_tree.h>
+#include <gudhi/Persistent_cohomology.h>
+
 #include "../../example/cxx-prettyprint/prettyprint.hpp"
 
 #include <boost/graph/graph_traits.hpp>
@@ -134,7 +138,7 @@ public:
       if (m.second.size()-1 > max_dim)
         max_dim = m.second.size()-1;
     }
-    std::cout << "Dimension of the complex is " << max_dim << ".\n\n";    
+    std::cout << "Dimension of the nerve is " << max_dim << ".\n\n";    
 
     // graph part to test the proximity
 
@@ -220,6 +224,83 @@ public:
 
   void write_coxeter_mesh(std::string file_name = "coxeter.mesh") {
     cs_.write_coxeter_mesh(v_map, a_map, file_name);
+  }
+
+  void collapse(bool pers_out = true) {
+    Fake_simplex_tree stree;
+
+    struct Pointer_compare {
+      typedef typename Vertex_map::iterator Pointer;
+      bool operator()(const Pointer& lhs, const Pointer& rhs) const { 
+        return lhs->first < rhs->first;
+      }
+    };    
+    std::map<typename Vertex_map::iterator, int, Pointer_compare> vi_map;
+    unsigned index = 0;
+    for (auto v_it = v_map.begin(); v_it != v_map.end(); ++v_it, ++index)
+      vi_map.emplace(v_it, index);
+    
+    for (auto a: a_map) {
+      std::vector<int> vertices;
+      for (auto v_it: std::get<2>(a.second))
+        vertices.push_back(vi_map[v_it]);
+      stree.insert_simplex_and_subfaces(vertices, 0);
+    }
+
+    if (pers_out) {
+      std::cout << "Start persistence calculation..." << std::endl;
+      using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
+      using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree<>, Field_Zp>;
+      double min_persistence = 0;
+      Simplex_tree<> real_stree;
+      for (auto s: stree.max_simplices()) {
+        real_stree.insert_simplex_and_subfaces(s);
+      }
+      // Sort the simplices in the order of the filtration
+      real_stree.initialize_filtration();
+      // Compute the persistence diagram of the complex
+      Persistent_cohomology pcoh(real_stree);
+      // initializes the coefficient field for homology
+      pcoh.init_coefficients(3);
+      
+      pcoh.compute_persistent_cohomology(min_persistence);
+      std::ofstream out("persdiag_cox.out");
+      pcoh.output_diagram(out);
+      out.close();
+      std::cout << "Persistence complete." << std::endl;
+    }
+    
+    SparseMsMatrix mat(stree);
+    auto matrix_formed  = std::chrono::high_resolution_clock::now();
+    std::cout << "Matrix formed ... Next action COLLAPSE!!" << std::endl;
+
+    Fake_simplex_tree coll_tree = mat.collapsed_tree();
+    auto collapse_done = std::chrono::high_resolution_clock::now();
+    std::cout << "Collapse done !" << std::endl;
+    auto collapseTime = std::chrono::duration<double, std::milli>(collapse_done- matrix_formed).count();
+    std::cout << "Time for Collapse : " << collapseTime << " ms\n" << std::endl;
+
+    int originalDim, collDim;
+    int originalNumVert, colNumVert;
+    long originalNumMxSimp, colNumMxSimp;
+
+    originalDim = stree.dimension();
+    collDim 	= coll_tree.dimension();
+		
+    originalNumVert = stree.num_vertices();
+    colNumVert		= coll_tree.num_vertices();
+
+    originalNumMxSimp 	= stree.num_simplices();
+    colNumMxSimp 		= coll_tree.num_simplices();
+
+    // std::cout << "Dimension of the collapsed complex is " << collDim << std::endl; 
+    // std::cout << "Number of maximal simplices is " << colNumSimp << std::endl;
+    
+    std::cout << "Coxeter complex is of dimension " << originalDim << " with " << originalNumMxSimp << " maximal simplices and " << originalNumVert << " vertices." << std::endl;
+    std::cout << "Collapsed Coxeter complex is of dimension " << collDim << " with " <<  colNumMxSimp << " maximal simplices and " << colNumVert << " vertices." << std::endl;
+
+    std::cout << "** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** " << std::endl;
+    
   }
   
 };
