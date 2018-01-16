@@ -502,6 +502,7 @@ class Simplex_tree {
    * sh has children.*/
   template<class SimplexHandle>
   bool has_children(SimplexHandle sh) const {
+    // Here we rely on the root using null_vertex(), which cannot match any real vertex.
     return (sh->second.children()->parent() == sh->first);
   }
 
@@ -531,18 +532,30 @@ class Simplex_tree {
   Simplex_handle find_simplex(const std::vector<Vertex_handle> & simplex) {
     Siblings * tmp_sib = &root_;
     Dictionary_it tmp_dit;
-    Vertex_handle last = simplex.back();
-    for (auto v : simplex) {
-      tmp_dit = tmp_sib->members_.find(v);
-      if (tmp_dit == tmp_sib->members_.end()) {
+    auto vi = simplex.begin();
+    if (Options::contiguous_vertices) {
+      // Equivalent to the first iteration of the normal loop
+      GUDHI_CHECK(contiguous_vertices(), "non-contiguous vertices");
+      Vertex_handle v = *vi++;
+      if(v < 0 || v >= static_cast<Vertex_handle>(root_.members_.size()))
         return null_simplex();
-      }
-      if (!has_children(tmp_dit) && v != last) {
+      tmp_dit = root_.members_.begin() + v;
+      if (vi == simplex.end())
+        return tmp_dit;
+      if (!has_children(tmp_dit))
         return null_simplex();
-      }
       tmp_sib = tmp_dit->second.children();
     }
-    return tmp_dit;
+    for (;;) {
+      tmp_dit = tmp_sib->members_.find(*vi++);
+      if (tmp_dit == tmp_sib->members_.end())
+        return null_simplex();
+      if (vi == simplex.end())
+        return tmp_dit;
+      if (!has_children(tmp_dit))
+        return null_simplex();
+      tmp_sib = tmp_dit->second.children();
+    }
   }
 
   /** \brief Returns the Simplex_handle corresponding to the 0-simplex
@@ -586,12 +599,14 @@ class Simplex_tree {
     std::pair<Simplex_handle, bool> res_insert;
     auto vi = simplex.begin();
     for (; vi != simplex.end() - 1; ++vi) {
+      GUDHI_CHECK(*vi != null_vertex(), "cannot use the dummy null_vertex() as a real vertex");
       res_insert = curr_sib->members_.emplace(*vi, Node(curr_sib, filtration));
       if (!(has_children(res_insert.first))) {
         res_insert.first->second.assign_children(new Siblings(curr_sib, *vi));
       }
       curr_sib = res_insert.first->second.children();
     }
+    GUDHI_CHECK(*vi != null_vertex(), "cannot use the dummy null_vertex() as a real vertex");
     res_insert = curr_sib->members_.emplace(*vi, Node(curr_sib, filtration));
     if (!res_insert.second) {
       // if already in the complex
@@ -678,6 +693,10 @@ class Simplex_tree {
     copy.clear();
     copy.insert(copy.end(), first, last);
     std::sort(std::begin(copy), std::end(copy));
+    GUDHI_CHECK_code(
+      for (Vertex_handle v : copy)
+        GUDHI_CHECK(v != null_vertex(), "cannot use the dummy null_vertex() as a real vertex");
+    )
 
     return insert_simplex_and_subfaces_sorted(copy, filtration);
   }
@@ -935,8 +954,9 @@ class Simplex_tree {
    * called.
    *
    * Inserts all vertices and edges given by a OneSkeletonGraph.
-   * OneSkeletonGraph must be a model of boost::AdjacencyGraph,
-   * boost::EdgeListGraph and boost::PropertyGraph.
+   * OneSkeletonGraph must be a model of
+   * <a href="http://www.boost.org/doc/libs/1_65_1/libs/graph/doc/EdgeListGraph.html">boost::EdgeListGraph</a>
+   * and <a href="http://www.boost.org/doc/libs/1_65_1/libs/graph/doc/PropertyGraph.html">boost::PropertyGraph</a>.
    *
    * The vertex filtration value is accessible through the property tag
    * vertex_filtration_t.
@@ -946,7 +966,10 @@ class Simplex_tree {
    * boost::graph_traits<OneSkeletonGraph>::vertex_descriptor
    *                                    must be Vertex_handle.
    * boost::graph_traits<OneSkeletonGraph>::directed_category
-   *                                    must be undirected_tag. */
+   *                                    must be undirected_tag.
+   *
+   * If an edge appears with multiplicity, the function will arbitrarily pick
+   * one representative to read the filtration value.  */
   template<class OneSkeletonGraph>
   void insert_graph(const OneSkeletonGraph& skel_graph) {
     // the simplex tree must be empty
@@ -977,18 +1000,22 @@ class Simplex_tree {
          ++e_it) {
       auto u = source(*e_it, skel_graph);
       auto v = target(*e_it, skel_graph);
-      if (u < v) {
-        // count edges only once { std::swap(u,v); } // u < v
-        auto sh = find_vertex(u);
-        if (!has_children(sh)) {
-          sh->second.assign_children(new Siblings(&root_, sh->first));
-        }
-
-        sh->second.children()->members().emplace(
-                                                 v,
-                                                 Node(sh->second.children(),
-                                                      boost::get(edge_filtration_t(), skel_graph, *e_it)));
+      if (u == v) throw "Self-loops are not simplicial";
+      // We cannot skip edges with the wrong orientation and expect them to
+      // come a second time with the right orientation, that does not always
+      // happen in practice. emplace() should be a NOP when an element with the
+      // same key is already there, so seeing the same edge multiple times is
+      // ok.
+      // Should we actually forbid multiple edges? That would be consistent
+      // with rejecting self-loops.
+      if (v < u) std::swap(u, v);
+      auto sh = find_vertex(u);
+      if (!has_children(sh)) {
+        sh->second.assign_children(new Siblings(&root_, sh->first));
       }
+
+      sh->second.children()->members().emplace(v,
+          Node(sh->second.children(), boost::get(edge_filtration_t(), skel_graph, *e_it)));
     }
   }
 
