@@ -13,6 +13,8 @@
 #include <gudhi/Fake_simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Dim_lists.h>
+#include <gudhi/Coxeter_complex/Collapse.h>
+// #include <gudhi/Coxeter_complex/Simplex_with_cofaces.h>
 
 #include "../../example/cxx-prettyprint/prettyprint.hpp"
 
@@ -305,85 +307,97 @@ public:
     //   stree.insert_simplex_and_subfaces(vertices, 0);
     // }
     // SparseMsMatrix mat(stree);
+
+
     typedef boost::iterator_range<Alcove_iterator> Max_simplex_range;
     Max_simplex_range max_simplex_range(Alcove_iterator(a_map.begin(), a_map, vi_map),
                                         Alcove_iterator(a_map.end(), a_map, vi_map));
     end = clock();
-    time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
-    std::cout << "Computed the ToplexMap in time " << time << " s. \n";
-    SparseMsMatrix mat(a_map.size(), max_simplex_range);
+    // time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+    // std::cout << "Computed the ToplexMap in time " << time << " s. \n";
+    // SparseMsMatrix mat(a_map.size(), max_simplex_range);
     
-    auto matrix_formed  = std::chrono::high_resolution_clock::now();
-    std::cout << "Start strong collapse..." << std::endl;
+    // auto matrix_formed  = std::chrono::high_resolution_clock::now();
+    // std::cout << "Start strong collapse..." << std::endl;
 
-    Fake_simplex_tree coll_tree = mat.collapsed_tree();
-    auto collapse_done = std::chrono::high_resolution_clock::now();
-    std::cout << "Strong collapse done." << std::endl;
-    auto collapseTime = std::chrono::duration<double, std::milli>(collapse_done- matrix_formed).count();
-    std::cout << "Time for Collapse : " << collapseTime << " ms\n" << std::endl;
+    // Fake_simplex_tree coll_tree = mat.collapsed_tree();
+    // auto collapse_done = std::chrono::high_resolution_clock::now();
+    // std::cout << "Strong collapse done." << std::endl;
+    // auto collapseTime = std::chrono::duration<double, std::milli>(collapse_done- matrix_formed).count();
+    // std::cout << "Time for Collapse : " << collapseTime << " ms\n" << std::endl;
 
-    int originalDim, collDim;
-    int originalNumVert, colNumVert;
-    long originalNumMxSimp, colNumMxSimp;
+    // int originalDim, collDim;
+    // int originalNumVert, colNumVert;
+    // long originalNumMxSimp, colNumMxSimp;
 
-    originalDim = stree.dimension();
-    collDim 	= coll_tree.dimension();
+    // originalDim = stree.dimension();
+    // collDim 	= coll_tree.dimension();
 		
-    originalNumVert = stree.num_vertices();
-    colNumVert		= coll_tree.num_vertices();
+    // originalNumVert = stree.num_vertices();
+    // colNumVert		= coll_tree.num_vertices();
 
-    originalNumMxSimp 	= stree.num_simplices();
-    colNumMxSimp 		= coll_tree.num_simplices();
+    // originalNumMxSimp 	= stree.num_simplices();
+    // colNumMxSimp 		= coll_tree.num_simplices();
 
-    // std::cout << "Dimension of the collapsed complex is " << collDim << std::endl; 
-    // std::cout << "Number of maximal simplices is " << colNumSimp << std::endl;
+    // // std::cout << "Dimension of the collapsed complex is " << collDim << std::endl; 
+    // // std::cout << "Number of maximal simplices is " << colNumSimp << std::endl;
     
-    std::cout << "Coxeter complex is of dimension " << originalDim << " with " << originalNumMxSimp << " maximal simplices and " << originalNumVert << " vertices." << std::endl;
-    std::cout << "Collapsed Coxeter complex is of dimension " << collDim << " with " <<  colNumMxSimp << " maximal simplices and " << colNumVert << " vertices." << std::endl;
+    // std::cout << "Coxeter complex is of dimension " << originalDim << " with " << originalNumMxSimp << " maximal simplices and " << originalNumVert << " vertices." << std::endl;
+    // std::cout << "Collapsed Coxeter complex is of dimension " << collDim << " with " <<  colNumMxSimp << " maximal simplices and " << colNumVert << " vertices." << std::endl;
     
-    std::cout << "** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** " << std::endl;
+    // std::cout << "** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** " << std::endl;
 
-    if (pers_out) {
-      std::cout << "Start persistence calculation..." << std::endl;
-      using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
-      using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree<>, Field_Zp>;
-      double min_persistence = 0;
-      Simplex_tree<> real_stree;
-      for (auto s: coll_tree.max_simplices()) {
-        real_stree.insert_simplex_and_subfaces(s);
-      }
-      // Sort the simplices in the order of the filtration
-      real_stree.initialize_filtration();
-      // Compute the persistence diagram of the complex
-      Persistent_cohomology pcoh(real_stree);
-      // initializes the coefficient field for homology
-      pcoh.init_coefficients(3);
-      
-      pcoh.compute_persistent_cohomology(min_persistence);
-      std::ofstream out("persdiag_cox.out");
-      pcoh.output_diagram(out);
-      out.close();
-      std::cout << "Persistence complete." << std::endl;
-
-      
-      witness_complex::Dim_lists<Simplex_tree<>> simplices(real_stree, collDim, 1);
-      start = clock();
-      simplices.collapse();
-      end = clock();
-      double time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
-      std::cout << "Collapses took " << time << " s. \n";
-      // Simplicial_complex collapsed_tree;
-      // for (auto sh: simplices) {
-      //   std::vector<int> vertices;
-      //   for (int v: collapsed_tree.simplex_vertex_range(sh))
-      //     vertices.push_back(v);
-      //   collapsed_tree.insert_simplex(vertices, simplex_tree.filtration(sh));
-      // }
-      std::cout << "The dimension after the simple collapses is " << simplices.dimension() << ".\n";
+    Simplex_tree<> coll_stree;
+    Collapse coll(max_simplex_range, coll_stree);
+    // std::cout << coll_stree << "\n";
+    unsigned dim_complex = 0;
+    for (auto sh: coll_stree.complex_simplex_range()) {
+      if (coll_stree.dimension(sh) > dim_complex)
+        dim_complex = coll_stree.dimension(sh);
     }
+    std::cout << "Dimension of the collapsed complex is " << dim_complex << "\n";
+    
+    // if (pers_out) {
+    //   std::cout << "Start persistence calculation..." << std::endl;
+    //   using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
+    //   using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree<>, Field_Zp>;
+    //   double min_persistence = 0;
+    //   Simplex_tree<> real_stree;
+    //   for (auto s: coll_tree.max_simplices()) {
+    //     real_stree.insert_simplex_and_subfaces(s);
+    //   }
+    //   // Sort the simplices in the order of the filtration
+    //   real_stree.initialize_filtration();
+    //   // Compute the persistence diagram of the complex
+    //   Persistent_cohomology pcoh(real_stree);
+    //   // initializes the coefficient field for homology
+    //   pcoh.init_coefficients(3);
+      
+    //   pcoh.compute_persistent_cohomology(min_persistence);
+    //   std::ofstream out("persdiag_cox.out");
+    //   pcoh.output_diagram(out);
+    //   out.close();
+    //   std::cout << "Persistence complete." << std::endl;
+
+      
+    //   witness_complex::Dim_lists<Simplex_tree<>> simplices(real_stree, collDim, 1);
+    //   start = clock();
+    //   simplices.collapse();
+    //   end = clock();
+    //   double time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+    //   std::cout << "Collapses took " << time << " s. \n";
+    //   // Simplicial_complex collapsed_tree;
+    //   // for (auto sh: simplices) {
+    //   //   std::vector<int> vertices;
+    //   //   for (int v: collapsed_tree.simplex_vertex_range(sh))
+    //   //     vertices.push_back(v);
+    //   //   collapsed_tree.insert_simplex(vertices, simplex_tree.filtration(sh));
+    //   // }
+    //   std::cout << "The dimension after the simple collapses is " << simplices.dimension() << ".\n";
+    // }
 
     
-    write_toplex_mesh(coll_tree);
+    // write_toplex_mesh(coll_tree);
     
   }
   
