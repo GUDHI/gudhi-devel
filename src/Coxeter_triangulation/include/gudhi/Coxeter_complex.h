@@ -12,12 +12,14 @@
 #include <gudhi/SparseMsMatrix.h>
 #include <gudhi/Fake_simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
+#include <gudhi/Dim_lists.h>
 
 #include "../../example/cxx-prettyprint/prettyprint.hpp"
 
-#include <boost/graph/graph_traits.hpp>
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/connected_components.hpp>
+#include <boost/iterator/iterator_facade.hpp>
+// #include <boost/graph/graph_traits.hpp>
+// #include <boost/graph/adjacency_list.hpp>
+// #include <boost/graph/connected_components.hpp>
 
 namespace Gudhi {
 
@@ -37,6 +39,14 @@ public:
   using Vertex_pointers = std::vector<typename Vertex_map::iterator>;
   using Alcove = std::tuple<std::size_t, Point_pointers, Vertex_pointers>;
   using Alcove_map = std::map<Alcove_id, Alcove>;
+
+  struct Pointer_compare {
+    typedef typename Vertex_map::iterator Pointer;
+    bool operator()(const Pointer& lhs, const Pointer& rhs) const { 
+      return lhs->first < rhs->first;
+    }
+  };
+  using Vertex_index_map = std::map<typename Vertex_map::iterator, int, Pointer_compare>;
   
   const Point_range& point_vector_;
   const Coxeter_system& cs_;
@@ -44,6 +54,49 @@ public:
   Alcove_map a_map;
   Vertex_map v_map;
   std::size_t max_id;
+  Vertex_index_map vi_map;
+
+  
+  class Alcove_iterator : public boost::iterator_facade< Alcove_iterator,
+                                                         std::vector<std::size_t> const,
+                                                         boost::forward_traversal_tag> {
+  private:
+    typename Alcove_map::iterator it_;
+    Alcove_map& a_map_;
+    Vertex_index_map& vi_map_;
+    std::vector<std::size_t> value_; 
+    friend class boost::iterator_core_access;
+
+    void update_value() {
+      value_.clear();
+      if (it_ != a_map_.end()) {
+        for (auto m_it: std::get<2>(it_->second))
+          value_.push_back(vi_map_[m_it]);
+        std::sort(value_.begin(), value_.end());
+      }
+    }
+    
+    bool equal(Alcove_iterator const& other) const {
+      return it_ == other.it_;
+    }
+
+    std::vector<std::size_t> const& dereference() const {
+      return value_;
+    }
+
+    void increment() {
+      it_++;
+      update_value();
+    }
+    
+  public:
+    Alcove_iterator(typename Alcove_map::iterator it,
+                    Alcove_map& a_map,
+                    Vertex_index_map& vi_map)
+      : it_(it), a_map_(a_map), vi_map_(vi_map) {
+      update_value();
+    }
+  };
   
   template <class AMap_iterator>
   void subdivide_alcove(AMap_iterator a_it) {
@@ -165,24 +218,26 @@ public:
     //     for (auto al_it2 = al_it1+1; al_it2 != v_it->second.end(); ++al_it2)
     //       boost::add_edge(g_map[*al_it1], g_map[*al_it2], adj_graph);
 
-    std::map<typename Vertex_map::iterator, typename Point_range::value_type> vp_map;
-    for (auto v_it = v_map.begin(); v_it != v_map.end(); v_it++) {
-      
-    }
+    /* It was uncommented  \/ */
     
-    std::vector<std::vector<bool>> adj_table(a_map.size(), std::vector<bool>(a_map.size(), false));
-    for (auto a_it = a_map.begin(); a_it != a_map.end(); a_it++) {
-      Vertex_pointers& v_list = std::get<2>(a_it->second);
-      for (auto v_it = v_list.begin(); v_it != v_list.end(); v_it++)
-        for (auto aa: (*v_it)->second)
-          adj_table[std::get<0>(a_it->second)][aa] = true;
-    }
+    // std::map<typename Vertex_map::iterator, typename Point_range::value_type> vp_map;
+    // for (auto v_it = v_map.begin(); v_it != v_map.end(); v_it++) {
+      
+    // }
+    
+    // std::vector<std::vector<bool>> adj_table(a_map.size(), std::vector<bool>(a_map.size(), false));
+    // for (auto a_it = a_map.begin(); a_it != a_map.end(); a_it++) {
+    //   Vertex_pointers& v_list = std::get<2>(a_it->second);
+    //   for (auto v_it = v_list.begin(); v_it != v_list.end(); v_it++)
+    //     for (auto aa: (*v_it)->second)
+    //       adj_table[std::get<0>(a_it->second)][aa] = true;
+    // }
 
-    for (unsigned i = 0; i != adj_table.size(); i++)
-      for (unsigned j = 0; j != adj_table[i].size(); j++)
-        if (!adj_table[i][j]) {
+    // for (unsigned i = 0; i != adj_table.size(); i++)
+    //   for (unsigned j = 0; j != adj_table[i].size(); j++)
+    //     if (!adj_table[i][j]) {
           
-        }
+    //     }
           
     
     // subdivision part
@@ -226,57 +281,44 @@ public:
     cs_.write_coxeter_mesh(v_map, a_map, file_name);
   }
 
+  template <class Fake_simplex_tree>
+  void write_toplex_mesh(Fake_simplex_tree& stree, std::string file_name = "toplex.mesh") const {
+    cs_.write_toplex_mesh(v_map, stree, file_name);
+  }
+
+  
   void collapse(bool pers_out = true) {
     Fake_simplex_tree stree;
 
-    struct Pointer_compare {
-      typedef typename Vertex_map::iterator Pointer;
-      bool operator()(const Pointer& lhs, const Pointer& rhs) const { 
-        return lhs->first < rhs->first;
-      }
-    };    
-    std::map<typename Vertex_map::iterator, int, Pointer_compare> vi_map;
+    clock_t start, end;
+    double time;
+    
     unsigned index = 0;
     for (auto v_it = v_map.begin(); v_it != v_map.end(); ++v_it, ++index)
       vi_map.emplace(v_it, index);
     
-    for (auto a: a_map) {
-      std::vector<int> vertices;
-      for (auto v_it: std::get<2>(a.second))
-        vertices.push_back(vi_map[v_it]);
-      stree.insert_simplex_and_subfaces(vertices, 0);
-    }
-
-    if (pers_out) {
-      std::cout << "Start persistence calculation..." << std::endl;
-      using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
-      using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree<>, Field_Zp>;
-      double min_persistence = 0;
-      Simplex_tree<> real_stree;
-      for (auto s: stree.max_simplices()) {
-        real_stree.insert_simplex_and_subfaces(s);
-      }
-      // Sort the simplices in the order of the filtration
-      real_stree.initialize_filtration();
-      // Compute the persistence diagram of the complex
-      Persistent_cohomology pcoh(real_stree);
-      // initializes the coefficient field for homology
-      pcoh.init_coefficients(3);
-      
-      pcoh.compute_persistent_cohomology(min_persistence);
-      std::ofstream out("persdiag_cox.out");
-      pcoh.output_diagram(out);
-      out.close();
-      std::cout << "Persistence complete." << std::endl;
-    }
+    start = clock();
+    // for (auto a: a_map) {
+    //   std::vector<int> vertices;
+    //   for (auto v_it: std::get<2>(a.second))
+    //     vertices.push_back(vi_map[v_it]);
+    //   stree.insert_simplex_and_subfaces(vertices, 0);
+    // }
+    // SparseMsMatrix mat(stree);
+    typedef boost::iterator_range<Alcove_iterator> Max_simplex_range;
+    Max_simplex_range max_simplex_range(Alcove_iterator(a_map.begin(), a_map, vi_map),
+                                        Alcove_iterator(a_map.end(), a_map, vi_map));
+    end = clock();
+    time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+    std::cout << "Computed the ToplexMap in time " << time << " s. \n";
+    SparseMsMatrix mat(a_map.size(), max_simplex_range);
     
-    SparseMsMatrix mat(stree);
     auto matrix_formed  = std::chrono::high_resolution_clock::now();
-    std::cout << "Matrix formed ... Next action COLLAPSE!!" << std::endl;
+    std::cout << "Start strong collapse..." << std::endl;
 
     Fake_simplex_tree coll_tree = mat.collapsed_tree();
     auto collapse_done = std::chrono::high_resolution_clock::now();
-    std::cout << "Collapse done !" << std::endl;
+    std::cout << "Strong collapse done." << std::endl;
     auto collapseTime = std::chrono::duration<double, std::milli>(collapse_done- matrix_formed).count();
     std::cout << "Time for Collapse : " << collapseTime << " ms\n" << std::endl;
 
@@ -298,8 +340,50 @@ public:
     
     std::cout << "Coxeter complex is of dimension " << originalDim << " with " << originalNumMxSimp << " maximal simplices and " << originalNumVert << " vertices." << std::endl;
     std::cout << "Collapsed Coxeter complex is of dimension " << collDim << " with " <<  colNumMxSimp << " maximal simplices and " << colNumVert << " vertices." << std::endl;
-
+    
     std::cout << "** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** " << std::endl;
+
+    if (pers_out) {
+      std::cout << "Start persistence calculation..." << std::endl;
+      using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
+      using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree<>, Field_Zp>;
+      double min_persistence = 0;
+      Simplex_tree<> real_stree;
+      for (auto s: coll_tree.max_simplices()) {
+        real_stree.insert_simplex_and_subfaces(s);
+      }
+      // Sort the simplices in the order of the filtration
+      real_stree.initialize_filtration();
+      // Compute the persistence diagram of the complex
+      Persistent_cohomology pcoh(real_stree);
+      // initializes the coefficient field for homology
+      pcoh.init_coefficients(3);
+      
+      pcoh.compute_persistent_cohomology(min_persistence);
+      std::ofstream out("persdiag_cox.out");
+      pcoh.output_diagram(out);
+      out.close();
+      std::cout << "Persistence complete." << std::endl;
+
+      
+      witness_complex::Dim_lists<Simplex_tree<>> simplices(real_stree, collDim, 1);
+      start = clock();
+      simplices.collapse();
+      end = clock();
+      double time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+      std::cout << "Collapses took " << time << " s. \n";
+      // Simplicial_complex collapsed_tree;
+      // for (auto sh: simplices) {
+      //   std::vector<int> vertices;
+      //   for (int v: collapsed_tree.simplex_vertex_range(sh))
+      //     vertices.push_back(v);
+      //   collapsed_tree.insert_simplex(vertices, simplex_tree.filtration(sh));
+      // }
+      std::cout << "The dimension after the simple collapses is " << simplices.dimension() << ".\n";
+    }
+
+    
+    write_toplex_mesh(coll_tree);
     
   }
   

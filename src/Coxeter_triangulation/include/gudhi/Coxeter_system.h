@@ -166,7 +166,17 @@ public:
       if (simple_system_range_.begin()->dimension() == 2 || simple_system_range_.begin()->dimension() == 3)
         simple_system_range_.begin()->write_coxeter_mesh(v_map, a_map, file_name);
   }
+
+  template <class VMap,
+            class Fake_simplex_tree>
+  void write_toplex_mesh(VMap& v_map, Fake_simplex_tree& stree, std::string file_name = "toplex.mesh") const {
+    if (simple_system_range_.size() == 1)
+      if (simple_system_range_.begin()->dimension() == 2 || simple_system_range_.begin()->dimension() == 3)
+        simple_system_range_.begin()->write_toplex_mesh(v_map, stree, file_name);
+  }
+
 };
+
 
   // Print the Coxeter_system in os.
 std::ostream& operator<<(std::ostream & os, Coxeter_system& cs) {
