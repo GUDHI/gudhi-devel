@@ -471,6 +471,62 @@ public:
     // std::cout << sparseMxSimplices << std::endl;
 	}
 
+  template <class Max_simplex_range>
+  SparseMsMatrix(unsigned numMaxSimplices, Max_simplex_range& range)
+  {
+    vertex_list.clear();
+    vertexToRow.clear();
+    maximal_simplices.clear();
+    rows = 0;
+
+    auto begin = std::chrono::high_resolution_clock::now();
+
+    using Vertex_ = std::size_t;
+    // using Simplex_ = std::vector<Vertex_>;
+    
+    //Extracting the unique vertices using unordered map.
+    std::unordered_set<Vertex_> vertices_;
+    for(auto& s: range)
+      for (Vertex_ v : s)
+        vertices_.emplace(v);
+
+    //Creating the map from vertex to row-index.
+    for(auto v: vertices_) {
+        vertex_list.push_back(v);  // vertex_list is implicitely a map as well, from rows to vertices
+        vertexToRow[v] = rows;
+        rows++;
+      }     
+	 
+    // vertex_list and vertexToRow have been formed 	
+  
+    sparseMxSimplices     = sparseMatrix(rows,numMaxSimplices); 			  // Initializing sparseMxSimplices, This is a column-major sparse matrix.  
+    sparseRowMxSimplices  = sparseRowMatrix(rows,numMaxSimplices);    	// Initializing sparseRowMxSimplices, This is a row-major sparse matrix.  
+    //We have two sparse matrices to have flexibility of iteratating through non-zero rows and columns efficiently.
+
+    cols = 0; 												        // Maintains the current count of maximal simplices
+    for(auto simplex: range) {			// Adding each maximal simplices iteratively.
+        for(auto vertex : simplex) {  // Transformes the current maximal simplex to row-index representation and adds it as a column in the sparse matrices.
+            sparseMxSimplices.insert(vertexToRow[vertex],cols) = 1;
+            sparseRowMxSimplices.insert(vertexToRow[vertex],cols) = 1;
+          }
+        cols++;
+      }
+    
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << "Created the sparse Matrix" << std::endl;
+    std::cout << "Time for sparse Matrix formation is : " <<  std::chrono::duration<double, std::milli>(end- begin).count()
+              << " ms\n" << std::endl;
+    std::cout << "Total number of Initial maximal simplices are: " << cols << std::endl;
+		
+    sparseMxSimplices.makeCompressed(); 	             //Optional for memory saving
+    sparseRowMxSimplices.makeCompressed(); 
+       	
+    init_lists();
+		
+    // std::cout << sparseMxSimplices << std::endl;
+  }
+
+  
 	//!	Destructor.
     /*!
       Frees up memory locations on the heap.
