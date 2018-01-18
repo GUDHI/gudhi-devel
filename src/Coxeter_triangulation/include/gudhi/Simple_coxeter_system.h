@@ -629,8 +629,8 @@ public:
   }
 
   template <class VMap,
-            class AMap>
-  void write_coxeter_mesh(VMap& v_map, AMap& a_map, std::string file_name = "coxeter.mesh") const
+            class Simplex_range>
+  void write_mesh(VMap& v_map, Simplex_range& range, std::string file_name = "toplex.mesh") const
   {
     short d = dimension_;
     if (d > 3);
@@ -650,8 +650,6 @@ public:
       for (int i = 0; i < d; i++) {
         b(i) = m.first[i+1]/denom;
       }
-      // std::cout << b << "\n\n";
-      // Eigen::SimplicialLDLT<Matrix, Eigen::Lower> chol(root_t_);
       Eigen::SparseLU<Matrix, Eigen::COLAMDOrdering<int>> chol(root_t_);
       Eigen::VectorXd x = chol.solve(b);
       if(chol.info()!=Eigen::Success) {
@@ -660,99 +658,8 @@ public:
       // std::cout << x << "\n\n";
       for (int i = 0; i < d; i++)
         ofs << x(i) << " ";
-      // std::vector<double> np;
-      // for (int i = 0; i < d; i++)
-      //   np.push_back(x(i));
-      // W.push_back(np);
-      ofs << "216" << std::endl;
-    }
-    // std::map<int,std::vector<int>> sv_map;
-    // int j = 1;
-    // for (auto m: v_map) {
-    //   for (auto s: m.second) {
-    //     auto find_it = sv_map.find(s);
-    //     if (find_it == sv_map.end())
-    //       sv_map.emplace(s, std::vector<int>(1,j));
-    //     else
-    //       find_it->second.push_back(j);
-    //   }
-    //   j++;
-    // }
-
-    struct Pointer_compare {
-      typedef typename VMap::iterator Pointer;
-      bool operator()(const Pointer& lhs, const Pointer& rhs) const { 
-        return lhs->first < rhs->first;
-      }
-    };    
-    std::map<typename VMap::iterator, int, Pointer_compare> vi_map;
-    unsigned index = 1;
-    for (auto v_it = v_map.begin(); v_it != v_map.end(); ++v_it, ++index)
-      vi_map.emplace(v_it, index);
-
-    if (d == 2)
-      ofs << "Triangles " << a_map.size() << "\n";
-    else
-      ofs << "Tetrahedra " << a_map.size() << "\n";
-    
-    for (auto a: a_map) {
-      for (auto m_it: std::get<2>(a.second)) {
-        ofs << vi_map[m_it] << " ";
-      }
-      ofs << "516" << std::endl;
-    }
-  }
-
-  template <class VMap,
-            class Fake_simplex_tree>
-  void write_toplex_mesh(VMap& v_map, Fake_simplex_tree& stree, std::string file_name = "toplex.mesh") const
-  {
-    short d = dimension_;
-    if (d > 3);
-  
-    std::ofstream ofs (file_name, std::ofstream::out);
-    if (d <= 2)
-      ofs << "MeshVersionFormatted 1\nDimension 2\n";
-    else
-      ofs << "MeshVersionFormatted 1\nDimension 3\n";
-  
-    ofs << "Vertices\n" << v_map.size() << "\n";
-
-    // std::vector<std::vector<double>> W;
-    for (auto m: v_map) {
-      FT denom = m.first[0]*vertex_level_;
-      Eigen::VectorXd b(d);
-      for (int i = 0; i < d; i++) {
-        b(i) = m.first[i+1]/denom;
-      }
-      // std::cout << b << "\n\n";
-      // Eigen::SimplicialLDLT<Matrix, Eigen::Lower> chol(root_t_);
-      Eigen::SparseLU<Matrix, Eigen::COLAMDOrdering<int>> chol(root_t_);
-      Eigen::VectorXd x = chol.solve(b);
-      if(chol.info()!=Eigen::Success) {
-        std::cout << "solving failed\n";
-      }
-      // std::cout << x << "\n\n";
-      for (int i = 0; i < d; i++)
-        ofs << x(i) << " ";
-      // std::vector<double> np;
-      // for (int i = 0; i < d; i++)
-      //   np.push_back(x(i));
-      // W.push_back(np);
       ofs << "1" << std::endl;
     }
-    // std::map<int,std::vector<int>> sv_map;
-    // int j = 1;
-    // for (auto m: v_map) {
-    //   for (auto s: m.second) {
-    //     auto find_it = sv_map.find(s);
-    //     if (find_it == sv_map.end())
-    //       sv_map.emplace(s, std::vector<int>(1,j));
-    //     else
-    //       find_it->second.push_back(j);
-    //   }
-    //   j++;
-    // }
 
     struct Pointer_compare {
       typedef typename VMap::iterator Pointer;
@@ -762,8 +669,8 @@ public:
     };    
     
     if (d == 2) {
-      std::vector<typename Fake_simplex_tree::Simplex> edges, triangles;
-      for (auto s: stree.max_simplices())
+      std::vector<typename Simplex_range::value_type> edges, triangles;
+      for (auto s: range)
         if (s.size() == 2)
           edges.push_back(s);
         else
@@ -785,14 +692,14 @@ public:
       }
     }
     else {
-      std::vector<typename Fake_simplex_tree::Simplex> edges, triangles, tetrahedra;
+      std::vector<typename Simplex_range::value_type> edges, triangles, tetrahedra;
       std::vector<std::vector<int>> facets;
-      for (auto s: stree.max_simplices())
+      for (auto s: range)
         if (s.size() == 2)
           edges.push_back(s);
         else if (s.size() == 3)
           triangles.push_back(s);
-        else
+        else if (s.size() == 4)
           tetrahedra.push_back(s);
       for (auto t: tetrahedra) {
         for (unsigned i = 0; i < t.size(); i++) {

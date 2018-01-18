@@ -41,7 +41,8 @@ public:
   template <class Range_of_simplices,
             class Simplex_tree>
   Collapse(Range_of_simplices& simplices, Simplex_tree& output) {
-    // std::cout << "Started collapses.\n"; 
+    // std::cout << "Started collapses.\n";
+    Simplex_tree collapsed_tree;
     typename Range_of_simplices::iterator current_it = simplices.begin();
     if (current_it == simplices.end())
       return;
@@ -49,11 +50,13 @@ public:
     cofaces_ = new Simplex_map();
     for (unsigned curr_dim = d; curr_dim > 0; curr_dim--) {
       auto coface_it = cofaces_->begin();
-      while (coface_it != cofaces_->end())
-        if (coface_it->second.number_of_cofaces() != 0)
-          cofaces_->erase(coface_it++);
-        else
-          coface_it++;
+      // while (coface_it != cofaces_->end())
+      //   if (coface_it->second.number_of_cofaces() != 0) {
+      //     // std::cout << "Coface " << coface_it->first << " erased\n";
+      //     cofaces_->erase(coface_it++);
+      //   }
+      //   else
+      //     coface_it++;
       while (current_it != simplices.end() && current_it->size() == curr_dim + 1)
         cofaces_->emplace(std::make_pair(*current_it++, Simplex_with_cofaces()));
       facets_  = new Simplex_map();
@@ -81,13 +84,18 @@ public:
           elementary_collapse(facet_it++);
         else
           facet_it++;
-      for (auto cf: *cofaces_)
+      for (auto cf: *cofaces_) {
+        // std::cout << "Coface " << cf.first << " inserted\n";
         output.insert_simplex_and_subfaces(cf.first);
+      }
       delete cofaces_;
       cofaces_ = facets_;
     }
-    for (auto cf: *cofaces_)
+    // The simplex tree has vertices with non-contiguous labels
+    for (auto cf: *cofaces_) {
+      // std::cout << "Coface " << cf.first << " inserted\n";
       output.insert_simplex_and_subfaces(cf.first);
+    }
     delete cofaces_;
   }
 
@@ -107,10 +115,8 @@ public:
         list_it++;
     }
     list_it++; // skip col_it
-    while (list_it != facet_list.end()) {
-      (*list_it)->second.remove_coface(coface_it);
-      list_it++;
-    }
+    while (list_it != facet_list.end())
+      (*(list_it++))->second.remove_coface(coface_it);
     facets_->erase(facet_it);
     cofaces_->erase(coface_it);
   }

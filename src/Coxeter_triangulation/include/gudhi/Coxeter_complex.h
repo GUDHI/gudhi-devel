@@ -63,9 +63,9 @@ public:
                                                          std::vector<std::size_t> const,
                                                          boost::forward_traversal_tag> {
   private:
-    typename Alcove_map::iterator it_;
-    Alcove_map& a_map_;
-    Vertex_index_map& vi_map_;
+    typename Alcove_map::const_iterator it_;
+    Alcove_map const& a_map_;
+    Vertex_index_map const& vi_map_;
     std::vector<std::size_t> value_; 
     friend class boost::iterator_core_access;
 
@@ -73,7 +73,7 @@ public:
       value_.clear();
       if (it_ != a_map_.end()) {
         for (auto m_it: std::get<2>(it_->second))
-          value_.push_back(vi_map_[m_it]);
+          value_.push_back(vi_map_.at(m_it));
         std::sort(value_.begin(), value_.end());
       }
     }
@@ -92,10 +92,49 @@ public:
     }
     
   public:
-    Alcove_iterator(typename Alcove_map::iterator it,
-                    Alcove_map& a_map,
-                    Vertex_index_map& vi_map)
+    Alcove_iterator(typename Alcove_map::const_iterator it,
+                    Alcove_map const& a_map,
+                    Vertex_index_map const& vi_map)
       : it_(it), a_map_(a_map), vi_map_(vi_map) {
+      update_value();
+    }
+  };
+
+  template <class Simplex_tree>
+  class Simplex_tree_simplex_iterator : public boost::iterator_facade< Simplex_tree_simplex_iterator<Simplex_tree>,
+                                                                       std::vector<std::size_t> const,
+                                                                       boost::forward_traversal_tag> {
+  private:
+    typename Simplex_tree::Complex_simplex_iterator it_;
+    Simplex_tree& stree_;
+    std::vector<std::size_t> value_; 
+    friend class boost::iterator_core_access;
+
+    void update_value() {
+      if (it_ != stree_.complex_simplex_range().end()) {
+        auto range = stree_.simplex_vertex_range(*it_);
+        value_ = std::vector<size_t>(range.begin(), range.end());
+      }
+    }
+    
+    bool equal(Simplex_tree_simplex_iterator<Simplex_tree> const& other) const {
+      return it_ == other.it_;
+    }
+
+    std::vector<std::size_t> const& dereference() const {
+      return value_;
+    }
+
+    void increment() {
+      it_++;
+      update_value();
+    }
+    
+  public:
+
+    Simplex_tree_simplex_iterator(typename Simplex_tree::Complex_simplex_iterator it,
+                                  Simplex_tree& stree)
+      : it_(it), stree_(stree) {
       update_value();
     }
   };
@@ -195,6 +234,10 @@ public:
     }
     std::cout << "Dimension of the nerve is " << max_dim << ".\n\n";    
 
+    unsigned index = 0;
+    for (auto v_it = v_map.begin(); v_it != v_map.end(); ++v_it, ++index)
+      vi_map.emplace(v_it, index);
+    
     // graph part to test the proximity
 
     // typedef typename boost::adjacency_list<boost::setS, boost::vecS, boost::undirectedS> Adj_graph;
@@ -279,26 +322,24 @@ public:
     // }
   }
 
-  void write_coxeter_mesh(std::string file_name = "coxeter.mesh") {
-    cs_.write_coxeter_mesh(v_map, a_map, file_name);
+  template <class Simplex_range>
+  void write_mesh(Simplex_range& range, std::string file_name) const {
+    cs_.write_mesh(v_map, range, file_name);
   }
 
-  template <class Fake_simplex_tree>
-  void write_toplex_mesh(Fake_simplex_tree& stree, std::string file_name = "toplex.mesh") const {
-    cs_.write_toplex_mesh(v_map, stree, file_name);
+  void write_mesh(std::string file_name = "toplex.mesh") const {
+    typedef boost::iterator_range<Alcove_iterator> Max_simplex_range;
+    Max_simplex_range range(Alcove_iterator(a_map.begin(), a_map, vi_map),
+                            Alcove_iterator(a_map.end(), a_map, vi_map));
+    cs_.write_mesh(v_map, range, file_name);
   }
-
   
   void collapse(bool pers_out = true) {
     Fake_simplex_tree stree;
 
     clock_t start, end;
     double time;
-    
-    unsigned index = 0;
-    for (auto v_it = v_map.begin(); v_it != v_map.end(); ++v_it, ++index)
-      vi_map.emplace(v_it, index);
-    
+        
     start = clock();
     // for (auto a: a_map) {
     //   std::vector<int> vertices;
@@ -312,9 +353,6 @@ public:
     typedef boost::iterator_range<Alcove_iterator> Max_simplex_range;
     Max_simplex_range max_simplex_range(Alcove_iterator(a_map.begin(), a_map, vi_map),
                                         Alcove_iterator(a_map.end(), a_map, vi_map));
-    end = clock();
-    // time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
-    // std::cout << "Computed the ToplexMap in time " << time << " s. \n";
     // SparseMsMatrix mat(a_map.size(), max_simplex_range);
     
     // auto matrix_formed  = std::chrono::high_resolution_clock::now();
@@ -347,8 +385,38 @@ public:
     
     // std::cout << "** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** " << std::endl;
 
+    if (pers_out) {
+      Simplex_tree<> full_stree;
+      for (auto s: max_simplex_range)
+        full_stree.insert_simplex_and_subfaces(s);
+      std::cout << "Start persistence calculation..." << std::endl;
+      using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
+      using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree<>, Field_Zp>;
+      double min_persistence = 0;
+      // Sort the simplices in the order of the filtration
+      full_stree.initialize_filtration();
+      // Compute the persistence diagram of the complex
+      Persistent_cohomology pcoh(full_stree);
+      // initializes the coefficient field for homology
+      pcoh.init_coefficients(3);
+      
+      pcoh.compute_persistent_cohomology(min_persistence);
+      std::ofstream out("persdiag_cox_full.out");
+      pcoh.output_diagram(out);
+      out.close();
+      std::cout << "Persistence complete." << std::endl;
+      int chi = 0;
+      for (auto sh: full_stree.complex_simplex_range())
+        chi += 1-2*(full_stree.dimension(sh)%2);
+      std::cout << "Euler characteristic of full_stree is " << chi << std::endl;
+    }
+      
     Simplex_tree<> coll_stree;
     Collapse coll(max_simplex_range, coll_stree);
+    end = clock();
+    time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+    std::cout << "Number of simplices before collapse: " << a_map.size() << "\n";
+    std::cout << "Collapse took " << time << " s. \n";
     // std::cout << coll_stree << "\n";
     unsigned dim_complex = 0;
     for (auto sh: coll_stree.complex_simplex_range()) {
@@ -356,31 +424,57 @@ public:
         dim_complex = coll_stree.dimension(sh);
     }
     std::cout << "Dimension of the collapsed complex is " << dim_complex << "\n";
+    int chi = 0;
+    for (auto sh: coll_stree.complex_simplex_range())
+      chi += 1-2*(coll_stree.dimension(sh)%2);
+    std::cout << "Euler characteristic of coll_stree is " << chi << std::endl;
     
-    // if (pers_out) {
-    //   std::cout << "Start persistence calculation..." << std::endl;
-    //   using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
-    //   using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree<>, Field_Zp>;
-    //   double min_persistence = 0;
-    //   Simplex_tree<> real_stree;
-    //   for (auto s: coll_tree.max_simplices()) {
-    //     real_stree.insert_simplex_and_subfaces(s);
-    //   }
-    //   // Sort the simplices in the order of the filtration
-    //   real_stree.initialize_filtration();
-    //   // Compute the persistence diagram of the complex
-    //   Persistent_cohomology pcoh(real_stree);
-    //   // initializes the coefficient field for homology
-    //   pcoh.init_coefficients(3);
-      
-    //   pcoh.compute_persistent_cohomology(min_persistence);
-    //   std::ofstream out("persdiag_cox.out");
-    //   pcoh.output_diagram(out);
-    //   out.close();
-    //   std::cout << "Persistence complete." << std::endl;
+    if (pers_out) {
+      std::cout << "Start persistence calculation..." << std::endl;
+      Simplex_tree<> cont_stree;
+      std::map<int, int> label_map;
+      int i = 0;
+      for (auto cf_it = coll_stree.complex_vertex_range().begin(); cf_it != coll_stree.complex_vertex_range().end(); ++cf_it, ++i)
+        label_map.emplace(std::make_pair(*cf_it, i));
+      // for (auto m: label_map) {
+      //   std::cout << m.first << ": " << m.second << "\n";
+      // }
+      // std::cout << "Stree before label mapping:\n" << coll_stree << "\n";
+      for (auto sh: coll_stree.complex_simplex_range()) {
+        std::vector<int> vertices;
+        for (auto i: coll_stree.simplex_vertex_range(sh))
+          vertices.push_back(label_map[i]);
+        cont_stree.insert_simplex(vertices);
+      }
+      // std::cout << "Stree after label mapping:\n" << cont_stree << "\n";    
+      int chi = 0;
+      for (auto sh: cont_stree.complex_simplex_range())
+        chi += 1-2*(cont_stree.dimension(sh)%2);
+      std::cout << "Euler characteristic of cont_stree is " << chi << std::endl;
 
+      using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
+      using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree<>, Field_Zp>;
+      double min_persistence = 0;
+      // Sort the simplices in the order of the filtration
+      cont_stree.set_dimension(dim_complex);
+      cont_stree.initialize_filtration();
+      // Compute the persistence diagram of the complex
+      Persistent_cohomology pcoh(cont_stree);
+      // initializes the coefficient field for homology
+      pcoh.init_coefficients(3);
       
-    //   witness_complex::Dim_lists<Simplex_tree<>> simplices(real_stree, collDim, 1);
+      pcoh.compute_persistent_cohomology(min_persistence);
+      std::ofstream out("persdiag_cox.out");
+      pcoh.output_diagram(out);
+      out.close();
+      std::cout << "Persistence complete." << std::endl;
+      typedef Simplex_tree_simplex_iterator<Simplex_tree<> > Simplex_tree_iterator;
+      typedef boost::iterator_range<Simplex_tree_iterator> Simplex_tree_range;
+      Simplex_tree_range simplex_tree_range(Simplex_tree_iterator(coll_stree.complex_simplex_range().begin(), coll_stree),
+                                            Simplex_tree_iterator(coll_stree.complex_simplex_range().end(), coll_stree));
+      write_mesh(simplex_tree_range, "coll_stree.mesh");
+      
+    //   witness_complex::Dim_lists<Simplex_tree<>> simplices(coll_stree, collDim, 1);
     //   start = clock();
     //   simplices.collapse();
     //   end = clock();
@@ -394,10 +488,8 @@ public:
     //   //   collapsed_tree.insert_simplex(vertices, simplex_tree.filtration(sh));
     //   // }
     //   std::cout << "The dimension after the simple collapses is " << simplices.dimension() << ".\n";
-    // }
-
+    }
     
-    // write_toplex_mesh(coll_tree);
     
   }
   
