@@ -170,8 +170,8 @@ public:
         base(6,7) = 1.0;
         base(7,7) = 1.0;
       }
-      std::cout << "base = " << std::endl << base << std::endl;
-      std::cout << "base^{-1} = " << std::endl << base.inverse() << std::endl;
+      // std::cout << "base = " << std::endl << base << std::endl;
+      // std::cout << "base^{-1} = " << std::endl << base.inverse() << std::endl;
       // for (int i = )
       break;
     }  
