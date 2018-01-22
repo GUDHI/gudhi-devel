@@ -13,8 +13,6 @@ class Coxeter_system  {
   typedef double FT;
   typedef Eigen::SparseMatrix<FT> Matrix;
   typedef Eigen::Triplet<FT> Triplet;
-  typedef std::vector<int> Alcove_id;
-  typedef Alcove_id Vertex_id;
   
   class wrong_family : public std::exception {  
   } wrong_family_exception_;
@@ -26,6 +24,8 @@ protected:
   
   
 public:
+  typedef typename Simple_coxeter_system::Alcove_id Alcove_id;
+  typedef Alcove_id Vertex_id;
 
   Coxeter_system()
     : dimension_(0) {
@@ -69,9 +69,9 @@ public:
    *  The matrix' rows are simple root vectors.
    */
   template <class Point>
-  Alcove_id alcove_coordinates(const Point& p, int level) const
+  Alcove_id alcove_coordinates(const Point& p, double level) const
   {
-    Alcove_id a_id(1, level);
+    Alcove_id a_id(level);
     auto p_it = p.begin();
     for (auto scs: simple_system_range_) {
       std::vector<FT> coordinate_segment;
@@ -107,16 +107,17 @@ private:
 
   
   void rec_combine_chunks(std::vector<std::vector<Vertex_id>>::iterator chunks_it, std::vector<Vertex_id>& vertices, Vertex_id& v_id) const {
-    int k = v_id.size()-1;
+    int k = v_id.size();
     if (k == dimension_) {
-      vertices.push_back(reduced_id(v_id));
+      //      vertices.push_back(reduced_id(v_id));
+      vertices.push_back(v_id);
       return;
     }
     for (auto chunk: *chunks_it) {
-      for (auto c_it = chunk.begin()+1; c_it != chunk.end(); ++c_it)
+      for (auto c_it = chunk.begin(); c_it != chunk.end(); ++c_it)
         v_id.push_back(*c_it);
       rec_combine_chunks(chunks_it+1, vertices, v_id);
-      v_id.resize(v_id.size()-chunk.size()+1);
+      v_id.resize(v_id.size()-chunk.size());
     }
   }
 
@@ -127,9 +128,9 @@ public:
     std::vector<Vertex_id> vertices;
     std::vector<std::vector<Vertex_id>> chunks;
     auto ai_it = ai_id.begin();
-    int level = *ai_it++;
+    double level = ai_id.level();
     for (auto scs: simple_system_range_) {
-      std::vector<int> ai_id_part(1, level);
+      Alcove_id ai_id_part(level);
       unsigned pos_root_count = scs.pos_root_count();
       for (unsigned i = 0; i < pos_root_count; i++) {
         ai_id_part.push_back(*ai_it++);
@@ -139,7 +140,7 @@ public:
     // std::vector<std::vector<Vertex_id>::iterator> iterators;
     // for (auto chunk: chunks)
     //   iterators.emplace_back(chunk.begin());
-    Vertex_id v_id(1, level);
+    Vertex_id v_id(level);
     rec_combine_chunks(chunks.begin(), vertices, v_id);
     return vertices;
   }
@@ -147,10 +148,10 @@ public:
   bool is_adjacent(const Vertex_id& v_id, const Alcove_id& a_id) const {
     int i = 1, j = 1;
     for (auto scs: simple_system_range_) {
-      Vertex_id chunk_v(1, v_id[0]);
+      Vertex_id chunk_v(v_id.level());
       for (unsigned ii = 0; ii < scs.dimension(); i++, ii++)
         chunk_v.push_back(v_id[i]);
-      Alcove_id chunk_a(1, a_id[0]);
+      Alcove_id chunk_a(a_id.level());
       for (unsigned jj = 0; jj < scs.pos_root_count(); j++, jj++)
         chunk_a.push_back(a_id[j]);
       if (!scs.is_adjacent(chunk_v, chunk_a))

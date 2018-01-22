@@ -27,7 +27,7 @@ class Coxeter_complex {
   
 public:
   
-  using Alcove_id = std::vector<int>;
+  using Alcove_id = typename Coxeter_system::Alcove_id;
   using Vertex_id = Alcove_id;    
 
   using Index_range = std::vector<std::size_t>;
@@ -158,7 +158,7 @@ private:
   
 public:
   
-  Coxeter_complex(const Point_range& point_vector, const Coxeter_system& cs, int init_level=1, bool store_points = false)
+  Coxeter_complex(const Point_range& point_vector, const Coxeter_system& cs, double init_level=1, bool store_points = false)
     : cs_(cs), max_id(0) {
     clock_t start, end, global_start;
     double time;
@@ -308,7 +308,7 @@ public:
         v_map.erase(v_it);
     }
     for (auto p_it: std::get<1>(a_it->second)) {
-      Alcove_id s_id = cs_.alcove_coordinates(*p_it, 2 * a_it->first[0]); 
+      Alcove_id s_id = cs_.alcove_coordinates(*p_it, 2 * a_it->first.level()); 
       auto new_a_it = a_map.find(s_id);
       if (new_a_it == a_map.end()) {
         auto success_pair = a_map.emplace(s_id, std::make_tuple(max_id++, Point_pointers(1, p_it), Vertex_pointers()));
@@ -320,9 +320,9 @@ public:
             auto success_pair = v_map.emplace(v, Index_range(1, std::get<0>(new_a_it->second)));
             new_v_it = success_pair.first;
             // add the coarser alcoves to the adjacency of the new vertex on the new level
-            if (v[0] == new_a_it->first[0]) {
+            if (v.level() == new_a_it->first.level()) {
               auto m_it = a_map.begin();
-              while (m_it != a_map.end() && m_it->first[0] < new_a_it->first[0]) {
+              while (m_it != a_map.end() && m_it->first.level() < new_a_it->first.level()) {
                 if (cs_.is_adjacent(new_v_it->first, m_it->first)) {
                   std::get<2>(m_it->second).push_back(new_v_it);
                   new_v_it->second.push_back(std::get<0>(m_it->second));

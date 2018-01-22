@@ -50,9 +50,9 @@ int main(int argc, char * const argv[]) {
     return 0;
   }
   Point_vector point_vector;
-  int init_level = 1;
+  double init_level = 1;
   if (argc == 3)
-    init_level = atoi(argv[2]);
+    init_level = atof(argv[2]);
   // Gudhi::Points_off_reader<Point_d> off_reader(argv[1]);
   // if (!off_reader.is_valid()) {
   //     std::cerr << "Coxeter triangulations - Unable to read file " << argv[1] << "\n";

@@ -13,14 +13,44 @@ class Simple_coxeter_system {
   typedef double FT;
   typedef Eigen::SparseMatrix<FT> Matrix;
   typedef Eigen::Triplet<FT> Triplet;
-  typedef std::vector<int> Alcove_id;
-  typedef Alcove_id Vertex_id;
-  typedef std::vector<std::pair<int,int>> Change_range;
-  typedef std::vector<Change_range> Local_changes;
-  
+  // typedef std::vector<int> Alcove_id;
+  // struct Alcove_id {
+  //   std::vector<int> coords;
+  //   double level;
+  //   typedef typename std::vector<int>::iterator iterator;
+  //   // typedef typename std::vector<int>::const_iterator const_iterator;
+    
+  //   Alcove_id(double level_, const std::vector<int>& coords_)
+  //     : level(level_), coords(coords_) {}
+
+  //   Alcove_id(double level_)
+  //     : level(level_) {}
+
+  //   iterator begin() {
+  //     return coords.begin();
+  //   }
+
+  //   iterator end() {
+  //     return coords.end();
+  //   }
+  // };
   class wrong_family : public std::exception {  
   } wrong_family_exception_;
+  
+public:
+  class Alcove_id : public std::vector<int> {
+    double level_;
 
+  public:
+    Alcove_id(double level)
+      : std::vector<int>(), level_(level) {}
+
+    double level() const {
+      return level_;
+    }
+  };
+  typedef Alcove_id Vertex_id;
+  
 public:
   
   Matrix root_t_;
@@ -195,7 +225,7 @@ public:
    */
   template <class Point,
             class OutputIterator>
-  void alcove_coordinates(const Point& p, int level, OutputIterator output_it) const
+  void alcove_coordinates(const Point& p, double level, OutputIterator output_it) const
   {
     unsigned short d = p.size();
     assert(d == dimension_);
@@ -393,14 +423,14 @@ private:
 
   template <class S_id_iterator>
   bool valid_coordinate(const Vertex_id& v_id, S_id_iterator& s_it, unsigned& integers, std::vector<Triplet>& triplets) {
-    int k = v_id.size();
+    int k = v_id.size()+1;
     unsigned short d = dimension_; 
     switch (family_) {
     case 'A': {
       // e_i - e_j
       int sum = 0;
       for (unsigned i = k-1; i >= 1; i--) {
-        sum += v_id[i];
+        sum += v_id[i-1];
         if (sum < *s_it || sum > *s_it + 1)
           return false;
         s_it++;
@@ -412,7 +442,7 @@ private:
         // e_i
         int sum = 0;
         for (unsigned i = d; i >= 1; i--) {
-          sum += v_id[i];
+          sum += v_id[i-1];
           if (sum < 2*(*s_it) || sum > 2*(*s_it) + 2)
             return false;
           if (sum % 2 == 0) {
@@ -424,10 +454,10 @@ private:
         // e_i + e_j
         int glob_sum = 0;
         for (unsigned i = d; i >= 1; i--) {
-          glob_sum += 2*v_id[i];
+          glob_sum += 2*v_id[i-1];
           int sum = glob_sum;
           for (short j = i-1; j >= 1; j--) {
-            sum += v_id[j];
+            sum += v_id[j-1];
             if (sum < 2*(*s_it) || sum > 2*(*s_it) + 2)
               return false;
             if (sum % 2 == 0) {
@@ -443,7 +473,7 @@ private:
       // e_i - e_j
       int sum = 0;
       for (unsigned i = k-1; i >= 1; i--) {
-        sum += v_id[i];
+        sum += v_id[i-1];
         if (sum < 2*(*s_it) || sum > 2*(*s_it + 1))
           return false;
         if (sum % 2 == 0) {
@@ -458,9 +488,9 @@ private:
     case 'C': {
       if (k == d+1) {
         // 2*e_i
-        int sum = -v_id[d];
+        int sum = -v_id[d-1];
         for (unsigned i = d; i >= 1; i--) {
-          sum += 2*v_id[i];
+          sum += 2*v_id[i-1];
           if (sum < 2*(*s_it) || sum > 2*(*s_it) + 2)
             return false;
           if (sum % 2 == 0) {
@@ -470,12 +500,12 @@ private:
           s_it++;
         }
         // e_i + e_j
-        int glob_sum = -v_id[d];
+        int glob_sum = -v_id[d-1];
         for (unsigned i = d; i >= 1; i--) {
-          glob_sum += 2*v_id[i];
+          glob_sum += 2*v_id[i-1];
           int sum = glob_sum;
           for (short j = i-1; j >= 1; j--) {
-            sum += v_id[j];
+            sum += v_id[j-1];
             if (sum < 2*(*s_it) || sum > 2*(*s_it) + 2)
               return false;
             if (sum % 2 == 0) {
@@ -491,7 +521,7 @@ private:
       // e_i - e_j
       int sum = 0;
       for (unsigned i = k-1; i >= 1; i--) {
-        sum += v_id[i];
+        sum += v_id[i-1];
         if (sum < 2*(*s_it) || sum > 2*(*s_it + 1))
           return false;
         if (sum % 2 == 0) {
@@ -506,12 +536,12 @@ private:
     case 'D': {
       if (k == d+1) {
         // e_i + e_j
-        int glob_sum = -v_id[d]-v_id[d-1];
+        int glob_sum = -v_id[d-1]-v_id[d-2];
         for (int i = d; i >= 1; i--) {
-          glob_sum += 2*v_id[i];
+          glob_sum += 2*v_id[i-1];
           int sum = glob_sum;
           for (short j = i-1; j >= 1; j--) {
-            sum += v_id[j];
+            sum += v_id[j-1];
             if (sum < 2*(*s_it) || sum > 2*(*s_it) + 2)
               return false;
             if (sum % 2 == 0) {
@@ -527,7 +557,7 @@ private:
       // e_i - e_j
       int sum = 0;
       for (unsigned i = k-1; i >= 1; i--) {
-        sum += v_id[i];
+        sum += v_id[i-1];
         if (sum < 2*(*s_it) || sum > 2*(*s_it + 1))
           return false;
         if (sum % 2 == 0) {
@@ -553,7 +583,7 @@ private:
   void rec_vertices_of_simplex(Vertex_id& v_id, S_id_iterator s_it, std::vector<Vertex_id>& vertices, unsigned& integers, std::vector<Triplet>& triplets)
   {
     unsigned short d = dimension_;
-    int k = v_id.size();
+    int k = v_id.size()+1;
     if (family_ == 'A') {
       if (k == d+1) {
         vertices.emplace_back(v_id);
@@ -600,27 +630,27 @@ public:
   std::vector<Vertex_id> vertices_of_simplex(Alcove_id ai_id)
   {
     unsigned d = dimension_;
-    Vertex_id v_id(1,*ai_id.begin() * vertex_level_);
-    v_id.reserve(d+1);
+    Vertex_id v_id(ai_id.level() * vertex_level_);
+    v_id.reserve(d);
     std::vector<Vertex_id> vertices;
     vertices.reserve(d+1);
     unsigned integers = 0;
     std::vector<Triplet> triplets;
-    rec_vertices_of_simplex(v_id, ai_id.begin()+1, vertices, integers, triplets);
+    rec_vertices_of_simplex(v_id, ai_id.begin(), vertices, integers, triplets);
     return vertices;
   }
 
   /** Check if the given simplex and vertex are adjacent.
    */ 
   bool is_adjacent(const Vertex_id& v_id, const Alcove_id& a_id) const {
-    auto alcove_it = a_id.begin()+1;
+    auto alcove_it = a_id.begin();
     for (unsigned i = 1; i < v_id.size(); ++i) {
       int sum = 0; 
       for (unsigned j = i; j >= 1; --j) {
-        sum += v_id[j];
+        sum += v_id[j-1];
         double
-          v_plane = ((double)sum)/v_id[0]/vertex_level_,
-          a_plane = ((double)*alcove_it++)/a_id[0]/vertex_level_;
+          v_plane = ((double)sum)/v_id.level()/vertex_level_,
+          a_plane = ((double)*alcove_it++)/a_id.level()/vertex_level_;
         if (v_plane < a_plane || v_plane > a_plane + 1)
           return false;
       }
@@ -645,10 +675,10 @@ public:
 
     // std::vector<std::vector<double>> W;
     for (auto m: v_map) {
-      FT denom = m.first[0]*vertex_level_;
+      FT denom = m.first.level()*vertex_level_;
       Eigen::VectorXd b(d);
       for (int i = 0; i < d; i++) {
-        b(i) = m.first[i+1]/denom;
+        b(i) = m.first[i]/denom;
       }
       Eigen::SparseLU<Matrix, Eigen::COLAMDOrdering<int>> chol(root_t_);
       Eigen::VectorXd x = chol.solve(b);
