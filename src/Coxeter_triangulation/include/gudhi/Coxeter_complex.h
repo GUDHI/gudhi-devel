@@ -12,16 +12,12 @@
 #include <gudhi/SparseMsMatrix.h>
 #include <gudhi/Fake_simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
-#include <gudhi/Dim_lists.h>
 #include <gudhi/Coxeter_complex/Collapse.h>
 // #include <gudhi/Coxeter_complex/Simplex_with_cofaces.h>
 
 #include "../../example/cxx-prettyprint/prettyprint.hpp"
 
 #include <boost/iterator/iterator_facade.hpp>
-// #include <boost/graph/graph_traits.hpp>
-// #include <boost/graph/adjacency_list.hpp>
-// #include <boost/graph/connected_components.hpp>
 
 namespace Gudhi {
 
@@ -50,7 +46,6 @@ public:
   };
   using Vertex_index_map = std::map<typename Vertex_map::iterator, int, Pointer_compare>;
   
-  const Point_range& point_vector_;
   const Coxeter_system& cs_;
   
   Alcove_map a_map;
@@ -98,6 +93,10 @@ public:
       : it_(it), a_map_(a_map), vi_map_(vi_map) {
       update_value();
     }
+
+    int dimension() {
+      return value_.size()-1;
+    }
   };
 
   template <class Simplex_tree>
@@ -138,6 +137,167 @@ public:
       update_value();
     }
   };
+
+private:
+
+  void compute_v_map() {
+    for (auto a_it = a_map.begin(); a_it != a_map.end(); ++a_it) {
+      std::vector<Vertex_id> vertices = cs_.vertices_of_alcove(a_it->first);
+      for (Vertex_id v: vertices) {
+        auto v_it = v_map.find(v);
+        if (v_it == v_map.end()) {
+          auto success_pair = v_map.emplace(v, Index_range(1, std::get<0>(a_it->second)));
+          v_it = success_pair.first;
+        }
+        else
+          v_it->second.push_back(std::get<0>(a_it->second));
+        std::get<2>(a_it->second).push_back(v_it);
+      }
+    }
+  }
+  
+public:
+  
+  Coxeter_complex(const Point_range& point_vector, const Coxeter_system& cs, int init_level=1, bool store_points = false)
+    : cs_(cs), max_id(0) {
+    clock_t start, end, global_start;
+    double time;
+    global_start = clock();
+    start = clock();
+    for (auto p_it = point_vector.begin(); p_it != point_vector.end(); ++p_it) {
+      Alcove_id s_id = cs.alcove_coordinates(*p_it, init_level); 
+      auto a_it = a_map.find(s_id);
+      if (a_it == a_map.end())
+        if (store_points)
+          a_map.emplace(s_id, std::make_tuple(max_id++, Point_pointers(1, p_it), Vertex_pointers()));
+        else
+          a_map.emplace(s_id, std::make_tuple(max_id++, Point_pointers(), Vertex_pointers()));
+      else
+        if (store_points)
+          std::get<1>(a_it->second).push_back(p_it);
+    }
+    end = clock();
+    time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+    std::cout << "Computed alcove coordinate map in " << time << " s. \n";
+    std::cout << "Alcove map size is " << a_map.size() << ".\n";
+    
+    // std::cout << "AMap:\n";
+    // for (auto m: a_map) 
+    //   std::cout << m.first << ": " << std::get<0>(m.second) << ", "
+    //             << "size=" << std::get<1>(m.second).size() << std::endl;    
+    // std::cout << "\n";
+    
+    start = clock();
+    compute_v_map();
+    end = clock();
+    time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+    std::cout << "Computed vertex map in " << time << " s. \n";
+    std::cout << "Vertex map size is " << v_map.size() << ".\n";
+    end = clock();
+    time = static_cast<double>(end - global_start) / CLOCKS_PER_SEC;
+    std::cout << "Total time: " << time << " s. \n";
+
+    // std::cout << "VMap:\n";
+    // for (auto m: v_map) 
+    //   std::cout << m.first << ": " << m.second << std::endl;
+    // std::cout << "\n";
+    
+    std::size_t max_dim = 0; 
+    for (auto m: v_map) {
+      if (m.second.size()-1 > max_dim)
+        max_dim = m.second.size()-1;
+    }
+    std::cout << "Dimension of the nerve is " << max_dim << ".\n\n";    
+
+    unsigned index = 0;
+    for (auto v_it = v_map.begin(); v_it != v_map.end(); ++v_it, ++index)
+      vi_map.emplace(v_it, index);
+                  
+    
+    // subdivision part
+        
+    // bool subdivision_needed = true;
+    // int current_level = 1;
+    // while (subdivision_needed) {
+    //   std::cout << "Subdivision level " << 2*current_level << std::endl;
+    //   subdivision_needed = false;
+    //   auto a_it = a_map.begin();
+    //   while (a_it != a_map.end() && a_it->first[0] <= current_level) {
+    //     if (std::get<1>(a_it->second).size() > 2) {
+    //       subdivision_needed = true;
+    //       subdivide_alcove(a_it++);
+    //     }
+    //     else
+    //       a_it++;
+    //   }
+    //   current_level *= 2;
+    //   std::cout << "AMap:\n";
+    //   for (auto m: a_map) 
+    //     std::cout << m.first << ": " << std::get<0>(m.second) << ", "
+    //               << "size=" << std::get<1>(m.second).size() << std::endl;    
+    //   std::cout << "\n";
+    
+      // std::cout << "VMap:\n";
+      // for (auto m: v_map) 
+      //   std::cout << m.first << ": " << m.second << std::endl;
+      // std::cout << "\n";
+
+    // }
+  }
+
+  // Coxeter_complex(const std::string& input_file, const Coxeter_system& cs, int init_level=1, bool store_points = false)
+  //   : cs_(cs), max_id(0) {
+  //   clock_t start, end, global_start;
+  //   double time;
+  //   global_start = clock();
+  //   start = clock();
+  //   Off_point_range<typename Point_range::value_type> off_range(input_file);
+  //   for (auto p: off_range) {
+  //     Alcove_id s_id = cs.alcove_coordinates(p, init_level); 
+  //     auto a_it = a_map.find(s_id);
+  //     if (a_it == a_map.end())
+  //       a_map.emplace(s_id, std::make_tuple(max_id++, Point_pointers(), Vertex_pointers()));
+  //     else
+  //       std::get<1>(a_it->second).push_back(p);
+  //   }
+  //   end = clock();
+  //   time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+  //   std::cout << "Computed alcove coordinate map in " << time << " s. \n";
+  //   std::cout << "Alcove map size is " << a_map.size() << ".\n";
+    
+  //   // std::cout << "AMap:\n";
+  //   // for (auto m: a_map) 
+  //   //   std::cout << m.first << ": " << std::get<0>(m.second) << ", "
+  //   //             << "size=" << std::get<1>(m.second).size() << std::endl;    
+  //   // std::cout << "\n";
+    
+  //   start = clock();
+  //   compute_v_map();
+  //   end = clock();
+  //   time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+  //   std::cout << "Computed vertex map in " << time << " s. \n";
+  //   std::cout << "Vertex map size is " << v_map.size() << ".\n";
+  //   end = clock();
+  //   time = static_cast<double>(end - global_start) / CLOCKS_PER_SEC;
+  //   std::cout << "Total time: " << time << " s. \n";
+
+  //   // std::cout << "VMap:\n";
+  //   // for (auto m: v_map) 
+  //   //   std::cout << m.first << ": " << m.second << std::endl;
+  //   // std::cout << "\n";
+    
+  //   std::size_t max_dim = 0; 
+  //   for (auto m: v_map) {
+  //     if (m.second.size()-1 > max_dim)
+  //       max_dim = m.second.size()-1;
+  //   }
+  //   std::cout << "Dimension of the nerve is " << max_dim << ".\n\n";    
+
+  //   unsigned index = 0;
+  //   for (auto v_it = v_map.begin(); v_it != v_map.end(); ++v_it, ++index)
+  //     vi_map.emplace(v_it, index);
+  // }
+
   
   template <class AMap_iterator>
   void subdivide_alcove(AMap_iterator a_it) {
@@ -180,146 +340,6 @@ public:
         std::get<1>(new_a_it->second).push_back(p_it);      
     }
     a_map.erase(a_it);
-  }
-
-  Coxeter_complex(const Point_range& point_vector, const Coxeter_system& cs, int init_level=1)
-    : point_vector_(point_vector), cs_(cs), max_id(0) {
-    clock_t start, end, global_start;
-    double time;
-    global_start = clock();
-    start = clock();
-    for (auto p_it = point_vector.begin(); p_it != point_vector.end(); ++p_it) {
-      Alcove_id s_id = cs.alcove_coordinates(*p_it, init_level); 
-      auto a_it = a_map.find(s_id);
-      if (a_it == a_map.end())
-        a_map.emplace(s_id, std::make_tuple(max_id++, Point_pointers(1, p_it), Vertex_pointers()));
-      else
-        std::get<1>(a_it->second).push_back(p_it);
-    }
-    end = clock();
-    time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
-    std::cout << "Computed alcove coordinate map in " << time << " s. \n";
-
-    // std::cout << "AMap:\n";
-    // for (auto m: a_map) 
-    //   std::cout << m.first << ": " << std::get<0>(m.second) << ", "
-    //             << "size=" << std::get<1>(m.second).size() << std::endl;    
-    // std::cout << "\n";
-    
-    start = clock();
-    for (auto a_it = a_map.begin(); a_it != a_map.end(); ++a_it) {
-      std::vector<Vertex_id> vertices = cs_.vertices_of_alcove(a_it->first);
-      for (Vertex_id v: vertices) {
-        auto v_it = v_map.find(v);
-        if (v_it == v_map.end()) {
-          auto success_pair = v_map.emplace(v, Index_range(1, std::get<0>(a_it->second)));
-          v_it = success_pair.first;
-        }
-        else
-          v_it->second.push_back(std::get<0>(a_it->second));
-        std::get<2>(a_it->second).push_back(v_it);
-      }
-    }
-    end = clock();
-    time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
-    std::cout << "Computed vertex alcove map in " << time << " s. \n";
-    end = clock();
-    time = static_cast<double>(end - global_start) / CLOCKS_PER_SEC;
-    std::cout << "Total time: " << time << " s. \n";
-      
-    std::size_t max_dim = 0; 
-    for (auto m: v_map) {
-      if (m.second.size()-1 > max_dim)
-        max_dim = m.second.size()-1;
-    }
-    std::cout << "Dimension of the nerve is " << max_dim << ".\n\n";    
-
-    unsigned index = 0;
-    for (auto v_it = v_map.begin(); v_it != v_map.end(); ++v_it, ++index)
-      vi_map.emplace(v_it, index);
-    
-    // graph part to test the proximity
-
-    // typedef typename boost::adjacency_list<boost::setS, boost::vecS, boost::undirectedS> Adj_graph;
-    // typedef boost::graph_traits<Adj_graph>::vertex_descriptor Vertex_t;
-    // typedef boost::graph_traits<Adj_graph>::edge_descriptor Edge_t;
-    // typedef boost::graph_traits<Adj_graph>::adjacency_iterator Adj_it;
-    // typedef std::pair<Adj_it, Adj_it> Out_edge_it;
-
-    // typedef boost::container::flat_map<std::size_t, Vertex_t> Graph_map;
-    // typedef boost::container::flat_map<Vertex_t, std::size_t> Inv_graph_map;    
-
-    // Adj_graph adj_graph;
-    // Graph_map g_map;
-    // Inv_graph_map ig_map;
-    // Vertex_t vert;
-    // for (auto a_it = a_map.begin(); a_it != a_map.end(); a_it++) {
-    //   vert = boost::add_vertex(adj_graph);
-    //   g_map.emplace(std::get<0>(a_it->second), vert);
-    //   ig_map.emplace(vert, std::get<0>(a_it->second));
-    // }
-    // for (auto v_it = v_map.begin(); v_it != v_map.end(); v_it++)
-    //   for (auto al_it1 = v_it->second.begin(); al_it1 != v_it->second.end(); ++al_it1)
-    //     for (auto al_it2 = al_it1+1; al_it2 != v_it->second.end(); ++al_it2)
-    //       boost::add_edge(g_map[*al_it1], g_map[*al_it2], adj_graph);
-
-    /* It was uncommented  \/ */
-    
-    // std::map<typename Vertex_map::iterator, typename Point_range::value_type> vp_map;
-    // for (auto v_it = v_map.begin(); v_it != v_map.end(); v_it++) {
-      
-    // }
-    
-    // std::vector<std::vector<bool>> adj_table(a_map.size(), std::vector<bool>(a_map.size(), false));
-    // for (auto a_it = a_map.begin(); a_it != a_map.end(); a_it++) {
-    //   Vertex_pointers& v_list = std::get<2>(a_it->second);
-    //   for (auto v_it = v_list.begin(); v_it != v_list.end(); v_it++)
-    //     for (auto aa: (*v_it)->second)
-    //       adj_table[std::get<0>(a_it->second)][aa] = true;
-    // }
-
-    // for (unsigned i = 0; i != adj_table.size(); i++)
-    //   for (unsigned j = 0; j != adj_table[i].size(); j++)
-    //     if (!adj_table[i][j]) {
-          
-    //     }
-          
-    
-    // subdivision part
-    
-    
-    // std::cout << "VMap:\n";
-    // for (auto m: v_map) 
-    //   std::cout << m.first << ": " << m.second << std::endl;
-    // std::cout << "\n";
-    
-    // bool subdivision_needed = true;
-    // int current_level = 1;
-    // while (subdivision_needed) {
-    //   std::cout << "Subdivision level " << 2*current_level << std::endl;
-    //   subdivision_needed = false;
-    //   auto a_it = a_map.begin();
-    //   while (a_it != a_map.end() && a_it->first[0] <= current_level) {
-    //     if (std::get<1>(a_it->second).size() > 2) {
-    //       subdivision_needed = true;
-    //       subdivide_alcove(a_it++);
-    //     }
-    //     else
-    //       a_it++;
-    //   }
-    //   current_level *= 2;
-    //   std::cout << "AMap:\n";
-    //   for (auto m: a_map) 
-    //     std::cout << m.first << ": " << std::get<0>(m.second) << ", "
-    //               << "size=" << std::get<1>(m.second).size() << std::endl;    
-    //   std::cout << "\n";
-    
-      // std::cout << "VMap:\n";
-      // for (auto m: v_map) 
-      //   std::cout << m.first << ": " << m.second << std::endl;
-      // std::cout << "\n";
-
-    // }
   }
 
   template <class Simplex_range>
@@ -418,7 +438,7 @@ public:
     std::cout << "Number of simplices before collapse: " << a_map.size() << "\n";
     std::cout << "Collapse took " << time << " s. \n";
     // std::cout << coll_stree << "\n";
-    unsigned dim_complex = 0;
+    int dim_complex = 0;
     for (auto sh: coll_stree.complex_simplex_range()) {
       if (coll_stree.dimension(sh) > dim_complex)
         dim_complex = coll_stree.dimension(sh);

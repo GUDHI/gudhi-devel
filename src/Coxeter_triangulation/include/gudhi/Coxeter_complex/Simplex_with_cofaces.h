@@ -83,8 +83,7 @@ public:
   }
 
   void remove_coface(Map_iterator& coface_it) {
-    std::size_t number_of_erased_elements = cofaces_.erase(coface_it);
-    assert(number_of_erased_elements == 1);
+    cofaces_.erase(coface_it);
   }
   
   // std::vector<std::size_t> const& vertices() const {

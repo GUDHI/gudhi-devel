@@ -49,18 +49,11 @@ public:
     unsigned d = current_it->size() - 1;
     cofaces_ = new Simplex_map();
     for (unsigned curr_dim = d; curr_dim > 0; curr_dim--) {
-      auto coface_it = cofaces_->begin();
-      // while (coface_it != cofaces_->end())
-      //   if (coface_it->second.number_of_cofaces() != 0) {
-      //     // std::cout << "Coface " << coface_it->first << " erased\n";
-      //     cofaces_->erase(coface_it++);
-      //   }
-      //   else
-      //     coface_it++;
       while (current_it != simplices.end() && current_it->size() == curr_dim + 1)
         cofaces_->emplace(std::make_pair(*current_it++, Simplex_with_cofaces()));
       facets_  = new Simplex_map();
-      for (coface_it = cofaces_->begin(); coface_it != cofaces_->end(); ++coface_it)
+      auto coface_it = cofaces_->begin();
+      for (; coface_it != cofaces_->end(); ++coface_it)
         for (unsigned i = 0; i <= curr_dim; i++) {
           std::vector<std::size_t> facet;
           for (unsigned j = 0; j <= curr_dim; j++)
@@ -70,6 +63,24 @@ public:
           coface_it->second.push_front_facet(fac_res.first);
           fac_res.first->second.emplace_coface(coface_it, coface_it->second.facets().begin());          
         }
+      /* ERASE PART: TO FIX */
+      // coface_it = cofaces_->begin();
+      // while (coface_it != cofaces_->end())
+      //   if (coface_it->second.number_of_cofaces() != 0) {
+      //     // std::cout << "Coface " << coface_it->first << " erased\n";
+      //     auto list_it = coface_it->second.facets().begin();
+      //     while (list_it != coface_it->second.facets().end()) {
+      //       (*list_it)->second.remove_coface(coface_it);
+      //       if ((*list_it)->second.number_of_cofaces() == 0)
+      //         facets_->erase(*(list_it++));
+      //       else
+      //         list_it++;
+      //     }
+      //     cofaces_->erase(coface_it++);
+      //   }
+      //   else
+      //     coface_it++;
+
       // std::cout << "Coface map is ready, size = " << cofaces_->size() << "\n";
       // for (auto cf: *cofaces_) {
       //   std::cout << cf.first << ": " << cf.second.number_of_cofaces() << " cofaces\n";
