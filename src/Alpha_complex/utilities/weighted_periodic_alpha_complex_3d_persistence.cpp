@@ -50,14 +50,14 @@ using PK = CGAL::Periodic_3_regular_triangulation_traits_3<Kernel>;
 
 // Vertex type
 using DsVb = CGAL::Periodic_3_triangulation_ds_vertex_base_3<>;
-using Vb = CGAL::Regular_triangulation_vertex_base_3<PK,DsVb>;
-using AsVb = CGAL::Alpha_shape_vertex_base_3<PK,Vb>;
+using Vb = CGAL::Regular_triangulation_vertex_base_3<PK, DsVb>;
+using AsVb = CGAL::Alpha_shape_vertex_base_3<PK, Vb>;
 // Cell type
 using DsCb = CGAL::Periodic_3_triangulation_ds_cell_base_3<>;
-using Cb = CGAL::Regular_triangulation_cell_base_3<PK,DsCb>;
-using AsCb = CGAL::Alpha_shape_cell_base_3<PK,Cb>;
-using Tds = CGAL::Triangulation_data_structure_3<AsVb,AsCb>;
-using P3RT3 = CGAL::Periodic_3_regular_triangulation_3<PK,Tds>;
+using Cb = CGAL::Regular_triangulation_cell_base_3<PK, DsCb>;
+using AsCb = CGAL::Alpha_shape_cell_base_3<PK, Cb>;
+using Tds = CGAL::Triangulation_data_structure_3<AsVb, AsCb>;
+using P3RT3 = CGAL::Periodic_3_regular_triangulation_3<PK, Tds>;
 using Alpha_shape_3 = CGAL::Alpha_shape_3<P3RT3>;
 
 using Point_3 = P3RT3::Bare_point;
@@ -127,14 +127,13 @@ int main(int argc, char* const argv[]) {
     std::cerr << "Unable to read file " << argv[3] << std::endl;
     usage(argv[0]);
   }
-  //Checking if the cuboid is the same in x,y and z direction. If not, CGAL will not process it.
-  if ((x_max-x_min != y_max-y_min) || (x_max-x_min != z_max-z_min) || (z_max-z_min != y_max-y_min))
-  {
+  // Checking if the cuboid is the same in x,y and z direction. If not, CGAL will not process it.
+  if ((x_max - x_min != y_max - y_min) || (x_max - x_min != z_max - z_min) || (z_max - z_min != y_max - y_min)) {
     std::cerr << "The size of the cuboid in every directions is not the same." << std::endl;
     exit(-1);
   }
 
-  double maximal_possible_weight = 0.015625 * (x_max-x_min) * (x_max-x_min);
+  double maximal_possible_weight = 0.015625 * (x_max - x_min) * (x_max - x_min);
 
   // Read weights information from file
   std::ifstream weights_ifstr(argv[2]);
@@ -145,8 +144,7 @@ int main(int argc, char* const argv[]) {
     wp.reserve(lp.size());
     // Attempt read the weight in a double format, return false if it fails
     while ((weights_ifstr >> weight) && (index < lp.size())) {
-      if ((weight >= maximal_possible_weight) || (weight < 0))
-      {
+      if ((weight >= maximal_possible_weight) || (weight < 0)) {
         std::cerr << "At line " << (index + 1) << ", the weight (" << weight
                   << ") is negative or more than or equal to maximal possible weight (" << maximal_possible_weight
                   << ") = 1/64*cuboid length squared, which is not an acceptable input." << std::endl;

@@ -169,9 +169,9 @@ class Cover_complex {
     double u;
     while (m < sampleSize) {
       u = GetUniform();
-      if ((populationSize - t) * u >= sampleSize - m)
+      if ((populationSize - t) * u >= sampleSize - m) {
         t++;
-      else {
+      } else {
         samples[m] = t;
         t++;
         m++;
@@ -679,8 +679,9 @@ class Cover_complex {
             tmp++;
           }
           u = inter3.second;
-        } else
+        } else {
           u = inter1.first;
+        }
 
         std::pair<double, double> inter2 = intervals[i + 1];
         while (func[points[tmp]] < inter2.first && tmp != n) {
@@ -1110,9 +1111,9 @@ class Cover_complex {
    */
   template <typename SimplicialComplex>
   void compute_distribution(int N = 100) {
-    if (distribution.size() >= N)
+    if (distribution.size() >= N) {
       std::cout << "Already done!" << std::endl;
-    else {
+    } else {
       for (int i = 0; i < N - distribution.size(); i++) {
         Cover_complex Cboot;
         Cboot.n = this->n;

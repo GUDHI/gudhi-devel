@@ -65,13 +65,13 @@ using Point_3 = Gt::Bare_point;
 using Weighted_point_3 = Gt::Weighted_point;
 
 // For CGAL >= 4.11
-#else  // CGAL_VERSION_NR < 1041100000
+#else   // CGAL_VERSION_NR < 1041100000
 using Rvb = CGAL::Regular_triangulation_vertex_base_3<Kernel>;
-using Vb = CGAL::Alpha_shape_vertex_base_3<Kernel,Rvb>;
+using Vb = CGAL::Alpha_shape_vertex_base_3<Kernel, Rvb>;
 using Rcb = CGAL::Regular_triangulation_cell_base_3<Kernel>;
-using Cb = CGAL::Alpha_shape_cell_base_3<Kernel,Rcb>;
-using Tds = CGAL::Triangulation_data_structure_3<Vb,Cb>;
-using Triangulation_3 = CGAL::Regular_triangulation_3<Kernel,Tds>;
+using Cb = CGAL::Alpha_shape_cell_base_3<Kernel, Rcb>;
+using Tds = CGAL::Triangulation_data_structure_3<Vb, Cb>;
+using Triangulation_3 = CGAL::Regular_triangulation_3<Kernel, Tds>;
 
 // From file type definition
 using Point_3 = Triangulation_3::Bare_point;
@@ -177,16 +177,16 @@ int main(int argc, char **argv) {
   std::vector<Alpha_value_type>::iterator the_alpha_value_iterator = the_alpha_values.begin();
   for (auto object_iterator : the_objects) {
     // Retrieve Alpha shape vertex list from object
-    if (const Cell_handle* cell = CGAL::object_cast<Cell_handle>(&object_iterator)) {
+    if (const Cell_handle *cell = CGAL::object_cast<Cell_handle>(&object_iterator)) {
       vertex_list = from_cell<Vertex_list, Cell_handle>(*cell);
       count_cells++;
-    } else if (const Facet* facet = CGAL::object_cast<Facet>(&object_iterator)) {
+    } else if (const Facet *facet = CGAL::object_cast<Facet>(&object_iterator)) {
       vertex_list = from_facet<Vertex_list, Facet>(*facet);
       count_facets++;
-    } else if (const Edge_3* edge = CGAL::object_cast<Edge_3>(&object_iterator)) {
+    } else if (const Edge_3 *edge = CGAL::object_cast<Edge_3>(&object_iterator)) {
       vertex_list = from_edge<Vertex_list, Edge_3>(*edge);
       count_edges++;
-    } else if (const Vertex_handle* vertex = CGAL::object_cast<Vertex_handle>(&object_iterator)) {
+    } else if (const Vertex_handle *vertex = CGAL::object_cast<Vertex_handle>(&object_iterator)) {
       count_vertices++;
       vertex_list = from_vertex<Vertex_list, Vertex_handle>(*vertex);
     }
