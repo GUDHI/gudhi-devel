@@ -46,7 +46,7 @@ double bottleneck_distance_approx(Persistence_graph& g, double e) {
     if (step <= b_lower_bound || step >= b_upper_bound)  // Avoid precision problem
       break;
     m.set_r(step);
-    while (m.multi_augment()) {};  // compute a maximum matching (in the graph corresponding to the current r)
+    while (m.multi_augment()) {}  // compute a maximum matching (in the graph corresponding to the current r)
     if (m.perfect()) {
       m = biggest_unperfect;
       b_upper_bound = step;
@@ -68,7 +68,7 @@ double bottleneck_distance_exact(Persistence_graph& g) {
   while (lower_bound_i != upper_bound_i) {
     long step = lower_bound_i + static_cast<long> ((upper_bound_i - lower_bound_i - 1) / alpha);
     m.set_r(sd.at(step));
-    while (m.multi_augment()) {};  // compute a maximum matching (in the graph corresponding to the current r)
+    while (m.multi_augment()) {}  // compute a maximum matching (in the graph corresponding to the current r)
     if (m.perfect()) {
       m = biggest_unperfect;
       upper_bound_i = step;

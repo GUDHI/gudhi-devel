@@ -23,6 +23,8 @@
 #ifndef READ_PERSISTENCE_FROM_FILE_H_
 #define READ_PERSISTENCE_FROM_FILE_H_
 
+#include <gudhi/reader_utils.h>
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -30,7 +32,7 @@
 #include <algorithm>
 #include <string>
 #include <utility>
-#include <gudhi/reader_utils.h>
+#include <limits>  // for std::numeric_limits<>
 
 namespace Gudhi {
 namespace Persistence_representations {
@@ -72,16 +74,9 @@ std::vector<std::pair<double, double> > read_persistence_intervals_in_one_dimens
       std::cout << "COnsidering interval : " << barcode_initial[i].first << " " << barcode_initial[i].second
                 << std::endl;
     }
-    // if ( barcode_initial[i].first == barcode_initial[i].second )
-    //{
-    //		if ( dbg )std::cout << "It has zero length \n";
-    //		continue;//zero length intervals are not relevant, so we skip all of them.
-    //}
 
-    if (barcode_initial[i].first >
-        barcode_initial[i]
-            .second)  // note that in this case barcode_initial[i].second != std::numeric_limits<double>::infinity()
-    {
+    if (barcode_initial[i].first > barcode_initial[i].second) {
+      // note that in this case barcode_initial[i].second != std::numeric_limits<double>::infinity()
       if (dbg) std::cout << "Swap and enter \n";
       // swap them to make sure that birth < death
       final_barcode.push_back(std::pair<double, double>(barcode_initial[i].second, barcode_initial[i].first));
