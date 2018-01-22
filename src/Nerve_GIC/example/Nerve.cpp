@@ -72,6 +72,7 @@ int main(int argc, char **argv) {
 
     Gudhi::Simplex_tree<> stree;
     SC.create_complex(stree);
+    SC.compute_PD();
 
     // ----------------------------------------------------------------------------
     // Display information about the graph induced complex
