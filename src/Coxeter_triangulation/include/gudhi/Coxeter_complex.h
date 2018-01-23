@@ -360,7 +360,6 @@ public:
     clock_t start, end;
     double time;
         
-    start = clock();
     // for (auto a: a_map) {
     //   std::vector<int> vertices;
     //   for (auto v_it: std::get<2>(a.second))
@@ -373,11 +372,7 @@ public:
     typedef boost::iterator_range<Alcove_iterator> Max_simplex_range;
     Max_simplex_range max_simplex_range(Alcove_iterator(a_map.begin(), a_map, vi_map),
                                         Alcove_iterator(a_map.end(), a_map, vi_map));
-    // SparseMsMatrix mat(a_map.size(), max_simplex_range);
     
-    // auto matrix_formed  = std::chrono::high_resolution_clock::now();
-    // std::cout << "Start strong collapse..." << std::endl;
-
     // Fake_simplex_tree coll_tree = mat.collapsed_tree();
     // auto collapse_done = std::chrono::high_resolution_clock::now();
     // std::cout << "Strong collapse done." << std::endl;
@@ -430,9 +425,27 @@ public:
         chi += 1-2*(full_stree.dimension(sh)%2);
       std::cout << "Euler characteristic of full_stree is " << chi << std::endl;
     }
-      
+
+    start = clock();
+
+    SparseMsMatrix mat(a_map.size(), max_simplex_range);
+                                
+    // auto matrix_formed  = std::chrono::high_resolution_clock::now();
+    std::cout << "Start strong collapse..." << std::endl;
+    mat.strong_collapse();
+    std::vector<std::vector<std::size_t>> scoll_simplex_range;
+    mat.output_simplices(std::back_inserter(scoll_simplex_range));
+
+    struct Size_comparison {
+      using Container = std::vector<std::size_t>;
+      bool operator() (const Container& lhs, const Container& rhs) {
+        return lhs.size() < rhs.size();
+      }
+    };
+    std::sort(scoll_simplex_range.begin(), scoll_simplex_range.end(), Size_comparison());
+    
     Simplex_tree<> coll_stree;
-    Collapse coll(max_simplex_range, coll_stree);
+    Collapse coll(scoll_simplex_range, coll_stree);
     end = clock();
     time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
     std::cout << "Number of simplices before collapse: " << a_map.size() << "\n";

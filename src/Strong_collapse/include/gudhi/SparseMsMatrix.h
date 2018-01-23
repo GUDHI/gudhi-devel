@@ -578,6 +578,13 @@ public:
 		return new_st;
 	}
 
+  template <class SimplexOutputIterator>
+  void output_simplices(SimplexOutputIterator output_it) {
+    for(unsigned co = 0 ; co < simpDomnIndicator.size() ; ++co)
+      if(!simpDomnIndicator[co])				//If the current column is not dominated
+        *output_it++ = readColumn(co); 
+  }
+  
 	//!	Function for returning the ReductionMap.
     /*!
       This is the (stl's unordered) map that stores all the collapses of vertices. <br>
