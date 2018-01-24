@@ -400,52 +400,53 @@ public:
     
     // std::cout << "** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** " << std::endl;
 
-    if (pers_out) {
-      Simplex_tree<> full_stree;
-      for (auto s: max_simplex_range)
-        full_stree.insert_simplex_and_subfaces(s);
-      std::cout << "Start persistence calculation..." << std::endl;
-      using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
-      using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree<>, Field_Zp>;
-      double min_persistence = 0;
-      // Sort the simplices in the order of the filtration
-      full_stree.initialize_filtration();
-      // Compute the persistence diagram of the complex
-      Persistent_cohomology pcoh(full_stree);
-      // initializes the coefficient field for homology
-      pcoh.init_coefficients(3);
+    /* Full simplicial complex computation */
+    // if (pers_out) {
+    //   Simplex_tree<> full_stree;
+    //   for (auto s: max_simplex_range)
+    //     full_stree.insert_simplex_and_subfaces(s);
+    //   std::cout << "Start persistence calculation..." << std::endl;
+    //   using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
+    //   using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree<>, Field_Zp>;
+    //   double min_persistence = 0;
+    //   // Sort the simplices in the order of the filtration
+    //   full_stree.initialize_filtration();
+    //   // Compute the persistence diagram of the complex
+    //   Persistent_cohomology pcoh(full_stree);
+    //   // initializes the coefficient field for homology
+    //   pcoh.init_coefficients(3);
       
-      pcoh.compute_persistent_cohomology(min_persistence);
-      std::ofstream out("persdiag_cox_full.out");
-      pcoh.output_diagram(out);
-      out.close();
-      std::cout << "Persistence complete." << std::endl;
-      int chi = 0;
-      for (auto sh: full_stree.complex_simplex_range())
-        chi += 1-2*(full_stree.dimension(sh)%2);
-      std::cout << "Euler characteristic of full_stree is " << chi << std::endl;
-    }
+    //   pcoh.compute_persistent_cohomology(min_persistence);
+    //   std::ofstream out("persdiag_cox_full.out");
+    //   pcoh.output_diagram(out);
+    //   out.close();
+    //   std::cout << "Persistence complete." << std::endl;
+    //   int chi = 0;
+    //   for (auto sh: full_stree.complex_simplex_range())
+    //     chi += 1-2*(full_stree.dimension(sh)%2);
+    //   std::cout << "Euler characteristic of full_stree is " << chi << std::endl;
+    // }
 
     start = clock();
 
-    SparseMsMatrix mat(a_map.size(), max_simplex_range);
+    // SparseMsMatrix mat(a_map.size(), max_simplex_range);
                                 
-    // auto matrix_formed  = std::chrono::high_resolution_clock::now();
-    std::cout << "Start strong collapse..." << std::endl;
-    mat.strong_collapse();
-    std::vector<std::vector<std::size_t>> scoll_simplex_range;
-    mat.output_simplices(std::back_inserter(scoll_simplex_range));
+    // // auto matrix_formed  = std::chrono::high_resolution_clock::now();
+    // std::cout << "Start strong collapse..." << std::endl;
+    // mat.strong_collapse();
+    // std::vector<std::vector<std::size_t>> scoll_simplex_range;
+    // mat.output_simplices(std::back_inserter(scoll_simplex_range));
 
-    struct Size_comparison {
-      using Container = std::vector<std::size_t>;
-      bool operator() (const Container& lhs, const Container& rhs) {
-        return lhs.size() < rhs.size();
-      }
-    };
-    std::sort(scoll_simplex_range.begin(), scoll_simplex_range.end(), Size_comparison());
+    // struct Size_comparison {
+    //   using Container = std::vector<std::size_t>;
+    //   bool operator() (const Container& lhs, const Container& rhs) {
+    //     return lhs.size() < rhs.size();
+    //   }
+    // };
+    // std::sort(scoll_simplex_range.begin(), scoll_simplex_range.end(), Size_comparison());
     
     Simplex_tree<> coll_stree;
-    Collapse coll(scoll_simplex_range, coll_stree);
+    Collapse coll(max_simplex_range, coll_stree);
     end = clock();
     time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
     std::cout << "Number of simplices before collapse: " << a_map.size() << "\n";
@@ -457,10 +458,10 @@ public:
         dim_complex = coll_stree.dimension(sh);
     }
     std::cout << "Dimension of the collapsed complex is " << dim_complex << "\n";
-    int chi = 0;
-    for (auto sh: coll_stree.complex_simplex_range())
-      chi += 1-2*(coll_stree.dimension(sh)%2);
-    std::cout << "Euler characteristic of coll_stree is " << chi << std::endl;
+    // int chi = 0;
+    // for (auto sh: coll_stree.complex_simplex_range())
+    //   chi += 1-2*(coll_stree.dimension(sh)%2);
+    // std::cout << "Euler characteristic of coll_stree is " << chi << std::endl;
     
     if (pers_out) {
       std::cout << "Start persistence calculation..." << std::endl;
@@ -489,7 +490,7 @@ public:
       using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree<>, Field_Zp>;
       double min_persistence = 0;
       // Sort the simplices in the order of the filtration
-      cont_stree.set_dimension(dim_complex);
+      cont_stree.set_dimension(dim_complex+1);
       cont_stree.initialize_filtration();
       // Compute the persistence diagram of the complex
       Persistent_cohomology pcoh(cont_stree);
@@ -497,6 +498,7 @@ public:
       pcoh.init_coefficients(3);
       
       pcoh.compute_persistent_cohomology(min_persistence);
+      std::cout << pcoh.persistent_betti_numbers(0,0) << std::endl;
       std::ofstream out("persdiag_cox.out");
       pcoh.output_diagram(out);
       out.close();
