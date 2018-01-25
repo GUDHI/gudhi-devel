@@ -35,12 +35,15 @@ private:
   typedef typename Simplex_map::iterator Map_iterator; 
   Simplex_map* cofaces_;
   Simplex_map* facets_;  
+  std::map<int, int> label_map; // Used to output contiguous labels for vertices
+  int max_index = 0;
   
 public:
 
   template <class Range_of_simplices,
             class Simplex_tree>
-  Collapse(Range_of_simplices& simplices, Simplex_tree& output) {
+  Collapse(Range_of_simplices& simplices, Simplex_tree& output)
+    : max_index(0) {
     // std::cout << "Started collapses.\n";
     Simplex_tree collapsed_tree;
     typename Range_of_simplices::iterator current_it = simplices.begin();
@@ -97,15 +100,35 @@ public:
           facet_it++;
       for (auto cf: *cofaces_) {
         // std::cout << "Coface " << cf.first << " inserted\n";
-        output.insert_simplex_and_subfaces(cf.first);
+        std::vector<std::size_t> vertices;
+        for (std::size_t v: cf.first) {
+          auto m_it = label_map.find(v);
+          if (m_it == label_map.end()) {
+            label_map.emplace(std::make_pair(v, max_index));
+            vertices.push_back(max_index++);
+          }
+          else
+            vertices.push_back(m_it->second);
+        }
+        output.insert_simplex_and_subfaces(vertices);
       }
       delete cofaces_;
       cofaces_ = facets_;
     }
     // The simplex tree has vertices with non-contiguous labels
     for (auto cf: *cofaces_) {
-      // std::cout << "Coface " << cf.first << " inserted\n";
-      output.insert_simplex_and_subfaces(cf.first);
+      // std::cout << "Coface " << cf.first << " inserted\n"; 
+      std::vector<std::size_t> vertices;
+      for (std::size_t v: cf.first) {
+        auto m_it = label_map.find(v);
+        if (m_it == label_map.end()) {
+          label_map.emplace(std::make_pair(v, max_index));
+          vertices.push_back(max_index++);
+        }
+        else
+          vertices.push_back(m_it->second);
+      }
+      output.insert_simplex_and_subfaces(vertices);
     }
     delete cofaces_;
   }

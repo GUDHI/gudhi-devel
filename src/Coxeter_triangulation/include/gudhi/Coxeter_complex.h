@@ -465,35 +465,19 @@ public:
     
     if (pers_out) {
       std::cout << "Start persistence calculation..." << std::endl;
-      Simplex_tree<> cont_stree;
-      std::map<int, int> label_map;
-      int i = 0;
-      for (auto cf_it = coll_stree.complex_vertex_range().begin(); cf_it != coll_stree.complex_vertex_range().end(); ++cf_it, ++i)
-        label_map.emplace(std::make_pair(*cf_it, i));
-      // for (auto m: label_map) {
-      //   std::cout << m.first << ": " << m.second << "\n";
-      // }
-      // std::cout << "Stree before label mapping:\n" << coll_stree << "\n";
-      for (auto sh: coll_stree.complex_simplex_range()) {
-        std::vector<int> vertices;
-        for (auto i: coll_stree.simplex_vertex_range(sh))
-          vertices.push_back(label_map[i]);
-        cont_stree.insert_simplex(vertices);
-      }
-      // std::cout << "Stree after label mapping:\n" << cont_stree << "\n";    
       int chi = 0;
-      for (auto sh: cont_stree.complex_simplex_range())
-        chi += 1-2*(cont_stree.dimension(sh)%2);
-      std::cout << "Euler characteristic of cont_stree is " << chi << std::endl;
+      for (auto sh: coll_stree.complex_simplex_range())
+        chi += 1-2*(coll_stree.dimension(sh)%2);
+      std::cout << "Euler characteristic of coll_stree is " << chi << std::endl;
 
       using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
       using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree<>, Field_Zp>;
       double min_persistence = 0;
       // Sort the simplices in the order of the filtration
-      cont_stree.set_dimension(dim_complex+1);
-      cont_stree.initialize_filtration();
+      coll_stree.set_dimension(dim_complex+1);
+      coll_stree.initialize_filtration();
       // Compute the persistence diagram of the complex
-      Persistent_cohomology pcoh(cont_stree);
+      Persistent_cohomology pcoh(coll_stree);
       // initializes the coefficient field for homology
       pcoh.init_coefficients(3);
       
