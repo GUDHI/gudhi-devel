@@ -449,7 +449,7 @@ public:
     Collapse coll(max_simplex_range, coll_stree);
     end = clock();
     time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
-    std::cout << "Number of simplices before collapse: " << a_map.size() << "\n";
+    std::cout << "Number of max simplices before collapse: " << a_map.size() << "\n";
     std::cout << "Collapse took " << time << " s. \n";
     // std::cout << coll_stree << "\n";
     int dim_complex = 0;
