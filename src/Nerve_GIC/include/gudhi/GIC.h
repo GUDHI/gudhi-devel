@@ -50,6 +50,7 @@
 #include <algorithm>  // for std::max
 #include <random>
 #include <cassert>
+#include <cmath>
 
 namespace Gudhi {
 
@@ -1044,9 +1045,7 @@ class Cover_complex {
     }
 
     for (auto const& simplex : simplices) {
-      // Add simplices
-      st.insert_simplex_and_subfaces(simplex);
-      // Add cone on simplices
+      // Add a simplex and a cone on it
       std::vector<int> splx = simplex;
       splx.push_back(-2);
       st.insert_simplex_and_subfaces(splx);
@@ -1070,7 +1069,7 @@ class Cover_complex {
       else
         st.assign_filtration(simplex, filts);
     }
-    std::vector<int> magic = {-2};
+    int magic[] = {-2};
     st.assign_filtration(st.find(magic), -3);
 
     // Compute PD
@@ -1084,7 +1083,7 @@ class Cover_complex {
     for (int i = 0; i < max_dim; i++) {
       std::vector<std::pair<double, double> > bars = pcoh.intervals_in_dimension(i);
       int num_bars = bars.size();
-      std::cout << num_bars << " interval(s) in dimension " << i << ":" << std::endl;
+      if(verbose)  std::cout << num_bars << " interval(s) in dimension " << i << ":" << std::endl;
       for (int j = 0; j < num_bars; j++) {
         double birth = bars[j].first;
         double death = bars[j].second;
@@ -1212,8 +1211,8 @@ class Cover_complex {
     }
 
     if (type == "Nerve") {
-      for (std::map<int, std::vector<int> >::iterator it = cover.begin(); it != cover.end(); it++)
-        simplices.push_back(it->second);
+      for(auto& simplex : cover)
+        simplices.push_back(simplex.second);
       std::sort(simplices.begin(), simplices.end());
       std::vector<std::vector<int> >::iterator it = std::unique(simplices.begin(), simplices.end());
       simplices.resize(std::distance(simplices.begin(), it));
