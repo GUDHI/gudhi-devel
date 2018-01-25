@@ -58,13 +58,13 @@ namespace cover_complex {
 using Simplex_tree = Gudhi::Simplex_tree<>;
 using Filtration_value = Simplex_tree::Filtration_value;
 using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
-using PersistenceDiagram = std::vector<std::pair<double, double> >;
+using Persistence_diagram = std::vector<std::pair<double, double> >;
 using Graph = boost::subgraph<
     boost::adjacency_list<boost::setS, boost::vecS, boost::undirectedS, boost::no_property,
                           boost::property<boost::edge_index_t, int, boost::property<boost::edge_weight_t, double> > > >;
-using vertex_t = boost::graph_traits<Graph>::vertex_descriptor;
-using IndexMap = boost::property_map<Graph, boost::vertex_index_t>::type;
-using WeightMap = boost::property_map<Graph, boost::edge_weight_t>::type;
+using Vertex_t = boost::graph_traits<Graph>::vertex_descriptor;
+using Index_map = boost::property_map<Graph, boost::vertex_index_t>::type;
+using Weight_map = boost::property_map<Graph, boost::edge_weight_t>::type;
 
 /**
  * \class Cover_complex
@@ -105,12 +105,12 @@ class Cover_complex {
 
   Graph one_skeleton_OFF;          // one-skeleton given by the input OFF file (if it exists).
   Graph one_skeleton;              // one-skeleton used to compute the connected components.
-  std::vector<vertex_t> vertices;  // vertices of one_skeleton.
+  std::vector<Vertex_t> vertices;  // vertices of one_skeleton.
 
   std::vector<std::vector<int> > simplices;  // simplices of output simplicial complex.
   std::vector<int> voronoi_subsamples;       // Voronoi germs (in case of Voronoi cover).
 
-  PersistenceDiagram PD;
+  Persistence_diagram PD;
   std::vector<double> distribution;
 
   std::map<int, std::vector<int> >
@@ -359,8 +359,8 @@ class Cover_complex {
 
  public:
   void set_graph_weights() {
-    IndexMap index = boost::get(boost::vertex_index, one_skeleton);
-    WeightMap weight = boost::get(boost::edge_weight, one_skeleton);
+    Index_map index = boost::get(boost::vertex_index, one_skeleton);
+    Weight_map weight = boost::get(boost::edge_weight, one_skeleton);
     boost::graph_traits<Graph>::edge_iterator ei, ei_end;
     for (boost::tie(ei, ei_end) = boost::edges(one_skeleton); ei != ei_end; ++ei)
       boost::put(weight, *ei,
@@ -420,7 +420,7 @@ class Cover_complex {
    */
   template <typename Distance>
   double set_graph_from_automatic_rips(Distance distance, int N = 100) {
-    int m = floor(n / exp((1 + rate_power) * log(log(n) / log(rate_constant))));
+    int m = floor(n / std::exp((1 + rate_power) * std::log(std::log(n) / std::log(rate_constant))));
     m = std::min(m, n - 1);
     std::vector<int> samples(m);
     double delta = 0;
@@ -521,7 +521,7 @@ class Cover_complex {
     }
 
     double reso = 0;
-    IndexMap index = boost::get(boost::vertex_index, one_skeleton);
+    Index_map index = boost::get(boost::vertex_index, one_skeleton);
 
     if (type == "GIC") {
       boost::graph_traits<Graph>::edge_iterator ei, ei_end;
@@ -660,7 +660,7 @@ class Cover_complex {
 
     int id = 0;
     int pos = 0;
-    IndexMap index = boost::get(boost::vertex_index, one_skeleton);  // int maxc = -1;
+    Index_map index = boost::get(boost::vertex_index, one_skeleton);  // int maxc = -1;
     std::map<int, std::vector<int> > preimages;
     std::map<int, double> funcstd;
 
@@ -799,8 +799,8 @@ class Cover_complex {
     SampleWithoutReplacement(n, m, voronoi_subsamples);
     if (distances.size() == 0) compute_pairwise_distances(distance);
     set_graph_weights();
-    WeightMap weight = boost::get(boost::edge_weight, one_skeleton);
-    IndexMap index = boost::get(boost::vertex_index, one_skeleton);
+    Weight_map weight = boost::get(boost::edge_weight, one_skeleton);
+    Index_map index = boost::get(boost::vertex_index, one_skeleton);
     std::vector<double> mindist(n);
     for (int j = 0; j < n; j++) mindist[j] = std::numeric_limits<double>::max();
 
@@ -1220,7 +1220,7 @@ class Cover_complex {
     }
 
     if (type == "GIC") {
-      IndexMap index = boost::get(boost::vertex_index, one_skeleton);
+      Index_map index = boost::get(boost::vertex_index, one_skeleton);
 
       if (functional_cover) {
         // Computes the simplices in the GIC by looking at all the edges of the graph and adding the
