@@ -63,6 +63,7 @@ int main(int argc, char * const argv[]) {
     }
     Point_vector* point_vector = new Point_vector(off_reader.get_point_cloud());
     int N = point_vector->size();
+    d = (*point_vector)[0].size();
     std::cout << "Successfully read " << N << " points in dimension " << d << std::endl;
     Coxeter_system cs_A('A', d);
     Coxeter_complex cc(*point_vector, cs_A, init_level);
