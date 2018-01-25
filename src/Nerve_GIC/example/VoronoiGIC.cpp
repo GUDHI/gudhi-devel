@@ -28,7 +28,7 @@
 void usage(int nbArgs, char *const progName) {
   std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
   std::cerr << "Usage: " << progName << " filename.off N [--v] \n";
-  std::cerr << "       i.e.: " << progName << " ../../../../data/points/human.off 100 --v \n";
+  std::cerr << "       i.e.: " << progName << " ../../data/points/human.off 100 --v \n";
   exit(-1);  // ----- >>
 }
 

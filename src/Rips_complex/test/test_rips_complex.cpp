@@ -36,6 +36,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/distance_functions.h>
 #include <gudhi/reader_utils.h>
+#include <gudhi/Unitary_tests_utils.h>
 
 // Type definitions
 using Point = std::vector<double>;
@@ -43,10 +44,6 @@ using Simplex_tree = Gudhi::Simplex_tree<>;
 using Filtration_value = Simplex_tree::Filtration_value;
 using Rips_complex = Gudhi::rips_complex::Rips_complex<Simplex_tree::Filtration_value>;
 using Distance_matrix = std::vector<std::vector<Filtration_value>>;
-
-bool are_almost_the_same(float a, float b) {
-  return std::fabs(a - b) < std::numeric_limits<float>::epsilon();
-}
 
 BOOST_AUTO_TEST_CASE(RIPS_DOC_OFF_file) {
   // ----------------------------------------------------------------------------
@@ -92,7 +89,7 @@ BOOST_AUTO_TEST_CASE(RIPS_DOC_OFF_file) {
       std::cout << ") - distance =" << Gudhi::Euclidean_distance()(vp.at(0), vp.at(1)) <<
           " - filtration =" << st.filtration(f_simplex) << std::endl;
       BOOST_CHECK(vp.size() == 2);
-      BOOST_CHECK(are_almost_the_same(st.filtration(f_simplex), Gudhi::Euclidean_distance()(vp.at(0), vp.at(1))));
+      GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), Gudhi::Euclidean_distance()(vp.at(0), vp.at(1)));
     }
   }
 
@@ -113,14 +110,14 @@ BOOST_AUTO_TEST_CASE(RIPS_DOC_OFF_file) {
   Simplex_tree::Filtration_value f12 = st2.filtration(st2.find({1, 2}));
   Simplex_tree::Filtration_value f012 = st2.filtration(st2.find({0, 1, 2}));
   std::cout << "f012= " << f012 << " | f01= " << f01 << " - f02= " << f02 << " - f12= " << f12 << std::endl;
-  BOOST_CHECK(are_almost_the_same(f012, std::max(f01, std::max(f02,f12))));
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(f012, std::max(f01, std::max(f02,f12)));
   
   Simplex_tree::Filtration_value f45 = st2.filtration(st2.find({4, 5}));
   Simplex_tree::Filtration_value f56 = st2.filtration(st2.find({5, 6}));
   Simplex_tree::Filtration_value f46 = st2.filtration(st2.find({4, 6}));
   Simplex_tree::Filtration_value f456 = st2.filtration(st2.find({4, 5, 6}));
   std::cout << "f456= " << f456 << " | f45= " << f45 << " - f56= " << f56 << " - f46= " << f46 << std::endl;
-  BOOST_CHECK(are_almost_the_same(f456, std::max(f45, std::max(f56,f46))));
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(f456, std::max(f45, std::max(f56,f46)));
 
   const int DIMENSION_3 = 3;
   Simplex_tree st3;
@@ -140,7 +137,7 @@ BOOST_AUTO_TEST_CASE(RIPS_DOC_OFF_file) {
   Simplex_tree::Filtration_value f0123 = st3.filtration(st3.find({0, 1, 2, 3}));
   std::cout << "f0123= " << f0123 << " | f012= " << f012 << " - f123= " << f123 << " - f013= " << f013 <<
       " - f023= " << f023 << std::endl;
-  BOOST_CHECK(are_almost_the_same(f0123, std::max(f012, std::max(f123, std::max(f013, f023)))));
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(f0123, std::max(f012, std::max(f123, std::max(f013, f023))));
 
 }
 
@@ -219,12 +216,12 @@ BOOST_AUTO_TEST_CASE(Rips_complex_from_points) {
     std::cout << "dimension(" << st.dimension(f_simplex) << ") - f = " << st.filtration(f_simplex) << std::endl;
     switch (st.dimension(f_simplex)) {
       case 0:
-        BOOST_CHECK(are_almost_the_same(st.filtration(f_simplex), 0.0));
+        GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), 0.0);
         break;
       case 1:
       case 2:
       case 3:
-        BOOST_CHECK(are_almost_the_same(st.filtration(f_simplex), 2.0));
+        GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), 2.0);
         break;
       default:
         BOOST_CHECK(false);  // Shall not happen
@@ -276,7 +273,7 @@ BOOST_AUTO_TEST_CASE(Rips_doc_csv_file) {
       }
       std::cout << ") - filtration =" << st.filtration(f_simplex) << std::endl;
       BOOST_CHECK(vvh.size() == 2);
-      BOOST_CHECK(are_almost_the_same(st.filtration(f_simplex), distances[vvh.at(0)][vvh.at(1)]));
+      GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), distances[vvh.at(0)][vvh.at(1)]);
     }
   }
 
@@ -297,14 +294,14 @@ BOOST_AUTO_TEST_CASE(Rips_doc_csv_file) {
   Simplex_tree::Filtration_value f12 = st2.filtration(st2.find({1, 2}));
   Simplex_tree::Filtration_value f012 = st2.filtration(st2.find({0, 1, 2}));
   std::cout << "f012= " << f012 << " | f01= " << f01 << " - f02= " << f02 << " - f12= " << f12 << std::endl;
-  BOOST_CHECK(are_almost_the_same(f012, std::max(f01, std::max(f02,f12))));
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(f012, std::max(f01, std::max(f02,f12)));
   
   Simplex_tree::Filtration_value f45 = st2.filtration(st2.find({4, 5}));
   Simplex_tree::Filtration_value f56 = st2.filtration(st2.find({5, 6}));
   Simplex_tree::Filtration_value f46 = st2.filtration(st2.find({4, 6}));
   Simplex_tree::Filtration_value f456 = st2.filtration(st2.find({4, 5, 6}));
   std::cout << "f456= " << f456 << " | f45= " << f45 << " - f56= " << f56 << " - f46= " << f46 << std::endl;
-  BOOST_CHECK(are_almost_the_same(f456, std::max(f45, std::max(f56,f46))));
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(f456, std::max(f45, std::max(f56,f46)));
 
   const int DIMENSION_3 = 3;
   Simplex_tree st3;
@@ -324,7 +321,7 @@ BOOST_AUTO_TEST_CASE(Rips_doc_csv_file) {
   Simplex_tree::Filtration_value f0123 = st3.filtration(st3.find({0, 1, 2, 3}));
   std::cout << "f0123= " << f0123 << " | f012= " << f012 << " - f123= " << f123 << " - f013= " << f013 <<
       " - f023= " << f023 << std::endl;
-  BOOST_CHECK(are_almost_the_same(f0123, std::max(f012, std::max(f123, std::max(f013, f023)))));
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(f0123, std::max(f012, std::max(f123, std::max(f013, f023))));
 
 }
 

@@ -24,11 +24,11 @@
 #define BOOST_TEST_MODULE "graph_induced_complex"
 
 #include <boost/test/unit_test.hpp>
-#include <cmath>  // float comparison
+
 #include <limits>
 #include <string>
 #include <vector>
-#include <algorithm>  // std::max
+
 #include <gudhi/GIC.h>
 #include <gudhi/distance_functions.h>
 #include <gudhi/reader_utils.h>

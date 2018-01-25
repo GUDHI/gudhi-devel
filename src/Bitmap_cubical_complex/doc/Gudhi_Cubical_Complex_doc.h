@@ -63,7 +63,7 @@ namespace cubical_complex {
  * For further details and theory of cubical complexes, please consult \cite kaczynski2004computational as well as the
  * following paper \cite peikert2012topological .
  *
- * \section cubicalcomplexdatastructure Data structure.
+ * \section cubicalcomplexdatastructure Data structure
  *
  * The implementation of Cubical complex provides a representation of complexes that occupy a rectangular region in
  * \f$\mathbb{R}^n\f$. This extra assumption allows for a memory efficient way of storing cubical complexes in a form
@@ -85,37 +85,14 @@ namespace cubical_complex {
  * present in the product that gives the cube \f$C\f$. In a similar way, we can compute boundary and the coboundary of
  * each cube. Further details can be found in the literature.
  *
- * \section inputformat Input Format.
+ * \section inputformat Input Format
  *
  * In the current implantation, filtration is given at the maximal cubes, and it is then extended by the lower star
  * filtration to all cubes. There are a number of constructors that can be used to construct cubical complex by users
  * who want to use the code directly. They can be found in the \a Bitmap_cubical_complex class.
  * Currently one input from a text file is used. It uses a format used already in Perseus software
- * (http://www.sas.upenn.edu/~vnanda/perseus/) by Vidit Nanda.
- * Below we are providing a description of the format. The first line contains a number d begin the dimension of the
- * bitmap (2 in the example below). Next d lines are the numbers of top dimensional cubes in each dimensions (3 and 3
- * in the example below). Next, in lexicographical order, the filtration of top dimensional cubes is given (1 4 6 8
- * 20 4 7 6 5 in the example below).
+ * (http://www.sas.upenn.edu/~vnanda/perseus/) by Vidit Nanda. The file format is described here: \ref FileFormatsPerseus.
  *
- *
- * \image html "exampleBitmap.png" "Example of a input data."
- *
- * The input file for the following complex is:
- * \verbatim
-2
-3
-3
-1
-4
-6
-8
-20
-4
-7
-6
-5
-\endverbatim
-
  * \section PeriodicBoundaryConditions Periodic boundary conditions
  * Often one would like to impose periodic boundary conditions to the cubical complex. Let \f$ I_1\times ... \times
  * I_n \f$ be a box that is decomposed with a cubical complex \f$ \mathcal{K} \f$. Imposing periodic boundary
@@ -123,28 +100,10 @@ namespace cubical_complex {
  * considered the same. In particular, if for a bitmap \f$ \mathcal{K} \f$ periodic boundary conditions are imposed
  * in all directions, then complex \f$ \mathcal{K} \f$ became n-dimensional torus. One can use various constructors
  * from the file Bitmap_cubical_complex_periodic_boundary_conditions_base.h to construct cubical complex with periodic
- * boundary conditions. One can also use Perseus style input files. To indicate periodic boundary conditions in a
- * given direction, then number of top dimensional cells in this direction have to be multiplied by -1. For instance:
-
- *\verbatim
-2
--3
-3
-1
-4
-6
-8
-20
-4
-7
-6
-5
-\endverbatim
-
- * Indicate that we have imposed periodic boundary conditions in the direction x, but not in the direction y.
-
+ * boundary conditions. One can also use Perseus style input files (see \ref FileFormatsPerseus).
+ *
  * \section BitmapExamples Examples
- * End user programs are available in example/Bitmap_cubical_complex folder.
+ * End user programs are available in example/Bitmap_cubical_complex and utilities/Bitmap_cubical_complex folders.
  * 
  * \copyright GNU General Public License v3.
  */

@@ -25,21 +25,19 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
 void usage(int nbArgs, char *const progName) {
-  cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
-  cerr << "Usage: " << progName << " filename.off coordinate resolution gain [--v] \n";
-  cerr << "       i.e.: " << progName << " ../../../../data/points/human.off 2 10 0.3 --v \n";
+  std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
+  std::cerr << "Usage: " << progName << " filename.off coordinate resolution gain [--v] \n";
+  std::cerr << "       i.e.: " << progName << " ../../data/points/human.off 2 10 0.3 --v \n";
   exit(-1);  // ----- >>
 }
 
 int main(int argc, char **argv) {
   if ((argc != 5) && (argc != 6)) usage(argc, argv[0]);
 
-  using Point = vector<float>;
+  using Point = std::vector<float>;
 
-  string off_file_name(argv[1]);
+  std::string off_file_name(argv[1]);
   int coord = atoi(argv[2]);
   int resolution = atoi(argv[3]);
   double gain = atof(argv[4]);
@@ -56,7 +54,7 @@ int main(int argc, char **argv) {
   bool check = SC.read_point_cloud(off_file_name);
 
   if (!check) {
-    cout << "Incorrect OFF file." << endl;
+    std::cout << "Incorrect OFF file." << std::endl;
   } else {
     SC.set_type("Nerve");
 

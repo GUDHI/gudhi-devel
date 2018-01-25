@@ -70,7 +70,7 @@ namespace cover_complex {
  *
  * When launching:
  *
- * \code $> ./Nerve ../../../../data/points/human.off 2 10 0.3 --v
+ * \code $> ./Nerve ../../data/points/human.off 2 10 0.3 --v
  * \endcode
  *
  * the program output is:
@@ -113,7 +113,7 @@ namespace cover_complex {
  *
  * When launching:
  *
- * \code $> ./VoronoiGIC ../../../../data/points/human.off 700 --v
+ * \code $> ./VoronoiGIC ../../data/points/human.off 700 --v
  * \endcode
  *
  * the program outputs SC.off. Using e.g.
@@ -146,7 +146,7 @@ namespace cover_complex {
  *
  * When launching:
  *
- * \code $> ./CoordGIC ../../../../data/points/KleinBottle5D.off 0 --v
+ * \code $> ./CoordGIC ../../data/points/KleinBottle5D.off 0 --v
  * \endcode
  *
  * the program outputs SC.dot. Using e.g.
@@ -169,7 +169,7 @@ namespace cover_complex {
  *
  * When launching:
  *
- * \code $> ./FuncGIC ../../../../data/points/COIL_database/lucky_cat.off ../../../../data/points/COIL_database/lucky_cat_PCA1 --v
+ * \code $> ./FuncGIC ../../data/points/COIL_database/lucky_cat.off ../../data/points/COIL_database/lucky_cat_PCA1 --v
  * \endcode
  *
  * the program outputs again SC.dot which gives the following visualization after using neato:
@@ -201,7 +201,7 @@ namespace cover_complex {
  *
  * When launching:
  *
- * \code $> ./GIC ../../../../data/points/human.off 0.075 2 0.075 0 --v
+ * \code $> ./GIC ../../data/points/human.off 0.075 2 0.075 0 --v
  * \endcode
  *
  * the program outputs SC.txt, which can be visualized with python and firefox as before:

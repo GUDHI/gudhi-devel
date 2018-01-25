@@ -38,7 +38,7 @@ PROJECT_NAME           = "GUDHI"
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = "2.0.1"
+PROJECT_NUMBER         = "2.1.0.rc1"
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -819,7 +819,8 @@ EXCLUDE_SYMBOLS        =
 # command).
 
 EXAMPLE_PATH           = biblio/ \
-	example/
+	example/ \
+	utilities/
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp and
@@ -852,7 +853,8 @@ IMAGE_PATH             = doc/Skeleton_blocker/ \
 	doc/Spatial_searching/ \
 	doc/Tangential_complex/ \
 	doc/Bottleneck_distance/ \
-	doc/Nerve_GIC/
+	doc/Nerve_GIC/ \
+        doc/Persistence_representations/
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should
 # invoke to filter for each input file. Doxygen will invoke the filter program

@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import km
 import numpy as np
 from collections import defaultdict
