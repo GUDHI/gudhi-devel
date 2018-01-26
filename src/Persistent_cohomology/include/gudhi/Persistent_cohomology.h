@@ -285,7 +285,7 @@ class Persistent_cohomology {
         }
       }
       cpx_->assign_key(sigma, cpx_->null_key());
-    } else {  // If ku == kv, same connected component: create a 1-cocycle class.
+    } else if (dim_max_ > 1) {  // If ku == kv, same connected component: create a 1-cocycle class.
       create_cocycle(sigma, coeff_field_.multiplicative_identity(), coeff_field_.characteristic());
     }
   }
