@@ -177,7 +177,6 @@ namespace cover_complex {
  * \image html "funcGICvisu.jpg" "Visualization with neato"
  *
  * \copyright GNU General Public License v3.                         
- * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
  */
 /** @} */  // end defgroup cover_complex
 
@@ -186,31 +185,3 @@ namespace cover_complex {
 }  // namespace Gudhi
 
 #endif  // DOC_COVER_COMPLEX_INTRO_COVER_COMPLEX_H_
-
-
-/* * \subsection gicexample Example with cover from function
- *
- * This example builds the GIC of a point cloud sampled on a 3D human shape (human.off).
- * The cover C comes from the preimages of intervals (with length 0.075 and gain 0)
- * covering the height function (coordinate 2),
- * and the graph G comes from a Rips complex built with threshold 0.075.
- * Note that if the gain is too big, the number of cliques increases a lot,
- * which make the computation time much larger.
- *
- * \include Nerve_GIC/GIC.cpp
- *
- * When launching:
- *
- * \code $> ./GIC ../../data/points/human.off 0.075 2 0.075 0 --v
- * \endcode
- *
- * the program outputs SC.txt, which can be visualized with python and firefox as before:
- *
- * \image html "gicvisu.jpg" "Visualization with KeplerMapper"
- * */
-
-
-/* * Using e.g.
- *
- * \code $> python KeplerMapperVisuFromTxtFile.py && firefox SC.html
- * \endcode */
