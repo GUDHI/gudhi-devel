@@ -46,7 +46,7 @@ namespace rips_complex {
  * \ingroup rips_complex
  * 
  * \details
- * This class is used to construct a sparse \f$(1+\epsilon)\f$-approximation of `Rips_complex`.
+ * This class is used to construct a sparse \f$(1+\epsilon)\f$-approximation of `Rips_complex`, i.e. a filtered simplicial complex that is multiplicatively \f$(1+\epsilon)\f$-interleaved with the Rips filtration.
  * 
  * \tparam Filtration_value is the type used to store the filtration values of the simplicial complex.
  */
@@ -65,10 +65,12 @@ class Sparse_rips_complex {
      *
      * @param[in] points Range of points.
      * @param[in] distance distance function that returns a `Filtration_value` from 2 given points.
+     * @param[in] epsilon (1+epsilon) is the desired approximation factor. epsilon must be positive.
      * 
      */
     template<typename RandomAccessPointRange, typename Distance >
       Sparse_rips_complex(const RandomAccessPointRange& points, Distance distance, double epsilon) {
+        GUDHI_CHECK(epsilon > 0, "epsilon must be positive");
         std::vector<Vertex_handle> sorted_points;
         std::vector<Filtration_value> params;
         auto dist_fun = [&](Vertex_handle i, Vertex_handle j){return distance(points[i], points[j]);};
@@ -83,6 +85,7 @@ class Sparse_rips_complex {
      * `distance_matrix[i][j]` returns the distance between points \f$i\f$ and
      * \f$j\f$ as long as \f$ 0 \leqslant i < j \leqslant
      * distance\_matrix.size().\f$
+     * @param[in] epsilon (1+epsilon) is the desired approximation factor. epsilon must be positive.
      */
     template<typename DistanceMatrix>
       Sparse_rips_complex(const DistanceMatrix& distance_matrix, double epsilon)
