@@ -250,7 +250,6 @@ namespace Persistence_representations {
  absolute value of differences between coordinates. A scalar product is a sum of products of
  values at the corresponding positions of two vectors.
 
- \copyright GNU General Public License v3.
  */
 /** @} */  // end defgroup Persistence_representations
 

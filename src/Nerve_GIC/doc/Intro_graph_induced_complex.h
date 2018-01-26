@@ -176,7 +176,6 @@ namespace cover_complex {
  *
  * \image html "funcGICvisu.jpg" "Visualization with neato"
  *
- * \copyright GNU General Public License v3.                         
  */
 /** @} */  // end defgroup cover_complex
 

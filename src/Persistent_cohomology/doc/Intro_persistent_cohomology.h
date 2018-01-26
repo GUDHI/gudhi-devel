@@ -248,7 +248,6 @@ Simplex_tree dim: 3
 Persistent_cohomology/plain_homology.cpp</a> computes the plain homology of a simple simplicial complex without
 filtration values.
 
- \copyright GNU General Public License v3.
  */
 
 }  // namespace persistent_cohomology
