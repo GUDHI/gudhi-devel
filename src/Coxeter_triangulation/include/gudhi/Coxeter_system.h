@@ -83,6 +83,29 @@ public:
     return a_id;
   }
 
+  template <class Point>
+  std::vector<Alcove_id> alcoves_of_ball(const Point& p, double init_level, double eps) const
+  {
+    std::vector<Alcove_id> alcoves;
+    std::vector<std::vector<Alcove_id>> chunks;
+    auto p_it = p.begin();
+    for (auto scs: simple_system_range_) {
+      std::vector<FT> p_part;
+      unsigned dimension = scs.dimension();
+      for (unsigned i = 0; i < dimension; i++) {
+        p_part.push_back(*p_it++);
+      }
+      chunks.emplace_back(scs.alcoves_of_ball(p_part, init_level, eps));
+    }
+    // std::vector<std::vector<Vertex_id>::iterator> iterators;
+    // for (auto chunk: chunks)
+    //   iterators.emplace_back(chunk.begin());
+    Alcove_id a_id(init_level);
+    rec_combine_chunks_alcove(chunks.begin(), chunks.end(), alcoves, a_id);
+    return alcoves;
+  }
+
+  
 private:
 
   int gcd(int a, int b) const {
@@ -103,6 +126,23 @@ private:
       *i_it = *i_it / common_gcd;
     }
     return id_red;
+  }
+
+  void rec_combine_chunks_alcove(std::vector<std::vector<Alcove_id>>::iterator chunks_it,
+                                 std::vector<std::vector<Alcove_id>>::iterator chunks_end,
+                                 std::vector<Alcove_id>& alcoves,
+                                 Alcove_id& a_id) const {
+    if (chunks_it == chunks_end) {
+      //      vertices.push_back(reduced_id(v_id));
+      alcoves.push_back(a_id);
+      return;
+    }
+    for (auto chunk: *chunks_it) {
+      for (auto c_it = chunk.begin(); c_it != chunk.end(); ++c_it)
+        a_id.push_back(*c_it);
+      rec_combine_chunks_alcove(chunks_it+1, chunks_end, alcoves, a_id);
+      a_id.resize(a_id.size()-chunk.size());
+    }
   }
 
   

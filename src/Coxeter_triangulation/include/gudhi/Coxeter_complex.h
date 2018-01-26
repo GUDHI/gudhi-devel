@@ -140,6 +140,24 @@ public:
 
 private:
 
+  void compute_a_map(const Point_range& point_vector, double init_level, double eps, bool store_points) {
+    for (auto p_it = point_vector.begin(); p_it != point_vector.end(); ++p_it) {
+      std::vector<Alcove_id> alcoves = cs_.alcoves_of_ball(*p_it, init_level, eps);
+      for (Alcove_id a: alcoves) {
+        auto a_it = a_map.find(a);
+        if (a_it == a_map.end()) {
+          if (store_points)
+            a_map.emplace(a, std::make_tuple(max_id++, Point_pointers(1, p_it), Vertex_pointers()));
+          else
+            a_map.emplace(a, std::make_tuple(max_id++, Point_pointers(), Vertex_pointers()));
+        }
+        else
+          if (store_points)
+            std::get<1>(a_it->second).push_back(p_it);
+      }
+    }
+  }
+  
   void compute_v_map() {
     for (auto a_it = a_map.begin(); a_it != a_map.end(); ++a_it) {
       std::vector<Vertex_id> vertices = cs_.vertices_of_alcove(a_it->first);
@@ -158,24 +176,13 @@ private:
   
 public:
   
-  Coxeter_complex(const Point_range& point_vector, const Coxeter_system& cs, double init_level=1, bool store_points = false)
+  Coxeter_complex(const Point_range& point_vector, const Coxeter_system& cs, double init_level=1, double eps=0, bool store_points = false)
     : cs_(cs), max_id(0) {
     clock_t start, end, global_start;
     double time;
     global_start = clock();
     start = clock();
-    for (auto p_it = point_vector.begin(); p_it != point_vector.end(); ++p_it) {
-      Alcove_id s_id = cs.alcove_coordinates(*p_it, init_level); 
-      auto a_it = a_map.find(s_id);
-      if (a_it == a_map.end())
-        if (store_points)
-          a_map.emplace(s_id, std::make_tuple(max_id++, Point_pointers(1, p_it), Vertex_pointers()));
-        else
-          a_map.emplace(s_id, std::make_tuple(max_id++, Point_pointers(), Vertex_pointers()));
-      else
-        if (store_points)
-          std::get<1>(a_it->second).push_back(p_it);
-    }
+    compute_a_map(point_vector, init_level, eps, store_points);
     end = clock();
     time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
     std::cout << "Computed alcove coordinate map in " << time << " s. \n";

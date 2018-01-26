@@ -220,6 +220,27 @@ public:
     return family_;
   }
 
+  unsigned pos_root_count() const {
+    switch (family_) {
+    case 'A': { return dimension_*(dimension_ + 1)/2; break; } 
+    case 'B': { return dimension_*dimension_; break; } 
+    case 'C': { return dimension_*dimension_; break; } 
+    case 'D': { return dimension_*(dimension_ - 1); break; }
+    case 'E': {
+      switch (dimension_) {
+      case 6: return 36;
+      case 7: return 63;
+      case 8: return 120;
+      }
+    }
+    default :
+      std::cerr << "Simple_coxeter_system::pos_root_count : The family " << family_ << " is not supported. "
+                << "Please use A, B, C or D family for the constructor (in capital).\n";
+      throw wrong_family_exception_;
+    }
+  }
+  
+  
   /** A conversion from Cartesian coordinates to the coordinates of the alcove containing the point.
    *  The matrix' rows are simple root vectors.
    */
@@ -379,27 +400,65 @@ public:
     }
   }
 
-  unsigned pos_root_count() {
-    switch (family_) {
-    case 'A': { return dimension_*(dimension_ + 1)/2; break; } 
-    case 'B': { return dimension_*dimension_; break; } 
-    case 'C': { return dimension_*dimension_; break; } 
-    case 'D': { return dimension_*(dimension_ - 1); break; }
-    case 'E': {
-      switch (dimension_) {
-      case 6: return 36;
-      case 7: return 63;
-      case 8: return 120;
+
+  /** A conversion from Cartesian coordinates to the coordinates of the alcove containing the ball centered 
+   *  at point of radius eps.
+   *  The matrix' rows are simple root vectors.
+   */
+  template <class Point>
+  std::vector<Alcove_id> alcoves_of_ball(const Point& p, double level, double eps) const {
+    unsigned d = dimension_;
+    Alcove_id a_id(level);
+    a_id.reserve(pos_root_count());
+    std::vector<Alcove_id> alcoves;
+    alcoves.reserve(pos_root_count());
+    Eigen::VectorXd p_vect(d);
+    for (unsigned short i = 0; i < d; i++)
+      p_vect(i) = p[i];
+    Eigen::VectorXd scalprod_vect = root_t_ * p_vect;
+    rec_alcoves_of_ball_A(a_id, scalprod_vect, eps, alcoves, 1, 0, 0);
+    return alcoves;
+  }
+
+private:
+
+  /** Add the vertices of the given simplex to a vertex-simplex map.
+   *  The root, which is tested is of the form \sum_{i <= k < j} r_k.
+   */
+  void rec_alcoves_of_ball_A(Alcove_id& a_id, Eigen::VectorXd& scalprod_vect, double eps, std::vector<Alcove_id>& alcoves, int j, int i, double root_scalprod) const {
+    unsigned short d = dimension_;
+    double level = a_id.level();
+    if (j == d+1) {
+      alcoves.emplace_back(a_id);
+      return;
+    }
+    if (i == -1) {
+      rec_alcoves_of_ball_A(a_id, scalprod_vect, eps, alcoves, j+1, j, 0);
+      return;
+    }
+    root_scalprod += scalprod_vect(i);
+    int min_lim = std::floor(level*root_scalprod - std::sqrt(2)*level*eps);
+    int max_lim = std::floor(level*root_scalprod + std::sqrt(2)*level*eps);
+    for (int val = min_lim; val <= max_lim; ++val) {
+      bool valid = true;
+      for (int l = i+1; l < j; ++l) {
+        int pr_i_l = *(a_id.end() - ((j+l-1)*(j-l)/2+(j-l))),
+          pr_l_j = *(a_id.end() - (l-i));
+        // check if the floor(<x,r>) + floor(<x,s>) - 1 <= floor(<x,r+s>) <= floor(<x,r>) + floor(<x,s>)
+        // for a point in the ball B(p,eps)
+        if (val < pr_i_l + pr_l_j || val > pr_i_l + pr_l_j + 1) {
+          valid = false;
+          break;
+        }
+      }
+      if (valid) {
+        a_id.push_back(val);
+        rec_alcoves_of_ball_A(a_id, scalprod_vect, eps, alcoves, j, i-1, root_scalprod);
+        a_id.pop_back();
       }
     }
-    default :
-      std::cerr << "Simple_coxeter_system::pos_root_count : The family " << family_ << " is not supported. "
-                << "Please use A, B, C or D family for the constructor (in capital).\n";
-      throw wrong_family_exception_;
-    }
   }
-  
-private:  
+
 
   int gcd(int a, int b) const {
     return b == 0 ? a : gcd(b, a % b);
