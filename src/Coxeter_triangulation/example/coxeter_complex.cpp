@@ -44,16 +44,18 @@ std::vector<FT> bounding_box_dimensions(Point_vector& points) {
 
 int main(int argc, char * const argv[]) {
   std::cout << "Coxeter complex computation\n";
-  if (argc > 3 || argc < 2) {
+  if (argc > 4 || argc < 2) {
     std::cerr << "Usage: " << argv[0]
-        << " path_to_off_point_file [initial level]\n";
+        << " path_to_off_point_file [initial level] [epsilon]\n";
     return 0;
   }
   
-  double init_level = 1;
-  bool store_in_ram = true;
-  if (argc == 3)
+  double init_level = 1, eps = 0;
+  bool store_in_ram = false;
+  if (argc >= 3)
     init_level = atof(argv[2]);
+  if (argc == 4)
+    eps = atof(argv[3]);
   int d = 0;
   if (store_in_ram) {
     Gudhi::Points_off_reader<Point_d> off_reader(argv[1]);
@@ -66,7 +68,7 @@ int main(int argc, char * const argv[]) {
     d = (*point_vector)[0].size();
     std::cout << "Successfully read " << N << " points in dimension " << d << std::endl;
     Coxeter_system cs_A('A', d);
-    Coxeter_complex cc(*point_vector, cs_A, init_level);
+    Coxeter_complex cc(*point_vector, cs_A, init_level, eps);
     delete point_vector;
     cc.write_mesh("sphere_coxeter_complex_A.mesh");
     cc.collapse();
@@ -77,7 +79,7 @@ int main(int argc, char * const argv[]) {
     std::cout << "Successfully opened the file of points in dimension " << d << std::endl;
     using Coxeter_complex_off = Gudhi::Coxeter_complex<Gudhi::Off_point_range<Point_d>, Coxeter_system>;
     Coxeter_system cs_A('A', d);
-    Coxeter_complex_off cc(off_range, cs_A, init_level);  
+    Coxeter_complex_off cc(off_range, cs_A, init_level, eps);  
     cc.write_mesh("sphere_coxeter_complex_A.mesh");
     cc.collapse();
   }    
