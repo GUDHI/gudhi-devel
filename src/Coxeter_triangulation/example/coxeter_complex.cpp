@@ -10,6 +10,7 @@
 
 //#include <Eigen/Dense>
 
+#include "memory_usage.h"
 #include "cxx-prettyprint/prettyprint.hpp"
 
 using K = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
@@ -81,8 +82,11 @@ int main(int argc, char * const argv[]) {
     Coxeter_system cs_A('A', d);
     Coxeter_complex_off cc(off_range, cs_A, init_level, eps);  
     cc.write_mesh("sphere_coxeter_complex_A.mesh");
+    std::cout << "Memory usage (Physical) before collapses: " << (float)getPhysicalValue()/1000 << "MB.\n";
     cc.collapse();
   }    
+  std::cout << "Memory usage (Virtual): " << (float)getVirtualValue()/1000. << "MB.\n";
+  std::cout << "Memory usage (Physical): " << (float)getPhysicalValue()/1000 << "MB.\n";
   // {
   //   Coxeter_system cs_B('B', d);
   //   Coxeter_complex cc(point_vector, cs_B, init_level);
