@@ -26,5 +26,5 @@ This program computes the Bottleneck distance between two persistence diagram fi
 
 where
 
-* `<file_1.pers>` and `<file_2.pers>` must be in the format described [here](http://gudhi.gforge.inria.fr/doc/latest/fileformats.html#FileFormatsPers).
+* `<file_1.pers>` and `<file_2.pers>` must be in the format described [here](../doc/latest/fileformats.html#FileFormatsPers).
 * `<tolerance>` is an error bound on the bottleneck distance (set by default to the smallest positive double value).

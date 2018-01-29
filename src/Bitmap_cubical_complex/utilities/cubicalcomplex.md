@@ -15,7 +15,7 @@ Must be in conformity with _data/navigation.yml
 
 ## cubical_complex_persistence ##
 This program computes persistent homology, by using the Bitmap_cubical_complex class, of cubical complexes provided in text files in Perseus style.
-See [here](http://gudhi.gforge.inria.fr/doc/latest/fileformats.html#FileFormatsPerseus) for a description of the file format.
+See [here](../doc/latest/fileformats.html#FileFormatsPerseus) for a description of the file format.
 
 **Example**
 
