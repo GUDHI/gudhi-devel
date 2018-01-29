@@ -376,8 +376,7 @@ class Cover_complex {
     double d;
     std::vector<double> zeros(n);
     for (int i = 0; i < n; i++) distances.push_back(zeros);
-    std::string distance = point_cloud_name;
-    distance.append("_dist");
+    std::string distance = point_cloud_name + "_dist";
     std::ifstream input(distance.c_str(), std::ios::out | std::ios::binary);
 
     if (input.good()) {
@@ -481,10 +480,8 @@ class Cover_complex {
            */
   void set_function_from_coordinate(int k) {
     for (int i = 0; i < n; i++) func.emplace(i, point_cloud[i][k]);
-    char coordinate[100];
-    sprintf(coordinate, "coordinate %d", k);
     functional_cover = true;
-    cover_name = coordinate;
+    cover_name = "coordinate " + std::to_string(k);
   }
 
  public:  // Set function from vector.
@@ -897,9 +894,8 @@ class Cover_complex {
    * of its 1-skeleton in a .pdf file.
    */
   void plot_DOT() {
-    char mapp[100];
-    sprintf(mapp, "%s_sc.dot", point_cloud_name.c_str());
-    std::ofstream graphic(mapp);
+    std::string mapp = point_cloud_name + "_sc.dot";
+    std::ofstream graphic(mapp.c_str());
 
     double maxv = std::numeric_limits<double>::lowest();
     double minv = std::numeric_limits<double>::max();
@@ -948,9 +944,8 @@ class Cover_complex {
   void write_info() {
     int num_simplices = simplices.size();
     int num_edges = 0;
-    char mapp[100];
-    sprintf(mapp, "%s_sc.txt", point_cloud_name.c_str());
-    std::ofstream graphic(mapp);
+    std::string mapp = point_cloud_name + "_sc.dot";
+    std::ofstream graphic(mapp.c_str());
 
     for (int i = 0; i < num_simplices; i++)
       if (simplices[i].size() == 2)
@@ -993,9 +988,8 @@ class Cover_complex {
     std::vector<std::vector<int> > edges, faces;
     int numsimplices = simplices.size();
 
-    char gic[100];
-    sprintf(gic, "%s_sc.off", point_cloud_name.c_str());
-    std::ofstream graphic(gic);
+    std::string mapp = point_cloud_name + "_sc.dot";
+    std::ofstream graphic(mapp.c_str());
 
     graphic << "OFF" << std::endl;
     for (int i = 0; i < numsimplices; i++) {
