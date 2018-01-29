@@ -1,18 +1,34 @@
-# Witness_complex #
+---
+layout: page
+title: "Witness complex"
+meta_title: "witnesscomplex"
+subheadline: ""
+teaser: ""
+permalink: "/witnesscomplex/"
+---
+{::comment}
+These flags above are here for web site generation, please let them.
+cf. https://gitlab.inria.fr/GUDHI/website
+Must be in conformity with _data/navigation.yml
+{:/comment}
+
 
 For more details about the witness complex, please read the [user manual of the package](http://gudhi.gforge.inria.fr/doc/latest/group__witness__complex.html).
 
-## `weak_witness_persistence` ##
-This program computes the persistent homology with coefficient field *Z/pZ* of a Weak witness complex defined on a set of input points. The output diagram contains one bar per line, written with the convention:
+## weak_witness_persistence ##
+This program computes the persistent homology with coefficient field *Z/pZ* of a Weak witness complex defined on a set of input points.
+The output diagram contains one bar per line, written with the convention:
 
 `p dim birth death`
 
-where `dim` is the dimension of the homological feature, `birth` and `death` are respectively the birth and death of the feature, and `p` is the characteristic of the field *Z/pZ* used for homology coefficients.
+where `dim` is the dimension of the homological feature, `birth` and `death` are respectively the birth and death of the feature,
+and `p` is the characteristic of the field *Z/pZ* used for homology coefficients.
 
-*Usage*
+**Usage**
+
 `weak_witness_persistence [options] <OFF input file>`
 
-*Allowed options*
+**Allowed options**
 
 * `-h [ --help ]` Produce help message
 * `-l [ --landmarks ]` Number of landmarks to choose from the point cloud.
@@ -22,33 +38,28 @@ where `dim` is the dimension of the homological feature, `birth` and `death` are
 * `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature to be recorded. Enter a negative value to see zero length intervals.
 * `-d [ --cpx-dimension ]` (default = 2147483647) Maximal dimension of the weak witness complex we want to compute.
 
-*Example*
-`weak_witness_persistence data/points/tore3D_1307.off -l 20 -a 0.5 -m 0.006`
+**Example**
 
-outputs:
-```
-Successfully read 1307 points.
-Ambient dimension is 3.
-The complex contains 732 simplices and has dimension 8 
-11  0 0 inf 
-11  1 0 inf 
-11  2 0.0275251 0.0534586 
-11  1 0 0.0239952 
-```
+`weak_witness_persistence data/points/tore3D_1307.off -l 20 -a 0.5 -m 0.006`
 
 N.B.: output is random as the 20 landmarks are chosen randomly.
 
-## `strong_witness_persistence` ##
-This program computes the persistent homology with coefficient field *Z/pZ* of a Strong witness complex defined on a set of input points. The output diagram contains one bar per line, written with the convention:
+
+## strong_witness_persistence ##
+
+This program computes the persistent homology with coefficient field *Z/pZ* of a Strong witness complex defined on a set of input points.
+The output diagram contains one bar per line, written with the convention:
 
 `p dim birth death`
 
-where `dim` is the dimension of the homological feature, `birth` and `death` are respectively the birth and death of the feature, and `p` is the characteristic of the field *Z/pZ* used for homology coefficients.
+where `dim` is the dimension of the homological feature, `birth` and `death` are respectively the birth and death of the feature,
+and `p` is the characteristic of the field *Z/pZ* used for homology coefficients.
 
-*Usage*
+**Usage**
+
 `strong_witness_persistence [options] <OFF input file>`
 
-*Allowed options*
+**Allowed options**
 
 * `-h [ --help ]` Produce help message
 * `-l [ --landmarks ]` Number of landmarks to choose from the point cloud.
@@ -58,17 +69,8 @@ where `dim` is the dimension of the homological feature, `birth` and `death` are
 * `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature to be recorded. Enter a negative value to see zero length intervals.
 * `-d [ --cpx-dimension ]` (default = 2147483647) Maximal dimension of the weak witness complex we want to compute.
 
-*Example*
-`strong_witness_persistence data/points/tore3D_1307.off -l 20 -a 0.5 -m 0.06`
+**Example**
 
-outputs:
-```
-Successfully read 1307 points.
-Ambient dimension is 3.
-The complex contains 1836 simplices and has dimension 8 
-11  0 0 inf 
-11  1 0.00674748 inf 
-11  2 0.0937751 0.235354 
-```
+`strong_witness_persistence data/points/tore3D_1307.off -l 20 -a 0.5 -m 0.06`
 
 N.B.: output is random as the 20 landmarks are chosen randomly.

@@ -1,16 +1,35 @@
-# Alpha_complex #
+---
+layout: page
+title: "Alpha complex"
+meta_title: "alphacomplex"
+subheadline: ""
+teaser: ""
+permalink: "/alphacomplex/"
+---
+{::comment}
+These flags above are here for web site generation, please let them.
+cf. https://gitlab.inria.fr/GUDHI/website
+Must be in conformity with _data/navigation.yml
+{:/comment}
 
-## `alpha_complex_3d_persistence` ##
+
+
+## alpha_complex_3d_persistence ##
 This program computes the persistent homology with coefficient field Z/pZ of the 3D alpha complex built from a 3D point cloud. The output diagram contains one bar per line, written with the convention:
 
-`p dim birth death`
+```
+p dim birth death
+```
 
 where `dim` is the dimension of the homological feature, `birth` and `death` are respectively the birth and death of the feature, and `p` is the characteristic of the field *Z/pZ* used for homology coefficients (`p` must be a prime number).
 
 **Usage**
-`alpha_complex_3d_persistence [options] <input OFF file>`
-where
-`<input OFF file>` is the path to the input point cloud in [nOFF ASCII format](http://www.geomview.org/docs/html/OFF.html).
+
+```
+   alpha_complex_3d_persistence [options] <input OFF file>
+```
+
+where `<input OFF file>` is the path to the input point cloud in [nOFF ASCII format](http://www.geomview.org/docs/html/OFF.html).
 
 **Allowed options**
 
@@ -20,43 +39,38 @@ where
 * `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature to be recorded. Enter a negative value to see zero length intervals.
 
 **Example**
-`alpha_complex_3d_persistence ../../data/points/tore3D_300.off -p 2 -m 0.45`
 
-outputs:
 ```
-Simplex_tree dim: 3
-2  0 0 inf
-2  1 0.0682162 1.0001
-2  1 0.0934117 1.00003
-2  2 0.56444 1.03938
+alpha_complex_3d_persistence ../../data/points/tore3D_300.off -p 2 -m 0.45
 ```
 
-Here we retrieve expected Betti numbers on a tore 3D:
-```
-Betti numbers[0] = 1
-Betti numbers[1] = 2
-Betti numbers[2] = 1
-```
+N.B.:
 
-N.B.: 
 * `alpha_complex_3d_persistence` only accepts OFF files in dimension 3.
 * Filtration values are alpha square values.
 
 
+## exact_alpha_complex_3d_persistence ##
 
-## `exact_alpha_complex_3d_persistence` ##
-Same as `alpha_complex_3d_persistence`, but using exact computation. It is slower, but it is necessary when points are on a grid for instance.
+Same as `alpha_complex_3d_persistence`, but using exact computation.
+It is slower, but it is necessary when points are on a grid for instance.
 
 
 
-## `weighted_alpha_complex_3d_persistence` ##
+## weighted_alpha_complex_3d_persistence ##
+
 Same as `alpha_complex_3d_persistence`, but using weighted points.
 
 **Usage**
-`weighted_alpha_complex_3d_persistence [options] <input OFF file> <weights input file>`
+
+```
+   weighted_alpha_complex_3d_persistence [options] <input OFF file> <weights input file>
+```
+
 where
-`<input OFF file>` is the path to the input point cloud in [nOFF ASCII format](http://www.geomview.org/docs/html/OFF.html).
-`<input weights file>` is the path to the file containing the weights of the points (one value per line).
+
+* `<input OFF file>` is the path to the input point cloud in [nOFF ASCII format](http://www.geomview.org/docs/html/OFF.html).
+* `<input weights file>` is the path to the file containing the weights of the points (one value per line).
 
 **Allowed options**
 
@@ -66,32 +80,33 @@ where
 * `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature to be recorded. Enter a negative value to see zero length intervals.
 
 **Example**
-`weighted_alpha_complex_3d_persistence ../../data/points/tore3D_300.off ../../data/points/tore3D_300.weights -p 2 -m 0.45`
 
-outputs:
 ```
-Simplex_tree dim: 3
-2  0 -1 inf
-2  1 -0.931784 0.000103311
-2  1 -0.906588 2.60165e-05
-2  2 -0.43556 0.0393798
+   weighted_alpha_complex_3d_persistence ../../data/points/tore3D_300.off ../../data/points/tore3D_300.weights -p 2 -m 0.45
 ```
+
 
 N.B.:
+
 * Weights values are explained on CGAL [Alpha shape](https://doc.cgal.org/latest/Alpha_shapes_3/index.html#title0)
 and [Regular triangulation](https://doc.cgal.org/latest/Triangulation_3/index.html#Triangulation3secclassRegulartriangulation) documentation.
 * Filtration values are alpha square values.
 
 
-## `periodic_alpha_complex_3d_persistence` ##
+## periodic_alpha_complex_3d_persistence ##
 Same as `alpha_complex_3d_persistence`, but using periodic alpha shape 3d.
 Refer to the [CGAL's 3D Periodic Triangulations User Manual](https://doc.cgal.org/latest/Periodic_3_triangulation_3/index.html) for more details.
 
 **Usage**
-`periodic_alpha_complex_3d_persistence [options] <input OFF file> <cuboid file>`
+
+```
+   periodic_alpha_complex_3d_persistence [options] <input OFF file> <cuboid file>
+```
+
 where
-`<input OFF file>` is the path to the input point cloud in [nOFF ASCII format](http://www.geomview.org/docs/html/OFF.html).
-`<cuboid file>` is the path to the file describing the periodic domain. It must be in the format described [here](http://gudhi.gforge.inria.fr/doc/latest/fileformats.html#FileFormatsIsoCuboid).
+
+* `<input OFF file>` is the path to the input point cloud in [nOFF ASCII format](http://www.geomview.org/docs/html/OFF.html).
+* `<cuboid file>` is the path to the file describing the periodic domain. It must be in the format described [here](http://gudhi.gforge.inria.fr/doc/latest/fileformats.html#FileFormatsIsoCuboid).
 
 **Allowed options**
 
@@ -102,46 +117,36 @@ where
 
 
 **Example**
-`periodic_alpha_complex_3d_persistence ../../data/points/grid_10_10_10_in_0_1.off ../../data/points/iso_cuboid_3_in_0_1.txt -p 3 -m 1.0`
 
-outputs:
 ```
-Periodic Delaunay computed.
-Simplex_tree dim: 3
-3  0 0 inf
-3  1 0.0025 inf
-3  1 0.0025 inf
-3  1 0.0025 inf
-3  2 0.005 inf
-3  2 0.005 inf
-3  2 0.005 inf
-3  3 0.0075 inf
+periodic_alpha_complex_3d_persistence ../../data/points/grid_10_10_10_in_0_1.off ../../data/points/iso_cuboid_3_in_0_1.txt -p 3 -m 1.0
 ```
 
-Here we retrieve expected Betti numbers on an 3D iso-oriented cuboids:
-```
-Betti numbers[0] = 1
-Betti numbers[1] = 3
-Betti numbers[2] = 3
-Betti numbers[3] = 1
-```
+N.B.:
 
-N.B.: 
 * Cuboid file must be in the format described [here](http://gudhi.gforge.inria.fr/doc/latest/fileformats.html#FileFormatsIsoCuboid).
 * Filtration values are alpha square values.
 
 
 
+## alpha_complex_persistence ##
 
-## `alpha_complex_persistence` ##
-This program computes the persistent homology with coefficient field Z/pZ of the dD alpha complex built from a dD point cloud. The output diagram contains one bar per line, written with the convention:
+This program computes the persistent homology with coefficient field Z/pZ of the dD alpha complex built from a dD point cloud.
+The output diagram contains one bar per line, written with the convention:
 
-`p dim birth death`
+```
+   p dim birth death
+```
 
-where `dim` is the dimension of the homological feature, `birth` and `death` are respectively the birth and death of the feature, and `p` is the characteristic of the field *Z/pZ* used for homology coefficients (`p` must be a prime number).
+where `dim` is the dimension of the homological feature, `birth` and `death` are respectively the birth and death of the feature,
+and `p` is the characteristic of the field *Z/pZ* used for homology coefficients (`p` must be a prime number).
 
 **Usage**
-`alpha_complex_persistence [options] <input OFF file>`
+
+```
+   alpha_complex_persistence [options] <input OFF file>
+```
+
 where
 `<input OFF file>` is the path to the input point cloud in [nOFF ASCII format](http://www.geomview.org/docs/html/OFF.html).
 
@@ -154,24 +159,11 @@ where
 * `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature to be recorded. Enter a negative value to see zero length intervals.
 
 **Example**
-`alpha_complex_persistence -r 32 -p 2 -m 0.45 ../../data/points/tore3D_300.off`
 
-outputs:
 ```
-Alpha complex is of dimension 3 - 9273 simplices - 300 vertices.
-Simplex_tree dim: 3
-2  0 0 inf 
-2  1 0.0682162 1.0001 
-2  1 0.0934117 1.00003 
-2  2 0.56444 1.03938 
-```
-
-Here we retrieve expected Betti numbers on a tore 3D:
-```
-Betti numbers[0] = 1
-Betti numbers[1] = 2
-Betti numbers[2] = 1
+   alpha_complex_persistence -r 32 -p 2 -m 0.45 ../../data/points/tore3D_300.off
 ```
 
 N.B.:
+
 * Filtration values are alpha square values.

@@ -934,7 +934,7 @@ class Cover_complex {
       }
     graphic << "}";
     graphic.close();
-    std::cout << ".dot file generated. It can be visualized with e.g. neato." << std::endl;
+    std::cout << mapp << " file generated. It can be visualized with e.g. neato." << std::endl;
   }
 
  public:  // Create a .txt file that can be compiled with KeplerMapper.
@@ -944,7 +944,7 @@ class Cover_complex {
   void write_info() {
     int num_simplices = simplices.size();
     int num_edges = 0;
-    std::string mapp = point_cloud_name + "_sc.dot";
+    std::string mapp = point_cloud_name + "_sc.txt";
     std::ofstream graphic(mapp.c_str());
 
     for (int i = 0; i < num_simplices; i++)
@@ -970,7 +970,8 @@ class Cover_complex {
         if (cover_color[simplices[i][0]].first > mask && cover_color[simplices[i][1]].first > mask)
           graphic << name2id[simplices[i][0]] << " " << name2id[simplices[i][1]] << std::endl;
     graphic.close();
-    std::cout << ".txt generated. It can be visualized with e.g. python KeplerMapperVisuFromTxtFile.py and firefox."
+    std::cout << mapp
+              << " generated. It can be visualized with e.g. python KeplerMapperVisuFromTxtFile.py and firefox."
               << std::endl;
   }
 
@@ -988,7 +989,7 @@ class Cover_complex {
     std::vector<std::vector<int> > edges, faces;
     int numsimplices = simplices.size();
 
-    std::string mapp = point_cloud_name + "_sc.dot";
+    std::string mapp = point_cloud_name + "_sc.off";
     std::ofstream graphic(mapp.c_str());
 
     graphic << "OFF" << std::endl;
@@ -1016,7 +1017,7 @@ class Cover_complex {
     for (int i = 0; i < numfaces; i++)
       graphic << 3 << " " << faces[i][0] << " " << faces[i][1] << " " << faces[i][2] << std::endl;
     graphic.close();
-    std::cout << ".off generated. It can be visualized with e.g. geomview." << std::endl;
+    std::cout << mapp << " generated. It can be visualized with e.g. geomview." << std::endl;
   }
 
   // *******************************************************************************************************************

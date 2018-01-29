@@ -77,8 +77,8 @@ namespace cover_complex {
  *
  * \include Nerve_GIC/Nerve.txt
  *
- * The program also writes a file SC.txt. The first three lines in this file are the location of the input point cloud
- * and the function used to compute the cover.
+ * The program also writes a file ../../data/points/human_sc.txt. The first three lines in this file are the location
+ * of the input point cloud and the function used to compute the cover.
  * The fourth line contains the number of vertices nv and edges ne of the Nerve.
  * The next nv lines represent the vertices. Each line contains the vertex ID,
  * the number of data points it contains, and their average color function value.
@@ -118,7 +118,7 @@ namespace cover_complex {
  *
  * the program outputs SC.off. Using e.g.
  *
- * \code $> geomview SC.off
+ * \code $> geomview ../../data/points/human_sc.off
  * \endcode
  *
  * one can obtain the following visualization:
