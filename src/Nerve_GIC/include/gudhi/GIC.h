@@ -377,7 +377,7 @@ class Cover_complex {
     std::vector<double> zeros(n);
     for (int i = 0; i < n; i++) distances.push_back(zeros);
     std::string distance = point_cloud_name + "_dist";
-    std::ifstream input(distance.c_str(), std::ios::out | std::ios::binary);
+    std::ifstream input(distance, std::ios::out | std::ios::binary);
 
     if (input.good()) {
       if (verbose) std::cout << "Reading distances..." << std::endl;
@@ -895,7 +895,7 @@ class Cover_complex {
    */
   void plot_DOT() {
     std::string mapp = point_cloud_name + "_sc.dot";
-    std::ofstream graphic(mapp.c_str());
+    std::ofstream graphic(mapp);
 
     double maxv = std::numeric_limits<double>::lowest();
     double minv = std::numeric_limits<double>::max();
@@ -945,7 +945,7 @@ class Cover_complex {
     int num_simplices = simplices.size();
     int num_edges = 0;
     std::string mapp = point_cloud_name + "_sc.txt";
-    std::ofstream graphic(mapp.c_str());
+    std::ofstream graphic(mapp);
 
     for (int i = 0; i < num_simplices; i++)
       if (simplices[i].size() == 2)
@@ -990,7 +990,7 @@ class Cover_complex {
     int numsimplices = simplices.size();
 
     std::string mapp = point_cloud_name + "_sc.off";
-    std::ofstream graphic(mapp.c_str());
+    std::ofstream graphic(mapp);
 
     graphic << "OFF" << std::endl;
     for (int i = 0; i < numsimplices; i++) {
