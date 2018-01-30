@@ -1,17 +1,6 @@
----
-layout: page
-title: "Cover complex"
-meta_title: "covercomplex"
-subheadline: ""
-teaser: ""
-permalink: "/covercomplex/"
----
-{::comment}
-These flags above are here for web site generation, please let them.
-cf. https://gitlab.inria.fr/GUDHI/website
-Must be in conformity with _data/navigation.yml
-{:/comment}
 
+
+# Cover complex #
 
 
 ## Nerve ##

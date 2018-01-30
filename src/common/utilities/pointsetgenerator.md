@@ -1,16 +1,6 @@
----
-layout: page
-title: "Pointset generator"
-meta_title: "pointsetgenerator"
-subheadline: ""
-teaser: ""
-permalink: "/pointsetgenerator/"
----
-{::comment}
-These flags above are here for web site generation, please let them.
-cf. https://gitlab.inria.fr/GUDHI/website
-Must be in conformity with _data/navigation.yml
-{:/comment}
+
+
+# common #
 
 ## off_file_from_shape_generator ##
 

@@ -1,19 +1,9 @@
----
-layout: page
-title: "Witness complex"
-meta_title: "witnesscomplex"
-subheadline: ""
-teaser: ""
-permalink: "/witnesscomplex/"
----
-{::comment}
-These flags above are here for web site generation, please let them.
-cf. https://gitlab.inria.fr/GUDHI/website
-Must be in conformity with _data/navigation.yml
-{:/comment}
 
 
-For more details about the witness complex, please read the [user manual of the package](../doc/latest/group__witness__complex.html).
+# Witness complex #
+
+
+For more details about the witness complex, please read the [user manual of the package](/doc/latest/group__witness__complex.html).
 
 ## weak_witness_persistence ##
 This program computes the persistent homology with coefficient field *Z/pZ* of a Weak witness complex defined on a set of input points.

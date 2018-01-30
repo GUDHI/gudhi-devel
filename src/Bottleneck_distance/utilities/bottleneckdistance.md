@@ -1,18 +1,6 @@
----
-layout: page
-title: "Bottleneck distance"
-meta_title: "bottleneckdistance"
-subheadline: ""
-teaser: ""
-permalink: "/bottleneckdistance/"
----
-{::comment}
-These flags above are here for web site generation, please let them.
-cf. https://gitlab.inria.fr/GUDHI/website
-Must be in conformity with _data/navigation.yml
-{:/comment}
 
 
+# Bottleneck distance #
 
 ## bottleneck_read_file_example ##
 
@@ -26,5 +14,5 @@ This program computes the Bottleneck distance between two persistence diagram fi
 
 where
 
-* `<file_1.pers>` and `<file_2.pers>` must be in the format described [here](../doc/latest/fileformats.html#FileFormatsPers).
+* `<file_1.pers>` and `<file_2.pers>` must be in the format described [here](/doc/latest/fileformats.html#FileFormatsPers).
 * `<tolerance>` is an error bound on the bottleneck distance (set by default to the smallest positive double value).

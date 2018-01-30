@@ -1,21 +1,9 @@
----
-layout: page
-title: "Rips complex"
-meta_title: "ripscomplex"
-subheadline: ""
-teaser: ""
-permalink: "/ripscomplex/"
----
-{::comment}
-These flags above are here for web site generation, please let them.
-cf. https://gitlab.inria.fr/GUDHI/website
-Must be in conformity with _data/navigation.yml
-{:/comment}
 
 
+# Rips complex #
 
 ## rips_persistence ##
-This program computes the persistent homology with coefficient field *Z/pZ* of a Rips complex defined on a set of input points. The output diagram contains one bar per line, written with the convention:
+This program computes the persistent homology with coefficient field *Z/pZ* of a Rips complex defined on a set of input points, using Euclidean distance. The output diagram contains one bar per line, written with the convention:
 
 `p dim birth death`
 
