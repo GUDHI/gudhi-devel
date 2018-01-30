@@ -11,11 +11,16 @@ if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
     target_link_libraries(FuncGIC ${TBB_LIBRARIES})
   endif()
 
+  # Copy files for not to pollute sources when testing
+  file(COPY "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+  file(COPY "${CMAKE_SOURCE_DIR}/data/points/COIL_database/lucky_cat.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+  file(COPY "${CMAKE_SOURCE_DIR}/data/points/COIL_database/lucky_cat_PCA1" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+
   add_test(NAME Nerve_GIC_example_CoordGIC COMMAND $<TARGET_FILE:CoordGIC>
-      "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" "0")
+      "tore3D_1307.off" "0")
 
   add_test(NAME Nerve_GIC_example_FuncGIC COMMAND $<TARGET_FILE:FuncGIC>
-      "${CMAKE_SOURCE_DIR}/data/points/COIL_database/lucky_cat.off"
-      "${CMAKE_SOURCE_DIR}/data/points/COIL_database/lucky_cat_PCA1")
+      "lucky_cat.off"
+      "lucky_cat_PCA1")
 
 endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)

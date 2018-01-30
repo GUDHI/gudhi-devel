@@ -12,11 +12,13 @@ if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
   endif()
 
   file(COPY KeplerMapperVisuFromTxtFile.py km.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+  # Copy files for not to pollute sources when testing
+  file(COPY "${CMAKE_SOURCE_DIR}/data/points/human.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
   add_test(NAME Nerve_GIC_utilities_nerve COMMAND $<TARGET_FILE:Nerve>
-      "${CMAKE_SOURCE_DIR}/data/points/human.off" "2" "10" "0.3")
+      "human.off" "2" "10" "0.3")
 
   add_test(NAME Nerve_GIC_utilities_VoronoiGIC COMMAND $<TARGET_FILE:VoronoiGIC>
-      "${CMAKE_SOURCE_DIR}/data/points/human.off" "100")
+      "human.off" "100")
 
 endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)
