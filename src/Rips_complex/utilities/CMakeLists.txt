@@ -7,9 +7,13 @@ target_link_libraries(rips_distance_matrix_persistence ${Boost_PROGRAM_OPTIONS_L
 add_executable(rips_persistence rips_persistence.cpp)
 target_link_libraries(rips_persistence ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
+add_executable(sparse_rips_persistence sparse_rips_persistence.cpp)
+target_link_libraries(sparse_rips_persistence ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
 if (TBB_FOUND)
   target_link_libraries(rips_distance_matrix_persistence ${TBB_LIBRARIES})
   target_link_libraries(rips_persistence ${TBB_LIBRARIES})
+  target_link_libraries(sparse_rips_persistence ${TBB_LIBRARIES})
 endif()
 
 add_test(NAME Rips_complex_utility_from_rips_distance_matrix COMMAND $<TARGET_FILE:rips_distance_matrix_persistence>
@@ -19,3 +23,4 @@ add_test(NAME Rips_complex_utility_from_rips_on_tore_3D COMMAND $<TARGET_FILE:ri
 
 install(TARGETS rips_distance_matrix_persistence DESTINATION bin)
 install(TARGETS rips_persistence DESTINATION bin)
+install(TARGETS sparse_rips_persistence DESTINATION bin)
