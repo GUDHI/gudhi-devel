@@ -152,10 +152,11 @@ class Sparse_rips_complex {
             GUDHI_CHECK(lj <= li, "Bad furthest point sorting");
             Filtration_value alpha;
 
+            // The paper has d/2 and d-lj/e to match the Cech, but we use doubles to match the Rips
             if(d * epsilon <= 2 * lj)
-              alpha = d / 2;
+              alpha = d;
             else if(d * epsilon <= li + lj && (epsilon >= 1 || d * epsilon <= lj * (1 + 1 / (1 - epsilon))))
-              alpha = d - lj / epsilon;
+              alpha = (d - lj / epsilon) * 2;
             else continue;
 
             add_edge(pi, pj, alpha, graph_);

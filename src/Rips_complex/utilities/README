@@ -97,14 +97,14 @@ where `dim` is the dimension of the homological feature, `birth` and `death` are
 * `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature to be recorded. Enter a negative value to see zero length intervals.
 
 **Example with Z/2Z coefficients**
-`rips_persistence ../../data/points/tore3D_1307.off -e .5 -m .1 -d 3 -p 2`
+`rips_persistence ../../data/points/tore3D_1307.off -e .5 -m .2 -d 3 -p 2`
 
-outputs:
+may output (there is randomness involved):
 ```
-The complex contains 16742034 simplices 
+The complex contains 17002096 simplices 
    and has dimension 3 
 2  0 0 inf 
-2  1 0.0521735 0.645093 
-2  2 0.0691677 0.289148 
-2  1 0.0491747 0.265232 
+2  1 0.104347 1.29343 
+2  2 0.138335 0.577743 
+2  1 0.0983494 0.529708 
 ```
