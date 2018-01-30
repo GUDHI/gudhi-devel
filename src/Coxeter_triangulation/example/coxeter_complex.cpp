@@ -44,12 +44,12 @@ std::vector<FT> bounding_box_dimensions(Point_vector& points) {
  */
 
 int main(int argc, char * const argv[]) {
-  std::cout << "Coxeter complex computation\n";
   if (argc > 4 || argc < 2) {
     std::cerr << "Usage: " << argv[0]
         << " path_to_off_point_file [initial level] [epsilon]\n";
     return 0;
   }
+  std::cout << "Coxeter complex computation for " << argv[1] << ", lev = " << argv[2] << ", eps = " << argv[3] << ".\n";
   
   double init_level = 1, eps = 0;
   bool store_in_ram = false;
