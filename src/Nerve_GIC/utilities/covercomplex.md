@@ -27,14 +27,14 @@ Finally, the next ne lines represent the edges, characterized by the ID of their
 
 **Usage**
 
-`Nerve <OFF input file> coordinate resolution gain [--v]`
+`Nerve <OFF input file> coordinate resolution gain [-v]`
 
 where
 
 * `coordinate` is the coordinate function to cover
 * `resolution` is the number of the intervals
 * `gain` is the gain for each interval
-* `--v` is optional, it activates verbose mode.
+* `-v` is optional, it activates verbose mode.
 
 **Example**
 
@@ -57,12 +57,12 @@ The program also writes a file `*_sc.off`, that is an OFF file that can be visua
 
 **Usage**
 
-`VoroniGIC <OFF input file> samples_number [--v]`
+`VoroniGIC <OFF input file> samples_number [-v]`
 
 where
 
 * `samples_number` is the number of samples to take from the point cloud
-* `--v` is optional, it activates verbose mode.
+* `-v` is optional, it activates verbose mode.
 
 **Example**
 

@@ -67,7 +67,7 @@ namespace Persistence_representations {
  \li Concept of representation of persistence that allows computations of distances.
  \li Concept of representation of persistence that allows computations of scalar products.
  \li Concept of representation of persistence that allows vectorization.
- \li Concept of representation of persistence that allows computations of real--valued characteristics of objects.
+ \li Concept of representation of persistence that allows computations of real-valued characteristics of objects.
 
 
  At the moment an implementation of the following representations of persistence are available (further details of
