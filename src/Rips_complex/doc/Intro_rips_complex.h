@@ -182,6 +182,22 @@ namespace rips_complex {
  * 
  * \include Rips_complex/full_skeleton_rips_for_doc.txt
  * 
+ * \subsection sparseripspointscloudexample Example of a sparse Rips from a point cloud
+ * 
+ * This example builds the full sparse Rips of a set of 2D Euclidean points, then prints some minimal information about the complex.
+ * 
+ * \include Rips_complex/example_sparse_rips.cpp
+ * 
+ * When launching:
+ * 
+ * \code $> ./Rips_complex_example_sparse
+ * \endcode
+ *
+ * the program output may be (the exact output varies from one run to the next):
+ *
+ * \code Sparse Rips complex is of dimension 2 - 19 simplices - 7 vertices.
+ * \endcode
+ * 
  * \copyright GNU General Public License v3.                         
  * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
  */
