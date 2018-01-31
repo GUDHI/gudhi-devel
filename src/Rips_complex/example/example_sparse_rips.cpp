@@ -9,7 +9,7 @@ int main() {
   using Point = std::vector<double>;
   using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
   using Filtration_value = Simplex_tree::Filtration_value;
-  using Complex = Gudhi::rips_complex::Sparse_rips_complex<Filtration_value>;
+  using Sparse_rips = Gudhi::rips_complex::Sparse_rips_complex<Filtration_value>;
 
   Point points[] = {
     {1.0, 1.0},
@@ -24,10 +24,10 @@ int main() {
   // Init from Euclidean points
   // ----------------------------------------------------------------------------
   double epsilon = 2; // very rough, no guarantees
-  Complex cpx(points, Gudhi::Euclidean_distance(), epsilon);
+  Sparse_rips sparse_rips(points, Gudhi::Euclidean_distance(), epsilon);
 
   Simplex_tree stree;
-  cpx.create_complex(stree, 10);
+  sparse_rips.create_complex(stree, 10);
 
   // ----------------------------------------------------------------------------
   // Display information about the complex
