@@ -51,7 +51,7 @@ where
 
 ## sparse_rips_persistence ##
 This program computes the persistent homology with coefficient field *Z/pZ*
-of a sparse (1+epsilon)-approximation of the Rips complex defined on a set of input points. The output diagram contains one bar per line, written with the convention:
+of a sparse (1+epsilon)-approximation of the Rips complex defined on a set of input Euclidean points. The output diagram contains one bar per line, written with the convention:
 
 `p dim birth death`
 
