@@ -79,7 +79,7 @@ class Sparse_rips_complex {
         compute_sparse_graph(sorted_points, params, dist_fun, epsilon);
       }
 
-    /** \brief Rips_complex constructor from a distance matrix.
+    /** \brief Sparse_rips_complex constructor from a distance matrix.
      *
      * @param[in] distance_matrix Range of range of distances.
      * `distance_matrix[i][j]` returns the distance between points \f$i\f$ and
