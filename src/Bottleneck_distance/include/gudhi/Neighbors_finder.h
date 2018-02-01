@@ -32,6 +32,7 @@
 
 #include <unordered_set>
 #include <vector>
+#include <algorithm>  // for std::max
 
 namespace Gudhi {
 

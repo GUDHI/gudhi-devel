@@ -113,9 +113,8 @@ int main(int argc, char **argv) {
     std::cerr << "Unable to read file " << cuboid_file << std::endl;
     exit(-1);
   }
-  //Checking if the cuboid is the same in x,y and z direction. If not, CGAL will not process it.
-  if ((x_max-x_min != y_max-y_min) || (x_max-x_min != z_max-z_min) || (z_max-z_min != y_max-y_min))
-  {
+  // Checking if the cuboid is the same in x,y and z direction. If not, CGAL will not process it.
+  if ((x_max - x_min != y_max - y_min) || (x_max - x_min != z_max - z_min) || (z_max - z_min != y_max - y_min)) {
     std::cerr << "The size of the cuboid in every directions is not the same." << std::endl;
     exit(-1);
   }
@@ -164,16 +163,16 @@ int main(int argc, char **argv) {
   std::vector<Alpha_value_type>::iterator the_alpha_value_iterator = the_alpha_values.begin();
   for (auto object_iterator : the_objects) {
     // Retrieve Alpha shape vertex list from object
-    if (const Cell_handle* cell = CGAL::object_cast<Cell_handle>(&object_iterator)) {
+    if (const Cell_handle *cell = CGAL::object_cast<Cell_handle>(&object_iterator)) {
       vertex_list = from_cell<Vertex_list, Cell_handle>(*cell);
       count_cells++;
-    } else if (const Facet* facet = CGAL::object_cast<Facet>(&object_iterator)) {
+    } else if (const Facet *facet = CGAL::object_cast<Facet>(&object_iterator)) {
       vertex_list = from_facet<Vertex_list, Facet>(*facet);
       count_facets++;
-    } else if (const Edge_3* edge = CGAL::object_cast<Edge_3>(&object_iterator)) {
+    } else if (const Edge_3 *edge = CGAL::object_cast<Edge_3>(&object_iterator)) {
       vertex_list = from_edge<Vertex_list, Edge_3>(*edge);
       count_edges++;
-    } else if (const Vertex_handle* vertex = CGAL::object_cast<Vertex_handle>(&object_iterator)) {
+    } else if (const Vertex_handle *vertex = CGAL::object_cast<Vertex_handle>(&object_iterator)) {
       count_vertices++;
       vertex_list = from_vertex<Vertex_list, Vertex_handle>(*vertex);
     }

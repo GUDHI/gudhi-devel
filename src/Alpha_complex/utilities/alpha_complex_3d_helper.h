@@ -52,7 +52,7 @@ Vertex_list from_facet(const Facet& fct) {
 template <class Vertex_list, class Edge_3>
 Vertex_list from_edge(const Edge_3& edg) {
   Vertex_list the_list;
-  for (auto i : { edg.second, edg.third }) {
+  for (auto i : {edg.second, edg.third}) {
 #ifdef DEBUG_TRACES
     std::cout << "from edge[" << i << "]=" << edg.first->vertex(i)->point() << std::endl;
 #endif  // DEBUG_TRACES

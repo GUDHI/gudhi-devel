@@ -200,8 +200,6 @@ namespace rips_complex {
  * \code Sparse Rips complex is of dimension 2 - 19 simplices - 7 vertices.
  * \endcode
  * 
- * \copyright GNU General Public License v3.                         
- * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
  */
 /** @} */  // end defgroup rips_complex
 

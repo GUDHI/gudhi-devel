@@ -25,6 +25,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <iostream>
+#include <limits>  // for std::numeric_limits<>
 
 template<typename FloatingType >
 void GUDHI_TEST_FLOAT_EQUALITY_CHECK(FloatingType a, FloatingType b,

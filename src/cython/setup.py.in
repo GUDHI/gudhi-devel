@@ -23,7 +23,7 @@ from Cython.Build import cythonize
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-__author__ = "Vincent Rouvreau"
+__author__ = "GUDHI Editorial Board"
 __copyright__ = "Copyright (C) 2016  INRIA"
 __license__ = "GPL v3"
 
@@ -41,7 +41,7 @@ gudhi = Extension(
 
 setup(
     name = 'gudhi',
-    author='Vincent Rouvreau',
+    author='GUDHI Editorial Board',
     author_email='gudhi-contact@lists.gforge.inria.fr',
     version='@GUDHI_VERSION@',
     url='http://gudhi.gforge.inria.fr/',

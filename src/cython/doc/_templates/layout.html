@@ -198,6 +198,8 @@
                     <ul class="dropdown">
                         <li><a href="http://gudhi.gforge.inria.fr/licensing/">Licensing</a></li>
                         <li><a href="https://gforge.inria.fr/frs/?group_id=3865" target="_blank">Get the sources</a></li>
+                        <li><a href="https://gforge.inria.fr/frs/download.php/file/37113/GUDHI_2.0.0_OSX_UTILS.beta.tar.gz" target="_blank">Utils for Mac OSx</a></li>
+                        <li><a href="https://gforge.inria.fr/frs/download.php/file/37112/GUDHI_2.0.0_WIN64_UTILS.beta.zip" target="_blank">Utils for Win x64</a></li>
                     </ul>
                 </li>
                 <li class="divider"></li>
@@ -208,6 +210,8 @@
                         <li><a href="http://gudhi.gforge.inria.fr/doc/latest/installation.html">C++ installation manual</a></li>
                         <li><a href="http://gudhi.gforge.inria.fr/python/latest/">Python documentation</a></li>
                         <li><a href="http://gudhi.gforge.inria.fr/python/latest/installation.html">Python installation manual</a></li>
+                        <li><a href="http://gudhi.gforge.inria.fr/utils/">Utilities</a></li>
+                        <li><a href="http://bertrand.michel.perso.math.cnrs.fr/Enseignements/TDA-Gudhi-Python.html" target="_blank">Tutorial</a></li>
                     </ul>
                 </li>
                 <li class="divider"></li>
@@ -255,7 +259,7 @@
       {%- if hasdoc('copyright') %}
         {% trans path=pathto('copyright'), copyright=copyright|e %}&copy; <a href="{{ path }}">Copyright</a> {{ copyright }}.{% endtrans %}
       {%- else %}
-        {% trans copyright=copyright|e %}&copy; Copyright {{ copyright }}.{% endtrans %}
+        {% trans copyright=copyright|e %} {{ copyright }}.{% endtrans %}
       {%- endif %}
     {%- endif %}
     {%- if last_updated %}
