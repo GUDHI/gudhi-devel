@@ -12,7 +12,7 @@ add_executable ( Rips_complex_example_one_skeleton_from_distance_matrix example_
 add_executable ( Rips_complex_example_from_csv_distance_matrix example_rips_complex_from_csv_distance_matrix_file.cpp )
 
 # Point cloud
-add_executable ( Rips_complex_example_sparse example_sparse_rips_complex.cpp )
+add_executable ( Rips_complex_example_sparse example_sparse_rips.cpp )
 
 if (TBB_FOUND)
   target_link_libraries(Rips_complex_example_from_off ${TBB_LIBRARIES})

@@ -44,8 +44,10 @@ namespace rips_complex {
  * simplex is the diameter of the corresponding subset of points.
  *
  * This filtered complex is most often used as an approximation of the
- * Čech complex (they share the same 1-skeleton and are multiplicatively
- * 2-interleaved or better), which is slightly bigger but easier to compute.
+ * Čech complex. After rescaling (Rips using the length of the edges and Čech
+ * the half-length), they share the same 1-skeleton and are multiplicatively
+ * 2-interleaved or better. While it is slightly bigger, it is also much
+ * easier to compute.
  *
  * The number of simplices in the full Rips complex is exponential in the
  * number of vertices, it is thus usually restricted, by excluding all the
