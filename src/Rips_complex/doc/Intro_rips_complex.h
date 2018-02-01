@@ -84,12 +84,12 @@ namespace rips_complex {
  * \f$(1+O(\epsilon))-\f$interleaved with it (in particular, their persistence
  * diagrams are at log-bottleneck distance at most &epsilon;).
  *
- * The sparse Rips filtration was introduced by Don Sheehy \cite
- * sheehy13linear. We are using the version from \cite buchet16efficient
+ * The sparse Rips filtration was introduced by Don Sheehy
+ * \cite sheehy13linear. We are using the version from \cite buchet16efficient
  * (except that we multiply all filtration values by 2, to match the usual
  * Rips complex).
- * A more intuitive presentation of the idea is available in \cite
- * cavanna15geometric, and in a video \cite cavanna15visualizing.
+ * A more intuitive presentation of the idea is available in
+ * \cite cavanna15geometric, and in a video \cite cavanna15visualizing.
  *
  * The interface of `Sparse_rips_complex` is similar to the one for the usual
  * `Rips_complex`, except that one has to specify the approximation factor, and
