@@ -45,6 +45,10 @@ public:
     }
   };
   using Vertex_index_map = std::map<typename Vertex_map::iterator, int, Pointer_compare>;
+
+  using Clique_id = int;
+  using Mask = std::map<Alcove_id, std::vector<Clique_id>>;
+  using Cech_nerve = std::vector<std::pair<std::size_t, Clique_id>>;
   
   const Coxeter_system& cs_;
   
@@ -305,6 +309,23 @@ public:
   //     vi_map.emplace(v_it, index);
   // }
 
+  /* Should never be called if a_map or v_map are empty */
+  void build_mask(Mask& mask) {
+    unsigned d = v_map.begin()->first.size();
+    double init_level = a_map.begin()->first.level();
+    std::vector<double> barycenter(d, 1./(d+1));
+    std::vector<Alcove_id> neighbors = cs_.alcoves_of_ball(barycenter, init_level, std::sqrt(d*(d+2.)/(d+1)/3)/init_level - 1/((d+1) * init_level), true); // d+1 in the end should be d in theory. Reduced for precaution.
+    std::cout << neighbors.size() << std::endl;
+    Alcove_id base(init_level);
+    for (unsigned i = 0; i < (d*(d+1))/2; i++)
+      base.push_back(0);
+    std::cout << cs_.barycenter(base) << std::endl;
+  }
+  
+  void construct_clique_complex() {
+    Mask mask;
+    build_mask(mask);
+  }
   
   template <class AMap_iterator>
   void subdivide_alcove(AMap_iterator a_it) {

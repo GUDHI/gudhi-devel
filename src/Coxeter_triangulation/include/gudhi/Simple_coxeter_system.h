@@ -403,10 +403,9 @@ public:
 
   /** A conversion from Cartesian coordinates to the coordinates of the alcove containing the ball centered 
    *  at point of radius eps.
-   *  The matrix' rows are simple root vectors.
    */
   template <class Point>
-  std::vector<Alcove_id> alcoves_of_ball(const Point& p, double level, double eps) const {
+  std::vector<Alcove_id> alcoves_of_ball(const Point& p, double level, double eps, bool root_coords = false) const {
     unsigned d = dimension_;
     Alcove_id a_id(level);
     a_id.reserve(pos_root_count());
@@ -415,11 +414,15 @@ public:
     Eigen::VectorXd p_vect(d);
     for (unsigned short i = 0; i < d; i++)
       p_vect(i) = p[i];
-    Eigen::VectorXd scalprod_vect = root_t_ * p_vect;
+    Eigen::VectorXd scalprod_vect;
+    if (root_coords)
+      scalprod_vect = p_vect;
+    else
+      scalprod_vect = root_t_ * p_vect;
     rec_alcoves_of_ball_A(a_id, scalprod_vect, eps, alcoves, 1, 0, 0);
     return alcoves;
   }
-
+  
 private:
 
   /** Add the vertices of the given simplex to a vertex-simplex map.
@@ -481,7 +484,7 @@ private:
   }
 
   template <class S_id_iterator>
-  bool valid_coordinate(const Vertex_id& v_id, S_id_iterator& s_it, unsigned& integers, std::vector<Triplet>& triplets) {
+  bool valid_coordinate(const Vertex_id& v_id, S_id_iterator& s_it, unsigned& integers, std::vector<Triplet>& triplets) const {
     int k = v_id.size()+1;
     unsigned short d = dimension_; 
     switch (family_) {
@@ -639,7 +642,7 @@ private:
   /** Add the vertices of the given simplex to a vertex-simplex map.
    */
   template <class S_id_iterator>
-  void rec_vertices_of_simplex(Vertex_id& v_id, S_id_iterator s_it, std::vector<Vertex_id>& vertices, unsigned& integers, std::vector<Triplet>& triplets)
+  void rec_vertices_of_simplex(Vertex_id& v_id, S_id_iterator s_it, std::vector<Vertex_id>& vertices, unsigned& integers, std::vector<Triplet>& triplets) const
   {
     unsigned short d = dimension_;
     int k = v_id.size()+1;
@@ -686,7 +689,7 @@ public:
   /** Add the vertices of the given simplex to a vertex-simplex map.
    * The size of si_it->first is d*(d+1)/2.
    */
-  std::vector<Vertex_id> vertices_of_simplex(Alcove_id ai_id)
+  std::vector<Vertex_id> vertices_of_simplex(const Alcove_id& ai_id) const
   {
     unsigned d = dimension_;
     Vertex_id v_id(ai_id.level() * vertex_level_);
@@ -717,6 +720,24 @@ public:
     return true;
   }
 
+  std::vector<double> barycenter(const Alcove_id& a_id) const {
+    short d = dimension_;
+    std::vector<double> result(d, 0);
+    std::vector<Vertex_id> vertices = vertices_of_simplex(a_id);
+    FT denom = a_id.level()*vertex_level_;
+    Eigen::SparseLU<Matrix, Eigen::COLAMDOrdering<int>> chol(root_t_);
+    for (auto v: vertices) {
+      Eigen::VectorXd b(d);
+      for (int i = 0; i < d; i++) {
+        b(i) = v[i]/denom;
+      }
+      Eigen::VectorXd x = chol.solve(b);
+      for (int i = 0; i < d; i++)
+        result[i] += x(i)/(d+1);
+    }
+    return result;
+  }
+  
   template <class VMap,
             class Simplex_range>
   void write_mesh(VMap& v_map, Simplex_range& range, std::string file_name = "toplex.mesh") const

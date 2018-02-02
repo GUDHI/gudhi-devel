@@ -84,7 +84,7 @@ public:
   }
 
   template <class Point>
-  std::vector<Alcove_id> alcoves_of_ball(const Point& p, double init_level, double eps) const
+  std::vector<Alcove_id> alcoves_of_ball(const Point& p, double init_level, double eps, bool root_coords = false) const
   {
     std::vector<Alcove_id> alcoves;
     std::vector<std::vector<Alcove_id>> chunks;
@@ -95,7 +95,7 @@ public:
       for (unsigned i = 0; i < dimension; i++) {
         p_part.push_back(*p_it++);
       }
-      chunks.emplace_back(scs.alcoves_of_ball(p_part, init_level, eps));
+      chunks.emplace_back(scs.alcoves_of_ball(p_part, init_level, eps, root_coords));
     }
     // std::vector<std::vector<Vertex_id>::iterator> iterators;
     // for (auto chunk: chunks)
@@ -104,7 +104,6 @@ public:
     rec_combine_chunks_alcove(chunks.begin(), chunks.end(), alcoves, a_id);
     return alcoves;
   }
-
   
 private:
 
@@ -185,6 +184,21 @@ public:
     return vertices;
   }
 
+  std::vector<double> barycenter(const Alcove_id& a_id) const {
+    std::vector<double> result;
+    auto a_it = a_id.begin();
+    for (auto scs: simple_system_range_) {
+      Alcove_id coordinate_segment(a_id.level());
+      unsigned pos_root_count = scs.pos_root_count();
+      coordinate_segment.reserve(pos_root_count);
+      for (unsigned i = 0; i < pos_root_count; i++)
+        coordinate_segment.push_back(*a_it++);
+      std::vector<double> barycenter = scs.barycenter(coordinate_segment);
+      result.insert(result.end(), barycenter.begin(), barycenter.end());
+    }
+    return result;
+  }
+  
   bool is_adjacent(const Vertex_id& v_id, const Alcove_id& a_id) const {
     int i = 1, j = 1;
     for (auto scs: simple_system_range_) {
