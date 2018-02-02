@@ -271,8 +271,7 @@ class Kd_tree_search {
     m_tree.search(it, Fuzzy_sphere(p, radius, eps, m_tree.traits()));
   }
 
-  int tree_depth() const
-  {
+  int tree_depth() const {
     return m_tree.root()->depth();
   }
 

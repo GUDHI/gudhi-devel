@@ -239,9 +239,6 @@ their collaboration to write the two initial papers
  about this data-structure
  and also Dominique for leaving him use a prototype.
 
-
-\copyright GNU General Public License v3.
-
 @} */
 
 }  // namespace skeleton_blocker

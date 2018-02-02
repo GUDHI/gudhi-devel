@@ -52,6 +52,10 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     return (Base::find(vh) != Base::null_simplex());
   }
 
+  void assign_simplex_filtration(const Simplex& vh, Filtration_value filtration) {
+    Base::assign_filtration(Base::find(vh), filtration);
+  }
+
   bool insert(const Simplex& simplex, Filtration_value filtration = 0) {
     Insertion_result result = Base::insert_simplex_and_subfaces(simplex, filtration);
     return (result.second);

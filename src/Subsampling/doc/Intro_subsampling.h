@@ -58,8 +58,6 @@ namespace subsampling {
  * This example outputs a subset of 100 points picked randomly.
  *
  * \include Subsampling/example_pick_n_random_points.cpp
- * \copyright GNU General Public License v3.                         
- * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
  */
 /** @} */  // end defgroup subsampling
 

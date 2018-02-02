@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 2.6)
+project(Persistence_representations_landscapes_utilities)
+
+add_persistence_representation_creation_utility(create_landscapes "-1")
+
+add_persistence_representation_plot_utility(plot_landscapes ".land")
+
+add_persistence_representation_function_utility(average_landscapes ".land")
+add_persistence_representation_function_utility(compute_distance_of_landscapes ".land" "1")
+add_persistence_representation_function_utility(compute_scalar_product_of_landscapes ".land")

@@ -169,8 +169,6 @@ namespace rips_complex {
  * 
  * All the other constructions discussed for Rips complex for distance matrix can be also performed for Rips complexes construction from correlation matrices.
  * 
- * \copyright GNU General Public License v3.                         
- * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
  */
 /** @} */  // end defgroup rips_complex
 

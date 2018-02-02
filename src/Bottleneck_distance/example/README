@@ -1,0 +1,19 @@
+# Bottleneck_distance #
+
+## `alpha_rips_persistence_bottleneck_distance` ##
+This program computes the persistent homology with coefficient field Z/pZ of a Rips complex defined on a set of input points. The output diagram contains one bar per line, written with the convention:
+
+`p dim birth death`
+
+where `dim` is the dimension of the homological feature, `birth` and `death` are respectively the birth and death of the feature, and `p` is the characteristic of the field *Z/pZ* used for homology coefficients.
+
+Usage:
+`alpha_rips_persistence_bottleneck_distance [options] <OFF input file>`
+
+Allowed options:
+
+* `-h [ --help ]` Produce help message
+* `-r [ --max-edge-length ]` (default = inf) Maximal length of an edge for the Rips complex construction.`
+* `-d [ --cpx-dimension ]` (default = 1) Maximal dimension of the Rips complex we want to compute.`
+* `-p [ --field-charac ]` (default = 11)     Characteristic p of the coefficient field Z/pZ for computing homology.
+* `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature to be recorded. Enter a negative value to see zero length intervals.

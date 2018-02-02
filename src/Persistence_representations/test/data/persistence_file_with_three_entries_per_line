@@ -1,0 +1,11 @@
+1 4 inf
+#this is a comment
+4 1 0
+# this is another comment
+       1 1 0 
+ 2 50 0
+#and here we have line with infnity:
+	1 1 inf
+#and another comment
+1 10 90
+1 4 4

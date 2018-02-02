@@ -79,7 +79,6 @@ Number of vertices = 10   Number of simplices = 98 \endcode
  * 1 incidence relations in a complex. It is consequently faster when accessing the boundary of a simplex, but is less
  * compact and harder to construct from scratch.
  * 
- * \copyright GNU General Public License v3.
  * @}
  */
 
