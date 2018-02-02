@@ -21,4 +21,8 @@ if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
   add_test(NAME Nerve_GIC_utilities_VoronoiGIC COMMAND $<TARGET_FILE:VoronoiGIC>
       "human.off" "100")
 
+  install(TARGETS Nerve DESTINATION bin)
+  install(TARGETS VoronoiGIC DESTINATION bin)
+  install(FILES KeplerMapperVisuFromTxtFile.py km.py km.py.COPYRIGHT DESTINATION bin)
+
 endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)
