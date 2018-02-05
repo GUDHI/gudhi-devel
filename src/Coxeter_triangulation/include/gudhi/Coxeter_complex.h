@@ -13,6 +13,12 @@
 #include <gudhi/Fake_simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Coxeter_complex/Collapse.h>
+
+#include <gudhi/Simplex_tree.h>
+#include <limits>
+#include <gudhi/Coxeter_complex/Cech_blocker.h>
+#include <gudhi/graph_simplicial_complex.h>
+#include <gudhi/distance_functions.h>
 // #include <gudhi/Coxeter_complex/Simplex_with_cofaces.h>
 
 #include "../../example/cxx-prettyprint/prettyprint.hpp"
@@ -38,6 +44,9 @@ public:
   using Alcove = std::tuple<std::size_t, Point_pointers, Vertex_pointers>;
   using Alcove_map = std::map<Alcove_id, Alcove>;
 
+  using Simplex_tree = Gudhi::Simplex_tree<>;
+  using Proximity_graph = Gudhi::Proximity_graph<Simplex_tree>;
+  
   struct Pointer_compare {
     typedef typename Vertex_map::iterator Pointer;
     bool operator()(const Pointer& lhs, const Pointer& rhs) const { 
@@ -311,15 +320,31 @@ public:
 
   /* Should never be called if a_map or v_map are empty */
   void build_mask(Mask& mask) {
-    unsigned d = v_map.begin()->first.size();
+    const unsigned d = v_map.begin()->first.size();
+    using Kernel = CGAL::Epick_d<CGAL::Dimension_tag<2> >;
+    using Point_d = typename Kernel::Point_d;
     double init_level = a_map.begin()->first.level();
     std::vector<double> barycenter(d, 1./(d+1));
-    std::vector<Alcove_id> neighbors = cs_.alcoves_of_ball(barycenter, init_level, std::sqrt(d*(d+2.)/(d+1)/3)/init_level - 1/((d+1) * init_level), true); // d+1 in the end should be d in theory. Reduced for precaution.
+    double rad = std::sqrt(d*(d+2.)/(d+1)/3)/init_level;
+    std::vector<Alcove_id> neighbors = cs_.alcoves_of_ball(barycenter, init_level, rad - 1/((d+1) * init_level), true); // d+1 in the end should be d in theory. Reduced for precaution.
     std::cout << neighbors.size() << std::endl;
     Alcove_id base(init_level);
     for (unsigned i = 0; i < (d*(d+1))/2; i++)
       base.push_back(0);
     std::cout << cs_.barycenter(base) << std::endl;
+    std::vector<Point_d> barycenters; 
+    for (auto n: neighbors) {
+      std::vector<double> barycenter_n = cs_.barycenter(n);
+      barycenters.push_back(Point_d(2, barycenter_n.begin(), barycenter_n.end()));
+    }
+    /* A very naive implementation with Simplex tree */
+    Simplex_tree st;
+    double threshold = 2*rad+1.0e-16;
+    Proximity_graph prox_graph = Gudhi::compute_proximity_graph<Simplex_tree>(barycenters,
+                                                                              threshold,
+                                                                              Gudhi::Euclidean_distance());
+    st.insert_graph(prox_graph);
+    st.expansion_with_blockers(std::numeric_limits<int>::max(), Cech_blocker<Simplex_tree, 2>(st, threshold, barycenters));
   }
   
   void construct_clique_complex() {
@@ -473,7 +498,7 @@ public:
     // };
     // std::sort(scoll_simplex_range.begin(), scoll_simplex_range.end(), Size_comparison());
     
-    Simplex_tree<> coll_stree;
+    Simplex_tree coll_stree;
     Collapse coll(max_simplex_range, coll_stree);
     end = clock();
     time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
@@ -499,7 +524,7 @@ public:
       std::cout << "Euler characteristic of coll_stree is " << chi << std::endl;
 
       using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
-      using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree<>, Field_Zp>;
+      using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
       double min_persistence = 0;
       // Sort the simplices in the order of the filtration
       coll_stree.set_dimension(dim_complex+1);
@@ -515,7 +540,7 @@ public:
       pcoh.output_diagram(out);
       out.close();
       std::cout << "Persistence complete." << std::endl;
-      typedef Simplex_tree_simplex_iterator<Simplex_tree<> > Simplex_tree_iterator;
+      typedef Simplex_tree_simplex_iterator<Simplex_tree> Simplex_tree_iterator;
       typedef boost::iterator_range<Simplex_tree_iterator> Simplex_tree_range;
       Simplex_tree_range simplex_tree_range(Simplex_tree_iterator(coll_stree.complex_simplex_range().begin(), coll_stree),
                                             Simplex_tree_iterator(coll_stree.complex_simplex_range().end(), coll_stree));
