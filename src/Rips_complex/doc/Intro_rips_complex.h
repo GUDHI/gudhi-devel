@@ -167,7 +167,8 @@ namespace rips_complex {
  * 
  * \include Rips_complex/one_skeleton_rips_from_correlation_matrix_for_doc.txt
  * 
- * All the other constructions discussed for Rips complex for distance matrix can be also performed for Rips complexes construction from correlation matrices.
+ * All the other constructions discussed for Rips complex for distance matrix can be also performed for Rips complexes
+ * construction from correlation matrices.
  * 
  */
 /** @} */  // end defgroup rips_complex
