@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import gudhi
+import sys
 import argparse
 
 """This file is part of the Gudhi Library. The Gudhi library
@@ -37,23 +38,29 @@ parser = argparse.ArgumentParser(description='RipsComplex creation from '
                                  '- Constructs a Rips complex with the '
                                  'correlation matrix from the given csv file.')
 parser.add_argument("-f", "--file", type=str, required=True)
-parser.add_argument("-e", "--max_edge_length", type=float, default=0.5)
+parser.add_argument("-c", "--min_edge_correlation", type=float, default=0.5)
 parser.add_argument("-d", "--max_dimension", type=int, default=1)
 parser.add_argument("-b", "--band_boot", type=float, default=0.)
 parser.add_argument('--no-diagram', default=False, action='store_true' , help='Flag for not to display the diagrams')
 
 args = parser.parse_args()
 
+if not (-1. < args.min_edge_correlation < 1.):
+    print("Wrong value of the treshold corelation (should be between -1 and 1).")
+    sys.exit(1)
+
 print("#####################################################################")
 print("RipsComplex creation from correlation matrix read in a csv file")
 
-message = "RipsComplex with max_edge_length=" + repr(args.max_edge_length)
+message = "RipsComplex with min_edge_correlation=" + repr(args.min_edge_correlation)
 print(message)
 
 correlation_matrix = gudhi.read_lower_triangular_matrix_from_csv_file(csv_file=args.file)
 # Given a correlation matrix M, we compute component-wise M'[i,j] = 1-M[i,j] to get a distance matrix:
-distance_matrix = [[1-correlation_matrix[i][j] for j in range(len(correlation_matrix[0]))] for i in range(len(correlation_matrix))]
-rips_complex = gudhi.RipsComplex(distance_matrix=distance_matrix, max_edge_length=args.max_edge_length)
+distance_matrix = [[1.-correlation_matrix[i][j] for j in range(len(correlation_matrix[i]))] for i in range(len(correlation_matrix))]
+
+rips_complex = gudhi.RipsComplex(distance_matrix=distance_matrix,
+                                 max_edge_length=1.-args.min_edge_correlation)
 simplex_tree = rips_complex.create_simplex_tree(max_dimension=args.max_dimension)
 
 message = "Number of simplices=" + repr(simplex_tree.num_simplices())
@@ -64,6 +71,9 @@ diag = simplex_tree.persistence()
 print("betti_numbers()=")
 print(simplex_tree.betti_numbers())
 
+# invert the persistence diagram
+invert_diag = [(diag[pers][0],(1.-diag[pers][1][0], 1.-diag[pers][1][1])) for pers in range(len(diag))]
+
 if args.no_diagram == False:
-    pplot = gudhi.plot_persistence_diagram(diag, band_boot=args.band_boot)
+    pplot = gudhi.plot_persistence_diagram(invert_diag, band_boot=args.band_boot)
     pplot.show()
