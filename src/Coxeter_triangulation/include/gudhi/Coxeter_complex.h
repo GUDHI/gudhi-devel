@@ -16,6 +16,7 @@
 
 #include <gudhi/Simplex_tree.h>
 #include <limits>
+#include <iomanip>
 #include <gudhi/Coxeter_complex/Cech_blocker.h>
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/distance_functions.h>
@@ -24,6 +25,8 @@
 #include "../../example/cxx-prettyprint/prettyprint.hpp"
 
 #include <boost/iterator/iterator_facade.hpp>
+
+double num_error = 1.0e-10;
 
 namespace Gudhi {
 
@@ -55,9 +58,23 @@ public:
   };
   using Vertex_index_map = std::map<typename Vertex_map::iterator, int, Pointer_compare>;
 
+  struct Alcove_pair_compare {
+    typedef std::pair<Alcove_id, double> Pair;
+    bool operator()(const Pair& lhs, const Pair& rhs) const { 
+      return lhs.second < rhs.second || lhs.first < lhs.first;
+    }
+  };
   using Clique_id = int;
-  using Mask = std::map<Alcove_id, std::vector<Clique_id>>;
-  using Cech_nerve = std::vector<std::pair<std::size_t, Clique_id>>;
+  using Mask = std::map<Alcove_id, std::vector<Clique_id> >;
+  using Mask_pointers = std::vector<typename Mask::iterator>;
+  struct Double_compare {
+    bool operator()(const double& lhs, const double& rhs) const { 
+      return lhs + num_error < rhs;
+    }
+  };
+  using Dist_mask_map = std::map<double, Mask_pointers, Double_compare>;
+  // using Mask = std::pair<Mask_clique_map, Dist_mask_map> ;
+  using Cech_nerve = std::vector<std::pair<std::size_t, Clique_id> >;
   
   const Coxeter_system& cs_;
   
@@ -66,7 +83,6 @@ public:
   std::size_t max_id;
   Vertex_index_map vi_map;
 
-  
   class Alcove_iterator : public boost::iterator_facade< Alcove_iterator,
                                                          std::vector<std::size_t> const,
                                                          boost::forward_traversal_tag> {
@@ -153,22 +169,33 @@ public:
 
 private:
 
-  void compute_a_map(const Point_range& point_vector, double init_level, double eps, bool store_points) {
-    for (auto p_it = point_vector.begin(); p_it != point_vector.end(); ++p_it) {
-      std::vector<Alcove_id> alcoves = cs_.alcoves_of_ball(*p_it, init_level, eps);
-      for (Alcove_id a: alcoves) {
-        auto a_it = a_map.find(a);
-        if (a_it == a_map.end()) {
-          if (store_points)
-            a_map.emplace(a, std::make_tuple(max_id++, Point_pointers(1, p_it), Vertex_pointers()));
-          else
-            a_map.emplace(a, std::make_tuple(max_id++, Point_pointers(), Vertex_pointers()));
-        }
+  struct Alcove_visitor {
+    Alcove_visitor(typename Point_range::const_iterator& p_it,
+                   Alcove_map& a_map,
+                   bool& store_points)
+      : p_it_(p_it), a_map_(a_map), store_points_(store_points) {}
+    
+    void operator() (const Alcove_id& a) {
+      auto a_it = a_map_.find(a);
+      if (a_it == a_map_.end()) {
+        if (store_points_)
+          a_map_.emplace(a, std::make_tuple(a_map_.size(), Point_pointers(1, p_it_), Vertex_pointers()));
         else
-          if (store_points)
-            std::get<1>(a_it->second).push_back(p_it);
+          a_map_.emplace(a, std::make_tuple(a_map_.size(), Point_pointers(), Vertex_pointers()));
       }
+      else
+        if (store_points_)
+          std::get<1>(a_it->second).push_back(p_it_);
     }
+  private :
+    typename Point_range::const_iterator& p_it_;
+    Alcove_map& a_map_;
+    bool& store_points_;
+  };
+  
+  void compute_a_map(const Point_range& point_vector, double init_level, double eps, bool store_points) {
+    for (auto p_it = point_vector.begin(); p_it != point_vector.end(); ++p_it)
+      cs_.alcoves_of_ball(*p_it, init_level, eps, Alcove_visitor(p_it, a_map, store_points));
   }
   
   void compute_v_map() {
@@ -318,33 +345,76 @@ public:
   //     vi_map.emplace(v_it, index);
   // }
 
+  /* Returns true if and only if the simplex is critical.
+   */
+  template <class SimplexTree>
+  bool is_maximal(typename SimplexTree::Simplex_handle sh,
+                  SimplexTree& st)
+  {
+    assert(st.num_simplices() != 0);
+    return st.cofaces_simplex_range(sh,1).empty();
+  }
+
+private:
+  struct Alcove_mask_visitor {
+    Alcove_mask_visitor(Mask& mask,
+                        Dist_mask_map& dmm,
+                        const Coxeter_system& cs,
+                        std::vector<double>& barycenter,
+                        double rad)
+      : mask_(mask), dmm_(dmm), cs_(cs), barycenter_(barycenter), rad_(rad) {}
+    
+    void operator() (const Alcove_id& a) {
+      std::vector<double> bary_a = cs_.barycenter(a);
+      double dist = Euclidean_distance()(barycenter_, bary_a);
+      if (dist <= 2*rad_+1.0e-10) {
+        auto r_pair = mask_.emplace(a, std::vector<Clique_id>());
+        auto d_it = dmm_.find(dist/rad_);
+        if (d_it == dmm_.end())
+          dmm_.emplace(dist/rad_, Mask_pointers(1, r_pair.first));
+        else
+          d_it->second.push_back(r_pair.first);
+      }
+    }
+  private :
+    Mask& mask_;
+    Dist_mask_map& dmm_;
+    const Coxeter_system& cs_;
+    std::vector<double>& barycenter_;
+    double rad_;
+  };
+
+public:
   /* Should never be called if a_map or v_map are empty */
   void build_mask(Mask& mask) {
     const unsigned d = v_map.begin()->first.size();
-    using Kernel = CGAL::Epick_d<CGAL::Dimension_tag<2> >;
-    using Point_d = typename Kernel::Point_d;
     double init_level = a_map.begin()->first.level();
-    std::vector<double> barycenter(d, 1./(d+1));
-    double rad = std::sqrt(d*(d+2.)/(d+1)/3)/init_level;
-    std::vector<Alcove_id> neighbors = cs_.alcoves_of_ball(barycenter, init_level, rad - 1/((d+1) * init_level), true); // d+1 in the end should be d in theory. Reduced for precaution.
-    std::cout << neighbors.size() << std::endl;
     Alcove_id base(init_level);
     for (unsigned i = 0; i < (d*(d+1))/2; i++)
       base.push_back(0);
-    std::cout << cs_.barycenter(base) << std::endl;
-    std::vector<Point_d> barycenters; 
-    for (auto n: neighbors) {
-      std::vector<double> barycenter_n = cs_.barycenter(n);
-      barycenters.push_back(Point_d(2, barycenter_n.begin(), barycenter_n.end()));
+    std::vector<double> barycenter = cs_.barycenter(base);
+    double rad = std::sqrt(d*(d+2.)/(d+1)/12)/init_level;
+    Dist_mask_map dmm;
+    cs_.alcoves_of_ball(barycenter,
+                        init_level,
+                        2*rad,
+                        Alcove_mask_visitor(mask, dmm, cs_, barycenter, rad));
+    for (auto m: mask)
+      std::cout << m.first << " " << m.second << std::endl;
+    std::cout << mask.size() << std::endl;
+    std::cout << std::endl;
+    std::cout << std::fixed;
+    std::cout << std::setprecision(6);
+    for (auto d: dmm) {
+      std::cout << d.first << " " << d.second.size() << " [";
+      if (!d.second.empty()) {
+        auto p_it = d.second.begin();
+        std::cout << (*p_it++)->first;
+        while (p_it != d.second.end())
+          std::cout << ", " << (*p_it++)->first;
+      }
+      std::cout << "]\n";
     }
-    /* A very naive implementation with Simplex tree */
-    Simplex_tree st;
-    double threshold = 2*rad+1.0e-16;
-    Proximity_graph prox_graph = Gudhi::compute_proximity_graph<Simplex_tree>(barycenters,
-                                                                              threshold,
-                                                                              Gudhi::Euclidean_distance());
-    st.insert_graph(prox_graph);
-    st.expansion_with_blockers(std::numeric_limits<int>::max(), Cech_blocker<Simplex_tree, 2>(st, threshold, barycenters));
   }
   
   void construct_clique_complex() {

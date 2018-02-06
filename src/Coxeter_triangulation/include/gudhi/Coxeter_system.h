@@ -83,10 +83,14 @@ public:
     return a_id;
   }
 
-  template <class Point>
-  std::vector<Alcove_id> alcoves_of_ball(const Point& p, double init_level, double eps, bool root_coords = false) const
+  template <class Point,
+            class Visitor>
+  void alcoves_of_ball(const Point& p,
+                       double init_level,
+                       double eps,
+                       Visitor visitor,
+                       bool root_coords = false) const
   {
-    std::vector<Alcove_id> alcoves;
     std::vector<std::vector<Alcove_id>> chunks;
     auto p_it = p.begin();
     for (auto scs: simple_system_range_) {
@@ -101,8 +105,7 @@ public:
     // for (auto chunk: chunks)
     //   iterators.emplace_back(chunk.begin());
     Alcove_id a_id(init_level);
-    rec_combine_chunks_alcove(chunks.begin(), chunks.end(), alcoves, a_id);
-    return alcoves;
+    rec_combine_chunks_alcove(chunks.begin(), chunks.end(), visitor, a_id);
   }
   
 private:
@@ -127,19 +130,20 @@ private:
     return id_red;
   }
 
+  template <class Visitor>
   void rec_combine_chunks_alcove(std::vector<std::vector<Alcove_id>>::iterator chunks_it,
                                  std::vector<std::vector<Alcove_id>>::iterator chunks_end,
-                                 std::vector<Alcove_id>& alcoves,
+                                 Visitor& visitor,
                                  Alcove_id& a_id) const {
     if (chunks_it == chunks_end) {
       //      vertices.push_back(reduced_id(v_id));
-      alcoves.push_back(a_id);
+      visitor(a_id);
       return;
     }
     for (auto chunk: *chunks_it) {
       for (auto c_it = chunk.begin(); c_it != chunk.end(); ++c_it)
         a_id.push_back(*c_it);
-      rec_combine_chunks_alcove(chunks_it+1, chunks_end, alcoves, a_id);
+      rec_combine_chunks_alcove(chunks_it+1, chunks_end, visitor, a_id);
       a_id.resize(a_id.size()-chunk.size());
     }
   }
