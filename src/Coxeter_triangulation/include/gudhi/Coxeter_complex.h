@@ -393,6 +393,7 @@ public:
     for (unsigned i = 0; i < (d*(d+1))/2; i++)
       base.push_back(0);
     std::vector<double> barycenter = cs_.barycenter(base);
+    std::cout << barycenter << "\n";
     double rad = std::sqrt(d*(d+2.)/(d+1)/12)/init_level;
     Dist_mask_map dmm;
     cs_.alcoves_of_ball(barycenter,

@@ -5,13 +5,16 @@
 #include <vector>
 #include <utility>
 #include <exception>
+#include <Eigen/Eigenvalues>
 #include <Eigen/Sparse>
+#include "../../example/cxx-prettyprint/prettyprint.hpp"
 // #include <Eigen/SPQRSupport>
 
 class Simple_coxeter_system {
 
   typedef double FT;
-  typedef Eigen::SparseMatrix<FT> Matrix;
+  typedef Eigen::MatrixXd Matrix;
+  typedef Eigen::SparseMatrix<FT> SparseMatrix;
   typedef Eigen::Triplet<FT> Triplet;
   // typedef std::vector<int> Alcove_id;
   // struct Alcove_id {
@@ -67,20 +70,34 @@ public:
     case 'A': {
       unsigned short d = dimension;
       vertex_level_ = 1;
-      std::vector<Triplet> cartan_triplets;
-      cartan_triplets.reserve(3*d-2);
+      // std::vector<Triplet> cartan_triplets;
+      // cartan_triplets.reserve(3*d-2);
+      // for (unsigned i = 0; i < d; i++) {
+      //   cartan_triplets.push_back(Triplet(i,i,2.0));
+      // }
+      // for (unsigned i = 1; i < d; i++) {
+      //   cartan_triplets.push_back(Triplet(i-1,i,-1.0));
+      //   cartan_triplets.push_back(Triplet(i,i-1,-1.0));
+      // }
+      // Matrix cartan(d,d);
+      // cartan.setFromTriplets(cartan_triplets.begin(), cartan_triplets.end());
+      // std::cout << "cartan =" << std::endl << cartan << std::endl;
+      // Eigen::SimplicialLLT<Matrix, Eigen::Lower> chol(cartan);
+      // root_t_ = chol.matrixL();
+      Matrix cartan(d,d);
       for (unsigned i = 0; i < d; i++) {
-        cartan_triplets.push_back(Triplet(i,i,2.0));
+        cartan(i,i) = 2.0;
       }
       for (unsigned i = 1; i < d; i++) {
-        cartan_triplets.push_back(Triplet(i-1,i,-1.0));
-        cartan_triplets.push_back(Triplet(i,i-1,-1.0));
+        cartan(i-1,i) = -1.0;
+        cartan(i,i-1) = -1.0;
       }
-      Matrix cartan(d,d);
-      cartan.setFromTriplets(cartan_triplets.begin(), cartan_triplets.end());
       // std::cout << "cartan =" << std::endl << cartan << std::endl;
-      Eigen::SimplicialLLT<Matrix, Eigen::Lower> chol(cartan);
-      root_t_ = chol.matrixL();
+      Eigen::SelfAdjointEigenSolver<Matrix> saes(cartan);
+      Eigen::VectorXd sqrt_diag(d);
+      for (int i = 0; i < d; ++i)
+        sqrt_diag(i) = std::sqrt(saes.eigenvalues()[i]);
+      root_t_ = saes.eigenvectors()*sqrt_diag.asDiagonal();
       // std::cout << "root^t =" << std::endl << root_t_ << std::endl;
       break;
     }
@@ -88,21 +105,35 @@ public:
       unsigned short d = dimension;
       vertex_level_ = 2;
       assert(d >= 2);
-      std::vector<Triplet> cartan_triplets;
-      cartan_triplets.reserve(3*d-2);
-      for (int i = 0; i < d-1; i++) {
-        cartan_triplets.push_back(Triplet(i,i,4.0));
-      }
-      cartan_triplets.push_back(Triplet(d-1,d-1,2.0));
-      for (int i = 1; i < d; i++) {
-        cartan_triplets.push_back(Triplet(i-1,i,-2.0));
-        cartan_triplets.push_back(Triplet(i,i-1,-2.0));
-      }
+      // std::vector<Triplet> cartan_triplets;
+      // cartan_triplets.reserve(3*d-2);
+      // for (int i = 0; i < d-1; i++) {
+      //   cartan_triplets.push_back(Triplet(i,i,4.0));
+      // }
+      // cartan_triplets.push_back(Triplet(d-1,d-1,2.0));
+      // for (int i = 1; i < d; i++) {
+      //   cartan_triplets.push_back(Triplet(i-1,i,-2.0));
+      //   cartan_triplets.push_back(Triplet(i,i-1,-2.0));
+      // }
+      // Matrix cartan(d,d);
+      // cartan.setFromTriplets(cartan_triplets.begin(), cartan_triplets.end());
+      // // std::cout << "cartan =" << std::endl << cartan << std::endl;
+      // Eigen::SimplicialLLT<Matrix, Eigen::Lower> chol(cartan);
+      // root_t_ = chol.matrixL();
       Matrix cartan(d,d);
-      cartan.setFromTriplets(cartan_triplets.begin(), cartan_triplets.end());
-      // std::cout << "cartan =" << std::endl << cartan << std::endl;
-      Eigen::SimplicialLLT<Matrix, Eigen::Lower> chol(cartan);
-      root_t_ = chol.matrixL();
+      for (int i = 0; i < d-1; i++) {
+        cartan(i,i) = 4.0;
+      }
+      cartan(d-1,d-1) = 2.0;
+      for (int i = 1; i < d; i++) {
+        cartan(i-1,i) = -2.0;
+        cartan(i,i-1) = -2.0;
+      }
+      Eigen::SelfAdjointEigenSolver<Matrix> saes(cartan);
+      Eigen::VectorXd sqrt_diag(d);
+      for (int i = 0; i < d; ++i)
+        sqrt_diag(i) = std::sqrt(saes.eigenvalues()[i]);
+      root_t_ = saes.eigenvectors()*sqrt_diag.asDiagonal();
       // std::cout << "root^t =" << std::endl << root_t_ << std::endl;
       break;
     }  
@@ -110,23 +141,39 @@ public:
       unsigned short d = dimension;
       vertex_level_ = 2;
       assert(d >= 2);
-      std::vector<Triplet> cartan_triplets;
-      cartan_triplets.reserve(3*d-2);
-      for (int i = 0; i < d-1; i++) {
-        cartan_triplets.push_back(Triplet(i,i,2.0));
-      }
-      cartan_triplets.push_back(Triplet(d-1,d-1,4.0));
-      for (int i = 1; i < d-1; i++) {
-        cartan_triplets.push_back(Triplet(i-1,i,-1.0));
-        cartan_triplets.push_back(Triplet(i,i-1,-1.0));
-      }
-      cartan_triplets.push_back(Triplet(d-1,d-2,-2.0));
-      cartan_triplets.push_back(Triplet(d-2,d-1,-2.0));
+      // std::vector<Triplet> cartan_triplets;
+      // cartan_triplets.reserve(3*d-2);
+      // for (int i = 0; i < d-1; i++) {
+      //   cartan_triplets.push_back(Triplet(i,i,2.0));
+      // }
+      // cartan_triplets.push_back(Triplet(d-1,d-1,4.0));
+      // for (int i = 1; i < d-1; i++) {
+      //   cartan_triplets.push_back(Triplet(i-1,i,-1.0));
+      //   cartan_triplets.push_back(Triplet(i,i-1,-1.0));
+      // }
+      // cartan_triplets.push_back(Triplet(d-1,d-2,-2.0));
+      // cartan_triplets.push_back(Triplet(d-2,d-1,-2.0));
+      // Matrix cartan(d,d);
+      // cartan.setFromTriplets(cartan_triplets.begin(), cartan_triplets.end());
+      // // std::cout << "cartan =" << std::endl << cartan << std::endl;
+      // Eigen::SimplicialLLT<Matrix, Eigen::Lower> chol(cartan);
+      // root_t_ = chol.matrixL();
       Matrix cartan(d,d);
-      cartan.setFromTriplets(cartan_triplets.begin(), cartan_triplets.end());
-      // std::cout << "cartan =" << std::endl << cartan << std::endl;
-      Eigen::SimplicialLLT<Matrix, Eigen::Lower> chol(cartan);
-      root_t_ = chol.matrixL();
+      for (int i = 0; i < d-1; i++) {
+        cartan(i,i) = 2.0;
+      }
+      cartan(d-1,d-1) = 4.0;
+      for (int i = 1; i < d-1; i++) {
+        cartan(i-1,i) = -1.0;
+        cartan(i,i-1) = -1.0;
+      }
+      cartan(d-1,d-2) = -2.0;
+      cartan(d-2,d-1) = -2.0;
+      Eigen::SelfAdjointEigenSolver<Matrix> saes(cartan);
+      Eigen::VectorXd sqrt_diag(d);
+      for (int i = 0; i < d; ++i)
+        sqrt_diag(i) = std::sqrt(saes.eigenvalues()[i]);
+      root_t_ = saes.eigenvectors()*sqrt_diag.asDiagonal();
       // std::cout << "root^t =" << std::endl << root_t_ << std::endl;
       break;
     }  
@@ -134,72 +181,87 @@ public:
       unsigned short d = dimension;
       vertex_level_ = 2;
       assert(d >= 3);
-      std::vector<Triplet> cartan_triplets;
-      cartan_triplets.reserve(3*d-2);
-      for (unsigned i = 0; i < d; i++) {
-        cartan_triplets.push_back(Triplet(i,i,2.0));
+      // std::vector<Triplet> cartan_triplets;
+      // cartan_triplets.reserve(3*d-2);
+      // for (unsigned i = 0; i < d; i++) {
+      //   cartan_triplets.push_back(Triplet(i,i,2.0));
+      // }
+      // for (int i = 1; i < d-1; i++) {
+      //   cartan_triplets.push_back(Triplet(i-1,i,-1.0));
+      //   cartan_triplets.push_back(Triplet(i,i-1,-1.0));
+      // }
+      // cartan_triplets.push_back(Triplet(d-1,d-3,-1.0));
+      // cartan_triplets.push_back(Triplet(d-3,d-1,-1.0));
+      // Matrix cartan(d,d);
+      // cartan.setFromTriplets(cartan_triplets.begin(), cartan_triplets.end());
+      // // std::cout << "cartan =" << std::endl << cartan << std::endl;
+      // Eigen::SimplicialLLT<Matrix, Eigen::Lower> chol(cartan);
+      // root_t_ = chol.matrixL();
+      Matrix cartan(d,d);
+      for (int i = 0; i < d; i++) {
+        cartan(i,i) = 2.0;
       }
       for (int i = 1; i < d-1; i++) {
-        cartan_triplets.push_back(Triplet(i-1,i,-1.0));
-        cartan_triplets.push_back(Triplet(i,i-1,-1.0));
+        cartan(i-1,i) = -1.0;
+        cartan(i,i-1) = -1.0;
       }
-      cartan_triplets.push_back(Triplet(d-1,d-3,-1.0));
-      cartan_triplets.push_back(Triplet(d-3,d-1,-1.0));
-      Matrix cartan(d,d);
-      cartan.setFromTriplets(cartan_triplets.begin(), cartan_triplets.end());
-      // std::cout << "cartan =" << std::endl << cartan << std::endl;
-      Eigen::SimplicialLLT<Matrix, Eigen::Lower> chol(cartan);
-      root_t_ = chol.matrixL();
+      cartan(d-1,d-3) = -1.0;
+      cartan(d-3,d-1) = -1.0;
+      Eigen::SelfAdjointEigenSolver<Matrix> saes(cartan);
+      Eigen::VectorXd sqrt_diag(d);
+      for (int i = 0; i < d; ++i)
+        sqrt_diag(i) = std::sqrt(saes.eigenvalues()[i]);
+      root_t_ = saes.eigenvectors()*sqrt_diag.asDiagonal();
       // std::cout << "root^t =" << std::endl << root_t_ << std::endl;
       break;
     }  
     case 'E': {   
-      unsigned short d = dimension;
-      vertex_level_ = 2;
-      assert(d >= 6 && d <= 8);
-      std::vector<Triplet> cartan_triplets;
-      cartan_triplets.reserve(3*d-2);
-      for (unsigned i = 0; i < d; i++) {
-        cartan_triplets.push_back(Triplet(i,i,2.0));
-      }
-      for (int i = 3; i < d; i++) {
-        cartan_triplets.push_back(Triplet(i-1,i,-1.0));
-        cartan_triplets.push_back(Triplet(i,i-1,-1.0));
-      }
-      cartan_triplets.push_back(Triplet(2,0,-1.0));
-      cartan_triplets.push_back(Triplet(3,1,-1.0));
-      cartan_triplets.push_back(Triplet(0,2,-1.0));
-      cartan_triplets.push_back(Triplet(1,3,-1.0));
-      Matrix cartan(d,d);
-      cartan.setFromTriplets(cartan_triplets.begin(), cartan_triplets.end());
-      std::cout << "cartan =" << std::endl << cartan << std::endl;
-      Eigen::SimplicialLLT<Matrix, Eigen::Lower> chol(cartan);
-      root_t_ = chol.matrixL();
-      std::cout << "root^t =" << std::endl << root_t_ << std::endl;
-      Eigen::MatrixXf base(8,8);      
-      std::vector<Triplet> base_triplets;
-      base(0,0) = 0.5;
-      base(7,0) = 0.5;
-      base(1,0) = -0.5;
-      base(2,0) = -0.5;
-      base(3,0) = -0.5;
-      base(4,0) = -0.5;
-      base(5,0) = -0.5;
-      base(6,0) = -0.5;
-      base(0,1) = 1.0;
-      base(1,1) = 1.0;
-      for (int i = 0; i < d-2; ++i) {
-        base(i, i+2) =  -1.0;
-        base(i+1, i+2) =  1.0;
-      }
-      if (d <= 6) {
-        base(5,6) = 1.0;
-        base(6,6) = -1.0;
-      }
-      if (d <= 7) {
-        base(6,7) = 1.0;
-        base(7,7) = 1.0;
-      }
+      // unsigned short d = dimension;
+      // vertex_level_ = 2;
+      // assert(d >= 6 && d <= 8);
+      // std::vector<Triplet> cartan_triplets;
+      // cartan_triplets.reserve(3*d-2);
+      // for (unsigned i = 0; i < d; i++) {
+      //   cartan_triplets.push_back(Triplet(i,i,2.0));
+      // }
+      // for (int i = 3; i < d; i++) {
+      //   cartan_triplets.push_back(Triplet(i-1,i,-1.0));
+      //   cartan_triplets.push_back(Triplet(i,i-1,-1.0));
+      // }
+      // cartan_triplets.push_back(Triplet(2,0,-1.0));
+      // cartan_triplets.push_back(Triplet(3,1,-1.0));
+      // cartan_triplets.push_back(Triplet(0,2,-1.0));
+      // cartan_triplets.push_back(Triplet(1,3,-1.0));
+      // Matrix cartan(d,d);
+      // cartan.setFromTriplets(cartan_triplets.begin(), cartan_triplets.end());
+      // std::cout << "cartan =" << std::endl << cartan << std::endl;
+      // Eigen::SimplicialLLT<Matrix, Eigen::Lower> chol(cartan);
+      // root_t_ = chol.matrixL();
+      // std::cout << "root^t =" << std::endl << root_t_ << std::endl;
+      // Eigen::MatrixXf base(8,8);      
+      // std::vector<Triplet> base_triplets;
+      // base(0,0) = 0.5;
+      // base(7,0) = 0.5;
+      // base(1,0) = -0.5;
+      // base(2,0) = -0.5;
+      // base(3,0) = -0.5;
+      // base(4,0) = -0.5;
+      // base(5,0) = -0.5;
+      // base(6,0) = -0.5;
+      // base(0,1) = 1.0;
+      // base(1,1) = 1.0;
+      // for (int i = 0; i < d-2; ++i) {
+      //   base(i, i+2) =  -1.0;
+      //   base(i+1, i+2) =  1.0;
+      // }
+      // if (d <= 6) {
+      //   base(5,6) = 1.0;
+      //   base(6,6) = -1.0;
+      // }
+      // if (d <= 7) {
+      //   base(6,7) = 1.0;
+      //   base(7,7) = 1.0;
+      // }
       // std::cout << "base = " << std::endl << base << std::endl;
       // std::cout << "base^{-1} = " << std::endl << base.inverse() << std::endl;
       // for (int i = )
@@ -663,10 +725,10 @@ private:
       if (k == d+1) {
         if (integers < d)
           return;
-        Matrix int_roots(integers, d);
+        SparseMatrix int_roots(integers, d);
         int_roots.setFromTriplets(triplets.begin(), triplets.end());
         // Eigen::SparseQR<Matrix, Eigen::COLAMDOrdering<int>> spQR(int_roots);
-        Eigen::SparseQR<Matrix, Eigen::NaturalOrdering<int>> spQR(int_roots);
+        Eigen::SparseQR<SparseMatrix, Eigen::NaturalOrdering<int>> spQR(int_roots);
         // Eigen::SPQR<Matrix> spQR(int_roots);
         if (spQR.rank() == d)
           vertices.emplace_back(v_id);
@@ -724,17 +786,22 @@ public:
     short d = dimension_;
     std::vector<double> result(d, 0);
     std::vector<Vertex_id> vertices = vertices_of_simplex(a_id);
+    // std::cout << "Vertices of " << a_id << " are " << vertices << ". ";
     FT denom = a_id.level()*vertex_level_;
-    Eigen::SparseLU<Matrix, Eigen::COLAMDOrdering<int>> chol(root_t_);
+    // Eigen::SparseLU<Matrix, Eigen::COLAMDOrdering<int>> chol(root_t_);
+    Eigen::PartialPivLU<Matrix> chol(root_t_);
     for (auto v: vertices) {
       Eigen::VectorXd b(d);
       for (int i = 0; i < d; i++) {
         b(i) = v[i]/denom;
       }
       Eigen::VectorXd x = chol.solve(b);
+      // std::cout << "Vertex " << v << "\n";
+      // std::cout << x << "\n";
       for (int i = 0; i < d; i++)
         result[i] += x(i)/(d+1);
     }
+    // std::cout << " The barycenter is " << result << ".\n";
     return result;
   }
   
@@ -760,11 +827,12 @@ public:
       for (int i = 0; i < d; i++) {
         b(i) = m.first[i]/denom;
       }
-      Eigen::SparseLU<Matrix, Eigen::COLAMDOrdering<int>> chol(root_t_);
+      // Eigen::SparseLU<Matrix, Eigen::COLAMDOrdering<int>> chol(root_t_);
+      Eigen::PartialPivLU<Matrix> chol(root_t_);
       Eigen::VectorXd x = chol.solve(b);
-      if(chol.info()!=Eigen::Success) {
-        std::cout << "solving failed\n";
-      }
+      // if(chol.info()!=Eigen::Success) {
+      //   std::cout << "solving failed\n";
+      // }
       // std::cout << x << "\n\n";
       for (int i = 0; i < d; i++)
         ofs << x(i) << " ";
