@@ -24,7 +24,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/reader_utils.h>
-#include <gudhi/file_writer.h>
+#include <gudhi/writing_persistence_to_file.h>
 
 #include <boost/program_options.hpp>
 
@@ -57,26 +57,21 @@ int main(int argc, char* argv[]) {
   Correlation_matrix correlations =
       Gudhi::read_lower_triangular_matrix_from_csv_file<Filtration_value>(csv_matrix_file);
 
+  Filtration_value threshold = 0;
+
   // Given a correlation matrix M, we compute component-wise M'[i,j] = 1-M[i,j] to get a distance matrix:
   for (size_t i = 0; i != correlations.size(); ++i) {
     for (size_t j = 0; j != correlations[i].size(); ++j) {
       correlations[i][j] = 1 - correlations[i][j];
-      if (correlations[i][j] < 0) {
-        std::cerr << "The input matrix is not a correlation matrix. \n";
-        throw "The input matrix is not a correlation matrix. \n";
+      //Here we make sure that the values of corelations lie between -1 and 1. 
+      //If not, we throw an exception.
+      if ((correlations[i][j] < -1) || (correlations[i][j] > 1)) 
+      {
+        std::cerr << "The input matrix is not a correlation matrix. The program will now terminate. \n";
+        throw "The input matrix is not a correlation matrix. The program will now terminate. \n";
       }
+      if ( correlations[i][j] > threshold ) threshold = correlations[i][j];
     }
-  }
-
-  Filtration_value threshold;
-  // If the correlation_min, being minimal corelation is in the range [0,1],
-  // change it to 1-correlation_min
-  if ((correlation_min >= 0) && (correlation_min <= 1)) {
-    threshold = 1 - correlation_min;
-  } else {
-    std::cout
-        << "Wrong value of the treshold corelation (should be between 0 and 1). The program will now terminate.\n";
-    return 1;
   }
 
   Rips_complex rips_complex_from_file(correlations, threshold);
@@ -95,10 +90,16 @@ int main(int argc, char* argv[]) {
   Persistent_cohomology pcoh(simplex_tree);
   // initializes the coefficient field for homology
   pcoh.init_coefficients(p);
-  // compute persistence
+  //compute persistence
   pcoh.compute_persistent_cohomology(min_persistence);
-
-  // invert the persistence diagram
+    
+  
+  //invert the persistence diagram. The reason for this procedure is the following:
+  //The input to the program is a corelation matrix M. When processing it, it is 
+  //turned into 1-M and the obtained persistence intervals are in '1-M' units.
+  //Below we reverse every (birth,death) pair into (1-birth, 1-death) pair
+  //so that the input and the output to the program is expressed in the same
+  //units. 
   auto pairs = pcoh.get_persistent_pairs();
   std::vector<intervals_common> processed_persistence_intervals;
   processed_persistence_intervals.reserve(pairs.size());
@@ -118,8 +119,7 @@ int main(int argc, char* argv[]) {
     write_persistence_intervals_to_stream(processed_persistence_intervals);
   } else {
     std::ofstream out(filediag);
-    write_persistence_intervals_to_stream(processed_persistence_intervals, out);
-    out.close();
+    write_persistence_intervals_to_stream(processed_persistence_intervals, out);    
   }
   return 0;
 }

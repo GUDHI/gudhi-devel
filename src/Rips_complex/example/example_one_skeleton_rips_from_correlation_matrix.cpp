@@ -40,11 +40,11 @@ int main() {
 		  std::cerr << "The input matrix is not a correlation matrix. The program will now terminate.\n";
           throw "The input matrix is not a correlation matrix. The program will now terminate.\n";
 	  }
-      correlations[i][j] = 1 - correlations[i][j];      
-    }
-    //Here we make sure that we will get the treshold value equal to maximal
-    //distance in the matrix.
-    if ( correlations[i][j] > threshold )threshold = correlations[i][j];
+      correlations[i][j] = 1 - correlations[i][j];            
+      //Here we make sure that we will get the treshold value equal to maximal
+      //distance in the matrix.
+      if ( correlations[i][j] > threshold )threshold = correlations[i][j];
+    }    
   }
 
   //-----------------------------------------------------------------------------

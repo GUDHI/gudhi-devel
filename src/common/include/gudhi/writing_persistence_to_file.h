@@ -39,21 +39,35 @@ template <typename Filtration_type , typename Coefficient_field>
 class Persistence_interval_common
 {
 public:	
+    /**
+     * Constructor taking as an input birth and death of the pair. 
+    **/ 
 	Persistence_interval_common( Filtration_type birth , Filtration_type death ):
 	birth_(birth),death_(death),dimension_(std::numeric_limits<unsigned>::max),
 	arith_element_(std::numeric_limits<Coefficient_field>::max() ){} 
 	
+    /**
+     * Constructor taking as an input birth, death and dimension of the pair. 
+    **/ 	
 	Persistence_interval_common( Filtration_type birth , Filtration_type death,
 	unsigned dim ):
 	birth_(birth),death_(death),dimension_(dim),
 	arith_element_(std::numeric_limits<Coefficient_field>::max()){}
 	
+	/**
+     * Constructor taking as an input birth, death, dimension of the pair as well
+     * as the number p such that this interval is present over Z_p field. 
+    **/ 
 	Persistence_interval_common( Filtration_type birth , Filtration_type death,
 	unsigned dim , Coefficient_field field ):
 	birth_(birth),death_(death),dimension_(dim),
 	arith_element_(field){}
 	
-	
+	/**
+	 * Operator to compare two persistence pairs. During the comparision all the 
+	 * fields: birth, death, dimensiona and arith_element_ are taken into account 
+	 * and they all have to be equal for two pairs to be equal.
+	**/ 
 	inline bool operator == ( const Persistence_interval_common &i2)
 	{
 		return ( 
@@ -62,6 +76,9 @@ public:
 		       );
 	}
 	
+	/**
+	 * Check if two persistence paris are not equal. 
+	**/ 
 	inline bool operator != ( const Persistence_interval_common &i2)
 	{
 		return (!((*this)==i2));
@@ -69,49 +86,52 @@ public:
 	
 	
 	/**
+	 * Operator to compare objects of a type Persistence_interval_common. 
+	 * One intervals is smaller than the other if it has lower persistence. 
 	 * Note that this operator do not take Arith_element into account when doing comparisions.
 	**/ 
 	inline bool operator < ( const Persistence_interval_common &i2)
-	{				
-		if ( this->birth_ < i2.birth_ )
-		{
-			return true;
-		}
-		else
-		{
-			if ( this->birth_ > i2.birth_ )
-			{
-				return false;
-			}
-			else
-			{
-				//in this case this->birth_ == i2.birth_
-				if ( this->death_ > i2.death_ )
-				{
-					return true;
-				}
-				else
-				{
-					if ( this->death_ < i2.death_ )
-					{
-						return false;
-					}
-					else
-					{
-						//in this case this->death_ == i2.death_
-						if ( this->dimension_ < i2.dimension_ )
-						{
-							return true;
-						}
-						else
-						{
-							//in this case this->dimension >= i2.dimension
-							return false;
-						}
-					}
-				}
-			}
-		}
+	{		
+		return 	fabs( this->death_-this->birth_ ) < fabs( i2.death_-i2.birth_ );
+		//if ( this->birth_ < i2.birth_ )
+		//{
+		//	return true;
+		//}
+		//else
+		//{
+		//	if ( this->birth_ > i2.birth_ )
+		//	{
+		//		return false;
+		//	}
+		//	else
+		//	{
+		//		//in this case this->birth_ == i2.birth_
+		//		if ( this->death_ > i2.death_ )
+		//		{
+		//			return true;
+		//		}
+		//		else
+		//		{
+		//			if ( this->death_ < i2.death_ )
+		//			{
+		//				return false;
+		//			}
+		//			else
+		//			{
+		//				//in this case this->death_ == i2.death_
+		//				if ( this->dimension_ < i2.dimension_ )
+		//				{
+		//					return true;
+		//				}
+		//				else
+		//				{
+		//					//in this case this->dimension >= i2.dimension
+		//					return false;
+		//				}
+		//			}
+		//		}
+		//	}
+		//}
 	}
 	
 	friend std::ostream& operator<<(std::ostream& out, const Persistence_interval_common& it)
