@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef FILE_WRITER_
-#define FILE_WRITER_
+#ifndef WRITING_PERSISTENCE_TO_FILE_H
+#define WRITING_PERSISTENCE_TO_FILE_H
 
 #include <iostream>
 #include <string>
@@ -141,8 +141,8 @@ private:
 **/ 
 template <typename Filtration_type , typename Coefficient_field>
 void write_persistence_intervals_to_stream( 
-//const std::vector< Persistence_interval_common<Filtration_type,Coefficient_field> >& intervals,
-
+const std::vector< Persistence_interval_common<Filtration_type,Coefficient_field> >& intervals,
+//TODO: change to ranges when it is clear how to do that.
                                           std::ostream& out = std::cout )
 {
 	for ( auto interval : intervals )
@@ -155,4 +155,4 @@ void write_persistence_intervals_to_stream(
 
 }
 
-#endif //FILE_WRITER_
+#endif //WRITING_PERSISTENCE_TO_FILE_H

@@ -31,26 +31,27 @@ int main() {
   // ----------------------------------------------------------------------------
   // Convert correlation matrix to a distance matrix:
   // ----------------------------------------------------------------------------
+  double threshold = 0;
   for (size_t i = 0; i != correlations.size(); ++i) {
     for (size_t j = 0; j != correlations[i].size(); ++j) {
-      correlations[i][j] = 1 - correlations[i][j];
-      if (correlations[i][j] < 0) {
-        std::cerr << "The input matrix is not a correlation matrix. \n";
-        throw "The input matrix is not a correlation matrix. \n";
-      }
+	  //Here we check if our data comes from corelation matrix.	
+	  if ( (correlations[i][j]<-1) || (correlations[i][j]>1) )	
+	  {
+		  std::cerr << "The input matrix is not a correlation matrix. The program will now terminate.\n";
+          throw "The input matrix is not a correlation matrix. The program will now terminate.\n";
+	  }
+      correlations[i][j] = 1 - correlations[i][j];      
     }
+    //Here we make sure that we will get the treshold value equal to maximal
+    //distance in the matrix.
+    if ( correlations[i][j] > threshold )threshold = correlations[i][j];
   }
 
   //-----------------------------------------------------------------------------
   // Now the correlation matrix is a distance matrix and can be processed further.
   //-----------------------------------------------------------------------------
   Distance_matrix distances = correlations;
-
-  //------------------------------------------------------------------------------
-  // Note that this treshold mean that the points in the distance 1, i.e. corelation
-  // 0 will be connected.
-  //------------------------------------------------------------------------------
-  double threshold = 1.0;
+  
 
   Rips_complex rips_complex_from_points(distances, threshold);
 
