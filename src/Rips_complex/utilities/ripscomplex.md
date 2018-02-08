@@ -72,4 +72,4 @@ where `dim` is the dimension of the homological feature, `birth` and `death` are
 
 **Example with Z/2Z coefficients**
 
-`rips_persistence ../../data/points/tore3D_1307.off -e .5 -m .2 -d 3 -p 2`
+`sparse_rips_persistence ../../data/points/tore3D_1307.off -e .5 -m .2 -d 3 -p 2`
