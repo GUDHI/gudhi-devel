@@ -126,9 +126,9 @@ class Points_off_visitor_reader {
  * \code $> ./vector_double_off_reader ../../data/points/alphacomplexdoc.off
  * \endcode
  *
- * the program output is:
+ * the program outputs a file ../../data/points/alphacomplexdoc.off.txt:
  * 
- * \include common/cgaloffreader_result.txt
+ * \include common/vectordoubleoffreader_result.txt
  */
 template<typename Point_d>
 class Points_off_reader {
