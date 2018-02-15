@@ -25,11 +25,14 @@
 #include <boost/test/unit_test.hpp>
 #include <gudhi/reader_utils.h>
 #include <gudhi/Persistence_heat_maps.h>
+#include <gudhi/Unitary_tests_utils.h>
 
 #include <iostream>
 
 using namespace Gudhi;
 using namespace Gudhi::Persistence_representations;
+
+double epsilon = 0.0005;
 
 BOOST_AUTO_TEST_CASE(check_construction_of_heat_maps) {
   std::vector<std::vector<double> > filter = create_Gaussian_filter(100, 1);
@@ -139,28 +142,15 @@ BOOST_AUTO_TEST_CASE(check_distance_for_heat_maps) {
   Persistence_heat_maps<constant_scaling_function> q("data/file_with_diagram_1", filter, false, 1000, 0, 1);
   Persistence_heat_maps<constant_scaling_function> r("data/file_with_diagram_2", filter, false, 1000, 0, 1);
 
-  // cerr << p.distance( p ) << endl;
-  // cerr << p.distance( q ) << endl;
-  // cerr << p.distance( r ) << endl;
-  // cerr << q.distance( p ) << endl;
-  // cerr << q.distance( q ) << endl;
-  // cerr << q.distance( r ) << endl;
-  // cerr << r.distance( p ) << endl;
-  // cerr << r.distance( q ) << endl;
-  // cerr << r.distance( r ) << endl;
-  // 0         624.183   415.815
-  // 624.183   0         528.06Z
-  // 415.815   528.066   0
-
-  BOOST_CHECK(fabs(p.distance(p) - 0) < 0.0005);
-  BOOST_CHECK(fabs(p.distance(q) - 624.183) < 0.0005);
-  BOOST_CHECK(fabs(p.distance(r) - 415.815) < 0.0005);
-  BOOST_CHECK(fabs(q.distance(p) - 624.183) < 0.0005);
-  BOOST_CHECK(fabs(q.distance(q) - 0) < 0.0005);
-  BOOST_CHECK(fabs(q.distance(r) - 528.066) < 0.0005);
-  BOOST_CHECK(fabs(r.distance(p) - 415.815) < 0.0005);
-  BOOST_CHECK(fabs(r.distance(q) - 528.066) < 0.0005);
-  BOOST_CHECK(fabs(r.distance(r) - 0) < 0.0005);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.distance(p), 0., epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.distance(q), 624.183, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.distance(r), 415.815, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(q.distance(p), 624.183, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(q.distance(q), 0., epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(q.distance(r), 528.066, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(r.distance(p), 415.815, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(r.distance(q), 528.066, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(r.distance(r), 0., epsilon);
 }
 
 BOOST_AUTO_TEST_CASE(check_projections_to_R_for_heat_maps) {
@@ -169,13 +159,9 @@ BOOST_AUTO_TEST_CASE(check_projections_to_R_for_heat_maps) {
   Persistence_heat_maps<constant_scaling_function> q("data/file_with_diagram_1", filter, false, 1000, 0, 1);
   Persistence_heat_maps<constant_scaling_function> r("data/file_with_diagram_2", filter, false, 1000, 0, 1);
 
-  // cerr << p.project_to_R(0) << endl;
-  // cerr << q.project_to_R(0) << endl;
-  // cerr << r.project_to_R(0) << endl;
-
-  BOOST_CHECK(fabs(p.project_to_R(0) - 44.3308) < 0.0005);
-  BOOST_CHECK(fabs(q.project_to_R(0) - 650.568) < 0.0005);
-  BOOST_CHECK(fabs(r.project_to_R(0) - 429.287) < 0.0005);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.project_to_R(0), 44.3308, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(q.project_to_R(0), 650.568, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(r.project_to_R(0), 429.287, epsilon);
 }
 
 BOOST_AUTO_TEST_CASE(check_scalar_products_for_heat_maps) {
@@ -184,25 +170,15 @@ BOOST_AUTO_TEST_CASE(check_scalar_products_for_heat_maps) {
   Persistence_heat_maps<constant_scaling_function> q("data/file_with_diagram_1", filter, false, 1000, 0, 1);
   Persistence_heat_maps<constant_scaling_function> r("data/file_with_diagram_2", filter, false, 1000, 0, 1);
 
-  // cerr << p.compute_scalar_product( p ) << endl;
-  // cerr << p.compute_scalar_product( q ) << endl;
-  // cerr << p.compute_scalar_product( r ) << endl;
-  // cerr << q.compute_scalar_product( p ) << endl;
-  // cerr << q.compute_scalar_product( q ) << endl;
-  // cerr << q.compute_scalar_product( r ) << endl;
-  // cerr << r.compute_scalar_product( p ) << endl;
-  // cerr << r.compute_scalar_product( q ) << endl;
-  // cerr << r.compute_scalar_product( r ) << endl;
-
-  BOOST_CHECK(fabs(p.compute_scalar_product(p) - 0.0345687) < 0.0005);
-  BOOST_CHECK(fabs(p.compute_scalar_product(q) - 0.0509357) < 0.0005);
-  BOOST_CHECK(fabs(p.compute_scalar_product(r) - 0.0375608) < 0.0005);
-  BOOST_CHECK(fabs(q.compute_scalar_product(p) - 0.0509357) < 0.0005);
-  BOOST_CHECK(fabs(q.compute_scalar_product(q) - 1.31293) < 0.0005);
-  BOOST_CHECK(fabs(q.compute_scalar_product(r) - 0.536799) < 0.0005);
-  BOOST_CHECK(fabs(r.compute_scalar_product(p) - 0.0375608) < 0.0005);
-  BOOST_CHECK(fabs(r.compute_scalar_product(q) - 0.536799) < 0.0005);
-  BOOST_CHECK(fabs(r.compute_scalar_product(r) - 0.672907) < 0.0005);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_scalar_product(p), 0.0345687, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_scalar_product(q), 0.0509357, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_scalar_product(r), 0.0375608, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(q.compute_scalar_product(p), 0.0509357, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(q.compute_scalar_product(q), 1.31293, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(q.compute_scalar_product(r), 0.536799, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(r.compute_scalar_product(p), 0.0375608, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(r.compute_scalar_product(q), 0.536799, epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(r.compute_scalar_product(r), 0.672907, epsilon);
 }
 
 BOOST_AUTO_TEST_CASE(check_arythmetic_operations_for_heat_maps) {

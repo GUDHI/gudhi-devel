@@ -107,8 +107,6 @@ dimensions are known at compile-time.
 
 \include Tangential_complex/example_with_perturb.cpp
 
-\copyright GNU General Public License v3.                         
-\verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
  */
 /** @} */  // end defgroup tangential_complex
 

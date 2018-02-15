@@ -582,10 +582,10 @@ void Persistence_heat_maps<Scalling_of_kernels>::construct(const std::vector<std
 
   for (size_t pt_nr = 0; pt_nr != intervals_.size(); ++pt_nr) {
     // compute the value of intervals_[pt_nr] in the grid:
-    int x_grid = static_cast<int>((intervals_[pt_nr].first - this->min_) /
-                                  (this->max_ - this->min_) * number_of_pixels);
-    int y_grid = static_cast<int>((intervals_[pt_nr].second - this->min_) /
-                                  (this->max_ - this->min_) * number_of_pixels);
+    int x_grid =
+        static_cast<int>((intervals_[pt_nr].first - this->min_) / (this->max_ - this->min_) * number_of_pixels);
+    int y_grid =
+        static_cast<int>((intervals_[pt_nr].second - this->min_) / (this->max_ - this->min_) * number_of_pixels);
 
     if (dbg) {
       std::cerr << "point : " << intervals_[pt_nr].first << " , " << intervals_[pt_nr].second << std::endl;
@@ -743,10 +743,10 @@ void Persistence_heat_maps<Scalling_of_kernels>::compute_percentage_of_active(
 template <typename Scalling_of_kernels>
 void Persistence_heat_maps<Scalling_of_kernels>::plot(const char* filename) const {
   std::ofstream out;
-  std::stringstream ss;
-  ss << filename << "_GnuplotScript";
+  std::stringstream gnuplot_script;
+  gnuplot_script << filename << "_GnuplotScript";
 
-  out.open(ss.str().c_str());
+  out.open(gnuplot_script.str().c_str());
   out << "plot      '-' matrix with image" << std::endl;
   for (size_t i = 0; i != this->heat_map.size(); ++i) {
     for (size_t j = 0; j != this->heat_map[i].size(); ++j) {
@@ -755,8 +755,8 @@ void Persistence_heat_maps<Scalling_of_kernels>::plot(const char* filename) cons
     out << std::endl;
   }
   out.close();
-  std::cout << "Gnuplot script have been created. Open gnuplot and type load \'" << ss.str().c_str()
-            << "\' to see the picture." << std::endl;
+  std::cout << "To visualize, install gnuplot and type the command: gnuplot -persist -e \"load \'"
+            << gnuplot_script.str().c_str() << "\'\"" << std::endl;
 }
 
 template <typename Scalling_of_kernels>
@@ -797,8 +797,7 @@ void Persistence_heat_maps<Scalling_of_kernels>::load_from_file(const char* file
 
   std::string temp;
   std::getline(in, temp);
-
-  while (!in.eof()) {
+  while (in.good()) {
     std::getline(in, temp);
     std::stringstream lineSS;
     lineSS << temp;

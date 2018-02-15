@@ -1207,10 +1207,9 @@ void Persistence_landscape_on_grid::plot(const char* filename, double min_x, dou
   // this program create a gnuplot script file that allows to plot persistence diagram.
   std::ofstream out;
 
-  std::ostringstream nameSS;
-  nameSS << filename << "_GnuplotScript";
-  std::string nameStr = nameSS.str();
-  out.open(nameStr);
+  std::ostringstream gnuplot_script;
+  gnuplot_script << filename << "_GnuplotScript";
+  out.open(gnuplot_script.str().c_str());
 
   if (min_x == max_x) {
     std::pair<double, double> min_max = compute_minimum_maximum();
@@ -1241,7 +1240,6 @@ void Persistence_landscape_on_grid::plot(const char* filename, double min_x, dou
 
   out << "plot ";
   for (size_t lambda = from; lambda != to; ++lambda) {
-    // out << "     '-' using 1:2 title 'l" << lambda << "' with lp";
     out << "     '-' using 1:2 notitle with lp";
     if (lambda + 1 != to) {
       out << ", \\";
@@ -1261,8 +1259,8 @@ void Persistence_landscape_on_grid::plot(const char* filename, double min_x, dou
     }
     out << "EOF" << std::endl;
   }
-  std::cout << "Gnuplot script to visualize persistence diagram written to the file: " << nameStr << ". Type load '"
-            << nameStr << "' in gnuplot to visualize." << std::endl;
+  std::cout << "To visualize, install gnuplot and type the command: gnuplot -persist -e \"load \'"
+            << gnuplot_script.str().c_str() << "\'\"" << std::endl;
 }
 
 template <typename T>

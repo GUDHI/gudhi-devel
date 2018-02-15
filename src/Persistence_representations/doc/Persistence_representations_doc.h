@@ -67,7 +67,7 @@ namespace Persistence_representations {
  \li Concept of representation of persistence that allows computations of distances.
  \li Concept of representation of persistence that allows computations of scalar products.
  \li Concept of representation of persistence that allows vectorization.
- \li Concept of representation of persistence that allows computations of real--valued characteristics of objects.
+ \li Concept of representation of persistence that allows computations of real-valued characteristics of objects.
 
 
  At the moment an implementation of the following representations of persistence are available (further details of
@@ -83,8 +83,8 @@ namespace Persistence_representations {
  \li Persistence vectors (allow averaging, computation of distances, scalar products, vectorizations and real value
  characteristics).
  \li Persistence diagrams / barcodes (allow computation of distances, vectorizations and real value characteristics).
- 
- 
+
+
  Note that at the while functionalities like averaging, distances and scalar products are fixed, there is no canonical
  way of vectorizing and computing real valued characteristics of objects. Therefore the
  vectorizations and computation of real value characteristics procedures are quite likely to evolve in the furthering
@@ -139,7 +139,8 @@ namespace Persistence_representations {
  possible ways to proceed:
 
  \li Use non exact representation on a grid described in the Section \ref sec_landscapes_on_grid.
- \li Compute just a number of initial nonzero landscapes. This option is available from C++ level as a last parameter of the constructor of persistence landscape (set by default to std::numeric_limits<size_t>::max()).
+ \li Compute just a number of initial nonzero landscapes. This option is available from C++ level as a last parameter of
+ the constructor of persistence landscape (set by default to std::numeric_limits<size_t>::max()).
 
 
 
@@ -249,7 +250,6 @@ namespace Persistence_representations {
  absolute value of differences between coordinates. A scalar product is a sum of products of
  values at the corresponding positions of two vectors.
 
- \copyright GNU General Public License v3.
  */
 /** @} */  // end defgroup Persistence_representations
 

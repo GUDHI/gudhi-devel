@@ -146,8 +146,6 @@ namespace rips_complex {
  * 
  * \include Rips_complex/full_skeleton_rips_for_doc.txt
  * 
- * \copyright GNU General Public License v3.                         
- * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
  */
 /** @} */  // end defgroup rips_complex
 

@@ -23,6 +23,7 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "alpha_complex"
 #include <boost/test/unit_test.hpp>
+#include <boost/mpl/list.hpp>
 
 #include <CGAL/Delaunay_triangulation.h>
 #include <CGAL/Epick_d.h>
@@ -36,7 +37,7 @@
 // to construct a simplex_tree from Delaunay_triangulation
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/Simplex_tree.h>
-#include <boost/mpl/list.hpp>
+#include <gudhi/Unitary_tests_utils.h>
 
 // Use dynamic_dimension_tag for the user to be able to set dimension
 typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kernel_d;
@@ -94,10 +95,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_from_OFF_file, TestedKernel, list_of
 
   std::cout << "simplex_tree_59.num_simplices()=" << simplex_tree_59.num_simplices() << std::endl;
   BOOST_CHECK(simplex_tree_59.num_simplices() == 23);
-}
-
-bool are_almost_the_same(float a, float b) {
-  return std::fabs(a - b) < std::numeric_limits<float>::epsilon();
 }
 
 // Use static dimension_tag for the user not to be able to set dimension
@@ -166,16 +163,16 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_from_points) {
   for (auto f_simplex : simplex_tree.filtration_simplex_range()) {
     switch (simplex_tree.dimension(f_simplex)) {
       case 0:
-        BOOST_CHECK(are_almost_the_same(simplex_tree.filtration(f_simplex), 0.0));
+        GUDHI_TEST_FLOAT_EQUALITY_CHECK(simplex_tree.filtration(f_simplex), 0.0);
         break;
       case 1:
-        BOOST_CHECK(are_almost_the_same(simplex_tree.filtration(f_simplex), 1.0/2.0));
+        GUDHI_TEST_FLOAT_EQUALITY_CHECK(simplex_tree.filtration(f_simplex), 1.0/2.0);
         break;
       case 2:
-        BOOST_CHECK(are_almost_the_same(simplex_tree.filtration(f_simplex), 2.0/3.0));
+        GUDHI_TEST_FLOAT_EQUALITY_CHECK(simplex_tree.filtration(f_simplex), 2.0/3.0);
         break;
       case 3:
-        BOOST_CHECK(are_almost_the_same(simplex_tree.filtration(f_simplex), 3.0/4.0));
+        GUDHI_TEST_FLOAT_EQUALITY_CHECK(simplex_tree.filtration(f_simplex), 3.0/4.0);
         break;
       default:
         BOOST_CHECK(false);  // Shall not happen
@@ -239,10 +236,10 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_from_points) {
   for (auto f_simplex : simplex_tree.filtration_simplex_range()) {
     switch (simplex_tree.dimension(f_simplex)) {
       case 0:
-        BOOST_CHECK(are_almost_the_same(simplex_tree.filtration(f_simplex), 0.0));
+        GUDHI_TEST_FLOAT_EQUALITY_CHECK(simplex_tree.filtration(f_simplex), 0.0);
         break;
       case 1:
-        BOOST_CHECK(are_almost_the_same(simplex_tree.filtration(f_simplex), 1.0/2.0));
+        GUDHI_TEST_FLOAT_EQUALITY_CHECK(simplex_tree.filtration(f_simplex), 1.0/2.0);
         break;
       default:
         BOOST_CHECK(false);  // Shall not happen

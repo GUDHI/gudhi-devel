@@ -105,7 +105,6 @@ namespace cubical_complex {
  * \section BitmapExamples Examples
  * End user programs are available in example/Bitmap_cubical_complex and utilities/Bitmap_cubical_complex folders.
  * 
- * \copyright GNU General Public License v3.
  */
 /** @} */  // end defgroup cubical_complex
 

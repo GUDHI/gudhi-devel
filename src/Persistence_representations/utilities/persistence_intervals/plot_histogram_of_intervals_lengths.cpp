@@ -20,7 +20,6 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gudhi/reader_utils.h>
 #include <gudhi/Persistence_intervals.h>
 
 #include <iostream>
@@ -31,30 +30,34 @@
 using Persistence_intervals = Gudhi::Persistence_representations::Persistence_intervals;
 
 int main(int argc, char** argv) {
-  std::cout << "This program compute a histogram of barcode's length. A number of bins in the histogram is a parameter "
-               "of this program. \n";
-  if (argc != 3) {
+  std::cout << "This program computes a histogram of barcode's length. A number of bins in the histogram is a "
+            << "parameter of this program. \n";
+  if ((argc != 3) && (argc != 4)) {
     std::cout << "To run this program, please provide the name of a file with persistence diagram and number of "
-                 "dominant intervals you would like to get \n";
-    std::cout << "The third parameter of a program is the dimension of the persistence that is to be used. If your "
-                 "file contains only birth-death pairs, you can skip this parameter\n";
+              << "dominant intervals you would like to get. Set a negative number dominant intervals value "
+              << "If your file contains only birth-death pairs.\n"
+              << "The third parameter is the dimension of the persistence that is to be used. If your "
+              << "file contains only birth-death pairs, you can skip this parameter\n";
     return 1;
   }
-  unsigned dimension = std::numeric_limits<unsigned>::max();
-  int dim = -1;
-  if (argc > 2) {
-    dim = atoi(argv[2]);
-  }
-  if (dim >= 0) {
-    dimension = (unsigned)dim;
+
+  unsigned dominant_interval_number = std::numeric_limits<unsigned>::max();
+  int nbr = atoi(argv[2]);
+  if (nbr >= 0) {
+    dominant_interval_number = static_cast<unsigned>(nbr);
   }
 
-  Persistence_intervals p(argv[1], dimension);
-  std::vector<std::pair<double, double> > dominant_intervals = p.dominant_intervals(atoi(argv[2]));
+  int persistence_dimension = -1;
+  if (argc == 4) {
+    persistence_dimension = atoi(argv[3]);
+  }
+
+  Persistence_intervals p(argv[1], dominant_interval_number);
+  std::vector<std::pair<double, double> > dominant_intervals = p.dominant_intervals(persistence_dimension);
   std::vector<size_t> histogram = p.histogram_of_lengths(10);
 
   std::stringstream gnuplot_script;
-  gnuplot_script << argv[1] << "_Gnuplot_script";
+  gnuplot_script << argv[1] << "_GnuplotScript";
   std::ofstream out;
   out.open(gnuplot_script.str().c_str());
 
@@ -66,7 +69,9 @@ int main(int argc, char** argv) {
     out << histogram[i] << std::endl;
   }
   out << std::endl;
-  std::cout << "To visualize, open gnuplot and type: load \'" << gnuplot_script.str().c_str() << "\'" << std::endl;
   out.close();
+
+  std::cout << "To visualize, install gnuplot and type the command: gnuplot -persist -e \"load \'"
+            << gnuplot_script.str().c_str() << "\'\"" << std::endl;
   return 0;
 }

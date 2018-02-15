@@ -30,7 +30,7 @@
 void usage(int nbArgs, char *const progName) {
   std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
   std::cerr << "Usage: " << progName << " PD1 PD2 \n";
-  std::cerr << "       i.e.: " << progName << " ../../../../data/persistence_diagram/PD1 ../../../../data/persistence_diagram/PD2 \n";
+  std::cerr << "       i.e.: " << progName << " ../../../../data/persistence_diagram/PD1.pers ../../../../data/persistence_diagram/PD2.pers \n";
   exit(-1);  // ----- >>
 }
 
@@ -53,13 +53,13 @@ int main(int argc, char **argv) {
     std::stringstream stream(line); stream >> b; stream >> d; v2.push_back(std::pair<double,double>(b,d));
   }
 
-  std::cout << "SWK exact = "    << Gudhi::kernel::swk             (v1,v2,sigma)     << std::endl;
-  std::cout << "SWK approx = "   << Gudhi::kernel::approx_swk      (v1,v2,sigma)     << std::endl;
-  std::cout << "PSSK exact = "   << Gudhi::kernel::pssk            (v1,v2,sigma)     << std::endl;
-  std::cout << "PSSK approx = "  << Gudhi::kernel::approx_pssk     (v1,v2,sigma)     << std::endl;
-  std::cout << "LPWGK exact = "  << Gudhi::kernel::lpwgk           (v1,v2,sigma)     << std::endl;
-  std::cout << "LPWGK approx = " << Gudhi::kernel::approx_lpwgk    (v1,v2,sigma)     << std::endl;
-  std::cout << "GPWGK exact = "  << Gudhi::kernel::gpwgk           (v1,v2,sigma,tau) << std::endl;
-  std::cout << "GPWGK approx = " << Gudhi::kernel::approx_gpwgk    (v1,v2,sigma,tau) << std::endl;
+  std::cout << "SWK exact = "    << Gudhi::kernel::sliced_wasserstein_kernel                             (v1,v2,sigma,-1)                                    << std::endl;
+  std::cout << "SWK approx = "   << Gudhi::kernel::sliced_wasserstein_kernel                             (v1,v2,sigma)                                       << std::endl;
+  std::cout << "PSSK exact = "   << Gudhi::kernel::persistence_scale_space_kernel                        (v1,v2,sigma,-1)                                    << std::endl;
+  std::cout << "PSSK approx = "  << Gudhi::kernel::persistence_scale_space_kernel                        (v1,v2,sigma)                                       << std::endl;
+  std::cout << "LPWGK exact = "  << Gudhi::kernel::linear_persistence_weighted_gaussian_kernel           (v1,v2,sigma,Gudhi::kernel::arctan_weight,-1)       << std::endl;
+  std::cout << "LPWGK approx = " << Gudhi::kernel::linear_persistence_weighted_gaussian_kernel           (v1,v2,sigma,Gudhi::kernel::arctan_weight)          << std::endl;
+  std::cout << "GPWGK exact = "  << Gudhi::kernel::gaussian_persistence_weighted_gaussian_kernel         (v1,v2,sigma,tau,Gudhi::kernel::arctan_weight,-1)   << std::endl;
+  std::cout << "GPWGK approx = " << Gudhi::kernel::gaussian_persistence_weighted_gaussian_kernel         (v1,v2,sigma,tau,Gudhi::kernel::arctan_weight)      << std::endl;
 
 }

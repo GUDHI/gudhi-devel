@@ -28,8 +28,7 @@
 #include <vector>
 
 using Euclidean_distance = Gudhi::Euclidean_distance;
-using Vector_distances_in_diagram =
-  Gudhi::Persistence_representations::Vector_distances_in_diagram<Euclidean_distance>;
+using Vector_distances_in_diagram = Gudhi::Persistence_representations::Vector_distances_in_diagram<Euclidean_distance>;
 
 int main(int argc, char** argv) {
   std::cout << "This program compute distance of persistence vectors stored in a file (the file needs to be created "
@@ -79,7 +78,7 @@ int main(int argc, char** argv) {
 
   // and now output the result to the screen and a file:
   std::ofstream out;
-  out.open("distance");
+  out.open("distance.vect");
   for (size_t i = 0; i != distance.size(); ++i) {
     for (size_t j = 0; j != distance.size(); ++j) {
       std::cout << distance[i][j] << " ";
@@ -90,5 +89,6 @@ int main(int argc, char** argv) {
   }
   out.close();
 
+  std::cout << "Distance can be found in 'distance.vect' file\n";
   return 0;
 }

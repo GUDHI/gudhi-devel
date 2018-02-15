@@ -21,7 +21,6 @@
  */
 
 #include <gudhi/Persistence_intervals_with_distances.h>
-#include <gudhi/read_persistence_from_file.h>
 
 #include <iostream>
 #include <sstream>
@@ -31,21 +30,21 @@
 using Persistence_intervals_with_distances = Gudhi::Persistence_representations::Persistence_intervals_with_distances;
 
 int main(int argc, char** argv) {
-  std::cout << "This program compute the bottleneck distance of persistence diagrams stored in a files. \n";
-  std::cout << "The first parameter of the program is the dimension of persistence to be used to construct persistence "
-               "landscapes. If your file contains ";
-  std::cout << "the information about dimension of persistence pairs, please provide here the dimension of persistence "
-               "pairs you want to use. If your input files consist only ";
-  std::cout << "of birth-death pairs, please set this first parameter to -1 \n";
-  std::cout << "The remaining parameters of this programs are names of files with persistence diagrams.\n";
+  std::cout << "This program computes the bottleneck distance of persistence pairs in diagrams provided as "
+            << "an input.\n"
+            << "The first parameter is the dimension of persistence to be used to create persistence intervals. "
+            << "If your file contains the information about dimension of persistence pairs, please provide here the "
+            << "dimension of persistence pairs you want to use. "
+            << "If your input files consist only of birth-death pairs, please set this first parameter to -1.\n"
+            << "The remaining parameters of the program are the names of files with persistence diagrams.\n";
 
   if (argc < 3) {
     std::cout << "Wrong number of parameters, the program will now terminate \n";
     return 1;
   }
 
-  int dim = atoi(argv[1]);
   unsigned dimension = std::numeric_limits<unsigned>::max();
+  int dim = atoi(argv[1]);
   if (dim >= 0) {
     dimension = (unsigned)dim;
   }
@@ -80,7 +79,7 @@ int main(int argc, char** argv) {
 
   // and now output the result to the screen and a file:
   std::ofstream out;
-  out.open("distance");
+  out.open("distance.itv");
   for (size_t i = 0; i != distance.size(); ++i) {
     for (size_t j = 0; j != distance.size(); ++j) {
       std::cout << distance[i][j] << " ";
@@ -91,5 +90,6 @@ int main(int argc, char** argv) {
   }
   out.close();
 
+  std::cout << "Distance can be found in 'distance.itv' file\n";
   return 0;
 }

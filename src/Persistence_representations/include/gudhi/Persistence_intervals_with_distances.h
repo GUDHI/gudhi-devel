@@ -26,7 +26,6 @@
 #include <gudhi/Persistence_intervals.h>
 #include <gudhi/Bottleneck.h>
 
-
 #include <limits>
 
 namespace Gudhi {
@@ -47,7 +46,7 @@ class Persistence_intervals_with_distances : public Persistence_intervals {
    * The last parameter, tolerance, it is an additiv error of the approimation, set by default to zero.
   **/
   double distance(const Persistence_intervals_with_distances& second, double power = std::numeric_limits<double>::max(),
-                  double tolerance = 0) const {
+                  double tolerance = (std::numeric_limits<double>::min)()) const {
     if (power >= std::numeric_limits<double>::max()) {
       return Gudhi::persistence_diagram::bottleneck_distance(this->intervals, second.intervals, tolerance);
     } else {

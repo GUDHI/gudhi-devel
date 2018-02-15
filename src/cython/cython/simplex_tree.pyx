@@ -106,8 +106,8 @@ cdef class SimplexTree:
         return self.pcohptr != NULL
 
     def filtration(self, simplex):
-        """This function returns the simplicial complex filtration value for a
-        given N-simplex.
+        """This function returns the filtration value for a given N-simplex in
+        this simplicial complex, or +infinity if it is not in the complex.
 
         :param simplex: The N-simplex, represented by a list of vertex.
         :type simplex: list of int.
@@ -222,14 +222,17 @@ cdef class SimplexTree:
 
     def insert(self, simplex, filtration=0.0):
         """This function inserts the given N-simplex and its subfaces with the
-        given filtration value (default value is '0.0').
+        given filtration value (default value is '0.0'). If some of those
+        simplices are already present with a higher filtration value, their
+        filtration value is lowered.
 
         :param simplex: The N-simplex to insert, represented by a list of
             vertex.
         :type simplex: list of int.
         :param filtration: The filtration value of the simplex.
         :type filtration: float.
-        :returns:  true if the simplex was found, false otherwise.
+        :returns:  true if the simplex was not yet in the complex, false
+            otherwise (whatever its original filtration value).
         :rtype:  bool
         """
         cdef vector[int] csimplex

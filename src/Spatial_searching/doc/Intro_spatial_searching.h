@@ -50,8 +50,6 @@ namespace spatial_searching {
  * 
  * \include Spatial_searching/example_spatial_searching.cpp
  * 
- * \copyright GNU General Public License v3.                         
- * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
  */
 /** @} */  // end defgroup spatial_searching
 

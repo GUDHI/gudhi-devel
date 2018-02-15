@@ -39,10 +39,9 @@ using Point_d = typename K::Point_d;
 using Witness_complex = Gudhi::witness_complex::Euclidean_strong_witness_complex<K>;
 using Point_vector = std::vector<Point_d>;
 
-int main(int argc, char * const argv[]) {
+int main(int argc, char* const argv[]) {
   if (argc != 5) {
-    std::cerr << "Usage: " << argv[0]
-        << " path_to_point_file number_of_landmarks max_squared_alpha limit_dimension\n";
+    std::cerr << "Usage: " << argv[0] << " path_to_point_file number_of_landmarks max_squared_alpha limit_dimension\n";
     return 0;
   }
 
@@ -56,9 +55,9 @@ int main(int argc, char * const argv[]) {
   Point_vector point_vector, landmarks;
   Gudhi::Points_off_reader<Point_d> off_reader(file_name);
   if (!off_reader.is_valid()) {
-      std::cerr << "Strong witness complex - Unable to read file " << file_name << "\n";
-      exit(-1);  // ----- >>
-    }
+    std::cerr << "Strong witness complex - Unable to read file " << file_name << "\n";
+    exit(-1);  // ----- >>
+  }
   point_vector = Point_vector(off_reader.get_point_cloud());
 
   std::cout << "Successfully read " << point_vector.size() << " points.\n";
@@ -66,16 +65,15 @@ int main(int argc, char * const argv[]) {
 
   // Choose landmarks (decomment one of the following two lines)
   // Gudhi::subsampling::pick_n_random_points(point_vector, nbL, std::back_inserter(landmarks));
-  Gudhi::subsampling::choose_n_farthest_points(K(), point_vector, nbL, Gudhi::subsampling::random_starting_point, std::back_inserter(landmarks));
-  
+  Gudhi::subsampling::choose_n_farthest_points(K(), point_vector, nbL, Gudhi::subsampling::random_starting_point,
+                                               std::back_inserter(landmarks));
+
   // Compute witness complex
   start = clock();
-  Witness_complex witness_complex(landmarks,
-                                  point_vector);
+  Witness_complex witness_complex(landmarks, point_vector);
 
   witness_complex.create_complex(simplex_tree, alpha2, lim_dim);
   end = clock();
-  std::cout << "Strong witness complex took "
-      << static_cast<double>(end - start) / CLOCKS_PER_SEC << " s. \n";
+  std::cout << "Strong witness complex took " << static_cast<double>(end - start) / CLOCKS_PER_SEC << " s. \n";
   std::cout << "Number of simplices is: " << simplex_tree.num_simplices() << "\n";
 }

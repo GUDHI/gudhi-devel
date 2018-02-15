@@ -1,46 +1,38 @@
 cmake_minimum_required(VERSION 2.6)
 project(Persistence_representations_intervals_utilities)
 
-file(COPY "${CMAKE_SOURCE_DIR}/data/persistence_diagram/simple_diagram.txt" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/")
-
-add_executable ( plot_persistence_intervals plot_persistence_intervals.cpp )
-target_link_libraries( plot_persistence_intervals ${Boost_SYSTEM_LIBRARY})
-
-add_test(NAME plot_persistence_intervals COMMAND $<TARGET_FILE:plot_persistence_intervals>
-    "${CMAKE_CURRENT_BINARY_DIR}/simple_diagram.txt")
-
-add_executable ( compute_birth_death_range_in_persistence_diagram compute_birth_death_range_in_persistence_diagram.cpp )
-target_link_libraries( compute_birth_death_range_in_persistence_diagram ${Boost_SYSTEM_LIBRARY})
-
-add_test(NAME compute_birth_death_range_in_persistence_diagram COMMAND $<TARGET_FILE:compute_birth_death_range_in_persistence_diagram>
-    "-1" "${CMAKE_CURRENT_BINARY_DIR}/simple_diagram.txt")
-
-add_executable ( compute_number_of_dominant_intervals compute_number_of_dominant_intervals.cpp )
-target_link_libraries( compute_number_of_dominant_intervals ${Boost_SYSTEM_LIBRARY})
-
-add_test(NAME compute_number_of_dominant_intervals COMMAND $<TARGET_FILE:compute_number_of_dominant_intervals>
-    "${CMAKE_CURRENT_BINARY_DIR}/simple_diagram.txt" "-1" "2")
 
 add_executable ( plot_histogram_of_intervals_lengths plot_histogram_of_intervals_lengths.cpp )
-target_link_libraries( plot_histogram_of_intervals_lengths ${Boost_SYSTEM_LIBRARY})
 
 add_test(NAME plot_histogram_of_intervals_lengths COMMAND $<TARGET_FILE:plot_histogram_of_intervals_lengths>
-    "${CMAKE_CURRENT_BINARY_DIR}/simple_diagram.txt" "2")
+    "${CMAKE_CURRENT_BINARY_DIR}/../first.pers" "-1")
 
-add_executable ( plot_persistence_Betti_numbers plot_persistence_Betti_numbers.cpp )
-target_link_libraries( plot_persistence_Betti_numbers ${Boost_SYSTEM_LIBRARY})
+install(TARGETS plot_histogram_of_intervals_lengths DESTINATION bin)
 
-add_test(NAME plot_persistence_Betti_numbers COMMAND $<TARGET_FILE:plot_persistence_Betti_numbers>
-    "${CMAKE_CURRENT_BINARY_DIR}/simple_diagram.txt")
+add_persistence_representation_plot_utility(plot_persistence_intervals "")
+add_persistence_representation_plot_utility(plot_persistence_Betti_numbers "")
+
+add_persistence_representation_creation_utility(compute_birth_death_range_in_persistence_diagram "-1")
+
+
+add_executable ( compute_number_of_dominant_intervals compute_number_of_dominant_intervals.cpp )
+add_test(NAME Persistence_representation_utilities_compute_number_of_dominant_intervals
+    COMMAND $<TARGET_FILE:compute_number_of_dominant_intervals>
+    "${CMAKE_CURRENT_BINARY_DIR}/../first.pers" "-1" "2")
+
+install(TARGETS compute_number_of_dominant_intervals DESTINATION bin)
+
 
 if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
   add_executable ( compute_bottleneck_distance compute_bottleneck_distance.cpp )
-  target_link_libraries( compute_bottleneck_distance ${Boost_SYSTEM_LIBRARY})
   if (TBB_FOUND)
   target_link_libraries(compute_bottleneck_distance ${TBB_LIBRARIES})
   endif(TBB_FOUND)
+  add_test(NAME Persistence_representation_utilities_compute_bottleneck_distance
+      COMMAND $<TARGET_FILE:compute_bottleneck_distance>
+      "-1"
+      "${CMAKE_CURRENT_BINARY_DIR}/../first.pers"
+      "${CMAKE_CURRENT_BINARY_DIR}/../second.pers")
 
-  add_test(NAME compute_bottleneck_distance COMMAND $<TARGET_FILE:compute_bottleneck_distance>
-      "${CMAKE_CURRENT_BINARY_DIR}/simple_diagram.txt"
-      "${CMAKE_CURRENT_BINARY_DIR}/simple_diagram.txt")
+  install(TARGETS compute_bottleneck_distance DESTINATION bin)
 endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)

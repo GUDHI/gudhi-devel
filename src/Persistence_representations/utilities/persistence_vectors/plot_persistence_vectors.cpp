@@ -26,8 +26,7 @@
 #include <sstream>
 
 using Euclidean_distance = Gudhi::Euclidean_distance;
-using Vector_distances_in_diagram =
-  Gudhi::Persistence_representations::Vector_distances_in_diagram<Euclidean_distance>;
+using Vector_distances_in_diagram = Gudhi::Persistence_representations::Vector_distances_in_diagram<Euclidean_distance>;
 
 int main(int argc, char** argv) {
   std::cout << "This program create a Gnuplot script to plot persistence vector. Please call this program with the "

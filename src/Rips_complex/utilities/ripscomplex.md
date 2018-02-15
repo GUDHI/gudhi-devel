@@ -1,13 +1,16 @@
-# Rips_complex #
 
-## `rips_persistence` ##
-This program computes the persistent homology with coefficient field *Z/pZ* of a Rips complex defined on a set of input points. The output diagram contains one bar per line, written with the convention:
+
+# Rips complex #
+
+## rips_persistence ##
+This program computes the persistent homology with coefficient field *Z/pZ* of a Rips complex defined on a set of input points, using Euclidean distance. The output diagram contains one bar per line, written with the convention:
 
 `p dim birth death`
 
 where `dim` is the dimension of the homological feature, `birth` and `death` are respectively the birth and death of the feature, and `p` is the characteristic of the field *Z/pZ* used for homology coefficients (`p` must be a prime number).
 
 **Usage**
+
 `rips_persistence [options] <OFF input file>`
 
 **Allowed options**
@@ -22,53 +25,25 @@ where `dim` is the dimension of the homological feature, `birth` and `death` are
 Beware: this program may use a lot of RAM and take a lot of time if `max-edge-length` is set to a large value.
 
 **Example 1 with Z/2Z coefficients**
-`rips_persistence ../../data/points/tore3D_1307.off -r 0.25 -m 0.5 -d 3 -p 2`
 
-outputs:
-```
-2  0 0 inf
-2  1 0.0983494 inf 
-2  1 0.104347 inf 
-2  2 0.138335 inf 
-```
+`rips_persistence ../../data/points/tore3D_1307.off -r 0.25 -m 0.5 -d 3 -p 2`
 
 **Example 2 with Z/3Z coefficients**
 
-rips_persistence ../../data/points/tore3D_1307.off -r 0.25 -m 0.5 -d 3 -p 3
-
-outputs:
-```
-3  0 0 inf
-3  1 0.0983494 inf
-3  1 0.104347 inf
-3  2 0.138335 inf
-```
+`rips_persistence ../../data/points/tore3D_1307.off -r 0.25 -m 0.5 -d 3 -p 3`
 
 
+## rips_distance_matrix_persistence ##
 
-
-## `rips_distance_matrix_persistence` ##
-Same as `rips_persistence` but taking a distance matrix as input. 
+Same as `rips_persistence` but taking a distance matrix as input.
 
 **Usage**
+
 `rips_persistence [options] <CSV input file>`
+
 where
 `<CSV input file>` is the path to the file containing a distance matrix. Can be square or lower triangular matrix. Separator is ';'.
 
 **Example**
-`rips_distance_matrix_persistence data/distance_matrix/full_square_distance_matrix.csv -r 15 -d 3 -p 3 -m 0`
 
-outputs:
-```
-The complex contains 46 simplices 
-   and has dimension 3 
-3  0 0 inf 
-3  0 0 8.94427 
-3  0 0 7.28011 
-3  0 0 6.08276 
-3  0 0 5.83095 
-3  0 0 5.38516 
-3  0 0 5 
-3  1 11 12.0416 
-3  1 6.32456 6.7082 
-```
+`rips_distance_matrix_persistence data/distance_matrix/full_square_distance_matrix.csv -r 15 -d 3 -p 3 -m 0`

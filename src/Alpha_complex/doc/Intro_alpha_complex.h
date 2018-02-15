@@ -31,7 +31,7 @@ namespace alpha_complex {
 /**  \defgroup alpha_complex Alpha complex
  * 
  * \author    Vincent Rouvreau
- * 
+ *
  * @{
  * 
  * \section definition Definition
@@ -195,8 +195,6 @@ namespace alpha_complex {
  * 
  * \include Alpha_complex/alphaoffreader_for_doc_32.txt
  * 
- * \copyright GNU General Public License v3.                         
- * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
  */
 /** @} */  // end defgroup alpha_complex
 

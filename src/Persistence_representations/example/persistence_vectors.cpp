@@ -30,7 +30,7 @@
 #include <utility>
 
 using Vector_distances_in_diagram =
-  Gudhi::Persistence_representations::Vector_distances_in_diagram<Gudhi::Euclidean_distance>;
+    Gudhi::Persistence_representations::Vector_distances_in_diagram<Gudhi::Euclidean_distance>;
 
 int main(int argc, char** argv) {
   // create two simple vectors with birth--death pairs:

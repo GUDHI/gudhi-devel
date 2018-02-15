@@ -1,6 +1,6 @@
 # This files manage third party libraries required by GUDHI
 
-find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework program_options thread)
+find_package(Boost 1.48.0 REQUIRED COMPONENTS system filesystem unit_test_framework program_options thread)
 
 if(NOT Boost_FOUND)
   message(FATAL_ERROR "NOTICE: This program requires Boost and will not be compiled.")
@@ -85,7 +85,6 @@ FIND_PROGRAM( GCOVR_PATH gcovr )
 if (GCOVR_PATH)
   message("gcovr found in ${GCOVR_PATH}")
 endif()
-# Required programs for unitary tests purpose
 FIND_PROGRAM( GPROF_PATH gprof )
 if (GPROF_PATH)
   message("gprof found in ${GPROF_PATH}")
@@ -93,6 +92,10 @@ endif()
 FIND_PROGRAM( DIFF_PATH diff )
 if (DIFF_PATH)
   message("diff found in ${DIFF_PATH}")
+endif()
+FIND_PROGRAM( GNUPLOT_PATH gnuplot )
+if (GNUPLOT_PATH)
+  message("gnuplot found in ${GNUPLOT_PATH}")
 endif()
 
 # BOOST ISSUE result_of vs C++11

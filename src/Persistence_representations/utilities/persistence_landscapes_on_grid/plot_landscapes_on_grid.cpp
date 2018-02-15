@@ -28,20 +28,17 @@
 using Persistence_landscape_on_grid = Gudhi::Persistence_representations::Persistence_landscape_on_grid;
 
 int main(int argc, char** argv) {
-  std::cout << "This program plot persistence landscape on grid stored in a file (the file needs to be created "
-               "beforehand). Please call the code with the name of a landscape on grid file \n";
-  if (argc == 1) {
-    std::cout << "Wrong parameters of a program call, the program will now terminate \n";
+  std::cout << "This program creates a gnuplot script from a persistence landscape on grid stored in a file (the file "
+            << "needs to be created beforehand). Please call the code with the name of a single landscape on grid file"
+            << ".\n";
+  if (argc != 2) {
+    std::cout << "Wrong parameter list, the program will now terminate \n";
     return 1;
   }
+
   Persistence_landscape_on_grid l;
   l.load_landscape_from_file(argv[1]);
-
-  std::stringstream ss;
-  ss << argv[1] << "_gnuplot_script";
-  l.plot(ss.str().c_str());
-
-  std::cout << "Done \n";
+  l.plot(argv[1]);
 
   return 0;
 }

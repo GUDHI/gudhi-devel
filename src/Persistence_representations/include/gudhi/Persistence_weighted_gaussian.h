@@ -1,0 +1,143 @@
+/*    This file is part of the Gudhi Library. The Gudhi library
+ *    (Geometric Understanding in Higher Dimensions) is a generic C++
+ *    library for computational topology.
+ *
+ *    Author(s):       Mathieu Carriere
+ *
+ *    Copyright (C) 2018  INRIA (France)
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef PERSISTENCE_WEIGHTED_GAUSSIAN_H_
+#define PERSISTENCE_WEIGHTED_GAUSSIAN_H_
+
+#ifdef GUDHI_USE_TBB
+#include <tbb/parallel_for.h>
+#endif
+
+// gudhi include
+#include <gudhi/read_persistence_from_file.h>
+
+// standard include
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <limits>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <string>
+#include <utility>
+#include <functional>
+#include <boost/math/constants/constants.hpp>
+
+double pi = boost::math::constants::pi<double>();
+using PD = std::vector<std::pair<double,double> >;
+
+namespace Gudhi {
+namespace Persistence_representations {
+
+class Persistence_weighted_gaussian{
+
+ protected:
+    PD diagram;
+
+ public:
+
+  Persistence_weighted_gaussian(PD _diagram){diagram = _diagram;}
+  PD get_diagram(){return this->diagram;}
+
+
+  // **********************************
+  // Utils.
+  // **********************************
+
+
+  static double pss_weight(std::pair<double,double> P){
+    if(P.second > P.first)  return 1;
+    else return -1;
+  }
+
+  static double arctan_weight(std::pair<double,double> P){
+    return atan(P.second - P.first);
+  }
+
+  template<class Weight = std::function<double (std::pair<double,double>) > >
+  std::vector<std::pair<double,double> > Fourier_feat(PD D, std::vector<std::pair<double,double> > Z, Weight weight = arctan_weight){
+    int m = D.size(); std::vector<std::pair<double,double> > B; int M = Z.size();
+    for(int i = 0; i < M; i++){
+      double d1 = 0; double d2 = 0; double zx = Z[i].first; double zy = Z[i].second;
+      for(int j = 0; j < m; j++){
+        double x = D[j].first; double y = D[j].second;
+        d1 += weight(D[j])*cos(x*zx + y*zy);
+        d2 += weight(D[j])*sin(x*zx + y*zy);
+      }
+      B.emplace_back(d1,d2);
+    }
+    return B;
+  }
+
+  std::vector<std::pair<double,double> > random_Fourier(double sigma, int M = 1000){
+    std::normal_distribution<double> distrib(0,1); std::vector<std::pair<double,double> > Z; std::random_device rd;
+    for(int i = 0; i < M; i++){
+      std::mt19937 e1(rd()); std::mt19937 e2(rd());
+      double zx = distrib(e1); double zy = distrib(e2);
+      Z.emplace_back(zx/sigma,zy/sigma);
+    }
+    return Z;
+  }
+
+
+
+  // **********************************
+  // Scalar product + distance.
+  // **********************************
+
+
+  template<class Weight = std::function<double (std::pair<double,double>) > >
+  double compute_scalar_product(Persistence_weighted_gaussian second, double sigma, Weight weight = arctan_weight, int m = 1000){
+
+    PD diagram1 = this->diagram; PD diagram2 = second.diagram;
+
+    if(m == -1){
+      int num_pts1 = diagram1.size(); int num_pts2 = diagram2.size(); double k = 0;
+      for(int i = 0; i < num_pts1; i++)
+        for(int j = 0; j < num_pts2; j++)
+          k += weight(diagram1[i])*weight(diagram2[j])*exp(-((diagram1[i].first  - diagram2[j].first)  *  (diagram1[i].first  - diagram2[j].first) +
+                                                             (diagram1[i].second - diagram2[j].second) *  (diagram1[i].second - diagram2[j].second))
+                                                           /(2*sigma*sigma));
+      return k;
+    }
+    else{
+      std::vector<std::pair<double,double> > z =  random_Fourier(sigma, m);
+      std::vector<std::pair<double,double> > b1 = Fourier_feat(diagram1,z,weight);
+      std::vector<std::pair<double,double> > b2 = Fourier_feat(diagram2,z,weight);
+      double d = 0; for(int i = 0; i < m; i++) d += b1[i].first*b2[i].first + b1[i].second*b2[i].second;
+      return d/m;
+    }
+  }
+
+  template<class Weight = std::function<double (std::pair<double,double>) > >
+  double distance(Persistence_weighted_gaussian second, double sigma, Weight weight = arctan_weight, int m = 1000, double power = 1) {
+    return std::pow(this->compute_scalar_product(*this, sigma, weight, m) + second.compute_scalar_product(second, sigma, weight, m)-2*this->compute_scalar_product(second, sigma, weight, m),  power/2.0);
+  }
+
+
+};
+
+}  // namespace Persistence_weighted_gaussian
+}  // namespace Gudhi
+
+#endif  // PERSISTENCE_WEIGHTED_GAUSSIAN_H_
