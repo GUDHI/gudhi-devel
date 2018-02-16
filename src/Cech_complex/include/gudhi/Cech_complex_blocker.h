@@ -23,8 +23,7 @@
 #ifndef CECH_COMPLEX_BLOCKER_H_
 #define CECH_COMPLEX_BLOCKER_H_
 
-#include <gudhi/graph_simplicial_complex.h>
-#include <gudhi/Cech_complex.h>
+#include <gudhi/Cech_complex.h>  // Cech_blocker is using a pointer on Gudhi::cech_complex::Cech_complex
 
 #include <Miniball/Miniball.hpp>
 
@@ -56,7 +55,7 @@ class Cech_blocker {
   bool operator()(Simplex_handle sh) {
     Point_cloud points;
     for (auto vertex : simplicial_complex_.simplex_vertex_range(sh)) {
-      points.push_back(cc_ptr_->point(vertex));
+      points.push_back(*(cc_ptr_->point(vertex)));
 #ifdef DEBUG_TRACES
       std::cout << "#(" << vertex << ")#";
 #endif  // DEBUG_TRACES

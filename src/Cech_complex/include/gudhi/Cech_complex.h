@@ -29,8 +29,8 @@
 
 #include <iostream>
 #include <vector>
-#include <cstddef>
-#include <iterator>  // for std::size
+#include <cstddef>    // for std::size_t
+#include <stdexcept>  // for exception management
 
 namespace Gudhi {
 
@@ -43,18 +43,21 @@ namespace cech_complex {
  * \ingroup Cech_complex
  * 
  * \details
- * The data structure is a one skeleton graph, or Rips graph, containing edges when the edge length is less or equal
- * to a given threshold. Edge length is computed from a user given point cloud with a given distance function, or a
- * distance matrix.
- * 
- * \tparam Filtration_value is the type used to store the filtration values of the simplicial complex.
+ * The data structure is a proximity graph, containing edges when the edge length is less or equal
+ * to a given threshold. Edge length is computed from a user given point cloud with a given distance function.
+ *
+ * \tparam SimplicialComplexForProximityGraph furnishes `Vertex_handle` and `Filtration_value` type definition required
+ * by `Gudhi::Proximity_graph`.
+ *
+ * \tparam ForwardPointRange furnishes `.size()`, `.begin()` and `.end()` methods, and a `const_iterator` type
+ * definition.
  */
-template<typename SimplicialComplexForCechComplex, typename ForwardPointRange>
+template<typename SimplicialComplexForProximityGraph, typename ForwardPointRange>
 class Cech_complex {
  private:
-  using Vertex_handle = typename SimplicialComplexForCechComplex::Vertex_handle;
-  using Filtration_value = typename SimplicialComplexForCechComplex::Filtration_value;
-  using Proximity_graph = Gudhi::Proximity_graph<SimplicialComplexForCechComplex>;
+  using Vertex_handle = typename SimplicialComplexForProximityGraph::Vertex_handle;
+  using Filtration_value = typename SimplicialComplexForProximityGraph::Filtration_value;
+  using Proximity_graph = Gudhi::Proximity_graph<SimplicialComplexForProximityGraph>;
 
  public:
   /** \brief Cech_complex constructor from a list of points.
@@ -62,9 +65,10 @@ class Cech_complex {
    * @param[in] points Range of points.
    * @param[in] threshold Rips value.
    * @param[in] distance distance function that returns a `Filtration_value` from 2 given points.
-   * 
-   * \tparam ForwardPointRange must be a range for which `std::begin` and `std::end` return input iterators on a
-   * point.
+   * @exception std::invalid_argument In debug mode, if `points.size()` returns a value &le; 0.
+   *
+   * \tparam ForwardPointRange must be a range for which `.size()`, `.begin()` and `.end()` methods return input
+   * iterators on a point. A point must have a `.size()` method available.
    *
    * \tparam Distance furnishes `operator()(const Point& p1, const Point& p2)`, where
    * `Point` is a point from the `ForwardPointRange`, and that returns a `Filtration_value`.
@@ -73,20 +77,23 @@ class Cech_complex {
   Cech_complex(const ForwardPointRange& points, Filtration_value threshold, Distance distance)
     : threshold_(threshold),
       point_cloud_(points) {
-    GUDHI_CHECK(std::size(points) > 0,
+    GUDHI_CHECK(points.size() > 0,
                 std::invalid_argument("Cech_complex::create_complex - point cloud is empty"));
-    dimension_ = points[0].size();
-    cech_skeleton_graph_ = Gudhi::compute_proximity_graph<SimplicialComplexForCechComplex>(point_cloud_, threshold_, distance);
+    dimension_ = points.begin()->size();
+    cech_skeleton_graph_ = Gudhi::compute_proximity_graph<SimplicialComplexForProximityGraph>(point_cloud_,
+                                                                                           threshold_,
+                                                                                           distance);
   }
 
-  /** \brief Initializes the simplicial complex from the Rips graph and expands it until a given maximal
-   * dimension.
+  /** \brief Initializes the simplicial complex from the proximity graph and expands it until a given maximal
+   * dimension, using the Cech blocker oracle.
    *
    * @param[in] complex SimplicialComplexForCech to be created.
-   * @param[in] dim_max graph expansion for Rips until this given maximal dimension.
+   * @param[in] dim_max graph expansion until this given maximal dimension.
    * @exception std::invalid_argument In debug mode, if `complex.num_vertices()` does not return 0.
    *
    */
+  template<typename SimplicialComplexForCechComplex >
   void create_complex(SimplicialComplexForCechComplex& complex, int dim_max) {
     GUDHI_CHECK(complex.num_vertices() == 0,
                 std::invalid_argument("Cech_complex::create_complex - simplicial complex is not empty"));
@@ -98,17 +105,23 @@ class Cech_complex {
                                     Cech_blocker<SimplicialComplexForCechComplex, ForwardPointRange>(complex, this));
   }
 
+  /** @return Threshold value given at construction. */
   Filtration_value threshold() const {
     return threshold_;
   }
 
+  /** @return Dimension value given at construction by the first point dimension. */
   std::size_t dimension() const {
     return dimension_;
   }
 
-  auto point(std::size_t vertex) const -> decltype(point_cloud_.begin() + vertex) {
+  /** @param[in] vertex Point position in the range.
+   * @return Threshold value given at construction.
+   * @exception std::out_of_range In debug mode, if point position in the range is out.
+   */
+  typename ForwardPointRange::const_iterator point(std::size_t vertex) const {
     GUDHI_CHECK((point_cloud_.begin() + vertex) < point_cloud_.end(),
-                std::invalid_argument("Cech_complex::point - simplicial complex is not empty"));
+                std::out_of_range("Cech_complex::point - simplicial complex is not empty"));
     return (point_cloud_.begin() + vertex);
   }
 
