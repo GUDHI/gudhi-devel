@@ -43,13 +43,17 @@ int main(int argc, char** argv) {
   persistence2.push_back(std::make_pair(3, 5));
   persistence2.push_back(std::make_pair(6, 10));
 
-  SW SW1(persistence1);
-  SW SW2(persistence2);
 
-  std::cout << SW1.compute_sliced_wasserstein_distance(SW2,100) << std::endl;
-  std::cout << SW1.compute_sliced_wasserstein_distance(SW2,-1) << std::endl;
-  std::cout << SW1.compute_scalar_product(SW2,1,100) << std::endl;
-  std::cout << SW1.distance(SW2,1,100,1) << std::endl;
+  SW sw1(persistence1, 1, 100);
+  SW sw2(persistence2, 1, 100);
+
+  SW swex1(persistence1, 1, -1);
+  SW swex2(persistence2, 1, -1);
+
+  std::cout << sw1.compute_sliced_wasserstein_distance(sw2) << std::endl;
+  std::cout << swex1.compute_sliced_wasserstein_distance(swex2) << std::endl;
+  std::cout << sw1.compute_scalar_product(sw2) << std::endl;
+  std::cout << swex1.distance(swex2) << std::endl;
 
   return 0;
 }

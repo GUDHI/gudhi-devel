@@ -45,6 +45,7 @@
 
 double pi = boost::math::constants::pi<double>();
 using PD = std::vector<std::pair<double,double> >;
+using Weight = std::function<double (std::pair<double,double>) >;
 
 namespace Gudhi {
 namespace Persistence_representations {
@@ -53,11 +54,18 @@ class Persistence_weighted_gaussian{
 
  protected:
     PD diagram;
+    Weight weight;
+    double sigma;
+    int approx;
 
  public:
 
-  Persistence_weighted_gaussian(PD _diagram){diagram = _diagram;}
+  Persistence_weighted_gaussian(PD _diagram){diagram = _diagram; sigma = 1.0; approx = 1000; weight = arctan_weight;}
+  Persistence_weighted_gaussian(PD _diagram, double _sigma, int _approx, Weight _weight){diagram = _diagram; sigma = _sigma; approx = _approx; weight = _weight;}
   PD get_diagram(){return this->diagram;}
+  double get_sigma(){return this->sigma;}
+  int get_approx(){return this->approx;}
+  Weight get_weight(){return this->weight;}
 
 
   // **********************************
@@ -65,38 +73,37 @@ class Persistence_weighted_gaussian{
   // **********************************
 
 
-  static double pss_weight(std::pair<double,double> P){
-    if(P.second > P.first)  return 1;
+  static double pss_weight(std::pair<double,double> p){
+    if(p.second > p.first)  return 1;
     else return -1;
   }
 
-  static double arctan_weight(std::pair<double,double> P){
-    return atan(P.second - P.first);
+  static double arctan_weight(std::pair<double,double> p){
+    return atan(p.second - p.first);
   }
 
-  template<class Weight = std::function<double (std::pair<double,double>) > >
-  std::vector<std::pair<double,double> > Fourier_feat(PD D, std::vector<std::pair<double,double> > Z, Weight weight = arctan_weight){
-    int m = D.size(); std::vector<std::pair<double,double> > B; int M = Z.size();
-    for(int i = 0; i < M; i++){
-      double d1 = 0; double d2 = 0; double zx = Z[i].first; double zy = Z[i].second;
-      for(int j = 0; j < m; j++){
-        double x = D[j].first; double y = D[j].second;
-        d1 += weight(D[j])*cos(x*zx + y*zy);
-        d2 += weight(D[j])*sin(x*zx + y*zy);
+  std::vector<std::pair<double,double> > Fourier_feat(PD diag, std::vector<std::pair<double,double> > z, Weight weight = arctan_weight){
+    int md = diag.size(); std::vector<std::pair<double,double> > b; int mz = z.size();
+    for(int i = 0; i < mz; i++){
+      double d1 = 0; double d2 = 0; double zx = z[i].first; double zy = z[i].second;
+      for(int j = 0; j < md; j++){
+        double x = diag[j].first; double y = diag[j].second;
+        d1 += weight(diag[j])*cos(x*zx + y*zy);
+        d2 += weight(diag[j])*sin(x*zx + y*zy);
       }
-      B.emplace_back(d1,d2);
+      b.emplace_back(d1,d2);
     }
-    return B;
+    return b;
   }
 
-  std::vector<std::pair<double,double> > random_Fourier(double sigma, int M = 1000){
-    std::normal_distribution<double> distrib(0,1); std::vector<std::pair<double,double> > Z; std::random_device rd;
-    for(int i = 0; i < M; i++){
+  std::vector<std::pair<double,double> > random_Fourier(double sigma, int m = 1000){
+    std::normal_distribution<double> distrib(0,1); std::vector<std::pair<double,double> > z; std::random_device rd;
+    for(int i = 0; i < m; i++){
       std::mt19937 e1(rd()); std::mt19937 e2(rd());
       double zx = distrib(e1); double zy = distrib(e2);
-      Z.emplace_back(zx/sigma,zy/sigma);
+      z.emplace_back(zx/sigma,zy/sigma);
     }
-    return Z;
+    return z;
   }
 
 
@@ -106,32 +113,33 @@ class Persistence_weighted_gaussian{
   // **********************************
 
 
-  template<class Weight = std::function<double (std::pair<double,double>) > >
-  double compute_scalar_product(Persistence_weighted_gaussian second, double sigma, Weight weight = arctan_weight, int m = 1000){
+  double compute_scalar_product(Persistence_weighted_gaussian second){
 
     PD diagram1 = this->diagram; PD diagram2 = second.diagram;
 
-    if(m == -1){
+    if(this->approx == -1){
       int num_pts1 = diagram1.size(); int num_pts2 = diagram2.size(); double k = 0;
       for(int i = 0; i < num_pts1; i++)
         for(int j = 0; j < num_pts2; j++)
-          k += weight(diagram1[i])*weight(diagram2[j])*exp(-((diagram1[i].first  - diagram2[j].first)  *  (diagram1[i].first  - diagram2[j].first) +
-                                                             (diagram1[i].second - diagram2[j].second) *  (diagram1[i].second - diagram2[j].second))
-                                                           /(2*sigma*sigma));
+          k += this->weight(diagram1[i])*this->weight(diagram2[j])*exp(-((diagram1[i].first  - diagram2[j].first)  *  (diagram1[i].first  - diagram2[j].first) +
+                                                                         (diagram1[i].second - diagram2[j].second) *  (diagram1[i].second - diagram2[j].second))
+                                                                        /(2*this->sigma*this->sigma));
       return k;
     }
     else{
-      std::vector<std::pair<double,double> > z =  random_Fourier(sigma, m);
-      std::vector<std::pair<double,double> > b1 = Fourier_feat(diagram1,z,weight);
-      std::vector<std::pair<double,double> > b2 = Fourier_feat(diagram2,z,weight);
-      double d = 0; for(int i = 0; i < m; i++) d += b1[i].first*b2[i].first + b1[i].second*b2[i].second;
-      return d/m;
+      std::vector<std::pair<double,double> > z =  random_Fourier(this->sigma, this->approx);
+      std::vector<std::pair<double,double> > b1 = Fourier_feat(diagram1,z,this->weight);
+      std::vector<std::pair<double,double> > b2 = Fourier_feat(diagram2,z,this->weight);
+      double d = 0; for(int i = 0; i < this->approx; i++) d += b1[i].first*b2[i].first + b1[i].second*b2[i].second;
+      return d/this->approx;
     }
   }
 
-  template<class Weight = std::function<double (std::pair<double,double>) > >
-  double distance(Persistence_weighted_gaussian second, double sigma, Weight weight = arctan_weight, int m = 1000, double power = 1) {
-    return std::pow(this->compute_scalar_product(*this, sigma, weight, m) + second.compute_scalar_product(second, sigma, weight, m)-2*this->compute_scalar_product(second, sigma, weight, m),  power/2.0);
+  double distance(Persistence_weighted_gaussian second, double power = 1) {
+    if(this->sigma != second.get_sigma() || this->approx != second.get_approx()){
+      std::cout << "Error: different representations!" << std::endl; return 0;
+    }
+    else return std::pow(this->compute_scalar_product(*this) + second.compute_scalar_product(second)-2*this->compute_scalar_product(second),  power/2.0);
   }
 
 
