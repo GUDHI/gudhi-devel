@@ -28,7 +28,6 @@
 #include <gudhi/Cech_complex_blocker.h>      // for Gudhi::cech_complex::Cech_blocker
 
 #include <iostream>
-#include <vector>
 #include <cstddef>    // for std::size_t
 #include <stdexcept>  // for exception management
 
@@ -40,7 +39,7 @@ namespace cech_complex {
  * \class Cech_complex
  * \brief Cech complex data structure.
  * 
- * \ingroup Cech_complex
+ * \ingroup cech_complex
  * 
  * \details
  * The data structure is a proximity graph, containing edges when the edge length is less or equal
@@ -65,10 +64,9 @@ class Cech_complex {
    * @param[in] points Range of points.
    * @param[in] threshold Rips value.
    * @param[in] distance distance function that returns a `Filtration_value` from 2 given points.
-   * @exception std::invalid_argument In debug mode, if `points.size()` returns a value &le; 0.
    *
    * \tparam ForwardPointRange must be a range for which `.size()`, `.begin()` and `.end()` methods return input
-   * iterators on a point. A point must have a `.size()` method available.
+   * iterators on a point. `.begin()` and `.end()` methods are required for a point.
    *
    * \tparam Distance furnishes `operator()(const Point& p1, const Point& p2)`, where
    * `Point` is a point from the `ForwardPointRange`, and that returns a `Filtration_value`.
@@ -77,12 +75,10 @@ class Cech_complex {
   Cech_complex(const ForwardPointRange& points, Filtration_value threshold, Distance distance)
     : threshold_(threshold),
       point_cloud_(points) {
-    GUDHI_CHECK(points.size() > 0,
-                std::invalid_argument("Cech_complex::create_complex - point cloud is empty"));
-    dimension_ = points.begin()->size();
+    dimension_ = points.begin()->end() - points.begin()->begin();
     cech_skeleton_graph_ = Gudhi::compute_proximity_graph<SimplicialComplexForProximityGraph>(point_cloud_,
-                                                                                           threshold_,
-                                                                                           distance);
+                                                                                              threshold_,
+                                                                                              distance);
   }
 
   /** \brief Initializes the simplicial complex from the proximity graph and expands it until a given maximal
@@ -116,10 +112,10 @@ class Cech_complex {
   }
 
   /** @param[in] vertex Point position in the range.
-   * @return Threshold value given at construction.
+   * @return A const iterator on the point.
    * @exception std::out_of_range In debug mode, if point position in the range is out.
    */
-  typename ForwardPointRange::const_iterator point(std::size_t vertex) const {
+  typename ForwardPointRange::const_iterator point_iterator(std::size_t vertex) const {
     GUDHI_CHECK((point_cloud_.begin() + vertex) < point_cloud_.end(),
                 std::out_of_range("Cech_complex::point - simplicial complex is not empty"));
     return (point_cloud_.begin() + vertex);

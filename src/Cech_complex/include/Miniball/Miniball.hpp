@@ -23,6 +23,9 @@
 //    CH-8092 Zuerich, Switzerland
 //    http://www.inf.ethz.ch/personal/gaertner
 
+#ifndef MINIBALL_HPP_
+#define MINIBALL_HPP_
+
 #include <cassert>
 #include <algorithm>
 #include <list>
@@ -513,3 +516,5 @@ namespace Miniball {
   }
 
 } // end Namespace Miniball
+
+#endif  // MINIBALL_HPP_

@@ -27,11 +27,12 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <array>
 #include <limits>  // for std::numeric_limits
 
 int main() {
   // Type definitions
-  using Point_cloud = std::vector<std::vector<double>>;
+  using Point_cloud = std::vector<std::array<double, 2>>;
   using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
   using Filtration_value = Simplex_tree::Filtration_value;
   using Cech_complex = Gudhi::cech_complex::Cech_complex<Simplex_tree, Point_cloud>;
@@ -52,7 +53,7 @@ int main() {
   Cech_complex cech_complex_from_points(points, threshold, Gudhi::Euclidean_distance());
 
   Simplex_tree stree;
-  cech_complex_from_points.create_complex(stree, 2);
+  cech_complex_from_points.create_complex(stree, 3);
   // ----------------------------------------------------------------------------
   // Display information about the one skeleton Rips complex
   // ----------------------------------------------------------------------------

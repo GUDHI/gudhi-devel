@@ -39,6 +39,20 @@ namespace cech_complex {
 template<typename SimplicialComplexForCechComplex, typename ForwardPointRange>
 class Cech_complex;
 
+/** \internal
+ * \class Cech_blocker
+ * \brief Cech complex blocker.
+ *
+ * \ingroup cech_complex
+ *
+ * \details
+ * Cech blocker is an oracle constructed from a Cech_complex and a simplicial complex.
+ *
+ * \tparam SimplicialComplexForProximityGraph furnishes `Simplex_handle` and `Filtration_value` type definition,
+ * `simplex_vertex_range(Simplex_handle sh)`and `assign_filtration(Simplex_handle sh, Filtration_value filt)` methods.
+ *
+ * \tparam ForwardPointRange is required by the pointer on Chech_complex for type definition.
+ */
 template <typename SimplicialComplexForCech, typename ForwardPointRange>
 class Cech_blocker {
  private:
@@ -52,10 +66,15 @@ class Cech_blocker {
   using Cech_complex = Gudhi::cech_complex::Cech_complex<SimplicialComplexForCech, ForwardPointRange>;
 
  public:
+  /** \internal \brief Cech complex blocker operator() - the oracle - assigns the filtration value from the simplex
+   * radius and returns if the simplex expansion must be blocked.
+   *  \param[in] sh The Simplex_handle.
+   *  \return true if the simplex radius is greater than the Cech_complex threshold*/
   bool operator()(Simplex_handle sh) {
     Point_cloud points;
     for (auto vertex : simplicial_complex_.simplex_vertex_range(sh)) {
-      points.push_back(*(cc_ptr_->point(vertex)));
+      points.push_back(Point(cc_ptr_->point_iterator(vertex)->begin(),
+                             cc_ptr_->point_iterator(vertex)->end()));
 #ifdef DEBUG_TRACES
       std::cout << "#(" << vertex << ")#";
 #endif  // DEBUG_TRACES
@@ -68,6 +87,8 @@ class Cech_blocker {
     simplicial_complex_.assign_filtration(sh, radius);
     return (radius > cc_ptr_->threshold());
   }
+
+  /** \internal \brief Cech complex blocker constructor. */
   Cech_blocker(SimplicialComplexForCech& simplicial_complex, Cech_complex* cc_ptr)
     : simplicial_complex_(simplicial_complex),
       cc_ptr_(cc_ptr) {
