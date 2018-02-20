@@ -28,7 +28,6 @@
 #include <string>
 #include <vector>
 #include <array>
-#include <limits>  // for std::numeric_limits
 
 int main() {
   // Type definitions
@@ -47,15 +46,16 @@ int main() {
   points.push_back({9.0, 17.0});
 
   // ----------------------------------------------------------------------------
-  // Init of a Rips complex from points
+  // Init of a Cech complex from points
   // ----------------------------------------------------------------------------
-  Filtration_value threshold = 12.0;
+  // 7.1 is a magic number to force one blocker, and one non-blocker
+  Filtration_value threshold = 7.1;
   Cech_complex cech_complex_from_points(points, threshold, Gudhi::Euclidean_distance());
 
   Simplex_tree stree;
-  cech_complex_from_points.create_complex(stree, 3);
+  cech_complex_from_points.create_complex(stree, 2);
   // ----------------------------------------------------------------------------
-  // Display information about the one skeleton Rips complex
+  // Display information about the one skeleton Cech complex
   // ----------------------------------------------------------------------------
   std::cout << "Cech complex is of dimension " << stree.dimension() <<
                " - " << stree.num_simplices() << " simplices - " <<

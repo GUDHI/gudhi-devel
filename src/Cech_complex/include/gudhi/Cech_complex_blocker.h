@@ -80,12 +80,12 @@ class Cech_blocker {
 #endif  // DEBUG_TRACES
     }
     Min_sphere ms(cc_ptr_->dimension(), points.begin(),points.end());
-    Filtration_value radius = std::sqrt(ms.squared_radius());
+    Filtration_value diameter = 2 * std::sqrt(ms.squared_radius());
 #ifdef DEBUG_TRACES
-    std::cout << "radius = " << radius << " - " << (radius > cc_ptr_->threshold()) << std::endl;
+    std::cout << "diameter = " << diameter << " - " << (diameter > cc_ptr_->threshold()) << std::endl;
 #endif  // DEBUG_TRACES
-    simplicial_complex_.assign_filtration(sh, radius);
-    return (radius > cc_ptr_->threshold());
+    simplicial_complex_.assign_filtration(sh, diameter);
+    return (diameter > cc_ptr_->threshold());
   }
 
   /** \internal \brief Cech complex blocker constructor. */
