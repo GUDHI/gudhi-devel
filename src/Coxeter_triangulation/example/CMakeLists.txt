@@ -19,6 +19,12 @@ target_link_libraries(generate_sphere_product ${Boost_SYSTEM_LIBRARY} ${Boost_UN
 target_link_libraries(generate_sphere_product ${Boost_PROGRAM_OPTIONS_LIBRARY})
 target_link_libraries(generate_sphere_product ${TBB_LIBRARIES})
 
+add_executable ( generate_projective_plane generate_projective_plane.cpp )
+target_link_libraries(generate_projective_plane ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+target_link_libraries(generate_projective_plane ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(generate_projective_plane ${TBB_LIBRARIES})
+
+
 # add_executable ( Witness_complex_example_nearest_landmark_table example_nearest_landmark_table.cpp )
 # if (TBB_FOUND)
 #   target_link_libraries(Witness_complex_example_nearest_landmark_table ${TBB_LIBRARIES})

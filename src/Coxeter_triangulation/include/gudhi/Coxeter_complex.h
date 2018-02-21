@@ -8,11 +8,13 @@
 #include <algorithm>
 #include <utility>
 #include <CGAL/Epick_d.h>
+#include "../../example/cxx-prettyprint/prettyprint.hpp"
 
 #include <gudhi/SparseMsMatrix.h>
 #include <gudhi/Fake_simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Coxeter_complex/Collapse.h>
+#include <gudhi/Coxeter_complex/Hasse_diagram.h>
 
 #include <gudhi/Simplex_tree.h>
 #include <limits>
@@ -22,7 +24,6 @@
 #include <gudhi/distance_functions.h>
 // #include <gudhi/Coxeter_complex/Simplex_with_cofaces.h>
 
-#include "../../example/cxx-prettyprint/prettyprint.hpp"
 
 #include <boost/iterator/iterator_facade.hpp>
 
@@ -30,6 +31,42 @@ double num_error = 1.0e-10;
 
 namespace Gudhi {
 
+std::ostream& operator<<(std::ostream & os, const typename Simple_coxeter_system::Alcove_id& a_id) {
+  int i = 0, j = 0;
+  os << "[";
+  if (a_id.empty())
+    return os;
+  auto a_it = a_id.begin();
+  if (a_it == a_id.end() - 1)
+    os << "\033[1;32m" << *a_it++ << "\033[0m";
+  else if (j == i)
+    os << "\033[1;31m" << *a_it++ << "\033[0m";
+  else
+    os << *a_it++;
+  if (j == 0) {
+    i++;
+    j = i;
+  }
+  else
+    j--;
+  while (a_it != a_id.end()) {
+    if (a_it == a_id.end() - 1)
+      os << ", \033[1;32m" << *a_it++ << "\033[0m";
+    else if (j == i)
+      os << ", \033[1;31m" << *a_it++ << "\033[0m";
+    else
+      os << ", " << *a_it++;
+    if (j == 0) {
+      i++;
+      j = i;
+    }
+    else
+      j--;
+  }
+  std::cout << "]";
+  return os;
+}
+  
 template <class Point_range,
           class Coxeter_system>
 class Coxeter_complex {
@@ -383,7 +420,7 @@ private:
     std::vector<double>& barycenter_;
     double rad_;
   };
-
+  
 public:
   /* Should never be called if a_map or v_map are empty */
   void build_mask(Mask& mask) {
@@ -476,6 +513,21 @@ public:
     Max_simplex_range range(Alcove_iterator(a_map.begin(), a_map, vi_map),
                             Alcove_iterator(a_map.end(), a_map, vi_map));
     cs_.write_mesh(v_map, range, file_name);
+  }
+
+  void strong_collapse(bool pers_out = true) {
+    struct Size_compare {
+      bool operator() (const Vertex_pointers& lhs, const Vertex_pointers& rhs) const {
+        return lhs->second.size() < rhs->second.size();
+      }
+    };
+    bool stable = false;
+    while (!stable) {
+      stable = true;
+      for (auto m: a_map) {
+        std::sort(std::get<2>(m.second).begin(), std::get<2>(m.second).end(), Size_compare());
+      }
+    }
   }
   
   void collapse(bool pers_out = true) {
@@ -633,6 +685,16 @@ public:
     //   std::cout << "The dimension after the simple collapses is " << simplices.dimension() << ".\n";
     }
     
+    
+  }
+
+  void filtered_complex() {
+    typedef typename Hasse_diagram::Node_iterator Node_iterator;
+    typedef Filtered_alcove = std::tuple<std::size_t, double, Vertex_pointers>;
+    Hasse_diagram hasse;
+    std::map<std::size_t, Node_iterator> iv_map;
+    std::map<Alcove_id, Filtered_alcove> filt_a_map;
+
     
   }
   

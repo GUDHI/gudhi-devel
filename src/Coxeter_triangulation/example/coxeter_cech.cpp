@@ -73,7 +73,7 @@ int main(int argc, char * const argv[]) {
     delete point_vector;
     cc.write_mesh("sphere_coxeter_complex_A.mesh");
     cc.collapse();
-    // cc.construct_clique_complex();
+    cc.construct_clique_complex();
   }
   else {
     Gudhi::Off_point_range<Point_d> off_range(argv[1]);
@@ -85,7 +85,7 @@ int main(int argc, char * const argv[]) {
     cc.write_mesh("sphere_coxeter_complex_A.mesh");
     std::cout << "Memory usage (Physical) before collapses: " << (float)getPhysicalValue()/1000 << "MB.\n";
     cc.collapse();
-    // cc.construct_clique_complex();
+    cc.construct_clique_complex();
   }    
   std::cout << "Memory usage (Virtual): " << (float)getVirtualValue()/1000. << "MB.\n";
   std::cout << "Memory usage (Physical): " << (float)getPhysicalValue()/1000 << "MB.\n";
