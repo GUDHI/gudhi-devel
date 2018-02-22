@@ -58,14 +58,15 @@ BOOST_AUTO_TEST_CASE(Cech_complex_from_file) {
   //
   // ----------------------------------------------------------------------------
   std::string off_file_name("alphacomplexdoc.off");
-  double threshold = 12.0;
-  std::cout << "========== OFF FILE NAME = " << off_file_name << " - Cech threshold=" <<
-      threshold << "==========" << std::endl;
+  double max_radius = 12.0;
+  std::cout << "========== OFF FILE NAME = " << off_file_name << " - Cech max_radius=" <<
+      max_radius << "==========" << std::endl;
 
   Points_off_reader off_reader(off_file_name);
   Point_cloud point_cloud = off_reader.get_point_cloud();
-  Cech_complex cech_complex_from_file(point_cloud, threshold, Gudhi::Euclidean_distance());
+  Cech_complex cech_complex_from_file(point_cloud, max_radius);
 
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(cech_complex_from_file.max_radius(), max_radius);
   std::size_t i = 0;
   for (; i < point_cloud.size(); i++) {
     BOOST_CHECK(point_cloud[i] == *(cech_complex_from_file.point_iterator(i)));
@@ -101,10 +102,10 @@ BOOST_AUTO_TEST_CASE(Cech_complex_from_file) {
         std::cout << vertex << ",";
         vp.push_back(off_reader.get_point_cloud().at(vertex));
       }
-      std::cout << ") - distance =" << Gudhi::Euclidean_distance()(vp.at(0), vp.at(1)) <<
+      std::cout << ") - distance =" << Gudhi::Radius_distance()(vp.at(0), vp.at(1)) <<
           " - filtration =" << st.filtration(f_simplex) << std::endl;
       BOOST_CHECK(vp.size() == 2);
-      GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), Gudhi::Euclidean_distance()(vp.at(0), vp.at(1)));
+      GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), Gudhi::Radius_distance()(vp.at(0), vp.at(1)));
     }
   }
 
@@ -125,7 +126,8 @@ BOOST_AUTO_TEST_CASE(Cech_complex_from_file) {
     points012.push_back(Point(cech_complex_from_file.point_iterator(vertex)->begin(),
                            cech_complex_from_file.point_iterator(vertex)->end()));
   }
-  Min_sphere ms012(cech_complex_from_file.dimension(), points012.begin(),points012.end());
+  std::size_t dimension = point_cloud[0].end() - point_cloud[0].begin();
+  Min_sphere ms012(dimension, points012.begin(),points012.end());
 
   Simplex_tree::Filtration_value f012 = st2.filtration(st2.find({0, 1, 2}));
   std::cout << "f012= " << f012 << " | ms012_radius= " << std::sqrt(ms012.squared_radius()) << std::endl;
@@ -137,7 +139,7 @@ BOOST_AUTO_TEST_CASE(Cech_complex_from_file) {
     points456.push_back(Point(cech_complex_from_file.point_iterator(vertex)->begin(),
                            cech_complex_from_file.point_iterator(vertex)->end()));
   }
-  Min_sphere ms456(cech_complex_from_file.dimension(), points456.begin(),points456.end());
+  Min_sphere ms456(dimension, points456.begin(),points456.end());
 
   Simplex_tree::Filtration_value f456 = st2.filtration(st2.find({4, 5, 6}));
   std::cout << "f456= " << f456 << " | ms456_radius= " << std::sqrt(ms456.squared_radius()) << std::endl;
@@ -161,7 +163,7 @@ BOOST_AUTO_TEST_CASE(Cech_complex_from_file) {
     points0123.push_back(Point(cech_complex_from_file.point_iterator(vertex)->begin(),
                                cech_complex_from_file.point_iterator(vertex)->end()));
   }
-  Min_sphere ms0123(cech_complex_from_file.dimension(), points0123.begin(),points0123.end());
+  Min_sphere ms0123(dimension, points0123.begin(),points0123.end());
 
   Simplex_tree::Filtration_value f0123 = st3.filtration(st3.find({0, 1, 2, 3}));
   std::cout << "f0123= " << f0123 << " | ms0123_radius= " << std::sqrt(ms0123.squared_radius()) << std::endl;
@@ -175,7 +177,7 @@ BOOST_AUTO_TEST_CASE(Cech_complex_from_file) {
     points01.push_back(Point(cech_complex_from_file.point_iterator(vertex)->begin(),
                            cech_complex_from_file.point_iterator(vertex)->end()));
   }
-  Min_sphere ms01(cech_complex_from_file.dimension(), points01.begin(),points01.end());
+  Min_sphere ms01(dimension, points01.begin(),points01.end());
 
   Simplex_tree::Filtration_value f01 = st2.filtration(st2.find({0, 1}));
   std::cout << "f01= " << f01 << " | ms01_radius= " << std::sqrt(ms01.squared_radius()) << std::endl;
@@ -199,7 +201,7 @@ BOOST_AUTO_TEST_CASE(Cech_complex_from_points) {
   // ----------------------------------------------------------------------------
   // Init of a Cech complex from the list of points
   // ----------------------------------------------------------------------------
-  Cech_complex cech_complex_from_points(points, 2.0, Gudhi::Euclidean_distance());
+  Cech_complex cech_complex_from_points(points, 2.0);
 
   std::cout << "========== cech_complex_from_points ==========" << std::endl;
   Simplex_tree st;
@@ -234,13 +236,13 @@ BOOST_AUTO_TEST_CASE(Cech_complex_from_points) {
         GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), 0.0);
         break;
       case 1:
-        GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), 1.41421, .00001);
+        GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), 0.5);
         break;
       case 2:
-        GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), 0.816497, .00001);
+        GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), 0.666667, .00001);
         break;
       case 3:
-        GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), 0.866025, .00001);
+        GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), 0.75);
         break;
       default:
         BOOST_CHECK(false);  // Shall not happen
@@ -257,12 +259,12 @@ BOOST_AUTO_TEST_CASE(Cech_create_complex_throw) {
   //
   // ----------------------------------------------------------------------------
   std::string off_file_name("alphacomplexdoc.off");
-  double threshold = 12.0;
-  std::cout << "========== OFF FILE NAME = " << off_file_name << " - Cech threshold=" <<
-      threshold << "==========" << std::endl;
+  double max_radius = 12.0;
+  std::cout << "========== OFF FILE NAME = " << off_file_name << " - Cech max_radius=" <<
+      max_radius << "==========" << std::endl;
 
   Gudhi::Points_off_reader<Point> off_reader(off_file_name);
-  Cech_complex cech_complex_from_file(off_reader.get_point_cloud(), threshold, Gudhi::Euclidean_distance());
+  Cech_complex cech_complex_from_file(off_reader.get_point_cloud(), max_radius);
 
   Simplex_tree stree;
   std::vector<int> simplex = {0, 1, 2};

@@ -23,12 +23,12 @@
 #ifndef CECH_COMPLEX_H_
 #define CECH_COMPLEX_H_
 
+#include <gudhi/distance_functions.h>        // for Gudhi::Squared_radius
 #include <gudhi/graph_simplicial_complex.h>  // for Gudhi::Proximity_graph
 #include <gudhi/Debug_utils.h>               // for GUDHI_CHECK
 #include <gudhi/Cech_complex_blocker.h>      // for Gudhi::cech_complex::Cech_blocker
 
 #include <iostream>
-#include <cstddef>    // for std::size_t
 #include <stdexcept>  // for exception management
 
 namespace Gudhi {
@@ -43,7 +43,7 @@ namespace cech_complex {
  * 
  * \details
  * The data structure is a proximity graph, containing edges when the edge length is less or equal
- * to a given threshold. Edge length is computed from a user given point cloud with a given distance function.
+ * to a given max_radius. Edge length is computed from `Gudhi::Squared_radius` distance function.
  *
  * \tparam SimplicialComplexForProximityGraph furnishes `Vertex_handle` and `Filtration_value` type definition required
  * by `Gudhi::Proximity_graph`.
@@ -62,23 +62,18 @@ class Cech_complex {
   /** \brief Cech_complex constructor from a list of points.
    *
    * @param[in] points Range of points.
-   * @param[in] threshold Rips value.
-   * @param[in] distance distance function that returns a `Filtration_value` from 2 given points.
+   * @param[in] max_radius Maximal radius value.
    *
    * \tparam ForwardPointRange must be a range for which `.size()`, `.begin()` and `.end()` methods return input
    * iterators on a point. `.begin()` and `.end()` methods are required for a point.
    *
-   * \tparam Distance furnishes `operator()(const Point& p1, const Point& p2)`, where
-   * `Point` is a point from the `ForwardPointRange`, and that returns a `Filtration_value`.
    */
-  template<typename Distance >
-  Cech_complex(const ForwardPointRange& points, Filtration_value threshold, Distance distance)
-    : threshold_(threshold),
+  Cech_complex(const ForwardPointRange& points, Filtration_value max_radius)
+    : max_radius_(max_radius),
       point_cloud_(points) {
-    dimension_ = points.begin()->end() - points.begin()->begin();
     cech_skeleton_graph_ = Gudhi::compute_proximity_graph<SimplicialComplexForProximityGraph>(point_cloud_,
-                                                                                              threshold_,
-                                                                                              distance);
+                                                                                              max_radius_,
+                                                                                              Gudhi::Radius_distance());
   }
 
   /** \brief Initializes the simplicial complex from the proximity graph and expands it until a given maximal
@@ -101,14 +96,9 @@ class Cech_complex {
                                     Cech_blocker<SimplicialComplexForCechComplex, ForwardPointRange>(complex, this));
   }
 
-  /** @return Threshold value given at construction. */
-  Filtration_value threshold() const {
-    return threshold_;
-  }
-
-  /** @return Dimension value given at construction by the first point dimension. */
-  std::size_t dimension() const {
-    return dimension_;
+  /** @return max_radius value given at construction. */
+  Filtration_value max_radius() const {
+    return max_radius_;
   }
 
   /** @param[in] vertex Point position in the range.
@@ -123,9 +113,8 @@ class Cech_complex {
 
  private:
   Proximity_graph cech_skeleton_graph_;
-  Filtration_value threshold_;
+  Filtration_value max_radius_;
   ForwardPointRange point_cloud_;
-  std::size_t dimension_;
 };
 
 }  // namespace cech_complex

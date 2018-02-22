@@ -23,9 +23,8 @@
 #ifndef CECH_COMPLEX_BLOCKER_H_
 #define CECH_COMPLEX_BLOCKER_H_
 
-#include <gudhi/Cech_complex.h>  // Cech_blocker is using a pointer on Gudhi::cech_complex::Cech_complex
-
-#include <Miniball/Miniball.hpp>
+#include <gudhi/Cech_complex.h>        // Cech_blocker is using a pointer on Gudhi::cech_complex::Cech_complex
+#include <gudhi/distance_functions.h>  // for Gudhi::Squared_radius
 
 #include <iostream>
 #include <vector>
@@ -58,9 +57,6 @@ class Cech_blocker {
  private:
   using Point = std::vector<double>;
   using Point_cloud = std::vector<Point>;
-  using Point_iterator = Point_cloud::const_iterator;
-  using Coordinate_iterator = Point::const_iterator;
-  using Min_sphere = Miniball::Miniball<Miniball::CoordAccessor<Point_iterator, Coordinate_iterator>>;
   using Simplex_handle = typename SimplicialComplexForCech::Simplex_handle;
   using Filtration_value = typename SimplicialComplexForCech::Filtration_value;
   using Cech_complex = Gudhi::cech_complex::Cech_complex<SimplicialComplexForCech, ForwardPointRange>;
@@ -69,7 +65,7 @@ class Cech_blocker {
   /** \internal \brief Cech complex blocker operator() - the oracle - assigns the filtration value from the simplex
    * radius and returns if the simplex expansion must be blocked.
    *  \param[in] sh The Simplex_handle.
-   *  \return true if the simplex radius is greater than the Cech_complex threshold*/
+   *  \return true if the simplex radius is greater than the Cech_complex max_radius*/
   bool operator()(Simplex_handle sh) {
     Point_cloud points;
     for (auto vertex : simplicial_complex_.simplex_vertex_range(sh)) {
@@ -79,13 +75,12 @@ class Cech_blocker {
       std::cout << "#(" << vertex << ")#";
 #endif  // DEBUG_TRACES
     }
-    Min_sphere ms(cc_ptr_->dimension(), points.begin(),points.end());
-    Filtration_value diameter = 2 * std::sqrt(ms.squared_radius());
+    Filtration_value squared_radius = Gudhi::Radius_distance()(points);
 #ifdef DEBUG_TRACES
-    std::cout << "diameter = " << diameter << " - " << (diameter > cc_ptr_->threshold()) << std::endl;
+    std::cout << "squared_radius = " << squared_radius << " - " << (squared_radius > cc_ptr_->max_radius()) << std::endl;
 #endif  // DEBUG_TRACES
-    simplicial_complex_.assign_filtration(sh, diameter);
-    return (diameter > cc_ptr_->threshold());
+    simplicial_complex_.assign_filtration(sh, squared_radius);
+    return (squared_radius > cc_ptr_->max_radius());
   }
 
   /** \internal \brief Cech complex blocker constructor. */

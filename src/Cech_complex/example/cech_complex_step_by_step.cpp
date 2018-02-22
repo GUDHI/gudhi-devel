@@ -65,23 +65,22 @@ class Cech_blocker {
       std::cout << "#(" << vertex << ")#";
 #endif  // DEBUG_TRACES
     }
-    Min_sphere ms(dimension_, points.begin(),points.end());
-    Filtration_value radius = std::sqrt(ms.squared_radius());
+    Filtration_value radius = Gudhi::Radius_distance()(points);
 #ifdef DEBUG_TRACES
-    std::cout << "radius = " << radius << " - " << (radius > threshold_) << std::endl;
+    std::cout << "radius = " << radius << " - " << (radius > max_radius_) << std::endl;
 #endif  // DEBUG_TRACES
     simplex_tree_.assign_filtration(sh, radius);
-    return (radius > threshold_);
+    return (radius > max_radius_);
   }
-  Cech_blocker(Simplex_tree& simplex_tree, Filtration_value threshold, const std::vector<Point>& point_cloud)
+  Cech_blocker(Simplex_tree& simplex_tree, Filtration_value max_radius, const std::vector<Point>& point_cloud)
     : simplex_tree_(simplex_tree),
-      threshold_(threshold),
+      max_radius_(max_radius),
       point_cloud_(point_cloud) {
     dimension_ = point_cloud_[0].size();
   }
  private:
   Simplex_tree simplex_tree_;
-  Filtration_value threshold_;
+  Filtration_value max_radius_;
   std::vector<Point> point_cloud_;
   int dimension_;
 };
@@ -89,31 +88,31 @@ class Cech_blocker {
 
 void program_options(int argc, char * argv[]
                      , std::string & off_file_points
-                     , Filtration_value & threshold
+                     , Filtration_value & max_radius
                      , int & dim_max);
 
 
 int main(int argc, char * argv[]) {
   std::string off_file_points;
-  Filtration_value threshold;
+  Filtration_value max_radius;
   int dim_max;
 
-  program_options(argc, argv, off_file_points, threshold, dim_max);
+  program_options(argc, argv, off_file_points, max_radius, dim_max);
 
   // Extract the points from the file filepoints
   Points_off_reader off_reader(off_file_points);
 
   // Compute the proximity graph of the points
   Proximity_graph prox_graph = Gudhi::compute_proximity_graph<Simplex_tree>(off_reader.get_point_cloud(),
-                                                                            threshold,
-                                                                            Gudhi::Euclidean_distance());
+                                                                            max_radius,
+                                                                            Gudhi::Radius_distance());
 
   // Construct the Rips complex in a Simplex Tree
   Simplex_tree st;
   // insert the proximity graph in the simplex tree
   st.insert_graph(prox_graph);
   // expand the graph until dimension dim_max
-  st.expansion_with_blockers(dim_max, Cech_blocker(st, threshold, off_reader.get_point_cloud()));
+  st.expansion_with_blockers(dim_max, Cech_blocker(st, max_radius, off_reader.get_point_cloud()));
 
   std::cout << "The complex contains " << st.num_simplices() << " simplices \n";
   std::cout << "   and has dimension " << st.dimension() << " \n";
@@ -123,7 +122,6 @@ int main(int argc, char * argv[]) {
 
 #if DEBUG_TRACES
   std::cout << "********************************************************************\n";
-  // Display the Simplex_tree - Can not be done in the middle of 2 inserts
   std::cout << "* The complex contains " << st.num_simplices() << " simplices - dimension=" << st.dimension() << "\n";
   std::cout << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
   for (auto f_simplex : st.filtration_simplex_range()) {
@@ -140,7 +138,7 @@ int main(int argc, char * argv[]) {
 
 void program_options(int argc, char * argv[]
                      , std::string & off_file_points
-                     , Filtration_value & threshold
+                     , Filtration_value & max_radius
                      , int & dim_max) {
   namespace po = boost::program_options;
   po::options_description hidden("Hidden options");
@@ -151,8 +149,8 @@ void program_options(int argc, char * argv[]
   po::options_description visible("Allowed options", 100);
   visible.add_options()
       ("help,h", "produce help message")
-      ("max-edge-length,r",
-       po::value<Filtration_value>(&threshold)->default_value(std::numeric_limits<Filtration_value>::infinity()),
+      ("max-radius,r",
+       po::value<Filtration_value>(&max_radius)->default_value(std::numeric_limits<Filtration_value>::infinity()),
        "Maximal length of an edge for the Rips complex construction.")
       ("cpx-dimension,d", po::value<int>(&dim_max)->default_value(1),
        "Maximal dimension of the Rips complex we want to compute.");

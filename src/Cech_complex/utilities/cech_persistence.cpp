@@ -43,20 +43,20 @@ using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
 
 void program_options(int argc, char* argv[], std::string& off_file_points, std::string& filediag,
-                     Filtration_value& threshold, int& dim_max, int& p, Filtration_value& min_persistence);
+                     Filtration_value& max_radius, int& dim_max, int& p, Filtration_value& min_persistence);
 
 int main(int argc, char* argv[]) {
   std::string off_file_points;
   std::string filediag;
-  Filtration_value threshold;
+  Filtration_value max_radius;
   int dim_max;
   int p;
   Filtration_value min_persistence;
 
-  program_options(argc, argv, off_file_points, filediag, threshold, dim_max, p, min_persistence);
+  program_options(argc, argv, off_file_points, filediag, max_radius, dim_max, p, min_persistence);
 
   Points_off_reader off_reader(off_file_points);
-  Cech_complex cech_complex_from_file(off_reader.get_point_cloud(), threshold, Gudhi::Euclidean_distance());
+  Cech_complex cech_complex_from_file(off_reader.get_point_cloud(), max_radius);
 
   // Construct the Cech complex in a Simplex Tree
   Simplex_tree simplex_tree;
@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
 }
 
 void program_options(int argc, char* argv[], std::string& off_file_points, std::string& filediag,
-                     Filtration_value& threshold, int& dim_max, int& p, Filtration_value& min_persistence) {
+                     Filtration_value& max_radius, int& dim_max, int& p, Filtration_value& min_persistence) {
   namespace po = boost::program_options;
   po::options_description hidden("Hidden options");
   hidden.add_options()("input-file", po::value<std::string>(&off_file_points),
@@ -98,8 +98,8 @@ void program_options(int argc, char* argv[], std::string& off_file_points, std::
   visible.add_options()("help,h", "produce help message")(
       "output-file,o", po::value<std::string>(&filediag)->default_value(std::string()),
       "Name of file in which the persistence diagram is written. Default print in std::cout")(
-      "max-edge-length,r",
-      po::value<Filtration_value>(&threshold)->default_value(std::numeric_limits<Filtration_value>::infinity()),
+      "max-radius,r",
+      po::value<Filtration_value>(&max_radius)->default_value(std::numeric_limits<Filtration_value>::infinity()),
       "Maximal length of an edge for the Cech complex construction.")(
       "cpx-dimension,d", po::value<int>(&dim_max)->default_value(1),
       "Maximal dimension of the Cech complex we want to compute.")(

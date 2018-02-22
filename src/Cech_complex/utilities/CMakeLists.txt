@@ -9,6 +9,6 @@ if (TBB_FOUND)
 endif()
 
 add_test(NAME Cech_complex_utility_from_rips_on_tore_3D COMMAND $<TARGET_FILE:cech_persistence>
-    "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" "-r" "0.25" "-m" "0.5" "-d" "3" "-p" "3")
+    "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "-r" "0.25" "-m" "0.5" "-d" "3" "-p" "3")
 
 install(TARGETS cech_persistence DESTINATION bin)

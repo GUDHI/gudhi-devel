@@ -25,6 +25,8 @@
 
 #include <gudhi/Debug_utils.h>
 
+#include <Miniball/Miniball.hpp>
+
 #include <boost/range/metafunctions.hpp>
 
 #include <cmath>  // for std::sqrt
@@ -65,6 +67,37 @@ class Euclidean_distance {
     T dy = f.second - s.second;
     using std::sqrt;
     return sqrt(dx*dx + dy*dy);
+  }
+};
+
+/** @brief Compute the squared radius between Points given by a range of coordinates. The points are assumed to
+ * have the same dimension. */
+class Radius_distance {
+ public:
+  // boost::range_value is not SFINAE-friendly so we cannot use it in the return type
+  template< typename Point >
+  typename std::iterator_traits<typename boost::range_iterator<Point>::type>::value_type
+  operator()(const Point& p1, const Point& p2) const {
+    return Euclidean_distance()(p1, p2) / 2.;
+  }
+  // boost::range_value is not SFINAE-friendly so we cannot use it in the return type
+  template< typename Point_cloud,
+            typename Point_iterator = typename boost::range_const_iterator<Point_cloud>::type,
+            typename Point= typename std::iterator_traits<Point_iterator>::value_type,
+            typename Coordinate_iterator = typename boost::range_const_iterator<Point>::type,
+            typename Coordinate = typename std::iterator_traits<Coordinate_iterator>::value_type>
+  Coordinate
+  operator()(const Point_cloud& point_cloud) const {
+    using Min_sphere = Miniball::Miniball<Miniball::CoordAccessor<Point_iterator, Coordinate_iterator>>;
+
+    //Min_sphere ms(point_cloud.begin()->end() - point_cloud.begin()->begin(), point_cloud.begin(),point_cloud.end());
+    Min_sphere ms(point_cloud.end() - point_cloud.begin(), point_cloud.begin(),point_cloud.end());
+#ifdef DEBUG_TRACES
+    std::cout << "Radius on " << point_cloud.end() - point_cloud.begin() << " points = "
+              << std::sqrt(ms.squared_radius()) << std::endl;
+#endif  // DEBUG_TRACES
+
+    return std::sqrt(ms.squared_radius());
   }
 };
 
