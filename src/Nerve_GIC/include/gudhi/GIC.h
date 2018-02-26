@@ -115,7 +115,7 @@ class Cover_complex {
   std::vector<double> distribution;
 
   std::map<int, std::vector<int> >
-      cover;  // function associating to each data point its vectors of cover elements to which it belongs.
+      cover;  // function associating to each data point the vector of cover elements to which it belongs.
   std::map<int, std::vector<int> >
       cover_back;  // inverse of cover, in order to get the data points associated to a specific cover element.
   std::map<int, double> cover_std;  // standard function (induced by func) used to compute the extended persistence
@@ -1044,12 +1044,30 @@ class Cover_complex {
       minf = std::min(minf, it->second);
     }
 
+    /*int magic[] = {-2};
+    st.insert_simplex(magic, -3);
+
     for (auto const& simplex : simplices) {
-      // Add a simplex and a cone on it
-      std::vector<int> splx = simplex;
-      splx.push_back(-2);
-      st.insert_simplex_and_subfaces(splx);
+      std::vector<int> splx = simplex; splx.push_back(-2);
+      st.insert_simplex_and_subfaces(splx, -3);
     }
+
+    for (auto const& simplex : simplices) {
+      if(simplex.size() == 1){
+        st.insert_simplex(it->first, -2 + (it->second - minf)/(maxf - minf));
+        int[] cone_edge = {-2,it->first};
+        st.insert_simplex(cone_edge, 2 - (it->second - minf)/(maxf - minf));
+      }
+      else{
+        st.insert_simplex(simplex, -2.5);
+        std::vector<int> splx = simplex; splx.push_back(-2);
+        st.insert_simplex(splx, 0);
+      }
+    }
+
+    st.make_filtration_non_decreasing();*/
+
+
 
     // Build filtration
     for (auto simplex : st.complex_simplex_range()) {
@@ -1062,7 +1080,7 @@ class Cover_complex {
           continue;
         }
         filta = std::max(-2 + (cover_std[vertex] - minf) / (maxf - minf), filta);
-        filts = std::max(2 - (cover_std[vertex] - minf) / (maxf - minf), filts);
+        filts = std::max( 2 - (cover_std[vertex] - minf) / (maxf - minf), filts);
       }
       if (ascending)
         st.assign_filtration(simplex, filta);
@@ -1071,11 +1089,10 @@ class Cover_complex {
     }
     int magic[] = {-2};
     st.assign_filtration(st.find(magic), -3);
+    st.initialize_filtration();
 
     // Compute PD
-    st.initialize_filtration();
-    Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Gudhi::persistent_cohomology::Field_Zp> pcoh(st);
-    pcoh.init_coefficients(2);
+    Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Gudhi::persistent_cohomology::Field_Zp> pcoh(st); pcoh.init_coefficients(2);
     pcoh.compute_persistent_cohomology();
 
     // Output PD
@@ -1198,6 +1215,27 @@ class Cover_complex {
       for (int i = 0; i < numvert; i++) filt = std::max(cover_color[simplex[i]].second, filt);
       complex.insert_simplex_and_subfaces(simplex, filt);
       if (dimension < simplex.size() - 1) dimension = simplex.size() - 1;
+    }
+  }
+
+ private:
+  std::vector<std::vector<int> > subfaces(std::vector<int> simplex){
+    if (simplex.size() == 1){
+      std::vector<std::vector<int> > dummy; dummy.clear();
+      std::vector<int> empty; empty.clear();
+      dummy.push_bakc(empty); dummy.push_back(simplex); return dummy;
+    }
+    else{
+      int popped_vertex = simplex[simplex.size()-1];
+      std::vector<int> popped_simplex = simplex; popped_simplex.pop_back();
+      std::vector<std::vector<int> > subf1 = subfaces(popped_simplex); std::vector<std::vector<int> > subf2;
+      for (int i = 0; i < subf1.size(); i++){
+        std::vector<int> face = subf1[i];
+        face.push_back(popped_vertex);
+        subf2.push_back(face);
+      }
+      subf1.insert(subf1.end(), subf2.begin(), subf2.end() );
+      return subf1;
     }
   }
 
