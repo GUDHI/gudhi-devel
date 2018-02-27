@@ -23,6 +23,12 @@
 #ifndef GIC_H_
 #define GIC_H_
 
+#ifdef GUDHI_USE_TBB
+#include <tbb/parallel_for.h>
+#include <tbb/task_scheduler_init.h>
+#include <tbb/mutex.h>
+#endif
+
 #include <gudhi/Debug_utils.h>
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/reader_utils.h>
@@ -99,9 +105,8 @@ class Cover_complex {
   int data_dimension;                           // dimension of input data.
   int n;                                        // number of points.
 
-  std::map<int, double> func;  // function used to compute the output simplicial complex.
-  std::map<int, double>
-      func_color;                 // function used to compute the colors of the nodes of the output simplicial complex.
+  std::vector<double> func;       // function used to compute the output simplicial complex.
+  std::vector<double> func_color; // function used to compute the colors of the nodes of the output simplicial complex.
   bool functional_cover = false;  // whether we use a cover with preimages of a function or not.
 
   Graph one_skeleton_OFF;          // one-skeleton given by the input OFF file (if it exists).
@@ -114,7 +119,7 @@ class Cover_complex {
   Persistence_diagram PD;
   std::vector<double> distribution;
 
-  std::map<int, std::vector<int> >
+  std::vector<std::vector<int> >
       cover;  // function associating to each data point the vector of cover elements to which it belongs.
   std::map<int, std::vector<int> >
       cover_back;  // inverse of cover, in order to get the data points associated to a specific cover element.
@@ -140,8 +145,8 @@ class Cover_complex {
 
   // Point comparator
   struct Less {
-    Less(std::map<int, double> func) { Fct = func; }
-    std::map<int, double> Fct;
+    Less(std::vector<double> func) { Fct = func; }
+    std::vector<double> Fct;
     bool operator()(int a, int b) {
       if (Fct[a] == Fct[b])
         return a < b;
@@ -276,6 +281,7 @@ class Cover_complex {
         point_cloud.emplace_back(point.begin(), point.begin() + data_dimension);
         boost::add_vertex(one_skeleton_OFF);
         vertices.push_back(boost::add_vertex(one_skeleton));
+        std::vector<int> dummy; dummy.clear(); cover.push_back(dummy);
         i++;
       }
     }
@@ -431,17 +437,29 @@ class Cover_complex {
 
     if (distances.size() == 0) compute_pairwise_distances(distance);
 
-    // #pragma omp parallel for
-    for (int i = 0; i < N; i++) {
-      SampleWithoutReplacement(n, m, samples);
-      double hausdorff_dist = 0;
-      for (int j = 0; j < n; j++) {
-        double mj = distances[j][samples[0]];
-        for (int k = 1; k < m; k++) mj = std::min(mj, distances[j][samples[k]]);
-        hausdorff_dist = std::max(hausdorff_dist, mj);
+    #ifdef GUDHI_USE_TBB
+      tbb::parallel_for(0, N, [&](int i){
+        SampleWithoutReplacement(n, m, samples);
+        double hausdorff_dist = 0;
+        for (int j = 0; j < n; j++) {
+          double mj = distances[j][samples[0]];
+          for (int k = 1; k < m; k++) mj = std::min(mj, distances[j][samples[k]]);
+          hausdorff_dist = std::max(hausdorff_dist, mj);
+        }
+        delta += hausdorff_dist / N;
+      });
+    #else
+      for (int i = 0; i < N; i++) {
+        SampleWithoutReplacement(n, m, samples);
+        double hausdorff_dist = 0;
+        for (int j = 0; j < n; j++) {
+          double mj = distances[j][samples[0]];
+          for (int k = 1; k < m; k++) mj = std::min(mj, distances[j][samples[k]]);
+          hausdorff_dist = std::max(hausdorff_dist, mj);
+        }
+        delta += hausdorff_dist / N;
       }
-      delta += hausdorff_dist / N;
-    }
+    #endif
 
     if (verbose) std::cout << "delta = " << delta << std::endl;
     set_graph_from_rips(delta, distance);
@@ -466,7 +484,7 @@ class Cover_complex {
     while (std::getline(input, line)) {
       std::stringstream stream(line);
       stream >> f;
-      func.emplace(i, f);
+      func.push_back(f);
       i++;
     }
     functional_cover = true;
@@ -480,7 +498,7 @@ class Cover_complex {
            *
            */
   void set_function_from_coordinate(int k) {
-    for (int i = 0; i < n; i++) func.emplace(i, point_cloud[i][k]);
+    for (int i = 0; i < n; i++) func.push_back(point_cloud[i][k]);
     char coordinate[100];
     sprintf(coordinate, "coordinate %d", k);
     functional_cover = true;
@@ -495,7 +513,7 @@ class Cover_complex {
            */
   template <class InputRange>
   void set_function_from_range(InputRange const& function) {
-    for (int i = 0; i < n; i++) func.emplace(i, function[i]);
+    for (int i = 0; i < n; i++) func.push_back(function[i]);
     functional_cover = true;
   }
 
@@ -713,37 +731,70 @@ class Cover_complex {
       funcstd[i] = 0.5 * (u + v);
     }
 
-    if (verbose) std::cout << "Computing connected components..." << std::endl;
-    // #pragma omp parallel for
-    for (int i = 0; i < res; i++) {
-      // Compute connected components
-      Graph G = one_skeleton.create_subgraph();
-      int num = preimages[i].size();
-      std::vector<int> component(num);
-      for (int j = 0; j < num; j++) boost::add_vertex(index[vertices[preimages[i][j]]], G);
-      boost::connected_components(G, &component[0]);
-      int max = 0;
+    #ifdef GUDHI_USE_TBB
+      tbb::task_scheduler_init init(4);
+      if (verbose) std::cout << "Computing connected components (parallelized)..." << std::endl;
+      tbb::parallel_for(0, res, [&](int i){
+        // Compute connected components
+        Graph G = one_skeleton.create_subgraph();
+        int num = preimages[i].size();
+        std::vector<int> component(num);
+        for (int j = 0; j < num; j++) boost::add_vertex(index[vertices[preimages[i][j]]], G);
+        boost::connected_components(G, &component[0]);
+        int max = 0;
 
-      // For each point in preimage
-      for (int j = 0; j < num; j++) {
-        // Update number of components in preimage
-        if (component[j] > max) max = component[j];
+        // For each point in preimage
+        for (int j = 0; j < num; j++) {
+          // Update number of components in preimage
+          if (component[j] > max) max = component[j];
 
-        // Identify component with Cantor polynomial N^2 -> N
-        int identifier = (std::pow(i + component[j], 2) + 3 * i + component[j]) / 2;
+          // Identify component with Cantor polynomial N^2 -> N
+          int identifier = ((i + component[j])*(i + component[j]) + 3 * i + component[j]) / 2;
 
-        // Update covers
-        cover[preimages[i][j]].push_back(identifier);
-        cover_back[identifier].push_back(preimages[i][j]);
-        cover_fct[identifier] = i;
-        cover_std[identifier] = funcstd[i];
-        cover_color[identifier].second += func_color[preimages[i][j]];
-        cover_color[identifier].first += 1;
+          // Update covers
+          cover[preimages[i][j]].push_back(identifier);
+          cover_back[identifier].push_back(preimages[i][j]);
+          cover_fct[identifier] = i;
+          cover_std[identifier] = funcstd[i];
+          cover_color[identifier].second += func_color[preimages[i][j]];
+          cover_color[identifier].first += 1;
+        }
+
+        // Maximal dimension is total number of connected components
+        id += max + 1;
+      });
+    #else
+      if (verbose) std::cout << "Computing connected components..." << std::endl;
+      for (int i = 0; i < res; i++) {
+        // Compute connected components
+        Graph G = one_skeleton.create_subgraph();
+        int num = preimages[i].size();
+        std::vector<int> component(num);
+        for (int j = 0; j < num; j++) boost::add_vertex(index[vertices[preimages[i][j]]], G);
+        boost::connected_components(G, &component[0]);
+        int max = 0;
+
+        // For each point in preimage
+        for (int j = 0; j < num; j++) {
+          // Update number of components in preimage
+          if (component[j] > max) max = component[j];
+
+          // Identify component with Cantor polynomial N^2 -> N
+          int identifier = (std::pow(i + component[j], 2) + 3 * i + component[j]) / 2;
+
+          // Update covers
+          cover[preimages[i][j]].push_back(identifier);
+          cover_back[identifier].push_back(preimages[i][j]);
+          cover_fct[identifier] = i;
+          cover_std[identifier] = funcstd[i];
+          cover_color[identifier].second += func_color[preimages[i][j]];
+          cover_color[identifier].first += 1;
+        }
+
+        // Maximal dimension is total number of connected components
+        id += max + 1;
       }
-
-      // Maximal dimension is total number of connected components
-      id += max + 1;
-    }
+    #endif
 
     maximal_dim = id - 1;
     for (std::map<int, std::pair<int, double> >::iterator iit = cover_color.begin(); iit != cover_color.end(); iit++)
@@ -805,25 +856,48 @@ class Cover_complex {
     std::vector<double> mindist(n);
     for (int j = 0; j < n; j++) mindist[j] = std::numeric_limits<double>::max();
 
-    // Compute the geodesic distances to subsamples with Dijkstra
-    // #pragma omp parallel for
-    for (int i = 0; i < m; i++) {
-      if (verbose) std::cout << "Computing geodesic distances to seed " << i << "..." << std::endl;
-      int seed = voronoi_subsamples[i];
-      std::vector<double> dmap(n);
-      boost::dijkstra_shortest_paths(
-          one_skeleton, vertices[seed],
-          boost::weight_map(weight).distance_map(boost::make_iterator_property_map(dmap.begin(), index)));
 
-      for (int j = 0; j < n; j++)
-        if (mindist[j] > dmap[j]) {
-          mindist[j] = dmap[j];
-          if (cover[j].size() == 0)
-            cover[j].push_back(i);
-          else
-            cover[j][0] = i;
-        }
-    }
+    // Compute the geodesic distances to subsamples with Dijkstra
+    #ifdef GUDHI_USE_TBB
+      if (verbose) std::cout << "Computing geodesic distances (parallelized)..." << std::endl;
+      tbb::mutex coverMutex; tbb::mutex mindistMutex;
+      tbb::parallel_for(0, m, [&](int i){
+        int seed = voronoi_subsamples[i];
+        std::vector<double> dmap(n);
+        boost::dijkstra_shortest_paths(
+            one_skeleton, vertices[seed],
+            boost::weight_map(weight).distance_map(boost::make_iterator_property_map(dmap.begin(), index)));
+
+        coverMutex.lock(); mindistMutex.lock();
+        for (int j = 0; j < n; j++)
+          if (mindist[j] > dmap[j]) {
+            mindist[j] = dmap[j];
+            if (cover[j].size() == 0)
+              cover[j].push_back(i);
+            else
+              cover[j][0] = i;
+          }
+        coverMutex.unlock(); mindistMutex.unlock();
+      });
+    #else
+      for (int i = 0; i < m; i++) {
+        if (verbose) std::cout << "Computing geodesic distances to seed " << i << "..." << std::endl;
+        int seed = voronoi_subsamples[i];
+        std::vector<double> dmap(n);
+        boost::dijkstra_shortest_paths(
+            one_skeleton, vertices[seed],
+            boost::weight_map(weight).distance_map(boost::make_iterator_property_map(dmap.begin(), index)));
+
+        for (int j = 0; j < n; j++)
+          if (mindist[j] > dmap[j]) {
+            mindist[j] = dmap[j];
+            if (cover[j].size() == 0)
+              cover[j].push_back(i);
+            else
+              cover[j][0] = i;
+          }
+      }
+    #endif
 
     for (int i = 0; i < n; i++) {
       cover_back[cover[i][0]].push_back(i);
@@ -863,7 +937,7 @@ class Cover_complex {
     while (std::getline(input, line)) {
       std::stringstream stream(line);
       stream >> f;
-      func_color.emplace(i, f);
+      func_color.push_back(f);
       i++;
     }
     color_name = color_file_name;
@@ -876,7 +950,7 @@ class Cover_complex {
            *
            */
   void set_color_from_coordinate(int k = 0) {
-    for (int i = 0; i < n; i++) func_color[i] = point_cloud[i][k];
+    for (int i = 0; i < n; i++) func_color.push_back(point_cloud[i][k]);
     color_name = "coordinate ";
     color_name.append(std::to_string(k));
   }
@@ -888,7 +962,7 @@ class Cover_complex {
    *
    */
   void set_color_from_vector(std::vector<double> color) {
-    for (unsigned int i = 0; i < color.size(); i++) func_color[i] = color[i];
+    for (unsigned int i = 0; i < color.size(); i++) func_color.push_back(color[i]);
   }
 
  public:  // Create a .dot file that can be compiled with neato to produce a .pdf file.
@@ -1044,52 +1118,19 @@ class Cover_complex {
       minf = std::min(minf, it->second);
     }
 
-    /*int magic[] = {-2};
-    st.insert_simplex(magic, -3);
-
+    // Build filtration
     for (auto const& simplex : simplices) {
       std::vector<int> splx = simplex; splx.push_back(-2);
       st.insert_simplex_and_subfaces(splx, -3);
     }
 
-    for (auto const& simplex : simplices) {
-      if(simplex.size() == 1){
-        st.insert_simplex(it->first, -2 + (it->second - minf)/(maxf - minf));
-        int[] cone_edge = {-2,it->first};
-        st.insert_simplex(cone_edge, 2 - (it->second - minf)/(maxf - minf));
-      }
-      else{
-        st.insert_simplex(simplex, -2.5);
-        std::vector<int> splx = simplex; splx.push_back(-2);
-        st.insert_simplex(splx, 0);
-      }
+    for (std::map<int, double>::iterator it = cover_std.begin(); it != cover_std.end(); it++) {
+      int vertex = it->first; float val = it->second;
+      int vert[] = {vertex}; int edge[] = {vertex, -2};
+      st.assign_filtration(st.find(vert), -2 + (val - minf)/(maxf - minf));
+      st.assign_filtration(st.find(edge),  2 - (val - minf)/(maxf - minf));
     }
-
-    st.make_filtration_non_decreasing();*/
-
-
-
-    // Build filtration
-    for (auto simplex : st.complex_simplex_range()) {
-      double filta = std::numeric_limits<double>::lowest();
-      double filts = filta;
-      bool ascending = true;
-      for (auto vertex : st.simplex_vertex_range(simplex)) {
-        if (vertex == -2) {
-          ascending = false;
-          continue;
-        }
-        filta = std::max(-2 + (cover_std[vertex] - minf) / (maxf - minf), filta);
-        filts = std::max( 2 - (cover_std[vertex] - minf) / (maxf - minf), filts);
-      }
-      if (ascending)
-        st.assign_filtration(simplex, filta);
-      else
-        st.assign_filtration(simplex, filts);
-    }
-    int magic[] = {-2};
-    st.assign_filtration(st.find(magic), -3);
-    st.initialize_filtration();
+    st.make_filtration_non_decreasing();
 
     // Compute PD
     Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Gudhi::persistent_cohomology::Field_Zp> pcoh(st); pcoh.init_coefficients(2);
@@ -1099,7 +1140,7 @@ class Cover_complex {
     int max_dim = st.dimension();
     for (int i = 0; i < max_dim; i++) {
       std::vector<std::pair<double, double> > bars = pcoh.intervals_in_dimension(i);
-      int num_bars = bars.size();
+      int num_bars = bars.size(); if(i == 0)  num_bars -= 1;
       if(verbose)  std::cout << num_bars << " interval(s) in dimension " << i << ":" << std::endl;
       for (int j = 0; j < num_bars; j++) {
         double birth = bars[j].first;
@@ -1218,27 +1259,6 @@ class Cover_complex {
     }
   }
 
- private:
-  std::vector<std::vector<int> > subfaces(std::vector<int> simplex){
-    if (simplex.size() == 1){
-      std::vector<std::vector<int> > dummy; dummy.clear();
-      std::vector<int> empty; empty.clear();
-      dummy.push_bakc(empty); dummy.push_back(simplex); return dummy;
-    }
-    else{
-      int popped_vertex = simplex[simplex.size()-1];
-      std::vector<int> popped_simplex = simplex; popped_simplex.pop_back();
-      std::vector<std::vector<int> > subf1 = subfaces(popped_simplex); std::vector<std::vector<int> > subf2;
-      for (int i = 0; i < subf1.size(); i++){
-        std::vector<int> face = subf1[i];
-        face.push_back(popped_vertex);
-        subf2.push_back(face);
-      }
-      subf1.insert(subf1.end(), subf2.begin(), subf2.end() );
-      return subf1;
-    }
-  }
-
  public:
   /** \brief Computes the simplices of the simplicial complex.
    */
@@ -1249,8 +1269,7 @@ class Cover_complex {
     }
 
     if (type == "Nerve") {
-      for(auto& simplex : cover)
-        simplices.push_back(simplex.second);
+      for(int i = 0; i < n; i++)  simplices.push_back(cover[i]);
       std::sort(simplices.begin(), simplices.end());
       std::vector<std::vector<int> >::iterator it = std::unique(simplices.begin(), simplices.end());
       simplices.resize(std::distance(simplices.begin(), it));
