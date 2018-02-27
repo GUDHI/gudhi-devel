@@ -23,10 +23,6 @@
 #ifndef SLICED_WASSERSTEIN_H_
 #define SLICED_WASSERSTEIN_H_
 
-#ifdef GUDHI_USE_TBB
-#include <tbb/parallel_for.h>
-#endif
-
 // gudhi include
 #include <gudhi/read_persistence_from_file.h>
 
@@ -242,31 +238,17 @@ class Sliced_Wasserstein {
         int n = diagram1.size();
 
         // Sort and compare all projections.
-        #ifdef GUDHI_USE_TBB
-          tbb::parallel_for(0, this->approx, [&](int i){
-            std::vector<std::pair<int,double> > l1, l2;
-            for (int j = 0; j < n; j++){
-              l1.emplace_back(   j, diagram1[j].first*cos(-pi/2+i*step) + diagram1[j].second*sin(-pi/2+i*step)   );
-              l2.emplace_back(   j, diagram2[j].first*cos(-pi/2+i*step) + diagram2[j].second*sin(-pi/2+i*step)   );
-            }
-            std::sort(l1.begin(),l1.end(), [=](const std::pair<int,double> & p1, const std::pair<int,double> & p2){return p1.second < p2.second;});
-            std::sort(l2.begin(),l2.end(), [=](const std::pair<int,double> & p1, const std::pair<int,double> & p2){return p1.second < p2.second;});
-            double f = 0; for (int j = 0; j < n; j++)  f += std::abs(l1[j].second - l2[j].second);
-            sw += f*step;
-          });
-        #else
-          for (int i = 0; i < this->approx; i++){
-            std::vector<std::pair<int,double> > l1, l2;
-            for (int j = 0; j < n; j++){
-              l1.emplace_back(   j, diagram1[j].first*cos(-pi/2+i*step) + diagram1[j].second*sin(-pi/2+i*step)   );
-              l2.emplace_back(   j, diagram2[j].first*cos(-pi/2+i*step) + diagram2[j].second*sin(-pi/2+i*step)   );
-            }
-            std::sort(l1.begin(),l1.end(), [=](const std::pair<int,double> & p1, const std::pair<int,double> & p2){return p1.second < p2.second;});
-            std::sort(l2.begin(),l2.end(), [=](const std::pair<int,double> & p1, const std::pair<int,double> & p2){return p1.second < p2.second;});
-            double f = 0; for (int j = 0; j < n; j++)  f += std::abs(l1[j].second - l2[j].second);
-            sw += f*step;
+        for (int i = 0; i < this->approx; i++){
+          std::vector<std::pair<int,double> > l1, l2;
+          for (int j = 0; j < n; j++){
+            l1.emplace_back(   j, diagram1[j].first*cos(-pi/2+i*step) + diagram1[j].second*sin(-pi/2+i*step)   );
+            l2.emplace_back(   j, diagram2[j].first*cos(-pi/2+i*step) + diagram2[j].second*sin(-pi/2+i*step)   );
           }
-        #endif
+          std::sort(l1.begin(),l1.end(), [=](const std::pair<int,double> & p1, const std::pair<int,double> & p2){return p1.second < p2.second;});
+          std::sort(l2.begin(),l2.end(), [=](const std::pair<int,double> & p1, const std::pair<int,double> & p2){return p1.second < p2.second;});
+          double f = 0; for (int j = 0; j < n; j++)  f += std::abs(l1[j].second - l2[j].second);
+          sw += f*step;
+        }
       }
 
       return sw/pi;

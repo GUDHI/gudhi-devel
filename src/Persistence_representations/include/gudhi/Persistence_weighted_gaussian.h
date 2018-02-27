@@ -23,10 +23,6 @@
 #ifndef PERSISTENCE_WEIGHTED_GAUSSIAN_H_
 #define PERSISTENCE_WEIGHTED_GAUSSIAN_H_
 
-#ifdef GUDHI_USE_TBB
-#include <tbb/parallel_for.h>
-#endif
-
 // gudhi include
 #include <gudhi/read_persistence_from_file.h>
 
