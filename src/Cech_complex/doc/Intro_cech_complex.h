@@ -67,10 +67,12 @@ namespace cech_complex {
  * The minimal ball radius computation is insured by
  * <a target="_blank" href="https://people.inf.ethz.ch/gaertner/subdir/software/miniball.html">
  * the miniball software (V3.0)</a> - Smallest Enclosing Balls of Points - and distributed with GUDHI.
- *
  * Please refer to
  * <a target="_blank" href="https://people.inf.ethz.ch/gaertner/subdir/texts/own_work/esa99_final.pdf">
  * the miniball software design description</a> for more information about this computation.
+ *
+ * This radius computation is the reason why the Cech_complex is taking much more time to be computed than the
+ * \ref rips_complex but it offers more topological guarantees.
  *
  * If the Cech_complex interfaces are not detailed enough for your need, please refer to
  * <a href="_cech_complex_2cech_complex_step_by_step_8cpp-example.html">

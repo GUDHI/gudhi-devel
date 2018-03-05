@@ -42,6 +42,22 @@
     </td>
  </tr>
 </table>
+ \subsection CechComplexDataStructure Cech complex
+ \image html "cech_complex_representation.png" "Cech complex representation"
+<table border="0">
+  <tr>
+    <td width="25%">
+      <b>Author:</b> Vincent Rouvreau<br>
+      <b>Introduced in:</b> GUDHI 2.2.0<br>
+      <b>Copyright:</b> GPL v3<br>
+    </td>
+    <td width="75%">
+    The Cech complex is a proximity graph that allows to construct a simplicial complex from it.
+    It guarantees the simplices inserted are inside a ball of a given radius.<br>
+    <b>User manual:</b> \ref cech_complex - <b>Reference manual:</b> Gudhi::cech_complex::Cech_complex
+    </td>
+ </tr>
+</table>
  \subsection CubicalComplexDataStructure Cubical complex
  \image html "Cubical_complex_representation.png" "Cubical complex representation"
 <table border="0">
@@ -57,6 +73,7 @@
     <b>User manual:</b> \ref cubical_complex - <b>Reference manual:</b> Gudhi::cubical_complex::Bitmap_cubical_complex
     </td>
  </tr>
+</table>
  \subsection RipsComplexDataStructure Rips complex
  \image html "rips_complex_representation.png" "Rips complex representation"
 <table border="0">
@@ -74,7 +91,6 @@
     <b>User manual:</b> \ref rips_complex - <b>Reference manual:</b> Gudhi::rips_complex::Rips_complex
     </td>
  </tr>
-</table>
 </table>
  \subsection SimplexTreeDataStructure Simplex tree
  \image html "Simplex_tree_representation.png" "Simplex tree representation"

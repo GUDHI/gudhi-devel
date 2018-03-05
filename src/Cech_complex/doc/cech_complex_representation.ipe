@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE ipe SYSTEM "ipe.dtd">
 <ipe version="70107" creator="Ipe 7.1.10">
-<info created="D:20150603143945" modified="D:20180223195207"/>
+<info created="D:20150603143945" modified="D:20180305162524"/>
 <ipestyle name="basic">
 <symbol name="arrow/arc(spx)">
 <path stroke="sym-stroke" fill="sym-stroke" pen="sym-pen">
@@ -267,7 +267,7 @@ h
 </path>
 <text matrix="1 0 0 1 -214.178 50.178" transformations="translations" pos="380 530" stroke="darkgray" type="label" width="80.052" height="8.302" depth="0" valign="baseline" size="large">Maximal radius</text>
 <text matrix="1 0 0 1 -226.178 -13.8225" transformations="translations" pos="375.332 689.453" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">7</text>
-<text matrix="1 0 0 1 -266.178 46.1775" transformations="translations" pos="375.332 689.453" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">8</text>
+<text matrix="1 0 0 1 -258.178 30.1775" transformations="translations" pos="375.332 689.453" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">8</text>
 <text matrix="1 0 0 1 -334.178 -13.8225" transformations="translations" pos="375.332 689.453" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">9</text>
 <path stroke="black">
 112 576 m

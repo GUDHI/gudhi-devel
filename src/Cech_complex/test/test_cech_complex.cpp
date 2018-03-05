@@ -42,7 +42,7 @@
 // Type definitions
 using Simplex_tree = Gudhi::Simplex_tree<>;
 using Filtration_value = Simplex_tree::Filtration_value;
-using Point = std::vector<double>;
+using Point = std::vector<Filtration_value>;
 using Point_cloud = std::vector<Point>;
 using Points_off_reader = Gudhi::Points_off_reader<Point>;
 using Cech_complex = Gudhi::cech_complex::Cech_complex<Simplex_tree, Point_cloud>;
@@ -51,42 +51,52 @@ using Point_iterator = Point_cloud::const_iterator;
 using Coordinate_iterator = Point::const_iterator;
 using Min_sphere = Miniball::Miniball<Miniball::CoordAccessor<Point_iterator, Coordinate_iterator>>;
 
-BOOST_AUTO_TEST_CASE(Cech_complex_from_file) {
+BOOST_AUTO_TEST_CASE(Cech_complex_for_documentation) {
   // ----------------------------------------------------------------------------
   //
-  // Init of a Cech complex from a OFF file
+  // Init of a Cech complex from a point cloud
   //
   // ----------------------------------------------------------------------------
-  std::string off_file_name("alphacomplexdoc.off");
-  double max_radius = 12.0;
-  std::cout << "========== OFF FILE NAME = " << off_file_name << " - Cech max_radius=" <<
+  Point_cloud points;
+  points.push_back({1., 0.});                 // 0
+  points.push_back({0., 1.});                 // 1
+  points.push_back({2., 1.});                 // 2
+  points.push_back({3., 2.});                 // 3
+  points.push_back({0., 3.});                 // 4
+  points.push_back({3. + std::sqrt(3.), 3.}); // 5
+  points.push_back({1., 4.});                 // 6
+  points.push_back({3., 4.});                 // 7
+  points.push_back({2., 4. + std::sqrt(3.)}); // 8
+  points.push_back({0., 4.});                 // 9
+  points.push_back({-0.5, 2.});               // 10
+
+  Filtration_value max_radius = 1.0;
+  std::cout << "========== NUMBER OF POINTS = " << points.size() << " - Cech max_radius = " <<
       max_radius << "==========" << std::endl;
 
-  Points_off_reader off_reader(off_file_name);
-  Point_cloud point_cloud = off_reader.get_point_cloud();
-  Cech_complex cech_complex_from_file(point_cloud, max_radius);
+  Cech_complex cech_complex_for_doc(points, max_radius);
 
-  GUDHI_TEST_FLOAT_EQUALITY_CHECK(cech_complex_from_file.max_radius(), max_radius);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(cech_complex_for_doc.max_radius(), max_radius);
   std::size_t i = 0;
-  for (; i < point_cloud.size(); i++) {
-    BOOST_CHECK(point_cloud[i] == *(cech_complex_from_file.point_iterator(i)));
+  for (; i < points.size(); i++) {
+    BOOST_CHECK(points[i] == *(cech_complex_for_doc.point_iterator(i)));
   }
 #ifdef GUDHI_DEBUG
-  BOOST_CHECK_THROW (cech_complex_from_file.point_iterator(i+1), std::out_of_range);
+  BOOST_CHECK_THROW (cech_complex_for_doc.point_iterator(i+1), std::out_of_range);
 #endif  // GUDHI_DEBUG
 
   const int DIMENSION_1 = 1;
   Simplex_tree st;
-  cech_complex_from_file.create_complex(st, DIMENSION_1);
+  cech_complex_for_doc.create_complex(st, DIMENSION_1);
   std::cout << "st.dimension()=" << st.dimension() << std::endl;
   BOOST_CHECK(st.dimension() == DIMENSION_1);
 
-  const int NUMBER_OF_VERTICES = 7;
+  const int NUMBER_OF_VERTICES = 11;
   std::cout << "st.num_vertices()=" << st.num_vertices() << std::endl;
   BOOST_CHECK(st.num_vertices() == NUMBER_OF_VERTICES);
 
   std::cout << "st.num_simplices()=" << st.num_simplices() << std::endl;
-  BOOST_CHECK(st.num_simplices() == 28);
+  BOOST_CHECK(st.num_simplices() == 27);
 
   // Check filtration values of vertices is 0.0
   for (auto f_simplex : st.skeleton_simplex_range(0)) {
@@ -100,7 +110,7 @@ BOOST_AUTO_TEST_CASE(Cech_complex_from_file) {
       std::cout << "vertex = (";
       for (auto vertex : st.simplex_vertex_range(f_simplex)) {
         std::cout << vertex << ",";
-        vp.push_back(off_reader.get_point_cloud().at(vertex));
+        vp.push_back(points.at(vertex));
       }
       std::cout << ") - distance =" << Gudhi::Radius_distance()(vp.at(0), vp.at(1)) <<
           " - filtration =" << st.filtration(f_simplex) << std::endl;
@@ -110,8 +120,13 @@ BOOST_AUTO_TEST_CASE(Cech_complex_from_file) {
   }
 
   const int DIMENSION_2 = 2;
+
+#ifdef GUDHI_DEBUG
+  BOOST_CHECK_THROW (cech_complex_for_doc.create_complex(st, DIMENSION_2), std::invalid_argument);
+#endif
+
   Simplex_tree st2;
-  cech_complex_from_file.create_complex(st2, DIMENSION_2);
+  cech_complex_for_doc.create_complex(st2, DIMENSION_2);
   std::cout << "st2.dimension()=" << st2.dimension() << std::endl;
   BOOST_CHECK(st2.dimension() == DIMENSION_2);
   
@@ -119,14 +134,14 @@ BOOST_AUTO_TEST_CASE(Cech_complex_from_file) {
   BOOST_CHECK(st2.num_vertices() == NUMBER_OF_VERTICES);
 
   std::cout << "st2.num_simplices()=" << st2.num_simplices() << std::endl;
-  BOOST_CHECK(st2.num_simplices() == 63);
+  BOOST_CHECK(st2.num_simplices() == 30);
 
   Point_cloud points012;
   for (std::size_t vertex = 0; vertex <= 2; vertex++) {
-    points012.push_back(Point(cech_complex_from_file.point_iterator(vertex)->begin(),
-                           cech_complex_from_file.point_iterator(vertex)->end()));
+    points012.push_back(Point(cech_complex_for_doc.point_iterator(vertex)->begin(),
+                           cech_complex_for_doc.point_iterator(vertex)->end()));
   }
-  std::size_t dimension = point_cloud[0].end() - point_cloud[0].begin();
+  std::size_t dimension = points[0].end() - points[0].begin();
   Min_sphere ms012(dimension, points012.begin(),points012.end());
 
   Simplex_tree::Filtration_value f012 = st2.filtration(st2.find({0, 1, 2}));
@@ -134,53 +149,36 @@ BOOST_AUTO_TEST_CASE(Cech_complex_from_file) {
 
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(f012, std::sqrt(ms012.squared_radius()));
 
-  Point_cloud points456;
-  for (std::size_t vertex = 4; vertex <= 6; vertex++) {
-    points456.push_back(Point(cech_complex_from_file.point_iterator(vertex)->begin(),
-                           cech_complex_from_file.point_iterator(vertex)->end()));
-  }
-  Min_sphere ms456(dimension, points456.begin(),points456.end());
+  Point_cloud points1410;
+  points1410.push_back(Point(cech_complex_for_doc.point_iterator(1)->begin(),
+                             cech_complex_for_doc.point_iterator(1)->end()));
+  points1410.push_back(Point(cech_complex_for_doc.point_iterator(4)->begin(),
+                             cech_complex_for_doc.point_iterator(4)->end()));
+  points1410.push_back(Point(cech_complex_for_doc.point_iterator(10)->begin(),
+                             cech_complex_for_doc.point_iterator(10)->end()));
+  Min_sphere ms1410(dimension, points1410.begin(),points1410.end());
 
-  Simplex_tree::Filtration_value f456 = st2.filtration(st2.find({4, 5, 6}));
-  std::cout << "f456= " << f456 << " | ms456_radius= " << std::sqrt(ms456.squared_radius()) << std::endl;
+  Simplex_tree::Filtration_value f1410 = st2.filtration(st2.find({1, 4, 10}));
+  std::cout << "f1410= " << f1410 << " | ms1410_radius= " << std::sqrt(ms1410.squared_radius()) << std::endl;
 
-  GUDHI_TEST_FLOAT_EQUALITY_CHECK(f456, std::sqrt(ms456.squared_radius()));
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(f1410, std::sqrt(ms1410.squared_radius()));
 
-  const int DIMENSION_3 = 3;
-  Simplex_tree st3;
-  cech_complex_from_file.create_complex(st3, DIMENSION_3);
-  std::cout << "st3.dimension()=" << st3.dimension() << std::endl;
-  BOOST_CHECK(st3.dimension() == DIMENSION_3);
-  
-  std::cout << "st3.num_vertices()=" << st3.num_vertices() << std::endl;
-  BOOST_CHECK(st3.num_vertices() == NUMBER_OF_VERTICES);
+  Point_cloud points469;
+  points469.push_back(Point(cech_complex_for_doc.point_iterator(4)->begin(),
+                            cech_complex_for_doc.point_iterator(4)->end()));
+  points469.push_back(Point(cech_complex_for_doc.point_iterator(6)->begin(),
+                            cech_complex_for_doc.point_iterator(6)->end()));
+  points469.push_back(Point(cech_complex_for_doc.point_iterator(9)->begin(),
+                            cech_complex_for_doc.point_iterator(9)->end()));
+  Min_sphere ms469(dimension, points469.begin(),points469.end());
 
-  std::cout << "st3.num_simplices()=" << st3.num_simplices() << std::endl;
-  BOOST_CHECK(st3.num_simplices() == 98);
+  Simplex_tree::Filtration_value f469 = st2.filtration(st2.find({4, 6, 9}));
+  std::cout << "f469= " << f469 << " | ms469_radius= " << std::sqrt(ms469.squared_radius()) << std::endl;
 
-  Point_cloud points0123;
-  for (std::size_t vertex = 0; vertex <= 3; vertex++) {
-    points0123.push_back(Point(cech_complex_from_file.point_iterator(vertex)->begin(),
-                               cech_complex_from_file.point_iterator(vertex)->end()));
-  }
-  Min_sphere ms0123(dimension, points0123.begin(),points0123.end());
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(f469, std::sqrt(ms469.squared_radius()));
 
-  Simplex_tree::Filtration_value f0123 = st3.filtration(st3.find({0, 1, 2, 3}));
-  std::cout << "f0123= " << f0123 << " | ms0123_radius= " << std::sqrt(ms0123.squared_radius()) << std::endl;
-
-  GUDHI_TEST_FLOAT_EQUALITY_CHECK(f0123, std::sqrt(ms0123.squared_radius()));
-
-
-
-  Point_cloud points01;
-  for (std::size_t vertex = 0; vertex <= 1; vertex++) {
-    points01.push_back(Point(cech_complex_from_file.point_iterator(vertex)->begin(),
-                           cech_complex_from_file.point_iterator(vertex)->end()));
-  }
-  Min_sphere ms01(dimension, points01.begin(),points01.end());
-
-  Simplex_tree::Filtration_value f01 = st2.filtration(st2.find({0, 1}));
-  std::cout << "f01= " << f01 << " | ms01_radius= " << std::sqrt(ms01.squared_radius()) << std::endl;
+  BOOST_CHECK((st2.find({6, 7, 8}) == st2.null_simplex()));
+  BOOST_CHECK((st2.find({3, 5, 7}) == st2.null_simplex()));
 
 }
 
