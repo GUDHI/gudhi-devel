@@ -23,7 +23,7 @@
 #ifndef CECH_COMPLEX_H_
 #define CECH_COMPLEX_H_
 
-#include <gudhi/distance_functions.h>        // for Gudhi::Squared_radius
+#include <gudhi/distance_functions.h>        // for Gudhi::Radius_distance
 #include <gudhi/graph_simplicial_complex.h>  // for Gudhi::Proximity_graph
 #include <gudhi/Debug_utils.h>               // for GUDHI_CHECK
 #include <gudhi/Cech_complex_blocker.h>      // for Gudhi::cech_complex::Cech_blocker
@@ -43,7 +43,7 @@ namespace cech_complex {
  * 
  * \details
  * The data structure is a proximity graph, containing edges when the edge length is less or equal
- * to a given max_radius. Edge length is computed from `Gudhi::Squared_radius` distance function.
+ * to a given max_radius. Edge length is computed from `Gudhi::Radius_distance` distance function.
  *
  * \tparam SimplicialComplexForProximityGraph furnishes `Vertex_handle` and `Filtration_value` type definition required
  * by `Gudhi::Proximity_graph`.

@@ -29,7 +29,7 @@ namespace cech_complex {
 
 /**  \defgroup cech_complex Cech complex
  * 
- * \author    Clément Maria, Pawel Dlotko, Vincent Rouvreau
+ * \author    Vincent Rouvreau
  * 
  * @{
  * 
@@ -40,40 +40,54 @@ namespace cech_complex {
  * proximity graph that allows to construct a
  * <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
  * from it.
- * The input can be a point cloud with a given distance function.
+ * The input shall be a point cloud in an Euclidean space.
  * 
- * The filtration value of each edge is computed from a user-given distance function.
+ * The filtration value of each edge of the `Gudhi::Proximity_graph` is computed from `Gudhi::Radius_distance` function.
  * 
- * All edges that have a filtration value strictly greater than a given threshold value are not inserted into
- * the complex.
+ * All edges that have a filtration value strictly greater than a user given maximal radius value, \f$max\_radius\f$,
+ * are not inserted into the complex.
  * 
- * When creating a simplicial complex from this proximity graph, Cech inserts the proximity graph into the data
- * structure, and then expands the simplicial complex when required.
- *
  * Vertex name correspond to the index of the point in the given range (aka. the point cloud).
  * 
- * \image html "cech_complex_representation.png" "Cech complex proximity graph representation"
+ * \image html "cech_one_skeleton.png" "Cech complex proximity graph representation"
  * 
- * On this example, as edges (4,5), (4,6) and (5,6) are in the complex, simplex (4,5,6) is added with the filtration
- * value set with \f$max(filtration(4,5), filtration(4,6), filtration(5,6))\f$.
- * And so on for simplex (0,1,2,3).
- * 
- * If the Cech_complex interfaces are not detailed enough for your need, please refer to
- * <a href="_persistent_cohomology_2cech_persistence_step_by_step_8cpp-example.html">
- * cech_persistence_step_by_step.cpp</a> example, where the graph construction over the Simplex_tree is more detailed.
+ * When creating a simplicial complex from this proximity graph, Cech inserts the proximity graph into the simplicial
+ * complex data structure, and then expands the simplicial complex when required.
  *
- * \section cechpointsdistance Point cloud and distance function
+ * On this example, as edges \f$(x,y)\f$, \f$(y,z)\f$ and \f$(z,y)\f$ are in the complex, the minimal ball radius
+ * containing the points \f$(x,y,z)\f$ is computed.
+ *
+ * \f$(x,y,z)\f$ is inserted to the simplicial complex with the filtration value set with
+ * \f$mini\_ball\_radius(x,y,z))\f$ iff \f$mini\_ball\_radius(x,y,z)) \leq max\_radius\f$.
+ *
+ * And so on for higher dimensions.
+ *
+ * \image html "cech_complex_representation.png" "Cech complex expansion"
+ *
+ * The minimal ball radius computation is insured by
+ * <a target="_blank" href="https://people.inf.ethz.ch/gaertner/subdir/software/miniball.html">
+ * the miniball software (V3.0)</a> - Smallest Enclosing Balls of Points - and distributed with GUDHI.
+ *
+ * Please refer to
+ * <a target="_blank" href="https://people.inf.ethz.ch/gaertner/subdir/texts/own_work/esa99_final.pdf">
+ * the miniball software design description</a> for more information about this computation.
+ *
+ * If the Cech_complex interfaces are not detailed enough for your need, please refer to
+ * <a href="_cech_complex_2cech_complex_step_by_step_8cpp-example.html">
+ * cech_complex_step_by_step.cpp</a> example, where the graph construction over the Simplex_tree is more detailed.
+ *
+ * \section cechpointsdistance Point cloud
  * 
- * \subsection cechpointscloudexample Example from a point cloud and a distance function
+ * \subsection cechpointscloudexample Example from a point cloud
  * 
- * This example builds the proximity graph from the given points, threshold value, and distance function.
+ * This example builds the proximity graph from the given points, and maximal radius values.
  * Then it creates a `Simplex_tree` with it.
  * 
  * Then, it is asked to display information about the simplicial complex.
  * 
  * \include Cech_complex/cech_complex_example_from_points.cpp
  * 
- * When launching (Cech maximal distance between 2 points is 7.1, is expanded until dimension 2):
+ * When launching (Cech maximal distance between 2 points is 1., is expanded until dimension 2):
  * 
  * \code $> ./Cech_complex_example_from_points
  * \endcode

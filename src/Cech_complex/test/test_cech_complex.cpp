@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(Cech_complex_from_file) {
   BOOST_CHECK(st.num_vertices() == NUMBER_OF_VERTICES);
 
   std::cout << "st.num_simplices()=" << st.num_simplices() << std::endl;
-  BOOST_CHECK(st.num_simplices() == 18);
+  BOOST_CHECK(st.num_simplices() == 28);
 
   // Check filtration values of vertices is 0.0
   for (auto f_simplex : st.skeleton_simplex_range(0)) {
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(Cech_complex_from_file) {
   BOOST_CHECK(st2.num_vertices() == NUMBER_OF_VERTICES);
 
   std::cout << "st2.num_simplices()=" << st2.num_simplices() << std::endl;
-  BOOST_CHECK(st2.num_simplices() == 23);
+  BOOST_CHECK(st2.num_simplices() == 63);
 
   Point_cloud points012;
   for (std::size_t vertex = 0; vertex <= 2; vertex++) {
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(Cech_complex_from_file) {
   BOOST_CHECK(st3.num_vertices() == NUMBER_OF_VERTICES);
 
   std::cout << "st3.num_simplices()=" << st3.num_simplices() << std::endl;
-  BOOST_CHECK(st3.num_simplices() == 24);
+  BOOST_CHECK(st3.num_simplices() == 98);
 
   Point_cloud points0123;
   for (std::size_t vertex = 0; vertex <= 3; vertex++) {
@@ -236,13 +236,13 @@ BOOST_AUTO_TEST_CASE(Cech_complex_from_points) {
         GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), 0.0);
         break;
       case 1:
-        GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), 0.5);
+        GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), 0.707107, .00001);
         break;
       case 2:
-        GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), 0.666667, .00001);
+        GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), 0.816497, .00001);
         break;
       case 3:
-        GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), 0.75);
+        GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), 0.866025, .00001);
         break;
       default:
         BOOST_CHECK(false);  // Shall not happen

@@ -90,11 +90,11 @@ class Radius_distance {
   operator()(const Point_cloud& point_cloud) const {
     using Min_sphere = Miniball::Miniball<Miniball::CoordAccessor<Point_iterator, Coordinate_iterator>>;
 
-    //Min_sphere ms(point_cloud.begin()->end() - point_cloud.begin()->begin(), point_cloud.begin(),point_cloud.end());
-    Min_sphere ms(point_cloud.end() - point_cloud.begin(), point_cloud.begin(),point_cloud.end());
+    Min_sphere ms(point_cloud.begin()->end() - point_cloud.begin()->begin(), point_cloud.begin(),point_cloud.end());
 #ifdef DEBUG_TRACES
-    std::cout << "Radius on " << point_cloud.end() - point_cloud.begin() << " points = "
-              << std::sqrt(ms.squared_radius()) << std::endl;
+    std::cout << "Radius_distance = " << std::sqrt(ms.squared_radius()) << " | nb points = "
+              << point_cloud.end() - point_cloud.begin() << " | dimension = "
+              << point_cloud.begin()->end() - point_cloud.begin()->begin() << std::endl;
 #endif  // DEBUG_TRACES
 
     return std::sqrt(ms.squared_radius());

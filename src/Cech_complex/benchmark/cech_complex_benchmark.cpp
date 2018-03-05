@@ -93,12 +93,12 @@ int main(int argc, char * argv[]) {
                                                                                                Radius_distance());
   std::cout << radius_clock << std::endl;
 
-  Gudhi::Clock squared_radius_clock("Gudhi::Radius_distance()");
+  Gudhi::Clock common_radius_clock("Gudhi::Radius_distance()");
   // Compute the proximity graph of the points
   Proximity_graph sq_radius_prox_graph = Gudhi::compute_proximity_graph<Simplex_tree>(off_reader.get_point_cloud(),
                                                                                                threshold,
                                                                                                Gudhi::Radius_distance());
-  std::cout << squared_radius_clock << std::endl;
+  std::cout << common_radius_clock << std::endl;
 
 
   boost::filesystem::path full_path(boost::filesystem::current_path());
@@ -116,6 +116,7 @@ int main(int argc, char * argv[]) {
       if ( itr->path().extension() == ".off" ) // see below
       {
         Points_off_reader off_reader(itr->path().string());
+        Point p0 = off_reader.get_point_cloud()[0];
 
         for (Filtration_value radius = 0.1; radius < 0.4; radius += 0.1) {
           std::cout << itr->path().stem() << ";";
@@ -123,7 +124,7 @@ int main(int argc, char * argv[]) {
           Gudhi::Clock rips_clock("Rips computation");
           Rips_complex rips_complex_from_points(off_reader.get_point_cloud(), radius, Gudhi::Radius_distance());
           Simplex_tree rips_stree;
-          rips_complex_from_points.create_complex(rips_stree, 2);
+          rips_complex_from_points.create_complex(rips_stree, p0.size() - 1);
           // ------------------------------------------
           // Display information about the Rips complex
           // ------------------------------------------
@@ -133,7 +134,7 @@ int main(int argc, char * argv[]) {
           Gudhi::Clock cech_clock("Cech computation");
           Cech_complex cech_complex_from_points(off_reader.get_point_cloud(), radius);
           Simplex_tree cech_stree;
-          cech_complex_from_points.create_complex(cech_stree, 2);
+          cech_complex_from_points.create_complex(cech_stree, p0.size() - 1);
           // ------------------------------------------
           // Display information about the Cech complex
           // ------------------------------------------
@@ -141,6 +142,7 @@ int main(int argc, char * argv[]) {
           std::cout << cech_sec << ";";
           std::cout << cech_sec / rips_sec << ";";
 
+          assert(rips_stree.num_simplices() >= cech_stree.num_simplices());
           std::cout << rips_stree.num_simplices() << ";";
           std::cout << cech_stree.num_simplices() << ";" << std::endl;
         }

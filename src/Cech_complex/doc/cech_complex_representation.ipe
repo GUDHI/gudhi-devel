@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE ipe SYSTEM "ipe.dtd">
 <ipe version="70107" creator="Ipe 7.1.10">
-<info created="D:20150603143945" modified="D:20160928121844"/>
+<info created="D:20150603143945" modified="D:20180223195207"/>
 <ipestyle name="basic">
 <symbol name="arrow/arc(spx)">
 <path stroke="sym-stroke" fill="sym-stroke" pen="sym-pen">
@@ -232,95 +232,99 @@ h
 <page>
 <layer name="alpha"/>
 <view layers="alpha" active="alpha"/>
-<path layer="alpha" matrix="1 0 0 1 0 -8" fill="darkblue">
-109.771 601.912 m
-159.595 601.797 l
-140.058 541.915 l
+<path layer="alpha" stroke="black" fill="darkcyan">
+48 640 m
+80 672 l
+48 672 l
 h
 </path>
-<path matrix="1 0 0 1 0 -8" fill="darkblue">
-79.8776 552.169 m
-109.756 601.699 l
-139.812 542.209 l
-h
-</path>
-<path matrix="1 0 0 1 0 -8" fill="lightblue">
-69.8453 682.419 m
-159.925 712.208 l
-90.12 732.039 l
-h
-</path>
-<text matrix="1 0 0 1 -230.178 14.1775" transformations="translations" pos="380 530" stroke="seagreen" type="label" width="68.836" height="8.307" depth="2.32" valign="baseline" size="large">Rips complex</text>
+<text matrix="1 0 0 1 -222.178 174.178" transformations="translations" pos="380 530" stroke="seagreen" type="label" width="70.886" height="8.307" depth="2.32" valign="baseline" size="large">Cech complex</text>
 <text matrix="1 0 0 1 -212.333 10.6762" transformations="translations" pos="282.952 524.893" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">0</text>
-<text matrix="1 0 0 1 -210.178 14.1775" transformations="translations" pos="352.708 510.349" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">1</text>
-<text matrix="1 0 0 1 -210.178 14.1775" transformations="translations" pos="310.693 578.759" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">2</text>
-<text matrix="1 0 0 1 -210.178 14.1775" transformations="translations" pos="375.332 578.49" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">3</text>
-<text matrix="1 0 0 1 -210.178 14.1775" transformations="translations" pos="272.179 660.635" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">4</text>
-<text matrix="1 0 0 1 -209.478 4.0238" transformations="translations" pos="296.419 724.197" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">5</text>
-<text matrix="1 0 0 1 -210.178 14.1775" transformations="translations" pos="375.332 689.453" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">6</text>
-<path matrix="1 0 0 1 29.8225 14.1775" stroke="black" pen="heavier">
-60 710 m
-40 660 l
+<text matrix="1 0 0 1 -314.178 58.1775" transformations="translations" pos="352.708 510.349" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">1</text>
+<text matrix="1 0 0 1 -194.178 -13.8225" transformations="translations" pos="310.693 578.759" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">2</text>
+<text matrix="1 0 0 1 -226.178 18.1775" transformations="translations" pos="375.332 578.49" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">3</text>
+<text matrix="1 0 0 1 -218.178 -21.8225" transformations="translations" pos="272.179 660.635" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">4</text>
+<text matrix="1 0 0 1 -89.478 -87.9762" transformations="translations" pos="296.419 724.197" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">5</text>
+<text matrix="1 0 0 1 -302.178 -13.8225" transformations="translations" pos="375.332 689.453" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">6</text>
+<use name="mark/circle(sx)" pos="80 544" size="normal" stroke="black"/>
+<use name="mark/circle(sx)" pos="48 576" size="normal" stroke="black"/>
+<use name="mark/circle(sx)" pos="112 576" size="normal" stroke="black"/>
+<use name="mark/fdisk(sfx)" pos="48 672" size="normal" stroke="black" fill="white"/>
+<use name="mark/circle(sx)" pos="48 640" size="normal" stroke="black"/>
+<use name="mark/circle(sx)" pos="48 672" size="normal" stroke="black"/>
+<use name="mark/circle(sx)" pos="80 672" size="normal" stroke="black"/>
+<use name="mark/circle(sx)" pos="144 672" size="normal" stroke="black"/>
+<use name="mark/circle(sx)" pos="144 608" size="normal" stroke="black"/>
+<use name="mark/circle(sx)" pos="200 640" size="normal" stroke="black"/>
+<use matrix="1 0 0 1 -100 -96" name="mark/circle(sx)" pos="304 672" size="normal" stroke="darkgray"/>
+<use matrix="1 0 0 1 -100 -96" name="mark/circle(sx)" pos="336 672" size="normal" stroke="darkgray"/>
+<path matrix="1 0 0 1 -100 -96" stroke="darkgray">
+32 0 0 32 304 672 e
 </path>
-<path matrix="1 0 0 1 29.8225 14.1775" stroke="black" pen="heavier">
-40 660 m
-130 690 l
+<path matrix="1 0 0 1 -100 -96" stroke="darkgray" pen="fat">
+304 672 m
+336 672 l
 </path>
-<path matrix="1 0 0 1 29.8225 14.1775" stroke="black" pen="heavier">
-130 690 m
-60 710 l
+<text matrix="1 0 0 1 -214.178 50.178" transformations="translations" pos="380 530" stroke="darkgray" type="label" width="80.052" height="8.302" depth="0" valign="baseline" size="large">Maximal radius</text>
+<text matrix="1 0 0 1 -226.178 -13.8225" transformations="translations" pos="375.332 689.453" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">7</text>
+<text matrix="1 0 0 1 -266.178 46.1775" transformations="translations" pos="375.332 689.453" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">8</text>
+<text matrix="1 0 0 1 -334.178 -13.8225" transformations="translations" pos="375.332 689.453" stroke="black" type="label" width="4.981" height="6.42" depth="0" valign="baseline">9</text>
+<path stroke="black">
+112 576 m
+144 608 l
 </path>
-<path matrix="1 0 0 1 29.8225 14.1775" stroke="black" pen="heavier">
-40 660 m
-80 580 l
+<path stroke="black">
+144 672 m
+144 608 l
+200 640 l
+h
 </path>
-<path matrix="1 0 0 1 29.8225 14.1775" stroke="black" pen="heavier">
-80 580 m
-130 580 l
-130 580 l
+<path stroke="black" fill="darkcyan">
+48 576 m
+112 576 l
+80 544 l
+h
 </path>
-<path matrix="1 0 0 1 29.8225 14.1775" stroke="black" pen="heavier">
-130 580 m
-110 520 l
+<use name="mark/fdisk(sfx)" pos="112 728" size="normal" stroke="black"/>
+<path stroke="black">
+80 672 m
+144 672 l
+112 728 l
+h
 </path>
-<path matrix="1 0 0 1 29.8225 14.1775" stroke="black" pen="heavier">
-110 520 m
-50 530 l
-50 530 l
-50 530 l
+<use name="mark/fdisk(sfx)" pos="112 728" size="normal" stroke="black" fill="white"/>
+<use name="mark/fdisk(sfx)" pos="80 672" size="normal" stroke="black" fill="white"/>
+<use name="mark/fdisk(sfx)" pos="144 672" size="normal" stroke="black" fill="white"/>
+<path stroke="black" fill="darkcyan">
+48 576 m
+48 640 l
+32 608 l
+h
 </path>
-<path matrix="1 0 0 1 29.8225 14.1775" stroke="black" pen="heavier">
-50 530 m
-80 580 l
+<use name="mark/fdisk(sfx)" pos="200 640" size="normal" stroke="black" fill="white"/>
+<use name="mark/fdisk(sfx)" pos="144 608" size="normal" stroke="black" fill="white"/>
+<use name="mark/fdisk(sfx)" pos="112 576" size="normal" stroke="black" fill="white"/>
+<use name="mark/fdisk(sfx)" pos="80 544" size="normal" stroke="black" fill="white"/>
+<use name="mark/fdisk(sfx)" pos="48 576" size="normal" stroke="black" fill="white"/>
+<use name="mark/fdisk(sfx)" pos="48 640" size="normal" stroke="black" fill="white"/>
+<path stroke="darkcyan">
+32 0 0 32 80 576 e
 </path>
-<path matrix="1 0 0 1 29.8225 14.1775" stroke="black" pen="heavier">
-130 580 m
-130 690 l
+<path stroke="darkcyan">
+22.6274 0 0 22.6274 64 656 e
 </path>
-<use matrix="1 0 0 1 -209.478 4.0238" name="mark/fdisk(sfx)" pos="300 720" size="normal" stroke="black" fill="white"/>
-<use matrix="1 0 0 1 -210.178 14.1775" name="mark/fdisk(sfx)" pos="280 660" size="normal" stroke="black" fill="white"/>
-<use matrix="1 0 0 1 -210.178 14.1775" name="mark/fdisk(sfx)" pos="370 690" size="normal" stroke="black" fill="white"/>
-<use matrix="1 0 0 1 -210.178 14.1775" name="mark/fdisk(sfx)" pos="370 580" size="normal" stroke="black" fill="white"/>
-<use matrix="1 0 0 1 -210.178 14.1775" name="mark/fdisk(sfx)" pos="290 530" size="normal" stroke="black" fill="white"/>
-<path matrix="1 0 0 1 -40 -16" stroke="black" pen="heavier">
-150.038 609.9 m
-179.929 549.727 l
+<path stroke="darkorange">
+37.1429 0 0 37.1429 112 690.857 e
 </path>
-<use matrix="1 0 0 1 -210.178 14.1775" name="mark/fdisk(sfx)" pos="320 580" size="normal" stroke="black" fill="white"/>
-<use matrix="1 0 0 1 -210.178 14.1775" name="mark/fdisk(sfx)" pos="350 520" size="normal" stroke="black" fill="white"/>
-<path stroke="black" pen="heavier">
-158.7 593.269 m
-81.4925 544.805 l
+<path stroke="darkorange">
+37.1429 0 0 37.1429 162.857 640 e
 </path>
-<path matrix="1 0 0 1 -17.9662 -17.9662" stroke="gray">
-256.324 639.958 m
-370.055 639.958 l
+<use name="mark/fdisk(sfx)" pos="32 608" size="normal" stroke="black"/>
+<text matrix="1 0 0 1 -334.178 94.1775" transformations="translations" pos="352.708 510.349" stroke="black" type="label" width="9.963" height="6.42" depth="0" valign="baseline">10</text>
+<path stroke="darkcyan">
+32 0 0 32 48 608 e
 </path>
-<path matrix="1 0 0 1 -17.9662 -17.9662" stroke="gray">
-56.8567 0 0 56.8567 313.217 639.756 e
-</path>
-<use matrix="1 0 0 1 52.1387 -98.0941" name="mark/fdisk(sfx)" pos="300 720" size="normal" stroke="gray" fill="white"/>
-<use matrix="1 0 0 1 -61.4926 -98.0942" name="mark/fdisk(sfx)" pos="300 720" size="normal" stroke="gray" fill="white"/>
-<text matrix="1 0 0 1 -26.6167 -33.2708" transformations="translations" pos="295.735 657.944" stroke="gray" type="label" width="63.374" height="6.926" depth="1.93" valign="baseline">Rips threshold</text>
+<use name="mark/fdisk(sfx)" pos="204 576" size="normal" stroke="darkgray" fill="white"/>
+<use name="mark/fdisk(sfx)" pos="236 576" size="normal" stroke="darkgray" fill="white"/>
 </page>
 </ipe>
