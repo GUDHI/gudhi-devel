@@ -32,6 +32,8 @@ int main(int argc, char** argv) {
 
   std::vector<std::pair<double, double> > persistence1;
   std::vector<std::pair<double, double> > persistence2;
+  std::vector<std::vector<std::pair<double, double> > > set1;
+  std::vector<std::vector<std::pair<double, double> > > set2;
 
   persistence1.push_back(std::make_pair(1, 2));
   persistence1.push_back(std::make_pair(6, 8));

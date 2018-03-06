@@ -30,7 +30,8 @@ __copyright__ = "Copyright (C) 2018 INRIA"
 __license__ = "GPL v3"
 
 cdef extern from "Kernels_interface.h" namespace "Gudhi::persistence_diagram":
-    double sw(vector[pair[double, double]], vector[pair[double, double]], double, int)
+    double                 sw            (vector[pair[double, double]],          vector[pair[double, double]],          double, int)
+    vector[vector[double]] sw_matrix     (vector[vector[pair[double, double]]],  vector[vector[pair[double, double]]],  double, int)
 
 def sliced_wasserstein(diagram_1, diagram_2, sigma = 1, N = 100):
     """
@@ -45,3 +46,17 @@ def sliced_wasserstein(diagram_1, diagram_2, sigma = 1, N = 100):
     :returns: the sliced wasserstein kernel.
     """
     return sw(diagram_1, diagram_2, sigma, N)
+
+def sliced_wasserstein_matrix(diagrams_1, diagrams_2, sigma = 1, N = 100):
+    """
+
+    :param diagram_1: The first set of diagrams.
+    :type diagram_1: vector[vector[pair[double, double]]]
+    :param diagram_2: The second set of diagrams.
+    :type diagram_2: vector[vector[pair[double, double]]]
+    :param sigma: bandwidth of Gaussian
+    :param N: number of directions
+
+    :returns: the sliced wasserstein kernel matrix.
+    """
+    return sw_matrix(diagrams_1, diagrams_2, sigma, N)
