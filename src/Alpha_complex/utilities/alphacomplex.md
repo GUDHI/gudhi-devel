@@ -1,3 +1,13 @@
+---
+layout: page
+title: "Alpha complex"
+meta_title: "Alpha complex"
+teaser: ""
+permalink: /alphacomplex/
+---
+{::comment}
+Leave the lines above as it is required by the web site generator 'Jekyll'
+{:/comment}
 
 
 # Alpha complex #

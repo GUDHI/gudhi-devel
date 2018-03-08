@@ -1,3 +1,13 @@
+---
+layout: page
+title: "Cubical complex"
+meta_title: "Cubical complex"
+teaser: ""
+permalink: /cubicalcomplex/
+---
+{::comment}
+Leave the lines above as it is required by the web site generator 'Jekyll'
+{:/comment}
 
 
 # Cubical complex#

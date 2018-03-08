@@ -1,3 +1,13 @@
+---
+layout: page
+title: "Rips complex"
+meta_title: "Rips complex"
+teaser: ""
+permalink: /ripscomplex/
+---
+{::comment}
+Leave the lines above as it is required by the web site generator 'Jekyll'
+{:/comment}
 
 
 # Rips complex #
