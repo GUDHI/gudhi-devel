@@ -472,7 +472,6 @@ public:
     Alcove_id a_id(level);
     a_id.reserve(pos_root_count());
     std::vector<Alcove_id> alcoves;
-    alcoves.reserve(pos_root_count());
     Eigen::VectorXd p_vect(d);
     for (unsigned short i = 0; i < d; i++)
       p_vect(i) = p[i];
@@ -487,14 +486,51 @@ public:
   
 private:
 
-  /** Add the vertices of the given simplex to a vertex-simplex map.
-   *  The root, which is tested is of the form \sum_{i <= k < j} r_k.
+  /** Construct the simplices that intersect a given ball.
    */
   void rec_alcoves_of_ball_A(Alcove_id& a_id, Eigen::VectorXd& scalprod_vect, double eps, std::vector<Alcove_id>& alcoves, int j, int i, double root_scalprod) const {
     unsigned short d = dimension_;
     double level = a_id.level();
     if (j == d+1) {
-      alcoves.emplace_back(a_id);
+      std::vector<Vertex_id> vertices = vertices_of_simplex(a_id);
+      std::vector<unsigned> count(pos_root_count(), 0);
+      for (auto v: vertices) {
+        unsigned k = 0;
+        for (int j = 1; j < d+1; ++j) {
+          int sum = 0;
+          for (int i = j-1; i >= 0; --i, ++k) {
+            sum += v[i];
+            if (sum == a_id[k])
+              count[k]++;
+          }
+        }
+      }
+      double sq_rnorm = 2*level*level;
+      Eigen::VectorXd projection(d);
+      for (int l = 0; l < d; ++l)
+        projection(l) = 0;
+      unsigned k = 0;
+      for (int j = 1; j < d+1; ++j) {
+        Eigen::VectorXd root(d);
+        for (int l = 0; l < d; ++l)
+          root(l) = 0;
+        double sum = 0;
+        for (int i = j-1; i >= 0; --i, ++k) {
+          for (int l = 0; l < d; ++l)
+            root(l) += root_t_(i,l);
+          sum += scalprod_vect(i);
+          if (count[k] == 1) {
+            if (std::floor(level*sum) > a_id[k])
+              projection += (1./2 * (sum - (a_id[k]+1)/level))*root;
+          }
+          if (count[k] == d) {
+            if (std::floor(level*sum) < a_id[k])
+              projection += (1./2 * (a_id[k]/level - sum))*root;            
+          }
+        }
+      }
+      if (projection.norm() <= eps)
+        alcoves.emplace_back(a_id);
       return;
     }
     if (i == -1) {
@@ -524,7 +560,105 @@ private:
     }
   }
 
+  // /** The filtration part */
+  // /** A conversion from Cartesian coordinates to the coordinates of the alcove containing the ball centered 
+  //  *  at point of radius eps.
+  //  */
+  // template <class Point>
+  // std::vector<std::pair<Alcove_id, double> > filtered_alcoves_of_ball(const Point& p, double level, double eps, bool root_coords = false) const {
+  //   unsigned d = dimension_;
+  //   Alcove_id a_id(level);
+  //   a_id.reserve(pos_root_count());
+  //   std::vector<Alcove_id> alcoves;
+  //   Eigen::VectorXd p_vect(d);
+  //   for (unsigned short i = 0; i < d; i++)
+  //     p_vect(i) = p[i];
+  //   Eigen::VectorXd scalprod_vect;
+  //   if (root_coords)
+  //     scalprod_vect = p_vect;
+  //   else
+  //     scalprod_vect = root_t_ * p_vect;
+  //   std::vector<int> point_alcove, min_limit, max_limit;
+  //   for (int j = 0; j < d; ++j) {
+  //     double root_scalprod = 0;
+  //     for (int i = j; i > -1; --i) {
+  //       root_scalprod += scalprod_vect(i);
+  //       point_alcove.push_back(std::floor(level*root_scalprod));
+  //       min_limit.push_back(std::floor(level*root_scalprod - std::sqrt(2)*level*eps));
+  //       max_limit.push_back(std::floor(level*root_scalprod + std::sqrt(2)*level*eps));
+  //     }
+  //   }
+  //   rec_filtered_alcoves_of_ball_A(a_id, scalprod_vect, point_alcove, min_limit, max_limit, eps, alcoves, 1, 0, 0);
+  //   return alcoves;
+  // }
 
+  // /** Construct the simplices that intersect a given ball.
+  //  */
+  // void rec_filtered_alcoves_of_ball_A(Alcove_id& a_id,
+  //                                     Eigen::VectorXd& scalprod_vect,
+  //                                     std::vector<int>& point_alcove,
+  //                                     std::vector<int>& min_limit,
+  //                                     std::vector<int>& max_limit,
+  //                                     double eps,
+  //                                     std::vector<std::pair<Alcove_id, double>>& alcoves,
+  //                                     int j,
+  //                                     int i,
+  //                                     double root_scalprod) const {
+  //   unsigned short d = dimension_;
+  //   double level = a_id.level();
+  //   if (j == d+1) {
+  //     double filtration = 0;
+  //     std::vector<Vertex_id> vertices = vertices_of_simplex(a_id);
+  //     std::vector<unsigned> count(pos_root_count(), 0);
+  //     std::vector<std::tuple<std::size_t, std::size_t, bool> > sup_hyperplanes;
+  //     for (auto v: vertices)
+  //       for (unsigned k = 0; k < vertices.size(); ++k)
+  //         if (v[k] == a_id[k])
+  //           count[k]++;
+  //     for (unsigned j = 0; j < d; ++j)
+  //       for (unsigned i = j; i > -1; --i) {
+  //         std::size_t pos = j*(j-1)/2 + (j-i+1);
+  //         if (count[pos] == 1)
+  //           sup_hyperplanes.emplace_back(std::make_tuple(j, i, a_id[pos] <= v[k]));
+  //       }
+  //     alcoves.emplace_back(std::make_pair(a_id, filtration));
+  //     return;
+  //   }
+  //   if (i == -1) {
+  //     rec_filtered_alcoves_of_ball_A(a_id,
+  //                                    scalprod_vect,
+  //                                    point_alcove,
+  //                                    min_limits,
+  //                                    max_limits,
+  //                                    eps,
+  //                                    alcoves,
+  //                                    j+1,
+  //                                    j,
+  //                                    0);
+  //     return;
+  //   }
+  //   root_scalprod += scalprod_vect(i);
+  //   int min_lim = min_limits[(j-1)*j/2+(j-i+1)];
+  //   int max_lim = max_limits[(j-1)*j/2+(j-i+1)];
+  //   bool valid = true;
+  //   for (int l = i+1; l < j; ++l) {
+  //     int pr_i_l = *(a_id.end() - ((j+l-1)*(j-l)/2+(j-l))),
+  //       pr_l_j = *(a_id.end() - (l-i));
+  //     // check if the floor(<x,r>) + floor(<x,s>) - 1 <= floor(<x,r+s>) <= floor(<x,r>) + floor(<x,s>)
+  //     // for a point in the ball B(p,eps)
+  //     if (val < pr_i_l + pr_l_j || val > pr_i_l + pr_l_j + 1) {
+  //       valid = false;
+  //       break;
+  //     }
+  //   }
+  //   if (valid) {
+  //     a_id.push_back(val);
+  //     old_rec_alcoves_of_ball_A(a_id, scalprod_vect, eps, alcoves, j, i-1, root_scalprod);
+  //     a_id.pop_back();
+  //   }
+  // }
+
+  
   int gcd(int a, int b) const {
     return b == 0 ? a : gcd(b, a % b);
   }

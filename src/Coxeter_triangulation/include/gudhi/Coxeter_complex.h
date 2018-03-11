@@ -112,6 +112,9 @@ public:
   using Dist_mask_map = std::map<double, Mask_pointers, Double_compare>;
   // using Mask = std::pair<Mask_clique_map, Dist_mask_map> ;
   using Cech_nerve = std::vector<std::pair<std::size_t, Clique_id> >;
+
+  using Filtered_alcove = std::tuple<std::size_t, double, Vertex_pointers>;
+  using Filtered_alcove_map = std::map<Alcove_id, Filtered_alcove>;
   
   const Coxeter_system& cs_;
   
@@ -688,15 +691,39 @@ public:
     
   }
 
-  void filtered_complex() {
-    typedef typename Hasse_diagram::Node_iterator Node_iterator;
-    typedef Filtered_alcove = std::tuple<std::size_t, double, Vertex_pointers>;
-    Hasse_diagram hasse;
-    std::map<std::size_t, Node_iterator> iv_map;
-    std::map<Alcove_id, Filtered_alcove> filt_a_map;
-
+  // struct Filtered_alcove_visitor {
+  //   Alcove_visitor(typename Point_range::const_iterator& p_it,
+  //                  Filtered_alcove_map& a_map,
+  //                  bool& store_points)
+  //     : p_it_(p_it), a_map_(a_map), store_points_(store_points) {}
     
-  }
+  //   void operator() (const Alcove_id& a) {
+  //     auto a_it = a_map_.find(a);
+  //     if (a_it == a_map_.end()) {
+  //       if (store_points_)
+  //         a_map_.emplace(a, std::make_tuple(a_map_.size(), Point_pointers(1, p_it_), Vertex_pointers()));
+  //       else
+  //         a_map_.emplace(a, std::make_tuple(a_map_.size(), Point_pointers(), Vertex_pointers()));
+  //     }
+  //     else
+  //       if (store_points_)
+  //         std::get<1>(a_it->second).push_back(p_it_);
+  //   }
+  // private :
+  //   typename Point_range::const_iterator& p_it_;
+  //   Filtered_alcove_map& a_map_;
+  //   bool& store_points_;
+  // };
+  
+  // void filtered_complex(const Point_range& point_vector, double init_level, double eps) {
+  //   typedef typename Hasse_diagram::Node_iterator Node_iterator;
+  //   Hasse_diagram hasse;
+  //   std::map<std::size_t, Node_iterator> iv_map;
+  //   Filtered_alcove_map filt_a_map;
+
+  //   for (auto p_it = point_vector.begin(); p_it != point_vector.end(); ++p_it)
+  //     cs_.alcoves_of_ball(*p_it, init_level, eps, Filtered_alcove_visitor(p_it, filt_a_map, false));
+  // }
   
 };
 
