@@ -92,8 +92,8 @@ public:
         cartan(i-1,i) = -1.0;
         cartan(i,i-1) = -1.0;
       }
-      for (int i = 1; i < d; i++)
-        for (int j = 1; j < d; j++)
+      for (int i = 0; i < d; i++)
+        for (int j = 0; j < d; j++)
           if (j < i-1 || j > i+1) 
             cartan(i,j) = 0;
       
