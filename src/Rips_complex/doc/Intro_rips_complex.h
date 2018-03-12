@@ -85,9 +85,9 @@ namespace rips_complex {
  * diagrams are at log-bottleneck distance at most \f$O(\epsilon)\f$).
  *
  * The sparse Rips filtration was introduced by Don Sheehy
- * \cite sheehy13linear. We are using the version from \cite buchet16efficient
- * (except that we multiply all filtration values by 2, to match the usual
- * Rips complex), which proves a
+ * \cite sheehy13linear. We are using the version described in
+ * \cite buchet16efficient (except that we multiply all filtration values
+ * by 2, to match the usual Rips complex), which proves a
  * \f$\frac{1+\epsilon}{1-\epsilon}\f$-interleaving, although in practice the
  * error is usually smaller.
  * A more intuitive presentation of the idea is available in
