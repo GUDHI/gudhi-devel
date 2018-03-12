@@ -37,11 +37,10 @@ private:
   Simplex_map* facets_;  
   std::map<int, int> label_map; // Used to output contiguous labels for vertices
   int max_index = 0;
-
-  // debug
-  int max_simplices_out = 0;
   
 public:
+  // debug
+  int max_simplices_out = 0;
 
   template <class Range_of_simplices,
             class Simplex_tree>
@@ -113,7 +112,8 @@ public:
           else
             vertices.push_back(m_it->second);
         }
-        max_simplices_out++;
+        if (!cf.second.number_of_cofaces())
+          max_simplices_out++;
         output.insert_simplex_and_subfaces(vertices);
       }
       delete cofaces_;
@@ -132,11 +132,12 @@ public:
         else
           vertices.push_back(m_it->second);
       }
-      max_simplices_out++;
+      if (!cf.second.number_of_cofaces())
+        max_simplices_out++;
       output.insert_simplex_and_subfaces(vertices);
     }
     delete cofaces_;
-    // std::cout << "Number of max simplices after collapse: " << max_simplices_out << "\n";
+    std::cout << "Number of max simplices after collapse: " << max_simplices_out << "\n";
   }
 
   void elementary_collapse(Map_iterator facet_it) {

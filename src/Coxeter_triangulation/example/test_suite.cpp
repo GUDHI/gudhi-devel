@@ -40,7 +40,7 @@ void program_options(int argc, char * const argv[]
      "The input file.")
     ("lambda-step,l", po::value<double>(&lambda_step)->default_value(0.01),
        "The step size for the lambda parameter.")
-    ("gamma-step,g", po::value<double>(&gamma_step)->default_value(0.01),
+    ("gamma-step,g", po::value<double>(&gamma_step)->default_value(0.001),
        "The step size for the gamma parameter.")
     ("time-limit,t", po::value<double>(&time_limit)->default_value(std::numeric_limits<double>::infinity()),
        "The time limit for the execution.")
@@ -89,7 +89,7 @@ int main(int argc, char * const argv[]) {
   std::cout << "Coxeter complex computation for " << in_file_name << ", lambda_step = " << lambda_step << ", gamma_step = " << gamma_step << ", time_limit = " << time_limit << ".\n";
   
   int d = 0;
-  using Test = std::tuple<double, int, int, double, std::size_t, std::size_t>;
+  using Test = std::tuple<double, int, int, double, std::size_t, std::size_t, std::size_t>;
   using Conf = std::tuple<double, int, int>;
   auto test_comp =
     [](const Conf& t1, const Conf& t2)
@@ -109,7 +109,7 @@ int main(int argc, char * const argv[]) {
     std::vector<int> betti_;
     double a_time_, col_time_;
     int chi_;
-    std::size_t max_simplices_, vertices_;
+    std::size_t max_simplices_, vertices_, coll_max_simplices_;
     Test best;
     int max_line = 0;
     int k = 0;
@@ -123,13 +123,14 @@ int main(int argc, char * const argv[]) {
       chi_ = cc.chi_;
       betti_ = cc.betti_;
       max_simplices_ = cc.max_simplices_;
+      coll_max_simplices_ = cc.coll_max_simplices_;
       vertices_ = cc.vertices_;
       if (betti_ == betti) {
         found = true;
-        best = std::make_tuple(a_time_, k, 0, col_time_, max_simplices_, vertices_);
+        best = std::make_tuple(a_time_, k, 0, col_time_, max_simplices_, vertices_, coll_max_simplices_);
         break;
       }
-      std::cout << "Parameters lambda=" << init_level + k*lambda_step << " and gamma=" << eps << " a_time=" << a_time_ << " and col_time=" << col_time_ << ". Max simplices=" << max_simplices_ << ", vertices=" << vertices_ << ", Betti numbers = " << betti_ << ", chi=" << chi_ << ".\n";
+      std::cout << "Parameters lambda=" << init_level + k*lambda_step << " and gamma=" << eps << " a_time=" << a_time_ << " and col_time=" << col_time_ << ". Max simplices=" << max_simplices_ << ", vertices=" << vertices_ <<", collapse max simplices=" << coll_max_simplices_ << ", Betti numbers = " << betti_ << ", chi=" << chi_ << ".\n";
       too_coarse = (betti_ < betti);
       k++;
     }
@@ -152,9 +153,9 @@ int main(int argc, char * const argv[]) {
       vertices_ = cc.vertices_;
       if (betti_ == betti) {
         found = true;
-        best = std::make_tuple(a_time_, k, l, col_time_, max_simplices_, vertices_);
+        best = std::make_tuple(a_time_, k, l, col_time_, max_simplices_, vertices_, coll_max_simplices_);
       }      
-      std::cout << "Parameters lambda=" << init_level + k*lambda_step << " and gamma=" << eps + l*gamma_step << " a_time=" << a_time_ << " and col_time=" << col_time_ << ". Max simplices=" << max_simplices_ << ", vertices=" << vertices_ << ", Betti numbers = " << betti_ << ", chi=" << chi_ << ".\n";
+      std::cout << "Parameters lambda=" << init_level + k*lambda_step << " and gamma=" << eps + l*gamma_step << " a_time=" << a_time_ << " and col_time=" << col_time_ << ". Max simplices=" << max_simplices_ << ", vertices=" << vertices_ << ", collapse max simplices=" << coll_max_simplices_ << ", Betti numbers = " << betti_ << ", chi=" << chi_ << ".\n";
       min_queue.pop();
       if (betti_ >= betti && a_time_ < time_limit && std::abs(chi_) < max_abs_euler)
         min_queue.push(std::make_tuple(a_time_, k, l));
@@ -170,9 +171,9 @@ int main(int argc, char * const argv[]) {
         vertices_ = cc.vertices_;
         if (betti_ == betti) {
           found = true;
-          best = std::make_tuple(a_time_, k+1, 0, col_time_, max_simplices_, vertices_);
+          best = std::make_tuple(a_time_, k+1, 0, col_time_, max_simplices_, vertices_, coll_max_simplices_);
         }
-        std::cout << "Parameters lambda=" << init_level + (k+1)*lambda_step << " and gamma=" << eps << " a_time=" << a_time_ << " and col_time=" << col_time_ << ". Max simplices=" << max_simplices_ << ", vertices=" << vertices_ << ", Betti numbers = " << betti_ << ", chi=" << chi_ << ".\n";
+        std::cout << "Parameters lambda=" << init_level + (k+1)*lambda_step << " and gamma=" << eps << " a_time=" << a_time_ << " and col_time=" << col_time_ << ". Max simplices=" << max_simplices_ << ", vertices=" << vertices_ << ", collapse max simplices=" << coll_max_simplices_ << ", Betti numbers = " << betti_ << ", chi=" << chi_ << ".\n";
         if (a_time_ < time_limit && std::abs(chi_) < max_abs_euler)
           min_queue.push(std::make_tuple(a_time_, k+1, 0));
         max_line = k+1;
@@ -195,11 +196,11 @@ int main(int argc, char * const argv[]) {
           vertices_ = cc.vertices_;
           if (betti_ == betti) {
             found = true;
-            best = std::make_tuple(a_time_, std::get<1>(line), l, col_time_, max_simplices_, vertices_);
+            best = std::make_tuple(a_time_, std::get<1>(line), l, col_time_, max_simplices_, vertices_, coll_max_simplices_);
           }
           if (betti_ < betti)
             too_coarse = true;
-          std::cout << "Parameters lambda=" << init_level + std::get<1>(line)*lambda_step << " and gamma=" << eps + l*gamma_step << " a_time=" << a_time_ << " and col_time=" << col_time_ << ". Max simplices=" << max_simplices_ << ", vertices=" << vertices_ << ", Betti numbers = " << betti_ << ", chi=" << chi_ << ".\n";          
+          std::cout << "Parameters lambda=" << init_level + std::get<1>(line)*lambda_step << " and gamma=" << eps + l*gamma_step << " a_time=" << a_time_ << " and col_time=" << col_time_ << ". Max simplices=" << max_simplices_ << ", vertices=" << vertices_ << ", collapse max simplices=" << coll_max_simplices_ << ", Betti numbers = " << betti_ << ", chi=" << chi_ << ".\n";          
         }
       }
       min_queue.pop();
