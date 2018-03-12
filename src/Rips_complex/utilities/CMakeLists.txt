@@ -20,6 +20,8 @@ add_test(NAME Rips_complex_utility_from_rips_distance_matrix COMMAND $<TARGET_FI
     "${CMAKE_SOURCE_DIR}/data/distance_matrix/full_square_distance_matrix.csv" "-r" "1.0" "-d" "3" "-p" "3" "-m" "0")
 add_test(NAME Rips_complex_utility_from_rips_on_tore_3D COMMAND $<TARGET_FILE:rips_persistence>
     "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" "-r" "0.25" "-m" "0.5" "-d" "3" "-p" "3")
+add_test(NAME Sparse_rips_complex_utility_on_tore_3D COMMAND $<TARGET_FILE:sparse_rips_persistence>
+    "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" "-e" "0.5" "-m" "0.2" "-d" "3" "-p" "2")
 
 install(TARGETS rips_distance_matrix_persistence DESTINATION bin)
 install(TARGETS rips_persistence DESTINATION bin)
