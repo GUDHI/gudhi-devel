@@ -28,6 +28,7 @@ void program_options(int argc, char * const argv[]
                      , double & lambda_step
                      , double & gamma_step
                      , double & time_limit
+                     , int & max_abs_euler
                      , std::vector<int> & betti
                      ) {
   namespace po = boost::program_options;
@@ -43,6 +44,8 @@ void program_options(int argc, char * const argv[]
        "The step size for the gamma parameter.")
     ("time-limit,t", po::value<double>(&time_limit)->default_value(std::numeric_limits<double>::infinity()),
        "The time limit for the execution.")
+    ("max-abs-euler,e", po::value<int>(&max_abs_euler)->default_value(100),
+       "The maximal Euler characteristic in absolute value.")
     ("betti,B", po::value<std::vector<int>>(&betti)->multitoken(),
      "The list of desired Betti numbers.");
 
@@ -74,6 +77,7 @@ void program_options(int argc, char * const argv[]
 int main(int argc, char * const argv[]) {
   double init_level = 1, eps = 0;
   double lambda_step = 0.01, gamma_step = 0.01, time_limit = std::numeric_limits<double>::infinity();
+  int max_abs_euler = 100;
   bool store_in_ram = true;
   std::vector<int> betti;
   std::string in_file_name;
@@ -81,7 +85,7 @@ int main(int argc, char * const argv[]) {
   //   lambda_step = atof(argv[2]);
   // if (argc == 4)
   //   gamma_step = atof(argv[3]);
-  program_options(argc, argv, in_file_name, lambda_step, gamma_step, time_limit, betti);
+  program_options(argc, argv, in_file_name, lambda_step, gamma_step, time_limit, max_abs_euler, betti);
   std::cout << "Coxeter complex computation for " << in_file_name << ", lambda_step = " << lambda_step << ", gamma_step = " << gamma_step << ", time_limit = " << time_limit << ".\n";
   
   int d = 0;
@@ -104,6 +108,7 @@ int main(int argc, char * const argv[]) {
     bool too_coarse = true, found = false;
     std::vector<int> betti_;
     double a_time_, col_time_;
+    int chi_;
     std::size_t max_simplices_, vertices_;
     Test best;
     int max_line = 0;
@@ -115,6 +120,7 @@ int main(int argc, char * const argv[]) {
       cc.collapse();
       a_time_ = cc.a_time_;
       col_time_ = cc.col_time_;
+      chi_ = cc.chi_;
       betti_ = cc.betti_;
       max_simplices_ = cc.max_simplices_;
       vertices_ = cc.vertices_;
@@ -123,7 +129,7 @@ int main(int argc, char * const argv[]) {
         best = std::make_tuple(a_time_, k, 0, col_time_, max_simplices_, vertices_);
         break;
       }
-      std::cout << "Parameters lambda=" << init_level + k*lambda_step << " and gamma=" << eps << " a_time=" << a_time_ << " and col_time=" << col_time_ << ". Max simplices=" << max_simplices_ << ", vertices=" << vertices_ << ", Betti numbers = " << betti_ << ".\n";
+      std::cout << "Parameters lambda=" << init_level + k*lambda_step << " and gamma=" << eps << " a_time=" << a_time_ << " and col_time=" << col_time_ << ". Max simplices=" << max_simplices_ << ", vertices=" << vertices_ << ", Betti numbers = " << betti_ << ", chi=" << chi_ << ".\n";
       too_coarse = (betti_ < betti);
       k++;
     }
@@ -141,15 +147,16 @@ int main(int argc, char * const argv[]) {
       a_time_ = cc.a_time_;
       col_time_ = cc.col_time_;
       betti_ = cc.betti_;
+      chi_ = cc.chi_;
       max_simplices_ = cc.max_simplices_;
       vertices_ = cc.vertices_;
       if (betti_ == betti) {
         found = true;
         best = std::make_tuple(a_time_, k, l, col_time_, max_simplices_, vertices_);
       }      
-      std::cout << "Parameters lambda=" << init_level + k*lambda_step << " and gamma=" << eps + l*gamma_step << " a_time=" << a_time_ << " and col_time=" << col_time_ << ". Max simplices=" << max_simplices_ << ", vertices=" << vertices_ << ", Betti numbers = " << betti_ << ".\n";
+      std::cout << "Parameters lambda=" << init_level + k*lambda_step << " and gamma=" << eps + l*gamma_step << " a_time=" << a_time_ << " and col_time=" << col_time_ << ". Max simplices=" << max_simplices_ << ", vertices=" << vertices_ << ", Betti numbers = " << betti_ << ", chi=" << chi_ << ".\n";
       min_queue.pop();
-      if (betti_ >= betti && a_time_ < time_limit)
+      if (betti_ >= betti && a_time_ < time_limit && std::abs(chi_) < max_abs_euler)
         min_queue.push(std::make_tuple(a_time_, k, l));
       if (k == max_line) {
         Coxeter_system cs_A('A', d);
@@ -158,15 +165,16 @@ int main(int argc, char * const argv[]) {
         a_time_ = cc.a_time_;
         col_time_ = cc.col_time_;
         betti_ = cc.betti_;
+        chi_ = cc.chi_;
         max_simplices_ = cc.max_simplices_;
         vertices_ = cc.vertices_;
         if (betti_ == betti) {
           found = true;
           best = std::make_tuple(a_time_, k+1, 0, col_time_, max_simplices_, vertices_);
         }
-        std::cout << "Parameters lambda=" << init_level + (k+1)*lambda_step << " and gamma=" << eps << " a_time=" << a_time_ << " and col_time=" << col_time_ << ". Max simplices=" << max_simplices_ << ", vertices=" << vertices_ << ", Betti numbers = " << betti_ << ".\n";
-        if (a_time_ < time_limit)
-        min_queue.push(std::make_tuple(a_time_, k+1, 0));
+        std::cout << "Parameters lambda=" << init_level + (k+1)*lambda_step << " and gamma=" << eps << " a_time=" << a_time_ << " and col_time=" << col_time_ << ". Max simplices=" << max_simplices_ << ", vertices=" << vertices_ << ", Betti numbers = " << betti_ << ", chi=" << chi_ << ".\n";
+        if (a_time_ < time_limit && std::abs(chi_) < max_abs_euler)
+          min_queue.push(std::make_tuple(a_time_, k+1, 0));
         max_line = k+1;
       }
     }
@@ -182,6 +190,7 @@ int main(int argc, char * const argv[]) {
           a_time_ = cc.a_time_;
           col_time_ = cc.col_time_;
           betti_ = cc.betti_;
+          chi_ = cc.chi_;
           max_simplices_ = cc.max_simplices_;
           vertices_ = cc.vertices_;
           if (betti_ == betti) {
@@ -190,7 +199,7 @@ int main(int argc, char * const argv[]) {
           }
           if (betti_ < betti)
             too_coarse = true;
-          std::cout << "Parameters lambda=" << init_level + std::get<1>(line)*lambda_step << " and gamma=" << eps + l*gamma_step << " a_time=" << a_time_ << " and col_time=" << col_time_ << ". Max simplices=" << max_simplices_ << ", vertices=" << vertices_ << ", Betti numbers = " << betti_ << ".\n";          
+          std::cout << "Parameters lambda=" << init_level + std::get<1>(line)*lambda_step << " and gamma=" << eps + l*gamma_step << " a_time=" << a_time_ << " and col_time=" << col_time_ << ". Max simplices=" << max_simplices_ << ", vertices=" << vertices_ << ", Betti numbers = " << betti_ << ", chi=" << chi_ << ".\n";          
         }
       }
       min_queue.pop();
@@ -198,7 +207,7 @@ int main(int argc, char * const argv[]) {
     if (found)
       std::cout << "The best time is a_time=" << std::get<0>(best) << ", col_time=" << std::get<3>(best) << " for values lambda=" << init_level + std::get<1>(best)*lambda_step << " and gamma=" << init_level + std::get<2>(best)*gamma_step << ". Max simplices=" << std::get<4>(best) << ", vertices=" << std::get<5>(best) << ".\n";
     else
-      std::cout << "No value found within the time limit";
+      std::cout << "No value found within the time and Euler characteristic limit.\n";
   }
   else {
     Gudhi::Off_point_range<Point_d> off_range(argv[1]);

@@ -126,6 +126,7 @@ public:
   double a_time_;
   double v_time_;
   double col_time_;
+  int chi_;
   std::vector<int> betti_;
   std::size_t max_simplices_;
   std::size_t vertices_;
@@ -652,7 +653,8 @@ public:
       int chi = 0;
       for (auto sh: coll_stree.complex_simplex_range())
         chi += 1-2*(coll_stree.dimension(sh)%2);
-      std::cout << "Euler characteristic of coll_stree is " << chi << std::endl;
+      chi_ = chi;
+      // std::cout << "Euler characteristic of coll_stree is " << chi << std::endl;
 
       using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
       using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
