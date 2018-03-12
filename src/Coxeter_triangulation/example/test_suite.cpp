@@ -125,10 +125,10 @@ int main(int argc, char * const argv[]) {
       max_simplices_ = cc.max_simplices_;
       coll_max_simplices_ = cc.coll_max_simplices_;
       vertices_ = cc.vertices_;
-      if (betti_ == betti) {
+      if (betti_ == betti && a_time_ < time_limit) {
         found = true;
         best = std::make_tuple(a_time_, k, 0, col_time_, max_simplices_, vertices_, coll_max_simplices_);
-        break;
+        time_limit = a_time_;
       }
       std::cout << "Parameters lambda=" << init_level + k*lambda_step << " and gamma=" << eps << " a_time=" << a_time_ << " and col_time=" << col_time_ << ". Max simplices=" << max_simplices_ << ", vertices=" << vertices_ <<", collapse max simplices=" << coll_max_simplices_ << ", Betti numbers = " << betti_ << ", chi=" << chi_ << ".\n";
       too_coarse = (betti_ < betti);
@@ -139,7 +139,7 @@ int main(int argc, char * const argv[]) {
     // min_queue.push(std::make_tuple(a_time_, k, 0));
     max_line = k-1;
     // Main loop: Each element in min_queue corresponds to some maximal l for the given k
-    while (!found && !min_queue.empty()) {
+    while (!min_queue.empty()) {
       int k = std::get<1>(min_queue.top());
       int l = std::get<2>(min_queue.top())+1;
       Coxeter_system cs_A('A', d);
@@ -151,9 +151,10 @@ int main(int argc, char * const argv[]) {
       chi_ = cc.chi_;
       max_simplices_ = cc.max_simplices_;
       vertices_ = cc.vertices_;
-      if (betti_ == betti) {
+      if (betti_ == betti && a_time_ < time_limit) {
         found = true;
         best = std::make_tuple(a_time_, k, l, col_time_, max_simplices_, vertices_, coll_max_simplices_);
+        time_limit = a_time_;
       }      
       std::cout << "Parameters lambda=" << init_level + k*lambda_step << " and gamma=" << eps + l*gamma_step << " a_time=" << a_time_ << " and col_time=" << col_time_ << ". Max simplices=" << max_simplices_ << ", vertices=" << vertices_ << ", collapse max simplices=" << coll_max_simplices_ << ", Betti numbers = " << betti_ << ", chi=" << chi_ << ".\n";
       min_queue.pop();
@@ -172,6 +173,7 @@ int main(int argc, char * const argv[]) {
         if (betti_ == betti) {
           found = true;
           best = std::make_tuple(a_time_, k+1, 0, col_time_, max_simplices_, vertices_, coll_max_simplices_);
+          time_limit = a_time_;
         }
         std::cout << "Parameters lambda=" << init_level + (k+1)*lambda_step << " and gamma=" << eps << " a_time=" << a_time_ << " and col_time=" << col_time_ << ". Max simplices=" << max_simplices_ << ", vertices=" << vertices_ << ", collapse max simplices=" << coll_max_simplices_ << ", Betti numbers = " << betti_ << ", chi=" << chi_ << ".\n";
         if (a_time_ < time_limit && std::abs(chi_) < max_abs_euler)
@@ -179,34 +181,8 @@ int main(int argc, char * const argv[]) {
         max_line = k+1;
       }
     }
-    // After a good value is found check all the values that are left in the rectangle (0,0) -- (k-1,l-1)  
-    while (!min_queue.empty()) {
-      Conf line = min_queue.top(); 
-      if (std::get<1>(line) < std::get<1>(best) && std::get<2>(line) <= std::get<2>(best)) {
-        bool too_coarse = false;
-        for (int l = std::get<2>(line)+1; l < std::get<2>(best) && !too_coarse; ++l) {
-          Coxeter_system cs_A('A', d);
-          Coxeter_complex cc(*point_vector, cs_A, init_level + std::get<1>(line)*lambda_step, eps + l*gamma_step);
-          cc.collapse();
-          a_time_ = cc.a_time_;
-          col_time_ = cc.col_time_;
-          betti_ = cc.betti_;
-          chi_ = cc.chi_;
-          max_simplices_ = cc.max_simplices_;
-          vertices_ = cc.vertices_;
-          if (betti_ == betti) {
-            found = true;
-            best = std::make_tuple(a_time_, std::get<1>(line), l, col_time_, max_simplices_, vertices_, coll_max_simplices_);
-          }
-          if (betti_ < betti)
-            too_coarse = true;
-          std::cout << "Parameters lambda=" << init_level + std::get<1>(line)*lambda_step << " and gamma=" << eps + l*gamma_step << " a_time=" << a_time_ << " and col_time=" << col_time_ << ". Max simplices=" << max_simplices_ << ", vertices=" << vertices_ << ", collapse max simplices=" << coll_max_simplices_ << ", Betti numbers = " << betti_ << ", chi=" << chi_ << ".\n";          
-        }
-      }
-      min_queue.pop();
-    }
     if (found)
-      std::cout << "The best time is a_time=" << std::get<0>(best) << ", col_time=" << std::get<3>(best) << " for values lambda=" << init_level + std::get<1>(best)*lambda_step << " and gamma=" << init_level + std::get<2>(best)*gamma_step << ". Max simplices=" << std::get<4>(best) << ", vertices=" << std::get<5>(best) << ".\n";
+      std::cout << "The best time is a_time=" << std::get<0>(best) << ", col_time=" << std::get<3>(best) << " for values lambda=" << init_level + std::get<1>(best)*lambda_step << " and gamma=" << eps + std::get<2>(best)*gamma_step << ". Max simplices=" << std::get<4>(best) << ", vertices=" << std::get<5>(best) << ", collapse max simplices=" << std::get<6>(best) << ".\n";
     else
       std::cout << "No value found within the time and Euler characteristic limit.\n";
   }
