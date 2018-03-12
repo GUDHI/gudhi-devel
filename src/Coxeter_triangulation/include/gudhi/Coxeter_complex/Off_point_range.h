@@ -57,19 +57,19 @@ public:
     private:
     std::ifstream& stream_;
     Point_d value_;
-    unsigned vertices_left_;
+    int vertices_left_;
     
     friend class boost::iterator_core_access;
 
     bool update_value() {
-      if (vertices_left_) {
+      if (vertices_left_ != -1) {
         std::string line;
+        vertices_left_--;
         if (!goto_next_uncomment_line(line, stream_)) return false;
         std::vector<double> point;
         std::istringstream iss(line);
         point.assign(std::istream_iterator<double>(iss), std::istream_iterator<double>());
         value_ = Point_d(point);
-        vertices_left_--;
       }
       return true;
     }
@@ -108,7 +108,7 @@ public:
   typedef iterator_ const_iterator;  
   
   Off_point_range(const std::string& name_file_off)
-    : begin_(stream_,0), end_(stream_,0) {
+    : begin_(stream_,-1), end_(stream_,-1) {
     stream_ = std::ifstream(name_file_off);
     if (!stream_.is_open()) {
       std::cerr << "could not open file \n";
