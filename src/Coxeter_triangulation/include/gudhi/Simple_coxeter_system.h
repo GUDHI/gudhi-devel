@@ -92,6 +92,11 @@ public:
         cartan(i-1,i) = -1.0;
         cartan(i,i-1) = -1.0;
       }
+      for (int i = 1; i < d; i++)
+        for (int j = 1; j < d; j++)
+          if (j < i-1 || j > i+1) 
+            cartan(i,j) = 0;
+      
       // std::cout << "cartan =" << std::endl << cartan << std::endl;
       Eigen::SelfAdjointEigenSolver<Matrix> saes(cartan);
       Eigen::VectorXd sqrt_diag(d);
@@ -480,6 +485,8 @@ public:
       scalprod_vect = p_vect;
     else
       scalprod_vect = root_t_ * p_vect;
+    // std::cout << "p_vect=" << p_vect << "\n";
+    // std::cout << "scalprod_vect=" << scalprod_vect << "\n";
     rec_alcoves_of_ball_A(a_id, scalprod_vect, eps, alcoves, 1, 0, 0);
     return alcoves;
   }
