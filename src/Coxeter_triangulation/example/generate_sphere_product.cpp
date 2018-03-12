@@ -45,7 +45,7 @@ void program_options(int argc, char * const argv[]
 
   if (vm.count("help")) {
     std::cout << std::endl;
-    std::cout << "Compute n random uniform points on a product of spheres. \n";
+    std::cout << "Compute n random points uniformly on a product of spheres. \n";
     std::cout << std::endl << std::endl;
 
     std::cout << "Usage: " << argv[0] << " [options]" << std::endl << std::endl;

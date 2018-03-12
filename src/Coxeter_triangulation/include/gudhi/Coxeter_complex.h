@@ -123,6 +123,13 @@ public:
   std::size_t max_id;
   Vertex_index_map vi_map;
 
+  double a_time_;
+  double v_time_;
+  double col_time_;
+  std::vector<int> betti_;
+  std::size_t max_simplices_;
+  std::size_t vertices_;
+  
   class Alcove_iterator : public boost::iterator_facade< Alcove_iterator,
                                                          std::vector<std::size_t> const,
                                                          boost::forward_traversal_tag> {
@@ -258,15 +265,14 @@ public:
   
   Coxeter_complex(const Point_range& point_vector, const Coxeter_system& cs, double init_level=1, double eps=0, bool store_points = false)
     : cs_(cs), max_id(0) {
-    clock_t start, end, global_start;
-    double time;
-    global_start = clock();
+    clock_t start, end;
     start = clock();
     compute_a_map(point_vector, init_level, eps, store_points);
     end = clock();
-    time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
-    std::cout << "Computed alcove coordinate map in " << time << " s. \n";
-    std::cout << "Alcove map size is " << a_map.size() << ".\n";
+    a_time_ = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+    max_simplices_ = a_map.size();
+    // std::cout << "Computed alcove coordinate map in " << a_time_ << " s. \n";
+    // std::cout << "Alcove map size is " << a_map.size() << ".\n";
     
     // std::cout << "AMap:\n";
     // for (auto m: a_map) 
@@ -277,12 +283,12 @@ public:
     start = clock();
     compute_v_map();
     end = clock();
-    time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
-    std::cout << "Computed vertex map in " << time << " s. \n";
-    std::cout << "Vertex map size is " << v_map.size() << ".\n";
-    end = clock();
-    time = static_cast<double>(end - global_start) / CLOCKS_PER_SEC;
-    std::cout << "Total time: " << time << " s. \n";
+    v_time_ = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+    vertices_ = v_map.size();
+    // std::cout << "Computed vertex map in " << v_time_ << " s. \n";
+    // std::cout << "Vertex map size is " << v_map.size() << ".\n";
+    // end = clock();
+    // std::cout << "Total time: " << a_time_ + v_time_ << " s. \n";
 
     // std::cout << "VMap:\n";
     // for (auto m: v_map) 
@@ -537,7 +543,6 @@ public:
     Fake_simplex_tree stree;
 
     clock_t start, end;
-    double time;
         
     // for (auto a: a_map) {
     //   std::vector<int> vertices;
@@ -627,9 +632,9 @@ public:
     Simplex_tree coll_stree;
     Collapse coll(max_simplex_range, coll_stree);
     end = clock();
-    time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+    col_time_ = static_cast<double>(end - start) / CLOCKS_PER_SEC;
     std::cout << "Number of all simplices after collapse: " << coll_stree.num_simplices() << "\n";
-    std::cout << "Collapse took " << time << " s. \n";
+    std::cout << "Collapse took " << col_time_ << " s. \n";
     // std::cout << coll_stree << "\n";
     int dim_complex = 0;
     for (auto sh: coll_stree.complex_simplex_range()) {
@@ -661,6 +666,7 @@ public:
       pcoh.init_coefficients(3);
       
       pcoh.compute_persistent_cohomology(min_persistence);
+      betti_ = pcoh.persistent_betti_numbers(0,0);
       std::cout << pcoh.persistent_betti_numbers(0,0) << std::endl;
       std::ofstream out("persdiag_cox.out");
       pcoh.output_diagram(out);

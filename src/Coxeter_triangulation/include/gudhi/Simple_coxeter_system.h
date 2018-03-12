@@ -505,7 +505,7 @@ private:
           }
         }
       }
-      double sq_rnorm = 2*level*level;
+      // double sq_rnorm = 2*level*level;
       Eigen::VectorXd projection(d);
       for (int l = 0; l < d; ++l)
         projection(l) = 0;
