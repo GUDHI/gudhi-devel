@@ -70,6 +70,8 @@ int main(int argc, char * argv[]) {
   std::cout << "The complex contains " << simplex_tree.num_simplices() << " simplices \n";
   std::cout << "   and has dimension " << simplex_tree.dimension() << " \n";
 
+  simplex_tree.set_dimension(simplex_tree.dimension()+1);
+  
   // Sort the simplices in the order of the filtration
   simplex_tree.initialize_filtration();
 

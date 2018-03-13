@@ -182,7 +182,7 @@ int main(int argc, char * const argv[]) {
       }
     }
     if (found)
-      std::cout << "The best time is a_time=" << std::get<0>(best) << ", col_time=" << std::get<3>(best) << " for values lambda=" << init_level + std::get<1>(best)*lambda_step << " and gamma=" << eps + std::get<2>(best)*gamma_step << ". Max simplices=" << std::get<4>(best) << ", vertices=" << std::get<5>(best) << ", collapse max simplices=" << std::get<6>(best) << ".\n";
+      std::cout << "\nThe best time is a_time=" << std::get<0>(best) << ", col_time=" << std::get<3>(best) << " for values lambda=" << init_level + std::get<1>(best)*lambda_step << " and gamma=" << eps + std::get<2>(best)*gamma_step << ". Max simplices=" << std::get<4>(best) << ", vertices=" << std::get<5>(best) << ", collapse max simplices=" << std::get<6>(best) << ".\n";
     else
       std::cout << "No value found within the time and Euler characteristic limit.\n";
   }

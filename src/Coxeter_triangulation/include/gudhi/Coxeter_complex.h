@@ -302,7 +302,7 @@ public:
       if (m.second.size()-1 > max_dim)
         max_dim = m.second.size()-1;
     }
-    std::cout << "Dimension of the nerve is " << max_dim << ".\n\n";    
+    // std::cout << "Dimension of the nerve is " << max_dim << ".\n\n";    
 
     unsigned index = 0;
     for (auto v_it = v_map.begin(); v_it != v_map.end(); ++v_it, ++index)
@@ -651,7 +651,7 @@ public:
     // std::cout << "Euler characteristic of coll_stree is " << chi << std::endl;
     
     if (pers_out) {
-      std::cout << "Start persistence calculation..." << std::endl;
+      std::cout << "Starting persistence..." << std::endl;
       int chi = 0;
       for (auto sh: coll_stree.complex_simplex_range())
         chi += 1-2*(coll_stree.dimension(sh)%2);
