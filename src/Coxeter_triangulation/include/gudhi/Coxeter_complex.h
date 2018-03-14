@@ -249,6 +249,19 @@ private:
       cs_.alcoves_of_ball(*p_it, init_level, eps, Alcove_visitor(p_it, a_map, store_points));
     for (auto m: a_map)
       std::get<3>(m.second) = std::sqrt(std::get<3>(m.second));
+    typedef typename Alcove_map::iterator Alcove_iterator;
+    std::vector<Alcove_iterator> iterators;
+    for (auto m_it = a_map.begin(); m_it != a_map.end(); ++m_it)
+      iterators.push_back(m_it);
+    struct Filt_compare {
+      bool operator() (const Alcove_iterator& lhs, const Alcove_iterator& rhs) const {
+        return std::get<3>(lhs->second) < std::get<3>(rhs->second);
+      }
+    };
+    std::sort(iterators.begin(), iterators.end(), Filt_compare());
+    int k = 0;
+    for (auto it: iterators)
+      std::get<0>(it->second) = k++;
   }
   
   void compute_v_map() {
@@ -283,7 +296,7 @@ public:
     // std::cout << "AMap:\n";
     // for (auto m: a_map) 
     //   std::cout << m.first << ": " << std::get<0>(m.second) << ", "
-    //             << "size=" << std::get<1>(m.second).size() << std::endl;    
+    //             << "size=" << std::get<1>(m.second).size() << ", filt=" << std::get<3>(m.second) << std::endl;    
     // std::cout << "\n";
     
     start = clock();
@@ -706,6 +719,14 @@ public:
     
   }
 
+  void nerve_collapse(bool pers_out = true) {
+    clock_t start, end;
+    typedef boost::iterator_range<Alcove_iterator> Max_simplex_range;
+    Max_simplex_range max_simplex_range(Alcove_iterator(a_map.begin(), a_map, vi_map),
+                                        Alcove_iterator(a_map.end(), a_map, vi_map));
+    
+  }
+  
   // struct Filtered_alcove_visitor {
   //   Alcove_visitor(typename Point_range::const_iterator& p_it,
   //                  Filtered_alcove_map& a_map,

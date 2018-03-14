@@ -10,6 +10,21 @@
 #include "../../example/cxx-prettyprint/prettyprint.hpp"
 // #include <Eigen/SPQRSupport>
 
+#include <CGAL/basic.h>
+#include <CGAL/QP_models.h>
+#include <CGAL/QP_functions.h>
+
+#ifdef CGAL_USE_GMP
+#include <CGAL/Gmpz.h>
+typedef CGAL::Gmpzf ET;
+// typedef double ET;
+#else
+#include <CGAL/MP_Float.h>
+typedef CGAL::MP_Float ET;
+#endif
+
+double prec = 1e-15;
+
 class Simple_coxeter_system {
 
   typedef double FT;
@@ -488,7 +503,7 @@ public:
       scalprod_vect = root_t_ * p_vect;
     // std::cout << "p_vect=" << p_vect << "\n";
     // std::cout << "scalprod_vect=" << scalprod_vect << "\n";
-    rec_alcoves_of_ball_A(a_id, scalprod_vect, eps, alcoves, 1, 0, 0);
+    rec_alcoves_of_ball_A(a_id, scalprod_vect, eps, alcoves, 1, 0, 0, p_vect);
     return alcoves;
   }
   
@@ -496,7 +511,7 @@ private:
 
   /** Construct the simplices that intersect a given ball.
    */
-  void rec_alcoves_of_ball_A(Alcove_id& a_id, Eigen::VectorXd& scalprod_vect, double eps, std::vector<std::pair<Alcove_id, double> >& alcoves, int j, int i, double root_scalprod) const {
+  void rec_alcoves_of_ball_A(Alcove_id& a_id, Eigen::VectorXd& scalprod_vect, double eps, std::vector<std::pair<Alcove_id, double> >& alcoves, int j, int i, double root_scalprod, Eigen::VectorXd& p_vect) const {
     unsigned short d = dimension_;
     double level = a_id.level();
     if (j == d+1) {
@@ -513,37 +528,55 @@ private:
           }
         }
       }
-      // double sq_rnorm = 2*level*level;
-      Eigen::VectorXd projection(d);
-      for (int l = 0; l < d; ++l)
-        projection(l) = 0;
+      typedef CGAL::Quadratic_program<double> Program;
+      typedef CGAL::Quadratic_program_solution<ET> Solution;
+      Program qp(CGAL::SMALLER, false); // No limits
+      // ET prec(1000000);
+      // The quadratic problem is
+      // minimize (x^t D x) + c^t x + c0 = ||x-p||^2
+      // for values A x <= b
+      // with A composed of roots and b values k_r/lambda
+      for (int i = 0; i < d; ++i)
+        qp.set_d(i, i, 2); // Need to specify 2*D
+      for (int i = 0; i < d; ++i)
+        qp.set_c(i, -2*p_vect(i));
+      qp.set_c0(p_vect.squaredNorm());
       unsigned k = 0;
+      unsigned line_no = 0;
       for (int j = 1; j < d+1; ++j) {
         Eigen::VectorXd root(d);
         for (int l = 0; l < d; ++l)
           root(l) = 0;
-        double sum = 0;
         for (int i = j-1; i >= 0; --i, ++k) {
           for (int l = 0; l < d; ++l)
             root(l) += root_t_(i,l);
-          sum += scalprod_vect(i);
           if (count[k] == 1) {
-            if (std::floor(level*sum) > a_id[k])
-              projection += (1./2 * (sum - (a_id[k]+1)/level))*root;
+            for (int l = 0; l < d; ++l)
+              qp.set_a(l, line_no, root(l));
+            qp.set_b(line_no++, (a_id[k]+1)/level);
           }
           if (count[k] == d) {
-            if (std::floor(level*sum) < a_id[k])
-              projection += (1./2 * (a_id[k]/level - sum))*root;            
+            for (int l = 0; l < d; ++l)
+              qp.set_a(l, line_no, -root(l));
+            qp.set_b(line_no++, -a_id[k]/level);
           }
         }
       }
-      double sq_norm = projection.squaredNorm();
+      Solution s = CGAL::solve_quadratic_program(qp, ET());
+      assert (s.solves_quadratic_program(qp));
+      // std::cout << "Point = ";
+      // for (auto it = s.variable_values_begin(); it != s.variable_values_end(); ++it)
+      //   std::cout << it->numerator().to_double() / it->denominator().to_double() << " ";
+      // std::cout << "\n";
+      double sq_norm = s.objective_value_numerator().to_double() / s.objective_value_denominator().to_double();
+      sq_norm = std::round(sq_norm*10e10)/10e10;
+      // double sq_norm = s.objective_value_numerator() / s.objective_value_denominator();
       if (sq_norm <= eps*eps)
         alcoves.emplace_back(std::make_pair(a_id, sq_norm));
       return;
     }
     if (i == -1) {
-      rec_alcoves_of_ball_A(a_id, scalprod_vect, eps, alcoves, j+1, j, 0);
+      rec_alcoves_of_ball_A(a_id, scalprod_vect, eps, alcoves, j+1, j, 0, p_vect);
       return;
     }
     root_scalprod += scalprod_vect(i);
@@ -563,7 +596,7 @@ private:
       }
       if (valid) {
         a_id.push_back(val);
-        rec_alcoves_of_ball_A(a_id, scalprod_vect, eps, alcoves, j, i-1, root_scalprod);
+        rec_alcoves_of_ball_A(a_id, scalprod_vect, eps, alcoves, j, i-1, root_scalprod, p_vect);
         a_id.pop_back();
       }
     }

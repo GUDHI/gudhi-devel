@@ -143,7 +143,7 @@ private:
     for (auto chunk: *chunks_it) {
       for (auto c_it = chunk.first.begin(); c_it != chunk.first.end(); ++c_it)
         a_id.first.push_back(*c_it);
-      a_id.second += chunk.second;
+      a_id.second = chunk.second;
       rec_combine_chunks_alcove(chunks_it+1, chunks_end, visitor, a_id);
       a_id.first.resize(a_id.first.size()-chunk.first.size());
     }
