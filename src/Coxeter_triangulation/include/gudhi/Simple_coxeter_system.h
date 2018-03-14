@@ -470,13 +470,14 @@ public:
 
   /** A conversion from Cartesian coordinates to the coordinates of the alcove containing the ball centered 
    *  at point of radius eps.
+   *  The second member in the output pairs is the squared distance.
    */
   template <class Point>
-  std::vector<Alcove_id> alcoves_of_ball(const Point& p, double level, double eps, bool root_coords = false) const {
+  std::vector<std::pair<Alcove_id, double> > alcoves_of_ball(const Point& p, double level, double eps, bool root_coords = false) const {
     unsigned d = dimension_;
     Alcove_id a_id(level);
     a_id.reserve(pos_root_count());
-    std::vector<Alcove_id> alcoves;
+    std::vector<std::pair<Alcove_id, double> > alcoves;
     Eigen::VectorXd p_vect(d);
     for (unsigned short i = 0; i < d; i++)
       p_vect(i) = p[i];
@@ -495,7 +496,7 @@ private:
 
   /** Construct the simplices that intersect a given ball.
    */
-  void rec_alcoves_of_ball_A(Alcove_id& a_id, Eigen::VectorXd& scalprod_vect, double eps, std::vector<Alcove_id>& alcoves, int j, int i, double root_scalprod) const {
+  void rec_alcoves_of_ball_A(Alcove_id& a_id, Eigen::VectorXd& scalprod_vect, double eps, std::vector<std::pair<Alcove_id, double> >& alcoves, int j, int i, double root_scalprod) const {
     unsigned short d = dimension_;
     double level = a_id.level();
     if (j == d+1) {
@@ -536,8 +537,9 @@ private:
           }
         }
       }
-      if (projection.norm() <= eps)
-        alcoves.emplace_back(a_id);
+      double sq_norm = projection.squaredNorm();
+      if (sq_norm <= eps*eps)
+        alcoves.emplace_back(std::make_pair(a_id, sq_norm));
       return;
     }
     if (i == -1) {

@@ -81,7 +81,7 @@ public:
 
   using Point_pointers = std::vector<typename Point_range::const_iterator>;
   using Vertex_pointers = std::vector<typename Vertex_map::iterator>;
-  using Alcove = std::tuple<std::size_t, Point_pointers, Vertex_pointers>;
+  using Alcove = std::tuple<std::size_t, Point_pointers, Vertex_pointers, double>;
   using Alcove_map = std::map<Alcove_id, Alcove>;
 
   using Simplex_tree = Gudhi::Simplex_tree<>;
@@ -224,17 +224,19 @@ private:
                    bool& store_points)
       : p_it_(p_it), a_map_(a_map), store_points_(store_points) {}
     
-    void operator() (const Alcove_id& a) {
-      auto a_it = a_map_.find(a);
+    void operator() (const std::pair<Alcove_id, double>& a) {
+      auto a_it = a_map_.find(a.first);
       if (a_it == a_map_.end()) {
         if (store_points_)
-          a_map_.emplace(a, std::make_tuple(a_map_.size(), Point_pointers(1, p_it_), Vertex_pointers()));
+          a_map_.emplace(a.first, std::make_tuple(a_map_.size(), Point_pointers(1, p_it_), Vertex_pointers(), a.second));
         else
-          a_map_.emplace(a, std::make_tuple(a_map_.size(), Point_pointers(), Vertex_pointers()));
+          a_map_.emplace(a.first, std::make_tuple(a_map_.size(), Point_pointers(), Vertex_pointers(), a.second));
       }
-      else
+      else {
+        std::get<3>(a_it->second) = std::min(std::get<3>(a_it->second), a.second);
         if (store_points_)
           std::get<1>(a_it->second).push_back(p_it_);
+      }
     }
   private :
     typename Point_range::const_iterator& p_it_;
@@ -245,6 +247,8 @@ private:
   void compute_a_map(const Point_range& point_vector, double init_level, double eps, bool store_points) {
     for (auto p_it = point_vector.begin(); p_it != point_vector.end(); ++p_it)
       cs_.alcoves_of_ball(*p_it, init_level, eps, Alcove_visitor(p_it, a_map, store_points));
+    for (auto m: a_map)
+      std::get<3>(m.second) = std::sqrt(std::get<3>(m.second));
   }
   
   void compute_v_map() {

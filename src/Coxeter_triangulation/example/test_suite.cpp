@@ -132,6 +132,8 @@ int main(int argc, char * const argv[]) {
       }
       std::cout << "Parameters lambda=" << init_level + k*lambda_step << " and gamma=" << eps << " a_time=" << a_time_ << " and col_time=" << col_time_ << ". Max simplices=" << max_simplices_ << ", vertices=" << vertices_ <<", collapse max simplices=" << coll_max_simplices_ << ", Betti numbers = " << betti_ << ", chi=" << chi_ << ".\n";
       too_coarse = (betti_ < betti);
+      if (a_time_ > time_limit)
+        break;
       k++;
     }
     if (a_time_ < time_limit)    

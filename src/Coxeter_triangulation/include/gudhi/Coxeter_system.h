@@ -91,7 +91,7 @@ public:
                        Visitor visitor,
                        bool root_coords = false) const
   {
-    std::vector<std::vector<Alcove_id>> chunks;
+    std::vector<std::vector<std::pair<Alcove_id, double> > > chunks;
     auto p_it = p.begin();
     for (auto scs: simple_system_range_) {
       std::vector<FT> p_part;
@@ -104,7 +104,7 @@ public:
     // std::vector<std::vector<Vertex_id>::iterator> iterators;
     // for (auto chunk: chunks)
     //   iterators.emplace_back(chunk.begin());
-    Alcove_id a_id(init_level);
+    std::pair<Alcove_id, double> a_id = std::make_pair(Alcove_id(init_level), 0);
     rec_combine_chunks_alcove(chunks.begin(), chunks.end(), visitor, a_id);
   }
   
@@ -131,20 +131,21 @@ private:
   }
 
   template <class Visitor>
-  void rec_combine_chunks_alcove(std::vector<std::vector<Alcove_id>>::iterator chunks_it,
-                                 std::vector<std::vector<Alcove_id>>::iterator chunks_end,
+  void rec_combine_chunks_alcove(std::vector<std::vector<std::pair<Alcove_id, double> > >::iterator chunks_it,
+                                 std::vector<std::vector<std::pair<Alcove_id, double> > >::iterator chunks_end,
                                  Visitor& visitor,
-                                 Alcove_id& a_id) const {
+                                 std::pair<Alcove_id, double>& a_id) const {
     if (chunks_it == chunks_end) {
       //      vertices.push_back(reduced_id(v_id));
       visitor(a_id);
       return;
     }
     for (auto chunk: *chunks_it) {
-      for (auto c_it = chunk.begin(); c_it != chunk.end(); ++c_it)
-        a_id.push_back(*c_it);
+      for (auto c_it = chunk.first.begin(); c_it != chunk.first.end(); ++c_it)
+        a_id.first.push_back(*c_it);
+      a_id.second += chunk.second;
       rec_combine_chunks_alcove(chunks_it+1, chunks_end, visitor, a_id);
-      a_id.resize(a_id.size()-chunk.size());
+      a_id.first.resize(a_id.first.size()-chunk.first.size());
     }
   }
 
