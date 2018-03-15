@@ -1103,7 +1103,6 @@ class Cover_complex {
    * @param[in] N number of bootstrap iterations.
    *
    */
-  template <typename SimplicialComplex>
   void compute_distribution(int N = 100) {
     if (distribution.size() >= N) {
       std::cout << "Already done!" << std::endl;

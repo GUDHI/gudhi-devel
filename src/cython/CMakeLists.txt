@@ -85,6 +85,7 @@ if(CYTHON_FOUND)
 
   if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
     set(GUDHI_CYTHON_BOTTLENECK_DISTANCE "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/bottleneck_distance.pyx'")
+    set(GUDHI_CYTHON_NERVE_GIC "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/nerve_gic.pyx'")
   endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)
   if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
     set(GUDHI_CYTHON_SUBSAMPLING "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/subsampling.pyx'")
