@@ -34,11 +34,18 @@ __license__ = "GPL v3"
 cdef extern from "Nerve_gic_interface.h" namespace "Gudhi":
     cdef cppclass Nerve_gic_interface "Gudhi::cover_complex::Nerve_gic_interface":
         Nerve_gic_interface()
-        bool read_point_cloud(string off_file_name)
         double compute_confidence_level_from_distance(double distance)
         double compute_distance_from_confidence_level(double alpha)
         void compute_distribution(int N)
         double compute_p_value()
+        void compute_PD()
+        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree)
+        bool read_point_cloud(string off_file_name)
+        double set_automatic_resolution()
+        void set_color_from_coordinate(int k)
+        void set_color_from_file(string color_file_name)
+        void set_color_from_vector(vector[double] color)
+        void set_cover_from_file(string cover_file_name)
 
 # CoverComplex python interface
 cdef class CoverComplex:
@@ -73,20 +80,6 @@ cdef class CoverComplex:
         """Returns true if CoverComplex pointer is not NULL.
          """
         return self.thisptr != NULL
-
-    def read_point_cloud(self, off_file):
-        """Reads and stores the input point cloud.
-
-        :param off_file: Name of the input .OFF or .nOFF file.
-        :type off_file: string
-        :rtype: bool
-        :returns: Read file status.
-        """
-        if os.path.isfile(off_file):
-            return self.thisptr.read_point_cloud(str.encode(off_file))
-        else:
-            print("file " + off_file + " not found.")
-            return False
 
     def compute_confidence_level_from_distance(self, distance):
         """Computes the confidence level of a specific bottleneck distance
@@ -127,3 +120,84 @@ cdef class CoverComplex:
         :returns: p-value.
         """
         return self.thisptr.compute_p_value()
+
+    def compute_PD(self):
+        """Computes the extended persistence diagram of the complex.
+        """
+        self.thisptr.compute_PD()
+
+    def create_simplex_tree(self):
+        """
+        :returns: A simplex tree created from the Cover complex.
+        :rtype: SimplexTree
+        """
+        simplex_tree = SimplexTree()
+        self.thisptr.create_simplex_tree(simplex_tree.thisptr)
+        return simplex_tree
+
+    def read_point_cloud(self, off_file):
+        """Reads and stores the input point cloud.
+
+        :param off_file: Name of the input .OFF or .nOFF file.
+        :type off_file: string
+        :rtype: bool
+        :returns: Read file status.
+        """
+        if os.path.isfile(off_file):
+            return self.thisptr.read_point_cloud(str.encode(off_file))
+        else:
+            print("file " + off_file + " not found.")
+            return False
+
+    def set_automatic_resolution(self):
+        """Computes the optimal length of intervals (i.e. the smallest interval
+        length avoiding discretization artifacts—see [12]) for a functional
+        cover.
+
+        :rtype: double
+        :returns: reso interval length used to compute the cover.
+        """
+        return self.thisptr.set_automatic_resolution()
+
+    def set_color_from_coordinate(self, k=0):
+        """Computes the function used to color the nodes of the simplicial
+        complex from the k-th coordinate.
+
+        :param k: Coordinate to use (start at 0). Default value is 0.
+        :type k: int
+        """
+        return self.thisptr.set_color_from_coordinate(k)
+
+    def set_color_from_file(self, color_file_name):
+        """Computes the function used to color the nodes of the simplicial
+        complex from a file containing the function values.
+
+        :param color_file_name: Name of the input color file.
+        :type color_file_name: string
+        """
+        if os.path.isfile(color_file_name):
+            self.thisptr.set_color_from_file(str.encode(color_file_name))
+        else:
+            print("file " + color_file_name + " not found.")
+
+    def set_color_from_vector(self, color):
+        """Computes the function used to color the nodes of the simplicial
+        complex from a vector stored in memory.
+
+        :param color: Input vector of values.
+        :type color: vector[double]
+        """
+        self.thisptr.set_color_from_vector(color)
+
+    def set_cover_from_file(self, cover_file_name):
+        """Creates the cover C from a file containing the cover elements of
+        each point (the order has to be the same as in the input file!).
+
+        :param cover_file_name: Name of the input cover file.
+        :type cover_file_name: string
+        """
+        if os.path.isfile(cover_file_name):
+            self.thisptr.set_cover_from_file(str.encode(cover_file_name))
+        else:
+            print("file " + cover_file_name + " not found.")
+
