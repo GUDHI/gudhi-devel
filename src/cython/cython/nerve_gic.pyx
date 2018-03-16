@@ -46,6 +46,12 @@ cdef extern from "Nerve_gic_interface.h" namespace "Gudhi":
         void set_color_from_file(string color_file_name)
         void set_color_from_vector(vector[double] color)
         void set_cover_from_file(string cover_file_name)
+        void set_cover_from_function()
+        void set_cover_from_Euclidean_Voronoi(int m)
+        void set_function_from_coordinate(int k)
+        void set_function_from_file(string func_file_name)
+        void set_function_from_range(vector[double] function)
+        void set_gain(double g)
 
 # CoverComplex python interface
 cdef class CoverComplex:
@@ -201,3 +207,51 @@ cdef class CoverComplex:
         else:
             print("file " + cover_file_name + " not found.")
 
+    def set_cover_from_function(self):
+        """Creates a cover C from the preimages of the function f.
+        """
+        self.thisptr.set_cover_from_function()
+
+    def set_cover_from_Voronoi(self, m=100):
+        """Creates the cover C from the Voronoï cells of a subsampling of the
+        point cloud.
+
+        :param m: Number of points in the subsample. Default value is 100.
+        :type m: int
+        """
+        self.thisptr.set_cover_from_Euclidean_Voronoi(m)
+
+    def set_function_from_coordinate(self, k):
+        """Creates the function f from the k-th coordinate of the point cloud.
+
+        :param k: coordinate to use (start at 0).
+        :type k: int
+        """
+        self.thisptr.set_function_from_coordinate(k)
+
+    def set_function_from_file(self, func_file_name):
+        """Creates the function f from a file containing the function values.
+
+        :param func_file_name: name of the input function file.
+        :type func_file_name: string
+        """
+        if os.path.isfile(func_file_name):
+            self.thisptr.set_function_from_file(str.encode(func_file_name))
+        else:
+            print("file " + func_file_name + " not found.")
+
+    def set_function_from_range(self, function):
+        """Creates the function f from a vector stored in memory.
+
+        :param function: Input vector of values.
+        :type function: vector[double]
+        """
+        self.thisptr.set_function_from_range(function)
+
+    def set_gain(self, g):
+        """Sets a gain from a value stored in memory.
+
+        :param g: gain (default value is 0.3).
+        :type g: double
+        """
+        self.thisptr.set_gain(g)
