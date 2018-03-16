@@ -133,21 +133,22 @@ public:
   std::size_t vertices_;
   
   class Alcove_iterator : public boost::iterator_facade< Alcove_iterator,
-                                                         std::vector<std::size_t> const,
+                                                         std::pair<std::vector<std::size_t>, double> const,
                                                          boost::forward_traversal_tag> {
   private:
     typename Alcove_map::const_iterator it_;
     Alcove_map const& a_map_;
     Vertex_index_map const& vi_map_;
-    std::vector<std::size_t> value_; 
+    std::pair<std::vector<std::size_t>, double> value_;
     friend class boost::iterator_core_access;
 
     void update_value() {
-      value_.clear();
+      value_.first.clear();
       if (it_ != a_map_.end()) {
         for (auto m_it: std::get<2>(it_->second))
-          value_.push_back(vi_map_.at(m_it));
-        std::sort(value_.begin(), value_.end());
+          value_.first.push_back(vi_map_.at(m_it));
+        std::sort(value_.first.begin(), value_.first.end());
+        value_.second = std::get<3>(it_->second);
       }
     }
     
@@ -155,8 +156,8 @@ public:
       return it_ == other.it_;
     }
 
-    std::vector<std::size_t> const& dereference() const {
-      return value_;
+    std::pair<std::vector<std::size_t>, double> const& dereference() const {
+      return value_; 
     }
 
     void increment() {
@@ -173,10 +174,80 @@ public:
     }
 
     int dimension() {
+      return value_.first.size()-1;
+    }
+  };
+
+  class No_filtration_alcove_iterator : public boost::iterator_facade< No_filtration_alcove_iterator,
+                                                                       std::vector<std::size_t> const,
+                                                                       boost::forward_traversal_tag> {
+  private:
+    typename Alcove_map::const_iterator it_;
+    Alcove_map const& a_map_;
+    Vertex_index_map const& vi_map_;
+    std::vector<std::size_t> value_;
+    friend class boost::iterator_core_access;
+
+    void update_value() {
+      value_.clear();
+      if (it_ != a_map_.end()) {
+        for (auto m_it: std::get<2>(it_->second))
+          value_.push_back(vi_map_.at(m_it));
+        std::sort(value_.begin(), value_.end());
+      }
+    }
+    
+    bool equal(No_filtration_alcove_iterator const& other) const {
+      return it_ == other.it_;
+    }
+
+    std::vector<std::size_t> const& dereference() const {
+      return value_;
+    }
+
+    void increment() {
+      it_++;
+      update_value();
+    }
+    
+  public:
+    No_filtration_alcove_iterator(typename Alcove_map::const_iterator it,
+                                  Alcove_map const& a_map,
+                                  Vertex_index_map const& vi_map)
+      : it_(it), a_map_(a_map), vi_map_(vi_map) {
+      update_value();
+    }
+
+    int dimension() {
       return value_.size()-1;
     }
   };
 
+  
+  // class No_filtration_alcove_iterator : public boost::iterator_facade< No_filtration_alcove_iterator,
+  //                                                                      std::vector<std::size_t> const,
+  //                                                                      boost::forward_traversal_tag> {
+  // private:
+  //   Alcove_iterator a_it_;
+  //   friend class boost::iterator_core_access;
+
+  //   bool equal(No_filtration_alcove_iterator const& other) const {
+  //     return a_it_ == other.a_it_;
+  //   }
+    
+  //   std::vector<std::size_t> const dereference() const {
+  //     return a_it_->first;
+  //   }
+
+  //   void increment() {
+  //     a_it_++;
+  //   }
+
+  // public:
+  //   No_filtration_alcove_iterator(Alcove_iterator a_it)
+  //     : a_it_(a_it) { }    
+  // };
+  
   template <class Simplex_tree>
   class Simplex_tree_simplex_iterator : public boost::iterator_facade< Simplex_tree_simplex_iterator<Simplex_tree>,
                                                                        std::vector<std::size_t> const,
@@ -290,7 +361,7 @@ public:
     end = clock();
     a_time_ = static_cast<double>(end - start) / CLOCKS_PER_SEC;
     max_simplices_ = a_map.size();
-    // std::cout << "Computed alcove coordinate map in " << a_time_ << " s. \n";
+    std::cout << "Computed alcove coordinate map in " << a_time_ << " s. \n";
     // std::cout << "Alcove map size is " << a_map.size() << ".\n";
     
     // std::cout << "AMap:\n";
@@ -304,7 +375,7 @@ public:
     end = clock();
     v_time_ = static_cast<double>(end - start) / CLOCKS_PER_SEC;
     vertices_ = v_map.size();
-    // std::cout << "Computed vertex map in " << v_time_ << " s. \n";
+    std::cout << "Computed vertex map in " << v_time_ << " s. \n";
     // std::cout << "Vertex map size is " << v_map.size() << ".\n";
     // end = clock();
     // std::cout << "Total time: " << a_time_ + v_time_ << " s. \n";
@@ -312,7 +383,7 @@ public:
     // std::cout << "VMap:\n";
     // for (auto m: v_map) 
     //   std::cout << m.first << ": " << m.second << std::endl;
-    // std::cout << "\n";
+    // std::cout << "\n"; 
     
     std::size_t max_dim = 0; 
     for (auto m: v_map) {
@@ -537,9 +608,11 @@ public:
   }
 
   void write_mesh(std::string file_name = "toplex.mesh") const {
-    typedef boost::iterator_range<Alcove_iterator> Max_simplex_range;
-    Max_simplex_range range(Alcove_iterator(a_map.begin(), a_map, vi_map),
-                            Alcove_iterator(a_map.end(), a_map, vi_map));
+    typedef boost::iterator_range<No_filtration_alcove_iterator> Max_simplex_range;
+    // Max_simplex_range range(No_filtration_alcove_iterator(Alcove_iterator(a_map.begin(), a_map, vi_map)),
+    //                         No_filtration_alcove_iterator(Alcove_iterator(a_map.end(), a_map, vi_map)));
+    Max_simplex_range range(No_filtration_alcove_iterator(a_map.begin(), a_map, vi_map),
+                            No_filtration_alcove_iterator(a_map.end(), a_map, vi_map));
     cs_.write_mesh(v_map, range, file_name);
   }
 
@@ -560,8 +633,6 @@ public:
 
   
   void collapse(bool pers_out = true) {
-    Fake_simplex_tree stree;
-
     clock_t start, end;
         
     // for (auto a: a_map) {
@@ -694,6 +765,25 @@ public:
       pcoh.output_diagram(out);
       out.close();
       std::cout << "Persistence complete." << std::endl;
+
+      Simplex_tree stree;
+      for (auto p: max_simplex_range)
+        stree.insert_simplex_and_subfaces(p.first, p.second);
+      std::cout << "Number of all simplices before collapse: " << stree.num_simplices() << "\n";
+      // std::cout << stree << "\n";
+      stree.set_dimension(v_map.begin()->first.size()+1);
+      stree.initialize_filtration();
+      Persistent_cohomology pcoh2(stree);
+      // initializes the coefficient field for homology
+      pcoh2.init_coefficients(3);
+      pcoh2.compute_persistent_cohomology(min_persistence);
+      std::cout << pcoh2.persistent_betti_numbers(0,0) << std::endl;
+      std::ofstream out2("persdiag_cox_original.out");
+      pcoh2.output_diagram(out2);
+      out2.close();
+      std::cout << "Persistence complete." << std::endl;
+      
+      
       typedef Simplex_tree_simplex_iterator<Simplex_tree> Simplex_tree_iterator;
       typedef boost::iterator_range<Simplex_tree_iterator> Simplex_tree_range;
       Simplex_tree_range simplex_tree_range(Simplex_tree_iterator(coll_stree.complex_simplex_range().begin(), coll_stree),
@@ -719,7 +809,7 @@ public:
     
   }
 
-  void nerve_collapse(bool pers_out = true) {
+  void filtered_collapse(bool pers_out = true) {
     clock_t start, end;
     typedef boost::iterator_range<Alcove_iterator> Max_simplex_range;
     Max_simplex_range max_simplex_range(Alcove_iterator(a_map.begin(), a_map, vi_map),

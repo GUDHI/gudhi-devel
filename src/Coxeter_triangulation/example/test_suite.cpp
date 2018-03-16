@@ -146,13 +146,7 @@ int main(int argc, char * const argv[]) {
       int l = std::get<2>(min_queue.top())+1;
       Coxeter_system cs_A('A', d);
       Coxeter_complex cc(*point_vector, cs_A, init_level + k*lambda_step, eps + l*gamma_step);
-      cc.collapse();
-      a_time_ = cc.a_time_;
-      col_time_ = cc.col_time_;
-      betti_ = cc.betti_;
-      chi_ = cc.chi_;
-      max_simplices_ = cc.max_simplices_;
-      vertices_ = cc.vertices_;
+      cc.collapse(); a_time_ = cc.a_time_; col_time_ = cc.col_time_; betti_ = cc.betti_; chi_ = cc.chi_; max_simplices_ = cc.max_simplices_; vertices_ = cc.vertices_;
       if (betti_ == betti && a_time_ < time_limit) {
         found = true;
         best = std::make_tuple(a_time_, k, l, col_time_, max_simplices_, vertices_, coll_max_simplices_);
@@ -166,12 +160,7 @@ int main(int argc, char * const argv[]) {
         Coxeter_system cs_A('A', d);
         Coxeter_complex cc(*point_vector, cs_A, init_level + (k+1)*lambda_step, eps);
         cc.collapse();
-        a_time_ = cc.a_time_;
-        col_time_ = cc.col_time_;
-        betti_ = cc.betti_;
-        chi_ = cc.chi_;
-        max_simplices_ = cc.max_simplices_;
-        vertices_ = cc.vertices_;
+        a_time_ = cc.a_time_; col_time_ = cc.col_time_; betti_ = cc.betti_; chi_ = cc.chi_; max_simplices_ = cc.max_simplices_; vertices_ = cc.vertices_;
         if (betti_ == betti) {
           found = true;
           best = std::make_tuple(a_time_, k+1, 0, col_time_, max_simplices_, vertices_, coll_max_simplices_);
@@ -183,10 +172,14 @@ int main(int argc, char * const argv[]) {
         max_line = k+1;
       }
     }
+    std::stringstream ss;
+    ss << in_file_name << ".result";
+    std::ofstream ofs(ss.str());
     if (found)
-      std::cout << "\nThe best time is a_time=" << std::get<0>(best) << ", col_time=" << std::get<3>(best) << " for values lambda=" << init_level + std::get<1>(best)*lambda_step << " and gamma=" << eps + std::get<2>(best)*gamma_step << ". Max simplices=" << std::get<4>(best) << ", vertices=" << std::get<5>(best) << ", collapse max simplices=" << std::get<6>(best) << ".\n";
+      ofs << "\nThe best time is a_time=" << std::get<0>(best) << ", col_time=" << std::get<3>(best) << " for values lambda=" << init_level + std::get<1>(best)*lambda_step << " and gamma=" << eps + std::get<2>(best)*gamma_step << ". Max simplices=" << std::get<4>(best) << ", vertices=" << std::get<5>(best) << ", collapse max simplices=" << std::get<6>(best) << ".\n";
     else
-      std::cout << "No value found within the time and Euler characteristic limit.\n";
+      ofs << "No value found within the time and Euler characteristic limit.\n";
+    ofs.close();
   }
   else {
     Gudhi::Off_point_range<Point_d> off_range(argv[1]);
