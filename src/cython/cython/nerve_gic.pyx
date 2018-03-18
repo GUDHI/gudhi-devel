@@ -52,6 +52,17 @@ cdef extern from "Nerve_gic_interface.h" namespace "Gudhi":
         void set_function_from_file(string func_file_name)
         void set_function_from_range(vector[double] function)
         void set_gain(double g)
+        double set_graph_from_automatic_euclidean_rips(int N)
+        void set_graph_from_file(string graph_file_name)
+        void set_graph_from_OFF()
+        void set_graph_from_euclidean_rips(double threshold)
+        void set_mask(int nodemask)
+        void set_resolution_with_interval_length(double resolution)
+        void set_resolution_with_interval_number(int resolution)
+        void set_subsampling(double constant, double power)
+        void set_type(string type)
+        void set_verbose(bool verbose)
+        vector[int] subpopulation(int c)
 
 # CoverComplex python interface
 cdef class CoverComplex:
@@ -157,8 +168,8 @@ cdef class CoverComplex:
 
     def set_automatic_resolution(self):
         """Computes the optimal length of intervals (i.e. the smallest interval
-        length avoiding discretization artifacts—see [12]) for a functional
-        cover.
+        length avoiding discretization artifacts—see :cite:`Carriere17c`) for a
+        functional cover.
 
         :rtype: double
         :returns: reso interval length used to compute the cover.
@@ -224,7 +235,7 @@ cdef class CoverComplex:
     def set_function_from_coordinate(self, k):
         """Creates the function f from the k-th coordinate of the point cloud.
 
-        :param k: coordinate to use (start at 0).
+        :param k: Coordinate to use (start at 0).
         :type k: int
         """
         self.thisptr.set_function_from_coordinate(k)
@@ -232,7 +243,7 @@ cdef class CoverComplex:
     def set_function_from_file(self, func_file_name):
         """Creates the function f from a file containing the function values.
 
-        :param func_file_name: name of the input function file.
+        :param func_file_name: Name of the input function file.
         :type func_file_name: string
         """
         if os.path.isfile(func_file_name):
@@ -251,7 +262,106 @@ cdef class CoverComplex:
     def set_gain(self, g):
         """Sets a gain from a value stored in memory.
 
-        :param g: gain (default value is 0.3).
+        :param g: Gain (default value is 0.3).
         :type g: double
         """
         self.thisptr.set_gain(g)
+
+    def set_graph_from_automatic_rips(self, N=100):
+        """Creates a graph G from a Rips complex whose threshold value is
+        automatically tuned with subsampling—see.
+
+        :param N: Number of subsampling iteration (the default reasonable value
+        is 100, but there is no guarantee on how to choose it).
+        :type N: int
+        :rtype: double
+        :returns: Delta threshold used for computing the Rips complex.
+        """
+        return self.thisptr.set_graph_from_automatic_euclidean_rips(N)
+
+    def set_graph_from_file(self, graph_file_name):
+        """Creates a graph G from a file containing the edges.
+
+        :param graph_file_name: Name of the input graph file. The graph file
+        contains one edge per line, each edge being represented by the IDs of
+        its two nodes.
+        :type graph_file_name: string
+        """
+        if os.path.isfile(graph_file_name):
+            self.thisptr.set_graph_from_file(str.encode(graph_file_name))
+        else:
+            print("file " + graph_file_name + " not found.")
+
+    def set_graph_from_OFF(self):
+        """Creates a graph G from the triangulation given by the input OFF
+        file.
+        """
+        self.thisptr.set_graph_from_OFF()
+
+    def set_graph_from_rips(self, threshold):
+        """Creates a graph G from a Rips complex.
+        :param threshold: Threshold value for the Rips complex.
+        :type threshold: double
+        """
+        self.thisptr.set_graph_from_euclidean_rips(threshold)
+
+    def set_mask(self, nodemask):
+        """Sets the mask, which is a threshold integer such that nodes in the
+        complex that contain a number of data points which is less than or
+        equal to this threshold are not displayed.
+
+        :param nodemask: Threshold.
+        :type nodemask: int
+        """
+        self.thisptr.set_mask(nodemask)
+
+    def set_resolution_with_interval_length(self, resolution):
+        """Sets a length of intervals from a value stored in memory.
+
+        :param resolution: Length of intervals.
+        :type resolution: double
+        """
+        self.thisptr.set_resolution_with_interval_length(resolution)
+
+    def set_resolution_with_interval_number(self, resolution):
+        """Sets a number of intervals from a value stored in memory.
+
+        :param resolution: Number of intervals.
+        :type resolution: int
+        """
+        self.thisptr.set_resolution_with_interval_number(resolution)
+
+    def set_subsampling(self, constant, power):
+        """Sets the constants used to subsample the data set. These constants
+        are explained in :cite:`Carriere17c`.
+
+        :param constant: Constant.
+        :type constant: double
+        :param power: Power.
+        :type resolution: double
+        """
+        self.thisptr.set_subsampling(constant, power)
+
+    def set_type(self, type):
+        """Specifies whether the type of the output simplicial complex.
+
+        :param type: either "GIC" or "Nerve".
+        :type type: string
+        """
+        self.thisptr.set_type(type)
+
+    def set_verbose(self, verbose):
+        """Specifies whether the program should display information or not.
+        :param verbose: true = display info, false = do not display info.
+        :type verbose: boolean
+        """
+        self.thisptr.set_verbose(verbose)
+
+    def subpopulation(self, c):
+        """Returns the data subset corresponding to a specific node of the
+        created complex.
+        :param c: ID of the node.
+        :type c: int
+        :rtype: vector[int]
+        :returns: Vector of IDs of data points.
+        """
