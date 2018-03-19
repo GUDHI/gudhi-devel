@@ -39,6 +39,7 @@ cdef extern from "Nerve_gic_interface.h" namespace "Gudhi":
         void compute_distribution(int N)
         double compute_p_value()
         void compute_PD()
+        void find_simplices()
         void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree)
         bool read_point_cloud(string off_file_name)
         double set_automatic_resolution()
@@ -63,6 +64,9 @@ cdef extern from "Nerve_gic_interface.h" namespace "Gudhi":
         void set_type(string type)
         void set_verbose(bool verbose)
         vector[int] subpopulation(int c)
+        void write_info()
+        void plot_DOT()
+        void plot_OFF()
 
 # CoverComplex python interface
 cdef class CoverComplex:
@@ -151,6 +155,11 @@ cdef class CoverComplex:
         simplex_tree = SimplexTree()
         self.thisptr.create_simplex_tree(simplex_tree.thisptr)
         return simplex_tree
+
+    def find_simplices(self):
+        """Computes the simplices of the simplicial complex.
+        """
+        self.thisptr.find_simplices()
 
     def read_point_cloud(self, off_file):
         """Reads and stores the input point cloud.
@@ -348,7 +357,7 @@ cdef class CoverComplex:
         :param type: either "GIC" or "Nerve".
         :type type: string
         """
-        self.thisptr.set_type(type)
+        self.thisptr.set_type(str.encode(type))
 
     def set_verbose(self, verbose):
         """Specifies whether the program should display information or not.
@@ -365,3 +374,25 @@ cdef class CoverComplex:
         :rtype: vector[int]
         :returns: Vector of IDs of data points.
         """
+        return self.thisptr.subpopulation(c)
+
+    def write_info(self):
+        """Creates a .txt file called SC.txt describing the 1-skeleton, which can
+        then be plotted with e.g. KeplerMapper.
+        """
+        return self.thisptr.write_info()
+
+    def plot_dot(self):
+        """Creates a .dot file called SC.dot for neato (part of the graphviz
+        package) once the simplicial complex is computed to get a visualization of
+        its 1-skeleton in a .pdf file.
+        """
+        return self.thisptr.plot_DOT()
+
+    def plot_off(self):
+        """Creates a .off file called SC.off for 3D visualization, which contains
+        the 2-skeleton of the GIC. This function assumes that the cover has been
+        computed with Voronoi. If data points are in 1D or 2D, the remaining
+        coordinates of the points embedded in 3D are set to 0.
+        """
+        return self.thisptr.plot_OFF()
