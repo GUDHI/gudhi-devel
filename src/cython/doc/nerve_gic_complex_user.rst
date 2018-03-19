@@ -75,6 +75,8 @@ which are then refined into their connected components using the triangulation o
 
 the program output is:
 
+.. code-block:: none
+
     Min function value = -0.979672 and Max function value = 0.816414
     Interval 0 = [-0.979672, -0.761576]
     Interval 1 = [-0.838551, -0.581967]
@@ -158,3 +160,63 @@ Using KeplerMapper, one can obtain the following visualization:
     :alt: Visualization with KeplerMapper
 
     Visualization with KeplerMapper
+
+Graph Induced Complexes (GIC)
+-----------------------------
+
+GIC definition
+^^^^^^^^^^^^^^
+
+Again, assume you are given a cover C of your point cloud P. Moreover, assume
+you are also given a graph G built on top of P. Then, for any clique in G
+whose nodes all belong to different elements of C, the GIC includes a
+corresponding simplex, whose dimension is the number of nodes in the clique
+minus one.
+See :cite:`Dey13` for more details.
+
+.. figure::
+    ../../doc/Nerve_GIC/GIC.jpg
+    :figclass: align-center
+    :alt: GIC of a point cloud
+
+    GIC of a point cloud
+
+Example with cover from Voronoï
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This example builds the GIC of a point cloud sampled on a 3D human shape
+(human.off).
+We randomly subsampled 100 points in the point cloud, which act as seeds of
+a geodesic Voronoï diagram. Each cell of the diagram is then an element of C.
+The graph G (used to compute both the geodesics for Voronoï and the GIC)
+comes from the triangulation of the human shape. Note that the resulting
+simplicial complex is in dimension 3 in this example.
+
+.. testcode::
+
+    import gudhi
+    nerve_complex = gudhi.CoverComplex()
+
+    if (nerve_complex.read_point_cloud(gudhi.__root_source_dir__ + \
+    '/data/points/human.off')):
+        nerve_complex.set_type('GIC')
+        nerve_complex.set_color_from_coordinate()
+        nerve_complex.set_graph_from_OFF()
+        nerve_complex.set_cover_from_Voronoi(700)
+        nerve_complex.find_simplices()
+        nerve_complex.plot_off()
+
+the program outputs SC.off. Using e.g.
+
+.. code-block:: none
+
+    geomview ../../data/points/human.off_sc.off
+
+one can obtain the following visualization:
+
+.. figure::
+    ../../doc/Nerve_GIC/gicvoronoivisu.jpg
+    :figclass: align-center
+    :alt: Visualization with Geomview
+
+    Visualization with Geomview
