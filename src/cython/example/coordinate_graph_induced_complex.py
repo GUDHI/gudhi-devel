@@ -33,7 +33,7 @@ parser = argparse.ArgumentParser(description='Coordinate GIC '
                                  'from points read in a OFF file.',
                                  epilog='Example: '
                                  'example/coordinate_graph_induced_complex.py '
-                                 '-f ../data/points/KleinBottle5D.off 0 -v'
+                                 '-f ../data/points/KleinBottle5D.off -c 0 -v'
                                  '- Constructs the coordinate GIC with the '
                                  'points from the given OFF file.')
 parser.add_argument("-f", "--file", type=str, required=True)
