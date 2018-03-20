@@ -220,3 +220,93 @@ one can obtain the following visualization:
     :alt: Visualization with Geomview
 
     Visualization with Geomview
+
+Functional GIC
+^^^^^^^^^^^^^^
+
+If one restricts to the cliques in G whose nodes all belong to preimages of
+consecutive intervals (assuming the cover of the height function is minimal,
+i.e. no more than two intervals can intersect at a time), the GIC is of
+dimension one, i.e. a graph.
+We call this graph the functional GIC. See :cite:`Carriere16` for more details.
+
+Example
+^^^^^^^
+
+Functional GIC comes with automatic selection of the Rips threshold,
+the resolution and the gain of the function cover. See :cite:`Carriere17c` for
+more details. In this example, we compute the functional GIC of a Klein bottle
+embedded in R^5, where the graph G comes from a Rips complex with automatic
+threshold, and the cover C comes from the preimages of intervals covering the
+first coordinate, with automatic resolution and gain. Note that automatic
+threshold, resolution and gain can be computed as well for the Nerve.
+
+.. testcode::
+
+    import gudhi
+    nerve_complex = gudhi.CoverComplex()
+
+    if (nerve_complex.read_point_cloud(gudhi.__root_source_dir__ + \
+    '/data/points/KleinBottle5D.off')):
+        nerve_complex.set_type('GIC')
+        nerve_complex.set_color_from_coordinate(0)
+        nerve_complex.set_function_from_coordinate(0)
+        nerve_complex.set_graph_from_automatic_rips()
+        nerve_complex.set_automatic_resolution()
+        nerve_complex.set_gain()
+        nerve_complex.set_cover_from_function()
+        nerve_complex.find_simplices()
+        nerve_complex.plot_dot()
+
+the program outputs SC.dot. Using e.g.
+
+.. code-block:: none
+
+    neato ../../data/points/KleinBottle5D.off_sc.dot -Tpdf -o ../../data/points/KleinBottle5D.off_sc.pdf
+
+one can obtain the following visualization:
+
+.. figure::
+    ../../doc/Nerve_GIC/coordGICvisu2.jpg
+    :figclass: align-center
+    :alt: Visualization with neato
+
+    Visualization with neato
+
+where nodes are colored by the filter function values and, for each node, the
+first number is its ID and the second is the number of data points that its
+contain.
+
+We also provide an example on a set of 72 pictures taken around the same object
+(lucky_cat.off).
+The function is now the first eigenfunction given by PCA, whose values are
+written in a file (lucky_cat_PCA1). Threshold, resolution and gain are
+automatically selected as before.
+
+.. testcode::
+
+    import gudhi
+    nerve_complex = gudhi.CoverComplex()
+
+    if (nerve_complex.read_point_cloud(gudhi.__root_source_dir__ + \
+    '/data/points/COIL_database/lucky_cat.off')):
+        nerve_complex.set_type('GIC')
+        pca_file = gudhi.__root_source_dir__ + \
+        '/data/points/COIL_database/lucky_cat_PCA1'
+        nerve_complex.set_color_from_file(pca_file)
+        nerve_complex.set_function_from_file(pca_file)
+        nerve_complex.set_graph_from_automatic_rips()
+        nerve_complex.set_automatic_resolution()
+        nerve_complex.set_gain()
+        nerve_complex.set_cover_from_function()
+        nerve_complex.find_simplices()
+        nerve_complex.plot_dot()
+
+the program outputs again SC.dot which gives the following visualization after using neato:
+
+.. figure::
+    ../../doc/Nerve_GIC/funcGICvisu.jpg
+    :figclass: align-center
+    :alt: Visualization with neato
+
+    Visualization with neato

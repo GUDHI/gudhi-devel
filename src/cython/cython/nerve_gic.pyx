@@ -268,7 +268,7 @@ cdef class CoverComplex:
         """
         self.thisptr.set_function_from_range(function)
 
-    def set_gain(self, g):
+    def set_gain(self, g = 0.3):
         """Sets a gain from a value stored in memory.
 
         :param g: Gain (default value is 0.3).
