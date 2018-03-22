@@ -57,6 +57,9 @@ class Cech_complex {
   using Vertex_handle = typename SimplicialComplexForProximityGraph::Vertex_handle;
   using Filtration_value = typename SimplicialComplexForProximityGraph::Filtration_value;
   using Proximity_graph = Gudhi::Proximity_graph<SimplicialComplexForProximityGraph>;
+  using Point_iterator = typename boost::range_const_iterator<ForwardPointRange>::type;
+  using Point= typename std::iterator_traits<Point_iterator>::value_type;
+  using Point_cloud = std::vector<Point>;
 
  public:
   /** \brief Cech_complex constructor from a list of points.
@@ -70,7 +73,7 @@ class Cech_complex {
    */
   Cech_complex(const ForwardPointRange& points, Filtration_value max_radius)
     : max_radius_(max_radius),
-      point_cloud_(points) {
+      point_cloud_(std::begin(points), std::end(points)) {
     cech_skeleton_graph_ =
         Gudhi::compute_proximity_graph<SimplicialComplexForProximityGraph>(point_cloud_,
                                                                            max_radius_,
@@ -115,7 +118,7 @@ class Cech_complex {
  private:
   Proximity_graph cech_skeleton_graph_;
   Filtration_value max_radius_;
-  ForwardPointRange point_cloud_;
+  Point_cloud point_cloud_;
 };
 
 }  // namespace cech_complex
