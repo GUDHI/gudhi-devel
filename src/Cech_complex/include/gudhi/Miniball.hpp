@@ -32,6 +32,8 @@
 #include <ctime>
 #include <limits>
 
+namespace Gudhi {
+
 namespace Miniball {
 
   // Global Functions
@@ -514,7 +516,8 @@ namespace Miniball {
       return -min_l;
     return nt0;
   }
+}  // namespace Miniball
 
-} // end Namespace Miniball
+}  // namespace Gudhi
 
 #endif  // MINIBALL_HPP_

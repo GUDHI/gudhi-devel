@@ -105,5 +105,4 @@ install(FILES
 
 # install the include file on "make install"
 install(DIRECTORY include/gudhi DESTINATION include)
-install(DIRECTORY include/Miniball DESTINATION include)
 #---------------------------------------------------------------------------------------

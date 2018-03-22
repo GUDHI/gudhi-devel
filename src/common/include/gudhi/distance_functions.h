@@ -25,7 +25,7 @@
 
 #include <gudhi/Debug_utils.h>
 
-#include <Miniball/Miniball.hpp>
+#include <gudhi/Miniball.hpp>
 
 #include <boost/range/metafunctions.hpp>
 

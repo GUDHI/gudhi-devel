@@ -27,8 +27,7 @@
 #include <gudhi/Rips_complex.h>
 #include <gudhi/Cech_complex.h>
 #include <gudhi/Simplex_tree.h>
-
-#include <Miniball/Miniball.hpp>
+#include <gudhi/Miniball.hpp>
 
 #include "boost/filesystem.hpp"   // includes all needed Boost.Filesystem declarations
 
@@ -57,7 +56,7 @@ class Radius_distance {
     using Point_cloud = std::vector<Point>;
     using Point_iterator = typename Point_cloud::const_iterator;
     using Coordinate_iterator = typename Point::const_iterator;
-    using Min_sphere = typename Miniball::Miniball<Miniball::CoordAccessor<Point_iterator, Coordinate_iterator>>;
+    using Min_sphere = typename Gudhi::Miniball::Miniball<Gudhi::Miniball::CoordAccessor<Point_iterator, Coordinate_iterator>>;
 
     Point_cloud point_cloud;
     point_cloud.push_back(p1);

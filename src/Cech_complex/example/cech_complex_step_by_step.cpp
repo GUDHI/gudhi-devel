@@ -25,7 +25,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Points_off_io.h>
 
-#include <Miniball/Miniball.hpp>
+#include <gudhi/Miniball.hpp>
 
 #include <boost/program_options.hpp>
 
@@ -55,7 +55,7 @@ class Cech_blocker {
   using Point_cloud = std::vector<Point>;
   using Point_iterator = Point_cloud::const_iterator;
   using Coordinate_iterator = Point::const_iterator;
-  using Min_sphere =  Miniball::Miniball <Miniball::CoordAccessor<Point_iterator, Coordinate_iterator>>;
+  using Min_sphere =  Gudhi::Miniball::Miniball <Gudhi::Miniball::CoordAccessor<Point_iterator, Coordinate_iterator>>;
  public:
   bool operator()(Simplex_handle sh) {
     std::vector<Point> points;

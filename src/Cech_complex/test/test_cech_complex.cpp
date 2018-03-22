@@ -36,8 +36,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/distance_functions.h>
 #include <gudhi/Unitary_tests_utils.h>
-
-#include <Miniball/Miniball.hpp>
+#include <gudhi/Miniball.hpp>
 
 // Type definitions
 using Simplex_tree = Gudhi::Simplex_tree<>;
@@ -49,7 +48,7 @@ using Cech_complex = Gudhi::cech_complex::Cech_complex<Simplex_tree, Point_cloud
 
 using Point_iterator = Point_cloud::const_iterator;
 using Coordinate_iterator = Point::const_iterator;
-using Min_sphere = Miniball::Miniball<Miniball::CoordAccessor<Point_iterator, Coordinate_iterator>>;
+using Min_sphere = Gudhi::Miniball::Miniball<Gudhi::Miniball::CoordAccessor<Point_iterator, Coordinate_iterator>>;
 
 BOOST_AUTO_TEST_CASE(Cech_complex_for_documentation) {
   // ----------------------------------------------------------------------------
