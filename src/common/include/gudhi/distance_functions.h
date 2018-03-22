@@ -28,6 +28,7 @@
 #include <gudhi/Miniball.hpp>
 
 #include <boost/range/metafunctions.hpp>
+#include <boost/range/size.hpp>
 
 #include <cmath>  // for std::sqrt
 #include <type_traits>  // for std::decay
@@ -74,13 +75,11 @@ class Euclidean_distance {
  * The points are assumed to have the same dimension. */
 class Minimal_enclosing_ball_radius {
  public:
-  // boost::range_value is not SFINAE-friendly so we cannot use it in the return type
   template< typename Point >
   typename std::iterator_traits<typename boost::range_iterator<Point>::type>::value_type
   operator()(const Point& p1, const Point& p2) const {
     return Euclidean_distance()(p1, p2) / 2.;
   }
-  // boost::range_value is not SFINAE-friendly so we cannot use it in the return type
   template< typename Point_cloud,
             typename Point_iterator = typename boost::range_const_iterator<Point_cloud>::type,
             typename Point= typename std::iterator_traits<Point_iterator>::value_type,
@@ -90,11 +89,11 @@ class Minimal_enclosing_ball_radius {
   operator()(const Point_cloud& point_cloud) const {
     using Min_sphere = Miniball::Miniball<Miniball::CoordAccessor<Point_iterator, Coordinate_iterator>>;
 
-    Min_sphere ms(point_cloud.begin()->end() - point_cloud.begin()->begin(), point_cloud.begin(),point_cloud.end());
+    Min_sphere ms(boost::size(*point_cloud.begin()), point_cloud.begin(),point_cloud.end());
 #ifdef DEBUG_TRACES
     std::cout << "Minimal_enclosing_ball_radius = " << std::sqrt(ms.squared_radius()) << " | nb points = "
-              << point_cloud.end() - point_cloud.begin() << " | dimension = "
-              << point_cloud.begin()->end() - point_cloud.begin()->begin() << std::endl;
+              << boost::size(point_cloud) << " | dimension = "
+              << boost::size(*point_cloud.begin()) << std::endl;
 #endif  // DEBUG_TRACES
 
     return std::sqrt(ms.squared_radius());

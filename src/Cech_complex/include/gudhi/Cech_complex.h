@@ -48,8 +48,8 @@ namespace cech_complex {
  * \tparam SimplicialComplexForProximityGraph furnishes `Vertex_handle` and `Filtration_value` type definition required
  * by `Gudhi::Proximity_graph`.
  *
- * \tparam ForwardPointRange furnishes `.size()`, `.begin()` and `.end()` methods, and a `const_iterator` type
- * definition.
+ * \tparam ForwardPointRange must be a range for which `std::begin()` and `std::end()` methods return input
+ * iterators on a point. `std::begin()` and `std::end()` methods are also required for a point.
  */
 template<typename SimplicialComplexForProximityGraph, typename ForwardPointRange>
 class Cech_complex {
@@ -64,8 +64,8 @@ class Cech_complex {
    * @param[in] points Range of points.
    * @param[in] max_radius Maximal radius value.
    *
-   * \tparam ForwardPointRange must be a range for which `.size()`, `.begin()` and `.end()` methods return input
-   * iterators on a point. `.begin()` and `.end()` methods are required for a point.
+   * \tparam ForwardPointRange must be a range for which `std::begin()` and `std::end()` methods return input
+   * iterators on a point. `std::begin()` and `std::end()` methods are also required for a point.
    *
    */
   Cech_complex(const ForwardPointRange& points, Filtration_value max_radius)
@@ -107,9 +107,9 @@ class Cech_complex {
    * @exception std::out_of_range In debug mode, if point position in the range is out.
    */
   typename ForwardPointRange::const_iterator point_iterator(std::size_t vertex) const {
-    GUDHI_CHECK((point_cloud_.begin() + vertex) < point_cloud_.end(),
+    GUDHI_CHECK((std::begin(point_cloud_) + vertex) < std::end(point_cloud_),
                 std::out_of_range("Cech_complex::point - simplicial complex is not empty"));
-    return (point_cloud_.begin() + vertex);
+    return (std::begin(point_cloud_) + vertex);
   }
 
  private:
