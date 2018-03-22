@@ -65,7 +65,7 @@ class Cech_blocker {
       std::cout << "#(" << vertex << ")#";
 #endif  // DEBUG_TRACES
     }
-    Filtration_value radius = Gudhi::Radius_distance()(points);
+    Filtration_value radius = Gudhi::Minimal_enclosing_ball_radius()(points);
 #ifdef DEBUG_TRACES
     std::cout << "radius = " << radius << " - " << (radius > max_radius_) << std::endl;
 #endif  // DEBUG_TRACES
@@ -105,7 +105,7 @@ int main(int argc, char * argv[]) {
   // Compute the proximity graph of the points
   Proximity_graph prox_graph = Gudhi::compute_proximity_graph<Simplex_tree>(off_reader.get_point_cloud(),
                                                                             max_radius,
-                                                                            Gudhi::Radius_distance());
+                                                                            Gudhi::Minimal_enclosing_ball_radius());
 
   // Construct the Rips complex in a Simplex Tree
   Simplex_tree st;

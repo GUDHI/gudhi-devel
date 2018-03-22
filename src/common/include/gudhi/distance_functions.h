@@ -70,9 +70,9 @@ class Euclidean_distance {
   }
 };
 
-/** @brief Compute the squared radius between Points given by a range of coordinates. The points are assumed to
- * have the same dimension. */
-class Radius_distance {
+/** @brief Compute the radius of the minimal enclosing ball between Points given by a range of coordinates.
+ * The points are assumed to have the same dimension. */
+class Minimal_enclosing_ball_radius {
  public:
   // boost::range_value is not SFINAE-friendly so we cannot use it in the return type
   template< typename Point >
@@ -92,7 +92,7 @@ class Radius_distance {
 
     Min_sphere ms(point_cloud.begin()->end() - point_cloud.begin()->begin(), point_cloud.begin(),point_cloud.end());
 #ifdef DEBUG_TRACES
-    std::cout << "Radius_distance = " << std::sqrt(ms.squared_radius()) << " | nb points = "
+    std::cout << "Minimal_enclosing_ball_radius = " << std::sqrt(ms.squared_radius()) << " | nb points = "
               << point_cloud.end() - point_cloud.begin() << " | dimension = "
               << point_cloud.begin()->end() - point_cloud.begin()->begin() << std::endl;
 #endif  // DEBUG_TRACES

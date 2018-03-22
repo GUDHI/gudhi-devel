@@ -46,7 +46,7 @@ using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
 using Cech_complex = Gudhi::cech_complex::Cech_complex<Simplex_tree, Point_cloud>;
 
 
-class Radius_distance {
+class Minimal_enclosing_ball_radius {
  public:
   // boost::range_value is not SFINAE-friendly so we cannot use it in the return type
   template< typename Point >
@@ -80,24 +80,26 @@ int main(int argc, char * argv[]) {
   Gudhi::Clock euclidean_clock("Gudhi::Euclidean_distance");
   // Compute the proximity graph of the points
   Proximity_graph euclidean_prox_graph = Gudhi::compute_proximity_graph<Simplex_tree>(off_reader.get_point_cloud(),
-                                                                                                  threshold,
-                                                                                                  Gudhi::Euclidean_distance());
+                                                                                      threshold,
+                                                                                      Gudhi::Euclidean_distance());
 
   std::cout << euclidean_clock << std::endl;
 
-  Gudhi::Clock radius_clock("Radius_distance");
+  Gudhi::Clock miniball_clock("Minimal_enclosing_ball_radius");
   // Compute the proximity graph of the points
-  Proximity_graph radius_prox_graph = Gudhi::compute_proximity_graph<Simplex_tree>(off_reader.get_point_cloud(),
-                                                                                               threshold,
-                                                                                               Radius_distance());
-  std::cout << radius_clock << std::endl;
+  Proximity_graph miniball_prox_graph =
+      Gudhi::compute_proximity_graph<Simplex_tree>(off_reader.get_point_cloud(),
+                                                   threshold,
+                                                   Minimal_enclosing_ball_radius());
+  std::cout << miniball_clock << std::endl;
 
-  Gudhi::Clock common_radius_clock("Gudhi::Radius_distance()");
+  Gudhi::Clock common_miniball_clock("Gudhi::Minimal_enclosing_ball_radius()");
   // Compute the proximity graph of the points
-  Proximity_graph sq_radius_prox_graph = Gudhi::compute_proximity_graph<Simplex_tree>(off_reader.get_point_cloud(),
-                                                                                               threshold,
-                                                                                               Gudhi::Radius_distance());
-  std::cout << common_radius_clock << std::endl;
+  Proximity_graph common_miniball_prox_graph =
+      Gudhi::compute_proximity_graph<Simplex_tree>(off_reader.get_point_cloud(),
+                                                   threshold,
+                                                   Gudhi::Minimal_enclosing_ball_radius());
+  std::cout << common_miniball_clock << std::endl;
 
 
   boost::filesystem::path full_path(boost::filesystem::current_path());
@@ -121,7 +123,9 @@ int main(int argc, char * argv[]) {
           std::cout << itr->path().stem() << ";";
           std::cout << radius << ";";
           Gudhi::Clock rips_clock("Rips computation");
-          Rips_complex rips_complex_from_points(off_reader.get_point_cloud(), radius, Gudhi::Radius_distance());
+          Rips_complex rips_complex_from_points(off_reader.get_point_cloud(),
+                                                radius,
+                                                Gudhi::Minimal_enclosing_ball_radius());
           Simplex_tree rips_stree;
           rips_complex_from_points.create_complex(rips_stree, p0.size() - 1);
           // ------------------------------------------

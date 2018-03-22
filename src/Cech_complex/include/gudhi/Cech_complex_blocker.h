@@ -24,7 +24,7 @@
 #define CECH_COMPLEX_BLOCKER_H_
 
 #include <gudhi/Cech_complex.h>        // Cech_blocker is using a pointer on Gudhi::cech_complex::Cech_complex
-#include <gudhi/distance_functions.h>  // for Gudhi::Radius_distance
+#include <gudhi/distance_functions.h>  // for Gudhi::Minimal_enclosing_ball_radius
 
 #include <iostream>
 #include <vector>
@@ -75,7 +75,7 @@ class Cech_blocker {
       std::cout << "#(" << vertex << ")#";
 #endif  // DEBUG_TRACES
     }
-    Filtration_value radius = Gudhi::Radius_distance()(points);
+    Filtration_value radius = Gudhi::Minimal_enclosing_ball_radius()(points);
 #ifdef DEBUG_TRACES
     if (radius > cc_ptr_->max_radius())
       std::cout << "radius > max_radius => expansion is blocked\n";

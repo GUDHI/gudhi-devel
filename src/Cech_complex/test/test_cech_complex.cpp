@@ -111,10 +111,10 @@ BOOST_AUTO_TEST_CASE(Cech_complex_for_documentation) {
         std::cout << vertex << ",";
         vp.push_back(points.at(vertex));
       }
-      std::cout << ") - distance =" << Gudhi::Radius_distance()(vp.at(0), vp.at(1)) <<
+      std::cout << ") - distance =" << Gudhi::Minimal_enclosing_ball_radius()(vp.at(0), vp.at(1)) <<
           " - filtration =" << st.filtration(f_simplex) << std::endl;
       BOOST_CHECK(vp.size() == 2);
-      GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), Gudhi::Radius_distance()(vp.at(0), vp.at(1)));
+      GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), Gudhi::Minimal_enclosing_ball_radius()(vp.at(0), vp.at(1)));
     }
   }
 
