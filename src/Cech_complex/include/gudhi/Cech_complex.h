@@ -97,7 +97,7 @@ class Cech_complex {
     complex.insert_graph(cech_skeleton_graph_);
     // expand the graph until dimension dim_max
     complex.expansion_with_blockers(dim_max,
-                                    Cech_blocker<SimplicialComplexForCechComplex, ForwardPointRange>(complex, this));
+                                    Cech_blocker<SimplicialComplexForCechComplex, ForwardPointRange>(&complex, this));
   }
 
   /** @return max_radius value given at construction. */

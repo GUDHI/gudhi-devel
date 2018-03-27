@@ -68,7 +68,7 @@ class Cech_blocker {
    *  \return true if the simplex radius is greater than the Cech_complex max_radius*/
   bool operator()(Simplex_handle sh) {
     Point_cloud points;
-    for (auto vertex : simplicial_complex_.simplex_vertex_range(sh)) {
+    for (auto vertex : sc_ptr_->simplex_vertex_range(sh)) {
       points.push_back(Point(cc_ptr_->point_iterator(vertex)->begin(),
                              cc_ptr_->point_iterator(vertex)->end()));
 #ifdef DEBUG_TRACES
@@ -80,17 +80,17 @@ class Cech_blocker {
     if (radius > cc_ptr_->max_radius())
       std::cout << "radius > max_radius => expansion is blocked\n";
 #endif  // DEBUG_TRACES
-    simplicial_complex_.assign_filtration(sh, radius);
+    sc_ptr_->assign_filtration(sh, radius);
     return (radius > cc_ptr_->max_radius());
   }
 
   /** \internal \brief Cech complex blocker constructor. */
-  Cech_blocker(SimplicialComplexForCech& simplicial_complex, Cech_complex* cc_ptr)
-    : simplicial_complex_(simplicial_complex),
+  Cech_blocker(SimplicialComplexForCech* sc_ptr, Cech_complex* cc_ptr)
+    : sc_ptr_(sc_ptr),
       cc_ptr_(cc_ptr) {
   }
  private:
-  SimplicialComplexForCech simplicial_complex_;
+  SimplicialComplexForCech* sc_ptr_;
   Cech_complex* cc_ptr_;
 };
 
