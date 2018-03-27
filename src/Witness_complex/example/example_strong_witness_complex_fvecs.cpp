@@ -22,6 +22,7 @@
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Fake_simplex_tree.h>
+#include <gudhi/Sb_wrapper.h>
 #include <gudhi/Euclidean_strong_witness_complex.h>
 #include <gudhi/pick_n_random_points.h>
 #include <gudhi/Points_fvecs_reader.h>
@@ -51,7 +52,8 @@ int main(int argc, char * const argv[]) {
   double alpha2 = atof(argv[3]);
   clock_t start, end;
   //Gudhi::Simplex_tree<> simplex_tree;
-  Gudhi::Fake_simplex_tree simplex_tree;
+  //Gudhi::Fake_simplex_tree simplex_tree;
+  Gudhi::Sb_wrapper simplex_tree;
 
   // Read the point file
   Point_vector point_vector, landmarks;
@@ -73,7 +75,7 @@ int main(int argc, char * const argv[]) {
   end = clock();
   std::cout << "Strong witness complex took "
       << static_cast<double>(end - start) / CLOCKS_PER_SEC << " s. \n";
-  std::cout << "Number of simplices is: " << simplex_tree.num_simplices() << std::endl;
-  std::cout << "Max dimension is : " << simplex_tree.dimension() << std::endl;
+//  std::cout << "Number of simplices is: " << simplex_tree.num_simplices() << std::endl;
+  // std::cout << "Max dimension is : " << simplex_tree.dimension() << std::endl;
 
 }

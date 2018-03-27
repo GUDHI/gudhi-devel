@@ -1,9 +1,10 @@
 #include <gudhi/Rips_complex.h>
-// to construct Rips_complex from a fvecs file of points
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Fake_simplex_tree.h>
+#include <gudhi/Sb_wrapper.h>
 #include <gudhi/distance_functions.h>
 #include <gudhi/Points_fvecs_reader.h>
+
 
 #include <CGAL/Epick_d.h>
 
@@ -30,7 +31,8 @@ int main(int argc, char **argv) {
     using K = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
     using Point = typename K::Point_d;
     //using Simplex_tree = Gudhi::Simplex_tree<>;
-    using Simplex_tree = Gudhi::Fake_simplex_tree;
+    //using Simplex_tree = Gudhi::Fake_simplex_tree;
+    using Simplex_tree = Gudhi::Sb_wrapper;
     using Filtration_value = Simplex_tree::Filtration_value;
     using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
     using Point_vector = std::vector<Point>;
@@ -52,7 +54,7 @@ int main(int argc, char **argv) {
     end = clock();
 
     std::cout << "Strong witness complex took "<< static_cast<double>(end - start) / CLOCKS_PER_SEC << " s." << std::endl;
-    std::cout << "Rips complex is of dimension " << stree.dimension() <<  " - " << stree.num_simplices() << " simplices." << std::endl;
+    //std::cout << "Rips complex is of dimension " << stree.dimension() <<  " - " << stree.num_simplices() << " simplices." << std::endl;
 
     return 0;
 }

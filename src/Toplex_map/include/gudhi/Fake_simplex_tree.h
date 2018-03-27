@@ -31,9 +31,6 @@ struct Visitor {
 class Fake_simplex_tree : public Filtered_toplex_map {
 
 public:
-    /** The type of the sets of Simplex_ptr.
-     * \ingroup toplex_map   */
-    typedef Toplex_map::Simplex_ptr_set Simplex_ptr_set;
 
     /** Handle type to a vertex contained in the simplicial complex.
      * \ingroup toplex_map   */
@@ -87,6 +84,8 @@ public:
       * \ingroup toplex_map   */
     std::vector<Toplex_map::Simplex> skeleton_simplex_range(int d) const;
 
+    Toplex_map::Vertex contraction(const Toplex_map::Vertex x, const Toplex_map::Vertex y);
+
 
 protected:
 
@@ -99,14 +98,14 @@ protected:
 
 template<class OneSkeletonGraph>
 void Fake_simplex_tree::insert_graph(const OneSkeletonGraph& skel_graph){
-    toplex_maps.emplace(nan(""),Toplex_map());
+    toplex_maps.emplace(nan(""), new Toplex_map());
     using vertex_iterator = typename boost::graph_traits<OneSkeletonGraph>::vertex_iterator;
     vertex_iterator vi, vi_end;
     for (std::tie(vi, vi_end) = boost::vertices(skel_graph); vi != vi_end; ++vi) {
         Simplex s; s.insert(*vi);
         insert_simplex_and_subfaces(s);
     }
-    bron_kerbosch_all_cliques(skel_graph, Visitor(&(this->toplex_maps.at(nan("")))));
+    bron_kerbosch_all_cliques(skel_graph, Visitor(this->toplex_maps.at(nan(""))));
 }
 
 void Fake_simplex_tree::expansion(int max_dim){}
@@ -150,7 +149,7 @@ Toplex_map::Simplex Fake_simplex_tree::simplex_vertex_range(const Simplex& s) co
 std::vector<Toplex_map::Simplex> Fake_simplex_tree::max_simplices() const{
     std::vector<Toplex_map::Simplex> max_s;
     for(auto kv : toplex_maps)
-        for(const Toplex_map::Simplex_ptr& sptr : kv.second.maximal_cofaces(Simplex()))
+        for(const Toplex_map::Simplex_ptr& sptr : kv.second->maximal_cofaces(Simplex()))
             max_s.emplace_back(*sptr);
     return max_s;
 }
@@ -176,6 +175,12 @@ std::vector<Toplex_map::Simplex> Fake_simplex_tree::filtration_simplex_range(int
 
 std::vector<Toplex_map::Simplex> Fake_simplex_tree::skeleton_simplex_range(int d) const{
     return filtration_simplex_range(d);
+}
+
+Toplex_map::Vertex Fake_simplex_tree::contraction(const Toplex_map::Vertex x, const Toplex_map::Vertex y){
+    for(auto kv : toplex_maps)
+        kv.second->contraction(x,y,true);
+    return y;
 }
 
 } //namespace Gudhi

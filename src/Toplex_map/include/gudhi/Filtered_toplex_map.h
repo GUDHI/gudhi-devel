@@ -50,15 +50,15 @@ public:
     bool membership(const Input_vertex_range &vertex_range) const;
 
 protected:
-    std::map<Filtration_value, Toplex_map> toplex_maps;
+    std::map<Filtration_value, Toplex_map*> toplex_maps;
 };
 
 template <typename Input_vertex_range>
 std::pair<Toplex_map::Simplex, bool> Filtered_toplex_map::insert_simplex_and_subfaces(const Input_vertex_range &vertex_range, Filtration_value f){
     Simplex s(vertex_range.begin(),vertex_range.end());
     if(membership(s)) return make_pair(s,false);
-    if(!toplex_maps.count(f)) toplex_maps.emplace(f,Toplex_map());
-    toplex_maps.at(f).insert_simplex(vertex_range);
+    if(!toplex_maps.count(f)) toplex_maps.emplace(f,new Toplex_map());
+    toplex_maps.at(f)->insert_simplex(vertex_range);
     return make_pair(s,true);
 }
 
@@ -66,7 +66,7 @@ std::pair<Toplex_map::Simplex, bool> Filtered_toplex_map::insert_simplex_and_sub
 template <typename Input_vertex_range>
 Filtered_toplex_map::Filtration_value Filtered_toplex_map::filtration(const Input_vertex_range &vertex_range) const{
     for(auto kv : toplex_maps)
-        if(kv.second.membership(vertex_range))
+        if(kv.second->membership(vertex_range))
             return kv.first; //min only because a map is ordered
     return nan("");
 }
@@ -74,7 +74,7 @@ Filtered_toplex_map::Filtration_value Filtered_toplex_map::filtration(const Inpu
 template <typename Input_vertex_range>
 bool Filtered_toplex_map::membership(const Input_vertex_range &vertex_range) const{
     for(auto kv : toplex_maps)
-        if(kv.second.membership(vertex_range))
+        if(kv.second->membership(vertex_range))
             return true;
     return false;
 }
