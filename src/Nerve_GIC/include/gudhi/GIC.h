@@ -732,7 +732,6 @@ class Cover_complex {
     }
 
     #ifdef GUDHI_USE_TBB
-      tbb::task_scheduler_init init(4);
       if (verbose) std::cout << "Computing connected components (parallelized)..." << std::endl;
       tbb::parallel_for(0, res, [&](int i){
         // Compute connected components
