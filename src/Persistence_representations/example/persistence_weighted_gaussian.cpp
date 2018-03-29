@@ -57,11 +57,11 @@ int main(int argc, char** argv) {
 
   // Linear PWG
 
-  std::cout << PWG1.compute_scalar_product  (PWG2) << std::endl;
-  std::cout << PWGex1.compute_scalar_product  (PWGex2) << std::endl;
+  std::cout << "Approx PWG kernel: " << PWG1.compute_scalar_product  (PWG2) << std::endl;
+  std::cout << "Exact  PWG kernel: " << PWGex1.compute_scalar_product  (PWGex2) << std::endl;
 
-  std::cout << PWG1.distance  (PWG2) << std::endl;
-  std::cout << PWGex1.distance  (PWGex2) << std::endl;
+  std::cout << "Distance induced by approx PWG kernel: " << PWG1.distance  (PWG2) << std::endl;
+  std::cout << "Distance induced by exact  PWG kernel: " << PWGex1.distance  (PWGex2) << std::endl;
 
 
 
@@ -71,8 +71,8 @@ int main(int argc, char** argv) {
 
   // Gaussian PWG
 
-  std::cout << std::exp( -PWG1.distance (PWG2, 2) ) / (2*tau*tau) << std::endl;
-  std::cout << std::exp( -PWGex1.distance (PWGex2, 2) ) / (2*tau*tau) << std::endl;
+  std::cout << "Approx Gaussian PWG kernel: " << std::exp( -PWG1.distance (PWG2) ) / (2*tau*tau) << std::endl;
+  std::cout << "Exact  Gaussian PWG kernel: " << std::exp( -PWGex1.distance (PWGex2) ) / (2*tau*tau) << std::endl;
 
 
 
@@ -91,8 +91,8 @@ int main(int argc, char** argv) {
   PWG pwgex1(pd1, 2*std::sqrt(sigma), -1, PWG::pss_weight);
   PWG pwgex2(pd2, 2*std::sqrt(sigma), -1, PWG::pss_weight);
 
-  std::cout << pwg1.compute_scalar_product  (pwg2) / (16*pi*sigma) << std::endl;
-  std::cout << pwgex1.compute_scalar_product  (pwgex2) / (16*pi*sigma) << std::endl;
+  std::cout << "Approx PSS kernel: " << pwg1.compute_scalar_product  (pwg2) / (16*pi*sigma) << std::endl;
+  std::cout << "Exact  PSS kernel: " << pwgex1.compute_scalar_product  (pwgex2) / (16*pi*sigma) << std::endl;
 
 
 

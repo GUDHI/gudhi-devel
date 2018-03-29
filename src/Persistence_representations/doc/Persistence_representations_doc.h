@@ -250,6 +250,68 @@ namespace Persistence_representations {
  absolute value of differences between coordinates. A scalar product is a sum of products of
  values at the corresponding positions of two vectors.
 
+
+
+
+
+\section sec_persistence_kernels Kernels on Persistence Diagrams
+ <b>Reference manual:</b> \ref Gudhi::Persistence_representations::Sliced_Wasserstein <br>
+ <b>Reference manual:</b> \ref Gudhi::Persistence_representations::Persistence_weighted_gaussian <br>
+
+ Kernels for Persistence Diagrams can be regarded as infinite-dimensional vectorizations. More specifically,
+ they are similarity functions whose evaluations on pairs of persistence diagrams equals the scalar products
+ between images of these pairs under a map \f$\Phi\f$ taking values in a specific (possibly non Euclidean) Hilbert space \f$k(D_i, D_j) = \langle \Phi(D_i),\Phi(D_j)\rangle\f$.
+ Reciprocally, classical results of learning theory ensure that such a \f$\Phi\f$ exists for a given similarity function \f$k\f$ if and only if \f$k\f$ is <i>positive semi-definite</i>.
+ Kernels are designed for algorithms that can be <i>kernelized</i>, i.e., algorithms that only require to know scalar products between instances in order to run.
+ Examples of such algorithms include Support Vector Machines, Principal Component Analysis and Ridge Regression. 
+
+ There have been several attempts at defining kernels, i.e., positive semi-definite functions, between persistence diagrams within the last few years. We provide implementation
+ for three of them:
+
+ \li the <i>Persistence Scale Space Kernel</i>---see \cite Reininghaus_Huber_ALL_PSSK, which is the classical scalar product between \f$L^2\f$ functions, where persistence diagrams
+ are turned into functions by centering and summing Gaussian functions over the diagram points and their symmetric counterparts w.r.t. the diagonal: \f$k(D_1,D_2)=\int \Phi(D_1)\Phi(D_2)\f$,
+ where \f$\Phi(D)=\sum_{p\in D} {\rm exp}\left(-\frac{\|p-\cdot\|_2^2}{2\sigma^2}\right)\f$. 
+ 
+ \li the <i>Persistence Weighted Gaussian Kernel</i>---see \cite Kusano_Fukumizu_Hiraoka_PWGK, which is a slight generalization of the previous kernel, is the scalar product between
+ weighted Kernel Mean Embeddings of persistence diagrams w.r.t. the Gaussian Kernel \f$k_G\f$ (with corresponding map \f$\Phi_G\f$) in \f$\mathbb{R}^2\f$: 
+ \f$k(D_1,D_2)=\langle\sum_{p\in D_1} w(p)\Phi_G(p), \sum_{q\in D_2} w(q)\Phi_G(q)\rangle\f$
+ 
+ \li the  <i>Sliced Wasserstein Kernel</i>---see \cite pmlr-v70-carriere17a, which takes the form of a Gaussian kernel with a specific distance between persistence diagrams
+     called the <i>Sliced Wasserstein Distance</i>: \f$k(D_1,D_2)={\rm exp}\left(-\frac{SW(D_1,D_2)}{2\sigma^2}\right)\f$
+
+ When launching:
+
+ \code $> ./Sliced_Wasserstein
+ \endcode
+ 
+ the program output is:
+ 
+ \code $> Approx SW distance: 5.33648
+ $> Exact SW distance: 5.33798
+ $> Approx SW kernel: 0.0693743
+ $> Exact  SW kernel: 0.0693224
+ $> Distance induced by approx SW kernel: 1.36428
+ $> Distance induced by exact  SW kernel: 1.3643 
+ \endcode
+
+
+ and when launching:
+
+ \code $> ./Persistence_weighted_gaussian
+ \endcode
+ 
+ the program output is:
+ 
+ \code $> Approx PWG kernel: 1.21509
+ $> Exact  PWG kernel: 1.13628
+ $> Distance induced by approx PWG kernel: 3.23354
+ $> Distance induced by exact  PWG kernel: 3.25697
+ $> Approx Gaussian PWG kernel: 0.0194222
+ $> Exact  Gaussian PWG kernel: 0.0192524
+ $> Approx PSS kernel: 0.134413
+ $> Exact  PSS kernel: 0.133394
+ \endcode
+
  */
 /** @} */  // end defgroup Persistence_representations
 

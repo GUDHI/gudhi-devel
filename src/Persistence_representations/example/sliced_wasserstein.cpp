@@ -32,8 +32,6 @@ int main(int argc, char** argv) {
 
   std::vector<std::pair<double, double> > persistence1;
   std::vector<std::pair<double, double> > persistence2;
-  std::vector<std::vector<std::pair<double, double> > > set1;
-  std::vector<std::vector<std::pair<double, double> > > set2;
 
   persistence1.push_back(std::make_pair(1, 2));
   persistence1.push_back(std::make_pair(6, 8));
@@ -52,10 +50,12 @@ int main(int argc, char** argv) {
   SW swex1(persistence1, 1, -1);
   SW swex2(persistence2, 1, -1);
 
-  std::cout << sw1.compute_sliced_wasserstein_distance(sw2) << std::endl;
-  std::cout << swex1.compute_sliced_wasserstein_distance(swex2) << std::endl;
-  std::cout << sw1.compute_scalar_product(sw2) << std::endl;
-  std::cout << swex1.distance(swex2) << std::endl;
+  std::cout << "Approx SW distance: " << sw1.compute_sliced_wasserstein_distance(sw2) << std::endl;
+  std::cout << "Exact SW distance: " << swex1.compute_sliced_wasserstein_distance(swex2) << std::endl;
+  std::cout << "Approx SW kernel: " << sw1.compute_scalar_product(sw2) << std::endl;
+  std::cout << "Exact  SW kernel: " << swex1.compute_scalar_product(swex2) << std::endl;
+  std::cout << "Distance induced by approx SW kernel: " << sw1.distance(sw2) << std::endl;
+  std::cout << "Distance induced by exact  SW kernel: " << swex1.distance(swex2) << std::endl;
 
   return 0;
 }

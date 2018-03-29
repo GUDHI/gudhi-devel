@@ -45,6 +45,30 @@ using PD = std::vector<std::pair<double,double> >;
 namespace Gudhi {
 namespace Persistence_representations {
 
+/**
+ * \class Sliced_Wasserstein gudhi/Sliced_Wasserstein.h
+ * \brief A class implementing the Sliced Wasserstein Kernel.
+ *
+ * \ingroup Persistence_representations
+ *
+ * \details
+ * The Sliced Wasserstein Kernel is defined as a Gaussian-like Kernel between persistence diagrams, where the distance used for
+ * comparison is the Sliced Wasserstein distance \f$SW\f$ between persistence diagrams, defined as the integral of the 1-norm
+ * between the sorted projections of the diagrams onto all lines passing through the origin:
+ *
+ * \f$ SW(D_1,D_2)=\int_{\theta\in\mathbb{S}}\,\|\pi_\theta(D_1\cup\pi_\Delta(D_2))-\pi_\theta(D_2\cup\pi_\Delta(D_1))\|_1{\rm d}\theta\f$,
+ *
+ * where \f$\pi_\theta\f$ is the projection onto the line defined with angle \f$\theta\f$ in the unit circle \f$\mathbb{S}\f$,
+ * and \f$\pi_\Delta\f$ is the projection onto the diagonal.
+ * The integral can be either computed exactly in \f$O(n^2{\rm log}(n))\f$ time, where \f$n\f$ is the number of points
+ * in the diagrams, or approximated by sampling \f$N\f$ lines in the circle in \f$O(Nn{\rm log}(n))\f$ time. The Sliced Wasserstein Kernel is then computed as:
+ *
+ * \f$ k(D_1,D_2) = {\rm exp}\left(-\frac{SW(D_1,D_2)}{2\sigma^2}\right).\f$
+ * 
+ * For more details, please consult <i>Sliced Wasserstein Kernel for Persistence Diagrams</i>\cite pmlr-v70-carriere17a .
+ * It implements the following concepts: Topological_data_with_distances, Topological_data_with_scalar_product.
+ *
+**/
 class Sliced_Wasserstein {
 
  protected:
@@ -83,8 +107,15 @@ class Sliced_Wasserstein {
 
   }
 
-  Sliced_Wasserstein(PD _diagram){diagram = _diagram; approx = 100; sigma = 0.001; build_rep();}
-  Sliced_Wasserstein(PD _diagram, double _sigma, int _approx){diagram = _diagram; approx = _approx; sigma = _sigma; build_rep();}
+  /** \brief Sliced Wasserstein Kernel constructor.
+   * \ingroup Sliced_Wasserstein
+   *
+   * @param[in] _diagram  persistence diagram.
+   * @param[in] _sigma  bandwidth parameter.
+   * @param[in] _approx number of directions used to approximate the integral in the Sliced Wasserstein distance, set to -1 for exact computation.
+   *
+   */
+  Sliced_Wasserstein(PD _diagram, double _sigma = 1.0, int _approx = 100){diagram = _diagram; approx = _approx; sigma = _sigma; build_rep();}
   
   PD get_diagram(){return this->diagram;}
   int get_approx(){return this->approx;}
@@ -163,6 +194,12 @@ class Sliced_Wasserstein {
   // Scalar product + distance.
   // **********************************
 
+  /** \brief Evaluation of the Sliced Wasserstein Distance between a pair of diagrams.
+   * \ingroup Sliced_Wasserstein
+   *
+   * @param[in] second other instance of class Sliced_Wasserstein. Warning: approx parameter needs to be the same for both instances!!! 
+   *
+   */
   double compute_sliced_wasserstein_distance(Sliced_Wasserstein second) {
 
       PD diagram1 = this->diagram; PD diagram2 = second.diagram; double sw = 0;
@@ -277,14 +314,25 @@ class Sliced_Wasserstein {
       return sw/pi;
   }
 
-
+  /** \brief Evaluation of the kernel on a pair of diagrams.
+   * \ingroup Sliced_Wasserstein
+   *
+   * @param[in] second other instance of class Sliced_Wasserstein. Warning: sigma and approx parameters need to be the same for both instances!!! 
+   *
+   */
   double compute_scalar_product(Sliced_Wasserstein second){
     return std::exp(-compute_sliced_wasserstein_distance(second)/(2*this->sigma*this->sigma));
   }
 
-  double distance(Sliced_Wasserstein second, double power = 1) {
+  /** \brief Evaluation of the distance between images of diagrams in the Hilbert space of the kernel.
+   * \ingroup Sliced_Wasserstein
+   *
+   * @param[in] second  other instance of class Sliced_Wasserstein. Warning: sigma and approx parameters need to be the same for both instances!!! 
+   *
+   */
+  double distance(Sliced_Wasserstein second) {
     if(this->sigma != second.sigma || this->approx != second.approx){std::cout << "Error: different representations!" << std::endl; return 0;}
-    else return std::pow(this->compute_scalar_product(*this) + second.compute_scalar_product(second)-2*this->compute_scalar_product(second),  power/2.0);
+    else return std::pow(this->compute_scalar_product(*this) + second.compute_scalar_product(second)-2*this->compute_scalar_product(second),  0.5);
   }
 
 

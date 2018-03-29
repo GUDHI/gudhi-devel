@@ -60,3 +60,59 @@ def sliced_wasserstein_matrix(diagrams_1, diagrams_2, sigma = 1, N = 100):
     :returns: the sliced wasserstein kernel matrix.
     """
     return sw_matrix(diagrams_1, diagrams_2, sigma, N)
+
+def persistence_weighted_gaussian(diagram_1, diagram_2, sigma = 1, N = 100):
+    """
+
+    :param diagram_1: The first diagram.
+    :type diagram_1: vector[pair[double, double]]
+    :param diagram_2: The second diagram.
+    :type diagram_2: vector[pair[double, double]]
+    :param sigma: bandwidth of Gaussian
+    :param N: number of Fourier features
+
+    :returns: the persistence weighted gaussian kernel.
+    """
+    return pwg(diagram_1, diagram_2, sigma, N)
+
+def persistence_weighted_gaussian_matrix(diagrams_1, diagrams_2, sigma = 1, N = 100):
+    """
+
+    :param diagram_1: The first set of diagrams.
+    :type diagram_1: vector[vector[pair[double, double]]]
+    :param diagram_2: The second set of diagrams.
+    :type diagram_2: vector[vector[pair[double, double]]]
+    :param sigma: bandwidth of Gaussian
+    :param N: number of Fourier features
+
+    :returns: the persistence weighted gaussian kernel matrix.
+    """
+    return pwg_matrix(diagrams_1, diagrams_2, sigma, N)
+
+def persistence_scale_space(diagram_1, diagram_2, sigma = 1, N = 100):
+    """
+
+    :param diagram_1: The first diagram.
+    :type diagram_1: vector[pair[double, double]]
+    :param diagram_2: The second diagram.
+    :type diagram_2: vector[pair[double, double]]
+    :param sigma: bandwidth of Gaussian
+    :param N: number of Fourier features
+
+    :returns: the persistence scale space kernel.
+    """
+    return pss(diagram_1, diagram_2, sigma, N)
+
+def persistence_scale_space_matrix(diagrams_1, diagrams_2, sigma = 1, N = 100):
+    """
+
+    :param diagram_1: The first set of diagrams.
+    :type diagram_1: vector[vector[pair[double, double]]]
+    :param diagram_2: The second set of diagrams.
+    :type diagram_2: vector[vector[pair[double, double]]]
+    :param sigma: bandwidth of Gaussian
+    :param N: number of Fourier features
+
+    :returns: the persistence scale space kernel matrix.
+    """
+    return pss_matrix(diagrams_1, diagrams_2, sigma, N)

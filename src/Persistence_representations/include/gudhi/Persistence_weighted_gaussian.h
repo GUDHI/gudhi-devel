@@ -45,7 +45,40 @@ using Weight = std::function<double (std::pair<double,double>) >;
 
 namespace Gudhi {
 namespace Persistence_representations {
-
+/**
+ * \class Persistence_weighted_gaussian gudhi/Persistence_weighted_gaussian.h
+ * \brief A class implementing the Persistence Weighted Gaussian Kernel and a specific case of it called the Persistence Scale Space Kernel.
+ *
+ * \ingroup Persistence_representations
+ *
+ * \details
+ * The Persistence Weighted Gaussian Kernel is built with Gaussian Kernel Mean Embedding, meaning that each persistence diagram is first
+ * sent to the Hilbert space of a Gaussian kernel with bandwidth parameter \f$\sigma >0\f$ using a weighted mean embedding \f$\Phi\f$:
+ *
+ * \f$ \Phi\,:\,D\,\rightarrow\,\sum_{p\in D}\,w(p)\,{\rm exp}\left(-\frac{\|p-\cdot\|_2^2}{2\sigma^2}\right) \f$,
+ *
+ * Usually, the weight function is chosen to be an arctan function of the distance of the point to the diagonal:
+ * \f$w(p) = {\rm arctan}(C\,|y-x|^\alpha)\f$, for some parameters \f$C,\alpha >0\f$.
+ * Then, their scalar product in this space is computed:
+ *
+ * \f$ k(D_1,D_2)=\langle\Phi(D_1),\Phi(D_2)\rangle
+ * \,=\,\sum_{p\in D_1}\,\sum_{q\in D_2}\,w(p)\,w(q)\,{\rm exp}\left(-\frac{\|p-q\|_2^2}{2\sigma^2}\right).\f$
+ *
+ * Note that one may apply a second Gaussian kernel to their distance in this space and still get a kernel.
+ *
+ * It follows that the computation time is \f$O(n^2)\f$ where \f$n\f$ is the number of points
+ * in the diagrams. This time can be improved by computing approximations of the kernel
+ * with \f$m\f$ Fourier features \cite Rahimi07randomfeatures. In that case, the computation time becomes \f$O(mn)\f$.
+ *
+ * The Persistence Scale Space Kernel is a Persistence Weighted Gaussian Kernel between modified diagrams:
+ * the symmetric of each point with respect to the diagonal is first added in each diagram, and then the weight function
+ * is set to be +1 if the point is above the diagonal and -1 otherwise.
+ * 
+ * For more details, please consult <i>Persistence Weighted Kernel for Topological Data Analysis</i>\cite Kusano_Fukumizu_Hiraoka_PWGK 
+ * and <i>A Stable Multi-Scale Kernel for Topological Machine Learning</i>\cite Reininghaus_Huber_ALL_PSSK . 
+ * It implements the following concepts: Topological_data_with_distances, Topological_data_with_scalar_product.
+ *
+**/
 class Persistence_weighted_gaussian{
 
  protected:
@@ -56,8 +89,17 @@ class Persistence_weighted_gaussian{
 
  public:
 
-  Persistence_weighted_gaussian(PD _diagram){diagram = _diagram; sigma = 1.0; approx = 1000; weight = arctan_weight;}
-  Persistence_weighted_gaussian(PD _diagram, double _sigma, int _approx, Weight _weight){diagram = _diagram; sigma = _sigma; approx = _approx; weight = _weight;}
+  /** \brief Persistence Weighted Gaussian Kernel constructor.
+   * \ingroup Persistence_weighted_gaussian
+   *
+   * @param[in] _diagram       persistence diagram.
+   * @param[in] _sigma         bandwidth parameter of the Gaussian Kernel used for the Kernel Mean Embedding of the diagrams.
+   * @param[in] _approx        number of random Fourier features in case of approximate computation, set to -1 for exact computation.
+   * @param[in] _weight        weight function for the points in the diagrams.
+   *
+   */
+  Persistence_weighted_gaussian(PD _diagram, double _sigma = 1.0, int _approx = 1000, Weight _weight = arctan_weight){diagram = _diagram; sigma = _sigma; approx = _approx; weight = _weight;}
+  
   PD get_diagram(){return this->diagram;}
   double get_sigma(){return this->sigma;}
   int get_approx(){return this->approx;}
@@ -68,7 +110,12 @@ class Persistence_weighted_gaussian{
   // Utils.
   // **********************************
 
-
+  /** \brief Specific weight of Persistence Scale Space Kernel.
+   * \ingroup Persistence_weighted_gaussian
+   *
+   * @param[in] p point in 2D.
+   *
+   */
   static double pss_weight(std::pair<double,double> p){
     if(p.second > p.first)  return 1;
     else return -1;
@@ -108,7 +155,12 @@ class Persistence_weighted_gaussian{
   // Scalar product + distance.
   // **********************************
 
-
+  /** \brief Evaluation of the kernel on a pair of diagrams.
+   * \ingroup Persistence_weighted_gaussian
+   *
+   * @param[in] second other instance of class Persistence_weighted_gaussian. Warning: sigma, approx and weight parameters need to be the same for both instances!!! 
+   *
+   */
   double compute_scalar_product(Persistence_weighted_gaussian second){
 
     PD diagram1 = this->diagram; PD diagram2 = second.diagram;
@@ -131,11 +183,17 @@ class Persistence_weighted_gaussian{
     }
   }
 
-  double distance(Persistence_weighted_gaussian second, double power = 1) {
+  /** \brief Evaluation of the distance between images of diagrams in the Hilbert space of the kernel.
+   * \ingroup Persistence_weighted_gaussian
+   *
+   * @param[in] second other instance of class Persistence_weighted_gaussian. Warning: sigma, approx and weight parameters need to be the same for both instances!!! 
+   *
+   */
+  double distance(Persistence_weighted_gaussian second) {
     if(this->sigma != second.get_sigma() || this->approx != second.get_approx()){
       std::cout << "Error: different representations!" << std::endl; return 0;
     }
-    else return std::pow(this->compute_scalar_product(*this) + second.compute_scalar_product(second)-2*this->compute_scalar_product(second),  power/2.0);
+    else return std::pow(this->compute_scalar_product(*this) + second.compute_scalar_product(second)-2*this->compute_scalar_product(second), 0.5);
   }
 
 
