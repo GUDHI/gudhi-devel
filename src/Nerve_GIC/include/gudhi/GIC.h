@@ -143,18 +143,6 @@ class Cover_complex {
   std::string point_cloud_name;
   std::string color_name;
 
-  // Point comparator
-  struct Less {
-    Less(std::vector<double> func) { Fct = func; }
-    std::vector<double> Fct;
-    bool operator()(int a, int b) {
-      if (Fct[a] == Fct[b])
-        return a < b;
-      else
-        return Fct[a] < Fct[b];
-    }
-  };
-
   // Remove all edges of a graph.
   void remove_edges(Graph& G) {
     boost::graph_traits<Graph>::edge_iterator ei, ei_end;
@@ -280,8 +268,7 @@ class Cover_complex {
         point.assign(std::istream_iterator<double>(iss), std::istream_iterator<double>());
         point_cloud.emplace_back(point.begin(), point.begin() + data_dimension);
         boost::add_vertex(one_skeleton_OFF);
-        vertices.push_back(boost::add_vertex(one_skeleton));
-        std::vector<int> dummy; dummy.clear(); cover.push_back(dummy);
+        vertices.push_back(boost::add_vertex(one_skeleton)); cover.emplace_back();
         i++;
       }
     }
@@ -675,7 +662,7 @@ class Cover_complex {
     // Sort points according to function values
     std::vector<int> points(n);
     for (int i = 0; i < n; i++) points[i] = i;
-    std::sort(points.begin(), points.end(), Less(this->func));
+    std::sort(points.begin(), points.end(), [=](const int & p1, const int & p2){return (this->func[p1] < this->func[p2]);});
 
     int id = 0;
     int pos = 0;
@@ -1179,8 +1166,9 @@ class Cover_complex {
           int id = std::floor(u * (this->n));
           boot[j] = id;
           Cboot.point_cloud[j] = this->point_cloud[id];
-          Cboot.func.emplace(j, this->func[id]);
+          Cboot.func.push_back(this->func[id]);
         }
+	Cboot.set_color_from_vector(Cboot.func);
         for (int j = 0; j < n; j++) {
           std::vector<double> dist(n);
           for (int k = 0; k < n; k++) dist[k] = distances[boot[j]][boot[k]];
