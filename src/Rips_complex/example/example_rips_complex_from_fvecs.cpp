@@ -30,9 +30,9 @@ int main(int argc, char **argv) {
     // Type definitions
     using K = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
     using Point = typename K::Point_d;
-    //using Simplex_tree = Gudhi::Simplex_tree<>;
+    using Simplex_tree = Gudhi::Simplex_tree<>;
     //using Simplex_tree = Gudhi::Fake_simplex_tree;
-    using Simplex_tree = Gudhi::Sb_wrapper;
+    //using Simplex_tree = Gudhi::Sb_wrapper;
     using Filtration_value = Simplex_tree::Filtration_value;
     using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
     using Point_vector = std::vector<Point>;
