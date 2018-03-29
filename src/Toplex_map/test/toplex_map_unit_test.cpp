@@ -1,7 +1,5 @@
 #include <iostream>
 #include <gudhi/Filtered_toplex_map.h>
-#include <gudhi/Fake_simplex_tree.h>
-#include <gudhi/Sb_wrapper.h>
 
 
 #define BOOST_TEST_DYN_LINK

@@ -21,8 +21,8 @@
  */
 
 #include <gudhi/Simplex_tree.h>
-#include <gudhi/Fake_simplex_tree.h>
-#include <gudhi/Sb_wrapper.h>
+//#include <gudhi/Fake_simplex_tree.h>
+//#include <gudhi/Sb_wrapper.h>
 #include <gudhi/Euclidean_strong_witness_complex.h>
 #include <gudhi/pick_n_random_points.h>
 #include <gudhi/Points_fvecs_reader.h>

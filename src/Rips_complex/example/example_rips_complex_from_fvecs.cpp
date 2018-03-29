@@ -1,7 +1,7 @@
 #include <gudhi/Rips_complex.h>
 #include <gudhi/Simplex_tree.h>
-#include <gudhi/Fake_simplex_tree.h>
-#include <gudhi/Sb_wrapper.h>
+//#include <gudhi/Fake_simplex_tree.h>
+//#include <gudhi/Sb_wrapper.h>
 #include <gudhi/distance_functions.h>
 #include <gudhi/Points_fvecs_reader.h>
 

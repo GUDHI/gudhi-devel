@@ -1,6 +1,6 @@
 #include <gudhi/Tangential_complex.h>
 #include <gudhi/sparsify_point_set.h>
-#include <gudhi/Fake_simplex_tree.h>
+//#include <gudhi/Fake_simplex_tree.h>
 
 
 #include <CGAL/Epick_d.h>
@@ -38,8 +38,8 @@ int main(void) {
   tc.compute_tangential_complex();
 
   // Export the TC into a Simplex_tree
-  //Gudhi::Simplex_tree<> stree;
-  Gudhi::Fake_simplex_tree stree;
+  Gudhi::Simplex_tree<> stree;
+  //Gudhi::Fake_simplex_tree stree;
   tc.create_complex(stree);
 
   // Display stats about inconsistencies
