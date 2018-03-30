@@ -32,6 +32,10 @@ __license__ = "GPL v3"
 cdef extern from "Kernels_interface.h" namespace "Gudhi::persistence_diagram":
     double                 sw            (vector[pair[double, double]],          vector[pair[double, double]],          double, int)
     vector[vector[double]] sw_matrix     (vector[vector[pair[double, double]]],  vector[vector[pair[double, double]]],  double, int)
+    double                 pss           (vector[pair[double, double]],          vector[pair[double, double]],          double, int)
+    vector[vector[double]] pss_matrix    (vector[vector[pair[double, double]]],  vector[vector[pair[double, double]]],  double, int)
+    double                 pwg           (vector[pair[double, double]],          vector[pair[double, double]],          double, int)
+    vector[vector[double]] pwg_matrix    (vector[vector[pair[double, double]]],  vector[vector[pair[double, double]]],  double, int)
 
 def sliced_wasserstein(diagram_1, diagram_2, sigma = 1, N = 100):
     """

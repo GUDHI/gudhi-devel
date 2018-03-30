@@ -39,7 +39,6 @@
 #include <functional>
 #include <boost/math/constants/constants.hpp>
 
-double pi = boost::math::constants::pi<double>();
 using PD = std::vector<std::pair<double,double> >;
 using Weight = std::function<double (std::pair<double,double>) >;
 
@@ -88,6 +87,8 @@ class Persistence_weighted_gaussian{
     int approx;
 
  public:
+ 
+  double pi = boost::math::constants::pi<double>();
 
   /** \brief Persistence Weighted Gaussian Kernel constructor.
    * \ingroup Persistence_weighted_gaussian

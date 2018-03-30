@@ -39,7 +39,6 @@
 #include <functional>
 #include <boost/math/constants/constants.hpp>
 
-double pi = boost::math::constants::pi<double>();
 using PD = std::vector<std::pair<double,double> >;
 
 namespace Gudhi {
@@ -77,13 +76,14 @@ class Sliced_Wasserstein {
     double sigma;
     std::vector<std::vector<double> > projections, projections_diagonal;
 
-
  public:
+
+  double pi = boost::math::constants::pi<double>();
 
   void build_rep(){
 
     if(approx > 0){
-
+      
       double step = pi/this->approx;
       int n = diagram.size();
 

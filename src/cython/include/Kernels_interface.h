@@ -24,6 +24,7 @@
 #define INCLUDE_KERNELS_INTERFACE_H_
 
 #include <gudhi/Sliced_Wasserstein.h>
+#include <gudhi/Persistence_weighted_gaussian.h>
 
 #include <iostream>
 #include <vector>
@@ -44,20 +45,20 @@ namespace persistence_diagram {
   double pwg(const std::vector<std::pair<double, double>>& diag1,
              const std::vector<std::pair<double, double>>& diag2,
              double sigma, int N) {
-    Gudhi::Persistence_representations::Persistence_weighted_gaussian pwg1(diag1, sigma, N, Gudhi::Persistence_representations::arctan_weight);
-    Gudhi::Persistence_representations::Persistence_weighted_gaussian pwg2(diag2, sigma, N, Gudhi::Persistence_representations::arctan_weight);
+    Gudhi::Persistence_representations::Persistence_weighted_gaussian pwg1(diag1, sigma, N, Gudhi::Persistence_representations::Persistence_weighted_gaussian::arctan_weight);
+    Gudhi::Persistence_representations::Persistence_weighted_gaussian pwg2(diag2, sigma, N, Gudhi::Persistence_representations::Persistence_weighted_gaussian::arctan_weight);
     return pwg1.compute_scalar_product(pwg2);
   }
 
   double pss(const std::vector<std::pair<double, double>>& diag1,
              const std::vector<std::pair<double, double>>& diag2,
              double sigma, int N) {
-
+    double pi = boost::math::constants::pi<double>();
     std::vector<std::pair<double, double>> pd1 = diag1; int numpts = diag1.size();    for(int i = 0; i < numpts; i++)  pd1.emplace_back(diag1[i].second,diag1[i].first);
     std::vector<std::pair<double, double>> pd2 = diag2;     numpts = diag2.size();    for(int i = 0; i < numpts; i++)  pd2.emplace_back(diag2[i].second,diag2[i].first);
 
-    Gudhi::Persistence_representations::Persistence_weighted_gaussian pwg1(pd1, 2*std::sqrt(sigma), N, Gudhi::Persistence_representations::pss_weight);
-    Gudhi::Persistence_representations::Persistence_weighted_gaussian pwg2(pd2, 2*std::sqrt(sigma), N, Gudhi::Persistence_representations::pss_weight);
+    Gudhi::Persistence_representations::Persistence_weighted_gaussian pwg1(pd1, 2*std::sqrt(sigma), N, Gudhi::Persistence_representations::Persistence_weighted_gaussian::pss_weight);
+    Gudhi::Persistence_representations::Persistence_weighted_gaussian pwg2(pd2, 2*std::sqrt(sigma), N, Gudhi::Persistence_representations::Persistence_weighted_gaussian::pss_weight);
 
     return pwg1.compute_scalar_product  (pwg2) / (16*pi*sigma);
   }
@@ -65,9 +66,9 @@ namespace persistence_diagram {
   double pss_sym(const std::vector<std::pair<double, double>>& diag1,
              const std::vector<std::pair<double, double>>& diag2,
              double sigma, int N) {
-
-    Gudhi::Persistence_representations::Persistence_weighted_gaussian pwg1(pd1, 2*std::sqrt(sigma), N, Gudhi::Persistence_representations::pss_weight);
-    Gudhi::Persistence_representations::Persistence_weighted_gaussian pwg2(pd2, 2*std::sqrt(sigma), N, Gudhi::Persistence_representations::pss_weight);
+    double pi = boost::math::constants::pi<double>();
+    Gudhi::Persistence_representations::Persistence_weighted_gaussian pwg1(diag1, 2*std::sqrt(sigma), N, Gudhi::Persistence_representations::Persistence_weighted_gaussian::pss_weight);
+    Gudhi::Persistence_representations::Persistence_weighted_gaussian pwg2(diag2, 2*std::sqrt(sigma), N, Gudhi::Persistence_representations::Persistence_weighted_gaussian::pss_weight);
 
     return pwg1.compute_scalar_product  (pwg2) / (16*pi*sigma);
   }
@@ -108,11 +109,13 @@ namespace persistence_diagram {
       std::vector<std::pair<double, double>> pd1 = s1[i]; int numpts = s1[i].size();    
       for(int j = 0; j < numpts; j++)  pd1.emplace_back(s1[i][j].second,s1[i][j].first);
       ss1.push_back(pd1);
+    }
     
     for(int i = 0; i < num_diag_2; i++){
       std::vector<std::pair<double, double>> pd2 = s2[i]; int numpts = s2[i].size();    
       for(int j = 0; j < numpts; j++)  pd2.emplace_back(s2[i][j].second,s2[i][j].first);
       ss2.push_back(pd2);
+    }
 
     for(int i = 0; i < num_diag_1; i++){
       std::cout << 100.0*i/num_diag_1 << " %" << std::endl;
