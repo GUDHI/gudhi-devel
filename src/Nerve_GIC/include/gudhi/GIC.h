@@ -415,9 +415,7 @@ class Cover_complex {
   template <typename Distance>
   double set_graph_from_automatic_rips(Distance distance, int N = 100) {
     int m = floor(n / std::exp((1 + rate_power) * std::log(std::log(n) / std::log(rate_constant))));
-    m = std::min(m, n - 1);
-    std::vector<int> samples(m);
-    double delta = 0;
+    m = std::min(m, n - 1); std::vector<int> samples(m); double delta = 0;
 
     if (verbose) std::cout << n << " points in R^" << data_dimension << std::endl;
     if (verbose) std::cout << "Subsampling " << m << " points" << std::endl;
@@ -1152,23 +1150,25 @@ class Cover_complex {
    * @param[in] N number of bootstrap iterations.
    *
    */
-  template <typename SimplicialComplex>
-  void compute_distribution(int N = 100) {
-    if (distribution.size() >= N) {
+  void compute_distribution(unsigned int N = 100) {
+    unsigned int sz = distribution.size();
+    if (sz >= N) {
       std::cout << "Already done!" << std::endl;
     } else {
-      for (int i = 0; i < N - distribution.size(); i++) {
-        Cover_complex Cboot;
-        Cboot.n = this->n;
+      for (unsigned int i = 0; i < N - sz; i++) {
+        if (verbose)  std::cout << "Computing " << i << "th bootstrap, bottleneck distance = ";
+
+        Cover_complex Cboot; Cboot.n = this->n; Cboot.data_dimension = this->data_dimension; Cboot.type = this->type; Cboot.functional_cover = true;
+
         std::vector<int> boot(this->n);
         for (int j = 0; j < this->n; j++) {
           double u = GetUniform();
-          int id = std::floor(u * (this->n));
-          boot[j] = id;
-          Cboot.point_cloud[j] = this->point_cloud[id];
-          Cboot.func.push_back(this->func[id]);
+          int id = std::floor(u * (this->n)); boot[j] = id;
+          Cboot.point_cloud.push_back(this->point_cloud[id]); Cboot.cover.emplace_back(); Cboot.func.push_back(this->func[id]);
+          boost::add_vertex(Cboot.one_skeleton_OFF); Cboot.vertices.push_back(boost::add_vertex(Cboot.one_skeleton));
         }
 	Cboot.set_color_from_vector(Cboot.func);
+
         for (int j = 0; j < n; j++) {
           std::vector<double> dist(n);
           for (int k = 0; k < n; k++) dist[k] = distances[boot[j]][boot[k]];
@@ -1181,8 +1181,9 @@ class Cover_complex {
         Cboot.set_cover_from_function();
         Cboot.find_simplices();
         Cboot.compute_PD();
-
-        distribution.push_back(Gudhi::persistence_diagram::bottleneck_distance(this->PD, Cboot.PD));
+        double db = Gudhi::persistence_diagram::bottleneck_distance(this->PD, Cboot.PD);
+        if (verbose)  std::cout << db << std::endl;
+        distribution.push_back(db);
       }
 
       std::sort(distribution.begin(), distribution.end());
@@ -1196,7 +1197,7 @@ class Cover_complex {
    *
    */
   double compute_distance_from_confidence_level(double alpha) {
-    int N = distribution.size();
+    unsigned int N = distribution.size();
     return distribution[std::floor(alpha * N)];
   }
 
@@ -1207,9 +1208,11 @@ class Cover_complex {
    *
    */
   double compute_confidence_level_from_distance(double d) {
-    int N = distribution.size();
-    for (int i = 0; i < N; i++)
-      if (distribution[i] > d) return i * 1.0 / N;
+    unsigned int N = distribution.size();
+    double level = 1;
+    for (unsigned int i = 0; i < N; i++)
+      if (distribution[i] > d){ level = i * 1.0 / N; break; }
+    return level;
   }
 
  public:
@@ -1221,7 +1224,9 @@ class Cover_complex {
     double distancemin = -std::numeric_limits<double>::lowest();
     int N = PD.size();
     for (int i = 0; i < N; i++) distancemin = std::min(distancemin, 0.5 * (PD[i].second - PD[i].first));
-    return 1 - compute_confidence_level_from_distance(distancemin);
+    double p_value = 1 - compute_confidence_level_from_distance(distancemin);
+    if (verbose)  std::cout << "p value = " << p_value << std::endl;
+    return p_value;
   }
 
   // *******************************************************************************************************************
