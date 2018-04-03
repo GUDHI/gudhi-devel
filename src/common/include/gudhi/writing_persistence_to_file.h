@@ -79,7 +79,7 @@ class Persistence_interval_common {
    * One intervals is smaller than the other if it has lower persistence.
    * Note that this operator do not take Arith_element into account when doing comparisions.
   **/
-  inline bool operator<(const Persistence_interval_common& i2) {
+  bool operator<(const Persistence_interval_common& i2) const {
     return fabs(this->death_ - this->birth_) < fabs(i2.death_ - i2.birth_);
   }
 
@@ -101,11 +101,6 @@ class Persistence_interval_common {
   Coefficient_field arith_element_;
 };
 
-template <typename Filtration_type, typename Coefficient_field>
-bool operator<(const Persistence_interval_common<Filtration_type, Coefficient_field>& i1,
-               const Persistence_interval_common<Filtration_type, Coefficient_field>& i2) {
-    return i1.operator<(i2);
-  }
 /**
  * This function write a vector<Persistence_interval_common> to a stream
 **/
@@ -116,6 +111,7 @@ void write_persistence_intervals_to_stream(const Persistence_interval_range& int
     out << interval << "\n";
   }
 }
+
 }
 
 #endif  // WRITING_PERSISTENCE_TO_FILE_H
