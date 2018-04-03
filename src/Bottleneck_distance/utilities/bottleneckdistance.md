@@ -1,3 +1,13 @@
+---
+layout: page
+title: "Bottleneck distance"
+meta_title: "Bottleneck distance"
+teaser: ""
+permalink: /bottleneckdistance/
+---
+{::comment}
+Leave the lines above as it is required by the web site generator 'Jekyll'
+{:/comment}
 
 
 # Bottleneck distance #

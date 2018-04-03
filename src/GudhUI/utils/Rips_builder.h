@@ -60,7 +60,7 @@ template<typename SkBlComplex> class Rips_builder {
       std::cout.flush();
       for (auto q = p; ++q != vertices.end(); /**/)
         if (squared_eucl_distance(complex_.point(*p), complex_.point(*q)) < 4 * alpha * alpha)
-          complex_.add_edge(*p, *q);
+          complex_.add_edge_without_blockers(*p, *q);
     }
     std::cout << std::endl;
   }
