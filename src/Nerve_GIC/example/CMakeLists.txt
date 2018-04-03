@@ -23,4 +23,7 @@ if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
       "lucky_cat.off"
       "lucky_cat_PCA1")
 
+  install(TARGETS CoordGIC DESTINATION bin)
+  install(TARGETS FuncGIC DESTINATION bin)
+
 endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)

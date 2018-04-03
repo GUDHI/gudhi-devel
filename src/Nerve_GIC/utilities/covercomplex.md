@@ -1,3 +1,13 @@
+---
+layout: page
+title: "Cover complex"
+meta_title: "Cover complex"
+teaser: ""
+permalink: /covercomplex/
+---
+{::comment}
+Leave the lines above as it is required by the web site generator 'Jekyll'
+{:/comment}
 
 
 # Cover complex #

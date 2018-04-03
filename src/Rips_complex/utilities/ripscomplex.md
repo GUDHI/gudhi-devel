@@ -1,3 +1,13 @@
+---
+layout: page
+title: "Rips complex"
+meta_title: "Rips complex"
+teaser: ""
+permalink: /ripscomplex/
+---
+{::comment}
+Leave the lines above as it is required by the web site generator 'Jekyll'
+{:/comment}
 
 
 # Rips complex #
@@ -35,18 +45,44 @@ Beware: this program may use a lot of RAM and take a lot of time if `max-edge-le
 
 ## rips_distance_matrix_persistence ##
 
-Same as `rips_persistence` but taking a distance matrix as input. 
+Same as `rips_persistence` but taking a distance matrix as input.
 
 **Usage**
 
-`rips_persistence [options] <CSV input file>`
+`rips_distance_matrix_persistence [options] <CSV input file>`
 
 where
 `<CSV input file>` is the path to the file containing a distance matrix. Can be square or lower triangular matrix. Separator is ';'.
+The code do not check if it is dealing with a distance matrix. It is the user responsibility to provide a valid input.
+Please refer to data/distance_matrix/lower_triangular_distance_matrix.csv for an example of a file.
 
 **Example**
 
 `rips_distance_matrix_persistence data/distance_matrix/full_square_distance_matrix.csv -r 15 -d 3 -p 3 -m 0`
+
+
+## rips_correlation_matrix_persistence ##
+
+Same as `rips_distance_matrix_persistence` but taking a correlation matrix as input.
+
+**Usage**
+
+`rips_correlation_matrix_persistence [options] <CSV input file>`
+
+where
+`<CSV input file>` is the path to the file containing a correlation matrix. Can be square or lower triangular matrix. Separator is ';'.
+Note that no check is performed if the matrix given as the input is a correlation matrix.
+It is the user responsibility to ensure that this is the case.
+Please refer to data/correlation_matrix/lower_triangular_correlation_matrix.csv for an example of a file.
+
+**Example**
+
+`rips_correlation_matrix_persistence data/distance_matrix/full_square_distance_matrix.csv -r 15 -d 3 -p 3 -m 0`
+
+**Warning**
+
+As persistence diagrams points will be under the diagonal, bottleneck distance and persistence graphical tool will not work
+properly, this is a known issue.
 
 
 ## sparse_rips_persistence ##

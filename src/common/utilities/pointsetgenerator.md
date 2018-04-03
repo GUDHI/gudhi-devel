@@ -1,6 +1,16 @@
+---
+layout: page
+title: "OFF point set generator"
+meta_title: "OFF point set generator"
+teaser: ""
+permalink: /pointsetgenerator/
+---
+{::comment}
+Leave the lines above as it is required by the web site generator 'Jekyll'
+{:/comment}
 
 
-# common #
+# Miscellaneous #
 
 ## off_file_from_shape_generator ##
 

@@ -383,7 +383,7 @@ class Bitmap_cubical_complex : public T {
     std::vector<std::size_t> bdry = this->get_boundary_of_a_cell(sh);
     if (globalDbg) {
       std::cerr << "std::pair<Simplex_handle, Simplex_handle> endpoints( Simplex_handle sh )\n";
-      std::cerr << "bdry.size() : " << bdry.size() << std::endl;
+      std::cerr << "bdry.size() : " << bdry.size() << "\n";
     }
     // this method returns two first elements from the boundary of sh.
     if (bdry.size() < 2)

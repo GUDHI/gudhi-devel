@@ -79,7 +79,7 @@ template<typename SkBlComplex> class Critical_points {
     unsigned pos = 0;
     for (Edge e : edges) {
       std::cout << "edge " << pos++ << "/" << edges.size() << "\n";
-      auto eh = filled_complex_.add_edge(e.first, e.second);
+      auto eh = filled_complex_.add_edge_without_blockers(e.first, e.second);
       int is_contractible(is_link_reducible(eh));
 
       switch (is_contractible) {

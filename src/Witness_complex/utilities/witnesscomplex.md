@@ -1,3 +1,13 @@
+---
+layout: page
+title: "Witness complex"
+meta_title: "Witness complex"
+teaser: ""
+permalink: /witnesscomplex/
+---
+{::comment}
+Leave the lines above as it is required by the web site generator 'Jekyll'
+{:/comment}
 
 
 # Witness complex #
