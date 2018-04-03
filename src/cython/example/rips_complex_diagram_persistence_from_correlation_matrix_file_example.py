@@ -50,6 +50,11 @@ if not (-1. < args.min_edge_correlation < 1.):
     sys.exit(1)
 
 print("#####################################################################")
+print("Caution: as persistence diagrams points will be under the diagonal,")
+print("bottleneck distance and persistence graphical tool will not work")
+print("properly, this is a known issue.")
+
+print("#####################################################################")
 print("RipsComplex creation from correlation matrix read in a csv file")
 
 message = "RipsComplex with min_edge_correlation=" + repr(args.min_edge_correlation)

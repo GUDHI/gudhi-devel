@@ -305,3 +305,8 @@ until dimension 1 - one skeleton graph in other words), the output is:
     [2, 4] -> 0.97
     [0, 3] -> 0.99
     [1, 3] -> 0.99
+
+.. note::
+    As persistence diagrams points will be under the diagonal,
+    bottleneck distance and persistence graphical tool will not work properly,
+    this is a known issue.

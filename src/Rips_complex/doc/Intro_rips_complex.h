@@ -170,6 +170,9 @@ namespace rips_complex {
  * All the other constructions discussed for Rips complex for distance matrix can be also performed for Rips complexes
  * construction from correlation matrices.
  * 
+ * @warning As persistence diagrams points will be under the diagonal, bottleneck distance and persistence graphical
+ * tool will not work properly, this is a known issue.
+ *
  */
 /** @} */  // end defgroup rips_complex
 

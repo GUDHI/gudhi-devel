@@ -68,3 +68,8 @@ Please refer to data/correlation_matrix/lower_triangular_correlation_matrix.csv 
 **Example**
 
 `rips_correlation_matrix_persistence data/distance_matrix/full_square_distance_matrix.csv -r 15 -d 3 -p 3 -m 0`
+
+**Warning**
+
+As persistence diagrams points will be under the diagonal, bottleneck distance and persistence graphical tool will not work
+properly, this is a known issue.
