@@ -113,14 +113,14 @@ public:
     if (!stream_.is_open()) {
       std::cerr << "could not open file \n";
     }
-    unsigned number_of_vertices = 0;
-    bool success_read_off_preambule = read_off_preambule(number_of_vertices);
+    number_of_vertices_ = 0;
+    bool success_read_off_preambule = read_off_preambule(number_of_vertices_);
     if (!success_read_off_preambule)
       std::cerr << "could not read off preambule\n";
-    begin_.update_number_of_vertices(number_of_vertices);
+    begin_.update_number_of_vertices(number_of_vertices_);
     dim_ = begin_.dimension();
   }
-
+  
   ~Off_point_range() {
     stream_.close();
   }
@@ -137,6 +137,10 @@ public:
     return dim_;
   }
 
+  std::size_t size() const {
+    return number_of_vertices_;
+  }
+  
 private:
   bool read_off_preambule(unsigned& number_of_vertices) {
     std::string line;
@@ -172,6 +176,7 @@ private:
   std::ifstream stream_;
   iterator begin_, end_;
   int dim_;
+  unsigned number_of_vertices_;
 };
 
 }  // namespace Gudhi

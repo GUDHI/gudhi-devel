@@ -12,6 +12,7 @@
 
 #include "memory_usage.h"
 #include "cxx-prettyprint/prettyprint.hpp"
+#include "output_points_to_medit.h"
 
 using K = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
 using FT = K::FT;
@@ -70,18 +71,25 @@ int main(int argc, char * const argv[]) {
     std::cout << "Successfully read " << N << " points in dimension " << d << std::endl;
     Coxeter_system cs_A('A', d);
     Coxeter_complex cc(*point_vector, cs_A, init_level, eps);
+    output_points_to_medit(*point_vector, "sphere_coxeter_complex_points.mesh");
     delete point_vector;
     cc.write_mesh("sphere_coxeter_complex_A.mesh");
+    cc.write_bb("sphere_coxeter_complex_A.bb");
     cc.collapse();
   }
   else {
-    Gudhi::Off_point_range<Point_d> off_range(argv[1]);
-    d = off_range.dimension();
+    Gudhi::Off_point_range<Point_d>* off_range = new Gudhi::Off_point_range<Point_d>(argv[1]);
+    d = off_range->dimension();
     std::cout << "Successfully opened the file of points in dimension " << d << std::endl;
     using Coxeter_complex_off = Gudhi::Coxeter_complex<Gudhi::Off_point_range<Point_d>, Coxeter_system>;
     Coxeter_system cs_A('A', d);
-    Coxeter_complex_off cc(off_range, cs_A, init_level, eps);  
+    Coxeter_complex_off cc(*off_range, cs_A, init_level, eps);  
     cc.write_mesh("sphere_coxeter_complex_A.mesh");
+    cc.write_bb("sphere_coxeter_complex_A.bb");
+    delete off_range;
+    off_range  = new Gudhi::Off_point_range<Point_d>(argv[1]);
+    output_points_to_medit(*off_range, "sphere_coxeter_complex_points.mesh");
+    delete off_range;
     std::cout << "Memory usage (Physical) before collapses: " << (float)getPhysicalValue()/1000 << "MB.\n";
     cc.collapse();
   }    

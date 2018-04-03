@@ -287,6 +287,46 @@ public:
     }
   };
 
+  template <class Simplex_tree>
+  class Filtered_simplex_tree_simplex_iterator : public boost::iterator_facade< Filtered_simplex_tree_simplex_iterator<Simplex_tree>,
+                                                                                std::pair<std::vector<std::size_t>, double> const,
+                                                                                boost::forward_traversal_tag> {
+  private:
+    typename Simplex_tree::Complex_simplex_iterator it_;
+    Simplex_tree& stree_;
+    std::pair<std::vector<std::size_t>, double> value_; 
+    friend class boost::iterator_core_access;
+
+    void update_value() {
+      if (it_ != stree_.complex_simplex_range().end()) {
+        auto range = stree_.simplex_vertex_range(*it_);
+        value_ = std::make_pair(std::vector<size_t>(range.begin(), range.end()), stree_.filtration(*it_));
+      }
+    }
+    
+    bool equal(Filtered_simplex_tree_simplex_iterator<Simplex_tree> const& other) const {
+      return it_ == other.it_;
+    }
+
+    std::pair<std::vector<std::size_t>, double> const& dereference() const {
+      return value_;
+    }
+
+    void increment() {
+      it_++;
+      update_value();
+    }
+    
+  public:
+
+    Filtered_simplex_tree_simplex_iterator(typename Simplex_tree::Complex_simplex_iterator it,
+                                  Simplex_tree& stree)
+      : it_(it), stree_(stree) {
+      update_value();
+    }
+  };
+
+  
 private:
 
   struct Alcove_visitor {
@@ -613,9 +653,59 @@ public:
     //                         No_filtration_alcove_iterator(Alcove_iterator(a_map.end(), a_map, vi_map)));
     Max_simplex_range range(No_filtration_alcove_iterator(a_map.begin(), a_map, vi_map),
                             No_filtration_alcove_iterator(a_map.end(), a_map, vi_map));
-    cs_.write_mesh(v_map, range, file_name);
+    Simplex_tree stree;
+    for (auto m: range)
+      stree.insert_simplex_and_subfaces(m);
+    typedef Simplex_tree_simplex_iterator<Simplex_tree> Simplex_tree_iterator;
+    typedef boost::iterator_range<Simplex_tree_iterator> Simplex_tree_range;
+    Simplex_tree_range simplex_tree_range(Simplex_tree_iterator(stree.complex_simplex_range().begin(), stree),
+                                          Simplex_tree_iterator(stree.complex_simplex_range().end(), stree));
+    cs_.write_mesh(v_map, simplex_tree_range, file_name);
   }
 
+  /* Write medit bb file containing the filtration */ 
+  template <class Filtered_simplex_range>
+  void write_bb(Filtered_simplex_range& range, std::string file_name) const
+  {
+    short d = v_map.begin()->first.size();
+    if (d > 3);
+    std::ofstream ofs (file_name, std::ofstream::out);
+    if (d <= 2)
+      ofs << "2 1 ";
+    else
+      ofs << "3 1 ";
+
+    std::size_t range_size = 0;    
+    for (auto m: range)
+      if (m.first.size() == 3 || m.first.size() == 4)
+        range_size++;
+    ofs << range_size << " 1\n";
+    for (auto m: range)
+      if (m.first.size() == 3)
+        ofs << m.second << "\n";
+    if (d == 3)
+      for (auto m: range)
+        if (m.first.size() == 4)
+          ofs << m.second << "\n";
+    ofs.close();
+  }
+  
+  void write_bb(std::string file_name = "toplex.bb") const
+  {
+    typedef boost::iterator_range<Alcove_iterator> Max_simplex_range;
+    Max_simplex_range range(Alcove_iterator(a_map.begin(), a_map, vi_map),
+                            Alcove_iterator(a_map.end(), a_map, vi_map));
+    Simplex_tree stree;
+    for (auto m: range)
+      stree.insert_simplex_and_subfaces(m.first, m.second);
+    typedef Filtered_simplex_tree_simplex_iterator<Simplex_tree> Simplex_tree_iterator;
+    typedef boost::iterator_range<Simplex_tree_iterator> Simplex_tree_range;
+    Simplex_tree_range simplex_tree_range(Simplex_tree_iterator(stree.complex_simplex_range().begin(), stree),
+                                          Simplex_tree_iterator(stree.complex_simplex_range().end(), stree));
+    write_bb(simplex_tree_range, file_name);
+    // write_bb(range, file_name);
+  }
+    
   void strong_collapse(bool pers_out = true) {
     struct Size_compare {
       bool operator() (const Vertex_pointers& lhs, const Vertex_pointers& rhs) const {
@@ -789,7 +879,13 @@ public:
       Simplex_tree_range simplex_tree_range(Simplex_tree_iterator(coll_stree.complex_simplex_range().begin(), coll_stree),
                                             Simplex_tree_iterator(coll_stree.complex_simplex_range().end(), coll_stree));
       write_mesh(simplex_tree_range, "coll_stree.mesh");
-      
+
+      typedef Simplex_tree_simplex_iterator<Simplex_tree> Simplex_tree_iterator;
+      typedef boost::iterator_range<Simplex_tree_iterator> Simplex_tree_range;
+      Simplex_tree_range simplex_tree_range2(Simplex_tree_iterator(stree.complex_simplex_range().begin(), stree),
+                                             Simplex_tree_iterator(stree.complex_simplex_range().end(), stree));
+      write_mesh(simplex_tree_range2, "sphere_coxeter_complex_A.mesh");
+
     //   witness_complex::Dim_lists<Simplex_tree<>> simplices(coll_stree, collDim, 1);
     //   start = clock();
     //   simplices.collapse();

@@ -1027,7 +1027,7 @@ public:
       for (auto s: range)
         if (s.size() == 2)
           edges.push_back(s);
-        else
+        else if (s.size() == 3)
           triangles.push_back(s);
       ofs << "Edges " << edges.size() << "\n";
       for (auto s: edges) {
@@ -1047,7 +1047,7 @@ public:
     }
     else {
       std::vector<typename Simplex_range::value_type> edges, triangles, tetrahedra;
-      std::vector<std::vector<int>> facets;
+      // std::vector<std::vector<int> > facets;
       for (auto s: range)
         if (s.size() == 2)
           edges.push_back(s);
@@ -1055,16 +1055,16 @@ public:
           triangles.push_back(s);
         else if (s.size() == 4)
           tetrahedra.push_back(s);
-      for (auto t: tetrahedra) {
-        for (unsigned i = 0; i < t.size(); i++) {
-          std::vector<int> facet;
-          auto it = t.begin();
-          for (unsigned j = 0; it != t.end(); ++j, ++it)
-            if (i != j)
-              facet.push_back(*it);
-          facets.push_back(facet);
-        }
-      }
+      // for (auto t: tetrahedra) {
+      //   for (unsigned i = 0; i < t.size(); i++) {
+      //     std::vector<int> facet;
+      //     auto it = t.begin();
+      //     for (unsigned j = 0; it != t.end(); ++j, ++it)
+      //       if (i != j)
+      //         facet.push_back(*it);
+      //     facets.push_back(facet);
+      //   }
+      // }
       // ofs << "Edges " << edges.size() << "\n";
       // for (auto s: edges) {
       //   for (auto v: s) {
@@ -1073,19 +1073,26 @@ public:
       //   ofs << "514" << std::endl;
       // }
       
-      ofs << "Triangles " << triangles.size() + facets.size() << "\n";
+      // ofs << "Triangles " << triangles.size() + facets.size() << "\n";
+      // for (auto s: triangles) {
+      //   for (auto v: s) {
+      //     ofs << v+1 << " ";
+      //   }
+      //   ofs << "515" << std::endl;
+      // }
+      ofs << "Triangles " << triangles.size() << "\n";
       for (auto s: triangles) {
         for (auto v: s) {
           ofs << v+1 << " ";
         }
         ofs << "515" << std::endl;
       }
-      for (auto s: facets) {
-        for (auto v: s) {
-          ofs << v+1 << " ";
-        }
-        ofs << "320" << std::endl;
-      }
+      // for (auto s: facets) {
+      //   for (auto v: s) {
+      //     ofs << v+1 << " ";
+      //   }
+      //   ofs << "320" << std::endl;
+      // }
 
       ofs << "Tetrahedra " << tetrahedra.size() << "\n";
       for (auto s: tetrahedra) {
@@ -1096,7 +1103,6 @@ public:
       }
     }
   }
-
   
 };
 
