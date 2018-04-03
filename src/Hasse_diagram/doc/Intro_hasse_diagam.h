@@ -45,7 +45,7 @@ namespace Hasse_diagram {
  * is set to a class to store the additional information. Please consult the picture
  * below for a simple example of a Hasse diagram representing two vertices
  * and two edges forming a loop.
- * \image html "Hasse_diag.png" 
+ * \image html "Hasse_diag.png" " "
  * 
  * Hasse diagram is a dynamic data structure. Addition and removal of cells 
  * can be performed by using add_cell and remove_cell methods. Please consult

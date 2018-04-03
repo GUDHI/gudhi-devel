@@ -845,6 +845,7 @@ IMAGE_PATH             = doc/Skeleton_blocker/ \
 	doc/common/ \
 	doc/Contraction/ \
 	doc/Simplex_tree/ \
+	doc/Hasse_diagram/ \
 	doc/Persistent_cohomology/ \
 	doc/Witness_complex/ \
 	doc/Bitmap_cubical_complex/ \

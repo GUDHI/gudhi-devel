@@ -14,7 +14,8 @@
 #include <gudhi/Fake_simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Coxeter_complex/Collapse.h>
-#include <gudhi/Coxeter_complex/Hasse_diagram.h>
+// #include <gudhi/Coxeter_complex/Hasse_diagram.h>
+#include <gudhi/Hasse_diagram_persistence.h>
 
 #include <gudhi/Simplex_tree.h>
 #include <limits>
@@ -26,6 +27,11 @@
 
 
 #include <boost/iterator/iterator_facade.hpp>
+
+#include <bitset>
+#include <boost/dynamic_bitset.hpp>
+#include <boost/graph/adjacency_list.hpp>
+
 
 double num_error = 1.0e-10;
 
@@ -72,6 +78,15 @@ template <class Point_range,
 class Coxeter_complex {
   
 public:
+
+  using Id = typename Coxeter_system::Alcove_id;
+  using Filtration = double;
+
+  using Alcove_vertex_graph = boost::adjacency_list< boost::listS,
+                                                     boost::vecS,
+                                                     boost::bidirectionalS,
+                                                     std::pair<Id, Filtration> >;
+
   
   using Alcove_id = typename Coxeter_system::Alcove_id;
   using Vertex_id = Alcove_id;    
