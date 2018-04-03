@@ -64,7 +64,7 @@ class Persistence_interval_common {
    * fields: birth, death, dimensiona and arith_element_ are taken into account
    * and they all have to be equal for two pairs to be equal.
   **/
-  inline bool operator==(const Persistence_interval_common& i2) {
+  bool operator==(const Persistence_interval_common& i2) const {
     return ((this->birth_ == i2.birth_) && (this->death_ == i2.death_) && (this->dimension_ == i2.dimension_) &&
             (this->arith_element_ == i2.arith_element_));
   }
@@ -72,7 +72,7 @@ class Persistence_interval_common {
   /**
    * Check if two persistence paris are not equal.
   **/
-  inline bool operator!=(const Persistence_interval_common& i2) { return (!((*this) == i2)); }
+  bool operator!=(const Persistence_interval_common& i2) const { return (!((*this) == i2)); }
 
   /**
    * Operator to compare objects of a type Persistence_interval_common.
