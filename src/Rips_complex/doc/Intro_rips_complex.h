@@ -146,6 +146,33 @@ namespace rips_complex {
  * 
  * \include Rips_complex/full_skeleton_rips_for_doc.txt
  * 
+ * 
+ * \section ripscorrelationematrix Correlation matrix
+ * 
+ * Analogously to the case of distance matrix, Rips complexes can be also constructed based on correlation matrix. 
+ * Given a correlation matrix M, comportment-wise 1-M is a distance matrix.
+ * This example builds the one skeleton graph from the given corelation matrix and threshold value.
+ * Then it creates a `Simplex_tree` with it.
+ * 
+ * Then, it is asked to display information about the simplicial complex.
+ * 
+ * \include Rips_complex/example_one_skeleton_rips_from_correlation_matrix.cpp
+ * 
+ * When launching:
+ * 
+ * \code $> ./example_one_skeleton_from_correlation_matrix
+ * \endcode
+ *
+ * the program output is:
+ * 
+ * \include Rips_complex/one_skeleton_rips_from_correlation_matrix_for_doc.txt
+ * 
+ * All the other constructions discussed for Rips complex for distance matrix can be also performed for Rips complexes
+ * construction from correlation matrices.
+ * 
+ * @warning As persistence diagrams points will be under the diagonal, bottleneck distance and persistence graphical
+ * tool will not work properly, this is a known issue.
+ *
  */
 /** @} */  // end defgroup rips_complex
 
