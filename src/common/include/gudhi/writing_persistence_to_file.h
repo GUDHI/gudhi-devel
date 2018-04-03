@@ -101,6 +101,11 @@ class Persistence_interval_common {
   Coefficient_field arith_element_;
 };
 
+template <typename Filtration_type, typename Coefficient_field>
+bool operator<(const Persistence_interval_common<Filtration_type, Coefficient_field>& i1,
+               const Persistence_interval_common<Filtration_type, Coefficient_field>& i2) {
+    return i1.operator<(i2);
+  }
 /**
  * This function write a vector<Persistence_interval_common> to a stream
 **/
