@@ -10,9 +10,6 @@ Leave the lines above as it is required by the web site generator 'Jekyll'
 {:/comment}
 
 
-# Cover complex #
-
-
 ## Nerve ##
 This program builds the Nerve of a point cloud sampled on an OFF file.
 The cover C comes from the preimages of intervals covering a coordinate function,

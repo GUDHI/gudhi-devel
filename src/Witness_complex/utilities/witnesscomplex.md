@@ -10,9 +10,6 @@ Leave the lines above as it is required by the web site generator 'Jekyll'
 {:/comment}
 
 
-# Witness complex #
-
-
 For more details about the witness complex, please read the [user manual of the package](/doc/latest/group__witness__complex.html).
 
 ## weak_witness_persistence ##
