@@ -43,7 +43,7 @@ class Persistence_interval_common {
   Persistence_interval_common(Filtration_type birth, Filtration_type death)
       : birth_(birth),
         death_(death),
-        dimension_(std::numeric_limits<unsigned>::max),
+        dimension_(std::numeric_limits<unsigned>::max()),
         arith_element_(std::numeric_limits<Coefficient_field>::max()) {}
 
   /**
