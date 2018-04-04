@@ -11,6 +11,9 @@ add_executable ( Rips_complex_example_one_skeleton_from_distance_matrix example_
 
 add_executable ( Rips_complex_example_from_csv_distance_matrix example_rips_complex_from_csv_distance_matrix_file.cpp )
 
+# Sparse rips from points
+add_executable ( Rips_complex_example_sparse example_sparse_rips.cpp )
+
 # Correlation matrix
 add_executable (  Rips_complex_example_one_skeleton_rips_from_correlation_matrix example_one_skeleton_rips_from_correlation_matrix.cpp )
 
@@ -19,6 +22,7 @@ if (TBB_FOUND)
   target_link_libraries(Rips_complex_example_one_skeleton_from_points ${TBB_LIBRARIES})
   target_link_libraries(Rips_complex_example_one_skeleton_from_distance_matrix ${TBB_LIBRARIES})
   target_link_libraries(Rips_complex_example_from_csv_distance_matrix ${TBB_LIBRARIES})
+  target_link_libraries(Rips_complex_example_sparse ${TBB_LIBRARIES})
   target_link_libraries(Rips_complex_example_one_skeleton_rips_from_correlation_matrix ${TBB_LIBRARIES})
 endif()
 
@@ -26,6 +30,8 @@ add_test(NAME Rips_complex_example_one_skeleton_from_points
     COMMAND $<TARGET_FILE:Rips_complex_example_one_skeleton_from_points>)
 add_test(NAME Rips_complex_example_one_skeleton_from_distance_matrix
     COMMAND $<TARGET_FILE:Rips_complex_example_one_skeleton_from_distance_matrix>)
+add_test(NAME Rips_complex_example_sparse
+    COMMAND $<TARGET_FILE:Rips_complex_example_sparse>)
 add_test(NAME Rips_complex_example_one_skeleton_rips_from_correlation_matrix
     COMMAND $<TARGET_FILE:Rips_complex_example_one_skeleton_rips_from_correlation_matrix>)
 

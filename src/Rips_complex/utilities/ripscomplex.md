@@ -83,3 +83,29 @@ Please refer to data/correlation_matrix/lower_triangular_correlation_matrix.csv 
 
 As persistence diagrams points will be under the diagonal, bottleneck distance and persistence graphical tool will not work
 properly, this is a known issue.
+
+
+## sparse_rips_persistence ##
+This program computes the persistent homology with coefficient field *Z/pZ*
+of a sparse (1+epsilon)-approximation of the Rips complex defined on a set of input Euclidean points. The output diagram contains one bar per line, written with the convention:
+
+`p dim birth death`
+
+where `dim` is the dimension of the homological feature, `birth` and `death` are respectively the birth and death of the feature, and `p` is the characteristic of the field *Z/pZ* used for homology coefficients (`p` must be a prime number).
+
+**Usage**
+
+`sparse_rips_persistence [options] <OFF input file>`
+
+**Allowed options**
+
+* `-h [ --help ]` Produce help message
+* `-o [ --output-file ]` Name of file in which the persistence diagram is written. Default print in standard output.
+* `-e [ --approximation ]` (default = .5) Epsilon, where the sparse Rips complex is a (1+epsilon)-approximation of the Rips complex.
+* `-d [ --cpx-dimension ]` (default = 1) Maximal dimension of the Rips complex we want to compute.
+* `-p [ --field-charac ]` (default = 11)     Characteristic p of the coefficient field Z/pZ for computing homology.
+* `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature to be recorded. Enter a negative value to see zero length intervals.
+
+**Example with Z/2Z coefficients**
+
+`sparse_rips_persistence ../../data/points/tore3D_1307.off -e .5 -m .2 -d 3 -p 2`
