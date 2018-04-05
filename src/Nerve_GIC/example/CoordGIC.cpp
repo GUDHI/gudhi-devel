@@ -66,6 +66,9 @@ int main(int argc, char **argv) {
 
     GIC.find_simplices();
 
+    GIC.compute_distribution(10);
+    GIC.compute_p_value();
+
     GIC.plot_DOT();
 
     Gudhi::Simplex_tree<> stree;
