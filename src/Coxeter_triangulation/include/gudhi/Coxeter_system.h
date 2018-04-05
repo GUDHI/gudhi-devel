@@ -26,6 +26,7 @@ protected:
 public:
   typedef typename Simple_coxeter_system::Alcove_id Alcove_id;
   typedef Alcove_id Vertex_id;
+  typedef typename Simple_coxeter_system::Filtered_alcove Filtered_alcove;
 
   Coxeter_system()
     : dimension_(0) {
@@ -91,7 +92,7 @@ public:
                        Visitor visitor,
                        bool root_coords = false) const
   {
-    std::vector<std::vector<std::pair<Alcove_id, double> > > chunks;
+    std::vector<std::vector<Filtered_alcove > > chunks;
     auto p_it = p.begin();
     for (auto scs: simple_system_range_) {
       std::vector<FT> p_part;
@@ -104,7 +105,7 @@ public:
     // std::vector<std::vector<Vertex_id>::iterator> iterators;
     // for (auto chunk: chunks)
     //   iterators.emplace_back(chunk.begin());
-    std::pair<Alcove_id, double> a_id = std::make_pair(Alcove_id(init_level), 0);
+    Filtered_alcove a_id(Alcove_id(init_level), 0);
     rec_combine_chunks_alcove(chunks.begin(), chunks.end(), visitor, a_id);
   }
   
@@ -131,26 +132,28 @@ private:
   }
 
   template <class Visitor>
-  void rec_combine_chunks_alcove(std::vector<std::vector<std::pair<Alcove_id, double> > >::iterator chunks_it,
-                                 std::vector<std::vector<std::pair<Alcove_id, double> > >::iterator chunks_end,
+  void rec_combine_chunks_alcove(std::vector<std::vector<Filtered_alcove > >::iterator chunks_it,
+                                 std::vector<std::vector<Filtered_alcove > >::iterator chunks_end,
                                  Visitor& visitor,
-                                 std::pair<Alcove_id, double>& a_id) const {
+                                 Filtered_alcove& a) const {
     if (chunks_it == chunks_end) {
       //      vertices.push_back(reduced_id(v_id));
-      visitor(a_id);
+      visitor(a);
       return;
     }
     for (auto chunk: *chunks_it) {
-      for (auto c_it = chunk.first.begin(); c_it != chunk.first.end(); ++c_it)
-        a_id.first.push_back(*c_it);
-      a_id.second = chunk.second;
-      rec_combine_chunks_alcove(chunks_it+1, chunks_end, visitor, a_id);
-      a_id.first.resize(a_id.first.size()-chunk.first.size());
+      for (auto c_it = chunk.id.begin(); c_it != chunk.id.end(); ++c_it)
+        a.id.push_back(*c_it);
+      a.f = chunk.f;
+      rec_combine_chunks_alcove(chunks_it+1, chunks_end, visitor, a);
+      a.id.resize(a.id.size()-chunk.id.size());
     }
   }
 
   
-  void rec_combine_chunks(std::vector<std::vector<Vertex_id>>::iterator chunks_it, std::vector<Vertex_id>& vertices, Vertex_id& v_id) const {
+  void rec_combine_chunks(std::vector<std::vector<Vertex_id>>::iterator chunks_it,
+                          std::vector<Vertex_id>& vertices,
+                          Vertex_id& v_id) const {
     int k = v_id.size();
     if (k == dimension_) {
       //      vertices.push_back(reduced_id(v_id));

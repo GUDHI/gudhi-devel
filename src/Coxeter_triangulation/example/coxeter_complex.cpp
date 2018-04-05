@@ -3,6 +3,7 @@
 
 #include <gudhi/Points_off_io.h>
 #include <gudhi/Coxeter_system.h>
+#include <gudhi/Coxeter_complex_remastered.h>
 #include <gudhi/Coxeter_complex.h>
 #include <gudhi/Coxeter_complex/Off_point_range.h>
 

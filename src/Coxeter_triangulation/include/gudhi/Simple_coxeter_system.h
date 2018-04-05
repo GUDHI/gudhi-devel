@@ -68,6 +68,12 @@ public:
     }
   };
   typedef Alcove_id Vertex_id;
+  struct Filtered_alcove {
+    Alcove_id id;
+    double f;
+    Filtered_alcove(const Alcove_id& id_in, double f_in) : id(id_in), f(f_in) {}
+    Filtered_alcove(const Alcove_id& id_in) : id(id_in), f(0) {}
+  };
   
 public:
   
@@ -488,11 +494,11 @@ public:
    *  The second member in the output pairs is the squared distance.
    */
   template <class Point>
-  std::vector<std::pair<Alcove_id, double> > alcoves_of_ball(const Point& p, double level, double eps, bool root_coords = false) const {
+  std::vector<Filtered_alcove> alcoves_of_ball(const Point& p, double level, double eps, bool root_coords = false) const {
     unsigned d = dimension_;
     Alcove_id a_id(level);
     a_id.reserve(pos_root_count());
-    std::vector<std::pair<Alcove_id, double> > alcoves;
+    std::vector<Filtered_alcove> alcoves;
     Eigen::VectorXd p_vect(d);
     for (unsigned short i = 0; i < d; i++)
       p_vect(i) = p[i];
@@ -511,7 +517,7 @@ private:
 
   /** Construct the simplices that intersect a given ball.
    */
-  void rec_alcoves_of_ball_A(Alcove_id& a_id, Eigen::VectorXd& scalprod_vect, double eps, std::vector<std::pair<Alcove_id, double> >& alcoves, int j, int i, double root_scalprod, Eigen::VectorXd& p_vect) const {
+  void rec_alcoves_of_ball_A(Alcove_id& a_id, Eigen::VectorXd& scalprod_vect, double eps, std::vector<Filtered_alcove>& alcoves, int j, int i, double root_scalprod, Eigen::VectorXd& p_vect) const {
     unsigned short d = dimension_;
     double level = a_id.level();
     if (j == d+1) {
@@ -572,7 +578,7 @@ private:
       sq_norm = std::round(sq_norm*10e10)/10e10;
       // double sq_norm = s.objective_value_numerator() / s.objective_value_denominator();
       if (sq_norm <= eps*eps)
-        alcoves.emplace_back(std::make_pair(a_id, sq_norm));
+        alcoves.emplace_back(Filtered_alcove(a_id, sq_norm));
       return;
     }
     if (i == -1) {
