@@ -99,8 +99,8 @@ class Coxeter_complex {
     bool& store_points_;
   };
 
-  // The procedure that emplaces the alcoves in the map
-  void compute_a_map(const Point_range& point_vector, double init_level, double eps, bool store_points) {
+  // The procedure that fills av_graph_
+  void compute_graph(const Point_range& point_vector, double init_level, double eps, bool store_points) {
     for (auto p_it = point_vector.begin(); p_it != point_vector.end(); ++p_it)
       cs_.alcoves_of_ball(*p_it,
                           init_level,
@@ -118,15 +118,23 @@ public:
                   double eps=0,
                   bool store_points = false) : cs_(cs)
   {
-    compute_a_map(point_vector, init_level, eps, store_points);
+    compute_graph(point_vector, init_level, eps, store_points);
 #ifdef DEBUG_TRACES
     auto& a_map = av_graph_.a_map;
     auto& v_map = av_graph_.v_map;
+    auto& inv_map = av_graph_.inv_map;
+    auto& graph = av_graph_.graph;
     std::cout << "Alcove map size is " << a_map.size() << ".\n";    
     std::cout << "AMap:\n";
-    for (auto m: a_map) 
-      std::cout << m.first << ": filt=" << m.second.f << std::endl;    
-    std::cout << "\n";
+    for (auto m: a_map) {
+      std::cout << m.first << ": filt=" << m.second.f;
+      std::cout << " vertices: [ ";
+      typename Graph::out_edge_iterator e_it, e_end;
+      for (std::tie(e_it, e_end) = boost::out_edges(m.second.gv, graph); e_it != e_end; ++e_it) {
+        std::cout << inv_map[boost::target(*e_it, graph)]->first << " ";
+      }
+      std::cout << "]\n";
+    }
     std::cout << "Vertex map size is " << v_map.size() << ".\n";    
     std::cout << "VMap:\n";
     for (auto m: v_map) 
