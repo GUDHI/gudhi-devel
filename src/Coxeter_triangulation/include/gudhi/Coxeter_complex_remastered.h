@@ -28,10 +28,15 @@ class Coxeter_complex {
                                        boost::listS,            
                                        boost::bidirectionalS >;      
   using Graph_v = typename Graph::vertex_descriptor;
+  struct Fields {
+    Graph_v gv;
+    Filtration f;
+    Fields(Graph_v gv_in, Filtration f_in) : gv(gv_in), f(f_in) {}
+  };
   
   // The data structure that contains the alcoves and the vertices
   struct Alcove_vertex_graph {
-    using Id_v_map = std::map<Id, std::pair<Graph_v, double> >;
+    using Id_v_map = std::map<Id, Fields >;
     using V_id_map = std::map<Graph_v, typename Id_v_map::iterator>;
     Id_v_map a_map, v_map;
     V_id_map inv_map;
@@ -40,11 +45,11 @@ class Coxeter_complex {
   // The underlying Coxeter system
   const Coxeter_system& cs_;
 
-  // The visitor that inserts the alcoves to the Alcove_vertex_list
-  struct Alcove_visitor {
-    Alcove_visitor(typename Point_range::const_iterator& p_it,
-                   Alcove_vertex_graph& av_graph,
-                   bool& store_points)
+  // The visitor that inserts the alcoves and vertices to the Alcove_vertex_graph
+  struct Alcove_vertex_visitor {
+    Alcove_vertex_visitor(typename Point_range::const_iterator& p_it,
+                          Alcove_vertex_graph& av_graph,
+                          bool& store_points)
       : p_it_(p_it), av_graph_(av_graph), store_points_(store_points) {}
     
     void operator() (const Filtered_alcove& a,
@@ -56,35 +61,35 @@ class Coxeter_complex {
       auto a_it = a_map.find(a.id);
       if (a_it == a_map.end()) {
         Graph_v a_v = boost::add_vertex(graph);
-        a_it = a_map.emplace(a.id, std::make_pair(a_v, a.f)).first;
+        a_it = a_map.emplace(a.id, Fields(a_v, a.f)).first;
         inv_map.emplace(a_v, a_it);
         for (Id v_id: vertices) {
           auto v_it = v_map.find(v_id);
           if (v_it == v_map.end()) {
             Graph_v v_v = boost::add_vertex(graph);
-            v_it = v_map.emplace(v_id, std::make_pair(v_v, a.f)).first;
+            v_it = v_map.emplace(v_id, Fields(v_v, a.f)).first;
             inv_map.emplace(v_v, v_it);
             boost::add_edge(a_v, v_v, graph);
           }
           else {
-            v_it->second.second = std::min(v_it->second.second, a.f);
-            boost::add_edge(a_v, v_it->second.first, graph);
+            v_it->second.f = std::min(v_it->second.f, a.f);
+            boost::add_edge(a_v, v_it->second.gv, graph);
           }
         }
       }
       else {
-        a_it->second.second = std::min(a_it->second.second, a.f);
-        Graph_v a_v = a_it->second.first;
+        a_it->second.f = std::min(a_it->second.f, a.f);
+        Graph_v a_v = a_it->second.gv;
         for (Id v_id: vertices) {
           auto v_it = v_map.find(v_id);
           if (v_it == v_map.end()) {
             Graph_v v_v = boost::add_vertex(graph);
-            v_it = v_map.emplace(v_id, std::make_pair(v_v, a.f)).first;
+            v_it = v_map.emplace(v_id, Fields(v_v, a.f)).first;
             inv_map.emplace(v_v, v_it);
             boost::add_edge(a_v, v_v, graph);
           }
           else
-            v_it->second.second = std::min(v_it->second.second, a.f);
+            v_it->second.f = std::min(v_it->second.f, a.f);
         }
       }
     }
@@ -100,9 +105,9 @@ class Coxeter_complex {
       cs_.alcoves_of_ball(*p_it,
                           init_level,
                           eps,
-                          Alcove_visitor(p_it, av_graph_, store_points));
+                          Alcove_vertex_visitor(p_it, av_graph_, store_points));
     for (auto m: av_graph_.a_map)
-      m.second.second = std::sqrt(m.second.second);
+      m.second.f = std::sqrt(m.second.f);
   }
   
 public:
@@ -120,12 +125,12 @@ public:
     std::cout << "Alcove map size is " << a_map.size() << ".\n";    
     std::cout << "AMap:\n";
     for (auto m: a_map) 
-      std::cout << m.first << ": filt=" << m.second.second << std::endl;    
+      std::cout << m.first << ": filt=" << m.second.f << std::endl;    
     std::cout << "\n";
     std::cout << "Vertex map size is " << v_map.size() << ".\n";    
     std::cout << "VMap:\n";
     for (auto m: v_map) 
-      std::cout << m.first << ": filt=" << m.second.second << std::endl;    
+      std::cout << m.first << ": filt=" << m.second.f << std::endl;    
     std::cout << "\n";
 #endif
 
