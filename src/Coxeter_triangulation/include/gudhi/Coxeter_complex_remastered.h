@@ -31,7 +31,10 @@ class Coxeter_complex {
   
   // The data structure that contains the alcoves and the vertices
   struct Alcove_vertex_graph {
-    std::map<Id, std::pair<Graph_v, double> > a_map, v_map;    
+    using Id_v_map = std::map<Id, std::pair<Graph_v, double> >;
+    using V_id_map = std::map<Graph_v, typename Id_v_map::iterator>;
+    Id_v_map a_map, v_map;
+    V_id_map inv_map;
     Graph graph;
   } av_graph_;
   // The underlying Coxeter system
@@ -48,16 +51,19 @@ class Coxeter_complex {
                      const std::vector<Id>& vertices) {
       auto& a_map = av_graph_.a_map;
       auto& v_map = av_graph_.v_map;
+      auto& inv_map = av_graph_.inv_map;
       auto& graph = av_graph_.graph;
       auto a_it = a_map.find(a.id);
       if (a_it == a_map.end()) {
         Graph_v a_v = boost::add_vertex(graph);
-        a_map.emplace(a.id, std::make_pair(a_v, a.f));
+        a_it = a_map.emplace(a.id, std::make_pair(a_v, a.f)).first;
+        inv_map.emplace(a_v, a_it);
         for (Id v_id: vertices) {
           auto v_it = v_map.find(v_id);
           if (v_it == v_map.end()) {
             Graph_v v_v = boost::add_vertex(graph);
-            v_map.emplace(v_id, std::make_pair(v_v, a.f));
+            v_it = v_map.emplace(v_id, std::make_pair(v_v, a.f)).first;
+            inv_map.emplace(v_v, v_it);
             boost::add_edge(a_v, v_v, graph);
           }
           else {
@@ -73,7 +79,8 @@ class Coxeter_complex {
           auto v_it = v_map.find(v_id);
           if (v_it == v_map.end()) {
             Graph_v v_v = boost::add_vertex(graph);
-            v_map.emplace(v_id, std::make_pair(v_v, a.f));
+            v_it = v_map.emplace(v_id, std::make_pair(v_v, a.f)).first;
+            inv_map.emplace(v_v, v_it);
             boost::add_edge(a_v, v_v, graph);
           }
           else
