@@ -23,17 +23,16 @@ class Coxeter_complex {
   using Filtration = double;
   using Filtered_alcove = typename Coxeter_system::Filtered_alcove;
 
+  // Graph definitions
+  using Graph = boost::adjacency_list< boost::listS,          
+                                       boost::listS,            
+                                       boost::bidirectionalS >;      
+  using Graph_v = typename Graph::vertex_descriptor;
+  
   // The data structure that contains the alcoves and the vertices
   struct Alcove_vertex_graph {
-    using Graph = boost::adjacency_list< boost::listS,          
-                                         boost::listS,            
-                                         boost::bidirectionalS >;      
-    std::map<Id, std::pair<typename Graph::vertex_descriptor, double> > a_map, v_map;    
+    std::map<Id, std::pair<Graph_v, double> > a_map, v_map;    
     Graph graph;
-    void emplace_alcove(const Filtered_alcove& a) {
-      typename Graph::vertex_descriptor v = boost::add_vertex(graph);
-      a_map.emplace(a.id, std::make_pair(v, a.f));
-    }
   } av_graph_;
   // The underlying Coxeter system
   const Coxeter_system& cs_;
@@ -45,13 +44,42 @@ class Coxeter_complex {
                    bool& store_points)
       : p_it_(p_it), av_graph_(av_graph), store_points_(store_points) {}
     
-    void operator() (const Filtered_alcove& a) {
+    void operator() (const Filtered_alcove& a,
+                     const std::vector<Id>& vertices) {
       auto& a_map = av_graph_.a_map;
+      auto& v_map = av_graph_.v_map;
+      auto& graph = av_graph_.graph;
       auto a_it = a_map.find(a.id);
-      if (a_it == a_map.end())
-        av_graph_.emplace_alcove(a);
-      else
+      if (a_it == a_map.end()) {
+        Graph_v a_v = boost::add_vertex(graph);
+        a_map.emplace(a.id, std::make_pair(a_v, a.f));
+        for (Id v_id: vertices) {
+          auto v_it = v_map.find(v_id);
+          if (v_it == v_map.end()) {
+            Graph_v v_v = boost::add_vertex(graph);
+            v_map.emplace(v_id, std::make_pair(v_v, a.f));
+            boost::add_edge(a_v, v_v, graph);
+          }
+          else {
+            v_it->second.second = std::min(v_it->second.second, a.f);
+            boost::add_edge(a_v, v_it->second.first, graph);
+          }
+        }
+      }
+      else {
         a_it->second.second = std::min(a_it->second.second, a.f);
+        Graph_v a_v = a_it->second.first;
+        for (Id v_id: vertices) {
+          auto v_it = v_map.find(v_id);
+          if (v_it == v_map.end()) {
+            Graph_v v_v = boost::add_vertex(graph);
+            v_map.emplace(v_id, std::make_pair(v_v, a.f));
+            boost::add_edge(a_v, v_v, graph);
+          }
+          else
+            v_it->second.second = std::min(v_it->second.second, a.f);
+        }
+      }
     }
   private :
     typename Point_range::const_iterator& p_it_;
@@ -62,24 +90,13 @@ class Coxeter_complex {
   // The procedure that emplaces the alcoves in the map
   void compute_a_map(const Point_range& point_vector, double init_level, double eps, bool store_points) {
     for (auto p_it = point_vector.begin(); p_it != point_vector.end(); ++p_it)
-      cs_.alcoves_of_ball(*p_it, init_level, eps, Alcove_visitor(p_it, av_graph_, store_points));
+      cs_.alcoves_of_ball(*p_it,
+                          init_level,
+                          eps,
+                          Alcove_visitor(p_it, av_graph_, store_points));
     for (auto m: av_graph_.a_map)
       m.second.second = std::sqrt(m.second.second);
-    // typedef typename Alcove_map::iterator Alcove_iterator;
-    // std::vector<Alcove_iterator> iterators;
-    // for (auto m_it = a_map.begin(); m_it != a_map.end(); ++m_it)
-    //   iterators.push_back(m_it);
-    // struct Filt_compare {
-    //   bool operator() (const Alcove_iterator& lhs, const Alcove_iterator& rhs) const {
-    //     return std::get<3>(lhs->second) < std::get<3>(rhs->second);
-    //   }
-    // };
-    // std::sort(iterators.begin(), iterators.end(), Filt_compare());
-    // int k = 0;
-    // for (auto it: iterators)
-    //   std::get<0>(it->second) = k++;
   }
-
   
 public:
 
@@ -92,14 +109,20 @@ public:
     compute_a_map(point_vector, init_level, eps, store_points);
 #ifdef DEBUG_TRACES
     auto& a_map = av_graph_.a_map;
-    std::cout << "Alcove map size is " << a_map.size() << ".\n";
-    
+    auto& v_map = av_graph_.v_map;
+    std::cout << "Alcove map size is " << a_map.size() << ".\n";    
     std::cout << "AMap:\n";
     for (auto m: a_map) 
       std::cout << m.first << ": filt=" << m.second.second << std::endl;    
     std::cout << "\n";
+    std::cout << "Vertex map size is " << v_map.size() << ".\n";    
+    std::cout << "VMap:\n";
+    for (auto m: v_map) 
+      std::cout << m.first << ": filt=" << m.second.second << std::endl;    
+    std::cout << "\n";
 #endif
-  
+
+    // compute_v_map();
   }
 
   template <class Simplex_range>

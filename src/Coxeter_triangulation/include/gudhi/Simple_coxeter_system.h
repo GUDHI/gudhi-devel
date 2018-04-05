@@ -494,11 +494,15 @@ public:
    *  The second member in the output pairs is the squared distance.
    */
   template <class Point>
-  std::vector<Filtered_alcove> alcoves_of_ball(const Point& p, double level, double eps, bool root_coords = false) const {
+  void alcoves_of_ball(const Point& p,
+                       double level,
+                       double eps,
+                       std::vector<Filtered_alcove>& alcoves,
+                       std::vector<std::vector<Vertex_id> >& vertices_per_alcove,
+                       bool root_coords = false) const {
     unsigned d = dimension_;
     Alcove_id a_id(level);
     a_id.reserve(pos_root_count());
-    std::vector<Filtered_alcove> alcoves;
     Eigen::VectorXd p_vect(d);
     for (unsigned short i = 0; i < d; i++)
       p_vect(i) = p[i];
@@ -509,15 +513,22 @@ public:
       scalprod_vect = root_t_ * p_vect;
     // std::cout << "p_vect=" << p_vect << "\n";
     // std::cout << "scalprod_vect=" << scalprod_vect << "\n";
-    rec_alcoves_of_ball_A(a_id, scalprod_vect, eps, alcoves, 1, 0, 0, p_vect);
-    return alcoves;
+    rec_alcoves_of_ball_A(a_id, scalprod_vect, eps, alcoves, vertices_per_alcove, 1, 0, 0, p_vect);
   }
   
 private:
 
   /** Construct the simplices that intersect a given ball.
    */
-  void rec_alcoves_of_ball_A(Alcove_id& a_id, Eigen::VectorXd& scalprod_vect, double eps, std::vector<Filtered_alcove>& alcoves, int j, int i, double root_scalprod, Eigen::VectorXd& p_vect) const {
+  void rec_alcoves_of_ball_A(Alcove_id& a_id,
+                             Eigen::VectorXd& scalprod_vect,
+                             double eps,
+                             std::vector<Filtered_alcove>& alcoves,
+                             std::vector<std::vector<Vertex_id> >& vertices_per_alcove,
+                             int j,
+                             int i,
+                             double root_scalprod,
+                             Eigen::VectorXd& p_vect) const {
     unsigned short d = dimension_;
     double level = a_id.level();
     if (j == d+1) {
@@ -577,12 +588,22 @@ private:
       double sq_norm = s.objective_value_numerator().to_double() / s.objective_value_denominator().to_double();
       sq_norm = std::round(sq_norm*10e10)/10e10;
       // double sq_norm = s.objective_value_numerator() / s.objective_value_denominator();
-      if (sq_norm <= eps*eps)
+      if (sq_norm <= eps*eps) {
         alcoves.emplace_back(Filtered_alcove(a_id, sq_norm));
+        vertices_per_alcove.push_back(vertices);
+      }
       return;
     }
     if (i == -1) {
-      rec_alcoves_of_ball_A(a_id, scalprod_vect, eps, alcoves, j+1, j, 0, p_vect);
+      rec_alcoves_of_ball_A(a_id,
+                            scalprod_vect,
+                            eps,
+                            alcoves,
+                            vertices_per_alcove,
+                            j+1,
+                            j,
+                            0,
+                            p_vect);
       return;
     }
     root_scalprod += scalprod_vect(i);
@@ -602,7 +623,15 @@ private:
       }
       if (valid) {
         a_id.push_back(val);
-        rec_alcoves_of_ball_A(a_id, scalprod_vect, eps, alcoves, j, i-1, root_scalprod, p_vect);
+        rec_alcoves_of_ball_A(a_id,
+                              scalprod_vect,
+                              eps,
+                              alcoves,
+                              vertices_per_alcove,
+                              j,
+                              i-1,
+                              root_scalprod,
+                              p_vect);
         a_id.pop_back();
       }
     }

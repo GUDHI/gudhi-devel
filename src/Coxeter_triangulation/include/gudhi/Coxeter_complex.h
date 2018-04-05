@@ -81,12 +81,6 @@ public:
 
   using Id = typename Coxeter_system::Alcove_id;
   using Filtration = double;
-
-  using Alcove_vertex_graph = boost::adjacency_list< boost::listS,
-                                                     boost::vecS,
-                                                     boost::bidirectionalS,
-                                                     std::pair<Id, Filtration> >;
-
   
   using Alcove_id = typename Coxeter_system::Alcove_id;
   using Vertex_id = Alcove_id;    
