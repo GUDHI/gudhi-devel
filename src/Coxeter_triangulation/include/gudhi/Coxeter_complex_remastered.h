@@ -6,7 +6,11 @@
 #include <string>
 #include <map>
 #include <utility>
+
+#include <gudhi/Hasse_diagram_persistence.h>
+
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/dynamic_bitset.hpp>
 
 #include "../../example/cxx-prettyprint/prettyprint.hpp"
 
@@ -36,8 +40,8 @@ class Coxeter_complex {
   
   // The data structure that contains the alcoves and the vertices
   struct Alcove_vertex_graph {
-    using Id_v_map = std::map<Id, Fields >;
-    using V_id_map = std::map<Graph_v, typename Id_v_map::iterator>;
+    typedef std::map<Id, Fields > Id_v_map;
+    typedef std::map<Graph_v, typename Id_v_map::iterator> V_id_map;
     Id_v_map a_map, v_map;
     V_id_map inv_map;
     Graph graph;
@@ -109,6 +113,31 @@ class Coxeter_complex {
     for (auto m: av_graph_.a_map)
       m.second.f = std::sqrt(m.second.f);
   }
+
+  using Part = boost::dynamic_bitset<>;
+  using Ordered_partition = std::vector<Part>;
+  // Compute the ordered partition of an alcove with respect to a vertex
+  Ordered_partition partition(const Id& a_id, const Id& v_id) {
+    int d = v_id.size();
+    std::vector<int> point;
+    for (int l = 0; l < d+1; ++l)
+      point.push_back(l);
+
+    auto a_it = a_id.begin();
+    for (int j = 1; j < d+1; ++j) {
+      int v_coord = 0;
+      for (int i = j-1; i >= 0; --i) {
+        v_coord += v_id[i];
+        point[i] -= (*a_it - v_coord);
+        point[j] += (*a_it - v_coord);
+        a_it++;
+      }
+    }
+    Ordered_partition op(d+1, Part(d+1));
+    for (int l = 0; l < d+1; ++l)
+      op[l][point[l]] = 1;
+    return op;
+  }
   
 public:
 
@@ -128,28 +157,27 @@ public:
     std::cout << "AMap:\n";
     for (auto m: a_map) {
       std::cout << m.first << ": filt=" << m.second.f;
-      // std::cout << " vertices: [ ";
-      // typename Graph::out_edge_iterator e_it, e_end;
-      // for (std::tie(e_it, e_end) = boost::out_edges(m.second.gv, graph); e_it != e_end; ++e_it) {
-      //   std::cout << inv_map[boost::target(*e_it, graph)]->first << " ";
-      // }
-      // std::cout << "]";
+      std::cout << " vertices: [ ";
+      typename Graph::out_edge_iterator e_it, e_end;
+      for (std::tie(e_it, e_end) = boost::out_edges(m.second.gv, graph); e_it != e_end; ++e_it) {
+        std::cout << inv_map[boost::target(*e_it, graph)]->first << " ";
+      }
+      std::cout << "]";
       std::cout << "\n";
     }
     std::cout << "Vertex map size is " << v_map.size() << ".\n";    
     std::cout << "VMap:\n";
     for (auto m: v_map) {
       std::cout << m.first << ": filt=" << m.second.f;    
-      // std::cout << " alcoves: [ ";
-      // typename Graph::in_edge_iterator e_it, e_end;
-      // for (std::tie(e_it, e_end) = boost::in_edges(m.second.gv, graph); e_it != e_end; ++e_it) {
-      //   std::cout << inv_map[boost::source(*e_it, graph)]->first << " ";
-      // }
-      // std::cout << "]";
+      std::cout << " alcoves: [ ";
+      typename Graph::in_edge_iterator e_it, e_end;
+      for (std::tie(e_it, e_end) = boost::in_edges(m.second.gv, graph); e_it != e_end; ++e_it) {
+        std::cout << inv_map[boost::source(*e_it, graph)]->first << " ";
+      }
+      std::cout << "]";
       std::cout << "\n";
     }
 #endif
-
     // compute_v_map();
   }
 
@@ -168,6 +196,48 @@ public:
   }
 
   void collapse(bool pers_out = true) {
+  }
+
+  // Computing Voronoi skeleton as in the paper
+  // k is the desired dimension
+  void voronoi_skeleton(int k) {
+    using Hasse_cell = Gudhi::Hasse_diagram::Hasse_diagram_cell<int, double, double>;
+    using PCMap = std::map<Ordered_partition, Hasse_cell*>;
+    using CPMap = std::map<Hasse_cell*, typename PCMap::iterator>;
+    using IVMap_it = typename Alcove_vertex_graph::Id_v_map::iterator;
+    struct ACMap_comparator {
+      bool operator() (const IVMap_it& l_it, const IVMap_it& r_it) {
+        return l_it->first < r_it->first;
+      }
+    };
+    using ACMap = std::map<IVMap_it, Hasse_cell*, ACMap_comparator>;
+
+    std::vector<std::vector<Hasse_cell*>> hasse_diagram(k+1);
+    ACMap ac_map;
+    auto& v_map = av_graph_.v_map;
+    auto& inv_map = av_graph_.inv_map;
+    auto& graph = av_graph_.graph;
+    for (auto v_pair: v_map) {
+      PCMap pc_map;
+      CPMap cp_map;
+      typename Graph::in_edge_iterator e_it, e_end;
+      for (std::tie(e_it, e_end) = boost::in_edges(v_pair.second.gv, graph); e_it != e_end; ++e_it) {
+        auto a_pair_it = inv_map[boost::source(*e_it, graph)];
+        Hasse_cell* cell = new Hasse_cell(0, a_pair_it->second.f);
+        auto ac_emplace_result = ac_map.emplace(a_pair_it, cell);
+        typename PCMap::iterator pc_map_it;
+        if (ac_emplace_result.second) {
+          pc_map_it = pc_map.emplace(partition(a_pair_it->first, v_pair.first), cell).first;
+          hasse_diagram[0].push_back(cell);
+        }
+        else {
+          pc_map_it = pc_map.emplace(partition(a_pair_it->first, v_pair.first),
+                                     ac_emplace_result.first->second).first;
+          delete cell;
+        }
+        cp_map.emplace(pc_map_it->second, pc_map_it);
+      }
+    }
   }
   
 };
