@@ -168,7 +168,7 @@ private:
       for (auto c: chunk_->id)
         a.id.push_back(c);
       vertex_chunks.push_back(*chunk_v_);
-      a.f = chunk_->f;
+      a.f += chunk_->f;
       if (a.f <= eps*eps)
         rec_combine_chunks_alcove(chunks_it+1,
                                   chunks_end,
@@ -178,6 +178,7 @@ private:
                                   a,
                                   vertex_chunks);
       a.id.resize(a.id.size()-chunk_->id.size());
+      a.f -= chunk_->f;
       vertex_chunks.pop_back();
     }
   }

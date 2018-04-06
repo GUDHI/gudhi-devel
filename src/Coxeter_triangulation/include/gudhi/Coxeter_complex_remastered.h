@@ -128,18 +128,26 @@ public:
     std::cout << "AMap:\n";
     for (auto m: a_map) {
       std::cout << m.first << ": filt=" << m.second.f;
-      std::cout << " vertices: [ ";
-      typename Graph::out_edge_iterator e_it, e_end;
-      for (std::tie(e_it, e_end) = boost::out_edges(m.second.gv, graph); e_it != e_end; ++e_it) {
-        std::cout << inv_map[boost::target(*e_it, graph)]->first << " ";
-      }
-      std::cout << "]\n";
+      // std::cout << " vertices: [ ";
+      // typename Graph::out_edge_iterator e_it, e_end;
+      // for (std::tie(e_it, e_end) = boost::out_edges(m.second.gv, graph); e_it != e_end; ++e_it) {
+      //   std::cout << inv_map[boost::target(*e_it, graph)]->first << " ";
+      // }
+      // std::cout << "]";
+      std::cout << "\n";
     }
     std::cout << "Vertex map size is " << v_map.size() << ".\n";    
     std::cout << "VMap:\n";
-    for (auto m: v_map) 
-      std::cout << m.first << ": filt=" << m.second.f << std::endl;    
-    std::cout << "\n";
+    for (auto m: v_map) {
+      std::cout << m.first << ": filt=" << m.second.f;    
+      // std::cout << " alcoves: [ ";
+      // typename Graph::in_edge_iterator e_it, e_end;
+      // for (std::tie(e_it, e_end) = boost::in_edges(m.second.gv, graph); e_it != e_end; ++e_it) {
+      //   std::cout << inv_map[boost::source(*e_it, graph)]->first << " ";
+      // }
+      // std::cout << "]";
+      std::cout << "\n";
+    }
 #endif
 
     // compute_v_map();
