@@ -114,9 +114,9 @@ class Coxeter_complex {
       m.second.f = std::sqrt(m.second.f);
   }
 
+  // Compute the ordered partition of an alcove with respect to a vertex
   using Part = boost::dynamic_bitset<>;
   using Ordered_partition = std::vector<Part>;
-  // Compute the ordered partition of an alcove with respect to a vertex
   Ordered_partition partition(const Id& a_id, const Id& v_id) {
     int d = v_id.size();
     std::vector<int> point;
@@ -137,6 +137,43 @@ class Coxeter_complex {
     for (int l = 0; l < d+1; ++l)
       op[l][point[l]] = 1;
     return op;
+  }
+
+  template <class PCMap>
+  bool rec_subfaces_are_present(Ordered_partition& op_face,
+                                const Ordered_partition& op,
+                                int i, int j, int d,
+                                const PCMap& pc_map) {
+    while (j < d+1 && op[i][j] != 1)
+      j++;
+    if (j == d+1)
+      return (op_face[i].none() || op_face[i+1].none() ||
+              pc_map.find(op_face) != pc_map.end());
+    bool present = true;
+    op_face[i][j] = 1;
+    op_face[i+1][j] = 0;
+    present = rec_subfaces_are_present(op_face, op, i, j+1, d, pc_map);
+    if (present) {
+      op_face[i][j] = 0;
+      op_face[i+1][j] = 1;
+      present = rec_subfaces_are_present(op_face, op, i, j+1, d, pc_map);
+    }
+    return present;
+  }
+  
+  template <class PCMap>
+  bool subparts_are_present(const Ordered_partition& op, const PCMap& pc_map) {
+    int d = av_graph_.v_map.begin()->first.size();
+    bool present = true;
+    for (unsigned i = 0; i < op.size() && present; ++i) {
+      Ordered_partition op_face(op.size()+1, Part(d+1));
+      for (unsigned j = 0; j < i; ++j)
+        op_face[j] = op[j];
+      for (unsigned j = i+2; j < op.size()+1; ++j)
+        op_face[j] = op[j-1];
+      present = rec_subfaces_are_present(op_face, op, i, 0, d, pc_map);
+    }
+    return present;
   }
   
 public:
@@ -218,25 +255,49 @@ public:
     auto& inv_map = av_graph_.inv_map;
     auto& graph = av_graph_.graph;
     for (auto v_pair: v_map) {
-      PCMap pc_map;
-      CPMap cp_map;
+      PCMap* pc_map_faces = new PCMap(), *pc_map_cofaces;
+      CPMap* cp_map_faces = new CPMap(), *cp_map_cofaces;
       typename Graph::in_edge_iterator e_it, e_end;
+      // Dual vertex insertion
       for (std::tie(e_it, e_end) = boost::in_edges(v_pair.second.gv, graph); e_it != e_end; ++e_it) {
         auto a_pair_it = inv_map[boost::source(*e_it, graph)];
         Hasse_cell* cell = new Hasse_cell(0, a_pair_it->second.f);
         auto ac_emplace_result = ac_map.emplace(a_pair_it, cell);
         typename PCMap::iterator pc_map_it;
         if (ac_emplace_result.second) {
-          pc_map_it = pc_map.emplace(partition(a_pair_it->first, v_pair.first), cell).first;
+          pc_map_it = pc_map_faces->emplace(partition(a_pair_it->first, v_pair.first), cell).first;
           hasse_diagram[0].push_back(cell);
         }
         else {
-          pc_map_it = pc_map.emplace(partition(a_pair_it->first, v_pair.first),
-                                     ac_emplace_result.first->second).first;
+          pc_map_it = pc_map_faces->emplace(partition(a_pair_it->first, v_pair.first),
+                                            ac_emplace_result.first->second).first;
           delete cell;
         }
-        cp_map.emplace(pc_map_it->second, pc_map_it);
+        cp_map_faces->emplace(pc_map_it->second, pc_map_it);
       }
+      // Dual face insertion
+      for (int curr_dim = 1; curr_dim <= k; ++curr_dim) {
+        pc_map_cofaces = new PCMap();
+        cp_map_cofaces = new CPMap();
+        PCMap candidates; // Some are repetitions with other Voronoi cells
+        for (auto pc_pair: *pc_map_faces) {
+          int d = v_pair.first.size();
+          for (int i = 0; i < d+1-curr_dim; ++i) {
+            Ordered_partition op(d+1-curr_dim, Part(d+1));
+            for (int j = 0; j <= i; ++j)
+              op[j] |= pc_pair.first[j];
+            for (int j = i; j < d+1-curr_dim; ++j)
+              op[j] |= pc_pair.first[j+1];
+            subparts_are_present(op, *pc_map_faces);
+          }
+        }
+        delete pc_map_faces;
+        delete cp_map_faces;
+        pc_map_faces = pc_map_cofaces;
+        cp_map_faces = cp_map_cofaces;
+      }
+      delete pc_map_cofaces;
+      delete cp_map_cofaces;      
     }
   }
   
