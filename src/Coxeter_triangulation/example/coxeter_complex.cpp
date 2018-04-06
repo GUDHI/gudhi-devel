@@ -76,6 +76,7 @@ int main(int argc, char * const argv[]) {
     delete point_vector;
     cc.write_mesh("sphere_coxeter_complex_A.mesh");
     cc.write_bb("sphere_coxeter_complex_A.bb");
+    cc.voronoi_skeleton(1);
     cc.collapse();
   }
   else {
@@ -92,6 +93,7 @@ int main(int argc, char * const argv[]) {
     output_points_to_medit(*off_range, "sphere_coxeter_complex_points.mesh");
     delete off_range;
     std::cout << "Memory usage (Physical) before collapses: " << (float)getPhysicalValue()/1000 << "MB.\n";
+    cc.voronoi_skeleton(1);
     cc.collapse();
   }    
   std::cout << "Memory usage (Virtual): " << (float)getVirtualValue()/1000. << "MB.\n";

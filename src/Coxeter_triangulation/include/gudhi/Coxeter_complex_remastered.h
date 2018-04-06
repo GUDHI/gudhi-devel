@@ -139,30 +139,46 @@ class Coxeter_complex {
     return op;
   }
 
+  // Check if all the subfaces are present for the face given by a partition
+  using Hasse_cell = Gudhi::Hasse_diagram::Hasse_diagram_cell<int, double, double>;
+  using Hasse_boundary = std::vector<std::pair<Hasse_cell*, int> >;
   template <class PCMap>
   bool rec_subfaces_are_present(Ordered_partition& op_face,
                                 const Ordered_partition& op,
-                                int i, int j, int d,
+                                int i, int j, int d, double& f,
+                                Hasse_boundary& boundary,
                                 const PCMap& pc_map) {
     while (j < d+1 && op[i][j] != 1)
       j++;
-    if (j == d+1)
-      return (op_face[i].none() || op_face[i+1].none() ||
-              pc_map.find(op_face) != pc_map.end());
+    if (j == d+1) {
+      if (op_face[i].none() || op_face[i+1].none())
+        return true;
+      auto pc_pair_it = pc_map.find(op_face);
+      if (pc_pair_it != pc_map.end()) {
+        f = std::max(f, pc_pair_it->second->get_filtration());
+        boundary.emplace_back(std::make_pair(pc_pair_it->second, 1));
+        return true;
+      }
+      else
+        return false;
+    }
     bool present = true;
     op_face[i][j] = 1;
     op_face[i+1][j] = 0;
-    present = rec_subfaces_are_present(op_face, op, i, j+1, d, pc_map);
+    present = rec_subfaces_are_present(op_face, op, i, j+1, d, f, boundary, pc_map);
     if (present) {
       op_face[i][j] = 0;
       op_face[i+1][j] = 1;
-      present = rec_subfaces_are_present(op_face, op, i, j+1, d, pc_map);
+      present = rec_subfaces_are_present(op_face, op, i, j+1, d, f, boundary, pc_map);
     }
     return present;
   }
   
   template <class PCMap>
-  bool subparts_are_present(const Ordered_partition& op, const PCMap& pc_map) {
+  bool subparts_are_present(const Ordered_partition& op,
+                            const PCMap& pc_map,
+                            double& f,
+                            Hasse_boundary& boundary) {
     int d = av_graph_.v_map.begin()->first.size();
     bool present = true;
     for (unsigned i = 0; i < op.size() && present; ++i) {
@@ -171,7 +187,7 @@ class Coxeter_complex {
         op_face[j] = op[j];
       for (unsigned j = i+2; j < op.size()+1; ++j)
         op_face[j] = op[j-1];
-      present = rec_subfaces_are_present(op_face, op, i, 0, d, pc_map);
+      present = rec_subfaces_are_present(op_face, op, i, 0, d, f, boundary, pc_map);
     }
     return present;
   }
@@ -238,9 +254,7 @@ public:
   // Computing Voronoi skeleton as in the paper
   // k is the desired dimension
   void voronoi_skeleton(int k) {
-    using Hasse_cell = Gudhi::Hasse_diagram::Hasse_diagram_cell<int, double, double>;
-    using PCMap = std::map<Ordered_partition, Hasse_cell*>;
-    using CPMap = std::map<Hasse_cell*, typename PCMap::iterator>;
+    using PCMap = std::map<Ordered_partition, Hasse_cell*>; 
     using IVMap_it = typename Alcove_vertex_graph::Id_v_map::iterator;
     struct ACMap_comparator {
       bool operator() (const IVMap_it& l_it, const IVMap_it& r_it) {
@@ -249,14 +263,23 @@ public:
     };
     using ACMap = std::map<IVMap_it, Hasse_cell*, ACMap_comparator>;
 
-    std::vector<std::vector<Hasse_cell*>> hasse_diagram(k+1);
+    struct Hasse_cell_comparator {
+      bool operator() (Hasse_cell* l_it, Hasse_cell* r_it) {
+        if (l_it->get_dimension() == 0)
+          return l_it < r_it; 
+        else
+          return l_it->get_boundary() < r_it->get_boundary();
+      }
+    };
+    using Hasse_diagram = std::vector<std::set<Hasse_cell*, Hasse_cell_comparator>>;
+    Hasse_diagram hasse_diagram(k+1);
     ACMap ac_map;
     auto& v_map = av_graph_.v_map;
     auto& inv_map = av_graph_.inv_map;
     auto& graph = av_graph_.graph;
     for (auto v_pair: v_map) {
+      std::cout << "Current vertex: " << v_pair.first << std::endl;
       PCMap* pc_map_faces = new PCMap(), *pc_map_cofaces;
-      CPMap* cp_map_faces = new CPMap(), *cp_map_cofaces;
       typename Graph::in_edge_iterator e_it, e_end;
       // Dual vertex insertion
       for (std::tie(e_it, e_end) = boost::in_edges(v_pair.second.gv, graph); e_it != e_end; ++e_it) {
@@ -266,20 +289,19 @@ public:
         typename PCMap::iterator pc_map_it;
         if (ac_emplace_result.second) {
           pc_map_it = pc_map_faces->emplace(partition(a_pair_it->first, v_pair.first), cell).first;
-          hasse_diagram[0].push_back(cell);
+          hasse_diagram[0].emplace(cell);
         }
         else {
           pc_map_it = pc_map_faces->emplace(partition(a_pair_it->first, v_pair.first),
                                             ac_emplace_result.first->second).first;
           delete cell;
         }
-        cp_map_faces->emplace(pc_map_it->second, pc_map_it);
+        std::cout << "dual vertex for " << a_pair_it->first
+                  << ", partition=" << partition(a_pair_it->first, v_pair.first) << std::endl;
       }
       // Dual face insertion
       for (int curr_dim = 1; curr_dim <= k; ++curr_dim) {
         pc_map_cofaces = new PCMap();
-        cp_map_cofaces = new CPMap();
-        PCMap candidates; // Some are repetitions with other Voronoi cells
         for (auto pc_pair: *pc_map_faces) {
           int d = v_pair.first.size();
           for (int i = 0; i < d+1-curr_dim; ++i) {
@@ -288,17 +310,26 @@ public:
               op[j] |= pc_pair.first[j];
             for (int j = i; j < d+1-curr_dim; ++j)
               op[j] |= pc_pair.first[j+1];
-            subparts_are_present(op, *pc_map_faces);
+            double f = 0;
+            Hasse_boundary boundary;
+            if (pc_map_cofaces->find(op) == pc_map_cofaces->end() &&
+                subparts_are_present(op, *pc_map_faces, f, boundary)) {
+              Hasse_cell* cell = new Hasse_cell(i, f);
+              std::sort(boundary.begin(), boundary.end());
+              cell->get_boundary() = boundary;
+              if (pc_map_cofaces->emplace(op, cell).second)
+                std::cout << "dual face " << op << std::endl;
+            }
           }
         }
+        for (auto pc_pair: *pc_map_cofaces)
+          hasse_diagram[curr_dim].emplace(pc_pair.second);
         delete pc_map_faces;
-        delete cp_map_faces;
         pc_map_faces = pc_map_cofaces;
-        cp_map_faces = cp_map_cofaces;
       }
       delete pc_map_cofaces;
-      delete cp_map_cofaces;      
     }
+    std::cout << "";
   }
   
 };
