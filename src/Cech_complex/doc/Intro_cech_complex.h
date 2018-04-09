@@ -33,7 +33,7 @@ namespace cech_complex {
  * 
  * @{
  * 
- * \section cechdefinition Cech complex definition
+ * \section cechdefinition Čech complex definition
  * 
  * Cech_complex
  * <a target="_blank" href="https://en.wikipedia.org/wiki/%C4%8Cech_cohomology">(Wikipedia)</a> is a
@@ -42,7 +42,8 @@ namespace cech_complex {
  * from it.
  * The input shall be a point cloud in an Euclidean space.
  * 
- * The filtration value of each edge of the `Gudhi::Proximity_graph` is computed from `Gudhi::Radius_distance` function.
+ * The filtration value of each edge of the `Gudhi::Proximity_graph` is computed from
+ * `Gudhi::Minimal_enclosing_ball_radius` function.
  * 
  * All edges that have a filtration value strictly greater than a user given maximal radius value, \f$max\_radius\f$,
  * are not inserted into the complex.
@@ -51,8 +52,8 @@ namespace cech_complex {
  * 
  * \image html "cech_one_skeleton.png" "Cech complex proximity graph representation"
  * 
- * When creating a simplicial complex from this proximity graph, Cech inserts the proximity graph into the simplicial
- * complex data structure, and then expands the simplicial complex when required.
+ * When creating a simplicial complex from this proximity graph, Cech_complex inserts the proximity graph into the
+ * simplicial complex data structure, and then expands the simplicial complex when required.
  *
  * On this example, as edges \f$(x,y)\f$, \f$(y,z)\f$ and \f$(z,y)\f$ are in the complex, the minimal ball radius
  * containing the points \f$(x,y,z)\f$ is computed.
@@ -62,7 +63,7 @@ namespace cech_complex {
  *
  * And so on for higher dimensions.
  *
- * \image html "cech_complex_representation.png" "Cech complex expansion"
+ * \image html "cech_complex_representation.png" "Čech complex expansion"
  *
  * The minimal ball radius computation is insured by
  * <a target="_blank" href="https://people.inf.ethz.ch/gaertner/subdir/software/miniball.html">
@@ -78,8 +79,6 @@ namespace cech_complex {
  * <a href="_cech_complex_2cech_complex_step_by_step_8cpp-example.html">
  * cech_complex_step_by_step.cpp</a> example, where the graph construction over the Simplex_tree is more detailed.
  *
- * \section cechpointsdistance Point cloud
- * 
  * \subsection cechpointscloudexample Example from a point cloud
  * 
  * This example builds the proximity graph from the given points, and maximal radius values.
@@ -89,7 +88,7 @@ namespace cech_complex {
  * 
  * \include Cech_complex/cech_complex_example_from_points.cpp
  * 
- * When launching (Cech maximal distance between 2 points is 1., is expanded until dimension 2):
+ * When launching (maximal enclosing ball radius is 1., is expanded until dimension 2):
  * 
  * \code $> ./Cech_complex_example_from_points
  * \endcode
