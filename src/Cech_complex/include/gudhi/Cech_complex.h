@@ -48,16 +48,16 @@ namespace cech_complex {
  * \tparam SimplicialComplexForProximityGraph furnishes `Vertex_handle` and `Filtration_value` type definition required
  * by `Gudhi::Proximity_graph`.
  *
- * \tparam ForwardPointRange must be a range for which `std::begin()` and `std::end()` methods return input
+ * \tparam InputPointRange must be a range for which `std::begin()` and `std::end()` methods return input
  * iterators on a point. `std::begin()` and `std::end()` methods are also required for a point.
  */
-template<typename SimplicialComplexForProximityGraph, typename ForwardPointRange>
+template<typename SimplicialComplexForProximityGraph, typename InputPointRange>
 class Cech_complex {
  private:
   using Vertex_handle = typename SimplicialComplexForProximityGraph::Vertex_handle;
   using Filtration_value = typename SimplicialComplexForProximityGraph::Filtration_value;
   using Proximity_graph = Gudhi::Proximity_graph<SimplicialComplexForProximityGraph>;
-  using Point_iterator = typename boost::range_const_iterator<ForwardPointRange>::type;
+  using Point_iterator = typename boost::range_const_iterator<InputPointRange>::type;
   using Point= typename std::iterator_traits<Point_iterator>::value_type;
   using Point_cloud = std::vector<Point>;
 
@@ -67,11 +67,11 @@ class Cech_complex {
    * @param[in] points Range of points.
    * @param[in] max_radius Maximal radius value.
    *
-   * \tparam ForwardPointRange must be a range for which `std::begin()` and `std::end()` methods return input
+   * \tparam InputPointRange must be a range for which `std::begin()` and `std::end()` methods return input
    * iterators on a point. `std::begin()` and `std::end()` methods are also required for a point.
    *
    */
-  Cech_complex(const ForwardPointRange& points, Filtration_value max_radius)
+  Cech_complex(const InputPointRange& points, Filtration_value max_radius)
     : max_radius_(max_radius),
       point_cloud_(std::begin(points), std::end(points)) {
     cech_skeleton_graph_ =
@@ -97,7 +97,7 @@ class Cech_complex {
     complex.insert_graph(cech_skeleton_graph_);
     // expand the graph until dimension dim_max
     complex.expansion_with_blockers(dim_max,
-                                    Cech_blocker<SimplicialComplexForCechComplex, ForwardPointRange>(&complex, this));
+                                    Cech_blocker<SimplicialComplexForCechComplex, InputPointRange>(&complex, this));
   }
 
   /** @return max_radius value given at construction. */
@@ -109,7 +109,7 @@ class Cech_complex {
    * @return A const iterator on the point.
    * @exception std::out_of_range In debug mode, if point position in the range is out.
    */
-  typename ForwardPointRange::const_iterator point_iterator(std::size_t vertex) const {
+  typename InputPointRange::const_iterator point_iterator(std::size_t vertex) const {
     GUDHI_CHECK((std::begin(point_cloud_) + vertex) < std::end(point_cloud_),
                 std::out_of_range("Cech_complex::point - simplicial complex is not empty"));
     return (std::begin(point_cloud_) + vertex);

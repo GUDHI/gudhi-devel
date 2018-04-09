@@ -35,7 +35,7 @@ namespace Gudhi {
 namespace cech_complex {
 
 // Just declaring Cech_complex class because used and not yet defined.
-template<typename SimplicialComplexForCechComplex, typename ForwardPointRange>
+template<typename SimplicialComplexForCechComplex, typename InputPointRange>
 class Cech_complex;
 
 /** \internal
@@ -50,16 +50,16 @@ class Cech_complex;
  * \tparam SimplicialComplexForProximityGraph furnishes `Simplex_handle` and `Filtration_value` type definition,
  * `simplex_vertex_range(Simplex_handle sh)`and `assign_filtration(Simplex_handle sh, Filtration_value filt)` methods.
  *
- * \tparam ForwardPointRange is required by the pointer on Chech_complex for type definition.
+ * \tparam InputPointRange is required by the pointer on Chech_complex for type definition.
  */
-template <typename SimplicialComplexForCech, typename ForwardPointRange>
+template <typename SimplicialComplexForCech, typename InputPointRange>
 class Cech_blocker {
  private:
   using Point = std::vector<double>;
   using Point_cloud = std::vector<Point>;
   using Simplex_handle = typename SimplicialComplexForCech::Simplex_handle;
   using Filtration_value = typename SimplicialComplexForCech::Filtration_value;
-  using Cech_complex = Gudhi::cech_complex::Cech_complex<SimplicialComplexForCech, ForwardPointRange>;
+  using Cech_complex = Gudhi::cech_complex::Cech_complex<SimplicialComplexForCech, InputPointRange>;
 
  public:
   /** \internal \brief Cech complex blocker operator() - the oracle - assigns the filtration value from the simplex
