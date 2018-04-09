@@ -14,6 +14,9 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/dynamic_bitset.hpp>
 
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/convex_hull_2.h>
+
 #include "../../example/cxx-prettyprint/prettyprint.hpp"
 
 double num_error = 1.0e-10;
@@ -324,15 +327,36 @@ private:
     std::vector<int> point;
     for (int l = 0; l < d+1; ++l)
       point.push_back(l);
-
+    Part mask(a_id.size());
     auto a_it = a_id.begin();
+    auto l = 0;
     for (int j = 1; j < d+1; ++j) {
       int v_coord = 0;
-      for (int i = j-1; i >= 0; --i) {
+      for (int i = j-1; i >= 0; --i, ++l) {
         v_coord += v_id[i];
-        point[i] -= (*a_it - v_coord);
-        point[j] += (*a_it - v_coord);
+        mask[l] = (v_coord - *a_it == 1);
         a_it++;
+      }
+    }
+    // std::cout << "(mask" << mask << ")";
+    while (!mask.none()) {
+      bool flipped = false;
+      for (unsigned k = 0; k < point.size()-1 && !flipped; ++k) {
+        int i,j;
+        if (point[k] < point[k+1]) {
+          i = point[k]; j = point[k+1];
+        }
+        else {
+          i = point[k+1]; j = point[k];
+        }
+        int l = (j+1)*j/2 - i - 1; 
+        if (mask[l]) {
+          int tmp = point[k];
+          point[k] = point[k+1];
+          point[k+1] = tmp; 
+          mask.flip(l);
+          flipped = true;
+        }
       }
     }
     Ordered_partition op(d+1, Part(d+1));
@@ -407,10 +431,16 @@ public:
     };
     using ACMap = std::map<IVMap_it, Hasse_cell*, ACMap_comparator>;
 
+    // The vertices are always smaller than the non-vertices
     struct Hasse_cell_comparator {
       bool operator() (Hasse_cell* l_it, Hasse_cell* r_it) {
         if (l_it->get_dimension() == 0)
-          return l_it < r_it; 
+          if (r_it->get_dimension() == 0)
+            return l_it < r_it;
+          else
+            return true;
+        else if (r_it->get_dimension() == 0)
+          return false;
         else
           return l_it->get_boundary() < r_it->get_boundary();
       }
@@ -435,7 +465,7 @@ public:
         typename PCMap::iterator pc_map_it;
         if (ac_emplace_result.second) {
           pc_map_it = pc_map_faces->emplace(partition(a_pair_it->first, v_pair.first), cell).first;
-          hasse_diagram.emplace(cell);
+          hasse_diagram.emplace(cell);          
         }
         else {
           pc_map_it = pc_map_faces->emplace(partition(a_pair_it->first, v_pair.first),
@@ -462,7 +492,7 @@ public:
             Hasse_boundary boundary;
             if (pc_map_cofaces->find(op) == pc_map_cofaces->end() &&
                 subparts_are_present(op, *pc_map_faces, f, boundary)) {
-              Hasse_cell* cell = new Hasse_cell(i, f);
+              Hasse_cell* cell = new Hasse_cell(curr_dim, f);
               std::sort(boundary.begin(), boundary.end());
               cell->get_boundary() = boundary;
 #ifdef DEBUG_TRACES
@@ -480,6 +510,10 @@ public:
         pc_map_faces = pc_map_cofaces;
       }
       delete pc_map_cofaces;
+      // std::cout << "\nHasse diagram:\n";
+      // for (auto c_ptr: hasse_diagram)
+      //   std::cout << *c_ptr << "\n";
+      // std::cout << std::endl;
     }
     typedef Gudhi::Hasse_diagram::Hasse_diagram_persistence<Hasse_cell> Hasse_pers_vector;
     Hasse_pers_vector hdp(std::vector<Hasse_cell*>(hasse_diagram.begin(),
@@ -487,23 +521,109 @@ public:
     typedef Gudhi::persistent_cohomology::Field_Zp Field_Zp;
     typedef Gudhi::persistent_cohomology::Persistent_cohomology
                           <Hasse_pers_vector, Field_Zp> Persistent_cohomology;
-    
+
+    hdp.set_up_the_arrays();
     Persistent_cohomology pcoh(hdp, true);  
     unsigned field_characteristic = 11;
     double min_persistence = 0;
+
+    int chi = 0;
+    for (auto c_ptr: hasse_diagram) {
+      chi += 1-2*(c_ptr->get_dimension()%2);
+    }
+    std::cout << "Euler characteristic = " << chi << ".\n"; 
     
     pcoh.init_coefficients(field_characteristic);
-    pcoh.increment_dimension();
     pcoh.compute_persistent_cohomology(min_persistence);
     std::cout << pcoh.persistent_betti_numbers(0,0) << std::endl;
     std::ofstream out("persdiag_vor.out");
     pcoh.output_diagram(out);
     out.close();
+#define VERBOSE_DEBUG_TRACES
 #ifdef VERBOSE_DEBUG_TRACES
     std::cout << "Hasse diagram:\n" << hdp << std::endl;
 #endif
+
+#define VOR_OUTPUT_MESH
+#ifdef VOR_OUTPUT_MESH
+    write_voronoi_mesh(ac_map, hasse_diagram, "voronoi_skeleton.mesh");
+#endif
     for (auto c_ptr: hasse_diagram) {
       delete c_ptr;
+    }
+  }
+
+private:
+
+  template <class ACMap,
+            class HasseDiagram>
+  void write_voronoi_mesh(const ACMap& ac_map,
+                          const HasseDiagram& hasse_diagram,
+                          std::string file_name = "voronoi_skeleton.mesh") const
+  {
+    short d = av_graph_.v_map.begin()->first.size();
+    if (d > 3);
+  
+    std::ofstream ofs (file_name, std::ofstream::out);
+    if (d <= 2)
+      ofs << "MeshVersionFormatted 1\nDimension 2\n";
+    else
+      ofs << "MeshVersionFormatted 1\nDimension 3\n";
+  
+    ofs << "Vertices\n" << ac_map.size() << "\n";
+
+    std::vector<std::vector<double> > W;
+    std::map<Hasse_cell*, int> ci_map;
+    int index = 1;
+    for (auto ac_pair: ac_map) {
+      ci_map.emplace(ac_pair.second, index++);
+      std::vector<double> b = cs_.barycenter(ac_pair.first->first);
+      W.push_back(b);
+      for (int i = 0; i < d; ++i)
+        ofs << b[i] << " ";
+      ofs << "\n";
+    }
+    if (d == 2) {
+      typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+      typedef K::Point_2 Point_2;
+      typedef std::vector<Point_2> Points;
+      std::vector<Hasse_cell*> edges, hexagons;
+      std::vector<std::vector<int> > triangles; 
+      for (auto s: hasse_diagram)
+        if (s->get_dimension() == 1)
+          edges.push_back(s);
+        else if (s->get_dimension() == 2)
+          hexagons.push_back(s);
+      for (auto h: hexagons) {
+        // constrain the outer edges, which are found by the convex hull
+        Points vertices, conv_hull;
+        std::set<Hasse_cell*> v_cells;
+        for (auto e_pair: h->get_boundary())
+          for (auto v_pair: e_pair.first->get_boundary())
+            v_cells.emplace(v_pair.first);
+        for (auto vc: v_cells) {
+          std::vector<double>& b = W[ci_map.at(vc)];
+          vertices.push_back(Point_2(b[0], b[1]));
+        }
+        CGAL::convex_hull_2(vertices.begin(), vertices.end(), std::back_inserter(conv_hull));
+      }
+      ofs << "Edges " << edges.size() << "\n";
+      for (auto s: edges) {
+        for (auto v: s->get_boundary()) {
+          ofs << ci_map.at(v.first) << " ";
+        }
+        ofs << "515" << std::endl;
+      }
+      ofs << "Triangles " << triangles.size() << "\n";
+      for (auto s: triangles) {
+        for (auto v: s) {
+          ofs << v << " ";
+        }
+        ofs << "516" << std::endl;
+      }
+    }
+    else {
+      
     }
   }
   
