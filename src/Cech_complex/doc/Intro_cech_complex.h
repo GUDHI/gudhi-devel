@@ -40,8 +40,11 @@ namespace cech_complex {
  * proximity graph that allows to construct a
  * <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
  * from it.
+ *
  * The input shall be a point cloud in an Euclidean space.
  * 
+ * \subsection cechalgorithm Algorithm
+ *
  * The filtration value of each edge of the `Gudhi::Proximity_graph` is computed from
  * `Gudhi::Minimal_enclosing_ball_radius` function.
  * 
@@ -50,7 +53,7 @@ namespace cech_complex {
  * 
  * Vertex name correspond to the index of the point in the given range (aka. the point cloud).
  * 
- * \image html "cech_one_skeleton.png" "Cech complex proximity graph representation"
+ * \image html "cech_one_skeleton.png" "Čech complex proximity graph representation"
  * 
  * When creating a simplicial complex from this proximity graph, Cech_complex inserts the proximity graph into the
  * simplicial complex data structure, and then expands the simplicial complex when required.
