@@ -153,10 +153,12 @@ private:
                                  std::vector<std::vector<Vertex_id > >& vertex_chunks) const {
     if (chunks_it == chunks_end) {
       std::vector<Vertex_id> vertices;
+#ifdef CC_A_V_VISITORS
       Vertex_id v_id(a.id.level());
       rec_combine_chunks(vertex_chunks.begin(),
                          vertices,
                          v_id);
+#endif
       visitor(a, vertices);
       return;
     }
@@ -167,7 +169,9 @@ private:
       // std::vector<Vertex_id >::iterator c_v_it = chunk_v_->begin();
       for (auto c: chunk_->id)
         a.id.push_back(c);
+#ifdef CC_A_V_VISITORS
       vertex_chunks.push_back(*chunk_v_);
+#endif
       a.f += chunk_->f;
       if (a.f <= eps*eps)
         rec_combine_chunks_alcove(chunks_it+1,
@@ -179,7 +183,9 @@ private:
                                   vertex_chunks);
       a.id.resize(a.id.size()-chunk_->id.size());
       a.f -= chunk_->f;
+#ifdef CC_A_V_VISITORS
       vertex_chunks.pop_back();
+#endif
     }
   }
 

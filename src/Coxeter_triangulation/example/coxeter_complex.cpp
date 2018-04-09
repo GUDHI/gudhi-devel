@@ -1,3 +1,6 @@
+// #define CC_STAR_COMPLETION
+// #define CC_A_V_VISITORS
+
 #include <iostream>
 #include <vector>
 
@@ -6,6 +9,7 @@
 #include <gudhi/Coxeter_complex_remastered.h>
 #include <gudhi/Coxeter_complex.h>
 #include <gudhi/Coxeter_complex/Off_point_range.h>
+#include <gudhi/Clock.h>
 
 #include <CGAL/Epick_d.h>
 
@@ -85,7 +89,16 @@ int main(int argc, char * const argv[]) {
     std::cout << "Successfully opened the file of points in dimension " << d << std::endl;
     using Coxeter_complex_off = Gudhi::Coxeter_complex<Gudhi::Off_point_range<Point_d>, Coxeter_system>;
     Coxeter_system cs_A('A', d);
-    Coxeter_complex_off cc(*off_range, cs_A, init_level, eps);  
+    Gudhi::Clock t;
+    Coxeter_complex_off cc(*off_range, cs_A, init_level, eps);
+    t.end();
+    #ifdef CC_STAR_COMPLETION
+    std::cout << "Star completion enabled.\n";
+    #endif
+    #ifdef CC_A_V_VISITORS
+    std::cout << "Vertices are constructed at the same time as the alcoves.\n";
+    #endif
+    std::cout << "Graph construction time: " << t.num_seconds() << "s\n";
     cc.write_mesh("sphere_coxeter_complex_A.mesh");
     cc.write_bb("sphere_coxeter_complex_A.bb");
     delete off_range;
@@ -94,7 +107,7 @@ int main(int argc, char * const argv[]) {
     delete off_range;
     std::cout << "Memory usage (Physical) before collapses: " << (float)getPhysicalValue()/1000 << "MB.\n";
     cc.voronoi_skeleton(1);
-    cc.collapse();
+    // cc.collapse();
   }    
   std::cout << "Memory usage (Virtual): " << (float)getVirtualValue()/1000. << "MB.\n";
   std::cout << "Memory usage (Physical): " << (float)getPhysicalValue()/1000 << "MB.\n";

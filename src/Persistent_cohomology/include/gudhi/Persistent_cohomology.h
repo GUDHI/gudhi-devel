@@ -173,6 +173,12 @@ class Persistent_cohomology {
     coeff_field_.init(charac_min, charac_max);
   }
 
+  /** SK TEMP increment the dimension by 1
+   */
+  void increment_dimension() {
+    dim_max_++;
+  }
+
   /** \brief Compute the persistent homology of the filtered simplicial
    * complex.
    *

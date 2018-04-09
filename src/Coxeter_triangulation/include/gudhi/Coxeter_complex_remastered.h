@@ -8,6 +8,8 @@
 #include <utility>
 
 #include <gudhi/Hasse_diagram_persistence.h>
+#include <gudhi/Persistent_cohomology.h>
+#include <gudhi/Simplex_tree.h>
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/dynamic_bitset.hpp>
@@ -58,6 +60,10 @@ class Coxeter_complex {
     
     void operator() (const Filtered_alcove& a,
                      const std::vector<Id>& vertices) {
+#ifndef CC_A_V_VISITORS
+      if (!vertices.empty())
+        std::cout << "Vertices are not empty!\n";
+#endif
       auto& a_map = av_graph_.a_map;
       auto& v_map = av_graph_.v_map;
       auto& inv_map = av_graph_.inv_map;
@@ -102,7 +108,7 @@ class Coxeter_complex {
     Alcove_vertex_graph& av_graph_;
     bool& store_points_;
   };
-
+  
   // The procedure that fills av_graph_
   void compute_graph(const Point_range& point_vector, double init_level, double eps, bool store_points) {
     for (auto p_it = point_vector.begin(); p_it != point_vector.end(); ++p_it)
@@ -112,7 +118,203 @@ class Coxeter_complex {
                           Alcove_vertex_visitor(p_it, av_graph_, store_points));
     for (auto m: av_graph_.a_map)
       m.second.f = std::sqrt(m.second.f);
+#ifndef CC_A_V_VISITORS
+    auto& inv_map = av_graph_.inv_map;
+    auto& v_map = av_graph_.v_map;
+    auto& graph = av_graph_.graph;
+    for (auto a_pair: av_graph_.a_map) {
+      std::vector<Id> vertices = cs_.vertices_of_alcove(a_pair.first);
+      Graph_v a_v = a_pair.second.gv;
+      for (Id v_id: vertices) {
+        auto v_it = v_map.find(v_id);
+        if (v_it == v_map.end()) {
+          Graph_v v_v = boost::add_vertex(graph);
+          v_it = v_map.emplace(v_id, Fields(v_v, a_pair.second.f)).first;
+          inv_map.emplace(v_v, v_it);
+          boost::add_edge(a_v, v_v, graph);
+        }
+        else {
+          v_it->second.f = std::min(v_it->second.f, a_pair.second.f);
+          boost::add_edge(a_v, v_it->second.gv, graph);
+        }
+      }
+    }
+#endif
   }
+  
+public:
+
+  Coxeter_complex(const Point_range& point_vector,
+                  const Coxeter_system& cs,
+                  double init_level=1,
+                  double eps=0,
+                  bool store_points = false) : cs_(cs)
+  {
+    compute_graph(point_vector, init_level, eps, store_points);
+#ifdef DEBUG_TRACES
+    auto& a_map = av_graph_.a_map;
+    auto& v_map = av_graph_.v_map;
+    auto& inv_map = av_graph_.inv_map;
+    auto& graph = av_graph_.graph;
+    std::cout << "Alcove map size is " << a_map.size() << ".\n";    
+    std::cout << "AMap:\n";
+    for (auto m: a_map) {
+      std::cout << m.first << ": filt=" << m.second.f;
+      std::cout << ", vertices: [ ";
+      typename Graph::out_edge_iterator e_it, e_end;
+      for (std::tie(e_it, e_end) = boost::out_edges(m.second.gv, graph); e_it != e_end; ++e_it) {
+        std::cout << inv_map[boost::target(*e_it, graph)]->first << " ";
+      }
+      std::cout << "]";
+      std::cout << "\n";
+    }
+    std::cout << "Vertex map size is " << v_map.size() << ".\n";    
+    std::cout << "VMap:\n";
+    for (auto m: v_map) {
+      std::cout << m.first << ": filt=" << m.second.f;    
+      std::cout << ", alcoves: [ ";
+      typename Graph::in_edge_iterator e_it, e_end;
+      for (std::tie(e_it, e_end) = boost::in_edges(m.second.gv, graph); e_it != e_end; ++e_it) {
+        std::cout << inv_map[boost::source(*e_it, graph)]->first << " ";
+      }
+      std::cout << "]";
+      std::cout << "\n";
+    }
+#endif
+    // compute_v_map();
+  }
+
+  template <class Simplex_range>
+  void write_mesh(Simplex_range& range, std::string file_name) const {
+    auto& v_map = av_graph_.v_map;
+    cs_.write_mesh(v_map, range, file_name);
+  }
+
+private:
+
+  // The map from vertices to indices
+  using Id_it = typename Alcove_vertex_graph::Id_v_map::const_iterator;
+  struct Pointer_compare {
+    typedef Id_it Pointer;
+    bool operator()(const Pointer& lhs, const Pointer& rhs) const { 
+      return lhs->first < rhs->first;
+    }
+  };
+  using Vertex_index_map = std::map<Id_it, std::size_t, Pointer_compare>;
+
+  /* An iterator over Simplex tree simplices */
+  template <class Simplex_tree>
+  class Simplex_tree_simplex_iterator : public boost::iterator_facade< Simplex_tree_simplex_iterator<Simplex_tree>,
+                                                                       std::vector<std::size_t> const,
+                                                                       boost::forward_traversal_tag> {
+  private:
+    typename Simplex_tree::Complex_simplex_iterator it_;
+    Simplex_tree& stree_;
+    std::vector<std::size_t> value_; 
+    friend class boost::iterator_core_access;
+    void update_value() {
+      if (it_ != stree_.complex_simplex_range().end()) {
+        auto range = stree_.simplex_vertex_range(*it_);
+        value_ = std::vector<size_t>(range.begin(), range.end());
+      }
+    }
+    bool equal(Simplex_tree_simplex_iterator<Simplex_tree> const& other) const {
+      return it_ == other.it_;
+    }
+    std::vector<std::size_t> const& dereference() const {
+      return value_;
+    }
+    void increment() {
+      it_++;
+      update_value();
+    }
+  public:
+    Simplex_tree_simplex_iterator(typename Simplex_tree::Complex_simplex_iterator it,
+                                  Simplex_tree& stree)
+      : it_(it), stree_(stree) {
+      update_value();
+    }
+  };
+
+  /* Alcove iterator */
+  class No_filtration_alcove_iterator : public boost::iterator_facade< No_filtration_alcove_iterator,
+                                                                       std::vector<std::size_t> const,
+                                                                       boost::forward_traversal_tag> {
+  private:
+    using Alcove_map = typename Alcove_vertex_graph::Id_v_map;
+    typename Alcove_map::const_iterator it_;
+    Alcove_vertex_graph const& av_graph_;
+    Vertex_index_map const& vi_map_;
+    std::vector<std::size_t> value_;
+    friend class boost::iterator_core_access;
+    void update_value() {
+      auto& a_map = av_graph_.a_map;
+      auto& inv_map = av_graph_.inv_map;
+      auto& graph = av_graph_.graph;    
+      value_.clear();
+      if (it_ != a_map.end()) {
+        typename Graph::out_edge_iterator e_it, e_end;
+        for (std::tie(e_it, e_end) = boost::out_edges(it_->second.gv, graph); e_it != e_end; ++e_it)
+          value_.push_back(vi_map_.at(inv_map.at(boost::target(*e_it, graph))));
+        std::sort(value_.begin(), value_.end());
+      }
+    }
+    bool equal(No_filtration_alcove_iterator const& other) const {
+      return it_ == other.it_;
+    }
+    std::vector<std::size_t> const& dereference() const {
+      return value_;
+    }
+    void increment() {
+      it_++;
+      update_value();
+    }
+  public:
+    No_filtration_alcove_iterator(typename Alcove_map::const_iterator it,
+                                  Alcove_vertex_graph const& av_graph,
+                                  Vertex_index_map const& vi_map)
+      : it_(it), av_graph_(av_graph), vi_map_(vi_map) {
+      update_value();
+    }
+    int dimension() {
+      return value_.size()-1;
+    }
+  };
+  
+public:
+  void write_mesh(std::string file_name = "toplex.mesh") const {
+    Vertex_index_map vi_map;
+    std::size_t index = 0;
+    auto& v_map = av_graph_.v_map;
+    auto& a_map = av_graph_.a_map;
+    for (Id_it v_it = v_map.begin(); v_it != v_map.end(); ++v_it, ++index)
+      vi_map.emplace(v_it, index);
+    
+    typedef boost::iterator_range<No_filtration_alcove_iterator> Max_simplex_range;
+    Max_simplex_range range(No_filtration_alcove_iterator(a_map.begin(), av_graph_, vi_map),
+                            No_filtration_alcove_iterator(a_map.end(), av_graph_, vi_map));
+    using Simplex_tree = Gudhi::Simplex_tree<>;
+    Simplex_tree stree;
+    for (auto m: range)
+      stree.insert_simplex_and_subfaces(m);
+    typedef Simplex_tree_simplex_iterator<Simplex_tree> Simplex_tree_iterator;
+    typedef boost::iterator_range<Simplex_tree_iterator> Simplex_tree_range;
+    Simplex_tree_range simplex_tree_range(Simplex_tree_iterator(stree.complex_simplex_range().begin(), stree),
+                                          Simplex_tree_iterator(stree.complex_simplex_range().end(), stree));
+    cs_.write_mesh(v_map, simplex_tree_range, file_name);
+  }
+
+    template <class Filtered_simplex_range>
+  void write_bb(Filtered_simplex_range& range, std::string file_name) const {
+  }
+  
+  void write_bb(std::string file_name = "toplex.bb") const {
+  }
+
+  void collapse(bool pers_out = true) {
+  }
+
+private:
 
   // Compute the ordered partition of an alcove with respect to a vertex
   using Part = boost::dynamic_bitset<>;
@@ -191,66 +393,8 @@ class Coxeter_complex {
     }
     return present;
   }
-  
-public:
 
-  Coxeter_complex(const Point_range& point_vector,
-                  const Coxeter_system& cs,
-                  double init_level=1,
-                  double eps=0,
-                  bool store_points = false) : cs_(cs)
-  {
-    compute_graph(point_vector, init_level, eps, store_points);
-#ifdef DEBUG_TRACES
-    auto& a_map = av_graph_.a_map;
-    auto& v_map = av_graph_.v_map;
-    auto& inv_map = av_graph_.inv_map;
-    auto& graph = av_graph_.graph;
-    std::cout << "Alcove map size is " << a_map.size() << ".\n";    
-    std::cout << "AMap:\n";
-    for (auto m: a_map) {
-      std::cout << m.first << ": filt=" << m.second.f;
-      std::cout << " vertices: [ ";
-      typename Graph::out_edge_iterator e_it, e_end;
-      for (std::tie(e_it, e_end) = boost::out_edges(m.second.gv, graph); e_it != e_end; ++e_it) {
-        std::cout << inv_map[boost::target(*e_it, graph)]->first << " ";
-      }
-      std::cout << "]";
-      std::cout << "\n";
-    }
-    std::cout << "Vertex map size is " << v_map.size() << ".\n";    
-    std::cout << "VMap:\n";
-    for (auto m: v_map) {
-      std::cout << m.first << ": filt=" << m.second.f;    
-      std::cout << " alcoves: [ ";
-      typename Graph::in_edge_iterator e_it, e_end;
-      for (std::tie(e_it, e_end) = boost::in_edges(m.second.gv, graph); e_it != e_end; ++e_it) {
-        std::cout << inv_map[boost::source(*e_it, graph)]->first << " ";
-      }
-      std::cout << "]";
-      std::cout << "\n";
-    }
-#endif
-    // compute_v_map();
-  }
-
-  template <class Simplex_range>
-  void write_mesh(Simplex_range& range, std::string file_name) const {
-  }
-  
-  void write_mesh(std::string file_name = "toplex.mesh") const {
-  }
-
-    template <class Filtered_simplex_range>
-  void write_bb(Filtered_simplex_range& range, std::string file_name) const {
-  }
-  
-  void write_bb(std::string file_name = "toplex.bb") const {
-  }
-
-  void collapse(bool pers_out = true) {
-  }
-
+public:  
   // Computing Voronoi skeleton as in the paper
   // k is the desired dimension
   void voronoi_skeleton(int k) {
@@ -271,14 +415,16 @@ public:
           return l_it->get_boundary() < r_it->get_boundary();
       }
     };
-    using Hasse_diagram = std::vector<std::set<Hasse_cell*, Hasse_cell_comparator>>;
-    Hasse_diagram hasse_diagram(k+1);
+    using Hasse_diagram = std::set<Hasse_cell*, Hasse_cell_comparator>;
+    Hasse_diagram hasse_diagram;
     ACMap ac_map;
     auto& v_map = av_graph_.v_map;
     auto& inv_map = av_graph_.inv_map;
     auto& graph = av_graph_.graph;
     for (auto v_pair: v_map) {
+#ifdef DEBUG_TRACES
       std::cout << "Current vertex: " << v_pair.first << std::endl;
+#endif
       PCMap* pc_map_faces = new PCMap(), *pc_map_cofaces;
       typename Graph::in_edge_iterator e_it, e_end;
       // Dual vertex insertion
@@ -289,15 +435,17 @@ public:
         typename PCMap::iterator pc_map_it;
         if (ac_emplace_result.second) {
           pc_map_it = pc_map_faces->emplace(partition(a_pair_it->first, v_pair.first), cell).first;
-          hasse_diagram[0].emplace(cell);
+          hasse_diagram.emplace(cell);
         }
         else {
           pc_map_it = pc_map_faces->emplace(partition(a_pair_it->first, v_pair.first),
                                             ac_emplace_result.first->second).first;
           delete cell;
         }
+#ifdef DEBUG_TRACES
         std::cout << "dual vertex for " << a_pair_it->first
                   << ", partition=" << partition(a_pair_it->first, v_pair.first) << std::endl;
+#endif
       }
       // Dual face insertion
       for (int curr_dim = 1; curr_dim <= k; ++curr_dim) {
@@ -317,19 +465,46 @@ public:
               Hasse_cell* cell = new Hasse_cell(i, f);
               std::sort(boundary.begin(), boundary.end());
               cell->get_boundary() = boundary;
+#ifdef DEBUG_TRACES
               if (pc_map_cofaces->emplace(op, cell).second)
                 std::cout << "dual face " << op << std::endl;
+#else
+              pc_map_cofaces->emplace(op, cell);
+#endif
             }
           }
         }
         for (auto pc_pair: *pc_map_cofaces)
-          hasse_diagram[curr_dim].emplace(pc_pair.second);
+          hasse_diagram.emplace(pc_pair.second);
         delete pc_map_faces;
         pc_map_faces = pc_map_cofaces;
       }
       delete pc_map_cofaces;
     }
-    std::cout << "";
+    typedef Gudhi::Hasse_diagram::Hasse_diagram_persistence<Hasse_cell> Hasse_pers_vector;
+    Hasse_pers_vector hdp(std::vector<Hasse_cell*>(hasse_diagram.begin(),
+                                                   hasse_diagram.end()));  
+    typedef Gudhi::persistent_cohomology::Field_Zp Field_Zp;
+    typedef Gudhi::persistent_cohomology::Persistent_cohomology
+                          <Hasse_pers_vector, Field_Zp> Persistent_cohomology;
+    
+    Persistent_cohomology pcoh(hdp, true);  
+    unsigned field_characteristic = 11;
+    double min_persistence = 0;
+    
+    pcoh.init_coefficients(field_characteristic);
+    pcoh.increment_dimension();
+    pcoh.compute_persistent_cohomology(min_persistence);
+    std::cout << pcoh.persistent_betti_numbers(0,0) << std::endl;
+    std::ofstream out("persdiag_vor.out");
+    pcoh.output_diagram(out);
+    out.close();
+#ifdef VERBOSE_DEBUG_TRACES
+    std::cout << "Hasse diagram:\n" << hdp << std::endl;
+#endif
+    for (auto c_ptr: hasse_diagram) {
+      delete c_ptr;
+    }
   }
   
 };

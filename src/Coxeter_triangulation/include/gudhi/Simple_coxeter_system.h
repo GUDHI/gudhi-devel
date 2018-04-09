@@ -532,6 +532,7 @@ private:
     unsigned short d = dimension_;
     double level = a_id.level();
     if (j == d+1) {
+#ifndef CC_STAR_COMPLETION
       std::vector<Vertex_id> vertices = vertices_of_simplex(a_id);
       std::vector<unsigned> count(pos_root_count(), 0);
       for (auto v: vertices) {
@@ -590,8 +591,14 @@ private:
       // double sq_norm = s.objective_value_numerator() / s.objective_value_denominator();
       if (sq_norm <= eps*eps) {
         alcoves.emplace_back(Filtered_alcove(a_id, sq_norm));
+#ifdef CC_A_V_VISITORS
         vertices_per_alcove.push_back(vertices);
+#endif
       }
+#else
+      alcoves.emplace_back(Filtered_alcove(a_id, 0));
+#endif
+
       return;
     }
     if (i == -1) {
