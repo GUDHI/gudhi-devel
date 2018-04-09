@@ -42,8 +42,8 @@
     </td>
  </tr>
 </table>
- \subsection CechComplexDataStructure Cech complex
- \image html "cech_complex_representation.png" "Cech complex representation"
+ \subsection CechComplexDataStructure Čech complex
+ \image html "cech_complex_representation.png" "Čech complex representation"
 <table border="0">
   <tr>
     <td width="25%">
@@ -52,8 +52,8 @@
       <b>Copyright:</b> GPL v3<br>
     </td>
     <td width="75%">
-    The Cech complex is a proximity graph that allows to construct a simplicial complex from it.
-    It guarantees the simplices inserted are inside a ball of a given radius.<br>
+    The Čech complex is a simplicial complex constructed from a proximity graph.<br>
+    The set of all simplices is filtered by the radius of their minimal enclosing ball.<br>
     <b>User manual:</b> \ref cech_complex - <b>Reference manual:</b> Gudhi::cech_complex::Cech_complex
     </td>
  </tr>
