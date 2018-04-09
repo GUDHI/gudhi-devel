@@ -21,3 +21,6 @@ Main Features:
     Easily integrates into your code. You can freely choose the coordinate type of your points and the container to store the points. If you still need to adapt the code, the header is small and readable and contains documentation for all major methods. 
 
 
+Changes done for the GUDHI version of MiniBall:
+  - Add include guard
+  - Move Miniball namespace inside a new Gudhi namespace
