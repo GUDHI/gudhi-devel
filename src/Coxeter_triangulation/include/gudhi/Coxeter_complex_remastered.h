@@ -546,7 +546,7 @@ public:
 
 #define VOR_OUTPUT_MESH
 #ifdef VOR_OUTPUT_MESH
-    write_voronoi_mesh(ac_map, hasse_diagram, "voronoi_skeleton.mesh");
+    write_voronoi_mathematica(ac_map, hasse_diagram, "voronoi_skeleton.dat");
 #endif
     for (auto c_ptr: hasse_diagram) {
       delete c_ptr;
@@ -555,6 +555,87 @@ public:
 
 private:
 
+  void output_vertex(Hasse_cell* c_ptr,
+                     std::map<Hasse_cell*, std::vector<double> >& cp_map,
+                     std::ofstream& ofs) const {
+    std::vector<double>& b = cp_map[c_ptr];
+    for (double x: b)
+      ofs << x << " ";
+  }
+  
+  template <class ACMap,
+            class HasseDiagram>
+  void write_voronoi_mathematica(const ACMap& ac_map,
+                                 const HasseDiagram& hasse_diagram,
+                                 std::string file_name = "voronoi_skeleton.dat") const
+  {
+    short d = av_graph_.v_map.begin()->first.size();
+    if (d > 3);
+  
+    std::ofstream ofs (file_name, std::ofstream::out);  
+
+    std::map<Hasse_cell*, std::vector<double> > cp_map;
+    for (auto ac_pair: ac_map)
+      cp_map.emplace(ac_pair.second, cs_.barycenter(ac_pair.first->first));
+
+    for (auto c_ptr: hasse_diagram) {
+      int k = c_ptr->get_dimension();
+      std::set<Hasse_cell*> v_cells;
+      typename std::set<Hasse_cell*>::iterator set_it;
+      switch (k) {
+      case 0: {
+        output_vertex(c_ptr, cp_map, ofs);
+        ofs << "\n";
+        break;
+      }
+      case 1: {
+        if (c_ptr->get_boundary().empty()) {
+          std::cerr << "Coxeter_complex: boundary is empty.\n";
+          return;
+        }
+        auto b_it = c_ptr->get_boundary().begin();
+        output_vertex((b_it++)->first, cp_map, ofs);
+        for (; b_it != c_ptr->get_boundary().end(); ++b_it) {
+          ofs << "; ";
+          output_vertex(b_it->first, cp_map, ofs);
+        }
+        ofs << "\n";
+        break;
+      }
+      case 2: {
+        for (auto e_pair: c_ptr->get_boundary())
+          for (auto v_pair: e_pair.first->get_boundary())
+            v_cells.emplace(v_pair.first);
+        set_it = v_cells.begin();
+        output_vertex(*set_it++, cp_map, ofs);
+        for (; set_it != v_cells.end(); ++set_it) {
+          ofs << "; ";
+          output_vertex(*set_it, cp_map, ofs);
+        }
+        ofs << "\n";
+        break;
+      }
+      case 3: {
+        for (auto h_pair: c_ptr->get_boundary())
+          for (auto e_pair: h_pair.first->get_boundary())
+            for (auto v_pair: e_pair.first->get_boundary())
+              v_cells.emplace(v_pair.first);
+        set_it = v_cells.begin();
+        output_vertex(*set_it++, cp_map, ofs);
+        for (; set_it != v_cells.end(); ++set_it) {
+          ofs << "; ";
+          output_vertex(*set_it, cp_map, ofs);
+        }
+        ofs << "\n";
+        break;
+      }
+      default: break;
+      }
+    }
+    
+    ofs.close();
+  }
+  
   template <class ACMap,
             class HasseDiagram>
   void write_voronoi_mesh(const ACMap& ac_map,

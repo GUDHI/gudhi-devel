@@ -9,6 +9,7 @@ if (TBB_FOUND)
   target_link_libraries(Hasse_diagram_test_unit ${TBB_LIBRARIES})
 endif()
 
+
 file(COPY "${CMAKE_SOURCE_DIR}/data/hasse_diagram/cw_decomposition_of_torus.hasse" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
 gudhi_add_coverage_test(Hasse_diagram_test_unit)

@@ -45,7 +45,7 @@ namespace Hasse_diagram {
  * is set to a class to store the additional information. Please consult the picture
  * below for a simple example of a Hasse diagram representing two vertices
  * and two edges forming a loop.
- * \image html "Hasse_diag.png" " "
+ * \image html "Hasse_diag.png" 
  * 
  * Hasse diagram is a dynamic data structure. Addition and removal of cells 
  * can be performed by using add_cell and remove_cell methods. Please consult
@@ -54,15 +54,16 @@ namespace Hasse_diagram {
  * i.e. cells that has been deleted are marked as deleted. They can be 
  * physically removed from the data structure by invoking the clean_up_the_structure() 
  * method. Once the number of cells marked as deleted reach the number defined 
- * in Hasse_diagram::percentate_of_removed_cells_that_triggers_reorganization_of_structure
+ * in Hasse_diagram::proportion_of_removed_cells_that_triggers_reorganization_of_structure
  * (which is set by default to 50\%) this method is called automatically. Note that in this case
  * all the cells are permanently removed from memory and any previous pointers to them
- * became invalid. 
+ * became invalid. Note that the user can manipulate the value of 
+ * Hasse_diagram::proportion_of_removed_cells_that_triggers_reorganization_of_structure
  * Note that all the iterators on the data structure do not automatically skip the deleted
  * elements. It is up to the user to filter the deleted cells out. 
  * 
  * Objects of a type Hasse_diagram_cell can be constructed by constitutive addition
- * new cells, by reading the data strucutre from a file (the format is described below).
+ * of new cells, by reading the data strucutre from a file (the format is described below).
  * One can also store the intermediate data structures in a file by using write_to_file
  * method. 
  * 

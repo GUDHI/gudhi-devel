@@ -71,10 +71,12 @@ template < typename Cell_type >
 class Hasse_diagram
 {
 public:
+	using Cell_range = std::vector< Cell_type* >;
+
 	/**
 	 * Default constructor.
 	**/ 
-	Hasse_diagram(){};
+	Hasse_diagram(){}
 	
 	/**
 	 * Creating Hasse diagram from a file. The file format is the following:
@@ -91,11 +93,11 @@ public:
 	 * that all the cells have boundaries set up. Setting up the coboundaries will
 	 * be done in the constructor based on the information about boundaries. 
 	**/ 
-    Hasse_diagram( const std::vector< Cell_type* >& cells_ ):cells(cells_),number_of_deleted_cells(0)
+    Hasse_diagram( const Cell_range& cells_ ):cells(cells_),number_of_deleted_cells(0)
     {
 		this->set_up_positions();
 		this->set_up_coboundaries();
-	};		
+	}		
 
     
 	/**
@@ -103,7 +105,7 @@ public:
 	 * very fragmented. Also, the complexity of operation using all the iterators
 	 * depends on the actual size of a structure (where the deleted elements are still
 	 * stored. This procedure remove permanently all the deleted elements. Ideally, 
-	 * it should be initialized when the percentage of deleted elements is larger than a 
+	 * it should be initialized when the proportion of deleted elements is larger than a 
 	 * predefined constant. 
 	**/     
     void clean_up_the_structure()
@@ -185,7 +187,7 @@ public:
 		//in case the structure gets too fragmented, we are calling the 
 		//to clean it up.
 		if ( this->number_of_deleted_cells/(double)(this->cells.size() ) > 
-			this->percentate_of_removed_cells_that_triggers_reorganization_of_structure )
+			this->proportion_of_removed_cells_that_triggers_reorganization_of_structure )
 		{
 			this->clean_up_the_structure();
 		}
@@ -254,7 +256,7 @@ public:
 	}
 	
 protected:	
-	std::vector< Cell_type* > cells;
+	Cell_range cells;
 	
 	//to check how fragmented the data structure is (as a result of removing cells).
 	size_t number_of_deleted_cells; 
@@ -272,11 +274,11 @@ protected:
 	**/ 
 	void set_up_positions();
 	
-	static double percentate_of_removed_cells_that_triggers_reorganization_of_structure;
+	static double proportion_of_removed_cells_that_triggers_reorganization_of_structure;
 };//Hasse_diagram
 
 template <typename Cell_type>
-double Hasse_diagram<Cell_type>::percentate_of_removed_cells_that_triggers_reorganization_of_structure = 0.5;
+double Hasse_diagram<Cell_type>::proportion_of_removed_cells_that_triggers_reorganization_of_structure = 0.5;
 
 
 template < typename Cell_type >

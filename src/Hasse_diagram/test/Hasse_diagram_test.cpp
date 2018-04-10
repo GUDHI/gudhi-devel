@@ -4,7 +4,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA Saclay (France)
+ *    Copyright (C) 2017  Swansea University UK
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -174,9 +174,26 @@ dimension: 1 filtration: 1.000000 position: 12 deleted_: 0 boundary ( 0 1) ( 8 1
 ( 13 1) ( 15 1) dimension: 2 filtration: 2.000000 position: 13 deleted_: 0 boundary ( 9 1) \
 ( 12 1) ( 14 1) ( 1 1)  coBoundary dimension: 1 filtration: 1.000000 position: 14 deleted_: 0 \
 boundary ( 10 1) ( 2 1)  coBoundary ( 13 1) ( 15 1) dimension: 2 filtration: 2.000000 position: \
-15 deleted_: 0 boundary ( 11 1) ( 14 1) ( 12 1) ( 3 1)  coBoundary ";  
-
+15 deleted_: 0 boundary ( 11 1) ( 14 1) ( 12 1) ( 3 1)  coBoundary ";
+	
 	BOOST_CHECK( reference_output.compare( hd.full_signature_of_the_structure() ) == 0 );
+	
+	delete A;
+	delete B;
+	delete C;
+	delete D;
+	delete E;
+	delete F;
+	delete G;
+	delete H;
+	delete I;
+	delete J;
+	delete K;
+	delete L;
+	delete M;
+	delete N;
+	delete O;
+	delete P;
 }
 
 
@@ -320,6 +337,16 @@ BOOST_AUTO_TEST_CASE(Hasse_diagram_insertion_and_removal_test)
 	std::string final_structure = hd.full_signature_of_the_structure();
 	
 	BOOST_CHECK( final_structure.compare( initial_structure ) == 0 );
+	
+	
+	delete A;
+	delete B;
+	delete C;
+	delete D;
+	delete E;
+	delete F;
+	delete G;
+	delete H;	
 }
 
 
@@ -436,6 +463,23 @@ BOOST_AUTO_TEST_CASE( write_to_file_test )
 
 	
 	BOOST_CHECK( first_structure.compare( second_structure ) == 0 );
+	
+	delete A;
+	delete B;
+	delete C;
+	delete D;
+	delete E;
+	delete F;
+	delete G;
+	delete H;
+	delete I;
+	delete J;
+	delete K;
+	delete L;
+	delete M;
+	delete N;
+	delete O;
+	delete P;
 }
 
 
@@ -541,7 +585,8 @@ BOOST_AUTO_TEST_CASE( computations_of_persistence_test )
 	boundary_of_P.push_back( std::pair<Cell*,int>( M,1 ) );
 	boundary_of_P.push_back( std::pair<Cell*,int>( D,1 ) );   
 
-	std::vector< Cell* > vect_of_cells = {A,C,I,K,B,D,E,G,J,L,M,O,F,H,N,P};
+	//std::vector< Cell* > vect_of_cells = {A,C,I,K,B,D,E,G,J,L,M,O,F,H,N,P};
+	std::vector< Cell* > vect_of_cells = {A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P};
 
 	//Here is a construction of a standard Hasse diagram:
 	Hasse_diag_persistence hd( vect_of_cells );  	
@@ -552,11 +597,28 @@ BOOST_AUTO_TEST_CASE( computations_of_persistence_test )
 	
 	std::stringstream output_pers;
 	pcoh_hd.output_diagram(output_pers);
-	std::string obtained_output = output_pers.str();
+	std::string obtained_output = output_pers.str();	
 	
-	std::string reference_output = "2  0 1 inf \n2  1 1 inf \n2  1 1 inf \n2  2 2 inf \n2  1 1 2 \n2  1 1 2 \n2  1 1 2 \n";
+	std::string reference_output = "2  0 0 inf \n2  1 1 inf \n2  1 1 inf \n2  2 2 inf \n2  1 1 2 \n2  1 1 2 \n2  1 1 2 \n";
 		
 	BOOST_CHECK( obtained_output.compare( reference_output ) == 0 );
+	
+	delete A;
+	delete B;
+	delete C;
+	delete D;
+	delete E;
+	delete F;
+	delete G;
+	delete H;
+	delete I;
+	delete J;
+	delete K;
+	delete L;
+	delete M;
+	delete N;
+	delete O;
+	delete P;
 }
 
 
@@ -687,7 +749,7 @@ BOOST_AUTO_TEST_CASE( computations_of_persistence_test_simplex_tree_conversion )
 	//pcoh_st.output_diagram();
 	
 	std::string reference_output = 
-"11  1 0.297153 inf \n11  1 0.294646 inf \n11  1 0.294634 inf \n11  1 0.263833 inf \n11  1 0.253499 inf \n11  1 0.25342 inf \n11  1 0.236033 inf \n11  1 0.217658 inf \n11  0 0 inf \n11  0 0 inf \n11  0 0 0.271628 \n11  0 0 0.259022 \n11  0 0 0.247532 \n11  0 0 0.24398 \n11  0 0 0.238475 \n11  0 0 0.235796 \n11  0 0 0.234403 \n11  0 0 0.215533 \n11  0 0 0.211884 \n11  0 0 0.210002 \n11  0 0 0.204546 \n11  0 0 0.203221 \n11  0 0 0.201823 \n11  0 0 0.200367 \n11  0 0 0.198641 \n11  0 0 0.197447 \n11  0 0 0.197388 \n11  0 0 0.195782 \n11  0 0 0.195525 \n11  0 0 0.19539 \n11  0 0 0.195028 \n11  0 0 0.193902 \n11  0 0 0.190355 \n11  0 0 0.190173 \n11  0 0 0.189392 \n11  0 0 0.189181 \n11  0 0 0.185264 \n11  0 0 0.183437 \n11  0 0 0.183413 \n11  0 0 0.182412 \n11  0 0 0.180441 \n11  0 0 0.17768 \n11  0 0 0.175111 \n11  0 0 0.173904 \n11  0 0 0.173381 \n11  0 0 0.172836 \n11  0 0 0.172237 \n11  0 0 0.17149 \n11  0 0 0.169415 \n11  0 0 0.167298 \n11  0 0 0.167214 \n11  0 0 0.162647 \n11  0 0 0.158647 \n11  0 0 0.158261 \n11  0 0 0.15752 \n11  0 0 0.156087 \n11  0 0 0.154912 \n11  0 0 0.153474 \n11  0 0 0.152784 \n11  0 0 0.150565 \n11  0 0 0.149812 \n11  0 0 0.14959 \n11  0 0 0.146201 \n11  0 0 0.143821 \n11  0 0 0.143596 \n11  0 0 0.142636 \n11  0 0 0.142306 \n11  0 0 0.14218 \n11  0 0 0.140146 \n11  0 0 0.13831 \n11  0 0 0.13771 \n11  0 0 0.13587 \n11  0 0 0.135243 \n11  0 0 0.134659 \n11  0 0 0.134171 \n11  0 0 0.133743 \n11  0 0 0.133375 \n11  0 0 0.133197 \n11  0 0 0.132358 \n11  0 0 0.131698 \n11  0 0 0.130077 \n11  0 0 0.128374 \n11  0 0 0.128305 \n11  0 0 0.128273 \n11  0 0 0.126277 \n11  0 0 0.125675 \n11  0 0 0.122605 \n11  0 0 0.119933 \n11  0 0 0.109991 \n11  0 0 0.107953 \n11  0 0 0.105193 \n11  0 0 0.104098 \n";
+"11  1 0.297153 inf \n11  1 0.294646 inf \n11  1 0.294634 inf \n11  1 0.263833 inf \n11  1 0.253499 inf \n11  1 0.25342 inf \n11  1 0.236033 inf \n11  1 0.217658 inf \n11  0 0 inf \n11  0 0 inf \n11  0 0 0.271628 \n11  0 0 0.259022 \n11  0 0 0.247532 \n11  0 0 0.24398 \n11  0 0 0.238475 \n11  0 0 0.235796 \n11  0 0 0.234403 \n11  0 0 0.215533 \n11  0 0 0.211884 \n11  0 0 0.210002 \n11  0 0 0.204546 \n11  0 0 0.203221 \n11  0 0 0.201823 \n11  0 0 0.200367 \n11  0 0 0.198641 \n11  0 0 0.197447 \n11  0 0 0.197388 \n11  0 0 0.195782 \n11  0 0 0.195525 \n11  0 0 0.19539 \n11  0 0 0.195028 \n11  0 0 0.193902 \n11  0 0 0.190355 \n11  0 0 0.190173 \n11  0 0 0.189392 \n11  0 0 0.189181 \n11  0 0 0.185264 \n11  0 0 0.183437 \n11  0 0 0.183413 \n11  0 0 0.182412 \n11  0 0 0.180441 \n11  0 0 0.17768 \n11  0 0 0.175111 \n11  0 0 0.173904 \n11  0 0 0.173381 \n11  0 0 0.172836 \n11  0 0 0.172237 \n11  0 0 0.17149 \n11  0 0 0.169415 \n11  0 0 0.167298 \n11  0 0 0.167214 \n11  0 0 0.162647 \n11  0 0 0.158647 \n11  0 0 0.158261 \n11  0 0 0.15752 \n11  0 0 0.156087 \n11  0 0 0.154912 \n11  0 0 0.153474 \n11  0 0 0.152784 \n11  0 0 0.150565 \n11  0 0 0.149812 \n11  0 0 0.14959 \n11  0 0 0.146201 \n11  0 0 0.143821 \n11  0 0 0.143596 \n11  0 0 0.142636 \n11  0 0 0.142306 \n11  0 0 0.14218 \n11  0 0 0.140146 \n11  0 0 0.13831 \n11  0 0 0.13771 \n11  0 0 0.136123 \n11  0 0 0.13587 \n11  0 0 0.135243 \n11  0 0 0.134659 \n11  0 0 0.134171 \n11  0 0 0.133743 \n11  0 0 0.133375 \n11  0 0 0.133197 \n11  0 0 0.132358 \n11  0 0 0.131698 \n11  0 0 0.130077 \n11  0 0 0.128374 \n11  0 0 0.128305 \n11  0 0 0.128273 \n11  0 0 0.126277 \n11  0 0 0.125675 \n11  0 0 0.122605 \n11  0 0 0.119933 \n11  0 0 0.109991 \n11  0 0 0.107953 \n11  0 0 0.105193 \n11  0 0 0.104098 \n";
 			
 	Hasse_diag_persistence* hd = Gudhi::Hasse_diagram::convert_to_Hasse_diagram_persistence<Simplex_tree,Cell>( simplex_tree );
 	Persistent_cohomology pcoh_hd(*hd);  

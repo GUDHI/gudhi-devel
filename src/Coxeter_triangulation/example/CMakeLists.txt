@@ -28,6 +28,9 @@ target_link_libraries(generate_projective_plane ${Boost_SYSTEM_LIBRARY} ${Boost_
 target_link_libraries(generate_projective_plane ${Boost_PROGRAM_OPTIONS_LIBRARY})
 target_link_libraries(generate_projective_plane ${TBB_LIBRARIES})
 
+add_executable ( Hasse_diagram_weird hasse_weird.cpp )
+target_link_libraries(Hasse_diagram_weird ${TBB_LIBRARIES})
+
 
 # add_executable ( Witness_complex_example_nearest_landmark_table example_nearest_landmark_table.cpp )
 # if (TBB_FOUND)

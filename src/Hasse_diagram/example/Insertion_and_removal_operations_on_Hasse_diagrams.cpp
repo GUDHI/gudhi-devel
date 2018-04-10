@@ -214,7 +214,16 @@ int main(int argc, char** argv)
 	pcoh2.compute_persistent_cohomology(min_persistence);
 	pcoh2.output_diagram();	
 	
-	
+	delete a;
+	delete b;
+	delete c;
+	delete i;
+	delete j;
+	delete r;
+	delete s;
+	delete t;
+	delete u;
+	delete w;	
 
     return 0;
 }
