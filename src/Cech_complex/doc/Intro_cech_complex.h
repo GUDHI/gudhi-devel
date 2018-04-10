@@ -35,16 +35,16 @@ namespace cech_complex {
  * 
  * \section cechdefinition Čech complex definition
  * 
- * Cech_complex
+ * Čech complex
  * <a target="_blank" href="https://en.wikipedia.org/wiki/%C4%8Cech_cohomology">(Wikipedia)</a> is a
- * proximity graph that allows to construct a
- * <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
- * from it.
+ * <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a> constructed
+ *  from a proximity graph. The set of all simplices is filtered by the radius of their minimal enclosing ball.
  *
  * The input shall be a point cloud in an Euclidean space.
  * 
  * \subsection cechalgorithm Algorithm
  *
+ * Cech_complex first builds a proximity graph from a point cloud.
  * The filtration value of each edge of the `Gudhi::Proximity_graph` is computed from
  * `Gudhi::Minimal_enclosing_ball_radius` function.
  * 
