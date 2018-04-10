@@ -1,7 +1,7 @@
 #ifndef COXETER_COMPLEX_
 #define COXETER_COMPLEX_
 
-#define DEBUG_TRACES
+// #define DEBUG_TRACES
 
 #include <string>
 #include <map>
@@ -14,8 +14,13 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/dynamic_bitset.hpp>
 
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/convex_hull_2.h>
+#include <CGAL/Epick_d.h>
+#include <CGAL/point_generators_d.h>
+#include <CGAL/Search_traits.h>
+#include <CGAL/Search_traits_adapter.h>
+#include <CGAL/Delaunay_triangulation.h>
+// #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+// #include <CGAL/convex_hull_2.h>
 
 #include "../../example/cxx-prettyprint/prettyprint.hpp"
 
@@ -535,18 +540,21 @@ public:
     
     pcoh.init_coefficients(field_characteristic);
     pcoh.compute_persistent_cohomology(min_persistence);
-    std::cout << pcoh.persistent_betti_numbers(0,0) << std::endl;
+    std::cout << pcoh.persistent_betti_numbers(100,100) << std::endl;
     std::ofstream out("persdiag_vor.out");
     pcoh.output_diagram(out);
     out.close();
 #define VERBOSE_DEBUG_TRACES
 #ifdef VERBOSE_DEBUG_TRACES
+#ifdef DEBUG_TRACES
     std::cout << "Hasse diagram:\n" << hdp << std::endl;
+#endif
 #endif
 
 #define VOR_OUTPUT_MESH
 #ifdef VOR_OUTPUT_MESH
     write_voronoi_mathematica(ac_map, hasse_diagram, "voronoi_skeleton.dat");
+    write_voronoi_mesh(ac_map, hasse_diagram, "voronoi_skeleton.mesh");
 #endif
     for (auto c_ptr: hasse_diagram) {
       delete c_ptr;
@@ -646,6 +654,7 @@ private:
     if (d > 3);
   
     std::ofstream ofs (file_name, std::ofstream::out);
+    std::ofstream ofs_bb ("voronoi_skeleton.bb", std::ofstream::out);
     if (d <= 2)
       ofs << "MeshVersionFormatted 1\nDimension 2\n";
     else
@@ -662,12 +671,13 @@ private:
       W.push_back(b);
       for (int i = 0; i < d; ++i)
         ofs << b[i] << " ";
-      ofs << "\n";
+      ofs << "215 \n";
     }
+    perturb_voronoi_vertices(W, 0.00005);
     if (d == 2) {
-      typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
-      typedef K::Point_2 Point_2;
-      typedef std::vector<Point_2> Points;
+      // typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+      // typedef K::Point_2 Point_2;
+      // typedef std::vector<Point_2> Points;
       std::vector<Hasse_cell*> edges, hexagons;
       std::vector<std::vector<int> > triangles; 
       for (auto s: hasse_diagram)
@@ -675,18 +685,35 @@ private:
           edges.push_back(s);
         else if (s->get_dimension() == 2)
           hexagons.push_back(s);
+      typedef CGAL::Epick_d<CGAL::Dimension_tag<2> > Kernel;
+      typedef typename Kernel::Point_d Point_d;
+      typedef CGAL::Delaunay_triangulation<Kernel> Delaunay_triangulation;
       for (auto h: hexagons) {
         // constrain the outer edges, which are found by the convex hull
-        Points vertices, conv_hull;
+        std::vector<Point_d> vertices;
+        std::vector<int> v_indices;
         std::set<Hasse_cell*> v_cells;
         for (auto e_pair: h->get_boundary())
           for (auto v_pair: e_pair.first->get_boundary())
             v_cells.emplace(v_pair.first);
         for (auto vc: v_cells) {
-          std::vector<double>& b = W[ci_map.at(vc)];
-          vertices.push_back(Point_2(b[0], b[1]));
+          std::vector<double>& b = W[ci_map.at(vc)-1];
+          vertices.push_back(Point_d(b[0], b[1]));
+          v_indices.push_back(ci_map.at(vc));
         }
-        CGAL::convex_hull_2(vertices.begin(), vertices.end(), std::back_inserter(conv_hull));
+        Delaunay_triangulation del(2);
+        index = 0;
+        std::map<typename Delaunay_triangulation::Vertex_handle, int> index_of_vertex;
+        for (auto p: vertices)
+          index_of_vertex.emplace(del.insert(p), index++);
+        for (auto fc_it = del.full_cells_begin(); fc_it != del.full_cells_end(); ++fc_it) {
+          if (del.is_infinite(fc_it))
+            continue;
+          std::vector<int> triangle;
+          for (auto fv_it = fc_it->vertices_begin(); fv_it != fc_it->vertices_end(); ++fv_it)
+            triangle.push_back(v_indices[index_of_vertex[*fv_it]]);
+          triangles.push_back(triangle);
+        }
       }
       ofs << "Edges " << edges.size() << "\n";
       for (auto s: edges) {
@@ -705,6 +732,21 @@ private:
     }
     else {
       
+    }
+    ofs.close();
+    ofs_bb.close();
+  }
+
+  template <class Points>
+  void perturb_voronoi_vertices(Points& vertices, double rad) const {
+    int d = vertices.begin()->size();
+    typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> Kernel;
+    typedef typename Kernel::Point_d Point_d;
+    for (auto& v: vertices) {
+      CGAL::Random_points_on_sphere_d<Point_d> rp(d+1, rad);
+      auto v_it = v.begin();
+      for (auto p_it = rp->cartesian_begin(); p_it != rp->cartesian_end(); ++p_it)
+        *v_it += *p_it;
     }
   }
   
