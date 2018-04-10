@@ -75,11 +75,29 @@ class Euclidean_distance {
  * The points are assumed to have the same dimension. */
 class Minimal_enclosing_ball_radius {
  public:
+  /** \brief Minimal_enclosing_ball_radius from two points.
+   *
+   * @param[in] point_1 First point.
+   * @param[in] point_2 second point.
+   * @return The minimal enclosing ball radius for the two points (aka. Euclidean distance / 2.).
+   *
+   * \tparam Point must be a range of Cartesian coordinates.
+   *
+   */
   template< typename Point >
   typename std::iterator_traits<typename boost::range_iterator<Point>::type>::value_type
-  operator()(const Point& p1, const Point& p2) const {
-    return Euclidean_distance()(p1, p2) / 2.;
+  operator()(const Point& point_1, const Point& point_2) const {
+    return Euclidean_distance()(point_1, point_2) / 2.;
   }
+  /** \brief Minimal_enclosing_ball_radius from a point cloud.
+   *
+   * @param[in] point_cloud The points.
+   * @return The minimal enclosing ball radius for the points.
+   *
+   * \tparam Point_cloud must be a range of points with Cartesian coordinates.
+   * Point_cloud is a range over a range of Coordinate.
+   *
+   */
   template< typename Point_cloud,
             typename Point_iterator = typename boost::range_const_iterator<Point_cloud>::type,
             typename Point= typename std::iterator_traits<Point_iterator>::value_type,
