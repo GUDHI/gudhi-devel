@@ -731,6 +731,94 @@ private:
       }
     }
     else {
+      std::vector<Hasse_cell*> edges, hexagons, permutahedra;
+      std::vector<std::vector<int> > tetrahedra; 
+      for (auto s: hasse_diagram)
+        if (s->get_dimension() == 1)
+          edges.push_back(s);
+        else if (s->get_dimension() == 2)
+          hexagons.push_back(s);
+        else if (s->get_dimension() == 3)
+          permutahedra.push_back(s);
+      typedef CGAL::Epick_d<CGAL::Dimension_tag<3> > Kernel;
+      typedef typename Kernel::Point_d Point_d;
+      typedef CGAL::Delaunay_triangulation<Kernel> Delaunay_triangulation;
+      for (auto h: hexagons) {
+        // constrain the outer edges, which are found by the convex hull
+        std::vector<Point_d> vertices;
+        std::vector<int> v_indices;
+        std::set<Hasse_cell*> v_cells;
+        for (auto e_pair: h->get_boundary())
+          for (auto v_pair: e_pair.first->get_boundary())
+            v_cells.emplace(v_pair.first);
+        for (auto vc: v_cells) {
+          std::vector<double>& b = W[ci_map.at(vc)-1];
+          vertices.push_back(Point_d(b[0], b[1], b[2]));
+          v_indices.push_back(ci_map.at(vc));
+        }
+        Delaunay_triangulation del(3);
+        index = 0;
+        std::map<typename Delaunay_triangulation::Vertex_handle, int> index_of_vertex;
+        for (auto p: vertices)
+          index_of_vertex.emplace(del.insert(p), index++);
+        for (auto fc_it = del.full_cells_begin(); fc_it != del.full_cells_end(); ++fc_it) {
+          if (del.is_infinite(fc_it))
+            continue;
+          std::vector<int> triangle;
+          for (auto fv_it = fc_it->vertices_begin(); fv_it != fc_it->vertices_end(); ++fv_it)
+            triangle.push_back(v_indices[index_of_vertex[*fv_it]]);
+          tetrahedra.push_back(triangle);
+        }
+      }
+      for (auto p: permutahedra) {
+        // constrain the outer edges, which are found by the convex hull
+        std::vector<Point_d> vertices;
+        std::vector<int> v_indices;
+        std::set<Hasse_cell*> v_cells;
+        for (auto h_pair: p->get_boundary())
+          for (auto e_pair: h_pair.first->get_boundary())
+            for (auto v_pair: e_pair.first->get_boundary())
+              v_cells.emplace(v_pair.first);
+        for (auto vc: v_cells) {
+          std::vector<double>& b = W[ci_map.at(vc)-1];
+          vertices.push_back(Point_d(b[0], b[1], b[2]));
+          v_indices.push_back(ci_map.at(vc));
+        }
+        Delaunay_triangulation del(3);
+        index = 0;
+        std::map<typename Delaunay_triangulation::Vertex_handle, int> index_of_vertex;
+        for (auto pt: vertices)
+          index_of_vertex.emplace(del.insert(pt), index++);
+        for (auto fc_it = del.full_cells_begin(); fc_it != del.full_cells_end(); ++fc_it) {
+          if (del.is_infinite(fc_it))
+            continue;
+          std::vector<int> tetrahedron;
+          for (auto fv_it = fc_it->vertices_begin(); fv_it != fc_it->vertices_end(); ++fv_it)
+            tetrahedron.push_back(v_indices[index_of_vertex[*fv_it]]);
+          tetrahedra.push_back(tetrahedron);
+        }
+      }
+      ofs << "Edges " << edges.size() << "\n";
+      for (auto s: edges) {
+        for (auto v: s->get_boundary()) {
+          ofs << ci_map.at(v.first) << " ";
+        }
+        ofs << "515" << std::endl;
+      }
+      // ofs << "Triangles " << triangles.size() << "\n";
+      // for (auto s: triangles) {
+      //   for (auto v: s) {
+      //     ofs << v << " ";
+      //   }
+      //   ofs << "516" << std::endl;
+      // }
+      ofs << "Tetrahedra " << tetrahedra.size() << "\n";
+      for (auto s: tetrahedra) {
+        for (auto v: s) {
+          ofs << v << " ";
+        }
+        ofs << "517" << std::endl;
+      }
       
     }
     ofs.close();
