@@ -78,11 +78,8 @@ BOOST_AUTO_TEST_CASE(Cech_complex_for_documentation) {
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(cech_complex_for_doc.max_radius(), max_radius);
   std::size_t i = 0;
   for (; i < points.size(); i++) {
-    BOOST_CHECK(points[i] == *(cech_complex_for_doc.point_iterator(i)));
+    BOOST_CHECK(points[i] == cech_complex_for_doc.get_point(i));
   }
-#ifdef GUDHI_DEBUG
-  BOOST_CHECK_THROW (cech_complex_for_doc.point_iterator(i+1), std::out_of_range);
-#endif  // GUDHI_DEBUG
 
   const int DIMENSION_1 = 1;
   Simplex_tree st;
@@ -137,8 +134,7 @@ BOOST_AUTO_TEST_CASE(Cech_complex_for_documentation) {
 
   Point_cloud points012;
   for (std::size_t vertex = 0; vertex <= 2; vertex++) {
-    points012.push_back(Point(cech_complex_for_doc.point_iterator(vertex)->begin(),
-                           cech_complex_for_doc.point_iterator(vertex)->end()));
+    points012.push_back(cech_complex_for_doc.get_point(vertex));
   }
   std::size_t dimension = points[0].end() - points[0].begin();
   Min_sphere ms012(dimension, points012.begin(),points012.end());
@@ -149,12 +145,9 @@ BOOST_AUTO_TEST_CASE(Cech_complex_for_documentation) {
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(f012, std::sqrt(ms012.squared_radius()));
 
   Point_cloud points1410;
-  points1410.push_back(Point(cech_complex_for_doc.point_iterator(1)->begin(),
-                             cech_complex_for_doc.point_iterator(1)->end()));
-  points1410.push_back(Point(cech_complex_for_doc.point_iterator(4)->begin(),
-                             cech_complex_for_doc.point_iterator(4)->end()));
-  points1410.push_back(Point(cech_complex_for_doc.point_iterator(10)->begin(),
-                             cech_complex_for_doc.point_iterator(10)->end()));
+  points1410.push_back(cech_complex_for_doc.get_point(1));
+  points1410.push_back(cech_complex_for_doc.get_point(4));
+  points1410.push_back(cech_complex_for_doc.get_point(10));
   Min_sphere ms1410(dimension, points1410.begin(),points1410.end());
 
   Simplex_tree::Filtration_value f1410 = st2.filtration(st2.find({1, 4, 10}));
@@ -163,12 +156,9 @@ BOOST_AUTO_TEST_CASE(Cech_complex_for_documentation) {
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(f1410, std::sqrt(ms1410.squared_radius()));
 
   Point_cloud points469;
-  points469.push_back(Point(cech_complex_for_doc.point_iterator(4)->begin(),
-                            cech_complex_for_doc.point_iterator(4)->end()));
-  points469.push_back(Point(cech_complex_for_doc.point_iterator(6)->begin(),
-                            cech_complex_for_doc.point_iterator(6)->end()));
-  points469.push_back(Point(cech_complex_for_doc.point_iterator(9)->begin(),
-                            cech_complex_for_doc.point_iterator(9)->end()));
+  points469.push_back(cech_complex_for_doc.get_point(4));
+  points469.push_back(cech_complex_for_doc.get_point(6));
+  points469.push_back(cech_complex_for_doc.get_point(9));
   Min_sphere ms469(dimension, points469.begin(),points469.end());
 
   Simplex_tree::Filtration_value f469 = st2.filtration(st2.find({4, 6, 9}));

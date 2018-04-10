@@ -1,6 +1,5 @@
 #include <gudhi/Cech_complex.h>
 #include <gudhi/Simplex_tree.h>
-#include <gudhi/distance_functions.h>
 
 #include <iostream>
 #include <string>

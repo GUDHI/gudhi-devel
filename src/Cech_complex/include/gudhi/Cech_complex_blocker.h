@@ -23,7 +23,6 @@
 #ifndef CECH_COMPLEX_BLOCKER_H_
 #define CECH_COMPLEX_BLOCKER_H_
 
-#include <gudhi/Cech_complex.h>        // Cech_blocker is using a pointer on Gudhi::cech_complex::Cech_complex
 #include <gudhi/distance_functions.h>  // for Gudhi::Minimal_enclosing_ball_radius
 
 #include <iostream>
@@ -33,10 +32,6 @@
 namespace Gudhi {
 
 namespace cech_complex {
-
-// Just declaring Cech_complex class because used and not yet defined.
-template<typename SimplicialComplexForCechComplex, typename InputPointRange>
-class Cech_complex;
 
 /** \internal
  * \class Cech_blocker
@@ -52,14 +47,13 @@ class Cech_complex;
  *
  * \tparam InputPointRange is required by the pointer on Chech_complex for type definition.
  */
-template <typename SimplicialComplexForCech, typename InputPointRange>
+template <typename SimplicialComplexForCech, typename Cech_complex>
 class Cech_blocker {
  private:
-  using Point = std::vector<double>;
-  using Point_cloud = std::vector<Point>;
+  using Point_cloud = typename Cech_complex::Point_cloud;
+
   using Simplex_handle = typename SimplicialComplexForCech::Simplex_handle;
   using Filtration_value = typename SimplicialComplexForCech::Filtration_value;
-  using Cech_complex = Gudhi::cech_complex::Cech_complex<SimplicialComplexForCech, InputPointRange>;
 
  public:
   /** \internal \brief Cech complex blocker operator() - the oracle - assigns the filtration value from the simplex
@@ -69,8 +63,7 @@ class Cech_blocker {
   bool operator()(Simplex_handle sh) {
     Point_cloud points;
     for (auto vertex : sc_ptr_->simplex_vertex_range(sh)) {
-      points.push_back(Point(cc_ptr_->point_iterator(vertex)->begin(),
-                             cc_ptr_->point_iterator(vertex)->end()));
+      points.push_back(cc_ptr_->get_point(vertex));
 #ifdef DEBUG_TRACES
       std::cout << "#(" << vertex << ")#";
 #endif  // DEBUG_TRACES
