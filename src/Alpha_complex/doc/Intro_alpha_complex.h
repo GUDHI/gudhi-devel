@@ -57,9 +57,13 @@ namespace alpha_complex {
  * href="http://doc.cgal.org/latest/Kernel_d/index.html#Chapter_dD_Geometry_Kernel">dD Geometry Kernel</a>
  * \cite cgal:s-gkd-15b from CGAL as template parameter.
  * 
- * \remark When the simplicial complex is constructed with an infinite value of alpha, the complex is a Delaunay
+ * \remark
+ * - When the simplicial complex is constructed with an infinite value of alpha, the complex is a Delaunay
  * complex.
- * 
+ * - For people only interested in the topology of the \ref alpha_complex (for instance persistence),
+ * \ref alpha_complex is equivalent to the \ref cech_complex and much smaller if you do not bound the radii.
+ * \ref cech_complex can still make sense in higher dimension precisely because you can bound the radii.
+ *
  * \section pointsexample Example from points
  * 
  * This example builds the Delaunay triangulation from the given points in a 2D static kernel, and creates a

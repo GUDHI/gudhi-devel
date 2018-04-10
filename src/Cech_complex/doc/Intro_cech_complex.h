@@ -27,7 +27,7 @@ namespace Gudhi {
 
 namespace cech_complex {
 
-/**  \defgroup cech_complex Cech complex
+/**  \defgroup cech_complex Čech complex
  * 
  * \author    Vincent Rouvreau
  * 
@@ -42,6 +42,10 @@ namespace cech_complex {
  *
  * The input shall be a point cloud in an Euclidean space.
  * 
+ * \remark For people only interested in the topology of the \ref cech_complex (for instance persistence),
+ * \ref alpha_complex is equivalent to the \ref cech_complex and much smaller if you do not bound the radii.
+ * \ref cech_complex can still make sense in higher dimension precisely because you can bound the radii.
+ *
  * \subsection cechalgorithm Algorithm
  *
  * Cech_complex first builds a proximity graph from a point cloud.
