@@ -35,17 +35,17 @@ namespace cech_complex {
 
 /** \internal
  * \class Cech_blocker
- * \brief Cech complex blocker.
+ * \brief Čech complex blocker.
  *
  * \ingroup cech_complex
  *
  * \details
- * Cech blocker is an oracle constructed from a Cech_complex and a simplicial complex.
+ * Čech blocker is an oracle constructed from a Cech_complex and a simplicial complex.
  *
  * \tparam SimplicialComplexForProximityGraph furnishes `Simplex_handle` and `Filtration_value` type definition,
  * `simplex_vertex_range(Simplex_handle sh)`and `assign_filtration(Simplex_handle sh, Filtration_value filt)` methods.
  *
- * \tparam InputPointRange is required by the pointer on Chech_complex for type definition.
+ * \tparam Chech_complex is required by the blocker.
  */
 template <typename SimplicialComplexForCech, typename Cech_complex>
 class Cech_blocker {
@@ -56,7 +56,7 @@ class Cech_blocker {
   using Filtration_value = typename SimplicialComplexForCech::Filtration_value;
 
  public:
-  /** \internal \brief Cech complex blocker operator() - the oracle - assigns the filtration value from the simplex
+  /** \internal \brief Čech complex blocker operator() - the oracle - assigns the filtration value from the simplex
    * radius and returns if the simplex expansion must be blocked.
    *  \param[in] sh The Simplex_handle.
    *  \return true if the simplex radius is greater than the Cech_complex max_radius*/
@@ -77,7 +77,7 @@ class Cech_blocker {
     return (radius > cc_ptr_->max_radius());
   }
 
-  /** \internal \brief Cech complex blocker constructor. */
+  /** \internal \brief Čech complex blocker constructor. */
   Cech_blocker(SimplicialComplexForCech* sc_ptr, Cech_complex* cc_ptr)
     : sc_ptr_(sc_ptr),
       cc_ptr_(cc_ptr) {
