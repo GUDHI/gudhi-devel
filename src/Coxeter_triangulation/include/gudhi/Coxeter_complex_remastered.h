@@ -1,7 +1,7 @@
 #ifndef COXETER_COMPLEX_
 #define COXETER_COMPLEX_
 
-#define DEBUG_TRACES
+// #define DEBUG_TRACES
 
 #include <string>
 #include <map>
@@ -16,11 +16,7 @@
 
 #include <CGAL/Epick_d.h>
 #include <CGAL/point_generators_d.h>
-#include <CGAL/Search_traits.h>
-#include <CGAL/Search_traits_adapter.h>
 #include <CGAL/Delaunay_triangulation.h>
-// #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-// #include <CGAL/convex_hull_2.h>
 
 #include "../../example/cxx-prettyprint/prettyprint.hpp"
 
@@ -324,6 +320,23 @@ public:
 
 private:
 
+  void inverse(std::vector<int>& point) {
+    using Ref_pair = std::pair<typename std::vector<int>::iterator, int>;
+    std::vector<Ref_pair> reference;
+    for (unsigned l = 0; l < point.size(); ++l)
+      reference.push_back(std::make_pair(point.begin()+l, l));
+    struct Ref_sort {
+      bool operator() (const Ref_pair& l_pair, const Ref_pair& r_pair) {
+        return *l_pair.first < *r_pair.first;
+      }
+    };
+    std::sort(reference.begin(), reference.end(), Ref_sort());
+    // std::cout << "Point: " << point << "\n";
+    for (unsigned l = 0; l < point.size(); ++l)
+      point[l] = reference[l].second;
+    // std::cout << "Inverse: " << point << "\n";
+  }
+  
   // Compute the ordered partition of an alcove with respect to a vertex
   using Part = boost::dynamic_bitset<>;
   using Ordered_partition = std::vector<Part>;
@@ -332,6 +345,17 @@ private:
     std::vector<int> point;
     for (int l = 0; l < d+1; ++l)
       point.push_back(l);
+
+    // auto a_it = a_id.begin();
+    // for (int j = 1; j < d+1; ++j) {
+    //   int v_coord = 0;
+    //   for (int i = j-1; i >= 0; --i) {
+    //     v_coord += v_id[i];
+    //     point[i] -= (*a_it - v_coord);
+    //     point[j] += (*a_it - v_coord);
+    //     a_it++;
+    //   }
+    // }
     Part mask(a_id.size());
     auto a_it = a_id.begin();
     auto l = 0;
@@ -364,6 +388,8 @@ private:
         }
       }
     }
+    // inverse(point);
+    
     Ordered_partition op(d+1, Part(d+1));
     for (int l = 0; l < d+1; ++l)
       op[l][point[l]] = 1;
@@ -482,6 +508,9 @@ public:
                   << ", partition=" << partition(a_pair_it->first, v_pair.first) << std::endl;
 #endif
       }
+#ifdef DEBUG_TRACES
+      std::cout << "Dual vertices: " << pc_map_faces->size() << "\n";
+#endif
       // Dual face insertion
       for (int curr_dim = 1; curr_dim <= k; ++curr_dim) {
         pc_map_cofaces = new PCMap();
@@ -514,6 +543,9 @@ public:
             }
           }
         }
+#ifdef DEBUG_TRACES
+        std::cout << "Dual faces of dim " << curr_dim << ": " << pc_map_cofaces->size() << "\n";
+#endif
         delete pc_map_faces;
         pc_map_faces = pc_map_cofaces;
       }
@@ -679,7 +711,7 @@ private:
         ofs << b[i] << " ";
       ofs << "215 \n";
     }
-    perturb_voronoi_vertices(W, 0.00005);
+    perturb_voronoi_vertices(W, 0.01);
     if (d == 2) {
       // typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
       // typedef K::Point_2 Point_2;
@@ -838,9 +870,11 @@ private:
     typedef typename Kernel::Point_d Point_d;
     for (auto& v: vertices) {
       CGAL::Random_points_on_sphere_d<Point_d> rp(d+1, rad);
-      auto v_it = v.begin();
-      for (auto p_it = rp->cartesian_begin(); p_it != rp->cartesian_end(); ++p_it)
-        *v_it += *p_it;
+      // auto v_it = v.begin();
+      // for (auto p_it = rp->cartesian_begin(); p_it != rp->cartesian_end(); ++p_it)
+      for (int i = 0; i < d; ++i)
+        // v[i] += *p_it;
+        v[i] += (*rp)[i];
     }
   }
   
