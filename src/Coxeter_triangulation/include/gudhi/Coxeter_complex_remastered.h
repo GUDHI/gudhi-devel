@@ -1,7 +1,7 @@
 #ifndef COXETER_COMPLEX_
 #define COXETER_COMPLEX_
 
-// #define DEBUG_TRACES
+#define DEBUG_TRACES
 
 #include <string>
 #include <map>
@@ -500,6 +500,11 @@ public:
               Hasse_cell* cell = new Hasse_cell(curr_dim, f);
               std::sort(boundary.begin(), boundary.end());
               cell->get_boundary() = boundary;
+              auto hd_emplace_pair = hasse_diagram.emplace(cell);
+              if (!hd_emplace_pair.second) {
+                delete cell;
+                cell = *hd_emplace_pair.first;
+              }
 #ifdef DEBUG_TRACES
               if (pc_map_cofaces->emplace(op, cell).second)
                 std::cout << "dual face " << op << std::endl;
@@ -509,8 +514,6 @@ public:
             }
           }
         }
-        for (auto pc_pair: *pc_map_cofaces)
-          hasse_diagram.emplace(pc_pair.second);
         delete pc_map_faces;
         pc_map_faces = pc_map_cofaces;
       }
@@ -533,9 +536,12 @@ public:
     double min_persistence = 0;
 
     int chi = 0;
+    std::vector<int> face_count(av_graph_.v_map.begin()->first.size()+1);
     for (auto c_ptr: hasse_diagram) {
       chi += 1-2*(c_ptr->get_dimension()%2);
+      face_count[c_ptr->get_dimension()]++;
     }
+    std::cout << "Faces by dimension: " << face_count << "\n";
     std::cout << "Euler characteristic = " << chi << ".\n"; 
     
     pcoh.init_coefficients(field_characteristic);
