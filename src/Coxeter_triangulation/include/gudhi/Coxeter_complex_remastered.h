@@ -566,7 +566,7 @@ public:
 
     hdp.set_up_the_arrays();
     Persistent_cohomology pcoh(hdp, true);  
-    unsigned field_characteristic = 11;
+    unsigned field_characteristic = 2;
     double min_persistence = 0;
 
     int chi = 0;
@@ -746,14 +746,23 @@ private:
         std::vector<Point_d> vertices;
         std::vector<int> v_indices;
         std::set<Hasse_cell*> v_cells;
-        for (auto h_pair: p->get_boundary())
-          for (auto e_pair: h_pair.first->get_boundary())
-            for (auto v_pair: e_pair.first->get_boundary())
+        // std::cout << "3-cell " << p->get_position()  << " " << p->get_filtration() << ":\n";
+        for (auto h_pair: p->get_boundary()) {
+          // std::cout << "2-cell " << h_pair.first->get_position() << " " << h_pair.first->get_filtration() << ":\n";
+          for (auto e_pair: h_pair.first->get_boundary()) {
+            // std::cout << "Edge " << e_pair.first->get_position() << " " << e_pair.first->get_filtration() << ":\n"; 
+            for (auto v_pair: e_pair.first->get_boundary()) {
+              // std::cout << "Vertex " << v_pair.first->get_position() << " " << v_pair.first->get_filtration() << ":\n"; 
               v_cells.emplace(v_pair.first);
+            }
+          }
+          // std::cout << "\n";
+        }
         for (auto vc: v_cells) {
           std::vector<double>& b = W[ci_map.at(vc)-1];
           vertices.push_back(Point_d(b[0], b[1], b[2]));
           v_indices.push_back(ci_map.at(vc));
+          // std::cout << "Vertex " << vc->get_position() << " " << vc->get_filtration() << ":\n"; 
         }
         Delaunay_triangulation del(3);
         index = 0;

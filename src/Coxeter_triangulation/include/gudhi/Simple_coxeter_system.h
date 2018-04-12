@@ -661,12 +661,14 @@ private:
       if (valid) {
         a_id.push_back(val);
 #ifdef CC_STAR_COMPLETION
-        double new_filtration;
+        double new_filtration = 0;
         int true_value = std::floor(level*root_scalprod);
-        if (val > true_value)
-          new_filtration = (val - level*root_scalprod)/(std::sqrt(2)*level);
+        if (val > true_value) {
+          new_filtration = (val - level*root_scalprod)/(std::sqrt(2)*level);        
+        }
         else if (val < true_value)
           new_filtration = (level*root_scalprod  - val - 1)/(std::sqrt(2)*level);
+        // std::cout << "val=" << val << ", true_value=" << true_value << ", filtration=" << new_filtration << "\n";
         rec_alcoves_of_ball_A(a_id,
                               scalprod_vect,
                               eps,
