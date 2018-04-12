@@ -91,8 +91,8 @@ int main(int argc, char** argv) {
   PWG pwgex1(pd1, 2*std::sqrt(sigma), -1, PWG::pss_weight);
   PWG pwgex2(pd2, 2*std::sqrt(sigma), -1, PWG::pss_weight);
 
-  std::cout << "Approx PSS kernel: " << pwg1.compute_scalar_product  (pwg2) / (16*pi*sigma) << std::endl;
-  std::cout << "Exact  PSS kernel: " << pwgex1.compute_scalar_product  (pwgex2) / (16*pi*sigma) << std::endl;
+  std::cout << "Approx PSS kernel: " << pwg1.compute_scalar_product  (pwg2) / (16*Gudhi::Persistence_representations::pi*sigma) << std::endl;
+  std::cout << "Exact  PSS kernel: " << pwgex1.compute_scalar_product  (pwgex2) / (16*Gudhi::Persistence_representations::pi*sigma) << std::endl;
 
 
 

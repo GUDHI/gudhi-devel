@@ -26,11 +26,13 @@
 #include <utility>
 #include <string>
 #include <cmath>
+#include <boost/math/constants/constants.hpp>
 
 namespace Gudhi {
 namespace Persistence_representations {
 // this file contain an implementation of some common procedures used in Persistence_representations.
 
+static constexpr double pi = boost::math::constants::pi<double>();
 // double epsi = std::numeric_limits<double>::epsilon();
 double epsi = 0.000005;
 

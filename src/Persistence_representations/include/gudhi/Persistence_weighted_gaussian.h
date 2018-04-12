@@ -25,6 +25,7 @@
 
 // gudhi include
 #include <gudhi/read_persistence_from_file.h>
+#include <gudhi/common_persistence_representations.h>
 
 // standard include
 #include <cmath>
@@ -37,7 +38,6 @@
 #include <string>
 #include <utility>
 #include <functional>
-#include <boost/math/constants/constants.hpp>
 
 using PD = std::vector<std::pair<double,double> >;
 using Weight = std::function<double (std::pair<double,double>) >;
@@ -87,8 +87,6 @@ class Persistence_weighted_gaussian{
     int approx;
 
  public:
- 
-  double pi = boost::math::constants::pi<double>();
 
   /** \brief Persistence Weighted Gaussian Kernel constructor.
    * \ingroup Persistence_weighted_gaussian
@@ -101,10 +99,10 @@ class Persistence_weighted_gaussian{
    */
   Persistence_weighted_gaussian(PD _diagram, double _sigma = 1.0, int _approx = 1000, Weight _weight = arctan_weight){diagram = _diagram; sigma = _sigma; approx = _approx; weight = _weight;}
   
-  PD get_diagram(){return this->diagram;}
-  double get_sigma(){return this->sigma;}
-  int get_approx(){return this->approx;}
-  Weight get_weight(){return this->weight;}
+  PD get_diagram() const {return this->diagram;}
+  double get_sigma() const {return this->sigma;}
+  int get_approx() const {return this->approx;}
+  Weight get_weight() const {return this->weight;}
 
 
   // **********************************
