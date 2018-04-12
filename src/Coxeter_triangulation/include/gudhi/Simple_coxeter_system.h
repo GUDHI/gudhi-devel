@@ -513,13 +513,29 @@ public:
       scalprod_vect = root_t_ * p_vect;
     // std::cout << "p_vect=" << p_vect << "\n";
     // std::cout << "scalprod_vect=" << scalprod_vect << "\n";
+#ifdef CC_STAR_COMPLETION
+    rec_alcoves_of_ball_A(a_id, scalprod_vect, eps, alcoves, vertices_per_alcove, 1, 0, 0, 0, p_vect);
+#else
     rec_alcoves_of_ball_A(a_id, scalprod_vect, eps, alcoves, vertices_per_alcove, 1, 0, 0, p_vect);
+#endif
   }
   
 private:
 
   /** Construct the simplices that intersect a given ball.
    */
+#ifdef CC_STAR_COMPLETION
+  void rec_alcoves_of_ball_A(Alcove_id& a_id,
+                             Eigen::VectorXd& scalprod_vect,
+                             double eps,
+                             std::vector<Filtered_alcove>& alcoves,
+                             std::vector<std::vector<Vertex_id> >& vertices_per_alcove,
+                             int j,
+                             int i,
+                             double root_scalprod,
+                             double filtration,
+                             Eigen::VectorXd& p_vect) const {
+#else
   void rec_alcoves_of_ball_A(Alcove_id& a_id,
                              Eigen::VectorXd& scalprod_vect,
                              double eps,
@@ -529,10 +545,13 @@ private:
                              int i,
                              double root_scalprod,
                              Eigen::VectorXd& p_vect) const {
+#endif
     unsigned short d = dimension_;
     double level = a_id.level();
     if (j == d+1) {
-#ifndef CC_STAR_COMPLETION
+#ifdef CC_STAR_COMPLETION
+      alcoves.emplace_back(Filtered_alcove(a_id, filtration));
+#else   
       std::vector<Vertex_id> vertices = vertices_of_simplex(a_id);
       std::vector<unsigned> count(pos_root_count(), 0);
       for (auto v: vertices) {
@@ -595,13 +614,23 @@ private:
         vertices_per_alcove.push_back(vertices);
 #endif
       }
-#else
-      alcoves.emplace_back(Filtered_alcove(a_id, 0));
 #endif
 
       return;
     }
     if (i == -1) {
+#ifdef CC_STAR_COMPLETION
+      rec_alcoves_of_ball_A(a_id,
+                            scalprod_vect,
+                            eps,
+                            alcoves,
+                            vertices_per_alcove,
+                            j+1,
+                            j,
+                            0,
+                            filtration,
+                            p_vect);
+#else
       rec_alcoves_of_ball_A(a_id,
                             scalprod_vect,
                             eps,
@@ -611,6 +640,7 @@ private:
                             j,
                             0,
                             p_vect);
+#endif
       return;
     }
     root_scalprod += scalprod_vect(i);
@@ -630,6 +660,24 @@ private:
       }
       if (valid) {
         a_id.push_back(val);
+#ifdef CC_STAR_COMPLETION
+        double new_filtration;
+        int true_value = std::floor(level*root_scalprod);
+        if (val > true_value)
+          new_filtration = (val - level*root_scalprod)/(std::sqrt(2)*level);
+        else if (val < true_value)
+          new_filtration = (level*root_scalprod  - val - 1)/(std::sqrt(2)*level);
+        rec_alcoves_of_ball_A(a_id,
+                              scalprod_vect,
+                              eps,
+                              alcoves,
+                              vertices_per_alcove,
+                              j,
+                              i-1,
+                              root_scalprod,
+                              std::max(filtration, new_filtration),
+                              p_vect);
+#else
         rec_alcoves_of_ball_A(a_id,
                               scalprod_vect,
                               eps,
@@ -639,6 +687,7 @@ private:
                               i-1,
                               root_scalprod,
                               p_vect);
+#endif
         a_id.pop_back();
       }
     }

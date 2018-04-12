@@ -79,7 +79,6 @@ int main(int argc, char * const argv[]) {
     output_points_to_medit(*point_vector, "sphere_coxeter_complex_points.mesh");
     delete point_vector;
     cc.write_mesh("sphere_coxeter_complex_A.mesh");
-    cc.write_bb("sphere_coxeter_complex_A.bb");
     cc.voronoi_skeleton(1);
     cc.collapse();
   }
@@ -100,7 +99,6 @@ int main(int argc, char * const argv[]) {
     #endif
     std::cout << "Graph construction time: " << t.num_seconds() << "s\n";
     cc.write_mesh("sphere_coxeter_complex_A.mesh");
-    cc.write_bb("sphere_coxeter_complex_A.bb");
     delete off_range;
     off_range  = new Gudhi::Off_point_range<Point_d>(argv[1]);
     output_points_to_medit(*off_range, "sphere_coxeter_complex_points.mesh");

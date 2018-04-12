@@ -120,8 +120,10 @@ class Coxeter_complex {
                           init_level,
                           eps,
                           Alcove_vertex_visitor(p_it, av_graph_, store_points));
-    for (auto m: av_graph_.a_map)
+#ifndef CC_STAR_COMPLETION
+    for (auto& m: av_graph_.a_map)
       m.second.f = std::sqrt(m.second.f);
+#endif
 #ifndef CC_A_V_VISITORS
     auto& inv_map = av_graph_.inv_map;
     auto& v_map = av_graph_.v_map;
@@ -591,8 +593,7 @@ public:
 
 #define VOR_OUTPUT_MESH
 #ifdef VOR_OUTPUT_MESH
-    write_voronoi_mathematica(ac_map, hasse_diagram, "voronoi_skeleton.dat");
-    write_voronoi_mesh(ac_map, hasse_diagram, "voronoi_skeleton.mesh");
+    write_voronoi_mesh(ac_map, hasse_diagram, "voronoi_skeleton");
 #endif
     for (auto c_ptr: hasse_diagram) {
       delete c_ptr;
@@ -601,123 +602,50 @@ public:
 
 private:
 
-  void output_vertex(Hasse_cell* c_ptr,
-                     std::map<Hasse_cell*, std::vector<double> >& cp_map,
-                     std::ofstream& ofs) const {
-    std::vector<double>& b = cp_map[c_ptr];
-    for (double x: b)
-      ofs << x << " ";
-  }
-  
-  template <class ACMap,
-            class HasseDiagram>
-  void write_voronoi_mathematica(const ACMap& ac_map,
-                                 const HasseDiagram& hasse_diagram,
-                                 std::string file_name = "voronoi_skeleton.dat") const
-  {
-    short d = av_graph_.v_map.begin()->first.size();
-    if (d > 3);
-  
-    std::ofstream ofs (file_name, std::ofstream::out);  
-
-    std::map<Hasse_cell*, std::vector<double> > cp_map;
-    for (auto ac_pair: ac_map)
-      cp_map.emplace(ac_pair.second, cs_.barycenter(ac_pair.first->first));
-
-    for (auto c_ptr: hasse_diagram) {
-      int k = c_ptr->get_dimension();
-      std::set<Hasse_cell*> v_cells;
-      typename std::set<Hasse_cell*>::iterator set_it;
-      switch (k) {
-      case 0: {
-        output_vertex(c_ptr, cp_map, ofs);
-        ofs << "\n";
-        break;
-      }
-      case 1: {
-        if (c_ptr->get_boundary().empty()) {
-          std::cerr << "Coxeter_complex: boundary is empty.\n";
-          return;
-        }
-        auto b_it = c_ptr->get_boundary().begin();
-        output_vertex((b_it++)->first, cp_map, ofs);
-        for (; b_it != c_ptr->get_boundary().end(); ++b_it) {
-          ofs << "; ";
-          output_vertex(b_it->first, cp_map, ofs);
-        }
-        ofs << "\n";
-        break;
-      }
-      case 2: {
-        for (auto e_pair: c_ptr->get_boundary())
-          for (auto v_pair: e_pair.first->get_boundary())
-            v_cells.emplace(v_pair.first);
-        set_it = v_cells.begin();
-        output_vertex(*set_it++, cp_map, ofs);
-        for (; set_it != v_cells.end(); ++set_it) {
-          ofs << "; ";
-          output_vertex(*set_it, cp_map, ofs);
-        }
-        ofs << "\n";
-        break;
-      }
-      case 3: {
-        for (auto h_pair: c_ptr->get_boundary())
-          for (auto e_pair: h_pair.first->get_boundary())
-            for (auto v_pair: e_pair.first->get_boundary())
-              v_cells.emplace(v_pair.first);
-        set_it = v_cells.begin();
-        output_vertex(*set_it++, cp_map, ofs);
-        for (; set_it != v_cells.end(); ++set_it) {
-          ofs << "; ";
-          output_vertex(*set_it, cp_map, ofs);
-        }
-        ofs << "\n";
-        break;
-      }
-      default: break;
-      }
-    }
-    
-    ofs.close();
-  }
-  
   template <class ACMap,
             class HasseDiagram>
   void write_voronoi_mesh(const ACMap& ac_map,
                           const HasseDiagram& hasse_diagram,
-                          std::string file_name = "voronoi_skeleton.mesh") const
+                          std::string file_name = "voronoi_skeleton") const
   {
     short d = av_graph_.v_map.begin()->first.size();
     if (d > 3);
   
-    std::ofstream ofs (file_name, std::ofstream::out);
-    std::ofstream ofs_bb ("voronoi_skeleton.bb", std::ofstream::out);
-    if (d <= 2)
+    std::ofstream ofs (file_name + ".mesh", std::ofstream::out);
+    std::ofstream ofs_bb (file_name + ".bb", std::ofstream::out);
+    if (d <= 2) {
       ofs << "MeshVersionFormatted 1\nDimension 2\n";
-    else
+      ofs_bb << "2 1 ";
+    }
+    else {
       ofs << "MeshVersionFormatted 1\nDimension 3\n";
+      ofs_bb << "3 1 ";
+    }
   
     ofs << "Vertices\n" << ac_map.size() << "\n";
-
+    ofs_bb << ac_map.size() << " 2 \n";
+    
     std::vector<std::vector<double> > W;
     std::map<Hasse_cell*, int> ci_map;
     int index = 1;
     for (auto ac_pair: ac_map) {
       ci_map.emplace(ac_pair.second, index++);
       std::vector<double> b = cs_.barycenter(ac_pair.first->first);
+      perturb_voronoi_vertex(b, 0.00001);
       W.push_back(b);
       for (int i = 0; i < d; ++i)
         ofs << b[i] << " ";
       ofs << "215 \n";
+      ofs_bb << ac_pair.second->get_filtration() << "\n";
     }
-    perturb_voronoi_vertices(W, 0.01);
+    // perturb_voronoi_vertices(W, 0.00001);
     if (d == 2) {
       // typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
       // typedef K::Point_2 Point_2;
       // typedef std::vector<Point_2> Points;
       std::vector<Hasse_cell*> edges, hexagons;
-      std::vector<std::vector<int> > triangles; 
+      std::vector<std::vector<int> > triangles;
+      std::vector<double> filtrations;
       for (auto s: hasse_diagram)
         if (s->get_dimension() == 1)
           edges.push_back(s);
@@ -751,6 +679,7 @@ private:
           for (auto fv_it = fc_it->vertices_begin(); fv_it != fc_it->vertices_end(); ++fv_it)
             triangle.push_back(v_indices[index_of_vertex[*fv_it]]);
           triangles.push_back(triangle);
+          filtrations.push_back(h->get_filtration());
         }
       }
       ofs << "Edges " << edges.size() << "\n";
@@ -761,16 +690,19 @@ private:
         ofs << "515" << std::endl;
       }
       ofs << "Triangles " << triangles.size() << "\n";
+      // ofs_bb << triangles.size() << " 1\n";
+      // auto f_it = filtrations.begin();
       for (auto s: triangles) {
-        for (auto v: s) {
+        for (auto v: s)
           ofs << v << " ";
-        }
         ofs << "516" << std::endl;
+        // ofs_bb << *f_it++ << "\n";
       }
     }
     else {
       std::vector<Hasse_cell*> edges, hexagons, permutahedra;
       std::vector<std::vector<int> > tetrahedra; 
+      std::vector<double> filtrations;
       for (auto s: hasse_diagram)
         if (s->get_dimension() == 1)
           edges.push_back(s);
@@ -802,10 +734,11 @@ private:
         for (auto fc_it = del.full_cells_begin(); fc_it != del.full_cells_end(); ++fc_it) {
           if (del.is_infinite(fc_it))
             continue;
-          std::vector<int> triangle;
+          std::vector<int> tetrahedron;
           for (auto fv_it = fc_it->vertices_begin(); fv_it != fc_it->vertices_end(); ++fv_it)
-            triangle.push_back(v_indices[index_of_vertex[*fv_it]]);
-          tetrahedra.push_back(triangle);
+            tetrahedron.push_back(v_indices[index_of_vertex[*fv_it]]);
+          tetrahedra.push_back(tetrahedron);
+          filtrations.push_back(h->get_filtration());
         }
       }
       for (auto p: permutahedra) {
@@ -834,6 +767,7 @@ private:
           for (auto fv_it = fc_it->vertices_begin(); fv_it != fc_it->vertices_end(); ++fv_it)
             tetrahedron.push_back(v_indices[index_of_vertex[*fv_it]]);
           tetrahedra.push_back(tetrahedron);
+          filtrations.push_back(p->get_filtration());
         }
       }
       ofs << "Edges " << edges.size() << "\n";
@@ -843,19 +777,15 @@ private:
         }
         ofs << "515" << std::endl;
       }
-      // ofs << "Triangles " << triangles.size() << "\n";
-      // for (auto s: triangles) {
-      //   for (auto v: s) {
-      //     ofs << v << " ";
-      //   }
-      //   ofs << "516" << std::endl;
-      // }
       ofs << "Tetrahedra " << tetrahedra.size() << "\n";
+      // ofs_bb << tetrahedra.size() << " 1\n";
+      // auto f_it = filtrations.begin();
       for (auto s: tetrahedra) {
         for (auto v: s) {
           ofs << v << " ";
         }
         ofs << "517" << std::endl;
+        // ofs_bb << *f_it++ << "\n";
       }
       
     }
@@ -876,6 +806,19 @@ private:
         // v[i] += *p_it;
         v[i] += (*rp)[i];
     }
+  }
+  
+  template <class Point>
+  void perturb_voronoi_vertex(Point& vertex, double rad) const {
+    int d = vertex.size();
+    typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> Kernel;
+    typedef typename Kernel::Point_d Point_d;
+    CGAL::Random_points_on_sphere_d<Point_d> rp(d+1, rad);
+    // auto v_it = v.begin();
+    // for (auto p_it = rp->cartesian_begin(); p_it != rp->cartesian_end(); ++p_it)
+    for (int i = 0; i < d; ++i)
+      // v[i] += *p_it;
+      vertex[i] += (*rp)[i];
   }
   
 };
