@@ -120,10 +120,10 @@ class Coxeter_complex {
                           init_level,
                           eps,
                           Alcove_vertex_visitor(p_it, av_graph_, store_points));
-#ifndef CC_STAR_COMPLETION
+    // #ifndef CC_STAR_COMPLETION
     for (auto& m: av_graph_.a_map)
       m.second.f = std::sqrt(m.second.f);
-#endif
+    // #endif
 #ifndef CC_A_V_VISITORS
     auto& inv_map = av_graph_.inv_map;
     auto& v_map = av_graph_.v_map;
@@ -574,8 +574,10 @@ public:
     for (auto c_ptr: hasse_diagram) {
       chi += 1-2*(c_ptr->get_dimension()%2);
       face_count[c_ptr->get_dimension()]++;
-    }
+    }    
     std::cout << "Faces by dimension: " << face_count << "\n";
+    if (is_pseudomanifold(hasse_diagram))
+      std::cout << "\033[1;32m" << "The Voronoi skeleton is a pseudomanifold.\033[0m\n";
     std::cout << "Euler characteristic = " << chi << ".\n"; 
     
     pcoh.init_coefficients(field_characteristic);
@@ -602,6 +604,47 @@ public:
 
 private:
 
+  template <class HasseDiagram>
+  bool is_pseudomanifold(const HasseDiagram& hasse_diagram) const {
+    bool return_value = true;
+    short d = av_graph_.v_map.begin()->first.size();
+    std::vector<std::vector<Hasse_cell*> > cells_by_dimension(d+1);
+    for (Hasse_cell* c: hasse_diagram)
+      cells_by_dimension[c->get_dimension()].push_back(c);
+    std::size_t k = d;
+    while (cells_by_dimension[k--].empty())
+      cells_by_dimension.pop_back();
+    int max_dim = cells_by_dimension.size()-1;
+    if (max_dim == d) {
+      std::vector<double> f_max;
+      for (auto c: cells_by_dimension[d])
+        f_max.push_back(c->get_filtration());
+      std::sort(f_max.begin(), f_max.end());
+      std::cout << "\033[1;36m d-cell filtrations: " << f_max << "\033[1;0m\n";
+      return false;
+    }
+    for (int k = max_dim-1; k >= 0; k--)
+      for (Hasse_cell* c: cells_by_dimension[k]) {
+        if (k == max_dim-1 && c->get_coBoundary().size() != 2) {
+          if (c->get_coBoundary().size() > 2) {
+            std::vector<double> f_cob;
+            for (auto h_pair: c->get_coBoundary())
+              f_cob.push_back(h_pair.first->get_filtration());
+            std::sort(f_cob.begin(), f_cob.end());
+            // std::cout << f_cob << "\n";
+            std::cout << "\033[1;31m Oversaturated facet " << f_cob[2] << "\033[0m\n"; 
+          }
+          return_value = false;
+        }
+        if (c->get_coBoundary().empty()) {
+          std::cout << "\033[1;35m Maximal face of dimension " << c->get_dimension() 
+                    << ", filtration " << c->get_filtration() << "\033[0m\n";
+          return_value = false;
+        }
+      }
+    return return_value;
+  }
+  
   template <class ACMap,
             class HasseDiagram>
   void write_voronoi_mesh(const ACMap& ac_map,
@@ -633,8 +676,12 @@ private:
       std::vector<double> b = cs_.barycenter(ac_pair.first->first);
       perturb_voronoi_vertex(b, 0.00001);
       W.push_back(b);
-      for (int i = 0; i < d; ++i)
-        ofs << b[i] << " ";
+      if (d == 2)
+        ofs << b[0] << " " << b[1] << " ";
+      else
+        ofs << b[0] << " " << b[1] << " " << b[2] << " ";
+      // for (int i = 0; i < d; ++i)
+      //   ofs << b[i] << " ";
       ofs << "215 \n";
       ofs_bb << ac_pair.second->get_filtration() << "\n";
     }
@@ -703,6 +750,7 @@ private:
       std::vector<Hasse_cell*> edges, hexagons, permutahedra;
       std::vector<std::vector<int> > tetrahedra; 
       std::vector<double> filtrations;
+      std::vector<int> mask;
       for (auto s: hasse_diagram)
         if (s->get_dimension() == 1)
           edges.push_back(s);
@@ -713,14 +761,27 @@ private:
       typedef CGAL::Epick_d<CGAL::Dimension_tag<3> > Kernel;
       typedef typename Kernel::Point_d Point_d;
       typedef CGAL::Delaunay_triangulation<Kernel> Delaunay_triangulation;
+      // for (auto e: edges) {
+      //   if (e->get_coBoundary().size() > 2) {
+      //     std::vector<double> f_cob;
+      //     for (auto h_pair: e->get_coBoundary())
+      //       f_cob.push_back(h_pair.first->get_filtration());
+      //     std::sort(f_cob.begin(), f_cob.end());
+      //     std::cout << "Oversaturated edge at filtration " << f_cob[2] << "\n";
+      //   }
+      // }
       for (auto h: hexagons) {
         // constrain the outer edges, which are found by the convex hull
         std::vector<Point_d> vertices;
         std::vector<int> v_indices;
         std::set<Hasse_cell*> v_cells;
-        for (auto e_pair: h->get_boundary())
+        int mask_val = 517;
+        for (auto e_pair: h->get_boundary()) {
+          if (e_pair.first->get_coBoundary().size() > 2)
+            mask_val = 518;
           for (auto v_pair: e_pair.first->get_boundary())
             v_cells.emplace(v_pair.first);
+        }
         for (auto vc: v_cells) {
           std::vector<double>& b = W[ci_map.at(vc)-1];
           vertices.push_back(Point_d(b[0], b[1], b[2]));
@@ -739,6 +800,7 @@ private:
             tetrahedron.push_back(v_indices[index_of_vertex[*fv_it]]);
           tetrahedra.push_back(tetrahedron);
           filtrations.push_back(h->get_filtration());
+          mask.push_back(mask_val);
         }
       }
       for (auto p: permutahedra) {
@@ -746,7 +808,7 @@ private:
         std::vector<Point_d> vertices;
         std::vector<int> v_indices;
         std::set<Hasse_cell*> v_cells;
-        // std::cout << "3-cell " << p->get_position()  << " " << p->get_filtration() << ":\n";
+        // std::cout << "3-cell " << p->get_filtration() << ":\n";
         for (auto h_pair: p->get_boundary()) {
           // std::cout << "2-cell " << h_pair.first->get_position() << " " << h_pair.first->get_filtration() << ":\n";
           for (auto e_pair: h_pair.first->get_boundary()) {
@@ -789,11 +851,12 @@ private:
       ofs << "Tetrahedra " << tetrahedra.size() << "\n";
       // ofs_bb << tetrahedra.size() << " 1\n";
       // auto f_it = filtrations.begin();
+      auto m_it = mask.begin();
       for (auto s: tetrahedra) {
         for (auto v: s) {
           ofs << v << " ";
         }
-        ofs << "517" << std::endl;
+        ofs << *m_it++ << std::endl;
         // ofs_bb << *f_it++ << "\n";
       }
       

@@ -28,6 +28,16 @@ target_link_libraries(generate_projective_plane ${Boost_SYSTEM_LIBRARY} ${Boost_
 target_link_libraries(generate_projective_plane ${Boost_PROGRAM_OPTIONS_LIBRARY})
 target_link_libraries(generate_projective_plane ${TBB_LIBRARIES})
 
+add_executable ( generate_torus_3 generate_torus_3.cpp )
+target_link_libraries(generate_torus_3 ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+target_link_libraries(generate_torus_3 ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(generate_torus_3 ${TBB_LIBRARIES})
+
+add_executable ( generate_swiss_roll generate_swiss_roll.cpp )
+target_link_libraries(generate_swiss_roll ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+target_link_libraries(generate_swiss_roll ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(generate_swiss_roll ${TBB_LIBRARIES})
+
 add_executable ( Hasse_diagram_weird hasse_weird.cpp )
 target_link_libraries(Hasse_diagram_weird ${TBB_LIBRARIES})
 
