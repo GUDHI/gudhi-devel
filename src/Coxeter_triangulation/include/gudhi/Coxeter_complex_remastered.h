@@ -41,6 +41,7 @@ class Coxeter_complex {
   struct Fields {
     Graph_v gv;
     Filtration f;
+    std::vector<typename Point_range::const_iterator> points;
     Fields(Graph_v gv_in, Filtration f_in) : gv(gv_in), f(f_in) {}
   };
   
@@ -76,6 +77,7 @@ class Coxeter_complex {
       if (a_it == a_map.end()) {
         Graph_v a_v = boost::add_vertex(graph);
         a_it = a_map.emplace(a.id, Fields(a_v, a.f)).first;
+        a_it->second.points.push_back(p_it_);
         inv_map.emplace(a_v, a_it);
         for (Id v_id: vertices) {
           auto v_it = v_map.find(v_id);
@@ -93,6 +95,7 @@ class Coxeter_complex {
       }
       else {
         a_it->second.f = std::min(a_it->second.f, a.f);
+        a_it->second.points.push_back(p_it_);
         Graph_v a_v = a_it->second.gv;
         for (Id v_id: vertices) {
           auto v_it = v_map.find(v_id);
@@ -748,7 +751,7 @@ private:
     }
     else {
       std::vector<Hasse_cell*> edges, hexagons, permutahedra;
-      std::vector<std::vector<int> > tetrahedra; 
+      std::vector<std::vector<int> > triangles, tetrahedra; 
       std::vector<double> filtrations;
       std::vector<int> mask;
       for (auto s: hasse_diagram)
@@ -758,9 +761,12 @@ private:
           hexagons.push_back(s);
         else if (s->get_dimension() == 3)
           permutahedra.push_back(s);
-      typedef CGAL::Epick_d<CGAL::Dimension_tag<3> > Kernel;
-      typedef typename Kernel::Point_d Point_d;
-      typedef CGAL::Delaunay_triangulation<Kernel> Delaunay_triangulation;
+      typedef CGAL::Epick_d<CGAL::Dimension_tag<3> > Kernel_3;
+      typedef CGAL::Epick_d<CGAL::Dimension_tag<2> > Kernel_2;
+      typedef typename Kernel_3::Point_d Point_3;
+      typedef typename Kernel_2::Point_d Point_2;
+      typedef CGAL::Delaunay_triangulation<Kernel_3> Delaunay_triangulation_3;
+      typedef CGAL::Delaunay_triangulation<Kernel_2> Delaunay_triangulation_2;
       // for (auto e: edges) {
       //   if (e->get_coBoundary().size() > 2) {
       //     std::vector<double> f_cob;
@@ -772,7 +778,7 @@ private:
       // }
       for (auto h: hexagons) {
         // constrain the outer edges, which are found by the convex hull
-        std::vector<Point_d> vertices;
+        std::vector<Point_2> vertices;
         std::vector<int> v_indices;
         std::set<Hasse_cell*> v_cells;
         int mask_val = 517;
@@ -784,28 +790,28 @@ private:
         }
         for (auto vc: v_cells) {
           std::vector<double>& b = W[ci_map.at(vc)-1];
-          vertices.push_back(Point_d(b[0], b[1], b[2]));
+          vertices.push_back(Point_2(b[0], b[1]));
           v_indices.push_back(ci_map.at(vc));
         }
-        Delaunay_triangulation del(3);
+        Delaunay_triangulation_2 del(2);
         index = 0;
-        std::map<typename Delaunay_triangulation::Vertex_handle, int> index_of_vertex;
+        std::map<typename Delaunay_triangulation_2::Vertex_handle, int> index_of_vertex;
         for (auto p: vertices)
           index_of_vertex.emplace(del.insert(p), index++);
         for (auto fc_it = del.full_cells_begin(); fc_it != del.full_cells_end(); ++fc_it) {
           if (del.is_infinite(fc_it))
             continue;
-          std::vector<int> tetrahedron;
+          std::vector<int> triangle;
           for (auto fv_it = fc_it->vertices_begin(); fv_it != fc_it->vertices_end(); ++fv_it)
-            tetrahedron.push_back(v_indices[index_of_vertex[*fv_it]]);
-          tetrahedra.push_back(tetrahedron);
+            triangle.push_back(v_indices[index_of_vertex[*fv_it]]);
+          triangles.push_back(triangle);
           filtrations.push_back(h->get_filtration());
           mask.push_back(mask_val);
         }
       }
       for (auto p: permutahedra) {
         // constrain the outer edges, which are found by the convex hull
-        std::vector<Point_d> vertices;
+        std::vector<Point_3> vertices;
         std::vector<int> v_indices;
         std::set<Hasse_cell*> v_cells;
         // std::cout << "3-cell " << p->get_filtration() << ":\n";
@@ -822,13 +828,13 @@ private:
         }
         for (auto vc: v_cells) {
           std::vector<double>& b = W[ci_map.at(vc)-1];
-          vertices.push_back(Point_d(b[0], b[1], b[2]));
+          vertices.push_back(Point_3(b[0], b[1], b[2]));
           v_indices.push_back(ci_map.at(vc));
           // std::cout << "Vertex " << vc->get_position() << " " << vc->get_filtration() << ":\n"; 
         }
-        Delaunay_triangulation del(3);
+        Delaunay_triangulation_3 del(3);
         index = 0;
-        std::map<typename Delaunay_triangulation::Vertex_handle, int> index_of_vertex;
+        std::map<typename Delaunay_triangulation_3::Vertex_handle, int> index_of_vertex;
         for (auto pt: vertices)
           index_of_vertex.emplace(del.insert(pt), index++);
         for (auto fc_it = del.full_cells_begin(); fc_it != del.full_cells_end(); ++fc_it) {
@@ -848,16 +854,20 @@ private:
         }
         ofs << "515" << std::endl;
       }
-      ofs << "Tetrahedra " << tetrahedra.size() << "\n";
-      // ofs_bb << tetrahedra.size() << " 1\n";
-      // auto f_it = filtrations.begin();
+      ofs << "Triangles " << triangles.size() << "\n";
       auto m_it = mask.begin();
-      for (auto s: tetrahedra) {
+      for (auto s: triangles) {
         for (auto v: s) {
           ofs << v << " ";
         }
         ofs << *m_it++ << std::endl;
-        // ofs_bb << *f_it++ << "\n";
+      }
+      ofs << "Tetrahedra " << tetrahedra.size() << "\n";
+      for (auto s: tetrahedra) {
+        for (auto v: s) {
+          ofs << v << " ";
+        }
+        ofs << "545\n";
       }
       
     }
