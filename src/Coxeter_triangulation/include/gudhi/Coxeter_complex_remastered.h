@@ -659,18 +659,7 @@ private:
   
     std::ofstream ofs (file_name + ".mesh", std::ofstream::out);
     std::ofstream ofs_bb (file_name + ".bb", std::ofstream::out);
-    if (d <= 2) {
-      ofs << "MeshVersionFormatted 1\nDimension 2\n";
-      ofs_bb << "2 1 ";
-    }
-    else {
-      ofs << "MeshVersionFormatted 1\nDimension 3\n";
-      ofs_bb << "3 1 ";
-    }
-  
-    ofs << "Vertices\n" << ac_map.size() << "\n";
-    ofs_bb << ac_map.size() << " 2 \n";
-    
+      
     std::vector<std::vector<double> > W;
     std::map<Hasse_cell*, int> ci_map;
     int index = 1;
@@ -679,14 +668,6 @@ private:
       std::vector<double> b = cs_.barycenter(ac_pair.first->first);
       perturb_voronoi_vertex(b, 0.00001);
       W.push_back(b);
-      if (d == 2)
-        ofs << b[0] << " " << b[1] << " ";
-      else
-        ofs << b[0] << " " << b[1] << " " << b[2] << " ";
-      // for (int i = 0; i < d; ++i)
-      //   ofs << b[i] << " ";
-      ofs << "215 \n";
-      ofs_bb << ac_pair.second->get_filtration() << "\n";
     }
     // perturb_voronoi_vertices(W, 0.00001);
     if (d == 2) {
@@ -714,7 +695,7 @@ private:
             v_cells.emplace(v_pair.first);
         for (auto vc: v_cells) {
           std::vector<double>& b = W[ci_map.at(vc)-1];
-          vertices.push_back(Point_d(b[0], b[1]));
+          vertices.push_back(Point_d(b[0]-b[2], b[1]));
           v_indices.push_back(ci_map.at(vc));
         }
         Delaunay_triangulation del(2);
@@ -732,6 +713,13 @@ private:
           filtrations.push_back(h->get_filtration());
         }
       }
+      ofs << "MeshVersionFormatted 1\nDimension 2\n";
+      ofs_bb << "2 1 ";
+      ofs << "Vertices\n" << W.size() << "\n";
+      // ofs_bb << ac_map.size() << " 2 \n";
+      for (auto p: W) {
+        ofs << p[0] << " " << p[1] << " 215\n";
+      }
       ofs << "Edges " << edges.size() << "\n";
       for (auto s: edges) {
         for (auto v: s->get_boundary()) {
@@ -740,13 +728,13 @@ private:
         ofs << "515" << std::endl;
       }
       ofs << "Triangles " << triangles.size() << "\n";
-      // ofs_bb << triangles.size() << " 1\n";
-      // auto f_it = filtrations.begin();
+      ofs_bb << triangles.size() << " 1\n";
+      auto f_it = filtrations.begin();
       for (auto s: triangles) {
         for (auto v: s)
           ofs << v << " ";
         ofs << "516" << std::endl;
-        // ofs_bb << *f_it++ << "\n";
+        ofs_bb << *f_it++ << "\n";
       }
     }
     else {
@@ -762,11 +750,8 @@ private:
         else if (s->get_dimension() == 3)
           permutahedra.push_back(s);
       typedef CGAL::Epick_d<CGAL::Dimension_tag<3> > Kernel_3;
-      typedef CGAL::Epick_d<CGAL::Dimension_tag<2> > Kernel_2;
       typedef typename Kernel_3::Point_d Point_3;
-      typedef typename Kernel_2::Point_d Point_2;
       typedef CGAL::Delaunay_triangulation<Kernel_3> Delaunay_triangulation_3;
-      typedef CGAL::Delaunay_triangulation<Kernel_2> Delaunay_triangulation_2;
       // for (auto e: edges) {
       //   if (e->get_coBoundary().size() > 2) {
       //     std::vector<double> f_cob;
@@ -778,32 +763,27 @@ private:
       // }
       for (auto h: hexagons) {
         // constrain the outer edges, which are found by the convex hull
-        std::vector<Point_2> vertices;
-        std::vector<int> v_indices;
+        // std::vector<Point_2> vertices;
+        // std::vector<std::vector<double> > vertices;
+        std::vector<double> barycenter(3);
         std::set<Hasse_cell*> v_cells;
-        int mask_val = 517;
+        int mask_val = 3;
         for (auto e_pair: h->get_boundary()) {
           if (e_pair.first->get_coBoundary().size() > 2)
-            mask_val = 518;
+            mask_val = 517;
           for (auto v_pair: e_pair.first->get_boundary())
-            v_cells.emplace(v_pair.first);
+            v_cells.emplace(v_pair.first);          
         }
         for (auto vc: v_cells) {
-          std::vector<double>& b = W[ci_map.at(vc)-1];
-          vertices.push_back(Point_2(b[0], b[1]));
-          v_indices.push_back(ci_map.at(vc));
+          barycenter[0] += W[ci_map.at(vc)-1][0] / v_cells.size();
+          barycenter[1] += W[ci_map.at(vc)-1][1] / v_cells.size();
+          barycenter[2] += W[ci_map.at(vc)-1][2] / v_cells.size();
         }
-        Delaunay_triangulation_2 del(2);
-        index = 0;
-        std::map<typename Delaunay_triangulation_2::Vertex_handle, int> index_of_vertex;
-        for (auto p: vertices)
-          index_of_vertex.emplace(del.insert(p), index++);
-        for (auto fc_it = del.full_cells_begin(); fc_it != del.full_cells_end(); ++fc_it) {
-          if (del.is_infinite(fc_it))
-            continue;
-          std::vector<int> triangle;
-          for (auto fv_it = fc_it->vertices_begin(); fv_it != fc_it->vertices_end(); ++fv_it)
-            triangle.push_back(v_indices[index_of_vertex[*fv_it]]);
+        W.push_back(barycenter);
+        for (auto e_pair: h->get_boundary()) {
+          std::vector<int> triangle(1, W.size());
+          for (auto v_pair: e_pair.first->get_boundary())
+            triangle.push_back(ci_map.at(v_pair.first));
           triangles.push_back(triangle);
           filtrations.push_back(h->get_filtration());
           mask.push_back(mask_val);
@@ -847,6 +827,12 @@ private:
           filtrations.push_back(p->get_filtration());
         }
       }
+      ofs << "MeshVersionFormatted 1\nDimension 3\n";
+      ofs_bb << "3 1 ";
+      ofs << "Vertices\n" << W.size() << "\n";
+      for (auto p: W) {
+        ofs << p[0] << " " << p[1] << " " << p[2] << " 215\n";
+      }
       ofs << "Edges " << edges.size() << "\n";
       for (auto s: edges) {
         for (auto v: s->get_boundary()) {
@@ -855,12 +841,15 @@ private:
         ofs << "515" << std::endl;
       }
       ofs << "Triangles " << triangles.size() << "\n";
+      ofs_bb << triangles.size()+tetrahedra.size() << " 1\n";
       auto m_it = mask.begin();
+      auto f_it = filtrations.begin();
       for (auto s: triangles) {
         for (auto v: s) {
           ofs << v << " ";
         }
         ofs << *m_it++ << std::endl;
+        ofs_bb << *f_it++ << "\n";
       }
       ofs << "Tetrahedra " << tetrahedra.size() << "\n";
       for (auto s: tetrahedra) {
@@ -868,6 +857,7 @@ private:
           ofs << v << " ";
         }
         ofs << "545\n";
+        ofs_bb << *f_it++ << "\n";
       }
       
     }
