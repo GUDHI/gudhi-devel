@@ -34,8 +34,8 @@ cdef extern from "Kernels_interface.h" namespace "Gudhi::persistence_diagram":
     vector[vector[double]] sw_matrix     (vector[vector[pair[double, double]]],  vector[vector[pair[double, double]]],  double, int)
     double                 pss           (vector[pair[double, double]],          vector[pair[double, double]],          double, int)
     vector[vector[double]] pss_matrix    (vector[vector[pair[double, double]]],  vector[vector[pair[double, double]]],  double, int)
-    double                 pwg           (vector[pair[double, double]],          vector[pair[double, double]],          double, int)
-    vector[vector[double]] pwg_matrix    (vector[vector[pair[double, double]]],  vector[vector[pair[double, double]]],  double, int)
+    double                 pwg           (vector[pair[double, double]],          vector[pair[double, double]],          double, int, double, double)
+    vector[vector[double]] pwg_matrix    (vector[vector[pair[double, double]]],  vector[vector[pair[double, double]]],  double, int, double, double)
 
 def sliced_wasserstein(diagram_1, diagram_2, sigma = 1, N = 100):
     """
@@ -65,7 +65,7 @@ def sliced_wasserstein_matrix(diagrams_1, diagrams_2, sigma = 1, N = 100):
     """
     return sw_matrix(diagrams_1, diagrams_2, sigma, N)
 
-def persistence_weighted_gaussian(diagram_1, diagram_2, sigma = 1, N = 100):
+def persistence_weighted_gaussian(diagram_1, diagram_2, sigma = 1, N = 100, C = 1, p = 1):
     """
 
     :param diagram_1: The first diagram.
@@ -74,12 +74,14 @@ def persistence_weighted_gaussian(diagram_1, diagram_2, sigma = 1, N = 100):
     :type diagram_2: vector[pair[double, double]]
     :param sigma: bandwidth of Gaussian
     :param N: number of Fourier features
+    :param C: cost of persistence weight
+    :param p: power of persistence weight
 
     :returns: the persistence weighted gaussian kernel.
     """
-    return pwg(diagram_1, diagram_2, sigma, N)
+    return pwg(diagram_1, diagram_2, sigma, N, C, p)
 
-def persistence_weighted_gaussian_matrix(diagrams_1, diagrams_2, sigma = 1, N = 100):
+def persistence_weighted_gaussian_matrix(diagrams_1, diagrams_2, sigma = 1, N = 100, C = 1, p = 1):
     """
 
     :param diagram_1: The first set of diagrams.
@@ -88,10 +90,12 @@ def persistence_weighted_gaussian_matrix(diagrams_1, diagrams_2, sigma = 1, N = 
     :type diagram_2: vector[vector[pair[double, double]]]
     :param sigma: bandwidth of Gaussian
     :param N: number of Fourier features
+    :param C: cost of persistence weight
+    :param p: power of persistence weight
 
     :returns: the persistence weighted gaussian kernel matrix.
     """
-    return pwg_matrix(diagrams_1, diagrams_2, sigma, N)
+    return pwg_matrix(diagrams_1, diagrams_2, sigma, N, C, p)
 
 def persistence_scale_space(diagram_1, diagram_2, sigma = 1, N = 100):
     """

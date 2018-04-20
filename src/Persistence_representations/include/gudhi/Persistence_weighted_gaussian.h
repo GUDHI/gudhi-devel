@@ -97,7 +97,7 @@ class Persistence_weighted_gaussian{
    * @param[in] _weight        weight function for the points in the diagrams.
    *
    */
-  Persistence_weighted_gaussian(PD _diagram, double _sigma = 1.0, int _approx = 1000, Weight _weight = arctan_weight){diagram = _diagram; sigma = _sigma; approx = _approx; weight = _weight;}
+  Persistence_weighted_gaussian(PD _diagram, double _sigma = 1.0, int _approx = 1000, Weight _weight = arctan_weight(1,1)){diagram = _diagram; sigma = _sigma; approx = _approx; weight = _weight;}
   
   PD get_diagram() const {return this->diagram;}
   double get_sigma() const {return this->sigma;}
@@ -115,16 +115,13 @@ class Persistence_weighted_gaussian{
    * @param[in] p point in 2D.
    *
    */
-  static double pss_weight(std::pair<double,double> p){
-    if(p.second > p.first)  return 1;
-    else return -1;
-  }
+  static double pss_weight(std::pair<double,double> p)     {if(p.second > p.first)  return 1; else return -1;}
+  static double linear_weight(std::pair<double,double> p)  {return std::abs(p.second - p.first);}
+  static double const_weight(std::pair<double,double> p)   {return 1;}
+  static std::function<double (std::pair<double,double>) > arctan_weight(double C, double power)  {return [=](std::pair<double,double> p){return C * atan(std::pow(std::abs(p.second - p.first), power));};}
 
-  static double arctan_weight(std::pair<double,double> p){
-    return atan(p.second - p.first);
-  }
 
-  std::vector<std::pair<double,double> > Fourier_feat(PD diag, std::vector<std::pair<double,double> > z, Weight weight = arctan_weight){
+  std::vector<std::pair<double,double> > Fourier_feat(PD diag, std::vector<std::pair<double,double> > z, Weight weight = arctan_weight(1,1)){
     int md = diag.size(); std::vector<std::pair<double,double> > b; int mz = z.size();
     for(int i = 0; i < mz; i++){
       double d1 = 0; double d2 = 0; double zx = z[i].first; double zy = z[i].second;

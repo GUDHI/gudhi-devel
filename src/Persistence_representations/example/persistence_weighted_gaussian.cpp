@@ -48,11 +48,11 @@ int main(int argc, char** argv) {
   double tau = 1;
   int m = 10000;
 
-  PWG PWG1(persistence1, sigma, m, PWG::arctan_weight);
-  PWG PWG2(persistence2, sigma, m, PWG::arctan_weight);
+  PWG PWG1(persistence1, sigma, m, PWG::arctan_weight(1,1));
+  PWG PWG2(persistence2, sigma, m, PWG::arctan_weight(1,1));
 
-  PWG PWGex1(persistence1, sigma, -1, PWG::arctan_weight);
-  PWG PWGex2(persistence2, sigma, -1, PWG::arctan_weight);
+  PWG PWGex1(persistence1, sigma, -1, PWG::arctan_weight(1,1));
+  PWG PWGex2(persistence2, sigma, -1, PWG::arctan_weight(1,1));
 
 
   // Linear PWG

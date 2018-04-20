@@ -34,25 +34,24 @@ namespace Gudhi {
 
 namespace persistence_diagram {
 
-  double sw(const std::vector<std::pair<double, double>>& diag1,
-            const std::vector<std::pair<double, double>>& diag2,
-            double sigma, int N) {
+
+  // *******************
+  // Kernel evaluations.
+  // *******************
+
+  double sw(const std::vector<std::pair<double, double>>& diag1, const std::vector<std::pair<double, double>>& diag2, double sigma, int N) {
     Gudhi::Persistence_representations::Sliced_Wasserstein sw1(diag1, sigma, N);
     Gudhi::Persistence_representations::Sliced_Wasserstein sw2(diag2, sigma, N);
     return sw1.compute_scalar_product(sw2);
   }
 
-  double pwg(const std::vector<std::pair<double, double>>& diag1,
-             const std::vector<std::pair<double, double>>& diag2,
-             double sigma, int N) {
-    Gudhi::Persistence_representations::Persistence_weighted_gaussian pwg1(diag1, sigma, N, Gudhi::Persistence_representations::Persistence_weighted_gaussian::arctan_weight);
-    Gudhi::Persistence_representations::Persistence_weighted_gaussian pwg2(diag2, sigma, N, Gudhi::Persistence_representations::Persistence_weighted_gaussian::arctan_weight);
+  double pwg(const std::vector<std::pair<double, double>>& diag1, const std::vector<std::pair<double, double>>& diag2, double sigma, int N, double C, double p) {
+    Gudhi::Persistence_representations::Persistence_weighted_gaussian pwg1(diag1, sigma, N, Gudhi::Persistence_representations::Persistence_weighted_gaussian::arctan_weight(C,p));
+    Gudhi::Persistence_representations::Persistence_weighted_gaussian pwg2(diag2, sigma, N, Gudhi::Persistence_representations::Persistence_weighted_gaussian::arctan_weight(C,p));
     return pwg1.compute_scalar_product(pwg2);
   }
 
-  double pss(const std::vector<std::pair<double, double>>& diag1,
-             const std::vector<std::pair<double, double>>& diag2,
-             double sigma, int N) {
+  double pss(const std::vector<std::pair<double, double>>& diag1, const std::vector<std::pair<double, double>>& diag2, double sigma, int N) {
     std::vector<std::pair<double, double>> pd1 = diag1; int numpts = diag1.size();    for(int i = 0; i < numpts; i++)  pd1.emplace_back(diag1[i].second,diag1[i].first);
     std::vector<std::pair<double, double>> pd2 = diag2;     numpts = diag2.size();    for(int i = 0; i < numpts; i++)  pd2.emplace_back(diag2[i].second,diag2[i].first);
 
@@ -62,9 +61,7 @@ namespace persistence_diagram {
     return pwg1.compute_scalar_product  (pwg2) / (16*Gudhi::Persistence_representations::pi*sigma);
   }
 
-  double pss_sym(const std::vector<std::pair<double, double>>& diag1,
-             const std::vector<std::pair<double, double>>& diag2,
-             double sigma, int N) {
+  double pss_sym(const std::vector<std::pair<double, double>>& diag1, const std::vector<std::pair<double, double>>& diag2, double sigma, int N) {
     Gudhi::Persistence_representations::Persistence_weighted_gaussian pwg1(diag1, 2*std::sqrt(sigma), N, Gudhi::Persistence_representations::Persistence_weighted_gaussian::pss_weight);
     Gudhi::Persistence_representations::Persistence_weighted_gaussian pwg2(diag2, 2*std::sqrt(sigma), N, Gudhi::Persistence_representations::Persistence_weighted_gaussian::pss_weight);
 
@@ -72,9 +69,11 @@ namespace persistence_diagram {
   }
 
 
-  std::vector<std::vector<double> > sw_matrix(const std::vector<std::vector<std::pair<double, double> > >& s1,
-                                              const std::vector<std::vector<std::pair<double, double> > >& s2,
-                                              double sigma, int N){
+  // ****************
+  // Kernel matrices.
+  // ****************
+
+  std::vector<std::vector<double> > sw_matrix(const std::vector<std::vector<std::pair<double, double> > >& s1, const std::vector<std::vector<std::pair<double, double> > >& s2, double sigma, int N){
     std::vector<std::vector<double> > matrix;
     std::vector<Gudhi::Persistence_representations::Sliced_Wasserstein> ss1;
     int num_diag_1 = s1.size(); for(int i = 0; i < num_diag_1; i++){Gudhi::Persistence_representations::Sliced_Wasserstein sw1(s1[i], sigma, N); ss1.push_back(sw1);}
@@ -87,22 +86,17 @@ namespace persistence_diagram {
     return matrix;
   }
 
-  std::vector<std::vector<double> > pwg_matrix(const std::vector<std::vector<std::pair<double, double> > >& s1,
-                                               const std::vector<std::vector<std::pair<double, double> > >& s2,
-                                               double sigma, int N){
+  std::vector<std::vector<double> > pwg_matrix(const std::vector<std::vector<std::pair<double, double> > >& s1, const std::vector<std::vector<std::pair<double, double> > >& s2, double sigma, int N, double C, double p){
     std::vector<std::vector<double> > matrix; int num_diag_1 = s1.size(); int num_diag_2 = s2.size();
     for(int i = 0; i < num_diag_1; i++){
       std::cout << 100.0*i/num_diag_1 << " %" << std::endl;
-      std::vector<double> ps; for(int j = 0; j < num_diag_2; j++) ps.push_back(pwg(s1[i], s2[j], sigma, N)); matrix.push_back(ps);
+      std::vector<double> ps; for(int j = 0; j < num_diag_2; j++) ps.push_back(pwg(s1[i], s2[j], sigma, N, C, p)); matrix.push_back(ps);
     }
     return matrix;
   }
 
-  std::vector<std::vector<double> > pss_matrix(const std::vector<std::vector<std::pair<double, double> > >& s1,
-                                               const std::vector<std::vector<std::pair<double, double> > >& s2,
-                                               double sigma, int N){
-    std::vector<std::vector<std::pair<double, double> > > ss1, ss2;
-    std::vector<std::vector<double> > matrix; int num_diag_1 = s1.size(); int num_diag_2 = s2.size();
+  std::vector<std::vector<double> > pss_matrix(const std::vector<std::vector<std::pair<double, double> > >& s1, const std::vector<std::vector<std::pair<double, double> > >& s2, double sigma, int N){
+    std::vector<std::vector<std::pair<double, double> > > ss1, ss2; std::vector<std::vector<double> > matrix; int num_diag_1 = s1.size(); int num_diag_2 = s2.size();
     for(int i = 0; i < num_diag_1; i++){
       std::vector<std::pair<double, double>> pd1 = s1[i]; int numpts = s1[i].size();    
       for(int j = 0; j < numpts; j++)  pd1.emplace_back(s1[i][j].second,s1[i][j].first);

@@ -37,6 +37,7 @@ include '@CMAKE_CURRENT_SOURCE_DIR@/cython/reader_utils.pyx'
 include '@CMAKE_CURRENT_SOURCE_DIR@/cython/witness_complex.pyx'
 include '@CMAKE_CURRENT_SOURCE_DIR@/cython/strong_witness_complex.pyx'
 include '@CMAKE_CURRENT_SOURCE_DIR@/cython/kernels.pyx'
+include '@CMAKE_CURRENT_SOURCE_DIR@/cython/vectors.pyx'
 @GUDHI_CYTHON_ALPHA_COMPLEX@
 @GUDHI_CYTHON_EUCLIDEAN_WITNESS_COMPLEX@
 @GUDHI_CYTHON_SUBSAMPLING@

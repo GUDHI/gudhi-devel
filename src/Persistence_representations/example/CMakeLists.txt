@@ -37,3 +37,12 @@ add_test(NAME Persistence_weighted_gaussian
     COMMAND $<TARGET_FILE:Persistence_weighted_gaussian>)
 install(TARGETS Persistence_weighted_gaussian DESTINATION bin)
 
+add_executable ( Persistence_image persistence_image.cpp )
+add_test(NAME Persistence_image
+    COMMAND $<TARGET_FILE:Persistence_image>)
+install(TARGETS Persistence_image DESTINATION bin)
+
+add_executable ( Landscape landscape.cpp )
+add_test(NAME Landscape
+    COMMAND $<TARGET_FILE:Landscape>)
+install(TARGETS Landscape DESTINATION bin)
