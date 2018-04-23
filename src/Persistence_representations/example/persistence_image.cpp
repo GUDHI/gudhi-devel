@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
   persistence.push_back(std::make_pair(0, 4));
   persistence.push_back(std::make_pair(3, 8));
 
-  double min_x = 0.0; double max_x = 10.0; int res_x = 100; double min_y = 0.0; double max_y = 10.0; int res_y = 100; double sigma = 1.0; Weight weight = Gudhi::Persistence_representations::Persistence_weighted_gaussian::linear_weight;
+  double min_x = 0.0; double max_x = 10.0; int res_x = 100; double min_y = 0.0; double max_y = 10.0; int res_y = 100; double sigma = 1.0; Weight weight = Gudhi::Persistence_representations::linear_weight;
 
   PI pim(persistence, min_x, max_x, res_x, min_y, max_y, res_y, weight, sigma);
   std::vector<std::vector<double> > P = pim.vectorize();

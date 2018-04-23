@@ -26,6 +26,7 @@
 // gudhi include
 #include <gudhi/read_persistence_from_file.h>
 #include <gudhi/common_persistence_representations.h>
+#include <gudhi/Weight_functions.h>
 
 // standard include
 #include <cmath>
@@ -39,19 +40,16 @@
 #include <utility>
 #include <functional>
 
-using PD = std::vector<std::pair<double,double> >;
-using Weight = std::function<double (std::pair<double,double>) >;
-
 namespace Gudhi {
 namespace Persistence_representations {
 /**
  * \class Persistence_weighted_gaussian gudhi/Persistence_weighted_gaussian.h
- * \brief A class implementing the Persistence Weighted Gaussian Kernel and a specific case of it called the Persistence Scale Space Kernel.
+ * \brief A class implementing the Persistence Weighted Gaussian kernel and a specific case thereof called the Persistence Scale Space kernel.
  *
  * \ingroup Persistence_representations
  *
  * \details
- * The Persistence Weighted Gaussian Kernel is built with Gaussian Kernel Mean Embedding, meaning that each persistence diagram is first
+ * The Persistence Weighted Gaussian kernel is built with Gaussian Kernel Mean Embedding, meaning that each persistence diagram is first
  * sent to the Hilbert space of a Gaussian kernel with bandwidth parameter \f$\sigma >0\f$ using a weighted mean embedding \f$\Phi\f$:
  *
  * \f$ \Phi\,:\,D\,\rightarrow\,\sum_{p\in D}\,w(p)\,{\rm exp}\left(-\frac{\|p-\cdot\|_2^2}{2\sigma^2}\right) \f$,
@@ -69,59 +67,41 @@ namespace Persistence_representations {
  * in the diagrams. This time can be improved by computing approximations of the kernel
  * with \f$m\f$ Fourier features \cite Rahimi07randomfeatures. In that case, the computation time becomes \f$O(mn)\f$.
  *
- * The Persistence Scale Space Kernel is a Persistence Weighted Gaussian Kernel between modified diagrams:
+ * The Persistence Scale Space kernel is a Persistence Weighted Gaussian kernel between modified diagrams:
  * the symmetric of each point with respect to the diagonal is first added in each diagram, and then the weight function
  * is set to be +1 if the point is above the diagonal and -1 otherwise.
  * 
- * For more details, please consult <i>Persistence Weighted Kernel for Topological Data Analysis</i>\cite Kusano_Fukumizu_Hiraoka_PWGK 
- * and <i>A Stable Multi-Scale Kernel for Topological Machine Learning</i>\cite Reininghaus_Huber_ALL_PSSK . 
- * It implements the following concepts: Topological_data_with_distances, Topological_data_with_scalar_product.
+ * For more details, please see \cite Kusano_Fukumizu_Hiraoka_PWGK
+ * and \cite Reininghaus_Huber_ALL_PSSK .
  *
 **/
 class Persistence_weighted_gaussian{
 
  protected:
-    PD diagram;
+    Persistence_diagram diagram;
     Weight weight;
     double sigma;
     int approx;
 
  public:
 
-  /** \brief Persistence Weighted Gaussian Kernel constructor.
+  /** \brief Persistence Weighted Gaussian kernel constructor.
    * \ingroup Persistence_weighted_gaussian
    *
    * @param[in] _diagram       persistence diagram.
-   * @param[in] _sigma         bandwidth parameter of the Gaussian Kernel used for the Kernel Mean Embedding of the diagrams.
+   * @param[in] _sigma         bandwidth parameter of the Gaussian kernel used for the Kernel Mean Embedding of the diagrams.
    * @param[in] _approx        number of random Fourier features in case of approximate computation, set to -1 for exact computation.
    * @param[in] _weight        weight function for the points in the diagrams.
    *
    */
-  Persistence_weighted_gaussian(PD _diagram, double _sigma = 1.0, int _approx = 1000, Weight _weight = arctan_weight(1,1)){diagram = _diagram; sigma = _sigma; approx = _approx; weight = _weight;}
-  
-  PD get_diagram() const {return this->diagram;}
-  double get_sigma() const {return this->sigma;}
-  int get_approx() const {return this->approx;}
-  Weight get_weight() const {return this->weight;}
+  Persistence_weighted_gaussian(const Persistence_diagram & _diagram, double _sigma = 1.0, int _approx = 1000, const Weight & _weight = arctan_weight(1,1)){diagram = _diagram; sigma = _sigma; approx = _approx; weight = _weight;}
 
 
   // **********************************
   // Utils.
   // **********************************
 
-  /** \brief Specific weight of Persistence Scale Space Kernel.
-   * \ingroup Persistence_weighted_gaussian
-   *
-   * @param[in] p point in 2D.
-   *
-   */
-  static double pss_weight(std::pair<double,double> p)     {if(p.second > p.first)  return 1; else return -1;}
-  static double linear_weight(std::pair<double,double> p)  {return std::abs(p.second - p.first);}
-  static double const_weight(std::pair<double,double> p)   {return 1;}
-  static std::function<double (std::pair<double,double>) > arctan_weight(double C, double power)  {return [=](std::pair<double,double> p){return C * atan(std::pow(std::abs(p.second - p.first), power));};}
-
-
-  std::vector<std::pair<double,double> > Fourier_feat(PD diag, std::vector<std::pair<double,double> > z, Weight weight = arctan_weight(1,1)){
+  std::vector<std::pair<double,double> > Fourier_feat(const Persistence_diagram & diag, const std::vector<std::pair<double,double> > & z, const Weight & weight = arctan_weight(1,1)) const {
     int md = diag.size(); std::vector<std::pair<double,double> > b; int mz = z.size();
     for(int i = 0; i < mz; i++){
       double d1 = 0; double d2 = 0; double zx = z[i].first; double zy = z[i].second;
@@ -135,7 +115,7 @@ class Persistence_weighted_gaussian{
     return b;
   }
 
-  std::vector<std::pair<double,double> > random_Fourier(double sigma, int m = 1000){
+  std::vector<std::pair<double,double> > random_Fourier(double sigma, int m = 1000) const {
     std::normal_distribution<double> distrib(0,1); std::vector<std::pair<double,double> > z; std::random_device rd;
     for(int i = 0; i < m; i++){
       std::mt19937 e1(rd()); std::mt19937 e2(rd());
@@ -154,12 +134,14 @@ class Persistence_weighted_gaussian{
   /** \brief Evaluation of the kernel on a pair of diagrams.
    * \ingroup Persistence_weighted_gaussian
    *
-   * @param[in] second other instance of class Persistence_weighted_gaussian. Warning: sigma, approx and weight parameters need to be the same for both instances!!! 
+   * @pre       sigma, approx and weight attributes need to be the same for both instances.
+   * @param[in] second other instance of class Persistence_weighted_gaussian.
    *
    */
-  double compute_scalar_product(Persistence_weighted_gaussian second){
+  double compute_scalar_product(const Persistence_weighted_gaussian & second) const {
 
-    PD diagram1 = this->diagram; PD diagram2 = second.diagram;
+    GUDHI_CHECK(this->sigma != second.sigma || this->approx != second.approx || this->weight != second.weight, std::invalid_argument("Error: different values for representations"));
+    Persistence_diagram diagram1 = this->diagram; Persistence_diagram diagram2 = second.diagram;
 
     if(this->approx == -1){
       int num_pts1 = diagram1.size(); int num_pts2 = diagram2.size(); double k = 0;
@@ -171,7 +153,7 @@ class Persistence_weighted_gaussian{
       return k;
     }
     else{
-      std::vector<std::pair<double,double> > z =  random_Fourier(this->sigma, this->approx);
+      std::vector<std::pair<double,double> > z  = random_Fourier(this->sigma, this->approx);
       std::vector<std::pair<double,double> > b1 = Fourier_feat(diagram1,z,this->weight);
       std::vector<std::pair<double,double> > b2 = Fourier_feat(diagram2,z,this->weight);
       double d = 0; for(int i = 0; i < this->approx; i++) d += b1[i].first*b2[i].first + b1[i].second*b2[i].second;
@@ -182,20 +164,18 @@ class Persistence_weighted_gaussian{
   /** \brief Evaluation of the distance between images of diagrams in the Hilbert space of the kernel.
    * \ingroup Persistence_weighted_gaussian
    *
-   * @param[in] second other instance of class Persistence_weighted_gaussian. Warning: sigma, approx and weight parameters need to be the same for both instances!!! 
+   * @pre       sigma, approx and weight attributes need to be the same for both instances.
+   * @param[in] second other instance of class Persistence_weighted_gaussian.
    *
    */
-  double distance(Persistence_weighted_gaussian second) {
-    if(this->sigma != second.get_sigma() || this->approx != second.get_approx()){
-      std::cout << "Error: different representations!" << std::endl; return 0;
-    }
-    else return std::pow(this->compute_scalar_product(*this) + second.compute_scalar_product(second)-2*this->compute_scalar_product(second), 0.5);
+  double distance(const Persistence_weighted_gaussian & second) const {
+    GUDHI_CHECK(this->sigma != second.sigma || this->approx != second.approx || this->weight != second.weight, std::invalid_argument("Error: different values for representations"));
+    return std::pow(this->compute_scalar_product(*this) + second.compute_scalar_product(second)-2*this->compute_scalar_product(second), 0.5);
   }
 
 
-};
-
-}  // namespace Persistence_weighted_gaussian
+}; // class Persistence_weighted_gaussian
+}  // namespace Persistence_representations
 }  // namespace Gudhi
 
 #endif  // PERSISTENCE_WEIGHTED_GAUSSIAN_H_

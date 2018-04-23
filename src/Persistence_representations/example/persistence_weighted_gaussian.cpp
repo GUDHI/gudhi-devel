@@ -26,13 +26,11 @@
 #include <vector>
 #include <utility>
 
-using PD = std::vector<std::pair<double,double> >;
 using PWG = Gudhi::Persistence_representations::Persistence_weighted_gaussian;
 
 int main(int argc, char** argv) {
 
-  std::vector<std::pair<double, double> > persistence1;
-  std::vector<std::pair<double, double> > persistence2;
+  Persistence_diagram persistence1, persistence2;
 
   persistence1.push_back(std::make_pair(1, 2));
   persistence1.push_back(std::make_pair(6, 8));
@@ -48,11 +46,11 @@ int main(int argc, char** argv) {
   double tau = 1;
   int m = 10000;
 
-  PWG PWG1(persistence1, sigma, m, PWG::arctan_weight(1,1));
-  PWG PWG2(persistence2, sigma, m, PWG::arctan_weight(1,1));
+  PWG PWG1(persistence1, sigma, m, Gudhi::Persistence_representations::arctan_weight(1,1));
+  PWG PWG2(persistence2, sigma, m, Gudhi::Persistence_representations::arctan_weight(1,1));
 
-  PWG PWGex1(persistence1, sigma, -1, PWG::arctan_weight(1,1));
-  PWG PWGex2(persistence2, sigma, -1, PWG::arctan_weight(1,1));
+  PWG PWGex1(persistence1, sigma, -1, Gudhi::Persistence_representations::arctan_weight(1,1));
+  PWG PWGex2(persistence2, sigma, -1, Gudhi::Persistence_representations::arctan_weight(1,1));
 
 
   // Linear PWG
@@ -82,14 +80,14 @@ int main(int argc, char** argv) {
 
   // PSS
 
-  PD pd1 = persistence1; int numpts = persistence1.size();    for(int i = 0; i < numpts; i++)  pd1.emplace_back(persistence1[i].second,persistence1[i].first);
-  PD pd2 = persistence2;     numpts = persistence2.size();    for(int i = 0; i < numpts; i++)  pd2.emplace_back(persistence2[i].second,persistence2[i].first);
+  Persistence_diagram pd1 = persistence1; int numpts = persistence1.size();    for(int i = 0; i < numpts; i++)  pd1.emplace_back(persistence1[i].second,persistence1[i].first);
+  Persistence_diagram pd2 = persistence2;     numpts = persistence2.size();    for(int i = 0; i < numpts; i++)  pd2.emplace_back(persistence2[i].second,persistence2[i].first);
 
-  PWG pwg1(pd1, 2*std::sqrt(sigma), m, PWG::pss_weight);
-  PWG pwg2(pd2, 2*std::sqrt(sigma), m, PWG::pss_weight);
+  PWG pwg1(pd1, 2*std::sqrt(sigma), m, Gudhi::Persistence_representations::pss_weight);
+  PWG pwg2(pd2, 2*std::sqrt(sigma), m, Gudhi::Persistence_representations::pss_weight);
 
-  PWG pwgex1(pd1, 2*std::sqrt(sigma), -1, PWG::pss_weight);
-  PWG pwgex2(pd2, 2*std::sqrt(sigma), -1, PWG::pss_weight);
+  PWG pwgex1(pd1, 2*std::sqrt(sigma), -1, Gudhi::Persistence_representations::pss_weight);
+  PWG pwgex2(pd2, 2*std::sqrt(sigma), -1, Gudhi::Persistence_representations::pss_weight);
 
   std::cout << "Approx PSS kernel: " << pwg1.compute_scalar_product  (pwg2) / (16*Gudhi::Persistence_representations::pi*sigma) << std::endl;
   std::cout << "Exact  PSS kernel: " << pwgex1.compute_scalar_product  (pwgex2) / (16*Gudhi::Persistence_representations::pi*sigma) << std::endl;

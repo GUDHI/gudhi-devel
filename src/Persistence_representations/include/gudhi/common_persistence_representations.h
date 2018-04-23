@@ -28,17 +28,28 @@
 #include <cmath>
 #include <boost/math/constants/constants.hpp>
 
+/**
+ * In this module, we use the name Persistence_diagram for the representation of a diagram in a vector of pairs of two double.
+ */
+using Persistence_diagram = std::vector<std::pair<double,double> >;
+
+/**
+ * In this module, we use the name Weight for the representation of a function taking a pair of two double and returning a double.
+ */
+using Weight = std::function<double (std::pair<double,double>) >;
+
 namespace Gudhi {
 namespace Persistence_representations {
 // this file contain an implementation of some common procedures used in Persistence_representations.
 
 static constexpr double pi = boost::math::constants::pi<double>();
+
 // double epsi = std::numeric_limits<double>::epsilon();
 double epsi = 0.000005;
 
 /**
  *  A procedure used to compare doubles. Typically given two doubles A and B, comparing A == B is not good idea. In this
- *case, we use the procedure almostEqual with the epsi defined at
+ *  case, we use the procedure almostEqual with the epsi defined at
  *  the top of the file. Setting up the epsi gives the user a tolerance on what should be consider equal.
 **/
 inline bool almost_equal(double a, double b) {
@@ -55,8 +66,7 @@ double birth_plus_deaths(std::pair<double, double> a) { return a.first + a.secon
 
 // landscapes
 /**
- * Given two points in R^2, the procedure compute the parameters A and B of the line y = Ax + B that crosses those two
- *points.
+ * Given two points in R^2, the procedure compute the parameters A and B of the line y = Ax + B that crosses those two points.
 **/
 std::pair<double, double> compute_parameters_of_a_line(std::pair<double, double> p1, std::pair<double, double> p2) {
   double a = (p2.second - p1.second) / (p2.first - p1.first);
@@ -66,8 +76,7 @@ std::pair<double, double> compute_parameters_of_a_line(std::pair<double, double>
 
 // landscapes
 /**
- * This procedure given two points which lies on the opposite sides of x axis, compute x for which the line connecting
- *those two points crosses x axis.
+ * This procedure given two points which lies on the opposite sides of x axis, compute x for which the line connecting those two points crosses x axis.
 **/
 double find_zero_of_a_line_segment_between_those_two_points(std::pair<double, double> p1,
                                                             std::pair<double, double> p2) {
@@ -91,8 +100,7 @@ double find_zero_of_a_line_segment_between_those_two_points(std::pair<double, do
 // landscapes
 /**
  * This method provides a comparison of points that is used in construction of persistence landscapes. The ordering is
- *lexicographical for the first coordinate, and reverse-lexicographical for the
- * second coordinate.
+ * lexicographical for the first coordinate, and reverse-lexicographical for the second coordinate.
 **/
 bool compare_points_sorting(std::pair<double, double> f, std::pair<double, double> s) {
   if (f.first < s.first) {

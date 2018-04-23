@@ -24,7 +24,6 @@
 #define DOC_GUDHI_STAT_H_
 
 namespace Gudhi {
-
 namespace Persistence_representations {
 
 /**  \defgroup Persistence_representations Persistence representations
@@ -254,11 +253,11 @@ namespace Persistence_representations {
 
 
 
-\section sec_persistence_kernels Kernels on Persistence Diagrams
+\section sec_persistence_kernels Kernels on persistence diagrams
  <b>Reference manual:</b> \ref Gudhi::Persistence_representations::Sliced_Wasserstein <br>
  <b>Reference manual:</b> \ref Gudhi::Persistence_representations::Persistence_weighted_gaussian <br>
 
- Kernels for Persistence Diagrams can be regarded as infinite-dimensional vectorizations. More specifically,
+ Kernels for persistence diagrams can be regarded as infinite-dimensional vectorizations. More specifically,
  they are similarity functions whose evaluations on pairs of persistence diagrams equals the scalar products
  between images of these pairs under a map \f$\Phi\f$ taking values in a specific (possibly non Euclidean) Hilbert space \f$k(D_i, D_j) = \langle \Phi(D_i),\Phi(D_j)\rangle\f$.
  Reciprocally, classical results of learning theory ensure that such a \f$\Phi\f$ exists for a given similarity function \f$k\f$ if and only if \f$k\f$ is <i>positive semi-definite</i>.

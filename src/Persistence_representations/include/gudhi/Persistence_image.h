@@ -26,8 +26,8 @@
 // gudhi include
 #include <gudhi/read_persistence_from_file.h>
 #include <gudhi/common_persistence_representations.h>
+#include <gudhi/Weight_functions.h>
 #include <gudhi/Debug_utils.h>
-#include <gudhi/Persistence_weighted_gaussian.h>
 
 // standard include
 #include <cmath>
@@ -41,39 +41,49 @@
 #include <utility>
 #include <functional>
 
-using PD = std::vector<std::pair<double,double> >;
-using Weight = std::function<double (std::pair<double,double>) >;
-
 namespace Gudhi {
 namespace Persistence_representations {
 
 /**
  * \class Persistence_image gudhi/Persistence_image.h
- * \brief A class implementing the Persistence Images.
+ * \brief A class implementing the persistence images.
  *
  * \ingroup Persistence_representations
  *
  * \details
+ *
+ * Persistence images are a way to build images from persistence diagrams. Roughly, the idea is to center Gaussians on each diagram point, with a weight that usually depends on
+ * the distance to the diagonal, so that the diagram is turned into a function, and then to discretize the plane into pixels, and integrate this function on each pixel.
+ * See \cite Persistence_Images_2017 for more details.
  *
 **/
 
 class Persistence_image {
 
  protected:
-    PD diagram;
-    int res_x, res_y;
-    double min_x, max_x, min_y, max_y;
-    Weight weight;
-    double sigma;
+  Persistence_diagram diagram;
+  int res_x, res_y;
+  double min_x, max_x, min_y, max_y;
+  Weight weight;
+  double sigma;
 
  public:
 
   /** \brief Persistence Image constructor.
    * \ingroup Persistence_image
    *
+   * @param[in] _diagram   persistence diagram.
+   * @param[in] _min_x     minimum value of pixel abscissa.
+   * @param[in] _max_x     maximum value of pixel abscissa.
+   * @param[in] _res_x     number of pixels for the x-direction.
+   * @param[in] _min_y     minimum value of pixel ordinate.
+   * @param[in] _max_y     maximum value of pixel ordinate.
+   * @param[in] _res_y     number of pixels for the y-direction.
+   * @param[in] _weight    weight function for the Gaussians.
+   * @param[in] _sigma     bandwidth parameter for the Gaussians.
+   *
    */
-  Persistence_image(PD _diagram, double _min_x = 0.0, double _max_x = 1.0, int _res_x = 10, double _min_y = 0.0, double _max_y = 1.0, int _res_y = 10,
-                    Weight _weight = Gudhi::Persistence_representations::Persistence_weighted_gaussian::arctan_weight(1,1), double _sigma = 1.0){
+  Persistence_image(const Persistence_diagram & _diagram, double _min_x = 0.0, double _max_x = 1.0, int _res_x = 10, double _min_y = 0.0, double _max_y = 1.0, int _res_y = 10, const Weight & _weight = arctan_weight(1,1), double _sigma = 1.0){
       diagram = _diagram; min_x = _min_x; max_x = _max_x; res_x = _res_x; min_y = _min_y; max_y = _max_y; res_y = _res_y, weight = _weight; sigma = _sigma;
   }
 
@@ -81,7 +91,7 @@ class Persistence_image {
    * \ingroup Persistence_image
    *
    */
-  std::vector<std::vector<double> > vectorize() {
+  std::vector<std::vector<double> > vectorize() const {
     std::vector<std::vector<double> > im; for(int i = 0; i < res_y; i++)  im.emplace_back();
     double step_x = (max_x - min_x)/res_x; double step_y = (max_y - min_y)/res_y;
 
@@ -109,9 +119,8 @@ class Persistence_image {
 
 
 
-};
-
-}  // namespace Persistence_image
+}; // class Persistence_image
+}  // namespace Persistence_representations
 }  // namespace Gudhi
 
 #endif  // PERSISTENCE_IMAGE_H_
