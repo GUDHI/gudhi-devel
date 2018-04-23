@@ -22,12 +22,12 @@ int main(int argc, char **argv) {
     usage(argv[0]);
   }
 
-  std::string offInputFile(argv[1]);
+  std::string off_input_file(argv[1]);
   // Read the OFF file (input file name given as parameter) and triangulate points
-  Gudhi::Points_off_reader<Point_d> off_reader(offInputFile);
+  Gudhi::Points_off_reader<Point_d> off_reader(off_input_file);
   // Check the read operation was correct
   if (!off_reader.is_valid()) {
-    std::cerr << "Unable to read file " << offInputFile << std::endl;
+    std::cerr << "Unable to read file " << off_input_file << std::endl;
     usage(argv[0]);
   }
 

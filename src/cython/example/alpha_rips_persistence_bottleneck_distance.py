@@ -45,13 +45,14 @@ args = parser.parse_args()
 with open(args.file, 'r') as f:
     first_line = f.readline()
     if (first_line == 'OFF\n') or (first_line == 'nOFF\n'):
+        point_cloud = gudhi.read_off(off_file=args.file)
         print("#####################################################################")
         print("RipsComplex creation from points read in a OFF file")
 
         message = "RipsComplex with max_edge_length=" + repr(args.threshold)
         print(message)
 
-        rips_complex = gudhi.RipsComplex(off_file=args.file,
+        rips_complex = gudhi.RipsComplex(points=point_cloud,
                                          max_edge_length=args.threshold)
 
         rips_stree = rips_complex.create_simplex_tree(max_dimension=args.max_dimension)
@@ -67,7 +68,7 @@ with open(args.file, 'r') as f:
         message = "AlphaComplex with max_edge_length=" + repr(args.threshold)
         print(message)
 
-        alpha_complex = gudhi.AlphaComplex(off_file=args.file)
+        alpha_complex = gudhi.AlphaComplex(points=point_cloud)
         alpha_stree = alpha_complex.create_simplex_tree(max_alpha_square=(args.threshold * args.threshold))
 
         message = "Number of simplices=" + repr(alpha_stree.num_simplices())

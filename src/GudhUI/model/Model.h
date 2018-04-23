@@ -74,7 +74,7 @@ class CGAL_geometric_flag_complex_wrapper {
       // std::cout << "size:" << vertices.size() << std::endl;
       for (std::size_t i = 0; i < vertices.size(); ++i)
         for (std::size_t j = i + 1; j < vertices.size(); ++j)
-          complex_.add_edge(Vertex_handle(vertices[i]), Vertex_handle(vertices[j]));
+          complex_.add_edge_without_blockers(Vertex_handle(vertices[i]), Vertex_handle(vertices[j]));
     }
   }
 

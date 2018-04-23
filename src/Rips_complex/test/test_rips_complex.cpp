@@ -31,6 +31,7 @@
 #include <algorithm>    // std::max
 
 #include <gudhi/Rips_complex.h>
+#include <gudhi/Sparse_rips_complex.h>
 // to construct Rips_complex from a OFF file of points
 #include <gudhi/Points_off_io.h>
 #include <gudhi/Simplex_tree.h>
@@ -43,6 +44,7 @@ using Point = std::vector<double>;
 using Simplex_tree = Gudhi::Simplex_tree<>;
 using Filtration_value = Simplex_tree::Filtration_value;
 using Rips_complex = Gudhi::rips_complex::Rips_complex<Simplex_tree::Filtration_value>;
+using Sparse_rips_complex = Gudhi::rips_complex::Sparse_rips_complex<Simplex_tree::Filtration_value>;
 using Distance_matrix = std::vector<std::vector<Filtration_value>>;
 
 BOOST_AUTO_TEST_CASE(RIPS_DOC_OFF_file) {
@@ -190,6 +192,71 @@ BOOST_AUTO_TEST_CASE(Rips_complex_from_points) {
   Simplex_tree st;
   const int DIMENSION = 3;
   rips_complex_from_points.create_complex(st, DIMENSION);
+
+  // Another way to check num_simplices
+  std::cout << "Iterator on Rips complex simplices in the filtration order, with [filtration value]:" << std::endl;
+  int num_simplices = 0;
+  for (auto f_simplex : st.filtration_simplex_range()) {
+    num_simplices++;
+    std::cout << "   ( ";
+    for (auto vertex : st.simplex_vertex_range(f_simplex)) {
+      std::cout << vertex << " ";
+    }
+    std::cout << ") -> " << "[" << st.filtration(f_simplex) << "] ";
+    std::cout << std::endl;
+  }
+  BOOST_CHECK(num_simplices == 15);
+  std::cout << "st.num_simplices()=" << st.num_simplices() << std::endl;
+  BOOST_CHECK(st.num_simplices() == 15);
+
+  std::cout << "st.dimension()=" << st.dimension() << std::endl;
+  BOOST_CHECK(st.dimension() == DIMENSION);
+  std::cout << "st.num_vertices()=" << st.num_vertices() << std::endl;
+  BOOST_CHECK(st.num_vertices() == 4);
+
+  for (auto f_simplex : st.filtration_simplex_range()) {
+    std::cout << "dimension(" << st.dimension(f_simplex) << ") - f = " << st.filtration(f_simplex) << std::endl;
+    switch (st.dimension(f_simplex)) {
+      case 0:
+        GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), 0.0);
+        break;
+      case 1:
+      case 2:
+      case 3:
+        GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), 2.0);
+        break;
+      default:
+        BOOST_CHECK(false);  // Shall not happen
+        break;
+    }
+  }
+}
+
+BOOST_AUTO_TEST_CASE(Sparse_rips_complex_from_points) {
+  // This is a clone of the test above
+  // ----------------------------------------------------------------------------
+  // Init of a list of points
+  // ----------------------------------------------------------------------------
+  Vector_of_points points;
+  std::vector<double> coords = { 0.0, 0.0, 0.0, 1.0 };
+  points.push_back(Point(coords.begin(), coords.end()));
+  coords = { 0.0, 0.0, 1.0, 0.0 };
+  points.push_back(Point(coords.begin(), coords.end()));
+  coords = { 0.0, 1.0, 0.0, 0.0 };
+  points.push_back(Point(coords.begin(), coords.end()));
+  coords = { 1.0, 0.0, 0.0, 0.0 };
+  points.push_back(Point(coords.begin(), coords.end()));
+
+  // ----------------------------------------------------------------------------
+  // Init of a Rips complex from the list of points
+  // ----------------------------------------------------------------------------
+  // .001 is small enough that we get a deterministic result matching the exact Rips
+  Sparse_rips_complex sparse_rips(points, Custom_square_euclidean_distance(), .001);
+
+  std::cout << "========== Sparse_rips_complex_from_points ==========" << std::endl;
+  Simplex_tree st;
+  const int DIMENSION = 3;
+  sparse_rips.create_complex(st, DIMENSION);
 
   // Another way to check num_simplices
   std::cout << "Iterator on Rips complex simplices in the filtration order, with [filtration value]:" << std::endl;
