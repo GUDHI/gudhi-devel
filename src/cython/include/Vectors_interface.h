@@ -44,9 +44,9 @@ namespace persistence_diagram {
 
   std::vector<std::vector<double> > compute_pim(const std::vector<std::pair<double, double> >& diag, double min_x, double max_x, int res_x, double min_y, double max_y, int res_y, std::string weight, double sigma, double C, double p) {
     Weight weight_fn;
-    if(weight.compare("linear") == 0)  weight_fn = Gudhi::Persistence_representations::Persistence_weighted_gaussian::linear_weight;
-    if(weight.compare("arctan") == 0)  weight_fn = Gudhi::Persistence_representations::Persistence_weighted_gaussian::arctan_weight(C,p);
-    if(weight.compare("const")  == 0)  weight_fn = Gudhi::Persistence_representations::Persistence_weighted_gaussian::const_weight;
+    if(weight.compare("linear") == 0)  weight_fn = Gudhi::Persistence_representations::linear_weight;
+    if(weight.compare("arctan") == 0)  weight_fn = Gudhi::Persistence_representations::arctan_weight(C,p);
+    if(weight.compare("const")  == 0)  weight_fn = Gudhi::Persistence_representations::const_weight;
     Gudhi::Persistence_representations::Persistence_image P(diag, min_x, max_x, res_x, min_y, max_y, res_y, weight_fn, sigma);
     return P.vectorize();
   }
