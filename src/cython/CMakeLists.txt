@@ -183,7 +183,7 @@ if(CYTHON_FOUND)
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
              COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
              ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/tangential_complex_plain_homology_from_off_file_example.py"
-             --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off)
+             --no-diagram -i 2 -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off)
 
     add_gudhi_py_test(test_tangential_complex)
 

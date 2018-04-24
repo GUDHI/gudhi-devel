@@ -29,7 +29,7 @@ __license__ = "GPL v3"
 
 def test_tangential():
     point_list = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]]
-    tc = TangentialComplex(points=point_list)
+    tc = TangentialComplex(intrisic_dim = 1, points=point_list)
     assert tc.__is_defined() == True
     assert tc.num_vertices() == 4
 

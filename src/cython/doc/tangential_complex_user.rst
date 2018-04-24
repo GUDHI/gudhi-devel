@@ -122,8 +122,8 @@ This example builds the Tangential complex of point set read in an OFF file.
 .. testcode::
 
     import gudhi
-    tc = gudhi.TangentialComplex(off_file=gudhi.__root_source_dir__ + \
-        '/data/points/alphacomplexdoc.off')
+    tc = gudhi.TangentialComplex(intrisic_dim = 1,
+        off_file=gudhi.__root_source_dir__ + '/data/points/alphacomplexdoc.off')
     result_str = 'Tangential contains ' + repr(tc.num_simplices()) + \
         ' simplices - ' + repr(tc.num_vertices()) + ' vertices.'
     print(result_str)
@@ -169,7 +169,8 @@ simplices.
 .. testcode::
 
    import gudhi
-   tc = gudhi.TangentialComplex(points=[[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
+   tc = gudhi.TangentialComplex(intrisic_dim = 1,
+       points=[[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
    result_str = 'Tangential contains ' + repr(tc.num_vertices()) + ' vertices.'
    print(result_str)
 

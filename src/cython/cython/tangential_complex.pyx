@@ -33,9 +33,9 @@ __license__ = "GPL v3"
 
 cdef extern from "Tangential_complex_interface.h" namespace "Gudhi":
     cdef cppclass Tangential_complex_interface "Gudhi::tangential_complex::Tangential_complex_interface":
-        Tangential_complex_interface(vector[vector[double]] points)
+        Tangential_complex_interface(int intrisic_dim, vector[vector[double]] points)
         # bool from_file is a workaround for cython to find the correct signature
-        Tangential_complex_interface(string off_file, bool from_file)
+        Tangential_complex_interface(int intrisic_dim, string off_file, bool from_file)
         vector[double] get_point(unsigned vertex)
         unsigned number_of_vertices()
         unsigned number_of_simplices()
@@ -54,8 +54,11 @@ cdef class TangentialComplex:
     cdef Tangential_complex_interface * thisptr
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, points=None, off_file=''):
+    def __init__(self, intrisic_dim, points=None, off_file=''):
         """TangentialComplex constructor.
+
+        :param intrisic_dim: Intrinsic dimension of the manifold.
+        :type intrisic_dim: integer
 
         :param points: A list of points in d-Dimension.
         :type points: list of list of double
@@ -67,17 +70,17 @@ cdef class TangentialComplex:
         """
 
     # The real cython constructor
-    def __cinit__(self, points=None, off_file=''):
+    def __cinit__(self, intrisic_dim, points=None, off_file=''):
         if off_file is not '':
             if os.path.isfile(off_file):
-                self.thisptr = new Tangential_complex_interface(str.encode(off_file), True)
+                self.thisptr = new Tangential_complex_interface(intrisic_dim, str.encode(off_file), True)
             else:
                 print("file " + off_file + " not found.")
         else:
             if points is None:
                 # Empty tangential construction
                 points=[]
-            self.thisptr = new Tangential_complex_interface(points)
+            self.thisptr = new Tangential_complex_interface(intrisic_dim, points)
                 
 
     def __dealloc__(self):
