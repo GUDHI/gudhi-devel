@@ -128,33 +128,35 @@ namespace Persistence_representations {
  function \f$L : \mathbb{N} \times \mathbb{R} \to [0,\infty)\f$ of two
  variables, if we define \f$L(k,t) = \lambda_k(t)\f$.
 
- The detailed description of algorithms used to compute persistence landscapes can be found in
- \cite bubenik_dlotko_landscapes_2016.
- Note that this implementation provides exact representation of landscapes. That have many advantages, but also a few
- drawbacks. For instance, as discussed
- in \cite bubenik_dlotko_landscapes_2016, the exact representation of landscape may be of quadratic size with respect
- to the input persistence diagram. It may therefore happen
- that, for very large diagrams, using this representation may be memory--prohibitive. In such a case, there are two
- possible ways to proceed:
+ The detailed description of algorithms used to compute persistence landscapes can be found in \cite bubenik_dlotko_landscapes_2016.
+ Note that this implementation provides exact representation of landscapes. That have many advantages, but also a few drawbacks. 
+ For instance, as discussed in \cite bubenik_dlotko_landscapes_2016, the exact representation of landscape may be of quadratic size with respect
+ to the input persistence diagram. It may therefore happen that, for very large diagrams, using this representation may be memory--prohibitive. 
+ In such a case, there are two possible ways to proceed:
 
- \li Use non exact representation on a grid described in the Section \ref sec_landscapes_on_grid.
+ \li Use representation on a grid---see section \ref sec_landscapes_on_grid.
  \li Compute just a number of initial nonzero landscapes. This option is available from C++ level as a last parameter of
  the constructor of persistence landscape (set by default to std::numeric_limits<size_t>::max()).
 
 
 
  \section sec_landscapes_on_grid Persistence Landscapes on a grid
- <b>Reference manual:</b> \ref Gudhi::Persistence_representations::Persistence_landscape_on_grid <br>
- This is an alternative, not--exact, representation of persistence landscapes defined in the Section \ref
- sec_persistence_landscapes. Unlike in the Section \ref sec_persistence_landscapes we build a
- representation of persistence landscape by sampling its values on a finite, equally distributed grid of points.
- Since, the persistence landscapes that originate from persistence diagrams have slope \f$1\f$ or \f$-1\f$, we have an
- estimate of a region between the grid points where the landscape cab be located.
- That allows to estimate an error make when performing various operations on landscape. Note that for average
- landscapes the slope is in range \f$[-1,1]\f$ and similar estimate can be used.
 
- Due to a lack of rigorous description of the algorithms to deal with this non--rigorous representation of persistence
- landscapes in the literature, we are providing a short discussion of them in below.
+ <b>Reference manual:</b> \ref Gudhi::Persistence_representations::Persistence_landscape_on_grid <br>
+ <b>Reference manual:</b> \ref Gudhi::Persistence_representations::Persistence_landscape_on_grid_exact <br>
+
+ Here, we provide alternative, not exact, representations of persistence landscapes defined in Section \ref sec_persistence_landscapes. 
+ Unlike Section \ref sec_persistence_landscapes, we build representations of persistence landscapes by evaluating the landscape functions on a finite, equally distributed grid of points.
+ We propose two different representations depending on whether the persistence intervals are also mapped on the grid (Persistence_landscape_on_grid) or not (Persistence_landscape_on_grid_exact).
+ This makes a big difference since mapping the intervals on the grid makes the computation time smaller but only provides an approximation of the landscape values.
+
+ Since persistence landscapes originating from persistence diagrams have slope \f$1\f$ or \f$-1\f$, we have an
+ estimate of a region between the grid points where the landscapes can be located.
+ That allows to estimate an error made when performing various operations on landscapes. Note that for average
+ landscapes the slope is in range \f$[-1,1]\f$ and similar estimates can be used.
+
+ Due to the lack of rigorous description of the algorithms for these non rigorous representations of persistence
+ landscapes in the literature, we provide a short discussion below.
 
  Let us assume that we want to compute persistence landscape on a interval \f$[x,y]\f$. Let us assume that we want to
  use \f$N\f$ grid points for that purpose.
@@ -166,11 +168,11 @@ namespace Persistence_representations {
  functions) on the i-th point of a grid, i.e. \f$x + i \frac{y-x}{N}\f$.
 
  When averaging two persistence landscapes represented by a grid we need to make sure that they are defined in a
- compatible grids. I.e. the intervals \f$[x,y]\f$ on which they are defined are
+ compatible grids, i.e. the intervals \f$[x,y]\f$ on which they are defined are
  the same, and the numbers of grid points \f$N\f$ are the same in both cases. If this is the case, we simply compute
- point-wise averages of the entries of corresponding
- vectors (In this whole section we assume that if one vector of numbers is shorter than another, we extend the shorter
- one with zeros so that they have the same length.)
+ point-wise averages of the entries of the corresponding
+ vectors (in this whole section we assume that if one vector of numbers is shorter than the other, we extend the shortest
+ one with zeros so that they have the same length).
 
  Computations of distances between two persistence landscapes on a grid is not much different than in the rigorous
  case. In this case, we sum up the distances between the same levels of
@@ -179,11 +181,11 @@ namespace Persistence_representations {
 
  Similarly as in case of distance, when computing the scalar product of two persistence landscapes on a grid, we sum up
  the scalar products of corresponding levels of landscapes. For each level,
- we assume that the persistence landscape on a grid between two grid points is approximated by linear function.
- Therefore to compute scalar product of two corresponding levels of landscapes,
+ we assume that the persistence landscape on a grid between two grid points is approximated by a linear function.
+ Therefore to compute the scalar product of two corresponding levels of landscapes,
  we sum up the integrals of products of line segments for every pair of constitutive grid points.
 
- Note that for this representation we need to specify a few parameters:
+ Note that for these representations we need to specify a few parameters:
 
  \li Begin and end point of a grid -- the interval \f$[x,y]\f$ (real numbers).
  \li Number of points in a grid (positive integer \f$N\f$).
@@ -192,29 +194,33 @@ namespace Persistence_representations {
  Note that the same representation is used in TDA R-package \cite Fasy_Kim_Lecci_Maria_tda.
 
  \section sec_persistence_heat_maps Persistence heat maps
+
  <b>Reference manual:</b> \ref Gudhi::Persistence_representations::Persistence_heat_maps <br>
- This is a general class of discrete structures which are based on idea of placing a kernel in the points of
- persistence diagrams.
+ <b>Reference manual:</b> \ref Gudhi::Persistence_representations::Persistence_heat_maps_exact <br>
+
+ This is a general class of discrete structures which are based on idea of placing a kernel in the points of persistence diagrams.
  This idea appeared in work by many authors over the last 15 years. As far as we know this idea was firstly described
  in the work of Bologna group in \cite Ferri_Frosini_comparision_sheme_1 and \cite Ferri_Frosini_comparision_sheme_2.
  Later it has been described by Colorado State University group in \cite Persistence_Images_2017. The presented paper
- in the first time provide a discussion of stability of the representation.
- Also, the same ideas are used in construction of two recent kernels used for machine learning:
- \cite Kusano_Fukumizu_Hiraoka_PWGK and \cite Reininghaus_Huber_ALL_PSSK. Both the kernel's construction uses
- interesting ideas to ensure stability of the representation with respect to Wasserstein metric. In the kernel
+ in the first time provided a discussion of stability of this representation.
+ Also, the same ideas are used in the construction of two recent kernels used for machine learning:
+ \cite Kusano_Fukumizu_Hiraoka_PWGK and \cite Reininghaus_Huber_ALL_PSSK. Both the kernels use
+ interesting ideas to ensure stability of the representations with respect to the 1-Wasserstein metric. In the kernel
  presented in \cite Kusano_Fukumizu_Hiraoka_PWGK, a scaling function is used to multiply the Gaussian kernel in the
- way that the points close to diagonal got low weight and consequently do not have a big influence on the resulting
+ way that the points close to diagonal have low weights and consequently do not have a big influence on the resulting
  distribution. In \cite Reininghaus_Huber_ALL_PSSK for every point \f$(b,d)\f$ two Gaussian kernels
  are added: first, with a weight 1 in a point \f$(b,d)\f$, and the second, with the weight -1 for a point \f$(b,d)\f$.
  In both cases, the representations are stable with respect to 1-Wasserstein distance.
 
- In Persistence\_representations package we currently implement a discretization of the distributions described above.
- The base of this implementation is 2-dimensional array of pixels. Each pixel have assigned a real value which
- is a sum of values of distributions induced by each point of the persistence diagram. At the moment we compute the
- sum of values on a center of a pixels. It can be easily extended to any other function
- (like for instance sum of integrals of the intermediate distribution on a pixel).
+ In Persistence_representations package, we currently implement a discretization of the distributions described above.
+ The base of this implementation is a 2-dimensional array of pixels. To each pixel is assigned a real value which
+ is the sum of the distribution values induced by each point of the persistence diagram. 
+ As for Persistence_landscapes, we propose two different representations depending on whether the persistence intervals are also mapped on the pixels 
+ (Persistence_heat_maps) or not (Persistence_heat_maps_exact).
+ At the moment we compute the sum over the evaluations of the distributions on the pixel centers. It can be easily extended to any other function
+ (like for instance the sum of the integrals of the distributions over the pixels).
 
- The parameters that determine the structure are the following:
+ Concerning Persistence_heat_maps, the parameters that determine the structure are the following:
 
  \li A positive integer k determining the size of the kernel we used (we always assume that the kernels are square).
  \li A filter: in practice a square matrix of a size \f$2k+1 \times 2k+1\f$. By default, this is a discretization of
@@ -226,6 +232,7 @@ namespace Persistence_representations {
  to diagonal are given then sometimes the kernel have support that reaches the region
  below the diagonal. If the value of this parameter is true, then the values below diagonal can be erased.
 
+ Concerning Persistence_heat_maps_exact, only Gaussian kernels are implemented, so the parameters are the array of pixels, the weight functions for the Gaussians and the bandwidth of the Gaussians. 
 
  \section sec_persistence_vectors Persistence vectors
  <b>Reference manual:</b> \ref Gudhi::Persistence_representations::Vector_distances_in_diagram <br>

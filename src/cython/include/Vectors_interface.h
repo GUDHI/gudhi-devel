@@ -23,9 +23,9 @@
 #ifndef INCLUDE_VECTORS_INTERFACE_H_
 #define INCLUDE_VECTORS_INTERFACE_H_
 
-#include <gudhi/Landscape.h>
-#include <gudhi/Persistence_image.h>
-#include <gudhi/Persistence_weighted_gaussian.h>
+#include <gudhi/Persistence_landscape_on_grid_exact.h>
+#include <gudhi/Persistence_heat_maps_exact.h>
+#include <gudhi/Weight_functions.h>
 
 #include <iostream>
 #include <vector>
@@ -38,7 +38,7 @@ namespace Gudhi {
 namespace persistence_diagram {
 
   std::vector<std::vector<double> > compute_ls(const std::vector<std::pair<double, double> >& diag, int nb_ls, double min_x, double max_x, int res_x) {
-    Gudhi::Persistence_representations::Landscape L(diag, nb_ls, min_x, max_x, res_x);
+    Gudhi::Persistence_representations::Persistence_landscape_on_grid_exact L(diag, nb_ls, min_x, max_x, res_x);
     return L.vectorize();
   }
 
@@ -47,7 +47,7 @@ namespace persistence_diagram {
     if(weight.compare("linear") == 0)  weight_fn = Gudhi::Persistence_representations::linear_weight;
     if(weight.compare("arctan") == 0)  weight_fn = Gudhi::Persistence_representations::arctan_weight(C,p);
     if(weight.compare("const")  == 0)  weight_fn = Gudhi::Persistence_representations::const_weight;
-    Gudhi::Persistence_representations::Persistence_image P(diag, min_x, max_x, res_x, min_y, max_y, res_y, weight_fn, sigma);
+    Gudhi::Persistence_representations::Persistence_heat_maps_exact P(diag, min_x, max_x, res_x, min_y, max_y, res_y, weight_fn, sigma);
     return P.vectorize();
   }
 

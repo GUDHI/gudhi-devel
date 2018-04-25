@@ -25,6 +25,7 @@
 
 #include <gudhi/Sliced_Wasserstein.h>
 #include <gudhi/Persistence_weighted_gaussian.h>
+#include <gudhi/Weight_functions.h>
 
 #include <iostream>
 #include <vector>

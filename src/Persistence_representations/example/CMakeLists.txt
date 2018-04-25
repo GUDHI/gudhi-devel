@@ -37,12 +37,12 @@ add_test(NAME Persistence_weighted_gaussian
     COMMAND $<TARGET_FILE:Persistence_weighted_gaussian>)
 install(TARGETS Persistence_weighted_gaussian DESTINATION bin)
 
-add_executable ( Persistence_image persistence_image.cpp )
-add_test(NAME Persistence_image
-    COMMAND $<TARGET_FILE:Persistence_image>)
-install(TARGETS Persistence_image DESTINATION bin)
+add_executable ( Persistence_heat_maps_exact persistence_heat_maps_exact.cpp )
+add_test(NAME Persistence_heat_maps_exact
+    COMMAND $<TARGET_FILE:Persistence_heat_maps_exact>)
+install(TARGETS Persistence_heat_maps_exact DESTINATION bin)
 
-add_executable ( Landscape landscape.cpp )
-add_test(NAME Landscape
-    COMMAND $<TARGET_FILE:Landscape>)
-install(TARGETS Landscape DESTINATION bin)
+add_executable ( Persistence_landscape_on_grid_exact persistence_landscape_on_grid_exact.cpp )
+add_test(NAME Persistence_landscape_on_grid_exact
+    COMMAND $<TARGET_FILE:Persistence_landscape_on_grid_exact>)
+install(TARGETS Persistence_landscape_on_grid_exact DESTINATION bin)
