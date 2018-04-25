@@ -281,7 +281,7 @@ cdef class CoverComplex:
         automatically tuned with subsampling—see.
 
         :param N: Number of subsampling iteration (the default reasonable value
-        is 100, but there is no guarantee on how to choose it).
+            is 100, but there is no guarantee on how to choose it).
         :type N: int
         :rtype: double
         :returns: Delta threshold used for computing the Rips complex.
@@ -292,8 +292,8 @@ cdef class CoverComplex:
         """Creates a graph G from a file containing the edges.
 
         :param graph_file_name: Name of the input graph file. The graph file
-        contains one edge per line, each edge being represented by the IDs of
-        its two nodes.
+            contains one edge per line, each edge being represented by the IDs of
+            its two nodes.
         :type graph_file_name: string
         """
         if os.path.isfile(graph_file_name):
@@ -309,6 +309,7 @@ cdef class CoverComplex:
 
     def set_graph_from_rips(self, threshold):
         """Creates a graph G from a Rips complex.
+
         :param threshold: Threshold value for the Rips complex.
         :type threshold: double
         """
@@ -361,6 +362,7 @@ cdef class CoverComplex:
 
     def set_verbose(self, verbose):
         """Specifies whether the program should display information or not.
+
         :param verbose: true = display info, false = do not display info.
         :type verbose: boolean
         """
@@ -369,6 +371,7 @@ cdef class CoverComplex:
     def subpopulation(self, c):
         """Returns the data subset corresponding to a specific node of the
         created complex.
+
         :param c: ID of the node.
         :type c: int
         :rtype: vector[int]
