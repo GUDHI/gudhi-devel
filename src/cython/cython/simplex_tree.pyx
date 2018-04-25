@@ -64,6 +64,7 @@ cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
         vector[int] persistent_betti_numbers(double from_value, double to_value)
         vector[pair[double,double]] intervals_in_dimension(int dimension)
         void write_output_diagram(string diagram_file_name)
+        vector[pair[vector[int], vector[int]]] persistence_pairs()
 
 # SimplexTree python interface
 cdef class SimplexTree:
@@ -485,6 +486,25 @@ cdef class SimplexTree:
             print("intervals_in_dim function requires persistence function"
                   " to be launched first.")
         return intervals_result
+
+    def persistence_pairs(self):
+        """This function returns the persistence pairs of the simplicial
+        complex.
+
+        :returns: The persistence intervals.
+        :rtype:  list of pair of list of int
+
+        :note: intervals_in_dim function requires
+            :func:`persistence()<gudhi.SimplexTree.persistence>`
+            function to be launched first.
+        """
+        cdef vector[pair[vector[int],vector[int]]] persistence_pairs_result
+        if self.pcohptr != NULL:
+            persistence_pairs_result = self.pcohptr.persistence_pairs()
+        else:
+            print("persistence_pairs function requires persistence function"
+                  " to be launched first.")
+        return persistence_pairs_result
 
     def write_persistence_diagram(self, persistence_file=''):
         """This function writes the persistence intervals of the simplicial
