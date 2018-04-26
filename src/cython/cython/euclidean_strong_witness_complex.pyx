@@ -8,7 +8,7 @@ from libcpp.utility cimport pair
 
    Author(s):       Vincent Rouvreau
 
-   Copyright (C) 2016 INRIA
+   Copyright (C) 2016 Inria
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ from libcpp.utility cimport pair
 """
 
 __author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 INRIA"
+__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
 cdef extern from "Euclidean_strong_witness_complex_interface.h" namespace "Gudhi":

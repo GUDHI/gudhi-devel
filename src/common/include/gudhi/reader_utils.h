@@ -4,7 +4,7 @@
  *
  *    Author(s):       Clement Maria, Pawel Dlotko, Clement Jamin
  *
- *    Copyright (C) 2014  INRIA
+ *    Copyright (C) 2014 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
