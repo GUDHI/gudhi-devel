@@ -5,7 +5,7 @@
  *    Author(s):       Vincent Rouvreau
  *                     Pawel Dlotko - 2017 - Swansea University, UK
  *
- *    Copyright (C) 2014  INRIA
+ *    Copyright (C) 2014 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
