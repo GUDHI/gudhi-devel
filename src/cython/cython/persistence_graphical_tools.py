@@ -64,7 +64,8 @@ def show_palette_values(alpha=0.6):
 
     :param alpha: alpha value in [0.0, 1.0] for horizontal bars (default is 0.6).
     :type alpha: float.
-    :returns: plot the dimension palette values.
+    :returns: A matplotlib object containing dimension palette values (launch
+        `show()` method on it to display it).
     """
     colors = []
     for color in palette:
@@ -78,11 +79,13 @@ def show_palette_values(alpha=0.6):
     return plt
 
 def plot_persistence_barcode(persistence=[], persistence_file='', alpha=0.6, max_barcodes=1000):
-    """This function plots the persistence bar code.
+    """This function plots the persistence bar code from persistence values list
+    or from a :doc:`persistence file <fileformats>`.
 
-    :param persistence: The persistence to plot.
+    :param persistence: Persistence values list.
     :type persistence: list of tuples(dimension, tuple(birth, death)).
-    :param persistence_file: A persistence file style name (reset persistence if both are set).
+    :param persistence_file: A :doc:`persistence file <fileformats>` style name
+        (reset persistence if both are set).
     :type persistence_file: string
     :param alpha: barcode transparency value (0.0 transparent through 1.0 opaque - default is 0.6).
     :type alpha: float.
@@ -90,7 +93,8 @@ def plot_persistence_barcode(persistence=[], persistence_file='', alpha=0.6, max
         Set it to 0 to see all, Default value is 1000.
         (persistence will be sorted by life time if max_barcodes is set)
     :type max_barcodes: int.
-    :returns: plot -- An horizontal bar plot of persistence.
+    :returns: A matplotlib object containing horizontal bar plot of persistence
+        (launch `show()` method on it to display it).
     """
     if persistence_file is not '':
         if os.path.isfile(persistence_file):
@@ -139,11 +143,13 @@ def plot_persistence_barcode(persistence=[], persistence_file='', alpha=0.6, max
     return plt
 
 def plot_persistence_diagram(persistence=[], persistence_file='', alpha=0.6, band=0., max_plots=1000):
-    """This function plots the persistence diagram with an optional confidence band.
+    """This function plots the persistence diagram from persistence values list
+    or from a :doc:`persistence file <fileformats>`.
 
-    :param persistence: The persistence to plot.
+    :param persistence: Persistence values list.
     :type persistence: list of tuples(dimension, tuple(birth, death)).
-    :param persistence_file: A persistence file style name (reset persistence if both are set).
+    :param persistence_file: A :doc:`persistence file <fileformats>` style name
+        (reset persistence if both are set).
     :type persistence_file: string
     :param alpha: plot transparency value (0.0 transparent through 1.0 opaque - default is 0.6).
     :type alpha: float.
@@ -153,7 +159,8 @@ def plot_persistence_diagram(persistence=[], persistence_file='', alpha=0.6, ban
         Set it to 0 to see all, Default value is 1000.
         (persistence will be sorted by life time if max_plots is set)
     :type max_plots: int.
-    :returns: plot -- A diagram plot of persistence.
+    :returns: A matplotlib object containing diagram plot of persistence
+        (launch `show()` method on it to display it).
     """
     if persistence_file is not '':
         if os.path.isfile(persistence_file):
