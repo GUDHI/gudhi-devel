@@ -29,11 +29,6 @@ __copyright__ = "Copyright (C) 2016 INRIA"
 __license__ = "GPL v3"
 
 print("#####################################################################")
-print("Show palette colors values for dimension")
-
-gudhi.show_palette_values()
-
-print("#####################################################################")
 print("Show barcode persistence example")
 
 persistence = [(2, (1.0, float('inf'))), (1, (1.4142135623730951, float('inf'))),
