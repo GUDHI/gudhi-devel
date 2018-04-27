@@ -50,5 +50,5 @@ pplot.show()
 print("#####################################################################")
 print("Show diagram persistence example with a confidence band")
 
-pplot = gudhi.plot_persistence_diagram(persistence, band_boot=0.2)
+pplot = gudhi.plot_persistence_diagram(persistence, band=0.2)
 pplot.show()

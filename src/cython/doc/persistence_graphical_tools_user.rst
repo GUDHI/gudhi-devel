@@ -62,7 +62,7 @@ This function can display the persistence result as a diagram:
     rips_complex = gudhi.RipsComplex(points=point_cloud, max_edge_length=0.2)
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=3)
     diag = simplex_tree.persistence()
-    plt = gudhi.plot_persistence_diagram(diag, band_boot=0.13)
+    plt = gudhi.plot_persistence_diagram(diag)
     plt.show()
 
 .. plot::
@@ -73,5 +73,5 @@ This function can display the persistence result as a diagram:
     rips_complex = gudhi.RipsComplex(points=point_cloud, max_edge_length=0.2)
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=3)
     diag = simplex_tree.persistence()
-    plt = gudhi.plot_persistence_diagram(diag, band_boot=0.13)
+    plt = gudhi.plot_persistence_diagram(diag)
     plt.show()

@@ -38,7 +38,7 @@ parser = argparse.ArgumentParser(description='TangentialComplex creation from '
                                  'points from the given OFF file')
 parser.add_argument("-f", "--file", type=str, required=True)
 parser.add_argument("-i", "--intrisic_dim", type=int, required=True)
-parser.add_argument("-b", "--band_boot", type=float, default=0.)
+parser.add_argument("-b", "--band", type=float, default=0.)
 parser.add_argument('--no-diagram', default=False, action='store_true' , help='Flag for not to display the diagrams')
 
 args = parser.parse_args()
@@ -61,7 +61,7 @@ with open(args.file, 'r') as f:
         print(st.betti_numbers())
     
         if args.no_diagram == False:
-            pplot = gudhi.plot_persistence_diagram(diag, band_boot=args.band_boot)
+            pplot = gudhi.plot_persistence_diagram(diag, band=args.band)
             pplot.show()
     else:
         print(args.file, "is not a valid OFF file")
