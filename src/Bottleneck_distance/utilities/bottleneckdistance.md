@@ -10,8 +10,6 @@ Leave the lines above as it is required by the web site generator 'Jekyll'
 {:/comment}
 
 
-# Bottleneck distance #
-
 ## bottleneck_read_file_example ##
 
 This program computes the Bottleneck distance between two persistence diagram files.

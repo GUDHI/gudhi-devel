@@ -2,9 +2,9 @@
  *    (Geometric Understanding in Higher Dimensions) is a generic C++
  *    library for computational topology.
  *
- *    Author(s):       Clément Maria
+ *    Author(s):       Vincent Rouvreau
  *
- *    Copyright (C) 2014  INRIA
+ *    Copyright (C) 2018 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
