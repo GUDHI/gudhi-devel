@@ -232,8 +232,8 @@ class Sliced_Wasserstein {
       }
 
       // Sort angles.
-      std::sort(angles1.begin(), angles1.end(), [=](std::pair<double, std::pair<int,int> >& p1, const std::pair<double, std::pair<int,int> >& p2){return (p1.first < p2.first);});
-      std::sort(angles2.begin(), angles2.end(), [=](std::pair<double, std::pair<int,int> >& p1, const std::pair<double, std::pair<int,int> >& p2){return (p1.first < p2.first);});
+      std::sort(angles1.begin(), angles1.end(), [=](const std::pair<double, std::pair<int,int> >& p1, const std::pair<double, std::pair<int,int> >& p2){return (p1.first < p2.first);});
+      std::sort(angles2.begin(), angles2.end(), [=](const std::pair<double, std::pair<int,int> >& p1, const std::pair<double, std::pair<int,int> >& p2){return (p1.first < p2.first);});
 
       // Initialize orders of the points of both PDs (given by ordinates when theta = -pi/2).
       std::vector<int> orderp1, orderp2;
