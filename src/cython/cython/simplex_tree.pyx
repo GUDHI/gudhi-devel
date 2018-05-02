@@ -55,6 +55,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         void expansion(int max_dim)
         void remove_maximal_simplex(vector[int] simplex)
         bool prune_above_filtration(double filtration)
+        bool make_filtration_non_decreasing()
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>":
@@ -399,6 +400,28 @@ cdef class SimplexTree:
         :type max_dim: int.
         """
         self.thisptr.expansion(max_dim)
+
+    def make_filtration_non_decreasing(self):
+        """Browse the simplex tree to ensure the filtration is not decreasing.
+        The simplex tree is browsed starting from the root until the leaf, and
+        the filtration values are set with their parent value (increased), in
+        case the values are decreasing.
+
+        :returns: The filtration modification information.
+        :rtype: bint
+
+
+        .. note::
+
+            Some simplex tree functions require the filtration to be valid.
+            make_filtration_non_decreasing function is not launching
+            :func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>`
+            but returns the filtration modification
+            information. If the complex has changed , please call
+            :func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>`
+            to recompute it.
+        """
+        return self.thisptr.make_filtration_non_decreasing()
 
     def persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
         """This function returns the persistence of the simplicial complex.
