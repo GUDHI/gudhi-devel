@@ -7,8 +7,8 @@
 
 using namespace Gudhi;
 
-typedef Simplex typeVectorVertex;
-typedef std::pair< Simplex_tree<>::Simplex_handle, bool > typePairSimplexBool;
+typedef Toplex_map::Vertex Vertex;
+typedef Toplex_map::Simplex Simplex;
 
 class ST_wrapper {
 
