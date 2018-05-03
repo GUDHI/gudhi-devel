@@ -37,7 +37,7 @@ public:
      * in the Filtered_toplex_map.
      * \ingroup toplex_map   */
     template <typename Input_vertex_range>
-    std::pair<Simplex, bool> insert_simplex_and_subfaces(const Input_vertex_range &vertex_range, Filtration_value f = nan(""));
+    std::pair<Simplex, bool> insert_simplex_and_subfaces(const Input_vertex_range &vertex_range, Filtration_value f = std::numeric_limits<double>::quiet_NaN());
 
     /** Gives the filtration of the input simplex.
      * \ingroup toplex_map   */
@@ -68,7 +68,7 @@ Filtered_toplex_map::Filtration_value Filtered_toplex_map::filtration(const Inpu
     for(auto kv : toplex_maps)
         if(kv.second->membership(vertex_range))
             return kv.first; //min only because a map is ordered
-    return nan("");
+    return std::numeric_limits<double>::quiet_NaN() ;
 }
 
 template <typename Input_vertex_range>

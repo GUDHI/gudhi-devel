@@ -3,7 +3,7 @@
 #include <chrono>
 
 #include <gudhi/Simplex_tree.h>
-#include <gudhi/Lazy_toplex_map.h>
+#include <gudhi/Lazy_Toplex_map.h>
 
 using namespace Gudhi;
 

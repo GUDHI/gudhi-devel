@@ -3,6 +3,7 @@
 
 #include <gudhi/Toplex_map.h>
 #include <boost/heap/fibonacci_heap.hpp>
+#include <cmath>
 
 namespace Gudhi {
 
