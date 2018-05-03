@@ -28,6 +28,15 @@
 #include <cmath>
 #include <boost/math/constants/constants.hpp>
 
+
+
+namespace Gudhi {
+namespace Persistence_representations {
+// this file contain an implementation of some common procedures used in Persistence_representations.
+
+static constexpr double pi = boost::math::constants::pi<double>();
+
+
 /**
  * In this module, we use the name Persistence_diagram for the representation of a diagram in a vector of pairs of two double.
  */
@@ -37,13 +46,6 @@ using Persistence_diagram = std::vector<std::pair<double,double> >;
  * In this module, we use the name Weight for the representation of a function taking a pair of two double and returning a double.
  */
 using Weight = std::function<double (std::pair<double,double>) >;
-
-namespace Gudhi {
-namespace Persistence_representations {
-// this file contain an implementation of some common procedures used in Persistence_representations.
-
-static constexpr double pi = boost::math::constants::pi<double>();
-
 // double epsi = std::numeric_limits<double>::epsilon();
 double epsi = 0.000005;
 

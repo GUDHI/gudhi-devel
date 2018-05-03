@@ -28,12 +28,13 @@
 #include <utility>
 #include <string>
 
+using Persistence_diagram = Gudhi::Persistence_representations::Persistence_diagram;
 using PI = Gudhi::Persistence_representations::Persistence_heat_maps_exact;
 using Weight = std::function<double (std::pair<double,double>) >;
 
 int main(int argc, char** argv) {
 
-  std::vector<std::pair<double, double> > persistence;
+  Persistence_diagram persistence;
 
   persistence.push_back(std::make_pair(1, 2));
   persistence.push_back(std::make_pair(6, 8));

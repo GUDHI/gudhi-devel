@@ -26,6 +26,7 @@
 #include <vector>
 #include <utility>
 
+using Persistence_diagram = Gudhi::Persistence_representations::Persistence_diagram;
 using PWG = Gudhi::Persistence_representations::Persistence_weighted_gaussian;
 
 int main(int argc, char** argv) {

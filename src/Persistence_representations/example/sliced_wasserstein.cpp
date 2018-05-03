@@ -26,6 +26,7 @@
 #include <vector>
 #include <utility>
 
+using Persistence_diagram = Gudhi::Persistence_representations::Persistence_diagram;
 using SW = Gudhi::Persistence_representations::Sliced_Wasserstein;
 
 int main(int argc, char** argv) {

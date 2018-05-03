@@ -26,11 +26,12 @@
 #include <vector>
 #include <utility>
 
+using Persistence_diagram = Gudhi::Persistence_representations::Persistence_diagram;
 using LS = Gudhi::Persistence_representations::Persistence_landscape_on_grid_exact;
 
 int main(int argc, char** argv) {
 
-  std::vector<std::pair<double, double> > persistence;
+  Persistence_diagram persistence;
 
   persistence.push_back(std::make_pair(1, 2));
   persistence.push_back(std::make_pair(6, 8));
