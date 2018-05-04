@@ -10,6 +10,7 @@
 #include <gudhi/Hasse_diagram_persistence.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Simplex_tree.h>
+#include <gudhi/Coxeter_complex/collapse.h>
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/dynamic_bitset.hpp>
