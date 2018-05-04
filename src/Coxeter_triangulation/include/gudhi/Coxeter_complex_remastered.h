@@ -10,6 +10,7 @@
 #include <gudhi/Hasse_diagram_persistence.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Simplex_tree.h>
+#include <gudhi/Coxeter_complex/Simplicial_complex_collapse_traits.h>
 #include <gudhi/Coxeter_complex/collapse.h>
 
 #include <boost/graph/adjacency_list.hpp>
@@ -320,7 +321,7 @@ public:
   
   void write_bb(std::string file_name = "toplex.bb") const {
   }
-
+  
   void collapse(bool pers_out = true) {
   }
 
