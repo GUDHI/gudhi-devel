@@ -96,7 +96,7 @@ struct simplex_tree_non_filtered_inserter {
     //     relabeled_simplex.push_back(m_it->second);
     // }
     // st_.insert_simplex_and_subfaces(relabeled_simplex);
-    st_.insert_simplex_and_subfaces(simplex);
+    st_.insert_simplex(simplex);
   }
 
   simplex_tree_non_filtered_inserter(SimplexTree& st)
