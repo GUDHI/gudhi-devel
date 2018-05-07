@@ -28,7 +28,7 @@
   /* The traits for a (non-filtered) simplicial complex collapse.
    */
   struct Simplicial_complex_collapse_traits {
-    typedef std::vector<int> Cell_type;
+    typedef std::vector<size_t> Cell_type;
     typedef std::less<Cell_type> Cell_comparison;
 
     int dimension(const Cell_type& simplex) const {
@@ -62,7 +62,7 @@
       }
     public:
       Simplex_facet_iterator(const Cell_type& simplex, int i)
-        : simplex_(simplex), i_(i) {
+        : simplex_(simplex), value_(simplex.size()-1), i_(i) {
         update_value();
       }
     };
@@ -79,5 +79,31 @@
       return true;
     }
   };
+
+/* A structure to be used as an argument boost::make_function_output_iterator
+ */
+template <class SimplexTree>
+struct simplex_tree_non_filtered_inserter {
+  void operator() (const std::vector<std::size_t>& simplex) {
+    std::vector<std::size_t> relabeled_simplex;
+    for (std::size_t v: simplex) {
+      auto m_it = label_map_.find(v);
+      if (m_it == label_map_.end()) {
+        label_map_.emplace(std::make_pair(v, max_index_));
+        relabeled_simplex.push_back(max_index_++);
+      }
+      else
+        relabeled_simplex.push_back(m_it->second);
+    }
+    st_.insert_simplex_and_subfaces(relabeled_simplex);
+  }
+
+  simplex_tree_non_filtered_inserter(SimplexTree& st)
+    : st_(st), max_index_(0) {}
+
+  SimplexTree& st_;
+  std::map<std::size_t, std::size_t> label_map_; // Used to output contiguous labels for vertices
+  std::size_t max_index_ = 0;
+};
 
 #endif

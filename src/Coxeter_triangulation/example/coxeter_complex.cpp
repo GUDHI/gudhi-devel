@@ -108,7 +108,7 @@ int main(int argc, char * const argv[]) {
     cc.voronoi_skeleton(d);
     t.end();
     std::cout << "Voronoi skeleton construction time: " << t.num_seconds() << "s\n";
-    // cc.collapse();
+    cc.collapse();
   }    
   std::cout << "Memory usage (Virtual): " << (float)getVirtualValue()/1000. << "MB.\n";
   std::cout << "Memory usage (Physical): " << (float)getPhysicalValue()/1000 << "MB.\n";

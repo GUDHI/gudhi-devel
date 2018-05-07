@@ -15,6 +15,7 @@
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/dynamic_bitset.hpp>
+#include <boost/function_output_iterator.hpp>
 
 #include <CGAL/Epick_d.h>
 #include <CGAL/point_generators_d.h>
@@ -247,7 +248,7 @@ private:
     }
   };
 
-  /* Alcove iterator */
+  /* Alcove iterator for simplicial alcoves that outputs its vertices that are numerated in a map */
   class No_filtration_alcove_iterator : public boost::iterator_facade< No_filtration_alcove_iterator,
                                                                        std::vector<std::size_t> const,
                                                                        boost::forward_traversal_tag> {
@@ -323,6 +324,74 @@ public:
   }
   
   void collapse(bool pers_out = true) {
+    Vertex_index_map vi_map;
+    std::size_t index = 0;
+    auto& v_map = av_graph_.v_map;
+    auto& a_map = av_graph_.a_map;
+    for (Id_it v_it = v_map.begin(); v_it != v_map.end(); ++v_it, ++index)
+      vi_map.emplace(v_it, index);
+    typedef boost::iterator_range<No_filtration_alcove_iterator> Max_simplex_range;
+    Max_simplex_range input_range(No_filtration_alcove_iterator(a_map.begin(), av_graph_, vi_map),
+                                  No_filtration_alcove_iterator(a_map.end(), av_graph_, vi_map));
+    using Simplex_tree = Gudhi::Simplex_tree<>;
+    Simplex_tree output_stree;
+    using Simplex_tree_inserter = simplex_tree_non_filtered_inserter<Simplex_tree>;
+    Simplex_tree_inserter st_inserter(output_stree);
+    Gudhi::collapse(input_range,
+                    boost::make_function_output_iterator(st_inserter),
+                    Simplicial_complex_collapse_traits());
+    if (pers_out) {
+      std::cout << "Number of all simplices after collapse: " << output_stree.num_simplices() << "\n";
+      int dim_complex = 0;
+      for (auto sh: output_stree.complex_simplex_range()) {
+        if (output_stree.dimension(sh) > dim_complex)
+          dim_complex = output_stree.dimension(sh);
+      }
+      std::cout << "Dimension of the collapsed complex is " << dim_complex << "\n";
+      int chi = 0;
+      for (auto sh: output_stree.complex_simplex_range())
+        chi += 1-2*(output_stree.dimension(sh)%2);
+      std::cout << "Euler characteristic of output_stree is " << chi << std::endl;
+      using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
+      using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
+      double min_persistence = 0;
+      // Sort the simplices in the order of the filtration
+      output_stree.set_dimension(dim_complex+1);
+      output_stree.initialize_filtration();
+      // Compute the persistence diagram of the complex
+      Persistent_cohomology pcoh(output_stree);
+      // initializes the coefficient field for homology
+      pcoh.init_coefficients(3);
+      
+      pcoh.compute_persistent_cohomology(min_persistence);
+      std::cout << pcoh.persistent_betti_numbers(0,0) << std::endl;
+      std::ofstream out("persdiag_cox.out");
+      pcoh.output_diagram(out);
+      out.close();
+      std::cout << "Persistence complete." << std::endl;
+
+      Simplex_tree stree;
+      for (auto p: input_range)
+        stree.insert_simplex_and_subfaces(p);
+      std::cout << "Number of all simplices before collapse: " << stree.num_simplices() << "\n";
+      stree.set_dimension(v_map.begin()->first.size()+1);
+      stree.initialize_filtration();
+      Persistent_cohomology pcoh2(stree);
+      // initializes the coefficient field for homology
+      pcoh2.init_coefficients(3);
+      pcoh2.compute_persistent_cohomology(min_persistence);
+      std::cout << pcoh2.persistent_betti_numbers(100,100) << std::endl;
+      std::ofstream out2("persdiag_cox_original.out");
+      pcoh2.output_diagram(out2);
+      out2.close();
+      std::cout << "Persistence complete." << std::endl;
+            
+      typedef Simplex_tree_simplex_iterator<Simplex_tree> Simplex_tree_iterator;
+      typedef boost::iterator_range<Simplex_tree_iterator> Simplex_tree_range;
+      Simplex_tree_range simplex_tree_range(Simplex_tree_iterator(output_stree.complex_simplex_range().begin(), output_stree),
+                                            Simplex_tree_iterator(output_stree.complex_simplex_range().end(), output_stree));
+      write_mesh(simplex_tree_range, "output_stree.mesh");
+    }
   }
 
 private:

@@ -25,6 +25,8 @@
 
 #include <boost/graph/adjacency_list.hpp>
 
+namespace Gudhi {
+
 /* NOTE: The elementary collapse is lazy. The coface is not removed physically, but all its adjacencies are
  * removed. Hence, the collapsed coface does not feature anywhere else in the algorithm.
  */
@@ -43,7 +45,7 @@ void elementary_collapse(typename Map::iterator facet_it,
   using Graph_v = typename Graph::vertex_descriptor;
   
   // check if there is one coface
-  if (boost::in_degree(facet_it->second, face_coface_graph) == 1)
+  if (boost::in_degree(facet_it->second, face_coface_graph) != 1)
     return;
 
   // check if it is valid wrt traits
@@ -61,14 +63,20 @@ void elementary_collapse(typename Map::iterator facet_it,
   while (out_edge_it != out_edge_end) {
     Graph_v another_facet_v = boost::target(*out_edge_it, face_coface_graph);
     boost::remove_edge(*out_edge_it++, face_coface_graph);
-    auto another_facet_it = inv_faces.find(another_facet_v);
+    auto another_facet_it = inv_faces->find(another_facet_v)->second;
     if (another_facet_v != facet_it->second &&
         Cell_comparison()(another_facet_it->first, facet_it->first))
-      elementary_collapse(another_facet_it, faces, inv_faces, cofaces, inv_cofaces, collapse_traits);
+      elementary_collapse(another_facet_it,
+                          faces,
+                          inv_faces,
+                          cofaces,
+                          inv_cofaces,
+                          face_coface_graph,
+                          collapse_traits);
   }
 
-  inv_cofaces->erase(inv_cofaces->find(facet_v));
-  cofaces->erase(facet_it);
+  inv_faces->erase(inv_faces->find(facet_v));
+  faces->erase(facet_it);
   boost::remove_vertex(facet_v, face_coface_graph);
   
   inv_cofaces->erase(inv_cofacet_it);
@@ -103,7 +111,7 @@ template <class InputRange,
           class OutputIterator,
           class CollapseTraits>
 void collapse(const InputRange& input_range,
-              OutputIterator& output_it,
+              OutputIterator output_it,
               const CollapseTraits& collapse_traits) {
   using Graph = boost::adjacency_list< boost::listS,
                                        boost::listS,
@@ -114,8 +122,10 @@ void collapse(const InputRange& input_range,
   using Map = std::map<Cell_type, Graph_v, Cell_comparison>;
   using Inv_map = std::map<Graph_v, typename Map::iterator>;  
   Graph face_coface_graph;
-  Map* faces, cofaces;
-  Inv_map* inv_faces, inv_cofaces;
+  Map *faces, *cofaces;
+  Inv_map *inv_faces, *inv_cofaces;
+  // The common source for all cofaces. Is present during the whole execution
+  Graph_v meet_v = boost::add_vertex(face_coface_graph);
   typename InputRange::iterator current_it = input_range.begin();
   if (current_it == input_range.end())
     return;
@@ -126,9 +136,11 @@ void collapse(const InputRange& input_range,
     while (current_it != input_range.end() && collapse_traits.dimension(*current_it) == curr_dim) 
       if (cofaces->find(*current_it) == cofaces->end()) {
         Graph_v v = boost::add_vertex(face_coface_graph);
-        auto cofacet_it = cofaces->emplace(std::make_pair(*current_it, v)).first;
+        auto cofacet_it = cofaces->emplace(std::make_pair(*current_it++, v)).first;
         inv_cofaces->emplace(std::make_pair(v, cofacet_it));
       }
+      else
+        current_it++;
     faces = new Map();
     inv_faces = new Inv_map();
     for (auto cf_pair: *cofaces) {
@@ -137,18 +149,30 @@ void collapse(const InputRange& input_range,
         if (facet_it == faces->end()) {
           Graph_v v = boost::add_vertex(face_coface_graph);
           facet_it = faces->emplace(std::make_pair(facet, v)).first;
-          inv_cofaces->emplace(std::make_pair(v, facet_it));
+          inv_faces->emplace(std::make_pair(v, facet_it));
         }
         boost::add_edge(cf_pair.second, facet_it->second, face_coface_graph);
       }
     }
     auto facet_it = faces->begin();
     while (facet_it != faces->end())
-      elementary_collapse(facet_it++, faces, inv_faces, cofaces, inv_cofaces, collapse_traits);
+      elementary_collapse(facet_it++,
+                          faces,
+                          inv_faces,
+                          cofaces,
+                          inv_cofaces,
+                          face_coface_graph,
+                          collapse_traits);
+    boost::clear_vertex(meet_v, face_coface_graph);
     for (auto cf_pair: *cofaces) {
-      boost::clear_in_edges(cf_pair.second, face_coface_graph);
+      typename Graph::out_edge_iterator out_edge_it, out_edge_end;
+      std::tie(out_edge_it, out_edge_end) = boost::out_edges(cf_pair.second, face_coface_graph);
+      while (out_edge_it != out_edge_end) {
+        boost::add_edge(meet_v, boost::target(*out_edge_it, face_coface_graph), face_coface_graph);
+        boost::remove_edge(*out_edge_it++, face_coface_graph);
+      }
       boost::remove_vertex(cf_pair.second, face_coface_graph);
-      output_it++ = cf_pair.first;
+      *output_it++ = cf_pair.first;
     }
     delete cofaces;
     delete inv_cofaces;
@@ -156,8 +180,9 @@ void collapse(const InputRange& input_range,
     inv_cofaces = inv_faces;
   }
   for (auto cf_pair: *cofaces)
-    output_it++ = cf_pair.first;
+    *output_it++ = cf_pair.first;
   delete cofaces;
 }
 
+} // namespace Gudhi
 #endif
