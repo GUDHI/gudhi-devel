@@ -45,11 +45,11 @@ void elementary_collapse(typename Map::iterator facet_it,
   using Graph_v = typename Graph::vertex_descriptor;
   
   // check if there is one coface
-  if (boost::in_degree(facet_it->second, face_coface_graph) != 1)
+  if (boost::in_degree(facet_it->second.v, face_coface_graph) != 1)
     return;
 
   // check if it is valid wrt traits
-  Graph_v facet_v = facet_it->second;
+  Graph_v facet_v = facet_it->second.v;
   Graph_v cofacet_v = boost::source(*boost::in_edges(facet_v, face_coface_graph).first,
                                     face_coface_graph);
   typename Inv_map::iterator inv_cofacet_it = inv_cofaces->find(cofacet_v);
@@ -59,12 +59,12 @@ void elementary_collapse(typename Map::iterator facet_it,
     return;
 
   typename Graph::out_edge_iterator out_edge_it, out_edge_end;
-  std::tie(out_edge_it, out_edge_end) = boost::out_edges(cofacet_it->second, face_coface_graph);
+  std::tie(out_edge_it, out_edge_end) = boost::out_edges(cofacet_it->second.v, face_coface_graph);
   while (out_edge_it != out_edge_end) {
     Graph_v another_facet_v = boost::target(*out_edge_it, face_coface_graph);
     boost::remove_edge(*out_edge_it++, face_coface_graph);
     auto another_facet_it = inv_faces->find(another_facet_v)->second;
-    if (another_facet_v != facet_it->second &&
+    if (another_facet_v != facet_it->second.v &&
         Cell_comparison()(another_facet_it->first, facet_it->first))
       elementary_collapse(another_facet_it,
                           faces,
@@ -110,16 +110,22 @@ void elementary_collapse(typename Map::iterator facet_it,
 template <class InputRange,
           class OutputIterator,
           class CollapseTraits>
-void collapse(const InputRange& input_range,
+void collapse(InputRange& input_range,
               OutputIterator output_it,
-              const CollapseTraits& collapse_traits) {
+              const CollapseTraits& collapse_traits,
+              bool ignore_filtrations = false) {
   using Graph = boost::adjacency_list< boost::listS,
                                        boost::listS,
                                        boost::bidirectionalS >;
   using Graph_v = typename Graph::vertex_descriptor;
   using Cell_type = typename CollapseTraits::Cell_type;
   using Cell_comparison = typename CollapseTraits::Cell_comparison;
-  using Map = std::map<Cell_type, Graph_v, Cell_comparison>;
+  struct Fields {
+    Graph_v v;
+    double  f;
+    Fields(Graph_v v_in, double f_in) : v(v_in), f(f_in) {}
+  };
+  using Map = std::map<Cell_type, Fields, Cell_comparison>;
   using Inv_map = std::map<Graph_v, typename Map::iterator>;  
   Graph face_coface_graph;
   Map *faces, *cofaces;
@@ -129,14 +135,19 @@ void collapse(const InputRange& input_range,
   typename InputRange::iterator current_it = input_range.begin();
   if (current_it == input_range.end())
     return;
-  int d = collapse_traits.dimension(*current_it);
+  int d = current_it->dimension();
   cofaces = new Map();
   inv_cofaces = new Inv_map();
   for (int curr_dim = d; curr_dim > 0; curr_dim--) {
-    while (current_it != input_range.end() && collapse_traits.dimension(*current_it) == curr_dim) 
-      if (cofaces->find(*current_it) == cofaces->end()) {
+    while (current_it != input_range.end() && current_it->dimension() == curr_dim) 
+      if (cofaces->find((Cell_type)*current_it) == cofaces->end()) {
         Graph_v v = boost::add_vertex(face_coface_graph);
-        auto cofacet_it = cofaces->emplace(std::make_pair(*current_it++, v)).first;
+        auto cofacet_it = cofaces->find((Cell_type)*current_it);
+        if (cofacet_it == cofaces->end())
+          cofacet_it = cofaces->emplace(std::make_pair((Cell_type)*current_it,
+                                                       Fields(v, current_it->f))).first;
+        else
+          cofacet_it->second.f = std::min(cofacet_it->second.f, current_it->f);
         inv_cofaces->emplace(std::make_pair(v, cofacet_it));
       }
       else
@@ -145,13 +156,16 @@ void collapse(const InputRange& input_range,
     inv_faces = new Inv_map();
     for (auto cf_pair: *cofaces) {
       for (auto facet: collapse_traits.facets(cf_pair.first)) {
+        Graph_v v = boost::add_vertex(face_coface_graph);
         auto facet_it = faces->find(facet);
         if (facet_it == faces->end()) {
-          Graph_v v = boost::add_vertex(face_coface_graph);
-          facet_it = faces->emplace(std::make_pair(facet, v)).first;
-          inv_faces->emplace(std::make_pair(v, facet_it));
+          facet_it = faces->emplace(std::make_pair(facet,
+                                                   Fields(v, cf_pair.second.f))).first;
         }
-        boost::add_edge(cf_pair.second, facet_it->second, face_coface_graph);
+        else
+          facet_it->second.f = std::min(facet_it->second.f, cf_pair.second.f);
+        inv_faces->emplace(std::make_pair(v, facet_it));
+        boost::add_edge(cf_pair.second.v, facet_it->second.v, face_coface_graph);
       }
     }
     auto facet_it = faces->begin();
@@ -166,13 +180,13 @@ void collapse(const InputRange& input_range,
     boost::clear_vertex(meet_v, face_coface_graph);
     for (auto cf_pair: *cofaces) {
       typename Graph::out_edge_iterator out_edge_it, out_edge_end;
-      std::tie(out_edge_it, out_edge_end) = boost::out_edges(cf_pair.second, face_coface_graph);
+      std::tie(out_edge_it, out_edge_end) = boost::out_edges(cf_pair.second.v, face_coface_graph);
       while (out_edge_it != out_edge_end) {
         boost::add_edge(meet_v, boost::target(*out_edge_it, face_coface_graph), face_coface_graph);
         boost::remove_edge(*out_edge_it++, face_coface_graph);
       }
-      boost::remove_vertex(cf_pair.second, face_coface_graph);
-      *output_it++ = cf_pair.first;
+      boost::remove_vertex(cf_pair.second.v, face_coface_graph);
+      *output_it++ = std::make_pair(cf_pair.first, cf_pair.second.f);
     }
     delete cofaces;
     delete inv_cofaces;
@@ -180,7 +194,7 @@ void collapse(const InputRange& input_range,
     inv_cofaces = inv_faces;
   }
   for (auto cf_pair: *cofaces)
-    *output_it++ = cf_pair.first;
+    *output_it++ = std::make_pair(cf_pair.first, cf_pair.second.f);
   delete cofaces;
 }
 

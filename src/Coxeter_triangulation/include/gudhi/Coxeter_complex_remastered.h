@@ -248,6 +248,113 @@ private:
     }
   };
 
+  /* A representation of a simplex slightly similar to Hasse_cell class
+   */
+  struct Filtered_simplex : public std::vector<size_t> {
+    double f;
+    Filtered_simplex(): std::vector<size_t>(), f(0) {}
+    Filtered_simplex(double f_in): std::vector<size_t>(), f(f_in) {}
+    Filtered_simplex(int n, double f_in): std::vector<size_t>(n), f(f_in) {}
+    int dimension() const { return size()-1; }
+  };
+  
+  /* Alcove iterator for simplicial alcoves that outputs its vertices that are numerated in a map.
+   * All filtrations are set to 0.
+   */
+  class Non_filtered_alcove_iterator : public boost::iterator_facade< Non_filtered_alcove_iterator,
+                                                                      Filtered_simplex const,
+                                                                      boost::forward_traversal_tag> {
+  protected:
+    typedef typename Alcove_vertex_graph::Id_v_map Alcove_map;
+    Filtered_simplex value_;
+    typename Alcove_map::const_iterator it_;
+    Alcove_vertex_graph const& av_graph_;
+    Vertex_index_map const& vi_map_;
+    friend class boost::iterator_core_access;
+    void update_value() {
+      auto& a_map = av_graph_.a_map;
+      auto& inv_map = av_graph_.inv_map;
+      auto& graph = av_graph_.graph;    
+      value_.clear();
+      if (it_ != a_map.end()) {
+        typename Graph::out_edge_iterator e_it, e_end;
+        for (std::tie(e_it, e_end) = boost::out_edges(it_->second.gv, graph); e_it != e_end; ++e_it)
+          value_.push_back(vi_map_.at(inv_map.at(boost::target(*e_it, graph))));
+        std::sort(value_.begin(), value_.end());
+      }
+    }
+    bool equal(Non_filtered_alcove_iterator const& other) const {
+      return it_ == other.it_;
+    }
+    Filtered_simplex const& dereference() const {
+      return value_;
+    }
+    void increment() {
+      it_++;
+      update_value();
+    }
+  public:
+    Non_filtered_alcove_iterator(typename Alcove_map::const_iterator it,
+                                 Alcove_vertex_graph const& av_graph,
+                                 Vertex_index_map const& vi_map)
+      : it_(it), av_graph_(av_graph), vi_map_(vi_map) {
+      value_.f = 0;
+      update_value();
+    }
+    int dimension() {
+      return value_.get_dimension();
+    }
+  };
+
+    /* Alcove iterator for simplicial alcoves that outputs its vertices that are numerated in a map.
+   * All filtrations are set to 0.
+   */
+  class Filtered_alcove_iterator : public boost::iterator_facade< Filtered_alcove_iterator,
+                                                                      Filtered_simplex const,
+                                                                      boost::forward_traversal_tag> {
+  protected:
+    typedef typename Alcove_vertex_graph::Id_v_map Alcove_map;
+    Filtered_simplex value_;
+    typename Alcove_map::const_iterator it_;
+    Alcove_vertex_graph const& av_graph_;
+    Vertex_index_map const& vi_map_;
+    friend class boost::iterator_core_access;
+    void update_value() {
+      auto& a_map = av_graph_.a_map;
+      auto& inv_map = av_graph_.inv_map;
+      auto& graph = av_graph_.graph;    
+      value_.clear();
+      if (it_ != a_map.end()) {
+        typename Graph::out_edge_iterator e_it, e_end;
+        for (std::tie(e_it, e_end) = boost::out_edges(it_->second.gv, graph); e_it != e_end; ++e_it)
+          value_.push_back(vi_map_.at(inv_map.at(boost::target(*e_it, graph))));
+        std::sort(value_.begin(), value_.end());
+        value_.f = it_->second.f;
+      }
+    }
+    bool equal(Filtered_alcove_iterator const& other) const {
+      return it_ == other.it_;
+    }
+    Filtered_simplex const& dereference() const {
+      return value_;
+    }
+    void increment() {
+      it_++;
+      update_value();
+    }
+  public:
+    Filtered_alcove_iterator(typename Alcove_map::const_iterator it,
+                             Alcove_vertex_graph const& av_graph,
+                             Vertex_index_map const& vi_map)
+      : it_(it), av_graph_(av_graph), vi_map_(vi_map) {
+      update_value();
+    }
+    int dimension() {
+      return value_.get_dimension();
+    }
+  };
+
+  
   /* Alcove iterator for simplicial alcoves that outputs its vertices that are numerated in a map */
   class No_filtration_alcove_iterator : public boost::iterator_facade< No_filtration_alcove_iterator,
                                                                        std::vector<std::size_t> const,
@@ -330,12 +437,13 @@ public:
     auto& a_map = av_graph_.a_map;
     for (Id_it v_it = v_map.begin(); v_it != v_map.end(); ++v_it, ++index)
       vi_map.emplace(v_it, index);
-    typedef boost::iterator_range<No_filtration_alcove_iterator> Max_simplex_range;
-    Max_simplex_range input_range(No_filtration_alcove_iterator(a_map.begin(), av_graph_, vi_map),
-                                  No_filtration_alcove_iterator(a_map.end(), av_graph_, vi_map));
+    using Alcove_iterator = Non_filtered_alcove_iterator;
+    typedef boost::iterator_range<Alcove_iterator> Max_simplex_range;
+    Max_simplex_range input_range(Alcove_iterator(a_map.begin(), av_graph_, vi_map),
+                                  Alcove_iterator(a_map.end(), av_graph_, vi_map));
     using Simplex_tree = Gudhi::Simplex_tree<>;
     Simplex_tree output_stree;
-    using Simplex_tree_inserter = simplex_tree_non_filtered_inserter<Simplex_tree>;
+    using Simplex_tree_inserter = simplex_tree_inserter<Simplex_tree>;
     Simplex_tree_inserter st_inserter(output_stree);
     Gudhi::collapse(input_range,
                     boost::make_function_output_iterator(st_inserter),
@@ -352,14 +460,19 @@ public:
       for (auto sh: output_stree.complex_simplex_range())
         chi += 1-2*(output_stree.dimension(sh)%2);
       std::cout << "Euler characteristic of output_stree is " << chi << std::endl;
+      // std::cout << "output_stree before relabeling:\n" << output_stree << "\n";
+      Simplex_tree output_stree_relabeled;
+      relabel_simplex_tree(output_stree, output_stree_relabeled);
+      // std::cout << "output_stree after relabeling:\n" << output_stree_relabeled << "\n";
+      
       using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
       using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
       double min_persistence = 0;
       // Sort the simplices in the order of the filtration
-      output_stree.set_dimension(dim_complex+1);
-      output_stree.initialize_filtration();
+      output_stree_relabeled.set_dimension(dim_complex+1);
+      output_stree_relabeled.initialize_filtration();
       // Compute the persistence diagram of the complex
-      Persistent_cohomology pcoh(output_stree);
+      Persistent_cohomology pcoh(output_stree_relabeled);
       // initializes the coefficient field for homology
       pcoh.init_coefficients(3);
       
@@ -369,10 +482,14 @@ public:
       pcoh.output_diagram(out);
       out.close();
       std::cout << "Persistence complete." << std::endl;
-
+      //Output the collapsed stree
+      out = std::ofstream("output_stree.txt");
+      out << output_stree << std::endl;
+      out.close();
+      
       Simplex_tree stree;
       for (auto p: input_range)
-        stree.insert_simplex_and_subfaces(p);
+        stree.insert_simplex_and_subfaces(p, p.f);
       std::cout << "Number of all simplices before collapse: " << stree.num_simplices() << "\n";
       stree.set_dimension(v_map.begin()->first.size()+1);
       stree.initialize_filtration();
@@ -385,7 +502,12 @@ public:
       pcoh2.output_diagram(out2);
       out2.close();
       std::cout << "Persistence complete." << std::endl;
-            
+      //Output the collapsed stree
+      out = std::ofstream("stree.txt");
+      out << stree << std::endl;
+      out.close();
+
+      
       typedef Simplex_tree_simplex_iterator<Simplex_tree> Simplex_tree_iterator;
       typedef boost::iterator_range<Simplex_tree_iterator> Simplex_tree_range;
       Simplex_tree_range simplex_tree_range(Simplex_tree_iterator(output_stree.complex_simplex_range().begin(), output_stree),
