@@ -10,10 +10,6 @@ Leave the lines above as it is required by the web site generator 'Jekyll'
 {:/comment}
 
 
-# Miscellaneous #
-
-## off_file_from_shape_generator ##
-
 Generates a pointset and save it in an OFF file. Command-line is:
 
 ```

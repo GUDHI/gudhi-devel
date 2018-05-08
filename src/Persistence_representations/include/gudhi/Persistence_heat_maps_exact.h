@@ -92,7 +92,7 @@ class Persistence_heat_maps_exact {
    */
   std::vector<std::vector<double> > vectorize() const {
     std::vector<std::vector<double> > im; for(int i = 0; i < res_y; i++)  im.emplace_back();
-    double step_x = (max_x - min_x)/res_x; double step_y = (max_y - min_y)/res_y;
+    double step_x = (max_x - min_x)/(res_x - 1); double step_y = (max_y - min_y)/(res_y - 1);
 
     int num_pts = diagram.size();
 

@@ -10,9 +10,6 @@ Leave the lines above as it is required by the web site generator 'Jekyll'
 {:/comment}
 
 
-# Alpha complex #
-
-
 ## alpha_complex_persistence ##
 
 This program computes the persistent homology with coefficient field Z/pZ of the dD alpha complex built from a dD point cloud.
