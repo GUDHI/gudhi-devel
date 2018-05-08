@@ -109,9 +109,11 @@ void elementary_collapse(typename Map::iterator facet_it,
 
 template <class InputRange,
           class OutputIterator,
+          class InputTraits,
           class CollapseTraits>
 void collapse(InputRange& input_range,
               OutputIterator output_it,
+              InputTraits input_traits,
               const CollapseTraits& collapse_traits,
               bool ignore_filtrations = false) {
   using Graph = boost::adjacency_list< boost::listS,
@@ -135,19 +137,20 @@ void collapse(InputRange& input_range,
   typename InputRange::iterator current_it = input_range.begin();
   if (current_it == input_range.end())
     return;
-  int d = current_it->dimension();
+  int d = input_traits.dimension(*current_it);
   cofaces = new Map();
   inv_cofaces = new Inv_map();
   for (int curr_dim = d; curr_dim > 0; curr_dim--) {
-    while (current_it != input_range.end() && current_it->dimension() == curr_dim) 
-      if (cofaces->find((Cell_type)*current_it) == cofaces->end()) {
+    while (current_it != input_range.end() && input_traits.dimension(*current_it) == curr_dim) 
+      if (cofaces->find(input_traits.cell(*current_it)) == cofaces->end()) {
         Graph_v v = boost::add_vertex(face_coface_graph);
-        auto cofacet_it = cofaces->find((Cell_type)*current_it);
+        auto cofacet_it = cofaces->find(input_traits.cell(*current_it));
         if (cofacet_it == cofaces->end())
-          cofacet_it = cofaces->emplace(std::make_pair((Cell_type)*current_it,
-                                                       Fields(v, current_it->f))).first;
+          cofacet_it = cofaces->emplace(std::make_pair(input_traits.cell(*current_it),
+                                                       Fields(v,
+                                                              input_traits.filtration(*current_it)))).first;
         else
-          cofacet_it->second.f = std::min(cofacet_it->second.f, current_it->f);
+          cofacet_it->second.f = std::min(cofacet_it->second.f, input_traits.filtration(*current_it));
         inv_cofaces->emplace(std::make_pair(v, cofacet_it));
       }
       else

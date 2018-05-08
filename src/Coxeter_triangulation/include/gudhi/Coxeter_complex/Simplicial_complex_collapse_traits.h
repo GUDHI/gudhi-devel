@@ -25,6 +25,21 @@
 
 #include <vector>
 
+/* The input traits for pairs simplex-filtration
+ */
+template <class Simplex_filtration_pair>
+struct Simplex_filtration_pair_input_traits {
+  int dimension(const Simplex_filtration_pair& sfp) {
+    return sfp.first.size()-1;
+  }
+  typename Simplex_filtration_pair::second_type filtration(const Simplex_filtration_pair& sfp) {
+    return sfp.second;
+  }
+  typename Simplex_filtration_pair::first_type cell(const Simplex_filtration_pair& sfp) {
+    return sfp.first;
+  }
+};
+
   /* The traits for a (non-filtered) simplicial complex collapse.
    */
   struct Simplicial_complex_collapse_traits {

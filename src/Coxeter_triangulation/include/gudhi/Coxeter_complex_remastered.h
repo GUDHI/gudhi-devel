@@ -248,70 +248,13 @@ private:
     }
   };
 
-  /* A representation of a simplex slightly similar to Hasse_cell class
-   */
-  struct Filtered_simplex : public std::vector<size_t> {
-    double f;
-    Filtered_simplex(): std::vector<size_t>(), f(0) {}
-    Filtered_simplex(double f_in): std::vector<size_t>(), f(f_in) {}
-    Filtered_simplex(int n, double f_in): std::vector<size_t>(n), f(f_in) {}
-    int dimension() const { return size()-1; }
-  };
-  
-  /* Alcove iterator for simplicial alcoves that outputs its vertices that are numerated in a map.
-   * All filtrations are set to 0.
-   */
-  class Non_filtered_alcove_iterator : public boost::iterator_facade< Non_filtered_alcove_iterator,
-                                                                      Filtered_simplex const,
-                                                                      boost::forward_traversal_tag> {
-  protected:
-    typedef typename Alcove_vertex_graph::Id_v_map Alcove_map;
-    Filtered_simplex value_;
-    typename Alcove_map::const_iterator it_;
-    Alcove_vertex_graph const& av_graph_;
-    Vertex_index_map const& vi_map_;
-    friend class boost::iterator_core_access;
-    void update_value() {
-      auto& a_map = av_graph_.a_map;
-      auto& inv_map = av_graph_.inv_map;
-      auto& graph = av_graph_.graph;    
-      value_.clear();
-      if (it_ != a_map.end()) {
-        typename Graph::out_edge_iterator e_it, e_end;
-        for (std::tie(e_it, e_end) = boost::out_edges(it_->second.gv, graph); e_it != e_end; ++e_it)
-          value_.push_back(vi_map_.at(inv_map.at(boost::target(*e_it, graph))));
-        std::sort(value_.begin(), value_.end());
-      }
-    }
-    bool equal(Non_filtered_alcove_iterator const& other) const {
-      return it_ == other.it_;
-    }
-    Filtered_simplex const& dereference() const {
-      return value_;
-    }
-    void increment() {
-      it_++;
-      update_value();
-    }
-  public:
-    Non_filtered_alcove_iterator(typename Alcove_map::const_iterator it,
-                                 Alcove_vertex_graph const& av_graph,
-                                 Vertex_index_map const& vi_map)
-      : it_(it), av_graph_(av_graph), vi_map_(vi_map) {
-      value_.f = 0;
-      update_value();
-    }
-    int dimension() {
-      return value_.get_dimension();
-    }
-  };
-
-    /* Alcove iterator for simplicial alcoves that outputs its vertices that are numerated in a map.
+  using Filtered_simplex = std::pair<std::vector<std::size_t>, double>;
+   /* Alcove iterator for simplicial alcoves that outputs its vertices that are numerated in a map.
    * All filtrations are set to 0.
    */
   class Filtered_alcove_iterator : public boost::iterator_facade< Filtered_alcove_iterator,
-                                                                      Filtered_simplex const,
-                                                                      boost::forward_traversal_tag> {
+                                                                  Filtered_simplex const,
+                                                                  boost::forward_traversal_tag> {
   protected:
     typedef typename Alcove_vertex_graph::Id_v_map Alcove_map;
     Filtered_simplex value_;
@@ -323,13 +266,13 @@ private:
       auto& a_map = av_graph_.a_map;
       auto& inv_map = av_graph_.inv_map;
       auto& graph = av_graph_.graph;    
-      value_.clear();
+      value_.first.clear();
       if (it_ != a_map.end()) {
         typename Graph::out_edge_iterator e_it, e_end;
         for (std::tie(e_it, e_end) = boost::out_edges(it_->second.gv, graph); e_it != e_end; ++e_it)
-          value_.push_back(vi_map_.at(inv_map.at(boost::target(*e_it, graph))));
-        std::sort(value_.begin(), value_.end());
-        value_.f = it_->second.f;
+          value_.first.push_back(vi_map_.at(inv_map.at(boost::target(*e_it, graph))));
+        std::sort(value_.first.begin(), value_.first.end());
+        value_.second = it_->second.f;
       }
     }
     bool equal(Filtered_alcove_iterator const& other) const {
@@ -349,8 +292,39 @@ private:
       : it_(it), av_graph_(av_graph), vi_map_(vi_map) {
       update_value();
     }
-    int dimension() {
-      return value_.get_dimension();
+  };
+
+    /* Alcove iterator for simplicial alcoves that outputs its vertices that are numerated in a map.
+   * All filtrations are set to 0.
+   */
+  class Non_filtered_alcove_iterator : public boost::iterator_facade< Non_filtered_alcove_iterator,
+                                                                      Filtered_simplex const,
+                                                                      boost::forward_traversal_tag> {
+  protected:
+    typedef typename Alcove_vertex_graph::Id_v_map Alcove_map;
+    Filtered_simplex value_;
+    Filtered_alcove_iterator it_;
+    friend class boost::iterator_core_access;
+    void update_value() {
+      value_.first = it_->first;
+    }
+    bool equal(Non_filtered_alcove_iterator const& other) const {
+      return it_ == other.it_;
+    }
+    Filtered_simplex const& dereference() const {
+      return value_;
+    }
+    void increment() {
+      it_++;
+      update_value();
+    }
+  public:
+    Non_filtered_alcove_iterator(typename Alcove_map::const_iterator it,
+                                 Alcove_vertex_graph const& av_graph,
+                                 Vertex_index_map const& vi_map)
+      : it_(it, av_graph, vi_map) {
+      value_.second = 0;
+      update_value();
     }
   };
 
@@ -447,6 +421,7 @@ public:
     Simplex_tree_inserter st_inserter(output_stree);
     Gudhi::collapse(input_range,
                     boost::make_function_output_iterator(st_inserter),
+                    Simplex_filtration_pair_input_traits<Filtered_simplex>(),
                     Simplicial_complex_collapse_traits());
     if (pers_out) {
       std::cout << "Number of all simplices after collapse: " << output_stree.num_simplices() << "\n";
@@ -489,7 +464,7 @@ public:
       
       Simplex_tree stree;
       for (auto p: input_range)
-        stree.insert_simplex_and_subfaces(p, p.f);
+        stree.insert_simplex_and_subfaces(p.first, p.second);
       std::cout << "Number of all simplices before collapse: " << stree.num_simplices() << "\n";
       stree.set_dimension(v_map.begin()->first.size()+1);
       stree.initialize_filtration();
@@ -647,6 +622,55 @@ private:
     return present;
   }
 
+  // /* A representation of a Hasse_cell class
+  //  */
+  // struct Filtered_cell : public Hasse_cell {
+  //   double f;
+  //   Filtered_cell(): Hasse_cell(), f(0) {}
+  //   Filtered_cell(double f_in): Hasse_cell(), f(f_in) {}
+  //   Filtered_cell(int dim, double f_in): Hasse_cell(dim), f(f_in) {}
+  //   int dimension() const { return Hasse_cell::dimension; }
+  // };
+
+  // /* Cell iterator for  that outputs its vertices that are numerated in a map.
+  //  * All filtrations are set to 0.
+  //  */
+  // class Filtered_cell_iterator : public boost::iterator_facade< Filtered_cell_iterator,
+  //                                                               Filtered_cell const,
+  //                                                               boost::forward_traversal_tag> {
+  // protected:
+  //   std::vector<Hasse_cell*> cells_;
+  //   typename std::vector<std::size_t>::iterator it_;
+  //   Filtered_cell value_;
+  //   friend class boost::iterator_core_access;
+  //   void update_value() {
+  //     if (it_ != cells_.end()) {
+  //       value_ = *it_;
+  //       value_.f = it_->get_filtration();
+  //     }
+  //   }
+  //   bool equal(Filtered_alcove_iterator const& other) const {
+  //     return *it_ == *other.it_;
+  //   }
+  //   Filtered_simplex const& dereference() const {
+  //     return value_;
+  //   }
+  //   void increment() {
+  //     it_++;
+  //     update_value();
+  //   }
+  // public:
+  //   Filtered_alcove_iterator(typename Alcove_map::const_iterator it,
+  //                            Alcove_vertex_graph const& av_graph,
+  //                            Vertex_index_map const& vi_map)
+  //     : it_(it), av_graph_(av_graph), vi_map_(vi_map) {
+  //     update_value();
+  //   }
+  //   int dimension() {
+  //     return value_.get_dimension();
+  //   }
+  // };
+  
 public:  
   // Computing Voronoi skeleton as in the paper
   // k is the desired dimension
