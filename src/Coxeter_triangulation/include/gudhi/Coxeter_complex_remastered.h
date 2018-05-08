@@ -10,7 +10,8 @@
 #include <gudhi/Hasse_diagram_persistence.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Simplex_tree.h>
-#include <gudhi/Coxeter_complex/Simplicial_complex_collapse_traits.h>
+#include <gudhi/Coxeter_complex/simplicial_complex_traits.h>
+#include <gudhi/Coxeter_complex/hasse_diagram_traits.h>
 #include <gudhi/Coxeter_complex/collapse.h>
 
 #include <boost/graph/adjacency_list.hpp>
@@ -412,6 +413,7 @@ public:
     for (Id_it v_it = v_map.begin(); v_it != v_map.end(); ++v_it, ++index)
       vi_map.emplace(v_it, index);
     using Alcove_iterator = Non_filtered_alcove_iterator;
+    // using Alcove_iterator = Filtered_alcove_iterator;
     typedef boost::iterator_range<Alcove_iterator> Max_simplex_range;
     Max_simplex_range input_range(Alcove_iterator(a_map.begin(), av_graph_, vi_map),
                                   Alcove_iterator(a_map.end(), av_graph_, vi_map));
@@ -622,54 +624,6 @@ private:
     return present;
   }
 
-  // /* A representation of a Hasse_cell class
-  //  */
-  // struct Filtered_cell : public Hasse_cell {
-  //   double f;
-  //   Filtered_cell(): Hasse_cell(), f(0) {}
-  //   Filtered_cell(double f_in): Hasse_cell(), f(f_in) {}
-  //   Filtered_cell(int dim, double f_in): Hasse_cell(dim), f(f_in) {}
-  //   int dimension() const { return Hasse_cell::dimension; }
-  // };
-
-  // /* Cell iterator for  that outputs its vertices that are numerated in a map.
-  //  * All filtrations are set to 0.
-  //  */
-  // class Filtered_cell_iterator : public boost::iterator_facade< Filtered_cell_iterator,
-  //                                                               Filtered_cell const,
-  //                                                               boost::forward_traversal_tag> {
-  // protected:
-  //   std::vector<Hasse_cell*> cells_;
-  //   typename std::vector<std::size_t>::iterator it_;
-  //   Filtered_cell value_;
-  //   friend class boost::iterator_core_access;
-  //   void update_value() {
-  //     if (it_ != cells_.end()) {
-  //       value_ = *it_;
-  //       value_.f = it_->get_filtration();
-  //     }
-  //   }
-  //   bool equal(Filtered_alcove_iterator const& other) const {
-  //     return *it_ == *other.it_;
-  //   }
-  //   Filtered_simplex const& dereference() const {
-  //     return value_;
-  //   }
-  //   void increment() {
-  //     it_++;
-  //     update_value();
-  //   }
-  // public:
-  //   Filtered_alcove_iterator(typename Alcove_map::const_iterator it,
-  //                            Alcove_vertex_graph const& av_graph,
-  //                            Vertex_index_map const& vi_map)
-  //     : it_(it), av_graph_(av_graph), vi_map_(vi_map) {
-  //     update_value();
-  //   }
-  //   int dimension() {
-  //     return value_.get_dimension();
-  //   }
-  // };
   
 public:  
   // Computing Voronoi skeleton as in the paper

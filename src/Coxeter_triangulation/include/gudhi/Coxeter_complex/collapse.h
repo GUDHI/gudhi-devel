@@ -122,6 +122,7 @@ void collapse(InputRange& input_range,
   using Graph_v = typename Graph::vertex_descriptor;
   using Cell_type = typename CollapseTraits::Cell_type;
   using Cell_comparison = typename CollapseTraits::Cell_comparison;
+  using Boundary_element = typename CollapseTraits::Boundary_element;
   struct Fields {
     Graph_v v;
     double  f;
@@ -157,18 +158,19 @@ void collapse(InputRange& input_range,
         current_it++;
     faces = new Map();
     inv_faces = new Inv_map();
-    for (auto cf_pair: *cofaces) {
-      for (auto facet: collapse_traits.facets(cf_pair.first)) {
+    for (auto cf_it = cofaces->begin(); cf_it != cofaces->end(); ++cf_it) {
+      for (Boundary_element facet: collapse_traits.boundary(cf_it)) {
         Graph_v v = boost::add_vertex(face_coface_graph);
-        auto facet_it = faces->find(facet);
+        auto facet_it = faces->find(collapse_traits.facet_cell(facet));
         if (facet_it == faces->end()) {
-          facet_it = faces->emplace(std::make_pair(facet,
-                                                   Fields(v, cf_pair.second.f))).first;
+          facet_it = faces->emplace(std::make_pair(collapse_traits.facet_cell(facet),
+                                                   Fields(v,
+                                                          collapse_traits.facet_filtration(facet)))).first;
         }
         else
-          facet_it->second.f = std::min(facet_it->second.f, cf_pair.second.f);
+          facet_it->second.f = std::min(facet_it->second.f, collapse_traits.facet_filtration(facet));
         inv_faces->emplace(std::make_pair(v, facet_it));
-        boost::add_edge(cf_pair.second.v, facet_it->second.v, face_coface_graph);
+        boost::add_edge(cf_it->second.v, facet_it->second.v, face_coface_graph);
       }
     }
     auto facet_it = faces->begin();
