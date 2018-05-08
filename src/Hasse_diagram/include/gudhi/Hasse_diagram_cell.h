@@ -122,7 +122,7 @@ public:
      * is a vector of pairs of pointers to boundary elements and incidence
      * coefficients.
     **/
-	inline Cell_range& get_boundary(){return this->boundary;}
+	inline Cell_range& get_boundary() {return this->boundary;}
 
 	/**
      * Procedure to get the coboundary of a fiven cell. The output format
@@ -134,7 +134,7 @@ public:
 	/**
      * Procedure to get the dimension of a cell.
     **/
-	inline unsigned& get_dimension(){return this->dimension;}
+	inline unsigned get_dimension() const {return this->dimension;}
 
 	/**
      * Procedure to get additional information about the cell.s
@@ -152,7 +152,7 @@ public:
 	/**
 	 * Accessing the filtration of the cell.
 	**/
-	inline Filtration_type& get_filtration()
+	inline Filtration_type get_filtration() const
 	{
 		//std::cout << "Accessing the filtration of a cell : " << *this << std::endl;
 		return this->filtration;

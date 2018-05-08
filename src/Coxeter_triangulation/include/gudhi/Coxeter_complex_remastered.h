@@ -26,6 +26,9 @@
 
 double num_error = 1.0e-10;
 
+// template <typename Cell_type>
+// double Gudhi::Hasse_diagram::Hasse_diagram<Cell_type>::proportion_of_removed_cells_that_triggers_reorganization_of_structure = 1;
+
 namespace Gudhi {
   
 template <class Point_range,
@@ -731,49 +734,114 @@ public:
       //   std::cout << *c_ptr << "\n";
       // std::cout << std::endl;
     }
+    std::vector<Hasse_cell*> hasse_vector(hasse_diagram.begin(), hasse_diagram.end());
+    struct Dimension_comparison {
+      bool operator() (Hasse_cell* lhs, Hasse_cell* rhs) const {
+        return lhs->get_dimension() > rhs->get_dimension();
+      }
+    };
+    std::sort(hasse_vector.begin(), hasse_vector.end(), Dimension_comparison());
+    
     typedef Gudhi::Hasse_diagram::Hasse_diagram_persistence<Hasse_cell> Hasse_pers_vector;
-    Hasse_pers_vector hdp(std::vector<Hasse_cell*>(hasse_diagram.begin(),
-                                                   hasse_diagram.end()));  
+    Hasse_pers_vector hdp(hasse_vector);  
     typedef Gudhi::persistent_cohomology::Field_Zp Field_Zp;
     typedef Gudhi::persistent_cohomology::Persistent_cohomology
                           <Hasse_pers_vector, Field_Zp> Persistent_cohomology;
-
     hdp.set_up_the_arrays();
-    Persistent_cohomology pcoh(hdp, true);  
-    unsigned field_characteristic = 2;
-    double min_persistence = 0;
 
-    int chi = 0;
-    std::vector<int> face_count(av_graph_.v_map.begin()->first.size()+1);
-    for (auto c_ptr: hasse_diagram) {
-      chi += 1-2*(c_ptr->get_dimension()%2);
-      face_count[c_ptr->get_dimension()]++;
-    }    
-    std::cout << "Faces by dimension: " << face_count << "\n";
-    if (is_pseudomanifold(hasse_diagram))
-      std::cout << "\033[1;32m" << "The Voronoi skeleton is a pseudomanifold.\033[0m\n";
-    std::cout << "Euler characteristic = " << chi << ".\n"; 
+    std::cout << "hdp:\n" << hdp << "\n";
     
-    pcoh.init_coefficients(field_characteristic);
-    pcoh.compute_persistent_cohomology(min_persistence);
-    std::cout << pcoh.persistent_betti_numbers(100,100) << std::endl;
-    std::ofstream out("persdiag_vor.out");
-    pcoh.output_diagram(out);
-    out.close();
+    {
+      Persistent_cohomology pcoh(hdp, true);  
+      unsigned field_characteristic = 2;
+      double min_persistence = 0;
+
+      int chi = 0;
+      std::vector<int> face_count(av_graph_.v_map.begin()->first.size()+1);
+      for (auto c_ptr: hasse_diagram) {
+        chi += 1-2*(c_ptr->get_dimension()%2);
+        face_count[c_ptr->get_dimension()]++;
+      }    
+      std::cout << "Faces by dimension: " << face_count << "\n";
+      if (is_pseudomanifold(hasse_diagram))
+        std::cout << "\033[1;32m" << "The Voronoi skeleton is a pseudomanifold.\033[0m\n";
+      std::cout << "Euler characteristic = " << chi << ".\n"; 
+    
+      pcoh.init_coefficients(field_characteristic);
+      pcoh.compute_persistent_cohomology(min_persistence);
+      std::cout << pcoh.persistent_betti_numbers(100,100) << std::endl;
+      std::ofstream out("persdiag_vor.out");
+      pcoh.output_diagram(out);
+      out.close();
 #define VERBOSE_DEBUG_TRACES
 #ifdef VERBOSE_DEBUG_TRACES
 #ifdef DEBUG_TRACES
-    std::cout << "Hasse diagram:\n" << hdp << std::endl;
+      std::cout << "Hasse diagram:\n" << hdp << std::endl;
 #endif
 #endif
 
 #define VOR_OUTPUT_MESH
 #ifdef VOR_OUTPUT_MESH
-    write_voronoi_mesh(ac_map, hasse_diagram, "voronoi_skeleton");
+      write_voronoi_mesh(ac_map, hasse_diagram, "voronoi_skeleton");
 #endif
-    for (auto c_ptr: hasse_diagram) {
+    }
+    std::cout << "hdp:\n" << hdp << "\n";
+    
+    std::cout << "Starting the collapses of the Hasse diagram.\n";
+    struct empty_function{
+      void operator() (const std::pair<Hasse_cell*, double> t) const {}
+    };
+    Gudhi::collapse(hasse_vector,
+                    boost::make_function_output_iterator(empty_function()),
+                    Hasse_cell_input_traits<Hasse_cell>(),
+                    Hasse_diagram_collapse_traits<Hasse_cell, Hasse_pers_vector>(hdp, true));
+    hdp.clean_up_the_structure();
+    std::cout << "hdp:\n" << hdp << "\n";
+    hasse_vector.clear();
+    unsigned complex_dimension = hdp.dimension();
+    for (unsigned k = 0; k <= complex_dimension; ++k)
+      for (auto pos: hdp.skeleton_simplex_range(k))
+        hasse_vector.push_back(hdp.give_me_cell_at_position(pos));    
+    
+    { 
+      Persistent_cohomology pcoh(hdp, true);  
+      unsigned field_characteristic = 2;
+      double min_persistence = 0;
+
+      int chi = 0;
+      std::vector<int> face_count(av_graph_.v_map.begin()->first.size()+1);
+      for (auto c_ptr: hasse_vector) {
+        chi += 1-2*(c_ptr->get_dimension()%2);
+        face_count[c_ptr->get_dimension()]++;
+      }    
+      std::cout << "Faces by dimension: " << face_count << "\n";
+      if (is_pseudomanifold(hasse_vector))
+        std::cout << "\033[1;32m" << "The Voronoi skeleton is a pseudomanifold.\033[0m\n";
+      std::cout << "Euler characteristic = " << chi << ".\n"; 
+    
+      pcoh.init_coefficients(field_characteristic);
+      pcoh.compute_persistent_cohomology(min_persistence);
+      std::cout << pcoh.persistent_betti_numbers(100,100) << std::endl;
+      std::ofstream out("persdiag_vor_collapsed.out");
+      pcoh.output_diagram(out);
+      out.close();
+#define VERBOSE_DEBUG_TRACES
+#ifdef VERBOSE_DEBUG_TRACES
+#ifdef DEBUG_TRACES
+      std::cout << "Hasse diagram:\n" << hdp << std::endl;
+#endif
+#endif
+
+#define VOR_OUTPUT_MESH
+#ifdef VOR_OUTPUT_MESH
+      write_voronoi_mesh(ac_map, hasse_vector, "voronoi_skeleton_collapsed");
+#endif
+    }
+    for (auto c_ptr: hasse_vector) {
       delete c_ptr;
     }
+    
+
   }
 
 private:

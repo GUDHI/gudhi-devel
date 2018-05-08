@@ -38,23 +38,25 @@ struct Hasse_cell_input_traits {
   Filtration_type filtration(const Hasse_cell* cell) const {
     return cell->get_filtration();
   }
-  Hasse_cell* cell(const Hasse_cell* cell) const {
+  Hasse_cell* cell(Hasse_cell* cell) const {
     return cell;
   }
 };
 
 /* The traits for a Hasse diagram collapse.
- * Marks the collapsed cells for deletion.
+ * Hasse_diagram template parameter should have remove_cell function, which
+ * marks a cell for deletion instead of deleting it.
+ * The traits mark the collapsed cells for deletion.
  */
-typedef <class Hasse_diagram>
+template <class Hasse_cell,
+          class Hasse_diagram>
 struct Hasse_diagram_collapse_traits {
-  using Hasse_cell = 
   typedef Hasse_cell* Cell_type;
-  typedef std::less<Hasse_cell*> Cell_comparison;
+  typedef std::less<Cell_type> Cell_comparison;
 
   using Incidence_type = typename Hasse_cell::Incidence_type;
-  typedef Boundary_element = std::pair<Hasse_cell*,Incidence_type>;
-  typedef Boundary_range = std::vector<Boundary_element>;
+  typedef std::pair<Hasse_cell*,Incidence_type> Boundary_element;
+  typedef std::vector<Boundary_element> Boundary_range;
   
   template <class MapIterator>
   Boundary_range boundary(const MapIterator& cofacet_it) const {
@@ -72,14 +74,21 @@ struct Hasse_diagram_collapse_traits {
   
   template <class MapIterator>
   bool is_valid_collapse(const MapIterator& facet_it,
-                         const MapIterator& cofacet_it) const {
-    bool is_valid = facet_it->second.f == cofacet_it->second.f;
+                         const MapIterator& cofacet_it) {
+    bool is_valid = ignore_filtration_ || facet_it->second.f == cofacet_it->second.f;
     if (is_valid) {
       hasse_diagram_.remove_cell(facet_it->first);
       hasse_diagram_.remove_cell(cofacet_it->first);
     }
     return is_valid;
   }
+
+  Hasse_diagram_collapse_traits(Hasse_diagram& hasse_diagram, bool ignore_filtration = false) 
+    : hasse_diagram_(hasse_diagram), ignore_filtration_(ignore_filtration) {}
+
+protected:
+  Hasse_diagram& hasse_diagram_;
+  bool ignore_filtration_;
 };
 
 

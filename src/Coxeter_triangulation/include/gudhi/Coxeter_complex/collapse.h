@@ -40,7 +40,7 @@ void elementary_collapse(typename Map::iterator facet_it,
                          Map* cofaces,
                          Inv_map* inv_cofaces,
                          Graph& face_coface_graph, 
-                         const CollapseTraits& collapse_traits) {
+                         CollapseTraits& collapse_traits) {
   using Cell_comparison = typename CollapseTraits::Cell_comparison; 
   using Graph_v = typename Graph::vertex_descriptor;
   
@@ -114,8 +114,7 @@ template <class InputRange,
 void collapse(InputRange& input_range,
               OutputIterator output_it,
               InputTraits input_traits,
-              const CollapseTraits& collapse_traits,
-              bool ignore_filtrations = false) {
+              CollapseTraits collapse_traits) {
   using Graph = boost::adjacency_list< boost::listS,
                                        boost::listS,
                                        boost::bidirectionalS >;

@@ -278,7 +278,7 @@ protected:
 };//Hasse_diagram
 
 template <typename Cell_type>
-double Hasse_diagram<Cell_type>::proportion_of_removed_cells_that_triggers_reorganization_of_structure = 0.5;
+double Hasse_diagram<Cell_type>::proportion_of_removed_cells_that_triggers_reorganization_of_structure = 1;
 
 
 template < typename Cell_type >
