@@ -20,14 +20,14 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gudhi/Persistence_landscape_on_grid_exact.h>
+#include <gudhi/Betti_sequence.h>
 
 #include <iostream>
 #include <vector>
 #include <utility>
 
 using Persistence_diagram = Gudhi::Persistence_representations::Persistence_diagram;
-using LS = Gudhi::Persistence_representations::Persistence_landscape_on_grid_exact;
+using BS = Gudhi::Persistence_representations::Betti_sequence;
 
 int main(int argc, char** argv) {
 
@@ -38,15 +38,12 @@ int main(int argc, char** argv) {
   persistence.push_back(std::make_pair(0, 4));
   persistence.push_back(std::make_pair(3, 8));
 
-  int nb_ls = 2; double min_x = 0; double max_x = 8; int res_x = 1000;
+  double min_x = 0; double max_x = 8; int res_x = 1000;
 
-  LS ls(persistence, nb_ls, min_x, max_x, res_x);
-  std::vector<std::vector<double> > L = ls.vectorize();
+  BS bs(persistence, min_x, max_x, res_x);
+  std::vector<int> B = bs.vectorize();
 
-  for(int i = 0; i < nb_ls; i++){
-    for(int j = 0; j < res_x; j++) std::cout << L[i][j] << ", ";
-    std::cout << std::endl;
-  }
+  for(int i = 0; i < res_x; i++)  std::cout << B[i] << ", ";
 
   return 0;
 }

@@ -46,3 +46,8 @@ add_executable ( Persistence_landscape_on_grid_exact persistence_landscape_on_gr
 add_test(NAME Persistence_landscape_on_grid_exact
     COMMAND $<TARGET_FILE:Persistence_landscape_on_grid_exact>)
 install(TARGETS Persistence_landscape_on_grid_exact DESTINATION bin)
+
+add_executable ( Betti_sequence betti_sequence.cpp )
+add_test(NAME Betti_sequence
+    COMMAND $<TARGET_FILE:Betti_sequence>)
+install(TARGETS Betti_sequence DESTINATION bin)
