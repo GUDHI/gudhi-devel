@@ -39,46 +39,49 @@ void elementary_collapse(typename Map::iterator facet_it,
                          Inv_map* inv_faces,
                          Map* cofaces,
                          Inv_map* inv_cofaces,
-                         Graph& face_coface_graph, 
+                         Graph& face_coface_graph,
+                         typename Map::iterator ref_it,
                          CollapseTraits& collapse_traits) {
   using Cell_comparison = typename CollapseTraits::Cell_comparison; 
   using Graph_v = typename Graph::vertex_descriptor;
   
   // check if there is one coface
-  if (boost::in_degree(facet_it->second.v, face_coface_graph) != 1)
+  Graph_v facet_v = facet_it->second.v;
+  if (boost::in_degree(facet_v, face_coface_graph) != 1)
     return;
 
   // check if it is valid wrt traits
-  Graph_v facet_v = facet_it->second.v;
   Graph_v cofacet_v = boost::source(*boost::in_edges(facet_v, face_coface_graph).first,
                                     face_coface_graph);
   typename Inv_map::iterator inv_cofacet_it = inv_cofaces->find(cofacet_v);
   typename Map::iterator cofacet_it = inv_cofacet_it->second; 
-  if (!collapse_traits.is_valid_collapse(facet_it,
-                                         cofacet_it))
+  if (!collapse_traits.is_valid_collapse(facet_it, cofacet_it))
     return;
 
   typename Graph::out_edge_iterator out_edge_it, out_edge_end;
-  std::tie(out_edge_it, out_edge_end) = boost::out_edges(cofacet_it->second.v, face_coface_graph);
-  while (out_edge_it != out_edge_end) {
-    Graph_v another_facet_v = boost::target(*out_edge_it, face_coface_graph);
-    boost::remove_edge(*out_edge_it++, face_coface_graph);
+  std::tie(out_edge_it, out_edge_end) = boost::out_edges(cofacet_v, face_coface_graph);
+  std::vector<Graph_v> another_facet_vertices;
+  while (out_edge_it != out_edge_end)
+    another_facet_vertices.push_back(boost::target(*out_edge_it++, face_coface_graph));
+  boost::clear_vertex(cofacet_v, face_coface_graph);
+  for (Graph_v another_facet_v : another_facet_vertices) {
     auto another_facet_it = inv_faces->find(another_facet_v)->second;
-    if (another_facet_v != facet_it->second.v &&
-        Cell_comparison()(another_facet_it->first, facet_it->first))
+    if (another_facet_v != facet_v &&
+        Cell_comparison()(another_facet_it->first, ref_it->first))
       elementary_collapse(another_facet_it,
                           faces,
                           inv_faces,
                           cofaces,
                           inv_cofaces,
                           face_coface_graph,
+                          ref_it,
                           collapse_traits);
   }
 
   inv_faces->erase(inv_faces->find(facet_v));
   faces->erase(facet_it);
   boost::remove_vertex(facet_v, face_coface_graph);
-  
+
   inv_cofaces->erase(inv_cofacet_it);
   cofaces->erase(cofacet_it);
   boost::remove_vertex(cofacet_v, face_coface_graph);
@@ -140,55 +143,67 @@ void collapse(InputRange& input_range,
   int d = input_traits.dimension(*current_it);
   cofaces = new Map();
   inv_cofaces = new Inv_map();
+  while (current_it != input_range.end() && input_traits.dimension(*current_it) == d) {
+    auto cofacet_it = cofaces->find(input_traits.cell(*current_it));
+    if (cofacet_it == cofaces->end()) {
+      Graph_v v = boost::add_vertex(face_coface_graph);
+      cofacet_it = cofaces->emplace(std::make_pair(input_traits.cell(*current_it),
+                                                   Fields(v,
+                                                          input_traits.filtration(*current_it)))).first;
+      inv_cofaces->emplace(std::make_pair(v, cofacet_it));
+    }
+    else
+      cofacet_it->second.f = std::min(cofacet_it->second.f, input_traits.filtration(*current_it));
+    current_it++;
+  }
   for (int curr_dim = d; curr_dim > 0; curr_dim--) {
-    while (current_it != input_range.end() && input_traits.dimension(*current_it) == curr_dim) 
-      if (cofaces->find(input_traits.cell(*current_it)) == cofaces->end()) {
-        Graph_v v = boost::add_vertex(face_coface_graph);
-        auto cofacet_it = cofaces->find(input_traits.cell(*current_it));
-        if (cofacet_it == cofaces->end())
-          cofacet_it = cofaces->emplace(std::make_pair(input_traits.cell(*current_it),
-                                                       Fields(v,
-                                                              input_traits.filtration(*current_it)))).first;
-        else
-          cofacet_it->second.f = std::min(cofacet_it->second.f, input_traits.filtration(*current_it));
-        inv_cofaces->emplace(std::make_pair(v, cofacet_it));
-      }
-      else
-        current_it++;
     faces = new Map();
     inv_faces = new Inv_map();
-    for (auto cf_it = cofaces->begin(); cf_it != cofaces->end(); ++cf_it) {
-      for (Boundary_element facet: collapse_traits.boundary(cf_it)) {
+    for (auto cf_pair: *cofaces)
+      boost::add_edge(meet_v, cf_pair.second.v, face_coface_graph);
+    while (current_it != input_range.end() && input_traits.dimension(*current_it) == curr_dim-1) {
+      auto facet_it = faces->find(input_traits.cell(*current_it));
+      if (facet_it == faces->end()) {
         Graph_v v = boost::add_vertex(face_coface_graph);
+        if (facet_it == faces->end())
+          facet_it = faces->emplace(std::make_pair(input_traits.cell(*current_it),
+                                                   Fields(v,
+                                                          input_traits.filtration(*current_it)))).first;
+        inv_faces->emplace(std::make_pair(v, facet_it));
+      }
+      else
+        facet_it->second.f = std::min(facet_it->second.f, input_traits.filtration(*current_it));
+      current_it++;
+    }
+    for (auto cf_it = cofaces->begin(); cf_it != cofaces->end(); ++cf_it)
+      for (Boundary_element facet: collapse_traits.boundary(cf_it)) {
         auto facet_it = faces->find(collapse_traits.facet_cell(facet));
         if (facet_it == faces->end()) {
+          Graph_v v = boost::add_vertex(face_coface_graph);
           facet_it = faces->emplace(std::make_pair(collapse_traits.facet_cell(facet),
                                                    Fields(v,
                                                           collapse_traits.facet_filtration(facet)))).first;
+          inv_faces->emplace(std::make_pair(v, facet_it));
         }
         else
           facet_it->second.f = std::min(facet_it->second.f, collapse_traits.facet_filtration(facet));
-        inv_faces->emplace(std::make_pair(v, facet_it));
         boost::add_edge(cf_it->second.v, facet_it->second.v, face_coface_graph);
       }
-    }
     auto facet_it = faces->begin();
-    while (facet_it != faces->end())
-      elementary_collapse(facet_it++,
+    while (facet_it != faces->end()) {
+      auto prev_it = facet_it++;
+      elementary_collapse(prev_it,
                           faces,
                           inv_faces,
                           cofaces,
                           inv_cofaces,
                           face_coface_graph,
+                          prev_it,
                           collapse_traits);
+    }
     boost::clear_vertex(meet_v, face_coface_graph);
     for (auto cf_pair: *cofaces) {
-      typename Graph::out_edge_iterator out_edge_it, out_edge_end;
-      std::tie(out_edge_it, out_edge_end) = boost::out_edges(cf_pair.second.v, face_coface_graph);
-      while (out_edge_it != out_edge_end) {
-        boost::add_edge(meet_v, boost::target(*out_edge_it, face_coface_graph), face_coface_graph);
-        boost::remove_edge(*out_edge_it++, face_coface_graph);
-      }
+      boost::clear_vertex(cf_pair.second.v, face_coface_graph);
       boost::remove_vertex(cf_pair.second.v, face_coface_graph);
       *output_it++ = std::make_pair(cf_pair.first, cf_pair.second.f);
     }

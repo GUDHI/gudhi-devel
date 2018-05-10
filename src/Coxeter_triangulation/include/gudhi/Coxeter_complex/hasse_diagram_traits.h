@@ -77,8 +77,8 @@ struct Hasse_diagram_collapse_traits {
                          const MapIterator& cofacet_it) {
     bool is_valid = ignore_filtration_ || facet_it->second.f == cofacet_it->second.f;
     if (is_valid) {
-      hasse_diagram_.remove_cell(facet_it->first);
       hasse_diagram_.remove_cell(cofacet_it->first);
+      hasse_diagram_.remove_cell(facet_it->first);
     }
     return is_valid;
   }

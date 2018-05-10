@@ -748,8 +748,6 @@ public:
     typedef Gudhi::persistent_cohomology::Persistent_cohomology
                           <Hasse_pers_vector, Field_Zp> Persistent_cohomology;
     hdp.set_up_the_arrays();
-
-    std::cout << "hdp:\n" << hdp << "\n";
     
     {
       Persistent_cohomology pcoh(hdp, true);  
@@ -782,12 +780,10 @@ public:
 
 #define VOR_OUTPUT_MESH
 #ifdef VOR_OUTPUT_MESH
-      write_voronoi_mesh(ac_map, hasse_diagram, "voronoi_skeleton");
+      write_voronoi_mesh(ac_map, hasse_vector, "voronoi_skeleton");
 #endif
     }
-    std::cout << "hdp:\n" << hdp << "\n";
     
-    std::cout << "Starting the collapses of the Hasse diagram.\n";
     struct empty_function{
       void operator() (const std::pair<Hasse_cell*, double> t) const {}
     };
@@ -796,7 +792,6 @@ public:
                     Hasse_cell_input_traits<Hasse_cell>(),
                     Hasse_diagram_collapse_traits<Hasse_cell, Hasse_pers_vector>(hdp, true));
     hdp.clean_up_the_structure();
-    std::cout << "hdp:\n" << hdp << "\n";
     hasse_vector.clear();
     unsigned complex_dimension = hdp.dimension();
     for (unsigned k = 0; k <= complex_dimension; ++k)
