@@ -210,7 +210,7 @@ public:
 	friend std::ostream& operator<<( std::ostream& out, const Hasse_diagram_cell<Incidence_type,Filtration_type,Additional_information>& c )
 	{
 		 //cout << "position : " << c.position << ", dimension : " << c.dimension << ", filtration: " << c.filtration << ", size of boudary : " <<  c.boundary.size() << "\n";
-		 out << c.position << " " << c.dimension << " " << c.filtration << std::endl;
+          out << c.position << " " << c.dimension << " " << c.filtration << " " << ((c.deleted_)? "true": "false") << std::endl;
 		 for ( size_t bd = 0 ; bd != c.boundary.size() ; ++bd )
 	     {
 			 //do not write out the cells that has been deleted

@@ -65,22 +65,22 @@ int main(int argc, char * const argv[]) {
     eps = atof(argv[3]);
   int d = 0;
   if (store_in_ram) {
-    Gudhi::Points_off_reader<Point_d> off_reader(argv[1]);
-    if (!off_reader.is_valid()) {
-      std::cerr << "Coxeter triangulations - Unable to read file " << argv[1] << "\n";
-      exit(-1);
-    }
-    Point_vector* point_vector = new Point_vector(off_reader.get_point_cloud());
-    int N = point_vector->size();
-    d = (*point_vector)[0].size();
-    std::cout << "Successfully read " << N << " points in dimension " << d << std::endl;
-    Coxeter_system cs_A('A', d);
-    Coxeter_complex cc(*point_vector, cs_A, init_level, eps);
-    output_points_to_medit(*point_vector, "sphere_coxeter_complex_points.mesh");
-    delete point_vector;
-    cc.write_mesh("sphere_coxeter_complex_A.mesh");
-    cc.voronoi_skeleton(1);
-    cc.collapse();
+    // Gudhi::Points_off_reader<Point_d> off_reader(argv[1]);
+    // if (!off_reader.is_valid()) {
+    //   std::cerr << "Coxeter triangulations - Unable to read file " << argv[1] << "\n";
+    //   exit(-1);
+    // }
+    // Point_vector* point_vector = new Point_vector(off_reader.get_point_cloud());
+    // int N = point_vector->size();
+    // d = (*point_vector)[0].size();
+    // std::cout << "Successfully read " << N << " points in dimension " << d << std::endl;
+    // Coxeter_system cs_A('A', d);
+    // Coxeter_complex cc(*point_vector, cs_A, init_level, eps);
+    // output_points_to_medit(*point_vector, "sphere_coxeter_complex_points.mesh");
+    // delete point_vector;
+    // cc.write_mesh("sphere_coxeter_complex_A.mesh");
+    // cc.voronoi_skeleton(1);
+    // cc.collapse();
   }
   else {
     Gudhi::Off_point_range<Point_d>* off_range = new Gudhi::Off_point_range<Point_d>(argv[1]);
@@ -108,7 +108,10 @@ int main(int argc, char * const argv[]) {
     cc.voronoi_skeleton(d);
     t.end();
     std::cout << "Voronoi skeleton construction time: " << t.num_seconds() << "s\n";
+    t.begin();
     cc.collapse();
+    t.end();
+    std::cout << "Collapsing the simplicial complex took: " << t.num_seconds() << "s\n";
   }    
   std::cout << "Memory usage (Virtual): " << (float)getVirtualValue()/1000. << "MB.\n";
   std::cout << "Memory usage (Physical): " << (float)getPhysicalValue()/1000 << "MB.\n";

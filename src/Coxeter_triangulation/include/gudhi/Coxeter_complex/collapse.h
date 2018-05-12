@@ -57,16 +57,50 @@ void elementary_collapse(typename Map::iterator facet_it,
   typename Map::iterator cofacet_it = inv_cofacet_it->second; 
   if (!collapse_traits.is_valid_collapse(facet_it, cofacet_it))
     return;
-
+  
   typename Graph::out_edge_iterator out_edge_it, out_edge_end;
   std::tie(out_edge_it, out_edge_end) = boost::out_edges(cofacet_v, face_coface_graph);
   std::vector<Graph_v> another_facet_vertices;
   while (out_edge_it != out_edge_end)
     another_facet_vertices.push_back(boost::target(*out_edge_it++, face_coface_graph));
   boost::clear_vertex(cofacet_v, face_coface_graph);
+
+  // // DEBUG OUTPUT FACES
+  // {
+  //   std::ofstream ofs("faces.txt");
+  //   ofs << "Face map:\n\n";
+  //   for (auto m_pair: *faces) {
+  //     ofs << "Face " << *m_pair.first << "\n";
+  //     ofs << "with cofaces\n";
+  //     typename Graph::in_edge_iterator in_edge_it, in_edge_end;
+  //     std::tie(in_edge_it, in_edge_end) = boost::in_edges(m_pair.second.v, face_coface_graph);
+  //     while (in_edge_it != in_edge_end)
+  //       ofs << *(inv_cofaces->find(boost::source(*in_edge_it++, face_coface_graph))->second->first);
+  //     ofs << "\n-------------------------------------------\n";
+  //   } 
+  //   ofs.close();
+  // }
+  // // DEBUG OUTPUT COFACES
+  // {
+  //   std::ofstream ofs("cofaces.txt");
+  //   ofs << "Coface map:\n\n";
+  //   for (auto m_pair: *cofaces) {
+  //     ofs << "Coface " << *m_pair.first << "\n";
+  //     ofs << "with faces\n";
+  //     typename Graph::out_edge_iterator out_edge_it, out_edge_end;
+  //     std::tie(out_edge_it, out_edge_end) = boost::out_edges(m_pair.second.v, face_coface_graph);
+  //     while (out_edge_it != out_edge_end)
+  //       ofs << *(inv_faces->find(boost::target(*out_edge_it++, face_coface_graph))->second->first);
+  //     ofs << "\n-------------------------------------------\n";
+  //   }
+  //   ofs.close();
+  // }
+  
   for (Graph_v another_facet_v : another_facet_vertices) {
-    auto another_facet_it = inv_faces->find(another_facet_v)->second;
-    if (another_facet_v != facet_v &&
+    auto inv_another_facet_it = inv_faces->find(another_facet_v);
+    auto another_facet_it = inv_another_facet_it->second;
+    if (inv_another_facet_it != inv_faces->end() &&
+        another_facet_v != facet_v &&
         Cell_comparison()(another_facet_it->first, ref_it->first))
       elementary_collapse(another_facet_it,
                           faces,
@@ -107,6 +141,10 @@ void elementary_collapse(typename Map::iterator facet_it,
   //       list_it++;
   //   facets_->erase(facet_it);
   //   cofaces_->erase(coface_it);
+
+  // debug note
+  // break 81 if facet_it->first->position == 2359
+  // break 85 if cofacet_it->first->boundary[2].first->position == 2359
 }
 
 
@@ -189,6 +227,10 @@ void collapse(InputRange& input_range,
           facet_it->second.f = std::min(facet_it->second.f, collapse_traits.facet_filtration(facet));
         boost::add_edge(cf_it->second.v, facet_it->second.v, face_coface_graph);
       }
+
+    assert(faces->size() == inv_faces->size());
+    assert(cofaces->size() == inv_cofaces->size());
+    
     auto facet_it = faces->begin();
     while (facet_it != faces->end()) {
       auto prev_it = facet_it++;

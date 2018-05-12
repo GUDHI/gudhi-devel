@@ -424,10 +424,10 @@ public:
     Simplex_tree output_stree;
     using Simplex_tree_inserter = simplex_tree_inserter<Simplex_tree>;
     Simplex_tree_inserter st_inserter(output_stree);
-    Gudhi::collapse(input_range,
-                    boost::make_function_output_iterator(st_inserter),
-                    Simplex_filtration_pair_input_traits<Filtered_simplex>(),
-                    Simplicial_complex_collapse_traits());
+    // Gudhi::collapse(input_range,
+    //                 boost::make_function_output_iterator(st_inserter),
+    //                 Simplex_filtration_pair_input_traits<Filtered_simplex>(),
+    //                 Simplicial_complex_collapse_traits());
     if (pers_out) {
       std::cout << "Number of all simplices after collapse: " << output_stree.num_simplices() << "\n";
       int dim_complex = 0;
@@ -462,10 +462,10 @@ public:
       pcoh.output_diagram(out);
       out.close();
       std::cout << "Persistence complete." << std::endl;
-      //Output the collapsed stree
-      out = std::ofstream("output_stree.txt");
-      out << output_stree << std::endl;
-      out.close();
+      // //Output the collapsed stree
+      // out = std::ofstream("output_stree.txt");
+      // out << output_stree << std::endl;
+      // out.close();
       
       Simplex_tree stree;
       for (auto p: input_range)
@@ -482,17 +482,18 @@ public:
       pcoh2.output_diagram(out2);
       out2.close();
       std::cout << "Persistence complete." << std::endl;
-      //Output the collapsed stree
-      out = std::ofstream("stree.txt");
-      out << stree << std::endl;
-      out.close();
 
       
       typedef Simplex_tree_simplex_iterator<Simplex_tree> Simplex_tree_iterator;
       typedef boost::iterator_range<Simplex_tree_iterator> Simplex_tree_range;
       Simplex_tree_range simplex_tree_range(Simplex_tree_iterator(output_stree.complex_simplex_range().begin(), output_stree),
                                             Simplex_tree_iterator(output_stree.complex_simplex_range().end(), output_stree));
-      write_mesh(simplex_tree_range, "output_stree.mesh");
+      write_mesh(simplex_tree_range, "output_stree_collapse.mesh");
+
+      Simplex_tree_range simplex_tree_range2(Simplex_tree_iterator(stree.complex_simplex_range().begin(), output_stree),
+                                            Simplex_tree_iterator(stree.complex_simplex_range().end(), output_stree));
+      write_mesh(simplex_tree_range2, "output_stree.mesh");
+
     }
   }
 
@@ -729,10 +730,6 @@ public:
         pc_map_faces = pc_map_cofaces;
       }
       delete pc_map_cofaces;
-      // std::cout << "\nHasse diagram:\n";
-      // for (auto c_ptr: hasse_diagram)
-      //   std::cout << *c_ptr << "\n";
-      // std::cout << std::endl;
     }
     std::vector<Hasse_cell*> hasse_vector(hasse_diagram.begin(), hasse_diagram.end());
     struct Dimension_comparison {
@@ -748,6 +745,13 @@ public:
     typedef Gudhi::persistent_cohomology::Persistent_cohomology
                           <Hasse_pers_vector, Field_Zp> Persistent_cohomology;
     hdp.set_up_the_arrays();
+    // {
+    //   std::ofstream ofs("hasse_diagram.txt");
+    //   ofs << "\nHasse diagram:\n";
+    //   for (auto c_ptr: hasse_vector)
+    //     ofs << *c_ptr << "\n";
+    //   ofs.close();
+    // }
     
     {
       Persistent_cohomology pcoh(hdp, true);  
@@ -889,8 +893,7 @@ private:
                           std::string file_name = "voronoi_skeleton") const
   {
     short d = av_graph_.v_map.begin()->first.size();
-    if (d > 3);
-  
+     
     std::ofstream ofs (file_name + ".mesh", std::ofstream::out);
     std::ofstream ofs_bb (file_name + ".bb", std::ofstream::out);
       
