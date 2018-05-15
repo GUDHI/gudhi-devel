@@ -28,10 +28,17 @@ BOOST_AUTO_TEST_CASE(toplexmap) {
     K.insert_simplex(sigma6);
     K.insert_simplex(sigma7);
     BOOST_CHECK(K.membership(sigma4));
-    BOOST_CHECK(!K.maximality(sigma5));
+    BOOST_CHECK(!K.maximality(sigma3));
     BOOST_CHECK(!K.membership(sigma5));
-    K.contraction(4,5);
+    K.insert_simplex(sigma5);
+    std::vector<Vertex> sigma9 = {1, 2, 3};
+    std::vector<Vertex> sigma10 = {2, 7};
+    auto r = K.contraction(4,5);
+    sigma9.emplace_back(r);
+    sigma10.emplace_back(r);
     BOOST_CHECK(!K.membership(sigma6));
+    BOOST_CHECK(K.membership(sigma9));
+    BOOST_CHECK(K.membership(sigma10));
 }
 
 

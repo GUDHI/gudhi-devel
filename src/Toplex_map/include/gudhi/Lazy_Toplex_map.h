@@ -64,8 +64,8 @@ private:
     std::size_t size_lbound = 0;
     std::size_t size = 0;
 
-    const double alpha = 2; //time
-    const double betta = 4; //memory
+    const double alpha = 4; //time
+    const double betta = 8; //memory
 };
 
 template <typename Input_vertex_range>
