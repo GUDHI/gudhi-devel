@@ -21,7 +21,7 @@
  */
 
 #include <gudhi/reader_utils.h>
-#include <gudhi/Fake_simplex_tree.h>
+#include "gudhi/Fake_simplex_tree.h"
 
 #include <iostream>
 #include <ctime>

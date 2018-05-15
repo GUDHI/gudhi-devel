@@ -21,7 +21,7 @@
  */
 
 #include <gudhi/graph_simplicial_complex.h>
-#include <gudhi/Fake_simplex_tree.h>
+#include "gudhi/Fake_simplex_tree.h"
 
 #include <iostream>
 #include <utility>  // for pair
