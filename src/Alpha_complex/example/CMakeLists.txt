@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
 project(Alpha_complex_examples)
 
 # need CGAL 4.7

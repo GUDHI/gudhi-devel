@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
 project(Persistent_cohomology_examples)
 
 add_executable(plain_homology plain_homology.cpp)

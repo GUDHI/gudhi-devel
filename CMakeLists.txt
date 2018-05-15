@@ -1,35 +1,18 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.1)
+
 project(GUDHIdev)
 
 include(CMakeGUDHIVersion.txt)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
 
-enable_testing()
-
-# This variable is used by Cython CMakeLists.txt to know its path
+# This variable is used by Cython CMakeLists.txt and by GUDHI_third_party_libraries to know its path
 set(GUDHI_CYTHON_PATH "src/cython")
+
 # For third parties libraries management - To be done last as CGAL updates CMAKE_MODULE_PATH
-include(GUDHI_third_party_libraries)
+include(GUDHI_third_party_libraries NO_POLICY_SCOPE)
 
-if(MSVC)
-  # Turn off some VC++ warnings
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4267 /wd4668 /wd4311 /wd4800 /wd4820 /wd4503 /wd4244 /wd4345 /wd4996 /wd4396 /wd4018")
-else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pedantic")
-endif()
-
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-  message("++ Debug compilation flags are: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG}")
-else()
-  message("++ Release compilation flags are: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
-endif()
-
-if (DEBUG_TRACES)
-  # For programs to be more verbose
-  message(STATUS "DEBUG_TRACES are activated")
-  add_definitions(-DDEBUG_TRACES)
-endif()
+include(GUDHI_compilation_flags)
 
 # Add your new module in the list, order is not important
 include(GUDHI_modules)

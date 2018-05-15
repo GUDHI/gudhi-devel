@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
 project(Bitmap_cubical_complex_utilities)
 
 add_executable ( cubical_complex_persistence cubical_complex_persistence.cpp )
