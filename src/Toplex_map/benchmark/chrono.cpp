@@ -68,7 +68,7 @@ int nb_membership2 = 400000;
 Simplex random_simplex(int n, int d){
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(1, n);
+    std::uniform_int_distribution<std::size_t> dis(1, n);
     Simplex s;
     while(s.size()!=d)
         s.insert(dis(gen));
@@ -78,7 +78,7 @@ Simplex random_simplex(int n, int d){
 std::vector<Simplex> r_vector_simplices(int n, int max_d, int m){
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(1, max_d);
+    std::uniform_int_distribution<std::size_t> dis(1, max_d);
     std::vector<Simplex> v;
     for(int i=0; i<m; i++)
         v.push_back(random_simplex(n,dis(gen)));
