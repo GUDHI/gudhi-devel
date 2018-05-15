@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 2.6)
+project(Toplex_map_examples)
+
+add_executable(Toplex_map_example_simple Simple_toplex_map.cpp)
+add_executable(Toplex_map_example_from_cliques_of_graph Toplex_map_from_cliques_of_graph.cpp)

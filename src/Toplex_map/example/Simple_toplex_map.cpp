@@ -21,7 +21,7 @@
  */
 
 #include <gudhi/graph_simplicial_complex.h>
-#include "gudhi/Fake_simplex_tree.h"
+#include "Fake_simplex_tree.h"
 
 #include <iostream>
 #include <utility>  // for pair
@@ -184,10 +184,12 @@ int main(int argc, char * const argv[]) {
               << " simplices - dimension is " << t_map.dimension() << "\n";
     std::cout << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
     for (auto f_simplex : t_map.filtration_simplex_range()) {
-        std::cout << "   " << "[" << t_map.filtration(f_simplex) << "] ";
-        for (auto vertex : t_map.simplex_vertex_range(f_simplex))
-            std::cout << "(" << vertex << ")";
-        std::cout << std::endl;
+        if (f_simplex.size() > 0) {
+          std::cout << "   " << "[" << t_map.filtration(f_simplex) << "] ";
+          for (auto vertex : t_map.simplex_vertex_range(f_simplex))
+              std::cout << "(" << vertex << ")";
+          std::cout << std::endl;
+        }
     }
     //   [0.1] 0
     //   [0.1] 1
@@ -201,13 +203,15 @@ int main(int argc, char * const argv[]) {
 
     std::cout << std::endl << std::endl;
 
-    std::cout << "Iterator on skeleton:" << std::endl;
-    for (auto f_simplex : t_map.skeleton_simplex_range()) {
-        std::cout << "   " << "[" << t_map.filtration(f_simplex) << "] ";
-        for (auto vertex : t_map.simplex_vertex_range(f_simplex)) {
-            std::cout << vertex << " ";
+    std::cout << "Iterator on skeleton[1]:" << std::endl;
+    for (auto f_simplex : t_map.skeleton_simplex_range(1)) {
+        if (f_simplex.size() > 0) {
+          std::cout << "   " << "[" << t_map.filtration(f_simplex) << "] ";
+          for (auto vertex : t_map.simplex_vertex_range(f_simplex)) {
+              std::cout << vertex << " ";
+          }
+          std::cout << std::endl;
         }
-        std::cout << std::endl;
     }
 
     return 0;

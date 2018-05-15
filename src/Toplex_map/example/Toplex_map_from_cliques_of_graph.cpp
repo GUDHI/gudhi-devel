@@ -21,7 +21,7 @@
  */
 
 #include <gudhi/reader_utils.h>
-#include "gudhi/Fake_simplex_tree.h"
+#include "Fake_simplex_tree.h"
 
 #include <iostream>
 #include <ctime>
@@ -82,7 +82,7 @@ int main(int argc, char * const argv[]) {
   std::cout << std::endl << std::endl;
 
   std::cout << "Iterator on skeleton:" << std::endl;
-  for (auto f_simplex : t_map.skeleton_simplex_range()) {
+  for (auto f_simplex : t_map.skeleton_simplex_range(max_dim)) {
     std::cout << "   " << "[" << t_map.filtration(f_simplex) << "] ";
     for (auto vertex : t_map.simplex_vertex_range(f_simplex)) {
       std::cout << vertex << " ";
@@ -90,5 +90,4 @@ int main(int argc, char * const argv[]) {
     std::cout << std::endl;
   }
   return 0;
-}
 }

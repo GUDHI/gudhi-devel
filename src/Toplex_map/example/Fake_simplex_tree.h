@@ -5,6 +5,7 @@
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Filtered_toplex_map.h>
+#include <gudhi/Lazy_Toplex_map.h>
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/bron_kerbosch_all_cliques.hpp>
@@ -117,39 +118,34 @@ bool Fake_simplex_tree::all_facets_inside(const Input_vertex_range &vertex_range
         if(!membership(s)) return false;
     return true;
 }
-/*
+
 std::size_t Fake_simplex_tree::dimension() const {
     std::size_t max = 0;
     for(const Simplex& s : max_simplices())
         max = std::max(max, s.size());
     return max-1;
 }
-*/
+
 std::size_t Fake_simplex_tree::dimension(Simplex_ptr& sptr) const{
     return sptr->size();
 }
-/*
+
 std::size_t Fake_simplex_tree::num_simplices() const {
-    //return filtration_simplex_range().size();
     return max_simplices().size();
 }
-*/
+
 std::size_t Fake_simplex_tree::num_vertices() const {
-    /*
     std::unordered_set<Toplex_map::Vertex> vertices;
     for(const Toplex_map::Simplex& s : max_simplices())
         for (Toplex_map::Vertex v : s)
             vertices.emplace(v);
     return vertices.size();
-    */
-    return 0;
 }
 
 Toplex_map::Simplex Fake_simplex_tree::simplex_vertex_range(const Simplex& s) const {
     return s;
 }
 
-/*
 std::vector<Toplex_map::Simplex> Fake_simplex_tree::max_simplices() const{
     std::vector<Toplex_map::Simplex> max_s;
     for(auto kv : toplex_maps)
@@ -157,8 +153,7 @@ std::vector<Toplex_map::Simplex> Fake_simplex_tree::max_simplices() const{
             max_s.emplace_back(*sptr);
     return max_s;
 }
-*/
-/*
+
 std::vector<Toplex_map::Simplex> Fake_simplex_tree::filtration_simplex_range(int d) const{
     std::vector<Toplex_map::Simplex> m = max_simplices();
     std::vector<Toplex_map::Simplex> range;
@@ -180,7 +175,7 @@ std::vector<Toplex_map::Simplex> Fake_simplex_tree::filtration_simplex_range(int
 
 std::vector<Toplex_map::Simplex> Fake_simplex_tree::skeleton_simplex_range(int d) const{
     return filtration_simplex_range(d);
-}*/
+}
 
 Toplex_map::Vertex Fake_simplex_tree::contraction(const Toplex_map::Vertex x, const Toplex_map::Vertex y){
     for(auto kv : toplex_maps)
