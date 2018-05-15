@@ -5,7 +5,6 @@
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Filtered_toplex_map.h>
-#include <gudhi/Lazy_Toplex_map.h>
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/bron_kerbosch_all_cliques.hpp>
@@ -13,9 +12,9 @@
 namespace Gudhi {
 
 struct Visitor {
-    Lazy_Toplex_map* tm;
+    Toplex_map* tm;
 
-    Visitor(Lazy_Toplex_map* tm)
+    Visitor(Toplex_map* tm)
         :tm(tm)
     {}
 
@@ -99,7 +98,7 @@ protected:
 
 template<class OneSkeletonGraph>
 void Fake_simplex_tree::insert_graph(const OneSkeletonGraph& skel_graph){
-    toplex_maps.emplace(nan(""), new Lazy_Toplex_map());
+    toplex_maps.emplace(nan(""), new Toplex_map());
     using vertex_iterator = typename boost::graph_traits<OneSkeletonGraph>::vertex_iterator;
     vertex_iterator vi, vi_end;
     for (std::tie(vi, vi_end) = boost::vertices(skel_graph); vi != vi_end; ++vi) {
