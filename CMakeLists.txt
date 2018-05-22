@@ -13,6 +13,8 @@ set(GUDHI_CYTHON_PATH "src/cython")
 include(GUDHI_third_party_libraries NO_POLICY_SCOPE)
 
 include(GUDHI_compilation_flags)
+# Only for dev version
+add_cxx_compiler_flag("-pedantic")
 
 # Add your new module in the list, order is not important
 include(GUDHI_modules)

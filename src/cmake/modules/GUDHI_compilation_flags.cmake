@@ -21,7 +21,6 @@ if(MSVC)
 endif()
 
 add_cxx_compiler_flag("-Wall")
-add_cxx_compiler_flag("-pedantic")
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
   message("++ Debug compilation flags are: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG}")
