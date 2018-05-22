@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
 project(Persistence_representations_test)
 
 include(GUDHI_test_coverage)

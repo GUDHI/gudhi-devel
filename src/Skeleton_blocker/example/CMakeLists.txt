@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
 project(Skeleton_blocker_examples)
 
 add_executable(Skeleton_blocker_example_from_simplices Skeleton_blocker_from_simplices.cpp)

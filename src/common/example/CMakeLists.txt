@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
 project(Common_examples)
 
 add_executable ( vector_double_off_reader example_vector_double_points_off_reader.cpp )

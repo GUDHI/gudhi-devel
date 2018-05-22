@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
 project(Persistence_representations_lanscapes_on_grid_utilities)
 
 # Need to set grid min and max for further average, distance and scalar_product
