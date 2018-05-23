@@ -3,12 +3,14 @@
 #include <chrono>
 
 #include <gudhi/Simplex_tree.h>
+#include <gudhi/Toplex_map.h>
 #include <gudhi/Lazy_Toplex_map.h>
 
 using namespace Gudhi;
 
-typedef Toplex_map::Vertex Vertex;
 typedef Toplex_map::Simplex Simplex;
+typedef Toplex_map::Vertex Vertex;
+typedef std::pair< Simplex_tree<>::Simplex_handle, bool > typePairSimplexBool;
 
 class ST_wrapper {
 
@@ -65,7 +67,7 @@ int nb_contraction = 300;
 int nb_insert_simplex2 = 3000;
 int nb_membership2 = 400000;
 
-Simplex random_simplex(int n, int d){
+Simplex random_simplex(int n, std::size_t d){
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<std::size_t> dis(1, n);
