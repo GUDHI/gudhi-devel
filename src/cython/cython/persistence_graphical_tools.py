@@ -125,7 +125,9 @@ def plot_persistence_barcode(persistence=[], persistence_file='', alpha=0.6,
 
     if legend:
         dimensions = list(set(item[0] for item in persistence))
-        plt.legend(handles=[mpatches.Patch(color=palette[dim], label=str(dim)) for dim in dimensions])
+        plt.legend(handles=[mpatches.Patch(color=palette[dim],
+                                           label=str(dim)) for dim in dimensions],
+                   loc='lower right')
     plt.title('Persistence barcode')
     # Ends plot on infinity value and starts a little bit before min_birth
     plt.axis([axis_start, infinity, 0, ind])
