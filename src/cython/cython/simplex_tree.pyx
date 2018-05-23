@@ -402,10 +402,8 @@ cdef class SimplexTree:
         self.thisptr.expansion(max_dim)
 
     def make_filtration_non_decreasing(self):
-        """Browse the simplex tree to ensure the filtration is not decreasing.
-        The simplex tree is browsed starting from the root until the leaf, and
-        the filtration values are set with their parent value (increased), in
-        case the values are decreasing.
+        """This function ensures that each simplex has a higher filtration
+        value than its faces by increasing the filtration values.
 
         :returns: The filtration modification information.
         :rtype: bint

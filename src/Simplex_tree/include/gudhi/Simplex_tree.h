@@ -1238,9 +1238,8 @@ class Simplex_tree {
   }
 
  public:
-  /** \brief Browse the simplex tree to ensure the filtration is not decreasing.
-   * The simplex tree is browsed starting from the root until the leaf, and the filtration values are set with their
-   * parent value (increased), in case the values are decreasing.
+  /** \brief This function ensures that each simplex has a higher filtration value than its faces by increasing the
+   * filtration values.
    * @return The filtration modification information.
    * \post Some simplex tree functions require the filtration to be valid. `make_filtration_non_decreasing()`
    * function is not launching `initialize_filtration()` but returns the filtration modification information. If the
