@@ -220,7 +220,8 @@ template <typename Input_vertex_range>
 void Toplex_map::insert_independent_simplex(const Input_vertex_range &vertex_range){
     for(const Toplex_map::Vertex& v : vertex_range){
         if(!t0.count(v)) t0.emplace(v, Simplex_ptr_set());
-        t0.at(v).emplace(get_key(vertex_range));
+        auto k = get_key(vertex_range);
+        t0.at(v).emplace(k);
     }
 }
 
