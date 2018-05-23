@@ -175,7 +175,7 @@ inline void Lazy_Toplex_map::erase_max(const Input_vertex_range &vertex_range){
     Simplex sigma(vertex_range.begin(),vertex_range.end());
     empty_toplex = false;
     Simplex_ptr sptr = std::make_shared<Simplex>(sigma);
-    bool erased;
+    bool erased=false;
     for(const Vertex& v : sigma){
         erased = t0.at(v).erase(sptr) > 0;
         if(t0.at(v).size()==0)
@@ -206,17 +206,17 @@ std::size_t Lazy_Toplex_map::get_gamma0_lbound(const Vertex v) const{
 void Lazy_Toplex_map::clean(const Vertex v){
     Toplex_map toplices;
     std::unordered_map<int, std::vector<Simplex>> dsorted_simplices;
-    int max_dim = 0;
+    std::size_t max_dim = 0;
     for(const Simplex_ptr& sptr : Simplex_ptr_set(t0.at(v))){
         if(sptr->size() > max_dim){
-            for(int d = max_dim+1; d<=sptr->size(); d++)
+            for(std::size_t d = max_dim+1; d<=sptr->size(); d++)
                 dsorted_simplices.emplace(d, std::vector<Simplex>());
             max_dim = sptr->size();
         }
         dsorted_simplices[sptr->size()].emplace_back(*sptr);
         erase_max(*sptr);
     }
-    for(int d = max_dim; d>=1; d--)
+    for(std::size_t d = max_dim; d>=1; d--)
         for(const Simplex &s : dsorted_simplices.at(d))
             if(!toplices.membership(s))
                 toplices.insert_independent_simplex(s);
