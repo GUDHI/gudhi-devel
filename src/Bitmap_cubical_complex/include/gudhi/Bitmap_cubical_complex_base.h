@@ -562,7 +562,7 @@ void Bitmap_cubical_complex_base<T>::put_data_to_bins(T diameter_of_bin) {
 
 template <typename T>
 std::pair<T, T> Bitmap_cubical_complex_base<T>::min_max_filtration() {
-  std::pair<T, T> min_max(std::numeric_limits<T>::infinity(), std::numeric_limits<T>::min());
+  std::pair<T, T> min_max(std::numeric_limits<T>::infinity(), -std::numeric_limits<T>::infinity());
   for (std::size_t i = 0; i != this->data.size(); ++i) {
     if (this->data[i] < min_max.first) min_max.first = this->data[i];
     if (this->data[i] > min_max.second) min_max.second = this->data[i];
