@@ -4,7 +4,7 @@
   *
   *    Author(s):       Clément Maria
   *
-  *    Copyright (C) 2014  INRIA Sophia Antipolis-Méditerranée (France)
+  *    Copyright (C) 2014 Inria
   *
   *    This program is free software: you can redistribute it and/or modify
   *    it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ struct FilteredComplex
   typedef unspecified      Simplex_handle;
 /** \brief Key associated to each simplex. 
   *
-  * Must be a signed integer type. */
+  * Must be an integer type. */
   typedef unspecified      Simplex_key;
 /** \brief Type for the value of the filtration function.
   *
@@ -67,8 +67,8 @@ struct FilteredComplex
   Simplex_key              key      ( Simplex_handle sh );
 /** \brief Returns the simplex that has index idx in the filtration.
  *
- * This is never called on null_key(). */
-  Simplex_handle           simplex  ( Simplex_key idx );
+ * This is only called on valid indices. */
+  Simplex_handle           simplex  ( size_t idx );
 /** \brief Assign a key to a simplex. */
   void                     assign_key(Simplex_handle sh, Simplex_key key);
  

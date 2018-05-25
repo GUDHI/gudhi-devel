@@ -9,7 +9,7 @@ import argparse
 
    Author(s):       Vincent Rouvreau
 
-   Copyright (C) 2016 INRIA
+   Copyright (C) 2016 Inria
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import argparse
 """
 
 __author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 INRIA"
+__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
 parser = argparse.ArgumentParser(description='RipsComplex creation from '
@@ -53,7 +53,8 @@ with open(args.file, 'r') as f:
         message = "RipsComplex with max_edge_length=" + repr(args.max_edge_length)
         print(message)
         
-        rips_complex = gudhi.RipsComplex(off_file=args.file, max_edge_length=args.max_edge_length)
+        point_cloud = gudhi.read_off(off_file=args.file)
+        rips_complex = gudhi.RipsComplex(points=point_cloud, max_edge_length=args.max_edge_length)
         simplex_tree = rips_complex.create_simplex_tree(max_dimension=args.max_dimension)
     
         message = "Number of simplices=" + repr(simplex_tree.num_simplices())

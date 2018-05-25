@@ -4,7 +4,7 @@
  *
  *    Author(s):       Vincent Rouvreau
  *
- *    Copyright (C) 2016 INRIA
+ *    Copyright (C) 2016 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -25,9 +25,7 @@
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Rips_complex.h>
-#include <gudhi/Points_off_io.h>
 #include <gudhi/distance_functions.h>
-#include <gudhi/reader_utils.h>
 
 #include "Simplex_tree_interface.h"
 
@@ -53,21 +51,6 @@ class Rips_complex_interface {
     } else {
       // Rips construction where values is a distance matrix
       rips_complex_ = new Rips_complex<Simplex_tree_interface<>::Filtration_value>(values, threshold);
-    }
-  }
-
-  Rips_complex_interface(const std::string& file_name, double threshold, bool euclidean, bool from_file = true) {
-    if (euclidean) {
-      // Rips construction where file_name is an OFF file
-      Gudhi::Points_off_reader<Point_d> off_reader(file_name);
-      rips_complex_ = new Rips_complex<Simplex_tree_interface<>::Filtration_value>(off_reader.get_point_cloud(),
-                                                                                   threshold,
-                                                                                   Gudhi::Euclidean_distance());
-    } else {
-      // Rips construction where values is a distance matrix
-      Distance_matrix distances =
-          Gudhi::read_lower_triangular_matrix_from_csv_file<Simplex_tree_interface<>::Filtration_value>(file_name);
-      rips_complex_ = new Rips_complex<Simplex_tree_interface<>::Filtration_value>(distances, threshold);
     }
   }
 

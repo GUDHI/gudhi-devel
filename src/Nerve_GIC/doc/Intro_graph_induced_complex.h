@@ -4,7 +4,7 @@
  *
  *    Author(s):       Mathieu Carriere
  *
- *    Copyright (C) 2017  INRIA
+ *    Copyright (C) 2017 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -70,15 +70,15 @@ namespace cover_complex {
  *
  * When launching:
  *
- * \code $> ./Nerve ../../data/points/human.off 2 10 0.3 --v
+ * \code $> ./Nerve ../../data/points/human.off 2 10 0.3 -v
  * \endcode
  *
  * the program output is:
  *
  * \include Nerve_GIC/Nerve.txt
  *
- * The program also writes a file SC.txt. The first three lines in this file are the location of the input point cloud
- * and the function used to compute the cover.
+ * The program also writes a file ../../data/points/human_sc.txt. The first three lines in this file are the location
+ * of the input point cloud and the function used to compute the cover.
  * The fourth line contains the number of vertices nv and edges ne of the Nerve.
  * The next nv lines represent the vertices. Each line contains the vertex ID,
  * the number of data points it contains, and their average color function value.
@@ -113,12 +113,12 @@ namespace cover_complex {
  *
  * When launching:
  *
- * \code $> ./VoronoiGIC ../../data/points/human.off 700 --v
+ * \code $> ./VoronoiGIC ../../data/points/human.off 700 -v
  * \endcode
  *
  * the program outputs SC.off. Using e.g.
  *
- * \code $> geomview SC.off
+ * \code $> geomview ../../data/points/human_sc.off
  * \endcode
  *
  * one can obtain the following visualization:
@@ -146,7 +146,7 @@ namespace cover_complex {
  *
  * When launching:
  *
- * \code $> ./CoordGIC ../../data/points/KleinBottle5D.off 0 --v
+ * \code $> ./CoordGIC ../../data/points/KleinBottle5D.off 0 -v
  * \endcode
  *
  * the program outputs SC.dot. Using e.g.
@@ -169,15 +169,13 @@ namespace cover_complex {
  *
  * When launching:
  *
- * \code $> ./FuncGIC ../../data/points/COIL_database/lucky_cat.off ../../data/points/COIL_database/lucky_cat_PCA1 --v
+ * \code $> ./FuncGIC ../../data/points/COIL_database/lucky_cat.off ../../data/points/COIL_database/lucky_cat_PCA1 -v
  * \endcode
  *
  * the program outputs again SC.dot which gives the following visualization after using neato:
  *
  * \image html "funcGICvisu.jpg" "Visualization with neato"
  *
- * \copyright GNU General Public License v3.                         
- * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
  */
 /** @} */  // end defgroup cover_complex
 
@@ -186,31 +184,3 @@ namespace cover_complex {
 }  // namespace Gudhi
 
 #endif  // DOC_COVER_COMPLEX_INTRO_COVER_COMPLEX_H_
-
-
-/* * \subsection gicexample Example with cover from function
- *
- * This example builds the GIC of a point cloud sampled on a 3D human shape (human.off).
- * The cover C comes from the preimages of intervals (with length 0.075 and gain 0)
- * covering the height function (coordinate 2),
- * and the graph G comes from a Rips complex built with threshold 0.075.
- * Note that if the gain is too big, the number of cliques increases a lot,
- * which make the computation time much larger.
- *
- * \include Nerve_GIC/GIC.cpp
- *
- * When launching:
- *
- * \code $> ./GIC ../../data/points/human.off 0.075 2 0.075 0 --v
- * \endcode
- *
- * the program outputs SC.txt, which can be visualized with python and firefox as before:
- *
- * \image html "gicvisu.jpg" "Visualization with KeplerMapper"
- * */
-
-
-/* * Using e.g.
- *
- * \code $> python KeplerMapperVisuFromTxtFile.py && firefox SC.html
- * \endcode */

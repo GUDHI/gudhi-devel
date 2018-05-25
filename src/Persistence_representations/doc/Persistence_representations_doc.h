@@ -4,7 +4,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2016  INRIA Sophia-Saclay (France)
+ *    Copyright (C) 2016 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -67,7 +67,7 @@ namespace Persistence_representations {
  \li Concept of representation of persistence that allows computations of distances.
  \li Concept of representation of persistence that allows computations of scalar products.
  \li Concept of representation of persistence that allows vectorization.
- \li Concept of representation of persistence that allows computations of real--valued characteristics of objects.
+ \li Concept of representation of persistence that allows computations of real-valued characteristics of objects.
 
 
  At the moment an implementation of the following representations of persistence are available (further details of
@@ -250,7 +250,6 @@ namespace Persistence_representations {
  absolute value of differences between coordinates. A scalar product is a sum of products of
  values at the corresponding positions of two vectors.
 
- \copyright GNU General Public License v3.
  */
 /** @} */  // end defgroup Persistence_representations
 

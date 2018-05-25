@@ -117,9 +117,6 @@ int main(int argc, char * const argv[]) {
 
    \include Witness_complex/example_nearest_landmark_table.cpp
 
-   \copyright GNU General Public License v3.
-
-
  */
 
 #endif  // WITNESS_COMPLEX_DOC_H_

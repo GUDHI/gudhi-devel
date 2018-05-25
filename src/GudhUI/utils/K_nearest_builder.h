@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -81,7 +81,7 @@ template<typename SkBlComplex> class K_nearest_builder {
       for (auto it = ++search.begin(); it != search.end(); ++it) {
         Vertex_handle q(std::get<1>(it->first));
         if (p != q && complex_.contains_vertex(p) && complex_.contains_vertex(q))
-          complex_.add_edge(p, q);
+          complex_.add_edge_without_blockers(p, q);
       }
     }
   }

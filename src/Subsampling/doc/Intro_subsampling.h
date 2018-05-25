@@ -4,7 +4,7 @@
  *
  *    Author(s):       Clement Jamin
  *
- *    Copyright (C) 2016 INRIA
+ *    Copyright (C) 2016 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -58,8 +58,6 @@ namespace subsampling {
  * This example outputs a subset of 100 points picked randomly.
  *
  * \include Subsampling/example_pick_n_random_points.cpp
- * \copyright GNU General Public License v3.                         
- * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
  */
 /** @} */  // end defgroup subsampling
 

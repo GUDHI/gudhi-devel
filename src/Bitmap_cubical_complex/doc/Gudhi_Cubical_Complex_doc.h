@@ -4,7 +4,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA Sophia-Saclay (France)
+ *    Copyright (C) 2015 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -105,7 +105,6 @@ namespace cubical_complex {
  * \section BitmapExamples Examples
  * End user programs are available in example/Bitmap_cubical_complex and utilities/Bitmap_cubical_complex folders.
  * 
- * \copyright GNU General Public License v3.
  */
 /** @} */  // end defgroup cubical_complex
 

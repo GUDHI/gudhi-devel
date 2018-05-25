@@ -4,7 +4,7 @@
  *
  *    Author:       Mathieu Carriere
  *
- *    Copyright (C) 2017  INRIA
+ *    Copyright (C) 2017 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -63,6 +63,7 @@ namespace Gudhi {
 namespace cover_complex {
 
 using Simplex_tree = Gudhi::Simplex_tree<>;
+using Simplex_handle = Simplex_tree::Simplex_handle;
 using Filtration_value = Simplex_tree::Filtration_value;
 using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
 using Persistence_diagram = std::vector<std::pair<double, double> >;
@@ -269,6 +270,7 @@ class Cover_complex {
         point_cloud.emplace_back(point.begin(), point.begin() + data_dimension);
         boost::add_vertex(one_skeleton_OFF);
         vertices.push_back(boost::add_vertex(one_skeleton)); cover.emplace_back();
+        cover.emplace_back();
         i++;
       }
     }
@@ -369,9 +371,8 @@ class Cover_complex {
     double d;
     std::vector<double> zeros(n);
     for (int i = 0; i < n; i++) distances.push_back(zeros);
-    std::string distance = point_cloud_name;
-    distance.append("_dist");
-    std::ifstream input(distance.c_str(), std::ios::out | std::ios::binary);
+    std::string distance = point_cloud_name + "_dist";
+    std::ifstream input(distance, std::ios::out | std::ios::binary);
 
     if (input.good()) {
       if (verbose) std::cout << "Reading distances..." << std::endl;
@@ -487,7 +488,7 @@ class Cover_complex {
     char coordinate[100];
     sprintf(coordinate, "coordinate %d", k);
     functional_cover = true;
-    cover_name = coordinate;
+    cover_name = "coordinate " + std::to_string(k);
   }
 
  public:  // Set function from vector.
@@ -955,8 +956,7 @@ class Cover_complex {
    * of its 1-skeleton in a .pdf file.
    */
   void plot_DOT() {
-    char mapp[100];
-    sprintf(mapp, "%s_sc.dot", point_cloud_name.c_str());
+    std::string mapp = point_cloud_name + "_sc.dot";
     std::ofstream graphic(mapp);
 
     double maxv = std::numeric_limits<double>::lowest();
@@ -996,7 +996,7 @@ class Cover_complex {
       }
     graphic << "}";
     graphic.close();
-    std::cout << ".dot file generated. It can be visualized with e.g. neato." << std::endl;
+    std::cout << mapp << " file generated. It can be visualized with e.g. neato." << std::endl;
   }
 
  public:  // Create a .txt file that can be compiled with KeplerMapper.
@@ -1006,8 +1006,7 @@ class Cover_complex {
   void write_info() {
     int num_simplices = simplices.size();
     int num_edges = 0;
-    char mapp[100];
-    sprintf(mapp, "%s_sc.txt", point_cloud_name.c_str());
+    std::string mapp = point_cloud_name + "_sc.txt";
     std::ofstream graphic(mapp);
 
     for (int i = 0; i < num_simplices; i++)
@@ -1033,7 +1032,8 @@ class Cover_complex {
         if (cover_color[simplices[i][0]].first > mask && cover_color[simplices[i][1]].first > mask)
           graphic << name2id[simplices[i][0]] << " " << name2id[simplices[i][1]] << std::endl;
     graphic.close();
-    std::cout << ".txt generated. It can be visualized with e.g. python KeplerMapperVisuFromTxtFile.py and firefox."
+    std::cout << mapp
+              << " generated. It can be visualized with e.g. python KeplerMapperVisuFromTxtFile.py and firefox."
               << std::endl;
   }
 
@@ -1051,9 +1051,8 @@ class Cover_complex {
     std::vector<std::vector<int> > edges, faces;
     int numsimplices = simplices.size();
 
-    char gic[100];
-    sprintf(gic, "%s_sc.off", point_cloud_name.c_str());
-    std::ofstream graphic(gic);
+    std::string mapp = point_cloud_name + "_sc.off";
+    std::ofstream graphic(mapp);
 
     graphic << "OFF" << std::endl;
     for (int i = 0; i < numsimplices; i++) {
@@ -1080,7 +1079,7 @@ class Cover_complex {
     for (int i = 0; i < numfaces; i++)
       graphic << 3 << " " << faces[i][0] << " " << faces[i][1] << " " << faces[i][2] << std::endl;
     graphic.close();
-    std::cout << ".off generated. It can be visualized with e.g. geomview." << std::endl;
+    std::cout << mapp << " generated. It can be visualized with e.g. geomview." << std::endl;
   }
 
   // *******************************************************************************************************************
@@ -1111,8 +1110,9 @@ class Cover_complex {
     for (std::map<int, double>::iterator it = cover_std.begin(); it != cover_std.end(); it++) {
       int vertex = it->first; float val = it->second;
       int vert[] = {vertex}; int edge[] = {vertex, -2};
-      st.assign_filtration(st.find(vert), -2 + (val - minf)/(maxf - minf));
-      st.assign_filtration(st.find(edge),  2 - (val - minf)/(maxf - minf));
+      Simplex_handle shv = st.find(vert); Simplex_handle she = st.find(edge);
+      if(shv != st.null_simplex()) st.assign_filtration(shv, -2 + (val - minf)/(maxf - minf));
+      if(she != st.null_simplex()) st.assign_filtration(she,  2 - (val - minf)/(maxf - minf));
     }
     st.make_filtration_non_decreasing();
 
@@ -1167,7 +1167,7 @@ class Cover_complex {
           Cboot.point_cloud.push_back(this->point_cloud[id]); Cboot.cover.emplace_back(); Cboot.func.push_back(this->func[id]);
           boost::add_vertex(Cboot.one_skeleton_OFF); Cboot.vertices.push_back(boost::add_vertex(Cboot.one_skeleton));
         }
-	Cboot.set_color_from_vector(Cboot.func);
+        Cboot.set_color_from_vector(Cboot.func);
 
         for (int j = 0; j < n; j++) {
           std::vector<double> dist(n);

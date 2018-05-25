@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -210,7 +210,6 @@ int main (int argc, char *argv[])
 }
   \endcode
 
-
 \verbatim
 ./example/Contraction/RipsContraction ../../data/SO3_10000.off 0.3
 [ 50%] [100%] Built target SkeletonBlockerIteration
@@ -223,9 +222,6 @@ Time to simplify and enumerate simplices:
  3.166621s wall, 3.150000s user + 0.010000s system = 3.160000s CPU (99.8%)
 \endverbatim
 
-
-
-\copyright GNU General Public License v3.                         
 */
 /** @} */  // end defgroup
 }  // namespace contraction

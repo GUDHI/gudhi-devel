@@ -10,6 +10,8 @@ function(add_persistence_representation_creation_utility creation_utility)
     add_test(NAME Persistence_representation_utilities_${creation_utility} COMMAND $<TARGET_FILE:${creation_utility}>
         ${ARGN} "${CMAKE_CURRENT_BINARY_DIR}/../first.pers"
         "${CMAKE_CURRENT_BINARY_DIR}/../second.pers")
+
+    install(TARGETS ${creation_utility} DESTINATION bin)
 endfunction(add_persistence_representation_creation_utility)
 
 function(add_persistence_representation_plot_utility plot_utility tool_extension)
@@ -26,6 +28,8 @@ function(add_persistence_representation_plot_utility plot_utility tool_extension
         #add_test(NAME Persistence_representation_utilities_${plot_utility}_second_gnuplot COMMAND ${GNUPLOT_PATH}
         #    "-e" "load '${CMAKE_CURRENT_BINARY_DIR}/../second.pers${tool_extension}_GnuplotScript'")
     endif()
+
+    install(TARGETS ${plot_utility} DESTINATION bin)
 endfunction(add_persistence_representation_plot_utility)
 
 function(add_persistence_representation_function_utility function_utility tool_extension)
@@ -44,6 +48,8 @@ function(add_persistence_representation_function_utility function_utility tool_e
             "${CMAKE_CURRENT_BINARY_DIR}/../first.pers${tool_extension}"
             "${CMAKE_CURRENT_BINARY_DIR}/../second.pers${tool_extension}")
     endif()
+
+    install(TARGETS ${function_utility} DESTINATION bin)
 endfunction(add_persistence_representation_function_utility)
 
 add_subdirectory(persistence_heat_maps)
