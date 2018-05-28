@@ -92,29 +92,29 @@ int main(int argc, char * const argv[]) {
     Coxeter_complex_off cc(*off_range, cs_A, init_level, eps);
     t.end();
     #ifdef CC_STAR_COMPLETION
-    std::cout << "Star completion enabled.\n";
+    // std::cout << "Star completion enabled.\n";
     #endif
     #ifdef CC_A_V_VISITORS
     std::cout << "Vertices are constructed at the same time as the alcoves.\n";
     #endif
-    std::cout << "Graph construction time: " << t.num_seconds() << "s\n";
+    // std::cout << "Simplex-vertex graph construction time: " << t.num_seconds() << "s\n";
     cc.write_mesh("sphere_coxeter_complex_A.mesh");
     delete off_range;
     off_range  = new Gudhi::Off_point_range<Point_d>(argv[1]);
     output_points_to_medit(*off_range, "sphere_coxeter_complex_points.mesh");
     delete off_range;
-    std::cout << "Memory usage (Physical) before Voronoi skeleton computation: " << (float)getPhysicalValue()/1000 << "MB.\n";
+    // std::cout << "Memory usage (Physical) before Voronoi skeleton computation: " << (float)getPhysicalValue()/1000 << "MB.\n";
     t.begin();
     cc.voronoi_skeleton(d);
     t.end();
-    std::cout << "Voronoi skeleton construction time: " << t.num_seconds() << "s\n";
-    t.begin();
-    cc.collapse();
-    t.end();
-    std::cout << "Collapsing the simplicial complex took: " << t.num_seconds() << "s\n";
+    // std::cout << "Voronoi skeleton construction time: " << t.num_seconds() << "s\n";
+    // t.begin();
+    // cc.collapse();
+    // t.end();
+    // std::cout << "Collapsing the simplicial complex took: " << t.num_seconds() << "s\n";
   }    
-  std::cout << "Memory usage (Virtual): " << (float)getVirtualValue()/1000. << "MB.\n";
-  std::cout << "Memory usage (Physical): " << (float)getPhysicalValue()/1000 << "MB.\n";
+  // std::cout << "Memory usage (Virtual): " << (float)getVirtualValue()/1000. << "MB.\n";
+  // std::cout << "Memory usage (Physical): " << (float)getPhysicalValue()/1000 << "MB.\n";
   // {
   //   Coxeter_system cs_B('B', d);
   //   Coxeter_complex cc(point_vector, cs_B, init_level);

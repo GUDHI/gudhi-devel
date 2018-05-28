@@ -5,7 +5,8 @@
 #include <vector>
 #include <exception>
 #include <Eigen/Sparse>
-#include <gudhi/Simple_coxeter_system.h>
+#include <gudhi/Simple_coxeter_system_remastered.h>
+// #include <gudhi/Simple_coxeter_system.h>
 #include "../../example/cxx-prettyprint/prettyprint.hpp"
 
 class Coxeter_system  {

@@ -13,6 +13,7 @@
 #include <gudhi/Coxeter_complex/simplicial_complex_traits.h>
 #include <gudhi/Coxeter_complex/hasse_diagram_traits.h>
 #include <gudhi/Coxeter_complex/collapse.h>
+#include <gudhi/Clock.h>
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/dynamic_bitset.hpp>
@@ -125,6 +126,8 @@ class Coxeter_complex {
   
   // The procedure that fills av_graph_
   void compute_graph(const Point_range& point_vector, double init_level, double eps, bool store_points) {
+    Gudhi::Clock t;
+    t.begin();
     for (auto p_it = point_vector.begin(); p_it != point_vector.end(); ++p_it)
       cs_.alcoves_of_ball(*p_it,
                           init_level,
@@ -134,10 +137,13 @@ class Coxeter_complex {
     for (auto& m: av_graph_.a_map)
       m.second.f = std::sqrt(m.second.f);
     // #endif
+    t.end();
+    std::cout << "\nTotal point location time: " << t.num_seconds() << "s\n";
 #ifndef CC_A_V_VISITORS
     auto& inv_map = av_graph_.inv_map;
     auto& v_map = av_graph_.v_map;
     auto& graph = av_graph_.graph;
+    t.begin();
     for (auto a_pair: av_graph_.a_map) {
       std::vector<Id> vertices = cs_.vertices_of_alcove(a_pair.first);
       Graph_v a_v = a_pair.second.gv;
@@ -155,6 +161,8 @@ class Coxeter_complex {
         }
       }
     }
+    t.end();
+    std::cout << "\nTotal vertex computation time: " << t.num_seconds() << "s\n";
 #endif
   }
   
@@ -424,10 +432,10 @@ public:
     Simplex_tree output_stree;
     using Simplex_tree_inserter = simplex_tree_inserter<Simplex_tree>;
     Simplex_tree_inserter st_inserter(output_stree);
-    // Gudhi::collapse(input_range,
-    //                 boost::make_function_output_iterator(st_inserter),
-    //                 Simplex_filtration_pair_input_traits<Filtered_simplex>(),
-    //                 Simplicial_complex_collapse_traits());
+    Gudhi::collapse(input_range,
+                    boost::make_function_output_iterator(st_inserter),
+                    Simplex_filtration_pair_input_traits<Filtered_simplex>(),
+                    Simplicial_complex_collapse_traits());
     if (pers_out) {
       std::cout << "Number of all simplices after collapse: " << output_stree.num_simplices() << "\n";
       int dim_complex = 0;
@@ -662,6 +670,7 @@ public:
     auto& v_map = av_graph_.v_map;
     auto& inv_map = av_graph_.inv_map;
     auto& graph = av_graph_.graph;
+    Gudhi::Clock t;
     for (auto v_pair: v_map) {
 #ifdef DEBUG_TRACES
       std::cout << "Current vertex: " << v_pair.first << std::endl;
@@ -731,6 +740,9 @@ public:
       }
       delete pc_map_cofaces;
     }
+    t.end();
+    std::cout << "\nCell complex construction time: " << t.num_seconds() << "s\n";
+
     std::vector<Hasse_cell*> hasse_vector(hasse_diagram.begin(), hasse_diagram.end());
     struct Dimension_comparison {
       bool operator() (Hasse_cell* lhs, Hasse_cell* rhs) const {
@@ -791,12 +803,16 @@ public:
     struct empty_function{
       void operator() (const std::pair<Hasse_cell*, double> t) const {}
     };
+    t.begin();
     Gudhi::collapse(hasse_vector,
                     boost::make_function_output_iterator(empty_function()),
                     Hasse_cell_input_traits<Hasse_cell>(),
                     Hasse_diagram_collapse_traits<Hasse_cell, Hasse_pers_vector>(hdp, true));
     hdp.clean_up_the_structure();
     hasse_vector.clear();
+    t.end();
+    std::cout << "\nCollapse time: " << t.num_seconds() << "s\n";
+
     unsigned complex_dimension = hdp.dimension();
     for (unsigned k = 0; k <= complex_dimension; ++k)
       for (auto pos: hdp.skeleton_simplex_range(k))
@@ -861,7 +877,7 @@ private:
       for (auto c: cells_by_dimension[d])
         f_max.push_back(c->get_filtration());
       std::sort(f_max.begin(), f_max.end());
-      std::cout << "\033[1;36m d-cell filtrations: " << f_max << "\033[1;0m\n";
+      // std::cout << "\033[1;36m d-cell filtrations: " << f_max << "\033[1;0m\n";
       return false;
     }
     for (int k = max_dim-1; k >= 0; k--)
@@ -873,13 +889,13 @@ private:
               f_cob.push_back(h_pair.first->get_filtration());
             std::sort(f_cob.begin(), f_cob.end());
             // std::cout << f_cob << "\n";
-            std::cout << "\033[1;31m Oversaturated facet " << f_cob[2] << "\033[0m\n"; 
+            // std::cout << "\033[1;31m Oversaturated facet " << f_cob[2] << "\033[0m\n"; 
           }
           return_value = false;
         }
         if (c->get_coBoundary().empty()) {
-          std::cout << "\033[1;35m Maximal face of dimension " << c->get_dimension() 
-                    << ", filtration " << c->get_filtration() << "\033[0m\n";
+          // std::cout << "\033[1;35m Maximal face of dimension " << c->get_dimension() 
+          //           << ", filtration " << c->get_filtration() << "\033[0m\n";
           return_value = false;
         }
       }
@@ -1004,7 +1020,7 @@ private:
         // std::vector<std::vector<double> > vertices;
         std::vector<double> barycenter(3);
         std::set<Hasse_cell*> v_cells;
-        int mask_val = 3;
+        int mask_val = 4;
         for (auto e_pair: h->get_boundary()) {
           if (e_pair.first->get_coBoundary().size() > 2)
             mask_val = 517;
