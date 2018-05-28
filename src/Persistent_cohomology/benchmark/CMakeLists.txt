@@ -1,6 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
 project(Persistent_cohomology_benchmark)
-
   
 if(GMP_FOUND)
    if(GMPXX_FOUND)

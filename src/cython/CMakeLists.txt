@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.8)
 project(Cython)
 
 include(CheckCXXSourceCompiles)
@@ -100,12 +99,11 @@ if(CYTHON_FOUND)
       add_gudhi_cython_lib(${Boost_THREAD_LIBRARY})
       set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${Boost_LIBRARY_DIRS}', ")
     endif()
-
     # Add CGAL compilation args
     if(CGAL_HEADER_ONLY)
       set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_HEADER_ONLY', ")
     else(CGAL_HEADER_ONLY)
-      add_gudhi_cython_lib(${CGAL_LIBRARIES})
+      add_gudhi_cython_lib(${CGAL_LIBRARY})
       set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${CGAL_LIBRARIES_DIR}', ")
       # If CGAL is not header only, CGAL library may link with boost system,
       add_gudhi_cython_lib(${Boost_SYSTEM_LIBRARY})

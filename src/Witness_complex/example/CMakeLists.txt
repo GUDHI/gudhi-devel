@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
 project(Witness_complex_examples)
 
 add_executable ( Witness_complex_example_nearest_landmark_table example_nearest_landmark_table.cpp )
