@@ -416,7 +416,7 @@ class Cover_complex {
   template <typename Distance>
   double set_graph_from_automatic_rips(Distance distance, int N = 100) {
     int m = floor(n / std::exp((1 + rate_power) * std::log(std::log(n) / std::log(rate_constant))));
-    m = std::min(m, n - 1); std::vector<int> samples(m); double delta = 0;
+    m = std::min(m, n - 1); double delta = 0;
 
     if (verbose) std::cout << n << " points in R^" << data_dimension << std::endl;
     if (verbose) std::cout << "Subsampling " << m << " points" << std::endl;
@@ -424,7 +424,9 @@ class Cover_complex {
     if (distances.size() == 0) compute_pairwise_distances(distance);
 
     #ifdef GUDHI_USE_TBB
+      tbb::mutex deltamutex;
       tbb::parallel_for(0, N, [&](int i){
+	std::vector<int> samples(m);
         SampleWithoutReplacement(n, m, samples);
         double hausdorff_dist = 0;
         for (int j = 0; j < n; j++) {
@@ -432,10 +434,13 @@ class Cover_complex {
           for (int k = 1; k < m; k++) mj = std::min(mj, distances[j][samples[k]]);
           hausdorff_dist = std::max(hausdorff_dist, mj);
         }
+	deltamutex.lock();
         delta += hausdorff_dist / N;
+	deltamutex.unlock();
       });
     #else
       for (int i = 0; i < N; i++) {
+	std::vector<int> samples(m);
         SampleWithoutReplacement(n, m, samples);
         double hausdorff_dist = 0;
         for (int j = 0; j < n; j++) {
@@ -718,12 +723,11 @@ class Cover_complex {
     }
 
     #ifdef GUDHI_USE_TBB
-      if (verbose) std::cout << "Computing connected components (parallelized)..." << std::endl;
+      if (verbose) std::cout << "Computing connected components (parallelized)..." << std::endl; tbb::mutex covermutex, idmutex;
       tbb::parallel_for(0, res, [&](int i){
         // Compute connected components
         Graph G = one_skeleton.create_subgraph();
-        int num = preimages[i].size();
-        std::vector<int> component(num);
+        int num = preimages[i].size(); std::vector<int> component(num);
         for (int j = 0; j < num; j++) boost::add_vertex(index[vertices[preimages[i][j]]], G);
         boost::connected_components(G, &component[0]);
         int max = 0;
@@ -737,16 +741,20 @@ class Cover_complex {
           int identifier = ((i + component[j])*(i + component[j]) + 3 * i + component[j]) / 2;
 
           // Update covers
+	  covermutex.lock();
           cover[preimages[i][j]].push_back(identifier);
           cover_back[identifier].push_back(preimages[i][j]);
           cover_fct[identifier] = i;
           cover_std[identifier] = funcstd[i];
           cover_color[identifier].second += func_color[preimages[i][j]];
           cover_color[identifier].first += 1;
+	  covermutex.unlock();
         }
 
         // Maximal dimension is total number of connected components
+	idmutex.lock();
         id += max + 1;
+	idmutex.unlock();
       });
     #else
       if (verbose) std::cout << "Computing connected components..." << std::endl;
