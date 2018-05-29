@@ -38,9 +38,9 @@ namespace cech_complex {
 /**
  * \class Cech_complex
  * \brief Cech complex data structure.
- * 
+ *
  * \ingroup cech_complex
- * 
+ *
  * \details
  * The data structure is a proximity graph, containing edges when the edge length is less or equal
  * to a given max_radius. Edge length is computed from `Gudhi::Minimal_enclosing_ball_radius` distance function.
@@ -51,7 +51,7 @@ namespace cech_complex {
  * \tparam ForwardPointRange must be a range for which `std::begin()` and `std::end()` methods return input
  * iterators on a point. `std::begin()` and `std::end()` methods are also required for a point.
  */
-template<typename SimplicialComplexForProximityGraph, typename ForwardPointRange>
+template <typename SimplicialComplexForProximityGraph, typename ForwardPointRange>
 class Cech_complex {
  private:
   // Required by compute_proximity_graph
@@ -63,7 +63,7 @@ class Cech_complex {
   using Point_from_range_iterator = typename boost::range_const_iterator<ForwardPointRange>::type;
   using Point_from_range = typename std::iterator_traits<Point_from_range_iterator>::value_type;
   using Coordinate_iterator = typename boost::range_const_iterator<Point_from_range>::type;
-  using Coordinate= typename std::iterator_traits<Coordinate_iterator>::value_type;
+  using Coordinate = typename std::iterator_traits<Coordinate_iterator>::value_type;
 
  public:
   // Point and Point_cloud type definition
@@ -79,17 +79,13 @@ class Cech_complex {
    * \tparam ForwardPointRange must be a range of Point. Point must be a range of <b>copyable</b> Cartesian coordinates.
    *
    */
-  Cech_complex(const ForwardPointRange& points, Filtration_value max_radius)
-    : max_radius_(max_radius) {
+  Cech_complex(const ForwardPointRange& points, Filtration_value max_radius) : max_radius_(max_radius) {
     // Point cloud deep copy
     point_cloud_.reserve(boost::size(points));
-    for (auto&& point : points)
-      point_cloud_.emplace_back(std::begin(point), std::end(point));
+    for (auto&& point : points) point_cloud_.emplace_back(std::begin(point), std::end(point));
 
-    cech_skeleton_graph_ =
-        Gudhi::compute_proximity_graph<SimplicialComplexForProximityGraph>(point_cloud_,
-                                                                           max_radius_,
-                                                                           Gudhi::Minimal_enclosing_ball_radius());
+    cech_skeleton_graph_ = Gudhi::compute_proximity_graph<SimplicialComplexForProximityGraph>(
+        point_cloud_, max_radius_, Gudhi::Minimal_enclosing_ball_radius());
   }
 
   /** \brief Initializes the simplicial complex from the proximity graph and expands it until a given maximal
@@ -100,7 +96,7 @@ class Cech_complex {
    * @exception std::invalid_argument In debug mode, if `complex.num_vertices()` does not return 0.
    *
    */
-  template<typename SimplicialComplexForCechComplex >
+  template <typename SimplicialComplexForCechComplex>
   void create_complex(SimplicialComplexForCechComplex& complex, int dim_max) {
     GUDHI_CHECK(complex.num_vertices() == 0,
                 std::invalid_argument("Cech_complex::create_complex - simplicial complex is not empty"));
@@ -113,16 +109,12 @@ class Cech_complex {
   }
 
   /** @return max_radius value given at construction. */
-  Filtration_value max_radius() const {
-    return max_radius_;
-  }
+  Filtration_value max_radius() const { return max_radius_; }
 
   /** @param[in] vertex Point position in the range.
    * @return The point.
    */
-  const Point& get_point(Vertex_handle vertex) const{
-    return point_cloud_[vertex];
-  }
+  const Point& get_point(Vertex_handle vertex) const { return point_cloud_[vertex]; }
 
  private:
   Proximity_graph cech_skeleton_graph_;

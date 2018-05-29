@@ -70,18 +70,15 @@ class Cech_blocker {
     }
     Filtration_value radius = Gudhi::Minimal_enclosing_ball_radius()(points);
 #ifdef DEBUG_TRACES
-    if (radius > cc_ptr_->max_radius())
-      std::cout << "radius > max_radius => expansion is blocked\n";
+    if (radius > cc_ptr_->max_radius()) std::cout << "radius > max_radius => expansion is blocked\n";
 #endif  // DEBUG_TRACES
     sc_ptr_->assign_filtration(sh, radius);
     return (radius > cc_ptr_->max_radius());
   }
 
   /** \internal \brief Čech complex blocker constructor. */
-  Cech_blocker(SimplicialComplexForCech* sc_ptr, Cech_complex* cc_ptr)
-    : sc_ptr_(sc_ptr),
-      cc_ptr_(cc_ptr) {
-  }
+  Cech_blocker(SimplicialComplexForCech* sc_ptr, Cech_complex* cc_ptr) : sc_ptr_(sc_ptr), cc_ptr_(cc_ptr) {}
+
  private:
   SimplicialComplexForCech* sc_ptr_;
   Cech_complex* cc_ptr_;

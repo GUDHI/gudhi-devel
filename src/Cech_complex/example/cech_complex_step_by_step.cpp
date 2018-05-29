@@ -31,7 +31,7 @@
 
 #include <string>
 #include <vector>
-#include <limits>  // infinity
+#include <limits>   // infinity
 #include <utility>  // for pair
 #include <map>
 
@@ -55,7 +55,8 @@ class Cech_blocker {
   using Point_cloud = std::vector<Point>;
   using Point_iterator = Point_cloud::const_iterator;
   using Coordinate_iterator = Point::const_iterator;
-  using Min_sphere =  Gudhi::Miniball::Miniball <Gudhi::Miniball::CoordAccessor<Point_iterator, Coordinate_iterator>>;
+  using Min_sphere = Gudhi::Miniball::Miniball<Gudhi::Miniball::CoordAccessor<Point_iterator, Coordinate_iterator>>;
+
  public:
   bool operator()(Simplex_handle sh) {
     std::vector<Point> points;
@@ -73,11 +74,10 @@ class Cech_blocker {
     return (radius > max_radius_);
   }
   Cech_blocker(Simplex_tree& simplex_tree, Filtration_value max_radius, const std::vector<Point>& point_cloud)
-    : simplex_tree_(simplex_tree),
-      max_radius_(max_radius),
-      point_cloud_(point_cloud) {
+      : simplex_tree_(simplex_tree), max_radius_(max_radius), point_cloud_(point_cloud) {
     dimension_ = point_cloud_[0].size();
   }
+
  private:
   Simplex_tree simplex_tree_;
   Filtration_value max_radius_;
@@ -85,14 +85,9 @@ class Cech_blocker {
   int dimension_;
 };
 
+void program_options(int argc, char* argv[], std::string& off_file_points, Filtration_value& max_radius, int& dim_max);
 
-void program_options(int argc, char * argv[]
-                     , std::string & off_file_points
-                     , Filtration_value & max_radius
-                     , int & dim_max);
-
-
-int main(int argc, char * argv[]) {
+int main(int argc, char* argv[]) {
   std::string off_file_points;
   Filtration_value max_radius;
   int dim_max;
@@ -103,8 +98,7 @@ int main(int argc, char * argv[]) {
   Points_off_reader off_reader(off_file_points);
 
   // Compute the proximity graph of the points
-  Proximity_graph prox_graph = Gudhi::compute_proximity_graph<Simplex_tree>(off_reader.get_point_cloud(),
-                                                                            max_radius,
+  Proximity_graph prox_graph = Gudhi::compute_proximity_graph<Simplex_tree>(off_reader.get_point_cloud(), max_radius,
                                                                             Gudhi::Minimal_enclosing_ball_radius());
 
   // Construct the Rips complex in a Simplex Tree
@@ -125,7 +119,8 @@ int main(int argc, char * argv[]) {
   std::cout << "* The complex contains " << st.num_simplices() << " simplices - dimension=" << st.dimension() << "\n";
   std::cout << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
   for (auto f_simplex : st.filtration_simplex_range()) {
-    std::cout << "   " << "[" << st.filtration(f_simplex) << "] ";
+    std::cout << "   "
+              << "[" << st.filtration(f_simplex) << "] ";
     for (auto vertex : st.simplex_vertex_range(f_simplex)) {
       std::cout << static_cast<int>(vertex) << " ";
     }
@@ -136,24 +131,19 @@ int main(int argc, char * argv[]) {
   return 0;
 }
 
-void program_options(int argc, char * argv[]
-                     , std::string & off_file_points
-                     , Filtration_value & max_radius
-                     , int & dim_max) {
+void program_options(int argc, char* argv[], std::string& off_file_points, Filtration_value& max_radius, int& dim_max) {
   namespace po = boost::program_options;
   po::options_description hidden("Hidden options");
-  hidden.add_options()
-      ("input-file", po::value<std::string>(&off_file_points),
-       "Name of an OFF file containing a point set.\n");
+  hidden.add_options()("input-file", po::value<std::string>(&off_file_points),
+                       "Name of an OFF file containing a point set.\n");
 
   po::options_description visible("Allowed options", 100);
-  visible.add_options()
-      ("help,h", "produce help message")
-      ("max-radius,r",
-       po::value<Filtration_value>(&max_radius)->default_value(std::numeric_limits<Filtration_value>::infinity()),
-       "Maximal length of an edge for the Rips complex construction.")
-      ("cpx-dimension,d", po::value<int>(&dim_max)->default_value(1),
-       "Maximal dimension of the Rips complex we want to compute.");
+  visible.add_options()("help,h", "produce help message")(
+      "max-radius,r",
+      po::value<Filtration_value>(&max_radius)->default_value(std::numeric_limits<Filtration_value>::infinity()),
+      "Maximal length of an edge for the Rips complex construction.")(
+      "cpx-dimension,d", po::value<int>(&dim_max)->default_value(1),
+      "Maximal dimension of the Rips complex we want to compute.");
 
   po::positional_options_description pos;
   pos.add("input-file", 1);
@@ -162,8 +152,7 @@ void program_options(int argc, char * argv[]
   all.add(visible).add(hidden);
 
   po::variables_map vm;
-  po::store(po::command_line_parser(argc, argv).
-            options(all).positional(pos).run(), vm);
+  po::store(po::command_line_parser(argc, argv).options(all).positional(pos).run(), vm);
   po::notify(vm);
 
   if (vm.count("help") || !vm.count("input-file")) {
