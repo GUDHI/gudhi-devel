@@ -39,6 +39,7 @@
 #include <string>
 #include <utility>
 #include <functional>
+#include <random>
 
 namespace Gudhi {
 namespace Persistence_representations {
