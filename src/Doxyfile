@@ -843,7 +843,8 @@ EXAMPLE_RECURSIVE      = NO
 IMAGE_PATH             = doc/Skeleton_blocker/ \
 	doc/Alpha_complex/ \
 	doc/common/ \
-	doc/Contraction/ \
+        doc/Cech_complex/ \
+        doc/Contraction/ \
 	doc/Simplex_tree/ \
 	doc/Persistent_cohomology/ \
 	doc/Witness_complex/ \

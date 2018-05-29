@@ -42,6 +42,12 @@ struct vertex_filtration_t {
   typedef boost::vertex_property_tag kind;
 };
 
+/** \brief Proximity_graph contains the vertices and edges with their filtration values in order to store the result
+ * of `Gudhi::compute_proximity_graph` function.
+ *
+ * \tparam SimplicialComplexForProximityGraph furnishes `Filtration_value` type definition.
+ *
+ */
 template <typename SimplicialComplexForProximityGraph>
 using Proximity_graph = typename boost::adjacency_list < boost::vecS, boost::vecS, boost::undirectedS
 , boost::property < vertex_filtration_t, typename SimplicialComplexForProximityGraph::Filtration_value >

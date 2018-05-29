@@ -1,0 +1,26 @@
+https://people.inf.ethz.ch/gaertner/subdir/software/miniball.html
+
+Smallest Enclosing Balls of Points - Fast and Robust in C++.
+(high-quality software for smallest enclosing balls of balls is available in the computational geometry algorithms library CGAL)
+
+
+This is the miniball software (V3.0) for computing smallest enclosing balls of points in arbitrary dimensions. It consists of a C++ header file Miniball.hpp (around 500 lines of code) and two example programs miniball_example.cpp and miniball_example_containers.cpp that demonstrate the usage. The first example stores the coordinates of the input points in a two-dimensional array, the second example uses a list of vectors to show how generic containers can be used.
+
+Credits: Aditya Gupta and Alexandros Konstantinakis-Karmis have significantly contributed to this version of the software.
+
+Changes - https://people.inf.ethz.ch/gaertner/subdir/software/miniball/changes.txt - from previous versions.
+
+The theory - https://people.inf.ethz.ch/gaertner/subdir/texts/own_work/esa99_final.pdf -  behind the miniball software (Proc. 7th Annual European Symposium on Algorithms (ESA), Lecture Notes in Computer Science 1643, Springer-Verlag, pp.325-338, 1999).
+
+Main Features:
+
+    Very fast in low dimensions. 1 million points in 5-space are processed within 0.05 seconds on any recent machine.
+
+    High numerical stability. Almost all input degeneracies (cospherical points, multiple points, points very close together) are routinely handled.
+
+    Easily integrates into your code. You can freely choose the coordinate type of your points and the container to store the points. If you still need to adapt the code, the header is small and readable and contains documentation for all major methods. 
+
+
+Changes done for the GUDHI version of MiniBall:
+  - Add include guard
+  - Move Miniball namespace inside a new Gudhi namespace
