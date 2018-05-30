@@ -5,8 +5,9 @@
  * Examples of GUDHI headers inclusion can be found in \ref demos.
  * 
  * \section compiling Compiling
- * The library uses c++11 and requires <a target="_blank" href="http://www.boost.org/">Boost</a> with version 1.48.0 or
- * more recent. It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2015.
+ * The library uses c++11 and requires <a target="_blank" href="http://www.boost.org/">Boost</a>  &ge; 1.48.0
+ * and <a target="_blank" href="https://www.cmake.org/">CMake</a> &ge; 3.1.
+ * It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2015.
  * 
  * \subsection demos Demos and examples
  * To build the demos and examples, run the following commands in a terminal:

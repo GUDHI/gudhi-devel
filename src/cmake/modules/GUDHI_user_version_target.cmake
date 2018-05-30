@@ -48,10 +48,10 @@ if (NOT CMAKE_VERSION VERSION_LESS 2.8.11)
                      copy_directory ${CMAKE_SOURCE_DIR}/src/GudhUI ${GUDHI_USER_VERSION_DIR}/GudhUI)
   
   set(GUDHI_DIRECTORIES "doc;example;concept;utilities")
-  if (NOT CGAL_VERSION VERSION_GREATER 4.11.0)
-    set(GUDHI_INCLUDE_DIRECTORIES "include/gudhi;include/gudhi_patches")
+  if (CGAL_VERSION VERSION_LESS 4.11.0)
+    set(GUDHI_INCLUDE_DIRECTORIES "include/gudhi;include/Miniball;include/gudhi_patches")
   else ()
-      set(GUDHI_INCLUDE_DIRECTORIES "include/gudhi")
+      set(GUDHI_INCLUDE_DIRECTORIES "include/gudhi;include/Miniball")
   endif ()
 
   foreach(GUDHI_MODULE ${GUDHI_MODULES_FULL_LIST})

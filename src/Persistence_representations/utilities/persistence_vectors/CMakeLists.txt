@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
 project(Persistence_vectors_utilities)
 
 add_persistence_representation_creation_utility(create_persistence_vectors "-1")

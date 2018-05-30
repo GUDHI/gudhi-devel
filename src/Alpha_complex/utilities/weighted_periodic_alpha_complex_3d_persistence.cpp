@@ -5,7 +5,7 @@
  *    Author(s):       Vincent Rouvreau
  *                     Pawel Dlotko - 2017 - Swansea University, UK
  *
- *    Copyright (C) 2014  INRIA
+ *    Copyright (C) 2014 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -31,6 +31,8 @@
 #include <CGAL/Periodic_3_regular_triangulation_traits_3.h>
 #include <CGAL/Periodic_3_regular_triangulation_3.h>
 #include <CGAL/Alpha_shape_3.h>
+#include <CGAL/Alpha_shape_cell_base_3.h>
+#include <CGAL/Alpha_shape_vertex_base_3.h>
 #include <CGAL/iterator.h>
 
 #include <fstream>
