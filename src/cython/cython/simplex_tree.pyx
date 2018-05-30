@@ -55,6 +55,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         void expansion(int max_dim)
         void remove_maximal_simplex(vector[int] simplex)
         bool prune_above_filtration(double filtration)
+        bool make_filtration_non_decreasing()
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>":
@@ -64,6 +65,7 @@ cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
         vector[int] persistent_betti_numbers(double from_value, double to_value)
         vector[pair[double,double]] intervals_in_dimension(int dimension)
         void write_output_diagram(string diagram_file_name)
+        vector[pair[vector[int], vector[int]]] persistence_pairs()
 
 # SimplexTree python interface
 cdef class SimplexTree:
@@ -399,6 +401,26 @@ cdef class SimplexTree:
         """
         self.thisptr.expansion(max_dim)
 
+    def make_filtration_non_decreasing(self):
+        """This function ensures that each simplex has a higher filtration
+        value than its faces by increasing the filtration values.
+
+        :returns: The filtration modification information.
+        :rtype: bint
+
+
+        .. note::
+
+            Some simplex tree functions require the filtration to be valid.
+            make_filtration_non_decreasing function is not launching
+            :func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>`
+            but returns the filtration modification
+            information. If the complex has changed , please call
+            :func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>`
+            to recompute it.
+        """
+        return self.thisptr.make_filtration_non_decreasing()
+
     def persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
         """This function returns the persistence of the simplicial complex.
 
@@ -485,6 +507,25 @@ cdef class SimplexTree:
             print("intervals_in_dim function requires persistence function"
                   " to be launched first.")
         return intervals_result
+
+    def persistence_pairs(self):
+        """This function returns the persistence pairs of the simplicial
+        complex.
+
+        :returns: The persistence intervals.
+        :rtype:  list of pair of list of int
+
+        :note: intervals_in_dim function requires
+            :func:`persistence()<gudhi.SimplexTree.persistence>`
+            function to be launched first.
+        """
+        cdef vector[pair[vector[int],vector[int]]] persistence_pairs_result
+        if self.pcohptr != NULL:
+            persistence_pairs_result = self.pcohptr.persistence_pairs()
+        else:
+            print("persistence_pairs function requires persistence function"
+                  " to be launched first.")
+        return persistence_pairs_result
 
     def write_persistence_diagram(self, persistence_file=''):
         """This function writes the persistence intervals of the simplicial

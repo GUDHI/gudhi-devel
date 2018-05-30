@@ -161,3 +161,47 @@ def test_automatic_dimension():
     assert st.upper_bound_dimension() == 2
     assert st.dimension() == 1
     assert st.upper_bound_dimension() == 1
+
+def test_make_filtration_non_decreasing():
+    st = SimplexTree()
+    assert st.__is_defined() == True
+    assert st.__is_persistence_defined() == False
+
+    # Inserted simplex:
+    #    1
+    #    o
+    #   /X\
+    #  o---o---o---o
+    #  2   0   3\X/4
+    #            o
+    #            5
+    assert st.insert([2, 1, 0], filtration=2.0) == True
+    assert st.insert([3, 0], filtration=2.0) == True
+    assert st.insert([3, 4, 5], filtration=2.0) == True
+
+    assert st.make_filtration_non_decreasing() == False
+
+    # Because of non decreasing property of simplex tree, { 0 } , { 1 } and
+    # { 0, 1 } are going to be set from value 2.0 to 1.0
+    st.insert([0, 1, 6, 7], filtration=1.0);
+
+    assert st.make_filtration_non_decreasing() == False
+
+    # Modify specific values to test make_filtration_non_decreasing
+    st.assign_filtration([0,1,6,7], 0.8);
+    st.assign_filtration([0,1,6], 0.9);
+    st.assign_filtration([0,6], 0.6);
+    st.assign_filtration([3,4,5], 1.2);
+    st.assign_filtration([3,4], 1.1);
+    st.assign_filtration([4,5], 1.99);
+
+    assert st.make_filtration_non_decreasing() == True
+
+    assert st.filtration([0,1,6,7]) == 1.
+    assert st.filtration([0,1,6]) == 1.
+    assert st.filtration([0,1]) == 1.
+    assert st.filtration([0]) == 1.
+    assert st.filtration([1]) == 1.
+    assert st.filtration([3,4,5]) == 2.
+    assert st.filtration([3,4]) == 2.
+    assert st.filtration([4,5]) == 2.

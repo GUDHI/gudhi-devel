@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import numpy as np
 import os
 
@@ -28,13 +29,13 @@ __author__ = "Vincent Rouvreau, Bertrand Michel"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
-def __min_birth_max_death(persistence, band_boot=0.):
+def __min_birth_max_death(persistence, band=0.):
     """This function returns (min_birth, max_death) from the persistence.
 
     :param persistence: The persistence to plot.
     :type persistence: list of tuples(dimension, tuple(birth, death)).
-    :param band_boot: bootstrap band
-    :type band_boot: float.
+    :param band: band
+    :type band: float.
     :returns: (float, float) -- (min_birth, max_death).
     """
     # Look for minimum birth date and maximum death date for plot optimisation
@@ -48,8 +49,8 @@ def __min_birth_max_death(persistence, band_boot=0.):
             max_death = float(interval[1][0])
         if float(interval[1][0]) < min_birth:
             min_birth = float(interval[1][0])
-    if band_boot > 0.:
-        max_death += band_boot
+    if band > 0.:
+        max_death += band
     return (min_birth, max_death)
 
 """
@@ -59,37 +60,27 @@ palette = ['#ff0000', '#00ff00', '#0000ff', '#00ffff', '#ff00ff', '#ffff00',
            '#000000', '#880000', '#008800', '#000088', '#888800', '#880088',
            '#008888']
  
-def show_palette_values(alpha=0.6):
-    """This function shows palette color values in function of the dimension.
+def plot_persistence_barcode(persistence=[], persistence_file='', alpha=0.6,
+        max_barcodes=1000, inf_delta=0.1, legend=False):
+    """This function plots the persistence bar code from persistence values list
+    or from a :doc:`persistence file <fileformats>`.
 
-    :param alpha: alpha value in [0.0, 1.0] for horizontal bars (default is 0.6).
-    :type alpha: float.
-    :returns: plot the dimension palette values.
-    """
-    colors = []
-    for color in palette:
-        colors.append(color)
-
-    y_pos = np.arange(len(palette))
-
-    plt.barh(y_pos, y_pos + 1, align='center', alpha=alpha, color=colors)
-    plt.ylabel('Dimension')
-    plt.title('Dimension palette values')
-    return plt
-
-def plot_persistence_barcode(persistence=[], persistence_file='', alpha=0.6, max_barcodes=0):
-    """This function plots the persistence bar code.
-
-    :param persistence: The persistence to plot.
+    :param persistence: Persistence values list.
     :type persistence: list of tuples(dimension, tuple(birth, death)).
-    :param persistence_file: A persistence file style name (reset persistence if both are set).
+    :param persistence_file: A :doc:`persistence file <fileformats>` style name
+        (reset persistence if both are set).
     :type persistence_file: string
-    :param alpha: alpha value in [0.0, 1.0] for horizontal bars (default is 0.6).
+    :param alpha: barcode transparency value (0.0 transparent through 1.0 opaque - default is 0.6).
     :type alpha: float.
-    :param max_barcodes: number of maximal barcodes to be displayed
+    :param max_barcodes: number of maximal barcodes to be displayed.
+        Set it to 0 to see all, Default value is 1000.
         (persistence will be sorted by life time if max_barcodes is set)
     :type max_barcodes: int.
-    :returns: plot -- An horizontal bar plot of persistence.
+    :param inf_delta: Infinity is placed at ((max_death - min_birth) x inf_delta).
+        A reasonable value is between 0.05 and 0.5 - default is 0.1.
+    :type inf_delta: float.
+    :returns: A matplotlib object containing horizontal bar plot of persistence
+        (launch `show()` method on it to display it).
     """
     if persistence_file is not '':
         if os.path.isfile(persistence_file):
@@ -107,9 +98,11 @@ def plot_persistence_barcode(persistence=[], persistence_file='', alpha=0.6, max
         # Sort by life time, then takes only the max_plots elements
         persistence = sorted(persistence, key=lambda life_time: life_time[1][1]-life_time[1][0], reverse=True)[:max_barcodes]
 
+    persistence = sorted(persistence, key=lambda birth: birth[1][0])
+
     (min_birth, max_death) = __min_birth_max_death(persistence)
     ind = 0
-    delta = ((max_death - min_birth) / 10.0)
+    delta = ((max_death - min_birth) * inf_delta)
     # Replace infinity values with max_death + delta for bar code to be more
     # readable
     infinity = max_death + delta
@@ -120,33 +113,49 @@ def plot_persistence_barcode(persistence=[], persistence_file='', alpha=0.6, max
             # Finite death case
             plt.barh(ind, (interval[1][1] - interval[1][0]), height=0.8,
                      left = interval[1][0], alpha=alpha,
-                     color = palette[interval[0]])
+                     color = palette[interval[0]],
+                     linewidth=0)
         else:
             # Infinite death case for diagram to be nicer
             plt.barh(ind, (infinity - interval[1][0]), height=0.8,
                      left = interval[1][0], alpha=alpha,
-                     color = palette[interval[0]])
+                     color = palette[interval[0]],
+                     linewidth=0)
         ind = ind + 1
 
+    if legend:
+        dimensions = list(set(item[0] for item in persistence))
+        plt.legend(handles=[mpatches.Patch(color=palette[dim],
+                                           label=str(dim)) for dim in dimensions],
+                   loc='lower right')
     plt.title('Persistence barcode')
     # Ends plot on infinity value and starts a little bit before min_birth
     plt.axis([axis_start, infinity, 0, ind])
     return plt
 
-def plot_persistence_diagram(persistence=[], persistence_file='', alpha=0.6, band_boot=0., max_plots=0):
-    """This function plots the persistence diagram with an optional confidence band.
+def plot_persistence_diagram(persistence=[], persistence_file='', alpha=0.6,
+        band=0., max_plots=1000, inf_delta=0.1, legend=False):
+    """This function plots the persistence diagram from persistence values list
+    or from a :doc:`persistence file <fileformats>`.
 
-    :param persistence: The persistence to plot.
+    :param persistence: Persistence values list.
     :type persistence: list of tuples(dimension, tuple(birth, death)).
-    :param persistence_file: A persistence file style name (reset persistence if both are set).
+    :param persistence_file: A :doc:`persistence file <fileformats>` style name
+        (reset persistence if both are set).
     :type persistence_file: string
-    :param alpha: alpha value in [0.0, 1.0] for points and horizontal infinity line (default is 0.6).
+    :param alpha: plot transparency value (0.0 transparent through 1.0 opaque - default is 0.6).
     :type alpha: float.
-    :param band_boot: bootstrap band (not displayed if :math:`\leq` 0.)
-    :type band_boot: float.
+    :param band: band (not displayed if :math:`\leq` 0. - default is 0.)
+    :type band: float.
     :param max_plots: number of maximal plots to be displayed
+        Set it to 0 to see all, Default value is 1000.
+        (persistence will be sorted by life time if max_plots is set)
     :type max_plots: int.
-    :returns: plot -- A diagram plot of persistence.
+    :param inf_delta: Infinity is placed at ((max_death - min_birth) x inf_delta).
+        A reasonable value is between 0.05 and 0.5 - default is 0.1.
+    :type inf_delta: float.
+    :returns: A matplotlib object containing diagram plot of persistence
+        (launch `show()` method on it to display it).
     """
     if persistence_file is not '':
         if os.path.isfile(persistence_file):
@@ -164,9 +173,9 @@ def plot_persistence_diagram(persistence=[], persistence_file='', alpha=0.6, ban
         # Sort by life time, then takes only the max_plots elements
         persistence = sorted(persistence, key=lambda life_time: life_time[1][1]-life_time[1][0], reverse=True)[:max_plots]
 
-    (min_birth, max_death) = __min_birth_max_death(persistence, band_boot)
+    (min_birth, max_death) = __min_birth_max_death(persistence, band)
     ind = 0
-    delta = ((max_death - min_birth) / 10.0)
+    delta = ((max_death - min_birth) * inf_delta)
     # Replace infinity values with max_death + delta for diagram to be more
     # readable
     infinity = max_death + delta
@@ -179,8 +188,8 @@ def plot_persistence_diagram(persistence=[], persistence_file='', alpha=0.6, ban
     plt.plot(x, [infinity] * len(x), linewidth=1.0, color='k', alpha=alpha)
     plt.text(axis_start, infinity, r'$\infty$', color='k', alpha=alpha)
     # bootstrap band
-    if band_boot > 0.:
-        plt.fill_between(x, x, x+band_boot, alpha=alpha, facecolor='red')
+    if band > 0.:
+        plt.fill_between(x, x, x+band, alpha=alpha, facecolor='red')
 
     # Draw points in loop
     for interval in reversed(persistence):
@@ -193,6 +202,10 @@ def plot_persistence_diagram(persistence=[], persistence_file='', alpha=0.6, ban
             plt.scatter(interval[1][0], infinity, alpha=alpha,
                         color = palette[interval[0]])
         ind = ind + 1
+
+    if legend:
+        dimensions = list(set(item[0] for item in persistence))
+        plt.legend(handles=[mpatches.Patch(color=palette[dim], label=str(dim)) for dim in dimensions])
 
     plt.title('Persistence diagram')
     plt.xlabel('Birth')
