@@ -1,7 +1,8 @@
 #ifndef COXETER_COMPLEX_
 #define COXETER_COMPLEX_
 
-// #define DEBUG_TRACES
+#define DEBUG_TRACES
+#include "../../example/cxx-prettyprint/prettyprint.hpp"
 
 #include <string>
 #include <map>
@@ -22,8 +23,6 @@
 #include <CGAL/Epick_d.h>
 #include <CGAL/point_generators_d.h>
 #include <CGAL/Delaunay_triangulation.h>
-
-#include "../../example/cxx-prettyprint/prettyprint.hpp"
 
 double num_error = 1.0e-10;
 
@@ -191,6 +190,8 @@ public:
       }
       std::cout << "]";
       std::cout << "\n";
+      for (auto facet_id: cs_.facet_range(m.first))
+        std::cout << " " << facet_id << "\n";
     }
     std::cout << "Vertex map size is " << v_map.size() << ".\n";    
     std::cout << "VMap:\n";

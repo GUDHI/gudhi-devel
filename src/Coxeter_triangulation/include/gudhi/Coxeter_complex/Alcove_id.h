@@ -14,14 +14,18 @@ struct Alcove_id {
 
   Alcove_id(double level, int dimension)
     : level_(level), dimension_(dimension) {}
+ 
+  Alcove_id& operator=(const Alcove_id& other) {
+    return *this;
+  }
   
   int operator[] (std::size_t i) const {
     return coords_[i];
   }
-
-  void push_back(int value) {
+  
+  void push_back(int value, bool fixed = false) {
     coords_.push_back(value);
-    fixed_.push_back(false);
+    fixed_.push_back(fixed);
   }
 
   void pop_back() {
@@ -40,7 +44,11 @@ struct Alcove_id {
   std::size_t size() const {
     return coords_.size();
   }
-    
+
+  std::size_t empty() const {
+    return coords_.size() == 0;
+  }
+  
   void reserve(std::size_t new_cap) {
     coords_.reserve(new_cap);
     fixed_.reserve(new_cap);
@@ -54,11 +62,11 @@ struct Alcove_id {
   double level() const {
     return level_;
   }
-      
-  bool is_fixed(const_iterator it) const {
-    return fixed_[it - coords_.begin()];
+  
+  double dimension() const {
+    return dimension_;
   }
-
+  
   bool is_fixed(std::size_t i) const {
     return fixed_[i];
   }
@@ -72,6 +80,24 @@ struct Alcove_id {
   bool operator< (const Alcove_id& lhs, const Alcove_id& rhs) {
     return lhs.coords_ < rhs.coords_;
   }
+
+  std::ostream& operator<<(std::ostream & os, const Alcove_id& a_id) {
+    os << "[";
+    if (a_id.empty())
+      return os;
+    if (a_id.is_fixed(0))
+        os << "\033[1;31m" << a_id[0] << "\033[0m";
+      else
+        os << a_id[0];
+    for (std::size_t i = 1; i < a_id.size(); ++i)
+      if (a_id.is_fixed(i))
+        os << ", \033[1;31m" << a_id[i] << "\033[0m";
+      else
+        os << ", " << a_id[i];
+    std::cout << "]";
+    return os;
+  }
+
   
 }
 
