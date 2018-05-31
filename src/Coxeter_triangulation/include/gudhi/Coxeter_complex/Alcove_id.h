@@ -15,9 +15,9 @@ struct Alcove_id {
   Alcove_id(double level, int dimension)
     : level_(level), dimension_(dimension) {}
  
-  Alcove_id& operator=(const Alcove_id& other) {
-    return *this;
-  }
+  // Alcove_id& operator=(const Alcove_id& other) {
+  //   return *this;
+  // }
   
   int operator[] (std::size_t i) const {
     return coords_[i];

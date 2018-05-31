@@ -142,6 +142,8 @@ private:
       Alcove_id facet = *facet_it_;
       for (std::size_t i = 0; i < facet.size(); ++i)
         value_.push_back(facet[i], facet.is_fixed(i));
+      for (std::size_t i = position_+1; i < coface_.size(); ++i)
+        value_.push_back(coface_[i], coface_.is_fixed(i));
     }
     bool equal(Facet_iterator const& other) const {
       return (position_ == coface_.size() && other.position_ == other.coface_.size()) ||
@@ -153,7 +155,7 @@ private:
     void increment_state() {
       if (position_ == coface_.size())
         return;
-      value_.resize(value_.size() - scs_it_->pos_root_count());
+      value_.resize(position_);
       facet_it_++;
       if (facet_it_ == facet_end_) {
         for (unsigned i = 0; i < scs_it_->pos_root_count(); ++i)
@@ -165,9 +167,11 @@ private:
           chunk_.reserve(scs_it_->pos_root_count());
           for (unsigned i = 0; i < scs_it_->pos_root_count(); ++i)
             chunk_.push_back(coface_[position_ + i], coface_.is_fixed(position_ + i));
-          auto facet_range = scs_it_->facet_range(chunk_);
-          facet_it_ = facet_range.begin();
-          facet_end_ = facet_range.end();
+          // auto facet_range = scs_it_->facet_range(chunk_);
+          // facet_it_ = facet_range.begin();
+          // facet_end_ = facet_range.end();
+          facet_it_ = Scs_facet_iterator(chunk_, chunk_.begin(), *scs_it_);
+          facet_end_ = Scs_facet_iterator(chunk_, chunk_.end(), *scs_it_);
         }
       } 
     }
@@ -193,7 +197,7 @@ private:
         chunk_.reserve(scs_it_->pos_root_count());
         for (unsigned i = 0; i < scs_it_->pos_root_count(); ++i)
           chunk_.push_back(coface_[position_ + i], coface_.is_fixed(position_ + i));
-        auto facet_range = scs_it_->facet_range(chunk_);
+        // auto facet_range = scs_it_->facet_range(chunk_);
         // facet_it_ = facet_range.begin();
         // facet_end_ = facet_range.end();
         facet_it_ = Scs_facet_iterator(chunk_, chunk_.begin(), *scs_it_);
