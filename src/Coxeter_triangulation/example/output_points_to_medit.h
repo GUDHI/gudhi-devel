@@ -4,7 +4,6 @@
 template <class Point_range>          
 void output_points_to_medit(Point_range& range, std::string file_name = "points.mesh") {
   short d = range.begin()->size();
-  if (d > 3);
 
   std::ofstream ofs (file_name, std::ofstream::out);
   if (d <= 2)

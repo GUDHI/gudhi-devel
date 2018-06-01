@@ -8,6 +8,10 @@ namespace Gudhi {
 struct Alcove_id {
   // typedef typename std::vector<int>::iterator iterator;
   typedef typename std::vector<int>::const_iterator const_iterator;
+  typedef int value_type;
+
+  Alcove_id()
+    : level_(0), dimension_(0) {}
 
   Alcove_id(double level)
     : level_(level), dimension_(0) {}

@@ -86,9 +86,9 @@ int main(int argc, char * const argv[]) {
     d = off_range->dimension();
     std::cout << "Successfully opened the file of points in dimension " << d << std::endl;
     using Coxeter_complex_off = Gudhi::Coxeter_complex<Gudhi::Off_point_range<Point_d>, Coxeter_system>;
-    // Coxeter_system cs_A('A', d);
-    Coxeter_system cs_A('A',1);
-    cs_A.emplace_back('A',1);
+    Coxeter_system cs_A('A', d);
+    // Coxeter_system cs_A('A',1);
+    // cs_A.emplace_back('A',1);
     Gudhi::Clock t;
     Coxeter_complex_off cc(*off_range, cs_A, init_level, eps);
     t.end();

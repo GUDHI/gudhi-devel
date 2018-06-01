@@ -110,7 +110,7 @@ public:
     // std::vector<std::vector<Vertex_id>::iterator> iterators;
     // for (auto chunk: chunks)
     //   iterators.emplace_back(chunk.begin());
-    Filtered_alcove a_id(Alcove_id(init_level), 0);
+    Filtered_alcove a_id(Alcove_id(init_level, dimension_), 0);
     std::vector<std::vector<Vertex_id > > vertex_chunks;
     rec_combine_chunks_alcove(chunks.begin(),
                               chunks.end(),
@@ -133,7 +133,7 @@ private:
                                                         boost::forward_traversal_tag> {
   protected:
     typedef typename std::vector<Simple_coxeter_system>::const_iterator Simple_coxeter_system_iterator;
-    typedef typename Simple_coxeter_system::Facet_iterator Scs_facet_iterator;
+    typedef typename Simple_coxeter_system::Face_iterator Scs_facet_iterator;
     friend class boost::iterator_core_access;
     
     void update_value() {
@@ -142,7 +142,7 @@ private:
       Alcove_id facet = *facet_it_;
       for (std::size_t i = 0; i < facet.size(); ++i)
         value_.push_back(facet[i], facet.is_fixed(i));
-      for (std::size_t i = position_+1; i < coface_.size(); ++i)
+      for (std::size_t i = position_ + facet.size(); i < coface_.size(); ++i)
         value_.push_back(coface_[i], coface_.is_fixed(i));
     }
     bool equal(Facet_iterator const& other) const {
@@ -163,15 +163,15 @@ private:
         position_ += scs_it_->pos_root_count();
         scs_it_++;
         if (position_ != coface_.size()) {
-          chunk_.resize(0);
+          chunk_ = Alcove_id(coface_.level(), scs_it_->dimension());
           chunk_.reserve(scs_it_->pos_root_count());
           for (unsigned i = 0; i < scs_it_->pos_root_count(); ++i)
             chunk_.push_back(coface_[position_ + i], coface_.is_fixed(position_ + i));
           // auto facet_range = scs_it_->facet_range(chunk_);
           // facet_it_ = facet_range.begin();
           // facet_end_ = facet_range.end();
-          facet_it_ = Scs_facet_iterator(chunk_, chunk_.begin(), *scs_it_);
-          facet_end_ = Scs_facet_iterator(chunk_, chunk_.end(), *scs_it_);
+          facet_it_ = Scs_facet_iterator(chunk_, *scs_it_, scs_it_->dimension()-1);
+          facet_end_ = Scs_facet_iterator(chunk_, *scs_it_, scs_it_->dimension());
         }
       } 
     }
@@ -186,22 +186,19 @@ private:
                    const Coxeter_system& cs)
       : coface_(coface),
         position_(it != coface.end() ? it - coface.begin() : coface_.size()),
-        facet_it_(coface, coface.begin(), *cs.simple_coxeter_system_begin()),
-        facet_end_(coface, coface.end(), *cs.simple_coxeter_system_begin()),
-        chunk_(coface.level(), coface.dimension()),
-        value_(coface.level(), coface.dimension()-1),
         scs_it_(cs.simple_coxeter_system_begin())
     {
       if (position_ != coface_.size()) {
         value_.reserve(coface_.size());
+        chunk_ = Alcove_id(coface_.level(), scs_it_->dimension());
         chunk_.reserve(scs_it_->pos_root_count());
         for (unsigned i = 0; i < scs_it_->pos_root_count(); ++i)
           chunk_.push_back(coface_[position_ + i], coface_.is_fixed(position_ + i));
         // auto facet_range = scs_it_->facet_range(chunk_);
         // facet_it_ = facet_range.begin();
         // facet_end_ = facet_range.end();
-        facet_it_ = Scs_facet_iterator(chunk_, chunk_.begin(), *scs_it_);
-        facet_end_ = Scs_facet_iterator(chunk_, chunk_.end(), *scs_it_);
+        facet_it_ = Scs_facet_iterator(chunk_, *scs_it_, scs_it_->dimension()-1);
+        facet_end_ = Scs_facet_iterator(chunk_, *scs_it_, scs_it_->dimension());
       }
       update_value();
     }
