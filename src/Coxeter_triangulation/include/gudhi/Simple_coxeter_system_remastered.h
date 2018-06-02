@@ -736,7 +736,7 @@ private:
               i--;
             continue;
           }
-          if (!mask_[k] && stack_.size() != dimension_ - coface_.dimension() + value_.dimension()) {
+          if (!mask_[k] && stack_.size() != stack_max_size_) {
             // first option: +0
             value_.push_back(coface_[k], true);
             std::size_t l = i + 1;
@@ -838,9 +838,11 @@ private:
             std::size_t k1 = (l*l+l-2)/2 - i;
             std::size_t k2 = (l*l+l-2)/2 - j;
             if (coface_.is_fixed(k1) && coface_.is_fixed(k2))
-              coface_.push_back(coface_[k1] - coface_[k2], true);
+              value_.push_back(coface_[k1] - coface_[k2], true);
             l++;
           }
+          if (coface_[k] > value_[k] || value_[k] > coface_[k] + 1)
+            curr_state_is_valid = false;
         }
         std::size_t l = i + 1;
         while (l < j && curr_state_is_valid)
@@ -864,13 +866,8 @@ private:
         value_.resize(k);
         do {
           if (!try_push_back(k))
-            return;
-          if (k++ ==
-              coface_.size()
-              - dimension_
-              + coface_.dimension()
-              - value_.dimension()
-              + stack_.size()) 
+            break;
+          if (++k == coface_.size() - stack_max_size_ + stack_.size() + 1) 
             break;
           else if (!mask_[k]) {              
             stack_push(k, false);
@@ -953,7 +950,8 @@ private:
         value_(coface_.level(), value_dim),
         family_(scs.family()),
         dimension_(scs.dimension_),
-        is_end_(coface.dimension() == value_dim)
+        is_end_(coface.dimension() <= value_dim),
+        stack_max_size_(coface.dimension() - value_dim)
     {
       for (std::size_t k = 0; k < coface.size(); k++)
         mask_.push_back(coface.is_fixed(k));
@@ -972,8 +970,7 @@ private:
     std::vector<std::pair<std::size_t, bool> > stack_;
     std::vector<bool> mask_;
     std::vector<std::vector<std::size_t> > mask_changes_;
-    std::map<std::size_t, std::set<std::size_t, std::greater<std::size_t> > > i_map_;
-    std::map<std::size_t, std::set<std::size_t> > j_map_;
+    std::size_t stack_max_size_;
   };
 
   
