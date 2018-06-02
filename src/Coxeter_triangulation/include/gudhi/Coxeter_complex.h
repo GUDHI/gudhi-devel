@@ -190,8 +190,15 @@ public:
       }
       std::cout << "]";
       std::cout << "\n";
-      for (auto facet_id: cs_.facet_range(m.first))
+      for (auto facet_id: cs_.face_range(m.first, cs.dimension() - 1)) {
         std::cout << " " << facet_id << "\n";
+        for (auto ff_id: cs_.face_range(facet_id, cs.dimension() - 2))
+          std::cout << "  " << ff_id << "\n";
+      }
+      std::cout << "vertices: ";
+      for (auto v_id: cs_.face_range(m.first, 0))
+        std::cout  << v_id << " ";
+      std::cout << "\n\n";
     }
     std::cout << "Vertex map size is " << v_map.size() << ".\n";    
     std::cout << "VMap:\n";
@@ -949,7 +956,7 @@ private:
             v_cells.emplace(v_pair.first);
         for (auto vc: v_cells) {
           std::vector<double>& b = W[ci_map.at(vc)-1];
-          vertices.push_back(Point_d(b[0]-b[2], b[1]));
+          vertices.push_back(Point_d(b[0] - b[2], b[1]));
           v_indices.push_back(ci_map.at(vc));
         }
         Delaunay_triangulation del(2);

@@ -43,6 +43,10 @@ public:
     for (auto scs: simple_system_range)
       dimension_ += scs.dimension();
   }
+
+  unsigned short dimension() const {
+    return dimension_;
+  }
   
   void emplace_back(const Simple_coxeter_system& rhs) {
     simple_system_range_.emplace_back(rhs);
@@ -128,96 +132,151 @@ public:
   
 private:
 
-  class Facet_iterator : public boost::iterator_facade< Facet_iterator,
+  class Face_iterator : public boost::iterator_facade< Face_iterator,
                                                         Alcove_id const,
                                                         boost::forward_traversal_tag> {
   protected:
     typedef typename std::vector<Simple_coxeter_system>::const_iterator Simple_coxeter_system_iterator;
-    typedef typename Simple_coxeter_system::Face_iterator Scs_facet_iterator;
+    typedef typename Simple_coxeter_system::Face_iterator Scs_face_iterator;
     friend class boost::iterator_core_access;
     
-    void update_value() {
-      if (position_ == coface_.size())
+    void update_value(std::size_t first_change_) {
+      if (is_end_)
         return;
-      Alcove_id facet = *facet_it_;
-      for (std::size_t i = 0; i < facet.size(); ++i)
-        value_.push_back(facet[i], facet.is_fixed(i));
-      for (std::size_t i = position_ + facet.size(); i < coface_.size(); ++i)
-        value_.push_back(coface_[i], coface_.is_fixed(i));
+      for (std::size_t i = first_change_; i < decomposition_.size(); ++i) {
+        if (decomposition_[i] == scs_iterators_[i]->dimension())
+          for (std::size_t j = 0; j < chunks_[i].size(); ++j)
+            value_.push_back(chunks_[i][j], chunks_[i].is_fixed(j));
+        else {
+          Alcove_id face = *face_iterators_[i].first;
+          for (std::size_t j = 0; j < face.size(); ++j)
+            value_.push_back(face[j], face.is_fixed(j));
+        }
+      }
+      first_change_ = decomposition_.size();
     }
-    bool equal(Facet_iterator const& other) const {
-      return (position_ == coface_.size() && other.position_ == other.coface_.size()) ||
-        (position_ == other.position_ && facet_it_ == other.facet_it_);
+
+    std::size_t update_from(std::size_t pos, std::size_t rest) {
+      for (std::size_t i = pos; i < decomposition_.size(); ++i) {
+        decomposition_[i] =
+          (rest < scs_iterators_[i]->dimension() ? rest : scs_iterators_[i]->dimension());
+        auto face_range = scs_iterators_[i]->face_range(chunks_[i],
+                                                        decomposition_[i]);
+        face_iterators_[i] = std::make_pair(face_range.begin(), face_range.end());
+        rest -= decomposition_[i];
+      }
+      return rest;
+    }
+    
+    bool equal(Face_iterator const& other) const {
+      return (is_end_ && other.is_end_) || (decomposition_ == other.decomposition_);
     }
     Alcove_id const& dereference() const {
       return value_;
     }
-    void increment_state() {
-      if (position_ == coface_.size())
+    void increment() {
+      if (is_end_)
         return;
-      value_.resize(position_);
-      facet_it_++;
-      if (facet_it_ == facet_end_) {
-        for (unsigned i = 0; i < scs_it_->pos_root_count(); ++i)
-          value_.push_back(coface_[position_ + i], coface_.is_fixed(position_ + i));
-        position_ += scs_it_->pos_root_count();
-        scs_it_++;
-        if (position_ != coface_.size()) {
-          chunk_ = Alcove_id(coface_.level(), scs_it_->dimension());
-          chunk_.reserve(scs_it_->pos_root_count());
-          for (unsigned i = 0; i < scs_it_->pos_root_count(); ++i)
-            chunk_.push_back(coface_[position_ + i], coface_.is_fixed(position_ + i));
-          // auto facet_range = scs_it_->facet_range(chunk_);
-          // facet_it_ = facet_range.begin();
-          // facet_end_ = facet_range.end();
-          facet_it_ = Scs_facet_iterator(chunk_, *scs_it_, scs_it_->dimension()-1);
-          facet_end_ = Scs_facet_iterator(chunk_, *scs_it_, scs_it_->dimension());
+      std::size_t rest = 0;
+      std::size_t pos = decomposition_.size() - 1;
+      while (true) {
+        value_.resize(value_.size() - chunks_[pos].size());
+        face_iterators_[pos].first++;
+        if (pos == 0) {
+          if (face_iterators_[pos].first == face_iterators_[pos].second &&
+              decomposition_[pos] != chunks_[pos].dimension()) {
+            if (decomposition_[pos] == 0) {
+              is_end_ = true;
+              return;
+            }
+            decomposition_[pos]--;
+            rest++;
+            auto face_range = scs_iterators_[pos]->face_range(chunks_[pos], decomposition_[pos]);
+            face_iterators_[pos] = std::make_pair(face_range.begin(), face_range.end());
+            is_end_ = update_from(pos + 1, rest);
+            update_value(pos);
+            return;
+          }
+          is_end_ = update_from(pos + 1, rest);
+          update_value(pos);
+          return;
         }
-      } 
+        // pos != 0
+        if (pos == decomposition_.size() - 1) {
+          if (face_iterators_[pos].first == face_iterators_[pos].second) {
+            pos--;
+            rest += decomposition_[pos];
+            continue;
+          }
+          update_value(pos);
+          return;
+        }
+        // pos != 0 or last
+        if (face_iterators_[pos].first == face_iterators_[pos].second &&
+            decomposition_[pos] != chunks_[pos].dimension()) {
+          if (decomposition_[pos] == 0) {
+            pos--;
+            rest += decomposition_[pos];
+            continue;
+          }
+          decomposition_[pos]--;
+          rest++;
+          auto face_range = scs_iterators_[pos]->face_range(chunks_[pos], decomposition_[pos]);
+          face_iterators_[pos] = std::make_pair(face_range.begin(), face_range.end());
+          is_end_ = update_from(pos + 1, rest);
+          update_value(pos);
+          return;
+        }
+        is_end_ = update_from(pos + 1, rest);
+        update_value(pos);
+        return;
+      }
     }
      
-    void increment() {
-      increment_state();
-      update_value();
-    }
   public:
-    Facet_iterator(const Alcove_id& coface,
-                   Alcove_id::const_iterator it,
-                   const Coxeter_system& cs)
-      : coface_(coface),
-        position_(it != coface.end() ? it - coface.begin() : coface_.size()),
-        scs_it_(cs.simple_coxeter_system_begin())
+    Face_iterator(const Alcove_id& coface,
+                   const Coxeter_system& cs,
+                   std::size_t value_dimension)
+      : value_(coface.level(), value_dimension),
+        is_end_(false),
+        decomposition_(cs.simple_coxeter_system_end() - cs.simple_coxeter_system_begin()),
+        face_iterators_(cs.simple_coxeter_system_end() - cs.simple_coxeter_system_begin())
     {
-      if (position_ != coface_.size()) {
-        value_.reserve(coface_.size());
-        chunk_ = Alcove_id(coface_.level(), scs_it_->dimension());
-        chunk_.reserve(scs_it_->pos_root_count());
-        for (unsigned i = 0; i < scs_it_->pos_root_count(); ++i)
-          chunk_.push_back(coface_[position_ + i], coface_.is_fixed(position_ + i));
-        // auto facet_range = scs_it_->facet_range(chunk_);
-        // facet_it_ = facet_range.begin();
-        // facet_end_ = facet_range.end();
-        facet_it_ = Scs_facet_iterator(chunk_, *scs_it_, scs_it_->dimension()-1);
-        facet_end_ = Scs_facet_iterator(chunk_, *scs_it_, scs_it_->dimension());
+      std::size_t pos = 0;
+      for (auto scs_it = cs.simple_coxeter_system_begin();
+           scs_it != cs.simple_coxeter_system_end();
+           ++scs_it) {
+        scs_iterators_.push_back(scs_it);
+        Alcove_id chunk(coface.level(), scs_it->dimension());
+        for (std::size_t i = pos; i < pos + scs_it->pos_root_count(); ++i)
+          chunk.push_back(coface[i], coface.is_fixed(i));
+        chunk.set_dimension(scs_it->alcove_dimension(chunk));
+        chunks_.push_back(chunk);
+        pos += scs_it->dimension();
       }
-      update_value();
+      if (update_from(0, value_dimension)) {
+        is_end_ = true;
+        return;
+      }
+      update_value(0);
     }
 
   protected:
-    Alcove_id coface_;
-    std::size_t position_;
-    Scs_facet_iterator facet_it_, facet_end_;
-    Alcove_id chunk_, value_;
-    Simple_coxeter_system_iterator scs_it_;
+    Alcove_id value_;
+    bool is_end_;
+    std::vector<Alcove_id> chunks_;
+    std::vector<std::size_t> decomposition_;
+    std::vector<std::pair<Scs_face_iterator, Scs_face_iterator> > face_iterators_;
+    std::vector<Simple_coxeter_system_iterator> scs_iterators_;
   };
 
   
 public:
-  typedef boost::iterator_range<Facet_iterator> Facet_range;
+  typedef boost::iterator_range<Face_iterator> Face_range;
   
-  Facet_range facet_range(const Alcove_id& a_id) const {
-    return Facet_range(Facet_iterator(a_id, a_id.begin(), *this),
-                       Facet_iterator(a_id, a_id.end(), *this));
+  Face_range face_range(const Alcove_id& a_id, std::size_t k) const {
+    return Face_range(Face_iterator(a_id, *this, k),
+                      Face_iterator(a_id, *this, dimension_ + 1));
   }
 
   

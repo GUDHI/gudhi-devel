@@ -75,6 +75,10 @@ struct Alcove_id {
     return fixed_[i];
   }
 
+  void set_dimension(std::size_t dim) {
+    dimension_ = dim;
+  }
+  
   double level_;
   int dimension_;
   std::vector<int> coords_;
