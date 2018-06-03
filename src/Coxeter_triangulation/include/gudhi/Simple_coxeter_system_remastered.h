@@ -704,8 +704,30 @@ private:
         j = std::floor(0.5*(1 + std::sqrt(1+8*k)));
         i = (j*j + j - 2)/2 - k;
         // k == value_.size() during the whole algorithm
+        // while (!is_end_ && (k != coface_.size() || stack_.size() != stack_max_size_)) {
+        //   if (k == coface_.size() && stack_.size() != stack_max_size_) {
+        //     elementary_increment();
+        //     if (stack_.empty())
+        //       k = 0;
+        //     else
+        //       k = stack_.back().first;
+        //     j = std::floor(0.5*(1 + std::sqrt(1+8*k)));
+        //     i = (j*j + j - 2)/2 - k;
+        //     continue;
+        //   }
         while (!is_end_ && k != coface_.size()) {
           value_.resize(k);
+          std::cout << "\n" << value_ << "[";
+          auto p_it = stack_.begin();
+          if (!stack_.empty()) {
+            std::cout << "(" << p_it->first << "," << p_it->second << ")";
+            ++p_it;
+          }
+          for (; p_it != stack_.end(); ++p_it) {
+            std::cout << ", (" << p_it->first << "," << p_it->second << ")";
+          }
+          std::cout << "]";
+          std::cout << mask_ << "\n";
           // if we are on the last new fixed value => skip the linear independence check 
           if (!stack_.empty() && stack_.back().first == k) {
             if (!stack_.back().second)
@@ -754,6 +776,8 @@ private:
                 i--;
               continue;
             }
+            else
+              value_.pop_back();
             // second option: +1
             value_.push_back(coface_[k] + 1, true);
             l = i + 1;
@@ -771,9 +795,12 @@ private:
                 i--;
               continue;
             }
+            else
+              value_.pop_back();
           }
           // try for the original value
-          if (try_push_back(k)) {
+          if (k < coface_.size() - stack_max_size_ + stack_.size() &&
+              try_push_back(k)) {
             k++;
             if (i == 0) {
               j++;
@@ -848,6 +875,8 @@ private:
         while (l < j && curr_state_is_valid)
           curr_state_is_valid = triplet_check(i, l++, j);
       }
+      if (!curr_state_is_valid)
+        value_.pop_back();
       return curr_state_is_valid;
     }
     

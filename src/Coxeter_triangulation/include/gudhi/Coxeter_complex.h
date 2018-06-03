@@ -190,15 +190,19 @@ public:
       }
       std::cout << "]";
       std::cout << "\n";
-      for (auto facet_id: cs_.face_range(m.first, cs.dimension() - 1)) {
-        std::cout << " " << facet_id << "\n";
-        for (auto ff_id: cs_.face_range(facet_id, cs.dimension() - 2))
-          std::cout << "  " << ff_id << "\n";
-      }
-      std::cout << "vertices: ";
-      for (auto v_id: cs_.face_range(m.first, 0))
-        std::cout  << v_id << " ";
-      std::cout << "\n\n";
+      // for (auto facet_id: cs_.face_range(m.first, cs.dimension() - 1)) {
+      //   std::cout << " " << facet_id << "\n";
+      //   for (auto ff_id: cs_.face_range(facet_id, cs.dimension() - 2))
+      //     std::cout << "  " << ff_id << "\n";
+      // }
+      // std::cout << "edges: ";
+      // for (auto v_id: cs_.face_range(m.first, 1))
+      //   std::cout  << v_id << " ";
+      // std::cout << "\n\n";
+      // std::cout << "vertices: ";
+      // for (auto v_id: cs_.face_range(m.first, 0))
+      //   std::cout  << v_id << " ";
+      // std::cout << "\n\n";
     }
     std::cout << "Vertex map size is " << v_map.size() << ".\n";    
     std::cout << "VMap:\n";
@@ -212,6 +216,24 @@ public:
       std::cout << "]";
       std::cout << "\n";
     }
+    Id a_id(1.5, 3);
+    a_id.push_back(-1);
+    a_id.push_back(0);
+    a_id.push_back(-1);
+    a_id.push_back(-1);
+    a_id.push_back(-1);
+    a_id.push_back(-1);
+    std::cout << "Alcove: " << a_id << "\n";
+    // std::cout << "Vertices: " << cs_.vertices_of_alcove(a_id) << "\n";
+    // for (auto facet_id: cs_.face_range(a_id, cs.dimension() - 1)) {
+    //   std::cout << " " << facet_id << "\n";
+    //   for (auto ff_id: cs_.face_range(facet_id, cs.dimension() - 2))
+    //     std::cout << "  " << ff_id << "\n";
+    // }
+    // std::cout << "vertices: ";
+    for (auto v_id: cs_.face_range(a_id, 1))
+      std::cout  << v_id << " ";
+    std::cout << "\n\n";
 #endif
     // compute_v_map();
   }
