@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <stack>
 #include <utility>
 #include <exception>
 
@@ -667,7 +668,7 @@ private:
 
   public:
   //////////////////////////////////////////////////////////////////////////////////////////////////
-  // Facet range
+  // Face range
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
   class Face_iterator : public boost::iterator_facade< Face_iterator,
@@ -703,31 +704,19 @@ private:
           k = stack_.back().first;
         j = std::floor(0.5*(1 + std::sqrt(1+8*k)));
         i = (j*j + j - 2)/2 - k;
-        // k == value_.size() during the whole algorithm
-        // while (!is_end_ && (k != coface_.size() || stack_.size() != stack_max_size_)) {
-        //   if (k == coface_.size() && stack_.size() != stack_max_size_) {
-        //     elementary_increment();
-        //     if (stack_.empty())
-        //       k = 0;
-        //     else
-        //       k = stack_.back().first;
-        //     j = std::floor(0.5*(1 + std::sqrt(1+8*k)));
-        //     i = (j*j + j - 2)/2 - k;
-        //     continue;
-        //   }
         while (!is_end_ && k != coface_.size()) {
           value_.resize(k);
-          std::cout << "\n" << value_ << "[";
-          auto p_it = stack_.begin();
-          if (!stack_.empty()) {
-            std::cout << "(" << p_it->first << "," << p_it->second << ")";
-            ++p_it;
-          }
-          for (; p_it != stack_.end(); ++p_it) {
-            std::cout << ", (" << p_it->first << "," << p_it->second << ")";
-          }
-          std::cout << "]";
-          std::cout << mask_ << "\n";
+          // std::cout << "\n" << value_ << "[";
+          // auto p_it = stack_.begin();
+          // if (!stack_.empty()) {
+          //   std::cout << "(" << p_it->first << "," << p_it->second << ")";
+          //   ++p_it;
+          // }
+          // for (; p_it != stack_.end(); ++p_it) {
+          //   std::cout << ", (" << p_it->first << "," << p_it->second << ")";
+          // }
+          // std::cout << "]";
+          // std::cout << mask_ << "\n";
           // if we are on the last new fixed value => skip the linear independence check 
           if (!stack_.empty() && stack_.back().first == k) {
             if (!stack_.back().second)
@@ -1007,6 +996,252 @@ private:
   Face_range face_range(const Alcove_id& a_id, std::size_t k) const {
     return Face_range(Face_iterator(a_id, *this, k),
                       Face_iterator(a_id, *this, a_id.dimension()));
+  }
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  // Coface range
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+
+  class Coface_iterator : public boost::iterator_facade< Coface_iterator,
+                                                         Alcove_id const,
+                                                         boost::forward_traversal_tag> {
+  protected:
+    // using State_pair = std::pair<std::size_t, bool>;
+    friend class boost::iterator_core_access;
+
+    bool triplet_check(std::size_t i, std::size_t l, std::size_t j) const {
+      int k  = (j*j+j-2)/2 - i;
+      int k1 = (l*l+l-2)/2 - i;
+      int k2 = (j*j+j-2)/2 - l;
+      if (value_.is_fixed(k))
+        return (value_.is_fixed(k1) && value_.is_fixed(k2) && value_[k1] + value_[k2] == value_[k]) ||
+               (!value_.is_fixed(k1) && !value_.is_fixed(k2) && value_[k1] + value_[k2] + 1 == value_[k]);
+      else
+        return ((value_.is_fixed(k1) xor value_.is_fixed(k2)) && value_[k] == value_[k1] + value_[k2]) ||
+               (!value_.is_fixed(k1) && !value_.is_fixed(k2) && (value_[k] == value_[k1] + value_[k2] ||
+                                                                 value_[k] == value_[k1] + value_[k2] + 1));
+    }
+    
+    void update_value() {
+      if (is_end_)
+        return;
+      switch (family_) {
+      case 'A': {
+        // current position variables
+        while (!is_end_) {
+          std::size_t k = value_.size();
+          std::size_t j = std::floor(0.5*(1 + std::sqrt(1+8*k)));
+          std::size_t i = (j*j + j - 2)/2 - k;
+          // std::cout << "\n" << value_ << ", ";
+          // std::cout << "stack_top = " << stack_.size() << "," << stack_.top().f << ", " << stack_.top().p << ", ";
+          // std::cout << "lower = " << curr_dim_lower_ <<
+          //   ", upper = " << curr_dim_upper_ << ", "; 
+          if (stack_.top().f)
+            if (stack_.top().p)
+              value_.push_back(a_id_[k]+1, true);
+            else
+              value_.push_back(a_id_[k], true);
+          else
+            if (stack_.top().p)
+              value_.push_back(a_id_[k]-1, false);
+            else
+              value_.push_back(a_id_[k], false);
+          // std::cout << value_ << "\n";
+          // std::cout << mask_ << "\n";
+          bool curr_state_is_valid = true;
+          for (std::size_t l = i + 1; l < j && curr_state_is_valid; ++l)
+            curr_state_is_valid = triplet_check(i,l,j);
+          if (curr_state_is_valid &&
+              value_.size() == a_id_.size())
+            return;
+          if (!curr_state_is_valid) {
+            elementary_increment();
+            continue;
+          }
+          if (!stack_push(false, false)) {
+            stack_pop();
+            if (!stack_push(true, false)) {
+              stack_pop();
+              elementary_increment();
+            }
+          }
+        }
+        break;
+      }
+      default:
+        std::cerr << "Simple_coxeter_system::facet_iterator : The family " << family_ << " is not supported. "
+                  << "Please use A family for the constructor (in capital).\n";
+      }
+    }
+    
+    bool equal(Coface_iterator const& other) const {
+      return (is_end_ && other.is_end_) || (stack_ == other.stack_);
+    }
+    Alcove_id const& dereference() const {
+      return value_;
+    }
+    void elementary_increment() {
+      if (is_end_)
+        return;
+      while (!stack_.empty()) {
+        bool f = stack_.top().f;
+        bool p = stack_.top().p;
+        stack_pop();
+        value_.pop_back();
+        if (a_id_.is_fixed(stack_.size()))
+          if (f)
+            continue;
+          else
+            if (p)
+              if (stack_push(true, false))
+                break;
+              else {
+                stack_pop();
+                continue;
+              }
+            else
+              if (stack_push(false, true))
+                break;
+              else {
+                stack_pop();
+                continue;
+              }
+        else
+          if (f)
+            if (p)
+              continue;
+            else
+              if (stack_push(true, true))
+                break;
+              else {
+                stack_pop();
+                continue;
+              }
+          else
+            if (stack_push(true, false)) {
+              break;
+            }
+            else {
+              stack_pop();
+              continue;
+            }
+      }
+      if (stack_.empty())
+        is_end_ = true;
+    }
+    
+    void increment() {
+      elementary_increment();
+      update_value();
+    }
+
+    bool stack_push(bool fixed, bool plus_one) {
+      std::size_t k = stack_.size();
+      std::size_t j = std::floor(0.5*(1+std::sqrt(1+8*k)));
+      std::size_t i = (j*j+j-2)/2 - k;
+      mask_[k] = true;
+      if (fixed)
+        for (std::size_t l = i + 1; l < j && mask_[k]; ++l) {
+          std::size_t k1 = (l*l+l-2)/2 - i;
+          std::size_t k2 = (j*j+j-2)/2 - l;
+          // if (value_.is_fixed(k1) xor value_.is_fixed(k2))
+          //   return false;
+          mask_[k] = !value_.is_fixed(k1) || !value_.is_fixed(k2);
+        }
+      else {
+        for (std::size_t l = i + 1; l < j && mask_[k]; ++l) {
+          std::size_t k1 = (l*l+l-2)/2 - i;
+          std::size_t k2 = (j*j+j-2)/2 - l;
+          // if (value_.is_fixed(k1) && value_.is_fixed(k2))
+          //   return false;
+          mask_[k] = !(value_.is_fixed(k1) xor value_.is_fixed(k2));
+        }
+        for (std::size_t l = 0; l < i && mask_[k]; ++l) {
+          mask_[k] = false;
+          for (std::size_t m = l+1; m < j && !mask_[k]; ++m) {
+            std::size_t k1 = (m*m+m-2)/2 - l;
+            mask_[k] = value_.is_fixed(k1);
+          }
+        }
+      }
+      if (mask_[k]) {
+        if (fixed)
+          curr_dim_upper_--;
+        else
+          curr_dim_lower_++;
+      }
+      stack_.push({fixed, plus_one});
+      return curr_dim_lower_ <= curr_dim_upper_ &&
+             curr_dim_lower_ <= value_dim_upper_ &&
+             curr_dim_upper_ >= value_dim_lower_;
+    }
+
+    void stack_pop() {
+      bool f = stack_.top().f;
+      stack_.pop();
+      if (mask_[stack_.size()]) {
+        if (f)
+          curr_dim_upper_++;
+        else
+          curr_dim_lower_--;
+      }
+    }
+    
+  public:
+    Coface_iterator(const Alcove_id& a_id,
+                    const Simple_coxeter_system& scs,
+                    std::size_t value_dim_lower,
+                    std::size_t value_dim_upper)
+      : a_id_(a_id),
+        value_(a_id.level()),
+        family_(scs.family()),
+        is_end_(false),
+        ambient_dimension_(scs.dimension_),
+        curr_dim_lower_(0),
+        curr_dim_upper_(scs.dimension_),
+        value_dim_lower_(value_dim_lower),
+        value_dim_upper_(value_dim_upper),
+        mask_(a_id.size())
+    {
+      if (!stack_push(false, false)) {
+        stack_pop();
+        if (!stack_push(true, false)) {
+          stack_pop();
+          elementary_increment();
+        }
+      }
+      update_value();
+    }
+
+    Coface_iterator() : is_end_(true) {}
+    
+    
+  protected:
+    struct State_ {
+      bool f, // is it fixed?
+           p; // has the value different from the original?
+      bool operator==(const State_& rhs) const {
+        return f == rhs.f && p == rhs.p;
+      }
+    };
+    Alcove_id a_id_; 
+    Alcove_id value_;
+    char family_;
+    bool is_end_;
+    std::size_t ambient_dimension_;
+    std::size_t curr_dim_lower_, curr_dim_upper_;
+    std::size_t value_dim_lower_, value_dim_upper_;
+    std::vector<bool> mask_;
+    std::stack<State_> stack_;
+  };
+
+  
+  typedef boost::iterator_range<Coface_iterator> Coface_range;
+  Coface_range coface_range(const Alcove_id& a_id,
+                            std::size_t value_dim_lower,
+                            std::size_t value_dim_upper) const {
+    return Coface_range(Coface_iterator(a_id, *this, value_dim_lower, value_dim_upper),
+                        Coface_iterator());
   }
   
   int gcd(int a, int b) const {

@@ -91,8 +91,10 @@ struct Alcove_id {
 
   std::ostream& operator<<(std::ostream & os, const Alcove_id& a_id) {
     os << "[";
-    if (a_id.empty())
+    if (a_id.empty()) {
+      std::cout << "]";
       return os;
+    }
     if (a_id.is_fixed(0))
         os << "\033[1;31m" << a_id[0] << "\033[0m";
       else
