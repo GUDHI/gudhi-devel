@@ -79,7 +79,7 @@
 <table border="0">
   <tr>
     <td width="25%">
-      <b>Author:</b> Cl&eacute;ment Maria, Pawel Dlotko, Vincent Rouvreau<br>
+      <b>Author:</b> Cl&eacute;ment Maria, Pawel Dlotko, Vincent Rouvreau, Marc Glisse<br>
       <b>Introduced in:</b> GUDHI 2.0.0<br>
       <b>Copyright:</b> GPL v3<br>
     </td>
