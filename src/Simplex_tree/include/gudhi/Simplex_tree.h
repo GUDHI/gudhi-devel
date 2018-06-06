@@ -689,7 +689,11 @@ class Simplex_tree {
       return { null_simplex(), true };  // ----->>
 
     // Copy before sorting
-    thread_local std::vector<Vertex_handle> copy;
+    // Thread local is not available on XCode version < V.8 - It will slow down computation
+#ifdef GUDHI_CAN_USE_CXX11_THREAD_LOCAL
+    thread_local
+#endif  // GUDHI_CAN_USE_CXX11_THREAD_LOCAL
+    std::vector<Vertex_handle> copy;
     copy.clear();
     copy.insert(copy.end(), first, last);
     std::sort(std::begin(copy), std::end(copy));

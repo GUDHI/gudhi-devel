@@ -142,6 +142,9 @@ class Cover_complex {
   std::string point_cloud_name;
   std::string color_name;
 
+  // 2 threads using 2 different GIC will have their own random engine
+  std::default_random_engine re;
+
   // Remove all edges of a graph.
   void remove_edges(Graph& G) {
     boost::graph_traits<Graph>::edge_iterator ei, ei_end;
@@ -150,8 +153,7 @@ class Cover_complex {
 
   // Find random number in [0,1].
   double GetUniform() {
-    thread_local std::default_random_engine re;
-    thread_local std::uniform_real_distribution<double> Dist(0, 1);
+    std::uniform_real_distribution<double> Dist(0, 1);
     return Dist(re);
   }
 
@@ -422,7 +424,9 @@ class Cover_complex {
 
     if (distances.size() == 0) compute_pairwise_distances(distance);
 
-    #ifdef GUDHI_USE_TBB
+    // This cannot be parallelized if thread_local is not defined
+    // thread_local is not defined for XCode < v.8
+    #if defined(GUDHI_USE_TBB) && defined(GUDHI_CAN_USE_CXX11_THREAD_LOCAL)
     tbb::mutex deltamutex;
     tbb::parallel_for(0, N, [&](int i){
         std::vector<int> samples(m);
