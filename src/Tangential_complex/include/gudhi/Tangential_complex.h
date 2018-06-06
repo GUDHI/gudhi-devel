@@ -1100,7 +1100,10 @@ class Tangential_complex {
     // of the sphere "star sphere" centered at "center_vertex"
     // and which contains all the
     // circumspheres of the star of "center_vertex"
-    boost::optional<FT> squared_star_sphere_radius_plus_margin;
+    boost::optional<FT> squared_star_sphere_radius_plus_margin = boost::make_optional(false, FT());
+    // This is the strange way boost is recommending to get rid of "may be used uninitialized in this function".
+    // Former code was :
+    // boost::optional<FT> squared_star_sphere_radius_plus_margin;
 
     // Insert points until we find a point which is outside "star sphere"
     for (auto nn_it = ins_range.begin();
