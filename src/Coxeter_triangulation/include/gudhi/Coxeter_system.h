@@ -127,7 +127,7 @@ public:
 
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
-  // Facet range
+  // Coface range
   //////////////////////////////////////////////////////////////////////////////////////////////////
   
 private:
@@ -161,6 +161,7 @@ private:
         decomposition_[i] =
           (rest < scs_iterators_[i]->dimension() ? rest : scs_iterators_[i]->dimension());
         auto face_range = scs_iterators_[i]->face_range(chunks_[i],
+                                                        decomposition_[i],
                                                         decomposition_[i]);
         face_iterators_[i] = std::make_pair(face_range.begin(), face_range.end());
         rest -= decomposition_[i];
@@ -191,7 +192,9 @@ private:
             }
             decomposition_[pos]--;
             rest++;
-            auto face_range = scs_iterators_[pos]->face_range(chunks_[pos], decomposition_[pos]);
+            auto face_range = scs_iterators_[pos]->face_range(chunks_[pos],
+                                                              decomposition_[pos],
+                                                              decomposition_[pos]);
             face_iterators_[pos] = std::make_pair(face_range.begin(), face_range.end());
             is_end_ = update_from(pos + 1, rest);
             update_value(pos);
@@ -221,7 +224,9 @@ private:
           }
           decomposition_[pos]--;
           rest++;
-          auto face_range = scs_iterators_[pos]->face_range(chunks_[pos], decomposition_[pos]);
+          auto face_range = scs_iterators_[pos]->face_range(chunks_[pos],
+                                                            decomposition_[pos],
+                                                            decomposition_[pos]);
           face_iterators_[pos] = std::make_pair(face_range.begin(), face_range.end());
           is_end_ = update_from(pos + 1, rest);
           update_value(pos);
@@ -277,8 +282,7 @@ public:
   Face_range face_range(const Alcove_id& a_id, std::size_t k) const {
     return Face_range(Face_iterator(a_id, *this, k),
                       Face_iterator(a_id, *this, dimension_ + 1));
-  }
-
+  }  
   
 private:
 

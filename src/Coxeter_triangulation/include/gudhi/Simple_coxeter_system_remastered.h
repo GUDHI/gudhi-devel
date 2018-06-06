@@ -683,12 +683,12 @@ private:
       int k1 = (l*l+l-2)/2 - i;
       int k2 = (j*j+j-2)/2 - l;
       if (value_.is_fixed(k))
-        return !((value_.is_fixed(k1) xor value_.is_fixed(k2)) ||
-                 (value_.is_fixed(k1) && value_[k] != value_[k1] + value_[k2]) ||
-                 (!value_.is_fixed(k1) && value_[k] != value_[k1] + value_[k2] + 1));
+        return (value_.is_fixed(k1) && value_.is_fixed(k2) && value_[k1] + value_[k2] == value_[k]) ||
+               (!value_.is_fixed(k1) && !value_.is_fixed(k2) && value_[k1] + value_[k2] + 1 == value_[k]);
       else
-        return !((value_.is_fixed(k1) && value_.is_fixed(k2)) ||
-                 ((value_.is_fixed(k1) xor value_.is_fixed(k2)) && value_[k] != value_[k1] + value_[k2]));
+        return ((value_.is_fixed(k1) xor value_.is_fixed(k2)) && value_[k] == value_[k1] + value_[k2]) ||
+               (!value_.is_fixed(k1) && !value_.is_fixed(k2) && (value_[k] == value_[k1] + value_[k2] ||
+                                                                 value_[k] == value_[k1] + value_[k2] + 1));
     }
     
     void update_value() {
@@ -697,176 +697,51 @@ private:
       switch (family_) {
       case 'A': {
         // current position variables
-        std::size_t i, j, k;
-        if (stack_.empty())
-          k = 0;
-        else
-          k = stack_.back().first;
-        j = std::floor(0.5*(1 + std::sqrt(1+8*k)));
-        i = (j*j + j - 2)/2 - k;
-        while (!is_end_ && k != coface_.size()) {
-          value_.resize(k);
-          // std::cout << "\n" << value_ << "[";
-          // auto p_it = stack_.begin();
-          // if (!stack_.empty()) {
-          //   std::cout << "(" << p_it->first << "," << p_it->second << ")";
-          //   ++p_it;
-          // }
-          // for (; p_it != stack_.end(); ++p_it) {
-          //   std::cout << ", (" << p_it->first << "," << p_it->second << ")";
-          // }
-          // std::cout << "]";
-          // std::cout << mask_ << "\n";
-          // if we are on the last new fixed value => skip the linear independence check 
-          if (!stack_.empty() && stack_.back().first == k) {
-            if (!stack_.back().second)
-              value_.push_back(coface_[k], true);
+        while (!is_end_) {
+          std::size_t k = value_.size();
+          std::size_t j = std::floor(0.5*(1 + std::sqrt(1+8*k)));
+          std::size_t i = (j*j + j - 2)/2 - k;
+          if (stack_.top().f)
+            if (stack_.top().p)
+              value_.push_back(a_id_[k]+1, true);
             else
-              value_.push_back(coface_[k]+1, true);
-            bool curr_state_is_valid = true;
-            std::size_t l = i + 1;
-            while (l < j && curr_state_is_valid)
-              curr_state_is_valid = triplet_check(i,l++,j);
-            if (!curr_state_is_valid) {
-              elementary_increment();
-              if (stack_.empty())
-                k = 0;
-              else
-                k = stack_.back().first;
-              j = std::floor(0.5*(1 + std::sqrt(1+8*k)));
-              i = (j*j + j - 2)/2 - k;
-              continue;       
-            }
-            // everything is fine => proceed
-            k++;
-            if (i == 0) {
-              j++;
-              i = j - 1;
-            }
+              value_.push_back(a_id_[k], true);
+          else
+            if (stack_.top().p)
+              value_.push_back(a_id_[k]-1, false);
             else
-              i--;
-            continue;
-          }
-          if (!mask_[k] && stack_.size() != stack_max_size_) {
-            // first option: +0
-            value_.push_back(coface_[k], true);
-            std::size_t l = i + 1;
-            bool curr_state_is_valid = true;
-            while (l < j && curr_state_is_valid)
-              curr_state_is_valid = triplet_check(i, l++, j);
-            if (curr_state_is_valid) {
-              stack_push(k, false);
-              k++;
-              if (i == 0) {
-                j++;
-                i = j - 1;
-              }
-              else
-                i--;
-              continue;
-            }
-            else
-              value_.pop_back();
-            // second option: +1
-            value_.push_back(coface_[k] + 1, true);
-            l = i + 1;
-            curr_state_is_valid = true;
-            while (l < j && curr_state_is_valid)
-              curr_state_is_valid = triplet_check(i, l++, j);
-            if (curr_state_is_valid) {
-              stack_push(k, true);
-              k++;
-              if (i == 0) {
-                j++;
-                i = j - 1;
-              }
-              else
-                i--;
-              continue;
-            }
-            else
-              value_.pop_back();
-          }
-          // try for the original value
-          if (k < coface_.size() - stack_max_size_ + stack_.size() &&
-              try_push_back(k)) {
-            k++;
-            if (i == 0) {
-              j++;
-              i = j - 1;
-            }
-            else
-              i--;
-            continue;
-          }
-          else {
+              value_.push_back(a_id_[k], false);
+          bool curr_state_is_valid = true;
+          for (std::size_t l = i + 1; l < j && curr_state_is_valid; ++l)
+            curr_state_is_valid = triplet_check(i,l,j);
+          if (curr_state_is_valid &&
+              value_.size() == a_id_.size())
+            return;
+          if (!curr_state_is_valid) {
             elementary_increment();
-            if (stack_.empty())
-              k = 0;
-            else
-              k = stack_.back().first;
-            j = std::floor(0.5*(1 + std::sqrt(1+8*k)));
-            i = (j*j + j - 2)/2 - k;
             continue;
-          }          
+          }
+          if (a_id_.is_fixed(k+1)) {
+            if (!stack_push(true, false)) {
+              stack_pop();
+              elementary_increment();
+            }
+          }
+          else 
+            if (!stack_push(false, false)) {
+              stack_pop();
+              if (!stack_push(true, false)) {
+                stack_pop();
+                elementary_increment();
+              }
+            }
         }
         break;
       }
       default:
         std::cerr << "Simple_coxeter_system::facet_iterator : The family " << family_ << " is not supported. "
                   << "Please use A family for the constructor (in capital).\n";
-        // throw wrong_family_exception_;
       }
-    }
-
-    bool try_push_back(std::size_t k) {
-      std::size_t j = std::floor(0.5*(1 + std::sqrt(1+8*k))),
-                  i = (j*j + j - 2)/2 - k;
-      bool curr_state_is_valid = true;
-      if (!mask_[k]) {
-        value_.push_back(coface_[k], false);
-        std::size_t l = i + 1;
-        while (l < j && curr_state_is_valid)
-          curr_state_is_valid = triplet_check(i, l++, j);
-      }
-      else {
-        if (coface_.is_fixed(k))
-          value_.push_back(coface_[k], true);
-        else {
-          std::size_t l = i + 1;
-          while (l < j && !(value_.size() == k+1)) {
-            std::size_t k1 = (l*l+l-2)/2 - i;
-            std::size_t k2 = (j*j+j-2)/2 - l;
-            if (value_.is_fixed(k1) && value_.is_fixed(k2))
-              value_.push_back(value_[k1] + value_[k2], true);
-            l++;
-          }
-          l = 0;
-          while (l < i && !(value_.size() == k+1)) {
-            std::size_t k1 = (i*i+i-2)/2 - l;
-            std::size_t k2 = (j*j+j-2)/2 - l;
-            if (value_.is_fixed(k1) && coface_.is_fixed(k2))
-              value_.push_back(- value_[k1] + coface_[k2], true);
-            l++;
-          }
-          l = j + 1;
-          while (l < dimension_ + 1 && !(value_.size() == k+1)) {
-            std::size_t k1 = (l*l+l-2)/2 - i;
-            std::size_t k2 = (l*l+l-2)/2 - j;
-            if (coface_.is_fixed(k1) && coface_.is_fixed(k2))
-              value_.push_back(coface_[k1] - coface_[k2], true);
-            l++;
-          }
-          if (coface_[k] > value_[k] || value_[k] > coface_[k] + 1)
-            curr_state_is_valid = false;
-        }
-        std::size_t l = i + 1;
-        while (l < j && curr_state_is_valid)
-          curr_state_is_valid = triplet_check(i, l++, j);
-      }
-      if (!curr_state_is_valid)
-        value_.pop_back();
-      return curr_state_is_valid;
     }
     
     bool equal(Face_iterator const& other) const {
@@ -878,26 +753,43 @@ private:
     void elementary_increment() {
       if (is_end_)
         return;
-      while (!stack_.empty() && stack_.back().second) {
-        std::size_t k = stack_.back().first;
+      while (!stack_.empty()) {
+        bool f = stack_.top().f;
+        bool p = stack_.top().p;
         stack_pop();
-        value_.resize(k);
-        do {
-          if (!try_push_back(k))
-            break;
-          if (++k == coface_.size() - stack_max_size_ + stack_.size() + 1) 
-            break;
-          else if (!mask_[k]) {              
-            stack_push(k, false);
-            return;
-          }
-        }
-        while (true);
+        value_.pop_back();
+        if (a_id_.is_fixed(stack_.size()))
+          if (f)
+            continue;
+          else
+            if (stack_push(true, false))
+              break;
+            else {
+              stack_pop();
+              continue;
+            }
+        else
+          if (f)
+            if (p)
+              continue;
+            else
+              if (stack_push(true, true))
+                break;
+              else {
+                stack_pop();
+                continue;
+              }
+          else
+            if (stack_push(true, false)) {
+              break;
+            }
+            else {
+              stack_pop();
+              continue;
+            }
       }
       if (stack_.empty())
         is_end_ = true;
-      else
-        stack_.back().second = true;
     }
     
     void increment() {
@@ -905,74 +797,77 @@ private:
       update_value();
     }
 
-    void stack_push(std::size_t k, bool plus_one) {
-      stack_.emplace_back(std::make_pair(k, plus_one));
-      mask_[k] = true;
+    bool stack_push(bool fixed, bool plus_one) {
+      std::size_t k = stack_.size();
       std::size_t j = std::floor(0.5*(1+std::sqrt(1+8*k)));
       std::size_t i = (j*j+j-2)/2 - k;
-      std::size_t l;
-      std::size_t k1, k2;
-      std::vector<std::size_t> curr_changes;
-      for (l = i + 1; l < j; ++l) {
-        k1 = (l*l+l-2)/2 - i;
-        k2 = (j*j+j-2)/2 - l;
-        if (mask_[k1]) {
-          mask_[k2] = true;
-          curr_changes.push_back(k2);
+      mask_[k] = true;
+      if (fixed)
+        for (std::size_t l = i + 1; l < j && mask_[k]; ++l) {
+          std::size_t k1 = (l*l+l-2)/2 - i;
+          std::size_t k2 = (j*j+j-2)/2 - l;
+          mask_[k] = !value_.is_fixed(k1) || !value_.is_fixed(k2);
         }
-        else if (mask_[k2]) {
-          mask_[k1] = true;
-          curr_changes.push_back(k1);
+      else {
+        for (std::size_t l = i + 1; l < j && mask_[k]; ++l) {
+          std::size_t k1 = (l*l+l-2)/2 - i;
+          std::size_t k2 = (j*j+j-2)/2 - l;
+          mask_[k] = !(value_.is_fixed(k1) xor value_.is_fixed(k2));
         }
-      }
-      for (l = 0; l < i; ++l) {
-        k1 = (i*i+i-2)/2 - l;
-        k2 = (j*j+j-2)/2 - l;
-        if (mask_[k1]) {
-          mask_[k2] = true;
-          curr_changes.push_back(k2);
-        }
-        else if (mask_[k2]) {
-          mask_[k1] = true;
-          curr_changes.push_back(k1);
+        for (std::size_t l = 0; l < i && mask_[k]; ++l) {
+          mask_[k] = false;
+          for (std::size_t m = l+1; m < j && !mask_[k]; ++m) {
+            std::size_t k1 = (m*m+m-2)/2 - l;
+            mask_[k] = value_.is_fixed(k1);
+          }
         }
       }
-      for (l = j + 1; l < dimension_ + 1; ++l) {
-        k1 = (l*l+l-2)/2 - i;
-        k2 = (l*l+l-2)/2 - j;
-        if (mask_[k1]) {
-          mask_[k2] = true;
-          curr_changes.push_back(k2);
-        }
-        else if (mask_[k2]) {
-          mask_[k1] = true;
-          curr_changes.push_back(k1);
-        }
+      if (mask_[k]) {
+        if (fixed)
+          curr_dim_upper_--;
+        else
+          curr_dim_lower_++;
       }
-      mask_changes_.push_back(curr_changes);
+      stack_.push({fixed, plus_one});
+      return curr_dim_lower_ <= curr_dim_upper_ &&
+             curr_dim_lower_ <= value_dim_upper_ &&
+             curr_dim_upper_ >= value_dim_lower_;
     }
 
     void stack_pop() {
-      mask_[stack_.back().first] = false;
-      for (std::size_t k: mask_changes_.back())
-        mask_[k] = false;
-      stack_.pop_back();
-      mask_changes_.pop_back();
+      bool f = stack_.top().f;
+      stack_.pop();
+      if (mask_[stack_.size()]) {
+        if (f)
+          curr_dim_upper_++;
+        else
+          curr_dim_lower_--;
+      }
     }
     
   public:
-    Face_iterator(const Alcove_id& coface,
+    Face_iterator(const Alcove_id& a_id,
                   const Simple_coxeter_system& scs,
-                  std::size_t value_dim)
-      : coface_(coface),
-        value_(coface_.level(), value_dim),
+                  std::size_t value_dim_lower,
+                  std::size_t value_dim_upper)
+      : a_id_(a_id),
+        value_(a_id.level()),
         family_(scs.family()),
-        dimension_(scs.dimension_),
-        is_end_(coface.dimension() <= value_dim),
-        stack_max_size_(coface.dimension() - value_dim)
+        is_end_(false),
+        ambient_dimension_(scs.dimension_),
+        curr_dim_lower_(0),
+        curr_dim_upper_(scs.dimension_),
+        value_dim_lower_(value_dim_lower),
+        value_dim_upper_(value_dim_upper),
+        mask_(a_id.size())
     {
-      for (std::size_t k = 0; k < coface.size(); k++)
-        mask_.push_back(coface.is_fixed(k));
+      if (!stack_push(false, false)) {
+        stack_pop();
+        if (!stack_push(true, false)) {
+          stack_pop();
+          elementary_increment();
+        }
+      }
       update_value();
     }
 
@@ -980,22 +875,31 @@ private:
     
     
   protected:
-    Alcove_id coface_; 
+    struct State_ {
+      bool f, // is it fixed?
+           p; // has the value different from the original?
+      bool operator==(const State_& rhs) const {
+        return f == rhs.f && p == rhs.p;
+      }
+    };
+    Alcove_id a_id_; 
     Alcove_id value_;
     char family_;
-    std::size_t dimension_;
     bool is_end_;
-    std::vector<std::pair<std::size_t, bool> > stack_;
+    std::size_t ambient_dimension_;
+    std::size_t curr_dim_lower_, curr_dim_upper_;
+    std::size_t value_dim_lower_, value_dim_upper_;
     std::vector<bool> mask_;
-    std::vector<std::vector<std::size_t> > mask_changes_;
-    std::size_t stack_max_size_;
+    std::stack<State_> stack_;
   };
 
   
   typedef boost::iterator_range<Face_iterator> Face_range;
-  Face_range face_range(const Alcove_id& a_id, std::size_t k) const {
-    return Face_range(Face_iterator(a_id, *this, k),
-                      Face_iterator(a_id, *this, a_id.dimension()));
+  Face_range face_range(const Alcove_id& a_id,
+                        std::size_t value_dim_lower,
+                        std::size_t value_dim_upper) const {
+    return Face_range(Face_iterator(a_id, *this, value_dim_lower, value_dim_upper),
+                      Face_iterator());
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1189,9 +1093,9 @@ private:
     
   public:
     Coface_iterator(const Alcove_id& a_id,
-                    const Simple_coxeter_system& scs,
-                    std::size_t value_dim_lower,
-                    std::size_t value_dim_upper)
+                  const Simple_coxeter_system& scs,
+                  std::size_t value_dim_lower,
+                  std::size_t value_dim_upper)
       : a_id_(a_id),
         value_(a_id.level()),
         family_(scs.family()),
@@ -1243,6 +1147,7 @@ private:
     return Coface_range(Coface_iterator(a_id, *this, value_dim_lower, value_dim_upper),
                         Coface_iterator());
   }
+
   
   int gcd(int a, int b) const {
     return b == 0 ? a : gcd(b, a % b);
