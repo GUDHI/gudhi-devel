@@ -46,8 +46,6 @@ setup(
     version='@GUDHI_VERSION@',
     url='http://gudhi.gforge.inria.fr/',
     ext_modules = cythonize(gudhi),
-
-    #install_requires = required,
     install_requires = [
         "matplotlib",
         "numpy",

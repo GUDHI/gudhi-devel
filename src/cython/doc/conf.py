@@ -85,7 +85,7 @@ version = gudhi.__version__
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build']
+exclude_patterns = ['_build', '*.inc']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -125,6 +125,7 @@ html_theme_options = {
      "sidebarbgcolor": "#A1ADCD",
      "sidebartextcolor": "black",
      "sidebarlinkcolor": "#334D5C",
+     "body_max_width": "1200px",
 }
 
 # Add any paths that contain custom themes here, relative to this directory.

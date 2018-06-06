@@ -1,3 +1,7 @@
+:orphan:
+
+.. To get rid of WARNING: document isn't included in any toctree
+
 ==========================================
 Euclidean witness complex reference manual
 ==========================================

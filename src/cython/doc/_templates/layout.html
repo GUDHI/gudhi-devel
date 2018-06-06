@@ -56,6 +56,12 @@
             </a></p>
           {%- endif %}
           {%- endblock %}
+            <h2><a href="index.html">GUDHI</a></h2>
+            <h2><a href="fileformats.html">File formats</a></h2>
+            <h2><a href="installation.html">GUDHI installation</a></h2>
+            <h2><a href="citation.html">Acknowledging the GUDHI library</a></h2>
+            <h2><a href="genindex.html">Index</a></h2>
+            <h2><a href="examples.html">Examples</a></h2>
           {%- if sidebars != None %}
             {#- new style sidebar: explicitly include/exclude templates #}
             {%- for sidebartemplate in sidebars %}
@@ -64,13 +70,6 @@
           {%- else %}
             {#- old style sidebars: using blocks -- should be deprecated #}
             {%- block sidebartoc %}
-<h2><a href="index.html">GUDHI</a></h2>
-<h2><a href="fileformats.html">File formats</a></h2>
-<h2><a href="installation.html">GUDHI installation</a></h2>
-<h2><a href="citation.html">Acknowledging the GUDHI library</a></h2>
-<h2><a href="genindex.html">Index</a></h2>
-<h2><a href="examples.html">Examples</a></h2>
-
             {%- include "localtoc.html" %}
             {%- endblock %}
             {%- block sidebarrel %}

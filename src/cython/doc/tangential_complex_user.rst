@@ -1,6 +1,10 @@
+:orphan:
+
+.. To get rid of WARNING: document isn't included in any toctree
+
 Tangential complex user manual
 ==============================
-.. include:: tangential_complex_sum.rst
+.. include:: tangential_complex_sum.inc
 
 Definition
 ----------
