@@ -92,7 +92,7 @@ struct Alcove_id {
   std::ostream& operator<<(std::ostream & os, const Alcove_id& a_id) {
     os << "[";
     if (a_id.empty()) {
-      std::cout << "]";
+      std::cout << "]_" << a_id.dimension();
       return os;
     }
     if (a_id.is_fixed(0))
@@ -104,7 +104,7 @@ struct Alcove_id {
         os << ", \033[1;31m" << a_id[i] << "\033[0m";
       else
         os << ", " << a_id[i];
-    std::cout << "]";
+    std::cout << "]_" << a_id.dimension();
     return os;
   }
 

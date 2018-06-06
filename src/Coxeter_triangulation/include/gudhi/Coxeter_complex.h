@@ -204,96 +204,26 @@ public:
       //   std::cout  << v_id << " ";
       // std::cout << "\n\n";
     }
-    // std::cout << "Vertex map size is " << v_map.size() << ".\n";    
-    // std::cout << "VMap:\n";
-    // for (auto m: v_map) {
-    //   std::cout << m.first << ": filt=" << m.second.f;    
-    //   std::cout << ", alcoves: [ ";
-    //   typename Graph::in_edge_iterator e_it, e_end;
-    //   for (std::tie(e_it, e_end) = boost::in_edges(m.second.gv, graph); e_it != e_end; ++e_it) {
-    //     std::cout << inv_map[boost::source(*e_it, graph)]->first << " ";
-    //   }
-    //   std::cout << "]";
-    //   std::cout << "\n";
-    // }
-    // std::cout << "Alcove: " << a_map.begin()->first << "\n";
-    // std::cout << "Vertices: [";
-    // typename Graph::out_edge_iterator e_it, e_end;
-    // for (std::tie(e_it, e_end) = boost::out_edges(a_map.begin()->second.gv, graph); e_it != e_end; ++e_it) {
-    //   std::cout << inv_map[boost::target(*e_it, graph)]->first << " ";
-    // }
-    // std::cout << "\n";
-    // for (auto v_id: cs_.face_range(a_map.begin()->first, 0))
-    //   std::cout  << v_id << " ";
-    // std::cout << "\n\n";
-    // Id a_id(1.5, 3);
-    // a_id.push_back(-1);
-    // a_id.push_back(0);
-    // a_id.push_back(-1);
-    // a_id.push_back(-1);
-    // a_id.push_back(-1);
-    // a_id.push_back(-1);
-    Id a_id(1.5, 3);
-    a_id.push_back(-1, true);
-    a_id.push_back(0, true);
-    a_id.push_back(-1, true);
-    a_id.push_back(0, true);
-    a_id.push_back(0, true);
-    a_id.push_back(-1, true);
-    std::cout << "Alcove: " << a_id << "\n";
-    // std::cout << "Faces:\n";
-    // for (auto facet_id: cs_.face_range(a_id, 1))
-    //   std::cout << " " << facet_id << "\n";
-    // std::cout << "Vertices: " << cs_.vertices_of_alcove(a_id) << "\n";
-    // for (auto facet_id: cs_.face_range(a_id, cs.dimension() - 1)) {
-    //   std::cout << " " << facet_id << "\n";
-    //   for (auto ff_id: cs_.face_range(facet_id, cs.dimension() - 2))
-    //     std::cout << "  " << ff_id << "\n";
-    // }
-    // std::cout << "vertices: ";
-    std::cout << "Range 0 0\n";
-    for (auto v_id: cs_.simple_coxeter_system_begin()->coface_range(a_id, 0, 0)) {
-      std::cout  << v_id << "\n";
-    }
-    std::cout << "\n\n";
-    std::cout << "Range 0 1\n";
-    for (auto v_id: cs_.simple_coxeter_system_begin()->coface_range(a_id, 0, 1))
-      std::cout  << v_id << "\n";
-    std::cout << "\n\n";
-    std::cout << "Range 0 2\n";
-    for (auto v_id: cs_.simple_coxeter_system_begin()->coface_range(a_id, 0, 2))
-      std::cout  << v_id << "\n";
-    std::cout << "\n\n";
-    std::cout << "Range 0 3\n";
-    for (auto v_id: cs_.simple_coxeter_system_begin()->coface_range(a_id, 0, 3))
-      std::cout  << v_id << "\n";
-    std::cout << "\n\n";
-    std::cout << "Range 1 1\n";
-    for (auto v_id: cs_.simple_coxeter_system_begin()->coface_range(a_id, 1, 1)) {
-      std::cout  << v_id << "\n";
-      for (auto w_id: cs_.simple_coxeter_system_begin()->coface_range(v_id, 0, 1)) {
-        std::cout << " " << w_id << "\n";
+    std::cout << "Vertex map size is " << v_map.size() << ".\n";    
+    std::cout << "VMap:\n";
+    for (auto m: v_map) {
+      std::cout << m.first << ": filt=" << m.second.f;    
+      std::cout << ", alcoves: [ ";
+      typename Graph::in_edge_iterator e_it, e_end;
+      for (std::tie(e_it, e_end) = boost::in_edges(m.second.gv, graph); e_it != e_end; ++e_it) {
+        std::cout << inv_map[boost::source(*e_it, graph)]->first << " ";
       }
+      std::cout << "]";
+      std::cout << "\n";
     }
-    std::cout << "\n\n";
-    std::cout << "Range 1 2\n";
-    for (auto v_id: cs_.simple_coxeter_system_begin()->coface_range(a_id, 1, 2))
-      std::cout  << v_id << "\n";
-    std::cout << "\n\n";
-    std::cout << "Range 1 3\n";
-    for (auto v_id: cs_.simple_coxeter_system_begin()->coface_range(a_id, 1, 3))
-      std::cout  << v_id << "\n";
-    std::cout << "\n\n";
-    std::cout << "Range 2 2\n";
-    for (auto v_id: cs_.simple_coxeter_system_begin()->coface_range(a_id, 2, 2))
-      std::cout  << v_id << "\n";
-    std::cout << "\n\n";
-    std::cout << "Range 2 3\n";
-    for (auto v_id: cs_.simple_coxeter_system_begin()->coface_range(a_id, 2, 3))
-      std::cout  << v_id << "\n";
-    std::cout << "\n\n";
-    std::cout << "Range 3 3\n";
-    for (auto v_id: cs_.simple_coxeter_system_begin()->coface_range(a_id, 3, 3))
+    std::cout << "Alcove: " << a_map.begin()->first << "\n";
+    // std::cout << "Vertices: [";
+    typename Graph::out_edge_iterator e_it, e_end;
+    for (std::tie(e_it, e_end) = boost::out_edges(a_map.begin()->second.gv, graph); e_it != e_end; ++e_it) {
+      std::cout << inv_map[boost::target(*e_it, graph)]->first << " ";
+    }
+    std::cout << "\n";
+    for (auto v_id: cs_.simple_coxeter_system_begin()->face_range(a_map.begin()->first, 0, 3))
       std::cout  << v_id << "\n";
     std::cout << "\n\n";
 #endif

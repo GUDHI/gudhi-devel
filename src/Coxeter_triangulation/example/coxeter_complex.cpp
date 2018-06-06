@@ -1,4 +1,4 @@
-#define CC_STAR_COMPLETION
+// #define CC_STAR_COMPLETION
 // #define CC_A_V_VISITORS
 
 #include <iostream>
