@@ -101,7 +101,9 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
 
 // any end() iterator
   explicit Simplex_tree_boundary_simplex_iterator(SimplexTree * st)
-      : sib_(nullptr),
+      : last_(st->null_vertex()),
+        next_(st->null_vertex()),
+        sib_(nullptr),
         sh_(st->null_simplex()),
         st_(st)  {
   }
@@ -109,7 +111,9 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
   template<class SimplexHandle>
   Simplex_tree_boundary_simplex_iterator(SimplexTree * st, SimplexHandle sh)
       : last_(sh->first),
+        next_(st->null_vertex()),
         sib_(nullptr),
+        sh_(st->null_simplex()),
         st_(st) {
     // Only check once at the beginning instead of for every increment, as this is expensive.
     if (SimplexTree::Options::contiguous_vertices)
@@ -123,9 +127,7 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
         sh_ = sib_->members_.begin()+next_;
       else
         sh_ = sib_->find(next_);
-    } else {
-      sh_ = st->null_simplex();
-    }  // vertex: == end()
+    }
   }
 
  private:
