@@ -1,3 +1,7 @@
+:orphan:
+
+.. To get rid of WARNING: document isn't included in any toctree
+
 Rips complex user manual
 =========================
 Definition
@@ -243,7 +247,7 @@ the program output is:
     [3, 6] -> 11.00
 
 Correlation matrix
----------------
+------------------
 
 Example from  a correlation matrix
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

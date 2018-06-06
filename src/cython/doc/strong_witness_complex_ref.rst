@@ -1,3 +1,7 @@
+:orphan:
+
+.. To get rid of WARNING: document isn't included in any toctree
+
 =======================================
 Strong witness complex reference manual
 =======================================
