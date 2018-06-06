@@ -759,15 +759,7 @@ private:
         stack_pop();
         value_.pop_back();
         if (a_id_.is_fixed(stack_.size()))
-          if (f)
-            continue;
-          else
-            if (stack_push(true, false))
-              break;
-            else {
-              stack_pop();
-              continue;
-            }
+          continue;
         else
           if (f)
             if (p)
@@ -902,6 +894,7 @@ private:
                       Face_iterator());
   }
 
+
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // Coface range
   //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -936,10 +929,6 @@ private:
           std::size_t k = value_.size();
           std::size_t j = std::floor(0.5*(1 + std::sqrt(1+8*k)));
           std::size_t i = (j*j + j - 2)/2 - k;
-          // std::cout << "\n" << value_ << ", ";
-          // std::cout << "stack_top = " << stack_.size() << "," << stack_.top().f << ", " << stack_.top().p << ", ";
-          // std::cout << "lower = " << curr_dim_lower_ <<
-          //   ", upper = " << curr_dim_upper_ << ", "; 
           if (stack_.top().f)
             if (stack_.top().p)
               value_.push_back(a_id_[k]+1, true);
@@ -950,8 +939,6 @@ private:
               value_.push_back(a_id_[k]-1, false);
             else
               value_.push_back(a_id_[k], false);
-          // std::cout << value_ << "\n";
-          // std::cout << mask_ << "\n";
           bool curr_state_is_valid = true;
           for (std::size_t l = i + 1; l < j && curr_state_is_valid; ++l)
             curr_state_is_valid = triplet_check(i,l,j);
@@ -962,13 +949,20 @@ private:
             elementary_increment();
             continue;
           }
-          if (!stack_push(false, false)) {
-            stack_pop();
-            if (!stack_push(true, false)) {
+          if (!a_id_.is_fixed(k+1)) {
+            if (!stack_push(false, false)) {              
               stack_pop();
               elementary_increment();
             }
           }
+          else 
+            if (!stack_push(false, false)) {
+              stack_pop();
+              if (!stack_push(true, false)) {
+                stack_pop();
+                elementary_increment();
+              }
+            }
         }
         break;
       }
@@ -997,38 +991,23 @@ private:
             continue;
           else
             if (p)
-              if (stack_push(true, false))
+              if (stack_push(true, false)) {
                 break;
+              }
               else {
                 stack_pop();
                 continue;
               }
             else
-              if (stack_push(false, true))
+              if (stack_push(false, true)) {
                 break;
+              }
               else {
                 stack_pop();
                 continue;
               }
         else
-          if (f)
-            if (p)
-              continue;
-            else
-              if (stack_push(true, true))
-                break;
-              else {
-                stack_pop();
-                continue;
-              }
-          else
-            if (stack_push(true, false)) {
-              break;
-            }
-            else {
-              stack_pop();
-              continue;
-            }
+          continue;
       }
       if (stack_.empty())
         is_end_ = true;
@@ -1048,16 +1027,12 @@ private:
         for (std::size_t l = i + 1; l < j && mask_[k]; ++l) {
           std::size_t k1 = (l*l+l-2)/2 - i;
           std::size_t k2 = (j*j+j-2)/2 - l;
-          // if (value_.is_fixed(k1) xor value_.is_fixed(k2))
-          //   return false;
           mask_[k] = !value_.is_fixed(k1) || !value_.is_fixed(k2);
         }
       else {
         for (std::size_t l = i + 1; l < j && mask_[k]; ++l) {
           std::size_t k1 = (l*l+l-2)/2 - i;
           std::size_t k2 = (j*j+j-2)/2 - l;
-          // if (value_.is_fixed(k1) && value_.is_fixed(k2))
-          //   return false;
           mask_[k] = !(value_.is_fixed(k1) xor value_.is_fixed(k2));
         }
         for (std::size_t l = 0; l < i && mask_[k]; ++l) {

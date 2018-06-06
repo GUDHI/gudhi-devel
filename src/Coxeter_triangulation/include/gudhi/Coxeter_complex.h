@@ -234,12 +234,12 @@ public:
     // a_id.push_back(-1);
     // a_id.push_back(-1);
     Id a_id(1.5, 3);
-    a_id.push_back(-1);
+    a_id.push_back(-1, true);
     a_id.push_back(0, true);
-    a_id.push_back(-1);
-    a_id.push_back(-1);
-    a_id.push_back(-1);
-    a_id.push_back(-1);
+    a_id.push_back(-1, true);
+    a_id.push_back(0, true);
+    a_id.push_back(0, true);
+    a_id.push_back(-1, true);
     std::cout << "Alcove: " << a_id << "\n";
     // std::cout << "Faces:\n";
     // for (auto facet_id: cs_.face_range(a_id, 1))
@@ -251,53 +251,51 @@ public:
     //     std::cout << "  " << ff_id << "\n";
     // }
     // std::cout << "vertices: ";
-    // std::cout << "Range 0 0\n";
-    // for (auto v_id: cs_.simple_coxeter_system_begin()->face_range(a_id, 0, 0)) {
-    //   std::cout  << v_id << "\n";
-    //   for (auto cf_id: cs_.simple_coxeter_system_begin()->face_range(v_id, 0, 0))
-    //     std::cout << " " << cf_id << "\n";
-    // }
-    // std::cout << "\n\n";
-    // std::cout << "Range 0 1\n";
-    // for (auto v_id: cs_.simple_coxeter_system_begin()->face_range(a_id, 0, 1))
-    //   std::cout  << v_id << "\n";
-    // std::cout << "\n\n";
-    // std::cout << "Range 0 2\n";
-    // for (auto v_id: cs_.simple_coxeter_system_begin()->face_range(a_id, 0, 2))
-    //   std::cout  << v_id << "\n";
-    // std::cout << "\n\n";
-    // std::cout << "Range 0 3\n";
-    // for (auto v_id: cs_.simple_coxeter_system_begin()->face_range(a_id, 0, 3))
-    //   std::cout  << v_id << "\n";
-    // std::cout << "\n\n";
-    // std::cout << "Range 1 1\n";
-    // for (auto v_id: cs_.simple_coxeter_system_begin()->face_range(a_id, 1, 1)) {
-    //   std::cout  << v_id << "\n";
-      // for (auto w_id: cs_.simple_coxeter_system_begin()->face_range(v_id, 0, 1)) {
-      //   std::cout << " " << w_id << "\n";
-      // }
-    // }
-    // std::cout << "\n\n";
-    std::cout << "Range 1 2\n";
-    for (auto v_id: cs_.simple_coxeter_system_begin()->face_range(a_id, 1, 2))
+    std::cout << "Range 0 0\n";
+    for (auto v_id: cs_.simple_coxeter_system_begin()->coface_range(a_id, 0, 0)) {
+      std::cout  << v_id << "\n";
+    }
+    std::cout << "\n\n";
+    std::cout << "Range 0 1\n";
+    for (auto v_id: cs_.simple_coxeter_system_begin()->coface_range(a_id, 0, 1))
       std::cout  << v_id << "\n";
     std::cout << "\n\n";
-    // std::cout << "Range 1 3\n";
-    // for (auto v_id: cs_.simple_coxeter_system_begin()->coface_range(a_id, 1, 3))
-    //   std::cout  << v_id << "\n";
-    // std::cout << "\n\n";
-    // std::cout << "Range 2 2\n";
-    // for (auto v_id: cs_.simple_coxeter_system_begin()->face_range(a_id, 2, 2))
-    //   std::cout  << v_id << "\n";
-    // std::cout << "\n\n";
-    // std::cout << "Range 2 3\n";
-    // for (auto v_id: cs_.simple_coxeter_system_begin()->coface_range(a_id, 2, 3))
-    //   std::cout  << v_id << "\n";
-    // std::cout << "\n\n";
-    // std::cout << "Range 3 3\n";
-    // for (auto v_id: cs_.simple_coxeter_system_begin()->coface_range(a_id, 3, 3))
-    //   std::cout  << v_id << "\n";
-    // std::cout << "\n\n";
+    std::cout << "Range 0 2\n";
+    for (auto v_id: cs_.simple_coxeter_system_begin()->coface_range(a_id, 0, 2))
+      std::cout  << v_id << "\n";
+    std::cout << "\n\n";
+    std::cout << "Range 0 3\n";
+    for (auto v_id: cs_.simple_coxeter_system_begin()->coface_range(a_id, 0, 3))
+      std::cout  << v_id << "\n";
+    std::cout << "\n\n";
+    std::cout << "Range 1 1\n";
+    for (auto v_id: cs_.simple_coxeter_system_begin()->coface_range(a_id, 1, 1)) {
+      std::cout  << v_id << "\n";
+      for (auto w_id: cs_.simple_coxeter_system_begin()->coface_range(v_id, 0, 1)) {
+        std::cout << " " << w_id << "\n";
+      }
+    }
+    std::cout << "\n\n";
+    std::cout << "Range 1 2\n";
+    for (auto v_id: cs_.simple_coxeter_system_begin()->coface_range(a_id, 1, 2))
+      std::cout  << v_id << "\n";
+    std::cout << "\n\n";
+    std::cout << "Range 1 3\n";
+    for (auto v_id: cs_.simple_coxeter_system_begin()->coface_range(a_id, 1, 3))
+      std::cout  << v_id << "\n";
+    std::cout << "\n\n";
+    std::cout << "Range 2 2\n";
+    for (auto v_id: cs_.simple_coxeter_system_begin()->coface_range(a_id, 2, 2))
+      std::cout  << v_id << "\n";
+    std::cout << "\n\n";
+    std::cout << "Range 2 3\n";
+    for (auto v_id: cs_.simple_coxeter_system_begin()->coface_range(a_id, 2, 3))
+      std::cout  << v_id << "\n";
+    std::cout << "\n\n";
+    std::cout << "Range 3 3\n";
+    for (auto v_id: cs_.simple_coxeter_system_begin()->coface_range(a_id, 3, 3))
+      std::cout  << v_id << "\n";
+    std::cout << "\n\n";
 #endif
     // compute_v_map();
   }
