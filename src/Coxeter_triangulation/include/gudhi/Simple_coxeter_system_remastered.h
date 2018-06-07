@@ -8,6 +8,7 @@
 #include <exception>
 
 #include <gudhi/Coxeter_complex/Alcove_id.h>
+#include <gudhi/Clock.h>
 
 #include <Eigen/Eigenvalues>
 #include <Eigen/Sparse>
@@ -464,15 +465,15 @@ public:
                                     const Alcove_id& a_id) const {
     switch (family_) {
     case 'A': {
-      // double level = a_id.level();
+      double level = a_id.level();
       std::size_t d = dimension_;
       double sq_distance = 0;
       Eigen::VectorXd p_vect(d);
       for (unsigned short i = 0; i < d; i++)
         p_vect(i) = p[i];
-      std::cout << "a_id =" << a_id << "\n";
-      std::cout << "root_t_=\n" << root_t_ << "\n";
-      std::list<std::pair<Eigen::VectorXd, int> > ah_hplanes, f_hplanes;
+      // std::cout << "a_id =" << a_id << "\n";
+      // std::cout << "root_t_=\n" << root_t_ << "\n";
+      std::list<std::pair<Eigen::VectorXd, double> > ah_hplanes, f_hplanes;
       // Find a basis for the affine hull of a_id
       std::size_t i = 0, j = 1, k = 0;
       while (k < a_id.size()) {
@@ -486,7 +487,7 @@ public:
             l++;
           }
           if (lin_independent) {
-            ah_hplanes.push_back(std::make_pair(Eigen::VectorXd(d), a_id[k]));
+            ah_hplanes.push_back(std::make_pair(Eigen::VectorXd(d), a_id[k]/level));
             for (std::size_t m = 0; m < d; ++m)
               ah_hplanes.back().first(m) = 0;
             for (std::size_t l = i; l < j; ++l)
@@ -509,10 +510,11 @@ public:
       // Add the hyperplanes that define the facets
       if (a_id.dimension() != 0)
         for (auto f_id: face_range(a_id, a_id.dimension()-1, a_id.dimension()-1))
-          for (i = 0, j = 0, k = 0; k < a_id.size(); ++k) {
+          for (i = 0, j = 1, k = 0; k < a_id.size(); ++k) {
             if (f_id.is_fixed(k) && !a_id.is_fixed(k)) {
+              // std::cout << "Facet : " << f_id << "\n";
               if (f_id[k] == a_id[k] + 1) {
-                f_hplanes.push_back(std::make_pair(Eigen::VectorXd(d), a_id[k]));
+                f_hplanes.push_back(std::make_pair(Eigen::VectorXd(d), (a_id[k] + 1)/level));
                 for (std::size_t m = 0; m < d; ++m)
                   f_hplanes.back().first(m) = 0;
                 for (std::size_t l = i; l < j; ++l)
@@ -520,7 +522,7 @@ public:
                     f_hplanes.back().first(m) += root_t_(l,m);
               }
               else {
-                f_hplanes.push_back(std::make_pair(Eigen::VectorXd(d), -a_id[k]));
+                f_hplanes.push_back(std::make_pair(Eigen::VectorXd(d), -a_id[k]/level));
                 for (std::size_t m = 0; m < d; ++m)
                   f_hplanes.back().first(m) = 0;
                 for (std::size_t l = i; l < j; ++l)
@@ -545,7 +547,7 @@ public:
            ah_hplane_it != ah_hplanes.end();
            ) {
         Eigen::VectorXd& n1 = ah_hplane_it->first;
-        int& a1 = ah_hplane_it->second;
+        double& a1 = ah_hplane_it->second;
         // std::cout << "Iteration for n =\n" << n1 << "\n a = " << a1 << "\n";
         double diff = a1 - p_vect.dot(n1);
         p_vect = p_vect + diff * n1;
@@ -556,7 +558,7 @@ public:
              ah_hplane_after_it != ah_hplanes.end();
              ++ah_hplane_after_it) {
           Eigen::VectorXd& n2 = ah_hplane_after_it->first;
-          int a2 = ah_hplane_after_it->second;
+          double a2 = ah_hplane_after_it->second;
           double n1n2 = n1.dot(n2);
           n2 = n2 - n1n2 * n1;
           double inv_newnorm = 1/n2.norm();
@@ -571,7 +573,7 @@ public:
              f_hplane_it != f_hplanes.end();
              ++f_hplane_it) {
           Eigen::VectorXd& n2 = f_hplane_it->first;
-          int a2 = f_hplane_it->second;
+          double a2 = f_hplane_it->second;
           double n1n2 = n1.dot(n2);
           n2 = n2 - n1n2 * n1;
           double inv_newnorm = 1/n2.norm();
@@ -585,23 +587,37 @@ public:
       }
       // Iteratively project the point on the hyperplanes that define the facets
       auto f_hplane_it = f_hplanes.begin();
+      // std::cout << "p_vect:\n" << p_vect << "\n";
       while (f_hplane_it != f_hplanes.end()) {
         Eigen::VectorXd& n1 = f_hplane_it->first;
-        int& a1 = f_hplane_it->second;
+        double& a1 = f_hplane_it->second;
+        // std::cout << "n1:\n" << n1 << "\n";
+        // std::cout << "a1 = " << a1 << "\n";
+        // std::cout << "p_vect.dot(n1) = " << p_vect.dot(n1) << "\n";
+        // std::cout << "diff = " << a1 - p_vect.dot(n1) << "\n";
         double diff = a1 - p_vect.dot(n1);
         if (diff < 0) {
           p_vect = p_vect + diff * n1;
           sq_distance += diff*diff;
+          // std::cout << "p_vect:\n" << p_vect << "\n";
+          // std::cout << "sq_distance = " << sq_distance << "\n";
           for (auto f_hplane_other_it = f_hplanes.begin();
                f_hplane_other_it != f_hplanes.end();
                ++f_hplane_other_it) {
-            Eigen::VectorXd& n2 = f_hplane_other_it->first;
-            int& a2 = f_hplane_other_it->second;
-            double n1n2 = n1.dot(n2);
-            n2 = n2 - n1n2 * n1;
-            double inv_newnorm = 1/n2.norm();
-            n2 = inv_newnorm * n2;
-            a2 = inv_newnorm * (a2 - n1n2 * a1);
+            if (f_hplane_other_it != f_hplane_it) {
+              Eigen::VectorXd& n2 = f_hplane_other_it->first;
+              double& a2 = f_hplane_other_it->second;
+              double n1n2 = n1.dot(n2);
+              n2 = n2 - n1n2 * n1;
+              double inv_newnorm = 1./n2.norm();
+              n2 = inv_newnorm * n2;
+              // std::cout << "inv_newnorm = " << inv_newnorm << "\n";
+              // std::cout << "a2 = " << a2 << "\n";
+              // std::cout << "n1n2 = " << n1n2 << "\n";
+              // std::cout << "a1 = " << a1 << "\n";
+              a2 = inv_newnorm * (a2 - n1n2 * a1);
+              // std::cout << "result a2 = " << a2 << "\n\n";
+            }
           }
           f_hplanes.erase(f_hplane_it);
           f_hplane_it = f_hplanes.begin();
@@ -609,7 +625,7 @@ public:
         else
           f_hplane_it++;
       }
-      std::cout << "sq_dist = " << sq_distance << "\n";
+      // std::cout << "sq_dist = " << sq_distance << "\n";
       return sq_distance;
     }
     default :
@@ -644,16 +660,6 @@ public:
       scalprod_vect = p_vect;
     else
       scalprod_vect = root_t_ * p_vect;
-    // Alcove_id a_0(level, 0);
-    // a_0.push_back(0, true);
-    // a_0.push_back(0);
-    // a_0.push_back(0);
-    // a_0.push_back(0);
-    // a_0.push_back(0);
-    // a_0.push_back(0);
-    // squared_distance_to_alcove(p, a_0);
-    // std::cout << "p_vect=" << p_vect << "\n";
-    // std::cout << "scalprod_vect=" << scalprod_vect << "\n";
 #ifdef CC_STAR_COMPLETION
     rec_alcoves_of_ball_A(a_id, scalprod_vect, eps, alcoves, vertices_per_alcove, 1, 0, 0, 0, p_vect);
 #else
@@ -695,64 +701,63 @@ private:
     if (j == d+1) {
 #ifdef CC_STAR_COMPLETION
       alcoves.emplace_back(Filtered_alcove(a_id, filtration));
-#else   
-      // std::vector<Vertex_id> vertices = vertices_of_simplex(a_id);
-      // std::vector<unsigned> count(pos_root_count(), 0);
-      // for (auto v: vertices) {
-      //   unsigned k = 0;
-      //   for (int j = 1; j < d+1; ++j) {
-      //     int sum = 0;
-      //     for (int i = j-1; i >= 0; --i, ++k) {
-      //       sum += v[i];
-      //       if (sum == a_id[k])
-      //         count[k]++;
-      //     }
-      //   }
-      // }
-      // typedef CGAL::Quadratic_program<double> Program;
-      // typedef CGAL::Quadratic_program_solution<ET> Solution;
-      // Program qp(CGAL::SMALLER, false); // No limits
-      // // ET prec(1000000);
-      // // The quadratic problem is
-      // // minimize (x^t D x) + c^t x + c0 = ||x-p||^2
-      // // for values A x <= b
-      // // with A composed of roots and b values k_r/lambda
-      // for (int i = 0; i < d; ++i)
-      //   qp.set_d(i, i, 2); // Need to specify 2*D
-      // for (int i = 0; i < d; ++i)
-      //   qp.set_c(i, -2*p_vect(i));
-      // qp.set_c0(p_vect.squaredNorm());
-      // unsigned k = 0;
-      // unsigned line_no = 0;
-      // for (int j = 1; j < d+1; ++j) {
-      //   Eigen::VectorXd root(d);
-      //   for (int l = 0; l < d; ++l)
-      //     root(l) = 0;
-      //   for (int i = j-1; i >= 0; --i, ++k) {
-      //     for (int l = 0; l < d; ++l)
-      //       root(l) += root_t_(i,l);
-      //     if (count[k] == 1) {
-      //       for (int l = 0; l < d; ++l)
-      //         qp.set_a(l, line_no, root(l));
-      //       qp.set_b(line_no++, (a_id[k]+1)/level);
-      //     }
-      //     if (count[k] == d) {
-      //       for (int l = 0; l < d; ++l)
-      //         qp.set_a(l, line_no, -root(l));
-      //       qp.set_b(line_no++, -a_id[k]/level);
-      //     }
-      //   }
-      // }
-      // Solution s = CGAL::solve_quadratic_program(qp, ET());
-      // assert (s.solves_quadratic_program(qp));
-      // // std::cout << "Point = ";
-      // // for (auto it = s.variable_values_begin(); it != s.variable_values_end(); ++it)
-      // //   std::cout << it->numerator().to_double() / it->denominator().to_double() << " ";
-      // // std::cout << "\n";
-      // double sq_norm = s.objective_value_numerator().to_double() / s.objective_value_denominator().to_double();
-      // sq_norm = std::round(sq_norm*10e10)/10e10;
-      // // double sq_norm = s.objective_value_numerator() / s.objective_value_denominator();
-      double sq_norm = squared_distance_to_alcove(p, a_id);
+#else
+      Gudhi::Clock t;
+      std::vector<Vertex_id> vertices = vertices_of_simplex(a_id);
+      std::vector<unsigned> count(pos_root_count(), 0);
+      for (auto v: vertices) {
+        unsigned k = 0;
+        for (int j = 1; j < d+1; ++j) {
+          int sum = 0;
+          for (int i = j-1; i >= 0; --i, ++k) {
+            sum += v[i];
+            if (sum == a_id[k])
+              count[k]++;
+          }
+        }
+      }
+      typedef CGAL::Quadratic_program<double> Program;
+      typedef CGAL::Quadratic_program_solution<ET> Solution;
+      Program qp(CGAL::SMALLER, false); // No limits
+      // ET prec(1000000);
+      // The quadratic problem is
+      // minimize (x^t D x) + c^t x + c0 = ||x-p||^2
+      // for values A x <= b
+      // with A composed of roots and b values k_r/lambda
+      for (int i = 0; i < d; ++i)
+        qp.set_d(i, i, 2); // Need to specify 2*D
+      for (int i = 0; i < d; ++i)
+        qp.set_c(i, -2*p_vect(i));
+      qp.set_c0(p_vect.squaredNorm());
+      unsigned k = 0;
+      unsigned line_no = 0;
+      for (int j = 1; j < d+1; ++j) {
+        Eigen::VectorXd root(d);
+        for (int l = 0; l < d; ++l)
+          root(l) = 0;
+        for (int i = j-1; i >= 0; --i, ++k) {
+          for (int l = 0; l < d; ++l)
+            root(l) += root_t_(i,l);
+          if (count[k] == 1) {
+            for (int l = 0; l < d; ++l)
+              qp.set_a(l, line_no, root(l));
+            qp.set_b(line_no++, (a_id[k]+1)/level);
+          }
+          if (count[k] == d) {
+            for (int l = 0; l < d; ++l)
+              qp.set_a(l, line_no, -root(l));
+            qp.set_b(line_no++, -a_id[k]/level);
+          }
+        }
+      }
+      Solution s = CGAL::solve_quadratic_program(qp, ET());
+      assert (s.solves_quadratic_program(qp));
+      // std::cout << "Point = ";
+      // for (auto it = s.variable_values_begin(); it != s.variable_values_end(); ++it)
+      //   std::cout << it->numerator().to_double() / it->denominator().to_double() << " ";
+      // std::cout << "\n";
+      double sq_norm = s.objective_value_numerator().to_double() / s.objective_value_denominator().to_double();
+      sq_norm = std::round(sq_norm*10e10)/10e10;
       if (sq_norm <= eps*eps) {
         alcoves.emplace_back(Filtered_alcove(a_id, sq_norm));
 #ifdef CC_A_V_VISITORS
@@ -842,6 +847,178 @@ private:
     }
   }
 
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  //  Distance test
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+
+  public:
+   /** A function that outputs the alcoves that intersect the ball centered 
+   *  at p of radius eps.
+   *  The output pairs consist of the Alcove_id and the squared distance.
+   */
+  template <class Point>
+  void alcoves_of_ball_dist(const Point& p,
+                            double level,
+                            double eps,
+                            std::vector<Filtered_alcove>& alcoves,
+                            std::vector<std::vector<Vertex_id> >& vertices_per_alcove,
+                            bool root_coords = false) const {
+    unsigned d = dimension_;
+    Alcove_id a_id(level, d);
+    a_id.reserve(pos_root_count());
+    Eigen::VectorXd p_vect(d);
+    for (unsigned short i = 0; i < d; i++)
+      p_vect(i) = p[i];
+    Eigen::VectorXd scalprod_vect;
+    if (root_coords)
+      scalprod_vect = p_vect;
+    else
+      scalprod_vect = root_t_ * p_vect;
+#ifdef CC_STAR_COMPLETION
+    rec_alcoves_of_ball_dist_A(a_id, scalprod_vect, eps, alcoves, vertices_per_alcove, 1, 0, 0, 0, p_vect);
+#else
+    rec_alcoves_of_ball_dist_A(p, a_id, scalprod_vect, eps, alcoves, vertices_per_alcove, 1, 0, 0, p_vect);
+#endif
+  }
+  
+private:
+
+  /** Construct the simplices that intersect a given ball.
+   */
+#ifdef CC_STAR_COMPLETION
+  void rec_alcoves_of_ball_dist_A(Alcove_id& a_id,
+                             Eigen::VectorXd& scalprod_vect,
+                             double eps,
+                             std::vector<Filtered_alcove>& alcoves,
+                             std::vector<std::vector<Vertex_id> >& vertices_per_alcove,
+                             int j,
+                             int i,
+                             double root_scalprod,
+                             double filtration,
+                             Eigen::VectorXd& p_vect) const {
+#else
+  template <class Point>
+  void rec_alcoves_of_ball_dist_A(const Point& p,
+                             Alcove_id& a_id,
+                             Eigen::VectorXd& scalprod_vect,
+                             double eps,
+                             std::vector<Filtered_alcove>& alcoves,
+                             std::vector<std::vector<Vertex_id> >& vertices_per_alcove,
+                             int j,
+                             int i,
+                             double root_scalprod,
+                             Eigen::VectorXd& p_vect) const {
+#endif
+    unsigned short d = dimension_;
+    double level = a_id.level();
+    double root_norm = level;
+    if (j == d+1) {
+#ifdef CC_STAR_COMPLETION
+      alcoves.emplace_back(Filtered_alcove(a_id, filtration));
+#else
+      double sq_norm = squared_distance_to_alcove(p, a_id);
+      if (sq_norm <= eps*eps) {
+        alcoves.emplace_back(Filtered_alcove(a_id, sq_norm));
+#ifdef CC_A_V_VISITORS
+        vertices_per_alcove.push_back(vertices);
+#endif
+      }
+#endif
+
+      return;
+    }
+    if (i == -1) {
+#ifdef CC_STAR_COMPLETION
+      rec_alcoves_of_ball_dist_A(a_id,
+                            scalprod_vect,
+                            eps,
+                            alcoves,
+                            vertices_per_alcove,
+                            j+1,
+                            j,
+                            0,
+                            filtration,
+                            p_vect);
+#else
+      rec_alcoves_of_ball_dist_A(p,
+                            a_id,
+                            scalprod_vect,
+                            eps,
+                            alcoves,
+                            vertices_per_alcove,
+                            j+1,
+                            j,
+                            0,
+                            p_vect);
+#endif
+      return;
+    }
+    root_scalprod += scalprod_vect(i);
+    int min_lim = std::floor(level*root_scalprod - root_norm*eps);
+    int max_lim = std::floor(level*root_scalprod + root_norm*eps);
+    for (int val = min_lim; val <= max_lim; ++val) {
+      bool valid = true;
+      for (int l = i+1; l < j; ++l) {
+        int pr_i_l = *(a_id.end() - ((j+l-1)*(j-l)/2+(j-l))),
+          pr_l_j = *(a_id.end() - (l-i));
+        // check if the floor(<x,r>) + floor(<x,s>) - 1 <= floor(<x,r+s>) <= floor(<x,r>) + floor(<x,s>)
+        // for a point in the ball B(p,eps)
+        if (val < pr_i_l + pr_l_j || val > pr_i_l + pr_l_j + 1) {
+          valid = false;
+          break;
+        }
+      }
+      if (valid) {
+        a_id.push_back(val);
+#ifdef CC_STAR_COMPLETION
+        double new_filtration = 0;
+        int true_value = std::floor(level*root_scalprod);
+        if (val > true_value) {
+          new_filtration = (val - level*root_scalprod)/root_norm;        
+        }
+        else if (val < true_value)
+          new_filtration = (level*root_scalprod  - val - 1)/root_norm;
+        // std::cout << "val=" << val << ", true_value=" << true_value << ", filtration=" << new_filtration << "\n";
+        rec_alcoves_of_ball_dist_A(a_id,
+                              scalprod_vect,
+                              eps,
+                              alcoves,
+                              vertices_per_alcove,
+                              j,
+                              i-1,
+                              root_scalprod,
+                              std::max(filtration, new_filtration),
+                              p_vect);
+#else
+        rec_alcoves_of_ball_dist_A(p,
+                              a_id,
+                              scalprod_vect,
+                              eps,
+                              alcoves,
+                              vertices_per_alcove,
+                              j,
+                              i-1,
+                              root_scalprod,
+                              p_vect);
+#endif
+        a_id.pop_back();
+      }
+    }
+  }
+  
   public:
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // Face range

@@ -1,7 +1,7 @@
 #ifndef COXETER_COMPLEX_
 #define COXETER_COMPLEX_
 
-#define DEBUG_TRACES
+// #define DEBUG_TRACES
 #include "../../example/cxx-prettyprint/prettyprint.hpp"
 
 #include <string>
@@ -127,11 +127,22 @@ class Coxeter_complex {
   void compute_graph(const Point_range& point_vector, double init_level, double eps, bool store_points) {
     Gudhi::Clock t;
     t.begin();
-    for (auto p_it = point_vector.begin(); p_it != point_vector.end(); ++p_it)
+    for (auto p_it = point_vector.begin(); p_it != point_vector.end(); ++p_it) {
+      Gudhi::Clock t2;
+      cs_.alcoves_of_ball_dist(*p_it,
+                               init_level,
+                               eps,
+                               Alcove_vertex_visitor(p_it, av_graph_, store_points));
+      t2.end();
+      std::cout << "\nNew method time: " << t2.num_seconds() << "s\n";
+      t2.begin();
       cs_.alcoves_of_ball(*p_it,
                           init_level,
                           eps,
                           Alcove_vertex_visitor(p_it, av_graph_, store_points));
+      t2.end();
+      std::cout << "\nOld method time: " << t2.num_seconds() << "s";
+    }
     // #ifndef CC_STAR_COMPLETION
     for (auto& m: av_graph_.a_map)
       m.second.f = std::sqrt(m.second.f);
