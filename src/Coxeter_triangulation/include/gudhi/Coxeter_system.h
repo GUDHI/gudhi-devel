@@ -111,9 +111,6 @@ public:
       chunks.emplace_back(alcoves);
       chunks_v.emplace_back(vertices);
     }
-    // std::vector<std::vector<Vertex_id>::iterator> iterators;
-    // for (auto chunk: chunks)
-    //   iterators.emplace_back(chunk.begin());
     Filtered_alcove a_id(Alcove_id(init_level, dimension_), 0);
     std::vector<std::vector<Vertex_id > > vertex_chunks;
     rec_combine_chunks_alcove(chunks.begin(),
@@ -124,55 +121,6 @@ public:
                               a_id,
                               vertex_chunks);
   }
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  // Distance test
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  template <class Point,
-            class Visitor>
-  void alcoves_of_ball_dist(const Point& p,
-                            double init_level,
-                            double eps,
-                            Visitor visitor,
-                            bool root_coords = false) const
-  {
-    std::vector<std::vector<Filtered_alcove> > chunks;
-    std::vector<std::vector<std::vector<Vertex_id> > > chunks_v;
-    auto p_it = p.begin();
-    for (auto scs: simple_system_range_) {
-      std::vector<FT> p_part;
-      unsigned dimension = scs.dimension();
-      for (unsigned i = 0; i < dimension; i++) {
-        p_part.push_back(*p_it++);
-      }
-      std::vector<Filtered_alcove> alcoves;
-      std::vector<std::vector<Vertex_id> > vertices;
-      scs.alcoves_of_ball_dist(p_part, init_level, eps, alcoves, vertices, root_coords);
-      chunks.emplace_back(alcoves);
-      chunks_v.emplace_back(vertices);
-    }
-    // std::vector<std::vector<Vertex_id>::iterator> iterators;
-    // for (auto chunk: chunks)
-    //   iterators.emplace_back(chunk.begin());
-    Filtered_alcove a_id(Alcove_id(init_level, dimension_), 0);
-    std::vector<std::vector<Vertex_id > > vertex_chunks;
-    rec_combine_chunks_alcove(chunks.begin(),
-                              chunks.end(),
-                              chunks_v.begin(),
-                              visitor,
-                              eps,
-                              a_id,
-                              vertex_chunks);
-  }
-  
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // Coface range

@@ -1,4 +1,4 @@
-// #define CC_STAR_COMPLETION
+#define CC_STAR_COMPLETION
 // #define CC_A_V_VISITORS
 
 #include <iostream>
@@ -99,7 +99,7 @@ int main(int argc, char * const argv[]) {
     std::cout << "Vertices are constructed at the same time as the alcoves.\n";
     #endif
     // // std::cout << "Simplex-vertex graph construction time: " << t.num_seconds() << "s\n";
-    // cc.write_mesh("sphere_coxeter_complex_A.mesh");
+    cc.write_mesh("sphere_coxeter_complex_A.mesh");
     // delete off_range;
     // off_range  = new Gudhi::Off_point_range<Point_d>(argv[1]);
     // output_points_to_medit(*off_range, "sphere_coxeter_complex_points.mesh");
