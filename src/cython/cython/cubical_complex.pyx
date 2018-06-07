@@ -105,7 +105,6 @@ cdef class CubicalComplex:
 
     def num_simplices(self):
         """This function returns the number of all cubes in the complex.
-        complex.
 
         :returns:  int -- the number of all cubes in the complex.
         """
@@ -150,7 +149,7 @@ cdef class CubicalComplex:
             launched first.
 
         :note: betti_numbers function always returns [1, 0, 0, ...] as infinity
-        filtration cubes are not removed from the complex.
+            filtration cubes are not removed from the complex.
         """
         cdef vector[int] bn_result
         if self.pcohptr != NULL:
