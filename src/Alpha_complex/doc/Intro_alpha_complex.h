@@ -93,63 +93,29 @@ namespace alpha_complex {
  * \image html "alpha_complex_doc.png" "Simplicial complex structure construction example"
  *
  * \subsection filtrationcomputation Filtration value computation algorithm
- *
- *
- *
- * <ul>
- *   <li style="list-style-type: none;">\f$ \textbf{for } i : dimension \rightarrow 0 \textbf{ do} \f$
- *     <ul>
- *       <li style="list-style-type: none;">\f$\textbf{for all } \sigma of dimension i \f$
- *         <ul>
- *           <li style="list-style-type: none;">\f$\textbf{if } filtration( \sigma ) is NaN \textbf{ then} \f$
- *             <ul>
- *               <li style="list-style-type: none;">\f$ filtration( \sigma ) = \alpha^2( \sigma ) \f$
- *               </li>
- *             </ul>
- *           </li>
- *           <li style="list-style-type: none;">\f$\textbf{end if}\f$
- *           </li>
- *           <li style="list-style-type: none;">\f$\textbf{for all } \tau face of \sigma \textbf{ do} \f$
- *             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// propagate alpha filtration value
- *             <ul>
- *               <li style="list-style-type: none;">\f$\textbf{if } filtration( \tau ) is not NaN \textbf{ then} \f$
- *                 <ul>
- *                   <li style="list-style-type: none;">\f$ filtration( \tau ) = min ( filtration( \tau ), filtration( \sigma ) ) \f$
- *                   </li>
- *                 </ul>
- *               </li>
- *               <li style="list-style-type: none;">\f$\textbf{else}\f$
- *                 <ul>
- *                   <li style="list-style-type: none;">\f$\textbf{if } \tau is not Gabriel for \sigma \textbf{ then} \f$
- *                     <ul>
- *                       <li style="list-style-type: none;">\f$ filtration( \tau ) = filtration( \sigma ) \f$
- *                       </li>
- *                     </ul>
- *                   </li>
- *                   <li style="list-style-type: none;">\f$\textbf{end if}\f$
- *                   </li>
- *                 </ul>
- *               </li>
- *               <li style="list-style-type: none;">\f$\textbf{end if}\f$
- *               </li>
- *             </ul>
- *           </li>
- *           <li style="list-style-type: none;">\f$\textbf{end for}\f$
- *           </li>
- *         </ul>
- *       </li>
- *       <li style="list-style-type: none;">\f$\textbf{end for}\f$
- *       </li>
- *     </ul>
- *   </li>
- *   <li style="list-style-type: none;">\f$\textbf{end for}\f$
- *   </li>
- *   <li style="list-style-type: none;">\f$make\_filtration\_non\_decreasing()\f$
- *   </li>
- *   <li style="list-style-type: none;">\f$prune\_above\_filtration()\f$
- *   </li>
- * </ul>
- *
+ * <br>
+ * \f$
+ * \textbf{for } \text{i : dimension } \rightarrow 0 \textbf{ do}\\
+ * \quad \textbf{for all } \sigma \text{ of dimension i}\\
+ * \quad\quad \textbf{if } \text{filtration(} \sigma ) \text{ is NaN} \textbf{ then}\\
+ * \quad\quad\quad \text{filtration(} \sigma ) = \alpha^2( \sigma )\\
+ * \quad\quad \textbf{end if}\\
+ * \quad\quad \textbf{for all } \tau \text{ face of } \sigma \textbf{ do}\quad\quad
+ * \textit{// propagate alpha filtration value}\\
+ * \quad\quad\quad \textbf{if } \text{filtration(} \tau ) \text{ is not NaN} \textbf{ then}\\
+ * \quad\quad\quad\quad \text{filtration(} \tau \text{) = min( filtration(} \tau \text{), filtration(} \sigma
+ * \text{) )}\\
+ * \quad\quad\quad \textbf{else}\\
+ * \quad\quad\quad\quad \textbf{if } \textbf{if } \tau \text{ is not Gabriel for } \sigma \textbf{ then}\\
+ * \quad\quad\quad\quad\quad \text{filtration(} \tau \text{) = filtration(} \sigma \text{)}\\
+ * \quad\quad\quad\quad \textbf{end if}\\
+ * \quad\quad\quad \textbf{end if}\\
+ * \quad\quad \textbf{end for}\\
+ * \quad \textbf{end for}\\
+ * \textbf{end for}\\
+ * \text{make_filtration_non_decreasing()}\\
+ * \text{prune_above_filtration()}\\
+ * \f$
  *
  * \subsubsection dimension2 Dimension 2
  * 
