@@ -1232,8 +1232,7 @@ class Cover_complex {
    *
    */
   double compute_p_value() {
-    double distancemin = -std::numeric_limits<double>::lowest();
-    int N = PD.size();
+    double distancemin = 0; int N = PD.size();
     for (int i = 0; i < N; i++) distancemin = std::min(distancemin, 0.5 * std::abs(PD[i].second - PD[i].first));
     double p_value = 1 - compute_confidence_level_from_distance(distancemin);
     if (verbose)  std::cout << "p value = " << p_value << std::endl;
