@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef WRITING_PERSISTENCE_TO_FILE_H
-#define WRITING_PERSISTENCE_TO_FILE_H
+#ifndef WRITING_PERSISTENCE_TO_FILE_H_
+#define WRITING_PERSISTENCE_TO_FILE_H_
 
 #include <iostream>
 #include <string>
@@ -112,6 +112,6 @@ void write_persistence_intervals_to_stream(const Persistence_interval_range& int
   }
 }
 
-}
+}  // namespace Gudhi
 
-#endif  // WRITING_PERSISTENCE_TO_FILE_H
+#endif  // WRITING_PERSISTENCE_TO_FILE_H_

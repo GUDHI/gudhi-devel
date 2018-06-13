@@ -30,6 +30,7 @@
 
 #include <iostream>
 #include <stdexcept>  // for exception management
+#include <vector>
 
 namespace Gudhi {
 
