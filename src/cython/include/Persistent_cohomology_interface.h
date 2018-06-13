@@ -106,7 +106,7 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
         }
       }
 
-      persistence_pairs.push_back(std::make_pair(birth,death));
+      persistence_pairs.push_back(std::make_pair(birth, death));
     }
     return persistence_pairs;
   }

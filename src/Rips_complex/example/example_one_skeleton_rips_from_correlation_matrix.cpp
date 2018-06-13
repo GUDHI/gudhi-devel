@@ -15,11 +15,11 @@ int main() {
   using Distance_matrix = std::vector<std::vector<Filtration_value>>;
 
   // User defined correlation matrix is:
-  // |1	    0.06	0.23	0.01	0.89|
-  // |0.06	1	    0.74	0.01	0.61|
-  // |0.23	0.74	1	    0.72	0.03|
-  // |0.01	0.01	0.72	1	    0.7 |
-  // |0.89	0.61	0.03	0.7	    1   |
+  // |1     0.06  0.23  0.01  0.89|
+  // |0.06  1     0.74  0.01  0.61|
+  // |0.23  0.74  1     0.72  0.03|
+  // |0.01  0.01  0.72  1     0.7 |
+  // |0.89  0.61  0.03  0.7   1   |
 
   Distance_matrix correlations;
   correlations.push_back({});
