@@ -58,7 +58,10 @@ def persistence_image(diagram, min_x = 0.0, max_x = 1.0, res_x = 10, min_y = 0.0
     :param min_x: Minimum ordinate
     :param max_x: Maximum ordinate
     :param res_x: Number of ordinate pixels 
+    :param weight: Weight to use for the diagram points
     :param sigma: bandwidth of Gaussian
+    :param C: cost of arctan persistence weight
+    :param p: power of arctan persistence weight    
 
     :returns: the persistence image
     """
