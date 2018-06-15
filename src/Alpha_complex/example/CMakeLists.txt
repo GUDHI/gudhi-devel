@@ -32,4 +32,6 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
   install(TARGETS Alpha_complex_example_from_points DESTINATION bin)
   install(TARGETS Alpha_complex_example_from_off DESTINATION bin)
 
+  add_executable ( traits_test traits_test.cpp )
+
 endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
