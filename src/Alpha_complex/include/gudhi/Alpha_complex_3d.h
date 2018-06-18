@@ -25,78 +25,16 @@
 
 
 #include <gudhi/Debug_utils.h>
+#include <gudhi/Alpha_complex_3d_options.h>
 
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Delaunay_triangulation_3.h>
-#include <CGAL/Regular_triangulation_3.h>
-#include <CGAL/Alpha_shape_3.h>
-#include <CGAL/Alpha_shape_cell_base_3.h>
-#include <CGAL/Alpha_shape_vertex_base_3.h>
+#include <CGAL/Object.h>
+#include <CGAL/tuple.h>
 #include <CGAL/iterator.h>
 
 
 namespace Gudhi {
 
 namespace alpha_complex {
-
-class Alpha_shapes_3d {
-private:
-  // Alpha_shape_3 templates type definitions
-  using Kernel = CGAL::Exact_predicates_inexact_constructions_kernel;
-  using Vb = CGAL::Alpha_shape_vertex_base_3<Kernel>;
-  using Fb = CGAL::Alpha_shape_cell_base_3<Kernel>;
-  using Tds = CGAL::Triangulation_data_structure_3<Vb, Fb>;
-  using Triangulation_3 = CGAL::Delaunay_triangulation_3<Kernel, Tds>;
-
-public:
-  using Alpha_shape_3 = CGAL::Alpha_shape_3<Triangulation_3>;
-  using Point_3 = Kernel::Point_3;
-
-  static const bool exact = false;
-  static const bool weighted = false;
-  static const bool periodic = false;
-
-};
-
-class Exact_alpha_shapes_3d {
-private:
-  // Alpha_shape_3 templates type definitions
-  using Kernel = CGAL::Exact_predicates_inexact_constructions_kernel;
-  using Exact_tag = CGAL::Tag_true;
-  using Vb = CGAL::Alpha_shape_vertex_base_3<Kernel, CGAL::Default, Exact_tag>;
-  using Fb = CGAL::Alpha_shape_cell_base_3<Kernel, CGAL::Default, Exact_tag>;
-  using Tds = CGAL::Triangulation_data_structure_3<Vb, Fb>;
-  using Triangulation_3 = CGAL::Delaunay_triangulation_3<Kernel, Tds>;
-
-public:
-  using Alpha_shape_3 = CGAL::Alpha_shape_3<Triangulation_3, Exact_tag>;
-  using Point_3 = Kernel::Point_3;
-
-  static const bool exact = true;
-  static const bool weighted = false;
-  static const bool periodic = false;
-};
-
-class Weighted_alpha_shapes_3d {
-private:
-  using Kernel = CGAL::Exact_predicates_inexact_constructions_kernel;
-  using Rvb = CGAL::Regular_triangulation_vertex_base_3<Kernel>;
-  using Vb = CGAL::Alpha_shape_vertex_base_3<Kernel, Rvb>;
-  using Rcb = CGAL::Regular_triangulation_cell_base_3<Kernel>;
-  using Cb = CGAL::Alpha_shape_cell_base_3<Kernel, Rcb>;
-  using Tds = CGAL::Triangulation_data_structure_3<Vb, Cb>;
-  using Triangulation_3 = CGAL::Regular_triangulation_3<Kernel, Tds>;
-
-
-public:
-  using Alpha_shape_3 = CGAL::Alpha_shape_3<Triangulation_3>;
-  using Point_3 = Triangulation_3::Bare_point;
-  using Weighted_point_3 = Triangulation_3::Weighted_point;
-
-  static const bool exact = false;
-  static const bool weighted = true;
-  static const bool periodic = false;
-};
 
 template<typename AlphaComplex3dOptions>
 class Alpha_complex_3d {
