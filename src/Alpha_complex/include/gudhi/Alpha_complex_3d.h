@@ -43,10 +43,9 @@ private:
   // filtration with alpha values needed type definition
   using Alpha_value_type = typename Alpha_shape_3::FT;
   using Object = CGAL::Object;
-  using Dispatch =
-  CGAL::Dispatch_output_iterator<CGAL::cpp11::tuple<Object, Alpha_value_type>,
-  CGAL::cpp11::tuple<std::back_insert_iterator<std::vector<Object> >,
-      std::back_insert_iterator<std::vector<Alpha_value_type> > > >;
+  using Dispatch = CGAL::Dispatch_output_iterator<CGAL::cpp11::tuple<Object, Alpha_value_type>,
+      CGAL::cpp11::tuple<std::back_insert_iterator<std::vector<Object> >,
+          std::back_insert_iterator<std::vector<Alpha_value_type> > > >;
   using Cell_handle = typename Alpha_shape_3::Cell_handle;
   using Facet = typename Alpha_shape_3::Facet;
   using Edge_3 = typename Alpha_shape_3::Edge;
@@ -116,6 +115,55 @@ public:
 #ifdef DEBUG_TRACES
     std::cout << "filtration_with_alpha_values returns : " << the_objects.size() << " objects" << std::endl;
 #endif  // DEBUG_TRACES
+  }
+
+  /** \brief Alpha_complex constructor from a list of points.
+*
+* Duplicate points are inserted once in the Alpha_complex. This is the reason why the vertices may be not contiguous.
+*
+* @param[in] points Range of points to triangulate. Points must be in Kernel::Point_d
+*
+* The type InputPointRange must be a range for which std::begin and
+* std::end return input iterators on a Kernel::Point_d.
+*/
+  template<typename InputPointRange>
+  Alpha_complex_3d(const InputPointRange& points,
+                   Alpha_value_type x_min, Alpha_value_type y_min, Alpha_value_type z_min,
+                   Alpha_value_type x_max, Alpha_value_type y_max, Alpha_value_type z_max) {
+    static_assert(!AlphaComplex3dOptions::weighted,
+                  "This constructor is not available for weighted versions of Alpha_complex_3d");
+    static_assert(AlphaComplex3dOptions::periodic,
+                  "This constructor is not available for non-periodic versions of Alpha_complex_3d");
+    // Checking if the cuboid is the same in x,y and z direction. If not, CGAL will not process it.
+    GUDHI_CHECK((x_max - x_min != y_max - y_min) || (x_max - x_min != z_max - z_min) || (z_max - z_min != y_max - y_min),
+                std::invalid_argument("The size of the cuboid in every directions is not the same."));
+
+    using Periodic_delaunay_triangulation_3 = typename AlphaComplex3dOptions::Periodic_delaunay_triangulation_3;
+    using Iso_cuboid_3 = typename AlphaComplex3dOptions::Iso_cuboid_3;
+    // Define the periodic cube
+    Periodic_delaunay_triangulation_3 pdt(Iso_cuboid_3(x_min, y_min, z_min, x_max, y_max, z_max));
+    // Heuristic for inserting large point sets (if pts is reasonably large)
+    pdt.insert(std::begin(points), std::end(points), true);
+    // As pdt won't be modified anymore switch to 1-sheeted cover if possible
+    GUDHI_CHECK(pdt.is_triangulation_in_1_sheet(),
+                std::invalid_argument("Uable to construct a triangulation within a single periodic domain."));
+
+    // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode. This is the default mode
+    // Maybe need to set it to GENERAL mode
+    Alpha_shape_3 as(pdt, 0, Alpha_shape_3::GENERAL);
+
+    // filtration with alpha values from alpha shape
+    std::vector<Object> the_objects;
+    std::vector<Alpha_value_type> the_alpha_values;
+
+    Dispatch disp = CGAL::dispatch_output<Object, Alpha_value_type>(std::back_inserter(the_objects),
+                                                                    std::back_inserter(the_alpha_values));
+
+    as.filtration_with_alpha_values(disp);
+#ifdef DEBUG_TRACES
+    std::cout << "filtration_with_alpha_values returns : " << the_objects.size() << " objects" << std::endl;
+#endif  // DEBUG_TRACES
+
   }
 
 private:
