@@ -24,21 +24,31 @@ int main(int argc, char **argv) {
 
   using Weighted_alpha_shapes_3d = Gudhi::alpha_complex::Weighted_alpha_shapes_3d;
   std::vector<Weighted_alpha_shapes_3d::Point_3> w_points;
-  w_points.push_back(Alpha_shapes_3d::Point_3(1., 2., 3.));
-  w_points.push_back(Alpha_shapes_3d::Point_3(6., 5., 4.));
+  w_points.push_back(Weighted_alpha_shapes_3d::Point_3(1., 2., 3.));
+  w_points.push_back(Weighted_alpha_shapes_3d::Point_3(6., 5., 4.));
 
-  std::vector<double> weights = {1., 2.};
+  std::vector<double> weights = {0.01, 0.005};
 
   Gudhi::alpha_complex::Alpha_complex_3d<Weighted_alpha_shapes_3d> weighted_alpha_complex(points, weights);
 
   using Periodic_alpha_shapes_3d = Gudhi::alpha_complex::Periodic_alpha_shapes_3d;
   std::vector<Periodic_alpha_shapes_3d::Point_3> p_points;
-  p_points.push_back(Alpha_shapes_3d::Point_3(1., 2., 3.));
-  p_points.push_back(Alpha_shapes_3d::Point_3(6., 5., 4.));
+  p_points.push_back(Periodic_alpha_shapes_3d::Point_3(1., 2., 3.));
+  p_points.push_back(Periodic_alpha_shapes_3d::Point_3(6., 5., 4.));
 
   Gudhi::alpha_complex::Alpha_complex_3d<Periodic_alpha_shapes_3d> periodic_alpha_complex(points,
                                                                                           0., 0., 0.,
                                                                                           1., 1., 1.);
+
+  using Weighted_periodic_alpha_shapes_3d = Gudhi::alpha_complex::Weighted_periodic_alpha_shapes_3d;
+  std::vector<Weighted_periodic_alpha_shapes_3d::Point_3> wp_points;
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.1, 0.2, 0.3));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.5, 0.4));
+
+  Gudhi::alpha_complex::Alpha_complex_3d<Weighted_periodic_alpha_shapes_3d>
+      weighted_periodic_alpha_complex(points, weights,
+                                      0., 0., 0.,
+                                      1., 1., 1.);
 
   return 0;
 }

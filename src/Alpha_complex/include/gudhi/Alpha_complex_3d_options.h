@@ -28,6 +28,8 @@
 #include <CGAL/Delaunay_triangulation_3.h>
 #include <CGAL/Periodic_3_Delaunay_triangulation_traits_3.h>
 #include <CGAL/Periodic_3_Delaunay_triangulation_3.h>
+#include <CGAL/Periodic_3_regular_triangulation_traits_3.h>
+#include <CGAL/Periodic_3_regular_triangulation_3.h>
 #include <CGAL/Regular_triangulation_3.h>
 #include <CGAL/Alpha_shape_3.h>
 #include <CGAL/Alpha_shape_cell_base_3.h>
@@ -116,6 +118,30 @@ public:
   using Iso_cuboid_3 = Periodic_kernel::Iso_cuboid_3;
 
   static const bool weighted = false;
+  static const bool periodic = true;
+};
+
+class Weighted_periodic_alpha_shapes_3d {
+private:
+  using Kernel = CGAL::Exact_predicates_inexact_constructions_kernel;
+  using Periodic_kernel = CGAL::Periodic_3_regular_triangulation_traits_3<Kernel>;
+  using DsVb = CGAL::Periodic_3_triangulation_ds_vertex_base_3<>;
+  using Vb = CGAL::Regular_triangulation_vertex_base_3<Periodic_kernel, DsVb>;
+  using AsVb = CGAL::Alpha_shape_vertex_base_3<Periodic_kernel, Vb>;
+  using DsCb = CGAL::Periodic_3_triangulation_ds_cell_base_3<>;
+  using Cb = CGAL::Regular_triangulation_cell_base_3<Periodic_kernel, DsCb>;
+  using AsCb = CGAL::Alpha_shape_cell_base_3<Periodic_kernel, Cb>;
+  using Tds = CGAL::Triangulation_data_structure_3<AsVb, AsCb>;
+
+public:
+  using Periodic_delaunay_triangulation_3 = CGAL::Periodic_3_regular_triangulation_3<Periodic_kernel, Tds>;
+  using Alpha_shape_3 = CGAL::Alpha_shape_3<Periodic_delaunay_triangulation_3>;
+  using Point_3 = Periodic_delaunay_triangulation_3::Bare_point;
+  using Weighted_point_3 = Periodic_delaunay_triangulation_3::Weighted_point;
+  using Alpha_value_type = Alpha_shape_3::FT;
+  using Iso_cuboid_3 = Periodic_kernel::Iso_cuboid_3;
+
+  static const bool weighted = true;
   static const bool periodic = true;
 };
 
