@@ -2,6 +2,7 @@
 #define TOPLEX_MAP_H
 
 #include <vector>
+#include <set>
 #include <unordered_set>
 #include <unordered_map>
 #include <memory>
@@ -69,7 +70,7 @@ public:
      * The edge has to verify the link condition if you want to preserve topology.
      * Returns the remaining vertex.
      * \ingroup toplex_map   */
-    Toplex_map::Vertex contraction(const Toplex_map::Vertex x, const Toplex_map::Vertex y, bool force=false);
+    Toplex_map::Vertex contraction(const Toplex_map::Vertex x, const Toplex_map::Vertex y);
 
     /** Adds the given simplex to the complex.
      * The simplex must not have neither maximal face nor coface in the complex.
@@ -88,6 +89,8 @@ public:
     /** \brief Number of maximal simplices.
       * \ingroup toplex_map   */
     std::size_t num_simplices() const;
+
+    std::set<Toplex_map::Vertex> unitary_collapse(const Toplex_map::Vertex k, const Toplex_map::Vertex d);
 
 protected:
     /** \internal Gives an index in order to look for a simplex quickly.
@@ -196,18 +199,17 @@ Toplex_map::Simplex_ptr_set Toplex_map::maximal_cofaces(const Input_vertex_range
     return cofaces;
 }
 
-Toplex_map::Vertex Toplex_map::contraction(const Toplex_map::Vertex x, const Toplex_map::Vertex y, bool force){
+Toplex_map::Vertex Toplex_map::contraction(const Toplex_map::Vertex x, const Toplex_map::Vertex y){
     if(!t0.count(x)) return y;
     if(!t0.count(y)) return x;
     int k, d;
-    if(force || (t0.at(x).size() > t0.at(y).size()))
+    if(t0.at(x).size() > t0.at(y).size())
         k=x, d=y;
     else
         k=y, d=x;
     for(const Toplex_map::Simplex_ptr& sptr : Simplex_ptr_set(t0.at(d))){
         //Copy constructor needed because the set is modified
         Simplex sigma(*sptr);
-        Simplex s; s.insert(2);
         erase_maximal(sptr);
         sigma.erase(d);
         sigma.insert(k);
@@ -216,12 +218,27 @@ Toplex_map::Vertex Toplex_map::contraction(const Toplex_map::Vertex x, const Top
     return k;
 }
 
+std::set<Toplex_map::Vertex> Toplex_map::unitary_collapse(const Toplex_map::Vertex k, const Toplex_map::Vertex d){
+   std::set<Toplex_map::Vertex> r;
+    for(const Toplex_map::Simplex_ptr& sptr : Simplex_ptr_set(t0.at(d))){
+        //Copy constructor needed because the set is modified
+        Simplex sigma(*sptr);
+        erase_maximal(sptr);
+        sigma.erase(d);
+        for(const Toplex_map::Vertex v : sigma)
+            r.insert(v);
+        sigma.insert(k);
+        insert_simplex(sigma);
+    }
+    return r;
+}
+
 template <typename Input_vertex_range>
 void Toplex_map::insert_independent_simplex(const Input_vertex_range &vertex_range){
+    auto key = get_key(vertex_range);
     for(const Toplex_map::Vertex& v : vertex_range){
         if(!t0.count(v)) t0.emplace(v, Simplex_ptr_set());
-        auto k = get_key(vertex_range);
-        t0.at(v).emplace(k);
+        t0.at(v).emplace(key);
     }
 }
 
