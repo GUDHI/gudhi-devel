@@ -37,6 +37,12 @@
 #include <CGAL/tuple.h>
 #include <CGAL/iterator.h>
 
+#include <iostream>
+#include <vector>
+#include <map>
+#include <stdexcept>
+#include <cstddef>
+#include <memory>  // for std::unique_ptr
 
 namespace Gudhi {
 
@@ -44,24 +50,25 @@ namespace alpha_complex {
 
 template<typename AlphaComplex3dOptions>
 class Alpha_complex_3d {
-private:
   using Alpha_shape_3 = typename AlphaComplex3dOptions::Alpha_shape_3;
-  // filtration with alpha values needed type definition
   using Alpha_value_type = typename Alpha_shape_3::FT;
-  using Object = CGAL::Object;
-  using Dispatch = CGAL::Dispatch_output_iterator<CGAL::cpp11::tuple<Object, Alpha_value_type>,
-      CGAL::cpp11::tuple<std::back_insert_iterator<std::vector<Object> >,
-          std::back_insert_iterator<std::vector<Alpha_value_type> > > >;
+  using Dispatch =
+  CGAL::Dispatch_output_iterator<CGAL::cpp11::tuple<CGAL::Object, Alpha_value_type>,
+  CGAL::cpp11::tuple<std::back_insert_iterator<std::vector<CGAL::Object> >,
+      std::back_insert_iterator<std::vector<Alpha_value_type> > > >;
+
   using Cell_handle = typename Alpha_shape_3::Cell_handle;
   using Facet = typename Alpha_shape_3::Facet;
-  using Edge_3 = typename Alpha_shape_3::Edge;
+  using Edge = typename Alpha_shape_3::Edge;
   using Alpha_vertex_handle = typename Alpha_shape_3::Vertex_handle;
-
 #if BOOST_VERSION >= 105400
   using Vertex_list = boost::container::static_vector<Alpha_vertex_handle, 4>;
 #else
   using Vertex_list = std::vector<Alpha_vertex_handle>;
 #endif
+
+public:
+  using Point_3 = typename AlphaComplex3dOptions::Point_3;
 
 public:
   /** \brief Alpha_complex constructor from a list of points.
@@ -75,17 +82,19 @@ public:
   */
   template<typename InputPointRange >
   Alpha_complex_3d(const InputPointRange& points) {
-    static_assert(!AlphaComplex3dOptions::weighted, "This constructor is not available for weighted versions of Alpha_complex_3d");
-    static_assert(!AlphaComplex3dOptions::periodic, "This constructor is not available for periodic versions of Alpha_complex_3d");
-    std::cout << points[0] << std::endl;
-    Alpha_shape_3 alpha_shape_3(std::begin(points), std::end(points), 0, Alpha_shape_3::GENERAL);
+    static_assert(!AlphaComplex3dOptions::weighted,
+                  "This constructor is not available for weighted versions of Alpha_complex_3d");
+    static_assert(!AlphaComplex3dOptions::periodic,
+                  "This constructor is not available for periodic versions of Alpha_complex_3d");
 
-    Dispatch disp = CGAL::dispatch_output<Object, Alpha_value_type>(std::back_inserter(the_objects),
-                                                                    std::back_inserter(the_alpha_values));
+    alpha_shape_3_ptr_ = std::unique_ptr<Alpha_shape_3>(new Alpha_shape_3(points.begin(), points.end(), 0,
+                                                        Alpha_shape_3::GENERAL));
+    Dispatch dispatcher = CGAL::dispatch_output<CGAL::Object, Alpha_value_type>(std::back_inserter(objects_),
+                                                                                std::back_inserter(alpha_values_));
 
-    alpha_shape_3.filtration_with_alpha_values(disp);
+    alpha_shape_3_ptr_->filtration_with_alpha_values(dispatcher);
 #ifdef DEBUG_TRACES
-    std::cout << "filtration_with_alpha_values returns : " << the_objects.size() << " objects" << std::endl;
+    std::cout << "filtration_with_alpha_values returns : " << objects_.size() << " objects" << std::endl;
 #endif  // DEBUG_TRACES
 
   }
@@ -106,7 +115,7 @@ public:
     static_assert(!AlphaComplex3dOptions::periodic,
                   "This constructor is not available for periodic versions of Alpha_complex_3d");
     GUDHI_CHECK((weights.size() == points.size()),
-                std::invalid_argument("Alpha_complex_3d constructor with weights requires points number to be equal with points number"));
+                std::invalid_argument("Points number in range different from weights range number"));
 
     using Weighted_point_3 = typename AlphaComplex3dOptions::Weighted_point_3;
     std::vector<Weighted_point_3> weighted_points_3;
@@ -118,14 +127,17 @@ public:
       index++;
     }
 
-    Alpha_shape_3 alpha_shape_3(std::begin(weighted_points_3), std::end(weighted_points_3), 0, Alpha_shape_3::GENERAL);
+    alpha_shape_3_ptr_ = std::unique_ptr<Alpha_shape_3>(new Alpha_shape_3(std::begin(weighted_points_3),
+                                                                          std::end(weighted_points_3),
+                                                                          0,
+                                                                          Alpha_shape_3::GENERAL));
 
-    Dispatch disp = CGAL::dispatch_output<Object, Alpha_value_type>(std::back_inserter(the_objects),
-                                                                    std::back_inserter(the_alpha_values));
+    Dispatch dispatcher = CGAL::dispatch_output<CGAL::Object, Alpha_value_type>(std::back_inserter(objects_),
+                                                                    std::back_inserter(alpha_values_));
 
-    alpha_shape_3.filtration_with_alpha_values(disp);
+    alpha_shape_3_ptr_->filtration_with_alpha_values(dispatcher);
 #ifdef DEBUG_TRACES
-    std::cout << "filtration_with_alpha_values returns : " << the_objects.size() << " objects" << std::endl;
+    std::cout << "filtration_with_alpha_values returns : " << objects_.size() << " objects" << std::endl;
 #endif  // DEBUG_TRACES
   }
 
@@ -140,14 +152,16 @@ public:
 */
   template<typename InputPointRange>
   Alpha_complex_3d(const InputPointRange& points,
-                   Alpha_value_type x_min, Alpha_value_type y_min, Alpha_value_type z_min,
-                   Alpha_value_type x_max, Alpha_value_type y_max, Alpha_value_type z_max) {
+                   double x_min, double y_min, double z_min,
+                   double x_max, double y_max, double z_max) {
     static_assert(!AlphaComplex3dOptions::weighted,
                   "This constructor is not available for weighted versions of Alpha_complex_3d");
     static_assert(AlphaComplex3dOptions::periodic,
                   "This constructor is not available for non-periodic versions of Alpha_complex_3d");
     // Checking if the cuboid is the same in x,y and z direction. If not, CGAL will not process it.
-    GUDHI_CHECK((x_max - x_min != y_max - y_min) || (x_max - x_min != z_max - z_min) || (z_max - z_min != y_max - y_min),
+    GUDHI_CHECK((x_max - x_min == y_max - y_min) ||
+                (x_max - x_min == z_max - z_min) ||
+                (z_max - z_min == y_max - y_min),
                 std::invalid_argument("The size of the cuboid in every directions is not the same."));
 
     using Periodic_delaunay_triangulation_3 = typename AlphaComplex3dOptions::Periodic_delaunay_triangulation_3;
@@ -157,23 +171,27 @@ public:
     // Heuristic for inserting large point sets (if pts is reasonably large)
     pdt.insert(std::begin(points), std::end(points), true);
     // As pdt won't be modified anymore switch to 1-sheeted cover if possible
-    GUDHI_CHECK(pdt.is_triangulation_in_1_sheet(),
-                std::invalid_argument("Uable to construct a triangulation within a single periodic domain."));
+    // GUDHI_CHECK(pdt.is_triangulation_in_1_sheet(),
+    //            std::invalid_argument("Uable to construct a triangulation within a single periodic domain."));
+    if (pdt.is_triangulation_in_1_sheet()) {
+      pdt.convert_to_1_sheeted_covering();
+    } else {
+      std::cerr << "ERROR: we were not able to construct a triangulation within a single periodic domain." << std::endl;
+      exit(-1);
+    }
+    std::cout << "Periodic Delaunay computed." << std::endl;
 
     // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode. This is the default mode
     // Maybe need to set it to GENERAL mode
-    Alpha_shape_3 as(pdt, 0, Alpha_shape_3::GENERAL);
+    alpha_shape_3_ptr_ = std::unique_ptr<Alpha_shape_3>(new Alpha_shape_3(pdt, 0,
+                                                                          Alpha_shape_3::GENERAL));
 
-    // filtration with alpha values from alpha shape
-    std::vector<Object> the_objects;
-    std::vector<Alpha_value_type> the_alpha_values;
+    Dispatch dispatcher = CGAL::dispatch_output<CGAL::Object, Alpha_value_type>(std::back_inserter(objects_),
+                                                                    std::back_inserter(alpha_values_));
 
-    Dispatch disp = CGAL::dispatch_output<Object, Alpha_value_type>(std::back_inserter(the_objects),
-                                                                    std::back_inserter(the_alpha_values));
-
-    as.filtration_with_alpha_values(disp);
+    alpha_shape_3_ptr_->filtration_with_alpha_values(dispatcher);
 #ifdef DEBUG_TRACES
-    std::cout << "filtration_with_alpha_values returns : " << the_objects.size() << " objects" << std::endl;
+    std::cout << "filtration_with_alpha_values returns : " << objects_.size() << " objects" << std::endl;
 #endif  // DEBUG_TRACES
 
   }
@@ -196,12 +214,17 @@ public:
     static_assert(AlphaComplex3dOptions::periodic,
                   "This constructor is not available for non-periodic versions of Alpha_complex_3d");
     GUDHI_CHECK((weights.size() == points.size()),
-                std::invalid_argument("Alpha_complex_3d constructor with weights requires points number to be equal with points number"));
+                std::invalid_argument("Points number in range different from weights range number"));
     // Checking if the cuboid is the same in x,y and z direction. If not, CGAL will not process it.
-    GUDHI_CHECK((x_max - x_min != y_max - y_min) || (x_max - x_min != z_max - z_min) || (z_max - z_min != y_max - y_min),
+    GUDHI_CHECK((x_max - x_min == y_max - y_min) ||
+                (x_max - x_min == z_max - z_min) ||
+                (z_max - z_min == y_max - y_min),
                 std::invalid_argument("The size of the cuboid in every directions is not the same."));
 
+#ifdef GUDHI_DEBUG
+    // Defined in GUDHI_DEBUG to avoid unused variable warning
     double maximal_possible_weight = 0.015625 * (x_max - x_min) * (x_max - x_min);
+#endif
 
     using Weighted_point_3 = typename AlphaComplex3dOptions::Weighted_point_3;
     std::vector<Weighted_point_3> weighted_points_3;
@@ -225,24 +248,24 @@ public:
     pdt.insert(std::begin(weighted_points_3), std::end(weighted_points_3), true);
     // As pdt won't be modified anymore switch to 1-sheeted cover if possible
     GUDHI_CHECK(pdt.is_triangulation_in_1_sheet(),
-                std::invalid_argument("Uable to construct a triangulation within a single periodic domain."));
+                std::invalid_argument("Unable to construct a triangulation within a single periodic domain."));
+
+    pdt.convert_to_1_sheeted_covering();
 
     // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode. This is the default mode
     // Maybe need to set it to GENERAL mode
-    Alpha_shape_3 as(pdt, 0, Alpha_shape_3::GENERAL);
+    alpha_shape_3_ptr_ = std::unique_ptr<Alpha_shape_3>(new Alpha_shape_3(pdt, 0,
+                                                                          Alpha_shape_3::GENERAL));
 
-    // filtration with alpha values from alpha shape
-    std::vector<Object> the_objects;
-    std::vector<Alpha_value_type> the_alpha_values;
+    Dispatch dispatcher = CGAL::dispatch_output<CGAL::Object, Alpha_value_type>(std::back_inserter(objects_),
+                                                                    std::back_inserter(alpha_values_));
 
-    Dispatch disp = CGAL::dispatch_output<Object, Alpha_value_type>(std::back_inserter(the_objects),
-                                                                    std::back_inserter(the_alpha_values));
-
-    as.filtration_with_alpha_values(disp);
+    alpha_shape_3_ptr_->filtration_with_alpha_values(dispatcher);
 #ifdef DEBUG_TRACES
-    std::cout << "filtration_with_alpha_values returns : " << the_objects.size() << " objects" << std::endl;
+    std::cout << "filtration_with_alpha_values returns : " << objects_.size() << " objects" << std::endl;
 #endif  // DEBUG_TRACES
   }
+
 
   template <typename SimplicialComplexForAlpha3d>
   void create_complex(SimplicialComplexForAlpha3d& complex) {
@@ -251,68 +274,86 @@ public:
   }
 
   /** \brief Inserts all Delaunay triangulation into the simplicial complex.
-   * It also computes the filtration values accordingly to the \ref createcomplexalgorithm
-   *
-   * \tparam SimplicialComplexForAlpha must meet `SimplicialComplexForAlpha` concept.
-   *
-   * @param[in] complex SimplicialComplexForAlpha to be created.
-   * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$.
-   *
-   * @return true if creation succeeds, false otherwise.
-   *
-   * @pre Delaunay triangulation must be already constructed with dimension strictly greater than 0.
-   * @pre The simplicial complex must be empty (no vertices)
-   *
-   * Initialization can be launched once.
-   */
+ * It also computes the filtration values accordingly to the \ref createcomplexalgorithm
+ *
+ * \tparam SimplicialComplexForAlpha3d must meet `SimplicialComplexForAlpha3d` concept.
+ *
+ * @param[in] complex SimplicialComplexForAlpha3d to be created.
+ * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$.
+ *
+ * @return true if creation succeeds, false otherwise.
+ *
+ * @pre The simplicial complex must be empty (no vertices)
+ *
+ * Initialization can be launched once.
+ */
   template <typename SimplicialComplexForAlpha3d>
-  void create_complex(SimplicialComplexForAlpha3d& complex,
+  bool create_complex(SimplicialComplexForAlpha3d& complex,
                       typename SimplicialComplexForAlpha3d::Filtration_value max_alpha_square) {
+    if (complex.num_vertices() > 0) {
+      std::cerr << "Alpha_complex_3d create_complex - complex is not empty\n";
+      return false;  // ----- >>
+    }
+
     using Filtration_value = typename SimplicialComplexForAlpha3d::Filtration_value;
-    using Vertex_handle = typename SimplicialComplexForAlpha3d::Vertex_handle;
+    using Complex_vertex_handle = typename SimplicialComplexForAlpha3d::Vertex_handle;
+    using Alpha_shape_simplex_tree_map = std::map<Alpha_vertex_handle,
+                                                  Complex_vertex_handle>;
+    using Simplex_tree_vector_vertex = std::vector<Complex_vertex_handle>;
+
 #ifdef DEBUG_TRACES
-    Alpha_shape_3::size_type count_vertices = 0;
-    Alpha_shape_3::size_type count_edges = 0;
-    Alpha_shape_3::size_type count_facets = 0;
-    Alpha_shape_3::size_type count_cells = 0;
+    std::size_t count_vertices = 0;
+    std::size_t count_edges = 0;
+    std::size_t count_facets = 0;
+    std::size_t count_cells = 0;
 #endif  // DEBUG_TRACES
 
-    // Loop on objects vector
-    Vertex_list vertex_list;
-    SimplicialComplexForAlpha3d simplex_tree;
-    std::map<Alpha_vertex_handle, Vertex_handle> map_cgal_simplex_tree;
-    typename std::vector<Alpha_value_type>::iterator the_alpha_value_iterator = the_alpha_values.begin();
-    for (auto object_iterator : the_objects) {
+    Alpha_shape_simplex_tree_map map_cgal_simplex_tree;
+    auto the_alpha_value_iterator = alpha_values_.begin();
+    for (auto object_iterator : objects_) {
+      Vertex_list vertex_list;
+
       // Retrieve Alpha shape vertex list from object
       if (const Cell_handle *cell = CGAL::object_cast<Cell_handle>(&object_iterator)) {
-        vertex_list = from_cell<Vertex_list, Cell_handle>(*cell);
+        for (auto i = 0; i < 4; i++) {
 #ifdef DEBUG_TRACES
+          std::cout << "from cell[" << i << "]=" << (*cell)->vertex(i)->point() << std::endl;
+#endif  // DEBUG_TRACES
+          vertex_list.push_back((*cell)->vertex(i));
+        }
         count_cells++;
-#endif  // DEBUG_TRACES
       } else if (const Facet *facet = CGAL::object_cast<Facet>(&object_iterator)) {
-        vertex_list = from_facet<Vertex_list, Facet>(*facet);
+          for (auto i = 0; i < 4; i++) {
+            if ((*facet).second != i) {
 #ifdef DEBUG_TRACES
+              std::cout << "from facet=[" << i << "]" << (*facet).first->vertex(i)->point() << std::endl;
+#endif  // DEBUG_TRACES
+              vertex_list.push_back((*facet).first->vertex(i));
+            }
+          }
         count_facets++;
-#endif  // DEBUG_TRACES
-      } else if (const Edge_3 *edge = CGAL::object_cast<Edge_3>(&object_iterator)) {
-        vertex_list = from_edge<Vertex_list, Edge_3>(*edge);
+      } else if (const Edge *edge = CGAL::object_cast<Edge>(&object_iterator)) {
+            for (auto i : {(*edge).second, (*edge).third}) {
 #ifdef DEBUG_TRACES
+              std::cout << "from edge[" << i << "]=" << (*edge).first->vertex(i)->point() << std::endl;
+#endif  // DEBUG_TRACES
+              vertex_list.push_back((*edge).first->vertex(i));
+            }
         count_edges++;
-#endif  // DEBUG_TRACES
-      } else if (const Vertex_handle *vertex = CGAL::object_cast<Vertex_handle>(&object_iterator)) {
-        vertex_list = from_vertex<Vertex_list, Vertex_handle>(*vertex);
-#ifdef DEBUG_TRACES
+      } else if (const Alpha_vertex_handle *vertex = CGAL::object_cast<Alpha_vertex_handle>(&object_iterator)) {
         count_vertices++;
+#ifdef DEBUG_TRACES
+              std::cout << "from vertex=" << (*vertex)->point() << std::endl;
 #endif  // DEBUG_TRACES
+              vertex_list.push_back((*vertex));
       }
       // Construction of the vector of simplex_tree vertex from list of alpha_shapes vertex
-      std::vector<Vertex_handle> the_simplex;
+      Simplex_tree_vector_vertex the_simplex;
       for (auto the_alpha_shape_vertex : vertex_list) {
-        typename std::map<Alpha_vertex_handle, Vertex_handle>::iterator the_map_iterator =
-            map_cgal_simplex_tree.find(the_alpha_shape_vertex);
+        auto the_map_iterator = map_cgal_simplex_tree.find(the_alpha_shape_vertex);
         if (the_map_iterator == map_cgal_simplex_tree.end()) {
           // alpha shape not found
-          Vertex_handle vertex = map_cgal_simplex_tree.size();
+          Complex_vertex_handle vertex = map_cgal_simplex_tree.size();
 #ifdef DEBUG_TRACES
           std::cout << "vertex [" << the_alpha_shape_vertex->point() << "] not found - insert " << vertex << std::endl;
 #endif  // DEBUG_TRACES
@@ -320,7 +361,7 @@ public:
           map_cgal_simplex_tree.emplace(the_alpha_shape_vertex, vertex);
         } else {
           // alpha shape found
-          Vertex_handle vertex = the_map_iterator->second;
+          Complex_vertex_handle vertex = the_map_iterator->second;
 #ifdef DEBUG_TRACES
           std::cout << "vertex [" << the_alpha_shape_vertex->point() << "] found in " << vertex << std::endl;
 #endif  // DEBUG_TRACES
@@ -332,84 +373,25 @@ public:
 #ifdef DEBUG_TRACES
       std::cout << "filtration = " << filtr << std::endl;
 #endif  // DEBUG_TRACES
-      simplex_tree.insert_simplex(the_simplex, filtr);
-      GUDHI_CHECK(the_alpha_value_iterator != the_alpha_values.end(), "CGAL provided more simplices than values");
+      complex.insert_simplex(the_simplex, filtr);
+      GUDHI_CHECK(the_alpha_value_iterator != alpha_values_.end(), "CGAL provided more simplices than values");
       ++the_alpha_value_iterator;
     }
 
 #ifdef DEBUG_TRACES
-    std::cout << "vertices \t\t" << count_vertices << std::endl;
+    std::cout << "vertices \t" << count_vertices << std::endl;
     std::cout << "edges \t\t" << count_edges << std::endl;
     std::cout << "facets \t\t" << count_facets << std::endl;
     std::cout << "cells \t\t" << count_cells << std::endl;
-
-    std::cout << "Information of the Simplex Tree: " << std::endl;
-    std::cout << "  Number of vertices = " << simplex_tree.num_vertices() << " ";
-    std::cout << "  Number of simplices = " << simplex_tree.num_simplices() << std::endl << std::endl;
-    std::cout << "  Dimension = " << simplex_tree.dimension() << " ";
 #endif  // DEBUG_TRACES
-
-#ifdef DEBUG_TRACES
-    std::cout << "Iterator on vertices: " << std::endl;
-    for (auto vertex : simplex_tree.complex_vertex_range()) {
-      std::cout << vertex << " ";
-    }
-#endif  // DEBUG_TRACES
-
+    return true;
   }
 
 private:
-  template <class Vertex_list, class Cell_handle>
-  Vertex_list from_cell(const Cell_handle& ch) {
-    Vertex_list the_list;
-    for (auto i = 0; i < 4; i++) {
-#ifdef DEBUG_TRACES
-      std::cout << "from cell[" << i << "]=" << ch->vertex(i)->point() << std::endl;
-#endif  // DEBUG_TRACES
-      the_list.push_back(ch->vertex(i));
-    }
-    return the_list;
-  }
-
-  template <class Vertex_list, class Facet>
-  Vertex_list from_facet(const Facet& fct) {
-    Vertex_list the_list;
-    for (auto i = 0; i < 4; i++) {
-      if (fct.second != i) {
-#ifdef DEBUG_TRACES
-        std::cout << "from facet=[" << i << "]" << fct.first->vertex(i)->point() << std::endl;
-#endif  // DEBUG_TRACES
-        the_list.push_back(fct.first->vertex(i));
-      }
-    }
-    return the_list;
-  }
-
-  template <class Vertex_list, class Edge_3>
-  Vertex_list from_edge(const Edge_3& edg) {
-    Vertex_list the_list;
-    for (auto i : {edg.second, edg.third}) {
-#ifdef DEBUG_TRACES
-      std::cout << "from edge[" << i << "]=" << edg.first->vertex(i)->point() << std::endl;
-#endif  // DEBUG_TRACES
-      the_list.push_back(edg.first->vertex(i));
-    }
-    return the_list;
-  }
-
-  template <class Vertex_list, class Vertex_handle>
-  Vertex_list from_vertex(const Vertex_handle& vh) {
-    Vertex_list the_list;
-#ifdef DEBUG_TRACES
-    std::cout << "from vertex=" << vh->point() << std::endl;
-#endif  // DEBUG_TRACES
-    the_list.push_back(vh);
-    return the_list;
-  }
-
-private:
-  std::vector<Object> the_objects;
-  std::vector<Alpha_value_type> the_alpha_values;
+  // Needs to store alpha_shape_3_ptr_ as objects_ and alpha_shape_3_ptr_ are freed with alpha_shape_3_ptr_
+  std::unique_ptr<Alpha_shape_3> alpha_shape_3_ptr_;
+  std::vector<CGAL::Object> objects_;
+  std::vector<Alpha_value_type> alpha_values_;
 
 };
 

@@ -42,7 +42,6 @@ namespace alpha_complex {
 
 class Alpha_shapes_3d {
 private:
-  // Alpha_shape_3 templates type definitions
   using Kernel = CGAL::Exact_predicates_inexact_constructions_kernel;
   using Vb = CGAL::Alpha_shape_vertex_base_3<Kernel>;
   using Fb = CGAL::Alpha_shape_cell_base_3<Kernel>;
@@ -55,7 +54,6 @@ public:
 
   static const bool weighted = false;
   static const bool periodic = false;
-
 };
 
 class Exact_alpha_shapes_3d {
@@ -98,24 +96,24 @@ public:
 
 class Periodic_alpha_shapes_3d {
 private:
-  using Kernel = CGAL::Exact_predicates_inexact_constructions_kernel;
-  using Periodic_kernel = CGAL::Periodic_3_Delaunay_triangulation_traits_3<Kernel>;
+  // Traits
+  using K = CGAL::Exact_predicates_inexact_constructions_kernel;
+  using PK = CGAL::Periodic_3_Delaunay_triangulation_traits_3<K>;
 // Vertex type
   using DsVb = CGAL::Periodic_3_triangulation_ds_vertex_base_3<>;
-  using Vb = CGAL::Triangulation_vertex_base_3<Periodic_kernel, DsVb>;
-  using AsVb = CGAL::Alpha_shape_vertex_base_3<Periodic_kernel, Vb>;
+  using Vb = CGAL::Triangulation_vertex_base_3<PK, DsVb>;
+  using AsVb = CGAL::Alpha_shape_vertex_base_3<PK, Vb>;
 // Cell type
   using DsCb = CGAL::Periodic_3_triangulation_ds_cell_base_3<>;
-  using Cb = CGAL::Triangulation_cell_base_3<Periodic_kernel, DsCb>;
-  using AsCb = CGAL::Alpha_shape_cell_base_3<Periodic_kernel, Cb>;
+  using Cb = CGAL::Triangulation_cell_base_3<PK, DsCb>;
+  using AsCb = CGAL::Alpha_shape_cell_base_3<PK, Cb>;
   using Tds = CGAL::Triangulation_data_structure_3<AsVb, AsCb>;
 
 public:
-  using Periodic_delaunay_triangulation_3 = CGAL::Periodic_3_Delaunay_triangulation_3<Periodic_kernel, Tds>;
+  using Periodic_delaunay_triangulation_3 = CGAL::Periodic_3_Delaunay_triangulation_3<PK, Tds>;
   using Alpha_shape_3 = CGAL::Alpha_shape_3<Periodic_delaunay_triangulation_3>;
-  using Point_3 = Periodic_kernel::Point_3;
-  using Alpha_value_type = Alpha_shape_3::FT;
-  using Iso_cuboid_3 = Periodic_kernel::Iso_cuboid_3;
+  using Point_3 = PK::Point_3;
+  using Iso_cuboid_3 = PK::Iso_cuboid_3;
 
   static const bool weighted = false;
   static const bool periodic = true;

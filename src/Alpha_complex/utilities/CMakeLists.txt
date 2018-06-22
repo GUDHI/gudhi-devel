@@ -8,10 +8,15 @@ if(CGAL_FOUND)
   add_executable(weighted_alpha_complex_3d_persistence weighted_alpha_complex_3d_persistence.cpp)
   target_link_libraries(weighted_alpha_complex_3d_persistence ${CGAL_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
+  add_executable(old_alpha_complex_3d_persistence old_alpha_complex_3d_persistence.cpp)
+  target_link_libraries(old_alpha_complex_3d_persistence ${CGAL_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
   if (TBB_FOUND)
     target_link_libraries(alpha_complex_3d_persistence ${TBB_LIBRARIES})
     target_link_libraries(exact_alpha_complex_3d_persistence ${TBB_LIBRARIES})
     target_link_libraries(weighted_alpha_complex_3d_persistence ${TBB_LIBRARIES})
+
+    target_link_libraries(old_alpha_complex_3d_persistence ${TBB_LIBRARIES})
   endif(TBB_FOUND)
   
   add_test(NAME Alpha_complex_utilities_alpha_complex_3d_persistence COMMAND $<TARGET_FILE:alpha_complex_3d_persistence>
