@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <limits>  // for numeric limits
+#include <random>
 
 void usage(int nbArgs, char * const progName) {
   std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
@@ -31,6 +32,21 @@ int main(int argc, char **argv) {
   Gudhi::Simplex_tree<> stree;
   alpha_complex.create_complex(stree);
 
+  std::cout << "Exact alpha complex 3d" << std::endl;
+  using Exact_alpha_shapes_3d = Gudhi::alpha_complex::Exact_alpha_shapes_3d;
+  std::vector<Exact_alpha_shapes_3d::Point_3> e_points;
+  e_points.push_back(Exact_alpha_shapes_3d::Point_3(0.0, 0.0, 0.0));
+  e_points.push_back(Exact_alpha_shapes_3d::Point_3(0.0, 0.0, 0.2));
+  e_points.push_back(Exact_alpha_shapes_3d::Point_3(0.2, 0.0, 0.2));
+  e_points.push_back(Exact_alpha_shapes_3d::Point_3(0.6, 0.6, 0.0));
+  e_points.push_back(Exact_alpha_shapes_3d::Point_3(0.8, 0.8, 0.2));
+  e_points.push_back(Exact_alpha_shapes_3d::Point_3(0.2, 0.8, 0.6));
+
+  Gudhi::alpha_complex::Alpha_complex_3d<Exact_alpha_shapes_3d> exact_alpha_complex(e_points);
+
+  Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence> exact_stree;
+  exact_alpha_complex.create_complex(exact_stree);
+
   std::cout << "Weighted alpha complex 3d" << std::endl;
   using Weighted_alpha_shapes_3d = Gudhi::alpha_complex::Weighted_alpha_shapes_3d;
   std::vector<Weighted_alpha_shapes_3d::Point_3> w_points;
@@ -51,6 +67,7 @@ int main(int argc, char **argv) {
   std::cout << "Periodic alpha complex 3d" << std::endl;
   using Periodic_alpha_shapes_3d = Gudhi::alpha_complex::Periodic_alpha_shapes_3d;
   std::vector<Periodic_alpha_shapes_3d::Point_3> p_points;
+
   p_points.push_back(Periodic_alpha_shapes_3d::Point_3(0.0, 0.0, 0.0));
   p_points.push_back(Periodic_alpha_shapes_3d::Point_3(0.0, 0.0, 0.2));
   p_points.push_back(Periodic_alpha_shapes_3d::Point_3(0.0, 0.0, 0.4));
@@ -131,8 +148,7 @@ int main(int argc, char **argv) {
   p_points.push_back(Periodic_alpha_shapes_3d::Point_3(0.6, 0.0, 0.4));
   p_points.push_back(Periodic_alpha_shapes_3d::Point_3(0.6, 0.0, 0.6));
   p_points.push_back(Periodic_alpha_shapes_3d::Point_3(0.6, 0.0, 0.8));
-  p_points.push_back(Periodic_alpha_shapes_3d::Point_3(0.6, 0.0, 0.0));
-  p_points.push_back(Periodic_alpha_shapes_3d::Point_3(0.6, 0.1, 0.0));  //
+  p_points.push_back(Periodic_alpha_shapes_3d::Point_3(0.6, 0.1, 0.0));
   p_points.push_back(Periodic_alpha_shapes_3d::Point_3(0.6, 0.2, 0.0));
   p_points.push_back(Periodic_alpha_shapes_3d::Point_3(0.6, 0.2, 0.2));
   p_points.push_back(Periodic_alpha_shapes_3d::Point_3(0.6, 0.2, 0.4));
@@ -177,22 +193,162 @@ int main(int argc, char **argv) {
   p_points.push_back(Periodic_alpha_shapes_3d::Point_3(0.8, 0.8, 0.2));
   p_points.push_back(Periodic_alpha_shapes_3d::Point_3(0.8, 0.8, 0.4));
   p_points.push_back(Periodic_alpha_shapes_3d::Point_3(0.8, 0.8, 0.6));
-  //p_points.push_back(Periodic_alpha_shapes_3d::Point_3(0.8, 0.8, 0.8));
 
-  Gudhi::alpha_complex::Alpha_complex_3d<Periodic_alpha_shapes_3d> periodic_alpha_complex(points,
+  Gudhi::alpha_complex::Alpha_complex_3d<Periodic_alpha_shapes_3d> periodic_alpha_complex(p_points,
                                                                                           0., 0., 0.,
                                                                                           1., 1., 1.);
+
+  Gudhi::Simplex_tree<> p_stree;
+  periodic_alpha_complex.create_complex(p_stree);
 
   std::cout << "Weighted periodic alpha complex 3d" << std::endl;
   using Weighted_periodic_alpha_shapes_3d = Gudhi::alpha_complex::Weighted_periodic_alpha_shapes_3d;
   std::vector<Weighted_periodic_alpha_shapes_3d::Point_3> wp_points;
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.1, 0.2, 0.3));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.5, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.0, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.0, 0.2));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.0, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.0, 0.6));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.0, 0.8));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.2, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.2, 0.2));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.2, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.2, 0.6));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.2, 0.8));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.4, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.4, 0.2));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.4, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.4, 0.6));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.4, 0.8));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.6, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.6, 0.2));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.6, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.6, 0.6));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.6, 0.8));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.8, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.8, 0.2));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.8, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.8, 0.6));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.8, 0.8));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.0, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.0, 0.2));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.0, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.0, 0.6));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.0, 0.8));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.2, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.2, 0.2));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.2, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.2, 0.6));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.2, 0.8));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.4, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.4, 0.2));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.4, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.4, 0.6));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.4, 0.8));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.6, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.6, 0.2));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.6, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.6, 0.6));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.6, 0.8));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.8, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.8, 0.2));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.8, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.8, 0.6));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.8, 0.8));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.0, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.0, 0.2));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.0, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.0, 0.6));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.0, 0.8));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.2, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.2, 0.2));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.2, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.2, 0.6));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.2, 0.8));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.4, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.4, 0.2));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.4, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.4, 0.6));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.4, 0.8));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.6, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.6, 0.2));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.6, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.6, 0.6));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.6, 0.8));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.8, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.8, 0.2));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.8, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.8, 0.6));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.8, 0.8));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.0, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.0, 0.2));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.0, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.0, 0.6));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.0, 0.8));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.1, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.2, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.2, 0.2));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.2, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.2, 0.6));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.2, 0.8));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.4, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.4, 0.2));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.4, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.4, 0.6));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.4, 0.8));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.6, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.6, 0.2));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.6, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.6, 0.6));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.6, 0.8));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.8, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.8, 0.2));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.8, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.8, 0.6));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.8, 0.8));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.0, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.0, 0.2));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.0, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.0, 0.6));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.0, 0.8));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.2, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.2, 0.2));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.2, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.2, 0.6));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.2, 0.8));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.4, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.4, 0.2));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.4, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.4, 0.6));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.4, 0.8));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.6, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.6, 0.2));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.6, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.6, 0.6));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.6, 0.8));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.8, 0.0));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.8, 0.2));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.8, 0.4));
+  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.8, 0.6));
+
+  std::vector<double> p_weights;
+
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  // Weights must be in range [0, <1/64]
+  std::uniform_real_distribution<double> dist(0.0, 0.0156245);
+
+  for (std::size_t i = 0; i < wp_points.size(); ++i) {
+    double value = dist(mt);
+    std::cout << value << std::endl;
+    p_weights.push_back(value);
+  }
 
   Gudhi::alpha_complex::Alpha_complex_3d<Weighted_periodic_alpha_shapes_3d>
-      weighted_periodic_alpha_complex(points, weights,
+      weighted_periodic_alpha_complex(wp_points, p_weights,
                                       0., 0., 0.,
                                       1., 1., 1.);
+  Gudhi::Simplex_tree<> wp_stree;
+  weighted_periodic_alpha_complex.create_complex(wp_stree);
 
   return 0;
 }

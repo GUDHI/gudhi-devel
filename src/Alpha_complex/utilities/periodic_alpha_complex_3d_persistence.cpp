@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
   // Read the OFF file (input file name given as parameter) and triangulate points
   Gudhi::Points_3D_off_reader<Point_3> off_reader(off_file_points);
   // Check the read operation was correct
-  if (!off_reader.is_valid()) {
+  if (off_reader.is_valid()) {
     std::cerr << "Unable to read OFF file " << off_file_points << std::endl;
     exit(-1);
   }

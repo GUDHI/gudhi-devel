@@ -54,6 +54,11 @@ public:
 
   static const bool weighted = false;
   static const bool periodic = false;
+
+  template<class Filtration_value, class Alpha_value_iterator>
+  static Filtration_value value_from_iterator(const Alpha_value_iterator avi){
+    return /*std::sqrt*/ *avi;
+  }
 };
 
 class Exact_alpha_shapes_3d {
@@ -72,6 +77,12 @@ public:
 
   static const bool weighted = false;
   static const bool periodic = false;
+  static const bool exact = true;
+
+  template<class Filtration_value, class Alpha_value_iterator>
+  static Filtration_value value_from_iterator(const Alpha_value_iterator avi){
+    return /*std::sqrt*/ CGAL::to_double(avi->exact());
+  }
 };
 
 class Weighted_alpha_shapes_3d {
@@ -92,6 +103,12 @@ public:
 
   static const bool weighted = true;
   static const bool periodic = false;
+  static const bool exact = false;
+
+  template<class Filtration_value, class Alpha_value_iterator>
+  static Filtration_value value_from_iterator(const Alpha_value_iterator avi){
+    return /*std::sqrt*/ *avi;
+  }
 };
 
 class Periodic_alpha_shapes_3d {
@@ -117,6 +134,12 @@ public:
 
   static const bool weighted = false;
   static const bool periodic = true;
+  static const bool exact = false;
+
+  template<class Filtration_value, class Alpha_value_iterator>
+  static Filtration_value value_from_iterator(const Alpha_value_iterator avi){
+    return /*std::sqrt*/ *avi;
+  }
 };
 
 class Weighted_periodic_alpha_shapes_3d {
@@ -136,11 +159,16 @@ public:
   using Alpha_shape_3 = CGAL::Alpha_shape_3<Periodic_delaunay_triangulation_3>;
   using Point_3 = Periodic_delaunay_triangulation_3::Bare_point;
   using Weighted_point_3 = Periodic_delaunay_triangulation_3::Weighted_point;
-  using Alpha_value_type = Alpha_shape_3::FT;
   using Iso_cuboid_3 = Periodic_kernel::Iso_cuboid_3;
 
   static const bool weighted = true;
   static const bool periodic = true;
+  static const bool exact = false;
+
+  template<class Filtration_value, class Alpha_value_iterator>
+  static Filtration_value value_from_iterator(const Alpha_value_iterator avi){
+    return /*std::sqrt*/ *avi;
+  }
 };
 
 }  // namespace alpha_complex

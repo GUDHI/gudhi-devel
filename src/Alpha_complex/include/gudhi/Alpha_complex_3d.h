@@ -36,6 +36,7 @@
 #include <CGAL/Object.h>
 #include <CGAL/tuple.h>
 #include <CGAL/iterator.h>
+#include <CGAL/version.h>
 
 #include <iostream>
 #include <vector>
@@ -43,6 +44,12 @@
 #include <stdexcept>
 #include <cstddef>
 #include <memory>  // for std::unique_ptr
+
+#if CGAL_VERSION_NR < 1041101000
+  // Make compilation fail - required for external projects - https://gitlab.inria.fr/GUDHI/gudhi-devel/issues/10
+  static_assert(false,
+                "Alpha_complex_3d is only available for CGAL >= 4.11");
+#endif
 
 namespace Gudhi {
 
@@ -87,7 +94,7 @@ public:
     static_assert(!AlphaComplex3dOptions::periodic,
                   "This constructor is not available for periodic versions of Alpha_complex_3d");
 
-    alpha_shape_3_ptr_ = std::unique_ptr<Alpha_shape_3>(new Alpha_shape_3(points.begin(), points.end(), 0,
+    alpha_shape_3_ptr_ = std::unique_ptr<Alpha_shape_3>(new Alpha_shape_3(std::begin(points), std::end(points), 0,
                                                         Alpha_shape_3::GENERAL));
     Dispatch dispatcher = CGAL::dispatch_output<CGAL::Object, Alpha_value_type>(std::back_inserter(objects_),
                                                                                 std::back_inserter(alpha_values_));
@@ -149,11 +156,13 @@ public:
 *
 * The type InputPointRange must be a range for which std::begin and
 * std::end return input iterators on a Kernel::Point_d.
+*
+* @exception std::invalid_argument In case the number of simplices is more than Simplex_key type numeric limit.
 */
   template<typename InputPointRange>
   Alpha_complex_3d(const InputPointRange& points,
-                   double x_min, double y_min, double z_min,
-                   double x_max, double y_max, double z_max) {
+                   Alpha_value_type x_min, Alpha_value_type y_min, Alpha_value_type z_min,
+                   Alpha_value_type x_max, Alpha_value_type y_max, Alpha_value_type z_max) {
     static_assert(!AlphaComplex3dOptions::weighted,
                   "This constructor is not available for weighted versions of Alpha_complex_3d");
     static_assert(AlphaComplex3dOptions::periodic,
@@ -171,15 +180,10 @@ public:
     // Heuristic for inserting large point sets (if pts is reasonably large)
     pdt.insert(std::begin(points), std::end(points), true);
     // As pdt won't be modified anymore switch to 1-sheeted cover if possible
-    // GUDHI_CHECK(pdt.is_triangulation_in_1_sheet(),
-    //            std::invalid_argument("Uable to construct a triangulation within a single periodic domain."));
-    if (pdt.is_triangulation_in_1_sheet()) {
-      pdt.convert_to_1_sheeted_covering();
-    } else {
-      std::cerr << "ERROR: we were not able to construct a triangulation within a single periodic domain." << std::endl;
-      exit(-1);
+    if (!pdt.is_triangulation_in_1_sheet()) {
+      throw std::invalid_argument("Unable to construct a triangulation within a single periodic domain.");
     }
-    std::cout << "Periodic Delaunay computed." << std::endl;
+    pdt.convert_to_1_sheeted_covering();
 
     // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode. This is the default mode
     // Maybe need to set it to GENERAL mode
@@ -232,7 +236,7 @@ public:
     std::size_t index = 0;
     weighted_points_3.reserve(points.size());
     while ((index < weights.size()) && (index < points.size())) {
-      GUDHI_CHECK((weights[index] >= maximal_possible_weight) || (weights[index] < 0),
+      GUDHI_CHECK((weights[index] < maximal_possible_weight) || (weights[index] >= 0),
                   std::invalid_argument("Invalid weight at line" + std::to_string(index + 1) +
                                         ". Must be positive and less than maximal possible weight = 1/64*cuboid length "
                                         "squared, which is not an acceptable input."));
@@ -247,9 +251,9 @@ public:
     // Heuristic for inserting large point sets (if pts is reasonably large)
     pdt.insert(std::begin(weighted_points_3), std::end(weighted_points_3), true);
     // As pdt won't be modified anymore switch to 1-sheeted cover if possible
-    GUDHI_CHECK(pdt.is_triangulation_in_1_sheet(),
-                std::invalid_argument("Unable to construct a triangulation within a single periodic domain."));
-
+    if (!pdt.is_triangulation_in_1_sheet()) {
+      throw std::invalid_argument("Unable to construct a triangulation within a single periodic domain.");
+    }
     pdt.convert_to_1_sheeted_covering();
 
     // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode. This is the default mode
@@ -369,11 +373,16 @@ public:
         }
       }
       // Construction of the simplex_tree
-      Filtration_value filtr = /*std::sqrt*/ (*the_alpha_value_iterator);
+      //Alpha_value_type filtr;
+      Filtration_value filtr =
+        AlphaComplex3dOptions::template value_from_iterator<Filtration_value,
+                                                            typename std::vector<Alpha_value_type>::iterator>
+                                                              (the_alpha_value_iterator);
+      //Filtration_value filtr = CGAL::to_double(the_alpha_value_iterator->exact());
 #ifdef DEBUG_TRACES
       std::cout << "filtration = " << filtr << std::endl;
 #endif  // DEBUG_TRACES
-      complex.insert_simplex(the_simplex, filtr);
+      //complex.insert_simplex(the_simplex, static_cast<Filtration_value>(filtr));
       GUDHI_CHECK(the_alpha_value_iterator != alpha_values_.end(), "CGAL provided more simplices than values");
       ++the_alpha_value_iterator;
     }
