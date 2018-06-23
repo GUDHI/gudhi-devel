@@ -62,7 +62,7 @@ namespace Persistence_representations {
  * in the diagrams, or approximated by sampling \f$N\f$ lines in the circle in \f$O(Nn{\rm log}(n))\f$ time. The Sliced Wasserstein Kernel is then computed as:
  *
  * \f$ k(D_1,D_2) = {\rm exp}\left(-\frac{SW(D_1,D_2)}{2\sigma^2}\right).\f$
- * 
+ *
  * For more details, please see \cite pmlr-v70-carriere17a .
  *
 **/
@@ -80,7 +80,7 @@ class Sliced_Wasserstein {
   void build_rep(){
 
     if(approx > 0){
-      
+
       double step = pi/this->approx;
       int n = diagram.size();
 
@@ -188,7 +188,7 @@ class Sliced_Wasserstein {
    * \ingroup Sliced_Wasserstein
    *
    * @pre       approx attribute needs to be the same for both instances.
-   * @param[in] second other instance of class Sliced_Wasserstein. 
+   * @param[in] second other instance of class Sliced_Wasserstein.
    *
    *
    */

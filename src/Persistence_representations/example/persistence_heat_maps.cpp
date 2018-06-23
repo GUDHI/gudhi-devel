@@ -21,6 +21,7 @@
  */
 
 #include <gudhi/Persistence_heat_maps.h>
+#include <gudhi/common_persistence_representations.h>
 
 #include <iostream>
 #include <vector>
@@ -75,6 +76,17 @@ int main(int argc, char** argv) {
 
   // to compute scalar product of hm1 and hm2:
   std::cout << "Scalar product is : " << hm1.compute_scalar_product(hm2) << std::endl;
+
+  Gudhi::Persistence_representations::Kernel k = Gudhi::Persistence_representations::Gaussian_kernel(1.0);
+
+  Persistence_heat_maps hm1k(persistence1, k);
+  Persistence_heat_maps hm2k(persistence2, k);
+
+  Persistence_heat_maps hm1i(persistence1, 20, 20, 0, 11, 0, 11, k);
+  Persistence_heat_maps hm2i(persistence2, 20, 20, 0, 11, 0, 11, k);
+
+  std::cout << "Scalar product computed with exact kernel is : " << hm1i.compute_scalar_product(hm2i) << std::endl;
+  std::cout << "Kernel value between PDs seen as functions is : " << hm1k.compute_scalar_product(hm2k) << std::endl;
 
   return 0;
 }

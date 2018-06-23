@@ -40,12 +40,23 @@ static constexpr double pi = boost::math::constants::pi<double>();
 /**
  * In this module, we use the name Persistence_diagram for the representation of a diagram in a vector of pairs of two double.
  */
-using Persistence_diagram = std::vector<std::pair<double,double> >;
+using Persistence_diagram = std::vector<std::pair<double, double> >;
 
 /**
  * In this module, we use the name Weight for the representation of a function taking a pair of two double and returning a double.
  */
-using Weight = std::function<double (std::pair<double,double>) >;
+using Weight = std::function<double (std::pair<double, double>) >;
+using Kernel = std::function<double (std::pair<double, double>, std::pair<double, double> )>;
+
+Kernel Gaussian_kernel(double sigma){
+  return [=](std::pair<double, double> p, std::pair<double, double> q){return std::exp(  -((p.first-q.first)*(p.first-q.first) + (p.second-q.second)*(p.second-q.second)) / (sigma*sigma)   );};
+}
+
+Kernel polynomial_kernel(double c, double d){
+  return [=](std::pair<double, double> p, std::pair<double, double> q){return std::pow( p.first*q.first + p.second*q.second + c, d);};
+}
+
+
 // double epsi = std::numeric_limits<double>::epsilon();
 double epsi = 0.000005;
 

@@ -31,23 +31,3 @@ add_executable ( Sliced_Wasserstein sliced_wasserstein.cpp )
 add_test(NAME Sliced_Wasserstein
     COMMAND $<TARGET_FILE:Sliced_Wasserstein>)
 install(TARGETS Sliced_Wasserstein DESTINATION bin)
-
-add_executable ( Persistence_weighted_gaussian persistence_weighted_gaussian.cpp )
-add_test(NAME Persistence_weighted_gaussian
-    COMMAND $<TARGET_FILE:Persistence_weighted_gaussian>)
-install(TARGETS Persistence_weighted_gaussian DESTINATION bin)
-
-add_executable ( Persistence_heat_maps_exact persistence_heat_maps_exact.cpp )
-add_test(NAME Persistence_heat_maps_exact
-    COMMAND $<TARGET_FILE:Persistence_heat_maps_exact>)
-install(TARGETS Persistence_heat_maps_exact DESTINATION bin)
-
-add_executable ( Persistence_landscape_on_grid_exact persistence_landscape_on_grid_exact.cpp )
-add_test(NAME Persistence_landscape_on_grid_exact
-    COMMAND $<TARGET_FILE:Persistence_landscape_on_grid_exact>)
-install(TARGETS Persistence_landscape_on_grid_exact DESTINATION bin)
-
-add_executable ( Betti_sequence betti_sequence.cpp )
-add_test(NAME Betti_sequence
-    COMMAND $<TARGET_FILE:Betti_sequence>)
-install(TARGETS Betti_sequence DESTINATION bin)
