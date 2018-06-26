@@ -30,15 +30,8 @@
 #include <gudhi/Points_3D_off_io.h>
 
 #include <fstream>
-#include <cmath>
 #include <string>
-#include <tuple>
-#include <map>
-#include <utility>
 #include <vector>
-#include <cstdlib>
-
-#include "alpha_complex_3d_helper.h"
 
 // gudhi type definition
 using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::Weighted_alpha_shapes_3d>;
