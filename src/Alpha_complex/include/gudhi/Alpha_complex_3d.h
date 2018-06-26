@@ -225,16 +225,17 @@ public:
                 (z_max - z_min == y_max - y_min),
                 std::invalid_argument("The size of the cuboid in every directions is not the same."));
 
-#ifdef GUDHI_DEBUG
-    // Defined in GUDHI_DEBUG to avoid unused variable warning
-    double maximal_possible_weight = 0.015625 * (x_max - x_min) * (x_max - x_min);
-#endif
-
     using Weighted_point_3 = typename AlphaComplex3dOptions::Weighted_point_3;
     std::vector<Weighted_point_3> weighted_points_3;
 
     std::size_t index = 0;
     weighted_points_3.reserve(points.size());
+
+#ifdef GUDHI_DEBUG
+    // Defined in GUDHI_DEBUG to avoid unused variable warning for GUDHI_CHECK
+    double maximal_possible_weight = 0.015625 * (x_max - x_min) * (x_max - x_min);
+#endif
+
     while ((index < weights.size()) && (index < points.size())) {
       GUDHI_CHECK((weights[index] < maximal_possible_weight) || (weights[index] >= 0),
                   std::invalid_argument("Invalid weight at line" + std::to_string(index + 1) +
@@ -325,7 +326,9 @@ public:
 #endif  // DEBUG_TRACES
           vertex_list.push_back((*cell)->vertex(i));
         }
+#ifdef DEBUG_TRACES
         count_cells++;
+#endif  // DEBUG_TRACES
       } else if (const Facet *facet = CGAL::object_cast<Facet>(&object_iterator)) {
           for (auto i = 0; i < 4; i++) {
             if ((*facet).second != i) {
@@ -335,7 +338,9 @@ public:
               vertex_list.push_back((*facet).first->vertex(i));
             }
           }
+#ifdef DEBUG_TRACES
         count_facets++;
+#endif  // DEBUG_TRACES
       } else if (const Edge *edge = CGAL::object_cast<Edge>(&object_iterator)) {
             for (auto i : {(*edge).second, (*edge).third}) {
 #ifdef DEBUG_TRACES
@@ -343,13 +348,15 @@ public:
 #endif  // DEBUG_TRACES
               vertex_list.push_back((*edge).first->vertex(i));
             }
-        count_edges++;
-      } else if (const Alpha_vertex_handle *vertex = CGAL::object_cast<Alpha_vertex_handle>(&object_iterator)) {
-        count_vertices++;
 #ifdef DEBUG_TRACES
-              std::cout << "from vertex=" << (*vertex)->point() << std::endl;
+        count_edges++;
 #endif  // DEBUG_TRACES
-              vertex_list.push_back((*vertex));
+      } else if (const Alpha_vertex_handle *vertex = CGAL::object_cast<Alpha_vertex_handle>(&object_iterator)) {
+#ifdef DEBUG_TRACES
+        count_vertices++;
+        std::cout << "from vertex=" << (*vertex)->point() << std::endl;
+#endif  // DEBUG_TRACES
+        vertex_list.push_back((*vertex));
       }
       // Construction of the vector of simplex_tree vertex from list of alpha_shapes vertex
       Simplex_tree_vector_vertex the_simplex;
@@ -378,11 +385,10 @@ public:
         AlphaComplex3dOptions::template value_from_iterator<Filtration_value,
                                                             typename std::vector<Alpha_value_type>::iterator>
                                                               (the_alpha_value_iterator);
-      //Filtration_value filtr = CGAL::to_double(the_alpha_value_iterator->exact());
 #ifdef DEBUG_TRACES
       std::cout << "filtration = " << filtr << std::endl;
 #endif  // DEBUG_TRACES
-      //complex.insert_simplex(the_simplex, static_cast<Filtration_value>(filtr));
+      complex.insert_simplex(the_simplex, static_cast<Filtration_value>(filtr));
       GUDHI_CHECK(the_alpha_value_iterator != alpha_values_.end(), "CGAL provided more simplices than values");
       ++the_alpha_value_iterator;
     }
