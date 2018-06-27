@@ -190,7 +190,8 @@ template <typename Kernel, typename OutputIterator>
 static void generate_uniform_points_on_torus_d(const Kernel &k, int dim, std::size_t num_slices,
                                                OutputIterator out,
                                                double radius_noise_percentage = 0.,
-                                               std::vector<typename Kernel::FT> current_point = std::vector<typename Kernel::FT>()) {
+                                               std::vector<typename Kernel::FT> current_point =
+                                                       std::vector<typename Kernel::FT>()) {
   CGAL::Random rng;
   int point_size = static_cast<int>(current_point.size());
   if (point_size == 2 * dim) {

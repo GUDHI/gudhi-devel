@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
 project(Nerve_GIC_examples)
 
 if (NOT CGAL_VERSION VERSION_LESS 4.8.1)

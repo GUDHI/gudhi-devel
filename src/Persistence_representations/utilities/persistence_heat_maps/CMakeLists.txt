@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
 project(Persistence_representations_heat_maps_utilities)
 
 add_persistence_representation_creation_utility(create_pssk  "10" "-1" "-1" "4" "-1")

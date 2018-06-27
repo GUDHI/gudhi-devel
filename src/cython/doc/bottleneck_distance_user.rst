@@ -1,9 +1,13 @@
+:orphan:
+
+.. To get rid of WARNING: document isn't included in any toctree
+
 Bottleneck distance user manual
 ===============================
 Definition
 ----------
 
-.. include:: bottleneck_distance_sum.rst
+.. include:: bottleneck_distance_sum.inc
 
 Function
 --------

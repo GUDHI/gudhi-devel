@@ -1,7 +1,11 @@
+:orphan:
+
+.. To get rid of WARNING: document isn't included in any toctree
+
 Witness complex user manual
 ===========================
 
-.. include:: witness_complex_sum.rst
+.. include:: witness_complex_sum.inc
 
 Definitions
 -----------

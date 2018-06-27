@@ -31,6 +31,7 @@
 #include <string>
 #include <vector>
 #include <limits>  // infinity
+#include <algorithm>  // for sort
 
 // Types definition
 using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;

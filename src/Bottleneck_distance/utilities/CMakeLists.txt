@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
 project(Bottleneck_distance_utilities)
 
 if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
