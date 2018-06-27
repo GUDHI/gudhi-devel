@@ -21,6 +21,7 @@
  */
 
 #include <boost/program_options.hpp>
+#include <boost/variant.hpp>
 
 #include <gudhi/Alpha_complex_3d.h>
 #include <gudhi/Alpha_complex_3d_options.h>
@@ -28,41 +29,130 @@
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Points_3D_off_io.h>
 
-#include <iostream>
+#include <fstream>
 #include <string>
-#include <limits>  // for numeric_limits
+#include <vector>
 
 // gudhi type definition
+using Weighted_periodic_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::Weighted_periodic_alpha_shapes_3d>;
+using Periodic_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::Periodic_alpha_shapes_3d>;
+using Weighted_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::Weighted_alpha_shapes_3d>;
+using Exact_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::Exact_alpha_shapes_3d>;
 using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::Alpha_shapes_3d>;
 using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
 using Filtration_value = Simplex_tree::Filtration_value;
 using Persistent_cohomology =
     Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Gudhi::persistent_cohomology::Field_Zp>;
 
-void program_options(int argc, char *argv[], std::string &off_file_points, std::string &output_file_diag,
-                     int &coeff_field_characteristic, Filtration_value &min_persistence);
+void program_options(int argc, char *argv[], std::string &off_file_points, bool& exact, std::string &weight_file,
+                     std::string &cuboid_file, std::string &output_file_diag, int &coeff_field_characteristic,
+                     Filtration_value &min_persistence);
+
+template<typename AlphaComplex3d>
+bool create_complex(AlphaComplex3d& alpha_complex, Simplex_tree& simplex_tree) {
+  return alpha_complex.create_complex(simplex_tree);
+}
+
+bool read_weight_file(const std::string& weight_file, std::vector<double>& weights) {
+  // Read weights information from file
+  std::ifstream weights_ifstr(weight_file);
+  if (weights_ifstr.good()) {
+    double weight = 0.0;
+    // Attempt read the weight in a double format, return false if it fails
+    while (weights_ifstr >> weight) {
+      weights.push_back(weight);
+    }
+  } else {
+    return false;
+  }
+  return true;
+}
+
+bool read_cuboid_file(const std::string& cuboid_file, double& x_min, double& y_min, double& z_min,
+                      double& x_max, double& y_max, double& z_max) {
+  // Read weights information from file
+  std::ifstream iso_cuboid_str(cuboid_file);
+  if (iso_cuboid_str.is_open()) {
+    if (!(iso_cuboid_str >> x_min >> y_min >> z_min >> x_max >> y_max >> z_max)) {
+      return false;
+    }
+  } else {
+    return false;
+  }
+  return true;
+}
 
 int main(int argc, char **argv) {
   std::string off_file_points;
+  std::string weight_file;
+  std::string cuboid_file;
   std::string output_file_diag;
-  int coeff_field_characteristic;
-  Filtration_value min_persistence;
+  int coeff_field_characteristic = 0;
+  Filtration_value min_persistence = 0.;
+  bool exact_version = false;
+  bool weighted_version = false;
+  bool periodic_version = false;
 
-  program_options(argc, argv, off_file_points, output_file_diag, coeff_field_characteristic, min_persistence);
+  program_options(argc, argv, off_file_points, exact_version, weight_file, cuboid_file, output_file_diag,
+                  coeff_field_characteristic, min_persistence);
 
   // Read the OFF file (input file name given as parameter) and triangulate points
   Gudhi::Points_3D_off_reader<Alpha_complex_3d::Point_3> off_reader(off_file_points);
   // Check the read operation was correct
   if (!off_reader.is_valid()) {
-    std::cerr << "Unable to read file " << off_file_points << std::endl;
+    std::cerr << "Unable to read OFF file " << off_file_points << std::endl;
     exit(-1);
   }
 
-  Alpha_complex_3d alpha_complex(off_reader.get_point_cloud());
+  std::vector<double> weights;
+  if (weight_file != std::string()) {
+    if (!read_weight_file(weight_file, weights)) {
+      std::cerr << "Unable to read weights file " << weight_file << std::endl;
+      exit(-1);
+    }
+    weighted_version = true;
+  }
+
+  double x_min=0., y_min=0., z_min=0., x_max=0., y_max=0., z_max=0.;
+  std::ifstream iso_cuboid_str(argv[3]);
+  if (cuboid_file != std::string()) {
+    if (!read_cuboid_file(cuboid_file, x_min, y_min, z_min, x_max, y_max, z_max)) {
+      std::cerr << "Unable to read cuboid file " << cuboid_file << std::endl;
+      exit(-1);
+    }
+    periodic_version = true;
+  }
 
   Simplex_tree simplex_tree;
 
-  alpha_complex.create_complex(simplex_tree);
+  if (exact_version) {
+    if ((weighted_version) || (periodic_version)) {
+      std::cerr << "Unable to compute exact version of a weighted and/or periodic alpha shape" << std::endl;
+      exit(-1);
+    } else {
+      Exact_alpha_complex_3d alpha_complex(off_reader.get_point_cloud());
+      create_complex(alpha_complex, simplex_tree);
+    }
+  } else {
+    if (weighted_version) {
+      if (periodic_version) {
+        Weighted_periodic_alpha_complex_3d alpha_complex(off_reader.get_point_cloud(), weights,
+                                                         x_min, y_min, z_min, x_max, y_max, z_max);
+        create_complex(alpha_complex, simplex_tree);
+      } else {
+        Weighted_alpha_complex_3d alpha_complex(off_reader.get_point_cloud(), weights);
+        create_complex(alpha_complex, simplex_tree);
+      }
+    } else {
+      if (periodic_version) {
+        Periodic_alpha_complex_3d alpha_complex(off_reader.get_point_cloud(), x_min, y_min, z_min, x_max, y_max, z_max);
+        create_complex(alpha_complex, simplex_tree);
+      } else {
+        Alpha_complex_3d alpha_complex(off_reader.get_point_cloud());
+        create_complex(alpha_complex, simplex_tree);
+      }
+    }
+  }
 
   // Sort the simplices in the order of the filtration
   simplex_tree.initialize_filtration();
@@ -88,8 +178,9 @@ int main(int argc, char **argv) {
   return 0;
 }
 
-void program_options(int argc, char *argv[], std::string &off_file_points, std::string &output_file_diag,
-                     int &coeff_field_characteristic, Filtration_value &min_persistence) {
+void program_options(int argc, char *argv[], std::string &off_file_points, bool& exact, std::string &weight_file,
+                     std::string &cuboid_file, std::string &output_file_diag, int &coeff_field_characteristic,
+                     Filtration_value &min_persistence) {
   namespace po = boost::program_options;
   po::options_description hidden("Hidden options");
   hidden.add_options()("input-file", po::value<std::string>(&off_file_points),
@@ -97,6 +188,12 @@ void program_options(int argc, char *argv[], std::string &off_file_points, std::
 
   po::options_description visible("Allowed options", 100);
   visible.add_options()("help,h", "produce help message")(
+      "exact,e", po::bool_switch(&exact),
+      "To activate exact version of Alpha complex 3d (default is false, not available for weighted and/or periodic)")(
+      "weight-file,w", po::value<std::string>(&weight_file)->default_value(std::string()),
+      "Name of file containing a point weights. Format is one weight per line:\n  W1\n  ...\n  Wn ")(
+      "cuboid-file,c", po::value<std::string>(&cuboid_file),
+      "Name of file describing the periodic domain. Format is:\n  min_hx min_hy min_hz\n  max_hx max_hy max_hz")(
       "output-file,o", po::value<std::string>(&output_file_diag)->default_value(std::string()),
       "Name of file in which the persistence diagram is written. Default print in std::cout")(
       "field-charac,p", po::value<int>(&coeff_field_characteristic)->default_value(11),
@@ -115,18 +212,19 @@ void program_options(int argc, char *argv[], std::string &off_file_points, std::
   po::store(po::command_line_parser(argc, argv).options(all).positional(pos).run(), vm);
   po::notify(vm);
 
-  if (vm.count("help") || !vm.count("input-file")) {
+  if (vm.count("help") || !vm.count("input-file") || !vm.count("weight-file")) {
     std::cout << std::endl;
     std::cout << "Compute the persistent homology with coefficient field Z/pZ \n";
-    std::cout << "of a 3D Alpha complex defined on a set of input points.\n \n";
+    std::cout << "of a 3D Alpha complex defined on a set of input points.\n";
+    std::cout << "3D Alpha complex can be exact or weighted and/or periodic\n\n";
     std::cout << "The output diagram contains one bar per line, written with the convention: \n";
     std::cout << "   p   dim b d \n";
     std::cout << "where dim is the dimension of the homological feature,\n";
     std::cout << "b and d are respectively the birth and death of the feature and \n";
-    std::cout << "p is the characteristic of the field Z/pZ used for homology coefficients." << std::endl << std::endl;
+    std::cout << "p is the characteristic of the field Z/pZ used for homology coefficients.\n\n";
 
-    std::cout << "Usage: " << argv[0] << " [options] input-file" << std::endl << std::endl;
+    std::cout << "Usage: " << argv[0] << " [options] input-file weight-file\n\n";
     std::cout << visible << std::endl;
-    std::abort();
+    exit(-1);
   }
 }

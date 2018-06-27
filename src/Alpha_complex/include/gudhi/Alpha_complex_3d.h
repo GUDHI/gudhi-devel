@@ -273,9 +273,9 @@ public:
 
 
   template <typename SimplicialComplexForAlpha3d>
-  void create_complex(SimplicialComplexForAlpha3d& complex) {
+  bool create_complex(SimplicialComplexForAlpha3d& complex) {
     using Filtration_value = typename SimplicialComplexForAlpha3d::Filtration_value;
-    create_complex(complex, std::numeric_limits<Filtration_value>::infinity());
+    return create_complex(complex, std::numeric_limits<Filtration_value>::infinity());
   }
 
   /** \brief Inserts all Delaunay triangulation into the simplicial complex.

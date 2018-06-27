@@ -56,7 +56,7 @@ public:
   static const bool periodic = false;
 
   template<class Filtration_value, class Alpha_value_iterator>
-  static Filtration_value value_from_iterator(const Alpha_value_iterator avi){
+  static Filtration_value value_from_iterator(const Alpha_value_iterator avi) {
     return /*std::sqrt*/ *avi;
   }
 };
@@ -80,7 +80,7 @@ public:
   static const bool exact = true;
 
   template<class Filtration_value, class Alpha_value_iterator>
-  static Filtration_value value_from_iterator(const Alpha_value_iterator avi){
+  static Filtration_value value_from_iterator(const Alpha_value_iterator avi) {
     return /*std::sqrt*/ CGAL::to_double(avi->exact());
   }
 };
@@ -106,7 +106,7 @@ public:
   static const bool exact = false;
 
   template<class Filtration_value, class Alpha_value_iterator>
-  static Filtration_value value_from_iterator(const Alpha_value_iterator avi){
+  static Filtration_value value_from_iterator(const Alpha_value_iterator avi) {
     return /*std::sqrt*/ *avi;
   }
 };
@@ -137,7 +137,7 @@ public:
   static const bool exact = false;
 
   template<class Filtration_value, class Alpha_value_iterator>
-  static Filtration_value value_from_iterator(const Alpha_value_iterator avi){
+  static Filtration_value value_from_iterator(const Alpha_value_iterator avi) {
     return /*std::sqrt*/ *avi;
   }
 };
@@ -166,7 +166,7 @@ public:
   static const bool exact = false;
 
   template<class Filtration_value, class Alpha_value_iterator>
-  static Filtration_value value_from_iterator(const Alpha_value_iterator avi){
+  static Filtration_value value_from_iterator(const Alpha_value_iterator avi) {
     return /*std::sqrt*/ *avi;
   }
 };
