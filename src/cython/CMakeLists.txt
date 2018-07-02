@@ -188,30 +188,33 @@ if(CYTHON_FOUND)
     add_gudhi_py_test(test_bottleneck_distance)
 
     # Cover complex
+    file(COPY ${CMAKE_SOURCE_DIR}/data/points/human.off DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+    file(COPY ${CMAKE_SOURCE_DIR}/data/points/COIL_database/lucky_cat.off DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+    file(COPY ${CMAKE_SOURCE_DIR}/data/points/COIL_database/lucky_cat_PCA1 DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
     add_test(NAME cover_complex_nerve_example_py_test
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
              COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
              ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/nerve_of_a_covering.py"
-             -f ${CMAKE_SOURCE_DIR}/data/points/human.off -c 2 -r 10 -g 0.3)
+             -f human.off -c 2 -r 10 -g 0.3)
 
     add_test(NAME cover_complex_coordinate_gic_example_py_test
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
              COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
              ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/coordinate_graph_induced_complex.py"
-             -f ${CMAKE_SOURCE_DIR}/data/points/human.off -c 0 -v)
+             -f human.off -c 0 -v)
 
     add_test(NAME cover_complex_functional_gic_example_py_test
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
              COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
              ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/functional_graph_induced_complex.py"
-             -o ${CMAKE_SOURCE_DIR}/data/points/COIL_database/lucky_cat.off
-             -f ${CMAKE_SOURCE_DIR}/data/points/COIL_database/lucky_cat_PCA1 -v)
+             -o lucky_cat.off
+             -f lucky_cat_PCA1 -v)
 
     add_test(NAME cover_complex_voronoi_gic_example_py_test
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
              COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
              ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/voronoi_graph_induced_complex.py"
-             -f ${CMAKE_SOURCE_DIR}/data/points/human.off -n 700 -v)
+             -f human.off -n 700 -v)
 
     add_gudhi_py_test(test_cover_complex)
   endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)

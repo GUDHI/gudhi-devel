@@ -51,8 +51,9 @@ def test_files_creation():
 
 def test_nerve():
     nerve = CoverComplex()
-    assert (nerve.read_point_cloud('cloud') == True)
     nerve.set_type('Nerve')
+    assert (nerve.read_point_cloud('cloud') == True)
+    nerve.set_color_from_coordinate()
     nerve.set_graph_from_file('graph')
     nerve.set_cover_from_file('cover')
     nerve.find_simplices()
@@ -66,6 +67,7 @@ def test_graph_induced_complex():
     gic = CoverComplex()
     gic.set_type('GIC')
     assert (gic.read_point_cloud('cloud') == True)
+    gic.set_color_from_coordinate()
     gic.set_graph_from_file('graph')
     gic.set_cover_from_file('cover')
     gic.find_simplices()
@@ -79,6 +81,7 @@ def test_voronoi_graph_induced_complex():
     gic = CoverComplex()
     gic.set_type('GIC')
     assert (gic.read_point_cloud('cloud') == True)
+    gic.set_color_from_coordinate()
     gic.set_graph_from_file('graph')
     gic.set_cover_from_Voronoi(2)
     gic.find_simplices()

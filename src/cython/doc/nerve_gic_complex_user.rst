@@ -100,12 +100,12 @@ the program output is:
 .. testoutput::
 
     Nerve is of dimension 1 - 41 simplices - 21 vertices.
-    [1]
     [0]
+    [1]
     [4]
-    [0, 4]
+    [1, 4]
     [2]
-    [1, 2]
+    [0, 2]
     [8]
     [2, 8]
     [5]
