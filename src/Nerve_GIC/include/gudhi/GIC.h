@@ -1193,8 +1193,8 @@ class Cover_complex {
         }
 
         Cboot.set_graph_from_automatic_rips(Gudhi::Euclidean_distance());
-        Cboot.set_automatic_resolution();
         Cboot.set_gain();
+        Cboot.set_automatic_resolution();
         Cboot.set_cover_from_function();
         Cboot.find_simplices();
         Cboot.compute_PD();
@@ -1215,7 +1215,9 @@ class Cover_complex {
    */
   double compute_distance_from_confidence_level(double alpha) {
     unsigned int N = distribution.size();
-    return distribution[std::floor(alpha * N)];
+    double d = distribution[std::floor(alpha * N)];
+    if (verbose)  std::cout << "Distance corresponding to confidence " << alpha << " is " << d << std::endl;
+    return d;
   }
 
  public:
@@ -1229,6 +1231,7 @@ class Cover_complex {
     double level = 1;
     for (unsigned int i = 0; i < N; i++)
       if (distribution[i] > d){ level = i * 1.0 / N; break; }
+    if (verbose)  std::cout << "Confidence level of distance " << d << " is " << level << std::endl;
     return level;
   }
 
@@ -1238,9 +1241,8 @@ class Cover_complex {
    *
    */
   double compute_p_value() {
-    double distancemin = -std::numeric_limits<double>::lowest();
-    int N = PD.size();
-    for (int i = 0; i < N; i++) distancemin = std::min(distancemin, 0.5 * (PD[i].second - PD[i].first));
+    double distancemin = std::numeric_limits<double>::max(); int N = PD.size();
+    for (int i = 0; i < N; i++) distancemin = std::min(distancemin, 0.5 * std::abs(PD[i].second - PD[i].first));
     double p_value = 1 - compute_confidence_level_from_distance(distancemin);
     if (verbose)  std::cout << "p value = " << p_value << std::endl;
     return p_value;
