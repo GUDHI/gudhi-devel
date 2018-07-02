@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
 project(Persistence_representations_example)
 
 add_executable ( Persistence_representations_example_landscape_on_grid persistence_landscape_on_grid.cpp )

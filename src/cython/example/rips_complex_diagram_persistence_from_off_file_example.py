@@ -9,7 +9,7 @@ import argparse
 
    Author(s):       Vincent Rouvreau
 
-   Copyright (C) 2016 INRIA
+   Copyright (C) 2016 Inria
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import argparse
 """
 
 __author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 INRIA"
+__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
 parser = argparse.ArgumentParser(description='RipsComplex creation from '
@@ -39,7 +39,7 @@ parser = argparse.ArgumentParser(description='RipsComplex creation from '
 parser.add_argument("-f", "--file", type=str, required=True)
 parser.add_argument("-e", "--max_edge_length", type=float, default=0.5)
 parser.add_argument("-d", "--max_dimension", type=int, default=1)
-parser.add_argument("-b", "--band_boot", type=float, default=0.)
+parser.add_argument("-b", "--band", type=float, default=0.)
 parser.add_argument('--no-diagram', default=False, action='store_true' , help='Flag for not to display the diagrams')
 
 args = parser.parse_args()
@@ -53,7 +53,8 @@ with open(args.file, 'r') as f:
         message = "RipsComplex with max_edge_length=" + repr(args.max_edge_length)
         print(message)
         
-        rips_complex = gudhi.RipsComplex(off_file=args.file, max_edge_length=args.max_edge_length)
+        point_cloud = gudhi.read_off(off_file=args.file)
+        rips_complex = gudhi.RipsComplex(points=point_cloud, max_edge_length=args.max_edge_length)
         simplex_tree = rips_complex.create_simplex_tree(max_dimension=args.max_dimension)
     
         message = "Number of simplices=" + repr(simplex_tree.num_simplices())
@@ -65,7 +66,7 @@ with open(args.file, 'r') as f:
         print(simplex_tree.betti_numbers())
     
         if args.no_diagram == False:
-            pplot = gudhi.plot_persistence_diagram(diag, band_boot=args.band_boot)
+            pplot = gudhi.plot_persistence_diagram(diag, band=args.band)
             pplot.show()
     else:
         print(args.file, "is not a valid OFF file")

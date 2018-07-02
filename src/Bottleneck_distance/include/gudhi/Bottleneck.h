@@ -4,7 +4,7 @@
  *
  *    Author:       Francois Godi
  *
- *    Copyright (C) 2015  INRIA
+ *    Copyright (C) 2015 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 #include <limits>  // for numeric_limits
 
 #include <cmath>
+#include <cfloat>  // FLT_EVAL_METHOD
 
 namespace Gudhi {
 
@@ -43,6 +44,13 @@ double bottleneck_distance_approx(Persistence_graph& g, double e) {
   Graph_matching biggest_unperfect(g);
   while (b_upper_bound - b_lower_bound > 2 * e) {
     double step = b_lower_bound + (b_upper_bound - b_lower_bound) / alpha;
+#if !defined FLT_EVAL_METHOD || FLT_EVAL_METHOD < 0 || FLT_EVAL_METHOD > 1
+    // On platforms where double computation is done with excess precision,
+    // we force it to its true precision so the following test is reliable.
+    volatile double drop_excess_precision = step;
+    step = drop_excess_precision;
+    // Alternative: step = CGAL::IA_force_to_double(step);
+#endif
     if (step <= b_lower_bound || step >= b_upper_bound)  // Avoid precision problem
       break;
     m.set_r(step);

@@ -54,23 +54,27 @@ if(CGAL_FOUND)
       endforeach(CGAL_INCLUDE_DIR ${CGAL_INCLUDE_DIRS})
     endif(NOT CGAL_VERSION VERSION_GREATER 4.9.0)
 
-    if (NOT CGAL_VERSION VERSION_GREATER 4.11.0)
+    if (CGAL_VERSION VERSION_LESS 4.11.0)
       # For dev version
       include_directories(BEFORE "src/common/include/gudhi_patches")
       # For user version
       include_directories(BEFORE "include/gudhi_patches")
-    endif (NOT CGAL_VERSION VERSION_GREATER 4.11.0)
+    endif ()
   endif()
 endif()
 
+option(WITH_GUDHI_USE_TBB "Build with Intel TBB parallelization" ON)
+
 # Find TBB package for parallel sort - not mandatory, just optional.
-set(TBB_FIND_QUIETLY ON)
-find_package(TBB)
-if (TBB_FOUND)
-  include(${TBB_USE_FILE})
-  message("TBB found in ${TBB_LIBRARY_DIRS}")
-  add_definitions(-DGUDHI_USE_TBB)
-endif()
+if(WITH_GUDHI_USE_TBB)
+  set(TBB_FIND_QUIETLY ON)
+  find_package(TBB)
+  if (TBB_FOUND)
+    include(${TBB_USE_FILE})
+    message("TBB found in ${TBB_LIBRARY_DIRS}")
+    add_definitions(-DGUDHI_USE_TBB)
+  endif()
+endif(WITH_GUDHI_USE_TBB)
 
 set(CGAL_WITH_EIGEN3_VERSION 0.0.0)
 find_package(Eigen3 3.1.0)

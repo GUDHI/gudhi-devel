@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.8)
 project(Cython)
 
 function( add_gudhi_cython_lib THE_LIB )
@@ -31,35 +30,6 @@ if(CYTHON_FOUND)
   set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_RESULT_OF_USE_DECLTYPE', ")
   set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_ALL_NO_LIB', ")
   set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_SYSTEM_NO_DEPRECATED', ")
-
-  # This is because of https://github.com/CGAL/cgal/blob/master/Installation/include/CGAL/tss.h
-  # CGAL is using boost thread if thread_local is not ready (requires XCode 8 for Mac).
-  # The test in https://github.com/CGAL/cgal/blob/master/Installation/include/CGAL/config.h
-  #   #if __has_feature(cxx_thread_local) || \
-  #       ( (__GNUC__ * 100 + __GNUC_MINOR__) >= 408 && __cplusplus >= 201103L ) || \
-  #       ( _MSC_VER >= 1900 )
-  #   #define CGAL_CAN_USE_CXX11_THREAD_LOCAL
-  #   #endif
-  set(CGAL_CAN_USE_CXX11_THREAD_LOCAL "
-      int main() {
-      #ifndef __has_feature
-        #define __has_feature(x) 0  // Compatibility with non-clang compilers.
-      #endif
-      #if __has_feature(cxx_thread_local) || \
-          ( (__GNUC__ * 100 + __GNUC_MINOR__) >= 408 && __cplusplus >= 201103L ) || \
-          ( _MSC_VER >= 1900 )
-        bool has_feature_thread_local = true;
-      #else
-        // Explicit error of compilation for CMake test purpose - has_feature_thread_local is not defined
-      #endif
-        bool result = has_feature_thread_local;
-      }  ")
-  check_cxx_source_compiles("${CGAL_CAN_USE_CXX11_THREAD_LOCAL}" CGAL_CAN_USE_CXX11_THREAD_LOCAL_RESULT)
-
-  if (NOT CGAL_CAN_USE_CXX11_THREAD_LOCAL_RESULT)
-    add_gudhi_cython_lib(${Boost_THREAD_LIBRARY})
-    set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${Boost_LIBRARY_DIRS}', ")
-  endif()
 
   # Gudhi and CGAL compilation option
   if(MSVC)
@@ -100,11 +70,16 @@ if(CYTHON_FOUND)
   endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
 
   if(CGAL_FOUND)
+    can_cgal_use_cxx11_thread_local()
+    if (NOT CGAL_CAN_USE_CXX11_THREAD_LOCAL_RESULT)
+      add_gudhi_cython_lib(${Boost_THREAD_LIBRARY})
+      set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${Boost_LIBRARY_DIRS}', ")
+    endif()
     # Add CGAL compilation args
     if(CGAL_HEADER_ONLY)
       set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_HEADER_ONLY', ")
     else(CGAL_HEADER_ONLY)
-      add_gudhi_cython_lib(${CGAL_LIBRARIES})
+      add_gudhi_cython_lib(${CGAL_LIBRARY})
       set(GUDHI_CYTHON_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}'${CGAL_LIBRARIES_DIR}', ")
       # If CGAL is not header only, CGAL library may link with boost system,
       add_gudhi_cython_lib(${Boost_SYSTEM_LIBRARY})
@@ -136,7 +111,7 @@ if(CYTHON_FOUND)
   endforeach()
   set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${CMAKE_SOURCE_DIR}/${GUDHI_CYTHON_PATH}/include', ")
 
-  if (TBB_FOUND)
+  if (TBB_FOUND AND WITH_GUDHI_USE_TBB)
     set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DGUDHI_USE_TBB', ")
     add_gudhi_cython_lib(${TBB_RELEASE_LIBRARY})
     add_gudhi_cython_lib(${TBB_MALLOC_RELEASE_LIBRARY})
@@ -182,7 +157,7 @@ if(CYTHON_FOUND)
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
              COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
              ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/tangential_complex_plain_homology_from_off_file_example.py"
-             --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off)
+             --no-diagram -i 2 -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off)
 
     add_gudhi_py_test(test_tangential_complex)
 

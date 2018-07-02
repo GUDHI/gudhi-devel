@@ -6,7 +6,7 @@ from gudhi import TangentialComplex, SimplexTree
 
    Author(s):       Vincent Rouvreau
 
-   Copyright (C) 2016 INRIA
+   Copyright (C) 2016 Inria
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -23,13 +23,13 @@ from gudhi import TangentialComplex, SimplexTree
 """
 
 __author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 INRIA"
+__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
 
 def test_tangential():
     point_list = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]]
-    tc = TangentialComplex(points=point_list)
+    tc = TangentialComplex(intrisic_dim = 1, points=point_list)
     assert tc.__is_defined() == True
     assert tc.num_vertices() == 4
 

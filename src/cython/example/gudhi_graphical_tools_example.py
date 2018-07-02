@@ -8,7 +8,7 @@ import gudhi
 
    Author(s):       Vincent Rouvreau
 
-   Copyright (C) 2016 INRIA
+   Copyright (C) 2016 Inria
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -25,13 +25,8 @@ import gudhi
 """
 
 __author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 INRIA"
+__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
-
-print("#####################################################################")
-print("Show palette colors values for dimension")
-
-gudhi.show_palette_values()
 
 print("#####################################################################")
 print("Show barcode persistence example")
@@ -50,5 +45,5 @@ pplot.show()
 print("#####################################################################")
 print("Show diagram persistence example with a confidence band")
 
-pplot = gudhi.plot_persistence_diagram(persistence, band_boot=0.2)
+pplot = gudhi.plot_persistence_diagram(persistence, band=0.2)
 pplot.show()

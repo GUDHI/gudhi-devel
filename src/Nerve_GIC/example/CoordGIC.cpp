@@ -4,7 +4,7 @@
  *
  *    Author(s):       Mathieu Carrière
  *
- *    Copyright (C) 2017  INRIA
+ *    Copyright (C) 2017 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -65,6 +65,9 @@ int main(int argc, char **argv) {
     GIC.set_cover_from_function();
 
     GIC.find_simplices();
+
+    GIC.compute_distribution(10);
+    GIC.compute_p_value();
 
     GIC.plot_DOT();
 

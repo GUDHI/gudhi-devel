@@ -4,7 +4,7 @@
  *
  *    Author(s):       Clément Maria
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Méditerranée (France)
+ *    Copyright (C) 2014 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -689,7 +689,11 @@ class Simplex_tree {
       return { null_simplex(), true };  // ----->>
 
     // Copy before sorting
-    thread_local std::vector<Vertex_handle> copy;
+    // Thread local is not available on XCode version < V.8 - It will slow down computation
+#ifdef GUDHI_CAN_USE_CXX11_THREAD_LOCAL
+    thread_local
+#endif  // GUDHI_CAN_USE_CXX11_THREAD_LOCAL
+    std::vector<Vertex_handle> copy;
     copy.clear();
     copy.insert(copy.end(), first, last);
     std::sort(std::begin(copy), std::end(copy));
@@ -1238,9 +1242,8 @@ class Simplex_tree {
   }
 
  public:
-  /** \brief Browse the simplex tree to ensure the filtration is not decreasing.
-   * The simplex tree is browsed starting from the root until the leaf, and the filtration values are set with their
-   * parent value (increased), in case the values are decreasing.
+  /** \brief This function ensures that each simplex has a higher filtration value than its faces by increasing the
+   * filtration values.
    * @return The filtration modification information.
    * \post Some simplex tree functions require the filtration to be valid. `make_filtration_non_decreasing()`
    * function is not launching `initialize_filtration()` but returns the filtration modification information. If the

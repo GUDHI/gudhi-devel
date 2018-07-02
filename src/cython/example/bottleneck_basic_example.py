@@ -8,7 +8,7 @@ import gudhi
 
    Author(s):       Francois Godi, Vincent Rouvreau
 
-   Copyright (C) 2016 INRIA
+   Copyright (C) 2016 Inria
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import gudhi
 """
 
 __author__ = "Francois Godi, Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 INRIA"
+__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
 diag1 = [[2.7, 3.7],[9.6, 14.],[34.2, 34.974], [3.,float('Inf')]]

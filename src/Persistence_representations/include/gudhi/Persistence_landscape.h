@@ -4,7 +4,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2016  INRIA (France)
+ *    Copyright (C) 2016 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -734,7 +734,7 @@ double Persistence_landscape::compute_integral_of_landscape(double p) const {
 double Persistence_landscape::compute_value_at_a_given_point(unsigned level, double x) const {
   bool compute_value_at_a_given_pointDbg = false;
   // in such a case lambda_level = 0.
-  if (level > this->land.size()) return 0;
+  if (level >= this->land.size()) return 0;
 
   // we know that the points in this->land[level] are ordered according to x coordinate. Therefore, we can find the
   // point by using bisection:
@@ -1235,40 +1235,43 @@ double compute_inner_product(const Persistence_landscape& l1, const Persistence_
       std::cerr << "Computing inner product for a level : " << level << std::endl;
       getchar();
     }
-    if (l1.land[level].size() * l2.land[level].size() == 0) continue;
+    auto&& l1_land_level = l1.land[level];
+    auto&& l2_land_level = l2.land[level];
+
+    if (l1_land_level.size() * l2_land_level.size() == 0) continue;
 
     // endpoints of the interval on which we will compute the inner product of two locally linear functions:
     double x1 = -std::numeric_limits<int>::max();
     double x2;
-    if (l1.land[level][1].first < l2.land[level][1].first) {
-      x2 = l1.land[level][1].first;
+    if (l1_land_level[1].first < l2_land_level[1].first) {
+      x2 = l1_land_level[1].first;
     } else {
-      x2 = l2.land[level][1].first;
+      x2 = l2_land_level[1].first;
     }
 
     // iterators for the landscapes l1 and l2
     size_t l1It = 0;
     size_t l2It = 0;
 
-    while ((l1It < l1.land[level].size() - 1) && (l2It < l2.land[level].size() - 1)) {
+    while ((l1It < l1_land_level.size() - 1) && (l2It < l2_land_level.size() - 1)) {
       // compute the value of a inner product on a interval [x1,x2]
 
       double a, b, c, d;
 
-      if (l1.land[level][l1It + 1].first != l1.land[level][l1It].first) {
-        a = (l1.land[level][l1It + 1].second - l1.land[level][l1It].second) /
-            (l1.land[level][l1It + 1].first - l1.land[level][l1It].first);
+      if (l1_land_level[l1It + 1].first != l1_land_level[l1It].first) {
+        a = (l1_land_level[l1It + 1].second - l1_land_level[l1It].second) /
+            (l1_land_level[l1It + 1].first - l1_land_level[l1It].first);
       } else {
         a = 0;
       }
-      b = l1.land[level][l1It].second - a * l1.land[level][l1It].first;
-      if (l2.land[level][l2It + 1].first != l2.land[level][l2It].first) {
-        c = (l2.land[level][l2It + 1].second - l2.land[level][l2It].second) /
-            (l2.land[level][l2It + 1].first - l2.land[level][l2It].first);
+      b = l1_land_level[l1It].second - a * l1_land_level[l1It].first;
+      if (l2_land_level[l2It + 1].first != l2_land_level[l2It].first) {
+        c = (l2_land_level[l2It + 1].second - l2_land_level[l2It].second) /
+            (l2_land_level[l2It + 1].first - l2_land_level[l2It].first);
       } else {
         c = 0;
       }
-      d = l2.land[level][l2It].second - c * l2.land[level][l2It].first;
+      d = l2_land_level[l2It].second - c * l2_land_level[l2It].first;
 
       double contributionFromThisPart = (a * c * x2 * x2 * x2 / 3 + (a * d + b * c) * x2 * x2 / 2 + b * d * x2) -
                                         (a * c * x1 * x1 * x1 / 3 + (a * d + b * c) * x1 * x1 / 2 + b * d * x1);
@@ -1276,10 +1279,10 @@ double compute_inner_product(const Persistence_landscape& l1, const Persistence_
       result += contributionFromThisPart;
 
       if (dbg) {
-        std::cerr << "[l1.land[level][l1It].first,l1.land[level][l1It+1].first] : " << l1.land[level][l1It].first
-                  << " , " << l1.land[level][l1It + 1].first << std::endl;
-        std::cerr << "[l2.land[level][l2It].first,l2.land[level][l2It+1].first] : " << l2.land[level][l2It].first
-                  << " , " << l2.land[level][l2It + 1].first << std::endl;
+        std::cerr << "[l1_land_level[l1It].first,l1_land_level[l1It+1].first] : " << l1_land_level[l1It].first
+                  << " , " << l1_land_level[l1It + 1].first << std::endl;
+        std::cerr << "[l2_land_level[l2It].first,l2_land_level[l2It+1].first] : " << l2_land_level[l2It].first
+                  << " , " << l2_land_level[l2It + 1].first << std::endl;
         std::cerr << "a : " << a << ", b : " << b << " , c: " << c << ", d : " << d << std::endl;
         std::cerr << "x1 : " << x1 << " , x2 : " << x2 << std::endl;
         std::cerr << "contributionFromThisPart : " << contributionFromThisPart << std::endl;
@@ -1288,14 +1291,14 @@ double compute_inner_product(const Persistence_landscape& l1, const Persistence_
       }
 
       // we have two intervals in which functions are constant:
-      // [l1.land[level][l1It].first , l1.land[level][l1It+1].first]
+      // [l1_land_level[l1It].first , l1_land_level[l1It+1].first]
       // and
-      // [l2.land[level][l2It].first , l2.land[level][l2It+1].first]
+      // [l2_land_level[l2It].first , l2_land_level[l2It+1].first]
       // We also have an interval [x1,x2]. Since the intervals in the landscapes cover the whole R, then it is clear
       // that x2
-      // is either l1.land[level][l1It+1].first of l2.land[level][l2It+1].first or both. Lets test it.
-      if (x2 == l1.land[level][l1It + 1].first) {
-        if (x2 == l2.land[level][l2It + 1].first) {
+      // is either l1_land_level[l1It+1].first of l2_land_level[l2It+1].first or both. Lets test it.
+      if (x2 == l1_land_level[l1It + 1].first) {
+        if (x2 == l2_land_level[l2It + 1].first) {
           // in this case, we increment both:
           ++l2It;
           if (dbg) {
@@ -1314,12 +1317,16 @@ double compute_inner_product(const Persistence_landscape& l1, const Persistence_
           std::cerr << "Incrementing second \n";
         }
       }
+
+      if ( l1It + 1 >= l1_land_level.size()  )break;
+      if ( l2It + 1 >= l2_land_level.size()  )break;
+
       // Now, we shift x1 and x2:
       x1 = x2;
-      if (l1.land[level][l1It + 1].first < l2.land[level][l2It + 1].first) {
-        x2 = l1.land[level][l1It + 1].first;
+      if (l1_land_level[l1It + 1].first < l2_land_level[l2It + 1].first) {
+        x2 = l1_land_level[l1It + 1].first;
       } else {
-        x2 = l2.land[level][l2It + 1].first;
+        x2 = l2_land_level[l2It + 1].first;
       }
     }
   }

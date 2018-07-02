@@ -4,7 +4,7 @@
  *
  *    Author(s):       Clément Maria, Pawel Dlotko, Vincent Rouvreau
  *
- *    Copyright (C) 2016  INRIA
+ *    Copyright (C) 2016 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -29,28 +29,41 @@ namespace rips_complex {
 
 /**  \defgroup rips_complex Rips complex
  * 
- * \author    Clément Maria, Pawel Dlotko, Vincent Rouvreau
+ * \author    Clément Maria, Pawel Dlotko, Vincent Rouvreau, Marc Glisse
  * 
  * @{
  * 
  * \section ripsdefinition Rips complex definition
  * 
- * Rips_complex
- * <a target="_blank" href="https://en.wikipedia.org/wiki/Vietoris%E2%80%93Rips_complex">(Wikipedia)</a> is a
- * one skeleton graph that allows to construct a
- * <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
- * from it.
- * The input can be a point cloud with a given distance function, or a distance matrix.
- * 
- * The filtration value of each edge is computed from a user-given distance function, or directly from the distance
- * matrix.
- * 
- * All edges that have a filtration value strictly greater than a given threshold value are not inserted into
- * the complex.
- * 
- * When creating a simplicial complex from this one skeleton graph, Rips inserts the one skeleton graph into the data
- * structure, and then expands the simplicial complex when required.
+ * The Vietoris-Rips complex
+ * <a target="_blank" href="https://en.wikipedia.org/wiki/Vietoris%E2%80%93Rips_complex">(Wikipedia)</a>
+ * is an abstract simplicial complex
+ * defined on a finite metric space, where each simplex corresponds to a subset
+ * of point whose diameter is smaller that some given threshold.
+ * Varying the threshold, we can also see the Rips complex as a filtration of
+ * the \f$(n-1)-\f$dimensional simplex, where the filtration value of each
+ * simplex is the diameter of the corresponding subset of points.
  *
+ * This filtered complex is most often used as an approximation of the
+ * Čech complex. After rescaling (Rips using the length of the edges and Čech
+ * the half-length), they share the same 1-skeleton and are multiplicatively
+ * 2-interleaved or better. While it is slightly bigger, it is also much
+ * easier to compute.
+ *
+ * The number of simplices in the full Rips complex is exponential in the
+ * number of vertices, it is thus usually restricted, by excluding all the
+ * simplices with filtration value larger than some threshold, and keeping only
+ * the dim_max-skeleton.
+ *
+ * In order to build this complex, the algorithm first builds the graph.
+ * The filtration value of each edge is computed from a user-given distance
+ * function, or directly read from the distance matrix.
+ * In a second step, this graph is inserted in a simplicial complex, which then
+ * gets expanded to a flag complex.
+ * 
+ * The input can be given as a range of points and a distance function, or as a
+ * distance matrix.
+ * 
  * Vertex name correspond to the index of the point in the given range (aka. the point cloud).
  * 
  * \image html "rips_complex_representation.png" "Rips-complex one skeleton graph representation"
@@ -61,7 +74,36 @@ namespace rips_complex {
  * 
  * If the Rips_complex interfaces are not detailed enough for your need, please refer to
  * <a href="_persistent_cohomology_2rips_persistence_step_by_step_8cpp-example.html">
- * rips_persistence_step_by_step.cpp</a> example, where the graph construction over the Simplex_tree is more detailed.
+ * rips_persistence_step_by_step.cpp</a> example, where the constructions of the graph and
+ * the Simplex_tree are more detailed.
+ *
+ * \section sparserips Sparse Rips complex
+ *
+ * Even truncated in filtration value and dimension, the Rips complex remains
+ * quite large. However, it is possible to approximate it by a much smaller
+ * filtered simplicial complex (linear size, with constants that depend on
+ * &epsilon; and the doubling dimension of the space) that is
+ * \f$(1+O(\epsilon))-\f$interleaved with it (in particular, their persistence
+ * diagrams are at log-bottleneck distance at most \f$O(\epsilon)\f$).
+ *
+ * The sparse Rips filtration was introduced by Don Sheehy
+ * \cite sheehy13linear. We are using the version described in
+ * \cite buchet16efficient (except that we multiply all filtration values
+ * by 2, to match the usual Rips complex), which proves a
+ * \f$\frac{1+\epsilon}{1-\epsilon}\f$-interleaving, although in practice the
+ * error is usually smaller.
+ * A more intuitive presentation of the idea is available in
+ * \cite cavanna15geometric, and in a video \cite cavanna15visualizing.
+ *
+ * The interface of `Sparse_rips_complex` is similar to the one for the usual
+ * `Rips_complex`, except that one has to specify the approximation factor, and
+ * there is no option to limit the maximum filtration value (the way the
+ * approximation is done means that larger filtration values are much cheaper
+ * to handle than low filtration values, so the gain would be too small).
+ *
+ * Theoretical guarantees are only available for \f$\epsilon<1\f$. The
+ * construction accepts larger values of &epsilon;, and the size of the complex
+ * keeps decreasing, but there is no guarantee on the quality of the result.
  *
  * \section ripspointsdistance Point cloud and distance function
  * 
@@ -103,6 +145,24 @@ namespace rips_complex {
  * the program output is:
  * 
  * \include Rips_complex/full_skeleton_rips_for_doc.txt
+ * 
+ *
+ * \subsection sparseripspointscloudexample Example of a sparse Rips from a point cloud
+ * 
+ * This example builds the full sparse Rips of a set of 2D Euclidean points, then prints some minimal
+ * information about the complex.
+ * 
+ * \include Rips_complex/example_sparse_rips.cpp
+ * 
+ * When launching:
+ * 
+ * \code $> ./Rips_complex_example_sparse
+ * \endcode
+ *
+ * the program output may be (the exact output varies from one run to the next):
+ *
+ * \code Sparse Rips complex is of dimension 2 - 19 simplices - 7 vertices.
+ * \endcode
  * 
  * 
  * 
@@ -146,6 +206,33 @@ namespace rips_complex {
  * 
  * \include Rips_complex/full_skeleton_rips_for_doc.txt
  * 
+ * 
+ * \section ripscorrelationematrix Correlation matrix
+ * 
+ * Analogously to the case of distance matrix, Rips complexes can be also constructed based on correlation matrix. 
+ * Given a correlation matrix M, comportment-wise 1-M is a distance matrix.
+ * This example builds the one skeleton graph from the given corelation matrix and threshold value.
+ * Then it creates a `Simplex_tree` with it.
+ * 
+ * Then, it is asked to display information about the simplicial complex.
+ * 
+ * \include Rips_complex/example_one_skeleton_rips_from_correlation_matrix.cpp
+ * 
+ * When launching:
+ * 
+ * \code $> ./example_one_skeleton_from_correlation_matrix
+ * \endcode
+ *
+ * the program output is:
+ * 
+ * \include Rips_complex/one_skeleton_rips_from_correlation_matrix_for_doc.txt
+ * 
+ * All the other constructions discussed for Rips complex for distance matrix can be also performed for Rips complexes
+ * construction from correlation matrices.
+ * 
+ * @warning As persistence diagrams points will be under the diagonal, bottleneck distance and persistence graphical
+ * tool will not work properly, this is a known issue.
+ *
  */
 /** @} */  // end defgroup rips_complex
 

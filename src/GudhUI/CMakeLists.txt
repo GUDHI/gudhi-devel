@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.8)
 project(GudhUI)
 
 # Need to find OpenGL first as find_package(Qt5) tries to #include"GL/gl.h" on some platforms

@@ -11,7 +11,7 @@ import os
 
    Author(s):       Vincent Rouvreau
 
-   Copyright (C) 2016 INRIA
+   Copyright (C) 2016 Inria
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ import os
 """
 
 __author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 INRIA"
+__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
 cdef extern from "Cubical_complex_interface.h" namespace "Gudhi":
@@ -106,22 +106,21 @@ cdef class PeriodicCubicalComplex:
         return self.pcohptr != NULL
 
     def num_simplices(self):
-        """This function returns the number of simplices of the simplicial
-        complex.
+        """This function returns the number of all cubes in the complex.
 
-        :returns:  int -- the simplicial complex number of simplices.
+        :returns:  int -- the number of all cubes in the complex.
         """
         return self.thisptr.num_simplices()
 
     def dimension(self):
-        """This function returns the dimension of the simplicial complex.
+        """This function returns the dimension of the complex.
 
-        :returns:  int -- the simplicial complex dimension.
+        :returns:  int -- the complex dimension.
         """
         return self.thisptr.dimension()
 
     def persistence(self, homology_coeff_field=11, min_persistence=0):
-        """This function returns the persistence of the simplicial complex.
+        """This function returns the persistence of the complex.
 
         :param homology_coeff_field: The homology coefficient field. Must be a
             prime number
@@ -132,7 +131,7 @@ cdef class PeriodicCubicalComplex:
             Sets min_persistence to -1.0 to see all values.
         :type min_persistence: float.
         :returns: list of pairs(dimension, pair(birth, death)) -- the
-            persistence of the simplicial complex.
+            persistence of the complex.
         """
         if self.pcohptr != NULL:
             del self.pcohptr
@@ -144,12 +143,15 @@ cdef class PeriodicCubicalComplex:
         return persistence_result
 
     def betti_numbers(self):
-        """This function returns the Betti numbers of the simplicial complex.
+        """This function returns the Betti numbers of the complex.
 
         :returns: list of int -- The Betti numbers ([B0, B1, ..., Bn]).
 
         :note: betti_numbers function requires persistence function to be
             launched first.
+
+        :note: betti_numbers function always returns [1, 0, 0, ...] as infinity
+            filtration cubes are not removed from the complex.
         """
         cdef vector[int] bn_result
         if self.pcohptr != NULL:
@@ -157,8 +159,7 @@ cdef class PeriodicCubicalComplex:
         return bn_result
 
     def persistent_betti_numbers(self, from_value, to_value):
-        """This function returns the persistent Betti numbers of the
-        simplicial complex.
+        """This function returns the persistent Betti numbers of the complex.
 
         :param from_value: The persistence birth limit to be added in the
             numbers (persistent birth <= from_value).
@@ -179,8 +180,8 @@ cdef class PeriodicCubicalComplex:
         return pbn_result
 
     def persistence_intervals_in_dimension(self, dimension):
-        """This function returns the persistence intervals of the simplicial
-        complex in a specific dimension.
+        """This function returns the persistence intervals of the complex in a
+        specific dimension.
 
         :param dimension: The specific dimension.
         :type from_value: int.

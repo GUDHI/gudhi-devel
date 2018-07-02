@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
 project(Witness_complex_tests)
 
 include(GUDHI_test_coverage)

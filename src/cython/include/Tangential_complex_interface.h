@@ -4,7 +4,7 @@
  *
  *    Author(s):       Vincent Rouvreau
  *
- *    Copyright (C) 2016 INRIA
+ *    Copyright (C) 2016 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -45,24 +45,19 @@ class Tangential_complex_interface {
   using TC = Tangential_complex<Dynamic_kernel, CGAL::Dynamic_dimension_tag, CGAL::Parallel_tag>;
 
  public:
-  Tangential_complex_interface(const std::vector<std::vector<double>>& points) {
+  Tangential_complex_interface(int intrisic_dim, const std::vector<std::vector<double>>& points) {
     Dynamic_kernel k;
-    unsigned intrisic_dim = 0;
-    if (points.size() > 0)
-      intrisic_dim = points[0].size() - 1;
 
     tangential_complex_ = new TC(points, intrisic_dim, k);
     tangential_complex_->compute_tangential_complex();
     num_inconsistencies_ = tangential_complex_->number_of_inconsistent_simplices();
   }
 
-  Tangential_complex_interface(const std::string& off_file_name, bool from_file = true) {
-    Gudhi::Points_off_reader<Point_d> off_reader(off_file_name);
+  Tangential_complex_interface(int intrisic_dim, const std::string& off_file_name, bool from_file = true) {
     Dynamic_kernel k;
-    unsigned intrisic_dim = 0;
+
+    Gudhi::Points_off_reader<Point_d> off_reader(off_file_name);
     std::vector<Point_d> points = off_reader.get_point_cloud();
-    if (points.size() > 0)
-      intrisic_dim = points[0].size() - 1;
 
     tangential_complex_ = new TC(points, intrisic_dim, k);
     tangential_complex_->compute_tangential_complex();

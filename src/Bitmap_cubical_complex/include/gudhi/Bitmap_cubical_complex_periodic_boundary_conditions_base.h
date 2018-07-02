@@ -4,7 +4,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA Sophia-Saclay (France)
+ *    Copyright (C) 2015 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -177,7 +177,7 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
       }
     }
     // std::reverse( this->sizes.begin() , this->sizes.end() );
-    this->data = std::vector<T>(multiplier, std::numeric_limits<T>::max());
+    this->data = std::vector<T>(multiplier, std::numeric_limits<T>::infinity());
     this->total_number_of_cells = multiplier;
   }
   Bitmap_cubical_complex_periodic_boundary_conditions_base(const std::vector<unsigned>& sizes);

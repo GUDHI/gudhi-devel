@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -137,7 +137,7 @@ class Off_reader {
       if (!std::ifstream::sentry(stream_)) return false;
       std::getline(stream_, uncomment_line);
     } while (uncomment_line[0] == '#');
-    return (bool)stream_;
+    return static_cast<bool>(stream_);
   }
 
   template<typename OffVisitor>
