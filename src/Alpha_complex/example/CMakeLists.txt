@@ -1,16 +1,6 @@
 project(Alpha_complex_examples)
 
 if(CGAL_FOUND)
-  add_executable(alpha_complex_3d_step_by_step alpha_complex_3d_step_by_step.cpp)
-  target_link_libraries(alpha_complex_3d_step_by_step ${CGAL_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
-
-  if (TBB_FOUND)
-    target_link_libraries(alpha_complex_3d_step_by_step ${TBB_LIBRARIES})
-  endif(TBB_FOUND)
-
-  add_test(NAME Alpha_complex_example_alpha_complex_3d_step_by_step COMMAND $<TARGET_FILE:alpha_complex_3d_step_by_step>
-          "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off")
-
   # need CGAL 4.7
   # cmake -DCGAL_DIR=~/workspace/CGAL-4.7 ..
   if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)

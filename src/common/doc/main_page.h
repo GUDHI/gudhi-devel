@@ -29,7 +29,7 @@
       <b>Author:</b> Vincent Rouvreau<br>
       <b>Introduced in:</b> GUDHI 1.3.0<br>
       <b>Copyright:</b> GPL v3<br>
-      <b>Requires:</b> \ref cgal &ge; 4.7.0 and \ref eigen3
+      <b>Requires:</b> \ref cgal &ge; 4.11.0 and \ref eigen3
     </td>
     <td width="75%">
     Alpha_complex is a simplicial complex constructed from the finite cells of a Delaunay Triangulation.<br>
