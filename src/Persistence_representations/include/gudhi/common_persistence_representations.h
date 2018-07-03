@@ -49,7 +49,7 @@ using Weight = std::function<double (std::pair<double, double>) >;
 using Kernel = std::function<double (std::pair<double, double>, std::pair<double, double> )>;
 
 Kernel Gaussian_kernel(double sigma){
-  return [=](std::pair<double, double> p, std::pair<double, double> q){return std::exp(  -((p.first-q.first)*(p.first-q.first) + (p.second-q.second)*(p.second-q.second)) / (sigma*sigma)   );};
+  return [=](std::pair<double, double> p, std::pair<double, double> q){return (1.0 / (std::sqrt(2*pi)*sigma)) * std::exp(  -((p.first-q.first)*(p.first-q.first) + (p.second-q.second)*(p.second-q.second)) / (2*sigma*sigma)   );};
 }
 
 Kernel polynomial_kernel(double c, double d){

@@ -29,21 +29,22 @@
 #include <string>
 #include <vector>
 #include <algorithm>  // std::max
+#include <gudhi/Persistence_heat_maps.h>
 #include <gudhi/common_persistence_representations.h>
-#include <gudhi/Weight_functions.h>
-#include <gudhi/Persistence_weighted_gaussian.h>
 #include <gudhi/Sliced_Wasserstein.h>
 #include <gudhi/distance_functions.h>
 #include <gudhi/reader_utils.h>
 
+using constant_scaling_function = Gudhi::Persistence_representations::constant_scaling_function;
 using SW = Gudhi::Persistence_representations::Sliced_Wasserstein;
-using PWG = Gudhi::Persistence_representations::Persistence_weighted_gaussian;
+using PWG = Gudhi::Persistence_representations::Persistence_heat_maps<constant_scaling_function>;
+using Persistence_diagram = std::vector<std::pair<double,double> >;
 
 BOOST_AUTO_TEST_CASE(check_PWG) {
   Persistence_diagram v1, v2; v1.emplace_back(0,1); v2.emplace_back(0,2);
-  PWG pwg1(v1, 1.0, 1000, Gudhi::Persistence_representations::arctan_weight(1,1)); PWG pwgex1(v1, 1.0, -1, Gudhi::Persistence_representations::arctan_weight(1,1));
-  PWG pwg2(v2, 1.0, 1000, Gudhi::Persistence_representations::arctan_weight(1,1)); PWG pwgex2(v2, 1.0, -1, Gudhi::Persistence_representations::arctan_weight(1,1));
-  BOOST_CHECK(std::abs(pwg1.compute_scalar_product(pwg2) - pwgex1.compute_scalar_product(pwgex2)) <= 1e-1);
+  PWG pwg1(v1, Gudhi::Persistence_representations::Gaussian_kernel(1.0));
+  PWG pwg2(v2, Gudhi::Persistence_representations::Gaussian_kernel(1.0));
+  BOOST_CHECK(std::abs(pwg1.compute_scalar_product(pwg2) - std::exp(-0.5)/(std::sqrt(2*Gudhi::Persistence_representations::pi))) <= 1e-3);
 }
 
 BOOST_AUTO_TEST_CASE(check_SW) {
