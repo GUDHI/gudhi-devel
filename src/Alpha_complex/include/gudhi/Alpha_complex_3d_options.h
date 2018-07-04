@@ -55,6 +55,7 @@ public:
   static const bool weighted = false;
   static const bool periodic = false;
 
+  // Default value_from_iterator as Alpha_shape_3 is not exact
   template<class Filtration_value, class Alpha_value_iterator>
   static Filtration_value value_from_iterator(const Alpha_value_iterator avi) {
     return /*std::sqrt*/ *avi;
@@ -77,8 +78,8 @@ public:
 
   static const bool weighted = false;
   static const bool periodic = false;
-  static const bool exact = true;
 
+  // value_from_iterator needs to compute filtration value as Alpha_shape_3 is exact
   template<class Filtration_value, class Alpha_value_iterator>
   static Filtration_value value_from_iterator(const Alpha_value_iterator avi) {
     return /*std::sqrt*/ CGAL::to_double(avi->exact());
@@ -103,8 +104,8 @@ public:
 
   static const bool weighted = true;
   static const bool periodic = false;
-  static const bool exact = false;
 
+  // Default value_from_iterator as Alpha_shape_3 is not exact
   template<class Filtration_value, class Alpha_value_iterator>
   static Filtration_value value_from_iterator(const Alpha_value_iterator avi) {
     return /*std::sqrt*/ *avi;
@@ -134,8 +135,8 @@ public:
 
   static const bool weighted = false;
   static const bool periodic = true;
-  static const bool exact = false;
 
+  // Default value_from_iterator as Alpha_shape_3 is not exact
   template<class Filtration_value, class Alpha_value_iterator>
   static Filtration_value value_from_iterator(const Alpha_value_iterator avi) {
     return /*std::sqrt*/ *avi;
@@ -163,8 +164,8 @@ public:
 
   static const bool weighted = true;
   static const bool periodic = true;
-  static const bool exact = false;
 
+  // Default value_from_iterator as Alpha_shape_3 is not exact
   template<class Filtration_value, class Alpha_value_iterator>
   static Filtration_value value_from_iterator(const Alpha_value_iterator avi) {
     return /*std::sqrt*/ *avi;

@@ -56,19 +56,23 @@ namespace Gudhi {
 namespace alpha_complex {
 
 /**
- * \class Alpha_complex_3d Alpha_complex_3d.h gudhi/Alpha_complex_3d.h
+ * \class Alpha_complex_3d
  * \brief Alpha complex data structure for 3d specific case.
  *
  * \ingroup alpha_complex
  *
  * \details
- * The data structure is constructing a CGAL Delaunay triangulation (for more informations on CGAL Delaunay
- * triangulation, please refer to the corresponding chapter in page http://doc.cgal.org/latest/Triangulation/) from a
- * range of points or from an OFF file (cf. Points_off_reader).
+ * The data structure is constructing a <a href="https://doc.cgal.org/latest/Alpha_shapes_3/index.html">CGAL 3D Alpha
+ * Shapes</a> from a range of points (can be read from an OFF file, cf. Points_off_reader).
+ *
+ * \tparam AlphaComplex3dOptions can be `Gudhi::alpha_complex::Alpha_shapes_3d`,
+ * `Gudhi::alpha_complex::Exact_alpha_shapes_3d`, `Gudhi::alpha_complex::Weighted_alpha_shapes_3d`,
+ * `Gudhi::alpha_complex::Periodic_alpha_shapes_3d` or `Gudhi::alpha_complex::Weighted_periodic_alpha_shapes_3d`.
  *
  * Please refer to \ref alpha_complex for examples.
  *
- * \remark When Alpha_complex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
+ * \remark When Alpha_complex_3d is constructed with an infinite value of alpha (default value), the complex is a
+ * Delaunay complex.
  *
  */
 template<typename AlphaComplex3dOptions>
@@ -99,6 +103,9 @@ public:
   * Duplicate points are inserted once in the Alpha_complex. This is the reason why the vertices may be not contiguous.
   *
   * @param[in] points Range of points to triangulate. Points must be in AlphaComplex3dOptions::Point_3
+  *
+  * @pre Available if AlphaComplex3dOptions is `Gudhi::alpha_complex::Alpha_shapes_3d` or
+  * `Gudhi::alpha_complex::Exact_alpha_shapes_3d`.
   *
   * The type InputPointRange must be a range for which std::begin and
   * std::end return input iterators on a AlphaComplex3dOptions::Point_3.
@@ -134,6 +141,8 @@ public:
   *
   * @param[in] points Range of points to triangulate. Points must be in AlphaComplex3dOptions::Point_3
   * @param[in] weights Range of weights on points. Points must be in AlphaComplex3dOptions::Point_3
+  *
+  * @pre Available if AlphaComplex3dOptions is `Weighted_alpha_shapes_3d`.
   *
   * The type InputPointRange must be a range for which std::begin and
   * std::end return input iterators on a AlphaComplex3dOptions::Point_3.
@@ -191,6 +200,8 @@ public:
   * @param[in] x_max Iso-oriented cuboid x_max.
   * @param[in] y_max Iso-oriented cuboid y_max.
   * @param[in] z_max Iso-oriented cuboid z_max.
+  *
+  * @pre Available if AlphaComplex3dOptions is `Periodic_alpha_shapes_3d`.
   *
   * The type InputPointRange must be a range for which std::begin and
   * std::end return input iterators on a AlphaComplex3dOptions::Point_3.
@@ -264,6 +275,8 @@ public:
   * @param[in] x_max Iso-oriented cuboid x_max.
   * @param[in] y_max Iso-oriented cuboid y_max.
   * @param[in] z_max Iso-oriented cuboid z_max.
+  *
+  * @pre Available if AlphaComplex3dOptions is `Weighted_periodic_alpha_shapes_3d`.
   *
   * The type InputPointRange must be a range for which std::begin and
   * std::end return input iterators on a AlphaComplex3dOptions::Point_3.
@@ -461,6 +474,12 @@ public:
     std::cout << "facets \t\t" << count_facets << std::endl;
     std::cout << "cells \t\t" << count_cells << std::endl;
 #endif  // DEBUG_TRACES
+    // --------------------------------------------------------------------------------------------
+    // As Alpha value is an approximation, we have to make filtration non decreasing while increasing the dimension
+    complex.make_filtration_non_decreasing();
+    // Remove all simplices that have a filtration value greater than max_alpha_square
+    complex.prune_above_filtration(max_alpha_square);
+    // --------------------------------------------------------------------------------------------
     return true;
   }
 

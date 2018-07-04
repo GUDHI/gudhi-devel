@@ -53,6 +53,6 @@ if(CGAL_FOUND)
 
     install(TARGETS alpha_complex_3d_persistence DESTINATION bin)
 
-  endif (NOT CGAL_VERSION VERSION_LESS 4.11.0)
+  endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
 
 endif(CGAL_FOUND)
