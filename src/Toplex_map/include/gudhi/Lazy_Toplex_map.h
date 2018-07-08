@@ -7,6 +7,9 @@
 
 namespace Gudhi {
 
+/** A Lazy_Toplex_map represents the simplicial complex.
+ * A "toplex" is a maximal simplex but not all simplices in a LTM are toplices.
+ * \ingroup toplex_map   */
 class Lazy_Toplex_map {
 
 public:
@@ -27,20 +30,43 @@ public:
      * \ingroup toplex_map   */
     typedef Toplex_map::Simplex_ptr_set Simplex_ptr_set;
 
+    /** Adds the given simplex to the complex.
+     * The simplex must not have maximal coface in the complex.
+     * \ingroup toplex_map   */
     template <typename Input_vertex_range>
-    void insert_max_simplex(const Input_vertex_range &vertex_range);
+    void insert_independent_simplex(const Input_vertex_range &vertex_range);
+
+    /** \brief Adds the given simplex to the complex.
+     * Nothing happens if the simplex has a coface in the complex.
+     * \ingroup toplex_map   */
     template <typename Input_vertex_range>
     bool insert_simplex(const Input_vertex_range &vertex_range);
+
+    /** \brief Removes the given simplex and its cofaces from the complex.
+     * Its faces are kept inside.
+     * \ingroup toplex_map   */
     template <typename Input_vertex_range>
     void remove_simplex(const Input_vertex_range &vertex_range);
 
+    /** Does a simplex belong to the complex ?
+     * \ingroup toplex_map   */
     template <typename Input_vertex_range>
     bool membership(const Input_vertex_range &vertex_range);
+
+
+    /** Do all the facets of a simplex belong to the complex ?
+     * \ingroup toplex_map   */
     template <typename Input_vertex_range>
     bool all_facets_inside(const Input_vertex_range &vertex_range);
 
+    /** Contracts one edge in the complex.
+     * The edge has to verify the link condition if you want to preserve topology.
+     * Returns the remaining vertex.
+     * \ingroup toplex_map   */
     Vertex contraction(const Vertex x, const Vertex y);
 
+    /** \brief Number of simplices stored.
+      * \ingroup toplex_map   */
     std::size_t num_simplices() const;
 
     std::unordered_map<Vertex, std::size_t> gamma0_lbounds;
@@ -69,7 +95,7 @@ private:
 };
 
 template <typename Input_vertex_range>
-void Lazy_Toplex_map::insert_max_simplex(const Input_vertex_range &vertex_range){
+void Lazy_Toplex_map::insert_independent_simplex(const Input_vertex_range &vertex_range){
     for(const Vertex& v : vertex_range)
         if(!gamma0_lbounds.count(v)) gamma0_lbounds.emplace(v,1);
         else gamma0_lbounds[v]++;
@@ -116,7 +142,7 @@ void Lazy_Toplex_map::remove_simplex(const Input_vertex_range &vertex_range){
             if(included(vertex_range, *sptr)){
                 erase_max(*sptr);
                 for(const Simplex& f : facets(vertex_range))
-                    insert_max_simplex(f);
+                    insert_independent_simplex(f);
             }
     }
 }
