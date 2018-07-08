@@ -25,7 +25,7 @@ public:
 
     /** Simplex is the type of simplices.
      * \ingroup toplex_map   */
-    typedef std::unordered_set<Toplex_map::Vertex> Simplex;
+    typedef std::set<Toplex_map::Vertex> Simplex;
 
     /** The type of the pointers to maximal simplices.
      * \ingroup toplex_map   */
