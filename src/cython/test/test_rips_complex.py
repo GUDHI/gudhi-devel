@@ -30,7 +30,6 @@ __license__ = "GPL v3"
 
 def test_empty_rips():
     rips_complex = RipsComplex()
-    assert rips_complex.__is_defined() == True
 
 def test_rips_from_points():
     point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
