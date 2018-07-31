@@ -45,12 +45,13 @@ using Persistent_cohomology =
     Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Gudhi::persistent_cohomology::Field_Zp>;
 
 void program_options(int argc, char *argv[], std::string &off_file_points, bool& exact, std::string &weight_file,
-                     std::string &cuboid_file, std::string &output_file_diag, int &coeff_field_characteristic,
-                     Filtration_value &min_persistence);
+                     std::string &cuboid_file, std::string &output_file_diag, Filtration_value &alpha_square_max_value,
+                     int &coeff_field_characteristic, Filtration_value &min_persistence);
 
 template<typename AlphaComplex3d>
-bool create_complex(AlphaComplex3d& alpha_complex, Simplex_tree& simplex_tree) {
-  return alpha_complex.create_complex(simplex_tree);
+bool create_complex(AlphaComplex3d& alpha_complex, Simplex_tree& simplex_tree,
+                    Filtration_value alpha_square_max_value) {
+  return alpha_complex.create_complex(simplex_tree, alpha_square_max_value);
 }
 
 bool read_weight_file(const std::string& weight_file, std::vector<double>& weights) {
@@ -87,6 +88,7 @@ int main(int argc, char **argv) {
   std::string weight_file;
   std::string cuboid_file;
   std::string output_file_diag;
+  Filtration_value alpha_square_max_value = 0.;
   int coeff_field_characteristic = 0;
   Filtration_value min_persistence = 0.;
   bool exact_version = false;
@@ -94,7 +96,7 @@ int main(int argc, char **argv) {
   bool periodic_version = false;
 
   program_options(argc, argv, off_file_points, exact_version, weight_file, cuboid_file, output_file_diag,
-                  coeff_field_characteristic, min_persistence);
+                  alpha_square_max_value, coeff_field_characteristic, min_persistence);
 
   // Read the OFF file (input file name given as parameter) and triangulate points
   Gudhi::Points_3D_off_reader<Alpha_complex_3d::Point_3> off_reader(off_file_points);
@@ -131,25 +133,25 @@ int main(int argc, char **argv) {
       exit(-1);
     } else {
       Exact_alpha_complex_3d alpha_complex(off_reader.get_point_cloud());
-      create_complex(alpha_complex, simplex_tree);
+      create_complex(alpha_complex, simplex_tree, alpha_square_max_value);
     }
   } else {
     if (weighted_version) {
       if (periodic_version) {
         Weighted_periodic_alpha_complex_3d alpha_complex(off_reader.get_point_cloud(), weights,
                                                          x_min, y_min, z_min, x_max, y_max, z_max);
-        create_complex(alpha_complex, simplex_tree);
+        create_complex(alpha_complex, simplex_tree, alpha_square_max_value);
       } else {
         Weighted_alpha_complex_3d alpha_complex(off_reader.get_point_cloud(), weights);
-        create_complex(alpha_complex, simplex_tree);
+        create_complex(alpha_complex, simplex_tree, alpha_square_max_value);
       }
     } else {
       if (periodic_version) {
         Periodic_alpha_complex_3d alpha_complex(off_reader.get_point_cloud(), x_min, y_min, z_min, x_max, y_max, z_max);
-        create_complex(alpha_complex, simplex_tree);
+        create_complex(alpha_complex, simplex_tree, alpha_square_max_value);
       } else {
         Alpha_complex_3d alpha_complex(off_reader.get_point_cloud());
-        create_complex(alpha_complex, simplex_tree);
+        create_complex(alpha_complex, simplex_tree, alpha_square_max_value);
       }
     }
   }
@@ -179,8 +181,8 @@ int main(int argc, char **argv) {
 }
 
 void program_options(int argc, char *argv[], std::string &off_file_points, bool& exact, std::string &weight_file,
-                     std::string &cuboid_file, std::string &output_file_diag, int &coeff_field_characteristic,
-                     Filtration_value &min_persistence) {
+                     std::string &cuboid_file, std::string &output_file_diag, Filtration_value &alpha_square_max_value,
+                     int &coeff_field_characteristic, Filtration_value &min_persistence) {
   namespace po = boost::program_options;
   po::options_description hidden("Hidden options");
   hidden.add_options()("input-file", po::value<std::string>(&off_file_points),
@@ -196,6 +198,9 @@ void program_options(int argc, char *argv[], std::string &off_file_points, bool&
       "Name of file describing the periodic domain. Format is:\n  min_hx min_hy min_hz\n  max_hx max_hy max_hz")(
       "output-file,o", po::value<std::string>(&output_file_diag)->default_value(std::string()),
       "Name of file in which the persistence diagram is written. Default print in std::cout")(
+      "max-alpha-square-value,r", po::value<Filtration_value>(&alpha_square_max_value)
+          ->default_value(std::numeric_limits<Filtration_value>::infinity()),
+      "Maximal alpha square value for the Alpha complex construction.")(
       "field-charac,p", po::value<int>(&coeff_field_characteristic)->default_value(11),
       "Characteristic p of the coefficient field Z/pZ for computing homology.")(
       "min-persistence,m", po::value<Filtration_value>(&min_persistence),

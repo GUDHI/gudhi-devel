@@ -216,8 +216,8 @@ public:
     static_assert(AlphaComplex3dOptions::periodic,
                   "This constructor is not available for non-periodic versions of Alpha_complex_3d");
     // Checking if the cuboid is the same in x,y and z direction. If not, CGAL will not process it.
-    GUDHI_CHECK((x_max - x_min == y_max - y_min) ||
-                (x_max - x_min == z_max - z_min) ||
+    GUDHI_CHECK((x_max - x_min == y_max - y_min) &&
+                (x_max - x_min == z_max - z_min) &&
                 (z_max - z_min == y_max - y_min),
                 std::invalid_argument("The size of the cuboid in every directions is not the same."));
 
@@ -295,8 +295,8 @@ public:
     GUDHI_CHECK((weights.size() == points.size()),
                 std::invalid_argument("Points number in range different from weights range number"));
     // Checking if the cuboid is the same in x,y and z direction. If not, CGAL will not process it.
-    GUDHI_CHECK((x_max - x_min == y_max - y_min) ||
-                (x_max - x_min == z_max - z_min) ||
+    GUDHI_CHECK((x_max - x_min == y_max - y_min) &&
+                (x_max - x_min == z_max - z_min) &&
                 (z_max - z_min == y_max - y_min),
                 std::invalid_argument("The size of the cuboid in every directions is not the same."));
 
@@ -312,7 +312,7 @@ public:
 #endif
 
     while ((index < weights.size()) && (index < points.size())) {
-      GUDHI_CHECK((weights[index] < maximal_possible_weight) || (weights[index] >= 0),
+      GUDHI_CHECK((weights[index] < maximal_possible_weight) && (weights[index] >= 0),
                   std::invalid_argument("Invalid weight at line" + std::to_string(index + 1) +
                                         ". Must be positive and less than maximal possible weight = 1/64*cuboid length "
                                         "squared, which is not an acceptable input."));

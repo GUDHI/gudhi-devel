@@ -94,6 +94,8 @@ where `<input OFF file>` is the path to the input point cloud in
 * `-h [ --help ]` Produce help message
 * `-o [ --output-file ]` Name of file in which the persistence diagram is
 written. Default print in standard output.
+* `-r [ --max-alpha-square-value ]` (default = inf) Maximal alpha square value
+for the Alpha complex construction.
 * `-p [ --field-charac ]` (default=11) Characteristic p of the coefficient
 field Z/pZ for computing homology.
 * `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature
@@ -120,45 +122,3 @@ N.B.:
 [Alpha shape](https://doc.cgal.org/latest/Alpha_shapes_3/index.html#title0)
 and
 [Regular triangulation](https://doc.cgal.org/latest/Triangulation_3/index.html#Triangulation3secclassRegulartriangulation) documentation.
-
-
-
-
-
-
-
-
-## periodic_alpha_complex_3d_persistence ##
-Same as `alpha_complex_3d_persistence`, but using periodic alpha shape 3d.
-Refer to the [CGAL's 3D Periodic Triangulations User Manual](https://doc.cgal.org/latest/Periodic_3_triangulation_3/index.html) for more details.
-
-**Usage**
-
-```
-   periodic_alpha_complex_3d_persistence [options] <input OFF file> <cuboid file>
-```
-
-where
-
-* `<input OFF file>` is the path to the input point cloud in [nOFF ASCII format](http://www.geomview.org/docs/html/OFF.html).
-* `<cuboid file>` is the path to the file describing the periodic domain. It must be in the format described
-[here](/doc/latest/fileformats.html#FileFormatsIsoCuboid).
-
-**Allowed options**
-
-* `-h [ --help ]` Produce help message
-* `-o [ --output-file ]` Name of file in which the persistence diagram is written. Default print in standard output.
-* `-p [ --field-charac ]` (default=11) Characteristic p of the coefficient field Z/pZ for computing homology.
-* `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature to be recorded. Enter a negative value to see zero length intervals
-
-
-**Example**
-
-```
-periodic_alpha_complex_3d_persistence ../../data/points/grid_10_10_10_in_0_1.off ../../data/points/iso_cuboid_3_in_0_1.txt -p 3 -m 1.0
-```
-
-N.B.:
-
-* Cuboid file must be in the format described [here](/doc/latest/fileformats.html#FileFormatsIsoCuboid).
-* Filtration values are alpha square values.

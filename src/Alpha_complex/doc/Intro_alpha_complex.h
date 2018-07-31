@@ -165,6 +165,29 @@ namespace alpha_complex {
  * 
  * \include Alpha_complex/alphaoffreader_for_doc_32.txt
  * 
+ *
+ * \section weighted3dexample 3d specific example
+ *
+ * A specific module for Alpha complex is available in 3d (cf. Alpha_complex_3d) and allows to construct default, exact,
+ * weighted, periodic or weighted and periodic versions of alpha complexes
+ *
+ * This example builds the CGAL 3d weighted alpha shapes from a small molecule, and initializes the alpha complex with
+ * it. This example is taken from <a href="https://doc.cgal.org/latest/Alpha_shapes_3/index.html#title13">CGAL 3d
+ * weighted alpha shapes</a>.
+ *
+ * Then, it is asked to display information about the alpha complex.
+ *
+ * \include Alpha_complex/Weighted_alpha_complex_3d_from_points.cpp
+ *
+ * When launching:
+ *
+ * \code $> ./Alpha_complex_example_weighted_3d_from_points
+ * \endcode
+ *
+ * the program output is:
+ *
+ * \include Alpha_complex/weightedalpha3dfrompoints_for_doc.txt
+ *
  */
 /** @} */  // end defgroup alpha_complex
 
