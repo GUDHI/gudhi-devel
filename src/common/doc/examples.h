@@ -53,6 +53,7 @@
  * @example Spatial_searching/example_spatial_searching.cpp
  * @example Alpha_complex/alpha_complex_3d_persistence.cpp
  * @example Alpha_complex/alpha_complex_persistence.cpp
+ * @example Alpha_complex/Weighted_alpha_complex_3d_from_points.cpp
  * @example Bottleneck_distance/bottleneck_distance.cpp
  * @example Witness_complex/weak_witness_persistence.cpp
  * @example Witness_complex/strong_witness_persistence.cpp
