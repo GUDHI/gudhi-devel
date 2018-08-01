@@ -1023,6 +1023,10 @@ private:
                       Face_iterator());
   }
 
+  Face_range face_range(const Alcove_id& a_id,
+                        std::size_t value_dim) const {
+    return face_range(a_id, value_dim, value_dim);
+  }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // Coface range

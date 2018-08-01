@@ -43,31 +43,33 @@ std::vector<FT> bounding_box_dimensions(Point_vector& points) {
 }
 
 /** Recursive procedure that checks test1 for all products of triangulations ~A_i at a given dimension */
-void rec_test1(std::vector<unsigned>& decomposition, Coxeter_system& cs, unsigned& dimension) {
-  if (decomposition[0] == dimension+1) {
-    std::cout << cs << std::endl;
+void rec_test1(std::vector<unsigned>& decomposition, Coxeter_system& cs, unsigned dimension) {
+  if (dimension == 0) {
+    std::cout << std::endl << cs;
     typedef typename Coxeter_system::Alcove_id A_id;
-    A_id a_id(1, dimension);
+    A_id a_id(1, cs.dimension());
     for (unsigned i = 0; i < cs.pos_root_count(); ++i)
       a_id.push_back(0);
     std::cout << "Cell " << a_id << ":\n";
-    unsigned total_faces_count = 0;
-    for (auto f_it: cs.face_range(a_id, 0)) {
-      std::cout << " " << f_it  << "\n";
-      total_faces_count++;
+    for (unsigned f_d = 0; f_d <= cs.dimension(); ++f_d) {
+      unsigned total_faces_count = 0;
+      std::cout << "Faces of dimension " << f_d << ":\n";
+      for (auto f_it: cs.face_range(a_id, f_d)) {
+        std::cout << " " << f_it  << "\n";
+        total_faces_count++;
+      }
+      std::cout << "Total number of faces of dimension " << f_d << " is " << total_faces_count << ".\n";
     }
     return;
   }
   unsigned i = decomposition.back();
   if (decomposition.back() == 0)
     i = 1;
-  for (; i <= dimension + 1 - decomposition[0]; ++i) {
+  for (; i <= dimension; ++i) {
     decomposition.push_back(i);
-    decomposition[0] += i;
     cs.emplace_back('A', i);
-    rec_test1(decomposition, cs, dimension);
+    rec_test1(decomposition, cs, dimension-i);
     cs.pop_back();
-    decomposition[0] -= i;
     decomposition.pop_back();
   }
 }

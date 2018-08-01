@@ -147,14 +147,9 @@ private:
       if (is_end_)
         return;
       for (std::size_t i = first_change_; i < decomposition_.size(); ++i) {
-        if (decomposition_[i] == scs_iterators_[i]->dimension())
-          for (std::size_t j = 0; j < chunks_[i].size(); ++j)
-            value_.push_back(chunks_[i][j], chunks_[i].is_fixed(j));
-        else {
-          Alcove_id face = *face_iterators_[i].first;
-          for (std::size_t j = 0; j < face.size(); ++j)
-            value_.push_back(face[j], face.is_fixed(j));
-        }
+        Alcove_id face = *face_iterators_[i].first;
+        for (std::size_t j = 0; j < face.size(); ++j)
+          value_.push_back(face[j], face.is_fixed(j));
       }
       first_change_ = decomposition_.size();
     }
@@ -164,7 +159,6 @@ private:
         decomposition_[i] =
           (rest < scs_iterators_[i]->dimension() ? rest : scs_iterators_[i]->dimension());
         auto face_range = scs_iterators_[i]->face_range(chunks_[i],
-                                                        decomposition_[i],
                                                         decomposition_[i]);
         face_iterators_[i] = std::make_pair(face_range.begin(), face_range.end());
         rest -= decomposition_[i];
@@ -173,7 +167,7 @@ private:
     }
     
     bool equal(Face_iterator const& other) const {
-      return (is_end_ && other.is_end_) || (decomposition_ == other.decomposition_);
+      return (is_end_ && other.is_end_) || (!is_end_ && !other.is_end_ && decomposition_ == other.decomposition_);
     }
     Alcove_id const& dereference() const {
       return value_;
@@ -186,56 +180,31 @@ private:
       while (true) {
         value_.resize(value_.size() - chunks_[pos].size());
         face_iterators_[pos].first++;
-        if (pos == 0) {
-          if (face_iterators_[pos].first == face_iterators_[pos].second &&
-              decomposition_[pos] != chunks_[pos].dimension()) {
-            if (decomposition_[pos] == 0) {
+        if (face_iterators_[pos].first == face_iterators_[pos].second) {
+          if (decomposition_[pos] == 0) {
+            if (pos == 0) {
               is_end_ = true;
               return;
             }
-            decomposition_[pos]--;
-            rest++;
-            auto face_range = scs_iterators_[pos]->face_range(chunks_[pos],
-                                                              decomposition_[pos],
-                                                              decomposition_[pos]);
-            face_iterators_[pos] = std::make_pair(face_range.begin(), face_range.end());
-            is_end_ = update_from(pos + 1, rest);
-            update_value(pos);
-            return;
-          }
-          is_end_ = update_from(pos + 1, rest);
-          update_value(pos);
-          return;
-        }
-        // pos != 0
-        if (pos == decomposition_.size() - 1) {
-          if (face_iterators_[pos].first == face_iterators_[pos].second) {
-            pos--;
             rest += decomposition_[pos];
-            continue;
-          }
-          update_value(pos);
-          return;
-        }
-        // pos != 0 or last
-        if (face_iterators_[pos].first == face_iterators_[pos].second &&
-            decomposition_[pos] != chunks_[pos].dimension()) {
-          if (decomposition_[pos] == 0) {
             pos--;
-            rest += decomposition_[pos];
             continue;
           }
           decomposition_[pos]--;
-          rest++;
+          rest++;    
           auto face_range = scs_iterators_[pos]->face_range(chunks_[pos],
-                                                            decomposition_[pos],
                                                             decomposition_[pos]);
           face_iterators_[pos] = std::make_pair(face_range.begin(), face_range.end());
-          is_end_ = update_from(pos + 1, rest);
-          update_value(pos);
-          return;
         }
-        is_end_ = update_from(pos + 1, rest);
+        if (update_from(pos + 1, rest)) {
+          if (pos == 0) {
+            is_end_ = true;
+            return;
+          }
+          rest += decomposition_[pos];
+          pos--;
+          continue;
+        }
         update_value(pos);
         return;
       }
