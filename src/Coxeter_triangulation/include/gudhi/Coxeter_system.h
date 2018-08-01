@@ -47,6 +47,13 @@ public:
   unsigned short dimension() const {
     return dimension_;
   }
+
+  unsigned pos_root_count() const {
+    unsigned value = 0;
+    for (auto ss: simple_system_range_)
+      value += ss.pos_root_count();
+    return value;
+  }
   
   void emplace_back(const Simple_coxeter_system& rhs) {
     simple_system_range_.emplace_back(rhs);
@@ -123,7 +130,7 @@ public:
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
-  // Coface range
+  // Face range
   //////////////////////////////////////////////////////////////////////////////////////////////////
   
 private:

@@ -105,14 +105,14 @@ int main(int argc, char * const argv[]) {
     // output_points_to_medit(*off_range, "sphere_coxeter_complex_points.mesh");
     // delete off_range;
     // // std::cout << "Memory usage (Physical) before Voronoi skeleton computation: " << (float)getPhysicalValue()/1000 << "MB.\n";
-    // t.begin();
-    // cc.voronoi_skeleton(d);
-    // t.end();
-    // // std::cout << "Voronoi skeleton construction time: " << t.num_seconds() << "s\n";
-    // // t.begin();
-    // // cc.collapse();
-    // // t.end();
-    // // std::cout << "Collapsing the simplicial complex took: " << t.num_seconds() << "s\n";
+    t.begin();
+    cc.voronoi_skeleton(d);
+    t.end();
+    std::cout << "Voronoi skeleton construction time: " << t.num_seconds() << "s\n";
+    t.begin();
+    cc.collapse();
+    t.end();
+    std::cout << "Collapsing the simplicial complex took: " << t.num_seconds() << "s\n";
   }    
   // std::cout << "Memory usage (Virtual): " << (float)getVirtualValue()/1000. << "MB.\n";
   // std::cout << "Memory usage (Physical): " << (float)getPhysicalValue()/1000 << "MB.\n";
