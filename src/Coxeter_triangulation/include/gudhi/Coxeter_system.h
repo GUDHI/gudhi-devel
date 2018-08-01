@@ -157,7 +157,7 @@ private:
     std::size_t update_from(std::size_t pos, std::size_t rest) {
       for (std::size_t i = pos; i < decomposition_.size(); ++i) {
         decomposition_[i] =
-          (rest < scs_iterators_[i]->dimension() ? rest : scs_iterators_[i]->dimension());
+          (rest < chunks_[i].dimension() ? rest : chunks_[i].dimension());
         auto face_range = scs_iterators_[i]->face_range(chunks_[i],
                                                         decomposition_[i]);
         face_iterators_[i] = std::make_pair(face_range.begin(), face_range.end());

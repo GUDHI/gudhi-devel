@@ -54,8 +54,11 @@ void rec_test1(std::vector<unsigned>& decomposition, Coxeter_system& cs, unsigne
     for (unsigned f_d = 0; f_d <= cs.dimension(); ++f_d) {
       unsigned total_faces_count = 0;
       std::cout << "Faces of dimension " << f_d << ":\n";
-      for (auto f_it: cs.face_range(a_id, f_d)) {
-        std::cout << " " << f_it  << "\n";
+      for (auto f_id: cs.face_range(a_id, f_d)) {
+        std::cout << " " << f_id  << "\n";
+        for (unsigned ff_d = 0; ff_d <= f_d; ++ff_d)
+          for (auto ff_id: cs.face_range(f_id, ff_d))
+            std::cout << "  " << ff_id  << "\n";
         total_faces_count++;
       }
       std::cout << "Total number of faces of dimension " << f_d << " is " << total_faces_count << ".\n";
@@ -86,5 +89,16 @@ int main(int argc, char * const argv[]) {
   std::vector<unsigned> decomposition; // first coordinate is the sum
   decomposition.reserve(dimension);
   Coxeter_system cs;
-  rec_test1(decomposition, cs, dimension);  
+  rec_test1(decomposition, cs, dimension);
+  // cs.emplace_back('A', 2);
+  // typename Coxeter_system::Alcove_id a_id(1, 1);
+  // a_id.push_back(0, true);
+  // a_id.push_back(0);
+  // a_id.push_back(0);
+  // std::cout << a_id << "\n";
+  // for (auto f_id: cs.face_range(a_id, 1))
+  //   std::cout <<  " " << f_id << "\n";
+  // std::cout << "\nSCS face range test:\n";
+  // for (auto f_id: cs.simple_coxeter_system_begin()->face_range(a_id, 1))
+  //   std::cout <<  " " << f_id << "\n";
 }

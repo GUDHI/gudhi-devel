@@ -982,12 +982,18 @@ private:
         value_dim_upper_(value_dim_upper),
         mask_(a_id.size())
     {
-      if (!stack_push(false, false)) {
-        stack_pop();
-        if (!stack_push(true, false)) {
+      if (!a_id.is_fixed(0)) {
+        if (!stack_push(false, false)) {
           stack_pop();
-          elementary_increment();
+          if (!stack_push(true, false)) {
+            stack_pop();
+            elementary_increment();
+          }
         }
+      }
+      else if (!stack_push(true, false)) {
+        stack_pop();
+        elementary_increment();
       }
       update_value();
     }
@@ -1217,12 +1223,18 @@ private:
         value_dim_upper_(value_dim_upper),
         mask_(a_id.size())
     {
-      if (!stack_push(false, false)) {
-        stack_pop();
-        if (!stack_push(true, false)) {
+      if (a_id.is_fixed(0)) {
+        if (!stack_push(false, false)) {
           stack_pop();
-          elementary_increment();
+          if (!stack_push(true, false)) {
+            stack_pop();
+            elementary_increment();
+          }
         }
+      }
+      else if (!stack_push(false, false)) {
+        stack_pop();
+        elementary_increment();
       }
       update_value();
     }
