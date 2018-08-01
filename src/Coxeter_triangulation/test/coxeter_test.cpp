@@ -56,8 +56,13 @@ void rec_test1(std::vector<unsigned>& decomposition, Coxeter_system& cs, unsigne
       std::cout << "Faces of dimension " << f_d << ":\n";
       for (auto f_id: cs.face_range(a_id, f_d)) {
         std::cout << " " << f_id  << "\n";
-        for (unsigned ff_d = 0; ff_d <= f_d; ++ff_d)
-          for (auto ff_id: cs.face_range(f_id, ff_d))
+        // std::cout << " Faces of " << f_id << ":\n";
+        // for (unsigned ff_d = 0; ff_d <= f_d; ++ff_d)
+        //   for (auto ff_id: cs.face_range(f_id, ff_d))
+        //     std::cout << "  " << ff_id  << "\n";
+        std::cout << " Cofaces of " << f_id << ":\n";
+        for (unsigned ff_d = f_d; ff_d <= cs.dimension(); ++ff_d)
+          for (auto ff_id: cs.coface_range(f_id, ff_d))
             std::cout << "  " << ff_id  << "\n";
         total_faces_count++;
       }
