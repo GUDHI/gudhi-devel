@@ -96,14 +96,13 @@ int main(int argc, char * const argv[]) {
   Coxeter_system cs;
   rec_test1(decomposition, cs, dimension);
   // cs.emplace_back('A', 2);
-  // typename Coxeter_system::Alcove_id a_id(1, 1);
+  // typename Coxeter_system::Alcove_id a_id(1, 0);
   // a_id.push_back(0, true);
-  // a_id.push_back(0);
-  // a_id.push_back(0);
+  // a_id.push_back(0, true);
+  // a_id.push_back(0, true);
   // std::cout << a_id << "\n";
-  // for (auto f_id: cs.face_range(a_id, 1))
+  // for (auto f_id: cs.face_range(a_id, 0))
   //   std::cout <<  " " << f_id << "\n";
-  // std::cout << "\nSCS face range test:\n";
-  // for (auto f_id: cs.simple_coxeter_system_begin()->face_range(a_id, 1))
+  // for (auto f_id: cs.simple_coxeter_system_begin()->coface_range(a_id, 0))
   //   std::cout <<  " " << f_id << "\n";
 }
