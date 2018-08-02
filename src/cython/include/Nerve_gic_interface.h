@@ -47,7 +47,7 @@ class Nerve_gic_interface : public Cover_complex<std::vector<double>> {
     set_cover_from_Voronoi(Gudhi::Euclidean_distance(), m);
   }
   double set_graph_from_automatic_euclidean_rips(int N) {
-    set_graph_from_automatic_rips(Gudhi::Euclidean_distance(), N);
+    return set_graph_from_automatic_rips(Gudhi::Euclidean_distance(), N);
   }
   void set_graph_from_euclidean_rips(double threshold) {
     set_graph_from_rips(threshold, Gudhi::Euclidean_distance());
