@@ -229,7 +229,7 @@ private:
           chunk.push_back(coface[i], coface.is_fixed(i));
         chunk.set_dimension(scs_it->alcove_dimension(chunk));
         chunks_.push_back(chunk);
-        pos += scs_it->dimension();
+        pos += scs_it->pos_root_count();
       }
       if (update_from(0, value_dimension)) {
         is_end_ = true;
@@ -357,9 +357,9 @@ private:
           chunk.push_back(cell[i], cell.is_fixed(i));
         chunk.set_dimension(scs_it->alcove_dimension(chunk));
         chunks_.push_back(chunk);
-        pos += scs_it->dimension();
+        pos += scs_it->pos_root_count();
       }
-      if (update_from(0, cs.dimension() - value_dimension)) {
+      if (cs.dimension() < value_dimension || update_from(0, cs.dimension() - value_dimension)) {
         is_end_ = true;
         return;
       }

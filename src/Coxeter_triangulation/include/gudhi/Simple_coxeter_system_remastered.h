@@ -839,8 +839,12 @@ private:
             else
               value_.push_back(a_id_[k], false);
           bool curr_state_is_valid = true;
-          for (std::size_t l = i + 1; l < j && curr_state_is_valid; ++l)
-            curr_state_is_valid = triplet_check(i,l,j);
+          if (basis_k_.size() == j && i != basis_k_.back())
+            for (std::size_t l = basis_k_.back(); l < j && curr_state_is_valid; ++l)
+              curr_state_is_valid = triplet_check(i,l,j);
+          else
+            for (std::size_t l = i + 1; l < j && curr_state_is_valid; ++l)
+              curr_state_is_valid = triplet_check(i,l,j);
           if (curr_state_is_valid &&
               value_.size() == a_id_.size()) {
             value_.set_dimension(curr_dim_lower_);
@@ -922,34 +926,57 @@ private:
       std::size_t k = stack_.size();
       std::size_t j = std::floor(0.5*(1+std::sqrt(1+8*k)));
       std::size_t i = (j*j+j-2)/2 - k;
-      mask_[k] = true;
-      if (fixed)
-        for (std::size_t l = i + 1; l < j && mask_[k]; ++l) {
+      if (basis_k_.size() == j - 1) {
+        bool is_basis_vect = true;
+        for (std::size_t l = i + 1; l < j && is_basis_vect; ++l) {
           std::size_t k1 = (l*l+l-2)/2 - i;
-          std::size_t k2 = (j*j+j-2)/2 - l;
-          mask_[k] = !value_.is_fixed(k1) || !value_.is_fixed(k2);
+          is_basis_vect = !value_.is_fixed(k1);
         }
-      else {
-        for (std::size_t l = i + 1; l < j && mask_[k]; ++l) {
-          std::size_t k1 = (l*l+l-2)/2 - i;
-          std::size_t k2 = (j*j+j-2)/2 - l;
-          mask_[k] = !(value_.is_fixed(k1) xor value_.is_fixed(k2));
-        }
-        for (std::size_t l = 0; l < i && mask_[k]; ++l) {
-          mask_[k] = false;
-          for (std::size_t m = l+1; m < j && !mask_[k]; ++m) {
-            std::size_t k1 = (m*m+m-2)/2 - l;
-            mask_[k] = value_.is_fixed(k1);
+        if (!fixed)
+          for (std::size_t l = 0; l < i && is_basis_vect; ++l) {
+           is_basis_vect = false;
+            for (std::size_t m = l+1; m < j && !is_basis_vect; ++m) {
+              std::size_t k1 = (m*m+m-2)/2 - l;
+              is_basis_vect = value_.is_fixed(k1);
+            }
           }
+        if (is_basis_vect) {
+          basis_k_.push_back(i);
+          if (fixed)
+            curr_dim_upper_--;
+          else
+            curr_dim_lower_++;
         }
       }
-      if (mask_[k]) {
-        if (fixed)
-          curr_dim_upper_--;
-        else
-          curr_dim_lower_++;
-      }
-      stack_.push({fixed, plus_one});
+      stack_.push({fixed, plus_one});        
+      // mask_[k] = true;
+      // if (fixed)
+      //   for (std::size_t l = i + 1; l < j && mask_[k]; ++l) {
+      //     std::size_t k1 = (l*l+l-2)/2 - i;
+      //     std::size_t k2 = (j*j+j-2)/2 - l;
+      //     mask_[k] = !value_.is_fixed(k1) || !value_.is_fixed(k2);
+      //   }
+      // else {
+      //   for (std::size_t l = i + 1; l < j && mask_[k]; ++l) {
+      //     std::size_t k1 = (l*l+l-2)/2 - i;
+      //     std::size_t k2 = (j*j+j-2)/2 - l;
+      //     mask_[k] = !(value_.is_fixed(k1) xor value_.is_fixed(k2));
+      //   }
+      //   for (std::size_t l = 0; l < i && mask_[k]; ++l) {
+      //     mask_[k] = false;
+      //     for (std::size_t m = l+1; m < j && !mask_[k]; ++m) {
+      //       std::size_t k1 = (m*m+m-2)/2 - l;
+      //       mask_[k] = value_.is_fixed(k1);
+      //     }
+      //   }
+      // }
+      // if (mask_[k]) {
+      //   if (fixed)
+      //     curr_dim_upper_--;
+      //   else
+      //     curr_dim_lower_++;
+      // }
+      // stack_.push({fixed, plus_one});
       return curr_dim_lower_ <= curr_dim_upper_ &&
              curr_dim_lower_ <= value_dim_upper_ &&
              curr_dim_upper_ >= value_dim_lower_;
@@ -958,12 +985,22 @@ private:
     void stack_pop() {
       bool f = stack_.top().f;
       stack_.pop();
-      if (mask_[stack_.size()]) {
+      std::size_t k = stack_.size();
+      std::size_t j = std::floor(0.5*(1+std::sqrt(1+8*k)));
+      std::size_t i = (j*j+j-2)/2 - k;
+      if (basis_k_.size() == j && basis_k_.back() == i) {
+        basis_k_.pop_back();
         if (f)
           curr_dim_upper_++;
         else
           curr_dim_lower_--;
       }
+      // if (mask_[stack_.size()]) {
+      //   if (f)
+      //     curr_dim_upper_++;
+      //   else
+      //     curr_dim_lower_--;
+      // }
     }
     
   public:
@@ -979,8 +1016,7 @@ private:
         curr_dim_lower_(0),
         curr_dim_upper_(scs.dimension_),
         value_dim_lower_(value_dim_lower),
-        value_dim_upper_(value_dim_upper),
-        mask_(a_id.size())
+        value_dim_upper_(value_dim_upper)
     {
       if (!a_id.is_fixed(0)) {
         if (!stack_push(false, false)) {
@@ -1016,7 +1052,7 @@ private:
     std::size_t ambient_dimension_;
     std::size_t curr_dim_lower_, curr_dim_upper_;
     std::size_t value_dim_lower_, value_dim_upper_;
-    std::vector<bool> mask_;
+    std::vector<unsigned> basis_k_;
     std::stack<State_> stack_;
   };
 
@@ -1093,22 +1129,22 @@ private:
           if (!a_id_.is_fixed(k+1)) {
             if (!stack_push(false, false)) {              
               stack_pop();
-              elementary_increment();
-            }
-          }
-          else 
-            if (!stack_push(false, false)) {
-              stack_pop();
               if (!stack_push(true, false)) {
                 stack_pop();
                 elementary_increment();
               }
             }
+          }
+          else 
+            if (!stack_push(false, false)) {
+              stack_pop();
+              elementary_increment();
+            }
         }
         break;
       }
       default:
-        std::cerr << "Simple_coxeter_system::facet_iterator : The family " << family_ << " is not supported. "
+        std::cerr << "Simple_coxeter_system::coface_iterator : The family " << family_ << " is not supported. "
                   << "Please use A family for the constructor (in capital).\n";
       }
     }
