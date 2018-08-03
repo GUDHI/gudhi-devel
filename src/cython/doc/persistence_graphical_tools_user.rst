@@ -43,6 +43,9 @@ This function can display the persistence result as a diagram:
         legend=True)
     plt.show()
 
+Persistence density
+-------------------
+
 If you want more information on a specific dimension, for instance:
 
 .. plot::
@@ -56,7 +59,7 @@ If you want more information on a specific dimension, for instance:
         gudhi.read_persistence_intervals_grouped_by_dimension(persistence_file=\
             persistence_file)
     dim = 1
-    # Display all points with some transparency
-    plt = gudhi.plot_persistence_diagram([(dim,interval) for interval in diag[dim]],
-        max_plots=0, alpha=0.1)
+    # Display persistence density
+    plt = gudhi.plot_persistence_density([(dim,interval) for interval in diag[dim]],
+        max_plots=0, legend=True)
     plt.show()
