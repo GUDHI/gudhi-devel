@@ -8,6 +8,7 @@ namespace Gudhi {
 struct Alcove_id {
   // typedef typename std::vector<int>::iterator iterator;
   typedef typename std::vector<int>::const_iterator const_iterator;
+  typedef typename std::vector<bool>::const_iterator fixed_const_iterator;
   typedef int value_type;
 
   Alcove_id()
@@ -45,6 +46,14 @@ struct Alcove_id {
     return coords_.end();
   }
 
+  fixed_const_iterator fixed_begin() const {
+    return fixed_.begin();
+  }
+
+  fixed_const_iterator fixed_end() const {
+    return fixed_.end();
+  }
+  
   std::size_t size() const {
     return coords_.size();
   }

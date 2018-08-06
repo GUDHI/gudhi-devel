@@ -293,6 +293,80 @@ public:
       throw wrong_family_exception_;
     } 
   }
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  // Normal base iterator
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+
+public:
+  class Normal_basis_iterator : public boost::iterator_facade< Normal_basis_iterator,
+                                                               std::size_t const,
+                                                               boost::forward_traversal_tag > {
+  protected:
+    friend class boost::iterator_core_access;
+    
+    void update_value() {
+      if (j_ != d_ + 1 && !*it_)
+        elementary_increment();
+    }
+    
+    bool equal(Normal_basis_iterator const& other) const {
+      return value_ == other.value_;
+    }
+
+    void elementary_increment() {
+      value_++;
+      if (i_ == 0) {
+        i_ = j_;
+        j_++;
+      }
+      else
+        i_--;
+      it_++;
+      update_value();
+    }
+    
+    void increment() {
+      while (i_ != 0) {
+        value_++;
+        i_--;
+        it_++;
+      }
+      i_ = j_;
+      j_++;
+      value_++;
+      it_++;
+      update_value();
+    }
+
+    std::size_t const& dereference() const {
+      return value_;
+    }
+    
+  public:
+    Normal_basis_iterator(const Alcove_id& a_id,
+                          const Simple_coxeter_system& scs)
+      : i_(0),
+        j_(1),
+        value_(0),
+        d_(scs.dimension()),
+        it_(a_id.fixed_begin())
+    {
+      update_value();
+    }
+
+    Normal_basis_iterator(const Simple_coxeter_system& scs)
+      : value_(scs.pos_root_count()) { }
+        
+    std::size_t i_, j_, value_, d_;
+    typename Alcove_id::fixed_const_iterator it_;
+  };
+
+  typedef boost::iterator_range<Normal_basis_iterator> Normal_basis_range;
+  Normal_basis_range normal_basis_range(const Alcove_id& a_id) const {
+    return Normal_basis_range(Normal_basis_iterator(a_id, *this),
+                              Normal_basis_iterator(*this));
+  }
   
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // Query point location
@@ -457,6 +531,114 @@ public:
     }
   }
 
+  /** A conversion from Cartesian coordinates to the coordinates of the alcove containing the point.
+   *  The matrix' rows are simple root vectors.
+   */
+  template <class Point>
+  Alcove_id query_point_location(const Point& p, double level) const {
+    unsigned short d = p.size();
+    assert(d == dimension_);
+    Alcove_id a_id(level, d);
+    Eigen::VectorXd p_vect(d);
+    for (short i = 0; i < d; i++)
+      p_vect(i) = p[i];
+    Eigen::VectorXd scalprod_vect = root_t_ * p_vect;
+    switch (family_) {
+    case 'A': {
+      // e_i - e_j
+      for (short i = 0; i < d; i++) {
+        FT root_scalprod = 0;
+        for (short j = i; j >= 0; j--) {
+          root_scalprod += scalprod_vect(j);
+          a_id.push_back(std::floor(level * root_scalprod), false);
+        }
+      }
+      break;
+    }
+    case 'B': {
+      // e_i - e_j
+      for (short i = 0; i < d-1; i++) {
+        FT root_scalprod = 0;
+        for (short j = i; j >= 0; j--) {
+          root_scalprod += scalprod_vect(j);
+          a_id.push_back(std::floor(level * root_scalprod), false);
+        }
+      }
+      // e_i
+      FT root_scalprod = 0;
+      for (short i = d-1; i >= 0; i--) {
+        root_scalprod += scalprod_vect(i);
+        a_id.push_back(std::floor(level * root_scalprod), false);
+      }
+      // e_i + e_j
+      FT global_scalprod = 0;
+      for (short i = d-1; i >= 0; i--) {
+        global_scalprod += 2*scalprod_vect(i);
+        FT root_scalprod = global_scalprod;
+        for (short j = i-1; j >= 0; j--) {
+          root_scalprod += scalprod_vect(j);
+          a_id.push_back(std::floor(level * root_scalprod), false);
+        }
+      }
+      break;
+    }
+    case 'C': {
+      // e_i - e_j
+      for (short i = 0; i < d-1; i++) {
+        FT root_scalprod = 0;
+        for (short j = i; j >= 0; j--) {
+          root_scalprod += scalprod_vect(j);
+          a_id.push_back(std::floor(level * root_scalprod), false);
+        }
+      }
+      // 2*e_i
+      FT root_scalprod = -scalprod_vect(d-1);
+      for (short i = d-1; i >= 0; i--) {
+        root_scalprod += 2*scalprod_vect(i);
+        a_id.push_back(std::floor(level * root_scalprod), false);
+      }
+      // e_i + e_j
+      FT global_scalprod = -scalprod_vect(d-1);
+      for (short i = d-1; i >= 0; i--) {
+        global_scalprod += 2*scalprod_vect(i);
+        FT root_scalprod = global_scalprod;
+        for (short j = i-1; j >= 0; j--) {
+          root_scalprod += scalprod_vect(j);
+          a_id.push_back(std::floor(level * root_scalprod), false);
+        }
+      }
+      break;
+    }
+    case 'D': {
+      // e_i - e_j
+      for (short i = 0; i < d-1; i++) {
+        FT root_scalprod = 0;
+        for (short j = i; j >= 0; j--) {
+          root_scalprod += scalprod_vect(j);
+          a_id.push_back(std::floor(level * root_scalprod), false);
+        }
+      }
+      // e_i + e_j
+      FT global_scalprod = -scalprod_vect(d-1) - scalprod_vect(d-2);
+      for (short i = d-1; i >= 1; i--) {
+        global_scalprod += 2*scalprod_vect(i);
+        FT root_scalprod = global_scalprod;
+        for (short j = i-1; j >= 0; j--) {
+          root_scalprod += scalprod_vect(j);
+          a_id.push_back(std::floor(level * root_scalprod), false);
+        }
+      }
+      break;
+    }
+    default :
+      std::cerr << "Simple_coxeter_system::alcove_coordinates : The family " << family_ << " is not supported. "
+                << "Please use A, B, C or D family for the constructor (in capital).\n";
+      throw wrong_family_exception_;
+    }
+    return a_id;
+  }
+
+  
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // Distance from a point to an alcove
   //////////////////////////////////////////////////////////////////////////////////////////////////
