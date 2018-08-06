@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 project(Coxeter_triangulation_examples)
 
 if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
-  add_executable ( Coxeter_triangulation_marching_cube marching_cube.cpp )
+  add_executable ( Coxeter_triangulation_marching_cube coxeter_marching_cube.cpp )
   if (TBB_FOUND)
     target_link_libraries(Coxeter_triangulation_marching_cube ${TBB_LIBRARIES})
   endif()
