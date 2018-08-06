@@ -32,7 +32,7 @@
 #include <vector>
 #include <cstddef>
 
-int main(int argc, char** argv) 
+int main() 
 {    
     //In this example we will show how to insert and remove elements from 
     //a Hasse diagram.
@@ -128,7 +128,7 @@ int main(int argc, char** argv)
 	<Gudhi::Hasse_diagram::Hasse_diagram_persistence<Cell>, Field_Zp> Persistent_cohomology;
 
 	Persistent_cohomology pcoh(hd);  
-	unsigned field_characteristic = 11;
+	int field_characteristic = 11;
 	double min_persistence = 0;
 
 	std::cout << "And here are the persistence of the Hasse diagram : " << std::endl;

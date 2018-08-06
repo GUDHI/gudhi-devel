@@ -37,7 +37,7 @@
 #include <vector>
 #include <cstddef>
 
-int main(int argc, char** argv) 
+int main() 
 {    
     //In this example we will first construct a Rips complex of points sampled
     //from a circle of a radius 1.
@@ -76,10 +76,10 @@ int main(int argc, char** argv)
 	};
 	
 	//and now let us create the Rips complex:
-	double threshold = 1;
-	unsigned dim_max = 2;//We are only intersed in see the 1 dimensional generator.
-	unsigned coef_field = 11;//We will use Z_11 to compute persistence.
-	double min_persistence = 0.1;//we are interested only in the intervals of persistence 0.1 or higher.
+	float threshold = 1;
+	int dim_max = 2;//We are only intersed in see the 1 dimensional generator.
+	int coef_field = 11;//We will use Z_11 to compute persistence.
+	float min_persistence = 0.1;//we are interested only in the intervals of persistence 0.1 or higher.
 	Rips_complex rips_complex_from_file(circle_pt_cloud, threshold, Gudhi::Euclidean_distance());
 
 	// Construct the Rips complex in a Simplex Tree

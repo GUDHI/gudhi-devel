@@ -35,7 +35,7 @@
 #include <vector>
 #include <cstddef>
 
-int main(int argc, char** argv) 
+int main() 
 {    
 	//This is an example of construction of Hasse diagram from a cubical complex. In the example
 	//below we first define 3 by 3 by 3 cubical complex and assign a filtration on it. Later
@@ -76,7 +76,7 @@ int main(int argc, char** argv)
 	typedef Gudhi::persistent_cohomology::Persistent_cohomology<Hasse_diag, Field_Zp> Persistent_cohomology;
 
 	Persistent_cohomology pcoh(*hd,true);  
-	unsigned field_characteristic = 11;
+	int field_characteristic = 11;
 	double min_persistence = 0;
 	
 	pcoh.init_coefficients(field_characteristic);    

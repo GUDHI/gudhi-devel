@@ -37,7 +37,6 @@
 
 
 namespace Gudhi {
-
 namespace Hasse_diagram {
 
 
@@ -82,24 +81,24 @@ public:
 	/**
      * Constructor of a cell of dimension dim.
     **/
-	Hasse_diagram_cell( unsigned dim ):dimension(dim),position(0),deleted_(false){}
+	Hasse_diagram_cell( int dim ):dimension(dim),position(0),deleted_(false){}
 	
 	/**
      * Constructor of a cell of dimension dim.
     **/
-	Hasse_diagram_cell( unsigned dim , Filtration_type filt_ ):dimension(dim),position(0),deleted_(false),filtration(filt_){}
+	Hasse_diagram_cell( int dim , Filtration_type filt_ ):dimension(dim),position(0),deleted_(false),filtration(filt_){}
 
 	/**
      * Constructor of a cell of dimension dim with a given boundary.
     **/	
-	Hasse_diagram_cell( const Cell_range& boundary_ , unsigned dim ):
+	Hasse_diagram_cell( const Cell_range& boundary_ , int dim ):
 	dimension(dim),boundary(boundary_),position(0),deleted_(false){}
 
 	/**
      * Constructor of a cell of dimension dim with a given boundary and coboundary.
     **/
 	Hasse_diagram_cell( const Cell_range&  boundary_ , const Cell_range& coboundary_,
-		 unsigned dim ):dimension(dim),boundary(boundary_),coBoundary(coboundary_),
+		 int dim ):dimension(dim),boundary(boundary_),coBoundary(coboundary_),
 		 position(0),deleted_(false){}
 
 	/**
@@ -107,14 +106,14 @@ public:
      * additional information.
     **/
 	Hasse_diagram_cell( const Cell_range&  boundary_ , const Cell_range&  coboundary_,
-	const Additional_information& ai, unsigned dim ):
+	const Additional_information& ai, int dim ):
 	dimension(dim),boundary(boundary_),coBoundary(coboundary_),additional_info(ai),
 	position(0),deleted_(false){}
 
 	/**
      * Construcor of a cell of dimension dim having given additional information.
     **/
-	Hasse_diagram_cell(Additional_information ai, unsigned dim ):
+	Hasse_diagram_cell(Additional_information ai, int dim ):
 	dimension(dim),additional_info(ai),position(0),deleted_(false){}
 
 	/**
@@ -122,7 +121,7 @@ public:
      * is a vector of pairs of pointers to boundary elements and incidence
      * coefficients.
     **/
-	inline Cell_range& get_boundary() {return this->boundary;}
+	inline Cell_range& get_boundary(){return this->boundary;}
 
 	/**
      * Procedure to get the coboundary of a fiven cell. The output format
@@ -134,7 +133,7 @@ public:
 	/**
      * Procedure to get the dimension of a cell.
     **/
-	inline unsigned get_dimension() const {return this->dimension;}
+	inline int& get_dimension(){return this->dimension;}
 
 	/**
      * Procedure to get additional information about the cell.s
@@ -147,12 +146,12 @@ public:
 	 * cell and subsequent call of clean_up_the_structure will change those
 	 * positions.
 	**/
-	inline size_t& get_position(){return this->position;}
+	inline unsigned& get_position(){return this->position;}
 	
 	/**
 	 * Accessing the filtration of the cell.
 	**/
-	inline Filtration_type get_filtration() const
+	inline Filtration_type& get_filtration()
 	{
 		//std::cout << "Accessing the filtration of a cell : " << *this << std::endl;
 		return this->filtration;
@@ -210,7 +209,7 @@ public:
 	friend std::ostream& operator<<( std::ostream& out, const Hasse_diagram_cell<Incidence_type,Filtration_type,Additional_information>& c )
 	{
 		 //cout << "position : " << c.position << ", dimension : " << c.dimension << ", filtration: " << c.filtration << ", size of boudary : " <<  c.boundary.size() << "\n";
-          out << c.position << " " << c.dimension << " " << c.filtration << " " << ((c.deleted_)? "true": "false") << std::endl;
+		 out << c.position << " " << c.dimension << " " << c.filtration << std::endl;
 		 for ( size_t bd = 0 ; bd != c.boundary.size() ; ++bd )
 	     {
 			 //do not write out the cells that has been deleted
@@ -298,9 +297,9 @@ public:
 protected:
 	Cell_range boundary;
 	Cell_range coBoundary;
-	unsigned dimension;
+	int dimension;
 	Additional_information additional_info;
-	size_t position;
+	unsigned position;
 	bool deleted_;
 	Filtration_type filtration;
 

@@ -36,11 +36,7 @@ namespace Gudhi {
 
 namespace Hasse_diagram {
 	
-/**
- * This variable indicate if a warning should be given anytime a cell is 
- * deleted that have nondeleted cell in the coboundary.
-**/ 
-bool enable_checking_validity_of_complex = true;
+
 template <typename Cell_type> class is_before_in_dimension;
 	
 	
@@ -115,7 +111,7 @@ public:
 		
 		if ( dbg )std::cout << "Calling clean_up_the_structure() procedure. \n";	
 		//count the number of not deleted cells:
-		unsigned number_of_non_deleted_cells = this->cells.size() - this->number_of_deleted_cells;
+		size_t number_of_non_deleted_cells = this->cells.size() - this->number_of_deleted_cells;
 		
 		//create a new vector to store the undeleted cells:
 		std::vector< Cell_type* > new_cells;
@@ -129,7 +125,7 @@ public:
 			if ( !this->cells[i]->deleted() )
 			{							
 				new_cells.push_back( this->cells[i] );
-				this->cells[i]->position = counter;
+				this->cells[i]->position = static_cast<unsigned>( counter );
 				this->cells[i]->remove_deleted_elements_from_boundary_and_coboundary();
 				++counter;							
 			}
@@ -150,7 +146,7 @@ public:
 	**/ 
 	void add_cell( Cell_type* cell )
 	{
-		cell->position = this->cells.size();
+		cell->position = static_cast<unsigned>( this->cells.size() );
 		this->cells.push_back( cell );		
 		//we still need to check if cobounadies of boundary elements of this 
 		//cell are set up in the correct way:
@@ -186,7 +182,7 @@ public:
 		
 		//in case the structure gets too fragmented, we are calling the 
 		//to clean it up.
-		if ( this->number_of_deleted_cells/(double)(this->cells.size() ) > 
+		if ( this->number_of_deleted_cells/(static_cast<double>( this->cells.size() )) > 
 			this->proportion_of_removed_cells_that_triggers_reorganization_of_structure )
 		{
 			this->clean_up_the_structure();
@@ -253,7 +249,7 @@ public:
 			result += this->cells[i]->full_signature_of_the_structure();
 		}		
 		return result;
-	}
+	}	
 	
 protected:	
 	Cell_range cells;
@@ -275,10 +271,20 @@ protected:
 	void set_up_positions();
 	
 	static double proportion_of_removed_cells_that_triggers_reorganization_of_structure;
+	
+	/**
+	* This variable indicate if a warning should be given anytime a cell is 
+	* deleted that have nondeleted cell in the coboundary.
+	**/ 
+	static bool enable_checking_validity_of_complex;
 };//Hasse_diagram
 
+template < typename Cell_type >
+bool Hasse_diagram<Cell_type>::enable_checking_validity_of_complex = true;
+
+
 template <typename Cell_type>
-double Hasse_diagram<Cell_type>::proportion_of_removed_cells_that_triggers_reorganization_of_structure = 1;
+double Hasse_diagram<Cell_type>::proportion_of_removed_cells_that_triggers_reorganization_of_structure = 0.5;
 
 
 template < typename Cell_type >
@@ -461,7 +467,7 @@ void Hasse_diagram<Cell_type>::set_up_positions()
 {
 	for ( size_t i = 0 ; i != this->cells.size() ; ++i )
 	{
-		this->cells[i]->get_position() = i;
+		this->cells[i]->get_position() = static_cast<unsigned>(i);
 	}	
 }//set_up_positions
 
@@ -523,7 +529,7 @@ std::vector<Cell_type*> convert_to_vector_of_Cell_type( Complex_type& cmplx )
 	size_t pos = 0;
 	for ( typename Complex_type::Filtration_simplex_iterator it = range.begin() ; it != range.end() ; ++it )
 	{
-		cmplx.assign_key( *it,pos );
+		cmplx.assign_key( *it, pos );
 		++pos;
 	}
 	
@@ -537,8 +543,8 @@ std::vector<Cell_type*> convert_to_vector_of_Cell_type( Complex_type& cmplx )
 		}		
 		Cell_type* this_cell = cells_of_Hasse_diag[counter];
 		
-		this_cell->get_dimension() = cmplx.dimension(*it);		
-		this_cell->get_filtration() = cmplx.filtration(*it);
+		this_cell->get_dimension() = static_cast<int>( cmplx.dimension(*it) );		
+		this_cell->get_filtration() = static_cast<typename Cell_type::Filtration_type>( cmplx.filtration(*it) );
 		
 		if ( dbg )
 		{

@@ -3,12 +3,14 @@
 
 #include <iostream>
 #include <vector>
+#include <fstream>
 
 // #include <gudhi/Points_off_io.h>
 // #include <gudhi/Coxeter_system.h>
 // #include <gudhi/Coxeter_complex.h>
 // #include <gudhi/Coxeter_complex/Off_point_range.h>
 // #include <gudhi/Clock.h>
+#include <gudhi/Hasse_diagram_persistence.h>
 
 #include <CGAL/Epick_d.h>
 
