@@ -51,7 +51,7 @@ cdef class RipsComplex:
         """RipsComplex constructor.
 
         :param max_edge_length: Rips value.
-        :type max_edge_length: int
+        :type max_edge_length: float
 
         :param points: A list of points in d-Dimension.
         :type points: list of list of double
