@@ -61,12 +61,28 @@ Point_d f(Point_d p) {
   return coords;
 }
 
-bool intersects(const Cell_id& f_id, const Eigen::MatrixXd li_matrix) {
-  unsigned curr_row = cod_d;
+bool intersects(const Cell_id& f_id, Eigen::MatrixXd li_matrix) {
+  std::size_t curr_row = 0;
+  Eigen::VectorXd val_vector(amb_d);
+  for (; curr_row < cod_d; ++curr_row)
+    val_vector(curr_row) = 0;
   for (std::size_t k: cs.normal_basis_range(f_id)) {
+    std::size_t j = std::floor(0.5*(1 + std::sqrt(1+8*k)));
+    std::size_t i = (j*j + j - 2)/2 - k;      
+    for (std::size_t col = 0; i < amb_d; ++i)
+      li_matrix(curr_row, col) = 0;
+    for (std::size_t l = i; l < j; ++l)
+      for (std::size_t col = 0; col < amb_d; ++col)
+        li_matrix(curr_row, col) += cs.simple_root_matrix()(l, col);
+    val_vector(curr_row) = f_id[k];
     curr_row++;
   }
-  return false;
+  Eigen::VectorXd intersection = li_matrix.colPivHouseholderQr().solve(val_vector);
+  Cell_id i_id = cs.query_point_location(intersection, f_id.level());
+  for (std::size_t k = 0; k < i_id.size(); ++k)
+    if (!f_id.is_fixed(k) && i_id[k] != f_id[k])
+      return false;
+  return true;
 }
 
 void seed_expansion(const Cell_id& c_id) {
@@ -86,6 +102,7 @@ void seed_expansion(const Cell_id& c_id) {
     ++i;
   }
   Eigen::MatrixXd lin_interpolation_matrix = point_matrix.colPivHouseholderQr().solve(value_matrix);
+  lin_interpolation_matrix.transpose();
   lin_interpolation_matrix.resize(amb_d, Eigen::NoChange);
   for (Cell_id f_id: cs.face_range(c_id, cod_d))
     if (intersects(c_id, lin_interpolation_matrix))
