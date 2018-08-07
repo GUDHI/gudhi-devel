@@ -1465,6 +1465,18 @@ private:
     return coface_range(a_id, value_dim, value_dim);
   }
 
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  // Cartesian coordinates of a vertex
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  Eigen::VectorXd cartesian_coordinates_of_vertex(const Alcove_id& v_id) const {
+    assert(v_id.dimension() == 0);
+    Eigen::VectorXd val_vector(dimension_);
+    std::size_t k = 0, j = 1;
+    for (; j < (unsigned)dimension_ + 1; k += j, j++)
+      val_vector(j-1) = v_id[k] / v_id.level();
+    return root_t_.colPivHouseholderQr().solve(val_vector);
+  }
   
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // Vertex_range
@@ -1649,6 +1661,8 @@ public:
       }
     }
   }
+
+
   
 };
 
