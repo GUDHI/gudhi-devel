@@ -14,6 +14,16 @@ add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    make_directory ${GUDHI_USER_VERSION_DIR}
                    COMMENT "user_version creation in ${GUDHI_USER_VERSION_DIR}")
 
+foreach(GUDHI_MODULE ${GUDHI_MODULES_FULL_LIST})
+  set(GUDHI_DOXYGEN_IMAGE_PATH "${GUDHI_DOXYGEN_IMAGE_PATH}    doc/${GUDHI_MODULE}/ \\  \n")
+endforeach(GUDHI_MODULE ${GUDHI_MODULES_FULL_LIST})
+
+# Generate setup.py file to cythonize Gudhi - This file must be named setup.py by convention
+configure_file(${CMAKE_SOURCE_DIR}/src/Doxyfile.in "${CMAKE_CURRENT_BINARY_DIR}/src/Doxyfile" @ONLY)
+
+add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
+        copy ${CMAKE_CURRENT_BINARY_DIR}/src/Doxyfile ${GUDHI_USER_VERSION_DIR}/Doxyfile)
+
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy ${CMAKE_SOURCE_DIR}/Conventions.txt ${GUDHI_USER_VERSION_DIR}/Conventions.txt)
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
@@ -22,8 +32,6 @@ add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy ${CMAKE_SOURCE_DIR}/COPYING ${GUDHI_USER_VERSION_DIR}/COPYING)
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy ${CMAKE_SOURCE_DIR}/src/CMakeLists.txt ${GUDHI_USER_VERSION_DIR}/CMakeLists.txt)
-add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
-                   copy ${CMAKE_SOURCE_DIR}/src/Doxyfile ${GUDHI_USER_VERSION_DIR}/Doxyfile)
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy ${CMAKE_SOURCE_DIR}/src/GUDHIConfigVersion.cmake.in ${GUDHI_USER_VERSION_DIR}/GUDHIConfigVersion.cmake.in)
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
