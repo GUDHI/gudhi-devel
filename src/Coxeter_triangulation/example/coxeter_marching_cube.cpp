@@ -1,64 +1,252 @@
-#define CC_STAR_COMPLETION
-// #define CC_A_V_VISITORS
+// #define LEMINISCATE_OF_GERONO
+// #define CIRCLE
+// #define WAVY_CIRCLE
+#define SMILEY
 
 #include <iostream>
 #include <vector>
 #include <fstream>
 
 #include <gudhi/Simple_coxeter_system_remastered.h>
+#include <gudhi/Coxeter_complex/Trie.h>
+#include <gudhi/Hasse_diagram_persistence.h>
+#include "output_hasse_to_medit.h"
+
 
 // #include <gudhi/Points_off_io.h>
 // #include <gudhi/Coxeter_system.h>
 // #include <gudhi/Coxeter_complex.h>
 // #include <gudhi/Coxeter_complex/Off_point_range.h>
 // #include <gudhi/Clock.h>
-#include <gudhi/Hasse_diagram_persistence.h>
-
-#include <CGAL/Epick_d.h>
 
 // #include "memory_usage.h"
 // #include "cxx-prettyprint/prettyprint.hpp"
-// #include "output_points_to_medit.h"
 
 using Cell_id = typename Simple_coxeter_system::Alcove_id;
-
-// using K = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
-// using FT = K::FT;
-// using Point_d = K::Point_d;
-
-using Point_d = std::vector<double>;
-
+using Point_d = Eigen::VectorXd;
 using Hasse_cell = Gudhi::Hasse_diagram::Hasse_diagram_cell<int, double, double>;
 using Hasse_boundary = std::vector<std::pair<Hasse_cell*, int> >;
-using Hasse_diagram = std::map<Cell_id, Hasse_cell*>;
-using Vertex_map = std::map<Hasse_cell*, Point_d>;
 
+// The vertices are always smaller than the non-vertices
+struct Hasse_cell_comparator {
+  bool operator() (Hasse_cell* l_it, Hasse_cell* r_it) {
+    if (l_it->get_dimension() == 0)
+      if (r_it->get_dimension() == 0)
+        return l_it < r_it;
+      else
+        return true;
+    else if (r_it->get_dimension() == 0)
+      return false;
+    else
+      return l_it->get_boundary() < r_it->get_boundary();
+  }
+};
+using Hasse_diagram = std::set<Hasse_cell*, Hasse_cell_comparator>;
+
+struct Cell_id_comparator {
+  bool operator()(const Cell_id& lhs, const Cell_id& rhs) {
+    if (lhs.size() < rhs.size())
+      return true;
+    else if (lhs.size() > rhs.size())
+      return false;
+    for (std::size_t k = 0; k < lhs.size(); ++k) {
+      if (lhs[k] < rhs[k])
+        return true;
+      else if (lhs[k] > rhs[k])
+        return false;
+      else if (!lhs.is_fixed(k) && rhs.is_fixed(k))
+        return true;
+      else if (lhs.is_fixed(k) && !rhs.is_fixed(k))
+        return false;
+    }
+    return false;
+  }
+};
+using VC_map = std::map<Cell_id, Hasse_cell*, Cell_id_comparator>;
+using VP_map = std::map<Hasse_cell*, Point_d>;
+using Full_cell_trie = Trie<Cell_id>;
+
+#ifdef CIRCLE
 const unsigned amb_d = 2; // Ambient (domain) dimension
 const unsigned cod_d = 1; // Codomain dimension
+double r = 5;
+Eigen::Vector2d point1(r, 0.0);
+std::vector<Point_d> seed_points = {point1};
+std::string name = "circle";
+
+Eigen::VectorXd f(Eigen::VectorXd p) {
+  double x = p(0), y = p(1);
+  Eigen::VectorXd coords(cod_d);
+  coords(0) = x*x + y*y - r*r;
+  return coords;
+}
+#endif
+
+#ifdef LEMINISCATE_OF_GERONO
+const unsigned amb_d = 2; // Ambient (domain) dimension
+const unsigned cod_d = 1; // Codomain dimension
+double a = 1;
+Eigen::Vector2d point1(std::sqrt(a)+0.01, 0.01);
+std::vector<Point_d> seed_points = {point1};
+std::string name = "leminiscate_of_gerono";
+
+Eigen::VectorXd f(Eigen::VectorXd p) {
+  double x = p(0)-0.01, y = p(1)-0.01;
+  Eigen::VectorXd coords(cod_d);
+  coords(0) = x*x*x*x - a*x*x + a*y*y;
+  return coords;
+}
+#endif
+
+#ifdef WAVY_CIRCLE
+const unsigned amb_d = 2; // Ambient (domain) dimension
+const unsigned cod_d = 1; // Codomain dimension
+double r = 1;
+double sr = 0.1;
+int n = 25;
+Eigen::Vector2d point1(r, 0.0);
+std::vector<Point_d> seed_points = {point1};
+std::string name = "wavy_circle";
+
+Eigen::VectorXd f(Eigen::VectorXd p) {
+  double x = p(0), y = p(1);
+  double pi = 3.14159265358;
+  Eigen::VectorXd coords(cod_d);
+  double theta = 0;
+  if (x > 0)
+    theta = std::atan(y/x);
+  else if (x < 0 && y >= 0)
+    theta = std::atan(y/x) + pi;
+  else if (x < 0 && y < 0)
+    theta = std::atan(y/x) - pi;
+  else if (x == 0 && y > 0)
+    theta = pi/2;
+  else
+    theta = -pi/2;
+  double real_pos = r + sr*std::sin(n*theta);
+  coords(0) = x*x + y*y - real_pos*real_pos;
+  return coords;
+}
+#endif
+
+#ifdef SMILEY
+const unsigned amb_d = 2; // Ambient (domain) dimension
+const unsigned cod_d = 1; // Codomain dimension
+double r = 4;
+double sr = 0.5;
+double ir = 3.5;
+double ey = 1.5, ex = 1.5;
+double offset = 0.01;
+Eigen::Vector2d point1(r+offset, offset);
+Eigen::Vector2d point2(offset, offset);
+Eigen::Vector2d point3(-ex+sr+offset, ey+offset);
+Eigen::Vector2d point4(ex+sr+offset, ey+offset);
+std::vector<Point_d> seed_points = {point1, point2, point3, point4};
+std::string name = "smiley";
+
+Eigen::VectorXd f(Eigen::VectorXd p) {
+  double x = p(0) - offset, y = p(1) - offset;
+  Eigen::VectorXd coords(cod_d);
+  if (x*x + y*y > r*r)
+    coords(0) = 1;
+  else if (x*x + y*y == r*r)
+    coords(0) = 0;
+  else if ((x*x + y*y < ir*ir) && (y < 0))
+    coords(0) = 1;
+  else if ((x*x + y*y == ir*ir) && (y < 0))
+    coords(0) = 0;
+  else if ((x*x + y*y <= ir*ir) && (y == 0))
+    coords(0) = 0;
+  else if ((x+ex)*(x+ex) + (y-ey)*(y-ey) < sr*sr)
+    coords(0) = 1;
+  else if ((x+ex)*(x+ex) + (y-ey)*(y-ey) == sr*sr)
+    coords(0) = 0;
+  else if ((x-ex)*(x-ex) + (y-ey)*(y-ey) < sr*sr)
+    coords(0) = 1;
+  else if ((x-ex)*(x-ex) + (y-ey)*(y-ey) == sr*sr)
+    coords(0) = 0;
+  else
+    coords(0) = -1;
+  return coords;
+}
+#endif
+
+#ifdef CIRCLE
+const unsigned amb_d = 3; // Ambient (domain) dimension
+const unsigned cod_d = 1; // Codomain dimension
+double r = 5;
+Eigen::Vector3d point1(r, 0.0, 0.0);
+std::vector<Point_d> seed_points = {point1};
+std::string name = "sphere";
+
+Eigen::VectorXd f(Eigen::VectorXd p) {
+  double x = p(0), y = p(1);
+  Eigen::VectorXd coords(cod_d);
+  coords(0) = x*x + y*y - r*r;
+  return coords;
+}
+#endif
+
 const Simple_coxeter_system cs('A', amb_d);
 Hasse_diagram hd;
-Vertex_map vm;
+VC_map vc_map;
+VP_map vp_map;
+Full_cell_trie trie;
 
 // using Point_vector = std::vector< Point_d >;
 
 // using Coxeter_complex = Gudhi::Coxeter_complex<Point_vector, Coxeter_system>;
 
 void mark(const Cell_id& c_id) {
+  trie.add(c_id);
+  // std::cout << "Added " << c_id << ". Trie is now: " << trie << "\n";
+  std::cout << "Size of the trie: " << trie.size() << "\n";
 }
 
 bool is_marked(const Cell_id& c_id) {
-  return true;
+  return trie.contains(c_id);
 }
 
-void insert(const Cell_id& c_id) {
+void add_hasse_vertex(const Cell_id& f_id, Eigen::VectorXd& cart_coords) {
+  Hasse_cell* new_cell = new Hasse_cell(0);
+  auto res_pair = vc_map.emplace(f_id, new_cell);
+  if (!res_pair.second) {
+    delete new_cell;
+    return;
+  }
+  hd.emplace(new_cell);
+  vp_map.emplace(new_cell, cart_coords);
 }
 
-// The function
-Eigen::VectorXd f(Eigen::VectorXd p) {
-  double x = p(0), y = p(1);
-  Eigen::VectorXd coords(cod_d);
-  coords(0) = x*x + y*y - 25;
-  return coords;
+Hasse_cell* insert_hasse_subdiagram(const Cell_id& c_id, const std::vector<Cell_id>& meet_faces) {
+  if (c_id.dimension() == cod_d) {
+    if (std::find(meet_faces.begin(), meet_faces.end(), c_id) != meet_faces.end())
+      return vc_map.find(c_id)->second;
+    else
+      return 0;
+  }
+  else {
+    Hasse_cell* new_cell = new Hasse_cell(c_id.dimension() - cod_d);
+    Hasse_boundary& boundary = new_cell->get_boundary();
+    for (auto f_id: cs.face_range(c_id, c_id.dimension() - 1)) {
+      Hasse_cell* facet_cell = insert_hasse_subdiagram(f_id, meet_faces);
+      if (facet_cell != 0)
+        boundary.push_back(std::make_pair(facet_cell, 1));
+    }
+    if (boundary.empty()) {
+      delete new_cell;
+      return 0;
+    }
+    else {
+      auto res_pair = hd.emplace(new_cell);
+      if (!res_pair.second) {
+        delete new_cell;
+        return *res_pair.first;
+      }
+      else
+        return new_cell;
+    }
+  }
 }
 
 bool intersects(const Cell_id& f_id, Eigen::MatrixXd& li_matrix, Eigen::VectorXd& last_column) {
@@ -67,7 +255,6 @@ bool intersects(const Cell_id& f_id, Eigen::MatrixXd& li_matrix, Eigen::VectorXd
   for (std::size_t k: cs.normal_basis_range(f_id)) {
     std::size_t j = std::floor(0.5*(1 + std::sqrt(1+8*k)));
     std::size_t i = (j*j + j - 2)/2 - k;
-    std::cout << "  (k, i, j) = (" << k << ", " << i << ", " << j << ")\n";
     for (std::size_t col = 0; col < amb_d; ++col)
       li_matrix(curr_row, col) = 0;
     for (std::size_t l = i; l < j; ++l)
@@ -76,10 +263,6 @@ bool intersects(const Cell_id& f_id, Eigen::MatrixXd& li_matrix, Eigen::VectorXd
     last_column(curr_row) = f_id[k] / f_id.level();
     curr_row++;
   }
-  // for (; curr_row < amb_d + cod_d; ++curr_row) {
-  //   for (std::size_t col = 0; col < amb_d; ++col)
-  //     li_matrix(curr_row, col) = 0;
-  // } 
   std::cout << "  lin_interpolation_matrix (after completion):\n" << li_matrix << "\n";
   std::cout << "  last_column:\n" << last_column << "\n";
   Eigen::VectorXd intersection = li_matrix.colPivHouseholderQr().solve(last_column);
@@ -92,6 +275,7 @@ bool intersects(const Cell_id& f_id, Eigen::MatrixXd& li_matrix, Eigen::VectorXd
   for (std::size_t k = 0; k < i_id.size(); ++k)
     if (!f_id.is_fixed(k) && i_id[k] != f_id[k])
       return false;
+  add_hasse_vertex(f_id, intersection);
   return true;
 }
 
@@ -131,20 +315,31 @@ void seed_expansion(const Cell_id& c_id) {
     }
     else
       std::cout << " Result = false\n";
+  std::cout << " Size of vc_map = " << vc_map.size() << "\n";
+  insert_hasse_subdiagram(c_id, meet_faces);
   for (const Cell_id& f_id: meet_faces)
-    if (!is_marked(f_id))
-      for (Cell_id cf_id: cs.coface_range(c_id, amb_d))
+    // if (!is_marked(f_id))
+      for (Cell_id cf_id: cs.coface_range(f_id, amb_d))
         if (!is_marked(cf_id))
           seed_expansion(cf_id);
 }
 
 int main(int argc, char * const argv[]) {
-  double level = 2;
-  std::vector<Point_d> seed_points = {{5,0}};
+  double level = 1.5;
+  if (argc == 2)
+    level = atof(argv[1]);
   std::cout << "root_t_:\n" << cs.simple_root_matrix() << "\n";
   for (const Point_d& p: seed_points) {
     seed_expansion(cs.query_point_location(p, level));
   }
+  std::cout << "Hasse_diagram:\n" << hd << "\n";
+  std::vector<unsigned> dimensions(cod_d+1, 0);
+  for (auto cell: hd) {
+    dimensions[cell->get_dimension()]++;
+  }
+  std::cout << dimensions << "\n";
+  // std::cout << "VC map:\n" << vc_map << "\n";
+  output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
   Simple_coxeter_system scs_test('A', 4);
   Cell_id a_id(1, 1);
   // a_id.push_back(0, true);

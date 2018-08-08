@@ -87,6 +87,15 @@ struct Alcove_id {
   void set_dimension(std::size_t dim) {
     dimension_ = dim;
   }
+
+  bool operator==(const Alcove_id& other) const {
+    if (this->size() != other.size())
+      return false;
+    for (std::size_t k = 0; k < this->size(); ++k)
+      if ((*this)[k] != other[k] || this->is_fixed(k) != other.is_fixed(k))
+        return false;
+    return true;
+  }
   
   double level_;
   int dimension_;
