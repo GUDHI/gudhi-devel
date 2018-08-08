@@ -220,6 +220,9 @@ void add_hasse_vertex(const Cell_id& f_id, Eigen::VectorXd& cart_coords) {
 }
 
 Hasse_cell* insert_hasse_subdiagram(const Cell_id& c_id, const std::vector<Cell_id>& meet_faces) {
+  // if (c_id[0] == -2 && c_id[1] == -4 && c_id[2] == -5 && c_id[3] == -1 && c_id[4] == -4 && c_id[5] == -6)
+  //   std::cout << "Problem!\n";
+  std::cout << "  Insert_hasse_subdiagram for " << c_id << ". Meet_faces = " << meet_faces << "\n";
   if (c_id.dimension() == cod_d) {
     if (std::find(meet_faces.begin(), meet_faces.end(), c_id) != meet_faces.end())
       return vc_map.find(c_id)->second;
@@ -239,6 +242,10 @@ Hasse_cell* insert_hasse_subdiagram(const Cell_id& c_id, const std::vector<Cell_
       return 0;
     }
     else {
+      std::cout << "Boundary of the new cell = " << boundary << "\n";
+      if (new_cell->get_dimension() == 1 && boundary.size() != 2) {
+        std::cout << "Problem!\n";
+      }
       auto res_pair = hd.emplace(new_cell);
       if (!res_pair.second) {
         delete new_cell;
@@ -318,6 +325,14 @@ void seed_expansion(const Cell_id& c_id) {
       std::cout << " Result = false\n";
   std::cout << " Size of vc_map = " << vc_map.size() << "\n";
   insert_hasse_subdiagram(c_id, meet_faces);
+
+  // DEBUG
+  // std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
+  // for (auto cell: hd)
+  //   dimensions[cell->get_dimension()]++;
+  // if (dimensions[0] + dimensions[2] != dimensions[1] + 1)
+  output_hasse_to_medit(hd, vp_map, "marching_cube_output_problem_"+name);
+
   for (const Cell_id& f_id: meet_faces)
     // if (!is_marked(f_id))
       for (Cell_id cf_id: cs.coface_range(f_id, amb_d))
