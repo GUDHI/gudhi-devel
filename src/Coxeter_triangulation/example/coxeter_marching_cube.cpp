@@ -1,7 +1,8 @@
 // #define LEMINISCATE_OF_GERONO
 // #define CIRCLE
 // #define WAVY_CIRCLE
-#define SMILEY
+// #define SMILEY
+#define SPHERE
 
 #include <iostream>
 #include <vector>
@@ -171,7 +172,7 @@ Eigen::VectorXd f(Eigen::VectorXd p) {
 }
 #endif
 
-#ifdef CIRCLE
+#ifdef SPHERE
 const unsigned amb_d = 3; // Ambient (domain) dimension
 const unsigned cod_d = 1; // Codomain dimension
 double r = 5;
@@ -180,9 +181,9 @@ std::vector<Point_d> seed_points = {point1};
 std::string name = "sphere";
 
 Eigen::VectorXd f(Eigen::VectorXd p) {
-  double x = p(0), y = p(1);
+  double x = p(0), y = p(1), z = p(2);
   Eigen::VectorXd coords(cod_d);
-  coords(0) = x*x + y*y - r*r;
+  coords(0) = x*x + y*y + z*z - r*r;
   return coords;
 }
 #endif
@@ -333,7 +334,7 @@ int main(int argc, char * const argv[]) {
     seed_expansion(cs.query_point_location(p, level));
   }
   std::cout << "Hasse_diagram:\n" << hd << "\n";
-  std::vector<unsigned> dimensions(cod_d+1, 0);
+  std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
   for (auto cell: hd) {
     dimensions[cell->get_dimension()]++;
   }

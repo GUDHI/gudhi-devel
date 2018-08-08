@@ -107,130 +107,115 @@ void perturb_vertex(Point& vertex, double rad) {
         ofs_bb << *f_it++ << "\n";
       }
     }
-    // else {
-    //   std::vector<Hasse_cell*> edges, hexagons, permutahedra;
-    //   std::vector<std::vector<int> > triangles, tetrahedra; 
-    //   std::vector<double> filtrations;
-    //   std::vector<int> mask;
-    //   for (auto s: hasse_diagram)
-    //     if (s->get_dimension() == 1)
-    //       edges.push_back(s);
-    //     else if (s->get_dimension() == 2)
-    //       hexagons.push_back(s);
-    //     else if (s->get_dimension() == 3)
-    //       permutahedra.push_back(s);
-    //   typedef CGAL::Epick_d<CGAL::Dimension_tag<3> > Kernel_3;
-    //   typedef typename Kernel_3::Point_d Point_3;
-    //   typedef CGAL::Delaunay_triangulation<Kernel_3> Delaunay_triangulation_3;
-    //   // for (auto e: edges) {
-    //   //   if (e->get_coBoundary().size() > 2) {
-    //   //     std::vector<double> f_cob;
-    //   //     for (auto h_pair: e->get_coBoundary())
-    //   //       f_cob.push_back(h_pair.first->get_filtration());
-    //   //     std::sort(f_cob.begin(), f_cob.end());
-    //   //     std::cout << "Oversaturated edge at filtration " << f_cob[2] << "\n";
-    //   //   }
-    //   // }
-    //   for (auto h: hexagons) {
-    //     // constrain the outer edges, which are found by the convex hull
-    //     // std::vector<Point_2> vertices;
-    //     // std::vector<std::vector<double> > vertices;
-    //     std::vector<double> barycenter(3);
-    //     std::set<Hasse_cell*> v_cells;
-    //     int mask_val = 4;
-    //     for (auto e_pair: h->get_boundary()) {
-    //       if (e_pair.first->get_coBoundary().size() > 2)
-    //         mask_val = 517;
-    //       for (auto v_pair: e_pair.first->get_boundary())
-    //         v_cells.emplace(v_pair.first);          
-    //     }
-    //     for (auto vc: v_cells) {
-    //       barycenter[0] += W[ci_map.at(vc)-1][0] / v_cells.size();
-    //       barycenter[1] += W[ci_map.at(vc)-1][1] / v_cells.size();
-    //       barycenter[2] += W[ci_map.at(vc)-1][2] / v_cells.size();
-    //     }
-    //     W.push_back(barycenter);
-    //     for (auto e_pair: h->get_boundary()) {
-    //       std::vector<int> triangle(1, W.size());
-    //       for (auto v_pair: e_pair.first->get_boundary())
-    //         triangle.push_back(ci_map.at(v_pair.first));
-    //       triangles.push_back(triangle);
-    //       filtrations.push_back(h->get_filtration());
-    //       mask.push_back(mask_val);
-    //     }
-    //   }
-    //   for (auto p: permutahedra) {
-    //     // constrain the outer edges, which are found by the convex hull
-    //     std::vector<Point_3> vertices;
-    //     std::vector<int> v_indices;
-    //     std::set<Hasse_cell*> v_cells;
-    //     // std::cout << "3-cell " << p->get_filtration() << ":\n";
-    //     for (auto h_pair: p->get_boundary()) {
-    //       // std::cout << "2-cell " << h_pair.first->get_position() << " " << h_pair.first->get_filtration() << ":\n";
-    //       for (auto e_pair: h_pair.first->get_boundary()) {
-    //         // std::cout << "Edge " << e_pair.first->get_position() << " " << e_pair.first->get_filtration() << ":\n"; 
-    //         for (auto v_pair: e_pair.first->get_boundary()) {
-    //           // std::cout << "Vertex " << v_pair.first->get_position() << " " << v_pair.first->get_filtration() << ":\n"; 
-    //           v_cells.emplace(v_pair.first);
-    //         }
-    //       }
-    //       // std::cout << "\n";
-    //     }
-    //     for (auto vc: v_cells) {
-    //       std::vector<double>& b = W[ci_map.at(vc)-1];
-    //       vertices.push_back(Point_3(b[0], b[1], b[2]));
-    //       v_indices.push_back(ci_map.at(vc));
-    //       // std::cout << "Vertex " << vc->get_position() << " " << vc->get_filtration() << ":\n"; 
-    //     }
-    //     Delaunay_triangulation_3 del(3);
-    //     index = 0;
-    //     std::map<typename Delaunay_triangulation_3::Vertex_handle, int> index_of_vertex;
-    //     for (auto pt: vertices)
-    //       index_of_vertex.emplace(del.insert(pt), index++);
-    //     for (auto fc_it = del.full_cells_begin(); fc_it != del.full_cells_end(); ++fc_it) {
-    //       if (del.is_infinite(fc_it))
-    //         continue;
-    //       std::vector<int> tetrahedron;
-    //       for (auto fv_it = fc_it->vertices_begin(); fv_it != fc_it->vertices_end(); ++fv_it)
-    //         tetrahedron.push_back(v_indices[index_of_vertex[*fv_it]]);
-    //       tetrahedra.push_back(tetrahedron);
-    //       filtrations.push_back(p->get_filtration());
-    //     }
-    //   }
-    //   ofs << "MeshVersionFormatted 1\nDimension 3\n";
-    //   ofs_bb << "3 1 ";
-    //   ofs << "Vertices\n" << W.size() << "\n";
-    //   for (auto p: W) {
-    //     ofs << p[0] << " " << p[1] << " " << p[2] << " 215\n";
-    //   }
-    //   ofs << "Edges " << edges.size() << "\n";
-    //   for (auto s: edges) {
-    //     for (auto v: s->get_boundary()) {
-    //       ofs << ci_map.at(v.first) << " ";
-    //     }
-    //     ofs << "515" << std::endl;
-    //   }
-    //   ofs << "Triangles " << triangles.size() << "\n";
-    //   ofs_bb << triangles.size()+tetrahedra.size() << " 1\n";
-    //   auto m_it = mask.begin();
-    //   auto f_it = filtrations.begin();
-    //   for (auto s: triangles) {
-    //     for (auto v: s) {
-    //       ofs << v << " ";
-    //     }
-    //     ofs << *m_it++ << std::endl;
-    //     ofs_bb << *f_it++ << "\n";
-    //   }
-    //   ofs << "Tetrahedra " << tetrahedra.size() << "\n";
-    //   for (auto s: tetrahedra) {
-    //     for (auto v: s) {
-    //       ofs << v << " ";
-    //     }
-    //     ofs << "545\n";
-    //     ofs_bb << *f_it++ << "\n";
-    //   }
+    else {
+      std::vector<Hasse_cell_ptr> edges, polygons, polytopes;
+      std::vector<std::vector<int> > triangles, tetrahedra; 
+      std::vector<double> filtrations;
+      for (auto s: hasse_diagram)
+        if (s->get_dimension() == 1)
+          edges.push_back(s);
+        else if (s->get_dimension() == 2)
+          polygons.push_back(s);
+        else if (s->get_dimension() == 3)
+          polytopes.push_back(s);
+      typedef CGAL::Epick_d<CGAL::Dimension_tag<3> > Kernel_3;
+      typedef typename Kernel_3::Point_d Point_3;
+      typedef CGAL::Delaunay_triangulation<Kernel_3> Delaunay_triangulation;
+      for (auto h: polygons) {
+        Point_t barycenter(3);
+        barycenter[0] = 0;
+        barycenter[1] = 0;
+        barycenter[2] = 0;
+        std::set<Hasse_cell_ptr> v_cells;
+        for (auto e_pair: h->get_boundary())
+          for (auto v_pair: e_pair.first->get_boundary())
+            v_cells.emplace(v_pair.first);          
+        for (auto vc: v_cells) {
+          int ci_value = ci_map.at(vc);
+          barycenter[0] += vertex_points[ci_value-1][0] / v_cells.size();
+          barycenter[1] += vertex_points[ci_value-1][1] / v_cells.size();
+          barycenter[2] += vertex_points[ci_value-1][2] / v_cells.size();
+        }
+        vertex_points.push_back(barycenter);
+        for (auto e_pair: h->get_boundary()) {
+          std::vector<int> triangle(1, vertex_points.size());
+          for (auto v_pair: e_pair.first->get_boundary())
+            triangle.push_back(ci_map.at(v_pair.first));
+          triangles.push_back(triangle);
+          filtrations.push_back(h->get_filtration());
+        }
+      }
+      for (auto p: polytopes) {
+        // constrain the outer edges, which are found by the convex hull
+        std::vector<Point_3> vertices;
+        std::vector<int> v_indices;
+        std::set<Hasse_cell_ptr> v_cells;
+        // std::cout << "3-cell " << p->get_filtration() << ":\n";
+        for (auto h_pair: p->get_boundary()) {
+          // std::cout << "2-cell " << h_pair.first->get_position() << " " << h_pair.first->get_filtration() << ":\n";
+          for (auto e_pair: h_pair.first->get_boundary()) {
+            // std::cout << "Edge " << e_pair.first->get_position() << " " << e_pair.first->get_filtration() << ":\n"; 
+            for (auto v_pair: e_pair.first->get_boundary()) {
+              // std::cout << "Vertex " << v_pair.first->get_position() << " " << v_pair.first->get_filtration() << ":\n"; 
+              v_cells.emplace(v_pair.first);
+            }
+          }
+          // std::cout << "\n";
+        }
+        for (auto vc: v_cells) {
+          Point_t& b = vertex_points[ci_map.at(vc)-1];
+          vertices.push_back(Point_3(b[0], b[1], b[2]));
+          v_indices.push_back(ci_map.at(vc));
+          // std::cout << "Vertex " << vc->get_position() << " " << vc->get_filtration() << ":\n"; 
+        }
+        Delaunay_triangulation del(3);
+        index = 0;
+        std::map<typename Delaunay_triangulation::Vertex_handle, int> index_of_vertex;
+        for (auto pt: vertices)
+          index_of_vertex.emplace(del.insert(pt), index++);
+        for (auto fc_it = del.full_cells_begin(); fc_it != del.full_cells_end(); ++fc_it) {
+          if (del.is_infinite(fc_it))
+            continue;
+          std::vector<int> tetrahedron;
+          for (auto fv_it = fc_it->vertices_begin(); fv_it != fc_it->vertices_end(); ++fv_it)
+            tetrahedron.push_back(v_indices[index_of_vertex[*fv_it]]);
+          tetrahedra.push_back(tetrahedron);
+          filtrations.push_back(p->get_filtration());
+        }
+      }
+      ofs << "MeshVersionFormatted 1\nDimension 3\n";
+      ofs_bb << "3 1 ";
+      ofs << "Vertices\n" << vertex_points.size() << "\n";
+      for (auto p: vertex_points) {
+        ofs << p[0] << " " << p[1] << " " << p[2] << " 215\n";
+      }
+      ofs << "Edges " << edges.size() << "\n";
+      for (auto s: edges) {
+        for (auto v: s->get_boundary()) {
+          ofs << ci_map.at(v.first) << " ";
+        }
+        ofs << "515" << std::endl;
+      }
+      ofs << "Triangles " << triangles.size() << "\n";
+      ofs_bb << triangles.size()+tetrahedra.size() << " 1\n";
+      auto f_it = filtrations.begin();
+      for (auto s: triangles) {
+        for (auto v: s) {
+          ofs << v << " ";
+        }
+        ofs << "515" << std::endl;
+        ofs_bb << *f_it++ << "\n";
+      }
+      ofs << "Tetrahedra " << tetrahedra.size() << "\n";
+      for (auto s: tetrahedra) {
+        for (auto v: s) {
+          ofs << v << " ";
+        }
+        ofs << "545\n";
+        ofs_bb << *f_it++ << "\n";
+      }
       
-    // }
+    }
     ofs.close();
     ofs_bb.close();
   }
