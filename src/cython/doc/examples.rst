@@ -23,3 +23,7 @@ Examples
     * :download:`rips_complex_diagram_persistence_from_distance_matrix_file_example.py <../example/rips_complex_diagram_persistence_from_distance_matrix_file_example.py>`
     * :download:`rips_persistence_diagram.py <../example/rips_persistence_diagram.py>`
     * :download:`random_cubical_complex_persistence_example.py <../example/random_cubical_complex_persistence_example.py>`
+    * :download:`coordinate_graph_induced_complex.py <../example/coordinate_graph_induced_complex.py>`
+    * :download:`functional_graph_induced_complex.py <../example/functional_graph_induced_complex.py>`
+    * :download:`voronoi_graph_induced_complex.py <../example/voronoi_graph_induced_complex.py>`
+    * :download:`nerve_of_a_covering.py <../example/nerve_of_a_covering.py>`
