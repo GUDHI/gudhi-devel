@@ -167,6 +167,6 @@ void program_options(int argc, char * argv[]
 
     std::cout << "Usage: " << argv[0] << " [options] input-file" << std::endl << std::endl;
     std::cout << visible << std::endl;
-    std::abort();
+    exit(-1);
   }
 }
