@@ -1,0 +1,15 @@
+The human.off point cloud is available at this webpage :
+http://segeval.cs.princeton.edu/
+
+Models in the Shape Repository are made freely available for research
+and non-commercial purposes only. Use of these models for commercial
+purposes is permitted only after the express approval of the Shape
+Repository and the onwner has been obtained. Please contact Princeton
+University by using the webform on their site in this regard.
+
+Citation
+
+If you use any part of this benchmark, please cite:
+Xiaobai Chen, Aleksey Golovinskiy, and Thomas Funkhouser,
+A Benchmark for 3D Mesh Segmentation
+ACM Transactions on Graphics (Proc. SIGGRAPH), 28(3), 2009.
