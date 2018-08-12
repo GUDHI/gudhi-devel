@@ -6,6 +6,8 @@
 
 struct Trie_node {
   std::map<int, Trie_node*> children_map;
+  Trie_node* parent = 0;
+  int label = 0;
 
   ~Trie_node() {
     for (auto map_pair: children_map)
@@ -28,7 +30,8 @@ class Trie {
   Trie_node root_;
   
 public:
-  Trie() {}
+  Trie(double level, unsigned dimension)
+    : level_(level), dimension_(dimension) {}
 
   void add(const Alcove_id& a_id) {
     Trie_node* curr_node = &root_;
@@ -36,6 +39,8 @@ public:
       auto map_it = curr_node->children_map.find(c);
       if (map_it == curr_node->children_map.end()) {
         Trie_node* new_node = new Trie_node;
+        new_node->parent = curr_node;
+        new_node->label = c;
         curr_node->children_map.emplace(c, new_node);
         curr_node = new_node;
       }
@@ -63,7 +68,33 @@ public:
   Trie_node const& root() const {
     return root_;
   }
-  
+
+  bool empty() const {
+    return root_.children_map.empty(); 
+  }
+
+  void erase(Trie_node* node) {
+    Trie_node* parent = node->parent;
+    parent->children_map.erase(node->label);
+    delete node;
+    if (parent != &root_ && parent->children_map.empty())
+      erase(parent);
+  }
+
+  Alcove_id pop() {
+    Alcove_id a_id(level_, dimension_);
+    Trie_node* curr_node = &root_;
+    while (!curr_node->children_map.empty()) {
+      a_id.push_back(curr_node->children_map.begin()->first);
+      curr_node = curr_node->children_map.begin()->second;
+    }
+    erase(curr_node);
+    return a_id;
+  }
+
+protected:
+  double level_;
+  unsigned dimension_;
 };
 
 std::ostream& operator<<(std::ostream & os, const Trie_node& trie_node) {

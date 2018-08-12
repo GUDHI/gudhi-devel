@@ -232,7 +232,7 @@ const Simple_coxeter_system cs('A', amb_d);
 Hasse_diagram hd;
 VC_map vc_map;
 VP_map vp_map;
-Full_cell_trie trie;
+Full_cell_trie trie(0, amb_d);
 
 // using Point_vector = std::vector< Point_d >;
 
@@ -341,83 +341,83 @@ bool intersects(const Cell_id& f_id, Eigen::MatrixXd& li_matrix, Eigen::VectorXd
   return true;
 }
 
-void seed_expansion(const Cell_id& c_id) {
-#ifdef DEBUG_TRACES
-  std::cout << "Simplex: "  << c_id << "\n";
-#endif
-  mark(c_id);
-  std::vector<Cell_id> meet_faces;
-  Eigen::MatrixXd
-    point_matrix(amb_d + 1, amb_d + 1),
-    value_matrix(cod_d, amb_d + 1);
-  int i = 0;
-  for (Cell_id v_id: cs.face_range(c_id, 0)) {
-    Eigen::VectorXd cart_coords = cs.cartesian_coordinates_of_vertex(v_id);
-#ifdef DEBUG_TRACES
-    std::cout << " Vertex: "  << v_id << "\n" << cart_coords << "\n";
-#endif
-    for (std::size_t j = 0; j < amb_d; ++j)
-      point_matrix(j, i) = cart_coords(j);
-    point_matrix(amb_d, i) = 1;
-    Eigen::VectorXd val_vector = f(cart_coords);
-    for (std::size_t j = 0; j < cod_d; ++j)
-      value_matrix(j, i) = val_vector(j);
-    ++i;
-  }
-#ifdef DEBUG_TRACES
-  std::cout << " point_matrix:\n" << point_matrix << "\n";
-#endif
-  Eigen::MatrixXd point_matrix_inv = point_matrix.colPivHouseholderQr().inverse();
-#ifdef DEBUG_TRACES
-  std::cout << " point_matrix_inv:\n" << point_matrix_inv << "\n";
-  std::cout << " value_matrix:\n" << value_matrix << "\n";
-#endif
-  Eigen::MatrixXd lin_interpolation_matrix = value_matrix * point_matrix_inv;
-  Eigen::VectorXd last_column = lin_interpolation_matrix.col(amb_d);
-#ifdef DEBUG_TRACES
-  std::cout << " lin_interpolation_matrix (before completion):\n" << lin_interpolation_matrix << "\n";
-#endif
-  lin_interpolation_matrix.conservativeResize(amb_d, amb_d);
-  last_column.conservativeResize(amb_d);
-  last_column = -last_column;
-  for (Cell_id f_id: cs.face_range(c_id, cod_d))
-    if (intersects(f_id, lin_interpolation_matrix, last_column)) {
-#ifdef DEBUG_TRACES
-      std::cout << " Result = true\n";
-#endif
-      meet_faces.push_back(f_id);
-    }
-#ifdef DEBUG_TRACES
-    else
-      std::cout << " Result = false\n";
-  std::cout << " Size of vc_map = " << vc_map.size() << "\n";
-#endif
-  insert_hasse_subdiagram(c_id, meet_faces);
-
-  // DEBUG
-  // std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
-  // for (auto cell: hd)
-  //   dimensions[cell->get_dimension()]++;
-  // if (dimensions[0] + dimensions[2] != dimensions[1] + 1)
-  // output_hasse_to_medit(hd, vp_map, "marching_cube_output_problem_"+name);
-
-  for (const Cell_id& f_id: meet_faces)
-    // if (!is_marked(f_id))
-      for (Cell_id cf_id: cs.coface_range(f_id, amb_d))
-        if (!is_marked(cf_id))
-          seed_expansion(cf_id);
-}
 
 int main(int argc, char * const argv[]) {
   double level = 1.5;
   if (argc == 2)
     level = atof(argv[1]);
+  Full_cell_trie visit_stack(level, amb_d);
 #ifdef DEBUG_TRACES
   std::cout << "root_t_:\n" << cs.simple_root_matrix() << "\n";
 #endif
   for (const Point_d& p: seed_points) {
-    seed_expansion(cs.query_point_location(p, level));
+    // seed_expansion(cs.query_point_location(p, level));
+    visit_stack.add(cs.query_point_location(p, level));
   }
+  std::cout << visit_stack << "\n";
+
+  
+  while (!visit_stack.empty()) {
+    Cell_id c_id = visit_stack.pop();
+    std::cout << c_id << "\n";
+#ifdef DEBUG_TRACES
+    std::cout << "Simplex: "  << c_id << "\n";
+#endif
+    mark(c_id);
+    std::vector<Cell_id> meet_faces;
+    Eigen::MatrixXd
+      point_matrix(amb_d + 1, amb_d + 1),
+      value_matrix(cod_d, amb_d + 1);
+    int i = 0;
+    for (Cell_id v_id: cs.face_range(c_id, 0)) {
+      Eigen::VectorXd cart_coords = cs.cartesian_coordinates_of_vertex(v_id);
+#ifdef DEBUG_TRACES
+      std::cout << " Vertex: "  << v_id << "\n" << cart_coords << "\n";
+#endif
+      for (std::size_t j = 0; j < amb_d; ++j)
+        point_matrix(j, i) = cart_coords(j);
+      point_matrix(amb_d, i) = 1;
+      Eigen::VectorXd val_vector = f(cart_coords);
+      for (std::size_t j = 0; j < cod_d; ++j)
+        value_matrix(j, i) = val_vector(j);
+      ++i;
+    }
+#ifdef DEBUG_TRACES
+    std::cout << " point_matrix:\n" << point_matrix << "\n";
+#endif
+    Eigen::MatrixXd point_matrix_inv = point_matrix.colPivHouseholderQr().inverse();
+#ifdef DEBUG_TRACES
+    std::cout << " point_matrix_inv:\n" << point_matrix_inv << "\n";
+    std::cout << " value_matrix:\n" << value_matrix << "\n";
+#endif
+    Eigen::MatrixXd lin_interpolation_matrix = value_matrix * point_matrix_inv;
+    Eigen::VectorXd last_column = lin_interpolation_matrix.col(amb_d);
+#ifdef DEBUG_TRACES
+    std::cout << " lin_interpolation_matrix (before completion):\n" << lin_interpolation_matrix << "\n";
+#endif
+    lin_interpolation_matrix.conservativeResize(amb_d, amb_d);
+    last_column.conservativeResize(amb_d);
+    last_column = -last_column;
+    for (Cell_id f_id: cs.face_range(c_id, cod_d))
+      if (intersects(f_id, lin_interpolation_matrix, last_column)) {
+#ifdef DEBUG_TRACES
+        std::cout << " Result = true\n";
+#endif
+        meet_faces.push_back(f_id);
+      }
+#ifdef DEBUG_TRACES
+      else
+        std::cout << " Result = false\n";
+    std::cout << " Size of vc_map = " << vc_map.size() << "\n";
+#endif
+    insert_hasse_subdiagram(c_id, meet_faces);
+    for (const Cell_id& f_id: meet_faces)
+      // if (!is_marked(f_id))
+      for (Cell_id cf_id: cs.coface_range(f_id, amb_d))
+        if (!is_marked(cf_id))
+          visit_stack.add(cf_id);    
+  }
+
 #ifdef DEBUG_TRACES
   std::cout << "Hasse_diagram:\n" << hd << "\n";
 #endif
