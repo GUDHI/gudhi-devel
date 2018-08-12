@@ -4,7 +4,7 @@
 // #define SMILEY
 // #define SPHERE
 // #define TORUS
-#define DOUBLE_TORUS
+// #define DOUBLE_TORUS
 
 #include <iostream>
 #include <vector>
@@ -20,7 +20,7 @@
 // #include <gudhi/Coxeter_system.h>
 // #include <gudhi/Coxeter_complex.h>
 // #include <gudhi/Coxeter_complex/Off_point_range.h>
-// #include <gudhi/Clock.h>
+#include <gudhi/Clock.h>
 
 // #include "memory_usage.h"
 // #include "cxx-prettyprint/prettyprint.hpp"
@@ -228,17 +228,12 @@ Eigen::VectorXd f(Eigen::VectorXd p) {
 }
 #endif
 
-const Simple_coxeter_system cs('A', amb_d);
-Hasse_diagram hd;
-VC_map vc_map;
-VP_map vp_map;
-Full_cell_trie trie(0, amb_d);
 
 // using Point_vector = std::vector< Point_d >;
 
 // using Coxeter_complex = Gudhi::Coxeter_complex<Point_vector, Coxeter_system>;
 
-void mark(const Cell_id& c_id) {
+void mark(const Cell_id& c_id, Full_cell_trie& trie) {
   trie.add(c_id);
   // std::cout << "Added " << c_id << ". Trie is now: " << trie << "\n";
 #ifdef DEBUG_TRACES
@@ -246,11 +241,11 @@ void mark(const Cell_id& c_id) {
 #endif
 }
 
-bool is_marked(const Cell_id& c_id) {
+bool is_marked(const Cell_id& c_id, Full_cell_trie& trie) {
   return trie.contains(c_id);
 }
 
-void add_hasse_vertex(const Cell_id& f_id, Eigen::VectorXd& cart_coords) {
+void add_hasse_vertex(const Cell_id& f_id, Eigen::VectorXd& cart_coords, Hasse_diagram& hd, VC_map& vc_map, VP_map& vp_map) {
   Hasse_cell* new_cell = new Hasse_cell(0);
   auto res_pair = vc_map.emplace(f_id, new_cell);
   if (!res_pair.second) {
@@ -261,7 +256,12 @@ void add_hasse_vertex(const Cell_id& f_id, Eigen::VectorXd& cart_coords) {
   vp_map.emplace(new_cell, cart_coords);
 }
 
-Hasse_cell* insert_hasse_subdiagram(const Cell_id& c_id, const std::vector<Cell_id>& meet_faces) {
+Hasse_cell* insert_hasse_subdiagram(const Cell_id& c_id,
+                                    const std::vector<Cell_id>& meet_faces,
+                                    Hasse_diagram& hd,
+                                    VC_map& vc_map,
+                                    unsigned cod_d,
+                                    const Simple_coxeter_system& cs) {
   // if (c_id[0] == -2 && c_id[1] == -4 && c_id[2] == -5 && c_id[3] == -1 && c_id[4] == -4 && c_id[5] == -6)
   //   std::cout << "Problem!\n";
 #ifdef DEBUG_TRACES
@@ -277,7 +277,7 @@ Hasse_cell* insert_hasse_subdiagram(const Cell_id& c_id, const std::vector<Cell_
     Hasse_cell* new_cell = new Hasse_cell(c_id.dimension() - cod_d);
     Hasse_boundary& boundary = new_cell->get_boundary();
     for (auto f_id: cs.face_range(c_id, c_id.dimension() - 1)) {
-      Hasse_cell* facet_cell = insert_hasse_subdiagram(f_id, meet_faces);
+      Hasse_cell* facet_cell = insert_hasse_subdiagram(f_id, meet_faces, hd, vc_map, cod_d, cs);
       if (facet_cell != 0)
         boundary.push_back(std::make_pair(facet_cell, 1));
     }
@@ -303,10 +303,18 @@ Hasse_cell* insert_hasse_subdiagram(const Cell_id& c_id, const std::vector<Cell_
   }
 }
 
-bool intersects(const Cell_id& f_id, Eigen::MatrixXd& li_matrix, Eigen::VectorXd& last_column) {
+bool intersects(const Cell_id& f_id,
+                Eigen::MatrixXd& li_matrix,
+                Eigen::VectorXd& last_column,
+                Hasse_diagram& hd,
+                VC_map& vc_map,
+                VP_map& vp_map,
+                const Simple_coxeter_system& cs) {
 #ifdef DEBUG_TRACES
   std::cout << " Intersects called for face " << f_id << "\n";
 #endif
+  std::size_t amb_d = li_matrix.cols();
+  std::size_t cod_d = li_matrix.rows();
   std::size_t curr_row = cod_d;
   for (std::size_t k: cs.normal_basis_range(f_id)) {
     std::size_t j = std::floor(0.5*(1 + std::sqrt(1+8*k)));
@@ -337,21 +345,26 @@ bool intersects(const Cell_id& f_id, Eigen::MatrixXd& li_matrix, Eigen::VectorXd
   for (std::size_t k = 0; k < i_id.size(); ++k)
     if (!f_id.is_fixed(k) && i_id[k] != f_id[k])
       return false;
-  add_hasse_vertex(f_id, intersection);
+  add_hasse_vertex(f_id, intersection, hd, vc_map, vp_map);
   return true;
 }
 
-
-int main(int argc, char * const argv[]) {
-  double level = 1.5;
-  if (argc == 2)
-    level = atof(argv[1]);
+template <typename Function>
+void compute_hasse_diagram(std::vector<Point_d>& seed_points,
+                           double level,
+                           unsigned amb_d,
+                           unsigned cod_d,
+                           Hasse_diagram& hd,
+                           VP_map& vp_map,
+                           const Function& f) {
+  const Simple_coxeter_system cs('A', amb_d);
+  VC_map vc_map;
+  Full_cell_trie trie(level, amb_d);
   Full_cell_trie visit_stack(level, amb_d);
 #ifdef DEBUG_TRACES
   std::cout << "root_t_:\n" << cs.simple_root_matrix() << "\n";
 #endif
   for (const Point_d& p: seed_points) {
-    // seed_expansion(cs.query_point_location(p, level));
     visit_stack.add(cs.query_point_location(p, level));
   }
   std::cout << visit_stack << "\n";
@@ -359,11 +372,10 @@ int main(int argc, char * const argv[]) {
   
   while (!visit_stack.empty()) {
     Cell_id c_id = visit_stack.pop();
-    std::cout << c_id << "\n";
 #ifdef DEBUG_TRACES
     std::cout << "Simplex: "  << c_id << "\n";
 #endif
-    mark(c_id);
+    mark(c_id, trie);
     std::vector<Cell_id> meet_faces;
     Eigen::MatrixXd
       point_matrix(amb_d + 1, amb_d + 1),
@@ -399,7 +411,7 @@ int main(int argc, char * const argv[]) {
     last_column.conservativeResize(amb_d);
     last_column = -last_column;
     for (Cell_id f_id: cs.face_range(c_id, cod_d))
-      if (intersects(f_id, lin_interpolation_matrix, last_column)) {
+      if (intersects(f_id, lin_interpolation_matrix, last_column, hd, vc_map, vp_map, cs)) {
 #ifdef DEBUG_TRACES
         std::cout << " Result = true\n";
 #endif
@@ -410,50 +422,50 @@ int main(int argc, char * const argv[]) {
         std::cout << " Result = false\n";
     std::cout << " Size of vc_map = " << vc_map.size() << "\n";
 #endif
-    insert_hasse_subdiagram(c_id, meet_faces);
+    insert_hasse_subdiagram(c_id, meet_faces, hd, vc_map, cod_d, cs);
     for (const Cell_id& f_id: meet_faces)
       // if (!is_marked(f_id))
       for (Cell_id cf_id: cs.coface_range(f_id, amb_d))
-        if (!is_marked(cf_id))
+        if (!is_marked(cf_id, trie))
           visit_stack.add(cf_id);    
   }
+}
 
-#ifdef DEBUG_TRACES
-  std::cout << "Hasse_diagram:\n" << hd << "\n";
-#endif
-  std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
-  for (auto cell: hd) {
-    dimensions[cell->get_dimension()]++;
-  }
-  std::cout << dimensions << "\n";
-  // std::cout << "VC map:\n" << vc_map << "\n";
+void test_circle(double level) {
+  std::cout << "Test 1: Circle...\n";
+  const unsigned amb_d = 2; // Ambient (domain) dimension
+  const unsigned cod_d = 1; // Codomain dimension
+  double r = 5;
+  Eigen::Vector2d point1(r, 0.0);
+  std::vector<Point_d> seed_points = {point1};
+  std::string name = "circle";
+
+  struct Function {
+    Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+      double x = p(0), y = p(1);
+      Eigen::VectorXd coords(cod_d_);
+      coords(0) = x*x + y*y - r_*r_;
+      return coords;
+    }
+
+    Function(unsigned cod_d, double r) : cod_d_(cod_d), r_(r) {}
+    unsigned cod_d_;
+    unsigned r_;
+  } f(cod_d, r);
+  Hasse_diagram hd;
+  VP_map vp_map;
+  Gudhi::Clock t;
+  compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
+  t.end();
+  std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
   output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
-  Simple_coxeter_system scs_test('A', 4);
-  Cell_id a_id(1, 1);
-  // a_id.push_back(0, true);
-  // a_id.push_back(0);
-  // a_id.push_back(0);
-  // a_id.push_back(0, true);
-  // a_id.push_back(0);
-  // a_id.push_back(0);
-  // a_id.push_back(0);
-  // a_id.push_back(0);
-  // a_id.push_back(1, true);
-  // a_id.push_back(1, true);
+  std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
+}
 
-  // a_id.push_back(0, true);
-  // a_id.push_back(0, true);
-  // a_id.push_back(0, true);
-  // a_id.push_back(0, true);
-  // a_id.push_back(0, true);
-  // a_id.push_back(0, true);
-  // a_id.push_back(0, true);
-  // a_id.push_back(0, true);
-  // a_id.push_back(0, true);
-  // a_id.push_back(0, true);
-  
-  // std::cout << a_id << " in dimension 4.\n";
-  // for (std::size_t i: scs_test.normal_basis_range(a_id)) {
-  //   std::cout << i << "\n";
-  // }
+int main(int argc, char * const argv[]) {
+  //   std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
+  //   for (auto cell: hd) {
+  //     dimensions[cell->get_dimension()]++;
+  //   }
+  test_circle(1.5);
 }
