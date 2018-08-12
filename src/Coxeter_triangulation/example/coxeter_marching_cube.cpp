@@ -5,6 +5,8 @@
 // #define SPHERE
 // #define TORUS
 // #define DOUBLE_TORUS
+// # define DEBUG_TRACES
+
 
 #include <iostream>
 #include <vector>
@@ -309,12 +311,15 @@ bool intersects(const Cell_id& f_id,
                 Hasse_diagram& hd,
                 VC_map& vc_map,
                 VP_map& vp_map,
+		unsigned cod_d,
                 const Simple_coxeter_system& cs) {
 #ifdef DEBUG_TRACES
   std::cout << " Intersects called for face " << f_id << "\n";
 #endif
   std::size_t amb_d = li_matrix.cols();
-  std::size_t cod_d = li_matrix.rows();
+#ifdef DEBUG_TRACES
+  std::cout << "amb_d = " << amb_d << ", cod_d = " << cod_d << "\n";
+#endif
   std::size_t curr_row = cod_d;
   for (std::size_t k: cs.normal_basis_range(f_id)) {
     std::size_t j = std::floor(0.5*(1 + std::sqrt(1+8*k)));
@@ -367,8 +372,6 @@ void compute_hasse_diagram(std::vector<Point_d>& seed_points,
   for (const Point_d& p: seed_points) {
     visit_stack.add(cs.query_point_location(p, level));
   }
-  std::cout << visit_stack << "\n";
-
   
   while (!visit_stack.empty()) {
     Cell_id c_id = visit_stack.pop();
@@ -411,7 +414,7 @@ void compute_hasse_diagram(std::vector<Point_d>& seed_points,
     last_column.conservativeResize(amb_d);
     last_column = -last_column;
     for (Cell_id f_id: cs.face_range(c_id, cod_d))
-      if (intersects(f_id, lin_interpolation_matrix, last_column, hd, vc_map, vp_map, cs)) {
+      if (intersects(f_id, lin_interpolation_matrix, last_column, hd, vc_map, vp_map, cod_d, cs)) {
 #ifdef DEBUG_TRACES
         std::cout << " Result = true\n";
 #endif
@@ -457,15 +460,16 @@ void test_circle(double level) {
   Gudhi::Clock t;
   compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
   t.end();
+  std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
+  for (auto cell: hd) {
+    dimensions[cell->get_dimension()]++;
+  }
+  std::cout << "Simplices by dimension: " << dimensions << "\n";
   std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
   output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
   std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
 }
 
 int main(int argc, char * const argv[]) {
-  //   std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
-  //   for (auto cell: hd) {
-  //     dimensions[cell->get_dimension()]++;
-  //   }
   test_circle(1.5);
 }
