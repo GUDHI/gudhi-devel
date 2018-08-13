@@ -643,6 +643,6 @@ void test_sphere(double level) {
 int main(int argc, char * const argv[]) {
   test_circle(1.5);
   test_wavy_circle(2.5);
-  test_smiley(10.1);
+  test_smiley(30.1);
   test_sphere(1.3);
 }
