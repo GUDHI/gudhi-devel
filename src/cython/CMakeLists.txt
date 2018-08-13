@@ -55,6 +55,7 @@ if(CYTHON_FOUND)
 
   if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
     set(GUDHI_CYTHON_BOTTLENECK_DISTANCE "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/bottleneck_distance.pyx'")
+    set(GUDHI_CYTHON_NERVE_GIC "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/nerve_gic.pyx'")
   endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)
   if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
     set(GUDHI_CYTHON_SUBSAMPLING "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/subsampling.pyx'")
@@ -185,6 +186,37 @@ if(CYTHON_FOUND)
              ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/bottleneck_basic_example.py")
 
     add_gudhi_py_test(test_bottleneck_distance)
+
+    # Cover complex
+    file(COPY ${CMAKE_SOURCE_DIR}/data/points/human.off DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+    file(COPY ${CMAKE_SOURCE_DIR}/data/points/COIL_database/lucky_cat.off DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+    file(COPY ${CMAKE_SOURCE_DIR}/data/points/COIL_database/lucky_cat_PCA1 DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+    add_test(NAME cover_complex_nerve_example_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/nerve_of_a_covering.py"
+             -f human.off -c 2 -r 10 -g 0.3)
+
+    add_test(NAME cover_complex_coordinate_gic_example_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/coordinate_graph_induced_complex.py"
+             -f human.off -c 0 -v)
+
+    add_test(NAME cover_complex_functional_gic_example_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/functional_graph_induced_complex.py"
+             -o lucky_cat.off
+             -f lucky_cat_PCA1 -v)
+
+    add_test(NAME cover_complex_voronoi_gic_example_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/voronoi_graph_induced_complex.py"
+             -f human.off -n 700 -v)
+
+    add_gudhi_py_test(test_cover_complex)
   endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)
 
   if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)

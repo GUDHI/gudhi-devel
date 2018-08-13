@@ -36,6 +36,11 @@ Alpha complex
 
 .. include:: alpha_complex_sum.inc
 
+Cover complexes
+===============
+
+.. include:: nerve_gic_complex_sum.rst
+
 Cubical complex
 ===============
 

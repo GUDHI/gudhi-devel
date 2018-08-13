@@ -79,10 +79,10 @@ int main(int argc, char **argv) {
     // --------------------------------------------
 
     if (verb) {
-      std::cout << "Functional GIC is of dimension " << stree.dimension() << " - " << stree.num_simplices()
+      std::cout << "Coordinate GIC is of dimension " << stree.dimension() << " - " << stree.num_simplices()
                 << " simplices - " << stree.num_vertices() << " vertices." << std::endl;
 
-      std::cout << "Iterator on functional GIC simplices" << std::endl;
+      std::cout << "Iterator on coordinate GIC simplices" << std::endl;
       for (auto f_simplex : stree.filtration_simplex_range()) {
         for (auto vertex : stree.simplex_vertex_range(f_simplex)) {
           std::cout << vertex << " ";
