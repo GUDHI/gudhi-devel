@@ -599,9 +599,50 @@ void test_smiley(double level) {
   std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
 }
 
+/** TEST SPHERE */
+void test_sphere(double level) {
+  const unsigned amb_d = 3; // Ambient (domain) dimension
+  const unsigned cod_d = 1; // Codomain dimension
+  double r = 5;
+  Eigen::Vector3d point1(r, 0.0, 0.0);
+  std::vector<Point_d> seed_points = {point1};
+  std::string name = "sphere";
+  std::cout << "Test 4: " << name << "...\n";
+
+  struct Function {
+    Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+      double x = p(0), y = p(1), z = p(2);
+      Eigen::VectorXd coords(cod_d);
+      coords(0) = x*x + y*y + z*z - r*r;
+      return coords;
+    }
+
+    Function(unsigned cod_d_,
+	     double r_)
+      : cod_d(cod_d_), r(r_) {}
+    unsigned cod_d;
+    double r;
+  } f(cod_d, r);
+  Hasse_diagram hd;
+  VP_map vp_map;
+  Gudhi::Clock t;
+  compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
+  t.end();
+  std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
+  for (auto cell: hd) {
+    dimensions[cell->get_dimension()]++;
+  }
+  std::cout << "Simplices by dimension: " << dimensions << "\n";
+  std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
+  output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
+  std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
+}
+
+
 
 int main(int argc, char * const argv[]) {
   test_circle(1.5);
   test_wavy_circle(2.5);
   test_smiley(10.1);
+  test_sphere(1.3);
 }
