@@ -249,14 +249,14 @@ class Persistence_heat_maps {
    * to turn the diagram into a function.
   **/
   Persistence_heat_maps(const Persistence_diagram & interval, size_t number_of_x_pixels, size_t number_of_y_pixels,
-                        double min_x = 0, double max_x = 1, double min_y = 0, double max_y = 1, const Kernel & kernel = Gaussian_kernel(1.0));
+                        double min_x = 0, double max_x = 1, double min_y = 0, double max_y = 1, const Kernel2D & kernel = Gaussian_kernel(1.0));
 
   /**
    * Construction that takes as inputs (1) the diagram and (2) a universal kernel on the plane used
    * to turn the diagram into a function. Note that this construction is infinite dimensional so
    * only compute_scalar_product() method is valid after calling this constructor.
   **/
-  Persistence_heat_maps(const Persistence_diagram & interval, const Kernel & kernel = Gaussian_kernel(1.0));
+  Persistence_heat_maps(const Persistence_diagram & interval, const Kernel2D & kernel = Gaussian_kernel(1.0));
 
   /**
    * Compute a mean value of a collection of heat maps and store it in the current object. Note that all the persistence
@@ -531,8 +531,8 @@ class Persistence_heat_maps {
 
   void construct_image_from_exact_universal_kernel(const Persistence_diagram & interval,
                                                    size_t number_of_x_pixels = 10, size_t number_of_y_pixels = 10,
-                                                   double min_x = 0, double max_x = 1, double min_y = 0, double max_y = 1, const Kernel & kernel = Gaussian_kernel(1.0));
-  void construct_kernel_from_exact_universal_kernel(const Persistence_diagram & interval, const Kernel & kernel = Gaussian_kernel(1.0));
+                                                   double min_x = 0, double max_x = 1, double min_y = 0, double max_y = 1, const Kernel2D & kernel = Gaussian_kernel(1.0));
+  void construct_kernel_from_exact_universal_kernel(const Persistence_diagram & interval, const Kernel2D & kernel = Gaussian_kernel(1.0));
 
   void set_up_parameters_for_basic_classes() {
     this->number_of_functions_for_vectorization = 1;
@@ -543,7 +543,7 @@ class Persistence_heat_maps {
   bool discrete = true;
 
   // PWGK
-  Kernel k;
+  Kernel2D k;
   Persistence_diagram d;
   std::vector<double> weights;
 
@@ -559,23 +559,22 @@ template <typename Scalling_of_kernels>
 void Persistence_heat_maps<Scalling_of_kernels>::construct_image_from_exact_universal_kernel(const Persistence_diagram & diagram,
                                                                                              size_t number_of_x_pixels, size_t number_of_y_pixels,
                                                                                              double min_x, double max_x,
-                                                                                             double min_y, double max_y, const Kernel & kernel) {
+                                                                                             double min_y, double max_y, const Kernel2D & kernel) {
 
   this->discrete = true; Scalling_of_kernels f; this->f = f; this->min_ = min_x; this->max_ = max_x;
-  for(size_t i = 0; i < number_of_y_pixels; i++)  this->heat_map.emplace_back();
+  this->heat_map.resize(number_of_y_pixels);
   double step_x = (max_x - min_x)/(number_of_x_pixels - 1); double step_y = (max_y - min_y)/(number_of_y_pixels - 1);
 
   int num_pts = diagram.size();
 
   for(size_t i = 0; i < number_of_y_pixels; i++){
-    double y = min_y + i*step_y;
+    double y = min_y + i*step_y; this->heat_map[i].reserve(number_of_x_pixels);
     for(size_t j = 0; j < number_of_x_pixels; j++){
       double x = min_x + j*step_x;
 
       std::pair<double, double> grid_point(x,y); double pixel_value = 0;
       for(int k = 0; k < num_pts; k++){
-        double px = diagram[k].first; double py = diagram[k].second; std::pair<double, double> diagram_point(px,py);
-        pixel_value += this->f(diagram_point) * kernel(diagram_point, grid_point);
+        pixel_value += this->f(diagram[k]) * kernel(diagram[k], grid_point);
       }
       this->heat_map[i].push_back(pixel_value);
 
@@ -589,13 +588,13 @@ template <typename Scalling_of_kernels>
 Persistence_heat_maps<Scalling_of_kernels>::Persistence_heat_maps(const Persistence_diagram & diagram,
                                                                   size_t number_of_x_pixels, size_t number_of_y_pixels,
                                                                   double min_x, double max_x,
-                                                                  double min_y, double max_y, const Kernel & kernel) {
+                                                                  double min_y, double max_y, const Kernel2D & kernel) {
   this->construct_image_from_exact_universal_kernel(diagram, number_of_x_pixels, number_of_y_pixels, min_x, max_x, min_y, max_y, kernel);
   this->set_up_parameters_for_basic_classes();
 }
 
 template <typename Scalling_of_kernels>
-void Persistence_heat_maps<Scalling_of_kernels>::construct_kernel_from_exact_universal_kernel(const Persistence_diagram & diagram, const Kernel & kernel){
+void Persistence_heat_maps<Scalling_of_kernels>::construct_kernel_from_exact_universal_kernel(const Persistence_diagram & diagram, const Kernel2D & kernel){
   this->discrete = false; Scalling_of_kernels f; this->f = f; this->k = kernel; this->d = diagram;
   int num_pts = this->d.size();
   for (int i = 0; i < num_pts; i++)  this->weights.push_back(this->f(this->d[i]));
@@ -603,7 +602,7 @@ void Persistence_heat_maps<Scalling_of_kernels>::construct_kernel_from_exact_uni
 
 
 template <typename Scalling_of_kernels>
-Persistence_heat_maps<Scalling_of_kernels>::Persistence_heat_maps(const Persistence_diagram& diagram, const Kernel & kernel) {
+Persistence_heat_maps<Scalling_of_kernels>::Persistence_heat_maps(const Persistence_diagram& diagram, const Kernel2D & kernel) {
   this->construct_kernel_from_exact_universal_kernel(diagram, kernel);
   this->set_up_parameters_for_basic_classes();
 }

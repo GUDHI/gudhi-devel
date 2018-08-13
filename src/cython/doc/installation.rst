@@ -47,8 +47,60 @@ following command in a terminal:
     export PYTHONPATH='$PYTHONPATH:/path-to-gudhi/build/cython'
     ctest -R py_test
 
-If tests fail, please try to :code:`import gudhi` and check the errors.
+Debugging issues
+================
+
+If tests fail, please check your PYTHONPATH and try to :code:`import gudhi`
+and check the errors.
 The problem can come from a third-party library bad link or installation.
+
+If :code:`import gudhi` succeeds, please have a look to debug informations:
+
+.. code-block:: python
+
+    import gudhi
+    print(gudhi.__debug_info__)
+
+You shall have something like:
+
+.. code-block:: none
+
+    Python version 2.7.15
+    Cython version 0.26.1
+    Eigen3 version 3.1.1
+    Installed modules are: off_reader;simplex_tree;rips_complex;cubical_complex;periodic_cubical_complex;
+        persistence_graphical_tools;reader_utils;witness_complex;strong_witness_complex;alpha_complex;
+        euclidean_witness_complex;euclidean_strong_witness_complex;
+    Missing modules are: bottleneck_distance;nerve_gic;subsampling;tangential_complex;persistence_graphical_tools;
+    CGAL version 4.7.1000
+    GMP_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgmp.so
+    GMPXX_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgmpxx.so
+    TBB version 9107 found and used
+
+Here, you can see that bottleneck_distance, nerve_gic, subsampling and
+tangential_complex are missing because of the CGAL version.
+persistence_graphical_tools is not available as numpy and matplotlib are not
+available.
+Unitary tests cannot be run as pytest is missing.
+
+A complete configuration would be :
+
+.. code-block:: none
+
+    Python version 3.6.5
+    Cython version 0.28.2
+    Pytest version 3.3.2
+    Matplotlib version 2.2.2
+    Numpy version 1.14.5
+    Eigen3 version 3.3.4
+    Installed modules are: off_reader;simplex_tree;rips_complex;cubical_complex;periodic_cubical_complex;
+        persistence_graphical_tools;reader_utils;witness_complex;strong_witness_complex;persistence_graphical_tools;
+        bottleneck_distance;nerve_gic;subsampling;tangential_complex;alpha_complex;euclidean_witness_complex;
+        euclidean_strong_witness_complex;
+    CGAL header only version 4.11.0
+    GMP_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgmp.so
+    GMPXX_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgmpxx.so
+    TBB version 9107 found and used
 
 Documentation
 =============

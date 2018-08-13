@@ -300,7 +300,10 @@ class Persistent_cohomology {
     // with multiplicity. We used to sum the coefficients directly in
     // annotations_in_boundary by using a map, we now do it later.
     typedef std::pair<Column *, int> annotation_t;
-    thread_local std::vector<annotation_t> annotations_in_boundary;
+#ifdef GUDHI_CAN_USE_CXX11_THREAD_LOCAL
+    thread_local
+#endif  // GUDHI_CAN_USE_CXX11_THREAD_LOCAL
+    std::vector<annotation_t> annotations_in_boundary;
     annotations_in_boundary.clear();
     int sign = 1 - 2 * (dim_sigma % 2);  // \in {-1,1} provides the sign in the
                                          // alternate sum in the boundary.

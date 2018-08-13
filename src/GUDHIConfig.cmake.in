@@ -1,7 +1,12 @@
 # - Config file for the GUDHI package
 # It defines the following variables
 #  GUDHI_INCLUDE_DIRS - include directories for GUDHI
+#
+# Order is :
+# 1. user defined GUDHI_INCLUDE_DIRS
+# 2. ${CMAKE_SOURCE_DIR}/include     => Where the 'cmake' has been done
+# 3. ${CMAKE_INSTALL_PREFIX}/include => Where the 'make install' has been performed
 
 # Compute paths
-set(GUDHI_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
+set(GUDHI_INCLUDE_DIRS "${GUDHI_INCLUDE_DIRS};@CONF_INCLUDE_DIRS@")
 

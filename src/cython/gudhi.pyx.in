@@ -26,6 +26,7 @@ __license__ = "GPL v3"
 __version__ = "@GUDHI_VERSION@"
 # This variable is used by doctest to find files
 __root_source_dir__ = "@CMAKE_SOURCE_DIR@"
+__debug_info__ = @GUDHI_CYTHON_DEBUG_INFO@
 
 include '@CMAKE_CURRENT_SOURCE_DIR@/cython/off_reader.pyx'
 include '@CMAKE_CURRENT_SOURCE_DIR@/cython/simplex_tree.pyx'
@@ -36,8 +37,6 @@ include '@CMAKE_CURRENT_SOURCE_DIR@/cython/persistence_graphical_tools.py'
 include '@CMAKE_CURRENT_SOURCE_DIR@/cython/reader_utils.pyx'
 include '@CMAKE_CURRENT_SOURCE_DIR@/cython/witness_complex.pyx'
 include '@CMAKE_CURRENT_SOURCE_DIR@/cython/strong_witness_complex.pyx'
-include '@CMAKE_CURRENT_SOURCE_DIR@/cython/kernels.pyx'
-include '@CMAKE_CURRENT_SOURCE_DIR@/cython/vectors.pyx'
 @GUDHI_CYTHON_ALPHA_COMPLEX@
 @GUDHI_CYTHON_EUCLIDEAN_WITNESS_COMPLEX@
 @GUDHI_CYTHON_SUBSAMPLING@

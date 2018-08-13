@@ -227,6 +227,9 @@ namespace Persistence_representations {
  to diagonal are given then sometimes the kernel have support that reaches the region
  below the diagonal. If the value of this parameter is true, then the values below diagonal can be erased.
 
+ We also provide two methods to perform exact calculations. In both methods, the kernel is no longer provided as a filter (i.e. a square matrix---see parameters above), but rather as
+ a function assigning a real value to a 2D point. In the first method, calculations are done on a grid, leading to a finite-dimensional representation.
+ On the other hand, in the second method, we do not use grids, meaning that diagrams are represented as functions. Thus, only scalar products are available.
 
  \section sec_persistence_vectors Persistence vectors
  <b>Reference manual:</b> \ref Gudhi::Persistence_representations::Vector_distances_in_diagram <br>
@@ -273,10 +276,8 @@ namespace Persistence_representations {
 
  the program output is:
 
- \code $> Approx SW distance: 5.33648
- $> Exact SW distance: 5.33798
- $> Approx SW kernel: 0.0693743
- $> Exact  SW kernel: 0.0693224
+ \code $> Approx SW kernel: 0.0693743
+ $> Exact  SW kernel: 0.0693218
  $> Distance induced by approx SW kernel: 1.36428
  $> Distance induced by exact  SW kernel: 1.3643
  \endcode

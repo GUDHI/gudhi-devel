@@ -43,16 +43,15 @@ static constexpr double pi = boost::math::constants::pi<double>();
 using Persistence_diagram = std::vector<std::pair<double, double> >;
 
 /**
- * In this module, we use the name Weight for the representation of a function taking a pair of two double and returning a double.
+ * In this module, we use the name Kernel for the representation of a function taking a pair of two points in the plane and returning a double.
  */
-using Weight = std::function<double (std::pair<double, double>) >;
-using Kernel = std::function<double (std::pair<double, double>, std::pair<double, double> )>;
+using Kernel2D = std::function<double (std::pair<double, double>, std::pair<double, double> )>;
 
-Kernel Gaussian_kernel(double sigma){
+inline Kernel2D Gaussian_kernel(double sigma){
   return [=](std::pair<double, double> p, std::pair<double, double> q){return (1.0 / (std::sqrt(2*pi)*sigma)) * std::exp(  -((p.first-q.first)*(p.first-q.first) + (p.second-q.second)*(p.second-q.second)) / (2*sigma*sigma)   );};
 }
 
-Kernel polynomial_kernel(double c, double d){
+inline Kernel2D polynomial_kernel(double c, double d){
   return [=](std::pair<double, double> p, std::pair<double, double> q){return std::pow( p.first*q.first + p.second*q.second + c, d);};
 }
 

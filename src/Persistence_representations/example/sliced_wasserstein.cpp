@@ -50,8 +50,6 @@ int main(int argc, char** argv) {
   SW swex1(persistence1, 1, -1);
   SW swex2(persistence2, 1, -1);
 
-  std::cout << "Approx SW distance: " << sw1.compute_sliced_wasserstein_distance(sw2) << std::endl;
-  std::cout << "Exact SW distance: " << swex1.compute_sliced_wasserstein_distance(swex2) << std::endl;
   std::cout << "Approx SW kernel: " << sw1.compute_scalar_product(sw2) << std::endl;
   std::cout << "Exact  SW kernel: " << swex1.compute_scalar_product(swex2) << std::endl;
   std::cout << "Distance induced by approx SW kernel: " << sw1.distance(sw2) << std::endl;
