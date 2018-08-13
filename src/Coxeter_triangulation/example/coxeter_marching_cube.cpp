@@ -434,14 +434,15 @@ void compute_hasse_diagram(std::vector<Point_d>& seed_points,
   }
 }
 
+/** TEST CIRCLE */
 void test_circle(double level) {
-  std::cout << "Test 1: Circle...\n";
   const unsigned amb_d = 2; // Ambient (domain) dimension
   const unsigned cod_d = 1; // Codomain dimension
   double r = 5;
   Eigen::Vector2d point1(r, 0.0);
   std::vector<Point_d> seed_points = {point1};
   std::string name = "circle";
+  std::cout << "Test 1: " << name << "...\n";
 
   struct Function {
     Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
@@ -453,7 +454,7 @@ void test_circle(double level) {
 
     Function(unsigned cod_d, double r) : cod_d_(cod_d), r_(r) {}
     unsigned cod_d_;
-    unsigned r_;
+    double r_;
   } f(cod_d, r);
   Hasse_diagram hd;
   VP_map vp_map;
@@ -470,6 +471,137 @@ void test_circle(double level) {
   std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
 }
 
+/** TEST WAVY CIRCLE */
+void test_wavy_circle(double level) {
+  const unsigned amb_d = 2; // Ambient (domain) dimension
+  const unsigned cod_d = 1; // Codomain dimension
+  unsigned n = 25;
+  double r = 5;
+  double sr = 0.5;
+  Eigen::Vector2d point1(r, 0.0);
+  std::vector<Point_d> seed_points = {point1};
+  std::string name = "wavy_circle";
+  std::cout << "Test 2: " << name << "...\n";
+
+  struct Function {
+    Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+      double x = p(0), y = p(1);
+      double pi = 3.14159265358;
+      Eigen::VectorXd coords(cod_d_);
+      double theta = 0;
+      if (x > 0)
+	theta = std::atan(y/x);
+      else if (x < 0 && y >= 0)
+	theta = std::atan(y/x) + pi;
+      else if (x < 0 && y < 0)
+	theta = std::atan(y/x) - pi;
+      else if (x == 0 && y > 0)
+	theta = pi/2;
+      else
+	theta = -pi/2;
+      double real_pos = r_ + sr_*std::sin(n_*theta);
+      coords(0) = x*x + y*y - real_pos*real_pos;
+      return coords;
+    }
+
+    Function(unsigned cod_d, unsigned n, double r, double sr)
+      : cod_d_(cod_d), n_(n), r_(r), sr_(sr) {}
+    unsigned cod_d_, n_;
+    double r_, sr_;
+    
+  } f(cod_d, n, r, sr);
+  Hasse_diagram hd;
+  VP_map vp_map;
+  Gudhi::Clock t;
+  compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
+  t.end();
+  std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
+  for (auto cell: hd) {
+    dimensions[cell->get_dimension()]++;
+  }
+  std::cout << "Simplices by dimension: " << dimensions << "\n";
+  std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
+  output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
+  std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
+}
+
+/** TEST SMILEY */
+void test_smiley(double level) {
+  const unsigned amb_d = 2; // Ambient (domain) dimension
+  const unsigned cod_d = 1; // Codomain dimension
+  double r = 4;
+  double sr = 0.5;
+  double ir = 3.5;
+  double ey = 1.5, ex = 1.5;
+  double offset = 0.01;
+  Eigen::Vector2d point1(r+offset, offset);
+  Eigen::Vector2d point2(offset, offset);
+  Eigen::Vector2d point3(-ex+sr+offset, ey+offset);
+  Eigen::Vector2d point4(ex+sr+offset, ey+offset);
+  std::vector<Point_d> seed_points = {point1, point2, point3, point4};
+  std::string name = "smiley";
+  std::cout << "Test 3: " << name << "...\n";
+
+  struct Function {
+    Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+      double x = p(0) - offset, y = p(1) - offset;
+      Eigen::VectorXd coords(cod_d);
+      if (x*x + y*y > r*r)
+	coords(0) = 1;
+      else if (x*x + y*y == r*r)
+	coords(0) = 0;
+      else if ((x*x + y*y < ir*ir) && (y < 0))
+	coords(0) = 1;
+      else if ((x*x + y*y == ir*ir) && (y < 0))
+	coords(0) = 0;
+      else if ((x*x + y*y <= ir*ir) && (y == 0))
+	coords(0) = 0;
+      else if ((x+ex)*(x+ex) + (y-ey)*(y-ey) < sr*sr)
+	coords(0) = 1;
+      else if ((x+ex)*(x+ex) + (y-ey)*(y-ey) == sr*sr)
+	coords(0) = 0;
+      else if ((x-ex)*(x-ex) + (y-ey)*(y-ey) < sr*sr)
+	coords(0) = 1;
+      else if ((x-ex)*(x-ex) + (y-ey)*(y-ey) == sr*sr)
+	coords(0) = 0;
+      else
+	coords(0) = -1;
+      return coords;
+    }
+
+    Function(unsigned cod_d_,
+	     double r_,
+	     double sr_,
+	     double ir_,
+	     double ey_,
+	     double ex_,
+	     double offset_)
+      : cod_d(cod_d_), r(r_), sr(sr_), ir(ir_), ey(ey_), ex(ex_), offset(offset_) {}
+    unsigned cod_d;
+    double r = 4;
+    double sr = 0.5;
+    double ir = 3.5;
+    double ey = 1.5, ex = 1.5;
+    double offset = 0.01;    
+  } f(cod_d, r, sr, ir, ey, ex, offset);
+  Hasse_diagram hd;
+  VP_map vp_map;
+  Gudhi::Clock t;
+  compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
+  t.end();
+  std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
+  for (auto cell: hd) {
+    dimensions[cell->get_dimension()]++;
+  }
+  std::cout << "Simplices by dimension: " << dimensions << "\n";
+  std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
+  output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
+  std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
+}
+
+
 int main(int argc, char * const argv[]) {
   test_circle(1.5);
+  test_wavy_circle(2.5);
+  test_smiley(10.1);
 }
