@@ -15,7 +15,8 @@
 #include <gudhi/Coxeter_complex/Trie.h>
 #include <gudhi/Hasse_diagram_persistence.h>
 #include "output_hasse_to_medit.h"
-
+#include "art/art.c"
+#include <cstdint>
 
 // #include <gudhi/Points_off_io.h>
 // #include <gudhi/Coxeter_system.h>
@@ -75,6 +76,7 @@ const double pi = 3.14159265358;
 
 double error = 1e-6;
 unsigned test_no = 0;
+bool use_art = false;
 
 // using Point_vector = std::vector< Point_d >;
 
@@ -199,6 +201,11 @@ bool intersects(const Cell_id& f_id,
   return true;
 }
 
+void cell_to_array(const Cell_id& c_id, int* buf) {
+  for (unsigned i = 0; i < c_id.size(); ++i)
+    buf[i] = c_id[i];
+}
+
 template <typename Function>
 void compute_hasse_diagram(std::vector<Point_d>& seed_points,
                            double level,
@@ -211,11 +218,20 @@ void compute_hasse_diagram(std::vector<Point_d>& seed_points,
   VC_map vc_map;
   Full_cell_trie trie(level, amb_d);
   Full_cell_trie visit_stack(level, amb_d);
+  art_tree visit_stack_art;
+  art_tree_init(&visit_stack_art);
+  uintptr_t line = 1;
+  int* buf = new int[cs.pos_root_count()];
 #ifdef DEBUG_TRACES
   std::cout << "root_t_:\n" << cs.simple_root_matrix() << "\n";
 #endif
   for (const Point_d& p: seed_points) {
-    visit_stack.add(cs.query_point_location(p, level));
+    if (use_art) {
+      Cell_id c_id = cs.query_point_location(p, level);
+      art_insert(&visit_stack_art, buf, c_id.size(), (void*)line);
+    }
+    else
+      visit_stack.add(cs.query_point_location(p, level));
   }
   
   while (!visit_stack.empty()) {
@@ -277,6 +293,8 @@ void compute_hasse_diagram(std::vector<Point_d>& seed_points,
         if (!is_marked(cf_id, trie))
           visit_stack.add(cf_id);    
   }
+  art_tree_destroy(&visit_stack_art);
+  delete[] buf;
 }
 
 /** TEST CIRCLE */
