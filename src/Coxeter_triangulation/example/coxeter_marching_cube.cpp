@@ -5,8 +5,7 @@
 // #define SPHERE
 // #define TORUS
 // #define DOUBLE_TORUS
-// # define DEBUG_TRACES
-
+// #define DEBUG_TRACES
 
 #include <iostream>
 #include <vector>
@@ -71,165 +70,11 @@ using VC_map = std::map<Cell_id, Hasse_cell*, Cell_id_comparator>;
 using VP_map = std::map<Hasse_cell*, Point_d>;
 using Full_cell_trie = Trie<Cell_id>;
 
-#ifdef CIRCLE
-const unsigned amb_d = 2; // Ambient (domain) dimension
-const unsigned cod_d = 1; // Codomain dimension
-double r = 5;
-Eigen::Vector2d point1(r, 0.0);
-std::vector<Point_d> seed_points = {point1};
-std::string name = "circle";
+// Pi definition
+const double pi = 3.14159265358;
 
-Eigen::VectorXd f(Eigen::VectorXd p) {
-  double x = p(0), y = p(1);
-  Eigen::VectorXd coords(cod_d);
-  coords(0) = x*x + y*y - r*r;
-  return coords;
-}
-#endif
-
-#ifdef LEMINISCATE_OF_GERONO
-const unsigned amb_d = 2; // Ambient (domain) dimension
-const unsigned cod_d = 1; // Codomain dimension
-double a = 1;
-Eigen::Vector2d point1(std::sqrt(a)+0.01, 0.01);
-std::vector<Point_d> seed_points = {point1};
-std::string name = "leminiscate_of_gerono";
-
-Eigen::VectorXd f(Eigen::VectorXd p) {
-  double x = p(0)-0.01, y = p(1)-0.01;
-  Eigen::VectorXd coords(cod_d);
-  coords(0) = x*x*x*x - a*x*x + a*y*y;
-  return coords;
-}
-#endif
-
-#ifdef WAVY_CIRCLE
-const unsigned amb_d = 2; // Ambient (domain) dimension
-const unsigned cod_d = 1; // Codomain dimension
-double r = 1;
-double sr = 0.1;
-int n = 25;
-Eigen::Vector2d point1(r, 0.0);
-std::vector<Point_d> seed_points = {point1};
-std::string name = "wavy_circle";
-
-Eigen::VectorXd f(Eigen::VectorXd p) {
-  double x = p(0), y = p(1);
-  double pi = 3.14159265358;
-  Eigen::VectorXd coords(cod_d);
-  double theta = 0;
-  if (x > 0)
-    theta = std::atan(y/x);
-  else if (x < 0 && y >= 0)
-    theta = std::atan(y/x) + pi;
-  else if (x < 0 && y < 0)
-    theta = std::atan(y/x) - pi;
-  else if (x == 0 && y > 0)
-    theta = pi/2;
-  else
-    theta = -pi/2;
-  double real_pos = r + sr*std::sin(n*theta);
-  coords(0) = x*x + y*y - real_pos*real_pos;
-  return coords;
-}
-#endif
-
-#ifdef SMILEY
-const unsigned amb_d = 2; // Ambient (domain) dimension
-const unsigned cod_d = 1; // Codomain dimension
-double r = 4;
-double sr = 0.5;
-double ir = 3.5;
-double ey = 1.5, ex = 1.5;
-double offset = 0.01;
-Eigen::Vector2d point1(r+offset, offset);
-Eigen::Vector2d point2(offset, offset);
-Eigen::Vector2d point3(-ex+sr+offset, ey+offset);
-Eigen::Vector2d point4(ex+sr+offset, ey+offset);
-std::vector<Point_d> seed_points = {point1, point2, point3, point4};
-std::string name = "smiley";
-
-Eigen::VectorXd f(Eigen::VectorXd p) {
-  double x = p(0) - offset, y = p(1) - offset;
-  Eigen::VectorXd coords(cod_d);
-  if (x*x + y*y > r*r)
-    coords(0) = 1;
-  else if (x*x + y*y == r*r)
-    coords(0) = 0;
-  else if ((x*x + y*y < ir*ir) && (y < 0))
-    coords(0) = 1;
-  else if ((x*x + y*y == ir*ir) && (y < 0))
-    coords(0) = 0;
-  else if ((x*x + y*y <= ir*ir) && (y == 0))
-    coords(0) = 0;
-  else if ((x+ex)*(x+ex) + (y-ey)*(y-ey) < sr*sr)
-    coords(0) = 1;
-  else if ((x+ex)*(x+ex) + (y-ey)*(y-ey) == sr*sr)
-    coords(0) = 0;
-  else if ((x-ex)*(x-ex) + (y-ey)*(y-ey) < sr*sr)
-    coords(0) = 1;
-  else if ((x-ex)*(x-ex) + (y-ey)*(y-ey) == sr*sr)
-    coords(0) = 0;
-  else
-    coords(0) = -1;
-  return coords;
-}
-#endif
-
-#ifdef SPHERE
-const unsigned amb_d = 3; // Ambient (domain) dimension
-const unsigned cod_d = 1; // Codomain dimension
-double r = 5;
-Eigen::Vector3d point1(r, 0.0, 0.0);
-std::vector<Point_d> seed_points = {point1};
-std::string name = "sphere";
-
-Eigen::VectorXd f(Eigen::VectorXd p) {
-  double x = p(0), y = p(1), z = p(2);
-  Eigen::VectorXd coords(cod_d);
-  coords(0) = x*x + y*y + z*z - r*r;
-  return coords;
-}
-#endif
-
-#ifdef TORUS
-const unsigned amb_d = 3; // Ambient (domain) dimension
-const unsigned cod_d = 1; // Codomain dimension
-double r = 5;
-double sr = 1;
-Eigen::Vector3d point1(r+sr, 0.0, 0.0);
-std::vector<Point_d> seed_points = {point1};
-std::string name = "torus";
-
-Eigen::VectorXd f(Eigen::VectorXd p) {
-  double x = p(0), y = p(1), z = p(2);
-  Eigen::VectorXd coords(cod_d);
-  coords(0) = (z*z + (std::sqrt(x*x + y*y) - r)*(std::sqrt(x*x + y*y) - r) - sr*sr);
-  return coords;
-}
-#endif
-
-
-#ifdef DOUBLE_TORUS
-const unsigned amb_d = 3; // Ambient (domain) dimension
-const unsigned cod_d = 1; // Codomain dimension
-double r = 5;
-double sr = 1;
-double ofs = 7;
-Eigen::Vector3d point1(r+sr, 0.0, 0.0);
-Eigen::Vector3d point2(r+sr+ofs, 0.0, 0.0);
-std::vector<Point_d> seed_points = {point1, point2};
-std::string name = "double_torus";
-
-Eigen::VectorXd f(Eigen::VectorXd p) {
-  double x = p(0), y = p(1), z = p(2);
-  Eigen::VectorXd coords(cod_d);
-  coords(0) = (z*z + (std::sqrt(x*x + y*y) - r)*(std::sqrt(x*x + y*y) - r) - sr*sr)
-    * (y*y + (std::sqrt((x-ofs)*(x-ofs) + z*z) - r)*(std::sqrt((x-ofs)*(x-ofs) + z*z) - r) - sr*sr);
-  return coords;
-}
-#endif
-
+double error = 1e-6;
+unsigned test_no = 0;
 
 // using Point_vector = std::vector< Point_d >;
 
@@ -341,7 +186,7 @@ bool intersects(const Cell_id& f_id,
   std::cout << "  intersection:\n" << intersection << "\n";
   std::cout << "  rel_error = " << (li_matrix * intersection - last_column).norm() / last_column.norm() << "\n";
 #endif
-  if ((li_matrix * intersection - last_column).norm() / last_column.norm() > 1e-5 / f_id.level())
+  if ((li_matrix * intersection - last_column).norm() / last_column.norm() > error / f_id.level())
     return false;
   Cell_id i_id = cs.query_point_location(intersection, f_id.level());
 #ifdef DEBUG_TRACES
@@ -442,7 +287,7 @@ void test_circle(double level) {
   Eigen::Vector2d point1(r, 0.0);
   std::vector<Point_d> seed_points = {point1};
   std::string name = "circle";
-  std::cout << "Test 1: " << name << "...\n";
+  std::cout << "Test " << test_no++ << ": " << name << "...\n";
 
   struct Function {
     Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
@@ -462,10 +307,13 @@ void test_circle(double level) {
   compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
   t.end();
   std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
+  int chi = 0;
   for (auto cell: hd) {
     dimensions[cell->get_dimension()]++;
+    chi += 1-2*(cell->get_dimension()%2);
   }
   std::cout << "Simplices by dimension: " << dimensions << "\n";
+  std::cout << "Euler characteristic = " << chi << "\n";
   std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
   output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
   std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
@@ -481,12 +329,11 @@ void test_wavy_circle(double level) {
   Eigen::Vector2d point1(r, 0.0);
   std::vector<Point_d> seed_points = {point1};
   std::string name = "wavy_circle";
-  std::cout << "Test 2: " << name << "...\n";
+  std::cout << "Test " << test_no++ << ": " << name << "...\n";
 
   struct Function {
     Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
       double x = p(0), y = p(1);
-      double pi = 3.14159265358;
       Eigen::VectorXd coords(cod_d_);
       double theta = 0;
       if (x > 0)
@@ -516,10 +363,13 @@ void test_wavy_circle(double level) {
   compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
   t.end();
   std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
+  int chi = 0;
   for (auto cell: hd) {
     dimensions[cell->get_dimension()]++;
+    chi += 1-2*(cell->get_dimension()%2);
   }
   std::cout << "Simplices by dimension: " << dimensions << "\n";
+  std::cout << "Euler characteristic = " << chi << "\n";
   std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
   output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
   std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
@@ -540,7 +390,7 @@ void test_smiley(double level) {
   Eigen::Vector2d point4(ex+sr+offset, ey+offset);
   std::vector<Point_d> seed_points = {point1, point2, point3, point4};
   std::string name = "smiley";
-  std::cout << "Test 3: " << name << "...\n";
+  std::cout << "Test " << test_no++ << ": " << name << "...\n";
 
   struct Function {
     Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
@@ -590,10 +440,13 @@ void test_smiley(double level) {
   compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
   t.end();
   std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
+  int chi = 0;
   for (auto cell: hd) {
     dimensions[cell->get_dimension()]++;
+    chi += 1-2*(cell->get_dimension()%2);
   }
   std::cout << "Simplices by dimension: " << dimensions << "\n";
+  std::cout << "Euler characteristic = " << chi << "\n";
   std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
   output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
   std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
@@ -607,7 +460,7 @@ void test_sphere(double level) {
   Eigen::Vector3d point1(r, 0.0, 0.0);
   std::vector<Point_d> seed_points = {point1};
   std::string name = "sphere";
-  std::cout << "Test 4: " << name << "...\n";
+  std::cout << "Test " << test_no++ << ": " << name << "...\n";
 
   struct Function {
     Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
@@ -629,20 +482,353 @@ void test_sphere(double level) {
   compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
   t.end();
   std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
+  int chi = 0;
   for (auto cell: hd) {
     dimensions[cell->get_dimension()]++;
+    chi += 1-2*(cell->get_dimension()%2);
   }
   std::cout << "Simplices by dimension: " << dimensions << "\n";
+  std::cout << "Euler characteristic = " << chi << "\n";
+  std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
+  output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
+  std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
+}
+
+/** TEST TORUS */
+void test_torus(double level) {
+  const unsigned amb_d = 3; // Ambient (domain) dimension
+  const unsigned cod_d = 1; // Codomain dimension
+  double r = 5;
+  double sr = 2;
+  Eigen::Vector3d point1(r+sr, 0.0, 0.0);
+  std::vector<Point_d> seed_points = {point1};
+  std::string name = "torus";
+  std::cout << "Test " << test_no++ << ": " << name << "...\n";
+
+  struct Function {
+    Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+      double x = p(0), y = p(1), z = p(2);
+      Eigen::VectorXd coords(cod_d);
+      coords(0) = (z*z + (std::sqrt(x*x + y*y) - r)*(std::sqrt(x*x + y*y) - r) - sr*sr);
+      return coords;
+    }
+
+    Function(unsigned cod_d_,
+	     double r_,
+             double sr_)
+      : cod_d(cod_d_), r(r_), sr(sr_) {}
+    unsigned cod_d;
+    double r, sr;
+  } f(cod_d, r, sr);
+  Hasse_diagram hd;
+  VP_map vp_map;
+  Gudhi::Clock t;
+  compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
+  t.end();
+  std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
+  int chi = 0;
+  for (auto cell: hd) {
+    dimensions[cell->get_dimension()]++;
+    chi += 1-2*(cell->get_dimension()%2);
+  }
+  std::cout << "Simplices by dimension: " << dimensions << "\n";
+  std::cout << "Euler characteristic = " << chi << "\n";
+  std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
+  output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
+  std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
+}
+
+/** TEST DOUBLE TORUS */
+void test_double_torus(double level) {
+  const unsigned amb_d = 3; // Ambient (domain) dimension
+  const unsigned cod_d = 1; // Codomain dimension
+  double r = 5;
+  double sr = 2;
+  double ofs = 5;
+  Eigen::Vector3d point1(r+sr, 0.0, 0.0);
+  Eigen::Vector3d point2(r+sr+ofs, 0.0, 0.0);
+  std::vector<Point_d> seed_points = {point1, point2};
+  std::string name = "double_torus";
+  std::cout << "Test 6: " << name << "...\n";
+
+  struct Function {
+    Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+      double x = p(0), y = p(1), z = p(2);
+      Eigen::VectorXd coords(cod_d);
+      coords(0) = (z*z + (std::sqrt(x*x + y*y) - r)*(std::sqrt(x*x + y*y) - r) - sr*sr)
+        * (y*y + (std::sqrt((x-ofs)*(x-ofs) + z*z) - r)*(std::sqrt((x-ofs)*(x-ofs) + z*z) - r) - sr*sr);
+      return coords;
+    }
+
+    Function(unsigned cod_d_,
+	     double r_,
+             double sr_,
+             double ofs_)
+      : cod_d(cod_d_), r(r_), sr(sr_), ofs(ofs_) {}
+    unsigned cod_d;
+    double r, sr, ofs;
+  } f(cod_d, r, sr, ofs);
+  Hasse_diagram hd;
+  VP_map vp_map;
+  Gudhi::Clock t;
+  compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
+  t.end();
+  std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
+  int chi = 0;
+  for (auto cell: hd) {
+    dimensions[cell->get_dimension()]++;
+    chi += 1-2*(cell->get_dimension()%2);
+  }
+  std::cout << "Simplices by dimension: " << dimensions << "\n";
+  std::cout << "Euler characteristic = " << chi << "\n";
+  std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
+  output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
+  std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
+}
+
+/** TEST CIRCLE 3D */
+void test_circle_3d(double level) {
+  const unsigned amb_d = 3; // Ambient (domain) dimension
+  const unsigned cod_d = 2; // Codomain dimension
+  double r = 5;
+  Eigen::Vector3d point1(r, 0.0, 0.0);
+  std::vector<Point_d> seed_points = {point1};
+  std::string name = "circle_3d";
+  std::cout << "Test " << test_no++ << ": " << name << "...\n";
+
+  struct Function {
+    Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+      double x = p(0), y = p(1), z = p(2);
+      Eigen::VectorXd coords(cod_d);
+      coords(0) = x*x + y*y - r*r;
+      coords(1) = z;
+      return coords;
+    }
+
+    Function(unsigned cod_d_,
+	     double r_)
+      : cod_d(cod_d_), r(r_) {}
+    unsigned cod_d;
+    double r;
+  } f(cod_d, r);
+  Hasse_diagram hd;
+  VP_map vp_map;
+  Gudhi::Clock t;
+  compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
+  t.end();
+  std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
+  int chi = 0;
+  for (auto cell: hd) {
+    dimensions[cell->get_dimension()]++;
+    chi += 1-2*(cell->get_dimension()%2);
+  }
+  std::cout << "Simplices by dimension: " << dimensions << "\n";
+  std::cout << "Euler characteristic = " << chi << "\n";
+  std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
+  output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
+  std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
+}
+
+/** TEST CHOPPER WAVE */
+void test_chopper_wave_3d(double level) {
+  const unsigned amb_d = 3; // Ambient (domain) dimension
+  const unsigned cod_d = 2; // Codomain dimension
+  double r = 5;
+  Eigen::Vector3d point1(0.0, 0.0, r);
+  std::vector<Point_d> seed_points = {point1};
+  std::string name = "chopper_wave";
+  std::cout << "Test " << test_no++ << ": " << name << "...\n";
+
+  struct Function {
+    Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+      double x = p(0), y = p(1), z = p(2);
+      Eigen::VectorXd coords(cod_d);
+      coords(0) = x*x + y*y + z*z - r*r;
+      coords(1) = x + std::sin(y) + std::cos(2*z) - std::cos(2*r);
+      return coords;
+    }
+
+    Function(unsigned cod_d_,
+	     double r_)
+      : cod_d(cod_d_), r(r_) {}
+    unsigned cod_d;
+    double r;
+  } f(cod_d, r);
+  Hasse_diagram hd;
+  VP_map vp_map;
+  Gudhi::Clock t;
+  compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
+  t.end();
+  std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
+  int chi = 0;
+  for (auto cell: hd) {
+    dimensions[cell->get_dimension()]++;
+    chi += 1-2*(cell->get_dimension()%2);
+  }
+  std::cout << "Simplices by dimension: " << dimensions << "\n";
+  std::cout << "Euler characteristic = " << chi << "\n";
+  std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
+  output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
+  std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
+}
+
+/** TEST S3 */
+void test_s3(double level) {
+  const unsigned amb_d = 4; // Ambient (domain) dimension
+  const unsigned cod_d = 1; // Codomain dimension
+  double r = 5;
+  Eigen::Vector4d point1(r, 0.0, 0.0, 0.0);
+  std::vector<Point_d> seed_points = {point1};
+  std::string name = "s3";
+  std::cout << "Test " << test_no++ << ": " << name << "...\n";
+
+  struct Function {
+    Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+      Eigen::VectorXd coords(cod_d);
+      coords(0) = - r*r;
+      for (unsigned i = 0; i < p.size(); ++i)
+        coords(0) += p(i)*p(i);
+      return coords;
+    }
+
+    Function(unsigned cod_d_,
+	     double r_)
+      : cod_d(cod_d_), r(r_) {}
+    unsigned cod_d;
+    double r;
+  } f(cod_d, r);
+  Hasse_diagram hd;
+  VP_map vp_map;
+  Gudhi::Clock t;
+  compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
+  t.end();
+  std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
+  int chi = 0;
+  for (auto cell: hd) {
+    dimensions[cell->get_dimension()]++;
+    chi += 1-2*(cell->get_dimension()%2);
+  }
+  std::cout << "Simplices by dimension: " << dimensions << "\n";
+  std::cout << "Euler characteristic = " << chi << "\n";
+  std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
+  output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
+  std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
+}
+
+/** TEST S11 */
+void test_s11(double level) {
+  const unsigned amb_d = 4; // Ambient (domain) dimension
+  const unsigned cod_d = 2; // Codomain dimension
+  double r1 = 5;
+  double r2 = 5;
+  Eigen::Vector4d point1(r1, 0.0, r2, 0.0);
+  std::vector<Point_d> seed_points = {point1};
+  std::string name = "s11";
+  std::cout << "Test " << test_no++ << ": " << name << "...\n";
+
+  struct Function {
+    Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+      Eigen::VectorXd coords(cod_d);
+      coords(0) = p(0)*p(0) + p(1)*p(1) - r1*r1;
+      coords(1) = p(2)*p(2) + p(3)*p(3) - r2*r2;
+      return coords;
+    }
+
+    Function(unsigned cod_d_,
+	     double r1_,
+             double r2_)
+      : cod_d(cod_d_), r1(r1_), r2(r2_) {}
+    unsigned cod_d;
+    double r1, r2;
+  } f(cod_d, r1, r2);
+  Hasse_diagram hd;
+  VP_map vp_map;
+  Gudhi::Clock t;
+  compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
+  t.end();
+  std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
+  int chi = 0;
+  for (auto cell: hd) {
+    dimensions[cell->get_dimension()]++;
+    chi += 1-2*(cell->get_dimension()%2);
+  }
+  std::cout << "Simplices by dimension: " << dimensions << "\n";
+  std::cout << "Euler characteristic = " << chi << "\n";
   std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
   output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
   std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
 }
 
 
+// /** TEST TORUS NECKLACE */
+// void test_torus_necklace(double level) {
+//   const unsigned amb_d = 3; // Ambient (domain) dimension
+//   const unsigned cod_d = 1; // Codomain dimension
+//   unsigned n = 5;
+//   double gr = 10;
+//   double r = gr*2*pi/4/n;
+//   double sr = r/5;
+//   std::vector<Point_d> seed_points;
+//   for (unsigned i = 0; i < 2*n; i++) {
+//     Eigen::Vector3d c(gr*std::cos(i*pi/n), 0, gr*std::sin(i*pi/n));
+//     seed_points.push_back(c + Eigen::Vector3d((r+sr)*std::sin(i*pi/n), 0.0, (r+sr)*std::cos(i*pi/n)));
+//   }
+//   std::string name = "torus_necklace";
+//   std::cout << "Test " << test_no++ << ": " << name << "...\n";
+
+//   struct Function {
+//     Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+//       double x = p(0), y = p(1), z = p(2);
+//       Eigen::VectorXd coords(cod_d);
+//       coords(0) = (z*z + (std::sqrt(x*x + y*y) - r)*(std::sqrt(x*x + y*y) - r) - sr*sr)
+//         * (y*y + (std::sqrt((x-ofs)*(x-ofs) + z*z) - r)*(std::sqrt((x-ofs)*(x-ofs) + z*z) - r) - sr*sr);
+//       return coords;
+//     }
+
+//     Function(unsigned cod_d_,
+// 	     double r_,
+//              double sr_,
+//              double ofs_)
+//       : cod_d(cod_d_), r(r_), sr(sr_), ofs(ofs_) {}
+//     unsigned cod_d;
+//     double r, sr, ofs;
+//   } f(cod_d, r, sr, ofs);
+//   Hasse_diagram hd;
+//   VP_map vp_map;
+//   Gudhi::Clock t;
+//   compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
+//   t.end();
+//   std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
+//   for (auto cell: hd) {
+//     dimensions[cell->get_dimension()]++;
+//   }
+//   std::cout << "Simplices by dimension: " << dimensions << "\n";
+//   std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
+//   output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
+//   std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
+// }
 
 int main(int argc, char * const argv[]) {
-  test_circle(1.5);
-  test_wavy_circle(2.5);
-  test_smiley(30.1);
-  test_sphere(1.3);
+  // if (argc == 2)
+  //   error = atof(argv[1]);
+  // test_circle(1.5);
+  // test_wavy_circle(3.3);
+  // test_smiley(30.1);
+  // test_sphere(1.3);
+  // if (test_no < (unsigned)argc)
+  //   test_torus(atof(argv[test_no+1]));
+  // else
+  //   test_torus(1.3);
+  if (test_no < (unsigned)argc)
+    test_double_torus(atof(argv[test_no+1]));
+  else
+    test_double_torus(3.7);
+  // test_double_torus(3.7);
+  // test_circle_3d(1.5);
+  // test_chopper_wave(30.5111211);
+  // test_s3(1.1);
+  // if (test_no < (unsigned)argc)
+  //   test_s11(atof(argv[test_no+1]));
+  // else
+  //   test_s11(3.79);
 }
