@@ -18,6 +18,8 @@
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/range/iterator_range.hpp>
 
+#include <gudhi/Coxeter_complex/Subset_chooser.h>
+
 #include <CGAL/basic.h>
 #include <CGAL/QP_models.h>
 #include <CGAL/QP_functions.h>
@@ -1465,6 +1467,343 @@ private:
     return coface_range(a_id, value_dim, value_dim);
   }
 
+  // //////////////////////////////////////////////////////////////////////////////////////////////////
+  // // Vertex range
+  // //////////////////////////////////////////////////////////////////////////////////////////////////
+
+  // public:
+  // class Vertex_iterator : public boost::iterator_facade< Vertex_iterator,
+  //                                                      Alcove_id const,
+  //                                                      boost::forward_traversal_tag> {
+  // protected:
+  //   // using State_pair = std::pair<std::size_t, bool>;
+  //   friend class boost::iterator_core_access;
+
+  //   bool triplet_check(std::size_t i, std::size_t l, std::size_t j) const {
+  //     int k  = (j*j+j-2)/2 - i;
+  //     int k1 = (l*l+l-2)/2 - i;
+  //     int k2 = (j*j+j-2)/2 - l;
+  //     if (value_.is_fixed(k))
+  //       return (value_.is_fixed(k1) && value_.is_fixed(k2) && value_[k1] + value_[k2] == value_[k]) ||
+  //              (!value_.is_fixed(k1) && !value_.is_fixed(k2) && value_[k1] + value_[k2] + 1 == value_[k]);
+  //     else
+  //       return ((value_.is_fixed(k1) xor value_.is_fixed(k2)) && value_[k] == value_[k1] + value_[k2]) ||
+  //              (!value_.is_fixed(k1) && !value_.is_fixed(k2) && (value_[k] == value_[k1] + value_[k2] ||
+  //                                                                value_[k] == value_[k1] + value_[k2] + 1));
+  //   }
+    
+  //   void update_value() {
+  //     if (is_end_)
+  //       return;
+  //     switch (family_) {
+  //     case 'A': {
+  //       // current position variables
+  //       while (!is_end_) {
+  //         std::size_t k = value_.size();
+  //         std::size_t j = std::floor(0.5*(1 + std::sqrt(1+8*k)));
+  //         std::size_t i = (j*j + j - 2)/2 - k;
+  //         if (stack_.top().f)
+  //           if (stack_.top().p)
+  //             value_.push_back(a_id_[k]+1, true);
+  //           else
+  //             value_.push_back(a_id_[k], true);
+  //         else
+  //           if (stack_.top().p)
+  //             value_.push_back(a_id_[k]-1, false);
+  //           else
+  //             value_.push_back(a_id_[k], false);
+  //         bool curr_state_is_valid = true;
+  //         if (basis_k_.size() == j && i != basis_k_.back())
+  //           for (std::size_t l = basis_k_.back(); l < j && curr_state_is_valid; ++l)
+  //             curr_state_is_valid = triplet_check(i,l,j);
+  //         else
+  //           for (std::size_t l = i + 1; l < j && curr_state_is_valid; ++l)
+  //             curr_state_is_valid = triplet_check(i,l,j);
+  //         if (curr_state_is_valid &&
+  //             value_.size() == a_id_.size()) {
+  //           value_.set_dimension(curr_dim_lower_);
+  //           return;
+  //         }
+  //         if (!curr_state_is_valid) {
+  //           elementary_increment();
+  //           continue;
+  //         }
+  //         if (a_id_.is_fixed(k+1)) {
+  //           if (!stack_push(true, false)) {
+  //             stack_pop();
+  //             elementary_increment();
+  //           }
+  //         }
+  //         else 
+  //           if (!stack_push(false, false)) {
+  //             stack_pop();
+  //             if (!stack_push(true, false)) {
+  //               stack_pop();
+  //               elementary_increment();
+  //             }
+  //           }
+  //       }
+  //       break;
+  //     }
+  //     default:
+  //       std::cerr << "Simple_coxeter_system::facet_iterator : The family " << family_ << " is not supported. "
+  //                 << "Please use A family for the constructor (in capital).\n";
+  //     }
+  //   }
+    
+  //   bool equal(Vertex_iterator const& other) const {
+  //     return (is_end_ && other.is_end_) || (stack_ == other.stack_);
+  //   }
+  //   Alcove_id const& dereference() const {
+  //     return value_;
+  //   }
+  //   void elementary_increment() {
+  //     if (is_end_)
+  //       return;
+  //     while (!stack_.empty()) {
+  //       bool f = stack_.top().f;
+  //       bool p = stack_.top().p;
+  //       stack_pop();
+  //       value_.pop_back();
+  //       if (a_id_.is_fixed(stack_.size()))
+  //         continue;
+  //       else
+  //         if (f)
+  //           if (p)
+  //             continue;
+  //           else
+  //             if (stack_push(true, true))
+  //               break;
+  //             else {
+  //               stack_pop();
+  //               continue;
+  //             }
+  //         else
+  //           if (stack_push(true, false)) {
+  //             break;
+  //           }
+  //           else {
+  //             stack_pop();
+  //             continue;
+  //           }
+  //     }
+  //     if (stack_.empty())
+  //       is_end_ = true;
+  //   }
+    
+  //   void increment() {
+  //     elementary_increment();
+  //     update_value();
+  //   }
+
+  //   bool stack_push(bool fixed, bool plus_one) {
+  //     std::size_t k = stack_.size();
+  //     std::size_t j = std::floor(0.5*(1+std::sqrt(1+8*k)));
+  //     std::size_t i = (j*j+j-2)/2 - k;
+  //     if (basis_k_.size() == j - 1) {
+  //       bool is_basis_vect = true;
+  //       for (std::size_t l = i + 1; l < j && is_basis_vect; ++l) {
+  //         std::size_t k1 = (l*l+l-2)/2 - i;
+  //         is_basis_vect = !value_.is_fixed(k1);
+  //       }
+  //       if (!fixed)
+  //         for (std::size_t l = 0; l < i && is_basis_vect; ++l) {
+  //          is_basis_vect = false;
+  //           for (std::size_t m = l+1; m < j && !is_basis_vect; ++m) {
+  //             std::size_t k1 = (m*m+m-2)/2 - l;
+  //             is_basis_vect = value_.is_fixed(k1);
+  //           }
+  //         }
+  //       if (is_basis_vect) {
+  //         basis_k_.push_back(i);
+  //         if (fixed)
+  //           curr_dim_upper_--;
+  //         else
+  //           curr_dim_lower_++;
+  //       }
+  //     }
+  //     stack_.push({fixed, plus_one});        
+  //     return curr_dim_lower_ <= curr_dim_upper_ &&
+  //            curr_dim_lower_ <= value_dim_upper_ &&
+  //            curr_dim_upper_ >= value_dim_lower_;
+  //   }
+
+  //   void stack_pop() {
+  //     bool f = stack_.top().f;
+  //     stack_.pop();
+  //     std::size_t k = stack_.size();
+  //     std::size_t j = std::floor(0.5*(1+std::sqrt(1+8*k)));
+  //     std::size_t i = (j*j+j-2)/2 - k;
+  //     if (basis_k_.size() == j && basis_k_.back() == i) {
+  //       basis_k_.pop_back();
+  //       if (f)
+  //         curr_dim_upper_++;
+  //       else
+  //         curr_dim_lower_--;
+  //     }
+  //   }
+    
+  // public:
+  //   Vertex_iterator(const Alcove_id& a_id,
+  //                 const Simple_coxeter_system& scs,
+  //                 std::size_t value_dim_lower,
+  //                 std::size_t value_dim_upper)
+  //     : a_id_(a_id),
+  //       value_(a_id.level()),
+  //       family_(scs.family()),
+  //       is_end_(false),
+  //       ambient_dimension_(scs.dimension_),
+  //       curr_dim_lower_(0),
+  //       curr_dim_upper_(scs.dimension_),
+  //       value_dim_lower_(value_dim_lower),
+  //       value_dim_upper_(value_dim_upper)
+  //   {
+  //     if (!a_id.is_fixed(0)) {
+  //       if (!stack_push(false, false)) {
+  //         stack_pop();
+  //         if (!stack_push(true, false)) {
+  //           stack_pop();
+  //           elementary_increment();
+  //         }
+  //       }
+  //     }
+  //     else if (!stack_push(true, false)) {
+  //       stack_pop();
+  //       elementary_increment();
+  //     }
+  //     update_value();
+  //   }
+
+  //   Vertex_iterator() : is_end_(true) {}
+    
+    
+  // protected:
+  //   struct State_ {
+  //     bool f, // is it fixed?
+  //          p; // has the value different from the original?
+  //     bool operator==(const State_& rhs) const {
+  //       return f == rhs.f && p == rhs.p;
+  //     }
+  //   };
+  //   Alcove_id a_id_; 
+  //   Alcove_id value_;
+  //   char family_;
+  //   bool is_end_;
+  //   std::size_t ambient_dimension_;
+  //   std::size_t curr_dim_lower_, curr_dim_upper_;
+  //   std::size_t value_dim_lower_, value_dim_upper_;
+  //   std::vector<unsigned> basis_k_;
+  //   std::stack<State_> stack_;
+  // };
+
+  
+  // typedef boost::iterator_range<Vertex_iterator> Vertex_range;
+  // Vertex_range vertex_range(const Alcove_id& a_id) const {
+  //   return Vertex_range(Vertex_iterator(a_id, *this),
+  //                       Vertex_iterator());
+  // }
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  // Face range experimental
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+
+  public:
+  class Face2_iterator : public boost::iterator_facade< Face2_iterator,
+                                                       Alcove_id const,
+                                                       boost::forward_traversal_tag> {
+  protected:
+    // using State_pair = std::pair<std::size_t, bool>;
+    friend class boost::iterator_core_access;
+    
+    void update_value() {
+      if (is_end_)
+        return;
+      value_.clear();
+      for (unsigned k = 0; k < vertices_[state_[0]].size(); ++k) {
+        int val = vertices_[state_[0]][k];
+        bool is_true = true;
+        for (auto p: state_)
+          if (vertices_[p][k] < val) {
+            val = vertices_[p][k];
+            is_true = false;
+            break;
+          }
+          else if (vertices_[p][k] > val) {
+            is_true = false;
+            break;
+          }
+        value_.push_back(val, is_true);
+      }
+    }
+    
+    bool equal(Face2_iterator const& other) const {
+      return (is_end_ && other.is_end_); 
+    }
+
+    Alcove_id const& dereference() const {
+      return value_;
+    }
+
+    void increment() {
+      is_end_ = !increment_state();
+      update_value();
+    }
+
+    bool increment_state() {
+      do {
+        if (state_.empty()) {
+          state_.push_back(0);
+        } else {
+          if (state_.size() < state_.capacity()) {
+            state_.push_back(state_.back());
+          }
+          
+          // Roll over when the remaining elements wouldn't fill the subset.
+          while (++state_.back() == vertices_.size()) {
+            state_.pop_back();
+            if (state_.empty())
+              // we have run out of possibilities
+              return false;
+          }
+        }
+      } while (state_.size() < state_.capacity());
+      return true;
+    }
+    
+  public:
+    Face2_iterator(const Alcove_id& a_id,
+                   const Simple_coxeter_system& scs,
+                   std::size_t value_dim)
+      : value_(a_id.level(), value_dim)
+    {
+      for (const Alcove_id& v_id: scs.face_range(a_id, 0))
+        vertices_.push_back(v_id);
+      state_.reserve(value_dim + 1);
+      if (value_dim > a_id.dimension())
+        is_end_ = true;
+      is_end_ = !increment_state();
+      update_value();
+    }
+
+    Face2_iterator() : is_end_(true) {}
+    
+    
+  protected:
+    Alcove_id value_;
+    std::vector<Alcove_id> vertices_;
+    SubsetChooser<std::vector<Alcove_id>::const_iterator> chooser_;
+    std::vector<std::size_t> state_;
+    bool is_end_;
+  };
+
+  
+  typedef boost::iterator_range<Face2_iterator> Face2_range;
+  Face2_range face2_range(const Alcove_id& a_id,
+                          std::size_t value_dim) const {
+    return Face2_range(Face2_iterator(a_id, *this, value_dim),
+                       Face2_iterator());
+  }  
+  
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // Cartesian coordinates of a vertex
   //////////////////////////////////////////////////////////////////////////////////////////////////

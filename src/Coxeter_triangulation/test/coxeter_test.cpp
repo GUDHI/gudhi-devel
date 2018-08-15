@@ -24,24 +24,6 @@ using Point_d = K::Point_d;
 using Point_vector = std::vector< Point_d >;
 using Coxeter_complex = Gudhi::Coxeter_complex<Point_vector, Coxeter_system>;
 
-std::vector<FT> bounding_box_dimensions(Point_vector& points) {
-  std::vector<FT> lower, upper, difference;
-  for (auto x: points[0]) {
-    lower.push_back(x);
-    upper.push_back(x);
-  }
-  for (auto p: points)
-    for (unsigned i = 0; i < p.size(); i++) {
-      if (p[i] < lower[i])
-        lower[i] = p[i];
-      if (p[i] > upper[i])
-        upper[i] = p[i];
-    }
-  for (unsigned i = 0; i < lower.size(); i++)
-    difference.push_back(upper[i]-lower[i]);
-  return difference;
-}
-
 /** Recursive procedure that checks test1 for all products of triangulations ~A_i at a given dimension */
 void rec_test1(std::vector<unsigned>& decomposition, Coxeter_system& cs, unsigned dimension) {
   if (dimension == 0) {

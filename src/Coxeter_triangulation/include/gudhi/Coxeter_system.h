@@ -374,7 +374,6 @@ private:
     std::vector<std::pair<Scs_coface_iterator, Scs_coface_iterator> > coface_iterators_;
     std::vector<Simple_coxeter_system_iterator> scs_iterators_;
   };
-
   
 public:
   typedef boost::iterator_range<Coface_iterator> Coface_range;
@@ -383,6 +382,134 @@ public:
     return Coface_range(Coface_iterator(a_id, *this, k),
                         Coface_iterator(a_id, *this, dimension_ + 1));
   }  
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  // Face range experimental
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  
+private:
+
+  class Face2_iterator : public boost::iterator_facade< Face2_iterator,
+                                                        Alcove_id const,
+                                                        boost::forward_traversal_tag> {
+  protected:
+    typedef typename std::vector<Simple_coxeter_system>::const_iterator Simple_coxeter_system_iterator;
+    typedef typename Simple_coxeter_system::Face2_iterator Scs_face_iterator;
+    friend class boost::iterator_core_access;
+    
+    void update_value(std::size_t first_change_) {
+      if (is_end_)
+        return;
+      for (std::size_t i = first_change_; i < decomposition_.size(); ++i) {
+        Alcove_id face = *face_iterators_[i].first;
+        for (std::size_t j = 0; j < face.size(); ++j)
+          value_.push_back(face[j], face.is_fixed(j));
+      }
+      first_change_ = decomposition_.size();
+    }
+
+    std::size_t update_from(std::size_t pos, std::size_t rest) {
+      for (std::size_t i = pos; i < decomposition_.size(); ++i) {
+        decomposition_[i] =
+          (rest < chunks_[i].dimension() ? rest : chunks_[i].dimension());
+        auto face_range = scs_iterators_[i]->face2_range(chunks_[i],
+                                                         decomposition_[i]);
+        face_iterators_[i] = std::make_pair(face_range.begin(), face_range.end());
+        rest -= decomposition_[i];
+      }
+      return rest;
+    }
+    
+    bool equal(Face2_iterator const& other) const {
+      return (is_end_ && other.is_end_) || (!is_end_ && !other.is_end_ && decomposition_ == other.decomposition_);
+    }
+    Alcove_id const& dereference() const {
+      return value_;
+    }
+    void increment() {
+      if (is_end_)
+        return;
+      std::size_t rest = 0;
+      std::size_t pos = decomposition_.size() - 1;
+      while (true) {
+        value_.resize(value_.size() - chunks_[pos].size());
+        face_iterators_[pos].first++;
+        if (face_iterators_[pos].first == face_iterators_[pos].second) {
+          if (decomposition_[pos] == 0) {
+            if (pos == 0) {
+              is_end_ = true;
+              return;
+            }
+            rest += decomposition_[pos];
+            pos--;
+            continue;
+          }
+          decomposition_[pos]--;
+          rest++;    
+          auto face_range = scs_iterators_[pos]->face2_range(chunks_[pos],
+                                                             decomposition_[pos]);
+          face_iterators_[pos] = std::make_pair(face_range.begin(), face_range.end());
+        }
+        if (update_from(pos + 1, rest)) {
+          if (pos == 0) {
+            is_end_ = true;
+            return;
+          }
+          rest += decomposition_[pos];
+          pos--;
+          continue;
+        }
+        update_value(pos);
+        return;
+      }
+    }
+     
+  public:
+    Face2_iterator(const Alcove_id& coface,
+                   const Coxeter_system& cs,
+                   std::size_t value_dimension)
+      : value_(coface.level(), value_dimension),
+        is_end_(false),
+        decomposition_(cs.simple_coxeter_system_end() - cs.simple_coxeter_system_begin()),
+        face_iterators_(cs.simple_coxeter_system_end() - cs.simple_coxeter_system_begin())
+    {
+      std::size_t pos = 0;
+      for (auto scs_it = cs.simple_coxeter_system_begin();
+           scs_it != cs.simple_coxeter_system_end();
+           ++scs_it) {
+        scs_iterators_.push_back(scs_it);
+        Alcove_id chunk(coface.level(), scs_it->dimension());
+        for (std::size_t i = pos; i < pos + scs_it->pos_root_count(); ++i)
+          chunk.push_back(coface[i], coface.is_fixed(i));
+        chunk.set_dimension(scs_it->alcove_dimension(chunk));
+        chunks_.push_back(chunk);
+        pos += scs_it->pos_root_count();
+      }
+      if (update_from(0, value_dimension)) {
+        is_end_ = true;
+        return;
+      }
+      update_value(0);
+    }
+
+  protected:
+    Alcove_id value_;
+    bool is_end_;
+    std::vector<Alcove_id> chunks_;
+    std::vector<std::size_t> decomposition_;
+    std::vector<std::pair<Scs_face_iterator, Scs_face_iterator> > face_iterators_;
+    std::vector<Simple_coxeter_system_iterator> scs_iterators_;
+  };
+
+  
+public:
+  typedef boost::iterator_range<Face2_iterator> Face2_range;
+  
+  Face2_range face2_range(const Alcove_id& a_id, std::size_t k) const {
+    return Face2_range(Face2_iterator(a_id, *this, k),
+                       Face2_iterator(a_id, *this, dimension_ + 1));
+  }  
+
 
   
 private:

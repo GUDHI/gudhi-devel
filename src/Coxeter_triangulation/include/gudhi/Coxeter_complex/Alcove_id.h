@@ -72,6 +72,10 @@ struct Alcove_id {
     fixed_.resize(new_size);
   }
 
+  void clear() {
+    resize(0);
+  }
+  
   double level() const {
     return level_;
   }
