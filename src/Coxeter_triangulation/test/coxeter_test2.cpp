@@ -97,29 +97,37 @@ int main(int argc, char * const argv[]) {
   std::vector<double> total1(dimension + 1, 0), total2(dimension + 1, 0);
   CGAL::Random_points_on_sphere_d<Point_d> rp(dimension + 1, 5);
   unsigned num_tests = 5000;
-  for (unsigned i = 0; i < num_tests; ++i) {
-    A_id a_id = cs.query_point_location(*rp++, 1);
-    // std::cout << *rp << "\n";
-    for (unsigned f_d = 0; f_d <= cs.dimension(); ++f_d) {
-      std::vector<A_id> faces, faces2;
-      Gudhi::Clock t;
+  for (unsigned f_d = 0; f_d <= cs.dimension(); ++f_d) {
+    Gudhi::Clock t;
+    for (unsigned i = 0; i < num_tests; ++i) {
+      A_id a_id = cs.query_point_location(*rp++, 1);
       for (auto f_id: cs.face_range(a_id, f_d)) {}
-        // faces.push_back(f_id);
-      t.end();
-      total1[f_d] += t.num_seconds();
-      t.begin();
-      for (auto f_id: cs.face2_range(a_id, f_d)) {}
-        // faces2.push_back(f_id);
-      t.end();
-      total2[f_d] += t.num_seconds();
-      // std::sort(faces.begin(), faces.end(), Alcove_compare());
-      // std::sort(faces2.begin(), faces2.end(), Alcove_compare());
-      // if (faces != faces2)
-      //   std::cerr << "The computed faces are not the same.";
     }
+    t.end();
+    total1[f_d] += t.num_seconds() / num_tests * 1000;
   }
-  std::cout << "Total time(old): " <<  total1 << "\n";
-  std::cout << "Total time(new): " <<  total2 << "\n";
+  for (unsigned f_d = 0; f_d <= cs.dimension(); ++f_d) {
+    Gudhi::Clock t;
+    for (unsigned i = 0; i < num_tests; ++i) {
+      A_id a_id = cs.query_point_location(*rp++, 1);
+      for (auto f_id: cs.face2_range(a_id, f_d)) {}
+    }
+    t.end();
+    total2[f_d] += t.num_seconds() / num_tests * 1000;
+  }
+
+  std::cout << "\\hline\n Face dimension ";
+  for (auto i = 0; i <= dimension; ++i)
+    std::cout << "& " << i << " ";
+  std::cout << "\\\\\n";
+  std::cout << "\\hline\\hline\nOld algorithm\n";
+  for (auto t: total1)
+    std::cout << "& " << t << " ";
+  std::cout << "\\\\\n\\hline\n";
+  std::cout << "New algorithm\n";
+  for (auto t: total2)
+    std::cout << "& " << t << " ";
+  std::cout << "\\\\\n\\hline\n";
   // rec_test1(decomposition, cs, dimension);
   // cs.emplace_back('A', 2);
   // typename Coxeter_system::Alcove_id a_id(1, 0);

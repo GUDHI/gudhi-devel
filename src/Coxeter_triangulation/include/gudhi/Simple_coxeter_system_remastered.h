@@ -1597,50 +1597,10 @@ private:
   //   }
 
   //   bool stack_push(bool fixed, bool plus_one) {
-  //     std::size_t k = stack_.size();
-  //     std::size_t j = std::floor(0.5*(1+std::sqrt(1+8*k)));
-  //     std::size_t i = (j*j+j-2)/2 - k;
-  //     if (basis_k_.size() == j - 1) {
-  //       bool is_basis_vect = true;
-  //       for (std::size_t l = i + 1; l < j && is_basis_vect; ++l) {
-  //         std::size_t k1 = (l*l+l-2)/2 - i;
-  //         is_basis_vect = !value_.is_fixed(k1);
-  //       }
-  //       if (!fixed)
-  //         for (std::size_t l = 0; l < i && is_basis_vect; ++l) {
-  //          is_basis_vect = false;
-  //           for (std::size_t m = l+1; m < j && !is_basis_vect; ++m) {
-  //             std::size_t k1 = (m*m+m-2)/2 - l;
-  //             is_basis_vect = value_.is_fixed(k1);
-  //           }
-  //         }
-  //       if (is_basis_vect) {
-  //         basis_k_.push_back(i);
-  //         if (fixed)
-  //           curr_dim_upper_--;
-  //         else
-  //           curr_dim_lower_++;
-  //       }
-  //     }
-  //     stack_.push({fixed, plus_one});        
-  //     return curr_dim_lower_ <= curr_dim_upper_ &&
-  //            curr_dim_lower_ <= value_dim_upper_ &&
-  //            curr_dim_upper_ >= value_dim_lower_;
+  //     return true;
   //   }
 
   //   void stack_pop() {
-  //     bool f = stack_.top().f;
-  //     stack_.pop();
-  //     std::size_t k = stack_.size();
-  //     std::size_t j = std::floor(0.5*(1+std::sqrt(1+8*k)));
-  //     std::size_t i = (j*j+j-2)/2 - k;
-  //     if (basis_k_.size() == j && basis_k_.back() == i) {
-  //       basis_k_.pop_back();
-  //       if (f)
-  //         curr_dim_upper_++;
-  //       else
-  //         curr_dim_lower_--;
-  //     }
   //   }
     
   // public:
