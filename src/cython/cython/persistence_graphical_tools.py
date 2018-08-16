@@ -205,7 +205,6 @@ try:
                 # Infinite death case for diagram to be nicer
                 plt.scatter(interval[1][0], infinity, alpha=alpha,
                             color = palette[interval[0]])
-            ind = ind + 1
 
         if legend:
             dimensions = list(set(item[0] for item in persistence))
