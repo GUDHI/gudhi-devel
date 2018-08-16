@@ -5,7 +5,7 @@
 // #define SPHERE
 // #define TORUS
 // #define DOUBLE_TORUS
-#define DEBUG_TRACES
+// #define DEBUG_TRACES
 
 #include <iostream>
 #include <vector>
@@ -15,8 +15,6 @@
 #include <gudhi/Coxeter_complex/Trie.h>
 #include <gudhi/Hasse_diagram_persistence.h>
 #include "output_hasse_to_medit.h"
-#include "art/art.c"
-#include <cstdint>
 
 // #include <gudhi/Points_off_io.h>
 // #include <gudhi/Coxeter_system.h>
@@ -76,7 +74,6 @@ const double pi = 3.14159265358;
 
 double error = 1e-6;
 unsigned test_no = 0;
-bool use_art = false;
 
 // using Point_vector = std::vector< Point_d >;
 
@@ -218,34 +215,15 @@ void compute_hasse_diagram(std::vector<Point_d>& seed_points,
   VC_map vc_map;
   Full_cell_trie trie(level, amb_d);
   Full_cell_trie visit_stack(level, amb_d);
-  art_tree visit_stack_art;
-  art_tree_init(&visit_stack_art);
-  unsigned pos_root_count = cs.pos_root_count();
-  uintptr_t line = 1;
-  int* buf = new int[pos_root_count+1];
-  buf[pos_root_count] = '\0';
 #ifdef DEBUG_TRACES
   std::cout << "root_t_:\n" << cs.simple_root_matrix() << "\n";
 #endif
-  for (const Point_d& p: seed_points) {
-    if (use_art) {
-      Cell_id c_id = cs.query_point_location(p, level);
-      cell_to_array(c_id, buf);
-      art_insert(&visit_stack_art, buf, c_id.size(), (void*)line);
-    }
-    else
-      visit_stack.add(cs.query_point_location(p, level));
-  }
+  for (const Point_d& p: seed_points)
+    visit_stack.add(cs.query_point_location(p, level));
   
   while (!visit_stack.empty()) {
     Cell_id c_id(level, amb_d);
-    if (use_art) {
-      art_leaf* l = art_minimum(&visit_stack_art);
-      for (unsigned i = 0; i < pos_root_count; ++i)
-	c_id.push_back(l->key[i]);
-    }
-    else
-      c_id = visit_stack.pop();
+    c_id = visit_stack.pop();
 #ifdef DEBUG_TRACES
     std::cout << "Simplex: "  << c_id << "\n";
 #endif
@@ -300,18 +278,9 @@ void compute_hasse_diagram(std::vector<Point_d>& seed_points,
     for (const Cell_id& f_id: meet_faces)
       // if (!is_marked(f_id))
       for (Cell_id cf_id: cs.coface_range(f_id, amb_d))
-        if (!is_marked(cf_id, trie)) {
-	  if (use_art) {
-	    cell_to_array(cf_id, buf);
-	    art_insert(&visit_stack_art, buf, cf_id.size(), (void*)line);
-	  }
-	  else {
+        if (!is_marked(cf_id, trie))
 	    visit_stack.add(cf_id);
-	  }
-	}
   }
-  art_tree_destroy(&visit_stack_art);
-  delete[] buf;
 }
 
 /** TEST CIRCLE */
@@ -584,7 +553,7 @@ void test_double_torus(double level) {
   Eigen::Vector3d point2(r+sr+ofs, 0.0, 0.0);
   std::vector<Point_d> seed_points = {point1, point2};
   std::string name = "double_torus";
-  std::cout << "Test 6: " << name << "...\n";
+  std::cout << "Test " << test_no << ": " << name << "...\n";
 
   struct Function {
     Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
@@ -603,45 +572,22 @@ void test_double_torus(double level) {
     unsigned cod_d;
     double r, sr, ofs;
   } f(cod_d, r, sr, ofs);
-  // {
-  //   std::cout << "ART is off.\n";
-  //   Hasse_diagram hd;
-  //   VP_map vp_map;
-  //   Gudhi::Clock t;
-  //   compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
-  //   t.end();
-  //   std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
-  //   int chi = 0;
-  //   for (auto cell: hd) {
-  //     dimensions[cell->get_dimension()]++;
-  //     chi += 1-2*(cell->get_dimension()%2);
-  //   }
-  //   std::cout << "Simplices by dimension: " << dimensions << "\n";
-  //   std::cout << "Euler characteristic = " << chi << "\n";
-  //   std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
-  //   output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
-  //   std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
-  // }
-  {
-    use_art = true;
-    std::cout << "ART is on.\n";
-    Hasse_diagram hd;
-    VP_map vp_map;
-    Gudhi::Clock t;
-    compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
-    t.end();
-    std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
-    int chi = 0;
-    for (auto cell: hd) {
-      dimensions[cell->get_dimension()]++;
-      chi += 1-2*(cell->get_dimension()%2);
-    }
-    std::cout << "Simplices by dimension: " << dimensions << "\n";
-    std::cout << "Euler characteristic = " << chi << "\n";
-    std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
-    output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
-    std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
+  Hasse_diagram hd;
+  VP_map vp_map;
+  Gudhi::Clock t;
+  compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
+  t.end();
+  std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
+  int chi = 0;
+  for (auto cell: hd) {
+    dimensions[cell->get_dimension()]++;
+    chi += 1-2*(cell->get_dimension()%2);
   }
+  std::cout << "Simplices by dimension: " << dimensions << "\n";
+  std::cout << "Euler characteristic = " << chi << "\n";
+  std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
+  output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
+  std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
 }
 
 /** TEST CIRCLE 3D */
