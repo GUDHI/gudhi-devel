@@ -94,40 +94,109 @@ int main(int argc, char * const argv[]) {
   }
   unsigned dimension = atoi(argv[1]);
   Coxeter_system cs('A', dimension);
-  std::vector<double> total1(dimension + 1, 0), total2(dimension + 1, 0);
+  std::vector<std::vector<double> >
+    total1(dimension + 1, std::vector<double>(dimension + 1, 0)),
+    total2(dimension + 1, std::vector<double>(dimension + 1, 0));
   CGAL::Random_points_on_sphere_d<Point_d> rp(dimension + 1, 5);
-  unsigned num_tests = 5000;
-  for (unsigned f_d = 0; f_d <= cs.dimension(); ++f_d) {
-    Gudhi::Clock t;
-    for (unsigned i = 0; i < num_tests; ++i) {
-      A_id a_id = cs.query_point_location(*rp++, 1);
-      for (auto f_id: cs.face_range(a_id, f_d)) {}
-    }
-    t.end();
-    total1[f_d] += t.num_seconds() / num_tests * 1000;
+  unsigned num_tests = 1000;
+  std::vector<std::vector<A_id> > faces(dimension + 1);
+  for (unsigned i = 0; i < num_tests; ++i) {
+    A_id a_id = cs.query_point_location(*rp++, 1);
+    for (unsigned f_d = 0; f_d <= dimension; ++f_d)
+      for (auto f_id: cs.face_range(a_id, f_d))
+        faces[f_d].push_back(f_id);
   }
-  for (unsigned f_d = 0; f_d <= cs.dimension(); ++f_d) {
-    Gudhi::Clock t;
-    for (unsigned i = 0; i < num_tests; ++i) {
-      A_id a_id = cs.query_point_location(*rp++, 1);
-      for (auto f_id: cs.face2_range(a_id, f_d)) {}
+  for (unsigned f_d = 0; f_d <= dimension; ++f_d) {
+    for (unsigned ff_d = 0; ff_d <= f_d; ++ff_d) {
+      Gudhi::Clock t;
+      for (auto f_id: faces[f_d])
+        for (auto ff_id: cs.face_range(f_id, ff_d)) {}
+      t.end();
+      total1[f_d][ff_d] += t.num_seconds() / faces[f_d].size() * 1000;
     }
-    t.end();
-    total2[f_d] += t.num_seconds() / num_tests * 1000;
+  }
+  for (unsigned f_d = 0; f_d <= dimension; ++f_d) {
+    for (unsigned ff_d = 0; ff_d <= f_d; ++ff_d) {
+      Gudhi::Clock t;
+      for (auto f_id: faces[f_d])
+        for (auto ff_id: cs.face2_range(f_id, ff_d)) {}
+      t.end();
+      total2[f_d][ff_d] += t.num_seconds() / faces[f_d].size() * 1000;
+    }
   }
 
-  std::cout << "\\hline\n Face dimension ";
-  for (auto i = 0; i <= dimension; ++i)
+  std::cout << "\\begin{table}\n\\begin{tabular}{";
+  for (unsigned i = 0; i <= dimension+4; ++i)
+    std::cout << "|l";
+  std::cout << "|}\n\\hline\n\\multicolumn{3}{|c|}{Face dimension} ";
+  for (unsigned i = 0; i <= dimension; ++i)
     std::cout << "& " << i << " ";
-  std::cout << "\\\\\n";
-  std::cout << "\\hline\\hline\nOld algorithm\n";
-  for (auto t: total1)
-    std::cout << "& " << t << " ";
-  std::cout << "\\\\\n\\hline\n";
-  std::cout << "New algorithm\n";
-  for (auto t: total2)
-    std::cout << "& " << t << " ";
-  std::cout << "\\\\\n\\hline\n";
+  std::cout << "\\\\ \\hline\n\\parbox[t]{2mm}{\\multirow{" << 2*(dimension + 1) << "}{*}{\\rotatebox[origin=c]{90}{\\centering Simplex dimension}}}";
+  for (unsigned f_d = 0; f_d <= dimension; ++f_d) {
+    std::cout << "& \\multirow{2}{*}{" << f_d << "} & old ";
+    for (unsigned ff_d = 0; ff_d <= f_d; ++ff_d) {
+      std::cout << "& ";
+      if (std::round(total1[f_d][ff_d]*1000)/1000 > std::round(total2[f_d][ff_d]*1000)/1000)
+        std::cout << "\\cellcolor{green!20} ";
+      std::cout  << std::round(total1[f_d][ff_d]*1000)/1000. << " ";
+    }
+    for (unsigned ff_d = f_d + 1; ff_d <= dimension; ++ff_d) {
+      std::cout << "& ";
+    }
+    std::cout << "\\\\ \\cline{3-" << f_d + 4 << "}\n & & new "; 
+    for (unsigned ff_d = 0; ff_d <= f_d; ++ff_d) {
+      std::cout << "& ";
+      if (std::round(total1[f_d][ff_d]*1000)/1000 > std::round(total2[f_d][ff_d]*1000)/1000)
+        std::cout << "\\cellcolor{green!20} ";
+      std::cout << std::round(total2[f_d][ff_d]*1000)/1000. << " ";
+    }
+    for (unsigned ff_d = f_d + 1; ff_d <= dimension; ++ff_d) {
+      std::cout << "& ";
+    }
+    std::cout << "\\\\ \\cline{2-" << dimension + 4 << "}\n"; 
+  }
+  std::cout << "\\hline\n\\end{tabular}\n\\caption{The table of average running times in milliseconds of the old and the new algorithms to compute all faces of the simplices of various dimensions in a $" << dimension << "$-dimensional triangulation.}\n\\label{tab:compar-" << dimension << "}\n\\end{table}\n";
+
+  // std::vector<double> total1(dimension + 1, 0), total2(dimension + 1, 0);
+  // for (unsigned f_d = 0; f_d <= cs.dimension(); ++f_d) {
+  //   Gudhi::Clock t;
+  //   for (unsigned i = 0; i < num_tests; ++i) {
+  //     A_id a_id = cs.query_point_location(*rp++, 1);
+  //     for (auto f_id: cs.face_range(a_id, f_d)) {}
+  //   }
+  //   t.end();
+  //   total1[f_d] += t.num_seconds() / num_tests * 1000;
+  // }
+  // for (unsigned f_d = 0; f_d <= cs.dimension(); ++f_d) {
+  //   Gudhi::Clock t;
+  //   for (unsigned i = 0; i < num_tests; ++i) {
+  //     A_id a_id = cs.query_point_location(*rp++, 1);
+  //     for (auto f_id: cs.face2_range(a_id, f_d)) {}
+  //   }
+  //   t.end();
+  //   total2[f_d] += t.num_seconds() / num_tests * 1000;
+  // }
+
+  // std::cout << "\\begin{table}\n\\begin{tabular}{";
+  // for (unsigned i = 0; i <= dimension+1; ++i)
+  //   std::cout << "|l";
+  // std::cout << "|}\n";
+  // std::cout << "\\hline\n Face dimension ";
+  // for (unsigned i = 0; i <= dimension; ++i)
+  //   std::cout << "& " << i << " ";
+  // std::cout << "\\\\\n";
+  // std::cout << "\\hline\\hline\nOld algorithm\n";
+  // for (auto t: total1)
+  //   std::cout << "& " << t << " ";
+  // std::cout << "\\\\\n\\hline\n";
+  // std::cout << "New algorithm\n";
+  // for (auto t: total2)
+  //   std::cout << "& " << t << " ";
+  // std::cout << "\\\\\n\\hline\n";
+  // std::cout << "\\end{tabular}\n\\caption{The table of average running times in milliseconds of the two algorithms to compute all faces of the full-dimensional simplex in a $" << dimension << "$-dimensional triangulation.}\n\\label{tab:compar-" << dimension << "}\\end{table}\n";
+
+
+
   // rec_test1(decomposition, cs, dimension);
   // cs.emplace_back('A', 2);
   // typename Coxeter_system::Alcove_id a_id(1, 0);
