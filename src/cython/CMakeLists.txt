@@ -54,10 +54,8 @@ if(CYTHON_FOUND)
   if(NUMPY_FOUND)
     add_gudhi_debug_info("Numpy version ${NUMPY_VERSION}")
   endif()
-  if(MATPLOTLIB_FOUND AND NUMPY_FOUND)
-    set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}persistence_graphical_tools;")
-  else()
-      set(GUDHI_CYTHON_MISSING_MODULES "${GUDHI_CYTHON_MODULES}persistence_graphical_tools;")
+  if(SCIPY_FOUND)
+    add_gudhi_debug_info("Scipy version ${SCIPY_VERSION}")
   endif()
 
   message("++ ${PYTHON_EXECUTABLE} v.${PYTHON_VERSION_STRING} - Cython is ${CYTHON_VERSION} - Sphinx is ${SPHINX_PATH}")
@@ -368,7 +366,7 @@ if(CYTHON_FOUND)
   add_gudhi_py_test(test_reader_utils)
 
   # Documentation generation is available through sphinx - requires all modules
-  if(SPHINX_PATH AND MATPLOTLIB_FOUND AND NUMPY_FOUND AND NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+  if(SPHINX_PATH AND MATPLOTLIB_FOUND AND NUMPY_FOUND AND SCIPY_FOUND AND NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
     set (GUDHI_SPHINX_MESSAGE "Generating API documentation with Sphinx in ${CMAKE_CURRENT_BINARY_DIR}/sphinx/")
     # User warning - Sphinx is a static pages generator, and configured to work fine with user_version
     # Images and biblio warnings because not found on developper version
