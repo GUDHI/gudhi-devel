@@ -19,12 +19,15 @@ This function can display the persistence result as a barcode:
 
     import gudhi
 
-    perseus_file = gudhi.__root_source_dir__ + '/data/bitmap/3d_torus.txt'
-    periodic_cc = gudhi.PeriodicCubicalComplex(perseus_file=perseus_file)
-    diag = periodic_cc.persistence()
-    print("diag = ", diag)
-    plt = gudhi.plot_persistence_barcode(diag)
-    plt.show()
+    off_file = gudhi.__root_source_dir__ + '/data/points/tore3D_300.off'
+    point_cloud = gudhi.read_off(off_file=off_file)
+
+    rips_complex = gudhi.RipsComplex(points=point_cloud, max_edge_length=0.7)
+    simplex_tree = rips_complex.create_simplex_tree(max_dimension=3)
+    diag = simplex_tree.persistence(min_persistence=0.4)
+
+    plot = gudhi.plot_persistence_barcode(diag)
+    plot.show()
 
 Show persistence as a diagram
 -----------------------------
@@ -53,13 +56,9 @@ If you want more information on a specific dimension, for instance:
 
     import gudhi
 
+    # rips_on_tore3D_1307.pers obtained from write_persistence_diagram method
     persistence_file=gudhi.__root_source_dir__ + \
         '/data/persistence_diagram/rips_on_tore3D_1307.pers'
-    diag = \
-        gudhi.read_persistence_intervals_grouped_by_dimension(persistence_file=\
-            persistence_file)
-    dim = 1
-    # Display persistence density
-    plt = gudhi.plot_persistence_density([(dim,interval) for interval in diag[dim]],
-        max_plots=0, legend=True)
+    plt = gudhi.plot_persistence_density(persistence_file=persistence_file,
+        max_plots=0, dimension=1, legend=True)
     plt.show()
