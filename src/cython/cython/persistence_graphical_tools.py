@@ -221,26 +221,31 @@ try:
         from scipy.stats import kde
         import math
 
-        def plot_persistence_density(persistence=[], persistence_file='', nbins=300,
-                                     max_plots=1000, cmap=plt.cm.hot_r, legend=False):
-            """This function plots the persistence density from persistence values list
-            or from a :doc:`persistence file <fileformats>`. Be aware that this
-            function does not distinguish the dimension, it is up to you to select the
-            required one.
+        def plot_persistence_density(persistence=[], persistence_file='',
+                                     nbins=300, max_plots=1000, dimension=None,
+                                     cmap=plt.cm.hot_r, legend=False):
+            """This function plots the persistence density from persistence
+            values list or from a :doc:`persistence file <fileformats>`. Be
+            aware that this function does not distinguish the dimension, it is
+            up to you to select the required one.
 
             :param persistence: Persistence values list.
             :type persistence: list of tuples(dimension, tuple(birth, death)).
-            :param persistence_file: A :doc:`persistence file <fileformats>` style name
-                (reset persistence if both are set).
+            :param persistence_file: A :doc:`persistence file <fileformats>`
+                style name (reset persistence if both are set).
             :type persistence_file: string
-            :param nbins: Evaluate a gaussian kde on a regular grid of nbins x nbins
-                over data extents (default is 300)
+            :param nbins: Evaluate a gaussian kde on a regular grid of nbins x
+                nbins over data extents (default is 300)
             :type nbins: int.
             :param max_plots: number of maximal plots to be displayed
                 Set it to 0 to see all, Default value is 1000.
                 (persistence will be sorted by life time if max_plots is set)
             :type max_plots: int.
-            :param cmap: A matplotlib colormap (default is matplotlib.pyplot.cm.hot_r).
+            :param dimension: the dimension to be selected in the intervals
+                (default is None to mix all dimensions).
+            :type dimension: int.
+            :param cmap: A matplotlib colormap (default is
+                matplotlib.pyplot.cm.hot_r).
             :type cmap: cf. matplotlib colormap.
             :param legend: Display the color bar values (default is False).
             :type legend: boolean.
@@ -259,13 +264,21 @@ try:
                     print("file " + persistence_file + " not found.")
                     return None
 
-            if max_plots > 0 and max_plots < len(persistence):
+            persistence_dim = []
+            if dimension is not None:
+                persistence_dim = [(dim_interval) for dim_interval in persistence if (dim_interval[0] == dimension)]
+            else:
+                persistence_dim = persistence
+
+            if max_plots > 0 and max_plots < len(persistence_dim):
                 # Sort by life time, then takes only the max_plots elements
-                persistence = sorted(persistence, key=lambda life_time: life_time[1][1]-life_time[1][0], reverse=True)[:max_plots]
+                persistence_dim = sorted(persistence_dim,
+                                     key=lambda life_time: life_time[1][1]-life_time[1][0],
+                                     reverse=True)[:max_plots]
 
             # Set as numpy array birth and death (remove undefined values - inf and NaN)
-            birth = np.asarray([(interval[1][0]) for interval in persistence if (math.isfinite(interval[1][1]) and math.isfinite(interval[1][0]))])
-            death = np.asarray([(interval[1][1]) for interval in persistence if (math.isfinite(interval[1][1]) and math.isfinite(interval[1][0]))])
+            birth = np.asarray([(interval[1][0]) for interval in persistence_dim if (math.isfinite(interval[1][1]) and math.isfinite(interval[1][0]))])
+            death = np.asarray([(interval[1][1]) for interval in persistence_dim if (math.isfinite(interval[1][1]) and math.isfinite(interval[1][0]))])
 
             # line display of equation : birth = death
             x = np.linspace(death.min(), birth.max(), 1000)
