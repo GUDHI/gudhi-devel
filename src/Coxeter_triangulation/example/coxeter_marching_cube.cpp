@@ -590,6 +590,57 @@ void test_double_torus(double level) {
   std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
 }
 
+
+/** TEST WENGER TORI */
+void test_wenger_tori(double level) {
+  const unsigned amb_d = 3; // Ambient (domain) dimension
+  const unsigned cod_d = 1; // Codomain dimension
+  double r = 5;
+  double sr = 2;
+  Eigen::Vector3d point1(2*r+sr, 0.0, 0.0);
+  Eigen::Vector3d point2(r+sr, 0.0, 0.0);
+  std::vector<Point_d> seed_points = {point1, point2};
+  std::string name = "wenger_tori";
+  std::cout << "Test " << test_no << ": " << name << "...\n";
+
+  struct Function {
+    Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+      double x = p(0), y = p(1), z = p(2);
+      Eigen::VectorXd coords(cod_d);
+      coords(0) = (z*z + (std::sqrt(x*x + y*y) - r)*(std::sqrt(x*x + y*y) - r) - sr*sr);
+      if (x > 0)
+        coords(0) *= (y*y + (std::sqrt((x-r)*(x-r) + z*z) - r)*(std::sqrt((x-r)*(x-r) + z*z) - r) - sr*sr);
+      else
+	coords(0) *= (y*y + (std::sqrt((x+r)*(x+r) + z*z) - r)*(std::sqrt((x+r)*(x+r) + z*z) - r) - sr*sr);
+      return coords;
+    }
+
+    Function(unsigned cod_d_,
+	     double r_,
+             double sr_)
+      : cod_d(cod_d_), r(r_), sr(sr_) {}
+    unsigned cod_d;
+    double r, sr;
+  } f(cod_d, r, sr);
+  Hasse_diagram hd;
+  VP_map vp_map;
+  Gudhi::Clock t;
+  compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
+  t.end();
+  std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
+  int chi = 0;
+  for (auto cell: hd) {
+    dimensions[cell->get_dimension()]++;
+    chi += 1-2*(cell->get_dimension()%2);
+  }
+  std::cout << "Simplices by dimension: " << dimensions << "\n";
+  std::cout << "Euler characteristic = " << chi << "\n";
+  std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
+  output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
+  std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
+}
+
+
 /** TEST CIRCLE 3D */
 void test_circle_3d(double level) {
   const unsigned amb_d = 3; // Ambient (domain) dimension
@@ -823,10 +874,14 @@ int main(int argc, char * const argv[]) {
   //   test_torus(atof(argv[test_no+1]));
   // else
   //   test_torus(1.3);
+  // if (test_no < (unsigned)argc)
+  //   test_double_torus(atof(argv[test_no+1]));
+  // else
+  //   test_double_torus(3.7);
   if (test_no < (unsigned)argc)
-    test_double_torus(atof(argv[test_no+1]));
+    test_wenger_tori(atof(argv[test_no+1]));
   else
-    test_double_torus(3.7);
+    test_wenger_tori(3.7);
   // test_double_torus(3.7);
   // test_circle_3d(1.5);
   // test_chopper_wave(30.5111211);
