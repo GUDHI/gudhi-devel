@@ -250,10 +250,10 @@ try:
                 (default), 'scott' is used. See scipy.stats.gaussian_kde
                 documentation for more details.
             :type bw_method: str, scalar or callable, optional.
-            :param max_plots: maximal number of points to display. Selected points
-                are those with the longest life time. Set it to 0 to see all,
-                default value is 1000.
-            :type max_plots: int.
+            :param max_intervals: maximal number of intervals to display.
+                Selected points are those with the longest life time. Set it
+                to 0 to see all. Default value is 1000.
+            :type max_intervals: int.
             :param dimension: the dimension to be selected in the intervals
                 (default is None to mix all dimensions).
             :type dimension: int.
@@ -283,11 +283,11 @@ try:
             else:
                 persistence_dim = persistence
 
-            if max_plots > 0 and max_plots < len(persistence_dim):
-                # Sort by life time, then takes only the max_plots elements
+            if max_intervals > 0 and max_intervals < len(persistence_dim):
+                # Sort by life time, then takes only the max_intervals elements
                 persistence_dim = sorted(persistence_dim,
                                      key=lambda life_time: life_time[1][1]-life_time[1][0],
-                                     reverse=True)[:max_plots]
+                                     reverse=True)[:max_intervals]
 
             # Set as numpy array birth and death (remove undefined values - inf and NaN)
             birth = np.asarray([(interval[1][0]) for interval in persistence_dim if (math.isfinite(interval[1][1]) and math.isfinite(interval[1][0]))])

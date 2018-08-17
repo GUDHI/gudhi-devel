@@ -60,5 +60,5 @@ If you want more information on a specific dimension, for instance:
     persistence_file=gudhi.__root_source_dir__ + \
         '/data/persistence_diagram/rips_on_tore3D_1307.pers'
     plt = gudhi.plot_persistence_density(persistence_file=persistence_file,
-        max_plots=0, dimension=1, legend=True)
+        max_intervals=0, dimension=1, legend=True)
     plt.show()
