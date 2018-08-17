@@ -138,21 +138,22 @@ try:
 
     def plot_persistence_diagram(persistence=[], persistence_file='', alpha=0.6,
             band=0., max_plots=1000, inf_delta=0.1, legend=False):
-        """This function plots the persistence diagram from persistence values list
-        or from a :doc:`persistence file <fileformats>`.
+        """This function plots the persistence diagram from persistence values
+        list or from a :doc:`persistence file <fileformats>`.
 
         :param persistence: Persistence values list.
         :type persistence: list of tuples(dimension, tuple(birth, death)).
         :param persistence_file: A :doc:`persistence file <fileformats>` style name
             (reset persistence if both are set).
         :type persistence_file: string
-        :param alpha: plot transparency value (0.0 transparent through 1.0 opaque - default is 0.6).
+        :param alpha: plot transparency value (0.0 transparent through 1.0
+            opaque - default is 0.6).
         :type alpha: float.
         :param band: band (not displayed if :math:`\leq` 0. - default is 0.)
         :type band: float.
-        :param max_plots: number of maximal plots to be displayed
-            Set it to 0 to see all, Default value is 1000.
-            (persistence will be sorted by life time if max_plots is set)
+        :param max_plots: maximal number of points to display. Selected points
+            are those with the longest life time. Set it to 0 to see all,
+            default value is 1000.
         :type max_plots: int.
         :param inf_delta: Infinity is placed at ((max_death - min_birth) x inf_delta).
             A reasonable value is between 0.05 and 0.5 - default is 0.1.
@@ -237,9 +238,9 @@ try:
             :param nbins: Evaluate a gaussian kde on a regular grid of nbins x
                 nbins over data extents (default is 300)
             :type nbins: int.
-            :param max_plots: number of maximal plots to be displayed
-                Set it to 0 to see all, Default value is 1000.
-                (persistence will be sorted by life time if max_plots is set)
+            :param max_plots: maximal number of points to display. Selected points
+                are those with the longest life time. Set it to 0 to see all,
+                default value is 1000.
             :type max_plots: int.
             :param dimension: the dimension to be selected in the intervals
                 (default is None to mix all dimensions).
