@@ -71,14 +71,16 @@ try:
         :param persistence_file: A :doc:`persistence file <fileformats>` style name
             (reset persistence if both are set).
         :type persistence_file: string
-        :param alpha: barcode transparency value (0.0 transparent through 1.0 opaque - default is 0.6).
+        :param alpha: barcode transparency value (0.0 transparent through 1.0
+            opaque - default is 0.6).
         :type alpha: float.
         :param max_barcodes: number of maximal barcodes to be displayed.
             Set it to 0 to see all, Default value is 1000.
             (persistence will be sorted by life time if max_barcodes is set)
         :type max_barcodes: int.
-        :param inf_delta: Infinity is placed at ((max_death - min_birth) x inf_delta).
-            A reasonable value is between 0.05 and 0.5 - default is 0.1.
+        :param inf_delta: Infinity is placed at ((max_death - min_birth) x
+            inf_delta) above the highest point. A reasonable value is between
+            0.05 and 0.5 - default is 0.1.
         :type inf_delta: float.
         :param legend: Display the dimension color legend (default is False).
         :type legend: boolean.
@@ -155,8 +157,9 @@ try:
             are those with the longest life time. Set it to 0 to see all,
             default value is 1000.
         :type max_plots: int.
-        :param inf_delta: Infinity is placed at ((max_death - min_birth) x inf_delta).
-            A reasonable value is between 0.05 and 0.5 - default is 0.1.
+        :param inf_delta: Infinity is placed at ((max_death - min_birth) x
+            inf_delta) above the highest point. A reasonable value is between
+            0.05 and 0.5 - default is 0.1.
         :type inf_delta: float.
         :param legend: Display the dimension color legend (default is False).
         :type legend: boolean.
