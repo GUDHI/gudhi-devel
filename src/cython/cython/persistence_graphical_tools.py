@@ -62,7 +62,8 @@ try:
     import os
 
     def plot_persistence_barcode(persistence=[], persistence_file='', alpha=0.6,
-            max_barcodes=1000, inf_delta=0.1, legend=False):
+                                 max_intervals=1000, max_barcodes=1000,
+                                 inf_delta=0.1, legend=False):
         """This function plots the persistence bar code from persistence values list
         or from a :doc:`persistence file <fileformats>`.
 
@@ -74,10 +75,10 @@ try:
         :param alpha: barcode transparency value (0.0 transparent through 1.0
             opaque - default is 0.6).
         :type alpha: float.
-        :param max_barcodes: number of maximal barcodes to be displayed.
-            Set it to 0 to see all, Default value is 1000.
-            (persistence will be sorted by life time if max_barcodes is set)
-        :type max_barcodes: int.
+        :param max_intervals: maximal number of intervals to display.
+            Selected points are those with the longest life time. Set it
+            to 0 to see all. Default value is 1000.
+        :type max_intervals: int.
         :param inf_delta: Infinity is placed at ((max_death - min_birth) x
             inf_delta) above the highest point. A reasonable value is between
             0.05 and 0.5 - default is 0.1.
@@ -99,9 +100,13 @@ try:
                 print("file " + persistence_file + " not found.")
                 return None
 
-        if max_barcodes > 0 and max_barcodes < len(persistence):
-            # Sort by life time, then takes only the max_plots elements
-            persistence = sorted(persistence, key=lambda life_time: life_time[1][1]-life_time[1][0], reverse=True)[:max_barcodes]
+        if max_barcodes is not 1000:
+            print('Deprecated parameter. It has been replaced by max_intervals')
+            max_intervals = max_barcodes
+
+        if max_intervals > 0 and max_intervals < len(persistence):
+            # Sort by life time, then takes only the max_intervals elements
+            persistence = sorted(persistence, key=lambda life_time: life_time[1][1]-life_time[1][0], reverse=True)[:max_intervals]
 
         persistence = sorted(persistence, key=lambda birth: birth[1][0])
 
@@ -139,7 +144,7 @@ try:
         return plt
 
     def plot_persistence_diagram(persistence=[], persistence_file='', alpha=0.6,
-            band=0., max_plots=1000, inf_delta=0.1, legend=False):
+            band=0., max_intervals=1000, max_plots=1000, inf_delta=0.1, legend=False):
         """This function plots the persistence diagram from persistence values
         list or from a :doc:`persistence file <fileformats>`.
 
@@ -153,10 +158,10 @@ try:
         :type alpha: float.
         :param band: band (not displayed if :math:`\leq` 0. - default is 0.)
         :type band: float.
-        :param max_plots: maximal number of points to display. Selected points
-            are those with the longest life time. Set it to 0 to see all,
-            default value is 1000.
-        :type max_plots: int.
+        :param max_intervals: maximal number of intervals to display.
+            Selected points are those with the longest life time. Set it
+            to 0 to see all. Default value is 1000.
+        :type max_intervals: int.
         :param inf_delta: Infinity is placed at ((max_death - min_birth) x
             inf_delta) above the highest point. A reasonable value is between
             0.05 and 0.5 - default is 0.1.
@@ -178,9 +183,13 @@ try:
                 print("file " + persistence_file + " not found.")
                 return None
 
-        if max_plots > 0 and max_plots < len(persistence):
-            # Sort by life time, then takes only the max_plots elements
-            persistence = sorted(persistence, key=lambda life_time: life_time[1][1]-life_time[1][0], reverse=True)[:max_plots]
+        if max_plots is not 1000:
+            print('Deprecated parameter. It has been replaced by max_intervals')
+            max_intervals = max_plots
+
+        if max_intervals > 0 and max_intervals < len(persistence):
+            # Sort by life time, then takes only the max_intervals elements
+            persistence = sorted(persistence, key=lambda life_time: life_time[1][1]-life_time[1][0], reverse=True)[:max_intervals]
 
         (min_birth, max_death) = __min_birth_max_death(persistence, band)
         delta = ((max_death - min_birth) * inf_delta)
@@ -227,7 +236,7 @@ try:
 
         def plot_persistence_density(persistence=[], persistence_file='',
                                      nbins=300, bw_method=None,
-                                     max_plots=1000, dimension=None,
+                                     max_intervals=1000, dimension=None,
                                      cmap=plt.cm.hot_r, legend=False):
             """This function plots the persistence density from persistence
             values list or from a :doc:`persistence file <fileformats>`. Be
