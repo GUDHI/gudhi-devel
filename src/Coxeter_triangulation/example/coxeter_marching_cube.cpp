@@ -640,6 +640,74 @@ void test_wenger_tori(double level) {
   std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
 }
 
+/** TEST TORUS RING */
+void test_torus_ring(double level) {
+  const unsigned amb_d = 3; // Ambient (domain) dimension
+  const unsigned cod_d = 1; // Codomain dimension
+  unsigned n = 36;
+  double r = 5;
+  double sr = 5./n;
+  double cr = r * std::cos(pi/n);
+  double tr = r * std::sin(pi/n);
+  std::vector<Point_d> seed_points;
+  // for (unsigned i = 0; i < n; ++i)
+  seed_points.push_back(Eigen::Vector3d(std::cos(pi/n) * cr, std::sin(pi/n) * cr, tr+sr));
+  std::string name = "torus_ring";
+  std::cout << "Test " << test_no << ": " << name << "...\n";
+
+  struct Function {
+    Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+      double x = p(0), y = p(1), z = p(2);
+      double cr = r * std::cos(pi/n);
+      double tr = r * std::sin(pi/n);
+      Eigen::VectorXd coords(cod_d);
+      double theta = std::atan2(y, x);
+      // if (x > 0)
+      //   theta = std::atan(y/x);
+      // else if (x < 0 && y >= 0)
+      //   theta = std::atan(y/x) + pi;
+      // else if (x < 0 && y < 0)
+      //   theta = std::atan(y/x) - pi;
+      // else if (x == 0 && y > 0)
+      //   theta = pi/2;
+      // else
+      //   theta = -pi/2;
+      double c_angle = (std::floor(n*theta/pi/2)+0.5)*2*pi/n;
+      double c_x = cr * std::cos(c_angle);
+      double c_y = cr * std::sin(c_angle);
+      double new_x = std::cos(c_angle)*(x-c_x) + std::sin(c_angle)*(y-c_y);
+      double new_y = -std::sin(c_angle)*(x-c_x) + std::cos(c_angle)*(y-c_y);
+      coords(0) = (new_x*new_x + (std::sqrt(new_y*new_y + z*z) - tr)*(std::sqrt(new_y*new_y + z*z) - tr) - sr*sr);
+      return coords;
+    }
+
+    Function(unsigned cod_d_,
+             unsigned n_,
+	     double r_,
+             double sr_)
+      : cod_d(cod_d_), n(n_), r(r_), sr(sr_) {}
+    unsigned cod_d, n;
+    double r, sr;
+  } f(cod_d, n, r, sr);
+  Hasse_diagram hd;
+  VP_map vp_map;
+  Gudhi::Clock t;
+  compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
+  t.end();
+  std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
+  int chi = 0;
+  for (auto cell: hd) {
+    dimensions[cell->get_dimension()]++;
+    chi += 1-2*(cell->get_dimension()%2);
+  }
+  std::cout << "Simplices by dimension: " << dimensions << "\n";
+  std::cout << "Euler characteristic = " << chi << "\n";
+  std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
+  output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
+  std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
+}
+
+
 
 /** TEST CIRCLE 3D */
 void test_circle_3d(double level) {
@@ -878,11 +946,14 @@ int main(int argc, char * const argv[]) {
   //   test_double_torus(atof(argv[test_no+1]));
   // else
   //   test_double_torus(3.7);
+  // if (test_no < (unsigned)argc)
+  //   test_wenger_tori(atof(argv[test_no+1]));
+  // else
+  //   test_wenger_tori(3.7);
   if (test_no < (unsigned)argc)
-    test_wenger_tori(atof(argv[test_no+1]));
+    test_torus_ring(atof(argv[test_no+1]));
   else
-    test_wenger_tori(3.7);
-  // test_double_torus(3.7);
+    test_torus_ring(3.7);
   // test_circle_3d(1.5);
   // test_chopper_wave(30.5111211);
   // test_s3(1.1);
