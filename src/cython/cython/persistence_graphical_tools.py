@@ -223,7 +223,8 @@ try:
         import math
 
         def plot_persistence_density(persistence=[], persistence_file='',
-                                     nbins=300, max_plots=1000, dimension=None,
+                                     nbins=300, bw_method=None,
+                                     max_plots=1000, dimension=None,
                                      cmap=plt.cm.hot_r, legend=False):
             """This function plots the persistence density from persistence
             values list or from a :doc:`persistence file <fileformats>`. Be
@@ -238,6 +239,14 @@ try:
             :param nbins: Evaluate a gaussian kde on a regular grid of nbins x
                 nbins over data extents (default is 300)
             :type nbins: int.
+            :param bw_method: The method used to calculate the estimator
+                bandwidth. This can be 'scott', 'silverman', a scalar constant
+                or a callable. If a scalar, this will be used directly as
+                kde.factor. If a callable, it should take a gaussian_kde
+                instance as only parameter and return a scalar. If None
+                (default), 'scott' is used. See scipy.stats.gaussian_kde
+                documentation for more details.
+            :type bw_method: str, scalar or callable, optional.
             :param max_plots: maximal number of points to display. Selected points
                 are those with the longest life time. Set it to 0 to see all,
                 default value is 1000.
@@ -286,7 +295,7 @@ try:
             plt.plot(x, x, color='k', linewidth=1.0)
 
             # Evaluate a gaussian kde on a regular grid of nbins x nbins over data extents
-            k = kde.gaussian_kde([birth,death])
+            k = kde.gaussian_kde([birth,death], bw_method=bw_method)
             xi, yi = np.mgrid[birth.min():birth.max():nbins*1j, death.min():death.max():nbins*1j]
             zi = k(np.vstack([xi.flatten(), yi.flatten()]))
 
