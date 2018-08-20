@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <vector>
+#include <list>
 #include <fstream>
 #include <cstdlib>
 
@@ -114,7 +115,7 @@ bool glob_good = true;
 #endif
 
 Hasse_cell* insert_hasse_subdiagram(const Cell_id& c_id,
-                                    const std::vector<Cell_id>& meet_faces,
+                                    const std::list<Cell_id>& meet_faces,
                                     Hasse_diagram& hd,
                                     VC_map& vc_map,
                                     unsigned cod_d,
@@ -175,7 +176,7 @@ Hasse_cell* insert_hasse_subdiagram(const Cell_id& c_id,
 bool intersects(const Cell_id& f_id,
                 Eigen::MatrixXd& li_matrix,
                 Eigen::VectorXd& last_column,
-                std::vector<Cell_id>& meet_cells,
+                std::list<Cell_id>& meet_cells,
                 Hasse_diagram& hd,
                 VC_map& vc_map,
                 VP_map& vp_map,
@@ -231,7 +232,15 @@ bool intersects(const Cell_id& f_id,
   if (!cs.is_face(i_id, f_id))
     return false;
   add_hasse_vertex(i_id, intersection, hd, vc_map, vp_map);
-  meet_cells.push_back(i_id);
+  auto mf_it = meet_cells.begin();
+  while (mf_it != meet_cells.end())
+    if (cs.is_face(*mf_it, i_id))
+      return true;
+    else if (cs.is_face(i_id, *mf_it))
+      meet_cells.erase(mf_it++);
+    else
+      mf_it++;
+  meet_cells.push_front(i_id);
   return true;
 }
 
@@ -274,7 +283,7 @@ void compute_hasse_diagram(std::vector<Point_d>& seed_points,
     }
 #endif
     mark(c_id, trie);
-    std::vector<Cell_id> meet_faces;
+    std::list<Cell_id> meet_faces;
     Eigen::MatrixXd
       point_matrix(amb_d + 1, amb_d + 1),
       value_matrix(cod_d, amb_d + 1);
@@ -311,12 +320,12 @@ void compute_hasse_diagram(std::vector<Point_d>& seed_points,
     for (Cell_id f_id: cs.face_range(c_id, cod_d))
       if (intersects(f_id, lin_interpolation_matrix, last_column, meet_faces, hd, vc_map, vp_map, cod_d, cs)) {
 #ifdef DEBUG_TRACES
-        std::cout << " Result = true\n";
+        std::cout << " Result = true\n\n";
 #endif
       }
 #ifdef DEBUG_TRACES
       else
-        std::cout << " Result = false\n";
+        std::cout << " Result = false\n\n";
     std::cout << " Size of vc_map = " << vc_map.size() << "\n";
     auto hc = insert_hasse_subdiagram(c_id, meet_faces, hd, vc_map, cod_d, cs);
     if (hc != 0)

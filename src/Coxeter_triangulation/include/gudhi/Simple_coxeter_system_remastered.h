@@ -645,10 +645,12 @@ public:
             a_id.push_back(std::round(level * root_scalprod), true);
         }
       }
+#ifdef DEBUG_TRACES
       if (!is_valid(a_id)) {
         std::cout << "Non-valid coordinates were constructed. " << a_id << ". Retrying...\n";
-        query_point_location(p, level);
       }
+#endif
+      a_id.set_dimension(alcove_dimension(a_id));
       break;
     }
     case 'B': {
