@@ -111,6 +111,7 @@ void perturb_vertex(Point& vertex, double rad) {
       std::vector<Hasse_cell_ptr> edges, polygons, polytopes;
       std::vector<std::vector<int> > triangles, tetrahedra; 
       std::vector<double> filtrations;
+      std::vector<int> mask;
       for (auto s: hasse_diagram)
         if (s->get_dimension() == 1)
           edges.push_back(s);
@@ -122,14 +123,18 @@ void perturb_vertex(Point& vertex, double rad) {
       typedef typename Kernel_3::Point_d Point_3;
       typedef CGAL::Delaunay_triangulation<Kernel_3> Delaunay_triangulation;
       for (auto h: polygons) {
+        int mask_val = 515;
         Point_t barycenter(3);
         barycenter[0] = 0;
         barycenter[1] = 0;
         barycenter[2] = 0;
         std::set<Hasse_cell_ptr> v_cells;
-        for (auto e_pair: h->get_boundary())
+        for (auto e_pair: h->get_boundary()) {
+          if (e_pair.first->get_coBoundary().size() > 2)
+            mask_val = 517;
           for (auto v_pair: e_pair.first->get_boundary())
-            v_cells.emplace(v_pair.first);          
+            v_cells.emplace(v_pair.first);
+        }
         for (auto vc: v_cells) {
           int ci_value = ci_map.at(vc);
           barycenter[0] += vertex_points[ci_value-1][0] / v_cells.size();
@@ -143,6 +148,7 @@ void perturb_vertex(Point& vertex, double rad) {
             triangle.push_back(ci_map.at(v_pair.first));
           triangles.push_back(triangle);
           filtrations.push_back(h->get_filtration());
+          mask.push_back(mask_val);
         }
       }
       for (auto p: polytopes) {
@@ -198,12 +204,13 @@ void perturb_vertex(Point& vertex, double rad) {
       }
       ofs << "Triangles " << triangles.size() << "\n";
       ofs_bb << triangles.size()+tetrahedra.size() << " 1\n";
+      auto m_it = mask.begin();
       auto f_it = filtrations.begin();
       for (auto s: triangles) {
         for (auto v: s) {
           ofs << v << " ";
         }
-        ofs << "515" << std::endl;
+        ofs << *m_it++ << std::endl;
         ofs_bb << *f_it++ << "\n";
       }
       ofs << "Tetrahedra " << tetrahedra.size() << "\n";

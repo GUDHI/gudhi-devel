@@ -10,6 +10,7 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
+#include <cstdlib>
 
 #include <gudhi/Simple_coxeter_system_remastered.h>
 #include <gudhi/Coxeter_complex/Trie.h>
@@ -96,11 +97,21 @@ void add_hasse_vertex(const Cell_id& f_id, Eigen::VectorXd& cart_coords, Hasse_d
   auto res_pair = vc_map.emplace(f_id, new_cell);
   if (!res_pair.second) {
     delete new_cell;
+#ifdef DEBUG_TRACES
+    std::cout << "Discarded cell " << new_cell << ". It exists under address " << res_pair.first->second << "\n";
+#endif  
     return;
   }
   hd.emplace(new_cell);
   vp_map.emplace(new_cell, cart_coords);
+#ifdef DEBUG_TRACES
+  std::cout << "Added cell " << new_cell << "\n";
+#endif  
 }
+
+#ifdef DEBUG_TRACES
+bool glob_good = true;
+#endif
 
 Hasse_cell* insert_hasse_subdiagram(const Cell_id& c_id,
                                     const std::vector<Cell_id>& meet_faces,
@@ -114,10 +125,17 @@ Hasse_cell* insert_hasse_subdiagram(const Cell_id& c_id,
   std::cout << "  Insert_hasse_subdiagram for " << c_id << ". Meet_faces = " << meet_faces << "\n";
 #endif
   if (c_id.dimension() == cod_d) {
-    if (std::find(meet_faces.begin(), meet_faces.end(), c_id) != meet_faces.end())
-      return vc_map.find(c_id)->second;
-    else
-      return 0;
+    for (const auto& mf_id: meet_faces)
+      if (cs.is_face(mf_id, c_id)) {
+#ifdef DEBUG_TRACES
+        std::cout << "Cell " << mf_id << ", hc = " << vc_map.find(mf_id)->second << " inserted.\n";
+#endif
+        return vc_map.find(mf_id)->second;
+      }
+#ifdef DEBUG_TRACES
+    std::cout << "Cell " << c_id << " not inserted.\n";
+#endif
+    return 0;
   }
   else {
     Hasse_cell* new_cell = new Hasse_cell(c_id.dimension() - cod_d);
@@ -125,17 +143,23 @@ Hasse_cell* insert_hasse_subdiagram(const Cell_id& c_id,
     for (auto f_id: cs.face_range(c_id, c_id.dimension() - 1)) {
       Hasse_cell* facet_cell = insert_hasse_subdiagram(f_id, meet_faces, hd, vc_map, cod_d, cs);
       if (facet_cell != 0)
-        boundary.push_back(std::make_pair(facet_cell, 1));
+        if (std::find(boundary.begin(), boundary.end(), std::make_pair(facet_cell, 1)) == boundary.end())
+          boundary.push_back(std::make_pair(facet_cell, 1));
     }
-    if (boundary.empty()) {
+    if (boundary.size() < (unsigned)new_cell->get_dimension() + 1) {
       delete new_cell;
       return 0;
     }
     else {
 #ifdef DEBUG_TRACES
       std::cout << "Boundary of the new cell = " << boundary << "\n";
-      if (new_cell->get_dimension() == 1 && boundary.size() != 2) {
+      if (boundary.size() < (unsigned)new_cell->get_dimension() + 1) {
         std::cout << "Problem!\n";
+        glob_good = false;
+      }
+      if ((unsigned)new_cell->get_dimension() == 1 && boundary.size() > 2) {
+        std::cout << "Problem!\n";
+        glob_good = false;
       }
 #endif
       auto res_pair = hd.emplace(new_cell);
@@ -143,8 +167,7 @@ Hasse_cell* insert_hasse_subdiagram(const Cell_id& c_id,
         delete new_cell;
         return *res_pair.first;
       }
-      else
-        return new_cell;
+      return new_cell;
     }
   }
 }
@@ -152,6 +175,7 @@ Hasse_cell* insert_hasse_subdiagram(const Cell_id& c_id,
 bool intersects(const Cell_id& f_id,
                 Eigen::MatrixXd& li_matrix,
                 Eigen::VectorXd& last_column,
+                std::vector<Cell_id>& meet_cells,
                 Hasse_diagram& hd,
                 VC_map& vc_map,
                 VP_map& vp_map,
@@ -159,6 +183,9 @@ bool intersects(const Cell_id& f_id,
                 const Simple_coxeter_system& cs) {
 #ifdef DEBUG_TRACES
   std::cout << " Intersects called for face " << f_id << "\n";
+  assert(cs.is_valid(f_id));
+  if (f_id[0] == -7 && f_id.is_fixed(0) && f_id[1] == -1 && f_id[3] == 4 && f_id.is_fixed(3) && f_id[8] == 1)
+    std::cout << "";
 #endif
   std::size_t amb_d = li_matrix.cols();
 #ifdef DEBUG_TRACES
@@ -187,14 +214,24 @@ bool intersects(const Cell_id& f_id,
 #endif
   if ((li_matrix * intersection - last_column).norm() / last_column.norm() > error / f_id.level())
     return false;
+  // perturbation, to avoid the invalid cell coordinate situation
+  // for (std::size_t i = 0; i < amb_d; ++i)
+  //   intersection(i) += ((double)std::rand()) / RAND_MAX * error/f_id.level();
   Cell_id i_id = cs.query_point_location(intersection, f_id.level());
 #ifdef DEBUG_TRACES
-  std::cout << "  cell containing the intersection: " << i_id << "\n";
+  std::cout << "  cell containing the intersection: " << i_id << ", ";
+  if (cs.is_valid(i_id))
+    std::cout << "it is valid.\n";
+  else {
+    std::cout << "it is NOT valid.\n";
+    assert(false);
+  }
+
 #endif
-  for (std::size_t k = 0; k < i_id.size(); ++k)
-    if (!f_id.is_fixed(k) && i_id[k] != f_id[k])
-      return false;
-  add_hasse_vertex(f_id, intersection, hd, vc_map, vp_map);
+  if (!cs.is_face(i_id, f_id))
+    return false;
+  add_hasse_vertex(i_id, intersection, hd, vc_map, vp_map);
+  meet_cells.push_back(i_id);
   return true;
 }
 
@@ -212,6 +249,9 @@ void compute_hasse_diagram(std::vector<Point_d>& seed_points,
                            VP_map& vp_map,
                            const Function& f) {
   const Simple_coxeter_system cs('A', amb_d);
+#ifdef DEBUG_TRACES
+  assert(cs.pos_root_check());
+#endif  
   VC_map vc_map;
   Full_cell_trie trie(level, amb_d);
   Full_cell_trie visit_stack(level, amb_d);
@@ -225,7 +265,13 @@ void compute_hasse_diagram(std::vector<Point_d>& seed_points,
     Cell_id c_id(level, amb_d);
     c_id = visit_stack.pop();
 #ifdef DEBUG_TRACES
-    std::cout << "Simplex: "  << c_id << "\n";
+    std::cout << "Simplex: "  << c_id << ", ";
+    if (cs.is_valid(c_id))
+      std::cout << "it is valid.\n";
+    else {
+      std::cout << "it is NOT valid.\n";
+      assert(false);
+    }
 #endif
     mark(c_id, trie);
     std::vector<Cell_id> meet_faces;
@@ -263,18 +309,24 @@ void compute_hasse_diagram(std::vector<Point_d>& seed_points,
     last_column.conservativeResize(amb_d);
     last_column = -last_column;
     for (Cell_id f_id: cs.face_range(c_id, cod_d))
-      if (intersects(f_id, lin_interpolation_matrix, last_column, hd, vc_map, vp_map, cod_d, cs)) {
+      if (intersects(f_id, lin_interpolation_matrix, last_column, meet_faces, hd, vc_map, vp_map, cod_d, cs)) {
 #ifdef DEBUG_TRACES
         std::cout << " Result = true\n";
 #endif
-        meet_faces.push_back(f_id);
       }
 #ifdef DEBUG_TRACES
       else
         std::cout << " Result = false\n";
     std::cout << " Size of vc_map = " << vc_map.size() << "\n";
-#endif
+    auto hc = insert_hasse_subdiagram(c_id, meet_faces, hd, vc_map, cod_d, cs);
+    if (hc != 0)
+      for (auto fc: hc->get_boundary())
+        for (auto ffc: fc.first->get_boundary())
+          vp_map.at(ffc.first);
+    assert(glob_good);
+#else
     insert_hasse_subdiagram(c_id, meet_faces, hd, vc_map, cod_d, cs);
+#endif
     for (const Cell_id& f_id: meet_faces)
       // if (!is_marked(f_id))
       for (Cell_id cf_id: cs.coface_range(f_id, amb_d))
@@ -644,14 +696,14 @@ void test_wenger_tori(double level) {
 void test_torus_ring(double level) {
   const unsigned amb_d = 3; // Ambient (domain) dimension
   const unsigned cod_d = 1; // Codomain dimension
-  unsigned n = 36;
+  unsigned n = 4;
   double r = 5;
   double sr = 5./n;
   double cr = r * std::cos(pi/n);
   double tr = r * std::sin(pi/n);
   std::vector<Point_d> seed_points;
   // for (unsigned i = 0; i < n; ++i)
-  seed_points.push_back(Eigen::Vector3d(std::cos(pi/n) * cr, std::sin(pi/n) * cr, tr+sr));
+  seed_points.push_back(Eigen::Vector3d(std::cos(pi/n) * cr, std::sin(pi/n) * cr, tr + sr));
   std::string name = "torus_ring";
   std::cout << "Test " << test_no << ": " << name << "...\n";
 
@@ -662,16 +714,6 @@ void test_torus_ring(double level) {
       double tr = r * std::sin(pi/n);
       Eigen::VectorXd coords(cod_d);
       double theta = std::atan2(y, x);
-      // if (x > 0)
-      //   theta = std::atan(y/x);
-      // else if (x < 0 && y >= 0)
-      //   theta = std::atan(y/x) + pi;
-      // else if (x < 0 && y < 0)
-      //   theta = std::atan(y/x) - pi;
-      // else if (x == 0 && y > 0)
-      //   theta = pi/2;
-      // else
-      //   theta = -pi/2;
       double c_angle = (std::floor(n*theta/pi/2)+0.5)*2*pi/n;
       double c_x = cr * std::cos(c_angle);
       double c_y = cr * std::sin(c_angle);
@@ -700,6 +742,17 @@ void test_torus_ring(double level) {
     dimensions[cell->get_dimension()]++;
     chi += 1-2*(cell->get_dimension()%2);
   }
+  typedef Gudhi::Hasse_diagram::Hasse_diagram_persistence<Hasse_cell> Hasse_pers_vector;
+  std::vector<Hasse_cell*> hasse_vector(hd.begin(), hd.end());
+  struct Dimension_comparison {
+    bool operator() (Hasse_cell* lhs, Hasse_cell* rhs) const {
+      return lhs->get_dimension() > rhs->get_dimension();
+    }
+  };
+  std::sort(hasse_vector.begin(), hasse_vector.end(), Dimension_comparison());
+  Hasse_pers_vector hdp(hasse_vector);
+  hdp.set_up_the_arrays();
+  
   std::cout << "Simplices by dimension: " << dimensions << "\n";
   std::cout << "Euler characteristic = " << chi << "\n";
   std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
@@ -932,8 +985,9 @@ void test_s11(double level) {
 // }
 
 int main(int argc, char * const argv[]) {
-  // if (argc == 2)
-  //   error = atof(argv[1]);
+  if (argc > 2) {
+    error = atof(argv[(test_no++)+1]);
+  }
   // test_circle(1.5);
   // test_wavy_circle(3.3);
   // test_smiley(30.1);
@@ -950,15 +1004,18 @@ int main(int argc, char * const argv[]) {
   //   test_wenger_tori(atof(argv[test_no+1]));
   // else
   //   test_wenger_tori(3.7);
-  if (test_no < (unsigned)argc)
-    test_torus_ring(atof(argv[test_no+1]));
-  else
-    test_torus_ring(3.7);
-  // test_circle_3d(1.5);
-  // test_chopper_wave(30.5111211);
-  // test_s3(1.1);
   // if (test_no < (unsigned)argc)
-  //   test_s11(atof(argv[test_no+1]));
+  //   test_torus_ring(atof(argv[test_no+1]));
   // else
-  //   test_s11(3.79);
+  //   test_torus_ring(3.7);
+  // test_circle_3d(1.5);
+  // if (test_no < (unsigned)argc)
+  //   test_chopper_wave_3d(atof(argv[test_no+1]));
+  // else
+  //   test_chopper_wave_3d(30.5111211);
+  // test_s3(1.1);
+  if (test_no < (unsigned)argc)
+    test_s11(atof(argv[(test_no++)+1]));
+  else
+    test_s11(3.79);
 }

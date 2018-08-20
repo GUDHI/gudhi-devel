@@ -258,6 +258,87 @@ public:
   Eigen::MatrixXd const& simple_root_matrix() const {
     return root_t_;
   }
+
+  bool pos_root_check() const {
+    switch (family_) {
+    case 'A': {
+      double error = 1e-6;
+      for (std::size_t i = 0; i < dimension_; ++i)
+        for (std::size_t j = i; j < dimension_; ++j) {
+          double product = root_t_.row(i).dot(root_t_.row(j));
+          std::cout << "row " << i << " * row " << j << " = " << product << "\n";
+          if (j == i && std::abs(product - 1) >= error)
+            return false;
+          if (j == i + 1 && std::abs(product + 0.5) >= error)
+            return false;
+          if (j > i + 1 && std::abs(product) >= error)
+            return false;
+        }
+      break;
+    } 
+    default :
+      std::cerr << "Simple_coxeter_system::pos_root_count : The family " << family_ << " is not supported. "
+                << "Please use A, B, C or D family for the constructor (in capital).\n";
+      throw wrong_family_exception_;
+    }
+    return true;
+  }
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  // Validity checks
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+
+  bool triplet_check(const Alcove_id& a_id, std::size_t i, std::size_t l, std::size_t j) const {
+    std::size_t k  = (j*j+j-2)/2 - i;
+    std::size_t k1 = (l*l+l-2)/2 - i;
+    std::size_t k2 = (j*j+j-2)/2 - l;
+    if (k >= a_id.size()) {
+      std::cout << "k = " << k << ", size = " << a_id.size() << "\n"; 
+      assert(false);
+    }
+    if (a_id.is_fixed(k))
+      return (a_id.is_fixed(k1) && a_id.is_fixed(k2) && a_id[k1] + a_id[k2] == a_id[k]) ||
+        (!a_id.is_fixed(k1) && !a_id.is_fixed(k2) && a_id[k1] + a_id[k2] + 1 == a_id[k]);
+    else
+      return ((a_id.is_fixed(k1) xor a_id.is_fixed(k2)) && a_id[k] == a_id[k1] + a_id[k2]) ||
+        (!a_id.is_fixed(k1) && !a_id.is_fixed(k2) && (a_id[k] == a_id[k1] + a_id[k2] ||
+                                                          a_id[k] == a_id[k1] + a_id[k2] + 1));
+  }
+    
+  bool is_valid(const Alcove_id& a_id) const {
+    switch (family_) {
+    case 'A': {
+      unsigned i = 0 , j = 1;
+      for (unsigned k = 0; k < a_id.size(); ++k) {
+        for (unsigned l = i+1; l < j; ++l)
+          if (!triplet_check(a_id, i, l, j))
+            return false;
+        if (i == 0)
+          i = j++;
+        else
+          --i;
+      }
+      break;
+    }
+    default:
+      std::cerr << "Simple_coxeter_system::Coface_iterator::triplet_check: The family " << family_ << " is not supported. "
+                << "Please use A family for the constructor (in capital).\n";
+    }
+    return true;      
+  }
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  // Is_face check
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  bool is_face(const Alcove_id& f_id, const Alcove_id& c_id) const {
+    for (std::size_t k = 0; k < f_id.size(); ++k)
+      if (f_id[k] < c_id[k] ||
+          f_id[k] > c_id[k] + 1 ||
+          (!f_id.is_fixed(k) && c_id.is_fixed(k)) ||
+          (f_id.is_fixed(k) == c_id.is_fixed(k) && f_id[k] != c_id[k]))
+        return false;
+    return true;
+  }
   
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // Alcove dimension
@@ -544,6 +625,7 @@ public:
   Alcove_id query_point_location(const Point& p, double level) const {
     unsigned short d = p.size();
     assert(d == dimension_);
+    double error = 1e-9;
     Alcove_id a_id(level, d);
     Eigen::VectorXd p_vect(d);
     for (short i = 0; i < d; i++)
@@ -556,8 +638,16 @@ public:
         FT root_scalprod = 0;
         for (short j = i; j >= 0; j--) {
           root_scalprod += scalprod_vect(j);
-          a_id.push_back(std::floor(level * root_scalprod), false);
+          double value = level * root_scalprod;
+          if (std::abs(value - std::round(value)) >= error)
+            a_id.push_back(std::floor(level * root_scalprod), false);
+          else
+            a_id.push_back(std::round(level * root_scalprod), true);
         }
+      }
+      if (!is_valid(a_id)) {
+        std::cout << "Non-valid coordinates were constructed. " << a_id << ". Retrying...\n";
+        query_point_location(p, level);
       }
       break;
     }
