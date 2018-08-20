@@ -994,37 +994,67 @@ void test_s11(double level) {
 // }
 
 int main(int argc, char * const argv[]) {
-  if (argc > 2) {
+  if (argc >= 2) {
     error = atof(argv[(test_no++)+1]);
   }
-  // test_circle(1.5);
-  // test_wavy_circle(3.3);
-  // test_smiley(30.1);
-  // test_sphere(1.3);
-  // if (test_no < (unsigned)argc)
-  //   test_torus(atof(argv[test_no+1]));
-  // else
-  //   test_torus(1.3);
-  // if (test_no < (unsigned)argc)
-  //   test_double_torus(atof(argv[test_no+1]));
-  // else
-  //   test_double_torus(3.7);
-  // if (test_no < (unsigned)argc)
-  //   test_wenger_tori(atof(argv[test_no+1]));
-  // else
-  //   test_wenger_tori(3.7);
-  // if (test_no < (unsigned)argc)
-  //   test_torus_ring(atof(argv[test_no+1]));
-  // else
-  //   test_torus_ring(3.7);
-  // test_circle_3d(1.5);
-  // if (test_no < (unsigned)argc)
-  //   test_chopper_wave_3d(atof(argv[test_no+1]));
-  // else
-  //   test_chopper_wave_3d(30.5111211);
-  // test_s3(1.1);
-  if (test_no < (unsigned)argc)
-    test_s11(atof(argv[(test_no++)+1]));
+
+  if (test_no+1 < (unsigned)argc)
+    test_circle(atof(argv[test_no+1]));
   else
-    test_s11(3.79);
+    test_circle(1.5);
+  
+  if (test_no+1 < (unsigned)argc)
+    test_wavy_circle(atof(argv[test_no+1]));
+  else
+    test_wavy_circle(3.3);
+
+  if (test_no+1 < (unsigned)argc)
+    test_smiley(atof(argv[test_no+1]));
+  else
+    test_smiley(30.1);
+
+  if (test_no+1 < (unsigned)argc)
+    test_sphere(atof(argv[test_no+1]));
+  else
+    test_sphere(1.3);
+
+  if (test_no+1 < (unsigned)argc)
+    test_torus(atof(argv[test_no+1]));
+  else
+    test_torus(1.3);
+
+  if (test_no+1 < (unsigned)argc)
+    test_double_torus(atof(argv[test_no+1]));
+  else
+    test_double_torus(3.7);
+
+  if (test_no+1 < (unsigned)argc)
+    test_wenger_tori(atof(argv[test_no+1]));
+  else
+    test_wenger_tori(3.7);
+
+  if (test_no+1 < (unsigned)argc)
+    test_torus_ring(atof(argv[test_no+1]));
+  else
+    test_torus_ring(3.7);
+
+  if (test_no+1 < (unsigned)argc)
+    test_circle_3d(atof(argv[test_no+1]));
+  else
+    test_circle_3d(1.5);
+
+  if (test_no+1 < (unsigned)argc)
+    test_chopper_wave_3d(atof(argv[test_no+1]));
+  else
+    test_chopper_wave_3d(30.5111211);
+
+  if (test_no+1 < (unsigned)argc)
+    test_s3(atof(argv[test_no+1]));
+  else
+    test_s3(0.7);
+
+  if (test_no+1 < (unsigned)argc)
+    test_s11(atof(argv[test_no+1]));
+  else
+    test_s11(0.7);
 }
