@@ -360,6 +360,21 @@ class Simplex_tree {
     return *this;
   }
 
+  /** \brief User-defined move assignment reproduces the whole tree structure. */
+  Simplex_tree& operator=(Simplex_tree&& simplex_source)
+  {
+#ifdef DEBUG_TRACES
+    std::cout << "move assignment" << std::endl;
+#endif  // DEBUG_TRACES
+    // Self-assignment detection
+    if (&simplex_source != this) {
+      std::swap( null_vertex_, simplex_source.null_vertex_ );
+      std::swap( root_, simplex_source.root_ );
+      std::swap( filtration_vect_, simplex_source.filtration_vect_ );
+      std::swap( dimension_, simplex_source.dimension_ );
+    }
+    return *this;
+  }
   /** @} */  // end constructor/destructor
  private:
   // Recursive deletion

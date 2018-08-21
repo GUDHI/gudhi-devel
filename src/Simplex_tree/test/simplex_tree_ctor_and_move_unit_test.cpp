@@ -1,11 +1,5 @@
 #include <iostream>
-#include <fstream>
-#include <string>
-#include <algorithm>
-#include <utility> // std::pair, std::make_pair
-#include <cmath> // float comparison
-#include <limits>
-#include <functional> // greater
+#include <vector>
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "simplex_tree_constructor_and_move"
@@ -19,6 +13,11 @@
 using namespace Gudhi;
 
 typedef boost::mpl::list<Simplex_tree<>, Simplex_tree<Simplex_tree_options_fast_persistence>> list_of_tested_variants;
+
+template<class SimplicialComplex>
+SimplicialComplex move_it(SimplicialComplex sc) {
+  return sc;
+}
 
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_copy_constructor, Simplex_tree, list_of_tested_variants) {
@@ -65,12 +64,21 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_copy_constructor, Simplex_tree, list_of_te
 
   std::cout << "********************************************************************" << std::endl;
   std::cout << "TEST OF MOVE CONSTRUCTOR" << std::endl;
-  Simplex_tree st5(std::move(st3));
-  Simplex_tree st6(std::move(st4));
+  Simplex_tree st5(std::move(st1));
+  Simplex_tree st6(std::move(st2));
 
   // Cross check
   BOOST_CHECK(st5 == st6);
   BOOST_CHECK(st == st6);
   BOOST_CHECK(st5 == st);
+
+  std::cout << "********************************************************************" << std::endl;
+  std::cout << "TEST OF MOVE ASSIGNMENT" << std::endl;
+
+  // A swap is a copy ctor of a tmp value, then it uses move assignment
+  std::swap(st3, st4);
+  BOOST_CHECK(st3 == st4);
+  BOOST_CHECK(st == st4);
+  BOOST_CHECK(st3 == st);
 
 }
