@@ -54,8 +54,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_copy_constructor, Simplex_tree, list_of_te
 
   std::cout << "********************************************************************" << std::endl;
   std::cout << "TEST OF COPY ASSIGNMENT" << std::endl;
-  Simplex_tree st3 = st;
-  Simplex_tree st4 = st;
+  Simplex_tree st3;
+  st3 = st;
+  Simplex_tree st4;
+  st4 = st;
   // Cross check
   BOOST_CHECK(st3 == st4);
   BOOST_CHECK(st == st4);
