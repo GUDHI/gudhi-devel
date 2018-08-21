@@ -301,6 +301,7 @@ class Simplex_tree {
       root_(nullptr, null_vertex_ , simplex_source.root_.members_),
       filtration_vect_(),
       dimension_(simplex_source.dimension_) {
+    std::cout << "copy constructor" << std::endl;
     auto root_source = simplex_source.root_;
     rec_copy(&root_, &root_source);
   }
@@ -326,6 +327,7 @@ class Simplex_tree {
       root_(std::move(old.root_)),
       filtration_vect_(std::move(old.filtration_vect_)),
       dimension_(std::move(old.dimension_)) {
+    std::cout << "move constructor" << std::endl;
     old.dimension_ = -1;
     old.root_ = Siblings(nullptr, null_vertex_);
   }
@@ -338,6 +340,20 @@ class Simplex_tree {
       }
     }
   }
+
+  /** \brief User-defined copy assignment reproduces the whole tree structure. */
+  Simplex_tree& operator= (const Simplex_tree& simplex_source)
+  {
+    std::cout << "copy assignment" << std::endl;
+    this->null_vertex_ = simplex_source.null_vertex_;
+    root_ = Siblings(nullptr, null_vertex_ , simplex_source.root_.members_);
+    this->filtration_vect_.clear();
+    this->dimension_ = simplex_source.dimension_;
+    auto root_source = simplex_source.root_;
+    rec_copy(&(this->root_), &root_source);
+    return *this;
+  }
+
   /** @} */  // end constructor/destructor
  private:
   // Recursive deletion
