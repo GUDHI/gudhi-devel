@@ -62,4 +62,15 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_copy_constructor, Simplex_tree, list_of_te
   BOOST_CHECK(st3 == st4);
   BOOST_CHECK(st == st4);
   BOOST_CHECK(st3 == st);
+
+  std::cout << "********************************************************************" << std::endl;
+  std::cout << "TEST OF MOVE CONSTRUCTOR" << std::endl;
+  Simplex_tree st5(std::move(st3));
+  Simplex_tree st6(std::move(st4));
+
+  // Cross check
+  BOOST_CHECK(st5 == st6);
+  BOOST_CHECK(st == st6);
+  BOOST_CHECK(st5 == st);
+
 }
