@@ -38,6 +38,9 @@ namespace Persistence_representations {
  * \ingroup Persistence_representations
  *
  * \details
+ * In this class, we compute infinite-dimensional representations of persistence diagrams by using the
+ * Sliced Wasserstein kernel (see \ref sec_persistence_kernels for more details on kernels). We recall that infinite-dimensional
+ * representations are defined implicitly, so only scalar products and distances are available for the representations defined in this class.
  * The Sliced Wasserstein kernel is defined as a Gaussian-like kernel between persistence diagrams, where the distance used for
  * comparison is the Sliced Wasserstein distance \f$SW\f$ between persistence diagrams, defined as the integral of the 1-norm
  * between the sorted projections of the diagrams onto all lines passing through the origin:
