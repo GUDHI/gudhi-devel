@@ -1002,8 +1002,6 @@ double Persistence_heat_maps<Scalling_of_kernels>::compute_scalar_product(const 
   }
 
   else{
-    GUDHI_CHECK(this->approx != second.approx || this->f != second.f, std::invalid_argument("Error: different values for representations"));
-
     int num_pts1 = this->d.size(); int num_pts2 = second.d.size(); double kernel_val = 0;
     for(int i = 0; i < num_pts1; i++)
       for(int j = 0; j < num_pts2; j++)
