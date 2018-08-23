@@ -43,7 +43,7 @@ static constexpr double pi = boost::math::constants::pi<double>();
 using Persistence_diagram = std::vector<std::pair<double, double> >;
 
 /**
- * In this module, we use the name Kernel for the representation of a function taking a pair of two points in the plane and returning a double.
+ * In this module, we use the name Kernel2D for the representation of a function taking a pair of two points in the plane and returning a double.
  */
 using Kernel2D = std::function<double (std::pair<double, double>, std::pair<double, double> )>;
 
