@@ -298,11 +298,11 @@ class Simplex_tree {
   /** \brief User-defined copy constructor reproduces the whole tree structure. */
   Simplex_tree(const Simplex_tree& simplex_source)
       : null_vertex_(simplex_source.null_vertex_),
-      root_(nullptr, null_vertex_ , simplex_source.root_.members_),
+      root_(nullptr, null_vertex_, simplex_source.root_.members_),
       filtration_vect_(),
       dimension_(simplex_source.dimension_) {
 #ifdef DEBUG_TRACES
-    std::cout << "copy constructor" << std::endl;
+    std::cout << "Simplex_tree copy constructor" << std::endl;
 #endif  // DEBUG_TRACES
     auto root_source = simplex_source.root_;
     rec_copy(&root_, &root_source);
@@ -323,17 +323,29 @@ class Simplex_tree {
     }
   }
 
-  /** \brief User-defined move constructor moves the whole tree structure. */
-  Simplex_tree(Simplex_tree && old)
-      : null_vertex_(std::move(old.null_vertex_)),
-      root_(std::move(old.root_)),
-      filtration_vect_(std::move(old.filtration_vect_)),
-      dimension_(std::move(old.dimension_)) {
+  /** \brief User-defined move constructor relocates the whole tree structure.
+   *  \exception std::invalid_argument In debug mode, if the simplex_source is invalid.
+   */
+  Simplex_tree(Simplex_tree && simplex_source)
+      : null_vertex_(std::move(simplex_source.null_vertex_)),
+      root_(std::move(simplex_source.root_)),
+      filtration_vect_(std::move(simplex_source.filtration_vect_)),
+      dimension_(std::move(simplex_source.dimension_)) {
 #ifdef DEBUG_TRACES
-    std::cout << "move constructor" << std::endl;
+    std::cout << "Simplex_tree move constructor" << std::endl;
 #endif  // DEBUG_TRACES
-    old.dimension_ = -1;
-    old.root_ = Siblings(nullptr, null_vertex_);
+    for (auto& map_el : root_.members()) {
+      if (map_el.second.children()->oncles() == &(simplex_source.root_))
+        // reset with the moved root_ pointer value
+        map_el.second.children()->oncles_ = &root_;
+      else
+        // if simplex is of dimension 0, oncles_ shall be nullptr
+        GUDHI_CHECK(map_el.second.children()->oncles_ == nullptr,
+                    std::invalid_argument("Simplex_tree move constructor from an invalid Simplex_tree"));
+    }
+    // just need to set dimension_ on source to make it available again
+    // (filtration_vect_ and members are already set from the move)
+    simplex_source.dimension_ = -1;
   }
 
   /** \brief Destructor; deallocates the whole tree structure. */
@@ -351,16 +363,24 @@ class Simplex_tree {
 #ifdef DEBUG_TRACES
     std::cout << "copy assignment" << std::endl;
 #endif  // DEBUG_TRACES
-    this->null_vertex_ = simplex_source.null_vertex_;
-    root_ = Siblings(nullptr, null_vertex_ , simplex_source.root_.members_);
-    this->filtration_vect_.clear();
-    this->dimension_ = simplex_source.dimension_;
+    null_vertex_ = simplex_source.null_vertex_;
+    filtration_vect_.clear();
+    dimension_ = simplex_source.dimension_;
     auto root_source = simplex_source.root_;
-    rec_copy(&(this->root_), &root_source);
+    // Here a copy will be done
+    root_ = Siblings(nullptr, null_vertex_);
+    root_.members() = Dictionary(boost::container::ordered_unique_range, root_source.members().begin(), root_source.members().end());
+    // Needs to reassign children
+    for (auto& map_el : root_.members()) {
+      map_el.second.assign_children(&root_);
+    }
+    rec_copy(&root_, &root_source);
     return *this;
   }
 
-  /** \brief User-defined move assignment reproduces the whole tree structure. */
+  /** \brief User-defined move assignment relocates the whole tree structure.
+   *  \exception std::invalid_argument In debug mode, if the simplex_source is invalid.
+   */
   Simplex_tree& operator=(Simplex_tree&& simplex_source)
   {
 #ifdef DEBUG_TRACES
@@ -372,6 +392,16 @@ class Simplex_tree {
       std::swap( root_, simplex_source.root_ );
       std::swap( filtration_vect_, simplex_source.filtration_vect_ );
       std::swap( dimension_, simplex_source.dimension_ );
+
+      for (auto& map_el : root_.members()) {
+        if (map_el.second.children()->oncles() == &(simplex_source.root_))
+          // reset with the moved root_ pointer value
+          map_el.second.children()->oncles_ = &root_;
+        else
+          // if simplex is of dimension 0, oncles_ shall be nullptr
+          GUDHI_CHECK(map_el.second.children()->oncles_ == nullptr,
+                      std::invalid_argument("Simplex_tree move constructor from an invalid Simplex_tree"));
+      }
     }
     return *this;
   }
