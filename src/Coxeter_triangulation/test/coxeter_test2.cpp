@@ -115,7 +115,7 @@ int main(int argc, char * const argv[]) {
       total1[f_d][ff_d] += t.num_seconds() / faces[f_d].size() * 1000;
     }
   }
-  for (unsigned f_d = 0; f_d <= dimension; ++f_d) {
+  for (unsigned f_d = 1; f_d <= dimension; ++f_d) {
     for (unsigned ff_d = 0; ff_d <= f_d; ++ff_d) {
       Gudhi::Clock t;
       for (auto f_id: faces[f_d])
