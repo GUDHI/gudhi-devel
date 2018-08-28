@@ -40,7 +40,7 @@ parser = argparse.ArgumentParser(description='RipsComplex creation from '
 parser.add_argument("-f", "--file", type=str, required=True)
 parser.add_argument("-c", "--min_edge_correlation", type=float, default=0.5)
 parser.add_argument("-d", "--max_dimension", type=int, default=1)
-parser.add_argument("-b", "--band_boot", type=float, default=0.)
+parser.add_argument("-b", "--band", type=float, default=0.)
 parser.add_argument('--no-diagram', default=False, action='store_true' , help='Flag for not to display the diagrams')
 
 args = parser.parse_args()
@@ -80,5 +80,5 @@ print(simplex_tree.betti_numbers())
 invert_diag = [(diag[pers][0],(1.-diag[pers][1][0], 1.-diag[pers][1][1])) for pers in range(len(diag))]
 
 if args.no_diagram == False:
-    pplot = gudhi.plot_persistence_diagram(invert_diag, band_boot=args.band_boot)
+    pplot = gudhi.plot_persistence_diagram(invert_diag, band=args.band)
     pplot.show()

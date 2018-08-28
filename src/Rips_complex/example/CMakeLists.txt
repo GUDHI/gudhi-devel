@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
 project(Rips_complex_examples)
 
 # Point cloud

@@ -29,11 +29,6 @@ __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
 print("#####################################################################")
-print("Show palette colors values for dimension")
-
-gudhi.show_palette_values()
-
-print("#####################################################################")
 print("Show barcode persistence example")
 
 persistence = [(2, (1.0, float('inf'))), (1, (1.4142135623730951, float('inf'))),
@@ -50,5 +45,5 @@ pplot.show()
 print("#####################################################################")
 print("Show diagram persistence example with a confidence band")
 
-pplot = gudhi.plot_persistence_diagram(persistence, band_boot=0.2)
+pplot = gudhi.plot_persistence_diagram(persistence, band=0.2)
 pplot.show()

@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
 project(Persistence_representations_landscapes_utilities)
 
 add_persistence_representation_creation_utility(create_landscapes "-1")

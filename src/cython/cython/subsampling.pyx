@@ -112,7 +112,8 @@ def pick_n_random_points(points=None, off_file='', nb_points=0):
         return subsampling_n_random_points(points, nb_points)
 
 def sparsify_point_set(points=None, off_file='', min_squared_dist=0.0):
-    """Subsample a point set by picking random vertices.
+    """Outputs a subset of the input points so that the squared distance
+    between any two points is greater than or equal to min_squared_dist.
 
     :param points: The input point set.
     :type points: vector[vector[double]].
@@ -122,8 +123,9 @@ def sparsify_point_set(points=None, off_file='', min_squared_dist=0.0):
     :param off_file: An OFF file style name.
     :type off_file: string
 
-    :param min_squared_dist: Number of points of the subsample.
-    :type min_squared_dist: unsigned.
+    :param min_squared_dist: Minimum squared distance separating the output \
+    points.
+    :type min_squared_dist: float.
     :returns:  The subsample point set.
     :rtype: vector[vector[double]]
     """

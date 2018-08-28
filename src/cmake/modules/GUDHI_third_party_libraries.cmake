@@ -8,11 +8,9 @@ endif(NOT Boost_FOUND)
 
 find_package(GMP)
 if(GMP_FOUND)
-  message(STATUS "GMP_LIBRARIES = ${GMP_LIBRARIES}")
   INCLUDE_DIRECTORIES(${GMP_INCLUDE_DIR})
   find_package(GMPXX)
   if(GMPXX_FOUND)
-    message(STATUS "GMPXX_LIBRARIES = ${GMPXX_LIBRARIES}")
     INCLUDE_DIRECTORIES(${GMPXX_INCLUDE_DIR})
   endif()
 endif()
@@ -54,12 +52,12 @@ if(CGAL_FOUND)
       endforeach(CGAL_INCLUDE_DIR ${CGAL_INCLUDE_DIRS})
     endif(NOT CGAL_VERSION VERSION_GREATER 4.9.0)
 
-    if (NOT CGAL_VERSION VERSION_GREATER 4.11.0)
+    if (CGAL_VERSION VERSION_LESS 4.11.0)
       # For dev version
       include_directories(BEFORE "src/common/include/gudhi_patches")
       # For user version
       include_directories(BEFORE "include/gudhi_patches")
-    endif (NOT CGAL_VERSION VERSION_GREATER 4.11.0)
+    endif ()
   endif()
 endif()
 
@@ -79,7 +77,6 @@ endif(WITH_GUDHI_USE_TBB)
 set(CGAL_WITH_EIGEN3_VERSION 0.0.0)
 find_package(Eigen3 3.1.0)
 if (EIGEN3_FOUND)
-  message(STATUS "Eigen3 version: ${EIGEN3_VERSION}.")
   include( ${EIGEN3_USE_FILE} )
   set(CGAL_WITH_EIGEN3_VERSION ${CGAL_VERSION})
 endif (EIGEN3_FOUND)
@@ -119,7 +116,34 @@ message(STATUS "boost library dirs:" ${Boost_LIBRARY_DIRS})
 
 # Find the correct Python interpreter.
 # Can be set with -DPYTHON_EXECUTABLE=/usr/bin/python3 or -DPython_ADDITIONAL_VERSIONS=3 for instance.
-find_package(Cython)
+find_package( PythonInterp )
+
+# find_python_module tries to import module in Python interpreter and to retrieve its version number
+# returns ${PYTHON_MODULE_NAME_UP}_VERSION and ${PYTHON_MODULE_NAME_UP}_FOUND
+function( find_python_module PYTHON_MODULE_NAME )
+  string(TOUPPER ${PYTHON_MODULE_NAME} PYTHON_MODULE_NAME_UP)
+  execute_process(
+          COMMAND ${PYTHON_EXECUTABLE}  -c "import ${PYTHON_MODULE_NAME}; print(${PYTHON_MODULE_NAME}.__version__)"
+          RESULT_VARIABLE PYTHON_MODULE_RESULT
+          OUTPUT_VARIABLE PYTHON_MODULE_VERSION
+          ERROR_VARIABLE PYTHON_MODULE_ERROR)
+  if(PYTHON_MODULE_RESULT EQUAL 0)
+    # Remove carriage return
+    string(STRIP ${PYTHON_MODULE_VERSION} PYTHON_MODULE_VERSION)
+    set(${PYTHON_MODULE_NAME_UP}_VERSION ${PYTHON_MODULE_VERSION} PARENT_SCOPE)
+    set(${PYTHON_MODULE_NAME_UP}_FOUND TRUE PARENT_SCOPE)
+  else()
+    unset(${PYTHON_MODULE_NAME_UP}_VERSION PARENT_SCOPE)
+    set(${PYTHON_MODULE_NAME_UP}_FOUND FALSE PARENT_SCOPE)
+  endif()
+endfunction( find_python_module )
+
+if( PYTHONINTERP_FOUND )
+  find_python_module("cython")
+  find_python_module("pytest")
+  find_python_module("matplotlib")
+  find_python_module("numpy")
+endif()
 
 if(NOT GUDHI_CYTHON_PATH)
   message(FATAL_ERROR "ERROR: GUDHI_CYTHON_PATH is not valid.")

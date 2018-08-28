@@ -1,3 +1,7 @@
+:orphan:
+
+.. To get rid of WARNING: document isn't included in any toctree
+
 Cubical complex user manual
 ===========================
 Definition
@@ -144,6 +148,7 @@ the program output is:
 .. testoutput::
 
     Periodic cubical complex is of dimension 2 - 42 simplices.
+
 Examples.
 ---------
 

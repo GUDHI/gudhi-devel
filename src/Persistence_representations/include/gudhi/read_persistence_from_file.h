@@ -57,7 +57,7 @@ std::vector<std::pair<double, double> > read_persistence_intervals_in_one_dimens
 
   std::string line;
   std::vector<std::pair<double, double> > barcode_initial =
-      read_persistence_intervals_in_dimension(filename, (int)dimension);
+      read_persistence_intervals_in_dimension(filename, static_cast<int>(dimension));
   std::vector<std::pair<double, double> > final_barcode;
   final_barcode.reserve(barcode_initial.size());
 
@@ -92,8 +92,8 @@ std::vector<std::pair<double, double> > read_persistence_intervals_in_one_dimens
 
     if ((barcode_initial[i].second == std::numeric_limits<double>::infinity()) &&
         (what_to_substitute_for_infinite_bar != -1)) {
-      if (barcode_initial[i].first < what_to_substitute_for_infinite_bar)  // if only birth < death.
-      {
+      if (barcode_initial[i].first < what_to_substitute_for_infinite_bar) {
+        // if only birth < death.
         final_barcode.push_back(
             std::pair<double, double>(barcode_initial[i].first, what_to_substitute_for_infinite_bar));
       }

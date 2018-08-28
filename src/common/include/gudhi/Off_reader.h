@@ -137,7 +137,7 @@ class Off_reader {
       if (!std::ifstream::sentry(stream_)) return false;
       std::getline(stream_, uncomment_line);
     } while (uncomment_line[0] == '#');
-    return (bool)stream_;
+    return static_cast<bool>(stream_);
   }
 
   template<typename OffVisitor>

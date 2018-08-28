@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EXAMPLE_WITNESS_COMPLEX_GENERATORS_H_
-#define EXAMPLE_WITNESS_COMPLEX_GENERATORS_H_
+#ifndef GENERATORS_H_
+#define GENERATORS_H_
 
 #include <CGAL/Epick_d.h>
 #include <CGAL/point_generators_d.h>
@@ -163,4 +163,4 @@ void generate_points_torus(Point_Vector& W, int nbP, int dim) {
   }
 }
 
-#endif  // EXAMPLE_WITNESS_COMPLEX_GENERATORS_H_
+#endif  // GENERATORS_H_

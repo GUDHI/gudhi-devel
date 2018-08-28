@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
 project(off_file_from_shape_generator)
 
 if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)

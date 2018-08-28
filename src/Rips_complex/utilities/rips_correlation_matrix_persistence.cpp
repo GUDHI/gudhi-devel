@@ -31,6 +31,7 @@
 #include <string>
 #include <vector>
 #include <limits>  // infinity
+#include <algorithm>  // for sort
 
 // Types definition
 using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
@@ -165,6 +166,6 @@ void program_options(int argc, char* argv[], std::string& csv_matrix_file, std::
 
     std::cout << "Usage: " << argv[0] << " [options] input-file" << std::endl << std::endl;
     std::cout << visible << std::endl;
-    std::abort();
+    exit(-1);
   }
 }

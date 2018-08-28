@@ -32,6 +32,8 @@
 #include <CGAL/Periodic_3_Delaunay_triangulation_traits_3.h>
 #include <CGAL/Periodic_3_Delaunay_triangulation_3.h>
 #include <CGAL/Alpha_shape_3.h>
+#include <CGAL/Alpha_shape_cell_base_3.h>
+#include <CGAL/Alpha_shape_vertex_base_3.h>
 #include <CGAL/iterator.h>
 
 #include <fstream>
@@ -295,6 +297,6 @@ void program_options(int argc, char *argv[], std::string &off_file_points, std::
 
     std::cout << "Usage: " << argv[0] << " [options] input-file cuboid-file" << std::endl << std::endl;
     std::cout << visible << std::endl;
-    std::abort();
+    exit(-1);
   }
 }

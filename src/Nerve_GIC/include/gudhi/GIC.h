@@ -25,7 +25,6 @@
 
 #ifdef GUDHI_USE_TBB
 #include <tbb/parallel_for.h>
-#include <tbb/task_scheduler_init.h>
 #include <tbb/mutex.h>
 #endif
 
@@ -63,7 +62,6 @@ namespace Gudhi {
 namespace cover_complex {
 
 using Simplex_tree = Gudhi::Simplex_tree<>;
-using Simplex_handle = Simplex_tree::Simplex_handle;
 using Filtration_value = Simplex_tree::Filtration_value;
 using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
 using Persistence_diagram = std::vector<std::pair<double, double> >;
@@ -150,10 +148,20 @@ class Cover_complex {
     for (boost::tie(ei, ei_end) = boost::edges(G); ei != ei_end; ++ei) boost::remove_edge(*ei, G);
   }
 
+  // Thread local is not available on XCode version < V.8
+  // If not available, random engine is a class member.
+#ifndef GUDHI_CAN_USE_CXX11_THREAD_LOCAL
+  std::default_random_engine re;
+#endif  // GUDHI_CAN_USE_CXX11_THREAD_LOCAL
+
   // Find random number in [0,1].
   double GetUniform() {
+    // Thread local is not available on XCode version < V.8
+    // If available, random engine is defined for each thread.
+#ifdef GUDHI_CAN_USE_CXX11_THREAD_LOCAL
     thread_local std::default_random_engine re;
-    thread_local std::uniform_real_distribution<double> Dist(0, 1);
+#endif  // GUDHI_CAN_USE_CXX11_THREAD_LOCAL
+    std::uniform_real_distribution<double> Dist(0, 1);
     return Dist(re);
   }
 
@@ -218,7 +226,25 @@ class Cover_complex {
   void set_mask(int nodemask) { mask = nodemask; }
 
  public:
-  /** \brief Reads and stores the input point cloud.
+
+
+  /** \brief Reads and stores the input point cloud from vector stored in memory.
+   *
+   * @param[in] cloud input vector representing the point cloud. Each row is a point and each coordinate is a vector.
+   *
+   */
+  template <class InputRange>
+  void set_point_cloud_from_range(InputRange const & cloud) {
+    n = cloud.size(); data_dimension = cloud[0].size(); point_cloud_name = "matrix";
+    for(int i = 0; i < n; i++){
+      point_cloud.emplace_back(cloud[i].begin(), cloud[i].begin() + data_dimension);
+      boost::add_vertex(one_skeleton_OFF);
+      vertices.push_back(boost::add_vertex(one_skeleton));
+      cover.emplace_back();
+    }
+  }
+
+  /** \brief Reads and stores the input point cloud from .(n)OFF file.
    *
    * @param[in] off_file_name name of the input .OFF or .nOFF file.
    *
@@ -269,7 +295,7 @@ class Cover_complex {
         point.assign(std::istream_iterator<double>(iss), std::istream_iterator<double>());
         point_cloud.emplace_back(point.begin(), point.begin() + data_dimension);
         boost::add_vertex(one_skeleton_OFF);
-        vertices.push_back(boost::add_vertex(one_skeleton)); cover.emplace_back();
+        vertices.push_back(boost::add_vertex(one_skeleton));
         cover.emplace_back();
         i++;
       }
@@ -416,17 +442,20 @@ class Cover_complex {
   template <typename Distance>
   double set_graph_from_automatic_rips(Distance distance, int N = 100) {
     int m = floor(n / std::exp((1 + rate_power) * std::log(std::log(n) / std::log(rate_constant))));
-    m = std::min(m, n - 1); double delta = 0;
+    m = std::min(m, n - 1);
+    double delta = 0;
 
     if (verbose) std::cout << n << " points in R^" << data_dimension << std::endl;
     if (verbose) std::cout << "Subsampling " << m << " points" << std::endl;
 
     if (distances.size() == 0) compute_pairwise_distances(distance);
 
-    #ifdef GUDHI_USE_TBB
-      tbb::mutex deltamutex;
-      tbb::parallel_for(0, N, [&](int i){
-	std::vector<int> samples(m);
+    // This cannot be parallelized if thread_local is not defined
+    // thread_local is not defined for XCode < v.8
+    #if defined(GUDHI_USE_TBB) && defined(GUDHI_CAN_USE_CXX11_THREAD_LOCAL)
+    tbb::mutex deltamutex;
+    tbb::parallel_for(0, N, [&](int i){
+        std::vector<int> samples(m);
         SampleWithoutReplacement(n, m, samples);
         double hausdorff_dist = 0;
         for (int j = 0; j < n; j++) {
@@ -434,13 +463,13 @@ class Cover_complex {
           for (int k = 1; k < m; k++) mj = std::min(mj, distances[j][samples[k]]);
           hausdorff_dist = std::max(hausdorff_dist, mj);
         }
-	deltamutex.lock();
+        deltamutex.lock();
         delta += hausdorff_dist / N;
-	deltamutex.unlock();
+        deltamutex.unlock();
       });
     #else
       for (int i = 0; i < N; i++) {
-	std::vector<int> samples(m);
+        std::vector<int> samples(m);
         SampleWithoutReplacement(n, m, samples);
         double hausdorff_dist = 0;
         for (int j = 0; j < n; j++) {
@@ -490,8 +519,6 @@ class Cover_complex {
            */
   void set_function_from_coordinate(int k) {
     for (int i = 0; i < n; i++) func.push_back(point_cloud[i][k]);
-    char coordinate[100];
-    sprintf(coordinate, "coordinate %d", k);
     functional_cover = true;
     cover_name = "coordinate " + std::to_string(k);
   }
@@ -723,11 +750,13 @@ class Cover_complex {
     }
 
     #ifdef GUDHI_USE_TBB
-      if (verbose) std::cout << "Computing connected components (parallelized)..." << std::endl; tbb::mutex covermutex, idmutex;
+      if (verbose) std::cout << "Computing connected components (parallelized)..." << std::endl;
+      tbb::mutex covermutex, idmutex;
       tbb::parallel_for(0, res, [&](int i){
         // Compute connected components
         Graph G = one_skeleton.create_subgraph();
-        int num = preimages[i].size(); std::vector<int> component(num);
+        int num = preimages[i].size();
+        std::vector<int> component(num);
         for (int j = 0; j < num; j++) boost::add_vertex(index[vertices[preimages[i][j]]], G);
         boost::connected_components(G, &component[0]);
         int max = 0;
@@ -741,20 +770,20 @@ class Cover_complex {
           int identifier = ((i + component[j])*(i + component[j]) + 3 * i + component[j]) / 2;
 
           // Update covers
-	  covermutex.lock();
+          covermutex.lock();
           cover[preimages[i][j]].push_back(identifier);
           cover_back[identifier].push_back(preimages[i][j]);
           cover_fct[identifier] = i;
           cover_std[identifier] = funcstd[i];
           cover_color[identifier].second += func_color[preimages[i][j]];
           cover_color[identifier].first += 1;
-	  covermutex.unlock();
+          covermutex.unlock();
         }
 
         // Maximal dimension is total number of connected components
-	idmutex.lock();
+        idmutex.lock();
         id += max + 1;
-	idmutex.unlock();
+        idmutex.unlock();
       });
     #else
       if (verbose) std::cout << "Computing connected components..." << std::endl;
@@ -848,7 +877,6 @@ class Cover_complex {
     Index_map index = boost::get(boost::vertex_index, one_skeleton);
     std::vector<double> mindist(n);
     for (int j = 0; j < n; j++) mindist[j] = std::numeric_limits<double>::max();
-
 
     // Compute the geodesic distances to subsamples with Dijkstra
     #ifdef GUDHI_USE_TBB
@@ -954,7 +982,7 @@ class Cover_complex {
    * @param[in] color input vector of values.
    *
    */
-  void set_color_from_vector(std::vector<double> color) {
+  void set_color_from_range(std::vector<double> color) {
     for (unsigned int i = 0; i < color.size(); i++) func_color.push_back(color[i]);
   }
 
@@ -1098,7 +1126,7 @@ class Cover_complex {
   /** \brief Computes the extended persistence diagram of the complex.
    *
    */
-  void compute_PD() {
+  Persistence_diagram compute_PD() {
     Simplex_tree st;
 
     // Compute max and min
@@ -1118,9 +1146,8 @@ class Cover_complex {
     for (std::map<int, double>::iterator it = cover_std.begin(); it != cover_std.end(); it++) {
       int vertex = it->first; float val = it->second;
       int vert[] = {vertex}; int edge[] = {vertex, -2};
-      Simplex_handle shv = st.find(vert); Simplex_handle she = st.find(edge);
-      if(shv != st.null_simplex()) st.assign_filtration(shv, -2 + (val - minf)/(maxf - minf));
-      if(she != st.null_simplex()) st.assign_filtration(she,  2 - (val - minf)/(maxf - minf));
+      st.assign_filtration(st.find(vert), -2 + (val - minf)/(maxf - minf));
+      st.assign_filtration(st.find(edge),  2 - (val - minf)/(maxf - minf));
     }
     st.make_filtration_non_decreasing();
 
@@ -1150,6 +1177,7 @@ class Cover_complex {
         if (verbose) std::cout << "  [" << birth << ", " << death << "]" << std::endl;
       }
     }
+    return PD;
   }
 
  public:
@@ -1175,7 +1203,7 @@ class Cover_complex {
           Cboot.point_cloud.push_back(this->point_cloud[id]); Cboot.cover.emplace_back(); Cboot.func.push_back(this->func[id]);
           boost::add_vertex(Cboot.one_skeleton_OFF); Cboot.vertices.push_back(boost::add_vertex(Cboot.one_skeleton));
         }
-        Cboot.set_color_from_vector(Cboot.func);
+        Cboot.set_color_from_range(Cboot.func);
 
         for (int j = 0; j < n; j++) {
           std::vector<double> dist(n);

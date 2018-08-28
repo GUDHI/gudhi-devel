@@ -29,10 +29,6 @@ struct FilteredComplex
 {
 /** Handle to specify a simplex. */
   typedef unspecified      Simplex_handle;
-/** \brief Key associated to each simplex. 
-  *
-  * Must be an integer type. */
-  typedef unspecified      Simplex_key;
 /** \brief Type for the value of the filtration function.
   *
   * Must be comparable with <. */
@@ -58,20 +54,10 @@ struct FilteredComplex
   * filtration function on the complex. */
   Filtration_value         filtration(Simplex_handle sh);
 
-/** \brief Returns a key that is different from the keys associated 
-  * to the simplices. */
-  Simplex_key              null_key ();
-/** \brief Returns the key associated to a simplex.
- *
- * This is never called on null_simplex(). */
-  Simplex_key              key      ( Simplex_handle sh );
 /** \brief Returns the simplex that has index idx in the filtration.
  *
  * This is only called on valid indices. */
   Simplex_handle           simplex  ( size_t idx );
-/** \brief Assign a key to a simplex. */
-  void                     assign_key(Simplex_handle sh, Simplex_key key);
- 
 /** \brief Iterator on the simplices belonging to the
   * boundary of a simplex.
   *
@@ -115,6 +101,26 @@ typedef unspecified Filtration_simplex_range;
   * .begin() and .end() return type Filtration_simplex_iterator.*/
 Filtration_simplex_range filtration_simplex_range();
 
+/** \name Map interface
+  * Conceptually a `std::unordered_map<Simplex_handle,std::size_t>`.
+  *  @{ */
+/** \brief Data stored for each simplex. 
+  *
+  * Must be an integer type. */
+  typedef unspecified      Simplex_key;
+/** \brief Returns a constant dummy number that is either negative,
+  * or at least as large as `num_simplices()`.  Suggested value: -1.  */
+  Simplex_key              null_key ();
+/** \brief Returns the number stored for a simplex by `assign_key`.
+  *
+  * This is never called on null_simplex(). */
+  Simplex_key              key      ( Simplex_handle sh );
+/** \brief Store a number for a simplex, which can later be retrieved with `key(sh)`.
+  *
+  * This is never called on null_simplex(). */
+  void                     assign_key(Simplex_handle sh, Simplex_key n);
+/** @} */
+ 
 
 /* \brief Iterator over the simplices of the complex,
   * in an arbitrary order.

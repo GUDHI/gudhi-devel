@@ -31,6 +31,8 @@
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Regular_triangulation_3.h>
 #include <CGAL/Alpha_shape_3.h>
+#include <CGAL/Alpha_shape_cell_base_3.h>
+#include <CGAL/Alpha_shape_vertex_base_3.h>
 #include <CGAL/iterator.h>
 
 // For CGAL < 4.11
@@ -309,6 +311,6 @@ void program_options(int argc, char *argv[], std::string &off_file_points, std::
 
     std::cout << "Usage: " << argv[0] << " [options] input-file weight-file" << std::endl << std::endl;
     std::cout << visible << std::endl;
-    std::abort();
+    exit(-1);
   }
 }
