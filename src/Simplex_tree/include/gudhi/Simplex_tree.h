@@ -334,7 +334,9 @@ class Simplex_tree {
 #ifdef DEBUG_TRACES
     std::cout << "Simplex_tree move constructor" << std::endl;
 #endif  // DEBUG_TRACES
+    // Need to update root members (children->oncles and children need to point on the new root pointer)
     for (auto& map_el : root_.members()) {
+      // children->oncles update after the move
       if (map_el.second.children()->oncles() == &(simplex_source.root_))
         // reset with the moved root_ pointer value
         map_el.second.children()->oncles_ = &root_;
@@ -342,6 +344,10 @@ class Simplex_tree {
         // if simplex is of dimension 0, oncles_ shall be nullptr
         GUDHI_CHECK(map_el.second.children()->oncles_ == nullptr,
                     std::invalid_argument("Simplex_tree move constructor from an invalid Simplex_tree"));
+      // children update after the move
+      if (map_el.second.children() == &(simplex_source.root_))
+        // reset with the moved root_ pointer value
+        map_el.second.assign_children(&root_);
     }
     // just need to set dimension_ on source to make it available again
     // (filtration_vect_ and members are already set from the move)
@@ -393,7 +399,9 @@ class Simplex_tree {
       std::swap( filtration_vect_, simplex_source.filtration_vect_ );
       std::swap( dimension_, simplex_source.dimension_ );
 
+      // Need to update root members (children->oncles and children need to point on the new root pointer)
       for (auto& map_el : root_.members()) {
+        // children->oncles update after the move
         if (map_el.second.children()->oncles() == &(simplex_source.root_))
           // reset with the moved root_ pointer value
           map_el.second.children()->oncles_ = &root_;
@@ -401,6 +409,10 @@ class Simplex_tree {
           // if simplex is of dimension 0, oncles_ shall be nullptr
           GUDHI_CHECK(map_el.second.children()->oncles_ == nullptr,
                       std::invalid_argument("Simplex_tree move constructor from an invalid Simplex_tree"));
+        // children update after the move
+        if (map_el.second.children() == &(simplex_source.root_))
+          // reset with the moved root_ pointer value
+          map_el.second.assign_children(&root_);
       }
     }
     return *this;
