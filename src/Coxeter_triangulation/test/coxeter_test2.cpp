@@ -143,7 +143,8 @@ int main(int argc, char * const argv[]) {
     std::cout << "& " << i << " ";
   std::cout << "\\\\ \\hline\n\\parbox[t]{2mm}{\\multirow{" << 2*(dimension + 1) << "}{*}{\\rotatebox[origin=c]{90}{\\centering Simplex dimension}}}";
   for (unsigned f_d = 0; f_d <= dimension; ++f_d) {
-    std::cout << "& \\multirow{2}{*}{" << f_d << "} & old ";
+    // std::cout << "& \\multirow{2}{*}{" << f_d << "} & old ";
+    std::cout << "& \\multirow{2}{*}{" << f_d << "} & $[0, \\dim]$ ";
     for (unsigned ff_d = 0; ff_d <= f_d; ++ff_d) {
       std::cout << "& ";
       if (std::round(total1[f_d][ff_d]*1000)/1000 > std::round(total2[f_d][ff_d]*1000)/1000)
@@ -153,9 +154,10 @@ int main(int argc, char * const argv[]) {
     for (unsigned ff_d = f_d + 1; ff_d <= dimension; ++ff_d) {
       std::cout << "& ";
     }
-    std::cout << "\\\\ \\cline{3-" << f_d + 4 << "}\n & & new "; 
+    // std::cout << "\\\\ \\cline{3-" << f_d + 4 << "}\n & & new "; 
+    std::cout << "\\\\ \\cline{3-" << f_d + 4 << "}\n & & $[0, \\mathrm{dim}(\\sigma_\\kappa)]$ "; 
     for (unsigned ff_d = 0; ff_d <= f_d; ++ff_d) {
-      std::cout << "& ";
+      std::cout << "& \\bf ";
       if (std::round(total1[f_d][ff_d]*1000)/1000 > std::round(total2[f_d][ff_d]*1000)/1000)
         std::cout << "\\cellcolor{green!20} ";
       std::cout << std::round(total2[f_d][ff_d]*1000)/1000. << " ";
