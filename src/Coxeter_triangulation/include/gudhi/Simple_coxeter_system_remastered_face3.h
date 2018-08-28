@@ -1293,16 +1293,16 @@ private:
               value_.push_back(a_id_[k], false);
           bool curr_state_is_valid = true;
           if (nonempty_lanes_[j]) {
-            std::size_t i_ref = j-1, k_ref = (j*j+j-2)/2 - i_ref;
-            while (!a_id_.is_fixed(k_ref++))
-              i_ref--;
-            curr_state_is_valid = triplet_check_nonempty(i, j, i_ref);
+            // std::size_t i_ref = j-1, k_ref = (j*j+j-2)/2 - i_ref;
+            // while (!a_id_.is_fixed(k_ref++))
+            //   i_ref--;
+            // curr_state_is_valid = triplet_check_nonempty(i, j, i_ref);
+            curr_state_is_valid = triplet_check_nonempty(i, j, mnv_[j]);
           }
           else {
             if (basis_k_.size() == j && i != basis_k_.back())
-              // for (std::size_t l = basis_k_.back(); l < j && curr_state_is_valid; ++l)
-              //   curr_state_is_valid = triplet_check(i,l,j);
-              curr_state_is_valid = triplet_check(i,i+1,j);
+              for (std::size_t l = basis_k_.back(); l < j && curr_state_is_valid; ++l)
+                curr_state_is_valid = triplet_check(i,l,j);
             else
               for (std::size_t l = i + 1; l < j && curr_state_is_valid; ++l)
                 curr_state_is_valid = triplet_check(i,l,j);
@@ -1456,8 +1456,10 @@ private:
       std::size_t i = 0, j = 1, k = 0; 
       for (; j < ambient_dimension_ + 1; ++j)
 	for (i = 0; i < j; ++i, ++k)
-	  if (a_id.is_fixed(k))
+	  if (a_id.is_fixed(k)) {
 	    nonempty_lanes_[j] = true;
+            mnv_.emplace(std::make_pair(j,j-i-1));
+          }
       if (!a_id.is_fixed(0)) {
         if (!stack_push(false, false)) {
           stack_pop();
@@ -1495,6 +1497,7 @@ private:
     std::vector<unsigned> basis_k_;
     std::stack<State_> stack_;
     std::vector<bool> nonempty_lanes_;
+    std::map<std::size_t, std::size_t> mnv_;
   };
 
   
