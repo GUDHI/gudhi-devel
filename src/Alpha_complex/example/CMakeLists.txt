@@ -39,5 +39,13 @@ if(CGAL_FOUND)
     add_test(NAME Alpha_complex_example_weighted_3d_from_points
             COMMAND $<TARGET_FILE:Alpha_complex_example_weighted_3d_from_points>)
 
+    add_executable ( Alpha_complex_example_3d_from_points Alpha_complex_3d_from_points.cpp )
+    target_link_libraries(Alpha_complex_example_3d_from_points  ${CGAL_LIBRARY})
+    if (TBB_FOUND)
+      target_link_libraries(Alpha_complex_example_3d_from_points ${TBB_LIBRARIES})
+    endif()
+    add_test(NAME Alpha_complex_example_3d_from_points
+            COMMAND $<TARGET_FILE:Alpha_complex_example_3d_from_points>)
+
   endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
 endif()

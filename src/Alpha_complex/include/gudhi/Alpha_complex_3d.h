@@ -44,6 +44,8 @@
 #include <stdexcept>
 #include <cstddef>
 #include <memory>  // for std::unique_ptr
+#include <type_traits>  // for std::conditional and std::enable_if
+
 
 #if CGAL_VERSION_NR < 1041101000
   // Make compilation fail - required for external projects - https://gitlab.inria.fr/GUDHI/gudhi-devel/issues/10
@@ -54,6 +56,13 @@
 namespace Gudhi {
 
 namespace alpha_complex {
+
+enum class complexity: char
+{
+  fast='f',
+  safe='s',
+  exact='e',
+};
 
 /**
  * \class Alpha_complex_3d
@@ -75,9 +84,51 @@ namespace alpha_complex {
  * Delaunay complex.
  *
  */
-template<typename AlphaComplex3dOptions>
+template<complexity Complexity = complexity::fast, bool Weighted = false, bool Periodic = false>
 class Alpha_complex_3d {
-  using Alpha_shape_3 = typename AlphaComplex3dOptions::Alpha_shape_3;
+  using Predicates = typename std::conditional<((!Weighted && !Periodic) || (Complexity == complexity::fast)),
+      CGAL::Exact_predicates_inexact_constructions_kernel,
+      CGAL::Exact_predicates_exact_constructions_kernel>::type;
+
+  using Kernel = typename std::conditional<Periodic,
+      CGAL::Periodic_3_Delaunay_triangulation_traits_3<Predicates>,
+      Predicates>::type;
+
+  using Exact_tag = typename std::conditional<(Complexity == complexity::fast),
+      CGAL::Tag_false,
+      CGAL::Tag_true>::type;
+
+  using TdsVb = typename std::conditional<Periodic,
+      CGAL::Periodic_3_triangulation_ds_vertex_base_3<>,
+      CGAL::Triangulation_ds_vertex_base_3<>>::type;
+
+  using Tvb = typename std::conditional<Weighted,
+      CGAL::Regular_triangulation_vertex_base_3<Kernel, TdsVb>,
+      CGAL::Triangulation_vertex_base_3<Kernel, TdsVb>>::type;
+
+  using Vb = CGAL::Alpha_shape_vertex_base_3<Kernel, Tvb, Exact_tag>;
+
+  using Tcb = typename std::conditional<Weighted,
+      CGAL::Regular_triangulation_cell_base_3<Kernel>,
+      CGAL::Triangulation_cell_base_3<Kernel>>::type;
+
+  using Cb = CGAL::Alpha_shape_cell_base_3<Kernel, Tcb, Exact_tag>;
+  using Tds = CGAL::Triangulation_data_structure_3<Vb, Cb>;
+
+  using Pre_triangulation_3 = typename std::conditional<Weighted,
+      CGAL::Regular_triangulation_3<Kernel, Tds>,
+      CGAL::Delaunay_triangulation_3<Kernel, Tds>>::type;
+
+  using Triangulation_3 = typename std::conditional<(Weighted && Periodic),
+      CGAL::Periodic_3_regular_triangulation_3<Kernel, Tds>,
+      Pre_triangulation_3>::type;
+
+public:
+  using Alpha_shape_3 = CGAL::Alpha_shape_3<Triangulation_3, Exact_tag>;
+
+  using Point_3 = typename Kernel::Point_3;
+
+private:
   using Alpha_value_type = typename Alpha_shape_3::FT;
   using Dispatch =
   CGAL::Dispatch_output_iterator<CGAL::cpp11::tuple<CGAL::Object, Alpha_value_type>,
@@ -95,9 +146,6 @@ class Alpha_complex_3d {
 #endif
 
 public:
-  using Point_3 = typename AlphaComplex3dOptions::Point_3;
-
-public:
   /** \brief Alpha_complex constructor from a list of points.
   *
   * Duplicate points are inserted once in the Alpha_complex. This is the reason why the vertices may be not contiguous.
@@ -112,9 +160,9 @@ public:
   */
   template<typename InputPointRange >
   Alpha_complex_3d(const InputPointRange& points) {
-    static_assert(!AlphaComplex3dOptions::weighted,
+    static_assert(!Weighted,
                   "This constructor is not available for weighted versions of Alpha_complex_3d");
-    static_assert(!AlphaComplex3dOptions::periodic,
+    static_assert(!Periodic,
                   "This constructor is not available for periodic versions of Alpha_complex_3d");
 
     alpha_shape_3_ptr_ = std::unique_ptr<Alpha_shape_3>(new Alpha_shape_3(std::begin(points), std::end(points), 0,
@@ -151,14 +199,14 @@ public:
   */
   template<typename InputPointRange , typename WeightRange>
   Alpha_complex_3d(const InputPointRange& points, WeightRange weights) {
-    static_assert(AlphaComplex3dOptions::weighted,
+    static_assert(Weighted,
                   "This constructor is not available for non-weighted versions of Alpha_complex_3d");
-    static_assert(!AlphaComplex3dOptions::periodic,
+    static_assert(!Periodic,
                   "This constructor is not available for periodic versions of Alpha_complex_3d");
     GUDHI_CHECK((weights.size() == points.size()),
                 std::invalid_argument("Points number in range different from weights range number"));
 
-    using Weighted_point_3 = typename AlphaComplex3dOptions::Weighted_point_3;
+    using Weighted_point_3 = typename Triangulation_3::Weighted_point;
     std::vector<Weighted_point_3> weighted_points_3;
 
     std::size_t index = 0;
@@ -207,13 +255,13 @@ public:
   * std::end return input iterators on a AlphaComplex3dOptions::Point_3.
   * The type of x_min, y_min, z_min, x_max, y_max and z_max is AlphaComplex3dOptions::Alpha_shape_3::FT.
   */
-  template<typename InputPointRange>
+  /*template<typename InputPointRange>
   Alpha_complex_3d(const InputPointRange& points,
                    Alpha_value_type x_min, Alpha_value_type y_min, Alpha_value_type z_min,
                    Alpha_value_type x_max, Alpha_value_type y_max, Alpha_value_type z_max) {
-    static_assert(!AlphaComplex3dOptions::weighted,
+    static_assert(!Weighted,
                   "This constructor is not available for weighted versions of Alpha_complex_3d");
-    static_assert(AlphaComplex3dOptions::periodic,
+    static_assert(Periodic,
                   "This constructor is not available for non-periodic versions of Alpha_complex_3d");
     // Checking if the cuboid is the same in x,y and z direction. If not, CGAL will not process it.
     GUDHI_CHECK((x_max - x_min == y_max - y_min) &&
@@ -246,7 +294,7 @@ public:
     std::cout << "filtration_with_alpha_values returns : " << objects_.size() << " objects" << std::endl;
 #endif  // DEBUG_TRACES
 
-  }
+  }*/
 
   /** \brief Alpha_complex constructor from a list of points, associated weights and an iso-cuboid coordinates.
   *
@@ -284,13 +332,13 @@ public:
   * std::end return an input iterator on a AlphaComplex3dOptions::Alpha_shape_3::FT.
   * The type of x_min, y_min, z_min, x_max, y_max and z_max is AlphaComplex3dOptions::Alpha_shape_3::FT.
   */
-  template<typename InputPointRange , typename WeightRange>
+  /*template<typename InputPointRange , typename WeightRange>
   Alpha_complex_3d(const InputPointRange& points, WeightRange weights,
                    Alpha_value_type x_min, Alpha_value_type y_min, Alpha_value_type z_min,
                    Alpha_value_type x_max, Alpha_value_type y_max, Alpha_value_type z_max) {
-    static_assert(AlphaComplex3dOptions::weighted,
+    static_assert(Weighted,
                   "This constructor is not available for non-weighted versions of Alpha_complex_3d");
-    static_assert(AlphaComplex3dOptions::periodic,
+    static_assert(Periodic,
                   "This constructor is not available for non-periodic versions of Alpha_complex_3d");
     GUDHI_CHECK((weights.size() == points.size()),
                 std::invalid_argument("Points number in range different from weights range number"));
@@ -344,6 +392,19 @@ public:
 #ifdef DEBUG_TRACES
     std::cout << "filtration_with_alpha_values returns : " << objects_.size() << " objects" << std::endl;
 #endif  // DEBUG_TRACES
+  }*/
+  template <class Filtration_value, class Alpha_value_iterator>
+  typename std::enable_if<std::is_same<Exact_tag, CGAL::Tag_false>::value, Filtration_value>::type
+  value_from_iterator(Alpha_value_iterator the_alpha_value_iterator)
+  {
+    return *(the_alpha_value_iterator);
+  }
+
+  template <class Filtration_value, class Alpha_value_iterator>
+  typename std::enable_if<std::is_same<Exact_tag, CGAL::Tag_true>::value, Filtration_value>::type
+  value_from_iterator(Alpha_value_iterator the_alpha_value_iterator)
+  {
+    return CGAL::to_double(the_alpha_value_iterator->exact());
   }
 
 
@@ -455,11 +516,8 @@ public:
         }
       }
       // Construction of the simplex_tree
-      //Alpha_value_type filtr;
-      Filtration_value filtr =
-        AlphaComplex3dOptions::template value_from_iterator<Filtration_value,
-                                                            typename std::vector<Alpha_value_type>::iterator>
-                                                              (the_alpha_value_iterator);
+      Filtration_value filtr = value_from_iterator<Filtration_value>(the_alpha_value_iterator);
+
 #ifdef DEBUG_TRACES
       std::cout << "filtration = " << filtr << std::endl;
 #endif  // DEBUG_TRACES

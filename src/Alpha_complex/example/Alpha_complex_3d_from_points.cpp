@@ -1,5 +1,4 @@
 #include <gudhi/Alpha_complex_3d.h>
-#include <gudhi/Alpha_complex_3d_options.h>
 // to construct a simplex_tree from alpha complex
 #include <gudhi/Simplex_tree.h>
 
@@ -8,10 +7,9 @@
 #include <vector>
 #include <limits>  // for numeric limits
 
-using Weighted_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact, true, false>;
-using Point = Weighted_alpha_complex_3d::Point_3 ;
+using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact, false, false>;
+using Point = Alpha_complex_3d::Point_3 ;
 using Vector_of_points = std::vector<Point>;
-using Vector_of_weights = std::vector<Weighted_alpha_complex_3d::Alpha_shape_3::FT>;
 
 int main(int argc, char **argv) {
   if (argc != 1) {
@@ -21,25 +19,19 @@ int main(int argc, char **argv) {
   }
 
   // ----------------------------------------------------------------------------
-  // Init of a list of points and weights from a small molecule
+  // Init of a list of points from a small molecule
   // ----------------------------------------------------------------------------
   Vector_of_points points;
-  Vector_of_weights weights;
   points.push_back(Point(1, -1, -1));
-  weights.push_back(4.);
   points.push_back(Point(-1, 1, -1));
-  weights.push_back(4.);
   points.push_back(Point(-1, -1, 1));
-  weights.push_back(4.);
   points.push_back(Point(1, 1, 1));
-  weights.push_back(4.);
   points.push_back(Point(2, 2, 2));
-  weights.push_back(1.);
 
   // ----------------------------------------------------------------------------
   // Init of an alpha complex from the list of points
   // ----------------------------------------------------------------------------
-  Weighted_alpha_complex_3d alpha_complex_from_points(points, weights);
+  Alpha_complex_3d alpha_complex_from_points(points);
 
   Gudhi::Simplex_tree<> simplex;
   if (alpha_complex_from_points.create_complex(simplex)) {
