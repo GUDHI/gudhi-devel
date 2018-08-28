@@ -1237,6 +1237,27 @@ private:
     // using State_pair = std::pair<std::size_t, bool>;
     friend class boost::iterator_core_access;
 
+    bool triplet_check_nonempty(std::size_t i, std::size_t j, std::size_t i_ref) const {
+      if (i < i_ref) {
+        std::size_t k  = (j*j+j-2)/2 - i;
+        std::size_t k1 = (i_ref*i_ref+i_ref-2)/2 - i;
+        std::size_t k2 = (j*j+j-2)/2 - i_ref;
+        int value_ref = a_id_[k2];
+        return (value_.is_fixed(k1) == value_.is_fixed(k) && value_[k] == value_[k1] + value_ref);
+      }
+      else if (i > i_ref) {
+        std::size_t k  = (j*j+j-2)/2 - i_ref;
+        std::size_t k1 = (i*i+i-2)/2 - i_ref;
+        std::size_t k2 = (j*j+j-2)/2 - i;
+        int value_ref = a_id_[k];
+        if (value_.is_fixed(k1))
+          return (value_.is_fixed(k2) && value_ref == value_[k1] + value_[k2]);
+        else
+          return (!value_.is_fixed(k2) && value_ref == value_[k1] + value_[k2] + 1);
+      }
+      return true;
+    }
+    
     bool triplet_check(std::size_t i, std::size_t l, std::size_t j) const {
       int k  = (j*j+j-2)/2 - i;
       int k1 = (l*l+l-2)/2 - i;
@@ -1271,12 +1292,21 @@ private:
             else
               value_.push_back(a_id_[k], false);
           bool curr_state_is_valid = true;
-          if (basis_k_.size() == j && i != basis_k_.back())
-            for (std::size_t l = basis_k_.back(); l < j && curr_state_is_valid; ++l)
-              curr_state_is_valid = triplet_check(i,l,j);
-          else
-            for (std::size_t l = i + 1; l < j && curr_state_is_valid; ++l)
-              curr_state_is_valid = triplet_check(i,l,j);
+          if (nonempty_lanes_[j]) {
+            std::size_t i_ref = j-1, k_ref = (j*j+j-2)/2 - i_ref;
+            while (!a_id_.is_fixed(k_ref++))
+              i_ref--;
+            curr_state_is_valid = triplet_check_nonempty(i, j, i_ref);
+          }
+          else {
+            if (basis_k_.size() == j && i != basis_k_.back())
+              // for (std::size_t l = basis_k_.back(); l < j && curr_state_is_valid; ++l)
+              //   curr_state_is_valid = triplet_check(i,l,j);
+              curr_state_is_valid = triplet_check(i,i+1,j);
+            else
+              for (std::size_t l = i + 1; l < j && curr_state_is_valid; ++l)
+                curr_state_is_valid = triplet_check(i,l,j);
+          }
           if (curr_state_is_valid &&
               value_.size() == a_id_.size()) {
             value_.set_dimension(curr_dim_lower_);
@@ -1398,13 +1428,12 @@ private:
       std::size_t i = (j*j+j-2)/2 - k;
       if (basis_k_.size() == j && basis_k_.back() == i) {
         basis_k_.pop_back();
-	if (nonempty_lanes_[j])
-	  curr_dim_upper_++;
-	else
-        if (f)
-          curr_dim_upper_++;
-        else
-          curr_dim_lower_--;
+	if (!nonempty_lanes_[j]) {
+          if (f)
+            curr_dim_upper_++;
+          else
+            curr_dim_lower_--;
+        }
       }
     }
     

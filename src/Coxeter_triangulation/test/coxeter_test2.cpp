@@ -11,6 +11,8 @@
 #include <gudhi/Coxeter_complex/Off_point_range.h>
 #include <gudhi/Clock.h>
 
+#include <boost/math/special_functions/binomial.hpp>
+
 #include <CGAL/Epick_d.h>
 #include <CGAL/point_generators_d.h>
 
@@ -85,6 +87,11 @@ void rec_test1(std::vector<unsigned>& decomposition, Coxeter_system& cs, unsigne
   }
 }
 
+std::size_t BinomialCoefficient(std::size_t n, std::size_t k) {
+  if (k == 0) { return 1; }
+  else { return (n * BinomialCoefficient(n - 1, k - 1)) / k; }
+}
+
 /** Test suite to check features of the code */ 
 int main(int argc, char * const argv[]) {
   if (argc != 2) {
@@ -115,11 +122,14 @@ int main(int argc, char * const argv[]) {
       total1[f_d][ff_d] += t.num_seconds() / faces[f_d].size() * 1000;
     }
   }
-  for (unsigned f_d = 1; f_d <= dimension; ++f_d) {
+  for (unsigned f_d = 0; f_d <= dimension; ++f_d) {
     for (unsigned ff_d = 0; ff_d <= f_d; ++ff_d) {
       Gudhi::Clock t;
-      for (auto f_id: faces[f_d])
-        for (auto ff_id: cs.face2_range(f_id, ff_d)) {}
+      for (auto f_id: faces[f_d]) {
+        std::size_t n_faces = 0;
+        for (auto ff_id: cs.face2_range(f_id, ff_d)) {n_faces++;}
+        // assert(n_faces == BinomialCoefficient(f_d+1, ff_d+1));
+      }
       t.end();
       total2[f_d][ff_d] += t.num_seconds() / faces[f_d].size() * 1000;
     }

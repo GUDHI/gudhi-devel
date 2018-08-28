@@ -352,7 +352,7 @@ void test_circle(double level) {
   Eigen::Vector2d point1(r, 0.0);
   std::vector<Point_d> seed_points = {point1};
   std::string name = "circle";
-  std::cout << "Test " << test_no++ << ": " << name << "...\n";
+  std::cout << "Test " << test_no++ << ": " << name << ", level = " << level <<  "...\n";
 
   struct Function {
     Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
@@ -394,7 +394,7 @@ void test_wavy_circle(double level) {
   Eigen::Vector2d point1(r, 0.0);
   std::vector<Point_d> seed_points = {point1};
   std::string name = "wavy_circle";
-  std::cout << "Test " << test_no++ << ": " << name << "...\n";
+  std::cout << "Test " << test_no++ << ": " << name << ", level = " << level <<  "...\n";
 
   struct Function {
     Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
@@ -455,7 +455,7 @@ void test_smiley(double level) {
   Eigen::Vector2d point4(ex+sr+offset, ey+offset);
   std::vector<Point_d> seed_points = {point1, point2, point3, point4};
   std::string name = "smiley";
-  std::cout << "Test " << test_no++ << ": " << name << "...\n";
+  std::cout << "Test " << test_no++ << ": " << name << ", level = " << level <<  "...\n";
 
   struct Function {
     Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
@@ -525,7 +525,7 @@ void test_sphere(double level) {
   Eigen::Vector3d point1(r, 0.0, 0.0);
   std::vector<Point_d> seed_points = {point1};
   std::string name = "sphere";
-  std::cout << "Test " << test_no++ << ": " << name << "...\n";
+  std::cout << "Test " << test_no++ << ": " << name << ", level = " << level <<  "...\n";
 
   struct Function {
     Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
@@ -568,7 +568,7 @@ void test_torus(double level) {
   Eigen::Vector3d point1(r+sr, 0.0, 0.0);
   std::vector<Point_d> seed_points = {point1};
   std::string name = "torus";
-  std::cout << "Test " << test_no++ << ": " << name << "...\n";
+  std::cout << "Test " << test_no++ << ": " << name << ", level = " << level <<  "...\n";
 
   struct Function {
     Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
@@ -614,7 +614,7 @@ void test_double_torus(double level) {
   Eigen::Vector3d point2(r+sr+ofs, 0.0, 0.0);
   std::vector<Point_d> seed_points = {point1, point2};
   std::string name = "double_torus";
-  std::cout << "Test " << test_no << ": " << name << "...\n";
+  std::cout << "Test " << test_no++ << ": " << name << ", level = " << level <<  "...\n";
 
   struct Function {
     Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
@@ -662,7 +662,7 @@ void test_wenger_tori(double level) {
   Eigen::Vector3d point2(r+sr, 0.0, 0.0);
   std::vector<Point_d> seed_points = {point1, point2};
   std::string name = "wenger_tori";
-  std::cout << "Test " << test_no << ": " << name << "...\n";
+  std::cout << "Test " << test_no++ << ": " << name << ", level = " << level <<  "...\n";
 
   struct Function {
     Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
@@ -714,7 +714,7 @@ void test_torus_ring(double level) {
   // for (unsigned i = 0; i < n; ++i)
   seed_points.push_back(Eigen::Vector3d(std::cos(pi/n) * cr, std::sin(pi/n) * cr, tr + sr));
   std::string name = "torus_ring";
-  std::cout << "Test " << test_no << ": " << name << "...\n";
+  std::cout << "Test " << test_no++ << ": " << name << ", level = " << level <<  "...\n";
 
   struct Function {
     Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
@@ -779,7 +779,7 @@ void test_circle_3d(double level) {
   Eigen::Vector3d point1(r, 0.0, 0.0);
   std::vector<Point_d> seed_points = {point1};
   std::string name = "circle_3d";
-  std::cout << "Test " << test_no++ << ": " << name << "...\n";
+  std::cout << "Test " << test_no++ << ": " << name << ", level = " << level <<  "...\n";
 
   struct Function {
     Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
@@ -822,7 +822,7 @@ void test_chopper_wave_3d(double level) {
   Eigen::Vector3d point1(0.0, 0.0, r);
   std::vector<Point_d> seed_points = {point1};
   std::string name = "chopper_wave";
-  std::cout << "Test " << test_no++ << ": " << name << "...\n";
+  std::cout << "Test " << test_no++ << ": " << name << ", level = " << level <<  "...\n";
 
   struct Function {
     Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
@@ -865,7 +865,7 @@ void test_s3(double level) {
   Eigen::Vector4d point1(r, 0.0, 0.0, 0.0);
   std::vector<Point_d> seed_points = {point1};
   std::string name = "s3";
-  std::cout << "Test " << test_no++ << ": " << name << "...\n";
+  std::cout << "Test " << test_no++ << ": " << name << ", level = " << level <<  "...\n";
 
   struct Function {
     Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
@@ -909,7 +909,7 @@ void test_s11(double level) {
   Eigen::Vector4d point1(r1, 0.0, r2, 0.0);
   std::vector<Point_d> seed_points = {point1};
   std::string name = "s11";
-  std::cout << "Test " << test_no++ << ": " << name << "...\n";
+  std::cout << "Test " << test_no++ << ": " << name << ", level = " << level <<  "...\n";
 
   struct Function {
     Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
@@ -944,6 +944,150 @@ void test_s11(double level) {
   std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
 }
 
+/** TEST DEFORMED SPHERE 4D */
+void test_deformed_sphere_4d(double level) {
+  const unsigned amb_d = 4; // Ambient (domain) dimension
+  const unsigned cod_d = 2; // Codomain dimension
+  double r1 = 5;
+  double a = 2;
+  Eigen::Vector4d point1(0.0, 0.0, r1/std::sqrt(2), r1/std::sqrt(2));
+  std::vector<Point_d> seed_points = {point1};
+  std::string name = "deformed_sphere_4d";
+  std::cout << "Test " << test_no++ << ": " << name << ", level = " << level <<  "...\n";
+
+  struct Function {
+    Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+      Eigen::VectorXd coords(cod_d);
+      double x2 = p(0)*p(0), y2 = p(1)*p(1), z2 = p(2)*p(2), t2 = p(3)*p(3);      
+      coords(0) = x2 + y2 + z2 + t2 - r1*r1;
+      coords(1) = a*x2 + y2 + z2 - t2;
+      return coords;
+    }
+
+    Function(unsigned cod_d_,
+	     double r1_,
+             double a_)
+      : cod_d(cod_d_), r1(r1_), a(a_) {}
+    unsigned cod_d;
+    double r1, a;
+  } f(cod_d, r1, a);
+  Hasse_diagram hd;
+  VP_map vp_map;
+  Gudhi::Clock t;
+  compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
+  t.end();
+  std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
+  int chi = 0;
+  for (auto cell: hd) {
+    dimensions[cell->get_dimension()]++;
+    chi += 1-2*(cell->get_dimension()%2);
+  }
+  std::cout << "Simplices by dimension: " << dimensions << "\n";
+  std::cout << "Euler characteristic = " << chi << "\n";
+  std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
+  output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
+  std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
+}
+
+/** TEST DEFORMED CIRCLE 3D */
+void test_deformed_circle_3d(double level) {
+  const unsigned amb_d = 3; // Ambient (domain) dimension
+  const unsigned cod_d = 2; // Codomain dimension
+  double r1 = 5;
+  double a = 2;
+  Eigen::Vector3d point1(0.0, r1/std::sqrt(2), r1/std::sqrt(2));
+  std::vector<Point_d> seed_points = {point1};
+  std::string name = "deformed_circle_3d";
+  std::cout << "Test " << test_no++ << ": " << name << ", level = " << level <<  "...\n";
+
+  struct Function {
+    Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+      Eigen::VectorXd coords(cod_d);
+      double x2 = p(0)*p(0), y2 = p(1)*p(1), z2 = p(2)*p(2);      
+      coords(0) = x2 + y2 + z2 - r1*r1;
+      coords(1) = a*x2 + y2 - z2;
+      return coords;
+    }
+
+    Function(unsigned cod_d_,
+	     double r1_,
+             double a_)
+      : cod_d(cod_d_), r1(r1_), a(a_) {}
+    unsigned cod_d;
+    double r1, a;
+  } f(cod_d, r1, a);
+  Hasse_diagram hd;
+  VP_map vp_map;
+  Gudhi::Clock t;
+  compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
+  t.end();
+  std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
+  int chi = 0;
+  for (auto cell: hd) {
+    dimensions[cell->get_dimension()]++;
+    chi += 1-2*(cell->get_dimension()%2);
+  }
+  std::cout << "Simplices by dimension: " << dimensions << "\n";
+  std::cout << "Euler characteristic = " << chi << "\n";
+  std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
+  output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
+  std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
+}
+
+/** TEST SO(3) 9D */
+void test_so3_9d(double level) {
+  const unsigned amb_d = 9; // Ambient (domain) dimension
+  const unsigned cod_d = 6; // Codomain dimension
+  double r1 = 5;
+  Eigen::VectorXd point1(9);
+  point1 << 1.0, 0.0, 0.0,
+            0.0, 1.0, 0.0,
+            0.0, 0.0, 1.0;
+  std::vector<Point_d> seed_points = {point1};
+  std::string name = "so3_9d";
+  std::cout << "Test " << test_no++ << ": " << name << ", level = " << level <<  "...\n";
+
+  struct Function {
+    Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+      Eigen::VectorXd coords(cod_d);
+      double
+        x11 = p(0), x12 = p(1), x13 = p(2),
+        x21 = p(3), x22 = p(4), x23 = p(5),
+        x31 = p(6), x32 = p(7), x33 = p(8);
+      // determinant = 1
+      // coords(0) = x11*x22*x33 + x12*x23*x31 + x13*x21*x32 - x11*x23*x32 - x12*x21*x33 - x13*x22*x31 - 1;
+      coords(1) = x11*x11 + x12*x12 + x13*x13 - 1;
+      coords(2) = x21*x21 + x22*x22 + x23*x23 - 1;
+      coords(3) = x31*x31 + x32*x32 + x33*x33 - 1;
+      coords(4) = x11*x21 + x12*x22 + x13*x23;
+      coords(5) = x11*x21 + x12*x22 + x13*x23;
+      coords(0) = x31*x21 + x32*x22 + x33*x23;
+      return coords;
+    }
+
+    Function(unsigned cod_d_,
+	     double r1_)
+      : cod_d(cod_d_), r1(r1_) {}
+    unsigned cod_d;
+    double r1;
+  } f(cod_d, r1);
+  Hasse_diagram hd;
+  VP_map vp_map;
+  Gudhi::Clock t;
+  compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
+  t.end();
+  std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
+  int chi = 0;
+  for (auto cell: hd) {
+    dimensions[cell->get_dimension()]++;
+    chi += 1-2*(cell->get_dimension()%2);
+  }
+  std::cout << "Simplices by dimension: " << dimensions << "\n";
+  std::cout << "Euler characteristic = " << chi << "\n";
+  std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
+  output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
+  std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
+}
 
 // /** TEST TORUS NECKLACE */
 // void test_torus_necklace(double level) {
@@ -959,7 +1103,7 @@ void test_s11(double level) {
 //     seed_points.push_back(c + Eigen::Vector3d((r+sr)*std::sin(i*pi/n), 0.0, (r+sr)*std::cos(i*pi/n)));
 //   }
 //   std::string name = "torus_necklace";
-//   std::cout << "Test " << test_no++ << ": " << name << "...\n";
+//   std::cout << "Test " << test_no++ << ": " << name << ", level = " << level <<  "...\n";
 
 //   struct Function {
 //     Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
@@ -998,63 +1142,78 @@ int main(int argc, char * const argv[]) {
     error = atof(argv[(test_no++)+1]);
   }
 
-  if (test_no+1 < (unsigned)argc)
-    test_circle(atof(argv[test_no+1]));
-  else
-    test_circle(1.5);
+  // if (test_no+1 < (unsigned)argc)
+  //   test_circle(atof(argv[test_no+1]));
+  // else
+  //   test_circle(1.5);
   
-  if (test_no+1 < (unsigned)argc)
-    test_wavy_circle(atof(argv[test_no+1]));
-  else
-    test_wavy_circle(3.3);
+  // if (test_no+1 < (unsigned)argc)
+  //   test_wavy_circle(atof(argv[test_no+1]));
+  // else
+  //   test_wavy_circle(3.3);
+
+  // if (test_no+1 < (unsigned)argc)
+  //   test_smiley(atof(argv[test_no+1]));
+  // else
+  //   test_smiley(30.1);
+
+  // if (test_no+1 < (unsigned)argc)
+  //   test_sphere(atof(argv[test_no+1]));
+  // else
+  //   test_sphere(1.3);
+
+  // if (test_no+1 < (unsigned)argc)
+  //   test_torus(atof(argv[test_no+1]));
+  // else
+  //   test_torus(1.3);
+
+  // if (test_no+1 < (unsigned)argc)
+  //   test_double_torus(atof(argv[test_no+1]));
+  // else
+  //   test_double_torus(3.7);
+
+  // if (test_no+1 < (unsigned)argc)
+  //   test_wenger_tori(atof(argv[test_no+1]));
+  // else
+  //   test_wenger_tori(3.7);
+
+  // if (test_no+1 < (unsigned)argc)
+  //   test_torus_ring(atof(argv[test_no+1]));
+  // else
+  //   test_torus_ring(3.7);
+
+  // if (test_no+1 < (unsigned)argc)
+  //   test_circle_3d(atof(argv[test_no+1]));
+  // else
+  //   test_circle_3d(1.5);
+
+  // if (test_no+1 < (unsigned)argc)
+  //   test_chopper_wave_3d(atof(argv[test_no+1]));
+  // else
+  //   test_chopper_wave_3d(30.5111211);
+
+  // if (test_no+1 < (unsigned)argc)
+  //   test_s3(atof(argv[test_no+1]));
+  // else
+  //   test_s3(0.7);
+
+  // if (test_no+1 < (unsigned)argc)
+  //   test_s11(atof(argv[test_no+1]));
+  // else
+  //   test_s11(0.7);
+
+  // if (test_no+1 < (unsigned)argc)
+  //   test_deformed_circle_3d(atof(argv[test_no+1]));
+  // else
+  //   test_deformed_circle_3d(0.7);
+
+  // if (test_no+1 < (unsigned)argc)
+  //   test_deformed_sphere_4d(atof(argv[test_no+1]));
+  // else
+  //   test_deformed_sphere_4d(0.7);
 
   if (test_no+1 < (unsigned)argc)
-    test_smiley(atof(argv[test_no+1]));
+    test_so3_9d(atof(argv[test_no+1]));
   else
-    test_smiley(30.1);
-
-  if (test_no+1 < (unsigned)argc)
-    test_sphere(atof(argv[test_no+1]));
-  else
-    test_sphere(1.3);
-
-  if (test_no+1 < (unsigned)argc)
-    test_torus(atof(argv[test_no+1]));
-  else
-    test_torus(1.3);
-
-  if (test_no+1 < (unsigned)argc)
-    test_double_torus(atof(argv[test_no+1]));
-  else
-    test_double_torus(3.7);
-
-  if (test_no+1 < (unsigned)argc)
-    test_wenger_tori(atof(argv[test_no+1]));
-  else
-    test_wenger_tori(3.7);
-
-  if (test_no+1 < (unsigned)argc)
-    test_torus_ring(atof(argv[test_no+1]));
-  else
-    test_torus_ring(3.7);
-
-  if (test_no+1 < (unsigned)argc)
-    test_circle_3d(atof(argv[test_no+1]));
-  else
-    test_circle_3d(1.5);
-
-  if (test_no+1 < (unsigned)argc)
-    test_chopper_wave_3d(atof(argv[test_no+1]));
-  else
-    test_chopper_wave_3d(30.5111211);
-
-  if (test_no+1 < (unsigned)argc)
-    test_s3(atof(argv[test_no+1]));
-  else
-    test_s3(0.7);
-
-  if (test_no+1 < (unsigned)argc)
-    test_s11(atof(argv[test_no+1]));
-  else
-    test_s11(0.7);
+    test_so3_9d(0.7);
 }

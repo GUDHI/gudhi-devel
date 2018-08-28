@@ -11,6 +11,7 @@
 #include <gudhi/Clock.h>
 
 #include <Eigen/Eigenvalues>
+#include <Eigen/SVD>
 #include <Eigen/Sparse>
 #include "../../example/cxx-prettyprint/prettyprint.hpp"
 // #include <Eigen/SPQRSupport>
@@ -61,7 +62,8 @@ public:
   char family_;
   unsigned short dimension_;
   unsigned short vertex_level_ = 1;
-
+  Eigen::ColPivHouseholderQR<Matrix> colpivhouseholderqr_;
+  
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // Constructors
   //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -94,6 +96,12 @@ public:
       for (int i = 0; i < d; ++i)
         sqrt_diag(i) = std::sqrt(saes.eigenvalues()[i]);
       root_t_ = saes.eigenvectors()*sqrt_diag.asDiagonal();
+
+      // Eigen::BDCSVD<Matrix> saes(cartan, Eigen::ComputeFullV);
+      // Eigen::VectorXd sqrt_diag(d);
+      // for (int i = 0; i < d; ++i)
+      //   sqrt_diag(i) = std::sqrt(saes.singularValues()[i]);
+      // root_t_ = saes.matrixV()*sqrt_diag.asDiagonal();
       // std::cout << "root^t =" << std::endl << root_t_ << std::endl;
       break;
     }
@@ -220,6 +228,8 @@ public:
                 << "Please use A, B, C or D family for the constructor (in capital).\n";
       throw wrong_family_exception_;
     }
+
+    colpivhouseholderqr_ = root_t_.colPivHouseholderQr();
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1866,7 +1876,8 @@ private:
     std::size_t k = 0, j = 1;
     for (; j < (unsigned)dimension_ + 1; k += j, j++)
       val_vector(j-1) = v_id[k] / v_id.level();
-    return root_t_.colPivHouseholderQr().solve(val_vector);
+    // return root_t_.colPivHouseholderQr().solve(val_vector);
+    return colpivhouseholderqr_.solve(val_vector);
   }
   
   //////////////////////////////////////////////////////////////////////////////////////////////////
