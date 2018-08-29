@@ -108,20 +108,38 @@ class Alpha_complex_3d {
 
   using Vb = CGAL::Alpha_shape_vertex_base_3<Kernel, Tvb, Exact_tag>;
 
+  using TdsCb = typename std::conditional<Periodic,
+      CGAL::Periodic_3_triangulation_ds_cell_base_3<>,
+      CGAL::Triangulation_ds_cell_base_3<>>::type;
+
   using Tcb = typename std::conditional<Weighted,
-      CGAL::Regular_triangulation_cell_base_3<Kernel>,
-      CGAL::Triangulation_cell_base_3<Kernel>>::type;
+      CGAL::Regular_triangulation_cell_base_3<Kernel, TdsCb>,
+      CGAL::Triangulation_cell_base_3<Kernel, TdsCb>>::type;
 
   using Cb = CGAL::Alpha_shape_cell_base_3<Kernel, Tcb, Exact_tag>;
   using Tds = CGAL::Triangulation_data_structure_3<Vb, Cb>;
 
-  using Pre_triangulation_3 = typename std::conditional<Weighted,
-      CGAL::Regular_triangulation_3<Kernel, Tds>,
-      CGAL::Delaunay_triangulation_3<Kernel, Tds>>::type;
+  // The other way to do a conditional type. Here there 4 possibilities, cannot use std::conditional
+  template<typename Kernel, typename Tds, bool Weighted_version, bool Periodic_version> struct Triangulation {};
 
-  using Triangulation_3 = typename std::conditional<(Weighted && Periodic),
-      CGAL::Periodic_3_regular_triangulation_3<Kernel, Tds>,
-      Pre_triangulation_3>::type;
+  template < typename Kernel, typename Tds >
+  struct Triangulation<Kernel, Tds, false, false> {
+    using Triangulation_3 = CGAL::Delaunay_triangulation_3<Kernel, Tds>;
+  };
+  template < typename Kernel, typename Tds >
+  struct Triangulation<Kernel, Tds, true, false> {
+    using Triangulation_3 = CGAL::Regular_triangulation_3<Kernel, Tds>;
+  };
+  template < typename Kernel, typename Tds >
+  struct Triangulation<Kernel, Tds, false, true> {
+    using Triangulation_3 = CGAL::Periodic_3_Delaunay_triangulation_3<Kernel, Tds>;
+  };
+  template < typename Kernel, typename Tds >
+  struct Triangulation<Kernel, Tds, true, true> {
+    using Triangulation_3 = CGAL::Periodic_3_regular_triangulation_3<Kernel, Tds>;
+  };
+
+  using Triangulation_3 = typename Triangulation<Kernel, Tds, Weighted, Periodic>::Triangulation_3;
 
 public:
   using Alpha_shape_3 = CGAL::Alpha_shape_3<Triangulation_3, Exact_tag>;
@@ -255,7 +273,7 @@ public:
   * std::end return input iterators on a AlphaComplex3dOptions::Point_3.
   * The type of x_min, y_min, z_min, x_max, y_max and z_max is AlphaComplex3dOptions::Alpha_shape_3::FT.
   */
-  /*template<typename InputPointRange>
+  template<typename InputPointRange>
   Alpha_complex_3d(const InputPointRange& points,
                    Alpha_value_type x_min, Alpha_value_type y_min, Alpha_value_type z_min,
                    Alpha_value_type x_max, Alpha_value_type y_max, Alpha_value_type z_max) {
@@ -269,10 +287,8 @@ public:
                 (z_max - z_min == y_max - y_min),
                 std::invalid_argument("The size of the cuboid in every directions is not the same."));
 
-    using Periodic_delaunay_triangulation_3 = typename AlphaComplex3dOptions::Periodic_delaunay_triangulation_3;
-    using Iso_cuboid_3 = typename AlphaComplex3dOptions::Iso_cuboid_3;
     // Define the periodic cube
-    Periodic_delaunay_triangulation_3 pdt(Iso_cuboid_3(x_min, y_min, z_min, x_max, y_max, z_max));
+    Triangulation_3 pdt(typename Kernel::Iso_cuboid_3(x_min, y_min, z_min, x_max, y_max, z_max));
     // Heuristic for inserting large point sets (if pts is reasonably large)
     pdt.insert(std::begin(points), std::end(points), true);
     // As pdt won't be modified anymore switch to 1-sheeted cover if possible
@@ -294,7 +310,7 @@ public:
     std::cout << "filtration_with_alpha_values returns : " << objects_.size() << " objects" << std::endl;
 #endif  // DEBUG_TRACES
 
-  }*/
+  }
 
   /** \brief Alpha_complex constructor from a list of points, associated weights and an iso-cuboid coordinates.
   *
