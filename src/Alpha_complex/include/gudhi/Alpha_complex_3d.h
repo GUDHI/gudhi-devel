@@ -90,9 +90,27 @@ class Alpha_complex_3d {
       CGAL::Exact_predicates_inexact_constructions_kernel,
       CGAL::Exact_predicates_exact_constructions_kernel>::type;
 
-  using Kernel = typename std::conditional<Periodic,
-      CGAL::Periodic_3_Delaunay_triangulation_traits_3<Predicates>,
-      Predicates>::type;
+  // The other way to do a conditional type. Here there are 3 possibilities
+  template<typename Predicates, bool Weighted_version, bool Periodic_version> struct Kernel_3 {};
+
+  template < typename Predicates >
+  struct Kernel_3<Predicates, false, false> {
+    using Kernel = Predicates;
+  };
+  template < typename Predicates >
+  struct Kernel_3<Predicates, true, false> {
+    using Kernel = Predicates;
+  };
+  template < typename Predicates >
+  struct Kernel_3<Predicates, false, true> {
+    using Kernel = CGAL::Periodic_3_Delaunay_triangulation_traits_3<Predicates>;
+  };
+  template < typename Predicates >
+  struct Kernel_3<Predicates, true, true> {
+    using Kernel = CGAL::Periodic_3_regular_triangulation_traits_3<Predicates>;
+  };
+
+  using Kernel = typename Kernel_3<Predicates, Weighted, Periodic>::Kernel;
 
   using Exact_tag = typename std::conditional<(Complexity == complexity::fast),
       CGAL::Tag_false,
@@ -348,7 +366,7 @@ public:
   * std::end return an input iterator on a AlphaComplex3dOptions::Alpha_shape_3::FT.
   * The type of x_min, y_min, z_min, x_max, y_max and z_max is AlphaComplex3dOptions::Alpha_shape_3::FT.
   */
-  /*template<typename InputPointRange , typename WeightRange>
+  template<typename InputPointRange , typename WeightRange>
   Alpha_complex_3d(const InputPointRange& points, WeightRange weights,
                    Alpha_value_type x_min, Alpha_value_type y_min, Alpha_value_type z_min,
                    Alpha_value_type x_max, Alpha_value_type y_max, Alpha_value_type z_max) {
@@ -364,7 +382,7 @@ public:
                 (z_max - z_min == y_max - y_min),
                 std::invalid_argument("The size of the cuboid in every directions is not the same."));
 
-    using Weighted_point_3 = typename AlphaComplex3dOptions::Weighted_point_3;
+    using Weighted_point_3 = typename Triangulation_3::Weighted_point;
     std::vector<Weighted_point_3> weighted_points_3;
 
     std::size_t index = 0;
@@ -372,7 +390,7 @@ public:
 
 #ifdef GUDHI_DEBUG
     // Defined in GUDHI_DEBUG to avoid unused variable warning for GUDHI_CHECK
-    double maximal_possible_weight = 0.015625 * (x_max - x_min) * (x_max - x_min);
+    Alpha_value_type maximal_possible_weight = 0.015625 * (x_max - x_min) * (x_max - x_min);
 #endif
 
     while ((index < weights.size()) && (index < points.size())) {
@@ -384,10 +402,8 @@ public:
       index++;
     }
 
-    using Periodic_delaunay_triangulation_3 = typename AlphaComplex3dOptions::Periodic_delaunay_triangulation_3;
-    using Iso_cuboid_3 = typename AlphaComplex3dOptions::Iso_cuboid_3;
     // Define the periodic cube
-    Periodic_delaunay_triangulation_3 pdt(Iso_cuboid_3(x_min, y_min, z_min, x_max, y_max, z_max));
+    Triangulation_3 pdt(typename Kernel::Iso_cuboid_3(x_min, y_min, z_min, x_max, y_max, z_max));
     // Heuristic for inserting large point sets (if pts is reasonably large)
     pdt.insert(std::begin(weighted_points_3), std::end(weighted_points_3), true);
     // As pdt won't be modified anymore switch to 1-sheeted cover if possible
@@ -408,7 +424,8 @@ public:
 #ifdef DEBUG_TRACES
     std::cout << "filtration_with_alpha_values returns : " << objects_.size() << " objects" << std::endl;
 #endif  // DEBUG_TRACES
-  }*/
+  }
+
   template <class Filtration_value, class Alpha_value_iterator>
   typename std::enable_if<std::is_same<Exact_tag, CGAL::Tag_false>::value, Filtration_value>::type
   value_from_iterator(Alpha_value_iterator the_alpha_value_iterator)

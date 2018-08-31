@@ -44,12 +44,8 @@ using Fast_weighted_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gu
 using Exact_weighted_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact, true, false>;
 using Fast_periodic_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast, false, true>;
 using Exact_periodic_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact, false, true>;
-/*using Fast_alpha_complex_3d = Gudhi::alpha_complex::Fast_alpha_complex_3d;
-using Exact_alpha_shapes_3d = Gudhi::alpha_complex::Exact_alpha_shapes_3d;
-using Weighted_alpha_shapes_3d = Gudhi::alpha_complex::Weighted_alpha_shapes_3d;
-using Periodic_alpha_shapes_3d = Gudhi::alpha_complex::Periodic_alpha_shapes_3d;
-using Weighted_periodic_alpha_shapes_3d = Gudhi::alpha_complex::Weighted_periodic_alpha_shapes_3d;*/
-
+using Fast_weighted_periodic_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast, true, true>;
+using Exact_weighted_periodic_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact, true, true>;
 
 BOOST_AUTO_TEST_CASE(Alpha_complex_3d_from_points) {
   // -----------------
@@ -545,136 +541,139 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_periodic) {
 
 }
 
-/*#ifdef GUDHI_DEBUG
-BOOST_AUTO_TEST_CASE(Alpha_complex_weighted_periodic_throw) {
+#ifdef GUDHI_DEBUG
+typedef boost::mpl::list<Fast_weighted_periodic_alpha_complex_3d, Fast_weighted_periodic_alpha_complex_3d> wp_variants_type_list;
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_weighted_periodic_throw, Weighted_periodic_alpha_complex_3d, wp_variants_type_list) {
   std::cout << "Weighted periodic alpha complex 3d exception throw" << std::endl;
 
-  std::vector<Weighted_periodic_alpha_shapes_3d::Point_3> wp_points;
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.0, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.0, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.0, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.0, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.0, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.2, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.2, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.2, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.2, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.2, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.4, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.4, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.4, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.4, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.4, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.6, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.6, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.6, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.6, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.6, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.8, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.8, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.8, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.8, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.8, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.0, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.0, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.0, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.0, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.0, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.2, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.2, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.2, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.2, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.2, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.4, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.4, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.4, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.4, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.4, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.6, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.6, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.6, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.6, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.6, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.8, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.8, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.8, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.8, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.8, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.0, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.0, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.0, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.0, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.0, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.2, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.2, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.2, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.2, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.2, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.4, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.4, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.4, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.4, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.4, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.6, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.6, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.6, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.6, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.6, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.8, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.8, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.8, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.8, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.8, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.0, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.0, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.0, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.0, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.0, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.1, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.2, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.2, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.2, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.2, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.2, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.4, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.4, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.4, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.4, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.4, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.6, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.6, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.6, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.6, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.6, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.8, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.8, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.8, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.8, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.8, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.0, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.0, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.0, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.0, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.0, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.2, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.2, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.2, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.2, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.2, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.4, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.4, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.4, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.4, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.4, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.6, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.6, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.6, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.6, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.6, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.8, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.8, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.8, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.8, 0.6));
+  using Point_3 = typename Weighted_periodic_alpha_complex_3d::Point_3;
+  std::vector<Point_3> wp_points;
+  wp_points.push_back(Point_3(0.0, 0.0, 0.0));
+  wp_points.push_back(Point_3(0.0, 0.0, 0.2));
+  wp_points.push_back(Point_3(0.0, 0.0, 0.4));
+  wp_points.push_back(Point_3(0.0, 0.0, 0.6));
+  wp_points.push_back(Point_3(0.0, 0.0, 0.8));
+  wp_points.push_back(Point_3(0.0, 0.2, 0.0));
+  wp_points.push_back(Point_3(0.0, 0.2, 0.2));
+  wp_points.push_back(Point_3(0.0, 0.2, 0.4));
+  wp_points.push_back(Point_3(0.0, 0.2, 0.6));
+  wp_points.push_back(Point_3(0.0, 0.2, 0.8));
+  wp_points.push_back(Point_3(0.0, 0.4, 0.0));
+  wp_points.push_back(Point_3(0.0, 0.4, 0.2));
+  wp_points.push_back(Point_3(0.0, 0.4, 0.4));
+  wp_points.push_back(Point_3(0.0, 0.4, 0.6));
+  wp_points.push_back(Point_3(0.0, 0.4, 0.8));
+  wp_points.push_back(Point_3(0.0, 0.6, 0.0));
+  wp_points.push_back(Point_3(0.0, 0.6, 0.2));
+  wp_points.push_back(Point_3(0.0, 0.6, 0.4));
+  wp_points.push_back(Point_3(0.0, 0.6, 0.6));
+  wp_points.push_back(Point_3(0.0, 0.6, 0.8));
+  wp_points.push_back(Point_3(0.0, 0.8, 0.0));
+  wp_points.push_back(Point_3(0.0, 0.8, 0.2));
+  wp_points.push_back(Point_3(0.0, 0.8, 0.4));
+  wp_points.push_back(Point_3(0.0, 0.8, 0.6));
+  wp_points.push_back(Point_3(0.0, 0.8, 0.8));
+  wp_points.push_back(Point_3(0.2, 0.0, 0.0));
+  wp_points.push_back(Point_3(0.2, 0.0, 0.2));
+  wp_points.push_back(Point_3(0.2, 0.0, 0.4));
+  wp_points.push_back(Point_3(0.2, 0.0, 0.6));
+  wp_points.push_back(Point_3(0.2, 0.0, 0.8));
+  wp_points.push_back(Point_3(0.2, 0.2, 0.0));
+  wp_points.push_back(Point_3(0.2, 0.2, 0.2));
+  wp_points.push_back(Point_3(0.2, 0.2, 0.4));
+  wp_points.push_back(Point_3(0.2, 0.2, 0.6));
+  wp_points.push_back(Point_3(0.2, 0.2, 0.8));
+  wp_points.push_back(Point_3(0.2, 0.4, 0.0));
+  wp_points.push_back(Point_3(0.2, 0.4, 0.2));
+  wp_points.push_back(Point_3(0.2, 0.4, 0.4));
+  wp_points.push_back(Point_3(0.2, 0.4, 0.6));
+  wp_points.push_back(Point_3(0.2, 0.4, 0.8));
+  wp_points.push_back(Point_3(0.2, 0.6, 0.0));
+  wp_points.push_back(Point_3(0.2, 0.6, 0.2));
+  wp_points.push_back(Point_3(0.2, 0.6, 0.4));
+  wp_points.push_back(Point_3(0.2, 0.6, 0.6));
+  wp_points.push_back(Point_3(0.2, 0.6, 0.8));
+  wp_points.push_back(Point_3(0.2, 0.8, 0.0));
+  wp_points.push_back(Point_3(0.2, 0.8, 0.2));
+  wp_points.push_back(Point_3(0.2, 0.8, 0.4));
+  wp_points.push_back(Point_3(0.2, 0.8, 0.6));
+  wp_points.push_back(Point_3(0.2, 0.8, 0.8));
+  wp_points.push_back(Point_3(0.4, 0.0, 0.0));
+  wp_points.push_back(Point_3(0.4, 0.0, 0.2));
+  wp_points.push_back(Point_3(0.4, 0.0, 0.4));
+  wp_points.push_back(Point_3(0.4, 0.0, 0.6));
+  wp_points.push_back(Point_3(0.4, 0.0, 0.8));
+  wp_points.push_back(Point_3(0.4, 0.2, 0.0));
+  wp_points.push_back(Point_3(0.4, 0.2, 0.2));
+  wp_points.push_back(Point_3(0.4, 0.2, 0.4));
+  wp_points.push_back(Point_3(0.4, 0.2, 0.6));
+  wp_points.push_back(Point_3(0.4, 0.2, 0.8));
+  wp_points.push_back(Point_3(0.4, 0.4, 0.0));
+  wp_points.push_back(Point_3(0.4, 0.4, 0.2));
+  wp_points.push_back(Point_3(0.4, 0.4, 0.4));
+  wp_points.push_back(Point_3(0.4, 0.4, 0.6));
+  wp_points.push_back(Point_3(0.4, 0.4, 0.8));
+  wp_points.push_back(Point_3(0.4, 0.6, 0.0));
+  wp_points.push_back(Point_3(0.4, 0.6, 0.2));
+  wp_points.push_back(Point_3(0.4, 0.6, 0.4));
+  wp_points.push_back(Point_3(0.4, 0.6, 0.6));
+  wp_points.push_back(Point_3(0.4, 0.6, 0.8));
+  wp_points.push_back(Point_3(0.4, 0.8, 0.0));
+  wp_points.push_back(Point_3(0.4, 0.8, 0.2));
+  wp_points.push_back(Point_3(0.4, 0.8, 0.4));
+  wp_points.push_back(Point_3(0.4, 0.8, 0.6));
+  wp_points.push_back(Point_3(0.4, 0.8, 0.8));
+  wp_points.push_back(Point_3(0.6, 0.0, 0.0));
+  wp_points.push_back(Point_3(0.6, 0.0, 0.2));
+  wp_points.push_back(Point_3(0.6, 0.0, 0.4));
+  wp_points.push_back(Point_3(0.6, 0.0, 0.6));
+  wp_points.push_back(Point_3(0.6, 0.0, 0.8));
+  wp_points.push_back(Point_3(0.6, 0.1, 0.0));
+  wp_points.push_back(Point_3(0.6, 0.2, 0.0));
+  wp_points.push_back(Point_3(0.6, 0.2, 0.2));
+  wp_points.push_back(Point_3(0.6, 0.2, 0.4));
+  wp_points.push_back(Point_3(0.6, 0.2, 0.6));
+  wp_points.push_back(Point_3(0.6, 0.2, 0.8));
+  wp_points.push_back(Point_3(0.6, 0.4, 0.0));
+  wp_points.push_back(Point_3(0.6, 0.4, 0.2));
+  wp_points.push_back(Point_3(0.6, 0.4, 0.4));
+  wp_points.push_back(Point_3(0.6, 0.4, 0.6));
+  wp_points.push_back(Point_3(0.6, 0.4, 0.8));
+  wp_points.push_back(Point_3(0.6, 0.6, 0.0));
+  wp_points.push_back(Point_3(0.6, 0.6, 0.2));
+  wp_points.push_back(Point_3(0.6, 0.6, 0.4));
+  wp_points.push_back(Point_3(0.6, 0.6, 0.6));
+  wp_points.push_back(Point_3(0.6, 0.6, 0.8));
+  wp_points.push_back(Point_3(0.6, 0.8, 0.0));
+  wp_points.push_back(Point_3(0.6, 0.8, 0.2));
+  wp_points.push_back(Point_3(0.6, 0.8, 0.4));
+  wp_points.push_back(Point_3(0.6, 0.8, 0.6));
+  wp_points.push_back(Point_3(0.6, 0.8, 0.8));
+  wp_points.push_back(Point_3(0.8, 0.0, 0.0));
+  wp_points.push_back(Point_3(0.8, 0.0, 0.2));
+  wp_points.push_back(Point_3(0.8, 0.0, 0.4));
+  wp_points.push_back(Point_3(0.8, 0.0, 0.6));
+  wp_points.push_back(Point_3(0.8, 0.0, 0.8));
+  wp_points.push_back(Point_3(0.8, 0.2, 0.0));
+  wp_points.push_back(Point_3(0.8, 0.2, 0.2));
+  wp_points.push_back(Point_3(0.8, 0.2, 0.4));
+  wp_points.push_back(Point_3(0.8, 0.2, 0.6));
+  wp_points.push_back(Point_3(0.8, 0.2, 0.8));
+  wp_points.push_back(Point_3(0.8, 0.4, 0.0));
+  wp_points.push_back(Point_3(0.8, 0.4, 0.2));
+  wp_points.push_back(Point_3(0.8, 0.4, 0.4));
+  wp_points.push_back(Point_3(0.8, 0.4, 0.6));
+  wp_points.push_back(Point_3(0.8, 0.4, 0.8));
+  wp_points.push_back(Point_3(0.8, 0.6, 0.0));
+  wp_points.push_back(Point_3(0.8, 0.6, 0.2));
+  wp_points.push_back(Point_3(0.8, 0.6, 0.4));
+  wp_points.push_back(Point_3(0.8, 0.6, 0.6));
+  wp_points.push_back(Point_3(0.8, 0.6, 0.8));
+  wp_points.push_back(Point_3(0.8, 0.8, 0.0));
+  wp_points.push_back(Point_3(0.8, 0.8, 0.2));
+  wp_points.push_back(Point_3(0.8, 0.8, 0.4));
+  wp_points.push_back(Point_3(0.8, 0.8, 0.6));
 
   std::vector<double> p_weights;
 
@@ -689,24 +688,23 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_weighted_periodic_throw) {
   }
 
   std::cout << "Cuboid is not iso exception" << std::endl;
-  using Weighted_periodic_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Weighted_periodic_alpha_shapes_3d>;
   // Check it throws an exception when the cuboid is not iso
-  BOOST_CHECK_THROW (Weighted_periodic_alpha_complex_3d periodic_alpha_complex(wp_points, p_weights, 0., 0., 0., 0.9, 1., 1.),
+  BOOST_CHECK_THROW (Weighted_periodic_alpha_complex_3d wp_alpha_complex(wp_points, p_weights, 0., 0., 0., 0.9, 1., 1.),
                      std::invalid_argument);
-  BOOST_CHECK_THROW (Weighted_periodic_alpha_complex_3d periodic_alpha_complex(wp_points, p_weights, 0., 0., 0., 1., 0.9, 1.),
+  BOOST_CHECK_THROW (Weighted_periodic_alpha_complex_3d wp_alpha_complex(wp_points, p_weights, 0., 0., 0., 1., 0.9, 1.),
                      std::invalid_argument);
-  BOOST_CHECK_THROW (Weighted_periodic_alpha_complex_3d periodic_alpha_complex(wp_points, p_weights, 0., 0., 0., 1., 1., 0.9),
+  BOOST_CHECK_THROW (Weighted_periodic_alpha_complex_3d wp_alpha_complex(wp_points, p_weights, 0., 0., 0., 1., 1., 0.9),
                      std::invalid_argument);
 
   std::cout << "0 <= point.weight() < 1/64 * domain_size * domain_size exception" << std::endl;
   // Weights must be in range [0, <1/64]
   p_weights[25] = 1.0;
-  BOOST_CHECK_THROW (Weighted_periodic_alpha_complex_3d periodic_alpha_complex(wp_points, p_weights, 0., 0., 0., 1., 1., 1.),
+  BOOST_CHECK_THROW (Weighted_periodic_alpha_complex_3d wp_alpha_complex(wp_points, p_weights, 0., 0., 0., 1., 1., 1.),
                      std::invalid_argument);
   // Weights must be in range [0, <1/64]
   p_weights[25] = 0.012;
   p_weights[14] = -0.012;
-  BOOST_CHECK_THROW (Weighted_periodic_alpha_complex_3d periodic_alpha_complex(wp_points, p_weights, 0., 0., 0., 1., 1., 1.),
+  BOOST_CHECK_THROW (Weighted_periodic_alpha_complex_3d wp_alpha_complex(wp_points, p_weights, 0., 0., 0., 1., 1., 1.),
                      std::invalid_argument);
   p_weights[14] = 0.005;
 
@@ -714,145 +712,148 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_weighted_periodic_throw) {
   // Weights and points must have the same size
   // + 1
   p_weights.push_back(0.007);
-  BOOST_CHECK_THROW (Weighted_periodic_alpha_complex_3d periodic_alpha_complex(wp_points, p_weights, 0., 0., 0., 1., 1., 1.),
+  BOOST_CHECK_THROW (Weighted_periodic_alpha_complex_3d wp_alpha_complex(wp_points, p_weights, 0., 0., 0., 1., 1., 1.),
                      std::invalid_argument);
   // - 1
   p_weights.pop_back();
   p_weights.pop_back();
-  BOOST_CHECK_THROW (Weighted_periodic_alpha_complex_3d periodic_alpha_complex(wp_points, p_weights, 0., 0., 0., 1., 1., 1.),
+  BOOST_CHECK_THROW (Weighted_periodic_alpha_complex_3d wp_alpha_complex(wp_points, p_weights, 0., 0., 0., 1., 1., 1.),
                      std::invalid_argument);
 }
 #endif
 
 BOOST_AUTO_TEST_CASE(Alpha_complex_weighted_periodic) {
-  std::cout << "Weighted periodic alpha complex 3d" << std::endl;
+  // ------------------------------
+  // Fast weighted periodic version
+  // ------------------------------
+  std::cout << "Fast weighted periodic alpha complex 3d" << std::endl;
 
-  std::vector<Weighted_periodic_alpha_shapes_3d::Point_3> wp_points;
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.0, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.0, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.0, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.0, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.0, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.2, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.2, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.2, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.2, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.2, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.4, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.4, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.4, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.4, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.4, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.6, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.6, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.6, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.6, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.6, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.8, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.8, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.8, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.8, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.0, 0.8, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.0, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.0, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.0, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.0, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.0, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.2, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.2, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.2, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.2, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.2, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.4, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.4, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.4, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.4, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.4, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.6, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.6, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.6, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.6, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.6, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.8, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.8, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.8, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.8, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.2, 0.8, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.0, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.0, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.0, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.0, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.0, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.2, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.2, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.2, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.2, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.2, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.4, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.4, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.4, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.4, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.4, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.6, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.6, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.6, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.6, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.6, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.8, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.8, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.8, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.8, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.4, 0.8, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.0, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.0, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.0, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.0, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.0, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.1, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.2, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.2, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.2, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.2, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.2, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.4, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.4, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.4, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.4, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.4, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.6, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.6, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.6, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.6, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.6, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.8, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.8, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.8, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.8, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.6, 0.8, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.0, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.0, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.0, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.0, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.0, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.2, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.2, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.2, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.2, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.2, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.4, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.4, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.4, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.4, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.4, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.6, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.6, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.6, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.6, 0.6));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.6, 0.8));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.8, 0.0));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.8, 0.2));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.8, 0.4));
-  wp_points.push_back(Weighted_periodic_alpha_shapes_3d::Point_3(0.8, 0.8, 0.6));
+  std::vector<Fast_weighted_periodic_alpha_complex_3d::Point_3> wp_points;
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.0, 0.2));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.0, 0.4));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.0, 0.6));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.0, 0.8));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.2, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.2, 0.2));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.2, 0.4));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.2, 0.6));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.2, 0.8));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.4, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.4, 0.2));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.4, 0.4));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.4, 0.6));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.4, 0.8));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.6, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.6, 0.2));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.6, 0.4));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.6, 0.6));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.6, 0.8));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.8, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.8, 0.2));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.8, 0.4));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.8, 0.6));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.8, 0.8));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.0, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.0, 0.2));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.0, 0.4));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.0, 0.6));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.0, 0.8));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.2, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.2, 0.2));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.2, 0.4));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.2, 0.6));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.2, 0.8));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.4, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.4, 0.2));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.4, 0.4));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.4, 0.6));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.4, 0.8));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.6, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.6, 0.2));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.6, 0.4));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.6, 0.6));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.6, 0.8));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.0, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.8, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.8, 0.2));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.8, 0.4));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.8, 0.6));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.8, 0.8));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.0, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.0, 0.2));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.0, 0.4));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.0, 0.6));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.0, 0.8));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.2, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.2, 0.2));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.2, 0.4));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.2, 0.6));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.2, 0.8));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.4, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.4, 0.2));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.4, 0.4));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.4, 0.6));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.4, 0.8));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.6, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.6, 0.2));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.6, 0.4));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.6, 0.6));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.6, 0.8));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.8, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.8, 0.2));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.8, 0.4));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.8, 0.6));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.8, 0.8));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.0, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.0, 0.2));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.0, 0.4));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.0, 0.6));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.0, 0.8));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.1, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.2, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.2, 0.2));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.2, 0.4));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.2, 0.6));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.2, 0.8));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.4, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.4, 0.2));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.4, 0.4));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.4, 0.6));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.4, 0.8));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.6, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.6, 0.2));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.6, 0.4));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.6, 0.6));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.6, 0.8));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.8, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.8, 0.2));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.8, 0.4));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.8, 0.6));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.8, 0.8));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.0, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.0, 0.2));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.0, 0.4));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.0, 0.6));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.0, 0.8));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.2, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.2, 0.2));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.2, 0.4));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.2, 0.6));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.2, 0.8));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.4, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.4, 0.2));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.4, 0.4));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.4, 0.6));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.4, 0.8));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.6, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.6, 0.2));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.6, 0.4));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.6, 0.6));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.6, 0.8));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.8, 0.0));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.8, 0.2));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.8, 0.4));
+  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.8, 0.6));
 
   std::vector<double> p_weights;
 
@@ -866,17 +867,180 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_weighted_periodic) {
     p_weights.push_back(value);
   }
 
-  using Weighted_periodic_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Weighted_periodic_alpha_shapes_3d>;
-  Weighted_periodic_alpha_complex_3d weighted_periodic_alpha_complex(wp_points, p_weights, 0., 0., 0., 1., 1., 1.);
+  Fast_weighted_periodic_alpha_complex_3d weighted_periodic_alpha_complex(wp_points, p_weights, 0., 0., 0., 1., 1., 1.);
 
-  Gudhi::Simplex_tree<> wp_stree;
-  weighted_periodic_alpha_complex.create_complex(wp_stree);
+  Gudhi::Simplex_tree<> stree;
+  weighted_periodic_alpha_complex.create_complex(stree);
 
-  std::cout << "Weighted periodic Alpha complex 3d is of dimension " << wp_stree.dimension() << std::endl;
-  BOOST_CHECK(wp_stree.dimension() == 3);
-  std::cout << "    num_simplices " << wp_stree.num_simplices() << std::endl;
-  BOOST_CHECK(wp_stree.num_simplices() >= 3100);
-  std::cout << "    num_vertices " << wp_stree.num_vertices() << std::endl;
-  BOOST_CHECK(wp_stree.num_vertices() == 125);
+  // -------------------------------
+  // Exact weighted periodic version
+  // -------------------------------
+  std::cout << "Exact weighted periodic alpha complex 3d" << std::endl;
+
+  std::vector<Exact_weighted_periodic_alpha_complex_3d::Point_3> e_wp_points;
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.0, 0.4));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.0, 0.6));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.0, 0.8));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.2, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.2, 0.2));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.2, 0.4));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.2, 0.6));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.2, 0.8));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.4, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.4, 0.2));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.4, 0.4));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.4, 0.6));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.4, 0.8));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.6, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.6, 0.2));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.6, 0.4));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.0, 0.2));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.6, 0.6));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.6, 0.8));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.8, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.8, 0.2));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.8, 0.4));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.8, 0.6));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.8, 0.8));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.0, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.0, 0.2));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.0, 0.4));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.0, 0.6));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.0, 0.8));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.2, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.2, 0.2));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.2, 0.4));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.2, 0.6));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.2, 0.8));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.4, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.4, 0.2));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.4, 0.4));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.4, 0.6));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.4, 0.8));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.6, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.6, 0.2));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.6, 0.4));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.6, 0.6));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.6, 0.8));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.0, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.8, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.8, 0.2));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.8, 0.4));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.8, 0.6));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.8, 0.8));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.0, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.0, 0.2));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.0, 0.4));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.0, 0.6));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.0, 0.8));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.2, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.2, 0.2));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.2, 0.4));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.2, 0.6));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.2, 0.8));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.4, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.4, 0.2));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.4, 0.4));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.4, 0.6));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.4, 0.8));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.6, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.6, 0.2));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.6, 0.4));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.6, 0.6));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.6, 0.8));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.8, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.8, 0.2));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.8, 0.4));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.8, 0.6));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.8, 0.8));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.0, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.0, 0.2));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.0, 0.4));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.0, 0.6));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.0, 0.8));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.1, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.2, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.2, 0.2));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.2, 0.4));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.2, 0.6));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.2, 0.8));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.4, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.4, 0.2));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.4, 0.4));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.4, 0.6));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.4, 0.8));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.6, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.6, 0.2));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.6, 0.4));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.6, 0.6));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.6, 0.8));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.8, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.8, 0.2));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.8, 0.4));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.8, 0.6));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.8, 0.8));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.0, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.0, 0.2));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.0, 0.4));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.0, 0.6));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.0, 0.8));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.2, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.2, 0.2));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.2, 0.4));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.2, 0.6));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.2, 0.8));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.4, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.4, 0.2));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.4, 0.4));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.4, 0.6));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.4, 0.8));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.6, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.6, 0.2));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.6, 0.4));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.6, 0.6));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.6, 0.8));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.8, 0.0));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.8, 0.2));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.8, 0.4));
+  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.8, 0.6));
+
+  Exact_weighted_periodic_alpha_complex_3d e_weighted_periodic_alpha_complex(e_wp_points, p_weights, 0., 0., 0., 1., 1., 1.);
+
+  Gudhi::Simplex_tree<> exact_stree;
+  e_weighted_periodic_alpha_complex.create_complex(exact_stree);
+
+  // ---------------------
+  // Compare both versions
+  // ---------------------
+  std::cout << "Exact periodic alpha complex 3d is of dimension " << exact_stree.dimension()
+            << " - Non exact is " << stree.dimension() << std::endl;
+  BOOST_CHECK(exact_stree.dimension() == stree.dimension());
+  std::cout << "Exact periodic alpha complex 3d num_simplices " << exact_stree.num_simplices()
+            << " - Non exact is " << stree.num_simplices() << std::endl;
+  // TODO(VR): BOOST_CHECK(exact_stree.num_simplices() == stree.num_simplices());
+  std::cout << "Exact periodic alpha complex 3d num_vertices " << exact_stree.num_vertices()
+            << " - Non exact is " << stree.num_vertices() << std::endl;
+  BOOST_CHECK(exact_stree.num_vertices() == stree.num_vertices());
+
+  auto sh = stree.filtration_simplex_range().begin();
+  while(sh != stree.filtration_simplex_range().end()) {
+    std::vector<int> simplex;
+    std::vector<int> exact_simplex;
+    std::cout << "Non-exact ( ";
+    for (auto vertex : stree.simplex_vertex_range(*sh)) {
+      simplex.push_back(vertex);
+      std::cout << vertex << " ";
+    }
+    std::cout << ") -> " << "[" << stree.filtration(*sh) << "] ";
+    std::cout << std::endl;
+
+    // Find it in the exact structure
+    auto sh_exact = exact_stree.find(simplex);
+    // TODO(VR): BOOST_CHECK(sh_exact != exact_stree.null_simplex());
+
+    // Exact and non-exact version is not exactly the same due to float comparison
+    // TODO(VR): GUDHI_TEST_FLOAT_EQUALITY_CHECK(exact_stree.filtration(sh_exact), stree.filtration(*sh));
+    ++sh;
+  }
+
 }
-*/
