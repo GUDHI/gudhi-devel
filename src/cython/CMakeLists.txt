@@ -1,7 +1,9 @@
 project(Cython)
 
 function( add_gudhi_cython_lib THE_LIB )
+  message("##### add_gudhi_cython_lib on ${THE_LIB}")
   if(EXISTS ${THE_LIB})
+    message("##### EXISTS")
     get_filename_component(THE_LIB_FILE_NAME ${THE_LIB} NAME_WE)
     if(WIN32)
       message("++ ${THE_LIB} => THE_LIB_FILE_NAME = ${THE_LIB_FILE_NAME}")
