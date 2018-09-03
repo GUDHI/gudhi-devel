@@ -75,6 +75,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_copy_constructor, Simplex_tree, list_of_te
   std::cout << "********************************************************************" << std::endl;
   std::cout << "TEST OF COPY ASSIGNMENT" << std::endl;
   Simplex_tree st3;
+  // To check there is no memory leak
+  st3.insert_simplex_and_subfaces({9, 10, 11}, 200.0);
   st3 = st;
   print_simplex_filtration(st3, "First copy assignment from the default Simplex_tree");
   Simplex_tree st4;
@@ -108,12 +110,18 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_copy_constructor, Simplex_tree, list_of_te
   std::cout << "********************************************************************" << std::endl;
   std::cout << "TEST OF MOVE ASSIGNMENT" << std::endl;
 
-  // A swap is a copy ctor of a tmp value, then it uses move assignment
-  std::swap(st3, st4);
-  print_simplex_filtration(st3, "First move assignment from the default Simplex_tree");
-  print_simplex_filtration(st4, "Second move assignment from the default Simplex_tree");
-  BOOST_CHECK(st3 == st4);
-  BOOST_CHECK(st == st4);
-  BOOST_CHECK(st3 == st);
+  Simplex_tree st7;
+  // To check there is no memory leak
+  st7.insert_simplex_and_subfaces({9, 10, 11}, 200.0);
+  st7 = std::move(st3);
+  print_simplex_filtration(st7, "First move assignment from the default Simplex_tree");
+  Simplex_tree st8;
+  st8 = std::move(st4);
+  print_simplex_filtration(st8, "Second move assignment from the default Simplex_tree");
+
+  // Cross check
+  BOOST_CHECK(st7 == st8);
+  BOOST_CHECK(st == st8);
+  BOOST_CHECK(st7 == st);
 
 }
