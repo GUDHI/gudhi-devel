@@ -993,6 +993,27 @@ private:
     // using State_pair = std::pair<std::size_t, bool>;
     friend class boost::iterator_core_access;
 
+    bool triplet_check_nonempty(std::size_t i, std::size_t j, std::size_t i_ref) const {
+      if (i < i_ref) {
+        std::size_t k  = (j*j+j-2)/2 - i;
+        std::size_t k1 = (i_ref*i_ref+i_ref-2)/2 - i;
+        std::size_t k2 = (j*j+j-2)/2 - i_ref;
+        int value_ref = a_id_[k2];
+        return (value_.is_fixed(k1) == value_.is_fixed(k) && value_[k] == value_[k1] + value_ref);
+      }
+      else if (i > i_ref) {
+        std::size_t k  = (j*j+j-2)/2 - i_ref;
+        std::size_t k1 = (i*i+i-2)/2 - i_ref;
+        std::size_t k2 = (j*j+j-2)/2 - i;
+        int value_ref = a_id_[k];
+        if (value_.is_fixed(k1))
+          return (value_.is_fixed(k2) && value_ref == value_[k1] + value_[k2]);
+        else
+          return (!value_.is_fixed(k2) && value_ref == value_[k1] + value_[k2] + 1);
+      }
+      return true;
+    }
+    
     bool triplet_check(std::size_t i, std::size_t l, std::size_t j) const {
       int k  = (j*j+j-2)/2 - i;
       int k1 = (l*l+l-2)/2 - i;
@@ -1027,12 +1048,21 @@ private:
             else
               value_.push_back(a_id_[k], false);
           bool curr_state_is_valid = true;
-          if (basis_k_.size() == j && i != basis_k_.back())
-            for (std::size_t l = basis_k_.back(); l < j && curr_state_is_valid; ++l)
-              curr_state_is_valid = triplet_check(i,l,j);
-          else
-            for (std::size_t l = i + 1; l < j && curr_state_is_valid; ++l)
-              curr_state_is_valid = triplet_check(i,l,j);
+          if (nonempty_lanes_[j]) {
+            // std::size_t i_ref = j-1, k_ref = (j*j+j-2)/2 - i_ref;
+            // while (!a_id_.is_fixed(k_ref++))
+            //   i_ref--;
+            // curr_state_is_valid = triplet_check_nonempty(i, j, i_ref);
+            curr_state_is_valid = triplet_check_nonempty(i, j, mnv_[j]);
+          }
+          else {
+            if (basis_k_.size() == j && i != basis_k_.back())
+              for (std::size_t l = basis_k_.back(); l < j && curr_state_is_valid; ++l)
+                curr_state_is_valid = triplet_check(i,l,j);
+            else
+              for (std::size_t l = i + 1; l < j && curr_state_is_valid; ++l)
+                curr_state_is_valid = triplet_check(i,l,j);
+          }
           if (curr_state_is_valid &&
               value_.size() == a_id_.size()) {
             value_.set_dimension(curr_dim_lower_);
@@ -1114,6 +1144,10 @@ private:
       std::size_t k = stack_.size();
       std::size_t j = std::floor(0.5*(1+std::sqrt(1+8*k)));
       std::size_t i = (j*j+j-2)/2 - k;
+      if (i == j-1 && nonempty_lanes_[j]) {
+	basis_k_.push_back(i);
+      }
+      else
       if (basis_k_.size() == j - 1) {
         bool is_basis_vect = true;
         for (std::size_t l = i + 1; l < j && is_basis_vect; ++l) {
@@ -1150,10 +1184,12 @@ private:
       std::size_t i = (j*j+j-2)/2 - k;
       if (basis_k_.size() == j && basis_k_.back() == i) {
         basis_k_.pop_back();
-        if (f)
-          curr_dim_upper_++;
-        else
-          curr_dim_lower_--;
+	if (!nonempty_lanes_[j]) {
+          if (f)
+            curr_dim_upper_++;
+          else
+            curr_dim_lower_--;
+        }
       }
     }
     
@@ -1168,10 +1204,18 @@ private:
         is_end_(false),
         ambient_dimension_(scs.dimension_),
         curr_dim_lower_(0),
-        curr_dim_upper_(scs.dimension_),
+        curr_dim_upper_(a_id.dimension()),
         value_dim_lower_(value_dim_lower),
-        value_dim_upper_(value_dim_upper)
+        value_dim_upper_(value_dim_upper),
+	nonempty_lanes_(scs.dimension_+1, false)
     {
+      std::size_t i = 0, j = 1, k = 0; 
+      for (; j < ambient_dimension_ + 1; ++j)
+	for (i = 0; i < j; ++i, ++k)
+	  if (a_id.is_fixed(k)) {
+	    nonempty_lanes_[j] = true;
+            mnv_.emplace(std::make_pair(j,j-i-1));
+          }
       if (!a_id.is_fixed(0)) {
         if (!stack_push(false, false)) {
           stack_pop();
@@ -1208,6 +1252,8 @@ private:
     std::size_t value_dim_lower_, value_dim_upper_;
     std::vector<unsigned> basis_k_;
     std::stack<State_> stack_;
+    std::vector<bool> nonempty_lanes_;
+    std::map<std::size_t, std::size_t> mnv_;
   };
 
   
@@ -1400,11 +1446,12 @@ private:
         }
         if (!fixed)
           for (std::size_t l = 0; l < i && is_basis_vect; ++l) {
-           is_basis_vect = false;
-            for (std::size_t m = l+1; m < j && !is_basis_vect; ++m) {
-              std::size_t k1 = (m*m+m-2)/2 - l;
-              is_basis_vect = value_.is_fixed(k1);
-            }
+	    is_basis_vect = !ti_[l].empty();
+	    // is_basis_vect = false;
+            // for (std::size_t m = l+1; m < j && !is_basis_vect; ++m) {
+            //   std::size_t k1 = (m*m+m-2)/2 - l;
+            //   is_basis_vect = value_.is_fixed(k1);
+            // }
           }
         if (is_basis_vect) {
           basis_k_.push_back(i);
@@ -1414,7 +1461,9 @@ private:
             curr_dim_lower_++;
         }
       }
-      stack_.push({fixed, plus_one});        
+      stack_.push({fixed, plus_one});
+      if (fixed)
+	ti_[i].push_back(j);
       return curr_dim_lower_ <= curr_dim_upper_ &&
              curr_dim_lower_ <= value_dim_upper_ &&
              curr_dim_upper_ >= value_dim_lower_;
@@ -1426,6 +1475,8 @@ private:
       std::size_t k = stack_.size();
       std::size_t j = std::floor(0.5*(1+std::sqrt(1+8*k)));
       std::size_t i = (j*j+j-2)/2 - k;
+      if (f)
+	ti_[i].pop_back();
       if (basis_k_.size() == j && basis_k_.back() == i) {
         basis_k_.pop_back();
 	if (!nonempty_lanes_[j]) {
@@ -1451,7 +1502,8 @@ private:
         curr_dim_upper_(a_id.dimension()),
         value_dim_lower_(value_dim_lower),
         value_dim_upper_(value_dim_upper),
-	nonempty_lanes_(scs.dimension_+1, false)
+	nonempty_lanes_(scs.dimension_+1, false),
+	ti_(scs.dimension())
     {
       std::size_t i = 0, j = 1, k = 0; 
       for (; j < ambient_dimension_ + 1; ++j)
@@ -1497,6 +1549,7 @@ private:
     std::vector<unsigned> basis_k_;
     std::stack<State_> stack_;
     std::vector<bool> nonempty_lanes_;
+    std::vector<std::vector<std::size_t> > ti_; 
     std::map<std::size_t, std::size_t> mnv_;
   };
 

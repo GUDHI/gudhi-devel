@@ -1197,23 +1197,23 @@ int main(int argc, char * const argv[]) {
   // else
   //   test_s3(0.7);
 
-  // if (test_no+1 < (unsigned)argc)
-  //   test_s11(atof(argv[test_no+1]));
-  // else
-  //   test_s11(0.7);
-
-  // if (test_no+1 < (unsigned)argc)
-  //   test_deformed_circle_3d(atof(argv[test_no+1]));
-  // else
-  //   test_deformed_circle_3d(0.7);
-
-  // if (test_no+1 < (unsigned)argc)
-  //   test_deformed_sphere_4d(atof(argv[test_no+1]));
-  // else
-  //   test_deformed_sphere_4d(0.7);
+  if (test_no+1 < (unsigned)argc)
+    test_s11(atof(argv[test_no+1]));
+  else
+    test_s11(0.7);
 
   if (test_no+1 < (unsigned)argc)
-    test_so3_9d(atof(argv[test_no+1]));
+    test_deformed_circle_3d(atof(argv[test_no+1]));
   else
-    test_so3_9d(0.7);
+    test_deformed_circle_3d(0.7);
+
+  if (test_no+1 < (unsigned)argc)
+    test_deformed_sphere_4d(atof(argv[test_no+1]));
+  else
+    test_deformed_sphere_4d(0.7);
+
+  // if (test_no+1 < (unsigned)argc)
+  //   test_so3_9d(atof(argv[test_no+1]));
+  // else
+  //   test_so3_9d(0.7);
 }

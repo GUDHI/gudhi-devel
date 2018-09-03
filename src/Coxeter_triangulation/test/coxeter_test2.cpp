@@ -128,7 +128,7 @@ int main(int argc, char * const argv[]) {
       for (auto f_id: faces[f_d]) {
         std::size_t n_faces = 0;
         for (auto ff_id: cs.face2_range(f_id, ff_d)) {n_faces++;}
-        // assert(n_faces == BinomialCoefficient(f_d+1, ff_d+1));
+        assert(n_faces == BinomialCoefficient(f_d+1, ff_d+1));
       }
       t.end();
       total2[f_d][ff_d] += t.num_seconds() / faces[f_d].size() * 1000;
