@@ -1095,6 +1095,27 @@ private:
     // using State_pair = std::pair<std::size_t, bool>;
     friend class boost::iterator_core_access;
 
+    bool triplet_check_nonempty(std::size_t i, std::size_t j, std::size_t i_ref) const {
+      if (i < i_ref) {
+        std::size_t k  = (j*j+j-2)/2 - i;
+        std::size_t k1 = (i_ref*i_ref+i_ref-2)/2 - i;
+        std::size_t k2 = (j*j+j-2)/2 - i_ref;
+        int value_ref = a_id_[k2];
+        return (value_.is_fixed(k1) == value_.is_fixed(k) && value_[k] == value_[k1] + value_ref);
+      }
+      else if (i > i_ref) {
+        std::size_t k  = (j*j+j-2)/2 - i_ref;
+        std::size_t k1 = (i*i+i-2)/2 - i_ref;
+        std::size_t k2 = (j*j+j-2)/2 - i;
+        int value_ref = a_id_[k];
+        if (value_.is_fixed(k1))
+          return (value_.is_fixed(k2) && value_ref == value_[k1] + value_[k2]);
+        else
+          return (!value_.is_fixed(k2) && value_ref == value_[k1] + value_[k2] + 1);
+      }
+      return true;
+    }
+    
     bool triplet_check(std::size_t i, std::size_t l, std::size_t j) const {
       int k  = (j*j+j-2)/2 - i;
       int k1 = (l*l+l-2)/2 - i;
@@ -1129,12 +1150,21 @@ private:
             else
               value_.push_back(a_id_[k], false);
           bool curr_state_is_valid = true;
-          if (basis_k_.size() == j && i != basis_k_.back())
-            for (std::size_t l = basis_k_.back(); l < j && curr_state_is_valid; ++l)
-              curr_state_is_valid = triplet_check(i,l,j);
-          else
-            for (std::size_t l = i + 1; l < j && curr_state_is_valid; ++l)
-              curr_state_is_valid = triplet_check(i,l,j);
+          if (nonempty_lanes_[j]) {
+            // std::size_t i_ref = j-1, k_ref = (j*j+j-2)/2 - i_ref;
+            // while (!a_id_.is_fixed(k_ref++))
+            //   i_ref--;
+            // curr_state_is_valid = triplet_check_nonempty(i, j, i_ref);
+            curr_state_is_valid = triplet_check_nonempty(i, j, mnv_[j]);
+          }
+          else {
+            if (basis_k_.size() == j && i != basis_k_.back())
+              for (std::size_t l = basis_k_.back(); l < j && curr_state_is_valid; ++l)
+                curr_state_is_valid = triplet_check(i,l,j);
+            else
+              for (std::size_t l = i + 1; l < j && curr_state_is_valid; ++l)
+                curr_state_is_valid = triplet_check(i,l,j);
+          }
           if (curr_state_is_valid &&
               value_.size() == a_id_.size()) {
             value_.set_dimension(curr_dim_lower_);
@@ -1168,7 +1198,8 @@ private:
     }
     
     bool equal(Face_iterator const& other) const {
-      return (is_end_ && other.is_end_) || (stack_ == other.stack_);
+      // return (is_end_ && other.is_end_) || (stack_ == other.stack_);
+      return (is_end_ && other.is_end_);
     }
     Alcove_id const& dereference() const {
       return value_;
@@ -1216,6 +1247,10 @@ private:
       std::size_t k = stack_.size();
       std::size_t j = std::floor(0.5*(1+std::sqrt(1+8*k)));
       std::size_t i = (j*j+j-2)/2 - k;
+      if (i == j-1 && nonempty_lanes_[j]) {
+	basis_k_.push_back(i);
+      }
+      else
       if (basis_k_.size() == j - 1) {
         bool is_basis_vect = true;
         for (std::size_t l = i + 1; l < j && is_basis_vect; ++l) {
@@ -1252,10 +1287,12 @@ private:
       std::size_t i = (j*j+j-2)/2 - k;
       if (basis_k_.size() == j && basis_k_.back() == i) {
         basis_k_.pop_back();
-        if (f)
-          curr_dim_upper_++;
-        else
-          curr_dim_lower_--;
+	if (!nonempty_lanes_[j]) {
+          if (f)
+            curr_dim_upper_++;
+          else
+            curr_dim_lower_--;
+        }
       }
     }
     
@@ -1268,24 +1305,38 @@ private:
         value_(a_id.level()),
         family_(scs.family()),
         is_end_(false),
+	is_itself_(value_dim_lower == a_id.dimension() &&
+		   value_dim_upper == a_id.dimension()),
         ambient_dimension_(scs.dimension_),
         curr_dim_lower_(0),
-        curr_dim_upper_(scs.dimension_),
+        curr_dim_upper_(a_id.dimension()),
         value_dim_lower_(value_dim_lower),
-        value_dim_upper_(value_dim_upper)
+        value_dim_upper_(value_dim_upper),
+	nonempty_lanes_(scs.dimension_+1, false)
     {
+      if (is_itself_) {
+	value_ = a_id_;
+	return;
+      }
+      std::size_t i = 0, j = 1, k = 0; 
+      for (; j < ambient_dimension_ + 1; ++j)
+	for (i = 0; i < j; ++i, ++k)
+	  if (a_id.is_fixed(k)) {
+	    nonempty_lanes_[j] = true;
+	    mnv_.emplace(std::make_pair(j,j-i-1));
+	  }
       if (!a_id.is_fixed(0)) {
-        if (!stack_push(false, false)) {
-          stack_pop();
-          if (!stack_push(true, false)) {
-            stack_pop();
-            elementary_increment();
-          }
-        }
+	if (!stack_push(false, false)) {
+	  stack_pop();
+	  if (!stack_push(true, false)) {
+	    stack_pop();
+	    elementary_increment();
+	  }
+	}
       }
       else if (!stack_push(true, false)) {
-        stack_pop();
-        elementary_increment();
+	stack_pop();
+	elementary_increment();
       }
       update_value();
     }
@@ -1296,7 +1347,7 @@ private:
   protected:
     struct State_ {
       bool f, // is it fixed?
-           p; // has the value different from the original?
+           p; // has a different value from the original?
       bool operator==(const State_& rhs) const {
         return f == rhs.f && p == rhs.p;
       }
@@ -1305,11 +1356,14 @@ private:
     Alcove_id value_;
     char family_;
     bool is_end_;
+    bool is_itself_;
     std::size_t ambient_dimension_;
     std::size_t curr_dim_lower_, curr_dim_upper_;
     std::size_t value_dim_lower_, value_dim_upper_;
     std::vector<unsigned> basis_k_;
     std::stack<State_> stack_;
+    std::vector<bool> nonempty_lanes_;
+    std::map<std::size_t, std::size_t> mnv_;
   };
 
   
@@ -1807,7 +1861,7 @@ private:
     }
 
     void increment() {
-      is_end_ = !increment_state();
+      is_end_ = is_itself_ || !increment_state();
       update_value();
     }
 
@@ -1836,8 +1890,13 @@ private:
     Face2_iterator(const Alcove_id& a_id,
                    const Simple_coxeter_system& scs,
                    std::size_t value_dim)
-      : value_(a_id.level(), value_dim)
+      : value_(a_id.level(), value_dim),
+	is_itself_(value_dim == a_id.dimension())
     {
+      if (is_itself_) {
+	value_ = a_id;
+	return;
+      }
       for (const Alcove_id& v_id: scs.face_range(a_id, 0))
         vertices_.push_back(v_id);
       state_.reserve(value_dim + 1);
@@ -1856,6 +1915,7 @@ private:
     SubsetChooser<std::vector<Alcove_id>::const_iterator> chooser_;
     std::vector<std::size_t> state_;
     bool is_end_;
+    bool is_itself_;
   };
 
   

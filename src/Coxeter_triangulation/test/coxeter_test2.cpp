@@ -136,36 +136,36 @@ int main(int argc, char * const argv[]) {
   }
 
   std::cout << "\\begin{table}\n\\begin{tabular}{";
-  for (unsigned i = 0; i <= dimension+4; ++i)
+  for (unsigned i = 0; i <= std::min(dimension, (unsigned)8)+4; ++i)
     std::cout << "|l";
   std::cout << "|}\n\\hline\n\\multicolumn{3}{|c|}{Face dimension} ";
-  for (unsigned i = 0; i <= dimension; ++i)
+  for (unsigned i = 0; i <= std::min(dimension, (unsigned)8); ++i)
     std::cout << "& " << i << " ";
   std::cout << "\\\\ \\hline\n\\parbox[t]{2mm}{\\multirow{" << 2*(dimension + 1) << "}{*}{\\rotatebox[origin=c]{90}{\\centering Simplex dimension}}}";
   for (unsigned f_d = 0; f_d <= dimension; ++f_d) {
     // std::cout << "& \\multirow{2}{*}{" << f_d << "} & old ";
-    std::cout << "& \\multirow{2}{*}{" << f_d << "} & $[0, \\dim]$ ";
-    for (unsigned ff_d = 0; ff_d <= f_d; ++ff_d) {
+    std::cout << "& \\multirow{2}{*}{" << f_d << "} & first ";
+    for (unsigned ff_d = 0; ff_d <= std::min(f_d, (unsigned)8); ++ff_d) {
       std::cout << "& ";
       if (std::round(total1[f_d][ff_d]*1000)/1000 > std::round(total2[f_d][ff_d]*1000)/1000)
         std::cout << "\\cellcolor{green!20} ";
       std::cout  << std::round(total1[f_d][ff_d]*1000)/1000. << " ";
     }
-    for (unsigned ff_d = f_d + 1; ff_d <= dimension; ++ff_d) {
+    for (unsigned ff_d = f_d + 1; ff_d <= std::min(dimension, (unsigned)8); ++ff_d) {
       std::cout << "& ";
     }
     // std::cout << "\\\\ \\cline{3-" << f_d + 4 << "}\n & & new "; 
-    std::cout << "\\\\ \\cline{3-" << f_d + 4 << "}\n & & $[0, \\mathrm{dim}(\\sigma_\\kappa)]$ "; 
-    for (unsigned ff_d = 0; ff_d <= f_d; ++ff_d) {
+    std::cout << "\\\\ \\cline{3-" << std::min(f_d, (unsigned)8) + 4 << "}\n & & second "; 
+    for (unsigned ff_d = 0; ff_d <= std::min(f_d, (unsigned)8); ++ff_d) {
       std::cout << "& \\bf ";
       if (std::round(total1[f_d][ff_d]*1000)/1000 > std::round(total2[f_d][ff_d]*1000)/1000)
         std::cout << "\\cellcolor{green!20} ";
       std::cout << std::round(total2[f_d][ff_d]*1000)/1000. << " ";
     }
-    for (unsigned ff_d = f_d + 1; ff_d <= dimension; ++ff_d) {
+    for (unsigned ff_d = f_d + 1; ff_d <= std::min(dimension, (unsigned)8); ++ff_d) {
       std::cout << "& ";
     }
-    std::cout << "\\\\ \\cline{2-" << dimension + 4 << "}\n"; 
+    std::cout << "\\\\ \\cline{2-" << std::min(dimension, (unsigned)8) + 4 << "}\n"; 
   }
   std::cout << "\\hline\n\\end{tabular}\n\\caption{The table of average running times in milliseconds of the old and the new algorithms to compute all faces of the simplices of various dimensions in a $" << dimension << "$-dimensional triangulation.}\n\\label{tab:compar-" << dimension << "}\n\\end{table}\n";
 
