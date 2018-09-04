@@ -168,12 +168,15 @@ private:
     }
     
     bool equal(Face_iterator const& other) const {
-      return (is_end_ && other.is_end_) || (!is_end_ && !other.is_end_ && decomposition_ == other.decomposition_);
+      return (is_end_ && other.is_end_);
+      // return (is_end_ && other.is_end_) || (!is_end_ && !other.is_end_ && decomposition_ == other.decomposition_);
     }
     Alcove_id const& dereference() const {
       return value_;
     }
     void increment() {
+      if (is_itself_)
+        is_end_ = true;
       if (is_end_)
         return;
       std::size_t rest = 0;
@@ -216,10 +219,17 @@ private:
                    const Coxeter_system& cs,
                    std::size_t value_dimension)
       : value_(coface.level(), value_dimension),
-        is_end_(false),
-        decomposition_(cs.simple_coxeter_system_end() - cs.simple_coxeter_system_begin()),
-        face_iterators_(cs.simple_coxeter_system_end() - cs.simple_coxeter_system_begin())
+        is_end_(value_dimension > coface.dimension()),
+        is_itself_(value_dimension == coface.dimension())        
     {
+      if (is_end_)
+        return;
+      if (is_itself_) {
+        value_ = coface;
+        return;
+      }
+      decomposition_ = std::vector<std::size_t>(cs.simple_coxeter_system_end() - cs.simple_coxeter_system_begin());
+      face_iterators_ = std::vector<std::pair<Scs_face_iterator, Scs_face_iterator> >(cs.simple_coxeter_system_end() - cs.simple_coxeter_system_begin());
       std::size_t pos = 0;
       for (auto scs_it = cs.simple_coxeter_system_begin();
            scs_it != cs.simple_coxeter_system_end();
@@ -242,6 +252,7 @@ private:
   protected:
     Alcove_id value_;
     bool is_end_;
+    bool is_itself_;
     std::vector<Alcove_id> chunks_;
     std::vector<std::size_t> decomposition_;
     std::vector<std::pair<Scs_face_iterator, Scs_face_iterator> > face_iterators_;
@@ -422,12 +433,15 @@ private:
     }
     
     bool equal(Face2_iterator const& other) const {
-      return (is_end_ && other.is_end_) || (!is_end_ && !other.is_end_ && decomposition_ == other.decomposition_);
+      return (is_end_ && other.is_end_);
+      // return (is_end_ && other.is_end_) || (!is_end_ && !other.is_end_ && decomposition_ == other.decomposition_);
     }
     Alcove_id const& dereference() const {
       return value_;
     }
     void increment() {
+      if (is_itself_)
+        is_end_ = true;
       if (is_end_)
         return;
       std::size_t rest = 0;
@@ -470,10 +484,17 @@ private:
                    const Coxeter_system& cs,
                    std::size_t value_dimension)
       : value_(coface.level(), value_dimension),
-        is_end_(false),
-        decomposition_(cs.simple_coxeter_system_end() - cs.simple_coxeter_system_begin()),
-        face_iterators_(cs.simple_coxeter_system_end() - cs.simple_coxeter_system_begin())
+        is_end_(value_dimension > coface.dimension()),
+        is_itself_(value_dimension == coface.dimension())
     {
+      if (is_end_)
+        return;
+      if (is_itself_) {
+        value_ = coface;
+        return;
+      }
+      decomposition_ = std::vector<std::size_t>(cs.simple_coxeter_system_end() - cs.simple_coxeter_system_begin());
+      face_iterators_ = std::vector<std::pair<Scs_face_iterator, Scs_face_iterator> >(cs.simple_coxeter_system_end() - cs.simple_coxeter_system_begin());
       std::size_t pos = 0;
       for (auto scs_it = cs.simple_coxeter_system_begin();
            scs_it != cs.simple_coxeter_system_end();
@@ -496,6 +517,7 @@ private:
   protected:
     Alcove_id value_;
     bool is_end_;
+    bool is_itself_;
     std::vector<Alcove_id> chunks_;
     std::vector<std::size_t> decomposition_;
     std::vector<std::pair<Scs_face_iterator, Scs_face_iterator> > face_iterators_;

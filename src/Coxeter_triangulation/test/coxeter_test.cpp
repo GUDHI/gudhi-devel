@@ -73,7 +73,7 @@ int main(int argc, char * const argv[]) {
   }
   unsigned dimension = atoi(argv[1]);
   /* Test1: print faces and cofaces of the simplex [0,...,0] */
-  std::vector<unsigned> decomposition; // first coordinate is the sum
+  std::vector<unsigned> decomposition(1, 0); // first coordinate is the sum
   decomposition.reserve(dimension);
   Coxeter_system cs;
   rec_test1(decomposition, cs, dimension);

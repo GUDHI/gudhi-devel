@@ -7,6 +7,7 @@
 
 #include <gudhi/Points_off_io.h>
 #include <gudhi/Coxeter_system.h>
+#include <gudhi/Coxeter_system2.h>
 #include <gudhi/Coxeter_complex.h>
 #include <gudhi/Coxeter_complex/Off_point_range.h>
 #include <gudhi/Clock.h>
@@ -104,14 +105,23 @@ int main(int argc, char * const argv[]) {
   std::vector<std::vector<double> >
     total1(dimension + 1, std::vector<double>(dimension + 1, 0)),
     total2(dimension + 1, std::vector<double>(dimension + 1, 0));
-  CGAL::Random_points_on_sphere_d<Point_d> rp(dimension + 1, 5);
+  CGAL::Random_points_on_sphere_d<Point_d> rp(dimension, 5);
   unsigned num_tests = 1000;
   std::vector<std::vector<A_id> > faces(dimension + 1);
   for (unsigned i = 0; i < num_tests; ++i) {
-    A_id a_id = cs.query_point_location(*rp++, 1);
-    for (unsigned f_d = 0; f_d <= dimension; ++f_d)
-      for (auto f_id: cs.face_range(a_id, f_d))
+    A_id a_id = cs.simple_coxeter_system_begin()->query_point_location(*rp++, 1);
+    for (unsigned f_d = 0; f_d <= dimension; ++f_d) 
+      for (auto f_id: Coxeter_system2('A', dimension).face_range(a_id, f_d))
         faces[f_d].push_back(f_id);
+  }
+  for (unsigned f_d = 0; f_d <= dimension; ++f_d) {
+    for (unsigned ff_d = 0; ff_d <= f_d; ++ff_d) {
+      Gudhi::Clock t;
+      for (auto f_id: faces[f_d])
+        for (auto ff_id: cs.face2_range(f_id, ff_d)) {}
+      t.end();
+      total2[f_d][ff_d] += t.num_seconds() / faces[f_d].size() * 1000;
+    }
   }
   for (unsigned f_d = 0; f_d <= dimension; ++f_d) {
     for (unsigned ff_d = 0; ff_d <= f_d; ++ff_d) {
@@ -120,18 +130,6 @@ int main(int argc, char * const argv[]) {
         for (auto ff_id: cs.face_range(f_id, ff_d)) {}
       t.end();
       total1[f_d][ff_d] += t.num_seconds() / faces[f_d].size() * 1000;
-    }
-  }
-  for (unsigned f_d = 0; f_d <= dimension; ++f_d) {
-    for (unsigned ff_d = 0; ff_d <= f_d; ++ff_d) {
-      Gudhi::Clock t;
-      for (auto f_id: faces[f_d]) {
-        std::size_t n_faces = 0;
-        for (auto ff_id: cs.face2_range(f_id, ff_d)) {n_faces++;}
-        assert(n_faces == BinomialCoefficient(f_d+1, ff_d+1));
-      }
-      t.end();
-      total2[f_d][ff_d] += t.num_seconds() / faces[f_d].size() * 1000;
     }
   }
 
@@ -208,7 +206,8 @@ int main(int argc, char * const argv[]) {
   // std::cout << "\\end{tabular}\n\\caption{The table of average running times in milliseconds of the two algorithms to compute all faces of the full-dimensional simplex in a $" << dimension << "$-dimensional triangulation.}\n\\label{tab:compar-" << dimension << "}\\end{table}\n";
 
 
-
+  // std::vector<unsigned> decomposition(1, 0); // first coordinate is the sum
+  // decomposition.reserve(dimension);
   // rec_test1(decomposition, cs, dimension);
   // cs.emplace_back('A', 2);
   // typename Coxeter_system::Alcove_id a_id(1, 0);

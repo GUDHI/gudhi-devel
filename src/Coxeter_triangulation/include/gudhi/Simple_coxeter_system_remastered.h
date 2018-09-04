@@ -1301,23 +1301,23 @@ private:
                   const Simple_coxeter_system& scs,
                   std::size_t value_dim_lower,
                   std::size_t value_dim_upper)
-      : a_id_(a_id),
+      : 
         value_(a_id.level()),
         family_(scs.family()),
         is_end_(false),
-	is_itself_(value_dim_lower == a_id.dimension() &&
-		   value_dim_upper == a_id.dimension()),
+	is_itself_(value_dim_lower == a_id.dimension()),
         ambient_dimension_(scs.dimension_),
         curr_dim_lower_(0),
         curr_dim_upper_(a_id.dimension()),
         value_dim_lower_(value_dim_lower),
-        value_dim_upper_(value_dim_upper),
-	nonempty_lanes_(scs.dimension_+1, false)
+        value_dim_upper_(value_dim_upper)
     {
       if (is_itself_) {
 	value_ = a_id_;
 	return;
       }
+      a_id_ = a_id;
+      nonempty_lanes_ = std::vector<bool>(scs.dimension_+1, false);
       std::size_t i = 0, j = 1, k = 0; 
       for (; j < ambient_dimension_ + 1; ++j)
 	for (i = 0; i < j; ++i, ++k)

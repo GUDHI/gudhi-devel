@@ -1346,9 +1346,13 @@ private:
             curr_state_is_valid = triplet_check_nonempty(i, j, mnv_[j]);
           }
           else {
-            if (basis_k_.size() == j && i != basis_k_.back())
-              for (std::size_t l = basis_k_.back(); l < j && curr_state_is_valid; ++l)
-                curr_state_is_valid = triplet_check(i,l,j);
+            if (basis_k_.size() == j && i != basis_k_.back()) {
+              if (value_.is_fixed(basis_k_.back()))
+                curr_state_is_valid = triplet_check(i, basis_k_.back(), j);
+              else
+                for (std::size_t l = basis_k_.back(); l < j && curr_state_is_valid; ++l)
+                  curr_state_is_valid = triplet_check(i,l,j);
+            }
             else
               for (std::size_t l = i + 1; l < j && curr_state_is_valid; ++l)
                 curr_state_is_valid = triplet_check(i,l,j);
