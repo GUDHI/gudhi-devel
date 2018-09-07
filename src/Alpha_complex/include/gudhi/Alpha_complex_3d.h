@@ -31,7 +31,7 @@
 #endif
 
 #include <gudhi/Debug_utils.h>
-#include <gudhi/Alpha_complex_3d_options.h>
+#include <gudhi/Alpha_complex_options.h>
 
 #include <CGAL/Object.h>
 #include <CGAL/tuple.h>
@@ -57,13 +57,6 @@ namespace Gudhi {
 
 namespace alpha_complex {
 
-enum class complexity: char
-{
-  fast='f',
-  safe='s',
-  exact='e',
-};
-
 /**
  * \class Alpha_complex_3d
  * \brief Alpha complex data structure for 3d specific case.
@@ -73,15 +66,30 @@ enum class complexity: char
  * \details
  * The data structure is constructing a <a href="https://doc.cgal.org/latest/Alpha_shapes_3/index.html">CGAL 3D Alpha
  * Shapes</a> from a range of points (can be read from an OFF file, cf. Points_off_reader).
+ * Duplicate points are inserted once in the Alpha_complex. This is the reason why the vertices may be not contiguous.
  *
- * \tparam AlphaComplex3dOptions can be `Gudhi::alpha_complex::Alpha_shapes_3d`,
- * `Gudhi::alpha_complex::Exact_alpha_shapes_3d`, `Gudhi::alpha_complex::Weighted_alpha_shapes_3d`,
- * `Gudhi::alpha_complex::Periodic_alpha_shapes_3d` or `Gudhi::alpha_complex::Weighted_periodic_alpha_shapes_3d`.
+ * \tparam Complexity shall be `Gudhi::alpha_complex::complexity`. Default value is
+ * `Gudhi::alpha_complex::complexity::fast`.
+ *
+ * \tparam Weighted Boolean used to set/unset the weighted version of Alpha_complex_3d. Default value is false.
+ *
+ * \tparam Periodic Boolean used to set/unset the periodic version of Alpha_complex_3d. Default value is false.
+ *
+ * For the weighted version, weights values are explained on CGAL
+ * <a href="https://doc.cgal.org/latest/Alpha_shapes_3/index.html#title0">Alpha shapes 3d</a> and
+ * <a href="https://doc.cgal.org/latest/Triangulation_3/index.html#Triangulation3secclassRegulartriangulation">Regular
+ * triangulation</a> documentation.
+ *
+ * For the periodic version, refer to the
+ * <a href="https://doc.cgal.org/latest/Periodic_3_triangulation_3/index.html">CGAL’s 3D Periodic Triangulations User
+ * Manual </a> for more details.
+ * The periodicity is defined by an iso-oriented cuboid with diagonal opposite vertices (x_min, y_min, z_min) and
+ * (x_max, y_max, z_max).
  *
  * Please refer to \ref alpha_complex for examples.
  *
  * \remark When Alpha_complex_3d is constructed with an infinite value of alpha (default value), the complex is a
- * Delaunay complex.
+ * 3d Delaunay complex.
  *
  */
 template<complexity Complexity = complexity::fast, bool Weighted = false, bool Periodic = false>
@@ -157,9 +165,9 @@ class Alpha_complex_3d {
     using Triangulation_3 = CGAL::Periodic_3_regular_triangulation_3<Kernel, Tds>;
   };
 
+public:
   using Triangulation_3 = typename Triangulation<Kernel, Tds, Weighted, Periodic>::Triangulation_3;
 
-public:
   using Alpha_shape_3 = CGAL::Alpha_shape_3<Triangulation_3, Exact_tag>;
 
   using Point_3 = typename Kernel::Point_3;
@@ -184,20 +192,16 @@ private:
 public:
   /** \brief Alpha_complex constructor from a list of points.
   *
-  * Duplicate points are inserted once in the Alpha_complex. This is the reason why the vertices may be not contiguous.
+  * @param[in] points Range of points to triangulate. Points must be in `Alpha_complex_3d::Point_3` or
+  * `Alpha_complex_3d::Triangulation_3::Weighted_point`.
   *
-  * @param[in] points Range of points to triangulate. Points must be in AlphaComplex3dOptions::Point_3
+  * @pre Available if Alpha_complex_3d is not Periodic.
   *
-  * @pre Available if AlphaComplex3dOptions is `Gudhi::alpha_complex::Alpha_shapes_3d` or
-  * `Gudhi::alpha_complex::Exact_alpha_shapes_3d`.
-  *
-  * The type InputPointRange must be a range for which std::begin and
-  * std::end return input iterators on a AlphaComplex3dOptions::Point_3.
+  * The type InputPointRange must be a range for which std::begin and std::end return input iterators on a
+  * `Alpha_complex_3d::Point_3` or a `Alpha_complex_3d::Triangulation_3::Weighted_point`.
   */
   template<typename InputPointRange >
   Alpha_complex_3d(const InputPointRange& points) {
-    static_assert(!Weighted,
-                  "This constructor is not available for weighted versions of Alpha_complex_3d");
     static_assert(!Periodic,
                   "This constructor is not available for periodic versions of Alpha_complex_3d");
 
@@ -215,23 +219,17 @@ public:
 
   /** \brief Alpha_complex constructor from a list of points and associated weights.
   *
-  * Duplicate points are inserted once in the Alpha_complex. This is the reason why the vertices may be not contiguous.
-  * Weights values are explained on CGAL <a href="https://doc.cgal.org/latest/Alpha_shapes_3/index.html#title0">Alpha
-  * shape</a> and
-  * <a href="https://doc.cgal.org/latest/Triangulation_3/index.html#Triangulation3secclassRegulartriangulation">Regular
-  * triangulation</a> documentation.
-  *
   * @exception std::invalid_argument In debug mode, if points and weights do not have the same size.
   *
-  * @param[in] points Range of points to triangulate. Points must be in AlphaComplex3dOptions::Point_3
-  * @param[in] weights Range of weights on points. Points must be in AlphaComplex3dOptions::Point_3
+  * @param[in] points Range of points to triangulate. Points must be in `Alpha_complex_3d::Point_3`
+  * @param[in] weights Range of weights on points. Weights shall be in `Alpha_complex_3d::Alpha_shape_3::FT`
   *
-  * @pre Available if AlphaComplex3dOptions is `Weighted_alpha_shapes_3d`.
+  * @pre Available if Alpha_complex_3d is Weighted and not Periodic.
   *
   * The type InputPointRange must be a range for which std::begin and
-  * std::end return input iterators on a AlphaComplex3dOptions::Point_3.
+  * std::end return input iterators on a `Alpha_complex_3d::Point_3`.
   * The type WeightRange must be a range for which std::begin and
-  * std::end return an input iterator on a AlphaComplex3dOptions::Alpha_shape_3::FT.
+  * std::end return an input iterator on a `Alpha_complex_3d::Alpha_shape_3::FT`.
   */
   template<typename InputPointRange , typename WeightRange>
   Alpha_complex_3d(const InputPointRange& points, WeightRange weights) {
@@ -268,16 +266,10 @@ public:
 
   /** \brief Alpha_complex constructor from a list of points and an iso-cuboid coordinates.
   *
-  * Duplicate points are inserted once in the Alpha_complex. This is the reason why the vertices may be not contiguous.
-  *
-  * Refer to the <a href="https://doc.cgal.org/latest/Periodic_3_triangulation_3/index.html">CGAL’s 3D Periodic
-  * Triangulations User Manual </a> for more details.
-  * The periodicity is defined by an iso-oriented cuboid with diagonal opposite vertices (x_min, y_min, z_min) and
-  * (x_max, y_max, z_max).
-  *
   * @exception std::invalid_argument In debug mode, if the size of the cuboid in every directions is not the same.
   *
-  * @param[in] points Range of points to triangulate. Points must be in AlphaComplex3dOptions::Point_3
+  * @param[in] points Range of points to triangulate. Points must be in `Alpha_complex_3d::Point_3` or
+  * `Alpha_complex_3d::Triangulation_3::Weighted_point`.
   * @param[in] x_min Iso-oriented cuboid x_min.
   * @param[in] y_min Iso-oriented cuboid y_min.
   * @param[in] z_min Iso-oriented cuboid z_min.
@@ -285,18 +277,18 @@ public:
   * @param[in] y_max Iso-oriented cuboid y_max.
   * @param[in] z_max Iso-oriented cuboid z_max.
   *
-  * @pre Available if AlphaComplex3dOptions is `Periodic_alpha_shapes_3d`.
+  * @pre Available if Alpha_complex_3d is Periodic.
   *
-  * The type InputPointRange must be a range for which std::begin and
-  * std::end return input iterators on a AlphaComplex3dOptions::Point_3.
-  * The type of x_min, y_min, z_min, x_max, y_max and z_max is AlphaComplex3dOptions::Alpha_shape_3::FT.
+  * The type InputPointRange must be a range for which std::begin and std::end return input iterators on a
+  * `Alpha_complex_3d::Point_3` or a `Alpha_complex_3d::Triangulation_3::Weighted_point`.
+  *
+  * @note In weighted version, please check weights are greater than zero, and lower than 1/64*cuboid length
+  * squared.
   */
   template<typename InputPointRange>
   Alpha_complex_3d(const InputPointRange& points,
                    Alpha_value_type x_min, Alpha_value_type y_min, Alpha_value_type z_min,
                    Alpha_value_type x_max, Alpha_value_type y_max, Alpha_value_type z_max) {
-    static_assert(!Weighted,
-                  "This constructor is not available for weighted versions of Alpha_complex_3d");
     static_assert(Periodic,
                   "This constructor is not available for non-periodic versions of Alpha_complex_3d");
     // Checking if the cuboid is the same in x,y and z direction. If not, CGAL will not process it.
@@ -332,25 +324,13 @@ public:
 
   /** \brief Alpha_complex constructor from a list of points, associated weights and an iso-cuboid coordinates.
   *
-  * Duplicate points are inserted once in the Alpha_complex. This is the reason why the vertices may be not contiguous.
-  *
-  * Weights values are explained on CGAL <a href="https://doc.cgal.org/latest/Alpha_shapes_3/index.html#title0">Alpha
-  * shape</a> and
-  * <a href="https://doc.cgal.org/latest/Triangulation_3/index.html#Triangulation3secclassRegulartriangulation">Regular
-  * triangulation</a> documentation.
-  *
-  * Refer to the <a href="https://doc.cgal.org/latest/Periodic_3_triangulation_3/index.html">CGAL’s 3D Periodic
-  * Triangulations User Manual</a> for more details.
-  * The periodicity is defined by an iso-oriented cuboid with diagonal opposite vertices (x_min, y_min, z_min) and
-  * (x_max, y_max, z_max).
-  *
   * @exception std::invalid_argument In debug mode, if points and weights do not have the same size.
   * @exception std::invalid_argument In debug mode, if the size of the cuboid in every directions is not the same.
   * @exception std::invalid_argument In debug mode, if a weight is negative, zero, or greater than 1/64*cuboid length
   * squared.
   *
-  * @param[in] points Range of points to triangulate. Points must be in AlphaComplex3dOptions::Point_3
-  * @param[in] weights Range of weights on points. Points must be in AlphaComplex3dOptions::Point_3
+  * @param[in] points Range of points to triangulate. Points must be in `Alpha_complex_3d::Point_3`
+  * @param[in] weights Range of weights on points. Weights shall be in `Alpha_complex_3d::Alpha_shape_3::FT`
   * @param[in] x_min Iso-oriented cuboid x_min.
   * @param[in] y_min Iso-oriented cuboid y_min.
   * @param[in] z_min Iso-oriented cuboid z_min.
@@ -358,13 +338,13 @@ public:
   * @param[in] y_max Iso-oriented cuboid y_max.
   * @param[in] z_max Iso-oriented cuboid z_max.
   *
-  * @pre Available if AlphaComplex3dOptions is `Weighted_periodic_alpha_shapes_3d`.
+  * @pre Available if Alpha_complex_3d is Weighted and Periodic.
   *
   * The type InputPointRange must be a range for which std::begin and
-  * std::end return input iterators on a AlphaComplex3dOptions::Point_3.
+  * std::end return input iterators on a `Alpha_complex_3d::Point_3`.
   * The type WeightRange must be a range for which std::begin and
-  * std::end return an input iterator on a AlphaComplex3dOptions::Alpha_shape_3::FT.
-  * The type of x_min, y_min, z_min, x_max, y_max and z_max is AlphaComplex3dOptions::Alpha_shape_3::FT.
+  * std::end return an input iterator on a `Alpha_complex_3d::Alpha_shape_3::FT`.
+  * The type of x_min, y_min, z_min, x_max, y_max and z_max is `Alpha_complex_3d::Alpha_shape_3::FT`.
   */
   template<typename InputPointRange , typename WeightRange>
   Alpha_complex_3d(const InputPointRange& points, WeightRange weights,
@@ -395,7 +375,7 @@ public:
 
     while ((index < weights.size()) && (index < points.size())) {
       GUDHI_CHECK((weights[index] < maximal_possible_weight) && (weights[index] >= 0),
-                  std::invalid_argument("Invalid weight at line" + std::to_string(index + 1) +
+                  std::invalid_argument("Invalid weight at index " + std::to_string(index + 1) +
                                         ". Must be positive and less than maximal possible weight = 1/64*cuboid length "
                                         "squared, which is not an acceptable input."));
       weighted_points_3.push_back(Weighted_point_3(points[index], weights[index]));

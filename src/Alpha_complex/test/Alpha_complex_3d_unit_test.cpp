@@ -30,9 +30,9 @@
 #include <string>
 #include <vector>
 #include <random>
+#include <cstddef>  // for std::size_t
 
 #include <gudhi/Alpha_complex_3d.h>
-#include <gudhi/Alpha_complex_3d_options.h>
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Unitary_tests_utils.h>
@@ -111,9 +111,9 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_3d_from_points) {
   }
 }
 
-#ifdef GUDHI_DEBUG
 typedef boost::mpl::list<Fast_weighted_alpha_complex_3d, Exact_weighted_alpha_complex_3d> weighted_variants_type_list;
 
+#ifdef GUDHI_DEBUG
 BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_weighted_throw, Weighted_alpha_complex_3d, weighted_variants_type_list) {
   using Point_3 = typename Weighted_alpha_complex_3d::Point_3;
   std::vector<Point_3> w_points;
@@ -132,61 +132,55 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_weighted_throw, Weighted_alpha_compl
 }
 #endif
 
-BOOST_AUTO_TEST_CASE(Alpha_complex_weighted) {
-  // ---------------------
-  // Fast weighted version
-  // ---------------------
-  std::cout << "Fast weighted alpha complex 3d" << std::endl;
-  std::vector<Fast_weighted_alpha_complex_3d::Point_3> w_points;
-  w_points.push_back(Fast_weighted_alpha_complex_3d::Point_3(0.0, 0.0, 0.0));
-  w_points.push_back(Fast_weighted_alpha_complex_3d::Point_3(0.0, 0.0, 0.2));
-  w_points.push_back(Fast_weighted_alpha_complex_3d::Point_3(0.2, 0.0, 0.2));
-  w_points.push_back(Fast_weighted_alpha_complex_3d::Point_3(0.6, 0.6, 0.0));
-  w_points.push_back(Fast_weighted_alpha_complex_3d::Point_3(0.8, 0.8, 0.2));
-  w_points.push_back(Fast_weighted_alpha_complex_3d::Point_3(0.2, 0.8, 0.6));
+BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_weighted, Weighted_alpha_complex_3d, weighted_variants_type_list) {
+  std::cout << "Weighted alpha complex 3d from points and weights" << std::endl;
+  using Point_3 = typename Weighted_alpha_complex_3d::Point_3;
+  std::vector<Point_3> w_points;
+  w_points.push_back(Point_3(0.0, 0.0, 0.0));
+  w_points.push_back(Point_3(0.0, 0.0, 0.2));
+  w_points.push_back(Point_3(0.2, 0.0, 0.2));
+  w_points.push_back(Point_3(0.6, 0.6, 0.0));
+  w_points.push_back(Point_3(0.8, 0.8, 0.2));
+  w_points.push_back(Point_3(0.2, 0.8, 0.6));
 
   // weights size is different from w_points size to make weighted Alpha_complex_3d throw in debug mode
   std::vector<double> weights = {0.01, 0.005, 0.006, 0.01, 0.009, 0.001};
 
-  Fast_weighted_alpha_complex_3d weighted_alpha_complex(w_points, weights);
+  Weighted_alpha_complex_3d alpha_complex_p_a_w(w_points, weights);
   Gudhi::Simplex_tree<> stree;
-  weighted_alpha_complex.create_complex(stree);
+  alpha_complex_p_a_w.create_complex(stree);
 
-  // ----------------------
-  // Exact weighted version
-  // ----------------------
-  std::cout << "Exact weighted alpha complex 3d" << std::endl;
+  std::cout << "Weighted alpha complex 3d from weighted points" << std::endl;
+  using Weighted_point_3 = typename Weighted_alpha_complex_3d::Triangulation_3::Weighted_point;
 
-  std::vector<Exact_weighted_alpha_complex_3d::Point_3> e_w_points;
-  e_w_points.push_back(Exact_weighted_alpha_complex_3d::Point_3(0.0, 0.0, 0.0));
-  e_w_points.push_back(Exact_weighted_alpha_complex_3d::Point_3(0.0, 0.0, 0.2));
-  e_w_points.push_back(Exact_weighted_alpha_complex_3d::Point_3(0.2, 0.0, 0.2));
-  e_w_points.push_back(Exact_weighted_alpha_complex_3d::Point_3(0.6, 0.6, 0.0));
-  e_w_points.push_back(Exact_weighted_alpha_complex_3d::Point_3(0.8, 0.8, 0.2));
-  e_w_points.push_back(Exact_weighted_alpha_complex_3d::Point_3(0.2, 0.8, 0.6));
-  Exact_weighted_alpha_complex_3d exact_alpha_complex(e_w_points, weights);
+  std::vector<Weighted_point_3> weighted_points;
 
-  Gudhi::Simplex_tree<> exact_stree;
-  exact_alpha_complex.create_complex(exact_stree);
+  for (std::size_t i=0; i < w_points.size(); i++) {
+    weighted_points.push_back(Weighted_point_3(w_points[i], weights[i]));
+  }
+  Weighted_alpha_complex_3d alpha_complex_w_p(weighted_points);
+
+  Gudhi::Simplex_tree<> stree_bis;
+  alpha_complex_w_p.create_complex(stree_bis);
 
   // ---------------------
   // Compare both versions
   // ---------------------
-  std::cout << "Exact weighted alpha complex 3d is of dimension " << exact_stree.dimension()
-            << " - Non exact is " << stree.dimension() << std::endl;
-  BOOST_CHECK(exact_stree.dimension() == stree.dimension());
-  std::cout << "Exact weighted alpha complex 3d num_simplices " << exact_stree.num_simplices()
-            << " - Non exact is " << stree.num_simplices() << std::endl;
-  BOOST_CHECK(exact_stree.num_simplices() == stree.num_simplices());
-  std::cout << "Exact weighted alpha complex 3d num_vertices " << exact_stree.num_vertices()
-            << " - Non exact is " << stree.num_vertices() << std::endl;
-  BOOST_CHECK(exact_stree.num_vertices() == stree.num_vertices());
+  std::cout << "Weighted alpha complex 3d is of dimension " << stree_bis.dimension()
+            << " - versus " << stree.dimension() << std::endl;
+  BOOST_CHECK(stree_bis.dimension() == stree.dimension());
+  std::cout << "Weighted alpha complex 3d num_simplices " << stree_bis.num_simplices()
+            << " - versus " << stree.num_simplices() << std::endl;
+  BOOST_CHECK(stree_bis.num_simplices() == stree.num_simplices());
+  std::cout << "Weighted alpha complex 3d num_vertices " << stree_bis.num_vertices()
+            << " - versus " << stree.num_vertices() << std::endl;
+  BOOST_CHECK(stree_bis.num_vertices() == stree.num_vertices());
 
   auto sh = stree.filtration_simplex_range().begin();
   while(sh != stree.filtration_simplex_range().end()) {
     std::vector<int> simplex;
     std::vector<int> exact_simplex;
-    std::cout << "Non-exact ( ";
+    std::cout << " ( ";
     for (auto vertex : stree.simplex_vertex_range(*sh)) {
       simplex.push_back(vertex);
       std::cout << vertex << " ";
@@ -195,11 +189,11 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_weighted) {
     std::cout << std::endl;
 
     // Find it in the exact structure
-    auto sh_exact = exact_stree.find(simplex);
-    BOOST_CHECK(sh_exact != exact_stree.null_simplex());
+    auto sh_exact = stree_bis.find(simplex);
+    BOOST_CHECK(sh_exact != stree_bis.null_simplex());
 
     // Exact and non-exact version is not exactly the same due to float comparison
-    GUDHI_TEST_FLOAT_EQUALITY_CHECK(exact_stree.filtration(sh_exact), stree.filtration(*sh));
+    GUDHI_TEST_FLOAT_EQUALITY_CHECK(stree_bis.filtration(sh_exact), stree.filtration(*sh));
 
     ++sh;
   }
@@ -207,7 +201,7 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_weighted) {
 }
 
 #ifdef GUDHI_DEBUG
-typedef boost::mpl::list<Fast_periodic_alpha_complex_3d, Fast_periodic_alpha_complex_3d> periodic_variants_type_list;
+typedef boost::mpl::list<Fast_periodic_alpha_complex_3d, Exact_periodic_alpha_complex_3d> periodic_variants_type_list;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_periodic_throw, Periodic_alpha_complex_3d, periodic_variants_type_list) {
   std::cout << "Periodic alpha complex 3d exception throw" << std::endl;
@@ -541,10 +535,11 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_periodic) {
 
 }
 
-#ifdef GUDHI_DEBUG
-typedef boost::mpl::list<Fast_weighted_periodic_alpha_complex_3d, Fast_weighted_periodic_alpha_complex_3d> wp_variants_type_list;
+typedef boost::mpl::list<Fast_weighted_periodic_alpha_complex_3d, Exact_weighted_periodic_alpha_complex_3d> wp_variants_type_list;
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_weighted_periodic_throw, Weighted_periodic_alpha_complex_3d, wp_variants_type_list) {
+#ifdef GUDHI_DEBUG
+BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_weighted_periodic_throw, Weighted_periodic_alpha_complex_3d,
+                              wp_variants_type_list) {
   std::cout << "Weighted periodic alpha complex 3d exception throw" << std::endl;
 
   using Point_3 = typename Weighted_periodic_alpha_complex_3d::Point_3;
@@ -722,311 +717,186 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_weighted_periodic_throw, Weighted_pe
 }
 #endif
 
-BOOST_AUTO_TEST_CASE(Alpha_complex_weighted_periodic) {
-  // ------------------------------
-  // Fast weighted periodic version
-  // ------------------------------
-  std::cout << "Fast weighted periodic alpha complex 3d" << std::endl;
+BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_weighted_periodic, Weighted_periodic_alpha_complex_3d,
+                              wp_variants_type_list) {
+  std::cout << "Weighted Periodic alpha complex 3d from points and weights" << std::endl;
+  using Point_3 = typename Weighted_periodic_alpha_complex_3d::Point_3;
+  std::vector<Point_3> points;
 
-  std::vector<Fast_weighted_periodic_alpha_complex_3d::Point_3> wp_points;
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.0, 0.2));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.0, 0.4));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.0, 0.6));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.0, 0.8));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.2, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.2, 0.2));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.2, 0.4));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.2, 0.6));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.2, 0.8));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.4, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.4, 0.2));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.4, 0.4));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.4, 0.6));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.4, 0.8));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.6, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.6, 0.2));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.6, 0.4));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.6, 0.6));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.6, 0.8));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.8, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.8, 0.2));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.8, 0.4));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.8, 0.6));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.8, 0.8));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.0, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.0, 0.2));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.0, 0.4));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.0, 0.6));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.0, 0.8));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.2, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.2, 0.2));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.2, 0.4));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.2, 0.6));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.2, 0.8));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.4, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.4, 0.2));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.4, 0.4));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.4, 0.6));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.4, 0.8));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.6, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.6, 0.2));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.6, 0.4));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.6, 0.6));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.6, 0.8));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.0, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.8, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.8, 0.2));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.8, 0.4));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.8, 0.6));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.8, 0.8));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.0, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.0, 0.2));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.0, 0.4));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.0, 0.6));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.0, 0.8));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.2, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.2, 0.2));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.2, 0.4));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.2, 0.6));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.2, 0.8));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.4, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.4, 0.2));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.4, 0.4));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.4, 0.6));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.4, 0.8));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.6, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.6, 0.2));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.6, 0.4));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.6, 0.6));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.6, 0.8));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.8, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.8, 0.2));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.8, 0.4));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.8, 0.6));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.8, 0.8));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.0, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.0, 0.2));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.0, 0.4));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.0, 0.6));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.0, 0.8));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.1, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.2, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.2, 0.2));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.2, 0.4));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.2, 0.6));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.2, 0.8));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.4, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.4, 0.2));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.4, 0.4));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.4, 0.6));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.4, 0.8));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.6, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.6, 0.2));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.6, 0.4));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.6, 0.6));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.6, 0.8));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.8, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.8, 0.2));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.8, 0.4));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.8, 0.6));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.8, 0.8));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.0, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.0, 0.2));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.0, 0.4));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.0, 0.6));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.0, 0.8));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.2, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.2, 0.2));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.2, 0.4));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.2, 0.6));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.2, 0.8));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.4, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.4, 0.2));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.4, 0.4));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.4, 0.6));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.4, 0.8));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.6, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.6, 0.2));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.6, 0.4));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.6, 0.6));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.6, 0.8));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.8, 0.0));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.8, 0.2));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.8, 0.4));
-  wp_points.push_back(Fast_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.8, 0.6));
+  points.push_back(Point_3(0.0, 0.0, 0.2));
+  points.push_back(Point_3(0.0, 0.0, 0.4));
+  points.push_back(Point_3(0.0, 0.0, 0.6));
+  points.push_back(Point_3(0.0, 0.0, 0.8));
+  points.push_back(Point_3(0.0, 0.2, 0.0));
+  points.push_back(Point_3(0.0, 0.2, 0.2));
+  points.push_back(Point_3(0.0, 0.2, 0.4));
+  points.push_back(Point_3(0.0, 0.2, 0.6));
+  points.push_back(Point_3(0.0, 0.2, 0.8));
+  points.push_back(Point_3(0.0, 0.4, 0.0));
+  points.push_back(Point_3(0.0, 0.4, 0.2));
+  points.push_back(Point_3(0.0, 0.4, 0.4));
+  points.push_back(Point_3(0.0, 0.4, 0.6));
+  points.push_back(Point_3(0.0, 0.4, 0.8));
+  points.push_back(Point_3(0.0, 0.6, 0.0));
+  points.push_back(Point_3(0.0, 0.6, 0.2));
+  points.push_back(Point_3(0.0, 0.6, 0.4));
+  points.push_back(Point_3(0.0, 0.6, 0.6));
+  points.push_back(Point_3(0.0, 0.6, 0.8));
+  points.push_back(Point_3(0.0, 0.8, 0.0));
+  points.push_back(Point_3(0.0, 0.8, 0.2));
+  points.push_back(Point_3(0.0, 0.8, 0.4));
+  points.push_back(Point_3(0.0, 0.8, 0.6));
+  points.push_back(Point_3(0.0, 0.8, 0.8));
+  points.push_back(Point_3(0.2, 0.0, 0.0));
+  points.push_back(Point_3(0.2, 0.0, 0.2));
+  points.push_back(Point_3(0.2, 0.0, 0.4));
+  points.push_back(Point_3(0.2, 0.0, 0.6));
+  points.push_back(Point_3(0.2, 0.0, 0.8));
+  points.push_back(Point_3(0.2, 0.2, 0.0));
+  points.push_back(Point_3(0.2, 0.2, 0.2));
+  points.push_back(Point_3(0.2, 0.2, 0.4));
+  points.push_back(Point_3(0.2, 0.2, 0.6));
+  points.push_back(Point_3(0.2, 0.2, 0.8));
+  points.push_back(Point_3(0.2, 0.4, 0.0));
+  points.push_back(Point_3(0.2, 0.4, 0.2));
+  points.push_back(Point_3(0.2, 0.4, 0.4));
+  points.push_back(Point_3(0.2, 0.4, 0.6));
+  points.push_back(Point_3(0.2, 0.4, 0.8));
+  points.push_back(Point_3(0.2, 0.6, 0.0));
+  points.push_back(Point_3(0.2, 0.6, 0.2));
+  points.push_back(Point_3(0.2, 0.6, 0.4));
+  points.push_back(Point_3(0.2, 0.6, 0.6));
+  points.push_back(Point_3(0.2, 0.6, 0.8));
+  points.push_back(Point_3(0.0, 0.0, 0.0));
+  points.push_back(Point_3(0.2, 0.8, 0.0));
+  points.push_back(Point_3(0.2, 0.8, 0.2));
+  points.push_back(Point_3(0.2, 0.8, 0.4));
+  points.push_back(Point_3(0.2, 0.8, 0.6));
+  points.push_back(Point_3(0.2, 0.8, 0.8));
+  points.push_back(Point_3(0.4, 0.0, 0.0));
+  points.push_back(Point_3(0.4, 0.0, 0.2));
+  points.push_back(Point_3(0.4, 0.0, 0.4));
+  points.push_back(Point_3(0.4, 0.0, 0.6));
+  points.push_back(Point_3(0.4, 0.0, 0.8));
+  points.push_back(Point_3(0.4, 0.2, 0.0));
+  points.push_back(Point_3(0.4, 0.2, 0.2));
+  points.push_back(Point_3(0.4, 0.2, 0.4));
+  points.push_back(Point_3(0.4, 0.2, 0.6));
+  points.push_back(Point_3(0.4, 0.2, 0.8));
+  points.push_back(Point_3(0.4, 0.4, 0.0));
+  points.push_back(Point_3(0.4, 0.4, 0.2));
+  points.push_back(Point_3(0.4, 0.4, 0.4));
+  points.push_back(Point_3(0.4, 0.4, 0.6));
+  points.push_back(Point_3(0.4, 0.4, 0.8));
+  points.push_back(Point_3(0.4, 0.6, 0.0));
+  points.push_back(Point_3(0.4, 0.6, 0.2));
+  points.push_back(Point_3(0.4, 0.6, 0.4));
+  points.push_back(Point_3(0.4, 0.6, 0.6));
+  points.push_back(Point_3(0.4, 0.6, 0.8));
+  points.push_back(Point_3(0.4, 0.8, 0.0));
+  points.push_back(Point_3(0.4, 0.8, 0.2));
+  points.push_back(Point_3(0.4, 0.8, 0.4));
+  points.push_back(Point_3(0.4, 0.8, 0.6));
+  points.push_back(Point_3(0.4, 0.8, 0.8));
+  points.push_back(Point_3(0.6, 0.0, 0.0));
+  points.push_back(Point_3(0.6, 0.0, 0.2));
+  points.push_back(Point_3(0.6, 0.0, 0.4));
+  points.push_back(Point_3(0.6, 0.0, 0.6));
+  points.push_back(Point_3(0.6, 0.0, 0.8));
+  points.push_back(Point_3(0.6, 0.1, 0.0));
+  points.push_back(Point_3(0.6, 0.2, 0.0));
+  points.push_back(Point_3(0.6, 0.2, 0.2));
+  points.push_back(Point_3(0.6, 0.2, 0.4));
+  points.push_back(Point_3(0.6, 0.2, 0.6));
+  points.push_back(Point_3(0.6, 0.2, 0.8));
+  points.push_back(Point_3(0.6, 0.4, 0.0));
+  points.push_back(Point_3(0.6, 0.4, 0.2));
+  points.push_back(Point_3(0.6, 0.4, 0.4));
+  points.push_back(Point_3(0.6, 0.4, 0.6));
+  points.push_back(Point_3(0.6, 0.4, 0.8));
+  points.push_back(Point_3(0.6, 0.6, 0.0));
+  points.push_back(Point_3(0.6, 0.6, 0.2));
+  points.push_back(Point_3(0.6, 0.6, 0.4));
+  points.push_back(Point_3(0.6, 0.6, 0.6));
+  points.push_back(Point_3(0.6, 0.6, 0.8));
+  points.push_back(Point_3(0.6, 0.8, 0.0));
+  points.push_back(Point_3(0.6, 0.8, 0.2));
+  points.push_back(Point_3(0.6, 0.8, 0.4));
+  points.push_back(Point_3(0.6, 0.8, 0.6));
+  points.push_back(Point_3(0.6, 0.8, 0.8));
+  points.push_back(Point_3(0.8, 0.0, 0.0));
+  points.push_back(Point_3(0.8, 0.0, 0.2));
+  points.push_back(Point_3(0.8, 0.0, 0.4));
+  points.push_back(Point_3(0.8, 0.0, 0.6));
+  points.push_back(Point_3(0.8, 0.0, 0.8));
+  points.push_back(Point_3(0.8, 0.2, 0.0));
+  points.push_back(Point_3(0.8, 0.2, 0.2));
+  points.push_back(Point_3(0.8, 0.2, 0.4));
+  points.push_back(Point_3(0.8, 0.2, 0.6));
+  points.push_back(Point_3(0.8, 0.2, 0.8));
+  points.push_back(Point_3(0.8, 0.4, 0.0));
+  points.push_back(Point_3(0.8, 0.4, 0.2));
+  points.push_back(Point_3(0.8, 0.4, 0.4));
+  points.push_back(Point_3(0.8, 0.4, 0.6));
+  points.push_back(Point_3(0.8, 0.4, 0.8));
+  points.push_back(Point_3(0.8, 0.6, 0.0));
+  points.push_back(Point_3(0.8, 0.6, 0.2));
+  points.push_back(Point_3(0.8, 0.6, 0.4));
+  points.push_back(Point_3(0.8, 0.6, 0.6));
+  points.push_back(Point_3(0.8, 0.6, 0.8));
+  points.push_back(Point_3(0.8, 0.8, 0.0));
+  points.push_back(Point_3(0.8, 0.8, 0.2));
+  points.push_back(Point_3(0.8, 0.8, 0.4));
+  points.push_back(Point_3(0.8, 0.8, 0.6));
 
-  std::vector<double> p_weights;
+  std::vector<double> weights;
 
   std::random_device rd;
   std::mt19937 mt(rd());
   // Weights must be in range [0, <1/64]
   std::uniform_real_distribution<double> dist(0.01, 0.0156245);
 
-  for (std::size_t i = 0; i < wp_points.size(); ++i) {
+  for (std::size_t i = 0; i < points.size(); ++i) {
     double value = dist(mt);
-    p_weights.push_back(value);
+    weights.push_back(value);
   }
 
-  Fast_weighted_periodic_alpha_complex_3d weighted_periodic_alpha_complex(wp_points, p_weights, 0., 0., 0., 1., 1., 1.);
+  Weighted_periodic_alpha_complex_3d weighted_periodic_alpha_complex(points, weights, 0., 0., 0., 1., 1., 1.);
 
   Gudhi::Simplex_tree<> stree;
   weighted_periodic_alpha_complex.create_complex(stree);
 
-  // -------------------------------
-  // Exact weighted periodic version
-  // -------------------------------
-  std::cout << "Exact weighted periodic alpha complex 3d" << std::endl;
+  std::cout << "Weighted periodic alpha complex 3d from weighted points" << std::endl;
+  using Weighted_point_3 = typename Weighted_periodic_alpha_complex_3d::Triangulation_3::Weighted_point;
 
-  std::vector<Exact_weighted_periodic_alpha_complex_3d::Point_3> e_wp_points;
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.0, 0.4));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.0, 0.6));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.0, 0.8));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.2, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.2, 0.2));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.2, 0.4));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.2, 0.6));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.2, 0.8));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.4, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.4, 0.2));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.4, 0.4));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.4, 0.6));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.4, 0.8));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.6, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.6, 0.2));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.6, 0.4));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.0, 0.2));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.6, 0.6));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.6, 0.8));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.8, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.8, 0.2));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.8, 0.4));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.8, 0.6));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.8, 0.8));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.0, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.0, 0.2));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.0, 0.4));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.0, 0.6));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.0, 0.8));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.2, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.2, 0.2));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.2, 0.4));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.2, 0.6));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.2, 0.8));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.4, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.4, 0.2));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.4, 0.4));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.4, 0.6));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.4, 0.8));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.6, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.6, 0.2));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.6, 0.4));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.6, 0.6));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.6, 0.8));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.0, 0.0, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.8, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.8, 0.2));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.8, 0.4));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.8, 0.6));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.2, 0.8, 0.8));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.0, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.0, 0.2));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.0, 0.4));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.0, 0.6));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.0, 0.8));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.2, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.2, 0.2));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.2, 0.4));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.2, 0.6));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.2, 0.8));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.4, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.4, 0.2));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.4, 0.4));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.4, 0.6));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.4, 0.8));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.6, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.6, 0.2));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.6, 0.4));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.6, 0.6));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.6, 0.8));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.8, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.8, 0.2));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.8, 0.4));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.8, 0.6));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.4, 0.8, 0.8));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.0, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.0, 0.2));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.0, 0.4));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.0, 0.6));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.0, 0.8));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.1, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.2, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.2, 0.2));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.2, 0.4));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.2, 0.6));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.2, 0.8));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.4, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.4, 0.2));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.4, 0.4));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.4, 0.6));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.4, 0.8));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.6, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.6, 0.2));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.6, 0.4));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.6, 0.6));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.6, 0.8));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.8, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.8, 0.2));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.8, 0.4));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.8, 0.6));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.6, 0.8, 0.8));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.0, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.0, 0.2));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.0, 0.4));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.0, 0.6));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.0, 0.8));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.2, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.2, 0.2));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.2, 0.4));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.2, 0.6));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.2, 0.8));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.4, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.4, 0.2));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.4, 0.4));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.4, 0.6));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.4, 0.8));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.6, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.6, 0.2));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.6, 0.4));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.6, 0.6));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.6, 0.8));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.8, 0.0));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.8, 0.2));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.8, 0.4));
-  e_wp_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(0.8, 0.8, 0.6));
+  std::vector<Weighted_point_3> weighted_points;
 
-  Exact_weighted_periodic_alpha_complex_3d e_weighted_periodic_alpha_complex(e_wp_points, p_weights, 0., 0., 0., 1., 1., 1.);
+  for (std::size_t i=0; i < points.size(); i++) {
+    weighted_points.push_back(Weighted_point_3(points[i], weights[i]));
+  }
+  Weighted_periodic_alpha_complex_3d alpha_complex_w_p(weighted_points, 0., 0., 0., 1., 1., 1.);
 
-  Gudhi::Simplex_tree<> exact_stree;
-  e_weighted_periodic_alpha_complex.create_complex(exact_stree);
+  Gudhi::Simplex_tree<> stree_bis;
+  alpha_complex_w_p.create_complex(stree_bis);
 
   // ---------------------
   // Compare both versions
   // ---------------------
-  std::cout << "Exact periodic alpha complex 3d is of dimension " << exact_stree.dimension()
-            << " - Non exact is " << stree.dimension() << std::endl;
-  BOOST_CHECK(exact_stree.dimension() == stree.dimension());
-  std::cout << "Exact periodic alpha complex 3d num_simplices " << exact_stree.num_simplices()
-            << " - Non exact is " << stree.num_simplices() << std::endl;
-  // TODO(VR): BOOST_CHECK(exact_stree.num_simplices() == stree.num_simplices());
-  std::cout << "Exact periodic alpha complex 3d num_vertices " << exact_stree.num_vertices()
-            << " - Non exact is " << stree.num_vertices() << std::endl;
-  BOOST_CHECK(exact_stree.num_vertices() == stree.num_vertices());
+  std::cout << "Weighted periodic alpha complex 3d is of dimension " << stree_bis.dimension()
+            << " - versus " << stree.dimension() << std::endl;
+  BOOST_CHECK(stree_bis.dimension() == stree.dimension());
+  std::cout << "Weighted periodic alpha complex 3d num_simplices " << stree_bis.num_simplices()
+            << " - versus " << stree.num_simplices() << std::endl;
+  BOOST_CHECK(stree_bis.num_simplices() == stree.num_simplices());
+  std::cout << "Weighted periodic alpha complex 3d num_vertices " << stree_bis.num_vertices()
+            << " - versus " << stree.num_vertices() << std::endl;
+  BOOST_CHECK(stree_bis.num_vertices() == stree.num_vertices());
 
   auto sh = stree.filtration_simplex_range().begin();
   while(sh != stree.filtration_simplex_range().end()) {
     std::vector<int> simplex;
     std::vector<int> exact_simplex;
-    std::cout << "Non-exact ( ";
+    std::cout << " ( ";
     for (auto vertex : stree.simplex_vertex_range(*sh)) {
       simplex.push_back(vertex);
       std::cout << vertex << " ";
@@ -1035,11 +905,12 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_weighted_periodic) {
     std::cout << std::endl;
 
     // Find it in the exact structure
-    auto sh_exact = exact_stree.find(simplex);
-    // TODO(VR): BOOST_CHECK(sh_exact != exact_stree.null_simplex());
+    auto sh_exact = stree_bis.find(simplex);
+    BOOST_CHECK(sh_exact != stree_bis.null_simplex());
 
     // Exact and non-exact version is not exactly the same due to float comparison
-    // TODO(VR): GUDHI_TEST_FLOAT_EQUALITY_CHECK(exact_stree.filtration(sh_exact), stree.filtration(*sh));
+    GUDHI_TEST_FLOAT_EQUALITY_CHECK(stree_bis.filtration(sh_exact), stree.filtration(*sh));
+
     ++sh;
   }
 
