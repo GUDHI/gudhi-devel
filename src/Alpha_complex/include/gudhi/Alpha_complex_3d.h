@@ -421,12 +421,6 @@ public:
   }
 
 
-  template <typename SimplicialComplexForAlpha3d>
-  bool create_complex(SimplicialComplexForAlpha3d& complex) {
-    using Filtration_value = typename SimplicialComplexForAlpha3d::Filtration_value;
-    return create_complex(complex, std::numeric_limits<Filtration_value>::infinity());
-  }
-
   /** \brief Inserts all Delaunay triangulation into the simplicial complex.
  * It also computes the filtration values accordingly to the \ref createcomplexalgorithm
  *
@@ -440,16 +434,18 @@ public:
  * @pre The simplicial complex must be empty (no vertices)
  *
  * Initialization can be launched once.
+ *
  */
-  template <typename SimplicialComplexForAlpha3d>
-  bool create_complex(SimplicialComplexForAlpha3d& complex,
-                      typename SimplicialComplexForAlpha3d::Filtration_value max_alpha_square) {
+  template <typename SimplicialComplexForAlpha3d, typename Filtration_value =
+      typename SimplicialComplexForAlpha3d::Filtration_value>
+  bool create_complex(SimplicialComplexForAlpha3d& complex, Filtration_value max_alpha_square =
+                      std::numeric_limits<Filtration_value>::infinity()) {
     if (complex.num_vertices() > 0) {
       std::cerr << "Alpha_complex_3d create_complex - complex is not empty\n";
       return false;  // ----- >>
     }
 
-    using Filtration_value = typename SimplicialComplexForAlpha3d::Filtration_value;
+    //using Filtration_value = typename SimplicialComplexForAlpha3d::Filtration_value;
     using Complex_vertex_handle = typename SimplicialComplexForAlpha3d::Vertex_handle;
     using Alpha_shape_simplex_tree_map = std::map<Alpha_vertex_handle,
                                                   Complex_vertex_handle>;
