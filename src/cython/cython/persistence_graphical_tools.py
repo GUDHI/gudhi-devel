@@ -256,8 +256,10 @@ try:
                 or a callable. If a scalar, this will be used directly as
                 kde.factor. If a callable, it should take a gaussian_kde
                 instance as only parameter and return a scalar. If None
-                (default), 'scott' is used. See scipy.stats.gaussian_kde
-                documentation for more details.
+                (default), 'scott' is used. See
+                `scipy.stats.gaussian_kde documentation
+                <http://scipy.github.io/devdocs/generated/scipy.stats.gaussian_kde.html>`_
+                for more details.
             :type bw_method: str, scalar or callable, optional.
             :param max_intervals: maximal number of intervals to display.
                 Selected points are those with the longest life time. Set it
