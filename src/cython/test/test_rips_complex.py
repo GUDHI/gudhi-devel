@@ -67,6 +67,18 @@ def test_filtered_rips_from_points():
     assert simplex_tree.num_simplices() == 8
     assert simplex_tree.num_vertices() == 4
 
+def test_sparse_filtered_rips_from_points():
+    point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
+    filtered_rips = RipsComplex(points=point_list, max_edge_length=1.0, sparse=.001)
+
+    simplex_tree = filtered_rips.create_simplex_tree(max_dimension=1)
+
+    assert simplex_tree.__is_defined() == True
+    assert simplex_tree.__is_persistence_defined() == False
+
+    assert simplex_tree.num_simplices() == 8
+    assert simplex_tree.num_vertices() == 4
+
 def test_rips_from_distance_matrix():
     distance_matrix = [[0],
                        [1, 0],
