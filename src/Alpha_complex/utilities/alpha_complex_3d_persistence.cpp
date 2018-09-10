@@ -38,28 +38,9 @@ using Filtration_value = Simplex_tree::Filtration_value;
 using Persistent_cohomology =
     Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Gudhi::persistent_cohomology::Field_Zp>;
 
-using Fast_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast, false, false>;
-using Safe_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::safe, false, false>;
-using Exact_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact, false, false>;
-using Fast_weighted_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast, true, false>;
-using Safe_weighted_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::safe, true, false>;
-using Exact_weighted_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact, true, false>;
-using Fast_periodic_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast, false, true>;
-using Safe_periodic_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::safe, false, true>;
-using Exact_periodic_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact, false, true>;
-using Fast_weighted_periodic_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast, true, true>;
-using Safe_weighted_periodic_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::safe, true, true>;
-using Exact_weighted_periodic_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact, true, true>;
-
 void program_options(int argc, char *argv[], std::string &off_file_points, bool& exact, std::string &weight_file,
                      std::string &cuboid_file, std::string &output_file_diag, Filtration_value &alpha_square_max_value,
                      int &coeff_field_characteristic, Filtration_value &min_persistence);
-
-template<typename AlphaComplex3d>
-bool create_complex(AlphaComplex3d& alpha_complex, Simplex_tree& simplex_tree,
-                    Filtration_value alpha_square_max_value) {
-  return alpha_complex.create_complex(simplex_tree, alpha_square_max_value);
-}
 
 bool read_weight_file(const std::string& weight_file, std::vector<double>& weights) {
   // Read weights information from file
@@ -90,6 +71,18 @@ bool read_cuboid_file(const std::string& cuboid_file, double& x_min, double& y_m
   return true;
 }
 
+template<typename AlphaComplex3d>
+std::vector<typename AlphaComplex3d::Point_3> read_off(const std::string& off_file_points) {
+  // Read the OFF file (input file name given as parameter) and triangulate points
+  Gudhi::Points_3D_off_reader<typename AlphaComplex3d::Point_3> off_reader(off_file_points);
+  // Check the read operation was correct
+  if (!off_reader.is_valid()) {
+    std::cerr << "Unable to read OFF file " << off_file_points << std::endl;
+    exit(-1);
+  }
+  return off_reader.get_point_cloud();
+}
+
 int main(int argc, char **argv) {
   std::string off_file_points;
   std::string weight_file;
@@ -104,80 +97,6 @@ int main(int argc, char **argv) {
 
   program_options(argc, argv, off_file_points, exact_version, weight_file, cuboid_file, output_file_diag,
                   alpha_square_max_value, coeff_field_characteristic, min_persistence);
-
-  Gudhi::alpha_complex::complexity complexity = Gudhi::alpha_complex::complexity::fast;
-  if (exact_version) {
-    complexity = Gudhi::alpha_complex::complexity::exact;
-  }
-
-  switch(complexity) {
-    case Gudhi::alpha_complex::complexity::fast:
-      if (weighted_version) {
-        if (periodic_version) {
-          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast,
-              true, true>;
-        } else {
-          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast,
-              true, false>;
-        }
-      } else {
-        if (periodic_version) {
-          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast,
-              false, true>;
-        } else {
-          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast,
-              false, false>;
-        }
-      }
-      break;
-    case Gudhi::alpha_complex::complexity::exact:
-      if (weighted_version) {
-        if (periodic_version) {
-          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact,
-              true, true>;
-        } else {
-          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact,
-              true, false>;
-        }
-      } else {
-        if (periodic_version) {
-          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact,
-              false, true>;
-        } else {
-          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact,
-              false, false>;
-        }
-      }
-      break;
-    case Gudhi::alpha_complex::complexity::safe:
-      if (weighted_version) {
-        if (periodic_version) {
-          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::safe,
-              true, true>;
-        } else {
-          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::safe,
-              true, false>;
-        }
-      } else {
-        if (periodic_version) {
-          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::safe,
-              false, true>;
-        } else {
-          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::safe,
-              false, false>;
-        }
-      }
-      break;
-  }
-
-  /*const Gudhi::alpha_complex::complexity complexity_(complexity);
-  // Read the OFF file (input file name given as parameter) and triangulate points
-  Gudhi::Points_3D_off_reader<Alpha_complex_3d::Point_3> off_reader(off_file_points);
-  // Check the read operation was correct
-  if (!off_reader.is_valid()) {
-    std::cerr << "Unable to read OFF file " << off_file_points << std::endl;
-    exit(-1);
-  }
 
   std::vector<double> weights;
   if (weight_file != std::string()) {
@@ -198,27 +117,112 @@ int main(int argc, char **argv) {
     periodic_version = true;
   }
 
-  Simplex_tree simplex_tree;
-
-  if (weighted_version) {
-    if (periodic_version) {
-      Alpha_complex_3d alpha_complex(off_reader.get_point_cloud(), weights,
-                        x_min, y_min, z_min, x_max, y_max, z_max);
-      create_complex(alpha_complex, simplex_tree, alpha_square_max_value);
-    } else {
-      Alpha_complex_3d alpha_complex(off_reader.get_point_cloud(), weights);
-      create_complex(alpha_complex, simplex_tree, alpha_square_max_value);
-    }
-  } else {
-    if (periodic_version) {
-      Alpha_complex_3d alpha_complex(off_reader.get_point_cloud(), x_min, y_min, z_min, x_max, y_max, z_max);
-      create_complex(alpha_complex, simplex_tree, alpha_square_max_value);
-    } else {
-      Alpha_complex_3d alpha_complex(off_reader.get_point_cloud());
-      create_complex(alpha_complex, simplex_tree, alpha_square_max_value);
-    }
+  Gudhi::alpha_complex::complexity complexity = Gudhi::alpha_complex::complexity::fast;
+  if (exact_version) {
+    complexity = Gudhi::alpha_complex::complexity::exact;
   }
 
+  Simplex_tree simplex_tree;
+
+  switch(complexity) {
+    case Gudhi::alpha_complex::complexity::fast:
+      if (weighted_version) {
+        if (periodic_version) {
+          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast,
+              true, true>;
+          auto points = read_off<Alpha_complex_3d>(off_file_points);
+          Alpha_complex_3d alpha_complex(points, weights, x_min, y_min, z_min, x_max, y_max, z_max);
+          alpha_complex.create_complex(simplex_tree, alpha_square_max_value);
+        } else {
+          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast,
+              true, false>;
+          auto points = read_off<Alpha_complex_3d>(off_file_points);
+          Alpha_complex_3d alpha_complex(points, weights);
+          alpha_complex.create_complex(simplex_tree, alpha_square_max_value);
+        }
+      } else {
+        if (periodic_version) {
+          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast,
+              false, true>;
+          auto points = read_off<Alpha_complex_3d>(off_file_points);
+          Alpha_complex_3d alpha_complex(points, x_min, y_min, z_min, x_max, y_max, z_max);
+          alpha_complex.create_complex(simplex_tree, alpha_square_max_value);
+        } else {
+          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast,
+              false, false>;
+          auto points = read_off<Alpha_complex_3d>(off_file_points);
+          Alpha_complex_3d alpha_complex(points);
+          alpha_complex.create_complex(simplex_tree, alpha_square_max_value);
+        }
+      }
+      break;
+    case Gudhi::alpha_complex::complexity::exact:
+      if (weighted_version) {
+        if (periodic_version) {
+          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact,
+              true, true>;
+          auto points = read_off<Alpha_complex_3d>(off_file_points);
+          Alpha_complex_3d alpha_complex(points, weights, x_min, y_min, z_min, x_max, y_max, z_max);
+          alpha_complex.create_complex(simplex_tree, alpha_square_max_value);
+        } else {
+          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact,
+              true, false>;
+          auto points = read_off<Alpha_complex_3d>(off_file_points);
+          Alpha_complex_3d alpha_complex(points, weights);
+          alpha_complex.create_complex(simplex_tree, alpha_square_max_value);
+        }
+      } else {
+        if (periodic_version) {
+          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact,
+              false, true>;
+          auto points = read_off<Alpha_complex_3d>(off_file_points);
+          Alpha_complex_3d alpha_complex(points, x_min, y_min, z_min, x_max, y_max, z_max);
+          alpha_complex.create_complex(simplex_tree, alpha_square_max_value);
+        } else {
+          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact,
+              false, false>;
+          auto points = read_off<Alpha_complex_3d>(off_file_points);
+          Alpha_complex_3d alpha_complex(points);
+          alpha_complex.create_complex(simplex_tree, alpha_square_max_value);
+        }
+      }
+      break;
+    case Gudhi::alpha_complex::complexity::safe:
+      if (weighted_version) {
+        if (periodic_version) {
+          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::safe,
+              true, true>;
+          auto points = read_off<Alpha_complex_3d>(off_file_points);
+          Alpha_complex_3d alpha_complex(points, weights, x_min, y_min, z_min, x_max, y_max, z_max);
+          alpha_complex.create_complex(simplex_tree, alpha_square_max_value);
+        } else {
+          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::safe,
+              true, false>;
+          auto points = read_off<Alpha_complex_3d>(off_file_points);
+          Alpha_complex_3d alpha_complex(points, weights);
+          alpha_complex.create_complex(simplex_tree, alpha_square_max_value);
+        }
+      } else {
+        if (periodic_version) {
+          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::safe,
+              false, true>;
+          auto points = read_off<Alpha_complex_3d>(off_file_points);
+          Alpha_complex_3d alpha_complex(points, x_min, y_min, z_min, x_max, y_max, z_max);
+          alpha_complex.create_complex(simplex_tree, alpha_square_max_value);
+        } else {
+          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::safe,
+              false, false>;
+          auto points = read_off<Alpha_complex_3d>(off_file_points);
+          Alpha_complex_3d alpha_complex(points);
+          alpha_complex.create_complex(simplex_tree, alpha_square_max_value);
+        }
+      }
+      break;
+    default:
+      std::cerr << "Unknown complexity value " << std::endl;
+      exit(-1);
+      break;
+  }
 
   // Sort the simplices in the order of the filtration
   simplex_tree.initialize_filtration();
@@ -239,7 +243,7 @@ int main(int argc, char **argv) {
     std::ofstream out(output_file_diag);
     pcoh.output_diagram(out);
     out.close();
-  }*/
+  }
 
   return 0;
 }

@@ -49,7 +49,7 @@ if(CGAL_FOUND)
         "${CMAKE_SOURCE_DIR}/data/points/grid_10_10_10_in_0_1.off"
         "-w" "${CMAKE_SOURCE_DIR}/data/points/grid_10_10_10_in_0_1.weights"
         "-c" "${CMAKE_SOURCE_DIR}/data/points/iso_cuboid_3_in_0_1.txt"
-        "-p" "2" "-m" "0")
+        "-p" "2" "-m" "0" "-e")
 
     install(TARGETS alpha_complex_3d_persistence DESTINATION bin)
 
