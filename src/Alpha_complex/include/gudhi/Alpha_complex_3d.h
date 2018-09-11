@@ -551,7 +551,7 @@ public:
   }
 
 private:
-  // Needs to store alpha_shape_3_ptr_ as objects_ and alpha_shape_3_ptr_ are freed with alpha_shape_3_ptr_
+  // Needs to store alpha_shape_3_ptr_ as objects_ are freed with alpha_shape_3_ptr_
   std::unique_ptr<Alpha_shape_3> alpha_shape_3_ptr_;
   std::vector<CGAL::Object> objects_;
   std::vector<Alpha_value_type> alpha_values_;
