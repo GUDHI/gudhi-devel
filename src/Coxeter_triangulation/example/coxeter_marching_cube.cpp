@@ -81,6 +81,28 @@ unsigned test_no = 0;
 
 // using Coxeter_complex = Gudhi::Coxeter_complex<Point_vector, Coxeter_system>;
 
+//////////// Start of the preliminary fuctions
+
+void convert_cartesian_to_spherical(double* x,
+                                    double* y,
+                                    double* z,
+                                    double* r,
+                                    double* theta,
+                                    double* phi) {
+  *r = (*x)*(*x) + (*y)*(*y) + (*z)*(*z);
+  *theta = std::acos(*z / *r);
+  *phi = std::atan2(*y, *x);
+}
+
+
+
+
+
+
+
+
+//////////// Start of the marching cube algorithm implemenation
+
 void mark(const Cell_id& c_id, Full_cell_trie& trie) {
   trie.add(c_id);
   // std::cout << "Added " << c_id << ". Trie is now: " << trie << "\n";
@@ -769,6 +791,51 @@ void test_torus_ring(double level) {
   std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
 }
 
+/** TEST APPLE */
+void test_apple(double level) {
+  const unsigned amb_d = 3; // Ambient (domain) dimension
+  const unsigned cod_d = 1; // Codomain dimension
+  double r = 1.3;
+  double sr = 2;
+  Eigen::Vector3d point1(2*r+sr, 0.0, 0.0);
+  std::vector<Point_d> seed_points = {point1};
+  std::string name = "apple";
+  std::cout << "Test " << test_no++ << ": " << name << ", level = " << level <<  "...\n";
+
+  struct Function {
+    Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+      double x = p(0), y = p(1), z = p(2);
+      double rad = 0, theta = 0, phi = 0;
+      Eigen::VectorXd coords(cod_d);
+      convert_cartesian_to_spherical(x, y, z, rad, theta, phi);
+      coords(0) = (z*z + (std::sqrt(x*x + y*y) - r)*(std::sqrt(x*x + y*y) - r) - sr*sr);
+      return coords;
+    }
+
+    Function(unsigned cod_d_,
+	     double r_,
+             double sr_)
+      : cod_d(cod_d_), r(r_), sr(sr_) {}
+    unsigned cod_d;
+    double r, sr;
+  } f(cod_d, r, sr);
+  Hasse_diagram hd;
+  VP_map vp_map;
+  Gudhi::Clock t;
+  compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
+  t.end();
+  std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
+  int chi = 0;
+  for (auto cell: hd) {
+    dimensions[cell->get_dimension()]++;
+    chi += 1-2*(cell->get_dimension()%2);
+  }
+  std::cout << "Simplices by dimension: " << dimensions << "\n";
+  std::cout << "Euler characteristic = " << chi << "\n";
+  std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
+  output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
+  std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
+}
 
 
 /** TEST CIRCLE 3D */
