@@ -6,10 +6,12 @@
 // The structure for the coordinates of a given relatively open simplex (alcove)
 namespace Gudhi {
 struct Alcove_id {
+
+  typedef long int value_type;
+
   // typedef typename std::vector<int>::iterator iterator;
-  typedef typename std::vector<int>::const_iterator const_iterator;
+  typedef typename std::vector<value_type>::const_iterator const_iterator;
   typedef typename std::vector<bool>::const_iterator fixed_const_iterator;
-  typedef int value_type;
 
   Alcove_id()
     : level_(0), dimension_(0) {}
@@ -17,18 +19,18 @@ struct Alcove_id {
   Alcove_id(double level)
     : level_(level), dimension_(0) {}
 
-  Alcove_id(double level, int dimension)
+  Alcove_id(double level, unsigned dimension)
     : level_(level), dimension_(dimension) {}
  
   // Alcove_id& operator=(const Alcove_id& other) {
   //   return *this;
   // }
   
-  int operator[] (std::size_t i) const {
+  value_type operator[] (std::size_t i) const {
     return coords_[i];
   }
   
-  void push_back(int value, bool fixed = false) {
+  void push_back(value_type value, bool fixed = false) {
     coords_.push_back(value);
     fixed_.push_back(fixed);
   }
@@ -102,8 +104,8 @@ struct Alcove_id {
   }
   
   double level_;
-  int dimension_;
-  std::vector<int> coords_;
+  unsigned dimension_;
+  std::vector<value_type> coords_;
   std::vector<bool> fixed_;
 };
 

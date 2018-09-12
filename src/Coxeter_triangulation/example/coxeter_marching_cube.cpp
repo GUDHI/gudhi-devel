@@ -5,7 +5,7 @@
 // #define SPHERE
 // #define TORUS
 // #define DOUBLE_TORUS
-// #define DEBUG_TRACES
+#define DEBUG_TRACES
 
 #include <iostream>
 #include <vector>
@@ -81,6 +81,18 @@ unsigned test_no = 0;
 
 // using Coxeter_complex = Gudhi::Coxeter_complex<Point_vector, Coxeter_system>;
 
+//////////// Counter of the number of steps in the algorithm
+
+std::size_t counter = 0;
+
+void reset_counter() {
+  counter = 0;
+}
+
+void increment_counter() {
+  ++counter;
+}
+  
 //////////// Start of the preliminary fuctions
 
 void convert_cartesian_to_spherical(double* x,
@@ -116,7 +128,7 @@ bool is_marked(const Cell_id& c_id, Full_cell_trie& trie) {
 }
 
 void add_hasse_vertex(const Cell_id& f_id, Eigen::VectorXd& cart_coords, Hasse_diagram& hd, VC_map& vc_map, VP_map& vp_map) {
-  Hasse_cell* new_cell = new Hasse_cell(0);
+  Hasse_cell* new_cell = new Hasse_cell(0, (double)counter);
   auto res_pair = vc_map.emplace(f_id, new_cell);
   if (!res_pair.second) {
     delete new_cell;
@@ -161,7 +173,8 @@ Hasse_cell* insert_hasse_subdiagram(const Cell_id& c_id,
     return 0;
   }
   else {
-    Hasse_cell* new_cell = new Hasse_cell(c_id.dimension() - cod_d);
+    Hasse_cell* new_cell = new Hasse_cell((int)(c_id.dimension() - cod_d), (double)counter);
+    // Hasse_cell* new_cell = new Hasse_cell(c_id.dimension() - cod_d, counter);
     Hasse_boundary& boundary = new_cell->get_boundary();
     for (auto f_id: cs.face_range(c_id, c_id.dimension() - 1)) {
       Hasse_cell* facet_cell = insert_hasse_subdiagram(f_id, meet_faces, hd, vc_map, cod_d, cs);
@@ -237,9 +250,13 @@ bool intersects(const Cell_id& f_id,
 #endif
   if ((li_matrix * intersection - last_column).norm() / last_column.norm() > error / f_id.level())
     return false;
+  // Dumb test to check that the point is in the vicinity of the simplex
+  if (cs.squared_distance_to_alcove(intersection, f_id) > 0)
+    return false;
   // perturbation, to avoid the invalid cell coordinate situation
   // for (std::size_t i = 0; i < amb_d; ++i)
   //   intersection(i) += ((double)std::rand()) / RAND_MAX * error/f_id.level();
+
   Cell_id i_id = cs.query_point_location(intersection, f_id.level());
 #ifdef DEBUG_TRACES
   std::cout << "  cell containing the intersection: " << i_id << ", ";
@@ -253,6 +270,7 @@ bool intersects(const Cell_id& f_id,
 #endif
   if (!cs.is_face(i_id, f_id))
     return false;
+
   add_hasse_vertex(i_id, intersection, hd, vc_map, vp_map);
   auto mf_it = meet_cells.begin();
   while (mf_it != meet_cells.end())
@@ -291,8 +309,10 @@ void compute_hasse_diagram(std::vector<Point_d>& seed_points,
 #endif
   for (const Point_d& p: seed_points)
     visit_stack.add(cs.query_point_location(p, level));
-  
+
+  reset_counter();
   while (!visit_stack.empty()) {
+    increment_counter();
     Cell_id c_id(level, amb_d);
     c_id = visit_stack.pop();
 #ifdef DEBUG_TRACES
@@ -566,6 +586,7 @@ void test_sphere(double level) {
   Hasse_diagram hd;
   VP_map vp_map;
   Gudhi::Clock t;
+  reset_counter();
   compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
   t.end();
   std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
@@ -610,6 +631,7 @@ void test_torus(double level) {
   Hasse_diagram hd;
   VP_map vp_map;
   Gudhi::Clock t;
+  reset_counter();
   compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
   t.end();
   std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
@@ -791,37 +813,40 @@ void test_torus_ring(double level) {
   std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
 }
 
-/** TEST APPLE */
-void test_apple(double level) {
+/** TEST CHAIR */
+void test_chair(double level) {
   const unsigned amb_d = 3; // Ambient (domain) dimension
   const unsigned cod_d = 1; // Codomain dimension
-  double r = 1.3;
-  double sr = 2;
-  Eigen::Vector3d point1(2*r+sr, 0.0, 0.0);
-  std::vector<Point_d> seed_points = {point1};
-  std::string name = "apple";
+  double a = 0.8;
+  double b = 0.4;
+  double k = 1.0;
+  std::vector<Point_d> seed_points;
+  double z0 = std::sqrt(k/(1.0-b)) * std::sqrt(a-b + std::sqrt((a-b)*(a-b) - (1.0-b)*(a*a - b)*k*k));
+  // for (unsigned i = 0; i < n; ++i)
+  seed_points.push_back(Eigen::Vector3d(0, 0, z0));
+  std::string name = "chair";
   std::cout << "Test " << test_no++ << ": " << name << ", level = " << level <<  "...\n";
 
   struct Function {
     Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
       double x = p(0), y = p(1), z = p(2);
-      double rad = 0, theta = 0, phi = 0;
       Eigen::VectorXd coords(cod_d);
-      convert_cartesian_to_spherical(x, y, z, rad, theta, phi);
-      coords(0) = (z*z + (std::sqrt(x*x + y*y) - r)*(std::sqrt(x*x + y*y) - r) - sr*sr);
+      coords(0) = std::pow(x*x + y*y + z*z - a*k*k, 2) - b*((z-k)*(z-k) - 2*x*x)*((z+k)*(z+k) - 2*y*y);
       return coords;
     }
 
     Function(unsigned cod_d_,
-	     double r_,
-             double sr_)
-      : cod_d(cod_d_), r(r_), sr(sr_) {}
+             double a_,
+	     double b_,
+             double k_)
+      : cod_d(cod_d_), a(a_), b(b_), k(k_) {}
     unsigned cod_d;
-    double r, sr;
-  } f(cod_d, r, sr);
+    double a, b, k;
+  } f(cod_d, a, b, k);
   Hasse_diagram hd;
   VP_map vp_map;
   Gudhi::Clock t;
+  std::cout << "Value of f = " << f(seed_points[0]) << "\n";
   compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
   t.end();
   std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
@@ -830,12 +855,69 @@ void test_apple(double level) {
     dimensions[cell->get_dimension()]++;
     chi += 1-2*(cell->get_dimension()%2);
   }
+  typedef Gudhi::Hasse_diagram::Hasse_diagram_persistence<Hasse_cell> Hasse_pers_vector;
+  std::vector<Hasse_cell*> hasse_vector(hd.begin(), hd.end());
+  struct Dimension_comparison {
+    bool operator() (Hasse_cell* lhs, Hasse_cell* rhs) const {
+      return lhs->get_dimension() > rhs->get_dimension();
+    }
+  };
+  std::sort(hasse_vector.begin(), hasse_vector.end(), Dimension_comparison());
+  Hasse_pers_vector hdp(hasse_vector);
+  hdp.set_up_the_arrays();
+  
   std::cout << "Simplices by dimension: " << dimensions << "\n";
   std::cout << "Euler characteristic = " << chi << "\n";
   std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
   output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
   std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
 }
+
+// /** TEST APPLE */
+// void test_apple(double level) {
+//   const unsigned amb_d = 3; // Ambient (domain) dimension
+//   const unsigned cod_d = 1; // Codomain dimension
+//   double r = 1.3;
+//   double sr = 2;
+//   Eigen::Vector3d point1(2*r+sr, 0.0, 0.0);
+//   std::vector<Point_d> seed_points = {point1};
+//   std::string name = "apple";
+//   std::cout << "Test " << test_no++ << ": " << name << ", level = " << level <<  "...\n";
+
+//   struct Function {
+//     Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+//       double x = p(0), y = p(1), z = p(2);
+//       double rad = 0, theta = 0, phi = 0;
+//       Eigen::VectorXd coords(cod_d);
+//       convert_cartesian_to_spherical(x, y, z, rad, theta, phi);
+//       coords(0) = (z*z + (std::sqrt(x*x + y*y) - r)*(std::sqrt(x*x + y*y) - r) - sr*sr);
+//       return coords;
+//     }
+
+//     Function(unsigned cod_d_,
+// 	     double r_,
+//              double sr_)
+//       : cod_d(cod_d_), r(r_), sr(sr_) {}
+//     unsigned cod_d;
+//     double r, sr;
+//   } f(cod_d, r, sr);
+//   Hasse_diagram hd;
+//   VP_map vp_map;
+//   Gudhi::Clock t;
+//   compute_hasse_diagram(seed_points, level, amb_d, cod_d, hd, vp_map, f);
+//   t.end();
+//   std::vector<unsigned> dimensions(amb_d-cod_d+1, 0);
+//   int chi = 0;
+//   for (auto cell: hd) {
+//     dimensions[cell->get_dimension()]++;
+//     chi += 1-2*(cell->get_dimension()%2);
+//   }
+//   std::cout << "Simplices by dimension: " << dimensions << "\n";
+//   std::cout << "Euler characteristic = " << chi << "\n";
+//   std::cout << "Reconstruction time: " <<  t.num_seconds() << "s\n";
+//   output_hasse_to_medit(hd, vp_map, "marching_cube_output_"+name);
+//   std::cout << "Wrote the reconstruction in marching_cube_output_" << name << ".mesh\n";
+// }
 
 
 /** TEST CIRCLE 3D */
@@ -1249,6 +1331,11 @@ int main(int argc, char * const argv[]) {
   // else
   //   test_torus_ring(3.7);
 
+  if (test_no+1 < (unsigned)argc)
+    test_chair(atof(argv[test_no+1]));
+  else
+    test_chair(0.7);
+
   // if (test_no+1 < (unsigned)argc)
   //   test_circle_3d(atof(argv[test_no+1]));
   // else
@@ -1264,20 +1351,20 @@ int main(int argc, char * const argv[]) {
   // else
   //   test_s3(0.7);
 
-  if (test_no+1 < (unsigned)argc)
-    test_s11(atof(argv[test_no+1]));
-  else
-    test_s11(0.7);
+  // if (test_no+1 < (unsigned)argc)
+  //   test_s11(atof(argv[test_no+1]));
+  // else
+  //   test_s11(0.7);
 
-  if (test_no+1 < (unsigned)argc)
-    test_deformed_circle_3d(atof(argv[test_no+1]));
-  else
-    test_deformed_circle_3d(0.7);
+  // if (test_no+1 < (unsigned)argc)
+  //   test_deformed_circle_3d(atof(argv[test_no+1]));
+  // else
+  //   test_deformed_circle_3d(0.7);
 
-  if (test_no+1 < (unsigned)argc)
-    test_deformed_sphere_4d(atof(argv[test_no+1]));
-  else
-    test_deformed_sphere_4d(0.7);
+  // if (test_no+1 < (unsigned)argc)
+  //   test_deformed_sphere_4d(atof(argv[test_no+1]));
+  // else
+  //   test_deformed_sphere_4d(0.7);
 
   // if (test_no+1 < (unsigned)argc)
   //   test_so3_9d(atof(argv[test_no+1]));
