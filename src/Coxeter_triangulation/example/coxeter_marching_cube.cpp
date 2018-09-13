@@ -5,7 +5,7 @@
 // #define SPHERE
 // #define TORUS
 // #define DOUBLE_TORUS
-#define DEBUG_TRACES
+// #define DEBUG_TRACES
 
 #include <iostream>
 #include <vector>
@@ -250,9 +250,17 @@ bool intersects(const Cell_id& f_id,
 #endif
   if ((li_matrix * intersection - last_column).norm() / last_column.norm() > error / f_id.level())
     return false;
+
+  for (unsigned i = 0; i < amb_d; ++i)
+    if (std::abs(intersection(i)) > 1e10)
+      return false;
   // Dumb test to check that the point is in the vicinity of the simplex
-  if (cs.squared_distance_to_alcove(intersection, f_id) > 0)
-    return false;
+  //   double dist_to_simpl = cs.squared_distance_to_alcove(intersection, f_id);
+  // #ifdef DEBUG_TRACES
+  //   std::cout << "  dist_to_simpl = " << dist_to_simpl << "\n";
+  // #endif
+  // if (dist_to_simpl > 0)
+  //   return false;
   // perturbation, to avoid the invalid cell coordinate situation
   // for (std::size_t i = 0; i < amb_d; ++i)
   //   intersection(i) += ((double)std::rand()) / RAND_MAX * error/f_id.level();
