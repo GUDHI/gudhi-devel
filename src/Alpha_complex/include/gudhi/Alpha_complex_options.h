@@ -24,22 +24,9 @@
 #define ALPHA_COMPLEX_OPTIONS_H_
 
 
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Delaunay_triangulation_3.h>
-#include <CGAL/Periodic_3_Delaunay_triangulation_traits_3.h>
-#include <CGAL/Periodic_3_Delaunay_triangulation_3.h>
-#include <CGAL/Periodic_3_regular_triangulation_traits_3.h>
-#include <CGAL/Periodic_3_regular_triangulation_3.h>
-#include <CGAL/Regular_triangulation_3.h>
-#include <CGAL/Alpha_shape_3.h>
-#include <CGAL/Alpha_shape_cell_base_3.h>
-#include <CGAL/Alpha_shape_vertex_base_3.h>
-
-
 namespace Gudhi {
 
 namespace alpha_complex {
-
 
 /**
  * \class complexity

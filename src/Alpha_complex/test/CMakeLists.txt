@@ -17,6 +17,7 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
 
   # Do not forget to copy test files in current binary dir
   file(COPY "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+  file(COPY "${CMAKE_SOURCE_DIR}/data/points/grid_5_5_5_in_0_1.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
   gudhi_add_coverage_test(Alpha_complex_test_unit)
   gudhi_add_coverage_test(Alpha_complex_3d_test_unit)

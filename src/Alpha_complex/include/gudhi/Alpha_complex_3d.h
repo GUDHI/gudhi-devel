@@ -33,6 +33,18 @@
 #include <gudhi/Debug_utils.h>
 #include <gudhi/Alpha_complex_options.h>
 
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Delaunay_triangulation_3.h>
+#include <CGAL/Periodic_3_Delaunay_triangulation_traits_3.h>
+#include <CGAL/Periodic_3_Delaunay_triangulation_3.h>
+#include <CGAL/Periodic_3_regular_triangulation_traits_3.h>
+#include <CGAL/Periodic_3_regular_triangulation_3.h>
+#include <CGAL/Regular_triangulation_3.h>
+#include <CGAL/Alpha_shape_3.h>
+#include <CGAL/Alpha_shape_cell_base_3.h>
+#include <CGAL/Alpha_shape_vertex_base_3.h>
+
 #include <CGAL/Object.h>
 #include <CGAL/tuple.h>
 #include <CGAL/iterator.h>
@@ -56,6 +68,40 @@
 namespace Gudhi {
 
 namespace alpha_complex {
+
+template <complexity Complexity>
+struct Value_from_iterator
+{
+  template<typename Iterator>
+  static double perform(Iterator it)
+  {
+    // Default behaviour is to return the value pointed by the given iterator
+    return *it;
+  }
+};
+
+template <>
+struct Value_from_iterator <complexity::safe>
+{
+  template<typename Iterator>
+  static double perform(Iterator it)
+  {
+    // In safe mode, we are with Epeck or Epick with exact value set to CGAL::Tag_true.
+    return CGAL::to_double(*it);
+  }
+};
+
+template <>
+struct Value_from_iterator <complexity::exact>
+{
+  template<typename Iterator>
+  static double perform(Iterator it)
+  {
+    // In exact mode, we are with Epeck or Epick with exact value set to CGAL::Tag_true.
+    return CGAL::to_double(it->exact());
+  }
+};
+
 
 /**
  * \class Alpha_complex_3d
@@ -207,14 +253,6 @@ public:
 
     alpha_shape_3_ptr_ = std::unique_ptr<Alpha_shape_3>(new Alpha_shape_3(std::begin(points), std::end(points), 0,
                                                         Alpha_shape_3::GENERAL));
-    Dispatch dispatcher = CGAL::dispatch_output<CGAL::Object, Alpha_value_type>(std::back_inserter(objects_),
-                                                                                std::back_inserter(alpha_values_));
-
-    alpha_shape_3_ptr_->filtration_with_alpha_values(dispatcher);
-#ifdef DEBUG_TRACES
-    std::cout << "filtration_with_alpha_values returns : " << objects_.size() << " objects" << std::endl;
-#endif  // DEBUG_TRACES
-
   }
 
   /** \brief Alpha_complex constructor from a list of points and associated weights.
@@ -254,14 +292,6 @@ public:
                                                                           std::end(weighted_points_3),
                                                                           0,
                                                                           Alpha_shape_3::GENERAL));
-
-    Dispatch dispatcher = CGAL::dispatch_output<CGAL::Object, Alpha_value_type>(std::back_inserter(objects_),
-                                                                    std::back_inserter(alpha_values_));
-
-    alpha_shape_3_ptr_->filtration_with_alpha_values(dispatcher);
-#ifdef DEBUG_TRACES
-    std::cout << "filtration_with_alpha_values returns : " << objects_.size() << " objects" << std::endl;
-#endif  // DEBUG_TRACES
   }
 
   /** \brief Alpha_complex constructor from a list of points and an iso-cuboid coordinates.
@@ -311,15 +341,6 @@ public:
     // Maybe need to set it to GENERAL mode
     alpha_shape_3_ptr_ = std::unique_ptr<Alpha_shape_3>(new Alpha_shape_3(pdt, 0,
                                                                           Alpha_shape_3::GENERAL));
-
-    Dispatch dispatcher = CGAL::dispatch_output<CGAL::Object, Alpha_value_type>(std::back_inserter(objects_),
-                                                                    std::back_inserter(alpha_values_));
-
-    alpha_shape_3_ptr_->filtration_with_alpha_values(dispatcher);
-#ifdef DEBUG_TRACES
-    std::cout << "filtration_with_alpha_values returns : " << objects_.size() << " objects" << std::endl;
-#endif  // DEBUG_TRACES
-
   }
 
   /** \brief Alpha_complex constructor from a list of points, associated weights and an iso-cuboid coordinates.
@@ -396,30 +417,7 @@ public:
     // Maybe need to set it to GENERAL mode
     alpha_shape_3_ptr_ = std::unique_ptr<Alpha_shape_3>(new Alpha_shape_3(pdt, 0,
                                                                           Alpha_shape_3::GENERAL));
-
-    Dispatch dispatcher = CGAL::dispatch_output<CGAL::Object, Alpha_value_type>(std::back_inserter(objects_),
-                                                                    std::back_inserter(alpha_values_));
-
-    alpha_shape_3_ptr_->filtration_with_alpha_values(dispatcher);
-#ifdef DEBUG_TRACES
-    std::cout << "filtration_with_alpha_values returns : " << objects_.size() << " objects" << std::endl;
-#endif  // DEBUG_TRACES
   }
-
-  template <class Filtration_value, class Alpha_value_iterator>
-  typename std::enable_if<std::is_same<Exact_tag, CGAL::Tag_false>::value, Filtration_value>::type
-  value_from_iterator(Alpha_value_iterator the_alpha_value_iterator)
-  {
-    return *(the_alpha_value_iterator);
-  }
-
-  template <class Filtration_value, class Alpha_value_iterator>
-  typename std::enable_if<std::is_same<Exact_tag, CGAL::Tag_true>::value, Filtration_value>::type
-  value_from_iterator(Alpha_value_iterator the_alpha_value_iterator)
-  {
-    return CGAL::to_double(the_alpha_value_iterator->exact());
-  }
-
 
   /** \brief Inserts all Delaunay triangulation into the simplicial complex.
  * It also computes the filtration values accordingly to the \ref createcomplexalgorithm
@@ -457,10 +455,21 @@ public:
     std::size_t count_facets = 0;
     std::size_t count_cells = 0;
 #endif  // DEBUG_TRACES
+    std::vector<CGAL::Object> objects;
+    std::vector<Alpha_value_type> alpha_values;
 
+    Dispatch dispatcher = CGAL::dispatch_output<CGAL::Object, Alpha_value_type>(std::back_inserter(objects),
+                                                                                std::back_inserter(alpha_values));
+
+    alpha_shape_3_ptr_->filtration_with_alpha_values(dispatcher);
+#ifdef DEBUG_TRACES
+    std::cout << "filtration_with_alpha_values returns : " << objects.size() << " objects" << std::endl;
+#endif  // DEBUG_TRACES
+    
     Alpha_shape_simplex_tree_map map_cgal_simplex_tree;
-    auto the_alpha_value_iterator = alpha_values_.begin();
-    for (auto object_iterator : objects_) {
+    using Alpha_value_iterator = typename std::vector<Alpha_value_type>::const_iterator;
+    Alpha_value_iterator alpha_value_iterator = alpha_values.begin();
+    for (auto object_iterator : objects) {
       Vertex_list vertex_list;
 
       // Retrieve Alpha shape vertex list from object
@@ -525,14 +534,14 @@ public:
         }
       }
       // Construction of the simplex_tree
-      Filtration_value filtr = value_from_iterator<Filtration_value>(the_alpha_value_iterator);
+      Filtration_value filtr = Value_from_iterator<Complexity>::perform(alpha_value_iterator);
 
 #ifdef DEBUG_TRACES
       std::cout << "filtration = " << filtr << std::endl;
 #endif  // DEBUG_TRACES
       complex.insert_simplex(the_simplex, static_cast<Filtration_value>(filtr));
-      GUDHI_CHECK(the_alpha_value_iterator != alpha_values_.end(), "CGAL provided more simplices than values");
-      ++the_alpha_value_iterator;
+      GUDHI_CHECK(alpha_value_iterator != alpha_values.end(), "CGAL provided more simplices than values");
+      ++alpha_value_iterator;
     }
 
 #ifdef DEBUG_TRACES
@@ -551,10 +560,8 @@ public:
   }
 
 private:
-  // Needs to store alpha_shape_3_ptr_ as objects_ are freed with alpha_shape_3_ptr_
+  // use of a unique_ptr on cgal Alpha_shape_3, as copy and default constructor is not available - no need to be freed
   std::unique_ptr<Alpha_shape_3> alpha_shape_3_ptr_;
-  std::vector<CGAL::Object> objects_;
-  std::vector<Alpha_value_type> alpha_values_;
 
 };
 

@@ -1,0 +1,162 @@
+#include <gudhi/Alpha_complex_3d.h>
+// to construct a simplex_tree from alpha complex
+#include <gudhi/Simplex_tree.h>
+#include <gudhi/random_point_generators.h>
+#include <gudhi/Clock.h>
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <limits>  // for numeric limits
+
+#include <CGAL/Epick_d.h>
+#include <CGAL/Random.h>
+
+template <typename Alpha_complex_3d>
+void benchmark_points_on_torus_3D(const std::string& msg ) {
+  using K = CGAL::Epick_d< CGAL::Dimension_tag<3> >;
+  std::cout << msg << std::endl;
+  for (int nb_points = 1000; nb_points <= /*12*/5000 ; nb_points *= 5) {
+    std::cout << "### Alpha complex 3d on torus with " << nb_points << " points." << std::endl;
+    std::vector<K::Point_d> points_on_torus = Gudhi::generate_points_on_torus_3D<K>(nb_points, 1.0, 0.5);
+    std::vector<typename Alpha_complex_3d::Point_3> points;
+
+    for(auto p:points_on_torus) {
+      points.push_back(typename Alpha_complex_3d::Point_3(p[0],p[1],p[2]));
+    }
+
+    Gudhi::Clock ac_create_clock("benchmark_points_on_torus_3D - Alpha complex 3d creation");  ac_create_clock.begin();
+    Alpha_complex_3d alpha_complex_from_points(points);
+    ac_create_clock.end(); std::cout << ac_create_clock;
+
+    Gudhi::Simplex_tree<> simplex;
+    Gudhi::Clock st_create_clock("benchmark_points_on_torus_3D - simplex tree creation");  st_create_clock.begin();
+    alpha_complex_from_points.create_complex(simplex);
+    st_create_clock.end(); std::cout << st_create_clock;
+  }
+
+}
+
+template <typename Weighted_alpha_complex_3d>
+void benchmark_weighted_points_on_torus_3D(const std::string& msg ) {
+  using K = CGAL::Epick_d< CGAL::Dimension_tag<3> >;
+
+  CGAL::Random random(8);
+
+  std::cout << msg << std::endl;
+  for (int nb_points = 1000; nb_points <= 125000 ; nb_points *= 5) {
+    std::cout << "### Alpha complex 3d on torus with " << nb_points << " points." << std::endl;
+    std::vector<K::Point_d> points_on_torus = Gudhi::generate_points_on_torus_3D<K>(nb_points, 1.0, 0.5);
+
+    using Point = typename Weighted_alpha_complex_3d::Point_3;
+    using Weighted_point = typename Weighted_alpha_complex_3d::Triangulation_3::Weighted_point;
+
+    std::vector<Weighted_point> points;
+
+    for(auto p:points_on_torus) {
+      points.push_back(Weighted_point(Point(p[0],p[1],p[2]), 0.9 + random.get_double(0., 0.01)));
+    }
+
+    Gudhi::Clock ac_create_clock("benchmark_weighted_points_on_torus_3D - Alpha complex 3d creation");  ac_create_clock.begin();
+    Weighted_alpha_complex_3d alpha_complex_from_points(points);
+    ac_create_clock.end(); std::cout << ac_create_clock;
+
+    Gudhi::Simplex_tree<> simplex;
+    Gudhi::Clock st_create_clock("benchmark_weighted_points_on_torus_3D - simplex tree creation");  st_create_clock.begin();
+    alpha_complex_from_points.create_complex(simplex);
+    st_create_clock.end(); std::cout << st_create_clock;
+  }
+
+}
+
+template <typename Periodic_alpha_complex_3d>
+void benchmark_periodic_points(const std::string& msg ) {
+  std::cout << msg << std::endl;
+  for (double nb_points = 10.; nb_points <= 40. ; nb_points += 10.) {
+    std::cout << "### Periodic alpha complex 3d with " << nb_points*nb_points*nb_points << " points." << std::endl;
+    using Point = typename Periodic_alpha_complex_3d::Point_3;
+    std::vector<Point> points;
+
+    for (double i = 0; i < nb_points; i++) {
+      for (double j = 0; j < nb_points; j++) {
+        for (double k = 0; k < nb_points; k++) {
+          points.push_back(Point(i,j,k));
+        }
+      }
+    }
+
+    Gudhi::Clock ac_create_clock("benchmark_periodic_points - Alpha complex 3d creation");  ac_create_clock.begin();
+    Periodic_alpha_complex_3d alpha_complex_from_points(points, 0., 0., 0., nb_points, nb_points, nb_points);
+    ac_create_clock.end(); std::cout << ac_create_clock;
+
+    Gudhi::Simplex_tree<> simplex;
+    Gudhi::Clock st_create_clock("benchmark_periodic_points - simplex tree creation");  st_create_clock.begin();
+    alpha_complex_from_points.create_complex(simplex);
+    st_create_clock.end(); std::cout << st_create_clock;
+  }
+
+}
+
+template <typename Weighted_periodic_alpha_complex_3d>
+void benchmark_weighted_periodic_points(const std::string& msg ) {
+  std::cout << msg << std::endl;
+  CGAL::Random random(8);
+
+  for (double nb_points = 10.; nb_points <= 40. ; nb_points += 10.) {
+    std::cout << "### Weighted periodic alpha complex 3d with " << nb_points*nb_points*nb_points << " points." << std::endl;
+
+    using Point = typename Weighted_periodic_alpha_complex_3d::Point_3;
+    using Weighted_point = typename Weighted_periodic_alpha_complex_3d::Triangulation_3::Weighted_point;
+    std::vector<Weighted_point> points;
+
+    for (double i = 0; i < nb_points; i++) {
+      for (double j = 0; j < nb_points; j++) {
+        for (double k = 0; k < nb_points; k++) {
+          points.push_back(Weighted_point(Point(i,j,k), random.get_double(0., (nb_points*nb_points)/64.)));
+        }
+      }
+    }
+
+    Gudhi::Clock ac_create_clock("benchmark_weighted_periodic_points - Alpha complex 3d creation");  ac_create_clock.begin();
+    Weighted_periodic_alpha_complex_3d alpha_complex_from_points(points, 0., 0., 0., nb_points, nb_points, nb_points);
+    ac_create_clock.end(); std::cout << ac_create_clock;
+
+    Gudhi::Simplex_tree<> simplex;
+    Gudhi::Clock st_create_clock("benchmark_weighted_periodic_points - simplex tree creation");  st_create_clock.begin();
+    alpha_complex_from_points.create_complex(simplex);
+    st_create_clock.end(); std::cout << st_create_clock;
+  }
+
+}
+
+int main(int argc, char **argv) {
+  /*
+  benchmark_points_on_torus_3D<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast,
+                                                                      false, false>>("### Fast version");
+  benchmark_points_on_torus_3D<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::safe,
+                                                                      false, false>>("### Safe version");
+  benchmark_points_on_torus_3D<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact,
+                                                                      false, false>>("### Exact version");
+
+  benchmark_weighted_points_on_torus_3D<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast,
+                                                                               true, false>>("### Fast version");
+  benchmark_weighted_points_on_torus_3D<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::safe,
+                                                                               true, false>>("### Safe version");
+  benchmark_weighted_points_on_torus_3D<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact,
+                                                                               true, false>>("### Exact version");
+  */
+  benchmark_periodic_points<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast,
+      false, true>>("### Fast version");
+  benchmark_periodic_points<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::safe,
+      false, true>>("### Safe version");
+  benchmark_periodic_points<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact,
+      false, true>>("### Exact version");
+
+  benchmark_weighted_periodic_points<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast,
+      true, true>>("### Fast version");
+  benchmark_weighted_periodic_points<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::safe,
+      true, true>>("### Safe version");
+  benchmark_weighted_periodic_points<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact,
+      true, true>>("### Exact version");
+  return 0;
+}
