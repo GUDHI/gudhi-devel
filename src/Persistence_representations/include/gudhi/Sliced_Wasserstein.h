@@ -148,19 +148,19 @@ class Sliced_Wasserstein {
     if(this->approx == -1){
 
       // Add projections onto diagonal.
-      int n1, n2; n1 = diagram1.size(); n2 = diagram2.size(); double min_ordinate = std::numeric_limits<double>::max(); double min_abscissa = std::numeric_limits<double>::max();
+      int n1, n2; n1 = diagram1.size(); n2 = diagram2.size(); double max_ordinate = 0; double max_abscissa = 0;
       for (int i = 0; i < n2; i++){
-        min_ordinate = std::min(min_ordinate, diagram2[i].second); min_abscissa = std::min(min_abscissa, diagram2[i].first);
+        max_ordinate = std::max(max_ordinate, std::abs(diagram2[i].second)); max_abscissa = std::max(max_abscissa, std::abs(diagram2[i].first));
         diagram1.emplace_back(  (diagram2[i].first+diagram2[i].second)/2, (diagram2[i].first+diagram2[i].second)/2  );
       }
       for (int i = 0; i < n1; i++){
-        min_ordinate = std::min(min_ordinate, diagram1[i].second); min_abscissa = std::min(min_abscissa, diagram1[i].first);
+        max_ordinate = std::max(max_ordinate, std::abs(diagram1[i].second)); max_abscissa = std::max(max_abscissa, std::abs(diagram1[i].first));
         diagram2.emplace_back(  (diagram1[i].first+diagram1[i].second)/2, (diagram1[i].first+diagram1[i].second)/2  );
       }
       int num_pts_dgm = diagram1.size();
 
       // Slightly perturb the points so that the PDs are in generic positions.
-      double thresh_y = pow(10,log10(min_ordinate)-5); double thresh_x = pow(10,log10(min_abscissa)-5);
+      double thresh_y = max_ordinate * 0.00001; double thresh_x = max_abscissa * 0.00001;
       srand(time(NULL));
       for (int i = 0; i < num_pts_dgm; i++){
         diagram1[i].first += thresh_x*(1.0-2.0*rand()/RAND_MAX); diagram1[i].second += thresh_y*(1.0-2.0*rand()/RAND_MAX);
@@ -189,8 +189,7 @@ class Sliced_Wasserstein {
 
       // Find the inverses of the orders.
       std::vector<int> order1(num_pts_dgm); std::vector<int> order2(num_pts_dgm);
-      for(int i = 0; i < num_pts_dgm; i++)  for (int j = 0; j < num_pts_dgm; j++)  if(orderp1[j] == i){  order1[i] = j; break;  }
-      for(int i = 0; i < num_pts_dgm; i++)  for (int j = 0; j < num_pts_dgm; j++)  if(orderp2[j] == i){  order2[i] = j; break;  }
+      for(int i = 0; i < num_pts_dgm; i++){ order1[orderp1[i]] = i; order2[orderp2[i]] = i; }
 
       // Record all inversions of points in the orders as theta varies along the positive half-disk.
       std::vector<std::vector<std::pair<int,double> > > anglePerm1(num_pts_dgm);

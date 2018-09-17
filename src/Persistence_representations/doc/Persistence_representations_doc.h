@@ -230,7 +230,7 @@ namespace Persistence_representations {
  In addition to the previous method, we also provide two more methods to perform exact calculations, in the sense that we use functions
  instead of matrices to define the kernel between the points of the diagrams.
  Indeed, in both of these exact methods, the kernel is no longer provided as a square matrix, or a filter (see parameters above), but rather as
- a function assigning a real value to a 2D point in the plane.
+ a function assigning a real value to a pair of points in the plane.
 
  In the first of these exact methods, we aim at obtaining a finite-dimensional representation of the diagram, so we still use a grid of pixels.
  On the other hand, in the second exact method, we represent diagrams implicitly as functions (i.e. infinite-dimensional representations). This way, we no longer require grids,
