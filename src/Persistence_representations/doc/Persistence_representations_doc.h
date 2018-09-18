@@ -238,7 +238,7 @@ namespace Persistence_representations {
  kernel methods (see \ref sec_persistence_kernels below for more details on kernels).
 
  Names can be a bit confusing so we recall that, with this second exact method, we implicitly define a kernel representation of diagrams that is built from a kernel between points
- in the plane. Hence, we have two kernels here, which are independent. One is defined between points in the plane (its type in the code is Kernel2D), and is a parameter,
+ in the plane. Hence, we have two kernels here, which are independent. One is defined between points in the plane (its type in the code is Kernel2D), and is a template parameter,
  whereas the other is defined between persistence diagrams (it is the scalar product of the infinite-dimensional representations of the diagrams).
 
  \section sec_persistence_vectors Persistence vectors

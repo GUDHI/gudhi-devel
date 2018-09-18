@@ -49,12 +49,14 @@ namespace Persistence_representations {
  *
  * where \f$\pi_\theta\f$ is the projection onto the line defined with angle \f$\theta\f$ in the unit circle \f$\mathbb{S}\f$,
  * and \f$\pi_\Delta\f$ is the projection onto the diagonal.
- * The integral can be either computed exactly in \f$O(n^2{\rm log}(n))\f$ time, where \f$n\f$ is the number of points
- * in the diagrams, or approximated by sampling \f$N\f$ lines in the circle in \f$O(Nn{\rm log}(n))\f$ time. The Sliced Wasserstein Kernel is then computed as:
+ * Assuming that the diagrams are in general position (i.e. there is no collinear triple), the integral can be computed exactly in \f$O(n^2{\rm log}(n))\f$ time, where \f$n\f$ is the number of points
+ * in the diagrams. We provide two approximations of the integral: one in which we slightly perturb the diagram points so that they are in general position,
+ * and another in which we approximate the integral by sampling \f$N\f$ lines in the circle in \f$O(Nn{\rm log}(n))\f$ time. The Sliced Wasserstein Kernel is then computed as:
  *
  * \f$ k(D_1,D_2) = {\rm exp}\left(-\frac{SW(D_1,D_2)}{2\sigma^2}\right).\f$
  *
- * For more details, please see \cite pmlr-v70-carriere17a .
+ * The first method is usually much more accurate but also
+ * much slower. For more details, please see \cite pmlr-v70-carriere17a .
  *
 **/
 
@@ -261,7 +263,7 @@ class Sliced_Wasserstein {
    *
    * @param[in] _diagram  persistence diagram.
    * @param[in] _sigma    bandwidth parameter.
-   * @param[in] _approx   number of directions used to approximate the integral in the Sliced Wasserstein distance, set to -1 for exact computation. If positive, then projections of the diagram
+   * @param[in] _approx   number of directions used to approximate the integral in the Sliced Wasserstein distance, set to -1 for random perturbation. If positive, then projections of the diagram
    *                      points on all directions are stored in memory to reduce computation time.
    *
    */
