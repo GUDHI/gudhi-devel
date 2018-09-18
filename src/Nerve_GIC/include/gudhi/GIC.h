@@ -389,6 +389,24 @@ class Cover_complex {
                  distances[index[boost::source(*ei, one_skeleton)]][index[boost::target(*ei, one_skeleton)]]);
   }
 
+ public:
+  /** \brief Reads and stores the distance matrices from vector stored in memory.
+   *
+   * @param[in] distance_matrix input vector representing the distance matrix.
+   *
+   */
+  template <class InputRange>
+  void set_distances_from_range(InputRange const & distance_matrix) {
+    n = distance_matrix.size(); data_dimension = 0; point_cloud_name = "matrix";
+    for(int i = 0; i < n; i++){
+      point_cloud.emplace_back();
+      boost::add_vertex(one_skeleton_OFF);
+      vertices.push_back(boost::add_vertex(one_skeleton));
+      cover.emplace_back();
+    }
+    distances = distance_matrix;
+  }
+
  public:  // Pairwise distances.
           /** \private \brief Computes all pairwise distances.
            */

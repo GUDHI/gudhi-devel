@@ -68,6 +68,7 @@ cdef extern from "Nerve_gic_interface.h" namespace "Gudhi":
         void plot_DOT()
         void plot_OFF()
         void set_point_cloud_from_range(vector[vector[double]] cloud)
+        void set_distances_from_range(vector[vector[double]] distance_matrix)
 
 # CoverComplex python interface
 cdef class CoverComplex:
@@ -110,6 +111,14 @@ cdef class CoverComplex:
         :type cloud: vector[vector[double]]
         """
         return self.thisptr.set_point_cloud_from_range(cloud)
+
+    def set_distances_from_range(self, distance_matrix):
+        """ Reads and stores the input distance matrix from a vector stored in memory.
+
+        :param distance_matrix: Input vector containing the distance matrix.
+        :type distance_matrix: vector[vector[double]]
+        """
+        return self.thisptr.set_distances_from_range(distance_matrix)
 
     def compute_confidence_level_from_distance(self, distance):
         """Computes the confidence level of a specific bottleneck distance
