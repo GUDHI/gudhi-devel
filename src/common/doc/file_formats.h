@@ -118,6 +118,9 @@ namespace Gudhi {
  Indicate that we have imposed periodic boundary conditions in the direction x, but not in the direction y.
 
  Other sample files can be found in the `data/bitmap` folder.
+ 
+ Please note that unlike in Perseus format the filtration on the maximal cubes can be any double precision number. 
+ Consequently one cannot mark the cubes that are not present with -1's. To do that please set their filtration value to +Inf.
 
 */
 }  // namespace Gudhi
