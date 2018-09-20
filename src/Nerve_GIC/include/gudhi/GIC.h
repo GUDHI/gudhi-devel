@@ -397,12 +397,16 @@ class Cover_complex {
    */
   template <class InputRange>
   void set_distances_from_range(InputRange const & distance_matrix) {
-    n = distance_matrix.size(); data_dimension = 0; point_cloud_name = "matrix";
-    for(int i = 0; i < n; i++){
-      point_cloud.emplace_back();
-      boost::add_vertex(one_skeleton_OFF);
-      vertices.push_back(boost::add_vertex(one_skeleton));
-      cover.emplace_back();
+    if(point_cloud.size() == 0){
+      n = distance_matrix.size();
+      point_cloud_name = "matrix";
+      data_dimension = 0;
+      for(int i = 0; i < n; i++){
+        point_cloud.emplace_back();
+        boost::add_vertex(one_skeleton_OFF);
+        vertices.push_back(boost::add_vertex(one_skeleton));
+        cover.emplace_back();
+      }
     }
     distances = distance_matrix;
   }
@@ -536,9 +540,17 @@ class Cover_complex {
            *
            */
   void set_function_from_coordinate(int k) {
-    for (int i = 0; i < n; i++) func.push_back(point_cloud[i][k]);
-    functional_cover = true;
-    cover_name = "coordinate " + std::to_string(k);
+    if(point_cloud[0].size() > 0){
+      for (int i = 0; i < n; i++) func.push_back(point_cloud[i][k]);
+      functional_cover = true;
+      cover_name = "coordinate " + std::to_string(k);
+    }
+    else{
+      std::cout << "Only pairwise distances provided---cannot access " << k << "th coordinate; returning null vector instead" << std::endl;
+      for (int i = 0; i < n; i++) func.push_back(0.0);
+      functional_cover = true;
+      cover_name = "null";
+    }
   }
 
  public:  // Set function from vector.
@@ -989,9 +1001,17 @@ class Cover_complex {
            *
            */
   void set_color_from_coordinate(int k = 0) {
-    for (int i = 0; i < n; i++) func_color.push_back(point_cloud[i][k]);
-    color_name = "coordinate ";
-    color_name.append(std::to_string(k));
+    if(point_cloud[0].size() > 0){
+      for (int i = 0; i < n; i++) func_color.push_back(point_cloud[i][k]);
+      color_name = "coordinate ";
+      color_name.append(std::to_string(k));
+    }
+    else{
+      std::cout << "Only pairwise distances provided---cannot access " << k << "th coordinate; returning null vector instead" << std::endl;
+      for (int i = 0; i < n; i++) func.push_back(0.0);
+      functional_cover = true;
+      cover_name = "null";
+    }
   }
 
  public:  // Set color from vector.
@@ -1157,15 +1177,18 @@ class Cover_complex {
 
     // Build filtration
     for (auto const& simplex : simplices) {
-      std::vector<int> splx = simplex; splx.push_back(-2);
+      std::vector<int> splx = simplex;
+      splx.push_back(-2);
       st.insert_simplex_and_subfaces(splx, -3);
     }
 
     for (std::map<int, double>::iterator it = cover_std.begin(); it != cover_std.end(); it++) {
       int vertex = it->first; float val = it->second;
       int vert[] = {vertex}; int edge[] = {vertex, -2};
-      st.assign_filtration(st.find(vert), -2 + (val - minf)/(maxf - minf));
-      st.assign_filtration(st.find(edge),  2 - (val - minf)/(maxf - minf));
+      if(st.find(vert) != st.null_simplex()){
+        st.assign_filtration(st.find(vert), -2 + (val - minf)/(maxf - minf));
+        st.assign_filtration(st.find(edge),  2 - (val - minf)/(maxf - minf));
+      }
     }
     st.make_filtration_non_decreasing();
 
@@ -1267,7 +1290,7 @@ class Cover_complex {
     unsigned int N = distribution.size();
     double level = 1;
     for (unsigned int i = 0; i < N; i++)
-      if (distribution[i] > d){ level = i * 1.0 / N; break; }
+      if (distribution[i] >= d){ level = i * 1.0 / N; break; }
     if (verbose)  std::cout << "Confidence level of distance " << d << " is " << level << std::endl;
     return level;
   }
