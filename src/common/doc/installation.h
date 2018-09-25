@@ -2,22 +2,34 @@
  *  \tableofcontents
  * As GUDHI is a header only library, there is no need to install the library.
  * 
- * Examples of GUDHI headers inclusion can be found in \ref demos.
+ * Examples of GUDHI headers inclusion can be found in \ref utilities.
  * 
  * \section compiling Compiling
  * The library uses c++11 and requires <a target="_blank" href="http://www.boost.org/">Boost</a>  &ge; 1.48.0
  * and <a target="_blank" href="https://www.cmake.org/">CMake</a> &ge; 3.1.
  * It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2015.
  * 
- * \subsection demos Demos and examples
- * To build the demos and examples, run the following commands in a terminal:
+ * \subsection utilities Utilities and examples
+ * To build the utilities, run the following commands in a terminal:
 \verbatim  cd /path-to-gudhi/
 mkdir build
 cd build/
 cmake ..
 make \endverbatim
- * A list of examples is available <a href="examples.html">here</a>.
+ * By default, examples are disabled. You can activate their compilation with
+ * <a href="https://cmake.org/cmake/help/v3.0/manual/ccmake.1.html">ccmake</a> (on Linux and Mac OSX),
+ * <a href="https://cmake.org/cmake/help/v3.0/manual/cmake-gui.1.html">cmake-gui</a> (on Windows) or y mofifying the
+ * cmake command as follows :
+\verbatim  cmake -DWITH_GUDHI_EXAMPLE=ON ..
+make \endverbatim
+ * A list of utilities and examples is available <a href="examples.html">here</a>.
  * 
+ * \subsection libraryinstallation Installation
+ * To install the library (headers and activated utilities), run the following command in a terminal:
+ * \verbatim  make install \endverbatim
+ * This action may require to be in the sudoer or administrator of the machine in function of the operating system and
+ * of <a href="https://cmake.org/cmake/help/v3.0/variable/CMAKE_INSTALL_PREFIX.html">CMAKE_INSTALL_PREFIX</a>.
+ *
  * \subsection testsuites Test suites
  * To test your build, run the following command in a terminal:
  * \verbatim  make test \endverbatim
@@ -30,6 +42,10 @@ make doxygen
 # Documentation will be generated in the folder YYYY-MM-DD-hh-mm-ss_GUDHI_X.Y.Z/doc/html/
 # You can customize the directory name by calling `cmake -DUSER_VERSION_DIR=/my/custom/folder`
 \endverbatim
+ *
+ * \subsection helloworld Hello world !
+ * The <a target="_blank" href="https://gitlab.inria.fr/GUDHI/hello-gudhi-world">Hello world for GUDHI</a>
+ * project is an example to help developers to make their own C++ project on top of the GUDHI library.
  *
  * \section optionallibrary Optional third-party library
  * \subsection gmp GMP

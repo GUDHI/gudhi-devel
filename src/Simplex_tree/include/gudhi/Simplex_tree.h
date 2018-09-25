@@ -1057,7 +1057,10 @@ class Simplex_tree {
     Dictionary_it next = siblings->members().begin();
     ++next;
 
-    thread_local std::vector<std::pair<Vertex_handle, Node> > inter;
+#ifdef GUDHI_CAN_USE_CXX11_THREAD_LOCAL
+    thread_local
+#endif  // GUDHI_CAN_USE_CXX11_THREAD_LOCAL
+    std::vector<std::pair<Vertex_handle, Node> > inter;
     for (Dictionary_it s_h = siblings->members().begin();
          s_h != siblings->members().end(); ++s_h, ++next) {
       Simplex_handle root_sh = find_vertex(s_h->first);
