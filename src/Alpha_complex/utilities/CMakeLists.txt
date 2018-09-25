@@ -30,9 +30,15 @@ if(CGAL_FOUND)
             "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off"
             "-p" "2" "-m" "0.45" "-o" "exact.pers" "-e")
 
+    add_test(NAME Alpha_complex_utilities_safe_alpha_complex_3d COMMAND $<TARGET_FILE:alpha_complex_3d_persistence>
+            "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off"
+            "-p" "2" "-m" "0.45" "-o" "safe.pers" "-s")
+
     if (DIFF_PATH)
       add_test(Alpha_complex_utilities_diff_alpha_complex_3d ${DIFF_PATH}
               "exact.pers" "alpha.pers")
+      add_test(Alpha_complex_utilities_diff_alpha_complex_3d ${DIFF_PATH}
+              "safe.pers" "alpha.pers")
     endif()
 
     add_test(NAME Alpha_complex_utilities_periodic_alpha_complex_3d_persistence COMMAND $<TARGET_FILE:alpha_complex_3d_persistence>

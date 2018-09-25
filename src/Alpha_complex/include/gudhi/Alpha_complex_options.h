@@ -23,7 +23,6 @@
 #ifndef ALPHA_COMPLEX_OPTIONS_H_
 #define ALPHA_COMPLEX_OPTIONS_H_
 
-
 namespace Gudhi {
 
 namespace alpha_complex {
@@ -33,11 +32,10 @@ namespace alpha_complex {
  *
  * \ingroup alpha_complex
  */
-enum class complexity: char
-{
-  FAST='f',      ///< Fast version.
-  SAFE='s',      ///< Safe version.
-  EXACT='e',     ///< Exact version.
+enum class complexity : char {
+  FAST = 'f',   ///< Fast version.
+  SAFE = 's',   ///< Safe version.
+  EXACT = 'e',  ///< Exact version.
 };
 
 }  // namespace alpha_complex

@@ -7,7 +7,8 @@
 #include <vector>
 #include <limits>  // for numeric limits
 
-using Weighted_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::EXACT, true, false>;
+using Weighted_alpha_complex_3d =
+    Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::EXACT, true, false>;
 using Point = Weighted_alpha_complex_3d::Point_3;
 using Weighted_point = Weighted_alpha_complex_3d::Triangulation_3::Weighted_point;
 using Vector_of_weighted_points = std::vector<Weighted_point>;
@@ -27,8 +28,8 @@ int main(int argc, char **argv) {
   weighted_points.push_back(Weighted_point(Point(1, -1, -1), 4.));
   weighted_points.push_back(Weighted_point(Point(-1, 1, -1), 4.));
   weighted_points.push_back(Weighted_point(Point(-1, -1, 1), 4.));
-  weighted_points.push_back(Weighted_point(Point(1, 1, 1),   4.));
-  weighted_points.push_back(Weighted_point(Point(2, 2, 2),   1.));
+  weighted_points.push_back(Weighted_point(Point(1, 1, 1), 4.));
+  weighted_points.push_back(Weighted_point(Point(2, 2, 2), 1.));
 
   // ----------------------------------------------------------------------------
   // Init of an alpha complex from the list of points
@@ -40,9 +41,8 @@ int main(int argc, char **argv) {
     // ----------------------------------------------------------------------------
     // Display information about the alpha complex
     // ----------------------------------------------------------------------------
-    std::cout << "Alpha complex is of dimension " << simplex.dimension() <<
-        " - " << simplex.num_simplices() << " simplices - " <<
-        simplex.num_vertices() << " vertices." << std::endl;
+    std::cout << "Alpha complex is of dimension " << simplex.dimension() << " - " << simplex.num_simplices()
+              << " simplices - " << simplex.num_vertices() << " vertices." << std::endl;
 
     std::cout << "Iterator on alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
     for (auto f_simplex : simplex.filtration_simplex_range()) {
@@ -50,7 +50,8 @@ int main(int argc, char **argv) {
       for (auto vertex : simplex.simplex_vertex_range(f_simplex)) {
         std::cout << vertex << " ";
       }
-      std::cout << ") -> " << "[" << simplex.filtration(f_simplex) << "] ";
+      std::cout << ") -> "
+                << "[" << simplex.filtration(f_simplex) << "] ";
       std::cout << std::endl;
     }
   }

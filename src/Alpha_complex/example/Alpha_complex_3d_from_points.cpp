@@ -8,7 +8,7 @@
 #include <limits>  // for numeric limits
 
 using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::EXACT, false, false>;
-using Point = Alpha_complex_3d::Point_3 ;
+using Point = Alpha_complex_3d::Point_3;
 using Vector_of_points = std::vector<Point>;
 
 int main(int argc, char **argv) {
@@ -38,9 +38,8 @@ int main(int argc, char **argv) {
     // ----------------------------------------------------------------------------
     // Display information about the alpha complex
     // ----------------------------------------------------------------------------
-    std::cout << "Alpha complex is of dimension " << simplex.dimension() <<
-        " - " << simplex.num_simplices() << " simplices - " <<
-        simplex.num_vertices() << " vertices." << std::endl;
+    std::cout << "Alpha complex is of dimension " << simplex.dimension() << " - " << simplex.num_simplices()
+              << " simplices - " << simplex.num_vertices() << " vertices." << std::endl;
 
     std::cout << "Iterator on alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
     for (auto f_simplex : simplex.filtration_simplex_range()) {
@@ -48,7 +47,8 @@ int main(int argc, char **argv) {
       for (auto vertex : simplex.simplex_vertex_range(f_simplex)) {
         std::cout << vertex << " ";
       }
-      std::cout << ") -> " << "[" << simplex.filtration(f_simplex) << "] ";
+      std::cout << ") -> "
+                << "[" << simplex.filtration(f_simplex) << "] ";
       std::cout << std::endl;
     }
   }
