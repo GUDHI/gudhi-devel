@@ -52,7 +52,7 @@
 
 #include <iostream>
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <stdexcept>
 #include <cstddef>
 #include <memory>  // for std::unique_ptr
@@ -445,8 +445,8 @@ public:
 
     //using Filtration_value = typename SimplicialComplexForAlpha3d::Filtration_value;
     using Complex_vertex_handle = typename SimplicialComplexForAlpha3d::Vertex_handle;
-    using Alpha_shape_simplex_tree_map = std::map<Alpha_vertex_handle,
-                                                  Complex_vertex_handle>;
+    using Alpha_shape_simplex_tree_map = std::unordered_map<Alpha_vertex_handle,
+                                                            Complex_vertex_handle>;
     using Simplex_tree_vector_vertex = std::vector<Complex_vertex_handle>;
 
 #ifdef DEBUG_TRACES
