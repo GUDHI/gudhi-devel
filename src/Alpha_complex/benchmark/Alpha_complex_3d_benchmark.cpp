@@ -233,33 +233,33 @@ int main(int argc, char **argv) {
   benchmark_points_on_torus_dD<CGAL::Epeck_d< CGAL::Dimension_tag<3> >>("Exact static dimension version");
   benchmark_points_on_torus_dD<CGAL::Epeck_d< CGAL::Dynamic_dimension_tag >>("Exact dynamic dimension version");
 
-  benchmark_points_on_torus_3D<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast,
+  benchmark_points_on_torus_3D<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::FAST,
                                                                       false, false>>("Fast version");
-  benchmark_points_on_torus_3D<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::safe,
+  benchmark_points_on_torus_3D<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::SAFE,
                                                                       false, false>>("Safe version");
-  benchmark_points_on_torus_3D<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact,
+  benchmark_points_on_torus_3D<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::EXACT,
                                                                       false, false>>("Exact version");
 
 
-  benchmark_weighted_points_on_torus_3D<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast,
+  benchmark_weighted_points_on_torus_3D<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::FAST,
                                                                                true, false>>("Fast version");
-  benchmark_weighted_points_on_torus_3D<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::safe,
+  benchmark_weighted_points_on_torus_3D<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::SAFE,
                                                                                true, false>>("Safe version");
-  benchmark_weighted_points_on_torus_3D<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact,
+  benchmark_weighted_points_on_torus_3D<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::EXACT,
                                                                                true, false>>("Exact version");
 
-  benchmark_periodic_points<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast,
+  benchmark_periodic_points<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::FAST,
       false, true>>("Fast version");
-  benchmark_periodic_points<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::safe,
+  benchmark_periodic_points<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::SAFE,
       false, true>>("Safe version");
-  benchmark_periodic_points<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact,
+  benchmark_periodic_points<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::EXACT,
       false, true>>("Exact version");
 
-  benchmark_weighted_periodic_points<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast,
+  benchmark_weighted_periodic_points<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::FAST,
       true, true>>("Fast version");
-  benchmark_weighted_periodic_points<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::safe,
+  benchmark_weighted_periodic_points<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::SAFE,
       true, true>>("Safe version");
-  benchmark_weighted_periodic_points<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact,
+  benchmark_weighted_periodic_points<Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::EXACT,
       true, true>>("Exact version");
 
   return 0;

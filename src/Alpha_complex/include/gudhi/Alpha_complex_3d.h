@@ -69,6 +69,11 @@ namespace Gudhi {
 
 namespace alpha_complex {
 
+// Value_from_iterator returns the filtration value from an iterator on alpha shapes values
+//
+// FAST                         SAFE                         EXACT
+// *iterator                    CGAL::to_double(*iterator)   CGAL::to_double(iterator->exact())
+
 template <complexity Complexity>
 struct Value_from_iterator
 {
@@ -81,23 +86,23 @@ struct Value_from_iterator
 };
 
 template <>
-struct Value_from_iterator <complexity::safe>
+struct Value_from_iterator <complexity::SAFE>
 {
   template<typename Iterator>
   static double perform(Iterator it)
   {
-    // In safe mode, we are with Epeck or Epick with exact value set to CGAL::Tag_true.
+    // In SAFE mode, we are with Epeck or Epick with EXACT value set to CGAL::Tag_true.
     return CGAL::to_double(*it);
   }
 };
 
 template <>
-struct Value_from_iterator <complexity::exact>
+struct Value_from_iterator <complexity::EXACT>
 {
   template<typename Iterator>
   static double perform(Iterator it)
   {
-    // In exact mode, we are with Epeck or Epick with exact value set to CGAL::Tag_true.
+    // In EXACT mode, we are with Epeck or Epick with EXACT value set to CGAL::Tag_true.
     return CGAL::to_double(it->exact());
   }
 };
@@ -115,7 +120,7 @@ struct Value_from_iterator <complexity::exact>
  * Duplicate points are inserted once in the Alpha_complex. This is the reason why the vertices may be not contiguous.
  *
  * \tparam Complexity shall be `Gudhi::alpha_complex::complexity`. Default value is
- * `Gudhi::alpha_complex::complexity::fast`.
+ * `Gudhi::alpha_complex::complexity::FAST`.
  *
  * \tparam Weighted Boolean used to set/unset the weighted version of Alpha_complex_3d. Default value is false.
  *
@@ -138,9 +143,22 @@ struct Value_from_iterator <complexity::exact>
  * 3d Delaunay complex.
  *
  */
-template<complexity Complexity = complexity::fast, bool Weighted = false, bool Periodic = false>
+template<complexity Complexity = complexity::FAST, bool Weighted = false, bool Periodic = false>
 class Alpha_complex_3d {
-  using Predicates = typename std::conditional<((!Weighted && !Periodic) || (Complexity == complexity::fast)),
+  // Epick = Exact_predicates_inexact_constructions_kernel
+  // Epeck = Exact_predicates_exact_constructions_kernel
+  // ExactAlphaComparisonTag = exact version of CGAL Alpha_shape_3 and of its objects (Alpha_shape_vertex_base_3 and
+  //                           Alpha_shape_cell_base_3). Not available if weighted or periodic.
+  //                           Can be CGAL::Tag_false or CGAL::Tag_true
+  //                           cf. https://doc.cgal.org/latest/Alpha_shapes_3/classCGAL_1_1Alpha__shape__3.html
+  //
+  //
+  //                        FAST                         SAFE                         EXACT
+  // not weighted and       Epick + CGAL::Tag_false      Epick + CGAL::Tag_true       Epick + CGAL::Tag_true
+  // not periodic
+  //
+  // otherwise              Epick + CGAL::Tag_false      Epeck                        Epeck
+  using Predicates = typename std::conditional<((!Weighted && !Periodic) || (Complexity == complexity::FAST)),
       CGAL::Exact_predicates_inexact_constructions_kernel,
       CGAL::Exact_predicates_exact_constructions_kernel>::type;
 
@@ -166,7 +184,7 @@ class Alpha_complex_3d {
 
   using Kernel = typename Kernel_3<Predicates, Weighted, Periodic>::Kernel;
 
-  using Exact_tag = typename std::conditional<(Complexity == complexity::fast),
+  using Exact_tag = typename std::conditional<(Complexity == complexity::FAST),
       CGAL::Tag_false,
       CGAL::Tag_true>::type;
 

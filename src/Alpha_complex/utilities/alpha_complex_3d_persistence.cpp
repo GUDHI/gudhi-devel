@@ -38,7 +38,7 @@ using Filtration_value = Simplex_tree::Filtration_value;
 using Persistent_cohomology =
     Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Gudhi::persistent_cohomology::Field_Zp>;
 
-void program_options(int argc, char *argv[], std::string &off_file_points, bool& exact, std::string &weight_file,
+void program_options(int argc, char *argv[], std::string &off_file_points, bool& EXACT, std::string &weight_file,
                      std::string &cuboid_file, std::string &output_file_diag, Filtration_value &alpha_square_max_value,
                      int &coeff_field_characteristic, Filtration_value &min_persistence);
 
@@ -117,24 +117,24 @@ int main(int argc, char **argv) {
     periodic_version = true;
   }
 
-  Gudhi::alpha_complex::complexity complexity = Gudhi::alpha_complex::complexity::fast;
+  Gudhi::alpha_complex::complexity complexity = Gudhi::alpha_complex::complexity::FAST;
   if (exact_version) {
-    complexity = Gudhi::alpha_complex::complexity::exact;
+    complexity = Gudhi::alpha_complex::complexity::EXACT;
   }
 
   Simplex_tree simplex_tree;
 
   switch(complexity) {
-    case Gudhi::alpha_complex::complexity::fast:
+    case Gudhi::alpha_complex::complexity::FAST:
       if (weighted_version) {
         if (periodic_version) {
-          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast,
+          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::FAST,
               true, true>;
           auto points = read_off<Alpha_complex_3d>(off_file_points);
           Alpha_complex_3d alpha_complex(points, weights, x_min, y_min, z_min, x_max, y_max, z_max);
           alpha_complex.create_complex(simplex_tree, alpha_square_max_value);
         } else {
-          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast,
+          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::FAST,
               true, false>;
           auto points = read_off<Alpha_complex_3d>(off_file_points);
           Alpha_complex_3d alpha_complex(points, weights);
@@ -142,13 +142,13 @@ int main(int argc, char **argv) {
         }
       } else {
         if (periodic_version) {
-          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast,
+          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::FAST,
               false, true>;
           auto points = read_off<Alpha_complex_3d>(off_file_points);
           Alpha_complex_3d alpha_complex(points, x_min, y_min, z_min, x_max, y_max, z_max);
           alpha_complex.create_complex(simplex_tree, alpha_square_max_value);
         } else {
-          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::fast,
+          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::FAST,
               false, false>;
           auto points = read_off<Alpha_complex_3d>(off_file_points);
           Alpha_complex_3d alpha_complex(points);
@@ -156,16 +156,16 @@ int main(int argc, char **argv) {
         }
       }
       break;
-    case Gudhi::alpha_complex::complexity::exact:
+    case Gudhi::alpha_complex::complexity::EXACT:
       if (weighted_version) {
         if (periodic_version) {
-          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact,
+          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::EXACT,
               true, true>;
           auto points = read_off<Alpha_complex_3d>(off_file_points);
           Alpha_complex_3d alpha_complex(points, weights, x_min, y_min, z_min, x_max, y_max, z_max);
           alpha_complex.create_complex(simplex_tree, alpha_square_max_value);
         } else {
-          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact,
+          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::EXACT,
               true, false>;
           auto points = read_off<Alpha_complex_3d>(off_file_points);
           Alpha_complex_3d alpha_complex(points, weights);
@@ -173,13 +173,13 @@ int main(int argc, char **argv) {
         }
       } else {
         if (periodic_version) {
-          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact,
+          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::EXACT,
               false, true>;
           auto points = read_off<Alpha_complex_3d>(off_file_points);
           Alpha_complex_3d alpha_complex(points, x_min, y_min, z_min, x_max, y_max, z_max);
           alpha_complex.create_complex(simplex_tree, alpha_square_max_value);
         } else {
-          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact,
+          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::EXACT,
               false, false>;
           auto points = read_off<Alpha_complex_3d>(off_file_points);
           Alpha_complex_3d alpha_complex(points);
@@ -187,16 +187,16 @@ int main(int argc, char **argv) {
         }
       }
       break;
-    case Gudhi::alpha_complex::complexity::safe:
+    case Gudhi::alpha_complex::complexity::SAFE:
       if (weighted_version) {
         if (periodic_version) {
-          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::safe,
+          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::SAFE,
               true, true>;
           auto points = read_off<Alpha_complex_3d>(off_file_points);
           Alpha_complex_3d alpha_complex(points, weights, x_min, y_min, z_min, x_max, y_max, z_max);
           alpha_complex.create_complex(simplex_tree, alpha_square_max_value);
         } else {
-          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::safe,
+          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::SAFE,
               true, false>;
           auto points = read_off<Alpha_complex_3d>(off_file_points);
           Alpha_complex_3d alpha_complex(points, weights);
@@ -204,13 +204,13 @@ int main(int argc, char **argv) {
         }
       } else {
         if (periodic_version) {
-          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::safe,
+          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::SAFE,
               false, true>;
           auto points = read_off<Alpha_complex_3d>(off_file_points);
           Alpha_complex_3d alpha_complex(points, x_min, y_min, z_min, x_max, y_max, z_max);
           alpha_complex.create_complex(simplex_tree, alpha_square_max_value);
         } else {
-          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::safe,
+          using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::SAFE,
               false, false>;
           auto points = read_off<Alpha_complex_3d>(off_file_points);
           Alpha_complex_3d alpha_complex(points);
@@ -248,7 +248,7 @@ int main(int argc, char **argv) {
   return 0;
 }
 
-void program_options(int argc, char *argv[], std::string &off_file_points, bool& exact, std::string &weight_file,
+void program_options(int argc, char *argv[], std::string &off_file_points, bool& EXACT, std::string &weight_file,
                      std::string &cuboid_file, std::string &output_file_diag, Filtration_value &alpha_square_max_value,
                      int &coeff_field_characteristic, Filtration_value &min_persistence) {
   namespace po = boost::program_options;
@@ -258,8 +258,8 @@ void program_options(int argc, char *argv[], std::string &off_file_points, bool&
 
   po::options_description visible("Allowed options", 100);
   visible.add_options()("help,h", "produce help message")(
-      "exact,e", po::bool_switch(&exact),
-      "To activate exact version of Alpha complex 3d (default is false, not available for weighted and/or periodic)")(
+      "EXACT,e", po::bool_switch(&EXACT),
+      "To activate EXACT version of Alpha complex 3d (default is false, not available for weighted and/or periodic)")(
       "weight-file,w", po::value<std::string>(&weight_file)->default_value(std::string()),
       "Name of file containing a point weights. Format is one weight per line:\n  W1\n  ...\n  Wn ")(
       "cuboid-file,c", po::value<std::string>(&cuboid_file),
@@ -289,7 +289,7 @@ void program_options(int argc, char *argv[], std::string &off_file_points, bool&
     std::cout << std::endl;
     std::cout << "Compute the persistent homology with coefficient field Z/pZ \n";
     std::cout << "of a 3D Alpha complex defined on a set of input points.\n";
-    std::cout << "3D Alpha complex can be exact or weighted and/or periodic\n\n";
+    std::cout << "3D Alpha complex can be EXACT or weighted and/or periodic\n\n";
     std::cout << "The output diagram contains one bar per line, written with the convention: \n";
     std::cout << "   p   dim b d \n";
     std::cout << "where dim is the dimension of the homological feature,\n";

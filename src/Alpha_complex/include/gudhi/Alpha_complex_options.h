@@ -29,19 +29,15 @@ namespace Gudhi {
 namespace alpha_complex {
 
 /**
- * \class complexity
  * \brief Alpha complex complexity template parameter possible values.
  *
  * \ingroup alpha_complex
  */
 enum class complexity: char
 {
-  /** \brief Fast version.*/
-  fast='f',
-  /** \brief Safe version.*/
-  safe='s',
-  /** \brief Exact version.*/
-  exact='e',
+  FAST='f',      ///< Fast version.
+  SAFE='s',      ///< Safe version.
+  EXACT='e',     ///< Exact version.
 };
 
 }  // namespace alpha_complex

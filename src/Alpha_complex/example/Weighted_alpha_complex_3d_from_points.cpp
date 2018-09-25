@@ -7,7 +7,7 @@
 #include <vector>
 #include <limits>  // for numeric limits
 
-using Weighted_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::exact, true, false>;
+using Weighted_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::EXACT, true, false>;
 using Point = Weighted_alpha_complex_3d::Point_3;
 using Weighted_point = Weighted_alpha_complex_3d::Triangulation_3::Weighted_point;
 using Vector_of_weighted_points = std::vector<Weighted_point>;
