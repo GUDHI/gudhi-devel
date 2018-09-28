@@ -21,11 +21,11 @@ endif()
 # A fix would be to use https://cmake.org/cmake/help/v3.1/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html
 # or even better https://cmake.org/cmake/help/v3.1/variable/CMAKE_CXX_STANDARD.html
 # but it implies to use cmake version 3.1 at least.
-find_package(CGAL)
+find_package(CGAL QUIET)
 
 # Only CGAL versions > 4.4 supports what Gudhi uses from CGAL
 if (CGAL_VERSION VERSION_LESS 4.4.0)
-  message("CGAL version ${CGAL_VERSION} is considered too old to be used by Gudhi.")
+  message("++ CGAL version ${CGAL_VERSION} is considered too old to be used by Gudhi.")
   unset(CGAL_FOUND)
 endif()
 if(CGAL_FOUND)
