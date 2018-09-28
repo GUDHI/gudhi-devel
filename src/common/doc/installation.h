@@ -18,7 +18,7 @@ cmake ..
 make \endverbatim
  * By default, examples are disabled. You can activate their compilation with
  * <a href="https://cmake.org/cmake/help/v3.0/manual/ccmake.1.html">ccmake</a> (on Linux and Mac OSX),
- * <a href="https://cmake.org/cmake/help/v3.0/manual/cmake-gui.1.html">cmake-gui</a> (on Windows) or y mofifying the
+ * <a href="https://cmake.org/cmake/help/v3.0/manual/cmake-gui.1.html">cmake-gui</a> (on Windows) or by modifying the
  * cmake command as follows :
 \verbatim  cmake -DWITH_GUDHI_EXAMPLE=ON ..
 make \endverbatim
