@@ -88,6 +88,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_copy_constructor, Simplex_tree, list_of_te
   BOOST_CHECK(st == st4);
   BOOST_CHECK(st3 == st);
 
+  st = st;
+  print_simplex_filtration(st4, "Third self copy assignment from the default Simplex_tree");
+
+  BOOST_CHECK(st3 == st);
+
   std::cout << "********************************************************************" << std::endl;
   std::cout << "TEST OF MOVE CONSTRUCTOR" << std::endl;
   Simplex_tree st5(std::move(st1));
@@ -122,6 +127,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_copy_constructor, Simplex_tree, list_of_te
   // Cross check
   BOOST_CHECK(st7 == st8);
   BOOST_CHECK(st == st8);
+  BOOST_CHECK(st7 == st);
+
+  st = std::move(st);
+  print_simplex_filtration(st, "Third self move assignment from the default Simplex_tree");
+
   BOOST_CHECK(st7 == st);
 
 }

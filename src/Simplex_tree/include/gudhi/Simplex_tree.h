@@ -296,15 +296,81 @@ class Simplex_tree {
       dimension_(-1) { }
 
   /** \brief User-defined copy constructor reproduces the whole tree structure. */
-  Simplex_tree(const Simplex_tree& complex_source)
-      : null_vertex_(complex_source.null_vertex_),
-      root_(nullptr, null_vertex_, complex_source.root_.members_),
-      filtration_vect_(),
-      dimension_(complex_source.dimension_) {
+  Simplex_tree(const Simplex_tree& complex_source) {
 #ifdef DEBUG_TRACES
     std::cout << "Simplex_tree copy constructor" << std::endl;
 #endif  // DEBUG_TRACES
+    copy_from(complex_source);
+  }
+
+  /** \brief User-defined move constructor relocates the whole tree structure.
+   *  \exception std::invalid_argument In debug mode, if the complex_source is invalid.
+   */
+  Simplex_tree(Simplex_tree && complex_source) {
+#ifdef DEBUG_TRACES
+    std::cout << "Simplex_tree move constructor" << std::endl;
+#endif  // DEBUG_TRACES
+    move_from(complex_source);
+
+    // just need to set dimension_ on source to make it available again
+    // (filtration_vect_ and members are already set from the move)
+    complex_source.dimension_ = -1;
+  }
+
+  /** \brief Destructor; deallocates the whole tree structure. */
+  ~Simplex_tree() {
+    root_members_recursive_deletion();
+  }
+
+  /** \brief User-defined copy assignment reproduces the whole tree structure. */
+  Simplex_tree& operator= (const Simplex_tree& complex_source)
+  {
+#ifdef DEBUG_TRACES
+    std::cout << "Simplex_tree copy assignment" << std::endl;
+#endif  // DEBUG_TRACES
+    // Self-assignment detection
+    if (&complex_source != this) {
+      // We start by deleting root_ if not empty
+      root_members_recursive_deletion();
+
+      copy_from(complex_source);
+    }
+    return *this;
+  }
+
+  /** \brief User-defined move assignment relocates the whole tree structure.
+   *  \exception std::invalid_argument In debug mode, if the complex_source is invalid.
+   */
+  Simplex_tree& operator=(Simplex_tree&& complex_source)
+  {
+#ifdef DEBUG_TRACES
+    std::cout << "Simplex_tree move assignment" << std::endl;
+#endif  // DEBUG_TRACES
+    // Self-assignment detection
+    if (&complex_source != this) {
+      // root_ deletion in case it was not empty
+      root_members_recursive_deletion();
+
+      move_from(complex_source);
+    }
+    return *this;
+  }
+  /** @} */  // end constructor/destructor
+
+ private:
+  // Copy from complex_source to "this"
+  void copy_from(const Simplex_tree& complex_source) {
+    null_vertex_ = complex_source.null_vertex_;
+    filtration_vect_.clear();
+    dimension_ = complex_source.dimension_;
     auto root_source = complex_source.root_;
+
+    // root members copy
+    root_.members() = Dictionary(boost::container::ordered_unique_range, root_source.members().begin(), root_source.members().end());
+    // Needs to reassign children
+    for (auto& map_el : root_.members()) {
+      map_el.second.assign_children(&root_);
+    }
     rec_copy(&root_, &root_source);
   }
 
@@ -323,20 +389,16 @@ class Simplex_tree {
     }
   }
 
-  /** \brief User-defined move constructor relocates the whole tree structure.
-   *  \exception std::invalid_argument In debug mode, if the complex_source is invalid.
-   */
-  Simplex_tree(Simplex_tree && complex_source)
-      : null_vertex_(std::move(complex_source.null_vertex_)),
-      root_(std::move(complex_source.root_)),
-      filtration_vect_(std::move(complex_source.filtration_vect_)),
-      dimension_(std::move(complex_source.dimension_)) {
-#ifdef DEBUG_TRACES
-    std::cout << "Simplex_tree move constructor" << std::endl;
-#endif  // DEBUG_TRACES
+  // Move from complex_source to "this"
+  void move_from(Simplex_tree& complex_source) {
+    null_vertex_ = std::move(complex_source.null_vertex_);
+    root_ = std::move(complex_source.root_);
+    filtration_vect_ = std::move(complex_source.filtration_vect_);
+    dimension_ = std::move(complex_source.dimension_);
+
     // Need to update root members (children->oncles and children need to point on the new root pointer)
     for (auto& map_el : root_.members()) {
-      if (map_el.second.children()->oncles() == &(complex_source.root_)) {
+      if (map_el.second.children() != &(complex_source.root_)) {
         // reset children->oncles with the moved root_ pointer value
         map_el.second.children()->oncles_ = &root_;
       } else {
@@ -347,89 +409,18 @@ class Simplex_tree {
         map_el.second.assign_children(&root_);
       }
     }
-    // just need to set dimension_ on source to make it available again
-    // (filtration_vect_ and members are already set from the move)
-    complex_source.dimension_ = -1;
   }
 
-  /** \brief Destructor; deallocates the whole tree structure. */
-  ~Simplex_tree() {
+  // delete all root_.members() recursively
+  void root_members_recursive_deletion() {
     for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh) {
       if (has_children(sh)) {
         rec_delete(sh->second.children());
       }
     }
+    root_.members().clear();
   }
 
-  /** \brief User-defined copy assignment reproduces the whole tree structure. */
-  Simplex_tree& operator= (const Simplex_tree& complex_source)
-  {
-#ifdef DEBUG_TRACES
-    std::cout << "Simplex_tree copy assignment" << std::endl;
-#endif  // DEBUG_TRACES
-    null_vertex_ = complex_source.null_vertex_;
-    filtration_vect_.clear();
-    dimension_ = complex_source.dimension_;
-    auto root_source = complex_source.root_;
-
-    // We start by deleting root_ if not empty
-    for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh) {
-      if (has_children(sh)) {
-        rec_delete(sh->second.children());
-      }
-    }
-
-    // root members copy
-    root_.members() = Dictionary(boost::container::ordered_unique_range, root_source.members().begin(), root_source.members().end());
-    // Needs to reassign children
-    for (auto& map_el : root_.members()) {
-      map_el.second.assign_children(&root_);
-    }
-    rec_copy(&root_, &root_source);
-    return *this;
-  }
-
-  /** \brief User-defined move assignment relocates the whole tree structure.
-   *  \exception std::invalid_argument In debug mode, if the complex_source is invalid.
-   */
-  Simplex_tree& operator=(Simplex_tree&& complex_source)
-  {
-#ifdef DEBUG_TRACES
-    std::cout << "Simplex_tree move assignment" << std::endl;
-#endif  // DEBUG_TRACES
-    // Self-assignment detection
-    if (&complex_source != this) {
-      std::swap( null_vertex_, complex_source.null_vertex_ );
-      std::swap( root_, complex_source.root_ );
-      std::swap( filtration_vect_, complex_source.filtration_vect_ );
-      std::swap( dimension_, complex_source.dimension_ );
-
-      // Need to update root members (children->oncles and children need to point on the new root pointer)
-      for (auto& map_el : root_.members()) {
-        if (map_el.second.children()->oncles() == &(complex_source.root_)) {
-          // reset children->oncles with the moved root_ pointer value
-          map_el.second.children()->oncles_ = &root_;
-        } else {
-          // if simplex is of dimension 0, oncles_ shall be nullptr
-          GUDHI_CHECK(map_el.second.children()->oncles_ == nullptr,
-                      std::invalid_argument("Simplex_tree move constructor from an invalid Simplex_tree"));
-          // and children points on root_ - to be moved
-          map_el.second.assign_children(&root_);
-        }
-      }
-      // complex_source root_ deletion
-      for (auto sh = complex_source.root_.members().begin(); sh != complex_source.root_.members().end(); ++sh) {
-        if (has_children(sh)) {
-          rec_delete(sh->second.children());
-        }
-      }
-      complex_source.root_.members().clear();
-      complex_source.dimension_ = -1;
-    }
-    return *this;
-  }
-  /** @} */  // end constructor/destructor
- private:
   // Recursive deletion
   void rec_delete(Siblings * sib) {
     for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh) {
