@@ -269,7 +269,8 @@ def plot_persistence_density(persistence=[], persistence_file='',
         <http://scipy.github.io/devdocs/generated/scipy.stats.gaussian_kde.html>`_
         for more details.
     :type bw_method: str, scalar or callable, optional.
-    :param max_intervals: maximal number of intervals to display.
+    :param max_intervals: maximal number of points used in the density
+        estimation.
         Selected points are those with the longest life time. Set it
         to 0 to see all. Default value is 1000.
     :type max_intervals: int.
