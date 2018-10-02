@@ -61,7 +61,7 @@ def plot_persistence_barcode(persistence=[], persistence_file='', alpha=0.6,
     """This function plots the persistence bar code from persistence values list
     or from a :doc:`persistence file <fileformats>`.
 
-    :param persistence: Persistence values list.
+    :param persistence: Persistence intervals values list grouped by dimension.
     :type persistence: list of tuples(dimension, tuple(birth, death)).
     :param persistence_file: A :doc:`persistence file <fileformats>` style name
         (reset persistence if both are set).
@@ -73,9 +73,9 @@ def plot_persistence_barcode(persistence=[], persistence_file='', alpha=0.6,
         Selected intervals are those with the longest life time. Set it
         to 0 to see all. Default value is 1000.
     :type max_intervals: int.
-    :param inf_delta: Infinity is placed at ((max_death - min_birth) x
-        inf_delta) above the highest point. A reasonable value is between
-        0.05 and 0.5 - default is 0.1.
+    :param inf_delta: Infinity is placed at :code:`((max_death - min_birth) x
+        inf_delta)` above :code:`max_death` value. A reasonable value is
+        between 0.05 and 0.5 - default is 0.1.
     :type inf_delta: float.
     :param legend: Display the dimension color legend (default is False).
     :type legend: boolean.
@@ -151,7 +151,7 @@ def plot_persistence_diagram(persistence=[], persistence_file='', alpha=0.6,
     """This function plots the persistence diagram from persistence values
     list or from a :doc:`persistence file <fileformats>`.
 
-    :param persistence: Persistence values list.
+    :param persistence: Persistence intervals values list grouped by dimension.
     :type persistence: list of tuples(dimension, tuple(birth, death)).
     :param persistence_file: A :doc:`persistence file <fileformats>` style name
         (reset persistence if both are set).
@@ -165,9 +165,9 @@ def plot_persistence_diagram(persistence=[], persistence_file='', alpha=0.6,
         Selected intervals are those with the longest life time. Set it
         to 0 to see all. Default value is 1000.
     :type max_intervals: int.
-    :param inf_delta: Infinity is placed at ((max_death - min_birth) x
-        inf_delta) above the highest point. A reasonable value is between
-        0.05 and 0.5 - default is 0.1.
+    :param inf_delta: Infinity is placed at :code:`((max_death - min_birth) x
+        inf_delta)` above :code:`max_death` value. A reasonable value is
+        between 0.05 and 0.5 - default is 0.1.
     :type inf_delta: float.
     :param legend: Display the dimension color legend (default is False).
     :type legend: boolean.
@@ -251,7 +251,7 @@ def plot_persistence_density(persistence=[], persistence_file='',
     aware that this function does not distinguish the dimension, it is
     up to you to select the required one.
 
-    :param persistence: Persistence values list.
+    :param persistence: Persistence intervals values list grouped by dimension.
     :type persistence: list of tuples(dimension, tuple(birth, death)).
     :param persistence_file: A :doc:`persistence file <fileformats>`
         style name (reset persistence if both are set).
