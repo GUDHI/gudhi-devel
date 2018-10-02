@@ -62,8 +62,7 @@ cdef class RipsComplex:
 
         Or
 
-        :param distance_matrix: A distance matrix (full square or lower
-        triangular).
+        :param distance_matrix: A distance matrix (full square or lower triangular).
         :type points: list of list of double
 
         And in both cases

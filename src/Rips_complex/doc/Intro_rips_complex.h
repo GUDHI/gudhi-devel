@@ -39,7 +39,7 @@ namespace rips_complex {
  * <a target="_blank" href="https://en.wikipedia.org/wiki/Vietoris%E2%80%93Rips_complex">(Wikipedia)</a>
  * is an abstract simplicial complex
  * defined on a finite metric space, where each simplex corresponds to a subset
- * of point whose diameter is smaller that some given threshold.
+ * of points whose diameter is smaller that some given threshold.
  * Varying the threshold, we can also see the Rips complex as a filtration of
  * the \f$(n-1)-\f$dimensional simplex, where the filtration value of each
  * simplex is the diameter of the corresponding subset of points.
