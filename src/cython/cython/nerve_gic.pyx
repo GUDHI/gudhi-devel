@@ -38,14 +38,14 @@ cdef extern from "Nerve_gic_interface.h" namespace "Gudhi":
         double compute_distance_from_confidence_level(double alpha)
         void compute_distribution(int N)
         double compute_p_value()
-        void compute_PD()
+        vector[pair[double, double]] compute_PD()
         void find_simplices()
         void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree)
         bool read_point_cloud(string off_file_name)
         double set_automatic_resolution()
         void set_color_from_coordinate(int k)
         void set_color_from_file(string color_file_name)
-        void set_color_from_vector(vector[double] color)
+        void set_color_from_range(vector[double] color)
         void set_cover_from_file(string cover_file_name)
         void set_cover_from_function()
         void set_cover_from_Euclidean_Voronoi(int m)
@@ -67,6 +67,8 @@ cdef extern from "Nerve_gic_interface.h" namespace "Gudhi":
         void write_info()
         void plot_DOT()
         void plot_OFF()
+        void set_point_cloud_from_range(vector[vector[double]] cloud)
+        void set_distances_from_range(vector[vector[double]] distance_matrix)
 
 # CoverComplex python interface
 cdef class CoverComplex:
@@ -101,6 +103,22 @@ cdef class CoverComplex:
         """Returns true if CoverComplex pointer is not NULL.
          """
         return self.thisptr != NULL
+
+    def set_point_cloud_from_range(self, cloud):
+        """ Reads and stores the input point cloud from a vector stored in memory.
+
+        :param cloud: Input vector containing the point cloud.
+        :type cloud: vector[vector[double]]
+        """
+        return self.thisptr.set_point_cloud_from_range(cloud)
+
+    def set_distances_from_range(self, distance_matrix):
+        """ Reads and stores the input distance matrix from a vector stored in memory.
+
+        :param distance_matrix: Input vector containing the distance matrix.
+        :type distance_matrix: vector[vector[double]]
+        """
+        return self.thisptr.set_distances_from_range(distance_matrix)
 
     def compute_confidence_level_from_distance(self, distance):
         """Computes the confidence level of a specific bottleneck distance
@@ -145,7 +163,7 @@ cdef class CoverComplex:
     def compute_PD(self):
         """Computes the extended persistence diagram of the complex.
         """
-        self.thisptr.compute_PD()
+        return self.thisptr.compute_PD()
 
     def create_simplex_tree(self):
         """
@@ -162,7 +180,7 @@ cdef class CoverComplex:
         self.thisptr.find_simplices()
 
     def read_point_cloud(self, off_file):
-        """Reads and stores the input point cloud.
+        """Reads and stores the input point cloud from .(n)OFF file.
 
         :param off_file: Name of the input .OFF or .nOFF file.
         :type off_file: string
@@ -206,14 +224,14 @@ cdef class CoverComplex:
         else:
             print("file " + color_file_name + " not found.")
 
-    def set_color_from_vector(self, color):
+    def set_color_from_range(self, color):
         """Computes the function used to color the nodes of the simplicial
         complex from a vector stored in memory.
 
         :param color: Input vector of values.
         :type color: vector[double]
         """
-        self.thisptr.set_color_from_vector(color)
+        self.thisptr.set_color_from_range(color)
 
     def set_cover_from_file(self, cover_file_name):
         """Creates the cover C from a file containing the cover elements of
