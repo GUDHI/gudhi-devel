@@ -249,7 +249,8 @@ def plot_persistence_density(persistence=[], persistence_file='',
     """This function plots the persistence density from persistence
     values list or from a :doc:`persistence file <fileformats>`. Be
     aware that this function does not distinguish the dimension, it is
-    up to you to select the required one.
+    up to you to select the required one. This function also does not handle
+    degenerate data set (scipy correlation matrix inversion can fail).
 
     :param persistence: Persistence intervals values list grouped by dimension.
     :type persistence: list of tuples(dimension, tuple(birth, death)).
