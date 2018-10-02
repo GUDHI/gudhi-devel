@@ -70,7 +70,7 @@ def plot_persistence_barcode(persistence=[], persistence_file='', alpha=0.6,
         opaque - default is 0.6).
     :type alpha: float.
     :param max_intervals: maximal number of intervals to display.
-        Selected points are those with the longest life time. Set it
+        Selected intervals are those with the longest life time. Set it
         to 0 to see all. Default value is 1000.
     :type max_intervals: int.
     :param inf_delta: Infinity is placed at ((max_death - min_birth) x
@@ -162,7 +162,7 @@ def plot_persistence_diagram(persistence=[], persistence_file='', alpha=0.6,
     :param band: band (not displayed if :math:`\leq` 0. - default is 0.)
     :type band: float.
     :param max_intervals: maximal number of intervals to display.
-        Selected points are those with the longest life time. Set it
+        Selected intervals are those with the longest life time. Set it
         to 0 to see all. Default value is 1000.
     :type max_intervals: int.
     :param inf_delta: Infinity is placed at ((max_death - min_birth) x
@@ -271,7 +271,7 @@ def plot_persistence_density(persistence=[], persistence_file='',
     :type bw_method: str, scalar or callable, optional.
     :param max_intervals: maximal number of points used in the density
         estimation.
-        Selected points are those with the longest life time. Set it
+        Selected intervals are those with the longest life time. Set it
         to 0 to see all. Default value is 1000.
     :type max_intervals: int.
     :param dimension: the dimension to be selected in the intervals
