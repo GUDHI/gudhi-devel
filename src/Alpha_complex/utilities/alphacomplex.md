@@ -143,7 +143,7 @@ where
 
 * `<input OFF file>` is the path to the input point cloud in [nOFF ASCII format](http://www.geomview.org/docs/html/OFF.html).
 * `<cuboid file>` is the path to the file describing the periodic domain. It must be in the format described
-[here](/doc/latest/fileformats.html#FileFormatsIsoCuboid).
+[here]({{ site.officialurl }}/doc/latest/fileformats.html#FileFormatsIsoCuboid).
 
 **Allowed options**
 
@@ -161,5 +161,5 @@ periodic_alpha_complex_3d_persistence ../../data/points/grid_10_10_10_in_0_1.off
 
 N.B.:
 
-* Cuboid file must be in the format described [here](/doc/latest/fileformats.html#FileFormatsIsoCuboid).
+* Cuboid file must be in the format described [here]({{ site.officialurl }}/doc/latest/fileformats.html#FileFormatsIsoCuboid).
 * Filtration values are alpha square values.
