@@ -1,11 +1,11 @@
 =================================================================  ===================================  ===================================
 :Author: Vincent Rouvreau                                          :Introduced in: GUDHI 2.0.0          :Copyright: GPL v3
-:Requires: Matplotlib                                              Numpy
+:Requires: matplotlib                                              numpy                                scipy
 =================================================================  ===================================  ===================================
 
 +-----------------------------------------------------------------+-----------------------------------------------------------------------+
 | .. figure::                                                     | These graphical tools comes on top of persistence results and allows  |
-|      img/graphical_tools_representation.png                     | the user to build easily barcode and persistence diagram.             |
+|      img/graphical_tools_representation.png                     | the user to build easily persistence barcode, diagram or density.     |
 |                                                                 |                                                                       |
 +-----------------------------------------------------------------+-----------------------------------------------------------------------+
 |  :doc:`persistence_graphical_tools_user`                        | :doc:`persistence_graphical_tools_ref`                                |

@@ -143,6 +143,7 @@ if( PYTHONINTERP_FOUND )
   find_python_module("pytest")
   find_python_module("matplotlib")
   find_python_module("numpy")
+  find_python_module("scipy")
 endif()
 
 if(NOT GUDHI_CYTHON_PATH)
