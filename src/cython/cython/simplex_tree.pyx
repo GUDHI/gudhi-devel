@@ -515,7 +515,7 @@ cdef class SimplexTree:
         :returns: The persistence intervals.
         :rtype:  list of pair of list of int
 
-        :note: intervals_in_dim function requires
+        :note: persistence_pairs function requires
             :func:`persistence()<gudhi.SimplexTree.persistence>`
             function to be launched first.
         """
