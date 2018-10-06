@@ -66,6 +66,7 @@ cdef class RipsComplex:
         :type points: list of list of double
 
         And in both cases
+
         :param sparse: If this is not None, it switches to building a sparse Rips and represents the approximation parameter epsilon.
         :type sparse: float
         """

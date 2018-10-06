@@ -15,12 +15,11 @@ Definition
 | :doc:`rips_complex_user`                  | :doc:`rips_complex_ref`                                              |
 +-------------------------------------------+----------------------------------------------------------------------+
 
-The `Rips complex <https://en.wikipedia.org/wiki/Vietoris%E2%80%93Rips_complex>`_ is a simplicial complex defined as the clique complex of a graph. The graph is defined on a set of points with one vertex for each point and an edge between any 2 points, of weight (aka filtration value) the distance between the 2 points. This graph (and thus the complex) can be restricted to edges shorter than some threshold, to reduce its size.
+The `Rips complex <https://en.wikipedia.org/wiki/Vietoris%E2%80%93Rips_complex>`_ is a simplicial complex that generalizes proximity (ε-ball) graphs to higher dimensions. The vertices correspond to the input points, and a simplex is present if and only if its diameter is smaller than some parameter α.  Considering all parameters α defines a filtered simplicial complex, where the filtration value of a simplex is its diameter.  The filtration can be restricted to values α smaller than some threshold, to reduce its size.
 
 The input discrete metric space can be provided as a point cloud plus a distance function, or as a distance matrix.
 
-When creating a simplicial complex from the graph, `RipsComplex` inserts the graph into the data
-structure, and then expands the simplicial complex (adds the simplices corresponding to cliques) when required. The expansion can be stopped at dimension `max_dimension`, by default 1.
+When creating a simplicial complex from the graph, `RipsComplex` first builds the graph and inserts it into the data structure. It then expands the simplicial complex (adds the simplices corresponding to cliques) when required. The expansion can be stopped at dimension `max_dimension`, by default 1.
 
 A vertex name corresponds to the index of the point in the given range (aka. the point cloud).
 
