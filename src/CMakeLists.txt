@@ -6,6 +6,9 @@ include(CMakeGUDHIVersion.txt)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
+set(GUDHI_MODULES "" CACHE INTERNAL "GUDHI_MODULES")
+set(GUDHI_MISSING_MODULES "" CACHE INTERNAL "GUDHI_MISSING_MODULES")
+
 # This variable is used by Cython CMakeLists.txt and by GUDHI_third_party_libraries to know its path
 set(GUDHI_CYTHON_PATH "cython")
 
@@ -35,8 +38,6 @@ add_gudhi_module(Tangential_complex)
 add_gudhi_module(Witness_complex)
 add_gudhi_module(Nerve_GIC)
 
-message("++ GUDHI_MODULES list is:\"${GUDHI_MODULES}\"")
-
 # For "make doxygen" - Requires GUDHI_USER_VERSION_DIR to be set
 set(GUDHI_USER_VERSION_DIR ${CMAKE_SOURCE_DIR})
 include(GUDHI_doxygen_target)
@@ -60,7 +61,14 @@ add_subdirectory(GudhUI)
 if (WITH_GUDHI_PYTHON)
   # specific for cython module
   add_subdirectory(${GUDHI_CYTHON_PATH})
+else()
+  message("++ Python module will not be compiled because WITH_GUDHI_PYTHON is set to OFF")
+  set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python")
 endif()
+
+message("++ GUDHI_MODULES list is:\"${GUDHI_MODULES}\"")
+message("++ GUDHI_MISSING_MODULES list is:\"${GUDHI_MISSING_MODULES}\"")
+
 #---------------------------------------------------------------------------------------
 
 #---------------------------------------------------------------------------------------
@@ -71,7 +79,7 @@ export(PACKAGE GUDHI)
 
 message("++ make install will install ${PROJECT_NAME} in the following directory : ${CMAKE_INSTALL_PREFIX}")
 # Create the GUDHIConfig.cmake and GUDHIConfigVersion files
-set(CONF_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include")
+set(CONF_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/include;${CMAKE_INSTALL_PREFIX}/include")
 configure_file(GUDHIConfig.cmake.in "${PROJECT_BINARY_DIR}/GUDHIConfig.cmake" @ONLY)
 configure_file(GUDHIConfigVersion.cmake.in "${PROJECT_BINARY_DIR}/GUDHIConfigVersion.cmake" @ONLY)
 

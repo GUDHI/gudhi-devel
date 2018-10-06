@@ -36,7 +36,7 @@ namespace Gudhi {
 
 namespace persistence_diagram {
 
-double bottleneck_distance_approx(Persistence_graph& g, double e) {
+inline double bottleneck_distance_approx(Persistence_graph& g, double e) {
   double b_lower_bound = 0.;
   double b_upper_bound = g.diameter_bound();
   const double alpha = std::pow(g.size(), 1. / 5.);
@@ -66,7 +66,7 @@ double bottleneck_distance_approx(Persistence_graph& g, double e) {
   return (b_lower_bound + b_upper_bound) / 2.;
 }
 
-double bottleneck_distance_exact(Persistence_graph& g) {
+inline double bottleneck_distance_exact(Persistence_graph& g) {
   std::vector<double> sd = g.sorted_distances();
   long lower_bound_i = 0;
   long upper_bound_i = sd.size() - 1;

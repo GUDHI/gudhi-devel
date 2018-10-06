@@ -1,11 +1,12 @@
 # A function to add a new module in GUDHI
 
-set(GUDHI_MODULES "")
 set(GUDHI_MODULES_FULL_LIST "")
 function(add_gudhi_module file_path)
   option("WITH_MODULE_GUDHI_${file_path}" "Activate/desactivate ${file_path} compilation and installation" ON)
   if (WITH_MODULE_GUDHI_${file_path})
-    set(GUDHI_MODULES ${GUDHI_MODULES} ${file_path} PARENT_SCOPE)
+    set(GUDHI_MODULES ${GUDHI_MODULES} ${file_path} CACHE INTERNAL "GUDHI_MODULES")
+  else()
+    set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} ${file_path} CACHE INTERNAL "GUDHI_MISSING_MODULES")
   endif()
   # Required by user_version
   set(GUDHI_MODULES_FULL_LIST ${GUDHI_MODULES_FULL_LIST} ${file_path} PARENT_SCOPE)
