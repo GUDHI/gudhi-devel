@@ -8,7 +8,7 @@ import gudhi
 
    Author(s):       Marc Glisse
 
-   Copyright (C) 2016 Inria
+   Copyright (C) 2018 Inria
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -25,11 +25,11 @@ import gudhi
 """
 
 __author__ = "Marc Glisse"
-__copyright__ = "Copyright (C) 2016 Inria"
+__copyright__ = "Copyright (C) 2018 Inria"
 __license__ = "GPL v3"
 
 print("#####################################################################")
-print("RipsComplex creation from points")
+print("Sparse RipsComplex creation from points")
 rips = gudhi.RipsComplex(points=[[0, 0], [0, 0.1], [1, 0], [0, 1], [1, 1]],
                          max_edge_length=42, sparse=.5)
 
