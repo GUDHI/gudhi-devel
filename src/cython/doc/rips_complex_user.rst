@@ -15,7 +15,7 @@ Definition
 | :doc:`rips_complex_user`                  | :doc:`rips_complex_ref`                                              |
 +-------------------------------------------+----------------------------------------------------------------------+
 
-The `Rips complex <https://en.wikipedia.org/wiki/Vietoris%E2%80%93Rips_complex>`_ is a simplicial complex that generalizes proximity (ε-ball) graphs to higher dimensions. The vertices correspond to the input points, and a simplex is present if and only if its diameter is smaller than some parameter α.  Considering all parameters α defines a filtered simplicial complex, where the filtration value of a simplex is its diameter.  The filtration can be restricted to values α smaller than some threshold, to reduce its size.
+The `Rips complex <https://en.wikipedia.org/wiki/Vietoris%E2%80%93Rips_complex>`_ is a simplicial complex that generalizes proximity (:math:`\varepsilon`-ball) graphs to higher dimensions. The vertices correspond to the input points, and a simplex is present if and only if its diameter is smaller than some parameter α.  Considering all parameters α defines a filtered simplicial complex, where the filtration value of a simplex is its diameter.  The filtration can be restricted to values α smaller than some threshold, to reduce its size.
 
 The input discrete metric space can be provided as a point cloud plus a distance function, or as a distance matrix.
 
@@ -50,7 +50,7 @@ error is usually smaller.  A more intuitive presentation of the idea is
 available in :cite:`cavanna15geometric`, and in a video
 :cite:`cavanna15visualizing`. Passing an extra argument `sparse=0.3` at the
 construction of a `RipsComplex` object asks it to build a sparse Rips with
-parameter `ε=0.3`, while the default `sparse=None` builds the
+parameter :math:`\varepsilon=0.3`, while the default `sparse=None` builds the
 regular Rips complex.
 
 
@@ -105,7 +105,13 @@ until dimension 1 - one skeleton graph in other words), the output is:
     [4, 6] -> 9.49
     [3, 6] -> 11.00
 
-Notice that if we use `rips_complex = gudhi.RipsComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]], max_edge_length=12.0, sparse=2)`, asking for very sparse version (theory only gives some guarantee on the meaning of the output if `sparse<1`), 2 to 5 edges disappear, depending on the random vertex used to start the sparsification.
+Notice that if we use
+
+.. code-block:: python
+
+    rips_complex = gudhi.RipsComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]], max_edge_length=12.0, sparse=2)
+
+asking for a very sparse version (theory only gives some guarantee on the meaning of the output if `sparse<1`), 2 to 5 edges disappear, depending on the random vertex used to start the sparsification.
 
 Example from OFF file
 ^^^^^^^^^^^^^^^^^^^^^
