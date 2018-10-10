@@ -19,7 +19,7 @@ The `Rips complex <https://en.wikipedia.org/wiki/Vietoris%E2%80%93Rips_complex>`
 
 The input discrete metric space can be provided as a point cloud plus a distance function, or as a distance matrix.
 
-When creating a simplicial complex from the graph, `RipsComplex` first builds the graph and inserts it into the data structure. It then expands the simplicial complex (adds the simplices corresponding to cliques) when required. The expansion can be stopped at dimension `max_dimension`, by default 1.
+When creating a simplicial complex from the graph, :doc:`RipsComplex <rips_complex_ref>` first builds the graph and inserts it into the data structure. It then expands the simplicial complex (adds the simplices corresponding to cliques) when required. The expansion can be stopped at dimension `max_dimension`, by default 1.
 
 A vertex name corresponds to the index of the point in the given range (aka. the point cloud).
 
