@@ -88,7 +88,7 @@ public:
 
     /** \brief Number of maximal simplices.
       * \ingroup toplex_map   */
-    std::size_t num_simplices() const;
+    std::size_t num_maximal_simplices() const;
 
     std::set<Toplex_map::Vertex> unitary_collapse(const Toplex_map::Vertex k, const Toplex_map::Vertex d);
 
@@ -251,7 +251,7 @@ void Toplex_map::remove_vertex(const Toplex_map::Vertex x){
     }
 }
 
-std::size_t Toplex_map::num_simplices() const{
+std::size_t Toplex_map::num_maximal_simplices() const{
     return maximal_cofaces(Simplex()).size();
 }
 

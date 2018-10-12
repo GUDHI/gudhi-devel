@@ -1,54 +1,79 @@
 #include <iostream>
-#include <gudhi/Filtered_toplex_map.h>
+#include <vector>
+#include <gudhi/Lazy_Toplex_map.h>
 
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "toplex map"
 #include <boost/test/unit_test.hpp>
+#include <boost/mpl/list.hpp>
 
-using namespace Gudhi;
+using list_of_tested_variants = boost::mpl::list<Gudhi::Toplex_map, Gudhi::Lazy_Toplex_map>;
 
-typedef Toplex_map::Vertex Vertex;
+BOOST_AUTO_TEST_CASE_TEMPLATE(common_toplex_map_functionnalities, Toplex_map, list_of_tested_variants) {
+  using Vertex = typename Toplex_map::Vertex;
 
-std::vector<Vertex> sigma1 = {1, 2, 3, 4};
-std::vector<Vertex> sigma2 = {5, 2, 3, 6};
-std::vector<Vertex> sigma3 = {5};
-std::vector<Vertex> sigma4 = {5, 2, 3};
-std::vector<Vertex> sigma5 = {5, 2, 7};
-std::vector<Vertex> sigma6 = {4, 5, 3};
-std::vector<Vertex> sigma7 = {4, 5, 9};
-std::vector<Vertex> sigma8 = {1, 2, 3, 6};
+  std::vector<Vertex> sigma1 = {1, 2, 3, 4};
+  std::vector<Vertex> sigma2 = {5, 2, 3, 6};
+  std::vector<Vertex> sigma3 = {5};
+  std::vector<Vertex> sigma4 = {5, 2, 3};
+  std::vector<Vertex> sigma5 = {5, 2, 7};
+  std::vector<Vertex> sigma6 = {4, 5, 3};
+  std::vector<Vertex> sigma7 = {4, 5, 9};
+  std::vector<Vertex> sigma8 = {1, 2, 3, 6};
 
+  Toplex_map K;
+  K.insert_simplex(sigma1);
+  K.insert_simplex(sigma2);
+  K.insert_simplex(sigma3);
+  K.insert_simplex(sigma6);
+  K.insert_simplex(sigma7);
 
-BOOST_AUTO_TEST_CASE(toplexmap) {
-    Toplex_map K;
-    K.insert_simplex(sigma1);
-    K.insert_simplex(sigma2);
-    K.insert_simplex(sigma3);
-    K.insert_simplex(sigma6);
-    K.insert_simplex(sigma7);
-    BOOST_CHECK(K.membership(sigma4));
-    BOOST_CHECK(!K.maximality(sigma3));
-    BOOST_CHECK(!K.membership(sigma5));
-    K.insert_simplex(sigma5);
-    std::vector<Vertex> sigma9 = {1, 2, 3};
-    std::vector<Vertex> sigma10 = {2, 7};
-    auto r = K.contraction(4,5);
-    sigma9.emplace_back(r);
-    sigma10.emplace_back(r);
-    BOOST_CHECK(!K.membership(sigma6));
-    BOOST_CHECK(K.membership(sigma9));
-    BOOST_CHECK(K.membership(sigma10));
+  std::cout << K.num_maximal_simplices();
+
+  BOOST_CHECK(K.membership(sigma4));
+  //BOOST_CHECK(!K.maximality(sigma3));
+  BOOST_CHECK(!K.membership(sigma5));
+  K.insert_simplex(sigma5);
+
+  std::cout << K.num_maximal_simplices();
+
+  BOOST_CHECK(K.membership(sigma5));
+  std::vector<Vertex> sigma9 = {1, 2, 3};
+  std::vector<Vertex> sigma10 = {2, 7};
+  auto r = K.contraction(4,5);
+
+  std::cout << K.num_maximal_simplices();
+
+  sigma9.emplace_back(r);
+  sigma10.emplace_back(r);
+  BOOST_CHECK(!K.membership(sigma6));
+  BOOST_CHECK(K.membership(sigma9));
+  BOOST_CHECK(K.membership(sigma10));
+  K.remove_simplex(sigma10);
+  BOOST_CHECK(!K.membership(sigma10));
+
 }
 
+BOOST_AUTO_TEST_CASE(toplex_map_maximality) {
+  using Vertex = Gudhi::Toplex_map::Vertex;
 
-BOOST_AUTO_TEST_CASE(ftoplexmap) {
-    Filtered_toplex_map K;
-    K.insert_simplex_and_subfaces(sigma1, 2.);
-    K.insert_simplex_and_subfaces(sigma2, 2.);
-    K.insert_simplex_and_subfaces(sigma6, 1.);
-    K.insert_simplex_and_subfaces(sigma7, 1.);
-    BOOST_CHECK(K.filtration(sigma4)==2.);
-    BOOST_CHECK(K.filtration(sigma3)==1.);
+  std::vector<Vertex> sigma1 = {1, 2, 3, 4};
+  std::vector<Vertex> sigma2 = {5, 2, 3, 6};
+  std::vector<Vertex> sigma3 = {5};
+  std::vector<Vertex> sigma4 = {4, 5, 3};
+  std::vector<Vertex> sigma5 = {4, 5, 9};
+
+  Gudhi::Toplex_map K;
+  K.insert_simplex(sigma1);
+  K.insert_simplex(sigma2);
+  K.insert_simplex(sigma3);
+  K.insert_simplex(sigma4);
+  K.insert_simplex(sigma5);
+  BOOST_CHECK(K.maximality(sigma1));
+  BOOST_CHECK(K.maximality(sigma2));
+  BOOST_CHECK(!K.maximality(sigma3));
+  BOOST_CHECK(K.maximality(sigma4));
+  BOOST_CHECK(K.maximality(sigma5));
 }
 

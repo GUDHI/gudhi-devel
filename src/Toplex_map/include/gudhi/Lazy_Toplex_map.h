@@ -3,7 +3,6 @@
 
 #include <gudhi/Toplex_map.h>
 #include <boost/heap/fibonacci_heap.hpp>
-#include <cmath>
 
 namespace Gudhi {
 
@@ -67,7 +66,7 @@ public:
 
     /** \brief Number of simplices stored.
       * \ingroup toplex_map   */
-    std::size_t num_simplices() const;
+    std::size_t num_maximal_simplices() const;
 
     std::unordered_map<Vertex, std::size_t> gamma0_lbounds;
 
@@ -254,7 +253,7 @@ void Lazy_Toplex_map::clean(const Vertex v){
         insert_simplex(*sptr);
 }
 
-std::size_t Lazy_Toplex_map::num_simplices() const{
+std::size_t Lazy_Toplex_map::num_maximal_simplices() const{
     return size;
 }
 
