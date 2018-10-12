@@ -64,8 +64,8 @@ public:
      * \ingroup toplex_map   */
     Vertex contraction(const Vertex x, const Vertex y);
 
-    /** \brief Number of simplices stored.
-      * \ingroup toplex_map   */
+    /** \brief Number of maximal simplices.
+     * \ingroup toplex_map   */
     std::size_t num_maximal_simplices() const;
 
     std::unordered_map<Vertex, std::size_t> gamma0_lbounds;

@@ -55,6 +55,30 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(common_toplex_map_functionnalities, Toplex_map, li
 
 }
 
+BOOST_AUTO_TEST_CASE(toplex_map_num_maximal_simplices) {
+  using Vertex = Gudhi::Toplex_map::Vertex;
+
+  Gudhi::Toplex_map K;
+  K.insert_simplex({1, 2, 3, 4});
+  K.insert_simplex({5, 2, 3, 6});
+  K.insert_simplex({4, 5, 3});
+  K.insert_simplex({4, 5, 9});
+
+  std::cout << K.num_maximal_simplices();
+  BOOST_CHECK(K.num_maximal_simplices() == 4);
+
+  K.insert_simplex({5, 2, 7});
+
+  std::cout << K.num_maximal_simplices();
+  BOOST_CHECK(K.num_maximal_simplices() == 5);
+
+  auto r = K.contraction(4,5);
+
+  std::cout << K.num_maximal_simplices();
+  BOOST_CHECK(K.num_maximal_simplices() == 4);
+
+}
+
 BOOST_AUTO_TEST_CASE(toplex_map_maximality) {
   using Vertex = Gudhi::Toplex_map::Vertex;
 
