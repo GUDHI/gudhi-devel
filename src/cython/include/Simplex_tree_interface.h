@@ -4,7 +4,7 @@
  *
  *    Author(s):       Vincent Rouvreau
  *
- *    Copyright (C) 2016 INRIA
+ *    Copyright (C) 2016 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -50,6 +50,10 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
  public:
   bool find_simplex(const Simplex& vh) {
     return (Base::find(vh) != Base::null_simplex());
+  }
+
+  void assign_simplex_filtration(const Simplex& vh, Filtration_value filtration) {
+    Base::assign_filtration(Base::find(vh), filtration);
   }
 
   bool insert(const Simplex& simplex, Filtration_value filtration = 0) {

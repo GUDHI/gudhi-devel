@@ -4,7 +4,7 @@
  *
  *    Author(s):       Vincent Rouvreau
  *
- *    Copyright (C) 2014  INRIA
+ *    Copyright (C) 2014 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -142,7 +142,6 @@ int main(int argc, char * const argv[]) {
   /*   An edge [11,6]         */
   /*   An edge [10,12,2]      */
 
-  st.set_dimension(2);
 
   std::cout << "The complex contains " << st.num_simplices() << " simplices - " << st.num_vertices() << " vertices "
       << std::endl;

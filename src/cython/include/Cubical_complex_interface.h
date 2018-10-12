@@ -4,7 +4,7 @@
  *
  *    Author(s):       Vincent Rouvreau
  *
- *    Copyright (C) 2016 INRIA
+ *    Copyright (C) 2016 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -41,6 +41,12 @@ class Cubical_complex_interface : public Bitmap_cubical_complex<CubicalComplexOp
   Cubical_complex_interface(const std::vector<unsigned>& dimensions,
                             const std::vector<double>& top_dimensional_cells)
   : Bitmap_cubical_complex<CubicalComplexOptions>(dimensions, top_dimensional_cells) {
+  }
+
+  Cubical_complex_interface(const std::vector<unsigned>& dimensions,
+                            const std::vector<double>& top_dimensional_cells,
+                            const std::vector<bool>& periodic_dimensions)
+  : Bitmap_cubical_complex<CubicalComplexOptions>(dimensions, top_dimensional_cells, periodic_dimensions) {
   }
 
   Cubical_complex_interface(const std::string& perseus_file)

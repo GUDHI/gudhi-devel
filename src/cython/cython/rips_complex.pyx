@@ -11,7 +11,7 @@ import os
 
    Author(s):       Vincent Rouvreau
 
-   Copyright (C) 2016 INRIA
+   Copyright (C) 2016 Inria
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -28,14 +28,12 @@ import os
 """
 
 __author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 INRIA"
+__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
 cdef extern from "Rips_complex_interface.h" namespace "Gudhi":
     cdef cppclass Rips_complex_interface "Gudhi::rips_complex::Rips_complex_interface":
         Rips_complex_interface(vector[vector[double]] values, double threshold, bool euclidean)
-        # bool from_file is a workaround for cython to find the correct signature
-        Rips_complex_interface(string file_name, double threshold, bool euclidean, bool from_file)
         void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, int dim_max)
 
 # RipsComplex python interface
@@ -49,52 +47,25 @@ cdef class RipsComplex:
     cdef Rips_complex_interface * thisptr
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, points=None, off_file='', distance_matrix=None, csv_file='', max_edge_length=float('inf')):
+    def __init__(self, points=None, distance_matrix=None, max_edge_length=float('inf')):
         """RipsComplex constructor.
 
         :param max_edge_length: Rips value.
-        :type max_edge_length: int
+        :type max_edge_length: float
 
         :param points: A list of points in d-Dimension.
         :type points: list of list of double
 
         Or
 
-        :param off_file: An OFF file style name.
-        :type off_file: string
-
-        Or
-
         :param distance_matrix: A distance matrix (full square or lower
         triangular).
         :type points: list of list of double
-
-        Or
-
-        :param csv_file: A csv file style name containing a full square or a
-        lower triangular distance matrix.
-        :type csv_file: string
         """
 
     # The real cython constructor
-    def __cinit__(self, points=None, off_file='', distance_matrix=None, csv_file='', max_edge_length=float('inf')):
-        if off_file is not '':
-            if os.path.isfile(off_file):
-                self.thisptr = new Rips_complex_interface(str.encode(off_file),
-                                                          max_edge_length,
-                                                          True,
-                                                          True)
-            else:
-                print("file " + off_file + " not found.")
-        elif csv_file is not '':
-            if os.path.isfile(csv_file):
-                self.thisptr = new Rips_complex_interface(str.encode(csv_file),
-                                                          max_edge_length,
-                                                          False,
-                                                          True)
-            else:
-                print("file " + csv_file + " not found.")
-        elif distance_matrix is not None:
+    def __cinit__(self, points=None, distance_matrix=None, max_edge_length=float('inf')):
+        if distance_matrix is not None:
             self.thisptr = new Rips_complex_interface(distance_matrix, max_edge_length, False)
         else:
             if points is None:

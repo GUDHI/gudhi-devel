@@ -7,7 +7,7 @@ from Cython.Build import cythonize
 
    Author(s):       Vincent Rouvreau
 
-   Copyright (C) 2016  INRIA
+   Copyright (C) 2016  Inria
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@ from Cython.Build import cythonize
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016  INRIA"
+__author__ = "GUDHI Editorial Board"
+__copyright__ = "Copyright (C) 2016  Inria"
 __license__ = "GPL v3"
 
 gudhi = Extension(
@@ -41,9 +41,10 @@ gudhi = Extension(
 
 setup(
     name = 'gudhi',
-    author='Vincent Rouvreau',
+    author='GUDHI Editorial Board',
     author_email='gudhi-contact@lists.gforge.inria.fr',
     version='@GUDHI_VERSION@',
     url='http://gudhi.gforge.inria.fr/',
     ext_modules = cythonize(gudhi),
+    install_requires = ["cython",],
 )

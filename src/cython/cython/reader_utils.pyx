@@ -11,7 +11,7 @@ import os
 
    Author(s):       Vincent Rouvreau
 
-   Copyright (C) 2017 INRIA
+   Copyright (C) 2017 Inria
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ import os
 """
 
 __author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2017 INRIA"
+__copyright__ = "Copyright (C) 2017 Inria"
 __license__ = "GPL v3"
 
 cdef extern from "Reader_utils_interface.h" namespace "Gudhi":

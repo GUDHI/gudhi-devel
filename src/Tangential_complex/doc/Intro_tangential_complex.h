@@ -4,7 +4,7 @@
  *
  *    Author(s):       Clement Jamin
  *
- *    Copyright (C) 2016 INRIA
+ *    Copyright (C) 2016 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -107,8 +107,6 @@ dimensions are known at compile-time.
 
 \include Tangential_complex/example_with_perturb.cpp
 
-\copyright GNU General Public License v3.                         
-\verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
  */
 /** @} */  // end defgroup tangential_complex
 

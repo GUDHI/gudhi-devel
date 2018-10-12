@@ -4,7 +4,7 @@
  *
  *    Author(s):       Clément Maria, Marc Glisse
  *
- *    Copyright (C) 2014  INRIA
+ *    Copyright (C) 2014 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -167,6 +167,6 @@ void program_options(int argc, char * argv[]
 
     std::cout << "Usage: " << argv[0] << " [options] input-file" << std::endl << std::endl;
     std::cout << visible << std::endl;
-    std::abort();
+    exit(-1);
   }
 }

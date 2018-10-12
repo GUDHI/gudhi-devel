@@ -4,7 +4,7 @@
  *
  *    Author(s):       Vincent Rouvreau
  *
- *    Copyright (C) 2014  INRIA Saclay (France)
+ *    Copyright (C) 2014 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -28,6 +28,8 @@
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Delaunay_triangulation_3.h>
 #include <CGAL/Alpha_shape_3.h>
+#include <CGAL/Alpha_shape_vertex_base_3.h>
+#include <CGAL/Alpha_shape_cell_base_3.h>
 #include <CGAL/iterator.h>
 
 #include <fstream>

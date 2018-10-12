@@ -6,7 +6,7 @@ from gudhi import CubicalComplex
 
    Author(s):       Vincent Rouvreau
 
-   Copyright (C) 2016 INRIA
+   Copyright (C) 2016 Inria
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ from gudhi import CubicalComplex
 """
 
 __author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 INRIA"
+__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
 
@@ -62,17 +62,28 @@ def test_dimension_or_perseus_file_constructor():
     assert cub.__is_defined() == False
     assert cub.__is_persistence_defined() == False
 
-def test_dimension_constructor():
+def test_dimension_simple_constructor():
     cub = CubicalComplex(dimensions=[3, 3],
                          top_dimensional_cells = [1,2,3,4,5,6,7,8,9])
     assert cub.__is_defined() == True
     assert cub.__is_persistence_defined() == False
-    assert cub.persistence() == [(1, (0.0, 100.0)), (0, (0.0, float('inf')))]
+    assert cub.persistence() == [(0, (1.0, float('inf')))]
     assert cub.__is_persistence_defined() == True
-    assert cub.betti_numbers() == [1, 0]
-    assert cub.persistent_betti_numbers(0, 1000) == [0, 0]
+    assert cub.betti_numbers() == [1, 0, 0]
+    assert cub.persistent_betti_numbers(0, 1000) == [0, 0, 0]
 
-def test_dimension_constructor():
+def test_user_case_simple_constructor():
+    cub = CubicalComplex(dimensions=[3, 3],
+                         top_dimensional_cells = [float('inf'), 0.,0.,0.,1.,0.,0.,0.,0.])
+    assert cub.__is_defined() == True
+    assert cub.__is_persistence_defined() == False
+    assert cub.persistence() == [(1, (0.0, 1.0)), (0, (0.0, float('inf')))]
+    assert cub.__is_persistence_defined() == True
+    other_cub = CubicalComplex(dimensions=[3, 3],
+                               top_dimensional_cells = [1000., 0.,0.,0.,1.,0.,0.,0.,0.])
+    assert other_cub.persistence() == [(1, (0.0, 1.0)), (0, (0.0, float('inf')))]
+
+def test_dimension_file_constructor():
     # Create test file
     test_file = open('CubicalOneSphere.txt', 'w')
     test_file.write('2\n3\n3\n0\n0\n0\n0\n100\n0\n0\n0\n0\n')

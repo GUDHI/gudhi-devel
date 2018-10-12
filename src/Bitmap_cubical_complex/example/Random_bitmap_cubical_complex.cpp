@@ -4,7 +4,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA Saclay (France)
+ *    Copyright (C) 2015 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 // for persistence algorithm
 #include <gudhi/reader_utils.h>
 #include <gudhi/Bitmap_cubical_complex.h>
@@ -34,10 +33,11 @@
 int main(int argc, char** argv) {
   srand(time(0));
 
-  std::cout << "This program computes persistent homology, by using bitmap_cubical_complex class, of cubical " <<
-      "complexes. The first parameter of the program is the dimension D of the bitmap. The next D parameters are " <<
-      "number of top dimensional cubes in each dimension of the bitmap. The program will create random cubical " <<
-      "complex of that sizes and compute persistent homology of it." << std::endl;
+  std::cout
+      << "This program computes persistent homology, by using bitmap_cubical_complex class, of cubical "
+      << "complexes. The first parameter of the program is the dimension D of the bitmap. The next D parameters are "
+      << "number of top dimensional cubes in each dimension of the bitmap. The program will create random cubical "
+      << "complex of that sizes and compute persistent homology of it." << std::endl;
 
   int p = 2;
   double min_persistence = 0;
@@ -47,16 +47,16 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  size_t dimensionOfBitmap = (size_t) atoi(argv[1]);
-  std::vector< unsigned > sizes;
+  size_t dimensionOfBitmap = (size_t)atoi(argv[1]);
+  std::vector<unsigned> sizes;
   size_t multipliers = 1;
   for (size_t dim = 0; dim != dimensionOfBitmap; ++dim) {
-    unsigned sizeInThisDimension = (unsigned) atoi(argv[2 + dim]);
+    unsigned sizeInThisDimension = (unsigned)atoi(argv[2 + dim]);
     sizes.push_back(sizeInThisDimension);
     multipliers *= sizeInThisDimension;
   }
 
-  std::vector< double > data;
+  std::vector<double> data;
   for (size_t i = 0; i != multipliers; ++i) {
     data.push_back(rand() / static_cast<double>(RAND_MAX));
   }
@@ -80,4 +80,3 @@ int main(int argc, char** argv) {
 
   return 0;
 }
-

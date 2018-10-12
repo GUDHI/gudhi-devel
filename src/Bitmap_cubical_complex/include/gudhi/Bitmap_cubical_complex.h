@@ -4,7 +4,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA Sophia-Saclay (France)
+ *    Copyright (C) 2015 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -31,10 +31,11 @@
 #endif
 
 #include <limits>
-#include <utility>  // for pair<>
+#include <utility>    // for pair<>
 #include <algorithm>  // for sort
 #include <vector>
 #include <numeric>  // for iota
+#include <cstddef>
 
 namespace Gudhi {
 
@@ -43,7 +44,8 @@ namespace cubical_complex {
 // global variable, was used just for debugging.
 const bool globalDbg = false;
 
-template <typename T> class is_before_in_filtration;
+template <typename T>
+class is_before_in_filtration;
 
 /**
  * @brief Cubical complex represented as a bitmap.
@@ -60,10 +62,9 @@ class Bitmap_cubical_complex : public T {
   //*********************************************//
   // Typedefs and typenames
   //*********************************************//
-  typedef size_t Simplex_key;
+  typedef std::size_t Simplex_key;
   typedef typename T::filtration_type Filtration_value;
   typedef Simplex_key Simplex_handle;
-
 
   //*********************************************//
   // Constructors
@@ -77,12 +78,12 @@ class Bitmap_cubical_complex : public T {
   /**
    * Constructor form a Perseus-style file.
    **/
-  Bitmap_cubical_complex(const char* perseus_style_file) :
-      T(perseus_style_file), key_associated_to_simplex(this->total_number_of_cells + 1) {
+  Bitmap_cubical_complex(const char* perseus_style_file)
+      : T(perseus_style_file), key_associated_to_simplex(this->total_number_of_cells + 1) {
     if (globalDbg) {
       std::cerr << "Bitmap_cubical_complex( const char* perseus_style_file )\n";
     }
-    for (size_t i = 0; i != this->total_number_of_cells; ++i) {
+    for (std::size_t i = 0; i != this->total_number_of_cells; ++i) {
       this->key_associated_to_simplex[i] = i;
     }
     // we initialize this only once, in each constructor, when the bitmap is constructed.
@@ -97,10 +98,9 @@ class Bitmap_cubical_complex : public T {
    * with filtration on top dimensional cells.
    **/
   Bitmap_cubical_complex(const std::vector<unsigned>& dimensions,
-                         const std::vector<Filtration_value>& top_dimensional_cells) :
-      T(dimensions, top_dimensional_cells),
-      key_associated_to_simplex(this->total_number_of_cells + 1) {
-    for (size_t i = 0; i != this->total_number_of_cells; ++i) {
+                         const std::vector<Filtration_value>& top_dimensional_cells)
+      : T(dimensions, top_dimensional_cells), key_associated_to_simplex(this->total_number_of_cells + 1) {
+    for (std::size_t i = 0; i != this->total_number_of_cells; ++i) {
       this->key_associated_to_simplex[i] = i;
     }
     // we initialize this only once, in each constructor, when the bitmap is constructed.
@@ -118,10 +118,10 @@ class Bitmap_cubical_complex : public T {
    **/
   Bitmap_cubical_complex(const std::vector<unsigned>& dimensions,
                          const std::vector<Filtration_value>& top_dimensional_cells,
-                         std::vector< bool > directions_in_which_periodic_b_cond_are_to_be_imposed) :
-      T(dimensions, top_dimensional_cells, directions_in_which_periodic_b_cond_are_to_be_imposed),
-      key_associated_to_simplex(this->total_number_of_cells + 1) {
-    for (size_t i = 0; i != this->total_number_of_cells; ++i) {
+                         std::vector<bool> directions_in_which_periodic_b_cond_are_to_be_imposed)
+      : T(dimensions, top_dimensional_cells, directions_in_which_periodic_b_cond_are_to_be_imposed),
+        key_associated_to_simplex(this->total_number_of_cells + 1) {
+    for (std::size_t i = 0; i != this->total_number_of_cells; ++i) {
       this->key_associated_to_simplex[i] = i;
     }
     // we initialize this only once, in each constructor, when the bitmap is constructed.
@@ -142,9 +142,7 @@ class Bitmap_cubical_complex : public T {
   /**
    * Returns number of all cubes in the complex.
    **/
-  size_t num_simplices()const {
-    return this->total_number_of_cells;
-  }
+  std::size_t num_simplices() const { return this->total_number_of_cells; }
 
   /**
    * Returns a Simplex_handle to a cube that do not exist in this complex.
@@ -159,14 +157,12 @@ class Bitmap_cubical_complex : public T {
   /**
    * Returns dimension of the complex.
    **/
-  inline size_t dimension()const {
-    return this->sizes.size();
-  }
+  inline std::size_t dimension() const { return this->sizes.size(); }
 
   /**
    * Return dimension of a cell pointed by the Simplex_handle.
    **/
-  inline unsigned dimension(Simplex_handle sh)const {
+  inline unsigned dimension(Simplex_handle sh) const {
     if (globalDbg) {
       std::cerr << "unsigned dimension(const Simplex_handle& sh)\n";
     }
@@ -199,7 +195,7 @@ class Bitmap_cubical_complex : public T {
   /**
    * Return the key of a cube pointed by the Simplex_handle.
    **/
-  Simplex_key key(Simplex_handle sh)const {
+  Simplex_key key(Simplex_handle sh) const {
     if (globalDbg) {
       std::cerr << "Simplex_key key(const Simplex_handle& sh)\n";
     }
@@ -217,7 +213,7 @@ class Bitmap_cubical_complex : public T {
       std::cerr << "Simplex_handle simplex(Simplex_key key)\n";
     }
     if (key != null_key()) {
-      return this->simplex_associated_to_key[ key ];
+      return this->simplex_associated_to_key[key];
     }
     return null_simplex();
   }
@@ -246,8 +242,8 @@ class Bitmap_cubical_complex : public T {
   /**
    * Boundary_simplex_range class provides ranges for boundary iterators.
    **/
-  typedef typename std::vector< Simplex_handle >::iterator Boundary_simplex_iterator;
-  typedef typename std::vector< Simplex_handle > Boundary_simplex_range;
+  typedef typename std::vector<Simplex_handle>::iterator Boundary_simplex_iterator;
+  typedef typename std::vector<Simplex_handle> Boundary_simplex_range;
 
   /**
    * Filtration_simplex_iterator class provides an iterator though the whole structure in the order of filtration.
@@ -257,13 +253,13 @@ class Bitmap_cubical_complex : public T {
    **/
   class Filtration_simplex_range;
 
-  class Filtration_simplex_iterator : std::iterator< std::input_iterator_tag, Simplex_handle > {
+  class Filtration_simplex_iterator : std::iterator<std::input_iterator_tag, Simplex_handle> {
     // Iterator over all simplices of the complex in the order of the indexing scheme.
     // 'value_type' must be 'Simplex_handle'.
    public:
-    Filtration_simplex_iterator(Bitmap_cubical_complex* b) : b(b), position(0) { }
+    Filtration_simplex_iterator(Bitmap_cubical_complex* b) : b(b), position(0) {}
 
-    Filtration_simplex_iterator() : b(NULL), position(0) { }
+    Filtration_simplex_iterator() : b(NULL), position(0) {}
 
     Filtration_simplex_iterator operator++() {
       if (globalDbg) {
@@ -288,14 +284,14 @@ class Bitmap_cubical_complex : public T {
       return (*this);
     }
 
-    bool operator==(const Filtration_simplex_iterator& rhs)const {
+    bool operator==(const Filtration_simplex_iterator& rhs) const {
       if (globalDbg) {
         std::cerr << "bool operator == ( const Filtration_simplex_iterator& rhs )\n";
       }
-      return ( this->position == rhs.position);
+      return (this->position == rhs.position);
     }
 
-    bool operator!=(const Filtration_simplex_iterator& rhs)const {
+    bool operator!=(const Filtration_simplex_iterator& rhs) const {
       if (globalDbg) {
         std::cerr << "bool operator != ( const Filtration_simplex_iterator& rhs )\n";
       }
@@ -306,14 +302,14 @@ class Bitmap_cubical_complex : public T {
       if (globalDbg) {
         std::cerr << "Simplex_handle operator*()\n";
       }
-      return this->b->simplex_associated_to_key[ this->position ];
+      return this->b->simplex_associated_to_key[this->position];
     }
 
     friend class Filtration_simplex_range;
 
    private:
     Bitmap_cubical_complex<T>* b;
-    size_t position;
+    std::size_t position;
   };
 
   /**
@@ -326,7 +322,7 @@ class Bitmap_cubical_complex : public T {
     typedef Filtration_simplex_iterator const_iterator;
     typedef Filtration_simplex_iterator iterator;
 
-    Filtration_simplex_range(Bitmap_cubical_complex<T>* b) : b(b) { }
+    Filtration_simplex_range(Bitmap_cubical_complex<T>* b) : b(b) {}
 
     Filtration_simplex_iterator begin() {
       if (globalDbg) {
@@ -348,8 +344,6 @@ class Bitmap_cubical_complex : public T {
     Bitmap_cubical_complex<T>* b;
   };
 
-
-
   //*********************************************//
   // Methods to access iterators from the container:
 
@@ -357,9 +351,7 @@ class Bitmap_cubical_complex : public T {
    * boundary_simplex_range creates an object of a Boundary_simplex_range class
    * that provides ranges for the Boundary_simplex_iterator.
    **/
-  Boundary_simplex_range boundary_simplex_range(Simplex_handle sh) {
-    return this->get_boundary_of_a_cell(sh);
-  }
+  Boundary_simplex_range boundary_simplex_range(Simplex_handle sh) { return this->get_boundary_of_a_cell(sh); }
 
   /**
    * filtration_simplex_range creates an object of a Filtration_simplex_range class
@@ -373,8 +365,6 @@ class Bitmap_cubical_complex : public T {
     return Filtration_simplex_range(this);
   }
   //*********************************************//
-
-
 
   //*********************************************//
   // Elements which are in Gudhi now, but I (and in all the cases I asked also Marc) do not understand why they are
@@ -390,43 +380,41 @@ class Bitmap_cubical_complex : public T {
    * Function needed for compatibility with Gudhi. Not useful for other purposes.
    **/
   std::pair<Simplex_handle, Simplex_handle> endpoints(Simplex_handle sh) {
-    std::vector< size_t > bdry = this->get_boundary_of_a_cell(sh);
+    std::vector<std::size_t> bdry = this->get_boundary_of_a_cell(sh);
     if (globalDbg) {
       std::cerr << "std::pair<Simplex_handle, Simplex_handle> endpoints( Simplex_handle sh )\n";
-      std::cerr << "bdry.size() : " << bdry.size() << std::endl;
+      std::cerr << "bdry.size() : " << bdry.size() << "\n";
     }
     // this method returns two first elements from the boundary of sh.
     if (bdry.size() < 2)
-      throw("Error in endpoints in Bitmap_cubical_complex class. The cell have less than two elements in the "
-            "boundary.");
+      throw(
+          "Error in endpoints in Bitmap_cubical_complex class. The cell have less than two elements in the "
+          "boundary.");
     return std::make_pair(bdry[0], bdry[1]);
   }
-
 
   /**
    * Class needed for compatibility with Gudhi. Not useful for other purposes.
    **/
   class Skeleton_simplex_range;
 
-  class Skeleton_simplex_iterator : std::iterator< std::input_iterator_tag, Simplex_handle > {
+  class Skeleton_simplex_iterator : std::iterator<std::input_iterator_tag, Simplex_handle> {
     // Iterator over all simplices of the complex in the order of the indexing scheme.
     // 'value_type' must be 'Simplex_handle'.
    public:
-    Skeleton_simplex_iterator(Bitmap_cubical_complex* b, size_t d) : b(b), dimension(d) {
+    Skeleton_simplex_iterator(Bitmap_cubical_complex* b, std::size_t d) : b(b), dimension(d) {
       if (globalDbg) {
-        std::cerr << "Skeleton_simplex_iterator ( Bitmap_cubical_complex* b , size_t d )\n";
+        std::cerr << "Skeleton_simplex_iterator ( Bitmap_cubical_complex* b , std::size_t d )\n";
       }
       // find the position of the first simplex of a dimension d
       this->position = 0;
-      while (
-             (this->position != b->data.size()) &&
-             (this->b->get_dimension_of_a_cell(this->position) != this->dimension)
-             ) {
+      while ((this->position != b->data.size()) &&
+             (this->b->get_dimension_of_a_cell(this->position) != this->dimension)) {
         ++this->position;
       }
     }
 
-    Skeleton_simplex_iterator() : b(NULL), position(0), dimension(0) { }
+    Skeleton_simplex_iterator() : b(NULL), position(0), dimension(0) {}
 
     Skeleton_simplex_iterator operator++() {
       if (globalDbg) {
@@ -434,10 +422,8 @@ class Bitmap_cubical_complex : public T {
       }
       // increment the position as long as you did not get to the next element of the dimension dimension.
       ++this->position;
-      while (
-             (this->position != this->b->data.size()) &&
-             (this->b->get_dimension_of_a_cell(this->position) != this->dimension)
-             ) {
+      while ((this->position != this->b->data.size()) &&
+             (this->b->get_dimension_of_a_cell(this->position) != this->dimension)) {
         ++this->position;
       }
       return (*this);
@@ -459,14 +445,14 @@ class Bitmap_cubical_complex : public T {
       return (*this);
     }
 
-    bool operator==(const Skeleton_simplex_iterator& rhs)const {
+    bool operator==(const Skeleton_simplex_iterator& rhs) const {
       if (globalDbg) {
         std::cerr << "bool operator ==\n";
       }
-      return ( this->position == rhs.position);
+      return (this->position == rhs.position);
     }
 
-    bool operator!=(const Skeleton_simplex_iterator& rhs)const {
+    bool operator!=(const Skeleton_simplex_iterator& rhs) const {
       if (globalDbg) {
         std::cerr << "bool operator != ( const Skeleton_simplex_iterator& rhs )\n";
       }
@@ -481,9 +467,10 @@ class Bitmap_cubical_complex : public T {
     }
 
     friend class Skeleton_simplex_range;
+
    private:
     Bitmap_cubical_complex<T>* b;
-    size_t position;
+    std::size_t position;
     unsigned dimension;
   };
 
@@ -497,7 +484,7 @@ class Bitmap_cubical_complex : public T {
     typedef Skeleton_simplex_iterator const_iterator;
     typedef Skeleton_simplex_iterator iterator;
 
-    Skeleton_simplex_range(Bitmap_cubical_complex<T>* b, unsigned dimension) : b(b), dimension(dimension) { }
+    Skeleton_simplex_range(Bitmap_cubical_complex<T>* b, unsigned dimension) : b(b), dimension(dimension) {}
 
     Skeleton_simplex_iterator begin() {
       if (globalDbg) {
@@ -533,8 +520,8 @@ class Bitmap_cubical_complex : public T {
   friend class is_before_in_filtration<T>;
 
  protected:
-  std::vector< size_t > key_associated_to_simplex;
-  std::vector< size_t > simplex_associated_to_key;
+  std::vector<std::size_t> key_associated_to_simplex;
+  std::vector<std::size_t> simplex_associated_to_key;
 };  // Bitmap_cubical_complex
 
 template <typename T>
@@ -542,7 +529,7 @@ void Bitmap_cubical_complex<T>::initialize_simplex_associated_to_key() {
   if (globalDbg) {
     std::cerr << "void Bitmap_cubical_complex<T>::initialize_elements_ordered_according_to_filtration() \n";
   }
-  this->simplex_associated_to_key = std::vector<size_t>(this->data.size());
+  this->simplex_associated_to_key = std::vector<std::size_t>(this->data.size());
   std::iota(std::begin(simplex_associated_to_key), std::end(simplex_associated_to_key), 0);
 #ifdef GUDHI_USE_TBB
   tbb::parallel_sort(simplex_associated_to_key.begin(), simplex_associated_to_key.end(),
@@ -552,16 +539,15 @@ void Bitmap_cubical_complex<T>::initialize_simplex_associated_to_key() {
 #endif
 
   // we still need to deal here with a key_associated_to_simplex:
-  for ( size_t i = 0  ; i != simplex_associated_to_key.size() ; ++i ) {
-    this->key_associated_to_simplex[ simplex_associated_to_key[i] ] = i;
+  for (std::size_t i = 0; i != simplex_associated_to_key.size(); ++i) {
+    this->key_associated_to_simplex[simplex_associated_to_key[i]] = i;
   }
 }
 
 template <typename T>
 class is_before_in_filtration {
  public:
-  explicit is_before_in_filtration(Bitmap_cubical_complex<T> * CC)
-      : CC_(CC) { }
+  explicit is_before_in_filtration(Bitmap_cubical_complex<T>* CC) : CC_(CC) {}
 
   bool operator()(const typename Bitmap_cubical_complex<T>::Simplex_handle& sh1,
                   const typename Bitmap_cubical_complex<T>::Simplex_handle& sh2) const {
@@ -573,8 +559,8 @@ class is_before_in_filtration {
       return fil1 < fil2;
     }
     // in this case they are on the same filtration level, so the dimension decide.
-    size_t dim1 = CC_->get_dimension_of_a_cell(sh1);
-    size_t dim2 = CC_->get_dimension_of_a_cell(sh2);
+    std::size_t dim1 = CC_->get_dimension_of_a_cell(sh1);
+    std::size_t dim2 = CC_->get_dimension_of_a_cell(sh2);
     if (dim1 != dim2) {
       return dim1 < dim2;
     }

@@ -4,7 +4,7 @@
  *
  *    Author(s):       Marc Glisse
  *
- *    Copyright (C) 2015  INRIA Saclay - Ile-de-France (France)
+ *    Copyright (C) 2015 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -52,8 +52,6 @@ int main() {
   auto edge03 = {0, 3};
   st.insert_simplex_and_subfaces(triangle012);
   st.insert_simplex_and_subfaces(edge03);
-  // FIXME: Remove this line
-  st.set_dimension(2);
 
   auto edge02 = {0, 2};
   ST::Simplex_handle e = st.find(edge02);

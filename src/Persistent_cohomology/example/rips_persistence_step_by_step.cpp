@@ -4,7 +4,7 @@
  *
  *    Author(s):       Clément Maria
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Méditerranée (France)
+ *    Copyright (C) 2014 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -45,14 +45,7 @@
 using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
 using Vertex_handle = Simplex_tree::Vertex_handle;
 using Filtration_value = Simplex_tree::Filtration_value;
-using Graph_t = boost::adjacency_list < boost::vecS, boost::vecS, boost::undirectedS
-, boost::property < vertex_filtration_t, Filtration_value >
-, boost::property < edge_filtration_t, Filtration_value >
->;
-using Edge_t = std::pair< Vertex_handle, Vertex_handle >;
-
-template< typename InputPointRange, typename Distance >
-Graph_t compute_proximity_graph(InputPointRange &points, Filtration_value threshold, Distance distance);
+using Proximity_graph = Gudhi::Proximity_graph<Simplex_tree>;
 
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp >;
@@ -81,8 +74,9 @@ int main(int argc, char * argv[]) {
   Points_off_reader off_reader(off_file_points);
 
   // Compute the proximity graph of the points
-  Graph_t prox_graph = compute_proximity_graph(off_reader.get_point_cloud(), threshold
-                                               , Gudhi::Euclidean_distance());
+  Proximity_graph prox_graph = Gudhi::compute_proximity_graph<Simplex_tree>(off_reader.get_point_cloud(),
+                                                                            threshold,
+                                                                            Gudhi::Euclidean_distance());
 
   // Construct the Rips complex in a Simplex Tree
   Simplex_tree st;
@@ -167,51 +161,6 @@ void program_options(int argc, char * argv[]
 
     std::cout << "Usage: " << argv[0] << " [options] input-file" << std::endl << std::endl;
     std::cout << visible << std::endl;
-    std::abort();
+    exit(-1);
   }
-}
-
-/** Output the proximity graph of the points.
- *
- * If points contains n elements, the proximity graph is the graph
- * with n vertices, and an edge [u,v] iff the distance function between
- * points u and v is smaller than threshold.
- *
- * The type PointCloud furnishes .begin() and .end() methods, that return
- * iterators with value_type Point.
- */
-template< typename InputPointRange, typename Distance >
-Graph_t compute_proximity_graph(InputPointRange &points, Filtration_value threshold, Distance distance) {
-  std::vector< Edge_t > edges;
-  std::vector< Filtration_value > edges_fil;
-
-  Vertex_handle idx_u, idx_v;
-  Filtration_value fil;
-  idx_u = 0;
-  for (auto it_u = points.begin(); it_u != points.end(); ++it_u) {
-    idx_v = idx_u + 1;
-    for (auto it_v = it_u + 1; it_v != points.end(); ++it_v, ++idx_v) {
-      fil = distance(*it_u, *it_v);
-      if (fil <= threshold) {
-        edges.emplace_back(idx_u, idx_v);
-        edges_fil.push_back(fil);
-      }
-    }
-    ++idx_u;
-  }
-
-  Graph_t skel_graph(edges.begin()
-                     , edges.end()
-                     , edges_fil.begin()
-                     , idx_u);  // number of points labeled from 0 to idx_u-1
-
-  auto vertex_prop = boost::get(vertex_filtration_t(), skel_graph);
-
-  boost::graph_traits<Graph_t>::vertex_iterator vi, vi_end;
-  for (std::tie(vi, vi_end) = boost::vertices(skel_graph);
-       vi != vi_end; ++vi) {
-    boost::put(vertex_prop, *vi, 0.);
-  }
-
-  return skel_graph;
 }

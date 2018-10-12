@@ -4,7 +4,7 @@
  *
  *    Author(s):       Clément Maria
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Méditerranée (France)
+ *    Copyright (C) 2014 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -143,8 +143,8 @@ namespace persistent_cohomology {
 
 We provide several example files: run these examples with -h for details on their use, and read the README file.
 
-\li <a href="_persistent_cohomology_2rips_persistence_8cpp-example.html">
-Persistent_cohomology/rips_persistence.cpp</a> computes the Rips complex of a point cloud and outputs its persistence
+\li <a href="_rips_complex_2rips_persistence_8cpp-example.html">
+Rips_complex/rips_persistence.cpp</a> computes the Rips complex of a point cloud and outputs its persistence
 diagram.
 \code $> ./rips_persistence ../../data/points/tore3D_1307.off -r 0.25 -m 0.5 -d 3 -p 3 \endcode
 \code The complex contains 177838 simplices 
@@ -158,44 +158,57 @@ diagram.
 Persistent_cohomology/rips_multifield_persistence.cpp</a> computes the Rips complex of a point cloud and outputs its
 persistence diagram with a family of field coefficients.
 
-\li <a href="_persistent_cohomology_2rips_distance_matrix_persistence_8cpp-example.html">
-Persistent_cohomology/rips_distance_matrix_persistence.cpp</a> computes the Rips complex of a distance matrix and
+\li <a href="_rips_complex_2rips_distance_matrix_persistence_8cpp-example.html">
+Rips_complex/rips_distance_matrix_persistence.cpp</a> computes the Rips complex of a distance matrix and
 outputs its persistence diagram.
 
-\li <a href="_persistent_cohomology_2alpha_complex_3d_persistence_8cpp-example.html">
-Persistent_cohomology/alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
+The file should contain square or lower triangular distance matrix with semicolons as separators.
+The code do not check if it is dealing with a distance matrix. It is the user responsibility to provide a valid input.
+Please refer to data/distance_matrix/lower_triangular_distance_matrix.csv for an example of a file.
+
+\li <a href="_rips_complex_2rips_correlation_matrix_persistence_8cpp-example.html">
+Rips_complex/rips_correlation_matrix_persistence.cpp</a>
+computes the Rips complex of a correlation matrix and outputs its persistence diagram.
+
+Note that no check is performed if the matrix given as the input is a correlation matrix.
+It is the user responsibility to ensure that this is the case. The input is to be given either as a square or a lower
+triangular matrix.
+Please refer to data/correlation_matrix/lower_triangular_correlation_matrix.csv for an example of a file.
+
+\li <a href="_alpha_complex_2alpha_complex_3d_persistence_8cpp-example.html">
+Alpha_complex/alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
 \f$\mathbb{Z}/2\mathbb{Z}\f$ coefficients of the alpha complex on points sampling from an OFF file.
-\code $> ./alpha_complex_3d_persistence ../../data/points/tore3D_300.off 2 0.45 \endcode
+\code $> ./alpha_complex_3d_persistence ../../data/points/tore3D_300.off -p 2 -m 0.45 \endcode
 \code Simplex_tree dim: 3
 2  0 0 inf 
 2  1 0.0682162 1.0001 
 2  1 0.0934117 1.00003 
 2  2 0.56444 1.03938 \endcode
 
-\li <a href="_persistent_cohomology_2exact_alpha_complex_3d_persistence_8cpp-example.html">
-Persistent_cohomology/exact_alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
+\li <a href="_alpha_complex_2exact_alpha_complex_3d_persistence_8cpp-example.html">
+Alpha_complex/exact_alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
 \f$\mathbb{Z}/2\mathbb{Z}\f$ coefficients of the alpha complex on points sampling from an OFF file.
 Here, as CGAL computes the exact values, it is slower, but it is necessary when points are on a grid
 for instance.
-\code $> ./exact_alpha_complex_3d_persistence ../../data/points/sphere3D_pts_on_grid.off 2 0.1 \endcode
+\code $> ./exact_alpha_complex_3d_persistence ../../data/points/sphere3D_pts_on_grid.off -p 2 -m 0.1 \endcode
 \code Simplex_tree dim: 3
 2  0 0 inf
 2  2 0.0002 0.2028 \endcode
 
-\li <a href="_persistent_cohomology_2weighted_alpha_complex_3d_persistence_8cpp-example.html">
-Persistent_cohomology/weighted_alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
+\li <a href="_alpha_complex_2weighted_alpha_complex_3d_persistence_8cpp-example.html">
+Alpha_complex/weighted_alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
 \f$\mathbb{Z}/2\mathbb{Z}\f$ coefficients of the weighted alpha complex on points sampling from an OFF file
 and a weights file.
 \code $> ./weighted_alpha_complex_3d_persistence ../../data/points/tore3D_300.off
-../../data/points/tore3D_300.weights 2 0.45 \endcode
+../../data/points/tore3D_300.weights -p 2 -m 0.45 \endcode
 \code Simplex_tree dim: 3
 2  0 -1 inf
 2  1 -0.931784 0.000103311
 2  1 -0.906588 2.60165e-05
 2  2 -0.43556 0.0393798 \endcode
 
-\li <a href="_persistent_cohomology_2alpha_complex_persistence_8cpp-example.html">
-Persistent_cohomology/alpha_complex_persistence.cpp</a> computes the persistent homology with
+\li <a href="_alpha_complex_2alpha_complex_persistence_8cpp-example.html">
+Alpha_complex/alpha_complex_persistence.cpp</a> computes the persistent homology with
 \f$\mathbb{Z}/p\mathbb{Z}\f$ coefficients of the alpha complex on points sampling from an OFF file.
 \code $> ./alpha_complex_persistence -r 32 -p 2 -m 0.45 ../../data/points/tore3D_300.off \endcode
 \code Alpha complex is of dimension 3 - 9273 simplices - 300 vertices.
@@ -205,11 +218,13 @@ Simplex_tree dim: 3
 2  1 0.0934117 1.00003 
 2  2 0.56444 1.03938 \endcode
 
-\li <a href="_persistent_cohomology_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
-Persistent_cohomology/periodic_alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
+\li <a href="_alpha_complex_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
+Alpha_complex/periodic_alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
 \f$\mathbb{Z}/2\mathbb{Z}\f$ coefficients of the periodic alpha complex on points sampling from an OFF file.
+The second parameter is a \ref FileFormatsIsoCuboid file with coordinates of the periodic cuboid.
+Note that the lengths of the sides of the periodic cuboid have to be the same.
 \code $> ./periodic_alpha_complex_3d_persistence ../../data/points/grid_10_10_10_in_0_1.off
-../../data/points/iso_cuboid_3_in_0_1.txt 3 1.0 \endcode
+../../data/points/iso_cuboid_3_in_0_1.txt -p 3 -m 1.0 \endcode
 \code Periodic Delaunay computed.
 Simplex_tree dim: 3
 3  0 0 inf 
@@ -221,11 +236,31 @@ Simplex_tree dim: 3
 3  2 0.005 inf 
 3  3 0.0075 inf \endcode
 
+\li <a href="_persistent_cohomology_2weighted_periodic_alpha_complex_3d_persistence_8cpp-example.html">
+Persistent_cohomology/weighted_periodic_alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
+\f$\mathbb{Z}/2\mathbb{Z}\f$ coefficients of the periodic alpha complex on weighted points from an OFF file. The
+additional parameters of this program are:<br>
+(a) The file with the weights of points. The file consist of a sequence of numbers (as many as points).
+Note that the weight of each single point have to be bounded by 1/64 times the square of the cuboid edge length.<br>
+(b) A \ref FileFormatsIsoCuboid file with coordinates of the periodic cuboid.
+Note that the lengths of the sides of the periodic cuboid have to be the same.<br>
+\code $> ./weighted_periodic_alpha_complex_3d_persistence ../../data/points/shifted_sphere.off
+../../data/points/shifted_sphere.weights ../../data/points/iso_cuboid_3_in_0_10.txt 3 1.0 \endcode
+\code Weighted Periodic Delaunay computed.
+Simplex_tree dim: 3
+3  0 -0.0001 inf
+3  1 16.0264 inf
+3  1 16.0273 inf
+3  1 16.0303 inf
+3  2 36.8635 inf
+3  2 36.8704 inf
+3  2 36.8838 inf
+3  3 58.6783 inf  \endcode
+
 \li <a href="_persistent_cohomology_2plain_homology_8cpp-example.html">
 Persistent_cohomology/plain_homology.cpp</a> computes the plain homology of a simple simplicial complex without
 filtration values.
 
- \copyright GNU General Public License v3.
  */
 
 }  // namespace persistent_cohomology

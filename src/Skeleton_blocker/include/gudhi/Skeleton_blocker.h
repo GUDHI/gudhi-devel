@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA
+ *    Copyright (C) 2014 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -238,9 +238,6 @@ their collaboration to write the two initial papers
 \cite socg_blockers_2011,\cite blockers2012
  about this data-structure
  and also Dominique for leaving him use a prototype.
-
-
-\copyright GNU General Public License v3.
 
 @} */
 

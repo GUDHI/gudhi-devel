@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
 project(Simplex_tree_examples)
 
 add_executable ( Simplex_tree_example_from_cliques_of_graph simplex_tree_from_cliques_of_graph.cpp )
@@ -32,6 +31,16 @@ if(GMP_FOUND AND CGAL_FOUND)
   endif()
   add_test(NAME Simplex_tree_example_alpha_shapes_3_from_off COMMAND $<TARGET_FILE:Simplex_tree_example_alpha_shapes_3_from_off>
       "${CMAKE_SOURCE_DIR}/data/points/bunny_5000.off")
+
+  install(TARGETS Simplex_tree_example_alpha_shapes_3_from_off DESTINATION bin)
+
+  add_executable ( Simplex_tree_example_cech_complex_cgal_mini_sphere_3d cech_complex_cgal_mini_sphere_3d.cpp )
+  target_link_libraries(Simplex_tree_example_cech_complex_cgal_mini_sphere_3d ${Boost_PROGRAM_OPTIONS_LIBRARY} ${CGAL_LIBRARY})
+  if (TBB_FOUND)
+    target_link_libraries(Simplex_tree_example_cech_complex_cgal_mini_sphere_3d ${TBB_LIBRARIES})
+  endif()
+  add_test(NAME Simplex_tree_example_cech_complex_cgal_mini_sphere_3d COMMAND $<TARGET_FILE:Simplex_tree_example_cech_complex_cgal_mini_sphere_3d>
+      "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" -r 0.3 -d 3)
 
   install(TARGETS Simplex_tree_example_alpha_shapes_3_from_off DESTINATION bin)
 endif()

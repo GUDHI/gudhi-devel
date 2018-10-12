@@ -4,7 +4,7 @@
  *
  *    Author(s):       Marc Glisse
  *
- *    Copyright (C) 2015  INRIA Saclay - Ile-de-France (France)
+ *    Copyright (C) 2015 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -64,8 +64,6 @@ int main() {
   st.insert_simplex_and_subfaces(edge03);
   st.insert_simplex(edge13);
   st.insert_simplex(vertex4);
-  // FIXME: Remove this line
-  st.set_dimension(2);
 
   // Sort the simplices in the order of the filtration
   st.initialize_filtration();

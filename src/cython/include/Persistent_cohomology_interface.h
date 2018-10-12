@@ -4,7 +4,7 @@
  *
  *    Author(s):       Vincent Rouvreau
  *
- *    Copyright (C) 2016 INRIA
+ *    Copyright (C) 2016 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -83,6 +83,32 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
                                                           stptr_->filtration(get<1>(pair)))));
     }
     return persistence;
+  }
+
+  std::vector<std::pair<std::vector<int>, std::vector<int>>> persistence_pairs() {
+    auto pairs = persistent_cohomology::Persistent_cohomology<FilteredComplex,
+      persistent_cohomology::Field_Zp>::get_persistent_pairs();
+
+    std::vector<std::pair<std::vector<int>, std::vector<int>>> persistence_pairs;
+    persistence_pairs.reserve(pairs.size());
+    for (auto pair : pairs) {
+      std::vector<int> birth;
+      if (get<0>(pair) != stptr_->null_simplex()) {
+        for (auto vertex : stptr_->simplex_vertex_range(get<0>(pair))) {
+          birth.push_back(vertex);
+        }
+      }
+
+      std::vector<int> death;
+      if (get<1>(pair) != stptr_->null_simplex()) {
+        for (auto vertex : stptr_->simplex_vertex_range(get<1>(pair))) {
+          death.push_back(vertex);
+        }
+      }
+
+      persistence_pairs.push_back(std::make_pair(birth, death));
+    }
+    return persistence_pairs;
   }
 
  private:

@@ -1,11 +1,15 @@
+:orphan:
+
+.. To get rid of WARNING: document isn't included in any toctree
+
 Alpha complex user manual
 =========================
 Definition
 ----------
 
-.. include:: alpha_complex_sum.rst
+.. include:: alpha_complex_sum.inc
 
-Alpha_complex is constructing a :doc:`Simplex_tree <simplex_tree_sum>` using
+Alpha_complex is constructing a :doc:`Simplex_tree <simplex_tree_ref>` using
 `Delaunay Triangulation  <http://doc.cgal.org/latest/Triangulation/index.html#Chapter_Triangulations>`_ 
 :cite:`cgal:hdj-t-15b` from `CGAL <http://www.cgal.org/>`_ (the Computational Geometry Algorithms Library
 :cite:`cgal:eb-15b`).
@@ -99,9 +103,9 @@ Filtration value computation algorithm
       **end for**
     **end for**
   **end for**
-  
+
   make_filtration_non_decreasing()
-  
+
   prune_above_filtration()
 
 Dimension 2

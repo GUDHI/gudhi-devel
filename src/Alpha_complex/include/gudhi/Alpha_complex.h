@@ -4,7 +4,7 @@
  *
  *    Author(s):       Vincent Rouvreau
  *
- *    Copyright (C) 2015  INRIA
+ *    Copyright (C) 2015 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@
 #include <CGAL/Epick_d.h>
 #include <CGAL/Spatial_sort_traits_adapter_d.h>
 #include <CGAL/property_map.h>  // for CGAL::Identity_property_map
+#include <CGAL/NT_converter.h>
 
 #include <iostream>
 #include <vector>
@@ -175,7 +176,7 @@ class Alpha_complex {
    *
    * @return The number of vertices.
    */
-  const std::size_t number_of_vertices() const {
+  std::size_t number_of_vertices() const {
     return vertex_handle_to_iterator_.size();
   }
 
@@ -268,8 +269,6 @@ class Alpha_complex {
       return false;  // ----- >>
     }
 
-    complex.set_dimension(triangulation_->maximal_dimension());
-
     // --------------------------------------------------------------------------------------------
     // Simplex_tree construction from loop on triangulation finite full cells list
     if (triangulation_->number_of_vertices() > 0) {
@@ -325,8 +324,9 @@ class Alpha_complex {
             if (f_simplex_dim > 0) {
               // squared_radius function initialization
               Squared_Radius squared_radius = kernel_.compute_squared_radius_d_object();
+              CGAL::NT_converter<typename Geom_traits::FT, Filtration_value> cv;
 
-              alpha_complex_filtration = squared_radius(pointVector.begin(), pointVector.end());
+              alpha_complex_filtration = cv(squared_radius(pointVector.begin(), pointVector.end()));
             }
             complex.assign_filtration(f_simplex, alpha_complex_filtration);
 #ifdef DEBUG_TRACES

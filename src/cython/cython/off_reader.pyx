@@ -9,7 +9,7 @@ import os
 
    Author(s):       Vincent Rouvreau
 
-   Copyright (C) 2016 INRIA
+   Copyright (C) 2016 Inria
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import os
 """
 
 __author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 INRIA"
+__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
 cdef extern from "Off_reader_interface.h" namespace "Gudhi":
@@ -46,4 +46,5 @@ def read_off(off_file=''):
             return read_points_from_OFF_file(str.encode(off_file))
         else:
             print("file " + off_file + " not found.")
+            return []
 

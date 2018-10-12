@@ -564,10 +564,6 @@ int main() {
 #endif
 #endif
 
-  unsigned int seed = static_cast<unsigned int> (time(NULL));
-  CGAL::default_random = CGAL::Random(seed);  // TODO(CJ): use set_default_random
-  std::cerr << "Random seed = " << seed << "\n";
-
   std::ifstream script_file;
   script_file.open(BENCHMARK_SCRIPT_FILENAME);
   // Script?

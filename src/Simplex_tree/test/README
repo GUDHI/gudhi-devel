@@ -9,6 +9,6 @@ make
 To launch with details:
 ***********************
 
-./SimplexTreeUT --report_level=detailed --log_level=all 
+./Simplex_tree_test_unit --report_level=detailed --log_level=all
 
    ==> echo $? returns 0 in case of success (non-zero otherwise)

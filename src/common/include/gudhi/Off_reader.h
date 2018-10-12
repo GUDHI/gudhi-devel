@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -105,25 +105,26 @@ class Off_reader {
     bool is_off_file = (line.find("OFF") != std::string::npos);
     bool is_noff_file = (line.find("nOFF") != std::string::npos);
 
+
+
     if (!is_off_file && !is_noff_file) {
       std::cerr << line << std::endl;
       std::cerr << "missing off header\n";
       return false;
     }
 
+    if (is_noff_file) {
+      // Should be on a separate line, but we accept it on the same line as the number of vertices
+      stream_ >> off_info_.dim;
+    } else {
+      off_info_.dim = 3;
+    }
+
     if (!goto_next_uncomment_line(line)) return false;
     std::istringstream iss(line);
-    if ((is_off_file) && (!is_noff_file)) {
-      off_info_.dim = 3;
-      if (!(iss >> off_info_.num_vertices >> off_info_.num_faces >> off_info_.num_edges)) {
-        std::cerr << "incorrect number of vertices/faces/edges\n";
-        return false;
-      }
-    } else {
-      if (!(iss >> off_info_.dim >> off_info_.num_vertices >> off_info_.num_faces >> off_info_.num_edges)) {
+    if (!(iss >> off_info_.num_vertices >> off_info_.num_faces >> off_info_.num_edges)) {
       std::cerr << "incorrect number of vertices/faces/edges\n";
       return false;
-      }
     }
     off_visitor.init(off_info_.dim, off_info_.num_vertices, off_info_.num_faces, off_info_.num_edges);
 
@@ -131,10 +132,12 @@ class Off_reader {
   }
 
   bool goto_next_uncomment_line(std::string& uncomment_line) {
-    uncomment_line.clear();
-    do
-      std::getline(stream_, uncomment_line); while (uncomment_line[0] == '%');
-    return (uncomment_line.size() > 0 && uncomment_line[0] != '%');
+    do {
+      // skip whitespace, including empty lines
+      if (!std::ifstream::sentry(stream_)) return false;
+      std::getline(stream_, uncomment_line);
+    } while (uncomment_line[0] == '#');
+    return static_cast<bool>(stream_);
   }
 
   template<typename OffVisitor>

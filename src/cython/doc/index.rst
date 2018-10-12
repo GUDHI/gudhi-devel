@@ -34,32 +34,37 @@ Data structures
 Alpha complex
 =============
 
-.. include:: alpha_complex_sum.rst
+.. include:: alpha_complex_sum.inc
+
+Cover complexes
+===============
+
+.. include:: nerve_gic_complex_sum.rst
 
 Cubical complex
 ===============
 
-.. include:: cubical_complex_sum.rst
+.. include:: cubical_complex_sum.inc
 
 Rips complex
 ============
 
-.. include:: rips_complex_sum.rst
+.. include:: rips_complex_sum.inc
 
 Simplex tree
 ============
 
-.. include:: simplex_tree_sum.rst
+.. include:: simplex_tree_sum.inc
 
 Tangential complex
 ==================
 
-.. include:: tangential_complex_sum.rst
+.. include:: tangential_complex_sum.inc
 
 Witness complex
 ===============
 
-.. include:: witness_complex_sum.rst
+.. include:: witness_complex_sum.inc
 
 
 Toolbox
@@ -68,17 +73,17 @@ Toolbox
 Bottleneck distance
 ===================
 
-.. include:: bottleneck_distance_sum.rst
+.. include:: bottleneck_distance_sum.inc
 
 Persistence cohomology
 ======================
 
-.. include:: persistent_cohomology_sum.rst
+.. include:: persistent_cohomology_sum.inc
 
 Persistence graphical tools
 ===========================
 
-.. include:: persistence_graphical_tools_sum.rst
+.. include:: persistence_graphical_tools_sum.inc
 
 Bibliography
 ************

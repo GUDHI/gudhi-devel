@@ -4,7 +4,7 @@
  *
  *    Author(s):       David Salinas
  *
- *    Copyright (C) 2014  INRIA Sophia Antipolis-Mediterranee (France)
+ *    Copyright (C) 2014 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
 // GUDHI_CHECK throw an exception if expression is false in debug mode, but does nothing in release mode
 // Could assert in release mode, but cmake sets NDEBUG (for "NO DEBUG") in this mode, means assert does nothing.
 #ifdef GUDHI_DEBUG
-  #define GUDHI_CHECK(expression, excpt) if ((expression) == 0) throw excpt
+  #define GUDHI_CHECK(expression, excpt) ((expression) ? (void) 0 : (throw excpt))
   #define GUDHI_CHECK_code(CODE) CODE
 #else
   #define GUDHI_CHECK(expression, excpt) (void) 0

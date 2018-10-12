@@ -4,7 +4,7 @@
  *
  *    Author(s):       Clement Jamin
  *
- *    Copyright (C) 2016 INRIA
+ *    Copyright (C) 2016 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -83,16 +83,11 @@ using namespace internal;
 
 class Vertex_data {
  public:
-  Vertex_data(std::size_t data = (std::numeric_limits<std::size_t>::max)())
-      : m_data(data) { }
+  Vertex_data(std::size_t data = (std::numeric_limits<std::size_t>::max)()) : m_data(data) {}
 
-  operator std::size_t() {
-    return m_data;
-  }
+  operator std::size_t() { return m_data; }
 
-  operator std::size_t() const {
-    return m_data;
-  }
+  operator std::size_t() const { return m_data; }
 
  private:
   std::size_t m_data;
@@ -101,9 +96,9 @@ class Vertex_data {
 /**
  * \class Tangential_complex Tangential_complex.h gudhi/Tangential_complex.h
  * \brief Tangential complex data structure.
- * 
+ *
  * \ingroup tangential_complex
- * 
+ *
  * \details
  *  The class Tangential_complex represents a tangential complex.
  *  After the computation of the complex, an optional post-processing called perturbation can
@@ -118,17 +113,14 @@ class Vertex_data {
  * or <a target="_blank"
  * href="http://doc.cgal.org/latest/Kernel_23/classCGAL_1_1Dynamic__dimension__tag.html">CGAL::Dynamic_dimension_tag</a>
  * if you don't.
- * \tparam Concurrency_tag enables sequential versus parallel computation. Possible values are `CGAL::Parallel_tag` (the default) and `CGAL::Sequential_tag`.
- * \tparam Triangulation_ is the type used for storing the local regular triangulations. We highly recommend to use the default value (`CGAL::Regular_triangulation`).
+ * \tparam Concurrency_tag enables sequential versus parallel computation. Possible values are `CGAL::Parallel_tag` (the
+ * default) and `CGAL::Sequential_tag`. \tparam Triangulation_ is the type used for storing the local regular
+ * triangulations. We highly recommend to use the default value (`CGAL::Regular_triangulation`).
  *
  */
-template
-<
-  typename Kernel_,  // ambiant kernel
-  typename DimensionTag,  // intrinsic dimension
-  typename Concurrency_tag = CGAL::Parallel_tag,
-  typename Triangulation_ = CGAL::Default
->
+template <typename Kernel_,       // ambiant kernel
+          typename DimensionTag,  // intrinsic dimension
+          typename Concurrency_tag = CGAL::Parallel_tag, typename Triangulation_ = CGAL::Default>
 class Tangential_complex {
   typedef Kernel_ K;
   typedef typename K::FT FT;
@@ -136,26 +128,19 @@ class Tangential_complex {
   typedef typename K::Weighted_point_d Weighted_point;
   typedef typename K::Vector_d Vector;
 
-  typedef typename CGAL::Default::Get
-  <
-    Triangulation_,
-    CGAL::Regular_triangulation
-    <
-      CGAL::Epick_d<DimensionTag>,
-      CGAL::Triangulation_data_structure
-      <
-        typename CGAL::Epick_d<DimensionTag>::Dimension,
-        CGAL::Triangulation_vertex
-        <
-          CGAL::Regular_triangulation_traits_adapter< CGAL::Epick_d<DimensionTag> >, Vertex_data
-        >,
-        CGAL::Triangulation_full_cell<CGAL::Regular_triangulation_traits_adapter< CGAL::Epick_d<DimensionTag> > >
-      >
-    >
-  >::type Triangulation;
+  typedef typename CGAL::Default::Get<
+      Triangulation_,
+      CGAL::Regular_triangulation<
+          CGAL::Epick_d<DimensionTag>,
+          CGAL::Triangulation_data_structure<
+              typename CGAL::Epick_d<DimensionTag>::Dimension,
+              CGAL::Triangulation_vertex<CGAL::Regular_triangulation_traits_adapter<CGAL::Epick_d<DimensionTag> >,
+                                         Vertex_data>,
+              CGAL::Triangulation_full_cell<
+                  CGAL::Regular_triangulation_traits_adapter<CGAL::Epick_d<DimensionTag> > > > > >::type Triangulation;
   typedef typename Triangulation::Geom_traits Tr_traits;
   typedef typename Triangulation::Weighted_point Tr_point;
-  typedef typename Triangulation::Bare_point Tr_bare_point;
+  typedef typename Tr_traits::Base::Point_d Tr_bare_point;
   typedef typename Triangulation::Vertex_handle Tr_vertex_handle;
   typedef typename Triangulation::Full_cell_handle Tr_full_cell_handle;
   typedef typename Tr_traits::Vector_d Tr_vector;
@@ -174,17 +159,13 @@ class Tangential_complex {
 
   struct Tr_and_VH {
    public:
-    Tr_and_VH()
-        : m_tr(NULL) { }
+    Tr_and_VH() : m_tr(NULL) {}
 
-    Tr_and_VH(int dim)
-        : m_tr(new Triangulation(dim)) { }
+    Tr_and_VH(int dim) : m_tr(new Triangulation(dim)) {}
 
-    ~Tr_and_VH() {
-      destroy_triangulation();
-    }
+    ~Tr_and_VH() { destroy_triangulation(); }
 
-    Triangulation & construct_triangulation(int dim) {
+    Triangulation &construct_triangulation(int dim) {
       delete m_tr;
       m_tr = new Triangulation(dim);
       return tr();
@@ -195,24 +176,16 @@ class Tangential_complex {
       m_tr = NULL;
     }
 
-    Triangulation & tr() {
-      return *m_tr;
-    }
+    Triangulation &tr() { return *m_tr; }
 
-    Triangulation const& tr() const {
-      return *m_tr;
-    }
+    Triangulation const &tr() const { return *m_tr; }
 
-    Tr_vertex_handle const& center_vertex() const {
-      return m_center_vertex;
-    }
+    Tr_vertex_handle const &center_vertex() const { return m_center_vertex; }
 
-    Tr_vertex_handle & center_vertex() {
-      return m_center_vertex;
-    }
+    Tr_vertex_handle &center_vertex() { return m_center_vertex; }
 
    private:
-    Triangulation* m_tr;
+    Triangulation *m_tr;
     Tr_vertex_handle m_center_vertex;
   };
 
@@ -243,9 +216,7 @@ class Tangential_complex {
 
   // For transform_iterator
 
-  static const Tr_point &vertex_handle_to_point(Tr_vertex_handle vh) {
-    return vh->point();
-  }
+  static const Tr_point &vertex_handle_to_point(Tr_vertex_handle vh) { return vh->point(); }
 
   template <typename P, typename VH>
   static const P &vertex_handle_to_point(VH vh) {
@@ -265,111 +236,97 @@ class Tangential_complex {
    * @param[in] k Kernel instance.
    */
   template <typename Point_range>
-  Tangential_complex(Point_range points,
-                     int intrinsic_dimension,
+  Tangential_complex(Point_range points, int intrinsic_dimension,
 #ifdef GUDHI_TC_USE_ANOTHER_POINT_SET_FOR_TANGENT_SPACE_ESTIM
-      InputIterator first_for_tse, InputIterator last_for_tse,
+                     InputIterator first_for_tse, InputIterator last_for_tse,
 #endif
-      const K &k = K()
-                     )
+                     const K &k = K())
       : m_k(k),
-      m_intrinsic_dim(intrinsic_dimension),
-      m_ambient_dim(points.empty() ? 0 : k.point_dimension_d_object()(*points.begin())),
-      m_points(points.begin(), points.end()),
-      m_weights(m_points.size(), FT(0))
+        m_intrinsic_dim(intrinsic_dimension),
+        m_ambient_dim(points.empty() ? 0 : k.point_dimension_d_object()(*points.begin())),
+        m_points(points.begin(), points.end()),
+        m_weights(m_points.size(), FT(0))
 #if defined(GUDHI_USE_TBB) && defined(GUDHI_TC_PERTURB_POSITION)
-      , m_p_perturb_mutexes(NULL)
+        ,
+        m_p_perturb_mutexes(NULL)
 #endif
-      , m_points_ds(m_points)
-      , m_last_max_perturb(0.)
-      , m_are_tangent_spaces_computed(m_points.size(), false)
-      , m_tangent_spaces(m_points.size(), Tangent_space_basis())
+        ,
+        m_points_ds(m_points),
+        m_last_max_perturb(0.),
+        m_are_tangent_spaces_computed(m_points.size(), false),
+        m_tangent_spaces(m_points.size(), Tangent_space_basis())
 #ifdef GUDHI_TC_EXPORT_NORMALS
-      , m_orth_spaces(m_points.size(), Orthogonal_space_basis())
+        ,
+        m_orth_spaces(m_points.size(), Orthogonal_space_basis())
 #endif
 #ifdef GUDHI_TC_USE_ANOTHER_POINT_SET_FOR_TANGENT_SPACE_ESTIM
-      , m_points_for_tse(first_for_tse, last_for_tse)
-      , m_points_ds_for_tse(m_points_for_tse)
+        ,
+        m_points_for_tse(first_for_tse, last_for_tse),
+        m_points_ds_for_tse(m_points_for_tse)
 #endif
-  { }
+  {
+  }
 
   /// Destructor
   ~Tangential_complex() {
 #if defined(GUDHI_USE_TBB) && defined(GUDHI_TC_PERTURB_POSITION)
-    delete [] m_p_perturb_mutexes;
+    delete[] m_p_perturb_mutexes;
 #endif
   }
 
   /// Returns the intrinsic dimension of the manifold.
-  int intrinsic_dimension() const {
-    return m_intrinsic_dim;
-  }
+  int intrinsic_dimension() const { return m_intrinsic_dim; }
 
   /// Returns the ambient dimension.
-  int ambient_dimension() const {
-    return m_ambient_dim;
-  }
+  int ambient_dimension() const { return m_ambient_dim; }
 
-  Points const& points() const {
-    return m_points;
-  }
+  Points const &points() const { return m_points; }
 
   /** \brief Returns the point corresponding to the vertex given as parameter.
    *
    * @param[in] vertex Vertex handle of the point to retrieve.
    * @return The point found.
    */
-  Point get_point(std::size_t vertex) const {
-    return m_points[vertex];
-  }
+  Point get_point(std::size_t vertex) const { return m_points[vertex]; }
 
   /** \brief Returns the perturbed position of the point corresponding to the vertex given as parameter.
    *
    * @param[in] vertex Vertex handle of the point to retrieve.
    * @return The perturbed position of the point found.
    */
-  Point get_perturbed_point(std::size_t vertex) const {
-    return compute_perturbed_point(vertex);
-  }
+  Point get_perturbed_point(std::size_t vertex) const { return compute_perturbed_point(vertex); }
 
   /// Returns the number of vertices.
 
-  std::size_t number_of_vertices() const {
-    return m_points.size();
-  }
+  std::size_t number_of_vertices() const { return m_points.size(); }
 
-  void set_weights(const Weights& weights) {
-    m_weights = weights;
-  }
+  void set_weights(const Weights &weights) { m_weights = weights; }
 
-  void set_tangent_planes(const TS_container& tangent_spaces
+  void set_tangent_planes(const TS_container &tangent_spaces
 #ifdef GUDHI_TC_EXPORT_NORMALS
-      , const OS_container& orthogonal_spaces
+                          ,
+                          const OS_container &orthogonal_spaces
 #endif
-      ) {
+  ) {
 #ifdef GUDHI_TC_EXPORT_NORMALS
-    GUDHI_CHECK(
-                m_points.size() == tangent_spaces.size()
-                && m_points.size() == orthogonal_spaces.size(),
+    GUDHI_CHECK(m_points.size() == tangent_spaces.size() && m_points.size() == orthogonal_spaces.size(),
                 std::logic_error("Wrong sizes"));
 #else
-    GUDHI_CHECK(
-                m_points.size() == tangent_spaces.size(),
-                std::logic_error("Wrong sizes"));
+    GUDHI_CHECK(m_points.size() == tangent_spaces.size(), std::logic_error("Wrong sizes"));
 #endif
     m_tangent_spaces = tangent_spaces;
 #ifdef GUDHI_TC_EXPORT_NORMALS
     m_orth_spaces = orthogonal_spaces;
 #endif
-    for (std::size_t i = 0; i < m_points.size(); ++i)
-      m_are_tangent_spaces_computed[i] = true;
+    for (std::size_t i = 0; i < m_points.size(); ++i) m_are_tangent_spaces_computed[i] = true;
   }
 
   /// Computes the tangential complex.
   void compute_tangential_complex() {
 #ifdef GUDHI_TC_PERFORM_EXTRA_CHECKS
     std::cerr << red << "WARNING: GUDHI_TC_PERFORM_EXTRA_CHECKS is defined. "
-        << "Computation might be slower than usual.\n" << white;
+              << "Computation might be slower than usual.\n"
+              << white;
 #endif
 
 #if defined(GUDHI_TC_PROFILING) && defined(GUDHI_USE_TBB)
@@ -386,10 +343,9 @@ class Tangential_complex {
     if (m_points.empty())
       m_translations.clear();
     else
-      m_translations.resize(m_points.size(),
-                            m_k.construct_vector_d_object()(m_ambient_dim));
+      m_translations.resize(m_points.size(), m_k.construct_vector_d_object()(m_ambient_dim));
 #if defined(GUDHI_USE_TBB)
-    delete [] m_p_perturb_mutexes;
+    delete[] m_p_perturb_mutexes;
     m_p_perturb_mutexes = new Mutex_for_perturb[m_points.size()];
 #endif
 #endif
@@ -397,21 +353,18 @@ class Tangential_complex {
 #ifdef GUDHI_USE_TBB
     // Parallel
     if (boost::is_convertible<Concurrency_tag, CGAL::Parallel_tag>::value) {
-      tbb::parallel_for(tbb::blocked_range<size_t>(0, m_points.size()),
-                        Compute_tangent_triangulation(*this));
+      tbb::parallel_for(tbb::blocked_range<size_t>(0, m_points.size()), Compute_tangent_triangulation(*this));
     } else {
 #endif  // GUDHI_USE_TBB
       // Sequential
-      for (std::size_t i = 0; i < m_points.size(); ++i)
-        compute_tangent_triangulation(i);
+      for (std::size_t i = 0; i < m_points.size(); ++i) compute_tangent_triangulation(i);
 #ifdef GUDHI_USE_TBB
     }
 #endif  // GUDHI_USE_TBB
 
 #if defined(GUDHI_TC_PROFILING) && defined(GUDHI_USE_TBB)
     t.end();
-    std::cerr << "Tangential complex computed in " << t.num_seconds()
-        << " seconds.\n";
+    std::cerr << "Tangential complex computed in " << t.num_seconds() << " seconds.\n";
 #endif
   }
 
@@ -437,14 +390,12 @@ class Tangential_complex {
   Fix_inconsistencies_info fix_inconsistencies_using_perturbation(double max_perturb, double time_limit = -1.) {
     Fix_inconsistencies_info info;
 
-    if (time_limit == 0.)
-      return info;
+    if (time_limit == 0.) return info;
 
     Gudhi::Clock t;
 
 #ifdef GUDHI_TC_SHOW_DETAILED_STATS_FOR_INCONSISTENCIES
-    std::tuple<std::size_t, std::size_t, std::size_t> stats_before =
-        number_of_inconsistent_simplices(false);
+    std::tuple<std::size_t, std::size_t, std::size_t> stats_before = number_of_inconsistent_simplices(false);
 
     if (std::get<1>(stats_before) == 0) {
 #ifdef DEBUG_TRACES
@@ -462,22 +413,17 @@ class Tangential_complex {
     info.num_steps = 0;
     while (!done) {
 #ifdef GUDHI_TC_SHOW_DETAILED_STATS_FOR_INCONSISTENCIES
-      std::cerr
-          << "\nBefore fix step:\n"
-          << "  * Total number of simplices in stars (incl. duplicates): "
-          << std::get<0>(stats_before) << "\n"
-          << "  * Num inconsistent simplices in stars (incl. duplicates): "
-          << red << std::get<1>(stats_before) << white << " ("
-          << 100. * std::get<1>(stats_before) / std::get<0>(stats_before) << "%)\n"
-          << "  * Number of stars containing inconsistent simplices: "
-          << red << std::get<2>(stats_before) << white << " ("
-          << 100. * std::get<2>(stats_before) / m_points.size() << "%)\n";
+      std::cerr << "\nBefore fix step:\n"
+                << "  * Total number of simplices in stars (incl. duplicates): " << std::get<0>(stats_before) << "\n"
+                << "  * Num inconsistent simplices in stars (incl. duplicates): " << red << std::get<1>(stats_before)
+                << white << " (" << 100. * std::get<1>(stats_before) / std::get<0>(stats_before) << "%)\n"
+                << "  * Number of stars containing inconsistent simplices: " << red << std::get<2>(stats_before)
+                << white << " (" << 100. * std::get<2>(stats_before) / m_points.size() << "%)\n";
 #endif
 
 #if defined(DEBUG_TRACES) || defined(GUDHI_TC_PROFILING)
-      std::cerr << yellow
-          << "\nAttempt to fix inconsistencies using perturbations - step #"
-          << info.num_steps + 1 << "... " << white;
+      std::cerr << yellow << "\nAttempt to fix inconsistencies using perturbations - step #" << info.num_steps + 1
+                << "... " << white;
 #endif
 
       std::size_t num_inconsistent_stars = 0;
@@ -492,29 +438,24 @@ class Tangential_complex {
       if (boost::is_convertible<Concurrency_tag, CGAL::Parallel_tag>::value) {
         tbb::combinable<std::size_t> num_inconsistencies;
         tbb::combinable<std::vector<std::size_t> > tls_updated_points;
-        tbb::parallel_for(
-                          tbb::blocked_range<size_t>(0, m_triangulations.size()),
-                          Try_to_solve_inconsistencies_in_a_local_triangulation(*this, max_perturb,
-                                                                                num_inconsistencies,
+        tbb::parallel_for(tbb::blocked_range<size_t>(0, m_triangulations.size()),
+                          Try_to_solve_inconsistencies_in_a_local_triangulation(*this, max_perturb, num_inconsistencies,
                                                                                 tls_updated_points));
-        num_inconsistent_stars =
-            num_inconsistencies.combine(std::plus<std::size_t>());
-        updated_points = tls_updated_points.combine(
-                                                    [](std::vector<std::size_t> const& x,
-                                                       std::vector<std::size_t> const& y) {
-                                                         std::vector<std::size_t> res;
-                                                         res.reserve(x.size() + y.size());
-                                                         res.insert(res.end(), x.begin(), x.end());
-                                                         res.insert(res.end(), y.begin(), y.end());
-                                                         return res;
-                                                    });
+        num_inconsistent_stars = num_inconsistencies.combine(std::plus<std::size_t>());
+        updated_points =
+            tls_updated_points.combine([](std::vector<std::size_t> const &x, std::vector<std::size_t> const &y) {
+              std::vector<std::size_t> res;
+              res.reserve(x.size() + y.size());
+              res.insert(res.end(), x.begin(), x.end());
+              res.insert(res.end(), y.begin(), y.end());
+              return res;
+            });
       } else {
 #endif  // GUDHI_USE_TBB
         // Sequential
         for (std::size_t i = 0; i < m_triangulations.size(); ++i) {
           num_inconsistent_stars +=
-              try_to_solve_inconsistencies_in_a_local_triangulation(i, max_perturb,
-                                                                    std::back_inserter(updated_points));
+              try_to_solve_inconsistencies_in_a_local_triangulation(i, max_perturb, std::back_inserter(updated_points));
         }
 #if defined(GUDHI_USE_TBB)
       }
@@ -525,57 +466,44 @@ class Tangential_complex {
 #endif
 
 #if defined(GUDHI_TC_SHOW_DETAILED_STATS_FOR_INCONSISTENCIES) || defined(DEBUG_TRACES)
-      std::cerr
-          << "\nEncountered during fix:\n"
-          << "  * Num stars containing inconsistent simplices: "
-          << red << num_inconsistent_stars << white
-          << " (" << 100. * num_inconsistent_stars / m_points.size() << "%)\n";
+      std::cerr << "\nEncountered during fix:\n"
+                << "  * Num stars containing inconsistent simplices: " << red << num_inconsistent_stars << white << " ("
+                << 100. * num_inconsistent_stars / m_points.size() << "%)\n";
 #endif
 
 #ifdef GUDHI_TC_PROFILING
-      std::cerr << yellow << "done in " << t_fix_step.num_seconds()
-          << " seconds.\n" << white;
+      std::cerr << yellow << "done in " << t_fix_step.num_seconds() << " seconds.\n" << white;
 #elif defined(DEBUG_TRACES)
       std::cerr << yellow << "done.\n" << white;
 #endif
 
-      if (num_inconsistent_stars > 0)
-        refresh_tangential_complex(updated_points);
+      if (num_inconsistent_stars > 0) refresh_tangential_complex(updated_points);
 
 #ifdef GUDHI_TC_PERFORM_EXTRA_CHECKS
       // Confirm that all stars were actually refreshed
-      std::size_t num_inc_1 =
-          std::get<1>(number_of_inconsistent_simplices(false));
+      std::size_t num_inc_1 = std::get<1>(number_of_inconsistent_simplices(false));
       refresh_tangential_complex();
-      std::size_t num_inc_2 =
-          std::get<1>(number_of_inconsistent_simplices(false));
+      std::size_t num_inc_2 = std::get<1>(number_of_inconsistent_simplices(false));
       if (num_inc_1 != num_inc_2)
-        std::cerr << red << "REFRESHMENT CHECK: FAILED. ("
-          << num_inc_1 << " vs " << num_inc_2 << ")\n" << white;
+        std::cerr << red << "REFRESHMENT CHECK: FAILED. (" << num_inc_1 << " vs " << num_inc_2 << ")\n" << white;
       else
         std::cerr << green << "REFRESHMENT CHECK: PASSED.\n" << white;
 #endif
 
 #ifdef GUDHI_TC_SHOW_DETAILED_STATS_FOR_INCONSISTENCIES
-      std::tuple<std::size_t, std::size_t, std::size_t> stats_after =
-          number_of_inconsistent_simplices(false);
+      std::tuple<std::size_t, std::size_t, std::size_t> stats_after = number_of_inconsistent_simplices(false);
 
-      std::cerr
-          << "\nAfter fix:\n"
-          << "  * Total number of simplices in stars (incl. duplicates): "
-          << std::get<0>(stats_after) << "\n"
-          << "  * Num inconsistent simplices in stars (incl. duplicates): "
-          << red << std::get<1>(stats_after) << white << " ("
-          << 100. * std::get<1>(stats_after) / std::get<0>(stats_after) << "%)\n"
-          << "  * Number of stars containing inconsistent simplices: "
-          << red << std::get<2>(stats_after) << white << " ("
-          << 100. * std::get<2>(stats_after) / m_points.size() << "%)\n";
+      std::cerr << "\nAfter fix:\n"
+                << "  * Total number of simplices in stars (incl. duplicates): " << std::get<0>(stats_after) << "\n"
+                << "  * Num inconsistent simplices in stars (incl. duplicates): " << red << std::get<1>(stats_after)
+                << white << " (" << 100. * std::get<1>(stats_after) / std::get<0>(stats_after) << "%)\n"
+                << "  * Number of stars containing inconsistent simplices: " << red << std::get<2>(stats_after) << white
+                << " (" << 100. * std::get<2>(stats_after) / m_points.size() << "%)\n";
 
       stats_before = stats_after;
 #endif
 
-      if (info.num_steps == 0)
-        info.initial_num_inconsistent_stars = num_inconsistent_stars;
+      if (info.num_steps == 0) info.initial_num_inconsistent_stars = num_inconsistent_stars;
 
       if (num_inconsistent_stars < info.best_num_inconsistent_stars)
         info.best_num_inconsistent_stars = num_inconsistent_stars;
@@ -615,8 +543,7 @@ class Tangential_complex {
   /// Returns the number of inconsistencies
   /// @param[in] verbose If true, outputs a message into `std::cerr`.
 
-  Num_inconsistencies
-  number_of_inconsistent_simplices(
+  Num_inconsistencies number_of_inconsistent_simplices(
 #ifdef DEBUG_TRACES
       bool verbose = true
 #else
@@ -634,8 +561,7 @@ class Tangential_complex {
       Star::const_iterator it_inc_simplex_end = m_stars[idx].end();
       for (; it_inc_simplex != it_inc_simplex_end; ++it_inc_simplex) {
         // Don't check infinite cells
-        if (is_infinite(*it_inc_simplex))
-          continue;
+        if (is_infinite(*it_inc_simplex)) continue;
 
         Simplex c = *it_inc_simplex;
         c.insert(idx);  // Add the missing index
@@ -651,18 +577,15 @@ class Tangential_complex {
     }
 
     if (verbose) {
-      std::cerr
-          << "\n==========================================================\n"
-          << "Inconsistencies:\n"
-          << "  * Total number of simplices in stars (incl. duplicates): "
-          << stats.num_simplices << "\n"
-          << "  * Number of inconsistent simplices in stars (incl. duplicates): "
-          << stats.num_inconsistent_simplices << " ("
-          << 100. * stats.num_inconsistent_simplices / stats.num_simplices << "%)\n"
-          << "  * Number of stars containing inconsistent simplices: "
-          << stats.num_inconsistent_stars << " ("
-          << 100. * stats.num_inconsistent_stars / m_points.size() << "%)\n"
-          << "==========================================================\n";
+      std::cerr << "\n==========================================================\n"
+                << "Inconsistencies:\n"
+                << "  * Total number of simplices in stars (incl. duplicates): " << stats.num_simplices << "\n"
+                << "  * Number of inconsistent simplices in stars (incl. duplicates): "
+                << stats.num_inconsistent_simplices << " ("
+                << 100. * stats.num_inconsistent_simplices / stats.num_simplices << "%)\n"
+                << "  * Number of stars containing inconsistent simplices: " << stats.num_inconsistent_stars << " ("
+                << 100. * stats.num_inconsistent_stars / m_points.size() << "%)\n"
+                << "==========================================================\n";
     }
 
     return stats;
@@ -672,23 +595,22 @@ class Tangential_complex {
    *
    * \tparam Simplex_tree_ must be a `Simplex_tree`.
    *
-   * @param[out] tree The result, where each `Vertex_handle` is the index of the 
+   * @param[out] tree The result, where each `Vertex_handle` is the index of the
    *   corresponding point in the range provided to the constructor (it can also be
    *   retrieved through the `Tangential_complex::get_point` function.
    * @param[in] export_inconsistent_simplices Also export inconsistent simplices or not?
    * @return The maximal dimension of the simplices.
    */
   template <typename Simplex_tree_>
-  int create_complex(Simplex_tree_ &tree
-                     , bool export_inconsistent_simplices = true
+  int create_complex(Simplex_tree_ &tree,
+                     bool export_inconsistent_simplices = true
                      /// \cond ADVANCED_PARAMETERS
-                     , bool export_infinite_simplices = false
-                     , Simplex_set *p_inconsistent_simplices = NULL
+                     ,
+                     bool export_infinite_simplices = false, Simplex_set *p_inconsistent_simplices = NULL
                      /// \endcond
                      ) const {
 #if defined(DEBUG_TRACES) || defined(GUDHI_TC_PROFILING)
-    std::cerr << yellow
-        << "\nExporting the TC as a Simplex_tree... " << white;
+    std::cerr << yellow << "\nExporting the TC as a Simplex_tree... " << white;
 #endif
 #ifdef GUDHI_TC_PROFILING
     Gudhi::Clock t;
@@ -705,14 +627,11 @@ class Tangential_complex {
         Simplex c = *it_inc_simplex;
 
         // Don't export infinite cells
-        if (!export_infinite_simplices && is_infinite(c))
-          continue;
+        if (!export_infinite_simplices && is_infinite(c)) continue;
 
-        if (!export_inconsistent_simplices && !is_simplex_consistent(c))
-          continue;
+        if (!export_inconsistent_simplices && !is_simplex_consistent(c)) continue;
 
-        if (static_cast<int> (c.size()) > max_dim)
-          max_dim = static_cast<int> (c.size());
+        if (static_cast<int>(c.size()) > max_dim) max_dim = static_cast<int>(c.size());
         // Add the missing center vertex
         c.insert(idx);
 
@@ -728,8 +647,7 @@ class Tangential_complex {
 
 #ifdef GUDHI_TC_PROFILING
     t.end();
-    std::cerr << yellow << "done in " << t.num_seconds()
-        << " seconds.\n" << white;
+    std::cerr << yellow << "done in " << t.num_seconds() << " seconds.\n" << white;
 #elif defined(DEBUG_TRACES)
     std::cerr << yellow << "done.\n" << white;
 #endif
@@ -747,14 +665,11 @@ class Tangential_complex {
   //   simplex whose dimension is different from the previous ones.
   //   N.B.: The check is quite expensive.
 
-  int create_complex(Simplicial_complex &complex,
-                     bool export_inconsistent_simplices = true,
-                     bool export_infinite_simplices = false,
-                     int check_lower_and_higher_dim_simplices = 2,
+  int create_complex(Simplicial_complex &complex, bool export_inconsistent_simplices = true,
+                     bool export_infinite_simplices = false, int check_lower_and_higher_dim_simplices = 2,
                      Simplex_set *p_inconsistent_simplices = NULL) const {
 #if defined(DEBUG_TRACES) || defined(GUDHI_TC_PROFILING)
-    std::cerr << yellow
-        << "\nExporting the TC as a Simplicial_complex... " << white;
+    std::cerr << yellow << "\nExporting the TC as a Simplicial_complex... " << white;
 #endif
 #ifdef GUDHI_TC_PROFILING
     Gudhi::Clock t;
@@ -772,31 +687,26 @@ class Tangential_complex {
         Simplex c = *it_inc_simplex;
 
         // Don't export infinite cells
-        if (!export_infinite_simplices && is_infinite(c))
-          continue;
+        if (!export_infinite_simplices && is_infinite(c)) continue;
 
-        if (!export_inconsistent_simplices && !is_simplex_consistent(c))
-          continue;
+        if (!export_inconsistent_simplices && !is_simplex_consistent(c)) continue;
 
         // Unusual simplex dim?
-        if (check_lower_and_higher_dim_simplices == 2
-            && max_dim != -1
-            && static_cast<int> (c.size()) != max_dim) {
+        if (check_lower_and_higher_dim_simplices == 2 && max_dim != -1 && static_cast<int>(c.size()) != max_dim) {
           // Let's activate the check
-          std::cerr << red <<
-              "Info: check_lower_and_higher_dim_simplices ACTIVATED. "
-              "Export might be take some time...\n" << white;
+          std::cerr << red
+                    << "Info: check_lower_and_higher_dim_simplices ACTIVATED. "
+                       "Export might be take some time...\n"
+                    << white;
           check_lower_and_higher_dim_simplices = 1;
         }
 
-        if (static_cast<int> (c.size()) > max_dim)
-          max_dim = static_cast<int> (c.size());
+        if (static_cast<int>(c.size()) > max_dim) max_dim = static_cast<int>(c.size());
         // Add the missing center vertex
         c.insert(idx);
 
         // Try to insert the simplex
-        bool added =
-            complex.add_simplex(c, check_lower_and_higher_dim_simplices == 1);
+        bool added = complex.add_simplex(c, check_lower_and_higher_dim_simplices == 1);
 
         // Inconsistent?
         if (p_inconsistent_simplices && added && !is_simplex_consistent(c)) {
@@ -807,8 +717,7 @@ class Tangential_complex {
 
 #ifdef GUDHI_TC_PROFILING
     t.end();
-    std::cerr << yellow << "done in " << t.num_seconds()
-        << " seconds.\n" << white;
+    std::cerr << yellow << "done in " << t.num_seconds() << " seconds.\n" << white;
 #elif defined(DEBUG_TRACES)
     std::cerr << yellow << "done.\n" << white;
 #endif
@@ -816,29 +725,24 @@ class Tangential_complex {
     return max_dim;
   }
 
-  template<typename ProjectionFunctor = CGAL::Identity<Point> >
-  std::ostream &export_to_off(
-                              const Simplicial_complex &complex, std::ostream & os,
+  template <typename ProjectionFunctor = CGAL::Identity<Point> >
+  std::ostream &export_to_off(const Simplicial_complex &complex, std::ostream &os,
                               Simplex_set const *p_simpl_to_color_in_red = NULL,
                               Simplex_set const *p_simpl_to_color_in_green = NULL,
                               Simplex_set const *p_simpl_to_color_in_blue = NULL,
-                              ProjectionFunctor const& point_projection = ProjectionFunctor())
-  const {
-    return export_to_off(
-                         os, false, p_simpl_to_color_in_red, p_simpl_to_color_in_green,
-                         p_simpl_to_color_in_blue, &complex, point_projection);
+                              ProjectionFunctor const &point_projection = ProjectionFunctor()) const {
+    return export_to_off(os, false, p_simpl_to_color_in_red, p_simpl_to_color_in_green, p_simpl_to_color_in_blue,
+                         &complex, point_projection);
   }
 
-  template<typename ProjectionFunctor = CGAL::Identity<Point> >
-  std::ostream &export_to_off(
-                              std::ostream & os, bool color_inconsistencies = false,
+  template <typename ProjectionFunctor = CGAL::Identity<Point> >
+  std::ostream &export_to_off(std::ostream &os, bool color_inconsistencies = false,
                               Simplex_set const *p_simpl_to_color_in_red = NULL,
                               Simplex_set const *p_simpl_to_color_in_green = NULL,
                               Simplex_set const *p_simpl_to_color_in_blue = NULL,
                               const Simplicial_complex *p_complex = NULL,
-                              ProjectionFunctor const& point_projection = ProjectionFunctor()) const {
-    if (m_points.empty())
-      return os;
+                              ProjectionFunctor const &point_projection = ProjectionFunctor()) const {
+    if (m_points.empty()) return os;
 
     if (m_ambient_dim < 2) {
       std::cerr << "Error: export_to_off => ambient dimension should be >= 2.\n";
@@ -847,14 +751,14 @@ class Tangential_complex {
     }
     if (m_ambient_dim > 3) {
       std::cerr << "Warning: export_to_off => ambient dimension should be "
-          "<= 3. Only the first 3 coordinates will be exported.\n";
+                   "<= 3. Only the first 3 coordinates will be exported.\n";
     }
 
     if (m_intrinsic_dim < 1 || m_intrinsic_dim > 3) {
       std::cerr << "Error: export_to_off => intrinsic dimension should be "
-          "between 1 and 3.\n";
+                   "between 1 and 3.\n";
       os << "Error: export_to_off => intrinsic dimension should be "
-          "between 1 and 3.\n";
+            "between 1 and 3.\n";
       return os;
     }
 
@@ -862,12 +766,10 @@ class Tangential_complex {
     std::size_t num_simplices, num_vertices;
     export_vertices_to_off(output, num_vertices, false, point_projection);
     if (p_complex) {
-      export_simplices_to_off(
-                              *p_complex, output, num_simplices, p_simpl_to_color_in_red,
-                              p_simpl_to_color_in_green, p_simpl_to_color_in_blue);
+      export_simplices_to_off(*p_complex, output, num_simplices, p_simpl_to_color_in_red, p_simpl_to_color_in_green,
+                              p_simpl_to_color_in_blue);
     } else {
-      export_simplices_to_off(
-                              output, num_simplices, color_inconsistencies, p_simpl_to_color_in_red,
+      export_simplices_to_off(output, num_simplices, color_inconsistencies, p_simpl_to_color_in_red,
                               p_simpl_to_color_in_green, p_simpl_to_color_in_blue);
     }
 
@@ -876,10 +778,9 @@ class Tangential_complex {
 #endif
 
     os << "OFF \n"
-        << num_vertices << " "
-        << num_simplices << " "
-        << "0 \n"
-        << output.str();
+       << num_vertices << " " << num_simplices << " "
+       << "0 \n"
+       << output.str();
 
     return os;
   }
@@ -896,21 +797,18 @@ class Tangential_complex {
 #ifdef GUDHI_USE_TBB
     // Parallel
     if (boost::is_convertible<Concurrency_tag, CGAL::Parallel_tag>::value) {
-      tbb::parallel_for(tbb::blocked_range<size_t>(0, m_points.size()),
-                        Compute_tangent_triangulation(*this));
+      tbb::parallel_for(tbb::blocked_range<size_t>(0, m_points.size()), Compute_tangent_triangulation(*this));
     } else {
 #endif  // GUDHI_USE_TBB
       // Sequential
-      for (std::size_t i = 0; i < m_points.size(); ++i)
-        compute_tangent_triangulation(i);
+      for (std::size_t i = 0; i < m_points.size(); ++i) compute_tangent_triangulation(i);
 #ifdef GUDHI_USE_TBB
     }
 #endif  // GUDHI_USE_TBB
 
 #ifdef GUDHI_TC_PROFILING
     t.end();
-    std::cerr << yellow << "done in " << t.num_seconds()
-        << " seconds.\n" << white;
+    std::cerr << yellow << "done in " << t.num_seconds() << " seconds.\n" << white;
 #elif defined(DEBUG_TRACES)
     std::cerr << yellow << "done.\n" << white;
 #endif
@@ -918,8 +816,7 @@ class Tangential_complex {
 
   // If the list of perturbed points is provided, it is much faster
   template <typename Point_indices_range>
-  void refresh_tangential_complex(
-                                  Point_indices_range const& perturbed_points_indices) {
+  void refresh_tangential_complex(Point_indices_range const &perturbed_points_indices) {
 #if defined(DEBUG_TRACES) || defined(GUDHI_TC_PROFILING)
     std::cerr << yellow << "\nRefreshing TC... " << white;
 #endif
@@ -939,22 +836,20 @@ class Tangential_complex {
     } else {
 #endif  // GUDHI_USE_TBB
       // Sequential
-      for (std::size_t i = 0; i < m_points.size(); ++i)
-        refresh_tangent_triangulation(i, updated_pts_ds);
+      for (std::size_t i = 0; i < m_points.size(); ++i) refresh_tangent_triangulation(i, updated_pts_ds);
 #ifdef GUDHI_USE_TBB
     }
 #endif  // GUDHI_USE_TBB
 
 #ifdef GUDHI_TC_PROFILING
     t.end();
-    std::cerr << yellow << "done in " << t.num_seconds()
-        << " seconds.\n" << white;
+    std::cerr << yellow << "done in " << t.num_seconds() << " seconds.\n" << white;
 #elif defined(DEBUG_TRACES)
     std::cerr << yellow << "done.\n" << white;
 #endif
   }
 
-  void export_inconsistent_stars_to_OFF_files(std::string const& filename_base) const {
+  void export_inconsistent_stars_to_OFF_files(std::string const &filename_base) const {
     // For each triangulation
     for (std::size_t idx = 0; idx < m_points.size(); ++idx) {
       // We build a SC along the way in case it's inconsistent
@@ -963,11 +858,9 @@ class Tangential_complex {
       bool is_inconsistent = false;
       Star::const_iterator it_inc_simplex = m_stars[idx].begin();
       Star::const_iterator it_inc_simplex_end = m_stars[idx].end();
-      for (; it_inc_simplex != it_inc_simplex_end;
-           ++it_inc_simplex) {
+      for (; it_inc_simplex != it_inc_simplex_end; ++it_inc_simplex) {
         // Skip infinite cells
-        if (is_infinite(*it_inc_simplex))
-          continue;
+        if (is_infinite(*it_inc_simplex)) continue;
 
         Simplex c = *it_inc_simplex;
         c.insert(idx);  // Add the missing index
@@ -975,8 +868,7 @@ class Tangential_complex {
         sc.add_simplex(c);
 
         // If we do not already know this star is inconsistent, test it
-        if (!is_inconsistent && !is_simplex_consistent(c))
-          is_inconsistent = true;
+        if (!is_inconsistent && !is_simplex_consistent(c)) is_inconsistent = true;
       }
 
       if (is_inconsistent) {
@@ -991,66 +883,58 @@ class Tangential_complex {
 
   class Compare_distance_to_ref_point {
    public:
-    Compare_distance_to_ref_point(Point const& ref, K const& k)
-        : m_ref(ref), m_k(k) { }
+    Compare_distance_to_ref_point(Point const &ref, K const &k) : m_ref(ref), m_k(k) {}
 
-    bool operator()(Point const& p1, Point const& p2) {
-      typename K::Squared_distance_d sqdist =
-          m_k.squared_distance_d_object();
+    bool operator()(Point const &p1, Point const &p2) {
+      typename K::Squared_distance_d sqdist = m_k.squared_distance_d_object();
       return sqdist(p1, m_ref) < sqdist(p2, m_ref);
     }
 
    private:
-    Point const& m_ref;
-    K const& m_k;
+    Point const &m_ref;
+    K const &m_k;
   };
 
 #ifdef GUDHI_USE_TBB
   // Functor for compute_tangential_complex function
   class Compute_tangent_triangulation {
-    Tangential_complex & m_tc;
+    Tangential_complex &m_tc;
 
    public:
     // Constructor
-    Compute_tangent_triangulation(Tangential_complex &tc)
-        : m_tc(tc) { }
+    Compute_tangent_triangulation(Tangential_complex &tc) : m_tc(tc) {}
 
     // Constructor
-    Compute_tangent_triangulation(const Compute_tangent_triangulation &ctt)
-        : m_tc(ctt.m_tc) { }
+    Compute_tangent_triangulation(const Compute_tangent_triangulation &ctt) : m_tc(ctt.m_tc) {}
 
     // operator()
-    void operator()(const tbb::blocked_range<size_t>& r) const {
-      for (size_t i = r.begin(); i != r.end(); ++i)
-        m_tc.compute_tangent_triangulation(i);
+    void operator()(const tbb::blocked_range<size_t> &r) const {
+      for (size_t i = r.begin(); i != r.end(); ++i) m_tc.compute_tangent_triangulation(i);
     }
   };
 
   // Functor for refresh_tangential_complex function
   class Refresh_tangent_triangulation {
-    Tangential_complex & m_tc;
-    Points_ds const& m_updated_pts_ds;
+    Tangential_complex &m_tc;
+    Points_ds const &m_updated_pts_ds;
 
    public:
     // Constructor
-    Refresh_tangent_triangulation(Tangential_complex &tc, Points_ds const& updated_pts_ds)
-        : m_tc(tc), m_updated_pts_ds(updated_pts_ds) { }
+    Refresh_tangent_triangulation(Tangential_complex &tc, Points_ds const &updated_pts_ds)
+        : m_tc(tc), m_updated_pts_ds(updated_pts_ds) {}
 
     // Constructor
     Refresh_tangent_triangulation(const Refresh_tangent_triangulation &ctt)
-        : m_tc(ctt.m_tc), m_updated_pts_ds(ctt.m_updated_pts_ds) { }
+        : m_tc(ctt.m_tc), m_updated_pts_ds(ctt.m_updated_pts_ds) {}
 
     // operator()
-    void operator()(const tbb::blocked_range<size_t>& r) const {
-      for (size_t i = r.begin(); i != r.end(); ++i)
-        m_tc.refresh_tangent_triangulation(i, m_updated_pts_ds);
+    void operator()(const tbb::blocked_range<size_t> &r) const {
+      for (size_t i = r.begin(); i != r.end(); ++i) m_tc.refresh_tangent_triangulation(i, m_updated_pts_ds);
     }
   };
 #endif  // GUDHI_USE_TBB
 
-  bool is_infinite(Simplex const& s) const {
-    return *s.rbegin() == (std::numeric_limits<std::size_t>::max)();
-  }
+  bool is_infinite(Simplex const &s) const { return *s.rbegin() == (std::numeric_limits<std::size_t>::max)(); }
 
   // Output: "triangulation" is a Regular Triangulation containing at least the
   // star of "center_pt"
@@ -1076,17 +960,16 @@ class Tangential_complex {
     Tr_point proj_wp;
     if (i == tsb.origin()) {
       // Insert {(0, 0, 0...), m_weights[i]}
-      proj_wp = local_tr_traits.construct_weighted_point_d_object()(local_tr_traits.construct_point_d_object()(tangent_space_dim, CGAL::ORIGIN),
-                                                                    m_weights[i]);
+      proj_wp = local_tr_traits.construct_weighted_point_d_object()(
+          local_tr_traits.construct_point_d_object()(tangent_space_dim, CGAL::ORIGIN), m_weights[i]);
     } else {
-      const Weighted_point& wp = compute_perturbed_weighted_point(i);
+      const Weighted_point &wp = compute_perturbed_weighted_point(i);
       proj_wp = project_point_and_compute_weight(wp, tsb, local_tr_traits);
     }
 
     Tr_vertex_handle center_vertex = triangulation.insert(proj_wp);
     center_vertex->data() = i;
-    if (verbose)
-      std::cerr << "* Inserted point #" << i << "\n";
+    if (verbose) std::cerr << "* Inserted point #" << i << "\n";
 
 #ifdef GUDHI_TC_VERY_VERBOSE
     std::size_t num_attempts_to_insert_points = 1;
@@ -1100,12 +983,13 @@ class Tangential_complex {
     // of the sphere "star sphere" centered at "center_vertex"
     // and which contains all the
     // circumspheres of the star of "center_vertex"
-    boost::optional<FT> squared_star_sphere_radius_plus_margin;
+    boost::optional<FT> squared_star_sphere_radius_plus_margin = boost::make_optional(false, FT());
+    // This is the strange way boost is recommending to get rid of "may be used uninitialized in this function".
+    // Former code was :
+    // boost::optional<FT> squared_star_sphere_radius_plus_margin;
 
     // Insert points until we find a point which is outside "star sphere"
-    for (auto nn_it = ins_range.begin();
-         nn_it != ins_range.end();
-         ++nn_it) {
+    for (auto nn_it = ins_range.begin(); nn_it != ins_range.end(); ++nn_it) {
       std::size_t neighbor_point_idx = nn_it->first;
 
       // ith point = p, which is already inserted
@@ -1120,13 +1004,11 @@ class Tangential_complex {
             k_sqdist(center_pt, neighbor_pt) > *squared_star_sphere_radius_plus_margin)
           break;
 
-        Tr_point proj_pt = project_point_and_compute_weight(neighbor_pt, neighbor_weight, tsb,
-                                                            local_tr_traits);
+        Tr_point proj_pt = project_point_and_compute_weight(neighbor_pt, neighbor_weight, tsb, local_tr_traits);
 
 #ifdef GUDHI_TC_VERY_VERBOSE
         ++num_attempts_to_insert_points;
 #endif
-
 
         Tr_vertex_handle vh = triangulation.insert_if_in_star(proj_pt, center_vertex);
         // Tr_vertex_handle vh = triangulation.insert(proj_pt);
@@ -1134,8 +1016,7 @@ class Tangential_complex {
 #ifdef GUDHI_TC_VERY_VERBOSE
           ++num_inserted_points;
 #endif
-          if (verbose)
-            std::cerr << "* Inserted point #" << neighbor_point_idx << "\n";
+          if (verbose) std::cerr << "* Inserted point #" << neighbor_point_idx << "\n";
 
           vh->data() = neighbor_point_idx;
 
@@ -1144,11 +1025,9 @@ class Tangential_complex {
             squared_star_sphere_radius_plus_margin = boost::none;
             // Get the incident cells and look for the biggest circumsphere
             std::vector<Tr_full_cell_handle> incident_cells;
-            triangulation.incident_full_cells(
-                                              center_vertex,
-                                              std::back_inserter(incident_cells));
-            for (typename std::vector<Tr_full_cell_handle>::iterator cit =
-                 incident_cells.begin(); cit != incident_cells.end(); ++cit) {
+            triangulation.incident_full_cells(center_vertex, std::back_inserter(incident_cells));
+            for (typename std::vector<Tr_full_cell_handle>::iterator cit = incident_cells.begin();
+                 cit != incident_cells.end(); ++cit) {
               Tr_full_cell_handle cell = *cit;
               if (triangulation.is_infinite(cell)) {
                 squared_star_sphere_radius_plus_margin = boost::none;
@@ -1156,12 +1035,11 @@ class Tangential_complex {
               } else {
                 // Note that this uses the perturbed point since it uses
                 // the points of the local triangulation
-                Tr_point c = power_center(boost::make_transform_iterator(cell->vertices_begin(),
-                                                                         vertex_handle_to_point<Tr_point,
-                                                                           Tr_vertex_handle>),
-                                          boost::make_transform_iterator(cell->vertices_end(),
-                                                                         vertex_handle_to_point<Tr_point,
-                                                                           Tr_vertex_handle>));
+                Tr_point c =
+                    power_center(boost::make_transform_iterator(cell->vertices_begin(),
+                                                                vertex_handle_to_point<Tr_point, Tr_vertex_handle>),
+                                 boost::make_transform_iterator(cell->vertices_end(),
+                                                                vertex_handle_to_point<Tr_point, Tr_vertex_handle>));
 
                 FT sq_power_sphere_diam = 4 * point_weight(c);
 
@@ -1176,12 +1054,11 @@ class Tangential_complex {
             // The value depends on whether we perturb weight or position
             if (squared_star_sphere_radius_plus_margin) {
               // "2*m_last_max_perturb" because both points can be perturbed
-              squared_star_sphere_radius_plus_margin = CGAL::square(std::sqrt(*squared_star_sphere_radius_plus_margin)
-                                                                    + 2 * m_last_max_perturb);
+              squared_star_sphere_radius_plus_margin =
+                  CGAL::square(std::sqrt(*squared_star_sphere_radius_plus_margin) + 2 * m_last_max_perturb);
 
               // Save it in `m_squared_star_spheres_radii_incl_margin`
-              m_squared_star_spheres_radii_incl_margin[i] =
-                  *squared_star_sphere_radius_plus_margin;
+              m_squared_star_spheres_radii_incl_margin[i] = *squared_star_sphere_radius_plus_margin;
             } else {
               m_squared_star_spheres_radii_incl_margin[i] = FT(-1);
             }
@@ -1193,36 +1070,28 @@ class Tangential_complex {
     return center_vertex;
   }
 
-  void refresh_tangent_triangulation(std::size_t i, Points_ds const& updated_pts_ds, bool verbose = false) {
-    if (verbose)
-      std::cerr << "** Refreshing tangent tri #" << i << " **\n";
+  void refresh_tangent_triangulation(std::size_t i, Points_ds const &updated_pts_ds, bool verbose = false) {
+    if (verbose) std::cerr << "** Refreshing tangent tri #" << i << " **\n";
 
-    if (m_squared_star_spheres_radii_incl_margin[i] == FT(-1))
-      return compute_tangent_triangulation(i, verbose);
+    if (m_squared_star_spheres_radii_incl_margin[i] == FT(-1)) return compute_tangent_triangulation(i, verbose);
 
     Point center_point = compute_perturbed_point(i);
     // Among updated point, what is the closer from our center point?
-    std::size_t closest_pt_index =
-        updated_pts_ds.k_nearest_neighbors(center_point, 1, false).begin()->first;
+    std::size_t closest_pt_index = updated_pts_ds.k_nearest_neighbors(center_point, 1, false).begin()->first;
 
-    typename K::Construct_weighted_point_d k_constr_wp =
-        m_k.construct_weighted_point_d_object();
+    typename K::Construct_weighted_point_d k_constr_wp = m_k.construct_weighted_point_d_object();
     typename K::Power_distance_d k_power_dist = m_k.power_distance_d_object();
 
     // Construct a weighted point equivalent to the star sphere
-    Weighted_point star_sphere = k_constr_wp(compute_perturbed_point(i),
-                                             m_squared_star_spheres_radii_incl_margin[i]);
-    Weighted_point closest_updated_point =
-        compute_perturbed_weighted_point(closest_pt_index);
+    Weighted_point star_sphere = k_constr_wp(compute_perturbed_point(i), m_squared_star_spheres_radii_incl_margin[i]);
+    Weighted_point closest_updated_point = compute_perturbed_weighted_point(closest_pt_index);
 
     // Is the "closest point" inside our star sphere?
-    if (k_power_dist(star_sphere, closest_updated_point) <= FT(0))
-      compute_tangent_triangulation(i, verbose);
+    if (k_power_dist(star_sphere, closest_updated_point) <= FT(0)) compute_tangent_triangulation(i, verbose);
   }
 
   void compute_tangent_triangulation(std::size_t i, bool verbose = false) {
-    if (verbose)
-      std::cerr << "** Computing tangent tri #" << i << " **\n";
+    if (verbose) std::cerr << "** Computing tangent tri #" << i << " **\n";
     // std::cerr << "***********************************************\n";
 
     // No need to lock the mutex here since this will not be called while
@@ -1233,7 +1102,7 @@ class Tangential_complex {
     // Estimate the tangent space
     if (!m_are_tangent_spaces_computed[i]) {
 #ifdef GUDHI_TC_EXPORT_NORMALS
-      tsb = compute_tangent_space(center_pt, i, true  /*normalize*/, &m_orth_spaces[i]);
+      tsb = compute_tangent_space(center_pt, i, true /*normalize*/, &m_orth_spaces[i]);
 #else
       tsb = compute_tangent_space(center_pt, i);
 #endif
@@ -1243,11 +1112,9 @@ class Tangential_complex {
     Gudhi::Clock t;
 #endif
     int tangent_space_dim = tangent_basis_dim(i);
-    Triangulation &local_tr =
-        m_triangulations[i].construct_triangulation(tangent_space_dim);
+    Triangulation &local_tr = m_triangulations[i].construct_triangulation(tangent_space_dim);
 
-    m_triangulations[i].center_vertex() =
-        compute_star(i, center_pt, tsb, local_tr, verbose);
+    m_triangulations[i].center_vertex() = compute_star(i, center_pt, tsb, local_tr, verbose);
 
 #if defined(GUDHI_TC_PROFILING) && defined(GUDHI_TC_VERY_VERBOSE)
     t.end();
@@ -1256,8 +1123,8 @@ class Tangential_complex {
 #endif
 
 #ifdef GUDHI_TC_VERY_VERBOSE
-    std::cerr << "Inserted " << num_inserted_points << " points / "
-        << num_attempts_to_insert_points << " attemps to compute the star\n";
+    std::cerr << "Inserted " << num_inserted_points << " points / " << num_attempts_to_insert_points
+              << " attemps to compute the star\n";
 #endif
 
     update_star(i);
@@ -1278,8 +1145,7 @@ class Tangential_complex {
     int cur_dim_plus_1 = local_tr.current_dimension() + 1;
 
     std::vector<Tr_full_cell_handle> incident_cells;
-    local_tr.incident_full_cells(
-                                 center_vertex, std::back_inserter(incident_cells));
+    local_tr.incident_full_cells(center_vertex, std::back_inserter(incident_cells));
 
     typename std::vector<Tr_full_cell_handle>::const_iterator it_c = incident_cells.begin();
     typename std::vector<Tr_full_cell_handle>::const_iterator it_c_end = incident_cells.end();
@@ -1289,30 +1155,25 @@ class Tangential_complex {
       Incident_simplex incident_simplex;
       for (int j = 0; j < cur_dim_plus_1; ++j) {
         std::size_t index = (*it_c)->vertex(j)->data();
-        if (index != i)
-          incident_simplex.insert(index);
+        if (index != i) incident_simplex.insert(index);
       }
       GUDHI_CHECK(incident_simplex.size() == cur_dim_plus_1 - 1,
-        std::logic_error("update_star: wrong size of incident simplex"));
+                  std::logic_error("update_star: wrong size of incident simplex"));
       star.push_back(incident_simplex);
     }
   }
 
   // Estimates tangent subspaces using PCA
 
-  Tangent_space_basis compute_tangent_space(const Point &p
-                                            , const std::size_t i
-                                            , bool normalize_basis = true
-                                            , Orthogonal_space_basis *p_orth_space_basis = NULL
-                                            ) {
-    unsigned int num_pts_for_pca = (std::min)(static_cast<unsigned int> (std::pow(GUDHI_TC_BASE_VALUE_FOR_PCA, m_intrinsic_dim)),
-                                              static_cast<unsigned int> (m_points.size()));
+  Tangent_space_basis compute_tangent_space(const Point &p, const std::size_t i, bool normalize_basis = true,
+                                            Orthogonal_space_basis *p_orth_space_basis = NULL) {
+    unsigned int num_pts_for_pca =
+        (std::min)(static_cast<unsigned int>(std::pow(GUDHI_TC_BASE_VALUE_FOR_PCA, m_intrinsic_dim)),
+                   static_cast<unsigned int>(m_points.size()));
 
     // Kernel functors
-    typename K::Construct_vector_d constr_vec =
-        m_k.construct_vector_d_object();
-    typename K::Compute_coordinate_d coord =
-        m_k.compute_coordinate_d_object();
+    typename K::Construct_vector_d constr_vec = m_k.construct_vector_d_object();
+    typename K::Compute_coordinate_d coord = m_k.compute_coordinate_d_object();
 
 #ifdef GUDHI_TC_USE_ANOTHER_POINT_SET_FOR_TANGENT_SPACE_ESTIM
     KNS_range kns_range = m_points_ds_for_tse.k_nearest_neighbors(p, num_pts_for_pca, false);
@@ -1325,9 +1186,7 @@ class Tangential_complex {
     // One row = one point
     Eigen::MatrixXd mat_points(num_pts_for_pca, m_ambient_dim);
     auto nn_it = kns_range.begin();
-    for (unsigned int j = 0;
-         j < num_pts_for_pca && nn_it != kns_range.end();
-         ++j, ++nn_it) {
+    for (unsigned int j = 0; j < num_pts_for_pca && nn_it != kns_range.end(); ++j, ++nn_it) {
       for (int i = 0; i < m_ambient_dim; ++i) {
         mat_points(j, i) = CGAL::to_double(coord(points_for_pca[nn_it->first], i));
       }
@@ -1340,36 +1199,26 @@ class Tangential_complex {
 
     // The eigenvectors are sorted in increasing order of their corresponding
     // eigenvalues
-    for (int j = m_ambient_dim - 1;
-         j >= m_ambient_dim - m_intrinsic_dim;
-         --j) {
+    for (int j = m_ambient_dim - 1; j >= m_ambient_dim - m_intrinsic_dim; --j) {
       if (normalize_basis) {
-        Vector v = constr_vec(m_ambient_dim,
-                              eig.eigenvectors().col(j).data(),
+        Vector v = constr_vec(m_ambient_dim, eig.eigenvectors().col(j).data(),
                               eig.eigenvectors().col(j).data() + m_ambient_dim);
         tsb.push_back(normalize_vector(v, m_k));
       } else {
-        tsb.push_back(constr_vec(
-                                 m_ambient_dim,
-                                 eig.eigenvectors().col(j).data(),
+        tsb.push_back(constr_vec(m_ambient_dim, eig.eigenvectors().col(j).data(),
                                  eig.eigenvectors().col(j).data() + m_ambient_dim));
       }
     }
 
     if (p_orth_space_basis) {
       p_orth_space_basis->set_origin(i);
-      for (int j = m_ambient_dim - m_intrinsic_dim - 1;
-           j >= 0;
-           --j) {
+      for (int j = m_ambient_dim - m_intrinsic_dim - 1; j >= 0; --j) {
         if (normalize_basis) {
-          Vector v = constr_vec(m_ambient_dim,
-                                eig.eigenvectors().col(j).data(),
+          Vector v = constr_vec(m_ambient_dim, eig.eigenvectors().col(j).data(),
                                 eig.eigenvectors().col(j).data() + m_ambient_dim);
           p_orth_space_basis->push_back(normalize_vector(v, m_k));
         } else {
-          p_orth_space_basis->push_back(constr_vec(
-                                                   m_ambient_dim,
-                                                   eig.eigenvectors().col(j).data(),
+          p_orth_space_basis->push_back(constr_vec(m_ambient_dim, eig.eigenvectors().col(j).data(),
                                                    eig.eigenvectors().col(j).data() + m_ambient_dim));
         }
       }
@@ -1386,29 +1235,23 @@ class Tangential_complex {
   // on it. Note that most points are duplicated.
 
   Tangent_space_basis compute_tangent_space(const Simplex &s, bool normalize_basis = true) {
-    unsigned int num_pts_for_pca = (std::min)(static_cast<unsigned int> (std::pow(GUDHI_TC_BASE_VALUE_FOR_PCA, m_intrinsic_dim)),
-                                              static_cast<unsigned int> (m_points.size()));
+    unsigned int num_pts_for_pca =
+        (std::min)(static_cast<unsigned int>(std::pow(GUDHI_TC_BASE_VALUE_FOR_PCA, m_intrinsic_dim)),
+                   static_cast<unsigned int>(m_points.size()));
 
     // Kernel functors
-    typename K::Construct_vector_d constr_vec =
-        m_k.construct_vector_d_object();
-    typename K::Compute_coordinate_d coord =
-        m_k.compute_coordinate_d_object();
-    typename K::Squared_length_d sqlen =
-        m_k.squared_length_d_object();
-    typename K::Scaled_vector_d scaled_vec =
-        m_k.scaled_vector_d_object();
-    typename K::Scalar_product_d scalar_pdct =
-        m_k.scalar_product_d_object();
-    typename K::Difference_of_vectors_d diff_vec =
-        m_k.difference_of_vectors_d_object();
+    typename K::Construct_vector_d constr_vec = m_k.construct_vector_d_object();
+    typename K::Compute_coordinate_d coord = m_k.compute_coordinate_d_object();
+    typename K::Squared_length_d sqlen = m_k.squared_length_d_object();
+    typename K::Scaled_vector_d scaled_vec = m_k.scaled_vector_d_object();
+    typename K::Scalar_product_d scalar_pdct = m_k.scalar_product_d_object();
+    typename K::Difference_of_vectors_d diff_vec = m_k.difference_of_vectors_d_object();
 
     // One row = one point
     Eigen::MatrixXd mat_points(s.size() * num_pts_for_pca, m_ambient_dim);
     unsigned int current_row = 0;
 
-    for (Simplex::const_iterator it_index = s.begin();
-         it_index != s.end(); ++it_index) {
+    for (Simplex::const_iterator it_index = s.begin(); it_index != s.end(); ++it_index) {
       const Point &p = m_points[*it_index];
 
 #ifdef GUDHI_TC_USE_ANOTHER_POINT_SET_FOR_TANGENT_SPACE_ESTIM
@@ -1420,12 +1263,9 @@ class Tangential_complex {
 #endif
 
       auto nn_it = kns_range.begin();
-      for (;
-           current_row < num_pts_for_pca && nn_it != kns_range.end();
-           ++current_row, ++nn_it) {
+      for (; current_row < num_pts_for_pca && nn_it != kns_range.end(); ++current_row, ++nn_it) {
         for (int i = 0; i < m_ambient_dim; ++i) {
-          mat_points(current_row, i) =
-              CGAL::to_double(coord(points_for_pca[nn_it->first], i));
+          mat_points(current_row, i) = CGAL::to_double(coord(points_for_pca[nn_it->first], i));
         }
       }
     }
@@ -1437,18 +1277,13 @@ class Tangential_complex {
 
     // The eigenvectors are sorted in increasing order of their corresponding
     // eigenvalues
-    for (int j = m_ambient_dim - 1;
-         j >= m_ambient_dim - m_intrinsic_dim;
-         --j) {
+    for (int j = m_ambient_dim - 1; j >= m_ambient_dim - m_intrinsic_dim; --j) {
       if (normalize_basis) {
-        Vector v = constr_vec(m_ambient_dim,
-                              eig.eigenvectors().col(j).data(),
+        Vector v = constr_vec(m_ambient_dim, eig.eigenvectors().col(j).data(),
                               eig.eigenvectors().col(j).data() + m_ambient_dim);
         tsb.push_back(normalize_vector(v, m_k));
       } else {
-        tsb.push_back(constr_vec(
-                                 m_ambient_dim,
-                                 eig.eigenvectors().col(j).data(),
+        tsb.push_back(constr_vec(m_ambient_dim, eig.eigenvectors().col(j).data(),
                                  eig.eigenvectors().col(j).data() + m_ambient_dim));
       }
     }
@@ -1458,14 +1293,11 @@ class Tangential_complex {
 
   // Returns the dimension of the ith local triangulation
 
-  int tangent_basis_dim(std::size_t i) const {
-    return m_tangent_spaces[i].dimension();
-  }
+  int tangent_basis_dim(std::size_t i) const { return m_tangent_spaces[i].dimension(); }
 
   Point compute_perturbed_point(std::size_t pt_idx) const {
 #ifdef GUDHI_TC_PERTURB_POSITION
-    return m_k.translated_point_d_object()(
-                                           m_points[pt_idx], m_translations[pt_idx]);
+    return m_k.translated_point_d_object()(m_points[pt_idx], m_translations[pt_idx]);
 #else
     return m_points[pt_idx];
 #endif
@@ -1473,8 +1305,7 @@ class Tangential_complex {
 
   void compute_perturbed_weighted_point(std::size_t pt_idx, Point &p, FT &w) const {
 #ifdef GUDHI_TC_PERTURB_POSITION
-    p = m_k.translated_point_d_object()(
-                                        m_points[pt_idx], m_translations[pt_idx]);
+    p = m_k.translated_point_d_object()(m_points[pt_idx], m_translations[pt_idx]);
 #else
     p = m_points[pt_idx];
 #endif
@@ -1482,8 +1313,7 @@ class Tangential_complex {
   }
 
   Weighted_point compute_perturbed_weighted_point(std::size_t pt_idx) const {
-    typename K::Construct_weighted_point_d k_constr_wp =
-        m_k.construct_weighted_point_d_object();
+    typename K::Construct_weighted_point_d k_constr_wp = m_k.construct_weighted_point_d_object();
 
     Weighted_point wp = k_constr_wp(
 #ifdef GUDHI_TC_PERTURB_POSITION
@@ -1496,33 +1326,22 @@ class Tangential_complex {
     return wp;
   }
 
-  Point unproject_point(const Tr_point &p,
-                        const Tangent_space_basis &tsb,
-                        const Tr_traits &tr_traits) const {
-    typename K::Translated_point_d k_transl =
-        m_k.translated_point_d_object();
-    typename K::Scaled_vector_d k_scaled_vec =
-        m_k.scaled_vector_d_object();
-    typename Tr_traits::Compute_coordinate_d coord =
-        tr_traits.compute_coordinate_d_object();
+  Point unproject_point(const Tr_point &p, const Tangent_space_basis &tsb, const Tr_traits &tr_traits) const {
+    typename K::Translated_point_d k_transl = m_k.translated_point_d_object();
+    typename K::Scaled_vector_d k_scaled_vec = m_k.scaled_vector_d_object();
+    typename Tr_traits::Compute_coordinate_d coord = tr_traits.compute_coordinate_d_object();
 
     Point global_point = compute_perturbed_point(tsb.origin());
-    for (int i = 0; i < m_intrinsic_dim; ++i)
-      global_point = k_transl(global_point,
-                              k_scaled_vec(tsb[i], coord(p, i)));
+    for (int i = 0; i < m_intrinsic_dim; ++i) global_point = k_transl(global_point, k_scaled_vec(tsb[i], coord(p, i)));
 
     return global_point;
   }
 
   // Project the point in the tangent space
   // Resulting point coords are expressed in tsb's space
-  Tr_bare_point project_point(const Point &p,
-                              const Tangent_space_basis &tsb,
-                              const Tr_traits &tr_traits) const {
-    typename K::Scalar_product_d scalar_pdct =
-        m_k.scalar_product_d_object();
-    typename K::Difference_of_points_d diff_points =
-        m_k.difference_of_points_d_object();
+  Tr_bare_point project_point(const Point &p, const Tangent_space_basis &tsb, const Tr_traits &tr_traits) const {
+    typename K::Scalar_product_d scalar_pdct = m_k.scalar_product_d_object();
+    typename K::Difference_of_points_d diff_points = m_k.difference_of_points_d_object();
 
     Vector v = diff_points(p, compute_perturbed_point(tsb.origin()));
 
@@ -1535,41 +1354,30 @@ class Tangential_complex {
       coords.push_back(coord);
     }
 
-    return tr_traits.construct_point_d_object()(
-                                                static_cast<int> (coords.size()), coords.begin(), coords.end());
+    return tr_traits.construct_point_d_object()(static_cast<int>(coords.size()), coords.begin(), coords.end());
   }
 
   // Project the point in the tangent space
   // The weight will be the squared distance between p and the projection of p
   // Resulting point coords are expressed in tsb's space
 
-  Tr_point project_point_and_compute_weight(const Weighted_point &wp,
-                                            const Tangent_space_basis &tsb,
+  Tr_point project_point_and_compute_weight(const Weighted_point &wp, const Tangent_space_basis &tsb,
                                             const Tr_traits &tr_traits) const {
-    typename K::Point_drop_weight_d k_drop_w =
-        m_k.point_drop_weight_d_object();
-    typename K::Compute_weight_d k_point_weight =
-        m_k.compute_weight_d_object();
-    return project_point_and_compute_weight(
-                                            k_drop_w(wp), k_point_weight(wp), tsb, tr_traits);
+    typename K::Point_drop_weight_d k_drop_w = m_k.point_drop_weight_d_object();
+    typename K::Compute_weight_d k_point_weight = m_k.compute_weight_d_object();
+    return project_point_and_compute_weight(k_drop_w(wp), k_point_weight(wp), tsb, tr_traits);
   }
 
   // Same as above, with slightly different parameters
-  Tr_point project_point_and_compute_weight(const Point &p, const FT w,
-                                            const Tangent_space_basis &tsb,
+  Tr_point project_point_and_compute_weight(const Point &p, const FT w, const Tangent_space_basis &tsb,
                                             const Tr_traits &tr_traits) const {
     const int point_dim = m_k.point_dimension_d_object()(p);
 
-    typename K::Construct_point_d constr_pt =
-        m_k.construct_point_d_object();
-    typename K::Scalar_product_d scalar_pdct =
-        m_k.scalar_product_d_object();
-    typename K::Difference_of_points_d diff_points =
-        m_k.difference_of_points_d_object();
-    typename K::Compute_coordinate_d coord =
-        m_k.compute_coordinate_d_object();
-    typename K::Construct_cartesian_const_iterator_d ccci =
-        m_k.construct_cartesian_const_iterator_d_object();
+    typename K::Construct_point_d constr_pt = m_k.construct_point_d_object();
+    typename K::Scalar_product_d scalar_pdct = m_k.scalar_product_d_object();
+    typename K::Difference_of_points_d diff_points = m_k.difference_of_points_d_object();
+    typename K::Compute_coordinate_d coord = m_k.compute_coordinate_d_object();
+    typename K::Construct_cartesian_const_iterator_d ccci = m_k.construct_cartesian_const_iterator_d_object();
 
     Point origin = compute_perturbed_point(tsb.origin());
     Vector v = diff_points(p, origin);
@@ -1588,8 +1396,7 @@ class Tangential_complex {
 
       // p_proj += c * tsb[i]
       if (!same_dim) {
-        for (int j = 0; j < point_dim; ++j)
-          p_proj[j] += c * coord(tsb[i], j);
+        for (int j = 0; j < point_dim; ++j) p_proj[j] += c * coord(tsb[i], j);
       }
     }
 
@@ -1600,24 +1407,21 @@ class Tangential_complex {
       sq_dist_to_proj_pt = m_k.squared_distance_d_object()(p, projected_pt);
     }
 
-    return tr_traits.construct_weighted_point_d_object()
-        (tr_traits.construct_point_d_object()(static_cast<int> (coords.size()), coords.begin(), coords.end()),
-         w - sq_dist_to_proj_pt);
+    return tr_traits.construct_weighted_point_d_object()(
+        tr_traits.construct_point_d_object()(static_cast<int>(coords.size()), coords.begin(), coords.end()),
+        w - sq_dist_to_proj_pt);
   }
 
   // Project all the points in the tangent space
 
   template <typename Indexed_point_range>
-  std::vector<Tr_point> project_points_and_compute_weights(
-                                                           const Indexed_point_range &point_indices,
+  std::vector<Tr_point> project_points_and_compute_weights(const Indexed_point_range &point_indices,
                                                            const Tangent_space_basis &tsb,
                                                            const Tr_traits &tr_traits) const {
     std::vector<Tr_point> ret;
-    for (typename Indexed_point_range::const_iterator
-         it = point_indices.begin(), it_end = point_indices.end();
+    for (typename Indexed_point_range::const_iterator it = point_indices.begin(), it_end = point_indices.end();
          it != it_end; ++it) {
-      ret.push_back(project_point_and_compute_weight(
-                                                     compute_perturbed_weighted_point(*it), tsb, tr_traits));
+      ret.push_back(project_point_and_compute_weight(compute_perturbed_weighted_point(*it), tsb, tr_traits));
     }
     return ret;
   }
@@ -1636,7 +1440,7 @@ class Tangential_complex {
   // A simplex here is a list of point indices
   // TODO(CJ): improve it like the other "is_simplex_consistent" below
 
-  bool is_simplex_consistent(Simplex const& simplex) const {
+  bool is_simplex_consistent(Simplex const &simplex) const {
     // Check if the simplex is in the stars of all its vertices
     Simplex::const_iterator it_point_idx = simplex.begin();
     // For each point p of the simplex, we parse the incidents cells of p
@@ -1644,18 +1448,16 @@ class Tangential_complex {
     for (; it_point_idx != simplex.end(); ++it_point_idx) {
       std::size_t point_idx = *it_point_idx;
       // Don't check infinite simplices
-      if (point_idx == (std::numeric_limits<std::size_t>::max)())
-        continue;
+      if (point_idx == (std::numeric_limits<std::size_t>::max)()) continue;
 
-      Star const& star = m_stars[point_idx];
+      Star const &star = m_stars[point_idx];
 
       // What we're looking for is "simplex" \ point_idx
       Incident_simplex is_to_find = simplex;
       is_to_find.erase(point_idx);
 
       // For each cell
-      if (std::find(star.begin(), star.end(), is_to_find) == star.end())
-        return false;
+      if (std::find(star.begin(), star.end(), is_to_find) == star.end()) return false;
     }
 
     return true;
@@ -1668,9 +1470,8 @@ class Tangential_complex {
   //       star(center_point)
 
   template <typename OutputIterator>  // value_type = std::size_t
-  bool is_simplex_consistent(
-                             std::size_t center_point,
-                             Incident_simplex const& s,  // without "center_point"
+  bool is_simplex_consistent(std::size_t center_point,
+                             Incident_simplex const &s,  // without "center_point"
                              OutputIterator points_whose_star_does_not_contain_s,
                              bool check_also_in_non_maximal_faces = false) const {
     Simplex full_simplex = s;
@@ -1683,10 +1484,9 @@ class Tangential_complex {
     for (; it_point_idx != s.end(); ++it_point_idx) {
       std::size_t point_idx = *it_point_idx;
       // Don't check infinite simplices
-      if (point_idx == (std::numeric_limits<std::size_t>::max)())
-        continue;
+      if (point_idx == (std::numeric_limits<std::size_t>::max)()) continue;
 
-      Star const& star = m_stars[point_idx];
+      Star const &star = m_stars[point_idx];
 
       // What we're looking for is full_simplex \ point_idx
       Incident_simplex is_to_find = full_simplex;
@@ -1696,15 +1496,11 @@ class Tangential_complex {
         // For each simplex "is" of the star, check if ic_to_simplex is
         // included in "is"
         bool found = false;
-        for (Star::const_iterator is = star.begin(), is_end = star.end();
-             !found && is != is_end; ++is) {
-          if (std::includes(is->begin(), is->end(),
-                            is_to_find.begin(), is_to_find.end()))
-            found = true;
+        for (Star::const_iterator is = star.begin(), is_end = star.end(); !found && is != is_end; ++is) {
+          if (std::includes(is->begin(), is->end(), is_to_find.begin(), is_to_find.end())) found = true;
         }
 
-        if (!found)
-          *points_whose_star_does_not_contain_s++ = point_idx;
+        if (!found) *points_whose_star_does_not_contain_s++ = point_idx;
       } else {
         // Does the star contain is_to_find?
         if (std::find(star.begin(), star.end(), is_to_find) == star.end())
@@ -1718,19 +1514,15 @@ class Tangential_complex {
   // A simplex here is a list of point indices
   // It looks for s in star(p).
   // "s" contains all the points of the simplex except p.
-  bool is_simplex_in_star(std::size_t p,
-                          Incident_simplex const& s,
-                          bool check_also_in_non_maximal_faces = true) const {
-    Star const& star = m_stars[p];
+  bool is_simplex_in_star(std::size_t p, Incident_simplex const &s, bool check_also_in_non_maximal_faces = true) const {
+    Star const &star = m_stars[p];
 
     if (check_also_in_non_maximal_faces) {
       // For each simplex "is" of the star, check if ic_to_simplex is
       // included in "is"
       bool found = false;
-      for (Star::const_iterator is = star.begin(), is_end = star.end();
-           !found && is != is_end; ++is) {
-        if (std::includes(is->begin(), is->end(), s.begin(), s.end()))
-          found = true;
+      for (Star::const_iterator is = star.begin(), is_end = star.end(); !found && is != is_end; ++is) {
+        if (std::includes(is->begin(), is->end(), s.begin(), s.end())) found = true;
       }
 
       return found;
@@ -1742,64 +1534,55 @@ class Tangential_complex {
 #ifdef GUDHI_USE_TBB
   // Functor for try_to_solve_inconsistencies_in_a_local_triangulation function
   class Try_to_solve_inconsistencies_in_a_local_triangulation {
-    Tangential_complex & m_tc;
+    Tangential_complex &m_tc;
     double m_max_perturb;
     tbb::combinable<std::size_t> &m_num_inconsistencies;
     tbb::combinable<std::vector<std::size_t> > &m_updated_points;
 
    public:
     // Constructor
-    Try_to_solve_inconsistencies_in_a_local_triangulation(Tangential_complex &tc,
-                                                          double max_perturb,
+    Try_to_solve_inconsistencies_in_a_local_triangulation(Tangential_complex &tc, double max_perturb,
                                                           tbb::combinable<std::size_t> &num_inconsistencies,
                                                           tbb::combinable<std::vector<std::size_t> > &updated_points)
         : m_tc(tc),
-        m_max_perturb(max_perturb),
-        m_num_inconsistencies(num_inconsistencies),
-        m_updated_points(updated_points) { }
+          m_max_perturb(max_perturb),
+          m_num_inconsistencies(num_inconsistencies),
+          m_updated_points(updated_points) {}
 
     // Constructor
-    Try_to_solve_inconsistencies_in_a_local_triangulation(const Try_to_solve_inconsistencies_in_a_local_triangulation&
-                                                            tsilt)
+    Try_to_solve_inconsistencies_in_a_local_triangulation(
+        const Try_to_solve_inconsistencies_in_a_local_triangulation &tsilt)
         : m_tc(tsilt.m_tc),
-        m_max_perturb(tsilt.m_max_perturb),
-        m_num_inconsistencies(tsilt.m_num_inconsistencies),
-        m_updated_points(tsilt.m_updated_points) { }
+          m_max_perturb(tsilt.m_max_perturb),
+          m_num_inconsistencies(tsilt.m_num_inconsistencies),
+          m_updated_points(tsilt.m_updated_points) {}
 
     // operator()
-    void operator()(const tbb::blocked_range<size_t>& r) const {
+    void operator()(const tbb::blocked_range<size_t> &r) const {
       for (size_t i = r.begin(); i != r.end(); ++i) {
-        m_num_inconsistencies.local() +=
-            m_tc.try_to_solve_inconsistencies_in_a_local_triangulation(i, m_max_perturb,
-                                                                       std::back_inserter(m_updated_points.local()));
+        m_num_inconsistencies.local() += m_tc.try_to_solve_inconsistencies_in_a_local_triangulation(
+            i, m_max_perturb, std::back_inserter(m_updated_points.local()));
       }
     }
   };
 #endif  // GUDHI_USE_TBB
 
   void perturb(std::size_t point_idx, double max_perturb) {
-    const Tr_traits &local_tr_traits =
-        m_triangulations[point_idx].tr().geom_traits();
-    typename Tr_traits::Compute_coordinate_d coord =
-        local_tr_traits.compute_coordinate_d_object();
-    typename K::Translated_point_d k_transl =
-        m_k.translated_point_d_object();
-    typename K::Construct_vector_d k_constr_vec =
-        m_k.construct_vector_d_object();
-    typename K::Scaled_vector_d k_scaled_vec =
-        m_k.scaled_vector_d_object();
+    const Tr_traits &local_tr_traits = m_triangulations[point_idx].tr().geom_traits();
+    typename Tr_traits::Compute_coordinate_d coord = local_tr_traits.compute_coordinate_d_object();
+    typename K::Translated_point_d k_transl = m_k.translated_point_d_object();
+    typename K::Construct_vector_d k_constr_vec = m_k.construct_vector_d_object();
+    typename K::Scaled_vector_d k_scaled_vec = m_k.scaled_vector_d_object();
 
-    CGAL::Random_points_in_ball_d<Tr_bare_point>
-        tr_point_in_ball_generator(m_intrinsic_dim,
-                                   m_random_generator.get_double(0., max_perturb));
+    CGAL::Random_points_in_ball_d<Tr_bare_point> tr_point_in_ball_generator(
+        m_intrinsic_dim, m_random_generator.get_double(0., max_perturb));
 
     Tr_point local_random_transl =
         local_tr_traits.construct_weighted_point_d_object()(*tr_point_in_ball_generator++, 0);
     Translation_for_perturb global_transl = k_constr_vec(m_ambient_dim);
     const Tangent_space_basis &tsb = m_tangent_spaces[point_idx];
     for (int i = 0; i < m_intrinsic_dim; ++i) {
-      global_transl = k_transl(global_transl,
-                               k_scaled_vec(tsb[i], coord(local_random_transl, i)));
+      global_transl = k_transl(global_transl, k_scaled_vec(tsb[i], coord(local_random_transl, i)));
     }
     // Parallel
 #if defined(GUDHI_USE_TBB)
@@ -1814,12 +1597,11 @@ class Tangential_complex {
 
   // Return true if inconsistencies were found
   template <typename OutputIt>
-  bool try_to_solve_inconsistencies_in_a_local_triangulation(std::size_t tr_index,
-                                                             double max_perturb,
-                                                             OutputIt perturbed_pts_indices = CGAL::Emptyset_iterator()) {
+  bool try_to_solve_inconsistencies_in_a_local_triangulation(
+      std::size_t tr_index, double max_perturb, OutputIt perturbed_pts_indices = CGAL::Emptyset_iterator()) {
     bool is_inconsistent = false;
 
-    Star const& star = m_stars[tr_index];
+    Star const &star = m_stars[tr_index];
 
     // For each incident simplex
     Star::const_iterator it_inc_simplex = star.begin();
@@ -1828,8 +1610,7 @@ class Tangential_complex {
       const Incident_simplex &incident_simplex = *it_inc_simplex;
 
       // Don't check infinite cells
-      if (is_infinite(incident_simplex))
-        continue;
+      if (is_infinite(incident_simplex)) continue;
 
       Simplex c = incident_simplex;
       c.insert(tr_index);  // Add the missing index
@@ -1851,31 +1632,24 @@ class Tangential_complex {
     return is_inconsistent;
   }
 
-
   // 1st line: number of points
   // Then one point per line
-  std::ostream &export_point_set(std::ostream & os,
-                                 bool use_perturbed_points = false,
+  std::ostream &export_point_set(std::ostream &os, bool use_perturbed_points = false,
                                  const char *coord_separator = " ") const {
     if (use_perturbed_points) {
       std::vector<Point> perturbed_points;
       perturbed_points.reserve(m_points.size());
-      for (std::size_t i = 0; i < m_points.size(); ++i)
-        perturbed_points.push_back(compute_perturbed_point(i));
+      for (std::size_t i = 0; i < m_points.size(); ++i) perturbed_points.push_back(compute_perturbed_point(i));
 
-      return export_point_set(
-                              m_k, perturbed_points, os, coord_separator);
+      return export_point_set(m_k, perturbed_points, os, coord_separator);
     } else {
-      return export_point_set(
-                              m_k, m_points, os, coord_separator);
+      return export_point_set(m_k, m_points, os, coord_separator);
     }
   }
 
-  template<typename ProjectionFunctor = CGAL::Identity<Point> >
-  std::ostream &export_vertices_to_off(
-                                       std::ostream & os, std::size_t &num_vertices,
-                                       bool use_perturbed_points = false,
-                                       ProjectionFunctor const& point_projection = ProjectionFunctor()) const {
+  template <typename ProjectionFunctor = CGAL::Identity<Point> >
+  std::ostream &export_vertices_to_off(std::ostream &os, std::size_t &num_vertices, bool use_perturbed_points = false,
+                                       ProjectionFunctor const &point_projection = ProjectionFunctor()) const {
     if (m_points.empty()) {
       num_vertices = 0;
       return os;
@@ -1887,8 +1661,7 @@ class Tangential_complex {
     const int N = (m_intrinsic_dim == 1 ? 2 : 1);
 
     // Kernel functors
-    typename K::Compute_coordinate_d coord =
-        m_k.compute_coordinate_d_object();
+    typename K::Compute_coordinate_d coord = m_k.compute_coordinate_d_object();
 
 #ifdef GUDHI_TC_EXPORT_ALL_COORDS_IN_OFF
     int num_coords = m_ambient_dim;
@@ -1903,18 +1676,14 @@ class Tangential_complex {
     typename Points::const_iterator it_p_end = m_points.end();
     // For each point p
     for (std::size_t i = 0; it_p != it_p_end; ++it_p, ++i) {
-      Point p = point_projection(
-                                 use_perturbed_points ? compute_perturbed_point(i) : *it_p);
+      Point p = point_projection(use_perturbed_points ? compute_perturbed_point(i) : *it_p);
       for (int ii = 0; ii < N; ++ii) {
         int j = 0;
-        for (; j < num_coords; ++j)
-          os << CGAL::to_double(coord(p, j)) << " ";
-        if (j == 2)
-          os << "0";
+        for (; j < num_coords; ++j) os << CGAL::to_double(coord(p, j)) << " ";
+        if (j == 2) os << "0";
 
 #ifdef GUDHI_TC_EXPORT_NORMALS
-        for (j = 0; j < num_coords; ++j)
-          os << " " << CGAL::to_double(coord(*it_os->begin(), j));
+        for (j = 0; j < num_coords; ++j) os << " " << CGAL::to_double(coord(*it_os->begin(), j));
 #endif
         os << "\n";
       }
@@ -1927,12 +1696,11 @@ class Tangential_complex {
     return os;
   }
 
-  std::ostream &export_simplices_to_off(std::ostream & os, std::size_t &num_OFF_simplices,
+  std::ostream &export_simplices_to_off(std::ostream &os, std::size_t &num_OFF_simplices,
                                         bool color_inconsistencies = false,
                                         Simplex_set const *p_simpl_to_color_in_red = NULL,
                                         Simplex_set const *p_simpl_to_color_in_green = NULL,
-                                        Simplex_set const *p_simpl_to_color_in_blue = NULL)
-  const {
+                                        Simplex_set const *p_simpl_to_color_in_blue = NULL) const {
     // If m_intrinsic_dim = 1, each point is output two times
     // (see export_vertices_to_off)
     num_OFF_simplices = 0;
@@ -1945,10 +1713,9 @@ class Tangential_complex {
     for (std::size_t idx = 0; it_tr != it_tr_end; ++it_tr, ++idx) {
       bool is_star_inconsistent = false;
 
-      Triangulation const& tr = it_tr->tr();
+      Triangulation const &tr = it_tr->tr();
 
-      if (tr.current_dimension() < m_intrinsic_dim)
-        continue;
+      if (tr.current_dimension() < m_intrinsic_dim) continue;
 
       // Color for this star
       std::stringstream color;
@@ -1974,23 +1741,16 @@ class Tangential_complex {
           color_simplex = 0;
           is_star_inconsistent = true;
         } else {
-          if (p_simpl_to_color_in_red &&
-              std::find(
-                        p_simpl_to_color_in_red->begin(),
-                        p_simpl_to_color_in_red->end(),
-                        c) != p_simpl_to_color_in_red->end()) {
+          if (p_simpl_to_color_in_red && std::find(p_simpl_to_color_in_red->begin(), p_simpl_to_color_in_red->end(),
+                                                   c) != p_simpl_to_color_in_red->end()) {
             color_simplex = 1;
           } else if (p_simpl_to_color_in_green &&
-                     std::find(
-                               p_simpl_to_color_in_green->begin(),
-                               p_simpl_to_color_in_green->end(),
-                               c) != p_simpl_to_color_in_green->end()) {
+                     std::find(p_simpl_to_color_in_green->begin(), p_simpl_to_color_in_green->end(), c) !=
+                         p_simpl_to_color_in_green->end()) {
             color_simplex = 2;
           } else if (p_simpl_to_color_in_blue &&
-                     std::find(
-                               p_simpl_to_color_in_blue->begin(),
-                               p_simpl_to_color_in_blue->end(),
-                               c) != p_simpl_to_color_in_blue->end()) {
+                     std::find(p_simpl_to_color_in_blue->begin(), p_simpl_to_color_in_blue->end(), c) !=
+                         p_simpl_to_color_in_blue->end()) {
             color_simplex = 3;
           }
         }
@@ -2002,10 +1762,8 @@ class Tangential_complex {
         if (m_intrinsic_dim == 1) {
           Simplex tmp_c;
           Simplex::iterator it = c.begin();
-          for (; it != c.end(); ++it)
-            tmp_c.insert(*it * 2);
-          if (num_vertices == 2)
-            tmp_c.insert(*tmp_c.rbegin() + 1);
+          for (; it != c.end(); ++it) tmp_c.insert(*it * 2);
+          if (num_vertices == 2) tmp_c.insert(*tmp_c.rbegin() + 1);
 
           c = tmp_c;
         }
@@ -2020,26 +1778,21 @@ class Tangential_complex {
             Simplex triangle;
             Simplex::iterator it = c.begin();
             for (int i = 0; it != c.end(); ++i, ++it) {
-              if (booleans[i])
-                triangle.insert(*it);
+              if (booleans[i]) triangle.insert(*it);
             }
-            star_using_triangles.push_back(
-                                           std::make_pair(triangle, color_simplex));
+            star_using_triangles.push_back(std::make_pair(triangle, color_simplex));
           } while (std::next_permutation(booleans.begin(), booleans.end()));
         }
       }
 
       // For each cell
-      Star_using_triangles::const_iterator it_simplex =
-          star_using_triangles.begin();
-      Star_using_triangles::const_iterator it_simplex_end =
-          star_using_triangles.end();
+      Star_using_triangles::const_iterator it_simplex = star_using_triangles.begin();
+      Star_using_triangles::const_iterator it_simplex_end = star_using_triangles.end();
       for (; it_simplex != it_simplex_end; ++it_simplex) {
         const Simplex &c = it_simplex->first;
 
         // Don't export infinite cells
-        if (is_infinite(c))
-          continue;
+        if (is_infinite(c)) continue;
 
         int color_simplex = it_simplex->second;
 
@@ -2051,46 +1804,42 @@ class Tangential_complex {
         }
 
         os << 3 << " " << sstr_c.str();
-        if (color_inconsistencies || p_simpl_to_color_in_red
-            || p_simpl_to_color_in_green || p_simpl_to_color_in_blue) {
+        if (color_inconsistencies || p_simpl_to_color_in_red || p_simpl_to_color_in_green || p_simpl_to_color_in_blue) {
           switch (color_simplex) {
-            case 0: os << " 255 255 0";
+            case 0:
+              os << " 255 255 0";
               break;
-            case 1: os << " 255 0 0";
+            case 1:
+              os << " 255 0 0";
               break;
-            case 2: os << " 0 255 0";
+            case 2:
+              os << " 0 255 0";
               break;
-            case 3: os << " 0 0 255";
+            case 3:
+              os << " 0 0 255";
               break;
-            default: os << " " << color.str();
+            default:
+              os << " " << color.str();
               break;
           }
         }
         ++num_OFF_simplices;
         os << "\n";
       }
-      if (is_star_inconsistent)
-        ++num_inconsistent_stars;
+      if (is_star_inconsistent) ++num_inconsistent_stars;
     }
 
 #ifdef DEBUG_TRACES
-    std::cerr
-        << "\n==========================================================\n"
-        << "Export from list of stars to OFF:\n"
-        << "  * Number of vertices: " << m_points.size() << "\n"
-        << "  * Total number of maximal simplices: " << num_maximal_simplices
-        << "\n";
+    std::cerr << "\n==========================================================\n"
+              << "Export from list of stars to OFF:\n"
+              << "  * Number of vertices: " << m_points.size() << "\n"
+              << "  * Total number of maximal simplices: " << num_maximal_simplices << "\n";
     if (color_inconsistencies) {
-      std::cerr
-          << "  * Number of inconsistent stars: "
-          << num_inconsistent_stars << " ("
-          << (m_points.size() > 0 ?
-              100. * num_inconsistent_stars / m_points.size() : 0.) << "%)\n"
-          << "  * Number of inconsistent maximal simplices: "
-          << num_inconsistent_maximal_simplices << " ("
-          << (num_maximal_simplices > 0 ?
-              100. * num_inconsistent_maximal_simplices / num_maximal_simplices
-              : 0.) << "%)\n";
+      std::cerr << "  * Number of inconsistent stars: " << num_inconsistent_stars << " ("
+                << (m_points.size() > 0 ? 100. * num_inconsistent_stars / m_points.size() : 0.) << "%)\n"
+                << "  * Number of inconsistent maximal simplices: " << num_inconsistent_maximal_simplices << " ("
+                << (num_maximal_simplices > 0 ? 100. * num_inconsistent_maximal_simplices / num_maximal_simplices : 0.)
+                << "%)\n";
     }
     std::cerr << "==========================================================\n";
 #endif
@@ -2099,13 +1848,11 @@ class Tangential_complex {
   }
 
  public:
-  std::ostream &export_simplices_to_off(
-                                        const Simplicial_complex &complex,
-                                        std::ostream & os, std::size_t &num_OFF_simplices,
+  std::ostream &export_simplices_to_off(const Simplicial_complex &complex, std::ostream &os,
+                                        std::size_t &num_OFF_simplices,
                                         Simplex_set const *p_simpl_to_color_in_red = NULL,
                                         Simplex_set const *p_simpl_to_color_in_green = NULL,
-                                        Simplex_set const *p_simpl_to_color_in_blue = NULL)
-  const {
+                                        Simplex_set const *p_simpl_to_color_in_blue = NULL) const {
     typedef Simplicial_complex::Simplex Simplex;
     typedef Simplicial_complex::Simplex_set Simplex_set;
 
@@ -2114,31 +1861,24 @@ class Tangential_complex {
     num_OFF_simplices = 0;
     std::size_t num_maximal_simplices = 0;
 
-    typename Simplex_set::const_iterator it_s =
-        complex.simplex_range().begin();
-    typename Simplex_set::const_iterator it_s_end =
-        complex.simplex_range().end();
+    typename Simplex_set::const_iterator it_s = complex.simplex_range().begin();
+    typename Simplex_set::const_iterator it_s_end = complex.simplex_range().end();
     // For each simplex
     for (; it_s != it_s_end; ++it_s) {
       Simplex c = *it_s;
       ++num_maximal_simplices;
 
       int color_simplex = -1;  // -1=no color, 0=yellow, 1=red, 2=green, 3=blue
-      if (p_simpl_to_color_in_red &&
-          std::find(
-                    p_simpl_to_color_in_red->begin(),
-                    p_simpl_to_color_in_red->end(),
-                    c) != p_simpl_to_color_in_red->end()) {
+      if (p_simpl_to_color_in_red && std::find(p_simpl_to_color_in_red->begin(), p_simpl_to_color_in_red->end(), c) !=
+                                         p_simpl_to_color_in_red->end()) {
         color_simplex = 1;
       } else if (p_simpl_to_color_in_green &&
-                 std::find(p_simpl_to_color_in_green->begin(),
-                           p_simpl_to_color_in_green->end(),
-                           c) != p_simpl_to_color_in_green->end()) {
+                 std::find(p_simpl_to_color_in_green->begin(), p_simpl_to_color_in_green->end(), c) !=
+                     p_simpl_to_color_in_green->end()) {
         color_simplex = 2;
       } else if (p_simpl_to_color_in_blue &&
-                 std::find(p_simpl_to_color_in_blue->begin(),
-                           p_simpl_to_color_in_blue->end(),
-                           c) != p_simpl_to_color_in_blue->end()) {
+                 std::find(p_simpl_to_color_in_blue->begin(), p_simpl_to_color_in_blue->end(), c) !=
+                     p_simpl_to_color_in_blue->end()) {
         color_simplex = 3;
       }
 
@@ -2148,8 +1888,7 @@ class Tangential_complex {
 
       int num_vertices = static_cast<int>(c.size());
       // Do not export smaller dimension simplices
-      if (num_vertices < m_intrinsic_dim + 1)
-        continue;
+      if (num_vertices < m_intrinsic_dim + 1) continue;
 
       // If m_intrinsic_dim = 1, each point is output two times,
       // so we need to multiply each index by 2
@@ -2158,10 +1897,8 @@ class Tangential_complex {
       if (m_intrinsic_dim == 1) {
         Simplex tmp_c;
         Simplex::iterator it = c.begin();
-        for (; it != c.end(); ++it)
-          tmp_c.insert(*it * 2);
-        if (num_vertices == 2)
-          tmp_c.insert(*tmp_c.rbegin() + 1);
+        for (; it != c.end(); ++it) tmp_c.insert(*it * 2);
+        if (num_vertices == 2) tmp_c.insert(*tmp_c.rbegin() + 1);
 
         c = tmp_c;
       }
@@ -2176,11 +1913,10 @@ class Tangential_complex {
           Simplex triangle;
           Simplex::iterator it = c.begin();
           for (int i = 0; it != c.end(); ++i, ++it) {
-            if (booleans[i])
-              triangle.insert(*it);
+            if (booleans[i]) triangle.insert(*it);
           }
           triangles.push_back(triangle);
-        }        while (std::next_permutation(booleans.begin(), booleans.end()));
+        } while (std::next_permutation(booleans.begin(), booleans.end()));
       }
 
       // For each cell
@@ -2188,8 +1924,7 @@ class Tangential_complex {
       Triangles::const_iterator it_tri_end = triangles.end();
       for (; it_tri != it_tri_end; ++it_tri) {
         // Don't export infinite cells
-        if (is_infinite(*it_tri))
-          continue;
+        if (is_infinite(*it_tri)) continue;
 
         os << 3 << " ";
         Simplex::const_iterator it_point_idx = it_tri->begin();
@@ -2197,18 +1932,22 @@ class Tangential_complex {
           os << *it_point_idx << " ";
         }
 
-        if (p_simpl_to_color_in_red || p_simpl_to_color_in_green
-            || p_simpl_to_color_in_blue) {
+        if (p_simpl_to_color_in_red || p_simpl_to_color_in_green || p_simpl_to_color_in_blue) {
           switch (color_simplex) {
-            case 0: os << " 255 255 0";
+            case 0:
+              os << " 255 255 0";
               break;
-            case 1: os << " 255 0 0";
+            case 1:
+              os << " 255 0 0";
               break;
-            case 2: os << " 0 255 0";
+            case 2:
+              os << " 0 255 0";
               break;
-            case 3: os << " 0 0 255";
+            case 3:
+              os << " 0 0 255";
               break;
-            default: os << " 128 128 128";
+            default:
+              os << " 128 128 128";
               break;
           }
         }
@@ -2219,13 +1958,11 @@ class Tangential_complex {
     }
 
 #ifdef DEBUG_TRACES
-    std::cerr
-        << "\n==========================================================\n"
-        << "Export from complex to OFF:\n"
-        << "  * Number of vertices: " << m_points.size() << "\n"
-        << "  * Total number of maximal simplices: " << num_maximal_simplices
-        << "\n"
-        << "==========================================================\n";
+    std::cerr << "\n==========================================================\n"
+              << "Export from complex to OFF:\n"
+              << "  * Number of vertices: " << m_points.size() << "\n"
+              << "  * Total number of maximal simplices: " << num_maximal_simplices << "\n"
+              << "==========================================================\n";
 #endif
 
     return os;
