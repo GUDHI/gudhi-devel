@@ -8,8 +8,6 @@
 #include <memory>
 #include <limits>
 
-#define vertex_upper_bound std::numeric_limits<Toplex_map::Vertex>::max()
-
 namespace Gudhi {
 
 /** A Toplex_map represents the simplicial complex.
@@ -85,6 +83,8 @@ protected:
     
     /** \internal The map from vertices to toplices */
     std::unordered_map<Toplex_map::Vertex, Toplex_map::Simplex_ptr_set> t0;
+
+    const Toplex_map::Vertex vertex_upper_bound = std::numeric_limits<Toplex_map::Vertex>::max();
 };
 
 // Pointers are also used as key in the hash sets.

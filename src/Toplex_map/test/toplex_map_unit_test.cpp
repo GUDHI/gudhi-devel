@@ -29,21 +29,21 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(common_toplex_map_functionnalities, Toplex_map, li
   K.insert_simplex(sigma6);
   K.insert_simplex(sigma7);
 
-  std::cout << K.num_maximal_simplices();
+  std::cout << "num_maximal_simplices" << K.num_maximal_simplices() << std::endl;
 
   BOOST_CHECK(K.membership(sigma4));
   //BOOST_CHECK(!K.maximality(sigma3));
   BOOST_CHECK(!K.membership(sigma5));
   K.insert_simplex(sigma5);
 
-  std::cout << K.num_maximal_simplices();
+  std::cout << "num_maximal_simplices" << K.num_maximal_simplices() << std::endl;
 
   BOOST_CHECK(K.membership(sigma5));
   std::vector<Vertex> sigma9 = {1, 2, 3};
   std::vector<Vertex> sigma10 = {2, 7};
   auto r = K.contraction(4,5);
 
-  std::cout << K.num_maximal_simplices();
+  std::cout << "num_maximal_simplices" << K.num_maximal_simplices() << std::endl;
 
   sigma9.emplace_back(r);
   sigma10.emplace_back(r);
@@ -59,23 +59,82 @@ BOOST_AUTO_TEST_CASE(toplex_map_num_maximal_simplices) {
   using Vertex = Gudhi::Toplex_map::Vertex;
 
   Gudhi::Toplex_map K;
-  K.insert_simplex({1, 2, 3, 4});
-  K.insert_simplex({5, 2, 3, 6});
-  K.insert_simplex({4, 5, 3});
-  K.insert_simplex({4, 5, 9});
+  std::vector<Vertex> sigma1 = {1, 2, 3, 4};
+  std::vector<Vertex> sigma2 = {5, 2, 3, 6};
+  std::vector<Vertex> sigma3 = {4, 5, 3};
+  std::vector<Vertex> sigma4 = {4, 5, 9};
+  K.insert_simplex(sigma1);
+  K.insert_simplex(sigma2);
+  K.insert_simplex(sigma3);
+  K.insert_simplex(sigma4);
 
-  std::cout << K.num_maximal_simplices();
+  std::cout << "num_maximal_simplices" << K.num_maximal_simplices() << std::endl;
   BOOST_CHECK(K.num_maximal_simplices() == 4);
 
-  K.insert_simplex({5, 2, 7});
+  std::vector<Vertex> sigma5 = {5, 2, 7};
+  K.insert_simplex(sigma5);
 
-  std::cout << K.num_maximal_simplices();
+  std::cout << "num_maximal_simplices" << K.num_maximal_simplices() << std::endl;
   BOOST_CHECK(K.num_maximal_simplices() == 5);
 
   auto r = K.contraction(4,5);
+  std::cout << "r=" << r << std::endl;
+  BOOST_CHECK(r == 5);
 
-  std::cout << K.num_maximal_simplices();
+  std::cout << "num_maximal_simplices" << K.num_maximal_simplices() << std::endl;
   BOOST_CHECK(K.num_maximal_simplices() == 4);
+
+  std::vector<Vertex> sigma6 = {2, 7};
+  K.remove_simplex(sigma6);
+
+  std::cout << "num_maximal_simplices" << K.num_maximal_simplices() << std::endl;
+  BOOST_CHECK(K.num_maximal_simplices() == 4);
+
+  K.remove_simplex(sigma2);
+
+  std::cout << "num_maximal_simplices" << K.num_maximal_simplices() << std::endl;
+  BOOST_CHECK(K.num_maximal_simplices() == 6);
+}
+
+BOOST_AUTO_TEST_CASE(lazy_toplex_map_num_maximal_simplices) {
+  using Vertex = Gudhi::Lazy_Toplex_map::Vertex;
+
+  Gudhi::Lazy_Toplex_map K;
+  std::vector<Vertex> sigma1 = {1, 2, 3, 4};
+  std::vector<Vertex> sigma2 = {5, 2, 3, 6};
+  std::vector<Vertex> sigma3 = {4, 5, 3};
+  std::vector<Vertex> sigma4 = {4, 5, 9};
+  K.insert_simplex(sigma1);
+  K.insert_simplex(sigma2);
+  K.insert_simplex(sigma3);
+  K.insert_simplex(sigma4);
+
+  std::cout << "num_maximal_simplices" << K.num_maximal_simplices() << std::endl;
+  BOOST_CHECK(K.num_maximal_simplices() == 4);
+
+  std::vector<Vertex> sigma5 = {5, 2, 7};
+  K.insert_simplex(sigma5);
+
+  std::cout << "num_maximal_simplices" << K.num_maximal_simplices() << std::endl;
+  BOOST_CHECK(K.num_maximal_simplices() == 5);
+
+  auto r = K.contraction(4,5);
+  std::cout << "r=" << r << std::endl;
+  BOOST_CHECK(r == 5);
+
+  std::cout << "num_maximal_simplices" << K.num_maximal_simplices() << std::endl;
+  BOOST_CHECK(K.num_maximal_simplices() == 5);
+
+  std::vector<Vertex> sigma6 = {2, 7};
+  K.remove_simplex(sigma6);
+
+  std::cout << "num_maximal_simplices" << K.num_maximal_simplices() << std::endl;
+  BOOST_CHECK(K.num_maximal_simplices() == 6);
+
+  K.remove_simplex(sigma2);
+
+  std::cout << "num_maximal_simplices" << K.num_maximal_simplices() << std::endl;
+  BOOST_CHECK(K.num_maximal_simplices() == 9);
 
 }
 

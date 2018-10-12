@@ -15,48 +15,40 @@ typedef std::pair< Simplex_tree<>::Simplex_handle, bool > typePairSimplexBool;
 class ST_wrapper {
 
 public:
-    void insert_simplex(const Simplex& tau);
-    bool membership(const Simplex& tau);
-    Vertex contraction(const Vertex x, const Vertex y);
-    std::size_t num_simplices();
-
-private:
-    Simplex_tree<> simplexTree;
-    void erase_max(const Simplex& sigma);
-};
-
-void ST_wrapper::insert_simplex(const Simplex& tau){
+  void insert_simplex(const Simplex& tau) {
     simplexTree.insert_simplex_and_subfaces(tau);
-}
+  }
 
-bool ST_wrapper::membership(const Simplex& tau) {
+  bool membership(const Simplex& tau) {
     return simplexTree.find(tau) != simplexTree.null_simplex();
-}
+  }
 
-void ST_wrapper::erase_max(const Simplex& sigma){
-    if(membership(sigma))
-        simplexTree.remove_maximal_simplex(simplexTree.find(sigma));
-}
-
-Vertex ST_wrapper::contraction(const Vertex x, const Vertex y){
+  Vertex contraction(const Vertex x, const Vertex y) {
     Simplex sx; sx.insert(x);
     auto hx = simplexTree.find(sx);
     if(hx != simplexTree.null_simplex())
-        for(auto h : simplexTree.cofaces_simplex_range(hx,0)){
-            auto sr = simplexTree.simplex_vertex_range(h);
-            Simplex sigma(sr.begin(),sr.end());
-            erase_max(sigma);
-            sigma.erase(x);
-            sigma.insert(y);
-            insert_simplex(sigma);
-        }
+      for(auto h : simplexTree.cofaces_simplex_range(hx,0)){
+        auto sr = simplexTree.simplex_vertex_range(h);
+        Simplex sigma(sr.begin(),sr.end());
+        erase_max(sigma);
+        sigma.erase(x);
+        sigma.insert(y);
+        insert_simplex(sigma);
+      }
     return y;
-}
+  }
 
-std::size_t ST_wrapper::num_simplices(){
+  std::size_t num_maximal_simplices() {
     return simplexTree.num_simplices();
-}
+  }
 
+private:
+    Simplex_tree<> simplexTree;
+    void erase_max(const Simplex& sigma) {
+      if(membership(sigma))
+        simplexTree.remove_maximal_simplex(simplexTree.find(sigma));
+    }
+};
 
 
 int n = 300;
@@ -120,7 +112,7 @@ void chrono(int n, int d){
     end = std::chrono::system_clock::now();
     auto c2 = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
 
-    std::cout << c1 << "\t \t" << c2 << "\t \t" << c3 << "\t \t" << K.num_simplices() << std::endl;
+    std::cout << c1 << "\t \t" << c2 << "\t \t" << c3 << "\t \t" << K.num_maximal_simplices() << std::endl;
 }
 
 int main(){
