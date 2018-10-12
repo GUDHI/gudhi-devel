@@ -13,59 +13,48 @@ class Lazy_Toplex_map {
 
 public:
 
-    /** Vertex is the type of vertices.
-     * \ingroup toplex_map   */
+    /** Vertex is the type of vertices. */
     typedef Toplex_map::Vertex Vertex;
 
-    /** Simplex is the type of simplices.
-     * \ingroup toplex_map   */
+    /** Simplex is the type of simplices. */
     typedef Toplex_map::Simplex Simplex;
 
-    /** The type of the pointers to maximal simplices.
-     * \ingroup toplex_map   */
+    /** The type of the pointers to maximal simplices. */
     typedef Toplex_map::Simplex_ptr Simplex_ptr;
 
-    /** The type of the sets of Simplex_ptr.
-     * \ingroup toplex_map   */
+    /** The type of the sets of Simplex_ptr. */
     typedef Toplex_map::Simplex_ptr_set Simplex_ptr_set;
 
     /** Adds the given simplex to the complex.
-     * The simplex must not have maximal coface in the complex.
-     * \ingroup toplex_map   */
+     * The simplex must not have maximal coface in the complex. */
     template <typename Input_vertex_range>
     void insert_independent_simplex(const Input_vertex_range &vertex_range);
 
     /** \brief Adds the given simplex to the complex.
-     * Nothing happens if the simplex has a coface in the complex.
-     * \ingroup toplex_map   */
+     * Nothing happens if the simplex has a coface in the complex. */
     template <typename Input_vertex_range>
     bool insert_simplex(const Input_vertex_range &vertex_range);
 
     /** \brief Removes the given simplex and its cofaces from the complex.
-     * Its faces are kept inside.
-     * \ingroup toplex_map   */
+     * Its faces are kept inside. */
     template <typename Input_vertex_range>
     void remove_simplex(const Input_vertex_range &vertex_range);
 
-    /** Does a simplex belong to the complex ?
-     * \ingroup toplex_map   */
+    /** Does a simplex belong to the complex ? */
     template <typename Input_vertex_range>
     bool membership(const Input_vertex_range &vertex_range);
 
 
-    /** Do all the facets of a simplex belong to the complex ?
-     * \ingroup toplex_map   */
+    /** Do all the facets of a simplex belong to the complex ? */
     template <typename Input_vertex_range>
     bool all_facets_inside(const Input_vertex_range &vertex_range);
 
     /** Contracts one edge in the complex.
      * The edge has to verify the link condition if you want to preserve topology.
-     * Returns the remaining vertex.
-     * \ingroup toplex_map   */
+     * Returns the remaining vertex. */
     Vertex contraction(const Vertex x, const Vertex y);
 
-    /** \brief Number of maximal simplices.
-     * \ingroup toplex_map   */
+    /** \brief Number of maximal simplices. */
     std::size_t num_maximal_simplices() const;
 
     std::unordered_map<Vertex, std::size_t> gamma0_lbounds;

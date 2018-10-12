@@ -14,92 +14,76 @@ namespace Gudhi {
 
 /** A Toplex_map represents the simplicial complex.
  * A "toplex" is a maximal simplex.
- * \ingroup toplex_map   */
+ * \ingroup toplex_map */
 class Toplex_map {
 
 public:
 
-    /** Vertex is the type of vertices.
-     * \ingroup toplex_map   */
+    /** Vertex is the type of vertices. */
     typedef std::size_t Vertex;
 
-    /** Simplex is the type of simplices.
-     * \ingroup toplex_map   */
+    /** Simplex is the type of simplices. */
     typedef std::set<Toplex_map::Vertex> Simplex;
 
-    /** The type of the pointers to maximal simplices.
-     * \ingroup toplex_map   */
+    /** The type of the pointers to maximal simplices. */
     typedef std::shared_ptr<Toplex_map::Simplex> Simplex_ptr;
 
     struct Sptr_hash{ std::size_t operator()(const Toplex_map::Simplex_ptr& s) const; };
     struct Sptr_equal{ std::size_t operator()(const Toplex_map::Simplex_ptr& a, const Toplex_map::Simplex_ptr& b) const; };
-    /** The type of the sets of Toplex_map::Simplex_ptr.
-     * \ingroup toplex_map   */
+    /** The type of the sets of Toplex_map::Simplex_ptr. */
     typedef std::unordered_set<Toplex_map::Simplex_ptr, Sptr_hash, Sptr_equal> Simplex_ptr_set;
 
     /** \brief Adds the given simplex to the complex.
-     * Nothing happens if the simplex has a coface in the complex.
-     * \ingroup toplex_map   */
+     * Nothing happens if the simplex has a coface in the complex. */
     template <typename Input_vertex_range>
     void insert_simplex(const Input_vertex_range &vertex_range);
 
     /** \brief Removes the given simplex and its cofaces from the complex.
-     * Its faces are kept inside.
-     * \ingroup toplex_map   */
+     * Its faces are kept inside. */
     template <typename Input_vertex_range>
     void remove_simplex(const Input_vertex_range &vertex_range);
 
-    /** Does a simplex belong to the complex ?
-     * \ingroup toplex_map   */
+    /** Does a simplex belong to the complex ? */
     template <typename Input_vertex_range>
     bool membership(const Input_vertex_range &vertex_range) const;
 
-    /** Does a simplex is a toplex ?
-     * \ingroup toplex_map   */
+    /** Does a simplex is a toplex ? */
     template <typename Input_vertex_range>
     bool maximality(const Input_vertex_range &vertex_range) const;
 
     /** Gives a set of pointers to the maximal cofaces of a simplex.
      * Gives all the toplices if given the empty simplex.
-     * Gives not more than max_number maximal cofaces if max_number is strictly positive.
-     * \ingroup toplex_map   */
+     * Gives not more than max_number maximal cofaces if max_number is strictly positive. */
     template <typename Input_vertex_range>
     Toplex_map::Simplex_ptr_set maximal_cofaces(const Input_vertex_range &vertex_range, const std::size_t max_number = 0) const;
 
     /** Contracts one edge in the complex.
      * The edge has to verify the link condition if you want to preserve topology.
-     * Returns the remaining vertex.
-     * \ingroup toplex_map   */
+     * Returns the remaining vertex. */
     Toplex_map::Vertex contraction(const Toplex_map::Vertex x, const Toplex_map::Vertex y);
 
     /** Adds the given simplex to the complex.
-     * The simplex must not have neither maximal face nor coface in the complex.
-     * \ingroup toplex_map   */
+     * The simplex must not have neither maximal face nor coface in the complex. */
     template <typename Input_vertex_range>
     void insert_independent_simplex(const Input_vertex_range &vertex_range);
 
-    /** \internal Removes a toplex without adding facets after.
-     * \ingroup toplex_map   */
+    /** \internal Removes a toplex without adding facets after. */
     void erase_maximal(const Toplex_map::Simplex_ptr& sptr);
 
-    /** Removes a vertex from any simplex containing it.
-     * \ingroup toplex_map   */
+    /** Removes a vertex from any simplex containing it. */
     void remove_vertex(const Toplex_map::Vertex x);
 
-    /** \brief Number of maximal simplices.
-      * \ingroup toplex_map   */
+    /** \brief Number of maximal simplices. */
     std::size_t num_maximal_simplices() const;
 
     std::set<Toplex_map::Vertex> unitary_collapse(const Toplex_map::Vertex k, const Toplex_map::Vertex d);
 
 protected:
-    /** \internal Gives an index in order to look for a simplex quickly.
-     * \ingroup toplex_map   */
+    /** \internal Gives an index in order to look for a simplex quickly. */
     template <typename Input_vertex_range>
     Toplex_map::Vertex best_index(const Input_vertex_range &vertex_range) const;
     
-    /** \internal The map from vertices to toplices
-     * \ingroup toplex_map   */
+    /** \internal The map from vertices to toplices */
     std::unordered_map<Toplex_map::Vertex, Toplex_map::Simplex_ptr_set> t0;
 };
 
