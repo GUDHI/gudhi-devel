@@ -57,6 +57,10 @@ public:
     /** \brief Number of maximal simplices. */
     std::size_t num_maximal_simplices() const;
 
+  /** \brief Number of vertices. */
+  std::size_t num_vertices() const{
+    return t0.size();
+  }
     std::unordered_map<Vertex, std::size_t> gamma0_lbounds;
 
 private:

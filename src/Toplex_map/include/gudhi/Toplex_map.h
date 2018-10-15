@@ -74,7 +74,12 @@ public:
     /** \brief Number of maximal simplices. */
     std::size_t num_maximal_simplices() const;
 
-    std::set<Toplex_map::Vertex> unitary_collapse(const Toplex_map::Vertex k, const Toplex_map::Vertex d);
+  /** \brief Number of vertices. */
+  std::size_t num_vertices() const{
+    return t0.size();
+  }
+
+  std::set<Toplex_map::Vertex> unitary_collapse(const Toplex_map::Vertex k, const Toplex_map::Vertex d);
 
 protected:
     /** \internal Gives an index in order to look for a simplex quickly. */
