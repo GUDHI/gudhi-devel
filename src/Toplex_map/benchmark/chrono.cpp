@@ -16,6 +16,11 @@ class ST_wrapper {
 
 public:
   void insert_simplex(const Simplex& tau) {
+    /*std::cout << "insert_simplex - " << simplexTree.num_simplices() << " - ";
+    for (auto v : tau)
+      std::cout << v << ", ";
+    std::cout << std::endl;
+    */
     simplexTree.insert_simplex_and_subfaces(tau);
   }
 
@@ -24,17 +29,7 @@ public:
   }
 
   Vertex contraction(const Vertex x, const Vertex y) {
-    Simplex sx; sx.insert(x);
-    auto hx = simplexTree.find(sx);
-    if(hx != simplexTree.null_simplex())
-      for(auto h : simplexTree.cofaces_simplex_range(hx,0)){
-        auto sr = simplexTree.simplex_vertex_range(h);
-        Simplex sigma(sr.begin(),sr.end());
-        erase_max(sigma);
-        sigma.erase(x);
-        sigma.insert(y);
-        insert_simplex(sigma);
-      }
+    // TODO (VR): edge contraction is not yet available for Simplex_tree
     return y;
   }
 
@@ -64,7 +59,7 @@ Simplex random_simplex(int n, std::size_t d){
     std::mt19937 gen(rd());
     std::uniform_int_distribution<std::size_t> dis(1, n);
     Simplex s;
-    while(s.size()!=d)
+    while(s.size() < d)
         s.insert(dis(gen));
     return s;
 }
@@ -95,7 +90,7 @@ void chrono(int n, int d){
         K.membership(s);
 
     start = std::chrono::system_clock::now();
-    for(int i = 0; i<=nb_contraction; i++)
+    for(int i = 1; i<=nb_contraction; i++)
         K.contraction(n-2*i,n-2*i-1);
     end = std::chrono::system_clock::now();
     auto c3 = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
