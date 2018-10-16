@@ -4,7 +4,7 @@
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Toplex_map.h>
-#include <gudhi/Lazy_Toplex_map.h>
+#include <gudhi/Lazy_toplex_map.h>
 
 using namespace Gudhi;
 
@@ -119,7 +119,7 @@ int main(){
         std::cout << "T Map \t \t";
         chrono<Toplex_map>(n,d);
         std::cout << "Lazy \t \t";
-        chrono<Lazy_Toplex_map>(n,d);
+        chrono<Lazy_toplex_map>(n,d);
         if(d<=15){
             std::cout << "ST \t \t";
             chrono<ST_wrapper>(n,d);

@@ -4,7 +4,7 @@
  *
  *    Author(s):       Vincent Rouvreau
  *
- *    Copyright (C) 2017
+ *    Copyright (C) 2018
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -20,12 +20,12 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gudhi/Lazy_Toplex_map.h>
 #include <gudhi/Toplex_map.h>
 
 #include <iostream>
 #include <utility>  // for pair
 #include <vector>
+#include <cassert>
 
 int main(int argc, char * const argv[]) {
   using Simplex = Gudhi::Toplex_map::Simplex;

@@ -1,3 +1,3 @@
 project(Toplex_map_benchmark)
 
-add_executable(toplex_map_chrono chrono.cpp)
+add_executable(Toplex_map_benchmark benchmark_tm.cpp)

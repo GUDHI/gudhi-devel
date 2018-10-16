@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include <gudhi/Lazy_Toplex_map.h>
+#include <gudhi/Lazy_toplex_map.h>
 
 
 #define BOOST_TEST_DYN_LINK
@@ -8,9 +8,9 @@
 #include <boost/test/unit_test.hpp>
 
 BOOST_AUTO_TEST_CASE(toplex_map) {
-  using Vertex = Gudhi::Lazy_Toplex_map::Vertex;
+  using Vertex = Gudhi::Lazy_toplex_map::Vertex;
 
-  Gudhi::Lazy_Toplex_map tm;
+  Gudhi::Lazy_toplex_map tm;
   std::cout << "insert_simplex {1, 2, 3, 4}" << std::endl;
   std::vector<Vertex> sigma1 = {1, 2, 3, 4};
   tm.insert_simplex(sigma1);

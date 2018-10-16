@@ -13,7 +13,7 @@ namespace Gudhi {
  * The lazy version is not always up to date as it requires clean operation in order to be.
  *
  * \ingroup toplex_map */
-class Lazy_Toplex_map {
+class Lazy_toplex_map {
 
 public:
   /** Vertex is the type of vertices. */
@@ -93,7 +93,7 @@ private:
 };
 
 template <typename Input_vertex_range>
-void Lazy_Toplex_map::insert_independent_simplex(const Input_vertex_range &vertex_range){
+void Lazy_toplex_map::insert_independent_simplex(const Input_vertex_range &vertex_range){
     for(const Vertex& v : vertex_range)
         if(!gamma0_lbounds.count(v)) gamma0_lbounds.emplace(v,1);
         else gamma0_lbounds[v]++;
@@ -102,7 +102,7 @@ void Lazy_Toplex_map::insert_independent_simplex(const Input_vertex_range &verte
 }
 
 template <typename Input_vertex_range>
-bool Lazy_Toplex_map::insert_simplex(const Input_vertex_range &vertex_range){
+bool Lazy_toplex_map::insert_simplex(const Input_vertex_range &vertex_range){
     Simplex sigma(vertex_range.begin(),vertex_range.end());
     empty_toplex = (sigma.size()==0); //vérifier la gestion de empty face
     Simplex_ptr sptr = std::make_shared<Simplex>(sigma);
@@ -124,7 +124,7 @@ bool Lazy_Toplex_map::insert_simplex(const Input_vertex_range &vertex_range){
 }
 
 template <typename Input_vertex_range>
-void Lazy_Toplex_map::remove_simplex(const Input_vertex_range &vertex_range){
+void Lazy_toplex_map::remove_simplex(const Input_vertex_range &vertex_range){
     if(vertex_range.begin()==vertex_range.end()){
         t0.clear();
         gamma0_lbounds.clear();
@@ -146,7 +146,7 @@ void Lazy_Toplex_map::remove_simplex(const Input_vertex_range &vertex_range){
 }
 
 template <typename Input_vertex_range>
-bool Lazy_Toplex_map::membership(const Input_vertex_range &vertex_range){
+bool Lazy_toplex_map::membership(const Input_vertex_range &vertex_range){
     if(t0.size()==0 && !empty_toplex) return false; //empty complex
     if(vertex_range.begin()==vertex_range.end()) return true; //empty query simplex
     Vertex v = best_index(vertex_range);
@@ -157,7 +157,7 @@ bool Lazy_Toplex_map::membership(const Input_vertex_range &vertex_range){
 }
 
 template <typename Input_vertex_range>
-bool Lazy_Toplex_map::all_facets_inside(const Input_vertex_range &vertex_range){
+bool Lazy_toplex_map::all_facets_inside(const Input_vertex_range &vertex_range){
     Simplex sigma(vertex_range.begin(),vertex_range.end());
     Vertex v = best_index(sigma);
     if(!t0.count(v))  return false;
@@ -173,7 +173,7 @@ bool Lazy_Toplex_map::all_facets_inside(const Input_vertex_range &vertex_range){
 }
 
 /* Returns the remaining vertex */
-Lazy_Toplex_map::Vertex Lazy_Toplex_map::contraction(const Vertex x, const Vertex y){
+Lazy_toplex_map::Vertex Lazy_toplex_map::contraction(const Vertex x, const Vertex y){
     if(!t0.count(x)) return y;
     if(!t0.count(y)) return x;
     Vertex k, d;
@@ -195,7 +195,7 @@ Lazy_Toplex_map::Vertex Lazy_Toplex_map::contraction(const Vertex x, const Verte
 
 /* No facets insert_simplexed */
 template <typename Input_vertex_range>
-inline void Lazy_Toplex_map::erase_max(const Input_vertex_range &vertex_range){
+inline void Lazy_toplex_map::erase_max(const Input_vertex_range &vertex_range){
     Simplex sigma(vertex_range.begin(),vertex_range.end());
     empty_toplex = false;
     Simplex_ptr sptr = std::make_shared<Simplex>(sigma);
@@ -210,7 +210,7 @@ inline void Lazy_Toplex_map::erase_max(const Input_vertex_range &vertex_range){
 }
 
 template <typename Input_vertex_range>
-Lazy_Toplex_map::Vertex Lazy_Toplex_map::best_index(const Input_vertex_range &vertex_range) {
+Lazy_toplex_map::Vertex Lazy_toplex_map::best_index(const Input_vertex_range &vertex_range) {
     Simplex tau(vertex_range.begin(),vertex_range.end());
     std::size_t min = std::numeric_limits<size_t>::max(); Vertex arg_min = -1;
     for(const Vertex& v : tau)
@@ -222,11 +222,11 @@ Lazy_Toplex_map::Vertex Lazy_Toplex_map::best_index(const Input_vertex_range &ve
     return arg_min;
 }
 
-std::size_t Lazy_Toplex_map::get_gamma0_lbound(const Vertex v) const{
+std::size_t Lazy_toplex_map::get_gamma0_lbound(const Vertex v) const{
     return gamma0_lbounds.count(v) ? gamma0_lbounds.at(v) : 0;
 }
 
-void Lazy_Toplex_map::clean(const Vertex v){
+void Lazy_toplex_map::clean(const Vertex v){
     Toplex_map toplices;
     std::unordered_map<int, std::vector<Simplex>> dsorted_simplices;
     std::size_t max_dim = 0;
