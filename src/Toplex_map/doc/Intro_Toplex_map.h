@@ -2,7 +2,7 @@
  *    (Geometric Understanding in Higher Dimensions) is a generic C++
  *    library for computational topology.
  *
- *    Author:       François Godi
+ *    Author:       François Godi, Vincent Rouvreau
  *
  *    Copyright (C) 2017  INRIA
  *
@@ -32,27 +32,24 @@ namespace Gudhi {
  * @{
  * 
  * \section toplexmapdefinition Definition
- * 
- * Let's consider a simplicial complex, denote by \f$d\f$ its dimension
- * and by \f$k\f$ its number of maximal simplices.
- * Furthermore, denote by \f$\gamma_0\f$ the maximal number of toplices, i.e. maximal simplices,
- * that contain a same vertex.
  *
- * The goal of the Toplex Map is both to represent the complex in optimal
- * O(kd) space and to provide fast standard operations such as : insertion, removal
- * and membership of a simplex, contraction of an edge, collapses. The time needed
- * for these operation is linear or quadratic in \f$\gamma_0\f$ and \f$d\f$.
+ * A Toplex_map is a data structure to represent and store a simplicial complex. A "toplex" is the contraction of
+ * "top-simplex", also known as a maximal simplex. We will call "toplices" a set of "toplex".
  *
- * Toplex map is composed firstly of a raw storage of toplices and secondly of a
- * map which associate any vertex to a set of pointers toward all toplices
- * containing this vertex.
+ * Let's consider a simplicial complex, denote by \f$d\f$ its dimension and by \f$k\f$ its number of maximal simplices.
+ * Furthermore, denote by \f$\gamma_0\f$ the maximal number of toplices, i.e. maximal simplices, that contain a same
+ * vertex.
+ *
+ * The goal of the Toplex Map is both to represent the complex in optimal O(kd) space and to provide fast standard
+ * operations such as : insertion, removal, contraction of an edge, collapses and membership of a simplex. The time
+ * needed for these operation is linear or quadratic in \f$\gamma_0\f$ and \f$d\f$.
+ *
+ * Toplex map is composed firstly of a raw storage of toplices and secondly of a map which associate any vertex to a
+ * set of pointers toward all toplices containing this vertex.
  *
  * \image html map.png
  *
- * The performances are a lot better than in simplex tree as soon you use maximal simplices and not simplices,
- * here the construction of a strong witness complex of a point set with growing parameter :
- *
- * \image html graph.png
+ * The performances are a lot better than the `Simplex_tree` as soon you use maximal simplices and not simplices.
  *
  */
 /** @} */  // end defgroup toplex_map
