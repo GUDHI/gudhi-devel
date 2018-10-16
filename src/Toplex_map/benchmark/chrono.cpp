@@ -107,7 +107,10 @@ void chrono(int n, int d){
     end = std::chrono::system_clock::now();
     auto c2 = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
 
-    std::cout << c1 << "\t \t" << c2 << "\t \t" << c3 << "\t \t" << K.num_maximal_simplices() << std::endl;
+    if (c3 > 0)
+      std::cout << c1 << "\t \t" << c2 << "\t \t" << c3 << "\t \t" << K.num_maximal_simplices() << std::endl;
+    else
+      std::cout << c1 << "\t \t" << c2 << "\t \tN/A\t \t" << K.num_maximal_simplices() << std::endl;
 }
 
 int main(){

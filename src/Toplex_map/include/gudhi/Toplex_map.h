@@ -10,8 +10,11 @@
 
 namespace Gudhi {
 
-/** A Toplex_map represents the simplicial complex.
- * A "toplex" is a maximal simplex.
+/**
+ * \brief Toplex map data structure for representing unfiltered simplicial complexes.
+ *
+ * \details A Toplex_map is an unordered map from vertices to maximal simplices (aka. toplices).
+ *
  * \ingroup toplex_map */
 class Toplex_map {
 
@@ -100,7 +103,7 @@ protected:
   /** \internal The map from vertices to toplices */
   std::unordered_map<Toplex_map::Vertex, Toplex_map::Simplex_ptr_set> t0;
 
-  const Toplex_map::Vertex vertex_upper_bound = std::numeric_limits<Toplex_map::Vertex>::max();
+  const Toplex_map::Vertex VERTEX_UPPER_BOUND = std::numeric_limits<Toplex_map::Vertex>::max();
 
   /** \internal Removes a toplex without adding facets after. */
   void erase_maximal(const Toplex_map::Simplex_ptr& sptr);
@@ -258,7 +261,7 @@ void Toplex_map::remove_vertex(const Toplex_map::Vertex x){
 inline void Toplex_map::erase_maximal(const Toplex_map::Simplex_ptr& sptr){
     Simplex sigma(*sptr);
     if (sptr->size()==0)
-        sigma.insert(vertex_upper_bound);
+        sigma.insert(VERTEX_UPPER_BOUND);
     for(const Toplex_map::Vertex& v : sigma){
         t0.at(v).erase(sptr);
         if(t0.at(v).size()==0) t0.erase(v);
@@ -268,7 +271,7 @@ inline void Toplex_map::erase_maximal(const Toplex_map::Simplex_ptr& sptr){
 template <typename Input_vertex_range>
 Toplex_map::Vertex Toplex_map::best_index(const Input_vertex_range &vertex_range) const{
     std::size_t min = std::numeric_limits<size_t>::max();
-    Vertex arg_min = vertex_upper_bound;
+    Vertex arg_min = VERTEX_UPPER_BOUND;
     for(const Toplex_map::Vertex& v : vertex_range)
         if(!t0.count(v)) return v;
         else if(t0.at(v).size() < min)

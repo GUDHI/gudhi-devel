@@ -6,84 +6,90 @@
 
 namespace Gudhi {
 
-/** A Lazy_Toplex_map represents the simplicial complex.
- * A "toplex" is a maximal simplex but not all simplices in a LTM are toplices.
- * \ingroup toplex_map   */
+/**
+ * \brief Lazy toplex map data structure for representing unfiltered simplicial complexes.
+ *
+ * \details A Toplex_map is an unordered map from vertices to maximal simplices (aka. toplices).
+ * The lazy version is not always up to date as it requires clean operation in order to be.
+ *
+ * \ingroup toplex_map */
 class Lazy_Toplex_map {
 
 public:
+  /** Vertex is the type of vertices. */
+  using Vertex = Toplex_map::Vertex;
 
-    /** Vertex is the type of vertices. */
-    typedef Toplex_map::Vertex Vertex;
+  /** Simplex is the type of simplices. */
+  using Simplex = Toplex_map::Simplex;
 
-    /** Simplex is the type of simplices. */
-    typedef Toplex_map::Simplex Simplex;
+  /** The type of the pointers to maximal simplices. */
+  using Simplex_ptr = Toplex_map::Simplex_ptr;
 
-    /** The type of the pointers to maximal simplices. */
-    typedef Toplex_map::Simplex_ptr Simplex_ptr;
+  /** The type of the sets of Simplex_ptr. */
+  using Simplex_ptr_set = Toplex_map::Simplex_ptr_set;
 
-    /** The type of the sets of Simplex_ptr. */
-    typedef Toplex_map::Simplex_ptr_set Simplex_ptr_set;
+  /** Adds the given simplex to the complex.
+   * The simplex must not have maximal coface in the complex. */
+  template <typename Input_vertex_range>
+  void insert_independent_simplex(const Input_vertex_range &vertex_range);
 
-    /** Adds the given simplex to the complex.
-     * The simplex must not have maximal coface in the complex. */
-    template <typename Input_vertex_range>
-    void insert_independent_simplex(const Input_vertex_range &vertex_range);
+  /** \brief Adds the given simplex to the complex.
+   * Nothing happens if the simplex has a coface in the complex. */
+  template <typename Input_vertex_range>
+  bool insert_simplex(const Input_vertex_range &vertex_range);
 
-    /** \brief Adds the given simplex to the complex.
-     * Nothing happens if the simplex has a coface in the complex. */
-    template <typename Input_vertex_range>
-    bool insert_simplex(const Input_vertex_range &vertex_range);
+  /** \brief Removes the given simplex and its cofaces from the complex.
+   * Its faces are kept inside. */
+  template <typename Input_vertex_range>
+  void remove_simplex(const Input_vertex_range &vertex_range);
 
-    /** \brief Removes the given simplex and its cofaces from the complex.
-     * Its faces are kept inside. */
-    template <typename Input_vertex_range>
-    void remove_simplex(const Input_vertex_range &vertex_range);
-
-    /** Does a simplex belong to the complex ? */
-    template <typename Input_vertex_range>
-    bool membership(const Input_vertex_range &vertex_range);
+  /** Does a simplex belong to the complex ? */
+  template <typename Input_vertex_range>
+  bool membership(const Input_vertex_range &vertex_range);
 
 
-    /** Do all the facets of a simplex belong to the complex ? */
-    template <typename Input_vertex_range>
-    bool all_facets_inside(const Input_vertex_range &vertex_range);
+  /** Do all the facets of a simplex belong to the complex ? */
+  template <typename Input_vertex_range>
+  bool all_facets_inside(const Input_vertex_range &vertex_range);
 
-    /** Contracts one edge in the complex.
-     * The edge has to verify the link condition if you want to preserve topology.
-     * Returns the remaining vertex. */
-    Vertex contraction(const Vertex x, const Vertex y);
+  /** Contracts one edge in the complex.
+   * The edge has to verify the link condition if you want to preserve topology.
+   * Returns the remaining vertex. */
+  Vertex contraction(const Vertex x, const Vertex y);
 
-    /** \brief Number of maximal simplices. */
-    std::size_t num_maximal_simplices() const;
+  /** \brief Number of maximal simplices. */
+  std::size_t num_maximal_simplices() const {
+    return size;
+  }
 
   /** \brief Number of vertices. */
   std::size_t num_vertices() const{
     return t0.size();
   }
-    std::unordered_map<Vertex, std::size_t> gamma0_lbounds;
 
 private:
-    template <typename Input_vertex_range>
-    void erase_max(const Input_vertex_range &vertex_range);
-    template <typename Input_vertex_range>
-    Vertex best_index(const Input_vertex_range &vertex_range);
-    void clean(const Vertex v);
+  template <typename Input_vertex_range>
+  void erase_max(const Input_vertex_range &vertex_range);
+  template <typename Input_vertex_range>
+  Vertex best_index(const Input_vertex_range &vertex_range);
+  void clean(const Vertex v);
 
-    std::unordered_map<Vertex, Simplex_ptr_set> t0;
-    bool empty_toplex; // Is the empty simplex a toplex ?
+  std::unordered_map<Vertex, std::size_t> gamma0_lbounds;
 
-    typedef boost::heap::fibonacci_heap<std::pair<std::size_t,Vertex>> PriorityQueue;
-    PriorityQueue cleaning_priority;
-    std::unordered_map<Vertex, PriorityQueue::handle_type> cp_handles;
+  std::unordered_map<Vertex, Simplex_ptr_set> t0;
+  bool empty_toplex; // Is the empty simplex a toplex ?
 
-    std::size_t get_gamma0_lbound(const Vertex v) const;
+  typedef boost::heap::fibonacci_heap<std::pair<std::size_t,Vertex>> PriorityQueue;
+  PriorityQueue cleaning_priority;
+  std::unordered_map<Vertex, PriorityQueue::handle_type> cp_handles;
 
-    std::size_t size_lbound = 0;
-    std::size_t size = 0;
+  std::size_t get_gamma0_lbound(const Vertex v) const;
 
-    const double alpha = 4; //time
-    const double betta = 8; //memory
+  std::size_t size_lbound = 0;
+  std::size_t size = 0;
+
+  const double ALPHA = 4; //time
+  const double BETTA = 8; //memory
 };
 
 template <typename Input_vertex_range>
@@ -112,7 +118,7 @@ bool Lazy_Toplex_map::insert_simplex(const Input_vertex_range &vertex_range){
     }
     if(inserted)
         size++;
-    if(size > (size_lbound+1) * betta)
+    if(size > (size_lbound+1) * BETTA)
         clean(cleaning_priority.top().second);
     return inserted;
 }
@@ -167,7 +173,7 @@ bool Lazy_Toplex_map::all_facets_inside(const Input_vertex_range &vertex_range){
 }
 
 /* Returns the remaining vertex */
-Toplex_map::Vertex Lazy_Toplex_map::contraction(const Vertex x, const Vertex y){
+Lazy_Toplex_map::Vertex Lazy_Toplex_map::contraction(const Vertex x, const Vertex y){
     if(!t0.count(x)) return y;
     if(!t0.count(y)) return x;
     Vertex k, d;
@@ -204,14 +210,14 @@ inline void Lazy_Toplex_map::erase_max(const Input_vertex_range &vertex_range){
 }
 
 template <typename Input_vertex_range>
-Toplex_map::Vertex Lazy_Toplex_map::best_index(const Input_vertex_range &vertex_range){
+Lazy_Toplex_map::Vertex Lazy_Toplex_map::best_index(const Input_vertex_range &vertex_range) {
     Simplex tau(vertex_range.begin(),vertex_range.end());
     std::size_t min = std::numeric_limits<size_t>::max(); Vertex arg_min = -1;
     for(const Vertex& v : tau)
         if(!t0.count(v)) return v;
         else if(t0.at(v).size() < min)
             min = t0.at(v).size(), arg_min = v;
-    if(min > alpha * get_gamma0_lbound(arg_min))
+    if(min > ALPHA * get_gamma0_lbound(arg_min))
         clean(arg_min);
     return arg_min;
 }
@@ -219,7 +225,6 @@ Toplex_map::Vertex Lazy_Toplex_map::best_index(const Input_vertex_range &vertex_
 std::size_t Lazy_Toplex_map::get_gamma0_lbound(const Vertex v) const{
     return gamma0_lbounds.count(v) ? gamma0_lbounds.at(v) : 0;
 }
-
 
 void Lazy_Toplex_map::clean(const Vertex v){
     Toplex_map toplices;
@@ -244,10 +249,6 @@ void Lazy_Toplex_map::clean(const Vertex v){
     gamma0_lbounds[v] = clean_cofaces.size();
     for(const Simplex_ptr& sptr : clean_cofaces)
         insert_simplex(*sptr);
-}
-
-std::size_t Lazy_Toplex_map::num_maximal_simplices() const{
-    return size;
 }
 
 } //namespace Gudhi
