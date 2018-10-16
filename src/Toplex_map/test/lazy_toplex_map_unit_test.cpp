@@ -1,7 +1,28 @@
+/*    This file is part of the Gudhi Library. The Gudhi library
+ *    (Geometric Understanding in Higher Dimensions) is a generic C++
+ *    library for computational topology.
+ *
+ *    Author:       François Godi, Vincent Rouvreau
+ *
+ *    Copyright (C) 2018  INRIA
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <iostream>
 #include <vector>
 #include <gudhi/Lazy_toplex_map.h>
-
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "lazy toplex map"
@@ -43,7 +64,7 @@ BOOST_AUTO_TEST_CASE(toplex_map) {
   BOOST_CHECK(tm.membership(sigma5));
 
   std::cout << "contraction(4,5)" << std::endl;
-  auto r = tm.contraction(4,5);
+  auto r = tm.contraction(4, 5);
   std::cout << "r=" << r << std::endl;
   BOOST_CHECK(r == 5);
 
@@ -73,6 +94,4 @@ BOOST_AUTO_TEST_CASE(toplex_map) {
   BOOST_CHECK(tm.membership(edge));
   edge = {7, 5};
   BOOST_CHECK(tm.membership(edge));
-
 }
-

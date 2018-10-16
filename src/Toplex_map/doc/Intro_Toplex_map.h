@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DOC_TOPLEX_MAP_H_
-#define DOC_TOPLEX_MAP_H_
+#ifndef DOC_TOPLEX_MAP_INTRO_TOPLEX_MAP_H_
+#define DOC_TOPLEX_MAP_INTRO_TOPLEX_MAP_H_
 
 // needs namespace for Doxygen to link on classes
 namespace Gudhi {
@@ -56,4 +56,4 @@ namespace Gudhi {
 
 }  // namespace Gudhi
 
-#endif  // DOC_TOPLEX_MAP_H_
+#endif  // DOC_TOPLEX_MAP_INTRO_TOPLEX_MAP_H_

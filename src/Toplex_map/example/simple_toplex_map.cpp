@@ -27,7 +27,7 @@
 #include <vector>
 #include <cassert>
 
-int main(int argc, char * const argv[]) {
+int main(int argc, char* const argv[]) {
   using Simplex = Gudhi::Toplex_map::Simplex;
   Simplex sigma1 = {1, 2, 3};
   Simplex sigma2 = {2, 3, 4, 5};
@@ -43,7 +43,8 @@ int main(int argc, char * const argv[]) {
   /*  o---o        */
   /*  1   3        */
 
-  std::cout << "num max simplices = " << tm.num_maximal_simplices() << " - num vertices = " << tm.num_vertices() << std::endl;
+  std::cout << "num max simplices = " << tm.num_maximal_simplices() << " - num vertices = " << tm.num_vertices()
+            << std::endl;
 
   // Browse maximal cofaces
   Simplex sigma3 = {2, 3};
@@ -75,7 +76,8 @@ int main(int argc, char * const argv[]) {
   /*     \5/       */
   /*      o        */
   /*      3        */
-  std::cout << "num max simplices = " << tm.num_maximal_simplices() << " - num vertices = " << tm.num_vertices() << std::endl;
+  std::cout << "num max simplices = " << tm.num_maximal_simplices() << " - num vertices = " << tm.num_vertices()
+            << std::endl;
 
   // Browse maximal simplices
   std::cout << "Maximal simplices are :" << std::endl;
@@ -97,7 +99,8 @@ int main(int argc, char * const argv[]) {
   /*     \X/       */
   /*      o        */
   /*      5        */
-  std::cout << "num max simplices = " << tm.num_maximal_simplices() << " - num vertices = " << tm.num_vertices() << std::endl;
+  std::cout << "num max simplices = " << tm.num_maximal_simplices() << " - num vertices = " << tm.num_vertices()
+            << std::endl;
 
   // Browse maximal simplices
   std::cout << "Maximal simplices are :" << std::endl;
@@ -125,7 +128,8 @@ int main(int argc, char * const argv[]) {
   /*   / \5/       */
   /*  o---o        */
   /*  1   3        */
-  std::cout << "num max simplices = " << tm.num_maximal_simplices() << " - num vertices = " << tm.num_vertices() << std::endl;
+  std::cout << "num max simplices = " << tm.num_maximal_simplices() << " - num vertices = " << tm.num_vertices()
+            << std::endl;
 
   // Browse maximal simplices
   std::cout << "Maximal simplices are :" << std::endl;
@@ -145,7 +149,8 @@ int main(int argc, char * const argv[]) {
   /*     \5/       */
   /*      o        */
   /*      3        */
-  std::cout << "num max simplices = " << tm.num_maximal_simplices() << " - num vertices = " << tm.num_vertices() << std::endl;
+  std::cout << "num max simplices = " << tm.num_maximal_simplices() << " - num vertices = " << tm.num_vertices()
+            << std::endl;
 
   // Browse maximal simplices
   std::cout << "Maximal simplices are :" << std::endl;
