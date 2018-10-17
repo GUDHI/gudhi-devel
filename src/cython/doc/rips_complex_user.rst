@@ -69,7 +69,7 @@ Finally, it is asked to display information about the simplicial complex.
 
     import gudhi
     rips_complex = gudhi.RipsComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]],
-        max_edge_length=12.0)
+                                     max_edge_length=12.0)
 
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=1)
     result_str = 'Rips complex is of dimension ' + repr(simplex_tree.dimension()) + ' - ' + \
@@ -109,9 +109,11 @@ Notice that if we use
 
 .. code-block:: python
 
-    rips_complex = gudhi.RipsComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]], max_edge_length=12.0, sparse=2)
+    rips_complex = gudhi.RipsComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]],
+                                     max_edge_length=12.0, sparse=2)
 
-asking for a very sparse version (theory only gives some guarantee on the meaning of the output if `sparse<1`), 2 to 5 edges disappear, depending on the random vertex used to start the sparsification.
+asking for a very sparse version (theory only gives some guarantee on the meaning of the output if `sparse<1`),
+2 to 5 edges disappear, depending on the random vertex used to start the sparsification.
 
 Example from OFF file
 ^^^^^^^^^^^^^^^^^^^^^
