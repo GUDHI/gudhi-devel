@@ -27,9 +27,13 @@
 #include <vector>
 #include <utility>
 
-using Gaussian_kernel = Gudhi::Persistence_representations::Gaussian_kernel_2D;
+
+std::function<double(std::pair<double, double>, std::pair<double, double>)> Gaussian_function(double sigma){
+  return [=](std::pair<double, double> p, std::pair<double, double> q){return std::exp(  -( (p.first-q.first)*(p.first-q.first) + (p.second-q.second)*(p.second-q.second) )/(sigma)  );};
+}
+
 using constant_scaling_function = Gudhi::Persistence_representations::constant_scaling_function;
-using Persistence_heat_maps = Gudhi::Persistence_representations::Persistence_heat_maps<constant_scaling_function, Gaussian_kernel>;
+using Persistence_heat_maps = Gudhi::Persistence_representations::Persistence_heat_maps<constant_scaling_function>;
 
 int main(int argc, char** argv) {
   // create two simple vectors with birth--death pairs:
@@ -79,10 +83,10 @@ int main(int argc, char** argv) {
   std::cout << "Scalar product is : " << hm1.compute_scalar_product(hm2) << std::endl;
 
   // Mathieu's code ************************************************************************************************************
-  Persistence_heat_maps hm1k(persistence1);
-  Persistence_heat_maps hm2k(persistence2);
-  Persistence_heat_maps hm1i(persistence1, 20, 20, 0, 11, 0, 11);
-  Persistence_heat_maps hm2i(persistence2, 20, 20, 0, 11, 0, 11);
+  Persistence_heat_maps hm1k(persistence1, Gaussian_function(1.0));
+  Persistence_heat_maps hm2k(persistence2, Gaussian_function(1.0));
+  Persistence_heat_maps hm1i(persistence1, Gaussian_function(1.0), 20, 20, 0, 11, 0, 11);
+  Persistence_heat_maps hm2i(persistence2, Gaussian_function(1.0), 20, 20, 0, 11, 0, 11);
   std::cout << "Scalar product computed with exact 2D kernel on grid is : " << hm1i.compute_scalar_product(hm2i) << std::endl;
   std::cout << "Scalar product computed with exact 2D kernel is : "         << hm1k.compute_scalar_product(hm2k) << std::endl;
   // ***************************************************************************************************************************

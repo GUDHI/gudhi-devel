@@ -163,10 +163,11 @@ class Sliced_Wasserstein {
 
       // Slightly perturb the points so that the PDs are in generic positions.
       double thresh_y = max_ordinate * 0.00001; double thresh_x = max_abscissa * 0.00001;
-      srand(time(NULL));
+      std::random_device rd; std::default_random_engine re(rd()); std::uniform_real_distribution<double> uni(-1,1);
+      double epsilon = uni(re);
       for (int i = 0; i < num_pts_dgm; i++){
-        diagram1[i].first += thresh_x*(1.0-2.0*rand()/RAND_MAX); diagram1[i].second += thresh_y*(1.0-2.0*rand()/RAND_MAX);
-        diagram2[i].first += thresh_x*(1.0-2.0*rand()/RAND_MAX); diagram2[i].second += thresh_y*(1.0-2.0*rand()/RAND_MAX);
+        diagram1[i].first += thresh_x*epsilon; diagram1[i].second += thresh_y*epsilon;
+        diagram2[i].first += thresh_x*epsilon; diagram2[i].second += thresh_y*epsilon;
       }
 
       // Compute all angles in both PDs.

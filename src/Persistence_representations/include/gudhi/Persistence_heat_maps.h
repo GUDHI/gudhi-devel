@@ -175,11 +175,11 @@ class weight_by_setting_maximal_interval_to_have_length_one {
 };
 
 // Mathieu's code ***********************************************************************************************************************
-class Gaussian_kernel_2D {
- public:
-  double operator()(const std::pair<double, double>& p, const std::pair<double, double>& q) const {
-    return (1.0/(std::sqrt(2*pi))) * std::exp(-((p.first-q.first)*(p.first-q.first) + (p.second-q.second)*(p.second-q.second)) / 2); }
-};
+//class Gaussian_kernel_2D {
+// public:
+//  double operator()(const std::pair<double, double>& p, const std::pair<double, double>& q) const {
+//    return (1.0/(std::sqrt(2*pi))) * std::exp(-((p.first-q.first)*(p.first-q.first) + (p.second-q.second)*(p.second-q.second)) / 2); }
+//};
 // **************************************************************************************************************************************
 
 /**
@@ -191,7 +191,7 @@ class Gaussian_kernel_2D {
 
 // This class implements the following concepts: Vectorized_topological_data, Topological_data_with_distances,
 // Real_valued_topological_data, Topological_data_with_averages, Topological_data_with_scalar_product
-template <typename Scalling_of_kernels = constant_scaling_function, typename Kernel2D = Gaussian_kernel_2D >
+template <typename Scalling_of_kernels = constant_scaling_function>
 class Persistence_heat_maps {
  public:
   /**
@@ -220,7 +220,7 @@ class Persistence_heat_maps {
    *std::numeric_limits<double>::max(), in which case the program compute the values based on the data.
   **/
   Persistence_heat_maps(const std::vector<std::pair<double, double> >& interval,
-                        std::vector<std::vector<double> > filter, //= create_Gaussian_filter(5, 1), Mathieu: I had to comment this default parameter otherwise there is an ambiguity with constructor defined line 263
+                        std::vector<std::vector<double> > filter = create_Gaussian_filter(5, 1),
                         bool erase_below_diagonal = false, size_t number_of_pixels = 1000,
                         double min_ = std::numeric_limits<double>::max(),
                         double max_ = std::numeric_limits<double>::max());
@@ -256,13 +256,16 @@ class Persistence_heat_maps {
   /**
    * Construction that takes as inputs (1) the diagram, and (2) the grid parameters (min, max and number of samples for x and y axes)
   **/
-  Persistence_heat_maps(const Persistence_diagram & interval, size_t number_of_x_pixels, size_t number_of_y_pixels,
+  Persistence_heat_maps(const std::vector<std::pair<double, double> >& interval,
+                        const std::function<double(std::pair<double, double>, std::pair<double, double>)>& kernel,
+                        size_t number_of_x_pixels, size_t number_of_y_pixels,
                         double min_x = 0, double max_x = 1, double min_y = 0, double max_y = 1);
 
   /**
    * Construction that takes only the diagram as input (weight and 2D kernel are template parameters)
   **/
-  Persistence_heat_maps(const Persistence_diagram & interval);
+  Persistence_heat_maps(const std::vector<std::pair<double, double> >& interval,
+                        const std::function<double(std::pair<double, double>, std::pair<double, double>)>& kernel);
 // **************************************************************************************************************************************
 
 
@@ -545,8 +548,8 @@ class Persistence_heat_maps {
 
 // Mathieu's code ***********************************************************************************************************************
   bool discrete = true; // Boolean indicating if we are computing persistence image (true) or persistence weighted gaussian kernel (false)
-  Kernel2D k;
-  Persistence_diagram d;
+  std::function<double(std::pair<double, double>, std::pair<double,double>)> kernel;
+  std::vector<std::pair<double, double> > interval;
   std::vector<double> weights;
 // **************************************************************************************************************************************
 
@@ -561,34 +564,36 @@ class Persistence_heat_maps {
 
 
 // Mathieu's code ***********************************************************************************************************************
-template <typename Scalling_of_kernels, typename Kernel2D>
-Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::Persistence_heat_maps(const Persistence_diagram & diagram,
-                                                                            size_t number_of_x_pixels, size_t number_of_y_pixels,
-                                                                            double min_x, double max_x,
-                                                                            double min_y, double max_y) {
+template <typename Scalling_of_kernels>
+Persistence_heat_maps<Scalling_of_kernels>::Persistence_heat_maps(const std::vector<std::pair<double, double> >& interval,
+                                                                  const std::function<double(std::pair<double, double>, std::pair<double, double>)>& kernel,
+                                                                  size_t number_of_x_pixels, size_t number_of_y_pixels,
+                                                                  double min_x, double max_x,
+                                                                  double min_y, double max_y) {
 
   this->discrete = true; this->min_ = min_x; this->max_ = max_x;
   this->heat_map.resize(number_of_y_pixels);
   double step_x = (max_x - min_x)/(number_of_x_pixels - 1); double step_y = (max_y - min_y)/(number_of_y_pixels - 1);
 
-  int num_pts = diagram.size();
+  int num_pts = interval.size();
   for(size_t i = 0; i < number_of_y_pixels; i++){
     double y = min_y + i*step_y; this->heat_map[i].reserve(number_of_x_pixels);
     for(size_t j = 0; j < number_of_x_pixels; j++){
       double x = min_x + j*step_x;
       std::pair<double, double> grid_point(x,y); double pixel_value = 0;
-      for(int k = 0; k < num_pts; k++)  pixel_value += this->f(diagram[k]) * this->k(diagram[k], grid_point);
+      for(int k = 0; k < num_pts; k++)  pixel_value += this->f(interval[k]) * kernel(interval[k], grid_point);
       this->heat_map[i].push_back(pixel_value);
     }
   }
   this->set_up_parameters_for_basic_classes();
 }
 
-template <typename Scalling_of_kernels, typename Kernel2D>
-Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::Persistence_heat_maps(const Persistence_diagram& diagram) {
-  this->discrete = false; this->d = diagram;
-  int num_pts = this->d.size();
-  for (int i = 0; i < num_pts; i++)  this->weights.push_back(this->f(this->d[i]));
+template <typename Scalling_of_kernels>
+Persistence_heat_maps<Scalling_of_kernels>::Persistence_heat_maps(const std::vector<std::pair<double, double> >& interval,
+                                                                  const std::function<double(std::pair<double, double>, std::pair<double, double>)>& kernel) {
+  this->discrete = false; this->interval = interval; this->kernel = kernel;
+  int num_pts = this->interval.size();
+  for (int i = 0; i < num_pts; i++)  this->weights.push_back(this->f(this->interval[i]));
   this->set_up_parameters_for_basic_classes();
 }
 // **************************************************************************************************************************************
@@ -596,8 +601,8 @@ Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::Persistence_heat_maps(cons
 
 
 // if min_ == max_, then the program is requested to set up the values itself based on persistence intervals
-template <typename Scalling_of_kernels, typename Kernel2D>
-void Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::construct(const std::vector<std::pair<double, double> >& intervals_,
+template <typename Scalling_of_kernels>
+void Persistence_heat_maps<Scalling_of_kernels>::construct(const std::vector<std::pair<double, double> >& intervals_,
                                                            std::vector<std::vector<double> > filter,
                                                            bool erase_below_diagonal, size_t number_of_pixels,
                                                            double min_, double max_) {
@@ -701,16 +706,16 @@ void Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::construct(const std::
   }
 }  // construct
 
-template <typename Scalling_of_kernels, typename Kernel2D>
-Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::Persistence_heat_maps(
+template <typename Scalling_of_kernels>
+Persistence_heat_maps<Scalling_of_kernels>::Persistence_heat_maps(
     const std::vector<std::pair<double, double> >& interval, std::vector<std::vector<double> > filter,
     bool erase_below_diagonal, size_t number_of_pixels, double min_, double max_) {
   this->construct(interval, filter, erase_below_diagonal, number_of_pixels, min_, max_);
   this->set_up_parameters_for_basic_classes();
 }
 
-template <typename Scalling_of_kernels, typename Kernel2D>
-Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::Persistence_heat_maps(const char* filename,
+template <typename Scalling_of_kernels>
+Persistence_heat_maps<Scalling_of_kernels>::Persistence_heat_maps(const char* filename,
                                                                   std::vector<std::vector<double> > filter,
                                                                   bool erase_below_diagonal, size_t number_of_pixels,
                                                                   double min_, double max_, unsigned dimension) {
@@ -724,8 +729,8 @@ Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::Persistence_heat_maps(cons
   this->set_up_parameters_for_basic_classes();
 }
 
-template <typename Scalling_of_kernels, typename Kernel2D>
-std::vector<std::vector<double> > Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::check_and_initialize_maps(
+template <typename Scalling_of_kernels>
+std::vector<std::vector<double> > Persistence_heat_maps<Scalling_of_kernels>::check_and_initialize_maps(
     const std::vector<Persistence_heat_maps*>& maps) {
   // checking if all the heat maps are of the same size:
   for (size_t i = 0; i != maps.size(); ++i) {
@@ -746,8 +751,8 @@ std::vector<std::vector<double> > Persistence_heat_maps<Scalling_of_kernels, Ker
   return heat_maps;
 }
 
-template <typename Scalling_of_kernels, typename Kernel2D>
-void Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::compute_median(const std::vector<Persistence_heat_maps*>& maps) {
+template <typename Scalling_of_kernels>
+void Persistence_heat_maps<Scalling_of_kernels>::compute_median(const std::vector<Persistence_heat_maps*>& maps) {
   std::vector<std::vector<double> > heat_maps = this->check_and_initialize_maps(maps);
 
   std::vector<double> to_compute_median(maps.size());
@@ -766,8 +771,8 @@ void Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::compute_median(const 
   this->max_ = maps[0]->max_;
 }
 
-template <typename Scalling_of_kernels, typename Kernel2D>
-void Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::compute_mean(const std::vector<Persistence_heat_maps*>& maps) {
+template <typename Scalling_of_kernels>
+void Persistence_heat_maps<Scalling_of_kernels>::compute_mean(const std::vector<Persistence_heat_maps*>& maps) {
   std::vector<std::vector<double> > heat_maps = this->check_and_initialize_maps(maps);
   for (size_t i = 0; i != heat_maps.size(); ++i) {
     for (size_t j = 0; j != heat_maps[i].size(); ++j) {
@@ -783,8 +788,8 @@ void Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::compute_mean(const st
   this->max_ = maps[0]->max_;
 }
 
-template <typename Scalling_of_kernels, typename Kernel2D>
-void Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::compute_percentage_of_active(
+template <typename Scalling_of_kernels>
+void Persistence_heat_maps<Scalling_of_kernels>::compute_percentage_of_active(
     const std::vector<Persistence_heat_maps*>& maps, size_t cutoff) {
   std::vector<std::vector<double> > heat_maps = this->check_and_initialize_maps(maps);
 
@@ -806,8 +811,8 @@ void Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::compute_percentage_of
   this->max_ = maps[0]->max_;
 }
 
-template <typename Scalling_of_kernels, typename Kernel2D>
-void Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::plot(const char* filename) const {
+template <typename Scalling_of_kernels>
+void Persistence_heat_maps<Scalling_of_kernels>::plot(const char* filename) const {
   std::ofstream out;
   std::stringstream gnuplot_script;
   gnuplot_script << filename << "_GnuplotScript";
@@ -825,8 +830,8 @@ void Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::plot(const char* file
             << gnuplot_script.str().c_str() << "\'\"" << std::endl;
 }
 
-template <typename Scalling_of_kernels, typename Kernel2D>
-void Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::print_to_file(const char* filename) const {
+template <typename Scalling_of_kernels>
+void Persistence_heat_maps<Scalling_of_kernels>::print_to_file(const char* filename) const {
   std::ofstream out;
   out.open(filename);
 
@@ -841,8 +846,8 @@ void Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::print_to_file(const c
   out.close();
 }
 
-template <typename Scalling_of_kernels, typename Kernel2D>
-void Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::load_from_file(const char* filename) {
+template <typename Scalling_of_kernels>
+void Persistence_heat_maps<Scalling_of_kernels>::load_from_file(const char* filename) {
   bool dbg = false;
 
   std::ifstream in;
@@ -890,8 +895,8 @@ void Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::load_from_file(const 
 }
 
 // Concretizations of virtual methods:
-template <typename Scalling_of_kernels, typename Kernel2D>
-std::vector<double> Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::vectorize(int number_of_function) const {
+template <typename Scalling_of_kernels>
+std::vector<double> Persistence_heat_maps<Scalling_of_kernels>::vectorize(int number_of_function) const {
 
   std::vector<double> result;
   if(!discrete){std::cout << "No vectorize method in case of infinite dimensional vectorization" << std::endl; return result;}
@@ -913,8 +918,8 @@ std::vector<double> Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::vector
   return result;
 }
 
-template <typename Scalling_of_kernels, typename Kernel2D>
-double Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::distance(const Persistence_heat_maps& second, double power) const {
+template <typename Scalling_of_kernels>
+double Persistence_heat_maps<Scalling_of_kernels>::distance(const Persistence_heat_maps& second, double power) const {
   if(this->discrete){
     // first we need to check if (*this) and second are defined on the same domain and have the same dimensions:
     if (!this->check_if_the_same(second)) {
@@ -950,8 +955,8 @@ double Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::distance(const Pers
   }
 }
 
-template <typename Scalling_of_kernels, typename Kernel2D>
-double Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::project_to_R(int number_of_function) const {
+template <typename Scalling_of_kernels>
+double Persistence_heat_maps<Scalling_of_kernels>::project_to_R(int number_of_function) const {
   double result = 0;
   for (size_t i = 0; i != this->heat_map.size(); ++i) {
     for (size_t j = 0; j != this->heat_map[i].size(); ++j) {
@@ -961,14 +966,14 @@ double Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::project_to_R(int nu
   return result;
 }
 
-template <typename Scalling_of_kernels, typename Kernel2D>
-void Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::compute_average(
+template <typename Scalling_of_kernels>
+void Persistence_heat_maps<Scalling_of_kernels>::compute_average(
     const std::vector<Persistence_heat_maps*>& to_average) {
   this->compute_mean(to_average);
 }
 
-template <typename Scalling_of_kernels, typename Kernel2D>
-double Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::compute_scalar_product(const Persistence_heat_maps& second) const {
+template <typename Scalling_of_kernels>
+double Persistence_heat_maps<Scalling_of_kernels>::compute_scalar_product(const Persistence_heat_maps& second) const {
 
   if(discrete){
     // first we need to check if (*this) and second are defined on the same domain and have the same dimensions:
@@ -991,12 +996,12 @@ double Persistence_heat_maps<Scalling_of_kernels, Kernel2D>::compute_scalar_prod
 
 // Mathieu's code ***********************************************************************************************************************
   else{
-    int num_pts1 = this->d.size(); int num_pts2 = second.d.size(); double kernel_val = 0;
+    int num_pts1 = this->interval.size(); int num_pts2 = second.interval.size(); double kernel_val = 0;
     for(int i = 0; i < num_pts1; i++){
-      std::pair<double, double> pi = this->d[i];
+      std::pair<double, double> pi = this->interval[i];
       for(int j = 0; j < num_pts2; j++){
-        std::pair<double, double> pj = second.d[j];
-        kernel_val += this->weights[i] * second.weights[j] * this->k(pi, pj);
+        std::pair<double, double> pj = second.interval[j];
+        kernel_val += this->weights[i] * second.weights[j] * this->kernel(pi, pj);
       }
     }
     return kernel_val;
