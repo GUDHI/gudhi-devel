@@ -143,7 +143,7 @@ class Sliced_Wasserstein {
   // Evaluation of the Sliced Wasserstein Distance between a pair of diagrams.
   double compute_sliced_wasserstein_distance(const Sliced_Wasserstein & second) const {
 
-    GUDHI_CHECK(this->approx != second.approx, std::invalid_argument("Error: different approx values for representations"));
+    GUDHI_CHECK(this->approx == second.approx, std::invalid_argument("Error: different approx values for representations"));
 
     Persistence_diagram diagram1 = this->diagram; Persistence_diagram diagram2 = second.diagram; double sw = 0;
 
@@ -283,7 +283,7 @@ class Sliced_Wasserstein {
    *
    */
   double compute_scalar_product(const Sliced_Wasserstein & second) const {
-    GUDHI_CHECK(this->sigma != second.sigma, std::invalid_argument("Error: different sigma values for representations"));
+    GUDHI_CHECK(this->sigma == second.sigma, std::invalid_argument("Error: different sigma values for representations"));
     return std::exp(-compute_sliced_wasserstein_distance(second)/(2*this->sigma*this->sigma));
   }
 
@@ -295,7 +295,7 @@ class Sliced_Wasserstein {
    *
    */
   double distance(const Sliced_Wasserstein & second) const {
-    GUDHI_CHECK(this->sigma != second.sigma, std::invalid_argument("Error: different sigma values for representations"));
+    GUDHI_CHECK(this->sigma == second.sigma, std::invalid_argument("Error: different sigma values for representations"));
     return std::pow(this->compute_scalar_product(*this) + second.compute_scalar_product(second)-2*this->compute_scalar_product(second),  0.5);
   }
 
