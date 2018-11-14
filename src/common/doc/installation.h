@@ -72,12 +72,6 @@ make doxygen
  * 
  * The following examples/utilities require the <a target="_blank" href="http://www.cgal.org/">Computational Geometry Algorithms
  * Library</a> (CGAL \cite cgal:eb-15b) and will not be built if CGAL is not installed:
- * \li <a href="_alpha_complex_2alpha_complex_3d_persistence_8cpp-example.html">
- * Alpha_complex/alpha_complex_3d_persistence.cpp</a>
- * \li <a href="_alpha_complex_2exact_alpha_complex_3d_persistence_8cpp-example.html">
- * Alpha_complex/exact_alpha_complex_3d_persistence.cpp</a>
- * \li <a href="_alpha_complex_2weighted_alpha_complex_3d_persistence_8cpp-example.html">
- * Alpha_complex/weighted_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_simplex_tree_2example_alpha_shapes_3_simplex_tree_from_off_file_8cpp-example.html">
  * Simplex_tree/example_alpha_shapes_3_simplex_tree_from_off_file.cpp</a>
  * 
@@ -100,8 +94,6 @@ make doxygen
  * Alpha_complex/Alpha_complex_from_points.cpp</a>
  * \li <a href="_alpha_complex_2alpha_complex_persistence_8cpp-example.html">
  * Alpha_complex/alpha_complex_persistence.cpp</a>
- * \li <a href="_alpha_complex_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
- * Alpha_complex/periodic_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2custom_persistence_sort_8cpp-example.html">
  * Persistent_cohomology/custom_persistence_sort.cpp</a>
  * 
@@ -135,6 +127,12 @@ make doxygen
  * \li <a href="_tangential_complex_2example_with_perturb_8cpp-example.html">
  * Tangential_complex/example_with_perturb.cpp</a>
  *
+ * The following example requires CGAL version &ge; 4.11.0:
+ * \li <a href="_alpha_complex_2_weighted_alpha_complex_3d_from_points_8cpp-example.html">
+ * Alpha_complex/Weighted_alpha_complex_3d_from_points.cpp</a>
+ * \li <a href="_alpha_complex_2alpha_complex_3d_persistence_8cpp-example.html">
+ * Alpha_complex/alpha_complex_3d_persistence.cpp</a>
+ *
  * \subsection eigen3 Eigen3
  * The \ref alpha_complex data structure and few examples requires
  * <a target="_blank" href="http://eigen.tuxfamily.org/">Eigen3</a> is a C++ template library for linear algebra:
@@ -148,8 +146,10 @@ make doxygen
  * Alpha_complex/Alpha_complex_from_points.cpp</a>
  * \li <a href="_alpha_complex_2alpha_complex_persistence_8cpp-example.html">
  * Alpha_complex/alpha_complex_persistence.cpp</a>
- * \li <a href="_alpha_complex_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
- * Alpha_complex/periodic_alpha_complex_3d_persistence.cpp</a>
+ * \li <a href="_alpha_complex_2alpha_complex_3d_persistence_8cpp-example.html">
+ * Alpha_complex/alpha_complex_3d_persistence.cpp</a>
+ * \li <a href="_alpha_complex_2_weighted_alpha_complex_3d_from_points_8cpp-example.html">
+ * Alpha_complex/Weighted_alpha_complex_3d_from_points.cpp</a>
  * \li <a href="_bottleneck_distance_2alpha_rips_persistence_bottleneck_distance_8cpp-example.html">
  * Bottleneck_distance/alpha_rips_persistence_bottleneck_distance.cpp.cpp</a>
  * \li <a href="_persistent_cohomology_2custom_persistence_sort_8cpp-example.html">
@@ -195,12 +195,6 @@ make doxygen
  * Alpha_complex/alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_alpha_complex_2alpha_complex_persistence_8cpp-example.html">
  * Alpha_complex/alpha_complex_persistence.cpp</a>
- * \li <a href="_alpha_complex_2exact_alpha_complex_3d_persistence_8cpp-example.html">
- * Alpha_complex/exact_alpha_complex_3d_persistence.cpp</a>
- * \li <a href="_alpha_complex_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
- * Alpha_complex/periodic_alpha_complex_3d_persistence.cpp</a>
- * \li <a href="_alpha_complex_2weighted_alpha_complex_3d_persistence_8cpp-example.html">
- * Alpha_complex/weighted_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_bitmap_cubical_complex_2_bitmap_cubical_complex_8cpp-example.html">
  * Bitmap_cubical_complex/cubical_complex_persistence.cpp</a>
  * \li <a href="_bitmap_cubical_complex_2_bitmap_cubical_complex_periodic_boundary_conditions_8cpp-example.html">
@@ -239,10 +233,6 @@ make doxygen
  * Persistent_cohomology/rips_multifield_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2rips_persistence_step_by_step_8cpp-example.html">
  * Persistent_cohomology/rips_persistence_step_by_step.cpp</a>
- * \li <a href="_persistent_cohomology_2exact_alpha_complex_3d_persistence_8cpp-example.html">
- * Persistent_cohomology/exact_alpha_complex_3d_persistence.cpp</a>
- * \li <a href="_persistent_cohomology_2weighted_alpha_complex_3d_persistence_8cpp-example.html">
- * Persistent_cohomology/weighted_alpha_complex_3d_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2custom_persistence_sort_8cpp-example.html">
  * Persistent_cohomology/custom_persistence_sort.cpp</a>
  * \li <a href="_rips_complex_2example_one_skeleton_rips_from_points_8cpp-example.html">

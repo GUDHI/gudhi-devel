@@ -4,7 +4,7 @@
  *
  *    Author(s):       Vincent Rouvreau
  *
- *    Copyright (C) 2017 Inria
+ *    Copyright (C) 2018 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -19,22 +19,27 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef UNITARY_TESTS_UTILS_H_
-#define UNITARY_TESTS_UTILS_H_
 
-#include <boost/test/unit_test.hpp>
+#ifndef ALPHA_COMPLEX_OPTIONS_H_
+#define ALPHA_COMPLEX_OPTIONS_H_
 
-#include <iostream>
-#include <limits>  // for std::numeric_limits<>
+namespace Gudhi {
 
-template<typename FloatingType >
-void GUDHI_TEST_FLOAT_EQUALITY_CHECK(FloatingType a, FloatingType b,
-                                     FloatingType epsilon = std::numeric_limits<FloatingType>::epsilon()) {
-#ifdef DEBUG_TRACES
-  std::cout << "GUDHI_TEST_FLOAT_EQUALITY_CHECK - " << a << " versus " << b
-            << " | diff = " << std::fabs(a - b) << " - epsilon = " << epsilon << std::endl;
-#endif
-  BOOST_CHECK(std::fabs(a - b) <= epsilon);
-}
+namespace alpha_complex {
 
-#endif  // UNITARY_TESTS_UTILS_H_
+/**
+ * \brief Alpha complex complexity template parameter possible values.
+ *
+ * \ingroup alpha_complex
+ */
+enum class complexity : char {
+  FAST = 'f',   ///< Fast version.
+  SAFE = 's',   ///< Safe version.
+  EXACT = 'e',  ///< Exact version.
+};
+
+}  // namespace alpha_complex
+
+}  // namespace Gudhi
+
+#endif  // ALPHA_COMPLEX_OPTIONS_H_
