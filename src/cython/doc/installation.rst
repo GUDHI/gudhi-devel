@@ -7,7 +7,7 @@ Installation
 
 Compiling
 *********
-The library uses c++11 and requires `Boost <https://www.boost.org/>`_ ≥ 1.48.0
+The library uses c++11 and requires `Boost <https://www.boost.org/>`_ ≥ 1.56.0
 and `CMake <https://www.cmake.org/>`_   ≥ 3.1.
 It is a multi-platform library and compiles on Linux, Mac OSX and Visual
 Studio 2015.
@@ -195,7 +195,7 @@ The following examples require the `Matplotlib <http://matplotlib.org>`_:
     * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
     * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
 
-Numpy
+NumPy
 =====
 
 The :doc:`persistence graphical tools </persistence_graphical_tools_user>`
@@ -215,6 +215,13 @@ The following examples require the `NumPy <http://numpy.org>`_:
     * :download:`tangential_complex_plain_homology_from_off_file_example.py <../example/tangential_complex_plain_homology_from_off_file_example.py>`
     * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
     * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
+
+SciPy
+=====
+
+The :doc:`persistence graphical tools </persistence_graphical_tools_user>`
+module requires `SciPy <http://scipy.org>`_, a Python-based ecosystem of
+open-source software for mathematics, science, and engineering.
 
 Threading Building Blocks
 =========================

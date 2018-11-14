@@ -5,7 +5,7 @@
  * Examples of GUDHI headers inclusion can be found in \ref utilities.
  * 
  * \section compiling Compiling
- * The library uses c++11 and requires <a target="_blank" href="http://www.boost.org/">Boost</a>  &ge; 1.48.0
+ * The library uses c++11 and requires <a target="_blank" href="http://www.boost.org/">Boost</a>  &ge; 1.56.0
  * and <a target="_blank" href="https://www.cmake.org/">CMake</a> &ge; 3.1.
  * It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2015.
  * 
@@ -18,7 +18,7 @@ cmake ..
 make \endverbatim
  * By default, examples are disabled. You can activate their compilation with
  * <a href="https://cmake.org/cmake/help/v3.0/manual/ccmake.1.html">ccmake</a> (on Linux and Mac OSX),
- * <a href="https://cmake.org/cmake/help/v3.0/manual/cmake-gui.1.html">cmake-gui</a> (on Windows) or y mofifying the
+ * <a href="https://cmake.org/cmake/help/v3.0/manual/cmake-gui.1.html">cmake-gui</a> (on Windows) or by modifying the
  * cmake command as follows :
 \verbatim  cmake -DWITH_GUDHI_EXAMPLE=ON ..
 make \endverbatim

@@ -102,7 +102,7 @@ field Z/pZ for computing homology.
 to be recorded. Enter a negative value to see zero length intervals.
 * `-c [ --cuboid-file ]` is the path to the file describing the periodic domain.
 It must be in the format described
-[here](/doc/latest/fileformats.html#FileFormatsIsoCuboid).
+[here]({{ site.officialurl }}/doc/latest/fileformats.html#FileFormatsIsoCuboid).
 * `-w [ --weight-file ]` is the path to the file containing the weights of the
 points (one value per line).
 * `-e [ --exact ]` for the exact computation version (not compatible with
