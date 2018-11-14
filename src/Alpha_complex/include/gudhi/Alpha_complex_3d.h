@@ -67,12 +67,20 @@ namespace Gudhi {
 
 namespace alpha_complex {
 
+#ifdef GUDHI_CAN_USE_CXX11_THREAD_LOCAL
+thread_local
+#endif  // GUDHI_CAN_USE_CXX11_THREAD_LOCAL
+    double RELATIVE_PRECISION_OF_TO_DOUBLE = 0.00001;
+
 // Value_from_iterator returns the filtration value from an iterator on alpha shapes values
 //
-// FAST                         SAFE                         EXACT
-// *iterator                    CGAL::to_double(*iterator)   CGAL::to_double(iterator->exact())
+//                        FAST                         SAFE                         EXACT
+// not weighted and       *iterator                    Specific case due to CGAL    CGAL::to_double(iterator->exact())
+// not periodic                                        issue # 3153
+//
+// otherwise              *iterator                    CGAL::to_double(*iterator)   CGAL::to_double(iterator->exact())
 
-template <complexity Complexity>
+template <complexity Complexity, bool Weighted_or_periodic>
 struct Value_from_iterator {
   template <typename Iterator>
   static double perform(Iterator it) {
@@ -82,16 +90,43 @@ struct Value_from_iterator {
 };
 
 template <>
-struct Value_from_iterator<complexity::SAFE> {
+struct Value_from_iterator<complexity::SAFE, true> {
   template <typename Iterator>
   static double perform(Iterator it) {
-    // In SAFE mode, we are with Epeck or Epick with EXACT value set to CGAL::Tag_true.
+    // In SAFE mode, we are with Epick with EXACT value set to CGAL::Tag_true.
     return CGAL::to_double(*it);
   }
 };
 
 template <>
-struct Value_from_iterator<complexity::EXACT> {
+struct Value_from_iterator<complexity::SAFE, false> {
+  template <typename Iterator>
+  static double perform(Iterator it) {
+    // In SAFE mode, we are with Epeck with EXACT value set to CGAL::Tag_true.
+    // Specific case due to CGAL issue https://github.com/CGAL/cgal/issues/3153
+    auto approx = it->approx();
+    double r;
+    if (CGAL::fit_in_double(approx, r)) return r;
+
+    // If it's precise enough, then OK.
+    if (CGAL::has_smaller_relative_precision(approx, RELATIVE_PRECISION_OF_TO_DOUBLE)) return CGAL::to_double(approx);
+
+    it->exact();
+    return CGAL::to_double(it->approx());
+  }
+};
+
+template <>
+struct Value_from_iterator<complexity::EXACT, true> {
+  template <typename Iterator>
+  static double perform(Iterator it) {
+    // In EXACT mode, we are with Epeck or Epick with EXACT value set to CGAL::Tag_true.
+    return CGAL::to_double(it->exact());
+  }
+};
+
+template <>
+struct Value_from_iterator<complexity::EXACT, false> {
   template <typename Iterator>
   static double perform(Iterator it) {
     // In EXACT mode, we are with Epeck or Epick with EXACT value set to CGAL::Tag_true.
@@ -524,7 +559,7 @@ class Alpha_complex_3d {
         }
       }
       // Construction of the simplex_tree
-      Filtration_value filtr = Value_from_iterator<Complexity>::perform(alpha_value_iterator);
+      Filtration_value filtr = Value_from_iterator<Complexity, (Weighted || Periodic)>::perform(alpha_value_iterator);
 
 #ifdef DEBUG_TRACES
       std::cout << "filtration = " << filtr << std::endl;
