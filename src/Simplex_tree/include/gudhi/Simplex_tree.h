@@ -1116,6 +1116,7 @@ class Simplex_tree {
    * The Simplex_tree must contain no simplex of dimension bigger than
    * 1 when calling the method. */
   void expansion(int max_dim) {
+    if (max_dim <= 1) return;
     dimension_ = max_dim;
     for (Dictionary_it root_it = root_.members_.begin();
          root_it != root_.members_.end(); ++root_it) {
@@ -1138,7 +1139,10 @@ class Simplex_tree {
     Dictionary_it next = siblings->members().begin();
     ++next;
 
-    thread_local std::vector<std::pair<Vertex_handle, Node> > inter;
+#ifdef GUDHI_CAN_USE_CXX11_THREAD_LOCAL
+    thread_local
+#endif  // GUDHI_CAN_USE_CXX11_THREAD_LOCAL
+    std::vector<std::pair<Vertex_handle, Node> > inter;
     for (Dictionary_it s_h = siblings->members().begin();
          s_h != siblings->members().end(); ++s_h, ++next) {
       Simplex_handle root_sh = find_vertex(s_h->first);
