@@ -114,17 +114,8 @@ struct Value_from_iterator<complexity::SAFE, false> {
   }
 };
 
-template <>
-struct Value_from_iterator<complexity::EXACT, true> {
-  template <typename Iterator>
-  static double perform(Iterator it) {
-    // In EXACT mode, we are with Epeck or Epick with EXACT value set to CGAL::Tag_true.
-    return CGAL::to_double(it->exact());
-  }
-};
-
-template <>
-struct Value_from_iterator<complexity::EXACT, false> {
+template<bool Weighted_or_periodic>
+struct Value_from_iterator<complexity::EXACT,Weighted_or_periodic>{
   template <typename Iterator>
   static double perform(Iterator it) {
     // In EXACT mode, we are with Epeck or Epick with EXACT value set to CGAL::Tag_true.
@@ -190,14 +181,11 @@ class Alpha_complex_3d {
   template <typename Predicates, bool Weighted_version, bool Periodic_version>
   struct Kernel_3 {};
 
-  template <typename Predicates>
-  struct Kernel_3<Predicates, false, false> {
+  template <typename Predicates, bool Is_periodic>
+  struct Kernel_3<Predicates, Is_periodic, false> {
     using Kernel = Predicates;
   };
-  template <typename Predicates>
-  struct Kernel_3<Predicates, true, false> {
-    using Kernel = Predicates;
-  };
+
   template <typename Predicates>
   struct Kernel_3<Predicates, false, true> {
     using Kernel = CGAL::Periodic_3_Delaunay_triangulation_traits_3<Predicates>;
