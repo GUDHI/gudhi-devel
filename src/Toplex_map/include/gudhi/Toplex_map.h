@@ -44,7 +44,7 @@ class Toplex_map {
   using Vertex = std::size_t;
 
   /** Simplex is the type of simplices. */
-  using Simplex = std::set<Toplex_map::Vertex>;
+  using Simplex = std::set<Vertex>;
 
   /** The type of the pointers to maximal simplices. */
   using Simplex_ptr = std::shared_ptr<Toplex_map::Simplex>;
@@ -94,10 +94,10 @@ class Toplex_map {
   /** Contracts one edge in the complex.
    * The edge has to verify the link condition if you want to preserve topology.
    * Returns the remaining vertex. */
-  Toplex_map::Vertex contraction(const Toplex_map::Vertex x, const Toplex_map::Vertex y);
+  Vertex contraction(const Vertex x, const Vertex y);
 
   /** Removes a vertex from any simplex containing it. */
-  void remove_vertex(const Toplex_map::Vertex x);
+  void remove_vertex(const Vertex x);
 
   /** \brief Number of maximal simplices. */
   std::size_t num_maximal_simplices() const { return maximal_simplices().size(); }
@@ -105,7 +105,7 @@ class Toplex_map {
   /** \brief Number of vertices. */
   std::size_t num_vertices() const { return t0.size(); }
 
-  std::set<Toplex_map::Vertex> unitary_collapse(const Toplex_map::Vertex k, const Toplex_map::Vertex d);
+  std::set<Vertex> unitary_collapse(const Vertex k, const Vertex d);
 
   /** Adds the given simplex to the complex.
    * The simplex must not be in the complex already, and it must not contain one of the current toplices. */
@@ -115,12 +115,12 @@ class Toplex_map {
  protected:
   /** \internal Gives an index in order to look for a simplex quickly. */
   template <typename Input_vertex_range>
-  Toplex_map::Vertex best_index(const Input_vertex_range& vertex_range) const;
+  Vertex best_index(const Input_vertex_range& vertex_range) const;
 
   /** \internal The map from vertices to toplices */
-  std::unordered_map<Toplex_map::Vertex, Toplex_map::Simplex_ptr_set> t0;
+  std::unordered_map<Vertex, Toplex_map::Simplex_ptr_set> t0;
 
-  const Toplex_map::Vertex VERTEX_UPPER_BOUND = std::numeric_limits<Toplex_map::Vertex>::max();
+  const Vertex VERTEX_UPPER_BOUND = std::numeric_limits<Vertex>::max();
 
   /** \internal Removes a toplex without adding facets after. */
   void erase_maximal(const Toplex_map::Simplex_ptr& sptr);
@@ -150,7 +150,7 @@ void Toplex_map::insert_simplex(const Input_vertex_range& vertex_range) {
   if (replace_facets)
     for (const Toplex_map::Simplex& facet : facets(vertex_range)) erase_maximal(get_key(facet));
   else
-    for (const Toplex_map::Vertex& v : vertex_range)
+    for (const Vertex& v : vertex_range)
       if (t0.count(v))
         for (const Toplex_map::Simplex_ptr& fptr : Simplex_ptr_set(t0.at(v)))
           // Copy constructor needed because the set is modified
@@ -164,7 +164,7 @@ void Toplex_map::remove_simplex(const Input_vertex_range& vertex_range) {
   if (vertex_range.begin() == vertex_range.end()) t0.clear();
   // Removal of the empty simplex means cleaning everything
   else {
-    const Toplex_map::Vertex& v = best_index(vertex_range);
+    const Vertex& v = best_index(vertex_range);
     if (t0.count(v))
       for (const Toplex_map::Simplex_ptr& sptr : Simplex_ptr_set(t0.at(v)))
         // Copy constructor needed because the set is modified
@@ -180,7 +180,7 @@ void Toplex_map::remove_simplex(const Input_vertex_range& vertex_range) {
 template <typename Input_vertex_range>
 bool Toplex_map::membership(const Input_vertex_range& vertex_range) const {
   if (t0.size() == 0) return false;
-  const Toplex_map::Vertex& v = best_index(vertex_range);
+  const Vertex& v = best_index(vertex_range);
   if (!t0.count(v)) return false;
   if (maximality(vertex_range)) return true;
   for (const Toplex_map::Simplex_ptr& sptr : t0.at(v))
@@ -190,7 +190,7 @@ bool Toplex_map::membership(const Input_vertex_range& vertex_range) const {
 
 template <typename Input_vertex_range>
 bool Toplex_map::maximality(const Input_vertex_range& vertex_range) const {
-  const Toplex_map::Vertex& v = best_index(vertex_range);
+  const Vertex& v = best_index(vertex_range);
   if (!t0.count(v)) return false;
   return t0.at(v).count(get_key(vertex_range));
 }
@@ -209,7 +209,7 @@ Toplex_map::Simplex_ptr_set Toplex_map::maximal_cofaces(const Input_vertex_range
         if (cofaces.size() == max_number) return cofaces;
       }
   else {
-    const Toplex_map::Vertex& v = best_index(vertex_range);
+    const Vertex& v = best_index(vertex_range);
     if (t0.count(v))
       for (const Toplex_map::Simplex_ptr& sptr : t0.at(v))
         if (included(vertex_range, *sptr)) {
@@ -240,13 +240,13 @@ Toplex_map::Vertex Toplex_map::contraction(const Toplex_map::Vertex x, const Top
 }
 
 std::set<Toplex_map::Vertex> Toplex_map::unitary_collapse(const Toplex_map::Vertex k, const Toplex_map::Vertex d) {
-  std::set<Toplex_map::Vertex> r;
+  Toplex_map::Simplex r;
   for (const Toplex_map::Simplex_ptr& sptr : Simplex_ptr_set(t0.at(d))) {
     // Copy constructor needed because the set is modified
     Simplex sigma(*sptr);
     erase_maximal(sptr);
     sigma.erase(d);
-    for (const Toplex_map::Vertex v : sigma) r.insert(v);
+    for (const Vertex v : sigma) r.insert(v);
     sigma.insert(k);
     insert_simplex(sigma);
   }
@@ -256,7 +256,7 @@ std::set<Toplex_map::Vertex> Toplex_map::unitary_collapse(const Toplex_map::Vert
 template <typename Input_vertex_range>
 void Toplex_map::insert_independent_simplex(const Input_vertex_range& vertex_range) {
   auto key = get_key(vertex_range);
-  for (const Toplex_map::Vertex& v : vertex_range) {
+  for (const Vertex& v : vertex_range) {
     if (!t0.count(v)) t0.emplace(v, Simplex_ptr_set());
     t0.at(v).emplace(key);
   }
@@ -274,7 +274,7 @@ void Toplex_map::remove_vertex(const Toplex_map::Vertex x) {
 inline void Toplex_map::erase_maximal(const Toplex_map::Simplex_ptr& sptr) {
   Simplex sigma(*sptr);
   if (sptr->size() == 0) sigma.insert(VERTEX_UPPER_BOUND);
-  for (const Toplex_map::Vertex& v : sigma) {
+  for (const Vertex& v : sigma) {
     t0.at(v).erase(sptr);
     if (t0.at(v).size() == 0) t0.erase(v);
   }
@@ -284,7 +284,7 @@ template <typename Input_vertex_range>
 Toplex_map::Vertex Toplex_map::best_index(const Input_vertex_range& vertex_range) const {
   std::size_t min = std::numeric_limits<size_t>::max();
   Vertex arg_min = VERTEX_UPPER_BOUND;
-  for (const Toplex_map::Vertex& v : vertex_range)
+  for (const Vertex& v : vertex_range)
     if (!t0.count(v))
       return v;
     else if (t0.at(v).size() < min)
@@ -303,7 +303,7 @@ std::size_t Toplex_map::Sptr_hash::operator()(const Toplex_map::Simplex_ptr& s) 
   std::hash<double> h_f;
   // double hash works better than int hash
   size_t h = 0;
-  for (const Toplex_map::Vertex& v : *s) h += h_f(static_cast<double>(v));
+  for (const Vertex& v : *s) h += h_f(static_cast<double>(v));
   return h;
 }
 
