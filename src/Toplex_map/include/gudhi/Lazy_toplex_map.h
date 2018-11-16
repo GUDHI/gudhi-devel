@@ -55,7 +55,7 @@ class Lazy_toplex_map {
   void insert_independent_simplex(const Input_vertex_range &vertex_range);
 
   /** \brief Adds the given simplex to the complex.
-   * Nothing happens if the simplex has a coface in the complex (i.e. it is a face of one of the toplices). */
+   * Nothing happens if the simplex is already in the complex (i.e. it is a face of one of the toplices). */
   template <typename Input_vertex_range>
   bool insert_simplex(const Input_vertex_range &vertex_range);
 
