@@ -95,3 +95,76 @@ BOOST_AUTO_TEST_CASE(toplex_map) {
   edge = {7, 5};
   BOOST_CHECK(tm.membership(edge));
 }
+
+BOOST_AUTO_TEST_CASE(toplex_map_empty_toplex) {
+  using Vertex = Gudhi::Lazy_toplex_map::Vertex;
+
+  Gudhi::Lazy_toplex_map tm;
+  std::cout << "num_maximal_simplices = " << tm.num_maximal_simplices() << std::endl;
+  BOOST_CHECK(tm.num_maximal_simplices() == 0);
+  std::cout << "num_vertices = " << tm.num_vertices() << std::endl;
+  BOOST_CHECK(tm.num_vertices() == 0);
+
+  std::cout << "Check an empty simplex is a member." << std::endl;
+  std::vector<Vertex> empty_sigma = {};
+  BOOST_CHECK(tm.membership(empty_sigma));
+
+  std::cout << "Check the edge 2,7 is not a member." << std::endl;
+  std::vector<Vertex> edge = {2, 7};
+  BOOST_CHECK(!tm.membership(edge));
+
+  std::cout << "Insert an empty simplex." << std::endl;
+  tm.insert_simplex(empty_sigma);
+
+  std::cout << "num_maximal_simplices = " << tm.num_maximal_simplices() << std::endl;
+  BOOST_CHECK(tm.num_maximal_simplices() == 0);
+  std::cout << "num_vertices = " << tm.num_vertices() << std::endl;
+  BOOST_CHECK(tm.num_vertices() == 0);
+
+  std::cout << "Check an empty simplex is a member." << std::endl;
+  BOOST_CHECK(tm.membership(empty_sigma));
+  std::cout << "Check the edge 2,7 is not a member." << std::endl;
+  BOOST_CHECK(!tm.membership(edge));
+
+  std::cout << "Insert edge 2,7." << std::endl;
+  tm.insert_simplex(edge);
+
+  std::cout << "num_maximal_simplices = " << tm.num_maximal_simplices() << std::endl;
+  BOOST_CHECK(tm.num_maximal_simplices() == 1);
+  std::cout << "num_vertices = " << tm.num_vertices() << std::endl;
+  BOOST_CHECK(tm.num_vertices() == 2);
+
+  std::cout << "Check an empty simplex is a member." << std::endl;
+  BOOST_CHECK(tm.membership(empty_sigma));
+  std::cout << "Check the edge 2,7 is a member." << std::endl;
+  BOOST_CHECK(tm.membership(edge));
+
+  std::cout << "contraction(2,7)" << std::endl;
+  auto r = tm.contraction(2, 7);
+  std::cout << "r=" << r << std::endl;
+  BOOST_CHECK(r == 7);
+
+  std::cout << "num_maximal_simplices = " << tm.num_maximal_simplices() << std::endl;
+  BOOST_CHECK(tm.num_maximal_simplices() == 1);
+  std::cout << "num_vertices = " << tm.num_vertices() << std::endl;
+  BOOST_CHECK(tm.num_vertices() == 1);
+
+  std::cout << "Check an empty simplex is a member." << std::endl;
+  BOOST_CHECK(tm.membership(empty_sigma));
+  std::cout << "Check the edge 2,7 is not a member." << std::endl;
+  BOOST_CHECK(!tm.membership(edge));
+
+  std::cout << "Remove the vertex 7." << std::endl;
+  std::vector<Vertex> vertex = {7};
+  tm.remove_simplex(vertex);
+
+  std::cout << "num_maximal_simplices = " << tm.num_maximal_simplices() << std::endl;
+  BOOST_CHECK(tm.num_maximal_simplices() == 0);
+  std::cout << "num_vertices = " << tm.num_vertices() << std::endl;
+  BOOST_CHECK(tm.num_vertices() == 0);
+
+  std::cout << "Check an empty simplex is a member." << std::endl;
+  BOOST_CHECK(tm.membership(empty_sigma));
+  std::cout << "Check the edge 2,7 is not a member." << std::endl;
+  BOOST_CHECK(!tm.membership(edge));
+}
