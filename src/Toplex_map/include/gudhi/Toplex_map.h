@@ -96,7 +96,7 @@ class Toplex_map {
    * Returns the remaining vertex. */
   Vertex contraction(const Vertex x, const Vertex y);
 
-  /** Removes a vertex from any simplex containing it. */
+  /** Remove the vertex and all its cofaces from the complex. */
   void remove_vertex(const Vertex x);
 
   /** \brief Number of maximal simplices. */
