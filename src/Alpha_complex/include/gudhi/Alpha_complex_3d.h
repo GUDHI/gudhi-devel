@@ -146,7 +146,7 @@ struct Value_from_iterator<complexity::EXACT, false> {
  * Duplicate points are inserted once in the Alpha_complex. This is the reason why the vertices may be not contiguous.
  *
  * \tparam Complexity shall be `Gudhi::alpha_complex::complexity`. Default value is
- * `Gudhi::alpha_complex::complexity::FAST`.
+ * `Gudhi::alpha_complex::complexity::SAFE`.
  *
  * \tparam Weighted Boolean used to set/unset the weighted version of Alpha_complex_3d. Default value is false.
  *
@@ -169,7 +169,7 @@ struct Value_from_iterator<complexity::EXACT, false> {
  * 3d Delaunay complex.
  *
  */
-template <complexity Complexity = complexity::FAST, bool Weighted = false, bool Periodic = false>
+template <complexity Complexity = complexity::SAFE, bool Weighted = false, bool Periodic = false>
 class Alpha_complex_3d {
   // Epick = Exact_predicates_inexact_constructions_kernel
   // Epeck = Exact_predicates_exact_constructions_kernel

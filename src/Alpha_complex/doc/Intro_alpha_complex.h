@@ -168,8 +168,10 @@ namespace alpha_complex {
  *
  * \section weighted3dexample 3d specific example
  *
- * A specific module for Alpha complex is available in 3d (cf. Alpha_complex_3d) and allows to construct default, exact,
- * weighted, periodic or weighted and periodic versions of alpha complexes
+ * A specific module for Alpha complex is available in 3d (cf. Alpha_complex_3d) and allows to construct standard,
+ * weighted, periodic or weighted and periodic versions of alpha complexes. Alpha values computation can be
+ * Gudhi::alpha_complex::complexity::FAST, Gudhi::alpha_complex::complexity::SAFE (default value) or
+ * Gudhi::alpha_complex::complexity::EXACT.
  *
  * This example builds the CGAL 3d weighted alpha shapes from a small molecule, and initializes the alpha complex with
  * it. This example is taken from <a href="https://doc.cgal.org/latest/Alpha_shapes_3/index.html#title13">CGAL 3d
