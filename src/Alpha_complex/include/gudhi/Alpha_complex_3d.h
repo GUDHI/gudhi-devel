@@ -26,10 +26,6 @@
 #include <boost/version.hpp>
 #include <boost/variant.hpp>
 
-#if BOOST_VERSION >= 105400
-#include <boost/container/static_vector.hpp>
-#endif
-
 #include <gudhi/Debug_utils.h>
 #include <gudhi/Alpha_complex_options.h>
 
@@ -49,6 +45,8 @@
 #include <CGAL/tuple.h>
 #include <CGAL/iterator.h>
 #include <CGAL/version.h>
+
+#include <boost/container/static_vector.hpp>
 
 #include <iostream>
 #include <vector>
@@ -269,11 +267,7 @@ class Alpha_complex_3d {
   using Facet = typename Alpha_shape_3::Facet;
   using Edge = typename Alpha_shape_3::Edge;
   using Alpha_vertex_handle = typename Alpha_shape_3::Vertex_handle;
-#if BOOST_VERSION >= 105400
   using Vertex_list = boost::container::static_vector<Alpha_vertex_handle, 4>;
-#else
-  using Vertex_list = std::vector<Alpha_vertex_handle>;
-#endif
 
  public:
   /** \brief Alpha_complex constructor from a list of points.
