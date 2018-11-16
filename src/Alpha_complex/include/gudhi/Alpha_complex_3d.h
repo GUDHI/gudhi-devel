@@ -437,9 +437,10 @@ class Alpha_complex_3d {
    *
    * @return true if creation succeeds, false otherwise.
    *
-   * @pre The simplicial complex must be empty (no vertices)
+   * @note Setting the max_alpha_square with a smaller value will not accelerate the complex creation. On the contrary
+   * it will launch SimplicialComplexForAlpha3d::prune_above_filtration after the complete creation.
    *
-   * Initialization can be launched once.
+   * @pre The simplicial complex must be empty (no vertices).
    *
    */
   template <typename SimplicialComplexForAlpha3d,
