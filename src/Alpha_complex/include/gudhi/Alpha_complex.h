@@ -235,7 +235,8 @@ class Alpha_complex {
    * \tparam SimplicialComplexForAlpha must meet `SimplicialComplexForAlpha` concept.
    * 
    * @param[in] complex SimplicialComplexForAlpha to be created.
-   * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$, and there is very little point using anything else since it does not save time.
+   * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$, and there is very
+   * little point using anything else since it does not save time.
    * 
    * @return true if creation succeeds, false otherwise.
    * 
@@ -244,8 +245,10 @@ class Alpha_complex {
    * 
    * Initialization can be launched once.
    */
-  template <typename SimplicialComplexForAlpha, typename Filtration_value = typename SimplicialComplexForAlpha::Filtration_value>
-  bool create_complex(SimplicialComplexForAlpha& complex, Filtration_value max_alpha_square = std::numeric_limits<Filtration_value>::infinity()) {
+  template <typename SimplicialComplexForAlpha,
+            typename Filtration_value = typename SimplicialComplexForAlpha::Filtration_value>
+  bool create_complex(SimplicialComplexForAlpha& complex,
+                      Filtration_value max_alpha_square = std::numeric_limits<Filtration_value>::infinity()) {
     // From SimplicialComplexForAlpha type required to insert into a simplicial complex (with or without subfaces).
     typedef typename SimplicialComplexForAlpha::Vertex_handle Vertex_handle;
     typedef typename SimplicialComplexForAlpha::Simplex_handle Simplex_handle;
@@ -267,7 +270,9 @@ class Alpha_complex {
     // --------------------------------------------------------------------------------------------
     // Simplex_tree construction from loop on triangulation finite full cells list
     if (triangulation_->number_of_vertices() > 0) {
-      for (auto cit = triangulation_->finite_full_cells_begin(); cit != triangulation_->finite_full_cells_end(); ++cit) {
+      for (auto cit = triangulation_->finite_full_cells_begin();
+           cit != triangulation_->finite_full_cells_end();
+           ++cit) {
         Vector_vertex vertexVector;
 #ifdef DEBUG_TRACES
         std::cout << "Simplex_tree insertion ";
@@ -330,7 +335,7 @@ class Alpha_complex {
           }
           // No need to propagate further, unweighted points all have value 0
           if (decr_dim > 1)
-            propagate_alpha_filtration(complex, f_simplex, decr_dim);
+            propagate_alpha_filtration(complex, f_simplex);
         }
       }
     }
@@ -347,7 +352,7 @@ class Alpha_complex {
 
  private:
   template <typename SimplicialComplexForAlpha, typename Simplex_handle>
-  void propagate_alpha_filtration(SimplicialComplexForAlpha& complex, Simplex_handle f_simplex, int decr_dim) {
+  void propagate_alpha_filtration(SimplicialComplexForAlpha& complex, Simplex_handle f_simplex) {
     // From SimplicialComplexForAlpha type required to assign filtration values.
     typedef typename SimplicialComplexForAlpha::Filtration_value Filtration_value;
 #ifdef DEBUG_TRACES
