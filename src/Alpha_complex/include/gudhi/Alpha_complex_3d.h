@@ -82,16 +82,7 @@ template <complexity Complexity, bool Weighted_or_periodic>
 struct Value_from_iterator {
   template <typename Iterator>
   static double perform(Iterator it) {
-    // Default behaviour is to return the value pointed by the given iterator
-    return *it;
-  }
-};
-
-template <>
-struct Value_from_iterator<complexity::SAFE, true> {
-  template <typename Iterator>
-  static double perform(Iterator it) {
-    // In SAFE mode, we are with Epick with EXACT value set to CGAL::Tag_true.
+    // Default behaviour
     return CGAL::to_double(*it);
   }
 };
@@ -118,7 +109,7 @@ template<bool Weighted_or_periodic>
 struct Value_from_iterator<complexity::EXACT,Weighted_or_periodic>{
   template <typename Iterator>
   static double perform(Iterator it) {
-    // In EXACT mode, we are with Epeck or Epick with EXACT value set to CGAL::Tag_true.
+    // In EXACT mode, we are with Epeck, or with Epick and EXACT value set to CGAL::Tag_true.
     return CGAL::to_double(it->exact());
   }
 };

@@ -432,13 +432,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_weighted_periodic_throw, Weighted_pe
                               wp_variants_type_list) {
   std::cout << "Weighted periodic alpha complex 3d exception throw" << std::endl;
 
-  using Creator = CGAL::Creator_uniform_3<double, Weighted_periodic_alpha_complex_3d::Point_3>;
+  using Creator = CGAL::Creator_uniform_3<double, typename Weighted_periodic_alpha_complex_3d::Point_3>;
   CGAL::Random random(7);
-  CGAL::Random_points_in_cube_3<Weighted_periodic_alpha_complex_3d::Point_3, Creator> in_cube(1, random);
-  std::vector<Weighted_periodic_alpha_complex_3d::Point_3> wp_points;
+  CGAL::Random_points_in_cube_3<typename Weighted_periodic_alpha_complex_3d::Point_3, Creator> in_cube(1, random);
+  std::vector<typename Weighted_periodic_alpha_complex_3d::Point_3> wp_points;
 
   for (int i = 0; i < 50; i++) {
-    Weighted_periodic_alpha_complex_3d::Point_3 p = *in_cube++;
+    typename Weighted_periodic_alpha_complex_3d::Point_3 p = *in_cube++;
     wp_points.push_back(p);
   }
   std::vector<double> p_weights;
