@@ -433,12 +433,10 @@ class Alpha_complex_3d {
    * \tparam SimplicialComplexForAlpha3d must meet `SimplicialComplexForAlpha3d` concept.
    *
    * @param[in] complex SimplicialComplexForAlpha3d to be created.
-   * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$.
+   * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$, and there is very
+   * little point using anything else since it does not save time.
    *
    * @return true if creation succeeds, false otherwise.
-   *
-   * @note Setting the max_alpha_square with a smaller value will not accelerate the complex creation. On the contrary
-   * it will launch SimplicialComplexForAlpha3d::prune_above_filtration after the complete creation.
    *
    * @pre The simplicial complex must be empty (no vertices).
    *

@@ -240,9 +240,6 @@ class Alpha_complex {
    * 
    * @return true if creation succeeds, false otherwise.
    * 
-   * @note Setting the max_alpha_square with a smaller value will not accelerate the complex creation. On the contrary
-   * it will launch SimplicialComplexForAlpha::prune_above_filtration after the complete creation.
-   *
    * @pre Delaunay triangulation must be already constructed with dimension strictly greater than 0.
    * @pre The simplicial complex must be empty (no vertices)
    * 
