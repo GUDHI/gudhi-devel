@@ -323,8 +323,7 @@ class Simplex_tree {
   }
 
   /** \brief User-defined copy assignment reproduces the whole tree structure. */
-  Simplex_tree& operator= (const Simplex_tree& complex_source)
-  {
+  Simplex_tree& operator= (const Simplex_tree& complex_source) {
 #ifdef DEBUG_TRACES
     std::cout << "Simplex_tree copy assignment" << std::endl;
 #endif  // DEBUG_TRACES
@@ -341,8 +340,7 @@ class Simplex_tree {
   /** \brief User-defined move assignment relocates the whole tree structure.
    *  \exception std::invalid_argument In debug mode, if the complex_source is invalid.
    */
-  Simplex_tree& operator=(Simplex_tree&& complex_source)
-  {
+  Simplex_tree& operator=(Simplex_tree&& complex_source) {
 #ifdef DEBUG_TRACES
     std::cout << "Simplex_tree move assignment" << std::endl;
 #endif  // DEBUG_TRACES

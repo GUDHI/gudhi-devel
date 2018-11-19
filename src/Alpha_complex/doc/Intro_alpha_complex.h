@@ -106,7 +106,7 @@ namespace alpha_complex {
  * \quad\quad\quad\quad \text{filtration(} \tau \text{) = min( filtration(} \tau \text{), filtration(} \sigma
  * \text{) )}\\
  * \quad\quad\quad \textbf{else}\\
- * \quad\quad\quad\quad \textbf{if } \textbf{if } \tau \text{ is not Gabriel for } \sigma \textbf{ then}\\
+ * \quad\quad\quad\quad \textbf{if } \tau \text{ is not Gabriel for } \sigma \textbf{ then}\\
  * \quad\quad\quad\quad\quad \text{filtration(} \tau \text{) = filtration(} \sigma \text{)}\\
  * \quad\quad\quad\quad \textbf{end if}\\
  * \quad\quad\quad \textbf{end if}\\
