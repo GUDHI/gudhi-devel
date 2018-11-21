@@ -228,7 +228,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_weighted, Weighted_alpha_complex_3d,
   alpha_complex_p_a_w.create_complex(stree);
 
   std::cout << "Weighted alpha complex 3d from weighted points" << std::endl;
-  using Weighted_point_3 = typename Weighted_alpha_complex_3d::Triangulation_3::Weighted_point;
+  using Weighted_point_3 = typename Weighted_alpha_complex_3d::Weighted_point_3;
 
   std::vector<Weighted_point_3> weighted_points;
 

@@ -58,7 +58,7 @@
 
 #if CGAL_VERSION_NR < 1041101000
 // Make compilation fail - required for external projects - https://gitlab.inria.fr/GUDHI/gudhi-devel/issues/10
-static_assert(false, "Alpha_complex_3d is only available for CGAL >= 4.11");
+# error Alpha_complex_3d is only available for CGAL >= 4.11
 #endif
 
 namespace Gudhi {
@@ -153,7 +153,7 @@ template <complexity Complexity = complexity::SAFE, bool Weighted = false, bool 
 class Alpha_complex_3d {
   // Epick = Exact_predicates_inexact_constructions_kernel
   // Epeck = Exact_predicates_exact_constructions_kernel
-  // ExactAlphaComparisonTag = exact version of CGAL Alpha_shape_3 and of its objects (Alpha_shape_vertex_base_3 and
+  // Exact_alpha_comparison_tag = exact version of CGAL Alpha_shape_3 and of its objects (Alpha_shape_vertex_base_3 and
   //                           Alpha_shape_cell_base_3). Not available if weighted or periodic.
   //                           Can be CGAL::Tag_false or CGAL::Tag_true
   //                           cf. https://doc.cgal.org/latest/Alpha_shapes_3/classCGAL_1_1Alpha__shape__3.html
@@ -188,7 +188,7 @@ class Alpha_complex_3d {
 
   using Kernel = typename Kernel_3<Predicates, Weighted, Periodic>::Kernel;
 
-  using Exact_tag = typename std::conditional<(Complexity == complexity::FAST), CGAL::Tag_false, CGAL::Tag_true>::type;
+  using Exact_alpha_comparison_tag = typename std::conditional<(Complexity == complexity::FAST), CGAL::Tag_false, CGAL::Tag_true>::type;
 
   using TdsVb = typename std::conditional<Periodic, CGAL::Periodic_3_triangulation_ds_vertex_base_3<>,
                                           CGAL::Triangulation_ds_vertex_base_3<>>::type;
@@ -196,7 +196,7 @@ class Alpha_complex_3d {
   using Tvb = typename std::conditional<Weighted, CGAL::Regular_triangulation_vertex_base_3<Kernel, TdsVb>,
                                         CGAL::Triangulation_vertex_base_3<Kernel, TdsVb>>::type;
 
-  using Vb = CGAL::Alpha_shape_vertex_base_3<Kernel, Tvb, Exact_tag>;
+  using Vb = CGAL::Alpha_shape_vertex_base_3<Kernel, Tvb, Exact_alpha_comparison_tag>;
 
   using TdsCb = typename std::conditional<Periodic, CGAL::Periodic_3_triangulation_ds_cell_base_3<>,
                                           CGAL::Triangulation_ds_cell_base_3<>>::type;
@@ -204,43 +204,84 @@ class Alpha_complex_3d {
   using Tcb = typename std::conditional<Weighted, CGAL::Regular_triangulation_cell_base_3<Kernel, TdsCb>,
                                         CGAL::Triangulation_cell_base_3<Kernel, TdsCb>>::type;
 
-  using Cb = CGAL::Alpha_shape_cell_base_3<Kernel, Tcb, Exact_tag>;
+  using Cb = CGAL::Alpha_shape_cell_base_3<Kernel, Tcb, Exact_alpha_comparison_tag>;
   using Tds = CGAL::Triangulation_data_structure_3<Vb, Cb>;
 
   // The other way to do a conditional type. Here there 4 possibilities, cannot use std::conditional
   template <typename Kernel, typename Tds, bool Weighted_version, bool Periodic_version>
-  struct Triangulation {};
+  struct Triangulation_3 {};
 
   template <typename Kernel, typename Tds>
-  struct Triangulation<Kernel, Tds, false, false> {
-    using Triangulation_3 = CGAL::Delaunay_triangulation_3<Kernel, Tds>;
+  struct Triangulation_3<Kernel, Tds, false, false> {
+    using Dt = CGAL::Delaunay_triangulation_3<Kernel, Tds>;
+    using Weighted_point_3 = void;
   };
   template <typename Kernel, typename Tds>
-  struct Triangulation<Kernel, Tds, true, false> {
-    using Triangulation_3 = CGAL::Regular_triangulation_3<Kernel, Tds>;
+  struct Triangulation_3<Kernel, Tds, true, false> {
+    using Dt = CGAL::Regular_triangulation_3<Kernel, Tds>;
+    using Weighted_point_3 = typename Dt::Weighted_point;
   };
   template <typename Kernel, typename Tds>
-  struct Triangulation<Kernel, Tds, false, true> {
-    using Triangulation_3 = CGAL::Periodic_3_Delaunay_triangulation_3<Kernel, Tds>;
+  struct Triangulation_3<Kernel, Tds, false, true> {
+    using Dt = CGAL::Periodic_3_Delaunay_triangulation_3<Kernel, Tds>;
+    using Weighted_point_3 = void;
   };
   template <typename Kernel, typename Tds>
-  struct Triangulation<Kernel, Tds, true, true> {
-    using Triangulation_3 = CGAL::Periodic_3_regular_triangulation_3<Kernel, Tds>;
+  struct Triangulation_3<Kernel, Tds, true, true> {
+    using Dt = CGAL::Periodic_3_regular_triangulation_3<Kernel, Tds>;
+    using Weighted_point_3 = typename Dt::Weighted_point;
   };
 
- public:
-  using Triangulation_3 = typename Triangulation<Kernel, Tds, Weighted, Periodic>::Triangulation_3;
+  /** \brief Is either Delaunay_triangulation_3 (Weighted = false and Periodic = false),
+   * Regular_triangulation_3 (Weighted = true and Periodic = false),
+   * Periodic_3_Delaunay_triangulation_3 (Weighted = false and Periodic = true)
+   * or Periodic_3_regular_triangulation_3 (Weighted = true and Periodic = true).
+   *
+   * This type is required by `Gudhi::alpha_complex::Alpha_complex_3d::Alpha_shape_3`.
+   * */
+  using Dt = typename Triangulation_3<Kernel, Tds, Weighted, Periodic>::Dt;
 
-  using Alpha_shape_3 = CGAL::Alpha_shape_3<Triangulation_3, Exact_tag>;
+public:
+  /** \brief The <a href="https://doc.cgal.org/latest/Alpha_shapes_3/classCGAL_1_1Alpha__shape__3.html">CGAL 3D Alpha
+   * Shapes</a> type.
+   *
+   *  The `Gudhi::alpha_complex::Alpha_complex_3d` is a wrapper on top of this class to ease the standard, weighted
+   *  and/or periodic build of the Alpha complex 3d.*/
+  using Alpha_shape_3 = CGAL::Alpha_shape_3<Dt, Exact_alpha_comparison_tag>;
 
+  /** \brief The alpha values type.
+   * Must be compatible with double. */
+  using FT = typename Alpha_shape_3::FT;
+
+  /** \brief Gives public access to the Point_3 type. Here is a Point_3 constructor example:
+\code{.cpp}
+using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::SAFE, false, false>;
+
+// x0 = 1., y0 = -1.1, z0 = -1..
+Alpha_complex_3d::Point_3 p0(1., -1.1, -1.);
+\endcode
+   * */
   using Point_3 = typename Kernel::Point_3;
 
- private:
-  using Alpha_value_type = typename Alpha_shape_3::FT;
+  /** \brief Gives public access to the Weighted_point_3 type. A Weighted point can be constructed as follows:
+\code{.cpp}
+using Weighted_alpha_complex_3d =
+  Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::SAFE, true, false>;
+
+// x0 = 1., y0 = -1.1, z0 = -1., weight = 4.
+Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Point_3(1., -1.1, -1.), 4.);
+\endcode
+ *
+ * Note: This type is defined to void if Alpha complex is not weighted.
+ *
+ * */
+  using Weighted_point_3 = typename Triangulation_3<Kernel, Tds, Weighted, Periodic>::Weighted_point_3;
+
+private:
   using Dispatch =
-      CGAL::Dispatch_output_iterator<CGAL::cpp11::tuple<CGAL::Object, Alpha_value_type>,
+      CGAL::Dispatch_output_iterator<CGAL::cpp11::tuple<CGAL::Object, FT>,
                                      CGAL::cpp11::tuple<std::back_insert_iterator<std::vector<CGAL::Object>>,
-                                                        std::back_insert_iterator<std::vector<Alpha_value_type>>>>;
+                                                        std::back_insert_iterator<std::vector<FT>>>>;
 
   using Cell_handle = typename Alpha_shape_3::Cell_handle;
   using Facet = typename Alpha_shape_3::Facet;
@@ -252,12 +293,12 @@ class Alpha_complex_3d {
   /** \brief Alpha_complex constructor from a list of points.
    *
    * @param[in] points Range of points to triangulate. Points must be in `Alpha_complex_3d::Point_3` or
-   * `Alpha_complex_3d::Triangulation_3::Weighted_point`.
+   * `Alpha_complex_3d::Weighted_point_3`.
    *
    * @pre Available if Alpha_complex_3d is not Periodic.
    *
    * The type InputPointRange must be a range for which std::begin and std::end return input iterators on a
-   * `Alpha_complex_3d::Point_3` or a `Alpha_complex_3d::Triangulation_3::Weighted_point`.
+   * `Alpha_complex_3d::Point_3` or a `Alpha_complex_3d::Weighted_point_3`.
    */
   template <typename InputPointRange>
   Alpha_complex_3d(const InputPointRange& points) {
@@ -271,15 +312,15 @@ class Alpha_complex_3d {
    *
    * @exception std::invalid_argument In debug mode, if points and weights do not have the same size.
    *
-   * @param[in] points Range of points to triangulate. Points must be in `Alpha_complex_3d::Point_3`
-   * @param[in] weights Range of weights on points. Weights shall be in `Alpha_complex_3d::Alpha_shape_3::FT`
+   * @param[in] points Range of points to triangulate. Points must be in `Alpha_complex_3d::Point_3`.
+   * @param[in] weights Range of weights on points. Weights shall be in double.
    *
    * @pre Available if Alpha_complex_3d is Weighted and not Periodic.
    *
    * The type InputPointRange must be a range for which std::begin and
    * std::end return input iterators on a `Alpha_complex_3d::Point_3`.
    * The type WeightRange must be a range for which std::begin and
-   * std::end return an input iterator on a `Alpha_complex_3d::Alpha_shape_3::FT`.
+   * std::end return an input iterator on a double.
    */
   template <typename InputPointRange, typename WeightRange>
   Alpha_complex_3d(const InputPointRange& points, WeightRange weights) {
@@ -288,7 +329,6 @@ class Alpha_complex_3d {
     GUDHI_CHECK((weights.size() == points.size()),
                 std::invalid_argument("Points number in range different from weights range number"));
 
-    using Weighted_point_3 = typename Triangulation_3::Weighted_point;
     std::vector<Weighted_point_3> weighted_points_3;
 
     std::size_t index = 0;
@@ -307,7 +347,7 @@ class Alpha_complex_3d {
    * @exception std::invalid_argument In debug mode, if the size of the cuboid in every directions is not the same.
    *
    * @param[in] points Range of points to triangulate. Points must be in `Alpha_complex_3d::Point_3` or
-   * `Alpha_complex_3d::Triangulation_3::Weighted_point`.
+   * `Alpha_complex_3d::Weighted_point_3`.
    * @param[in] x_min Iso-oriented cuboid x_min.
    * @param[in] y_min Iso-oriented cuboid y_min.
    * @param[in] z_min Iso-oriented cuboid z_min.
@@ -318,14 +358,14 @@ class Alpha_complex_3d {
    * @pre Available if Alpha_complex_3d is Periodic.
    *
    * The type InputPointRange must be a range for which std::begin and std::end return input iterators on a
-   * `Alpha_complex_3d::Point_3` or a `Alpha_complex_3d::Triangulation_3::Weighted_point`.
+   * `Alpha_complex_3d::Point_3` or a `Alpha_complex_3d::Weighted_point_3`.
    *
    * @note In weighted version, please check weights are greater than zero, and lower than 1/64*cuboid length
    * squared.
    */
   template <typename InputPointRange>
-  Alpha_complex_3d(const InputPointRange& points, Alpha_value_type x_min, Alpha_value_type y_min,
-                   Alpha_value_type z_min, Alpha_value_type x_max, Alpha_value_type y_max, Alpha_value_type z_max) {
+  Alpha_complex_3d(const InputPointRange& points, FT x_min, FT y_min,
+                   FT z_min, FT x_max, FT y_max, FT z_max) {
     static_assert(Periodic, "This constructor is not available for non-periodic versions of Alpha_complex_3d");
     // Checking if the cuboid is the same in x,y and z direction. If not, CGAL will not process it.
     GUDHI_CHECK(
@@ -333,7 +373,7 @@ class Alpha_complex_3d {
         std::invalid_argument("The size of the cuboid in every directions is not the same."));
 
     // Define the periodic cube
-    Triangulation_3 pdt(typename Kernel::Iso_cuboid_3(x_min, y_min, z_min, x_max, y_max, z_max));
+    Dt pdt(typename Kernel::Iso_cuboid_3(x_min, y_min, z_min, x_max, y_max, z_max));
     // Heuristic for inserting large point sets (if pts is reasonably large)
     pdt.insert(std::begin(points), std::end(points), true);
     // As pdt won't be modified anymore switch to 1-sheeted cover if possible
@@ -354,8 +394,8 @@ class Alpha_complex_3d {
    * @exception std::invalid_argument In debug mode, if a weight is negative, zero, or greater than 1/64*cuboid length
    * squared.
    *
-   * @param[in] points Range of points to triangulate. Points must be in `Alpha_complex_3d::Point_3`
-   * @param[in] weights Range of weights on points. Weights shall be in `Alpha_complex_3d::Alpha_shape_3::FT`
+   * @param[in] points Range of points to triangulate. Points must be in `Alpha_complex_3d::Point_3`.
+   * @param[in] weights Range of weights on points. Weights shall be in double.
    * @param[in] x_min Iso-oriented cuboid x_min.
    * @param[in] y_min Iso-oriented cuboid y_min.
    * @param[in] z_min Iso-oriented cuboid z_min.
@@ -368,12 +408,12 @@ class Alpha_complex_3d {
    * The type InputPointRange must be a range for which std::begin and
    * std::end return input iterators on a `Alpha_complex_3d::Point_3`.
    * The type WeightRange must be a range for which std::begin and
-   * std::end return an input iterator on a `Alpha_complex_3d::Alpha_shape_3::FT`.
-   * The type of x_min, y_min, z_min, x_max, y_max and z_max is `Alpha_complex_3d::Alpha_shape_3::FT`.
+   * std::end return an input iterator on a double.
+   * The type of x_min, y_min, z_min, x_max, y_max and z_max must be a double.
    */
   template <typename InputPointRange, typename WeightRange>
-  Alpha_complex_3d(const InputPointRange& points, WeightRange weights, Alpha_value_type x_min, Alpha_value_type y_min,
-                   Alpha_value_type z_min, Alpha_value_type x_max, Alpha_value_type y_max, Alpha_value_type z_max) {
+  Alpha_complex_3d(const InputPointRange& points, WeightRange weights, FT x_min, FT y_min,
+                   FT z_min, FT x_max, FT y_max, FT z_max) {
     static_assert(Weighted, "This constructor is not available for non-weighted versions of Alpha_complex_3d");
     static_assert(Periodic, "This constructor is not available for non-periodic versions of Alpha_complex_3d");
     GUDHI_CHECK((weights.size() == points.size()),
@@ -383,7 +423,6 @@ class Alpha_complex_3d {
         (x_max - x_min == y_max - y_min) && (x_max - x_min == z_max - z_min) && (z_max - z_min == y_max - y_min),
         std::invalid_argument("The size of the cuboid in every directions is not the same."));
 
-    using Weighted_point_3 = typename Triangulation_3::Weighted_point;
     std::vector<Weighted_point_3> weighted_points_3;
 
     std::size_t index = 0;
@@ -391,7 +430,7 @@ class Alpha_complex_3d {
 
 #ifdef GUDHI_DEBUG
     // Defined in GUDHI_DEBUG to avoid unused variable warning for GUDHI_CHECK
-    Alpha_value_type maximal_possible_weight = 0.015625 * (x_max - x_min) * (x_max - x_min);
+    FT maximal_possible_weight = 0.015625 * (x_max - x_min) * (x_max - x_min);
 #endif
 
     while ((index < weights.size()) && (index < points.size())) {
@@ -404,7 +443,7 @@ class Alpha_complex_3d {
     }
 
     // Define the periodic cube
-    Triangulation_3 pdt(typename Kernel::Iso_cuboid_3(x_min, y_min, z_min, x_max, y_max, z_max));
+    Dt pdt(typename Kernel::Iso_cuboid_3(x_min, y_min, z_min, x_max, y_max, z_max));
     // Heuristic for inserting large point sets (if pts is reasonably large)
     pdt.insert(std::begin(weighted_points_3), std::end(weighted_points_3), true);
     // As pdt won't be modified anymore switch to 1-sheeted cover if possible
@@ -453,9 +492,9 @@ class Alpha_complex_3d {
     std::size_t count_cells = 0;
 #endif  // DEBUG_TRACES
     std::vector<CGAL::Object> objects;
-    std::vector<Alpha_value_type> alpha_values;
+    std::vector<FT> alpha_values;
 
-    Dispatch dispatcher = CGAL::dispatch_output<CGAL::Object, Alpha_value_type>(std::back_inserter(objects),
+    Dispatch dispatcher = CGAL::dispatch_output<CGAL::Object, FT>(std::back_inserter(objects),
                                                                                 std::back_inserter(alpha_values));
 
     alpha_shape_3_ptr_->filtration_with_alpha_values(dispatcher);
@@ -464,7 +503,7 @@ class Alpha_complex_3d {
 #endif  // DEBUG_TRACES
 
     Alpha_shape_simplex_tree_map map_cgal_simplex_tree;
-    using Alpha_value_iterator = typename std::vector<Alpha_value_type>::const_iterator;
+    using Alpha_value_iterator = typename std::vector<FT>::const_iterator;
     Alpha_value_iterator alpha_value_iterator = alpha_values.begin();
     for (auto object_iterator : objects) {
       Vertex_list vertex_list;

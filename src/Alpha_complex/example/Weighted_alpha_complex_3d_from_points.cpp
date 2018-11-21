@@ -11,21 +11,13 @@
 using Weighted_alpha_complex_3d =
     Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::EXACT, true, false>;
 using Point = Weighted_alpha_complex_3d::Point_3;
-using Weighted_point = Weighted_alpha_complex_3d::Triangulation_3::Weighted_point;
-using Vector_of_weighted_points = std::vector<Weighted_point>;
-using Vector_of_weights = std::vector<Weighted_alpha_complex_3d::Alpha_shape_3::FT>;
+using Weighted_point = Weighted_alpha_complex_3d::Weighted_point_3;
 
 int main(int argc, char **argv) {
-  if (argc != 1) {
-    std::cerr << "Error: Number of arguments (" << argc << ") is not correct\n";
-    std::cerr << "Usage: " << (argv[0] - 1) << " \n";
-    exit(-1);  // ----- >>
-  }
-
   // ----------------------------------------------------------------------------
   // Init of a list of points and weights from a small molecule
   // ----------------------------------------------------------------------------
-  Vector_of_weighted_points weighted_points;
+  std::vector<Weighted_point> weighted_points;
   weighted_points.push_back(Weighted_point(Point(1, -1, -1), 4.));
   weighted_points.push_back(Weighted_point(Point(-1, 1, -1), 4.));
   weighted_points.push_back(Weighted_point(Point(-1, -1, 1), 4.));

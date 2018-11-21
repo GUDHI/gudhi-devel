@@ -116,7 +116,7 @@ void benchmark_weighted_points_on_torus_3D(const std::string& msg) {
     std::vector<K::Point_d> points_on_torus = Gudhi::generate_points_on_torus_3D<K>(nb_points, 1.0, 0.5);
 
     using Point = typename Weighted_alpha_complex_3d::Point_3;
-    using Weighted_point = typename Weighted_alpha_complex_3d::Triangulation_3::Weighted_point;
+    using Weighted_point = typename Weighted_alpha_complex_3d::Weighted_point_3;
 
     std::vector<Weighted_point> points;
 
@@ -207,7 +207,7 @@ void benchmark_weighted_periodic_points(const std::string& msg) {
               << std::endl;
 
     using Point = typename Weighted_periodic_alpha_complex_3d::Point_3;
-    using Weighted_point = typename Weighted_periodic_alpha_complex_3d::Triangulation_3::Weighted_point;
+    using Weighted_point = typename Weighted_periodic_alpha_complex_3d::Weighted_point_3;
     std::vector<Weighted_point> points;
 
     for (double i = 0; i < nb_points; i++) {
