@@ -72,13 +72,10 @@ thread_local
 
 // Value_from_iterator returns the filtration value from an iterator on alpha shapes values
 //
-//                        FAST                         SAFE                         EXACT
-// not weighted and       *iterator                    Specific case due to CGAL    CGAL::to_double(iterator->exact())
-// not periodic                                        issue # 3153
-//
-// otherwise              *iterator                    CGAL::to_double(*iterator)   CGAL::to_double(iterator->exact())
+// FAST                         SAFE                         EXACT
+// CGAL::to_double(*iterator)   CGAL::to_double(*iterator)   CGAL::to_double(iterator->exact())
 
-template <complexity Complexity, bool Weighted_or_periodic>
+template <complexity Complexity>
 struct Value_from_iterator {
   template <typename Iterator>
   static double perform(Iterator it) {
@@ -88,28 +85,9 @@ struct Value_from_iterator {
 };
 
 template <>
-struct Value_from_iterator<complexity::SAFE, false> {
+struct Value_from_iterator<complexity::EXACT> {
   template <typename Iterator>
   static double perform(Iterator it) {
-    // In SAFE mode, we are with Epeck with EXACT value set to CGAL::Tag_true.
-    // Specific case due to CGAL issue https://github.com/CGAL/cgal/issues/3153
-    auto approx = it->approx();
-    double r;
-    if (CGAL::fit_in_double(approx, r)) return r;
-
-    // If it's precise enough, then OK.
-    if (CGAL::has_smaller_relative_precision(approx, RELATIVE_PRECISION_OF_TO_DOUBLE)) return CGAL::to_double(approx);
-
-    it->exact();
-    return CGAL::to_double(it->approx());
-  }
-};
-
-template<bool Weighted_or_periodic>
-struct Value_from_iterator<complexity::EXACT,Weighted_or_periodic>{
-  template <typename Iterator>
-  static double perform(Iterator it) {
-    // In EXACT mode, we are with Epeck, or with Epick and EXACT value set to CGAL::Tag_true.
     return CGAL::to_double(it->exact());
   }
 };
@@ -568,7 +546,7 @@ private:
         }
       }
       // Construction of the simplex_tree
-      Filtration_value filtr = Value_from_iterator<Complexity, (Weighted || Periodic)>::perform(alpha_value_iterator);
+      Filtration_value filtr = Value_from_iterator<Complexity>::perform(alpha_value_iterator);
 
 #ifdef DEBUG_TRACES
       std::cout << "filtration = " << filtr << std::endl;
