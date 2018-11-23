@@ -155,16 +155,16 @@ class Alpha_complex_3d {
   // Epeck = Exact_predicates_exact_constructions_kernel
   // Exact_alpha_comparison_tag = exact version of CGAL Alpha_shape_3 and of its objects (Alpha_shape_vertex_base_3 and
   //                           Alpha_shape_cell_base_3). Not available if weighted or periodic.
-  //                           Can be CGAL::Tag_false or CGAL::Tag_true
+  //                           Can be CGAL::Tag_false or CGAL::Tag_true. Default is False.
   //                           cf. https://doc.cgal.org/latest/Alpha_shapes_3/classCGAL_1_1Alpha__shape__3.html
   //
+  // We could use Epick + CGAL::Tag_true for not weighted nor periodic, but during benchmark, we found a bug
+  // https://github.com/CGAL/cgal/issues/3460
+  // This is the reason we only use Epick + CGAL::Tag_false, or Epeck
   //
-  //                        FAST                         SAFE                         EXACT
-  // not weighted and       Epick + CGAL::Tag_false      Epick + CGAL::Tag_true       Epick + CGAL::Tag_true
-  // not periodic
-  //
-  // otherwise              Epick + CGAL::Tag_false      Epeck                        Epeck
-  using Predicates = typename std::conditional<((!Weighted && !Periodic) || (Complexity == complexity::FAST)),
+  // FAST                         SAFE                         EXACT
+  // Epick + CGAL::Tag_false      Epeck                        Epeck
+  using Predicates = typename std::conditional<(Complexity == complexity::FAST),
                                                CGAL::Exact_predicates_inexact_constructions_kernel,
                                                CGAL::Exact_predicates_exact_constructions_kernel>::type;
 
@@ -188,15 +188,13 @@ class Alpha_complex_3d {
 
   using Kernel = typename Kernel_3<Predicates, Weighted, Periodic>::Kernel;
 
-  using Exact_alpha_comparison_tag = typename std::conditional<(Complexity == complexity::FAST), CGAL::Tag_false, CGAL::Tag_true>::type;
-
   using TdsVb = typename std::conditional<Periodic, CGAL::Periodic_3_triangulation_ds_vertex_base_3<>,
                                           CGAL::Triangulation_ds_vertex_base_3<>>::type;
 
   using Tvb = typename std::conditional<Weighted, CGAL::Regular_triangulation_vertex_base_3<Kernel, TdsVb>,
                                         CGAL::Triangulation_vertex_base_3<Kernel, TdsVb>>::type;
 
-  using Vb = CGAL::Alpha_shape_vertex_base_3<Kernel, Tvb, Exact_alpha_comparison_tag>;
+  using Vb = CGAL::Alpha_shape_vertex_base_3<Kernel, Tvb>;
 
   using TdsCb = typename std::conditional<Periodic, CGAL::Periodic_3_triangulation_ds_cell_base_3<>,
                                           CGAL::Triangulation_ds_cell_base_3<>>::type;
@@ -204,7 +202,7 @@ class Alpha_complex_3d {
   using Tcb = typename std::conditional<Weighted, CGAL::Regular_triangulation_cell_base_3<Kernel, TdsCb>,
                                         CGAL::Triangulation_cell_base_3<Kernel, TdsCb>>::type;
 
-  using Cb = CGAL::Alpha_shape_cell_base_3<Kernel, Tcb, Exact_alpha_comparison_tag>;
+  using Cb = CGAL::Alpha_shape_cell_base_3<Kernel, Tcb>;
   using Tds = CGAL::Triangulation_data_structure_3<Vb, Cb>;
 
   // The other way to do a conditional type. Here there 4 possibilities, cannot use std::conditional
@@ -247,7 +245,7 @@ public:
    *
    *  The `Gudhi::alpha_complex::Alpha_complex_3d` is a wrapper on top of this class to ease the standard, weighted
    *  and/or periodic build of the Alpha complex 3d.*/
-  using Alpha_shape_3 = CGAL::Alpha_shape_3<Dt, Exact_alpha_comparison_tag>;
+  using Alpha_shape_3 = CGAL::Alpha_shape_3<Dt>;
 
   /** \brief The alpha values type.
    * Must be compatible with double. */

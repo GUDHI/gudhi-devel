@@ -7,9 +7,9 @@
 #include <vector>
 #include <limits>  // for numeric limits
 
-// Complexity = EXACT, weighted = true, periodic = false
+// Complexity = FAST, weighted = true, periodic = false
 using Weighted_alpha_complex_3d =
-    Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::EXACT, true, false>;
+    Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::SAFE, true, false>;
 using Point = Weighted_alpha_complex_3d::Point_3;
 using Weighted_point = Weighted_alpha_complex_3d::Weighted_point_3;
 

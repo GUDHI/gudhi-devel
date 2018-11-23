@@ -48,20 +48,27 @@ using Safe_alpha_complex_3d =
 using Exact_alpha_complex_3d =
     Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::EXACT, false, false>;
 
+template <typename Point>
+std::vector<Point> get_points() {
+  std::vector<Point> points;
+  points.push_back(Point(0.0, 0.0, 0.0));
+  points.push_back(Point(0.0, 0.0, 0.2));
+  points.push_back(Point(0.2, 0.0, 0.2));
+  points.push_back(Point(0.6, 0.6, 0.0));
+  points.push_back(Point(0.8, 0.8, 0.2));
+  points.push_back(Point(0.2, 0.8, 0.6));
+
+  return points;
+}
+
+
 BOOST_AUTO_TEST_CASE(Alpha_complex_3d_from_points) {
   // -----------------
   // Fast version
   // -----------------
   std::cout << "Fast alpha complex 3d" << std::endl;
-  std::vector<Fast_alpha_complex_3d::Point_3> points;
-  points.push_back(Fast_alpha_complex_3d::Point_3(0.0, 0.0, 0.0));
-  points.push_back(Fast_alpha_complex_3d::Point_3(0.0, 0.0, 0.2));
-  points.push_back(Fast_alpha_complex_3d::Point_3(0.2, 0.0, 0.2));
-  points.push_back(Fast_alpha_complex_3d::Point_3(0.6, 0.6, 0.0));
-  points.push_back(Fast_alpha_complex_3d::Point_3(0.8, 0.8, 0.2));
-  points.push_back(Fast_alpha_complex_3d::Point_3(0.2, 0.8, 0.6));
 
-  Fast_alpha_complex_3d alpha_complex(points);
+  Fast_alpha_complex_3d alpha_complex(get_points<Fast_alpha_complex_3d::Point_3>());
 
   Gudhi::Simplex_tree<> stree;
   alpha_complex.create_complex(stree);
@@ -71,7 +78,7 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_3d_from_points) {
   // -----------------
   std::cout << "Exact alpha complex 3d" << std::endl;
 
-  Exact_alpha_complex_3d exact_alpha_complex(points);
+  Exact_alpha_complex_3d exact_alpha_complex(get_points<Exact_alpha_complex_3d::Point_3>());
 
   Gudhi::Simplex_tree<> exact_stree;
   exact_alpha_complex.create_complex(exact_stree);
@@ -79,13 +86,13 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_3d_from_points) {
   // ---------------------
   // Compare both versions
   // ---------------------
-  std::cout << "Exact Alpha complex 3d is of dimension " << exact_stree.dimension() << " - Non exact is "
+  std::cout << "Exact Alpha complex 3d is of dimension " << exact_stree.dimension() << " - Fast is "
             << stree.dimension() << std::endl;
   BOOST_CHECK(exact_stree.dimension() == stree.dimension());
-  std::cout << "Exact Alpha complex 3d num_simplices " << exact_stree.num_simplices() << " - Non exact is "
+  std::cout << "Exact Alpha complex 3d num_simplices " << exact_stree.num_simplices() << " - Fast is "
             << stree.num_simplices() << std::endl;
   BOOST_CHECK(exact_stree.num_simplices() == stree.num_simplices());
-  std::cout << "Exact Alpha complex 3d num_vertices " << exact_stree.num_vertices() << " - Non exact is "
+  std::cout << "Exact Alpha complex 3d num_vertices " << exact_stree.num_vertices() << " - Fast is "
             << stree.num_vertices() << std::endl;
   BOOST_CHECK(exact_stree.num_vertices() == stree.num_vertices());
 
@@ -93,19 +100,18 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_3d_from_points) {
   while (sh != stree.filtration_simplex_range().end()) {
     std::vector<int> simplex;
     std::vector<int> exact_simplex;
-    std::cout << "Non-exact ( ";
+    std::cout << "Fast ( ";
     for (auto vertex : stree.simplex_vertex_range(*sh)) {
       simplex.push_back(vertex);
       std::cout << vertex << " ";
     }
-    std::cout << ") -> "
-              << "[" << stree.filtration(*sh) << "] ";
-    std::cout << std::endl;
+    std::cout << ") -> [" << stree.filtration(*sh) << "] ";
 
     // Find it in the exact structure
     auto sh_exact = exact_stree.find(simplex);
     BOOST_CHECK(sh_exact != exact_stree.null_simplex());
 
+    std::cout << " versus [" << exact_stree.filtration(sh_exact) << "] " << std::endl;
     // Exact and non-exact version is not exactly the same due to float comparison
     GUDHI_TEST_FLOAT_EQUALITY_CHECK(exact_stree.filtration(sh_exact), stree.filtration(*sh));
 
@@ -116,7 +122,7 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_3d_from_points) {
   // -----------------
   std::cout << "Safe alpha complex 3d" << std::endl;
 
-  Safe_alpha_complex_3d safe_alpha_complex(points);
+  Safe_alpha_complex_3d safe_alpha_complex(get_points<Safe_alpha_complex_3d::Point_3>());
 
   Gudhi::Simplex_tree<> safe_stree;
   safe_alpha_complex.create_complex(safe_stree);
@@ -124,13 +130,13 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_3d_from_points) {
   // ---------------------
   // Compare both versions
   // ---------------------
-  std::cout << "Exact Alpha complex 3d is of dimension " << safe_stree.dimension() << " - Non exact is "
+  std::cout << "Safe Alpha complex 3d is of dimension " << safe_stree.dimension() << " - Fast is "
             << stree.dimension() << std::endl;
   BOOST_CHECK(safe_stree.dimension() == stree.dimension());
-  std::cout << "Exact Alpha complex 3d num_simplices " << safe_stree.num_simplices() << " - Non exact is "
+  std::cout << "Safe Alpha complex 3d num_simplices " << safe_stree.num_simplices() << " - Fast is "
             << stree.num_simplices() << std::endl;
   BOOST_CHECK(safe_stree.num_simplices() == stree.num_simplices());
-  std::cout << "Exact Alpha complex 3d num_vertices " << safe_stree.num_vertices() << " - Non exact is "
+  std::cout << "Safe Alpha complex 3d num_vertices " << safe_stree.num_vertices() << " - Fast is "
             << stree.num_vertices() << std::endl;
   BOOST_CHECK(safe_stree.num_vertices() == stree.num_vertices());
 
@@ -138,27 +144,20 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_3d_from_points) {
   while (safe_sh != stree.filtration_simplex_range().end()) {
     std::vector<int> simplex;
     std::vector<int> exact_simplex;
-#ifdef DEBUG_TRACES
-    std::cout << "Non-exact ( ";
-#endif
+    std::cout << "Fast ( ";
     for (auto vertex : stree.simplex_vertex_range(*safe_sh)) {
       simplex.push_back(vertex);
-#ifdef DEBUG_TRACES
       std::cout << vertex << " ";
-#endif
     }
-#ifdef DEBUG_TRACES
-    std::cout << ") -> "
-              << "[" << stree.filtration(*safe_sh) << "] ";
-    std::cout << std::endl;
-#endif
+    std::cout << ") -> [" << stree.filtration(*safe_sh) << "] ";
 
     // Find it in the exact structure
     auto sh_exact = safe_stree.find(simplex);
     BOOST_CHECK(sh_exact != safe_stree.null_simplex());
 
+    std::cout << " versus [" << safe_stree.filtration(sh_exact) << "] " << std::endl;
     // Exact and non-exact version is not exactly the same due to float comparison
-    GUDHI_TEST_FLOAT_EQUALITY_CHECK(safe_stree.filtration(sh_exact), stree.filtration(*safe_sh));
+    GUDHI_TEST_FLOAT_EQUALITY_CHECK(safe_stree.filtration(sh_exact), stree.filtration(*safe_sh), 1e-15);
 
     ++safe_sh;
   }
