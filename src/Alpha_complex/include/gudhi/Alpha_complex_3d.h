@@ -217,7 +217,7 @@ class Alpha_complex_3d {
    * */
   using Dt = typename Triangulation_3<Kernel, Tds, Weighted, Periodic>::Dt;
 
-public:
+ public:
   /** \brief The <a href="https://doc.cgal.org/latest/Alpha_shapes_3/classCGAL_1_1Alpha__shape__3.html">CGAL 3D Alpha
    * Shapes</a> type.
    *
@@ -253,7 +253,7 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Point
  * */
   using Weighted_point_3 = typename Triangulation_3<Kernel, Tds, Weighted, Periodic>::Weighted_point_3;
 
-private:
+ private:
   using Dispatch =
       CGAL::Dispatch_output_iterator<CGAL::cpp11::tuple<CGAL::Object, FT>,
                                      CGAL::cpp11::tuple<std::back_insert_iterator<std::vector<CGAL::Object>>,
