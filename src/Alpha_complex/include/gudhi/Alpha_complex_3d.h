@@ -55,7 +55,7 @@
 #include <cstddef>
 #include <memory>       // for std::unique_ptr
 #include <type_traits>  // for std::conditional and std::enable_if
-#include <limits>  // for numeric_limits<> 
+#include <limits>  // for numeric_limits<>
 
 #if CGAL_VERSION_NR < 1041101000
 // Make compilation fail - required for external projects - https://gitlab.inria.fr/GUDHI/gudhi-devel/issues/10
