@@ -228,7 +228,6 @@ class Alpha_complex {
   }
 
  public:
-
   /** \brief Inserts all Delaunay triangulation into the simplicial complex.
    * It also computes the filtration values accordingly to the \ref createcomplexalgorithm
    *
