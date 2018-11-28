@@ -20,19 +20,91 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/distance_functions.h>
-#include <gudhi/Simplex_tree.h>
-#include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Points_off_io.h>
 
+#ifdef GUDHI_USE_TBB
+#include <tbb/parallel_for.h>
+#endif
+
 #include <boost/program_options.hpp>
+#include <boost/graph/adjacency_list.hpp>
+
+#include <utility>  // for pair<>
+#include <vector>
+#include <map>
+#include <tuple>  // for std::tie
 
 #include <string>
 #include <vector>
 #include <limits>  // infinity
 #include <utility>  // for pair
-#include <map>
+
+/* Edge tag for Boost PropertyGraph. */
+struct edge_filtration_t {
+  typedef boost::edge_property_tag kind;
+};
+
+/** \brief Proximity_graph contains the edges with their filtration values and vertices in order to store the result
+ * of `compute_proximity_graph` function.
+ *
+ * \tparam SimplicialComplexForProximityGraph furnishes `Filtration_value` type definition.
+ *
+ */
+template <typename SimplicialComplexForProximityGraph>
+using Proximity_graph = typename boost::adjacency_list < boost::vecS, boost::vecS, boost::undirectedS,
+    boost::no_property,  // no edge property
+    boost::property < edge_filtration_t, typename SimplicialComplexForProximityGraph::Filtration_value >>;
+
+// setS returns pointer-like vertices (don't know why):
+// source = 0x55ef4a232310 - target = 0x55ef4a232670 - filtration = 6.08276
+// instead of :
+// source = 0 - target = 1 - filtration = 6.08276
+// template <typename SimplicialComplexForProximityGraph>
+// using Proximity_graph = typename boost::adjacency_list < boost::setS, boost::setS, boost::undirectedS
+//     , boost::property < vertex_filtration_t, typename SimplicialComplexForProximityGraph::Filtration_value >
+//     , boost::property < edge_filtration_t, typename SimplicialComplexForProximityGraph::Filtration_value >>;
+
+template< typename SimplicialComplexForProximityGraph
+    , typename ForwardPointRange
+    , typename Distance >
+Proximity_graph<SimplicialComplexForProximityGraph> compute_proximity_graph(
+    const ForwardPointRange& points,
+    typename SimplicialComplexForProximityGraph::Filtration_value threshold,
+    Distance distance) {
+  using Vertex_handle = typename SimplicialComplexForProximityGraph::Vertex_handle;
+  using Filtration_value = typename SimplicialComplexForProximityGraph::Filtration_value;
+
+  std::vector<std::pair< Vertex_handle, Vertex_handle >> edges;
+  std::vector< Filtration_value > edges_fil;
+
+  Vertex_handle idx_u, idx_v;
+  Filtration_value fil;
+  idx_u = 0;
+  for (auto it_u = points.begin(); it_u != points.end(); ++it_u) {
+    idx_v = idx_u + 1;
+    for (auto it_v = it_u + 1; it_v != points.end(); ++it_v, ++idx_v) {
+      fil = distance(*it_u, *it_v);
+      if (fil <= threshold) {
+        auto edges_iter = edges.begin();
+        auto edges_fil_iter = edges_fil.begin();
+        while (edges_iter < edges.end() && edges_fil_iter != edges_fil.end() && fil > *edges_fil_iter) {
+          ++edges_iter;
+          ++edges_fil_iter;
+        }
+
+        edges.insert(edges_iter, std::make_pair(idx_u, idx_v));
+        edges_fil.insert(edges_fil_iter, fil);
+      }
+    }
+    ++idx_u;
+  }
+
+  // Points are labeled from 0 to idx_u-1
+  Proximity_graph<SimplicialComplexForProximityGraph> skel_graph(edges.begin(), edges.end(), edges_fil.begin(), idx_u);
+
+  return skel_graph;
+}
 
 // ----------------------------------------------------------------------------
 // rips_persistence_step_by_step is an example of each step that is required to
@@ -49,7 +121,6 @@ struct Graph {
 
 using Vertex_handle = Graph::Vertex_handle;
 using Filtration_value = Graph::Filtration_value;
-using Proximity_graph = Gudhi::Proximity_graph<Graph>;
 
 using Point = std::vector<double>;
 using Points_off_reader = Gudhi::Points_off_reader<Point>;
@@ -68,22 +139,52 @@ int main(int argc, char * argv[]) {
   Points_off_reader off_reader(off_file_points);
 
   // Compute the proximity graph of the points
-  Proximity_graph prox_graph = Gudhi::compute_proximity_graph<Graph>(off_reader.get_point_cloud(),
+  Proximity_graph<Graph> prox_graph = compute_proximity_graph<Graph>(off_reader.get_point_cloud(),
                                                                             threshold,
                                                                             Gudhi::Euclidean_distance());
 
   std::cout << "Vertices = " << boost::num_vertices(prox_graph) << std::endl;
   std::cout << "Edges = " << boost::num_edges(prox_graph) << std::endl;
 
-  typename boost::graph_traits<Proximity_graph>::edge_iterator e_it, e_it_end;
-  for (std::tie(e_it, e_it_end) = boost::edges(prox_graph); e_it != e_it_end;
-       ++e_it) {
-    auto u = source(*e_it, prox_graph);
-    auto v = target(*e_it, prox_graph);
-    if (v < u) std::swap(u, v);
-
-    std::cout << "source = " << u << " - target = " << v <<  " - filtration = " << boost::get(Gudhi::edge_filtration_t(), prox_graph, *e_it) << std::endl;
+  std::vector<Filtration_value> alpha_values;
+  for (std::vector<Filtration_value>::size_type index = 0; index < 10; index ++) {
+    alpha_values.push_back((index + 1) * threshold/10.);  // Can be 0
   }
+
+#if defined(GUDHI_USE_TBB)
+  tbb::parallel_for<std::size_t>( static_cast<std::size_t>(0), alpha_values.size(), [&](std::size_t index){
+    Filtration_value alpha = alpha_values[index];
+    typename boost::graph_traits<Proximity_graph<Graph>>::edge_iterator e_it, e_it_end;
+    for (std::tie(e_it, e_it_end) = boost::edges(prox_graph); e_it != e_it_end;
+         ++e_it) {
+      auto u = source(*e_it, prox_graph);
+      auto v = target(*e_it, prox_graph);
+      //if (v < u) std::swap(u, v);
+      if (boost::get(edge_filtration_t(), prox_graph, *e_it) <= alpha) {
+        std::cout << "alpha = " << alpha << " - source = " << u << " - target = " << v << " - filtration = "
+                  << boost::get(edge_filtration_t(), prox_graph, *e_it) << std::endl;
+      } else {
+        break;
+      }
+    }
+  });
+#else
+  for (Filtration_value alpha : alpha_values) {
+    typename boost::graph_traits<Proximity_graph<Graph>>::edge_iterator e_it, e_it_end;
+    for (std::tie(e_it, e_it_end) = boost::edges(prox_graph); e_it != e_it_end;
+         ++e_it) {
+      auto u = source(*e_it, prox_graph);
+      auto v = target(*e_it, prox_graph);
+      //if (v < u) std::swap(u, v);
+      if (boost::get(edge_filtration_t(), prox_graph, *e_it) <= alpha) {
+        std::cout << "alpha = " << alpha << "source = " << u << " - target = " << v << " - filtration = "
+                  << boost::get(edge_filtration_t(), prox_graph, *e_it) << std::endl;
+      } else {
+        break;
+      }
+    }
+  }
+#endif
 
   return 0;
 }
