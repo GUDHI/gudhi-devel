@@ -57,14 +57,25 @@ using Proximity_graph = typename boost::adjacency_list < boost::vecS, boost::vec
     boost::property < edge_filtration_t, typename SimplicialComplexForProximityGraph::Filtration_value >>;
 
 // setS returns pointer-like vertices (don't know why):
-// source = 0x55ef4a232310 - target = 0x55ef4a232670 - filtration = 6.08276
+// alpha = 6 - source = 0x56162a042ec0 - target = 0x56162a042f10 - filtration = 5
 // instead of :
-// source = 0 - target = 1 - filtration = 6.08276
+// alpha = 6 - source = 2 - target = 3 - filtration = 5
 // template <typename SimplicialComplexForProximityGraph>
 // using Proximity_graph = typename boost::adjacency_list < boost::setS, boost::setS, boost::undirectedS
-//     , boost::property < vertex_filtration_t, typename SimplicialComplexForProximityGraph::Filtration_value >
+//     , boost::no_property  // no edge property
 //     , boost::property < edge_filtration_t, typename SimplicialComplexForProximityGraph::Filtration_value >>;
 
+/** \brief Computes the proximity graph of the points, sorted by filtrations values.
+ *
+ * If points contains n elements, the proximity graph is the graph with n vertices (with no filtration values), and an
+ * edge [u,v] (with a filtration value equals to the distance between u and v) iff the distance function between points
+ * u and v is smaller than threshold.
+ *
+ * \tparam ForwardPointRange furnishes `.begin()` and `.end()` methods.
+ *
+ * \tparam Distance furnishes `operator()(const Point& p1, const Point& p2)`, where
+ * `Point` is a point from the `ForwardPointRange`, and that returns a `Filtration_value`.
+ */
 template< typename SimplicialComplexForProximityGraph
     , typename ForwardPointRange
     , typename Distance >
@@ -146,12 +157,29 @@ int main(int argc, char * argv[]) {
   std::cout << "Vertices = " << boost::num_vertices(prox_graph) << std::endl;
   std::cout << "Edges = " << boost::num_edges(prox_graph) << std::endl;
 
+  // Let's define the alpha values iterator
+  // alpha_1 = threshold/10.
+  // alpha_2 = 2*threshold/10.
+  // ...
+  // alpha_10 = threshold
   std::vector<Filtration_value> alpha_values;
   for (std::vector<Filtration_value>::size_type index = 0; index < 10; index ++) {
     alpha_values.push_back((index + 1) * threshold/10.);  // Can be 0
   }
 
+  //
+  // alpha_1                    < alpha_2                    < ...                    < alpha_10
+  //                                                                                       |
+  //                                                                                      \ /
+  //                                                                                    Proximity_graph(alpha_10 = threshold)
+  //                                                                                       |
+  //   +-----------------------------------------------------------------------------------+
+  //   |                             |                         ...                         |
+  //  \ /                           \ /                                                   \ /
+  // Proximity_graph(alpha_1)   < Proximity_graph(alpha_2)   < ...                    < Proximity_graph(alpha_10 = threshold)
+  //
 #if defined(GUDHI_USE_TBB)
+  // Parallel version
   tbb::parallel_for<std::size_t>( static_cast<std::size_t>(0), alpha_values.size(), [&](std::size_t index){
     Filtration_value alpha = alpha_values[index];
     typename boost::graph_traits<Proximity_graph<Graph>>::edge_iterator e_it, e_it_end;
@@ -169,6 +197,7 @@ int main(int argc, char * argv[]) {
     }
   });
 #else
+  // Non-parallel version
   for (Filtration_value alpha : alpha_values) {
     typename boost::graph_traits<Proximity_graph<Graph>>::edge_iterator e_it, e_it_end;
     for (std::tie(e_it, e_it_end) = boost::edges(prox_graph); e_it != e_it_end;
