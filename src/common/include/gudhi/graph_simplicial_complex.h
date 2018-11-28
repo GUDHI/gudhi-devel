@@ -53,6 +53,15 @@ using Proximity_graph = typename boost::adjacency_list < boost::vecS, boost::vec
 , boost::property < vertex_filtration_t, typename SimplicialComplexForProximityGraph::Filtration_value >
 , boost::property < edge_filtration_t, typename SimplicialComplexForProximityGraph::Filtration_value >>;
 
+// setS returns pointer-like vertices (don't know why):
+// source = 0x55ef4a232310 - target = 0x55ef4a232670 - filtration = 6.08276
+// instead of :
+// source = 0 - target = 1 - filtration = 6.08276
+// template <typename SimplicialComplexForProximityGraph>
+// using Proximity_graph = typename boost::adjacency_list < boost::setS, boost::setS, boost::undirectedS
+//     , boost::property < vertex_filtration_t, typename SimplicialComplexForProximityGraph::Filtration_value >
+//     , boost::property < edge_filtration_t, typename SimplicialComplexForProximityGraph::Filtration_value >>;
+
 /** \brief Computes the proximity graph of the points.
  *
  * If points contains n elements, the proximity graph is the graph with n vertices, and an edge [u,v] iff the
@@ -85,8 +94,15 @@ Proximity_graph<SimplicialComplexForProximityGraph> compute_proximity_graph(
     for (auto it_v = it_u + 1; it_v != points.end(); ++it_v, ++idx_v) {
       fil = distance(*it_u, *it_v);
       if (fil <= threshold) {
-        edges.emplace_back(idx_u, idx_v);
-        edges_fil.push_back(fil);
+        auto edges_iter = edges.begin();
+        auto edges_fil_iter = edges_fil.begin();
+        while (edges_iter < edges.end() && edges_fil_iter != edges_fil.end() && fil > *edges_fil_iter) {
+          ++edges_iter;
+          ++edges_fil_iter;
+        }
+
+        edges.insert(edges_iter, std::make_pair(idx_u, idx_v));
+        edges_fil.insert(edges_fil_iter, fil);
       }
     }
     ++idx_u;
