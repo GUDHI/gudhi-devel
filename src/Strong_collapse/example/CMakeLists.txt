@@ -8,4 +8,4 @@ if (TBB_FOUND)
 endif()
 
 add_test(NAME Strong_collapse_example_proximity_graph_on_tore_3D COMMAND $<TARGET_FILE:proximity_graph>
-        "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" "-r" "10.")
+        "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" "-r" "12.")
