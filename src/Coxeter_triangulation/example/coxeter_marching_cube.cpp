@@ -12,6 +12,7 @@
 #include <list>
 #include <fstream>
 #include <cstdlib>
+#include <unordered_set>
 
 #include <gudhi/Simple_coxeter_system_remastered.h>
 #include <gudhi/Coxeter_complex/Trie.h>
@@ -297,6 +298,10 @@ void cell_to_array(const Cell_id& c_id, int* buf) {
     buf[i] = c_id[i];
 }
 
+// Rewriting std::hash for the hash table of the marked full-dim simplices
+
+
+
 template <typename Function>
 void compute_hasse_diagram(std::vector<Point_d>& seed_points,
                            double level,
@@ -310,7 +315,8 @@ void compute_hasse_diagram(std::vector<Point_d>& seed_points,
   assert(cs.pos_root_check());
 #endif  
   VC_map vc_map;
-  Full_cell_trie trie(level, amb_d);
+  // Full_cell_trie trie(level, amb_d);
+  std::unordered_set<Cell_id> marked_simplices;
   Full_cell_trie visit_stack(level, amb_d);
 #ifdef DEBUG_TRACES
   std::cout << "root_t_:\n" << cs.simple_root_matrix() << "\n";
@@ -332,7 +338,8 @@ void compute_hasse_diagram(std::vector<Point_d>& seed_points,
       assert(false);
     }
 #endif
-    mark(c_id, trie);
+    // mark(c_id, trie);
+    marked_simplices.insert(c_id);
     std::list<Cell_id> meet_faces;
     Eigen::MatrixXd
       point_matrix(amb_d + 1, amb_d + 1),
@@ -389,8 +396,9 @@ void compute_hasse_diagram(std::vector<Point_d>& seed_points,
     for (const Cell_id& f_id: meet_faces)
       // if (!is_marked(f_id))
       for (Cell_id cf_id: cs.coface_range(f_id, amb_d))
-        if (!is_marked(cf_id, trie))
-	    visit_stack.add(cf_id);
+        // if (!is_marked(cf_id, trie))
+        if (marked_simplices.find(cf_id) == marked_simplices.end())
+          visit_stack.add(cf_id);
   }
 }
 
