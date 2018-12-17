@@ -4,7 +4,7 @@
  *
  *    Author(s):       Mathieu Carrière
  *
- *    Copyright (C) 2017  INRIA
+ *    Copyright (C) 2017 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -27,9 +27,9 @@
 
 void usage(int nbArgs, char *const progName) {
   std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
-  std::cerr << "Usage: " << progName << " filename.off function [--v] \n";
+  std::cerr << "Usage: " << progName << " filename.off function [-v] \n";
   std::cerr << "       i.e.: " << progName << " ../../data/points/COIL_database/lucky_cat.off "
-                                              "../../data/points/COIL_database/lucky_cat_PCA1 --v \n";
+                                              "../../data/points/COIL_database/lucky_cat_PCA1 -v \n";
   exit(-1);  // ----- >>
 }
 

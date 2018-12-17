@@ -4,7 +4,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA Sophia-Saclay (France)
+ *    Copyright (C) 2015 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@
 #include <algorithm>  // for sort
 #include <vector>
 #include <numeric>  // for iota
+#include <cstddef>
 
 namespace Gudhi {
 
@@ -61,7 +62,7 @@ class Bitmap_cubical_complex : public T {
   //*********************************************//
   // Typedefs and typenames
   //*********************************************//
-  typedef size_t Simplex_key;
+  typedef std::size_t Simplex_key;
   typedef typename T::filtration_type Filtration_value;
   typedef Simplex_key Simplex_handle;
 
@@ -82,7 +83,7 @@ class Bitmap_cubical_complex : public T {
     if (globalDbg) {
       std::cerr << "Bitmap_cubical_complex( const char* perseus_style_file )\n";
     }
-    for (size_t i = 0; i != this->total_number_of_cells; ++i) {
+    for (std::size_t i = 0; i != this->total_number_of_cells; ++i) {
       this->key_associated_to_simplex[i] = i;
     }
     // we initialize this only once, in each constructor, when the bitmap is constructed.
@@ -99,7 +100,7 @@ class Bitmap_cubical_complex : public T {
   Bitmap_cubical_complex(const std::vector<unsigned>& dimensions,
                          const std::vector<Filtration_value>& top_dimensional_cells)
       : T(dimensions, top_dimensional_cells), key_associated_to_simplex(this->total_number_of_cells + 1) {
-    for (size_t i = 0; i != this->total_number_of_cells; ++i) {
+    for (std::size_t i = 0; i != this->total_number_of_cells; ++i) {
       this->key_associated_to_simplex[i] = i;
     }
     // we initialize this only once, in each constructor, when the bitmap is constructed.
@@ -120,7 +121,7 @@ class Bitmap_cubical_complex : public T {
                          std::vector<bool> directions_in_which_periodic_b_cond_are_to_be_imposed)
       : T(dimensions, top_dimensional_cells, directions_in_which_periodic_b_cond_are_to_be_imposed),
         key_associated_to_simplex(this->total_number_of_cells + 1) {
-    for (size_t i = 0; i != this->total_number_of_cells; ++i) {
+    for (std::size_t i = 0; i != this->total_number_of_cells; ++i) {
       this->key_associated_to_simplex[i] = i;
     }
     // we initialize this only once, in each constructor, when the bitmap is constructed.
@@ -141,7 +142,7 @@ class Bitmap_cubical_complex : public T {
   /**
    * Returns number of all cubes in the complex.
    **/
-  size_t num_simplices() const { return this->total_number_of_cells; }
+  std::size_t num_simplices() const { return this->total_number_of_cells; }
 
   /**
    * Returns a Simplex_handle to a cube that do not exist in this complex.
@@ -156,7 +157,7 @@ class Bitmap_cubical_complex : public T {
   /**
    * Returns dimension of the complex.
    **/
-  inline size_t dimension() const { return this->sizes.size(); }
+  inline std::size_t dimension() const { return this->sizes.size(); }
 
   /**
    * Return dimension of a cell pointed by the Simplex_handle.
@@ -308,7 +309,7 @@ class Bitmap_cubical_complex : public T {
 
    private:
     Bitmap_cubical_complex<T>* b;
-    size_t position;
+    std::size_t position;
   };
 
   /**
@@ -379,10 +380,10 @@ class Bitmap_cubical_complex : public T {
    * Function needed for compatibility with Gudhi. Not useful for other purposes.
    **/
   std::pair<Simplex_handle, Simplex_handle> endpoints(Simplex_handle sh) {
-    std::vector<size_t> bdry = this->get_boundary_of_a_cell(sh);
+    std::vector<std::size_t> bdry = this->get_boundary_of_a_cell(sh);
     if (globalDbg) {
       std::cerr << "std::pair<Simplex_handle, Simplex_handle> endpoints( Simplex_handle sh )\n";
-      std::cerr << "bdry.size() : " << bdry.size() << std::endl;
+      std::cerr << "bdry.size() : " << bdry.size() << "\n";
     }
     // this method returns two first elements from the boundary of sh.
     if (bdry.size() < 2)
@@ -401,9 +402,9 @@ class Bitmap_cubical_complex : public T {
     // Iterator over all simplices of the complex in the order of the indexing scheme.
     // 'value_type' must be 'Simplex_handle'.
    public:
-    Skeleton_simplex_iterator(Bitmap_cubical_complex* b, size_t d) : b(b), dimension(d) {
+    Skeleton_simplex_iterator(Bitmap_cubical_complex* b, std::size_t d) : b(b), dimension(d) {
       if (globalDbg) {
-        std::cerr << "Skeleton_simplex_iterator ( Bitmap_cubical_complex* b , size_t d )\n";
+        std::cerr << "Skeleton_simplex_iterator ( Bitmap_cubical_complex* b , std::size_t d )\n";
       }
       // find the position of the first simplex of a dimension d
       this->position = 0;
@@ -469,7 +470,7 @@ class Bitmap_cubical_complex : public T {
 
    private:
     Bitmap_cubical_complex<T>* b;
-    size_t position;
+    std::size_t position;
     unsigned dimension;
   };
 
@@ -519,8 +520,8 @@ class Bitmap_cubical_complex : public T {
   friend class is_before_in_filtration<T>;
 
  protected:
-  std::vector<size_t> key_associated_to_simplex;
-  std::vector<size_t> simplex_associated_to_key;
+  std::vector<std::size_t> key_associated_to_simplex;
+  std::vector<std::size_t> simplex_associated_to_key;
 };  // Bitmap_cubical_complex
 
 template <typename T>
@@ -528,7 +529,7 @@ void Bitmap_cubical_complex<T>::initialize_simplex_associated_to_key() {
   if (globalDbg) {
     std::cerr << "void Bitmap_cubical_complex<T>::initialize_elements_ordered_according_to_filtration() \n";
   }
-  this->simplex_associated_to_key = std::vector<size_t>(this->data.size());
+  this->simplex_associated_to_key = std::vector<std::size_t>(this->data.size());
   std::iota(std::begin(simplex_associated_to_key), std::end(simplex_associated_to_key), 0);
 #ifdef GUDHI_USE_TBB
   tbb::parallel_sort(simplex_associated_to_key.begin(), simplex_associated_to_key.end(),
@@ -538,7 +539,7 @@ void Bitmap_cubical_complex<T>::initialize_simplex_associated_to_key() {
 #endif
 
   // we still need to deal here with a key_associated_to_simplex:
-  for (size_t i = 0; i != simplex_associated_to_key.size(); ++i) {
+  for (std::size_t i = 0; i != simplex_associated_to_key.size(); ++i) {
     this->key_associated_to_simplex[simplex_associated_to_key[i]] = i;
   }
 }
@@ -558,8 +559,8 @@ class is_before_in_filtration {
       return fil1 < fil2;
     }
     // in this case they are on the same filtration level, so the dimension decide.
-    size_t dim1 = CC_->get_dimension_of_a_cell(sh1);
-    size_t dim2 = CC_->get_dimension_of_a_cell(sh2);
+    std::size_t dim1 = CC_->get_dimension_of_a_cell(sh1);
+    std::size_t dim2 = CC_->get_dimension_of_a_cell(sh2);
     if (dim1 != dim2) {
       return dim1 < dim2;
     }

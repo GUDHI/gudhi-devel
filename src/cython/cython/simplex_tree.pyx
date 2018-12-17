@@ -10,7 +10,7 @@ from libcpp.string cimport string
 
    Author(s):       Vincent Rouvreau
 
-   Copyright (C) 2016 INRIA
+   Copyright (C) 2016 Inria
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ from libcpp.string cimport string
 """
 
 __author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 INRIA"
+__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
 cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
@@ -44,8 +44,8 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         void set_dimension(int dimension)
         int dimension()
         int upper_bound_dimension()
-        bint find_simplex(vector[int] simplex)
-        bint insert_simplex_and_subfaces(vector[int] simplex,
+        bool find_simplex(vector[int] simplex)
+        bool insert_simplex_and_subfaces(vector[int] simplex,
                                          double filtration)
         vector[pair[vector[int], double]] get_filtration()
         vector[pair[vector[int], double]] get_skeleton(int dimension)
@@ -55,6 +55,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         void expansion(int max_dim)
         void remove_maximal_simplex(vector[int] simplex)
         bool prune_above_filtration(double filtration)
+        bool make_filtration_non_decreasing()
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>":
@@ -64,6 +65,7 @@ cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
         vector[int] persistent_betti_numbers(double from_value, double to_value)
         vector[pair[double,double]] intervals_in_dimension(int dimension)
         void write_output_diagram(string diagram_file_name)
+        vector[pair[vector[int], vector[int]]] persistence_pairs()
 
 # SimplexTree python interface
 cdef class SimplexTree:
@@ -106,8 +108,8 @@ cdef class SimplexTree:
         return self.pcohptr != NULL
 
     def filtration(self, simplex):
-        """This function returns the simplicial complex filtration value for a
-        given N-simplex.
+        """This function returns the filtration value for a given N-simplex in
+        this simplicial complex, or +infinity if it is not in the complex.
 
         :param simplex: The N-simplex, represented by a list of vertex.
         :type simplex: list of int.
@@ -222,14 +224,17 @@ cdef class SimplexTree:
 
     def insert(self, simplex, filtration=0.0):
         """This function inserts the given N-simplex and its subfaces with the
-        given filtration value (default value is '0.0').
+        given filtration value (default value is '0.0'). If some of those
+        simplices are already present with a higher filtration value, their
+        filtration value is lowered.
 
         :param simplex: The N-simplex to insert, represented by a list of
             vertex.
         :type simplex: list of int.
         :param filtration: The filtration value of the simplex.
         :type filtration: float.
-        :returns:  true if the simplex was found, false otherwise.
+        :returns:  true if the simplex was not yet in the complex, false
+            otherwise (whatever its original filtration value).
         :rtype:  bool
         """
         cdef vector[int] csimplex
@@ -350,7 +355,7 @@ cdef class SimplexTree:
         :param filtration: Maximum threshold value.
         :type filtration: float.
         :returns: The filtration modification information.
-        :rtype: bint
+        :rtype: bool
 
 
         .. note::
@@ -396,6 +401,26 @@ cdef class SimplexTree:
         """
         self.thisptr.expansion(max_dim)
 
+    def make_filtration_non_decreasing(self):
+        """This function ensures that each simplex has a higher filtration
+        value than its faces by increasing the filtration values.
+
+        :returns: The filtration modification information.
+        :rtype: bool
+
+
+        .. note::
+
+            Some simplex tree functions require the filtration to be valid.
+            make_filtration_non_decreasing function is not launching
+            :func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>`
+            but returns the filtration modification
+            information. If the complex has changed , please call
+            :func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>`
+            to recompute it.
+        """
+        return self.thisptr.make_filtration_non_decreasing()
+
     def persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
         """This function returns the persistence of the simplicial complex.
 
@@ -407,6 +432,10 @@ cdef class SimplexTree:
             0.0.
             Sets min_persistence to -1.0 to see all values.
         :type min_persistence: float.
+        :param persistence_dim_max: If true, the persistent homology for the
+            maximal dimension in the complex is computed. If false, it is
+            ignored. Default is false.
+        :type persistence_dim_max: bool
         :returns: The persistence of the simplicial complex.
         :rtype:  list of pairs(dimension, pair(birth, death))
         """
@@ -482,6 +511,25 @@ cdef class SimplexTree:
             print("intervals_in_dim function requires persistence function"
                   " to be launched first.")
         return intervals_result
+
+    def persistence_pairs(self):
+        """This function returns the persistence pairs of the simplicial
+        complex.
+
+        :returns: The persistence intervals.
+        :rtype:  list of pair of list of int
+
+        :note: persistence_pairs function requires
+            :func:`persistence()<gudhi.SimplexTree.persistence>`
+            function to be launched first.
+        """
+        cdef vector[pair[vector[int],vector[int]]] persistence_pairs_result
+        if self.pcohptr != NULL:
+            persistence_pairs_result = self.pcohptr.persistence_pairs()
+        else:
+            print("persistence_pairs function requires persistence function"
+                  " to be launched first.")
+        return persistence_pairs_result
 
     def write_persistence_diagram(self, persistence_file=''):
         """This function writes the persistence intervals of the simplicial

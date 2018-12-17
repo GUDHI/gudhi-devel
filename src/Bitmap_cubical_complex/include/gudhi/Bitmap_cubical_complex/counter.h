@@ -4,7 +4,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA Sophia-Saclay (France)
+ *    Copyright (C) 2015 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 
 #include <iostream>
 #include <vector>
+#include <cstddef>
 
 namespace Gudhi {
 
@@ -63,14 +64,14 @@ class counter {
    * If the value of the function is false, that means, that the counter have reached its end-value.
    **/
   bool increment() {
-    size_t i = 0;
+    std::size_t i = 0;
     while ((i != this->end.size()) && (this->current[i] == this->end[i])) {
       ++i;
     }
 
     if (i == this->end.size())return false;
     ++this->current[i];
-    for (size_t j = 0; j != i; ++j) {
+    for (std::size_t j = 0; j != i; ++j) {
       this->current[j] = this->begin[j];
     }
     return true;
@@ -80,7 +81,7 @@ class counter {
    * Function to check if we are at the end of counter.
    **/
   bool isFinal() {
-    for (size_t i = 0; i != this->current.size(); ++i) {
+    for (std::size_t i = 0; i != this->current.size(); ++i) {
       if (this->current[i] == this->end[i])return true;
     }
     return false;
@@ -93,7 +94,7 @@ class counter {
    **/
   std::vector< unsigned > find_opposite(const std::vector< bool >& directionsForPeriodicBCond) {
     std::vector< unsigned > result;
-    for (size_t i = 0; i != this->current.size(); ++i) {
+    for (std::size_t i = 0; i != this->current.size(); ++i) {
       if ((this->current[i] == this->end[i]) && (directionsForPeriodicBCond[i] == true)) {
         result.push_back(this->begin[i]);
       } else {
@@ -108,7 +109,7 @@ class counter {
    **/
   std::vector< bool > directions_of_finals() {
     std::vector< bool > result;
-    for (size_t i = 0; i != this->current.size(); ++i) {
+    for (std::size_t i = 0; i != this->current.size(); ++i) {
       if (this->current[i] == this->end[i]) {
         result.push_back(true);
       } else {
@@ -123,7 +124,7 @@ class counter {
    **/
   friend std::ostream& operator<<(std::ostream& out, const counter& c) {
     // std::cerr << "c.current.size() : " << c.current.size() << endl;
-    for (size_t i = 0; i != c.current.size(); ++i) {
+    for (std::size_t i = 0; i != c.current.size(); ++i) {
       out << c.current[i] << " ";
     }
     return out;

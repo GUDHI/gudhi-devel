@@ -4,7 +4,7 @@
  *
  *    Author(s):       Siargey Kachanovich
  *
- *    Copyright (C) 2016 INRIA
+ *    Copyright (C) 2016 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -93,7 +93,7 @@ void choose_n_farthest_points(Kernel const &k,
     // Choose randomly the first landmark
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<std::size_t> dis(0, (input_pts.size() - 1));
+    std::uniform_int_distribution<std::size_t> dis(0, nb_points - 1);
     starting_point = dis(gen);
   }
 
@@ -110,7 +110,7 @@ void choose_n_farthest_points(Kernel const &k,
     *output_it++ = input_pts[curr_max_w];
     *dist_it++ = dist_to_L[curr_max_w];
     std::size_t i = 0;
-    for (auto& p : input_pts) {
+    for (auto&& p : input_pts) {
       double curr_dist = sqdist(p, *(std::begin(input_pts) + curr_max_w));
       if (curr_dist < dist_to_L[i])
         dist_to_L[i] = curr_dist;

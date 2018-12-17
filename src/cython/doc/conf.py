@@ -62,7 +62,7 @@ import gudhi
 
 # General information about the project.
 project = gudhi.__name__
-copyright = gudhi.__copyright__
+copyright = gudhi.__copyright__ + ' - ' + gudhi.__license__
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -85,7 +85,7 @@ version = gudhi.__version__
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build']
+exclude_patterns = ['_build', '*.inc']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -125,6 +125,7 @@ html_theme_options = {
      "sidebarbgcolor": "#A1ADCD",
      "sidebartextcolor": "black",
      "sidebarlinkcolor": "#334D5C",
+     "body_max_width": "1200px",
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
@@ -158,7 +159,7 @@ html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
-#html_last_updated_fmt = '%b %d, %Y'
+html_last_updated_fmt = '%b %d, %Y'
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.

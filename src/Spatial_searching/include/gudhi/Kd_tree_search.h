@@ -4,7 +4,7 @@
  *
  *    Author(s):       Clement Jamin
  *
- *    Copyright (C) 2016 INRIA
+ *    Copyright (C) 2016 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -271,8 +271,7 @@ class Kd_tree_search {
     m_tree.search(it, Fuzzy_sphere(p, radius, eps, m_tree.traits()));
   }
 
-  int tree_depth() const
-  {
+  int tree_depth() const {
     return m_tree.root()->depth();
   }
 

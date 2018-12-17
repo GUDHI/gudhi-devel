@@ -1,8 +1,5 @@
-cmake_minimum_required(VERSION 2.6)
 project(Alpha_complex_examples)
 
-# need CGAL 4.7
-# cmake -DCGAL_DIR=~/workspace/CGAL-4.7 ..
 if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
   add_executable ( Alpha_complex_example_from_points Alpha_complex_from_points.cpp )
   target_link_libraries(Alpha_complex_example_from_points  ${CGAL_LIBRARY})
@@ -29,8 +26,23 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
     add_test(Alpha_complex_example_from_off_32_diff_files ${DIFF_PATH}
         ${CMAKE_CURRENT_BINARY_DIR}/alphaoffreader_result_32.txt ${CMAKE_CURRENT_BINARY_DIR}/alphaoffreader_for_doc_32.txt)
   endif()
-
-  install(TARGETS Alpha_complex_example_from_points DESTINATION bin)
-  install(TARGETS Alpha_complex_example_from_off DESTINATION bin)
-
 endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
+
+if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+  add_executable ( Alpha_complex_example_weighted_3d_from_points Weighted_alpha_complex_3d_from_points.cpp )
+  target_link_libraries(Alpha_complex_example_weighted_3d_from_points  ${CGAL_LIBRARY})
+  if (TBB_FOUND)
+    target_link_libraries(Alpha_complex_example_weighted_3d_from_points ${TBB_LIBRARIES})
+  endif()
+  add_test(NAME Alpha_complex_example_weighted_3d_from_points
+          COMMAND $<TARGET_FILE:Alpha_complex_example_weighted_3d_from_points>)
+
+  add_executable ( Alpha_complex_example_3d_from_points Alpha_complex_3d_from_points.cpp )
+  target_link_libraries(Alpha_complex_example_3d_from_points  ${CGAL_LIBRARY})
+  if (TBB_FOUND)
+    target_link_libraries(Alpha_complex_example_3d_from_points ${TBB_LIBRARIES})
+  endif()
+  add_test(NAME Alpha_complex_example_3d_from_points
+          COMMAND $<TARGET_FILE:Alpha_complex_example_3d_from_points>)
+
+endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)

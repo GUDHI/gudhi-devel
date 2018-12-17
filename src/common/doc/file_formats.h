@@ -4,7 +4,7 @@
 *
 *    Author(s):       Clément Jamin
 *
-*    Copyright (C) 2017  INRIA
+*    Copyright (C) 2017 Inria
 *
 *    This program is free software: you can redistribute it and/or modify
 *    it under the terms of the GNU General Public License as published by
@@ -57,10 +57,10 @@ namespace Gudhi {
 
  \section FileFormatsIsoCuboid Iso-cuboid
 
- Such a file describes an iso-oriented cuboid with diagonal opposite vertices (min_hx, min_hy, min_hz,...) and (max_hx, max_hy, max_hz, ...). The format is:<br>
+ Such a file describes an iso-oriented cuboid with diagonal opposite vertices (min_x, min_y, min_z,...) and (max_x, max_y, max_z, ...). The format is:<br>
  \verbatim
-   min_hx min_hy [min_hz ...]
-   max_hx max_hy [max_hz ...]
+   min_x min_y [min_z ...]
+   max_x max_y [max_z ...]
  \endverbatim
 
  Here is a simple sample file in the 3D case:
@@ -68,6 +68,57 @@ namespace Gudhi {
    -1. -1. -1.
    1. 1. 1.
  \endverbatim
+
+
+ \section FileFormatsPerseus Perseus
+
+ This file format is the format used by the Perseus software
+ (http://www.sas.upenn.edu/~vnanda/perseus/) by Vidit Nanda.
+ The first line contains a number d begin the dimension of the
+ bitmap (2 in the example below). Next d lines are the numbers of top dimensional cubes in each dimensions (3 and 3
+ in the example below). Next, in lexicographical order, the filtration of top dimensional cubes is given (1 4 6 8
+ 20 4 7 6 5 in the example below).
+ 
+ \image html "exampleBitmap.png" "Example of a input data."
+ 
+ The input file for the following complex is:
+ \verbatim
+ 2
+ 3
+ 3
+ 1
+ 4
+ 6
+ 8
+ 20
+ 4
+ 7
+ 6
+ 5
+ \endverbatim
+
+ To indicate periodic boundary conditions in a
+ given direction, then number of top dimensional cells in this direction have to be multiplied by -1. For instance:
+
+ \verbatim
+ 2
+ -3
+ 3
+ 1
+ 4
+ 6
+ 8
+ 20
+ 4
+ 7
+ 6
+ 5
+ \endverbatim
+
+ Indicate that we have imposed periodic boundary conditions in the direction x, but not in the direction y.
+
+ Other sample files can be found in the `data/bitmap` folder.
+
 */
 }  // namespace Gudhi
 

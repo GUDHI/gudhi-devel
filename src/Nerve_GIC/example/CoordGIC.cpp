@@ -4,7 +4,7 @@
  *
  *    Author(s):       Mathieu Carrière
  *
- *    Copyright (C) 2017  INRIA
+ *    Copyright (C) 2017 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -27,8 +27,8 @@
 
 void usage(int nbArgs, char *const progName) {
   std::cerr << "Error: Number of arguments (" << nbArgs << ") is not correct\n";
-  std::cerr << "Usage: " << progName << " filename.off coordinate [--v] \n";
-  std::cerr << "       i.e.: " << progName << " ../../data/points/human.off 2 --v \n";
+  std::cerr << "Usage: " << progName << " filename.off coordinate [-v] \n";
+  std::cerr << "       i.e.: " << progName << " ../../data/points/human.off 2 -v \n";
   exit(-1);  // ----- >>
 }
 
@@ -66,6 +66,9 @@ int main(int argc, char **argv) {
 
     GIC.find_simplices();
 
+    GIC.compute_distribution(10);
+    GIC.compute_p_value();
+
     GIC.plot_DOT();
 
     Gudhi::Simplex_tree<> stree;
@@ -76,10 +79,10 @@ int main(int argc, char **argv) {
     // --------------------------------------------
 
     if (verb) {
-      std::cout << "Functional GIC is of dimension " << stree.dimension() << " - " << stree.num_simplices()
+      std::cout << "Coordinate GIC is of dimension " << stree.dimension() << " - " << stree.num_simplices()
                 << " simplices - " << stree.num_vertices() << " vertices." << std::endl;
 
-      std::cout << "Iterator on functional GIC simplices" << std::endl;
+      std::cout << "Iterator on coordinate GIC simplices" << std::endl;
       for (auto f_simplex : stree.filtration_simplex_range()) {
         for (auto vertex : stree.simplex_vertex_range(f_simplex)) {
           std::cout << vertex << " ";

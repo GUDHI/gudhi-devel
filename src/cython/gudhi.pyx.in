@@ -4,7 +4,7 @@
 
    Author(s):       Vincent Rouvreau
 
-   Copyright (C) 2016  INRIA
+   Copyright (C) 2016  Inria
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -21,11 +21,12 @@
 """
 
 __author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016  INRIA"
+__copyright__ = "Copyright (C) 2016  Inria"
 __license__ = "GPL v3"
 __version__ = "@GUDHI_VERSION@"
 # This variable is used by doctest to find files
 __root_source_dir__ = "@CMAKE_SOURCE_DIR@"
+__debug_info__ = @GUDHI_CYTHON_DEBUG_INFO@
 
 include '@CMAKE_CURRENT_SOURCE_DIR@/cython/off_reader.pyx'
 include '@CMAKE_CURRENT_SOURCE_DIR@/cython/simplex_tree.pyx'
@@ -41,3 +42,4 @@ include '@CMAKE_CURRENT_SOURCE_DIR@/cython/strong_witness_complex.pyx'
 @GUDHI_CYTHON_SUBSAMPLING@
 @GUDHI_CYTHON_TANGENTIAL_COMPLEX@
 @GUDHI_CYTHON_BOTTLENECK_DISTANCE@
+@GUDHI_CYTHON_NERVE_GIC@

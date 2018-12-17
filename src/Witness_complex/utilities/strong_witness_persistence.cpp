@@ -4,7 +4,7 @@
  *
  *    Author(s):       Siargey Kachanovich
  *
- *    Copyright (C) 2016  INRIA (France)
+ *    Copyright (C) 2016 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -47,16 +47,10 @@ using Filtration_value = SimplexTree::Filtration_value;
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<SimplexTree, Field_Zp>;
 
-void program_options(int argc, char * argv[]
-                     , int & nbL
-                     , std::string & file_name
-                     , std::string & filediag
-                     , Filtration_value & max_squared_alpha
-                     , int & p
-                     , int & dim_max
-                     , Filtration_value & min_persistence);
+void program_options(int argc, char* argv[], int& nbL, std::string& file_name, std::string& filediag,
+                     Filtration_value& max_squared_alpha, int& p, int& dim_max, Filtration_value& min_persistence);
 
-int main(int argc, char * argv[]) {
+int main(int argc, char* argv[]) {
   std::string file_name;
   std::string filediag;
   Filtration_value max_squared_alpha;
@@ -70,8 +64,8 @@ int main(int argc, char * argv[]) {
   Point_vector witnesses, landmarks;
   Gudhi::Points_off_reader<Point_d> off_reader(file_name);
   if (!off_reader.is_valid()) {
-      std::cerr << "Witness complex - Unable to read file " << file_name << "\n";
-      exit(-1);  // ----- >>
+    std::cerr << "Witness complex - Unable to read file " << file_name << "\n";
+    exit(-1);  // ----- >>
   }
   witnesses = Point_vector(off_reader.get_point_cloud());
   std::cout << "Successfully read " << witnesses.size() << " points.\n";
@@ -79,11 +73,11 @@ int main(int argc, char * argv[]) {
 
   // Choose landmarks (decomment one of the following two lines)
   // Gudhi::subsampling::pick_n_random_points(point_vector, nbL, std::back_inserter(landmarks));
-  Gudhi::subsampling::choose_n_farthest_points(K(), witnesses, nbL, Gudhi::subsampling::random_starting_point, std::back_inserter(landmarks));
+  Gudhi::subsampling::choose_n_farthest_points(K(), witnesses, nbL, Gudhi::subsampling::random_starting_point,
+                                               std::back_inserter(landmarks));
 
   // Compute witness complex
-  Strong_witness_complex strong_witness_complex(landmarks,
-                                                witnesses);
+  Strong_witness_complex strong_witness_complex(landmarks, witnesses);
 
   strong_witness_complex.create_complex(simplex_tree, max_squared_alpha, lim_d);
 
@@ -112,37 +106,28 @@ int main(int argc, char * argv[]) {
   return 0;
 }
 
-void program_options(int argc, char * argv[]
-                     , int & nbL
-                     , std::string & file_name
-                     , std::string & filediag
-                     , Filtration_value & max_squared_alpha
-                     , int & p
-                     , int & dim_max
-                     , Filtration_value & min_persistence) {
+void program_options(int argc, char* argv[], int& nbL, std::string& file_name, std::string& filediag,
+                     Filtration_value& max_squared_alpha, int& p, int& dim_max, Filtration_value& min_persistence) {
   namespace po = boost::program_options;
 
   po::options_description hidden("Hidden options");
-  hidden.add_options()
-      ("input-file", po::value<std::string>(&file_name),
-      "Name of file containing a point set in off format.");
+  hidden.add_options()("input-file", po::value<std::string>(&file_name),
+                       "Name of file containing a point set in off format.");
 
   po::options_description visible("Allowed options", 100);
   Filtration_value default_alpha = std::numeric_limits<Filtration_value>::infinity();
-  visible.add_options()
-      ("help,h", "produce help message")
-      ("landmarks,l", po::value<int>(&nbL),
-       "Number of landmarks to choose from the point cloud.")
-      ("output-file,o", po::value<std::string>(&filediag)->default_value(std::string()),
-       "Name of file in which the persistence diagram is written. Default print in std::cout")
-      ("max-sq-alpha,a", po::value<Filtration_value>(&max_squared_alpha)->default_value(default_alpha),
-       "Maximal squared relaxation parameter.")
-      ("field-charac,p", po::value<int>(&p)->default_value(11),
-       "Characteristic p of the coefficient field Z/pZ for computing homology.")
-      ("min-persistence,m", po::value<Filtration_value>(&min_persistence)->default_value(0),
-       "Minimal lifetime of homology feature to be recorded. Default is 0. Enter a negative value to see zero length intervals")
-      ("cpx-dimension,d", po::value<int>(&dim_max)->default_value(std::numeric_limits<int>::max()),
-       "Maximal dimension of the strong witness complex we want to compute.");
+  visible.add_options()("help,h", "produce help message")("landmarks,l", po::value<int>(&nbL),
+                                                          "Number of landmarks to choose from the point cloud.")(
+      "output-file,o", po::value<std::string>(&filediag)->default_value(std::string()),
+      "Name of file in which the persistence diagram is written. Default print in std::cout")(
+      "max-sq-alpha,a", po::value<Filtration_value>(&max_squared_alpha)->default_value(default_alpha),
+      "Maximal squared relaxation parameter.")(
+      "field-charac,p", po::value<int>(&p)->default_value(11),
+      "Characteristic p of the coefficient field Z/pZ for computing homology.")(
+      "min-persistence,m", po::value<Filtration_value>(&min_persistence)->default_value(0),
+      "Minimal lifetime of homology feature to be recorded. Default is 0. Enter a negative value to see zero length "
+      "intervals")("cpx-dimension,d", po::value<int>(&dim_max)->default_value(std::numeric_limits<int>::max()),
+                   "Maximal dimension of the strong witness complex we want to compute.");
 
   po::positional_options_description pos;
   pos.add("input-file", 1);
@@ -151,8 +136,7 @@ void program_options(int argc, char * argv[]
   all.add(visible).add(hidden);
   po::variables_map vm;
 
-  po::store(po::command_line_parser(argc, argv).
-            options(all).positional(pos).run(), vm);
+  po::store(po::command_line_parser(argc, argv).options(all).positional(pos).run(), vm);
   po::notify(vm);
 
   if (vm.count("help") || !vm.count("input-file")) {
@@ -167,7 +151,6 @@ void program_options(int argc, char * argv[]
 
     std::cout << "Usage: " << argv[0] << " [options] input-file" << std::endl << std::endl;
     std::cout << visible << std::endl;
-    std::abort();
+    exit(-1);
   }
 }
-

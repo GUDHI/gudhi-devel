@@ -4,7 +4,7 @@
  *
  *    Author(s):       Vincent Rouvreau
  *
- *    Copyright (C) 2016  INRIA
+ *    Copyright (C) 2016 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -41,9 +41,6 @@ struct SimplicialComplexForAlpha {
   /** Returns the number of vertices in the simplicial complex. */
   std::size_t num_vertices();
 
-  /** Sets the simplicial complex dimension. */
-  void set_dimension(int dimension);
-
   /** Gets the 'simplex' dimension. */
   int dimension(Simplex_handle simplex);
 
@@ -65,8 +62,7 @@ struct SimplicialComplexForAlpha {
    * 'value type' must be 'Vertex_handle'.*/
   typedef unspecified Simplex_vertex_range;
 
-  /** \brief Returns a range over vertices of a given
-   *  simplex. */
+  /** \brief Returns a range over vertices of a given simplex. */
   Simplex_vertex_range simplex_vertex_range(Simplex_handle const & simplex);
 
   /** \brief Iterator over the boundaries of the complex, in an arbitrary order.
@@ -76,6 +72,14 @@ struct SimplicialComplexForAlpha {
 
   /** \brief Returns a range over boundaries of a given simplex. */
   Boundary_simplex_range boundary_simplex_range(Simplex_handle const & simplex);
+
+  /** \brief Iterator over the simplices of the skeleton of the complex, for a given dimension.
+   *
+   * 'value_type' must be 'Simplex_handle'. */
+  typedef unspecified Skeleton_simplex_range;
+  /** \brief Returns a range over the simplices of the skeleton of the simplicial complex, for a given
+   * dimension. */
+  Skeleton_simplex_range skeleton_simplex_range;
 
   /** \brief Return type of an insertion of a simplex
    */

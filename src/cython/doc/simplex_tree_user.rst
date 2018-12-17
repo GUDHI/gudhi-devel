@@ -1,9 +1,13 @@
+:orphan:
+
+.. To get rid of WARNING: document isn't included in any toctree
+
 Simplex tree user manual
 ========================
 Definition
 ----------
 
-.. include:: simplex_tree_sum.rst
+.. include:: simplex_tree_sum.inc
 
 A simplicial complex :math:`\mathbf{K}` on a set of vertices :math:`V = \{1, \cdots ,|V|\}` is a collection of
 simplices :math:`\{\sigma\}`, :math:`\sigma \subseteq V` such that

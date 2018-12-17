@@ -4,7 +4,7 @@
  *
  *    Author(s):       Pawel Dlotko
  *
- *    Copyright (C) 2015  INRIA Sophia-Saclay (France)
+ *    Copyright (C) 2015 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 #include <limits>  // for numeric_limits<>
 #include <vector>
 #include <stdexcept>
+#include <cstddef>
 
 namespace Gudhi {
 
@@ -94,7 +95,7 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
    * The boundary elements are guaranteed to be returned so that the
    * incidence coefficients are alternating.
    */
-  virtual std::vector<size_t> get_boundary_of_a_cell(size_t cell) const;
+  virtual std::vector<std::size_t> get_boundary_of_a_cell(std::size_t cell) const;
 
   /**
    * A version of a function that return coboundary of a given cell for an object of
@@ -104,7 +105,7 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
    * To compute incidence between cells use compute_incidence_between_cells
    * procedure
    */
-  virtual std::vector<size_t> get_coboundary_of_a_cell(size_t cell) const;
+  virtual std::vector<std::size_t> get_coboundary_of_a_cell(std::size_t cell) const;
 
   /**
   * This procedure compute incidence numbers between cubes. For a cube \f$A\f$ of
@@ -125,15 +126,15 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
   * @exception std::logic_error In case when the cube \f$B\f$ is not n-1
   * dimensional face of a cube \f$A\f$.
   **/
-  virtual int compute_incidence_between_cells(size_t coface, size_t face) {
+  virtual int compute_incidence_between_cells(std::size_t coface, std::size_t face) {
     // first get the counters for coface and face:
     std::vector<unsigned> coface_counter = this->compute_counter_for_given_cell(coface);
     std::vector<unsigned> face_counter = this->compute_counter_for_given_cell(face);
 
     // coface_counter and face_counter should agree at all positions except from one:
     int number_of_position_in_which_counters_do_not_agree = -1;
-    size_t number_of_full_faces_that_comes_before = 0;
-    for (size_t i = 0; i != coface_counter.size(); ++i) {
+    std::size_t number_of_full_faces_that_comes_before = 0;
+    for (std::size_t i = 0; i != coface_counter.size(); ++i) {
       if ((coface_counter[i] % 2 == 1) && (number_of_position_in_which_counters_do_not_agree == -1)) {
         ++number_of_full_faces_that_comes_before;
       }
@@ -165,7 +166,7 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
 
   void set_up_containers(const std::vector<unsigned>& sizes) {
     unsigned multiplier = 1;
-    for (size_t i = 0; i != sizes.size(); ++i) {
+    for (std::size_t i = 0; i != sizes.size(); ++i) {
       this->sizes.push_back(sizes[i]);
       this->multipliers.push_back(multiplier);
 
@@ -176,7 +177,7 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
       }
     }
     // std::reverse( this->sizes.begin() , this->sizes.end() );
-    this->data = std::vector<T>(multiplier, std::numeric_limits<T>::max());
+    this->data = std::vector<T>(multiplier, std::numeric_limits<T>::infinity());
     this->total_number_of_cells = multiplier;
   }
   Bitmap_cubical_complex_periodic_boundary_conditions_base(const std::vector<unsigned>& sizes);
@@ -198,7 +199,7 @@ void Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::construct_comp
   this->directions_in_which_periodic_b_cond_are_to_be_imposed = directions_in_which_periodic_b_cond_are_to_be_imposed;
   this->set_up_containers(dimensions);
 
-  size_t i = 0;
+  std::size_t i = 0;
   for (auto it = this->top_dimensional_cells_iterator_begin(); it != this->top_dimensional_cells_iterator_end(); ++it) {
     this->get_cell_data(*it) = topDimensionalCells[i];
     ++i;
@@ -229,7 +230,7 @@ Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_comp
 
   std::vector<unsigned> sizes;
   sizes.reserve(dimensionOfData);
-  for (size_t i = 0; i != dimensionOfData; ++i) {
+  for (std::size_t i = 0; i != dimensionOfData; ++i) {
     int size_in_this_dimension;
     inFiltration >> size_in_this_dimension;
     if (size_in_this_dimension < 0) {
@@ -285,19 +286,19 @@ Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_comp
 // ***********************Methods************************ //
 
 template <typename T>
-std::vector<size_t> Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::get_boundary_of_a_cell(
-    size_t cell) const {
+std::vector<std::size_t> Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::get_boundary_of_a_cell(
+    std::size_t cell) const {
   bool dbg = false;
   if (dbg) {
     std::cerr << "Computations of boundary of a cell : " << cell << std::endl;
   }
 
-  std::vector<size_t> boundary_elements;
+  std::vector<std::size_t> boundary_elements;
   boundary_elements.reserve(this->dimension() * 2);
-  size_t cell1 = cell;
-  size_t sum_of_dimensions = 0;
+  std::size_t cell1 = cell;
+  std::size_t sum_of_dimensions = 0;
 
-  for (size_t i = this->multipliers.size(); i != 0; --i) {
+  for (std::size_t i = this->multipliers.size(); i != 0; --i) {
     unsigned position = cell1 / this->multipliers[i - 1];
     // this cell have a nonzero length in this direction, therefore we can compute its boundary in this direction.
     if (position % 2 == 1) {
@@ -351,12 +352,12 @@ std::vector<size_t> Bitmap_cubical_complex_periodic_boundary_conditions_base<T>:
 }
 
 template <typename T>
-std::vector<size_t> Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::get_coboundary_of_a_cell(
-    size_t cell) const {
+std::vector<std::size_t> Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::get_coboundary_of_a_cell(
+    std::size_t cell) const {
   std::vector<unsigned> counter = this->compute_counter_for_given_cell(cell);
-  std::vector<size_t> coboundary_elements;
-  size_t cell1 = cell;
-  for (size_t i = this->multipliers.size(); i != 0; --i) {
+  std::vector<std::size_t> coboundary_elements;
+  std::size_t cell1 = cell;
+  for (std::size_t i = this->multipliers.size(); i != 0; --i) {
     unsigned position = cell1 / this->multipliers[i - 1];
     // if the cell has zero length in this direction, then it will have cbd in this direction.
     if (position % 2 == 0) {

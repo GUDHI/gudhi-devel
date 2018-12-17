@@ -4,7 +4,7 @@
  *
  *    Author(s):       Mathieu Carrière
  *
- *    Copyright (C) 2017  INRIA
+ *    Copyright (C) 2017 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -24,11 +24,11 @@
 #define BOOST_TEST_MODULE "graph_induced_complex"
 
 #include <boost/test/unit_test.hpp>
-#include <cmath>  // float comparison
+
 #include <limits>
 #include <string>
 #include <vector>
-#include <algorithm>  // std::max
+
 #include <gudhi/GIC.h>
 #include <gudhi/distance_functions.h>
 #include <gudhi/reader_utils.h>
@@ -39,6 +39,7 @@ BOOST_AUTO_TEST_CASE(check_nerve) {
   N.set_type("Nerve");
   std::string cloud_file_name("data/cloud");
   N.read_point_cloud(cloud_file_name);
+  N.set_color_from_coordinate();
   std::string graph_file_name("data/graph");
   N.set_graph_from_file(graph_file_name);
   std::string cover_file_name("data/cover");
@@ -58,6 +59,7 @@ BOOST_AUTO_TEST_CASE(check_GIC) {
   GIC.set_type("GIC");
   std::string cloud_file_name("data/cloud");
   GIC.read_point_cloud(cloud_file_name);
+  GIC.set_color_from_coordinate();
   std::string graph_file_name("data/graph");
   GIC.set_graph_from_file(graph_file_name);
   std::string cover_file_name("data/cover");
@@ -77,6 +79,7 @@ BOOST_AUTO_TEST_CASE(check_voronoiGIC) {
   GIC.set_type("GIC");
   std::string cloud_file_name("data/cloud");
   GIC.read_point_cloud(cloud_file_name);
+  GIC.set_color_from_coordinate();
   std::string graph_file_name("data/graph");
   GIC.set_graph_from_file(graph_file_name);
   GIC.set_cover_from_Voronoi(Gudhi::Euclidean_distance(), 2);

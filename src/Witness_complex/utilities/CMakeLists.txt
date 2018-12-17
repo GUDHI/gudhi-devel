@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
 project(Witness_complex_utilities)
 
 # CGAL and Eigen3 are required for Euclidean version of Witness
