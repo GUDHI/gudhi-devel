@@ -10,12 +10,14 @@ Definition
 :Author: Clément Maria                 :Introduced in: GUDHI PYTHON 2.0.0     :Copyright: GPL v3
 =====================================  =====================================  =====================================
 
-+---------------------------------------------+----------------------------------------------------------------------+
-|  :doc:`persistent_cohomology_user`          | Please refer to each data structure that contains persistence        |
-|                                             | feature for reference:                                               |
-|                                             |                                                                      |
-|                                             | * :doc:`simplex_tree_ref`                                            |
-+---------------------------------------------+----------------------------------------------------------------------+
++-----------------------------------------------------------------+-----------------------------------------------------------------------+
+|  :doc:`persistent_cohomology_user`                              | Please refer to each data structure that contains persistence         |
+|                                                                 | feature for reference:                                                |
+|                                                                 |                                                                       |
+|                                                                 | * :doc:`simplex_tree_ref`                                             |
+|                                                                 | * :doc:`cubical_complex_ref`                                          |
+|                                                                 | * :doc:`periodic_cubical_complex_ref`                                 |
++-----------------------------------------------------------------+-----------------------------------------------------------------------+
 
 
 Computation of persistent cohomology using the algorithm of :cite:`DBLP:journals/dcg/SilvaMV11` and
