@@ -1,7 +1,11 @@
 #ifndef COXETER_TRIANGULATION_DS_H_
 #define COXETER_TRIANGULATION_DS_H_
 
+#include <stack>
+
 #include <gudhi/Coxeter_triangulation/Cell_id.h>
+
+#include <boost/range/iterator_range.hpp>
 
 #include <Eigen/Eigenvalues>
 #include <Eigen/Sparse>
@@ -127,6 +131,135 @@ public:
     c_id.set_dimension(alcove_dimension(c_id));
     return c_id;
   }
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  // Cartesian coordinates and barycenter
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+
+  
+  Eigen::VectorXd cartesian_coordinates(const Cell_id& v_id) const {
+    assert(v_id.dimension() == 0);
+    Eigen::VectorXd val_vector(dimension_);
+    std::size_t k = 0, j = 1;
+    for (; j < (unsigned)dimension_ + 1; k += j, j++)
+      val_vector(j-1) = v_id.value(k) / v_id.level();
+    // return root_t_.colPivHouseholderQr().solve(val_vector);
+    return colpivhouseholderqr_.solve(val_vector);
+  }
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  // Vertex computation
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+
+  class Vertex_iterator : public boost::iterator_facade< Vertex_iterator,
+							 Cell_id const,
+							 boost::forward_traversal_tag> {
+  protected:
+    friend class boost::iterator_core_access;
+
+    bool equal(Vertex_iterator const& other) const {
+      return (is_end_ && other.is_end_);
+    }
+
+    Cell_id const& dereference() const {
+      return value_;
+    }
+
+    void update_value() {
+      while (!is_end_) {
+	std::size_t k = value_.size();
+	std::size_t j = std::floor(0.5*(1 + std::sqrt(1+8*k)));
+	if (state_stack_.top())
+	  value_.push_back(c_id_.value(k)+1, true);
+	else
+	  value_.push_back(c_id_.value(k), true);
+	std::size_t i = j-2;
+	for (; i < j; --i) { // i is unsigned: if goes past 0, then becomes >j
+	  std::size_t
+	    k_s = i*(i+1)/2, // index of the simple root s_i
+	    k_r = value_.size()-1; // index of the previous positive root r_{i+1,j}
+	  value_.push_back(value_.value(k_r) + value_.value(k_s), true);
+	  if (c_id_.mask(k_r+1)) {
+	    if (value_.value(k_r+1) != c_id_.value(k_r+1))
+	      break;
+	  }
+	  else // !c_id_.mask(k_r+1)
+	    if (value_.value(k_r+1) < c_id_.value(k_r+1) ||
+		value_.value(k_r+1) > c_id_.value(k_r+1) + 1)
+	    break;
+	}
+	if (i >= j) { // success
+	  if (value_.size() == c_id_.size()) // finished
+	    return;
+	  state_stack_.push(false);
+	}
+	if (i < j) { // fail
+	  value_.resize(k);
+	  elementary_increment();
+	}
+      }
+    }
+
+    void elementary_increment() {
+      if (is_end_)
+        return;
+      while (!state_stack_.empty()) {
+	bool p = state_stack_.top();
+	state_stack_.pop();
+	std::size_t j = state_stack_.size();
+	std::size_t k_s = j*(j+1)/2;
+	value_.resize(k_s);
+	if (c_id_.mask(k_s))
+	  continue;
+	else if (p)
+	  continue;
+	else {
+	  state_stack_.push(true);
+	  return;
+	}
+      }
+      if (state_stack_.empty())
+	is_end_ = true;
+    }
+    
+    void increment() {
+      elementary_increment();
+      update_value();
+    }
+
+  public:
+    Vertex_iterator(const Cell_id& c_id,
+		    const Coxeter_triangulation_ds& scs)
+      :
+      value_(c_id.level(), 0),
+      is_end_(false),
+      is_itself_(c_id.dimension() == 0)
+    {
+      if (is_itself_) {
+	value_ = c_id_;
+	return;
+      }
+      c_id_ = c_id;
+      state_stack_.push(false);
+      update_value();
+    }
+
+    Vertex_iterator() : is_end_(true) {}
+  
+  
+  protected:
+    Cell_id c_id_; 
+    Cell_id value_;
+    bool is_end_;
+    bool is_itself_;
+    std::stack<bool> state_stack_; // true means +1, false means +0
+  };
+  
+  typedef boost::iterator_range<Vertex_iterator> Vertex_range;
+  Vertex_range vertex_range(const Cell_id& a_id) const {
+    return Vertex_range(Vertex_iterator(a_id, *this),
+			Vertex_iterator());
+  }  
   
 protected:
   Matrix root_t_;
