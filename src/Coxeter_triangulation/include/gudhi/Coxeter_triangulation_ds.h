@@ -233,6 +233,7 @@ public:
     }
     
     void increment() {
+      is_end_ = is_itself_;
       elementary_increment();
       update_value();
     }
@@ -375,6 +376,69 @@ public:
 			std::size_t value_dim) const {
     return Face_range(Face_iterator(c_id, *this, value_dim),
 		      Face_iterator());
+  }  
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  // Coface computation
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+
+  class Coface_iterator : public boost::iterator_facade< Coface_iterator,
+							 Cell_id const,
+							 boost::forward_traversal_tag> {
+  protected:
+    friend class boost::iterator_core_access;
+    
+    void update_value() {
+      if (is_end_)
+        return;
+    }
+    
+    bool equal(Coface_iterator const& other) const {
+      return (is_end_ && other.is_end_); 
+    }
+
+    Cell_id const& dereference() const {
+      return value_;
+    }
+
+    void increment() {
+      is_end_ = is_itself_;
+      update_value();
+    }
+
+    
+  public:
+    Coface_iterator(const Cell_id& c_id,
+		    const Coxeter_triangulation_ds& scs,
+		    std::size_t value_dim)
+      : value_(c_id.level(), value_dim),
+	v_id(*Coxeter_triangulation_ds::Vertex_iterator(c_id, scs)),
+	is_end_(false),
+	is_itself_(value_dim == c_id.dimension())
+    {
+      if (is_itself_) {
+	value_ = c_id;
+	return;
+      }
+      update_value();
+    }
+
+    Coface_iterator() : is_end_(true) {}
+    
+    
+  protected:
+    Cell_id value_;
+    Cell_id v_id;
+    bool is_end_;
+    bool is_itself_;
+  };
+
+  
+  typedef boost::iterator_range<Coface_iterator> Coface_range;
+  Coface_range coface_range(const Cell_id& c_id,
+			    std::size_t value_dim) const {
+    return Coface_range(Coface_iterator(c_id, *this, value_dim),
+			Coface_iterator());
   }  
 
   
