@@ -135,7 +135,6 @@ public:
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // Cartesian coordinates and barycenter
   //////////////////////////////////////////////////////////////////////////////////////////////////
-
   
   Eigen::VectorXd cartesian_coordinates(const Cell_id& v_id) const {
     assert(v_id.dimension() == 0);
@@ -145,6 +144,16 @@ public:
       val_vector(j-1) = v_id.value(k) / v_id.level();
     // return root_t_.colPivHouseholderQr().solve(val_vector);
     return colpivhouseholderqr_.solve(val_vector);
+  }
+
+  Eigen::VectorXd barycenter(const Cell_id& c_id) const {
+    Eigen::VectorXd res_vector(dimension_);
+    for (size_t i = 0; i < dimension_; ++i)
+      res_vector(i) = 0;
+    for (auto v: vertex_range(c_id)) {
+      res_vector += cartesian_coordinates(v);
+    }
+    return (1/(c_id.dimension()+1)) * res_vector;
   }
   
   //////////////////////////////////////////////////////////////////////////////////////////////////

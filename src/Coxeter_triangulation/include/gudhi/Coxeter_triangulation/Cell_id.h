@@ -195,6 +195,10 @@ namespace Gudhi {
       return true;
     }
 
+    bool operator!=(const Cell_id& other) const {
+      return !(*this == other);
+    }
+    
   protected:
     double level_;
     unsigned dimension_;

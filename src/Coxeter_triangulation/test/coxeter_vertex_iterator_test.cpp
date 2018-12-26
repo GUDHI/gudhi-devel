@@ -43,17 +43,25 @@ int main() {
   std::vector<Point_d > points = Gudhi::generate_points_in_cube_d<Kernel>(n, d, 500.0);
   for (std::vector<double> p: points) {
     Gudhi::Cell_id c = ct_ds_d.locate_point(p, 1);
+    // cell == point located barycenter
+    if (c != ct_ds_d.locate_point(ct_ds_d.barycenter(c))) {
+	std::cerr << "Error: cell = " << c << ", ct_ds_d.locate_point(ct_ds_d.barycenter(c)) = " << ct_ds_d.locate_point(ct_ds_d.barycenter(c)) << ".\n";
+	return 1;
+    }
     std::size_t number_of_vertices = 0;
     for (Gudhi::Cell_id v: ct_ds_d.vertex_range(c)) {
+      // v is a face of c
       if (!is_face(v,c)) {
 	std::cerr << "Error: cell = " << c << ", v = " << v << ".\n";
 	return 1;
       }
+      // v == point located cartesian coordinates of v
       if (!(v == ct_ds_d.locate_point(ct_ds_d.cartesian_coordinates(v)))) {
 	std::cerr << "Error: vertex = " << v << ", ct_ds_d.locate_point(ct_ds_d.cartesian_coordinates(v)) = " << ct_ds_d.locate_point(ct_ds_d.cartesian_coordinates(v)) << ".\n";
       }
       number_of_vertices++;
     }
+    // number of vertices is c.dimension()+1
     if (number_of_vertices != c.dimension()+1) {
       std::cerr << "Error: cell = " << c << ", n_vertices = " << number_of_vertices << ".\n";
       return 1;
