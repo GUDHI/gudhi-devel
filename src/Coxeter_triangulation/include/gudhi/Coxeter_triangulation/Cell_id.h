@@ -183,8 +183,8 @@ namespace Gudhi {
     }
 
     /** \brief Returns true if all coordinates of the tuple other are equal to the coordinates of the current tuple.
-	@param[in] other A tuple of cell coordinates to compare.
-	@param[out] The result of the comparison. The result is true if the two sizes are equal, and all coordinates are equal in both integer and boolean values. Otherwise, the result is false.
+     * @param[in] other A tuple of cell coordinates to compare.
+     * @param[out] The result of the comparison. The result is true if the two sizes are equal, and all coordinates are equal in both integer and boolean values. Otherwise, the result is false.
      */
     bool operator==(const Cell_id& other) const {
       if (this->size() != other.size())
@@ -197,6 +197,27 @@ namespace Gudhi {
 
     bool operator!=(const Cell_id& other) const {
       return !(*this == other);
+    }
+
+    /** \brief Check if a simplex is a face of another simplex.
+     * \detail Returns true if c1 is a face of c2. The two tuples c1 and c2 are required to be valid.
+     */
+    static bool is_face(Gudhi::Cell_id& c1, Gudhi::Cell_id& c2) {
+      std::size_t k = 0; 
+      for (; k < c1.size(); ++k) {
+	if (c2.mask(k)) {
+	  if (!c1.mask(k) || c1.value(k) != c2.value(k))
+	    return false;
+	}
+	else { // !c2.mask(k)
+	  if (!c1.mask(k) && c1.value(k) != c2.value(k))
+	    return false;
+	  if (c1.mask(k))
+	    if (c1.value(k) < c2.value(k) || c1.value(k) > c2.value(k)+1)
+	      return false;
+	} 
+      }
+      return true;
     }
     
   protected:

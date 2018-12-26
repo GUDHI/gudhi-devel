@@ -4,6 +4,7 @@
 #include <stack>
 
 #include <gudhi/Coxeter_triangulation/Cell_id.h>
+#include <gudhi/Coxeter_triangulation/Subset_chooser.h>
 
 #include <boost/range/iterator_range.hpp>
 
@@ -245,7 +246,7 @@ public:
       is_itself_(c_id.dimension() == 0)
     {
       if (is_itself_) {
-	value_ = c_id_;
+	value_ = c_id;
 	return;
       }
       c_id_ = c_id;
@@ -269,6 +270,113 @@ public:
     return Vertex_range(Vertex_iterator(a_id, *this),
 			Vertex_iterator());
   }  
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  // Face computation
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+
+  class Face_iterator : public boost::iterator_facade< Face_iterator,
+						       Cell_id const,
+						       boost::forward_traversal_tag> {
+  protected:
+    friend class boost::iterator_core_access;
+    
+    void update_value() {
+      if (is_end_)
+        return;
+      value_.clear();
+      for (unsigned k = 0; k < vertices_[state_[0]].size(); ++k) {
+        int val = vertices_[state_[0]].value(k);
+        bool is_true = true;
+        for (auto p: state_)
+          if (vertices_[p].value(k) < val) {
+            val = vertices_[p].value(k);
+            is_true = false;
+            break;
+          }
+          else if (vertices_[p].value(k) > val) {
+            is_true = false;
+            break;
+          }
+        value_.push_back(val, is_true);
+      }
+    }
+    
+    bool equal(Face_iterator const& other) const {
+      return (is_end_ && other.is_end_); 
+    }
+
+    Cell_id const& dereference() const {
+      return value_;
+    }
+
+    void increment() {
+      is_end_ = is_itself_ || !increment_state();
+      update_value();
+    }
+
+    bool increment_state() {
+      do {
+        if (state_.empty()) {
+          state_.push_back(0);
+        } else {
+          if (state_.size() < state_.capacity()) {
+            state_.push_back(state_.back());
+          }
+          
+          // Roll over when the remaining elements wouldn't fill the subset.
+          while (++state_.back() == vertices_.size()) {
+            state_.pop_back();
+            if (state_.empty())
+              // we have run out of possibilities
+              return false;
+          }
+        }
+      } while (state_.size() < state_.capacity());
+      return true;
+    }
+    
+  public:
+    Face_iterator(const Cell_id& c_id,
+		  const Coxeter_triangulation_ds& scs,
+		  std::size_t value_dim)
+      : value_(c_id.level(), value_dim),
+	is_end_(false),
+	is_itself_(value_dim == c_id.dimension())
+    {
+      if (is_itself_) {
+	value_ = c_id;
+	return;
+      }
+      for (const Cell_id& v_id: scs.vertex_range(c_id))
+        vertices_.push_back(v_id);
+      state_.reserve(value_dim + 1);
+      if (value_dim > c_id.dimension())
+        is_end_ = true;
+      is_end_ = !increment_state();
+      update_value();
+    }
+
+    Face_iterator() : is_end_(true) {}
+    
+    
+  protected:
+    Cell_id value_;
+    std::vector<Cell_id> vertices_;
+    SubsetChooser<std::vector<Cell_id>::const_iterator> chooser_;
+    std::vector<std::size_t> state_;
+    bool is_end_;
+    bool is_itself_;
+  };
+
+  
+  typedef boost::iterator_range<Face_iterator> Face_range;
+  Face_range face_range(const Cell_id& c_id,
+			std::size_t value_dim) const {
+    return Face_range(Face_iterator(c_id, *this, value_dim),
+		      Face_iterator());
+  }  
+
   
 protected:
   Matrix root_t_;

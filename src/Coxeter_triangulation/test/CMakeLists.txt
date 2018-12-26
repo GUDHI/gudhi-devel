@@ -4,6 +4,7 @@ project(Coxeter_triangulation_test)
 add_executable ( Cell_id_test cell_id_test.cpp )
 add_executable ( Coxeter_triangulation_test coxeter_triangulation_test.cpp )
 add_executable ( Coxeter_vertex_iterator_test coxeter_vertex_iterator_test.cpp )
+add_executable ( Coxeter_face_iterator_test coxeter_face_iterator_test.cpp )
 
 # if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
 #   add_executable ( Coxeter_triangulation_coxeter_test coxeter_test.cpp )
