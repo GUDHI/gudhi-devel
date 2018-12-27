@@ -1,8 +1,8 @@
+#include "../example/cxx-prettyprint/prettyprint.hpp"
 #include <gudhi/Coxeter_triangulation_ds.h>
 // #include <gudhi/Coxeter_triangulation/base_n_range.h>
 // #include <gudhi_patches/CGAL/Epick_d.h>
 // #include <gudhi/random_point_generators.h>
-#include "../example/cxx-prettyprint/prettyprint.hpp"
 
 int main() {
   // std::size_t n = 8, k = 2;
@@ -12,7 +12,7 @@ int main() {
 
   Gudhi::Coxeter_triangulation_ds ct_ds_2(3);
   Gudhi::Cell_id c(1.5, 3);
-  c.push_back(1, false);
+  c.push_back(1, true);
   c.push_back(-1, false);  
   c.push_back(0, false);
   c.push_back(2, false);

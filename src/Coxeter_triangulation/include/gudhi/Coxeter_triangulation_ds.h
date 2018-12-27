@@ -401,7 +401,9 @@ public:
     typedef std::vector<std::size_t> Parent;
     typedef boost::disjoint_sets<std::size_t*, std::size_t*> Disjoint_sets;
     typedef std::map<int, Graph_node> IN_map;
+    typedef typename IN_map::iterator IN_map_iterator;
     typedef std::map<Graph_node, int> NI_map;
+    typedef std::vector<std::vector<std::size_t> > Partition;
     
     void update_value() {
       if (is_end_)
@@ -460,10 +462,29 @@ public:
       	    boost::add_edge(i, j, graph);
       }
 
-      std::cout << "c_id = " << c_id << ", v_id = " << v_id << "\n";
-      std::cout << "IN_map contents:\n";
-      for (auto in_pair: in_map)
-      	std::cout << in_pair.first << ": out_degree=" << boost::out_degree(in_pair.second, graph) << "\n";
+      // std::cout << "c_id = " << c_id << ", v_id = " << v_id << "\n";
+      // std::cout << "IN_map contents:\n";
+      // for (auto in_pair: in_map)
+      // 	std::cout << in_pair.first << ": out_degree=" << boost::out_degree(in_pair.second, graph) << "\n";
+      std::vector<IN_map_iterator> nodes;
+      for (auto it = in_map.begin(); it != in_map.end(); ++it)
+	nodes.push_back(it);
+      auto compare = [graph](const IN_map_iterator& lhs, const IN_map_iterator& rhs)
+		     {return boost::out_degree(lhs->second, graph) < boost::out_degree(rhs->second, graph);};
+      std::sort(nodes.begin(), nodes.end(), compare);
+      std::size_t curr_degree = 0;
+      if (!nodes.empty())
+	nonrefined_partition_.push_back(std::vector<std::size_t>());
+      for (auto node: nodes) {
+	std::size_t node_degree = boost::out_degree(node->second, graph);
+	if (node_degree == curr_degree)
+	  nonrefined_partition_.back().push_back(node->first);
+	else {
+	  curr_degree = node_degree;
+	  nonrefined_partition_.push_back(std::vector<std::size_t>(1, node->first));
+	}
+      }
+      std::cout << nonrefined_partition_ << "\n";
       
       update_value();
     }
@@ -474,6 +495,7 @@ public:
   protected:
     Cell_id value_;
     Cell_id v_id;
+    Partition nonrefined_partition_;
     bool is_end_;
     bool is_itself_;
   };
