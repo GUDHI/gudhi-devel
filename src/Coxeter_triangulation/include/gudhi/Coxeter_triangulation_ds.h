@@ -17,6 +17,10 @@
 #include <Eigen/Sparse>
 #include <Eigen/SVD>
 
+#include "comb/mixedradix-init.cc"
+#include "comb/mixedradix-sod-lex.h"
+#include "fxtalloca.h"
+
 namespace Gudhi {
   
 class Coxeter_triangulation_ds {
@@ -485,6 +489,15 @@ public:
 	}
       }
       std::cout << nonrefined_partition_ << "\n";
+
+      // NB:
+      // n == nonrefined_partition_.size()
+      // s == d+1-n
+      // m1[i] (aka i-th nine) == nonrefined_partition_[i].size()-1 
+      std::size_t nines[nonrefined_partition_.size()]; // as in 'nines' in the mixed radix
+      for (std::size_t i = 0; i < nonrefined_partition_.size(); ++i)
+	nines[i] = nonrefined_partition_[i].size()-1;
+      mixedradix_sod_lex(nonrefined_partition_.size(), 0, nines);
       
       update_value();
     }
