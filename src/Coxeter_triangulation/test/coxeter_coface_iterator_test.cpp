@@ -1,23 +1,26 @@
 #include <gudhi/Coxeter_triangulation_ds.h>
-#include <gudhi/Coxeter_triangulation/base_n_range.h>
-#include <gudhi_patches/CGAL/Epick_d.h>
-#include <gudhi/random_point_generators.h>
+// #include <gudhi/Coxeter_triangulation/base_n_range.h>
+// #include <gudhi_patches/CGAL/Epick_d.h>
+// #include <gudhi/random_point_generators.h>
 #include "../example/cxx-prettyprint/prettyprint.hpp"
 
 int main() {
-  std::size_t n = 8, k = 2;
-  for (std::vector<size_t> part: base_n_range(n,k)) {
-    std::cout << part << "\n";
-  }
+  // std::size_t n = 8, k = 2;
+  // for (std::vector<size_t> part: base_n_range(n,k)) {
+  //   std::cout << part << "\n";
+  // }
+
+  Gudhi::Coxeter_triangulation_ds ct_ds_2(3);
+  Gudhi::Cell_id c(1.5, 3);
+  c.push_back(1, false);
+  c.push_back(-1, false);  
+  c.push_back(0, false);
+  c.push_back(2, false);
+  c.push_back(2, false);
+  c.push_back(3, false);
+  // Gudhi::Cell_id v = *Gudhi::Coxeter_triangulation_ds::Vertex_iterator(c, ct_ds_2);
+  Gudhi::Coxeter_triangulation_ds::Coface_iterator(c, ct_ds_2, 2);
   
-  // Gudhi::Coxeter_triangulation_ds ct_ds_2(3);
-  // Gudhi::Cell_id c(1.5, 3);
-  // c.push_back(1, false);
-  // c.push_back(-1, false);
-  // c.push_back(0, false);
-  // c.push_back(2, false);
-  // c.push_back(2, false);
-  // c.push_back(3, false);
   
   // std::cout << "Cell: " << c << "\nVertices:\n";
   // for (Gudhi::Cell_id f: ct_ds_2.face_range(c, 1))

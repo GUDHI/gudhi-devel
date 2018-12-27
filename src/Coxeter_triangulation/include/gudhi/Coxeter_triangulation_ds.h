@@ -2,11 +2,16 @@
 #define COXETER_TRIANGULATION_DS_H_
 
 #include <stack>
+#include <map>
 
 #include <gudhi/Coxeter_triangulation/Cell_id.h>
 #include <gudhi/Coxeter_triangulation/Subset_chooser.h>
 
 #include <boost/range/iterator_range.hpp>
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/pending/disjoint_sets.hpp>
+#include <boost/property_map/property_map.hpp>
 
 #include <Eigen/Eigenvalues>
 #include <Eigen/Sparse>
@@ -387,6 +392,16 @@ public:
 							 boost::forward_traversal_tag> {
   protected:
     friend class boost::iterator_core_access;
+    typedef typename boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> Graph;
+    typedef boost::graph_traits<Graph>::vertex_descriptor Graph_node;
+    typedef boost::graph_traits<Graph>::edge_descriptor Graph_edge;
+    typedef boost::graph_traits<Graph>::adjacency_iterator Adj_it;
+    typedef std::pair<Adj_it, Adj_it> Out_edge_it;
+    typedef std::vector<std::size_t> Rank;
+    typedef std::vector<std::size_t> Parent;
+    typedef boost::disjoint_sets<std::size_t*, std::size_t*> Disjoint_sets;
+    typedef std::map<int, Graph_node> IN_map;
+    typedef std::map<Graph_node, int> NI_map;
     
     void update_value() {
       if (is_end_)
@@ -420,6 +435,36 @@ public:
 	value_ = c_id;
 	return;
       }
+
+      // Building a union-find data structure for the partition and a graph for the order      
+      std::size_t d = scs.dimension();
+      Rank rank(d+1);
+      Parent parent(d+1);
+      Disjoint_sets partition(&rank[0], &parent[0]);
+      Graph graph;
+      IN_map in_map;
+      NI_map ni_map;
+      std::size_t k = 0;
+      
+      for (std::size_t j = 0; j <= d; ++j) {
+      	partition.make_set(j);
+      	Graph_node node = boost::add_vertex(graph);
+      	in_map.emplace(std::make_pair(j, node));
+      	ni_map.emplace(std::make_pair(node, j));
+      	for (std::size_t i = j-1; i < j; --i, ++k)
+      	  if (c_id.mask(k))
+      	    partition.union_set(i, j);
+      	  else if (c_id.value(k) == v_id.value(k))
+      	    boost::add_edge(j, i, graph);
+      	  else
+      	    boost::add_edge(i, j, graph);
+      }
+
+      std::cout << "c_id = " << c_id << ", v_id = " << v_id << "\n";
+      std::cout << "IN_map contents:\n";
+      for (auto in_pair: in_map)
+      	std::cout << in_pair.first << ": out_degree=" << boost::out_degree(in_pair.second, graph) << "\n";
+      
       update_value();
     }
 
