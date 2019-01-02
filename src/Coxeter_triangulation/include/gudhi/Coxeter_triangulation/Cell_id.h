@@ -202,7 +202,7 @@ namespace Gudhi {
     /** \brief Check if a simplex is a face of another simplex.
      * \detail Returns true if c1 is a face of c2. The two tuples c1 and c2 are required to be valid.
      */
-    static bool is_face(Gudhi::Cell_id& c1, Gudhi::Cell_id& c2) {
+    static bool is_face(const Gudhi::Cell_id& c1, const Gudhi::Cell_id& c2) {
       std::size_t k = 0; 
       for (; k < c1.size(); ++k) {
 	if (c2.mask(k)) {
