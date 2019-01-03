@@ -232,22 +232,24 @@ namespace Gudhi {
 /** \brief The default comparison operator between two tuples of cell coordinates.
     \detail If the sizes of the two tuples are different, the smallest tuple is returned as the smallest. If the sizes are the same, then order for the comparison is the lexicographical order, with a true coordinate smaller than a false coordinate, in the case of difference.
 */
-bool operator< (const Gudhi::Cell_id& lhs, const Gudhi::Cell_id& rhs) {
-  if (lhs.size() < rhs.size())
-    return true;
-  else if (lhs.size() > rhs.size())
+namespace std {
+  bool operator< (const Gudhi::Cell_id& lhs, const Gudhi::Cell_id& rhs) {
+    if (lhs.size() < rhs.size())
+      return true;
+    else if (lhs.size() > rhs.size())
+      return false;
+    else
+      for (std::size_t k = 0; k < lhs.size(); ++k)
+	if (lhs.value(k) < rhs.value(k))
+	  return true;
+	else if (lhs.value(k) < rhs.value(k))
+	  return false;
+	else if (lhs.mask(k) && !rhs.mask(k))
+	  return true;
+	else if (!lhs.mask(k) && rhs.mask(k))
+	  return false;
     return false;
-  else
-    for (std::size_t k = 0; k < lhs.size(); ++k)
-      if (lhs.value(k) < rhs.value(k))
-	return true;
-      else if (lhs.value(k) < rhs.value(k))
-	return false;
-      else if (lhs.mask(k) && !rhs.mask(k))
-	return true;
-      else if (!lhs.mask(k) && rhs.mask(k))
-	return false;
-  return false;
+  }
 }
 
 /** \brief Inserts a tuple of cell coordinates to a stream.

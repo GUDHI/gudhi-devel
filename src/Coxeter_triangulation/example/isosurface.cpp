@@ -12,7 +12,7 @@
 #include <gudhi/random_point_generators.h> // construct_point
 #include <gudhi/Coxeter_triangulation_ds.h>
 // #include <gudhi/Hasse_diagram_persistence.h>
-// #include "output_hasse_to_medit.h"
+#include "output_max_cells_to_medit.h"
 
 #include <Eigen/Eigenvalues>
 #include <Eigen/Sparse>
@@ -53,6 +53,9 @@ bool intersects(const Cell_id& c,
     j++;
   }
   Eigen::VectorXd z(cod_d + 1);
+  z(0) = 1;
+  for (std::size_t i = 1; i < cod_d + 1; ++i)
+    z(i) = 0;
   Eigen::VectorXd lambda = matrix.colPivHouseholderQr().solve(z);
   for (std::size_t i = 0; i < cod_d + 1; ++i)
     if (lambda(i) < 0 || lambda(i) > 1)
@@ -65,7 +68,9 @@ template <class Point_range,
 void compute_complex(const Point_range& seed_points,
 		     double level,
 		     std::unordered_set<Cell_id>& max_cells,
-		     const Function& fun) {
+		     const Function& fun,
+		     bool output_to_medit = true,
+		     std::string file_name_prefix = "reconstruction") {
   std::size_t amb_d = fun.amb_d();
   std::size_t cod_d = fun.cod_d();
   CT ct(amb_d);
@@ -75,10 +80,11 @@ void compute_complex(const Point_range& seed_points,
   for (const Point_d& p: seed_points) {
     Cell_id c = ct.locate_point(p, level);
     for (auto f: ct.face_range(c, cod_d))
-      if (max_cells.emplace(f).second)
+      if (intersects(f, fun, ct) && max_cells.emplace(f).second)
 	queue.emplace(f);
   }
-  
+
+  std::size_t snapshot_num = 0;
   while (!queue.empty()) {
     Cell_id s = queue.front();
     queue.pop();
@@ -91,12 +97,14 @@ void compute_complex(const Point_range& seed_points,
 	for (auto f: ct.face_range(*cof_it, cod_d))
 	  if (intersects(f, fun, ct) && max_cells.emplace(f).second)
 	    queue.emplace(f);
-    std::cout << "queue.size() = " << queue.size() << "\n";
+    // std::cout << "queue.size() = " << queue.size() << "\n";
+    // output_max_cells_to_medit(max_cells, ct, file_name_prefix + std::to_string(snapshot_num++));
   }
   std::cout << "#max_cells = " << max_cells.size() << "\n";
   std::cout << "#facet_cells = " << facet_cells.size() << "\n";
+  if (output_to_medit)
+    output_max_cells_to_medit(max_cells, ct, file_name_prefix);
 }
-
   
 
 int main(int argc, char * const argv[]) {
@@ -106,9 +114,9 @@ int main(int argc, char * const argv[]) {
   // Circle
   {
     double r = 5;
-    Function_S1_in_R2 fun(5);
+    Function_S1_in_R2 fun(r);
     std::vector<Point_d> seed_points = {Gudhi::construct_point(k, r, 0)};
-    double level = 1.5;
-    compute_complex(seed_points, level, max_cells, fun);
+    double level = 15;
+    compute_complex(seed_points, level, max_cells, fun, true, "circle_reconstruction");
   }
 }
