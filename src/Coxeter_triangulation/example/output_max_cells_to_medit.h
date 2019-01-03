@@ -28,7 +28,8 @@ void output_max_cells_to_medit(const CellSet& max_cells,
 {
   using Cell_id = typename CellSet::value_type;
   using Point_d = Eigen::VectorXd;
-
+  using Coface_it = Gudhi::Coxeter_triangulation_ds::Coface_iterator;
+  
   if (max_cells.empty())
     return;
   // determine dimension from VP_map
@@ -41,8 +42,8 @@ void output_max_cells_to_medit(const CellSet& max_cells,
   int index = 1;
   std::unordered_map<Cell_id, std::size_t> ci_map;
   for (auto c: max_cells) {
-    Gudhi::Coxeter_triangulation_ds::Coface_iterator cof_it(c, ct, d);
-    Gudhi::Coxeter_triangulation_ds::Coface_iterator cof_end;
+    Coface_it cof_it(c, ct, d);
+    Coface_it cof_end;
     for (; cof_it != cof_end; ++cof_it)
       if (ci_map.emplace(std::make_pair(*cof_it, index)).second) {
 	vertex_points.emplace_back(ct.barycenter(*cof_it));
@@ -59,8 +60,8 @@ void output_max_cells_to_medit(const CellSet& max_cells,
     }
     ofs << "Edges " << max_cells.size() << "\n";
     for (auto e: max_cells) {
-      Gudhi::Coxeter_triangulation_ds::Coface_iterator cof_it(e, ct, d);
-      Gudhi::Coxeter_triangulation_ds::Coface_iterator cof_end;
+      Coface_it cof_it(e, ct, d);
+      Coface_it cof_end;
       for (; cof_it != cof_end; ++cof_it) {
     	ofs << ci_map.at(*cof_it) << " ";
       }
@@ -81,8 +82,8 @@ void output_max_cells_to_medit(const CellSet& max_cells,
       }
       ofs << "Edges " << max_cells.size() << "\n";
       for (auto e: max_cells) {
-	Gudhi::Coxeter_triangulation_ds::Coface_iterator cof_it(e, ct, d);
-	Gudhi::Coxeter_triangulation_ds::Coface_iterator cof_end;
+	Coface_it cof_it(e, ct, d);
+	Coface_it cof_end;
 	for (; cof_it != cof_end; ++cof_it) {
 	  ofs << ci_map.at(*cof_it) << " ";
 	}
@@ -97,8 +98,9 @@ void output_max_cells_to_medit(const CellSet& max_cells,
         barycenter[1] = 0;
         barycenter[2] = 0;
         std::unordered_set<Cell_id> v_cells;
-	Gudhi::Coxeter_triangulation_ds::Coface_iterator cof_it(c, ct, 2);
-	Gudhi::Coxeter_triangulation_ds::Coface_iterator cof_end;
+	Coface_it cof_it(c, ct, 2);
+	Coface_it cof_end;
+	std::size_t num_vertices = 0;
 	for (; cof_it != cof_end; ++cof_it) {
 	  std::size_t num_cof_cells = 0;
 	  for (auto f: ct.face_range(*cof_it, 1)) 
@@ -108,18 +110,19 @@ void output_max_cells_to_medit(const CellSet& max_cells,
 	    mask_val = 517;
 	  edges.emplace(*cof_it);
 	}
-	Gudhi::Coxeter_triangulation_ds::Coface_iterator cof2_it(c, ct, 3);
-	for (; cof2_it != cof_end; ++cof2_it) {
+	Coface_it cof2_it(c, ct, 3);
+	for (; cof2_it != cof_end; ++cof2_it, ++num_vertices) {
           int ci_value = ci_map.at(*cof2_it);
-          barycenter[0] += vertex_points[ci_value-1][0] / v_cells.size();
-          barycenter[1] += vertex_points[ci_value-1][1] / v_cells.size();
-          barycenter[2] += vertex_points[ci_value-1][2] / v_cells.size();
+          barycenter[0] += vertex_points[ci_value-1][0];
+          barycenter[1] += vertex_points[ci_value-1][1];
+          barycenter[2] += vertex_points[ci_value-1][2];
         }
-        vertex_points.push_back(barycenter);
-        Gudhi::Coxeter_triangulation_ds::Coface_iterator cof3_it(c, ct, 2);
+        vertex_points.push_back(barycenter / num_vertices);
+	// std::cout << "num_vertices = " << num_vertices << "\n";
+        Coface_it cof3_it(c, ct, 2);
 	for (; cof3_it != cof_end; ++cof3_it) {
           std::vector<int> triangle(1, vertex_points.size());
-	  Gudhi::Coxeter_triangulation_ds::Coface_iterator cof_it(*cof3_it, ct, 3);
+	  Coface_it cof_it(*cof3_it, ct, 3);
           for (; cof_it != cof_end; ++cof_it)
             triangle.push_back(ci_map.at(*cof_it));
           triangles.push_back(triangle);
@@ -135,8 +138,8 @@ void output_max_cells_to_medit(const CellSet& max_cells,
       }
       ofs << "Edges " << edges.size() << "\n";
       for (auto e: edges) {
-	Gudhi::Coxeter_triangulation_ds::Coface_iterator cof_it(e, ct, d);
-	Gudhi::Coxeter_triangulation_ds::Coface_iterator cof_end;
+	Coface_it cof_it(e, ct, d);
+	Coface_it cof_end;
 	for (; cof_it != cof_end; ++cof_it) {
 	  ofs << ci_map.at(*cof_it) << " ";
 	}

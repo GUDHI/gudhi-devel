@@ -22,6 +22,7 @@
 #include "comb/mixedradix-sod-lex.h"
 #include "comb/setpart-p-rgs-lex.h"
 #include "comb/perm-lex.h"
+#include "comb/perm-heap.h"
 #include "fxtalloca.h"
 
 namespace Gudhi {
@@ -411,6 +412,7 @@ public:
     typedef typename IN_map::iterator IN_map_iterator;
     // typedef std::map<Graph_node, int> NI_map;
     typedef std::vector<std::vector<std::size_t> > Partition;
+    typedef perm_lex Perm; 
     
     void update_value() {
       if (is_end_)
@@ -426,11 +428,11 @@ public:
 	  refined_partition.push_back(std::vector<std::size_t>());
 	if (msl_->data()[n] == 0)
 	  for (std::size_t l = 0; l < nonrefined_partition_[n].size(); ++l)
-	    refined_partition[offset + sprl_vector_[n]->data()[l]].push_back(nonrefined_partition_[n][l]);
+	    refined_partition[offset + setpart_vector_[n]->data()[l]].push_back(nonrefined_partition_[n][l]);
 	else
 	  for (std::size_t l = 0; l < nonrefined_partition_[n].size(); ++l)
-	    refined_partition[offset + pl_vector_[n]->data()[sprl_vector_[n]->data()[l]]].push_back(nonrefined_partition_[n][l]);
-	  // std::cout << "sprl_vector[" << n << "].data()[" << l << "] = " << sprl_vector_[n]->data()[l] << ", nonrefined_partition_[" << n << "][" << l << "] = " << nonrefined_partition_[n][l] << "\n";
+	    refined_partition[offset + perm_vector_[n]->data()[setpart_vector_[n]->data()[l]]].push_back(nonrefined_partition_[n][l]);
+	  // std::cout << "setpart_vector[" << n << "].data()[" << l << "] = " << setpart_vector_[n]->data()[l] << ", nonrefined_partition_[" << n << "][" << l << "] = " << nonrefined_partition_[n][l] << "\n";
 	offset += msl_->data()[n] + 1;
       }
       // std::cout << "refined_partition = " << refined_partition << "\n";
@@ -462,34 +464,38 @@ public:
     void increment() {
       is_end_ = is_itself_;
       while (true) {
-	if (pl_vector_.size() == 0) {
+	if (perm_vector_.size() == 0) {
 	  if (!msl_->next())
 	    is_end_ = true;
 	  break;
 	}
-	std::size_t n = pl_vector_.size()-1;
-	if (!msl_->data()[n] || !pl_vector_[n]->next()) {
-	  delete pl_vector_[n];
-	  pl_vector_.pop_back();
-	  if (!sprl_vector_[n]->next()) {
-	    delete sprl_vector_[n];
-	    sprl_vector_.pop_back();
+	std::size_t n = perm_vector_.size()-1;
+	if (!perm_vector_[n]->next()) {
+	  delete perm_vector_.at(n);
+	  perm_vector_.pop_back();
+	  if (!setpart_vector_[n]->next()) {
+	    delete setpart_vector_.at(n);
+	    setpart_vector_.pop_back();
 	    continue;
 	  }
-	  else
-	    pl_vector_.push_back(new perm_lex(msl_->data()[n]+1));
+	  else {
+	    perm_vector_.push_back(new Perm(msl_->data()[n]+1));
+	    break;
+	  }
 	}
 	else
 	  break;
       }
       if (!is_end_)
-	while (pl_vector_.size() != nonrefined_partition_.size()) {
-	  std::size_t n = pl_vector_.size();
-	  sprl_vector_.push_back(new setpart_p_rgs_lex(nonrefined_partition_[n].size(), msl_->data()[n]+1));
-	  // sprl_vector_.back()->print_sets("    "); std::cout << "\n";
-	  pl_vector_.push_back(new perm_lex(msl_->data()[n]+1));
-	  // pl_vector_.back()->print("    "); std::cout << "\n";
+	while (perm_vector_.size() != nonrefined_partition_.size()) {
+	  std::size_t n = perm_vector_.size();
+	  setpart_vector_.push_back(new setpart_p_rgs_lex(nonrefined_partition_[n].size(), msl_->data()[n]+1));
+	  perm_vector_.push_back(new Perm(msl_->data()[n]+1));
 	}      
+      for (std::size_t i = 0; i < perm_vector_.size(); ++i) {
+	setpart_vector_[i]->print_sets("    "); std::cout << "\n";
+	perm_vector_[i]->print("    "); std::cout << "\n";
+      }
       update_value();
     }
 
@@ -556,15 +562,17 @@ public:
       }
       msl_ = new mixedradix_sod_lex(n, 0, radix);
       msl_->first(value_dim+1-n);
-      // msl_->print_nines("Nines: "); std::cout << "\n";
-      // std::cout << "n = " << n << ", value_dim = " << value_dim << "\n";
-      // msl_->print("  ", true); std::cout << "\n";
-      
+      msl_->print_nines("Nines: "); std::cout << "\n";
+      std::cout << "n = " << n << ", value_dim = " << value_dim << "\n";
+      msl_->print("  ", true); std::cout << "\n";
+
+      setpart_vector_.reserve(n);
+      perm_vector_.reserve(n);
       for (std::size_t i = 0; i < n; ++i) {
-	sprl_vector_.push_back(new setpart_p_rgs_lex(radix[i], msl_->data()[i]+1));
-	// sprl_vector_.back()->print_sets("    "); std::cout << "\n";
-	pl_vector_.push_back(new perm_lex(msl_->data()[i]+1)); 
-	// pl_vector_.back()->print("    "); std::cout << "\n";
+	setpart_vector_.push_back(new setpart_p_rgs_lex(radix[i], msl_->data()[i]+1));
+	setpart_vector_.back()->print_sets("    "); std::cout << "\n";
+	perm_vector_.push_back(new Perm(msl_->data()[i]+1)); 
+	perm_vector_.back()->print("    "); std::cout << "\n";
       }
       update_value();
     }
@@ -575,10 +583,10 @@ public:
 
     ~Coface_iterator() {
       delete msl_;
-      for (setpart_p_rgs_lex* sprl_: sprl_vector_)
-	delete sprl_;
-      for (perm_lex* pl_: pl_vector_)
-	delete pl_;
+      for (setpart_p_rgs_lex* setpart_: setpart_vector_)
+	delete setpart_;
+      for (Perm* perm_: perm_vector_)
+	delete perm_;
     }
     
   protected:
@@ -586,8 +594,8 @@ public:
     Cell_id v_id_;
     Partition nonrefined_partition_;
     mixedradix_sod_lex* msl_;
-    std::vector<setpart_p_rgs_lex*> sprl_vector_;
-    std::vector<perm_lex*> pl_vector_;
+    std::vector<setpart_p_rgs_lex*> setpart_vector_;
+    std::vector<Perm*> perm_vector_;
     bool is_end_;
     bool is_itself_;
   };

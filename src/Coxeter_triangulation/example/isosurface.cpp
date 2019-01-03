@@ -52,7 +52,7 @@ bool intersects(const Cell_id& c,
       return false;
   return true;
 }
-
+ 
 template <class Point_range,
 	  class Function>
 void compute_complex(const Point_range& seed_points,
@@ -74,7 +74,7 @@ void compute_complex(const Point_range& seed_points,
 	queue.emplace(f);
   }
 
-  std::size_t snapshot_num = 0;
+  // std::size_t snapshot_num = 0;
   while (!queue.empty()) {
     Cell_id s = queue.front();
     queue.pop();
@@ -117,7 +117,7 @@ int main(int argc, char * const argv[]) {
     double r = 5;
     Function_S2_in_R3 fun(r);
     std::vector<Point_d> seed_points = {Gudhi::construct_point(k, r+fun.off_[0], fun.off_[1], fun.off_[2])};
-    double level = 15.13;
+    double level = 1.513;
     compute_complex(seed_points, level, max_cells, fun, true, "sphere_reconstruction");
     break;
   }

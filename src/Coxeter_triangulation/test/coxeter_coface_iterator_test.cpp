@@ -23,45 +23,67 @@ int main() {
   // c.push_back(2, true);
   // c.push_back(1, false);
   // c.push_back(2, false);
-  c.push_back(0, true);
-  c.push_back(0, true);  
-  c.push_back(0, true);
-  c.push_back(0, false);
-  c.push_back(0, false);
-  c.push_back(0, false);
-  std::cout << "c = " << c << "\n";
-  // Gudhi::Cell_id v = *Gudhi::Coxeter_triangulation_ds::Vertex_iterator(c, ct_ds_2);
-  // for (auto cf: ct_ds_2.coface_range(c, 3)) {}
-  auto cof_it = Gudhi::Coxeter_triangulation_ds::Coface_iterator(c, ct_ds_2, 3);
-  auto cof_end = Gudhi::Coxeter_triangulation_ds::Coface_iterator();
-  for (; cof_it != cof_end; ++cof_it)
-    std::cout << *cof_it << "\n";
+
+  // {
+  // // [*,*,*, , , ]
+  // c.push_back(0, true);
+  // c.push_back(0, true);  
+  // c.push_back(0, true);
+  // c.push_back(0, false);
+  // c.push_back(0, false);
+  // c.push_back(0, false);
+  // std::cout << "c = " << c << "\n";
+  // // Gudhi::Cell_id v = *Gudhi::Coxeter_triangulation_ds::Vertex_iterator(c, ct_ds_2);
+  // // for (auto cf: ct_ds_2.coface_range(c, 3)) {}
+  // auto cof_it = Gudhi::Coxeter_triangulation_ds::Coface_iterator(c, ct_ds_2, 2);
+  // auto cof_end = Gudhi::Coxeter_triangulation_ds::Coface_iterator();
+  // for (; cof_it != cof_end; ++cof_it)
+  //   std::cout << *cof_it << "\n";
+  // }
+
+  {
+    // [*, , ,*, , ]
+    c.resize(0);
+    c.push_back(0, true);
+    c.push_back(0, false); 
+    c.push_back(0, false);
+    c.push_back(0, true); 
+    c.push_back(0, false);
+    c.push_back(0, false);
+    std::cout << "c = " << c << "\n";
+    // Gudhi::Cell_id v = *Gudhi::Coxeter_triangulation_ds::Vertex_iterator(c, ct_ds_2);
+    // for (auto cf: ct_ds_2.coface_range(c, 3)) {}
+    auto cof_it = Gudhi::Coxeter_triangulation_ds::Coface_iterator(c, ct_ds_2, 2);
+    auto cof_end = Gudhi::Coxeter_triangulation_ds::Coface_iterator();
+    for (; cof_it != cof_end; ++cof_it)
+      std::cout << *cof_it << "\n";
+  }
   
   // Generate 500 random points in a box, point locate them, compute vertices and check is_face
-  using Kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
-  using Point_d = Kernel::Point_d;
+  // using Kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
+  // using Point_d = Kernel::Point_d;
 
-  std::size_t d = 8, n = 10;
-  Gudhi::Coxeter_triangulation_ds ct_ds_d(d);
-  std::vector<Point_d > points = Gudhi::generate_points_in_cube_d<Kernel>(n, d, 500.0);
-  for (std::vector<double> p: points) {
-    Gudhi::Cell_id c = ct_ds_d.locate_point(p, 1);
-    // cell == point located barycenter
-    for (std::size_t h1 = 0; h1 <= c.dimension(); ++h1)
-      for (auto f: ct_ds_2.face_range(c, h1))
-	for (std::size_t h = h1; h <= d; ++h) {
-	  auto cof_it = Gudhi::Coxeter_triangulation_ds::Coface_iterator(f, ct_ds_2, h);
-	  auto cof_end = Gudhi::Coxeter_triangulation_ds::Coface_iterator();
-	  for (; cof_it != cof_end; ++cof_it) {
-	    // f is a face of c
-	    if (!Gudhi::Cell_id::is_face(f, *cof_it)) {
-	      std::cerr << "Error: coface = " << *cof_it << ", f = " << f << ".\n";
-	      return 1;
-	    }
-	  }
-	}
-  }
-  std::cout << "Success!\n";
+  // std::size_t d = 8, n = 10;
+  // Gudhi::Coxeter_triangulation_ds ct_ds_d(d);
+  // std::vector<Point_d > points = Gudhi::generate_points_in_cube_d<Kernel>(n, d, 500.0);
+  // for (std::vector<double> p: points) {
+  //   Gudhi::Cell_id c = ct_ds_d.locate_point(p, 1);
+  //   // cell == point located barycenter
+  //   for (std::size_t h1 = 0; h1 <= c.dimension(); ++h1)
+  //     for (auto f: ct_ds_2.face_range(c, h1))
+  // 	for (std::size_t h = h1; h <= d; ++h) {
+  // 	  auto cof_it = Gudhi::Coxeter_triangulation_ds::Coface_iterator(f, ct_ds_2, h);
+  // 	  auto cof_end = Gudhi::Coxeter_triangulation_ds::Coface_iterator();
+  // 	  for (; cof_it != cof_end; ++cof_it) {
+  // 	    // f is a face of c
+  // 	    if (!Gudhi::Cell_id::is_face(f, *cof_it)) {
+  // 	      std::cerr << "Error: coface = " << *cof_it << ", f = " << f << ".\n";
+  // 	      return 1;
+  // 	    }
+  // 	  }
+  // 	}
+  // }
+  // std::cout << "Success!\n";
   return 0;
 }
 
