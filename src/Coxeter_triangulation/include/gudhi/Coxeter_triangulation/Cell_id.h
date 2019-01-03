@@ -252,6 +252,19 @@ namespace std {
   }
 }
 
+namespace std {
+  template<>
+  struct hash<Gudhi::Cell_id> {
+    typedef Gudhi::Cell_id argument_type;
+    typedef std::size_t result_type;
+    result_type operator()(const argument_type& c) const noexcept {
+      return c.value(0);
+    }
+  };
+}
+
+
+
 /** \brief Inserts a tuple of cell coordinates to a stream.
  *  \details The output format of the cell coordinates is the integer values in the order between square brackets, followed by underscore and the dimension. The coordinates with true boolean values are highlighted in bold red. 
  */

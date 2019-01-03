@@ -19,23 +19,13 @@
 #include <Eigen/SVD>
 
 #include "functions/sphere_S1_in_R2.h"
+#include "functions/sphere_S2_in_R3.h"
 
 using Cell_id = Gudhi::Cell_id;
 // using Point_d = Eigen::VectorXd;
 using Kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
 using Point_d = Kernel::Point_d;
 using CT = Gudhi::Coxeter_triangulation_ds;
-
-namespace std {
-  template<>
-  struct hash<Cell_id> {
-    typedef Cell_id argument_type;
-    typedef std::size_t result_type;
-    result_type operator()(const argument_type& c) const noexcept {
-      return c.value(0);
-    }
-  };
-}
 
 template <class Function>
 bool intersects(const Cell_id& c,
@@ -110,13 +100,26 @@ void compute_complex(const Point_range& seed_points,
 int main(int argc, char * const argv[]) {
   Kernel k;
   std::unordered_set<Cell_id> max_cells; 
-  
+  std::size_t exp_number = 1;
+
+  switch (exp_number) {
   // Circle
-  {
+  case 0: {
     double r = 5;
     Function_S1_in_R2 fun(r);
-    std::vector<Point_d> seed_points = {Gudhi::construct_point(k, r, 0)};
+    std::vector<Point_d> seed_points = {Gudhi::construct_point(k, r+fun.off_[0], fun.off_[1])};
     double level = 15;
     compute_complex(seed_points, level, max_cells, fun, true, "circle_reconstruction");
+    break;
+  }  
+  // Sphere
+  case 1: {
+    double r = 5;
+    Function_S2_in_R3 fun(r);
+    std::vector<Point_d> seed_points = {Gudhi::construct_point(k, r+fun.off_[0], fun.off_[1], fun.off_[2])};
+    double level = 15.13;
+    compute_complex(seed_points, level, max_cells, fun, true, "sphere_reconstruction");
+    break;
+  }
   }
 }
