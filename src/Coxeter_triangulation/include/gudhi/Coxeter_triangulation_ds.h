@@ -10,8 +10,6 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
-#include <boost/pending/disjoint_sets.hpp>
-#include <boost/property_map/property_map.hpp>
 
 #include <Eigen/Eigenvalues>
 #include <Eigen/Sparse>
@@ -123,7 +121,7 @@ public:
   //////////////////////////////////////////////////////////////////////////////////////////////////
   
   template <class Point_d>
-  Cell_id locate_point(const Point_d& point, double level=1) {
+  Cell_id locate_point(const Point_d& point, double level=1) const {
     unsigned short d = point.size();
     assert(d == dimension_);
     double error = 1e-9;
@@ -403,15 +401,15 @@ public:
     friend class boost::iterator_core_access;
     typedef typename boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> Graph;
     typedef boost::graph_traits<Graph>::vertex_descriptor Graph_node;
-    typedef boost::graph_traits<Graph>::edge_descriptor Graph_edge;
-    typedef boost::graph_traits<Graph>::adjacency_iterator Adj_it;
-    typedef std::pair<Adj_it, Adj_it> Out_edge_it;
-    typedef std::vector<std::size_t> Rank;
-    typedef std::vector<std::size_t> Parent;
-    typedef boost::disjoint_sets<std::size_t*, std::size_t*> Disjoint_sets;
+    // typedef boost::graph_traits<Graph>::edge_descriptor Graph_edge;
+    // typedef boost::graph_traits<Graph>::adjacency_iterator Adj_it;
+    // typedef std::pair<Adj_it, Adj_it> Out_edge_it;
+    // typedef std::vector<std::size_t> Rank;
+    // typedef std::vector<std::size_t> Parent;
+    // typedef boost::disjoint_sets<std::size_t*, std::size_t*> Disjoint_sets;
     typedef std::map<int, Graph_node> IN_map;
     typedef typename IN_map::iterator IN_map_iterator;
-    typedef std::map<Graph_node, int> NI_map;
+    // typedef std::map<Graph_node, int> NI_map;
     typedef std::vector<std::vector<std::size_t> > Partition;
     
     void update_value() {
@@ -498,13 +496,11 @@ public:
     Partition nonrefined_partition(const Cell_id& c_id, const Cell_id& v_id) {
       Graph graph;
       IN_map in_map;
-      NI_map ni_map;
       std::size_t k = 0;
       
       for (std::size_t j = 0; k < c_id.size(); ++j) {
       	Graph_node node = boost::add_vertex(graph);
       	in_map.emplace(std::make_pair(j, node));
-      	ni_map.emplace(std::make_pair(node, j));
       	for (std::size_t i = j-1; i < j; --i, ++k)
       	  if (!c_id.mask(k)) {
       	    if (c_id.value(k) == v_id.value(k))
