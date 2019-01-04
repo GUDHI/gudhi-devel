@@ -492,10 +492,10 @@ public:
 	  setpart_vector_.push_back(new setpart_p_rgs_lex(nonrefined_partition_[n].size(), msl_->data()[n]+1));
 	  perm_vector_.push_back(new Perm(msl_->data()[n]+1));
 	}      
-      for (std::size_t i = 0; i < perm_vector_.size(); ++i) {
-	setpart_vector_[i]->print_sets("    "); std::cout << "\n";
-	perm_vector_[i]->print("    "); std::cout << "\n";
-      }
+      // for (std::size_t i = 0; i < perm_vector_.size(); ++i) {
+      // 	setpart_vector_[i]->print_sets("    "); std::cout << "\n";
+      // 	perm_vector_[i]->print("    "); std::cout << "\n";
+      // }
       update_value();
     }
 
@@ -562,17 +562,17 @@ public:
       }
       msl_ = new mixedradix_sod_lex(n, 0, radix);
       msl_->first(value_dim+1-n);
-      msl_->print_nines("Nines: "); std::cout << "\n";
-      std::cout << "n = " << n << ", value_dim = " << value_dim << "\n";
-      msl_->print("  ", true); std::cout << "\n";
+      // msl_->print_nines("Nines: "); std::cout << "\n";
+      // std::cout << "n = " << n << ", value_dim = " << value_dim << "\n";
+      // msl_->print("  ", true); std::cout << "\n";
 
       setpart_vector_.reserve(n);
       perm_vector_.reserve(n);
       for (std::size_t i = 0; i < n; ++i) {
 	setpart_vector_.push_back(new setpart_p_rgs_lex(radix[i], msl_->data()[i]+1));
-	setpart_vector_.back()->print_sets("    "); std::cout << "\n";
+	// setpart_vector_.back()->print_sets("    "); std::cout << "\n";
 	perm_vector_.push_back(new Perm(msl_->data()[i]+1)); 
-	perm_vector_.back()->print("    "); std::cout << "\n";
+	// perm_vector_.back()->print("    "); std::cout << "\n";
       }
       update_value();
     }

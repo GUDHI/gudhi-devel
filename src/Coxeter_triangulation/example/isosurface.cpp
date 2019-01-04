@@ -20,6 +20,7 @@
 
 #include "functions/sphere_S1_in_R2.h"
 #include "functions/sphere_S2_in_R3.h"
+#include "functions/chair_in_R3.h"
 
 using Cell_id = Gudhi::Cell_id;
 // using Point_d = Eigen::VectorXd;
@@ -100,7 +101,7 @@ void compute_complex(const Point_range& seed_points,
 int main(int argc, char * const argv[]) {
   Kernel k;
   std::unordered_set<Cell_id> max_cells; 
-  std::size_t exp_number = 1;
+  std::size_t exp_number = 2;
 
   switch (exp_number) {
   // Circle
@@ -118,6 +119,16 @@ int main(int argc, char * const argv[]) {
     Function_S2_in_R3 fun(r);
     std::vector<Point_d> seed_points = {Gudhi::construct_point(k, r+fun.off_[0], fun.off_[1], fun.off_[2])};
     double level = 1.513;
+    compute_complex(seed_points, level, max_cells, fun, true, "sphere_reconstruction");
+    break;
+  }
+  // Chair
+  case 2: {
+    Function_chair_in_R3 fun;
+    Eigen::VectorXd seed = fun.seed();
+    std::vector<Point_d> seed_points {Gudhi::construct_point(k, seed(0), seed(1), seed(2))};
+    std::cout << "fun(fun.seed()) = " << fun(fun.seed()) << "\n";
+    double level = 19.13;
     compute_complex(seed_points, level, max_cells, fun, true, "sphere_reconstruction");
     break;
   }
