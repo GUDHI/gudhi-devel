@@ -11,8 +11,10 @@
 #include <gudhi_patches/CGAL/Epick_d.h>
 #include <gudhi/random_point_generators.h> // construct_point
 #include <gudhi/Coxeter_triangulation_ds.h>
-// #include <gudhi/Hasse_diagram_persistence.h>
+#include <gudhi/Hasse_diagram_persistence.h>
 #include "output_max_cells_to_medit.h"
+#include "output_allgowerschmidt.h"
+#include "output_transition_graph_to_medit.h"
 
 #include <Eigen/Eigenvalues>
 #include <Eigen/Sparse>
@@ -27,6 +29,7 @@ using Cell_id = Gudhi::Cell_id;
 using Kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
 using Point_d = Kernel::Point_d;
 using CT = Gudhi::Coxeter_triangulation_ds;
+
 
 template <class Function>
 bool intersects(const Cell_id& c,
@@ -66,12 +69,13 @@ void compute_complex(const Point_range& seed_points,
   std::size_t cod_d = fun.cod_d();
   CT ct(amb_d);
   std::unordered_set<Cell_id> facet_cells;
+  std::unordered_map<Cell_id, std::size_t> order_map;
     
   std::queue<Cell_id> queue;
   for (const Point_d& p: seed_points) {
     Cell_id c = ct.locate_point(p, level);
     for (auto f: ct.face_range(c, cod_d))
-      if (intersects(f, fun, ct) && max_cells.emplace(f).second)
+      if (intersects(f, fun, ct) && max_cells.emplace(f).second && order_map.emplace(std::make_pair(f, order_map.size())).second)
 	queue.emplace(f);
   }
 
@@ -86,15 +90,24 @@ void compute_complex(const Point_range& seed_points,
     for (; cof_it != cof_end; ++cof_it)
       if (facet_cells.emplace(*cof_it).second)
 	for (auto f: ct.face_range(*cof_it, cod_d))
-	  if (intersects(f, fun, ct) && max_cells.emplace(f).second)
+	  if (intersects(f, fun, ct) && max_cells.emplace(f).second && order_map.emplace(std::make_pair(f, order_map.size())).second)
 	    queue.emplace(f);
     // std::cout << "queue.size() = " << queue.size() << "\n";
     // output_max_cells_to_medit(max_cells, ct, file_name_prefix + std::to_string(snapshot_num++));
   }
   std::cout << "#max_cells = " << max_cells.size() << "\n";
   std::cout << "#facet_cells = " << facet_cells.size() << "\n";
+
+  std::unordered_set<Cell_id> half_set;
+  // for (auto c: max_cells)
+  //   if (c.value(0) == 0)
+  //     half_set.emplace(c);
+  // output_max_cells_to_medit(half_set, ct, order_map, file_name_prefix);
+  // output_transition_graph_to_medit(half_set, ct, file_name_prefix + "_tg");
   if (output_to_medit)
-    output_max_cells_to_medit(max_cells, ct, file_name_prefix);
+    output_max_cells_to_medit(max_cells, ct, order_map, file_name_prefix);
+  output_allgowerschmidt_to_medit(max_cells, ct, order_map, file_name_prefix + "_as");
+  output_transition_graph_to_medit(max_cells, ct, file_name_prefix + "_tg");
 }
   
 
@@ -110,6 +123,8 @@ int main(int argc, char * const argv[]) {
     Function_S1_in_R2 fun(r);
     std::vector<Point_d> seed_points = {Gudhi::construct_point(k, r+fun.off_[0], fun.off_[1])};
     double level = 15;
+    if (argc > 1)
+      level = std::atof(argv[1]);
     compute_complex(seed_points, level, max_cells, fun, true, "circle_reconstruction");
     break;
   }  
@@ -119,6 +134,8 @@ int main(int argc, char * const argv[]) {
     Function_S2_in_R3 fun(r);
     std::vector<Point_d> seed_points = {Gudhi::construct_point(k, r+fun.off_[0], fun.off_[1], fun.off_[2])};
     double level = 1.513;
+    if (argc > 1)
+      level = std::atof(argv[1]);
     compute_complex(seed_points, level, max_cells, fun, true, "sphere_reconstruction");
     break;
   }
@@ -128,8 +145,10 @@ int main(int argc, char * const argv[]) {
     Eigen::VectorXd seed = fun.seed();
     std::vector<Point_d> seed_points {Gudhi::construct_point(k, seed(0), seed(1), seed(2))};
     std::cout << "fun(fun.seed()) = " << fun(fun.seed()) << "\n";
-    double level = 19.13;
-    compute_complex(seed_points, level, max_cells, fun, true, "sphere_reconstruction");
+    double level = 35.13;
+    if (argc > 1)
+      level = std::atof(argv[1]);
+    compute_complex(seed_points, level, max_cells, fun, true, "chair_reconstruction");
     break;
   }
   }

@@ -9,156 +9,52 @@
 #include <CGAL/point_generators_d.h>
 #include <CGAL/Delaunay_triangulation.h>
 
-template <class Point>
-void perturb_vertex(Point& vertex, double rad) {
-  int d = vertex.size();
-  typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> Kernel;
-  typedef typename Kernel::Point_d Point_d;
-  CGAL::Random_points_on_sphere_d<Point_d> rp(d+1, rad);
-  for (int i = 0; i < d; ++i)
-    vertex[i] += (*rp)[i];
+#include "output_hasse_to_medit.h"
+
+Hasse_cell* insert_hasse_subdiagram(const Cell_id& c_id,
+				    Hasse_diagram& hd,
+				    VP_map& vp_map,
+				    VC_map& dictionary,
+				    const Gudhi::Coxeter_triangulation_ds& ct) {
+  auto res_pair = dictionary.emplace(std::make_pair(c_id, new Hasse_cell((int)(ct.dimension() - c_id.dimension()), 0.0)));
+  if (res_pair.second) {
+    Hasse_cell* new_cell = res_pair.first->second;
+    if (new_cell->get_dimension() == 0)
+      vp_map.emplace(std::make_pair(new_cell, ct.barycenter(c_id)));
+    hd.emplace(new_cell);
+    Hasse_boundary& boundary = new_cell->get_boundary();
+    Coface_it cof_it(c_id, ct, c_id.dimension() + 1);
+    Coface_it cof_end;
+    for (; cof_it != cof_end; ++cof_it) {
+      Hasse_cell* facet_cell = insert_hasse_subdiagram(*cof_it, hd, vp_map, dictionary, ct);
+      if (facet_cell != 0)
+	if (std::find(boundary.begin(), boundary.end(), std::make_pair(facet_cell, 1)) == boundary.end())
+	  boundary.push_back(std::make_pair(facet_cell, 1));
+    }
+  }
+  return res_pair.first->second;
 }
 
 
 template <class CellSet,
-	  class Coxeter_triangulation_ds>
+	  class Coxeter_triangulation_ds,
+	  class OrderMap>
 void output_max_cells_to_medit(const CellSet& max_cells,
-			       const Coxeter_triangulation_ds& ct, 
+			       const Coxeter_triangulation_ds& ct,
+			       const OrderMap& order_map,
 			       std::string file_name = "reconstruction")
 {
-  using Cell_id = typename CellSet::value_type;
-  using Point_d = Eigen::VectorXd;
-  using Coface_it = Gudhi::Coxeter_triangulation_ds::Coface_iterator;
   
-  if (max_cells.empty())
-    return;
-  // determine dimension from VP_map
-  unsigned d = ct.dimension();
-
-  std::ofstream ofs (file_name + ".mesh", std::ofstream::out);
-  std::ofstream ofs_bb (file_name + ".bb", std::ofstream::out);
-
-  std::vector<Point_d> vertex_points;
-  int index = 1;
-  std::unordered_map<Cell_id, std::size_t> ci_map;
+  // Compute the Hasse diagram
+  Hasse_diagram hd;
+  VC_map dictionary;
+  VP_map vp_map;
   for (auto c: max_cells) {
-    Coface_it cof_it(c, ct, d);
-    Coface_it cof_end;
-    for (; cof_it != cof_end; ++cof_it)
-      if (ci_map.emplace(std::make_pair(*cof_it, index)).second) {
-	vertex_points.emplace_back(ct.barycenter(*cof_it));
-	perturb_vertex(vertex_points.back(), 0.00001);
-	index++;
-      }    
-  }
-  if (d == 2) {
-    ofs << "MeshVersionFormatted 1\nDimension 2\n";
-    ofs_bb << "2 1 ";
-    ofs << "Vertices\n" << vertex_points.size() << "\n";
-    for (auto p: vertex_points) {
-      ofs << p[0] << " " << p[1] << " 215\n";
-    }
-    ofs << "Edges " << max_cells.size() << "\n";
-    for (auto e: max_cells) {
-      Coface_it cof_it(e, ct, d);
-      Coface_it cof_end;
-      for (; cof_it != cof_end; ++cof_it) {
-    	ofs << ci_map.at(*cof_it) << " ";
-      }
-      ofs << "515" << std::endl;
-    }
-  } // d == 3
-  else {
-    std::unordered_set<Cell_id> edges;
-    std::vector<std::vector<int> > triangles;
-    std::vector<double> filtrations;
-    std::vector<std::size_t> mask;
-    if (max_cells.begin()->dimension() == 2) {
-      ofs << "MeshVersionFormatted 1\nDimension 3\n";
-      ofs_bb << "3 1 ";
-      ofs << "Vertices\n" << vertex_points.size() << "\n";
-      for (auto p: vertex_points) {
-	ofs << p[0] << " " << p[1] << " 215\n";
-      }
-      ofs << "Edges " << max_cells.size() << "\n";
-      for (auto e: max_cells) {
-	Coface_it cof_it(e, ct, d);
-	Coface_it cof_end;
-	for (; cof_it != cof_end; ++cof_it) {
-	  ofs << ci_map.at(*cof_it) << " ";
-	}
-	ofs << "515" << std::endl;
-      }
-    }
-    else { // max_cells.begin()->dimension() == 1
-      for (auto c: max_cells) {
-	std::size_t mask_val = 515;
-        Point_d barycenter(3);
-        barycenter[0] = 0;
-        barycenter[1] = 0;
-        barycenter[2] = 0;
-        std::unordered_set<Cell_id> v_cells;
-	Coface_it cof_it(c, ct, 2);
-	Coface_it cof_end;
-	std::size_t num_vertices = 0;
-	for (; cof_it != cof_end; ++cof_it) {
-	  std::size_t num_cof_cells = 0;
-	  for (auto f: ct.face_range(*cof_it, 1)) 
-	    if (max_cells.find(f) != max_cells.end())
-	      num_cof_cells++;
-	  if (num_cof_cells > 2)
-	    mask_val = 517;
-	  edges.emplace(*cof_it);
-	}
-	Coface_it cof2_it(c, ct, 3);
-	for (; cof2_it != cof_end; ++cof2_it, ++num_vertices) {
-          int ci_value = ci_map.at(*cof2_it);
-          barycenter[0] += vertex_points[ci_value-1][0];
-          barycenter[1] += vertex_points[ci_value-1][1];
-          barycenter[2] += vertex_points[ci_value-1][2];
-        }
-        vertex_points.push_back(barycenter / num_vertices);
-	// std::cout << "num_vertices = " << num_vertices << "\n";
-        Coface_it cof3_it(c, ct, 2);
-	for (; cof3_it != cof_end; ++cof3_it) {
-          std::vector<int> triangle(1, vertex_points.size());
-	  Coface_it cof_it(*cof3_it, ct, 3);
-          for (; cof_it != cof_end; ++cof_it)
-            triangle.push_back(ci_map.at(*cof_it));
-          triangles.push_back(triangle);
-          filtrations.push_back(0);
-          mask.push_back(mask_val);
-        }
-      }
-      ofs << "MeshVersionFormatted 1\nDimension 3\n";
-      ofs_bb << "3 1 ";
-      ofs << "Vertices\n" << vertex_points.size() << "\n";
-      for (auto p: vertex_points) {
-        ofs << p[0] << " " << p[1] << " " << p[2] << " 215\n";
-      }
-      ofs << "Edges " << edges.size() << "\n";
-      for (auto e: edges) {
-	Coface_it cof_it(e, ct, d);
-	Coface_it cof_end;
-	for (; cof_it != cof_end; ++cof_it) {
-	  ofs << ci_map.at(*cof_it) << " ";
-	}
-	ofs << "515" << std::endl;
-      }
-      ofs << "Triangles " << triangles.size() << "\n";
-      ofs_bb << triangles.size() << " 1\n";
-      auto m_it = mask.begin();
-      auto f_it = filtrations.begin();
-      for (auto s: triangles) {
-        for (auto v: s)
-	  ofs << v << " ";
-        ofs << *m_it++ << std::endl;
-        ofs_bb << *f_it++ << "\n";
-      }
-    }
-  }
-  ofs.close();
-  ofs_bb.close();
+    insert_hasse_subdiagram(c, hd, vp_map, dictionary, ct);
+  }  
+  output_hasse_to_medit(hd, vp_map, file_name);
+  hd.clear();
+  
 }
 
 
