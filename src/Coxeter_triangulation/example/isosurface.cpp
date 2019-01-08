@@ -105,8 +105,8 @@ void compute_complex(const Point_range& seed_points,
   // output_max_cells_to_medit(half_set, ct, order_map, file_name_prefix);
   // output_transition_graph_to_medit(half_set, ct, file_name_prefix + "_tg");
   if (output_to_medit)
-    output_max_cells_to_medit(max_cells, ct, order_map, file_name_prefix);
-  output_allgowerschmidt_to_medit(max_cells, ct, order_map, file_name_prefix + "_as");
+    output_max_cells_to_medit(max_cells, ct, order_map, cod_d, file_name_prefix);
+  // output_allgowerschmidt_to_medit(max_cells, ct, order_map, file_name_prefix + "_as");
   output_transition_graph_to_medit(max_cells, ct, file_name_prefix + "_tg");
 }
   
@@ -148,6 +148,7 @@ int main(int argc, char * const argv[]) {
     double level = 35.13;
     if (argc > 1)
       level = std::atof(argv[1]);
+    std::cout << "level = " << level << "\n";
     compute_complex(seed_points, level, max_cells, fun, true, "chair_reconstruction");
     break;
   }

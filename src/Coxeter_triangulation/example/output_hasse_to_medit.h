@@ -15,6 +15,7 @@
 using Cell_id = Gudhi::Cell_id;
 using Point_d_eigen = Eigen::VectorXd;
 using Coface_it = Gudhi::Coxeter_triangulation_ds::Coface_iterator;
+using Face_it = Gudhi::Coxeter_triangulation_ds::Face_iterator;
 
 using Hasse_cell = Gudhi::Hasse_diagram::Hasse_diagram_cell<int, double, double>;
 using Hasse_boundary = std::vector<std::pair<Hasse_cell*, int> >;
@@ -97,7 +98,7 @@ void output_hasse_to_medit(const HasseDiagram& hasse_diagram,
     ci_map.emplace(vp_pair.first, index++);
     vertex_points.push_back(vp_pair.second);
     perturb_vertex(vertex_points.back(), 0.00001);
-    std::cout << "Inserted vertex " << vp_pair.first << ", index = " << ci_map.at(vp_pair.first) << "\n";
+    // std::cout << "Inserted vertex " << vp_pair.first << ", index = " << ci_map.at(vp_pair.first) << "\n";
   }
   for (auto s: hasse_diagram)
     if (s->get_dimension() == 1)
@@ -119,7 +120,7 @@ void output_hasse_to_medit(const HasseDiagram& hasse_diagram,
       // perturb_vertex(vertex_points.back(), 0.00001);
       std::size_t e_index = ci_map.size()+1;
       ci_map.emplace(std::make_pair(e, e_index));
-      std::cout << "Inserted edge " << e << ", index = " << ci_map.at(e) << "\n";
+      // std::cout << "Inserted edge " << e << ", index = " << ci_map.at(e) << "\n";
     }
   for (auto h: polygons) {
     std::set<Hasse_cell_ptr> v_cells;
@@ -137,7 +138,7 @@ void output_hasse_to_medit(const HasseDiagram& hasse_diagram,
     // perturb_vertex(vertex_points.back(), 0.00001);
     std::size_t h_index = ci_map.size()+1;
     ci_map.emplace(std::make_pair(h, h_index));
-    std::cout << "Inserted polygon " << h << ", index = " << ci_map.at(h) << "\n";
+    // std::cout << "Inserted polygon " << h << ", index = " << ci_map.at(h) << "\n";
     for (auto e_pair: h->get_boundary()) {
       if (barycentric) {	  
 	for (auto v_pair: e_pair.first->get_boundary()) {
