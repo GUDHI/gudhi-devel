@@ -553,6 +553,11 @@ public:
 	msl_ = new mixedradix_sod_lex(1, 0);
 	return;
       }
+      if (value_dim < c_id.dimension() || value_dim > scs.dimension()) {
+	msl_ = new mixedradix_sod_lex(1, 0);
+	is_end_ = true;
+	return;
+      }
       // std::size_t d = scs.dimension();
       std::size_t n = nonrefined_partition_.size();
       ALLOCA(std::size_t, radix, n); // as in 'radix' in the mixed radix

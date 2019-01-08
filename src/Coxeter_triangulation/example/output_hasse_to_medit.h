@@ -71,7 +71,8 @@ void perturb_vertex(Point& vertex, double rad) {
 template <class VPMap,
 	  class HasseDiagram>
 void output_hasse_to_medit(const HasseDiagram& hasse_diagram,
-			   const VPMap& vp_map, 
+			   const VPMap& vp_map,
+			   bool barycentric,
 			   std::string file_name = "hasse_diagram_output")
 {
   using Hasse_cell_ptr = typename VPMap::key_type;
@@ -85,54 +86,106 @@ void output_hasse_to_medit(const HasseDiagram& hasse_diagram,
   std::ofstream ofs (file_name + ".mesh", std::ofstream::out);
   std::ofstream ofs_bb (file_name + ".bb", std::ofstream::out);
 
+  std::vector<Hasse_cell_ptr> edges, polygons, polytopes;
+  std::vector<std::vector<std::size_t> > triangles, tetrahedra; 
+  std::vector<double> filtrations;
+  std::vector<std::size_t> mask;
   std::vector<Point_t> vertex_points;
-  std::map<Hasse_cell_ptr, int> ci_map;
+  std::map<Hasse_cell_ptr, std::size_t> ci_map;
   int index = 1;
   for (auto vp_pair: vp_map) {
     ci_map.emplace(vp_pair.first, index++);
     vertex_points.push_back(vp_pair.second);
     perturb_vertex(vertex_points.back(), 0.00001);
+    std::cout << "Inserted vertex " << vp_pair.first << ", index = " << ci_map.at(vp_pair.first) << "\n";
   }
-  if (d == 2) {
-    std::vector<Hasse_cell_ptr> edges, polygons;
-    std::vector<std::vector<int> > triangles;
-    std::vector<double> filtrations;
-    for (auto s: hasse_diagram)
-      if (s->get_dimension() == 1)
-	edges.push_back(s);
-      else if (s->get_dimension() == 2)
-	polygons.push_back(s);
-    typedef CGAL::Epick_d<CGAL::Dimension_tag<2> > Kernel;
-    typedef typename Kernel::Point_d Point_2;
-    typedef CGAL::Delaunay_triangulation<Kernel> Delaunay_triangulation;
-    for (auto h: polygons) {
-      // constrain the outer edges, which are found by the convex hull
-      std::vector<Point_2> vertices;
-      std::vector<int> v_indices;
-      std::set<Hasse_cell_ptr> v_cells;
-      for (auto e_pair: h->get_boundary())
-	for (auto v_pair: e_pair.first->get_boundary())
-	  v_cells.emplace(v_pair.first);
-      for (auto vc: v_cells) {
-	v_indices.push_back(ci_map.at(vc));
-	Point_t& b = vertex_points[v_indices.back()-1];
-	vertices.push_back(Point_2(b[0], b[1]));
+  for (auto s: hasse_diagram)
+    if (s->get_dimension() == 1)
+      edges.push_back(s);
+    else if (s->get_dimension() == 2)
+      polygons.push_back(s);
+    else if (s->get_dimension() == 3)
+      polytopes.push_back(s);
+
+  if (barycentric)
+    for (auto e: edges) {
+      Point_t edge_barycenter(d);
+      for (std::size_t i = 0; i < d; ++i)
+	edge_barycenter(i) = 0;
+      for (auto v_pair: e->get_boundary())
+	for (std::size_t i = 0; i < d; ++i)
+	  edge_barycenter(i) += vp_map.at(v_pair.first)(i);
+      vertex_points.emplace_back(edge_barycenter / 2);
+      // perturb_vertex(vertex_points.back(), 0.00001);
+      std::size_t e_index = ci_map.size()+1;
+      ci_map.emplace(std::make_pair(e, e_index));
+      std::cout << "Inserted edge " << e << ", index = " << ci_map.at(e) << "\n";
+    }
+  for (auto h: polygons) {
+    std::set<Hasse_cell_ptr> v_cells;
+    for (auto e_pair: h->get_boundary())
+      for (auto v_pair: e_pair.first->get_boundary())
+	v_cells.emplace(v_pair.first);
+    Point_t barycenter(d);
+    for (std::size_t i = 0; i < d; ++i)
+      barycenter(i) = 0;
+    for (auto vc: v_cells) {
+      for (std::size_t i = 0; i < d; ++i)
+	barycenter(i) += vp_map.at(vc)(i);
+    }
+    vertex_points.emplace_back(barycenter / v_cells.size());
+    // perturb_vertex(vertex_points.back(), 0.00001);
+    std::size_t h_index = ci_map.size()+1;
+    ci_map.emplace(std::make_pair(h, h_index));
+    std::cout << "Inserted polygon " << h << ", index = " << ci_map.at(h) << "\n";
+    for (auto e_pair: h->get_boundary()) {
+      if (barycentric) {	  
+	for (auto v_pair: e_pair.first->get_boundary()) {
+	  triangles.push_back(std::vector<std::size_t>({h_index, ci_map.at(e_pair.first), ci_map.at(v_pair.first)}));
+	  filtrations.push_back(v_pair.first->get_filtration());
+	  mask.push_back(515);
+	}
       }
-      Delaunay_triangulation del(2);
-      index = 0;
-      std::map<typename Delaunay_triangulation::Vertex_handle, int> index_of_vertex;
-      for (auto p: vertices)
-	index_of_vertex.emplace(del.insert(p), index++);
-      for (auto fc_it = del.full_cells_begin(); fc_it != del.full_cells_end(); ++fc_it) {
-	if (del.is_infinite(fc_it))
-	  continue;
-	std::vector<int> triangle;
-	for (auto fv_it = fc_it->vertices_begin(); fv_it != fc_it->vertices_end(); ++fv_it)
-	  triangle.push_back(v_indices[index_of_vertex[*fv_it]]);
+      else { // not barycentric
+	std::vector<std::size_t> triangle(1, h_index); 
+	for (auto v_pair: e_pair.first->get_boundary())
+	  triangle.push_back(ci_map.at(v_pair.first));
 	triangles.push_back(triangle);
-	filtrations.push_back(h->get_filtration());
+	filtrations.push_back(e_pair.first->get_filtration());
+	mask.push_back(515);
       }
     }
+  }
+  for (auto p: polytopes) {
+    std::set<Hasse_cell_ptr> v_cells;
+    for (auto h_pair: p->get_boundary())
+      for (auto e_pair: h_pair.first->get_boundary())
+	for (auto v_pair: e_pair.first->get_boundary())
+	  v_cells.emplace(v_pair.first);
+    Point_t barycenter(d);
+    for (std::size_t i = 0; i < d; ++i)
+      barycenter(i) = 0;
+    for (auto vc: v_cells) {
+      for (std::size_t i = 0; i < d; ++i)
+	barycenter(i) += vp_map.at(vc)(i);
+    }
+    vertex_points.emplace_back(barycenter / v_cells.size());
+    // perturb_vertex(vertex_points.back(), 0.00001);
+    std::size_t p_index = vertex_points.size();
+    ci_map.emplace(std::make_pair(p, p_index));
+    for (auto h_pair: p->get_boundary())
+      if (barycentric) {
+	for (auto e_pair: h_pair.first->get_boundary())
+	  for (auto v_pair: e_pair.first->get_boundary()) {
+	    tetrahedra.push_back(std::vector<std::size_t>({p_index, ci_map.at(h_pair.first), ci_map.at(e_pair.first), ci_map.at(v_pair.first)}));
+	    filtrations.push_back(v_pair.first->get_filtration());
+	  }
+      }
+      else { // not barycentric // code below should fit
+      }
+  }
+  
+  if (d == 2) {
     ofs << "MeshVersionFormatted 1\nDimension 2\n";
     ofs_bb << "2 1 ";
     ofs << "Vertices\n" << vertex_points.size() << "\n";
@@ -157,87 +210,6 @@ void output_hasse_to_medit(const HasseDiagram& hasse_diagram,
     }
   }
   else {
-    std::vector<Hasse_cell_ptr> edges, polygons, polytopes;
-    std::vector<std::vector<int> > triangles, tetrahedra; 
-    std::vector<double> filtrations;
-    std::vector<int> mask;
-    for (auto s: hasse_diagram)
-      if (s->get_dimension() == 1)
-	edges.push_back(s);
-      else if (s->get_dimension() == 2)
-	polygons.push_back(s);
-      else if (s->get_dimension() == 3)
-	polytopes.push_back(s);
-    typedef CGAL::Epick_d<CGAL::Dimension_tag<3> > Kernel_3;
-    typedef typename Kernel_3::Point_d Point_3;
-    typedef CGAL::Delaunay_triangulation<Kernel_3> Delaunay_triangulation;
-    for (auto h: polygons) {
-      int mask_val = 515;
-      Point_t barycenter(3);
-      barycenter[0] = 0;
-      barycenter[1] = 0;
-      barycenter[2] = 0;
-      std::set<Hasse_cell_ptr> v_cells;
-      for (auto e_pair: h->get_boundary()) {
-	if (e_pair.first->get_coBoundary().size() > 2)
-	  mask_val = 517;
-	for (auto v_pair: e_pair.first->get_boundary())
-	  v_cells.emplace(v_pair.first);
-      }
-      for (auto vc: v_cells) {
-	int ci_value = ci_map.at(vc);
-	barycenter[0] += vertex_points[ci_value-1][0] / v_cells.size();
-	barycenter[1] += vertex_points[ci_value-1][1] / v_cells.size();
-	barycenter[2] += vertex_points[ci_value-1][2] / v_cells.size();
-      }
-      vertex_points.push_back(barycenter);
-      for (auto e_pair: h->get_boundary()) {
-	std::vector<int> triangle(1, vertex_points.size());
-	for (auto v_pair: e_pair.first->get_boundary())
-	  triangle.push_back(ci_map.at(v_pair.first));
-	triangles.push_back(triangle);
-	filtrations.push_back(h->get_filtration());
-	mask.push_back(mask_val);
-      }
-    }
-    for (auto p: polytopes) {
-      // constrain the outer edges, which are found by the convex hull
-      std::vector<Point_3> vertices;
-      std::vector<int> v_indices;
-      std::set<Hasse_cell_ptr> v_cells;
-      // std::cout << "3-cell " << p->get_filtration() << ":\n";
-      for (auto h_pair: p->get_boundary()) {
-	// std::cout << "2-cell " << h_pair.first->get_position() << " " << h_pair.first->get_filtration() << ":\n";
-	for (auto e_pair: h_pair.first->get_boundary()) {
-	  // std::cout << "Edge " << e_pair.first->get_position() << " " << e_pair.first->get_filtration() << ":\n"; 
-	  for (auto v_pair: e_pair.first->get_boundary()) {
-	    // std::cout << "Vertex " << v_pair.first->get_position() << " " << v_pair.first->get_filtration() << ":\n"; 
-	    v_cells.emplace(v_pair.first);
-	  }
-	}
-	// std::cout << "\n";
-      }
-      for (auto vc: v_cells) {
-	Point_t& b = vertex_points[ci_map.at(vc)-1];
-	vertices.push_back(Point_3(b[0], b[1], b[2]));
-	v_indices.push_back(ci_map.at(vc));
-	// std::cout << "Vertex " << vc->get_position() << " " << vc->get_filtration() << ":\n"; 
-      }
-      Delaunay_triangulation del(3);
-      index = 0;
-      std::map<typename Delaunay_triangulation::Vertex_handle, int> index_of_vertex;
-      for (auto pt: vertices)
-	index_of_vertex.emplace(del.insert(pt), index++);
-      for (auto fc_it = del.full_cells_begin(); fc_it != del.full_cells_end(); ++fc_it) {
-	if (del.is_infinite(fc_it))
-	  continue;
-	std::vector<int> tetrahedron;
-	for (auto fv_it = fc_it->vertices_begin(); fv_it != fc_it->vertices_end(); ++fv_it)
-	  tetrahedron.push_back(v_indices[index_of_vertex[*fv_it]]);
-	tetrahedra.push_back(tetrahedron);
-	filtrations.push_back(p->get_filtration());
-      }
-    }
     ofs << "MeshVersionFormatted 1\nDimension 3\n";
     ofs_bb << "3 1 ";
     ofs << "Vertices\n" << vertex_points.size() << "\n";
@@ -270,11 +242,52 @@ void output_hasse_to_medit(const HasseDiagram& hasse_diagram,
       ofs << "545\n";
       ofs_bb << *f_it++ << "\n";
     }
+
+    // typedef CGAL::Epick_d<CGAL::Dimension_tag<3> > Kernel_3;
+    // typedef typename Kernel_3::Point_d Point_3;
+    // typedef CGAL::Delaunay_triangulation<Kernel_3> Delaunay_triangulation;
       
+      // // constrain the outer edges, which are found by the convex hull
+      // std::vector<Point_3> vertices;
+      // std::vector<int> v_indices;
+      // std::set<Hasse_cell_ptr> v_cells;
+      // // std::cout << "3-cell " << p->get_filtration() << ":\n";
+      // for (auto h_pair: p->get_boundary()) {
+      // 	// std::cout << "2-cell " << h_pair.first->get_position() << " " << h_pair.first->get_filtration() << ":\n";
+      // 	for (auto e_pair: h_pair.first->get_boundary()) {
+      // 	  // std::cout << "Edge " << e_pair.first->get_position() << " " << e_pair.first->get_filtration() << ":\n"; 
+      // 	  for (auto v_pair: e_pair.first->get_boundary()) {
+      // 	    // std::cout << "Vertex " << v_pair.first->get_position() << " " << v_pair.first->get_filtration() << ":\n"; 
+      // 	    v_cells.emplace(v_pair.first);
+      // 	  }
+      // 	}
+      // 	// std::cout << "\n";
+      // }
+      // for (auto vc: v_cells) {
+      // 	Point_t& b = vertex_points[ci_map.at(vc)-1];
+      // 	vertices.push_back(Point_3(b[0], b[1], b[2]));
+      // 	v_indices.push_back(ci_map.at(vc));
+      // 	// std::cout << "Vertex " << vc->get_position() << " " << vc->get_filtration() << ":\n"; 
+      // }
+      // Delaunay_triangulation del(3);
+      // index = 0;
+      // std::map<typename Delaunay_triangulation::Vertex_handle, int> index_of_vertex;
+      // for (auto pt: vertices)
+      // 	index_of_vertex.emplace(del.insert(pt), index++);
+      // for (auto fc_it = del.full_cells_begin(); fc_it != del.full_cells_end(); ++fc_it) {
+      // 	if (del.is_infinite(fc_it))
+      // 	  continue;
+      // 	std::vector<int> tetrahedron;
+      // 	for (auto fv_it = fc_it->vertices_begin(); fv_it != fc_it->vertices_end(); ++fv_it)
+      // 	  tetrahedron.push_back(v_indices[index_of_vertex[*fv_it]]);
+      // 	tetrahedra.push_back(tetrahedron);
+      // 	filtrations.push_back(p->get_filtration());
+      // }
   }
+
   ofs.close();
   ofs_bb.close();
-}
+  }
 
 
 #endif
