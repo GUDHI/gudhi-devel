@@ -34,32 +34,63 @@ using Point_d = Kernel::Point_d;
 using Point_range = std::vector<Point_d>;
 using CT = Gudhi::Coxeter_triangulation_ds;
 
+std::size_t GUDHI_CT_NB_POINTS_FOR_PCA = 2;
+Point_range points;
 
 template <class Kd_tree_search>
 bool intersects(const Cell_id& c,
 		const Kd_tree_search& kd_tree,
 		const CT& ct) {
-  // std::size_t cod_d = fun.cod_d();
-  // Eigen::MatrixXd matrix(cod_d + 1, cod_d + 1);
-  // for (std::size_t i = 0; i < cod_d + 1; ++i)
-  //   matrix(0, i) = 1;
-  // std::size_t j = 0;
-  // for (auto v: ct.vertex_range(c)) {
-  //   Eigen::VectorXd v_coords = fun(ct.cartesian_coordinates(v));
-  //   for (std::size_t i = 1; i < cod_d + 1; ++i)
-  //     matrix(i, j) = v_coords(i-1);
-  //   j++;
-  // }
-  // Eigen::VectorXd z(cod_d + 1);
-  // z(0) = 1;
-  // for (std::size_t i = 1; i < cod_d + 1; ++i)
-  //   z(i) = 0;
-  // Eigen::VectorXd lambda = matrix.colPivHouseholderQr().solve(z);
-  // for (std::size_t i = 0; i < cod_d + 1; ++i)
-  //   if (lambda(i) < 0 || lambda(i) > 1)
-  //     return false;
-  // return true;
-  return false;  
+  std::size_t amb_d = ct.dimension();
+  std::size_t intr_d = amb_d - c.dimension();
+  std::size_t cod_d = amb_d - intr_d;
+  Kernel k;
+  auto pt = k.construct_point_d_object();
+  auto coord = k.compute_coordinate_d_object();
+  auto scalar = k.scalar_product_d_object();
+  std::size_t nb_pts_pca = std::min(static_cast<std::size_t>(std::pow(GUDHI_CT_NB_POINTS_FOR_PCA, intr_d)), points.size());  
+  Eigen::MatrixXd pt_matrix(nb_pts_pca, amb_d);
+  Eigen::VectorXd b = ct.barycenter(c);
+  Point_d b_point = pt(amb_d, b.data(), b.data()+amb_d);
+
+  auto kns_range = kd_tree.k_nearest_neighbors(b_point, nb_pts_pca, false);
+  auto nn_it = kns_range.begin();
+  Point_d closest_point = points[nn_it->first];
+  std::size_t curr_row = 0;
+  for (; nn_it != kns_range.end(), curr_row < (std::size_t)pt_matrix.rows(); ++nn_it, ++curr_row)
+    for (std::size_t i = 0; i < amb_d; ++i)
+      pt_matrix(curr_row, i) = CGAL::to_double(coord(points[nn_it->first], i));
+  Eigen::MatrixXd centered = pt_matrix.rowwise() - pt_matrix.colwise().mean();
+  Eigen::MatrixXd cov = centered.adjoint() * centered;
+  Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig(cov);
+
+  Eigen::VectorXd free_term(cod_d);
+  for (std::size_t i = 0; i < cod_d; ++i) {
+    Point_d ui = pt(amb_d,
+		    eig.eigenvectors().col(i).data(),
+		    eig.eigenvectors().col(i).data() + amb_d);
+    free_term(i) = scalar(ui, closest_point);
+  }
+    
+  Eigen::MatrixXd matrix(cod_d + 1, cod_d + 1);
+  for (std::size_t i = 0; i < cod_d + 1; ++i)
+    matrix(0, i) = 1;
+  std::size_t j = 0;
+  for (auto v: ct.vertex_range(c)) {
+    Eigen::VectorXd v_vec = ct.cartesian_coordinates(v);
+    for (std::size_t i = 0; i < cod_d; ++i)
+      matrix(i+1, j) = v_vec.dot(eig.eigenvectors().col(i)) - free_term(i);
+    j++;
+  }
+  Eigen::VectorXd z(cod_d + 1);
+  z(0) = 1;
+  for (std::size_t i = 1; i < cod_d + 1; ++i)
+    z(i) = 0;
+  Eigen::VectorXd lambda = matrix.colPivHouseholderQr().solve(z);
+  for (std::size_t i = 0; i < cod_d + 1; ++i)
+    if (lambda(i) < 0 || lambda(i) > 1)
+      return false;
+  return true;
 }
  
 template <class Point,
@@ -134,7 +165,7 @@ int main(int argc, char * const argv[]) {
     std::cerr << "Coxeter triangulation - Unable to read file " << path.string() << "\n";
     exit(-1);  // ----- >>
   }
-  Point_range points(off_reader.get_point_cloud());
+  points = off_reader.get_point_cloud();
   std::cout << "Number of points: " << points.size() << "\n";
   if (points.empty()) {
     std::cerr << "Coxeter triangulation - No points found\n";
