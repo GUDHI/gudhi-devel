@@ -11,6 +11,8 @@
 
 #include "output_hasse_to_medit.h"
 
+std::size_t filt_index = 1;
+
 void insert_hasse_subdiagram(const Cell_id& c_id,
 			     VP_map& vp_map,
 			     VC_map& dictionary,
@@ -18,7 +20,7 @@ void insert_hasse_subdiagram(const Cell_id& c_id,
 			     const Gudhi::Coxeter_triangulation_ds& ct) {
   // std::cout << "  Insert_hasse_subdiagram for " << c_id << "\n";
   if (dictionary.find(c_id) == dictionary.end()) {
-    cells.push_back(new Hasse_cell((int)(ct.dimension() - c_id.dimension()), 0.0));
+    cells.push_back(new Hasse_cell((int)(ct.dimension() - c_id.dimension()), filt_index++));
     Hasse_cell* new_cell = cells.back();
     dictionary.emplace(std::make_pair(c_id, new_cell));
     if (new_cell->get_dimension() == 0)
@@ -47,7 +49,7 @@ Hasse_cell* insert_hasse_subdiagram_as(Hasse_cell* cell,
   auto d_it = dictionary2.find(cell);
   if (d_it == dictionary2.end()) {
     std::size_t c_dim = cell->get_dimension();
-    cells.push_back(new Hasse_cell((int)(amb_d - cod_d - c_dim), 0.0));
+    cells.push_back(new Hasse_cell((int)(amb_d - cod_d - c_dim), cell->get_filtration()));
     Hasse_cell* new_cell = cells.back();
     dictionary2.emplace(std::make_pair(cell, new_cell));
     for (auto f_pair: cell->get_boundary()) {
@@ -96,6 +98,7 @@ void output_max_cells_to_medit(const CellSet& max_cells,
   // }
   // output_hasse_to_medit(cells, vp_map, false, file_name+"_no_barycentric");
   output_hasse_to_medit(cells, vp_map, true, file_name+"_barycentric");
+  allgow_switch = true;
   output_hasse_to_medit(cells_as, vp_map2, true, file_name+"_allgowerschmidt");
   for (auto c: cells)
     delete c;

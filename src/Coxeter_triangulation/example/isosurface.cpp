@@ -114,7 +114,7 @@ void compute_complex(const Point_range& seed_points,
 int main(int argc, char * const argv[]) {
   Kernel k;
   std::unordered_set<Cell_id> max_cells; 
-  std::size_t exp_number = 2;
+  std::size_t exp_number = 1;
 
   switch (exp_number) {
   // Circle

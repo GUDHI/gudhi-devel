@@ -12,6 +12,8 @@
 #include <gudhi/Coxeter_triangulation_ds.h>
 #include <gudhi/Hasse_diagram.h>
 
+bool allgow_switch = false;
+
 using Cell_id = Gudhi::Cell_id;
 using Point_d_eigen = Eigen::VectorXd;
 using Coface_it = Gudhi::Coxeter_triangulation_ds::Coface_iterator;
@@ -122,6 +124,7 @@ void output_hasse_to_medit(const HasseDiagram& hasse_diagram,
       ci_map.emplace(std::make_pair(e, e_index));
       // std::cout << "Inserted edge " << e << ", index = " << ci_map.at(e) << "\n";
     }
+  std::size_t ref_size = vertex_points.size() - 1;
   for (auto h: polygons) {
     std::set<Hasse_cell_ptr> v_cells;
     for (auto e_pair: h->get_boundary())
@@ -144,7 +147,10 @@ void output_hasse_to_medit(const HasseDiagram& hasse_diagram,
 	for (auto v_pair: e_pair.first->get_boundary()) {
 	  triangles.push_back(std::vector<std::size_t>({h_index, ci_map.at(e_pair.first), ci_map.at(v_pair.first)}));
 	  filtrations.push_back(v_pair.first->get_filtration());
-	  mask.push_back(515);
+	  if (allgow_switch)
+	    mask.push_back(std::round(v_pair.first->get_filtration()));
+	  else
+	    mask.push_back(std::round(h->get_filtration()));
 	}
       }
       else { // not barycentric
@@ -153,7 +159,7 @@ void output_hasse_to_medit(const HasseDiagram& hasse_diagram,
 	  triangle.push_back(ci_map.at(v_pair.first));
 	triangles.push_back(triangle);
 	filtrations.push_back(e_pair.first->get_filtration());
-	mask.push_back(515);
+	mask.push_back(h_index - ref_size);
       }
     }
   }
