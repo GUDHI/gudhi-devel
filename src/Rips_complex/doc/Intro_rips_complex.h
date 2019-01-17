@@ -39,7 +39,7 @@ namespace rips_complex {
  * <a target="_blank" href="https://en.wikipedia.org/wiki/Vietoris%E2%80%93Rips_complex">(Wikipedia)</a>
  * is an abstract simplicial complex
  * defined on a finite metric space, where each simplex corresponds to a subset
- * of point whose diameter is smaller that some given threshold.
+ * of points whose diameter is smaller that some given threshold.
  * Varying the threshold, we can also see the Rips complex as a filtration of
  * the \f$(n-1)-\f$dimensional simplex, where the filtration value of each
  * simplex is the diameter of the corresponding subset of points.
@@ -53,7 +53,10 @@ namespace rips_complex {
  * The number of simplices in the full Rips complex is exponential in the
  * number of vertices, it is thus usually restricted, by excluding all the
  * simplices with filtration value larger than some threshold, and keeping only
- * the dim_max-skeleton.
+ * the dim_max-skeleton. It may also be a good idea to start by making the
+ * point set sparser, for instance with
+ * `Gudhi::subsampling::sparsify_point_set()`, since small clusters of points
+ * have a disproportionate cost without affecting the persistence diagram much.
  *
  * In order to build this complex, the algorithm first builds the graph.
  * The filtration value of each edge is computed from a user-given distance

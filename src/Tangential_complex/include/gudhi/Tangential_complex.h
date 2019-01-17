@@ -30,6 +30,7 @@
 #include <gudhi/console_color.h>
 #include <gudhi/Clock.h>
 #include <gudhi/Simplex_tree.h>
+#include <gudhi/Debug_utils.h>
 
 #include <CGAL/Default.h>
 #include <CGAL/Dimension.h>
@@ -356,7 +357,7 @@ class Tangential_complex {
       tbb::parallel_for(tbb::blocked_range<size_t>(0, m_points.size()), Compute_tangent_triangulation(*this));
     } else {
 #endif  // GUDHI_USE_TBB
-      // Sequential
+        // Sequential
       for (std::size_t i = 0; i < m_points.size(); ++i) compute_tangent_triangulation(i);
 #ifdef GUDHI_USE_TBB
     }
@@ -629,11 +630,11 @@ class Tangential_complex {
         // Don't export infinite cells
         if (!export_infinite_simplices && is_infinite(c)) continue;
 
-        if (!export_inconsistent_simplices && !is_simplex_consistent(c)) continue;
-
         if (static_cast<int>(c.size()) > max_dim) max_dim = static_cast<int>(c.size());
         // Add the missing center vertex
         c.insert(idx);
+
+        if (!export_inconsistent_simplices && !is_simplex_consistent(c)) continue;
 
         // Try to insert the simplex
         bool inserted = tree.insert_simplex_and_subfaces(c).second;
@@ -689,6 +690,10 @@ class Tangential_complex {
         // Don't export infinite cells
         if (!export_infinite_simplices && is_infinite(c)) continue;
 
+        if (static_cast<int>(c.size()) > max_dim) max_dim = static_cast<int>(c.size());
+        // Add the missing center vertex
+        c.insert(idx);
+
         if (!export_inconsistent_simplices && !is_simplex_consistent(c)) continue;
 
         // Unusual simplex dim?
@@ -700,10 +705,6 @@ class Tangential_complex {
                     << white;
           check_lower_and_higher_dim_simplices = 1;
         }
-
-        if (static_cast<int>(c.size()) > max_dim) max_dim = static_cast<int>(c.size());
-        // Add the missing center vertex
-        c.insert(idx);
 
         // Try to insert the simplex
         bool added = complex.add_simplex(c, check_lower_and_higher_dim_simplices == 1);
@@ -800,7 +801,7 @@ class Tangential_complex {
       tbb::parallel_for(tbb::blocked_range<size_t>(0, m_points.size()), Compute_tangent_triangulation(*this));
     } else {
 #endif  // GUDHI_USE_TBB
-      // Sequential
+        // Sequential
       for (std::size_t i = 0; i < m_points.size(); ++i) compute_tangent_triangulation(i);
 #ifdef GUDHI_USE_TBB
     }
@@ -835,7 +836,7 @@ class Tangential_complex {
                         Refresh_tangent_triangulation(*this, updated_pts_ds));
     } else {
 #endif  // GUDHI_USE_TBB
-      // Sequential
+        // Sequential
       for (std::size_t i = 0; i < m_points.size(); ++i) refresh_tangent_triangulation(i, updated_pts_ds);
 #ifdef GUDHI_USE_TBB
     }
@@ -983,10 +984,9 @@ class Tangential_complex {
     // of the sphere "star sphere" centered at "center_vertex"
     // and which contains all the
     // circumspheres of the star of "center_vertex"
-    boost::optional<FT> squared_star_sphere_radius_plus_margin = boost::make_optional(false, FT());
-    // This is the strange way boost is recommending to get rid of "may be used uninitialized in this function".
-    // Former code was :
-    // boost::optional<FT> squared_star_sphere_radius_plus_margin;
+    // If th the m_max_squared_edge_length is set the maximal radius of the "star sphere"
+    // is at most square root of m_max_squared_edge_length
+    boost::optional<FT> squared_star_sphere_radius_plus_margin = m_max_squared_edge_length;
 
     // Insert points until we find a point which is outside "star sphere"
     for (auto nn_it = ins_range.begin(); nn_it != ins_range.end(); ++nn_it) {
@@ -999,10 +999,16 @@ class Tangential_complex {
         Point neighbor_pt;
         FT neighbor_weight;
         compute_perturbed_weighted_point(neighbor_point_idx, neighbor_pt, neighbor_weight);
-
+        GUDHI_CHECK(!m_max_squared_edge_length ||
+                    squared_star_sphere_radius_plus_margin.value() <= m_max_squared_edge_length.value(),
+                    std::invalid_argument("Tangential_complex::compute_star - set a bigger value with set_max_squared_edge_length."));
         if (squared_star_sphere_radius_plus_margin &&
-            k_sqdist(center_pt, neighbor_pt) > *squared_star_sphere_radius_plus_margin)
+            k_sqdist(center_pt, neighbor_pt) > squared_star_sphere_radius_plus_margin.value()) {
+          GUDHI_CHECK(triangulation.current_dimension() >= tangent_space_dim,
+                      std::invalid_argument("Tangential_complex::compute_star - Dimension of the star is only " + \
+                                            std::to_string(triangulation.current_dimension())));
           break;
+        }
 
         Tr_point proj_pt = project_point_and_compute_weight(neighbor_pt, neighbor_weight, tsb, local_tr_traits);
 
@@ -1044,7 +1050,7 @@ class Tangential_complex {
                 FT sq_power_sphere_diam = 4 * point_weight(c);
 
                 if (!squared_star_sphere_radius_plus_margin ||
-                    sq_power_sphere_diam > *squared_star_sphere_radius_plus_margin) {
+                    sq_power_sphere_diam > squared_star_sphere_radius_plus_margin.value()) {
                   squared_star_sphere_radius_plus_margin = sq_power_sphere_diam;
                 }
               }
@@ -1055,12 +1061,22 @@ class Tangential_complex {
             if (squared_star_sphere_radius_plus_margin) {
               // "2*m_last_max_perturb" because both points can be perturbed
               squared_star_sphere_radius_plus_margin =
-                  CGAL::square(std::sqrt(*squared_star_sphere_radius_plus_margin) + 2 * m_last_max_perturb);
+                  CGAL::square(std::sqrt(squared_star_sphere_radius_plus_margin.value()) + 2 * m_last_max_perturb);
+
+              // Reduce the square radius to  m_max_squared_edge_length if necessary
+              if (m_max_squared_edge_length && squared_star_sphere_radius_plus_margin.value() > m_max_squared_edge_length.value()) {
+                squared_star_sphere_radius_plus_margin = m_max_squared_edge_length.value();
+              }
 
               // Save it in `m_squared_star_spheres_radii_incl_margin`
-              m_squared_star_spheres_radii_incl_margin[i] = *squared_star_sphere_radius_plus_margin;
+              m_squared_star_spheres_radii_incl_margin[i] = squared_star_sphere_radius_plus_margin.value();
             } else {
-              m_squared_star_spheres_radii_incl_margin[i] = FT(-1);
+              if (m_max_squared_edge_length) {
+                squared_star_sphere_radius_plus_margin = m_max_squared_edge_length.value();
+                m_squared_star_spheres_radii_incl_margin[i] = m_max_squared_edge_length.value();
+              } else {
+                m_squared_star_spheres_radii_incl_margin[i] = FT(-1);
+              }
             }
           }
         }
@@ -1968,6 +1984,8 @@ class Tangential_complex {
     return os;
   }
 
+  void set_max_squared_edge_length(FT max_squared_edge_length) { m_max_squared_edge_length = max_squared_edge_length; }
+
  private:
   const K m_k;
   const int m_intrinsic_dim;
@@ -1993,6 +2011,7 @@ class Tangential_complex {
   // and their center vertex
   Stars_container m_stars;
   std::vector<FT> m_squared_star_spheres_radii_incl_margin;
+  boost::optional<FT> m_max_squared_edge_length;
 
 #ifdef GUDHI_TC_USE_ANOTHER_POINT_SET_FOR_TANGENT_SPACE_ESTIM
   Points m_points_for_tse;

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 login="vrouvrea"
-version="2.3.0.rc3"
+version="2.3.0"
 cgaldir="/home/vincent/workspace/CGAL-4.11-HO/build"
 cpucount=7
 
@@ -18,6 +18,9 @@ fi
 
 rm -rf build; mkdir build; cd build; cmake  -DCMAKE_BUILD_TYPE=Debug -DDEBUG_TRACES=ON -DCGAL_DIR=${cgaldir} -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_BENCHMARK=ON -DPython_ADDITIONAL_VERSIONS=3 ..
 cmake  -DCMAKE_BUILD_TYPE=Debug .
+
+CURRENTDIRECTORY=`pwd`
+export PYTHONPATH=$CURRENTDIRECTORY/src/cython:$PYTHONPATH
 
 make -j ${cpucount} all test
 
@@ -43,6 +46,10 @@ make doxygen
 cp -R ${userversiondir}/doc/html ${userdocdir}/cpp
 cd ${userversiondir}
 rm -rf build; mkdir build; cd build; cmake  -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=./installed -DCGAL_DIR=${cgaldir} -DWITH_GUDHI_EXAMPLE=ON -DPython_ADDITIONAL_VERSIONS=3 ..
+
+CURRENTDIRECTORY=`pwd`
+export PYTHONPATH=$CURRENTDIRECTORY/cython:$PYTHONPATH
+
 make sphinx
 
 cp -R cython/sphinx ../../${userdocdir}/python

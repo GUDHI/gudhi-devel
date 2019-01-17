@@ -1,6 +1,6 @@
 # This files manage third party libraries required by GUDHI
 
-find_package(Boost 1.48.0 REQUIRED COMPONENTS system filesystem unit_test_framework program_options thread)
+find_package(Boost 1.56.0 REQUIRED COMPONENTS system filesystem unit_test_framework program_options thread)
 
 if(NOT Boost_FOUND)
   message(FATAL_ERROR "NOTICE: This program requires Boost and will not be compiled.")
@@ -21,11 +21,11 @@ endif()
 # A fix would be to use https://cmake.org/cmake/help/v3.1/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html
 # or even better https://cmake.org/cmake/help/v3.1/variable/CMAKE_CXX_STANDARD.html
 # but it implies to use cmake version 3.1 at least.
-find_package(CGAL)
+find_package(CGAL QUIET)
 
 # Only CGAL versions > 4.4 supports what Gudhi uses from CGAL
 if (CGAL_VERSION VERSION_LESS 4.4.0)
-  message("CGAL version ${CGAL_VERSION} is considered too old to be used by Gudhi.")
+  message("++ CGAL version ${CGAL_VERSION} is considered too old to be used by Gudhi.")
   unset(CGAL_FOUND)
 endif()
 if(CGAL_FOUND)
@@ -127,6 +127,10 @@ function( find_python_module PYTHON_MODULE_NAME )
           RESULT_VARIABLE PYTHON_MODULE_RESULT
           OUTPUT_VARIABLE PYTHON_MODULE_VERSION
           ERROR_VARIABLE PYTHON_MODULE_ERROR)
+  message ("PYTHON_MODULE_NAME = ${PYTHON_MODULE_NAME}
+   - PYTHON_MODULE_RESULT = ${PYTHON_MODULE_RESULT}
+   - PYTHON_MODULE_VERSION = ${PYTHON_MODULE_VERSION}
+   - PYTHON_MODULE_ERROR = ${PYTHON_MODULE_ERROR}")
   if(PYTHON_MODULE_RESULT EQUAL 0)
     # Remove carriage return
     string(STRIP ${PYTHON_MODULE_VERSION} PYTHON_MODULE_VERSION)
@@ -143,6 +147,7 @@ if( PYTHONINTERP_FOUND )
   find_python_module("pytest")
   find_python_module("matplotlib")
   find_python_module("numpy")
+  find_python_module("scipy")
 endif()
 
 if(NOT GUDHI_CYTHON_PATH)
