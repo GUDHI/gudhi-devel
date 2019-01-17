@@ -864,34 +864,51 @@ BOOST_AUTO_TEST_CASE(make_filtration_non_decreasing) {
   
 }
 
-BOOST_AUTO_TEST_CASE(insert_graph) {
+
+typedef boost::mpl::list<boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS,
+                                               boost::property<vertex_filtration_t, double>,
+                                               boost::property<edge_filtration_t, double>>,
+                         boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS,
+                                               boost::property<vertex_filtration_t, double>,
+                                               boost::property<edge_filtration_t, double>>,
+                         boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS,
+                                               boost::property<vertex_filtration_t, double>,
+                                               boost::property<edge_filtration_t, double>>> list_of_graph_variants;
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insert_graph, Graph, list_of_graph_variants) {
   std::cout << "********************************************************************" << std::endl;
   std::cout << "INSERT GRAPH" << std::endl;
-  typedef typename boost::adjacency_list<boost::vecS, boost::vecS,
-          boost::undirectedS,
-          boost::property<vertex_filtration_t, double>,
-          boost::property<edge_filtration_t, double>> Graph;
+
   Graph g(3);
   // filtration value 0 everywhere
   put(Gudhi::vertex_filtration_t(), g, 0, 0);
   put(Gudhi::vertex_filtration_t(), g, 1, 0);
   put(Gudhi::vertex_filtration_t(), g, 2, 0);
   // vertices don't always occur in sorted order
-  add_edge(0, 1, 0, g);
-  add_edge(2, 1, 0, g);
-  add_edge(2, 0, 0, g);
+  add_edge(0, 1, 1.1, g);
+  add_edge(2, 0, 2.2, g);
+  add_edge(2, 1, 3.3, g);
 
-  typedef Simplex_tree<> typeST;
-  typeST st1;
+  Simplex_tree<> st1;
   st1.insert_graph(g);
   BOOST_CHECK(st1.num_simplices() == 6);
 
   // edges can have multiplicity in the graph unless we replace the first vecS with (hash_)setS
-  add_edge(1, 0, 0, g);
-  add_edge(1, 2, 0, g);
-  add_edge(0, 2, 0, g);
-  add_edge(0, 2, 0, g);
-  typeST st2;
+  add_edge(1, 0, 1.1, g);
+  add_edge(1, 2, 3.3, g);
+  add_edge(0, 2, 2.2, g);
+  add_edge(0, 1, 1.1, g);
+  add_edge(2, 1, 3.3, g);
+  add_edge(2, 0, 2.2, g);
+  Simplex_tree<> st2;
   st2.insert_graph(g);
   BOOST_CHECK(st2.num_simplices() == 6);
+
+  std::cout << "st1 is" << std::endl;
+  std::cout << st1 << std::endl;
+
+  std::cout << "st2 is" << std::endl;
+  std::cout << st2 << std::endl;
+
+  BOOST_CHECK(st1 == st2);
 }

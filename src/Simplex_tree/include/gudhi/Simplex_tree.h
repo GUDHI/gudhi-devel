@@ -1049,7 +1049,8 @@ class Simplex_tree {
    * boost::graph_traits<OneSkeletonGraph>::vertex_descriptor
    *                                    must be Vertex_handle.
    * boost::graph_traits<OneSkeletonGraph>::directed_category
-   *                                    must be undirected_tag.
+   *                                    can be directed_tag (the fastest, the least RAM use), undirected_tag or even
+   *                                    bidirected_tag.
    *
    * If an edge appears with multiplicity, the function will arbitrarily pick
    * one representative to read the filtration value.  */
@@ -1077,12 +1078,14 @@ class Simplex_tree {
                                   root_.members_.end(), *v_it,
                                   Node(&root_, boost::get(vertex_filtration_t(), skel_graph, *v_it)));
     }
-    typename boost::graph_traits<OneSkeletonGraph>::edge_iterator e_it,
-        e_it_end;
-    for (std::tie(e_it, e_it_end) = boost::edges(skel_graph); e_it != e_it_end;
-         ++e_it) {
-      auto u = source(*e_it, skel_graph);
-      auto v = target(*e_it, skel_graph);
+    std::pair<typename boost::graph_traits<OneSkeletonGraph>::edge_iterator,
+              typename boost::graph_traits<OneSkeletonGraph>::edge_iterator> boost_edges = boost::edges(skel_graph);
+    // boost_edges.first is the equivalent to boost_edges.begin()
+    // boost_edges.second is the equivalent to boost_edges.end()
+    for (; boost_edges.first != boost_edges.second; boost_edges.first++) {
+      auto edge = *(boost_edges.first);
+      auto u = source(edge, skel_graph);
+      auto v = target(edge, skel_graph);
       if (u == v) throw "Self-loops are not simplicial";
       // We cannot skip edges with the wrong orientation and expect them to
       // come a second time with the right orientation, that does not always
@@ -1098,7 +1101,7 @@ class Simplex_tree {
       }
 
       sh->second.children()->members().emplace(v,
-          Node(sh->second.children(), boost::get(edge_filtration_t(), skel_graph, *e_it)));
+          Node(sh->second.children(), boost::get(edge_filtration_t(), skel_graph, edge)));
     }
   }
 
