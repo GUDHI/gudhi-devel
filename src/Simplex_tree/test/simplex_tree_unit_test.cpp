@@ -865,7 +865,16 @@ BOOST_AUTO_TEST_CASE(make_filtration_non_decreasing) {
 }
 
 
-typedef boost::mpl::list<boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS,
+typedef boost::mpl::list<boost::adjacency_list<boost::setS, boost::vecS, boost::directedS,
+                                               boost::property<vertex_filtration_t, double>,
+                                               boost::property<edge_filtration_t, double>>,
+                         boost::adjacency_list<boost::setS, boost::vecS, boost::undirectedS,
+                                               boost::property<vertex_filtration_t, double>,
+                                               boost::property<edge_filtration_t, double>>,
+                         boost::adjacency_list<boost::setS, boost::vecS, boost::bidirectionalS,
+                                               boost::property<vertex_filtration_t, double>,
+                                               boost::property<edge_filtration_t, double>>,
+                         boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS,
                                                boost::property<vertex_filtration_t, double>,
                                                boost::property<edge_filtration_t, double>>,
                          boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS,
