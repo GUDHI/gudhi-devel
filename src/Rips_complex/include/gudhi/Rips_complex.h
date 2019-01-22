@@ -59,7 +59,7 @@ class Rips_complex {
   /**
    * \brief Type of the one skeleton graph stored inside the Rips complex structure.
    */
-  typedef typename boost::adjacency_list < boost::vecS, boost::vecS, boost::undirectedS
+  typedef typename boost::adjacency_list < boost::vecS, boost::vecS, boost::directedS
   , boost::property < vertex_filtration_t, Filtration_value >
   , boost::property < edge_filtration_t, Filtration_value >> OneSkeletonGraph;
 
