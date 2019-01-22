@@ -31,6 +31,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <limits>  // for numeric_limits<>
 
 // gudhi type definition
 using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
