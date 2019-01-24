@@ -33,7 +33,6 @@
 using namespace Gudhi;
 using namespace Gudhi::persistent_cohomology;
 
-typedef int Vertex_handle;
 typedef double Filtration_value;
 
 void program_options(int argc, char * argv[]
