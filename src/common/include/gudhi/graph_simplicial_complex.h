@@ -63,25 +63,31 @@ public:
                         EdgePropertyIterator ep_iter,
                         typename SimplicialComplexForFilteredEdges::Vertex_handle n) {
     for(;first < last;++first) {
-      edges.push_back(std::make_tuple(*ep_iter, first->first, first->second));
+      edges_.push_back(std::make_tuple(*ep_iter, first->first, first->second));
       ++ep_iter;
     }
     // By default the sort is done on the first element (Filtration_value) in ascending order.
-    std::sort(edges.begin(), edges.end());
+    std::sort(edges_.begin(), edges_.end());
+  }
+
+  /** \brief Returns the edges vector.
+   */
+  Filtered_edges edges() {
+    return edges_;
   }
 
   /** \brief Returns the sub-filtered edges vector from a `new_threshold` filtration value.
    */
   Filtered_edges sub_filter_edges(typename SimplicialComplexForFilteredEdges::Filtration_value new_threshold) {
-    auto edge_it = edges.begin();
-    while ((std::get<0>(*edge_it) <= new_threshold) && (edge_it < edges.end())) {
+    auto edge_it = edges_.begin();
+    while ((std::get<0>(*edge_it) <= new_threshold) && (edge_it < edges_.end())) {
       ++edge_it;
     }
-    return Filtered_edges(edges.begin(), edge_it);
+    return Filtered_edges(edges_.begin(), edge_it);
   }
 
  private:
-  Filtered_edges edges;
+  Filtered_edges edges_;
 };
 
 /** \brief Computes the edge graph of the points.
