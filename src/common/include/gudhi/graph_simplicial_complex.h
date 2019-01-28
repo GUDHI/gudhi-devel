@@ -1,5 +1,5 @@
-/*    This file is part of the Gudhi Library. The Gudhi library 
- *    (Geometric Understanding in Higher Dimensions) is a generic C++ 
+/*    This file is part of the Gudhi Library. The Gudhi library
+ *    (Geometric Understanding in Higher Dimensions) is a generic C++
  *    library for computational topology.
  *
  *    Author(s):       Clément Maria
@@ -28,7 +28,7 @@
 #include <utility>  // for pair<>
 #include <vector>
 #include <map>
-#include <tuple>  // for std::tie
+#include <tuple>      // for std::tie
 #include <algorithm>  // for std::sort
 
 namespace Gudhi {
@@ -51,18 +51,17 @@ struct vertex_filtration_t {
  */
 template <typename SimplicialComplexForFilteredEdges>
 class Filtered_edges_vector {
-public:
+ public:
   /** \brief Type of the `Gudhi::Filtered_edges_vector` data structure.
    */
-  using Filtered_edges = std::vector< std::tuple < typename SimplicialComplexForFilteredEdges::Filtration_value,
-      typename SimplicialComplexForFilteredEdges::Vertex_handle,
-      typename SimplicialComplexForFilteredEdges::Vertex_handle > >;
+  using Filtered_edges = std::vector<std::tuple<typename SimplicialComplexForFilteredEdges::Filtration_value,
+                                                typename SimplicialComplexForFilteredEdges::Vertex_handle,
+                                                typename SimplicialComplexForFilteredEdges::Vertex_handle>>;
 
   template <class EdgeIterator, class EdgePropertyIterator>
-  Filtered_edges_vector(EdgeIterator first, EdgeIterator last,
-                        EdgePropertyIterator ep_iter,
+  Filtered_edges_vector(EdgeIterator first, EdgeIterator last, EdgePropertyIterator ep_iter,
                         typename SimplicialComplexForFilteredEdges::Vertex_handle n) {
-    for(;first < last;++first) {
+    for (; first < last; ++first) {
       edges_.push_back(std::make_tuple(*ep_iter, first->first, first->second));
       ++ep_iter;
     }
@@ -70,15 +69,27 @@ public:
     std::sort(edges_.begin(), edges_.end());
   }
 
+  /** \brief Returns the edges vector min filtration value.
+   */
+  Filtered_edges edges() const { return edges_; }
+
+  typename SimplicialComplexForFilteredEdges::Filtration_value get_filtration_min() const {
+    return std::get<0>(*(edges_.begin()));
+  }
+
+  /** \brief Returns the edges vector max filtration value.
+   */
+  typename SimplicialComplexForFilteredEdges::Filtration_value get_filtration_max() const {
+    return std::get<0>(*(edges_.rbegin()));
+  }
+
   /** \brief Returns the edges vector.
    */
-  Filtered_edges edges() {
-    return edges_;
-  }
+  std::size_t size() const { return edges_.size(); }
 
   /** \brief Returns the sub-filtered edges vector from a `new_threshold` filtration value.
    */
-  Filtered_edges sub_filter_edges(typename SimplicialComplexForFilteredEdges::Filtration_value new_threshold) {
+  Filtered_edges sub_filter_edges(typename SimplicialComplexForFilteredEdges::Filtration_value new_threshold) const {
     auto edge_it = edges_.begin();
     while ((std::get<0>(*edge_it) <= new_threshold) && (edge_it < edges_.end())) {
       ++edge_it;
@@ -102,19 +113,17 @@ public:
  *
  * \tparam SimplicialComplexForEdgeGraph furnishes `Vertex_handle` and `Filtration_value` types declarations.
  */
-template<template<class> class Edge_graph, class SimplicialComplexForEdgeGraph
-    , typename ForwardPointRange
-    , typename Distance >
+template <template <class> class Edge_graph, class SimplicialComplexForEdgeGraph, typename ForwardPointRange,
+          typename Distance>
 Edge_graph<SimplicialComplexForEdgeGraph> compute_edge_graph(
-    const ForwardPointRange& points,
-    typename SimplicialComplexForEdgeGraph::Filtration_value threshold,
+    const ForwardPointRange& points, typename SimplicialComplexForEdgeGraph::Filtration_value threshold,
     Distance distance) {
   using Vertex_handle = typename SimplicialComplexForEdgeGraph::Vertex_handle;
   using Filtration_value = typename SimplicialComplexForEdgeGraph::Filtration_value;
 
-  std::vector<std::pair< Vertex_handle, Vertex_handle >> edges;
-  std::vector< Filtration_value > edges_fil;
-  std::map< Vertex_handle, Filtration_value > vertices;
+  std::vector<std::pair<Vertex_handle, Vertex_handle>> edges;
+  std::vector<Filtration_value> edges_fil;
+  std::map<Vertex_handle, Filtration_value> vertices;
 
   Vertex_handle idx_u, idx_v;
   Filtration_value fil;
@@ -143,9 +152,10 @@ Edge_graph<SimplicialComplexForEdgeGraph> compute_edge_graph(
  *
  */
 template <typename SimplicialComplexForProximityGraph>
-using Proximity_graph = typename boost::adjacency_list < boost::vecS, boost::vecS, boost::directedS
-, boost::property < vertex_filtration_t, typename SimplicialComplexForProximityGraph::Filtration_value >
-, boost::property < edge_filtration_t, typename SimplicialComplexForProximityGraph::Filtration_value >>;
+using Proximity_graph = typename boost::adjacency_list<
+    boost::vecS, boost::vecS, boost::directedS,
+    boost::property<vertex_filtration_t, typename SimplicialComplexForProximityGraph::Filtration_value>,
+    boost::property<edge_filtration_t, typename SimplicialComplexForProximityGraph::Filtration_value>>;
 
 /** \brief Computes the proximity graph of the points.
  *
@@ -159,22 +169,19 @@ using Proximity_graph = typename boost::adjacency_list < boost::vecS, boost::vec
  *
  * \tparam SimplicialComplexForProximityGraph furnishes `Vertex_handle` and `Filtration_value` types declarations.
  */
-template< typename SimplicialComplexForProximityGraph
-          , typename ForwardPointRange
-          , typename Distance >
+template <typename SimplicialComplexForProximityGraph, typename ForwardPointRange, typename Distance>
 Proximity_graph<SimplicialComplexForProximityGraph> compute_proximity_graph(
-    const ForwardPointRange& points,
-    typename SimplicialComplexForProximityGraph::Filtration_value threshold,
+    const ForwardPointRange& points, typename SimplicialComplexForProximityGraph::Filtration_value threshold,
     Distance distance) {
   // Points are labeled from 0 to idx_u-1
-  Proximity_graph<SimplicialComplexForProximityGraph> skel_graph = compute_edge_graph<Proximity_graph, SimplicialComplexForProximityGraph>(points, threshold, distance);
+  Proximity_graph<SimplicialComplexForProximityGraph> skel_graph =
+      compute_edge_graph<Proximity_graph, SimplicialComplexForProximityGraph>(points, threshold, distance);
 
   // Insert all vertices with a 0. filtration value
   auto vertex_prop = boost::get(vertex_filtration_t(), skel_graph);
 
   typename boost::graph_traits<Proximity_graph<SimplicialComplexForProximityGraph>>::vertex_iterator vi, vi_end;
-  for (std::tie(vi, vi_end) = boost::vertices(skel_graph);
-       vi != vi_end; ++vi) {
+  for (std::tie(vi, vi_end) = boost::vertices(skel_graph); vi != vi_end; ++vi) {
     boost::put(vertex_prop, *vi, 0.);
   }
 

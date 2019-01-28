@@ -33,7 +33,7 @@
 
 #include <string>
 #include <vector>
-#include <limits>  // infinity
+#include <limits>   // infinity
 #include <utility>  // for pair
 #include <map>
 
@@ -50,19 +50,14 @@ using Proximity_graph = Gudhi::Proximity_graph<Simplex_tree>;
 using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
 
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
-using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp >;
+using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
 using Point = std::vector<double>;
 using Points_off_reader = Gudhi::Points_off_reader<Point>;
 
-void program_options(int argc, char * argv[]
-    , std::string & off_file_points
-    , std::string & filediag
-    , Filtration_value & threshold
-    , int & dim_max
-    , int & p
-    , Filtration_value & min_persistence);
+void program_options(int argc, char* argv[], std::string& off_file_points, std::string& filediag,
+                     Filtration_value& threshold, int& dim_max, int& p, Filtration_value& min_persistence);
 
-int main(int argc, char * argv[]) {
+int main(int argc, char* argv[]) {
   std::string off_file_points;
   std::string filediag;
   Filtration_value threshold;
@@ -82,12 +77,10 @@ int main(int argc, char * argv[]) {
   std::size_t number_of_points = off_reader.get_point_cloud().size();
   // Compute the proximity graph of the points
   Gudhi::Filtered_edges_vector<Simplex_tree> edge_graph =
-      Gudhi::compute_edge_graph<Gudhi::Filtered_edges_vector, Simplex_tree>(
-          off_reader.get_point_cloud(),
-          threshold,
-          Gudhi::Euclidean_distance());
+      Gudhi::compute_edge_graph<Gudhi::Filtered_edges_vector, Simplex_tree>(off_reader.get_point_cloud(), threshold,
+                                                                            Gudhi::Euclidean_distance());
 
-  Tower_assembler twr_assembler(number_of_points) ;
+  Tower_assembler twr_assembler(number_of_points);
 
   // The pipeline is:
   //
@@ -101,9 +94,14 @@ int main(int argc, char * argv[]) {
   //      \ /                           \ /                                               \ /
   // Edge_graph(alpha_1)   <       Edge_graph(alpha_2)             < ...           < Edge_graph(alpha_10 = threshold)
   //
+  Filtration_value threshold_step = (edge_graph.get_filtration_max() - edge_graph.get_filtration_min()) / 10.;
+  std::cout << "min=" << edge_graph.get_filtration_min() << " - max=" << edge_graph.get_filtration_max()
+            << " - step=" << threshold_step << " - size=" << edge_graph.size() << std::endl;
+
   Flag_complex_sparse_matrix mat_prev_coll(number_of_points);
 
-  for(Filtration_value sub_threshold = threshold/10.; sub_threshold < threshold; sub_threshold += threshold/10.) {
+  for (Filtration_value sub_threshold = edge_graph.get_filtration_min() + threshold_step; sub_threshold <= threshold;
+       sub_threshold += threshold_step) {
     Flag_complex_sparse_matrix mat_coll(number_of_points, edge_graph.sub_filter_edges(sub_threshold));
 
     mat_coll.strong_collapse();
@@ -146,33 +144,27 @@ int main(int argc, char * argv[]) {
   return 0;
 }
 
-void program_options(int argc, char * argv[]
-    , std::string & off_file_points
-    , std::string & filediag
-    , Filtration_value & threshold
-    , int & dim_max
-    , int & p
-    , Filtration_value & min_persistence) {
+void program_options(int argc, char* argv[], std::string& off_file_points, std::string& filediag,
+                     Filtration_value& threshold, int& dim_max, int& p, Filtration_value& min_persistence) {
   namespace po = boost::program_options;
   po::options_description hidden("Hidden options");
-  hidden.add_options()
-      ("input-file", po::value<std::string>(&off_file_points),
-       "Name of an OFF file containing a point set.\n");
+  hidden.add_options()("input-file", po::value<std::string>(&off_file_points),
+                       "Name of an OFF file containing a point set.\n");
 
   po::options_description visible("Allowed options", 100);
-  visible.add_options()
-      ("help,h", "produce help message")
-      ("output-file,o", po::value<std::string>(&filediag)->default_value(std::string()),
-       "Name of file in which the persistence diagram is written. Default print in std::cout")
-      ("max-edge-length,r",
-       po::value<Filtration_value>(&threshold)->default_value(std::numeric_limits<Filtration_value>::infinity()),
-       "Maximal length of an edge for the Rips complex construction.")
-      ("cpx-dimension,d", po::value<int>(&dim_max)->default_value(1),
-       "Maximal dimension of the Rips complex we want to compute.")
-      ("field-charac,p", po::value<int>(&p)->default_value(11),
-       "Characteristic p of the coefficient field Z/pZ for computing homology.")
-      ("min-persistence,m", po::value<Filtration_value>(&min_persistence),
-       "Minimal lifetime of homology feature to be recorded. Default is 0. Enter a negative value to see zero length intervals");
+  visible.add_options()("help,h", "produce help message")(
+      "output-file,o", po::value<std::string>(&filediag)->default_value(std::string()),
+      "Name of file in which the persistence diagram is written. Default print in std::cout")(
+      "max-edge-length,r",
+      po::value<Filtration_value>(&threshold)->default_value(std::numeric_limits<Filtration_value>::infinity()),
+      "Maximal length of an edge for the Rips complex construction.")(
+      "cpx-dimension,d", po::value<int>(&dim_max)->default_value(1),
+      "Maximal dimension of the Rips complex we want to compute.")(
+      "field-charac,p", po::value<int>(&p)->default_value(11),
+      "Characteristic p of the coefficient field Z/pZ for computing homology.")(
+      "min-persistence,m", po::value<Filtration_value>(&min_persistence),
+      "Minimal lifetime of homology feature to be recorded. Default is 0. Enter a negative value to see zero length "
+      "intervals");
 
   po::positional_options_description pos;
   pos.add("input-file", 1);
@@ -181,8 +173,7 @@ void program_options(int argc, char * argv[]
   all.add(visible).add(hidden);
 
   po::variables_map vm;
-  po::store(po::command_line_parser(argc, argv).
-      options(all).positional(pos).run(), vm);
+  po::store(po::command_line_parser(argc, argv).options(all).positional(pos).run(), vm);
   po::notify(vm);
 
   if (vm.count("help") || !vm.count("input-file")) {
