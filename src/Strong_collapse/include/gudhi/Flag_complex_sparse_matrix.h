@@ -200,7 +200,7 @@ Subsequently once a dominated column is found, its non-zero row indices are inse
   void after_collapse() {
     sparse_colpsd_adj_Matrix = sparseRowMatrix(rows, rows);  // Just for debugging purpose.
     one_simplices.clear();
-    for (int rw = 0; rw < rows; ++rw) {
+    for (std::size_t rw = 0; rw < rows; ++rw) {
       if (not vertDomnIndicator[rw])  // If the current column is not dominated
       {
         auto nbhrs_to_insert = read_row_index(rw);  // returns row indices of the non-dominated vertices.
@@ -405,15 +405,15 @@ Subsequently once a dominated column is found, its non-zero row indices are inse
     values assigned true. [All maximal simplices are maximal to begin with]
       6. Calls the private function init_lists().
   */
-  Flag_complex_sparse_matrix(const size_t& num_vertices, const Filtered_sorted_edge_list& edge_t) {
+  Flag_complex_sparse_matrix(const std::size_t num_vertices, const Filtered_sorted_edge_list& edge_t) {
     init();
 
     sparseRowAdjMatrix = sparseRowMatrix(
         expansion_limit * num_vertices,
         expansion_limit * num_vertices);  // Initializing sparseRowAdjMatrix, This is a row-major sparse matrix.
 
-    for (size_t bgn_idx = 0; bgn_idx < edge_t.size(); bgn_idx++) {
-      std::vector<size_t> s = {std::get<1>(edge_t.at(bgn_idx)), std::get<2>(edge_t.at(bgn_idx))};
+    for (std::size_t bgn_idx = 0; bgn_idx < edge_t.size(); bgn_idx++) {
+      vertexVector s = {std::get<1>(edge_t.at(bgn_idx)), std::get<2>(edge_t.at(bgn_idx))};
       insert_new_edges(std::get<1>(edge_t.at(bgn_idx)), std::get<2>(edge_t.at(bgn_idx)), 1);
     }
     sparseRowAdjMatrix.makeCompressed();
@@ -595,7 +595,6 @@ Subsequently once a dominated column is found, its non-zero row indices are inse
 
   void active_strong_expansion(const Vertex& v, const Vertex& w, double filt_val) {
     if (membership(v) && membership(w) && v != w) {
-      // std::cout << "Strong expansion of the vertex " << v << " and " << w << " begins. " << std::endl;
       auto active_list_v_w = active_relative_neighbors(v, w);
       auto active_list_w_v = active_relative_neighbors(w, v);
       if (active_list_w_v.size() <

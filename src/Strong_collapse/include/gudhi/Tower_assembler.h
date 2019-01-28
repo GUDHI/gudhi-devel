@@ -44,20 +44,17 @@ using Distance_matrix = std::vector<std::vector<double>>;
 
 class Tower_assembler {
  private:
-  Map renamedVertices;
-  Map representative_map;
-  std::size_t current_rename_counter;
-  size_t total_vertices;
+  Map renamed_vertices_;
+  std::size_t current_rename_counter_;
 
   Flag_complex_sparse_matrix flag_filtration_;
 
  public:
   Tower_assembler(std::size_t numVert) : flag_filtration_(numVert) {
     for (std::size_t i = 0; i <= numVert; ++i) {
-      renamedVertices[i] = i;
+      renamed_vertices_[i] = i;
     }
-    total_vertices = 0;
-    current_rename_counter = numVert + 1;
+    current_rename_counter_ = numVert + 1;
   }
 
   void build_tower_for_two_cmplxs(Flag_complex_sparse_matrix mat_1, const Flag_complex_sparse_matrix& mat_2,
@@ -71,18 +68,18 @@ class Tower_assembler {
         auto collapsed_to = redmap_2.find(v);            // If v collapsed to something?
         if (collapsed_to != redmap_2.end()) {            // Collapse happened, because there is a vertex in the map
           if (mat_1.membership(collapsed_to->second)) {  // Collapsed to an existing vertex in mat_1.
-            flag_filtration_.active_strong_expansion(renamedVertices.at(v), renamedVertices.at(collapsed_to->second),
+            flag_filtration_.active_strong_expansion(renamed_vertices_.at(v), renamed_vertices_.at(collapsed_to->second),
                                                      filtration_value);
-            renamedVertices.at(v) = current_rename_counter;
-            current_rename_counter++;
+            renamed_vertices_.at(v) = current_rename_counter_;
+            current_rename_counter_++;
           } else {
-            myfile << filtration_value << " i " << renamedVertices.at(collapsed_to->second) << std::endl;
-            myfile << filtration_value << " c " << renamedVertices.at(v) << " "
-                   << renamedVertices.at(collapsed_to->second) << std::endl;
-            flag_filtration_.active_strong_expansion(renamedVertices.at(v), renamedVertices.at(collapsed_to->second),
+            myfile << filtration_value << " i " << renamed_vertices_.at(collapsed_to->second) << std::endl;
+            myfile << filtration_value << " c " << renamed_vertices_.at(v) << " "
+                   << renamed_vertices_.at(collapsed_to->second) << std::endl;
+            flag_filtration_.active_strong_expansion(renamed_vertices_.at(v), renamed_vertices_.at(collapsed_to->second),
                                                      filtration_value);
-            renamedVertices.at(v) = current_rename_counter;
-            current_rename_counter++;
+            renamed_vertices_.at(v) = current_rename_counter_;
+            current_rename_counter_++;
           }
           // If the vertex "collapsed_to->second" is not a member of mat_1, the contraction function will simply add and
           // then collapse
@@ -97,26 +94,26 @@ class Tower_assembler {
         auto u = std::get<0>(e);
         auto v = std::get<1>(e);
         if (!mat_1.membership(u)) {
-          flag_filtration_.insert_vertex(renamedVertices.at(u), filtration_value);
+          flag_filtration_.insert_vertex(renamed_vertices_.at(u), filtration_value);
           myfile << filtration_value << " i";
-          myfile << " " << renamedVertices.at(u);
+          myfile << " " << renamed_vertices_.at(u);
           myfile << std::endl;
           mat_1.insert_vertex(u, 1);
         }
 
         if (!mat_1.membership(v)) {
-          flag_filtration_.insert_vertex(renamedVertices.at(v), filtration_value);
+          flag_filtration_.insert_vertex(renamed_vertices_.at(v), filtration_value);
 
           myfile << filtration_value << " i";
-          myfile << " " << renamedVertices.at(v);
+          myfile << " " << renamed_vertices_.at(v);
           myfile << std::endl;
           mat_1.insert_vertex(v, 1);
         }
         if (!mat_1.membership(e)) {
-          flag_filtration_.insert_new_edges(renamedVertices.at(u), renamedVertices.at(v), filtration_value);
+          flag_filtration_.insert_new_edges(renamed_vertices_.at(u), renamed_vertices_.at(v), filtration_value);
 
           myfile << filtration_value << " i";
-          myfile << " " << renamedVertices.at(u) << ", " << renamedVertices.at(v);
+          myfile << " " << renamed_vertices_.at(u) << ", " << renamed_vertices_.at(v);
           myfile << std::endl;
           mat_1.insert_new_edges(u, v, 1);
         }
@@ -128,29 +125,34 @@ class Tower_assembler {
       exit(-1);
     }
   }
+
   Distance_matrix distance_matrix() {
-    size_t non_zero_rw = flag_filtration_.num_vertices();
+    std::size_t non_zero_rw = flag_filtration_.num_vertices();
     double inf = std::numeric_limits<double>::max();
     sparseRowMatrix mat = flag_filtration_.uncollapsed_matrix();
 
     Distance_matrix distance_mat;
-    for (size_t indx = 0; indx < non_zero_rw; indx++) {
+    for (std::size_t indx = 0; indx < non_zero_rw; indx++) {
       doubleVector distances;
       rowInnerIterator it(mat, indx);
-      for (size_t j = 0; j <= indx; j++) {  // Iterate over the non-zero columns
+      for (std::size_t j = 0; j <= indx; j++) {  // Iterate over the non-zero columns
         if (it.index() == j && j != indx) {
           distances.push_back(it.value());  // inner index, here it is equal to it.columns()
           ++it;
-        } else if (j == indx)
+        } else if (j == indx) {
           distances.push_back(0);
-        else
+        } else {
           distances.push_back(inf);
+        }
       }
       distance_mat.push_back(distances);
     }
     return distance_mat;
   }
-  void print_sparse_matrix() { flag_filtration_.print_sparse_skeleton(); }
+
+  void print_sparse_matrix() {
+    flag_filtration_.print_sparse_skeleton();
+  }
 };
 
 #endif  // TOWER_ASSEMBLER_H_
