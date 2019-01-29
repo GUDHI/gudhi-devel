@@ -36,6 +36,10 @@
 
 #include <Eigen/Sparse>
 
+namespace Gudhi {
+
+namespace strong_collapse {
+
 typedef int Vertex;
 using Edge = std::pair<Vertex, Vertex>;
 using Edge_list = std::vector<Edge>;
@@ -622,5 +626,9 @@ Subsequently once a dominated column is found, its non-zero row indices are inse
 
   void print_sparse_skeleton() { std::cout << sparseRowAdjMatrix << std::endl; }
 };
+
+}  // namespace strong_collapse
+
+}  // namespace Gudhi
 
 #endif  // FLAG_COMPLEX_SPARSE_MATRIX_H_

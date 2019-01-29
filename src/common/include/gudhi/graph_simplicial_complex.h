@@ -89,7 +89,7 @@ class Filtered_edges_vector {
 
   /** \brief Returns the sub-filtered edges vector from a `new_threshold` filtration value.
    */
-  Filtered_edges sub_filter_edges(typename SimplicialComplexForFilteredEdges::Filtration_value new_threshold) const {
+  Filtered_edges sub_filter_edges_by_filtration(typename SimplicialComplexForFilteredEdges::Filtration_value new_threshold) const {
     auto edge_it = edges_.begin();
     while ((std::get<0>(*edge_it) <= new_threshold) && (edge_it < edges_.end())) {
       ++edge_it;
@@ -97,7 +97,16 @@ class Filtered_edges_vector {
     return Filtered_edges(edges_.begin(), edge_it);
   }
 
- private:
+  /** \brief Returns the sub-filtered edges vector from a `new_index` index value.
+   */
+  Filtered_edges sub_filter_edges_by_index(std::size_t new_index) const {
+    if (new_index >= size())
+      return edges_;
+
+    return Filtered_edges(edges_.begin(), edges_.begin() + new_index);
+  }
+
+private:
   Filtered_edges edges_;
 };
 

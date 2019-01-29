@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
       Gudhi::compute_edge_graph<Gudhi::Filtered_edges_vector, Simplex_tree>(off_reader.get_point_cloud(), threshold,
                                                                             Gudhi::Euclidean_distance());
 
-  Tower_assembler twr_assembler(number_of_points);
+  Gudhi::strong_collapse::Tower_assembler twr_assembler(number_of_points);
 
   // The pipeline is:
   //
@@ -94,23 +94,36 @@ int main(int argc, char* argv[]) {
   //      \ /                           \ /                                               \ /
   // Edge_graph(alpha_1)   <       Edge_graph(alpha_2)             < ...           < Edge_graph(alpha_10 = threshold)
   //
-  Filtration_value threshold_step = (edge_graph.get_filtration_max() - edge_graph.get_filtration_min()) / 10.;
+  std::size_t edge_graph_size = edge_graph.size();
+
+  // Creates a vector of index to sub filter on - just change the vector size to modify the number of loops
+  std::vector<std::size_t> indices(4);
+  std::size_t indices_size = indices.size();
+  std::size_t index_iterator = 0;
+  std::generate(indices.begin(), indices.end(),
+                [=] () mutable { index_iterator++;
+                                 return index_iterator * edge_graph_size / indices_size;
+                               });
+  // Force the last index value because of division rounding
+  indices[indices_size] = edge_graph_size;
+
   std::cout << "min=" << edge_graph.get_filtration_min() << " - max=" << edge_graph.get_filtration_max()
-            << " - step=" << threshold_step << " - size=" << edge_graph.size() << std::endl;
+            << " - index_step=" << indices[0] << " - size=" << edge_graph_size << std::endl;
 
-  Flag_complex_sparse_matrix mat_prev_coll(number_of_points);
+  Gudhi::strong_collapse::Flag_complex_sparse_matrix mat_prev_coll(number_of_points);
 
-  for (Filtration_value sub_threshold = edge_graph.get_filtration_min() + threshold_step; sub_threshold <= threshold;
-       sub_threshold += threshold_step) {
-    Flag_complex_sparse_matrix mat_coll(number_of_points, edge_graph.sub_filter_edges(sub_threshold));
+  for (std::size_t index : indices) {
+    std::cout << "index=" << index << std::endl;
+    Gudhi::strong_collapse::Flag_complex_sparse_matrix mat_coll(number_of_points,
+                                                                edge_graph.sub_filter_edges_by_index(index));
 
     mat_coll.strong_collapse();
-    Map redmap = mat_coll.reduction_map();
+    Gudhi::strong_collapse::Map redmap = mat_coll.reduction_map();
 
-    twr_assembler.build_tower_for_two_cmplxs(mat_prev_coll, mat_coll, redmap, threshold, "CollapsedTowerRips.txt");
+    twr_assembler.build_tower_for_two_cmplxs(mat_prev_coll, mat_coll, redmap, threshold);
     mat_prev_coll = mat_coll;
   }
-  Distance_matrix sparse_distances = twr_assembler.distance_matrix();
+  Gudhi::strong_collapse::Distance_matrix sparse_distances = twr_assembler.distance_matrix();
 
   Rips_complex rips_complex_after_collapse(sparse_distances, threshold);
 
