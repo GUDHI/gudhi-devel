@@ -29,12 +29,15 @@
 #include <set>
 #include <fstream>
 #include <string>
-#include <algorithm>
 #include <limits>
+#include <algorithm>
+
+namespace Gudhi {
+
+namespace strong_collapse {
 
 using Distance_matrix = std::vector<std::vector<double>>;
 
-// using infinity              = std::numeric_limits<double>::max();
 // assumptions : (1) K1 and K2 have the same vertex set
 //               (2) The set of simplices of K1 is a subset of set of simplices of K2
 // K1  ->  K2    [Original Simplicial Complexes]
@@ -46,24 +49,23 @@ class Tower_assembler {
  private:
   Map renamed_vertices_;
   std::size_t current_rename_counter_;
-
   Flag_complex_sparse_matrix flag_filtration_;
 
  public:
-  Tower_assembler(std::size_t numVert) : flag_filtration_(numVert) {
-    for (std::size_t i = 0; i <= numVert; ++i) {
+  Tower_assembler(const std::size_t num_vertices) : flag_filtration_(num_vertices) {
+    for (std::size_t i = 0; i <= num_vertices; ++i) {
       renamed_vertices_[i] = i;
     }
-    current_rename_counter_ = numVert + 1;
+    current_rename_counter_ = num_vertices + 1;
   }
 
-  void build_tower_for_two_cmplxs(Flag_complex_sparse_matrix mat_1, const Flag_complex_sparse_matrix& mat_2,
-                                  Map redmap_2, double filtration_value,
-                                  std::string outFile)  // mat_1 and mat_2 are simplex_trees of K1c and K2c (the
+  void build_tower_for_two_cmplxs(Flag_complex_sparse_matrix& mat_1, const Flag_complex_sparse_matrix& mat_2,
+                                  const Map& redmap_2, const double filtration_value,
+                                  const std::string& outFile = "")  // mat_1 and mat_2 are simplex_trees of K1c and K2c (the
                                                         // collapsed ones), redmap_2 is the map of K2 -> K2c
   {
     std::ofstream myfile(outFile, std::ios::app);
-    if (myfile.is_open()) {
+    if (myfile.is_open() || outFile.empty()) {
       for (auto& v : mat_1.vertex_set()) {
         auto collapsed_to = redmap_2.find(v);            // If v collapsed to something?
         if (collapsed_to != redmap_2.end()) {            // Collapse happened, because there is a vertex in the map
@@ -73,9 +75,11 @@ class Tower_assembler {
             renamed_vertices_.at(v) = current_rename_counter_;
             current_rename_counter_++;
           } else {
-            myfile << filtration_value << " i " << renamed_vertices_.at(collapsed_to->second) << std::endl;
-            myfile << filtration_value << " c " << renamed_vertices_.at(v) << " "
-                   << renamed_vertices_.at(collapsed_to->second) << std::endl;
+            if (!outFile.empty()) {
+              myfile << filtration_value << " i " << renamed_vertices_.at(collapsed_to->second) << std::endl;
+              myfile << filtration_value << " c " << renamed_vertices_.at(v) << " "
+                     << renamed_vertices_.at(collapsed_to->second) << std::endl;
+            }
             flag_filtration_.active_strong_expansion(renamed_vertices_.at(v), renamed_vertices_.at(collapsed_to->second),
                                                      filtration_value);
             renamed_vertices_.at(v) = current_rename_counter_;
@@ -95,31 +99,39 @@ class Tower_assembler {
         auto v = std::get<1>(e);
         if (!mat_1.membership(u)) {
           flag_filtration_.insert_vertex(renamed_vertices_.at(u), filtration_value);
-          myfile << filtration_value << " i";
-          myfile << " " << renamed_vertices_.at(u);
-          myfile << std::endl;
+          if (!outFile.empty()) {
+            myfile << filtration_value << " i";
+            myfile << " " << renamed_vertices_.at(u);
+            myfile << std::endl;
+          }
           mat_1.insert_vertex(u, 1);
         }
 
         if (!mat_1.membership(v)) {
           flag_filtration_.insert_vertex(renamed_vertices_.at(v), filtration_value);
 
-          myfile << filtration_value << " i";
-          myfile << " " << renamed_vertices_.at(v);
-          myfile << std::endl;
+          if (!outFile.empty()) {
+            myfile << filtration_value << " i";
+            myfile << " " << renamed_vertices_.at(v);
+            myfile << std::endl;
+          }
           mat_1.insert_vertex(v, 1);
         }
         if (!mat_1.membership(e)) {
           flag_filtration_.insert_new_edges(renamed_vertices_.at(u), renamed_vertices_.at(v), filtration_value);
 
-          myfile << filtration_value << " i";
-          myfile << " " << renamed_vertices_.at(u) << ", " << renamed_vertices_.at(v);
-          myfile << std::endl;
+          if (!outFile.empty()) {
+            myfile << filtration_value << " i";
+            myfile << " " << renamed_vertices_.at(u) << ", " << renamed_vertices_.at(v);
+            myfile << std::endl;
+          }
           mat_1.insert_new_edges(u, v, 1);
         }
       }
-      myfile << "# Tower updated for the additional subcomplex.\n";
-      myfile.close();
+      if (!outFile.empty()) {
+        myfile << "# Tower updated for the additional subcomplex.\n";
+        myfile.close();
+      }
     } else {
       std::cerr << "Unable to open file " << outFile;
       exit(-1);
@@ -154,5 +166,9 @@ class Tower_assembler {
     flag_filtration_.print_sparse_skeleton();
   }
 };
+
+}  // namespace strong_collapse
+
+}  // namespace Gudhi
 
 #endif  // TOWER_ASSEMBLER_H_
