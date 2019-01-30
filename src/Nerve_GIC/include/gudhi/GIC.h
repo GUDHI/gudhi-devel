@@ -230,18 +230,17 @@ class Cover_complex {
 
   /** \brief Reads and stores the input point cloud from vector stored in memory.
    *
-   * @param[in] cloud input vector representing the point cloud. Each row is a point and each coordinate is a vector.
+   * @param[in] point_cloud input vector representing the point cloud. Each row is a point and each coordinate is a vector.
    *
    */
-  template <class InputRange>
-  void set_point_cloud_from_range(InputRange const & cloud) {
-    n = cloud.size(); data_dimension = cloud[0].size(); point_cloud_name = "matrix";
+  void set_point_cloud_from_range(const std::vector<std::vector<double> > & point_cloud) {
+    n = point_cloud.size(); data_dimension = point_cloud[0].size();
+    point_cloud_name = "matrix"; cover.resize(n);
     for(int i = 0; i < n; i++){
-      point_cloud.emplace_back(cloud[i].begin(), cloud[i].begin() + data_dimension);
       boost::add_vertex(one_skeleton_OFF);
       vertices.push_back(boost::add_vertex(one_skeleton));
-      cover.emplace_back();
     }
+    this->point_cloud = point_cloud;
   }
 
   /** \brief Reads and stores the input point cloud from .(n)OFF file.
@@ -395,18 +394,12 @@ class Cover_complex {
    * @param[in] distance_matrix input vector representing the distance matrix.
    *
    */
-  template <class InputRange>
-  void set_distances_from_range(InputRange const & distance_matrix) {
-    if(point_cloud.size() == 0){
-      n = distance_matrix.size();
-      point_cloud_name = "matrix";
-      data_dimension = 0;
-      for(int i = 0; i < n; i++){
-        point_cloud.emplace_back();
-        boost::add_vertex(one_skeleton_OFF);
-        vertices.push_back(boost::add_vertex(one_skeleton));
-        cover.emplace_back();
-      }
+  void set_distances_from_range(const std::vector<std::vector<double> > & distance_matrix) {
+    n = distance_matrix.size(); data_dimension = 0; point_cloud_name = "matrix";
+    cover.resize(n); point_cloud.resize(n);
+    for(int i = 0; i < n; i++){
+      boost::add_vertex(one_skeleton_OFF);
+      vertices.push_back(boost::add_vertex(one_skeleton));
     }
     distances = distance_matrix;
   }
