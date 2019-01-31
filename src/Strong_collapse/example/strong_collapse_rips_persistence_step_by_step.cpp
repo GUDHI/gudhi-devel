@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
   std::size_t edge_graph_size = edge_graph.size();
 
   // Creates a vector of index to sub filter on - just change the vector size to modify the number of loops
-  std::vector<std::size_t> indices(4);
+  std::vector<std::size_t> indices(50);
   std::size_t indices_size = indices.size();
   std::size_t index_iterator = 0;
   std::generate(indices.begin(), indices.end(),
