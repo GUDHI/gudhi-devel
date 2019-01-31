@@ -30,7 +30,7 @@
 #include <unordered_map>
 #include <tuple>
 #include <algorithm>
-
+#include <unordered_set>
 #include <ctime>
 #include <fstream>
 
@@ -417,7 +417,7 @@ Subsequently once a dominated column is found, its non-zero row indices are inse
         expansion_limit * num_vertices);  // Initializing sparseRowAdjMatrix, This is a row-major sparse matrix.
 
     for (std::size_t bgn_idx = 0; bgn_idx < edge_t.size(); bgn_idx++) {
-      vertexVector s = {std::get<1>(edge_t.at(bgn_idx)), std::get<2>(edge_t.at(bgn_idx))};
+      //vertexVector s = {std::get<1>(edge_t.at(bgn_idx)), std::get<2>(edge_t.at(bgn_idx))};
       insert_new_edges(std::get<1>(edge_t.at(bgn_idx)), std::get<2>(edge_t.at(bgn_idx)), 1);
     }
     sparseRowAdjMatrix.makeCompressed();
