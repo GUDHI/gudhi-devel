@@ -1,0 +1,11 @@
+project(Strong_collapse_tests)
+
+include(GUDHI_test_coverage)
+
+add_executable ( Strong_collapse_flag_complex_sparse_matrix_test_unit test_flag_complex_sparse_matrix.cpp )
+target_link_libraries(Strong_collapse_flag_complex_sparse_matrix_test_unit ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+if (TBB_FOUND)
+  target_link_libraries(Strong_collapse_flag_complex_sparse_matrix_test_unit ${TBB_LIBRARIES})
+endif()
+
+gudhi_add_coverage_test(Strong_collapse_flag_complex_sparse_matrix_test_unit)
