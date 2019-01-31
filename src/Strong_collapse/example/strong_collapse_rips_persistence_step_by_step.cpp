@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
                                                                 edge_graph.sub_filter_edges_by_index(index));
 
     mat_coll.strong_collapse();
-    Gudhi::strong_collapse::Map redmap = mat_coll.reduction_map();
+    Gudhi::strong_collapse::Reduction_map redmap = mat_coll.reduction_map();
 
     twr_assembler.build_tower_for_two_cmplxs(mat_prev_coll, mat_coll, redmap, threshold);
     mat_prev_coll = mat_coll;

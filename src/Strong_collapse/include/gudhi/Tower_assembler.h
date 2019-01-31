@@ -47,7 +47,7 @@ using Distance_matrix = std::vector<std::vector<double>>;
 
 class Tower_assembler {
  private:
-  Map renamed_vertices_;
+  Reduction_map renamed_vertices_;
   std::size_t current_rename_counter_;
   Flag_complex_sparse_matrix flag_filtration_;
 
@@ -60,7 +60,7 @@ class Tower_assembler {
   }
 
   void build_tower_for_two_cmplxs(Flag_complex_sparse_matrix& mat_1, const Flag_complex_sparse_matrix& mat_2,
-                                  const Map& redmap_2, const double filtration_value,
+                                  const Reduction_map& redmap_2, const double filtration_value,
                                   const std::string& outFile = "")  // mat_1 and mat_2 are simplex_trees of K1c and K2c (the
                                                         // collapsed ones), redmap_2 is the map of K2 -> K2c
   {

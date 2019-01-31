@@ -45,7 +45,7 @@ using Edge = std::pair<Vertex, Vertex>;
 using Edge_list = std::vector<Edge>;
 
 using MapVertexToIndex = std::unordered_map<Vertex, int>;
-using Map = std::unordered_map<Vertex, Vertex>;
+using Reduction_map = std::unordered_map<Vertex, Vertex>;
 
 using sparseRowMatrix = Eigen::SparseMatrix<double, Eigen::RowMajor>;
 using rowInnerIterator = sparseRowMatrix::InnerIterator;
@@ -54,7 +54,6 @@ using doubleVector = std::vector<double>;
 using vertexVector = std::vector<Vertex>;
 using boolVector = std::vector<bool>;
 
-using doubleQueue = std::queue<double>;
 
 typedef std::vector<std::tuple<double, Vertex, Vertex> > Filtered_sorted_edge_list;
 
@@ -65,41 +64,22 @@ typedef std::vector<std::tuple<double, Vertex, Vertex> > Filtered_sorted_edge_li
 */
 class Flag_complex_sparse_matrix {
  private:
-  std::unordered_map<int, Vertex> rowToVertex;
+  /** \brief Stores the vertices (or unordered set of vertex) of the original simplicial complex. */
+  std::unordered_set<Vertex> vertices_;
 
-  // Vertices strored as an unordered_set
-  std::unordered_set<Vertex> vertices;
+  /** \brief Stores the 1-simplices (or list of edges) of the original simplicial complex. The list is updated in
+   * `after_collapse()` method. */
+  Edge_list one_simplices_;
 
-  //! Stores the 1-simplices9edges) of the original Simplicial Complex.
-  /*!
-    \code
-    simplexVector = std::vector< Simplex >
-    \endcode
-    This is a vector that stores all the maximal simplices of the Original Simplicial Complex. <br>
-    \endverbatim
-  */
-  Edge_list one_simplices;
+  /** \brief The row in the sparse matrix does not correspond to the vertex number. This map helps to switch from row
+   * to vertex 
+   * */
+  std::unordered_map<int, Vertex> row_to_vertex_;
 
-  //! Stores the Map between vertices<B>rowToVertex  and row indices <B>rowToVertex -> row-index</B>.
-  /*!
-    \code
-    MapVertexToIndex = std::unordered_map<Vertex,int>
-    \endcode
-    So, if the original simplex tree had vertices 0,1,4,5 <br>
-    <B>rowToVertex</B> would store : <br>
-    \verbatim
-    Values =  | 0 | 1 | 4 | 5 |
-    Indices =   0   1   2   3
-    \endverbatim
-    And <B>vertexToRow</B> would be a map like the following : <br>
-    \verbatim
-    0 -> 0
-    1 -> 1
-    4 -> 2
-    5 -> 3
-    \endverbatim
-  */
-  MapVertexToIndex vertexToRow;
+  /** \brief The row in the sparse matrix does not correspond to the vertex number. This map helps to switch from
+   * vertex to row
+   * */
+  std::unordered_map<Vertex, int> vertex_to_row_;
 
   //! Stores the number of vertices in the original Simplicial Complex.
   /*!
@@ -107,90 +87,67 @@ class Flag_complex_sparse_matrix {
   */
   std::size_t rows;
 
-  std::size_t numOneSimplices;
+  /** \brief Stores the collapsed sparse matrix representation. Initialized by the `after_collapse()` method.
+   * */
+  sparseRowMatrix sparse_collapsed_matrix_;
+  /** \brief Stores the sparse matrix representation of the 1-simplices. Initialized by the constructor.
+   * */
+  sparseRowMatrix sparse_matrix_;
 
-  //! Stores the Sparse matrix of double values representing the Original Simplicial Complex.
-  /*!
-    \code
-    sparseMatrix   = Eigen::SparseMatrix<double> ;
-    \endcode
-    So after counting the number of rows and num of Maximal simplices, this is initialised as : <br>
-    \code
-    sparseMxSimplices =  sparseMatrix(rows,numOneSimplices);
-    \endcode
-    And filled with columns by the Constructor with a Fake Simplex tree as an argument.
-  ;
-      sparseMatrix* Sparse*/
-
-  sparseRowMatrix sparse_colpsd_adj_Matrix;  // Stores the collapsed sparse matrix representaion.
-  sparseRowMatrix sparseRowAdjMatrix;  // This is row-major version of the same sparse-matrix, to facilitate easy access
-                                       // to elements when traversing the matrix row-wise.
-
-  //! Stores <I>true</I> for dominated rows and  <I>false</I> for undominated rows.
-  /*!
-    Initialised to a vector of length equal to the value of the variable <B>rows</B> with all <I>false</I> values.
-    Subsequent removal of dominated vertices is reflected by concerned entries changing to <I>true</I> in this vector.
+  /** \brief Stores <I>true</I> for dominated rows and  <I>false</I> for undominated rows.
+   * Initialised to a vector of length equal to the value of the variable <B>rows</B> with all <I>false</I> values.
+   * Subsequent removal of dominated vertices is reflected by concerned entries changing to <I>true</I> in this vector.
   */
-  boolVector vertDomnIndicator;  //(domination indicator)
+  boolVector domination_indicator_;
 
-  //! Stores the indices of the rows to-be checked for domination in the current iteration.
-  /*!
-    Initialised to a queue with all row-indices inserted.
-    Subsequently once the row is checked for dominated the row-index is poped out from the queue. A row-index is
-    inserted once again if it is a non-zero element of a dominated column.
-  */
-  boolVector activeIndicator;       // active indicator
-  boolVector contractionIndicator;  //(contraction indicator)
+  /** \brief Stores the indices of the rows to be checked for domination in the current iteration.
+   * Initialised to a queue with all row-indices inserted.
+   * Subsequently once the row is checked for dominated the row-index is poped out from the queue. A row-index is
+   * inserted once again if it is a non-zero element of a dominated column.
+   */
+  boolVector contraction_indicator_;
 
-  //! Stores the indices of the row to-be checked for domination in the current iteration.
-  /*!
-Initialised to an empty queue.
-Subsequently once a dominated column is found, its non-zero row indices are inserted.
-*/
-  doubleQueue rowIterator;
+  /** \brief Stores the indices of the row to-be checked for domination in the current iteration.
+   * Initialised to an empty queue.
+   * Subsequently once a dominated column is found, its non-zero row indices are inserted.
+   */
+  std::queue<std::size_t> row_iterator_;
 
-  //! Stores <I>true</I> if the current row is inserted in the queue <B>rowIterator<B> otherwise its value is
-  //! <I>false<I>.
-  /*!
-    Initialised to a boolean vector of length equal to the value of the variable <B>rows</B> with all <I>true</I>
-    values. Subsequent removal/addition of a row from <B>rowIterator<B> is reflected by concerned entries changing to
-    <I>false</I>/<I>true</I> in this vector.
-  */
-  boolVector rowInsertIndicator;  //(current iteration row insertion indicator)
+  /** \brief Stores <I>true</I> if the current row is inserted in the queue <B>row_iterator_<B> otherwise its value is
+   * <I>false<I>.
+   *
+   * Initialised to a boolean vector of length equal to the value of the variable <B>rows</B> with all <I>true</I>
+   * values. Subsequent removal/addition of a row from <B>row_iterator_<B> is reflected by concerned entries changing
+   * to <I>false</I>/<I>true</I> in this vector.
+   */
+  boolVector row_insert_indicator_;
 
-  //! Map that stores the Reduction / Collapse of vertices.
-  /*!
-    \code
-    Map = std::unordered_map<Vertex,Vertex>
-    \endcode
-    This is empty to begin with. As and when collapses are done (let's say from dominated vertex <I>v</I> to dominating
-    vertex <I>v'</I>) : <br> <B>ReductionMap</B>[<I>v</I>] = <I>v'</I> is entered into the map. <br> <I>This does not
-    store uncollapsed vertices. What it means is that say vertex <I>x</I> was never collapsed onto any other vertex.
-    Then, this map <B>WILL NOT</B> have any entry like <I>x</I> -> <I>x</I>. Basically, it will have no entry
-    corresponding to vertex <I>x</I> at all. </I>
-  */
-  Map ReductionMap;
+  /** \brief Stores the Reduction / Collapse of vertices.
+   * This is empty to begin with. As and when collapses are done (let's say from dominated vertex <I>v</I> to
+   * dominating vertex <I>v'</I>) : <br> <B>reduction_map_</B>[<I>v</I>] = <I>v'</I> is entered into the map. <br>
+   * This does not store uncollapsed vertices. What it means is that say vertex <I>x</I> was never collapsed onto
+   * any other vertex.
+   * Then, this map <B>WILL NOT</B> have any entry like <I>x</I> -> <I>x</I>. Basically, it will have no entry
+   * corresponding to vertex <I>x</I> at all.
+   */
+  Reduction_map reduction_map_;
 
-  bool already_collapsed;
-  int expansion_limit;
+  int expansion_limit_;
 
   void init() {
-    rowToVertex.clear();
-    vertexToRow.clear();
-    one_simplices.clear();
-    ReductionMap.clear();
+    row_to_vertex_.clear();
+    vertex_to_row_.clear();
+    one_simplices_.clear();
+    reduction_map_.clear();
 
-    vertDomnIndicator.clear();
-    rowInsertIndicator.clear();
-    rowIterator.push(0);
-    rowIterator.pop();
+    domination_indicator_.clear();
+    row_insert_indicator_.clear();
+    // VR: row_iterator_.push(0);
+    // VR: row_iterator_.pop();
 
     rows = 0;
 
-    numOneSimplices = 0;
-    expansion_limit = 3;
-
-    already_collapsed = false;
+    expansion_limit_ = 3;
   }
 
   //!	Function for computing the Fake Simplex_tree corresponding to the core of the complex.
@@ -202,34 +159,34 @@ Subsequently once a dominated column is found, its non-zero row indices are inse
     <I>insert_new_edges()</I> function from Gudhi's Fake_simplex_tree.
   */
   void after_collapse() {
-    sparse_colpsd_adj_Matrix = sparseRowMatrix(rows, rows);  // Just for debugging purpose.
-    one_simplices.clear();
+    sparse_collapsed_matrix_ = sparseRowMatrix(rows, rows);  // Just for debugging purpose.
+    one_simplices_.clear();
     for (std::size_t rw = 0; rw < rows; ++rw) {
-      if (not vertDomnIndicator[rw])  // If the current column is not dominated
+      if (not domination_indicator_[rw])  // If the current column is not dominated
       {
         auto nbhrs_to_insert = read_row_index(rw);  // returns row indices of the non-dominated vertices.
         for (auto& v : nbhrs_to_insert) {
-          sparse_colpsd_adj_Matrix.insert(rw, v) = 1;
-          if (rw <= v) one_simplices.push_back({rowToVertex[rw], rowToVertex[v]});
+          sparse_collapsed_matrix_.insert(rw, v) = 1;
+          if (rw <= v) one_simplices_.push_back({row_to_vertex_[rw], row_to_vertex_[v]});
         }
       }
     }
     return;
   }
-  //! Function to fully compact a particular vertex of the ReductionMap.
+  //! Function to fully compact a particular vertex of the reduction_map_.
   /*!
-    It takes as argument the iterator corresponding to a particular vertex pair (key-value) stored in the ReductionMap.
+    It takes as argument the iterator corresponding to a particular vertex pair (key-value) stored in the reduction_map_.
     <br> It then checks if the second element of this particular vertex pair is present as a first element of some other
     key-value pair in the map. If no, then the first element of the vertex pair in consideration is fully compact. If
     yes, then recursively call fully_compact_this_vertex() on the second element of the original pair in consideration
     and assign its resultant image as the image of the first element of the original pair in consideration as well.
   */
-  void fully_compact_this_vertex(Map::iterator iter) {
-    Map::iterator found = ReductionMap.find(iter->second);
-    if (found == ReductionMap.end()) return;
+  void fully_compact_this_vertex(Reduction_map::iterator iter) {
+    Reduction_map::iterator found = reduction_map_.find(iter->second);
+    if (found == reduction_map_.end()) return;
 
     fully_compact_this_vertex(found);
-    iter->second = ReductionMap[iter->second];
+    iter->second = reduction_map_[iter->second];
   }
 
   //! Function to fully compact the Reduction Map.
@@ -241,35 +198,30 @@ Subsequently once a dominated column is found, its non-zero row indices are inse
     basically calls fully_compact_this_vertex() for each entry in the map.
   */
   void fully_compact() {
-    Map::iterator it = ReductionMap.begin();
-    while (it != ReductionMap.end()) {
+    Reduction_map::iterator it = reduction_map_.begin();
+    while (it != reduction_map_.end()) {
       fully_compact_this_vertex(it);
       it++;
     }
   }
 
   void sparse_strong_collapse() {
-    complete_domination_check(
-        rowIterator, rowInsertIndicator,
-        vertDomnIndicator);  // Complete check for rows in rowIterator, rowInsertIndicator is a list of boolean
-                             // indicator if a vertex is already inserted in the working row_queue (rowIterator)
-    if (not rowIterator.empty())
-      sparse_strong_collapse();
-    else
-      return;
+    complete_domination_check();
+    return;
   }
 
-  void complete_domination_check(doubleQueue& iterator, boolVector& insertIndicator, boolVector& domnIndicator) {
-    double k;
-    doubleVector nonZeroInnerIdcs;
-    while (not iterator.empty())  // "iterator" contains list(FIFO) of rows to be considered for domination check
+  // Complete check for rows in row_iterator_, row_insert_indicator_ is a list of boolean
+  // indicator if a vertex is already inserted in the working row_queue (row_iterator_)
+  void complete_domination_check() {
+    // row_iterator_ contains list (FIFO) of rows to be considered for domination check
+    while (not row_iterator_.empty())
     {
-      k = iterator.front();
-      iterator.pop();
-      insertIndicator[k] = false;
-      if (not domnIndicator[k])  // Check if is  already dominated
+      double k = row_iterator_.front();
+      row_iterator_.pop();
+      row_insert_indicator_[k] = false;
+      if (not domination_indicator_[k])  // Check if is  already dominated
       {
-        nonZeroInnerIdcs = read_row_index(k);
+        doubleVector nonZeroInnerIdcs = read_row_index(k);
         for (doubleVector::iterator it = nonZeroInnerIdcs.begin(); it != nonZeroInnerIdcs.end(); it++) {
           int checkDom = pair_domination_check(k, *it);  // "true" for row domination comparison
           if (checkDom == 1)                             // row k is dominated by *it, k <= *it;
@@ -302,9 +254,9 @@ Subsequently once a dominated column is found, its non-zero row indices are inse
   doubleVector read_row_index(double indx)  // Returns list of non-zero columns of the particular indx.
   {
     doubleVector nonZeroIndices;
-    if (not vertDomnIndicator[indx])
-      for (rowInnerIterator it(sparseRowAdjMatrix, indx); it; ++it) {  // Iterate over the non-zero columns
-        if (not vertDomnIndicator[it.index()]) {
+    if (not domination_indicator_[indx])
+      for (rowInnerIterator it(sparse_matrix_, indx); it; ++it) {  // Iterate over the non-zero columns
+        if (not domination_indicator_[it.index()]) {
           nonZeroIndices.push_back(it.index());  // inner index, here it is equal to it.columns()
         }
       }
@@ -312,19 +264,19 @@ Subsequently once a dominated column is found, its non-zero row indices are inse
   }
 
   void setZero(double dominated, double dominating) {
-    vertDomnIndicator[dominated] = true;
-    ReductionMap[rowToVertex[dominated]] = rowToVertex[dominating];
+    domination_indicator_[dominated] = true;
+    reduction_map_[row_to_vertex_[dominated]] = row_to_vertex_[dominating];
 
-    vertexToRow.erase(rowToVertex[dominated]);
-    vertices.erase(rowToVertex[dominated]);
-    rowToVertex.erase(dominated);
+    vertex_to_row_.erase(row_to_vertex_[dominated]);
+    vertices_.erase(row_to_vertex_[dominated]);
+    row_to_vertex_.erase(dominated);
 
-    for (rowInnerIterator it(sparseRowAdjMatrix, dominated); it; ++it)  // Iterate over the non-zero rows
-      if (not vertDomnIndicator[it.index()] &&
-          not rowInsertIndicator[it.index()])  // Checking if the row is already dominated(set zero) or inserted
+    for (rowInnerIterator it(sparse_matrix_, dominated); it; ++it)  // Iterate over the non-zero rows
+      if (not domination_indicator_[it.index()] &&
+          not row_insert_indicator_[it.index()])  // Checking if the row is already dominated(set zero) or inserted
       {
-        rowIterator.push(it.index());
-        rowInsertIndicator[it.index()] = true;
+        row_iterator_.push(it.index());
+        row_insert_indicator_[it.index()] = true;
       }
   }
 
@@ -332,9 +284,9 @@ Subsequently once a dominated column is found, its non-zero row indices are inse
                                         // is in the return type
   {
     vertexVector colmns;
-    for (rowInnerIterator itCol(sparseRowAdjMatrix, rowIndx); itCol; ++itCol)  // Iterate over the non-zero columns
-      if (not vertDomnIndicator[itCol.index()])        // Check if the row corresponds to a dominated vertex
-        colmns.push_back(rowToVertex[itCol.index()]);  // inner index, here it is equal to it.col()
+    for (rowInnerIterator itCol(sparse_matrix_, rowIndx); itCol; ++itCol)  // Iterate over the non-zero columns
+      if (not domination_indicator_[itCol.index()])        // Check if the row corresponds to a dominated vertex
+        colmns.push_back(row_to_vertex_[itCol.index()]);  // inner index, here it is equal to it.col()
     std::sort(colmns.begin(), colmns.end());
     return colmns;
   }
@@ -343,9 +295,9 @@ Subsequently once a dominated column is found, its non-zero row indices are inse
                                               // are currently active. the difference is in the return type.
   {
     vertexVector colmns;
-    for (rowInnerIterator itCol(sparseRowAdjMatrix, rowIndx); itCol; ++itCol)  // Iterate over the non-zero columns
-      if (not contractionIndicator[itCol.index()])     // Check if the row corresponds to a contracted vertex
-        colmns.push_back(rowToVertex[itCol.index()]);  // inner index, here it is equal to it.col()
+    for (rowInnerIterator itCol(sparse_matrix_, rowIndx); itCol; ++itCol)  // Iterate over the non-zero columns
+      if (not contraction_indicator_[itCol.index()])     // Check if the row corresponds to a contracted vertex
+        colmns.push_back(row_to_vertex_[itCol.index()]);  // inner index, here it is equal to it.col()
 
     std::sort(colmns.begin(), colmns.end());
     return colmns;
@@ -355,8 +307,8 @@ Subsequently once a dominated column is found, its non-zero row indices are inse
                                            // dominated or not. the difference is in the return type.
   {
     vertexVector colmns;
-    for (rowInnerIterator itCol(sparseRowAdjMatrix, rowIndx); itCol; ++itCol)  // Iterate over the non-zero columns
-      colmns.push_back(rowToVertex[itCol.index()]);  // inner index, here it is equal to it.row()
+    for (rowInnerIterator itCol(sparse_matrix_, rowIndx); itCol; ++itCol)  // Iterate over the non-zero columns
+      colmns.push_back(row_to_vertex_[itCol.index()]);  // inner index, here it is equal to it.row()
     std::sort(colmns.begin(), colmns.end());
     return colmns;
   }
@@ -364,12 +316,12 @@ Subsequently once a dominated column is found, its non-zero row indices are inse
   void swap_rows(const Vertex& v,
                  const Vertex& w) {  // swap the rows of v and w. Both should be members of the skeleton
     if (membership(v) && membership(w)) {
-      auto rw_v = vertexToRow[v];
-      auto rw_w = vertexToRow[w];
-      vertexToRow[v] = rw_w;
-      vertexToRow[w] = rw_v;
-      rowToVertex[rw_v] = w;
-      rowToVertex[rw_w] = v;
+      auto rw_v = vertex_to_row_[v];
+      auto rw_w = vertex_to_row_[w];
+      vertex_to_row_[v] = rw_w;
+      vertex_to_row_[w] = rw_v;
+      row_to_vertex_[rw_v] = w;
+      row_to_vertex_[rw_w] = v;
     }
   }
 
@@ -385,20 +337,20 @@ Subsequently once a dominated column is found, its non-zero row indices are inse
 
   Flag_complex_sparse_matrix(std::size_t expRows) {
     init();
-    sparseRowAdjMatrix = sparseRowMatrix(
-        expansion_limit * expRows,
-        expansion_limit * expRows);  // Initializing sparseRowAdjMatrix, This is a row-major sparse matrix.
+    sparse_matrix_ = sparseRowMatrix(
+        expansion_limit_ * expRows,
+        expansion_limit_ * expRows);  // Initializing sparse_matrix_, This is a row-major sparse matrix.
   }
 
   //! Main Constructor
   /*!
     Argument is an instance of Fake_simplex_tree. <br>
     This is THE function that initialises all data members to appropriate values. <br>
-    <B>rowToVertex</B>, <B>vertexToRow</B>, <B>rows</B>, <B>cols</B>, <B>sparseMxSimplices</B> are initialised here.
-    <B>vertDomnIndicator</B>, <B>rowInsertIndicator</B>
-    ,<B>rowIterator<B>,<B>simpDomnIndicator<B>,<B>colInsertIndicator<B> and <B>columnIterator<B> are initialised by
+    <B>row_to_vertex_</B>, <B>vertex_to_row_</B>, <B>rows</B>, <B>cols</B>, <B>sparseMxSimplices</B> are initialised here.
+    <B>domination_indicator_</B>, <B>row_insert_indicator_</B>
+    ,<B>row_iterator_<B>,<B>simpDomnIndicator<B>,<B>colInsertIndicator<B> and <B>columnIterator<B> are initialised by
     init_lists() function which is called at the end of this. <br> What this does:
-      1. Populate <B>rowToVertex</B> and <B>vertexToRow</B> by going over through the vertices of the Fake_simplex_tree
+      1. Populate <B>row_to_vertex_</B> and <B>vertex_to_row_</B> by going over through the vertices of the Fake_simplex_tree
     and assign the variable <B>rows</B> = no. of vertices
       2. Initialise the variable <B>cols</B> to zero and allocate memory from the heap to <B>MxSimplices</B> by doing
     <br> <I>MxSimplices = new boolVector[rows];</I>
@@ -412,15 +364,15 @@ Subsequently once a dominated column is found, its non-zero row indices are inse
   Flag_complex_sparse_matrix(const std::size_t num_vertices, const Filtered_sorted_edge_list& edge_t) {
     init();
 
-    sparseRowAdjMatrix = sparseRowMatrix(
-        expansion_limit * num_vertices,
-        expansion_limit * num_vertices);  // Initializing sparseRowAdjMatrix, This is a row-major sparse matrix.
+    sparse_matrix_ = sparseRowMatrix(
+        expansion_limit_ * num_vertices,
+        expansion_limit_ * num_vertices);  // Initializing sparse_matrix_, This is a row-major sparse matrix.
 
     for (std::size_t bgn_idx = 0; bgn_idx < edge_t.size(); bgn_idx++) {
       //vertexVector s = {std::get<1>(edge_t.at(bgn_idx)), std::get<2>(edge_t.at(bgn_idx))};
       insert_new_edges(std::get<1>(edge_t.at(bgn_idx)), std::get<2>(edge_t.at(bgn_idx)), 1);
     }
-    sparseRowAdjMatrix.makeCompressed();
+    sparse_matrix_.makeCompressed();
   }
 
   //!	Destructor.
@@ -432,11 +384,10 @@ Subsequently once a dominated column is found, its non-zero row indices are inse
   //!	Function for performing strong collapse.
   /*!
     calls sparse_strong_collapse(), and
-    Then, it compacts the ReductionMap by calling the function fully_compact().
+    Then, it compacts the reduction_map_ by calling the function fully_compact().
   */
   void strong_collapse() {
     sparse_strong_collapse();
-    already_collapsed = true;
     // Now we complete the Reduction Map
     fully_compact();
     // Post processing...
@@ -445,8 +396,8 @@ Subsequently once a dominated column is found, its non-zero row indices are inse
   }
 
   bool membership(const Vertex& v) {
-    auto rw = vertexToRow.find(v);
-    if (rw != vertexToRow.end())
+    auto rw = vertex_to_row_.find(v);
+    if (rw != vertex_to_row_.end())
       return true;
     else
       return false;
@@ -456,8 +407,8 @@ Subsequently once a dominated column is found, its non-zero row indices are inse
     auto u = std::get<0>(e);
     auto v = std::get<1>(e);
     if (membership(u) && membership(v)) {
-      auto rw_u = vertexToRow[u];
-      auto rw_v = vertexToRow[v];
+      auto rw_u = vertex_to_row_[u];
+      auto rw_v = vertex_to_row_[v];
       if (rw_u <= rw_v)
         for (auto x : read_row_index(rw_v)) {  // Taking advantage of sorted lists.
           if (rw_u == x)
@@ -476,17 +427,17 @@ Subsequently once a dominated column is found, its non-zero row indices are inse
     return false;
   }
   void insert_vertex(const Vertex& vertex, double filt_val) {
-    auto rw = vertexToRow.find(vertex);
-    if (rw == vertexToRow.end()) {
-      sparseRowAdjMatrix.insert(rows, rows) =
+    auto rw = vertex_to_row_.find(vertex);
+    if (rw == vertex_to_row_.end()) {
+      sparse_matrix_.insert(rows, rows) =
           filt_val;  // Initializing the diagonal element of the adjency matrix corresponding to rw_b.
-      vertDomnIndicator.push_back(false);
-      rowInsertIndicator.push_back(true);
-      contractionIndicator.push_back(false);
-      rowIterator.push(rows);
-      vertexToRow.insert(std::make_pair(vertex, rows));
-      rowToVertex.insert(std::make_pair(rows, vertex));
-      vertices.emplace(vertex);
+      domination_indicator_.push_back(false);
+      row_insert_indicator_.push_back(true);
+      contraction_indicator_.push_back(false);
+      row_iterator_.push(rows);
+      vertex_to_row_.insert(std::make_pair(vertex, rows));
+      row_to_vertex_.insert(std::make_pair(rows, vertex));
+      vertices_.emplace(vertex);
       rows++;
     }
   }
@@ -496,44 +447,44 @@ Subsequently once a dominated column is found, its non-zero row indices are inse
     if (u != v) {
       insert_vertex(v, filt_val);
 
-      auto rw_u = vertexToRow.find(u);
-      auto rw_v = vertexToRow.find(v);
+      auto rw_u = vertex_to_row_.find(u);
+      auto rw_v = vertex_to_row_.find(v);
 
-      sparseRowAdjMatrix.insert(rw_u->second, rw_v->second) = filt_val;
-      sparseRowAdjMatrix.insert(rw_v->second, rw_u->second) = filt_val;
-      one_simplices.emplace_back(u, v);
-      numOneSimplices++;
+      sparse_matrix_.insert(rw_u->second, rw_v->second) = filt_val;
+      sparse_matrix_.insert(rw_v->second, rw_u->second) = filt_val;
+      one_simplices_.emplace_back(u, v);
     }
   }
 
-  std::size_t num_vertices() const { return vertices.size(); }
+  std::size_t num_vertices() const { return vertices_.size(); }
 
-  //!	Function for returning the ReductionMap.
+  //!	Function for returning the reduction_map_.
   /*!
     This is the (stl's unordered) map that stores all the collapses of vertices. <br>
     It is simply returned.
   */
 
-  Map reduction_map() const { return ReductionMap; }
-  std::unordered_set<Vertex> vertex_set() const { return vertices; }
-  sparseRowMatrix collapsed_matrix() const { return sparse_colpsd_adj_Matrix; }
+  Reduction_map reduction_map() const { return reduction_map_; }
+  std::unordered_set<Vertex> vertex_set() const { return vertices_; }
+  
+  sparseRowMatrix collapsed_matrix() const { return sparse_collapsed_matrix_; }
 
-  sparseRowMatrix uncollapsed_matrix() const { return sparseRowAdjMatrix; }
+  sparseRowMatrix uncollapsed_matrix() const { return sparse_matrix_; }
 
-  Edge_list all_edges() const { return one_simplices; }
+  Edge_list all_edges() const { return one_simplices_; }
 
   vertexVector active_neighbors(const Vertex& v) {
     vertexVector nb;
-    auto rw_v = vertexToRow.find(v);
-    if (rw_v != vertexToRow.end()) nb = readActiveRow(rw_v->second);
+    auto rw_v = vertex_to_row_.find(v);
+    if (rw_v != vertex_to_row_.end()) nb = readActiveRow(rw_v->second);
 
     return nb;
   }
 
   vertexVector neighbors(const Vertex& v) {
     vertexVector nb;
-    auto rw_v = vertexToRow.find(v);
-    if (rw_v != vertexToRow.end()) nb = readRow(rw_v->second);
+    auto rw_v = vertex_to_row_.find(v);
+    if (rw_v != vertex_to_row_.end()) nb = readRow(rw_v->second);
 
     return nb;
   }
@@ -555,27 +506,27 @@ Subsequently once a dominated column is found, its non-zero row indices are inse
       bool keep_mem = membership(keep);
       if (del_mem && keep_mem) {
         doubleVector del_indcs, keep_indcs, diff;
-        auto row_del = vertexToRow[del];
-        auto row_keep = vertexToRow[keep];
+        auto row_del = vertex_to_row_[del];
+        auto row_keep = vertex_to_row_[keep];
         del_indcs = read_row_index(row_del);
         keep_indcs = read_row_index(row_keep);
         std::set_difference(del_indcs.begin(), del_indcs.end(), keep_indcs.begin(), keep_indcs.end(),
                             std::inserter(diff, diff.begin()));
         for (auto& v : diff) {
           if (v != row_del) {
-            sparseRowAdjMatrix.insert(row_keep, v) = 1;
-            sparseRowAdjMatrix.insert(v, row_keep) = 1;
+            sparse_matrix_.insert(row_keep, v) = 1;
+            sparse_matrix_.insert(v, row_keep) = 1;
           }
         }
-        vertexToRow.erase(del);
-        vertices.erase(del);
-        rowToVertex.erase(row_del);
+        vertex_to_row_.erase(del);
+        vertices_.erase(del);
+        row_to_vertex_.erase(row_del);
       } else if (del_mem && not keep_mem) {
-        vertexToRow.insert(std::make_pair(keep, vertexToRow.find(del)->second));
-        rowToVertex[vertexToRow.find(del)->second] = keep;
-        vertices.emplace(keep);
-        vertices.erase(del);
-        vertexToRow.erase(del);
+        vertex_to_row_.insert(std::make_pair(keep, vertex_to_row_.find(del)->second));
+        row_to_vertex_[vertex_to_row_.find(del)->second] = keep;
+        vertices_.emplace(keep);
+        vertices_.erase(del);
+        vertex_to_row_.erase(del);
 
       } else {
         std::cerr << "The first vertex entered in the method contraction() doesn't exist in the skeleton." << std::endl;
@@ -586,12 +537,12 @@ Subsequently once a dominated column is found, its non-zero row indices are inse
 
   void relable(const Vertex& v, const Vertex& w) {  // relable v as w.
     if (membership(v) and v != w) {
-      auto rw_v = vertexToRow[v];
-      rowToVertex[rw_v] = w;
-      vertexToRow.insert(std::make_pair(w, rw_v));
-      vertices.emplace(w);
-      vertexToRow.erase(v);
-      vertices.erase(v);
+      auto rw_v = vertex_to_row_[v];
+      row_to_vertex_[rw_v] = w;
+      vertex_to_row_.insert(std::make_pair(w, rw_v));
+      vertices_.emplace(w);
+      vertex_to_row_.erase(v);
+      vertices_.erase(v);
     }
   }
 
@@ -612,8 +563,8 @@ Subsequently once a dominated column is found, its non-zero row indices are inse
           active_edge_insertion(w, y, filt_val);
         }
       }
-      auto rw_v = vertexToRow.find(v);
-      contractionIndicator[rw_v->second] = true;
+      auto rw_v = vertex_to_row_.find(v);
+      contraction_indicator_[rw_v->second] = true;
     }
     if (membership(v) && !membership(w)) {
       relable(v, w);
@@ -624,7 +575,7 @@ Subsequently once a dominated column is found, its non-zero row indices are inse
     // update_active_indicator(v,w);
   }
 
-  void print_sparse_skeleton() { std::cout << sparseRowAdjMatrix << std::endl; }
+  void print_sparse_skeleton() { std::cout << sparse_matrix_ << std::endl; }
 };
 
 }  // namespace strong_collapse
