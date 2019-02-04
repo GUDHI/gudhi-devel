@@ -55,7 +55,7 @@ template <typename Filtration_value>
 class Sparse_rips_complex {
  private:
   // TODO(MG): use a different graph where we know we can safely insert in parallel.
-  typedef typename boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS,
+  typedef typename boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS,
                                          boost::property<vertex_filtration_t, Filtration_value>,
                                          boost::property<edge_filtration_t, Filtration_value>>
       Graph;
