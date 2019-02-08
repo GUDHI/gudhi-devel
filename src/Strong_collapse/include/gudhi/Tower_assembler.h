@@ -59,10 +59,11 @@ class Tower_assembler {
     current_rename_counter_ = num_vertices + 1;
   }
 
+  // mat_1 and mat_2 are simplex_trees of K1c and K2c (the
+  // collapsed ones), redmap_2 is the map of K2 -> K2c
   void build_tower_for_two_cmplxs(Flag_complex_sparse_matrix& mat_1, const Flag_complex_sparse_matrix& mat_2,
                                   const Reduction_map& redmap_2, const double filtration_value,
-                                  const std::string& outFile = "")  // mat_1 and mat_2 are simplex_trees of K1c and K2c (the
-                                                        // collapsed ones), redmap_2 is the map of K2 -> K2c
+                                  const std::string& outFile = "")
   {
     std::ofstream myfile(outFile, std::ios::app);
     if (myfile.is_open() || outFile.empty()) {
@@ -141,15 +142,17 @@ class Tower_assembler {
   Distance_matrix distance_matrix() {
     std::size_t non_zero_rw = flag_filtration_.num_vertices();
     double inf = std::numeric_limits<double>::max();
-    sparseRowMatrix mat = flag_filtration_.uncollapsed_matrix();
+    Sparse_row_matrix mat = flag_filtration_.uncollapsed_matrix();
 
     Distance_matrix distance_mat;
     for (std::size_t indx = 0; indx < non_zero_rw; indx++) {
-      doubleVector distances;
-      rowInnerIterator it(mat, indx);
-      for (std::size_t j = 0; j <= indx; j++) {  // Iterate over the non-zero columns
+      std::vector<double> distances;
+      Sparse_row_iterator it(mat, indx);
+      // Iterate over the non-zero columns
+      for (std::size_t j = 0; j <= indx; j++) {
         if (it.index() == j && j != indx) {
-          distances.push_back(it.value());  // inner index, here it is equal to it.columns()
+          // inner index, here it is equal to it.columns()
+          distances.push_back(it.value());
           ++it;
         } else if (j == indx) {
           distances.push_back(0);

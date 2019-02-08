@@ -272,3 +272,21 @@ BOOST_AUTO_TEST_CASE(flag_complex_sparse_matrix_strong_collapse) {
   }
 }
 
+BOOST_AUTO_TEST_CASE(flag_complex_sparse_matrix_dummy_test) {
+  Filtered_sorted_edge_list input_edges;
+  input_edges.push_back({1., 0, 1});
+  input_edges.push_back({1., 1, 0});
+
+  {
+    Gudhi::strong_collapse::Flag_complex_sparse_matrix mat_coll(2, input_edges);
+    mat_coll.print_sparse_skeleton();
+    Edge_list collapsed_edges = mat_coll.all_edges();
+    std::cout << "---------------------------------------------------------------------------------------" << std::endl;
+    for (auto edge : collapsed_edges)
+      std::cout << edge.first << " - " << edge.second << std::endl;
+    Reduction_map reduction_map = mat_coll.reduction_map();
+    for (auto edge : reduction_map)
+      std::cout << edge.first << " -> " << edge.second << std::endl;
+
+  }
+}
