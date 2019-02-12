@@ -90,7 +90,7 @@ namespace cubical_complex {
  * In the current implantation, filtration is given at the maximal cubes, and it is then extended by the lower star
  * filtration to all cubes. There are a number of constructors that can be used to construct cubical complex by users
  * who want to use the code directly. They can be found in the \a Bitmap_cubical_complex class.
- * Currently one input from a text file is used. It uses a format nspired from the Perseus software
+ * Currently one input from a text file is used. It uses a format inspired from the Perseus software
  * (http://www.sas.upenn.edu/~vnanda/perseus/) by Vidit Nanda. Note however an important difference: while Perseus
  * assume the filtration of all maximal cubes to be non-negative, over here we do not enforce this and we allow any
  * filtration values.
