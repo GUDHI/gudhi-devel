@@ -650,18 +650,33 @@ void Bitmap_cubical_complex_base<T>::read_perseus_style_file(const char* perseus
   Bitmap_cubical_complex_base<T>::Top_dimensional_cells_iterator it(*this);
   it = this->top_dimensional_cells_iterator_begin();
 
-  T filtrationLevel;
-  for (std::size_t i = 0; i < dimensions; ++i) {
-    if (!(inFiltration >> filtrationLevel) || (inFiltration.eof())) {
-      throw std::ios_base::failure("Bad Perseus file format.");
+  T filtrationLevel = 0.;
+  std::size_t filtration_counter = 0;
+  while (!inFiltration.eof()) {
+    std::string line;
+    getline(inFiltration, line);
+    if (line.length() != 0) {
+      int n = sscanf(line.c_str(), "%lf", &filtrationLevel);
+      if (n != 1) {
+        std::string perseus_error("Bad Perseus file format. This line is incorrect : " + line);
+        throw std::ios_base::failure(perseus_error.c_str());
+      }
+
+      if (dbg) {
+        std::cerr << "Cell of an index : " << it.compute_index_in_bitmap()
+                  << " and dimension: " << this->get_dimension_of_a_cell(it.compute_index_in_bitmap())
+                  << " get the value : " << filtrationLevel << std::endl;
+      }
+      this->get_cell_data(*it) = filtrationLevel;
+      ++it;
+      ++filtration_counter;
     }
-    if (dbg) {
-      std::cerr << "Cell of an index : " << it.compute_index_in_bitmap()
-                << " and dimension: " << this->get_dimension_of_a_cell(it.compute_index_in_bitmap())
-                << " get the value : " << filtrationLevel << std::endl;
-    }
-    this->get_cell_data(*it) = filtrationLevel;
-    ++it;
+  }
+
+  if (filtration_counter != dimensions) {
+    std::string perseus_error("Bad Perseus file format. Read " + std::to_string(filtration_counter) + " expected " + \
+      std::to_string(dimensions) + " values");
+    throw std::ios_base::failure(perseus_error.c_str());
   }
 
   inFiltration.close();
