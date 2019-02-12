@@ -72,7 +72,7 @@ namespace Gudhi {
 
  \section FileFormatsPerseus Perseus
 
- This file format is the format used by the Perseus software
+ This file format is a format inspired from the Perseus software
  (http://www.sas.upenn.edu/~vnanda/perseus/) by Vidit Nanda.
  The first line contains a number d begin the dimension of the
  bitmap (2 in the example below). Next d lines are the numbers of top dimensional cubes in each dimensions (3 and 3
@@ -119,9 +119,9 @@ namespace Gudhi {
 
  Other sample files can be found in the `data/bitmap` folder.
  
- Please note that unlike in Perseus format the filtration on the maximal cubes can be any double precision number.
- Consequently one cannot mark the cubes that are not present with -1's. To do that please set their filtration value to
- +Inf.
+ \note Unlike in Perseus format the filtration on the maximal cubes can be any double precision number.
+ Consequently one cannot mark the cubes that are not present with `-1`'s. To do that please set their filtration value
+ to \f$+\infty\f$ (aka. `inf` in the file).
 
 */
 }  // namespace Gudhi

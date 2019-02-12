@@ -51,10 +51,12 @@ Here is a simple sample file in the 3D case::
     1. 1. 1.
 
 
+.. _Perseus file format:
+
 Perseus
 *******
 
-This file format is the format used by the
+This file format is a format inspired from the
 `Perseus software <http://www.sas.upenn.edu/~vnanda/perseus/>`_ by Vidit Nanda.
 The first line contains a number d begin the dimension of the bitmap (2 in the
 example below). Next d lines are the numbers of top dimensional cubes in each
@@ -88,3 +90,9 @@ Indicate that we have imposed periodic boundary conditions in the direction x,
 but not in the direction y.
 
 Other sample files can be found in the `data/bitmap` folder.
+
+.. note::
+    Unlike in Perseus format the filtration on the maximal cubes can be any
+    double precision number. Consequently one cannot mark the cubes that are
+    not present with ``-1``'s. To do that please set their filtration value to
+    :math:`+\infty` (aka. ``inf`` in the file).
