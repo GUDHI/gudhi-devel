@@ -787,19 +787,22 @@ class Simplex_tree {
  private:
   /// Same as insert_simplex_and_subfaces but assumes that the range of vertices is sorted
   template<class ForwardVertexRange = std::initializer_list<Vertex_handle>>
-  std::pair<Simplex_handle, bool> insert_simplex_and_subfaces_sorted(const ForwardVertexRange& Nsimplex, Filtration_value filt = 0) {
+  std::pair<Simplex_handle, bool> insert_simplex_and_subfaces_sorted(const ForwardVertexRange& Nsimplex,
+                                                                     Filtration_value filt = 0) {
     auto first = std::begin(Nsimplex);
     auto last = std::end(Nsimplex);
     if (first == last)
       return { null_simplex(), true }; // FIXME: false would make more sense to me.
     GUDHI_CHECK(std::is_sorted(first, last), "simplex vertices listed in unsorted order");
-    // Update dimension if needed. We could wait to see if the insertion succeeds, but I doubt there is much to gain.
-    dimension_ = (std::max)(dimension_, static_cast<int>(std::distance(first, last)) - 1);
-    return rec_insert_simplex_and_subfaces_sorted(root(), first, last, filt);
+    return rec_insert_simplex_and_subfaces_sorted(root(), first, last, filt, 0);
   }
   // To insert {1,2,3,4}, we insert {2,3,4} twice, once at the root, and once below 1.
   template<class ForwardVertexIterator>
-  std::pair<Simplex_handle, bool> rec_insert_simplex_and_subfaces_sorted(Siblings* sib, ForwardVertexIterator first, ForwardVertexIterator last, Filtration_value filt) {
+  std::pair<Simplex_handle, bool> rec_insert_simplex_and_subfaces_sorted(Siblings* sib,
+                                                                         ForwardVertexIterator first,
+                                                                         ForwardVertexIterator last,
+                                                                         Filtration_value filt,
+                                                                         int dimension) {
     // An alternative strategy would be:
     // - try to find the complete simplex, if found (and low filtration) exit
     // - insert all the vertices at once in sib
@@ -811,19 +814,30 @@ class Simplex_tree {
     bool one_is_new = insertion_result.second;
     if (!one_is_new) {
       if (filtration(simplex_one) > filt) {
-	assign_filtration(simplex_one, filt);
+        assign_filtration(simplex_one, filt);
       } else {
-	// FIXME: this interface makes no sense, and it doesn't seem to be tested.
-	insertion_result.first = null_simplex();
+        // FIXME: this interface makes no sense, and it doesn't seem to be tested.
+        insertion_result.first = null_simplex();
       }
     }
-    if (++first == last) return insertion_result;
+    // Next iteration to avoid consecutive equal values
+    while ((vertex_one == *first) && (first < last)) {
+      ++first;
+    }
+    // End of insertion
+    if (first == last) {
+      dimension_ = (std::max)(dimension_, dimension);
+      return insertion_result;
+    }
     if (!has_children(simplex_one))
       // TODO: have special code here, we know we are building the whole subtree from scratch.
       simplex_one->second.assign_children(new Siblings(sib, vertex_one));
-    auto res = rec_insert_simplex_and_subfaces_sorted(simplex_one->second.children(), first, last, filt);
+    ++dimension;
+    auto res = rec_insert_simplex_and_subfaces_sorted(simplex_one->second.children(), first, last, filt, dimension);
     // No need to continue if the full simplex was already there with a low enough filtration value.
-    if (res.first != null_simplex()) rec_insert_simplex_and_subfaces_sorted(sib, first, last, filt);
+    if (res.first != null_simplex()) {
+      rec_insert_simplex_and_subfaces_sorted(sib, first, last, filt, dimension);
+    }
     return res;
   }
 
