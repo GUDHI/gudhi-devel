@@ -154,6 +154,8 @@ if(NOT GUDHI_CYTHON_PATH)
   message(FATAL_ERROR "ERROR: GUDHI_CYTHON_PATH is not valid.")
 endif(NOT GUDHI_CYTHON_PATH)
 
+option(WITH_GUDHI_CYTHON_RUNTIME_LIBRARY_DIRS "Build with setting runtime_library_dirs. Usefull when setting rpath is not allowed" ON)
+
 if(PYTHONINTERP_FOUND AND CYTHON_FOUND)
   # Default found version 2
   if(PYTHON_VERSION_MAJOR EQUAL 2)

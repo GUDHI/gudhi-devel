@@ -198,9 +198,9 @@ if(PYTHONINTERP_FOUND)
       set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${TBB_INCLUDE_DIRS}', ")
     endif()
 
-    if(UNIX)
+    if(UNIX AND WITH_GUDHI_CYTHON_RUNTIME_LIBRARY_DIRS)
       set( GUDHI_CYTHON_RUNTIME_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}")
-    endif(UNIX)
+    endif(UNIX AND WITH_GUDHI_CYTHON_RUNTIME_LIBRARY_DIRS)
 
     # Generate setup.py file to cythonize Gudhi - This file must be named setup.py by convention
     configure_file(setup.py.in "${CMAKE_CURRENT_BINARY_DIR}/setup.py" @ONLY)
