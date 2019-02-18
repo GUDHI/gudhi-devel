@@ -45,11 +45,13 @@ namespace Gudhi {
  * needed for these operation is linear or quadratic in \f$\Gamma_0\f$ and \f$d\f$.
  *
  * Toplex map is composed firstly of a raw storage of toplices and secondly of a map which associate any vertex to a
- * set of pointers toward all toplices containing this vertex.
+ * set of pointers toward all toplices containing this vertex. The data structure is described in
+ * \cite boissonnat_et_al:LIPIcs:2015:5098 (aka. Simplex Array List or SAL).
  *
  * \image html map.png
  *
- * The performances are a lot better than the `Simplex_tree` as soon you use maximal simplices and not simplices.
+ * The performances are a lot better than the `Simplex_tree` as soon you use maximal simplices and not simplices
+ * (cf. \cite DBLP:journals/corr/BoissonnatS16 ).
  *
  */
 /** @} */  // end defgroup toplex_map
