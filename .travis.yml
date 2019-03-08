@@ -1,6 +1,6 @@
 language: cpp 
 dist: xenial 
-sudo: false 
+sudo: required 
 git: 
  depth: 3
 env:
@@ -26,7 +26,8 @@ install:
   - tar xf CGAL-4.12.1.tar.xz
   - cd CGAL-4.12.1
   - cmake -DCMAKE_BUILD_TYPE=Release -DCGAL_HEADER_ONLY=ON .
-  - make all install
+  - make all
+  - sudo make install
   - cd ..
 script: 
 - mkdir -p build 
