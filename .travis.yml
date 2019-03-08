@@ -7,10 +7,9 @@ cache:
   directories:
     - $HOME/.cache/pip
     - $HOME/CGAL-4.13
-branches:
-  only:
-    - master
 env:
+ global: 
+    - CGAL_VERSION='CGAL-4.13'
  matrix: 
 # Only examples and associated tests
 #    - CMAKE_EXAMPLE='ON' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
@@ -42,9 +41,9 @@ addons:
 
 # When installing through libcgal-dev apt, CMake Error at CGAL Exports.cmake The imported target "CGAL::CGAL Qt5" references the file
 install: 
-  - [[ -d 'CGAL-4.13' ]] || curl -LO "https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-4.13/CGAL-4.13.tar.xz"
-  - [[ -d 'CGAL-4.13' ]] || tar xf CGAL-4.13.tar.xz
-  - cd CGAL-4.13
+  - [[ -d ${CGAL_VERSION} ]] || curl -LO "https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-4.13/CGAL-4.13.tar.xz"
+  - [[ -d ${CGAL_VERSION} ]] || tar xf CGAL-4.13.tar.xz
+  - cd ${CGAL_VERSION}
   - cmake -DCMAKE_BUILD_TYPE=Release -DCGAL_HEADER_ONLY=ON .
   - make all
   - cd ..
@@ -54,7 +53,7 @@ script:
   - rm -rf build
   - mkdir -p build 
   - cd build 
-  - cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=${CMAKE_EXAMPLE} -DWITH_GUDHI_TEST=${CMAKE_TEST} -DWITH_GUDHI_UTILITIES=${CMAKE_UTILITIES} -DWITH_GUDHI_PYTHON=${CMAKE_PYTHON} -DUSER_VERSION_DIR=version -DPython_ADDITIONAL_VERSIONS=3 -DCGAL_DIR=$HOME/CGAL-4.13 .. 
+  - cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=${CMAKE_EXAMPLE} -DWITH_GUDHI_TEST=${CMAKE_TEST} -DWITH_GUDHI_UTILITIES=${CMAKE_UTILITIES} -DWITH_GUDHI_PYTHON=${CMAKE_PYTHON} -DUSER_VERSION_DIR=version -DPython_ADDITIONAL_VERSIONS=3 -DCGAL_DIR=$HOME/${CGAL_VERSION} .. 
   - make all ${MAKE_TARGET}
   - cd ..
 notifications:
