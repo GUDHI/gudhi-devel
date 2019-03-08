@@ -12,15 +12,15 @@ env:
     - CGAL_VERSION='CGAL-4.13'
  matrix: 
 # Only examples and associated tests
-#    - CMAKE_EXAMPLE='ON' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
+    - CMAKE_EXAMPLE='ON' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
 # Only unitary tests
-#    - CMAKE_EXAMPLE='OFF' CMAKE_TEST='ON' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
+    - CMAKE_EXAMPLE='OFF' CMAKE_TEST='ON' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
 # Only utilities and associated tests
-#    - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='ON' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
+    - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='ON' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
 # Only doxygen documentation
     - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='doxygen'
 # Only Python, associated tests and sphinx documentation
-#    - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='test sphinx'
+    - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='test sphinx'
 compiler: gcc
 addons:
   apt:
@@ -41,8 +41,9 @@ addons:
 
 # When installing through libcgal-dev apt, CMake Error at CGAL Exports.cmake The imported target "CGAL::CGAL Qt5" references the file
 install: 
-  - [[ -d ${CGAL_VERSION} ]] || curl -LO "https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-4.13/CGAL-4.13.tar.xz"
-  - [[ -d ${CGAL_VERSION} ]] || tar xf CGAL-4.13.tar.xz
+  - [[ -d ${CGAL_VERSION} ]] || echo "Download https://github.com/CGAL/cgal/releases/download/releases%2F${CGAL_VERSION}/${CGAL_VERSION}.tar.xz"
+  - [[ -d ${CGAL_VERSION} ]] || curl -LO "https://github.com/CGAL/cgal/releases/download/releases%2F${CGAL_VERSION}/${CGAL_VERSION}.tar.xz"
+  - [[ -d ${CGAL_VERSION} ]] || tar xf ${CGAL_VERSION}.tar.xz
   - cd ${CGAL_VERSION}
   - cmake -DCMAKE_BUILD_TYPE=Release -DCGAL_HEADER_ONLY=ON .
   - make all
