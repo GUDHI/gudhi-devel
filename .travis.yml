@@ -3,6 +3,9 @@ dist: xenial
 sudo: required 
 git: 
  depth: 3
+cache:
+  directories:
+    - $HOME/.cache/pip
 env:
  matrix: 
 # Only examples and associated tests
@@ -41,7 +44,7 @@ install:
   - make all
   - sudo make install
   - cd ..
-  - pip3 install Cython sphinx sphinxcontrib-bibtex matplotlib numpy
+  - pip3 install setuptools Cython sphinx sphinxcontrib-bibtex matplotlib numpy
 script: 
   - mkdir -p build 
   - cd build 
