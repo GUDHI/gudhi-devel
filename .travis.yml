@@ -44,6 +44,7 @@ install:
   - make all
   - sudo make install
   - cd ..
+  - pip3 install --upgrade pip
   - pip3 install setuptools Cython sphinx sphinxcontrib-bibtex matplotlib numpy
 script: 
   - mkdir -p build 
