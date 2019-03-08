@@ -4,8 +4,6 @@ sudo: required
 git: 
  depth: 3
 env:
- global: 
-    - CGAL_VERSION='CGAL-4.13'
  matrix: 
 # Only examples and associated tests
     - CMAKE_EXAMPLE='ON' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
@@ -14,13 +12,13 @@ env:
 # Only utilities and associated tests
     - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='ON' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
 # Only doxygen documentation
-    - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='doxygen'
+# make user_version fails because it tries to copy a file that name changed...
+#    - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='doxygen'
 # Only Python, associated tests and sphinx documentation
     - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='test sphinx'
 cache:
   directories:
     - $HOME/.cache/pip
-    - $HOME/$CGAL_VERSION
 compiler: gcc
 addons:
   apt:
@@ -41,12 +39,12 @@ addons:
 
 # When installing through libcgal-dev apt, CMake Error at CGAL Exports.cmake The imported target "CGAL::CGAL Qt5" references the file
 install: 
-  - if [ ! -d "${CGAL_VERSION}" ]; then echo "Download https://github.com/CGAL/cgal/releases/download/releases%2F${CGAL_VERSION}/${CGAL_VERSION}.tar.xz"; fi
-  - if [ ! -d "${CGAL_VERSION}" ]; then curl -LO "https://github.com/CGAL/cgal/releases/download/releases%2F${CGAL_VERSION}/${CGAL_VERSION}.tar.xz"; fi
-  - if [ ! -d "${CGAL_VERSION}" ]; then tar xf ${CGAL_VERSION}.tar.xz; fi
-  - cd ${CGAL_VERSION}
+  - curl -LO "https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-4.13/CGAL-4.13.tar.xz"
+  - tar xf CGAL-4.13.tar.xz
+  - cd CGAL-4.13
   - cmake -DCMAKE_BUILD_TYPE=Release -DCGAL_HEADER_ONLY=ON .
   - make all
+  - sudo make install
   - cd ..
   - pip3 install --upgrade pip
   - pip3 install --user Cython sphinx sphinxcontrib-bibtex matplotlib numpy scipy
@@ -54,8 +52,7 @@ script:
   - rm -rf build
   - mkdir -p build 
   - cd build 
-  - echo "CGAL_DIR = ${HOME}/${CGAL_VERSION}"
-  - cmake -DCGAL_DIR=${HOME}/${CGAL_VERSION} -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=${CMAKE_EXAMPLE} -DWITH_GUDHI_TEST=${CMAKE_TEST} -DWITH_GUDHI_UTILITIES=${CMAKE_UTILITIES} -DWITH_GUDHI_PYTHON=${CMAKE_PYTHON} -DUSER_VERSION_DIR=version -DPython_ADDITIONAL_VERSIONS=3 .. 
+  - cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=${CMAKE_EXAMPLE} -DWITH_GUDHI_TEST=${CMAKE_TEST} -DWITH_GUDHI_UTILITIES=${CMAKE_UTILITIES} -DWITH_GUDHI_PYTHON=${CMAKE_PYTHON} -DUSER_VERSION_DIR=version -DPython_ADDITIONAL_VERSIONS=3 .. 
   - make all ${MAKE_TARGET}
   - cd ..
 notifications:
