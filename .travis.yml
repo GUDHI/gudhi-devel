@@ -46,7 +46,7 @@ install:
   - sudo make install
   - cd ..
   - pip3 install --upgrade pip
-  - pip3 install --user Cython sphinx sphinxcontrib-bibtex matplotlib numpy
+  - pip3 install --user Cython sphinx sphinxcontrib-bibtex matplotlib numpy scipy
 script: 
   - mkdir -p build 
   - cd build 
