@@ -1,4 +1,4 @@
-![alt text](https://gudhi.inria.fr/assets/img/logo.png "GUDHI library - Topological data analysis and geometric inference in higher dimensions")
+![GUDHI](https://gudhi.inria.fr/assets/img/logo.png)
 
 The GUDHI library is a generic open source C++ library, with a Python interface, for Topological Data Analysis (TDA) and Higher Dimensional Geometry Understanding. The library offers state-of-the-art data structures and algorithms to construct simplicial complexes and compute persistent homology.
 
