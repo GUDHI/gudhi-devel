@@ -1,0 +1,33 @@
+language: cpp 
+dist: xenial 
+sudo: false 
+git: 
+ depth: 3
+env:
+ matrix: 
+    - CMAKE_ARGS='-DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF' 
+    - CMAKE_ARGS='-DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF'
+    - CMAKE_ARGS='-DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF'
+compiler: gcc
+addons:
+  apt:
+    packages:
+      - cmake
+      - graphviz 
+      - doxygen
+      - libboost-all-dev
+      - libgmp3-dev
+      - libmpfr-dev
+      - libtbb-dev
+      - libcgal-dev
+
+script: 
+- mkdir -p build 
+- cd build 
+- cmake ${CMAKE_ARGS} .. 
+- make all test
+- cd ..
+notifications:
+  email:
+    on_success: change # default: always
+    on_failure: always # default: always
