@@ -22,7 +22,6 @@ addons:
       - libcgal-dev
 
 script: 
-- ls
 - mkdir -p build 
 - cd build 
 - cmake ${CMAKE_ARGS} .. 
