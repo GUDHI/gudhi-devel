@@ -16,6 +16,7 @@ addons:
       - graphviz 
       - doxygen
       - libboost-all-dev
+      - libeigen3-dev
       - libgmp3-dev
       - libmpfr-dev
       - libtbb-dev
@@ -30,11 +31,11 @@ install:
   - sudo make install
   - cd ..
 script: 
-- mkdir -p build 
-- cd build 
-- cmake ${CMAKE_ARGS} .. 
-- make all test
-- cd ..
+  - mkdir -p build 
+  - cd build 
+  - cmake -DCMAKE_BUILD_TYPE=Release ${CMAKE_ARGS} .. 
+  - make all test
+  - cd ..
 notifications:
   email:
     on_success: change # default: always
