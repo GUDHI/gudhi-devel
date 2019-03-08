@@ -42,8 +42,8 @@ addons:
 # When installing through libcgal-dev apt, CMake Error at CGAL Exports.cmake The imported target "CGAL::CGAL Qt5" references the file
 install: 
   - if [ ! -d "${CGAL_VERSION}" ]; then echo "Download https://github.com/CGAL/cgal/releases/download/releases%2F${CGAL_VERSION}/${CGAL_VERSION}.tar.xz"; fi
-  - if [ ! -d "${CGAL_VERSION}" ]; curl -LO "https://github.com/CGAL/cgal/releases/download/releases%2F${CGAL_VERSION}/${CGAL_VERSION}.tar.xz"; fi
-  - if [ ! -d "${CGAL_VERSION}" ]; tar xf ${CGAL_VERSION}.tar.xz; fi
+  - if [ ! -d "${CGAL_VERSION}" ]; then curl -LO "https://github.com/CGAL/cgal/releases/download/releases%2F${CGAL_VERSION}/${CGAL_VERSION}.tar.xz"; fi
+  - if [ ! -d "${CGAL_VERSION}" ]; then tar xf ${CGAL_VERSION}.tar.xz; fi
   - cd ${CGAL_VERSION}
   - cmake -DCMAKE_BUILD_TYPE=Release -DCGAL_HEADER_ONLY=ON .
   - make all
