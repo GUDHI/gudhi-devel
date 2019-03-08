@@ -19,6 +19,7 @@ addons:
       - libgmp3-dev
       - libmpfr-dev
       - libtbb-dev
+      - qtbase5-dev
       - libcgal-dev
 
 script: 
