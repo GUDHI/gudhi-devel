@@ -13,8 +13,8 @@ env:
     - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='ON' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
 # Only doxygen documentation
     - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='doxygen'
-# Only Python and sphinx documentation
-    - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='sphinx'
+# Only Python, associated tests and sphinx documentation
+    - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='test sphinx'
 compiler: gcc
 addons:
   apt:
@@ -29,6 +29,7 @@ addons:
       - libtbb-dev
       - curl
       - python3
+      - python3-pip
       - python3-pytest
 
 # When installing through libcgal-dev apt, CMake Error at CGAL Exports.cmake The imported target "CGAL::CGAL Qt5" references the file
