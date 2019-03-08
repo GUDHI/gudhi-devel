@@ -5,10 +5,14 @@ git:
  depth: 3
 env:
  matrix: 
-    - CMAKE_ARGS='-DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF' DOXYGEN=''
-    - CMAKE_ARGS='-DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF' DOXYGEN=''
-    - CMAKE_ARGS='-DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF' DOXYGEN=''
-    - CMAKE_ARGS='-DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF' DOXYGEN='doxygen'
+# Only examples and associated tests
+    - CMAKE_EXAMPLE='ON' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
+# Only unitary tests
+    - CMAKE_EXAMPLE='OFF' CMAKE_TEST='ON' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
+# Only utilities and associated tests
+    - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='ON' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
+# Only doxygen
+    - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='ON' CMAKE_PYTHON='OFF' MAKE_TARGET='doygen'
 compiler: gcc
 addons:
   apt:
@@ -23,10 +27,11 @@ addons:
       - libtbb-dev
       - curl
 
+# When installing through libcgal-dev apt, CMake Error at CGAL Exports.cmake The imported target "CGAL::CGAL Qt5" references the file
 install: 
-  - curl -LO "https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-4.12.1/CGAL-4.12.1.tar.xz"
-  - tar xf CGAL-4.12.1.tar.xz
-  - cd CGAL-4.12.1
+  - curl -LO "https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-4.13/CGAL-4.13.tar.xz"
+  - tar xf CGAL-4.13.tar.xz
+  - cd CGAL-4.13
   - cmake -DCMAKE_BUILD_TYPE=Release -DCGAL_HEADER_ONLY=ON .
   - make all
   - sudo make install
@@ -34,8 +39,8 @@ install:
 script: 
   - mkdir -p build 
   - cd build 
-  - cmake -DCMAKE_BUILD_TYPE=Release ${CMAKE_ARGS} .. 
-  - make all test ${DOXYGEN}
+  - cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=${CMAKE_EXAMPLE} -DWITH_GUDHI_TEST=${CMAKE_TEST} -DWITH_GUDHI_UTILITIES=${CMAKE_UTILITIES} -DWITH_GUDHI_PYTHON=${CMAKE_PYTHON} .. 
+  - make all ${MAKE_TARGET}
   - cd ..
 notifications:
   email:
