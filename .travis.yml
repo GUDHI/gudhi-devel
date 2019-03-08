@@ -20,6 +20,17 @@ addons:
       - libmpfr-dev
       - libtbb-dev
       - qtbase5-dev
+      - libqt5sql5-sqlite
+      - libqt5opengl5-dev
+      - qtscript5-dev
+      - libqt5svg5-dev
+      - qttools5-dev
+      - qttools5-dev-tools
+      - qml-module-qtgraphicaleffects
+      - libopencv-dev
+      - mesa-common-dev
+      - libmetis-dev
+      - libglu1-mesa-dev
       - libcgal-dev
 
 script: 
