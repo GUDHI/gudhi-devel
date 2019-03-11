@@ -1,8 +1,18 @@
 language: cpp 
-dist: xenial 
+
+os:
+  - linux
+  - osx
+
+compiler:
+  - gcc
+  - clang
+
 sudo: required 
+
 git: 
  depth: 3
+
 env:
  matrix: 
 # Only examples and associated tests
@@ -15,10 +25,11 @@ env:
     - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='doxygen'
 # Only Python, associated tests and sphinx documentation
     - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='test sphinx'
+
 cache:
   directories:
     - $HOME/.cache/pip
-compiler: gcc
+
 addons:
   apt:
     packages:
@@ -35,6 +46,22 @@ addons:
       - python3-pip
       - python3-pytest
       - python3-setuptools
+  homebrew:
+    packages:
+      - cmake
+      - graphviz 
+      - doxygen
+      - boost
+      - eigen
+      - gmp
+      - mpfr
+      - tbb
+      - curl
+      - python3
+      - python3-pip
+      - python3-pytest
+      - python3-setuptools
+
 
 # When installing through libcgal-dev apt, CMake Error at CGAL Exports.cmake The imported target "CGAL::CGAL Qt5" references the file
 install: 
@@ -47,6 +74,7 @@ install:
   - cd ..
   - pip3 install --upgrade pip
   - pip3 install --user Cython sphinx sphinxcontrib-bibtex matplotlib numpy scipy
+
 script: 
   - rm -rf build
   - mkdir -p build 
@@ -54,6 +82,7 @@ script:
   - cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=${CMAKE_EXAMPLE} -DWITH_GUDHI_TEST=${CMAKE_TEST} -DWITH_GUDHI_UTILITIES=${CMAKE_UTILITIES} -DWITH_GUDHI_PYTHON=${CMAKE_PYTHON} -DUSER_VERSION_DIR=version -DPython_ADDITIONAL_VERSIONS=3 .. 
   - make all ${MAKE_TARGET}
   - cd ..
+
 notifications:
   email:
     on_success: change # default: always
