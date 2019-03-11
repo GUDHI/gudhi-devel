@@ -10,58 +10,70 @@ matrix:
     - os: linux
       dist: xenial
       compiler: gcc
-      addons:
-        apt:
-          packages:
-            - cmake
-            - graphviz 
-            - doxygen
-            - libboost-all-dev
-            - libeigen3-dev
-            - libgmp3-dev
-            - libmpfr-dev
-            - libtbb-dev
-            - curl
-            - python3
-            - python3-pip
-            - python3-pytest
-            - python3-setuptools
+      env:
+        matrix:
+          # Only examples and associated tests
+          - CMAKE_EXAMPLE='ON' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
+          # Only unitary tests
+          - CMAKE_EXAMPLE='OFF' CMAKE_TEST='ON' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
+          # Only utilities and associated tests
+          - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='ON' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
+          # Only doxygen documentation
+          - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='doxygen'
+          # Only Python, associated tests and sphinx documentation
+          - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='test sphinx'
     - os: osx
       osx_image: xcode9.4
       compiler: clang
-      addons:
-        homebrew:
-          packages:
-            - cmake
-            - graphviz 
-            - doxygen
-            - boost
-            - eigen
-            - gmp
-            - mpfr
-            - tbb
-            - curl
-            - python3
-            - python3-pip
-            - python3-pytest
-            - python3-setuptools
-
-env:
- matrix: 
-# Only examples and associated tests
-    - CMAKE_EXAMPLE='ON' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
-# Only unitary tests
-    - CMAKE_EXAMPLE='OFF' CMAKE_TEST='ON' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
-# Only utilities and associated tests
-    - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='ON' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
-# Only doxygen documentation
-    - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='doxygen'
-# Only Python, associated tests and sphinx documentation
-    - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='test sphinx'
+      env:
+        matrix:
+          # Only examples and associated tests
+          - CMAKE_EXAMPLE='ON' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
+          # Only unitary tests
+          - CMAKE_EXAMPLE='OFF' CMAKE_TEST='ON' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
+          # Only utilities and associated tests
+          - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='ON' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
+          # Only doxygen documentation
+          - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='doxygen'
+          # Only Python, associated tests and sphinx documentation
+          - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='test sphinx'
 
 cache:
   directories:
     - $HOME/.cache/pip
+
+addons:
+  apt:
+    packages:
+      - cmake
+      - graphviz 
+      - doxygen
+      - libboost-all-dev
+      - libeigen3-dev
+      - libgmp3-dev
+      - libmpfr-dev
+      - libtbb-dev
+      - curl
+      - python3
+      - python3-pip
+      - python3-pytest
+      - python3-setuptools
+  homebrew:
+    packages:
+      - cmake
+      - graphviz 
+      - doxygen
+      - boost
+      - eigen
+      - gmp
+      - mpfr
+      - tbb
+      - curl
+      - python3
+      - python3-pip
+      - python3-pytest
+      - python3-setuptools
+
 
 # When installing through libcgal-dev apt, CMake Error at CGAL Exports.cmake The imported target "CGAL::CGAL Qt5" references the file
 install: 
