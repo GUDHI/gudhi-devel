@@ -1,24 +1,79 @@
 language: cpp 
-dist: xenial 
+
 sudo: required 
+
 git: 
  depth: 3
-env:
- matrix: 
-# Only examples and associated tests
-    - CMAKE_EXAMPLE='ON' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
-# Only unitary tests
-    - CMAKE_EXAMPLE='OFF' CMAKE_TEST='ON' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
-# Only utilities and associated tests
-    - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='ON' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
-# Only doxygen documentation
-    - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='doxygen'
-# Only Python, associated tests and sphinx documentation
-    - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='test sphinx'
+
+matrix:
+  include:
+    # A. Linux
+    - os: linux
+      dist: xenial
+      compiler: gcc
+      env:
+        # 1. Only examples and associated tests
+        - CMAKE_EXAMPLE='ON' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
+    - os: linux
+      dist: xenial
+      compiler: gcc
+      env:
+        # 2. Only unitary tests
+        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='ON' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
+    - os: linux
+      dist: xenial
+      compiler: gcc
+      env:
+        # 3. Only utilities and associated tests
+        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='ON' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
+    - os: linux
+      dist: xenial
+      compiler: gcc
+      env:
+        # 4. Only doxygen documentation
+        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='doxygen'
+    - os: linux
+      dist: xenial
+      compiler: gcc
+      env:
+        # 5. Only Python, associated tests and sphinx documentation
+        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='test sphinx'
+    # A. Mac OSX
+    - os: osx
+      osx_image: xcode9.4
+      compiler: clang
+      env:
+        # 1. Only examples and associated tests
+        - CMAKE_EXAMPLE='ON' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
+    - os: osx
+      osx_image: xcode9.4
+      compiler: clang
+      env:
+        # 2. Only unitary tests
+        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='ON' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
+    - os: osx
+      osx_image: xcode9.4
+      compiler: clang
+      env:
+        # 3. Only utilities and associated tests
+        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='ON' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
+    - os: osx
+      osx_image: xcode9.4
+      compiler: clang
+      env:
+        # 4. Only doxygen documentation
+        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='doxygen'
+    - os: osx
+      osx_image: xcode9.4
+      compiler: clang
+      env:
+        # 5. Only Python, associated tests and sphinx documentation
+        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='test sphinx'
+
 cache:
   directories:
     - $HOME/.cache/pip
-compiler: gcc
+
 addons:
   apt:
     packages:
@@ -33,8 +88,18 @@ addons:
       - curl
       - python3
       - python3-pip
-      - python3-pytest
-      - python3-setuptools
+  homebrew:
+    packages:
+      - cmake
+      - graphviz 
+      - doxygen
+      - boost
+      - eigen
+      - gmp
+      - mpfr
+      - tbb
+      - curl
+      - python3
 
 # When installing through libcgal-dev apt, CMake Error at CGAL Exports.cmake The imported target "CGAL::CGAL Qt5" references the file
 install: 
@@ -45,8 +110,9 @@ install:
   - make all
   - sudo make install
   - cd ..
-  - pip3 install --upgrade pip
-  - pip3 install --user Cython sphinx sphinxcontrib-bibtex matplotlib numpy scipy
+  - python3 -m pip install --upgrade pip setuptools wheel
+  - python3 -m pip install --user pytest Cython sphinx sphinxcontrib-bibtex matplotlib numpy scipy
+
 script: 
   - rm -rf build
   - mkdir -p build 
@@ -54,6 +120,7 @@ script:
   - cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=${CMAKE_EXAMPLE} -DWITH_GUDHI_TEST=${CMAKE_TEST} -DWITH_GUDHI_UTILITIES=${CMAKE_UTILITIES} -DWITH_GUDHI_PYTHON=${CMAKE_PYTHON} -DUSER_VERSION_DIR=version -DPython_ADDITIONAL_VERSIONS=3 .. 
   - make all ${MAKE_TARGET}
   - cd ..
+
 notifications:
   email:
     on_success: change # default: always
