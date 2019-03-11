@@ -88,8 +88,6 @@ addons:
       - curl
       - python3
       - python3-pip
-      - python3-pytest
-      - python3-setuptools
   homebrew:
     packages:
       - cmake
@@ -102,10 +100,6 @@ addons:
       - tbb
       - curl
       - python3
-      - python3-pip
-      - python3-pytest
-      - python3-setuptools
-
 
 # When installing through libcgal-dev apt, CMake Error at CGAL Exports.cmake The imported target "CGAL::CGAL Qt5" references the file
 install: 
@@ -116,8 +110,8 @@ install:
   - make all
   - sudo make install
   - cd ..
-  - pip3 install --upgrade pip
-  - pip3 install --user Cython sphinx sphinxcontrib-bibtex matplotlib numpy scipy
+  - python3 -m pip install --upgrade pip setuptools wheel
+  - python3 -m pip install --user pytest Cython sphinx sphinxcontrib-bibtex matplotlib numpy scipy
 
 script: 
   - rm -rf build
