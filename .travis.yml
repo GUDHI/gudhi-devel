@@ -1,20 +1,50 @@
 language: cpp 
 
-os:
-  - linux
-  - osx
-
-dist: xenial
-osx_image: xcode9.4
-
-compiler:
-  - gcc
-  - clang
-
 sudo: required 
 
 git: 
  depth: 3
+
+matrix:
+  include:
+    - os: linux
+      dist: xenial
+      compiler: gcc
+      addons:
+        apt:
+          packages:
+            - cmake
+            - graphviz 
+            - doxygen
+            - libboost-all-dev
+            - libeigen3-dev
+            - libgmp3-dev
+            - libmpfr-dev
+            - libtbb-dev
+            - curl
+            - python3
+            - python3-pip
+            - python3-pytest
+            - python3-setuptools
+    - os: osx
+      osx_image: xcode9.4
+      compiler: clang
+      addons:
+        homebrew:
+          packages:
+            - cmake
+            - graphviz 
+            - doxygen
+            - boost
+            - eigen
+            - gmp
+            - mpfr
+            - tbb
+            - curl
+            - python3
+            - python3-pip
+            - python3-pytest
+            - python3-setuptools
 
 env:
  matrix: 
@@ -32,39 +62,6 @@ env:
 cache:
   directories:
     - $HOME/.cache/pip
-
-addons:
-  apt:
-    packages:
-      - cmake
-      - graphviz 
-      - doxygen
-      - libboost-all-dev
-      - libeigen3-dev
-      - libgmp3-dev
-      - libmpfr-dev
-      - libtbb-dev
-      - curl
-      - python3
-      - python3-pip
-      - python3-pytest
-      - python3-setuptools
-  homebrew:
-    packages:
-      - cmake
-      - graphviz 
-      - doxygen
-      - boost
-      - eigen
-      - gmp
-      - mpfr
-      - tbb
-      - curl
-      - python3
-      - python3-pip
-      - python3-pytest
-      - python3-setuptools
-
 
 # When installing through libcgal-dev apt, CMake Error at CGAL Exports.cmake The imported target "CGAL::CGAL Qt5" references the file
 install: 
