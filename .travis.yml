@@ -12,8 +12,7 @@ env:
 # Only utilities and associated tests
     - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='ON' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
 # Only doxygen documentation
-# make user_version fails because it tries to copy a file that name changed...
-#    - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='doxygen'
+    - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='doxygen'
 # Only Python, associated tests and sphinx documentation
     - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='test sphinx'
 cache:
