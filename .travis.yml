@@ -4,6 +4,9 @@ os:
   - linux
   - osx
 
+dist: xenial
+osx_image: xcode9.4
+
 compiler:
   - gcc
   - clang
