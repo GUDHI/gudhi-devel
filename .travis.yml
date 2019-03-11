@@ -7,35 +7,77 @@ git:
 
 matrix:
   include:
+    # A. Linux
     - os: linux
       dist: xenial
       compiler: gcc
       env:
         matrix:
-          # Only examples and associated tests
+          # 1. Only examples and associated tests
           - CMAKE_EXAMPLE='ON' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
-          # Only unitary tests
+    - os: linux
+      dist: xenial
+      compiler: gcc
+      env:
+        matrix:
+          # 2. Only unitary tests
           - CMAKE_EXAMPLE='OFF' CMAKE_TEST='ON' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
-          # Only utilities and associated tests
+    - os: linux
+      dist: xenial
+      compiler: gcc
+      env:
+        matrix:
+          # 3. Only utilities and associated tests
           - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='ON' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
-          # Only doxygen documentation
+    - os: linux
+      dist: xenial
+      compiler: gcc
+      env:
+        matrix:
+          # 4. Only doxygen documentation
           - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='doxygen'
-          # Only Python, associated tests and sphinx documentation
+    - os: linux
+      dist: xenial
+      compiler: gcc
+      env:
+        matrix:
+          # 5. Only Python, associated tests and sphinx documentation
           - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='test sphinx'
+    # A. Mac OSX
     - os: osx
       osx_image: xcode9.4
       compiler: clang
       env:
         matrix:
-          # Only examples and associated tests
+          # 1. Only examples and associated tests
           - CMAKE_EXAMPLE='ON' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
-          # Only unitary tests
+    - os: osx
+      osx_image: xcode9.4
+      compiler: clang
+      env:
+        matrix:
+          # 2. Only unitary tests
           - CMAKE_EXAMPLE='OFF' CMAKE_TEST='ON' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
-          # Only utilities and associated tests
+    - os: osx
+      osx_image: xcode9.4
+      compiler: clang
+      env:
+        matrix:
+          # 3. Only utilities and associated tests
           - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='ON' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
-          # Only doxygen documentation
+    - os: osx
+      osx_image: xcode9.4
+      compiler: clang
+      env:
+        matrix:
+          # 4. Only doxygen documentation
           - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='doxygen'
-          # Only Python, associated tests and sphinx documentation
+    - os: osx
+      osx_image: xcode9.4
+      compiler: clang
+      env:
+        matrix:
+          # 5. Only Python, associated tests and sphinx documentation
           - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='test sphinx'
 
 cache:
