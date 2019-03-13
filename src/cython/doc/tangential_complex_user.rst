@@ -23,8 +23,9 @@ What is a Tangential Complex?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Let us start with the description of the Tangential complex of a simple
-example, with :math:`k = 1` and :math:`d = 2`. The input data is 4 points
-:math:`P` located on a curve embedded in 2D.
+example, with :math:`k = 1` and :math:`d = 2`. Only 4 points will be displayed
+(more are required for PCA) to simplify the figures. :math:`P` located
+on a closed curve embedded in 2D.
 
 .. figure:: ../../doc/Tangential_complex/tc_example_01.png
     :alt: The input
@@ -32,8 +33,7 @@ example, with :math:`k = 1` and :math:`d = 2`. The input data is 4 points
 
     The input
 
-For each point :math:`p`, estimate its tangent subspace :math:`T_p` (e.g.
-using PCA). 
+For each point :math:`p`, estimate its tangent subspace :math:`T_p` using PCA.
 
 .. figure:: ../../doc/Tangential_complex/tc_example_02.png
     :alt: The estimated normals
