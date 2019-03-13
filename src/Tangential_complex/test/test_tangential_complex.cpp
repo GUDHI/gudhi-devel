@@ -126,3 +126,33 @@ BOOST_AUTO_TEST_CASE(test_mini_tangential) {
   BOOST_CHECK(stree.num_vertices() == 4);
   BOOST_CHECK(stree.num_simplices() == 6);
 }
+
+#ifdef GUDHI_DEBUG
+BOOST_AUTO_TEST_CASE(test_basic_example_throw) {
+  typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> Kernel;
+  typedef Kernel::FT FT;
+  typedef Kernel::Point_d Point;
+  typedef Kernel::Vector_d Vector;
+  typedef tc::Tangential_complex<Kernel, CGAL::Dynamic_dimension_tag,CGAL::Parallel_tag> TC;
+
+  const int INTRINSIC_DIM = 2;
+  const int AMBIENT_DIM = 3;
+  const int NUM_POINTS = 1000;
+
+  Kernel k;
+
+  // Generate points on a 2-sphere
+  CGAL::Random_points_on_sphere_d<Point> generator(AMBIENT_DIM, 3.);
+  std::vector<Point> points;
+  points.reserve(NUM_POINTS);
+  for (int i = 0; i < NUM_POINTS; ++i)
+    points.push_back(*generator++);
+
+  // Compute the TC
+  TC tc(points, INTRINSIC_DIM, k);
+  tc.set_max_squared_edge_length(0.01);
+  std::cout << "test_basic_example_throw - set_max_squared_edge_length(0.01) to make GUDHI_CHECK fail" << std::endl;
+  BOOST_CHECK_THROW(tc.compute_tangential_complex(), std::invalid_argument);
+
+}
+#endif

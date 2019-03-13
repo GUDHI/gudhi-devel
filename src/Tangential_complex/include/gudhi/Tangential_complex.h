@@ -322,7 +322,11 @@ class Tangential_complex {
     for (std::size_t i = 0; i < m_points.size(); ++i) m_are_tangent_spaces_computed[i] = true;
   }
 
-  /// Computes the tangential complex.
+  /** \brief Computes the tangential complex.
+   *  \exception std::invalid_argument In debug mode, if the computed star dimension is too low. Try to set a bigger
+   *  maximal edge length value with `Tangential_complex::set_max_squared_edge_length` if
+   *  this happens.
+   */
   void compute_tangential_complex() {
 #ifdef GUDHI_TC_PERFORM_EXTRA_CHECKS
     std::cerr << red << "WARNING: GUDHI_TC_PERFORM_EXTRA_CHECKS is defined. "
@@ -1984,6 +1988,13 @@ class Tangential_complex {
     return os;
   }
 
+  /** \brief Sets the maximal possible squared edge length for the edges in the triangulations.
+   *
+   * @param[in] max_squared_edge_length Maximal possible squared edge length.
+   *
+   * If the maximal edge length value is too low `Tangential_complex::compute_tangential_complex` will throw an
+   * exception in debug mode.
+   */
   void set_max_squared_edge_length(FT max_squared_edge_length) { m_max_squared_edge_length = max_squared_edge_length; }
 
  private:
