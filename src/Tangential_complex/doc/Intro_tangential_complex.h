@@ -35,9 +35,11 @@ namespace tangential_complex {
 
 \section tangentialdefinition Definition
 
-A Tangential Delaunay complex is a <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
+A Tangential Delaunay complex is a
+<a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
 designed to reconstruct a \f$k\f$-dimensional smooth manifold embedded in \f$d\f$-dimensional Euclidean space. 
-The input is a point sample coming from an unknown manifold, which means that the points lie close to a structure of "small" intrinsic dimension.
+The input is a point sample coming from an unknown manifold, which means that the points lie close to a structure of
+"small" intrinsic dimension.
 The running time depends only linearly on the extrinsic dimension \f$ d \f$
 and exponentially on the intrinsic dimension \f$ k \f$.
 
@@ -46,18 +48,19 @@ An extensive description of the Tangential complex can be found in \cite tangent
 \subsection whatisthetc What is a Tangential Complex?
 
 Let us start with the description of the Tangential complex of a simple example, with \f$ k=1 \f$ and \f$ d=2 \f$.
-Only 4 points will be displayed (more are required for PCA) to simplify the figures. \f$ P \f$ located on a closed
-curve embedded in 2D.
+The point set \f$ \mathscr P \f$ is located on a closed curve embedded in 2D.
+Only 4 points will be displayed (more are required for PCA) to simplify the figures.
 \image html "tc_example_01.png" "The input"
-For each point \f$ p \f$, estimate its tangent subspace \f$ T_p \f$ using PCA.
+For each point \f$ P \f$, estimate its tangent subspace \f$ T_p \f$ using PCA.
 \image html "tc_example_02.png" "The estimated normals"
-Let us add the Voronoi diagram of the points in orange. For each point \f$ p \f$, construct its star in the Delaunay triangulation of \f$ P \f$ restricted to \f$ T_p \f$.
+Let us add the Voronoi diagram of the points in orange. For each point \f$ P \f$, construct its star in the Delaunay
+triangulation of \f$ \mathscr P \f$ restricted to \f$ T_p \f$.
 \image html "tc_example_03.png" "The Voronoi diagram"
 The Tangential Delaunay complex is the union of those stars.
 
 In practice, neither the ambient Voronoi diagram nor the ambient Delaunay triangulation is computed.
-Instead, local \f$ k \f$-dimensional regular triangulations are computed with a limited number of points as we only need the star of each point.
-More details can be found in \cite tangentialcomplex2014.
+Instead, local \f$ k \f$-dimensional regular triangulations are computed with a limited number of points as we only
+need the star of each point. More details can be found in \cite tangentialcomplex2014.
 
 \subsection inconsistencies Inconsistencies
 
