@@ -986,7 +986,7 @@ void Persistence_landscape_on_grid::set_up_values_of_landscapes(const std::vecto
   for (size_t int_no = 0; int_no != p.size(); ++int_no) {
     size_t grid_interval_begin = (p[int_no].first - grid_min_) / dx;
     size_t grid_interval_end = (p[int_no].second - grid_min_) / dx;
-    size_t grid_interval_midpoint = (size_t)(0.5 * (p[int_no].first + p[int_no].second) - grid_min + 1);
+    size_t grid_interval_midpoint = (size_t)(0.5 * (grid_interval_begin + grid_interval_end));
 
     if (dbg) {
       std::cerr << "Considering an interval : " << p[int_no].first << "," << p[int_no].second << std::endl;
@@ -996,7 +996,7 @@ void Persistence_landscape_on_grid::set_up_values_of_landscapes(const std::vecto
       std::cerr << "grid_interval_midpoint : " << grid_interval_midpoint << std::endl;
     }
 
-    double landscape_value = grid_min + dx * (grid_interval_begin + 1) - p[int_no].first;
+    double landscape_value = dx;
     for (size_t i = grid_interval_begin + 1; i < grid_interval_midpoint; ++i) {
       if (dbg) {
         std::cerr << "Adding landscape value (going up) for a point : " << i << " equal : " << landscape_value
@@ -1030,8 +1030,6 @@ void Persistence_landscape_on_grid::set_up_values_of_landscapes(const std::vecto
       }
       landscape_value += dx;
     }
-
-    landscape_value = p[int_no].second - grid_min - dx * grid_interval_midpoint;
     for (size_t i = grid_interval_midpoint; i <= grid_interval_end; ++i) {
       if (landscape_value > 0) {
         if (number_of_levels != std::numeric_limits<unsigned>::max()) {

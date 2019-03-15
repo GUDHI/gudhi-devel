@@ -2,9 +2,12 @@
  *    (Geometric Understanding in Higher Dimensions) is a generic C++
  *    library for computational topology.
  *
- *    Author(s):       Pawel Dlotko
+ *    Author(s):       Pawel Dlotko and Mathieu Carriere
  *
- *    Copyright (C) 2016 Inria
+ *    Copyright (C) 2019 Inria
+ *
+ *    Modifications:
+ *      - 2018/04 MC: Add persistence heat maps computation
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -26,10 +29,14 @@
 #include <iostream>
 #include <vector>
 #include <utility>
+#include <functional>
+#include <cmath>
 
-
-std::function<double(std::pair<double, double>, std::pair<double, double>)> Gaussian_function(double sigma){
-  return [=](std::pair<double, double> p, std::pair<double, double> q){return std::exp(  -( (p.first-q.first)*(p.first-q.first) + (p.second-q.second)*(p.second-q.second) )/(sigma)  );};
+std::function<double(std::pair<double, double>, std::pair<double, double>)> Gaussian_function(double sigma) {
+  return [=](std::pair<double, double> p, std::pair<double, double> q) {
+    return std::exp(-((p.first - q.first) * (p.first - q.first) + (p.second - q.second) * (p.second - q.second)) /
+                    (sigma));
+  };
 }
 
 using constant_scaling_function = Gudhi::Persistence_representations::constant_scaling_function;
@@ -82,14 +89,13 @@ int main(int argc, char** argv) {
   // to compute scalar product of hm1 and hm2:
   std::cout << "Scalar product is : " << hm1.compute_scalar_product(hm2) << std::endl;
 
-  // Mathieu's code ************************************************************************************************************
   Persistence_heat_maps hm1k(persistence1, Gaussian_function(1.0));
   Persistence_heat_maps hm2k(persistence2, Gaussian_function(1.0));
   Persistence_heat_maps hm1i(persistence1, Gaussian_function(1.0), 20, 20, 0, 11, 0, 11);
   Persistence_heat_maps hm2i(persistence2, Gaussian_function(1.0), 20, 20, 0, 11, 0, 11);
-  std::cout << "Scalar product computed with exact 2D kernel on grid is : " << hm1i.compute_scalar_product(hm2i) << std::endl;
-  std::cout << "Scalar product computed with exact 2D kernel is : "         << hm1k.compute_scalar_product(hm2k) << std::endl;
-  // ***************************************************************************************************************************
+  std::cout << "Scalar product computed with exact 2D kernel on grid is : " << hm1i.compute_scalar_product(hm2i)
+            << std::endl;
+  std::cout << "Scalar product computed with exact 2D kernel is : " << hm1k.compute_scalar_product(hm2k) << std::endl;
 
   return 0;
 }
