@@ -23,8 +23,10 @@ What is a Tangential Complex?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Let us start with the description of the Tangential complex of a simple
-example, with :math:`k = 1` and :math:`d = 2`. The input data is 4 points
-:math:`P` located on a curve embedded in 2D.
+example, with :math:`k = 1` and :math:`d = 2`. The point set
+:math:`\mathscr P` is located on a closed curve embedded in 2D.
+Only 4 points will be displayed (more are required for PCA) to simplify the
+figures.
 
 .. figure:: ../../doc/Tangential_complex/tc_example_01.png
     :alt: The input
@@ -32,8 +34,7 @@ example, with :math:`k = 1` and :math:`d = 2`. The input data is 4 points
 
     The input
 
-For each point :math:`p`, estimate its tangent subspace :math:`T_p` (e.g.
-using PCA). 
+For each point :math:`P`, estimate its tangent subspace :math:`T_P` using PCA.
 
 .. figure:: ../../doc/Tangential_complex/tc_example_02.png
     :alt: The estimated normals
@@ -43,8 +44,8 @@ using PCA).
 
 
 Let us add the Voronoi diagram of the points in orange. For each point
-:math:`p`, construct its star in the Delaunay triangulation of :math:`P`
-restricted to :math:`T_p`.
+:math:`P`, construct its star in the Delaunay triangulation of
+:math:`\mathscr P` restricted to :math:`T_P`.
 
 .. figure:: ../../doc/Tangential_complex/tc_example_03.png
     :alt: The Voronoi diagram
@@ -72,7 +73,7 @@ Let us take the same example.
 
     Before
 
-Let us slightly move the tangent subspace :math:`T_q`
+Let us slightly move the tangent subspace :math:`T_Q`
 
 .. figure:: ../../doc/Tangential_complex/tc_example_07_after.png
     :alt: After
