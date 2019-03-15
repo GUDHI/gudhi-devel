@@ -34,7 +34,7 @@ figures.
 
     The input
 
-For each point :math:`P`, estimate its tangent subspace :math:`T_p` using PCA.
+For each point :math:`P`, estimate its tangent subspace :math:`T_P` using PCA.
 
 .. figure:: ../../doc/Tangential_complex/tc_example_02.png
     :alt: The estimated normals
@@ -45,7 +45,7 @@ For each point :math:`P`, estimate its tangent subspace :math:`T_p` using PCA.
 
 Let us add the Voronoi diagram of the points in orange. For each point
 :math:`P`, construct its star in the Delaunay triangulation of
-:math:`\mathscr P` restricted to :math:`T_p`.
+:math:`\mathscr P` restricted to :math:`T_P`.
 
 .. figure:: ../../doc/Tangential_complex/tc_example_03.png
     :alt: The Voronoi diagram
@@ -73,7 +73,7 @@ Let us take the same example.
 
     Before
 
-Let us slightly move the tangent subspace :math:`T_q`
+Let us slightly move the tangent subspace :math:`T_Q`
 
 .. figure:: ../../doc/Tangential_complex/tc_example_07_after.png
     :alt: After

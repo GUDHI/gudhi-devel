@@ -51,10 +51,10 @@ Let us start with the description of the Tangential complex of a simple example,
 The point set \f$ \mathscr P \f$ is located on a closed curve embedded in 2D.
 Only 4 points will be displayed (more are required for PCA) to simplify the figures.
 \image html "tc_example_01.png" "The input"
-For each point \f$ P \f$, estimate its tangent subspace \f$ T_p \f$ using PCA.
+For each point \f$ P \f$, estimate its tangent subspace \f$ T_P \f$ using PCA.
 \image html "tc_example_02.png" "The estimated normals"
 Let us add the Voronoi diagram of the points in orange. For each point \f$ P \f$, construct its star in the Delaunay
-triangulation of \f$ \mathscr P \f$ restricted to \f$ T_p \f$.
+triangulation of \f$ \mathscr P \f$ restricted to \f$ T_P \f$.
 \image html "tc_example_03.png" "The Voronoi diagram"
 The Tangential Delaunay complex is the union of those stars.
 
@@ -69,7 +69,7 @@ An inconsistency occurs when a simplex is not in the star of all its vertices.
 
 Let us take the same example.
 \image html "tc_example_07_before.png" "Before"
-Let us slightly move the tangent subspace \f$ T_q \f$
+Let us slightly move the tangent subspace \f$ T_Q \f$
 \image html "tc_example_07_after.png" "After"
 Now, the star of \f$ Q \f$ contains \f$ QP \f$, but the star of \f$ P \f$ does not contain \f$ QP \f$. We have an inconsistency.
 \image html "tc_example_08.png" "After"
