@@ -121,9 +121,9 @@ class Sparse_rips_complex {
     for(int i=0;i<n;++i)
       lambda[sorted_points[i]] = params[i];
     double cst = epsilon_ * (1 - epsilon_);
-    auto block = [=cst,&complex](typename SimplicialComplexForRips::Simplex_handle sh){
+    auto block = [cst,&complex,&lambda](typename SimplicialComplexForRips::Simplex_handle sh){
       auto filt = complex.filtration(sh);
-      auto mini = file * cst;
+      auto mini = filt * cst;
       for(auto v : complex.simplex_vertex_range(sh)){
         if(lambda[v] < mini) // FIXME: store lambda/params somewhere!!!
           return true; // v died before this simplex could be born
@@ -146,7 +146,7 @@ class Sparse_rips_complex {
   };
 
   // PointRange must be random access.
-  template <typename PointRange, typename ParamRange, typename Distance>
+  template <typename Distance>
   void compute_sparse_graph(Distance& dist, double epsilon) {
     const auto& points = sorted_points; // convenience alias
     const int n = boost::size(points);
