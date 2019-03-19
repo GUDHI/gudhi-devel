@@ -47,7 +47,9 @@ namespace rips_complex {
  *
  * \details
  * This class is used to construct a sparse \f$(1+O(\epsilon))\f$-approximation of `Rips_complex`, i.e. a filtered
- * simplicial complex that is multiplicatively \f$(1+O(\epsilon))\f$-interleaved with the Rips filtration.
+ * simplicial complex that is multiplicatively
+ * \f$(1+O(\epsilon))\f$-interleaved with the Rips filtration. More precisely,
+ * this is a \f$(1,\frac{1}{1-\epsilon}\f$-interleaving.
  *
  * \tparam Filtration_value is the type used to store the filtration values of the simplicial complex.
  */
@@ -71,7 +73,8 @@ class Sparse_rips_complex {
    *
    */
   template <typename RandomAccessPointRange, typename Distance>
-  Sparse_rips_complex(const RandomAccessPointRange& points, Distance distance, double epsilon) {
+  Sparse_rips_complex(const RandomAccessPointRange& points, Distance distance, double epsilon)
+      : epsilon_(epsilon) {
     GUDHI_CHECK(epsilon > 0, "epsilon must be positive");
     std::vector<Vertex_handle> sorted_points;
     std::vector<Filtration_value> params;
@@ -111,7 +114,21 @@ class Sparse_rips_complex {
                 std::invalid_argument("Sparse_rips_complex::create_complex - simplicial complex is not empty"));
 
     complex.insert_graph(graph_);
-    complex.expansion(dim_max);
+    if(epsilon_ >= 1) {
+      complex.expansion(dim_max);
+      return;
+    }
+    double cst = epsilon_ * (1 - epsilon_);
+    auto block = [=cst,&complex](typename SimplicialComplexForRips::Simplex_handle sh){
+      auto filt = complex.filtration(sh);
+      auto mini = file * cst;
+      for(auto v : complex.simplex_vertex_range(sh)){
+        if(lambda[v] < mini) // FIXME: store lambda/params somewhere!!!
+          return true; // v died before this simplex could be born
+      }
+      return false;
+    };
+    complex.expansion_with_blockers(dim_max, block);
   }
 
  private:
@@ -166,6 +183,7 @@ class Sparse_rips_complex {
   }
 
   Graph graph_;
+  double epsilon_;
 };
 
 }  // namespace rips_complex

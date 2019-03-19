@@ -92,8 +92,8 @@ namespace rips_complex {
  * The sparse Rips filtration was introduced by Don Sheehy
  * \cite sheehy13linear. We are using the version described in
  * \cite buchet16efficient (except that we multiply all filtration values
- * by 2, to match the usual Rips complex), which proves a
- * \f$\frac{1+\epsilon}{1-\epsilon}\f$-interleaving, although in practice the
+ * by 2, to match the usual Rips complex), for which \cite cavanna15geometric proves a
+ * \f$(1,\frac{1}{1-\epsilon})\f$-interleaving, although in practice the
  * error is usually smaller.
  * A more intuitive presentation of the idea is available in
  * \cite cavanna15geometric, and in a video \cite cavanna15visualizing.
@@ -107,6 +107,9 @@ namespace rips_complex {
  * Theoretical guarantees are only available for \f$\epsilon<1\f$. The
  * construction accepts larger values of &epsilon;, and the size of the complex
  * keeps decreasing, but there is no guarantee on the quality of the result.
+ * Note that while the number of edges decreases when &epsilon; increases, the
+ * number of higher-dimensional simplices may not be monotonous when
+ * \f$\frac12\leq\epsilon\leq 1\f$.
  *
  * \section ripspointsdistance Point cloud and distance function
  * 
