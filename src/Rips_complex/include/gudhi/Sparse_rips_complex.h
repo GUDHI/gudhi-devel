@@ -76,13 +76,11 @@ class Sparse_rips_complex {
   Sparse_rips_complex(const RandomAccessPointRange& points, Distance distance, double epsilon)
       : epsilon_(epsilon) {
     GUDHI_CHECK(epsilon > 0, "epsilon must be positive");
-    std::vector<Vertex_handle> sorted_points;
-    std::vector<Filtration_value> params;
     auto dist_fun = [&](Vertex_handle i, Vertex_handle j) { return distance(points[i], points[j]); };
     Ker<decltype(dist_fun)> kernel(dist_fun);
     subsampling::choose_n_farthest_points(kernel, boost::irange<Vertex_handle>(0, boost::size(points)), -1, -1,
                                           std::back_inserter(sorted_points), std::back_inserter(params));
-    compute_sparse_graph(sorted_points, params, dist_fun, epsilon);
+    compute_sparse_graph(dist_fun, epsilon);
   }
 
   /** \brief Sparse_rips_complex constructor from a distance matrix.
@@ -118,6 +116,10 @@ class Sparse_rips_complex {
       complex.expansion(dim_max);
       return;
     }
+    const int n = boost::size(params);
+    std::vector<Filtration_value> lambda(n);
+    for(int i=0;i<n;++i)
+      lambda[sorted_points[i]] = params[i];
     double cst = epsilon_ * (1 - epsilon_);
     auto block = [=cst,&complex](typename SimplicialComplexForRips::Simplex_handle sh){
       auto filt = complex.filtration(sh);
@@ -145,7 +147,8 @@ class Sparse_rips_complex {
 
   // PointRange must be random access.
   template <typename PointRange, typename ParamRange, typename Distance>
-  void compute_sparse_graph(const PointRange& points, const ParamRange& params, Distance& dist, double epsilon) {
+  void compute_sparse_graph(Distance& dist, double epsilon) {
+    const auto& points = sorted_points; // convenience alias
     const int n = boost::size(points);
     graph_.~Graph();
     new (&graph_) Graph(n);
@@ -184,6 +187,9 @@ class Sparse_rips_complex {
 
   Graph graph_;
   double epsilon_;
+  // Because of the arbitrary split between constructor and create_complex
+  std::vector<Vertex_handle> sorted_points;
+  std::vector<Filtration_value> params;
 };
 
 }  // namespace rips_complex
