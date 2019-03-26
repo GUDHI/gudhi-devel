@@ -26,7 +26,7 @@
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Points_off_io.h>
 #include <gudhi/Flag_complex_sparse_matrix.h>
-#include <gudhi/Tower_assembler.h>
+#include <gudhi/Flag_complex_tower_assembler.h>
 #include <gudhi/Rips_complex.h>
 
 #include <boost/program_options.hpp>
@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
       Gudhi::compute_edge_graph<Gudhi::Filtered_edges_vector, Simplex_tree>(off_reader.get_point_cloud(), threshold,
                                                                             Gudhi::Euclidean_distance());
 
-  Gudhi::strong_collapse::Tower_assembler twr_assembler(number_of_points);
+  Gudhi::strong_collapse::Flag_complex_tower_assembler twr_assembler(number_of_points);
 
   // The pipeline is:
   //
