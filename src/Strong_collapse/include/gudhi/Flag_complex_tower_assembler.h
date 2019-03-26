@@ -21,8 +21,8 @@
 
 */
 
-#ifndef TOWER_ASSEMBLER_H_
-#define TOWER_ASSEMBLER_H_
+#ifndef FLAG_COMPLEX_TOWER_ASSEMBLER_H_
+#define FLAG_COMPLEX_TOWER_ASSEMBLER_H_
 
 #include <gudhi/Flag_complex_sparse_matrix.h>
 
@@ -45,14 +45,14 @@ using Distance_matrix = std::vector<std::vector<double>>;
 // |       |
 // K1c ->  K2c   [Strongly Collapsed Flag Complexes]
 
-class Tower_assembler {
+class Flag_complex_tower_assembler {
  private:
   Reduction_map renamed_vertices_;
   std::size_t current_rename_counter_;
   Flag_complex_sparse_matrix flag_filtration_;
 
  public:
-  Tower_assembler(const std::size_t num_vertices) : flag_filtration_(num_vertices) {
+  Flag_complex_tower_assembler(const std::size_t num_vertices) : flag_filtration_(num_vertices) {
     for (std::size_t i = 0; i <= num_vertices; ++i) {
       renamed_vertices_[i] = i;
     }
@@ -174,4 +174,4 @@ class Tower_assembler {
 
 }  // namespace Gudhi
 
-#endif  // TOWER_ASSEMBLER_H_
+#endif  // FLAG_COMPLEX_TOWER_ASSEMBLER_H_
