@@ -39,7 +39,7 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 // strong_collapse_rips_persistence_step_by_step is an example of each step that is required to collapse a Rips over a
-// Simplex_tree in prder to compute its persistence
+// Simplex_tree in order to compute its persistence
 // -------------------------------------------------------------------------------------------------------------------
 
 // Types definition
@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
 
   program_options(argc, argv, off_file_points, filediag, threshold, dim_max, p, min_persistence);
 
-  // Extract the points from the file filepoints
+  // Extract the points from the file
   Points_off_reader off_reader(off_file_points);
   if (!off_reader.is_valid()) {
     std::cerr << "Unable to read file " << off_file_points << "\n";
