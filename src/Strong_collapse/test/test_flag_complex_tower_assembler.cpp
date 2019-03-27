@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
 
   Gudhi::strong_collapse::Flag_complex_tower_assembler tower_assembler_1(4);
 
-  tower_assembler_1.build_tower_for_two_cmplxs(mat_coll_1,
+  tower_assembler_1.build_tower_for_two_complexes(mat_coll_1,
                                              mat_coll_2,
                                              mat_coll_2.reduction_map(),
                                              10.,
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
 
   Gudhi::strong_collapse::Flag_complex_tower_assembler tower_assembler_2(6);
 
-  tower_assembler_2.build_tower_for_two_cmplxs(mat_coll_2,
+  tower_assembler_2.build_tower_for_two_complexes(mat_coll_2,
                                              mat_coll_3,
                                              mat_coll_3.reduction_map(),
                                              10.,
@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
 
   Gudhi::strong_collapse::Flag_complex_tower_assembler tower_assembler_3(6);
 
-  tower_assembler_3.build_tower_for_two_cmplxs(mat_coll_3,
+  tower_assembler_3.build_tower_for_two_complexes(mat_coll_3,
                                              mat_coll_4,
                                              mat_coll_4.reduction_map(),
                                              10.,
@@ -206,7 +206,7 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
 
   Gudhi::strong_collapse::Flag_complex_tower_assembler tower_assembler_4(8);
 
-  tower_assembler_4.build_tower_for_two_cmplxs(mat_coll_4,
+  tower_assembler_4.build_tower_for_two_complexes(mat_coll_4,
                                              mat_coll_5,
                                              mat_coll_5.reduction_map(),
                                              10.,
@@ -243,7 +243,7 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
 
   Gudhi::strong_collapse::Flag_complex_tower_assembler tower_assembler_5(8);
 
-  tower_assembler_5.build_tower_for_two_cmplxs(mat_coll_5,
+  tower_assembler_5.build_tower_for_two_complexes(mat_coll_5,
                                              mat_coll_6,
                                              mat_coll_6.reduction_map(),
                                              10.,
