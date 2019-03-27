@@ -61,7 +61,7 @@ class Flag_complex_tower_assembler {
 
   // mat_1 and mat_2 are simplex_trees of K1c and K2c (the
   // collapsed ones), redmap_2 is the map of K2 -> K2c
-  void build_tower_for_two_cmplxs(Flag_complex_sparse_matrix& mat_1, const Flag_complex_sparse_matrix& mat_2,
+  void build_tower_for_two_complexes(Flag_complex_sparse_matrix& mat_1, const Flag_complex_sparse_matrix& mat_2,
                                   const Reduction_map& redmap_2, const double filtration_value,
                                   const std::string& outFile = "")
   {
