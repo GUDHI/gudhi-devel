@@ -45,15 +45,16 @@ using Flag_complex_strong_collapse = Gudhi::strong_collapse::Flag_complex_strong
 using Filtration_set = std::vector<Filtration_value>;
 
 void program_options(int argc, char* argv[], std::string& off_file_points, std::string& output_file,
-                     Filtration_set& threshold);
+                     bool& dry_run, Filtration_set& edge_length_set);
 
 int main(int argc, char* argv[]) {
   std::string off_file_points;
   std::string output_file;
-  Filtration_set threshold;
+  bool dry_run = false;
+  Filtration_set edge_length_set;
 
-  program_options(argc, argv, off_file_points, output_file, threshold);
-  std::sort (threshold.begin(), threshold.end());
+  program_options(argc, argv, off_file_points, output_file, dry_run, edge_length_set);
+  std::sort (edge_length_set.begin(), edge_length_set.end());
 
   Points_off_reader off_reader(off_file_points);
   if (!off_reader.is_valid()) {
@@ -66,10 +67,22 @@ int main(int argc, char* argv[]) {
   Gudhi::Filtered_edges_vector<Simplicial_complex> edge_graph =
       Gudhi::compute_edge_graph<Gudhi::Filtered_edges_vector, Simplicial_complex>(
           off_reader.get_point_cloud(),
-          threshold.back(),
+          edge_length_set.back(),
           Gudhi::Euclidean_distance());
 
-  Flag_complex_strong_collapse flag_complex(off_reader.get_point_cloud().size(), edge_graph, threshold);
+  std::cout << "Edge graph contains " << edge_graph.size() << " edges. ";
+  std::cout << "Minimal edge length is '" << edge_graph.get_filtration_min() << "'. ";
+  std::cout << "Maximal edge length is '" << edge_graph.get_filtration_max() << "'." << std::endl;
+
+  if (dry_run) {
+    exit(0);
+  }
+
+  Flag_complex_strong_collapse flag_complex(off_reader.get_point_cloud().size());
+  if (edge_length_set.size() == 1)
+    flag_complex.initialize_exact_version(edge_graph);
+  else
+    flag_complex.initialize_approximate_version(edge_graph, edge_length_set);
 
   auto distance_matrix = flag_complex.get_distance_matrix();
 
@@ -96,7 +109,7 @@ int main(int argc, char* argv[]) {
 }
 
 void program_options(int argc, char* argv[], std::string& off_file_points, std::string& output_file,
-                     Filtration_set& threshold) {
+                     bool& dry_run, Filtration_set& edge_length_set) {
   namespace po = boost::program_options;
   po::options_description visible("Allowed options", 100);
 
@@ -105,7 +118,9 @@ void program_options(int argc, char* argv[], std::string& off_file_points, std::
       "Name of an OFF file containing a point set.")(
       "output-file,o", po::value<std::string>(&output_file)->default_value(std::string()),
       "Name of file in which the distance matrix is written. Default print in std::cout")(
-      "edge-length-set,s", po::value<Filtration_set>(&threshold)->multitoken()->default_value(
+      "dry-run,d",
+      "If the dry-run is set, only a summary of the edge graph will be displayed. This can help to define edge-length-set")(
+      "edge-length-set,s", po::value<Filtration_set>(&edge_length_set)->multitoken()->default_value(
           Filtration_set{std::numeric_limits<Filtration_value>::infinity()}, "{inf}"),
       "Edge length set. i.e. '-s 0.2 0.3 0.4'");
 
@@ -115,6 +130,8 @@ void program_options(int argc, char* argv[], std::string& off_file_points, std::
   po::variables_map vm;
   po::store(po::command_line_parser(argc, argv).options(all).run(), vm);
   po::notify(vm);
+
+  dry_run = vm.count("dry-run");
 
   if (vm.count("help") || !vm.count("input-file")) {
     std::cout << std::endl;

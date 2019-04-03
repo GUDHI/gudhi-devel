@@ -7,7 +7,9 @@ if (TBB_FOUND)
   target_link_libraries(strong_collapse_distance_matrix ${TBB_LIBRARIES})
 endif()
 
-add_test(NAME Strong_collapse_utility_distance_matrix COMMAND $<TARGET_FILE:strong_collapse_distance_matrix>
-    "-i" "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "-s" "1.0")
+add_test(NAME Strong_collapse_utility_distance_matrix_dry_run COMMAND $<TARGET_FILE:strong_collapse_distance_matrix>
+    "-i" "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "-d")
+add_test(NAME Strong_collapse_utility_distance_matrix_torus COMMAND $<TARGET_FILE:strong_collapse_distance_matrix>
+    "-i" "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "-s" "0.0467216" "1.0467216" "2.0467216" "3.0467216" "4.0467216" "5.0467216" "6.0467216" "-o" "md.csv")
 
 install(TARGETS strong_collapse_distance_matrix DESTINATION bin)

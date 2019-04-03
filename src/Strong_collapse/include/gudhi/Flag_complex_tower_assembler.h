@@ -31,6 +31,7 @@
 #include <string>
 #include <limits>
 #include <algorithm>
+#include <cmath>
 
 namespace Gudhi {
 
@@ -52,7 +53,8 @@ class Flag_complex_tower_assembler {
   Flag_complex_sparse_matrix flag_filtration_;
 
  public:
-  Flag_complex_tower_assembler(const std::size_t num_vertices) : flag_filtration_(num_vertices) {
+  Flag_complex_tower_assembler(const std::size_t num_vertices)
+      : flag_filtration_((num_vertices * log2(num_vertices)) +1) {
     for (std::size_t i = 0; i <= num_vertices; ++i) {
       renamed_vertices_[i] = i;
     }
@@ -62,15 +64,18 @@ class Flag_complex_tower_assembler {
   // mat_1 and mat_2 are simplex_trees of K1c and K2c (the
   // collapsed ones), redmap_2 is the map of K2 -> K2c
   void build_tower_for_two_complexes(Flag_complex_sparse_matrix& mat_1, const Flag_complex_sparse_matrix& mat_2,
-                                  const Reduction_map& redmap_2, const double filtration_value,
-                                  const std::string& outFile = "")
+                                     const double filtration_value, const std::string& outFile = "")
   {
     std::ofstream myfile(outFile, std::ios::app);
     if (myfile.is_open() || outFile.empty()) {
+      Reduction_map reduction_map_2 = mat_2.reduction_map();
       for (auto& v : mat_1.vertex_set()) {
-        auto collapsed_to = redmap_2.find(v);            // If v collapsed to something?
-        if (collapsed_to != redmap_2.end()) {            // Collapse happened, because there is a vertex in the map
-          if (mat_1.membership(collapsed_to->second)) {  // Collapsed to an existing vertex in mat_1.
+        // If v collapsed to something?
+        auto collapsed_to = reduction_map_2.find(v);
+        // Collapse happened, because there is a vertex in the map
+        if (collapsed_to != reduction_map_2.end()) {
+          // Collapsed to an existing vertex in mat_1.
+          if (mat_1.membership(collapsed_to->second)) {
             flag_filtration_.active_strong_expansion(renamed_vertices_.at(v), renamed_vertices_.at(collapsed_to->second),
                                                      filtration_value);
             renamed_vertices_.at(v) = current_rename_counter_;

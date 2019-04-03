@@ -39,48 +39,77 @@ namespace strong_collapse {
 
 class Flag_complex_strong_collapse {
  private:
+  std::size_t number_of_points_;
   Gudhi::strong_collapse::Flag_complex_tower_assembler tower_assembler_;
  public:
+  Flag_complex_strong_collapse(std::size_t number_of_points)
+      : number_of_points_(number_of_points), tower_assembler_(number_of_points) {}
+
   template<typename FilteredEdgesVector, class InputStepRange = std::initializer_list<double>>
-  Flag_complex_strong_collapse(std::size_t number_of_points,
-                               const FilteredEdgesVector& edge_graph,
-                               const InputStepRange& step_range)
-  : tower_assembler_(number_of_points) {
+  void initialize_approximate_version(const FilteredEdgesVector& edge_graph,
+                                 const InputStepRange& step_range) {
     GUDHI_CHECK(std::begin(step_range) != std::end(step_range),
-                std::invalid_argument("Flag_complex_strong_collapse::ctor - At least one step_range is mandatory"));
+                std::invalid_argument("At least one step_range is mandatory for initialize_approximate_version"));
 
-    Flag_complex_sparse_matrix matrix_before_collapse(number_of_points);
+    // Copy step range to be modified
+    InputStepRange step_range_copy(step_range.begin(), step_range.end());
+    // edge graph min length is required in the range
+    step_range_copy.insert(step_range_copy.begin(), edge_graph.get_filtration_min());
+    // If we want to go further edge graph max length, let's stop at edge graph max length
+    if (step_range_copy.back() > edge_graph.get_filtration_max())
+      step_range_copy.push_back(edge_graph.get_filtration_max());
 
-    // Empty step_range means exact version of the Strong Collapse
-    /*if (std::begin(step_range + 1) == std::end(step_range)) {
-      Flag_complex_sparse_matrix collapsed_matrix(number_of_points,
-                                                  edge_graph.sub_filter_edges_by_filtration(*step_range));
+    // Insert by default min and max of edge graph to ease the interface
+    std::sort(step_range_copy.begin(), step_range_copy.end());
+    // Remove duplicate values
+    step_range_copy.erase(std::unique(step_range_copy.begin(), step_range_copy.end()), step_range_copy.end());
+    // Remove all thresholds values that are < edge graph min length and > edge graph max length
+    step_range_copy.erase(std::remove_if(step_range_copy.begin(), step_range_copy.end(), [edge_graph](const double& x) {
+                                           return (x < edge_graph.get_filtration_min() ||
+                                               x > edge_graph.get_filtration_max());
+                                         }), step_range_copy.end());
+
+    Flag_complex_sparse_matrix matrix_before_collapse(number_of_points_);
+
+    for (auto threshold : step_range_copy) {
+#ifdef DEBUG_TRACES
+      std::cout << "Flag_complex_strong_collapse::initialize_approximate_version - threshold=" << threshold << std::endl;
+#endif  // DEBUG_TRACES
+      Flag_complex_sparse_matrix collapsed_matrix(number_of_points_,
+                                                  edge_graph.sub_filter_edges_by_filtration(threshold));
 
       collapsed_matrix.strong_collapse();
-      Reduction_map reduction_matrix = collapsed_matrix.reduction_map();
-
-      tower_assembler_.build_tower_for_two_complexes(matrix_before_collapse, collapsed_matrix, reduction_matrix,
-                                                     edge_graph.get_filtration_min());
-    } else {*/
+      tower_assembler_.build_tower_for_two_complexes(matrix_before_collapse, collapsed_matrix, threshold);
+      matrix_before_collapse = collapsed_matrix;
+    }
 #ifdef GUDHI_USE_TBB
 
 #else
-      for (auto threshold : step_range) {
-        std::cout << "threshold=" << threshold << std::endl;
-        Flag_complex_sparse_matrix collapsed_matrix(number_of_points,
-                                                    edge_graph.sub_filter_edges_by_filtration(threshold));
-
-        collapsed_matrix.strong_collapse();
-        Reduction_map reduction_matrix = collapsed_matrix.reduction_map();
-
-        tower_assembler_.build_tower_for_two_complexes(matrix_before_collapse, collapsed_matrix,
-                                                       reduction_matrix, threshold);
-        matrix_before_collapse = collapsed_matrix;
-      }
 #endif
-    //}
 
   }
+
+  template<typename FilteredEdgesVector>
+  void initialize_exact_version(const FilteredEdgesVector& edge_graph) {
+    Flag_complex_sparse_matrix matrix_before_collapse(number_of_points_);
+
+    for (std::size_t index = 0; index < edge_graph.size(); index++) {
+      Flag_complex_sparse_matrix collapsed_matrix(number_of_points_,
+                                                  edge_graph.sub_filter_edges_by_index(index));
+
+      collapsed_matrix.strong_collapse();
+      tower_assembler_.build_tower_for_two_complexes(matrix_before_collapse, collapsed_matrix,
+                                                     edge_graph.get_filtration_at(index));
+      matrix_before_collapse = collapsed_matrix;
+    }
+#ifdef GUDHI_USE_TBB
+
+#else
+
+#endif
+
+  }
+
 
   Distance_matrix get_distance_matrix() {
     return tower_assembler_.distance_matrix();
