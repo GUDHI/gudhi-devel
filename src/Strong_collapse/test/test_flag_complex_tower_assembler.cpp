@@ -103,7 +103,6 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
 
   tower_assembler_1.build_tower_for_two_complexes(mat_coll_1,
                                              mat_coll_2,
-                                             mat_coll_2.reduction_map(),
                                              10.,
                                              "./tower_assembler_1.txt");
   Gudhi::strong_collapse::Distance_matrix sparse_distances_1 = tower_assembler_1.distance_matrix();
@@ -137,7 +136,6 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
 
   tower_assembler_2.build_tower_for_two_complexes(mat_coll_2,
                                              mat_coll_3,
-                                             mat_coll_3.reduction_map(),
                                              10.,
                                              "./tower_assembler_2.txt");
   Gudhi::strong_collapse::Distance_matrix sparse_distances_2 = tower_assembler_2.distance_matrix();
@@ -170,7 +168,6 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
 
   tower_assembler_3.build_tower_for_two_complexes(mat_coll_3,
                                              mat_coll_4,
-                                             mat_coll_4.reduction_map(),
                                              10.,
                                              "./tower_assembler_3.txt");
   Gudhi::strong_collapse::Distance_matrix sparse_distances_3 = tower_assembler_3.distance_matrix();
@@ -208,7 +205,6 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
 
   tower_assembler_4.build_tower_for_two_complexes(mat_coll_4,
                                              mat_coll_5,
-                                             mat_coll_5.reduction_map(),
                                              10.,
                                              "./tower_assembler_4.txt");
   Gudhi::strong_collapse::Distance_matrix sparse_distances_4 = tower_assembler_4.distance_matrix();
@@ -245,7 +241,6 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
 
   tower_assembler_5.build_tower_for_two_complexes(mat_coll_5,
                                              mat_coll_6,
-                                             mat_coll_6.reduction_map(),
                                              10.,
                                              "./tower_assembler_5.txt");
   Gudhi::strong_collapse::Distance_matrix sparse_distances_5 = tower_assembler_5.distance_matrix();

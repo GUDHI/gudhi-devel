@@ -118,11 +118,11 @@ void program_options(int argc, char* argv[], std::string& off_file_points, std::
       "Name of an OFF file containing a point set.")(
       "output-file,o", po::value<std::string>(&output_file)->default_value(std::string()),
       "Name of file in which the distance matrix is written. Default print in std::cout")(
-      "dry-run,d",
+      "dry-run",
       "If the dry-run is set, only a summary of the edge graph will be displayed. This can help to define edge-length-set")(
       "edge-length-set,s", po::value<Filtration_set>(&edge_length_set)->multitoken()->default_value(
           Filtration_set{std::numeric_limits<Filtration_value>::infinity()}, "{inf}"),
-      "Edge length set. i.e. '-s 0.2 0.3 0.4'");
+      "Edge length set. Default computes exact version. i.e. '-s 0.2 0.3 0.4'");
 
   po::options_description all;
   all.add(visible);

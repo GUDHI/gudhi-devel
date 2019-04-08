@@ -70,17 +70,11 @@ BOOST_AUTO_TEST_CASE(flag_complex_sparse_matrix_strong_collapse) {
     std::cout << "---------------------------------------------------------------------------------------" << std::endl;
     for (auto edge : collapsed_edges)
       std::cout << edge.first << " - " << edge.second << std::endl;
-    BOOST_CHECK(collapsed_edges.size() == 8);
+    BOOST_CHECK(collapsed_edges.size() == 4);
     BOOST_CHECK(find(collapsed_edges, 1, 2));
     BOOST_CHECK(find(collapsed_edges, 2, 3));
     BOOST_CHECK(find(collapsed_edges, 3, 4));
     BOOST_CHECK(find(collapsed_edges, 4, 1));
-
-    // Added by strong_collapse method
-    BOOST_CHECK(find(collapsed_edges, 1, 1));
-    BOOST_CHECK(find(collapsed_edges, 2, 2));
-    BOOST_CHECK(find(collapsed_edges, 3, 3));
-    BOOST_CHECK(find(collapsed_edges, 4, 4));
 
     Reduction_map reduction_map = mat_coll.reduction_map();
     for (auto edge : reduction_map)
@@ -108,10 +102,7 @@ BOOST_AUTO_TEST_CASE(flag_complex_sparse_matrix_strong_collapse) {
     for (auto edge : collapsed_edges)
       std::cout << edge.first << " - " << edge.second << std::endl;
 
-    BOOST_CHECK(collapsed_edges.size() == 1);
-
-    // Added by strong_collapse method
-    BOOST_CHECK(find(collapsed_edges, 1, 1));
+    BOOST_CHECK(collapsed_edges.size() == 0);
 
     Reduction_map reduction_map = mat_coll.reduction_map();
     for (auto edge : reduction_map)
@@ -141,16 +132,11 @@ BOOST_AUTO_TEST_CASE(flag_complex_sparse_matrix_strong_collapse) {
     std::cout << "---------------------------------------------------------------------------------------" << std::endl;
     for (auto edge : collapsed_edges)
       std::cout << edge.first << " - " << edge.second << std::endl;
+    BOOST_CHECK(collapsed_edges.size() == 4);
     BOOST_CHECK(find(collapsed_edges, 2, 3));
     BOOST_CHECK(find(collapsed_edges, 2, 5));
     BOOST_CHECK(find(collapsed_edges, 3, 6));
     BOOST_CHECK(find(collapsed_edges, 5, 6));
-
-    // Added by strong_collapse method
-    BOOST_CHECK(find(collapsed_edges, 2, 2));
-    BOOST_CHECK(find(collapsed_edges, 3, 3));
-    BOOST_CHECK(find(collapsed_edges, 5, 5));
-    BOOST_CHECK(find(collapsed_edges, 6, 6));
 
     Reduction_map reduction_map = mat_coll.reduction_map();
     for (auto edge : reduction_map)
@@ -178,8 +164,7 @@ BOOST_AUTO_TEST_CASE(flag_complex_sparse_matrix_strong_collapse) {
     std::cout << "---------------------------------------------------------------------------------------" << std::endl;
     for (auto edge : collapsed_edges)
       std::cout << edge.first << " - " << edge.second << std::endl;
-    // Added by strong_collapse method
-    BOOST_CHECK(find(collapsed_edges, 2, 2));
+    BOOST_CHECK(collapsed_edges.size() == 0);
 
     Reduction_map reduction_map = mat_coll.reduction_map();
     for (auto edge : reduction_map)
@@ -214,16 +199,11 @@ BOOST_AUTO_TEST_CASE(flag_complex_sparse_matrix_strong_collapse) {
     for (auto edge : collapsed_edges)
       std::cout << edge.first << " - " << edge.second << std::endl;
 
+    BOOST_CHECK(collapsed_edges.size() == 4);
     BOOST_CHECK(find(collapsed_edges, 3, 4));
     BOOST_CHECK(find(collapsed_edges, 3, 7));
     BOOST_CHECK(find(collapsed_edges, 4, 8));
     BOOST_CHECK(find(collapsed_edges, 7, 8));
-
-    // Added by strong_collapse method
-    BOOST_CHECK(find(collapsed_edges, 3, 3));
-    BOOST_CHECK(find(collapsed_edges, 4, 4));
-    BOOST_CHECK(find(collapsed_edges, 7, 7));
-    BOOST_CHECK(find(collapsed_edges, 8, 8));
 
     Reduction_map reduction_map = mat_coll.reduction_map();
     for (auto edge : reduction_map)
@@ -256,8 +236,7 @@ BOOST_AUTO_TEST_CASE(flag_complex_sparse_matrix_strong_collapse) {
     for (auto edge : collapsed_edges)
       std::cout << edge.first << " - " << edge.second << std::endl;
 
-    // Added by strong_collapse method
-    BOOST_CHECK(find(collapsed_edges, 3, 3));
+    BOOST_CHECK(collapsed_edges.size() == 0);
 
     Reduction_map reduction_map = mat_coll.reduction_map();
     for (auto edge : reduction_map)

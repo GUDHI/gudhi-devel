@@ -118,9 +118,8 @@ int main(int argc, char* argv[]) {
                                                                 edge_graph.sub_filter_edges_by_index(index));
 
     mat_coll.strong_collapse();
-    Gudhi::strong_collapse::Reduction_map redmap = mat_coll.reduction_map();
 
-    twr_assembler.build_tower_for_two_complexes(mat_prev_coll, mat_coll, redmap, threshold);
+    twr_assembler.build_tower_for_two_complexes(mat_prev_coll, mat_coll, threshold);
     mat_prev_coll = mat_coll;
   }
   Gudhi::strong_collapse::Distance_matrix sparse_distances = twr_assembler.distance_matrix();
