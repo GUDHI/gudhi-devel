@@ -50,10 +50,10 @@ bool find(const Structure& structure, int edge_source, int edge_target) {
 
 BOOST_AUTO_TEST_CASE(flag_complex_sparse_matrix_strong_collapse) {
   Filtered_sorted_edge_list input_edges;
-  input_edges.push_back({1., 1, 2});
-  input_edges.push_back({1., 2, 3});
-  input_edges.push_back({1., 3, 4});
-  input_edges.push_back({1., 4, 1});
+  input_edges.push_back(std::make_tuple(1., 1, 2));
+  input_edges.push_back(std::make_tuple(1., 2, 3));
+  input_edges.push_back(std::make_tuple(1., 3, 4));
+  input_edges.push_back(std::make_tuple(1., 4, 1));
 
   {
     // Edges:
@@ -84,8 +84,8 @@ BOOST_AUTO_TEST_CASE(flag_complex_sparse_matrix_strong_collapse) {
     BOOST_CHECK(reduction_map.empty());
 
   }
-  input_edges.push_back({1.5, 1, 3});
-  input_edges.push_back({1.5, 2, 4});
+  input_edges.push_back(std::make_tuple(1.5, 1, 3));
+  input_edges.push_back(std::make_tuple(1.5, 2, 4));
   {
     // Edges:
     //  1 o---o 2
@@ -112,9 +112,9 @@ BOOST_AUTO_TEST_CASE(flag_complex_sparse_matrix_strong_collapse) {
     BOOST_CHECK(find(reduction_map, 3, 1));
     BOOST_CHECK(find(reduction_map, 4, 1));
   }
-  input_edges.push_back({2., 2, 5});
-  input_edges.push_back({2., 5, 6});
-  input_edges.push_back({2., 3, 6});
+  input_edges.push_back(std::make_tuple(2., 2, 5));
+  input_edges.push_back(std::make_tuple(2., 5, 6));
+  input_edges.push_back(std::make_tuple(2., 3, 6));
   {
     // Edges:
     //        2
@@ -145,8 +145,8 @@ BOOST_AUTO_TEST_CASE(flag_complex_sparse_matrix_strong_collapse) {
     BOOST_CHECK(find(reduction_map, 1, 2));
     BOOST_CHECK(find(reduction_map, 4, 2));
   }
-  input_edges.push_back({2.5, 2, 6});
-  input_edges.push_back({2.5, 5, 3});
+  input_edges.push_back(std::make_tuple(2.5, 2, 6));
+  input_edges.push_back(std::make_tuple(2.5, 5, 3));
   {
     // Edges:
     //        2
@@ -175,9 +175,9 @@ BOOST_AUTO_TEST_CASE(flag_complex_sparse_matrix_strong_collapse) {
     BOOST_CHECK(find(reduction_map, 5, 2));
     BOOST_CHECK(find(reduction_map, 6, 2));
   }
-  input_edges.push_back({3., 3, 7});
-  input_edges.push_back({3., 7, 8});
-  input_edges.push_back({3., 4, 8});
+  input_edges.push_back(std::make_tuple(3., 3, 7));
+  input_edges.push_back(std::make_tuple(3., 7, 8));
+  input_edges.push_back(std::make_tuple(3., 4, 8));
   {
     // Edges:
     //        2
@@ -213,8 +213,8 @@ BOOST_AUTO_TEST_CASE(flag_complex_sparse_matrix_strong_collapse) {
     BOOST_CHECK(find(reduction_map, 5, 3));
     BOOST_CHECK(find(reduction_map, 6, 3));
   }
-  input_edges.push_back({3., 3, 8});
-  input_edges.push_back({3., 4, 7});
+  input_edges.push_back(std::make_tuple(3., 3, 8));
+  input_edges.push_back(std::make_tuple(3., 4, 7));
   {
     // Edges:
     //        2
@@ -253,8 +253,8 @@ BOOST_AUTO_TEST_CASE(flag_complex_sparse_matrix_strong_collapse) {
 
 BOOST_AUTO_TEST_CASE(flag_complex_sparse_matrix_dummy_test) {
   Filtered_sorted_edge_list input_edges;
-  input_edges.push_back({1., 0, 1});
-  input_edges.push_back({1., 1, 0});
+  input_edges.push_back(std::make_tuple(1., 0, 1));
+  input_edges.push_back(std::make_tuple(1., 1, 0));
 
   {
     Gudhi::strong_collapse::Flag_complex_sparse_matrix mat_coll(2, input_edges);
