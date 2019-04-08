@@ -69,10 +69,10 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
   remove("./tower_assembler_5.txt");
 
   Filtered_sorted_edge_list input_edges;
-  input_edges.push_back({1., 1, 2});
-  input_edges.push_back({1., 2, 3});
-  input_edges.push_back({1., 3, 4});
-  input_edges.push_back({1., 4, 1});
+  input_edges.push_back(std::make_tuple(1., 1, 2));
+  input_edges.push_back(std::make_tuple(1., 2, 3));
+  input_edges.push_back(std::make_tuple(1., 3, 4));
+  input_edges.push_back(std::make_tuple(1., 4, 1));
 
   // Edges:
   //  1 o---o 2
@@ -85,8 +85,8 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
 
   mat_coll_1.strong_collapse();
 
-  input_edges.push_back({1.5, 1, 3});
-  input_edges.push_back({1.5, 2, 4});
+  input_edges.push_back(std::make_tuple(1.5, 1, 3));
+  input_edges.push_back(std::make_tuple(1.5, 2, 4));
 
   // Edges:
   //  1 o---o 2
@@ -115,9 +115,9 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
     std::cout << std::endl;
   }
 
-  input_edges.push_back({2., 2, 5});
-  input_edges.push_back({2., 5, 6});
-  input_edges.push_back({2., 3, 6});
+  input_edges.push_back(std::make_tuple(2., 2, 5));
+  input_edges.push_back(std::make_tuple(2., 5, 6));
+  input_edges.push_back(std::make_tuple(2., 3, 6));
 
   // Edges:
   //        2
@@ -148,8 +148,8 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
     std::cout << std::endl;
   }
 
-  input_edges.push_back({2.5, 2, 6});
-  input_edges.push_back({2.5, 5, 3});
+  input_edges.push_back(std::make_tuple(2.5, 2, 6));
+  input_edges.push_back(std::make_tuple(2.5, 5, 3));
 
   // Edges:
   //        2
@@ -181,9 +181,9 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
   }
   GUDHI_TEST_DISTANCE_MATRIX_CLOSE(sparse_distances_1, sparse_distances_3);
 
-  input_edges.push_back({3., 3, 7});
-  input_edges.push_back({3., 7, 8});
-  input_edges.push_back({3., 4, 8});
+  input_edges.push_back(std::make_tuple(3., 3, 7));
+  input_edges.push_back(std::make_tuple(3., 7, 8));
+  input_edges.push_back(std::make_tuple(3., 4, 8));
 
   // Edges:
   //        2
@@ -218,8 +218,8 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
   }
   GUDHI_TEST_DISTANCE_MATRIX_CLOSE(sparse_distances_2, sparse_distances_4);
 
-  input_edges.push_back({3., 3, 8});
-  input_edges.push_back({3., 4, 7});
+  input_edges.push_back(std::make_tuple(3., 3, 8));
+  input_edges.push_back(std::make_tuple(3., 4, 7));
 
   // Edges:
   //        2
