@@ -118,6 +118,7 @@ class Sparse_rips_complex {
     }
     const int n = boost::size(params);
     std::vector<Filtration_value> lambda(n);
+    // lambda[original_order]=params[sorted_order]
     for(int i=0;i<n;++i)
       lambda[sorted_points[i]] = params[i];
     double cst = epsilon_ * (1 - epsilon_);
@@ -125,7 +126,7 @@ class Sparse_rips_complex {
       auto filt = complex.filtration(sh);
       auto mini = filt * cst;
       for(auto v : complex.simplex_vertex_range(sh)){
-        if(lambda[v] < mini) // FIXME: store lambda/params somewhere!!!
+        if(lambda[v] < mini)
           return true; // v died before this simplex could be born
       }
       return false;
@@ -188,7 +189,9 @@ class Sparse_rips_complex {
   Graph graph_;
   double epsilon_;
   // Because of the arbitrary split between constructor and create_complex
+  // sorted_points[sorted_order]=original_order
   std::vector<Vertex_handle> sorted_points;
+  // params[sorted_order]=distance to previous points
   std::vector<Filtration_value> params;
 };
 
