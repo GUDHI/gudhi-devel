@@ -37,7 +37,7 @@ matrix:
       compiler: gcc
       env:
         # 5. Only Python, associated tests and sphinx documentation
-        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='test sphinx' DEBUG='ctest -R sphinx_py_test -V'
+        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='#test sphinx' DEBUG='ctest -R sphinx_py_test -V'
     # A. Mac OSX
     - os: osx
       osx_image: xcode9.4
