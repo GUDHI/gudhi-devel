@@ -25,8 +25,8 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Points_off_io.h>
-#include <gudhi/Flag_complex_sparse_matrix.h>
-#include <gudhi/Flag_complex_tower_assembler.h>
+#include <gudhi/Strong_collapse/Flag_complex_sparse_matrix.h>
+#include <gudhi/Strong_collapse/Flag_complex_tower_assembler.h>
 #include <gudhi/Rips_complex.h>
 
 #include <boost/program_options.hpp>

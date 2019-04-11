@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-#ifndef FLAG_COMPLEX_SPARSE_MATRIX_H_
-#define FLAG_COMPLEX_SPARSE_MATRIX_H_
+#ifndef STRONG_COLLAPSE_FLAG_COMPLEX_SPARSE_MATRIX_H_
+#define STRONG_COLLAPSE_FLAG_COMPLEX_SPARSE_MATRIX_H_
 
 #include <iostream>
 #include <utility>
@@ -595,4 +595,4 @@ class Flag_complex_sparse_matrix {
 
 }  // namespace Gudhi
 
-#endif  // FLAG_COMPLEX_SPARSE_MATRIX_H_
+#endif  // STRONG_COLLAPSE_FLAG_COMPLEX_SPARSE_MATRIX_H_

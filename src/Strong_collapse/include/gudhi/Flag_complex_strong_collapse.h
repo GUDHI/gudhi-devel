@@ -24,8 +24,8 @@
 #ifndef FLAG_COMPLEX_STRONG_COLLAPSE_H_
 #define FLAG_COMPLEX_STRONG_COLLAPSE_H_
 
-#include <gudhi/Flag_complex_sparse_matrix.h>
-#include <gudhi/Flag_complex_tower_assembler.h>
+#include <gudhi/Strong_collapse/Flag_complex_sparse_matrix.h>
+#include <gudhi/Strong_collapse/Flag_complex_tower_assembler.h>
 
 #ifdef GUDHI_USE_TBB
 #include <gudhi/Strong_collapse/flag_complex_strong_collapse_tbb_filters.h>

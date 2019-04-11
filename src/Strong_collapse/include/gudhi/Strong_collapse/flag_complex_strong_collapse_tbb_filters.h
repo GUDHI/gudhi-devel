@@ -27,8 +27,8 @@
 // Not available if TBB is not used
 #ifdef GUDHI_USE_TBB
 
-#include <gudhi/Flag_complex_sparse_matrix.h>
-#include <gudhi/Flag_complex_tower_assembler.h>
+#include <gudhi/Strong_collapse/Flag_complex_sparse_matrix.h>
+#include <gudhi/Strong_collapse/Flag_complex_tower_assembler.h>
 
 #include <tbb/pipeline.h>  // for tbb::pipeline
 #include <tbb/concurrent_vector.h>  // for tbb::concurrent_vector

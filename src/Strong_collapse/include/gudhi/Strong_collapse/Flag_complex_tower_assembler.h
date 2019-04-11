@@ -21,10 +21,10 @@
 
 */
 
-#ifndef FLAG_COMPLEX_TOWER_ASSEMBLER_H_
-#define FLAG_COMPLEX_TOWER_ASSEMBLER_H_
+#ifndef STRONG_COLLAPSE_FLAG_COMPLEX_TOWER_ASSEMBLER_H_
+#define STRONG_COLLAPSE_FLAG_COMPLEX_TOWER_ASSEMBLER_H_
 
-#include <gudhi/Flag_complex_sparse_matrix.h>
+#include <gudhi/Strong_collapse/Flag_complex_sparse_matrix.h>
 
 #include <set>
 #include <fstream>
@@ -179,4 +179,4 @@ class Flag_complex_tower_assembler {
 
 }  // namespace Gudhi
 
-#endif  // FLAG_COMPLEX_TOWER_ASSEMBLER_H_
+#endif  // STRONG_COLLAPSE_FLAG_COMPLEX_TOWER_ASSEMBLER_H_

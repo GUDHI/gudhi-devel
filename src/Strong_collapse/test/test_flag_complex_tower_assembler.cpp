@@ -33,8 +33,8 @@
 #include <limits>
 #include <cmath>
 
-#include <gudhi/Flag_complex_tower_assembler.h>
-#include <gudhi/Flag_complex_sparse_matrix.h>
+#include <gudhi/Strong_collapse/Flag_complex_tower_assembler.h>
+#include <gudhi/Strong_collapse/Flag_complex_sparse_matrix.h>
 #include <gudhi/Unitary_tests_utils.h>
 
 // Type definitions
