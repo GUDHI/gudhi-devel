@@ -4,7 +4,7 @@
  *
  *    Author(s):       Siddharth Pritam
  *
- *    Copyright (C) 2019 INRIA Sophia Antipolis (France)
+ *    Copyright (C) 2019 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -27,6 +27,13 @@
 #include <gudhi/Flag_complex_sparse_matrix.h>
 #include <gudhi/Flag_complex_tower_assembler.h>
 
+#ifdef GUDHI_USE_TBB
+#include <gudhi/Strong_collapse/flag_complex_strong_collapse_tbb_filters.h>
+
+#include <tbb/task_scheduler_init.h>  // for tbb::task_scheduler_init
+#include <tbb/pipeline.h>  // for tbb::pipeline
+#endif  // GUDHI_USE_TBB
+
 #include <set>
 #include <fstream>
 #include <string>
@@ -43,11 +50,12 @@ class Flag_complex_strong_collapse {
   Gudhi::strong_collapse::Flag_complex_tower_assembler tower_assembler_;
  public:
   Flag_complex_strong_collapse(std::size_t number_of_points)
-      : number_of_points_(number_of_points), tower_assembler_(number_of_points) {}
+      : number_of_points_(number_of_points)
+      , tower_assembler_(number_of_points) {}
 
   template<typename FilteredEdgesVector, class InputStepRange = std::initializer_list<double>>
   void initialize_approximate_version(const FilteredEdgesVector& edge_graph,
-                                 const InputStepRange& step_range) {
+                                      const InputStepRange& step_range) {
     GUDHI_CHECK(std::begin(step_range) != std::end(step_range),
                 std::invalid_argument("At least one step_range is mandatory for initialize_approximate_version"));
 
@@ -69,6 +77,33 @@ class Flag_complex_strong_collapse {
                                                x > edge_graph.get_filtration_max());
                                          }), step_range_copy.end());
 
+#ifdef GUDHI_USE_TBB
+
+    tbb::task_scheduler_init init_parallel;
+
+    // Create the pipeline
+    tbb::pipeline pipeline;
+
+    // Create strong collapse parallel stage and add it to the pipeline
+    Strong_collapse_parallel_filter<FilteredEdgesVector, InputStepRange> collapse_parallel(number_of_points_,
+                                                                                           edge_graph,
+                                                                                           step_range_copy);
+    pipeline.add_filter(collapse_parallel);
+
+    // Create tower assembler parallel stage and add it to the pipeline
+    Tower_assembler_parallel_filter<FilteredEdgesVector, InputStepRange> tower_parallel(number_of_points_,
+                                                                                        edge_graph,
+                                                                                        step_range_copy,
+                                                                                        &tower_assembler_);
+    pipeline.add_filter(tower_parallel);
+
+    // Run the pipeline
+    // Need more than one token in flight per thread to keep all threads
+    // busy; 2-4 works
+    pipeline.run(init_parallel.default_num_threads() * 4);
+
+#else  // GUDHI_USE_TBB
+
     Flag_complex_sparse_matrix matrix_before_collapse(number_of_points_);
 
     for (auto threshold : step_range_copy) {
@@ -82,15 +117,36 @@ class Flag_complex_strong_collapse {
       tower_assembler_.build_tower_for_two_complexes(matrix_before_collapse, collapsed_matrix, threshold);
       matrix_before_collapse = collapsed_matrix;
     }
-#ifdef GUDHI_USE_TBB
 
-#else
-#endif
+#endif  // GUDHI_USE_TBB
 
   }
 
   template<typename FilteredEdgesVector>
   void initialize_exact_version(const FilteredEdgesVector& edge_graph) {
+#ifdef GUDHI_USE_TBB
+
+    tbb::task_scheduler_init init_parallel;
+
+    // Create the pipeline
+    tbb::pipeline pipeline;
+
+    // Create strong collapse parallel stage and add it to the pipeline
+    Strong_collapse_parallel_filter<FilteredEdgesVector> collapse_parallel(number_of_points_, edge_graph);
+    pipeline.add_filter(collapse_parallel);
+
+    // Create tower assembler parallel stage and add it to the pipeline
+    Tower_assembler_parallel_filter<FilteredEdgesVector> tower_parallel(number_of_points_, edge_graph,
+                                                                        &tower_assembler_);
+    pipeline.add_filter(tower_parallel);
+
+    // Run the pipeline
+    // Need more than one token in flight per thread to keep all threads
+    // busy; 2-4 works
+    pipeline.run(init_parallel.default_num_threads() * 4);
+
+#else  // GUDHI_USE_TBB
+
     Flag_complex_sparse_matrix matrix_before_collapse(number_of_points_);
 
     for (std::size_t index = 0; index < edge_graph.size(); index++) {
@@ -102,11 +158,8 @@ class Flag_complex_strong_collapse {
                                                      edge_graph.get_filtration_at(index));
       matrix_before_collapse = collapsed_matrix;
     }
-#ifdef GUDHI_USE_TBB
 
-#else
-
-#endif
+#endif  // GUDHI_USE_TBB
 
   }
 
