@@ -148,6 +148,7 @@ if( PYTHONINTERP_FOUND )
   find_python_module("matplotlib")
   find_python_module("numpy")
   find_python_module("scipy")
+  find_python_module("sphinx")
 endif()
 
 if(NOT GUDHI_CYTHON_PATH)
@@ -159,11 +160,15 @@ option(WITH_GUDHI_CYTHON_RUNTIME_LIBRARY_DIRS "Build with setting runtime_librar
 if(PYTHONINTERP_FOUND AND CYTHON_FOUND)
   # Default found version 2
   if(PYTHON_VERSION_MAJOR EQUAL 2)
-    # Documentation generation is available through sphinx
-    find_program( SPHINX_PATH sphinx-build )
+    if(SPHINX_FOUND)
+      # Documentation generation is available through sphinx
+      find_program( SPHINX_PATH sphinx-build )
+    endif(SPHINX_FOUND)
   elseif(PYTHON_VERSION_MAJOR EQUAL 3)
-    # No sphinx-build in Pyton3, just hack it
-    set(SPHINX_PATH "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/${GUDHI_CYTHON_PATH}/doc/python3-sphinx-build.py")
+    if(SPHINX_FOUND)
+      # No sphinx-build in Pyton3, just hack it
+      set(SPHINX_PATH "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/${GUDHI_CYTHON_PATH}/doc/python3-sphinx-build.py")
+    endif(SPHINX_FOUND)
   else()
     message(FATAL_ERROR "ERROR: Try to compile the Cython interface. Python version ${PYTHON_VERSION_STRING} is not valid.")
   endif(PYTHON_VERSION_MAJOR EQUAL 2)
