@@ -49,8 +49,17 @@ jobs:
           command: |
             mkdir build;
             cd build;
-            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 -DUSER_VERSION_DIR=version ..;
+            cmake ..;
+            make user_version;
+            cd version;
+            mkdir build;
+            cd build;            
+            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 ..;
             make all test sphinx;
+            cp -R cython/sphinx /tmp/sphinx;
+
+      - store_artifacts:
+          path: /tmp/sphinx
 
   doxygen:
     docker:
@@ -67,8 +76,8 @@ jobs:
             grep warning dox.log;
             cp dox.log version/doc/html/;
             cp -R version/doc/html /tmp/doxygen;
-            which bibtex;
-            which perl;
+            which bibtex > /tmp/doxygen/bitex.txt;
+            which perl >> /tmp/doxygen/bitex.txt;
 
       - store_artifacts:
           path: /tmp/doxygen
