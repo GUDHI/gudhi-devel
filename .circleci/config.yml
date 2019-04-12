@@ -7,7 +7,11 @@ jobs:
       - checkout
       - run:
           name: Build and test examples
-          command: mkdir build; cd build; cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..; make all test
+          command: |
+            mkdir build;
+            cd build;
+            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..;
+            make all test;
 
   tests:
     docker:
@@ -16,7 +20,11 @@ jobs:
       - checkout
       - run:
           name: Build and test unitary tests
-          command: mkdir build; cd build; cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..; make all test
+          command: |
+            mkdir build;
+            cd build;
+            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..;
+            make all test;
 
   utils:
     docker:
@@ -25,7 +33,11 @@ jobs:
       - checkout
       - run:
           name: Build and test utilities
-          command: mkdir build; cd build; cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF ..; make all test
+          command: |
+            mkdir build;
+            cd build;
+            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF ..;
+            make all test;
 
   python:
     docker:
@@ -34,7 +46,11 @@ jobs:
       - checkout
       - run:
           name: Build and test python module. Generates and tests the python documentation
-          command: mkdir build; cd build; cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 -DUSER_VERSION_DIR=version ..; make all test sphinx
+          command: |
+            mkdir build;
+            cd build;
+            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 -DUSER_VERSION_DIR=version ..;
+            make all test sphinx;
 
   doxygen:
     docker:
@@ -43,7 +59,17 @@ jobs:
       - checkout
       - run:
           name: Generates the C++ documentation with doxygen
-          command: mkdir build; cd build; cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF -DUSER_VERSION_DIR=version ..; make doxygen
+          command: |
+            mkdir build;
+            cd build;
+            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF -DUSER_VERSION_DIR=version ..;
+            make doxygen 2>&1 | tee dox.log;
+            grep warning dox.log;
+            cp dox.log version/doc/html/;
+
+      - store_artifacts:
+          path: version/doc/html
+          destination: doxygen
 
 workflows:
   version: 2
