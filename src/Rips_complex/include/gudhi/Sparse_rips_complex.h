@@ -87,7 +87,7 @@ class Sparse_rips_complex {
    *
    * @param[in] distance_matrix Range of range of distances.
    * `distance_matrix[i][j]` returns the distance between points \f$i\f$ and
-   * \f$j\f$ as long as \f$ 0 \leqslant i < j \leqslant
+   * \f$j\f$ as long as \f$ 0 \leqslant j < i \leqslant
    * distance\_matrix.size().\f$
    * @param[in] epsilon Approximation parameter. epsilon must be positive.
    */
