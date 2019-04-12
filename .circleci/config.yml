@@ -66,10 +66,10 @@ jobs:
             make doxygen 2>&1 | tee dox.log;
             grep warning dox.log;
             cp dox.log version/doc/html/;
+            cp -R version/doc/html /tmp/doxygen;
 
       - store_artifacts:
-          path: version/doc/html
-          destination: doxygen
+          path: /tmp/doxygen
 
 workflows:
   version: 2
