@@ -94,7 +94,7 @@ class Sparse_rips_complex {
   template <typename DistanceMatrix>
   Sparse_rips_complex(const DistanceMatrix& distance_matrix, double epsilon)
       : Sparse_rips_complex(boost::irange<Vertex_handle>(0, boost::size(distance_matrix)),
-                            [&](Vertex_handle i, Vertex_handle j) { return distance_matrix[j][i]; }, epsilon) {}
+                            [&](Vertex_handle i, Vertex_handle j) { return (i==j) ? 0 : (i<j) ? distance_matrix[j][i] : distance_matrix[i][j]; }, epsilon) {}
 
   /** \brief Fills the simplicial complex with the sparse Rips graph and
    * expands it with all the cliques, stopping at a given maximal dimension.
