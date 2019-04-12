@@ -76,8 +76,6 @@ jobs:
             grep warning dox.log;
             cp dox.log version/doc/html/;
             cp -R version/doc/html /tmp/doxygen;
-            which bibtex > /tmp/doxygen/bitex.txt;
-            which perl > /tmp/doxygen/perl.txt;
 
       - store_artifacts:
           path: /tmp/doxygen
