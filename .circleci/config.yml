@@ -5,60 +5,35 @@ jobs:
       - image: gudhi/ci_for_gudhi:latest
     steps:
       - checkout
-      - run: rm -rf build
-      - run: mkdir -p build 
-      - run: cd build 
-      - run: cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF -DPython_ADDITIONAL_VERSIONS=3 .. 
-      - run: make all test
-      - run: cd ..
+      - run: mkdir build; cd build; cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF -DPython_ADDITIONAL_VERSIONS=3 ..; make all test
 
   tests:
     docker:
       - image: gudhi/ci_for_gudhi:latest
     steps:
       - checkout
-      - run: rm -rf build
-      - run: mkdir -p build 
-      - run: cd build 
-      - run: cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF -DPython_ADDITIONAL_VERSIONS=3 .. 
-      - run: make all test
-      - run: cd ..
+      - run: mkdir build; cd build; cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF -DPython_ADDITIONAL_VERSIONS=3 ..; make all test
 
   utils:
     docker:
       - image: gudhi/ci_for_gudhi:latest
     steps:
       - checkout
-      - run: rm -rf build
-      - run: mkdir -p build 
-      - run: cd build 
-      - run: cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF -DPython_ADDITIONAL_VERSIONS=3 .. 
-      - run: make all test
-      - run: cd ..
+      - run: mkdir build; cd build; cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF -DPython_ADDITIONAL_VERSIONS=3 ..; make all test
 
   python:
     docker:
       - image: gudhi/ci_for_gudhi:latest
     steps:
       - checkout
-      - run: rm -rf build
-      - run: mkdir -p build 
-      - run: cd build 
-      - run: cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 .. 
-      - run: make all test sphinx
-      - run: cd ..
+      - run: mkdir build; cd build; cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 ..; make all test sphinx
 
   doxygen:
     docker:
       - image: gudhi/ci_for_gudhi:latest
     steps:
       - checkout
-      - run: rm -rf build
-      - run: mkdir -p build 
-      - run: cd build 
-      - run: cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF -DPython_ADDITIONAL_VERSIONS=3 .. 
-      - run: make doxygen
-      - run: cd ..
+      - run: mkdir build; cd build; cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF -DPython_ADDITIONAL_VERSIONS=3 ..; make doxygen
 
 workflows:
   version: 2
