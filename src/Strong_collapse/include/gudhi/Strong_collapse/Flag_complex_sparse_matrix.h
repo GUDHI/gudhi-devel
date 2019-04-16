@@ -368,7 +368,7 @@ class Flag_complex_sparse_matrix {
     This is THE function that initialises all data members to appropriate values. <br>
     <B>row_to_vertex_</B>, <B>vertex_to_row_</B>, <B>rows</B>, <B>cols</B>, <B>sparseMxSimplices</B> are initialised here.
     <B>domination_indicator_</B>, <B>row_insert_indicator_</B>
-    ,<B>row_iterator_<B>,<B>simpDomnIndicator<B>,<B>colInsertIndicator<B> and <B>columnIterator<B> are initialised by
+    ,<B>row_iterator_</B>,<B>simpDomnIndicator</B>,<B>colInsertIndicator</B> and <B>columnIterator</B> are initialised by
     init_lists() function which is called at the end of this. <br> What this does:
       1. Populate <B>row_to_vertex_</B> and <B>vertex_to_row_</B> by going over through the vertices of the Fake_simplex_tree
     and assign the variable <B>rows</B> = no. of vertices

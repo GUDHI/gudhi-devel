@@ -128,6 +128,12 @@ public:
     delete matrix_before_collapse_ptr_;
   }
 
+  // Forbid copy/move constructor/assignment operator
+  Tower_assembler_parallel_filter(const Tower_assembler_parallel_filter& other) = delete;
+  Tower_assembler_parallel_filter& operator= (const Tower_assembler_parallel_filter& other) = delete;
+  Tower_assembler_parallel_filter (Tower_assembler_parallel_filter&& other) = delete;
+  Tower_assembler_parallel_filter& operator= (Tower_assembler_parallel_filter&& other) = delete;
+
 private:
   FilteredEdgesVector edge_graph_;
   InputStepRange step_range_;
