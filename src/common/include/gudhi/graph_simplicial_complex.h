@@ -54,9 +54,10 @@ class Filtered_edges_vector {
  public:
   /** \brief Type of the `Gudhi::Filtered_edges_vector` data structure.
    */
-  using Filtered_edges = std::vector<std::tuple<typename SimplicialComplexForFilteredEdges::Filtration_value,
-                                                typename SimplicialComplexForFilteredEdges::Vertex_handle,
-                                                typename SimplicialComplexForFilteredEdges::Vertex_handle>>;
+  using Filtered_edge = std::tuple<typename SimplicialComplexForFilteredEdges::Filtration_value,
+                                   typename SimplicialComplexForFilteredEdges::Vertex_handle,
+                                   typename SimplicialComplexForFilteredEdges::Vertex_handle>;
+  using Filtered_edge_set = std::vector<Filtered_edge>;
 
   template <class EdgeIterator, class EdgePropertyIterator>
   Filtered_edges_vector(EdgeIterator first, EdgeIterator last, EdgePropertyIterator ep_iter,
@@ -69,10 +70,16 @@ class Filtered_edges_vector {
     std::sort(edges_.begin(), edges_.end());
   }
 
+  Filtered_edge_set edges() const { return edges_; }
+
+  /** \brief Returns the edges vector at a specific index filtration value.
+   */
+  typename SimplicialComplexForFilteredEdges::Filtration_value get_filtration_at(std::size_t new_index) const {
+    return std::get<0>(*(edges_.begin() + new_index));
+  }
+
   /** \brief Returns the edges vector min filtration value.
    */
-  Filtered_edges edges() const { return edges_; }
-
   typename SimplicialComplexForFilteredEdges::Filtration_value get_filtration_min() const {
     return std::get<0>(*(edges_.begin()));
   }
@@ -89,25 +96,49 @@ class Filtered_edges_vector {
 
   /** \brief Returns the sub-filtered edges vector from a `new_threshold` filtration value.
    */
-  Filtered_edges sub_filter_edges_by_filtration(typename SimplicialComplexForFilteredEdges::Filtration_value new_threshold) const {
+  Filtered_edge_set sub_filter_edges_by_filtration(typename SimplicialComplexForFilteredEdges::Filtration_value new_threshold) const {
     auto edge_it = edges_.begin();
-    while ((std::get<0>(*edge_it) <= new_threshold) && (edge_it < edges_.end())) {
+    while ((std::get<0>(*edge_it) < new_threshold) && (edge_it < edges_.end())) {
       ++edge_it;
     }
-    return Filtered_edges(edges_.begin(), edge_it);
+#ifdef DEBUG_TRACES
+    if (edges_.begin() != edge_it) {
+      Filtered_edge_set output(edges_.begin(), edge_it);
+      Filtered_edge back = output.back();
+      std::cout << "Filtered_edges_vector::sub_filter_edges_by_filtration threshold = "
+                << std::get<0>(back) << " - size = " << output.size() << " - back = "
+                << std::get<0>(back) << " - u = " << std::get<1>(back)
+                << " - v = " << std::get<2>(back) << std::endl;
+    } else {
+      std::cout << "Filtered_edges_vector::sub_filter_edges_by_filtration is empty " << std::endl;
+    }
+#endif  // DEBUG_TRACES
+    return Filtered_edge_set(edges_.begin(), edge_it);
   }
 
   /** \brief Returns the sub-filtered edges vector from a `new_index` index value.
    */
-  Filtered_edges sub_filter_edges_by_index(std::size_t new_index) const {
+  Filtered_edge_set sub_filter_edges_by_index(std::size_t new_index) const {
     if (new_index >= size())
       return edges_;
 
-    return Filtered_edges(edges_.begin(), edges_.begin() + new_index);
+#ifdef DEBUG_TRACES
+    if (edges_.begin() != edges_.begin() + new_index + 1) {
+      Filtered_edge_set output(edges_.begin(), edges_.begin() + new_index + 1);
+      Filtered_edge back(output.back());
+      std::cout << "Filtered_edges_vector::sub_filter_edges_by_filtration threshold = "
+                << std::get<0>(back) << " - size = " << output.size() << " - back = "
+                << std::get<0>(back) << " - u = " << std::get<1>(back)
+                << " - v = " << std::get<2>(back) << std::endl;
+    } else {
+      std::cout << "Filtered_edges_vector::sub_filter_edges_by_index is empty " << std::endl;
+    }
+#endif  // DEBUG_TRACES
+    return Filtered_edge_set(edges_.begin(), edges_.begin() + new_index + 1);
   }
 
 private:
-  Filtered_edges edges_;
+  Filtered_edge_set edges_;
 };
 
 /** \brief Computes the edge graph of the points.

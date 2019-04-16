@@ -4,7 +4,7 @@
  *
  *    Author(s):       Siddharth Pritam
  *
- *    Copyright (C) 2019 INRIA Sophia Antipolis (France)
+ *    Copyright (C) 2019 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -21,16 +21,17 @@
 
 */
 
-#ifndef TOWER_ASSEMBLER_H_
-#define TOWER_ASSEMBLER_H_
+#ifndef STRONG_COLLAPSE_FLAG_COMPLEX_TOWER_ASSEMBLER_H_
+#define STRONG_COLLAPSE_FLAG_COMPLEX_TOWER_ASSEMBLER_H_
 
-#include <gudhi/Flag_complex_sparse_matrix.h>
+#include <gudhi/Strong_collapse/Flag_complex_sparse_matrix.h>
 
 #include <set>
 #include <fstream>
 #include <string>
 #include <limits>
 #include <algorithm>
+#include <cmath>
 
 namespace Gudhi {
 
@@ -45,14 +46,15 @@ using Distance_matrix = std::vector<std::vector<double>>;
 // |       |
 // K1c ->  K2c   [Strongly Collapsed Flag Complexes]
 
-class Tower_assembler {
+class Flag_complex_tower_assembler {
  private:
   Reduction_map renamed_vertices_;
   std::size_t current_rename_counter_;
   Flag_complex_sparse_matrix flag_filtration_;
 
  public:
-  Tower_assembler(const std::size_t num_vertices) : flag_filtration_(num_vertices) {
+  Flag_complex_tower_assembler(const std::size_t num_vertices)
+      : flag_filtration_((num_vertices * log2(num_vertices)) +1) {
     for (std::size_t i = 0; i <= num_vertices; ++i) {
       renamed_vertices_[i] = i;
     }
@@ -61,16 +63,19 @@ class Tower_assembler {
 
   // mat_1 and mat_2 are simplex_trees of K1c and K2c (the
   // collapsed ones), redmap_2 is the map of K2 -> K2c
-  void build_tower_for_two_cmplxs(Flag_complex_sparse_matrix& mat_1, const Flag_complex_sparse_matrix& mat_2,
-                                  const Reduction_map& redmap_2, const double filtration_value,
-                                  const std::string& outFile = "")
+  void build_tower_for_two_complexes(Flag_complex_sparse_matrix& mat_1, const Flag_complex_sparse_matrix& mat_2,
+                                     const double filtration_value, const std::string& outFile = "")
   {
     std::ofstream myfile(outFile, std::ios::app);
     if (myfile.is_open() || outFile.empty()) {
+      Reduction_map reduction_map_2 = mat_2.reduction_map();
       for (auto& v : mat_1.vertex_set()) {
-        auto collapsed_to = redmap_2.find(v);            // If v collapsed to something?
-        if (collapsed_to != redmap_2.end()) {            // Collapse happened, because there is a vertex in the map
-          if (mat_1.membership(collapsed_to->second)) {  // Collapsed to an existing vertex in mat_1.
+        // If v collapsed to something?
+        auto collapsed_to = reduction_map_2.find(v);
+        // Collapse happened, because there is a vertex in the map
+        if (collapsed_to != reduction_map_2.end()) {
+          // Collapsed to an existing vertex in mat_1.
+          if (mat_1.membership(collapsed_to->second)) {
             flag_filtration_.active_strong_expansion(renamed_vertices_.at(v), renamed_vertices_.at(collapsed_to->second),
                                                      filtration_value);
             renamed_vertices_.at(v) = current_rename_counter_;
@@ -174,4 +179,4 @@ class Tower_assembler {
 
 }  // namespace Gudhi
 
-#endif  // TOWER_ASSEMBLER_H_
+#endif  // STRONG_COLLAPSE_FLAG_COMPLEX_TOWER_ASSEMBLER_H_

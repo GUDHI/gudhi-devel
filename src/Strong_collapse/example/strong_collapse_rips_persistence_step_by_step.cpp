@@ -25,8 +25,8 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Points_off_io.h>
-#include <gudhi/Flag_complex_sparse_matrix.h>
-#include <gudhi/Tower_assembler.h>
+#include <gudhi/Strong_collapse/Flag_complex_sparse_matrix.h>
+#include <gudhi/Strong_collapse/Flag_complex_tower_assembler.h>
 #include <gudhi/Rips_complex.h>
 
 #include <boost/program_options.hpp>
@@ -39,7 +39,7 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 // strong_collapse_rips_persistence_step_by_step is an example of each step that is required to collapse a Rips over a
-// Simplex_tree in prder to compute its persistence
+// Simplex_tree in order to compute its persistence
 // -------------------------------------------------------------------------------------------------------------------
 
 // Types definition
@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
 
   program_options(argc, argv, off_file_points, filediag, threshold, dim_max, p, min_persistence);
 
-  // Extract the points from the file filepoints
+  // Extract the points from the file
   Points_off_reader off_reader(off_file_points);
   if (!off_reader.is_valid()) {
     std::cerr << "Unable to read file " << off_file_points << "\n";
@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
       Gudhi::compute_edge_graph<Gudhi::Filtered_edges_vector, Simplex_tree>(off_reader.get_point_cloud(), threshold,
                                                                             Gudhi::Euclidean_distance());
 
-  Gudhi::strong_collapse::Tower_assembler twr_assembler(number_of_points);
+  Gudhi::strong_collapse::Flag_complex_tower_assembler twr_assembler(number_of_points);
 
   // The pipeline is:
   //
@@ -118,9 +118,8 @@ int main(int argc, char* argv[]) {
                                                                 edge_graph.sub_filter_edges_by_index(index));
 
     mat_coll.strong_collapse();
-    Gudhi::strong_collapse::Reduction_map redmap = mat_coll.reduction_map();
 
-    twr_assembler.build_tower_for_two_cmplxs(mat_prev_coll, mat_coll, redmap, threshold);
+    twr_assembler.build_tower_for_two_complexes(mat_prev_coll, mat_coll, threshold);
     mat_prev_coll = mat_coll;
   }
   Gudhi::strong_collapse::Distance_matrix sparse_distances = twr_assembler.distance_matrix();

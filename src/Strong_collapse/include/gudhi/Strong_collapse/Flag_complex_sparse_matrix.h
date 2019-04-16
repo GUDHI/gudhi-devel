@@ -4,7 +4,7 @@
  *
  *    Author(s):       Siddharth Pritam
  *
- *    Copyright (C) 2019 INRIA Sophia Antipolis (France)
+ *    Copyright (C) 2019 Inria
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-#ifndef FLAG_COMPLEX_SPARSE_MATRIX_H_
-#define FLAG_COMPLEX_SPARSE_MATRIX_H_
+#ifndef STRONG_COLLAPSE_FLAG_COMPLEX_SPARSE_MATRIX_H_
+#define STRONG_COLLAPSE_FLAG_COMPLEX_SPARSE_MATRIX_H_
 
 #include <iostream>
 #include <utility>
@@ -79,7 +79,7 @@ class Flag_complex_sparse_matrix {
   /*!
     This stores the count of vertices (which is also the number of rows in the Matrix).
   */
-  std::size_t rows;
+  std::size_t rows_;
 
   /** \brief Stores the collapsed sparse matrix representation. Initialized by the `after_collapse()` method.
    * */
@@ -139,9 +139,9 @@ class Flag_complex_sparse_matrix {
     // VR: row_iterator_.push(0);
     // VR: row_iterator_.pop();
 
-    rows = 0;
+    rows_ = 0;
 
-    expansion_limit_ = 3;
+    expansion_limit_ = 2;
   }
 
   //!	Function for computing the Fake Simplex_tree corresponding to the core of the complex.
@@ -153,15 +153,17 @@ class Flag_complex_sparse_matrix {
     <I>insert_new_edges()</I> function from Gudhi's Fake_simplex_tree.
   */
   void after_collapse() {
-    sparse_collapsed_matrix_ = Sparse_row_matrix(rows, rows);  // Just for debugging purpose.
+    sparse_collapsed_matrix_ = Sparse_row_matrix(rows_, rows_);  // Just for debugging purpose.
     one_simplices_.clear();
-    for (std::size_t rw = 0; rw < rows; ++rw) {
+    for (std::size_t rw = 0; rw < rows_; ++rw) {
       if (not domination_indicator_[rw])  // If the current column is not dominated
       {
         auto nbhrs_to_insert = read_row_index(rw);  // returns row indices of the non-dominated vertices.
         for (auto& v : nbhrs_to_insert) {
           sparse_collapsed_matrix_.insert(rw, v) = 1;
-          if (rw <= v) one_simplices_.push_back({row_to_vertex_[rw], row_to_vertex_[v]});
+          if (rw < v) {
+            one_simplices_.push_back({row_to_vertex_[rw], row_to_vertex_[v]});
+          }
         }
       }
     }
@@ -366,7 +368,7 @@ class Flag_complex_sparse_matrix {
     This is THE function that initialises all data members to appropriate values. <br>
     <B>row_to_vertex_</B>, <B>vertex_to_row_</B>, <B>rows</B>, <B>cols</B>, <B>sparseMxSimplices</B> are initialised here.
     <B>domination_indicator_</B>, <B>row_insert_indicator_</B>
-    ,<B>row_iterator_<B>,<B>simpDomnIndicator<B>,<B>colInsertIndicator<B> and <B>columnIterator<B> are initialised by
+    ,<B>row_iterator_</B>,<B>simpDomnIndicator</B>,<B>colInsertIndicator</B> and <B>columnIterator</B> are initialised by
     init_lists() function which is called at the end of this. <br> What this does:
       1. Populate <B>row_to_vertex_</B> and <B>vertex_to_row_</B> by going over through the vertices of the Fake_simplex_tree
     and assign the variable <B>rows</B> = no. of vertices
@@ -443,18 +445,19 @@ class Flag_complex_sparse_matrix {
     auto rw = vertex_to_row_.find(vertex);
     if (rw == vertex_to_row_.end()) {
       // Initializing the diagonal element of the adjency matrix corresponding to rw_b.
-      sparse_matrix_.insert(rows, rows) = filt_val;
+      sparse_matrix_.insert(rows_, rows_) = filt_val;
       domination_indicator_.push_back(false);
       row_insert_indicator_.push_back(true);
       contraction_indicator_.push_back(false);
-      row_iterator_.push(rows);
-      vertex_to_row_.insert(std::make_pair(vertex, rows));
-      row_to_vertex_.insert(std::make_pair(rows, vertex));
+      row_iterator_.push(rows_);
+      vertex_to_row_.insert(std::make_pair(vertex, rows_));
+      row_to_vertex_.insert(std::make_pair(rows_, vertex));
       vertices_.emplace(vertex);
-      rows++;
+      rows_++;
     }
   }
 
+  // The edge must not be added before, it should be a new edge.
   void insert_new_edges(const Vertex& u, const Vertex& v, double filt_val) {
     insert_vertex(u, filt_val);
     if (u != v) {
@@ -532,6 +535,7 @@ class Flag_complex_sparse_matrix {
       // simulate the contraction of w by expanding the star of v
       if (active_list_w_v.size() <
           active_list_v_w.size()) {
+        // simulate the contraction of w by expanding the star of v
         for (auto& x : active_list_w_v) {
           active_edge_insertion(v, x, filt_val);
         }
@@ -591,4 +595,4 @@ class Flag_complex_sparse_matrix {
 
 }  // namespace Gudhi
 
-#endif  // FLAG_COMPLEX_SPARSE_MATRIX_H_
+#endif  // STRONG_COLLAPSE_FLAG_COMPLEX_SPARSE_MATRIX_H_

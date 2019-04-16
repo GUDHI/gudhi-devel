@@ -151,6 +151,21 @@
     </td>
  </tr>
 </table>
+ \subsection StrongCollapseDataStructure Strong collapse
+ \image html "strong_collapse_representation.png" "Strong collapse representation"
+<table border="0">
+  <tr>
+    <td width="25%">
+      <b>Author:</b> Siddharth Pritam<br>
+      <b>Introduced in:</b> GUDHI 2.4.0<br>
+      <b>Copyright:</b> GPL v3<br>
+    </td>
+    <td width="75%">
+    The Strong collapse blablabla.<br>
+    <b>User manual:</b> \ref strong_collapse - <b>Reference manual:</b> Gudhi::strong_collapse::Flag_complex_strong_collapse
+    </td>
+ </tr>
+</table>
  \subsection TangentialComplexDataStructure Tangential complex
  \image html "tc_examples.png" "Tangential complex representation"
 <table border="0">

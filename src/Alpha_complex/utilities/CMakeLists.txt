@@ -23,7 +23,7 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
 
   add_test(NAME Alpha_complex_utilities_alpha_complex_3d COMMAND $<TARGET_FILE:alpha_complex_3d_persistence>
           "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off"
-          "-p" "2" "-m" "0.45" "-o" "alpha.pers")
+          "-p" "2" "-m" "0.45" "-o" "safe.pers")
 
   add_test(NAME Alpha_complex_utilities_exact_alpha_complex_3d COMMAND $<TARGET_FILE:alpha_complex_3d_persistence>
           "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off"
@@ -31,13 +31,13 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
 
   add_test(NAME Alpha_complex_utilities_safe_alpha_complex_3d COMMAND $<TARGET_FILE:alpha_complex_3d_persistence>
           "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off"
-          "-p" "2" "-m" "0.45" "-o" "safe.pers" "-s")
+          "-p" "2" "-m" "0.45" "-o" "fast.pers" "-f")
 
   if (DIFF_PATH)
     add_test(Alpha_complex_utilities_diff_alpha_complex_3d ${DIFF_PATH}
-            "exact.pers" "alpha.pers")
+            "exact.pers" "safe.pers")
     add_test(Alpha_complex_utilities_diff_alpha_complex_3d ${DIFF_PATH}
-            "safe.pers" "alpha.pers")
+            "fast.pers" "safe.pers")
   endif()
 
   add_test(NAME Alpha_complex_utilities_periodic_alpha_complex_3d_persistence COMMAND $<TARGET_FILE:alpha_complex_3d_persistence>

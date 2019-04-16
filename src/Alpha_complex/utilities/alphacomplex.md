@@ -107,6 +107,7 @@ It must be in the format described
 points (one value per line).
 * `-e [ --exact ]` for the exact computation version (not compatible with
 weight and periodic version).
+* `-f [ --fast ]` for the fast computation version.
 
 **Example**
 

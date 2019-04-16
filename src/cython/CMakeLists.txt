@@ -198,9 +198,9 @@ if(PYTHONINTERP_FOUND)
       set(GUDHI_CYTHON_INCLUDE_DIRS "${GUDHI_CYTHON_INCLUDE_DIRS}'${TBB_INCLUDE_DIRS}', ")
     endif()
 
-    if(UNIX)
+    if(UNIX AND WITH_GUDHI_CYTHON_RUNTIME_LIBRARY_DIRS)
       set( GUDHI_CYTHON_RUNTIME_LIBRARY_DIRS "${GUDHI_CYTHON_LIBRARY_DIRS}")
-    endif(UNIX)
+    endif(UNIX AND WITH_GUDHI_CYTHON_RUNTIME_LIBRARY_DIRS)
 
     # Generate setup.py file to cythonize Gudhi - This file must be named setup.py by convention
     configure_file(setup.py.in "${CMAKE_CURRENT_BINARY_DIR}/setup.py" @ONLY)
@@ -215,12 +215,7 @@ if(PYTHONINTERP_FOUND)
     add_custom_target(cython ALL DEPENDS gudhi.so
                       COMMENT "Do not forget to add ${CMAKE_CURRENT_BINARY_DIR}/ to your PYTHONPATH before using examples or tests")
 
-    # For installation purpose
-    # TODO(VR) : files matching pattern mechanism is copying all cython directory
-    install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}" DESTINATION "${PYTHON_SITE_PACKAGES}/" FILES_MATCHING
-        PATTERN "*.so"
-        PATTERN "*.dylib"
-        PATTERN "*.pyd")
+    install(CODE "execute_process(COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/setup.py install)")
 
     # Test examples
     if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)

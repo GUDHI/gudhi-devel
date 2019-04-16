@@ -24,12 +24,17 @@
 #define BOOST_TEST_MODULE "tower_assembler"
 #include <boost/test/unit_test.hpp>
 
+#include <boost/test/test_tools.hpp>
+#include <boost/test/floating_point_comparison.hpp>
+
 #include <vector>
 #include <tuple>
 #include <cstdio>
+#include <limits>
+#include <cmath>
 
-#include <gudhi/Tower_assembler.h>
-#include <gudhi/Flag_complex_sparse_matrix.h>
+#include <gudhi/Strong_collapse/Flag_complex_tower_assembler.h>
+#include <gudhi/Strong_collapse/Flag_complex_sparse_matrix.h>
 #include <gudhi/Unitary_tests_utils.h>
 
 // Type definitions
@@ -37,6 +42,23 @@ using Filtered_edge = std::tuple<double, int, int>;
 using Filtered_sorted_edge_list = std::vector<Filtered_edge>;
 using Edge_list = std::vector<std::pair<int, int>>;
 using Reduction_map = std::unordered_map<int, int>;
+
+#define GUDHI_TEST_DISTANCE_MATRIX_CLOSE(first_collection, second_collection) { \
+  BOOST_CHECK(first_collection.size() == second_collection.size()); \
+  auto second_iter = std::begin(second_collection); \
+  int i=0, j=0; \
+  for (auto line : first_collection) { \
+    auto second_iter_iter = std::begin(*second_iter); \
+    for (auto value : line) { \
+      BOOST_CHECK_MESSAGE(std::fabs(value - *second_iter_iter) <= std::numeric_limits<double>::epsilon(), \
+        "Failed for value [" << i << "][" << j << "] - " << value << " versus " << *second_iter_iter); \
+      second_iter_iter++; \
+      j++; \
+    } \
+    second_iter++; \
+    i++; j=0; \
+  } \
+}
 
 BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
   // Clean produced files
@@ -47,10 +69,10 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
   remove("./tower_assembler_5.txt");
 
   Filtered_sorted_edge_list input_edges;
-  input_edges.push_back({1., 1, 2});
-  input_edges.push_back({1., 2, 3});
-  input_edges.push_back({1., 3, 4});
-  input_edges.push_back({1., 4, 1});
+  input_edges.push_back(std::make_tuple(1., 1, 2));
+  input_edges.push_back(std::make_tuple(1., 2, 3));
+  input_edges.push_back(std::make_tuple(1., 3, 4));
+  input_edges.push_back(std::make_tuple(1., 4, 1));
 
   // Edges:
   //  1 o---o 2
@@ -63,8 +85,8 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
 
   mat_coll_1.strong_collapse();
 
-  input_edges.push_back({1.5, 1, 3});
-  input_edges.push_back({1.5, 2, 4});
+  input_edges.push_back(std::make_tuple(1.5, 1, 3));
+  input_edges.push_back(std::make_tuple(1.5, 2, 4));
 
   // Edges:
   //  1 o---o 2
@@ -77,11 +99,10 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
 
   mat_coll_2.strong_collapse();
 
-  Gudhi::strong_collapse::Tower_assembler tower_assembler_1(4);
+  Gudhi::strong_collapse::Flag_complex_tower_assembler tower_assembler_1(4);
 
-  tower_assembler_1.build_tower_for_two_cmplxs(mat_coll_1,
+  tower_assembler_1.build_tower_for_two_complexes(mat_coll_1,
                                              mat_coll_2,
-                                             mat_coll_2.reduction_map(),
                                              10.,
                                              "./tower_assembler_1.txt");
   Gudhi::strong_collapse::Distance_matrix sparse_distances_1 = tower_assembler_1.distance_matrix();
@@ -94,9 +115,9 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
     std::cout << std::endl;
   }
 
-  input_edges.push_back({2., 2, 5});
-  input_edges.push_back({2., 5, 6});
-  input_edges.push_back({2., 3, 6});
+  input_edges.push_back(std::make_tuple(2., 2, 5));
+  input_edges.push_back(std::make_tuple(2., 5, 6));
+  input_edges.push_back(std::make_tuple(2., 3, 6));
 
   // Edges:
   //        2
@@ -111,11 +132,10 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
 
   mat_coll_3.strong_collapse();
 
-  Gudhi::strong_collapse::Tower_assembler tower_assembler_2(6);
+  Gudhi::strong_collapse::Flag_complex_tower_assembler tower_assembler_2(6);
 
-  tower_assembler_2.build_tower_for_two_cmplxs(mat_coll_2,
+  tower_assembler_2.build_tower_for_two_complexes(mat_coll_2,
                                              mat_coll_3,
-                                             mat_coll_3.reduction_map(),
                                              10.,
                                              "./tower_assembler_2.txt");
   Gudhi::strong_collapse::Distance_matrix sparse_distances_2 = tower_assembler_2.distance_matrix();
@@ -128,8 +148,8 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
     std::cout << std::endl;
   }
 
-  input_edges.push_back({2.5, 2, 6});
-  input_edges.push_back({2.5, 5, 3});
+  input_edges.push_back(std::make_tuple(2.5, 2, 6));
+  input_edges.push_back(std::make_tuple(2.5, 5, 3));
 
   // Edges:
   //        2
@@ -144,11 +164,10 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
 
   mat_coll_4.strong_collapse();
 
-  Gudhi::strong_collapse::Tower_assembler tower_assembler_3(6);
+  Gudhi::strong_collapse::Flag_complex_tower_assembler tower_assembler_3(6);
 
-  tower_assembler_3.build_tower_for_two_cmplxs(mat_coll_3,
+  tower_assembler_3.build_tower_for_two_complexes(mat_coll_3,
                                              mat_coll_4,
-                                             mat_coll_4.reduction_map(),
                                              10.,
                                              "./tower_assembler_3.txt");
   Gudhi::strong_collapse::Distance_matrix sparse_distances_3 = tower_assembler_3.distance_matrix();
@@ -160,11 +179,11 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
     }
     std::cout << std::endl;
   }
-  BOOST_CHECK(sparse_distances_1 == sparse_distances_3);
+  GUDHI_TEST_DISTANCE_MATRIX_CLOSE(sparse_distances_1, sparse_distances_3);
 
-  input_edges.push_back({3., 3, 7});
-  input_edges.push_back({3., 7, 8});
-  input_edges.push_back({3., 4, 8});
+  input_edges.push_back(std::make_tuple(3., 3, 7));
+  input_edges.push_back(std::make_tuple(3., 7, 8));
+  input_edges.push_back(std::make_tuple(3., 4, 8));
 
   // Edges:
   //        2
@@ -182,11 +201,10 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
 
   mat_coll_5.strong_collapse();
 
-  Gudhi::strong_collapse::Tower_assembler tower_assembler_4(8);
+  Gudhi::strong_collapse::Flag_complex_tower_assembler tower_assembler_4(8);
 
-  tower_assembler_4.build_tower_for_two_cmplxs(mat_coll_4,
+  tower_assembler_4.build_tower_for_two_complexes(mat_coll_4,
                                              mat_coll_5,
-                                             mat_coll_5.reduction_map(),
                                              10.,
                                              "./tower_assembler_4.txt");
   Gudhi::strong_collapse::Distance_matrix sparse_distances_4 = tower_assembler_4.distance_matrix();
@@ -198,10 +216,10 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
     }
     std::cout << std::endl;
   }
-  BOOST_CHECK(sparse_distances_2 != sparse_distances_4);
+  GUDHI_TEST_DISTANCE_MATRIX_CLOSE(sparse_distances_2, sparse_distances_4);
 
-  input_edges.push_back({3., 3, 8});
-  input_edges.push_back({3., 4, 7});
+  input_edges.push_back(std::make_tuple(3., 3, 8));
+  input_edges.push_back(std::make_tuple(3., 4, 7));
 
   // Edges:
   //        2
@@ -219,11 +237,10 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
 
   mat_coll_6.strong_collapse();
 
-  Gudhi::strong_collapse::Tower_assembler tower_assembler_5(8);
+  Gudhi::strong_collapse::Flag_complex_tower_assembler tower_assembler_5(8);
 
-  tower_assembler_5.build_tower_for_two_cmplxs(mat_coll_5,
+  tower_assembler_5.build_tower_for_two_complexes(mat_coll_5,
                                              mat_coll_6,
-                                             mat_coll_6.reduction_map(),
                                              10.,
                                              "./tower_assembler_5.txt");
   Gudhi::strong_collapse::Distance_matrix sparse_distances_5 = tower_assembler_5.distance_matrix();
@@ -235,6 +252,6 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
     }
     std::cout << std::endl;
   }
-  BOOST_CHECK(sparse_distances_3 == sparse_distances_5);
+  GUDHI_TEST_DISTANCE_MATRIX_CLOSE(sparse_distances_3, sparse_distances_5);
 }
 
