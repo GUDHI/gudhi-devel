@@ -99,10 +99,13 @@ namespace rips_complex {
  * \cite cavanna15geometric, and in a video \cite cavanna15visualizing.
  *
  * The interface of `Sparse_rips_complex` is similar to the one for the usual
- * `Rips_complex`, except that one has to specify the approximation factor, and
- * there is no option to limit the maximum filtration value (the way the
- * approximation is done means that larger filtration values are much cheaper
- * to handle than low filtration values, so the gain would be too small).
+ * `Rips_complex`, except that one has to specify the approximation factor.
+ * There is an option to limit the minimum and maximum filtration values, but
+ * they are not recommended: the way the approximation is done means that
+ * larger filtration values are much cheaper to handle than low filtration
+ * values, so the gain in ignoring the large ones is small, and
+ * `Gudhi::subsampling::sparsify_point_set()` is a more efficient way of
+ * ignoring small filtration values.
  *
  * Theoretical guarantees are only available for \f$\epsilon<1\f$. The
  * construction accepts larger values of &epsilon;, and the size of the complex

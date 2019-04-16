@@ -70,17 +70,19 @@ class Sparse_rips_complex {
    * @param[in] points Range of points.
    * @param[in] distance Distance function that returns a `Filtration_value` from 2 given points.
    * @param[in] epsilon Approximation parameter. epsilon must be positive.
+   * @param[in] mini Minimal filtration value. Ignore anything below this scale. This is a less efficient version of `Gudhi::subsampling::sparsify_point_set()`.
+   * @param[in] maxi Maximal filtration value. Ignore anything above this scale.
    *
    */
   template <typename RandomAccessPointRange, typename Distance>
-  Sparse_rips_complex(const RandomAccessPointRange& points, Distance distance, double epsilon)
+  Sparse_rips_complex(const RandomAccessPointRange& points, Distance distance, double epsilon, Filtration_value mini=-std::numeric_limits<Filtration_value>::infinity(), Filtration_value maxi=std::numeric_limits<Filtration_value>::infinity())
       : epsilon_(epsilon) {
     GUDHI_CHECK(epsilon > 0, "epsilon must be positive");
     auto dist_fun = [&](Vertex_handle i, Vertex_handle j) { return distance(points[i], points[j]); };
     Ker<decltype(dist_fun)> kernel(dist_fun);
     subsampling::choose_n_farthest_points(kernel, boost::irange<Vertex_handle>(0, boost::size(points)), -1, -1,
                                           std::back_inserter(sorted_points), std::back_inserter(params));
-    compute_sparse_graph(dist_fun, epsilon);
+    compute_sparse_graph(dist_fun, epsilon, mini, maxi);
   }
 
   /** \brief Sparse_rips_complex constructor from a distance matrix.
@@ -90,11 +92,14 @@ class Sparse_rips_complex {
    * \f$j\f$ as long as \f$ 0 \leqslant j < i \leqslant
    * distance\_matrix.size().\f$
    * @param[in] epsilon Approximation parameter. epsilon must be positive.
+   * @param[in] mini Minimal filtration value. Ignore anything below this scale. This is a less efficient version of `Gudhi::subsampling::sparsify_point_set()`.
+   * @param[in] maxi Maximal filtration value. Ignore anything above this scale.
    */
   template <typename DistanceMatrix>
-  Sparse_rips_complex(const DistanceMatrix& distance_matrix, double epsilon)
+  Sparse_rips_complex(const DistanceMatrix& distance_matrix, double epsilon, Filtration_value mini=-std::numeric_limits<Filtration_value>::infinity(), Filtration_value maxi=std::numeric_limits<Filtration_value>::infinity())
       : Sparse_rips_complex(boost::irange<Vertex_handle>(0, boost::size(distance_matrix)),
-                            [&](Vertex_handle i, Vertex_handle j) { return (i==j) ? 0 : (i<j) ? distance_matrix[j][i] : distance_matrix[i][j]; }, epsilon) {}
+                            [&](Vertex_handle i, Vertex_handle j) { return (i==j) ? 0 : (i<j) ? distance_matrix[j][i] : distance_matrix[i][j]; },
+                            epsilon, mini, maxi) {}
 
   /** \brief Fills the simplicial complex with the sparse Rips graph and
    * expands it with all the cliques, stopping at a given maximal dimension.
@@ -148,7 +153,7 @@ class Sparse_rips_complex {
 
   // PointRange must be random access.
   template <typename Distance>
-  void compute_sparse_graph(Distance& dist, double epsilon) {
+  void compute_sparse_graph(Distance& dist, double epsilon, Filtration_value mini, Filtration_value maxi) {
     const auto& points = sorted_points; // convenience alias
     const int n = boost::size(points);
     graph_.~Graph();
@@ -164,13 +169,15 @@ class Sparse_rips_complex {
     // TODO(MG):
     // - make it parallel
     // - only test near-enough neighbors
-    for (int i = 0; i < n; ++i)
+    for (int i = 0; i < n; ++i) {
+      auto&& pi = points[i];
+      auto li = params[i];
+      if (li < mini) break;
       for (int j = i + 1; j < n; ++j) {
-        auto&& pi = points[i];
         auto&& pj = points[j];
         auto d = dist(pi, pj);
-        auto li = params[i];
         auto lj = params[j];
+        if (lj < mini) break;
         GUDHI_CHECK(lj <= li, "Bad furthest point sorting");
         Filtration_value alpha;
 
@@ -182,8 +189,10 @@ class Sparse_rips_complex {
         else
           continue;
 
-        add_edge(pi, pj, alpha, graph_);
+        if (alpha <= maxi)
+          add_edge(pi, pj, alpha, graph_);
       }
+    }
   }
 
   Graph graph_;
