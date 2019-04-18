@@ -1,5 +1,7 @@
 
 [![Build Status](https://travis-ci.org/GUDHI/gudhi-devel.svg?branch=master)](https://travis-ci.org/GUDHI/gudhi-devel)
+[![CircleCI](https://circleci.com/gh/GUDHI/gudhi-devel/tree/master.svg?style=svg)](https://circleci.com/gh/GUDHI/gudhi-devel/tree/master)
+
 ![GUDHI](src/common/doc/Gudhi_banner.png "Topological Data Analysis (TDA) and Higher Dimensional Geometry Understanding")
 
 The GUDHI library is a generic open source C++ library, with a Python interface, for Topological Data Analysis (TDA) and Higher Dimensional Geometry Understanding. The library offers state-of-the-art data structures and algorithms to construct simplicial complexes and compute persistent homology.

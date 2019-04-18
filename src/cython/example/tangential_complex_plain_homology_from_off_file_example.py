@@ -50,6 +50,7 @@ with open(args.file, 'r') as f:
         print("TangentialComplex creation from points read in a OFF file")
         
         tc = gudhi.TangentialComplex(intrisic_dim = args.intrisic_dim, off_file=args.file)
+        tc.compute_tangential_complex()
         st = tc.create_simplex_tree()
     
         message = "Number of simplices=" + repr(st.num_simplices())
