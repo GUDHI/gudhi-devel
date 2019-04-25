@@ -13,10 +13,8 @@
 #include <Eigen/Sparse>
 #include <Eigen/SVD>
 
+#include <gudhi/Freudenthal_triangulation.h>
 #include <gudhi/Coxeter_triangulation/Freudenthal_representation.h>
-#include <gudhi/Coxeter_triangulation/Vertex_iterator.h>
-#include <gudhi/Coxeter_triangulation/Face_iterator.h>
-#include <gudhi/Coxeter_triangulation/Coface_iterator.h>
 
 namespace Gudhi {
   
@@ -43,12 +41,12 @@ public:
       for (unsigned j = 0; j < d; j++)
 	if (j+1 < i || j > i+1) 
 	  cartan(i,j) = 0;    
-    std::cout << "cartan =" << std::endl << cartan << std::endl;
+    // std::cout << "cartan =" << std::endl << cartan << std::endl;
     Eigen::SelfAdjointEigenSolver<Matrix> saes(cartan);
     Eigen::VectorXd sqrt_diag(d);
     for (unsigned i = 0; i < d; ++i)
       sqrt_diag(i) = std::sqrt(saes.eigenvalues()[i]);
-    std::cout << "sqrt_diag =" << std::endl << sqrt_diag << std::endl;
+    // std::cout << "sqrt_diag =" << std::endl << sqrt_diag << std::endl;
 
     Matrix lower(d,d);
     for (unsigned i = 0; i < d; i++)
