@@ -61,6 +61,9 @@ int main(int argc, char * const argv[]) {
 
   double r = 0.5, R = 1;
   double pi = 3.14159265358;
+
+  /******OFFSET*******************/
+  Point_d off_ = *CGAL::Random_points_on_sphere_d<Point_d>(3, 0.001);
   
   program_options(argc, argv, number_of_points, r, out_name);
   
@@ -78,9 +81,12 @@ int main(int argc, char * const argv[]) {
     while (y >= f);
     // we just need the value of x
     y = rand.get_double(0, 2.*pi);
-    double x_coord = (R + r*cos(x))*cos(y);
-    double y_coord = (R + r*cos(x))*sin(y);
-    double z_coord = r*sin(x);
+    // double x_coord = (R + r*cos(x))*cos(y);
+    // double y_coord = (R + r*cos(x))*sin(y);
+    // double z_coord = r*sin(x);
+    double x_coord = (R + r*cos(x))*cos(y)+off_[0];
+    double y_coord = (R + r*cos(x))*sin(y)+off_[1];
+    double z_coord = r*sin(x)+off_[2];
     ofs << x_coord << " " << y_coord << " " << z_coord << "\n";
   }
   ofs.close();

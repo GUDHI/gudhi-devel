@@ -72,6 +72,7 @@ int main(int argc, char * const argv[]) {
       for (auto p_it = rp->cartesian_begin(); p_it != rp->cartesian_end(); ++p_it)
         ofs << *p_it << " ";
     }
+    // ofs << "0.01 ";
     ofs << "\n";
   }
   ofs.close();

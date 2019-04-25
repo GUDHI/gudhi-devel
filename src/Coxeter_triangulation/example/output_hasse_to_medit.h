@@ -150,7 +150,8 @@ void output_hasse_to_medit(const HasseDiagram& hasse_diagram,
 	  if (allgow_switch)
 	    mask.push_back(std::round(v_pair.first->get_filtration()));
 	  else
-	    mask.push_back(std::round(h->get_filtration()));
+	    mask.push_back(std::round(h_index));
+	    // mask.push_back(std::round(h->get_filtration()));
 	}
       }
       else { // not barycentric
@@ -162,6 +163,12 @@ void output_hasse_to_medit(const HasseDiagram& hasse_diagram,
 	mask.push_back(h_index - ref_size);
       }
     }
+    // output the primary edges as well
+
+    // for ()
+    // vertex_points.emplace_back();
+
+    // std::size_t mask_ref = h_index;
   }
   for (auto p: polytopes) {
     std::set<Hasse_cell_ptr> v_cells;

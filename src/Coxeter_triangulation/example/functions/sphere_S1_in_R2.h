@@ -1,6 +1,9 @@
 #ifndef SPHERE_S1_IN_R2_H_
 #define SPHERE_S1_IN_R2_H_
 
+#include <gudhi_patches/CGAL/Epick_d.h>
+#include <gudhi/random_point_generators.h> // construct_point
+
 #include <Eigen/Eigenvalues>
 #include <Eigen/Sparse>
 #include <Eigen/SVD>

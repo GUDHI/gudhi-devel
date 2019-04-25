@@ -8,8 +8,12 @@
 #include <CGAL/Epick_d.h>
 #include <CGAL/point_generators_d.h>
 #include <CGAL/Delaunay_triangulation.h>
+#include <gudhi/Hasse_diagram_persistence.h>
+#include <gudhi/Persistent_cohomology.h>
 
 #include "output_hasse_to_medit.h"
+
+#include "cxx-prettyprint/prettyprint.hpp"
 
 std::size_t filt_index = 1;
 
@@ -20,7 +24,8 @@ void insert_hasse_subdiagram(const Cell_id& c_id,
 			     const Gudhi::Coxeter_triangulation_ds& ct) {
   // std::cout << "  Insert_hasse_subdiagram for " << c_id << "\n";
   if (dictionary.find(c_id) == dictionary.end()) {
-    cells.push_back(new Hasse_cell((int)(ct.dimension() - c_id.dimension()), filt_index++));
+    // cells.push_back(new Hasse_cell((int)(ct.dimension() - c_id.dimension()), filt_index++));
+    cells.push_back(new Hasse_cell((int)(ct.dimension() - c_id.dimension()), 0.0));
     Hasse_cell* new_cell = cells.back();
     dictionary.emplace(std::make_pair(c_id, new_cell));
     if (new_cell->get_dimension() == 0)
@@ -86,6 +91,36 @@ void output_max_cells_to_medit(const CellSet& max_cells,
     if (c.dimension() == cod_d)
       vp_map2.emplace(std::make_pair(cell2, ct.barycenter(c)));
   }
+  typedef Gudhi::Hasse_diagram::Hasse_diagram_persistence<Hasse_cell> Hasse_pers_vector;
+  Hasse_pers_vector hdp(cells);  
+  typedef Gudhi::persistent_cohomology::Field_Zp Field_Zp;
+  typedef Gudhi::persistent_cohomology::Persistent_cohomology
+    <Hasse_pers_vector, Field_Zp> Persistent_cohomology;
+  hdp.set_up_the_arrays();
+  {
+    Persistent_cohomology pcoh(hdp, true);  
+    unsigned field_characteristic = 2;
+    double min_persistence = 0;
+
+    int chi = 0;
+    std::vector<int> face_count(ct.dimension() - cod_d + 1, 0);
+    for (auto c_ptr: cells) {
+      chi += 1-2*(c_ptr->get_dimension()%2);
+      face_count[c_ptr->get_dimension()]++;
+    }    
+    std::cout << "Faces by dimension: " << face_count << "\n";
+    // if (is_pseudomanifold(hasse_diagram))
+    //   std::cout << "\033[1;32m" << "The Voronoi skeleton is a pseudomanifold.\033[0m\n";
+    std::cout << "Euler characteristic = " << chi << ".\n"; 
+    
+    pcoh.init_coefficients(field_characteristic);
+    pcoh.compute_persistent_cohomology(min_persistence);
+    std::cout << pcoh.persistent_betti_numbers(filt_index-1,filt_index-1) << std::endl;
+    std::ofstream out("persdiag_vor.out");
+    pcoh.output_diagram(out);
+    out.close();
+  }
+  
   // for (auto d_pair: dictionary2) {
   //   std::cout << d_pair.first << ": ";
   //   for (auto b_pair: d_pair.first->get_boundary())
@@ -98,8 +133,8 @@ void output_max_cells_to_medit(const CellSet& max_cells,
   // }
   // output_hasse_to_medit(cells, vp_map, false, file_name+"_no_barycentric");
   output_hasse_to_medit(cells, vp_map, true, file_name+"_barycentric");
-  allgow_switch = true;
-  output_hasse_to_medit(cells_as, vp_map2, true, file_name+"_allgowerschmidt");
+  // allgow_switch = true;
+  // output_hasse_to_medit(cells_as, vp_map2, true, file_name+"_allgowerschmidt");
   for (auto c: cells)
     delete c;
   for (auto c: cells_as)

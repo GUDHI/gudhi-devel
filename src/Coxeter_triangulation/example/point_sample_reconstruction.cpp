@@ -19,6 +19,9 @@
 #include "output_allgowerschmidt.h"
 #include "output_transition_graph_to_medit.h"
 
+#include <CGAL/Search_traits_d.h>
+#include <CGAL/Fuzzy_sphere.h>
+
 #include <Eigen/Eigenvalues> 
 #include <Eigen/Sparse>
 #include <Eigen/SVD>
@@ -27,6 +30,7 @@
 #include "functions/sphere_S2_in_R3.h"
 #include "functions/chair_in_R3.h"
 
+
 using Cell_id = Gudhi::Cell_id;
 // using Point_d = Eigen::VectorXd;
 using Kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
@@ -34,8 +38,271 @@ using Point_d = Kernel::Point_d;
 using Point_range = std::vector<Point_d>;
 using CT = Gudhi::Coxeter_triangulation_ds;
 
-std::size_t GUDHI_CT_NB_POINTS_FOR_PCA = 2;
+using Traits = CGAL::Search_traits_d<Kernel, CGAL::Dynamic_dimension_tag>;
+using Fuzzy_sphere = CGAL::Fuzzy_sphere<Traits>;
+
+std::size_t GUDHI_CT_NB_POINTS_FOR_PCA = 20;
 Point_range points;
+std::size_t snapshot_num = 0;
+
+std::vector<Cell_id> ambient_edges_transv;
+std::vector<Cell_id> ambient_edges_n_transv;
+
+// template <>
+void output_curve_to_medit() {
+  std::vector<std::vector<double> > vertex_points;
+  std::vector<std::vector<std::size_t> > edges, triangles, tetrahedra;
+  std::vector<std::size_t> trn_mask, edge_mask;
+  std::vector<bool> neighborhood_mask(points.size(), false);
+
+  std::ofstream ofs ("curve" + std::to_string(snapshot_num) + ".mesh", std::ofstream::out);
+  std::ofstream ofs_bb ("curve" + std::to_string(snapshot_num++) + ".bb", std::ofstream::out);
+
+  double r = 0.005/ambient_edges_transv.begin()->level();
+  std::vector<double>
+    p0 = {r/std::sqrt(2), -r/2},
+    p1 = {-r/std::sqrt(2), -r/2},
+    p2 = {0, r};  
+  for (std::size_t i = 0; i < points.size(); ++i) {
+    Point_d& p = points[i];
+    std::size_t ind = vertex_points.size()+1;
+    triangles.push_back(std::vector<std::size_t>({ind, ind+1, ind+2}));
+    trn_mask.push_back(1); trn_mask.push_back(1); trn_mask.push_back(1);
+    vertex_points.push_back(std::vector<double>({p[0]+p0[0], p[1] + p0[1]}));
+    vertex_points.push_back(std::vector<double>({p[0]+p1[0], p[1] + p1[1]}));
+    vertex_points.push_back(std::vector<double>({p[0]+p2[0], p[1] + p2[1]}));
+  }
+  CT ct(2);
+  for (auto c: ambient_edges_n_transv) {
+    std::size_t ind = vertex_points.size()+1;
+    edges.push_back(std::vector<std::size_t>({ind, ind+1}));
+    edge_mask.push_back(2);
+    for (auto v: ct.vertex_range(c)) {
+      Eigen::VectorXd v_ = ct.cartesian_coordinates(v);
+      vertex_points.push_back(std::vector<double>({v_(0), v_(1)}));
+    }
+  }
+  for (auto c: ambient_edges_transv) {
+    std::size_t ind = vertex_points.size()+1;
+    edges.push_back(std::vector<std::size_t>({ind, ind+1}));
+    edge_mask.push_back(3);
+    for (auto v: ct.vertex_range(c)) {
+      Eigen::VectorXd v_ = ct.cartesian_coordinates(v);
+      vertex_points.push_back(std::vector<double>({v_(0), v_(1)}));
+    }
+    edges.push_back(std::vector<std::size_t>({ind+2, ind+3}));
+    edge_mask.push_back(4);
+    Coface_it c_it(c, ct, 2), c_end;
+    for (; c_it != c_end; ++c_it) {
+      Eigen::VectorXd v_ = ct.barycenter(*c_it);
+      vertex_points.push_back(std::vector<double>({v_(0), v_(1)}));
+    }
+  }
+  // std::size_t ind = vertex_points.size()+1;
+  // if (vertices.size() == 2) {
+  //   edges.push_back(std::vector<std::size_t>({ind, ind+1}));
+  //   for (auto v: vertices)
+  //     vertex_points.push_back(std::vector<double>({v(0), v(1), v(2)}));
+  //   nn_it = kns_range.begin();
+  //   Point_d& p = points[nn_it->first];
+  //   Eigen::VectorXd
+  //     u0 = eigenvectors.col(1),
+  //     u1 = eigenvectors.col(2);
+  //   ind = vertex_points.size()+1;
+  //   triangles.push_back(std::vector<std::size_t>({ind, ind+1, ind+2}));
+  //   triangles.push_back(std::vector<std::size_t>({ind, ind+2, ind+3}));
+  //   triangles.push_back(std::vector<std::size_t>({ind, ind+3, ind+4}));
+  //   triangles.push_back(std::vector<std::size_t>({ind, ind+4, ind+1}));
+  //   trn_mask.push_back(3); trn_mask.push_back(3); trn_mask.push_back(3); trn_mask.push_back(3);
+  //   vertex_points.push_back(std::vector<double>({p[0], p[1], p[2]}));
+  //   vertex_points.push_back(std::vector<double>({p[0] + u0(0) + u1(0),
+  // 						 p[1] + u0(1) + u1(1),
+  // 						 p[2] + u0(2) + u1(2)}));
+  //   vertex_points.push_back(std::vector<double>({p[0] + u0(0) - u1(0),
+  // 						 p[1] + u0(1) - u1(1),
+  // 						 p[2] + u0(2) - u1(2)}));
+  //   vertex_points.push_back(std::vector<double>({p[0] - u0(0) - u1(0),
+  // 						 p[1] - u0(1) - u1(1),
+  // 						 p[2] - u0(2) - u1(2)}));
+  //   vertex_points.push_back(std::vector<double>({p[0] - u0(0) + u1(0),
+  // 						 p[1] - u0(1) + u1(1),
+  // 						 p[2] - u0(2) + u1(2)}));
+  // }
+  // if (vertices.size() == 3) {
+  //   triangles.push_back(std::vector<std::size_t>({ind, ind+1, ind+2}));
+  //   trn_mask.push_back(4);
+  //   for (auto v: vertices)
+  //     vertex_points.push_back(std::vector<double>({v(0), v(1), v(2)}));
+  //   nn_it = kns_range.begin();
+  //   Point_d& p = points[nn_it->first];
+  //   Eigen::VectorXd u0 = eigenvectors.col(2);
+  //   ind = vertex_points.size()+1;
+  //   edges.push_back(std::vector<std::size_t>({ind, ind+1}));
+  //   vertex_points.push_back(std::vector<double>({p[0] - u0(0),
+  // 						 p[1] - u0(1),
+  // 						 p[2] - u0(2)}));
+  //   vertex_points.push_back(std::vector<double>({p[0] + u0(0),
+  // 						 p[1] + u0(1),
+  // 						 p[2] + u0(2)}));
+  // }  
+  ofs << "MeshVersionFormatted 1\nDimension 2\n";
+  ofs_bb << "2 1 ";
+  ofs << "Vertices\n" << vertex_points.size() << "\n";
+  for (auto p: vertex_points) {
+    ofs << p[0] << " " << p[1] << " 215\n";
+  }
+  ofs << "Edges " << edges.size() << "\n";
+  auto em_it = edge_mask.begin();
+  for (auto s: edges) {
+    for (auto v: s) {
+      ofs << v << " ";
+    }
+    ofs << *em_it++ << std::endl;
+  }
+  ofs << "Triangles " << triangles.size() << "\n";
+  ofs_bb << triangles.size()+tetrahedra.size() << " 1\n";
+  auto m_it = trn_mask.begin();
+  // auto f_it = filtrations.begin();
+  for (auto s: triangles) {
+    for (auto v: s) {
+      ofs << v << " ";
+    }
+    ofs << *m_it++ << std::endl;
+    // ofs_bb << *f_it++ << "\n";
+  }
+  ofs.close();
+  ofs_bb.close();
+}
+
+
+template <class KNSRange,
+	  class VertexRange,
+	  class Eigenvectors>
+void output_config_to_medit(KNSRange& kns_range,
+			    VertexRange& vertices,
+			    Eigenvectors& eigenvectors) {
+  std::vector<std::vector<double> > vertex_points;
+  std::vector<std::vector<std::size_t> > edges, triangles, tetrahedra;
+  std::vector<std::size_t> trn_mask, tet_mask;
+  std::vector<bool> neighborhood_mask(points.size(), false);
+
+  std::ofstream ofs ("non_insertion" + std::to_string(snapshot_num) + ".mesh", std::ofstream::out);
+  std::ofstream ofs_bb ("non_insertion" + std::to_string(snapshot_num++) + ".bb", std::ofstream::out);
+
+  double r = 0.005;
+  std::vector<double>
+    p0 = {r, 0, -r/std::sqrt(2)},
+    p1 = {-r, 0, -r/std::sqrt(2)},
+    p2 = {0, r, r/std::sqrt(2)},
+    p3 = {0, -r, r/std::sqrt(2)};
+
+  std::size_t nb_pts_pca = std::min(static_cast<std::size_t>(std::pow(GUDHI_CT_NB_POINTS_FOR_PCA, 2)), points.size());
+  // std::size_t nb_pts_pca = std::min(static_cast<std::size_t>(std::pow(90, 2)), points.size());
+  auto nn_it = kns_range.begin();
+  for (std::size_t i = 0; i < nb_pts_pca && nn_it != kns_range.end(); ++i, ++nn_it)
+    neighborhood_mask[nn_it->first] = true;
+  
+  for (std::size_t i = 0; i < points.size(); ++i) {
+    Point_d& p = points[i];
+    std::size_t ind = vertex_points.size()+1;
+    triangles.push_back(std::vector<std::size_t>({ind, ind+1, ind+2}));
+    triangles.push_back(std::vector<std::size_t>({ind, ind+1, ind+3}));
+    triangles.push_back(std::vector<std::size_t>({ind, ind+2, ind+3}));
+    triangles.push_back(std::vector<std::size_t>({ind+1, ind+2, ind+3}));
+    if (neighborhood_mask[i]) {
+      trn_mask.push_back(1); trn_mask.push_back(1); trn_mask.push_back(1); trn_mask.push_back(1);
+    }
+    else {
+      trn_mask.push_back(2); trn_mask.push_back(2); trn_mask.push_back(2); trn_mask.push_back(2);
+    }
+    vertex_points.push_back(std::vector<double>({p[0]+p0[0], p[1] + p0[1], p[2] + p0[2]}));
+    vertex_points.push_back(std::vector<double>({p[0]+p1[0], p[1] + p1[1], p[2] + p1[2]}));
+    vertex_points.push_back(std::vector<double>({p[0]+p2[0], p[1] + p2[1], p[2] + p2[2]}));
+    vertex_points.push_back(std::vector<double>({p[0]+p3[0], p[1] + p3[1], p[2] + p3[2]}));
+  }
+  std::size_t ind = vertex_points.size()+1;
+  if (vertices.size() == 2) {
+    edges.push_back(std::vector<std::size_t>({ind, ind+1}));
+    for (auto v: vertices)
+      vertex_points.push_back(std::vector<double>({v(0), v(1), v(2)}));
+    nn_it = kns_range.begin();
+    Point_d& p = points[nn_it->first];
+    Eigen::VectorXd
+      u0 = eigenvectors.col(1),
+      u1 = eigenvectors.col(2);
+    ind = vertex_points.size()+1;
+    triangles.push_back(std::vector<std::size_t>({ind, ind+1, ind+2}));
+    triangles.push_back(std::vector<std::size_t>({ind, ind+2, ind+3}));
+    triangles.push_back(std::vector<std::size_t>({ind, ind+3, ind+4}));
+    triangles.push_back(std::vector<std::size_t>({ind, ind+4, ind+1}));
+    trn_mask.push_back(3); trn_mask.push_back(3); trn_mask.push_back(3); trn_mask.push_back(3);
+    vertex_points.push_back(std::vector<double>({p[0], p[1], p[2]}));
+    vertex_points.push_back(std::vector<double>({p[0] + u0(0) + u1(0),
+						 p[1] + u0(1) + u1(1),
+						 p[2] + u0(2) + u1(2)}));
+    vertex_points.push_back(std::vector<double>({p[0] + u0(0) - u1(0),
+						 p[1] + u0(1) - u1(1),
+						 p[2] + u0(2) - u1(2)}));
+    vertex_points.push_back(std::vector<double>({p[0] - u0(0) - u1(0),
+						 p[1] - u0(1) - u1(1),
+						 p[2] - u0(2) - u1(2)}));
+    vertex_points.push_back(std::vector<double>({p[0] - u0(0) + u1(0),
+						 p[1] - u0(1) + u1(1),
+						 p[2] - u0(2) + u1(2)}));
+  }
+  if (vertices.size() == 3) {
+    triangles.push_back(std::vector<std::size_t>({ind, ind+1, ind+2}));
+    trn_mask.push_back(4);
+    for (auto v: vertices)
+      vertex_points.push_back(std::vector<double>({v(0), v(1), v(2)}));
+    nn_it = kns_range.begin();
+    Point_d& p = points[nn_it->first];
+    Eigen::VectorXd u0 = eigenvectors.col(2);
+    ind = vertex_points.size()+1;
+    edges.push_back(std::vector<std::size_t>({ind, ind+1}));
+    vertex_points.push_back(std::vector<double>({p[0] - u0(0),
+						 p[1] - u0(1),
+						 p[2] - u0(2)}));
+    vertex_points.push_back(std::vector<double>({p[0] + u0(0),
+						 p[1] + u0(1),
+						 p[2] + u0(2)}));
+  }  
+  ofs << "MeshVersionFormatted 1\nDimension 3\n";
+  ofs_bb << "3 1 ";
+  ofs << "Vertices\n" << vertex_points.size() << "\n";
+  for (auto p: vertex_points) {
+    ofs << p[0] << " " << p[1] << " " << p[2] << " 215\n";
+  }
+  ofs << "Edges " << edges.size() << "\n";
+  for (auto s: edges) {
+    for (auto v: s) {
+      ofs << v << " ";
+    }
+    ofs << "515" << std::endl;
+  }
+  ofs << "Triangles " << triangles.size() << "\n";
+  ofs_bb << triangles.size()+tetrahedra.size() << " 1\n";
+  auto m_it = trn_mask.begin();
+  // auto f_it = filtrations.begin();
+  for (auto s: triangles) {
+    for (auto v: s) {
+      ofs << v << " ";
+    }
+    ofs << *m_it++ << std::endl;
+    // ofs_bb << *f_it++ << "\n";
+  }
+  ofs << "Tetrahedra " << tetrahedra.size() << "\n";
+  for (auto s: tetrahedra) {
+    for (auto v: s) {
+      ofs << v << " ";
+    }
+    // ofs << "545\n";
+    // ofs_bb << *f_it++ << "\n";
+  }
+  ofs.close();
+  ofs_bb.close();
+}
+
 
 template <class Kd_tree_search>
 bool intersects(const Cell_id& c,
@@ -48,11 +315,20 @@ bool intersects(const Cell_id& c,
   auto pt = k.construct_point_d_object();
   auto coord = k.compute_coordinate_d_object();
   auto scalar = k.scalar_product_d_object();
+  auto sq_dist = k.squared_distance_d_object();
   std::size_t nb_pts_pca = std::min(static_cast<std::size_t>(std::pow(GUDHI_CT_NB_POINTS_FOR_PCA, intr_d)), points.size());  
   Eigen::MatrixXd pt_matrix(nb_pts_pca, amb_d);
   Eigen::VectorXd b = ct.barycenter(c);
   Point_d b_point = pt(amb_d, b.data(), b.data()+amb_d);
 
+  // KNS with Fuzzy_sphere
+  Eigen::VectorXd v0 = ct.cartesian_coordinates(*ct.vertex_range(c).begin());
+  double rad = std::sqrt(sq_dist(b_point, pt(amb_d, v0.data(), v0.data()+amb_d)));
+  double fs_err = 1e-5;
+  Fuzzy_sphere fs(b_point, rad, fs_err);
+  std::vector<Point_d> kns_points;
+  kd_tree.search(std::back_inserter<std::vector<Point_d> >(kns_points), fs);
+  
   auto kns_range = kd_tree.k_nearest_neighbors(b_point, nb_pts_pca, false);
   auto nn_it = kns_range.begin();
   Point_d closest_point = points[nn_it->first];
@@ -69,7 +345,10 @@ bool intersects(const Cell_id& c,
     Point_d ui = pt(amb_d,
 		    eig.eigenvectors().col(i).data(),
 		    eig.eigenvectors().col(i).data() + amb_d);
-    free_term(i) = scalar(ui, closest_point);
+    // free_term(i) = scalar(ui, closest_point);
+    // free_term(i) = scalar(ui, b_point);
+    double cheat_lambda = 0, cheat_colambda = 1 - cheat_lambda;
+    free_term(i) = cheat_colambda*scalar(ui, closest_point) + cheat_lambda*scalar(ui, b_point);
   }
     
   Eigen::MatrixXd matrix(cod_d + 1, cod_d + 1);
@@ -87,12 +366,21 @@ bool intersects(const Cell_id& c,
   for (std::size_t i = 1; i < cod_d + 1; ++i)
     z(i) = 0;
   Eigen::VectorXd lambda = matrix.colPivHouseholderQr().solve(z);
+  double toler = 1e-4;
   for (std::size_t i = 0; i < cod_d + 1; ++i)
-    if (lambda(i) < 0 || lambda(i) > 1)
+    if (lambda(i) < -toler || lambda(i) > 1+toler) {
+      // std::vector<Eigen::VectorXd> vertices;
+      // for (auto v: ct.vertex_range(c))
+      // 	vertices.push_back(ct.cartesian_coordinates(v));
+      // output_config_to_medit(kns_range, vertices, eig.eigenvectors());
+      ambient_edges_n_transv.push_back(c);
       return false;
+    }
+  ambient_edges_transv.push_back(c);  
   return true;
 }
- 
+
+
 template <class Point,
 	  class Kd_tree_search>
 void compute_complex(const Point& seed_point,
@@ -143,6 +431,7 @@ void compute_complex(const Point& seed_point,
     output_max_cells_to_medit(max_cells, ct, order_map, cod_d, file_name_prefix);
   // output_allgowerschmidt_to_medit(max_cells, ct, order_map, file_name_prefix + "_as");
   output_transition_graph_to_medit(max_cells, ct, file_name_prefix + "_tg");
+  output_curve_to_medit();
 }
   
 
