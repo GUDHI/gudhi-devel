@@ -34,7 +34,7 @@ public:
 		       const Triangulation& triangulation,
 		       double level,
 		       const Intersection_oracle& oracle,
-		       std::unordered_set<typename Triangulation::Simplex_handle>& out_simplices)
+		       std::unordered_set<typename Triangulation::Simplex_handle>& out_simplices) const
   {
     /* initialization */
     using Simplex_handle = typename Triangulation::Simplex_handle;

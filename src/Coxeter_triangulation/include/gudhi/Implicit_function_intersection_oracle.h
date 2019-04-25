@@ -16,14 +16,14 @@ public:
 
   template <class Triangulation>
   bool intersects(const typename Triangulation::Simplex_handle& c,
-		  const Triangulation& tr) {
+		  const Triangulation& tr) const {
     std::size_t cod_d = this->cod_d();
     Eigen::MatrixXd matrix(cod_d + 1, cod_d + 1);
     for (std::size_t i = 0; i < cod_d + 1; ++i)
       matrix(0, i) = 1;
     std::size_t j = 0;
     for (auto v: tr.vertex_range(c)) {
-      Eigen::VectorXd v_coords = fun(tr.cartesian_coordinates(v));
+      Eigen::VectorXd v_coords = fun_(tr.cartesian_coordinates(v));
       for (std::size_t i = 1; i < cod_d + 1; ++i)
 	matrix(i, j) = v_coords(i-1);
       j++;
@@ -39,11 +39,11 @@ public:
     return true;
   }
 
-  std::size_t amb_d() {
+  std::size_t amb_d() const {
     return fun_.amb_d();
   }
   
-  std::size_t cod_d() {
+  std::size_t cod_d() const {
     return fun_.cod_d();
   }
   

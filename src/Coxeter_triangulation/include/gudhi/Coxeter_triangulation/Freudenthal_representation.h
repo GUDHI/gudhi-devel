@@ -13,6 +13,19 @@ struct Freudenthal_representation {
   unsigned dimension() const {
     return partition.size() - 1;
   }
+
+  bool operator==(const Freudenthal_representation& other) const {
+    if (dimension() != other.dimension())
+      return false;
+    if (vertex != other.vertex)
+      return false;
+    for (std::size_t k = 0; k < partition.size(); ++k)
+      if (partition[k] != other.partition[k])
+	return false;
+    return true;
+  }
 };
+
+
 
 #endif

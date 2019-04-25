@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <limits>
+#include <iostream>
+
 #include <gudhi/Coxeter_triangulation/Size_range.h>
 #include <gudhi/Coxeter_triangulation/Integer_combination_iterator.h>
 #include <gudhi/Coxeter_triangulation/Ordered_set_partition_iterator.h>
