@@ -7,27 +7,27 @@ Rips complex user manual
 Definition
 ----------
 
-=======================================================  =====================================  =====================================
-:Authors: Clément Maria, Pawel Dlotko, Vincent Rouvreau  :Introduced in: GUDHI 2.0.0            :Copyright: GPL v3
-=======================================================  =====================================  =====================================
+====================================================================  ================================  ======================
+:Authors: Clément Maria, Pawel Dlotko, Vincent Rouvreau, Marc Glisse  :Introduced in: GUDHI 2.0.0       :Copyright: GPL v3
+====================================================================  ================================  ======================
 
 +-------------------------------------------+----------------------------------------------------------------------+
 | :doc:`rips_complex_user`                  | :doc:`rips_complex_ref`                                              |
 +-------------------------------------------+----------------------------------------------------------------------+
 
-`Rips complex <https://en.wikipedia.org/wiki/Vietoris%E2%80%93Rips_complex>`_ is a one skeleton graph that allows to
-construct a simplicial complex from it. The input can be a point cloud with a given distance function, or a distance
-matrix.
+The `Rips complex <https://en.wikipedia.org/wiki/Vietoris%E2%80%93Rips_complex>`_ is a simplicial complex that
+generalizes proximity (:math:`\varepsilon`-ball) graphs to higher dimensions. The vertices correspond to the input
+points, and a simplex is present if and only if its diameter is smaller than some parameter α.  Considering all
+parameters α defines a filtered simplicial complex, where the filtration value of a simplex is its diameter.
+The filtration can be restricted to values α smaller than some threshold, to reduce its size.
 
-The filtration value of each edge is computed from a user-given distance function, or directly from the distance
-matrix.
+The input discrete metric space can be provided as a point cloud plus a distance function, or as a distance matrix.
 
-All edges that have a filtration value strictly greater than a given threshold value are not inserted into the complex.
+When creating a simplicial complex from the graph, :doc:`RipsComplex <rips_complex_ref>` first builds the graph and
+inserts it into the data structure. It then expands the simplicial complex (adds the simplices corresponding to cliques)
+when required. The expansion can be stopped at dimension `max_dimension`, by default 1.
 
-When creating a simplicial complex from this one skeleton graph, Rips inserts the one skeleton graph into the data
-structure, and then expands the simplicial complex when required.
-
-Vertex name correspond to the index of the point in the given range (aka. the point cloud).
+A vertex name corresponds to the index of the point in the given range (aka. the point cloud).
 
 .. figure::
     ../../doc/Rips_complex/rips_complex_representation.png
@@ -38,8 +38,27 @@ Vertex name correspond to the index of the point in the given range (aka. the po
 On this example, as edges (4,5), (4,6) and (5,6) are in the complex, simplex (4,5,6) is added with the filtration value
 set with :math:`max(filtration(4,5), filtration(4,6), filtration(5,6))`. And so on for simplex (0,1,2,3).
 
-If the Rips_complex interfaces are not detailed enough for your need, please refer to rips_persistence_step_by_step.cpp
-example, where the graph construction over the Simplex_tree is more detailed.
+If the `RipsComplex` interfaces are not detailed enough for your need, please refer to rips_persistence_step_by_step.cpp
+C++ example, where the graph construction over the Simplex_tree is more detailed.
+
+A Rips complex can easily become huge, even if we limit the length of the edges
+and the dimension of the simplices. One easy trick, before building a Rips
+complex on a point cloud, is to call `sparsify_point_set` which removes points
+that are too close to each other. This does not change its persistence diagram
+by more than the length used to define "too close".
+
+A more general technique is to use a sparse approximation of the Rips
+introduced by Don Sheehy :cite:`sheehy13linear`. We are using the version
+described in :cite:`buchet16efficient` (except that we multiply all filtration
+values by 2, to match the usual Rips complex), which proves a
+:math:`\frac{1+\varepsilon}{1-\varepsilon}`-interleaving, although in practice the
+error is usually smaller.  A more intuitive presentation of the idea is
+available in :cite:`cavanna15geometric`, and in a video
+:cite:`cavanna15visualizing`. Passing an extra argument `sparse=0.3` at the
+construction of a `RipsComplex` object asks it to build a sparse Rips with
+parameter :math:`\varepsilon=0.3`, while the default `sparse=None` builds the
+regular Rips complex.
+
 
 Point cloud
 -----------
@@ -47,7 +66,7 @@ Point cloud
 Example from a point cloud
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This example builds the one skeleton graph from the given points, and max_edge_length value.
+This example builds the neighborhood graph from the given points, up to max_edge_length.
 Then it creates a :doc:`Simplex_tree <simplex_tree_ref>` with it.
 
 Finally, it is asked to display information about the simplicial complex.
@@ -56,7 +75,7 @@ Finally, it is asked to display information about the simplicial complex.
 
     import gudhi
     rips_complex = gudhi.RipsComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]],
-        max_edge_length=12.0)
+                                     max_edge_length=12.0)
 
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=1)
     result_str = 'Rips complex is of dimension ' + repr(simplex_tree.dimension()) + ' - ' + \
@@ -92,10 +111,20 @@ until dimension 1 - one skeleton graph in other words), the output is:
     [4, 6] -> 9.49
     [3, 6] -> 11.00
 
+Notice that if we use
+
+.. code-block:: python
+
+    rips_complex = gudhi.RipsComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]],
+                                     max_edge_length=12.0, sparse=2)
+
+asking for a very sparse version (theory only gives some guarantee on the meaning of the output if `sparse<1`),
+2 to 5 edges disappear, depending on the random vertex used to start the sparsification.
+
 Example from OFF file
 ^^^^^^^^^^^^^^^^^^^^^
 
-This example builds the :doc:`Rips_complex <rips_complex_ref>` from the given
+This example builds the :doc:`RipsComplex <rips_complex_ref>` from the given
 points in an OFF file, and max_edge_length value.
 Then it creates a :doc:`Simplex_tree <simplex_tree_ref>` with it.
 
@@ -200,7 +229,7 @@ until dimension 1 - one skeleton graph in other words), the output is:
 Example from csv file
 ^^^^^^^^^^^^^^^^^^^^^
 
-This example builds the :doc:`Rips_complex <rips_complex_ref>` from the given
+This example builds the :doc:`RipsComplex <rips_complex_ref>` from the given
 distance matrix in a csv file, and max_edge_length value.
 Then it creates a :doc:`Simplex_tree <simplex_tree_ref>` with it.
 

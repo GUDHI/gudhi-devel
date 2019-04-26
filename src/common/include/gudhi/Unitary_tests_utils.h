@@ -34,7 +34,7 @@ void GUDHI_TEST_FLOAT_EQUALITY_CHECK(FloatingType a, FloatingType b,
   std::cout << "GUDHI_TEST_FLOAT_EQUALITY_CHECK - " << a << " versus " << b
             << " | diff = " << std::fabs(a - b) << " - epsilon = " << epsilon << std::endl;
 #endif
-  BOOST_CHECK(std::fabs(a - b) < epsilon);
+  BOOST_CHECK(std::fabs(a - b) <= epsilon);
 }
 
 #endif  // UNITARY_TESTS_UTILS_H_
