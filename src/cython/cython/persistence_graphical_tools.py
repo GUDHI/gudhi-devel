@@ -1,10 +1,14 @@
+from os import path
+from math import isfinite
+import numpy as np
+
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
    library for computational topology.
 
    Author(s):       Vincent Rouvreau, Bertrand Michel
 
-   Copyright (C) 2016 Inria
+   Copyright (C) 2019 Inria
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -85,11 +89,9 @@ def plot_persistence_barcode(persistence=[], persistence_file='', alpha=0.6,
     try:
         import matplotlib.pyplot as plt
         import matplotlib.patches as mpatches
-        import numpy as np
-        import os
 
         if persistence_file is not '':
-            if os.path.isfile(persistence_file):
+            if path.isfile(persistence_file):
                 # Reset persistence
                 persistence = []
                 diag = read_persistence_intervals_grouped_by_dimension(persistence_file=persistence_file)
@@ -144,7 +146,7 @@ def plot_persistence_barcode(persistence=[], persistence_file='', alpha=0.6,
         return plt
 
     except ImportError:
-        print("This function is not available, you may be missing numpy and/or matplotlib.")
+        print("This function is not available, you may be missing matplotlib.")
 
 def plot_persistence_diagram(persistence=[], persistence_file='', alpha=0.6,
         band=0., max_intervals=1000, max_plots=1000, inf_delta=0.1, legend=False):
@@ -177,11 +179,9 @@ def plot_persistence_diagram(persistence=[], persistence_file='', alpha=0.6,
     try:
         import matplotlib.pyplot as plt
         import matplotlib.patches as mpatches
-        import numpy as np
-        import os
 
         if persistence_file is not '':
-            if os.path.isfile(persistence_file):
+            if path.isfile(persistence_file):
                 # Reset persistence
                 persistence = []
                 diag = read_persistence_intervals_grouped_by_dimension(persistence_file=persistence_file)
@@ -240,7 +240,7 @@ def plot_persistence_diagram(persistence=[], persistence_file='', alpha=0.6,
         return plt
 
     except ImportError:
-        print("This function is not available, you may be missing numpy and/or matplotlib.")
+        print("This function is not available, you may be missing matplotlib.")
 
 def plot_persistence_density(persistence=[], persistence_file='',
                              nbins=300, bw_method=None,
@@ -288,13 +288,10 @@ def plot_persistence_density(persistence=[], persistence_file='',
     """
     try:
         import matplotlib.pyplot as plt
-        import numpy as np
         from scipy.stats import kde
-        import os
-        import math
 
         if persistence_file is not '':
-            if os.path.isfile(persistence_file):
+            if path.isfile(persistence_file):
                 # Reset persistence
                 persistence = []
                 diag = read_persistence_intervals_grouped_by_dimension(persistence_file=persistence_file)
@@ -318,8 +315,8 @@ def plot_persistence_density(persistence=[], persistence_file='',
                                  reverse=True)[:max_intervals]
 
         # Set as numpy array birth and death (remove undefined values - inf and NaN)
-        birth = np.asarray([(interval[1][0]) for interval in persistence_dim if (math.isfinite(interval[1][1]) and math.isfinite(interval[1][0]))])
-        death = np.asarray([(interval[1][1]) for interval in persistence_dim if (math.isfinite(interval[1][1]) and math.isfinite(interval[1][0]))])
+        birth = np.asarray([(interval[1][0]) for interval in persistence_dim if (isfinite(interval[1][1]) and isfinite(interval[1][0]))])
+        death = np.asarray([(interval[1][1]) for interval in persistence_dim if (isfinite(interval[1][1]) and isfinite(interval[1][0]))])
 
         # line display of equation : birth = death
         x = np.linspace(death.min(), birth.max(), 1000)
@@ -345,4 +342,4 @@ def plot_persistence_density(persistence=[], persistence_file='',
         return plt
 
     except ImportError:
-        print("This function is not available, you may be missing numpy, matplotlib and/or scipy.")
+        print("This function is not available, you may be missing matplotlib and/or scipy.")
