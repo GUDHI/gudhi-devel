@@ -1,0 +1,4 @@
+project(Toplex_map_examples)
+
+add_executable(Toplex_map_example_simple_toplex_map simple_toplex_map.cpp)
+add_test(NAME Toplex_map_example_simple_toplex_map COMMAND $<TARGET_FILE:Toplex_map_example_simple_toplex_map>)
