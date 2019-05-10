@@ -75,10 +75,10 @@ class Witness_complex {
   /**
    *  \brief Initializes member variables before constructing simplicial complex.
    *  \details Records nearest landmark table.
-   *  @param[in] nearest_landmark_table needs to be a range of a range of pairs of nearest landmarks and distances.
+   *  @param[in] nearest_landmark_table needs to be a range (one entry per witness) of sorted ranges of pairs of nearest landmarks and distances.
    *         The class Nearest_landmark_table_::value_type must be a copiable range.
    *         The range of pairs must admit a member type 'iterator'. The dereference type 
-   *         of the pair range iterator needs to be 'std::pair<std::size_t, double>'.
+   *         of the pair range iterator needs to be 'std::pair<std::size_t, double>' where the first element is the index of the landmark, and the second its (squared) distance to the witness.
    */
 
   Witness_complex(Nearest_landmark_table_ const & nearest_landmark_table)
@@ -108,8 +108,8 @@ class Witness_complex {
     }
     ActiveWitnessList active_witnesses;
     Landmark_id k = 0; /* current dimension in iterative construction */
-    for (auto w : nearest_landmark_table_)
-      active_witnesses.push_back(ActiveWitness(w));
+    for (auto&& w : nearest_landmark_table_)
+      active_witnesses.emplace_back(w);
     while (!active_witnesses.empty() && k <= limit_dimension) {
       typename ActiveWitnessList::iterator aw_it = active_witnesses.begin();
       std::vector<Landmark_id> simplex;
