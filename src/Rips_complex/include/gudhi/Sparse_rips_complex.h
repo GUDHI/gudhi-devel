@@ -126,7 +126,7 @@ class Sparse_rips_complex {
     // lambda[original_order]=params[sorted_order]
     for(int i=0;i<n;++i)
       lambda[sorted_points[i]] = params[i];
-    double cst = epsilon_ * (1 - epsilon_);
+    double cst = epsilon_ * (1 - epsilon_) / 2;
     auto block = [cst,&complex,&lambda](typename SimplicialComplexForRips::Simplex_handle sh){
       auto filt = complex.filtration(sh);
       auto mini = filt * cst;
@@ -156,6 +156,7 @@ class Sparse_rips_complex {
   void compute_sparse_graph(Distance& dist, double epsilon, Filtration_value mini, Filtration_value maxi) {
     const auto& points = sorted_points; // convenience alias
     const int n = boost::size(points);
+    double cst = epsilon * (1 - epsilon) / 2;
     graph_.~Graph();
     new (&graph_) Graph(n);
     // for(auto v : vertices(g)) // doesn't work :-(
@@ -184,10 +185,14 @@ class Sparse_rips_complex {
         // The paper has d/2 and d-lj/e to match the Cech, but we use doubles to match the Rips
         if (d * epsilon <= 2 * lj)
           alpha = d;
-        else if (d * epsilon <= li + lj && (epsilon >= 1 || d * epsilon <= lj * (1 + 1 / (1 - epsilon))))
-          alpha = (d - lj / epsilon) * 2;
-        else
+        else if (d * epsilon > li + lj)
           continue;
+        else {
+          alpha = (d - lj / epsilon) * 2;
+          // Keep the test exactly the same as in block to avoid inconsistencies
+          if (epsilon < 1 && alpha * cst > lj)
+            continue;
+        }
 
         if (alpha <= maxi)
           add_edge(pi, pj, alpha, graph_);
