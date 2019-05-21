@@ -161,14 +161,19 @@
       <b>Copyright:</b> GPL v3<br>
     </td>
     <td width="75%">
-    An elementary strong collapse of a simplicial complex $K$ is removal of a vertex $v$ whose link $lk_K(v)$ is a simplicial cone $v^\prime*L$.
-    A series of elementary strong collapses is called a strong collapse. Strong collapse is a special type of classical simple collapse. 
-    To compute strong collapse of a general simplicial complex we only need a data-structure which consists of maximal simplices and vertices. 
+    An elementary strong collapse of a simplicial complex \f$K\f$ is removal of a vertex \f$v\f$ whose link
+    \f$lk_K(v)\f$ is a simplicial cone \f$v^\prime*L\f$.
+    A series of elementary strong collapses is called a strong collapse. Strong collapse is a special type of classical
+    simple collapse. 
+    To compute strong collapse of a general simplicial complex we only need a data-structure which consists of maximal
+    simplices and vertices. 
     And for a flag complex, strong collapse can be computed using only the 1-skeleton of the flag complex. 
-    Moreover unlike simple collapse, a strong collapse can be associated to a simplical map from the complex $K$ to an unique core $K^0$. 
+    Moreover unlike simple collapse, a strong collapse can be associated to a simplical map from the complex \f$K\f$
+    to an unique core \f$K^0\f$. 
 	
-	Computation of strong collapse and persistent homology of a filtered flag complex via strong collapse as described in \cite strongcollapsesocg2019.
-     <br>
+	  Computation of strong collapse and persistent homology of a filtered flag complex via strong collapse as described in
+    \cite strongcollapsesocg2019.
+
     <b>User manual:</b> \ref strong_collapse - <b>Reference manual:</b> Gudhi::strong_collapse::Flag_complex_strong_collapse
     </td>
  </tr>
