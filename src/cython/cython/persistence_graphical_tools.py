@@ -291,32 +291,30 @@ def plot_persistence_density(persistence=[], persistence_file='',
         from scipy.stats import kde
 
         if persistence_file is not '':
+            if dimension is None:
+                # All dimension case
+                dimension = -1
             if path.isfile(persistence_file):
-                # Reset persistence
-                persistence = []
-                diag = read_persistence_intervals_grouped_by_dimension(persistence_file=persistence_file)
-                for key in diag.keys():
-                    for persistence_interval in diag[key]:
-                        persistence.append((key, persistence_interval))
+                persistence_dim = read_persistence_intervals_in_dimension(persistence_file=persistence_file,
+                                                                                only_this_dim=dimension)
+                print(persistence_dim)
             else:
                 print("file " + persistence_file + " not found.")
                 return None
 
-        persistence_dim = []
-        if dimension is not None:
-            persistence_dim = [(dim_interval) for dim_interval in persistence if (dim_interval[0] == dimension)]
-        else:
-            persistence_dim = persistence
+        if len(persistence) > 0:
+            persistence_dim = np.array([(dim_interval[1][0], dim_interval[1][1]) for dim_interval in persistence if (dim_interval[0] == dimension) or (dimension is None)])
 
+        persistence_dim = persistence_dim[np.isfinite(persistence_dim[:,1])]
         if max_intervals > 0 and max_intervals < len(persistence_dim):
             # Sort by life time, then takes only the max_intervals elements
-            persistence_dim = sorted(persistence_dim,
-                                 key=lambda life_time: life_time[1][1]-life_time[1][0],
-                                 reverse=True)[:max_intervals]
+            persistence_dim = np.array(sorted(persistence_dim,
+                                              key=lambda life_time: life_time[1]-life_time[0],
+                                              reverse=True)[:max_intervals])
 
         # Set as numpy array birth and death (remove undefined values - inf and NaN)
-        birth = np.asarray([(interval[1][0]) for interval in persistence_dim if (isfinite(interval[1][1]) and isfinite(interval[1][0]))])
-        death = np.asarray([(interval[1][1]) for interval in persistence_dim if (isfinite(interval[1][1]) and isfinite(interval[1][0]))])
+        birth = persistence_dim[:,0]
+        death = persistence_dim[:,1]
 
         # line display of equation : birth = death
         x = np.linspace(death.min(), birth.max(), 1000)
