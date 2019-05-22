@@ -98,7 +98,7 @@ void program_options(int argc, char* argv[], std::string& off_file_points, std::
       "Name of file in which the persistence diagram is written. Default print in std::cout")(
       "approximation,e", po::value<double>(&epsilon)->default_value(.5),
       "Epsilon, where the sparse Rips complex is a (1+epsilon)-approximation of the Rips complex.")(
-      "cpx-dimension,d", po::value<int>(&dim_max)->default_value(1),
+      "cpx-dimension,d", po::value<int>(&dim_max)->default_value(std::numeric_limits<int>::max()),
       "Maximal dimension of the Rips complex we want to compute.")(
       "field-charac,p", po::value<int>(&p)->default_value(11),
       "Characteristic p of the coefficient field Z/pZ for computing homology.")(
@@ -119,7 +119,7 @@ void program_options(int argc, char* argv[], std::string& off_file_points, std::
   if (vm.count("help") || !vm.count("input-file")) {
     std::cout << std::endl;
     std::cout << "Compute the persistent homology with coefficient field Z/pZ \n";
-    std::cout << "of a sparse (1+epsilon)-approximation of the Rips complex \ndefined on a set of input points.\n \n";
+    std::cout << "of a sparse 1/(1-epsilon)-approximation of the Rips complex \ndefined on a set of input points.\n \n";
     std::cout << "The output diagram contains one bar per line, written with the convention: \n";
     std::cout << "   p   dim b d \n";
     std::cout << "where dim is the dimension of the homological feature,\n";
