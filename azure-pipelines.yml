@@ -28,7 +28,7 @@ steps:
   displayName: 'CMake'
   inputs:
     workingDirectory: 'build'
-    cmakeArgs: '..\.. -G "Visual Studio 15 2017 Win64"'
+    cmakeArgs: '.. -G "Visual Studio 15 2017 Win64"'
 
 - task: MSBuild@1
   displayName: 'Build solution GUDHIdev.sln'
