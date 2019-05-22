@@ -36,6 +36,7 @@ add_gudhi_module(Spatial_searching)
 add_gudhi_module(Strong_collapse)
 add_gudhi_module(Subsampling)
 add_gudhi_module(Tangential_complex)
+add_gudhi_module(Toplex_map)
 add_gudhi_module(Witness_complex)
 add_gudhi_module(Nerve_GIC)
 

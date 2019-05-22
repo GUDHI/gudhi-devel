@@ -1,5 +1,7 @@
 #include <gudhi/Tangential_complex.h>
 #include <gudhi/sparsify_point_set.h>
+//#include <gudhi/Fake_simplex_tree.h>
+
 
 #include <CGAL/Epick_d.h>
 #include <CGAL/Random.h>
@@ -20,7 +22,7 @@ CGAL::Parallel_tag> TC;
 int main(void) {
   const int INTRINSIC_DIM = 2;
   const int AMBIENT_DIM = 3;
-  const int NUM_POINTS = 1000;
+  const int NUM_POINTS = 100;
 
   Kernel k;
 
@@ -37,6 +39,7 @@ int main(void) {
 
   // Export the TC into a Simplex_tree
   Gudhi::Simplex_tree<> stree;
+  //Gudhi::Fake_simplex_tree stree;
   tc.create_complex(stree);
 
   // Display stats about inconsistencies

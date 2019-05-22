@@ -198,6 +198,23 @@
     </td>
  </tr>
 </table>
+ \subsection ToplexMapDataStructure Toplex Map
+ \image html "map.png" "Toplex map representation"
+<table border="0">
+  <tr>
+    <td width="25%">
+      <b>Author:</b> Fran&ccedil;ois Godi<br>
+      <b>Introduced in:</b> GUDHI 2.1.0<br>
+      <b>Copyright:</b> GPL v3<br>
+    </td>
+    <td width="75%">
+    The Toplex map data structure is composed firstly of a raw storage of toplices (the maximal simplices)
+    and secondly of a map which associate any vertex to a set of pointers toward all toplices
+    containing this vertex.
+    <b>User manual:</b> \ref toplex_map - <b>Reference manual:</b> Gudhi::Toplex_map
+    </td>
+ </tr>
+
  \subsection WitnessComplexDataStructure Witness complex
  \image html "Witness_complex_representation.png" "Witness complex representation"
 <table border="0">

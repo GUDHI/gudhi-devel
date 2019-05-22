@@ -54,23 +54,17 @@ class Rips_complex_interface {
   }
 
   void init_points_sparse(const std::vector<std::vector<double>>& points, double threshold, double epsilon) {
-    sparse_rips_complex_.emplace(points, Gudhi::Euclidean_distance(), epsilon);
-    threshold_ = threshold;
+    sparse_rips_complex_.emplace(points, Gudhi::Euclidean_distance(), epsilon, -std::numeric_limits<double>::infinity(), threshold);
   }
   void init_matrix_sparse(const std::vector<std::vector<double>>& matrix, double threshold, double epsilon) {
-    sparse_rips_complex_.emplace(matrix, epsilon);
-    threshold_ = threshold;
+    sparse_rips_complex_.emplace(matrix, epsilon, -std::numeric_limits<double>::infinity(), threshold);
   }
 
   void create_simplex_tree(Simplex_tree_interface<>* simplex_tree, int dim_max) {
     if (rips_complex_)
       rips_complex_->create_complex(*simplex_tree, dim_max);
-    else {
+    else
       sparse_rips_complex_->create_complex(*simplex_tree, dim_max);
-      // This pruning should be done much earlier! It isn't that useful for sparse Rips,
-      // but it would be inconsistent not to do it.
-      simplex_tree->prune_above_filtration(threshold_);
-    }
     simplex_tree->initialize_filtration();
   }
 
@@ -79,7 +73,6 @@ class Rips_complex_interface {
   // Anyway, storing a graph would make more sense. Or changing the interface completely so there is no such storage.
   boost::optional<Rips_complex<Simplex_tree_interface<>::Filtration_value>> rips_complex_;
   boost::optional<Sparse_rips_complex<Simplex_tree_interface<>::Filtration_value>> sparse_rips_complex_;
-  double threshold_;
 };
 
 }  // namespace rips_complex
