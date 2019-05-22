@@ -148,6 +148,7 @@ if( PYTHONINTERP_FOUND )
   find_python_module("matplotlib")
   find_python_module("numpy")
   find_python_module("scipy")
+  find_python_module("sphinx")
 endif()
 
 if(NOT GUDHI_CYTHON_PATH)
@@ -157,20 +158,16 @@ endif(NOT GUDHI_CYTHON_PATH)
 option(WITH_GUDHI_CYTHON_RUNTIME_LIBRARY_DIRS "Build with setting runtime_library_dirs. Usefull when setting rpath is not allowed" ON)
 
 if(PYTHONINTERP_FOUND AND CYTHON_FOUND)
-  # Default found version 2
-  if(PYTHON_VERSION_MAJOR EQUAL 2)
+  if(SPHINX_FOUND)
     # Documentation generation is available through sphinx
     find_program( SPHINX_PATH sphinx-build )
-  elseif(PYTHON_VERSION_MAJOR EQUAL 3)
-    # No sphinx-build in Pyton3, just hack it
-    set(SPHINX_PATH "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/${GUDHI_CYTHON_PATH}/doc/python3-sphinx-build.py")
-  else()
-    message(FATAL_ERROR "ERROR: Try to compile the Cython interface. Python version ${PYTHON_VERSION_STRING} is not valid.")
-  endif(PYTHON_VERSION_MAJOR EQUAL 2)
-  # get PYTHON_SITE_PACKAGES relative path from a python command line
-  execute_process(
-    COMMAND "${PYTHON_EXECUTABLE}" -c "from distutils.sysconfig import get_python_lib; print (get_python_lib(prefix='', plat_specific=True))"
-    OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    if(NOT SPHINX_PATH)
+      if(PYTHON_VERSION_MAJOR EQUAL 3)
+        # In Python3, just hack sphinx-build if it does not exist
+        set(SPHINX_PATH "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/${GUDHI_CYTHON_PATH}/doc/python3-sphinx-build.py")
+      endif(PYTHON_VERSION_MAJOR EQUAL 3)
+    endif(NOT SPHINX_PATH)
+  endif(SPHINX_FOUND)
 endif(PYTHONINTERP_FOUND AND CYTHON_FOUND)
 

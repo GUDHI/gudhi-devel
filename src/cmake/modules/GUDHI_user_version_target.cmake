@@ -27,7 +27,7 @@ add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy ${CMAKE_SOURCE_DIR}/Conventions.txt ${GUDHI_USER_VERSION_DIR}/Conventions.txt)
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
-                   copy ${CMAKE_SOURCE_DIR}/README ${GUDHI_USER_VERSION_DIR}/README)
+                   copy ${CMAKE_SOURCE_DIR}/README.md ${GUDHI_USER_VERSION_DIR}/README.md)
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy ${CMAKE_SOURCE_DIR}/COPYING ${GUDHI_USER_VERSION_DIR}/COPYING)
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E

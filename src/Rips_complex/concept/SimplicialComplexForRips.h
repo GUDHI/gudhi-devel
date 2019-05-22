@@ -34,6 +34,9 @@ struct SimplicialComplexForRips {
   /** \brief Type used to store the filtration values of the simplicial complex. */
   typedef unspecified Filtration_value;
 
+  /** \brief Handle type to a simplex contained in the simplicial complex. */
+  typedef unspecified Simplex_handle;
+
   /** \brief Inserts a given `Gudhi::rips_complex::Rips_complex::OneSkeletonGraph` in the simplicial complex. */
   template<class OneSkeletonGraph>
   void insert_graph(const OneSkeletonGraph& skel_graph);
@@ -41,6 +44,24 @@ struct SimplicialComplexForRips {
   /** \brief Expands the simplicial complex containing only its one skeleton until a given maximal dimension as
    * explained in \ref ripsdefinition. */
   void expansion(int max_dim);
+
+  /** \brief Expands a simplicial complex containing only a graph. Simplices corresponding to cliques in the graph are added
+   * incrementally, faces before cofaces, unless the simplex has dimension larger than `max_dim` or `block_simplex`
+   * returns true for this simplex.
+   *
+   * @param[in] max_dim Expansion maximal dimension value.
+   * @param[in] block_simplex Blocker oracle. Its concept is <CODE>bool block_simplex(Simplex_handle sh)</CODE>
+   *
+   * The function identifies a candidate simplex whose faces are all already in the complex, inserts
+   * it with a filtration value corresponding to the maximum of the filtration values of the faces, then calls
+   * `block_simplex` on a `Simplex_handle` for this new simplex. If `block_simplex` returns true, the simplex is
+   * removed, otherwise it is kept.
+   */
+  template< typename Blocker >
+  void expansion_with_blockers(int max_dim, Blocker block_simplex);
+
+  /** \brief Returns a range over the vertices of a simplex.  */
+  unspecified simplex_vertex_range(Simplex_handle sh);
 
   /** \brief Returns the number of vertices in the simplicial complex. */
   std::size_t num_vertices();

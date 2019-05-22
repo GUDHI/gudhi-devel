@@ -50,8 +50,8 @@ by more than the length used to define "too close".
 A more general technique is to use a sparse approximation of the Rips
 introduced by Don Sheehy :cite:`sheehy13linear`. We are using the version
 described in :cite:`buchet16efficient` (except that we multiply all filtration
-values by 2, to match the usual Rips complex), which proves a
-:math:`\frac{1+\varepsilon}{1-\varepsilon}`-interleaving, although in practice the
+values by 2, to match the usual Rips complex). :cite:`cavanna15geometric` proves
+a :math:`\frac{1}{1-\varepsilon}`-interleaving, although in practice the
 error is usually smaller.  A more intuitive presentation of the idea is
 available in :cite:`cavanna15geometric`, and in a video
 :cite:`cavanna15visualizing`. Passing an extra argument `sparse=0.3` at the

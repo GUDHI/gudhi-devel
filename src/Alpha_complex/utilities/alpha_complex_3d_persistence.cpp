@@ -94,11 +94,11 @@ int main(int argc, char **argv) {
   int coeff_field_characteristic = 0;
   Filtration_value min_persistence = 0.;
   bool exact_version = false;
-  bool safe_version = false;
+  bool fast_version = false;
   bool weighted_version = false;
   bool periodic_version = false;
 
-  program_options(argc, argv, off_file_points, exact_version, safe_version, weight_file, cuboid_file, output_file_diag,
+  program_options(argc, argv, off_file_points, exact_version, fast_version, weight_file, cuboid_file, output_file_diag,
                   alpha_square_max_value, coeff_field_characteristic, min_persistence);
 
   std::vector<double> weights;
@@ -120,16 +120,16 @@ int main(int argc, char **argv) {
     periodic_version = true;
   }
 
-  Gudhi::alpha_complex::complexity complexity = Gudhi::alpha_complex::complexity::FAST;
+  Gudhi::alpha_complex::complexity complexity = Gudhi::alpha_complex::complexity::SAFE;
   if (exact_version) {
-    if (safe_version) {
-      std::cerr << "You cannot set the exact and the safe version." << std::endl;
+    if (fast_version) {
+      std::cerr << "You cannot set the exact and the fast version." << std::endl;
       exit(-1);
     }
     complexity = Gudhi::alpha_complex::complexity::EXACT;
   }
-  if (safe_version) {
-    complexity = Gudhi::alpha_complex::complexity::SAFE;
+  if (fast_version) {
+    complexity = Gudhi::alpha_complex::complexity::FAST;
   }
 
   Simplex_tree simplex_tree;
@@ -258,7 +258,7 @@ int main(int argc, char **argv) {
   return 0;
 }
 
-void program_options(int argc, char *argv[], std::string &off_file_points, bool &exact, bool &safe,
+void program_options(int argc, char *argv[], std::string &off_file_points, bool &exact, bool &fast,
                      std::string &weight_file, std::string &cuboid_file, std::string &output_file_diag,
                      Filtration_value &alpha_square_max_value, int &coeff_field_characteristic,
                      Filtration_value &min_persistence) {
@@ -270,9 +270,9 @@ void program_options(int argc, char *argv[], std::string &off_file_points, bool 
   po::options_description visible("Allowed options", 100);
   visible.add_options()("help,h", "produce help message")(
       "exact,e", po::bool_switch(&exact),
-      "To activate exact version of Alpha complex 3d (default is false, not available if safe is set)")(
-      "safe,s", po::bool_switch(&safe),
-      "To activate safe version of Alpha complex 3d (default is false, not available if exact is set)")(
+      "To activate exact version of Alpha complex 3d (default is false, not available if fast is set)")(
+      "fast,f", po::bool_switch(&fast),
+      "To activate fast version of Alpha complex 3d (default is false, not available if exact is set)")(
       "weight-file,w", po::value<std::string>(&weight_file)->default_value(std::string()),
       "Name of file containing a point weights. Format is one weight per line:\n  W1\n  ...\n  Wn ")(
       "cuboid-file,c", po::value<std::string>(&cuboid_file),
@@ -303,7 +303,7 @@ void program_options(int argc, char *argv[], std::string &off_file_points, bool 
     std::cout << std::endl;
     std::cout << "Compute the persistent homology with coefficient field Z/pZ \n";
     std::cout << "of a 3D Alpha complex defined on a set of input points.\n";
-    std::cout << "3D Alpha complex can be exact or safe, weighted and/or periodic\n\n";
+    std::cout << "3D Alpha complex can be safe (by default) exact or fast, weighted and/or periodic\n\n";
     std::cout << "The output diagram contains one bar per line, written with the convention: \n";
     std::cout << "   p   dim b d \n";
     std::cout << "where dim is the dimension of the homological feature,\n";
