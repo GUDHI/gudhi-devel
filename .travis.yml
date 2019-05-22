@@ -7,37 +7,6 @@ git:
 
 matrix:
   include:
-    # A. Linux
-    - os: linux
-      dist: xenial
-      compiler: gcc
-      env:
-        # 1. Only examples and associated tests
-        - CMAKE_EXAMPLE='ON' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
-    - os: linux
-      dist: xenial
-      compiler: gcc
-      env:
-        # 2. Only unitary tests
-        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='ON' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
-    - os: linux
-      dist: xenial
-      compiler: gcc
-      env:
-        # 3. Only utilities and associated tests
-        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='ON' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
-    - os: linux
-      dist: xenial
-      compiler: gcc
-      env:
-        # 4. Only doxygen documentation
-        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='doxygen'
-    - os: linux
-      dist: xenial
-      compiler: gcc
-      env:
-        # 5. Only Python, associated tests and sphinx documentation
-        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='test sphinx'
     # A. Mac OSX
     - os: osx
       osx_image: xcode9.4
@@ -63,31 +32,19 @@ matrix:
       env:
         # 4. Only doxygen documentation
         - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='doxygen'
-    - os: osx
-      osx_image: xcode9.4
-      compiler: clang
-      env:
-        # 5. Only Python, associated tests and sphinx documentation
-        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='test sphinx'
+    # Issue with sphinx-build with sphinx 2.0.1
+    # - os: osx
+    #   osx_image: xcode9.4
+    #   compiler: clang
+    #   env:
+    #     # 5. Only Python, associated tests and sphinx documentation
+    #     - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='test sphinx'
 
 cache:
   directories:
     - $HOME/.cache/pip
 
 addons:
-  apt:
-    packages:
-      - cmake
-      - graphviz 
-      - doxygen
-      - libboost-all-dev
-      - libeigen3-dev
-      - libgmp3-dev
-      - libmpfr-dev
-      - libtbb-dev
-      - curl
-      - python3
-      - python3-pip
   homebrew:
     packages:
       - cmake
@@ -98,18 +55,11 @@ addons:
       - gmp
       - mpfr
       - tbb
-      - curl
+      - cgal
       - python3
 
 # When installing through libcgal-dev apt, CMake Error at CGAL Exports.cmake The imported target "CGAL::CGAL Qt5" references the file
 install: 
-  - curl -LO "https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-4.13/CGAL-4.13.tar.xz"
-  - tar xf CGAL-4.13.tar.xz
-  - cd CGAL-4.13
-  - cmake -DCMAKE_BUILD_TYPE=Release -DCGAL_HEADER_ONLY=ON .
-  - make all
-  - sudo make install
-  - cd ..
   - python3 -m pip install --upgrade pip setuptools wheel
   - python3 -m pip install --user pytest Cython sphinx sphinxcontrib-bibtex matplotlib numpy scipy
 
