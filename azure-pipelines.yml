@@ -1,0 +1,34 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool:
+  vmImage: 'vs2017-win2016'
+
+strategy:
+  matrix:
+    x64-Release:
+      buildPlatform: x64
+      buildConfiguration: Release
+    x64-Debug:
+      buildPlatform: x64
+      buildConfiguration: Debug
+
+workspace:
+  clean: all
+
+steps:
+
+- task: CMake@1
+  inputs:
+    workingDirectory: 'built\cmake_$(buildPlatform)'
+    cmakeArgs: '..\.. -G "Visual Studio 15 2017" -A "$(buildPlatform)"'
+
+- task: CMake@1
+  inputs:
+    workingDirectory: 'built\cmake_$(buildPlatform)'
+    cmakeArgs: '--build . --target test --config $(buildConfiguration) -- /m'
