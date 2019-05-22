@@ -34,7 +34,7 @@ steps:
   displayName: 'Build solution GUDHIdev.sln'
   inputs:
     workingDirectory: 'build'
-    solution: 'GUDHIdev.sln'
+    solution: 'build/GUDHIdev.sln'
     msbuildArguments: '/m /p:Configuration=$(buildConfiguration) /p:Platform=$(buildPlatform)'
 
 - script: 'ctest -j 1 --interactive-debug-mode 0 --output-on-failure -C $(buildConfiguration) -R "in_memory"'
