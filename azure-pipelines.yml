@@ -23,13 +23,15 @@ workspace:
   clean: all
 
 steps:
+- script: 'vcpkg install cgal eigen3:x64-windows'
+  displayName: vcpkg install dependencies
 
 - task: UsePythonVersion@0
   inputs:
     versionSpec: '3.6'
     architecture: 'x64'
 
-- script: python -m pip install --upgrade pip setuptools numpy matplotlib scipy Cython sphinx sphinxcontrib-bibtex
+- script: python -m pip install --upgrade pip setuptools numpy matplotlib scipy Cython pytest sphinx sphinxcontrib-bibtex
   displayName: 'Install tools'
 
 - task: CMake@1
