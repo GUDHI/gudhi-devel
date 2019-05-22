@@ -10,6 +10,7 @@ pool:
   vmImage: 'vs2017-win2016'
 
 strategy:
+  maxParallel: 2
   matrix:
     x64-Release:
       buildPlatform: x64
@@ -24,11 +25,18 @@ workspace:
 steps:
 
 - task: CMake@1
+  displayName: 'CMake'
   inputs:
-    workingDirectory: 'built\cmake_$(buildPlatform)'
-    cmakeArgs: '..\.. -G "Visual Studio 15 2017" -A "$(buildPlatform)"'
+    workingDirectory: 'build'
+    cmakeArgs: '..\.. -G "Visual Studio 15 2017 Win64"'
 
-- task: CMake@1
+- task: MSBuild@1
+  displayName: 'Build solution GUDHIdev.sln'
   inputs:
-    workingDirectory: 'built\cmake_$(buildPlatform)'
-    cmakeArgs: '--build . --target test --config $(buildConfiguration) -- /m'
+    workingDirectory: 'build'
+    solution: 'GUDHIdev.sln'
+    msbuildArguments: '/m /p:Configuration=$(buildConfiguration) /p:Platform=$(buildPlatform)'
+
+- script: 'ctest -j 1 --interactive-debug-mode 0 --output-on-failure -C $(buildConfiguration) -R "in_memory"'
+  workingDirectory: 'build'
+  displayName: 'Run Ctest'
