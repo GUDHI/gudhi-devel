@@ -24,6 +24,14 @@ workspace:
 
 steps:
 
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.6'
+    architecture: 'x64'
+
+- script: python -m pip install --upgrade pip setuptools numpy matplotlib scipy Cython sphinx sphinxcontrib-bibtex
+  displayName: 'Install tools'
+
 - task: CMake@1
   displayName: 'CMake'
   inputs:
