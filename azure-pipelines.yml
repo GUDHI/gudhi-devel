@@ -49,7 +49,7 @@ steps:
   displayName: 'Install tools'
 
 - task: CMake@1
-  displayName: 'CMake'
+  displayName: 'CMake solution GUDHIdev.sln'
   inputs:
     workingDirectory: 'build'
     cmakeArgs: '.. -G "Visual Studio 15 2017 Win64" -DCMAKE_TOOLCHAIN_FILE="C:\vcpkg\scripts\buildsystems\vcpkg.cmake" -DWITH_GUDHI_EXAMPLE=$(cmakeExample) -DWITH_GUDHI_TEST=$(cmakeTest) -DWITH_GUDHI_UTILITIES=$(cmakeUtil) -DWITH_GUDHI_PYTHON=$(cmakePython)'
@@ -61,6 +61,8 @@ steps:
     solution: 'build/GUDHIdev.sln'
     msbuildArguments: '/m /p:Configuration=Release /p:Platform=x64'
 
-- script: 'ctest'
-  workingDirectory: 'build'
-  displayName: 'Run Ctest'
+- task: CTest@1
+  displayName: 'CTest solution GUDHIdev.sln'
+  inputs:
+    workingDirectory: 'build'
+    cmakeArgs: '-j 1'
