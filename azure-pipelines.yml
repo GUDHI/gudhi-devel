@@ -38,7 +38,7 @@ steps:
   displayName: 'CMake'
   inputs:
     workingDirectory: 'build'
-    cmakeArgs: '.. -G "Visual Studio 15 2017 Win64" -DCMAKE_TOOLCHAIN_FILE="C:\vcpkg\scripts\buildsystems\vcpkg.cmake"'
+    cmakeArgs: '.. -G "Visual Studio 15 2017 Win64" -DCMAKE_TOOLCHAIN_FILE="C:\vcpkg\scripts\buildsystems\vcpkg.cmake" -DCGAL_DIR="C:/vcpkg/installed/x86-windows/share/"'
 
 - task: MSBuild@1
   displayName: 'Build solution GUDHIdev.sln'
