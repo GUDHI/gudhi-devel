@@ -10,14 +10,28 @@ pool:
   vmImage: 'vs2017-win2016'
 
 strategy:
-  maxParallel: 2
+  maxParallel: 4
   matrix:
-    x64-Release:
-      buildPlatform: x64
-      buildConfiguration: Release
-    x64-Debug:
-      buildPlatform: x64
-      buildConfiguration: Debug
+    Examples:
+      cmakeExample: ON
+      cmakeTest: OFF
+      cmakeUtil: OFF
+      cmakePython: OFF
+    Unitary-tests:
+      cmakeExample: OFF
+      cmakeTest: ON
+      cmakeUtil: OFF
+      cmakePython: OFF
+    Utilities:
+      cmakeExample: OFF
+      cmakeTest: OFF
+      cmakeUtil: ON
+      cmakePython: OFF
+    Python-module:
+      cmakeExample: OFF
+      cmakeTest: OFF
+      cmakeUtil: OFF
+      cmakePython: ON
 
 workspace:
   clean: all
@@ -38,15 +52,15 @@ steps:
   displayName: 'CMake'
   inputs:
     workingDirectory: 'build'
-    cmakeArgs: '.. -G "Visual Studio 15 2017 Win64" -DCMAKE_TOOLCHAIN_FILE="C:\vcpkg\scripts\buildsystems\vcpkg.cmake"'
+    cmakeArgs: '.. -G "Visual Studio 15 2017 Win64" -DCMAKE_TOOLCHAIN_FILE="C:\vcpkg\scripts\buildsystems\vcpkg.cmake" -DWITH_GUDHI_EXAMPLE=$(cmakeExample) -DWITH_GUDHI_TEST=$(cmakeTest) -DWITH_GUDHI_UTILITIES=$(cmakeUtil) -DWITH_GUDHI_PYTHON=$(cmakePython)'
 
 - task: MSBuild@1
   displayName: 'Build solution GUDHIdev.sln'
   inputs:
     workingDirectory: 'build'
     solution: 'build/GUDHIdev.sln'
-    msbuildArguments: '/m /p:Configuration=$(buildConfiguration) /p:Platform=$(buildPlatform)'
+    msbuildArguments: '/m /p:Configuration=$(buildConfiguration) /p:Platform=x64'
 
-- script: 'ctest -j 1 --interactive-debug-mode 0 --output-on-failure -C $(buildConfiguration) -R "in_memory"'
+- script: 'ctest'
   workingDirectory: 'build'
   displayName: 'Run Ctest'
