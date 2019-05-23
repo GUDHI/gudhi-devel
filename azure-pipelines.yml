@@ -23,7 +23,7 @@ workspace:
   clean: all
 
 steps:
-- script: 'vcpkg install cgal eigen3:x64-windows'
+- script: 'vcpkg install eigen3:x64-windows cgal'
   displayName: vcpkg install dependencies
 
 - task: UsePythonVersion@0
@@ -38,7 +38,7 @@ steps:
   displayName: 'CMake'
   inputs:
     workingDirectory: 'build'
-    cmakeArgs: '.. -G "Visual Studio 15 2017 Win64"'
+    cmakeArgs: '.. -G "Visual Studio 15 2017 Win64" -DCMAKE_TOOLCHAIN_FILE="C:\vcpkg\scripts\buildsystems\vcpkg.cmake"'
 
 - task: MSBuild@1
   displayName: 'Build solution GUDHIdev.sln'
