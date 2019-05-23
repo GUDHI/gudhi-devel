@@ -59,7 +59,7 @@ steps:
   inputs:
     workingDirectory: 'build'
     solution: 'build/GUDHIdev.sln'
-    msbuildArguments: '/m /p:Configuration=$(buildConfiguration) /p:Platform=x64'
+    msbuildArguments: '/m /p:Configuration=Release /p:Platform=x64'
 
 - script: 'ctest'
   workingDirectory: 'build'
