@@ -61,8 +61,7 @@ steps:
     solution: 'build/GUDHIdev.sln'
     msbuildArguments: '/m /p:Configuration=Release /p:Platform=x64'
 
-- task: CTest@1
+- script: ctest -j 1 --output-on-failure -C Release
+  workingDirectory: build
+  failOnStderr: true
   displayName: 'CTest solution GUDHIdev.sln'
-  inputs:
-    workingDirectory: 'build'
-    cmakeArgs: '-j 1'
