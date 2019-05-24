@@ -40,5 +40,5 @@ build_script:
   - mkdir build
   - cd build
   - cmake -G "Visual Studio 15 2017 Win64" %CMAKE_FLAGS% -DCMAKE_TOOLCHAIN_FILE=c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake ..
-  - MSBuild /m /p:Configuration=Release /p:Platform=x64
+  - MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64
   - ctest -j 1 -C Release
