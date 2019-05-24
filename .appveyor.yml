@@ -40,5 +40,8 @@ build_script:
   - mkdir build
   - cd build
   - cmake -G "Visual Studio 15 2017 Win64" %CMAKE_FLAGS% -DCMAKE_TOOLCHAIN_FILE=c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake ..
-  - MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64
-  - ctest -j 1 -C Release -E diff_files
+  - if NOT "%target%"=="Python" MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64
+  - if NOT "%target%"=="Python" ctest -j 1 -C Release -E diff_files
+  - if "%target%"=="Python" cd src/cython
+  - if "%target%"=="Python" python setup.py install
+  - if "%target%"=="Python" MSBuild RUN_TESTS.vcxproj
