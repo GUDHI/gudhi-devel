@@ -38,8 +38,8 @@ init:
 install:
   - vcpkg install tbb:x64-windows boost-disjoint-sets:x64-windows boost-serialization:x64-windows boost-date-time:x64-windows boost-system:x64-windows boost-filesystem:x64-windows boost-units:x64-windows boost-thread:x64-windows boost-program-options:x64-windows eigen3:x64-windows cgal:x64-windows
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
-  - python --version
-  - python -m pip install -U pip setuptools numpy matplotlib scipy Cython pytest sphinx sphinxcontrib-bibtex
+  - python3 --version
+  - python3 -m pip install -U pip setuptools numpy matplotlib scipy Cython pytest sphinx sphinxcontrib-bibtex
 
 build_script:
   - mkdir build
@@ -48,5 +48,5 @@ build_script:
   - if NOT "%target%"=="Python" MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64
   - if NOT "%target%"=="Python" ctest -j 1 -C Release -E diff_files
   - if "%target%"=="Python" cd src/cython
-  - if "%target%"=="Python" python setup.py install
+  - if "%target%"=="Python" python3 setup.py install
   - if "%target%"=="Python" MSBuild RUN_TESTS.vcxproj
