@@ -24,7 +24,7 @@ environment:
 
       - target: Python
         CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON
-        PYTHON: "C:\Python36-x64"
+        PYTHON_VERSION: "3.7"
 
 
 cache:
@@ -37,7 +37,7 @@ init:
 
 install:
   - vcpkg install tbb:x64-windows boost-disjoint-sets:x64-windows boost-serialization:x64-windows boost-date-time:x64-windows boost-system:x64-windows boost-filesystem:x64-windows boost-units:x64-windows boost-thread:x64-windows boost-program-options:x64-windows eigen3:x64-windows cgal:x64-windows
-  - SET PATH=%PYTHON%;%path%
+  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
   - python --version
   - python -m pip install -U pip setuptools numpy matplotlib scipy Cython pytest sphinx sphinxcontrib-bibtex
 
