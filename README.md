@@ -1,6 +1,7 @@
 
 [![Build Status](https://travis-ci.org/GUDHI/gudhi-devel.svg?branch=master)](https://travis-ci.org/GUDHI/gudhi-devel)
 [![CircleCI](https://circleci.com/gh/GUDHI/gudhi-devel/tree/master.svg?style=svg)](https://circleci.com/gh/GUDHI/gudhi-devel/tree/master)
+![Appveyor](https://ci.appveyor.com/api/projects/status/github/GUDHI/gudhi-devel?branch=master&svg=true)
 
 ![GUDHI](src/common/doc/Gudhi_banner.png "Topological Data Analysis (TDA) and Higher Dimensional Geometry Understanding")
 
