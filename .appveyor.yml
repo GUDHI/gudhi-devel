@@ -24,7 +24,7 @@ environment:
 
       - target: Python
         CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON
-        PYTHON_VERSION: "3.7"
+        PYTHON: "C:\\Python36-x64"
 
 
 cache:
