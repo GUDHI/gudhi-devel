@@ -24,7 +24,7 @@ jobs:
             mkdir build;
             cd build;
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..;
-            make all; ctest -R Lazy_toplex_map_unit_test -V;
+            make all; src/Toplex_map/test/Lazy_toplex_map_unit_test  --report_level=detailed --log_level=all;
 
   utils:
     docker:
