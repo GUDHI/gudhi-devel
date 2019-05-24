@@ -33,7 +33,7 @@ init:
   - echo %target%
 
 install:
-  - vcpkg install eigen3:x64-windows cgal:x64-windows
+  - vcpkg install boost-program-options:x64-windows eigen3:x64-windows cgal:x64-windows
   - pip install -U setuptools numpy matplotlib scipy Cython pytest sphinx sphinxcontrib-bibtex
 
 build_script:
