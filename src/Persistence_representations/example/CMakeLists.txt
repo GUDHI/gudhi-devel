@@ -26,3 +26,7 @@ add_test(NAME Persistence_representations_example_heat_maps
     COMMAND $<TARGET_FILE:Persistence_representations_example_heat_maps>)
 install(TARGETS Persistence_representations_example_heat_maps DESTINATION bin)
 
+add_executable ( Persistent_entropy persistent_entropy.cpp )
+add_test(NAME Persistent_entropy
+    COMMAND $<TARGET_FILE:Persistent_entropy>)
+install(TARGETS Persistent_entropy DESTINATION bin)
