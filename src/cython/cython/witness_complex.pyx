@@ -47,7 +47,9 @@ cdef class WitnessComplex:
     def __init__(self, nearest_landmark_table=None):
         """WitnessComplex constructor.
 
-        :param nearest_landmark_table: A list of lists of nearest landmarks and their distances. `nearest_landmark_table[w][k]==(l,d)` means that l is the k-th nearest landmark to witness w, and d is the (squared) distance between l and w.
+        :param nearest_landmark_table: A list of lists of nearest landmarks and their distances.
+            `nearest_landmark_table[w][k]==(l,d)` means that l is the k-th nearest landmark to
+            witness w, and d is the (squared) distance between l and w.
         :type nearest_landmark_table: list of list of pair of int and float
         """
 
