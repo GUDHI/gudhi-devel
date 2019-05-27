@@ -38,9 +38,9 @@ init:
 install:
   - vcpkg install tbb:x64-windows boost-disjoint-sets:x64-windows boost-serialization:x64-windows boost-date-time:x64-windows boost-system:x64-windows boost-filesystem:x64-windows boost-units:x64-windows boost-thread:x64-windows boost-program-options:x64-windows eigen3:x64-windows cgal:x64-windows
   - if [%target%]==[Python] (
-      SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
-      python --version
-      pip version
+      SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH% &
+      python --version &
+      pip version &
       pip install -U setuptools numpy matplotlib scipy Cython pytest )
 
 build_script:
@@ -48,10 +48,10 @@ build_script:
   - cd build
   - cmake -G "Visual Studio 15 2017 Win64" %CMAKE_FLAGS% -DCMAKE_TOOLCHAIN_FILE=c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake ..
   - if [%target%]==[Python] (
-      cd src/cython
-      python setup.py install
+      cd src/cython &
+      python setup.py install &
       MSBuild RUN_TESTS.vcxproj
     ) else (
-      MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64
+      MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64 &
       ctest -j 1 -C Release -E diff_files
     )
