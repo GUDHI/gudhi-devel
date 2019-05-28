@@ -52,7 +52,7 @@
 #include <string>
 #include <limits>     // for numeric_limits
 #include <utility>    // for std::pair<>
-#include <algorithm>  // for std::max
+#include <algorithm>  // for (std::max)
 #include <random>
 #include <cassert>
 #include <cmath>
@@ -457,7 +457,7 @@ class Cover_complex {
   template <typename Distance>
   double set_graph_from_automatic_rips(Distance distance, int N = 100) {
     int m = floor(n / std::exp((1 + rate_power) * std::log(std::log(n) / std::log(rate_constant))));
-    m = std::min(m, n - 1);
+    m = (std::min)(m, n - 1);
     double delta = 0;
 
     if (verbose) std::cout << n << " points in R^" << data_dimension << std::endl;
@@ -475,8 +475,8 @@ class Cover_complex {
         double hausdorff_dist = 0;
         for (int j = 0; j < n; j++) {
           double mj = distances[j][samples[0]];
-          for (int k = 1; k < m; k++) mj = std::min(mj, distances[j][samples[k]]);
-          hausdorff_dist = std::max(hausdorff_dist, mj);
+          for (int k = 1; k < m; k++) mj = (std::min)(mj, distances[j][samples[k]]);
+          hausdorff_dist = (std::max)(hausdorff_dist, mj);
         }
         deltamutex.lock();
         delta += hausdorff_dist / N;
@@ -489,8 +489,8 @@ class Cover_complex {
         double hausdorff_dist = 0;
         for (int j = 0; j < n; j++) {
           double mj = distances[j][samples[0]];
-          for (int k = 1; k < m; k++) mj = std::min(mj, distances[j][samples[k]]);
-          hausdorff_dist = std::max(hausdorff_dist, mj);
+          for (int k = 1; k < m; k++) mj = (std::min)(mj, distances[j][samples[k]]);
+          hausdorff_dist = (std::max)(hausdorff_dist, mj);
         }
         delta += hausdorff_dist / N;
       }
@@ -586,7 +586,7 @@ class Cover_complex {
     if (type == "GIC") {
       boost::graph_traits<Graph>::edge_iterator ei, ei_end;
       for (boost::tie(ei, ei_end) = boost::edges(one_skeleton); ei != ei_end; ++ei)
-        reso = std::max(reso, std::abs(func[index[boost::source(*ei, one_skeleton)]] -
+        reso = (std::max)(reso, std::abs(func[index[boost::source(*ei, one_skeleton)]] -
                                        func[index[boost::target(*ei, one_skeleton)]]));
       if (verbose) std::cout << "resolution = " << reso << std::endl;
       resolution_double = reso;
@@ -595,7 +595,7 @@ class Cover_complex {
     if (type == "Nerve") {
       boost::graph_traits<Graph>::edge_iterator ei, ei_end;
       for (boost::tie(ei, ei_end) = boost::edges(one_skeleton); ei != ei_end; ++ei)
-        reso = std::max(reso, std::abs(func[index[boost::source(*ei, one_skeleton)]] -
+        reso = (std::max)(reso, std::abs(func[index[boost::source(*ei, one_skeleton)]] -
                                        func[index[boost::target(*ei, one_skeleton)]]) /
                                   gain);
       if (verbose) std::cout << "resolution = " << reso << std::endl;
@@ -643,8 +643,8 @@ class Cover_complex {
     double minf = std::numeric_limits<float>::max();
     double maxf = std::numeric_limits<float>::lowest();
     for (int i = 0; i < n; i++) {
-      minf = std::min(minf, func[i]);
-      maxf = std::max(maxf, func[i]);
+      minf = (std::min)(minf, func[i]);
+      maxf = (std::max)(maxf, func[i]);
     }
     if (verbose) std::cout << "Min function value = " << minf << " and Max function value = " << maxf << std::endl;
 
@@ -1029,8 +1029,8 @@ class Cover_complex {
     double maxv = std::numeric_limits<double>::lowest();
     double minv = std::numeric_limits<double>::max();
     for (std::map<int, std::pair<int, double> >::iterator iit = cover_color.begin(); iit != cover_color.end(); iit++) {
-      maxv = std::max(maxv, iit->second.second);
-      minv = std::min(minv, iit->second.second);
+      maxv = (std::max)(maxv, iit->second.second);
+      minv = (std::min)(minv, iit->second.second);
     }
 
     int k = 0;
@@ -1164,8 +1164,8 @@ class Cover_complex {
     double maxf = std::numeric_limits<double>::lowest();
     double minf = std::numeric_limits<double>::max();
     for (std::map<int, double>::iterator it = cover_std.begin(); it != cover_std.end(); it++) {
-      maxf = std::max(maxf, it->second);
-      minf = std::min(minf, it->second);
+      maxf = (std::max)(maxf, it->second);
+      minf = (std::min)(minf, it->second);
     }
 
     // Build filtration
@@ -1295,7 +1295,7 @@ class Cover_complex {
    */
   double compute_p_value() {
     double distancemin = std::numeric_limits<double>::max(); int N = PD.size();
-    for (int i = 0; i < N; i++) distancemin = std::min(distancemin, 0.5 * std::abs(PD[i].second - PD[i].first));
+    for (int i = 0; i < N; i++) distancemin = (std::min)(distancemin, 0.5 * std::abs(PD[i].second - PD[i].first));
     double p_value = 1 - compute_confidence_level_from_distance(distancemin);
     if (verbose)  std::cout << "p value = " << p_value << std::endl;
     return p_value;
@@ -1317,7 +1317,7 @@ class Cover_complex {
     for (auto const& simplex : simplices) {
       int numvert = simplex.size();
       double filt = std::numeric_limits<double>::lowest();
-      for (int i = 0; i < numvert; i++) filt = std::max(cover_color[simplex[i]].second, filt);
+      for (int i = 0; i < numvert; i++) filt = (std::max)(cover_color[simplex[i]].second, filt);
       complex.insert_simplex_and_subfaces(simplex, filt);
       if (dimension < simplex.size() - 1) dimension = simplex.size() - 1;
     }
@@ -1361,8 +1361,8 @@ class Cover_complex {
               int vt = cover[index[boost::target(*ei, one_skeleton)]][j];
               if (cover_fct[vs] == cover_fct[vt] + 1 || cover_fct[vt] == cover_fct[vs] + 1) {
                 std::vector<int> edge(2);
-                edge[0] = std::min(vs, vt);
-                edge[1] = std::max(vs, vt);
+                edge[0] = (std::min)(vs, vt);
+                edge[1] = (std::max)(vs, vt);
                 simplices.push_back(edge);
                 goto afterLoop;
               }
