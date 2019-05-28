@@ -38,7 +38,7 @@ init:
 install:
   - vcpkg install tbb:x64-windows boost-disjoint-sets:x64-windows boost-serialization:x64-windows boost-date-time:x64-windows boost-system:x64-windows boost-filesystem:x64-windows boost-units:x64-windows boost-thread:x64-windows boost-program-options:x64-windows eigen3:x64-windows cgal:x64-windows
   - if [%target%]==[Python] (
-      SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH% &
+      SET PATH="%PYTHON%;%PYTHON%\\Scripts;%PATH%" &
       python --version &
       pip version &
       pip install -U setuptools numpy matplotlib scipy Cython pytest )
