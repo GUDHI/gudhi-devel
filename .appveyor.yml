@@ -43,7 +43,7 @@ install:
   - SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
   - if [%target%]==[Python] ( python --version &
                               pip --version &
-                              pip install -U setuptools numpy matplotlib scipy Cython pytest )
+                              pip install -U pip setuptools numpy matplotlib scipy Cython pytest )
 
 build_script:
   - mkdir build
