@@ -44,7 +44,8 @@ install:
   - CALL "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
   - if [%target%]==[Python] ( python --version &
                               pip --version &
-                              pip install -U pip setuptools numpy matplotlib scipy Cython pytest )
+                              python -m pip install --upgrade pip &
+                              pip install -U setuptools numpy matplotlib scipy Cython pytest )
 
 build_script:
   - mkdir build
