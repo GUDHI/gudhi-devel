@@ -30,6 +30,9 @@
 #include <gudhi/Persistence_graph.h>
 #include <gudhi/Internal_point.h>
 
+// Specific for Windows
+#define NOMINMAX
+
 #include <unordered_set>
 #include <vector>
 #include <algorithm>  // for std::max
