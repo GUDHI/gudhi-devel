@@ -95,7 +95,7 @@
       \image html "rips_complex_representation.png"
     </td>
     <td width="50%">
-    Rips_complex is a simplicial complex constructed from a one skeleton graph.<br>
+    Rips complex is a simplicial complex constructed from a one skeleton graph.<br>
     The filtration value of each edge is computed from a user-given distance function and is inserted until a
     user-given threshold value.<br>
     This complex can be built from a point cloud and a distance function, or from a distance matrix.
