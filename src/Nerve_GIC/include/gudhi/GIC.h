@@ -640,7 +640,7 @@ class Cover_complex {
     }
 
     // Read function values and compute min and max
-    double minf = std::numeric_limits<float>::max();
+    double minf = (std::numeric_limits<float>::max)();
     double maxf = std::numeric_limits<float>::lowest();
     for (int i = 0; i < n; i++) {
       minf = (std::min)(minf, func[i]);
@@ -899,7 +899,7 @@ class Cover_complex {
     Weight_map weight = boost::get(boost::edge_weight, one_skeleton);
     Index_map index = boost::get(boost::vertex_index, one_skeleton);
     std::vector<double> mindist(n);
-    for (int j = 0; j < n; j++) mindist[j] = std::numeric_limits<double>::max();
+    for (int j = 0; j < n; j++) mindist[j] = (std::numeric_limits<double>::max)();
 
     // Compute the geodesic distances to subsamples with Dijkstra
     #ifdef GUDHI_USE_TBB
@@ -1027,7 +1027,7 @@ class Cover_complex {
     std::ofstream graphic(mapp);
 
     double maxv = std::numeric_limits<double>::lowest();
-    double minv = std::numeric_limits<double>::max();
+    double minv = (std::numeric_limits<double>::max)();
     for (std::map<int, std::pair<int, double> >::iterator iit = cover_color.begin(); iit != cover_color.end(); iit++) {
       maxv = (std::max)(maxv, iit->second.second);
       minv = (std::min)(minv, iit->second.second);
@@ -1162,7 +1162,7 @@ class Cover_complex {
 
     // Compute max and min
     double maxf = std::numeric_limits<double>::lowest();
-    double minf = std::numeric_limits<double>::max();
+    double minf = (std::numeric_limits<double>::max)();
     for (std::map<int, double>::iterator it = cover_std.begin(); it != cover_std.end(); it++) {
       maxf = (std::max)(maxf, it->second);
       minf = (std::min)(minf, it->second);
@@ -1294,7 +1294,7 @@ class Cover_complex {
    *
    */
   double compute_p_value() {
-    double distancemin = std::numeric_limits<double>::max(); int N = PD.size();
+    double distancemin = (std::numeric_limits<double>::max)(); int N = PD.size();
     for (int i = 0; i < N; i++) distancemin = (std::min)(distancemin, 0.5 * std::abs(PD[i].second - PD[i].first));
     double p_value = 1 - compute_confidence_level_from_distance(distancemin);
     if (verbose)  std::cout << "p value = " << p_value << std::endl;
