@@ -1,17 +1,16 @@
-=====================================================================  ===========================  ===================================
-:Author: Clément Maria, Pawel Dlotko, Vincent Rouvreau, Marc Glisse    :Introduced in: GUDHI 2.0.0          :Copyright: GPL v3
-=====================================================================  ===========================  ===================================
+.. table::
+   :widths: 30 50 20
 
-+----------------------------------------------------------------+------------------------------------------------------------------------+
-| .. figure::                                                    | Rips complex is a simplicial complex constructed from a one skeleton   |
-|      ../../doc/Rips_complex/rips_complex_representation.png    | graph.                                                                 |
-|      :figclass: align-center                                   |                                                                        |
-|                                                                | The filtration value of each edge is computed from a user-given        |
-|      Rips complex representation                               | distance function and is inserted until a user-given threshold         |
-|                                                                | value.                                                                 |
-|                                                                |                                                                        |
-|                                                                | This complex can be built from a point cloud and a distance function,  |
-|                                                                | or from a distance matrix.                                             |
-+----------------------------------------------------------------+------------------------------------------------------------------------+
-| :doc:`rips_complex_user`                                       | :doc:`rips_complex_ref`                                                |
-+----------------------------------------------------------------+------------------------------------------------------------------------+
+   +----------------------------------------------------------------+------------------------------------------------------------------------+----------------------------------------------------------------------+
+   | .. figure::                                                    | Rips complex is a simplicial complex constructed from a one skeleton   | :Authors: Clément Maria, Pawel Dlotko, Vincent Rouvreau, Marc Glisse |
+   |      ../../doc/Rips_complex/rips_complex_representation.png    | graph.                                                                 |                                                                      |
+   |      :figclass: align-center                                   |                                                                        | :Introduced in: GUDHI 2.0.0                                          |
+   |                                                                | The filtration value of each edge is computed from a user-given        |                                                                      |
+   |                                                                | distance function and is inserted until a user-given threshold         | :Copyright: GPL v3                                                   |
+   |                                                                | value.                                                                 |                                                                      |
+   |                                                                |                                                                        |                                                                      |
+   |                                                                | This complex can be built from a point cloud and a distance function,  |                                                                      |
+   |                                                                | or from a distance matrix.                                             |                                                                      |
+   +----------------------------------------------------------------+------------------------------------------------------------------------+----------------------------------------------------------------------+
+   | :doc:`rips_complex_user`                                       | :doc:`rips_complex_ref`                                                                                                                       |
+   +----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------+
