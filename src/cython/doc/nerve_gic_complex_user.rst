@@ -7,7 +7,7 @@ Cover complexes user manual
 Definition
 ----------
 
-.. include:: nerve_gic_complex_sum.rst
+.. include:: nerve_gic_complex_sum.inc
 
 Visualizations of the simplicial complexes can be done with either
 neato (from `graphviz <http://www.graphviz.org/>`_),
