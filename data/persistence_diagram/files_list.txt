@@ -1,0 +1,6 @@
+/home/luque/Escritorio/Gudhi/gudhi-devel/data/persistence_diagram/first.pers
+/home/luque/Escritorio/Gudhi/gudhi-devel/data/persistence_diagram/rips_on_tore3D_1307.pers
+/home/luque/Escritorio/Gudhi/gudhi-devel/data/persistence_diagram/second.pers
+
+
+
