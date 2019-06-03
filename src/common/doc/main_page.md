@@ -23,7 +23,7 @@
     </td>
  </tr>
  <tr>
-    <td colspan=2 height="100">
+    <td colspan=2 height="25">
     <b>User manual:</b> \ref cubical_complex - <b>Reference manual:</b> Gudhi::cubical_complex::Bitmap_cubical_complex
     </td>
  </tr>
@@ -56,7 +56,7 @@
     </td>
  </tr>
  <tr>
-    <td colspan=2 height="100">
+    <td colspan=2 height="25">
     <b>User manual:</b> \ref alpha_complex - <b>Reference manual:</b> Gudhi::alpha_complex::Alpha_complex and
     Gudhi::alpha_complex::Alpha_complex_3d
     </td>
@@ -81,7 +81,7 @@
     </td>
  </tr>
  <tr>
-    <td colspan=2 height="100">
+    <td colspan=2 height="25">
     <b>User manual:</b> \ref cech_complex - <b>Reference manual:</b> Gudhi::cech_complex::Cech_complex
     </td>
  </tr>
@@ -107,7 +107,7 @@
     </td>
  </tr>
  <tr>
-    <td colspan=2 height="100">
+    <td colspan=2 height="25">
     <b>User manual:</b> \ref rips_complex - <b>Reference manual:</b> Gudhi::rips_complex::Rips_complex
     </td>
  </tr>
@@ -132,7 +132,7 @@
     </td>
  </tr>
  <tr>
-    <td colspan=2 height="100">
+    <td colspan=2 height="25">
     <b>User manual:</b> \ref witness_complex - <b>Reference manual:</b> Gudhi::witness_complex::SimplicialComplexForWitness
     </td>
  </tr>
@@ -159,7 +159,7 @@
     </td>
  </tr>
  <tr>
-    <td colspan=2 height="100">
+    <td colspan=2 height="25">
     <b>User manual:</b> \ref cover_complex - <b>Reference manual:</b> Gudhi::cover_complex::Cover_complex
     </td>
  </tr>
@@ -187,7 +187,7 @@
     </td>
  </tr>
  <tr>
-    <td colspan=2 height="100">
+    <td colspan=2 height="25">
     <b>User manual:</b> \ref simplex_tree - <b>Reference manual:</b> Gudhi::Simplex_tree
     </td>
  </tr>
@@ -215,7 +215,7 @@
     </td>
  </tr>
  <tr>
-    <td colspan=2 height="100">
+    <td colspan=2 height="25">
     <b>User manual:</b> \ref skbl - <b>Reference manual:</b> Gudhi::skeleton_blocker::Skeleton_blocker_complex
     </td>
  </tr>
@@ -240,7 +240,7 @@
     </td>
  </tr>
  <tr>
-    <td colspan=2 height="100">
+    <td colspan=2 height="25">
     <b>User manual:</b> \ref toplex_map - <b>Reference manual:</b> Gudhi::Toplex_map
     </td>
  </tr>
@@ -268,7 +268,7 @@
     </td>
  </tr>
  <tr>
-    <td colspan=2 height="100">
+    <td colspan=2 height="25">
     <b>User manual:</b> \ref contr
     </td>
  </tr>
@@ -300,7 +300,7 @@
     </td>
  </tr>
  <tr>
-    <td colspan=2 height="100">
+    <td colspan=2 height="25">
     <b>User manual:</b> \ref persistent_cohomology - <b>Reference manual:</b> Gudhi::persistent_cohomology::Persistent_cohomology
     </td>
  </tr>
@@ -330,7 +330,7 @@
     </td>
  </tr>
  <tr>
-    <td colspan=2 height="100">
+    <td colspan=2 height="25">
     <b>User manual:</b> \ref tangential_complex - <b>Reference manual:</b> Gudhi::tangential_complex::Tangential_complex
     </td>
  </tr>
@@ -359,7 +359,7 @@
     </td>
  </tr>
  <tr>
-    <td colspan=2 height="100">
+    <td colspan=2 height="25">
     <b>User manual:</b> \ref bottleneck_distance
     </td>
  </tr>
@@ -384,7 +384,7 @@
     </td>
  </tr>
  <tr>
-    <td colspan=2 height="100">
+    <td colspan=2 height="25">
     <b>User manual:</b> \ref Persistence_representations
     </td>
  </tr>

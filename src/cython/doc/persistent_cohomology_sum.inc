@@ -17,10 +17,10 @@
    |                                                                 | :cite:`DBLP:conf/esa/BoissonnatDM13`.                                 |                                               |
    |                                                                 |                                                                       |                                               |
    +-----------------------------------------------------------------+-----------------------------------------------------------------------+-----------------------------------------------+
-   |  :doc:`persistent_cohomology_user`                              | Please refer to each data structure that contains persistence         |                                               |
-   |                                                                 | feature for reference:                                                |                                               |
-   |                                                                 |                                                                       |                                               |
-   |                                                                 | * :doc:`simplex_tree_ref`                                             |                                               |
-   |                                                                 | * :doc:`cubical_complex_ref`                                          |                                               |
-   |                                                                 | * :doc:`periodic_cubical_complex_ref`                                 |                                               |
-   +-----------------------------------------------------------------+-----------------------------------------------------------------------+-----------------------------------------------+
+   |  * :doc:`persistent_cohomology_user`                            | Please refer to each data structure that contains persistence                                                         |
+   |                                                                 | feature for reference:                                                                                                |
+   |                                                                 |                                                                                                                       |
+   |                                                                 | * :doc:`simplex_tree_ref`                                                                                             |
+   |                                                                 | * :doc:`cubical_complex_ref`                                                                                          |
+   |                                                                 | * :doc:`periodic_cubical_complex_ref`                                                                                 |
+   +-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------+
