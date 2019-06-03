@@ -405,7 +405,8 @@ cdef class SimplexTree:
         """This function ensures that each simplex has a higher filtration
         value than its faces by increasing the filtration values.
 
-        :returns: The filtration modification information.
+        :returns: True if any filtration value was modified,
+        False if the filtration was already non-decreasing.
         :rtype: bool
 
 
