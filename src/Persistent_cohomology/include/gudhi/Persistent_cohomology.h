@@ -64,13 +64,18 @@ template<class FilteredComplex, class CoefficientField>
 class Persistent_cohomology {
  public:
   // Data attached to each simplex to interface with a Property Map.
+
+  /** \brief Data stored for each simplex. */
   typedef typename FilteredComplex::Simplex_key Simplex_key;
+  /** \brief Handle to specify a simplex. */
   typedef typename FilteredComplex::Simplex_handle Simplex_handle;
+  /** \brief Type for the value of the filtration function. */
   typedef typename FilteredComplex::Filtration_value Filtration_value;
+  /** \brief Type of element of the field. */
   typedef typename CoefficientField::Element Arith_element;
   /** \brief Persistent interval type. The Arith_element field is used for the multi-field framework. */
   typedef std::tuple<Simplex_handle, Simplex_handle, Arith_element> Persistent_interval;
-  
+
  private:
   // Compressed Annotation Matrix types:
   // Column type
@@ -692,9 +697,8 @@ class Persistent_cohomology {
     return betti_number;
   }
 
-  /** @brief Returns the persistent pairs.
-   * @return Persistent pairs
-   *
+  /** @brief Returns a list of persistence birth and death FilteredComplex::Simplex_handle pairs.
+   * @return A list of Persistent_cohomology::Persistent_interval
    */
   const std::vector<Persistent_interval>& get_persistent_pairs() const {
     return persistent_pairs_;
