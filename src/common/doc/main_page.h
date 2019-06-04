@@ -29,7 +29,9 @@
       <b>Author:</b> Vincent Rouvreau<br>
       <b>Introduced in:</b> GUDHI 1.3.0<br>
       <b>Copyright:</b> GPL v3<br>
-      <b>Requires:</b> \ref cgal &ge; 4.7.0 and \ref eigen3
+      <b>Requires:</b> \ref eigen3 and<br>
+      \ref cgal &ge; 4.7.0 for Alpha_complex<br>
+      \ref cgal &ge; 4.11.0 for Alpha_complex_3d
     </td>
     <td width="75%">
     Alpha_complex is a simplicial complex constructed from the finite cells of a Delaunay Triangulation.<br>
@@ -38,7 +40,8 @@
     values of the codimension 1 cofaces that make it not Gabriel otherwise.
     All simplices that have a filtration value strictly greater than a given alpha squared value are not inserted into
     the complex.<br>
-    <b>User manual:</b> \ref alpha_complex - <b>Reference manual:</b> Gudhi::alpha_complex::Alpha_complex
+    <b>User manual:</b> \ref alpha_complex - <b>Reference manual:</b> Gudhi::alpha_complex::Alpha_complex and
+    Gudhi::alpha_complex::Alpha_complex_3d
     </td>
  </tr>
 </table>
@@ -168,6 +171,23 @@
     </td>
  </tr>
 </table>
+ \subsection ToplexMapDataStructure Toplex Map
+ \image html "map.png" "Toplex map representation"
+<table border="0">
+  <tr>
+    <td width="25%">
+      <b>Author:</b> Fran&ccedil;ois Godi<br>
+      <b>Introduced in:</b> GUDHI 2.1.0<br>
+      <b>Copyright:</b> GPL v3<br>
+    </td>
+    <td width="75%">
+    The Toplex map data structure is composed firstly of a raw storage of toplices (the maximal simplices)
+    and secondly of a map which associate any vertex to a set of pointers toward all toplices
+    containing this vertex.
+    <b>User manual:</b> \ref toplex_map - <b>Reference manual:</b> Gudhi::Toplex_map
+    </td>
+ </tr>
+
  \subsection WitnessComplexDataStructure Witness complex
  \image html "Witness_complex_representation.png" "Witness complex representation"
 <table border="0">

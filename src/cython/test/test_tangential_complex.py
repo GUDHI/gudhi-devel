@@ -32,6 +32,15 @@ def test_tangential():
     tc = TangentialComplex(intrisic_dim = 1, points=point_list)
     assert tc.__is_defined() == True
     assert tc.num_vertices() == 4
+    assert tc.num_simplices() == 0
+    assert tc.num_inconsistent_simplices() == 0
+    assert tc.num_inconsistent_stars() == 0
+
+    tc.compute_tangential_complex()
+    assert tc.num_vertices() == 4
+    assert tc.num_simplices() == 4
+    assert tc.num_inconsistent_simplices() == 0
+    assert tc.num_inconsistent_stars() == 0
 
     st = tc.create_simplex_tree()
     assert st.__is_defined() == True

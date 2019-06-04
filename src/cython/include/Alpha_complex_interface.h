@@ -60,7 +60,7 @@ class Alpha_complex_interface {
       Point_d ph = alpha_complex_->get_point(vh);
       for (auto coord = ph.cartesian_begin(); coord < ph.cartesian_end(); coord++)
         vd.push_back(*coord);
-    } catch (std::out_of_range outofrange) {
+    } catch (std::out_of_range const&) {
       // std::out_of_range is thrown in case not found. Other exceptions must be re-thrown
     }
     return vd;

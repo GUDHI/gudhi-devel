@@ -172,10 +172,10 @@ bool read_simplex(std::istream& in_, std::vector<Vertex_handle>& simplex, Filtra
   if (!(in_ >> dim)) return false;
   Vertex_handle v;
   for (int i = 0; i < dim + 1; ++i) {
-    in_ >> v;
+    if (!(in_ >> v)) return false;
     simplex.push_back(v);
   }
-  in_ >> fil;
+  if (!(in_ >> fil)) return false;
   in_.ignore((std::numeric_limits<std::streamsize>::max)(), '\n');  // ignore until the carriage return
   return true;
 }

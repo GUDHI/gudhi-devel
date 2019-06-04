@@ -1,7 +1,7 @@
 # add a target to generate API documentation with Doxygen
-find_package(Doxygen)
+find_package(Doxygen QUIET)
 if(DOXYGEN_FOUND)
-  # configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+  set(GUDHI_MODULES ${GUDHI_MODULES} "cpp-documentation" CACHE INTERNAL "GUDHI_MODULES")
 
   # starting from cmake 3.9 the usage of DOXYGEN_EXECUTABLE is deprecated
   if(TARGET Doxygen::doxygen)
@@ -16,4 +16,6 @@ if(DOXYGEN_FOUND)
     # In dev version, doxygen target depends on user_version target. Not existing in user version
     add_dependencies(doxygen user_version)
   endif()
-endif(DOXYGEN_FOUND)
+else()
+  set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "cpp-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
+endif()

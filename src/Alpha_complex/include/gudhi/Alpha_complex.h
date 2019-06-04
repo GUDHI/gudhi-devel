@@ -228,19 +228,14 @@ class Alpha_complex {
   }
 
  public:
-  template <typename SimplicialComplexForAlpha>
-  bool create_complex(SimplicialComplexForAlpha& complex) {
-    typedef typename SimplicialComplexForAlpha::Filtration_value Filtration_value;
-    return create_complex(complex, std::numeric_limits<Filtration_value>::infinity());
-  }
-
   /** \brief Inserts all Delaunay triangulation into the simplicial complex.
    * It also computes the filtration values accordingly to the \ref createcomplexalgorithm
    *
    * \tparam SimplicialComplexForAlpha must meet `SimplicialComplexForAlpha` concept.
    * 
    * @param[in] complex SimplicialComplexForAlpha to be created.
-   * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$.
+   * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$, and there is very
+   * little point using anything else since it does not save time.
    * 
    * @return true if creation succeeds, false otherwise.
    * 
@@ -249,8 +244,10 @@ class Alpha_complex {
    * 
    * Initialization can be launched once.
    */
-  template <typename SimplicialComplexForAlpha, typename Filtration_value>
-  bool create_complex(SimplicialComplexForAlpha& complex, Filtration_value max_alpha_square) {
+  template <typename SimplicialComplexForAlpha,
+            typename Filtration_value = typename SimplicialComplexForAlpha::Filtration_value>
+  bool create_complex(SimplicialComplexForAlpha& complex,
+                      Filtration_value max_alpha_square = std::numeric_limits<Filtration_value>::infinity()) {
     // From SimplicialComplexForAlpha type required to insert into a simplicial complex (with or without subfaces).
     typedef typename SimplicialComplexForAlpha::Vertex_handle Vertex_handle;
     typedef typename SimplicialComplexForAlpha::Simplex_handle Simplex_handle;
@@ -272,7 +269,9 @@ class Alpha_complex {
     // --------------------------------------------------------------------------------------------
     // Simplex_tree construction from loop on triangulation finite full cells list
     if (triangulation_->number_of_vertices() > 0) {
-      for (auto cit = triangulation_->finite_full_cells_begin(); cit != triangulation_->finite_full_cells_end(); ++cit) {
+      for (auto cit = triangulation_->finite_full_cells_begin();
+           cit != triangulation_->finite_full_cells_end();
+           ++cit) {
         Vector_vertex vertexVector;
 #ifdef DEBUG_TRACES
         std::cout << "Simplex_tree insertion ";
@@ -333,7 +332,9 @@ class Alpha_complex {
             std::cout << "filt(Sigma) is NaN : filt(Sigma) =" << complex.filtration(f_simplex) << std::endl;
 #endif  // DEBUG_TRACES
           }
-          propagate_alpha_filtration(complex, f_simplex, decr_dim);
+          // No need to propagate further, unweighted points all have value 0
+          if (decr_dim > 1)
+            propagate_alpha_filtration(complex, f_simplex);
         }
       }
     }
@@ -350,7 +351,7 @@ class Alpha_complex {
 
  private:
   template <typename SimplicialComplexForAlpha, typename Simplex_handle>
-  void propagate_alpha_filtration(SimplicialComplexForAlpha& complex, Simplex_handle f_simplex, int decr_dim) {
+  void propagate_alpha_filtration(SimplicialComplexForAlpha& complex, Simplex_handle f_simplex) {
     // From SimplicialComplexForAlpha type required to assign filtration values.
     typedef typename SimplicialComplexForAlpha::Filtration_value Filtration_value;
 #ifdef DEBUG_TRACES
@@ -379,46 +380,42 @@ class Alpha_complex {
 #endif  // DEBUG_TRACES
         // ### Else
       } else {
-        // No need to compute is_gabriel for dimension <= 2
-        // i.e. : Sigma = (3,1) => Tau = 1
-        if (decr_dim > 1) {
-          // insert the Tau points in a vector for is_gabriel function
-          Vector_of_CGAL_points pointVector;
+        // insert the Tau points in a vector for is_gabriel function
+        Vector_of_CGAL_points pointVector;
 #ifdef DEBUG_TRACES
-          Vertex_handle vertexForGabriel = Vertex_handle();
+        Vertex_handle vertexForGabriel = Vertex_handle();
 #endif  // DEBUG_TRACES
-          for (auto vertex : complex.simplex_vertex_range(f_boundary)) {
-            pointVector.push_back(get_point(vertex));
+        for (auto vertex : complex.simplex_vertex_range(f_boundary)) {
+          pointVector.push_back(get_point(vertex));
+        }
+        // Retrieve the Sigma point that is not part of Tau - parameter for is_gabriel function
+        Point_d point_for_gabriel;
+        for (auto vertex : complex.simplex_vertex_range(f_simplex)) {
+          point_for_gabriel = get_point(vertex);
+          if (std::find(pointVector.begin(), pointVector.end(), point_for_gabriel) == pointVector.end()) {
+#ifdef DEBUG_TRACES
+            // vertex is not found in Tau
+            vertexForGabriel = vertex;
+#endif  // DEBUG_TRACES
+            // No need to continue loop
+            break;
           }
-          // Retrieve the Sigma point that is not part of Tau - parameter for is_gabriel function
-          Point_d point_for_gabriel;
-          for (auto vertex : complex.simplex_vertex_range(f_simplex)) {
-            point_for_gabriel = get_point(vertex);
-            if (std::find(pointVector.begin(), pointVector.end(), point_for_gabriel) == pointVector.end()) {
+        }
+        // is_gabriel function initialization
+        Is_Gabriel is_gabriel = kernel_.side_of_bounded_sphere_d_object();
+        bool is_gab = is_gabriel(pointVector.begin(), pointVector.end(), point_for_gabriel)
+          != CGAL::ON_BOUNDED_SIDE;
 #ifdef DEBUG_TRACES
-              // vertex is not found in Tau
-              vertexForGabriel = vertex;
+        std::cout << " | Tau is_gabriel(Sigma)=" << is_gab << " - vertexForGabriel=" << vertexForGabriel << std::endl;
 #endif  // DEBUG_TRACES
-              // No need to continue loop
-              break;
-            }
-          }
-          // is_gabriel function initialization
-          Is_Gabriel is_gabriel = kernel_.side_of_bounded_sphere_d_object();
-          bool is_gab = is_gabriel(pointVector.begin(), pointVector.end(), point_for_gabriel)
-              != CGAL::ON_BOUNDED_SIDE;
+        // ### If Tau is not Gabriel of Sigma
+        if (false == is_gab) {
+          // ### filt(Tau) = filt(Sigma)
+          Filtration_value alpha_complex_filtration = complex.filtration(f_simplex);
+          complex.assign_filtration(f_boundary, alpha_complex_filtration);
 #ifdef DEBUG_TRACES
-          std::cout << " | Tau is_gabriel(Sigma)=" << is_gab << " - vertexForGabriel=" << vertexForGabriel << std::endl;
+          std::cout << " | filt(Tau) = filt(Sigma) = " << complex.filtration(f_boundary) << std::endl;
 #endif  // DEBUG_TRACES
-          // ### If Tau is not Gabriel of Sigma
-          if (false == is_gab) {
-            // ### filt(Tau) = filt(Sigma)
-            Filtration_value alpha_complex_filtration = complex.filtration(f_simplex);
-            complex.assign_filtration(f_boundary, alpha_complex_filtration);
-#ifdef DEBUG_TRACES
-            std::cout << " | filt(Tau) = filt(Sigma) = " << complex.filtration(f_boundary) << std::endl;
-#endif  // DEBUG_TRACES
-          }
         }
       }
     }

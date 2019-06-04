@@ -49,7 +49,7 @@ struct vertex_filtration_t {
  *
  */
 template <typename SimplicialComplexForProximityGraph>
-using Proximity_graph = typename boost::adjacency_list < boost::vecS, boost::vecS, boost::undirectedS
+using Proximity_graph = typename boost::adjacency_list < boost::vecS, boost::vecS, boost::directedS
 , boost::property < vertex_filtration_t, typename SimplicialComplexForProximityGraph::Filtration_value >
 , boost::property < edge_filtration_t, typename SimplicialComplexForProximityGraph::Filtration_value >>;
 

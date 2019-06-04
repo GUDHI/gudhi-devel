@@ -39,7 +39,7 @@ namespace rips_complex {
  * <a target="_blank" href="https://en.wikipedia.org/wiki/Vietoris%E2%80%93Rips_complex">(Wikipedia)</a>
  * is an abstract simplicial complex
  * defined on a finite metric space, where each simplex corresponds to a subset
- * of point whose diameter is smaller that some given threshold.
+ * of points whose diameter is smaller that some given threshold.
  * Varying the threshold, we can also see the Rips complex as a filtration of
  * the \f$(n-1)-\f$dimensional simplex, where the filtration value of each
  * simplex is the diameter of the corresponding subset of points.
@@ -53,7 +53,10 @@ namespace rips_complex {
  * The number of simplices in the full Rips complex is exponential in the
  * number of vertices, it is thus usually restricted, by excluding all the
  * simplices with filtration value larger than some threshold, and keeping only
- * the dim_max-skeleton.
+ * the dim_max-skeleton. It may also be a good idea to start by making the
+ * point set sparser, for instance with
+ * `Gudhi::subsampling::sparsify_point_set()`, since small clusters of points
+ * have a disproportionate cost without affecting the persistence diagram much.
  *
  * In order to build this complex, the algorithm first builds the graph.
  * The filtration value of each edge is computed from a user-given distance
@@ -89,21 +92,27 @@ namespace rips_complex {
  * The sparse Rips filtration was introduced by Don Sheehy
  * \cite sheehy13linear. We are using the version described in
  * \cite buchet16efficient (except that we multiply all filtration values
- * by 2, to match the usual Rips complex), which proves a
- * \f$\frac{1+\epsilon}{1-\epsilon}\f$-interleaving, although in practice the
+ * by 2, to match the usual Rips complex), for which \cite cavanna15geometric proves a
+ * \f$(1,\frac{1}{1-\epsilon})\f$-interleaving, although in practice the
  * error is usually smaller.
  * A more intuitive presentation of the idea is available in
  * \cite cavanna15geometric, and in a video \cite cavanna15visualizing.
  *
  * The interface of `Sparse_rips_complex` is similar to the one for the usual
- * `Rips_complex`, except that one has to specify the approximation factor, and
- * there is no option to limit the maximum filtration value (the way the
- * approximation is done means that larger filtration values are much cheaper
- * to handle than low filtration values, so the gain would be too small).
+ * `Rips_complex`, except that one has to specify the approximation factor.
+ * There is an option to limit the minimum and maximum filtration values, but
+ * they are not recommended: the way the approximation is done means that
+ * larger filtration values are much cheaper to handle than low filtration
+ * values, so the gain in ignoring the large ones is small, and
+ * `Gudhi::subsampling::sparsify_point_set()` is a more efficient way of
+ * ignoring small filtration values.
  *
  * Theoretical guarantees are only available for \f$\epsilon<1\f$. The
  * construction accepts larger values of &epsilon;, and the size of the complex
  * keeps decreasing, but there is no guarantee on the quality of the result.
+ * Note that while the number of edges decreases when &epsilon; increases, the
+ * number of higher-dimensional simplices may not be monotonous when
+ * \f$\frac12\leq\epsilon\leq 1\f$.
  *
  * \section ripspointsdistance Point cloud and distance function
  * 
@@ -116,8 +125,8 @@ namespace rips_complex {
  * 
  * \include Rips_complex/example_one_skeleton_rips_from_points.cpp
  * 
- * When launching (Rips maximal distance between 2 points is 12.0, is expanded until dimension 1 - one skeleton graph
- * in other words):
+ * When launching (Rips maximal distance between 2 points is 12.0, is expanded
+ * until dimension 1 - one skeleton graph in other words):
  * 
  * \code $> ./Rips_complex_example_one_skeleton_from_points
  * \endcode

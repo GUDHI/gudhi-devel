@@ -59,7 +59,7 @@ class Rips_complex {
   /**
    * \brief Type of the one skeleton graph stored inside the Rips complex structure.
    */
-  typedef typename boost::adjacency_list < boost::vecS, boost::vecS, boost::undirectedS
+  typedef typename boost::adjacency_list < boost::vecS, boost::vecS, boost::directedS
   , boost::property < vertex_filtration_t, Filtration_value >
   , boost::property < edge_filtration_t, Filtration_value >> OneSkeletonGraph;
 
@@ -90,7 +90,7 @@ class Rips_complex {
    * @param[in] threshold Rips value.
    * 
    * \tparam DistanceMatrix must have a `size()` method and on which `distance_matrix[i][j]` returns
-   * the distance between points \f$i\f$ and \f$j\f$ as long as \f$ 0 \leqslant i < j \leqslant
+   * the distance between points \f$i\f$ and \f$j\f$ as long as \f$ 0 \leqslant j < i \leqslant
    * distance\_matrix.size().\f$
    */
   template<typename DistanceMatrix>
