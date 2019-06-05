@@ -50,7 +50,7 @@ using Vertex_handle = Simplex_tree::Vertex_handle;
 using Simplex_handle = Simplex_tree::Simplex_handle;
 using Filtration_value = Simplex_tree::Filtration_value;
 using Siblings = Simplex_tree::Siblings;
-using Graph_t = boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS,
+using Graph_t = boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS,
                                       boost::property<Gudhi::vertex_filtration_t, Filtration_value>,
                                       boost::property<Gudhi::edge_filtration_t, Filtration_value> >;
 using Edge_t = std::pair<Vertex_handle, Vertex_handle>;

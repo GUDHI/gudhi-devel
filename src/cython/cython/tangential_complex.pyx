@@ -36,6 +36,7 @@ cdef extern from "Tangential_complex_interface.h" namespace "Gudhi":
         Tangential_complex_interface(int intrisic_dim, vector[vector[double]] points)
         # bool from_file is a workaround for cython to find the correct signature
         Tangential_complex_interface(int intrisic_dim, string off_file, bool from_file)
+        void compute_tangential_complex() except +
         vector[double] get_point(unsigned vertex)
         unsigned number_of_vertices()
         unsigned number_of_simplices()
@@ -43,6 +44,7 @@ cdef extern from "Tangential_complex_interface.h" namespace "Gudhi":
         unsigned number_of_inconsistent_stars()
         void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree)
         void fix_inconsistencies_using_perturbation(double max_perturb, double time_limit)
+        void set_max_squared_edge_length(double max_squared_edge_length)
 
 # TangentialComplex python interface
 cdef class TangentialComplex:
@@ -91,6 +93,17 @@ cdef class TangentialComplex:
         """Returns true if TangentialComplex pointer is not NULL.
          """
         return self.thisptr != NULL
+
+    def compute_tangential_complex(self):
+        """This function computes the tangential complex.
+
+        Raises:
+            ValueError: In debug mode, if the computed star dimension is too
+                low. Try to set a bigger maximal edge length value with
+                :func:`~gudhi.Tangential_complex.set_max_squared_edge_length`
+                if this happens.
+        """
+        self.thisptr.compute_tangential_complex()
 
     def get_point(self, vertex):
         """This function returns the point corresponding to a given vertex.
@@ -152,3 +165,16 @@ cdef class TangentialComplex:
         """
         self.thisptr.fix_inconsistencies_using_perturbation(max_perturb,
                                                             time_limit)
+
+    def set_max_squared_edge_length(self, max_squared_edge_length):
+        """Sets the maximal possible squared edge length for the edges in the
+        triangulations.
+
+        :param max_squared_edge_length: Maximal possible squared edge length.
+        :type max_squared_edge_length: double
+
+        If the maximal edge length value is too low
+        :func:`~gudhi.Tangential_complex.compute_tangential_complex`
+        will throw an exception in debug mode.
+        """
+        self.thisptr.set_max_squared_edge_length(max_squared_edge_length)

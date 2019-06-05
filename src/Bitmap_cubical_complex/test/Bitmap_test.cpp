@@ -32,6 +32,7 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <limits>
 
 typedef Gudhi::cubical_complex::Bitmap_cubical_complex_base<double> Bitmap_cubical_complex_base;
 typedef Gudhi::cubical_complex::Bitmap_cubical_complex<Bitmap_cubical_complex_base> Bitmap_cubical_complex;
@@ -1575,4 +1576,18 @@ BOOST_AUTO_TEST_CASE(compute_incidence_between_cells_test_periodic_boundary_cond
       BOOST_CHECK(elems_in_boundary[i] == 0);
     }
   }
+}
+
+BOOST_AUTO_TEST_CASE(perseus_file_read) {
+  Bitmap_cubical_complex increasing("sinusoid.txt");
+
+  auto it = increasing.top_dimensional_cells_iterator_begin();
+  double value = increasing.get_cell_data(*it);
+  std::cout << "First value of sinusoid.txt is " << value << std::endl;
+  BOOST_CHECK(value == 10.);
+  // Next value
+  ++it;
+  value = increasing.get_cell_data(*it);
+  std::cout << "Second value of sinusoid.txt is " << value << std::endl;
+  BOOST_CHECK(value == std::numeric_limits<double>::infinity());
 }

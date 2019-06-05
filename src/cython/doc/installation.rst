@@ -7,24 +7,23 @@ Installation
 
 Compiling
 *********
-The library uses c++11 and requires `Boost <https://www.boost.org/>`_ ≥ 1.48.0
-and `CMake <https://www.cmake.org/>`_   ≥ 3.1.
+The library uses c++11 and requires `Boost <https://www.boost.org/>`_ ≥ 1.56.0,
+`CMake <https://www.cmake.org/>`_   ≥ 3.1  to generate makefiles, and
+`Cython <https://www.cython.org/>`_ to compile the GUDHI Python module.
 It is a multi-platform library and compiles on Linux, Mac OSX and Visual
 Studio 2015.
-It also requires cmake to generate makefiles, and cython to compile the
-library.
 
 On `Windows <https://wiki.python.org/moin/WindowsCompilers>`_ , only Python
 3.5 and 3.6 are available because of the required Visual Studio version.
 
-On other systems, if you have several Python/cython installed, the version 2.X
+On other systems, if you have several Python/Cython installed, the version 2.X
 will be used by default, but you can force it by adding
 :code:`-DPython_ADDITIONAL_VERSIONS=3` to the cmake command.
 
-GUDHI Cythonization
-===================
+GUDHI Python module compilation
+===============================
 
-To build the GUDHI cython module, run the following commands in a terminal:
+To build the GUDHI Python module, run the following commands in a terminal:
 
 .. code-block:: bash
 
@@ -32,7 +31,28 @@ To build the GUDHI cython module, run the following commands in a terminal:
     mkdir build
     cd build/
     cmake ..
-    make cython
+    cd cython
+    make
+
+GUDHI Python module installation
+================================
+
+Once the compilation succeeds, one can add the GUDHI Python module path to the
+PYTHONPATH:
+
+.. code-block:: bash
+
+    # For windows, you have to set PYTHONPATH environment variable
+    export PYTHONPATH='$PYTHONPATH:/path-to-gudhi/build/cython'
+
+Or install it definitely in your Python packages folder:
+
+.. code-block:: bash
+
+    cd /path-to-gudhi/build/cython
+    # May require sudo or administrator privileges
+    make install
+
 
 Test suites
 ===========
@@ -45,7 +65,7 @@ following command in a terminal:
     cd /path-to-gudhi/build/cython
     # For windows, you have to set PYTHONPATH environment variable
     export PYTHONPATH='$PYTHONPATH:/path-to-gudhi/build/cython'
-    ctest -R py_test
+    make test
 
 Debugging issues
 ================
@@ -54,7 +74,7 @@ If tests fail, please check your PYTHONPATH and try to :code:`import gudhi`
 and check the errors.
 The problem can come from a third-party library bad link or installation.
 
-If :code:`import gudhi` succeeds, please have a look to debug informations:
+If :code:`import gudhi` succeeds, please have a look to debug information:
 
 .. code-block:: python
 
@@ -105,13 +125,17 @@ A complete configuration would be :
 Documentation
 =============
 
-To build the documentation, `sphinx-doc <http://http://www.sphinx-doc.org>`_ is
-required. Please refer to *conf.py* file to see which
-`sphinx-doc <http://http://www.sphinx-doc.org>`_ modules are required to
-generate the documentation. Run the following commands in a terminal:
+To build the documentation, `sphinx-doc <http://www.sphinx-doc.org>`_ and
+`sphinxcontrib-bibtex <https://sphinxcontrib-bibtex.readthedocs.io>`_ are
+required. As the documentation is auto-tested, `CGAL`_, `Eigen3`_,
+`Matplotlib`_, `NumPy`_ and `SciPy`_ are also mandatory to build the
+documentation.
+
+Run the following commands in a terminal:
 
 .. code-block:: bash
 
+    cd /path-to-gudhi/build/cython
     make sphinx
 
 Optional third-party library
@@ -127,7 +151,7 @@ The :doc:`Alpha complex </alpha_complex_user>`,
 C++ library which provides easy access to efficient and reliable geometric
 algorithms.
 
-Having CGAL,  the Computational Geometry Algorithms Library, version 4.7.0 or
+Having CGAL, the Computational Geometry Algorithms Library, version 4.7.0 or
 higher installed is recommended. The procedure to install this library
 according to your operating system is detailed
 `here <http://doc.cgal.org/latest/Manual/installation.html>`_.
@@ -195,7 +219,7 @@ The following examples require the `Matplotlib <http://matplotlib.org>`_:
     * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
     * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
 
-Numpy
+NumPy
 =====
 
 The :doc:`persistence graphical tools </persistence_graphical_tools_user>`
@@ -215,6 +239,13 @@ The following examples require the `NumPy <http://numpy.org>`_:
     * :download:`tangential_complex_plain_homology_from_off_file_example.py <../example/tangential_complex_plain_homology_from_off_file_example.py>`
     * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
     * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
+
+SciPy
+=====
+
+The :doc:`persistence graphical tools </persistence_graphical_tools_user>`
+module requires `SciPy <http://scipy.org>`_, a Python-based ecosystem of
+open-source software for mathematics, science, and engineering.
 
 Threading Building Blocks
 =========================

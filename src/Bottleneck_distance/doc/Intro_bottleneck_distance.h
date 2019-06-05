@@ -41,6 +41,9 @@ namespace persistence_diagram {
  *
  * \image html perturb_pd.png On this picture, the red edges represent the matching. The bottleneck distance is the length of the longest edge.
  *
+ * This implementation is based on ideas from "Geometry Helps in Bottleneck Matching and Related Problems"
+ * \cite DBLP:journals/algorithmica/EfratIK01. Another relevant publication, although it was not used is
+ * "Geometry Helps to Compare Persistence Diagrams" \cite Kerber:2017:GHC:3047249.3064175.
  */
 /** @} */  // end defgroup bottleneck_distance
 

@@ -296,12 +296,79 @@ class Simplex_tree {
       dimension_(-1) { }
 
   /** \brief User-defined copy constructor reproduces the whole tree structure. */
-  Simplex_tree(const Simplex_tree& simplex_source)
-      : null_vertex_(simplex_source.null_vertex_),
-      root_(nullptr, null_vertex_ , simplex_source.root_.members_),
-      filtration_vect_(),
-      dimension_(simplex_source.dimension_) {
-    auto root_source = simplex_source.root_;
+  Simplex_tree(const Simplex_tree& complex_source) {
+#ifdef DEBUG_TRACES
+    std::cout << "Simplex_tree copy constructor" << std::endl;
+#endif  // DEBUG_TRACES
+    copy_from(complex_source);
+  }
+
+  /** \brief User-defined move constructor relocates the whole tree structure.
+   *  \exception std::invalid_argument In debug mode, if the complex_source is invalid.
+   */
+  Simplex_tree(Simplex_tree && complex_source) {
+#ifdef DEBUG_TRACES
+    std::cout << "Simplex_tree move constructor" << std::endl;
+#endif  // DEBUG_TRACES
+    move_from(complex_source);
+
+    // just need to set dimension_ on source to make it available again
+    // (filtration_vect_ and members are already set from the move)
+    complex_source.dimension_ = -1;
+  }
+
+  /** \brief Destructor; deallocates the whole tree structure. */
+  ~Simplex_tree() {
+    root_members_recursive_deletion();
+  }
+
+  /** \brief User-defined copy assignment reproduces the whole tree structure. */
+  Simplex_tree& operator= (const Simplex_tree& complex_source) {
+#ifdef DEBUG_TRACES
+    std::cout << "Simplex_tree copy assignment" << std::endl;
+#endif  // DEBUG_TRACES
+    // Self-assignment detection
+    if (&complex_source != this) {
+      // We start by deleting root_ if not empty
+      root_members_recursive_deletion();
+
+      copy_from(complex_source);
+    }
+    return *this;
+  }
+
+  /** \brief User-defined move assignment relocates the whole tree structure.
+   *  \exception std::invalid_argument In debug mode, if the complex_source is invalid.
+   */
+  Simplex_tree& operator=(Simplex_tree&& complex_source) {
+#ifdef DEBUG_TRACES
+    std::cout << "Simplex_tree move assignment" << std::endl;
+#endif  // DEBUG_TRACES
+    // Self-assignment detection
+    if (&complex_source != this) {
+      // root_ deletion in case it was not empty
+      root_members_recursive_deletion();
+
+      move_from(complex_source);
+    }
+    return *this;
+  }
+  /** @} */  // end constructor/destructor
+
+ private:
+  // Copy from complex_source to "this"
+  void copy_from(const Simplex_tree& complex_source) {
+    null_vertex_ = complex_source.null_vertex_;
+    filtration_vect_.clear();
+    dimension_ = complex_source.dimension_;
+    auto root_source = complex_source.root_;
+
+    // root members copy
+    root_.members() = Dictionary(boost::container::ordered_unique_range, root_source.members().begin(), root_source.members().end());
+    // Needs to reassign children
+    for (auto& map_el : root_.members()) {
+      map_el.second.assign_children(&root_);
+    }
     rec_copy(&root_, &root_source);
   }
 
@@ -320,26 +387,38 @@ class Simplex_tree {
     }
   }
 
-  /** \brief User-defined move constructor moves the whole tree structure. */
-  Simplex_tree(Simplex_tree && old)
-      : null_vertex_(std::move(old.null_vertex_)),
-      root_(std::move(old.root_)),
-      filtration_vect_(std::move(old.filtration_vect_)),
-      dimension_(std::move(old.dimension_)) {
-    old.dimension_ = -1;
-    old.root_ = Siblings(nullptr, null_vertex_);
+  // Move from complex_source to "this"
+  void move_from(Simplex_tree& complex_source) {
+    null_vertex_ = std::move(complex_source.null_vertex_);
+    root_ = std::move(complex_source.root_);
+    filtration_vect_ = std::move(complex_source.filtration_vect_);
+    dimension_ = std::move(complex_source.dimension_);
+
+    // Need to update root members (children->oncles and children need to point on the new root pointer)
+    for (auto& map_el : root_.members()) {
+      if (map_el.second.children() != &(complex_source.root_)) {
+        // reset children->oncles with the moved root_ pointer value
+        map_el.second.children()->oncles_ = &root_;
+      } else {
+        // if simplex is of dimension 0, oncles_ shall be nullptr
+        GUDHI_CHECK(map_el.second.children()->oncles_ == nullptr,
+                    std::invalid_argument("Simplex_tree move constructor from an invalid Simplex_tree"));
+        // and children points on root_ - to be moved
+        map_el.second.assign_children(&root_);
+      }
+    }
   }
 
-  /** \brief Destructor; deallocates the whole tree structure. */
-  ~Simplex_tree() {
+  // delete all root_.members() recursively
+  void root_members_recursive_deletion() {
     for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh) {
       if (has_children(sh)) {
         rec_delete(sh->second.children());
       }
     }
+    root_.members().clear();
   }
-  /** @} */  // end constructor/destructor
- private:
+
   // Recursive deletion
   void rec_delete(Siblings * sib) {
     for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh) {
@@ -970,7 +1049,8 @@ class Simplex_tree {
    * boost::graph_traits<OneSkeletonGraph>::vertex_descriptor
    *                                    must be Vertex_handle.
    * boost::graph_traits<OneSkeletonGraph>::directed_category
-   *                                    must be undirected_tag.
+   *                                    can be directed_tag (the fastest, the least RAM use), undirected_tag or even
+   *                                    bidirected_tag.
    *
    * If an edge appears with multiplicity, the function will arbitrarily pick
    * one representative to read the filtration value.  */
@@ -998,12 +1078,14 @@ class Simplex_tree {
                                   root_.members_.end(), *v_it,
                                   Node(&root_, boost::get(vertex_filtration_t(), skel_graph, *v_it)));
     }
-    typename boost::graph_traits<OneSkeletonGraph>::edge_iterator e_it,
-        e_it_end;
-    for (std::tie(e_it, e_it_end) = boost::edges(skel_graph); e_it != e_it_end;
-         ++e_it) {
-      auto u = source(*e_it, skel_graph);
-      auto v = target(*e_it, skel_graph);
+    std::pair<typename boost::graph_traits<OneSkeletonGraph>::edge_iterator,
+              typename boost::graph_traits<OneSkeletonGraph>::edge_iterator> boost_edges = boost::edges(skel_graph);
+    // boost_edges.first is the equivalent to boost_edges.begin()
+    // boost_edges.second is the equivalent to boost_edges.end()
+    for (; boost_edges.first != boost_edges.second; boost_edges.first++) {
+      auto edge = *(boost_edges.first);
+      auto u = source(edge, skel_graph);
+      auto v = target(edge, skel_graph);
       if (u == v) throw "Self-loops are not simplicial";
       // We cannot skip edges with the wrong orientation and expect them to
       // come a second time with the right orientation, that does not always
@@ -1019,7 +1101,7 @@ class Simplex_tree {
       }
 
       sh->second.children()->members().emplace(v,
-          Node(sh->second.children(), boost::get(edge_filtration_t(), skel_graph, *e_it)));
+          Node(sh->second.children(), boost::get(edge_filtration_t(), skel_graph, edge)));
     }
   }
 
@@ -1035,6 +1117,7 @@ class Simplex_tree {
    * The Simplex_tree must contain no simplex of dimension bigger than
    * 1 when calling the method. */
   void expansion(int max_dim) {
+    if (max_dim <= 1) return;
     dimension_ = max_dim;
     for (Dictionary_it root_it = root_.members_.begin();
          root_it != root_.members_.end(); ++root_it) {
@@ -1057,7 +1140,10 @@ class Simplex_tree {
     Dictionary_it next = siblings->members().begin();
     ++next;
 
-    thread_local std::vector<std::pair<Vertex_handle, Node> > inter;
+#ifdef GUDHI_CAN_USE_CXX11_THREAD_LOCAL
+    thread_local
+#endif  // GUDHI_CAN_USE_CXX11_THREAD_LOCAL
+    std::vector<std::pair<Vertex_handle, Node> > inter;
     for (Dictionary_it s_h = siblings->members().begin();
          s_h != siblings->members().end(); ++s_h, ++next) {
       Simplex_handle root_sh = find_vertex(s_h->first);

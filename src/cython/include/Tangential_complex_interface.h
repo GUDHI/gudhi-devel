@@ -49,8 +49,6 @@ class Tangential_complex_interface {
     Dynamic_kernel k;
 
     tangential_complex_ = new TC(points, intrisic_dim, k);
-    tangential_complex_->compute_tangential_complex();
-    num_inconsistencies_ = tangential_complex_->number_of_inconsistent_simplices();
   }
 
   Tangential_complex_interface(int intrisic_dim, const std::string& off_file_name, bool from_file = true) {
@@ -60,12 +58,15 @@ class Tangential_complex_interface {
     std::vector<Point_d> points = off_reader.get_point_cloud();
 
     tangential_complex_ = new TC(points, intrisic_dim, k);
-    tangential_complex_->compute_tangential_complex();
-    num_inconsistencies_ = tangential_complex_->number_of_inconsistent_simplices();
   }
 
   ~Tangential_complex_interface() {
     delete tangential_complex_;
+  }
+
+  void compute_tangential_complex() {
+    tangential_complex_->compute_tangential_complex();
+    num_inconsistencies_ = tangential_complex_->number_of_inconsistent_simplices();
   }
 
   std::vector<double> get_point(unsigned vh) {
@@ -104,7 +105,11 @@ class Tangential_complex_interface {
     simplex_tree->initialize_filtration();
   }
 
- private:
+  void set_max_squared_edge_length(double max_squared_edge_length) {
+    tangential_complex_->set_max_squared_edge_length(max_squared_edge_length);
+  }
+
+private:
   TC* tangential_complex_;
   TC::Num_inconsistencies num_inconsistencies_;
 };

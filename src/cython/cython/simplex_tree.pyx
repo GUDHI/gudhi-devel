@@ -44,8 +44,8 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         void set_dimension(int dimension)
         int dimension()
         int upper_bound_dimension()
-        bint find_simplex(vector[int] simplex)
-        bint insert_simplex_and_subfaces(vector[int] simplex,
+        bool find_simplex(vector[int] simplex)
+        bool insert_simplex_and_subfaces(vector[int] simplex,
                                          double filtration)
         vector[pair[vector[int], double]] get_filtration()
         vector[pair[vector[int], double]] get_skeleton(int dimension)
@@ -355,7 +355,7 @@ cdef class SimplexTree:
         :param filtration: Maximum threshold value.
         :type filtration: float.
         :returns: The filtration modification information.
-        :rtype: bint
+        :rtype: bool
 
 
         .. note::
@@ -406,7 +406,7 @@ cdef class SimplexTree:
         value than its faces by increasing the filtration values.
 
         :returns: The filtration modification information.
-        :rtype: bint
+        :rtype: bool
 
 
         .. note::
@@ -432,6 +432,10 @@ cdef class SimplexTree:
             0.0.
             Sets min_persistence to -1.0 to see all values.
         :type min_persistence: float.
+        :param persistence_dim_max: If true, the persistent homology for the
+            maximal dimension in the complex is computed. If false, it is
+            ignored. Default is false.
+        :type persistence_dim_max: bool
         :returns: The persistence of the simplicial complex.
         :rtype:  list of pairs(dimension, pair(birth, death))
         """
@@ -515,7 +519,7 @@ cdef class SimplexTree:
         :returns: The persistence intervals.
         :rtype:  list of pair of list of int
 
-        :note: intervals_in_dim function requires
+        :note: persistence_pairs function requires
             :func:`persistence()<gudhi.SimplexTree.persistence>`
             function to be launched first.
         """
