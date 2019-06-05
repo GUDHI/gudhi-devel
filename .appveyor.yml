@@ -55,6 +55,7 @@ build_script:
       cd src/cython &
       Type setup.py &
       python setup.py install &
+      python -c "import gudhi; print(gudhi.__version__)" &
       MSBuild RUN_TESTS.vcxproj
     ) else (
       MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64 &
