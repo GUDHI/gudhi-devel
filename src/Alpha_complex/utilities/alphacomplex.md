@@ -33,7 +33,7 @@ a prime number).
 
 where
 `<input OFF file>` is the path to the input point cloud in
-[nOFF ASCII format](http://www.geomview.org/docs/html/OFF.html).
+[nOFF ASCII format]({{ site.officialurl }}/doc/latest/fileformats.html#FileFormatsOFF).
 
 **Allowed options**
 
@@ -87,7 +87,7 @@ a prime number).
 ```
 
 where `<input OFF file>` is the path to the input point cloud in
-[nOFF ASCII format](http://www.geomview.org/docs/html/OFF.html).
+[nOFF ASCII format]({{ site.officialurl }}/doc/latest/fileformats.html#FileFormatsOFF).
 
 **Allowed options**
 
