@@ -374,8 +374,8 @@
     </td>
     <td width="50%">
     It contains implementation of various representations of persistence diagrams; diagrams themselves, persistence
-    landscapes (rigorous and grid version), persistence heath maps, vectors and others. It implements basic
-    functionalities which are neccessary to use persistence in statistics and machine learning.
+    landscapes (rigorous and grid version), persistence heat maps, vectors and others. It implements basic
+    functionalities which are necessary to use persistence in statistics and machine learning.
     </td>
     <td width="15%">
       <b>Author:</b> Pawel Dlotko<br>
