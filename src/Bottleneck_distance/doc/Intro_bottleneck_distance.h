@@ -6,6 +6,9 @@
  *
  *    Copyright (C) 2015 Inria
  *
+ *    Modifications:
+ *      - 2019/06 Vincent Rouvreau : Fix #11 - Distance computation shall be better documented.
+ *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation, either version 3 of the License, or
@@ -44,6 +47,43 @@ namespace persistence_diagram {
  * This implementation is based on ideas from "Geometry Helps in Bottleneck Matching and Related Problems"
  * \cite DBLP:journals/algorithmica/EfratIK01. Another relevant publication, although it was not used is
  * "Geometry Helps to Compare Persistence Diagrams" \cite Kerber:2017:GHC:3047249.3064175.
+ * 
+ * \section bottleneckdistanceprecision Distance computation
+ *
+ * Bottleneck distance does not use Euclidean distance, like explained in the following example:
+ *
+ * \code{.cpp}
+#include <gudhi/Bottleneck.h>
+
+#include <iostream>
+#include <vector>
+#include <utility>  // for pair
+
+int main() {
+  std::vector< std::pair<double, double> > diag1, diag2;
+  diag1.emplace_back(0., 0.);
+  diag2.emplace_back(0., 13.);
+
+  double b = Gudhi::persistence_diagram::bottleneck_distance(diag1, diag2);
+  std::cout << "Bottleneck distance = " << b << std::endl;
+}
+ * \endcode
+ *
+ * \code Bottleneck distance = 6.5
+ * \endcode
+ *
+ * \image html bottleneck_distance_example.png The point (0, 13) is at 6.5 distance from the diagonal and more specifically from the point (6.5, 6.5)
+ *
+ * \section bottleneckbasicexample Basic example
+ *
+ * This another example computes the bottleneck distance from 2 persistence diagrams:
+ * \include Bottleneck_distance/bottleneck_basic_example.cpp
+ *
+ * \code
+    Bottleneck distance = 0.75
+    Approx bottleneck distance = 0.808176
+ * \endcode
+
  */
 /** @} */  // end defgroup bottleneck_distance
 

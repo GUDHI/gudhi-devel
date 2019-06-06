@@ -13,11 +13,34 @@ Function
 --------
 .. autofunction:: gudhi.bottleneck_distance
 
+Distance computation
+--------------------
+
+Bottleneck distance does not use Euclidean distance, like explained in the following example:
+
+.. testcode::
+
+    import gudhi
+
+    message = "Bottleneck distance = " + '%.2f' % gudhi.bottleneck_distance([0., 0.], [0., 13.])
+    print(message)
+
+.. testoutput::
+
+    Bottleneck distance = 6.5
+
+.. figure::
+    ../../doc/Bottleneck_distance/bottleneck_distance_example.png
+    :figclass: align-center
+    
+    The point (0, 13) is at 6.5 distance from the diagonal and more
+    specifically from the point (6.5, 6.5)
+
 
 Basic example
 -------------
 
-This example computes the bottleneck distance from 2 persistence diagrams:
+This another example computes the bottleneck distance from 2 persistence diagrams:
 
 .. testcode::
 
@@ -26,15 +49,15 @@ This example computes the bottleneck distance from 2 persistence diagrams:
     diag1 = [[2.7, 3.7],[9.6, 14.],[34.2, 34.974], [3.,float('Inf')]]
     diag2 = [[2.8, 4.45],[9.5, 14.1],[3.2,float('Inf')]]
 
-    message = "Bottleneck distance approximation=" + '%.2f' % gudhi.bottleneck_distance(diag1, diag2, 0.1)
+    message = "Bottleneck distance approximation = " + '%.2f' % gudhi.bottleneck_distance(diag1, diag2, 0.1)
     print(message)
 
-    message = "Bottleneck distance value=" + '%.2f' % gudhi.bottleneck_distance(diag1, diag2)
+    message = "Bottleneck distance value = " + '%.2f' % gudhi.bottleneck_distance(diag1, diag2)
     print(message)
 
 The output is:
 
 .. testoutput::
 
-    Bottleneck distance approximation=0.81
-    Bottleneck distance value=0.75
+    Bottleneck distance approximation = 0.81
+    Bottleneck distance value = 0.75
