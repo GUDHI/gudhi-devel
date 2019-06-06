@@ -73,7 +73,8 @@ class Persistent_cohomology {
   typedef typename FilteredComplex::Filtration_value Filtration_value;
   /** \brief Type of element of the field. */
   typedef typename CoefficientField::Element Arith_element;
-  /** \brief Persistent interval type. The Arith_element field is used for the multi-field framework. */
+  /** \brief Type for birth and death FilteredComplex::Simplex_handle.
+   * The Arith_element field is used for the multi-field framework. */
   typedef std::tuple<Simplex_handle, Simplex_handle, Arith_element> Persistent_interval;
 
  private:
