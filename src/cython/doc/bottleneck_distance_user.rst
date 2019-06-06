@@ -22,7 +22,7 @@ Bottleneck distance does not use Euclidean distance, like explained in the follo
 
     import gudhi
 
-    message = "Bottleneck distance = " + '%.2f' % gudhi.bottleneck_distance([0., 0.], [0., 13.])
+    message = "Bottleneck distance = " + '%.1f' % gudhi.bottleneck_distance([[0., 0.]], [[0., 13.]])
     print(message)
 
 .. testoutput::
