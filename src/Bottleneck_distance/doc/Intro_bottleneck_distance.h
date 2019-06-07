@@ -72,7 +72,7 @@ int main() {
  * \code Bottleneck distance = 6.5
  * \endcode
  *
- * \image html bottleneck_distance_example.png The point (0, 13) is at 6.5 distance from the diagonal and more specifically from the point (6.5, 6.5)
+ * \image html bottleneck_distance_example.png The point (0, 13) is at distance 6.5 from the diagonal and more specifically from the point (6.5, 6.5)
  *
  * \section bottleneckbasicexample Basic example
  *
