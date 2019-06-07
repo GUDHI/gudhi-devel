@@ -9,6 +9,10 @@ Definition
 
 .. include:: bottleneck_distance_sum.inc
 
+This implementation is based on ideas from "Geometry Helps in Bottleneck Matching and Related Problems"
+:cite:`DBLP:journals/algorithmica/EfratIK01`. Another relevant publication, although it was not used is
+"Geometry Helps to Compare Persistence Diagrams" :cite:`Kerber:2017:GHC:3047249.3064175`.
+
 Function
 --------
 .. autofunction:: gudhi.bottleneck_distance
@@ -16,7 +20,7 @@ Function
 Distance computation
 --------------------
 
-Bottleneck distance does not use Euclidean distance, like explained in the following example:
+The following example explains how the distance is computed:
 
 .. testcode::
 
@@ -33,14 +37,14 @@ Bottleneck distance does not use Euclidean distance, like explained in the follo
     ../../doc/Bottleneck_distance/bottleneck_distance_example.png
     :figclass: align-center
     
-    The point (0, 13) is at 6.5 distance from the diagonal and more
+    The point (0, 13) is at distance 6.5 from the diagonal and more
     specifically from the point (6.5, 6.5)
 
 
 Basic example
 -------------
 
-This another example computes the bottleneck distance from 2 persistence diagrams:
+This other example computes the bottleneck distance from 2 persistence diagrams:
 
 .. testcode::
 

@@ -349,7 +349,9 @@
     Bottleneck distance measures the similarity between two persistence diagrams. 
     It's the shortest distance b for which there exists a perfect matching between 
     the points of the two diagrams (+ all the diagonal points) such that 
-    any couple of matched points are at distance at most b.
+    any couple of matched points are at distance at most b,
+    where the distance between points is the sup norm in \f$\mathbb{R}^2\f$
+    (not the Euclidean distance).
     </td>
     <td width="15%">
       <b>Author:</b> Fran&ccedil;ois Godi<br>

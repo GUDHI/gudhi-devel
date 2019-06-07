@@ -40,7 +40,8 @@ namespace persistence_diagram {
  * 
  * The bottleneck distance measures the similarity between two persistence diagrams. It is the shortest distance b for
  * which there exists a perfect matching between the points of the two diagrams (completed with all the points on the
- * diagonal in order to ignore cardinality mismatchs) such that any couple of matched points are at distance at most b.
+ * diagonal in order to ignore cardinality mismatchs) such that any couple of matched points are at distance at most b,
+ * where the distance between points is the sup norm in \f$\mathbb{R}^2\f$ (not the Euclidean distance).
  *
  * \image html perturb_pd.png On this picture, the red edges represent the matching. The bottleneck distance is the length of the longest edge.
  *
@@ -50,7 +51,7 @@ namespace persistence_diagram {
  * 
  * \section bottleneckdistanceprecision Distance computation
  *
- * Bottleneck distance does not use Euclidean distance, like explained in the following example:
+ * The following example explains how the distance is computed:
  *
  * \code{.cpp}
 #include <gudhi/Bottleneck.h>
