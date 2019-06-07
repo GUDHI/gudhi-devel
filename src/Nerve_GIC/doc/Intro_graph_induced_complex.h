@@ -37,8 +37,7 @@ namespace cover_complex {
  * neato (from <a target="_blank" href="http://www.graphviz.org/">graphviz</a>),
  * <a target="_blank" href="http://www.geomview.org/">geomview</a>,
  * <a target="_blank" href="https://github.com/MLWave/kepler-mapper">KeplerMapper</a>.
- * Input point clouds are assumed to be
- * <a target="_blank" href="http://www.geomview.org/docs/html/OFF.html">OFF files</a>.
+ * Input point clouds are assumed to be \ref FileFormatsOFF "OFF files"
  *
  * \section covers Covers
  *

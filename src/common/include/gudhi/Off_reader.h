@@ -37,8 +37,7 @@ namespace Gudhi {
 
 /** \brief OFF file reader top class visitor. 
  * 
- * OFF file must be conform to format described here : 
- * http://www.geomview.org/docs/html/OFF.html
+ * OFF file must be conform to \ref FileFormatsOFF
  */
 class Off_reader {
  public:

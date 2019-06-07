@@ -1330,7 +1330,7 @@ class Simplex_tree {
  public:
   /** \brief This function ensures that each simplex has a higher filtration value than its faces by increasing the
    * filtration values.
-   * @return The filtration modification information.
+   * @return True if any filtration value was modified, false if the filtration was already non-decreasing.
    * \post Some simplex tree functions require the filtration to be valid. `make_filtration_non_decreasing()`
    * function is not launching `initialize_filtration()` but returns the filtration modification information. If the
    * complex has changed , please call `initialize_filtration()` to recompute it.

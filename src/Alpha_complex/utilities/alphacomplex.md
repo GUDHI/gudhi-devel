@@ -33,7 +33,7 @@ a prime number).
 
 where
 `<input OFF file>` is the path to the input point cloud in
-[nOFF ASCII format](http://www.geomview.org/docs/html/OFF.html).
+[nOFF ASCII format]({{ site.officialurl }}/doc/latest/fileformats.html#FileFormatsOFF).
 
 **Allowed options**
 
@@ -87,7 +87,7 @@ a prime number).
 ```
 
 where `<input OFF file>` is the path to the input point cloud in
-[nOFF ASCII format](http://www.geomview.org/docs/html/OFF.html).
+[nOFF ASCII format]({{ site.officialurl }}/doc/latest/fileformats.html#FileFormatsOFF).
 
 **Allowed options**
 
@@ -103,8 +103,10 @@ to be recorded. Enter a negative value to see zero length intervals.
 * `-c [ --cuboid-file ]` is the path to the file describing the periodic domain.
 It must be in the format described
 [here]({{ site.officialurl }}/doc/latest/fileformats.html#FileFormatsIsoCuboid).
+Default version is not periodic.
 * `-w [ --weight-file ]` is the path to the file containing the weights of the
 points (one value per line).
+Default version is not weighted.
 * `-e [ --exact ]` for the exact computation version (not compatible with
 weight and periodic version).
 * `-f [ --fast ]` for the fast computation version.
