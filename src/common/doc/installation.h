@@ -44,7 +44,7 @@ make doxygen
 \endverbatim
  *
  * \subsection helloworld Hello world !
- * The <a target="_blank" href="https://gitlab.inria.fr/GUDHI/hello-gudhi-world">Hello world for GUDHI</a>
+ * The <a target="_blank" href="https://github.com/GUDHI/hello-gudhi-world">Hello world for GUDHI</a>
  * project is an example to help developers to make their own C++ project on top of the GUDHI library.
  *
  * \section optionallibrary Optional third-party library

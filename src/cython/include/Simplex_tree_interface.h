@@ -45,7 +45,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   using Simplex_handle = typename Base::Simplex_handle;
   using Insertion_result = typename std::pair<Simplex_handle, bool>;
   using Simplex = std::vector<Vertex_handle>;
-  using Complex = std::vector<std::pair<Simplex, Filtration_value>>;
+  using Filtered_simplices = std::vector<std::pair<Simplex, Filtration_value>>;
 
  public:
   bool find_simplex(const Simplex& vh) {
@@ -94,9 +94,9 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     Base::initialize_filtration();
   }
 
-  Complex get_filtration() {
+  Filtered_simplices get_filtration() {
     Base::initialize_filtration();
-    Complex filtrations;
+    Filtered_simplices filtrations;
     for (auto f_simplex : Base::filtration_simplex_range()) {
       Simplex simplex;
       for (auto vertex : Base::simplex_vertex_range(f_simplex)) {
@@ -107,8 +107,8 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     return filtrations;
   }
 
-  Complex get_skeleton(int dimension) {
-    Complex skeletons;
+  Filtered_simplices get_skeleton(int dimension) {
+    Filtered_simplices skeletons;
     for (auto f_simplex : Base::skeleton_simplex_range(dimension)) {
       Simplex simplex;
       for (auto vertex : Base::simplex_vertex_range(f_simplex)) {
@@ -119,29 +119,25 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     return skeletons;
   }
 
-  Complex get_star(const Simplex& simplex) {
-    Complex star;
+  Filtered_simplices get_star(const Simplex& simplex) {
+    Filtered_simplices star;
     for (auto f_simplex : Base::star_simplex_range(Base::find(simplex))) {
       Simplex simplex_star;
       for (auto vertex : Base::simplex_vertex_range(f_simplex)) {
-        std::cout << vertex << " ";
         simplex_star.insert(simplex_star.begin(), vertex);
       }
-      std::cout << std::endl;
       star.push_back(std::make_pair(simplex_star, Base::filtration(f_simplex)));
     }
     return star;
   }
 
-  Complex get_cofaces(const Simplex& simplex, int dimension) {
-    Complex cofaces;
+  Filtered_simplices get_cofaces(const Simplex& simplex, int dimension) {
+    Filtered_simplices cofaces;
     for (auto f_simplex : Base::cofaces_simplex_range(Base::find(simplex), dimension)) {
       Simplex simplex_coface;
       for (auto vertex : Base::simplex_vertex_range(f_simplex)) {
-        std::cout << vertex << " ";
         simplex_coface.insert(simplex_coface.begin(), vertex);
       }
-      std::cout << std::endl;
       cofaces.push_back(std::make_pair(simplex_coface, Base::filtration(f_simplex)));
     }
     return cofaces;

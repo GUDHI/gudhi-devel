@@ -6,79 +6,72 @@ GUDHI Python module documentation
      :alt: Gudhi banner
      :figclass: align-center
 
-Introduction
-************
+Complexes
+*********
 
-The Python interface for the Gudhi library (Geometry Understanding in Higher
-Dimensions) is a generic open source
-`Python module <http://gudhi.gforge.inria.fr/python/latest/>`_, for
-Computational Topology and Topological Data Analysis
-(`TDA <https://en.wikipedia.org/wiki/Topological_data_analysis>`_).
-The GUDHI library intends to help the development of new algorithmic solutions
-in TDA and their transfer to applications. It provides robust, efficient,
-flexible and easy to use implementations of state-of-the-art algorithms and
-data structures.
+Cubical complexes
+=================
 
-The current release of the GUDHI library includes:
+.. include:: cubical_complex_sum.inc
 
-* Data structures to represent, construct and manipulate simplicial complexes.
-* Simplification of simplicial complexes by edge contraction.
-* Algorithms to compute persistent homology and bottleneck distance.
-
-We refer to :cite:`gudhilibrary_ICMS14` for a detailed description of the
-design of the library.
-
-Data structures
-***************
+Simplicial complexes
+====================
 
 Alpha complex
-=============
+-------------
 
 .. include:: alpha_complex_sum.inc
+
+Rips complex
+-------------
+
+.. include:: rips_complex_sum.inc
+
+Witness complex
+---------------
+
+.. include:: witness_complex_sum.inc
 
 Cover complexes
 ===============
 
-.. include:: nerve_gic_complex_sum.rst
+.. include:: nerve_gic_complex_sum.inc
 
-Cubical complex
+Data structures and basic operations
+************************************
+
+Data structures
 ===============
 
-.. include:: cubical_complex_sum.inc
-
-Rips complex
-============
-
-.. include:: rips_complex_sum.inc
-
 Simplex tree
-============
+------------
 
 .. include:: simplex_tree_sum.inc
+
+Topological descriptors computation
+***********************************
+
+Persistence cohomology
+======================
+
+.. include:: persistent_cohomology_sum.inc
+
+Manifold reconstruction
+***********************
 
 Tangential complex
 ==================
 
 .. include:: tangential_complex_sum.inc
 
-Witness complex
-===============
 
-.. include:: witness_complex_sum.inc
-
-
-Toolbox
-*******
+Topological descriptors tools
+*****************************
 
 Bottleneck distance
 ===================
 
 .. include:: bottleneck_distance_sum.inc
-
-Persistence cohomology
-======================
-
-.. include:: persistent_cohomology_sum.inc
 
 Persistence graphical tools
 ===========================

@@ -29,6 +29,32 @@ namespace Gudhi {
 
  \tableofcontents
 
+ \section FileFormatsOFF OFF file format
+
+ OFF files must be conform to format described here: http://www.geomview.org/docs/html/OFF.html
+
+ OFF files are mainly used as point cloud inputs. Here is an example of 7 points in a 3-dimensional space. As edges and
+ faces are not used for point set, there is no need to specify them (just set their numbers to 0):
+
+ \include points/alphacomplexdoc.off
+
+ For dimensions bigger than 3, the dimension can be set like here:
+ \verbatim
+  # Dimension is no more 3
+  nOFF
+  # dimension 4 - 7 vertices - 0 face - 0 edge
+  4 7 0 0
+  # Point set:
+  1.0 1.0  0.0 0.0
+  7.0 0.0  0.0 0.0
+  4.0 6.0  0.0 0.0
+  9.0 6.0  0.0 0.0
+  0.0 14.0 0.0 0.0
+  2.0 19.0 0.0 0.0
+  9.0 17.0 0.0 0.0
+ \endverbatim
+
+
  \section FileFormatsPers Persistence Diagram
 
  Such a file, whose extension is usually `.pers`, contains a list of persistence intervals.<br>
