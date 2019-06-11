@@ -40,7 +40,7 @@ init:
 
 install:
   - vcpkg install tbb:x64-windows boost-disjoint-sets:x64-windows boost-serialization:x64-windows boost-date-time:x64-windows boost-system:x64-windows boost-filesystem:x64-windows boost-units:x64-windows boost-thread:x64-windows boost-program-options:x64-windows eigen3:x64-windows mpfr:x64-windows mpir:x64-windows cgal:x64-windows
-  - SET PATH=c:\Tools\vcpkg\installed\x86-windows\bin;%PATH%
+  - SET PATH=c:\Tools\vcpkg\installed\x64-windows\bin;%PATH%
   - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PYTHON%\Library\bin;%PATH%
   - SET PYTHONPATH=%PYTHON%\\Lib\\site-packages;%PYTHONPATH%
   - CALL "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
@@ -64,7 +64,7 @@ build_script:
 test_script:
   - cd build
   - if [%target%]==[Python] (
-      dumpbin /dependents %PYTHON%\\Lib\\site-packages\\
+      dumpbin /dependents %PYTHON%\\Lib\\site-packages\\gudhi.cp37-win_amd64.pyd
       cd src/cython &
       python -c "import sys; print(sys.path)" &
       python -c "import gudhi; print(gudhi.__version__)" &
