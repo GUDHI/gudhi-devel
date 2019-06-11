@@ -54,7 +54,6 @@ build_script:
   - cd build
   - cmake -G "Visual Studio 15 2017 Win64" %CMAKE_FLAGS% -DCMAKE_TOOLCHAIN_FILE=c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake ..
   - if [%target%]==[Python] (
-      ECHO %PYTHONPATH% &
       cd src/cython &
       python setup.py install
     ) else (
@@ -64,11 +63,9 @@ build_script:
 test_script:
   - cd build
   - if [%target%]==[Python] (
-      dumpbin /dependents %PYTHON%\\Lib\\site-packages\\gudhi.cp37-win_amd64.pyd
       cd src/cython &
-      python -c "import sys; print(sys.path)" &
       python -c "import gudhi; print(gudhi.__version__)" &
-      ECHO MSBuild RUN_TESTS.vcxproj
+      MSBuild RUN_TESTS.vcxproj
     ) else (
       ctest -j 1 -C Release -E diff_files
     )
