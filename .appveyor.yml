@@ -63,6 +63,7 @@ build_script:
 test_script:
   - cd build
   - if [%target%]==[Python] (
+      DIR src/cython &
       cd src/cython &
       python -c "import gudhi; print(gudhi.__version__)" &
       MSBuild RUN_TESTS.vcxproj
