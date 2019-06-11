@@ -57,7 +57,7 @@ build_script:
       cd src/cython &
       python setup.py install
     ) else (
-      MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64 &
+      MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64
     )
 
 test_script:
