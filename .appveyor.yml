@@ -56,9 +56,16 @@ build_script:
       ECHO %PYTHONPATH% &
       cd src/cython &
       python setup.py install &
-      ECHO This fails : python -c "import gudhi; print(gudhi.__version__)" &
-      ECHO This fails : MSBuild RUN_TESTS.vcxproj
     ) else (
       MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64 &
+    )
+
+test_script:
+  - cd build
+  - if [%target%]==[Python] (
+      cd src/cython &
+      python -c "import gudhi; print(gudhi.__version__)" &
+      ECHO MSBuild RUN_TESTS.vcxproj
+    ) else (
       ctest -j 1 -C Release -E diff_files
     )
