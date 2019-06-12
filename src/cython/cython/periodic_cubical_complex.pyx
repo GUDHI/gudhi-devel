@@ -5,13 +5,15 @@ from libcpp.string cimport string
 from libcpp cimport bool
 import os
 
+from numpy import array as np_array
+
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
    library for computational topology.
 
    Author(s):       Vincent Rouvreau
 
-   Copyright (C) 2016 Inria
+   Copyright (C) 2019 Inria
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -184,9 +186,9 @@ cdef class PeriodicCubicalComplex:
         specific dimension.
 
         :param dimension: The specific dimension.
-        :type from_value: int.
+        :type dimension: int.
         :returns: The persistence intervals.
-        :rtype:  list of pair of float
+        :rtype:  numpy array of dimension 2
 
         :note: intervals_in_dim function requires persistence function to be
             launched first.
@@ -197,4 +199,4 @@ cdef class PeriodicCubicalComplex:
         else:
             print("intervals_in_dim function requires persistence function"
                   " to be launched first.")
-        return intervals_result
+        return np_array(intervals_result)
