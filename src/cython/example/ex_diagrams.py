@@ -1,6 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.kernel_approximation import RBFSampler
+
+import sys
+sys.path.append("../sktda/")
 from preprocessing import *
 from metrics import *
 from vector_methods import *

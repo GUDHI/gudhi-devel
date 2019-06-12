@@ -2,6 +2,9 @@ import numpy as np
 import sklearn_tda as tda
 from sklearn.cluster import DBSCAN
 import os
+
+import sys
+sys.path.append("../sktda/")
 from clustering import *
 
 X = np.loadtxt("human")
