@@ -227,6 +227,19 @@ namespace Persistence_representations {
  to diagonal are given then sometimes the kernel have support that reaches the region
  below the diagonal. If the value of this parameter is true, then the values below diagonal can be erased.
 
+ In addition to the previous method, we also provide two more methods to perform exact calculations, in the sense that we use functions
+ instead of matrices to define the kernel between the points of the diagrams.
+ Indeed, in both of these exact methods, the kernel is no longer provided as a square matrix, or a filter (see parameters above), but rather as
+ a function assigning a real value to a pair of points in the plane.
+
+ In the first of these exact methods, we aim at obtaining a finite-dimensional representation of the diagram, so we still use a grid of pixels.
+ On the other hand, in the second exact method, we represent diagrams implicitly as functions (i.e. infinite-dimensional representations). This way, we no longer require grids,
+ but only scalar products and distances are available with these implicit representations. This type of representations is known as
+ kernel methods (see \ref sec_persistence_kernels below for more details on kernels).
+
+ Names can be a bit confusing so we recall that, with this second exact method, we implicitly define a kernel representation of diagrams that is built from a kernel between points
+ in the plane. Hence, we have two kernels here, which are independent. One is defined between points in the plane (its type in the code is Kernel2D), and is a template parameter,
+ whereas the other is defined between persistence diagrams (it is the scalar product of the infinite-dimensional representations of the diagrams).
 
  \section sec_persistence_vectors Persistence vectors
  <b>Reference manual:</b> \ref Gudhi::Persistence_representations::Vector_distances_in_diagram <br>
@@ -249,6 +262,35 @@ namespace Persistence_representations {
  assume that the vectors are extended by zeros if they are of a different size. To compute distances we compute
  absolute value of differences between coordinates. A scalar product is a sum of products of
  values at the corresponding positions of two vectors.
+
+  \section sec_persistence_kernels Kernels on persistence diagrams
+ <b>Reference manual:</b> \ref Gudhi::Persistence_representations::Sliced_Wasserstein <br>
+ <b>Reference manual:</b> \ref Gudhi::Persistence_representations::Persistence_heat_maps <br>
+
+ Kernels for persistence diagrams can be regarded as infinite-dimensional vectorizations. More specifically,
+ they are similarity functions whose evaluations on pairs of persistence diagrams equals the scalar products
+ between images of these pairs under a map \f$\Phi\f$ taking values in a specific (possibly non Euclidean) Hilbert space \f$k(D_i, D_j) = \langle \Phi(D_i),\Phi(D_j)\rangle\f$.
+ Reciprocally, classical results of learning theory ensure that such a \f$\Phi\f$ exists for a given similarity function \f$k\f$ if and only if \f$k\f$ is <i>positive semi-definite</i>.
+ Kernels are designed for algorithms that can be <i>kernelized</i>, i.e., algorithms that only require to know scalar products between instances in order to run.
+ Examples of such algorithms include Support Vector Machines, Principal Component Analysis and Ridge Regression.
+
+ There have been several attempts at defining kernels, i.e., positive semi-definite functions, between persistence diagrams within the last few years. We provide implementation
+ for the <i>Sliced Wasserstein kernel</i>---see \cite pmlr-v70-carriere17a, which takes the form of a Gaussian kernel with a specific distance between persistence diagrams
+ called the <i>Sliced Wasserstein distance</i>: \f$k(D_1,D_2)={\rm exp}\left(-\frac{SW(D_1,D_2)}{2\sigma^2}\right)\f$. Other kernels such as the Persistence Weighted Gaussian kernel or
+ the Persistence Scale Space kernel are implemented in Persistence_heat_maps.
+
+ When launching:
+
+ \code $> ./Sliced_Wasserstein
+ \endcode
+
+ the program output is:
+
+ \code $> Approx SW kernel: 0.0693743
+ $> Exact  SW kernel: 0.0693218
+ $> Distance induced by approx SW kernel: 1.36428
+ $> Distance induced by exact  SW kernel: 1.3643
+ \endcode
 
  */
 /** @} */  // end defgroup Persistence_representations

@@ -44,19 +44,19 @@ BOOST_AUTO_TEST_CASE( points_doc_test )
   BOOST_CHECK(point_cloud.size() == 7);
 
   std::vector<Point_d> expected_points;
-  std::vector<double> point = {1.0, 1.0};
+  std::vector<double> point = {1.0, 1.0, 0.0};
   expected_points.push_back(Point_d(point.begin(), point.end()));
-  point = {7.0, 0.0};
+  point = {7.0, 0.0, 0.0};
   expected_points.push_back(Point_d(point.begin(), point.end()));
-  point = {4.0, 6.0};
+  point = {4.0, 6.0, 0.0};
   expected_points.push_back(Point_d(point.begin(), point.end()));
-  point = {9.0, 6.0};
+  point = {9.0, 6.0, 0.0};
   expected_points.push_back(Point_d(point.begin(), point.end()));
-  point = {0.0, 14.0};
+  point = {0.0, 14.0, 0.0};
   expected_points.push_back(Point_d(point.begin(), point.end()));
-  point = {2.0, 19.0};
+  point = {2.0, 19.0, 0.0};
   expected_points.push_back(Point_d(point.begin(), point.end()));
-  point = {9.0, 17.0};
+  point = {9.0, 17.0, 0.0};
   expected_points.push_back(Point_d(point.begin(), point.end()));
 
   BOOST_CHECK(point_cloud == expected_points);
