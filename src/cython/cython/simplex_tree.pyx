@@ -4,13 +4,15 @@ from libcpp.utility cimport pair
 from libcpp cimport bool
 from libcpp.string cimport string
 
+from numpy import array as np_array
+
 """This file is part of the Gudhi Library. The Gudhi library
    (Geometric Understanding in Higher Dimensions) is a generic C++
    library for computational topology.
 
    Author(s):       Vincent Rouvreau
 
-   Copyright (C) 2016 Inria
+   Copyright (C) 2019 Inria
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -499,7 +501,7 @@ cdef class SimplexTree:
         :param dimension: The specific dimension.
         :type dimension: int.
         :returns: The persistence intervals.
-        :rtype:  list of pair of float
+        :rtype:  numpy array of dimension 2
 
         :note: intervals_in_dim function requires
             :func:`persistence()<gudhi.SimplexTree.persistence>`
@@ -511,7 +513,7 @@ cdef class SimplexTree:
         else:
             print("intervals_in_dim function requires persistence function"
                   " to be launched first.")
-        return intervals_result
+        return np_array(intervals_result)
 
     def persistence_pairs(self):
         """This function returns a list of persistence birth and death simplices pairs.
