@@ -154,6 +154,8 @@ diagram.
 3  1 0.104347 inf 
 3  2 0.138335 inf \endcode
 
+More details on the <a href="../../ripscomplex/">Rips complex utilities</a> dedicated page.
+
 \li <a href="_persistent_cohomology_2rips_multifield_persistence_8cpp-example.html">
 Persistent_cohomology/rips_multifield_persistence.cpp</a> computes the Rips complex of a point cloud and outputs its
 persistence diagram with a family of field coefficients.
@@ -166,6 +168,8 @@ The file should contain square or lower triangular distance matrix with semicolo
 The code do not check if it is dealing with a distance matrix. It is the user responsibility to provide a valid input.
 Please refer to data/distance_matrix/lower_triangular_distance_matrix.csv for an example of a file.
 
+More details on the <a href="../../ripscomplex/">Rips complex utilities</a> dedicated page.
+
 \li <a href="_rips_complex_2rips_correlation_matrix_persistence_8cpp-example.html">
 Rips_complex/rips_correlation_matrix_persistence.cpp</a>
 computes the Rips complex of a correlation matrix and outputs its persistence diagram.
@@ -174,6 +178,8 @@ Note that no check is performed if the matrix given as the input is a correlatio
 It is the user responsibility to ensure that this is the case. The input is to be given either as a square or a lower
 triangular matrix.
 Please refer to data/correlation_matrix/lower_triangular_correlation_matrix.csv for an example of a file.
+
+More details on the <a href="../../ripscomplex/">Rips complex utilities</a> dedicated page.
 
 \li <a href="_alpha_complex_2alpha_complex_3d_persistence_8cpp-example.html">
 Alpha_complex/alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
@@ -185,27 +191,61 @@ Alpha_complex/alpha_complex_3d_persistence.cpp</a> computes the persistent homol
 2  1 0.0934117 1.00003 
 2  2 0.56444 1.03938 \endcode
 
-\li <a href="_alpha_complex_2exact_alpha_complex_3d_persistence_8cpp-example.html">
-Alpha_complex/exact_alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
-\f$\mathbb{Z}/2\mathbb{Z}\f$ coefficients of the alpha complex on points sampling from an OFF file.
+More details on the <a href="../../alphacomplex/">Alpha complex utilities</a> dedicated page.
+
 Here, as CGAL computes the exact values, it is slower, but it is necessary when points are on a grid
-for instance.
-\code $> ./exact_alpha_complex_3d_persistence ../../data/points/sphere3D_pts_on_grid.off -p 2 -m 0.1 \endcode
+for instance (the fast version `--fast` would give incorrect values).
+\code $> ./alpha_complex_3d_persistence ../../data/points/sphere3D_pts_on_grid.off --exact -p 2 -m 0.1 \endcode
 \code Simplex_tree dim: 3
 2  0 0 inf
 2  2 0.0002 0.2028 \endcode
 
-\li <a href="_alpha_complex_2weighted_alpha_complex_3d_persistence_8cpp-example.html">
-Alpha_complex/weighted_alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
+It can also compute the persistent homology with
 \f$\mathbb{Z}/2\mathbb{Z}\f$ coefficients of the weighted alpha complex on points sampling from an OFF file
 and a weights file.
-\code $> ./weighted_alpha_complex_3d_persistence ../../data/points/tore3D_300.off
-../../data/points/tore3D_300.weights -p 2 -m 0.45 \endcode
+\code $> ./alpha_complex_3d_persistence ../../data/points/tore3D_300.off
+--weight-file ../../data/points/tore3D_300.weights -p 2 -m 0.45 \endcode
 \code Simplex_tree dim: 3
 2  0 -1 inf
 2  1 -0.931784 0.000103311
 2  1 -0.906588 2.60165e-05
 2  2 -0.43556 0.0393798 \endcode
+
+One can also compute the persistent homology with
+\f$\mathbb{Z}/2\mathbb{Z}\f$ coefficients of the periodic alpha complex on points sampling from an OFF file.
+The second parameter is a \ref FileFormatsIsoCuboid file with coordinates of the periodic cuboid.
+Note that the lengths of the sides of the periodic cuboid have to be the same.
+\code $> ./alpha_complex_3d_persistence ../../data/points/grid_10_10_10_in_0_1.off
+--cuboid-file ../../data/points/iso_cuboid_3_in_0_1.txt -p 3 -m 1.0 \endcode
+\code Simplex_tree dim: 3
+3  0 0 inf 
+3  1 0.0025 inf 
+3  1 0.0025 inf 
+3  1 0.0025 inf 
+3  2 0.005 inf 
+3  2 0.005 inf 
+3  2 0.005 inf 
+3  3 0.0075 inf \endcode
+
+In order to compute the persistent homology with
+\f$\mathbb{Z}/2\mathbb{Z}\f$ coefficients of the periodic alpha complex on weighted points from an OFF file. The
+additional parameters of this program are:<br>
+(a) The file with the weights of points. The file consist of a sequence of numbers (as many as points).
+Note that the weight of each single point have to be bounded by 1/64 times the square of the cuboid edge length.<br>
+(b) A \ref FileFormatsIsoCuboid file with coordinates of the periodic cuboid.
+Note that the lengths of the sides of the periodic cuboid have to be the same.<br>
+\code $> ./alpha_complex_3d_persistence ../../data/points/shifted_sphere.off 
+--weight-file ../../data/points/shifted_sphere.weights 
+--cuboid-file  ../../data/points/iso_cuboid_3_in_0_10.txt -p 3 -m 1.0 \endcode
+\code Simplex_tree dim: 3
+3  0 -0.0001 inf
+3  1 16.0264 inf
+3  1 16.0273 inf
+3  1 16.0303 inf
+3  2 36.8635 inf
+3  2 36.8704 inf
+3  2 36.8838 inf
+3  3 58.6783 inf  \endcode
 
 \li <a href="_alpha_complex_2alpha_complex_persistence_8cpp-example.html">
 Alpha_complex/alpha_complex_persistence.cpp</a> computes the persistent homology with
@@ -218,44 +258,7 @@ Simplex_tree dim: 3
 2  1 0.0934117 1.00003 
 2  2 0.56444 1.03938 \endcode
 
-\li <a href="_alpha_complex_2periodic_alpha_complex_3d_persistence_8cpp-example.html">
-Alpha_complex/periodic_alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
-\f$\mathbb{Z}/2\mathbb{Z}\f$ coefficients of the periodic alpha complex on points sampling from an OFF file.
-The second parameter is a \ref FileFormatsIsoCuboid file with coordinates of the periodic cuboid.
-Note that the lengths of the sides of the periodic cuboid have to be the same.
-\code $> ./periodic_alpha_complex_3d_persistence ../../data/points/grid_10_10_10_in_0_1.off
-../../data/points/iso_cuboid_3_in_0_1.txt -p 3 -m 1.0 \endcode
-\code Periodic Delaunay computed.
-Simplex_tree dim: 3
-3  0 0 inf 
-3  1 0.0025 inf 
-3  1 0.0025 inf 
-3  1 0.0025 inf 
-3  2 0.005 inf 
-3  2 0.005 inf 
-3  2 0.005 inf 
-3  3 0.0075 inf \endcode
-
-\li <a href="_persistent_cohomology_2weighted_periodic_alpha_complex_3d_persistence_8cpp-example.html">
-Persistent_cohomology/weighted_periodic_alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
-\f$\mathbb{Z}/2\mathbb{Z}\f$ coefficients of the periodic alpha complex on weighted points from an OFF file. The
-additional parameters of this program are:<br>
-(a) The file with the weights of points. The file consist of a sequence of numbers (as many as points).
-Note that the weight of each single point have to be bounded by 1/64 times the square of the cuboid edge length.<br>
-(b) A \ref FileFormatsIsoCuboid file with coordinates of the periodic cuboid.
-Note that the lengths of the sides of the periodic cuboid have to be the same.<br>
-\code $> ./weighted_periodic_alpha_complex_3d_persistence ../../data/points/shifted_sphere.off
-../../data/points/shifted_sphere.weights ../../data/points/iso_cuboid_3_in_0_10.txt 3 1.0 \endcode
-\code Weighted Periodic Delaunay computed.
-Simplex_tree dim: 3
-3  0 -0.0001 inf
-3  1 16.0264 inf
-3  1 16.0273 inf
-3  1 16.0303 inf
-3  2 36.8635 inf
-3  2 36.8704 inf
-3  2 36.8838 inf
-3  3 58.6783 inf  \endcode
+More details on the <a href="../../alphacomplex/">Alpha complex utilities</a> dedicated page.
 
 \li <a href="_persistent_cohomology_2plain_homology_8cpp-example.html">
 Persistent_cohomology/plain_homology.cpp</a> computes the plain homology of a simple simplicial complex without
