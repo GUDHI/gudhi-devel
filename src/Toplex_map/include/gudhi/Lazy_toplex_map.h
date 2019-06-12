@@ -93,7 +93,7 @@ class Lazy_toplex_map {
   std::unordered_map<Vertex, std::size_t> gamma0_lbounds;
 
   std::unordered_map<Vertex, Simplex_ptr_set> t0;
-  bool empty_toplex;  // Is the empty simplex a toplex ?
+  bool empty_toplex = true;  // Is the empty simplex a toplex ?
 
   typedef boost::heap::fibonacci_heap<std::pair<std::size_t, Vertex>> PriorityQueue;
   PriorityQueue cleaning_priority;

@@ -26,3 +26,7 @@ add_test(NAME Persistence_representations_example_heat_maps
     COMMAND $<TARGET_FILE:Persistence_representations_example_heat_maps>)
 install(TARGETS Persistence_representations_example_heat_maps DESTINATION bin)
 
+add_executable ( Sliced_Wasserstein sliced_wasserstein.cpp )
+add_test(NAME Sliced_Wasserstein
+    COMMAND $<TARGET_FILE:Sliced_Wasserstein>)
+install(TARGETS Sliced_Wasserstein DESTINATION bin)

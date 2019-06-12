@@ -19,22 +19,19 @@ int main(int argc, char * const argv[]) {
   using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
 
   Simplex_tree simplex_tree;
-  Nearest_landmark_table nlt;
 
   // Example contains 5 witnesses and 5 landmarks
-  Nearest_landmark_range w0 = {std::make_pair(0, 0), std::make_pair(1, 1), std::make_pair(2, 2),
-                               std::make_pair(3, 3), std::make_pair(4, 4)}; nlt.push_back(w0);
-  Nearest_landmark_range w1 = {std::make_pair(1, 0), std::make_pair(2, 1), std::make_pair(3, 2),
-                               std::make_pair(4, 3), std::make_pair(0, 4)}; nlt.push_back(w1);
-  Nearest_landmark_range w2 = {std::make_pair(2, 0), std::make_pair(3, 1), std::make_pair(4, 2),
-                               std::make_pair(0, 3), std::make_pair(1, 4)}; nlt.push_back(w2);
-  Nearest_landmark_range w3 = {std::make_pair(3, 0), std::make_pair(4, 1), std::make_pair(0, 2),
-                               std::make_pair(1, 3), std::make_pair(2, 4)}; nlt.push_back(w3);
-  Nearest_landmark_range w4 = {std::make_pair(4, 0), std::make_pair(0, 1), std::make_pair(1, 2),
-                               std::make_pair(2, 3), std::make_pair(3, 4)}; nlt.push_back(w4);
+  Nearest_landmark_table nlt = {
+    {{0, 0.0}, {1, 0.1}, {2, 0.2}, {3, 0.3}, {4, 0.4}}, // witness 0
+    {{1, 0.0}, {2, 0.1}, {3, 0.2}, {4, 0.3}, {0, 0.4}}, // witness 1
+    {{2, 0.0}, {3, 0.1}, {4, 0.2}, {0, 0.3}, {1, 0.4}}, // witness 2
+    {{3, 0.0}, {4, 0.1}, {0, 0.2}, {1, 0.3}, {2, 0.4}}, // witness 3
+    {{4, 0.0}, {0, 0.1}, {1, 0.2}, {2, 0.3}, {3, 0.4}}  // witness 4
+  };
+  /* distance(witness3, landmark3) is 0, distance(witness3, landmark4) is 0.1, etc.  */
 
   Witness_complex witness_complex(nlt);
-  witness_complex.create_complex(simplex_tree, 4.1);
+  witness_complex.create_complex(simplex_tree, .41);
 
   std::cout << "Number of simplices: " << simplex_tree.num_simplices() << std::endl;
 
