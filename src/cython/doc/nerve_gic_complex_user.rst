@@ -13,8 +13,7 @@ Visualizations of the simplicial complexes can be done with either
 neato (from `graphviz <http://www.graphviz.org/>`_),
 `geomview <http://www.geomview.org/>`_,
 `KeplerMapper <https://github.com/MLWave/kepler-mapper>`_.
-Input point clouds are assumed to be
-`OFF files <http://www.geomview.org/docs/html/OFF.html>`_.
+Input point clouds are assumed to be OFF files (cf. :doc:`fileformats`).
 
 Covers
 ------

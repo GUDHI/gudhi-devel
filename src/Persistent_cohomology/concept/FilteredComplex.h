@@ -27,7 +27,7 @@
   */
 struct FilteredComplex
 {
-/** Handle to specify a simplex. */
+/** \brief Handle to specify a simplex. */
   typedef unspecified      Simplex_handle;
 /** \brief Type for the value of the filtration function.
   *
@@ -39,8 +39,7 @@ struct FilteredComplex
   * is model of IndexingTag. */
   typedef unspecified      Indexing_tag;
 
-/** Returns a Simplex_handle that is different from all simplex handles 
-  * of the simplices. */
+/** \brief Returns a Simplex_handle that is different from all simplex handles of the simplices. */
   Simplex_handle           null_simplex();
 /** \brief Returns the number of simplices in the complex.
   *
@@ -58,22 +57,19 @@ struct FilteredComplex
  *
  * This is only called on valid indices. */
   Simplex_handle           simplex  ( size_t idx );
-/** \brief Iterator on the simplices belonging to the
-  * boundary of a simplex.
+/** \brief Iterator on the simplices belonging to the boundary of a simplex.
   *
   * <CODE>value_type</CODE> must be 'Simplex_handle'.
   */
 typedef unspecified Boundary_simplex_iterator;
-/** \brief Range giving access to the simplices in the boundary of 
-  * a simplex.
+/** \brief Range giving access to the simplices in the boundary of a simplex.
   *
   * .begin() and .end() return type Boundary_simplex_iterator.
   */
 typedef unspecified Boundary_simplex_range;
 
-/** \brief Returns a range giving access to all simplices of the 
-  * boundary of a simplex, i.e.
-  * the set of codimension 1 subsimplices of the Simplex.
+/** \brief Returns a range giving access to all simplices of the boundary of a simplex, i.e. the set of codimension 1
+  * subsimplices of the Simplex.
   *
   * If the simplex is \f$[v_0, \cdots ,v_d]\f$, with canonical orientation
   * induced by \f$ v_0 < \cdots < v_d \f$, the iterator enumerates the 
@@ -84,19 +80,16 @@ typedef unspecified Boundary_simplex_range;
   * gives the chains corresponding to the boundary of the simplex.*/
 Boundary_simplex_range boundary_simplex_range(Simplex_handle sh);
 
-/** \brief Iterator over all simplices of the complex 
-  * in the order of the indexing scheme.
+/** \brief Iterator over all simplices of the complex in the order of the indexing scheme.
   *
   * 'value_type' must be 'Simplex_handle'.
   */
 typedef unspecified Filtration_simplex_iterator;
-/** \brief Range over the simplices of the complex
-  * in the order of the filtration.
+/** \brief Range over the simplices of the complex in the order of the filtration.
   *
   * .begin() and .end() return type Filtration_simplex_iterator.*/
 typedef unspecified Filtration_simplex_range;
-/** \brief Returns a range over the simplices of the complex
-  * in the order of the filtration.
+/** \brief Returns a range over the simplices of the complex in the order of the filtration.
   *
   * .begin() and .end() return type Filtration_simplex_iterator.*/
 Filtration_simplex_range filtration_simplex_range();

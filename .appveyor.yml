@@ -15,16 +15,19 @@ environment:
   matrix:
       - target: Examples
         CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF
+        PYTHON: "C:\\Python37-x64"
 
       - target: UnitaryTests
         CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF
+        PYTHON: "C:\\Python37-x64"
 
       - target: Utilities
         CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF
+        PYTHON: "C:\\Python37-x64"
 
       - target: Python
-        CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON
-        PYTHON: "C:\\Python36-x64"
+        CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DGMP_INCLUDE_DIR="c:/Tools/vcpkg/installed/x64-windows/include" -DGMP_LIBRARIES="c:/Tools/vcpkg/installed/x64-windows/lib/mpir.lib" -DGMP_LIBRARIES_DIR="c:/Tools/vcpkg/installed/x64-windows/lib"
+        PYTHON: "C:\\Python37-x64"
 
 
 cache:
@@ -36,12 +39,15 @@ init:
 
 
 install:
-  - vcpkg install tbb:x64-windows boost-disjoint-sets:x64-windows boost-serialization:x64-windows boost-date-time:x64-windows boost-system:x64-windows boost-filesystem:x64-windows boost-units:x64-windows boost-thread:x64-windows boost-program-options:x64-windows eigen3:x64-windows cgal:x64-windows
-  - if [%target%]==[Python] (
-      SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH% &
-      python --version &
-      pip version &
-      pip install -U setuptools numpy matplotlib scipy Cython pytest )
+  - vcpkg install tbb:x64-windows boost-disjoint-sets:x64-windows boost-serialization:x64-windows boost-date-time:x64-windows boost-system:x64-windows boost-filesystem:x64-windows boost-units:x64-windows boost-thread:x64-windows boost-program-options:x64-windows eigen3:x64-windows mpfr:x64-windows mpir:x64-windows cgal:x64-windows
+  - SET PATH=c:\Tools\vcpkg\installed\x64-windows\bin;%PATH%
+  - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PYTHON%\Library\bin;%PATH%
+  - SET PYTHONPATH=%PYTHON%\\Lib\\site-packages;%PYTHONPATH%
+  - CALL "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
+  - python --version
+  - pip --version
+  - python -m pip install --upgrade pip
+  - pip install -U setuptools numpy matplotlib scipy Cython pytest
 
 build_script:
   - mkdir build
