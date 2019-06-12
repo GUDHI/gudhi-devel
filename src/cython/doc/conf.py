@@ -125,7 +125,7 @@ html_theme_options = {
      "sidebarbgcolor": "#A1ADCD",
      "sidebartextcolor": "black",
      "sidebarlinkcolor": "#334D5C",
-     "body_max_width": "1200px",
+     "body_max_width": "100%",
 }
 
 # Add any paths that contain custom themes here, relative to this directory.

@@ -42,7 +42,7 @@
 // Use dynamic_dimension_tag for the user to be able to set dimension
 typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kernel_d;
 // Use static dimension_tag for the user not to be able to set dimension
-typedef CGAL::Epick_d< CGAL::Dimension_tag<2> > Kernel_s;
+typedef CGAL::Epick_d< CGAL::Dimension_tag<3> > Kernel_s;
 // The triangulation uses the default instantiation of the TriangulationDataStructure template parameter
 
 typedef boost::mpl::list<Kernel_d, Kernel_s> list_of_kernel_variants;

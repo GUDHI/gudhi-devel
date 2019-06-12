@@ -407,7 +407,8 @@ cdef class SimplexTree:
         """This function ensures that each simplex has a higher filtration
         value than its faces by increasing the filtration values.
 
-        :returns: The filtration modification information.
+        :returns: True if any filtration value was modified,
+        False if the filtration was already non-decreasing.
         :rtype: bool
 
 
@@ -515,10 +516,9 @@ cdef class SimplexTree:
         return np_array(intervals_result)
 
     def persistence_pairs(self):
-        """This function returns the persistence pairs of the simplicial
-        complex.
+        """This function returns a list of persistence birth and death simplices pairs.
 
-        :returns: The persistence intervals.
+        :returns: A list of persistence simplices intervals.
         :rtype:  list of pair of list of int
 
         :note: persistence_pairs function requires
