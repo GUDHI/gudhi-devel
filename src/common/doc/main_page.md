@@ -24,7 +24,7 @@
  </tr>
  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref cubical_complex - <b>Reference manual:</b> Gudhi::cubical_complex::Bitmap_cubical_complex
+    <b>User manual:</b> \ref cubical_complex
     </td>
  </tr>
 </table>
@@ -57,8 +57,7 @@
  </tr>
  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref alpha_complex - <b>Reference manual:</b> Gudhi::alpha_complex::Alpha_complex and
-    Gudhi::alpha_complex::Alpha_complex_3d
+    <b>User manual:</b> \ref alpha_complex
     </td>
  </tr>
 </table>
@@ -82,7 +81,7 @@
  </tr>
  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref cech_complex - <b>Reference manual:</b> Gudhi::cech_complex::Cech_complex
+    <b>User manual:</b> \ref cech_complex
     </td>
  </tr>
 </table>
@@ -108,7 +107,7 @@
  </tr>
  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref rips_complex - <b>Reference manual:</b> Gudhi::rips_complex::Rips_complex
+    <b>User manual:</b> \ref rips_complex
     </td>
  </tr>
 </table>
@@ -133,7 +132,7 @@
  </tr>
  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref witness_complex - <b>Reference manual:</b> Gudhi::witness_complex::SimplicialComplexForWitness
+    <b>User manual:</b> \ref witness_complex
     </td>
  </tr>
 </table>
@@ -149,7 +148,6 @@
     topological information about the input data. They can be computed with a cover of the
     data, that comes i.e. from the preimage of a family of intervals covering the image
     of a scalar-valued function defined on the data. <br>
-    <b>User manual:</b> \ref cover_complex - <b>Reference manual:</b> Gudhi::cover_complex::Cover_complex
     </td>
     <td width="15%">
       <b>Author:</b> Mathieu Carri&egrave;re<br>
@@ -160,7 +158,7 @@
  </tr>
  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref cover_complex - <b>Reference manual:</b> Gudhi::cover_complex::Cover_complex
+    <b>User manual:</b> \ref cover_complex
     </td>
  </tr>
 </table>
@@ -188,7 +186,7 @@
  </tr>
  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref simplex_tree - <b>Reference manual:</b> Gudhi::Simplex_tree
+    <b>User manual:</b> \ref simplex_tree
     </td>
  </tr>
 </table>
@@ -216,7 +214,7 @@
  </tr>
  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref skbl - <b>Reference manual:</b> Gudhi::skeleton_blocker::Skeleton_blocker_complex
+    <b>User manual:</b> \ref skbl
     </td>
  </tr>
 </table>
@@ -241,7 +239,7 @@
  </tr>
  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref toplex_map - <b>Reference manual:</b> Gudhi::Toplex_map
+    <b>User manual:</b> \ref toplex_map
     </td>
  </tr>
 </table>
@@ -301,7 +299,7 @@
  </tr>
  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref persistent_cohomology - <b>Reference manual:</b> Gudhi::persistent_cohomology::Persistent_cohomology
+    <b>User manual:</b> \ref persistent_cohomology
     </td>
  </tr>
 </table>
@@ -331,7 +329,7 @@
  </tr>
  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref tangential_complex - <b>Reference manual:</b> Gudhi::tangential_complex::Tangential_complex
+    <b>User manual:</b> \ref tangential_complex
     </td>
  </tr>
 </table>
