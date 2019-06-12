@@ -193,7 +193,7 @@ Alpha_complex/alpha_complex_3d_persistence.cpp</a> computes the persistent homol
 
 More details on the <a href="../../alphacomplex/">Alpha complex utilities</a> dedicated page.
 
-Here, as CGAL computes the exact values, it is slower, but it is necessary when points are on a grid
+CGAL can be forced to compute the exact values, it is slower, but it is necessary when points are on a grid
 for instance (the fast version `--fast` would give incorrect values).
 \code $> ./alpha_complex_3d_persistence ../../data/points/sphere3D_pts_on_grid.off --exact -p 2 -m 0.1 \endcode
 \code Simplex_tree dim: 3
