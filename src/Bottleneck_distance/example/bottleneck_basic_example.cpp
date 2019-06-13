@@ -1,15 +1,3 @@
-/*    This file is part of the Gudhi Library. The Gudhi library
- *    (Geometric Understanding in Higher Dimensions) is a generic C++
- *    library for computational topology.
- *
- *    Authors:       Francois Godi, small modifications by Pawel Dlotko
- *
- *    Copyright (C) 2015 Inria
- *
- *    Modification(s):
- *      - YYYY/MM Author: Description of the modification
- */
-
 #include <gudhi/Bottleneck.h>
 
 #include <iostream>

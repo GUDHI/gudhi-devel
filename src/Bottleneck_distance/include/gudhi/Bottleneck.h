@@ -8,6 +8,7 @@
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
+ *      - 2019/06 Vincent Rouvreau : Fix doxygen warning.
  */
 
 #ifndef BOTTLENECK_H_
@@ -82,6 +83,10 @@ inline double bottleneck_distance_exact(Persistence_graph& g) {
  *
  * \tparam Persistence_diagram1,Persistence_diagram2
  * models of the concept `PersistenceDiagram`.
+ *
+ * \param[in] diag1 The first persistence diagram.
+ * \param[in] diag2 The second persistence diagram.
+ *
  * \param[in] e
  * \parblock
  * If `e` is 0, this uses an expensive algorithm to compute the exact distance.
