@@ -156,7 +156,7 @@ class Flag_complex_sparse_matrix {
     sparse_collapsed_matrix_ = Sparse_row_matrix(rows_, rows_);  // Just for debugging purpose.
     one_simplices_.clear();
     for (std::size_t rw = 0; rw < rows_; ++rw) {
-      if (not domination_indicator_[rw])  // If the current column is not dominated
+      if (!domination_indicator_[rw])  // If the current column is not dominated
       {
         auto nbhrs_to_insert = read_row_index(rw);  // returns row indices of the non-dominated vertices.
         for (auto& v : nbhrs_to_insert) {
@@ -210,12 +210,12 @@ class Flag_complex_sparse_matrix {
   // indicator if a vertex is already inserted in the working row_queue (row_iterator_)
   void complete_domination_check() {
     // row_iterator_ contains list (FIFO) of rows to be considered for domination check
-    while (not row_iterator_.empty())
+    while (!row_iterator_.empty())
     {
       double k = row_iterator_.front();
       row_iterator_.pop();
       row_insert_indicator_[k] = false;
-      if (not domination_indicator_[k])  // Check if is  already dominated
+      if (!domination_indicator_[k])  // Check if is  already dominated
       {
         std::vector<double> non_zero_inner_indices = read_row_index(k);
         for (auto index : non_zero_inner_indices) {
@@ -258,10 +258,10 @@ class Flag_complex_sparse_matrix {
   std::vector<double> read_row_index(double indx)
   {
     std::vector<double> non_zero_indices;
-    if (not domination_indicator_[indx])
+    if (!domination_indicator_[indx])
       // Iterate over the non-zero columns
       for (Sparse_row_iterator it(sparse_matrix_, indx); it; ++it) {
-        if (not domination_indicator_[it.index()]) {
+        if (!domination_indicator_[it.index()]) {
           // inner index, here it is equal to it.columns()
           non_zero_indices.push_back(it.index());
         }
@@ -280,8 +280,8 @@ class Flag_complex_sparse_matrix {
     // Iterate over the non-zero rows
     for (Sparse_row_iterator it(sparse_matrix_, dominated); it; ++it)
       // Checking if the row is already dominated(set zero) or inserted
-      if (not domination_indicator_[it.index()] &&
-          not row_insert_indicator_[it.index()])
+      if (!domination_indicator_[it.index()] &&
+          !row_insert_indicator_[it.index()])
       {
         row_iterator_.push(it.index());
         row_insert_indicator_[it.index()] = true;
@@ -296,7 +296,7 @@ class Flag_complex_sparse_matrix {
     // Iterate over the non-zero columns
     for (Sparse_row_iterator non_zero_column_it(sparse_matrix_, row_index); non_zero_column_it; ++non_zero_column_it)
       // Check if the row corresponds to a dominated vertex
-      if (not domination_indicator_[non_zero_column_it.index()])
+      if (!domination_indicator_[non_zero_column_it.index()])
         // inner index, here it is equal to it.col()
         colmns.push_back(row_to_vertex_[non_zero_column_it.index()]);
     std::sort(colmns.begin(), colmns.end());
@@ -311,7 +311,7 @@ class Flag_complex_sparse_matrix {
     // Iterate over the non-zero columns
     for (Sparse_row_iterator non_zero_column_it(sparse_matrix_, row_index); non_zero_column_it; ++non_zero_column_it)
       // Check if the row corresponds to a contracted vertex
-      if (not contraction_indicator_[non_zero_column_it.index()])
+      if (!contraction_indicator_[non_zero_column_it.index()])
         // inner index, here it is equal to it.col()
         colmns.push_back(row_to_vertex_[non_zero_column_it.index()]);
 
@@ -511,7 +511,7 @@ class Flag_complex_sparse_matrix {
         vertex_to_row_.erase(del);
         vertices_.erase(del);
         row_to_vertex_.erase(row_del);
-      } else if (del_mem && not keep_mem) {
+      } else if (del_mem && !keep_mem) {
         vertex_to_row_.insert(std::make_pair(keep, vertex_to_row_.find(del)->second));
         row_to_vertex_[vertex_to_row_.find(del)->second] = keep;
         vertices_.emplace(keep);
