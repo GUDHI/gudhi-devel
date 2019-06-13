@@ -75,7 +75,8 @@ int main() {
   st.initialize_filtration();
 
   // Class for homology computation
-  // We want persistent homology to be computed for the maximal dimension in the complex (persistence_dim_max = true)
+  // By default, since the complex has dimension 1, only 0-dimensional homology would be computed.
+  // Here we also want persistent homology to be computed for the maximal dimension in the complex (persistence_dim_max = true)
   Persistent_cohomology pcoh(st, true);
 
   // Initialize the coefficient field Z/2Z for homology
