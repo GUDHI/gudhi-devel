@@ -575,7 +575,7 @@ class Flag_complex_sparse_matrix {
 
   // relable v as w.
   void relable(const Vertex& v, const Vertex& w) {
-    if (membership(v) and v != w) {
+    if (membership(v) && v != w) {
       auto rw_v = vertex_to_row_[v];
       row_to_vertex_[rw_v] = w;
       vertex_to_row_.insert(std::make_pair(w, rw_v));
