@@ -98,9 +98,13 @@ class Persistent_cohomology {
    *
    * @param[in] cpx Complex for which the persistent homology is computed.
    * cpx is a model of FilteredComplex
+   *
+   * @param[in] persistence_dim_max if true, the persistent homology for the maximal dimension in the
+   *                                complex is computed. If false, it is ignored. Default is false.
+   *
    * @exception std::out_of_range In case the number of simplices is more than Simplex_key type numeric limit.
    */
-  explicit Persistent_cohomology(FilteredComplex& cpx)
+  explicit Persistent_cohomology(FilteredComplex& cpx, bool persistence_dim_max = false)
       : cpx_(&cpx),
         dim_max_(cpx.dimension()),                       // upper bound on the dimension of the simplices
         coeff_field_(),                                  // initialize the field coefficient structure.
@@ -126,18 +130,6 @@ class Persistent_cohomology {
       ++idx_fil;
       dsets_.make_set(cpx_->key(sh));
     }
-  }
-
-  /** \brief Initializes the Persistent_cohomology class.
-   *
-   * @param[in] cpx Complex for which the persistent homology is compiuted.
-   * cpx is a model of FilteredComplex
-   *
-   * @param[in] persistence_dim_max if true, the persistent homology for the maximal dimension in the
-   *                                complex is computed. If false, it is ignored. Default is false.
-   */
-  Persistent_cohomology(FilteredComplex& cpx, bool persistence_dim_max)
-      : Persistent_cohomology(cpx) {
     if (persistence_dim_max) {
       ++dim_max_;
     }
