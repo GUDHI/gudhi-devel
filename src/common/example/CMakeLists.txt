@@ -25,12 +25,12 @@ if(CGAL_FOUND)
   install(TARGETS cgal_3D_off_reader DESTINATION bin)
 
   # need CGAL 4.7 and Eigen3
-  if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
+  if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
     add_executable ( cgal_off_reader example_CGAL_points_off_reader.cpp )
     target_link_libraries(cgal_off_reader ${CGAL_LIBRARY})
     add_test(NAME Common_example_vector_cgal_off_reader COMMAND $<TARGET_FILE:cgal_off_reader>
         "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off")
     install(TARGETS cgal_off_reader DESTINATION bin)
-  endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
+  endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
 
 endif()

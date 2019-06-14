@@ -6,7 +6,7 @@
    |      img/graphical_tools_representation.png                     | the user to build easily persistence barcode, diagram or density.     |                                               |
    |                                                                 |                                                                       | :Introduced in: GUDHI 2.0.0                   |
    |                                                                 |                                                                       |                                               |
-   |                                                                 |                                                                       | :Copyright: GPL v3                            |
+   |                                                                 |                                                                       | :Copyright: MIT                               |
    |                                                                 |                                                                       |                                               |
    |                                                                 |                                                                       | :Requires: matplotlib, numpy and scipy        |
    +-----------------------------------------------------------------+-----------------------------------------------------------------------+-----------------------------------------------+

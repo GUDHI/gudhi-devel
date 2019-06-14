@@ -6,7 +6,7 @@
    |      ../../doc/Simplex_tree/Simplex_tree_representation.png    | representing general (filtered) simplicial complexes.                  |                             |
    |      :alt: Simplex tree representation                         |                                                                        | :Introduced in: GUDHI 2.0.0 |
    |      :figclass: align-center                                   | The data structure is described in                                     |                             |
-   |                                                                | :cite:`boissonnatmariasimplextreealgorithmica`                         | :Copyright: GPL v3          |
+   |                                                                | :cite:`boissonnatmariasimplextreealgorithmica`                         | :Copyright: MIT             |
    |                                                                |                                                                        |                             |
    +----------------------------------------------------------------+------------------------------------------------------------------------+-----------------------------+
    | * :doc:`simplex_tree_user`                                     | * :doc:`simplex_tree_ref`                                                                            |

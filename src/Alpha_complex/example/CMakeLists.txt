@@ -1,6 +1,6 @@
 project(Alpha_complex_examples)
 
-if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
+if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   add_executable ( Alpha_complex_example_from_points Alpha_complex_from_points.cpp )
   target_link_libraries(Alpha_complex_example_from_points  ${CGAL_LIBRARY})
   add_executable ( Alpha_complex_example_from_off Alpha_complex_from_off.cpp )
@@ -26,9 +26,7 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
     add_test(Alpha_complex_example_from_off_32_diff_files ${DIFF_PATH}
         ${CMAKE_CURRENT_BINARY_DIR}/alphaoffreader_result_32.txt ${CMAKE_CURRENT_BINARY_DIR}/alphaoffreader_for_doc_32.txt)
   endif()
-endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
 
-if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   add_executable ( Alpha_complex_example_weighted_3d_from_points Weighted_alpha_complex_3d_from_points.cpp )
   target_link_libraries(Alpha_complex_example_weighted_3d_from_points  ${CGAL_LIBRARY})
   if (TBB_FOUND)

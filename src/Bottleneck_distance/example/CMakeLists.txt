@@ -1,6 +1,6 @@
 project(Bottleneck_distance_examples)
 
-if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
+if (NOT CGAL_VERSION VERSION_LESS 4.11.0)
   add_executable (bottleneck_basic_example bottleneck_basic_example.cpp)
   add_executable (alpha_rips_persistence_bottleneck_distance alpha_rips_persistence_bottleneck_distance.cpp)
   target_link_libraries(alpha_rips_persistence_bottleneck_distance ${Boost_PROGRAM_OPTIONS_LIBRARY})
@@ -18,4 +18,4 @@ if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
   install(TARGETS bottleneck_basic_example DESTINATION bin)
   install(TARGETS alpha_rips_persistence_bottleneck_distance DESTINATION bin)
   
-endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)
+endif (NOT CGAL_VERSION VERSION_LESS 4.11.0)

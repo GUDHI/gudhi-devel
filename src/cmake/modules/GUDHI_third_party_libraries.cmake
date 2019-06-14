@@ -23,42 +23,14 @@ endif()
 # but it implies to use cmake version 3.1 at least.
 find_package(CGAL QUIET)
 
-# Only CGAL versions > 4.4 supports what Gudhi uses from CGAL
-if (CGAL_VERSION VERSION_LESS 4.4.0)
+# Only CGAL versions > 4.11 supports what Gudhi uses from CGAL
+if (CGAL_FOUND AND CGAL_VERSION VERSION_LESS 4.11.0)
   message("++ CGAL version ${CGAL_VERSION} is considered too old to be used by Gudhi.")
   unset(CGAL_FOUND)
 endif()
 if(CGAL_FOUND)
   message(STATUS "CGAL version: ${CGAL_VERSION}.")
   include( ${CGAL_USE_FILE} )
-
-  if (NOT CGAL_VERSION VERSION_LESS 4.8.0)
-    # HACK to detect CGAL version 4.8.0
-    # CGAL version 4.8, 4.8.1 and 4.8.2 are identified as version 4.8.1000)
-    # cf. https://github.com/CGAL/cgal/issues/1559
-    # Limit the HACK between CGAL versions 4.8 and 4.9 because of file read
-    if (NOT CGAL_VERSION VERSION_GREATER 4.9.0)
-      foreach(CGAL_INCLUDE_DIR ${CGAL_INCLUDE_DIRS})
-        if (EXISTS "${CGAL_INCLUDE_DIR}/CGAL/version.h")
-          FILE(READ "${CGAL_INCLUDE_DIR}/CGAL/version.h" contents)
-          STRING(REGEX REPLACE "\n" ";" contents "${contents}")
-          foreach(Line ${contents})
-            if("${Line}" STREQUAL "#define CGAL_VERSION 4.8")
-              set(CGAL_VERSION 4.8.0)
-              message (">>>>> HACK CGAL version to ${CGAL_VERSION}")
-            endif("${Line}" STREQUAL "#define CGAL_VERSION 4.8")
-          endforeach(Line ${contents})
-        endif (EXISTS "${CGAL_INCLUDE_DIR}/CGAL/version.h")
-      endforeach(CGAL_INCLUDE_DIR ${CGAL_INCLUDE_DIRS})
-    endif(NOT CGAL_VERSION VERSION_GREATER 4.9.0)
-
-    if (CGAL_VERSION VERSION_LESS 4.11.0)
-      # For dev version
-      include_directories(BEFORE "src/common/include/gudhi_patches")
-      # For user version
-      include_directories(BEFORE "include/gudhi_patches")
-    endif ()
-  endif()
 endif()
 
 option(WITH_GUDHI_USE_TBB "Build with Intel TBB parallelization" ON)

@@ -53,17 +53,16 @@ if(GMP_FOUND)
    endif(GMPXX_FOUND)
 endif(GMP_FOUND)
 
-if(CGAL_FOUND)
-  if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
-    add_executable(custom_persistence_sort custom_persistence_sort.cpp)
-    target_link_libraries(custom_persistence_sort ${CGAL_LIBRARY})
+if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
 
-    if (TBB_FOUND)
-      target_link_libraries(custom_persistence_sort ${TBB_LIBRARIES})
-    endif(TBB_FOUND)
-    add_test(NAME Persistent_cohomology_example_custom_persistence_sort COMMAND $<TARGET_FILE:custom_persistence_sort>)
+  add_executable(custom_persistence_sort custom_persistence_sort.cpp)
+  target_link_libraries(custom_persistence_sort ${CGAL_LIBRARY})
 
-    install(TARGETS custom_persistence_sort DESTINATION bin)
+  if (TBB_FOUND)
+    target_link_libraries(custom_persistence_sort ${TBB_LIBRARIES})
+  endif(TBB_FOUND)
+  add_test(NAME Persistent_cohomology_example_custom_persistence_sort COMMAND $<TARGET_FILE:custom_persistence_sort>)
 
-  endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
-endif(CGAL_FOUND)
+  install(TARGETS custom_persistence_sort DESTINATION bin)
+
+endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)

@@ -91,7 +91,7 @@ if(PYTHONINTERP_FOUND)
       set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_EIGEN3_ENABLED', ")
     endif (EIGEN3_FOUND)
 
-    if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
+    if (NOT CGAL_VERSION VERSION_LESS 4.11.0)
       set(GUDHI_CYTHON_BOTTLENECK_DISTANCE "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/bottleneck_distance.pyx'")
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}bottleneck_distance;")
       set(GUDHI_CYTHON_NERVE_GIC "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/nerve_gic.pyx'")
@@ -100,7 +100,7 @@ if(PYTHONINTERP_FOUND)
       set(GUDHI_CYTHON_MISSING_MODULES "${GUDHI_CYTHON_MISSING_MODULES}bottleneck_distance;")
       set(GUDHI_CYTHON_MISSING_MODULES "${GUDHI_CYTHON_MISSING_MODULES}nerve_gic;")
     endif ()
-    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
       set(GUDHI_CYTHON_SUBSAMPLING "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/subsampling.pyx'")
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}subsampling;")
       set(GUDHI_CYTHON_TANGENTIAL_COMPLEX "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/tangential_complex.pyx'")
@@ -109,13 +109,13 @@ if(PYTHONINTERP_FOUND)
       set(GUDHI_CYTHON_MISSING_MODULES "${GUDHI_CYTHON_MISSING_MODULES}subsampling;")
       set(GUDHI_CYTHON_MISSING_MODULES "${GUDHI_CYTHON_MISSING_MODULES}tangential_complex;")
     endif ()
-    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
+    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
       set(GUDHI_CYTHON_ALPHA_COMPLEX "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/alpha_complex.pyx'")
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}alpha_complex;")
     else()
       set(GUDHI_CYTHON_MISSING_MODULES "${GUDHI_CYTHON_MISSING_MODULES}alpha_complex;")
     endif ()
-    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
+    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
       set(GUDHI_CYTHON_EUCLIDEAN_WITNESS_COMPLEX
           "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/euclidean_witness_complex.pyx'\ninclude '${CMAKE_CURRENT_SOURCE_DIR}/cython/euclidean_strong_witness_complex.pyx'\n")
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}euclidean_witness_complex;")
@@ -224,7 +224,7 @@ if(PYTHONINTERP_FOUND)
     install(CODE "execute_process(COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/setup.py install)")
 
     # Test examples
-    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
       # Bottleneck and Alpha
       add_test(NAME alpha_rips_persistence_bottleneck_distance_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -259,8 +259,8 @@ if(PYTHONINTERP_FOUND)
       # Subsampling
       add_gudhi_py_test(test_subsampling)
 
-    endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
-    if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
+    endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+    if (NOT CGAL_VERSION VERSION_LESS 4.11.0)
       # Bottleneck
       add_test(NAME bottleneck_basic_example_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -299,9 +299,9 @@ if(PYTHONINTERP_FOUND)
                -f human.off -n 700 -v)
 
       add_gudhi_py_test(test_cover_complex)
-    endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)
+    endif (NOT CGAL_VERSION VERSION_LESS 4.11.0)
 
-    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
+    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
       # Alpha
       add_test(NAME alpha_complex_from_points_example_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -318,13 +318,13 @@ if(PYTHONINTERP_FOUND)
 
       add_gudhi_py_test(test_alpha_complex)
 
-    endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.7.0)
+    endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
 
-    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
+    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
       # Euclidean witness
       add_gudhi_py_test(test_euclidean_witness_complex)
 
-    endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
+    endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
 
     # Cubical
     add_test(NAME periodic_cubical_complex_barcode_persistence_from_perseus_file_example_py_test
@@ -389,7 +389,7 @@ if(PYTHONINTERP_FOUND)
       if(MATPLOTLIB_FOUND)
         if(NUMPY_FOUND)
           if(SCIPY_FOUND)
-            if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+            if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
               set (GUDHI_SPHINX_MESSAGE "Generating API documentation with Sphinx in ${CMAKE_CURRENT_BINARY_DIR}/sphinx/")
               # User warning - Sphinx is a static pages generator, and configured to work fine with user_version
               # Images and biblio warnings because not found on developper version
@@ -411,10 +411,10 @@ if(PYTHONINTERP_FOUND)
 
               # Set missing or not modules
               set(GUDHI_MODULES ${GUDHI_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MODULES")
-            else(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+            else(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
               message("++ Python documentation module will not be compiled because it requires a CGAL with Eigen3 version greater or equal than 4.8.1")
               set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
-            endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+            endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
           else(SCIPY_FOUND)
             message("++ Python documentation module will not be compiled because scipy was not found")
             set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")

@@ -62,7 +62,7 @@ import gudhi
 
 # General information about the project.
 project = gudhi.__name__
-copyright = gudhi.__copyright__ + ' - ' + gudhi.__license__
+copyright = gudhi.__copyright__ + ' - MIT'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

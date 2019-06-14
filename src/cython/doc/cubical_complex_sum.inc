@@ -6,7 +6,7 @@
    |      ../../doc/Bitmap_cubical_complex/Cubical_complex_representation.png | computational mathematics (specially rigorous numerics) and image    |                             |
    |      :alt: Cubical complex representation                                | analysis.                                                            | :Introduced in: GUDHI 2.0.0 |
    |      :figclass: align-center                                             |                                                                      |                             |
-   |                                                                          |                                                                      | :Copyright: GPL v3          |
+   |                                                                          |                                                                      | :Copyright: MIT             |
    |                                                                          |                                                                      |                             |
    +--------------------------------------------------------------------------+----------------------------------------------------------------------+-----------------------------+
    | * :doc:`cubical_complex_user`                                            | * :doc:`cubical_complex_ref`                                                                       |

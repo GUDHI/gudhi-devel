@@ -6,7 +6,7 @@
    |      ../../doc/Rips_complex/rips_complex_representation.png    | graph.                                                                 |                                                                      |
    |      :figclass: align-center                                   |                                                                        | :Introduced in: GUDHI 2.0.0                                          |
    |                                                                | The filtration value of each edge is computed from a user-given        |                                                                      |
-   |                                                                | distance function and is inserted until a user-given threshold         | :Copyright: GPL v3                                                   |
+   |                                                                | distance function and is inserted until a user-given threshold         | :Copyright: MIT                                                      |
    |                                                                | value.                                                                 |                                                                      |
    |                                                                |                                                                        |                                                                      |
    |                                                                | This complex can be built from a point cloud and a distance function,  |                                                                      |

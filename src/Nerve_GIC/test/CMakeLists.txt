@@ -1,6 +1,6 @@
 project(Graph_induced_complex_tests)
 
-if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
+if (NOT CGAL_VERSION VERSION_LESS 4.11.0)
   include(GUDHI_test_coverage)
 
   add_executable ( Nerve_GIC_test_unit test_GIC.cpp )
@@ -13,4 +13,4 @@ if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
 
   gudhi_add_coverage_test(Nerve_GIC_test_unit)
 
-endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)
+endif (NOT CGAL_VERSION VERSION_LESS 4.11.0)
