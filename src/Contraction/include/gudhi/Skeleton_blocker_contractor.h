@@ -13,9 +13,6 @@
 #ifndef SKELETON_BLOCKER_CONTRACTOR_H_
 #define SKELETON_BLOCKER_CONTRACTOR_H_
 
-// todo remove the queue to be independent from cgald
-#include <gudhi/Contraction/CGAL_queue/Modifiable_priority_queue.h>
-
 #include <gudhi/Contraction/Edge_profile.h>
 #include <gudhi/Contraction/policies/Cost_policy.h>
 #include <gudhi/Contraction/policies/Edge_length_cost.h>
@@ -29,6 +26,8 @@
 #include <gudhi/Skeleton_blocker/Skeleton_blocker_complex_visitor.h>
 #include <gudhi/Debug_utils.h>
 
+// todo remove the queue to be independent from cgald
+#include <CGAL/Modifiable_priority_queue.h>
 
 #include <boost/scoped_array.hpp>
 #include <boost/scoped_ptr.hpp>

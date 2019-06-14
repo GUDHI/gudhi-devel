@@ -12,6 +12,7 @@
 #define CONTRACTION_EDGE_PROFILE_H_
 
 #include <ostream>
+#include <cassert>
 
 namespace Gudhi {
 
