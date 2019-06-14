@@ -6,7 +6,7 @@ import sys
 sys.path.append("../sktda/")
 from clustering import *
 
-X = np.loadtxt("human")
+X = np.loadtxt("../../../data/points/human")
 
 print("Mapper computation with point cloud")
 mapper = MapperComplex(inp="point cloud", 
