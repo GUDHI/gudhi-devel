@@ -58,6 +58,9 @@ addons:
       - cgal
       - python3
 
+before_install:
+  - brew update >/dev/null
+  
 # When installing through libcgal-dev apt, CMake Error at CGAL Exports.cmake The imported target "CGAL::CGAL Qt5" references the file
 install: 
   - python3 -m pip install --upgrade pip setuptools wheel
