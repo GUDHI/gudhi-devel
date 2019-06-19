@@ -43,6 +43,7 @@ matrix:
 cache:
   directories:
     - $HOME/.cache/pip
+    - $HOME/Library/Caches/Homebrew
 
 addons:
   homebrew:
@@ -58,8 +59,8 @@ addons:
       - cgal
       - python3
 
-before_install:
-  - brew update >/dev/null
+before_cache:
+  - brew cleanup
   
 # When installing through libcgal-dev apt, CMake Error at CGAL Exports.cmake The imported target "CGAL::CGAL Qt5" references the file
 install: 
