@@ -412,7 +412,7 @@ if(PYTHONINTERP_FOUND)
               # Set missing or not modules
               set(GUDHI_MODULES ${GUDHI_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MODULES")
             else(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-              message("++ Python documentation module will not be compiled because it requires a CGAL with Eigen3 version greater or equal than 4.8.1")
+              message("++ Python documentation module will not be compiled because it requires a Eigen3 and CGAL version >= 4.11.0")
               set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
             endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
           else(SCIPY_FOUND)

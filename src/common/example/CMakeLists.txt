@@ -6,8 +6,6 @@ file(COPY "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" DESTINATION ${CM
 add_test(NAME Common_example_vector_double_off_reader COMMAND $<TARGET_FILE:vector_double_off_reader>
     "alphacomplexdoc.off")
 
-install(TARGETS vector_double_off_reader DESTINATION bin)
-
 if (DIFF_PATH)
   # Do not forget to copy test results files in current binary dir
   file(COPY "vectordoubleoffreader_result.txt" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
@@ -16,21 +14,17 @@ if (DIFF_PATH)
       ${CMAKE_CURRENT_BINARY_DIR}/vectordoubleoffreader_result.txt ${CMAKE_CURRENT_BINARY_DIR}/alphacomplexdoc.off.txt)
 endif()
 
-if(CGAL_FOUND)
+if(NOT CGAL_VERSION VERSION_LESS 4.11.0)
   add_executable ( cgal_3D_off_reader example_CGAL_3D_points_off_reader.cpp )
   target_link_libraries(cgal_3D_off_reader ${CGAL_LIBRARY})
   add_test(NAME Common_example_vector_cgal_3D_off_reader COMMAND $<TARGET_FILE:cgal_3D_off_reader>
       "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off")
-
-  install(TARGETS cgal_3D_off_reader DESTINATION bin)
-
-  # need CGAL 4.7 and Eigen3
-  if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-    add_executable ( cgal_off_reader example_CGAL_points_off_reader.cpp )
-    target_link_libraries(cgal_off_reader ${CGAL_LIBRARY})
-    add_test(NAME Common_example_vector_cgal_off_reader COMMAND $<TARGET_FILE:cgal_off_reader>
-        "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off")
-    install(TARGETS cgal_off_reader DESTINATION bin)
-  endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-
 endif()
+
+# requires CGAL and Eigen3
+if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+  add_executable ( cgal_off_reader example_CGAL_points_off_reader.cpp )
+  target_link_libraries(cgal_off_reader ${CGAL_LIBRARY})
+  add_test(NAME Common_example_vector_cgal_off_reader COMMAND $<TARGET_FILE:cgal_off_reader>
+      "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off")
+endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
