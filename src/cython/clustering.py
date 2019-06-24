@@ -185,12 +185,11 @@ class MapperComplex(BaseEstimator, TransformerMixin):
             for clus_i in range(num_clus_pre):
                 node_name = clus_base + clus_i
                 subpopulation = idxs[clusters == clus_i]
-                if len(subpopulation) >= self.mask:
-                    self.node_info_[node_name] = {}
-                    self.node_info_[node_name]["indices"] = subpopulation
-                    self.node_info_[node_name]["size"] = len(subpopulation)
-                    self.node_info_[node_name]["colors"] = np.mean(self.colors[subpopulation,:], axis=0)
-                    self.node_info_[node_name]["patch"] = preimage
+                self.node_info_[node_name] = {}
+                self.node_info_[node_name]["indices"] = subpopulation
+                self.node_info_[node_name]["size"] = len(subpopulation)
+                self.node_info_[node_name]["colors"] = np.mean(self.colors[subpopulation,:], axis=0)
+                self.node_info_[node_name]["patch"] = preimage
 
             # Update the cover map
             for pt in range(clusters.shape[0]):
