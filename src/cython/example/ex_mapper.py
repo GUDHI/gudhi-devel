@@ -25,7 +25,7 @@ for (edge,_) in mapper.mapper_.get_skeleton(1):
         f.write(str(edge[0]) + " " + str(edge[1]) + "\n")
 f.close()
 
-os.system("python3 ~/Git/gudhi-devel/src/Nerve_GIC/utilities/KeplerMapperVisuFromTxtFile.py -f mapper_pc")
+os.system("python3 ~/Documents/code/gudhi-devel/src/Nerve_GIC/utilities/KeplerMapperVisuFromTxtFile.py -f mapper_pc")
 os.system("rm mapper_pc")
 
 dgms = mapper.compute_persistence_diagrams()
@@ -53,7 +53,7 @@ for (edge,_) in mapper.mapper_.get_skeleton(1):
         f.write(str(edge[0]) + " " + str(edge[1]) + "\n")
 f.close()
 
-os.system("python3 ~/Git/gudhi-devel/src/Nerve_GIC/utilities/KeplerMapperVisuFromTxtFile.py -f mapper_dm")
+os.system("python3 ~/Documents/code/gudhi-devel/src/Nerve_GIC/utilities/KeplerMapperVisuFromTxtFile.py -f mapper_dm")
 os.system("rm mapper_dm")
 
 dgms = mapper.compute_persistence_diagrams()
