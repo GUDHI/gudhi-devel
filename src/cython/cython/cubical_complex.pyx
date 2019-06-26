@@ -13,7 +13,7 @@ from numpy import array as np_array
 
    Author(s):       Vincent Rouvreau
 
-   Copyright (C) 2019 Inria
+   Copyright (C) 2016 Inria
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
