@@ -3,19 +3,19 @@ from libcpp.vector cimport vector
 from libcpp.string cimport string
 import os
 
-"""This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
     Author(s):       Vincent Rouvreau
 
-   Copyright (C) 2016 Inria
+    Copyright (C) 2016 Inria
 
-   Modification(s):
-     - YYYY/MM Author: Description of the modification
+    Modification(s):
+      - YYYY/MM Author: Description of the modification
 """
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "GPL v3"
+__license__ = "MIT"
 
 cdef extern from "Off_reader_interface.h" namespace "Gudhi":
     vector[vector[double]] read_points_from_OFF_file(string off_file)

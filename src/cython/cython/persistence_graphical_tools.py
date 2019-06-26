@@ -2,19 +2,19 @@ from os import path
 from math import isfinite
 import numpy as np
 
-"""This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
     Author(s):       Vincent Rouvreau, Bertrand Michel
 
-   Copyright (C) 2019 Inria
+    Copyright (C) 2016 Inria
 
-   Modification(s):
-     - YYYY/MM Author: Description of the modification
+    Modification(s):
+      - YYYY/MM Author: Description of the modification
 """
 
 __author__ = "Vincent Rouvreau, Bertrand Michel"
 __copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "GPL v3"
+__license__ = "MIT"
 
 def __min_birth_max_death(persistence, band=0.):
     """This function returns (min_birth, max_death) from the persistence.

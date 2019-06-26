@@ -2,19 +2,19 @@
 
 import gudhi
 
-"""This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
-    Author(s):       Francois Godi, Vincent Rouvreau
+    Author(s):       Vincent Rouvreau
 
-   Copyright (C) 2016 Inria
+    Copyright (C) 2016 Inria
 
-   Modification(s):
-     - YYYY/MM Author: Description of the modification
+    Modification(s):
+      - YYYY/MM Author: Description of the modification
 """
 
 __author__ = "Francois Godi, Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "GPL v3"
+__license__ = "MIT"
 
 diag1 = [[2.7, 3.7],[9.6, 14.],[34.2, 34.974], [3.,float('Inf')]]
 

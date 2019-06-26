@@ -7,19 +7,19 @@ from libcpp.pair cimport pair
 from os import path
 from numpy import array as np_array
 
-"""This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
     Author(s):       Vincent Rouvreau
 
-   Copyright (C) 2019 Inria
+    Copyright (C) 2017 Inria
 
-   Modification(s):
-     - YYYY/MM Author: Description of the modification
+    Modification(s):
+      - YYYY/MM Author: Description of the modification
 """
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2017 Inria"
-__license__ = "GPL v3"
+__license__ = "MIT"
 
 cdef extern from "Reader_utils_interface.h" namespace "Gudhi":
     vector[vector[double]] read_matrix_from_csv_file(string off_file, char separator)
