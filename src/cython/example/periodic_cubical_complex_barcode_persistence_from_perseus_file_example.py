@@ -17,8 +17,9 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
+
 def is_file_perseus(file):
-    num_lines = open(file).read().count('\n')
+    num_lines = open(file).read().count("\n")
     try:
         f = open(file)
         num_dim = int(f.readline())
@@ -36,14 +37,21 @@ def is_file_perseus(file):
     except ValueError:
         return False
 
-parser = argparse.ArgumentParser(description='Periodic cubical complex from a '
-                                 'Perseus-style file name.',
-                                 epilog='Example: '
-                                 './periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py'
-                                 ' -f ../data/bitmap/CubicalTwoSphere.txt')
+
+parser = argparse.ArgumentParser(
+    description="Periodic cubical complex from a " "Perseus-style file name.",
+    epilog="Example: "
+    "./periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py"
+    " -f ../data/bitmap/CubicalTwoSphere.txt",
+)
 
 parser.add_argument("-f", "--file", type=str, required=True)
-parser.add_argument('--no-barcode', default=False, action='store_true' , help='Flag for not to display the barcodes')
+parser.add_argument(
+    "--no-barcode",
+    default=False,
+    action="store_true",
+    help="Flag for not to display the barcodes",
+)
 
 args = parser.parse_args()
 
@@ -53,7 +61,9 @@ if is_file_perseus(args.file):
     periodic_cubical_complex = gudhi.PeriodicCubicalComplex(perseus_file=args.file)
 
     print("persistence(homology_coeff_field=3, min_persistence=0)=")
-    diag = periodic_cubical_complex.persistence(homology_coeff_field=3, min_persistence=0)
+    diag = periodic_cubical_complex.persistence(
+        homology_coeff_field=3, min_persistence=0
+    )
     print(diag)
 
     print("betti_numbers()=")

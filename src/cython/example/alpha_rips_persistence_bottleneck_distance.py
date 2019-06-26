@@ -18,21 +18,23 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
-parser = argparse.ArgumentParser(description='AlphaComplex and RipsComplex '
-                                 'persistence creation from points read in '
-                                 'a OFF file. Bottleneck distance computation'
-                                 ' on each dimension',
-                                 epilog='Example: '
-                                 'example/alpha_rips_persistence_bottleneck_distance.py '
-                                 '-f ../data/points/tore3D_1307.off -t 0.15 -d 3')
+parser = argparse.ArgumentParser(
+    description="AlphaComplex and RipsComplex "
+    "persistence creation from points read in "
+    "a OFF file. Bottleneck distance computation"
+    " on each dimension",
+    epilog="Example: "
+    "example/alpha_rips_persistence_bottleneck_distance.py "
+    "-f ../data/points/tore3D_1307.off -t 0.15 -d 3",
+)
 parser.add_argument("-f", "--file", type=str, required=True)
 parser.add_argument("-t", "--threshold", type=float, default=0.5)
 parser.add_argument("-d", "--max_dimension", type=int, default=1)
 
 args = parser.parse_args()
-with open(args.file, 'r') as f:
+with open(args.file, "r") as f:
     first_line = f.readline()
-    if (first_line == 'OFF\n') or (first_line == 'nOFF\n'):
+    if (first_line == "OFF\n") or (first_line == "nOFF\n"):
         point_cloud = gudhi.read_off(off_file=args.file)
         print("#####################################################################")
         print("RipsComplex creation from points read in a OFF file")
@@ -40,8 +42,9 @@ with open(args.file, 'r') as f:
         message = "RipsComplex with max_edge_length=" + repr(args.threshold)
         print(message)
 
-        rips_complex = gudhi.RipsComplex(points=point_cloud,
-                                         max_edge_length=args.threshold)
+        rips_complex = gudhi.RipsComplex(
+            points=point_cloud, max_edge_length=args.threshold
+        )
 
         rips_stree = rips_complex.create_simplex_tree(max_dimension=args.max_dimension)
 
@@ -57,7 +60,9 @@ with open(args.file, 'r') as f:
         print(message)
 
         alpha_complex = gudhi.AlphaComplex(points=point_cloud)
-        alpha_stree = alpha_complex.create_simplex_tree(max_alpha_square=(args.threshold * args.threshold))
+        alpha_stree = alpha_complex.create_simplex_tree(
+            max_alpha_square=(args.threshold * args.threshold)
+        )
 
         message = "Number of simplices=" + repr(alpha_stree.num_simplices())
         print(message)
@@ -71,15 +76,26 @@ with open(args.file, 'r') as f:
             funcs = [math.sqrt, math.sqrt]
             alpha_intervals = []
             for interval in alpha_stree.persistence_intervals_in_dimension(dim):
-                alpha_intervals.append(map(lambda func,value: func(value), funcs, interval))
+                alpha_intervals.append(
+                    map(lambda func, value: func(value), funcs, interval)
+                )
 
             rips_intervals = rips_stree.persistence_intervals_in_dimension(dim)
-            bottleneck_distance = gudhi.bottleneck_distance(rips_intervals, alpha_intervals)
-            message = "In dimension " + repr(dim) + ", bottleneck distance = " + repr(bottleneck_distance)
+            bottleneck_distance = gudhi.bottleneck_distance(
+                rips_intervals, alpha_intervals
+            )
+            message = (
+                "In dimension "
+                + repr(dim)
+                + ", bottleneck distance = "
+                + repr(bottleneck_distance)
+            )
             print(message)
             max_b_distance = max(bottleneck_distance, max_b_distance)
 
-        print("================================================================================")
+        print(
+            "================================================================================"
+        )
         message = "Bottleneck distance is " + repr(max_b_distance)
         print(message)
 

@@ -16,9 +16,9 @@ __author__ = "Francois Godi, Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
-diag1 = [[2.7, 3.7],[9.6, 14.],[34.2, 34.974], [3.,float('Inf')]]
+diag1 = [[2.7, 3.7], [9.6, 14.0], [34.2, 34.974], [3.0, float("Inf")]]
 
-diag2 = [[2.8, 4.45],[9.5, 14.1],[3.2,float('Inf')]]
+diag2 = [[2.8, 4.45], [9.5, 14.1], [3.2, float("Inf")]]
 
 message = "diag1=" + repr(diag1)
 print(message)
@@ -26,9 +26,12 @@ print(message)
 message = "diag2=" + repr(diag2)
 print(message)
 
-message = "Bottleneck distance approximation=" + repr(gudhi.bottleneck_distance(diag1, diag2, 0.1))
+message = "Bottleneck distance approximation=" + repr(
+    gudhi.bottleneck_distance(diag1, diag2, 0.1)
+)
 print(message)
 
-message = "Bottleneck distance exact value=" + repr(gudhi.bottleneck_distance(diag1, diag2))
+message = "Bottleneck distance exact value=" + repr(
+    gudhi.bottleneck_distance(diag1, diag2)
+)
 print(message)
-

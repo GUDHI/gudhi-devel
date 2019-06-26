@@ -17,7 +17,7 @@ __license__ = "MIT"
 
 def test_tangential():
     point_list = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]]
-    tc = TangentialComplex(intrisic_dim = 1, points=point_list)
+    tc = TangentialComplex(intrisic_dim=1, points=point_list)
     assert tc.__is_defined() == True
     assert tc.num_vertices() == 4
     assert tc.num_simplices() == 0
@@ -36,11 +36,17 @@ def test_tangential():
 
     assert st.num_simplices() == 6
     assert st.num_vertices() == 4
- 
-    assert st.get_filtration() == \
-        [([0], 0.0), ([1], 0.0), ([2], 0.0), ([0, 2], 0.0), ([3], 0.0), ([1, 3], 0.0)]
+
+    assert st.get_filtration() == [
+        ([0], 0.0),
+        ([1], 0.0),
+        ([2], 0.0),
+        ([0, 2], 0.0),
+        ([3], 0.0),
+        ([1, 3], 0.0),
+    ]
     assert st.get_cofaces([0], 1) == [([0, 2], 0.0)]
- 
+
     assert point_list[0] == tc.get_point(0)
     assert point_list[1] == tc.get_point(1)
     assert point_list[2] == tc.get_point(2)

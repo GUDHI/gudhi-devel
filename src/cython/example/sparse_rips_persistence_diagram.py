@@ -18,8 +18,9 @@ __license__ = "MIT"
 
 print("#####################################################################")
 print("Sparse RipsComplex creation from points")
-rips = gudhi.RipsComplex(points=[[0, 0], [0, 0.1], [1, 0], [0, 1], [1, 1]],
-                         max_edge_length=42, sparse=.5)
+rips = gudhi.RipsComplex(
+    points=[[0, 0], [0, 0.1], [1, 0], [0, 1], [1, 1]], max_edge_length=42, sparse=0.5
+)
 
 simplex_tree = rips.create_simplex_tree(max_dimension=2)
 
