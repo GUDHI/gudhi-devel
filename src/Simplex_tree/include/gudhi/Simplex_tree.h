@@ -821,7 +821,7 @@ class Simplex_tree {
       }
     }
     // Next iteration to avoid consecutive equal values
-    while ((vertex_one == *first) && (first < last)) {
+    while ((first < last) && (vertex_one == *first)) {
       ++first;
     }
     // End of insertion
