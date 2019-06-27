@@ -775,27 +775,18 @@ class Simplex_tree {
     std::vector<Vertex_handle> copy;
     copy.clear();
     copy.insert(copy.end(), first, last);
-    std::sort(std::begin(copy), std::end(copy));
+    std::sort(copy.begin(), copy.end());
+    auto last_unique = std::unique(copy.begin(), copy.end());
+    copy.erase(last_unique, copy.end());
     GUDHI_CHECK_code(
       for (Vertex_handle v : copy)
         GUDHI_CHECK(v != null_vertex(), "cannot use the dummy null_vertex() as a real vertex");
     )
 
-    return insert_simplex_and_subfaces_sorted(copy, filtration);
+    return rec_insert_simplex_and_subfaces_sorted(root(), copy.begin(), copy.end(), filtration, 0);
   }
 
  private:
-  /// Same as insert_simplex_and_subfaces but assumes that the range of vertices is sorted
-  template<class ForwardVertexRange = std::initializer_list<Vertex_handle>>
-  std::pair<Simplex_handle, bool> insert_simplex_and_subfaces_sorted(const ForwardVertexRange& Nsimplex,
-                                                                     Filtration_value filt = 0) {
-    auto first = std::begin(Nsimplex);
-    auto last = std::end(Nsimplex);
-    if (first == last)
-      return { null_simplex(), true }; // FIXME: false would make more sense to me.
-    GUDHI_CHECK(std::is_sorted(first, last), "simplex vertices listed in unsorted order");
-    return rec_insert_simplex_and_subfaces_sorted(root(), first, last, filt, 0);
-  }
   // To insert {1,2,3,4}, we insert {2,3,4} twice, once at the root, and once below 1.
   template<class ForwardVertexIterator>
   std::pair<Simplex_handle, bool> rec_insert_simplex_and_subfaces_sorted(Siblings* sib,
