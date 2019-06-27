@@ -33,12 +33,12 @@ matrix:
         # 4. Only doxygen documentation
         - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='doxygen'
     # Issue with sphinx-build with sphinx 2.0.1
-    - os: osx
-      osx_image: xcode10.2
-      compiler: clang
-      env:
-        # 5. Only Python, associated tests and sphinx documentation
-        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET=''
+    # - os: osx
+    #   osx_image: xcode10.2
+    #   compiler: clang
+    #   env:
+    #     # 5. Only Python, associated tests and sphinx documentation
+    #     - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='test sphinx'
 
 cache:
   directories:
@@ -69,7 +69,6 @@ script:
   - cd build 
   - cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=${CMAKE_EXAMPLE} -DWITH_GUDHI_TEST=${CMAKE_TEST} -DWITH_GUDHI_UTILITIES=${CMAKE_UTILITIES} -DWITH_GUDHI_PYTHON=${CMAKE_PYTHON} -DUSER_VERSION_DIR=version -DPython_ADDITIONAL_VERSIONS=3 .. 
   - make all ${MAKE_TARGET}
-  - ctest -R sphinx_py_test -V
   - cd ..
 
 notifications:
