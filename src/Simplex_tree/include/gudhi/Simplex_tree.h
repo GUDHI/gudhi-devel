@@ -765,7 +765,7 @@ class Simplex_tree {
     auto last = std::end(Nsimplex);
 
     if (first == last)
-      return { null_simplex(), true };  // ----->>
+      return { null_simplex(), true }; // FIXME: false would make more sense to me.
 
     // Copy before sorting
     // Thread local is not available on XCode version < V.8 - It will slow down computation
