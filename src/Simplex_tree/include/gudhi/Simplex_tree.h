@@ -782,18 +782,19 @@ class Simplex_tree {
       for (Vertex_handle v : copy)
         GUDHI_CHECK(v != null_vertex(), "cannot use the dummy null_vertex() as a real vertex");
     )
+    // Update dimension if needed. We could wait to see if the insertion succeeds, but I doubt there is much to gain.
+    dimension_ = (std::max)(dimension_, static_cast<int>(std::distance(copy.begin(), copy.end())) - 1);
 
-    return rec_insert_simplex_and_subfaces_sorted(root(), copy.begin(), copy.end(), filtration, 0);
+    return rec_insert_simplex_and_subfaces_sorted(root(), copy.begin(), copy.end(), filtration);
   }
 
  private:
   // To insert {1,2,3,4}, we insert {2,3,4} twice, once at the root, and once below 1.
   template<class ForwardVertexIterator>
   std::pair<Simplex_handle, bool> rec_insert_simplex_and_subfaces_sorted(Siblings* sib,
-                                                                         ForwardVertexIterator first,
-                                                                         ForwardVertexIterator last,
-                                                                         Filtration_value filt,
-                                                                         int dimension) {
+  	                                                                     ForwardVertexIterator first,
+  	                                                                     ForwardVertexIterator last,
+  	                                                                     Filtration_value filt) {
     // An alternative strategy would be:
     // - try to find the complete simplex, if found (and low filtration) exit
     // - insert all the vertices at once in sib
@@ -811,24 +812,13 @@ class Simplex_tree {
         insertion_result.first = null_simplex();
       }
     }
-    // Next iteration to avoid consecutive equal values
-    while ((first < last) && (vertex_one == *first)) {
-      ++first;
-    }
-    // End of insertion
-    if (first == last) {
-      dimension_ = (std::max)(dimension_, dimension);
-      return insertion_result;
-    }
+    if (++first == last) return insertion_result;
     if (!has_children(simplex_one))
       // TODO: have special code here, we know we are building the whole subtree from scratch.
       simplex_one->second.assign_children(new Siblings(sib, vertex_one));
-    ++dimension;
-    auto res = rec_insert_simplex_and_subfaces_sorted(simplex_one->second.children(), first, last, filt, dimension);
+    auto res = rec_insert_simplex_and_subfaces_sorted(simplex_one->second.children(), first, last, filt);
     // No need to continue if the full simplex was already there with a low enough filtration value.
-    if (res.first != null_simplex()) {
-      rec_insert_simplex_and_subfaces_sorted(sib, first, last, filt, dimension);
-    }
+    if (res.first != null_simplex()) rec_insert_simplex_and_subfaces_sorted(sib, first, last, filt);
     return res;
   }
 
