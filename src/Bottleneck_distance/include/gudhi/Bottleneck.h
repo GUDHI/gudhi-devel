@@ -6,6 +6,9 @@
  *
  *    Copyright (C) 2015 Inria
  *
+ *    Modifications:
+ *      - 2019/06 Vincent Rouvreau : Fix doxygen warning.
+ *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation, either version 3 of the License, or
@@ -92,6 +95,10 @@ inline double bottleneck_distance_exact(Persistence_graph& g) {
  *
  * \tparam Persistence_diagram1,Persistence_diagram2
  * models of the concept `PersistenceDiagram`.
+ *
+ * \param[in] diag1 The first persistence diagram.
+ * \param[in] diag2 The second persistence diagram.
+ *
  * \param[in] e
  * \parblock
  * If `e` is 0, this uses an expensive algorithm to compute the exact distance.
