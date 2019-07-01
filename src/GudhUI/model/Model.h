@@ -6,6 +6,8 @@
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
+ *      - 2019/07 Vincent Rouvreau: homsimpl (from CHOMP) is no more delivered.
+ *                                  Error message when not previously installed.
  */
 
 #ifndef MODEL_MODEL_H_
@@ -307,7 +309,6 @@ class Model {
  private:
   void run_chomp() {
     save_complex_in_file_for_chomp();
-    std::cout << "POUET" << std::endl;
     std::cout << "Call CHOMP library\n";
     int returnValue = system("which homsimpl");
     if (returnValue != 0) {
