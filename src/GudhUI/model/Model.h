@@ -307,9 +307,15 @@ class Model {
  private:
   void run_chomp() {
     save_complex_in_file_for_chomp();
+    std::cout << "POUET" << std::endl;
     std::cout << "Call CHOMP library\n";
-    int returnValue = system("utils/homsimpl chomp.sim");
-    std::cout << "CHOMP returns" << returnValue << std::endl;
+    int returnValue = system("which homsimpl");
+    if (returnValue != 0) {
+        std::cout << "CHOMP must be installed and available in PATH for this functionnality." << std::endl;
+        return;
+    }
+    returnValue = system("homsimpl chomp.sim");
+    std::cout << "CHOMP returns " << returnValue << std::endl;
   }
 
   void save_complex_in_file_for_chomp() {
