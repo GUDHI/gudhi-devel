@@ -17,7 +17,7 @@ import os
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2018 Inria"
-__license__ = "MIT"
+__license__ = "GPL v3"
 
 cdef extern from "Nerve_gic_interface.h" namespace "Gudhi":
     cdef cppclass Nerve_gic_interface "Gudhi::cover_complex::Nerve_gic_interface":

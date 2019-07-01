@@ -17,7 +17,7 @@ import os
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT"
+__license__ = "GPL v3"
 
 cdef extern from "Tangential_complex_interface.h" namespace "Gudhi":
     cdef cppclass Tangential_complex_interface "Gudhi::tangential_complex::Tangential_complex_interface":

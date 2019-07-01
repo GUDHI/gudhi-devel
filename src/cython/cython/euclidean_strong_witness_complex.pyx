@@ -14,7 +14,7 @@ from libcpp.utility cimport pair
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT"
+__license__ = "GPL v3"
 
 cdef extern from "Euclidean_strong_witness_complex_interface.h" namespace "Gudhi":
     cdef cppclass Euclidean_strong_witness_complex_interface "Gudhi::witness_complex::Euclidean_strong_witness_complex_interface":

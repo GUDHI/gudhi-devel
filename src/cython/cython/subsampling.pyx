@@ -16,7 +16,7 @@ import os
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT"
+__license__ = "GPL v3"
 
 cdef extern from "Subsampling_interface.h" namespace "Gudhi::subsampling":
     vector[vector[double]] subsampling_n_farthest_points(vector[vector[double]] points, unsigned nb_points)
