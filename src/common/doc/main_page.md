@@ -261,7 +261,7 @@
     <td width="15%">
       <b>Author:</b> David Salinas<br>
       <b>Introduced in:</b> GUDHI 1.1.0<br>
-      <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
+      <b>Copyright:</b> MIT [(LGPL v3)](../../licensing/)<br>
       <b>Requires:</b> \ref cgal &ge; 4.11.0
     </td>
  </tr>
