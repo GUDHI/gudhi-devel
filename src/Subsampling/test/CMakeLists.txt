@@ -1,6 +1,6 @@
 project(Subsampling_tests)
 
-if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   include(GUDHI_test_coverage)
 
   add_executable( Subsampling_test_pick_n_random_points test_pick_n_random_points.cpp )
@@ -15,4 +15,4 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
   gudhi_add_coverage_test(Subsampling_test_pick_n_random_points)
   gudhi_add_coverage_test(Subsampling_test_choose_n_farthest_points)
   gudhi_add_coverage_test(Subsampling_test_sparsify_point_set)
-endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)

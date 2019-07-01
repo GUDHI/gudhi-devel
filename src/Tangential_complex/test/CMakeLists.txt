@@ -1,6 +1,6 @@
 project(Tangential_complex_tests)
 
-if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   include(GUDHI_test_coverage)
 
   add_executable( Tangential_complex_test_TC test_tangential_complex.cpp )
@@ -10,4 +10,4 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
   endif()
 
   gudhi_add_coverage_test(Tangential_complex_test_TC)
-endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)

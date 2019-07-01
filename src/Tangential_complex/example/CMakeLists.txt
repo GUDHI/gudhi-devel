@@ -1,6 +1,6 @@
 project(Tangential_complex_examples)
 
-if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   add_executable( Tangential_complex_example_basic example_basic.cpp )
   target_link_libraries(Tangential_complex_example_basic ${CGAL_LIBRARY})
   add_executable( Tangential_complex_example_with_perturb example_with_perturb.cpp )
@@ -17,4 +17,4 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
 
   install(TARGETS Tangential_complex_example_basic DESTINATION bin)
   install(TARGETS Tangential_complex_example_with_perturb DESTINATION bin)
-endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)

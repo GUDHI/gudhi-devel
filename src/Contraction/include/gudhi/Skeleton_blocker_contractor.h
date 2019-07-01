@@ -6,25 +6,12 @@
  *
  *    Copyright (C) 2014 Inria
  *
- *    This program is free software: you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation, either version 3 of the License, or
- *    (at your option) any later version.
- *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
- *
- *    You should have received a copy of the GNU General Public License
- *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    Modification(s):
+ *      - YYYY/MM Author: Description of the modification
  */
 
 #ifndef SKELETON_BLOCKER_CONTRACTOR_H_
 #define SKELETON_BLOCKER_CONTRACTOR_H_
-
-// todo remove the queue to be independent from cgald
-#include <gudhi/Contraction/CGAL_queue/Modifiable_priority_queue.h>
 
 #include <gudhi/Contraction/Edge_profile.h>
 #include <gudhi/Contraction/policies/Cost_policy.h>
@@ -39,6 +26,8 @@
 #include <gudhi/Skeleton_blocker/Skeleton_blocker_complex_visitor.h>
 #include <gudhi/Debug_utils.h>
 
+// todo remove the queue to be independent from cgald
+#include <CGAL/Modifiable_priority_queue.h>
 
 #include <boost/scoped_array.hpp>
 #include <boost/scoped_ptr.hpp>
