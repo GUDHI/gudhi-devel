@@ -14,11 +14,11 @@ from numpy import get_include as numpy_get_include
 
 __author__ = "GUDHI Editorial Board"
 __copyright__ = "Copyright (C) 2016  Inria"
-__license__ = "GPL v3"
+__license__ = "MIT"
 
-gudhi = Extension(
-    "gudhi",
-    sources = ['@CMAKE_CURRENT_BINARY_DIR@/gudhi.pyx',],
+simplextree = Extension(
+    "gudhi.simplextree",
+    sources = ['@CMAKE_CURRENT_SOURCE_DIR@/cython/simplex_tree.pyx',],
     language = 'c++',
     extra_compile_args=[@GUDHI_CYTHON_EXTRA_COMPILE_ARGS@],
     extra_link_args=[@GUDHI_CYTHON_EXTRA_LINK_ARGS@],
@@ -34,7 +34,7 @@ setup(
     author_email='gudhi-contact@lists.gforge.inria.fr',
     version='@GUDHI_VERSION@',
     url='http://gudhi.gforge.inria.fr/',
-    ext_modules = cythonize(gudhi),
+    ext_modules = cythonize(simplextree),
     install_requires = ['cython','numpy >= 1.9',],
     setup_requires = ['numpy >= 1.9',],
 )
