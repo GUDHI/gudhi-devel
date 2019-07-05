@@ -1,6 +1,10 @@
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
+from libc.stdint cimport intptr_t
+
+from gudhi.simplex_tree cimport *
+from gudhi.simplex_tree import SimplexTree
 
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
@@ -63,9 +67,12 @@ cdef class StrongWitnessComplex:
         :returns: A simplex tree created from the Delaunay Triangulation.
         :rtype: SimplexTree
         """
-        simplex_tree = SimplexTree()
+        stree = SimplexTree()
+        cdef intptr_t stree_int_ptr=stree.thisptr
+        cdef Simplex_tree_interface_full_featured* stree_ptr = <Simplex_tree_interface_full_featured*>stree_int_ptr
         if limit_dimension is not -1:
-            self.thisptr.create_simplex_tree(simplex_tree.thisptr, max_alpha_square, limit_dimension)
+            self.thisptr.create_simplex_tree(stree_ptr,
+                max_alpha_square, limit_dimension)
         else:
-            self.thisptr.create_simplex_tree(simplex_tree.thisptr, max_alpha_square)
-        return simplex_tree
+            self.thisptr.create_simplex_tree(stree_ptr, max_alpha_square)
+        return stree

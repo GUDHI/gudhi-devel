@@ -195,7 +195,7 @@ if(PYTHONINTERP_FOUND)
 
     # Generate gudhi/__init__.py
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
-    configure_file(__init__.py.in "${CMAKE_CURRENT_BINARY_DIR}/gudhi/__init__.py" @ONLY)
+    configure_file("gudhi/__init__.py.in" "${CMAKE_CURRENT_BINARY_DIR}/gudhi/__init__.py" @ONLY)
 
     add_custom_command(
         OUTPUT gudhi.so
