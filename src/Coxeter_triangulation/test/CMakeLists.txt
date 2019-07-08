@@ -1,0 +1,4 @@
+cmake_minimum_required(VERSION 2.6)
+project(Coxeter_triangulation_test)
+
+add_executable ( Coxeter_triangulation_permutahedral_representation_test perm_rep_test.cpp )
