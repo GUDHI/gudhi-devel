@@ -77,11 +77,11 @@ protected:
   }
 
 public:  
-  Vertex_iterator(const Permutahedral_representation& fr)
+  Vertex_iterator(const Permutahedral_representation& simplex)
     :
-    o_it_(fr.partition.begin()),
-    o_end_(fr.partition.end()),
-    value_(fr.vertex),
+    o_it_(simplex.partition().begin()),
+    o_end_(simplex.partition().end()),
+    value_(simplex.vertex()),
     is_end_(o_it_ == o_end_)
   {}
 
@@ -130,18 +130,18 @@ protected:
 
   void update_value() {
     // Combination *c_it_ is supposed to be sorted in increasing order
-    value_ = face_from_indices<Permutahedral_representation>(fr_, *c_it_);
+    value_ = face_from_indices<Permutahedral_representation>(simplex_, *c_it_);
   }
   
 public:
   
-  Face_iterator(const Permutahedral_representation& fr, const uint& k)
-    : fr_(fr),
+  Face_iterator(const Permutahedral_representation& simplex, const uint& k)
+    : simplex_(simplex),
       k_(k),
-      l_(fr.dimension()),
+      l_(simplex.dimension()),
       c_it_(l_+1, k_+1),
       is_end_(k_ > l_),
-      value_({Vertex(fr.vertex.size()), Ordered_partition(k+1)})
+      value_({Vertex(simplex.vertex().size()), Ordered_partition(k+1)})
   {
     update_value();
   }
@@ -150,7 +150,7 @@ public:
   Face_iterator() : is_end_(true) {}
   
 protected:
-  Permutahedral_representation fr_; // Input simplex
+  Permutahedral_representation simplex_; // Input simplex
   uint k_;
   uint l_; // Dimension of the input simplex
   Combination_iterator c_it_, c_end_; // indicates the vertices in the current face
@@ -198,7 +198,7 @@ protected:
       }
       o_its_.clear();
       for (uint j = 0; j < k_ + 1; j++)
-	o_its_.emplace_back(Ordered_set_partition_iterator(fr_.partition[j].size(), (*i_it_)[j]+1));
+	o_its_.emplace_back(Ordered_set_partition_iterator(simplex_.partition()[j].size(), (*i_it_)[j]+1));
     }
     else
       for (uint j = 0; j < i; j++)
@@ -207,8 +207,8 @@ protected:
   }
 
   void update_value() {
-    value_.vertex = fr_.vertex;
-    for (auto& p: value_.partition)
+    value_.vertex() = simplex_.vertex();
+    for (auto& p: value_.partition())
       p.clear();
     uint u_ = 0; // the part in o_its_[k_] that contains t_
     for (; u_ <= (*i_it_)[k_]; u_++) {
@@ -219,47 +219,47 @@ protected:
     uint i = 0;
     for (uint j = u_+1; j <= (*i_it_)[k_]; j++, i++)
       for (uint b: (*o_its_[k_])[j]) {
-	uint c = fr_.partition[k_][b];
-        value_.partition[i].push_back(c);
-	value_.vertex[c]--;
+	uint c = simplex_.partition()[k_][b];
+        value_.partition()[i].push_back(c);
+	value_.vertex()[c]--;
       }
     for (uint h = 0; h < k_; h++)
       for (uint j = 0; j <= (*i_it_)[h]; j++, i++) {
 	for (uint b: (*o_its_[h])[j])
-	  value_.partition[i].push_back(fr_.partition[h][b]);
+	  value_.partition()[i].push_back(simplex_.partition()[h][b]);
       }
     for (uint j = 0; j <= u_; j++, i++)
       for (uint b: (*o_its_[k_])[j])
-	value_.partition[i].push_back(fr_.partition[k_][b]);
+	value_.partition()[i].push_back(simplex_.partition()[k_][b]);
     // sort the values in each part (probably not needed)
-    for (auto& part: value_.partition)
+    for (auto& part: value_.partition())
       std::sort(part.begin(), part.end());
   }
   
 public:
   
-  Coface_iterator(const Permutahedral_representation& fr, const uint& l)
-    : fr_(fr),
-      d_(fr.vertex.size()),
+  Coface_iterator(const Permutahedral_representation& simplex, const uint& l)
+    : simplex_(simplex),
+      d_(simplex.vertex().size()),
       l_(l),
-      k_(fr.dimension()),
-      i_it_(l_-k_ , k_+1, Size_range<Ordered_partition>(fr.partition)),
+      k_(simplex.dimension()),
+      i_it_(l_-k_ , k_+1, Size_range<Ordered_partition>(simplex.partition())),
       is_end_(k_ > l_),
       value_({Vertex(d_), Ordered_partition(l_+1)})
   {
     uint j = 0;
-    for (; j < fr_.partition[k_].size(); j++)
-      if (fr_.partition[k_][j] == d_) {
+    for (; j < simplex_.partition()[k_].size(); j++)
+      if (simplex_.partition()[k_][j] == d_) {
 	t_ = j;
 	break;
       }
-    if (j == fr_.partition[k_].size()) {
-      std::cerr << "Coface iterator: the argument fr is not a permutahedral representation\n";
+    if (j == simplex_.partition()[k_].size()) {
+      std::cerr << "Coface iterator: the argument simplex is not a permutahedral representation\n";
       is_end_ = true;
       return;
     }
     for (uint i = 0; i < k_+1; i++)
-      o_its_.emplace_back(Ordered_set_partition_iterator(fr_.partition[i].size(), (*i_it_)[i]+1));
+      o_its_.emplace_back(Ordered_set_partition_iterator(simplex_.partition()[i].size(), (*i_it_)[i]+1));
     update_value();
   }
 
@@ -267,13 +267,13 @@ public:
   Coface_iterator() : is_end_(true) {}
   
 protected:
-  Permutahedral_representation fr_; // Input simplex
+  Permutahedral_representation simplex_; // Input simplex
   uint d_; // Ambient dimension
   uint l_; // Dimension of the coface
   uint k_; // Dimension of the input simplex
-  uint t_; // The position of d in fr_.partition[k_]
-  Integer_combination_iterator i_it_, i_end_; // indicates in how many parts each fr_[i] is subdivided
-  std::vector<Ordered_set_partition_iterator> o_its_; // indicates subdivision for each fr_[i]
+  uint t_; // The position of d in simplex_.partition()[k_]
+  Integer_combination_iterator i_it_, i_end_; // indicates in how many parts each simplex_[i] is subdivided
+  std::vector<Ordered_set_partition_iterator> o_its_; // indicates subdivision for each simplex_[i]
   Ordered_set_partition_iterator o_end_;      // one end for all o_its_
 
   bool is_end_;   // is true when the current permutation is the final one
