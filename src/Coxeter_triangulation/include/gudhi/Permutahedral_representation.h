@@ -65,6 +65,11 @@ public:
   Permutahedral_representation(const Vertex& vertex, const OrderedSetPartition& partition)
     : vertex_(vertex), partition_(partition) {}
 
+  /** \brief Constructor for an empty permutahedral representation that does not correspond
+   *  to any simplex.
+   */
+  Permutahedral_representation() {}
+  
   /** \brief Dimension of the simplex.
    */
   unsigned dimension() const {
@@ -157,7 +162,7 @@ public:
   /** \brief Returns a range of permutahedral representations of cofacets of the simplex.
    * The dimension of the simplex must be strictly different from the ambient dimension (the size of the vertex).
    */
-  Face_range cofacet_range() const {
+  Coface_range cofacet_range() const {
     return Coface_range(Coface_iterator(*this, dimension()+1),
 			Coface_iterator());
   }
@@ -212,7 +217,6 @@ public:
 	for (const auto& i: other.partition_[other_i])
 	  if (i != d && vertex_[i] != other.vertex_[i])
 	    return false;		
-	// break;
       }
       other_i++;
     }
@@ -251,8 +255,10 @@ private:
 };
 
 /** \brief Print a permutahedral representation to a stream.
+ * \ingroup coxeter_triangulation
  *
- * @param[in] 
+ * @param[in] os The output stream.
+ * @param[in] simplex A simplex represented by its permutahedral representation.
  */
 template <class Vertex,
 	  class OrderedSetPartition>
@@ -273,18 +279,16 @@ std::ostream& operator<<(std::ostream& os,
   // ordered partition part
   using Part = typename OrderedSetPartition::value_type;
   auto print_part =
-    [&os](const Part& p) -> std::ostream& {
-      os << " {";
+    [&os](const Part& p) {
+      os << "{";
       if (p.empty()) {
 	std::cout << "}";
-	return os;
       }
       auto p_it = p.begin();
       os << *p_it++;
       for (; p_it != p.end(); ++p_it)
 	os << ", " << *p_it;  
       os << "}";
-      return os;
     };
   os << " [";
   if (simplex.partition().empty()) {
