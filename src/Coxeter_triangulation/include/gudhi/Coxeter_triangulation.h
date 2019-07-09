@@ -26,7 +26,7 @@
 #include <Eigen/SVD>
 
 #include <gudhi/Freudenthal_triangulation.h>
-#include <gudhi/Permutahedral_representation/Permutahedral_representation.h>
+#include <gudhi/Permutahedral_representation.h>
 
 namespace Gudhi {
   
@@ -83,7 +83,7 @@ public:
    * @param[in] dimension The dimension of the triangulation.
    */
   Coxeter_triangulation(unsigned dimension)
-    : Freudenthal_triangulation(dimension, root_matrix(dimension)) {}
+    : Freudenthal_triangulation<Permutahedral_representation_>(dimension, root_matrix(dimension)) {}
 };
 
 } // namespace coxeter_triangulation

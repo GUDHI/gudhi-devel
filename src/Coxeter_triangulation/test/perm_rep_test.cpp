@@ -44,6 +44,6 @@ int main() {
   Simplex_handle s2(v2, omega2);
   std::cout << "Simplex " << s1 << " is " << (s1.is_face_of(s)? "": "not ") << "a face of " << s << "\n";
   std::cout << "Simplex " << s2 << " is " << (s2.is_face_of(s)? "": "not ") << "a face of " << s << "\n";
-  
+
   return 0;
 }

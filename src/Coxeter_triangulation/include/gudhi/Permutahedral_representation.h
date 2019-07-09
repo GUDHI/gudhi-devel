@@ -44,16 +44,13 @@ class Permutahedral_representation {
   typedef Permutahedral_representation<Vertex_, Ordered_set_partition_> Self;
 
 public:
-  /**
-   * \brief Type of the vertex.
-   */
+  /** \brief Type of the vertex. */
   typedef Vertex_ Vertex;
   
-  /**
-   * \brief Type of the ordered partition.
-   */
+  /** \brief Type of the ordered partition. */
   typedef Ordered_set_partition_ OrderedSetPartition;
 
+  
   /** \brief Permutahedral_representation constructor from a vertex and an ordered set partition.
    *
    * @param[in] vertex Vertex.
@@ -70,32 +67,27 @@ public:
    */
   Permutahedral_representation() {}
   
-  /** \brief Dimension of the simplex.
-   */
+  /** \brief Dimension of the simplex. */
   unsigned dimension() const {
     return partition_.size() - 1;
   }
 
-  /** \brief Lexicographically-minimal vertex.
-   */
+  /** \brief Lexicographically-minimal vertex. */
   Vertex& vertex() {
     return vertex_;
   }
 
-  /** \brief Lexicographically-minimal vertex.
-   */
+  /** \brief Lexicographically-minimal vertex. */
   const Vertex& vertex() const {
     return vertex_;
   }
 
-  /** \brief Ordered set partition.
-   */
+  /** \brief Ordered set partition. */
   OrderedSetPartition& partition() {
     return partition_;
   }
 
-  /** \brief Identifying vertex.
-   */
+  /** \brief Identifying vertex. */
   const OrderedSetPartition& partition() const {
     return partition_;
   }

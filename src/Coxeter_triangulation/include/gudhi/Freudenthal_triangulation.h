@@ -23,6 +23,10 @@
 
 #include <gudhi/Permutahedral_representation.h>
 
+namespace Gudhi {
+
+namespace coxeter_triangulation {
+
 /** 
  * \class Freudenthal_triangulation
  * \brief A class that stores any affine transformation of the Freudenthal-Kuhn
@@ -36,10 +40,6 @@
  *
  * \tparam Permutahedral_representation_ Type of a simplex given by a permutahedral representation.
  */
-namespace Gudhi {
-
-namespace coxeter_triangulation {
-
 template <class Permutahedral_representation_
 	  = Permutahedral_representation<std::vector<int>, std::vector<std::vector<std::size_t> > > >
 class Freudenthal_triangulation {
