@@ -16,6 +16,7 @@
 #include <gudhi/Permutahedral_representation/Permutahedral_representation_iterators.h>
 
 #include <unordered_set>
+#include <iostream>
 
 namespace Gudhi {
 
@@ -84,13 +85,13 @@ public:
 
   /** \brief Ordered set partition.
    */
-  Vertex& partition() {
+  OrderedSetPartition& partition() {
     return partition_;
   }
 
   /** \brief Identifying vertex.
    */
-  const Vertex& partition() const {
+  const OrderedSetPartition& partition() const {
     return partition_;
   }
 
@@ -245,9 +246,60 @@ public:
   
 private:
   Vertex vertex_;
-  Ordered_set_partition partition_;
+  OrderedSetPartition partition_;
 
 };
+
+/** \brief Print a permutahedral representation to a stream.
+ *
+ * @param[in] 
+ */
+template <class Vertex,
+	  class OrderedSetPartition>
+std::ostream& operator<<(std::ostream& os,
+			 const Permutahedral_representation<Vertex, OrderedSetPartition>& simplex) {
+  // vertex part
+  os << "(";
+  if (simplex.vertex().empty()) {
+    std::cout << ")";
+    return os;
+  }
+  auto v_it = simplex.vertex().begin();
+  os << *v_it++;
+  for (; v_it != simplex.vertex().end(); ++v_it)
+    os << ", " << *v_it;
+  os << ")";
+  
+  // ordered partition part
+  using Part = typename OrderedSetPartition::value_type;
+  auto print_part =
+    [&os](const Part& p) -> std::ostream& {
+      os << " {";
+      if (p.empty()) {
+	std::cout << "}";
+	return os;
+      }
+      auto p_it = p.begin();
+      os << *p_it++;
+      for (; p_it != p.end(); ++p_it)
+	os << ", " << *p_it;  
+      os << "}";
+      return os;
+    };
+  os << " [";
+  if (simplex.partition().empty()) {
+    std::cout << "]";
+    return os;
+  }
+  auto o_it = simplex.partition().begin();
+  print_part(*o_it++);
+  for (; o_it != simplex.partition().end(); ++o_it) {
+    os << ", ";
+    print_part(*o_it);
+  }
+  os << "]";
+  return os;
+}
 
 } // namespace coxeter_triangulation
 
