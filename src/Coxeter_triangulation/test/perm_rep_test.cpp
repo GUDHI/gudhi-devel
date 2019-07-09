@@ -34,6 +34,16 @@ int main() {
     std::cout << f << "\n";
   std::cout << "Cofaces of " << s << " of dimension 2:\n";
   for (auto& f: s.coface_range(2))
-    std::cout << f << "\n";  
+    std::cout << f << "\n";
+
+  Vertex v1 = {0,1,1};
+  Partition omega1 = {Part({0,1,2,3})};
+  Simplex_handle s1(v1, omega1);
+  Vertex v2 = {0,1,0};
+  Partition omega2 = {Part({0}), Part({1,2,3})};
+  Simplex_handle s2(v2, omega2);
+  std::cout << "Simplex " << s1 << " is " << (s1.is_face_of(s)? "": "not ") << "a face of " << s << "\n";
+  std::cout << "Simplex " << s2 << " is " << (s2.is_face_of(s)? "": "not ") << "a face of " << s << "\n";
+  
   return 0;
 }
