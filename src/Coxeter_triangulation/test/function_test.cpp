@@ -2,6 +2,8 @@
 #include <gudhi/Functions/Function_affine_plane_in_Rd.h>
 #include <gudhi/Functions/Constant_function.h>
 #include <gudhi/Functions/Function_chair_in_R3.h>
+#include <gudhi/Functions/Function_torus_in_R3.h>
+#include <gudhi/Functions/Function_whitney_umbrella_in_R3.h>
 #include <iostream>
 #include <string>
 
@@ -56,6 +58,18 @@ int main() {
     Gudhi::coxeter_triangulation::Function_chair_in_R3 fun_chair;
     std::cout << "Function chair:\n";
     print_test(fun_chair);
+  }
+  {
+    // the torus function
+    Gudhi::coxeter_triangulation::Function_torus_in_R3 fun_torus;
+    std::cout << "Function torus:\n";
+    print_test(fun_torus);
+  }
+  {
+    // the whitney umbrella function
+    Gudhi::coxeter_triangulation::Function_whitney_umbrella_in_R3 fun_umbrella;
+    std::cout << "Function Whitney umbrella:\n";
+    print_test(fun_umbrella);
   }
   return 0;
 }
