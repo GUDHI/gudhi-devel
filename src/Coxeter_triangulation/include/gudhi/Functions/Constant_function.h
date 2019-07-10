@@ -27,6 +27,10 @@ namespace coxeter_triangulation {
  * \ingroup coxeter_triangulation
  */
 struct Constant_function {
+
+  /** \brief Value of the function at a specified point. The value is constant.
+   * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
+   */
   Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
     return value_;
   }

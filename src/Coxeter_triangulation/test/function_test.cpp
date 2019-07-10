@@ -1,6 +1,7 @@
 #include <gudhi/Functions/Function_Sm_in_Rd.h>
 #include <gudhi/Functions/Function_affine_plane_in_Rd.h>
 #include <gudhi/Functions/Constant_function.h>
+#include <gudhi/Functions/Function_chair_in_R3.h>
 #include <iostream>
 #include <string>
 
@@ -28,6 +29,7 @@ int main() {
     double radius = 5;
     typedef Gudhi::coxeter_triangulation::Function_Sm_in_Rd Function_sphere;
     Function_sphere fun_sphere(radius, m, d, center);
+    std::cout << "Function sphere:\n";
     print_test(fun_sphere);
   }
   {
@@ -38,6 +40,7 @@ int main() {
       normal_matrix(i,i) = 1;
     typedef Gudhi::coxeter_triangulation::Function_affine_plane_in_Rd Function_plane;
     Function_plane fun_plane(normal_matrix);
+    std::cout << "Function plane:\n";
     print_test(fun_plane);
   }
   {
@@ -45,7 +48,14 @@ int main() {
     std::size_t k = 2, d = 5;
     auto x = Eigen::VectorXd::Constant(2, 1);
     Gudhi::coxeter_triangulation::Constant_function fun_const(d, k, x);
+    std::cout << "Constant function:\n";
     print_test(fun_const);
+  }
+  {
+    // the chair function
+    Gudhi::coxeter_triangulation::Function_chair_in_R3 fun_chair;
+    std::cout << "Function chair:\n";
+    print_test(fun_chair);
   }
   return 0;
 }
