@@ -28,7 +28,7 @@ This example builds the Delaunay triangulation from the given points, and initia
     import gudhi
     alpha_complex = gudhi.AlphaComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]])
 
-    simplex_tree = alpha_complex.create_simplex_tree(max_alpha_square=60.0)
+    simplex_tree = alpha_complex.create_simplex_tree()
     result_str = 'Alpha complex is of dimension ' + repr(simplex_tree.dimension()) + ' - ' + \
         repr(simplex_tree.num_simplices()) + ' simplices - ' + \
         repr(simplex_tree.num_vertices()) + ' vertices.'
@@ -146,8 +146,9 @@ Prune above given filtration value
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The simplex tree is pruned from the given maximum alpha squared value (cf. `Simplex_tree::prune_above_filtration()`
-in the `C++ version <http://gudhi.gforge.inria.fr/doc/latest/index.html>`_).
-In the following example, the value is given by the user as argument of the program.
+in the `C++ version <http://gudhi.gforge.inria.fr/doc/latest/index.html>`_). Note that this does not provide any kind
+of speed-up, since we always first build the full filtered complex, so it is recommended not to use `max_alpha_square`.
+In the following example, a threshold of 59 is used.
 
 
 Example from OFF file
