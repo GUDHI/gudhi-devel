@@ -112,7 +112,7 @@ struct Function_Sm_in_Rd {
 		    std::size_t m)
     : m_(m), k_(1), d_(m_+1), r_(r), center_(Eigen::VectorXd::Zero(d_)) {}
   
-private:
+protected:
   std::size_t m_, k_, d_;
   double r_;
   Eigen::VectorXd center_;

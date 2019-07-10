@@ -62,6 +62,7 @@ struct Function_torus_in_R3 {
 		       Eigen::Vector3d off = Eigen::Vector3d::Zero()) :
     R_(R), r_(r), off_(off) {}
   
+protected:
   double R_, r_;
   Eigen::Vector3d off_;
 };

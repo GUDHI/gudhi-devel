@@ -84,7 +84,7 @@ struct Function_affine_plane_in_Rd {
     normal_matrix_.colwise().normalize();
   }
 
-private:
+protected:
   Eigen::MatrixXd normal_matrix_;
   std::size_t d_, k_, m_;
   Eigen::VectorXd off_;  

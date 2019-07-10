@@ -70,6 +70,7 @@ struct Function_chair_in_R3 {
 		       Eigen::Vector3d off = Eigen::Vector3d::Zero()) :
     a_(a), b_(b), k_(k), off_(off) {}
   
+protected:
   double a_, b_, k_;
   Eigen::Vector3d off_;
 };

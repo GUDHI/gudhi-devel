@@ -4,6 +4,7 @@
 #include <gudhi/Functions/Function_chair_in_R3.h>
 #include <gudhi/Functions/Function_torus_in_R3.h>
 #include <gudhi/Functions/Function_whitney_umbrella_in_R3.h>
+#include <gudhi/Functions/Function_lemniscate_revolution_in_R3.h>
 #include <iostream>
 #include <string>
 
@@ -70,6 +71,12 @@ int main() {
     Gudhi::coxeter_triangulation::Function_whitney_umbrella_in_R3 fun_umbrella;
     std::cout << "Function Whitney umbrella:\n";
     print_test(fun_umbrella);
+  }
+  {
+    // the lemniscate revolution function
+    Gudhi::coxeter_triangulation::Function_lemniscate_revolution_in_R3 fun_lemniscate;
+    std::cout << "Function Revolution surface of Lemniscate of Bernoulli:\n";
+    print_test(fun_lemniscate);
   }
   return 0;
 }
