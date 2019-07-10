@@ -3,3 +3,4 @@ project(Coxeter_triangulation_test)
 
 add_executable ( Coxeter_triangulation_permutahedral_representation_test perm_rep_test.cpp )
 add_executable ( Coxeter_triangulation_freudenthal_triangulation_test freud_triang_test.cpp )
+add_executable ( Coxeter_triangulation_functions_test function_test.cpp )

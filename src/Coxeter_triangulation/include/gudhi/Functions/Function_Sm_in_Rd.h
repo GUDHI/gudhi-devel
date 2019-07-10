@@ -10,12 +10,10 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#ifndef FUNCTIONS_SPHERE_SM_IN_RD_H_
-#define FUNCTIONS_SPHERE_SM_IN_RD_H_
+#ifndef FUNCTIONS_FUNCTION_SM_IN_RD_H_
+#define FUNCTIONS_FUNCTION_SM_IN_RD_H_
 
-#include <Eigen/Eigenvalues>
-#include <Eigen/Sparse>
-#include <Eigen/SVD>
+#include <Eigen/Dense>
 
 namespace Gudhi {
 
@@ -30,14 +28,13 @@ namespace coxeter_triangulation {
  */
 struct Function_Sm_in_Rd {
 
-/** 
- * \brief Value of the function at a specified point.
+/** \brief Value of the function at a specified point.
  * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
  */
   Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
     Eigen::VectorXd x = p;
     for (std::size_t i = 0; i < d_; ++i)
-      x(i) -= off_[i];
+      x(i) -= center_[i];
     Eigen::VectorXd coords(k_);
     for (std::size_t i = 0; i < m_+1; ++i)
       coords(0) += x(i)*x(i);
@@ -58,7 +55,7 @@ struct Function_Sm_in_Rd {
     Eigen::VectorXd point = Eigen::VectorXd::Zero(d_);
     point(0) += r_;
     for (std::size_t i = 0; i < d_; ++i)
-      point(i) += off_[i];
+      point(i) += center_[i];
     return point;
   }
   
@@ -75,7 +72,7 @@ struct Function_Sm_in_Rd {
 		    std::size_t m,
 		    std::size_t d,
 		    Eigen::VectorXd center)
-    : m_(m), k_(d-m), d_(d), r_(r), off_(center) {}
+    : m_(m), k_(d-m), d_(d), r_(r), center_(center) {}
 
   /** 
    * \brief Constructor of the function that defines an m-dimensional implicit sphere embedded
@@ -88,7 +85,7 @@ struct Function_Sm_in_Rd {
   Function_Sm_in_Rd(double r,
 		    std::size_t m,
 		    std::size_t d)
-    : m_(m), k_(d-m), d_(d), r_(r), off_(Eigen::VectorXd::Zero(d_)) {}
+    : m_(m), k_(d-m), d_(d), r_(r), center_(Eigen::VectorXd::Zero(d_)) {}
 
   
   /** 
@@ -102,7 +99,7 @@ struct Function_Sm_in_Rd {
   Function_Sm_in_Rd(double r,
 		    std::size_t m,
 		    Eigen::VectorXd center)
-    : m_(m), k_(1), d_(m_+1), r_(r), off_(center) {}
+    : m_(m), k_(1), d_(m_+1), r_(r), center_(center) {}
 
   /** 
    * \brief Constructor of the function that defines an m-dimensional implicit sphere embedded
@@ -113,12 +110,12 @@ struct Function_Sm_in_Rd {
    */
   Function_Sm_in_Rd(double r,
 		    std::size_t m)
-    : m_(m), k_(1), d_(m_+1), r_(r), off_(Eigen::VectorXd::Zero(d_)) {}
+    : m_(m), k_(1), d_(m_+1), r_(r), center_(Eigen::VectorXd::Zero(d_)) {}
   
 private:
   std::size_t m_, k_, d_;
   double r_;
-  Eigen::VectorXd off_; // random perturbation of the center  
+  Eigen::VectorXd center_;
 };
 
 } // namespace coxeter_triangulation

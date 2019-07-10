@@ -35,7 +35,7 @@ struct Constant_function {
   std::size_t amb_d() const {return d_;};
 
   /** \brief Returns the codomain dimension. Same as the codimension of the sphere. */
-  std::size_t cod_d() const {return 0;};
+  std::size_t cod_d() const {return k_;};
 
   /** \brief No seed point is available. Throws an exception on evocation. */
   Eigen::VectorXd seed() const {

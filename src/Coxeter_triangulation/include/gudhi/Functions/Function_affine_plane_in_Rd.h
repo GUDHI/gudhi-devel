@@ -54,7 +54,7 @@ struct Function_affine_plane_in_Rd {
    *
    * @param[in] normal_matrix A normal matrix of the affine plane. The number of rows should
    * correspond to the ambient dimension, the number of columns should corespond to 
-   * the size of the normal basis (codimension) 
+   * the size of the normal basis (codimension). 
    * @param[in] offset The offset vector of the affine plane.
    */
   Function_affine_plane_in_Rd(const Eigen::MatrixXd& normal_matrix,
@@ -73,7 +73,7 @@ struct Function_affine_plane_in_Rd {
    *
    * @param[in] normal A normal matrix of the affine plane. The number of rows should
    * correspond to the ambient dimension, the number of columns should corespond to 
-   * the size of the normal basis (codimension) 
+   * the size of the normal basis (codimension). 
    */
   Function_affine_plane_in_Rd(const Eigen::MatrixXd& normal_matrix)
     : normal_matrix_(normal_matrix),
