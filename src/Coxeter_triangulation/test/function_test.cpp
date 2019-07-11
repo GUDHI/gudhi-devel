@@ -1,3 +1,9 @@
+
+// workaround for the annoying boost message in boost 1.69
+#define BOOST_PENDING_INTEGER_LOG2_HPP
+#include <boost/integer/integer_log2.hpp>
+// end workaround 
+
 #include <gudhi/Functions/Function_Sm_in_Rd.h>
 #include <gudhi/Functions/Function_affine_plane_in_Rd.h>
 #include <gudhi/Functions/Constant_function.h>
@@ -6,8 +12,12 @@
 #include <gudhi/Functions/Function_whitney_umbrella_in_R3.h>
 #include <gudhi/Functions/Function_lemniscate_revolution_in_R3.h>
 #include <gudhi/Functions/Function_iron_in_R3.h>
+#include <gudhi/Functions/random_orthogonal_matrix.h>
 #include <iostream>
 #include <string>
+
+#include <random>
+#include <cstdlib>
 
 template <class Function>
 void print_test(const Function& fun) {
@@ -85,5 +95,10 @@ int main() {
     std::cout << "Function iron:\n";
     print_test(fun_iron);
   }
+  // {
+  //   // random orthogonal matrix
+  //   auto matrix = random_orthogonal_matrix(5);
+  //   std::cout << "M:\n" << matrix << "\nM^t * M\n" << matrix.transpose() * matrix << "\n";
+  // }
   return 0;
 }
