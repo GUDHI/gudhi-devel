@@ -26,6 +26,8 @@ namespace coxeter_triangulation {
 /* \class Embed_in_Rd
  * \brief Embedding of an implicit manifold in a higher dimension.
  *
+ * \tparam Function The function template parameter. Should comply to the concept  
+ *
  * \ingroup coxeter_triangulation
  */
 template <class Function>
@@ -55,7 +57,7 @@ struct Embed_in_Rd {
   /** \brief Returns the codomain dimension. */
   std::size_t cod_d() const {return d_-(fun_.amb_d() - fun_.cod_d());}
 
-  /** \brief Returns a point on the zero-set. */
+  /** \brief Returns a point on the zero-set of the embedded function. */
   Eigen::VectorXd seed() const {
     Eigen::VectorXd seed_k = fun_.seed();
     seed_k.conservativeResize(d_);
