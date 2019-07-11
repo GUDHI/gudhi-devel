@@ -10,8 +10,8 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#ifndef FUNCTIONS_TRANSLATE_H_
-#define FUNCTIONS_TRANSLATE_H_
+#ifndef FUNCTIONS_LINEAR_TRANSFORMATION_H_
+#define FUNCTIONS_LINEAR_TRANSFORMATION_H_
 
 #include <cstdlib>
 
@@ -21,9 +21,9 @@ namespace Gudhi {
 
 namespace coxeter_triangulation {
 
-/* \class Translate
- * \brief Translates the zero-set of the function by a vector.
- * The underlying function corresponds to f(x-off), where off is the offset vector.
+/* \class Linear_transformation
+ * \brief Transforms the zero-set of the function by a given linear transformation.
+ * The underlying function corresponds to f(M*x), where M is the transformation matrix.
  *
  * \tparam Function The function template parameter. Should be a model of 
  * the concept FunctionForImplicitManifold.
@@ -31,14 +31,14 @@ namespace coxeter_triangulation {
  * \ingroup coxeter_triangulation
  */
 template <class Function>
-struct Translate {
+struct Linear_transformation {
   
   /** 
    * \brief Value of the function at a specified point.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
   Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
-    return fun_(p - off_);
+    return fun_(matrix_.householderQr().solve(p));
   }
 
   /** \brief Returns the domain (ambient) dimension. */
@@ -49,34 +49,35 @@ struct Translate {
 
   /** \brief Returns a point on the zero-set. */
   Eigen::VectorXd seed() const {
-    return fun_.seed() + off_;
+    return matrix_ * fun_.seed();
   }
 
   /** 
    * \brief Constructor of the translated function.
    *
    * @param[in] function The function to be translated.
-   * @param[in] off The offset vector. The dimension should correspond to the 
-   * domain (ambient) dimension of 'function'.
+   * @param[in] matrix The transformation matrix. Its dimension should be d*d,
+   * where d is the domain (ambient) dimension of 'function'.
    */
-  Translate(const Function& function, const Eigen::VectorXd& off) :
-    fun_(function), off_(off) {
+  Linear_transformation(const Function& function, const Eigen::MatrixXd& matrix) :
+    fun_(function), matrix_(matrix) {
   }
   Function fun_;
-  Eigen::VectorXd off_;
+  Eigen::MatrixXd matrix_;
 };
 
 
 /** 
- * \brief Static constructor of a translated function.
+ * \brief Static constructor of a linearly transformed function.
  *
- * @param[in] function The function to be translated.
- * @param[in] off The offset vector. The dimension should correspond to the 
- * domain (ambient) dimension of 'function'.
+ * @param[in] function The function to be linearly transformed.
+ * @param[in] matrix The transformation matrix. Its dimension should be d*d,
+   * where d is the domain (ambient) dimension of 'function'.
  */
 template <class Function>
-Translate<Function> translate(const Function& function, Eigen::VectorXd off) {
-  return Translate<Function>(function, off);
+Linear_transformation<Function> linear_transformation(const Function& function,
+						      const Eigen::MatrixXd& matrix) {
+  return Linear_transformation<Function>(function, matrix); 
 }
 
 } // namespace coxeter_triangulation

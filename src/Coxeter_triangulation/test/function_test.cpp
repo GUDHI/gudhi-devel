@@ -15,6 +15,7 @@
 // #include <gudhi/Functions/random_orthogonal_matrix.h>
 #include <gudhi/Functions/Embed_in_Rd.h>
 #include <gudhi/Functions/Translate.h>
+#include <gudhi/Functions/Linear_transformation.h>
 #include <iostream>
 #include <string>
 
@@ -111,6 +112,11 @@ int main() {
     auto fun_trans = Gudhi::coxeter_triangulation::translate(fun_embed, off);
     std::cout << "Offset vector:\n" << off << "\n";
     print_test(fun_trans);
+    Eigen::MatrixXd matrix = Eigen::MatrixXd::Random(5, 5);
+    std::cout << "Transformation matrix:\n" << matrix << "\n";
+    std::cout << "Determinant = " << matrix.determinant() << "\n";
+    auto fun_lin = Gudhi::coxeter_triangulation::linear_transformation(fun_trans, matrix);
+    print_test(fun_lin);
   }
   return 0;
 }
