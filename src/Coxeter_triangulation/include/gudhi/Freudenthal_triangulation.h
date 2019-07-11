@@ -51,10 +51,10 @@ class Freudenthal_triangulation {
   
 public:
 
-  /** \brief Type of the simplices in the triangulation */
+  /** \brief Type of the simplices in the triangulation. */
   typedef Permutahedral_representation_ Simplex_handle;
 
-  /** \brief Type of the vertices in the triangulation */
+  /** \brief Type of the vertices in the triangulation. */
   typedef typename Permutahedral_representation_::Vertex Vertex_handle;
   
   

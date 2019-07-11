@@ -159,8 +159,11 @@ public:
 			Coface_iterator());
   }
 
-  
-    bool is_face_of(const Permutahedral_representation& other) const {
+  /** \brief Returns true, if the simplex is a face of other simplex.
+   *
+   * @param[in] other A simplex that is potential a coface of the current simplex.
+   */
+  bool is_face_of(const Permutahedral_representation& other) const {
     if (other.dimension() < dimension())
       return false;
     if (other.vertex_.size() != vertex_.size())
