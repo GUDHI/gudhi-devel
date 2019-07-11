@@ -41,6 +41,7 @@ namespace coxeter_triangulation {
  * \ingroup coxeter_triangulation
  *
  * \tparam Permutahedral_representation_ Type of a simplex given by a permutahedral representation.
+ *  Needs to be a model of SimplexInCoxeterTriangulation.
  */
 template <class Permutahedral_representation_
 	  = Permutahedral_representation<std::vector<int>, std::vector<std::vector<std::size_t> > > >
