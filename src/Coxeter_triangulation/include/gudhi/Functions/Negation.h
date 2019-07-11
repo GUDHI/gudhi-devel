@@ -10,8 +10,8 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#ifndef FUNCTIONS_LINEAR_TRANSFORMATION_H_
-#define FUNCTIONS_LINEAR_TRANSFORMATION_H_
+#ifndef FUNCTIONS_NEGATION_H_
+#define FUNCTIONS_NEGATION_H_
 
 #include <cstdlib>
 
@@ -21,9 +21,9 @@ namespace Gudhi {
 
 namespace coxeter_triangulation {
 
-/* \class Linear_transformation
- * \brief Transforms the zero-set of the function by a given linear transformation.
- * The underlying function corresponds to f(M*x), where M is the transformation matrix.
+/* \class Negation
+ * \brief Constructs the "minus" function. The zero-set is the same, but
+ * the values at other points are the negative of their original value.
  *
  * \tparam Function The function template parameter. Should be a model of 
  * the concept FunctionForImplicitManifold.
@@ -31,14 +31,14 @@ namespace coxeter_triangulation {
  * \ingroup coxeter_triangulation
  */
 template <class Function>
-struct Linear_transformation {
+struct Negation {
   
   /** 
    * \brief Value of the function at a specified point.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
   Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
-    return fun_(matrix_.householderQr().solve(p));
+    return -fun_(p);
   }
 
   /** \brief Returns the domain (ambient) dimension. */
@@ -49,38 +49,34 @@ struct Linear_transformation {
 
   /** \brief Returns a point on the zero-set. */
   Eigen::VectorXd seed() const {
-    return matrix_ * fun_.seed();
+    return fun_.seed();
   }
 
   /** 
-   * \brief Constructor of the translated function.
+   * \brief Constructor of the negative function.
    *
-   * @param[in] function The function to be translated.
-   * @param[in] matrix The transformation matrix. Its dimension should be d*d,
-   * where d is the domain (ambient) dimension of 'function'.
+   * @param[in] function The function to be negated.
    */
-  Linear_transformation(const Function& function, const Eigen::MatrixXd& matrix) :
-    fun_(function), matrix_(matrix) {
+  Negation(const Function& function) :
+    fun_(function) {
   }
   Function fun_;
-  Eigen::MatrixXd matrix_;
 };
 
 
 /** 
- * \brief Static constructor of a linearly transformed function.
+ * \brief Static constructor of a translated function.
  *
- * @param[in] function The function to be linearly transformed.
- * @param[in] matrix The transformation matrix. Its dimension should be d*d,
- * where d is the domain (ambient) dimension of 'function'.
+ * @param[in] function The function to be translated.
+ * @param[in] off The offset vector. The dimension should correspond to the 
+ * domain (ambient) dimension of 'function'.
  *
  * \tparam Function The function template parameter. Should be a model of 
  * the concept FunctionForImplicitManifold.
  */
 template <class Function>
-Linear_transformation<Function> linear_transformation(const Function& function,
-						      const Eigen::MatrixXd& matrix) {
-  return Linear_transformation<Function>(function, matrix); 
+Negation<Function>  negation(const Function& function) {
+  return Negation<Function>(function);
 }
 
 } // namespace coxeter_triangulation

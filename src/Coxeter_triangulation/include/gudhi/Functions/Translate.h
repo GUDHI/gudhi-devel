@@ -73,6 +73,9 @@ struct Translate {
  * @param[in] function The function to be translated.
  * @param[in] off The offset vector. The dimension should correspond to the 
  * domain (ambient) dimension of 'function'.
+ *
+ * \tparam Function The function template parameter. Should be a model of 
+ * the concept FunctionForImplicitManifold.
  */
 template <class Function>
 Translate<Function> translate(const Function& function, Eigen::VectorXd off) {

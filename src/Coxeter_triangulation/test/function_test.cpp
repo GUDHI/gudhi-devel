@@ -16,6 +16,7 @@
 #include <gudhi/Functions/Embed_in_Rd.h>
 #include <gudhi/Functions/Translate.h>
 #include <gudhi/Functions/Linear_transformation.h>
+#include <gudhi/Functions/Negation.h>
 #include <iostream>
 #include <string>
 
@@ -117,6 +118,9 @@ int main() {
     std::cout << "Determinant = " << matrix.determinant() << "\n";
     auto fun_lin = Gudhi::coxeter_triangulation::linear_transformation(fun_trans, matrix);
     print_test(fun_lin);
+    std::cout << "Negative function:\n";
+    auto fun_neg = Gudhi::coxeter_triangulation::negation(fun_lin);
+    print_test(fun_neg);
   }
   return 0;
 }

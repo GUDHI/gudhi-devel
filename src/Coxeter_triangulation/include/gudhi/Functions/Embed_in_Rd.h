@@ -86,6 +86,9 @@ struct Embed_in_Rd {
  *
  * @param[in] function The function to be embedded in higher dimension.
  * @param[in] d Embedding dimension.
+ *
+ * \tparam Function The function template parameter. Should be a model of 
+ * the concept FunctionForImplicitManifold.
  */
 template <class Function>
 Embed_in_Rd<Function> make_embedding(const Function& function, std::size_t d) {
