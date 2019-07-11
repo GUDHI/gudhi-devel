@@ -23,6 +23,10 @@
 #include <gudhi_patches/CGAL/Epick_d.h>
 #include <CGAL/point_generators_d.h>
 
+namespace Gudhi {
+
+namespace coxeter_triangulation {
+
 /** \brief Generates a uniform random orthogonal matrix using the "subgroup algorithm" by 
  * Diaconis & Shashahani. 
  * \details Taken from https://en.wikipedia.org/wiki/Rotation_matrix#Uniform_random_rotation_matrices.
@@ -58,5 +62,9 @@ Eigen::MatrixXd random_orthogonal_matrix(std::size_t d) {
   rot = rot.householderQr().householderQ(); // a way to do Gram-Schmidt, see https://forum.kde.org/viewtopic.php?f=74&t=118568#p297246
   return rot;
 }
+
+} // namespace coxeter_triangulation
+
+} // namespace Gudhi
 
 #endif

@@ -12,7 +12,8 @@
 #include <gudhi/Functions/Function_whitney_umbrella_in_R3.h>
 #include <gudhi/Functions/Function_lemniscate_revolution_in_R3.h>
 #include <gudhi/Functions/Function_iron_in_R3.h>
-#include <gudhi/Functions/random_orthogonal_matrix.h>
+// #include <gudhi/Functions/random_orthogonal_matrix.h>
+#include <gudhi/Functions/Embed_in_Rd.h>
 #include <iostream>
 #include <string>
 
@@ -100,5 +101,11 @@ int main() {
   //   auto matrix = random_orthogonal_matrix(5);
   //   std::cout << "M:\n" << matrix << "\nM^t * M\n" << matrix.transpose() * matrix << "\n";
   // }
+  {
+    // embedding function
+    Gudhi::coxeter_triangulation::Function_iron_in_R3 fun_iron;
+    auto fun_embed = Gudhi::coxeter_triangulation::make_embedding(fun_iron, 5);
+    print_test(fun_embed);
+  }
   return 0;
 }
