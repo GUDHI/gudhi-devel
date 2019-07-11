@@ -21,7 +21,7 @@ namespace Gudhi {
 
 namespace coxeter_triangulation {
 
-/* \class Linear_transformation
+/** \class Linear_transformation
  * \brief Transforms the zero-set of the function by a given linear transformation.
  * The underlying function corresponds to f(M*x), where M is the transformation matrix.
  *
