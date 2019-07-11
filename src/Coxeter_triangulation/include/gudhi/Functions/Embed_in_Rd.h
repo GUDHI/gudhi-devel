@@ -26,7 +26,8 @@ namespace coxeter_triangulation {
 /* \class Embed_in_Rd
  * \brief Embedding of an implicit manifold in a higher dimension.
  *
- * \tparam Function The function template parameter. Should comply to the concept  
+ * \tparam Function The function template parameter. Should be a model of 
+ * the concept FunctionForImplicitManifold.
  *
  * \ingroup coxeter_triangulation
  */
