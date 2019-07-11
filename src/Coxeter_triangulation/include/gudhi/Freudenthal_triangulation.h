@@ -137,8 +137,11 @@ public:
    * triangulation that shares the origin, but is scaled by a given factor.
    * This parameter can be useful to simulate the point location in a subdivided
    * triangulation.
-   * 
    * The returned simplex is always minimal by inclusion.
+   * 
+   * \tparam Point_d A class that represents a point in d-dimensional Euclidean space.
+   * The coordinates should be random-accessible. Needs to provide the method size().
+   *
    * @param[in] point The query point.
    * @param[in] scale The scale of the triangulation. 
    */

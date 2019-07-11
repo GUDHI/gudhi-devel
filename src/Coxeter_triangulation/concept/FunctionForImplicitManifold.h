@@ -18,7 +18,7 @@ namespace Gudhi {
 namespace coxeter_triangulation {
 
 /** \brief The concept FunctionForImplicitManifold describes the requirements 
- * for a type to implement a function used for example in Manifold_tracing.
+ * for a type to implement an implicit function class used for example in Manifold_tracing.
  */
 struct FunctionForImplicitManifold {
 
