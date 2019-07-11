@@ -76,7 +76,11 @@ struct PL_approximation {
   /** \brief Returns a point on the zero-set. */
   Eigen::VectorXd seed() const {
     Eigen::VectorXd seed_k(fun_.amb_d());
-    // TODO: not finished
+    // auto c = tr_.locate_point(fun_.seed());
+    // for (auto f: c.face_range(fun_.cod_d())) {      
+    // }
+    // TODO: not finished. Should use an oracle.
+    // Also need to make sure, s is of the highest dimension.
     return seed_k;
   }
 

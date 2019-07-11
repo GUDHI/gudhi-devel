@@ -22,7 +22,7 @@ namespace coxeter_triangulation {
 /** 
  * \class Function_Sm_in_Rd 
  * \brief A class for the function that defines an m-dimensional implicit sphere embedded
- * in d-dimensional Euclidean space.
+ * in the d-dimensional Euclidean space.
  *
  * \ingroup coxeter_triangulation
  */

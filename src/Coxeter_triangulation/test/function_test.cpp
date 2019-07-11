@@ -12,6 +12,7 @@
 #include <gudhi/Functions/Function_whitney_umbrella_in_R3.h>
 #include <gudhi/Functions/Function_lemniscate_revolution_in_R3.h>
 #include <gudhi/Functions/Function_iron_in_R3.h>
+#include <gudhi/Functions/Function_moment_curve_in_Rd.h>
 // #include <gudhi/Functions/random_orthogonal_matrix.h>
 // #include <gudhi/Functions/Embed_in_Rd.h>
 // #include <gudhi/Functions/Translate.h>
@@ -137,6 +138,11 @@ int main() {
     Coxeter_triangulation<> cox_tr(6);
     auto fun_pl = make_pl_approximation(fun_prod, cox_tr);
     print_test(fun_pl);
+  }
+  {
+    Function_moment_curve_in_Rd fun_moment_curve(3, 5);
+    std::cout << "Function moment curve:\n";
+    print_test(fun_moment_curve);
   }
   return 0;
 }
