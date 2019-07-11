@@ -53,15 +53,17 @@ struct Linear_transformation {
   }
 
   /** 
-   * \brief Constructor of the translated function.
+   * \brief Constructor of a linearly transformed function.
    *
-   * @param[in] function The function to be translated.
+   * @param[in] function The function to be linearly transformed.
    * @param[in] matrix The transformation matrix. Its dimension should be d*d,
    * where d is the domain (ambient) dimension of 'function'.
    */
   Linear_transformation(const Function& function, const Eigen::MatrixXd& matrix) :
     fun_(function), matrix_(matrix) {
   }
+
+private:
   Function fun_;
   Eigen::MatrixXd matrix_;
 };

@@ -18,11 +18,17 @@
 // #include <gudhi/Functions/Linear_transformation.h>
 #include <gudhi/Functions/Negation.h>
 #include <gudhi/Functions/Cartesian_product.h>
+#include <gudhi/Functions/PL_approximation.h>
+
+#include <gudhi/Coxeter_triangulation.h>
+
 #include <iostream>
 #include <string>
 
 #include <random>
 #include <cstdlib>
+
+using namespace Gudhi::coxeter_triangulation;
 
 template <class Function>
 void print_test(const Function& fun) {
@@ -46,7 +52,7 @@ int main() {
     std::size_t m = 3, d = 5;
     Eigen::VectorXd center(d); center << 2, 1.5, -0.5, 4.5, -1;
     double radius = 5;
-    typedef Gudhi::coxeter_triangulation::Function_Sm_in_Rd Function_sphere;
+    typedef Function_Sm_in_Rd Function_sphere;
     Function_sphere fun_sphere(radius, m, d, center);
     std::cout << "Function sphere:\n";
     print_test(fun_sphere);
@@ -57,7 +63,7 @@ int main() {
     Eigen::MatrixXd normal_matrix = Eigen::MatrixXd::Zero(d, d-m);
     for (std::size_t i = 0; i < d-m; ++i)
       normal_matrix(i,i) = 1;
-    typedef Gudhi::coxeter_triangulation::Function_affine_plane_in_Rd Function_plane;
+    typedef Function_affine_plane_in_Rd Function_plane;
     Function_plane fun_plane(normal_matrix);
     std::cout << "Function plane:\n";
     print_test(fun_plane);
@@ -66,37 +72,37 @@ int main() {
     // the constant function testing part
     std::size_t k = 2, d = 5;
     auto x = Eigen::VectorXd::Constant(2, 1);
-    Gudhi::coxeter_triangulation::Constant_function fun_const(d, k, x);
+    Constant_function fun_const(d, k, x);
     std::cout << "Constant function:\n";
     print_test(fun_const);
   }
   {
     // the chair function
-    Gudhi::coxeter_triangulation::Function_chair_in_R3 fun_chair;
+    Function_chair_in_R3 fun_chair;
     std::cout << "Function chair:\n";
     print_test(fun_chair);
   }
   {
     // the torus function
-    Gudhi::coxeter_triangulation::Function_torus_in_R3 fun_torus;
+    Function_torus_in_R3 fun_torus;
     std::cout << "Function torus:\n";
     print_test(fun_torus);
   }
   {
     // the whitney umbrella function
-    Gudhi::coxeter_triangulation::Function_whitney_umbrella_in_R3 fun_umbrella;
+    Function_whitney_umbrella_in_R3 fun_umbrella;
     std::cout << "Function Whitney umbrella:\n";
     print_test(fun_umbrella);
   }
   {
     // the lemniscate revolution function
-    Gudhi::coxeter_triangulation::Function_lemniscate_revolution_in_R3 fun_lemniscate;
+    Function_lemniscate_revolution_in_R3 fun_lemniscate;
     std::cout << "Function Revolution surface of Lemniscate of Bernoulli:\n";
     print_test(fun_lemniscate);
   }
   {
     // the iron function
-    Gudhi::coxeter_triangulation::Function_iron_in_R3 fun_iron;
+    Function_iron_in_R3 fun_iron;
     std::cout << "Function iron:\n";
     print_test(fun_iron);
   }
@@ -107,29 +113,30 @@ int main() {
   // }
   // {
   //   // embedding function
-  //   Gudhi::coxeter_triangulation::Function_iron_in_R3 fun_iron;
-  //   auto fun_embed = Gudhi::coxeter_triangulation::make_embedding(fun_iron, 5);
+  //   Function_iron_in_R3 fun_iron;
+  //   auto fun_embed = make_embedding(fun_iron, 5);
   //   print_test(fun_embed);
   //   Eigen::VectorXd off = Eigen::VectorXd::Random(5);
-  //   auto fun_trans = Gudhi::coxeter_triangulation::translate(fun_embed, off);
+  //   auto fun_trans = translate(fun_embed, off);
   //   std::cout << "Offset vector:\n" << off << "\n";
   //   print_test(fun_trans);
   //   Eigen::MatrixXd matrix = Eigen::MatrixXd::Random(5, 5);
   //   std::cout << "Transformation matrix:\n" << matrix << "\n";
   //   std::cout << "Determinant = " << matrix.determinant() << "\n";
-  //   auto fun_lin = Gudhi::coxeter_triangulation::linear_transformation(fun_trans, matrix);
+  //   auto fun_lin = linear_transformation(fun_trans, matrix);
   //   print_test(fun_lin);
   //   std::cout << "Negative function:\n";
-  //   auto fun_neg = Gudhi::coxeter_triangulation::negation(fun_lin);
+  //   auto fun_neg = negation(fun_lin);
   //   print_test(fun_neg);
   // }
   {
-    typedef Gudhi::coxeter_triangulation::Function_Sm_in_Rd Function_sphere;
+    typedef Function_Sm_in_Rd Function_sphere;
     Function_sphere fun_sphere(1, 1);
-    auto fun_prod = Gudhi::coxeter_triangulation::make_product_function(fun_sphere,
-									fun_sphere,
-									fun_sphere);
+    auto fun_prod = make_product_function(fun_sphere, fun_sphere, fun_sphere);
     print_test(fun_prod);
+    Coxeter_triangulation<> cox_tr(6);
+    auto fun_pl = make_pl_approximation(fun_prod, cox_tr);
+    print_test(fun_pl);
   }
   return 0;
 }
