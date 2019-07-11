@@ -65,7 +65,7 @@ struct Negation {
 
 
 /** 
- * \brief Static constructor of a translated function.
+ * \brief Static constructor of the negative function.
  *
  * @param[in] function The function to be translated.
  * @param[in] off The offset vector. The dimension should correspond to the 

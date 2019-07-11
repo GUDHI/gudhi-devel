@@ -13,10 +13,11 @@
 #include <gudhi/Functions/Function_lemniscate_revolution_in_R3.h>
 #include <gudhi/Functions/Function_iron_in_R3.h>
 // #include <gudhi/Functions/random_orthogonal_matrix.h>
-#include <gudhi/Functions/Embed_in_Rd.h>
-#include <gudhi/Functions/Translate.h>
-#include <gudhi/Functions/Linear_transformation.h>
+// #include <gudhi/Functions/Embed_in_Rd.h>
+// #include <gudhi/Functions/Translate.h>
+// #include <gudhi/Functions/Linear_transformation.h>
 #include <gudhi/Functions/Negation.h>
+#include <gudhi/Functions/Cartesian_product.h>
 #include <iostream>
 #include <string>
 
@@ -104,23 +105,31 @@ int main() {
   //   auto matrix = random_orthogonal_matrix(5);
   //   std::cout << "M:\n" << matrix << "\nM^t * M\n" << matrix.transpose() * matrix << "\n";
   // }
+  // {
+  //   // embedding function
+  //   Gudhi::coxeter_triangulation::Function_iron_in_R3 fun_iron;
+  //   auto fun_embed = Gudhi::coxeter_triangulation::make_embedding(fun_iron, 5);
+  //   print_test(fun_embed);
+  //   Eigen::VectorXd off = Eigen::VectorXd::Random(5);
+  //   auto fun_trans = Gudhi::coxeter_triangulation::translate(fun_embed, off);
+  //   std::cout << "Offset vector:\n" << off << "\n";
+  //   print_test(fun_trans);
+  //   Eigen::MatrixXd matrix = Eigen::MatrixXd::Random(5, 5);
+  //   std::cout << "Transformation matrix:\n" << matrix << "\n";
+  //   std::cout << "Determinant = " << matrix.determinant() << "\n";
+  //   auto fun_lin = Gudhi::coxeter_triangulation::linear_transformation(fun_trans, matrix);
+  //   print_test(fun_lin);
+  //   std::cout << "Negative function:\n";
+  //   auto fun_neg = Gudhi::coxeter_triangulation::negation(fun_lin);
+  //   print_test(fun_neg);
+  // }
   {
-    // embedding function
-    Gudhi::coxeter_triangulation::Function_iron_in_R3 fun_iron;
-    auto fun_embed = Gudhi::coxeter_triangulation::make_embedding(fun_iron, 5);
-    print_test(fun_embed);
-    Eigen::VectorXd off = Eigen::VectorXd::Random(5);
-    auto fun_trans = Gudhi::coxeter_triangulation::translate(fun_embed, off);
-    std::cout << "Offset vector:\n" << off << "\n";
-    print_test(fun_trans);
-    Eigen::MatrixXd matrix = Eigen::MatrixXd::Random(5, 5);
-    std::cout << "Transformation matrix:\n" << matrix << "\n";
-    std::cout << "Determinant = " << matrix.determinant() << "\n";
-    auto fun_lin = Gudhi::coxeter_triangulation::linear_transformation(fun_trans, matrix);
-    print_test(fun_lin);
-    std::cout << "Negative function:\n";
-    auto fun_neg = Gudhi::coxeter_triangulation::negation(fun_lin);
-    print_test(fun_neg);
+    typedef Gudhi::coxeter_triangulation::Function_Sm_in_Rd Function_sphere;
+    Function_sphere fun_sphere(1, 1);
+    auto fun_prod = Gudhi::coxeter_triangulation::make_product_function(fun_sphere,
+									fun_sphere,
+									fun_sphere);
+    print_test(fun_prod);
   }
   return 0;
 }
