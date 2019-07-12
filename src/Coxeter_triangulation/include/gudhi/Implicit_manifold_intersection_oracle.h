@@ -85,7 +85,9 @@ public:
    *   point to be considered lying at the lower-dimensional face.
    */
   Implicit_manifold_intersection_oracle(const Function_& function, double threshold = 0)
-    : fun_(function), domain_(function.amb_d()), threshold_(threshold) {}
+    : fun_(function),
+      domain_(Constant_function(function.amb_d(), 1, Eigen::VectorXd::Constant(1,-1))),
+      threshold_(threshold) {}
   
 private:
   Function_ fun_;
