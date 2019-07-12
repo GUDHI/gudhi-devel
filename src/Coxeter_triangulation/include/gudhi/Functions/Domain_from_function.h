@@ -23,9 +23,8 @@ namespace coxeter_triangulation {
 
 /** \class Domain_from_function
  * \brief Builds a domain from a given function.
- * The codomain of the function must be one-dimensional.
- * The domain consists of all points that have negative image by the function.
- * This class is a model of the concept DomainForManifoldTracing.
+ *  This class is a model of the concept DomainForManifoldTracing and
+ *  can be used to define an implicit manifold with boundary.
  *
  * \tparam Function The function template parameter. Should be a model of 
  * the concept FunctionForImplicitManifold.
@@ -43,9 +42,12 @@ struct Domain_from_function {
     return (function_(p)[0] < 0);
   }
 
-  /** \brief Constructs domain from a given function.
+  /** \brief Constructs a domain from a given function that can be used to define
+   *  an implicit manifold with boundary.
+   *  The domain consists of all points that have negative image by the given function.
    *
    * @param[in] function Input function.
+   * The codomain of the function must be one-dimensional (i.e. function.cod_d() == 1).
    */
   Domain_from_function(const Function& function)
     : function_(function) {
