@@ -38,6 +38,56 @@ using Infinite_domain = Domain_from_function<Constant_function>;
 template<class Function_,
 	 class Domain_ = Infinite_domain>
 class Implicit_manifold_intersection_oracle {
+
+  /* Computes the affine coordinates of the intersection point of the implicit manifold
+   * and the affine hull of the simplex. */
+  template <class Simplex_handle, 
+	    class Triangulation>
+  Eigen::VectorXd compute_lambda(const Simplex_handle& simplex,
+				 const Triangulation& triangulation) const {
+    std::size_t cod_d = this->cod_d();
+    Eigen::MatrixXd matrix(cod_d + 1, cod_d + 1);
+    for (std::size_t i = 0; i < cod_d + 1; ++i)
+      matrix(0, i) = 1;
+    std::size_t j = 0;
+    for (auto v: simplex.vertex_range()) {
+      Eigen::VectorXd v_coords = fun_(triangulation.cartesian_coordinates(v));
+      for (std::size_t i = 1; i < cod_d + 1; ++i)
+	matrix(i, j) = v_coords(i-1);
+      j++;
+    }
+    Eigen::VectorXd z(cod_d + 1);
+    z(0) = 1;
+    for (std::size_t i = 1; i < cod_d + 1; ++i)
+      z(i) = 0;
+    return matrix.colPivHouseholderQr().solve(z);
+  }
+
+  /* Computes the affine coordinates of the intersection point of the boundary
+   * of the implicit manifold and the affine hull of the simplex. */
+  template <class Simplex_handle, 
+	    class Triangulation>
+  Eigen::VectorXd compute_boundary_lambda(const Simplex_handle& simplex,
+					  const Triangulation& triangulation) const {
+    std::size_t cod_d = this->cod_d();
+    Eigen::MatrixXd matrix(cod_d + 2, cod_d + 2);
+    for (std::size_t i = 0; i < cod_d + 2; ++i)
+      matrix(0, i) = 1;
+    std::size_t j = 0;
+    for (auto v: simplex.vertex_range()) {
+      Eigen::VectorXd v_coords = fun_(triangulation.cartesian_coordinates(v));
+      for (std::size_t i = 1; i < cod_d + 1; ++i)
+	matrix(i, j) = v_coords(i-1);
+      matrix(cod_d + 1, j) = domain_.function_(triangulation.cartesian_coordinates(v))(0);
+      j++;
+    }
+    Eigen::VectorXd z(cod_d + 2);
+    z(0) = 1;
+    for (std::size_t i = 1; i < cod_d + 2; ++i)
+      z(i) = 0;
+    return matrix.colPivHouseholderQr().solve(z);
+  }
+
   
 public:
 
