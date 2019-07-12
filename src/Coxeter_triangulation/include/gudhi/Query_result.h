@@ -16,6 +16,10 @@ namespace coxeter_triangulation {
 
 /** \class Query_result
  *  \brief The result of a query by an oracle such as Implicit_manifold_intersection_oracle. 
+ *
+ *  \tparam Simplex_handle The class of the query simplex.
+ *
+ *  \ingroup coxeter_triangulation
  */
 template <class Simplex_handle>
 struct Query_result {
