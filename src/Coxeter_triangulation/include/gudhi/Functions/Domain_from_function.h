@@ -42,7 +42,7 @@ struct Domain_from_function {
     return (function_(p)[0] < 0);
   }
 
-  /** \brief Constructs a domain from a given function that can be used to define
+  /** \brief Constructs a piecewise-linear domain from a given function that can be used to define
    *  an implicit manifold with boundary.
    *  The domain consists of all points that have negative image by the given function.
    *
