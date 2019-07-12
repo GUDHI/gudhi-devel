@@ -97,10 +97,9 @@ class Implicit_manifold_intersection_oracle {
 						   const Triangulation& triangulation) const {
     using QR = Query_result<Simplex_handle>;
     std::size_t amb_d = triangulation.dimension();
-    std::size_t cod_d = fun_->cod_d();
 
     std::vector<std::size_t> snapping_indices;
-    for (std::size_t i = 0; i < lambda.size(); ++i) {
+    for (std::size_t i = 0; i < (std::size_t)lambda.size(); ++i) {
       if (lambda(i) < -threshold_ || lambda(i) > 1 + threshold_)
 	return QR({Simplex_handle(), Eigen::VectorXd(), false});
       if (lambda(i) >= threshold_ && lambda(i) <= 1 - threshold_)
