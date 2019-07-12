@@ -30,7 +30,7 @@ struct Query_result {
   Eigen::VectorXd intersection;
   /** \brief True if the query simplex intersects the manifold. */
   bool success;
-}
+};
 
 } // namespace coxeter_triangulation 
 
