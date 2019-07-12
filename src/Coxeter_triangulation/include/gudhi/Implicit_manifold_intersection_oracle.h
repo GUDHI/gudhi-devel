@@ -15,9 +15,12 @@
 
 #include <Eigen/Dense>
 
+#include <gudhi/Permutahedral_representation/face_from_indices.h>
 #include <gudhi/Functions/Domain_from_function.h>
 #include <gudhi/Functions/Constant_function.h>
 #include <gudhi/Query_result.h>
+
+#include <vector>
 
 namespace Gudhi {
 
@@ -88,21 +91,111 @@ class Implicit_manifold_intersection_oracle {
     return matrix.colPivHouseholderQr().solve(z);
   }
 
+  /* Computes the intersection result for a given simplex in a triangulation. */
+  template <class Simplex_handle,
+	    class Triangulation>
+  Query_result<Simplex_handle> intersection_result(const Eigen::VectorXd& lambda,
+						   const Simplex_handle& simplex,
+						   const Triangulation& triangulation) const {
+    using QR = Query_result<Simplex_handle>;
+    std::size_t amb_d = triangulation.dimension();
+    std::size_t cod_d = fun_->cod_d();
+
+    std::vector<std::size_t> snapping_indices;
+    for (std::size_t i = 0; i < lambda.size(); ++i) {
+      if (lambda(i) < -threshold_ || lambda(i) > 1 + threshold_)
+	return QR({Simplex_handle(), Eigen::VectorXd(), false});
+      if (lambda(i) >= threshold_ && lambda(i) <= 1 - threshold_)
+	snapping_indices.push_back(i);
+    }
+
+    std::size_t snap_d = snapping_indices.size();
+    std::size_t i = 0;
+    std::size_t num_line = 0;
+    Eigen::MatrixXd vertex_matrix(snap_d, amb_d);
+    Eigen::VectorXd reduced_lambda(snap_d);
+    auto v_range = simplex.vertex_range();
+    auto v_it = v_range.begin();
+    for (; num_line < snap_d && v_it != v_range.end(); ++v_it, ++i) {
+      if (i == snapping_indices[num_line]) {
+	Eigen::VectorXd v_coords = triangulation.cartesian_coordinates(*v_it);
+	for (std::size_t j = 0; j < amb_d; ++j)
+	  vertex_matrix(num_line, j) = v_coords(j);
+	reduced_lambda(num_line) = lambda(i);
+	num_line++;
+      }
+    }
+    reduced_lambda /= reduced_lambda.sum();
+    Eigen::VectorXd intersection = reduced_lambda.transpose()*vertex_matrix;
+    return QR({face_from_indices(simplex, snapping_indices), intersection, true});
+  }
   
 public:
 
+  /** \brief Ambient dimension of the implicit manifold. */
+  std::size_t amb_d() const {
+    return fun_.amb_d();
+  }
+  
+  /** \brief Codimension of the implicit manifold. */
+  std::size_t cod_d() const {
+    return fun_.cod_d();
+  }
+
+  /** \brief Intersection query with the relative interior of the manifold.
+   *  
+   *  \details The returned structure Query_result contains the boolean value
+   *   that is true only if the intersection point of the query simplex and
+   *   the relative interior of the manifold exists, the intersection point
+   *   and the face of the query simplex that contains 
+   *   the intersection point.
+   *   
+   *  \tparam Simplex_handle The class of the query simplex.
+   *   Needs to be a model of the concept SimplexInCoxeterTriangulation.
+   *  \tparam Triangulation The class of the triangulation.
+   *   Needs to be a model of the concept TriangulationForManifoldTracing.
+   *
+   *  @param[in] simplex The query simplex. The dimension of the simplex
+   *   should be the same as the codimension of the manifold 
+   *   (the codomain dimension of the function).
+   *  @param[in] triangulation The ambient triangulation. The dimension of 
+   *   the triangulation should be the same as the ambient dimension of the manifold 
+   *   (the domain dimension of the function).
+   */
   template <class Simplex_handle,
 	    class Triangulation>
   Query_result<Simplex_handle> intersects(const Simplex_handle& simplex,
 					  const Triangulation& triangulation) {
-    return Query_result<Simplex_handle>();
+    Eigen::VectorXd lambda = compute_lambda(simplex, triangulation);
+    return intersection_result(lambda, simplex, triangulation);
   }
 
+  /** \brief Intersection query with the boundary of the manifold.
+   *  
+   *  \details The returned structure Query_result contains the boolean value
+   *   that is true only if the intersection point of the query simplex and
+   *   the boundary of the manifold exists, the intersection point
+   *   and the face of the query simplex that contains 
+   *   the intersection point.
+   *   
+   *  \tparam Simplex_handle The class of the query simplex.
+   *   Needs to be a model of the concept SimplexInCoxeterTriangulation.
+   *  \tparam Triangulation The class of the triangulation.
+   *   Needs to be a model of the concept TriangulationForManifoldTracing.
+   *
+   *  @param[in] simplex The query simplex. The dimension of the simplex
+   *   should be the same as the codimension of the boundary of the manifold 
+   *   (the codomain dimension of the function + 1).
+   *  @param[in] triangulation The ambient triangulation. The dimension of 
+   *   the triangulation should be the same as the ambient dimension of the manifold 
+   *   (the domain dimension of the function).
+   */
   template <class Simplex_handle,
 	    class Triangulation>
   Query_result<Simplex_handle> intersects_boundary(const Simplex_handle& simplex,
 						   const Triangulation& triangulation) {
-    return Query_result<Simplex_handle>();
+    Eigen::VectorXd lambda = compute_boundary_lambda(simplex, triangulation);
+    return intersection_result(lambda, simplex, triangulation);
   }
 
   bool lies_in_domain(const Eigen::VectorXd& p) {
