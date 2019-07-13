@@ -16,7 +16,6 @@
 #include <Eigen/Dense>
 
 #include <gudhi/Permutahedral_representation/face_from_indices.h>
-#include <gudhi/Functions/Domain_from_function.h>
 #include <gudhi/Functions/Constant_function.h>
 #include <gudhi/Query_result.h>
 
@@ -102,7 +101,7 @@ class Implicit_manifold_intersection_oracle {
     for (std::size_t i = 0; i < (std::size_t)lambda.size(); ++i) {
       if (lambda(i) < -threshold_ || lambda(i) > 1 + threshold_)
 	return QR({Simplex_handle(), Eigen::VectorXd(), false});
-      if (lambda(i) >= threshold_ && lambda(i) <= 1 - threshold_)
+      if (lambda(i) >= threshold_)
 	snapping_indices.push_back(i);
     }
 
@@ -162,7 +161,7 @@ public:
   template <class Simplex_handle,
 	    class Triangulation>
   Query_result<Simplex_handle> intersects(const Simplex_handle& simplex,
-					  const Triangulation& triangulation) {
+					  const Triangulation& triangulation) const {
     Eigen::VectorXd lambda = compute_lambda(simplex, triangulation);
     return intersection_result(lambda, simplex, triangulation);
   }
@@ -190,7 +189,7 @@ public:
   template <class Simplex_handle,
 	    class Triangulation>
   Query_result<Simplex_handle> intersects_boundary(const Simplex_handle& simplex,
-						   const Triangulation& triangulation) {
+						   const Triangulation& triangulation) const {
     Eigen::VectorXd lambda = compute_boundary_lambda(simplex, triangulation);
     return intersection_result(lambda, simplex, triangulation);
   }

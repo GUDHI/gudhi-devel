@@ -5,3 +5,4 @@ add_executable ( Coxeter_triangulation_permutahedral_representation_test perm_re
 add_executable ( Coxeter_triangulation_freudenthal_triangulation_test freud_triang_test.cpp )
 add_executable ( Coxeter_triangulation_functions_test function_test.cpp )
 add_executable ( Coxeter_triangulation_oracle_test oracle_test.cpp )
+add_executable ( Coxeter_triangulation_manifold_tracing_test manifold_tracing_test.cpp )

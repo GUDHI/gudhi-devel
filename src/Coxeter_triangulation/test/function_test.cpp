@@ -20,7 +20,6 @@
 #include <gudhi/Functions/Negation.h>
 #include <gudhi/Functions/Cartesian_product.h>
 #include <gudhi/Functions/PL_approximation.h>
-#include <gudhi/Functions/Domain_from_function.h> 
 
 #include <gudhi/Coxeter_triangulation.h>
 

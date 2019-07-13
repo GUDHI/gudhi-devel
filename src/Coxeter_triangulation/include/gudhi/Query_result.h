@@ -10,6 +10,9 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+#ifndef QUERY_RESULT_H_
+#define QUERY_RESULT_H_
+
 namespace Gudhi {
 
 namespace coxeter_triangulation {
@@ -35,3 +38,5 @@ struct Query_result {
 } // namespace coxeter_triangulation 
 
 } // namespace Gudhi
+
+#endif

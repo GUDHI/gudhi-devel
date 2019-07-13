@@ -5,10 +5,8 @@
 
 #include <gudhi/Functions/Function_Sm_in_Rd.h>
 #include <gudhi/Functions/Cartesian_product.h>
-#include <gudhi/Functions/Domain_from_function.h>
 
 #include <gudhi/Coxeter_triangulation.h>
-
 
 #include <random>
 #include <cstdlib>
@@ -17,7 +15,7 @@ using namespace Gudhi::coxeter_triangulation;
 
 int main() {
   Function_Sm_in_Rd fun_sph(5.1111, 2);
-  auto oracle = make_oracle(fun_sph);
+  auto oracle = make_oracle(fun_sph, 0.3);
   Coxeter_triangulation<> cox_tr(oracle.amb_d());
   cox_tr.change_offset(Eigen::VectorXd::Random(oracle.amb_d()));
   
@@ -32,5 +30,6 @@ int main() {
     std::cout << "Intersection point:\n" << qr.intersection << "\n";
     std::cout << "Success: " << qr.success << "\n\n";
   }
+  
   return 0;
 }
