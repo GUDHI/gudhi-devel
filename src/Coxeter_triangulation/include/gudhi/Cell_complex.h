@@ -35,6 +35,8 @@ namespace coxeter_triangulation {
 template <class Out_simplex_map_>
 class Cell_complex {
 
+  
+  
 public:  
   typedef typename Out_simplex_map_::key_type Simplex_handle;
   using Hasse_cell = Gudhi::Hasse_diagram::Hasse_diagram_cell<int, double, double>;
@@ -42,11 +44,15 @@ public:
 		   Hasse_cell*,
 		   Simplex_comparator<Simplex_handle> > Simplex_cell_map;
   typedef std::vector<Simplex_cell_map> Simplex_cell_maps;
-  
+
   Cell_complex() {}
+  
+  Cell_complex(std::size_t limit_d)
+    : simplex_cell_maps(limit_d+1) {}
 
 private:
   Simplex_cell_maps simplex_cell_maps;
+  std::vector<Hasse_cell*> hasse_cells;
 };
 
 } // namespace coxeter_triangulation 
