@@ -35,12 +35,14 @@ join(const Permutahedral_representation_range& simplex_range) {
   using Vertex = typename Permutahedral_representation::Vertex;
   using Ordered_partition = typename Permutahedral_representation::OrderedSetPartition;
   using Part = typename Ordered_partition::value_type;
+
   if (simplex_range.empty())
     return Permutahedral_representation();
   std::set<Vertex> vertices;
   for (auto s: simplex_range)
     for (auto v: s.vertex_range())
       vertices.insert(v);
+  
   Permutahedral_representation result;
   result.vertex() = *vertices.begin();
   std::size_t d = vertices.begin()->size();
@@ -49,6 +51,7 @@ join(const Permutahedral_representation_range& simplex_range) {
   std::set<std::size_t> indices;
   for (std::size_t k = 0; k < d+1; ++k)
     indices.insert(k);
+
   while (curr_it != vertices.end()) {
     Part part;
     result.partition().emplace_back(Part());
@@ -64,6 +67,7 @@ join(const Permutahedral_representation_range& simplex_range) {
     curr_it++;
     prev_it++;
   }
+  
   result.partition().emplace_back(Part());
   for (std::size_t k: indices)
     result.partition().back().push_back(k);
