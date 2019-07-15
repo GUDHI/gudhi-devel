@@ -51,38 +51,82 @@ private:
     auto upper_bound = simplex_cell_map.upper_bound(simplex);
     for (; curr_it != upper_bound; ++curr_it) 
       if (simplex.is_face_of(curr_it->first)) {
+	std::cout << "Current simplex \033[1;31m" << simplex
+		  << "\033[0m is a face of \033[1;34m" << curr_it->first << "\033[0m\n";
 	Hasse_cell* cell = curr_it->second;
 	cell_simplex_map.at(cell) = simplex;
 	simplex_cell_map.erase(curr_it);
+	simplex_cell_map.emplace(std::make_pair(simplex, cell));
+	for (auto& sc_pair: simplex_cell_map)
+	  std::cout << " \033[1;31m" << sc_pair.first << "\033[0m\n";
 	return cell;
       }
     upper_bound = simplex_cell_map.upper_bound(simplex.greatest_face());
     for (; curr_it != upper_bound; ++curr_it) 
-      if (curr_it->first.is_face_of(simplex))
+      if (curr_it->first.is_face_of(simplex)) {
+	std::cout << "Current simplex \033[1;34m" << simplex
+		  << "\033[0m is a coface of \033[1;31m" << curr_it->first << "\033[0m\n";
+	for (auto& sc_pair: simplex_cell_map)
+	  std::cout << " \033[1;31m" << sc_pair.first << "\033[0m\n";
 	return curr_it->second;
+      }
     hasse_cells.push_back(new Hasse_cell(cell_d, 0.0));
     Hasse_cell* new_cell = hasse_cells.back();
     cell_simplex_map.emplace(std::make_pair(new_cell, simplex));
     simplex_cell_map.emplace(std::make_pair(simplex, new_cell));
+    std::cout << "Current simplex \033[1;31m" << simplex << "\n";
+    for (auto& sc_pair: simplex_cell_map)
+      std::cout << " \033[1;31m" << sc_pair.first << "\033[0m\n";
+
     return new_cell;
+  }
+
+  void expand_level(std::size_t cell_d) {
+  }
+
+  void construct_complex_(const Out_simplex_map_& out_simplex_map) {
+    for (auto& os_pair: out_simplex_map)
+      insert_cell(os_pair.first, 0);    
+  }
+
+  void construct_complex_(const Out_simplex_map_& interior_simplex_map,
+			  const Out_simplex_map_& boundary_simplex_map) {
   }
   
 public:  
 
-  void construct_complex(std::size_t limit_d) {
+  Cell_complex(std::size_t intrinsic_dimension)
+    : intr_d_(intrinsic_dimension) {}
+  
+  void construct_complex(const Out_simplex_map_& out_simplex_map) {
+    simplex_cell_maps.resize(intr_d_ + 1);
+    construct_complex_(out_simplex_map);
+  }
+  
+  void construct_complex(const Out_simplex_map_& out_simplex_map,
+			 std::size_t limit_dimension) {
+    simplex_cell_maps.resize(limit_dimension + 1);
+    construct_complex_(out_simplex_map);
+  }
+
+  void construct_complex(const Out_simplex_map_& interior_simplex_map,
+			 const Out_simplex_map_& boundary_simplex_map) {
+    construct_complex_(interior_simplex_map, boundary_simplex_map);
+  }
+
+  void construct_complex(const Out_simplex_map_& interior_simplex_map,
+			 const Out_simplex_map_& boundary_simplex_map,
+			 std::size_t limit_d) {
     simplex_cell_maps.resize(limit_d + 1);
+    construct_complex_(interior_simplex_map, boundary_simplex_map);
   }
 
-  void construct_complex() {
-    
+  const Simplex_cell_map& simplex_cell_map(std::size_t cell_d) const {
+    return simplex_cell_maps[cell_d];
   }
   
-  Cell_complex() {}
-  
-  Cell_complex(std::size_t limit_d)
-    : simplex_cell_maps(limit_d+1) {}
-
 private:
+  std::size_t intr_d_;
   Simplex_cell_maps simplex_cell_maps;
   Cell_simplex_map cell_simplex_map;
   std::vector<Hasse_cell*> hasse_cells;

@@ -42,9 +42,9 @@ struct Simplex_comparator {
       return true;
     if (lhs.vertex() > rhs.vertex())
       return false;
-    if (lhs.partition() < lhs.partition())
+    if (lhs.partition() < rhs.partition())
       return true;
-    if (lhs.partition() > lhs.partition())
+    if (lhs.partition() > rhs.partition())
       return false;
     return false;
   }
