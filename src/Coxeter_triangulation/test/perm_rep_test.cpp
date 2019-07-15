@@ -1,4 +1,5 @@
 #include <gudhi/Permutahedral_representation.h>
+#include <gudhi/Permutahedral_representation/join.h>
 
 int main() {
   typedef std::vector<int> Vertex;
@@ -50,6 +51,12 @@ int main() {
 
   std::cout << "The smallest coface of " << s2 << " is " << s2.smallest_coface() << "\n";
   std::cout << "The greatest face of " << s2 << " is " << s2.greatest_face() << "\n";
+
+  Vertex v3 = {0,0,-1};
+  Partition omega3 = {Part({0,1,2}), Part({3})};
+  Simplex_handle s3(v3, omega3);
+  std::vector<Simplex_handle> simplices = {s2,s3};
+  std::cout << "The join of " << s2 << " and " << s3 << " is " << join(simplices) << "\n";
   
   return 0;
 }
