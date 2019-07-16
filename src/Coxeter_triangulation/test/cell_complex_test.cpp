@@ -56,11 +56,11 @@ int main() {
   using Partition = typename Simplex_handle::OrderedSetPartition;
   using Part = typename Partition::value_type;
   using SC = Simplex_comparator<Simplex_handle>;
-  Vertex v1 = {-1,0,-1};
-  Partition omega1 = {Part({2}), Part({0,1,3})};
+  Vertex v1 = {1,1,0};
+  Partition omega1 = {Part({0,1,2,3})};
   Simplex_handle s1(v1, omega1);
-  Vertex v2 = {-1,0,-1};
-  Partition omega2 = {Part({0,2}), Part({1,3})};
+  Vertex v2 = {1,1,0};
+  Partition omega2 = {Part({2}), Part({0,1,3})};
   Simplex_handle s2(v2, omega2);
   
   std::cout << "Vertex comparison: " << v1 << " "

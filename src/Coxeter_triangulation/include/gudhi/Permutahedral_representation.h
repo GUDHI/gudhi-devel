@@ -68,7 +68,7 @@ public:
   Permutahedral_representation() {}
   
   /** \brief Dimension of the simplex. */
-  unsigned dimension() const {
+  std::size_t dimension() const {
     return partition_.size() - 1;
   }
 

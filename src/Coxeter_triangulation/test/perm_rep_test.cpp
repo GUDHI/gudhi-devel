@@ -37,7 +37,7 @@ int main() {
   for (auto& f: s.coface_range(2))
     std::cout << f << "\n";
 
-  Vertex v1 = {0,1,1};
+  Vertex v1 = {0,0,0};
   Partition omega1 = {Part({0,1,2,3})};
   Simplex_handle s1(v1, omega1);
   Vertex v2 = {0,1,0};
@@ -46,6 +46,9 @@ int main() {
   std::cout << "Simplex " << s1 << " is " << (s1.is_face_of(s)? "": "not ") << "a face of " << s << "\n";
   std::cout << "Simplex " << s2 << " is " << (s2.is_face_of(s)? "": "not ") << "a face of " << s << "\n";
 
+  v1 = {1,1,0};
+  omega1 = {Part({2}), Part({0,1,3})};
+  s1 = Simplex_handle(v1, omega1);
   std::cout << "The smallest coface of " << s1 << " is " << s1.smallest_coface() << "\n";
   std::cout << "The greatest face of " << s1 << " is " << s1.greatest_face() << "\n";
 
