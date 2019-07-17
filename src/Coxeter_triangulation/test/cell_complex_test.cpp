@@ -43,14 +43,17 @@ int main() {
   auto& sc_map = cc.simplex_cell_map(0);
   for (auto si_pair: out_simplex_map)
     if (sc_map.find(si_pair.first) != sc_map.end())
-      std::cout << "Simplex = \033[1;31m" << si_pair.first << "\033[0m\n";
+      std::cout << "Simplex = \033[1;31m" << si_pair.first << "\033[0m"
+		<< " point:\n"  << si_pair.second << "\n";
     else
-      std::cout << "Simplex = \033[1;34m" << si_pair.first << "\033[0m\n";      
+      std::cout << "Simplex = \033[1;34m" << si_pair.first << "\033[0m"
+		<< " point:\n"  << si_pair.second << "\n";     
   std::cout << "\nSize of the initial output = " << out_simplex_map.size() << "\n";
 
   std::cout << "The state of the map:\n";
   for (auto& sc_pair: sc_map)
-    std::cout << "Simplex = \033[1;31m" << sc_pair.first << "\033[0m\n";
+    std::cout << "Simplex = \033[1;31m" << sc_pair.first << "\033[0m"
+	      << " point:\n"  << cc.cell_point_map().at(sc_pair.second) << "\n";
   std::cout << "Size of the final output = " << sc_map.size() << "\n";
 
   using Simplex_handle = Coxeter_triangulation<>::Simplex_handle;
