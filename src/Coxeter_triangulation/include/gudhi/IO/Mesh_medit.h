@@ -10,8 +10,8 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#ifndef MESH_MEDIT_H_
-#define MESH_MEDIT_H_
+#ifndef IO_MESH_MEDIT_H_
+#define IO_MESH_MEDIT_H_
 
 /* \class Mesh_medit
  * \brief Structure to store a mesh that can be output in Medit .mesh file format

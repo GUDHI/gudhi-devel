@@ -6,6 +6,8 @@
 #include <gudhi/Manifold_tracing.h>
 #include <gudhi/Cell_complex.h>
 
+#include <gudhi/IO/output_meshes_to_medit.h>
+
 using namespace Gudhi::coxeter_triangulation;
 
 template <class T>
