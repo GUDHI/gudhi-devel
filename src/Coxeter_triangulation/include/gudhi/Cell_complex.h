@@ -197,20 +197,23 @@ private:
   void construct_complex_(const Out_simplex_map_& out_simplex_map) {
     for (auto& os_pair: out_simplex_map)
       insert_cell(os_pair.first, 0);
-    std::cout << "Finished building the layer 0. Simplices:\n";
-    std::size_t color = 31;
-    for (auto& sc_pair: simplex_cell_maps[0])
-      std::cout << "\033[1;" << color << "m" << sc_pair.first << "\033[0m\n";
-    std::cout << "\n";
-    color++;
+    // std::cout << "Finished building the layer 0. Simplices:\n";
+    // std::size_t color = 31;
+    // for (auto& sc_pair: simplex_cell_maps[0])
+    //   std::cout << "\033[1;" << color << "m" << sc_pair.first << "\033[0m\n";
+    // std::cout << "Size: " << simplex_cell_maps[0].size() << "\n";
+    // std::cout << "\n";
+    // color++;
     for (std::size_t cell_d = 1;
 	 cell_d < simplex_cell_maps.size() && !simplex_cell_maps[cell_d - 1].empty();
-	 ++cell_d, ++color) {
+	 ++cell_d) {
       expand_level(cell_d);
-      std::cout << "Finished building the layer " << cell_d << ". Simplices:\n";
-      for (auto& sc_pair: simplex_cell_maps[cell_d])
-    	std::cout << "\033[1;" << color << "m" << sc_pair.first << "\033[0m\n";
-      std::cout << "\n";
+      // ++color;
+      // std::cout << "Finished building the layer " << cell_d << ". Simplices:\n";
+      // for (auto& sc_pair: simplex_cell_maps[cell_d])
+      // 	std::cout << "\033[1;" << color << "m" << sc_pair.first << "\033[0m\n";
+      // std::cout << "Size: " << simplex_cell_maps[cell_d].size() << "\n";
+      // std::cout << "\n";
     }
   }
   
