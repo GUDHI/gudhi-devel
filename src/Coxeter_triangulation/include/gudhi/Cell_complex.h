@@ -53,18 +53,18 @@ private:
   };
   
   std::pair<Hasse_cell*, bool> insert_cell(const Simplex_handle& simplex, std::size_t cell_d) {
-    std::cout << "Insert simplex for " << simplex << "\n";
+    // std::cout << "Insert simplex for " << simplex << "\n";
     Simplex_cell_map& simplex_cell_map = simplex_cell_maps[cell_d];
     auto curr_it = simplex_cell_map.lower_bound(simplex.smallest_coface());
     auto upper_bound = simplex_cell_map.upper_bound(simplex);
     for (; curr_it != upper_bound; ++curr_it) {
-      std::cout << " Checking if face: " << curr_it->first << "\n";
+      // std::cout << " Checking if face: " << curr_it->first << "\n";
       if (simplex == curr_it->first) {
-	std::cout << "  Same simplex!\n";
+	// std::cout << "  Same simplex!\n";
 	return std::make_pair(curr_it->second, true);
       }
       if (simplex.is_face_of(curr_it->first)) {
-	std::cout << "  Face!\n";
+	// std::cout << "  Face!\n";
 	Hasse_cell* cell = curr_it->second;
 	cell_simplex_map.at(cell) = simplex;
 	simplex_cell_map.erase(curr_it++);
@@ -72,7 +72,7 @@ private:
 	  if (simplex == curr_it->first)
 	    continue;
 	  if (simplex.is_face_of(curr_it->first)) {
-	    std::cout << "  Post-deleting " << curr_it->first << "\n";
+	    // std::cout << "  Post-deleting " << curr_it->first << "\n";
 	    simplex_cell_map.erase(curr_it++);
 	  }
 	  else
@@ -84,9 +84,9 @@ private:
     }
     upper_bound = simplex_cell_map.upper_bound(simplex.greatest_face());
     for (; curr_it != upper_bound; ++curr_it) {
-      std::cout << " Checking if coface: " << curr_it->first << "\n";
+      // std::cout << " Checking if coface: " << curr_it->first << "\n";
       if (curr_it->first.is_face_of(simplex)) {
-	std::cout << "  Coface!\n";
+	// std::cout << "  Coface!\n";
 	return std::make_pair(curr_it->second, false);
       }
     }
@@ -94,15 +94,16 @@ private:
     Hasse_cell* new_cell = hasse_cells.back();
     cell_simplex_map.emplace(std::make_pair(new_cell, simplex));
     simplex_cell_map.emplace(std::make_pair(simplex, new_cell));
-    std::cout << " OK for insertion!\n";
+    // std::cout << " OK for insertion!\n";
     return std::make_pair(new_cell, true);
   }
 
   void expand_level(std::size_t cell_d) {
     std::size_t min_d = cell_d + intr_d_;
+    std::size_t amb_d = simplex_cell_maps[0].begin()->first.vertex().size();
     for (auto& sc_pair: simplex_cell_maps[cell_d - 1])
       min_d = std::min(min_d, sc_pair.first.dimension());
-    for (std::size_t i = min_d + 1; i <= cell_d + intr_d_; ++i) {
+    for (std::size_t i = min_d + 1; i <= std::min(cell_d + intr_d_, amb_d); ++i) {
       for (auto& sc_pair: simplex_cell_maps[cell_d - 1]) {
 	const Simplex_handle& simplex = sc_pair.first;
 	if (simplex.dimension() >= i)
@@ -114,35 +115,35 @@ private:
 	  std::tie(new_cell, success) = insert_cell(coface, cell_d);
 	  if (success) {
 	    new_cell->get_boundary().emplace_back(std::make_pair(cell, 1));
-	    std::cout << "The cell " << cell_simplex_map[cell]
-		      << " (" << cell <<  ") became a face of the cell "
-		      << cell_simplex_map[new_cell] << " (" << new_cell << ")\n";
+	    // std::cout << "The cell " << cell_simplex_map[cell]
+	    // 	      << " (" << cell <<  ") became a face of the cell "
+	    // 	      << cell_simplex_map[new_cell] << " (" << new_cell << ")\n";
 	  }
 	}
       }
-      std::cout << "\nThe layer " << cell_d << " before the cleanup at simplex dimension " << i << "\n";
-      for (auto& sc_pair: simplex_cell_maps[cell_d]) {
-	std::cout << " \033[1;31m" << sc_pair.first << "\033[0m: [ ";
-	if (sc_pair.second->get_boundary().empty()) {
-	  std::cout << "]";
-	  continue;
-	}
-	Hasse_cell* cell = sc_pair.second;
-	auto b_it = cell->get_boundary().begin();
-	std::cout << "\033[1;32m" << cell_simplex_map[(b_it++)->first] << "\033[0m";
-	for (; b_it != cell->get_boundary().end(); ++b_it) {
-	  std::cout << ",  \033[1;32m" << cell_simplex_map[b_it->first] << "\033[0m";
-	}
-	std::cout << " ]";
-	std::vector<Simplex_handle> faces;
-	faces.reserve(cell->get_boundary().size());
-	for (auto& bi_pair: cell->get_boundary()) {
-	  const Simplex_handle& face = cell_simplex_map.at(bi_pair.first);
-	  faces.push_back(face);
-	}
-	Simplex_handle join = Gudhi::coxeter_triangulation::join(faces);
-	std::cout << " join = \033[1;33m" << join << "\033[0m\n";
-      }
+      // std::cout << "\nThe layer " << cell_d << " before the cleanup at simplex dimension " << i << "\n";
+      // for (auto& sc_pair: simplex_cell_maps[cell_d]) {
+      // 	std::cout << " \033[1;31m" << sc_pair.first << "\033[0m: [ ";
+      // 	if (sc_pair.second->get_boundary().empty()) {
+      // 	  std::cout << "]";
+      // 	  continue;
+      // 	}
+      // 	Hasse_cell* cell = sc_pair.second;
+      // 	auto b_it = cell->get_boundary().begin();
+      // 	std::cout << "\033[1;32m" << cell_simplex_map[(b_it++)->first] << "\033[0m";
+      // 	for (; b_it != cell->get_boundary().end(); ++b_it) {
+      // 	  std::cout << ",  \033[1;32m" << cell_simplex_map[b_it->first] << "\033[0m";
+      // 	}
+      // 	std::cout << " ]";
+      // 	std::vector<Simplex_handle> faces;
+      // 	faces.reserve(cell->get_boundary().size());
+      // 	for (auto& bi_pair: cell->get_boundary()) {
+      // 	  const Simplex_handle& face = cell_simplex_map.at(bi_pair.first);
+      // 	  faces.push_back(face);
+      // 	}
+      // 	Simplex_handle join = Gudhi::coxeter_triangulation::join(faces);
+      // 	std::cout << " join = \033[1;33m" << join << "\033[0m\n";
+      // }
       Simplex_cell_map& new_layer = simplex_cell_maps[cell_d];
       auto curr_it = new_layer.begin();
       while (curr_it != new_layer.end()) {
@@ -170,26 +171,26 @@ private:
 	if (join_is_face)
 	  new_layer.erase(curr_it++);
 	else if (simplex != join) {
-	  curr_it++;
+	  new_layer.erase(curr_it++);
 	  insert_cell(join, cell_d);
 	}
 	else
 	  curr_it++;
       }
-      std::cout << "\nThe layer " << cell_d << " after the cleanup at simplex dimension " << i << "\n";
-      for (auto& sc_pair: simplex_cell_maps[cell_d]) {
-	std::cout << " \033[1;31m" << sc_pair.first << "\033[0m: [ ";
-	if (sc_pair.second->get_boundary().empty()) {
-	  std::cout << "]";
-	  continue;
-	}
-	auto b_it = sc_pair.second->get_boundary().begin();
-	std::cout << "\033[1;32m" << cell_simplex_map[(b_it++)->first] << "\033[0m";
-	for (; b_it != sc_pair.second->get_boundary().end(); ++b_it) {
-	  std::cout << ",  \033[1;32m" << cell_simplex_map[b_it->first] << "\033[0m";
-	}
-	std::cout << " ]\n";
-      }
+      // std::cout << "\nThe layer " << cell_d << " after the cleanup at simplex dimension " << i << "\n";
+      // for (auto& sc_pair: simplex_cell_maps[cell_d]) {
+      // 	std::cout << " \033[1;31m" << sc_pair.first << "\033[0m: [ ";
+      // 	if (sc_pair.second->get_boundary().empty()) {
+      // 	  std::cout << "]";
+      // 	  continue;
+      // 	}
+      // 	auto b_it = sc_pair.second->get_boundary().begin();
+      // 	std::cout << "\033[1;32m" << cell_simplex_map[(b_it++)->first] << "\033[0m";
+      // 	for (; b_it != sc_pair.second->get_boundary().end(); ++b_it) {
+      // 	  std::cout << ",  \033[1;32m" << cell_simplex_map[b_it->first] << "\033[0m";
+      // 	}
+      // 	std::cout << " ]\n";
+      // }
     }
   }
 
@@ -197,20 +198,22 @@ private:
     for (auto& os_pair: out_simplex_map)
       insert_cell(os_pair.first, 0);
     std::cout << "Finished building the layer 0. Simplices:\n";
-    // std::size_t color = 31;
-    // for (auto& sc_pair: simplex_cell_maps[0])
-    //   std::cout << "\033[1;" << color << "m" << sc_pair.first << "\033[0m\n";
-    // std::cout << "\n";
-    // color++;
-    // for (std::size_t cell_d = 1; cell_d < simplex_cell_maps.size(); ++cell_d, ++color) {
-    //   expand_level(cell_d);
-    //   std::cout << "Finished building the layer " << cell_d << ". Simplices:\n";
-    //   for (auto& sc_pair: simplex_cell_maps[cell_d])
-    // 	std::cout << "\033[1;" << color << "m" << sc_pair.first << "\033[0m\n";
-    //   std::cout << "\n";
-    // }
+    std::size_t color = 31;
+    for (auto& sc_pair: simplex_cell_maps[0])
+      std::cout << "\033[1;" << color << "m" << sc_pair.first << "\033[0m\n";
+    std::cout << "\n";
+    color++;
+    for (std::size_t cell_d = 1;
+	 cell_d < simplex_cell_maps.size() && !simplex_cell_maps[cell_d - 1].empty();
+	 ++cell_d, ++color) {
+      expand_level(cell_d);
+      std::cout << "Finished building the layer " << cell_d << ". Simplices:\n";
+      for (auto& sc_pair: simplex_cell_maps[cell_d])
+    	std::cout << "\033[1;" << color << "m" << sc_pair.first << "\033[0m\n";
+      std::cout << "\n";
+    }
   }
-
+  
   void construct_complex_(const Out_simplex_map_& interior_simplex_map,
 			  const Out_simplex_map_& boundary_simplex_map) {
   }
