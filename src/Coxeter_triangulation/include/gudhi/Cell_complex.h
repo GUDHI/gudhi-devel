@@ -38,7 +38,7 @@ template <class Out_simplex_map_>
 class Cell_complex {
 public:
   typedef typename Out_simplex_map_::key_type Simplex_handle;
-  using Hasse_cell = Gudhi::Hasse_diagram::Hasse_diagram_cell<int, double, double>;
+  typedef Gudhi::Hasse_diagram::Hasse_diagram_cell<int, double, double> Hasse_cell;
   typedef std::map<Simplex_handle,
 		   Hasse_cell*,
 		   Simplex_comparator<Simplex_handle> > Simplex_cell_map;

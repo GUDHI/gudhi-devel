@@ -6,6 +6,7 @@
 #include <gudhi/Manifold_tracing.h>
 #include <gudhi/Cell_complex.h>
 
+#include <gudhi/IO/build_mesh_from_cell_complex.h>
 #include <gudhi/IO/output_meshes_to_medit.h>
 
 using namespace Gudhi::coxeter_triangulation;
@@ -27,7 +28,7 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& vector) {
 
 int main() {
   Function_Sm_in_Rd fun_sph(1.1111, 2);
-  auto oracle = make_oracle(fun_sph, 0.0);
+  auto oracle = make_oracle(fun_sph, 0.3);
   Coxeter_triangulation<> cox_tr(oracle.amb_d());
   cox_tr.change_offset(Eigen::VectorXd::Random(oracle.amb_d()));
   
