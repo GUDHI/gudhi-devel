@@ -28,7 +28,7 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& vector) {
 
 int main() {
   Function_Sm_in_Rd fun_sph(1.1111, 2);
-  auto oracle = make_oracle(fun_sph, 0.3);
+  auto oracle = make_oracle(fun_sph, 0);
   Coxeter_triangulation<> cox_tr(oracle.amb_d());
   cox_tr.change_offset(Eigen::VectorXd::Random(oracle.amb_d()));
   
@@ -75,5 +75,10 @@ int main() {
 	    << (omega1 < omega2? "<": "") << (omega1 > omega2? ">": "") << " " << omega2 << "\n";
   std::cout << "Simplex comparison: " << s1 << " "
 	    << (SC()(s1, s2)? "<": "") << (SC()(s2, s1)? ">": "") << " " << s2 << "\n";
+
+  output_meshes_to_medit(3,
+			 "test.mesh",
+			 build_mesh_from_cell_complex(cc,
+						      Configuration({true, true, true, 1, 2, 3})));
   return 0;
 }

@@ -261,6 +261,10 @@ public:
     construct_complex_(interior_simplex_map, boundary_simplex_map);
   }
 
+  std::size_t intrinsic_dimension() const {
+    return intr_d_;
+  }
+  
   const Simplex_cell_map& simplex_cell_map(std::size_t cell_d) const {
     return simplex_cell_maps_[cell_d];
   }

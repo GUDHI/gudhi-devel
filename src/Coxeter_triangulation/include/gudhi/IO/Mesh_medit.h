@@ -13,6 +13,10 @@
 #ifndef IO_MESH_MEDIT_H_
 #define IO_MESH_MEDIT_H_
 
+namespace Gudhi {
+
+namespace coxeter_triangulation {
+
 /* \class Mesh_medit
  * \brief Structure to store a mesh that can be output in Medit .mesh file format
  *  using the output_meshes_to_medit method.
@@ -45,5 +49,9 @@ struct Mesh_medit {
   /** \brief Range of scalar values over tetrahedra. */
   Scalar_field_range tetrahedra_scalar_range;
 };
+
+} // namespace coxeter_triangulation 
+
+} // namespace Gudhi
 
 #endif
