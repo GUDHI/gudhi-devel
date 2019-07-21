@@ -28,9 +28,12 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& vector) {
 
 int main() {
   Function_Sm_in_Rd fun_sph(1.1111, 2);
-  auto oracle = make_oracle(fun_sph, 0);
+  double thr = 0;
+  auto oracle = make_oracle(fun_sph, thr);
+  double lambda = 0.2;
   Coxeter_triangulation<> cox_tr(oracle.amb_d());
   cox_tr.change_offset(Eigen::VectorXd::Random(oracle.amb_d()));
+  cox_tr.change_matrix(lambda * cox_tr.matrix());
   
   using MT = Manifold_tracing<Coxeter_triangulation<> >;
   using Out_simplex_map = typename MT::Out_simplex_map;
@@ -41,27 +44,27 @@ int main() {
   std::size_t intr_d = oracle.amb_d() - oracle.cod_d();
   Cell_complex<Out_simplex_map> cc(intr_d);
   cc.construct_complex(out_simplex_map);
-  auto& sc_map = cc.simplex_cell_map(0);
-  for (auto si_pair: out_simplex_map)
-    if (sc_map.find(si_pair.first) != sc_map.end())
-      std::cout << "Simplex = \033[1;31m" << si_pair.first << "\033[0m"
-		<< " point:\n"  << si_pair.second << "\n";
-    else
-      std::cout << "Simplex = \033[1;34m" << si_pair.first << "\033[0m"
-		<< " point:\n"  << si_pair.second << "\n";     
-  std::cout << "\nSize of the initial output = " << out_simplex_map.size() << "\n";
+  // auto& sc_map = cc.simplex_cell_map(0);
+  // for (auto si_pair: out_simplex_map)
+  //   if (sc_map.find(si_pair.first) != sc_map.end())
+  //     std::cout << "Simplex = \033[1;31m" << si_pair.first << "\033[0m"
+  // 		<< " point:\n"  << si_pair.second << "\n";
+  //   else
+  //     std::cout << "Simplex = \033[1;34m" << si_pair.first << "\033[0m"
+  // 		<< " point:\n"  << si_pair.second << "\n";     
+  // std::cout << "\nSize of the initial output = " << out_simplex_map.size() << "\n";
 
-  std::cout << "The state of the map:\n";
-  for (auto& sc_pair: sc_map)
-    std::cout << "Simplex = \033[1;31m" << sc_pair.first << "\033[0m"
-	      << " point:\n"  << cc.cell_point_map().at(sc_pair.second) << "\n";
-  std::cout << "Size of the final output = " << sc_map.size() << "\n";
+  // std::cout << "The state of the map:\n";
+  // for (auto& sc_pair: sc_map)
+  //   std::cout << "Simplex = \033[1;31m" << sc_pair.first << "\033[0m"
+  // 	      << " point:\n"  << cc.cell_point_map().at(sc_pair.second) << "\n";
+  // std::cout << "Size of the final output = " << sc_map.size() << "\n";
 
   using Simplex_handle = Coxeter_triangulation<>::Simplex_handle;
   using Vertex = typename Simplex_handle::Vertex;
   using Partition = typename Simplex_handle::OrderedSetPartition;
   using Part = typename Partition::value_type;
-  using SC = Simplex_comparator<Simplex_handle>;
+  // using SC = Simplex_comparator<Simplex_handle>;
   Vertex v1 = {1,1,0};
   Partition omega1 = {Part({0,1,2,3})};
   Simplex_handle s1(v1, omega1);
@@ -69,15 +72,15 @@ int main() {
   Partition omega2 = {Part({2}), Part({0,1,3})};
   Simplex_handle s2(v2, omega2);
   
-  std::cout << "Vertex comparison: " << v1 << " "
-	    << (v1 < v2? "<": "") << (v1 > v2? ">": "") << " " << v2 << "\n";
-  std::cout << "Partition comparison: " << omega1 << " "
-	    << (omega1 < omega2? "<": "") << (omega1 > omega2? ">": "") << " " << omega2 << "\n";
-  std::cout << "Simplex comparison: " << s1 << " "
-	    << (SC()(s1, s2)? "<": "") << (SC()(s2, s1)? ">": "") << " " << s2 << "\n";
+  // std::cout << "Vertex comparison: " << v1 << " "
+  // 	    << (v1 < v2? "<": "") << (v1 > v2? ">": "") << " " << v2 << "\n";
+  // std::cout << "Partition comparison: " << omega1 << " "
+  // 	    << (omega1 < omega2? "<": "") << (omega1 > omega2? ">": "") << " " << omega2 << "\n";
+  // std::cout << "Simplex comparison: " << s1 << " "
+  // 	    << (SC()(s1, s2)? "<": "") << (SC()(s2, s1)? ">": "") << " " << s2 << "\n";
 
   output_meshes_to_medit(3,
-			 "test.mesh",
+			 "test",
 			 build_mesh_from_cell_complex(cc,
 						      Configuration({true, true, true, 1, 2, 3})));
   return 0;

@@ -17,6 +17,7 @@
 #include <tuple>
 #include <utility>
 
+#include <gudhi/Functions/Function.h>
 #include <Eigen/Dense>
 
 namespace Gudhi {
@@ -102,7 +103,7 @@ get_value (const std::tuple<T...>& tuple, const Eigen::VectorXd& x, Eigen::Vecto
  * \ingroup coxeter_triangulation
  */
 template <class... Functions>
-struct Cartesian_product {
+struct Cartesian_product : public Function {
   
   /** 
    * \brief Value of the function at a specified point.

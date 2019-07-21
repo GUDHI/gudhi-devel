@@ -15,6 +15,7 @@
 
 #include <cstdlib>
 
+#include <gudhi/Functions/Function.h>
 #include <Eigen/Dense>
 
 namespace Gudhi {
@@ -31,7 +32,7 @@ namespace coxeter_triangulation {
  * \ingroup coxeter_triangulation
  */
 template <class Function>
-struct Linear_transformation {
+struct Linear_transformation : public Function {
   
   /** 
    * \brief Value of the function at a specified point.

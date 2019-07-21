@@ -16,6 +16,7 @@
 #include <cstdlib>
 #include <random>
 
+#include <gudhi/Functions/Function.h>
 #include <Eigen/Dense>
 
 
@@ -32,7 +33,7 @@ namespace coxeter_triangulation {
  * \ingroup coxeter_triangulation
  */
 template <class Function>
-struct Embed_in_Rd {
+struct Embed_in_Rd : public Function {
   
   /** 
    * \brief Value of the function at a specified point.

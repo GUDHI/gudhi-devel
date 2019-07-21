@@ -15,6 +15,7 @@
 
 #include <cstdlib>
 
+#include <gudhi/Functions/Function.h>
 #include <Eigen/Dense>
 
 namespace Gudhi {
@@ -34,7 +35,7 @@ namespace coxeter_triangulation {
  */
 template <class Function,
 	  class Triangulation>
-struct PL_approximation {
+struct PL_approximation : public Function {
   
   /** 
    * \brief Value of the function at a specified point.

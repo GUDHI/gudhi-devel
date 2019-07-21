@@ -13,6 +13,7 @@
 #ifndef FUNCTIONS_FUNCTION_LEMNISCATE_REVOLUTION_IN_R3_H_
 #define FUNCTIONS_FUNCTION_LEMNISCATE_REVOLUTION_IN_R3_H_
 
+#include <gudhi/Functions/Function.h>
 #include <Eigen/Dense>
 
 namespace Gudhi {
@@ -26,7 +27,7 @@ namespace coxeter_triangulation {
  *
  * \ingroup coxeter_triangulation
  */
-struct Function_lemniscate_revolution_in_R3 {
+struct Function_lemniscate_revolution_in_R3 : public Function {
 
   /** 
    * \brief Value of the function at a specified point.

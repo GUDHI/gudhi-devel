@@ -13,6 +13,7 @@
 #ifndef FUNCTIONS_CONSTANT_FUNCTION_H_
 #define FUNCTIONS_CONSTANT_FUNCTION_H_
 
+#include <gudhi/Functions/Function.h>
 #include <Eigen/Dense>
 
 namespace Gudhi {
@@ -26,7 +27,7 @@ namespace coxeter_triangulation {
  *
  * \ingroup coxeter_triangulation
  */
-struct Constant_function {
+struct Constant_function : public Function {
 
   /** \brief Value of the function at a specified point. The value is constant.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.

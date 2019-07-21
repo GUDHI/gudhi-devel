@@ -13,6 +13,7 @@
 #ifndef FUNCTIONS_FUNCTION_AFFINE_PLANE_IN_RD_H_
 #define FUNCTIONS_FUNCTION_AFFINE_PLANE_IN_RD_H_
 
+#include <gudhi/Functions/Function.h>
 #include <Eigen/Dense>
 
 namespace Gudhi {
@@ -26,7 +27,7 @@ namespace coxeter_triangulation {
  *
  * \ingroup coxeter_triangulation
  */
-struct Function_affine_plane_in_Rd {
+struct Function_affine_plane_in_Rd : public Function {
   
   /** 
    * \brief Value of the function at a specified point.
