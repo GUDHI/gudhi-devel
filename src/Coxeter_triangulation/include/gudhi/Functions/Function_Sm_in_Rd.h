@@ -59,7 +59,15 @@ struct Function_Sm_in_Rd: public Function {
       point(i) += center_[i];
     return point;
   }
+
+  Function_Sm_in_Rd(const Function_Sm_in_Rd& rhs) { 
+    std::cout << "Derived created by deep copy" << std::endl; 
+  }
   
+  Function_Sm_in_Rd* clone() const {
+    return new Function_Sm_in_Rd(*this);
+  }
+    
   /** 
    * \brief Constructor of the function that defines an m-dimensional implicit sphere embedded
    * in the d-dimensional Euclidean space.

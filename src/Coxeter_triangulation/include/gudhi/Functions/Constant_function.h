@@ -47,6 +47,12 @@ struct Constant_function : public Function {
     throw "Seed invoked on a constant function.\n";
   }
 
+  Constant_function* clone() const {
+    return new Constant_function(*this);
+  }
+
+  Constant_function() {}
+  
   /** 
    * \brief Constructor of a constant function from R^d to R^m.
    *

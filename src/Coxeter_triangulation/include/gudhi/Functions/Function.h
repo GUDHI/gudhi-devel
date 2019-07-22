@@ -46,6 +46,8 @@ struct Function {
     return Eigen::VectorXd();
   }
 
+  virtual Function* clone() const = 0;
+
   /** \brief Virtual destructor. */
   virtual ~Function() {}
 };
