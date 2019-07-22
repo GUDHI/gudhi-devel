@@ -31,9 +31,7 @@ struct Function {
   /** \brief Virtual method for the value of the function at a specified point.
    * @param[in] p The input point.
    */
-  virtual Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
-    return Eigen::VectorXd();
-  }
+  virtual void evaluate(const Eigen::VectorXd& p, Eigen::VectorXd& result) const {}
   
   /** \brief Virtual method for the domain dimension. */
   virtual std::size_t amb_d() const {return 0;};

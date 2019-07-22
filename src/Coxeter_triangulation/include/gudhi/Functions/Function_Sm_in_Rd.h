@@ -32,17 +32,16 @@ struct Function_Sm_in_Rd: public Function {
 /** \brief Value of the function at a specified point.
  * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
  */
-  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+  void evaluate(const Eigen::VectorXd& p, Eigen::VectorXd& result) const {
     Eigen::VectorXd x = p;
     for (std::size_t i = 0; i < d_; ++i)
       x(i) -= center_[i];
-    Eigen::VectorXd coords(k_);
+    result = Eigen::VectorXd::Zero(k_); 
     for (std::size_t i = 0; i < m_+1; ++i)
-      coords(0) += x(i)*x(i);
-    coords(0) -= r_*r_;
+      result(0) += x(i)*x(i);
+    result(0) -= r_*r_;
     for (std::size_t j = 1; j < k_; ++j)
-      coords(j) = x(m_+j);
-    return coords;
+      result(j) = x(m_+j);
   }
   
   /** \brief Returns the domain dimension. Same as the ambient dimension of the sphere. */

@@ -200,12 +200,13 @@ int main(int argc, char** const argv) {
   }
   It fun = parse_input(stream, fun_range);
   std::size_t amb_d = (*fun)->amb_d();
-  // Eigen::VectorXd value = (**fun)(Eigen::VectorXd::Zero(amb_d));
-  // std::cout << "amb_d = " << amb_d << "\n";
-  // std::cout << "cod_d = " << (*fun)->cod_d() << "\n";
-  // std::cout << "f(0) =\n" << value << "\n";
-  std::cout << "f(0) =\n" << Function_Sm_in_Rd(1.0, 2)(Eigen::VectorXd::Zero(3)) << "\n";
+  Eigen::VectorXd value;
+  (*fun)->evaluate(Eigen::VectorXd::Zero(amb_d), value);
   
+  std::cout << "amb_d = " << amb_d << "\n";
+  std::cout << "cod_d = " << (*fun)->cod_d() << "\n";
+  std::cout << "f(0) =\n" << value << "\n";
+   
   // fun_range.emplace_back(new Function_Sm_in_Rd(2.3, 2));
   // std::cout << "amb_d = " << (*fun_range.begin())->amb_d() << "\n";
   // Function* fun = (*fun_range.begin())->clone();
