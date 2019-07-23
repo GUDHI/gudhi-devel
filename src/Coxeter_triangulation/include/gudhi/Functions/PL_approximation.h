@@ -41,7 +41,7 @@ struct PL_approximation : public Function {
    * \brief Value of the function at a specified point.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
-  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+  void evaluate(const Eigen::VectorXd& p, Eigen::VectorXd& result) const {
     std::size_t cod_d = this->cod_d();
     std::size_t amb_d = this->amb_d();
     auto s = tr_.locate_point(p);
@@ -52,7 +52,8 @@ struct PL_approximation : public Function {
     std::size_t j = 0;
     for (auto v: s.vertex_range()) {
       Eigen::VectorXd pt_v = tr_.cartesian_coordinates(v);
-      Eigen::VectorXd fun_v = fun_(pt_v);
+      Eigen::VectorXd fun_v;
+      fun_.evaluate(pt_v, fun_v);
       for (std::size_t i = 1; i < amb_d + 1; ++i)
 	vertex_matrix(i, j) = pt_v(i-1); 
       for (std::size_t i = 0; i < cod_d; ++i)
@@ -65,7 +66,7 @@ struct PL_approximation : public Function {
     for (std::size_t i = 1; i < amb_d + 1; ++i)
       z(i) = p(i-1);
     Eigen::VectorXd lambda = vertex_matrix.colPivHouseholderQr().solve(z);    
-    return matrix * lambda;
+    result = matrix * lambda;
   }
 
   /** \brief Returns the domain (ambient) dimension. */
@@ -75,14 +76,14 @@ struct PL_approximation : public Function {
   std::size_t cod_d() const {return fun_.cod_d();}
 
   /** \brief Returns a point on the zero-set. */
-  Eigen::VectorXd seed() const {
-    Eigen::VectorXd seed_k(fun_.amb_d());
+  void seed(Eigen::VectorXd& result) const {
+    // Eigen::VectorXd seed_k(fun_.amb_d());
     // auto c = tr_.locate_point(fun_.seed());
     // for (auto f: c.face_range(fun_.cod_d())) {      
     // }
     // TODO: not finished. Should use an oracle.
     // Also need to make sure, s is of the highest dimension.
-    return seed_k;
+    // return seed_k;
   }
 
   /** 

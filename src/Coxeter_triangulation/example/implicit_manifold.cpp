@@ -160,6 +160,37 @@ private:
   std::size_t d_;
 };
 
+/* An alternative version of Negation that takes a
+ * pointer as argument. */
+struct Negation_function : public Function {
+
+  void evaluate(const Eigen::VectorXd& p, Eigen::VectorXd& result) const {
+    fun_->evaluate(p, result);
+    result = -result;
+  }
+  
+  /* Returns the domain (ambient) dimension. */
+  std::size_t amb_d() const {return fun_->amb_d();}
+
+  /* Returns the codomain dimension. */
+  std::size_t cod_d() const {return fun_->cod_d();}
+
+  void seed(Eigen::VectorXd& result) {
+    fun_->seed(result);
+  }
+
+  Negation_function* clone() const {
+    return new Negation_function(*this);
+  }
+
+  Negation_function(Function* fun) :
+    fun_(fun) {
+  }
+
+private:
+  Function *fun_;
+};
+
 
 bool read_symbol(std::ifstream& stream, char& symbol) {
   if (!(stream >> symbol)) {
@@ -298,8 +329,17 @@ It parse_in_parenthesis(std::ifstream& stream, Function_range& fun_range) {
     case 'S':
       fun = parse_S(stream, fun_range);
       break;
+    case '(':
+      fun = parse_in_parenthesis(stream, fun_range);
+      break;      
     case ')':
       return fun;
+    case '-': {
+      fun = parse_in_parenthesis(stream, fun_range);
+      fun_range.emplace_front(new Negation_function(*fun));
+      fun = fun_range.begin();
+      return fun;
+    }
     case 'x': {
       It fun2 = parse_in_parenthesis(stream, fun_range);
       fun_range.emplace_front(new Cartesian_product_two(*fun, *fun2));
@@ -345,9 +385,15 @@ It parse_input(std::ifstream& stream, Function_range& fun_range) {
     case '(':
       fun = parse_in_parenthesis(stream, fun_range);
       break;
+    case '-': {
+      fun = parse_in_parenthesis(stream, fun_range);
+      fun_range.emplace_front(new Negation_function(*fun));
+      fun = fun_range.begin();
+      return fun;
+    }
     case 'x': {
       It fun2 = parse_input(stream, fun_range);
-      fun_range.emplace_front(new Cartesian_product_two(*fun, *fun2));
+      fun_range.emplace_front(new Cartesian_product_two(*fun, *fun2)); 
       fun = fun_range.begin();
       break;
     }

@@ -47,10 +47,9 @@ struct Embed_in_Rd : public Function {
     for (std::size_t i = fun_.amb_d(); i < d_; ++i)
       x_rest(i - fun_.amb_d()) = x(i);
     fun_.evaluate(x_k, result);
-    res.conservativeResize(this->cod_d());
+    result.conservativeResize(this->cod_d());
     for (std::size_t i = fun_.cod_d(); i < this->cod_d(); ++i)
-      res(i) = x_rest(i - fun_.cod_d());
-    return res;
+      result(i) = x_rest(i - fun_.cod_d());
   }
 
   /** \brief Returns the domain (ambient) dimension. */
