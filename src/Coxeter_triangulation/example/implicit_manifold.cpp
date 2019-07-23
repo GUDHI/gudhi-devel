@@ -191,6 +191,38 @@ private:
   Function *fun_;
 };
 
+/* An alternative version of Linear_transformation that takes a
+ * pointer as argument. */
+struct Linear_transformation_function : public Function {
+
+  void evaluate(const Eigen::VectorXd& p, Eigen::VectorXd& result) const {
+    fun_->evaluate(matrix_.householderQr().solve(p), result);
+  }
+  
+  /* Returns the domain (ambient) dimension. */
+  std::size_t amb_d() const {return fun_->amb_d();}
+
+  /* Returns the codomain dimension. */
+  std::size_t cod_d() const {return fun_->cod_d();}
+
+  void seed(Eigen::VectorXd& result) {
+    fun_->seed(result);
+    result = matrix_ * result;
+  }
+
+  Linear_transformation_function* clone() const {
+    return new Linear_transformation_function(*this);
+  }
+
+  Linear_transformation_function(Function* fun, const Eigen::MatrixXd& matrix) :
+    fun_(fun), matrix_(matrix) {
+  }
+
+private:
+  Function *fun_;
+  Eigen::MatrixXd  matrix_;
+};
+
 
 bool read_symbol(std::ifstream& stream, char& symbol) {
   if (!(stream >> symbol)) {
@@ -236,10 +268,48 @@ void read_vector(std::ifstream& stream, Eigen::VectorXd& result) {
     std::cerr << "RV: Unrecognized symbol " << symbol << ". Expected ')'\n";
     return;
   }
-  result.resize(coords.size());
-  std::size_t i = 0;
-  for (double& x: coords)
-    result(i++) = x;
+}
+
+void read_matrix(std::ifstream& stream, Eigen::MatrixXd& result) {
+  std::size_t cols = result.cols();
+  std::vector<double> coords;
+  char symbol;
+  if (!read_symbol(stream, symbol))
+    return;
+  if (symbol != '(') {
+    std::cerr << "RM: Invalid vector specification\n";
+    return;
+  }
+  double x;
+  while (stream >> x) {
+    std::cout << "RM: Read " << x << "\n";
+    coords.push_back(x);
+    if (!read_symbol(stream, symbol))
+      return;
+    if (symbol != ')' && symbol != ',') {
+      std::cerr << "RM: Unrecognized symbol " << symbol << ". Expected ')' or ','\n";
+      return;
+    }
+    std::cout << "RM: Read " << symbol << "\n";
+    if (symbol == ')') {
+      std::size_t i = 0, j = 0;
+      for (double& x: coords) {
+	result(j, i++) = x;
+	if (i == cols) {
+	  j++;
+	  i = 0;
+	}
+      }
+      return;
+    }
+  }
+  if (!read_symbol(stream, symbol))
+    return;
+  std::cout << "RM: Read " << symbol << "\n";
+  if (symbol != ')') {
+    std::cerr << "RM: Unrecognized symbol " << symbol << ". Expected ')'\n";
+    return;
+  }
 }
 
 void read_scalar(std::ifstream& stream, double& result) {
@@ -382,6 +452,13 @@ It parse_in_parenthesis(std::ifstream& stream, Function_range& fun_range) {
       fun = fun_range.begin();
       break;
     }
+    case 'M': {
+      Eigen::MatrixXd matrix((*fun)->amb_d(), (*fun)->amb_d());
+      read_matrix(stream, matrix);
+      fun_range.emplace_front(new Linear_transformation_function(*fun, matrix));
+      fun = fun_range.begin();
+      break;
+    }
     default:
       std::cerr << "P: Unrecognized symbol " << symbol << "\n";
       return fun;
@@ -433,6 +510,13 @@ It parse_input(std::ifstream& stream, Function_range& fun_range) {
       }
       std::cout << "R: Read " << d << "\n";
       fun_range.emplace_front(new Embed_function(*fun, d));
+      fun = fun_range.begin();
+      break;
+    }
+    case 'M': {
+      Eigen::MatrixXd matrix((*fun)->amb_d(), (*fun)->amb_d());
+      read_matrix(stream, matrix);
+      fun_range.emplace_front(new Linear_transformation_function(*fun, matrix));
       fun = fun_range.begin();
       break;
     }
