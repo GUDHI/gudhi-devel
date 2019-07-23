@@ -85,8 +85,8 @@ private:
   std::size_t amb_d_, cod_d_;
 };
 
-/* An alternative version of Translate that takes two
- * pointers as arguments. */
+/* An alternative version of Translate that takes a
+ * pointer as argument. */
 struct Translate_function : public Function {
 
   void evaluate(const Eigen::VectorXd& p, Eigen::VectorXd& result) const {
@@ -115,6 +115,49 @@ struct Translate_function : public Function {
 private:
   Function *fun_;
   Eigen::VectorXd off_;
+};
+
+/* An alternative version of Embed_in_Rd that takes a
+ * pointer as argument. */
+struct Embed_function : public Function {
+
+  void evaluate(const Eigen::VectorXd& p, Eigen::VectorXd& result) const {
+    Eigen::VectorXd x = p;
+    Eigen::VectorXd x_k(fun_->amb_d()), x_rest(d_ - fun_->amb_d());
+    for (std::size_t i = 0; i < fun_->amb_d(); ++i)
+      x_k(i) = x(i);
+    for (std::size_t i = fun_->amb_d(); i < d_; ++i)
+      x_rest(i - fun_->amb_d()) = x(i);
+    fun_->evaluate(x_k, result);
+    result.conservativeResize(this->cod_d());
+    for (std::size_t i = fun_->cod_d(); i < this->cod_d(); ++i)
+      result(i) = x_rest(i - fun_->cod_d());
+  }
+  
+  /* Returns the domain (ambient) dimension. */
+  std::size_t amb_d() const {return d_;}
+
+  /* Returns the codomain dimension. */
+  std::size_t cod_d() const {return d_ - (fun_->amb_d() - fun_->cod_d());}
+
+  void seed(Eigen::VectorXd& result) {
+    fun_->seed(result);
+    result.conservativeResize(d_);
+    for (std::size_t l = fun_->amb_d(); l < d_; ++l)
+      result(l) = 0;
+  }
+
+  Embed_function* clone() const {
+    return new Embed_function(*this);
+  }
+
+  Embed_function(Function* fun, std::size_t d) :
+    fun_(fun), d_(d) {
+  }
+
+private:
+  Function *fun_;
+  std::size_t d_;
 };
 
 
@@ -225,6 +268,26 @@ It parse_S(std::ifstream& stream, Function_range& fun_range) {
   return fun;
 }
 
+// It parse_input(std::ifstream& stream, Function_range& fun_range);
+
+It read_function(std::ifstream& stream, Function_range& fun_range) {
+  It fun = fun_range.begin();
+  char symbol;
+  if (!read_symbol(stream, symbol))
+    return fun;
+  std::cout << "RF: Read " << symbol << "\n";
+  switch (symbol) {
+  case 'S':
+    fun = parse_S(stream, fun_range);
+    break;
+  default:
+    std::cerr << "RF: Unrecognized symbol " << symbol << "\n";
+    return fun;
+  }
+  return fun;
+}  
+
+
 It parse_in_parenthesis(std::ifstream& stream, Function_range& fun_range) {
   // fun_range.emplace_back(new Function());
   It fun = fun_range.begin();
@@ -237,6 +300,30 @@ It parse_in_parenthesis(std::ifstream& stream, Function_range& fun_range) {
       break;
     case ')':
       return fun;
+    case 'x': {
+      It fun2 = parse_in_parenthesis(stream, fun_range);
+      fun_range.emplace_front(new Cartesian_product_two(*fun, *fun2));
+      fun = fun_range.begin();
+      return fun;
+    }
+    case 't': {
+      Eigen::VectorXd v;
+      read_vector(stream, v);
+      fun_range.emplace_front(new Translate_function(*fun, v));
+      fun = fun_range.begin();
+      break;
+    }
+    case 'R': {
+      std::size_t d;
+      if (!(stream >> d)) {
+	std::cerr << "R: Expected dimension\n";
+	return fun;
+      }
+      std::cout << "R: Read " << d << "\n";
+      fun_range.emplace_front(new Embed_function(*fun, d));
+      fun = fun_range.begin();
+      break;
+    }
     default:
       std::cerr << "P: Unrecognized symbol " << symbol << "\n";
       return fun;
@@ -268,6 +355,17 @@ It parse_input(std::ifstream& stream, Function_range& fun_range) {
       Eigen::VectorXd v;
       read_vector(stream, v);
       fun_range.emplace_front(new Translate_function(*fun, v));
+      fun = fun_range.begin();
+      break;
+    }
+    case 'R': {
+      std::size_t d;
+      if (!(stream >> d)) {
+	std::cerr << "R: Expected dimension\n";
+	return fun;
+      }
+      std::cout << "R: Read " << d << "\n";
+      fun_range.emplace_front(new Embed_function(*fun, d));
       fun = fun_range.begin();
       break;
     }
