@@ -331,6 +331,56 @@ void read_scalar(std::ifstream& stream, double& result) {
   }
 }
 
+It parse_A(std::ifstream& stream, Function_range& fun_range) {
+  It fun = fun_range.begin();
+  char symbol;
+  std::size_t m, d;
+  if (!(stream >> m)) {
+    std::cerr << "A: Expected intrinsic dimension\n";
+    return fun;
+  }
+  std::cout << "A: Read " << m << "\n";
+  if (!read_symbol(stream, symbol))
+    return fun;
+  if (symbol != 'R') {
+    std::cerr << "A: Unrecognized symbol " << symbol << ". Expected 'R'\n";
+    return fun;
+  }
+  if (!(stream >> d)) {
+    std::cerr << "A: Expected ambient dimension\n";
+    return fun;
+  }
+  std::cout << "A: Read " << d << "\n";
+
+  Eigen::VectorXd offset = Eigen::VectorXd::Zero(d);
+  Eigen::MatrixXd matrix(d, d-m);
+  if (!read_symbol(stream, symbol))
+    return fun;
+  if (symbol != '(') {
+    std::cerr << "A: Unrecognized symbol " << symbol << ". Expected ')'\n";
+    return fun;
+  }
+  while (stream >> symbol) {
+    std::cout << "A: Read " << symbol << "\n";
+    switch (symbol) {
+    case 'o':
+      read_vector(stream, offset);
+      break;
+    case 'N':
+      read_matrix(stream, matrix);
+      break;
+    case ')':
+      fun_range.emplace_front(new Function_affine_plane_in_Rd(matrix, offset));
+      return fun_range.begin();
+    default:
+      std::cerr << "A: Unrecognized symbol " << symbol << "\n";
+      return fun;
+    }
+  }
+  std::cerr << "A: Unexpected end of file.\n";
+  return fun;
+}
+
 It parse_C(std::ifstream& stream, Function_range& fun_range) {
   It fun = fun_range.begin();
   char symbol;
@@ -366,6 +416,34 @@ It parse_C(std::ifstream& stream, Function_range& fun_range) {
     }
   }
   std::cerr << "C: Unexpected end of file.\n";
+  return fun;
+}
+
+It parse_I(std::ifstream& stream, Function_range& fun_range) {
+  It fun = fun_range.begin();
+  char symbol;
+  Eigen::VectorXd center = Eigen::Vector3d::Zero();
+  if (!read_symbol(stream, symbol))
+    return fun;
+  if (symbol != '(') {
+    std::cerr << "I: Unrecognized symbol " << symbol << ". Expected ')'\n";
+    return fun;
+  }
+  while (stream >> symbol) {
+    std::cout << "I: Read " << symbol << "\n";
+    switch (symbol) {
+    case 'c':
+      read_vector(stream, center);
+      break;
+    case ')':
+      fun_range.emplace_front(new Function_iron_in_R3(center));
+      return fun_range.begin();
+    default:
+      std::cerr << "I: Unrecognized symbol " << symbol << "\n";
+      return fun;
+    }
+  }
+  std::cerr << "I: Unexpected end of file.\n";
   return fun;
 }
 
@@ -442,56 +520,6 @@ It parse_T(std::ifstream& stream, Function_range& fun_range) {
   return fun;
 }
 
-It parse_A(std::ifstream& stream, Function_range& fun_range) {
-  It fun = fun_range.begin();
-  char symbol;
-  std::size_t m, d;
-  if (!(stream >> m)) {
-    std::cerr << "A: Expected intrinsic dimension\n";
-    return fun;
-  }
-  std::cout << "A: Read " << m << "\n";
-  if (!read_symbol(stream, symbol))
-    return fun;
-  if (symbol != 'R') {
-    std::cerr << "A: Unrecognized symbol " << symbol << ". Expected 'R'\n";
-    return fun;
-  }
-  if (!(stream >> d)) {
-    std::cerr << "A: Expected ambient dimension\n";
-    return fun;
-  }
-  std::cout << "A: Read " << d << "\n";
-
-  Eigen::VectorXd offset = Eigen::VectorXd::Zero(d);
-  Eigen::MatrixXd matrix(d, d-m);
-  if (!read_symbol(stream, symbol))
-    return fun;
-  if (symbol != '(') {
-    std::cerr << "A: Unrecognized symbol " << symbol << ". Expected ')'\n";
-    return fun;
-  }
-  while (stream >> symbol) {
-    std::cout << "A: Read " << symbol << "\n";
-    switch (symbol) {
-    case 'o':
-      read_vector(stream, offset);
-      break;
-    case 'N':
-      read_matrix(stream, matrix);
-      break;
-    case ')':
-      fun_range.emplace_front(new Function_affine_plane_in_Rd(matrix, offset));
-      return fun_range.begin();
-    default:
-      std::cerr << "A: Unrecognized symbol " << symbol << "\n";
-      return fun;
-    }
-  }
-  std::cerr << "A: Unexpected end of file.\n";
-  return fun;
-}
-
 It parse_in_parenthesis(std::ifstream& stream, Function_range& fun_range) {
   // fun_range.emplace_back(new Function());
   It fun = fun_range.begin();
@@ -504,6 +532,9 @@ It parse_in_parenthesis(std::ifstream& stream, Function_range& fun_range) {
       break;
     case 'C':
       fun = parse_C(stream, fun_range);
+      break;
+    case 'I':
+      fun = parse_I(stream, fun_range);
       break;
     case 'S':
       fun = parse_S(stream, fun_range);
@@ -573,6 +604,9 @@ It parse_input(std::ifstream& stream, Function_range& fun_range) {
       break;
     case 'C':
       fun = parse_C(stream, fun_range);
+      break;
+    case 'I':
+      fun = parse_I(stream, fun_range);
       break;
     case 'S':
       fun = parse_S(stream, fun_range);
