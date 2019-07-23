@@ -29,6 +29,8 @@ using namespace Gudhi::coxeter_triangulation;
 using Function_range = std::list<Function*>;
 using It = typename Function_range::iterator;
 
+/* An alternative version of the Cartesian product that takes two
+ * pointers as arguments. */
 struct Cartesian_product_two : public Function {
 
   void evaluate(const Eigen::VectorXd& p, Eigen::VectorXd& result) const {
@@ -82,6 +84,39 @@ private:
   Function *fun1_, *fun2_;
   std::size_t amb_d_, cod_d_;
 };
+
+/* An alternative version of Translate that takes two
+ * pointers as arguments. */
+struct Translate_function : public Function {
+
+  void evaluate(const Eigen::VectorXd& p, Eigen::VectorXd& result) const {
+    fun_->evaluate(p - off_, result);
+  }
+  
+  /* Returns the domain (ambient) dimension. */
+  std::size_t amb_d() const {return fun_->amb_d();}
+
+  /* Returns the codomain dimension. */
+  std::size_t cod_d() const {return fun_->cod_d();}
+
+  void seed(Eigen::VectorXd& result) {
+    fun_->seed(result);
+    result += off_;
+  }
+
+  Translate_function* clone() const {
+    return new Translate_function(*this);
+  }
+
+  Translate_function(Function* fun, const Eigen::VectorXd& off) :
+    fun_(fun), off_(off) {
+  }
+
+private:
+  Function *fun_;
+  Eigen::VectorXd off_;
+};
+
 
 bool read_symbol(std::ifstream& stream, char& symbol) {
   if (!(stream >> symbol)) {
@@ -226,6 +261,13 @@ It parse_input(std::ifstream& stream, Function_range& fun_range) {
     case 'x': {
       It fun2 = parse_input(stream, fun_range);
       fun_range.emplace_front(new Cartesian_product_two(*fun, *fun2));
+      fun = fun_range.begin();
+      break;
+    }
+    case 't': {
+      Eigen::VectorXd v;
+      read_vector(stream, v);
+      fun_range.emplace_front(new Translate_function(*fun, v));
       fun = fun_range.begin();
       break;
     }
