@@ -51,7 +51,8 @@ class Implicit_manifold_intersection_oracle {
       matrix(0, i) = 1;
     std::size_t j = 0;
     for (auto v: simplex.vertex_range()) {
-      Eigen::VectorXd v_coords = fun_(triangulation.cartesian_coordinates(v));
+      Eigen::VectorXd v_coords;
+      fun_.evaluate(triangulation.cartesian_coordinates(v), v_coords);
       for (std::size_t i = 1; i < cod_d + 1; ++i)
 	matrix(i, j) = v_coords(i-1);
       j++;
@@ -75,10 +76,13 @@ class Implicit_manifold_intersection_oracle {
       matrix(0, i) = 1;
     std::size_t j = 0;
     for (auto v: simplex.vertex_range()) {
-      Eigen::VectorXd v_coords = fun_(triangulation.cartesian_coordinates(v));
+      Eigen::VectorXd v_coords;
+      fun_.evaluate(triangulation.cartesian_coordinates(v), v_coords);
       for (std::size_t i = 1; i < cod_d + 1; ++i)
 	matrix(i, j) = v_coords(i-1);
-      matrix(cod_d + 1, j) = domain_fun_(triangulation.cartesian_coordinates(v))(0);
+      Eigen::VectorXd bv_coords;
+      domain_fun_.evaluate(triangulation.cartesian_coordinates(v), bv_coords);
+      matrix(cod_d + 1, j) = bv_coords(0);
       j++;
     }
     Eigen::VectorXd z(cod_d + 2);
