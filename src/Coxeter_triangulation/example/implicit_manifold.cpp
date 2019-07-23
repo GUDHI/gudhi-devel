@@ -92,67 +92,64 @@ bool read_symbol(std::ifstream& stream, char& symbol) {
   return true;
 }
 
-double read_sphere_radius(std::ifstream& stream) {
-  double radius;
-  char symbol;
-  if (!read_symbol(stream, symbol))
-    return 0;
-  if (symbol != '(') {
-    std::cerr << "SR: Unrecognized symbol " << symbol << ". Expected '('\n";
-    return 0;
-  }
-  if (!(stream >> radius))
-    std::cerr << "SR: Invalid radius specification\n";
-  std::cout << "SR: Read " << radius << "\n";
-  if (!read_symbol(stream, symbol))
-    return 0;
-  if (symbol != ')') {
-    std::cerr << "SR: Unrecognized symbol " << symbol << ". Expected ')'\n";
-    return 0;
-  }
-  return radius;
-}
-
-Eigen::VectorXd read_sphere_center(std::ifstream& stream) { 
+void read_vector(std::ifstream& stream, Eigen::VectorXd& result) {
   std::vector<double> coords;
   char symbol;
   if (!read_symbol(stream, symbol))
-    return Eigen::VectorXd();
+    return;
   if (symbol != '(') {
-    std::cerr << "SC: Invalid center specification\n";
-    return Eigen::VectorXd();
+    std::cerr << "RV: Invalid vector specification\n";
+    return;
   }
   double x;
   while (stream >> x) {
-    std::cout << "SC: Read " << x << "\n";
+    std::cout << "RV: Read " << x << "\n";
     coords.push_back(x);
     if (!read_symbol(stream, symbol))
-      return Eigen::VectorXd();
+      return;
     if (symbol != ')' && symbol != ',') {
-      std::cerr << "SC: Unrecognized symbol " << symbol << ". Expected ')' or ','\n";
-      return Eigen::VectorXd();
+      std::cerr << "RV: Unrecognized symbol " << symbol << ". Expected ')' or ','\n";
+      return;
     }
-    std::cout << "SC: Read " << symbol << "\n";
+    std::cout << "RV: Read " << symbol << "\n";
     if (symbol == ')') {
-      Eigen::VectorXd v(coords.size());
+      result.resize(coords.size());
       std::size_t i = 0;
       for (double& x: coords)
-	v(i++) = x;
-      return v;
+	result(i++) = x;
+      return;
     }
   }
   if (!read_symbol(stream, symbol))
-    return Eigen::VectorXd();
-  std::cout << "SC: Read " << symbol << "\n";
+    return;
+  std::cout << "RV: Read " << symbol << "\n";
   if (symbol != ')') {
-    std::cerr << "SC: Unrecognized symbol " << symbol << ". Expected ')'\n";
-    return Eigen::VectorXd();
+    std::cerr << "RV: Unrecognized symbol " << symbol << ". Expected ')'\n";
+    return;
   }
-  Eigen::VectorXd v(coords.size());
+  result.resize(coords.size());
   std::size_t i = 0;
   for (double& x: coords)
-    v(i++) = x;
-  return v;  
+    result(i++) = x;
+}
+
+void read_scalar(std::ifstream& stream, double& result) {
+  char symbol;
+  if (!read_symbol(stream, symbol))
+    return;
+  if (symbol != '(') {
+    std::cerr << "RS: Unrecognized symbol " << symbol << ". Expected '('\n";
+    return;
+  }
+  if (!(stream >> result))
+    std::cerr << "RS: Invalid radius specification\n";
+  std::cout << "RS: Read " << result << "\n";
+  if (!read_symbol(stream, symbol))
+    return;
+  if (symbol != ')') {
+    std::cerr << "RS: Unrecognized symbol " << symbol << ". Expected ')'\n";
+    return;
+  }
 }
 
 It parse_S(std::ifstream& stream, Function_range& fun_range) {
@@ -176,10 +173,10 @@ It parse_S(std::ifstream& stream, Function_range& fun_range) {
     std::cout << "S: Read " << symbol << "\n";
     switch (symbol) {
     case 'c':
-      center = read_sphere_center(stream);
+      read_vector(stream, center);
       break;
     case 'r':
-      radius = read_sphere_radius(stream);
+      read_scalar(stream, radius);
       break;
     case ')':
       fun_range.emplace_front(new Function_Sm_in_Rd(radius, m, center));
