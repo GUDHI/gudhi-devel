@@ -127,7 +127,11 @@ struct Cartesian_product : public Function {
     get_seed(function_tuple_, point, 0);
     return point;
   }
-
+  
+  Cartesian_product<Functions...>* clone() const {
+    return new Cartesian_product<Functions...>(*this);
+  }
+  
   /** 
    * \brief Constructor of the Cartesian product function.
    *
@@ -159,6 +163,12 @@ template <typename... Functions>
 Cartesian_product<Functions...> make_product_function(const Functions&... functions) {
   return Cartesian_product<Functions...>(functions...);
 }
+
+template <typename... Functions>
+Cartesian_product<Functions...>* new_product_function(const Functions&... functions) {
+  return new Cartesian_product<Functions...>(functions...);
+}
+
 
 } // namespace coxeter_triangulation
 

@@ -40,11 +40,11 @@ struct Function {
   virtual std::size_t cod_d() const {return 0;};
 
   /** \brief Virtual method for the seed point. */
-  virtual Eigen::VectorXd seed() const {
-    return Eigen::VectorXd();
-  }
+  virtual void seed(Eigen::VectorXd& result) const {}
 
-  virtual Function* clone() const = 0;
+  virtual Function* clone() const {
+    return new Function(*this);
+  }
 
   /** \brief Virtual destructor. */
   virtual ~Function() {}

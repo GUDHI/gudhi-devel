@@ -51,12 +51,11 @@ struct Function_Sm_in_Rd: public Function {
   std::size_t cod_d() const {return k_;};
 
   /** \brief Returns a point on the sphere. */
-  Eigen::VectorXd seed() const {
-    Eigen::VectorXd point = Eigen::VectorXd::Zero(d_);
-    point(0) += r_;
+  void seed(Eigen::VectorXd& result) const {
+    result.resize(d_);
+    result(0) += r_;
     for (std::size_t i = 0; i < d_; ++i)
-      point(i) += center_[i];
-    return point;
+      result(i) += center_[i];
   }
 
   Function_Sm_in_Rd(const Function_Sm_in_Rd& rhs) { 
