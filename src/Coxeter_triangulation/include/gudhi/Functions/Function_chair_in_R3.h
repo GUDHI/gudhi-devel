@@ -35,11 +35,10 @@ struct Function_chair_in_R3 : public Function {
    * \brief Value of the function at a specified point.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
-  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+  void evaluate(const Eigen::VectorXd& p, Eigen::VectorXd& result) const {
     double x = p(0)-off_[0], y = p(1)-off_[1], z = p(2)-off_[2];
-    Eigen::VectorXd coords(cod_d());
-    coords(0) = std::pow(x*x + y*y + z*z - a_*k_*k_, 2) - b_*((z-k_)*(z-k_) - 2*x*x)*((z+k_)*(z+k_) - 2*y*y);
-    return coords;
+    result.resize(cod_d());
+    result(0) = std::pow(x*x + y*y + z*z - a_*k_*k_, 2) - b_*((z-k_)*(z-k_) - 2*x*x)*((z+k_)*(z+k_) - 2*y*y);
   }
 
   /** \brief Returns the domain (ambient) dimension. */
@@ -49,11 +48,11 @@ struct Function_chair_in_R3 : public Function {
   std::size_t cod_d() const {return 1;}
 
   /** \brief Returns a point on the surface. */
-  Eigen::VectorXd seed() const {
+  void seed(Eigen::Vector3d& result) const {
     double t1 = a_-b_;
     double discr = t1*t1 - (1.0 - b_)*(a_*a_ - b_);
     double z0 = k_*std::sqrt((t1+std::sqrt(discr))/(1-b_));
-    return Eigen::Vector3d(off_[0], off_[1], z0+off_[2]);
+    result = Eigen::Vector3d(off_[0], off_[1], z0+off_[2]);
   }
 
   /** 

@@ -331,10 +331,48 @@ void read_scalar(std::ifstream& stream, double& result) {
   }
 }
 
+It parse_C(std::ifstream& stream, Function_range& fun_range) {
+  It fun = fun_range.begin();
+  char symbol;
+  Eigen::VectorXd center = Eigen::Vector3d::Zero();
+  double a = 0.8, b = 0.4, k = 1.0;
+  if (!read_symbol(stream, symbol))
+    return fun;
+  if (symbol != '(') {
+    std::cerr << "C: Unrecognized symbol " << symbol << ". Expected ')'\n";
+    return fun;
+  }
+  while (stream >> symbol) {
+    std::cout << "C: Read " << symbol << "\n";
+    switch (symbol) {
+    case 'c':
+      read_vector(stream, center);
+      break;
+    case 'a':
+      read_scalar(stream, a);
+      break;
+    case 'b':
+      read_scalar(stream, b);
+      break;  
+    case 'k':
+      read_scalar(stream, k);
+      break;  
+    case ')':
+      fun_range.emplace_front(new Function_chair_in_R3(a, b, k, center));
+      return fun_range.begin();
+    default:
+      std::cerr << "C: Unrecognized symbol " << symbol << "\n";
+      return fun;
+    }
+  }
+  std::cerr << "C: Unexpected end of file.\n";
+  return fun;
+}
+
 It parse_S(std::ifstream& stream, Function_range& fun_range) {
   It fun = fun_range.begin();
   char symbol;
-  Eigen::VectorXd center;
+  Eigen::VectorXd center = Eigen::Vector3d::Zero();
   double radius;
   std::size_t m;
   if (!(stream >> m)) {
@@ -373,7 +411,7 @@ It parse_T(std::ifstream& stream, Function_range& fun_range) {
   It fun = fun_range.begin();
   char symbol;
   Eigen::VectorXd center = Eigen::Vector3d::Zero();
-  double Radius, radius;
+  double Radius = 1, radius = 0.5;
   if (!read_symbol(stream, symbol))
     return fun;
   if (symbol != '(') {
@@ -464,6 +502,9 @@ It parse_in_parenthesis(std::ifstream& stream, Function_range& fun_range) {
     case 'A':
       fun = parse_A(stream, fun_range);
       break;
+    case 'C':
+      fun = parse_C(stream, fun_range);
+      break;
     case 'S':
       fun = parse_S(stream, fun_range);
       break;
@@ -529,6 +570,9 @@ It parse_input(std::ifstream& stream, Function_range& fun_range) {
     switch (symbol) {
     case 'A':
       fun = parse_A(stream, fun_range);
+      break;
+    case 'C':
+      fun = parse_C(stream, fun_range);
       break;
     case 'S':
       fun = parse_S(stream, fun_range);
