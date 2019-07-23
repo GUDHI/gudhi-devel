@@ -32,11 +32,10 @@ struct Function_moment_curve_in_Rd : public Function {
 /** \brief Value of the function at a specified point.
  * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
  */
-  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
-    Eigen::VectorXd coords(k_);
+  void evaluate(const Eigen::VectorXd& p, Eigen::VectorXd& result) const {
+    result.resize(k_);
     for (std::size_t i = 1; i < d_; ++i)
-      coords(i-1) = p(i) - p(0) * p(i-1);
-    return coords;
+      result(i-1) = p(i) - p(0) * p(i-1);
   }
   
   /** \brief Returns the domain (ambient) dimension.. */
@@ -46,8 +45,8 @@ struct Function_moment_curve_in_Rd : public Function {
   std::size_t cod_d() const {return k_;};
 
   /** \brief Returns a point on the moment curve. */
-  Eigen::VectorXd seed() const {
-    return Eigen::VectorXd::Zero(d_);
+  void seed(Eigen::VectorXd& result) const {
+    result = Eigen::VectorXd::Zero(d_);
   }
   
   /** 
@@ -64,7 +63,7 @@ struct Function_moment_curve_in_Rd : public Function {
 protected:
   std::size_t m_, k_, d_;
   double r_;
-  Eigen::VectorXd center_;
+  Eigen::VectorXd off_;
 };
 
 } // namespace coxeter_triangulation
