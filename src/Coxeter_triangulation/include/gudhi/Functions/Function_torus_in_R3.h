@@ -33,11 +33,10 @@ struct Function_torus_in_R3 : public Function {
    * \brief Value of the function at a specified point.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
-  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+  void evaluate(const Eigen::VectorXd& p, Eigen::VectorXd& result) const {
     double x = p(0)-off_[0], y = p(1)-off_[1], z = p(2)-off_[2];
-    Eigen::VectorXd coords(cod_d());
-    coords(0) = (z*z + (std::sqrt(x*x + y*y) - r_)*(std::sqrt(x*x + y*y) - r_) - R_*R_);
-    return coords;
+    result.resize(cod_d());
+    result(0) = (z*z + (std::sqrt(x*x + y*y) - r_)*(std::sqrt(x*x + y*y) - r_) - R_*R_);
   }
 
   /** \brief Returns the domain (ambient) dimension. */
@@ -47,8 +46,8 @@ struct Function_torus_in_R3 : public Function {
   std::size_t cod_d() const {return 1;};
 
   /** \brief Returns a point on the surface. */
-  Eigen::VectorXd seed() const {
-    return Eigen::Vector3d(R_ + r_ +off_[0], off_[1], off_[2]);
+  void seed(Eigen::VectorXd& result) const {
+    result = Eigen::Vector3d(R_ + r_ +off_[0], off_[1], off_[2]);
   }
   
   /** 

@@ -299,25 +299,40 @@ It parse_S(std::ifstream& stream, Function_range& fun_range) {
   return fun;
 }
 
-// It parse_input(std::ifstream& stream, Function_range& fun_range);
-
-It read_function(std::ifstream& stream, Function_range& fun_range) {
+It parse_T(std::ifstream& stream, Function_range& fun_range) {
   It fun = fun_range.begin();
   char symbol;
+  Eigen::VectorXd center = Eigen::Vector3d::Zero();
+  double Radius, radius;
   if (!read_symbol(stream, symbol))
     return fun;
-  std::cout << "RF: Read " << symbol << "\n";
-  switch (symbol) {
-  case 'S':
-    fun = parse_S(stream, fun_range);
-    break;
-  default:
-    std::cerr << "RF: Unrecognized symbol " << symbol << "\n";
+  if (symbol != '(') {
+    std::cerr << "T: Unrecognized symbol " << symbol << ". Expected ')'\n";
     return fun;
   }
+  while (stream >> symbol) {
+    std::cout << "T: Read " << symbol << "\n";
+    switch (symbol) {
+    case 'c':
+      read_vector(stream, center);
+      break;
+    case 'r':
+      read_scalar(stream, radius);
+      break;
+    case 'R':
+      read_scalar(stream, Radius);
+      break;  
+    case ')':
+      fun_range.emplace_front(new Function_torus_in_R3(Radius, radius, center));
+      return fun_range.begin();
+    default:
+      std::cerr << "T: Unrecognized symbol " << symbol << "\n";
+      return fun;
+    }
+  }
+  std::cerr << "T: Unexpected end of file.\n";
   return fun;
-}  
-
+}
 
 It parse_in_parenthesis(std::ifstream& stream, Function_range& fun_range) {
   // fun_range.emplace_back(new Function());
@@ -328,6 +343,9 @@ It parse_in_parenthesis(std::ifstream& stream, Function_range& fun_range) {
     switch (symbol) {
     case 'S':
       fun = parse_S(stream, fun_range);
+      break;
+    case 'T':
+      fun = parse_T(stream, fun_range);
       break;
     case '(':
       fun = parse_in_parenthesis(stream, fun_range);
@@ -382,6 +400,9 @@ It parse_input(std::ifstream& stream, Function_range& fun_range) {
     case 'S':
       fun = parse_S(stream, fun_range);
       break;
+    case 'T':
+      fun = parse_T(stream, fun_range);
+      break;
     case '(':
       fun = parse_in_parenthesis(stream, fun_range);
       break;
@@ -428,11 +449,7 @@ int main(int argc, char** const argv) {
     std::cout << "Too few arguments. Usage: " << argv[0] << " input_file_name";
     return 1;
   }
-  std::cout << "sizeof(Function*)" << sizeof(Function*) << "\n";
-  std::cout << "sizeof(Function)" << sizeof(Function) << "\n";
-  std::cout << "sizeof(Function_Sm_in_Rd*)" << sizeof(Function_Sm_in_Rd*) << "\n";
-  std::cout << "sizeof(Function_Sm_in_Rd)" << sizeof(Function_Sm_in_Rd) << "\n";
-  boost::filesystem::path path(argv[1]);
+  boost::filesystem::path path(argv[1]); 
   std::string input_file_name = path.string();
 
   Function_range fun_range;
