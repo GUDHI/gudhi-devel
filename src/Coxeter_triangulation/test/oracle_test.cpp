@@ -20,7 +20,9 @@ int main() {
   cox_tr.change_offset(Eigen::VectorXd::Random(oracle.amb_d()));
   
   std::cout << std::boolalpha;
-  auto s = cox_tr.locate_point(fun_sph.seed());
+  Eigen::VectorXd seed;
+  fun_sph.seed(seed);
+  auto s = cox_tr.locate_point(seed);
   std::cout << "Full simplex = \033[1;31m" << s << "\033[0m:\n\n";
   
   for (auto f: s.face_range(oracle.cod_d())) {

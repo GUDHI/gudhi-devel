@@ -26,12 +26,12 @@ namespace coxeter_triangulation {
  * \brief Transforms the zero-set of the function by a given linear transformation.
  * The underlying function corresponds to f(M*x), where M is the transformation matrix.
  *
- * \tparam Function The function template parameter. Should be a model of 
+ * \tparam Function_ The function template parameter. Should be a model of 
  * the concept FunctionForImplicitManifold.
  *
  * \ingroup coxeter_triangulation
  */
-template <class Function>
+template <class Function_>
 struct Linear_transformation : public Function {
   
   /** 
@@ -61,12 +61,12 @@ struct Linear_transformation : public Function {
    * @param[in] matrix The transformation matrix. Its dimension should be d*d,
    * where d is the domain (ambient) dimension of 'function'.
    */
-  Linear_transformation(const Function& function, const Eigen::MatrixXd& matrix) :
+  Linear_transformation(const Function_& function, const Eigen::MatrixXd& matrix) :
     fun_(function), matrix_(matrix) {
   }
 
 private:
-  Function fun_;
+  Function_ fun_;
   Eigen::MatrixXd matrix_;
 };
 
@@ -78,13 +78,13 @@ private:
  * @param[in] matrix The transformation matrix. Its dimension should be d*d,
  * where d is the domain (ambient) dimension of 'function'.
  *
- * \tparam Function The function template parameter. Should be a model of 
+ * \tparam Function_ The function template parameter. Should be a model of 
  * the concept FunctionForImplicitManifold.
  */
-template <class Function>
-Linear_transformation<Function> linear_transformation(const Function& function,
-						      const Eigen::MatrixXd& matrix) {
-  return Linear_transformation<Function>(function, matrix); 
+template <class Function_>
+Linear_transformation<Function_> linear_transformation(const Function_& function,
+						       const Eigen::MatrixXd& matrix) {
+  return Linear_transformation<Function_>(function, matrix); 
 }
 
 } // namespace coxeter_triangulation

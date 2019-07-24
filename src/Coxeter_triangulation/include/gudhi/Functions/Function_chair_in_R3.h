@@ -48,7 +48,7 @@ struct Function_chair_in_R3 : public Function {
   std::size_t cod_d() const {return 1;}
 
   /** \brief Returns a point on the surface. */
-  void seed(Eigen::Vector3d& result) const {
+  void seed(Eigen::VectorXd& result) const {
     double t1 = a_-b_;
     double discr = t1*t1 - (1.0 - b_)*(a_*a_ - b_);
     double z0 = k_*std::sqrt((t1+std::sqrt(discr))/(1-b_));

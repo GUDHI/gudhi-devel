@@ -33,13 +33,18 @@ using namespace Gudhi::coxeter_triangulation;
 
 template <class Function>
 void print_test(const Function& fun) {
+  Eigen::VectorXd v_origin;
+  fun.evaluate(Eigen::VectorXd::Zero(fun.amb_d()), v_origin);
   std::cout << "Ambient dimension = " << fun.amb_d()
 	    << ", codimension = " << fun.cod_d() << "\n";
   std::cout << "Value of fun at the origin:\n"
-	    << fun(Eigen::VectorXd::Zero(fun.amb_d())) << "\n";
+	    << v_origin << "\n";
   try {
-    std::cout << "Seed point:\n" << fun.seed() << "\nValue at seed point:\n"
-	      << fun(fun.seed()) << "\n";
+    Eigen::VectorXd seed, v_seed;
+    fun.seed(seed);
+    fun.evaluate(seed, v_seed);
+    std::cout << "Seed point:\n" << seed << "\nValue at seed point:\n"
+	      << v_seed << "\n";
   }
   catch (...) {
     std::cout << "Caught an exception!\n";

@@ -51,7 +51,7 @@ struct Function_lemniscate_revolution_in_R3 : public Function {
    * two necessary seed points for the manifold tracing algorithm.
    * See the method seed2() for the other point. 
    */
-  void seed(Eigen::Vector3d& result) const {
+  void seed(Eigen::VectorXd& result) const {
     result = Eigen::Vector3d(sqrt(2*a_)+off_[0], off_[1], off_[2]);
   }
 
@@ -61,6 +61,10 @@ struct Function_lemniscate_revolution_in_R3 : public Function {
    */
   void seed2(Eigen::VectorXd& result) const {
     result = Eigen::Vector3d(-sqrt(2*a_)+off_[0], off_[1], off_[2]);
+  }
+
+  Function_lemniscate_revolution_in_R3* clone() const {
+    return new Function_lemniscate_revolution_in_R3(*this);
   }
   
   /** 

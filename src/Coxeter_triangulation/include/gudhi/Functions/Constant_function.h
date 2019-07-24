@@ -32,8 +32,8 @@ struct Constant_function : public Function {
   /** \brief Value of the function at a specified point. The value is constant.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
-  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
-    return value_;
+  void evaluate(const Eigen::VectorXd& p, Eigen::VectorXd& result) const {
+    result = value_;
   }
   
   /** \brief Returns the domain dimension. Same as the ambient dimension of the sphere. */
@@ -43,7 +43,7 @@ struct Constant_function : public Function {
   std::size_t cod_d() const {return k_;};
 
   /** \brief No seed point is available. Throws an exception on evocation. */
-  Eigen::VectorXd seed() const {
+  void seed(Eigen::VectorXd& result) const {
     throw "Seed invoked on a constant function.\n";
   }
 

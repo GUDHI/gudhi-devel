@@ -59,7 +59,6 @@ struct Function_Sm_in_Rd: public Function {
   }
 
   Function_Sm_in_Rd(const Function_Sm_in_Rd& rhs) { 
-    std::cout << "Derived created by deep copy" << std::endl; 
   }
   
   Function_Sm_in_Rd* clone() const {

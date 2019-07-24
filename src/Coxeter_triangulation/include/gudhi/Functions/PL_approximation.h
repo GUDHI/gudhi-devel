@@ -33,8 +33,8 @@ namespace coxeter_triangulation {
  *
  * \ingroup coxeter_triangulation
  */
-template <class Function,
-	  class Triangulation>
+template <class Function_,
+	  class Triangulation_>
 struct PL_approximation : public Function {
   
   /** 
@@ -86,6 +86,10 @@ struct PL_approximation : public Function {
     // return seed_k;
   }
 
+  PL_approximation<Function_, Triangulation_>* clone() const {
+    return new PL_approximation<Function_, Triangulation_>(*this);
+  }
+
   /** 
    * \brief Constructor of the piecewise-linear approximation of a function 
    * induced by an ambient triangulation.
@@ -93,12 +97,12 @@ struct PL_approximation : public Function {
    * @param[in] function The function.
    * @param[in] triangulation The ambient triangulation.
    */
-  PL_approximation(const Function& function, const Triangulation& triangulation) :
-    fun_(function), tr_(triangulation) {}
+  PL_approximation(const Function_& function, const Triangulation_& triangulation)
+    : fun_(function), tr_(triangulation) {}
 
 private:  
-  Function fun_;
-  Triangulation tr_;
+  Function_ fun_;
+  Triangulation_ tr_;
 };
 
 
@@ -109,14 +113,15 @@ private:
  * @param[in] function The function.
  * @param[in] triangulation The ambient triangulation.
  *
- * \tparam Function The function template parameter. Should be a model of 
- * the concept FunctionForImplicitManifold.
+ * \tparam Function_ The function template parameter. Should be a model of 
+ * the concept Function_ForImplicitManifold.
  */
-template <class Function,
-	  class Triangulation>
-PL_approximation<Function, Triangulation> make_pl_approximation(const Function& function,
-								const Triangulation& triangulation) {
-  return PL_approximation<Function, Triangulation>(function, triangulation);
+template <class Function_,
+	  class Triangulation_>
+PL_approximation<Function_, Triangulation_>
+make_pl_approximation(const Function_& function,
+		      const Triangulation_& triangulation) {
+  return PL_approximation<Function_, Triangulation_>(function, triangulation);
 }
 
 } // namespace coxeter_triangulation

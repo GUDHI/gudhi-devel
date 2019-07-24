@@ -26,12 +26,12 @@ namespace coxeter_triangulation {
  * \brief Constructs the "minus" function. The zero-set is the same, but
  * the values at other points are the negative of their original value.
  *
- * \tparam Function The function template parameter. Should be a model of 
+ * \tparam Function_ The function template parameter. Should be a model of 
  * the concept FunctionForImplicitManifold.
  *
  * \ingroup coxeter_triangulation
  */
-template <class Function>
+template <class Function_>
 struct Negation : public Function {
   
   /** 
@@ -59,10 +59,10 @@ struct Negation : public Function {
    *
    * @param[in] function The function to be negated.
    */
-  Negation(const Function& function) :
+  Negation(const Function_& function) :
     fun_(function) {
   }
-  Function fun_;
+  Function_ fun_;
 };
 
 
@@ -73,12 +73,12 @@ struct Negation : public Function {
  * @param[in] off The offset vector. The dimension should correspond to the 
  * domain (ambient) dimension of 'function'.
  *
- * \tparam Function The function template parameter. Should be a model of 
+ * \tparam Function_ The function template parameter. Should be a model of 
  * the concept FunctionForImplicitManifold.
  */
-template <class Function>
-Negation<Function>  negation(const Function& function) {
-  return Negation<Function>(function);
+template <class Function_>
+Negation<Function_>  negation(const Function_& function) {
+  return Negation<Function_>(function);
 }
 
 } // namespace coxeter_triangulation

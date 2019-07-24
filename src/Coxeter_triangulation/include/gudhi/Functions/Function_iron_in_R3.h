@@ -46,7 +46,7 @@ struct Function_iron_in_R3 : public Function {
   std::size_t cod_d() const {return 1;};
 
   /** \brief Returns a point on the surface. */
-  void seed(Eigen::Vector3d& result) const {
+  void seed(Eigen::VectorXd& result) const {
     result = Eigen::Vector3d(std::pow(4500, 1./6), 0, 0);
   }
   

@@ -37,7 +37,9 @@ int main() {
   
   using MT = Manifold_tracing<Coxeter_triangulation<> >;
   using Out_simplex_map = typename MT::Out_simplex_map;
-  std::vector<Eigen::VectorXd> seed_points(1, fun_sph.seed());
+  Eigen::VectorXd seed;
+  fun_sph.seed(seed);
+  std::vector<Eigen::VectorXd> seed_points(1, seed);
   Out_simplex_map out_simplex_map;
   manifold_tracing_algorithm(seed_points, cox_tr, oracle, out_simplex_map);
 

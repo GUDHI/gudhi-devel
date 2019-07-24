@@ -14,7 +14,9 @@ int main() {
   cox_tr.change_offset(Eigen::VectorXd::Random(oracle.amb_d()));
   
   using MT = Manifold_tracing<Coxeter_triangulation<> >;
-  std::vector<Eigen::VectorXd> seed_points(1, fun_sph.seed());
+  Eigen::VectorXd seed;
+  fun_sph.seed(seed);
+  std::vector<Eigen::VectorXd> seed_points(1, seed);
   typename MT::Out_simplex_map out_simplex_map;
   manifold_tracing_algorithm(seed_points, cox_tr, oracle, out_simplex_map);
 

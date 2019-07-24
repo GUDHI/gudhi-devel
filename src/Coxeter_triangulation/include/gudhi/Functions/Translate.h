@@ -26,12 +26,12 @@ namespace coxeter_triangulation {
  * \brief Translates the zero-set of the function by a vector.
  * The underlying function corresponds to f(x-off), where off is the offset vector.
  *
- * \tparam Function The function template parameter. Should be a model of 
+ * \tparam Function_ The function template parameter. Should be a model of 
  * the concept FunctionForImplicitManifold.
  *
  * \ingroup coxeter_triangulation
  */
-template <class Function>
+template <class Function_>
 struct Translate : public Function {
   
   /** 
@@ -61,10 +61,10 @@ struct Translate : public Function {
    * @param[in] off The offset vector. The dimension should correspond to the 
    * domain (ambient) dimension of 'function'.
    */
-  Translate(const Function& function, const Eigen::VectorXd& off) :
+  Translate(const Function_& function, const Eigen::VectorXd& off) :
     fun_(function), off_(off) {
   }
-  Function fun_;
+  Function_ fun_;
   Eigen::VectorXd off_;
 };
 
@@ -76,12 +76,12 @@ struct Translate : public Function {
  * @param[in] off The offset vector. The dimension should correspond to the 
  * domain (ambient) dimension of 'function'.
  *
- * \tparam Function The function template parameter. Should be a model of 
+ * \tparam Function_ The function template parameter. Should be a model of 
  * the concept FunctionForImplicitManifold.
  */
-template <class Function>
-Translate<Function> translate(const Function& function, Eigen::VectorXd off) {
-  return Translate<Function>(function, off);
+template <class Function_>
+Translate<Function_> translate(const Function_& function, Eigen::VectorXd off) {
+  return Translate<Function_>(function, off);
 }
 
 } // namespace coxeter_triangulation

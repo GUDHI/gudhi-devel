@@ -27,12 +27,12 @@ namespace coxeter_triangulation {
 /* \class Embed_in_Rd
  * \brief Embedding of an implicit manifold in a higher dimension.
  *
- * \tparam Function The function template parameter. Should be a model of 
+ * \tparam Function_ The function template parameter. Should be a model of 
  * the concept FunctionForImplicitManifold.
  *
  * \ingroup coxeter_triangulation
  */
-template <class Function>
+template <class Function_>
 struct Embed_in_Rd : public Function {
   
   /** 
@@ -72,10 +72,10 @@ struct Embed_in_Rd : public Function {
    * @param[in] function The function to be embedded in higher dimension.
    * @param[in] d Embedding dimension.
    */
-  Embed_in_Rd(const Function& function, std::size_t d) :
+  Embed_in_Rd(const Function_& function, std::size_t d) :
     fun_(function), d_(d) {
   }
-  Function fun_;
+  Function_ fun_;
   std::size_t d_;
 };
 
@@ -86,12 +86,12 @@ struct Embed_in_Rd : public Function {
  * @param[in] function The function to be embedded in higher dimension.
  * @param[in] d Embedding dimension.
  *
- * \tparam Function The function template parameter. Should be a model of 
+ * \tparam Function_ The function template parameter. Should be a model of 
  * the concept FunctionForImplicitManifold.
  */
-template <class Function>
-Embed_in_Rd<Function> make_embedding(const Function& function, std::size_t d) {
-  return Embed_in_Rd<Function>(function, d);
+template <class Function_>
+Embed_in_Rd<Function_> make_embedding(const Function_& function, std::size_t d) {
+  return Embed_in_Rd<Function_>(function, d);
 }
 
 } // namespace coxeter_triangulation
