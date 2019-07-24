@@ -265,9 +265,10 @@ private:
  */
 template<class Function_,
 	 class Domain_function_>
-Implicit_manifold_intersection_oracle<Function_, Domain_function_> make_oracle(const Function_& function,
-									       const Domain_function_& domain_function,
-									       double threshold = 0){
+Implicit_manifold_intersection_oracle<Function_, Domain_function_>
+make_oracle(const Function_& function,
+	    const Domain_function_& domain_function,
+	    double threshold = 0){
   return Implicit_manifold_intersection_oracle<Function_, Domain_function_>(function,
 									    domain_function,
 									    threshold);

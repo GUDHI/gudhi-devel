@@ -46,6 +46,7 @@ Mesh_medit build_mesh_from_cell_complex(const Cell_complex& cell_complex,
   for (const auto& cp_pair: cell_complex.cell_point_map()) {
     vi_map.emplace(std::make_pair(cp_pair.first, index++));
     output.vertex_points.push_back(cp_pair.second);
+    output.vertex_points.back().conservativeResize(amb_d);
   }
   if (cell_complex.intrinsic_dimension() >= 2) 
     for (const auto& sc_pair: cell_complex.simplex_cell_map(2)) {

@@ -22,12 +22,20 @@
 #include <gudhi/Functions/Cartesian_product.h>
 #include <gudhi/Functions/PL_approximation.h>
 
+#include <gudhi/Query_result.h>
+#include <gudhi/Coxeter_triangulation.h>
+#include <gudhi/Manifold_tracing.h>
 #include <gudhi/Cell_complex.h>
+
+#include <gudhi/IO/build_mesh_from_cell_complex.h>
+#include <gudhi/IO/output_meshes_to_medit.h> 
 
 using namespace Gudhi::coxeter_triangulation;
 
 using Function_range = std::list<Function*>;
 using It = typename Function_range::iterator;
+
+/******************************* DYNAMIC VERSIONS OF FUNCTION MODIFIERS ****************/
 
 /* An alternative version of the Cartesian product that takes two
  * pointers as arguments. */
@@ -56,7 +64,7 @@ struct Cartesian_product_two : public Function {
   /* Returns the codomain dimension. */
   std::size_t cod_d() const {return cod_d_;}
 
-  void seed(Eigen::VectorXd& result) {
+  void seed(Eigen::VectorXd& result) const {
     result.resize(amb_d_);
     std::size_t d1 = fun1_->amb_d(), d2 = fun2_->amb_d();
     Eigen::VectorXd res1(d1), res2(d2);
@@ -99,7 +107,7 @@ struct Translate_function : public Function {
   /* Returns the codomain dimension. */
   std::size_t cod_d() const {return fun_->cod_d();}
 
-  void seed(Eigen::VectorXd& result) {
+  void seed(Eigen::VectorXd& result) const {
     fun_->seed(result);
     result += off_;
   }
@@ -140,7 +148,7 @@ struct Embed_function : public Function {
   /* Returns the codomain dimension. */
   std::size_t cod_d() const {return d_ - (fun_->amb_d() - fun_->cod_d());}
 
-  void seed(Eigen::VectorXd& result) {
+  void seed(Eigen::VectorXd& result) const {
     fun_->seed(result);
     result.conservativeResize(d_);
     for (std::size_t l = fun_->amb_d(); l < d_; ++l)
@@ -175,7 +183,7 @@ struct Negation_function : public Function {
   /* Returns the codomain dimension. */
   std::size_t cod_d() const {return fun_->cod_d();}
 
-  void seed(Eigen::VectorXd& result) {
+  void seed(Eigen::VectorXd& result) const {
     fun_->seed(result);
   }
 
@@ -205,7 +213,7 @@ struct Linear_transformation_function : public Function {
   /* Returns the codomain dimension. */
   std::size_t cod_d() const {return fun_->cod_d();}
 
-  void seed(Eigen::VectorXd& result) {
+  void seed(Eigen::VectorXd& result) const {
     fun_->seed(result);
     result = matrix_ * result;
   }
@@ -223,6 +231,7 @@ private:
   Eigen::MatrixXd  matrix_;
 };
 
+/******************************* PARSER *****************************************/
 
 bool read_symbol(std::ifstream& stream, char& symbol) {
   if (!(stream >> symbol)) {
@@ -576,7 +585,7 @@ It parse_T(std::ifstream& stream, Function_range& fun_range) {
       read_scalar(stream, Radius);
       break;  
     case ')':
-      fun_range.emplace_front(new Function_torus_in_R3(Radius, radius, center));
+      fun_range.emplace_front(new Function_torus_in_R3(radius, Radius, center));
       return fun_range.begin();
     default:
       std::cerr << "T: Unrecognized symbol " << symbol << "\n";
@@ -775,9 +784,209 @@ It parse_input(std::ifstream& stream, Function_range& fun_range) {
   return fun;
 }
 
+/***************** DYNAMIC VERSION OF THE IMPLICIT MANIFOLD ORACLE ****************/
+
+class Implicit_manifold_intersection_oracle {
+
+  /* Computes the affine coordinates of the intersection point of the implicit manifold
+   * and the affine hull of the simplex. */
+  template <class Simplex_handle, 
+	    class Triangulation>
+  Eigen::VectorXd compute_lambda(const Simplex_handle& simplex,
+				 const Triangulation& triangulation) const {
+    std::size_t cod_d = this->cod_d();
+    Eigen::MatrixXd matrix(cod_d + 1, cod_d + 1);
+    for (std::size_t i = 0; i < cod_d + 1; ++i)
+      matrix(0, i) = 1;
+    std::size_t j = 0;
+    for (auto v: simplex.vertex_range()) {
+      Eigen::VectorXd v_coords;
+      fun_->evaluate(triangulation.cartesian_coordinates(v), v_coords);
+      for (std::size_t i = 1; i < cod_d + 1; ++i)
+	matrix(i, j) = v_coords(i-1);
+      j++;
+    }
+    Eigen::VectorXd z(cod_d + 1);
+    z(0) = 1;
+    for (std::size_t i = 1; i < cod_d + 1; ++i)
+      z(i) = 0;
+    return matrix.colPivHouseholderQr().solve(z);
+  }
+
+  /* Computes the affine coordinates of the intersection point of the boundary
+   * of the implicit manifold and the affine hull of the simplex. */
+  template <class Simplex_handle, 
+	    class Triangulation>
+  Eigen::VectorXd compute_boundary_lambda(const Simplex_handle& simplex,
+					  const Triangulation& triangulation) const {
+    std::size_t cod_d = this->cod_d();
+    Eigen::MatrixXd matrix(cod_d + 2, cod_d + 2);
+    for (std::size_t i = 0; i < cod_d + 2; ++i)
+      matrix(0, i) = 1;
+    std::size_t j = 0;
+    for (auto v: simplex.vertex_range()) {
+      Eigen::VectorXd v_coords;
+      fun_->evaluate(triangulation.cartesian_coordinates(v), v_coords);
+      for (std::size_t i = 1; i < cod_d + 1; ++i)
+	matrix(i, j) = v_coords(i-1);
+      Eigen::VectorXd bv_coords;
+      domain_fun_->evaluate(triangulation.cartesian_coordinates(v), bv_coords);
+      matrix(cod_d + 1, j) = bv_coords(0);
+      j++;
+    }
+    Eigen::VectorXd z(cod_d + 2);
+    z(0) = 1;
+    for (std::size_t i = 1; i < cod_d + 2; ++i)
+      z(i) = 0;
+    return matrix.colPivHouseholderQr().solve(z);
+  }
+
+  /* Computes the intersection result for a given simplex in a triangulation. */
+  template <class Simplex_handle,
+	    class Triangulation>
+  Query_result<Simplex_handle> intersection_result(const Eigen::VectorXd& lambda,
+						   const Simplex_handle& simplex,
+						   const Triangulation& triangulation) const {
+    using QR = Query_result<Simplex_handle>;
+    std::size_t amb_d = triangulation.dimension();
+
+    std::vector<std::size_t> snapping_indices;
+    for (std::size_t i = 0; i < (std::size_t)lambda.size(); ++i) {
+      if (lambda(i) < -threshold_ || lambda(i) > 1 + threshold_)
+	return QR({Simplex_handle(), Eigen::VectorXd(), false});
+      if (lambda(i) >= threshold_)
+	snapping_indices.push_back(i);
+    }
+
+    std::size_t snap_d = snapping_indices.size();
+    std::size_t i = 0;
+    std::size_t num_line = 0;
+    Eigen::MatrixXd vertex_matrix(snap_d, amb_d);
+    Eigen::VectorXd reduced_lambda(snap_d);
+    auto v_range = simplex.vertex_range();
+    auto v_it = v_range.begin();
+    for (; num_line < snap_d && v_it != v_range.end(); ++v_it, ++i) {
+      if (i == snapping_indices[num_line]) {
+	Eigen::VectorXd v_coords = triangulation.cartesian_coordinates(*v_it);
+	for (std::size_t j = 0; j < amb_d; ++j)
+	  vertex_matrix(num_line, j) = v_coords(j);
+	reduced_lambda(num_line) = lambda(i);
+	num_line++;
+      }
+    }
+    reduced_lambda /= reduced_lambda.sum();
+    Eigen::VectorXd intersection = reduced_lambda.transpose()*vertex_matrix;
+    return QR({face_from_indices(simplex, snapping_indices), intersection, true});
+  }
+  
+public:
+
+  /** \brief Ambient dimension of the implicit manifold. */
+  std::size_t amb_d() const {
+    return fun_->amb_d();
+  }
+  
+  /** \brief Codimension of the implicit manifold. */
+  std::size_t cod_d() const {
+    return fun_->cod_d();
+  }
+
+  /** \brief Intersection query with the relative interior of the manifold.
+   *  
+   *  \details The returned structure Query_result contains the boolean value
+   *   that is true only if the intersection point of the query simplex and
+   *   the relative interior of the manifold exists, the intersection point
+   *   and the face of the query simplex that contains 
+   *   the intersection point.
+   *   
+   *  \tparam Simplex_handle The class of the query simplex.
+   *   Needs to be a model of the concept SimplexInCoxeterTriangulation.
+   *  \tparam Triangulation The class of the triangulation.
+   *   Needs to be a model of the concept TriangulationForManifoldTracing.
+   *
+   *  @param[in] simplex The query simplex. The dimension of the simplex
+   *   should be the same as the codimension of the manifold 
+   *   (the codomain dimension of the function).
+   *  @param[in] triangulation The ambient triangulation. The dimension of 
+   *   the triangulation should be the same as the ambient dimension of the manifold 
+   *   (the domain dimension of the function).
+   */
+  template <class Simplex_handle,
+	    class Triangulation>
+  Query_result<Simplex_handle> intersects(const Simplex_handle& simplex,
+					  const Triangulation& triangulation) const {
+    Eigen::VectorXd lambda = compute_lambda(simplex, triangulation);
+    return intersection_result(lambda, simplex, triangulation);
+  }
+
+  /** \brief Intersection query with the boundary of the manifold.
+   *  
+   *  \details The returned structure Query_result contains the boolean value
+   *   that is true only if the intersection point of the query simplex and
+   *   the boundary of the manifold exists, the intersection point
+   *   and the face of the query simplex that contains 
+   *   the intersection point.
+   *   
+   *  \tparam Simplex_handle The class of the query simplex.
+   *   Needs to be a model of the concept SimplexInCoxeterTriangulation.
+   *  \tparam Triangulation The class of the triangulation.
+   *   Needs to be a model of the concept TriangulationForManifoldTracing.
+   *
+   *  @param[in] simplex The query simplex. The dimension of the simplex
+   *   should be the same as the codimension of the boundary of the manifold 
+   *   (the codomain dimension of the function + 1).
+   *  @param[in] triangulation The ambient triangulation. The dimension of 
+   *   the triangulation should be the same as the ambient dimension of the manifold 
+   *   (the domain dimension of the function).
+   */
+  template <class Simplex_handle,
+	    class Triangulation>
+  Query_result<Simplex_handle> intersects_boundary(const Simplex_handle& simplex,
+						   const Triangulation& triangulation) const {
+    Eigen::VectorXd lambda = compute_boundary_lambda(simplex, triangulation);
+    return intersection_result(lambda, simplex, triangulation);
+  }
+
+  
+  /** \brief Returns true if the input point lies inside the piecewise-linear
+   *   domain induced by the given ambient triangulation.
+   *
+   * @param p The input point. Needs to have the same dimension as the ambient
+   *  dimension of the manifold (the domain dimension of the function).
+   * @param triangulation The ambient triangulation. Needs to have the same
+   *  dimension as the ambient dimension of the manifold 
+   *  (the domain dimension of the function).
+   */
+  template <class Triangulation>
+  bool lies_in_domain(const Eigen::VectorXd& p,
+		      const Triangulation& triangulation) {
+    return make_pl_approx(domain_fun_, triangulation)(p)(0) < 0;
+  }
+  
+  Implicit_manifold_intersection_oracle(Function* function,
+					Function* domain_function,
+					double threshold = 0)
+    : fun_(function), domain_fun_(domain_function->clone()), threshold_(threshold) {}
+
+  Implicit_manifold_intersection_oracle(Function* function, double threshold = 0)
+    : fun_(function),
+      domain_fun_(new Constant_function(function->amb_d(), 1, Eigen::VectorXd::Constant(1,-1))),
+      threshold_(threshold) {}
+
+  ~Implicit_manifold_intersection_oracle() {
+    delete domain_fun_;
+  }
+  
+private:
+  Function *fun_, *domain_fun_;
+  double threshold_ = 0;
+};
+
+
 int main(int argc, char** const argv) {
   if (argc < 2) {
-    std::cout << "Too few arguments. Usage: " << argv[0] << " input_file_name";
+    std::cout << "Too few arguments. Usage: " << argv[0]
+	      << " input_file_name [snapping_threshold] [triangulation_scale]\n";
     return 1;
   }
   boost::filesystem::path path(argv[1]); 
@@ -790,18 +999,43 @@ int main(int argc, char** const argv) {
     std::cerr << argv[0] << ": can't open file " << input_file_name << "\n";
     return 2;
   }
-  It fun = parse_input(stream, fun_range);
-  std::size_t amb_d = (*fun)->amb_d();
-  Eigen::VectorXd value;
-  (*fun)->evaluate(Eigen::VectorXd::Zero(amb_d), value);
+  Function* function = *parse_input(stream, fun_range);
+
+  double threshold = 0;
+  if (argc >= 3)
+    threshold = atof(argv[2]);
+  Implicit_manifold_intersection_oracle oracle(function, threshold);
+
+  double lambda = 1;
+  if (argc >= 4)
+    lambda = 0.2;
+  Coxeter_triangulation<> cox_tr(oracle.amb_d());
+  cox_tr.change_offset(Eigen::VectorXd::Random(oracle.amb_d()));
+  cox_tr.change_matrix(lambda * cox_tr.matrix());
+
+  using MT = Manifold_tracing<Coxeter_triangulation<> >;
+  using Out_simplex_map = typename MT::Out_simplex_map;
+  Eigen::VectorXd seed;
+  function->seed(seed);
+  std::cout << "function->amb_d() = " << function->amb_d() << "\n";
+  std::cout << "seed\n" << seed << "\n";
+  std::vector<Eigen::VectorXd> seed_points(1, seed);
+  Out_simplex_map out_simplex_map;
+  manifold_tracing_algorithm(seed_points, cox_tr, oracle, out_simplex_map);
+
+  std::size_t intr_d = oracle.amb_d() - oracle.cod_d();
+  Cell_complex<Out_simplex_map> cc(intr_d);
+  cc.construct_complex(out_simplex_map);
+
+  output_meshes_to_medit(3,
+			 "test",
+			 build_mesh_from_cell_complex(cc,
+						      Configuration({true, true, true, 1, 2, 3})));
   
-  std::cout << "amb_d = " << amb_d << "\n";
-  std::cout << "cod_d = " << (*fun)->cod_d() << "\n";
-  std::cout << "f(0) =\n" << value << "\n";
-   
+  
   for (auto fun: fun_range)
     delete fun;
-  
+
   stream.close();
   return 0;
 }
