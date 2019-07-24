@@ -1000,6 +1000,7 @@ int main(int argc, char** const argv) {
     return 2;
   }
   Function* function = *parse_input(stream, fun_range);
+  stream.close();
 
   double threshold = 0;
   if (argc >= 3)
@@ -1027,8 +1028,12 @@ int main(int argc, char** const argv) {
   Cell_complex<Out_simplex_map> cc(intr_d);
   cc.construct_complex(out_simplex_map);
 
+  stream = std::ifstream(input_file_name);
+  std::string output_file_name((std::istreambuf_iterator<char>(stream)),
+			       std::istreambuf_iterator<char>());
+  std::cout << "output_file_name = " << output_file_name << "\n";
   output_meshes_to_medit(3,
-			 "test",
+			 output_file_name,
 			 build_mesh_from_cell_complex(cc,
 						      Configuration({true, true, true, 1, 2, 3})));
   
@@ -1036,6 +1041,5 @@ int main(int argc, char** const argv) {
   for (auto fun: fun_range)
     delete fun;
 
-  stream.close();
   return 0;
 }
