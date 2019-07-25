@@ -57,9 +57,6 @@ struct Function_Sm_in_Rd: public Function {
     for (std::size_t i = 0; i < d_; ++i)
       result(i) += center_[i];
   }
-
-  Function_Sm_in_Rd(const Function_Sm_in_Rd& rhs) { 
-  }
   
   Function_Sm_in_Rd* clone() const {
     return new Function_Sm_in_Rd(*this);
@@ -117,6 +114,10 @@ struct Function_Sm_in_Rd: public Function {
   Function_Sm_in_Rd(double r,
 		    std::size_t m)
     : m_(m), k_(1), d_(m_+1), r_(r), center_(Eigen::VectorXd::Zero(d_)) {}
+
+  Function_Sm_in_Rd(const Function_Sm_in_Rd& rhs)
+    : Function_Sm_in_Rd(rhs.r_, rhs.m_, rhs.d_, rhs.center_) {}
+
   
 protected:
   std::size_t m_, k_, d_;

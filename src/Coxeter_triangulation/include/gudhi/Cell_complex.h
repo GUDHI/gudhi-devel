@@ -48,6 +48,8 @@ public:
 
   typedef std::map<Hasse_cell*, Eigen::VectorXd> Cell_point_map;
 
+  typedef std::map<Hasse_cell*, bool> Cell_bool_map;
+
 private:
   
   enum class Result_type {self, face, coface, inserted};
@@ -57,7 +59,9 @@ private:
     bool success;
   };
   
-  std::pair<Hasse_cell*, Result_type> insert_cell(const Simplex_handle& simplex, std::size_t cell_d) {
+  std::pair<Hasse_cell*, Result_type> insert_cell(const Simplex_handle& simplex,
+						  std::size_t cell_d,
+						  bool is_boundary = false) {
     // std::cout << "Insert simplex for " << simplex << "\n";
     Simplex_cell_map& simplex_cell_map = simplex_cell_maps_[cell_d];
     auto curr_it = simplex_cell_map.lower_bound(simplex.smallest_coface());
@@ -66,16 +70,25 @@ private:
       // std::cout << " Checking if face: " << curr_it->first << "\n";
       if (simplex == curr_it->first) {
 	// std::cout << "  Same simplex!\n";
-	return std::make_pair(curr_it->second, Result_type::self);
+	if (!is_boundary || cell_boundary_map_.at(curr_it->second) == true)
+	  return std::make_pair(curr_it->second, Result_type::self);
+	// else {
+	//   curr_it++;
+	//   continue;
+	// }
       }
       if (simplex.is_face_of(curr_it->first)) {
 	// std::cout << "  Face!\n";
 	Hasse_cell* cell = curr_it->second;
 	cell_simplex_map_.at(cell) = simplex;
+	cell_boundary_map_.at(cell) = is_boundary;
 	simplex_cell_map.erase(curr_it++);
 	while (curr_it != upper_bound) {
 	  if (simplex == curr_it->first)
-	    continue;
+	    if (!is_boundary || cell_boundary_map_.at(curr_it->second) == true) {
+	      curr_it++;
+	      continue;
+	    }
 	  if (simplex.is_face_of(curr_it->first)) {
 	    // std::cout << "  Post-deleting " << curr_it->first << "\n";
 	    simplex_cell_map.erase(curr_it++);
@@ -92,12 +105,14 @@ private:
       // std::cout << " Checking if coface: " << curr_it->first << "\n";
       if (curr_it->first.is_face_of(simplex)) {
 	// std::cout << "  Coface!\n";
-	return std::make_pair(curr_it->second, Result_type::coface);
+	if (!is_boundary || cell_boundary_map_.at(curr_it->second))
+	  return std::make_pair(curr_it->second, Result_type::coface);
       }
     }
     hasse_cells_.push_back(new Hasse_cell(cell_d, 0.0));
     Hasse_cell* new_cell = hasse_cells_.back();
     cell_simplex_map_.emplace(std::make_pair(new_cell, simplex));
+    cell_boundary_map_.emplace(std::make_pair(new_cell, is_boundary));
     simplex_cell_map.emplace(std::make_pair(simplex, new_cell));
     // std::cout << " OK for insertion!\n";
     return std::make_pair(new_cell, Result_type::inserted);
@@ -231,12 +246,35 @@ private:
   
   void construct_complex_(const Out_simplex_map_& interior_simplex_map,
 			  const Out_simplex_map_& boundary_simplex_map) {
+    for (auto& os_pair: interior_simplex_map) {
+      Hasse_cell* new_cell;
+      Result_type success;
+      std::tie(new_cell, success) = insert_cell(os_pair.first, 0, false);
+      if (success == Result_type::inserted)
+	cell_point_map_.emplace(std::make_pair(new_cell, os_pair.second));
+      else if (success == Result_type::face)
+	cell_point_map_.at(new_cell) = os_pair.second;
+    }
+    for (auto& os_pair: boundary_simplex_map) {
+      Hasse_cell* new_cell;
+      Result_type success;
+      std::tie(new_cell, success) = insert_cell(os_pair.first, 0, true);
+      if (success == Result_type::inserted)
+	cell_point_map_.emplace(std::make_pair(new_cell, os_pair.second));
+      else if (success == Result_type::face)
+	cell_point_map_.at(new_cell) = os_pair.second;
+    }
+    std::cout << "Finished building the layer 0. Simplices:\n";
+    for (auto& sc_pair: simplex_cell_maps_[0])
+      if (cell_boundary_map_.at(sc_pair.second))
+	std::cout << "\033[1;32mB" << sc_pair.first << "\033[0m\n";
+      else 
+	std::cout << "\033[1;33mI" << sc_pair.first << "\033[0m\n";
+    std::cout << "Size: " << simplex_cell_maps_[0].size() << "\n";
+    std::cout << "\n";
   }
   
 public:  
-
-  Cell_complex(std::size_t intrinsic_dimension)
-    : intr_d_(intrinsic_dimension) {}
   
   void construct_complex(const Out_simplex_map_& out_simplex_map) {
     simplex_cell_maps_.resize(intr_d_ + 1);
@@ -251,6 +289,7 @@ public:
 
   void construct_complex(const Out_simplex_map_& interior_simplex_map,
 			 const Out_simplex_map_& boundary_simplex_map) {
+    simplex_cell_maps_.resize(intr_d_ + 1);
     construct_complex_(interior_simplex_map, boundary_simplex_map);
   }
 
@@ -273,11 +312,15 @@ public:
     return cell_point_map_;
   }
 
+  Cell_complex(std::size_t intrinsic_dimension)
+    : intr_d_(intrinsic_dimension) {}
+  
 private:
   std::size_t intr_d_;
   Simplex_cell_maps simplex_cell_maps_;
   Cell_simplex_map cell_simplex_map_;
   Cell_point_map cell_point_map_;
+  Cell_bool_map cell_boundary_map_;
   std::vector<Hasse_cell*> hasse_cells_;
 };
 

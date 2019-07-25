@@ -17,6 +17,7 @@
 
 #include <gudhi/Permutahedral_representation/face_from_indices.h>
 #include <gudhi/Functions/Constant_function.h>
+#include <gudhi/Functions/PL_approximation.h>
 #include <gudhi/Query_result.h>
 
 #include <vector>
@@ -210,8 +211,10 @@ public:
    */
   template <class Triangulation>
   bool lies_in_domain(const Eigen::VectorXd& p,
-		      const Triangulation& triangulation) {
-    return make_pl_approx(domain_fun_, triangulation)(p)(0) < 0;
+		      const Triangulation& triangulation) const {
+    Eigen::VectorXd pl_p;
+    make_pl_approximation(domain_fun_, triangulation).evaluate(p, pl_p);
+    return pl_p(0) < 0;
   }
   
   /** \brief Constructs an intersection oracle for an implicit manifold potentially 

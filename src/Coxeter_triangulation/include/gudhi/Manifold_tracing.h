@@ -139,7 +139,7 @@ public:
   template <class Point_range,
 	    class Intersection_oracle>
   void manifold_tracing_algorithm(const Point_range& seed_points,
-				  Triangulation_& triangulation,
+				  const Triangulation_& triangulation,
 				  const Intersection_oracle& oracle,
 				  Out_simplex_map& interior_simplex_map,
 				  Out_simplex_map& boundary_simplex_map) {
@@ -148,7 +148,7 @@ public:
 
     for (const auto& p: seed_points) {
       Simplex_handle full_simplex = triangulation.locate_point(p);
-      for (Simplex_handle face: triangulation.face_range(full_simplex, cod_d)) {
+      for (Simplex_handle face: full_simplex.face_range(cod_d)) {
 	auto qr = oracle.intersects(face, triangulation);
 	if (qr.success &&
 	    interior_simplex_map.emplace(std::make_pair(qr.face, qr.intersection)).second) {
@@ -161,18 +161,19 @@ public:
     while (!queue.empty()) {
       Simplex_handle s = queue.front();
       queue.pop();
-      for (auto cof: triangulation.coface_range(s, cod_d+1)) {
-	for (auto face: triangulation.face_range(cof, cod_d)) {
+      for (auto cof: s.coface_range(cod_d+1)) {
+	for (auto face: cof.face_range(cod_d)) {
 	  auto qr = oracle.intersects(face, triangulation);
 	  if (qr.success) {
-	    if (oracle.lies_in_boundary(qr.intersection)) {
+	    if (oracle.lies_in_domain(qr.intersection, triangulation)) {
 	      if (interior_simplex_map.emplace(qr.face, qr.intersection).second)
 		queue.emplace(qr.face);
 	    }
 	    else {
 	      auto qrb = oracle.intersects_boundary(cof, triangulation);
-	      assert (qrb.success); // always a success
-	      boundary_simplex_map.emplace(qrb.face, qrb.intersection);
+	      // assert (qrb.success); // always a success
+	      if (qrb.success)
+		boundary_simplex_map.emplace(qrb.face, qrb.intersection);
 	    }
 	  }
 	}
