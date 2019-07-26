@@ -64,23 +64,23 @@ private:
 						  bool is_boundary) {
     Simplex_cell_maps& simplex_cell_maps
       = (is_boundary? boundary_simplex_cell_maps_: interior_simplex_cell_maps_);
-    std::cout << "Insert simplex for "
-	      << (is_boundary? "\033[1;32mB" : "\033[1;33mI")
-	      << simplex << "\033[0m\n";
+    // std::cout << "Insert simplex for "
+    // 	      << (is_boundary? "\033[1;32mB" : "\033[1;33mI")
+    // 	      << simplex << "\033[0m\n";
 
     Simplex_cell_map& simplex_cell_map = simplex_cell_maps[cell_d];
     auto curr_it = simplex_cell_map.lower_bound(simplex.smallest_coface());
     auto upper_bound = simplex_cell_map.upper_bound(simplex);
     for (; curr_it != upper_bound; ++curr_it) {
-      std::cout << " Checking if face: "
-		<< (is_boundary? "\033[1;32mB" : "\033[1;33mI")
-		<< curr_it->first << "\033[0m\n";
+      // std::cout << " Checking if face: "
+      // 		<< (is_boundary? "\033[1;32mB" : "\033[1;33mI")
+      // 		<< curr_it->first << "\033[0m\n";
       if (simplex == curr_it->first) {
-	std::cout << "  Same simplex!\n";
+	// std::cout << "  Same simplex!\n";
 	return std::make_pair(curr_it->second, Result_type::self);
       }
       if (simplex.is_face_of(curr_it->first)) {
-	std::cout << "  Face!\n";
+	// std::cout << "  Face!\n";
 	Hasse_cell* cell = curr_it->second;
 	cell_simplex_map_.at(cell) = simplex;
 	simplex_cell_map.erase(curr_it++);
@@ -90,9 +90,9 @@ private:
 	    continue;
 	  }
 	  if (simplex.is_face_of(curr_it->first)) {
-	    std::cout << "  Post-deleting "
-		      << (is_boundary? "\033[1;32mB" : "\033[1;33mI")
-		      << curr_it->first << "\033[0m\n";
+	    // std::cout << "  Post-deleting "
+	    // 	      << (is_boundary? "\033[1;32mB" : "\033[1;33mI")
+	    // 	      << curr_it->first << "\033[0m\n";
 	    simplex_cell_map.erase(curr_it++);
 	  }
 	  else
@@ -104,11 +104,11 @@ private:
     }
     upper_bound = simplex_cell_map.upper_bound(simplex.greatest_face());
     for (; curr_it != upper_bound; ++curr_it) {
-      std::cout << " Checking if coface: "
-		<< (is_boundary? "\033[1;32mB" : "\033[1;33mI")
-		<< curr_it->first << "\033[0m\n";
+      // std::cout << " Checking if coface: "
+      // 		<< (is_boundary? "\033[1;32mB" : "\033[1;33mI")
+      // 		<< curr_it->first << "\033[0m\n";
       if (curr_it->first.is_face_of(simplex)) {
-	std::cout << "  Coface!\n";
+	// std::cout << "  Coface!\n";
 	return std::make_pair(curr_it->second, Result_type::coface);
       }
     }
@@ -116,7 +116,7 @@ private:
     Hasse_cell* new_cell = hasse_cells_.back();
     cell_simplex_map_.emplace(std::make_pair(new_cell, simplex));
     simplex_cell_map.emplace(std::make_pair(simplex, new_cell));
-    std::cout << " OK for insertion!\n";
+    // std::cout << " OK for insertion!\n";
     return std::make_pair(new_cell, Result_type::inserted);
   }
 
@@ -225,9 +225,9 @@ private:
 	      new_cell->get_boundary().emplace_back(std::make_pair(cell, 1));
 	  }
 	}
-	output_layer_before(boundary_simplex_cell_maps_, cell_d, i, true);
+	// output_layer_before(boundary_simplex_cell_maps_, cell_d, i, true);
 	join_collapse_level(cell_d, true);
-	output_layer_before(boundary_simplex_cell_maps_, cell_d, i, false);
+	// output_layer_before(boundary_simplex_cell_maps_, cell_d, i, false);
       }
 
       for (auto& sc_pair: interior_simplex_cell_maps_[cell_d - 1]) {
@@ -254,9 +254,9 @@ private:
   	    new_cell->get_boundary().emplace_back(std::make_pair(cell, 1));
 	}
       }
-      output_layer_before(interior_simplex_cell_maps_, cell_d, i, true);
+      // output_layer_before(interior_simplex_cell_maps_, cell_d, i, true);
       join_collapse_level(cell_d, false);
-      output_layer_before(interior_simplex_cell_maps_, cell_d, i, false);
+      // output_layer_before(interior_simplex_cell_maps_, cell_d, i, false);
     }
   }
   
@@ -315,24 +315,41 @@ private:
 	cell_point_map_.at(new_cell) = os_pair.second;
     }
     std::cout << "Finished building the layer 0. Simplices:\n";
-    for (auto& sc_pair: interior_simplex_cell_maps_[0])
-      std::cout << "\033[1;33mI" << sc_pair.first << "\033[0m\n";
-    for (auto& sc_pair: boundary_simplex_cell_maps_[0])
-      std::cout << "\033[1;32mB" << sc_pair.first << "\033[0m\n";
+    // for (auto& sc_pair: interior_simplex_cell_maps_[0])
+    //   std::cout << "\033[1;33mI" << sc_pair.first << "\033[0m\n";
+    // for (auto& sc_pair: boundary_simplex_cell_maps_[0])
+    //   std::cout << "\033[1;32mB" << sc_pair.first << "\033[0m\n";
+    std::size_t i_size = interior_simplex_cell_maps_[0].size();
+    std::size_t b_size = boundary_simplex_cell_maps_[0].size();
+    std::cout << "I: " << i_size << "\n"
+	      << "B: " << b_size << "\n"
+	      << "T: " << i_size + b_size << "\n";
 
     for (std::size_t cell_d = 1;
 	 cell_d < interior_simplex_cell_maps_.size() &&
 	   !interior_simplex_cell_maps_[cell_d - 1].empty();
 	 ++cell_d) {
       expand_level(cell_d);
-
+      
       std::cout << "\nFinished building the layer " << cell_d << ". Simplices:\n";
-      for (auto& sc_pair: interior_simplex_cell_maps_[cell_d])
-	std::cout << "\033[1;33mI" << sc_pair.first << "\033[0m\n";
-      if (cell_d < intr_d_)
-	for (auto& sc_pair: boundary_simplex_cell_maps_[cell_d])
-	  std::cout << "\033[1;32mB" << sc_pair.first << "\033[0m\n";
-      std::cout << "\n";
+      // for (auto& sc_pair: interior_simplex_cell_maps_[cell_d])
+      // 	std::cout << "\033[1;33mI" << sc_pair.first << "\033[0m\n";
+      // if (cell_d < intr_d_)
+      // 	for (auto& sc_pair: boundary_simplex_cell_maps_[cell_d])
+      // 	  std::cout << "\033[1;32mB" << sc_pair.first << "\033[0m\n";
+      // std::cout << "\n";
+      if (cell_d < intr_d_) {
+	std::size_t i_size = interior_simplex_cell_maps_[cell_d].size();
+	std::size_t b_size = boundary_simplex_cell_maps_[cell_d].size();
+	std::cout << "I: " << i_size << "\n"
+		  << "B: " << b_size << "\n"
+		  << "T: " << i_size + b_size << "\n";
+      }
+      else {
+	std::size_t i_size = interior_simplex_cell_maps_[cell_d].size();
+	std::cout << "I: " << i_size << "\n"
+		  << "T: " << i_size << "\n";
+      }
     }
   }
   

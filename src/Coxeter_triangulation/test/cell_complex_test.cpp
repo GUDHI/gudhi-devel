@@ -26,16 +26,20 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& vector) {
   return os;
 }
 
-int main() {
+int main(int argc, char** argv) {
   double radius = 1.1111;
   Function_Sm_in_Rd fun_sph(radius, 2);
   Eigen::VectorXd seed;
   fun_sph.seed(seed);
   Function_Sm_in_Rd fun_bound(radius/2, 2, seed);
     
-  double thr = 0.2; 
+  double thr = 0.1;
+  if (argc >= 2)
+    thr = atof(argv[1]);
   auto oracle = make_oracle(fun_sph, fun_bound, thr);
-  double lambda = 0.5;
+  double lambda = 0.2;
+  if (argc >= 3)
+    lambda = atof(argv[2]);
   Coxeter_triangulation<> cox_tr(oracle.amb_d());
   cox_tr.change_offset(Eigen::VectorXd::Random(oracle.amb_d()));
   cox_tr.change_matrix(lambda * cox_tr.matrix());
@@ -45,16 +49,16 @@ int main() {
   std::vector<Eigen::VectorXd> seed_points(1, seed);
   Out_simplex_map interior_simplex_map, boundary_simplex_map;
   manifold_tracing_algorithm(seed_points, cox_tr, oracle, interior_simplex_map, boundary_simplex_map);
-  std::cout << "Interior_simplex_map:\n";
-  for (auto si_pair: interior_simplex_map)
-    std::cout << "Simplex = \033[1;33m" << si_pair.first << "\033[0m"
-	      << " point:\n"  << si_pair.second << "\n";
-  std::cout << "\nSize of the initial output = " << interior_simplex_map.size() << "\n\n";
-  std::cout << "Boundary_simplex_map:\n";
-  for (auto si_pair: boundary_simplex_map)
-    std::cout << "Simplex = \033[1;32m" << si_pair.first << "\033[0m"
-	      << " point:\n"  << si_pair.second << "\n";
-  std::cout << "\nSize of the initial output = " << boundary_simplex_map.size() << "\n\n";
+  // std::cout << "Interior_simplex_map:\n";
+  // for (auto si_pair: interior_simplex_map)
+  //   std::cout << "Simplex = \033[1;33m" << si_pair.first << "\033[0m"
+  // 	      << " point:\n"  << si_pair.second << "\n";
+  // std::cout << "\nSize of the initial output = " << interior_simplex_map.size() << "\n\n";
+  // std::cout << "Boundary_simplex_map:\n";
+  // for (auto si_pair: boundary_simplex_map)
+  //   std::cout << "Simplex = \033[1;32m" << si_pair.first << "\033[0m"
+  // 	      << " point:\n"  << si_pair.second << "\n";
+  // std::cout << "\nSize of the initial output = " << boundary_simplex_map.size() << "\n\n";
   
 
   
