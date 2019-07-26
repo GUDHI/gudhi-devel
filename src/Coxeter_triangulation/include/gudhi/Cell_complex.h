@@ -384,6 +384,14 @@ public:
   std::size_t intrinsic_dimension() const {
     return intr_d_;
   }
+
+  const Simplex_cell_maps& interior_simplex_cell_maps() const {
+    return interior_simplex_cell_maps_;
+  }
+
+  const Simplex_cell_maps& boundary_simplex_cell_maps() const {
+    return boundary_simplex_cell_maps_;
+  }
   
   const Simplex_cell_map& simplex_cell_map(std::size_t cell_d) const {
     return interior_simplex_cell_maps_[cell_d];

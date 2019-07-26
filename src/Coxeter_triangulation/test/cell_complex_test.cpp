@@ -2,6 +2,7 @@
 
 #include <gudhi/Coxeter_triangulation.h>
 #include <gudhi/Functions/Function_Sm_in_Rd.h>
+#include <gudhi/Functions/Function_torus_in_R3.h>
 #include <gudhi/Implicit_manifold_intersection_oracle.h>
 #include <gudhi/Manifold_tracing.h>
 #include <gudhi/Cell_complex.h>
@@ -28,10 +29,10 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& vector) {
 
 int main(int argc, char** argv) {
   double radius = 1.1111;
-  Function_Sm_in_Rd fun_sph(radius, 2);
+  Function_torus_in_R3 fun_sph(radius, 3*radius);
   Eigen::VectorXd seed;
   fun_sph.seed(seed);
-  Function_Sm_in_Rd fun_bound(radius/2, 2, seed);
+  Function_Sm_in_Rd fun_bound(2.5*radius, 2, seed);
     
   double thr = 0.1;
   if (argc >= 2)
@@ -103,6 +104,7 @@ int main(int argc, char** argv) {
   output_meshes_to_medit(3,
 			 "test",
 			 build_mesh_from_cell_complex(cc,
-						      Configuration({true, true, true, 1, 2, 3})));
+						      Configuration({true, true, true, 1, 5, 3}),
+						      Configuration({true, true, true, 2, 13, 14})));
   return 0;
 }

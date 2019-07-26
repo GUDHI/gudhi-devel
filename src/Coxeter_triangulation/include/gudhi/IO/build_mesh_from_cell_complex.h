@@ -29,27 +29,18 @@ struct Configuration {
 };
 
 
-template <class Cell_complex>
-Mesh_medit build_mesh_from_cell_complex(const Cell_complex& cell_complex,
-					Configuration configuration = Configuration()) {
-  using Hasse_cell = typename Cell_complex::Hasse_cell;
+template <class Hasse_cell,
+	  class Simplex_cell_map>
+void populate_mesh(Mesh_medit& output,
+		   Simplex_cell_map& sc_map,
+		   Configuration configuration,
+		   std::size_t amb_d,
+		   std::map<Hasse_cell*, std::size_t> vi_map) {
   using Mesh_element_vertices = Mesh_medit::Mesh_elements::value_type::first_type;
-  Mesh_medit output;
-  std::map<Hasse_cell*, std::size_t> vi_map, ci_map; // one for vertices, other for 2d-cells
-  std::vector<Hasse_cell*> edge_cells, polygon_cells, polytope_cells;
-  std::size_t index = 1; // current size of output.vertex_points
-
-  if (cell_complex.cell_point_map().empty())
-    return output;
-  std::size_t amb_d = std::min((int) cell_complex.cell_point_map().begin()->second.size(), 3);
-  
-  for (const auto& cp_pair: cell_complex.cell_point_map()) {
-    vi_map.emplace(std::make_pair(cp_pair.first, index++));
-    output.vertex_points.push_back(cp_pair.second);
-    output.vertex_points.back().conservativeResize(amb_d);
-  }
-  if (cell_complex.intrinsic_dimension() >= 2) 
-    for (const auto& sc_pair: cell_complex.simplex_cell_map(2)) {
+  std::map<Hasse_cell*, std::size_t> ci_map;
+  std::size_t index = vi_map.size() + 1; // current size of output.vertex_points
+  if (sc_map.size() >= 3) 
+    for (const auto& sc_pair: sc_map[2]) {
       Eigen::VectorXd barycenter = Eigen::VectorXd::Zero(amb_d);
       std::set<std::size_t> vertex_indices;
       Hasse_cell* cell = sc_pair.second;
@@ -62,8 +53,8 @@ Mesh_medit build_mesh_from_cell_complex(const Cell_complex& cell_complex,
       output.vertex_points.emplace_back((1./vertex_indices.size()) * barycenter);    
     }
 
-  if (configuration.toggle_edges && cell_complex.intrinsic_dimension() >= 1)
-    for (const auto& sc_map: cell_complex.simplex_cell_map(1)) {
+  if (configuration.toggle_edges && sc_map.size() >= 2)
+    for (const auto& sc_map: sc_map[1]) {
       Hasse_cell* edge_cell = sc_map.second;
       Mesh_element_vertices edge;
       for (const auto& vi_pair: edge_cell->get_boundary())
@@ -71,8 +62,8 @@ Mesh_medit build_mesh_from_cell_complex(const Cell_complex& cell_complex,
       output.edges.emplace_back(std::make_pair(edge, configuration.ref_edges));
     }
   
-  if (configuration.toggle_triangles && cell_complex.intrinsic_dimension() >= 2)
-    for (const auto& sc_pair: cell_complex.simplex_cell_map(2))
+  if (configuration.toggle_triangles && sc_map.size() >= 3)
+    for (const auto& sc_pair: sc_map[2])
       for (const auto& ei_pair: sc_pair.second->get_boundary()) {
 	Mesh_element_vertices triangle(1, ci_map[sc_pair.second]);
 	for (const auto& vi_pair: ei_pair.first->get_boundary())
@@ -80,8 +71,8 @@ Mesh_medit build_mesh_from_cell_complex(const Cell_complex& cell_complex,
 	output.triangles.emplace_back(std::make_pair(triangle, configuration.ref_triangles));
       }
   
-  if (configuration.toggle_tetrahedra && cell_complex.intrinsic_dimension() >= 3)
-    for (const auto& sc_pair: cell_complex.simplex_cell_map(3)) {
+  if (configuration.toggle_tetrahedra && sc_map.size() >= 4)
+    for (const auto& sc_pair: sc_map[3]) {
       Eigen::VectorXd barycenter = Eigen::VectorXd::Zero(amb_d);
       std::set<std::size_t> vertex_indices;
       Hasse_cell* cell = sc_pair.second;
@@ -101,8 +92,30 @@ Mesh_medit build_mesh_from_cell_complex(const Cell_complex& cell_complex,
 	  output.tetrahedra.emplace_back(std::make_pair(tetrahedron, configuration.ref_tetrahedra));
 	}
       index++;
-    }
-      
+    }  
+}
+
+template <class Cell_complex>
+Mesh_medit build_mesh_from_cell_complex(const Cell_complex& cell_complex,
+					Configuration i_configuration = Configuration(),
+					Configuration b_configuration = Configuration()) {
+  using Hasse_cell = typename Cell_complex::Hasse_cell;
+  Mesh_medit output;
+  std::map<Hasse_cell*, std::size_t> vi_map; // one for vertices, other for 2d-cells
+  std::size_t index = 1; // current size of output.vertex_points
+
+  if (cell_complex.cell_point_map().empty())
+    return output;
+  std::size_t amb_d = std::min((int) cell_complex.cell_point_map().begin()->second.size(), 3);
+  
+  for (const auto& cp_pair: cell_complex.cell_point_map()) {
+    vi_map.emplace(std::make_pair(cp_pair.first, index++));
+    output.vertex_points.push_back(cp_pair.second);
+    output.vertex_points.back().conservativeResize(amb_d);
+  }
+
+  populate_mesh(output, cell_complex.interior_simplex_cell_maps(), i_configuration, amb_d, vi_map);
+  populate_mesh(output, cell_complex.boundary_simplex_cell_maps(), b_configuration, amb_d, vi_map);  
   return output;
 }
 
