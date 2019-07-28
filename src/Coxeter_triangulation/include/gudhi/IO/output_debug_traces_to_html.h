@@ -60,7 +60,19 @@ struct MT_inserted_info {
     qr_intersection_oss << qr.intersection; qr_intersection_ = qr_intersection_oss.str();
   }
 };
-std::list<MT_inserted_info> mt_seed_inserted_list;
+std::list<MT_inserted_info> mt_seed_inserted_list, mt_inserted_list;
+
+struct CC_summary_info {
+  std::string face_, cell_;
+  template <class SC_pair>
+  CC_summary_info(const SC_pair& sc_pair) {
+    std::ostringstream face_oss, cell_oss;
+    face_oss << sc_pair.first; face_ = face_oss.str();
+    cell_oss << sc_pair.second; cell_ = cell_oss.str();
+  }
+};
+using CC_summary_list = std::list<CC_summary_info>;
+std::vector<CC_summary_list> cc_interior_summary_lists, cc_boundary_summary_lists;
 
 std::ostringstream mt_ostream, vis_ostream;
 std::vector<std::ostringstream> cc_summary_ostream, cc_traces_ostream;
@@ -123,7 +135,7 @@ void write_to_html(std::string file_name) {
       << "    </div>\n";
   ofs << "    <h1> Debug traces for " << file_name << " </h1>\n";
 
-  ofs << "    <div id=""#mant"">\n";
+  ofs << "    <div id=""mant"">\n";
   ofs << "      <h2> Manifold debug trace </h2>\n";
   ofs << "      <h3> Simplices inserted during the seed phase </h3>\n";
   ofs << "      <ul>\n";
@@ -137,18 +149,50 @@ void write_to_html(std::string file_name) {
 	  << ")</li>\n";
   }
   ofs << "      </ul>\n";
+  ofs << "      <h3> Simplices inserted during the while loop phase </h3>\n";
+  ofs << "      <ul>\n";
+  for (const MT_inserted_info& mt_info: mt_inserted_list) {
+    if (mt_info.qr_success_)
+      ofs << "        <li>Inserted " << simplex_format(mt_info.qr_face_, mt_info.is_boundary_)
+	  << " (initially " << simplex_format(mt_info.init_face_, mt_info.is_boundary_)
+	  << ") intersection point is " << mt_info.qr_intersection_ << "</li>\n";
+    else
+      ofs << "        <li>Failed to insert " << mt_info.init_face_
+	  << ")</li>\n";
+  }
+  ofs << "      </ul>\n";
   ofs << "    </div>\n";
 
-  ofs << "    <div id=""#cell"">\n"
+  ofs << "    <div id=""cell"">\n"
       << "      <h2> Cell complex debug trace </h2>\n"
       << "      <p>Go to:</p>\n"
-      << "      <ul>\n"
-      << "	<li><a href=""#dim0"">Dimension 0</a></li>\n"
-      << "	<li><a href=""#dim1"">Dimension 1</a></li>\n"
-      << "	<li><a href=""#dim2"">Dimension 2</a></li>\n"
-      << "      </ul>\n";
-  ofs << Straighten(Eigen::VectorXd::Random(4)) << "\n";
-  ofs << "    <div id=""#visu"">\n"
+      << "      <ul>\n";
+  for (std::size_t i = 0; i < cc_interior_summary_lists.size(); ++i) {
+    ofs << "	<li><a href=""#dim" << i << """>Dimension " << i << "</a></li>\n";
+  }
+  ofs << "      </ul>\n";
+  for (std::size_t i = 0; i < cc_interior_summary_lists.size(); ++i) {
+    ofs << "      <h3 id=""dim" << i << """> Summary for dimension " << i << "</h3>\n";
+    ofs << "      <h4> Summary for interior simplices</h4>\n"
+	<< "        <ul>\n";
+    for (const CC_summary_info& cc_info: cc_interior_summary_lists[i])
+      ofs << "          <li>" << simplex_format(cc_info.face_, false)
+	  << " cell =" << cc_info.cell_ << "</li>\n";
+    ofs << "        </ul>\n";
+    if (i < cc_boundary_summary_lists.size()) {
+      ofs << "      <h4> Summary for boundary simplices</h4>\n"
+	  << "        <ul>\n";
+      for (const CC_summary_info& cc_info: cc_boundary_summary_lists[i])
+	ofs << "          <li>" << simplex_format(cc_info.face_, true)
+	    << " cell =" << cc_info.cell_ << "</li>\n";
+      ofs << "        </ul>\n";
+    }    
+  }
+  
+  ofs << "      <h3> Details </h3>\n";
+  ofs << "    </div>\n";
+  
+  ofs << "    <div id=""visu"">\n"
       << "      <h2> Visualization details debug trace </h2>\n"
       << "    </div>\n";
   ofs << "  </body>\n";

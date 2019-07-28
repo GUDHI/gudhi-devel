@@ -261,6 +261,9 @@ private:
   }
   
   void construct_complex_(const Out_simplex_map_& out_simplex_map) {
+#ifdef GUDHI_COX_OUTPUT_TO_HTML
+    cc_interior_summary_lists.resize(interior_simplex_cell_maps_.size());
+#endif    
     for (auto& os_pair: out_simplex_map) {
       const Simplex_handle& simplex = os_pair.first;
       const Eigen::VectorXd& point = os_pair.second;
@@ -282,6 +285,10 @@ private:
   
   void construct_complex_(const Out_simplex_map_& interior_simplex_map,
 			  const Out_simplex_map_& boundary_simplex_map) {
+#ifdef GUDHI_COX_OUTPUT_TO_HTML
+    cc_interior_summary_lists.resize(interior_simplex_cell_maps_.size());
+    cc_boundary_summary_lists.resize(boundary_simplex_cell_maps_.size());
+#endif    
     for (auto& os_pair: boundary_simplex_map) {
       const Simplex_handle& simplex = os_pair.first;
       const Eigen::VectorXd& point = os_pair.second;
@@ -314,11 +321,13 @@ private:
       else if (success == Result_type::face)
 	cell_point_map_.at(new_cell) = os_pair.second;
     }
+#ifdef GUDHI_COX_OUTPUT_TO_HTML
+    for (const auto& sc_pair: interior_simplex_cell_maps_[0])
+      cc_interior_summary_lists[0].push_back(CC_summary_info(sc_pair));
+    for (const auto& sc_pair: boundary_simplex_cell_maps_[0])
+      cc_boundary_summary_lists[0].push_back(CC_summary_info(sc_pair));
+#endif        
     std::cout << "Finished building the layer 0. Simplices:\n";
-    // for (auto& sc_pair: interior_simplex_cell_maps_[0])
-    //   std::cout << "\033[1;33mI" << sc_pair.first << "\033[0m\n";
-    // for (auto& sc_pair: boundary_simplex_cell_maps_[0])
-    //   std::cout << "\033[1;32mB" << sc_pair.first << "\033[0m\n";
     std::size_t i_size = interior_simplex_cell_maps_[0].size();
     std::size_t b_size = boundary_simplex_cell_maps_[0].size();
     std::cout << "I: " << i_size << "\n"
@@ -332,12 +341,13 @@ private:
       expand_level(cell_d);
       
       std::cout << "\nFinished building the layer " << cell_d << ". Simplices:\n";
-      // for (auto& sc_pair: interior_simplex_cell_maps_[cell_d])
-      // 	std::cout << "\033[1;33mI" << sc_pair.first << "\033[0m\n";
-      // if (cell_d < intr_d_)
-      // 	for (auto& sc_pair: boundary_simplex_cell_maps_[cell_d])
-      // 	  std::cout << "\033[1;32mB" << sc_pair.first << "\033[0m\n";
-      // std::cout << "\n";
+#ifdef GUDHI_COX_OUTPUT_TO_HTML
+      for (const auto& sc_pair: interior_simplex_cell_maps_[cell_d])
+	cc_interior_summary_lists[cell_d].push_back(CC_summary_info(sc_pair));
+      if (cell_d < boundary_simplex_cell_maps_.size())
+	for (const auto& sc_pair: boundary_simplex_cell_maps_[cell_d])
+	  cc_boundary_summary_lists[cell_d].push_back(CC_summary_info(sc_pair));
+#endif        
       if (cell_d < intr_d_) {
 	std::size_t i_size = interior_simplex_cell_maps_[cell_d].size();
 	std::size_t b_size = boundary_simplex_cell_maps_[cell_d].size();
