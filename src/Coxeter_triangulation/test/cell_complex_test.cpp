@@ -14,21 +14,6 @@
 
 using namespace Gudhi::coxeter_triangulation;
 
-template <class T>
-std::ostream& operator<<(std::ostream& os, const std::vector<T>& vector) {
-    os << "(";  
-  if (vector.empty()) {
-    std::cout << ")";
-    return os;
-  }
-  auto v_it = vector.begin();
-  os << *v_it++;
-  for (; v_it != vector.end(); ++v_it)
-    os << ", " << *v_it;
-  os << ")";
-  return os;
-}
-
 int main(int argc, char** argv) {
 
 #ifdef GUDHI_DEBUG    
@@ -121,5 +106,6 @@ int main(int argc, char** argv) {
 			 build_mesh_from_cell_complex(cc,
 						      Configuration({true, true, true, 1, 5, 3}),
 						      Configuration({true, true, true, 2, 13, 14})));
+  write_to_html("test");
   return 0;
 }

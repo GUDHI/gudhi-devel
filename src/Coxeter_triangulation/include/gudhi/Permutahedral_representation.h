@@ -297,7 +297,7 @@ std::ostream& operator<<(std::ostream& os,
   // vertex part
   os << "(";
   if (simplex.vertex().empty()) {
-    std::cout << ")";
+    os << ")";
     return os;
   }
   auto v_it = simplex.vertex().begin();
@@ -312,7 +312,7 @@ std::ostream& operator<<(std::ostream& os,
     [&os](const Part& p) {
       os << "{";
       if (p.empty()) {
-	std::cout << "}";
+	os << "}";
       }
       auto p_it = p.begin();
       os << *p_it++;
@@ -322,7 +322,7 @@ std::ostream& operator<<(std::ostream& os,
     };
   os << " [";
   if (simplex.partition().empty()) {
-    std::cout << "]";
+    os << "]";
     return os;
   }
   auto o_it = simplex.partition().begin();

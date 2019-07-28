@@ -92,6 +92,12 @@ public:
 	Query_result<Simplex_handle> qr = oracle.intersects(face, triangulation);
 	if (qr.success &&
 	    out_simplex_map.emplace(std::make_pair(qr.face, qr.intersection)).second) {
+#ifdef GUDHI_COX_OUTPUT_TO_HTML
+	  std::cout << "Gudhi_cox_output_to_html is active\n";
+	  mt_seed_inserted_list.push_back(MT_inserted_info(qr, face, false));
+#else
+	  std::cout << "Gudhi_cox_output_to_html is not active\n";
+#endif
 	  queue.emplace(qr.face);
 	  break;
 	}
@@ -150,14 +156,29 @@ public:
       Simplex_handle full_simplex = triangulation.locate_point(p);
       for (Simplex_handle face: full_simplex.face_range(cod_d)) {
 	auto qr = oracle.intersects(face, triangulation);
-	if (qr.success &&
-	    interior_simplex_map.emplace(std::make_pair(qr.face, qr.intersection)).second) {
-	  queue.emplace(qr.face);
-	  break;
+#ifdef GUDHI_COX_OUTPUT_TO_HTML
+	mt_seed_inserted_list.push_back(MT_inserted_info(qr, face, false));
+#endif	
+	if (qr.success) {
+	  if (oracle.lies_in_domain(qr.intersection, triangulation)) {
+	    if (interior_simplex_map.emplace(std::make_pair(qr.face, qr.intersection)).second)
+	      queue.emplace(qr.face);
+	  }
+	  else {
+	    for (Simplex_handle cof: face.coface_range(cod_d+1)) {
+	      auto qrb = oracle.intersects_boundary(cof, triangulation);
+#ifdef GUDHI_COX_OUTPUT_TO_HTML
+	      mt_seed_inserted_list.push_back(MT_inserted_info(qrb, cof, true));
+#endif	
+	      if (qrb.success)
+		boundary_simplex_map.emplace(qrb.face, qrb.intersection);
+	    }
+	  }
+	  // break;
 	}
       }
     }
-
+    
     while (!queue.empty()) {
       Simplex_handle s = queue.front();
       queue.pop();
