@@ -63,18 +63,23 @@ private:
 						  std::size_t cell_d,
 						  bool is_boundary) {
     Simplex_cell_maps& simplex_cell_maps
-      = (is_boundary? boundary_simplex_cell_maps_: interior_simplex_cell_maps_);
-    // std::cout << "Insert simplex for "
-    // 	      << (is_boundary? "\033[1;32mB" : "\033[1;33mI")
-    // 	      << simplex << "\033[0m\n";
-
+      = (is_boundary? boundary_simplex_cell_maps_: interior_simplex_cell_maps_); 
+#ifdef GUDHI_COX_OUTPUT_TO_HTML
+    if (is_boundary)
+      cc_boundary_detail_lists[cell_d].emplace_back(CC_detail_info(simplex));
+    else
+      cc_interior_detail_lists[cell_d].emplace_back(CC_detail_info(simplex));
+#endif
     Simplex_cell_map& simplex_cell_map = simplex_cell_maps[cell_d];
     auto curr_it = simplex_cell_map.lower_bound(simplex.smallest_coface());
     auto upper_bound = simplex_cell_map.upper_bound(simplex);
     for (; curr_it != upper_bound; ++curr_it) {
-      // std::cout << " Checking if face: "
-      // 		<< (is_boundary? "\033[1;32mB" : "\033[1;33mI")
-      // 		<< curr_it->first << "\033[0m\n";
+#ifdef GUDHI_COX_OUTPUT_TO_HTML
+      if (is_boundary)
+	cc_boundary_detail_lists[cell_d].back().faces_.emplace_back(to_string(curr_it->first));
+      else
+	cc_interior_detail_lists[cell_d].back().faces_.emplace_back(to_string(curr_it->first));
+#endif
       if (simplex == curr_it->first) {
 	// std::cout << "  Same simplex!\n";
 	return std::make_pair(curr_it->second, Result_type::self);
@@ -104,9 +109,12 @@ private:
     }
     upper_bound = simplex_cell_map.upper_bound(simplex.greatest_face());
     for (; curr_it != upper_bound; ++curr_it) {
-      // std::cout << " Checking if coface: "
-      // 		<< (is_boundary? "\033[1;32mB" : "\033[1;33mI")
-      // 		<< curr_it->first << "\033[0m\n";
+#ifdef GUDHI_COX_OUTPUT_TO_HTML
+      if (is_boundary)
+	cc_boundary_detail_lists[cell_d].back().cofaces_.emplace_back(to_string(curr_it->first));
+      else
+	cc_interior_detail_lists[cell_d].back().cofaces_.emplace_back(to_string(curr_it->first));
+#endif
       if (curr_it->first.is_face_of(simplex)) {
 	// std::cout << "  Coface!\n";
 	return std::make_pair(curr_it->second, Result_type::coface);
@@ -263,6 +271,7 @@ private:
   void construct_complex_(const Out_simplex_map_& out_simplex_map) {
 #ifdef GUDHI_COX_OUTPUT_TO_HTML
     cc_interior_summary_lists.resize(interior_simplex_cell_maps_.size());
+    cc_interior_detail_lists.resize(interior_simplex_cell_maps_.size());
 #endif    
     for (auto& os_pair: out_simplex_map) {
       const Simplex_handle& simplex = os_pair.first;
@@ -287,7 +296,9 @@ private:
 			  const Out_simplex_map_& boundary_simplex_map) {
 #ifdef GUDHI_COX_OUTPUT_TO_HTML
     cc_interior_summary_lists.resize(interior_simplex_cell_maps_.size());
+    cc_interior_detail_lists.resize(interior_simplex_cell_maps_.size());
     cc_boundary_summary_lists.resize(boundary_simplex_cell_maps_.size());
+    cc_boundary_detail_lists.resize(boundary_simplex_cell_maps_.size());
 #endif    
     for (auto& os_pair: boundary_simplex_map) {
       const Simplex_handle& simplex = os_pair.first;

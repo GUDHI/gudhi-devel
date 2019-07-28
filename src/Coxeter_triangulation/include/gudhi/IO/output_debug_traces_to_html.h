@@ -47,32 +47,44 @@ std::ostream& operator<<(std::ostream& os, const Straighten& str) {
   return os;
 }
 
+template <typename T>
+std::string to_string(const T& t) {
+  std::ostringstream oss;
+  oss << t;
+  return oss.str();
+}
+
 struct MT_inserted_info {
   std::string qr_face_, init_face_, qr_intersection_;
   bool qr_success_, is_boundary_;
   template <class Query_result,
 	    class Simplex_handle>
   MT_inserted_info(const Query_result& qr, const Simplex_handle& face, bool is_boundary)
-    : qr_success_(qr.success), is_boundary_(is_boundary) {
-    std::ostringstream qr_face_oss, qr_intersection_oss, init_face_oss;
-    qr_face_oss << qr.face; qr_face_ = qr_face_oss.str();
-    init_face_oss << face; init_face_ = init_face_oss.str();
-    qr_intersection_oss << qr.intersection; qr_intersection_ = qr_intersection_oss.str();
-  }
+    : qr_face_(to_string(qr.face)), init_face_(to_string(face)),
+      qr_intersection_(to_string(qr.intersection)),
+      qr_success_(qr.success), is_boundary_(is_boundary) {}
 };
 std::list<MT_inserted_info> mt_seed_inserted_list, mt_inserted_list;
 
 struct CC_summary_info {
   std::string face_, cell_;
   template <class SC_pair>
-  CC_summary_info(const SC_pair& sc_pair) {
-    std::ostringstream face_oss, cell_oss;
-    face_oss << sc_pair.first; face_ = face_oss.str();
-    cell_oss << sc_pair.second; cell_ = cell_oss.str();
-  }
+  CC_summary_info(const SC_pair& sc_pair)
+    : face_(to_string(sc_pair.first)), cell_(to_string(sc_pair.second)) {}
 };
 using CC_summary_list = std::list<CC_summary_info>;
 std::vector<CC_summary_list> cc_interior_summary_lists, cc_boundary_summary_lists;
+
+struct CC_detail_info {
+  std::string simplex_, status_, deleted_;
+  std::list<std::string> faces_, cofaces_;
+  template <class Simplex_handle>
+  CC_detail_info(const Simplex_handle& simplex)
+    : simplex_(to_string(simplex)) {}
+};
+using CC_detail_list = std::list<CC_detail_info>;
+std::vector<CC_detail_list> cc_interior_detail_lists, cc_boundary_detail_lists;
+
 
 std::ostringstream mt_ostream, vis_ostream;
 std::vector<std::ostringstream> cc_summary_ostream, cc_traces_ostream;
@@ -172,24 +184,63 @@ void write_to_html(std::string file_name) {
   }
   ofs << "      </ul>\n";
   for (std::size_t i = 0; i < cc_interior_summary_lists.size(); ++i) {
-    ofs << "      <h3 id=""dim" << i << """> Summary for dimension " << i << "</h3>\n";
-    ofs << "      <h4> Summary for interior simplices</h4>\n"
-	<< "        <ul>\n";
+    ofs << "      <h3 id=""dim" << i << """> Dimension " << i << "</h3>\n";
+    ofs << "      <h4 id=""dim" << i << "i""> Summary for interior simplices</h4>\n";
+    if (i < cc_boundary_summary_lists.size())
+      ofs << "      <p><a href=""#dim" << i << "b"">Go to boundary</a></p>\n";
+    ofs << "        <ul>\n";
     for (const CC_summary_info& cc_info: cc_interior_summary_lists[i])
       ofs << "          <li>" << simplex_format(cc_info.face_, false)
 	  << " cell =" << cc_info.cell_ << "</li>\n";
     ofs << "        </ul>\n";
+    ofs << "      <h4> Details for interior simplices</h4>\n";
+    ofs << "        <ul>\n";
+    for (const CC_detail_info& cc_info: cc_interior_detail_lists[i]) {
+      ofs << "          <li> Insert_cell called for " << simplex_format(cc_info.simplex_, false)
+	  << "\n";
+      ofs << "            <ul>\n";
+      for (const std::string& cof: cc_info.faces_)
+	ofs << "              <li>Checking if " << simplex_format(cc_info.simplex_, false)
+	    << " is a face of " << simplex_format(cof, false) << "\n";
+      ofs << "            </ul>\n";
+      ofs << "            <ul>\n";
+      for (const std::string& fac: cc_info.cofaces_)
+	ofs << "              <li>Checking if " << simplex_format(cc_info.simplex_, false)
+	    << " is a coface of " << simplex_format(fac, false) << "\n";
+      ofs << "            </ul>\n";
+      ofs << "          </li>\n";
+    }
+    ofs << "        </ul>\n";
+
     if (i < cc_boundary_summary_lists.size()) {
-      ofs << "      <h4> Summary for boundary simplices</h4>\n"
-	  << "        <ul>\n";
+      ofs << "      <h4 id=""dim" << i << "b""> Summary for boundary simplices</h4>\n";
+      ofs << "      <p><a href=""#dim" << i << "i"">Go to interior</a></p>\n";
+      ofs << "        <ul>\n";
       for (const CC_summary_info& cc_info: cc_boundary_summary_lists[i])
 	ofs << "          <li>" << simplex_format(cc_info.face_, true)
 	    << " cell =" << cc_info.cell_ << "</li>\n";
       ofs << "        </ul>\n";
-    }    
-  }
-  
-  ofs << "      <h3> Details </h3>\n";
+    }
+    if (i < cc_boundary_detail_lists.size()) {
+      ofs << "      <h4> Details for boundary simplices</h4>\n"
+	  << "        <ul>\n";
+      for (const CC_detail_info& cc_info: cc_boundary_detail_lists[i]) {
+	ofs << "          <li>" << simplex_format(cc_info.simplex_, true);
+	ofs << "            <ul>\n";
+	for (const std::string& cof: cc_info.faces_)
+	  ofs << "              <li>Checking if " << simplex_format(cc_info.simplex_, true)
+	      << " is a face of " << simplex_format(cof, true) << "\n";
+	ofs << "            </ul>\n";
+	ofs << "            <ul>\n";
+	for (const std::string& fac: cc_info.cofaces_)
+	  ofs << "              <li>Checking if " << simplex_format(cc_info.simplex_, true)
+	      << " is a coface of " << simplex_format(fac, true) << "\n";
+	ofs << "            </ul>\n";
+	ofs << "          </li>\n";
+      }
+      ofs << "        </ul>\n";
+    }
+  }  
   ofs << "    </div>\n";
   
   ofs << "    <div id=""visu"">\n"
