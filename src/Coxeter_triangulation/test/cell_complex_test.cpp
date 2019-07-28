@@ -1,3 +1,5 @@
+#include <gudhi/Debug_utils.h>
+#include <gudhi/IO/output_debug_traces_to_html.h>
 #include <iostream>
 
 #include <gudhi/Coxeter_triangulation.h>
@@ -28,6 +30,19 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& vector) {
 }
 
 int main(int argc, char** argv) {
+
+#ifdef GUDHI_DEBUG    
+  std::cout << "Debug run\n";
+#else
+  std::cout << "Release run\n";
+#endif
+
+#ifdef DEBUG_TRACES    
+  std::cout << "Debug traces are on\n";
+#else
+  std::cout << "Debug traces are off\n";
+#endif
+
   double radius = 1.1111;
   Function_torus_in_R3 fun_sph(radius, 3*radius);
   Eigen::VectorXd seed;

@@ -13,7 +13,7 @@
 #ifndef CELL_COMPLEX_H_
 #define CELL_COMPLEX_H_
 
-#include <Eigen/Dense>
+#include <Eigen/Dense> 
 
 #include <algorithm>
 #include <gudhi/Permutahedral_representation/Simplex_comparator.h>
