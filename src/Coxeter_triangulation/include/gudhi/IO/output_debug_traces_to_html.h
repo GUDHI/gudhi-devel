@@ -6,6 +6,7 @@
 #include <vector>
 #include <list>
 #include <string>
+#include <regex>
 
 #include <Eigen/Dense>
 
@@ -45,6 +46,11 @@ std::ostream& operator<<(std::ostream& os, const Straighten& str) {
     os << ", " << str.vector_(i);
   os << ")";
   return os;
+}
+
+std::string id_from_simplex(const std::string& simplex) {
+  std::regex r("\\s+");
+  return std::regex_replace(simplex, r, "");
 }
 
 template <typename T>
@@ -94,11 +100,11 @@ std::vector<std::ostringstream> cc_summary_ostream, cc_traces_ostream;
 void write_head(std::ofstream& ofs) {
   ofs << "  <head>\n"
       << "    <style>\n"
-      << "      span.boundary {\n"
+      << "      a.boundary {\n"
       << "	  color: darkred;\n"
       << "	  background-color: lightgreen\n"
       << "      }\n"
-      << "      span.interior {\n"
+      << "      a.interior {\n"
       << "	  color: navy;\n"
       << "	  background-color: yellow\n"
       << "      }\n"
@@ -106,32 +112,46 @@ void write_head(std::ofstream& ofs) {
       << "	  list-style-type: none;\n"
       << "	  margin: 0;\n"
       << "	  padding: 0;\n"
-      << "	  overflow: hidden;\n"
+      << "	  overflow: auto;\n"
       << "	  background-color: #333;\n"
       << "	  position: fixed;\n"
-      << "	  top: 0;\n"
-      << "	  width: 100%;\n"
+      // << "	  top: 0;\n"
+      << "	  height: 100%;\n"
+      << "	  width: 15%;\n"
       << "      }\n"
-      << "      ul.nav li {\n"
-      << "	  float: left;\n"
-      << "      }\n"
+      // << "      ul.nav li {\n"
+      // << "	  float: left;\n"
+      // << "      }\n"
       << "      ul.nav li a {\n"
       << "	  display: block;\n"
       << "	  color: white;\n"
-      << "	  text-align: center;\n"
+      << "	  text-align: left;\n"
       << "	  padding: 14px 16px;\n"
       << "	  text-decoration: none;\n"
       << "      }\n"
       << "      .active {\n"
       << "	  background-color: #4CAF50;\n"
       << "      }\n"
+      << "      div {\n"
+      << "        margin-left: 15%;\n"
+      << "        padding: 1px 16px\n"
+      << "      }\n"
+      << "      div.navi {\n"
+      << "        margin-left: 0%;\n"
+      << "        padding: 0px 0px\n"
+      << "      }\n"
+      << "      h1 {\n"
+      << "        margin-left: 15%;\n"
+      << "        padding: 1px 16px\n"
+      << "      }\n"
       << "    </style>\n"
       << "  </head>\n";
 }
 
 std::string simplex_format(const std::string& simplex, bool is_boundary) {
-  return (std::string)"<span class=""" + (is_boundary? "boundary": "interior") + """>" +
-    (is_boundary? "B": "I") + simplex + "</span>";
+  return (std::string)"<a class=""" + (is_boundary? "boundary": "interior")
+    + """ href=""#" + id_from_simplex(simplex) + """>" +
+    (is_boundary? "B": "I") + simplex + "</a>";
 }
 
 void write_to_html(std::string file_name) {
@@ -140,10 +160,23 @@ void write_to_html(std::string file_name) {
       << "<html>\n";
   write_head(ofs);
   ofs << "  <body>\n"
-      << "    <div style=""padding:20px;margin-top:30px;background-color:#1abc9c;"">\n"
+      << "    <div class=""navi"" style=""margin-top:30px;background-color:#1abc9c;"">\n"
       << "    <ul class=""nav"">\n"
       << "      <li><a href=""#mant"">Manifold tracing</a></li>\n"
-      << "      <li><a href=""#cell"">Cell complex</a></li>\n"
+      << "      <li><a href=""#cell"">Cell complex</a>\n"
+      << "        <ul>\n";
+  for (std::size_t i = 0; i < cc_interior_summary_lists.size(); ++i) {
+    ofs << "          <li><a href=""#dim" << i << """>Dimension " << i << "</a>\n";
+    ofs << "            <ul>\n";
+    ofs << "              <li><a href=""#dim" << i << "i"">Interior</a></li>\n";
+    if (i < cc_boundary_summary_lists.size()) {
+      ofs << "              <li><a href=""#dim" << i << "b"">Boundary</a></li>\n";
+    }
+    ofs << "            </ul>\n";
+    ofs << "          </li>\n";
+  }
+  ofs << "        </ul>\n"
+      << "      </li>\n"
       << "      <li><a href=""#visu"">Visualization details</a></li>\n"
       << "    </ul>\n"
       << "    </div>\n";
@@ -192,7 +225,8 @@ void write_to_html(std::string file_name) {
       ofs << "      <p><a href=""#dim" << i << "b"">Go to boundary</a></p>\n";
     ofs << "        <ul>\n";
     for (const CC_summary_info& cc_info: cc_interior_summary_lists[i])
-      ofs << "          <li>" << simplex_format(cc_info.face_, false)
+      ofs << "          <li id = """ << id_from_simplex(cc_info.face_) << """>"
+	  << simplex_format(cc_info.face_, false)
 	  << " cell =" << cc_info.cell_ << "</li>\n";
     ofs << "        </ul>\n";
     ofs << "      <h4> Details for interior simplices</h4>\n";
@@ -271,11 +305,13 @@ void write_to_html(std::string file_name) {
 	      << simplex_format(cc_info.trigger_, true) << "!</span><br>\n";
 	  ofs << "              <ul>\n";
 	  for (const std::string post_face: cc_info.post_faces_)
-	    ofs << "                <li>Post deleting " << simplex_format(post_face, true)
+	    ofs << "                <li id=""" << id_from_simplex(post_face)
+		<< """>Post deleting " << simplex_format(post_face, true)
 		<< "</li>\n";
 	  ofs << "              </ul>\n";
 	  ofs << "            </p>\n";
-	  ofs << "            <p>Deleting " << simplex_format(cc_info.trigger_, true) << "</p>\n";
+	  ofs << "            <p id=""" << id_from_simplex(cc_info.trigger_)
+	      << """>Deleting " << simplex_format(cc_info.trigger_, true) << "</p>\n";
 	}
 	for (const std::string& fac: cc_info.cofaces_)
 	  ofs << "              <li>Checking if " << simplex_format(cc_info.simplex_, true)
