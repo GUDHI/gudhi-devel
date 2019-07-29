@@ -187,10 +187,12 @@ void write_to_html(std::string file_name) {
   ofs << "      <h3> Simplices inserted during the seed phase </h3>\n";
   ofs << "      <ul>\n";
   for (const MT_inserted_info& mt_info: mt_seed_inserted_list) {
-    if (mt_info.qr_success_)
-      ofs << "        <li>Inserted " << simplex_format(mt_info.qr_face_, mt_info.is_boundary_)
-	  << " (initially " << simplex_format(mt_info.init_face_, mt_info.is_boundary_)
-	  << ") intersection point is " << mt_info.qr_intersection_ << "</li>\n";
+    if (mt_info.qr_success_) {
+      ofs << "        <li>Inserted " << simplex_format(mt_info.qr_face_, mt_info.is_boundary_);
+      if (mt_info.qr_face_ != mt_info.init_face_)
+	ofs << " (initially " << simplex_format(mt_info.init_face_, mt_info.is_boundary_) << ")";
+      ofs << " intersection point is " << mt_info.qr_intersection_ << "</li>\n";
+    }
     else
       ofs << "        <li>Failed to insert " << mt_info.init_face_
 	  << ")</li>\n";
@@ -199,10 +201,12 @@ void write_to_html(std::string file_name) {
   ofs << "      <h3> Simplices inserted during the while loop phase </h3>\n";
   ofs << "      <ul>\n";
   for (const MT_inserted_info& mt_info: mt_inserted_list) {
-    if (mt_info.qr_success_)
-      ofs << "        <li>Inserted " << simplex_format(mt_info.qr_face_, mt_info.is_boundary_)
-	  << " (initially " << simplex_format(mt_info.init_face_, mt_info.is_boundary_)
-	  << ") intersection point is " << mt_info.qr_intersection_ << "</li>\n";
+    if (mt_info.qr_success_) {
+      ofs << "        <li>Inserted " << simplex_format(mt_info.qr_face_, mt_info.is_boundary_);
+      if (mt_info.qr_face_ != mt_info.init_face_)
+	ofs << " (initially " << simplex_format(mt_info.init_face_, mt_info.is_boundary_) << ")";
+      ofs << " intersection point is " << mt_info.qr_intersection_ << "</li>\n";
+    }
     else
       ofs << "        <li>Failed to insert " << mt_info.init_face_
 	  << ")</li>\n";
