@@ -81,11 +81,33 @@ private:
 	cc_interior_detail_lists[cell_d].back().faces_.emplace_back(to_string(curr_it->first));
 #endif
       if (simplex == curr_it->first) {
-	// std::cout << "  Same simplex!\n";
+#ifdef GUDHI_COX_OUTPUT_TO_HTML
+	if (is_boundary) {
+	  CC_detail_info& cc_info = cc_boundary_detail_lists[cell_d].back();
+	  cc_info.trigger_ = to_string(curr_it->first);
+	  cc_info.status_ = CC_detail_info::Result_type::self;
+	}
+	else {
+	  CC_detail_info& cc_info = cc_interior_detail_lists[cell_d].back();
+	  cc_info.trigger_ = to_string(curr_it->first);
+	  cc_info.status_ = CC_detail_info::Result_type::self;
+	}
+#endif
 	return std::make_pair(curr_it->second, Result_type::self);
       }
       if (simplex.is_face_of(curr_it->first)) {
-	// std::cout << "  Face!\n";
+#ifdef GUDHI_COX_OUTPUT_TO_HTML
+	if (is_boundary) {
+	  CC_detail_info& cc_info = cc_boundary_detail_lists[cell_d].back();
+	  cc_info.trigger_ = to_string(curr_it->first);
+	  cc_info.status_ = CC_detail_info::Result_type::face;
+	}
+	else {
+	  CC_detail_info& cc_info = cc_interior_detail_lists[cell_d].back();
+	  cc_info.trigger_ = to_string(curr_it->first);
+	  cc_info.status_ = CC_detail_info::Result_type::face;
+	}
+#endif
 	Hasse_cell* cell = curr_it->second;
 	cell_simplex_map_.at(cell) = simplex;
 	simplex_cell_map.erase(curr_it++);
@@ -95,9 +117,12 @@ private:
 	    continue;
 	  }
 	  if (simplex.is_face_of(curr_it->first)) {
-	    // std::cout << "  Post-deleting "
-	    // 	      << (is_boundary? "\033[1;32mB" : "\033[1;33mI")
-	    // 	      << curr_it->first << "\033[0m\n";
+#ifdef GUDHI_COX_OUTPUT_TO_HTML
+	    if (is_boundary)
+	      cc_boundary_detail_lists[cell_d].back().post_faces_.emplace_back(to_string(curr_it->first));
+	    else
+	      cc_interior_detail_lists[cell_d].back().post_faces_.emplace_back(to_string(curr_it->first));
+#endif
 	    simplex_cell_map.erase(curr_it++);
 	  }
 	  else
@@ -116,7 +141,18 @@ private:
 	cc_interior_detail_lists[cell_d].back().cofaces_.emplace_back(to_string(curr_it->first));
 #endif
       if (curr_it->first.is_face_of(simplex)) {
-	// std::cout << "  Coface!\n";
+#ifdef GUDHI_COX_OUTPUT_TO_HTML
+	if (is_boundary) {
+	  CC_detail_info& cc_info = cc_boundary_detail_lists[cell_d].back();
+	  cc_info.trigger_ = to_string(curr_it->first);
+	  cc_info.status_ = CC_detail_info::Result_type::coface;
+	}
+	else {
+	  CC_detail_info& cc_info = cc_interior_detail_lists[cell_d].back();
+	  cc_info.trigger_ = to_string(curr_it->first);
+	  cc_info.status_ = CC_detail_info::Result_type::coface;
+	}
+#endif
 	return std::make_pair(curr_it->second, Result_type::coface);
       }
     }
@@ -124,7 +160,12 @@ private:
     Hasse_cell* new_cell = hasse_cells_.back();
     cell_simplex_map_.emplace(std::make_pair(new_cell, simplex));
     simplex_cell_map.emplace(std::make_pair(simplex, new_cell));
-    // std::cout << " OK for insertion!\n";
+#ifdef GUDHI_COX_OUTPUT_TO_HTML
+      if (is_boundary)
+	cc_boundary_detail_lists[cell_d].back().status_ = CC_detail_info::Result_type::inserted;
+      else
+	cc_interior_detail_lists[cell_d].back().status_ = CC_detail_info::Result_type::inserted;
+#endif
     return std::make_pair(new_cell, Result_type::inserted);
   }
 

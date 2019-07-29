@@ -76,8 +76,10 @@ using CC_summary_list = std::list<CC_summary_info>;
 std::vector<CC_summary_list> cc_interior_summary_lists, cc_boundary_summary_lists;
 
 struct CC_detail_info {
-  std::string simplex_, status_, deleted_;
-  std::list<std::string> faces_, cofaces_;
+  enum class Result_type {self, face, coface, inserted};
+  std::string simplex_, trigger_;
+  Result_type status_;
+  std::list<std::string> faces_, post_faces_, cofaces_;
   template <class Simplex_handle>
   CC_detail_info(const Simplex_handle& simplex)
     : simplex_(to_string(simplex)) {}
@@ -204,9 +206,35 @@ void write_to_html(std::string file_name) {
 	    << " is a face of " << simplex_format(cof, false) << "\n";
       ofs << "            </ul>\n";
       ofs << "            <ul>\n";
+      if (cc_info.status_ == CC_detail_info::Result_type::self) {
+	ofs << "            <p><span style=""color:blue"">The simplex "
+	    << simplex_format(cc_info.simplex_, false)
+	    << " already exists in the cell complex!</span></p>\n";
+      }
+      if (cc_info.status_ == CC_detail_info::Result_type::face) {
+	ofs << "            <p><span style=""color:red"">The simplex "
+	    << simplex_format(cc_info.simplex_, false) << " is a face of the simplex "
+	    << simplex_format(cc_info.trigger_, false) << "!</span><br>\n";
+	ofs << "              <ul>\n";
+	for (const std::string post_face: cc_info.post_faces_)
+	  ofs << "                <li>Post deleting " << simplex_format(post_face, false)
+	      << "</li>\n";
+	ofs << "              </ul>\n";
+	ofs << "            </p>\n";
+	ofs << "            <p>Deleting " << simplex_format(cc_info.trigger_, false) << "</p>\n";
+      }
       for (const std::string& fac: cc_info.cofaces_)
 	ofs << "              <li>Checking if " << simplex_format(cc_info.simplex_, false)
 	    << " is a coface of " << simplex_format(fac, false) << "\n";
+      if (cc_info.status_ == CC_detail_info::Result_type::coface) {
+	ofs << "            <p><span style=""color:darkorange"">The simplex "
+	    << simplex_format(cc_info.simplex_, false) << " is a coface of the simplex "
+	    << simplex_format(cc_info.trigger_, false) << "!</span><p>\n";
+      }
+      if (cc_info.status_ == CC_detail_info::Result_type::inserted) {
+	ofs << "            <p><span style=""color:green"">Successfully inserted "
+	    << simplex_format(cc_info.simplex_, false) << "!</span><p>\n";
+      }
       ofs << "            </ul>\n";
       ofs << "          </li>\n";
     }
@@ -232,11 +260,37 @@ void write_to_html(std::string file_name) {
 	      << " is a face of " << simplex_format(cof, true) << "\n";
 	ofs << "            </ul>\n";
 	ofs << "            <ul>\n";
+	if (cc_info.status_ == CC_detail_info::Result_type::self) {
+	  ofs << "            <p><span style=""color:blue"">The simplex "
+	      << simplex_format(cc_info.simplex_, true)
+	      << " already exists in the cell complex!</span></p>\n";
+	}
+	if (cc_info.status_ == CC_detail_info::Result_type::face) {
+	  ofs << "            <p><span style=""color:red"">The simplex "
+	      << simplex_format(cc_info.simplex_, true) << " is a face of the simplex "
+	      << simplex_format(cc_info.trigger_, true) << "!</span><br>\n";
+	  ofs << "              <ul>\n";
+	  for (const std::string post_face: cc_info.post_faces_)
+	    ofs << "                <li>Post deleting " << simplex_format(post_face, true)
+		<< "</li>\n";
+	  ofs << "              </ul>\n";
+	  ofs << "            </p>\n";
+	  ofs << "            <p>Deleting " << simplex_format(cc_info.trigger_, true) << "</p>\n";
+	}
 	for (const std::string& fac: cc_info.cofaces_)
 	  ofs << "              <li>Checking if " << simplex_format(cc_info.simplex_, true)
 	      << " is a coface of " << simplex_format(fac, true) << "\n";
 	ofs << "            </ul>\n";
 	ofs << "          </li>\n";
+	if (cc_info.status_ == CC_detail_info::Result_type::coface) {
+	  ofs << "            <p><span style=""color:darkorange"">The simplex "
+	      << simplex_format(cc_info.simplex_, true) << " is a coface of the simplex "
+	      << simplex_format(cc_info.trigger_, true) << "!</span><p>\n";
+	}
+	if (cc_info.status_ == CC_detail_info::Result_type::inserted) {
+	  ofs << "            <p><span style=""color:green"">Successfully inserted "
+	      << simplex_format(cc_info.simplex_, true) << "!</span><p>\n";
+	}
       }
       ofs << "        </ul>\n";
     }
