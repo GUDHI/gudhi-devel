@@ -149,9 +149,9 @@ void write_head(std::ofstream& ofs) {
 }
 
 std::string simplex_format(const std::string& simplex, bool is_boundary) {
+  std::string b_simplex = (is_boundary? "B": "I") + simplex;
   return (std::string)"<a class=""" + (is_boundary? "boundary": "interior")
-    + """ href=""#" + id_from_simplex(simplex) + """>" +
-    (is_boundary? "B": "I") + simplex + "</a>";
+    + """ href=""#" + id_from_simplex(b_simplex) + """>" + b_simplex + "</a>";
 }
 
 void write_to_html(std::string file_name) {
@@ -225,7 +225,7 @@ void write_to_html(std::string file_name) {
       ofs << "      <p><a href=""#dim" << i << "b"">Go to boundary</a></p>\n";
     ofs << "        <ul>\n";
     for (const CC_summary_info& cc_info: cc_interior_summary_lists[i])
-      ofs << "          <li id = """ << id_from_simplex(cc_info.face_) << """>"
+      ofs << "          <li id = """ << id_from_simplex("I" + cc_info.face_) << """>"
 	  << simplex_format(cc_info.face_, false)
 	  << " cell =" << cc_info.cell_ << "</li>\n";
     ofs << "        </ul>\n";
@@ -251,11 +251,12 @@ void write_to_html(std::string file_name) {
 	    << simplex_format(cc_info.trigger_, false) << "!</span><br>\n";
 	ofs << "              <ul>\n";
 	for (const std::string post_face: cc_info.post_faces_)
-	  ofs << "                <li>Post deleting " << simplex_format(post_face, false)
-	      << "</li>\n";
+	  ofs << "                <li id = """ << id_from_simplex("I" + post_face) << """>"
+	      << "Post deleting " << simplex_format(post_face, false) << "</li>\n";
 	ofs << "              </ul>\n";
 	ofs << "            </p>\n";
-	ofs << "            <p>Deleting " << simplex_format(cc_info.trigger_, false) << "</p>\n";
+	ofs << "            <p id = """ << id_from_simplex("I" + cc_info.trigger_) << """>"
+	    << "Deleting " << simplex_format(cc_info.trigger_, false) << "</p>\n";
       }
       for (const std::string& fac: cc_info.cofaces_)
 	ofs << "              <li>Checking if " << simplex_format(cc_info.simplex_, false)
@@ -279,7 +280,8 @@ void write_to_html(std::string file_name) {
       ofs << "      <p><a href=""#dim" << i << "i"">Go to interior</a></p>\n";
       ofs << "        <ul>\n";
       for (const CC_summary_info& cc_info: cc_boundary_summary_lists[i])
-	ofs << "          <li>" << simplex_format(cc_info.face_, true)
+	ofs << "          <li  id = """ << id_from_simplex("B" + cc_info.face_) << """>"
+	    << simplex_format(cc_info.face_, true)
 	    << " cell =" << cc_info.cell_ << "</li>\n";
       ofs << "        </ul>\n";
     }
@@ -305,7 +307,7 @@ void write_to_html(std::string file_name) {
 	      << simplex_format(cc_info.trigger_, true) << "!</span><br>\n";
 	  ofs << "              <ul>\n";
 	  for (const std::string post_face: cc_info.post_faces_)
-	    ofs << "                <li id=""" << id_from_simplex(post_face)
+	    ofs << "                <li id=""" << id_from_simplex("B" + post_face)
 		<< """>Post deleting " << simplex_format(post_face, true)
 		<< "</li>\n";
 	  ofs << "              </ul>\n";
