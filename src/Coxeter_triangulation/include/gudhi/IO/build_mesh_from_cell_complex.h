@@ -52,7 +52,7 @@ void populate_mesh(Mesh_medit& output,
       ci_map.emplace(std::make_pair(cell, index++));
       output.vertex_points.emplace_back((1./vertex_indices.size()) * barycenter);    
 #ifdef GUDHI_COX_OUTPUT_TO_HTML
-      std::string vlist;
+      std::string vlist = " (" + std::to_string(index-1) + ")";
       for (const std::size_t& v: vertex_indices)
 	vlist += " " + std::to_string(v);
       cell_vlist_map.emplace(std::make_pair(to_string(cell), vlist));
@@ -97,7 +97,7 @@ void populate_mesh(Mesh_medit& output,
 	barycenter += output.vertex_points[v-1];
       output.vertex_points.emplace_back((1./vertex_indices.size()) * barycenter);
 #ifdef GUDHI_COX_OUTPUT_TO_HTML
-      std::string vlist;
+      std::string vlist = " (" + std::to_string(index) + ")";
       for (const std::size_t& v: vertex_indices)
 	vlist += " " + std::to_string(v);
       cell_vlist_map.emplace(std::make_pair(to_string(cell), vlist));
