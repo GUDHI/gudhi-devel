@@ -82,9 +82,10 @@ using CC_summary_list = std::list<CC_summary_info>;
 std::vector<CC_summary_list> cc_interior_summary_lists, cc_boundary_summary_lists;
 
 struct CC_detail_info {
-  enum class Result_type {self, face, coface, inserted};
-  std::string simplex_, trigger_;
+  enum class Result_type {self, face, coface, inserted, join_single, join_is_face};
+  std::string simplex_, trigger_, init_simplex_;
   Result_type status_;
+  bool join_trigger_ = false;
   std::list<std::string> faces_, post_faces_, cofaces_;
   template <class Simplex_handle>
   CC_detail_info(const Simplex_handle& simplex)
@@ -92,10 +93,32 @@ struct CC_detail_info {
 };
 using CC_detail_list = std::list<CC_detail_info>;
 std::vector<CC_detail_list> cc_interior_detail_lists, cc_boundary_detail_lists;
+std::vector<CC_detail_list> cc_interior_insert_detail_lists, cc_boundary_insert_detail_lists;
 
+struct CC_join_info {
+  enum class Result_type {self, face, coface, inserted, join_single, join_is_face};
+  std::string simplex_, join_, trigger_;
+  Result_type status_;
+  std::list<std::string> boundary_faces_;
+  std::list<std::string> faces_, post_faces_, cofaces_;
+  template <class Simplex_handle>
+  CC_join_info(const Simplex_handle& simplex)
+    : simplex_(to_string(simplex)) {}
+};
+bool join_switch = false;
+std::vector<CC_detail_list> cc_interior_join_detail_lists, cc_boundary_join_detail_lists;
+
+std::map<std::string, std::string> cell_vlist_map;
+std::map<std::string, std::string> simplex_vlist_map;
 
 std::ostringstream mt_ostream, vis_ostream;
 std::vector<std::ostringstream> cc_summary_ostream, cc_traces_ostream;
+
+std::string simplex_format(const std::string& simplex, bool is_boundary) {
+  std::string b_simplex = (is_boundary? "B": "I") + simplex;
+  return (std::string)"<a class=""" + (is_boundary? "boundary": "interior")
+    + """ href=""#" + id_from_simplex(b_simplex) + """>" + b_simplex + "</a>";
+}
 
 void write_head(std::ofstream& ofs) {
   ofs << "  <head>\n"
@@ -148,19 +171,8 @@ void write_head(std::ofstream& ofs) {
       << "  </head>\n";
 }
 
-std::string simplex_format(const std::string& simplex, bool is_boundary) {
-  std::string b_simplex = (is_boundary? "B": "I") + simplex;
-  return (std::string)"<a class=""" + (is_boundary? "boundary": "interior")
-    + """ href=""#" + id_from_simplex(b_simplex) + """>" + b_simplex + "</a>";
-}
-
-void write_to_html(std::string file_name) {
-  std::ofstream ofs(file_name + ".html", std::ofstream::out);
-  ofs << "<!DOCTYPE html>\n"
-      << "<html>\n";
-  write_head(ofs);
-  ofs << "  <body>\n"
-      << "    <div class=""navi"" style=""margin-top:30px;background-color:#1abc9c;"">\n"
+void write_nav(std::ofstream& ofs) {
+  ofs << "    <div class=""navi"" style=""margin-top:30px;background-color:#1abc9c;"">\n"
       << "    <ul class=""nav"">\n"
       << "      <li><a href=""#mant"">Manifold tracing</a></li>\n"
       << "      <li><a href=""#cell"">Cell complex</a>\n"
@@ -180,8 +192,9 @@ void write_to_html(std::string file_name) {
       << "      <li><a href=""#visu"">Visualization details</a></li>\n"
       << "    </ul>\n"
       << "    </div>\n";
-  ofs << "    <h1> Debug traces for " << file_name << " </h1>\n";
+}
 
+void write_mt(std::ofstream& ofs) {
   ofs << "    <div id=""mant"">\n";
   ofs << "      <h2> Manifold debug trace </h2>\n";
   ofs << "      <h3> Simplices inserted during the seed phase </h3>\n";
@@ -213,7 +226,9 @@ void write_to_html(std::string file_name) {
   }
   ofs << "      </ul>\n";
   ofs << "    </div>\n";
+}
 
+void write_cc(std::ofstream& ofs) {
   ofs << "    <div id=""cell"">\n"
       << "      <h2> Cell complex debug trace </h2>\n"
       << "      <p>Go to:</p>\n"
@@ -236,6 +251,20 @@ void write_to_html(std::string file_name) {
     ofs << "      <h4> Details for interior simplices</h4>\n";
     ofs << "        <ul>\n";
     for (const CC_detail_info& cc_info: cc_interior_detail_lists[i]) {
+      if (cc_info.status_ == CC_detail_info::Result_type::join_single) {
+	ofs << "          <li style=""color:magenta"" id = """
+	    << id_from_simplex("I" + cc_info.simplex_) << """> Simplex "
+	    << simplex_format(cc_info.simplex_, false) << " has only one face ("
+	    << simplex_format(cc_info.trigger_, false) << ") and is deleted.";
+	continue;
+      }
+      if (cc_info.status_ == CC_detail_info::Result_type::join_single) {
+	ofs << "          <li style=""color:darkmagenta"" id = """
+	    << id_from_simplex("I" + cc_info.simplex_) << """> The join of the simplex "
+	    << simplex_format(cc_info.simplex_, false) << " is one of its faces ("
+	    << simplex_format(cc_info.trigger_, false) << "), hence it is is deleted.";
+	continue;
+      }
       ofs << "          <li> Insert_cell called for " << simplex_format(cc_info.simplex_, false)
 	  << "\n";
       ofs << "            <ul>\n";
@@ -293,7 +322,21 @@ void write_to_html(std::string file_name) {
       ofs << "      <h4> Details for boundary simplices</h4>\n"
 	  << "        <ul>\n";
       for (const CC_detail_info& cc_info: cc_boundary_detail_lists[i]) {
-	ofs << "          <li>" << simplex_format(cc_info.simplex_, true);
+	if (cc_info.status_ == CC_detail_info::Result_type::join_single) {
+	  ofs << "          <li style=""color:magenta"" id = """
+	      << id_from_simplex("B" + cc_info.simplex_) << """> Simplex "
+	      << simplex_format(cc_info.simplex_, true) << " has only one face ("
+	      << simplex_format(cc_info.trigger_, true) << ") and is deleted.";
+	  continue;
+	}
+	if (cc_info.status_ == CC_detail_info::Result_type::join_single) {
+	  ofs << "          <li style=""color:darkmagenta"" id = """
+	      << id_from_simplex("B" + cc_info.simplex_) << """> The join of the simplex "
+	      << simplex_format(cc_info.simplex_, true) << " is one of its faces ("
+	      << simplex_format(cc_info.trigger_, true) << "), hence it is is deleted.";
+	  continue;
+	}
+	ofs << "          <li> Insert_simplex called on " << simplex_format(cc_info.simplex_, true);
 	ofs << "            <ul>\n";
 	for (const std::string& cof: cc_info.faces_)
 	  ofs << "              <li>Checking if " << simplex_format(cc_info.simplex_, true)
@@ -338,10 +381,37 @@ void write_to_html(std::string file_name) {
     }
   }  
   ofs << "    </div>\n";
-  
+}
+
+void write_visu(std::ofstream& ofs) {
   ofs << "    <div id=""visu"">\n"
-      << "      <h2> Visualization details debug trace </h2>\n"
-      << "    </div>\n";
+      << "      <h2> Visualization details debug trace </h2>\n";
+  // std::vector<std::map<std::string, std::string> > vs_maps(cc_interior_summary_lists.size());
+  std::map<std::string, std::string> vs_map;
+  for (const auto& sv_pair: simplex_vlist_map)
+    vs_map.emplace(std::make_pair(sv_pair.second, sv_pair.first));
+  ofs << "      <ul>\n";
+  for (const auto& vs_pair: vs_map) {
+    std::string w_simplex = vs_pair.second.substr(1);
+    bool is_boundary = vs_pair.second[0] == 'B';
+    ofs << "      <li><b>" << vs_pair.first << "</b>: "
+	<< simplex_format(w_simplex, is_boundary) << "</li>\n";
+  }
+  ofs << "      </ul>\n";
+  ofs << "    </div>\n";
+}
+
+void write_to_html(std::string file_name) {
+  std::ofstream ofs(file_name + ".html", std::ofstream::out);
+  ofs << "<!DOCTYPE html>\n"
+      << "<html>\n";
+  write_head(ofs);
+  ofs << "  <body>\n";
+  write_nav(ofs);
+  ofs << "    <h1> Debug traces for " << file_name << " </h1>\n";
+  write_mt(ofs);
+  write_cc(ofs);
+  write_visu(ofs);  
   ofs << "  </body>\n";
   ofs << "</html>\n";
 

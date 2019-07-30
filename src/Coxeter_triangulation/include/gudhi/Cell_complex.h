@@ -171,6 +171,9 @@ private:
 
   void join_collapse_level(std::size_t cell_d,
 			   bool is_boundary) {
+#ifdef GUDHI_COX_OUTPUT_TO_HTML
+    join_switch = true;
+#endif
     Simplex_cell_maps& simplex_cell_maps
       = (is_boundary? boundary_simplex_cell_maps_: interior_simplex_cell_maps_);
     Simplex_cell_map& simplex_cell_map = simplex_cell_maps[cell_d];
@@ -180,6 +183,19 @@ private:
       const Simplex_handle& simplex = curr_it->first;
       Hasse_cell* cell = curr_it->second;
       if (cell->get_boundary().size() == 1) {
+#ifdef GUDHI_COX_OUTPUT_TO_HTML
+	Simplex_handle& join = cell_simplex_map_.at(cell->get_boundary().begin()->first);
+	if (is_boundary) {
+	  cc_boundary_detail_lists[cell_d].emplace_back(CC_detail_info(simplex));
+	  cc_boundary_detail_lists[cell_d].back().status_ = CC_detail_info::Result_type::join_single;
+	  cc_boundary_detail_lists[cell_d].back().trigger_ = to_string(join);
+	}
+	else {
+	  cc_interior_detail_lists[cell_d].emplace_back(CC_detail_info(simplex));
+	  cc_interior_detail_lists[cell_d].back().status_ = CC_detail_info::Result_type::join_single;
+	  cc_boundary_detail_lists[cell_d].back().trigger_ = to_string(join);
+	}
+#endif
 	simplex_cell_map.erase(curr_it++);
 	continue;
       }
@@ -199,15 +215,41 @@ private:
 	  break;
 	}
       }
-      if (join_is_face)
+      if (join_is_face) {
+#ifdef GUDHI_COX_OUTPUT_TO_HTML
+	if (is_boundary) {
+	  cc_boundary_detail_lists[cell_d].emplace_back(CC_detail_info(simplex));
+	  cc_boundary_detail_lists[cell_d].back().status_ = CC_detail_info::Result_type::join_is_face;
+	  cc_boundary_detail_lists[cell_d].back().trigger_ = to_string(join);
+	}
+	else {
+	  cc_interior_detail_lists[cell_d].emplace_back(CC_detail_info(simplex));
+	  cc_interior_detail_lists[cell_d].back().status_ = CC_detail_info::Result_type::join_is_face;
+	  cc_interior_detail_lists[cell_d].back().trigger_ = to_string(join);
+	}
+#endif
 	simplex_cell_map.erase(curr_it++);
+      }
       else if (simplex != join) {
 	simplex_cell_map.erase(curr_it++);
 	insert_cell(join, cell_d, is_boundary);
+#ifdef GUDHI_COX_OUTPUT_TO_HTML
+	if (is_boundary) {
+	  cc_boundary_detail_lists[cell_d].back().join_trigger_ = true;
+	  cc_boundary_detail_lists[cell_d].back().init_simplex_ = to_string(simplex);
+	}
+	else {
+	  cc_interior_detail_lists[cell_d].back().join_trigger_ = true;
+	  cc_interior_detail_lists[cell_d].back().init_simplex_ = to_string(simplex);
+	}
+#endif
       }
       else
 	curr_it++;
     }
+#ifdef GUDHI_COX_OUTPUT_TO_HTML
+    join_switch = false;
+#endif
   }
 
   void output_layer_before(const Simplex_cell_maps& simplex_cell_maps,
