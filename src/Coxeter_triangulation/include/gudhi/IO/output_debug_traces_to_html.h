@@ -49,8 +49,13 @@ std::ostream& operator<<(std::ostream& os, const Straighten& str) {
 }
 
 std::string id_from_simplex(const std::string& simplex) {
-  std::regex r("\\s+");
-  return std::regex_replace(simplex, r, "");
+  std::regex r("\\s+"), r2("\\(|\\)|\\{|\\}"), r3(","), r4("\\["), r5("\\]");
+  std::string output = std::regex_replace(simplex, r, "");
+  output = std::regex_replace(output, r2, ":");
+  output = std::regex_replace(output, r3, ".");
+  output = std::regex_replace(output, r4, "_");
+  output = std::regex_replace(output, r5, "");
+  return output;
 }
 
 template <typename T>
@@ -116,21 +121,77 @@ std::vector<std::ostringstream> cc_summary_ostream, cc_traces_ostream;
 
 std::string simplex_format(const std::string& simplex, bool is_boundary) {
   std::string b_simplex = (is_boundary? "B": "I") + simplex;
-  return (std::string)"<a class=""" + (is_boundary? "boundary": "interior")
-    + """ href=""#" + id_from_simplex(b_simplex) + """>" + b_simplex + "</a>";
+  std::string tooltiptext;
+  auto it = simplex_vlist_map.find(b_simplex);
+  if (it == simplex_vlist_map.end())
+    tooltiptext = "deleted";
+  else
+    tooltiptext = simplex_vlist_map.at(b_simplex);
+  return (std::string)"<a class=\"" + (is_boundary? "boundary": "interior")
+    + "\" href=\"#" + id_from_simplex(b_simplex) + "\">" + b_simplex
+    + "<span class=\"tooltiptext\">" + tooltiptext + "</span></a>";
 }
 
 void write_head(std::ofstream& ofs) {
   ofs << "  <head>\n"
+      << "    <title>Cell complex debug trace</title>\n"
       << "    <style>\n"
       << "      a.boundary {\n"
+      << "        position: relative;\n"
+      << "        display: inline-block;\n"
       << "	  color: darkred;\n"
       << "	  background-color: lightgreen\n"
       << "      }\n"
       << "      a.interior {\n"
+      << "        position: relative;\n"
+      << "        display: inline-block;\n"
       << "	  color: navy;\n"
       << "	  background-color: yellow\n"
       << "      }\n"
+      << "      .tooltiptext {\n"
+      << "        visibility: hidden;\n"
+      << "        width: 120px;\n"
+      << "        background-color: #555;\n"
+      << "        color: #fff;\n"
+      << "        text-align: center;\n"
+      << "        padding: 5px 0;\n"
+      << "        border-radius: 6px;\n"
+      << "        position: absolute;\n"
+      << "        z-index: 1;\n"
+      << "        bottom: 125%;\n"
+      << "        left: 50%;\n"
+      << "        margin-left: -60px;\n"
+      << "        opacity: 0;\n"
+      << "        transition: opacity 0.3s;\n"
+      << "      }\n"
+      << "      .boundary .tooltiptext::after {\n"
+      << "        content: \"\";\n"
+      << "        position: absolute;\n"
+      << "        top: 100%;\n"
+      << "        left: 50%;\n"
+      << "        margin-left: -5px;\n"
+      << "        border-width: 5px;\n"
+      << "        border-style: solid;\n"
+      << "        border-color: #555 transparent transparent transparent;\n"
+      << "      }\n"
+      << "      .interior .tooltiptext::after {\n"
+      << "        content: \"\";\n"
+      << "        position: absolute;\n"
+      << "        top: 100%;\n"
+      << "        left: 50%;\n"
+      << "        margin-left: -5px;\n"
+      << "        border-width: 5px;\n"
+      << "        border-style: solid;\n"
+      << "        border-color: #555 transparent transparent transparent;\n"
+      << "      }\n"
+      << "      .boundary:hover .tooltiptext {\n"
+      << "        visibility: visible;\n"
+      << "        opacity: 1;\n"
+      << "      }\n"    
+      << "      .interior:hover .tooltiptext {\n"
+      << "        visibility: visible;\n"
+      << "        opacity: 1;\n"
+      << "      }\n"    
       << "      ul.nav {\n"
       << "	  list-style-type: none;\n"
       << "	  margin: 0;\n"
@@ -138,13 +199,9 @@ void write_head(std::ofstream& ofs) {
       << "	  overflow: auto;\n"
       << "	  background-color: #333;\n"
       << "	  position: fixed;\n"
-      // << "	  top: 0;\n"
       << "	  height: 100%;\n"
       << "	  width: 15%;\n"
       << "      }\n"
-      // << "      ul.nav li {\n"
-      // << "	  float: left;\n"
-      // << "      }\n"
       << "      ul.nav li a {\n"
       << "	  display: block;\n"
       << "	  color: white;\n"
@@ -172,30 +229,30 @@ void write_head(std::ofstream& ofs) {
 }
 
 void write_nav(std::ofstream& ofs) {
-  ofs << "    <div class=""navi"" style=""margin-top:30px;background-color:#1abc9c;"">\n"
-      << "    <ul class=""nav"">\n"
-      << "      <li><a href=""#mant"">Manifold tracing</a></li>\n"
-      << "      <li><a href=""#cell"">Cell complex</a>\n"
+  ofs << "    <div class=\"navi\" style=\"margin-top:30px;background-color:#1abc9c;\">\n"
+      << "    <ul class=\"nav\">\n"
+      << "      <li><a href=\"#mant\">Manifold tracing</a></li>\n"
+      << "      <li><a href=\"#cell\">Cell complex</a>\n"
       << "        <ul>\n";
   for (std::size_t i = 0; i < cc_interior_summary_lists.size(); ++i) {
-    ofs << "          <li><a href=""#dim" << i << """>Dimension " << i << "</a>\n";
+    ofs << "          <li><a href=\"#dim" << i << "\">Dimension " << i << "</a>\n";
     ofs << "            <ul>\n";
-    ofs << "              <li><a href=""#dim" << i << "i"">Interior</a></li>\n";
+    ofs << "              <li><a href=\"#dim" << i << "i\">Interior</a></li>\n";
     if (i < cc_boundary_summary_lists.size()) {
-      ofs << "              <li><a href=""#dim" << i << "b"">Boundary</a></li>\n";
+      ofs << "              <li><a href=\"#dim" << i << "b\">Boundary</a></li>\n";
     }
     ofs << "            </ul>\n";
     ofs << "          </li>\n";
   }
   ofs << "        </ul>\n"
       << "      </li>\n"
-      << "      <li><a href=""#visu"">Visualization details</a></li>\n"
+      << "      <li><a href=\"#visu\">Visualization details</a></li>\n"
       << "    </ul>\n"
       << "    </div>\n";
 }
 
 void write_mt(std::ofstream& ofs) {
-  ofs << "    <div id=""mant"">\n";
+  ofs << "    <div id=\"mant\">\n";
   ofs << "      <h2> Manifold debug trace </h2>\n";
   ofs << "      <h3> Simplices inserted during the seed phase </h3>\n";
   ofs << "      <ul>\n";
@@ -229,22 +286,22 @@ void write_mt(std::ofstream& ofs) {
 }
 
 void write_cc(std::ofstream& ofs) {
-  ofs << "    <div id=""cell"">\n"
+  ofs << "    <div id=\"cell\">\n"
       << "      <h2> Cell complex debug trace </h2>\n"
       << "      <p>Go to:</p>\n"
       << "      <ul>\n";
   for (std::size_t i = 0; i < cc_interior_summary_lists.size(); ++i) {
-    ofs << "	<li><a href=""#dim" << i << """>Dimension " << i << "</a></li>\n";
+    ofs << "	<li><a href=\"#dim" << i << "\">Dimension " << i << "</a></li>\n";
   }
   ofs << "      </ul>\n";
   for (std::size_t i = 0; i < cc_interior_summary_lists.size(); ++i) {
-    ofs << "      <h3 id=""dim" << i << """> Dimension " << i << "</h3>\n";
-    ofs << "      <h4 id=""dim" << i << "i""> Summary for interior simplices</h4>\n";
+    ofs << "      <h3 id=\"dim" << i << "\"> Dimension " << i << "</h3>\n";
+    ofs << "      <h4 id=\"dim" << i << "i\"> Summary for interior simplices</h4>\n";
     if (i < cc_boundary_summary_lists.size())
-      ofs << "      <p><a href=""#dim" << i << "b"">Go to boundary</a></p>\n";
+      ofs << "      <p><a href=\"#dim" << i << "b\">Go to boundary</a></p>\n";
     ofs << "        <ul>\n";
     for (const CC_summary_info& cc_info: cc_interior_summary_lists[i])
-      ofs << "          <li id = """ << id_from_simplex("I" + cc_info.face_) << """>"
+      ofs << "          <li id = \"" << id_from_simplex("I" + cc_info.face_) << "\">"
 	  << simplex_format(cc_info.face_, false)
 	  << " cell =" << cc_info.cell_ << "</li>\n";
     ofs << "        </ul>\n";
@@ -252,15 +309,15 @@ void write_cc(std::ofstream& ofs) {
     ofs << "        <ul>\n";
     for (const CC_detail_info& cc_info: cc_interior_detail_lists[i]) {
       if (cc_info.status_ == CC_detail_info::Result_type::join_single) {
-	ofs << "          <li style=""color:magenta"" id = """
-	    << id_from_simplex("I" + cc_info.simplex_) << """> Simplex "
+	ofs << "          <li style=\"color:magenta\" id = \""
+	    << id_from_simplex("I" + cc_info.simplex_) << "\"> Simplex "
 	    << simplex_format(cc_info.simplex_, false) << " has only one face ("
 	    << simplex_format(cc_info.trigger_, false) << ") and is deleted.";
 	continue;
       }
       if (cc_info.status_ == CC_detail_info::Result_type::join_single) {
-	ofs << "          <li style=""color:darkmagenta"" id = """
-	    << id_from_simplex("I" + cc_info.simplex_) << """> The join of the simplex "
+	ofs << "          <li style=\"color:darkmagenta\" id = \""
+	    << id_from_simplex("I" + cc_info.simplex_) << "\"> The join of the simplex "
 	    << simplex_format(cc_info.simplex_, false) << " is one of its faces ("
 	    << simplex_format(cc_info.trigger_, false) << "), hence it is is deleted.";
 	continue;
@@ -274,33 +331,33 @@ void write_cc(std::ofstream& ofs) {
       ofs << "            </ul>\n";
       ofs << "            <ul>\n";
       if (cc_info.status_ == CC_detail_info::Result_type::self) {
-	ofs << "            <p><span style=""color:blue"">The simplex "
+	ofs << "            <p><span style=\"color:blue\">The simplex "
 	    << simplex_format(cc_info.simplex_, false)
 	    << " already exists in the cell complex!</span></p>\n";
       }
       if (cc_info.status_ == CC_detail_info::Result_type::face) {
-	ofs << "            <p><span style=""color:red"">The simplex "
+	ofs << "            <p><span style=\"color:red\">The simplex "
 	    << simplex_format(cc_info.simplex_, false) << " is a face of the simplex "
 	    << simplex_format(cc_info.trigger_, false) << "!</span><br>\n";
 	ofs << "              <ul>\n";
 	for (const std::string post_face: cc_info.post_faces_)
-	  ofs << "                <li id = """ << id_from_simplex("I" + post_face) << """>"
+	  ofs << "                <li id = \"" << id_from_simplex("I" + post_face) << "\">"
 	      << "Post deleting " << simplex_format(post_face, false) << "</li>\n";
 	ofs << "              </ul>\n";
 	ofs << "            </p>\n";
-	ofs << "            <p id = """ << id_from_simplex("I" + cc_info.trigger_) << """>"
+	ofs << "            <p id = \"" << id_from_simplex("I" + cc_info.trigger_) << "\">"
 	    << "Deleting " << simplex_format(cc_info.trigger_, false) << "</p>\n";
       }
       for (const std::string& fac: cc_info.cofaces_)
 	ofs << "              <li>Checking if " << simplex_format(cc_info.simplex_, false)
 	    << " is a coface of " << simplex_format(fac, false) << "\n";
       if (cc_info.status_ == CC_detail_info::Result_type::coface) {
-	ofs << "            <p><span style=""color:darkorange"">The simplex "
+	ofs << "            <p><span style=\"color:darkorange\">The simplex "
 	    << simplex_format(cc_info.simplex_, false) << " is a coface of the simplex "
 	    << simplex_format(cc_info.trigger_, false) << "!</span><p>\n";
       }
       if (cc_info.status_ == CC_detail_info::Result_type::inserted) {
-	ofs << "            <p><span style=""color:green"">Successfully inserted "
+	ofs << "            <p><span style=\"color:green\">Successfully inserted "
 	    << simplex_format(cc_info.simplex_, false) << "!</span><p>\n";
       }
       ofs << "            </ul>\n";
@@ -309,11 +366,11 @@ void write_cc(std::ofstream& ofs) {
     ofs << "        </ul>\n";
 
     if (i < cc_boundary_summary_lists.size()) {
-      ofs << "      <h4 id=""dim" << i << "b""> Summary for boundary simplices</h4>\n";
-      ofs << "      <p><a href=""#dim" << i << "i"">Go to interior</a></p>\n";
+      ofs << "      <h4 id=\"dim" << i << "b\"> Summary for boundary simplices</h4>\n";
+      ofs << "      <p><a href=\"#dim" << i << "i\">Go to interior</a></p>\n";
       ofs << "        <ul>\n";
       for (const CC_summary_info& cc_info: cc_boundary_summary_lists[i])
-	ofs << "          <li  id = """ << id_from_simplex("B" + cc_info.face_) << """>"
+	ofs << "          <li  id = \"" << id_from_simplex("B" + cc_info.face_) << "\">"
 	    << simplex_format(cc_info.face_, true)
 	    << " cell =" << cc_info.cell_ << "</li>\n";
       ofs << "        </ul>\n";
@@ -323,15 +380,15 @@ void write_cc(std::ofstream& ofs) {
 	  << "        <ul>\n";
       for (const CC_detail_info& cc_info: cc_boundary_detail_lists[i]) {
 	if (cc_info.status_ == CC_detail_info::Result_type::join_single) {
-	  ofs << "          <li style=""color:magenta"" id = """
-	      << id_from_simplex("B" + cc_info.simplex_) << """> Simplex "
+	  ofs << "          <li style=\"color:magenta\" id = \""
+	      << id_from_simplex("B" + cc_info.simplex_) << "\"> Simplex "
 	      << simplex_format(cc_info.simplex_, true) << " has only one face ("
 	      << simplex_format(cc_info.trigger_, true) << ") and is deleted.";
 	  continue;
 	}
 	if (cc_info.status_ == CC_detail_info::Result_type::join_single) {
-	  ofs << "          <li style=""color:darkmagenta"" id = """
-	      << id_from_simplex("B" + cc_info.simplex_) << """> The join of the simplex "
+	  ofs << "          <li style=\"color:darkmagenta\" id = \""
+	      << id_from_simplex("B" + cc_info.simplex_) << "\"> The join of the simplex "
 	      << simplex_format(cc_info.simplex_, true) << " is one of its faces ("
 	      << simplex_format(cc_info.trigger_, true) << "), hence it is is deleted.";
 	  continue;
@@ -344,23 +401,23 @@ void write_cc(std::ofstream& ofs) {
 	ofs << "            </ul>\n";
 	ofs << "            <ul>\n";
 	if (cc_info.status_ == CC_detail_info::Result_type::self) {
-	  ofs << "            <p><span style=""color:blue"">The simplex "
+	  ofs << "            <p><span style=\"color:blue\">The simplex "
 	      << simplex_format(cc_info.simplex_, true)
 	      << " already exists in the cell complex!</span></p>\n";
 	}
 	if (cc_info.status_ == CC_detail_info::Result_type::face) {
-	  ofs << "            <p><span style=""color:red"">The simplex "
+	  ofs << "            <p><span style=\"color:red\">The simplex "
 	      << simplex_format(cc_info.simplex_, true) << " is a face of the simplex "
 	      << simplex_format(cc_info.trigger_, true) << "!</span><br>\n";
 	  ofs << "              <ul>\n";
 	  for (const std::string post_face: cc_info.post_faces_)
-	    ofs << "                <li id=""" << id_from_simplex("B" + post_face)
-		<< """>Post deleting " << simplex_format(post_face, true)
+	    ofs << "                <li id=\"" << id_from_simplex("B" + post_face)
+		<< "\">Post deleting " << simplex_format(post_face, true)
 		<< "</li>\n";
 	  ofs << "              </ul>\n";
 	  ofs << "            </p>\n";
-	  ofs << "            <p id=""" << id_from_simplex(cc_info.trigger_)
-	      << """>Deleting " << simplex_format(cc_info.trigger_, true) << "</p>\n";
+	  ofs << "            <p id=\"" << id_from_simplex(cc_info.trigger_)
+	      << "\">Deleting " << simplex_format(cc_info.trigger_, true) << "</p>\n";
 	}
 	for (const std::string& fac: cc_info.cofaces_)
 	  ofs << "              <li>Checking if " << simplex_format(cc_info.simplex_, true)
@@ -368,12 +425,12 @@ void write_cc(std::ofstream& ofs) {
 	ofs << "            </ul>\n";
 	ofs << "          </li>\n";
 	if (cc_info.status_ == CC_detail_info::Result_type::coface) {
-	  ofs << "            <p><span style=""color:darkorange"">The simplex "
+	  ofs << "            <p><span style=\"color:darkorange\">The simplex "
 	      << simplex_format(cc_info.simplex_, true) << " is a coface of the simplex "
 	      << simplex_format(cc_info.trigger_, true) << "!</span><p>\n";
 	}
 	if (cc_info.status_ == CC_detail_info::Result_type::inserted) {
-	  ofs << "            <p><span style=""color:green"">Successfully inserted "
+	  ofs << "            <p><span style=\"color:green\">Successfully inserted "
 	      << simplex_format(cc_info.simplex_, true) << "!</span><p>\n";
 	}
       }
@@ -384,7 +441,7 @@ void write_cc(std::ofstream& ofs) {
 }
 
 void write_visu(std::ofstream& ofs) {
-  ofs << "    <div id=""visu"">\n"
+  ofs << "    <div id=\"visu\">\n"
       << "      <h2> Visualization details debug trace </h2>\n";
   // std::vector<std::map<std::string, std::string> > vs_maps(cc_interior_summary_lists.size());
   std::map<std::string, std::string> vs_map;
