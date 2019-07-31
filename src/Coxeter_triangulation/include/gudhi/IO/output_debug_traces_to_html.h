@@ -100,6 +100,20 @@ using CC_detail_list = std::list<CC_detail_info>;
 std::vector<CC_detail_list> cc_interior_detail_lists, cc_boundary_detail_lists;
 std::vector<CC_detail_list> cc_interior_insert_detail_lists, cc_boundary_insert_detail_lists;
 
+struct CC_prejoin_info {
+  enum class Result_type {join_single, join_is_face, join_different, join_same};
+  std::string simplex_, join_;
+  std::vector<std::string> faces_;
+  std::size_t dimension_;
+  Result_type status_;
+  template <class Simplex_handle>
+  CC_prejoin_info(const Simplex_handle& simplex)
+    : simplex_(to_string(simplex)), dimension_(simplex.dimension()) {}
+};
+using CC_prejoin_list = std::list<CC_prejoin_info>;
+std::vector<CC_prejoin_list> cc_interior_prejoin_lists, cc_boundary_prejoin_lists;
+
+
 struct CC_join_info {
   enum class Result_type {self, face, coface, inserted, join_single, join_is_face};
   std::string simplex_, join_, trigger_;
@@ -131,6 +145,20 @@ std::string simplex_format(const std::string& simplex, bool is_boundary) {
     + "\" href=\"#" + id_from_simplex(b_simplex) + "\">" + b_simplex
     + "<span class=\"tooltiptext\">" + tooltiptext + "</span></a>";
 }
+
+std::string simplex_format(const std::string& b_simplex) {
+  bool is_boundary = b_simplex[0] == 'B';
+  std::string tooltiptext;
+  auto it = simplex_vlist_map.find(b_simplex);
+  if (it == simplex_vlist_map.end())
+    tooltiptext = "deleted";
+  else
+    tooltiptext = simplex_vlist_map.at(b_simplex);
+  return (std::string)"<a class=\"" + (is_boundary? "boundary": "interior")
+    + "\" href=\"#" + id_from_simplex(b_simplex) + "\">" + b_simplex
+    + "<span class=\"tooltiptext\">" + tooltiptext + "</span></a>";
+}
+
 
 void write_head(std::ofstream& ofs) {
   ofs << "  <head>\n"
@@ -265,7 +293,7 @@ void write_mt(std::ofstream& ofs) {
     }
     else
       ofs << "        <li>Failed to insert " << mt_info.init_face_
-	  << ")</li>\n";
+	  << "</li>\n";
   }
   ofs << "      </ul>\n";
   ofs << "      <h3> Simplices inserted during the while loop phase </h3>\n";
@@ -305,6 +333,45 @@ void write_cc(std::ofstream& ofs) {
 	  << simplex_format(cc_info.face_, false)
 	  << " cell =" << cc_info.cell_ << "</li>\n";
     ofs << "        </ul>\n";
+    ofs << "      <h4> Prejoin state of the interior cells of dimension " << i << "</h4>\n";
+    auto prejoin_it = cc_interior_prejoin_lists[i].begin();
+    while (prejoin_it != cc_interior_prejoin_lists[i].end()) {
+      std::size_t j = prejoin_it->dimension_;
+      ofs << "        <h5>" << j << "-dimensional ambient simplices</h5>\n";
+      ofs << "          <ul>\n";
+      for (; prejoin_it->dimension_ == j; ++prejoin_it) {
+	ofs << "          <li>" << simplex_format(prejoin_it->simplex_, false)
+	    << " join = " << simplex_format(prejoin_it->join_, false)
+	    << " boundary:\n"
+	    << "            <ul>\n";
+	for (const auto& face: prejoin_it->faces_)
+	  ofs << "              <li>" << simplex_format(face) << "</li>";
+	ofs << "            </ul>\n";
+	switch (prejoin_it->status_) {
+	case (CC_prejoin_info::Result_type::join_single):
+	  ofs << "            <p style=\"color: red\">Deleted "
+	      << simplex_format(prejoin_it->simplex_, false)
+	      << " as it has a single face.</p>";
+	  break;
+	case (CC_prejoin_info::Result_type::join_is_face):
+	  ofs << "            <p style=\"color: red\">Deleted "
+	      << simplex_format(prejoin_it->simplex_, false)
+	      << " as its join " << simplex_format(prejoin_it->join_, false)
+	      << " is one of the faces.</p>";
+	  break;
+	case (CC_prejoin_info::Result_type::join_different):
+	  ofs << "            <p style=\"color: magenta\">Deleted " << simplex_format(prejoin_it->simplex_, false)
+	      << " and replaced by its join " << simplex_format(prejoin_it->join_, false)
+	      << ".</p>";
+	  break;
+	case (CC_prejoin_info::Result_type::join_same):
+	  ofs << "            <p style=\"color: green\">Kept " << simplex_format(prejoin_it->simplex_, false)
+	      << ".</p>";
+	}
+	ofs << "          </li>";
+      }
+      ofs << "          </ul>\n";
+    }
     ofs << "      <h4> Details for interior simplices</h4>\n";
     ofs << "        <ul>\n";
     for (const CC_detail_info& cc_info: cc_interior_detail_lists[i]) {
@@ -374,6 +441,45 @@ void write_cc(std::ofstream& ofs) {
 	    << simplex_format(cc_info.face_, true)
 	    << " cell =" << cc_info.cell_ << "</li>\n";
       ofs << "        </ul>\n";
+      ofs << "      <h4> Prejoin state of the boundary cells of dimension " << i << "</h4>\n";
+      auto prejoin_it = cc_boundary_prejoin_lists[i].begin();
+      while (prejoin_it != cc_boundary_prejoin_lists[i].end()) {
+	std::size_t j = prejoin_it->dimension_;
+	ofs << "        <h5>" << j << "-dimensional ambient simplices</h5>\n";
+	ofs << "          <ul>\n";
+	for (; prejoin_it->dimension_ == j; ++prejoin_it) {
+	  ofs << "          <li>" << simplex_format(prejoin_it->simplex_, true)
+	      << " join = " << simplex_format(prejoin_it->join_, true)
+	      << " boundary:\n"
+	      << "            <ul>\n";
+	  for (const auto& face: prejoin_it->faces_)
+	    ofs << "              <li>" << simplex_format(face) << "</li>";
+	  ofs << "            </ul>\n";
+	  switch (prejoin_it->status_) {
+	  case (CC_prejoin_info::Result_type::join_single):
+	    ofs << "            <p style=\"color: red\">Deleted"
+		<< simplex_format(prejoin_it->simplex_, true)
+		<< " as it has a single face.</p>";
+	    break;
+	  case (CC_prejoin_info::Result_type::join_is_face):
+	    ofs << "            <p style=\"color: red\">Deleted "
+		<< simplex_format(prejoin_it->simplex_, true)
+		<< " as its join " << simplex_format(prejoin_it->join_, true)
+		<< " is one of the faces.</p>";
+	    break;
+	  case (CC_prejoin_info::Result_type::join_different):
+	    ofs << "            <p style=\"color: magenta\">Deleted " << simplex_format(prejoin_it->simplex_, true)
+		<< " and replaced by its join " << simplex_format(prejoin_it->join_, true)
+		<< ".</p>";
+	    break;
+	  case (CC_prejoin_info::Result_type::join_same):
+	    ofs << "            <p style=\"color: green\">Kept " << simplex_format(prejoin_it->simplex_, true)
+		<< ".</p>";
+	  }
+	  ofs << "          </li>";
+	}
+	ofs << "          </ul>\n";
+      }
     }
     if (i < cc_boundary_detail_lists.size()) {
       ofs << "      <h4> Details for boundary simplices</h4>\n"

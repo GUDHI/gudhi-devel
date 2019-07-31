@@ -185,15 +185,24 @@ private:
       if (cell->get_boundary().size() == 1) {
 #ifdef GUDHI_COX_OUTPUT_TO_HTML
 	Simplex_handle& join = cell_simplex_map_.at(cell->get_boundary().begin()->first);
+	std::string IB = (is_boundary? "B": "I");
 	if (is_boundary) {
+	  cc_boundary_prejoin_lists[cell_d].emplace_back(CC_prejoin_info(simplex));
+	  cc_boundary_prejoin_lists[cell_d].back().join_ = to_string(join);
+	  cc_boundary_prejoin_lists[cell_d].back().faces_.emplace_back(IB + to_string(join));
+	  cc_boundary_prejoin_lists[cell_d].back().status_ = CC_prejoin_info::Result_type::join_single;
 	  cc_boundary_detail_lists[cell_d].emplace_back(CC_detail_info(simplex));
 	  cc_boundary_detail_lists[cell_d].back().status_ = CC_detail_info::Result_type::join_single;
 	  cc_boundary_detail_lists[cell_d].back().trigger_ = to_string(join);
 	}
 	else {
+	  cc_interior_prejoin_lists[cell_d].emplace_back(CC_prejoin_info(simplex));
+	  cc_interior_prejoin_lists[cell_d].back().join_ = to_string(join);
+	  cc_interior_prejoin_lists[cell_d].back().faces_.emplace_back(IB + to_string(join));
+	  cc_interior_prejoin_lists[cell_d].back().status_ = CC_prejoin_info::Result_type::join_single;
 	  cc_interior_detail_lists[cell_d].emplace_back(CC_detail_info(simplex));
 	  cc_interior_detail_lists[cell_d].back().status_ = CC_detail_info::Result_type::join_single;
-	  cc_boundary_detail_lists[cell_d].back().trigger_ = to_string(join);
+	  cc_interior_detail_lists[cell_d].back().trigger_ = to_string(join);
 	}
 #endif
 	simplex_cell_map.erase(curr_it++);
@@ -218,11 +227,29 @@ private:
       if (join_is_face) {
 #ifdef GUDHI_COX_OUTPUT_TO_HTML
 	if (is_boundary) {
+	  cc_boundary_prejoin_lists[cell_d].emplace_back(CC_prejoin_info(simplex));
+	  cc_boundary_prejoin_lists[cell_d].back().join_ = to_string(join);
+	  for (const auto& bi_pair: cell->get_boundary()) {
+	    const Simplex_handle& face = cell_simplex_map_.at(bi_pair.first);
+	    bool b_is_boundary = bi_pair.first->get_additional_information();
+	    std::string IB = (b_is_boundary? "B": "I");
+	    cc_boundary_prejoin_lists[cell_d].back().faces_.emplace_back(IB + to_string(face));
+	  }
+	  cc_boundary_prejoin_lists[cell_d].back().status_ = CC_prejoin_info::Result_type::join_is_face;
 	  cc_boundary_detail_lists[cell_d].emplace_back(CC_detail_info(simplex));
 	  cc_boundary_detail_lists[cell_d].back().status_ = CC_detail_info::Result_type::join_is_face;
 	  cc_boundary_detail_lists[cell_d].back().trigger_ = to_string(join);
 	}
 	else {
+	  cc_interior_prejoin_lists[cell_d].emplace_back(CC_prejoin_info(simplex));
+	  cc_interior_prejoin_lists[cell_d].back().join_ = to_string(join);
+	  for (const auto& bi_pair: cell->get_boundary()) {
+	    const Simplex_handle& face = cell_simplex_map_.at(bi_pair.first);
+	    bool b_is_boundary = bi_pair.first->get_additional_information();
+	    std::string IB = (b_is_boundary? "B": "I");
+	    cc_interior_prejoin_lists[cell_d].back().faces_.emplace_back(IB + to_string(face));
+	  }
+	  cc_interior_prejoin_lists[cell_d].back().status_ = CC_prejoin_info::Result_type::join_is_face;
 	  cc_interior_detail_lists[cell_d].emplace_back(CC_detail_info(simplex));
 	  cc_interior_detail_lists[cell_d].back().status_ = CC_detail_info::Result_type::join_is_face;
 	  cc_interior_detail_lists[cell_d].back().trigger_ = to_string(join);
@@ -231,21 +258,64 @@ private:
 	simplex_cell_map.erase(curr_it++);
       }
       else if (simplex != join) {
-	simplex_cell_map.erase(curr_it++);
-	insert_cell(join, cell_d, is_boundary);
 #ifdef GUDHI_COX_OUTPUT_TO_HTML
 	if (is_boundary) {
+	  cc_boundary_prejoin_lists[cell_d].emplace_back(CC_prejoin_info(simplex));
+	  cc_boundary_prejoin_lists[cell_d].back().join_ = to_string(join);
+	  for (const auto& bi_pair: cell->get_boundary()) {
+	    const Simplex_handle& face = cell_simplex_map_.at(bi_pair.first);
+	    bool b_is_boundary = bi_pair.first->get_additional_information();
+	    std::string IB = (b_is_boundary? "B": "I");
+	    cc_boundary_prejoin_lists[cell_d].back().faces_.emplace_back(IB + to_string(face));
+	  }
+	  cc_boundary_prejoin_lists[cell_d].back().status_ = CC_prejoin_info::Result_type::join_different;
 	  cc_boundary_detail_lists[cell_d].back().join_trigger_ = true;
 	  cc_boundary_detail_lists[cell_d].back().init_simplex_ = to_string(simplex);
 	}
 	else {
+	  cc_interior_prejoin_lists[cell_d].emplace_back(CC_prejoin_info(simplex));
+	  cc_interior_prejoin_lists[cell_d].back().join_ = to_string(join);
+	  for (const auto& bi_pair: cell->get_boundary()) {
+	    const Simplex_handle& face = cell_simplex_map_.at(bi_pair.first);
+	    bool b_is_boundary = bi_pair.first->get_additional_information();
+	    std::string IB = (b_is_boundary? "B": "I");
+	    cc_interior_prejoin_lists[cell_d].back().faces_.emplace_back(IB + to_string(face));
+	  }
+	  cc_interior_prejoin_lists[cell_d].back().status_ = CC_prejoin_info::Result_type::join_different;
 	  cc_interior_detail_lists[cell_d].back().join_trigger_ = true;
 	  cc_interior_detail_lists[cell_d].back().init_simplex_ = to_string(simplex);
 	}
 #endif
+	simplex_cell_map.erase(curr_it++);
+	insert_cell(join, cell_d, is_boundary);
       }
-      else
+      else {
+#ifdef GUDHI_COX_OUTPUT_TO_HTML
+	if (is_boundary) {
+	  cc_boundary_prejoin_lists[cell_d].emplace_back(CC_prejoin_info(simplex));
+	  cc_boundary_prejoin_lists[cell_d].back().join_ = to_string(join);
+	  for (const auto& bi_pair: cell->get_boundary()) {
+	    const Simplex_handle& face = cell_simplex_map_.at(bi_pair.first);
+	    bool b_is_boundary = bi_pair.first->get_additional_information();
+	    std::string IB = (b_is_boundary? "B": "I");
+	    cc_boundary_prejoin_lists[cell_d].back().faces_.emplace_back(IB + to_string(face));
+	  }
+	  cc_boundary_prejoin_lists[cell_d].back().status_ = CC_prejoin_info::Result_type::join_same;
+	}
+	else {
+	  cc_interior_prejoin_lists[cell_d].emplace_back(CC_prejoin_info(simplex));
+	  cc_interior_prejoin_lists[cell_d].back().join_ = to_string(join);
+	  for (const auto& bi_pair: cell->get_boundary()) {
+	    const Simplex_handle& face = cell_simplex_map_.at(bi_pair.first);
+	    bool b_is_boundary = bi_pair.first->get_additional_information();
+	    std::string IB = (b_is_boundary? "B": "I");
+	    cc_interior_prejoin_lists[cell_d].back().faces_.emplace_back(IB + to_string(face));
+	  }
+	  cc_interior_prejoin_lists[cell_d].back().status_ = CC_prejoin_info::Result_type::join_same;
+	}
+#endif
 	curr_it++;
+      }
     }
 #ifdef GUDHI_COX_OUTPUT_TO_HTML
     join_switch = false;
@@ -354,6 +424,7 @@ private:
   void construct_complex_(const Out_simplex_map_& out_simplex_map) {
 #ifdef GUDHI_COX_OUTPUT_TO_HTML
     cc_interior_summary_lists.resize(interior_simplex_cell_maps_.size());
+    cc_interior_prejoin_lists.resize(interior_simplex_cell_maps_.size());
     cc_interior_detail_lists.resize(interior_simplex_cell_maps_.size());
 #endif    
     for (auto& os_pair: out_simplex_map) {
@@ -379,8 +450,10 @@ private:
 			  const Out_simplex_map_& boundary_simplex_map) {
 #ifdef GUDHI_COX_OUTPUT_TO_HTML
     cc_interior_summary_lists.resize(interior_simplex_cell_maps_.size());
+    cc_interior_prejoin_lists.resize(interior_simplex_cell_maps_.size());
     cc_interior_detail_lists.resize(interior_simplex_cell_maps_.size());
     cc_boundary_summary_lists.resize(boundary_simplex_cell_maps_.size());
+    cc_boundary_prejoin_lists.resize(boundary_simplex_cell_maps_.size());
     cc_boundary_detail_lists.resize(boundary_simplex_cell_maps_.size());
 #endif    
     for (auto& os_pair: boundary_simplex_map) {
