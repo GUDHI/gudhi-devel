@@ -164,81 +164,31 @@ public:
    * @param[in] other A simplex that is potential a coface of the current simplex.
    */
   bool is_face_of(const Permutahedral_representation& other) const {
+    using Part = typename OrderedSetPartition::value_type;
+      
     if (other.dimension() < dimension())
       return false;
     if (other.vertex_.size() != vertex_.size())
       std::cerr << "Error: Permutahedral_representation::is_face_of: incompatible ambient dimensions.\n";
-    std::size_t d = vertex_.size();    
-
-    /* check the vertex */    
-    Vertex v_copy = vertex_;
-    std::size_t other_i = 0, self_i = 0;
-    bool other_chosen = false;
-    bool other_start = 0;
-    while (other_i < other.partition_.size()) {
-      auto part_it = std::find(partition_[partition_.size()-1].begin(),
-			       partition_[partition_.size()-1].end(),
-			       *other.partition_[other_i].begin());      
-      if (!other_chosen && part_it != partition_[partition_.size()-1].end()) {
-	bool cyclic_shifted = false;
-	for (const auto& i: other.partition_[other_i])
-	  if (i == d) {
-	    if (cyclic_shifted)
-	      return false;
-	    if (!other_chosen) {
-	      other_chosen = true;
-	      other_start = other_i;
-	    }
-	  }
-	  else if (vertex_[i] == other.vertex_[i]) {
-	    if (cyclic_shifted)
-	      return false;
-	    other_chosen = true;
-	    other_start = other_i;
-	  }
-	  else if (vertex_[i] == other.vertex_[i] + 1) {
-	    if (other_chosen)
-	      return false;
-	    cyclic_shifted = true;
-	  }
-	  else
-	    return false;	
-      }
-      else {
-	if (!other_chosen) {
-	  other_chosen = true;
-	  other_start = other_i;
-	}
-	for (const auto& i: other.partition_[other_i])
-	  if (i != d && vertex_[i] != other.vertex_[i])
-	    return false;		
-      }
-      other_i++;
-    }
-    other_i = other_start;
-    if (other_i == other.partition_.size())
-      std::cerr << "Error: Permutahedral_representation::is_face_of: wrong partition.\n";
-
-    std::unordered_set<std::size_t> part;
-    for (const auto& i: partition_[self_i])
-      part.insert(i);
     
-    /* check the partitions */    
-    while (self_i < partition_.size()) {
-      for (const auto& i: other.partition_[other_i]) {
-	auto part_it = part.find(i);
-	if (part_it == part.end()) //mismatch
+    Vertex v_self = vertex_, v_other = other.vertex_;
+    auto self_partition_it = partition_.begin();
+    auto other_partition_it = other.partition_.begin();
+    while (self_partition_it != partition_.end()) {
+      while (other_partition_it != other.partition_.end() && v_self != v_other) {
+	const Part& other_part = *other_partition_it++;
+	if (other_partition_it == other.partition_.end())
 	  return false;
-	else
-	  part.erase(part_it);
+	for (const auto& k: other_part)
+	  v_other[k]++;	  
       }
-      other_i = (other_i + 1) % other.partition_.size();
-      if (part.empty()) {
-	self_i++;
-	if (self_i < partition_.size())
-	  for (const auto& i: partition_[self_i])
-	    part.insert(i);
-      }
+      if (other_partition_it == other.partition_.end())
+	return false;
+      const Part& self_part = *self_partition_it++;
+      if (self_partition_it == partition_.end())
+	return true;
+      for (const auto& k: self_part)
+	v_self[k]++;
     }
     return true;
   }

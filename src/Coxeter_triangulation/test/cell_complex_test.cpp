@@ -106,6 +106,8 @@ int main(int argc, char** argv) {
 			 build_mesh_from_cell_complex(cc,
 						      Configuration({true, true, true, 1, 5, 3}),
 						      Configuration({true, true, true, 2, 13, 14})));
+#ifdef GUDHI_COX_OUTPUT_TO_HTML
   write_to_html("test");
+#endif
   return 0;
 }

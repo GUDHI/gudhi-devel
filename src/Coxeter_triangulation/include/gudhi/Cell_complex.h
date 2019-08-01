@@ -401,6 +401,15 @@ private:
   	  Result_type success;
   	  std::tie(new_cell, success) = insert_cell(coface, cell_d, false);
 	  if (success == Result_type::inserted) {
+#ifdef GUDHI_COX_OUTPUT_TO_HTML	    
+	  using Vertex = typename Simplex_handle::Vertex;
+	  using Ordered_set_partition = typename Simplex_handle::OrderedSetPartition;
+	  using Part = typename Ordered_set_partition::value_type;
+	  Vertex vertex = {0, -1, -4};
+	  Ordered_set_partition partition = { Part({2}), Part({1}), Part({0}), Part({3}) };
+	  if (coface == Simplex_handle(vertex, partition))
+	    std::cout << "";
+#endif
 	    Simplex_cell_map b_layer = boundary_simplex_cell_maps_[cell_d-1];
 	    auto curr_it = b_layer.lower_bound(coface);
 	    auto upper_bound = b_layer.upper_bound(coface.greatest_face());

@@ -457,7 +457,7 @@ void write_cc(std::ofstream& ofs) {
 	  ofs << "            </ul>\n";
 	  switch (prejoin_it->status_) {
 	  case (CC_prejoin_info::Result_type::join_single):
-	    ofs << "            <p style=\"color: red\">Deleted"
+	    ofs << "            <p style=\"color: red\">Deleted "
 		<< simplex_format(prejoin_it->simplex_, true)
 		<< " as it has a single face.</p>";
 	    break;
