@@ -44,3 +44,13 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         void remove_maximal_simplex(vector[int] simplex)
         bool prune_above_filtration(double filtration)
         bool make_filtration_non_decreasing()
+
+cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
+    cdef cppclass Simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>":
+        Simplex_tree_persistence_interface(Simplex_tree_interface_full_featured * st, bool persistence_dim_max)
+        vector[pair[int, pair[double, double]]] get_persistence(int homology_coeff_field, double min_persistence)
+        vector[int] betti_numbers()
+        vector[int] persistent_betti_numbers(double from_value, double to_value)
+        vector[pair[double,double]] intervals_in_dimension(int dimension)
+        void write_output_diagram(string diagram_file_name)
+        vector[pair[vector[int], vector[int]]] persistence_pairs()
