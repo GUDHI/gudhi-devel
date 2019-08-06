@@ -26,7 +26,7 @@ function( add_gudhi_py_test THE_TEST )
 endfunction( add_gudhi_py_test )
 
 # Set gudhi.__debug_info__
-# WARNING : to be done before gudhi.pyx.in configure_file
+# WARNING : to be done before setup.py.in configure_file
 function( add_gudhi_debug_info DEBUG_INFO )
   set(GUDHI_CYTHON_DEBUG_INFO "${GUDHI_CYTHON_DEBUG_INFO}    \"${DEBUG_INFO}\\n\" \\\n" PARENT_SCOPE)
 endfunction( add_gudhi_debug_info )
@@ -94,20 +94,24 @@ if(PYTHONINTERP_FOUND)
       set(GUDHI_CYTHON_EXTRA_COMPILE_ARGS "${GUDHI_CYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_EIGEN3_ENABLED', ")
     endif (EIGEN3_FOUND)
 
+    set(GUDHI_CYTHON_MODULES_TO_COMPILE "${GUDHI_CYTHON_MODULES_TO_COMPILE}'off_reader', ")
+    set(GUDHI_CYTHON_MODULES_TO_COMPILE "${GUDHI_CYTHON_MODULES_TO_COMPILE}'simplex_tree', ")
+    set(GUDHI_CYTHON_MODULES_TO_COMPILE "${GUDHI_CYTHON_MODULES_TO_COMPILE}'rips_complex', ")
+    set(GUDHI_CYTHON_MODULES_TO_COMPILE "${GUDHI_CYTHON_MODULES_TO_COMPILE}'cubical_complex', ")
+    set(GUDHI_CYTHON_MODULES_TO_COMPILE "${GUDHI_CYTHON_MODULES_TO_COMPILE}'periodic_cubical_complex', ")
+    set(GUDHI_CYTHON_MODULES_TO_COMPILE "${GUDHI_CYTHON_MODULES_TO_COMPILE}'reader_utils', ")
+    #set(GUDHI_CYTHON_MODULES_TO_COMPILE "${GUDHI_CYTHON_MODULES_TO_COMPILE}'witness_complex', ")
+    #set(GUDHI_CYTHON_MODULES_TO_COMPILE "${GUDHI_CYTHON_MODULES_TO_COMPILE}'strong_witness_complex', ")
     if (NOT CGAL_VERSION VERSION_LESS 4.11.0)
-      set(GUDHI_CYTHON_BOTTLENECK_DISTANCE "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/bottleneck_distance.pyx'")
-      set(GUDHI_CYTHON_NERVE_GIC "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/nerve_gic.pyx'")
+      #set(GUDHI_CYTHON_MODULES_TO_COMPILE "${GUDHI_CYTHON_MODULES_TO_COMPILE}'bottleneck_distance', ")
+      #set(GUDHI_CYTHON_MODULES_TO_COMPILE "${GUDHI_CYTHON_MODULES_TO_COMPILE}'nerve_gic', ")
     endif ()
     if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-      set(GUDHI_CYTHON_SUBSAMPLING "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/subsampling.pyx'")
-      set(GUDHI_CYTHON_TANGENTIAL_COMPLEX "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/tangential_complex.pyx'")
-    endif ()
-    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-      set(GUDHI_CYTHON_ALPHA_COMPLEX "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/alpha_complex.pyx'")
-    endif ()
-    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-      set(GUDHI_CYTHON_EUCLIDEAN_WITNESS_COMPLEX
-          "include '${CMAKE_CURRENT_SOURCE_DIR}/cython/euclidean_witness_complex.pyx'\ninclude '${CMAKE_CURRENT_SOURCE_DIR}/cython/euclidean_strong_witness_complex.pyx'\n")
+      set(GUDHI_CYTHON_MODULES_TO_COMPILE "${GUDHI_CYTHON_MODULES_TO_COMPILE}'subsampling', ")
+      #set(GUDHI_CYTHON_MODULES_TO_COMPILE "${GUDHI_CYTHON_MODULES_TO_COMPILE}'tangential_complex', ")
+      #set(GUDHI_CYTHON_MODULES_TO_COMPILE "${GUDHI_CYTHON_MODULES_TO_COMPILE}'alpha_complex', ")
+      #set(GUDHI_CYTHON_MODULES_TO_COMPILE "${GUDHI_CYTHON_MODULES_TO_COMPILE}'euclidean_witness_complex', ")
+      #set(GUDHI_CYTHON_MODULES_TO_COMPILE "${GUDHI_CYTHON_MODULES_TO_COMPILE}'euclidean_strong_witness_complex', ")
     endif ()
 
     if(CGAL_FOUND)
@@ -190,8 +194,6 @@ if(PYTHONINTERP_FOUND)
 
     # Generate setup.py file to cythonize Gudhi - This file must be named setup.py by convention
     configure_file(setup.py.in "${CMAKE_CURRENT_BINARY_DIR}/setup.py" @ONLY)
-    # Generate gudhi.pyx - Gudhi cython file
-    configure_file(gudhi.pyx.in "${CMAKE_CURRENT_BINARY_DIR}/gudhi.pyx" @ONLY)
 
     # Generate gudhi/__init__.py
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/gudhi")

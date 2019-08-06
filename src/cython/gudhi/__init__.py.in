@@ -10,7 +10,7 @@ from importlib import import_module
      - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Vincent Rouvreau"
+__author__ = "GUDHI Editorial Board"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "https://gudhi.inria.fr/licensing/"
 __version__ = "@GUDHI_VERSION@"
