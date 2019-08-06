@@ -1,6 +1,6 @@
 from libc.stdint cimport intptr_t
 from numpy import array as np_array
-from simplex_tree cimport *
+cimport simplex_tree
 
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.

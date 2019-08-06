@@ -16,8 +16,8 @@ __author__ = "GUDHI Editorial Board"
 __copyright__ = "Copyright (C) 2016  Inria"
 __license__ = "MIT"
 
-simplextree = Extension(
-    "gudhi.simplextree",
+simplex_tree = Extension(
+    "gudhi.simplex_tree",
     sources = ['@CMAKE_CURRENT_SOURCE_DIR@/gudhi/simplex_tree.pyx',],
     language = 'c++',
     extra_compile_args=[@GUDHI_CYTHON_EXTRA_COMPILE_ARGS@],
@@ -35,8 +35,8 @@ setup(
     author_email='gudhi-contact@lists.gforge.inria.fr',
     version='@GUDHI_VERSION@',
     url='http://gudhi.gforge.inria.fr/',
-    ext_modules = cythonize(simplextree),
-#    cmdclass = {'build_ext': build_ext},
+    ext_modules = cythonize(simplex_tree),
+#    cmdclass={'build_ext': Cython.Build.build_ext},
     install_requires = ['cython','numpy >= 1.9',],
     setup_requires = ['numpy >= 1.9',],
 )
