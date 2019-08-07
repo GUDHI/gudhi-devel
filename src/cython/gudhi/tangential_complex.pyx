@@ -147,9 +147,6 @@ cdef class TangentialComplex:
         cdef Simplex_tree_interface_full_featured* stree_ptr = <Simplex_tree_interface_full_featured*>stree_int_ptr
         self.thisptr.create_simplex_tree(stree_ptr)
         return stree
-        simplex_tree = SimplexTree()
-        self.thisptr.create_simplex_tree(simplex_tree.thisptr)
-        return simplex_tree
 
     def fix_inconsistencies_using_perturbation(self, max_perturb, time_limit=-1.0):
         """Attempts to fix inconsistencies by perturbing the point positions.
