@@ -56,7 +56,7 @@ build_script:
   - if [%target%]==[Python] (
       cd src/cython &
       python setup.py install &
-      ctest -j 1
+      ctest -j 1 -C Release
     ) else (
       MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64 &
       ctest -j 1 -C Release -E diff_files
