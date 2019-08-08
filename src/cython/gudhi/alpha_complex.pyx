@@ -103,7 +103,9 @@ cdef class AlphaComplex:
     def create_simplex_tree(self, max_alpha_square=float('inf')):
         """
         :param max_alpha_square: The maximum alpha square threshold the
-            simplices shall not exceed. Default is set to infinity.
+            simplices shall not exceed. Default is set to infinity, and
+            there is very little point using anything else since it does
+            not save time.
         :type max_alpha_square: float
         :returns: A simplex tree created from the Delaunay Triangulation.
         :rtype: SimplexTree
