@@ -42,7 +42,6 @@ if(PYTHONINTERP_FOUND)
     set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'reader_utils', ")
     set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'witness_complex', ")
     set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'strong_witness_complex', ")
-    set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'persistence_graphical_tools', ")
     set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'bottleneck', ")
     set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'nerve_gic', ")
     set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'subsampling', ")
@@ -198,6 +197,9 @@ if(PYTHONINTERP_FOUND)
     # Generate gudhi/__init__.py
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     configure_file("gudhi/__init__.py.in" "${CMAKE_CURRENT_BINARY_DIR}/gudhi/__init__.py" @ONLY)
+
+    # Other .py files
+    file(COPY "gudhi/persistence_graphical_tools.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
 
     add_custom_command(
         OUTPUT gudhi.so
