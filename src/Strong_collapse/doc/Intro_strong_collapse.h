@@ -1,23 +1,11 @@
-/*    This file is part of the Gudhi Library. The Gudhi library
- *    (Geometric Understanding in Higher Dimensions) is a generic C++
- *    library for computational topology.
- *
+/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+ *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Siddharth Pritam
  *
  *    Copyright (C) 2019 Inria
  *
- *    This program is free software: you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation, either version 3 of the License, or
- *    (at your option) any later version.
- *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
- *
- *    You should have received a copy of the GNU General Public License
- *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    Modification(s):
+ *      - YYYY/MM Author: Description of the modification
  */
 
 #ifndef DOC_STRONG_COLLAPSE_INTRO_STRONG_COLLAPSE_H_
@@ -41,7 +29,7 @@ namespace strong_collapse {
  * \f$v\f$ and \f$v\f$ is {dominated} by \f$v^{\prime}\f$. 
  * An <b>elementary strong collapse</b> is the deletion of a dominated vertex \f$v\f$ from \f$K\f$, 
  * which we denote with \f$K\f$ \f${\searrow\searrow}\f$ \f$K\setminus v\f$. 
- * The symbol \f$\textbf{K \setminus v}\f$ (deletion of \f$v\f$ from \f$K\f$) refers to the subcomplex of \f$K\f$ which
+ * The symbol \f$\mathbf{K\setminus v}\f$ (deletion of \f$v\f$ from \f$K\f$) refers to the subcomplex of \f$K\f$ which
  * has all simplices of \f$K\f$ except the ones containing \f$v\f$.
  * There is a <b>strong collapse</b> from a simplicial complex \f$K\f$ to its subcomplex \f$L\f$, 
  * if there exists a series of elementary strong collapses from \f$K\f$ to \f$L\f$, denoted as \f$K\f$

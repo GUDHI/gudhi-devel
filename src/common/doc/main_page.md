@@ -160,7 +160,7 @@
     <td width="15%">
       <b>Author:</b> Siddharth Pritam<br>
       <b>Introduced in:</b> GUDHI 2.4.0<br>
-      <b>Copyright:</b> GPL v3<br>
+      <b>Copyright:</b> MIT<br>
       <b>Requires:</b> \ref eigen3
     </td>
  </tr>
