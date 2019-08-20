@@ -5,6 +5,7 @@
  *    Copyright (C) 2018 Inria
  *
  *    Modification(s):
+ *      - 2019/08 Vincent Rouvreau: Fix issue #10 for CGAL and Eigen3
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -32,7 +33,9 @@
 #include <CGAL/Object.h>
 #include <CGAL/tuple.h>
 #include <CGAL/iterator.h>
-#include <CGAL/version.h>
+#include <CGAL/version.h>  // for CGAL_VERSION_NR
+
+#include <Eigen/src/Core/util/Macros.h>  // for EIGEN_VERSION_AT_LEAST
 
 #include <boost/container/static_vector.hpp>
 
@@ -45,9 +48,13 @@
 #include <type_traits>  // for std::conditional and std::enable_if
 #include <limits>  // for numeric_limits<>
 
-#if CGAL_VERSION_NR < 1041101000
 // Make compilation fail - required for external projects - https://github.com/GUDHI/gudhi-devel/issues/10
+#if CGAL_VERSION_NR < 1041101000
 # error Alpha_complex_3d is only available for CGAL >= 4.11
+#endif
+
+#if !EIGEN_VERSION_AT_LEAST(3,1,0)
+# error Alpha_complex_3d is only available for Eigen3 >= 3.1.0 installed with CGAL
 #endif
 
 namespace Gudhi {

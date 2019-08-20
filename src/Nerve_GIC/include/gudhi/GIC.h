@@ -5,6 +5,7 @@
  *    Copyright (C) 2017 Inria
  *
  *    Modification(s):
+ *      - 2019/08 Vincent Rouvreau: Fix issue #10 for CGAL
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -34,6 +35,8 @@
 #include <boost/graph/subgraph.hpp>
 #include <boost/graph/graph_utility.hpp>
 
+#include <CGAL/version.h>  // for CGAL_VERSION_NR
+
 #include <iostream>
 #include <vector>
 #include <map>
@@ -44,6 +47,11 @@
 #include <random>
 #include <cassert>
 #include <cmath>
+
+// Make compilation fail - required for external projects - https://github.com/GUDHI/gudhi-devel/issues/10
+#if CGAL_VERSION_NR < 1041101000
+# error Alpha_complex_3d is only available for CGAL >= 4.11
+#endif
 
 namespace Gudhi {
 
