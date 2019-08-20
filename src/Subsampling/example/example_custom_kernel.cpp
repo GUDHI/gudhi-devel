@@ -1,8 +1,6 @@
 #include <gudhi/choose_n_farthest_points.h>
 
-#include <CGAL/Epick_d.h>
-#include <CGAL/Random.h>
-
+#include <iostream>
 #include <vector>
 #include <iterator>
 
