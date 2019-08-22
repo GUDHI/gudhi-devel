@@ -230,13 +230,16 @@ class Alpha_complex {
 
  public:
   /** \brief Inserts all Delaunay triangulation into the simplicial complex.
-   * It also computes the filtration values accordingly to the \ref createcomplexalgorithm
+   * It also computes the filtration values accordingly to the \ref createcomplexalgorithm if default_filtration_value
+   * is not set.
    *
    * \tparam SimplicialComplexForAlpha must meet `SimplicialComplexForAlpha` concept.
    * 
    * @param[in] complex SimplicialComplexForAlpha to be created.
    * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$, and there is very
    * little point using anything else since it does not save time.
+   * @param[in] default_filtration_value Default Delaunay triangulation filtration value. Set this value if filtration
+   * values are not needed to be computed. Default value is NaN (which means compute the filtration values).
    * 
    * @return true if creation succeeds, false otherwise.
    * 
@@ -248,7 +251,8 @@ class Alpha_complex {
   template <typename SimplicialComplexForAlpha,
             typename Filtration_value = typename SimplicialComplexForAlpha::Filtration_value>
   bool create_complex(SimplicialComplexForAlpha& complex,
-                      Filtration_value max_alpha_square = std::numeric_limits<Filtration_value>::infinity()) {
+                      Filtration_value max_alpha_square = std::numeric_limits<Filtration_value>::infinity(),
+                      Filtration_value default_filtration_value = std::numeric_limits<Filtration_value>::quiet_NaN()) {
     // From SimplicialComplexForAlpha type required to insert into a simplicial complex (with or without subfaces).
     typedef typename SimplicialComplexForAlpha::Vertex_handle Vertex_handle;
     typedef typename SimplicialComplexForAlpha::Simplex_handle Simplex_handle;
@@ -290,63 +294,66 @@ class Alpha_complex {
         std::cout << std::endl;
 #endif  // DEBUG_TRACES
         // Insert each simplex and its subfaces in the simplex tree - filtration is NaN
-        complex.insert_simplex_and_subfaces(vertexVector, std::numeric_limits<double>::quiet_NaN());
+        complex.insert_simplex_and_subfaces(vertexVector, default_filtration_value);
       }
     }
     // --------------------------------------------------------------------------------------------
 
-    // --------------------------------------------------------------------------------------------
-    // Will be re-used many times
-    Vector_of_CGAL_points pointVector;
-    // ### For i : d -> 0
-    for (int decr_dim = triangulation_->maximal_dimension(); decr_dim >= 0; decr_dim--) {
-      // ### Foreach Sigma of dim i
-      for (Simplex_handle f_simplex : complex.skeleton_simplex_range(decr_dim)) {
-        int f_simplex_dim = complex.dimension(f_simplex);
-        if (decr_dim == f_simplex_dim) {
-          pointVector.clear();
+    if (std::isnan(default_filtration_value)) {
+      // Filtration values need to be computed (non-Delaunay triangulation case)
+      // --------------------------------------------------------------------------------------------
+      // Will be re-used many times
+      Vector_of_CGAL_points pointVector;
+      // ### For i : d -> 0
+      for (int decr_dim = triangulation_->maximal_dimension(); decr_dim >= 0; decr_dim--) {
+        // ### Foreach Sigma of dim i
+        for (Simplex_handle f_simplex : complex.skeleton_simplex_range(decr_dim)) {
+          int f_simplex_dim = complex.dimension(f_simplex);
+          if (decr_dim == f_simplex_dim) {
+            pointVector.clear();
 #ifdef DEBUG_TRACES
-          std::cout << "Sigma of dim " << decr_dim << " is";
+            std::cout << "Sigma of dim " << decr_dim << " is";
 #endif  // DEBUG_TRACES
-          for (auto vertex : complex.simplex_vertex_range(f_simplex)) {
-            pointVector.push_back(get_point(vertex));
+            for (auto vertex : complex.simplex_vertex_range(f_simplex)) {
+              pointVector.push_back(get_point(vertex));
 #ifdef DEBUG_TRACES
-            std::cout << " " << vertex;
+              std::cout << " " << vertex;
 #endif  // DEBUG_TRACES
-          }
-#ifdef DEBUG_TRACES
-          std::cout << std::endl;
-#endif  // DEBUG_TRACES
-          // ### If filt(Sigma) is NaN : filt(Sigma) = alpha(Sigma)
-          if (std::isnan(complex.filtration(f_simplex))) {
-            Filtration_value alpha_complex_filtration = 0.0;
-            // No need to compute squared_radius on a single point - alpha is 0.0
-            if (f_simplex_dim > 0) {
-              // squared_radius function initialization
-              Squared_Radius squared_radius = kernel_.compute_squared_radius_d_object();
-              CGAL::NT_converter<typename Geom_traits::FT, Filtration_value> cv;
-
-              alpha_complex_filtration = cv(squared_radius(pointVector.begin(), pointVector.end()));
             }
-            complex.assign_filtration(f_simplex, alpha_complex_filtration);
 #ifdef DEBUG_TRACES
-            std::cout << "filt(Sigma) is NaN : filt(Sigma) =" << complex.filtration(f_simplex) << std::endl;
+            std::cout << std::endl;
 #endif  // DEBUG_TRACES
+            // ### If filt(Sigma) is NaN : filt(Sigma) = alpha(Sigma)
+            if (std::isnan(complex.filtration(f_simplex))) {
+              Filtration_value alpha_complex_filtration = 0.0;
+              // No need to compute squared_radius on a single point - alpha is 0.0
+              if (f_simplex_dim > 0) {
+                // squared_radius function initialization
+                Squared_Radius squared_radius = kernel_.compute_squared_radius_d_object();
+                CGAL::NT_converter<typename Geom_traits::FT, Filtration_value> cv;
+
+                alpha_complex_filtration = cv(squared_radius(pointVector.begin(), pointVector.end()));
+              }
+              complex.assign_filtration(f_simplex, alpha_complex_filtration);
+#ifdef DEBUG_TRACES
+              std::cout << "filt(Sigma) is NaN : filt(Sigma) =" << complex.filtration(f_simplex) << std::endl;
+#endif  // DEBUG_TRACES
+            }
+            // No need to propagate further, unweighted points all have value 0
+            if (decr_dim > 1)
+              propagate_alpha_filtration(complex, f_simplex);
           }
-          // No need to propagate further, unweighted points all have value 0
-          if (decr_dim > 1)
-            propagate_alpha_filtration(complex, f_simplex);
         }
       }
-    }
-    // --------------------------------------------------------------------------------------------
+      // --------------------------------------------------------------------------------------------
 
-    // --------------------------------------------------------------------------------------------
-    // As Alpha value is an approximation, we have to make filtration non decreasing while increasing the dimension
-    complex.make_filtration_non_decreasing();
-    // Remove all simplices that have a filtration value greater than max_alpha_square
-    complex.prune_above_filtration(max_alpha_square);
-    // --------------------------------------------------------------------------------------------
+      // --------------------------------------------------------------------------------------------
+      // As Alpha value is an approximation, we have to make filtration non decreasing while increasing the dimension
+      complex.make_filtration_non_decreasing();
+      // Remove all simplices that have a filtration value greater than max_alpha_square
+      complex.prune_above_filtration(max_alpha_square);
+      // --------------------------------------------------------------------------------------------
+    }
     return true;
   }
 
