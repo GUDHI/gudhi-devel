@@ -60,8 +60,8 @@ make doxygen
  * Having GMP version 4.2 or higher installed is recommended.
  * 
  * \subsection cgal CGAL
- * The \ref alpha_complex data structure, \ref bottleneck_distance, and few examples requires CGAL, which is a C++
- * library which provides easy access to efficient and reliable geometric algorithms.
+ * Some GUDHI modules (cf. \ref main_page "modules list"), and few examples requires CGAL, a C++ library that provides
+ * easy access to efficient and reliable geometric algorithms.
  *
  * \note There is no need to install CGAL, you can just <CODE>cmake . && make</CODE> CGAL (or even
  * <CODE>cmake -DCGAL_HEADER_ONLY=ON .</CODE>), thereafter you will be able to compile
@@ -125,13 +125,13 @@ make doxygen
  * \li <a href="_alpha_complex_2alpha_complex_3d_persistence_8cpp-example.html">
  * Alpha_complex/alpha_complex_3d_persistence.cpp</a>
  *
- * \subsection eigen3 Eigen3
+ * \subsection eigen Eigen
  * The \ref alpha_complex data structure and few examples requires
- * <a target="_blank" href="http://eigen.tuxfamily.org/">Eigen3</a> is a C++ template library for linear algebra:
+ * <a target="_blank" href="http://eigen.tuxfamily.org/">Eigen</a> is a C++ template library for linear algebra:
  * matrices, vectors, numerical solvers, and related algorithms.
  * 
- * The following examples/utilities require the <a target="_blank" href="http://eigen.tuxfamily.org/">Eigen3</a> and will not be
- * built if Eigen3 is not installed:
+ * The following examples/utilities require the <a target="_blank" href="http://eigen.tuxfamily.org/">Eigen</a> and will not be
+ * built if Eigen is not installed:
  * \li <a href="_alpha_complex_2_alpha_complex_from_off_8cpp-example.html">
  * Alpha_complex/Alpha_complex_from_off.cpp</a>
  * \li <a href="_alpha_complex_2_alpha_complex_from_points_8cpp-example.html">

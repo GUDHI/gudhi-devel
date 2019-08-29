@@ -5,6 +5,7 @@
  *    Copyright (C) 2014 Inria
  *
  *    Modification(s):
+ *      - 2019/08 Vincent Rouvreau: Fix issue #10 for CGAL
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -24,8 +25,9 @@
 #include <gudhi/Skeleton_blocker/Skeleton_blocker_complex_visitor.h>
 #include <gudhi/Debug_utils.h>
 
-// todo remove the queue to be independent from cgald
+// todo remove the queue to be independent from cgal
 #include <CGAL/Modifiable_priority_queue.h>
+#include <CGAL/version.h>  // for CGAL_VERSION_NR
 
 #include <boost/scoped_array.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -35,6 +37,11 @@
 #include <list>
 #include <utility>  // for pair
 #include <vector>
+
+// Make compilation fail - required for external projects - https://github.com/GUDHI/gudhi-devel/issues/10
+#if CGAL_VERSION_NR < 1041101000
+# error Alpha_complex_3d is only available for CGAL >= 4.11
+#endif
 
 namespace Gudhi {
 
