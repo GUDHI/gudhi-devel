@@ -1,10 +1,6 @@
-from cython cimport numeric
-from libcpp.vector cimport vector
-from libcpp.utility cimport pair
-from libcpp cimport bool
-from libcpp.string cimport string
-
+from libc.stdint cimport intptr_t
 from numpy import array as np_array
+cimport simplex_tree
 
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
@@ -20,43 +16,6 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
-cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
-    cdef cppclass Simplex_tree_options_full_featured:
-        pass
-
-    cdef cppclass Simplex_tree_interface_full_featured "Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>":
-        Simplex_tree()
-        double simplex_filtration(vector[int] simplex)
-        void assign_simplex_filtration(vector[int] simplex, double filtration)
-        void initialize_filtration()
-        int num_vertices()
-        int num_simplices()
-        void set_dimension(int dimension)
-        int dimension()
-        int upper_bound_dimension()
-        bool find_simplex(vector[int] simplex)
-        bool insert_simplex_and_subfaces(vector[int] simplex,
-                                         double filtration)
-        vector[pair[vector[int], double]] get_filtration()
-        vector[pair[vector[int], double]] get_skeleton(int dimension)
-        vector[pair[vector[int], double]] get_star(vector[int] simplex)
-        vector[pair[vector[int], double]] get_cofaces(vector[int] simplex,
-                                                          int dimension)
-        void expansion(int max_dim)
-        void remove_maximal_simplex(vector[int] simplex)
-        bool prune_above_filtration(double filtration)
-        bool make_filtration_non_decreasing()
-
-cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
-    cdef cppclass Simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>":
-        Simplex_tree_persistence_interface(Simplex_tree_interface_full_featured * st, bool persistence_dim_max)
-        vector[pair[int, pair[double, double]]] get_persistence(int homology_coeff_field, double min_persistence)
-        vector[int] betti_numbers()
-        vector[int] persistent_betti_numbers(double from_value, double to_value)
-        vector[pair[double,double]] intervals_in_dimension(int dimension)
-        void write_output_diagram(string diagram_file_name)
-        vector[pair[vector[int], vector[int]]] persistence_pairs()
-
 # SimplexTree python interface
 cdef class SimplexTree:
     """The simplex tree is an efficient and flexible data structure for
@@ -68,7 +27,13 @@ cdef class SimplexTree:
     This class is a filtered, with keys, and non contiguous vertices version
     of the simplex tree.
     """
-    cdef Simplex_tree_interface_full_featured * thisptr
+    # unfortunately 'cdef public Simplex_tree_interface_full_featured* thisptr' is not possible
+    # Use intptr_t instead to cast the pointer
+    cdef public intptr_t thisptr
+
+    # Get the pointer casted as it should be
+    cdef Simplex_tree_interface_full_featured* get_ptr(self):
+        return <Simplex_tree_interface_full_featured*>(self.thisptr)
 
     cdef Simplex_tree_persistence_interface * pcohptr
 
@@ -79,18 +44,20 @@ cdef class SimplexTree:
 
     # The real cython constructor
     def __cinit__(self):
-        self.thisptr = new Simplex_tree_interface_full_featured()
+        cdef Simplex_tree_interface_full_featured* ptr = new Simplex_tree_interface_full_featured()
+        self.thisptr = <intptr_t>ptr
 
     def __dealloc__(self):
-        if self.thisptr != NULL:
-            del self.thisptr
+        cdef Simplex_tree_interface_full_featured* ptr = self.get_ptr()
+        if ptr != NULL:
+            del ptr
         if self.pcohptr != NULL:
             del self.pcohptr
 
     def __is_defined(self):
         """Returns true if SimplexTree pointer is not NULL.
          """
-        return self.thisptr != NULL
+        return self.get_ptr() != NULL
 
     def __is_persistence_defined(self):
         """Returns true if Persistence pointer is not NULL.
@@ -106,7 +73,7 @@ cdef class SimplexTree:
         :returns:  The simplicial complex filtration value.
         :rtype:  float
         """
-        return self.thisptr.simplex_filtration(simplex)
+        return self.get_ptr().simplex_filtration(simplex)
 
     def assign_filtration(self, simplex, filtration):
         """This function assigns the simplicial complex filtration value for a
@@ -117,7 +84,7 @@ cdef class SimplexTree:
         :param filtration:  The simplicial complex filtration value.
         :type filtration:  float
         """
-        self.thisptr.assign_simplex_filtration(simplex, filtration)
+        self.get_ptr().assign_simplex_filtration(simplex, filtration)
 
     def initialize_filtration(self):
         """This function initializes and sorts the simplicial complex
@@ -134,7 +101,7 @@ cdef class SimplexTree:
             :func:`removing<gudhi.SimplexTree.remove_maximal_simplex>`
             simplices.
         """
-        self.thisptr.initialize_filtration()
+        self.get_ptr().initialize_filtration()
 
     def num_vertices(self):
         """This function returns the number of vertices of the simplicial
@@ -143,7 +110,7 @@ cdef class SimplexTree:
         :returns:  The simplicial complex number of vertices.
         :rtype:  int
         """
-        return self.thisptr.num_vertices()
+        return self.get_ptr().num_vertices()
 
     def num_simplices(self):
         """This function returns the number of simplices of the simplicial
@@ -152,7 +119,7 @@ cdef class SimplexTree:
         :returns:  the simplicial complex number of simplices.
         :rtype:  int
         """
-        return self.thisptr.num_simplices()
+        return self.get_ptr().num_simplices()
 
     def dimension(self):
         """This function returns the dimension of the simplicial complex.
@@ -169,7 +136,7 @@ cdef class SimplexTree:
             :func:`prune_above_filtration()<gudhi.SimplexTree.prune_above_filtration>`
             methods).
         """
-        return self.thisptr.dimension()
+        return self.get_ptr().dimension()
 
     def upper_bound_dimension(self):
         """This function returns a valid dimension upper bound of the
@@ -178,7 +145,7 @@ cdef class SimplexTree:
         :returns:  an upper bound on the dimension of the simplicial complex.
         :rtype:  int
         """
-        return self.thisptr.upper_bound_dimension()
+        return self.get_ptr().upper_bound_dimension()
 
     def set_dimension(self, dimension):
         """This function sets the dimension of the simplicial complex.
@@ -196,7 +163,7 @@ cdef class SimplexTree:
             :func:`prune_above_filtration()<gudhi.SimplexTree.prune_above_filtration>`
             ).
         """
-        self.thisptr.set_dimension(<int>dimension)
+        self.get_ptr().set_dimension(<int>dimension)
 
     def find(self, simplex):
         """This function returns if the N-simplex was found in the simplicial
@@ -210,7 +177,7 @@ cdef class SimplexTree:
         cdef vector[int] csimplex
         for i in simplex:
             csimplex.push_back(i)
-        return self.thisptr.find_simplex(csimplex)
+        return self.get_ptr().find_simplex(csimplex)
 
     def insert(self, simplex, filtration=0.0):
         """This function inserts the given N-simplex and its subfaces with the
@@ -230,7 +197,7 @@ cdef class SimplexTree:
         cdef vector[int] csimplex
         for i in simplex:
             csimplex.push_back(i)
-        return self.thisptr.insert_simplex_and_subfaces(csimplex,
+        return self.get_ptr().insert_simplex_and_subfaces(csimplex,
                                                         <double>filtration)
 
     def get_filtration(self):
@@ -241,7 +208,7 @@ cdef class SimplexTree:
         :rtype:  list of tuples(simplex, filtration)
         """
         cdef vector[pair[vector[int], double]] filtration \
-            = self.thisptr.get_filtration()
+            = self.get_ptr().get_filtration()
         ct = []
         for filtered_complex in filtration:
             v = []
@@ -260,7 +227,7 @@ cdef class SimplexTree:
         :rtype:  list of tuples(simplex, filtration)
         """
         cdef vector[pair[vector[int], double]] skeleton \
-            = self.thisptr.get_skeleton(<int>dimension)
+            = self.get_ptr().get_skeleton(<int>dimension)
         ct = []
         for filtered_simplex in skeleton:
             v = []
@@ -281,7 +248,7 @@ cdef class SimplexTree:
         for i in simplex:
             csimplex.push_back(i)
         cdef vector[pair[vector[int], double]] star \
-            = self.thisptr.get_star(csimplex)
+            = self.get_ptr().get_star(csimplex)
         ct = []
         for filtered_simplex in star:
             v = []
@@ -306,7 +273,7 @@ cdef class SimplexTree:
         for i in simplex:
             csimplex.push_back(i)
         cdef vector[pair[vector[int], double]] cofaces \
-            = self.thisptr.get_cofaces(csimplex, <int>codimension)
+            = self.get_ptr().get_cofaces(csimplex, <int>codimension)
         ct = []
         for filtered_simplex in cofaces:
             v = []
@@ -337,7 +304,7 @@ cdef class SimplexTree:
             :func:`dimension()<gudhi.SimplexTree.dimension>`
             to recompute the exact dimension.
         """
-        self.thisptr.remove_maximal_simplex(simplex)
+        self.get_ptr().remove_maximal_simplex(simplex)
 
     def prune_above_filtration(self, filtration):
         """Prune above filtration value given as parameter.
@@ -370,7 +337,7 @@ cdef class SimplexTree:
             :func:`dimension()<gudhi.SimplexTree.dimension>`
             method to recompute the exact dimension.
         """
-        return self.thisptr.prune_above_filtration(filtration)
+        return self.get_ptr().prune_above_filtration(filtration)
 
     def expansion(self, max_dim):
         """Expands the Simplex_tree containing only its one skeleton
@@ -389,7 +356,7 @@ cdef class SimplexTree:
         :param max_dim: The maximal dimension.
         :type max_dim: int.
         """
-        self.thisptr.expansion(max_dim)
+        self.get_ptr().expansion(max_dim)
 
     def make_filtration_non_decreasing(self):
         """This function ensures that each simplex has a higher filtration
@@ -410,7 +377,7 @@ cdef class SimplexTree:
             :func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>`
             to recompute it.
         """
-        return self.thisptr.make_filtration_non_decreasing()
+        return self.get_ptr().make_filtration_non_decreasing()
 
     def persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
         """This function returns the persistence of the simplicial complex.
@@ -432,7 +399,7 @@ cdef class SimplexTree:
         """
         if self.pcohptr != NULL:
             del self.pcohptr
-        self.pcohptr = new Simplex_tree_persistence_interface(self.thisptr, persistence_dim_max)
+        self.pcohptr = new Simplex_tree_persistence_interface(self.get_ptr(), persistence_dim_max)
         cdef vector[pair[int, pair[double, double]]] persistence_result
         if self.pcohptr != NULL:
             persistence_result = self.pcohptr.get_persistence(homology_coeff_field, min_persistence)

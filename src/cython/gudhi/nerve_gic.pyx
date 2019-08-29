@@ -4,6 +4,10 @@ from libcpp.utility cimport pair
 from libcpp.string cimport string
 from libcpp cimport bool
 import os
+from libc.stdint cimport intptr_t
+
+from gudhi.simplex_tree cimport *
+from gudhi.simplex_tree import SimplexTree
 
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
@@ -158,9 +162,11 @@ cdef class CoverComplex:
         :returns: A simplex tree created from the Cover complex.
         :rtype: SimplexTree
         """
-        simplex_tree = SimplexTree()
-        self.thisptr.create_simplex_tree(simplex_tree.thisptr)
-        return simplex_tree
+        stree = SimplexTree()
+        cdef intptr_t stree_int_ptr=stree.thisptr
+        cdef Simplex_tree_interface_full_featured* stree_ptr = <Simplex_tree_interface_full_featured*>stree_int_ptr
+        self.thisptr.create_simplex_tree(stree_ptr)
+        return stree
 
     def find_simplices(self):
         """Computes the simplices of the simplicial complex.

@@ -3,7 +3,10 @@ from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 from libcpp.string cimport string
 from libcpp cimport bool
-import os
+from libc.stdint cimport intptr_t
+
+from gudhi.simplex_tree cimport *
+from gudhi.simplex_tree import SimplexTree
 
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
@@ -93,6 +96,7 @@ cdef class RipsComplex:
         :returns: A simplex tree created from the Delaunay Triangulation.
         :rtype: SimplexTree
         """
-        simplex_tree = SimplexTree()
-        self.thisref.create_simplex_tree(simplex_tree.thisptr, max_dimension)
-        return simplex_tree
+        stree = SimplexTree()
+        cdef intptr_t stree_ptr=stree.thisptr
+        self.thisref.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_ptr, max_dimension)
+        return stree
