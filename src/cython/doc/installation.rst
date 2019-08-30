@@ -156,7 +156,7 @@ CGAL
 ====
 
 Some GUDHI modules (cf. :doc:`modules list </index>`), and few examples
-requires CGAL, a C++ library that provides easy access to efficient and
+require CGAL, a C++ library that provides easy access to efficient and
 reliable geometric algorithms.
 
 
@@ -178,10 +178,8 @@ The following examples requires CGAL version ≥ 4.11.0:
 Eigen
 =====
 
-The :doc:`Alpha complex </alpha_complex_user>`,
-:doc:`Tangential complex </tangential_complex_user>` and
-:doc:`Witness complex </witness_complex_user>` data structures and few
-examples requires `Eigen <http://eigen.tuxfamily.org/>`_, a C++ template
+Some GUDHI modules (cf. :doc:`modules list </index>`), and few examples
+require `Eigen <http://eigen.tuxfamily.org/>`_, a C++ template
 library for linear algebra: matrices, vectors, numerical solvers, and related
 algorithms.
 

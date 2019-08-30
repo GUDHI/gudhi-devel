@@ -60,7 +60,7 @@ make doxygen
  * Having GMP version 4.2 or higher installed is recommended.
  * 
  * \subsection cgal CGAL
- * Some GUDHI modules (cf. \ref main_page "modules list"), and few examples requires CGAL, a C++ library that provides
+ * Some GUDHI modules (cf. \ref main_page "modules list"), and few examples require CGAL, a C++ library that provides
  * easy access to efficient and reliable geometric algorithms.
  *
  * \note There is no need to install CGAL, you can just <CODE>cmake . && make</CODE> CGAL (or even
@@ -126,7 +126,7 @@ make doxygen
  * Alpha_complex/alpha_complex_3d_persistence.cpp</a>
  *
  * \subsection eigen Eigen
- * The \ref alpha_complex data structure and few examples requires
+ * Some GUDHI modules (cf. \ref main_page "modules list"), and few examples require
  * <a target="_blank" href="http://eigen.tuxfamily.org/">Eigen</a> is a C++ template library for linear algebra:
  * matrices, vectors, numerical solvers, and related algorithms.
  * 
