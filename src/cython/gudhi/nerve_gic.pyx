@@ -164,8 +164,7 @@ cdef class CoverComplex:
         """
         stree = SimplexTree()
         cdef intptr_t stree_int_ptr=stree.thisptr
-        cdef Simplex_tree_interface_full_featured* stree_ptr = <Simplex_tree_interface_full_featured*>stree_int_ptr
-        self.thisptr.create_simplex_tree(stree_ptr)
+        self.thisptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr)
         return stree
 
     def find_simplices(self):

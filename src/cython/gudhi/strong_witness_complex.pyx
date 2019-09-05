@@ -69,10 +69,10 @@ cdef class StrongWitnessComplex:
         """
         stree = SimplexTree()
         cdef intptr_t stree_int_ptr=stree.thisptr
-        cdef Simplex_tree_interface_full_featured* stree_ptr = <Simplex_tree_interface_full_featured*>stree_int_ptr
         if limit_dimension is not -1:
-            self.thisptr.create_simplex_tree(stree_ptr,
+            self.thisptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr,
                 max_alpha_square, limit_dimension)
         else:
-            self.thisptr.create_simplex_tree(stree_ptr, max_alpha_square)
+            self.thisptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr,
+                max_alpha_square)
         return stree
