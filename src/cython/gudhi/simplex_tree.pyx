@@ -44,8 +44,7 @@ cdef class SimplexTree:
 
     # The real cython constructor
     def __cinit__(self):
-        cdef Simplex_tree_interface_full_featured* ptr = new Simplex_tree_interface_full_featured()
-        self.thisptr = <intptr_t>ptr
+        self.thisptr = <intptr_t>(new Simplex_tree_interface_full_featured())
 
     def __dealloc__(self):
         cdef Simplex_tree_interface_full_featured* ptr = self.get_ptr()
