@@ -9,14 +9,14 @@ Compiling
 *********
 The library uses c++11 and requires `Boost <https://www.boost.org/>`_ ≥ 1.56.0,
 `CMake <https://www.cmake.org/>`_   ≥ 3.1  to generate makefiles, and
-`Cython <https://www.cython.org/>`_ to compile the GUDHI Python module.
+`python <https://www.python.org/>`_ to compile the GUDHI Python module.
 It is a multi-platform library and compiles on Linux, Mac OSX and Visual
 Studio 2015.
 
 On `Windows <https://wiki.python.org/moin/WindowsCompilers>`_ , only Python
 3.5 and 3.6 are available because of the required Visual Studio version.
 
-On other systems, if you have several Python/Cython installed, the version 2.X
+On other systems, if you have several Python/python installed, the version 2.X
 will be used by default, but you can force it by adding
 :code:`-DPython_ADDITIONAL_VERSIONS=3` to the cmake command.
 
@@ -31,7 +31,7 @@ To build the GUDHI Python module, run the following commands in a terminal:
     mkdir build
     cd build/
     cmake ..
-    cd cython
+    cd python
     make
 
 GUDHI Python module installation
@@ -43,13 +43,13 @@ PYTHONPATH:
 .. code-block:: bash
 
     # For windows, you have to set PYTHONPATH environment variable
-    export PYTHONPATH='$PYTHONPATH:/path-to-gudhi/build/cython'
+    export PYTHONPATH='$PYTHONPATH:/path-to-gudhi/build/python'
 
 Or install it definitely in your Python packages folder:
 
 .. code-block:: bash
 
-    cd /path-to-gudhi/build/cython
+    cd /path-to-gudhi/build/python
     # May require sudo or administrator privileges
     make install
 
@@ -62,9 +62,9 @@ following command in a terminal:
 
 .. code-block:: bash
 
-    cd /path-to-gudhi/build/cython
+    cd /path-to-gudhi/build/python
     # For windows, you have to set PYTHONPATH environment variable
-    export PYTHONPATH='$PYTHONPATH:/path-to-gudhi/build/cython'
+    export PYTHONPATH='$PYTHONPATH:/path-to-gudhi/build/python'
     make test
 
 Debugging issues
@@ -86,7 +86,7 @@ You shall have something like:
 .. code-block:: none
 
     Python version 2.7.15
-    Cython version 0.26.1
+    python version 0.26.1
     Eigen3 version 3.1.1
     Installed modules are: off_reader;simplex_tree;rips_complex;cubical_complex;periodic_cubical_complex;
         persistence_graphical_tools;reader_utils;witness_complex;strong_witness_complex;alpha_complex;
@@ -108,7 +108,7 @@ A complete configuration would be :
 .. code-block:: none
 
     Python version 3.6.5
-    Cython version 0.28.2
+    python version 0.28.2
     Pytest version 3.3.2
     Matplotlib version 2.2.2
     Numpy version 1.14.5
@@ -135,7 +135,7 @@ Run the following commands in a terminal:
 
 .. code-block:: bash
 
-    cd /path-to-gudhi/build/cython
+    cd /path-to-gudhi/build/python
     make sphinx
 
 Optional third-party library
