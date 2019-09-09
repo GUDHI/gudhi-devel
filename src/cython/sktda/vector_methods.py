@@ -5,10 +5,10 @@ All rights reserved
 
 import numpy as np
 from sklearn.base          import BaseEstimator, TransformerMixin
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.neighbors     import DistanceMetric
 
-from preprocessing import DiagramPreprocessor
+from .preprocessing import DiagramPreprocessor, BirthPersistenceTransform
 
 #############################################
 # Finite Vectorization methods ##############
@@ -40,7 +40,8 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
             y (n x 1 array): persistence diagram labels (unused).
         """
         if np.isnan(np.array(self.im_range)).any():
-            pre = DiagramPreprocessor(use=True, scalers=[([0,1], MinMaxScaler())]).fit(X,y)
+            new_X = DiagramPreprocessor(use=True, scalers=[([0,1], BirthPersistenceTransform())]).fit_transform(X)
+            pre = DiagramPreprocessor(use=True, scalers=[([0,1], MinMaxScaler())]).fit(new_X,y)
             [mx,my],[Mx,My] = pre.scalers[0][1].data_min_, pre.scalers[0][1].data_max_
             self.im_range = np.where(np.isnan(np.array(self.im_range)), np.array([mx, Mx, my, My]), np.array(self.im_range))
         return self
@@ -56,9 +57,11 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
             Xfit (numpy array with shape (number of diagrams) x (number of pixels = **resolution[0]** x **resolution[1]**)): output persistence images.
         """
         num_diag, Xfit = len(X), []
+        new_X = DiagramPreprocessor(use=True, scalers=[([0,1], BirthPersistenceTransform())]).fit_transform(X)
+
         for i in range(num_diag):
 
-            diagram, num_pts_in_diag = X[i], X[i].shape[0]
+            diagram, num_pts_in_diag = new_X[i], X[i].shape[0]
 
             w = np.ones(num_pts_in_diag)
             for j in range(num_pts_in_diag):
@@ -69,7 +72,8 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
             image = np.tensordot(w, np.exp((-np.square(Xs)-np.square(Ys))/(2*np.square(self.bandwidth)))/(self.bandwidth*np.sqrt(2*np.pi)), 1)
 
             Xfit.append(image.flatten()[np.newaxis,:])
-            Xfit = np.concatenate(Xfit,0)
+
+        Xfit = np.concatenate(Xfit,0)
 
         return Xfit
 
@@ -150,7 +154,8 @@ class Landscape(BaseEstimator, TransformerMixin):
                     ls[k,j] = events[j][k]
 
             Xfit.append(np.sqrt(2)*np.reshape(ls,[1,-1]))
-            Xfit = np.concatenate(Xfit,0)
+
+        Xfit = np.concatenate(Xfit,0)
 
         return Xfit
 
@@ -227,7 +232,8 @@ class Silhouette(BaseEstimator, TransformerMixin):
                         silhouette_value -= step_x
 
             Xfit.append(np.reshape(np.sqrt(2) * sh, [1,-1]))
-            Xfit = np.concatenate(Xfit, 0)
+
+        Xfit = np.concatenate(Xfit, 0)
 
         return Xfit 
 
@@ -286,7 +292,78 @@ class BettiCurve(BaseEstimator, TransformerMixin):
                     bc[k] += 1
 
             Xfit.append(np.reshape(bc,[1,-1]))
-            Xfit = np.concatenate(Xfit, 0)
+
+        Xfit = np.concatenate(Xfit, 0)
+
+        return Xfit
+
+class Entropy(BaseEstimator, TransformerMixin):
+    """
+    This is a class for computing persistence entropy. Persistence entropy is a statistic for persistence diagrams inspired from Shannon entropy. This statistic can also be used to compute a feature vector, called the entropy summary function. See https://arxiv.org/pdf/1803.08304.pdf for more details.
+    """
+    def __init__(self, mode="scalar", normalized=True, resolution=100, ent_range=[np.nan, np.nan]):
+        """
+        Constructor for the Entropy class.
+
+        Attributes:
+            mode (string): what entropy to compute: either "scalar" for computing the entropy statistics, or "vector" for computing the entropy summary functions (default "scalar").
+            normalized (bool): whether to normalize the entropy summary function (default True). Used only if **mode** = "vector". 
+            resolution (int): number of sample for the entropy summary function (default 100). Used only if **mode** = "vector".
+            ent_range ([double, double]): minimum and maximum of the entropy summary function domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn uniformly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method. Used only if **mode** = "vector".
+        """
+        self.mode, self.normalized, self.resolution, self.ent_range = mode, normalized, resolution, ent_range
+
+    def fit(self, X, y=None):
+        """
+        Fit the Entropy class on a list of persistence diagrams.
+
+        Parameters:
+            X (list of n x 2 numpy arrays): input persistence diagrams.
+            y (n x 1 array): persistence diagram labels (unused).
+        """
+        if np.isnan(np.array(self.ent_range)).any():
+            pre = DiagramPreprocessor(use=True, scalers=[([0,1], MinMaxScaler())]).fit(X,y)
+            [mx,my],[Mx,My] = pre.scalers[0][1].data_min_, pre.scalers[0][1].data_max_
+            self.ent_range = np.where(np.isnan(np.array(self.ent_range)), np.array([mx, My]), np.array(self.ent_range))
+        return self
+
+    def transform(self, X):
+        """
+        Compute the entropy for each persistence diagram individually and concatenate the results.
+
+        Parameters:
+            X (list of n x 2 numpy arrays): input persistence diagrams.
+    
+        Returns:
+            Xfit (numpy array with shape (number of diagrams) x (1 if **mode** = "scalar" else **resolution**)): output entropy.
+        """
+        num_diag, Xfit = len(X), []
+        x_values = np.linspace(self.ent_range[0], self.ent_range[1], self.resolution)
+        step_x = x_values[1] - x_values[0]
+        new_X = DiagramPreprocessor(use=True, scalers=[([0,1], BirthPersistenceTransform())]).fit_transform(X)        
+
+        for i in range(num_diag):
+
+            orig_diagram, diagram, num_pts_in_diag = X[i], new_X[i], X[i].shape[0]
+            new_diagram = DiagramPreprocessor(use=True, scalers=[([1], MaxAbsScaler())]).fit_transform([diagram])[0]
+
+            if self.mode == "scalar":
+                ent = - np.sum( np.multiply(new_diagram[:,1], np.log(new_diagram[:,1])) )
+                Xfit.append(np.array([[ent]]))
+
+            else:
+                ent = np.zeros(self.resolution)
+                for j in range(num_pts_in_diag):
+                    [px,py] = orig_diagram[j,:]
+                    min_idx = np.minimum(np.maximum(np.ceil((px - self.ent_range[0]) / step_x).astype(int), 0), self.resolution)
+                    max_idx = np.minimum(np.maximum(np.ceil((py - self.ent_range[0]) / step_x).astype(int), 0), self.resolution)
+                    for k in range(min_idx, max_idx):
+                        ent[k] += (-1) * new_diagram[j,1] * np.log(new_diagram[j,1])
+                    if self.normalized:
+                        ent = ent / np.linalg.norm(ent, ord=1)
+                    Xfit.append(np.reshape(ent,[1,-1]))
+
+        Xfit = np.concatenate(Xfit, 0)
 
         return Xfit
 

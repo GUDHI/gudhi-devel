@@ -192,7 +192,7 @@ class PersistenceFisherDistance(BaseEstimator, TransformerMixin):
                         U, V = np.sum(np.concatenate([self.approx_[i], self.approx_diagonal_[j]], axis=0), axis=0), np.sum(np.concatenate([self.approx_[j], self.approx_diagonal_[i]], axis=0), axis=0) 
                         vectori, vectorj = np.matmul(Z, U.T), np.matmul(Z, V.T)
                         vectori, vectorj = vectori/np.sum(vectori), vectorj/np.sum(vectorj)
-                        Xfit[i,j] = np.arccos(np.dot(np.sqrt(vectori), np.sqrt(vectorj)))
+                        Xfit[i,j] = np.arccos(  min(np.dot(np.sqrt(vectori), np.sqrt(vectorj)), 1.)  )
                         Xfit[j,i] = Xfit[i,j]
                     else:
                         Z = np.concatenate([self.diagrams_[i], self.diagonal_projections_[i], self.diagrams_[j], self.diagonal_projections_[j]], axis=0)
@@ -200,7 +200,7 @@ class PersistenceFisherDistance(BaseEstimator, TransformerMixin):
                         vectori = np.sum(np.exp(-np.square(pairwise_distances(Z,U))/(2 * np.square(self.bandwidth)))/(self.bandwidth * np.sqrt(2*np.pi)), axis=1)
                         vectorj = np.sum(np.exp(-np.square(pairwise_distances(Z,V))/(2 * np.square(self.bandwidth)))/(self.bandwidth * np.sqrt(2*np.pi)), axis=1)
                         vectori, vectorj = vectori/np.sum(vectori), vectorj/np.sum(vectorj)
-                        Xfit[i,j] = np.arccos(np.dot(np.sqrt(vectori), np.sqrt(vectorj)))
+                        Xfit[i,j] = np.arccos(  min(np.dot(np.sqrt(vectori), np.sqrt(vectorj)), 1.)  )
                         Xfit[j,i] = Xfit[i,j]
         else:
             projection = (1./2) * np.ones((2,2))
@@ -214,13 +214,19 @@ class PersistenceFisherDistance(BaseEstimator, TransformerMixin):
                         Z = np.concatenate([approx[i], approx_diagonal[i], self.approx_[j], self.approx_diagonal_[j]], axis=0)
                         U, V = np.sum(np.concatenate([approx[i], self.approx_diagonal_[j]], axis=0), axis=0), np.sum(np.concatenate([self.approx_[j], approx_diagonal[i]], axis=0), axis=0) 
                         vectori, vectorj = np.matmul(Z, U.T), np.matmul(Z, V.T)
-                        vectori, vectorj = vectori/np.sum(vectori), vectorj/np.sum(vectorj)
-                        Xfit[i,j] = np.arccos(np.dot(np.sqrt(vectori), np.sqrt(vectorj)))
+                        if np.sum(vectori) != 0:
+                            vectori = vectori/np.sum(vectori)
+                        if np.sum(vectorj) != 0:
+                            vectorj = vectorj/np.sum(vectorj)
+                        Xfit[i,j] = np.arccos(  min(np.dot(np.sqrt(vectori), np.sqrt(vectorj)), 1.)  )
                     else:
                         Z = np.concatenate([X[i], diagonal_projections[i], self.diagrams_[j], self.diagonal_projections_[j]], axis=0)
                         U, V = np.concatenate([X[i], self.diagonal_projections_[j]], axis=0), np.concatenate([self.diagrams_[j], diagonal_projections[i]], axis=0) 
                         vectori = np.sum(np.exp(-np.square(pairwise_distances(Z,U))/(2 * np.square(self.bandwidth)))/(self.bandwidth * np.sqrt(2*np.pi)), axis=1)
                         vectorj = np.sum(np.exp(-np.square(pairwise_distances(Z,V))/(2 * np.square(self.bandwidth)))/(self.bandwidth * np.sqrt(2*np.pi)), axis=1)
-                        vectori, vectorj = vectori/np.sum(vectori), vectorj/np.sum(vectorj)
-                        Xfit[i,j] = np.arccos(np.dot(np.sqrt(vectori), np.sqrt(vectorj)))
+                        if np.sum(vectori) != 0:
+                            vectori = vectori/np.sum(vectori)
+                        if np.sum(vectorj) != 0:
+                            vectorj = vectorj/np.sum(vectorj)
+                        Xfit[i,j] = np.arccos(  min(np.dot(np.sqrt(vectori), np.sqrt(vectorj)), 1.)  )
         return Xfit

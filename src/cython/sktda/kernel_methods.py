@@ -6,7 +6,7 @@ All rights reserved
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.metrics import pairwise_distances
-from metrics import SlicedWassersteinDistance, PersistenceFisherDistance
+from .metrics import SlicedWassersteinDistance, PersistenceFisherDistance
 
 #############################################
 # Kernel methods ############################

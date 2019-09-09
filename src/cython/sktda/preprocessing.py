@@ -26,8 +26,8 @@ class BirthPersistenceTransform(BaseEstimator, TransformerMixin):
         Fit the BirthPersistenceTransform class on a list of persistence diagrams (this function actually does nothing but is useful when BirthPersistenceTransform is included in a scikit-learn Pipeline).
 
         Parameters:
-            X (list of n x 2 or n x 1 numpy arrays): input persistence diagrams.
-            y (n x 1 array): persistence diagram labels (unused).
+            X (n x 2 numpy array): input persistence diagram.
+            y (n x 1 array): persistence diagram label (unused).
         """
         return self
 
@@ -36,10 +36,10 @@ class BirthPersistenceTransform(BaseEstimator, TransformerMixin):
         Apply the BirthPersistenceTransform function on the persistence diagrams.
 
         Parameters:
-            X (list of n x 2 or n x 1 numpy arrays): input persistence diagrams.
+            X (n x 2 numpy array): input persistence diagram.
 
         Returns:
-            Xfit (list of n x 2 numpy arrays): transformed persistence diagrams.
+            Xfit (n x 2 numpy array): transformed persistence diagram.
         """
         Xfit = np.matmul(X, np.array([[1., -1.],[0., 1.]]))
         return Xfit
@@ -55,10 +55,10 @@ class DiagramPreprocessor(BaseEstimator, TransformerMixin):
 
         Attributes:
             use (bool): whether to use the class or not (default False).
-            scalers (list of classes): list of scalers to be fit on the persistence diagrams (default []). Each element of the list is a tuple with two elements: the first  one is a list of coordinates, and the second one is a scaler (i.e. a class with fit() and transform() methods) that is going to be applied to these coordinates. Common scalers can be found in the scikit-learn library (such as MinMaxScaler for instance).
+            scalers (list of classes): list of scalers to be fit on the persistence diagrams (default []). Each element of the list is a tuple with two elements: the first one is a list of coordinates, and the second one is a scaler (i.e. a class with fit() and transform() methods) that is going to be applied to these coordinates. Common scalers can be found in the scikit-learn library (such as MinMaxScaler for instance).
         """
-        self.scalers = scalers
-        self.use     = use
+        self.scalers  = scalers
+        self.use      = use
 
     def fit(self, X, y=None):
         """
@@ -74,7 +74,7 @@ class DiagramPreprocessor(BaseEstimator, TransformerMixin):
             else:
                 P = np.concatenate(X,0)
             for (indices, scaler) in self.scalers:
-                scaler.fit(P[:,indices])
+                scaler.fit(np.reshape(P[:,indices], [-1, 1]))
         return self
 
     def transform(self, X):
