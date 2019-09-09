@@ -13,7 +13,7 @@ from sklearn.preprocessing import StandardScaler
 
 class BirthPersistenceTransform(BaseEstimator, TransformerMixin):
     """
-    This is a class for the affine transformation (x,y) -> (x,y-x) to be applied on persistence diagrams. It is a particular scaler for persistence diagram that can be given as input for the DiagramPreprocessor class.
+    This is a class for the affine transformation (x,y) -> (x,y-x) to be applied on persistence diagrams.
     """
     def __init__(self):
         """
@@ -26,8 +26,8 @@ class BirthPersistenceTransform(BaseEstimator, TransformerMixin):
         Fit the BirthPersistenceTransform class on a list of persistence diagrams (this function actually does nothing but is useful when BirthPersistenceTransform is included in a scikit-learn Pipeline).
 
         Parameters:
-            X (n x 2 numpy array): input persistence diagram.
-            y (n x 1 array): persistence diagram label (unused).
+            X (n x 2 numpy array): input persistence diagrams.
+            y (n x 1 array): persistence diagram labels (unused).
         """
         return self
 
@@ -36,16 +36,56 @@ class BirthPersistenceTransform(BaseEstimator, TransformerMixin):
         Apply the BirthPersistenceTransform function on the persistence diagrams.
 
         Parameters:
-            X (n x 2 numpy array): input persistence diagram.
+            X (list of n x 2 numpy array): input persistence diagrams.
 
         Returns:
-            Xfit (n x 2 numpy array): transformed persistence diagram.
+            Xfit (list of n x 2 numpy array): transformed persistence diagrams.
         """
-        Xfit = np.matmul(X, np.array([[1., -1.],[0., 1.]]))
+        Xfit = []
+        for diag in X:
+            new_diag = np.empty(diag.shape)
+            np.copyto(new_diag, diag)
+            new_diag[:,1] = new_diag[:,1] - new_diag[:,0]
+            Xfit.append(new_diag)
         return Xfit
 
+class Clamping(BaseEstimator, TransformerMixin):
+    """
+    This is a class for clamping values. It can be used as a parameter for the DiagramScaler class, for instance if you want to clamp abscissae or ordinates of persistence diagrams.
+    """
+    def __init__(self, limit=np.inf):
+        """
+        Constructor for the Clamping class.
 
-class DiagramPreprocessor(BaseEstimator, TransformerMixin):
+        Attributes:
+            limit (double): clamping value (default np.inf).
+        """
+        self.limit = limit
+
+    def fit(self, X, y=None):
+        """
+        Fit the Clamping class on a list of list of values (this function actually does nothing but is useful when Clamping is included in a scikit-learn Pipeline).
+
+        Parameters:
+            X (list of numpy arrays of size n): input values.
+            y (n x 1 array): value labels (unused).
+        """
+        return self
+
+    def transform(self, X):
+        """
+        Clamp each list of values individually.
+
+        Parameters:
+            X (list of numpy arrays of size n): input list of list of values.
+
+        Returns:
+            Xfit (list of numpy arrays of size n): output list of list of values.
+        """
+        Xfit = [np.where(L >= self.limit, self.limit * np.ones(L.shape), L) for L in X]
+        return Xfit
+
+class DiagramScaler(BaseEstimator, TransformerMixin):
     """
     This is a class for preprocessing persistence diagrams with a given list of scalers, such as those included in scikit-learn.
     """
@@ -116,6 +156,7 @@ class Padding(BaseEstimator, TransformerMixin):
             X (list of n x 2 or n x 1 numpy arrays): input persistence diagrams.
             y (n x 1 array): persistence diagram labels (unused).
         """
+        self.max_pts = max([len(diag) for diag in X])
         return self
 
     def transform(self, X):
@@ -130,12 +171,9 @@ class Padding(BaseEstimator, TransformerMixin):
         """
         if self.use:
             Xfit, num_diag = [], len(X)
-            max_card = max([len(diag) for diag in X])
             for diag in X:
-                [num_pts, dim] = diag.shape
-                diag_pad = np.zeros([max_card, dim+1])
-                diag_pad[:num_pts,:dim] = diag
-                diag_pad[:num_pts, dim] = np.ones(num_pts)
+                diag_pad = np.pad(diag, ((0,max(0, self.max_pts - diag.shape[0])), (0,1)), "constant", constant_values=((0,0),(0,0)))
+                diag_pad[:diag.shape[0],2] = np.ones(diag.shape[0])
                 Xfit.append(diag_pad)                    
         else:
             Xfit = X
@@ -143,9 +181,9 @@ class Padding(BaseEstimator, TransformerMixin):
 
 class ProminentPoints(BaseEstimator, TransformerMixin):
     """
-    This is a class for removing points that are close or far from the diagonal in persistence diagrams.
+    This is a class for removing points that are close or far from the diagonal in persistence diagrams.  If persistence diagrams are n x 2 numpy arrays (i.e. persistence diagrams with ordinary features), points are ordered and thresholded by distance-to-diagonal. If persistence diagrams are n x 1 numpy arrays (i.e. persistence diagrams with essential features), points are not ordered and thresholded by first coordinate.
     """
-    def __init__(self, use=False, num_pts=10, threshold=-1, location="upper", point_type="finite"):
+    def __init__(self, use=False, num_pts=10, threshold=-1, location="upper"):
         """
         Constructor for the ProminentPoints class.
      
@@ -154,13 +192,11 @@ class ProminentPoints(BaseEstimator, TransformerMixin):
             location (string): either "upper" or "lower" (default "upper"). Whether to keep the points that are far away ("upper") or close ("lower") to the diagonal.
             num_pts (int): cardinality threshold (default 10). If location == "upper", keep the top **num_pts** points that are the farthest away from the diagonal. If location == "lower", keep the top **num_pts** points that are the closest to the diagonal. 
             threshold (double): distance-to-diagonal threshold (default -1). If location == "upper", keep the points that are at least at a distance **threshold** from the diagonal. If location == "lower", keep the points that are at most at a distance **threshold** from the diagonal. 
-            point_type (string): either "finite" if persistence diagrams are n x 2 numpy arrays, or "essential" if persistence diagrams are n x 1 numpy arrays (default "finite"). If "finite", points are ordered and thresholded by distance-to-diagonal. If "essential", points are ordered and thresholded by first coordinate.
         """
         self.num_pts    = num_pts
         self.threshold  = threshold
         self.use        = use
         self.location   = location
-        self.point_type = point_type
 
     def fit(self, X, y=None):
         """
@@ -174,7 +210,7 @@ class ProminentPoints(BaseEstimator, TransformerMixin):
 
     def transform(self, X):
         """
-        If location == "upper", first select the top **num_pts** points that are the farthest away from the diagonal, then select and return from these points the ones that are at least at distance **threshold** from the diagonal for each persistence diagram individually. If location == "lower", first select the top **num_pts** points that are the closest to the diagonal, then select and return from these points the ones that are at most at distance **threshold** from the diagonal for each persistence diagram individually. If point_type == "essential", do the same with first coordinate instead of distance-to-diagonal.
+        If location == "upper", first select the top **num_pts** points that are the farthest away from the diagonal, then select and return from these points the ones that are at least at distance **threshold** from the diagonal for each persistence diagram individually. If location == "lower", first select the top **num_pts** points that are the closest to the diagonal, then select and return from these points the ones that are at most at distance **threshold** from the diagonal for each persistence diagram individually.
 
         Parameters:
             X (list of n x 2 or n x 1 numpy arrays): input persistence diagrams.
@@ -186,16 +222,16 @@ class ProminentPoints(BaseEstimator, TransformerMixin):
             Xfit, num_diag = [], len(X)
             for i in range(num_diag):
                 diag = X[i]
-                if self.point_type == "finite":
+                if diag.shape[1] >= 2:
                     if diag.shape[0] > 0:
-                        pers       = np.abs(np.matmul(diag[:,:2], [-1., 1.]))
+                        pers       = np.abs(diag[:,1] - diag[:,0])
                         idx_thresh = pers >= self.threshold
-                        thresh_diag, thresh_pers  = diag[idx_thresh.flatten()], pers[idx_thresh.flatten()]
+                        thresh_diag, thresh_pers  = diag[idx_thresh], pers[idx_thresh]
                         sort_index  = np.flip(np.argsort(thresh_pers, axis=None), 0)
                         if self.location == "upper":
                             new_diag = thresh_diag[sort_index[:min(self.num_pts, thresh_diag.shape[0])],:]
                         if self.location == "lower":
-                            new_diag = np.concatenate( [ thresh_diag[sort_index[min(self.num_pts, thresh_diag.shape[0]):],:], diag[~idx_thresh.flatten()] ], axis=0)
+                            new_diag = np.concatenate( [ thresh_diag[sort_index[min(self.num_pts, thresh_diag.shape[0]):],:], diag[~idx_thresh] ], axis=0)
                     else:
                         new_diag = diag
 
@@ -203,11 +239,11 @@ class ProminentPoints(BaseEstimator, TransformerMixin):
                     if diag.shape[0] > 0:
                         birth      = diag[:,:1]
                         idx_thresh = birth >= self.threshold
-                        thresh_diag, thresh_birth  = diag[idx_thresh.flatten()], birth[idx_thresh.flatten()]
+                        thresh_diag, thresh_birth  = diag[idx_thresh], birth[idx_thresh]
                         if self.location == "upper":
                             new_diag = thresh_diag[:min(self.num_pts, thresh_diag.shape[0]),:]
                         if self.location == "lower":
-                            new_diag = np.concatenate( [ thresh_diag[min(self.num_pts, thresh_diag.shape[0]):,:], diag[~idx_thresh.flatten()] ], axis=0)
+                            new_diag = np.concatenate( [ thresh_diag[min(self.num_pts, thresh_diag.shape[0]):,:], diag[~idx_thresh] ], axis=0)
                     else:
                         new_diag = diag
 
@@ -254,21 +290,9 @@ class DiagramSelector(BaseEstimator, TransformerMixin):
         if self.use:
             Xfit, num_diag = [], len(X)
             if self.point_type == "finite":
-                for i in range(num_diag):
-                    diag = X[i]
-                    if diag.shape[0] != 0:
-                        idx_fin = diag[:,1] != self.limit
-                        Xfit.append(diag[idx_fin,:])
-                    else:
-                        Xfit.append(diag)
-            if self.point_type == "essential":
-                for i in range(num_diag):
-                    diag = X[i]
-                    if diag.shape[0] != 0:
-                        idx_ess = diag[:,1] == self.limit
-                        Xfit.append(np.delete(diag,1,1)[idx_ess,:])
-                    else:
-                        Xfit.append(np.delete(diag,1,1))
+                Xfit = [ diag[diag[:,1] < self.limit] if diag.shape[0] != 0 else diag for diag in X]
+            else:
+                Xfit = [ diag[diag[:,1] == self.limit, 0:1] if diag.shape[0] != 0 else diag for diag in X]
         else:
             Xfit = X
         return Xfit

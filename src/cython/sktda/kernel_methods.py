@@ -101,7 +101,7 @@ class PersistenceWeightedGaussianKernel(BaseEstimator, TransformerMixin):
                         W = np.matmul(self.ws_[i][:,np.newaxis], self.ws_[j][np.newaxis,:])
                         E = (1./(np.sqrt(2*np.pi)*self.bandwidth)) * np.exp(-np.square(pairwise_distances(self.diagrams_[i], self.diagrams_[j]))/(2*np.square(self.bandwidth)))
                         Xfit[i,j] = np.sum(np.multiply(W, E))
-                        Xfit[j,i] = X[i,j]
+                        Xfit[j,i] = Xfit[i,j]
         else:
             ws = [ np.array([self.weight(Xp[i][j,:]) for j in range(Xp[i].shape[0])]) for i in range(len(Xp)) ]
             if self.kernel_approx is not None:

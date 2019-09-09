@@ -8,7 +8,7 @@ from sklearn.base          import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.neighbors     import DistanceMetric
 
-from .preprocessing import DiagramPreprocessor, BirthPersistenceTransform
+from .preprocessing import DiagramScaler, BirthPersistenceTransform
 
 #############################################
 # Finite Vectorization methods ##############
@@ -40,15 +40,15 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
             y (n x 1 array): persistence diagram labels (unused).
         """
         if np.isnan(np.array(self.im_range)).any():
-            new_X = DiagramPreprocessor(use=True, scalers=[([0,1], BirthPersistenceTransform())]).fit_transform(X)
-            pre = DiagramPreprocessor(use=True, scalers=[([0,1], MinMaxScaler())]).fit(new_X,y)
-            [mx,my],[Mx,My] = pre.scalers[0][1].data_min_, pre.scalers[0][1].data_max_
+            new_X = BirthPersistenceTransform().fit_transform(X)
+            pre = DiagramScaler(use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]).fit(new_X,y)
+            [mx,my],[Mx,My] = [pre.scalers[0][1].data_min_[0], pre.scalers[1][1].data_min_[0]], [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
             self.im_range = np.where(np.isnan(np.array(self.im_range)), np.array([mx, Mx, my, My]), np.array(self.im_range))
         return self
 
     def transform(self, X):
         """
-        Compute the persistence image for each persistence diagram individually and concatenate the results.
+        Compute the persistence image for each persistence diagram individually and store the results in a single numpy array.
 
         Parameters:
             X (list of n x 2 numpy arrays): input persistence diagrams.
@@ -57,13 +57,13 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
             Xfit (numpy array with shape (number of diagrams) x (number of pixels = **resolution[0]** x **resolution[1]**)): output persistence images.
         """
         num_diag, Xfit = len(X), []
-        new_X = DiagramPreprocessor(use=True, scalers=[([0,1], BirthPersistenceTransform())]).fit_transform(X)
+        new_X = BirthPersistenceTransform().fit_transform(X)
 
         for i in range(num_diag):
 
             diagram, num_pts_in_diag = new_X[i], X[i].shape[0]
 
-            w = np.ones(num_pts_in_diag)
+            w = np.empty(num_pts_in_diag)
             for j in range(num_pts_in_diag):
                 w[j] = self.weight(diagram[j,:])
 
@@ -81,29 +81,29 @@ class Landscape(BaseEstimator, TransformerMixin):
     """
     This is a class for computing persistence landscapes from a list of persistence diagrams. A persistence landscape is a collection of 1D piecewise-linear functions computed from the rank function associated to the persistence diagram. These piecewise-linear functions are then sampled uniformly on a given range and the corresponding vectors of samples are concatenated and returned. See http://jmlr.org/papers/v16/bubenik15a.html for more details.
     """
-    def __init__(self, num_landscapes=5, resolution=100, ls_range=[np.nan, np.nan]):
+    def __init__(self, num_landscapes=5, resolution=100, sample_range=[np.nan, np.nan]):
         """
         Constructor for the Landscape class.
 
         Attributes:
             num_landscapes (int): number of piecewise-linear functions to output (default 5).
             resolution (int): number of sample for all piecewise-linear functions (default 100).
-            ls_range ([double, double]): minimum and maximum of all piecewise-linear function domains, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn uniformly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
+            sample_range ([double, double]): minimum and maximum of all piecewise-linear function domains, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn uniformly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
         """
-        self.num_landscapes, self.resolution, self.ls_range = num_landscapes, resolution, ls_range
+        self.num_landscapes, self.resolution, self.sample_range = num_landscapes, resolution, sample_range
 
     def fit(self, X, y=None):
         """
-        Fit the Landscape class on a list of persistence diagrams: if any of the values in **ls_range** is numpy.nan, replace it with the corresponding value computed on the given list of persistence diagrams.
+        Fit the Landscape class on a list of persistence diagrams: if any of the values in **sample_range** is numpy.nan, replace it with the corresponding value computed on the given list of persistence diagrams.
 
         Parameters:
             X (list of n x 2 numpy arrays): input persistence diagrams.
             y (n x 1 array): persistence diagram labels (unused).
         """
-        if np.isnan(np.array(self.ls_range)).any():
-            pre = DiagramPreprocessor(use=True, scalers=[([0,1], MinMaxScaler())]).fit(X,y)
-            [mx,my],[Mx,My] = pre.scalers[0][1].data_min_, pre.scalers[0][1].data_max_
-            self.ls_range = np.where(np.isnan(np.array(self.ls_range)), np.array([mx, My]), np.array(self.ls_range))
+        if np.isnan(np.array(self.sample_range)).any():
+            pre = DiagramScaler(use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]).fit(X,y)
+            [mx,my],[Mx,My] = [pre.scalers[0][1].data_min_[0], pre.scalers[1][1].data_min_[0]], [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
+            self.sample_range = np.where(np.isnan(np.array(self.sample_range)), np.array([mx, My]), np.array(self.sample_range))
         return self
 
     def transform(self, X):
@@ -117,7 +117,7 @@ class Landscape(BaseEstimator, TransformerMixin):
             Xfit (numpy array with shape (number of diagrams) x (number of samples = **num_landscapes** x **resolution**)): output persistence landscapes.
         """
         num_diag, Xfit = len(X), []
-        x_values = np.linspace(self.ls_range[0], self.ls_range[1], self.resolution)
+        x_values = np.linspace(self.sample_range[0], self.sample_range[1], self.resolution)
         step_x = x_values[1] - x_values[0]
 
         for i in range(num_diag):
@@ -131,19 +131,19 @@ class Landscape(BaseEstimator, TransformerMixin):
                 events.append([])
 
             for j in range(num_pts_in_diag):
-                [px,py] = diagram[j,:]
-                min_idx = np.minimum(np.maximum(np.ceil((px          - self.ls_range[0]) / step_x).astype(int), 0), self.resolution)
-                mid_idx = np.minimum(np.maximum(np.ceil((0.5*(py+px) - self.ls_range[0]) / step_x).astype(int), 0), self.resolution)
-                max_idx = np.minimum(np.maximum(np.ceil((py          - self.ls_range[0]) / step_x).astype(int), 0), self.resolution)
+                [px,py] = diagram[j,:2]
+                min_idx = np.minimum(np.maximum(np.ceil((px          - self.sample_range[0]) / step_x).astype(int), 0), self.resolution)
+                mid_idx = np.minimum(np.maximum(np.ceil((0.5*(py+px) - self.sample_range[0]) / step_x).astype(int), 0), self.resolution)
+                max_idx = np.minimum(np.maximum(np.ceil((py          - self.sample_range[0]) / step_x).astype(int), 0), self.resolution)
 
                 if min_idx < self.resolution and max_idx > 0:
 
-                    landscape_value = self.ls_range[0] + min_idx * step_x - px
+                    landscape_value = self.sample_range[0] + min_idx * step_x - px
                     for k in range(min_idx, mid_idx):
                         events[k].append(landscape_value)
                         landscape_value += step_x
 
-                    landscape_value = py - self.ls_range[0] - mid_idx * step_x
+                    landscape_value = py - self.sample_range[0] - mid_idx * step_x
                     for k in range(mid_idx, max_idx):
                         events[k].append(landscape_value)
                         landscape_value -= step_x
@@ -163,29 +163,29 @@ class Silhouette(BaseEstimator, TransformerMixin):
     """
     This is a class for computing persistence silhouettes from a list of persistence diagrams. A persistence silhouette is computed by taking a weighted average of the collection of 1D piecewise-linear functions given by the persistence landscapes, and then by uniformly sampling this average on a given range. Finally, the corresponding vector of samples is returned. See https://arxiv.org/abs/1312.0308 for more details.
     """
-    def __init__(self, weight=lambda x: 1, resolution=100, sh_range=[np.nan, np.nan]):
+    def __init__(self, weight=lambda x: 1, resolution=100, sample_range=[np.nan, np.nan]):
         """
         Constructor for the Silhouette class.
 
         Attributes:
             weight (function): weight function for the persistence diagram points (default constant function, ie lambda x: 1). This function must be defined on 2D points, ie on lists or numpy arrays of the form [p_x,p_y].
             resolution (int): number of samples for the weighted average (default 100).
-            sh_range ([double, double]): minimum and maximum for the weighted average domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn uniformly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
+            sample_range ([double, double]): minimum and maximum for the weighted average domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn uniformly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
         """
-        self.weight, self.resolution, self.sh_range = weight, resolution, sh_range
+        self.weight, self.resolution, self.sample_range = weight, resolution, sample_range
 
     def fit(self, X, y=None):
         """
-        Fit the Silhouette class on a list of persistence diagrams: if any of the values in **sh_range** is numpy.nan, replace it with the corresponding value computed on the given list of persistence diagrams.
+        Fit the Silhouette class on a list of persistence diagrams: if any of the values in **sample_range** is numpy.nan, replace it with the corresponding value computed on the given list of persistence diagrams.
 
         Parameters:
             X (list of n x 2 numpy arrays): input persistence diagrams.
             y (n x 1 array): persistence diagram labels (unused).
         """
-        if np.isnan(np.array(self.sh_range)).any():
-            pre = DiagramPreprocessor(use=True, scalers=[([0,1], MinMaxScaler())]).fit(X,y)
-            [mx,my],[Mx,My] = pre.scalers[0][1].data_min_, pre.scalers[0][1].data_max_
-            self.sh_range = np.where(np.isnan(np.array(self.sh_range)), np.array([mx, My]), np.array(self.sh_range))
+        if np.isnan(np.array(self.sample_range)).any():
+            pre = DiagramScaler(use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]).fit(X,y)
+            [mx,my],[Mx,My] = [pre.scalers[0][1].data_min_[0], pre.scalers[1][1].data_min_[0]], [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
+            self.sample_range = np.where(np.isnan(np.array(self.sample_range)), np.array([mx, My]), np.array(self.sample_range))
         return self
 
     def transform(self, X):
@@ -199,7 +199,7 @@ class Silhouette(BaseEstimator, TransformerMixin):
             Xfit (numpy array with shape (number of diagrams) x (**resolution**): output persistence silhouettes.
         """
         num_diag, Xfit = len(X), []
-        x_values = np.linspace(self.sh_range[0], self.sh_range[1], self.resolution)
+        x_values = np.linspace(self.sample_range[0], self.sample_range[1], self.resolution)
         step_x = x_values[1] - x_values[0]
 
         for i in range(num_diag):
@@ -213,20 +213,20 @@ class Silhouette(BaseEstimator, TransformerMixin):
 
             for j in range(num_pts_in_diag):
 
-                [px,py] = diagram[j,:]
+                [px,py] = diagram[j,:2]
                 weight  = weights[j] / total_weight
-                min_idx = np.minimum(np.maximum(np.ceil((px          - self.sh_range[0]) / step_x).astype(int), 0), self.resolution)
-                mid_idx = np.minimum(np.maximum(np.ceil((0.5*(py+px) - self.sh_range[0]) / step_x).astype(int), 0), self.resolution)
-                max_idx = np.minimum(np.maximum(np.ceil((py          - self.sh_range[0]) / step_x).astype(int), 0), self.resolution)
+                min_idx = np.minimum(np.maximum(np.ceil((px          - self.sample_range[0]) / step_x).astype(int), 0), self.resolution)
+                mid_idx = np.minimum(np.maximum(np.ceil((0.5*(py+px) - self.sample_range[0]) / step_x).astype(int), 0), self.resolution)
+                max_idx = np.minimum(np.maximum(np.ceil((py          - self.sample_range[0]) / step_x).astype(int), 0), self.resolution)
 
                 if min_idx < self.resolution and max_idx > 0:
 
-                    silhouette_value = self.sh_range[0] + min_idx * step_x - px
+                    silhouette_value = self.sample_range[0] + min_idx * step_x - px
                     for k in range(min_idx, mid_idx):
                         sh[k] += weight * silhouette_value
                         silhouette_value += step_x
 
-                    silhouette_value = py - self.sh_range[0] - mid_idx * step_x
+                    silhouette_value = py - self.sample_range[0] - mid_idx * step_x
                     for k in range(mid_idx, max_idx):
                         sh[k] += weight * silhouette_value
                         silhouette_value -= step_x
@@ -241,28 +241,28 @@ class BettiCurve(BaseEstimator, TransformerMixin):
     """
     This is a class for computing Betti curves from a list of persistence diagrams. A Betti curve is a 1D piecewise-constant function obtained from the rank function. It is sampled uniformly on a given range and the vector of samples is returned. See https://www.researchgate.net/publication/316604237_Time_Series_Classification_via_Topological_Data_Analysis for more details.
     """
-    def __init__(self, resolution=100, bc_range=[np.nan, np.nan]):
+    def __init__(self, resolution=100, sample_range=[np.nan, np.nan]):
         """
         Constructor for the BettiCurve class.
 
         Attributes:
             resolution (int): number of sample for the piecewise-constant function (default 100).
-            bc_range ([double, double]): minimum and maximum of the piecewise-constant function domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn uniformly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
+            sample_range ([double, double]): minimum and maximum of the piecewise-constant function domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn uniformly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
         """
-        self.resolution, self.bc_range = resolution, bc_range
+        self.resolution, self.sample_range = resolution, sample_range
 
     def fit(self, X, y=None):
         """
-        Fit the BettiCurve class on a list of persistence diagrams: if any of the values in **bc_range** is numpy.nan, replace it with the corresponding value computed on the given list of persistence diagrams.
+        Fit the BettiCurve class on a list of persistence diagrams: if any of the values in **sample_range** is numpy.nan, replace it with the corresponding value computed on the given list of persistence diagrams.
 
         Parameters:
             X (list of n x 2 numpy arrays): input persistence diagrams.
             y (n x 1 array): persistence diagram labels (unused).
         """
-        if np.isnan(np.array(self.bc_range)).any():
-            pre = DiagramPreprocessor(use=True, scalers=[([0,1], MinMaxScaler())]).fit(X,y)
-            [mx,my],[Mx,My] = pre.scalers[0][1].data_min_, pre.scalers[0][1].data_max_
-            self.bc_range = np.where(np.isnan(np.array(self.bc_range)), np.array([mx, My]), np.array(self.bc_range))
+        if np.isnan(np.array(self.sample_range)).any():
+            pre = DiagramScaler(use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]).fit(X,y)
+            [mx,my],[Mx,My] = [pre.scalers[0][1].data_min_[0], pre.scalers[1][1].data_min_[0]], [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
+            self.sample_range = np.where(np.isnan(np.array(self.sample_range)), np.array([mx, My]), np.array(self.sample_range))
         return self
 
     def transform(self, X):
@@ -276,7 +276,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
             Xfit (numpy array with shape (number of diagrams) x (**resolution**): output Betti curves.
         """
         num_diag, Xfit = len(X), []
-        x_values = np.linspace(self.bc_range[0], self.bc_range[1], self.resolution)
+        x_values = np.linspace(self.sample_range[0], self.sample_range[1], self.resolution)
         step_x = x_values[1] - x_values[0]
 
         for i in range(num_diag):
@@ -285,9 +285,9 @@ class BettiCurve(BaseEstimator, TransformerMixin):
 
             bc =  np.zeros(self.resolution)
             for j in range(num_pts_in_diag):
-                [px,py] = diagram[j,:]
-                min_idx = np.minimum(np.maximum(np.ceil((px - self.bc_range[0]) / step_x).astype(int), 0), self.resolution)
-                max_idx = np.minimum(np.maximum(np.ceil((py - self.bc_range[0]) / step_x).astype(int), 0), self.resolution)
+                [px,py] = diagram[j,:2]
+                min_idx = np.minimum(np.maximum(np.ceil((px - self.sample_range[0]) / step_x).astype(int), 0), self.resolution)
+                max_idx = np.minimum(np.maximum(np.ceil((py - self.sample_range[0]) / step_x).astype(int), 0), self.resolution)
                 for k in range(min_idx, max_idx):
                     bc[k] += 1
 
@@ -301,7 +301,7 @@ class Entropy(BaseEstimator, TransformerMixin):
     """
     This is a class for computing persistence entropy. Persistence entropy is a statistic for persistence diagrams inspired from Shannon entropy. This statistic can also be used to compute a feature vector, called the entropy summary function. See https://arxiv.org/pdf/1803.08304.pdf for more details.
     """
-    def __init__(self, mode="scalar", normalized=True, resolution=100, ent_range=[np.nan, np.nan]):
+    def __init__(self, mode="scalar", normalized=True, resolution=100, sample_range=[np.nan, np.nan]):
         """
         Constructor for the Entropy class.
 
@@ -309,9 +309,9 @@ class Entropy(BaseEstimator, TransformerMixin):
             mode (string): what entropy to compute: either "scalar" for computing the entropy statistics, or "vector" for computing the entropy summary functions (default "scalar").
             normalized (bool): whether to normalize the entropy summary function (default True). Used only if **mode** = "vector". 
             resolution (int): number of sample for the entropy summary function (default 100). Used only if **mode** = "vector".
-            ent_range ([double, double]): minimum and maximum of the entropy summary function domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn uniformly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method. Used only if **mode** = "vector".
+            sample_range ([double, double]): minimum and maximum of the entropy summary function domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn uniformly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method. Used only if **mode** = "vector".
         """
-        self.mode, self.normalized, self.resolution, self.ent_range = mode, normalized, resolution, ent_range
+        self.mode, self.normalized, self.resolution, self.sample_range = mode, normalized, resolution, sample_range
 
     def fit(self, X, y=None):
         """
@@ -321,10 +321,10 @@ class Entropy(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
             y (n x 1 array): persistence diagram labels (unused).
         """
-        if np.isnan(np.array(self.ent_range)).any():
-            pre = DiagramPreprocessor(use=True, scalers=[([0,1], MinMaxScaler())]).fit(X,y)
-            [mx,my],[Mx,My] = pre.scalers[0][1].data_min_, pre.scalers[0][1].data_max_
-            self.ent_range = np.where(np.isnan(np.array(self.ent_range)), np.array([mx, My]), np.array(self.ent_range))
+        if np.isnan(np.array(self.sample_range)).any():
+            pre = DiagramScaler(use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]).fit(X,y)
+            [mx,my],[Mx,My] = [pre.scalers[0][1].data_min_[0], pre.scalers[1][1].data_min_[0]], [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
+            self.sample_range = np.where(np.isnan(np.array(self.sample_range)), np.array([mx, My]), np.array(self.sample_range))
         return self
 
     def transform(self, X):
@@ -338,14 +338,14 @@ class Entropy(BaseEstimator, TransformerMixin):
             Xfit (numpy array with shape (number of diagrams) x (1 if **mode** = "scalar" else **resolution**)): output entropy.
         """
         num_diag, Xfit = len(X), []
-        x_values = np.linspace(self.ent_range[0], self.ent_range[1], self.resolution)
+        x_values = np.linspace(self.sample_range[0], self.sample_range[1], self.resolution)
         step_x = x_values[1] - x_values[0]
-        new_X = DiagramPreprocessor(use=True, scalers=[([0,1], BirthPersistenceTransform())]).fit_transform(X)        
+        new_X = BirthPersistenceTransform().fit_transform(X)        
 
         for i in range(num_diag):
 
             orig_diagram, diagram, num_pts_in_diag = X[i], new_X[i], X[i].shape[0]
-            new_diagram = DiagramPreprocessor(use=True, scalers=[([1], MaxAbsScaler())]).fit_transform([diagram])[0]
+            new_diagram = DiagramScaler(use=True, scalers=[([1], MaxAbsScaler())]).fit_transform([diagram])[0]
 
             if self.mode == "scalar":
                 ent = - np.sum( np.multiply(new_diagram[:,1], np.log(new_diagram[:,1])) )
@@ -354,9 +354,9 @@ class Entropy(BaseEstimator, TransformerMixin):
             else:
                 ent = np.zeros(self.resolution)
                 for j in range(num_pts_in_diag):
-                    [px,py] = orig_diagram[j,:]
-                    min_idx = np.minimum(np.maximum(np.ceil((px - self.ent_range[0]) / step_x).astype(int), 0), self.resolution)
-                    max_idx = np.minimum(np.maximum(np.ceil((py - self.ent_range[0]) / step_x).astype(int), 0), self.resolution)
+                    [px,py] = orig_diagram[j,:2]
+                    min_idx = np.minimum(np.maximum(np.ceil((px - self.sample_range[0]) / step_x).astype(int), 0), self.resolution)
+                    max_idx = np.minimum(np.maximum(np.ceil((py - self.sample_range[0]) / step_x).astype(int), 0), self.resolution)
                     for k in range(min_idx, max_idx):
                         ent[k] += (-1) * new_diagram[j,1] * np.log(new_diagram[j,1])
                     if self.normalized:
@@ -411,7 +411,7 @@ class TopologicalVector(BaseEstimator, TransformerMixin):
         for i in range(num_diag):
 
             diagram, num_pts_in_diag = X[i], X[i].shape[0]
-            pers = 0.5 * np.matmul(diagram, np.array([[-1.0],[1.0]]))
+            pers = 0.5 * (diagram[:,1]-diagram[:,0])
             min_pers = np.minimum(pers,np.transpose(pers))
             distances = DistanceMetric.get_metric("chebyshev").pairwise(diagram)
             vect = np.flip(np.sort(np.triu(np.minimum(distances, min_pers)), axis=None), 0)

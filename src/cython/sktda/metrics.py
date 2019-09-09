@@ -145,7 +145,7 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
 
 class PersistenceFisherDistance(BaseEstimator, TransformerMixin):
     """
-    This is a class for computing the persistence Fisher distance matrix from a list of persistence diagrams. The persistence Fisher distance is obtained by computing the original Fisher distance between the probability distributions associated to the persistence diagrams given by convolving them with a Gaussian kernel. See papers.nips.cc/paper/8205-persistence-fisher-kernel-a-riemannian-manifold-kernel-for-persistence-diagrams for more details. 
+    This is a class for computing the persistence Fisher distance matrix from a list of persistence diagrams. The persistence Fisher distance is obtained by computing the original Fisher distance between the probability distributions associated to the persistence diagrams given by convolving them with a Gaussian kernel. See http://papers.nips.cc/paper/8205-persistence-fisher-kernel-a-riemannian-manifold-kernel-for-persistence-diagrams for more details. 
     """
     def __init__(self, bandwidth=1., kernel_approx=None):
         """
@@ -190,8 +190,12 @@ class PersistenceFisherDistance(BaseEstimator, TransformerMixin):
                     if self.kernel_approx is not None:
                         Z = np.concatenate([self.approx_[i], self.approx_diagonal_[i], self.approx_[j], self.approx_diagonal_[j]], axis=0)
                         U, V = np.sum(np.concatenate([self.approx_[i], self.approx_diagonal_[j]], axis=0), axis=0), np.sum(np.concatenate([self.approx_[j], self.approx_diagonal_[i]], axis=0), axis=0) 
-                        vectori, vectorj = np.matmul(Z, U.T), np.matmul(Z, V.T)
-                        vectori, vectorj = vectori/np.sum(vectori), vectorj/np.sum(vectorj)
+                        vectori, vectorj = np.abs(np.matmul(Z, U.T)), np.abs(np.matmul(Z, V.T))
+                        vectori_sum, vectorj_sum = np.sum(vectori), np.sum(vectorj)
+                        if vectori_sum != 0:
+                            vectori = vectori/vectori_sum
+                        if vectorj_sum != 0:
+                            vectorj = vectorj/vectorj_sum
                         Xfit[i,j] = np.arccos(  min(np.dot(np.sqrt(vectori), np.sqrt(vectorj)), 1.)  )
                         Xfit[j,i] = Xfit[i,j]
                     else:
@@ -199,7 +203,11 @@ class PersistenceFisherDistance(BaseEstimator, TransformerMixin):
                         U, V = np.concatenate([self.diagrams_[i], self.diagonal_projections_[j]], axis=0), np.concatenate([self.diagrams_[j], self.diagonal_projections_[i]], axis=0) 
                         vectori = np.sum(np.exp(-np.square(pairwise_distances(Z,U))/(2 * np.square(self.bandwidth)))/(self.bandwidth * np.sqrt(2*np.pi)), axis=1)
                         vectorj = np.sum(np.exp(-np.square(pairwise_distances(Z,V))/(2 * np.square(self.bandwidth)))/(self.bandwidth * np.sqrt(2*np.pi)), axis=1)
-                        vectori, vectorj = vectori/np.sum(vectori), vectorj/np.sum(vectorj)
+                        vectori_sum, vectorj_sum = np.sum(vectori), np.sum(vectorj)
+                        if vectori_sum != 0:
+                            vectori = vectori/vectori_sum
+                        if vectorj_sum != 0:
+                            vectorj = vectorj/vectorj_sum
                         Xfit[i,j] = np.arccos(  min(np.dot(np.sqrt(vectori), np.sqrt(vectorj)), 1.)  )
                         Xfit[j,i] = Xfit[i,j]
         else:
@@ -213,20 +221,22 @@ class PersistenceFisherDistance(BaseEstimator, TransformerMixin):
                     if self.kernel_approx is not None:
                         Z = np.concatenate([approx[i], approx_diagonal[i], self.approx_[j], self.approx_diagonal_[j]], axis=0)
                         U, V = np.sum(np.concatenate([approx[i], self.approx_diagonal_[j]], axis=0), axis=0), np.sum(np.concatenate([self.approx_[j], approx_diagonal[i]], axis=0), axis=0) 
-                        vectori, vectorj = np.matmul(Z, U.T), np.matmul(Z, V.T)
-                        if np.sum(vectori) != 0:
-                            vectori = vectori/np.sum(vectori)
-                        if np.sum(vectorj) != 0:
-                            vectorj = vectorj/np.sum(vectorj)
+                        vectori, vectorj = np.abs(np.matmul(Z, U.T)), np.abs(np.matmul(Z, V.T))
+                        vectori_sum, vectorj_sum = np.sum(vectori), np.sum(vectorj)
+                        if vectori_sum != 0:
+                            vectori = vectori/vectori_sum
+                        if vectorj_sum != 0:
+                            vectorj = vectorj/vectorj_sum
                         Xfit[i,j] = np.arccos(  min(np.dot(np.sqrt(vectori), np.sqrt(vectorj)), 1.)  )
                     else:
                         Z = np.concatenate([X[i], diagonal_projections[i], self.diagrams_[j], self.diagonal_projections_[j]], axis=0)
                         U, V = np.concatenate([X[i], self.diagonal_projections_[j]], axis=0), np.concatenate([self.diagrams_[j], diagonal_projections[i]], axis=0) 
                         vectori = np.sum(np.exp(-np.square(pairwise_distances(Z,U))/(2 * np.square(self.bandwidth)))/(self.bandwidth * np.sqrt(2*np.pi)), axis=1)
                         vectorj = np.sum(np.exp(-np.square(pairwise_distances(Z,V))/(2 * np.square(self.bandwidth)))/(self.bandwidth * np.sqrt(2*np.pi)), axis=1)
-                        if np.sum(vectori) != 0:
-                            vectori = vectori/np.sum(vectori)
-                        if np.sum(vectorj) != 0:
-                            vectorj = vectorj/np.sum(vectorj)
+                        vectori_sum, vectorj_sum = np.sum(vectori), np.sum(vectorj)
+                        if vectori_sum != 0:
+                            vectori = vectori/vectori_sum
+                        if vectorj_sum != 0:
+                            vectorj = vectorj/vectorj_sum
                         Xfit[i,j] = np.arccos(  min(np.dot(np.sqrt(vectori), np.sqrt(vectorj)), 1.)  )
         return Xfit
