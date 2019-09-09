@@ -117,7 +117,7 @@ A complete configuration would be :
 .. code-block:: none
 
     Python version 3.6.5
-    python version 0.28.2
+    Cython version 0.28.2
     Pytest version 3.3.2
     Matplotlib version 2.2.2
     Numpy version 1.14.5
