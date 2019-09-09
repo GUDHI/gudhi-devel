@@ -1,7 +1,5 @@
-/*    This file is part of the Gudhi Library. The Gudhi library
- *    (Geometric Understanding in Higher Dimensions) is a generic C++
- *    library for computational topology.
- *
+/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+ *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Clément Maria
  *
  *    Copyright (C) 2014 Inria
@@ -755,7 +753,7 @@ class Simplex_tree {
     auto last = std::end(Nsimplex);
 
     if (first == last)
-      return { null_simplex(), true };  // ----->>
+      return { null_simplex(), true }; // FIXME: false would make more sense to me.
 
     // Copy before sorting
     // Thread local is not available on XCode version < V.8 - It will slow down computation
@@ -765,31 +763,26 @@ class Simplex_tree {
     std::vector<Vertex_handle> copy;
     copy.clear();
     copy.insert(copy.end(), first, last);
-    std::sort(std::begin(copy), std::end(copy));
+    std::sort(copy.begin(), copy.end());
+    auto last_unique = std::unique(copy.begin(), copy.end());
+    copy.erase(last_unique, copy.end());
     GUDHI_CHECK_code(
       for (Vertex_handle v : copy)
         GUDHI_CHECK(v != null_vertex(), "cannot use the dummy null_vertex() as a real vertex");
     )
+    // Update dimension if needed. We could wait to see if the insertion succeeds, but I doubt there is much to gain.
+    dimension_ = (std::max)(dimension_, static_cast<int>(std::distance(copy.begin(), copy.end())) - 1);
 
-    return insert_simplex_and_subfaces_sorted(copy, filtration);
+    return rec_insert_simplex_and_subfaces_sorted(root(), copy.begin(), copy.end(), filtration);
   }
 
  private:
-  /// Same as insert_simplex_and_subfaces but assumes that the range of vertices is sorted
-  template<class ForwardVertexRange = std::initializer_list<Vertex_handle>>
-  std::pair<Simplex_handle, bool> insert_simplex_and_subfaces_sorted(const ForwardVertexRange& Nsimplex, Filtration_value filt = 0) {
-    auto first = std::begin(Nsimplex);
-    auto last = std::end(Nsimplex);
-    if (first == last)
-      return { null_simplex(), true }; // FIXME: false would make more sense to me.
-    GUDHI_CHECK(std::is_sorted(first, last), "simplex vertices listed in unsorted order");
-    // Update dimension if needed. We could wait to see if the insertion succeeds, but I doubt there is much to gain.
-    dimension_ = (std::max)(dimension_, static_cast<int>(std::distance(first, last)) - 1);
-    return rec_insert_simplex_and_subfaces_sorted(root(), first, last, filt);
-  }
   // To insert {1,2,3,4}, we insert {2,3,4} twice, once at the root, and once below 1.
   template<class ForwardVertexIterator>
-  std::pair<Simplex_handle, bool> rec_insert_simplex_and_subfaces_sorted(Siblings* sib, ForwardVertexIterator first, ForwardVertexIterator last, Filtration_value filt) {
+  std::pair<Simplex_handle, bool> rec_insert_simplex_and_subfaces_sorted(Siblings* sib,
+  	                                                                     ForwardVertexIterator first,
+  	                                                                     ForwardVertexIterator last,
+  	                                                                     Filtration_value filt) {
     // An alternative strategy would be:
     // - try to find the complete simplex, if found (and low filtration) exit
     // - insert all the vertices at once in sib
@@ -801,10 +794,10 @@ class Simplex_tree {
     bool one_is_new = insertion_result.second;
     if (!one_is_new) {
       if (filtration(simplex_one) > filt) {
-	assign_filtration(simplex_one, filt);
+        assign_filtration(simplex_one, filt);
       } else {
-	// FIXME: this interface makes no sense, and it doesn't seem to be tested.
-	insertion_result.first = null_simplex();
+        // FIXME: this interface makes no sense, and it doesn't seem to be tested.
+        insertion_result.first = null_simplex();
       }
     }
     if (++first == last) return insertion_result;

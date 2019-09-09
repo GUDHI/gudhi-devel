@@ -1,12 +1,11 @@
-/*    This file is part of the Gudhi Library. The Gudhi library
- *    (Geometric Understanding in Higher Dimensions) is a generic C++
- *    library for computational topology.
- *
+/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+ *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Clement Jamin
  *
  *    Copyright (C) 2016 Inria
  *
  *    Modification(s):
+ *      - 2019/08 Vincent Rouvreau: Fix issue #10 for CGAL and Eigen3
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -31,9 +30,11 @@
 #include <CGAL/Delaunay_triangulation.h>
 #include <CGAL/Combination_enumerator.h>
 #include <CGAL/point_generators_d.h>
+#include <CGAL/version.h>  // for CGAL_VERSION_NR
 
 #include <Eigen/Core>
 #include <Eigen/Eigen>
+#include <Eigen/src/Core/util/Macros.h>  // for EIGEN_VERSION_AT_LEAST
 
 #include <boost/optional.hpp>
 #include <boost/iterator/transform_iterator.hpp>
@@ -63,6 +64,15 @@
 #endif
 
 // #define GUDHI_TC_EXPORT_NORMALS // Only for 3D surfaces (k=2, d=3)
+
+// Make compilation fail - required for external projects - https://github.com/GUDHI/gudhi-devel/issues/10
+#if CGAL_VERSION_NR < 1041101000
+# error Alpha_complex_3d is only available for CGAL >= 4.11
+#endif
+
+#if !EIGEN_VERSION_AT_LEAST(3,1,0)
+# error Alpha_complex_3d is only available for Eigen3 >= 3.1.0 installed with CGAL
+#endif
 
 namespace sps = Gudhi::spatial_searching;
 
