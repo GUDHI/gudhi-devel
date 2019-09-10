@@ -39,8 +39,8 @@ namespace strong_collapse {
  * \ingroup strong_collapse
  *
  * \details
- * Strong collapse is constructing in loop Flag complexes, stored in a `Flag_complex_sparse_matrix`, collapse them,
- * and finally fill a Tower assembler, aka. `Flag_complex_tower_assembler`.
+ * Strong collapse is constructing in loop Flag complexes, stored in a `Flag_complex_sparse_matrix` and collapse them.
+ * Finally, one can get the distance matrix of the collapsed complex.
  *
  * \remark `Flag_complex_strong_collapse` is parallelized using \ref tbb.
  * Performances are quite improved when it is installed.
@@ -52,8 +52,6 @@ class Flag_complex_strong_collapse {
  public:
   /** \brief Flag_complex_strong_collapse constructor.
    *
-   * Initializes the Tower assembler, aka. `Flag_complex_tower_assembler`.
-   *
    * @param[in] number_of_points Number of points.
    */
   Flag_complex_strong_collapse(std::size_t number_of_points)
@@ -62,8 +60,7 @@ class Flag_complex_strong_collapse {
 
   /** \brief Strong collapse approximate version initialization.
    *
-   * It constructs in loop Flag complexes but only for the given filtration values given, collapse them,
-   * and finally fill a Tower assembler, aka. `Flag_complex_tower_assembler`.
+   * It constructs in loop Flag complexes but only for the given filtration values given and collapse them.
    *
    * @param[in] edge_graph A valid Gudhi::Filtered_edges_vector.
    * @param[in] step_range A valid range of filtration values.
@@ -142,8 +139,7 @@ class Flag_complex_strong_collapse {
 
   /** \brief Strong collapse exact version initialization.
    *
-   * It constructs in loop Flag complexes for every filtration values in edge_graph, collapse them,
-   * and finally fill a Tower assembler, aka. `Flag_complex_tower_assembler`.
+   * It constructs in loop Flag complexes for every filtration values in edge_graph and collapse them.
    *
    * @param[in] edge_graph A valid Gudhi::Filtered_edges_vector.
    */
@@ -189,7 +185,7 @@ class Flag_complex_strong_collapse {
 
   }
 
-  /** \brief Returns the distance matrix constructed from the Tower assembler, aka. `Flag_complex_tower_assembler`.
+  /** \brief Returns the distance matrix constructed after strong collapse computation.
    *
    * @return Distance matrix.
    */
