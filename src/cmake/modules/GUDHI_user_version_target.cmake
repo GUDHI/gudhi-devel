@@ -42,7 +42,7 @@ add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy_directory ${CMAKE_SOURCE_DIR}/biblio ${GUDHI_USER_VERSION_DIR}/biblio)
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
-                   copy_directory ${CMAKE_SOURCE_DIR}/src/cython ${GUDHI_USER_VERSION_DIR}/cython)
+                   copy_directory ${CMAKE_SOURCE_DIR}/${GUDHI_PYTHON_PATH} ${GUDHI_USER_VERSION_DIR}/python)
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy_directory ${CMAKE_SOURCE_DIR}/data ${GUDHI_USER_VERSION_DIR}/data)
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E

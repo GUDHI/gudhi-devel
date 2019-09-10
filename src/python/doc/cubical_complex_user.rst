@@ -158,7 +158,7 @@ the program output is:
 Examples.
 ---------
 
-End user programs are available in cython/example/ folder.
+End user programs are available in python/example/ folder.
 
 Bibliography
 ============

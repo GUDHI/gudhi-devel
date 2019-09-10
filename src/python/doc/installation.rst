@@ -22,7 +22,7 @@ Studio 2015.
 On `Windows <https://wiki.python.org/moin/WindowsCompilers>`_ , only Python
 ≥ 3.5 are available because of the required Visual Studio version.
 
-On other systems, if you have several Python/Cython installed, the version 2.X
+On other systems, if you have several Python/python installed, the version 2.X
 will be used by default, but you can force it by adding
 :code:`-DPython_ADDITIONAL_VERSIONS=3` to the cmake command.
 
@@ -37,7 +37,7 @@ To build the GUDHI Python module, run the following commands in a terminal:
     mkdir build
     cd build/
     cmake ..
-    cd cython
+    cd python
     make
 
 GUDHI Python module installation
@@ -49,13 +49,13 @@ PYTHONPATH:
 .. code-block:: bash
 
     # For windows, you have to set PYTHONPATH environment variable
-    export PYTHONPATH='$PYTHONPATH:/path-to-gudhi/build/cython'
+    export PYTHONPATH='$PYTHONPATH:/path-to-gudhi/build/python'
 
 Or install it definitely in your Python packages folder:
 
 .. code-block:: bash
 
-    cd /path-to-gudhi/build/cython
+    cd /path-to-gudhi/build/python
     # May require sudo or administrator privileges
     make install
 
@@ -68,9 +68,9 @@ following command in a terminal:
 
 .. code-block:: bash
 
-    cd /path-to-gudhi/build/cython
+    cd /path-to-gudhi/build/python
     # For windows, you have to set PYTHONPATH environment variable
-    export PYTHONPATH='$PYTHONPATH:/path-to-gudhi/build/cython'
+    export PYTHONPATH='$PYTHONPATH:/path-to-gudhi/build/python'
     make test
 
 Debugging issues
@@ -146,7 +146,7 @@ Run the following commands in a terminal:
 
 .. code-block:: bash
 
-    cd /path-to-gudhi/build/cython
+    cd /path-to-gudhi/build/python
     make sphinx
 
 Optional third-party library

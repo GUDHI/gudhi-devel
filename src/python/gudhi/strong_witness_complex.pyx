@@ -20,24 +20,24 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
-cdef extern from "Witness_complex_interface.h" namespace "Gudhi":
-    cdef cppclass Witness_complex_interface "Gudhi::witness_complex::Witness_complex_interface":
-        Witness_complex_interface(vector[vector[pair[size_t, double]]] nearest_landmark_table)
+cdef extern from "Strong_witness_complex_interface.h" namespace "Gudhi":
+    cdef cppclass Strong_witness_complex_interface "Gudhi::witness_complex::Strong_witness_complex_interface":
+        Strong_witness_complex_interface(vector[vector[pair[size_t, double]]] nearest_landmark_table)
         void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square)
         void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square,
             unsigned limit_dimension)
 
-# WitnessComplex python interface
-cdef class WitnessComplex:
-    """Constructs (weak) witness complex for a given table of nearest landmarks
-    with respect to witnesses.
+# StrongWitnessComplex python interface
+cdef class StrongWitnessComplex:
+    """Constructs (strong) witness complex for a given table of nearest
+    landmarks with respect to witnesses.
     """
 
-    cdef Witness_complex_interface * thisptr
+    cdef Strong_witness_complex_interface * thisptr
 
     # Fake constructor that does nothing but documenting the constructor
     def __init__(self, nearest_landmark_table=None):
-        """WitnessComplex constructor.
+        """StrongWitnessComplex constructor.
 
         :param nearest_landmark_table: A list of lists of nearest landmarks and their distances.
             `nearest_landmark_table[w][k]==(l,d)` means that l is the k-th nearest landmark to
@@ -48,14 +48,14 @@ cdef class WitnessComplex:
     # The real cython constructor
     def __cinit__(self, nearest_landmark_table=None):
         if nearest_landmark_table is not None:
-            self.thisptr = new Witness_complex_interface(nearest_landmark_table)
+            self.thisptr = new Strong_witness_complex_interface(nearest_landmark_table)
 
     def __dealloc__(self):
         if self.thisptr != NULL:
             del self.thisptr
 
     def __is_defined(self):
-        """Returns true if WitnessComplex pointer is not NULL.
+        """Returns true if StrongWitnessComplex pointer is not NULL.
          """
         return self.thisptr != NULL
 
@@ -69,10 +69,10 @@ cdef class WitnessComplex:
         """
         stree = SimplexTree()
         cdef intptr_t stree_int_ptr=stree.thisptr
-        cdef Simplex_tree_interface_full_featured* stree_ptr = <Simplex_tree_interface_full_featured*>stree_int_ptr
         if limit_dimension is not -1:
-            self.thisptr.create_simplex_tree(stree_ptr,
+            self.thisptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr,
                 max_alpha_square, limit_dimension)
         else:
-            self.thisptr.create_simplex_tree(stree_ptr, max_alpha_square)
+            self.thisptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr,
+                max_alpha_square)
         return stree

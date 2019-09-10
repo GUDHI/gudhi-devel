@@ -54,7 +54,7 @@ build_script:
   - cd build
   - cmake -G "Visual Studio 15 2017 Win64" %CMAKE_FLAGS% -DCMAKE_TOOLCHAIN_FILE=c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake ..
   - if [%target%]==[Python] (
-      cd src/cython &
+      cd src/python &
       MSBuild Cython.sln /m /p:Configuration=Release /p:Platform=x64 &
       ctest -j 1 -C Release
     ) else (
