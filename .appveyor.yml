@@ -13,17 +13,17 @@ environment:
   APPVEYOR_SAVE_CACHE_ON_ERROR: true
 
   matrix:
-      - target: Examples
-        CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF
-        PYTHON: "C:\\Python37-x64"
+      #- target: Examples
+      #  CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF
+      #  PYTHON: "C:\\Python37-x64"
 
-      - target: UnitaryTests
-        CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF
-        PYTHON: "C:\\Python37-x64"
+      #- target: UnitaryTests
+      #  CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF
+      #  PYTHON: "C:\\Python37-x64"
 
-      - target: Utilities
-        CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF
-        PYTHON: "C:\\Python37-x64"
+      #- target: Utilities
+      #  CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF
+      #  PYTHON: "C:\\Python37-x64"
 
       - target: Python
         CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DGMP_INCLUDE_DIR="c:/Tools/vcpkg/installed/x64-windows/include" -DGMP_LIBRARIES="c:/Tools/vcpkg/installed/x64-windows/lib/mpir.lib" -DGMP_LIBRARIES_DIR="c:/Tools/vcpkg/installed/x64-windows/lib"
@@ -55,6 +55,7 @@ build_script:
   - cmake -G "Visual Studio 15 2017 Win64" %CMAKE_FLAGS% -DCMAKE_TOOLCHAIN_FILE=c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake ..
   - if [%target%]==[Python] (
       cd src/python &
+      dir &
       MSBuild Cython.sln /m /p:Configuration=Release /p:Platform=x64 &
       ctest -j 1 -C Release
     ) else (
