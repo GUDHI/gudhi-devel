@@ -60,22 +60,20 @@ make doxygen
  * Having GMP version 4.2 or higher installed is recommended.
  * 
  * \subsection cgal CGAL
- * The \ref alpha_complex data structure, \ref bottleneck_distance, and few examples requires CGAL, which is a C++
- * library which provides easy access to efficient and reliable geometric algorithms.
+ * Some GUDHI modules (cf. \ref main_page "modules list"), and few examples require CGAL, a C++ library that provides
+ * easy access to efficient and reliable geometric algorithms.
  *
  * \note There is no need to install CGAL, you can just <CODE>cmake . && make</CODE> CGAL (or even
- * <CODE>cmake -DCGAL_HEADER_ONLY=ON .</CODE> for CGAL version &ge; 4.8.0), thereafter you will be able to compile
+ * <CODE>cmake -DCGAL_HEADER_ONLY=ON .</CODE>), thereafter you will be able to compile
  * GUDHI by calling <CODE>cmake -DCGAL_DIR=/your/path/to/CGAL-X.Y .. && make</CODE>
  * 
- * Having CGAL version 4.4.0 or higher installed is recommended. The procedure to install this library according to
+ * The procedure to install this library according to
  * your operating system is detailed here http://doc.cgal.org/latest/Manual/installation.html
  * 
  * The following examples/utilities require the <a target="_blank" href="http://www.cgal.org/">Computational Geometry Algorithms
- * Library</a> (CGAL \cite cgal:eb-15b) and will not be built if CGAL is not installed:
+ * Library</a> (CGAL \cite cgal:eb-15b) and will not be built if CGAL version 4.11.0 or higher is not installed:
  * \li <a href="_simplex_tree_2example_alpha_shapes_3_simplex_tree_from_off_file_8cpp-example.html">
  * Simplex_tree/example_alpha_shapes_3_simplex_tree_from_off_file.cpp</a>
- * 
- * The following examples/utilities require CGAL version &ge; 4.6.0:
  * \li <a href="_witness_complex_2strong_witness_persistence_8cpp-example.html">
  * Witness_complex/strong_witness_persistence.cpp</a>
  * \li <a href="_witness_complex_2weak_witness_persistence_8cpp-example.html">
@@ -86,8 +84,6 @@ make doxygen
  * Witness_complex/example_witness_complex_off.cpp</a>
  * \li <a href="_witness_complex_2example_witness_complex_sphere_8cpp-example.html">
  * Witness_complex/example_witness_complex_sphere.cpp</a>
- *
- * The following example requires CGAL version &ge; 4.7.0:
  * \li <a href="_alpha_complex_2_alpha_complex_from_off_8cpp-example.html">
  * Alpha_complex/Alpha_complex_from_off.cpp</a>
  * \li <a href="_alpha_complex_2_alpha_complex_from_points_8cpp-example.html">
@@ -96,8 +92,6 @@ make doxygen
  * Alpha_complex/alpha_complex_persistence.cpp</a>
  * \li <a href="_persistent_cohomology_2custom_persistence_sort_8cpp-example.html">
  * Persistent_cohomology/custom_persistence_sort.cpp</a>
- * 
- * The following example requires CGAL version &ge; 4.8.1:
  * \li <a href="_bottleneck_distance_2alpha_rips_persistence_bottleneck_distance_8cpp-example.html">
  * Bottleneck_distance/alpha_rips_persistence_bottleneck_distance.cpp.cpp</a>
  * \li <a href="_bottleneck_distance_2bottleneck_basic_example_8cpp-example.html">
@@ -126,20 +120,18 @@ make doxygen
  * Tangential_complex/example_basic.cpp</a>
  * \li <a href="_tangential_complex_2example_with_perturb_8cpp-example.html">
  * Tangential_complex/example_with_perturb.cpp</a>
- *
- * The following example requires CGAL version &ge; 4.11.0:
  * \li <a href="_alpha_complex_2_weighted_alpha_complex_3d_from_points_8cpp-example.html">
  * Alpha_complex/Weighted_alpha_complex_3d_from_points.cpp</a>
  * \li <a href="_alpha_complex_2alpha_complex_3d_persistence_8cpp-example.html">
  * Alpha_complex/alpha_complex_3d_persistence.cpp</a>
  *
- * \subsection eigen3 Eigen3
- * The \ref alpha_complex data structure and few examples requires
- * <a target="_blank" href="http://eigen.tuxfamily.org/">Eigen3</a> is a C++ template library for linear algebra:
+ * \subsection eigen Eigen
+ * Some GUDHI modules (cf. \ref main_page "modules list"), and few examples require
+ * <a target="_blank" href="http://eigen.tuxfamily.org/">Eigen</a> is a C++ template library for linear algebra:
  * matrices, vectors, numerical solvers, and related algorithms.
  * 
- * The following examples/utilities require the <a target="_blank" href="http://eigen.tuxfamily.org/">Eigen3</a> and will not be
- * built if Eigen3 is not installed:
+ * The following examples/utilities require the <a target="_blank" href="http://eigen.tuxfamily.org/">Eigen</a> and will not be
+ * built if Eigen is not installed:
  * \li <a href="_alpha_complex_2_alpha_complex_from_off_8cpp-example.html">
  * Alpha_complex/Alpha_complex_from_off.cpp</a>
  * \li <a href="_alpha_complex_2_alpha_complex_from_points_8cpp-example.html">

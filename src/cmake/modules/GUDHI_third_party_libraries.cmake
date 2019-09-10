@@ -23,42 +23,16 @@ endif()
 # but it implies to use cmake version 3.1 at least.
 find_package(CGAL QUIET)
 
-# Only CGAL versions > 4.4 supports what Gudhi uses from CGAL
-if (CGAL_VERSION VERSION_LESS 4.4.0)
+# Only CGAL versions > 4.11 supports what Gudhi uses from CGAL
+if (CGAL_FOUND AND CGAL_VERSION VERSION_LESS 4.11.0)
   message("++ CGAL version ${CGAL_VERSION} is considered too old to be used by Gudhi.")
   unset(CGAL_FOUND)
+  unset(CGAL_VERSION)
 endif()
+
 if(CGAL_FOUND)
   message(STATUS "CGAL version: ${CGAL_VERSION}.")
   include( ${CGAL_USE_FILE} )
-
-  if (NOT CGAL_VERSION VERSION_LESS 4.8.0)
-    # HACK to detect CGAL version 4.8.0
-    # CGAL version 4.8, 4.8.1 and 4.8.2 are identified as version 4.8.1000)
-    # cf. https://github.com/CGAL/cgal/issues/1559
-    # Limit the HACK between CGAL versions 4.8 and 4.9 because of file read
-    if (NOT CGAL_VERSION VERSION_GREATER 4.9.0)
-      foreach(CGAL_INCLUDE_DIR ${CGAL_INCLUDE_DIRS})
-        if (EXISTS "${CGAL_INCLUDE_DIR}/CGAL/version.h")
-          FILE(READ "${CGAL_INCLUDE_DIR}/CGAL/version.h" contents)
-          STRING(REGEX REPLACE "\n" ";" contents "${contents}")
-          foreach(Line ${contents})
-            if("${Line}" STREQUAL "#define CGAL_VERSION 4.8")
-              set(CGAL_VERSION 4.8.0)
-              message (">>>>> HACK CGAL version to ${CGAL_VERSION}")
-            endif("${Line}" STREQUAL "#define CGAL_VERSION 4.8")
-          endforeach(Line ${contents})
-        endif (EXISTS "${CGAL_INCLUDE_DIR}/CGAL/version.h")
-      endforeach(CGAL_INCLUDE_DIR ${CGAL_INCLUDE_DIRS})
-    endif(NOT CGAL_VERSION VERSION_GREATER 4.9.0)
-
-    if (CGAL_VERSION VERSION_LESS 4.11.0)
-      # For dev version
-      include_directories(BEFORE "src/common/include/gudhi_patches")
-      # For user version
-      include_directories(BEFORE "include/gudhi_patches")
-    endif ()
-  endif()
 endif()
 
 option(WITH_GUDHI_USE_TBB "Build with Intel TBB parallelization" ON)
@@ -127,16 +101,18 @@ function( find_python_module PYTHON_MODULE_NAME )
           RESULT_VARIABLE PYTHON_MODULE_RESULT
           OUTPUT_VARIABLE PYTHON_MODULE_VERSION
           ERROR_VARIABLE PYTHON_MODULE_ERROR)
-  message ("PYTHON_MODULE_NAME = ${PYTHON_MODULE_NAME}
-   - PYTHON_MODULE_RESULT = ${PYTHON_MODULE_RESULT}
-   - PYTHON_MODULE_VERSION = ${PYTHON_MODULE_VERSION}
-   - PYTHON_MODULE_ERROR = ${PYTHON_MODULE_ERROR}")
   if(PYTHON_MODULE_RESULT EQUAL 0)
     # Remove carriage return
     string(STRIP ${PYTHON_MODULE_VERSION} PYTHON_MODULE_VERSION)
+    message ("++ Python module ${PYTHON_MODULE_NAME} - Version ${PYTHON_MODULE_VERSION} found")
+
     set(${PYTHON_MODULE_NAME_UP}_VERSION ${PYTHON_MODULE_VERSION} PARENT_SCOPE)
     set(${PYTHON_MODULE_NAME_UP}_FOUND TRUE PARENT_SCOPE)
   else()
+    message ("PYTHON_MODULE_NAME = ${PYTHON_MODULE_NAME}
+     - PYTHON_MODULE_RESULT = ${PYTHON_MODULE_RESULT}
+     - PYTHON_MODULE_VERSION = ${PYTHON_MODULE_VERSION}
+     - PYTHON_MODULE_ERROR = ${PYTHON_MODULE_ERROR}")
     unset(${PYTHON_MODULE_NAME_UP}_VERSION PARENT_SCOPE)
     set(${PYTHON_MODULE_NAME_UP}_FOUND FALSE PARENT_SCOPE)
   endif()
@@ -151,11 +127,11 @@ if( PYTHONINTERP_FOUND )
   find_python_module("sphinx")
 endif()
 
-if(NOT GUDHI_CYTHON_PATH)
-  message(FATAL_ERROR "ERROR: GUDHI_CYTHON_PATH is not valid.")
-endif(NOT GUDHI_CYTHON_PATH)
+if(NOT GUDHI_PYTHON_PATH)
+  message(FATAL_ERROR "ERROR: GUDHI_PYTHON_PATH is not valid.")
+endif(NOT GUDHI_PYTHON_PATH)
 
-option(WITH_GUDHI_CYTHON_RUNTIME_LIBRARY_DIRS "Build with setting runtime_library_dirs. Usefull when setting rpath is not allowed" ON)
+option(WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS "Build with setting runtime_library_dirs. Usefull when setting rpath is not allowed" ON)
 
 if(PYTHONINTERP_FOUND AND CYTHON_FOUND)
   if(SPHINX_FOUND)
@@ -165,7 +141,7 @@ if(PYTHONINTERP_FOUND AND CYTHON_FOUND)
     if(NOT SPHINX_PATH)
       if(PYTHON_VERSION_MAJOR EQUAL 3)
         # In Python3, just hack sphinx-build if it does not exist
-        set(SPHINX_PATH "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/${GUDHI_CYTHON_PATH}/doc/python3-sphinx-build.py")
+        set(SPHINX_PATH "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/${GUDHI_PYTHON_PATH}/doc/python3-sphinx-build.py")
       endif(PYTHON_VERSION_MAJOR EQUAL 3)
     endif(NOT SPHINX_PATH)
   endif(SPHINX_FOUND)

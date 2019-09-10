@@ -10,7 +10,7 @@ set(GUDHI_MODULES "" CACHE INTERNAL "GUDHI_MODULES")
 set(GUDHI_MISSING_MODULES "" CACHE INTERNAL "GUDHI_MISSING_MODULES")
 
 # This variable is used by Cython CMakeLists.txt and by GUDHI_third_party_libraries to know its path
-set(GUDHI_CYTHON_PATH "cython")
+set(GUDHI_PYTHON_PATH "python")
 
 # For third parties libraries management - To be done last as CGAL updates CMAKE_MODULE_PATH
 include(GUDHI_third_party_libraries NO_POLICY_SCOPE)
@@ -61,7 +61,7 @@ add_subdirectory(GudhUI)
 
 if (WITH_GUDHI_PYTHON)
   # specific for cython module
-  add_subdirectory(${GUDHI_CYTHON_PATH})
+  add_subdirectory(${GUDHI_PYTHON_PATH})
 else()
   message("++ Python module will not be compiled because WITH_GUDHI_PYTHON is set to OFF")
   set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python")

@@ -22,7 +22,7 @@ add_test(NAME Persistence_representation_utilities_compute_number_of_dominant_in
 install(TARGETS compute_number_of_dominant_intervals DESTINATION bin)
 
 
-if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   add_executable ( compute_bottleneck_distance compute_bottleneck_distance.cpp )
   if (TBB_FOUND)
   target_link_libraries(compute_bottleneck_distance ${TBB_LIBRARIES})
@@ -34,4 +34,4 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
       "${CMAKE_CURRENT_BINARY_DIR}/../second.pers")
 
   install(TARGETS compute_bottleneck_distance DESTINATION bin)
-endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)

@@ -1,0 +1,53 @@
+from setuptools import setup, Extension
+from Cython.Build import cythonize
+from numpy import get_include as numpy_get_include
+
+"""This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+    Author(s):       Vincent Rouvreau
+
+   Copyright (C) 2019  Inria
+
+   Modification(s):
+     - YYYY/MM Author: Description of the modification
+"""
+
+__author__ = "Vincent Rouvreau"
+__copyright__ = "Copyright (C) 2016  Inria"
+__license__ = "MIT"
+
+modules = [@GUDHI_PYTHON_MODULES_TO_COMPILE@]
+
+source_dir='@CMAKE_CURRENT_SOURCE_DIR@/gudhi/'
+extra_compile_args=[@GUDHI_PYTHON_EXTRA_COMPILE_ARGS@]
+extra_link_args=[@GUDHI_PYTHON_EXTRA_LINK_ARGS@]
+libraries=[@GUDHI_PYTHON_LIBRARIES@]
+library_dirs=[@GUDHI_PYTHON_LIBRARY_DIRS@]
+include_dirs = [numpy_get_include(), '@CMAKE_CURRENT_SOURCE_DIR@/gudhi/', @GUDHI_PYTHON_INCLUDE_DIRS@]
+runtime_library_dirs=[@GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS@]
+
+# Create ext_modules list from module list
+ext_modules = []
+for module in modules:
+    ext_modules.append(Extension(
+        'gudhi.' + module,
+        sources = [source_dir + module + '.pyx',],
+        language = 'c++',
+        extra_compile_args=extra_compile_args,
+        extra_link_args=extra_link_args,
+        libraries=libraries,
+        library_dirs=library_dirs,
+        include_dirs=include_dirs,
+        runtime_library_dirs=runtime_library_dirs,))
+
+setup(
+    name = 'gudhi',
+    packages=["gudhi",],
+    author='GUDHI Editorial Board',
+    author_email='gudhi-contact@lists.gforge.inria.fr',
+    version='@GUDHI_VERSION@',
+    url='http://gudhi.gforge.inria.fr/',
+    ext_modules = cythonize(ext_modules),
+    install_requires = ['cython','numpy >= 1.9',],
+    setup_requires = ['numpy >= 1.9',],
+)

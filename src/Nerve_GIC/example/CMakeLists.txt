@@ -1,6 +1,6 @@
 project(Nerve_GIC_examples)
 
-if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
+if (NOT CGAL_VERSION VERSION_LESS 4.11.0)
 
   add_executable ( CoordGIC CoordGIC.cpp )
   add_executable ( FuncGIC FuncGIC.cpp )
@@ -25,4 +25,4 @@ if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
   install(TARGETS CoordGIC DESTINATION bin)
   install(TARGETS FuncGIC DESTINATION bin)
 
-endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)
+endif (NOT CGAL_VERSION VERSION_LESS 4.11.0)

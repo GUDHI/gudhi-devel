@@ -1,0 +1,40 @@
+from importlib import import_module
+
+"""This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+    Author(s):       Vincent Rouvreau
+
+   Copyright (C) 2016  Inria
+
+   Modification(s):
+     - YYYY/MM Author: Description of the modification
+"""
+
+__author__ = "GUDHI Editorial Board"
+__copyright__ = "Copyright (C) 2016 Inria"
+__license__ = "https://gudhi.inria.fr/licensing/"
+__version__ = "@GUDHI_VERSION@"
+# This variable is used by doctest to find files
+__root_source_dir__ = "@CMAKE_SOURCE_DIR@"
+__debug_info__ = @GUDHI_PYTHON_DEBUG_INFO@
+
+from sys import exc_info
+from importlib import import_module
+
+__all__ = [@GUDHI_PYTHON_MODULES@]
+
+__available_modules__ = ''
+__missing_modules__ = ''
+
+# try to import * from gudhi.__module_name__
+for __module_name__ in __all__:
+    try:
+        __module__ = import_module('gudhi.' + __module_name__)
+        try:
+            __to_import__ = __module__.__all__
+        except AttributeError:
+            __to_import__ = [name for name in __module__.__dict__ if not name.startswith('_')]
+        globals().update({name: __module__.__dict__[name] for name in __to_import__})
+        __available_modules__ += __module_name__ + ";"
+    except:
+        __missing_modules__ += __module_name__ + ";"

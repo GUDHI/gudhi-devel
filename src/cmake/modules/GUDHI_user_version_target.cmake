@@ -29,7 +29,7 @@ add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy ${CMAKE_SOURCE_DIR}/README.md ${GUDHI_USER_VERSION_DIR}/README.md)
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
-                   copy ${CMAKE_SOURCE_DIR}/COPYING ${GUDHI_USER_VERSION_DIR}/COPYING)
+                   copy ${CMAKE_SOURCE_DIR}/LICENSE ${GUDHI_USER_VERSION_DIR}/LICENSE)
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy ${CMAKE_SOURCE_DIR}/src/CMakeLists.txt ${GUDHI_USER_VERSION_DIR}/CMakeLists.txt)
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
@@ -42,7 +42,7 @@ add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy_directory ${CMAKE_SOURCE_DIR}/biblio ${GUDHI_USER_VERSION_DIR}/biblio)
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
-                   copy_directory ${CMAKE_SOURCE_DIR}/src/cython ${GUDHI_USER_VERSION_DIR}/cython)
+                   copy_directory ${CMAKE_SOURCE_DIR}/${GUDHI_PYTHON_PATH} ${GUDHI_USER_VERSION_DIR}/python)
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy_directory ${CMAKE_SOURCE_DIR}/data ${GUDHI_USER_VERSION_DIR}/data)
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
@@ -51,11 +51,8 @@ add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy_directory ${CMAKE_SOURCE_DIR}/src/GudhUI ${GUDHI_USER_VERSION_DIR}/GudhUI)
 
 set(GUDHI_DIRECTORIES "doc;example;concept;utilities")
-if (CGAL_VERSION VERSION_LESS 4.11.0)
-  set(GUDHI_INCLUDE_DIRECTORIES "include/gudhi;include/gudhi_patches")
-else ()
-    set(GUDHI_INCLUDE_DIRECTORIES "include/gudhi")
-endif ()
+
+set(GUDHI_INCLUDE_DIRECTORIES "include/gudhi")
 
 foreach(GUDHI_MODULE ${GUDHI_MODULES_FULL_LIST})
   foreach(GUDHI_DIRECTORY ${GUDHI_DIRECTORIES})
