@@ -23,18 +23,18 @@ from importlib import import_module
 
 __all__ = [@GUDHI_PYTHON_MODULES@]
 
-__available_modules__ = ''
-__missing_modules__ = ''
+__available_modules = ''
+__missing_modules = ''
 
-# try to import * from gudhi.__module_name__
-for __module_name__ in __all__:
+# try to import * from gudhi.__module_name
+for __module_name in __all__:
     try:
-        __module__ = import_module('gudhi.' + __module_name__)
+        __module = import_module('gudhi.' + __module_name)
         try:
-            __to_import__ = __module__.__all__
+            __to_import = __module.__all__
         except AttributeError:
-            __to_import__ = [name for name in __module__.__dict__ if not name.startswith('_')]
-        globals().update({name: __module__.__dict__[name] for name in __to_import__})
-        __available_modules__ += __module_name__ + ";"
+            __to_import = [name for name in __module.__dict__ if not name.startswith('_')]
+        globals().update({name: __module.__dict__[name] for name in __to_import})
+        __available_modules += __module_name + ";"
     except:
-        __missing_modules__ += __module_name__ + ";"
+        __missing_modules += __module_name + ";"
