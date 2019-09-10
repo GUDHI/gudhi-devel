@@ -3,12 +3,11 @@
 All rights reserved
 """
 
-import sys
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.metrics import pairwise_distances
 try:
-    from gudhi import bottleneck_distance
+    from .. import bottleneck_distance
     USE_GUDHI = True
 except ImportError:
     USE_GUDHI = False
@@ -120,7 +119,6 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
 
             if USE_GUDHI:
                 for i in range(num_diag1):
-                    #sys.stdout.write( str(i*1.0 / num_diag1) + "\r")
                     for j in range(i+1, num_diag1):
                         matrix[i,j] = bottleneck_distance(X[i], X[j], self.epsilon)
                         matrix[j,i] = matrix[i,j]
@@ -133,7 +131,6 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
 
             if USE_GUDHI:
                 for i in range(num_diag1):
-                    #sys.stdout.write( str(i*1.0 / num_diag1) + "\r")
                     for j in range(num_diag2):
                         matrix[i,j] = bottleneck_distance(X[i], self.diagrams_[j], self.epsilon)
             else:

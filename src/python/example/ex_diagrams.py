@@ -2,12 +2,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.kernel_approximation import RBFSampler
 
-import sys
-sys.path.append("../sktda/")
-from preprocessing import *
-from metrics import *
-from vector_methods import *
-from kernel_methods import *
+from gudhi.sktda import Landscape, Silhouette, BettiCurve, ComplexPolynomial,\
+  TopologicalVector, DiagramScaler, BirthPersistenceTransform,\
+  PersistenceImage, PersistenceWeightedGaussianKernel,\
+  PersistenceScaleSpaceKernel, SlicedWassersteinDistance,\
+  SlicedWassersteinKernel, BottleneckDistance, PersistenceFisherKernel
 
 D = np.array([[0.,4.],[1.,2.],[3.,8.],[6.,8.]])
 plt.scatter(D[:,0],D[:,1])
@@ -44,11 +43,11 @@ TV = TopologicalVector(threshold=-1)
 tv = TV.fit_transform(diags)
 print("Topological vector is " + str(tv[0,:]))
 
-diagsT = DiagramPreprocessor(use=True, scalers=[([0,1], BirthPersistenceTransform())]).fit_transform(diags)
-PI = PersistenceImage(bandwidth=1., weight=lambda x: x[1], im_range=[0,10,0,10], resolution=[100,100])
-pi = PI.fit_transform(diagsT)
-plt.imshow(np.flip(np.reshape(pi[0], [100,100]), 0))
-plt.show()
+#diagsT = DiagramPreprocessor(use=True, scalers=[([0,1], BirthPersistenceTransform())]).fit_transform(diags)
+#PI = PersistenceImage(bandwidth=1., weight=lambda x: x[1], im_range=[0,10,0,10], resolution=[100,100])
+#pi = PI.fit_transform(diagsT)
+#plt.imshow(np.flip(np.reshape(pi[0], [100,100]), 0))
+#plt.show()
 
 plt.scatter(D[:,0],D[:,1])
 D = np.array([[1.,5.],[3.,6.],[2.,7.]])
