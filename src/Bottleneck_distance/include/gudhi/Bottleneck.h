@@ -1,14 +1,13 @@
-/*    This file is part of the Gudhi Library. The Gudhi library
- *    (Geometric Understanding in Higher Dimensions) is a generic C++
- *    library for computational topology.
- *
+/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+ *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author:       Francois Godi
  *
  *    Copyright (C) 2015 Inria
  *
  *    Modification(s):
- *      - YYYY/MM Author: Description of the modification
  *      - 2019/06 Vincent Rouvreau : Fix doxygen warning.
+ *      - 2019/08 Vincent Rouvreau: Fix issue #10 for CGAL
+ *      - YYYY/MM Author: Description of the modification
  */
 
 #ifndef BOTTLENECK_H_
@@ -16,12 +15,19 @@
 
 #include <gudhi/Graph_matching.h>
 
+#include <CGAL/version.h>  // for CGAL_VERSION_NR
+
 #include <vector>
 #include <algorithm>  // for max
 #include <limits>  // for numeric_limits
 
 #include <cmath>
 #include <cfloat>  // FLT_EVAL_METHOD
+
+// Make compilation fail - required for external projects - https://github.com/GUDHI/gudhi-devel/issues/10
+#if CGAL_VERSION_NR < 1041101000
+# error Alpha_complex_3d is only available for CGAL >= 4.11
+#endif
 
 namespace Gudhi {
 

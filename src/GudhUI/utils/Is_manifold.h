@@ -1,10 +1,5 @@
-/*
- * Is_manifold.h
- *  Created on: Jan 28, 2015
- * This file is part of the Gudhi Library. The Gudhi library 
- *    (Geometric Understanding in Higher Dimensions) is a generic C++ 
- *    library for computational topology.
- *
+/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+ *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       David Salinas
  *
  *    Copyright (C) 2014 Inria
