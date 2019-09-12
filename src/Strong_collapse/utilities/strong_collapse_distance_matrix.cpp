@@ -66,13 +66,16 @@ int main(int argc, char* argv[]) {
     exit(0);
   }
 
-  Flag_complex_strong_collapse flag_complex(off_reader.get_point_cloud().size());
-  if (edge_length_set.size() == 1)
-    flag_complex.initialize_exact_version(edge_graph);
-  else
-    flag_complex.initialize_approximate_version(edge_graph, edge_length_set);
-
-  auto distance_matrix = flag_complex.get_distance_matrix();
+  Gudhi::strong_collapse::Distance_matrix distance_matrix;
+  if (edge_length_set.size() == 1) {
+    Flag_complex_strong_collapse flag_complex_exact_version(off_reader.get_point_cloud().size(),
+                                                            edge_graph);
+    distance_matrix = flag_complex_exact_version.get_distance_matrix();
+  } else {
+    Flag_complex_strong_collapse flag_complex_approximate_version(off_reader.get_point_cloud().size(),
+                                                            edge_graph, edge_length_set);
+    distance_matrix = flag_complex_approximate_version.get_distance_matrix();
+  }
 
   std::ostream* output_stream = &std::cout;
   std::ofstream file_out;
