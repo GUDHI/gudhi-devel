@@ -1,0 +1,9 @@
+Edge graph contains 11 edges. Minimal edge length is '5'. Maximal edge length is '11'.
+Distance matrix after strong collapse computation.
+           0
+       6.325           0
+       6.325  1.798e+308           0
+       6.708       6.325       6.325           0
+          11  1.798e+308  1.798e+308  1.798e+308           0
+  1.798e+308  1.798e+308  1.798e+308  1.798e+308          11           0
+          11  1.798e+308  1.798e+308  1.798e+308  1.798e+308          11           0

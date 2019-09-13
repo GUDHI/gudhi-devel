@@ -65,7 +65,26 @@ namespace strong_collapse {
  * 4 of \cite strongcollapsesocg2019 descibes an efficient strategy to convert a flag tower to a flag filtration, 
  * using only the 1-skeletons of the complexes, which we implement here.
  * 
- * \subsection approximate_and_exact_versions Approximate and Exact versions
+ * \subsection strong_collapse_from_points_example Example from a point cloud and a distance function
+ * 
+ * This example builds the edge graph from the given points, threshold value, and distance function.
+ * Then it creates a `Flag_complex_strong_collapse` (exact version) with it.
+ * 
+ * Then, it is asked to display the distance matrix after the collapse operation.
+ * 
+ * \include Strong_collapse/strong_collapse_from_points.cpp
+ * 
+ * \code $> ./strong_collapse_from_points
+ * \endcode
+ *
+ * the program output is:
+ * 
+ * \include Strong_collapse/strong_collapse_from_points_for_doc.txt
+ * 
+ * A `Gudhi::rips_complex::Rips_complex` can be built from the distance matrix if you want to compute persistence on
+ * top of it.
+ * 
+ * \subsection strong_collapse_approximate_and_exact_versions Approximate and Exact versions
  * Given a Rips filtration, one can choose to collapse the original complexes after each edge inclusion. 
  * However, we can also choose to strong collapse the complexes less often, i.e. after several edge inclusions rather
  * than just one. 
@@ -85,8 +104,9 @@ namespace strong_collapse {
 
  * For more information about our approach of computing strong collapses and persitent homology via strong collapses,
  * we refer the users to \cite strongcollapsesocg2019 and \cite strongcollapseesa2018.
+ * 
  */
-/** @} */  // end defgroup rips_complex
+/** @} */  // end defgroup strong_collapse
 
 }  // namespace strong_collapse
 
