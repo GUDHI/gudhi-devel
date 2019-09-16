@@ -83,7 +83,7 @@ public:
   /** \brief Constructor of Coxeter triangulation of a given dimension. 
    * @param[in] dimension The dimension of the triangulation.
    */
-  Coxeter_triangulation(unsigned dimension)
+  Coxeter_triangulation(std::size_t dimension)
     : Freudenthal_triangulation<Permutahedral_representation_>(dimension, root_matrix(dimension)) {}
 };
 

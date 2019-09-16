@@ -368,29 +368,32 @@ private:
     std::size_t amb_d = interior_simplex_cell_maps_[0].begin()->first.vertex().size();
     for (auto& sc_pair: interior_simplex_cell_maps_[cell_d - 1])
       min_d = std::min(min_d, sc_pair.first.dimension());
-    for (auto& sc_pair: boundary_simplex_cell_maps_[cell_d - 1])
-      min_d = std::min(min_d, sc_pair.first.dimension());
+    if (boundary_simplex_cell_maps_.size() > 0)
+      for (auto& sc_pair: boundary_simplex_cell_maps_[cell_d - 1])
+	min_d = std::min(min_d, sc_pair.first.dimension());
 
     for (std::size_t i = min_d + 1; i <= amb_d; ++i) {
-      if (cell_d != intr_d_) {
-	for (auto& sc_pair: boundary_simplex_cell_maps_[cell_d - 1]) {
-	  const Simplex_handle& simplex = sc_pair.first;
-	  Hasse_cell* cell = sc_pair.second;
-	  if (simplex.dimension() >= i)
-	    continue;
-	  for (Simplex_handle coface: simplex.coface_range(i)) {
-	    Hasse_cell* new_cell;
-	    Result_type success;
-	    std::tie(new_cell, success) = insert_cell(coface, cell_d, true);
-	    if (success == Result_type::self || success == Result_type::inserted)
-	      new_cell->get_boundary().emplace_back(std::make_pair(cell, 1));
+      if (boundary_simplex_cell_maps_.size() > 0) {
+	if (cell_d != intr_d_) {
+	  for (auto& sc_pair: boundary_simplex_cell_maps_[cell_d - 1]) {
+	    const Simplex_handle& simplex = sc_pair.first;
+	    Hasse_cell* cell = sc_pair.second;
+	    if (simplex.dimension() >= i)
+	      continue;
+	    for (Simplex_handle coface: simplex.coface_range(i)) {
+	      Hasse_cell* new_cell;
+	      Result_type success;
+	      std::tie(new_cell, success) = insert_cell(coface, cell_d, true);
+	      if (success == Result_type::self || success == Result_type::inserted)
+		new_cell->get_boundary().emplace_back(std::make_pair(cell, 1));
+	    }
 	  }
-	}
-	// output_layer_before(boundary_simplex_cell_maps_, cell_d, i, true);
-	join_collapse_level(cell_d, true);
-	// output_layer_before(boundary_simplex_cell_maps_, cell_d, i, false);
+	  // output_layer_before(boundary_simplex_cell_maps_, cell_d, i, true);
+	  join_collapse_level(cell_d, true);
+	  // output_layer_before(boundary_simplex_cell_maps_, cell_d, i, false);
+	}	  
       }
-
+      
       for (auto& sc_pair: interior_simplex_cell_maps_[cell_d - 1]) {
 	const Simplex_handle& simplex = sc_pair.first;
         Hasse_cell* cell = sc_pair.second;
@@ -402,22 +405,24 @@ private:
   	  std::tie(new_cell, success) = insert_cell(coface, cell_d, false);
 	  if (success == Result_type::inserted) {
 #ifdef GUDHI_COX_OUTPUT_TO_HTML	    
-	  using Vertex = typename Simplex_handle::Vertex;
-	  using Ordered_set_partition = typename Simplex_handle::OrderedSetPartition;
-	  using Part = typename Ordered_set_partition::value_type;
-	  Vertex vertex = {0, -1, -4};
-	  Ordered_set_partition partition = { Part({2}), Part({1}), Part({0}), Part({3}) };
-	  if (coface == Simplex_handle(vertex, partition))
-	    std::cout << "";
+	    using Vertex = typename Simplex_handle::Vertex;
+	    using Ordered_set_partition = typename Simplex_handle::OrderedSetPartition;
+	    using Part = typename Ordered_set_partition::value_type;
+	    Vertex vertex = {0, -1, -4};
+	    Ordered_set_partition partition = { Part({2}), Part({1}), Part({0}), Part({3}) };
+	    if (coface == Simplex_handle(vertex, partition))
+	      std::cout << "";
 #endif
-	    Simplex_cell_map b_layer = boundary_simplex_cell_maps_[cell_d-1];
-	    auto curr_it = b_layer.lower_bound(coface);
-	    auto upper_bound = b_layer.upper_bound(coface.greatest_face());
-	    for (; curr_it != upper_bound; ++curr_it) {
-	      const Simplex_handle& b_simplex = curr_it->first;
-	      Hasse_cell* b_cell = curr_it->second;
-	      if (b_simplex.is_face_of(coface))
-		new_cell->get_boundary().emplace_back(std::make_pair(b_cell, 1));
+	    if (boundary_simplex_cell_maps_.size() > 0) {
+	      Simplex_cell_map b_layer = boundary_simplex_cell_maps_[cell_d-1];
+	      auto curr_it = b_layer.lower_bound(coface);
+	      auto upper_bound = b_layer.upper_bound(coface.greatest_face());
+	      for (; curr_it != upper_bound; ++curr_it) {
+		const Simplex_handle& b_simplex = curr_it->first;
+		Hasse_cell* b_cell = curr_it->second;
+		if (b_simplex.is_face_of(coface))
+		  new_cell->get_boundary().emplace_back(std::make_pair(b_cell, 1));
+	      }
 	    }
 	  }
   	  if (success == Result_type::self || success == Result_type::inserted)
@@ -585,6 +590,10 @@ public:
 
   const Simplex_cell_map& boundary_simplex_cell_map(std::size_t cell_d) const {
     return boundary_simplex_cell_maps_[cell_d];
+  }
+
+  const Cell_simplex_map& cell_simplex_map() const {
+    return cell_simplex_map_;
   }
 
   const Cell_point_map& cell_point_map() const {

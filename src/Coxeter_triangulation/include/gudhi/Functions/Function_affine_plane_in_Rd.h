@@ -56,6 +56,7 @@ struct Function_affine_plane_in_Rd : public Function {
    * correspond to the ambient dimension, the number of columns should corespond to 
    * the size of the normal basis (codimension). 
    * @param[in] offset The offset vector of the affine plane.
+   * The dimension of the vector should be the ambient dimension of the manifold.
    */
   Function_affine_plane_in_Rd(const Eigen::MatrixXd& normal_matrix,
 			      const Eigen::VectorXd& offset)

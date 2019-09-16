@@ -392,9 +392,9 @@ void write_cc(std::ofstream& ofs) {
       ofs << "          <li> Insert_cell called for " << simplex_format(cc_info.simplex_, false)
 	  << "\n";
       ofs << "            <ul>\n";
-      for (const std::string& cof: cc_info.faces_)
-	ofs << "              <li>Checking if " << simplex_format(cc_info.simplex_, false)
-	    << " is a face of " << simplex_format(cof, false) << "\n";
+      // for (const std::string& cof: cc_info.faces_)
+      // 	ofs << "              <li>Checking if " << simplex_format(cc_info.simplex_, false)
+      // 	    << " is a face of " << simplex_format(cof, false) << "\n";
       ofs << "            </ul>\n";
       ofs << "            <ul>\n";
       if (cc_info.status_ == CC_detail_info::Result_type::self) {
@@ -415,9 +415,9 @@ void write_cc(std::ofstream& ofs) {
 	ofs << "            <p id = \"" << id_from_simplex("I" + cc_info.trigger_) << "\">"
 	    << "Deleting " << simplex_format(cc_info.trigger_, false) << "</p>\n";
       }
-      for (const std::string& fac: cc_info.cofaces_)
-	ofs << "              <li>Checking if " << simplex_format(cc_info.simplex_, false)
-	    << " is a coface of " << simplex_format(fac, false) << "\n";
+      // for (const std::string& fac: cc_info.cofaces_)
+      // 	ofs << "              <li>Checking if " << simplex_format(cc_info.simplex_, false)
+      // 	    << " is a coface of " << simplex_format(fac, false) << "\n";
       if (cc_info.status_ == CC_detail_info::Result_type::coface) {
 	ofs << "            <p><span style=\"color:darkorange\">The simplex "
 	    << simplex_format(cc_info.simplex_, false) << " is a coface of the simplex "
@@ -501,9 +501,9 @@ void write_cc(std::ofstream& ofs) {
 	}
 	ofs << "          <li> Insert_simplex called on " << simplex_format(cc_info.simplex_, true);
 	ofs << "            <ul>\n";
-	for (const std::string& cof: cc_info.faces_)
-	  ofs << "              <li>Checking if " << simplex_format(cc_info.simplex_, true)
-	      << " is a face of " << simplex_format(cof, true) << "\n";
+	// for (const std::string& cof: cc_info.faces_)
+	//   ofs << "              <li>Checking if " << simplex_format(cc_info.simplex_, true)
+	//       << " is a face of " << simplex_format(cof, true) << "\n";
 	ofs << "            </ul>\n";
 	ofs << "            <ul>\n";
 	if (cc_info.status_ == CC_detail_info::Result_type::self) {
@@ -525,9 +525,9 @@ void write_cc(std::ofstream& ofs) {
 	  ofs << "            <p id=\"" << id_from_simplex(cc_info.trigger_)
 	      << "\">Deleting " << simplex_format(cc_info.trigger_, true) << "</p>\n";
 	}
-	for (const std::string& fac: cc_info.cofaces_)
-	  ofs << "              <li>Checking if " << simplex_format(cc_info.simplex_, true)
-	      << " is a coface of " << simplex_format(fac, true) << "\n";
+	// for (const std::string& fac: cc_info.cofaces_)
+	//   ofs << "              <li>Checking if " << simplex_format(cc_info.simplex_, true)
+	//       << " is a coface of " << simplex_format(fac, true) << "\n";
 	ofs << "            </ul>\n";
 	ofs << "          </li>\n";
 	if (cc_info.status_ == CC_detail_info::Result_type::coface) {

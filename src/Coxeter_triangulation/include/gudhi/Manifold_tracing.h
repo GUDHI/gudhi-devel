@@ -10,8 +10,8 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#ifndef MANIFOLD_TRACING_ALGORITHM_H_
-#define MANIFOLD_TRACING_ALGORITHM_H_
+#ifndef MANIFOLD_TRACING_H_
+#define MANIFOLD_TRACING_H_
 
 #include <gudhi/Query_result.h>
 

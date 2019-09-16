@@ -1,7 +1,7 @@
 #include <gudhi/Freudenthal_triangulation.h>
 #include <gudhi/Coxeter_triangulation.h>
 
-int main() {
+int main(int argc, char** argv) {
   Gudhi::coxeter_triangulation::Freudenthal_triangulation<> tr(3);
   std::vector<double> point({3,-1,0});
   std::cout << tr.locate_point(point) << "\n";
@@ -36,5 +36,24 @@ int main() {
   std::cout << "Coxeter triangulation's matrix is\n" << cox_tr.matrix() << "\n";
   std::cout << "Coxeter triangulation's offset is\n" << cox_tr.offset() << "\n";
 
+  {
+    std::size_t d = atoi(argv[1]);
+    double level = atof(argv[2]);
+    Gudhi::coxeter_triangulation::Coxeter_triangulation<> cox_tr(d);
+    cox_tr.change_matrix(level * cox_tr.matrix());
+    cox_tr.change_offset(Eigen::VectorXd::Random(d));
+    double diam = 0;
+    auto s = cox_tr.locate_point(Eigen::VectorXd::Zero(d));
+    for (auto v1: s.vertex_range())
+      for (auto v2: s.vertex_range()) {
+	Eigen::VectorXd p1 = cox_tr.cartesian_coordinates(v1);
+	Eigen::VectorXd p2 = cox_tr.cartesian_coordinates(v2);
+	double dist = (p1-p2).norm();
+	if (dist > diam)
+	  diam = dist;
+      }
+    std::cout << "The diameter of a simplex in a " << d << "-dimensional Coxeter triangulation with level " << level << " = " << diam << "\n";
+  }
+  
   return 0;
 }

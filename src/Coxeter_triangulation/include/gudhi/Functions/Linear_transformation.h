@@ -82,7 +82,7 @@ private:
  * the concept FunctionForImplicitManifold.
  */
 template <class Function_>
-Linear_transformation<Function_> linear_transformation(const Function_& function,
+Linear_transformation<Function_> make_linear_transformation(const Function_& function,
 						       const Eigen::MatrixXd& matrix) {
   return Linear_transformation<Function_>(function, matrix); 
 }

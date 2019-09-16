@@ -26,6 +26,8 @@ namespace Gudhi {
 
 namespace coxeter_triangulation {
 
+
+
 /** \class Implicit_manifold_intersection_oracle
  *  \brief An oracle that supports the intersection query on an implicit manifold.
  *

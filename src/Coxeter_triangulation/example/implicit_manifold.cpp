@@ -1009,7 +1009,9 @@ int main(int argc, char** const argv) {
 
   double lambda = 1;
   if (argc >= 4)
-    lambda = 0.2;
+    lambda = atof(argv[3]);
+  std::cout << "threshold = " << threshold << "\n";
+  std::cout << "lambda = " << lambda << "\n";
   Coxeter_triangulation<> cox_tr(oracle.amb_d());
   cox_tr.change_offset(Eigen::VectorXd::Random(oracle.amb_d()));
   cox_tr.change_matrix(lambda * cox_tr.matrix());

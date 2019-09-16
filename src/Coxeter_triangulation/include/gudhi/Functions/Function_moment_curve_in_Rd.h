@@ -51,7 +51,7 @@ struct Function_moment_curve_in_Rd : public Function {
   
   /** 
    * \brief Constructor of the function that defines an implicit moment curve
- * in the d-dimensional Euclidean space.
+   * in the d-dimensional Euclidean space.
    *
    * @param[in] r Numerical parameter.
    * @param[in] d The ambient dimension.
@@ -59,6 +59,18 @@ struct Function_moment_curve_in_Rd : public Function {
   Function_moment_curve_in_Rd(double r,
 			      std::size_t d)
     : m_(1), k_(d-1), d_(d), r_(r) {}
+
+  /** 
+   * \brief Constructor of the function that defines an implicit moment curve
+   * in the d-dimensional Euclidean space.
+   *
+   * @param[in] r Numerical parameter.
+   * @param[in] d The ambient dimension.
+   */
+  Function_moment_curve_in_Rd(double r,
+			      std::size_t d,
+			      Eigen::VectorXd& center)
+    : m_(1), k_(d-1), d_(d), r_(r), off_(center) {}
   
 protected:
   std::size_t m_, k_, d_;
