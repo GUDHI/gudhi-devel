@@ -29,7 +29,8 @@ using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featur
 using Filtration_value = Simplex_tree::Filtration_value;
 using Point = std::vector<Filtration_value>;
 using Points_off_reader = Gudhi::Points_off_reader<Point>;
-using Flag_complex_strong_collapse = Gudhi::strong_collapse::Flag_complex_strong_collapse;
+using Flag_complex_strong_collapse = Gudhi::strong_collapse::Flag_complex_strong_collapse<Simplex_tree>;
+using Flag_complex_sparse_matrix = Gudhi::strong_collapse::Flag_complex_sparse_matrix<Simplex_tree>;
 using Filtration_set = std::vector<Filtration_value>;
 using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
@@ -73,7 +74,7 @@ int main(int argc, char* argv[]) {
     exit(0);
   }
 
-  Gudhi::strong_collapse::Distance_matrix distance_matrix;
+  Flag_complex_sparse_matrix::Distance_matrix distance_matrix;
   if (edge_length_set.size() == 1) {
     Flag_complex_strong_collapse flag_complex_exact_version(off_reader.get_point_cloud().size(),
                                                             edge_graph);

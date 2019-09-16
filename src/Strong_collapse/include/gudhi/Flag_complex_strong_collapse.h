@@ -45,9 +45,10 @@ namespace strong_collapse {
  * \remark `Flag_complex_strong_collapse` is parallelized using \ref tbb.
  * Performances are quite improved when it is installed.
  */
+template<class SimplicialComplex>
 class Flag_complex_strong_collapse {
  private:
-  Gudhi::strong_collapse::Flag_complex_tower_assembler tower_assembler_;
+  Gudhi::strong_collapse::Flag_complex_tower_assembler<SimplicialComplex> tower_assembler_;
  public:
   /** \brief Flag_complex_strong_collapse approximate version constructor.
    *
@@ -59,8 +60,7 @@ class Flag_complex_strong_collapse {
    * @param[in] step_range A valid range of filtration values.
    * @exception std::invalid_argument In case step_range is empty.
    */
-  template<typename SimplicialComplex,
-      class InputStepRange = std::initializer_list<typename SimplicialComplex::Filtration_value>>
+  template<class InputStepRange = std::initializer_list<typename SimplicialComplex::Filtration_value>>
   Flag_complex_strong_collapse(std::size_t number_of_points,
                                const Gudhi::Filtered_edges_vector<SimplicialComplex>& edge_graph,
                                const InputStepRange& step_range)
@@ -92,18 +92,17 @@ class Flag_complex_strong_collapse {
     // Create the pipeline
     tbb::pipeline pipeline;
 
-    using Filtered_edges_vector = Gudhi::Filtered_edges_vector<SimplicialComplex>;
     // Create strong collapse parallel stage and add it to the pipeline
-    Strong_collapse_parallel_filter<Filtered_edges_vector, InputStepRange> collapse_parallel(number_of_points,
-                                                                                             edge_graph,
-                                                                                             step_range_copy);
+    Strong_collapse_parallel_filter<SimplicialComplex, InputStepRange> collapse_parallel(number_of_points,
+                                                                                         edge_graph,
+                                                                                         step_range_copy);
     pipeline.add_filter(collapse_parallel);
 
     // Create tower assembler parallel stage and add it to the pipeline
-    Tower_assembler_parallel_filter<Filtered_edges_vector, InputStepRange> tower_parallel(number_of_points,
-                                                                                          edge_graph,
-                                                                                          step_range_copy,
-                                                                                          &tower_assembler_);
+    Tower_assembler_parallel_filter<SimplicialComplex, InputStepRange> tower_parallel(number_of_points,
+                                                                                      edge_graph,
+                                                                                      step_range_copy,
+                                                                                      &tower_assembler_);
     pipeline.add_filter(tower_parallel);
 
     // Run the pipeline
@@ -111,13 +110,13 @@ class Flag_complex_strong_collapse {
     // busy; 2-4 works
     pipeline.run(init_parallel.default_num_threads() * 4);
 #else  // GUDHI_USE_TBB
-    Flag_complex_sparse_matrix matrix_before_collapse(number_of_points);
+    Flag_complex_sparse_matrix<SimplicialComplex> matrix_before_collapse(number_of_points);
 
     for (auto threshold : step_range_copy) {
 #ifdef DEBUG_TRACES
       std::cout << "Flag_complex_strong_collapse::initialize_approximate_version - threshold=" << threshold << std::endl;
 #endif  // DEBUG_TRACES
-      Flag_complex_sparse_matrix collapsed_matrix(number_of_points,
+      Flag_complex_sparse_matrix<SimplicialComplex> collapsed_matrix(number_of_points,
                                                   edge_graph.sub_filter_edges_by_filtration(threshold));
 
       collapsed_matrix.strong_collapse();
@@ -135,7 +134,6 @@ class Flag_complex_strong_collapse {
    * @param[in] number_of_points Number of points.
    * @param[in] edge_graph A valid Gudhi::Filtered_edges_vector.
    */
-  template<typename SimplicialComplex>
   Flag_complex_strong_collapse(std::size_t number_of_points,
                                const Gudhi::Filtered_edges_vector<SimplicialComplex>& edge_graph)
       : tower_assembler_(number_of_points) {
@@ -145,13 +143,12 @@ class Flag_complex_strong_collapse {
     // Create the pipeline
     tbb::pipeline pipeline;
 
-    using Filtered_edges_vector = Gudhi::Filtered_edges_vector<SimplicialComplex>;
     // Create strong collapse parallel stage and add it to the pipeline
-    Strong_collapse_parallel_filter<Filtered_edges_vector> collapse_parallel(number_of_points, edge_graph);
+    Strong_collapse_parallel_filter<SimplicialComplex> collapse_parallel(number_of_points, edge_graph);
     pipeline.add_filter(collapse_parallel);
 
     // Create tower assembler parallel stage and add it to the pipeline
-    Tower_assembler_parallel_filter<Filtered_edges_vector> tower_parallel(number_of_points, edge_graph,
+    Tower_assembler_parallel_filter<SimplicialComplex> tower_parallel(number_of_points, edge_graph,
                                                                           &tower_assembler_);
     pipeline.add_filter(tower_parallel);
 
@@ -160,10 +157,10 @@ class Flag_complex_strong_collapse {
     // busy; 2-4 works
     pipeline.run(init_parallel.default_num_threads() * 4);
 #else  // GUDHI_USE_TBB
-    Flag_complex_sparse_matrix matrix_before_collapse(number_of_points);
+    Flag_complex_sparse_matrix<SimplicialComplex> matrix_before_collapse(number_of_points);
 
     for (std::size_t index = 0; index < edge_graph.size(); index++) {
-      Flag_complex_sparse_matrix collapsed_matrix(number_of_points,
+      Flag_complex_sparse_matrix<SimplicialComplex> collapsed_matrix(number_of_points,
                                                   edge_graph.sub_filter_edges_by_index(index));
 
       collapsed_matrix.strong_collapse();
@@ -178,7 +175,7 @@ class Flag_complex_strong_collapse {
    *
    * @return Distance matrix.
    */
-  Distance_matrix get_distance_matrix() {
+  typename Flag_complex_sparse_matrix<SimplicialComplex>::Distance_matrix get_distance_matrix() {
     return tower_assembler_.distance_matrix();
   }
 

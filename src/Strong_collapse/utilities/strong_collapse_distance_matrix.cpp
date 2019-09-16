@@ -29,7 +29,8 @@ struct Simplicial_complex {
 using Filtration_value = Simplicial_complex::Filtration_value;
 using Point = std::vector<Filtration_value>;
 using Points_off_reader = Gudhi::Points_off_reader<Point>;
-using Flag_complex_strong_collapse = Gudhi::strong_collapse::Flag_complex_strong_collapse;
+using Flag_complex_strong_collapse = Gudhi::strong_collapse::Flag_complex_strong_collapse<Simplicial_complex>;
+using Flag_complex_sparse_matrix = Gudhi::strong_collapse::Flag_complex_sparse_matrix<Simplicial_complex>;
 using Filtration_set = std::vector<Filtration_value>;
 
 void program_options(int argc, char* argv[], std::string& off_file_points, std::string& output_file,
@@ -66,7 +67,7 @@ int main(int argc, char* argv[]) {
     exit(0);
   }
 
-  Gudhi::strong_collapse::Distance_matrix distance_matrix;
+  Flag_complex_sparse_matrix::Distance_matrix distance_matrix;
   if (edge_length_set.size() == 1) {
     Flag_complex_strong_collapse flag_complex_exact_version(off_reader.get_point_cloud().size(),
                                                             edge_graph);

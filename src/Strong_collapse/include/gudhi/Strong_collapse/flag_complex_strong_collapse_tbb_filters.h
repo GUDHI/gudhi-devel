@@ -16,6 +16,7 @@
 
 #include <gudhi/Strong_collapse/Flag_complex_sparse_matrix.h>
 #include <gudhi/Strong_collapse/Flag_complex_tower_assembler.h>
+#include <gudhi/graph_simplicial_complex.h>
 
 #include <tbb/pipeline.h>  // for tbb::pipeline
 #include <tbb/concurrent_vector.h>  // for tbb::concurrent_vector
@@ -28,18 +29,18 @@ namespace Gudhi {
 
 namespace strong_collapse {
 
-using Indexed_sparse_matrix_ptr = std::pair<std::size_t, Flag_complex_sparse_matrix*>;
-
-template<typename FilteredEdgesVector, class InputStepRange = std::initializer_list<double>>
+template<typename SimplicialComplex, class InputStepRange = std::initializer_list<typename SimplicialComplex::Filtration_value>>
 class Strong_collapse_parallel_filter: public tbb::filter {
 public:
-  Strong_collapse_parallel_filter(std::size_t number_of_points, const FilteredEdgesVector& edge_graph) :
+  Strong_collapse_parallel_filter(std::size_t number_of_points,
+                                  const Filtered_edges_vector<SimplicialComplex>& edge_graph) :
       filter(parallel),
       number_of_points_(number_of_points),
       edge_graph_(edge_graph),
       index_(0) { }
 
-  Strong_collapse_parallel_filter(std::size_t number_of_points, const FilteredEdgesVector& edge_graph,
+  Strong_collapse_parallel_filter(std::size_t number_of_points,
+                                  const Filtered_edges_vector<SimplicialComplex>& edge_graph,
                                   const InputStepRange& step_range) :
       filter(parallel),
       number_of_points_(number_of_points),
@@ -48,8 +49,9 @@ public:
       index_(0) { }
 
 private:
+  using Indexed_sparse_matrix_ptr = std::pair<std::size_t, Flag_complex_sparse_matrix<SimplicialComplex>*>;
   std::size_t number_of_points_;
-  FilteredEdgesVector edge_graph_;
+  Filtered_edges_vector<SimplicialComplex> edge_graph_;
   InputStepRange step_range_;
   std::size_t index_;
   std::mutex index_mutex;
@@ -59,7 +61,7 @@ private:
     std::size_t index_backup = index_;
     index_++;
     index_mutex.unlock();
-    Flag_complex_sparse_matrix *collapsed_matrix_ptr = nullptr;
+    Flag_complex_sparse_matrix<SimplicialComplex> *collapsed_matrix_ptr = nullptr;
 
     if (step_range_.size() > 0) {
       // Approximate version
@@ -68,7 +70,7 @@ private:
         return nullptr;
       }
       double threshold = *(step_range_.begin() + index_backup);
-      collapsed_matrix_ptr = new Flag_complex_sparse_matrix(number_of_points_,
+      collapsed_matrix_ptr = new Flag_complex_sparse_matrix<SimplicialComplex>(number_of_points_,
                                                             edge_graph_.sub_filter_edges_by_filtration(threshold));
     } else {
       // Exact version
@@ -76,7 +78,7 @@ private:
         // Parallel end condition
         return nullptr;
       }
-      collapsed_matrix_ptr = new Flag_complex_sparse_matrix(number_of_points_,
+      collapsed_matrix_ptr = new Flag_complex_sparse_matrix<SimplicialComplex>(number_of_points_,
                                                             edge_graph_.sub_filter_edges_by_index(index_backup));
     }
 
@@ -87,28 +89,31 @@ private:
   }
 };
 
-template<typename FilteredEdgesVector, class InputStepRange = std::initializer_list<double>>
+template<typename SimplicialComplex, class InputStepRange = std::initializer_list<double>>
 class Tower_assembler_parallel_filter: public tbb::filter {
 public:
-  Tower_assembler_parallel_filter(std::size_t number_of_points, const FilteredEdgesVector& edge_graph,
-                                        Flag_complex_tower_assembler* tower_assembler_ptr) :
+  Tower_assembler_parallel_filter(std::size_t number_of_points,
+                                  const Filtered_edges_vector<SimplicialComplex>& edge_graph,
+                                  Flag_complex_tower_assembler<SimplicialComplex>* tower_assembler_ptr) :
       filter(serial_in_order),
       edge_graph_(edge_graph),
       tower_assembler_ptr_(tower_assembler_ptr),
       parallel_matrix_ptr_(edge_graph_.size(), nullptr),
       index_(0) {
-    matrix_before_collapse_ptr_ = new Flag_complex_sparse_matrix(number_of_points);
+    matrix_before_collapse_ptr_ = new Flag_complex_sparse_matrix<SimplicialComplex>(number_of_points);
   }
 
-  Tower_assembler_parallel_filter(std::size_t number_of_points, const FilteredEdgesVector& edge_graph,
-                                  const InputStepRange& step_range, Flag_complex_tower_assembler* tower_assembler_ptr) :
+  Tower_assembler_parallel_filter(std::size_t number_of_points,
+                                  const Filtered_edges_vector<SimplicialComplex>& edge_graph,
+                                  const InputStepRange& step_range,
+                                  Flag_complex_tower_assembler<SimplicialComplex>* tower_assembler_ptr) :
       filter(parallel),
       edge_graph_(edge_graph),
       step_range_(step_range),
       tower_assembler_ptr_(tower_assembler_ptr),
       parallel_matrix_ptr_(edge_graph_.size(), nullptr),
       index_(0) {
-    matrix_before_collapse_ptr_ = new Flag_complex_sparse_matrix(number_of_points);
+    matrix_before_collapse_ptr_ = new Flag_complex_sparse_matrix<SimplicialComplex>(number_of_points);
   }
 
   ~Tower_assembler_parallel_filter() {
@@ -122,12 +127,13 @@ public:
   Tower_assembler_parallel_filter& operator= (Tower_assembler_parallel_filter&& other) = delete;
 
 private:
-  FilteredEdgesVector edge_graph_;
+  using Indexed_sparse_matrix_ptr = std::pair<std::size_t, Flag_complex_sparse_matrix<SimplicialComplex>*>;
+  Filtered_edges_vector<SimplicialComplex>  edge_graph_;
   InputStepRange step_range_;
-  Flag_complex_tower_assembler* tower_assembler_ptr_;
-  tbb::concurrent_vector<Flag_complex_sparse_matrix*> parallel_matrix_ptr_;
+  Flag_complex_tower_assembler<SimplicialComplex>* tower_assembler_ptr_;
+  tbb::concurrent_vector<Flag_complex_sparse_matrix<SimplicialComplex>*> parallel_matrix_ptr_;
   std::size_t index_;
-  Flag_complex_sparse_matrix* matrix_before_collapse_ptr_;
+  Flag_complex_sparse_matrix<SimplicialComplex>* matrix_before_collapse_ptr_;
   std::mutex index_mutex;
 
   void *operator()(void * item) {
@@ -144,7 +150,7 @@ private:
       while ((parallel_matrix_ptr_[index_] != nullptr) && index_ < parallel_matrix_ptr_.size()) {
         if (step_range_.size() > 0) {
           // Approximate version
-          double threshold = *(step_range_.begin() + index_);
+          auto threshold = *(step_range_.begin() + index_);
 
           tower_assembler_ptr_->build_tower_for_two_complexes(*matrix_before_collapse_ptr_,
                                                               *(parallel_matrix_ptr_[index_]),

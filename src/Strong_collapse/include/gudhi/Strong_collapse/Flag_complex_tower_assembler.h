@@ -24,8 +24,6 @@ namespace Gudhi {
 
 namespace strong_collapse {
 
-using Distance_matrix = std::vector<std::vector<double>>;
-
 // assumptions : (1) K1 and K2 have the same vertex set
 //               (2) The set of simplices of K1 is a subset of set of simplices of K2
 // K1  ->  K2    [Original Simplicial Complexes]
@@ -33,11 +31,18 @@ using Distance_matrix = std::vector<std::vector<double>>;
 // |       |
 // K1c ->  K2c   [Strongly Collapsed Flag Complexes]
 
+template<class SimplicialComplex>
 class Flag_complex_tower_assembler {
  private:
+  using Filtration_value = typename SimplicialComplex::Filtration_value;
+  using Reduction_map = typename Flag_complex_sparse_matrix<SimplicialComplex>::Reduction_map;
+  using Edge = typename Flag_complex_sparse_matrix<SimplicialComplex>::Edge;
+  using Sparse_row_matrix = typename Flag_complex_sparse_matrix<SimplicialComplex>::Sparse_row_matrix;
+  using Sparse_row_iterator = typename Flag_complex_sparse_matrix<SimplicialComplex>::Sparse_row_iterator;
+
   Reduction_map renamed_vertices_;
   std::size_t current_rename_counter_;
-  Flag_complex_sparse_matrix flag_filtration_;
+  Flag_complex_sparse_matrix<SimplicialComplex> flag_filtration_;
 
  public:
   Flag_complex_tower_assembler(const std::size_t num_vertices)
@@ -50,8 +55,9 @@ class Flag_complex_tower_assembler {
 
   // mat_1 and mat_2 are simplex_trees of K1c and K2c (the
   // collapsed ones), redmap_2 is the map of K2 -> K2c
-  void build_tower_for_two_complexes(Flag_complex_sparse_matrix& mat_1, const Flag_complex_sparse_matrix& mat_2,
-                                     const double filtration_value, const std::string& outFile = "")
+  void build_tower_for_two_complexes(Flag_complex_sparse_matrix<SimplicialComplex>& mat_1,
+                                     const Flag_complex_sparse_matrix<SimplicialComplex>& mat_2,
+                                     const Filtration_value filtration_value, const std::string& outFile = "")
   {
     std::ofstream myfile(outFile, std::ios::app);
     if (myfile.is_open() || outFile.empty()) {
@@ -131,14 +137,14 @@ class Flag_complex_tower_assembler {
     }
   }
 
-  Distance_matrix distance_matrix() {
+  typename Flag_complex_sparse_matrix<SimplicialComplex>::Distance_matrix distance_matrix() {
     std::size_t non_zero_rw = flag_filtration_.num_vertices();
-    double inf = std::numeric_limits<double>::max();
+    Filtration_value inf = std::numeric_limits<Filtration_value>::max();
     Sparse_row_matrix mat = flag_filtration_.uncollapsed_matrix();
 
-    Distance_matrix distance_mat;
+    typename Flag_complex_sparse_matrix<SimplicialComplex>::Distance_matrix distance_mat;
     for (std::size_t indx = 0; indx < non_zero_rw; indx++) {
-      std::vector<double> distances;
+      std::vector<Filtration_value> distances;
       Sparse_row_iterator it(mat, indx);
       // Iterate over the non-zero columns
       for (std::size_t j = 0; j <= indx; j++) {

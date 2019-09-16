@@ -28,23 +28,27 @@ namespace Gudhi {
 
 namespace strong_collapse {
 
-using Vertex = int;
-using Edge = std::pair<Vertex, Vertex>;
-using Edge_list = std::vector<Edge>;
-
-using Reduction_map = std::unordered_map<Vertex, Vertex>;
-
-using Sparse_row_matrix = Eigen::SparseMatrix<double, Eigen::RowMajor>;
-using Sparse_row_iterator = Sparse_row_matrix::InnerIterator;
-
-using Filtered_sorted_edge_list = std::vector<std::tuple<double, Vertex, Vertex> >;
-
 //!  Class Flag_complex_sparse_matrix
 /*!
   The class for storing the Vertices v/s MaxSimplices Sparse Matrix and performing collapses operations using the N^2()
   Algorithm.
 */
+template<class SimplicialComplex>
 class Flag_complex_sparse_matrix {
+ private:
+  using Vertex = typename SimplicialComplex::Vertex_handle;
+  using Filtration_value = typename SimplicialComplex::Filtration_value;
+
+ public:
+  using Reduction_map = std::unordered_map<Vertex, Vertex>;
+  using Edge = std::pair<Vertex, Vertex>;
+  using Edge_list = std::vector<Edge>;
+  using Filtered_sorted_edge_list = std::vector<std::tuple<Filtration_value, Vertex, Vertex> >;
+  using Sparse_row_matrix = Eigen::SparseMatrix<Filtration_value, Eigen::RowMajor>;
+  using Sparse_row_iterator = typename Sparse_row_matrix::InnerIterator;
+  /** \brief Type definition to store a distance matrix. */
+  using Distance_matrix = std::vector<std::vector<typename SimplicialComplex::Filtration_value>>;
+
  private:
   /** \brief Stores the vertices (or unordered set of vertex) of the original simplicial complex. */
   std::unordered_set<Vertex> vertices_;
@@ -165,8 +169,8 @@ class Flag_complex_sparse_matrix {
     yes, then recursively call fully_compact_this_vertex() on the second element of the original pair in consideration
     and assign its resultant image as the image of the first element of the original pair in consideration as well.
   */
-  void fully_compact_this_vertex(Reduction_map::iterator iter) {
-    Reduction_map::iterator found = reduction_map_.find(iter->second);
+  void fully_compact_this_vertex(typename Reduction_map::iterator iter) {
+    typename Reduction_map::iterator found = reduction_map_.find(iter->second);
     if (found == reduction_map_.end()) return;
 
     fully_compact_this_vertex(found);
@@ -182,7 +186,7 @@ class Flag_complex_sparse_matrix {
     basically calls fully_compact_this_vertex() for each entry in the map.
   */
   void fully_compact() {
-    Reduction_map::iterator it = reduction_map_.begin();
+    typename Reduction_map::iterator it = reduction_map_.begin();
     while (it != reduction_map_.end()) {
       fully_compact_this_vertex(it);
       it++;
@@ -200,12 +204,12 @@ class Flag_complex_sparse_matrix {
     // row_iterator_ contains list (FIFO) of rows to be considered for domination check
     while (!row_iterator_.empty())
     {
-      double k = row_iterator_.front();
+      Filtration_value k = row_iterator_.front();
       row_iterator_.pop();
       row_insert_indicator_[k] = false;
       if (!domination_indicator_[k])  // Check if is  already dominated
       {
-        std::vector<double> non_zero_inner_indices = read_row_index(k);
+        std::vector<Filtration_value> non_zero_inner_indices = read_row_index(k);
         for (auto index : non_zero_inner_indices) {
           // "true" for row domination comparison
           int check_domination = pair_domination_check(k, index);
@@ -224,11 +228,11 @@ class Flag_complex_sparse_matrix {
   }
 
   // True for row comparison, false for column comparison
-  int pair_domination_check(double i, double j)
+  int pair_domination_check(Filtration_value i, Filtration_value j)
   {
     if (i != j) {
-      std::vector<double> list_i = read_row_index(i);
-      std::vector<double> list_j = read_row_index(j);
+      std::vector<Filtration_value> list_i = read_row_index(i);
+      std::vector<Filtration_value> list_j = read_row_index(j);
       if (list_j.size() <= list_i.size()) {
         if (std::includes(list_i.begin(), list_i.end(), list_j.begin(), list_j.end()))
           // list_j is a subset of list_i
@@ -243,9 +247,9 @@ class Flag_complex_sparse_matrix {
   }
 
   // Returns list of non-zero columns of the particular indx.
-  std::vector<double> read_row_index(double indx)
+  std::vector<Filtration_value> read_row_index(Filtration_value indx)
   {
-    std::vector<double> non_zero_indices;
+    std::vector<Filtration_value> non_zero_indices;
     if (!domination_indicator_[indx])
       // Iterate over the non-zero columns
       for (Sparse_row_iterator it(sparse_matrix_, indx); it; ++it) {
@@ -257,7 +261,7 @@ class Flag_complex_sparse_matrix {
     return non_zero_indices;
   }
 
-  void set_zero(double dominated, double dominating) {
+  void set_zero(Filtration_value dominated, Filtration_value dominating) {
     domination_indicator_[dominated] = true;
     reduction_map_[row_to_vertex_[dominated]] = row_to_vertex_[dominating];
 
@@ -278,7 +282,7 @@ class Flag_complex_sparse_matrix {
 
   // Returns list of non-zero "vertices" of the particular colIndx. the difference
   // is in the return type
-  std::vector<Vertex> read_row(double row_index)
+  std::vector<Vertex> read_row(Filtration_value row_index)
   {
     std::vector<Vertex> colmns;
     // Iterate over the non-zero columns
@@ -293,7 +297,7 @@ class Flag_complex_sparse_matrix {
 
   // Returns list of all non-zero "vertices" of the particular colIndx which
   // are currently active. the difference is in the return type.
-  std::vector<Vertex> read_active_row(double row_index)
+  std::vector<Vertex> read_active_row(Filtration_value row_index)
   {
     std::vector<Vertex> colmns;
     // Iterate over the non-zero columns
@@ -309,7 +313,7 @@ class Flag_complex_sparse_matrix {
 
   // Returns list of all non-zero "vertices" of the particular colIndx whether
   // dominated or not. the difference is in the return type.
-  std::vector<Vertex> read_all_row(double row_index)
+  std::vector<Vertex> read_all_row(Filtration_value row_index)
   {
     std::vector<Vertex> colmns;
     // Iterate over the non-zero columns
@@ -352,8 +356,7 @@ class Flag_complex_sparse_matrix {
 
   //! Main Constructor
   /*!
-    Argument is an instance of Fake_simplex_tree. <br>
-    This is THE function that initialises all data members to appropriate values. <br>
+    This constructor initialises all data members to appropriate values. <br>
     <B>row_to_vertex_</B>, <B>vertex_to_row_</B>, <B>rows</B>, <B>cols</B>, <B>sparseMxSimplices</B> are initialised here.
     <B>domination_indicator_</B>, <B>row_insert_indicator_</B>
     ,<B>row_iterator_</B>,<B>simpDomnIndicator</B>,<B>colInsertIndicator</B> and <B>columnIterator</B> are initialised by
@@ -429,7 +432,7 @@ class Flag_complex_sparse_matrix {
     }
     return false;
   }
-  void insert_vertex(const Vertex& vertex, double filt_val) {
+  void insert_vertex(const Vertex& vertex, Filtration_value filt_val) {
     auto rw = vertex_to_row_.find(vertex);
     if (rw == vertex_to_row_.end()) {
       // Initializing the diagonal element of the adjency matrix corresponding to rw_b.
@@ -446,7 +449,7 @@ class Flag_complex_sparse_matrix {
   }
 
   // The edge must not be added before, it should be a new edge.
-  void insert_new_edges(const Vertex& u, const Vertex& v, double filt_val) {
+  void insert_new_edges(const Vertex& u, const Vertex& v, Filtration_value filt_val) {
     insert_vertex(u, filt_val);
     if (u != v) {
       insert_vertex(v, filt_val);
@@ -483,7 +486,7 @@ class Flag_complex_sparse_matrix {
       bool del_mem = membership(del);
       bool keep_mem = membership(keep);
       if (del_mem && keep_mem) {
-        std::vector<double> del_indcs, keep_indcs, diff;
+        std::vector<Filtration_value> del_indcs, keep_indcs, diff;
         auto row_del = vertex_to_row_[del];
         auto row_keep = vertex_to_row_[keep];
         del_indcs = read_row_index(row_del);
@@ -516,7 +519,7 @@ class Flag_complex_sparse_matrix {
   void print_sparse_skeleton() { std::cout << sparse_matrix_ << std::endl; }
 
   // Returns the contracted edge. along with the contracted vertex in the begining of the list at {u,u} or {v,v}
-  void active_strong_expansion(const Vertex& v, const Vertex& w, double filt_val) {
+  void active_strong_expansion(const Vertex& v, const Vertex& w, Filtration_value filt_val) {
     if (membership(v) && membership(w) && v != w) {
       auto active_list_v_w = active_relative_neighbors(v, w);
       auto active_list_w_v = active_relative_neighbors(w, v);
@@ -573,7 +576,7 @@ class Flag_complex_sparse_matrix {
     }
   }
 
-  void active_edge_insertion(const Vertex& v, const Vertex& w, double filt_val) {
+  void active_edge_insertion(const Vertex& v, const Vertex& w, Filtration_value filt_val) {
     insert_new_edges(v, w, filt_val);
   }
 

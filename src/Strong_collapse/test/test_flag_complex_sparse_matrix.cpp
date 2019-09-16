@@ -19,10 +19,16 @@
 #include <gudhi/Unitary_tests_utils.h>
 
 // Type definitions
-using Filtered_edge = std::tuple<double, int, int>;
-using Filtered_sorted_edge_list = std::vector<Filtered_edge>;
-using Edge_list = std::vector<std::pair<int, int>>;
-using Reduction_map = std::unordered_map<int, int>;
+struct Simplicial_complex {
+  using Vertex_handle = int;
+  using Filtration_value = double;
+};
+
+using Flag_complex_sparse_matrix = Gudhi::strong_collapse::Flag_complex_sparse_matrix<Simplicial_complex>;
+
+using Filtered_sorted_edge_list = Flag_complex_sparse_matrix::Filtered_sorted_edge_list;
+using Edge_list = Flag_complex_sparse_matrix::Edge_list;
+using Reduction_map = Flag_complex_sparse_matrix::Reduction_map;
 
 // Can be used with Edge_list or Reduction_map
 template<typename Structure >
@@ -51,7 +57,7 @@ BOOST_AUTO_TEST_CASE(flag_complex_sparse_matrix_strong_collapse) {
     //    |   |
     //  4 o---o 3
     // Check no collapse is performed
-    Gudhi::strong_collapse::Flag_complex_sparse_matrix mat_coll(4, input_edges);
+    Flag_complex_sparse_matrix mat_coll(4, input_edges);
 
     mat_coll.strong_collapse();
     Edge_list collapsed_edges = mat_coll.all_edges();
@@ -82,7 +88,7 @@ BOOST_AUTO_TEST_CASE(flag_complex_sparse_matrix_strong_collapse) {
     //    |/ \|
     //  4 o---o 3
     // Check all is collapsed on 1
-    Gudhi::strong_collapse::Flag_complex_sparse_matrix mat_coll(4, input_edges);
+    Flag_complex_sparse_matrix mat_coll(4, input_edges);
 
     mat_coll.strong_collapse();
     Edge_list collapsed_edges = mat_coll.all_edges();
@@ -113,7 +119,7 @@ BOOST_AUTO_TEST_CASE(flag_complex_sparse_matrix_strong_collapse) {
     //  4 o---o---o 6
     //        3
     // Check 4 and 1 are collapsed on 2
-    Gudhi::strong_collapse::Flag_complex_sparse_matrix mat_coll(6, input_edges);
+    Flag_complex_sparse_matrix mat_coll(6, input_edges);
 
     mat_coll.strong_collapse();
     Edge_list collapsed_edges = mat_coll.all_edges();
@@ -145,7 +151,7 @@ BOOST_AUTO_TEST_CASE(flag_complex_sparse_matrix_strong_collapse) {
     //  4 o---o---o 6
     //        3
     // Check all is collapsed on 2
-    Gudhi::strong_collapse::Flag_complex_sparse_matrix mat_coll(6, input_edges);
+    Flag_complex_sparse_matrix mat_coll(6, input_edges);
 
     mat_coll.strong_collapse();
     Edge_list collapsed_edges = mat_coll.all_edges();
@@ -179,7 +185,7 @@ BOOST_AUTO_TEST_CASE(flag_complex_sparse_matrix_strong_collapse) {
     //    |   |
     //  8 o---o 7
     // Check 1, 2, 5 and 6 are collapsed on 3
-    Gudhi::strong_collapse::Flag_complex_sparse_matrix mat_coll(8, input_edges);
+    Flag_complex_sparse_matrix mat_coll(8, input_edges);
 
     mat_coll.strong_collapse();
     Edge_list collapsed_edges = mat_coll.all_edges();
@@ -216,7 +222,7 @@ BOOST_AUTO_TEST_CASE(flag_complex_sparse_matrix_strong_collapse) {
     //    |/ \|
     //  8 o---o 7
     // Check all is collapsed on 3
-    Gudhi::strong_collapse::Flag_complex_sparse_matrix mat_coll(8, input_edges);
+    Flag_complex_sparse_matrix mat_coll(8, input_edges);
 
     mat_coll.strong_collapse();
     Edge_list collapsed_edges = mat_coll.all_edges();
@@ -245,7 +251,7 @@ BOOST_AUTO_TEST_CASE(flag_complex_sparse_matrix_dummy_test) {
   input_edges.push_back(std::make_tuple(1., 1, 0));
 
   {
-    Gudhi::strong_collapse::Flag_complex_sparse_matrix mat_coll(2, input_edges);
+    Flag_complex_sparse_matrix mat_coll(2, input_edges);
     mat_coll.print_sparse_skeleton();
     Edge_list collapsed_edges = mat_coll.all_edges();
     std::cout << "---------------------------------------------------------------------------------------" << std::endl;

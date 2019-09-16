@@ -42,6 +42,9 @@ using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomolog
 using Point = std::vector<double>;
 using Points_off_reader = Gudhi::Points_off_reader<Point>;
 
+using Flag_complex_tower_assembler = Gudhi::strong_collapse::Flag_complex_tower_assembler<Simplex_tree>;
+using Flag_complex_sparse_matrix = Gudhi::strong_collapse::Flag_complex_sparse_matrix<Simplex_tree>;
+
 void program_options(int argc, char* argv[], std::string& off_file_points, std::string& filediag,
                      Filtration_value& threshold, int& dim_max, int& p, Filtration_value& min_persistence);
 
@@ -68,7 +71,7 @@ int main(int argc, char* argv[]) {
       Gudhi::compute_edge_graph<Gudhi::Filtered_edges_vector, Simplex_tree>(off_reader.get_point_cloud(), threshold,
                                                                             Gudhi::Euclidean_distance());
 
-  Gudhi::strong_collapse::Flag_complex_tower_assembler twr_assembler(number_of_points);
+  Flag_complex_tower_assembler twr_assembler(number_of_points);
 
   // The pipeline is:
   //
@@ -98,19 +101,19 @@ int main(int argc, char* argv[]) {
   std::cout << "min=" << edge_graph.get_filtration_min() << " - max=" << edge_graph.get_filtration_max()
             << " - index_step=" << indices[0] << " - size=" << edge_graph_size << std::endl;
 
-  Gudhi::strong_collapse::Flag_complex_sparse_matrix mat_prev_coll(number_of_points);
+  Flag_complex_sparse_matrix mat_prev_coll(number_of_points);
 
   for (std::size_t index : indices) {
     std::cout << "index=" << index << std::endl;
-    Gudhi::strong_collapse::Flag_complex_sparse_matrix mat_coll(number_of_points,
-                                                                edge_graph.sub_filter_edges_by_index(index));
+    Flag_complex_sparse_matrix mat_coll(number_of_points,
+                                        edge_graph.sub_filter_edges_by_index(index));
 
     mat_coll.strong_collapse();
 
     twr_assembler.build_tower_for_two_complexes(mat_prev_coll, mat_coll, threshold);
     mat_prev_coll = mat_coll;
   }
-  Gudhi::strong_collapse::Distance_matrix sparse_distances = twr_assembler.distance_matrix();
+  Flag_complex_sparse_matrix::Distance_matrix sparse_distances = twr_assembler.distance_matrix();
 
   Rips_complex rips_complex_after_collapse(sparse_distances, threshold);
 

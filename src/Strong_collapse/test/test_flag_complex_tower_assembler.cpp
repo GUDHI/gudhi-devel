@@ -26,10 +26,16 @@
 #include <gudhi/Unitary_tests_utils.h>
 
 // Type definitions
-using Filtered_edge = std::tuple<double, int, int>;
-using Filtered_sorted_edge_list = std::vector<Filtered_edge>;
-using Edge_list = std::vector<std::pair<int, int>>;
-using Reduction_map = std::unordered_map<int, int>;
+struct Simplicial_complex {
+  using Vertex_handle = int;
+  using Filtration_value = double;
+};
+
+using Flag_complex_sparse_matrix = Gudhi::strong_collapse::Flag_complex_sparse_matrix<Simplicial_complex>;
+using Filtered_sorted_edge_list = Flag_complex_sparse_matrix::Filtered_sorted_edge_list;
+using Edge_list = Flag_complex_sparse_matrix::Edge_list;
+using Reduction_map = Flag_complex_sparse_matrix::Reduction_map;
+using Flag_complex_tower_assembler = Gudhi::strong_collapse::Flag_complex_tower_assembler<Simplicial_complex>;
 
 #define GUDHI_TEST_DISTANCE_MATRIX_CLOSE(first_collection, second_collection) { \
   BOOST_CHECK(first_collection.size() == second_collection.size()); \
@@ -69,7 +75,7 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
   //    |   |
   //  4 o---o 3
   // No collapse is performed
-  Gudhi::strong_collapse::Flag_complex_sparse_matrix mat_coll_1(4, input_edges);
+  Flag_complex_sparse_matrix mat_coll_1(4, input_edges);
 
   mat_coll_1.strong_collapse();
 
@@ -83,17 +89,17 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
   //    |/ \|
   //  4 o---o 3
   // All is collapsed on 1
-  Gudhi::strong_collapse::Flag_complex_sparse_matrix mat_coll_2(4, input_edges);
+  Flag_complex_sparse_matrix mat_coll_2(4, input_edges);
 
   mat_coll_2.strong_collapse();
 
-  Gudhi::strong_collapse::Flag_complex_tower_assembler tower_assembler_1(4);
+  Flag_complex_tower_assembler tower_assembler_1(4);
 
   tower_assembler_1.build_tower_for_two_complexes(mat_coll_1,
                                              mat_coll_2,
                                              10.,
                                              "./tower_assembler_1.txt");
-  Gudhi::strong_collapse::Distance_matrix sparse_distances_1 = tower_assembler_1.distance_matrix();
+  Flag_complex_sparse_matrix::Distance_matrix sparse_distances_1 = tower_assembler_1.distance_matrix();
 
   std::cout << "#1. sparse_distances size =" << sparse_distances_1.size() << std::endl;
   for (auto line : sparse_distances_1) {
@@ -116,17 +122,17 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
   //  4 o---o---o 6
   //        3
   // Check 4 and 1 are collapsed on 2
-  Gudhi::strong_collapse::Flag_complex_sparse_matrix mat_coll_3(6, input_edges);
+  Flag_complex_sparse_matrix mat_coll_3(6, input_edges);
 
   mat_coll_3.strong_collapse();
 
-  Gudhi::strong_collapse::Flag_complex_tower_assembler tower_assembler_2(6);
+  Flag_complex_tower_assembler tower_assembler_2(6);
 
   tower_assembler_2.build_tower_for_two_complexes(mat_coll_2,
                                              mat_coll_3,
                                              10.,
                                              "./tower_assembler_2.txt");
-  Gudhi::strong_collapse::Distance_matrix sparse_distances_2 = tower_assembler_2.distance_matrix();
+  Flag_complex_sparse_matrix::Distance_matrix sparse_distances_2 = tower_assembler_2.distance_matrix();
 
   std::cout << "#2. sparse_distances size =" << sparse_distances_2.size() << std::endl;
   for (auto line : sparse_distances_2) {
@@ -148,17 +154,17 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
   //  4 o---o---o 6
   //        3
   // all is collapsed on 2
-  Gudhi::strong_collapse::Flag_complex_sparse_matrix mat_coll_4(6, input_edges);
+  Flag_complex_sparse_matrix mat_coll_4(6, input_edges);
 
   mat_coll_4.strong_collapse();
 
-  Gudhi::strong_collapse::Flag_complex_tower_assembler tower_assembler_3(6);
+  Flag_complex_tower_assembler tower_assembler_3(6);
 
   tower_assembler_3.build_tower_for_two_complexes(mat_coll_3,
                                              mat_coll_4,
                                              10.,
                                              "./tower_assembler_3.txt");
-  Gudhi::strong_collapse::Distance_matrix sparse_distances_3 = tower_assembler_3.distance_matrix();
+  Flag_complex_sparse_matrix::Distance_matrix sparse_distances_3 = tower_assembler_3.distance_matrix();
 
   std::cout << "#3. sparse_distances size =" << sparse_distances_3.size() << std::endl;
   for (auto line : sparse_distances_3) {
@@ -185,17 +191,17 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
   //    |   |
   //  8 o---o 7
   // 1, 2, 5 and 6 are collapsed on 3
-  Gudhi::strong_collapse::Flag_complex_sparse_matrix mat_coll_5(8, input_edges);
+  Flag_complex_sparse_matrix mat_coll_5(8, input_edges);
 
   mat_coll_5.strong_collapse();
 
-  Gudhi::strong_collapse::Flag_complex_tower_assembler tower_assembler_4(8);
+  Flag_complex_tower_assembler tower_assembler_4(8);
 
   tower_assembler_4.build_tower_for_two_complexes(mat_coll_4,
                                              mat_coll_5,
                                              10.,
                                              "./tower_assembler_4.txt");
-  Gudhi::strong_collapse::Distance_matrix sparse_distances_4 = tower_assembler_4.distance_matrix();
+  Flag_complex_sparse_matrix::Distance_matrix sparse_distances_4 = tower_assembler_4.distance_matrix();
 
   std::cout << "#4. sparse_distances size =" << sparse_distances_4.size() << std::endl;
   for (auto line : sparse_distances_4) {
@@ -221,17 +227,17 @@ BOOST_AUTO_TEST_CASE(tower_assembler_strong_collapse) {
   //    |/ \|
   //  8 o---o 7
   // all is collapsed on 3
-  Gudhi::strong_collapse::Flag_complex_sparse_matrix mat_coll_6(8, input_edges);
+  Flag_complex_sparse_matrix mat_coll_6(8, input_edges);
 
   mat_coll_6.strong_collapse();
 
-  Gudhi::strong_collapse::Flag_complex_tower_assembler tower_assembler_5(8);
+  Flag_complex_tower_assembler tower_assembler_5(8);
 
   tower_assembler_5.build_tower_for_two_complexes(mat_coll_5,
                                              mat_coll_6,
                                              10.,
                                              "./tower_assembler_5.txt");
-  Gudhi::strong_collapse::Distance_matrix sparse_distances_5 = tower_assembler_5.distance_matrix();
+  Flag_complex_sparse_matrix::Distance_matrix sparse_distances_5 = tower_assembler_5.distance_matrix();
 
   std::cout << "#5. sparse_distances size =" << sparse_distances_5.size() << std::endl;
   for (auto line : sparse_distances_5) {

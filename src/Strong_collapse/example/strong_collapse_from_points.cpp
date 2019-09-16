@@ -6,17 +6,15 @@
 #include <vector>
 #include <iomanip>  // for std::setw, std::setprecision
 
-using Strong_collapse = Gudhi::strong_collapse::Flag_complex_strong_collapse;
-
 struct Simplicial_complex {
-  using Vertex_handle = int;
+  using Vertex_handle = short;
   using Filtration_value = double;
 };
 
 using Point = std::vector<Simplicial_complex::Filtration_value>;
 using Point_cloud = std::vector<Point>;
 using Filtered_edges_vector = Gudhi::Filtered_edges_vector<Simplicial_complex>;
-using Flag_complex_strong_collapse = Gudhi::strong_collapse::Flag_complex_strong_collapse;
+using Flag_complex_strong_collapse = Gudhi::strong_collapse::Flag_complex_strong_collapse<Simplicial_complex>;
 
 int main(int argc, char **argv) {
   // ----------------------------------------------------------------------------
