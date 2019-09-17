@@ -11,4 +11,5 @@ add_executable ( Coxeter_triangulation_projective_plane_test projective_plane_te
 
 if (TBB_FOUND)
    target_link_libraries(Coxeter_triangulation_cell_complex_test ${TBB_LIBRARIES})
+   target_link_libraries(Coxeter_triangulation_projective_plane_test ${TBB_LIBRARIES})
 endif()

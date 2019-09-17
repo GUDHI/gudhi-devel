@@ -3,8 +3,7 @@
 #include <iostream>
 
 #include <gudhi/Coxeter_triangulation.h>
-#include <gudhi/Functions/Function_Sm_in_Rd.h>
-#include <gudhi/Functions/Function_torus_in_R3.h>
+#include <gudhi/Functions/Function_RP2_in_R4.h>
 #include <gudhi/Implicit_manifold_intersection_oracle.h>
 #include <gudhi/Manifold_tracing.h>
 #include <gudhi/Cell_complex.h>
@@ -28,13 +27,14 @@ int main(int argc, char** argv) {
   std::cout << "Debug traces are off\n";
 #endif
 
-  double radius = 1.1111;
-  Function_torus_in_R3 fun_sph(radius, 3*radius);
-  Eigen::VectorXd seed;
-  fun_sph.seed(seed);
-  Function_Sm_in_Rd fun_bound(2.5*radius, 2, seed);
+  double radius = 3.1111;
+  Function_RP2_in_R4 fun_sph(radius);
+  Eigen::VectorXd seed, result;
+  fun_sph.seed(seed); 
+  fun_sph.evaluate(seed, result);
+  std::cout << "result =\n" << result << "\n";
     
-  auto oracle = make_oracle(fun_sph, fun_bound);
+  auto oracle = make_oracle(fun_sph);
   double lambda = 0.2;
   if (argc >= 2)
     lambda = atof(argv[1]);
@@ -45,24 +45,17 @@ int main(int argc, char** argv) {
   using MT = Manifold_tracing<Coxeter_triangulation<> >;
   using Out_simplex_map = typename MT::Out_simplex_map;
   std::vector<Eigen::VectorXd> seed_points(1, seed);
-  Out_simplex_map interior_simplex_map, boundary_simplex_map;
-  manifold_tracing_algorithm(seed_points, cox_tr, oracle, interior_simplex_map, boundary_simplex_map);
-  // std::cout << "Interior_simplex_map:\n";
+  Out_simplex_map interior_simplex_map;
+  manifold_tracing_algorithm(seed_points, cox_tr, oracle, interior_simplex_map);
+  std::cout << "Interior_simplex_map:\n";
   // for (auto si_pair: interior_simplex_map)
   //   std::cout << "Simplex = \033[1;33m" << si_pair.first << "\033[0m"
   // 	      << " point:\n"  << si_pair.second << "\n";
-  // std::cout << "\nSize of the initial output = " << interior_simplex_map.size() << "\n\n";
-  // std::cout << "Boundary_simplex_map:\n";
-  // for (auto si_pair: boundary_simplex_map)
-  //   std::cout << "Simplex = \033[1;32m" << si_pair.first << "\033[0m"
-  // 	      << " point:\n"  << si_pair.second << "\n";
-  // std::cout << "\nSize of the initial output = " << boundary_simplex_map.size() << "\n\n";
-  
-
+  std::cout << "\nSize of the initial output = " << interior_simplex_map.size() << "\n\n";
   
   std::size_t intr_d = oracle.amb_d() - oracle.cod_d();
   Cell_complex<Out_simplex_map> cc(intr_d);
-  cc.construct_complex(interior_simplex_map, boundary_simplex_map);
+  cc.construct_complex(interior_simplex_map);
   
   output_meshes_to_medit(3,
 			 "RP2_test",
