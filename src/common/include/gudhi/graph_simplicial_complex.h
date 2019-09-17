@@ -34,7 +34,7 @@ struct vertex_filtration_t {
 /** \brief Filtered_edges_vector contains the edges with their filtration values, sorted by ascending filtration values,
  * in order to store the result of `Gudhi::compute_edge_graph` function.
  *
- * \tparam SimplicialComplexForProximityGraph furnishes `Filtration_value` and `Vertex_handle` types definition.
+ * \tparam SimplicialComplexForFilteredEdges furnishes `Filtration_value` and `Vertex_handle` types definitions.
  *
  */
 template <typename SimplicialComplexForFilteredEdges>

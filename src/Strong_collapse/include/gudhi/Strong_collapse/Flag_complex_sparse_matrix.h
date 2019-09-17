@@ -28,16 +28,18 @@ namespace Gudhi {
 
 namespace strong_collapse {
 
-//!  Class Flag_complex_sparse_matrix
-/*!
-  The class for storing the Vertices v/s MaxSimplices Sparse Matrix and performing collapses operations using the N^2()
-  Algorithm.
-*/
-template<class SimplicialComplex>
+/**
+ * \class Flag_complex_sparse_matrix
+ * \brief The class for storing the Vertices v/s MaxSimplices Sparse Matrix and performing collapses operations using
+ * the N^2() algorithm.
+ *
+ * \tparam SimplicialComplexForStrongCollapse furnishes `Vertex_handle` and `Filtration_value` type definitions.
+ */
+template<class SimplicialComplexForStrongCollapse>
 class Flag_complex_sparse_matrix {
  private:
-  using Vertex = typename SimplicialComplex::Vertex_handle;
-  using Filtration_value = typename SimplicialComplex::Filtration_value;
+  using Vertex = typename SimplicialComplexForStrongCollapse::Vertex_handle;
+  using Filtration_value = typename SimplicialComplexForStrongCollapse::Filtration_value;
 
  public:
   using Reduction_map = std::unordered_map<Vertex, Vertex>;
@@ -47,7 +49,7 @@ class Flag_complex_sparse_matrix {
   using Sparse_row_matrix = Eigen::SparseMatrix<Filtration_value, Eigen::RowMajor>;
   using Sparse_row_iterator = typename Sparse_row_matrix::InnerIterator;
   /** \brief Type definition to store a distance matrix. */
-  using Distance_matrix = std::vector<std::vector<typename SimplicialComplex::Filtration_value>>;
+  using Distance_matrix = std::vector<std::vector<typename SimplicialComplexForStrongCollapse::Filtration_value>>;
 
  private:
   /** \brief Stores the vertices (or unordered set of vertex) of the original simplicial complex. */
