@@ -104,33 +104,23 @@ class Implicit_manifold_intersection_oracle {
     using QR = Query_result<Simplex_handle>;
     std::size_t amb_d = triangulation.dimension();
 
-    std::vector<std::size_t> snapping_indices;
-    for (std::size_t i = 0; i < (std::size_t)lambda.size(); ++i) {
-      if (lambda(i) < -threshold_ || lambda(i) > 1 + threshold_)
-	return QR({Simplex_handle(), Eigen::VectorXd(), false});
-      if (lambda(i) >= threshold_)
-	snapping_indices.push_back(i);
-    }
+    for (std::size_t i = 0; i < (std::size_t)lambda.size(); ++i)
+      if (lambda(i) < 0 || lambda(i) > 1)
+	return QR({Eigen::VectorXd(), false});
 
-    std::size_t snap_d = snapping_indices.size();
-    std::size_t i = 0;
+    Eigen::MatrixXd vertex_matrix(amb_d + 1, amb_d);
     std::size_t num_line = 0;
-    Eigen::MatrixXd vertex_matrix(snap_d, amb_d);
-    Eigen::VectorXd reduced_lambda(snap_d);
     auto v_range = simplex.vertex_range();
     auto v_it = v_range.begin();
-    for (; num_line < snap_d && v_it != v_range.end(); ++v_it, ++i) {
-      if (i == snapping_indices[num_line]) {
-	Eigen::VectorXd v_coords = triangulation.cartesian_coordinates(*v_it);
-	for (std::size_t j = 0; j < amb_d; ++j)
-	  vertex_matrix(num_line, j) = v_coords(j);
-	reduced_lambda(num_line) = lambda(i);
-	num_line++;
-      }
+    for (; num_line < amb_d + 1 && v_it != v_range.end(); ++v_it, ++i) {
+      Eigen::VectorXd v_coords = triangulation.cartesian_coordinates(*v_it);
+      for (std::size_t j = 0; j < amb_d; ++j)
+	vertex_matrix(num_line, j) = v_coords(j);
+      reduced_lambda(num_line) = lambda(i);
+      num_line++;
     }
-    reduced_lambda /= reduced_lambda.sum();
-    Eigen::VectorXd intersection = reduced_lambda.transpose()*vertex_matrix;
-    return QR({face_from_indices(simplex, snapping_indices), intersection, true});
+    Eigen::VectorXd intersection = lambda*vertex_matrix;
+    return QR({intersection, true});
   }
   
 public:

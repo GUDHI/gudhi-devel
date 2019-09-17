@@ -91,11 +91,11 @@ public:
       for (Simplex_handle face: full_simplex.face_range(cod_d)) {
 	Query_result<Simplex_handle> qr = oracle.intersects(face, triangulation);
 	if (qr.success &&
-	    out_simplex_map.emplace(std::make_pair(qr.face, qr.intersection)).second) {
+	    out_simplex_map.emplace(std::make_pair(face, qr.intersection)).second) {
 #ifdef GUDHI_COX_OUTPUT_TO_HTML
 	  mt_seed_inserted_list.push_back(MT_inserted_info(qr, face, false));
 #endif
-	  queue.emplace(qr.face);
+	  queue.emplace(face);
 	  break;
 	}
       }
@@ -108,8 +108,8 @@ public:
 	for (auto face: cof.face_range(cod_d)) {
 	  Query_result<Simplex_handle> qr = oracle.intersects(face, triangulation);
 	  if (qr.success &&
-	      out_simplex_map.emplace(std::make_pair(qr.face, qr.intersection)).second)
-	    queue.emplace(qr.face);
+	      out_simplex_map.emplace(std::make_pair(face, qr.intersection)).second)
+	    queue.emplace(face);
 	}
       }
     }
@@ -158,8 +158,8 @@ public:
 #endif	
 	if (qr.success) {
 	  if (oracle.lies_in_domain(qr.intersection, triangulation)) {
-	    if (interior_simplex_map.emplace(std::make_pair(qr.face, qr.intersection)).second)
-	      queue.emplace(qr.face);
+	    if (interior_simplex_map.emplace(std::make_pair(face, qr.intersection)).second)
+	      queue.emplace(face);
 	  }
 	  else {
 	    for (Simplex_handle cof: face.coface_range(cod_d+1)) {
@@ -168,7 +168,7 @@ public:
 	      mt_seed_inserted_list.push_back(MT_inserted_info(qrb, cof, true));
 #endif	
 	      if (qrb.success)
-		boundary_simplex_map.emplace(qrb.face, qrb.intersection);
+		boundary_simplex_map.emplace(cof, qrb.intersection);
 	    }
 	  }
 	  // break;
@@ -187,8 +187,8 @@ public:
 #endif	
 	  if (qr.success) {
 	    if (oracle.lies_in_domain(qr.intersection, triangulation)) {
-	      if (interior_simplex_map.emplace(qr.face, qr.intersection).second)
-		queue.emplace(qr.face);
+	      if (interior_simplex_map.emplace(face, qr.intersection).second)
+		queue.emplace(face);
 	    }
 	    else {
 	      auto qrb = oracle.intersects_boundary(cof, triangulation);
@@ -197,7 +197,7 @@ public:
 #endif	
 	      // assert (qrb.success); // always a success
 	      if (qrb.success)
-		boundary_simplex_map.emplace(qrb.face, qrb.intersection);
+		boundary_simplex_map.emplace(cof, qrb.intersection);
 	    }
 	  }
 	}

@@ -27,8 +27,8 @@ namespace coxeter_triangulation {
 template <class Simplex_handle>
 struct Query_result {
   /** \brief The potentially lower-dimensional face of the query simplex
-   *   that contains the intersection point. */
-  Simplex_handle face;
+   *   that contains the intersection point. OBSOLETE: as the snapping is removed. */
+  // Simplex_handle face;
   /** \brief The intersection point. */
   Eigen::VectorXd intersection;
   /** \brief True if the query simplex intersects the manifold. */
