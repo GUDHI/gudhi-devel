@@ -128,11 +128,8 @@ class Flag_complex_sparse_matrix {
 
     domination_indicator_.clear();
     row_insert_indicator_.clear();
-    // VR: row_iterator_.push(0);
-    // VR: row_iterator_.pop();
 
     rows_ = 0;
-
     expansion_limit_ = 2;
   }
 
@@ -337,41 +334,27 @@ class Flag_complex_sparse_matrix {
   }
 
  public:
-  //! Default Constructor
-  /*!
-    Only initialises all Data Members of the class to empty/Null values as appropriate.
-    One <I>WILL</I> have to create the matrix using the Constructor that has an object of the Simplex_tree class as
-    argument.
-  */
-
-  Flag_complex_sparse_matrix() { init(); }
-
-  Flag_complex_sparse_matrix(std::size_t expRows) {
+  /** \brief Flag_complex_sparse_matrix default constructor.
+   *
+   * It constructs an empty sparse matrix.
+   * 
+   * @param[in] num_vertices Number of vertices.
+   */
+  Flag_complex_sparse_matrix(std::size_t num_vertices) {
     init();
     // Initializing sparse_matrix_, This is a row-major sparse matrix.
     sparse_matrix_ = Sparse_row_matrix(
-        expansion_limit_ * expRows,
-        expansion_limit_ * expRows);
+        expansion_limit_ * num_vertices,
+        expansion_limit_ * num_vertices);
   }
 
-  //! Main Constructor
-  /*!
-    This constructor initialises all data members to appropriate values. <br>
-    <B>row_to_vertex_</B>, <B>vertex_to_row_</B>, <B>rows</B>, <B>cols</B>, <B>sparseMxSimplices</B> are initialised here.
-    <B>domination_indicator_</B>, <B>row_insert_indicator_</B>
-    ,<B>row_iterator_</B>,<B>simpDomnIndicator</B>,<B>colInsertIndicator</B> and <B>columnIterator</B> are initialised by
-    init_lists() function which is called at the end of this. <br> What this does:
-      1. Populate <B>row_to_vertex_</B> and <B>vertex_to_row_</B> by going over through the vertices of the Fake_simplex_tree
-    and assign the variable <B>rows</B> = no. of vertices
-      2. Initialise the variable <B>cols</B> to zero and allocate memory from the heap to <B>MxSimplices</B> by doing
-    <br> <I>MxSimplices = new std::vector<bool>[rows];</I>
-      3. Iterate over all maximal simplices of the Fake_simplex_tree and populates the column of the sparseMatrix.
-      4. Initialise <B>active_rows</B> to an array of length equal to the value of the variable <B>rows</B> and all
-    values assigned true. [All vertices are there in the simplex to begin with]
-      5. Initialise <B>active_cols</B> to an array of length equal to the value of the variable <B>cols</B> and all
-    values assigned true. [All maximal simplices are maximal to begin with]
-      6. Calls the private function init_lists().
-  */
+  /** \brief Flag_complex_sparse_matrix constructor from the edge graph.
+   *
+   * It constructs a sparse matrix filled with the edge graph filtration values and compress it.
+   * 
+   * @param[in] num_vertices Number of vertices.
+   * @param[in] edge_t The edge graph.
+   */
   Flag_complex_sparse_matrix(const std::size_t num_vertices, const Filtered_sorted_edge_list& edge_t) {
     init();
     // Initializing sparse_matrix_, This is a row-major sparse matrix.
