@@ -103,20 +103,21 @@ class Implicit_manifold_intersection_oracle {
 						   const Triangulation& triangulation) const {
     using QR = Query_result<Simplex_handle>;
     std::size_t amb_d = triangulation.dimension();
+    std::size_t cod_d = simplex.dimension();
 
     for (std::size_t i = 0; i < (std::size_t)lambda.size(); ++i)
       if (lambda(i) < 0 || lambda(i) > 1)
 	return QR({Eigen::VectorXd(), false});
 
-    Eigen::MatrixXd vertex_matrix(amb_d + 1, amb_d);
+    Eigen::MatrixXd vertex_matrix(cod_d + 1, amb_d);
     auto v_range = simplex.vertex_range();
     auto v_it = v_range.begin();
-    for (std::size_t i = 0; i < amb_d + 1 && v_it != v_range.end(); ++v_it, ++i) {
+    for (std::size_t i = 0; i < cod_d + 1 && v_it != v_range.end(); ++v_it, ++i) {
       Eigen::VectorXd v_coords = triangulation.cartesian_coordinates(*v_it);
       for (std::size_t j = 0; j < amb_d; ++j)
 	vertex_matrix(i, j) = v_coords(j);
     }
-    Eigen::VectorXd intersection = lambda*vertex_matrix;
+    Eigen::VectorXd intersection = lambda.transpose()*vertex_matrix;
     return QR({intersection, true});
   }
   

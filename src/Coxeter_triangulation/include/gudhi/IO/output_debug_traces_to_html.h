@@ -71,7 +71,7 @@ struct MT_inserted_info {
   template <class Query_result,
 	    class Simplex_handle>
   MT_inserted_info(const Query_result& qr, const Simplex_handle& face, bool is_boundary)
-    : qr_face_(to_string(qr.face)), init_face_(to_string(face)),
+    : qr_face_(to_string(face)), init_face_(to_string(face)),
       qr_intersection_(to_string(qr.intersection)),
       qr_success_(qr.success), is_boundary_(is_boundary) {}
 };

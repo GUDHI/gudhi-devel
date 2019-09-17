@@ -58,7 +58,7 @@ private:
     Simplex_cell_maps& simplex_cell_maps
       = (is_boundary? boundary_simplex_cell_maps_ : interior_simplex_cell_maps_); 
 #ifdef GUDHI_COX_OUTPUT_TO_HTML
-    std::vector<CC_detail_list>& cc_detail_list =
+    CC_detail_list& cc_detail_list =
       (is_boundary? cc_boundary_detail_lists[cell_d] : cc_interior_detail_lists[cell_d]);
     cc_detail_list.emplace_back(CC_detail_info(simplex));
 #endif

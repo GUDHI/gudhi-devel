@@ -1,5 +1,5 @@
-// #include <gudhi/Debug_utils.h>
-// #include <gudhi/IO/output_debug_traces_to_html.h>
+#include <gudhi/Debug_utils.h>
+#include <gudhi/IO/output_debug_traces_to_html.h>
 #include <iostream>
 
 #include <gudhi/Coxeter_triangulation.h>
@@ -47,16 +47,16 @@ int main(int argc, char** argv) {
   std::vector<Eigen::VectorXd> seed_points(1, seed);
   Out_simplex_map interior_simplex_map, boundary_simplex_map;
   manifold_tracing_algorithm(seed_points, cox_tr, oracle, interior_simplex_map, boundary_simplex_map);
-  // std::cout << "Interior_simplex_map:\n";
-  // for (auto si_pair: interior_simplex_map)
-  //   std::cout << "Simplex = \033[1;33m" << si_pair.first << "\033[0m"
-  // 	      << " point:\n"  << si_pair.second << "\n";
-  // std::cout << "\nSize of the initial output = " << interior_simplex_map.size() << "\n\n";
-  // std::cout << "Boundary_simplex_map:\n";
-  // for (auto si_pair: boundary_simplex_map)
-  //   std::cout << "Simplex = \033[1;32m" << si_pair.first << "\033[0m"
-  // 	      << " point:\n"  << si_pair.second << "\n";
-  // std::cout << "\nSize of the initial output = " << boundary_simplex_map.size() << "\n\n";
+  std::cout << "Interior_simplex_map:\n";
+  for (auto si_pair: interior_simplex_map)
+    std::cout << "Simplex = \033[1;33m" << si_pair.first << "\033[0m"
+  	      << " point:\n"  << si_pair.second << "\n";
+  std::cout << "\nSize of the initial output = " << interior_simplex_map.size() << "\n\n";
+  std::cout << "Boundary_simplex_map:\n";
+  for (auto si_pair: boundary_simplex_map)
+    std::cout << "Simplex = \033[1;32m" << si_pair.first << "\033[0m"
+  	      << " point:\n"  << si_pair.second << "\n";
+  std::cout << "\nSize of the initial output = " << boundary_simplex_map.size() << "\n\n";
   
 
   
@@ -91,13 +91,6 @@ int main(int argc, char** argv) {
   // Partition omega2 = {Part({2}), Part({0,1,3})};
   // Simplex_handle s2(v2, omega2);
   
-  // std::cout << "Vertex comparison: " << v1 << " "
-  // 	    << (v1 < v2? "<": "") << (v1 > v2? ">": "") << " " << v2 << "\n";
-  // std::cout << "Partition comparison: " << omega1 << " "
-  // 	    << (omega1 < omega2? "<": "") << (omega1 > omega2? ">": "") << " " << omega2 << "\n";
-  // std::cout << "Simplex comparison: " << s1 << " "
-  // 	    << (SC()(s1, s2)? "<": "") << (SC()(s2, s1)? ">": "") << " " << s2 << "\n";
-
   output_meshes_to_medit(3,
 			 "test",
 			 build_mesh_from_cell_complex(cc,
