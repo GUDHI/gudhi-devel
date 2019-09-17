@@ -109,15 +109,12 @@ class Implicit_manifold_intersection_oracle {
 	return QR({Eigen::VectorXd(), false});
 
     Eigen::MatrixXd vertex_matrix(amb_d + 1, amb_d);
-    std::size_t num_line = 0;
     auto v_range = simplex.vertex_range();
     auto v_it = v_range.begin();
-    for (; num_line < amb_d + 1 && v_it != v_range.end(); ++v_it, ++i) {
+    for (std::size_t i = 0; i < amb_d + 1 && v_it != v_range.end(); ++v_it, ++i) {
       Eigen::VectorXd v_coords = triangulation.cartesian_coordinates(*v_it);
       for (std::size_t j = 0; j < amb_d; ++j)
-	vertex_matrix(num_line, j) = v_coords(j);
-      reduced_lambda(num_line) = lambda(i);
-      num_line++;
+	vertex_matrix(i, j) = v_coords(j);
     }
     Eigen::VectorXd intersection = lambda*vertex_matrix;
     return QR({intersection, true});
@@ -216,14 +213,10 @@ public:
    *   before the restriction with the domain.
    *  @param domain_function The input domain function that can be used to define an implicit
    *   manifold with boundary.
-   *  @param threshold The input parameter that defines the distance in terms
-   *   of affine coordinates to a lower-dimensional face for the intersection 
-   *   point to be considered lying at the lower-dimensional face.
    */
   Implicit_manifold_intersection_oracle(const Function_& function,
-					const Domain_function_& domain_function,
-					double threshold = 0)
-    : fun_(function), domain_fun_(domain_function), threshold_(threshold) {}
+					const Domain_function_& domain_function)
+    : fun_(function), domain_fun_(domain_function) {}
 
   /** \brief Constructs an intersection oracle for an implicit manifold 
    *   without boundary from a given function.
@@ -233,19 +226,14 @@ public:
    *
    *  @param function The input function that represents the implicit manifold
    *   without boundary.
-   *  @param threshold The input parameter that defines the distance in terms
-   *   of affine coordinates to a lower-dimensional face for the intersection 
-   *   point to be considered lying at the lower-dimensional face.
    */
-  Implicit_manifold_intersection_oracle(const Function_& function, double threshold = 0)
+  Implicit_manifold_intersection_oracle(const Function_& function)
     : fun_(function),
-      domain_fun_(function.amb_d(), 1, Eigen::VectorXd::Constant(1,-1)),
-      threshold_(threshold) {}
+      domain_fun_(function.amb_d(), 1, Eigen::VectorXd::Constant(1,-1)) {}
   
 private:
   Function_ fun_;
   Domain_function_ domain_fun_;
-  double threshold_ = 0;
 };
 
 /** \brief Static constructor of an intersection oracle from a function with a domain.
@@ -254,19 +242,14 @@ private:
  *   before the restriction with the domain.
  *  @param domain_function The input domain function that can be used to define an implicit
  *   manifold with boundary.
- *  @param threshold The input parameter that defines the distance in terms
- *   of affine coordinates to a lower-dimensional face for the intersection 
- *   point to be considered lying at the lower-dimensional face.
  */
 template<class Function_,
 	 class Domain_function_>
 Implicit_manifold_intersection_oracle<Function_, Domain_function_>
 make_oracle(const Function_& function,
-	    const Domain_function_& domain_function,
-	    double threshold = 0){
+	    const Domain_function_& domain_function){
   return Implicit_manifold_intersection_oracle<Function_, Domain_function_>(function,
-									    domain_function,
-									    threshold);
+									    domain_function);
 }
 
 
@@ -274,14 +257,10 @@ make_oracle(const Function_& function,
  *
  *  @param function The input function that represents the implicit manifold
  *   without boundary.
- *  @param threshold The input parameter that defines the distance in terms
- *   of affine coordinates to a lower-dimensional face for the intersection 
- *   point to be considered lying at the lower-dimensional face.
  */
 template<class Function_>
-Implicit_manifold_intersection_oracle<Function_> make_oracle(const Function_& function,
-							     double threshold = 0){
-  return Implicit_manifold_intersection_oracle<Function_>(function, threshold);
+Implicit_manifold_intersection_oracle<Function_> make_oracle(const Function_& function){
+  return Implicit_manifold_intersection_oracle<Function_>(function);
 }
 
 } // namespace coxeter_triangulation 

@@ -1,5 +1,5 @@
-#include <gudhi/Debug_utils.h>
-#include <gudhi/IO/output_debug_traces_to_html.h>
+// #include <gudhi/Debug_utils.h>
+// #include <gudhi/IO/output_debug_traces_to_html.h>
 #include <iostream>
 
 #include <gudhi/Coxeter_triangulation.h>
@@ -34,13 +34,10 @@ int main(int argc, char** argv) {
   fun_sph.seed(seed);
   Function_Sm_in_Rd fun_bound(2.5*radius, 2, seed);
     
-  double thr = 0.1;
-  if (argc >= 2)
-    thr = atof(argv[1]);
-  auto oracle = make_oracle(fun_sph, fun_bound, thr);
+  auto oracle = make_oracle(fun_sph, fun_bound);
   double lambda = 0.2;
-  if (argc >= 3)
-    lambda = atof(argv[2]);
+  if (argc >= 2)
+    lambda = atof(argv[1]);
   Coxeter_triangulation<> cox_tr(oracle.amb_d());
   cox_tr.change_offset(Eigen::VectorXd::Random(oracle.amb_d()));
   cox_tr.change_matrix(lambda * cox_tr.matrix());

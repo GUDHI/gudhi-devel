@@ -87,7 +87,7 @@ private:
       for (auto& sc_pair: boundary_simplex_cell_maps_[cell_d - 1]) {
 	const Simplex_handle& simplex = sc_pair.first;
 	Hasse_cell* cell = sc_pair.second;
-	for (Simplex_handle coface: simplex.coface_range(i)) {
+	for (Simplex_handle coface: simplex.coface_range(cod_d_ + cell_d)) {
 	  Hasse_cell* new_cell = insert_cell(coface, cell_d, true);
 	  new_cell->get_boundary().emplace_back(std::make_pair(cell, 1));
 	}
@@ -96,16 +96,16 @@ private:
     for (auto& sc_pair: interior_simplex_cell_maps_[cell_d - 1]) {
       const Simplex_handle& simplex = sc_pair.first;
       Hasse_cell* cell = sc_pair.second;
-      for (Simplex_handle coface: simplex.coface_range(i)) {
+      for (Simplex_handle coface: simplex.coface_range(cod_d_ + cell_d)) {
 	Hasse_cell* new_cell = insert_cell(coface, cell_d, false);
 	new_cell->get_boundary().emplace_back(std::make_pair(cell, 1));
       }
     }
-    for (auto& sc_pair: boundary_simplex_cell_maps[cell_d - 1]) {
+    for (auto& sc_pair: boundary_simplex_cell_maps_[cell_d - 1]) {
       const Simplex_handle& simplex = sc_pair.first;
       Hasse_cell* b_cell = sc_pair.second;
-      auto map_it = boundary_simplex_cell_maps_[cell_d-1].find(simplex);
-      if (map_it == boundary_simplex_cell_maps_[cell_d-1].end())
+      auto map_it = boundary_simplex_cell_maps_[cell_d - 1].find(simplex);
+      if (map_it == boundary_simplex_cell_maps_[cell_d - 1].end())
 	std::cerr << "Cell_complex::expand_level error: A boundary cell does not have an interior counterpart.\n";
       else {
 	Hasse_cell* i_cell = map_it->second;
@@ -202,12 +202,16 @@ public:
   
   void construct_complex(const Out_simplex_map_& out_simplex_map) {
     interior_simplex_cell_maps_.resize(intr_d_ + 1);
+    if (!out_simplex_map.empty())
+      cod_d_ = out_simplex_map.begin()->second.size();
     construct_complex_(out_simplex_map);
   }
   
   void construct_complex(const Out_simplex_map_& out_simplex_map,
 			 std::size_t limit_dimension) {
     interior_simplex_cell_maps_.resize(limit_dimension + 1);
+    if (!out_simplex_map.empty())
+      cod_d_ = out_simplex_map.begin()->second.size();
     construct_complex_(out_simplex_map);
   }
 
@@ -215,6 +219,8 @@ public:
 			 const Out_simplex_map_& boundary_simplex_map) {
     interior_simplex_cell_maps_.resize(intr_d_ + 1);
     boundary_simplex_cell_maps_.resize(intr_d_);
+    if (!interior_simplex_map.empty())
+      cod_d_ = interior_simplex_map.begin()->second.size();
     construct_complex_(interior_simplex_map, boundary_simplex_map);
   }
 
@@ -223,6 +229,8 @@ public:
 			 std::size_t limit_dimension) {
     interior_simplex_cell_maps_.resize(limit_dimension + 1);
     boundary_simplex_cell_maps_.resize(limit_dimension);
+    if (!interior_simplex_map.empty())
+      cod_d_ = interior_simplex_map.begin()->second.size();
     construct_complex_(interior_simplex_map, boundary_simplex_map);
   }
 
@@ -258,7 +266,7 @@ public:
     : intr_d_(intrinsic_dimension) {}
   
 private:
-  std::size_t intr_d_;
+  std::size_t intr_d_, cod_d_;
   Simplex_cell_maps interior_simplex_cell_maps_, boundary_simplex_cell_maps_;
   Cell_simplex_map cell_simplex_map_;
   Cell_point_map cell_point_map_;
