@@ -67,6 +67,7 @@ private:
     if (map_it == simplex_cell_map.end()) {
       hasse_cells_.push_back(new Hasse_cell(is_boundary, cell_d));
       Hasse_cell* new_cell = hasse_cells_.back();    
+      simplex_cell_map.emplace(std::make_pair(simplex, new_cell));
       cell_simplex_map_.emplace(std::make_pair(new_cell, simplex));
 #ifdef GUDHI_COX_OUTPUT_TO_HTML
       cc_detail_list.back().status_ = CC_detail_info::Result_type::inserted;
@@ -83,16 +84,6 @@ private:
 
   void expand_level(std::size_t cell_d) {
     bool is_manifold_with_boundary = boundary_simplex_cell_maps_.size() > 0;
-    if (is_manifold_with_boundary && cell_d != intr_d_)
-      for (auto& sc_pair: boundary_simplex_cell_maps_[cell_d - 1]) {
-	const Simplex_handle& simplex = sc_pair.first;
-	Hasse_cell* cell = sc_pair.second;
-	for (Simplex_handle coface: simplex.coface_range(cod_d_ + cell_d)) {
-	  Hasse_cell* new_cell = insert_cell(coface, cell_d, true);
-	  new_cell->get_boundary().emplace_back(std::make_pair(cell, 1));
-	}
-      }
-      
     for (auto& sc_pair: interior_simplex_cell_maps_[cell_d - 1]) {
       const Simplex_handle& simplex = sc_pair.first;
       Hasse_cell* cell = sc_pair.second;
@@ -101,15 +92,23 @@ private:
 	new_cell->get_boundary().emplace_back(std::make_pair(cell, 1));
       }
     }
-    for (auto& sc_pair: boundary_simplex_cell_maps_[cell_d - 1]) {
-      const Simplex_handle& simplex = sc_pair.first;
-      Hasse_cell* b_cell = sc_pair.second;
-      auto map_it = boundary_simplex_cell_maps_[cell_d - 1].find(simplex);
-      if (map_it == boundary_simplex_cell_maps_[cell_d - 1].end())
-	std::cerr << "Cell_complex::expand_level error: A boundary cell does not have an interior counterpart.\n";
-      else {
-	Hasse_cell* i_cell = map_it->second;
-	i_cell->get_boundary().emplace_back(std::make_pair(b_cell, 1));
+    
+    if (is_manifold_with_boundary) {
+      for (auto& sc_pair: boundary_simplex_cell_maps_[cell_d - 1]) {
+	const Simplex_handle& simplex = sc_pair.first;
+	Hasse_cell* cell = sc_pair.second;
+	if (cell_d != intr_d_)
+	  for (Simplex_handle coface: simplex.coface_range(cod_d_ + cell_d + 1)) {
+	    Hasse_cell* new_cell = insert_cell(coface, cell_d, true);
+	    new_cell->get_boundary().emplace_back(std::make_pair(cell, 1));
+	  }
+	auto map_it = interior_simplex_cell_maps_[cell_d].find(simplex);
+	if (map_it == interior_simplex_cell_maps_[cell_d].end())
+	  std::cerr << "Cell_complex::expand_level error: A boundary cell does not have an interior counterpart.\n";
+	else {
+	  Hasse_cell* i_cell = map_it->second;
+	  i_cell->get_boundary().emplace_back(std::make_pair(cell, 1));
+	}
       }
     }
   }
@@ -203,7 +202,7 @@ public:
   void construct_complex(const Out_simplex_map_& out_simplex_map) {
     interior_simplex_cell_maps_.resize(intr_d_ + 1);
     if (!out_simplex_map.empty())
-      cod_d_ = out_simplex_map.begin()->second.size();
+      cod_d_ = out_simplex_map.begin()->first.dimension();
     construct_complex_(out_simplex_map);
   }
   
@@ -211,7 +210,7 @@ public:
 			 std::size_t limit_dimension) {
     interior_simplex_cell_maps_.resize(limit_dimension + 1);
     if (!out_simplex_map.empty())
-      cod_d_ = out_simplex_map.begin()->second.size();
+      cod_d_ = out_simplex_map.begin()->first.dimension();
     construct_complex_(out_simplex_map);
   }
 
@@ -220,7 +219,7 @@ public:
     interior_simplex_cell_maps_.resize(intr_d_ + 1);
     boundary_simplex_cell_maps_.resize(intr_d_);
     if (!interior_simplex_map.empty())
-      cod_d_ = interior_simplex_map.begin()->second.size();
+      cod_d_ = interior_simplex_map.begin()->first.dimension();
     construct_complex_(interior_simplex_map, boundary_simplex_map);
   }
 
@@ -230,7 +229,7 @@ public:
     interior_simplex_cell_maps_.resize(limit_dimension + 1);
     boundary_simplex_cell_maps_.resize(limit_dimension);
     if (!interior_simplex_map.empty())
-      cod_d_ = interior_simplex_map.begin()->second.size();
+      cod_d_ = interior_simplex_map.begin()->first.dimension();
     construct_complex_(interior_simplex_map, boundary_simplex_map);
   }
 
