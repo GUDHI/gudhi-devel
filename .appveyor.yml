@@ -26,7 +26,7 @@ environment:
         PYTHON: "C:\\Python37-x64"
 
       - target: Python
-        CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DGMP_INCLUDE_DIR="c:/Tools/vcpkg/installed/x64-windows/include" -DGMP_LIBRARIES="c:/Tools/vcpkg/installed/x64-windows/lib/mpir.lib" -DGMP_LIBRARIES_DIR="c:/Tools/vcpkg/installed/x64-windows/lib"
+        CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON
         PYTHON: "C:\\Python37-x64"
 
 
@@ -52,7 +52,7 @@ install:
 build_script:
   - mkdir build
   - cd build
-  - cmake -G "Visual Studio 15 2017 Win64" %CMAKE_FLAGS% -DCMAKE_TOOLCHAIN_FILE=c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake ..
+  - cmake -G "Visual Studio 15 2017 Win64" %CMAKE_FLAGS% -DGMP_INCLUDE_DIR="c:/Tools/vcpkg/installed/x64-windows/include" -DGMP_LIBRARIES="c:/Tools/vcpkg/installed/x64-windows/lib/mpir.lib" -DGMP_LIBRARIES_DIR="c:/Tools/vcpkg/installed/x64-windows/lib" -DCMAKE_TOOLCHAIN_FILE=c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake ..
   - if [%target%]==[Python] (
       cd src/python &
       MSBuild Cython.sln /m /p:Configuration=Release /p:Platform=x64 &
