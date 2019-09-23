@@ -49,6 +49,7 @@ if(PYTHONINTERP_FOUND)
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'alpha_complex', ")
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'euclidean_witness_complex', ")
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'euclidean_strong_witness_complex', ")
+    set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'wasserstein', ")
 
     add_gudhi_debug_info("Python version ${PYTHON_VERSION_STRING}")
     add_gudhi_debug_info("Cython version ${CYTHON_VERSION}")
@@ -199,6 +200,7 @@ if(PYTHONINTERP_FOUND)
 
     # Other .py files
     file(COPY "gudhi/persistence_graphical_tools.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
+    file(COPY "gudhi/wasserstein.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
 
     add_custom_command(
         OUTPUT gudhi.so
@@ -370,6 +372,11 @@ if(PYTHONINTERP_FOUND)
 
     # Reader utils
     add_gudhi_py_test(test_reader_utils)
+
+    # Wasserstein
+    if(OT_FOUND)
+        add_gudhi_py_test(test_wasserstein_distance)
+    endif(OT_FOUND)
 
     # Documentation generation is available through sphinx - requires all modules
     if(SPHINX_PATH)
