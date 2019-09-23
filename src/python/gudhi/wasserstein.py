@@ -3,7 +3,7 @@ import scipy.spatial.distance as sc
 try:
     import ot
 except ImportError:
-    print("POT (Python Optimal Transport) package is not installed. Try to run $ pip install POT")
+    print("POT (Python Optimal Transport) package is not installed. Try to run $ conda install -c conda-forge pot ; or $ pip install POT")
 
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
