@@ -65,6 +65,9 @@ if(PYTHONINTERP_FOUND)
     if(SCIPY_FOUND)
       add_gudhi_debug_info("Scipy version ${SCIPY_VERSION}")
     endif()
+    if(OT_FOUND)
+      add_gudhi_debug_info("POT version ${OT_VERSION}")
+    endif()
 
     set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_RESULT_OF_USE_DECLTYPE', ")
     set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_ALL_NO_LIB', ")
@@ -375,7 +378,7 @@ if(PYTHONINTERP_FOUND)
 
     # Wasserstein
     if(OT_FOUND)
-        add_gudhi_py_test(test_wasserstein_distance)
+      add_gudhi_py_test(test_wasserstein_distance)
     endif(OT_FOUND)
 
     # Documentation generation is available through sphinx - requires all modules
@@ -383,32 +386,37 @@ if(PYTHONINTERP_FOUND)
       if(MATPLOTLIB_FOUND)
         if(NUMPY_FOUND)
           if(SCIPY_FOUND)
-            if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-              set (GUDHI_SPHINX_MESSAGE "Generating API documentation with Sphinx in ${CMAKE_CURRENT_BINARY_DIR}/sphinx/")
-              # User warning - Sphinx is a static pages generator, and configured to work fine with user_version
-              # Images and biblio warnings because not found on developper version
-              if (GUDHI_PYTHON_PATH STREQUAL "src/python")
-                set (GUDHI_SPHINX_MESSAGE "${GUDHI_SPHINX_MESSAGE} \n WARNING : Sphinx is configured for user version, you run it on developper version. Images and biblio will miss")
-              endif()
-              # sphinx target requires gudhi.so, because conf.py reads gudhi version from it
-              add_custom_target(sphinx
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc
-                  COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-                  ${SPHINX_PATH} -b html ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/sphinx
-                  DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so"
-                  COMMENT "${GUDHI_SPHINX_MESSAGE}" VERBATIM)
+            if(OT_FOUND)
+              if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+                set (GUDHI_SPHINX_MESSAGE "Generating API documentation with Sphinx in ${CMAKE_CURRENT_BINARY_DIR}/sphinx/")
+                # User warning - Sphinx is a static pages generator, and configured to work fine with user_version
+                # Images and biblio warnings because not found on developper version
+                if (GUDHI_PYTHON_PATH STREQUAL "src/python")
+                  set (GUDHI_SPHINX_MESSAGE "${GUDHI_SPHINX_MESSAGE} \n WARNING : Sphinx is configured for user version, you run it on developper version. Images and biblio will miss")
+                endif()
+                # sphinx target requires gudhi.so, because conf.py reads gudhi version from it
+                add_custom_target(sphinx
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc
+                    COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+                    ${SPHINX_PATH} -b html ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/sphinx
+                    DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so"
+                    COMMENT "${GUDHI_SPHINX_MESSAGE}" VERBATIM)
 
-              add_test(NAME sphinx_py_test
-                       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                       COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-                       ${SPHINX_PATH} -b doctest ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/doctest)
+                add_test(NAME sphinx_py_test
+                         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                         COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+                         ${SPHINX_PATH} -b doctest ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/doctest)
 
-              # Set missing or not modules
-              set(GUDHI_MODULES ${GUDHI_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MODULES")
-            else(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-              message("++ Python documentation module will not be compiled because it requires a Eigen3 and CGAL version >= 4.11.0")
+                # Set missing or not modules
+                set(GUDHI_MODULES ${GUDHI_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MODULES")
+              else(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+                message("++ Python documentation module will not be compiled because it requires a Eigen3 and CGAL version >= 4.11.0")
+                set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
+              endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+            else(OT_FOUND)
+              message("++ Python documentation module will not be compiled because POT was not found")
               set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
-            endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+            endif(OT_FOUND)
           else(SCIPY_FOUND)
             message("++ Python documentation module will not be compiled because scipy was not found")
             set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
