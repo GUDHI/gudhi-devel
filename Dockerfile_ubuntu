@@ -51,6 +51,7 @@ RUN pip3 install \
     matplotlib \
     scipy \
     Cython \
+    POT \
     sphinx \
     sphinxcontrib-bibtex
 
