@@ -55,7 +55,8 @@ before_cache:
 # When installing through libcgal-dev apt, CMake Error at CGAL Exports.cmake The imported target "CGAL::CGAL Qt5" references the file
 install: 
   - python3 -m pip install --upgrade pip setuptools wheel
-  - python3 -m pip install --user pytest Cython sphinx sphinxcontrib-bibtex matplotlib numpy scipy POT
+  - python3 -m pip install --user pytest Cython sphinx sphinxcontrib-bibtex matplotlib numpy scipy
+  - python3 -m pip install --user POT
 
 script: 
   - rm -rf build
