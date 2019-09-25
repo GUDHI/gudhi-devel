@@ -12,7 +12,7 @@ The easiest way to install the Python version of GUDHI is using
 
 Compiling
 *********
-The library uses c++11 and requires `Boost <https://www.boost.org/>`_ ≥ 1.56.0,
+The library uses c++14 and requires `Boost <https://www.boost.org/>`_ ≥ 1.56.0,
 `CMake <https://www.cmake.org/>`_ ≥ 3.1  to generate makefiles,
 `NumPy <http://numpy.org>`_ and `Cython <https://www.cython.org/>`_ to compile
 the GUDHI Python module.

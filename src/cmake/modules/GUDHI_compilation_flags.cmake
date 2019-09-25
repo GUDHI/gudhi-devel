@@ -38,7 +38,7 @@ function(can_cgal_use_cxx11_thread_local)
   check_cxx_source_compiles("${CGAL_CAN_USE_CXX11_THREAD_LOCAL}" CGAL_CAN_USE_CXX11_THREAD_LOCAL_RESULT)
 endfunction()
 
-set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_CXX_STANDARD 14)
 
 enable_testing()
 
