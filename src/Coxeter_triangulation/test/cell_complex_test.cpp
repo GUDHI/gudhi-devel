@@ -29,12 +29,12 @@ int main(int argc, char** argv) {
 #endif
 
   double radius = 1.1111;
-  Function_torus_in_R3 fun_sph(radius, 3*radius);
+  Function_torus_in_R3 fun_torus(radius, 3*radius);
   Eigen::VectorXd seed;
-  fun_sph.seed(seed);
+  fun_torus.seed(seed);
   Function_Sm_in_Rd fun_bound(2.5*radius, 2, seed);
     
-  auto oracle = make_oracle(fun_sph, fun_bound);
+  auto oracle = make_oracle(fun_torus, fun_bound);
   double lambda = 0.2;
   if (argc >= 2)
     lambda = atof(argv[1]);

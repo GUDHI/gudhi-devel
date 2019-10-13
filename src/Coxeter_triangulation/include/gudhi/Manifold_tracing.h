@@ -100,6 +100,7 @@ public:
 	}
       }
     }
+    
 
     while (!queue.empty()) {
       Simplex_handle s = queue.front();

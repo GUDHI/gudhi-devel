@@ -161,12 +161,6 @@ private:
     for (const auto& sc_pair: boundary_simplex_cell_maps_[0])
       cc_boundary_summary_lists[0].push_back(CC_summary_info(sc_pair));
 #endif        
-    // std::cout << "Finished building the layer 0. Simplices:\n";
-    // std::size_t i_size = interior_simplex_cell_maps_[0].size();
-    // std::size_t b_size = boundary_simplex_cell_maps_[0].size();
-    // std::cout << "I: " << i_size << "\n"
-    // 	      << "B: " << b_size << "\n"
-    // 	      << "T: " << i_size + b_size << "\n";
 
     for (std::size_t cell_d = 1;
 	 cell_d < interior_simplex_cell_maps_.size() &&
@@ -174,7 +168,6 @@ private:
 	 ++cell_d) {
       expand_level(cell_d);
       
-      // std::cout << "\nFinished building the layer " << cell_d << ". Simplices:\n";
 #ifdef GUDHI_COX_OUTPUT_TO_HTML
       for (const auto& sc_pair: interior_simplex_cell_maps_[cell_d])
 	cc_interior_summary_lists[cell_d].push_back(CC_summary_info(sc_pair));
@@ -182,18 +175,6 @@ private:
 	for (const auto& sc_pair: boundary_simplex_cell_maps_[cell_d])
 	  cc_boundary_summary_lists[cell_d].push_back(CC_summary_info(sc_pair));
 #endif
-      // if (cell_d < intr_d_) {
-      // 	std::size_t i_size = interior_simplex_cell_maps_[cell_d].size();
-      // 	std::size_t b_size = boundary_simplex_cell_maps_[cell_d].size();
-      // 	std::cout << "I: " << i_size << "\n"
-      // 		  << "B: " << b_size << "\n"
-      // 		  << "T: " << i_size + b_size << "\n";
-      // }
-      // else {
-      // 	std::size_t i_size = interior_simplex_cell_maps_[cell_d].size();
-      // 	std::cout << "I: " << i_size << "\n"
-      // 		  << "T: " << i_size << "\n";
-      // }
     }
   }
   
@@ -245,7 +226,7 @@ public:
     return boundary_simplex_cell_maps_;
   }
   
-  const Simplex_cell_map& simplex_cell_map(std::size_t cell_d) const {
+  const Simplex_cell_map& interior_simplex_cell_map(std::size_t cell_d) const {
     return interior_simplex_cell_maps_[cell_d];
   }
 
@@ -263,13 +244,17 @@ public:
 
   Cell_complex(std::size_t intrinsic_dimension)
     : intr_d_(intrinsic_dimension) {}
+
+  ~Cell_complex() {
+    for (Hasse_cell* hs_ptr: hasse_cells_)
+      delete hs_ptr;
+  }
   
 private:
   std::size_t intr_d_, cod_d_;
   Simplex_cell_maps interior_simplex_cell_maps_, boundary_simplex_cell_maps_;
   Cell_simplex_map cell_simplex_map_;
   Cell_point_map cell_point_map_;
-  // Cell_bool_map cell_boundary_map_;
   std::vector<Hasse_cell*> hasse_cells_;
 };
 

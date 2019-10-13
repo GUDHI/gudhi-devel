@@ -206,6 +206,11 @@ public:
     make_pl_approximation(domain_fun_, triangulation).evaluate(p, pl_p);
     return pl_p(0) < 0;
   }
+
+  /** \brief Returns the function that defines the interior of the manifold */
+  const Function_& function() const {
+    return fun_;
+  }
   
   /** \brief Constructs an intersection oracle for an implicit manifold potentially 
    *   with boundary from given function and domain.
