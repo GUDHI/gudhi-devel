@@ -25,13 +25,17 @@ namespace tangential_complex {
 
 \section Module overview
 
-Coxeter triangulation module is designed to provide tools for constructing a piecewise-linear approximation of an \f$m\f$-dimensional smooth manifold embedded in the \f$d\f$-dimensional Euclidean space.
+Coxeter triangulation module is designed to provide tools for constructing a piecewise-linear approximation of an \f$m\f$-dimensional smooth manifold embedded in \f$\mathbb{R}^d\f$ using an ambient triangulation.
+
+\section manifoldtracing Manifold tracing algorithm
+The central piece of the module is the manifold tracing algorithm represented by the class Gudhi::Manifold_tracing.
 
 \section ambienttriangulations Ambient triangulations
 
+The ambient triangulations available in the module are \f$\mathcal{T}\f$ which is a linear transformation of the Freudenthal-Kuhn triangulation of \f$\mathbb{R}^d\f$.
+
 \section intersectionoracle Implicit manifold intersection oracle
 
-\section manifoldtracing Manifold tracing algorithm
 
 \section cellcomplex Cell complex construction
 
