@@ -114,6 +114,13 @@ Each individual map for cells of a specific dimension \f$l\f$ can be accessed us
 \li The method Gudhi::coxeter_triangulation::Cell_complex::cell_simplex_maps() returns a map from the cells in the cell complex to the permutahedral representations of the corresponding simplices in the  ambient triangulation.
 \li The method Gudhi::coxeter_triangulation::Cell_complex::cell_point_maps() returns a map from the vertex cells in the cell complex to their Cartesian coordinates.
 
+\section example Examples
+
+Here is an example of constructing a piecewise-linear approximation of a flat torus embedded in \f$\mathbb{R}^4\f$, rotated by a random rotation in \f$\mathbb{R}^4\f$ and cut by a hyperplane.
+
+\include Coxeter_triangulation/manifold_tracing_flat_torus_with_boundary.cpp
+
+
  */
 /** @} */  // end defgroup coxeter_triangulation
 
