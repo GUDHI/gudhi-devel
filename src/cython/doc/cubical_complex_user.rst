@@ -83,9 +83,15 @@ Input Format.
 In the current implantation, filtration is given at the maximal cubes, and it is then extended by the lower star
 filtration to all cubes. There are a number of constructors that can be used to construct cubical complex by users
 who want to use the code directly. They can be found in the :doc:`cubical_complex_ref`.
-Currently one input from a text file is used. It uses a format used already in
+Currently one input from a text file is used. It uses a format inspired from the Perseus software
 `Perseus software <http://www.sas.upenn.edu/~vnanda/perseus/>`_ by Vidit Nanda.
-The file format is described here: :doc:`Perseus <fileformats>`.
+
+.. note::
+    While Perseus assume the filtration of all maximal cubes to be non-negative, over here we do not enforce this and
+    we allow any filtration values. As a consequence one cannot use ``-1``'s to indicate missing cubes. If you have
+    missing cubes in your complex, please set their filtration to :math:`+\infty` (aka. ``inf`` in the file).
+
+The file format is described in details in :ref:`Perseus file format` file format section.
 
 .. testcode::
 
