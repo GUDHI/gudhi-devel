@@ -120,6 +120,10 @@ Here is an example of constructing a piecewise-linear approximation of a flat to
 
 \include Coxeter_triangulation/manifold_tracing_flat_torus_with_boundary.cpp
 
+In the following more complex example, we define a custom function for the implicit manifold.
+
+\include Coxeter_triangulation/manifold_tracing_flat_torus_with_boundary.cpp
+
 
  */
 /** @} */  // end defgroup coxeter_triangulation

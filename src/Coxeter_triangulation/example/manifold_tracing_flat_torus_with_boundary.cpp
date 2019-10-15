@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
     normal_matrix(i,0) = -seed(i);
   Function_affine_plane_in_Rd fun_bound(normal_matrix, -seed/2);
     
-  // Defining the oracle
+  // Defining the intersection oracle
   auto oracle = make_oracle(fun_flat_torus_rotated, fun_bound);
 
   // Define a Coxeter triangulation scaled by a factor lambda.
