@@ -19,6 +19,7 @@ add_executable ( Coxeter_triangulation_manifold_tracing_test manifold_tracing_te
 target_link_libraries( Coxeter_triangulation_manifold_tracing_test ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 add_executable ( Coxeter_triangulation_cell_complex_test cell_complex_test.cpp )
+target_link_libraries( Coxeter_triangulation_cell_complex_test ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 if (TBB_FOUND)
    target_link_libraries(Coxeter_triangulation_cell_complex_test ${TBB_LIBRARIES})

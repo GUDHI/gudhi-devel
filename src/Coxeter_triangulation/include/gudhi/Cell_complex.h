@@ -20,7 +20,6 @@
 #include <fstream> // for Hasse_diagram_persistence.h
 
 #include <gudhi/Hasse_diagram_persistence.h> // for Hasse_cell
-#include <gudhi/Permutahedral_representation/join.h>
 
 namespace Gudhi {
 
