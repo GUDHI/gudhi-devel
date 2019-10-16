@@ -1,3 +1,15 @@
+/*    This file is part of the Gudhi Library. The Gudhi library
+ *    (Geometric Understanding in Higher Dimensions) is a generic C++
+ *    library for computational topology.
+ *
+ *    Author(s):       Siargey Kachanovich
+ *
+ *    Copyright (C) 2019 Inria
+ *
+ *    Modification(s):
+ *      - YYYY/MM Author: Description of the modification
+ */
+
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "permutahedral_representation"
 #include <boost/test/unit_test.hpp>

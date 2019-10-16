@@ -1,10 +1,22 @@
+/*    This file is part of the Gudhi Library. The Gudhi library
+ *    (Geometric Understanding in Higher Dimensions) is a generic C++
+ *    library for computational topology.
+ *
+ *    Author(s):       Siargey Kachanovich
+ *
+ *    Copyright (C) 2019 Inria
+ *
+ *    Modification(s):
+ *      - YYYY/MM Author: Description of the modification
+ */
+
 // workaround for the annoying boost message in boost 1.69
 #define BOOST_PENDING_INTEGER_LOG2_HPP
 #include <boost/integer/integer_log2.hpp>
 // end workaround 
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE "permutahedral_representation"
+#define BOOST_TEST_MODULE "function_test"
 #include <boost/test/unit_test.hpp>
 #include <gudhi/Unitary_tests_utils.h>
 
@@ -27,7 +39,6 @@
 
 #include <gudhi/Coxeter_triangulation.h>
 
-#include <iostream>
 #include <string>
 
 #include <random>
@@ -45,7 +56,7 @@ void test_function(const Function& fun) {
     GUDHI_TEST_FLOAT_EQUALITY_CHECK(res_seed(i), 0., 1e-10);
 }
 
-BOOST_AUTO_TEST_CASE(permutahedral_representation) {
+BOOST_AUTO_TEST_CASE(function_test) {
 
   {
     // the sphere testing part

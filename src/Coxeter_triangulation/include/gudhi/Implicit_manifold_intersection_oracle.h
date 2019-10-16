@@ -54,8 +54,7 @@ class Implicit_manifold_intersection_oracle {
       matrix(0, i) = 1;
     std::size_t j = 0;
     for (auto v: simplex.vertex_range()) {
-      Eigen::VectorXd v_coords;
-      fun_.evaluate(triangulation.cartesian_coordinates(v), v_coords);
+      Eigen::VectorXd v_coords = fun_(triangulation.cartesian_coordinates(v));
       for (std::size_t i = 1; i < cod_d + 1; ++i)
 	matrix(i, j) = v_coords(i-1);
       j++;
@@ -64,7 +63,8 @@ class Implicit_manifold_intersection_oracle {
     z(0) = 1;
     for (std::size_t i = 1; i < cod_d + 1; ++i)
       z(i) = 0;
-    return matrix.colPivHouseholderQr().solve(z);
+    Eigen::VectorXd lambda = matrix.colPivHouseholderQr().solve(z);
+    return lambda;
   }
 
   /* Computes the affine coordinates of the intersection point of the boundary
@@ -79,12 +79,10 @@ class Implicit_manifold_intersection_oracle {
       matrix(0, i) = 1;
     std::size_t j = 0;
     for (auto v: simplex.vertex_range()) {
-      Eigen::VectorXd v_coords;
-      fun_.evaluate(triangulation.cartesian_coordinates(v), v_coords);
+      Eigen::VectorXd v_coords = fun_(triangulation.cartesian_coordinates(v));
       for (std::size_t i = 1; i < cod_d + 1; ++i)
 	matrix(i, j) = v_coords(i-1);
-      Eigen::VectorXd bv_coords;
-      domain_fun_.evaluate(triangulation.cartesian_coordinates(v), bv_coords);
+      Eigen::VectorXd bv_coords = domain_fun_(triangulation.cartesian_coordinates(v));
       matrix(cod_d + 1, j) = bv_coords(0);
       j++;
     }
@@ -92,7 +90,8 @@ class Implicit_manifold_intersection_oracle {
     z(0) = 1;
     for (std::size_t i = 1; i < cod_d + 2; ++i)
       z(i) = 0;
-    return matrix.colPivHouseholderQr().solve(z);
+    Eigen::VectorXd lambda = matrix.colPivHouseholderQr().solve(z);
+    return lambda;
   }
 
   /* Computes the intersection result for a given simplex in a triangulation. */
@@ -202,8 +201,7 @@ public:
   template <class Triangulation>
   bool lies_in_domain(const Eigen::VectorXd& p,
 		      const Triangulation& triangulation) const {
-    Eigen::VectorXd pl_p;
-    make_pl_approximation(domain_fun_, triangulation).evaluate(p, pl_p);
+    Eigen::VectorXd pl_p = make_pl_approximation(domain_fun_, triangulation)(p);
     return pl_p(0) < 0;
   }
 

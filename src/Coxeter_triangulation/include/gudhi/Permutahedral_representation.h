@@ -193,41 +193,6 @@ public:
     return true;
   }
 
-  /** \brief Returns the permutahedral representation of the smallest coface
-   *  in lexicographic order, which is always a full-dimensional simplex.
-   */
-  Self smallest_coface() const {
-    using Part = typename OrderedSetPartition::value_type;
-    std::size_t d = vertex_.size();
-    Self result(vertex_, OrderedSetPartition());
-    for (auto k: partition_.back())
-      if (k != d) {
-	result.vertex()[k]--;
-	result.partition().push_back(Part(1, k));
-      }
-    for (std::size_t i = 0; i < partition_.size() - 1; ++i)
-      for (auto k: partition_[i])
-	result.partition().push_back(Part(1, k));
-    result.partition().push_back(Part(1,d));
-    return result;
-  }
-
-  /** \brief Returns the permutahedral representation of the greatest face
-   *  in lexicographic order, which is always a vertex.
-   */
-  Self greatest_face() const {
-    std::size_t d = vertex_.size();
-    Self result(vertex_, OrderedSetPartition(1));
-    for (std::size_t i = 0; i < partition_.size() - 1; ++i)
-      for (auto k: partition_[i])
-	result.vertex()[k]++;
-    using Part = typename OrderedSetPartition::value_type;
-    using part_index = typename Part::value_type;
-    for (part_index k = 0; k < d+1; ++k)
-      result.partition().front().push_back(k);
-    return result;
-  }
-
 private:
   Vertex vertex_;
   OrderedSetPartition partition_;

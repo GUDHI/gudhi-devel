@@ -1,12 +1,24 @@
+/*    This file is part of the Gudhi Library. The Gudhi library
+ *    (Geometric Understanding in Higher Dimensions) is a generic C++
+ *    library for computational topology.
+ *
+ *    Author(s):       Siargey Kachanovich
+ *
+ *    Copyright (C) 2019 Inria
+ *
+ *    Modification(s):
+ *      - YYYY/MM Author: Description of the modification
+ */
+
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE "permutahedral_representation"
+#define BOOST_TEST_MODULE "freudenthal_triangulation"
 #include <boost/test/unit_test.hpp>
 
 #include <gudhi/Unitary_tests_utils.h>
 #include <gudhi/Freudenthal_triangulation.h>
 #include <gudhi/Coxeter_triangulation.h>
 
-BOOST_AUTO_TEST_CASE(permutahedral_representation) {
+BOOST_AUTO_TEST_CASE(freudenthal_triangulation) {
   
   // Point location check
   typedef std::vector<double> Point;
