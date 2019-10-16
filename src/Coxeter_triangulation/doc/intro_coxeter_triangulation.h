@@ -40,14 +40,14 @@ It starts at the specified seed points and inserts a \f$(d-m)\f$-dimensional sim
 Starting from this simplex, the algorithm propagates the search for other \f$(d-m)\f$-dimensional simplices that intersect the manifold by marching from a simplex to neighbouring simplices via their common cofaces.
 
 This class Gudhi::coxeter_triangulation::Manifold_tracing has one template parameter Triangulation_ which specifies the ambient triangulation which is used by the algorithm.
-The template type Triangulation_ has to be a model of the concept TriangulationForManifoldTracing.
+The template type Triangulation_ has to be a model of the concept \ref Gudhi::coxeter_triangulation::TriangulationForManifoldTracing "TriangulationForManifoldTracing".
 
 The module also provides two static methods: \ref Gudhi::coxeter_triangulation::manifold_tracing_algorithm() "Gudhi::coxeter_triangulation::manifold_tracing_algorithm(seed_points, triangulation, oracle, out_simplex_map)" for boundaryless manifolds and \ref manifold_tracing_algorithm() "Gudhi::coxeter_triangulation::manifold_tracing_algorithm(seed_points, triangulation, oracle, interior_simplex_map, boundary_simplex_map)" for manifolds with boundary.
 For these static methods it is not necessary to specify any template arguments.
 
 \section ambienttriangulations Ambient triangulations
 
-The ambient triangulations supported by the manifold tracing algorithm have to be models of the concept TriangulationForManifoldTracing. 
+The ambient triangulations supported by the manifold tracing algorithm have to be models of the concept \ref Gudhi::coxeter_triangulation::TriangulationForManifoldTracing "TriangulationForManifoldTracing". 
 This module offers two such models: the class Gudhi::coxeter_triangulation::Freudenthal_triangulation and the derived class Gudhi::coxeter_triangulation::Coxeter_triangulation. 
 Both these classes encode affine transformations of the so-called Freudenthal-Kuhn triangulation of \f$\mathbb{R}^d\f$.
 The Freudenthal-Kuhn triangulation of \f$\mathbb{R}^d\f$ is defined as the simplicial subdivision of the unit cubic partition of \f$\mathbb{R}^d\f$.
@@ -59,10 +59,10 @@ The class Gudhi::coxeter_triangulation::Coxeter_triangulation is derived from Gu
 \section intersectionoracle Intersection oracle
 
 The input \f$m\f$-dimensional manifold in \f$\mathbb{R}^d\f$ needs to be given via the intersection oracle that answers the following query: given a \f$(d-m)\f$-dimensional simplex, does it intersect the manifold?
-The concept IntersectionOracle describes all requirements for an intersection oracle class to be compatible with the class Gudhi::coxeter_triangulation::Manifold_tracing.
-This module offers one model of the concept IntersectionOracle, which is the class Gudhi::coxeter_triangulation::Implicit_manifold_intersection_oracle.
+The concept \ref Gudhi::coxeter_triangulation::IntersectionOracle "IntersectionOracle" describes all requirements for an intersection oracle class to be compatible with the class Gudhi::coxeter_triangulation::Manifold_tracing.
+This module offers one model of the concept \ref Gudhi::coxeter_triangulation::IntersectionOracle "IntersectionOracle", which is the class Gudhi::coxeter_triangulation::Implicit_manifold_intersection_oracle.
 This class represents a manifold given as the zero-set of a specified function \f$F: \mathbb{R}^d \rightarrow \mathbb{R}^{d-m}\f$.
-The function \f$F\f$ is given by a class which is a model of the concept FunctionForImplicitManifold.
+The function \f$F\f$ is given by a class which is a model of the concept \ref Gudhi::coxeter_triangulation::FunctionForImplicitManifold "FunctionForImplicitManifold".
 There are multiple function classes that are already implemented in this module.
 
 \li \ref Gudhi::coxeter_triangulation::Constant_function(std::size_t, std::size_t, Eigen::VectorXd) "Gudhi::coxeter_triangulation::Constant_function(d,k,v)" defines a constant function \f$F\f$ such that for all \f$x \in \mathbb{R}^d\f$, we have \f$F(x) = v \in \mathbb{R}^k\f$.

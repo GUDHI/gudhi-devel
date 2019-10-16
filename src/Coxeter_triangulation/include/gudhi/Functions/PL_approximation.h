@@ -106,7 +106,7 @@ private:
  * @param[in] triangulation The ambient triangulation.
  *
  * \tparam Function_ The function template parameter. Should be a model of 
- * the concept Function_ForImplicitManifold.
+ * the concept FunctionForImplicitManifold.
  *
  * \ingroup coxeter_triangulation
  */

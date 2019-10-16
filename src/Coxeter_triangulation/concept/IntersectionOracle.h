@@ -20,7 +20,6 @@ namespace coxeter_triangulation {
 /** \brief The concept IntersectionOracle describes the requirements 
  * for a type to implement an intersection oracle class used for example in Manifold_tracing.
  *
- * \ingroup coxeter_triangulation
  */
 struct IntersectionOracle {
 
