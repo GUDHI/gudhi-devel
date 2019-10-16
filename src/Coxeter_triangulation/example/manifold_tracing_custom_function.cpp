@@ -21,10 +21,10 @@ using namespace Gudhi::coxeter_triangulation;
  */
 struct Function_surface_on_CP2_in_R4 : public Function {
 
-  void evaluate(const Eigen::VectorXd& p, Eigen::VectorXd& result) const {
+  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
     // The real and imaginary parts of the variables x and y
     double xr = p(0), xi = p(1), yr = p(2), yi = p(3);
-    result.resize(cod_d());
+    Eigen::VectorXd result(cod_d());
     
     // Squares and cubes of real and imaginary parts used in the computations
     double
@@ -39,28 +39,27 @@ struct Function_surface_on_CP2_in_R4 : public Function {
     result(1) =
       3*xr2*xi*yr + xr3*yi - 3*xr*xi2*yi - xi3*yr
       + 3*yr2*yi - yi3 + xi;
+    return result;
   }
 
   std::size_t amb_d() const {return 4;};
   std::size_t cod_d() const {return 2;};
 
-  void seed(Eigen::VectorXd& result) const {
-    result = Eigen::VectorXd::Zero(4);
+  Eigen::VectorXd seed() const {
+    Eigen::VectorXd result = Eigen::VectorXd::Zero(4);
+    return result;
   }
 
-  Function_surface_on_CP2_in_R4() : {}  
+  Function_surface_on_CP2_in_R4() {}  
 };
 
 int main(int argc, char** argv) {
 
   // The function for the (non-compact) manifold
-  Function_on_CP2_in_R4 fun;
+  Function_surface_on_CP2_in_R4 fun;
 
   // Seed of the function
-  Eigen::VectorXd seed, result;
-  fun.seed(seed);
-  fun.evaluate(seed, result);
-  std::cout << "fun(seed):\n" << result << "\n";
+  Eigen::VectorXd seed = fun.seed();
 
   // Creating the function that defines the boundary of a compact region on the manifold
   double radius = 3.0;
@@ -72,8 +71,6 @@ int main(int argc, char** argv) {
   // Define a Coxeter triangulation scaled by a factor lambda.
   // The triangulation is translated by a random vector to avoid violating the genericity hypothesis.
   double lambda = 0.2;
-  if (argc >= 2)
-    lambda = atof(argv[1]);
   Coxeter_triangulation<> cox_tr(oracle.amb_d());
   cox_tr.change_offset(Eigen::VectorXd::Random(oracle.amb_d()));
   cox_tr.change_matrix(lambda * cox_tr.matrix());

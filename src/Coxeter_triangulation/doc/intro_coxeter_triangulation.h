@@ -23,14 +23,14 @@ namespace tangential_complex {
 
 @{
 
-\section Module overview
+\section overview Module overview
 
-Coxeter triangulation module is designed to provide tools for constructing a piecewise-linear approximation of an \f$m\f$-dimensional smooth manifold embedded in \f$\mathbb{R}^d\f$ using an ambient triangulation.
+Coxeter triangulation module is designed to provide tools for constructing a piecewise-linear approximation of an \f$m\f$-dimensional smooth manifold embedded in \f$ \mathbb{R}^d \f$ using an ambient triangulation.
 For a more detailed description of the module see \cite KachanovichThesis.
 
 \section manifoldtracing Manifold tracing algorithm
 The central piece of the module is the manifold tracing algorithm represented by the class Gudhi::coxeter_triangulation::Manifold_tracing.
-The manifold tracing algorithm takes as input a manifold of some dimension \f$m\f$ embedded in \f$\mathbb{R}^d\f represented by an intersection oracle (see Section "Intersection oracle"), a point on the manifold and an ambient triangulation (see Section "Ambient triangulations").
+The manifold tracing algorithm takes as input a manifold of some dimension \f$m\f$ embedded in \f$\mathbb{R}^d\f$ represented by an intersection oracle (see Section \ref intersectionoracle "Intersection oracle"), a point on the manifold and an ambient triangulation (see Section \ref ambienttriangulations "Ambient triangulations").
 The output consists of one map (or two maps in the case of manifolds with boundary) from the \f$(d-m)\f$-dimensional (and \f$(d-m+1)\f$-dimensional in the case of manifolds with boundary) simplices in the ambient triangulation that intersect the manifold to their intersection points.
 From this output, it is possible to construct the cell complex of the piecewise-linear approximation of the input manifold.
 
@@ -65,11 +65,11 @@ This class represents a manifold given as the zero-set of a specified function \
 The function \f$F\f$ is given by a class which is a model of the concept FunctionForImplicitManifold.
 There are multiple function classes that are already implemented in this module.
 
-\li Gudhi::coxeter_triangulation::Constant_function(d,k,v) defines a constant function \f$F\f$ such that for all \f$x \in \mathbb{R}^d\f$, we have \f$F(x) = v \in \mathbb{R}^k\f$.
+\li \ref Gudhi::coxeter_triangulation::Constant_function(std::size_t, std::size_t, Eigen::VectorXd) "Gudhi::coxeter_triangulation::Constant_function(d,k,v)" defines a constant function \f$F\f$ such that for all \f$x \in \mathbb{R}^d\f$, we have \f$F(x) = v \in \mathbb{R}^k\f$.
   The class Constant_function does not define an implicit manifold, but is useful as the domain function when defining boundaryless implicit manifolds.
 \li Gudhi::coxeter_triangulation::Function_affine_plane_in_Rd(N,b) defines an \f$m\f$-dimensional implicit affine plane in the \f$d\f$-dimensional Euclidean space given by a normal matrix \f$N\f$ and an offset vector \f$b\f$.
 \li Gudhi::coxeter_triangulation::Function_Sm_in_Rd(r,m,d,center) defines an \f$m\f$-dimensional implicit sphere embedded in the \f$d\f$-dimensional Euclidean space of radius \f$r\f$ centered at the point center.
-\li Gudhi::coxeter_triangulation::Function_moment_curve(r,d) defines the moment curve in the \f$d\f$-dimensional Euclidean space of radius \f$r\f$ given as the parameterized curve (but implemented as an implicit surface):
+\li \ref Gudhi::coxeter_triangulation::Function_moment_curve_in_Rd(r,d) "Gudhi::coxeter_triangulation::Function_moment_curve(r,d)" defines the moment curve in the \f$d\f$-dimensional Euclidean space of radius \f$r\f$ given as the parameterized curve (but implemented as an implicit surface):
   \f[ (r, rt, \ldots, rt^{d-1}) \in \mathbb{R}^d,\text{ for $t \in \mathbb{R}$.} \f]
 \li Gudhi::coxeter_triangulation::Function_torus_in_R3(R, r) defines a torus in \f$\mathbb{R}^3\f$ with the outer radius \f$R\f$ and the inner radius, given by the equation:
   \f[ z^2 + (\sqrt{x^2 + y^2} - r)^2 - R^2 = 0. \f]
@@ -122,7 +122,11 @@ Here is an example of constructing a piecewise-linear approximation of a flat to
 
 In the following more complex example, we define a custom function for the implicit manifold.
 
-\include Coxeter_triangulation/manifold_tracing_flat_torus_with_boundary.cpp
+\include Coxeter_triangulation/manifold_tracing_custom_function.cpp
+
+The output in medit looks as follows:
+
+\image html "custom_function.png" "Output from the example with a custom function"
 
 
  */

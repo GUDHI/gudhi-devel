@@ -24,7 +24,7 @@ namespace Gudhi {
 
 namespace coxeter_triangulation {
 
-/* \brief Get the domain dimension of the tuple of functions.
+/* Get the domain dimension of the tuple of functions.
  */
 template <std::size_t I = 0, typename... T>
 inline typename std::enable_if<I == sizeof... (T), std::size_t>::type
@@ -38,7 +38,7 @@ get_amb_d (const std::tuple<T...>& tuple) {
   return std::get<I>(tuple).amb_d() + get_amb_d<I+1, T...>(tuple);
 }
 
-/* \brief Get the codomain dimension of the tuple of functions.
+/* Get the codomain dimension of the tuple of functions.
  */
 template <std::size_t I = 0, typename... T>
 inline typename std::enable_if<I == sizeof... (T), std::size_t>::type
@@ -52,7 +52,7 @@ get_cod_d (const std::tuple<T...>& tuple) {
   return std::get<I>(tuple).cod_d() + get_cod_d<I+1, T...>(tuple);
 }
 
-/* \brief Get the seed of the tuple of functions.
+/* Get the seed of the tuple of functions.
  */
 template <std::size_t I = 0, typename... T>
 inline typename std::enable_if<I == sizeof... (T), void>::type
@@ -70,7 +70,7 @@ get_seed (const std::tuple<T...>& tuple, Eigen::VectorXd& point, std::size_t i =
   get_seed<I+1, T...>(tuple, point, i+n);  
 }
 
-/* \brief Get the seed of the tuple of functions.
+/* Get the seed of the tuple of functions.
  */
 template <std::size_t I = 0, typename... T>
 inline typename std::enable_if<I == sizeof... (T), void>::type

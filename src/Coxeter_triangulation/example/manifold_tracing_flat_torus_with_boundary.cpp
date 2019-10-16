@@ -34,8 +34,7 @@ int main(int argc, char** argv) {
   auto fun_flat_torus_rotated = make_linear_transformation(fun_flat_torus, matrix);
 
   // Computing the seed of the function fun_flat_torus
-  Eigen::VectorXd seed;
-  fun_flat_torus_rotated.seed(seed);    
+  Eigen::VectorXd seed = fun_flat_torus_rotated.seed();    
   
   // Defining a domain function that defines the boundary, which is a hyperplane passing by the origin and orthogonal to x.
   Eigen::MatrixXd normal_matrix = Eigen::MatrixXd::Zero(4, 1);
@@ -48,7 +47,7 @@ int main(int argc, char** argv) {
 
   // Define a Coxeter triangulation scaled by a factor lambda.
   // The triangulation is translated by a random vector to avoid violating the genericity hypothesis.
-  double lambda = 0.05;
+  double lambda = 0.2;
   Coxeter_triangulation<> cox_tr(oracle.amb_d());
   cox_tr.change_offset(Eigen::VectorXd::Random(oracle.amb_d()));
   cox_tr.change_matrix(lambda * cox_tr.matrix());
