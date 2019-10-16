@@ -68,11 +68,12 @@ struct Function_moment_curve_in_Rd : public Function {
    *
    * @param[in] r Numerical parameter.
    * @param[in] d The ambient dimension.
+   * @param[in] offset The offset of the moment curve.
    */
   Function_moment_curve_in_Rd(double r,
 			      std::size_t d,
-			      Eigen::VectorXd& center)
-    : m_(1), k_(d-1), d_(d), r_(r), off_(center) {}
+			      Eigen::VectorXd& offset)
+    : m_(1), k_(d-1), d_(d), r_(r), off_(offset) {}
   
 protected:
   std::size_t m_, k_, d_;

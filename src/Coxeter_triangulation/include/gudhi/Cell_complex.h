@@ -209,7 +209,7 @@ public:
    *  without boundary embedded in the \f$ d \f$-dimensional Euclidean space
    *  from the output of the class Gudhi::Manifold_tracing.
    *
-   * \param[in] interior_simplex_map A map from simplices of dimension \f$(d-m)\f$ 
+   * \param[in] out_simplex_map A map from simplices of dimension \f$(d-m)\f$ 
    * in the ambient triangulation that intersect the relative interior of the manifold 
    * to the intersection points.
    */
@@ -226,7 +226,7 @@ public:
    *  in the \f$d\f$-dimensional Euclidean space
    *  up to a limit dimension from the output of the class Gudhi::Manifold_tracing.
    *
-   * \param[in] interior_simplex_map A map from simplices of dimension \f$(d-m)\f$ 
+   * \param[in] out_simplex_map A map from simplices of dimension \f$(d-m)\f$ 
    * in the ambient triangulation that intersect the relative interior of the manifold 
    * to the intersection points.
    * \param[in] limit_dimension The dimension of the constructed skeleton.

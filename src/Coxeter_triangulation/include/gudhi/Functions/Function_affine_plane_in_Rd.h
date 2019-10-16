@@ -74,7 +74,7 @@ struct Function_affine_plane_in_Rd : public Function {
    * \brief Constructor of the function that defines an m-dimensional implicit affine
    * plane in the d-dimensional Euclidean space that passes through origin.
    *
-   * @param[in] normal A normal matrix of the affine plane. The number of rows should
+   * @param[in] normal_matrix A normal matrix of the affine plane. The number of rows should
    * correspond to the ambient dimension, the number of columns should corespond to 
    * the size of the normal basis (codimension). 
    */

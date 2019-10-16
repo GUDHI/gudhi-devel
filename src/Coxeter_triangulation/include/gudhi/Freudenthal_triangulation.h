@@ -199,10 +199,10 @@ public:
    * @param[in] vertex The query vertex.
    * @param[in] scale The scale of the triangulation. 
    */
-  Eigen::VectorXd cartesian_coordinates(const Vertex_handle& v, double scale = 1) const {
+  Eigen::VectorXd cartesian_coordinates(const Vertex_handle& vertex, double scale = 1) const {
     Eigen::VectorXd v_vect(dimension_);
     for (std::size_t j = 0; j < dimension_; j++)
-      v_vect(j) = v[j] / scale;
+      v_vect(j) = vertex[j] / scale;
     return matrix_ * v_vect + offset_;
   }
 

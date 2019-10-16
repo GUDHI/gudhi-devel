@@ -34,7 +34,7 @@ namespace coxeter_triangulation {
 
 /** 
  * \class Coxeter_triangulation
- * \brief A class that stores Coxeter triangulation of type $\tilde{A}_d$.
+ * \brief A class that stores Coxeter triangulation of type \f$\tilde{A}_d\f$.
  * This triangulation has the greatest simplex quality out of all linear transformations
  * of the Freudenthal-Kuhn triangulation.
  *

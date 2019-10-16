@@ -37,12 +37,16 @@ struct TriangulationForManifoldTracing {
    * @param[in] point The query point.
    */
   template <class Point_d>
-  Simplex_handle locate_point(const Point_d& p) const;
+  Simplex_handle locate_point(const Point_d& point) const;
 
-  /** \brief Returns the Cartesian coordinates of the given vertex 'v'. */
+  /** \brief Returns the Cartesian coordinates of the given vertex 'v'. 
+   * @param[in] v The input vertex.
+   */
   Eigen::VectorXd cartesian_coordinates(const Vertex_handle& v) const;
 
-  /** \brief Returns the Cartesian coordinates of the barycenter of a given simplex 's'. */
+  /** \brief Returns the Cartesian coordinates of the barycenter of a given simplex 's'. 
+   * @param[in] s The input simplex given by permutahedral representation.
+   */
   Eigen::VectorXd barycenter(const Simplex_handle& s) const;
   
 };
