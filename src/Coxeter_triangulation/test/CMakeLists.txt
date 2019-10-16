@@ -4,9 +4,11 @@ include(GUDHI_test_coverage)
 
 
 add_executable ( Coxeter_triangulation_permutahedral_representation_test perm_rep_test.cpp )
-target_link_libraries(Coxeter_triangulation_permutahedral_representation_test ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+target_link_libraries( Coxeter_triangulation_permutahedral_representation_test ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
 
 add_executable ( Coxeter_triangulation_freudenthal_triangulation_test freud_triang_test.cpp )
+target_link_libraries( Coxeter_triangulation_freudenthal_triangulation_test ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+
 add_executable ( Coxeter_triangulation_functions_test function_test.cpp )
 add_executable ( Coxeter_triangulation_oracle_test oracle_test.cpp )
 add_executable ( Coxeter_triangulation_manifold_tracing_test manifold_tracing_test.cpp )
