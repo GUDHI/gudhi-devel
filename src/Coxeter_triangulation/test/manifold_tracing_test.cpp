@@ -31,7 +31,20 @@ BOOST_AUTO_TEST_CASE(manifold_tracing) {
   }
   BOOST_CHECK ( out_simplex_map.size() == 1054 );
 
+  // manifold with boundary
   Function_Sm_in_Rd fun_boundary(3.0, 2, fun_sph.seed());
   auto oracle_with_boundary = make_oracle(fun_sph, fun_boundary);
+  typename MT::Out_simplex_map interior_simplex_map, boundary_simplex_map;
+  manifold_tracing_algorithm(seed_points, cox_tr, oracle_with_boundary, interior_simplex_map, boundary_simplex_map);
+  for (auto si_pair: interior_simplex_map) {
+    BOOST_CHECK ( si_pair.first.dimension() == oracle.function().cod_d() );
+    BOOST_CHECK ( si_pair.second.size() == oracle.function().amb_d() );
+  }
+  BOOST_CHECK ( interior_simplex_map.size() == 89 );
+  for (auto si_pair: boundary_simplex_map) {
+    BOOST_CHECK ( si_pair.first.dimension() == oracle.function().cod_d()+1 );
+    BOOST_CHECK ( si_pair.second.size() == oracle.function().amb_d() );
+  }
+  BOOST_CHECK ( boundary_simplex_map.size() == 54 );
   
 }
