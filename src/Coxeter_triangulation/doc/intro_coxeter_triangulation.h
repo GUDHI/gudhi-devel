@@ -85,19 +85,19 @@ There are multiple function classes that are already implemented in this module.
 The base function classes above can be composed or modified into new functions using the following classes and methods:
 
 \li Gudhi::coxeter_triangulation::Cartesian_product expresses the Cartesian product \f$F_1^{-1}(0) \times \ldots \times F_k^{-1}(0)\f$ of multiple implicit manifolds as an implicit manifold.
-  For convenience, a static function \ref Gudhi::coxeter_triangulation::make_product_function(Functions) "Gudhi::coxeter_triangulation::make_product_function(functions...)" is provided that takes a pack of function-typed objects as the argument.
+  For convenience, a static function \ref Gudhi::coxeter_triangulation::make_product_function() "Gudhi::coxeter_triangulation::make_product_function(functions...)" is provided that takes a pack of function-typed objects as the argument.
 \li Gudhi::coxeter_triangulation::Embed_in_Rd expresses an implicit manifolds embedded in a higher-dimensional Euclidean space.
-  For convenience, a static function Gudhi::coxeter_triangulation::make_embedding(F, d) is provided that takes two arguments: a function-type object \f$F\f$ and a positive integer \f$d\f$ which represents the dimension of the embedding space.
+  For convenience, a static function \ref Gudhi::coxeter_triangulation::make_embedding() "Gudhi::coxeter_triangulation::make_embedding(F, d)" is provided that takes two arguments: a function-type object \f$F\f$ and a positive integer \f$d\f$ which represents the dimension of the embedding space.
 \li Gudhi::coxeter_triangulation::Linear_transformation applies a linear transformation on an implicit manifold.
-  For convenience, a static function Gudhi::coxeter_triangulation::linear_transformation(F, M) is provided that takes two arguments: a function-type object \f$F\f$ and a linear-transformation matrix \f$M\f$ of type Eigen::MatrixXd provided by the Eigen C++ library.
+  For convenience, a static function \ref Gudhi::coxeter_triangulation::linear_transformation() "Gudhi::coxeter_triangulation::linear_transformation(F, M)" is provided that takes two arguments: a function-type object \f$F\f$ and a linear-transformation matrix \f$M\f$ of type Eigen::MatrixXd provided by the Eigen C++ library.
 \li Gudhi::coxeter_triangulation::Translate translates an implicit manifold by a vector.
-  For convenience, a static function Gudhi::coxeter_triangulation::translate(F, v) is provided that takes two arguments: a function-type object \f$F\f$ and a translation vector \f$v\f$ of type Eigen::VectorXd provided by the Eigen C++ library.
+  For convenience, a static function \ref Gudhi::coxeter_triangulation::translate(F, v) "Gudhi::coxeter_triangulation::translate(F, v)" is provided that takes two arguments: a function-type object \f$F\f$ and a translation vector \f$v\f$ of type Eigen::VectorXd provided by the Eigen C++ library.
 \li Gudhi::coxeter_triangulation::Negation defines the negative of a given function.
   This class is useful to define the complementary of a given domain, when defining a manifold with boundary.
-  For convenience, a static function Gudhi::coxeter_triangulation::negation(F) is provided that a function-type object \f$F\f$ as argument.
+  For convenience, a static function \ref Gudhi::coxeter_triangulation::negation() "Gudhi::coxeter_triangulation::negation(F)" is provided that a function-type object \f$F\f$ as argument.
 \li Gudhi::coxeter_triangulation::PL_approximation defines a piecewise-linear approximation of a given function induced by an ambient triangulation.
   The purpose of this class is to define a piecewise-linear function that is compatible with the requirements for the domain function \f$D\f$ when defining a manifold with boundary.
-  For convenience, a static function Gudhi::coxeter_triangulation::make_pl_approximation(F, T) is provided that takes two arguments: a function-type object \f$F\f$ and a triangulation \f$T\f$.
+  For convenience, a static function \ref Gudhi::coxeter_triangulation::make_pl_approximation() "Gudhi::coxeter_triangulation::make_pl_approximation(F, T)" is provided that takes two arguments: a function-type object \f$F\f$ and a triangulation \f$T\f$.
   The type of \f$T\f$ is required to have the same interface as the class Gudhi::coxeter_triangulation::Freudenthal_triangulation.
 
 
