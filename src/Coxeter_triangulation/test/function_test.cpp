@@ -16,7 +16,7 @@
 // end workaround 
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE "function_test"
+#define BOOST_TEST_MODULE "function"
 #include <boost/test/unit_test.hpp>
 #include <gudhi/Unitary_tests_utils.h>
 
@@ -56,7 +56,7 @@ void test_function(const Function& fun) {
     GUDHI_TEST_FLOAT_EQUALITY_CHECK(res_seed(i), 0., 1e-10);
 }
 
-BOOST_AUTO_TEST_CASE(function_test) {
+BOOST_AUTO_TEST_CASE(function) {
 
   {
     // the sphere testing part

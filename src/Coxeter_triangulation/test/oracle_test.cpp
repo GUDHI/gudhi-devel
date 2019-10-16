@@ -11,7 +11,7 @@
  */
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE "oracle_test"
+#define BOOST_TEST_MODULE "oracle"
 #include <boost/test/unit_test.hpp>
 #include <gudhi/Unitary_tests_utils.h>
 
@@ -29,7 +29,7 @@
 
 using namespace Gudhi::coxeter_triangulation;
 
-BOOST_AUTO_TEST_CASE(oracle_test) {
+BOOST_AUTO_TEST_CASE(oracle) {
 
   Function_Sm_in_Rd fun_sph(5.1111, 2);
   auto oracle = make_oracle(fun_sph, 0.3);
