@@ -22,7 +22,8 @@ namespace Gudhi {
 
 namespace coxeter_triangulation {
 
-/* \class Translate
+/** 
+ * \class Translate
  * \brief Translates the zero-set of the function by a vector.
  * The underlying function corresponds to f(x-off), where off is the offset vector.
  *
@@ -80,6 +81,8 @@ struct Translate : public Function {
  *
  * \tparam Function_ The function template parameter. Should be a model of 
  * the concept FunctionForImplicitManifold.
+ *
+ * \ingroup coxeter_triangulation
  */
 template <class Function_>
 Translate<Function_> translate(const Function_& function, Eigen::VectorXd off) {

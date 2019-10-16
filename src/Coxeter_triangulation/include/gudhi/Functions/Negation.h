@@ -22,7 +22,8 @@ namespace Gudhi {
 
 namespace coxeter_triangulation {
 
-/* \class Negation
+/** 
+ *\class Negation
  * \brief Constructs the "minus" function. The zero-set is the same, but
  * the values at other points are the negative of their original value.
  *
@@ -76,6 +77,8 @@ struct Negation : public Function {
  *
  * \tparam Function_ The function template parameter. Should be a model of 
  * the concept FunctionForImplicitManifold.
+ *
+ * \ingroup coxeter_triangulation
  */
 template <class Function_>
 Negation<Function_>  negation(const Function_& function) {

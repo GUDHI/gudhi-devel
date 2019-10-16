@@ -24,7 +24,8 @@ namespace Gudhi {
 
 namespace coxeter_triangulation {
 
-/* \class Embed_in_Rd
+/**
+ * \class Embed_in_Rd
  * \brief Embedding of an implicit manifold in a higher dimension.
  *
  * \tparam Function_ The function template parameter. Should be a model of 
@@ -90,6 +91,8 @@ struct Embed_in_Rd : public Function {
  *
  * \tparam Function_ The function template parameter. Should be a model of 
  * the concept FunctionForImplicitManifold.
+ *
+ * \ingroup coxeter_triangulation
  */
 template <class Function_>
 Embed_in_Rd<Function_> make_embedding(const Function_& function, std::size_t d) {

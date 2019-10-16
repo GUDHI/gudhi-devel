@@ -34,7 +34,7 @@ The manifold tracing algorithm takes as input a manifold of some dimension \f$m\
 The output consists of one map (or two maps in the case of manifolds with boundary) from the \f$(d-m)\f$-dimensional (and \f$(d-m+1)\f$-dimensional in the case of manifolds with boundary) simplices in the ambient triangulation that intersect the manifold to their intersection points.
 From this output, it is possible to construct the cell complex of the piecewise-linear approximation of the input manifold.
 
-There are two methods that execute the manifold tracing algorithm: the method Gudhi::coxeter_triangulation::Manifold_tracing::manifold_tracing_algorithm(seed_points, triangulation, oracle, out_simplex_map) for boundaryless manifolds and Gudhi::coxeter_triangulation::Manifold_tracing::manifold_tracing_algorithm(seed_points, triangulation, oracle, interior_simplex_map, boundary_simplex_map) for manifolds with boundary.
+There are two methods that execute the manifold tracing algorithm: the method \ref Gudhi::coxeter_triangulation::Manifold_tracing::manifold_tracing_algorithm() "Gudhi::coxeter_triangulation::Manifold_tracing::manifold_tracing_algorithm(seed_points, triangulation, oracle, out_simplex_map)" for boundaryless manifolds and \ref Gudhi::coxeter_triangulation::Manifold_tracing::manifold_tracing_algorithm() "Gudhi::coxeter_triangulation::Manifold_tracing::manifold_tracing_algorithm(seed_points, triangulation, oracle, interior_simplex_map, boundary_simplex_map)" for manifolds with boundary.
 The algorithm functions as follows.
 It starts at the specified seed points and inserts a \f$(d-m)\f$-dimensional simplices nearby each seed point that intersect the manifold into the output.
 Starting from this simplex, the algorithm propagates the search for other \f$(d-m)\f$-dimensional simplices that intersect the manifold by marching from a simplex to neighbouring simplices via their common cofaces.
@@ -42,7 +42,7 @@ Starting from this simplex, the algorithm propagates the search for other \f$(d-
 This class Gudhi::coxeter_triangulation::Manifold_tracing has one template parameter Triangulation_ which specifies the ambient triangulation which is used by the algorithm.
 The template type Triangulation_ has to be a model of the concept TriangulationForManifoldTracing.
 
-The module also provides two static methods: Gudhi::coxeter_triangulation::manifold_tracing_algorithm(seed_points, triangulation, oracle, out_simplex_map) for boundaryless manifolds and Gudhi::coxeter_triangulation::manifold_tracing_algorithm(seed_points, triangulation, oracle, interior_simplex_map, boundary_simplex_map) for manifolds with boundary.
+The module also provides two static methods: \ref Gudhi::coxeter_triangulation::manifold_tracing_algorithm() "Gudhi::coxeter_triangulation::manifold_tracing_algorithm(seed_points, triangulation, oracle, out_simplex_map)" for boundaryless manifolds and \ref manifold_tracing_algorithm() "Gudhi::coxeter_triangulation::manifold_tracing_algorithm(seed_points, triangulation, oracle, interior_simplex_map, boundary_simplex_map)" for manifolds with boundary.
 For these static methods it is not necessary to specify any template arguments.
 
 \section ambienttriangulations Ambient triangulations
@@ -52,9 +52,9 @@ This module offers two such models: the class Gudhi::coxeter_triangulation::Freu
 Both these classes encode affine transformations of the so-called Freudenthal-Kuhn triangulation of \f$\mathbb{R}^d\f$.
 The Freudenthal-Kuhn triangulation of \f$\mathbb{R}^d\f$ is defined as the simplicial subdivision of the unit cubic partition of \f$\mathbb{R}^d\f$.
 Each simplex is encoded using the permutahedral representation, which consists of an integer-valued vector \f$y\f$ that positions the simplex in a specific cube in the cubical partition and an ordered partition \f$\omega\f$ of the set \f$\{1,\ldots,d+1\}\f$, which positions the simplex in the simplicial subdivision of the cube.
-The default constructor Gudhi::coxeter_triangulation::Freudenthal_triangulation::Freudenthal_triangulation(d) the Freudenthal-Kuhn triangulation of \f$\mathbb{R}^d\f$.
+The default constructor \ref Gudhi::coxeter_triangulation::Freudenthal_triangulation::Freudenthal_triangulation(std::size_t) "Gudhi::coxeter_triangulation::Freudenthal_triangulation::Freudenthal_triangulation(d)" the Freudenthal-Kuhn triangulation of \f$\mathbb{R}^d\f$.
 The class Gudhi::coxeter_triangulation::Freudenthal_triangulation can also encode any affine transformation of the Freudenthal-Kuhn triangulation of \f$\mathbb{R}^d\f$ using an invertible matrix \f$\Lambda\f$ and an offset vector \f$b\f$ that can be specified in the constructor and which can be changed using the methods change_matrix and change_offset.
-The class Gudhi::coxeter_triangulation::Coxeter_triangulation is derived from Gudhi::coxeter_triangulation::Freudenthal_triangulation and its default constructor Gudhi::coxeter_triangulation::Coxeter_triangulation::Coxeter_triangulation(d) builds a Coxeter triangulation of type \f$\mathbb{R}^d\f$, which has the best simplex quality of all linear transformations of the Freudenthal-Kuhn triangulation of \f$\mathbb{R}^d\f$.
+The class Gudhi::coxeter_triangulation::Coxeter_triangulation is derived from Gudhi::coxeter_triangulation::Freudenthal_triangulation and its default constructor \ref Gudhi::coxeter_triangulation::Coxeter_triangulation::Coxeter_triangulation(std::size_t) "Gudhi::coxeter_triangulation::Coxeter_triangulation::Coxeter_triangulation(d)" builds a Coxeter triangulation of type \f$\mathbb{R}^d\f$, which has the best simplex quality of all linear transformations of the Freudenthal-Kuhn triangulation of \f$\mathbb{R}^d\f$.
 
 \section intersectionoracle Intersection oracle
 
@@ -85,7 +85,7 @@ There are multiple function classes that are already implemented in this module.
 The base function classes above can be composed or modified into new functions using the following classes and methods:
 
 \li Gudhi::coxeter_triangulation::Cartesian_product expresses the Cartesian product \f$F_1^{-1}(0) \times \ldots \times F_k^{-1}(0)\f$ of multiple implicit manifolds as an implicit manifold.
-  For convenience, a static function Gudhi::coxeter_triangulation::make_product_function(functions...) is provided that takes a pack of function-typed objects as the argument.
+  For convenience, a static function \ref Gudhi::coxeter_triangulation::make_product_function(Functions) "Gudhi::coxeter_triangulation::make_product_function(functions...)" is provided that takes a pack of function-typed objects as the argument.
 \li Gudhi::coxeter_triangulation::Embed_in_Rd expresses an implicit manifolds embedded in a higher-dimensional Euclidean space.
   For convenience, a static function Gudhi::coxeter_triangulation::make_embedding(F, d) is provided that takes two arguments: a function-type object \f$F\f$ and a positive integer \f$d\f$ which represents the dimension of the embedding space.
 \li Gudhi::coxeter_triangulation::Linear_transformation applies a linear transformation on an implicit manifold.
@@ -108,11 +108,11 @@ The type of the cells in the Hasse diagram is Gudhi::Hasse_cell<int, double, boo
 The cells in the cell complex are accessed through several maps that are accessed through the following methods.
 
 \li The method Gudhi::coxeter_triangulation::Cell_complex::interior_simplex_cell_maps() returns a vector of maps from the cells of various dimensions in the interior of the cell complex to the permutahedral representations of the corresponding simplices in the ambient triangulation.
-Each individual map for cells of a specific dimension \f$l\f$ can be accessed using the method Gudhi::coxeter_triangulation::Cell_complex::interior_simplex_cell_map(l).
+Each individual map for cells of a specific dimension \f$l\f$ can be accessed using the method \ref Gudhi::coxeter_triangulation::Cell_complex::interior_simplex_cell_map() "Gudhi::coxeter_triangulation::Cell_complex::interior_simplex_cell_map(l)".
 \li The method Gudhi::coxeter_triangulation::Cell_complex::boundary_simplex_cell_maps() returns a vector of maps from the cells of various dimensions on the boundary of the cell complex to the permutahedral representations of the corresponding simplices in the ambient triangulation.
-Each individual map for cells of a specific dimension \f$l\f$ can be accessed using the method Gudhi::coxeter_triangulation::Cell_complex::boundary_simplex_cell_map(l).
-\li The method Gudhi::coxeter_triangulation::Cell_complex::cell_simplex_maps() returns a map from the cells in the cell complex to the permutahedral representations of the corresponding simplices in the  ambient triangulation.
-\li The method Gudhi::coxeter_triangulation::Cell_complex::cell_point_maps() returns a map from the vertex cells in the cell complex to their Cartesian coordinates.
+Each individual map for cells of a specific dimension \f$l\f$ can be accessed using the method \ref Gudhi::coxeter_triangulation::Cell_complex::boundary_simplex_cell_map() "Gudhi::coxeter_triangulation::Cell_complex::boundary_simplex_cell_map(l)".
+\li The method Gudhi::coxeter_triangulation::Cell_complex::cell_simplex_map() returns a map from the cells in the cell complex to the permutahedral representations of the corresponding simplices in the  ambient triangulation.
+\li The method Gudhi::coxeter_triangulation::Cell_complex::cell_point_map() returns a map from the vertex cells in the cell complex to their Cartesian coordinates.
 
 \section example Examples
 

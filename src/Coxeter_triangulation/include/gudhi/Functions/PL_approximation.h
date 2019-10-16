@@ -22,7 +22,8 @@ namespace Gudhi {
 
 namespace coxeter_triangulation {
 
-/* \class PL_approximation
+/** 
+ * \class PL_approximation
  * \brief Constructs a piecewise-linear approximation of a function induced by
  * an ambient triangulation.
  *
@@ -106,6 +107,8 @@ private:
  *
  * \tparam Function_ The function template parameter. Should be a model of 
  * the concept Function_ForImplicitManifold.
+ *
+ * \ingroup coxeter_triangulation
  */
 template <class Function_,
 	  class Triangulation_>

@@ -93,7 +93,8 @@ get_value (const std::tuple<T...>& tuple, const Eigen::VectorXd& x, Eigen::Vecto
 }
 
 
-/* \class Cartesian_product
+/** 
+ * \class Cartesian_product
  * \brief Constructs the function the zero-set of which is the Cartesian product
  * of the zero-sets of some given functions.
  *
@@ -154,15 +155,12 @@ private:
  *
  * \tparam Functions A pack template parameter for functions. All functions should be models of 
  * the concept FunctionForImplicitManifold.
+ *
+ * \ingroup coxeter_triangulation
  */
 template <typename... Functions>
 Cartesian_product<Functions...> make_product_function(const Functions&... functions) {
   return Cartesian_product<Functions...>(functions...);
-}
-
-template <typename... Functions>
-Cartesian_product<Functions...>* new_product_function(const Functions&... functions) {
-  return new Cartesian_product<Functions...>(functions...);
 }
 
 

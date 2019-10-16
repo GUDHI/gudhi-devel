@@ -235,6 +235,8 @@ public:
  * \param[out] out_simplex_map The output map, where the keys are k-simplices in
  * the input triangulation that intersect the input manifold and the mapped values 
  * are the intersection points.
+ *
+ * \ingroup coxeter_triangulation
  */
 template <class Point_range,
 	  class Triangulation,
@@ -277,6 +279,8 @@ void manifold_tracing_algorithm(const Point_range& seed_points,
  * \param[out] boundary_simplex_map The output map, where the keys are k-simplices in
  * the input triangulation that intersect the boundary of the input manifold  
  * and the mapped values are the intersection points.
+ *
+ * \ingroup coxeter_triangulation
  */
 template <class Point_range,
 	  class Triangulation,
