@@ -22,8 +22,11 @@ namespace coxeter_triangulation {
  */
 struct FunctionForImplicitManifold {
 
-  /** \brief Value of the function at a specified point 'p'. */
-  void evaluate(const Eigen::VectorXd& p, Eigen::VectorXd& result) const;
+  /** \brief Value of the function at a specified point 'p'. 
+   *  @param[in] p The input point given by its Cartesian coordinates.
+   *  Its size needs to be equal to amb_d().
+   */
+  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const;
 
   /** \brief Returns the domain (ambient) dimension. */
   std::size_t amb_d() const;
@@ -32,7 +35,7 @@ struct FunctionForImplicitManifold {
   std::size_t cod_d() const;
 
   /** \brief Returns a point on the zero-set of the function. */
-  void seed(Eigen::VectorXd& result) const;
+  Eigen::VectorXd seed() const;
 };
 
 }  // namespace coxeter_triangulation

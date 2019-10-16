@@ -190,7 +190,8 @@ public:
 
   
   /** \brief Returns true if the input point lies inside the piecewise-linear
-   *   domain induced by the given ambient triangulation.
+   *   domain induced by the given ambient triangulation that defines the relative
+   *   interior of the piecewise-linear approximation of the manifold.
    *
    * @param p The input point. Needs to have the same dimension as the ambient
    *  dimension of the manifold (the domain dimension of the function).
@@ -246,6 +247,8 @@ private:
  *   before the restriction with the domain.
  *  @param domain_function The input domain function that can be used to define an implicit
  *   manifold with boundary.
+ *
+ *  \ingroup coxeter_triangulation
  */
 template<class Function_,
 	 class Domain_function_>
@@ -261,6 +264,8 @@ make_oracle(const Function_& function,
  *
  *  @param function The input function that represents the implicit manifold
  *   without boundary.
+ *
+ *  \ingroup coxeter_triangulation
  */
 template<class Function_>
 Implicit_manifold_intersection_oracle<Function_> make_oracle(const Function_& function){
