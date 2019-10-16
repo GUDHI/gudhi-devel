@@ -33,8 +33,9 @@ struct Function_affine_plane_in_Rd : public Function {
    * \brief Value of the function at a specified point.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
-  void evaluate(const Eigen::VectorXd& p, Eigen::VectorXd& result) const {
-    result = normal_matrix_.transpose() * (p - off_);
+  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+    Eigen::VectorXd result = normal_matrix_.transpose() * (p - off_);
+    return result;
   }
   
   /** \brief Returns the domain dimension. Same as the ambient dimension of the sphere. */
@@ -44,8 +45,9 @@ struct Function_affine_plane_in_Rd : public Function {
   std::size_t cod_d() const {return k_;};
 
   /** \brief Returns a point on the affine plane. */
-  void seed(Eigen::VectorXd& result) const {
-    result = off_;
+  Eigen::VectorXd seed() const {
+    Eigen::VectorXd result = off_;
+    return result;
   }
   
   /** 

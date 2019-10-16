@@ -32,10 +32,11 @@ struct Function_moment_curve_in_Rd : public Function {
 /** \brief Value of the function at a specified point.
  * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
  */
-  void evaluate(const Eigen::VectorXd& p, Eigen::VectorXd& result) const {
-    result.resize(k_);
+  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+    Eigen::VectorXd result(k_);
     for (std::size_t i = 1; i < d_; ++i)
       result(i-1) = p(i) - p(0) * p(i-1);
+    return result;
   }
   
   /** \brief Returns the domain (ambient) dimension.. */
@@ -45,8 +46,9 @@ struct Function_moment_curve_in_Rd : public Function {
   std::size_t cod_d() const {return k_;};
 
   /** \brief Returns a point on the moment curve. */
-  void seed(Eigen::VectorXd& result) const {
-    result = Eigen::VectorXd::Zero(d_);
+  Eigen::VectorXd seed() const {
+    Eigen::VectorXd result = Eigen::VectorXd::Zero(d_);
+    return result;
   }
   
   /** 

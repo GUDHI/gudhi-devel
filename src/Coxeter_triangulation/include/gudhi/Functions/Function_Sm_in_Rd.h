@@ -32,16 +32,17 @@ struct Function_Sm_in_Rd: public Function {
 /** \brief Value of the function at a specified point.
  * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
  */
-  void evaluate(const Eigen::VectorXd& p, Eigen::VectorXd& result) const {
+  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
     Eigen::VectorXd x = p;
     for (std::size_t i = 0; i < d_; ++i)
       x(i) -= center_[i];
-    result = Eigen::VectorXd::Zero(k_); 
+    Eigen::VectorXd result = Eigen::VectorXd::Zero(k_); 
     for (std::size_t i = 0; i < m_+1; ++i)
       result(0) += x(i)*x(i);
     result(0) -= r_*r_;
     for (std::size_t j = 1; j < k_; ++j)
       result(j) = x(m_+j);
+    return result;
   }
   
   /** \brief Returns the domain dimension. Same as the ambient dimension of the sphere. */
@@ -51,15 +52,12 @@ struct Function_Sm_in_Rd: public Function {
   std::size_t cod_d() const {return k_;};
 
   /** \brief Returns a point on the sphere. */
-  void seed(Eigen::VectorXd& result) const {
-    result.resize(d_);
+  Eigen::VectorXd seed() const {
+    Eigen::VectorXd result = Eigen::VectorXd::Zero(d_);
     result(0) += r_;
     for (std::size_t i = 0; i < d_; ++i)
       result(i) += center_[i];
-  }
-  
-  Function_Sm_in_Rd* clone() const {
-    return new Function_Sm_in_Rd(*this);
+    return result;
   }
     
   /** 

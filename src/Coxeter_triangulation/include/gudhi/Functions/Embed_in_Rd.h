@@ -39,17 +39,18 @@ struct Embed_in_Rd : public Function {
    * \brief Value of the function at a specified point.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
-  void evaluate(const Eigen::VectorXd& p, Eigen::VectorXd& result) const {
+  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
     Eigen::VectorXd x = p;
     Eigen::VectorXd x_k(fun_.amb_d()), x_rest(d_ - fun_.amb_d());
     for (std::size_t i = 0; i < fun_.amb_d(); ++i)
       x_k(i) = x(i);
     for (std::size_t i = fun_.amb_d(); i < d_; ++i)
       x_rest(i - fun_.amb_d()) = x(i);
-    fun_.evaluate(x_k, result);
+    Eigen::VectorXd result = fun_(x_k);
     result.conservativeResize(this->cod_d());
     for (std::size_t i = fun_.cod_d(); i < this->cod_d(); ++i)
       result(i) = x_rest(i - fun_.cod_d());
+    return result;
   }
 
   /** \brief Returns the domain (ambient) dimension. */
@@ -59,11 +60,12 @@ struct Embed_in_Rd : public Function {
   std::size_t cod_d() const {return d_-(fun_.amb_d() - fun_.cod_d());}
 
   /** \brief Returns a point on the zero-set of the embedded function. */
-  void seed(Eigen::VectorXd& result) const {
-    fun_.seed(result);
+  Eigen::VectorXd seed() const {
+    Eigen::VectorXd result = fun_.seed();
     result.conservativeResize(d_);
     for (std::size_t l = fun_.amb_d(); l < d_; ++l)
       result(l) = 0;
+    return result;
   }
 
   /** 

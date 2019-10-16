@@ -33,12 +33,13 @@ struct Function_lemniscate_revolution_in_R3 : public Function {
    * \brief Value of the function at a specified point.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
-  void evaluate(const Eigen::VectorXd& p, Eigen::VectorXd& result) const {
+  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
     double x = p(0)-off_[0], y = p(1)-off_[1], z = p(2)-off_[2];
-    result.resize(cod_d());
+    Eigen::VectorXd result(cod_d());
     double x2 = x*x, y2 = y*y, z2 = z*z, a2 = a_*a_;
     double t1 = x2 + y2 + z2;
     result(0) = t1*t1 - 2*a2*(x2 - y2 - z2);
+    return result;
   }
 
   /** \brief Returns the (ambient) domain dimension.*/
@@ -51,20 +52,18 @@ struct Function_lemniscate_revolution_in_R3 : public Function {
    * two necessary seed points for the manifold tracing algorithm.
    * See the method seed2() for the other point. 
    */
-  void seed(Eigen::VectorXd& result) const {
-    result = Eigen::Vector3d(sqrt(2*a_)+off_[0], off_[1], off_[2]);
+  Eigen::VectorXd seed() const {
+    Eigen::Vector3d result(sqrt(2*a_)+off_[0], off_[1], off_[2]);
+    return result;
   }
 
   /** \brief Returns a point on the surface. This seed point is only one of 
    * two necessary seed points for the manifold tracing algorithm. 
    * See the method seed() for the other point. 
    */
-  void seed2(Eigen::VectorXd& result) const {
-    result = Eigen::Vector3d(-sqrt(2*a_)+off_[0], off_[1], off_[2]);
-  }
-
-  Function_lemniscate_revolution_in_R3* clone() const {
-    return new Function_lemniscate_revolution_in_R3(*this);
+  Eigen::VectorXd seed2() const {
+    Eigen::Vector3d result(-sqrt(2*a_)+off_[0], off_[1], off_[2]);
+    return result;
   }
   
   /** 

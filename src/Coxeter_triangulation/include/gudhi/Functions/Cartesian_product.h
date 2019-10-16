@@ -64,8 +64,7 @@ inline typename std::enable_if<I != sizeof... (T), void>::type
 get_seed (const std::tuple<T...>& tuple, Eigen::VectorXd& point, std::size_t i = 0) {
   const auto& f = std::get<I>(tuple);
   std::size_t n = f.amb_d();
-  Eigen::VectorXd seed;
-  f.seed(seed);
+  Eigen::VectorXd seed = f.seed();
   for (std::size_t j = 0; j < n; ++j)
     point(i+j) = seed(j);
   get_seed<I+1, T...>(tuple, point, i+n);  
@@ -87,8 +86,7 @@ get_value (const std::tuple<T...>& tuple, const Eigen::VectorXd& x, Eigen::Vecto
   Eigen::VectorXd x_i(n);
   for (std::size_t l = 0; l < n; ++l)
     x_i(l) = x(i+l);
-  Eigen::VectorXd res;
-  f.evaluate(x_i, res);
+  Eigen::VectorXd res = f(x_i);
   for (std::size_t l = 0; l < k; ++l)
     point(j+l) = res(l);
   get_value<I+1, T...>(tuple, x, point, i+n, j+k);  
@@ -111,9 +109,10 @@ struct Cartesian_product : public Function {
    * \brief Value of the function at a specified point.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
-  void evaluate(const Eigen::VectorXd& p, Eigen::VectorXd& result) const {
-    result.resize(cod_d_);
+  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+    Eigen::VectorXd result(cod_d_);
     get_value(function_tuple_, p, result, 0, 0);
+    return result;
   }
 
   /** \brief Returns the domain (ambient) dimension. */
@@ -123,13 +122,10 @@ struct Cartesian_product : public Function {
   std::size_t cod_d() const {return cod_d_;}
 
   /** \brief Returns a point on the zero-set. */
-  void seed(Eigen::VectorXd& result) const {
-    result.resize(amb_d_);
+  Eigen::VectorXd seed() const {
+    Eigen::VectorXd result(amb_d_);
     get_seed(function_tuple_, result, 0);
-  }
-  
-  Cartesian_product<Functions...>* clone() const {
-    return new Cartesian_product<Functions...>(*this);
+    return result;
   }
   
   /** 

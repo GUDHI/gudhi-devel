@@ -38,8 +38,9 @@ struct Linear_transformation : public Function {
    * \brief Value of the function at a specified point.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
-  void evaluate(const Eigen::VectorXd& p, Eigen::VectorXd& result) const {
-    fun_.evaluate(matrix_.householderQr().solve(p), result);
+  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+    Eigen::VectorXd result = fun_(matrix_.householderQr().solve(p));
+    return result;
   }
 
   /** \brief Returns the domain (ambient) dimension. */
@@ -49,9 +50,10 @@ struct Linear_transformation : public Function {
   std::size_t cod_d() const {return fun_.cod_d();}
 
   /** \brief Returns a point on the zero-set. */
-  void seed(Eigen::VectorXd& result) const {
-    fun_.seed(result);
+  Eigen::VectorXd seed() const {
+    Eigen::VectorXd result = fun_.seed();
     result = matrix_ * result;
+    return result;
   }
 
   /** 
