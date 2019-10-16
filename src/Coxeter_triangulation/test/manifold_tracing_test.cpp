@@ -13,8 +13,9 @@
 using namespace Gudhi::coxeter_triangulation;
 
 BOOST_AUTO_TEST_CASE(manifold_tracing) {
+  // manifold without boundary
   Function_Sm_in_Rd fun_sph(5.1111, 2);
-  auto oracle = make_oracle(fun_sph, 0.3);
+  auto oracle = make_oracle(fun_sph);
   Coxeter_triangulation<> cox_tr(oracle.amb_d());
   cox_tr.change_offset(Eigen::VectorXd::Random(oracle.amb_d()));
   
@@ -29,4 +30,8 @@ BOOST_AUTO_TEST_CASE(manifold_tracing) {
     BOOST_CHECK ( si_pair.second.size() == oracle.function().amb_d() );
   }
   BOOST_CHECK ( out_simplex_map.size() == 1054 );
+
+  Function_Sm_in_Rd fun_boundary(3.0, 2, fun_sph.seed());
+  auto oracle_with_boundary = make_oracle(fun_sph, fun_boundary);
+  
 }
