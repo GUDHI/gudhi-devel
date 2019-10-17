@@ -81,8 +81,6 @@ int main(int argc, char** argv) {
   std::vector<Eigen::VectorXd> seed_points(1, seed);
   Out_simplex_map interior_simplex_map, boundary_simplex_map;
   manifold_tracing_algorithm(seed_points, cox_tr, oracle, interior_simplex_map, boundary_simplex_map);
-  std::cout << "Interior_simplex_map size = " << interior_simplex_map.size() << "\n\n";
-  std::cout << "Boundary_simplex_map size = " << boundary_simplex_map.size() << "\n\n";
   
   // Constructing the cell complex
   std::size_t intr_d = oracle.amb_d() - oracle.cod_d();
@@ -93,7 +91,7 @@ int main(int argc, char** argv) {
   output_meshes_to_medit(3,
 			 "manifold_on_CP2_with_boundary",
 			 build_mesh_from_cell_complex(cell_complex,
-						      Configuration({true, true, true, 1, 5, 3}),
-						      Configuration({true, true, true, 2, 13, 14})));
+						      Configuration(true, true, true, 1, 5, 3),
+						      Configuration(true, true, true, 2, 13, 14)));
   return 0;
 }

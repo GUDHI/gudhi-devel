@@ -68,8 +68,8 @@ int main(int argc, char** argv) {
   output_meshes_to_medit(3,
 			 "flat_torus_with_boundary",
 			 build_mesh_from_cell_complex(cell_complex,
-						      Configuration({true, true, true, 1, 5, 3}),
-						      Configuration({true, true, true, 2, 13, 14})));
+						      Configuration(true, true, true, 1, 5, 3),
+						      Configuration(true, true, true, 2, 13, 14)));
 
   return 0;
 }

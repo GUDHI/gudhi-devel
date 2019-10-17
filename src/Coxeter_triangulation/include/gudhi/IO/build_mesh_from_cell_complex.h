@@ -26,6 +26,11 @@ struct Configuration {
   std::size_t ref_edges = 1,
     ref_triangles = 1,
     ref_tetrahedra = 1;
+
+  Configuration(bool t_edges, bool t_triangles, bool t_tetrahedra,
+		std::size_t r_edges, std::size_t r_triangles, std::size_t r_tetrahedra)
+    : toggle_edges(t_edges), toggle_triangles(t_triangles), toggle_tetrahedra(t_tetrahedra),
+      ref_edges(r_edges), ref_triangles(r_triangles), ref_tetrahedra(r_tetrahedra) {}
 };
 
 
