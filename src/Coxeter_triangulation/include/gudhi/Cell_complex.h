@@ -19,7 +19,7 @@
 #include <gudhi/Permutahedral_representation/Simplex_comparator.h>
 #include <fstream> // for Hasse_diagram_persistence.h
 
-#include <gudhi/Hasse_diagram_persistence.h> // for Hasse_cell
+#include <gudhi/Cell_complex/Hasse_diagram_cell.h> // for Hasse_cell
 
 namespace Gudhi {
 
