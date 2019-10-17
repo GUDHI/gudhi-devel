@@ -20,7 +20,7 @@
 #include <Eigen/Sparse>
 #include <Eigen/SVD>
 
-#include <gudhi_patches/CGAL/Epick_d.h>
+#include <CGAL/Epick_d.h>
 #include <CGAL/point_generators_d.h>
 
 namespace Gudhi {
