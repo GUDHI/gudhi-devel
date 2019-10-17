@@ -26,8 +26,8 @@ def _proj_on_diag(X):
 
 def _build_dist_matrix(X, Y, p=2., q=2.):
     '''
-    :param X: (n x 2) np.array encoding the (points of the) first diagram.
-    :param Y: (m x 2) np.array encoding the second diagram.
+    :param X: (n x 2) numpy.array encoding the (points of the) first diagram.
+    :param Y: (m x 2) numpy.array encoding the second diagram.
     :param q: Ground metric (i.e. norm l_q).
     :param p: exponent for the Wasserstein metric.
     :returns: (n+1) x (m+1) np.array encoding the cost matrix C. 
@@ -54,19 +54,19 @@ def _build_dist_matrix(X, Y, p=2., q=2.):
 
 def _perstot(X, p, q):
     '''
-    :param X: (n x 2) numpy array (points of a given diagram)
-    :param q: Ground metric on the (upper-half) plane (i.e. norm l_q in R^2); Default value is 2 (euclidean norm).
+    :param X: (n x 2) numpy.array (points of a given diagram).
+    :param q: Ground metric on the (upper-half) plane (i.e. norm l_q in R^2); Default value is 2 (Euclidean norm).
     :param p: exponent for Wasserstein; Default value is 2.
     :returns: float, the total persistence of the diagram (that is, its distance to the empty diagram).    
     '''
     Xdiag = _proj_on_diag(X)
-    return (np.sum(np.linalg.norm(X - Xdiag, ord=q, axis=1)**p))**(1/p)
+    return (np.sum(np.linalg.norm(X - Xdiag, ord=q, axis=1)**p))**(1./p)
 
 
 def wasserstein_distance(X, Y, p=2., q=2.):
     '''
-    :param X: (n x 2) np.array encoding the (points of the) first diagram.
-    :param Y: (m x 2) np.array encoding the second diagram.
+    :param X: (n x 2) numpy.array encoding the (finite points of the) first diagram. Must not contain essential points (i.e. with infinite coordinate).
+    :param Y: (m x 2) numpy.array encoding the second diagram.
     :param q: Ground metric on the (upper-half) plane (i.e. norm l_q in R^2); Default value is 2 (euclidean norm).
     :param p: exponent for Wasserstein; Default value is 2.
     :returns: the p-Wasserstein distance (1 <= p < infty) with respect to the q-norm as ground metric.
