@@ -49,12 +49,16 @@ For these static methods it is not necessary to specify any template arguments.
 
 The ambient triangulations supported by the manifold tracing algorithm have to be models of the concept \ref Gudhi::coxeter_triangulation::TriangulationForManifoldTracing "TriangulationForManifoldTracing". 
 This module offers two such models: the class \ref Gudhi::coxeter_triangulation::Freudenthal_triangulation "Freudenthal_triangulation" and the derived class \ref Gudhi::coxeter_triangulation::Coxeter_triangulation "Coxeter_triangulation". 
+
 Both these classes encode affine transformations of the so-called Freudenthal-Kuhn triangulation of \f$\mathbb{R}^d\f$.
 The Freudenthal-Kuhn triangulation of \f$\mathbb{R}^d\f$ is defined as the simplicial subdivision of the unit cubic partition of \f$\mathbb{R}^d\f$.
 Each simplex is encoded using the permutahedral representation, which consists of an integer-valued vector \f$y\f$ that positions the simplex in a specific cube in the cubical partition and an ordered partition \f$\omega\f$ of the set \f$\{1,\ldots,d+1\}\f$, which positions the simplex in the simplicial subdivision of the cube.
 The default constructor \ref Gudhi::coxeter_triangulation::Freudenthal_triangulation::Freudenthal_triangulation(std::size_t) "Freudenthal_triangulation(d)" the Freudenthal-Kuhn triangulation of \f$\mathbb{R}^d\f$.
 The class \ref Gudhi::coxeter_triangulation::Freudenthal_triangulation "Freudenthal_triangulation" can also encode any affine transformation of the Freudenthal-Kuhn triangulation of \f$\mathbb{R}^d\f$ using an invertible matrix \f$\Lambda\f$ and an offset vector \f$b\f$ that can be specified in the constructor and which can be changed using the methods change_matrix and change_offset.
-The class \ref Gudhi::coxeter_triangulation::Coxeter_triangulation "Coxeter_triangulation" is derived from \ref Gudhi::coxeter_triangulation::Freudenthal_triangulation "Freudenthal_triangulation" and its default constructor \ref Gudhi::coxeter_triangulation::Coxeter_triangulation::Coxeter_triangulation(std::size_t) "Coxeter_triangulation(d)" builds a Coxeter triangulation of type \f$\mathbb{R}^d\f$, which has the best simplex quality of all linear transformations of the Freudenthal-Kuhn triangulation of \f$\mathbb{R}^d\f$.
+The class \ref Gudhi::coxeter_triangulation::Coxeter_triangulation "Coxeter_triangulation" is derived from \ref Gudhi::coxeter_triangulation::Freudenthal_triangulation "Freudenthal_triangulation" and its default constructor \ref Gudhi::coxeter_triangulation::Coxeter_triangulation::Coxeter_triangulation(std::size_t) "Coxeter_triangulation(d)" builds a Coxeter triangulation of type \f$\tilde{A}_d\f$, which has the best simplex quality of all linear transformations of the Freudenthal-Kuhn triangulation of \f$\mathbb{R}^d\f$.
+
+\image html two_triangulations.png "On the left: Coxeter triangulation of type \f$\tilde{A}_2\f$. On the right: Freudenthal-Kuhn triangulation of \f$\mathbb{R}^d\f$."
+
 
 \section intersectionoracle Intersection oracle
 
@@ -118,6 +122,10 @@ Each individual map for cells of a specific dimension \f$l\f$ can be accessed us
 Here is an example of constructing a piecewise-linear approximation of a flat torus embedded in \f$\mathbb{R}^4\f$, rotated by a random rotation in \f$\mathbb{R}^4\f$ and cut by a hyperplane.
 
 \include Coxeter_triangulation/manifold_tracing_flat_torus_with_boundary.cpp
+
+The output in medit is:
+
+\image html "flat_torus_with_boundary.png" "Output from the example of a flat torus with boundary"
 
 In the following more complex example, we define a custom function for the implicit manifold.
 
